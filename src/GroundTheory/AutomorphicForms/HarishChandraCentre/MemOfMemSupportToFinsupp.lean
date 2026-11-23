@@ -1,5 +1,56 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.HarishChandraCentre.MemCenterOfCommuteE
+module
+
+public import GroundTheory.AutomorphicForms.HarishChandraCentre.MemCenterOfCommuteE
+public import Mathlib.Data.Finsupp.Multiset
+public import Mathlib.Data.Finsupp.Weight
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 namespace GroundTheory.Automorphic.HarishChandra
 
@@ -20,9 +71,6 @@ theorem closed_lower : Closed (IsLower (n := n)) := fun a b ha hb h => by
 
 theorem closed_upper : Closed (IsUpper (n := n)) := fun a b ha hb h => by
   simp only [IsUpper] at *; rw [h] at ha; exact lt_trans ha hb
-
-theorem closed_diag : Closed (IsDiag (n := n)) := fun a b ha hb h => by
-  simp only [IsDiag] at *; rw [ha, h, hb]
 
 theorem closed_true : Closed (fun _ : Fin n × Fin n => True) := fun _ _ _ _ _ => trivial
 
@@ -47,16 +95,6 @@ theorem e_mul_mem_wordSpan {P : Fin n × Fin n → Prop} {a : Fin n × Fin n} (h
   | zero => simp
   | add x y _ _ hx hy => rw [mul_add]; exact Submodule.add_mem _ hx hy
   | smul r x _ hx => rw [mul_smul_comm]; exact Submodule.smul_mem _ r hx
-
-theorem mul_mem_wordSpan {P : Fin n × Fin n → Prop} {v : List (Fin n × Fin n)}
-    (hv : ∀ a ∈ v, P a) {k : ℕ} {u : U n} (hu : u ∈ wordSpan P k) :
-    word v * u ∈ wordSpan P (v.length + k) := by
-  induction v with
-  | nil => simpa using hu
-  | cons a v ih =>
-    rw [word_cons, mul_assoc, List.length_cons, show v.length + 1 + k = (v.length + k) + 1 by omega]
-    exact e_mul_mem_wordSpan (hv a (List.mem_cons_self ..))
-      (ih fun b hb => hv b (List.mem_cons_of_mem _ hb))
 
 theorem commutator_mul_mem_wordSpan {P : Fin n × Fin n → Prop} (hP : Closed P)
     {a b : Fin n × Fin n} (ha : P a) (hb : P b) {l : List (Fin n × Fin n)} (hl : ∀ c ∈ l, P c) :
@@ -294,15 +332,6 @@ theorem span_canon_eq_top : Submodule.span ℂ (Set.range (canon (n := n))) = �
 
 def filt (d : ℕ) : Submodule ℂ (U n) :=
   Submodule.span ℂ {u | ∃ w : List (Fin n × Fin n), w.length ≤ d ∧ word w = u}
-
-theorem word_mem_filt {w : List (Fin n × Fin n)} {d : ℕ} (h : w.length ≤ d) : word w ∈ filt (n := n) d :=
-  Submodule.subset_span ⟨w, h, rfl⟩
-
-theorem filt_mono {d d' : ℕ} (h : d ≤ d') : filt (n := n) d ≤ filt d' :=
-  Submodule.span_mono fun _ ⟨w, hw, hu⟩ => ⟨w, hw.trans h, hu⟩
-
-theorem canon_mem_filt (m : Fin n × Fin n →₀ ℕ) : canon m ∈ filt (n := n) m.degree :=
-  word_mem_filt (length_expand m).le
 
 theorem wordSpan_le_filt (P : Fin n × Fin n → Prop) (k : ℕ) : wordSpan (n := n) P k ≤ filt k :=
   Submodule.span_le.2 fun _ ⟨w, _, hw, hu⟩ => Submodule.subset_span ⟨w, hw.le, hu⟩

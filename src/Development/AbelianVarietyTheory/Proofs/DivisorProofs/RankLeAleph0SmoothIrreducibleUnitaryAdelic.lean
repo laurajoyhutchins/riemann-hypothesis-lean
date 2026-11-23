@@ -1,6 +1,54 @@
-import Mathlib
-import Formalism.LocalToGlobal.GaloisLevelStructure.DefsFinTyp
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.FiniteAdeleStrongApproximationModNat
+module
+
+public import Formalism.LocalToGlobal.GaloisLevelStructure.DefsFinTyp
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.FiniteAdeleStrongApproximationModNat
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain ReciprocityTheory.Aut Formalism.AUTREP Formalism.L2.NG
 open scoped TensorProduct
@@ -11,7 +59,7 @@ namespace GlobalTheory.FinTypCount
 
 variable {L : Type} [Field L] [NumberField L] [IsCMField L]
 
-local notation3 "L⁺" => NumberField.maximalRealSubfield L
+local notation3 "L⁺" => maximalRealSubfield L
 
 theorem countable_field : Countable L :=
   (Module.finBasis ℚ L).equivFun.toEquiv.injective.countable
@@ -35,8 +83,7 @@ theorem exists_nat_smul_int (e : L) : ∃ D : ℕ, 0 < D ∧ ∃ o : 𝓞 L, (o 
 
 theorem exists_approx (M : ℕ) (hM : 0 < M) (x : AL L) :
     ∃ c : L, ∃ y ∈ ALint L, x = c ⊗ₜ[L⁺] (1 : AFplus L) + M • y := by
-  induction x using TensorProduct.induction_on with
-  | zero => exact ⟨0, 0, zero_mem _, by simp⟩
+  induction x using TensorProduct.inductionOn with
   | add x x' hx hx' =>
     obtain ⟨c, y, hy, rfl⟩ := hx
     obtain ⟨c', y', hy', rfl⟩ := hx'
@@ -151,7 +198,8 @@ theorem countable_range_rt {f : GAf L n → ℂ} {N : ℕ} (hN : 0 < N)
     have e := hq.choose_spec
     have h3 := hp3 hq.choose
     rw [e] at h3
-    have hc : Cong L n N (g⁻¹ * hq.choose) := cong_of_code (hp2 g) (hp3 g) h3
+    have hc : Cong L n N (g⁻¹ * hq.choose) :=
+      cong_of_code (c := (p g).2) (hp2 g) (hp3 g) h3
     calc rt L n g f = rt L n g (rt L n (g⁻¹ * hq.choose) f) := by rw [hf _ hc]
       _ = rt L n hq.choose f := by rw [← rt_mul, mul_inv_cancel_left]
   refine (Set.countable_range Ψ).mono ?_
@@ -162,8 +210,8 @@ end GlobalTheory.FinTypCount
 
 namespace GlobalTheory
 
-open GlobalTheory.FinTypCount in
 
+open GlobalTheory.FinTypCount in
 theorem FinTyp.rank_le_aleph0 : ∀ {L : Type} [Field L] [NumberField L] [IsCMField L] {n : ℕ}
     (π : Formalism.L2.NG.FinTyp L n), Module.rank ℂ π.S ≤ Cardinal.aleph0 := by
   intro L _ _ _ n π

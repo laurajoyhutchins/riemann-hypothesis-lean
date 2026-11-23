@@ -1,9 +1,48 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsIsCan
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsEquivHeckeKernelSchemePointsHeckeKernels
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsIsRigIsoOfIsGen
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsTransferPts
-import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.IsPointedOfIsHkIsog
+module
+
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsIsCan
+public import Development.AbelianVarietyTheory.Definitions.ModuliSpaces.KerScheme
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Definitions.ExistenceOfLattices.UnivFrame
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Out ReciprocityTheory.ChartRestriction.G.Geo.Tor Formalism.L2.Pj
 open GlobalTheory.ThetaTrace GlobalTheory.HkFam GlobalTheory.Frames GlobalTheory.HeckeEx
@@ -40,12 +79,6 @@ variable {h} {x x' : Sp T ⟶ Xo.X} (hx : x = h ≫ Z.π₁) (hx' : x' = h ≫ Z
 @[reassoc] theorem hkLift_hom : hkLift Z h hx ≫ Z.o₁.t.G.hom = (fst (Over.mk x) Xo.univ.t.G).left ≫ h :=
   Z.m₁.cart.1.lift_snd _ _ _
 
-@[reassoc] theorem hkLift₂_φ : hkLift₂ Z h hx' ≫ Z.m₂.cm.F = (snd (Over.mk x') Xo.univ.t.G).left :=
-  Z.m₂.cart.1.lift_fst _ _ _
-
-@[reassoc] theorem hkLift₂_hom : hkLift₂ Z h hx' ≫ Z.o₂.t.G.hom = (fst (Over.mk x') Xo.univ.t.G).left ≫ h :=
-  Z.m₂.cart.1.lift_snd _ _ _
-
 def hkMap : Gx x ⟶ Gx x' :=
   pullback.lift (f := (Over.mk x').hom) (g := Xo.univ.t.G.hom) (fst (Over.mk x) Xo.univ.t.G).left
     (hkLift Z h hx ≫ Z.ψ.left ≫ Z.m₂.cm.F) (by
@@ -59,10 +92,6 @@ def hkMap : Gx x ⟶ Gx x' :=
 @[reassoc] theorem hkMap_snd :
     hkMap Z hx hx' ≫ (snd (Over.mk x') Xo.univ.t.G).left = hkLift Z h hx ≫ Z.ψ.left ≫ Z.m₂.cm.F :=
   pullback.lift_snd _ _ _
-
-@[reassoc] theorem hkMap_hkLift₂ : hkMap Z hx hx' ≫ hkLift₂ Z h hx' = hkLift Z h hx ≫ Z.ψ.left :=
-  Z.m₂.cart.1.hom_ext (by rw [Category.assoc, hkLift₂_φ, hkMap_snd, Category.assoc])
-    (by rw [Category.assoc, hkLift₂_hom, hkMap_fst_assoc, Category.assoc, Over.w Z.ψ, hkLift_hom])
 
 end Map
 
@@ -79,14 +108,25 @@ theorem hkLift_isPullback (hx : x = h ≫ Z.π₁) :
 
 theorem hkLift₂_isPullback (hx' : x' = h ≫ Z.π₂) :
     IsPullback (hkLift₂ Z h hx') (fst (Over.mk x') Xo.univ.t.G).left Z.o₂.t.G.hom h := by
-  refine IsPullback.of_right (h₁₂ := Z.m₂.cm.F) (v₁₃ := Xo.univ.t.G.hom) (h₂₂ := Z.π₂) ?_ (hkLift₂_hom Z hx')
+  have hφ : hkLift₂ Z h hx' ≫ Z.m₂.cm.F = (snd (Over.mk x') Xo.univ.t.G).left :=
+    Z.m₂.cart.1.lift_fst _ _ _
+  have hhom : hkLift₂ Z h hx' ≫ Z.o₂.t.G.hom = (fst (Over.mk x') Xo.univ.t.G).left ≫ h :=
+    Z.m₂.cart.1.lift_snd _ _ _
+  refine IsPullback.of_right (h₁₂ := Z.m₂.cm.F) (v₁₃ := Xo.univ.t.G.hom) (h₂₂ := Z.π₂) ?_ hhom
     Z.m₂.cart.1
-  rw [hkLift₂_φ, ← hx']
+  rw [hφ, ← hx']
   exact (IsPullback.of_hasPullback (Over.mk x').hom Xo.univ.t.G.hom).flip
 
 theorem hkMap_isPullback (hx : x = h ≫ Z.π₁) (hx' : x' = h ≫ Z.π₂) :
     IsPullback (hkLift Z h hx) (hkMap Z hx hx') Z.ψ.left (hkLift₂ Z h hx') := by
-  refine IsPullback.of_bot ?_ (hkMap_hkLift₂ Z hx hx').symm (hkLift₂_isPullback Z hx')
+  have hφ : hkLift₂ Z h hx' ≫ Z.m₂.cm.F = (snd (Over.mk x') Xo.univ.t.G).left :=
+    Z.m₂.cart.1.lift_fst _ _ _
+  have hhom : hkLift₂ Z h hx' ≫ Z.o₂.t.G.hom = (fst (Over.mk x') Xo.univ.t.G).left ≫ h :=
+    Z.m₂.cart.1.lift_snd _ _ _
+  have heq : hkMap Z hx hx' ≫ hkLift₂ Z h hx' = hkLift Z h hx ≫ Z.ψ.left :=
+    Z.m₂.cart.1.hom_ext (by rw [Category.assoc, hφ, hkMap_snd, Category.assoc])
+      (by rw [Category.assoc, hhom, hkMap_fst_assoc, Category.assoc, Over.w Z.ψ, hkLift_hom])
+  refine IsPullback.of_bot ?_ heq.symm (hkLift₂_isPullback Z hx')
   rw [hkMap_fst, Over.w Z.ψ]
   exact hkLift_isPullback Z hx
 

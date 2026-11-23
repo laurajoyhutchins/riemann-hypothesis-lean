@@ -1,11 +1,50 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Statements.FundamentalDomains.ExistsIsAddFundamentalDomain
-import Development.AbelianVarietyTheory.Definitions.AbelianSchemeLaws.ExistsUniqueEqConstMulOriginSec
-import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.IsStandardSmoothOfRelativeDimensionAwayJacobian
-import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.ExistsCommGrpObjWeierstrassSchemeStatement
-import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.IsAbelianSchemeSchemeOver
-import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.SurjectiveFst
-import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.OriginLineBundlePolarisation
+module
+
+public import Development.AbelianVarietyTheory.Definitions.ShimuraVarieties.OpensRangeChartYSupOpensRangeChartZ
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsCompletedStrictHens
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.CubicalStructures.CubeSymmetricSwapFirst
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -37,33 +76,5 @@ theorem exists_mem_coordOpen_two {R : Type} [CommRing R] (W : WeierstrassCurve R
   have e : (Polynomial.evalRingHom (0 : R)).comp (algebraMap R (Polynomial R)) = RingHom.id R := by
     ext; simp
   exact congrArg (fun f => PrimeSpectrum.comap f s) e
-
-theorem exists_keyIn_iso_elliptic (R : Type) [CommRing R] (W : WeierstrassCurve R) [W.IsElliptic] :
-    ∃ (x : KeyIn R) (e : x.P.A ≅ schemeOver W), x.P.g = 1 ∧ eSec x.P.A ≫ e.hom.left = zero W ∧
-      Out.nonzeroLocus x.th = e.hom.left ⁻¹ᵁ coordOpen W 2 := by
-  obtain ⟨G, hc, h0, -⟩ := GlobalTheory.T.exists_commGrpObj_weierstrassScheme R W W.isUnit_Δ
-  obtain ⟨hr, hs, ha, hk⟩ := originLB_polarisation R W hc h0
-  let P : Out.PolAV (Sp R) :=
-    { A := schemeOver W
-      isAb := isAbelianScheme_schemeOver R W W.isUnit_Δ hc
-      g := 1
-      smoothDim := smoothOfRelativeDimension_toSpec W
-      L := originLB W
-      isLB := originLB_isLB W
-      rigid := hr
-      sym := hs
-      ample := ha
-      ktriv := hk }
-  obtain ⟨rig, hrig⟩ := P.rigid
-  obtain ⟨v, -, hv⟩ := WeierstrassLie.isLieBasis_eps R W h0
-  refine ⟨⟨P, le_rfl, rig, hrig, originSec W, fun s => ?_, ![v], hv⟩, Iso.refl _, rfl,
-    (Category.comp_id _).trans h0, nonzeroLocus_originSec W⟩
-  obtain ⟨x, hx, hx'⟩ := exists_mem_coordOpen_two W s
-  exact ⟨x, hx, (nonzeroLocus_originSec W).ge hx'⟩
-
-theorem exists_keyIn_elliptic (R : Type) [CommRing R] [IsLocalRing R] (W : WeierstrassCurve R) [W.IsElliptic] :
-    ∃ x : KeyIn R, x.P.g = 1 :=
-  let ⟨x, _, h, _⟩ := exists_keyIn_iso_elliptic R W
-  ⟨x, h⟩
 
 end GlobalTheory.KeyPow

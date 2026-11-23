@@ -1,16 +1,53 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ActAApply
+public import Formalism.LocalToGlobal.IndefiniteReal.LocalNewformFunction
+public import Development.AbelianVarietyTheory.Counterexamples.HeightSurvey.StarPurelyImaginaryEqNeg
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ExistsIntegralSplitIdempotentOverTwo
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.MemRangeOfOneTmulMem
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.RealIdemMulOfReal
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.FiniteAdeleStrongApproximationModNat
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Definitions.Divisors.IsUnitaryOnTheta
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.RealIdemMulOfReal
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.SelfDualLatticePairingDual
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.IsSelfDualCLatFrame
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.MemRangeOfOneTmulMem
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.SmulMemLatO
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.AddNsmulResidueAssoc
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ExistsIntegralSplitIdempotentOverTwo
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.IsOpenNsmulCompletedHomLatticeFiniteAdelic
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ThetaNormSqSumHeisenbergTranslatesDistinctChars
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.EventuallyFinEqOne
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ActAApply
+
+@[expose] public section
 
 noncomputable section
 
@@ -35,14 +72,14 @@ theorem tmul_split {F E : Type} [Field F] [NumberField F] [Field E] [Algebra F E
     TensorProduct.smul_tmul, Algebra.smul_def x t]
 
 theorem map_add_nsmul {A B : Type} [Ring A] [Ring B] (f : A →+* B) (k : ℕ) (a s : A) :
-    f (a + k • s) = f a + k • f s := by rw [map_add, map_nsmul]
+    f (a + k • s) = f a + k • f s := by rw [map_add (f := _), map_nsmul]
 
 theorem zero_eq_map_add_nsmul_zero {E A B : Type} [Ring E] [Ring A] [Ring B] (g : E →+* A) (f : A →+* B) (k : ℕ) :
     0 = f (g 0 + k • 0) := by simp
 
 theorem add_nsmul_residue_add {E A B : Type} [Ring E] [Ring A] [Ring B] (g : E →+* A) (f : A →+* B) (k : ℕ) (r r' : E)
     (s s' : A) : f (g r + k • s) + f (g r' + k • s') = f (g (r + r') + k • (s + s')) := by
-  rw [← map_add, map_add g, smul_add]; congr 1; abel
+  rw [← map_add (f := _), map_add g, smul_add]; congr 1; abel
 
 theorem neg_nsmul_residue {E A B : Type} [Ring E] [Ring A] [Ring B] (g : E →+* A) (f : A →+* B) (k : ℕ) (r : E)
     (s : A) : -f (g r + k • s) = f (g (-r) + k • (-s)) := by
@@ -69,8 +106,8 @@ theorem approx {k : ℕ} (hk : 0 < k) {z : Af D.host.F ⊗[D.host.F] D.host.E} (
   | add x x' _ _ h h' =>
     obtain ⟨r, s, h1, h2, rfl⟩ := h
     obtain ⟨r', s', h1', h2', rfl⟩ := h'
-    refine ⟨r + r', s + s', by rw [RingHom.map_add]; exact add_mem h1 h1',
-      by rw [RingHom.map_add, RingHom.map_add]; exact add_mem h2 h2', ?_⟩
+    refine ⟨r + r', s + s', by rw [RingHom.map_add (f := _)]; exact add_mem h1 h1',
+      by rw [RingHom.map_add (f := _), RingHom.map_add (f := _)]; exact add_mem h2 h2', ?_⟩
     exact add_nsmul_residue_add (incA D) (finPart D) k _ _ s s'
   | neg x _ h =>
     obtain ⟨r, s, h1, h2, rfl⟩ := h
@@ -86,7 +123,7 @@ theorem core_mem {O A M : Type} [CommRing O] [CommRing A] [AddCommGroup M] [Modu
     { carrier := {a | ι a • y ∈ Λ}
       add_mem' := fun {a b} ha hb => by
         show ι (a + b) • y ∈ Λ
-        rw [map_add, add_smul]; exact add_mem ha hb
+        rw [map_add (f := _), add_smul]; exact add_mem ha hb
       zero_mem' := by
         show ι 0 • y ∈ Λ
         rw [map_zero, zero_smul]; exact zero_mem _

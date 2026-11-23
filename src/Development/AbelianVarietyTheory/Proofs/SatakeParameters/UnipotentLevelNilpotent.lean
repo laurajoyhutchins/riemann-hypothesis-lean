@@ -1,8 +1,51 @@
-import Mathlib
-import Formalism.LocalToGlobal.KernelLattices.FirstKernelLawReading
+module
+
+public import Formalism.LocalToGlobal.KernelLattices.FirstKernelLawReading
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.NatCastMemOfPrimeDvdAbsNorm
+public import Formalism.LocalToGlobal.InertKernelTheory.InertCoprimeLemmas.RepDataRec
 import Formalism.LocalToGlobal.KernelLattices.KernelLocalFactors.PeriodLatticeFinitelyGenerated
-import Formalism.LocalToGlobal.InertKernelTheory.InertCoprimeLemmas.RepDataRec
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.NatCastMemOfPrimeDvdAbsNorm
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Formalism.BasicNotions Formalism.MainNotions Formalism.L2.Ker Formalism.L2.Col Formalism.HermitianLatticesTheory Formalism.L2.DIV Classical
 
@@ -101,7 +144,7 @@ theorem smul_mem_of_pow {A V : Type*} [Ring A] [AddCommGroup V] [Module A V] (M 
         refine hdivk k _ ?_
         have h2 : aeval ν (((1 + X : ℤ[X]) ^ m - 1) ^ k) = ((1 + ν) ^ m - 1) ^ k := by simp
         have h3 := huk k x hx
-        rw [← h2, hv, map_add, add_smul] at h3
+        rw [← h2, hv, map_add (f := _), add_smul] at h3
         have h4 := ih (k + 1) (by omega) v x hx
         have h5 := M.sub_mem h3 h4
         rw [add_sub_cancel_right] at h5
@@ -110,7 +153,7 @@ theorem smul_mem_of_pow {A V : Type*} [Ring A] [AddCommGroup V] [Module A V] (M 
       have e : X ^ k * f = C (f.coeff 0) * X ^ k + X ^ (k + 1) * f.divX := by
         conv_lhs => rw [← divX_mul_X_add f]
         ring
-      rw [e, map_add, add_smul]
+      rw [e, map_add (f := _), add_smul]
       refine M.add_mem ?_ (ih (k + 1) (by omega) _ x hx)
       rw [map_mul, mul_smul, aeval_C]
       have : ∀ (a : ℤ) (y : V), y ∈ M → (algebraMap ℤ A a) • y ∈ M := by

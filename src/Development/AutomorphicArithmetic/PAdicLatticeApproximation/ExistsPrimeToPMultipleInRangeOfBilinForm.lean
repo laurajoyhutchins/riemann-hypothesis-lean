@@ -1,8 +1,50 @@
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.SphericalCoordinates.WitSys
-import Development.AutomorphicArithmetic.PAdicLatticeApproximation.FiniteFreeOfBoundedDenominatorsLattice
-import Development.AutomorphicArithmetic.PAdicLatticeApproximation.LatticeSaturatedAtPAndPrimeToP
-import Development.AutomorphicArithmetic.PAdicLatticeApproximation.ExistsDualVectorOfIntegralFunctional
-import Development.AutomorphicArithmetic.PAdicLatticeApproximation.ExistsDenominatorOfLattice
+module
+
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.SphericalCoordinates.WitSys
+public import Development.AutomorphicArithmetic.PAdicLatticeApproximation.ExistsDenominatorOfLattice
+public import Development.AutomorphicArithmetic.PAdicLatticeApproximation.ExistsDualVectorOfIntegralFunctional
+public import Development.AutomorphicArithmetic.PAdicLatticeApproximation.FiniteFreeOfBoundedDenominatorsLattice
+public import Development.AutomorphicArithmetic.PAdicLatticeApproximation.LatticeSaturatedAtPAndPrimeToP
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 open NumberField
 open GlobalTheory GlobalTheory.PELU GlobalTheory.UPel.HT GlobalTheory.LKTrip GlobalTheory.LKRes GlobalTheory.LKMid GlobalTheory.LKGeo UpperTheory.Gal.W2.Wit
 open scoped TensorProduct
@@ -22,6 +64,7 @@ theorem UpperTheory.exists_prime_to_p_multiple_in_range_of_bilinForm :
   have hcoe : ∀ u : X.lat, (u : VQ D) = ∑ i, ((b.repr u i : ℤ) : ℚ) • ((b i : X.lat) : VQ D) := by
     intro u
     have h := congrArg X.lat.subtype (b.sum_repr u)
+
     rw [map_sum] at h
     rw [← show _ = (u : VQ D) from h]
     refine Finset.sum_congr rfl fun i _ => ?_
@@ -50,6 +93,7 @@ theorem UpperTheory.exists_prime_to_p_multiple_in_range_of_bilinForm :
     calc Bq.coord i u = Bq.coord i (∑ j, ((b.repr ⟨u, hu⟩ j : ℤ) : ℚ) • ((b j : X.lat) : VQ D)) :=
           congrArg _ h
       _ = _ := by
+
           rw [map_sum]
           simp [hd]
   choose w hwM hw using fun i => UpperTheory.exists_dual_vector_of_integral_functional p D X (Bq.coord i) (hint i)
@@ -75,4 +119,5 @@ theorem UpperTheory.exists_prime_to_p_multiple_in_range_of_bilinForm :
     exact_mod_cast h3
   choose t ht using ht
   refine ⟨∑ i, f (b i) • t i, b.ext fun j => ?_⟩
+
   simp [map_sum, LinearMap.sum_apply, ht, mul_comm]

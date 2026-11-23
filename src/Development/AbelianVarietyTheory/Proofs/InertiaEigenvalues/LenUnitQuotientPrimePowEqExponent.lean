@@ -1,6 +1,54 @@
-import Mathlib
+module
+
+public import Mathlib.NumberTheory.Padics.PadicIntegers
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.BlockTheory.NonGaloisCusps.ResidualConstruction
 import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.MemSpanRingCornerIdealModuleIff
+import Formalism.SharpRestriction.CuspSpanNormBounds.Point
+import Formalism.SharpRestriction.LevelLetterCocycles.DataN
+import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
+public import Mathlib.RingTheory.DedekindDomain.Basic
+
+@[expose] public section
 
 open Formalism.BasicNotions Formalism.MainNotions Formalism.MainNotions.N GlobalTheory.IndefiniteRowSideFullHecke.CongruenceModuleMatrices GlobalTheory.SpanRing
 
@@ -9,9 +57,9 @@ namespace GlobalTheory.LenUnitPow
 variable (l : ℕ) [Fact l.Prime] {O : Type} [CommRing O] [IsDomain O] [IsDiscreteValuationRing O]
   [Algebra ℤ_[l] O] [Module.Finite ℤ_[l] O]
 
+
 variable (l : ℕ) [Fact l.Prime] {O : Type} [CommRing O] [IsDomain O] [IsDiscreteValuationRing O]
   [Algebra ℤ_[l] O] [Module.Finite ℤ_[l] O] in
-
 theorem _root_.GlobalTheory.LenUnitPow.natCast_ne_zero : (l : O) ≠ 0 := by
   intro h
   have hker : (RingHom.ker (algebraMap ℤ_[l] O)).IsMaximal := by
@@ -22,44 +70,22 @@ theorem _root_.GlobalTheory.LenUnitPow.natCast_ne_zero : (l : O) ≠ 0 := by
     rw [hbot, Ideal.mem_bot] at hl
     exact (Nat.cast_ne_zero.2 (Fact.out : l.Prime).ne_zero) hl
   have hbot : (⊥ : Ideal O).IsMaximal := by
-    refine Ideal.isMaximal_of_isIntegral_of_isMaximal_comap (R := ℤ_[l]) _ ?_
+    refine Ideal.isMaximal_of_isIntegral_of_isMaximal_under (R := ℤ_[l]) (⊥ : Ideal O) ?_
+    change (Ideal.comap (algebraMap ℤ_[l] O) ⊥).IsMaximal
     rwa [← RingHom.ker_eq_comap_bot]
   exact IsDiscreteValuationRing.not_a_field O (IsLocalRing.eq_maximalIdeal hbot).symm
 
+
 variable (l : ℕ) [Fact l.Prime] {O : Type} [CommRing O] [IsDomain O] [IsDiscreteValuationRing O]
   [Algebra ℤ_[l] O] [Module.Finite ℤ_[l] O] in
-
 theorem _root_.GlobalTheory.LenUnitPow.natCast_not_isUnit : ¬ IsUnit (l : O) := by
   intro h
   have hm : (Ideal.comap (algebraMap ℤ_[l] O) (IsLocalRing.maximalIdeal O)).IsMaximal :=
-    Ideal.isMaximal_comap_of_isIntegral_of_isMaximal _
+    Ideal.isMaximal_under_of_isIntegral_of_isMaximal (R := ℤ_[l]) (IsLocalRing.maximalIdeal O)
   have hl : (l : ℤ_[l]) ∈ Ideal.comap (algebraMap ℤ_[l] O) (IsLocalRing.maximalIdeal O) := by
     rw [IsLocalRing.eq_maximalIdeal hm, PadicInt.maximalIdeal_eq_span_p]
     exact Ideal.subset_span rfl
   rw [Ideal.mem_comap, map_natCast, IsLocalRing.mem_maximalIdeal, mem_nonunits_iff] at hl
   exact hl h
-
-theorem lenUnit_quot_unit_mul_pow (w : Oˣ) (m : ℕ) :
-    lenUnit (O := O) l (O ⧸ Ideal.span {(w : O) * (l : O) ^ m}) = (m : ℚ) := by
-  have h0 := natCast_ne_zero l (O := O)
-  have h1 := natCast_not_isUnit l (O := O)
-  unfold lenUnit
-  change ((Ring.ord O ((w : O) * (l : O) ^ m)).toNat : ℚ) / ((Ring.ord O (l : O)).toNat : ℚ) = m
-  rw [Ring.ord_mul_of_isUnit_left w.isUnit, Ring.ord_pow (mem_nonZeroDivisors_of_ne_zero h0),
-    Ring.ord_eq_addVal]
-  have htop : IsDiscreteValuationRing.addVal O (l : O) ≠ ⊤ := by
-    rwa [Ne, IsDiscreteValuationRing.addVal_eq_top_iff]
-  have hz : IsDiscreteValuationRing.addVal O (l : O) ≠ 0 := by
-    rwa [Ne, IsDiscreteValuationRing.addVal_eq_zero_iff]
-  obtain ⟨e, he⟩ := ENat.ne_top_iff_exists.mp htop
-  rw [← he] at hz ⊢
-  have he0 : (e : ℚ) ≠ 0 := by exact_mod_cast hz
-  rw [nsmul_eq_mul, ← Nat.cast_mul, ENat.toNat_coe, ENat.toNat_coe, Nat.cast_mul]
-  exact mul_div_cancel_right₀ _ he0
-
-theorem main : ∀ (l : ℕ) [Fact l.Prime] {O : Type} [CommRing O] [IsDomain O]
-    [IsDiscreteValuationRing O] [Algebra ℤ_[l] O] [Module.Finite ℤ_[l] O] (w : Oˣ) (m : ℕ),
-    lenUnit (O := O) l (O ⧸ Ideal.span {(w : O) * (l : O) ^ m}) = (m : ℚ) :=
-  fun l _ _ _ _ _ _ _ w m => lenUnit_quot_unit_mul_pow l w m
 
 end GlobalTheory.LenUnitPow

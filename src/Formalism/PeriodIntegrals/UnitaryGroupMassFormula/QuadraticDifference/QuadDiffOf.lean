@@ -1,25 +1,53 @@
-import Mathlib
-import Formalism.PeriodIntegrals.QuadDiff
+module
+
+public import Mathlib.NumberTheory.NumberField.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
 namespace PI.QD
 
 open NumberField
-
-def AdjTop : Prop :=
-  ∀ (K : Type) [Field K] [NumberField K] (d : ℕ) (θ : K) (α : 𝓞 K), Squarefree d → d % 4 = 3 →
-    θ ^ 2 = -(d : K) → Algebra.adjoin ℚ {θ} = ⊤ → 2 * (α : K) - 1 = θ →
-    Algebra.adjoin ℤ {α} = ⊤
-
-def DiffK : Prop :=
-  ∀ (K : Type) [Field K] [NumberField K] (d : ℕ) (θ : K) (α : 𝓞 K), Squarefree d → d % 4 = 3 →
-    θ ^ 2 = -(d : K) → Algebra.adjoin ℚ {θ} = ⊤ → 2 * (α : K) - 1 = θ →
-    differentIdeal ℤ (𝓞 K) = Ideal.span {2 * α - 1}
-
-def DiffOfAdj : Prop := AdjTop → DiffK
-
-def MapStep : Prop := DiffK → PI.QuadDiff
 
 def Arith : Prop :=
   ∀ (d : ℕ) (x y : ℚ), Squarefree d → d % 4 = 3 → (∃ u : ℤ, 2 * x = u) →
@@ -33,8 +61,6 @@ def IntCoeffs : Prop :=
 def Form : Prop :=
   ∀ (K : Type) [Field K] [NumberField K] (d : ℕ) (θ : K), θ ^ 2 = -(d : K) →
     Algebra.adjoin ℚ {θ} = ⊤ → ∀ z : K, ∃ x y : ℚ, z = x + y * θ
-
-def AdjOfParts : Prop := Form → IntCoeffs → Arith → AdjTop
 
 end PI.QD
 

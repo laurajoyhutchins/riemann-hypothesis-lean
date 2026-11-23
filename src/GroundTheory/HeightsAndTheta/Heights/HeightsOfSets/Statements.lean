@@ -1,6 +1,52 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HeightsOfSets.Points
-import GroundTheory.HeightsAndTheta.Heights.HeightsOfSets.Slopes
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HeightsOfSets.Points
+public import GroundTheory.HeightsAndTheta.Heights.HeightsOfSets.Slopes
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -8,36 +54,6 @@ namespace GroundTheory.Heights₂.Heights
 open MvPolynomial NumberField
 
 noncomputable section
-
-def HeightLowerBound.Statement : Prop :=
-  ∀ (ι : Type) [Fintype ι] [DecidableEq ι] (n : ι → ℕ) (P : ArithVariety n) (A : HermLine n)
-    (J : Type) [Fintype J] (s : J → IntegralSection P A.deg) (C : ℝ),
-    (∀ j, (s j).SupNormLE A C) →
-    (∀ x ∈ P.points (AlgebraicClosure ℚ), ∃ j, (s j).NonzeroAt x) →
-    ∀ x ∈ P.points (AlgebraicClosure ℚ), -C ≤ height A x
-
-def HeightMetricChange.Statement : Prop :=
-  ∀ (ι : Type) [Fintype ι] [DecidableEq ι] (n : ι → ℕ) (P : ArithVariety n) (A A' : HermLine n),
-    A.deg = A'.deg → ∀ B : ℝ,
-    (∀ z ∈ P.points ℂ, |Real.log (A.metric z) - Real.log (A'.metric z)| ≤ B) →
-    ∀ x ∈ P.points (AlgebraicClosure ℚ), |height A x - height A' x| ≤ B
-
-def HeightLocalAgreement.Statement : Prop :=
-  ∀ (ι ι' : Type) [Fintype ι] [DecidableEq ι] [Fintype ι'] [DecidableEq ι'] (n : ι → ℕ)
-    (n' : ι' → ℕ) (A : HermLine n) (A' : HermLine n') (x : Cone n (AlgebraicClosure ℚ))
-    (x' : Cone n' (AlgebraicClosure ℚ)), BlockNonzero x → BlockNonzero x' →
-    ∀ (L : IntermediateField ℚ (AlgebraicClosure ℚ)) [NumberField L] (hx : ∀ k i, x k i ∈ L)
-      (hx' : ∀ k i, x' k i ∈ L),
-      (∀ v : FinitePlace L, finiteTerm A v (coordIn L x hx) = finiteTerm A' v (coordIn L x' hx')) →
-      (∀ σ : L →+* ℂ, A.metric (fun k i ↦ σ (coordIn L x hx k i)) =
-        A'.metric (fun k i ↦ σ (coordIn L x' hx' k i))) →
-      height A x = height A' x'
-
-def HeightPullback.Statement : Prop :=
-  ∀ (ι ι' : Type) [Fintype ι] [DecidableEq ι] [Fintype ι'] [DecidableEq ι'] (n' : ι' → ℕ)
-    (j : ι → ι') (hj : Function.Injective j) (A : HermLine (n' ∘ j))
-    (x : Cone n' (AlgebraicClosure ℚ)), BlockNonzero x →
-    height (A.pullback j hj) x = height A (HermLine.project j x)
 
 def HeightComparison.Statement : Prop :=
   ∀ (ι : Type) [Fintype ι] [DecidableEq ι] (n : ι → ℕ) (P : ArithVariety n) (A : HermLine n),
@@ -53,12 +69,6 @@ def SlopeMaxExtension.Statement : Prop :=
   ∀ (K : Type) [Field K] [NumberField K] (E' E E'' : HermitianBundle.{0} K),
     HermitianExtension E' E E'' → E.slopeMax ≤ max E'.slopeMax E''.slopeMax
 
-def FlagDegreeBound.Statement : Prop :=
-  ∀ (K : Type) [Field K] [NumberField K] (E : HermitianBundle.{0} K) (r : ℕ)
-    (F : Fin (r + 1) → Submodule (𝓞 K) E.carrier), Monotone F → (∀ i, E.Saturated (F i)) →
-    (∀ i, E.rank (F i) = i) →
-    ∀ i, -((E.normDegree (F i) : ℝ) : EReal) ≥ -(((i : ℕ) : EReal) * E.slopeMax)
-
 section Inhabitants
 
 variable {ι : Type} [Fintype ι] [DecidableEq ι] {n : ι → ℕ}
@@ -70,7 +80,7 @@ theorem evalCone_chartMonomial {F : Type*} [CommRing F] (z : Cone n F)
   simp [evalCone, chartMonomial, eval₂_prod]
 
 theorem chartSection_supNormLE (P : ArithVariety n) (c0 : (k : ι) → Fin (n k + 1)) :
-    (IntegralSection.chartSection P c0).SupNormLE (HermLine.standard n) 0 := by
+    (IntegralSection.chartSection (P := P) c0).SupNormLE (HermLine.standard n) 0 := by
   intro z hz c d e he hc
   have hpos : 0 < ∏ k, l2Norm (z k) := Finset.prod_pos fun k _ ↦ vectorL2Norm_pos (hz.1 k)
   have h0 : evalCone z (1 * e - chartMonomial c0 1 * chartMonomial c d) = 0 := hz.2 _ he.2
@@ -85,7 +95,7 @@ theorem chartSection_supNormLE (P : ArithVariety n) (c0 : (k : ι) → Fin (n k 
   rw [h1, norm_mul, Real.exp_zero, div_le_one (mul_pos hmn hpos), mul_comm]
   refine mul_le_mul_of_nonneg_left ?_ hmn.le
   rw [evalCone_chartMonomial, norm_prod]
-  refine Finset.prod_le_prod (fun k _ ↦ norm_nonneg _) (fun k _ ↦ ?_)
+  refine Finset.prod_le_prod₀ (fun k _ ↦ norm_nonneg _) (fun k _ ↦ ?_)
   simpa using norm_le_l2Norm (z k) (c0 k)
 
 end Inhabitants

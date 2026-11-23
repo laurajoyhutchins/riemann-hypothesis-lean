@@ -1,7 +1,52 @@
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RowsConc
-import Formalism.SharpRestriction.CuspSpanNormBounds.BesselShellMomentBounds
-import Formalism.LocalRingCardinality.SpanPowerMembership.ExampleLayerExistsGenerators
-import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.ThmBUse
+module
+
+public import Formalism.SharpRestriction.CuspSpanNormBounds.BesselShellMomentBounds
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.ThmBUse
+import Formalism.FlagUnipotentLattices.AlgebraicIdentityHigherDegree
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -217,7 +262,7 @@ theorem one_le_rd : 1 ≤ D.host.rdE := by
 theorem dlast_eq (w : Point D.host.E (D.R.rS + 1)) : DlastPt (toPts w) = leadMinorK (ptMat w) (D.R.rS + 1) le_rfl := by
   have hpos : 0 < (toPts w).1.length := comp_len_pos _
   unfold DlastPt
-  rw [dif_pos hpos]
+  rw [dite_eq_left hpos]
   unfold endMin
   rw [E5minor_eq]
   have e : (toPts w).1.sizeUpTo (((⟨(toPts w).1.length - 1, by omega⟩ : Fin (toPts w).1.length) : ℕ) + 1) = D.R.rS + 1 := by
@@ -233,18 +278,18 @@ theorem dr_eq (w : Point D.host.E (D.R.rS + 1)) : DrPt (toPts w) = leadMinorK (p
     rw [leadMinorK_eq, ptMat_eq]; rfl
   rw [eL]
   unfold DrPt
-  rw [dif_pos hpos]
+  rw [dite_eq_left hpos]
   by_cases hb : (toPts w).1.blocksFun ⟨(toPts w).1.length - 1, by omega⟩ = 1
   · rw [if_pos hb]
     have hr : D.R.rS = (toPts w).1.sizeUpTo ((toPts w).1.length - 1) := by omega
     by_cases h2 : 2 ≤ (toPts w).1.length
-    · rw [dif_pos h2]
+    · rw [dite_eq_left h2]
       unfold endMin
       rw [E5minor_eq, congrArg (Formalism.HermitianLatticeCounting.ExpansionTerms.leadingPrincipalMinor _) hr]
       congr 2
       simp only
       omega
-    · rw [dif_neg h2]
+    · rw [dite_eq_right h2]
       have h1 : (toPts w).1.length - 1 = 0 := by omega
       rw [congrArg (Formalism.HermitianLatticeCounting.ExpansionTerms.leadingPrincipalMinor _) hr, Formalism.HermitianLatticeCounting.Final.ExpansionTerms.e4aValue, h1]
       simp
@@ -363,18 +408,18 @@ theorem ng_le (T T' : ℕ) (w : Point D.host.E (D.R.rS + 1)) :
     rw [GPt_eq]
     calc ∏ p, (D.host.rdE ^ (2 * D.R.rS * (D.R.rS + 1)))⁻¹ * p (Gglob D T T' w)
         ≤ ∏ p : NumberField.InfinitePlace D.host.E, p (Gglob D T T' w) :=
-          Finset.prod_le_prod (fun p _ => hnn _ _ (apply_nonneg p _)) (fun p _ => hle _ _ (apply_nonneg p _))
+          Finset.prod_le_prod₀ (fun p _ => hnn _ _ (apply_nonneg p _)) (fun p _ => hle _ _ (apply_nonneg p _))
       _ = ∏ v, absV D v (Gglob D T T' w) :=
           (Fintype.prod_bijective (plOf D) (plOf_bij D) _ _ fun v => (plOf_apply D v _).symm).symm
   · unfold NDPt
-    refine (Finset.prod_le_prod (fun a _ => Finset.prod_nonneg fun p _ => hnn _ _ (sq_nonneg _))
-      (fun a _ => Finset.prod_le_prod (fun p _ => hnn _ _ (sq_nonneg _)) (fun p _ => hle _ _ (sq_nonneg _)))).trans
+    refine (Finset.prod_le_prod₀ (fun a _ => Finset.prod_nonneg fun p _ => hnn _ _ (sq_nonneg _))
+      (fun a _ => Finset.prod_le_prod₀ (fun p _ => hnn _ _ (sq_nonneg _)) (fun p _ => hle _ _ (sq_nonneg _)))).trans
       (le_of_eq ?_)
     rw [blockEnds_prod]
     symm
     refine Fintype.prod_equiv (finCongr (toComp_length w).symm) _ _ fun a => ?_
     have hle' : 0 + pS w.1 ((a : ℕ) + 1) ≤ D.R.rS + 1 := by rw [zero_add]; exact (toComp w).sizeUpTo_le _
-    rw [dif_pos hle', NE]
+    rw [dite_eq_left hle', NE]
     refine Fintype.prod_bijective (plOf D) (plOf_bij D) _ _ fun v => ?_
     rw [plOf_apply]
     congr 2

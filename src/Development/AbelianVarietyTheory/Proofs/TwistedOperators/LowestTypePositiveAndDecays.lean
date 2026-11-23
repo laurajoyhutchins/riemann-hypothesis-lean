@@ -1,29 +1,82 @@
-import Mathlib
-import Formalism.SharpRestriction.Divisibility.SchurIrreducible
-import Formalism.LocalToGlobal.BesselHermitianTheta.DefsReal
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.FunJetApply
-import Development.AbelianVarietyTheory.Proofs.HeightProofs.RhoCompactTwiceEqOfSignBlockOrdered
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.PsiHolomorphicNearPositiveMatricesAtOne
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.KTypeExtendsHolomorphicComplexifiedK
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.DerivedAdjoint
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsGrpDataMapHaar
-import Development.AbelianVarietyTheory.Proofs.HeightProofs.TorusWeightVectorIffCartanWeightVector
+module
+
+public import Formalism.SharpRestriction.Divisibility.SchurIrreducible
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.FunJetApply
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.LayerProd
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.PosPartUnitaryMul
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.ExistsBlockOrd
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.NotTrivialAndTwist
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.KTypeExtendsHolomorphicComplexifiedK
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.PsiHolomorphicNearPositiveMatricesAtOne
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsGrpDataMapHaar
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.DiscreteSeriesCoverIrreducibleUnitary
 import Development.AbelianVarietyTheory.Proofs.HeightProofs.FiniteDimKStableSubspaceKFiniteLie
-import Development.AbelianVarietyTheory.Proofs.HeightProofs.IsKStableOnOfLieStableFiniteDim
-import Development.AbelianVarietyTheory.Proofs.HeightProofs.HighestWeightGeneratedWeightsBelow
-import Development.AbelianVarietyTheory.Proofs.HeightProofs.DiscreteSeriesCoverIrreducibleUnitary
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.GlWordJetRelationsEqZeroOfNilStatement
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.CompressedWordsGlWordJetRelationsOfNoTypesStatement
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.UnitaryFlowCoeffEqOfTaylorSeriesStatement
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.GlWordJetRelationsOfSchmidSystemJetsStatement
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IteratedDerivInnerExpEqWordJetFormsStatement
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.LowestKTypeFunctionEquivalenceStatement
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.NegativeRootArrayHighestVectorCoeffEqZeroStatement
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.LowerKTypesPTensorStableUnderKStatement
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.FderivLeadingMinorPowerProductStrictUpperEqZeroStatement
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.InnerFderivKAveragedMinorOperatorIntegralStatement
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsHolomorphicLowestKTypeComplexifiedStatement
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.KAveragedMinorOperatorExpPosBoundAnalyticStatement
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.HighestWeightGeneratedWeightsBelow
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.IsKStableOnOfLieStableFiniteDim
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.RhoCompactTwiceEqOfSignBlockOrdered
+import Development.AbelianVarietyTheory.Proofs.HeightProofs.TorusWeightVectorIffCartanWeightVector
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.CompressedWordsGlWordJetRelationsOfNoTypesStatement
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.DerivedAdjoint
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsHolomorphicLowestKTypeComplexifiedStatement
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.FderivLeadingMinorPowerProductStrictUpperEqZeroStatement
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.GlWordJetRelationsEqZeroOfNilStatement
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.GlWordJetRelationsOfSchmidSystemJetsStatement
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.InnerFderivKAveragedMinorOperatorIntegralStatement
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IteratedDerivInnerExpEqWordJetFormsStatement
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.KAveragedMinorOperatorExpPosBoundAnalyticStatement
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.LowerKTypesPTensorStableUnderKStatement
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.LowestKTypeFunctionEquivalenceStatement
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.NegativeRootArrayHighestVectorCoeffEqZeroStatement
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.UnitaryFlowCoeffEqOfTaylorSeriesStatement
+import Formalism.RealPlaceAnalysis.QuotientSettingHolds
+import Formalism.RealPlaceAnalysis.RealPlaceTaylor.NoncompactGeneratorRaisesPfil
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.MatrixExponential
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Matrix.FiniteDimensional
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Development.AbelianVarietyTheory.BlockTheory.HeightDefect.IsotypicSignedParameters
+
+@[expose] public section
 
 noncomputable section
 
@@ -48,7 +101,7 @@ theorem funSchmid_ps (hl : IsHCParam lam) (hτ : IsTau ε (lowK ε lam) τ w) (h
   have hd := fun p => GlobalTheory.T.inner_fderiv_kAveragedMinorOperator_integral n ε lam W τ w hl hτ z hz (z * thE ε p) y (G p)
   rw [inner_sum, inner_zero_right]
   simp only [fun p => (hd p).2]
-  rw [← Finset.mul_sum, ← integral_finset_sum _ fun p _ => (hd p).1]
+  rw [← Finset.mul_sum, ← integral_finsetSum _ fun p _ => (hd p).1]
   refine mul_eq_zero_of_right _ (integral_eq_zero_of_ae (Eventually.of_forall fun k => ?_))
   obtain ⟨G', hG', he⟩ := GlobalTheory.T.lowerKTypes_pTensor_stable_under_K V W n ε E _ u j τ w hD hτ ht G hG (toMK k) k.2
   have hk : toMK k * (toMK k)⁻¹ = 1 :=
@@ -65,6 +118,7 @@ theorem funSchmid_ps (hl : IsHCParam lam) (hτ : IsTau ε (lowK ε lam) τ w) (h
     · have : Matrix.single p.2 p.1 (1 : ℂ) i i' = 0 :=
         Matrix.single_apply_of_ne _ _ _ _ _ fun h => hp (Prod.ext h.2 h.1)
       rw [thE, Matrix.smul_apply, Matrix.smul_apply, this, smul_zero, smul_zero])
+
   rw [← he, Matrix.mul_sum, map_sum] at h0
   have e : ∀ p, (toMK k)⁻¹ * z * toMK k * (⟪τ (toMK k) w, G p⟫_ℂ • ((toMK k)⁻¹ * thE ε p * toMK k)) =
       ⟪τ (toMK k) w, G p⟫_ℂ • ((toMK k)⁻¹ * (z * thE ε p) * toMK k) := fun p => by
@@ -194,6 +248,7 @@ def unitOp (e : Ix p q ≃ Fin n) (act : Mat p q →ₗ[ℂ] Module.End ℂ V) (
 theorem act_eq_sum (act : Mat p q →ₗ[ℂ] Module.End ℂ V) (Z : Mat p q) :
     act Z = ∑ a, ∑ b, Z a b • act (Eab a b) := by
   conv_lhs => rw [Matrix.matrix_eq_sum_single Z]
+
   simp only [map_sum, Eab, ← map_smul, Matrix.smul_single, smul_eq_mul, mul_one]
 
 theorem actM_unitOp (act : Mat p q →ₗ[ℂ] Module.End ℂ V) (Z : Mat p q) :

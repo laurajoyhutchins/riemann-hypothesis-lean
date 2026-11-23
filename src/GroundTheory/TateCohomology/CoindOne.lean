@@ -1,4 +1,56 @@
-import Mathlib
+module
+
+public import Mathlib.RepresentationTheory.Coinduced
+public import Mathlib.RepresentationTheory.Homological.GroupCohomology.Basic
+public import Mathlib.RepresentationTheory.Invariants
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RepresentationTheory.Homological.GroupCohomology.Functoriality
+public import Mathlib.RepresentationTheory.Homological.GroupCohomology.Shapiro
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.GroupCoh
@@ -13,9 +65,6 @@ noncomputable def coindOneRep : Representation k G (G → X) where
   toFun g := LinearMap.funLeft k X (· * g)
   map_one' := by ext; simp
   map_mul' g h := by ext; simp [mul_assoc]
-
-@[simp]
-lemma coindOneRep_apply (g : G) (F : G → X) (x : G) : coindOneRep k G X g F x = F (x * g) := rfl
 
 noncomputable abbrev coindOne : Rep k G := Rep.of (coindOneRep k G X)
 
@@ -70,6 +119,7 @@ noncomputable def resCoindOneIso :
         simp only
         rw [cosetPart_out_mul, mk_out_mul] }
     (fun t => LinearMap.ext fun F => funext fun s => funext fun c => by
+      change F ((c.out * s) * t) = F (c.out * ((s * t : S) : G))
       simp [mul_assoc])
 
 noncomputable def quotientToInvariantsCoindOneIso [S.Normal] :
@@ -77,9 +127,11 @@ noncomputable def quotientToInvariantsCoindOneIso [S.Normal] :
   Rep.mkIso <| Representation.Equiv.mk
     { toFun := fun F c => Quotient.liftOn' c F.1 fun x y hxy => by
         have h := congrFun (F.2 ⟨x⁻¹ * y, QuotientGroup.leftRel_apply.1 hxy⟩) x
+        change F.1 (x * (x⁻¹ * y)) = F.1 x at h
         simpa using h.symm
       invFun := fun F => ⟨fun x => F x, fun s => funext fun x => by
-        simp⟩
+        change F (↑(x * (s : G)) : G ⧸ S) = F (x : G ⧸ S)
+        exact congrArg F (QuotientGroup.eq.2 (by simp))⟩
       map_add' := fun F F' => funext fun c => by
         induction c using QuotientGroup.induction_on; rfl
       map_smul' := fun r F => funext fun c => by

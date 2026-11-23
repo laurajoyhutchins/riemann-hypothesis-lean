@@ -1,11 +1,57 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SlantProductSecondAction
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CoboundaryCup1
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CoboundaryCup0
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ValSuccAbove
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsFactorOfExactIsField
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsDualFunctionalsOfLinearIndependent
-import Development.WeilBound.CoreStatements.AutomorphicKernels.AbelianDeRham.AbelianHodgeDeRham.H1DimGeAbelianDim
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.BisimplicialActionSecondFactor
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CechNerveFaceOneZero
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.PullbackZeroCochainsAlgebraMap
+public import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.HodgeWedgeFields.IsPullbackH2Structure
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CoboundaryCup0
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CoboundaryCup1
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsDualFunctionalsOfLinearIndependent
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsFactorOfExactIsField
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SlantProductSecondAction
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ValSuccAbove
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -38,6 +84,7 @@ theorem S_dn (q : ℕ) (w : Cn (box F) (q + 1)) :
     rw [S_apply]
     simp only [dn, LinearMap.sum_apply, LinearMap.smul_apply, cof_eq]
     refine Finset.sum_congr rfl fun i _ ↦ ?_
+
     rw [map_sum, Finset.smul_sum]
     refine Finset.sum_congr rfl fun j _ ↦ ?_
     rw [LinearMap.map_smul, bi_act, smul_smul, ← pow_add, neg_one_pow_smul_int (R := R)]
@@ -45,6 +92,7 @@ theorem S_dn (q : ℕ) (w : Cn (box F) (q + 1)) :
       ∑ j : Fin (q + 2), ∑ i : Fin (q + 1), ((-1 : ℤ) ^ ((i : ℕ) + (j : ℕ))) •
         bi F (th q i) ((Fin.succAboveOrderEmb j).toOrderHom.comp (sg q i)) w := by
     refine Finset.sum_congr rfl fun j _ ↦ ?_
+
     rw [S_apply, map_sum, Finset.smul_sum]
     refine Finset.sum_congr rfl fun i _ ↦ ?_
     rw [LinearMap.map_smul, bisimplicial_action_second_factor, smul_smul, ← pow_add, neg_one_pow_smul_int (R := R),
@@ -72,6 +120,7 @@ theorem T_dn [Fintype (Fin 1 ⥤ C)] [Fintype (Fin 2 ⥤ C)] (q : ℕ) (ρ : Cn 
       exact LinearMap.ext fun f ↦ funext fun c ↦ GlobalTheory.CompanionTheory.Dict.dn0 F f c
     rw [d, LinearMap.comp_sub]
   change sl F (q + 1) ρ (S F (q + 1) _) = sl F (q + 1) (ρ ∘ₗ dn F 0) (S0 F (q + 1) w) - dn F q (sl F q ρ (S F q w))
+
   rw [S_dn, e, map_sub, map_sub, map_sum, slant_product_first_action, slant_product_first_action, sl_sub]
   congr 1
   simp only [dn, LinearMap.sum_apply, LinearMap.smul_apply, map_smul, slant_product_second_action, cof_eq]
@@ -144,8 +193,8 @@ theorem core_step [Fintype (Fin 1 ⥤ C)] [Fintype (Fin 2 ⥤ C)] (hR : IsField 
   | zero =>
     obtain ⟨u, hu⟩ := hprim (Fin.last g)
     refine ⟨x (Fin.last g), pulln (boxL F) 1 (x (Fin.last g)) + pulln (boxR F) 1 (x (Fin.last g)), hx _,
-      by rw [map_add, cmL _ (hx _), cmR _ (hx _), add_zero], ⟨u, hu⟩, ?_, fun i hi ↦ ?_, fun h ↦ ?_⟩
-    · rw [map_add, tau_L F T₀ ε _ (hx _), tau_R F T₀ ε 1]
+      by rw [map_add (f := _), cmL _ (hx _), cmR _ (hx _), add_zero], ⟨u, hu⟩, ?_, fun i hi ↦ ?_, fun h ↦ ?_⟩
+    · rw [map_add (f := _), tau_L F T₀ ε _ (hx _), tau_R F T₀ ε 1]
       exact zero_add _
     · have hne : i ≠ Fin.last g := fun e ↦ by
         rw [e] at hi
@@ -162,13 +211,13 @@ theorem core_step [Fintype (Fin 1 ⥤ C)] [Fintype (Fin 2 ⥤ C)] (hR : IsField 
     set pj := pulln (boxL F) 1 xj with hpj
     set qj := pulln (boxR F) 1 xj with hqj
     have hpq : dn (box F) 1 (pj + qj) = 0 := by
-      rw [map_add, cmL _ hxj0, cmR _ hxj0, add_zero]
+      rw [map_add (f := _), cmL _ hxj0, cmR _ hxj0, add_zero]
 
     have hT : ∀ i : Fin (g + 1), ∃ y, T F (s + 1) (Λ i) (cup1 (box F) (pj + qj) w) =
         Λ i xj • z + dn F s y - cup1 F xj (T F s (Λ i) w) := fun i ↦ by
       obtain ⟨y, hy⟩ := T_cup_L' F hR hS T₀ ε s (Λ i) xj hxj0 w hw
       refine ⟨y, ?_⟩
-      rw [cup1_add_left, map_add, hy, T_cup_R F s (Λ i) xj hxj0 w, hτ]
+      rw [cup1_add_left, map_add (f := _), hy, T_cup_R F s (Λ i) xj hxj0 w, hτ]
       abel
     have hw' : dn (box F) (s + 1 + 1) (cup1 (box F) (pj + qj) w) = 0 := by
       rw [DnCup.coboundary_cup1 _ _ _ hpq, hw, cup1_zero, neg_zero]
@@ -189,12 +238,12 @@ theorem core_step [Fintype (Fin 1 ⥤ C)] [Fintype (Fin 2 ⥤ C)] (hR : IsField 
         rw [coboundary_cup0, hd]
         simp [cup0]
       refine ⟨- cup1 G (pulln m 1 xj) v + cup0 G u (pulln π (s + 1) w), ?_⟩
-      rw [pullback_cup1, pullback_cup1, e1, cup1_add_left, hcup, e2, cup1_add_right, map_add, map_neg,
+      rw [pullback_cup1, pullback_cup1, e1, cup1_add_left, hcup, e2, cup1_add_right, map_add (f := _), map_neg,
         DnCup.coboundary_cup1 G _ _ hmx, ← e2]
       abel
     refine ⟨cup1 F xj z, cup1 (box F) (pj + qj) w, ?_, hw', hW, ?_, fun i hi ↦ ?_, fun h ↦ ?_⟩
     · rw [DnCup.coboundary_cup1 F _ _ hxj0, hz, cup1_zero, neg_zero]
-    · rw [pullback_cup1, map_add, tau_L F T₀ ε _ hxj0, tau_R F T₀ ε 1, zero_add, hτ]
+    · rw [pullback_cup1, map_add (f := _), tau_L F T₀ ε _ hxj0, tau_R F T₀ ε 1, zero_add, hτ]
     · have hij : i ≠ j := fun e ↦ by
         have := congrArg Fin.val e
         simp only [hjdef] at this
@@ -206,7 +255,7 @@ theorem core_step [Fintype (Fin 1 ⥤ C)] [Fintype (Fin 2 ⥤ C)] (hR : IsField 
     · obtain ⟨t, ht⟩ := h
       obtain ⟨v', hv'⟩ := hW
       obtain ⟨r, hr⟩ := (hπ.2 (s + 1)).1 _ hw' ⟨pulln m (s + 1) t + v', by
-        rw [map_add, ← cmm, ← ht, ← hv']
+        rw [map_add (f := _), ← cmm, ← ht, ← hv']
         abel⟩
       obtain ⟨y, hy⟩ := hT j
       have hjs : (j : ℕ) + s < g := by
@@ -295,12 +344,12 @@ theorem hopfLeSt : CxSt → DictSt → LowSt → HopfLeSt := by
   have hpr : ∀ i, ∃ u, pulln π 1 (pulln (boxL F) 1 (xt i) + pulln (boxR F) 1 (xt i)) - pulln m 1 (xt i) =
       dn G 0 u := fun i ↦ by
     have h := hprim (x i)
-    rw [← hf i, CoefMap.pullCohomologyOne_class, CoefMap.pullCohomologyOne_class, CoefMap.pullCohomologyOne_class, ← map_add, CoefMap.pullCohomologyOne_class,
+    rw [← hf i, CoefMap.pullCohomologyOne_class, CoefMap.pullCohomologyOne_class, CoefMap.pullCohomologyOne_class, ← map_add (f := _), CoefMap.pullCohomologyOne_class,
       H1.mk_eq_mk] at h
     obtain ⟨a, ha⟩ := h
     obtain ⟨u, rfl⟩ := (GlobalTheory.CompanionTheory.Dict.L0_bijective_cochain G).2 a
     refine ⟨-u, (GlobalTheory.CompanionTheory.Dict.L1_bijective_cochain G).1 ?_⟩
-    rw [map_neg, map_neg, GlobalTheory.CompanionTheory.Dict.L1_dn_zero_eq_d0_L0, ha, map_sub, L1_pullback_naturality, map_add, L1_pullback_naturality, L1_pullback_naturality, L1_pullback_naturality, hxt]
+    rw [map_neg, map_neg, GlobalTheory.CompanionTheory.Dict.L1_dn_zero_eq_d0_L0, ha, map_sub, L1_pullback_naturality, map_add (f := _), L1_pullback_naturality, L1_pullback_naturality, L1_pullback_naturality, hxt]
     rw [neg_sub]
     rfl
   obtain ⟨z, w, hz, -, -, -, -, hI⟩ := core_step hR hS π m hπ T₀ ε g xt hxc hpr Λ hΛ0 hΛ1 hΛn g le_rfl

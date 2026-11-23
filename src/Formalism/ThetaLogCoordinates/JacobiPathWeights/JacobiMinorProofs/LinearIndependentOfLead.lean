@@ -1,6 +1,56 @@
-import Mathlib
-import Formalism.ThetaLogCoordinates.JacobiPathWeights.StatementA
-import Lemmata.GeneralBFactRightFurther.Imports
+module
+
+public import Formalism.ThetaLogCoordinates.JacobiPathWeights.StatementA
+public import Lemmata.GeneralBFactRightFurther.Imports
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Data.List.GetD
+
+@[expose] public section
 
 noncomputable section
 
@@ -108,7 +158,7 @@ theorem exists_LL_max (hκ : Function.Injective κ) {ι : Type*} (d : ι → σ 
 variable {R : Type*} [CommRing R] (κ)
 
 def Lead (f : MvPolynomial σ R) (d : σ →₀ ℕ) : Prop :=
-  coeff d f = 1 ∧ ∀ e ∈ f.support, e ≠ d → LL κ e d
+  AddMonoidAlgebra.coeff f d = 1 ∧ ∀ e ∈ f.support, e ≠ d → LL κ e d
 
 variable {κ}
 
@@ -183,7 +233,7 @@ theorem linearIndependent_of_Lead (hκ : Function.Injective κ) {k : Type*} [Fie
   obtain ⟨i₁, hi₁, hg₁⟩ := hcon
   have hne : (s.filter fun i => g i ≠ 0).Nonempty := ⟨i₁, Finset.mem_filter.2 ⟨hi₁, hg₁⟩⟩
   obtain ⟨i₀, hi₀, hmax⟩ := exists_LL_max hκ d hd _ hne
-  have hc : coeff (d i₀) (∑ i ∈ s, g i • v i) = 0 := by rw [hsum]; simp
+  have hc : AddMonoidAlgebra.coeff (∑ i ∈ s, g i • v i) (d i₀) = 0 := by rw [hsum]; simp
   rw [MvPolynomial.coeff_sum, Finset.sum_eq_single i₀] at hc
   · rw [MvPolynomial.coeff_smul, (hv i₀).1, smul_eq_mul, mul_one] at hc
     exact (Finset.mem_filter.1 hi₀).2 hc
@@ -303,7 +353,7 @@ theorem Lead_det (k : Type*) [CommRing k] {m : ℕ} (r c : Fin m → Fin n) (hr 
     rw [MvPolynomial.monomial_sum_one]
     refine Finset.prod_congr rfl fun i _ => ?_
     simp [genX, Matrix.transpose_apply, Matrix.submatrix_apply, MvPolynomial.X]
-  have hcoeff : ∀ e, coeff e (((genX k n).submatrix r c).det) =
+  have hcoeff : ∀ e, AddMonoidAlgebra.coeff (((genX k n).submatrix r c).det) e =
       ∑ π : Equiv.Perm (Fin m), ((Equiv.Perm.sign π : ℤ) : k) * (if mon r c π = e then (1 : k) else 0) := by
     intro e
     rw [hdet, MvPolynomial.coeff_sum]
@@ -450,7 +500,7 @@ theorem Lead_minor (k : Type*) [CommRing k] (J : Finset (Fin n)) :
   have hle : J.card ≤ n := by simpa using Finset.card_le_univ J
   have hcard : J.card = (initSeg n J.card).card := (card_initSeg hle).symm
   unfold minorF
-  rw [dif_pos hcard, colDiag_eq J hcard ((initSeg n J.card).orderEmbOfFin rfl)
+  rw [dite_eq_left hcard, colDiag_eq J hcard ((initSeg n J.card).orderEmbOfFin rfl)
     (fun i => initSeg_emb hle rfl i)]
   exact Lead_det k _ _ (OrderEmbedding.strictMono _) (OrderEmbedding.strictMono _)
 

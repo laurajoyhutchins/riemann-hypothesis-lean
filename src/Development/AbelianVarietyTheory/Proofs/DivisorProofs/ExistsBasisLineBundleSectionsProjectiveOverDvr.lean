@@ -1,13 +1,56 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.Definitions.QuasicoherentCohomology.BijectiveSmulChartSec
+public import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.AbelianVarietyLineBundleSectionsFinite
+public import Mathlib.RingTheory.DiscreteValuationRing.Basic
+public import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.NonemptyPerfectSectionsComplexOfNoetherian
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Definitions.Divisors.MapSmulOfIsHausdorff
 import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.TateUnramifiedOfTorsionUnramified
-import Development.AbelianVarietyTheory.Definitions.Degenerations.OfDerivationFnOn
-import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.IsProjOverMorphismRestrictOfRelAmple
-import Development.AbelianVarietyTheory.Definitions.ThetaMetrics.TwistingSheafOneChartEqPreimageStandardChart
-import Development.AbelianVarietyTheory.Definitions.ThetaMetrics.IsRegularFnIffOfIsAffineOpen
-import Development.AbelianVarietyTheory.Definitions.QuasicoherentCohomology.BijectiveSmulChartSec
-import Development.AbelianVarietyTheory.Definitions.AbelianSchemeLaws.FirstCohomologyVanishesSpecOfIsLocalRing
-import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.NonemptyPerfectSectionsComplexOfNoetherian
-import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.AbelianVarietyLineBundleSectionsFinite
+import Development.AbelianVarietyTheory.PublishedTheorems.Landherr₂.DimEqZero
+
+@[expose] public section
+
 open CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj AlgebraicGeometry
 open scoped CategoryTheory.Obj CategoryTheory.MonObj Pointwise
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor
@@ -49,8 +92,8 @@ theorem Perf.iSup_preimage : ⨆ i, π ⁻¹ᵁ Q.W i = ⊤ := by
   rw [← Scheme.Hom.preimage_iSup, Q.cover]
   exact top_unique fun _ _ => trivial
 
-include Q in
 
+include Q in
 theorem Perf.sec_add
     (hE : ∀ v i, rs X' (le_pull M π (Q.le i)) ((E v).f (fun _ => Q.ch i)) =
         ∑ k, cst f' (π ⁻¹ᵁ Q.W i) (v.1 k) * (π.app (Q.W i)).hom (Q.u k i))
@@ -60,10 +103,10 @@ theorem Perf.sec_add
     (fun i => le_pull M π (Q.le i)) _ _ fun i => ?_
   refine (hE _ i).trans (Eq.trans ?_ ((map_add (rs X' (le_pull M π (Q.le i))) ((E v).f fun _ => Q.ch i)
     ((E w).f fun _ => Q.ch i)).trans (congrArg₂ (· + ·) (hE v i) (hE w i))).symm)
-  simp only [Pi.add_apply, map_add, add_mul, Finset.sum_add_distrib]
+  simp only [Pi.add_apply, map_add (f := _), add_mul, Finset.sum_add_distrib]
+
 
 include Q in
-
 theorem Perf.sec_smul
     (hE : ∀ v i, rs X' (le_pull M π (Q.le i)) ((E v).f (fun _ => Q.ch i)) =
         ∑ k, cst f' (π ⁻¹ᵁ Q.W i) (v.1 k) * (π.app (Q.W i)).hom (Q.u k i))
@@ -151,6 +194,7 @@ theorem exists_basis_sec_of_isDiscreteValuationRing : ∀ (W : Type) [CommRing W
   have hsum : ∀ c : Fin n → W, φ (∑ j, cst f ⊤ (c j) • t j) = ∑ j, c j • (b j).1 := by
     intro c
     change φh _ = _
+
     rw [map_sum]
     exact Finset.sum_congr rfl fun j _ => (hsmul (c j) (t j)).trans (by rw [ht])
   refine ⟨n, t, fun u => ⟨fun j => b.repr ⟨φ u, memN u⟩ j, ?_, ?_⟩⟩

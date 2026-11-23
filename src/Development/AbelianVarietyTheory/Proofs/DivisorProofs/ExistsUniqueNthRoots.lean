@@ -1,5 +1,59 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsMonoHom
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsMonoHom
+public import Mathlib.Algebra.Algebra.Bilinear
+public import Mathlib.LinearAlgebra.FreeModule.Basic
+public import Mathlib.RingTheory.Finiteness.Defs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Algebra.Module.BigOperators
+public import Mathlib.LinearAlgebra.Basis.Bilinear
+public import Mathlib.LinearAlgebra.Dimension.Finrank
+public import Mathlib.LinearAlgebra.Dimension.Free
+
+@[expose] public section
 
 open GlobalTheory.MonoHom
 
@@ -121,8 +175,8 @@ theorem existsUnique_coeff {ε : ι → LinearMap.BilinForm ℤ X} (hε : IsSymB
   · rw [hF]
     have := bimul_ext e q (fun x y => ∏ p : Fin (Module.finrank ℤ X) × Fin (Module.finrank ℤ X),
         q (e p.1) (e p.2) ^ halfForm e p.1 p.2 x y) hadd hadd'
-      (fun a a' b => by simp only [map_add, LinearMap.add_apply, zpow_add, Finset.prod_mul_distrib])
-      (fun a b b' => by simp only [map_add, zpow_add, Finset.prod_mul_distrib])
+      (fun a a' b => by simp only [map_add (f := _), LinearMap.add_apply, zpow_add, Finset.prod_mul_distrib])
+      (fun a b b' => by simp only [map_add (f := _), zpow_add, Finset.prod_mul_distrib])
       (fun i j => by
         simp only [halfForm_basis]
         rw [Finset.prod_eq_single (min i j, max i j)]
@@ -138,8 +192,8 @@ theorem existsUnique_coeff {ε : ι → LinearMap.BilinForm ℤ X} (hε : IsSymB
       rw [div_eq_one]
       have := bimul_ext e q (fun x y => ∏ p : Fin (Module.finrank ℤ X) × Fin (Module.finrank ℤ X),
           q (e p.1) (e p.2) ^ halfForm e p.1 p.2 x y) hadd hadd'
-        (fun a a' b => by simp only [map_add, LinearMap.add_apply, zpow_add, Finset.prod_mul_distrib])
-        (fun a b b' => by simp only [map_add, zpow_add, Finset.prod_mul_distrib])
+        (fun a a' b => by simp only [map_add (f := _), LinearMap.add_apply, zpow_add, Finset.prod_mul_distrib])
+        (fun a b b' => by simp only [map_add (f := _), zpow_add, Finset.prod_mul_distrib])
         (fun i j => by
           simp only [halfForm_basis]
           rw [Finset.prod_eq_single (min i j, max i j)]
@@ -178,8 +232,5 @@ theorem isSymBasis_mul : IsSymBasis (fun _ : Fin 1 => (LinearMap.mul ℤ ℤ : L
     have hy : y = y • (1 : ℤ) := by simp
     rw [hx, hy, LinearMap.map_smul₂, LinearMap.map_smul]
     simp only [smul_eq_mul]; ring
-
-example (s s' : ℚˣ) (h : ∀ x y : ℤ, s ^ ((3 : ℤ) * (x * y)) = s' ^ ((3 : ℤ) * (x * y))) : s ^ 3 = s' ^ 3 :=
-  pow_eq_pow_of_prod isSymBasis_mul 3 (fun _ => s) (fun _ => s') (fun x y => by simpa using h x y) 0
 
 end GlobalTheory.PerRoot

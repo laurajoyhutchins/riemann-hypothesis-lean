@@ -1,9 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.RevPosRevPos
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsArchimedeanLiftUnitaryGroupProduct
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.CircleHomEqZpow
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.CharEqOneOfDetEqOne
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.RealIsotropicOrOneClass
+module
+
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.RevPosRevPos
+public import Development.AbelianVarietyTheory.Definitions.AdelicHermitianForms.IsHermHyperbolic
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.CircleHomEqZpow
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsArchimedeanLiftUnitaryGroupProduct
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.CharEqOneOfDetEqOne
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.RealIsotropicOrOneClass
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IsSmoothVector
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.L2.Theta Formalism.IndefR Formalism.IndefR.Datum Formalism.IndefR.Links Formalism.IndefR.Mult Formalism.IndefR.FWT Formalism.L2.Pj
 open MeasureTheory IsDedekindDomain NumberField Matrix Complex
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.FD GlobalTheory GlobalTheory.ThFr GlobalTheory.Ker GlobalTheory.AdSpan
@@ -17,6 +63,7 @@ open scoped ComplexOrder
 
 theorem hf_eq {n : ℕ} (H : Matrix (Fin n) (Fin n) ℂ) (x y : Fin n → ℂ) :
     hf (starRingEnd ℂ) (H.map (starRingEnd ℂ)) x y = starRingEnd ℂ (star x ⬝ᵥ (H *ᵥ y)) := by
+
   simp only [hf, dotProduct, mulVec, map_sum, map_mul, Matrix.map_apply, Pi.star_apply, RCLike.star_def, Complex.conj_conj, Finset.mul_sum]
   refine Finset.sum_congr rfl fun a _ => Finset.sum_congr rfl fun b _ => ?_
   ring
@@ -61,19 +108,18 @@ theorem isU_iff {n : ℕ} (H g : Matrix (Fin n) (Fin n) ℂ) :
     rw [key, h', hf_eq]
 
 theorem isHerm {n : ℕ} (H : Matrix (Fin n) (Fin n) ℂ) (hH : H.IsHermitian) (hd : H.det ≠ 0) :
-    IsHerm (starRingEnd ℂ) (H.map (starRingEnd ℂ)) where
-  invol a := Complex.conj_conj a
-  ne_id := ⟨Complex.I, by
+    IsHerm (starRingEnd ℂ) (H.map (starRingEnd ℂ)) := by
+  refine ⟨Complex.conj_conj, ?_, ?_, ?_⟩
+  · refine ⟨Complex.I, ?_⟩
     intro h
     have := congrArg Complex.im h
-    norm_num at this⟩
-  herm a b := by
+    norm_num at this
+  · intro a b
     simp only [Matrix.map_apply, Complex.conj_conj]
     have := congrFun (congrFun hH b) a
     simp only [Matrix.conjTranspose_apply, RCLike.star_def] at this
     rw [← this, Complex.conj_conj]
-  det_ne := by
-    rw [← RingHom.mapMatrix_apply, ← RingHom.map_det]
+  · rw [← RingHom.mapMatrix_apply, ← RingHom.map_det]
     exact (map_ne_zero _).2 hd
 
 theorem iso_or_one_class {n : ℕ} (H : Matrix (Fin n) (Fin n) ℂ) (hH : H.IsHermitian) (hd : H.det ≠ 0) :

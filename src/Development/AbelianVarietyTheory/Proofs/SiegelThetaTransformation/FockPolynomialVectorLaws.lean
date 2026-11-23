@@ -1,8 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.ThetaKernelOrthonormalFrameInDomainPeriodLinearStatement
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.ThetaFunctionSpaceHeisenbergLawsStatement
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.HeisenbergDerivativeThetaFunctionLaws
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.RealPeriodMapHomeomorphRiemannFormDensity
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IsWeakOfDatum
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.HeisenbergDerivativeThetaFunctionLaws
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.RealPeriodMapHomeomorphRiemannFormDensity
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.ThetaFunctionSpaceHeisenbergLawsStatement
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.ThetaKernelOrthonormalFrameInDomainPeriodLinearStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.L2.Theta Formalism.IndefR.Datum Formalism.L2.Pj MeasureTheory IsDedekindDomain NumberField Matrix Complex
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.FD GlobalTheory GlobalTheory.ThFr GlobalTheory.Ker
@@ -52,7 +93,7 @@ theorem pure_mem (hadd : ∀ f f', P f → P f' → P (f + f')) (hsm : ∀ (a : 
     rw [pure_monomial]
     exact hsm c _ (foldr_mem hA hf _)
   | add p q hp hq =>
-    rw [map_add]
+    rw [map_add (f := _)]
     exact hadd _ _ hp hq
 
 private theorem opPow_single_add (hA : ∀ i f, P f → P (A i f))
@@ -61,7 +102,7 @@ private theorem opPow_single_add (hA : ∀ i f, P f → P (A i f))
   show List.foldr (fun i g => A i g) f (Finsupp.toMultiset (Finsupp.single v 1 + k)).toList =
     List.foldr (fun i g => A i g) f (v :: (Finsupp.toMultiset k).toList)
   apply foldr_perm hA hc hf
-  rw [← Multiset.coe_eq_coe, Multiset.coe_toList, ← Multiset.cons_coe, Multiset.coe_toList, map_add,
+  rw [← Multiset.coe_eq_coe, Multiset.coe_toList, ← Multiset.cons_coe, Multiset.coe_toList, map_add (f := _),
     Finsupp.toMultiset_single, one_nsmul, Multiset.singleton_add]
 
 theorem pure_X_mul (hadd : ∀ f f', P f → P f' → P (f + f')) (hsm : ∀ (a : ℂ) f, P f → P (a • f))
@@ -77,7 +118,7 @@ theorem pure_X_mul (hadd : ∀ f f', P f → P f' → P (f + f')) (hsm : ∀ (a 
     rw [MvPolynomial.monomial_mul, one_mul, pure_monomial, pure_monomial,
       opPow_single_add hA hc hf, Asm v c _ hk]
   | add p q hp hq =>
-    rw [mul_add, map_add, map_add, hp, hq,
+    rw [mul_add, map_add (f := _), map_add (f := _), hp, hq,
       Aadd v _ _ (pure_mem hadd hsm hA hf p) (pure_mem hadd hsm hA hf q)]
 
 private theorem foldr_apply_add (hA : ∀ i f, P f → P (A i f))
@@ -101,7 +142,7 @@ theorem pure_add (hA : ∀ i f, P f → P (A i f))
     congr 1
     exact foldr_apply_add hA Aadd hf hf' _
   | add p q hp hq =>
-    rw [map_add, map_add, map_add, hp, hq]
+    rw [map_add (f := _), map_add (f := _), map_add (f := _), hp, hq]
     abel
 
 private theorem foldr_apply_comm (hA : ∀ i f, P f → P (A i f)) (R : (X → ℂ) → (X → ℂ))
@@ -125,7 +166,7 @@ theorem pure_comm (hA : ∀ i f, P f → P (A i f)) (R : (X → ℂ) → (X → 
     congr 1
     exact foldr_apply_comm hA R hR hf _
   | add p q hp hq =>
-    rw [map_add, map_add, hp, hq, Radd]
+    rw [map_add (f := _), map_add (f := _), hp, hq, Radd]
 
 end Generic
 

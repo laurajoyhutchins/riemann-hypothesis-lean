@@ -1,6 +1,54 @@
+module
+
+public import Formalism.FormalDegreeBessel.StatementG
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.Matrix.Normed
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.HermitianCurvature.StatementB
 import Formalism.HermitianCurvature.StatementJF
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.RegularisedPairingViaPhase
-import Formalism.FormalDegreeBessel.FinalG
+
+@[expose] public section
 
 open Matrix MeasureTheory Filter
 
@@ -27,39 +75,5 @@ namespace Formalism.FourierDecayAlt.P
 open Formalism.REAL Formalism.QuantumDeterminants Formalism.FourierDecayAlt.B Formalism.FourierDecayAlt.JF
 
 attribute [local instance] Matrix.normedAddCommGroup Matrix.normedSpace
-
-theorem bessel_capelli_commute_of_parts : Formalism.FourierDecayAlt.JF.BesselCommutesOfParts := by
-  intro hW hCVR hCVU hGq hCI hNE hUE k r Wp Wq _ _ _ _ _ _ D A m F Y hnm hThr hF _hCVF
-  have hCk : CkOn (m : ℕ∞) (GV k r) F := hF.choose_spec.1
-  have hCkn : CkOn ((2 * r + k + 1 : ℕ) : ℕ∞) (GV k r) F := B5.ckOn_mono (by exact_mod_cast hnm) hCk
-  have hThr' : TransportedAlt k r A m := hThr
-  have := B5.haar_sigmaFinite D.haarW
-  have := B5.haar_sigmaFinite D.haarN
-  have := B5.haar_sigmaFinite D.haarW'
-  have hN := hNE Wp Wq k r D.z D.z' cStd D.π D.π' D.μW D.μN D.μW' F D.z_mem D.z'_mem D.haarN.conc
-    (fun n₀ h => D.haarN.left n₀ h)
-  refine ⟨JF D F, ?_, ?_, ?_, ?_, ?_, ?_⟩
-  · intro g₀ hg₀
-    obtain ⟨U, F', hU, hgU, hc, he⟩ := (hW k r Wp Wq D A m F hThr' hF).1 g₀ hg₀
-    exact ⟨U, F', hU, hgU, hc.of_le (by exact_mod_cast hnm), he⟩
-  · intro g _ n hn
-    have e := hN g n hn.1 1 WeylGroupFacts.mem_n_one
-    rw [Matrix.mul_one, BesselCapelliCommutation.psi_one D.z'_mem, mul_one] at e
-    exact e
-  · intro g _ n hn
-    have e := hN g 1 WeylGroupFacts.mem_n_one n hn.1
-    rw [Matrix.one_mul, BesselCapelliCommutation.psi_one D.z_mem, one_mul] at e
-    exact e
-  · intro g _ h hh h' hh'
-    exact hUE Wp Wq k r D.z D.z' cStd D.π D.π' D.μW D.μN D.μW' F D.z_mem D.z'_mem D.haarN.conc D.haarW.conc
-      D.haarW'.conc (fun h₀ hh₀ => D.haarW.left h₀ hh₀) (fun h₀ hh₀ => D.haarW'.left h₀ hh₀) (hCI k r Wp Wq D)
-      D.π_rep D.π'_rep g h hh h' hh'
-  · exact Filter.Eventually.of_forall fun q => rfl
-  · filter_upwards [hGq k r Wp Wq D] with q hq
-    rw [hCVU k r Wp Wq D A m F Y hnm hThr' hF (gq D q) hq]
-    show _ = ∫ p, xiP D p • rho D p (Q.CV k r Y F) (gq D q) ∂D.μSS
-    refine integral_congr_ae ?_
-    filter_upwards [B5.ae_inSS D] with p hp
-    rw [hCVR k r Wp Wq D Y F p hp hCkn (gq D q) hq.1]
 
 end Formalism.FourierDecayAlt.P

@@ -1,4 +1,46 @@
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.OrbitPowerSeriesCoefficients.JetMul
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.OrbitPowerSeriesCoefficients.JetMul
+public import Mathlib.RingTheory.MvPowerSeries.Rename
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -97,7 +139,7 @@ theorem applyAt0_rename (φ : Lt ↪ Lt') (T : MvPowerSeries (Lt × Fin N0 × Fi
       show Finsupp.mapDomain (xzMap φ) μ = Finsupp.embDomain (xzEmb φ) μ from
         (Finsupp.embDomain_eq_mapDomain (xzEmb φ) μ).symm]
     exact applyTerm_rename l φ T μ c
-  | add P Q hP hQ => rw [map_add, applyAt0_add, applyAt0_add, hP, hQ, map_add]
+  | add P Q hP hQ => rw [map_add (f := _), applyAt0_add, applyAt0_add, hP, hQ, map_add (f := _)]
 
 end Rename₂
 
@@ -116,8 +158,8 @@ theorem serIn_rename {Lt Lt' γ K : Type*} [CommSemiring K] (φ : Lt ↪ Lt') (T
   · exact hv (Finsupp.embDomain_of_notMem_range _ _ _ h)
 
 theorem norm_coeff_rename_le {σ τ K : Type*} [NormedCommRing K] (f : σ ↪ τ) (A : MvPolynomial σ K) {b : ℝ}
-    (hb : 0 ≤ b) (hA : ∀ m, ‖MvPolynomial.coeff m A‖ ≤ b) (m : τ →₀ ℕ) :
-    ‖MvPolynomial.coeff m (MvPolynomial.rename f A)‖ ≤ b := by
+    (hb : 0 ≤ b) (hA : ∀ m, ‖AddMonoidAlgebra.coeff A m‖ ≤ b) (m : τ →₀ ℕ) :
+    ‖AddMonoidAlgebra.coeff (MvPolynomial.rename f A) m‖ ≤ b := by
   by_cases h : ∃ m', Finsupp.mapDomain f m' = m
   · obtain ⟨m', rfl⟩ := h
     rw [MvPolynomial.coeff_rename_mapDomain f f.injective]

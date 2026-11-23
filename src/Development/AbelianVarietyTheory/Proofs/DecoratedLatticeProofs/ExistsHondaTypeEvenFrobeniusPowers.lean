@@ -1,9 +1,59 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.EndOmega
-import Formalism.LocalToGlobal.TorsionIntegrality.RamifiedCurveKernels.PairedSquareJets.InverseEndoIntegralHolds
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.HondaFrobeniusTwistLogAdditiveModPrimeStatement
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.HondaFrobeniusTwistLogEigenModPrimeStatement
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.LazardBinomialNormUltrametricStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.LatticeFrames.EndOmega
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.HondaFrobeniusTwistLogAdditiveModPrimeStatement
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.HondaFrobeniusTwistLogEigenModPrimeStatement
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.LazardBinomialNormUltrametricStatement
+public import Formalism.LocalToGlobal.TorsionIntegrality.RamifiedCurveKernels.PairedSquareJets.InverseEndoIntegralHolds
+import Formalism.LocalToGlobal.TorsionIntegrality.SecondCoefficientNorms.BinomialSeriesCoefficients.DegreeLeOfMemAntidiagonal
+import Formalism.LocalToGlobal.TorsionIntegrality.SecondCoefficientNorms.BinomialSeriesCoefficients.Points
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Presheaf
+
+@[expose] public section
 
 open PowerSeries GlobalTheory.Honda
 
@@ -62,6 +112,7 @@ theorem subst_comb {A : MvPowerSeries ι K} (hA : MvPowerSeries.constantCoeff A 
     (C a * f - ∑ k ∈ s, C (c k) * g k).subst A =
       MvPowerSeries.C a * f.subst A - ∑ k ∈ s, MvPowerSeries.C (c k) * (g k).subst A := by
   have hs := Pts.hasSubst hA
+
   rw [subst_sub hs, subst_mul hs, subst_C, ← coe_substAlgHom hs, map_sum]
   simp only [coe_substAlgHom hs, subst_mul hs, subst_C]
 
@@ -120,7 +171,7 @@ theorem cob_degree : ∀ (K : Type) [NormedField K] [IsUltrametricDist K] (l : �
     convert a2 using 2
     rw [fadd]; ring
   have key := norm_coeff_subst_sub (norm_nonneg (l : K)) (Pts.constantCoeff_fadd hp h0 h1)
-    (by rw [map_add, h0, h1, add_zero]) hord hf.2.2 h d (by rwa [hdeg])
+    (by rw [map_add (f := _), h0, h1, add_zero]) hord hf.2.2 h d (by rwa [hdeg])
   have hch : MvPowerSeries.coeff d ((MvPowerSeries.X (0 : Fin 2) + MvPowerSeries.X (1 : Fin 2) :
       MvPowerSeries (Fin 2) K) ^ n) = (n.choose k : K) := by
     rw [← MvPolynomial.coe_X, ← MvPolynomial.coe_X, ← MvPolynomial.coe_add, ← MvPolynomial.coe_pow,
@@ -208,6 +259,7 @@ theorem cob_even_sum : ∀ (K : Type) [NormedField K] [IsUltrametricDist K] [Cha
     rw [subst_comb (Pts.constantCoeff_fadd hp h0 h1), subst_comb h0, subst_comb h1, Pts.l_fadd hp h0 h1]
     simp only [mul_sub, Finset.sum_sub_distrib]
     ring
+
   rw [this, map_neg, norm_neg, map_sum]
   refine IsUltrametricDist.norm_sum_le_of_forall_le_of_nonneg (norm_nonneg _) fun k hk => ?_
   rw [MvPowerSeries.coeff_C_mul, norm_mul]
@@ -237,6 +289,7 @@ theorem eig_even_sum : ∀ (K : Type) [NormedField K] [IsUltrametricDist K] [Cha
     rw [hcomb, hl]
     simp only [hσ2, mul_sub, Finset.sum_sub_distrib, Finset.mul_sum, mul_left_comm (C w)]
     ring
+
   rw [this, map_neg, norm_neg, map_sum]
   refine IsUltrametricDist.norm_sum_le_of_forall_le_of_nonneg (norm_nonneg _) fun k hk => ?_
   rw [coeff_C_mul, norm_mul]
@@ -296,6 +349,7 @@ theorem exists_even_type : ∀ (K : Type) [NormedField K] [IsUltrametricDist K] 
   have hHc : ∀ n m, coeff m (H n) =
       (l : K) * coeff m f - ∑ k ∈ Finset.range n, d n k * coeff m (Φ k) := by
     intro n m
+
     simp only [hH, hΦ, map_sub, map_sum, coeff_C_mul]
   have hlow : ∀ n m, m ≤ n → (∀ k, N k = n → m < n) → coeff m (H n) = coeff m G := by
     intro n m hmn hk'

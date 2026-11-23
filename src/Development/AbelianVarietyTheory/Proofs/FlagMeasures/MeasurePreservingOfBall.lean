@@ -1,7 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.IsLatMeasurableConst
-import Development.AbelianVarietyTheory.Definitions.ThetaMetrics.IsAddFundamentalDomainLatticeDomain
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsSmulMemOfMemSpanFraction
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.IsLatMeasurableConst
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.Complex
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open MeasureTheory NumberField Matrix Finset Formalism.MainNotions.S GlobalTheory.Count GlobalTheory.FlagMeas GlobalTheory.FlagBase
 open scoped nonZeroDivisors
@@ -458,7 +505,7 @@ private theorem exists_matrix_fractionalIdeals_coords_of_fg : ∀ (j : ℕ) (Λ 
       · rintro ⟨hy0, h⟩
         simpa using Λ.add_mem h (hv _ hy0)
 
-theorem exists_coords {j : ℕ} (Λ : Submodule (𝓞 E) (Fin j → E)) (hΛ : Submodule.IsLattice E Λ) :
+theorem exists_coords {j : ℕ} (Λ : Submodule (𝓞 E) (Fin j → E)) (hΛ : Submodule.IsFullLattice E Λ) :
     ∃ (P : Matrix (Fin j) (Fin j) E) (c : Fin j → FractionalIdeal (𝓞 E)⁰ E), P.det ≠ 0 ∧ (∀ i, c i ≠ 0) ∧
       ∀ y, y ∈ Λ ↔ ∀ i, (P *ᵥ y) i ∈ c i := by
   obtain ⟨P, c, hP, hc⟩ := exists_matrix_fractionalIdeals_coords_of_fg E j Λ hΛ.fg
@@ -628,7 +675,7 @@ private theorem homCovolume_eq_mul_pow (a b v Da Db : ℝ) (F r s : ℕ) (ha : a
 
 end Main
 
-theorem homCovolume : ∀ (E : Type) [Field E] [NumberField E], IsTotallyComplex E → ∀ (r s : ℕ) (Λ : Submodule (𝓞 E) (Fin r → E)) (Λ' : Submodule (𝓞 E) (Fin s → E)), Submodule.IsLattice E Λ → Submodule.IsLattice E Λ' → ∀ (g : MatInf E r) (g' : MatInf E s), 0 < detNorm E r g → 0 < detNorm E s g' → ∀ L : Submodule ℤ (InfinitePlace E → Fin r → Fin s → ℂ), (∀ z, z ∈ L ↔ ∃ T : Matrix (Fin r) (Fin s) E, (∀ y ∈ Λ', T *ᵥ y ∈ Λ) ∧ ∀ w, Matrix.of (z w) = (Matrix.of (g w))⁻¹ * T.map w.embedding * Matrix.of (g' w)) → ∃ _ : DiscreteTopology L, IsZLattice ℝ L ∧ ZLattice.covolume L volume = covAt E r (latAt E r Λ g) ^ s * (Formalism.HermitianLatticesTheory.vInv E ^ (Formalism.HermitianLatticesTheory.fDeg E * s) / covAt E s (latAt E s Λ' g')) ^ r := by
+theorem homCovolume : ∀ (E : Type) [Field E] [NumberField E], IsTotallyComplex E → ∀ (r s : ℕ) (Λ : Submodule (𝓞 E) (Fin r → E)) (Λ' : Submodule (𝓞 E) (Fin s → E)), Submodule.IsFullLattice E Λ → Submodule.IsFullLattice E Λ' → ∀ (g : MatInf E r) (g' : MatInf E s), 0 < detNorm E r g → 0 < detNorm E s g' → ∀ L : Submodule ℤ (InfinitePlace E → Fin r → Fin s → ℂ), (∀ z, z ∈ L ↔ ∃ T : Matrix (Fin r) (Fin s) E, (∀ y ∈ Λ', T *ᵥ y ∈ Λ) ∧ ∀ w, Matrix.of (z w) = (Matrix.of (g w))⁻¹ * T.map w.embedding * Matrix.of (g' w)) → ∃ _ : DiscreteTopology L, IsZLattice ℝ L ∧ ZLattice.covolume L volume = covAt E r (latAt E r Λ g) ^ s * (Formalism.HermitianLatticesTheory.vInv E ^ (Formalism.HermitianLatticesTheory.fDeg E * s) / covAt E s (latAt E s Λ' g')) ^ r := by
   classical
   intro E _ _ hE r s Λ Λ' hΛl hΛ'l g g' hg hg' L hL
   obtain ⟨P, c, hP, hc, hΛ⟩ := exists_coords E Λ hΛl

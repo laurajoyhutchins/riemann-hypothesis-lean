@@ -1,12 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.GeometricallyConnectedOfIsIsoRestrict
-import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsIsLocModelIsPrimeOf
-import Development.AbelianVarietyTheory.Definitions.Divisors.NotDominatesTopPlace
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DvrPlaceCentreOnBaseOfEtaleTowerOverNormalLocalStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DvrPlaceOrdEqAlongEtaleTowerStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.OrderDifferentialFormEtTowerStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FormOrderWedgeEqOfEtaleTowerHeightOnePrimeStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsFreeGenTopFormEtaleTowerTranscendenceBasisStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.NotDominatesTopPlace
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DvrPlaceCentreOnBaseOfEtaleTowerOverNormalLocalStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DvrPlaceOrdEqAlongEtaleTowerStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FormOrderWedgeEqOfEtaleTowerHeightOnePrimeStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsFreeGenTopFormEtaleTowerTranscendenceBasisStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.OrderDifferentialFormEtTowerStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 open CategoryTheory AlgebraicGeometry TopologicalSpace
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor
 open GlobalTheory GlobalTheory.Cartier GlobalTheory.TopForm GlobalTheory.Discrepancy GlobalTheory.FieldPair
@@ -37,12 +77,12 @@ theorem effAt_etTower : ∀ {K L : Type} [Field K] [Field L] (cK : ℂ →+* K) 
     exact one_ne_zero (hC.1 (a₁ := 1) (a₂ := 0) (by simp [h]))
   · rw [Finsupp.add_apply]
     have h1 : Finsupp.mapDomain (fun g : R => (ι g : L)) φ 0 = 0 := by
-      have e := Finsupp.mapDomain_apply hi φ 0
+      have e := Finsupp.mapDomain_apply_of_injective hi φ 0
       simp only [map_zero, ZeroMemClass.coe_zero] at e
       rw [e]
       exact Finsupp.notMem_support_iff.1 fun h => hφ 0 h rfl
     have h2 : Finsupp.mapDomain (fun g : T => (g : L)) θ 0 = 0 := by
-      have e := Finsupp.mapDomain_apply Subtype.val_injective θ 0
+      have e := Finsupp.mapDomain_apply_of_injective Subtype.val_injective θ 0
       simp only [ZeroMemClass.coe_zero] at e
       rw [e]
       exact Finsupp.notMem_support_iff.1 fun h => (hθ 0 h).1 rfl
@@ -57,9 +97,11 @@ theorem effAt_etTower : ∀ {K L : Type} [Field K] [Field L] (cK : ℂ →+* K) 
       refine Finset.sum_nonneg fun g hg => mul_nonneg (hθ g hg).2 ?_
       exact_mod_cast (P.ord_nonneg_iff (hθ g hg).1).2 (hP.1 _ g.2)
     rw [hq] at hθ'
-    rw [Place.disc, map_add]
+    rw [Place.disc, map_add (f := _)]
     rcases GlobalTheory.T.dvrPlace_centre_on_base_of_etaleTowerOverNormalLocal cK cL r R T ι ψ τ P hT hP with h0 | ⟨P0, hP0, h0⟩
-    · rw [GlobalTheory.T.order_differential_form_et_tower cK cL n r R T ι ψ τ x P hT hx hP h0, hq, hq]
+    · have ho := GlobalTheory.T.order_differential_form_et_tower cK cL n r R T ι ψ τ x P hT hx hP h0
+      change P.formOrd (dForm cL (Fin.append (fun i => (τ i : L)) (fun i => (ι (x i) : L)))) = 0 at ho
+      rw [ho, hq, hq]
       have : (φ.sum fun g t => t * (P.ord (ι g : L) : ℚ)) = 0 :=
         Finset.sum_eq_zero fun g hg => by dsimp only; rw [h0 g (hφ g hg)]; simp
       rw [this]
@@ -68,7 +110,9 @@ theorem effAt_etTower : ∀ {K L : Type} [Field K] [Field L] (cK : ℂ →+* K) 
     · have h1 := GlobalTheory.T.dvrPlace_ord_eq_along_etaleTower cK cL r R T ι ψ τ P P0 hT hP hP0 h0
       have hd := hE.2.2 P0 hP0
       rw [Place.disc, hq] at hd
-      rw [GlobalTheory.T.formOrder_wedge_eq_of_etaleTower_heightOnePrime cK cL n r R T ι ψ τ x P P0 hT hx hP hP0 h1, hq, hq]
+      have ho := GlobalTheory.T.formOrder_wedge_eq_of_etaleTower_heightOnePrime cK cL n r R T ι ψ τ x P P0 hT hx hP hP0 h1
+      change P.formOrd (dForm cL (Fin.append (fun i => (τ i : L)) (fun i => (ι (x i) : L)))) = P0.formOrd (dForm cK (fun i => (x i : K))) at ho
+      rw [ho, hq, hq]
       have : (φ.sum fun g t => t * (P.ord (ι g : L) : ℚ)) =
           φ.sum fun g t => t * (P0.ord (g : K) : ℚ) :=
         Finset.sum_congr rfl fun g hg => by dsimp only; rw [h1 g (hφ g hg)]

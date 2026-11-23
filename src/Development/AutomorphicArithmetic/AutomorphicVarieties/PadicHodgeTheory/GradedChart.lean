@@ -1,6 +1,56 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.IsFirstOrderDeformationOfRZero
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.ChartChange
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsUniqueFixedPointOfAdicContraction
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.IsFirstOrderDeformationOfRZero
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.IsInertiaInfiniteCyclotomic
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsUniqueFixedPointOfAdicContraction
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.ChartChange
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Formalism.ConjugateSelfDual ReciprocityTheory.Gal Module UpperTheory.V.Loc UpperTheory.V.Alg UpperTheory.V.GradeZeroInterpolatingElement UpperTheory.V.HV UpperTheory.V.Base IsLocalRing
 
@@ -63,6 +113,7 @@ private theorem gc_mem_pow_iff {E σ : Type} [Field E] [Finite σ] (N : ℕ) (g 
           fun i e => rfl
         have hdecomp : g = ∑ i, X i * gi i := by
           ext e
+
           rw [map_sum]
           simp only [X, coeff_monomial_mul, one_mul]
           by_cases he : e = 0
@@ -97,7 +148,7 @@ private theorem gc_mem_pow_iff {E σ : Type} [Field E] [Finite σ] (N : ℕ) (g 
         rw [hgi]
         split_ifs
         · apply hg
-          rw [map_add, Finsupp.degree_single]
+          rw [map_add (f := _), Finsupp.degree_single]
           omega
         · rfl
 
@@ -113,6 +164,7 @@ private theorem gc_lin {A σ : Type} [CommRing A] [Fintype σ] (f : MvPowerSerie
     (hd : d.degree < 2) :
     coeff d (f - algebraMap A _ (constantCoeff f) - ∑ i, coeff (Finsupp.single i 1) f • (X i : MvPowerSeries σ A)) = 0 := by
   classical
+
   simp [MvPowerSeries.algebraMap_apply, coeff_C, coeff_X, map_sum]
   by_cases hd0 : d = 0
   · subst hd0
@@ -136,7 +188,7 @@ private lemma gc_exists_order (W : WPres O Y R) (h : W.HasOrigin) (n : ℕ) :
     obtain ⟨f, hf⟩ := W.surj (algebraMap R R r)
     exact ⟨f, hf, by simp⟩
   · rintro a b i - - ⟨f, hf, hfo⟩ ⟨g, hg, hgo⟩
-    exact ⟨f + g, by rw [map_add, hf, hg], le_trans (le_min hfo hgo) min_order_le_add⟩
+    exact ⟨f + g, by rw [map_add (f := _), hf, hg], le_trans (le_min hfo hgo) min_order_le_add⟩
   · rintro m hm i a - ⟨f, hf, hfo⟩
     obtain ⟨g, rfl⟩ := W.surj m
     have hg0 : constantCoeff g = 0 := by
@@ -290,7 +342,7 @@ private lemma gc_graded [IsDomain O] [IsFractionRing O E] [Finite τ] (W : WPres
         · rw [Finsupp.single_apply, if_neg (Ne.symm hk)]
           exact Nat.zero_le _
       have := congrArg Finsupp.degree (tsub_add_cancel_of_le hs)
-      rw [map_add, Finsupp.degree_single] at this
+      rw [map_add (f := _), Finsupp.degree_single] at this
       omega
     simp
     omega
@@ -311,6 +363,7 @@ private lemma gc_graded [IsDomain O] [IsFractionRing O E] [Finite τ] (W : WPres
   have hF : φ (W.π (d • f - ∑ e' ∈ T, a e' • Pm e')) ∈ maximalIdeal (MvPowerSeries τ E) ^ N := by
     rw [gc_mem_pow_iff]
     intro e'' he''
+
     rw [map_sub, map_sub, map_sum, map_sum, map_smul, map_smul, map_sub, map_sum, hcs]
     simp only [map_smul, hψ, hcs, coeff_monomial, smul_ite, smul_zero]
     rw [Finset.sum_ite_eq T e'' (fun e' => a e' • (1 : E)), if_pos (hTmem e'' he''),
@@ -324,13 +377,16 @@ private lemma gc_graded [IsDomain O] [IsFractionRing O E] [Finite τ] (W : WPres
   have hwF : wcomp O W.wt (Finsupp.weight (fun i => W.wt (u i)) e) (d • f - ∑ e' ∈ T, a e' • Pm e') =
       -∑ e' ∈ T.filter (fun e' => Finsupp.weight (fun i => W.wt (u i)) e' =
         Finsupp.weight (fun i => W.wt (u i)) e), a e' • Pm e' := by
+
     rw [Finset.sum_filter, map_sub, map_smul, map_sum, gc_wcomp_ne W.wt hjk hf, smul_zero, zero_sub]
     congr 1
     refine Finset.sum_congr rfl (fun e' _ => ?_)
     rw [map_smul, hwP, smul_ite, smul_zero]
   have hW := gc_homog W h hφ hy hF (Finsupp.weight (fun i => W.wt (u i)) e)
+
   rw [hwF, map_neg, map_neg, Ideal.neg_mem_iff, map_sum, map_sum] at hW
   have hc := (gc_mem_pow_iff N _).mp hW e (by omega)
+
   simp only [map_smul, hψ, map_sum, hcs, coeff_monomial, smul_ite, smul_zero] at hc
   rw [Finset.sum_ite_eq _ e (fun e' => a e' • (1 : E))] at hc
   have heT : e ∈ T.filter (fun e' => Finsupp.weight (fun i => W.wt (u i)) e' =
@@ -375,13 +431,14 @@ private lemma gc_span [IsDomain O] [FaithfulSMul O E] {n : ℕ} (W : WPres O Y R
         ∑ k, coeff (Finsupp.single k 1) g • (X k : MvPowerSeries W.σ O)) +
         algebraMap O _ (constantCoeff g) + ∑ k, coeff (Finsupp.single k 1) g • X k := by
       abel
-    rw [hg_eq, map_add, map_add, map_add, map_add, map_add, map_add]
+    rw [hg_eq, map_add (f := _), map_add (f := _), map_add (f := _), map_add (f := _), map_add (f := _), map_add (f := _)]
     refine add_mem (add_mem ?_ ?_) ?_
     · rw [hlin2 _ (gc_low W h hφ (nat_le_order (fun d hd => gc_lin g d hd)))]
       exact zero_mem _
     · rw [AlgHom.commutes, AlgHom.commutes, hC]
       exact zero_mem _
-    · rw [map_sum, map_sum, map_sum]
+    · set_option synthInstance.maxHeartbeats 100000 in
+        rw [map_sum, map_sum, map_sum]
       refine Submodule.sum_mem _ (fun k _ => ?_)
       rw [map_smul, map_smul, hlinO]
       exact Submodule.smul_mem _ _ (hv k)
@@ -452,7 +509,7 @@ private lemma gc_der [IsDomain O] [IsFractionRing O E] [Fintype τ] (x : R →�
       rw [RingHom.mem_ker] at hu hv
       rw [hDm, hu, hv, map_zero, zero_mul, zero_mul, add_zero]
     · intro u v hu hv
-      rw [map_add, hu, hv, add_zero]
+      rw [map_add (f := _), hu, hv, add_zero]
   obtain ⟨y, hy0, hyP⟩ := hy
   have hDP : ∀ p ∈ P, D p = 0 := by
     intro p hp
@@ -468,7 +525,7 @@ private lemma gc_der [IsDomain O] [IsFractionRing O E] [Fintype τ] (x : R →�
   have hDs : ∀ a ∈ RingHom.ker x ^ 2 ⊔ P, D a = 0 := by
     intro a ha
     obtain ⟨u, hu, v, hv, rfl⟩ := Submodule.mem_sup.mp ha
-    rw [map_add, hDk2 u hu, hDP v hv, add_zero]
+    rw [map_add (f := _), hDk2 u hu, hDP v hv, add_zero]
   refine LinearMap.ext (fun a => ?_)
   rw [LinearMap.zero_apply]
   obtain ⟨b', hd⟩ := IsLocalization.exist_integer_multiples (nonZeroDivisors O)
@@ -482,6 +539,7 @@ private lemma gc_der [IsDomain O] [IsFractionRing O E] [Fintype τ] (x : R →�
   set F' : MvPowerSeries τ E := d • φ a with hF'
   have key : φ (d • a - algebraMap O R (d * x a) - ∑ i, b i • z i) =
       F' - algebraMap E _ (constantCoeff F') - ∑ i, coeff (Finsupp.single i 1) F' • X i := by
+
     rw [map_sub, map_sub, map_sum, map_smul, AlgHom.commutes]
     congr 1
     · congr 1
@@ -498,6 +556,7 @@ private lemma gc_der [IsDomain O] [IsFractionRing O E] [Fintype τ] (x : R →�
   have h1 := hDs _ hcm
   rw [map_smul, Algebra.smul_def] at h1
   have h2 := (mul_eq_zero.mp h1).resolve_left (fun h => hc (hinj (by rw [h, map_zero])))
+
   rw [map_sub, map_sub, map_sum, hDc, map_smul] at h2
   simp only [map_smul, h0, smul_zero, Finset.sum_const_zero, sub_zero] at h2
   rw [Algebra.smul_def] at h2
@@ -533,7 +592,7 @@ private lemma gc_count [IsDomain O] [IsFractionRing O E] [Fintype τ] (x : R →
       { toFun := fun a => ∑ i0 : {i // w i = j}, v i0 * coeff (Finsupp.single i0.1 1) (φ a)
         map_add' := by
           intro a b
-          simp only [map_add, mul_add, Finset.sum_add_distrib]
+          simp only [map_add (f := _), mul_add, Finset.sum_add_distrib]
         map_smul' := by
           intro c a
           simp only [map_smul, RingHom.id_apply]

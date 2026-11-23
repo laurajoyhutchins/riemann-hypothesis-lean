@@ -1,7 +1,60 @@
-import Development.WeilBound.ThetaLifts.LeviDeterminants.CharacterAdmissibility.ResAdm
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsDiagonalLagrangianInvariantForm
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.AddHaarLeftRightMulAdelicMatricesModule
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.LcscAdelicUnitaryGroup
+module
+
+public import Development.WeilBound.ThetaLifts.LeviDeterminants.CharacterAdmissibility.ResAdm
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsDiagonalLagrangianInvariantForm
+public import Development.AbelianVarietyTheory.Definitions.Foundations.T2SpaceTensorProductFiniteExtension
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.T2SpaceNumberFieldInfiniteAdeles
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.MulVecCEApply
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.AddEquivAddHaarCharEqOfIsOpenEmbeddingRestrictStatement
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.AddHaarLeftRightMulAdelicMatricesModule
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.TensorIdeleNormalizedAbsEqAdelicAbsNormStatement
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdicIntegersCompact.IsCompactAdicCompletionIntegers
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Calculus.BumpFunction.FiniteDimension
+public import Mathlib.Analysis.Calculus.BumpFunction.Normed
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Compactness.Paracompact
+import Mathlib.Topology.LocallyConstant.Algebra
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open scoped TensorProduct NNReal Matrix ENNReal
 open NumberField IsDedekindDomain MeasureTheory Filter Topology Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes
@@ -57,14 +110,16 @@ theorem continuous_ofMixed : Continuous (InfiniteAdeleRing.ringEquiv_mixedSpace 
     exact ((continuous_apply _).comp continuous_snd).congr fun y =>
       (congrFun (congrArg Prod.snd ((InfiniteAdeleRing.ringEquiv_mixedSpace F).apply_symm_apply y)) ⟨v, hv⟩).symm
 
-variable (F κ) in
 
+variable (F κ) in
 def glueE : (Vi F κ × Vf F κ) ≃ₜ+ (κ → AF F) where
   toFun := glue
   invFun := shiftOf
   left_inv p := by
     refine Prod.ext ?_ rfl
-    simp [shiftOf, glue]
+    change (eI F κ).symm (fun i => InfiniteAdeleRing.ringEquiv_mixedSpace F
+      ((InfiniteAdeleRing.ringEquiv_mixedSpace F).symm (eI F κ p.1 i))) = p.1
+    simp only [RingEquiv.apply_symm_apply, ContinuousLinearEquiv.symm_apply_apply]
   right_inv x := by
     funext i
     refine Prod.ext ?_ rfl
@@ -74,7 +129,7 @@ def glueE : (Vi F κ × Vf F κ) ≃ₜ+ (κ → AF F) where
     funext i
     refine Prod.ext ?_ rfl
     show (InfiniteAdeleRing.ringEquiv_mixedSpace F).symm (eI F κ (p.1 + q.1) i) = _
-    rw [map_add, Pi.add_apply, map_add]
+    rw [map_add (f := _), Pi.add_apply, map_add (f := _)]
     rfl
   continuous_toFun := continuous_pi fun i =>
     (continuous_ofMixed.comp ((continuous_apply i).comp ((eI F κ).continuous.comp continuous_fst))).prodMk
@@ -103,7 +158,7 @@ theorem axInt [IsTotallyReal F] : AxInt (adeleClass F) := by
       rw [hp]
       exact (cI f).integrable.mul_prod (hg g hg')
     | zero => rw [map_zero]; exact integrable_zero _ _ _
-    | add x y _ _ hx hy => rw [map_add]; exact hx.add hy
+    | add x y _ _ hx hy => rw [map_add (f := _)]; exact hx.add hy
     | smul c x _ hx => rw [map_smul]; exact hx.smul c
   have : (mu F κ).IsAddHaarMeasure := by unfold mu; infer_instance
   let ν : Measure (κ → AF F) := (mu F κ).map (glueE F κ)

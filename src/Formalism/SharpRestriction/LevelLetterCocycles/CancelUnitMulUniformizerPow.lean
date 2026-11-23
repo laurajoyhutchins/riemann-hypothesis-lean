@@ -1,6 +1,56 @@
-import Formalism.SharpRestriction.LevelLetterCocycles.SplittingOfExactnessAndData
-import Formalism.SharpRestriction.LevelLetterCocycles.RelayGeneralCaseOfAdmissible
-import Formalism.SharpRestriction.LevelLetterCocycles.BaseChangePreservesUnitaryOf
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.SplittingOfExactnessAndData
+public import Formalism.SharpRestriction.LevelLetterCocycles.RelayGeneralCaseOfAdmissible
+public import Formalism.SharpRestriction.LevelLetterCocycles.BaseChangePreservesUnitaryOf
+import Formalism.SharpRestriction.LevelLetterCocycles.JumpsLetOfWin
+import Formalism.SharpRestriction.LevelLetterCocycles.SaturationPullbackOfRingCondition
+import Formalism.SharpRestriction.LevelLetterCocycles.WachFrobeniusLatticeUnramifiedFunctor
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -152,8 +202,10 @@ theorem tauZ_exists [IsDomain O] (T : LocLat G Qp LL O) (hC : Ctx W T) (h9 : For
   set S := ∑ r ∈ Finset.range M, W.π₀ ^ r • Formalism.MainNotions.LiftingTheory.vecB W T b (y r) with hSdef
   have hφS : ((W.φD T) ^ A.j) S = ∑ r ∈ Finset.range M, ∑ m,
       (((W.φA ^ A.j) W.π₀) ^ r * algebraMap O (LetA O n) (y r m)) • β m := by
+
     rw [hSdef, map_sum]
     refine Finset.sum_congr rfl fun r _ => ?_
+
     rw [φpow_smul, map_pow, Formalism.MainNotions.LiftingTheory.vecB, map_sum, Finset.smul_sum]
     refine Finset.sum_congr rfl fun m _ => ?_
     rw [map_smul, ← algebraMap_smul (LetA O n) (y r m), smul_smul]
@@ -213,6 +265,7 @@ theorem DelF_inv {g : W.Gam} (hg : g ∈ W.DelF) : g⁻¹ ∈ W.DelF := by
 theorem sumΔ_inv (T : LocLat G Qp LL O) (x : W.DD T) :
     ∀ δ ∈ W.DelF, W.γD T δ (∑ g ∈ W.DelF, W.γD T g x) = ∑ g ∈ W.DelF, W.γD T g x := by
   intro δ hδ
+
   rw [map_sum]
   simp_rw [← W.γD_mul]
   exact Finset.sum_nbij' (fun g => δ * g) (fun g => δ⁻¹ * g) (fun a ha => DelF_mul W hδ ha)
@@ -331,7 +384,7 @@ theorem e_tf [NeZero n] [IsDomain O] (hinj : Function.Injective (algebraMap O LL
     | add t₁ t₂ h₁ h₂ =>
       obtain ⟨ζ₁, h₁⟩ := h₁
       obtain ⟨ζ₂, h₂⟩ := h₂
-      exact ⟨ζ₁ + ζ₂, by rw [map_add, h₁, h₂, add_smul]⟩
+      exact ⟨ζ₁ + ζ₂, by rw [map_add (f := _), h₁, h₂, add_smul]⟩
   haveI : Nontrivial W.EE := W.EE_inj.nontrivial
   obtain ⟨hfree, hrank⟩ := W.DD_free W.one
   rw [finrank_one_lat W hinj] at hrank
@@ -361,8 +414,9 @@ theorem lift_avg (hΔu : IsUnit ((W.DelF.card : ℕ) : O)) {Y : LocLat G Qp LL O
     rw [hy, map_smul, sumΔ_inv W Y z δ hδ]
   refine ⟨y, ⟨⟨N_of_Nl W hyNl, hyΔ⟩, hyNl⟩, ?_⟩
   have h1 : ∀ g ∈ W.DelF, W.map π (W.γD Y g z) = t := fun g hg => by rw [W.map_γ, ht, htΔ g hg]
+
   rw [hy, LinearMap.map_smul_of_tower, hs, map_sum, Finset.sum_congr rfl h1, Finset.sum_const,
-    ← Nat.cast_smul_eq_nsmul O, smul_smul, hΔu.val_inv_mul, one_smul]
+  ← Nat.cast_smul_eq_nsmul O, smul_smul, hΔu.val_inv_mul, one_smul]
 
 theorem pp_pull [NeZero n] [IsDomain O] (hinj : Function.Injective (algebraMap O LL))
     (hone : IsCrys PD W.one.ρ) {T₂ Y : LocLat G Qp LL O} {ι : LatHom T₂.L Y.L}
@@ -383,8 +437,8 @@ theorem pp_pull [NeZero n] [IsDomain O] (hinj : Function.Injective (algebraMap O
       (W.φA ^ e') g • u - θ • ((W.φD Y) ^ e') y = W.map ι v := by
     refine Relay2.Pp_ind W Y c e' _ ⟨0, 0, (Pp W T₂ c e').zero_mem, by simp, by simp⟩ ?_ ?_ ?_
     · rintro u₁ u₂ ⟨θ₁, v₁, hv₁, h₁, e₁⟩ ⟨θ₂, v₂, hv₂, h₂, e₂⟩
-      refine ⟨θ₁ + θ₂, v₁ + v₂, (Pp W T₂ c e').add_mem hv₁ hv₂, by rw [map_add, h₁, h₂, add_smul], ?_⟩
-      rw [map_add, ← e₁, ← e₂, smul_add, add_smul]
+      refine ⟨θ₁ + θ₂, v₁ + v₂, (Pp W T₂ c e').add_mem hv₁ hv₂, by rw [map_add (f := _), h₁, h₂, add_smul], ?_⟩
+      rw [map_add (f := _), ← e₁, ← e₂, smul_add, add_smul]
       abel
     · rintro u ⟨θ, v, hv, h, e₁⟩
       refine ⟨-θ, -v, (Pp W T₂ c e').neg_mem hv, by rw [map_neg, h, neg_smul], ?_⟩
@@ -560,9 +614,10 @@ theorem cutData_of [NeZero n] [IsDomain O] (hinj : Function.Injective (algebraMa
           Formalism.MainNotions.LiftingTheory.lp W rr • ((letE c : LetA O n) • e) := fun g _ => by
         rw [W.map_γ, hx'π, γD_smulA, hy0Δ]
         simp [Formalism.MainNotions.LiftingTheory.lp]
+
       rw [hxdef, LinearMap.map_smul_of_tower, hs, map_sum, Finset.sum_congr rfl h1, Finset.sum_const,
-        ← Nat.cast_smul_eq_nsmul O, smul_smul, show Formalism.MainNotions.LiftingTheory.lp W rr = lA W ^ rr from rfl,
-        Split.lA_pow_smul, smul_smul]
+      ← Nat.cast_smul_eq_nsmul O, smul_smul, show Formalism.MainNotions.LiftingTheory.lp W rr = lA W ^ rr from rfl,
+      Split.lA_pow_smul, smul_smul]
       congr 1
       have hcu : (((hΔu hCA).unit⁻¹ : Oˣ) : O) * ((W.DelF.card : ℕ) : O) = 1 :=
         (hΔu hCA).val_inv_mul

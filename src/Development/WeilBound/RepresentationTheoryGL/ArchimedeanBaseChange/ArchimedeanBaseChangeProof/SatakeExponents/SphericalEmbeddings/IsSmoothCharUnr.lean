@@ -1,12 +1,55 @@
-import Mathlib
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.SatakeExponents.SphericalEmbeddings.ExtremeSph
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.SatakeExponents.SphericalEmbeddings.SigmaUniqueEqStdBlocks
-import Development.WeilBound.CoreStatements.AutomorphicKernels.LanglandsExhaustion.ExhaustionOfThree
-import Development.WeilBound.CoreStatements.AutomorphicKernels.LanglandsExhaustion.LUnlinkedIrrOfSeg
-import Development.WeilBound.CoreStatements.AutomorphicKernels.LanglandsExhaustion.Outright
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.SatakeExponents.SphericalEmbeddings.ExtremeSph
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.NonemptyEquivMultiProdOne
+public import Development.AbelianVarietyTheory.Definitions.Divisors.EqOfHasValueAtInfinite
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.UnramifiedPrincipalSeriesNoInvariant
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.NormalizedAbsCharacterization
+public import Development.WeilBound.CoreStatements.AutomorphicKernels.LanglandsExhaustion.ExhaustionOfThree
+public import Development.WeilBound.CoreStatements.AutomorphicKernels.LanglandsExhaustion.LUnlinkedIrrOfSeg
+public import Development.WeilBound.CoreStatements.AutomorphicKernels.LanglandsExhaustion.Outright
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.SatakeExponents.SphericalEmbeddings.SigmaUniqueEqStdBlocks
 import Development.WeilBound.RepresentationTheoryGL.GenericUnitaryGL.ComplementarySeries.SegmentJacquetSubquotients.SegmentRepresentation
-import Development.AbelianVarietyTheory.Definitions.Divisors.EqOfHasValueAtInfinite
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.UnramifiedPrincipalSeriesNoInvariant
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -18,7 +61,7 @@ variable {k : Type} [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchim
 
 theorem isSmoothChar_unr (α : ℂˣ) : IsSmoothChar (unrChar k α) := isSmoothChar_of_isUnram (isUnram_unrChar k α)
 
-abbrev cls (α : ℂˣ) : IrrGL k := IrrGL.ofChar (unrChar k α) (isSmoothChar_unr α)
+abbrev cls (α : ℂˣ) : IrrGL (k := k) := IrrGL.ofChar (unrChar k α) (isSmoothChar_unr α)
 
 theorem norm_lt_of_nu {α β : ℂˣ} {m : ℕ} (hm : 0 < m) (h : (cls (k := k) β) = (cls (k := k) α).nu (m : ℂ)) :
     ‖(β : ℂ)‖ < ‖(α : ℂ)‖ := by
@@ -42,8 +85,8 @@ theorem norm_lt_of_nu {α β : ℂˣ} {m : ℕ} (hm : 0 < m) (h : (cls (k := k) 
 
 theorem uniqSub' : UniqSub k := by
   intro h0 n ξ hm V W _ _ _ _ π σ hπ hσ f g hf hg
-  let c : Fin n → IrrGL k := fun i => cls (ξ i)
-  let x : Fin n → IrrGL k := fun a => c (Fin.rev a)
+  let c : Fin n → IrrGL (k := k) := fun i => cls (ξ i)
+  let x : Fin n → IrrGL (k := k) := fun a => c (Fin.rev a)
   have hc : ∀ a, (x a).IsCusp := fun a => IrrGL.isCusp_ofChar _ _
   let Δ : Fin n → Segment k := fun a => Segment.single (x a) (hc a)
   have hord : IsOrderedForm Δ (Finset.univ.val.map Δ) := by
@@ -68,7 +111,7 @@ theorem uniqSub' : UniqSub k := by
       simp
     refine ⟨hd, ?_⟩
     obtain ⟨E⟩ := nonempty_equiv_prodIrr_one (x a) (by simp)
-    have key : ∀ (y : Fin 1 → IrrGL k) (hy : ∑ b, (y b).1 = (x a).1), y = (fun _ : Fin 1 => x a) →
+    have key : ∀ (y : Fin 1 → IrrGL (k := k)) (hy : ∑ b, (y b).1 = (x a).1), y = (fun _ : Fin 1 => x a) →
         IsCosocle (x a).rep (prodIrr y hy) := by
       rintro y hy rfl
       exact (isCosocle_self (x a).2.rep.irr).of_equiv (Representation.Equiv.refl _) E
@@ -91,7 +134,7 @@ theorem uniqSub' : UniqSub k := by
   let E1 := prodIrrEquiv h1 (fun i => detRep (Fin 1) (unrChar k (ξ i)))
     (fun i => (IrrRep.det (Fin 1) _ (isSmoothChar_unr (ξ i))).smooth)
     (fun i => (IrrRep.det (Fin 1) _ (isSmoothChar_unr (ξ i))).irr)
-  have key2 : ∀ (y : Fin n → IrrGL k) (hy : ∑ a, (y a).1 = n), y = c →
+  have key2 : ∀ (y : Fin n → IrrGL (k := k)) (hy : ∑ a, (y a).1 = n), y = c →
       Nonempty ((prodIrr (fun a => IrrGL.of (detRep (Fin 1) (unrChar k (ξ a)))
         (IrrRep.det (Fin 1) _ (isSmoothChar_unr (ξ a))).smooth (IrrRep.det (Fin 1) _ (isSmoothChar_unr (ξ a))).irr) h1).Equiv
         (prodIrr y hy)) := by

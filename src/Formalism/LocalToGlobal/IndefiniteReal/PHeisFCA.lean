@@ -1,6 +1,53 @@
-import Formalism.LocalToGlobal.IndefiniteReal.IsWeilDatum
-import Formalism.LocalToGlobal.Columns.RecLevelTop
-import Formalism.LocalToGlobal.GlobalTheory.GL1.CompactFixesLattice.ExistsDenOfIsCompactAdele
+module
+
+public import Formalism.LocalToGlobal.GlobalTheory.GL1.CompactFixesLattice.CompactFixesLattice
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.NumberTheory.NumberField.AdeleRing
+public import Formalism.LocalToGlobal.Columns.RecLevelTop
+public import Formalism.LocalToGlobal.GlobalTheory.GL1.CompactFixesLattice.ExistsDenOfIsCompactAdele
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.MetricSpace.Ultra.TotallySeparated
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -19,18 +66,6 @@ theorem eM_apply (x : InfiniteAdeleRing F) :
       fun v : {w : InfinitePlace F // w.IsComplex} => InfinitePlace.Completion.extensionEmbedding v.1 (x v.1)) :=
   InfiniteAdeleRing.ringEquiv_mixedSpace_apply F x
 
-theorem continuous_eM : Continuous (eM F) := by
-  have h : ∀ x : InfiniteAdeleRing F, eM F x = ((fun v : {w : InfinitePlace F // w.IsReal} =>
-        InfinitePlace.Completion.extensionEmbeddingOfIsReal v.2 (x v.1)),
-      fun v : {w : InfinitePlace F // w.IsComplex} => InfinitePlace.Completion.extensionEmbedding v.1 (x v.1)) :=
-    eM_apply F
-  refine Continuous.congr ?_ (fun x => (h x).symm)
-  first | apply Continuous.prodMk | apply Continuous.prod_mk
-  · exact continuous_pi fun v =>
-      (InfinitePlace.Completion.isometry_extensionEmbeddingOfIsReal v.2).continuous.comp (continuous_apply v.1)
-  · exact continuous_pi fun v =>
-      (InfinitePlace.Completion.isometry_extensionEmbedding v.1).continuous.comp (continuous_apply v.1)
-
 def Pinf : Set (InfiniteAdeleRing F) := eM F ⁻¹' ZSpan.fundamentalDomain (mixedEmbedding.latticeBasis F)
 
 theorem eM_algebraMap (a : F) : eM F (algebraMap F (InfiniteAdeleRing F) a) = mixedEmbedding F a := by
@@ -44,7 +79,7 @@ theorem inf_exU (x : InfiniteAdeleRing F) : ∃! a : 𝓞 F, algebraMap F (Infin
       mixedEmbedding F (a : F) + eM F x ∈ ZSpan.fundamentalDomain (mixedEmbedding.latticeBasis F) := by
     intro a
     show eM F (algebraMap F (InfiniteAdeleRing F) (a : F) + x) ∈ ZSpan.fundamentalDomain (mixedEmbedding.latticeBasis F) ↔ _
-    rw [map_add, eM_algebraMap]
+    rw [map_add (f := _), eM_algebraMap]
   have hmem : ∀ a : 𝓞 F, mixedEmbedding F (a : F) ∈
       Submodule.span ℤ (Set.range (mixedEmbedding.latticeBasis F)) := by
     intro a
@@ -150,12 +185,12 @@ theorem ad_exU (x : AdeleRing (𝓞 F) F) : ∃! q : F, algebraMap F (AdeleRing 
     · change algebraMap F (InfiniteAdeleRing F) (-u + (a : F)) + x.1 ∈ Pinf F
       have e : algebraMap F (InfiniteAdeleRing F) (-u + (a : F)) + x.1 =
           algebraMap F (InfiniteAdeleRing F) (a : F) + (algebraMap F (InfiniteAdeleRing F) (-u) + x.1) := by
-        rw [map_add]; abel
+        rw [map_add (f := _)]; abel
       rw [e]; exact ha
     · change algebraMap F (FiniteAdeleRing (𝓞 F) F) (-u + (a : F)) + x.2 ∈ Formalism.L2.GlobalTheoryTheory.FiltrationBoundaryCriterion.CompactFixesLatticeTheory.intAd F
       have e : algebraMap F (FiniteAdeleRing (𝓞 F) F) (-u + (a : F)) + x.2 =
           (x.2 - algebraMap F (FiniteAdeleRing (𝓞 F) F) u) + algebraMap F (FiniteAdeleRing (𝓞 F) F) (a : F) := by
-        rw [map_add, map_neg]; abel
+        rw [map_add (f := _), map_neg]; abel
       rw [e]; exact add_mem hu (hOa a)
   · intro q hq
     simp only [F0, Set.mem_setOf_eq] at hq
@@ -166,13 +201,13 @@ theorem ad_exU (x : AdeleRing (𝓞 F) F) : ∃! q : F, algebraMap F (AdeleRing 
       have h4 := sub_mem h2' hu
       have e : algebraMap F (FiniteAdeleRing (𝓞 F) F) (q + u) =
           algebraMap F (FiniteAdeleRing (𝓞 F) F) q + x.2 - (x.2 - algebraMap F (FiniteAdeleRing (𝓞 F) F) u) := by
-        rw [map_add]; abel
+        rw [map_add (f := _)]; abel
       rw [e]; exact h4
     obtain ⟨b, hb⟩ := hint (q + u) h3
     have h5 : algebraMap F (InfiniteAdeleRing F) (b : F) + (algebraMap F (InfiniteAdeleRing F) (-u) + x.1) ∈ Pinf F := by
       have e : algebraMap F (InfiniteAdeleRing F) (b : F) + (algebraMap F (InfiniteAdeleRing F) (-u) + x.1) =
           algebraMap F (InfiniteAdeleRing F) q + x.1 := by
-        rw [hb, map_add, map_neg]; abel
+        rw [hb, map_add (f := _), map_neg]; abel
       rw [e]; exact h1'
     have hba : b = a := hauniq b h5
     rw [hba] at hb

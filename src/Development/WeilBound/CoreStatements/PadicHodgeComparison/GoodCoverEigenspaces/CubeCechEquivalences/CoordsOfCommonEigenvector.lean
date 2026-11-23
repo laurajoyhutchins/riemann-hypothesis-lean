@@ -1,4 +1,64 @@
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.GoodCoverEigenspaces.MemRangeOfSol
+module
+
+public import Mathlib.LinearAlgebra.Eigenspace.Basic
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.GoodCoverEigenspaces.MemRangeOfSol
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.RingTheory.Flat.Basic
+public import Mathlib.RingTheory.TensorProduct.Free
+
+@[expose] public section
 
 open Matrix TensorProduct
 
@@ -12,6 +72,7 @@ theorem coords_of_common_eigenvector {k k' M M' I J : Type*} [Field k] [Field k'
   have hm : ∀ j, (LinearMap.toMatrix c c (T j)).map φ = LinearMap.toMatrix c' c' (S j) := fun j => by
     ext p q
     rw [map_apply, LinearMap.toMatrix_apply, LinearMap.toMatrix_apply, hc, ← h]
+
     conv_rhs => rw [← c.sum_repr (T j (c q)), map_sum]
     simp [LinearMap.map_smulₛₗ, ← hc, Finsupp.single_apply]
   refine ⟨c'.repr x, fun h0 => hx0 (c'.repr.injective (by ext p; simpa using congrFun h0 p)), fun j => ?_⟩
@@ -147,6 +208,7 @@ theorem occE {U : Type*} [AddCommGroup U] [Module k U]
         conv_lhs => rw [← b.sum_repr u]
         simp only [Submodule.coe_sum, Submodule.coe_smul]
       have hρ' : ∀ q, g σ (b q).1 = ∑ p, ρ σ p q • (b p).1 := hρ σ
+
       rw [h0, map_sum, Submodule.coe_sum]
       simp only [mulVec, dotProduct, Submodule.coe_smul]
       simp only [Finset.sum_smul]
@@ -173,8 +235,11 @@ theorem occE {U : Type*} [AddCommGroup U] [Module k U]
       Subtype.ext (by simp)
     rw [this]
     funext p
-    simp only [A, mulVec, dotProduct, map_sum, map_smul, Finsupp.coe_finset_sum, Finset.sum_apply, Finsupp.coe_smul,
-      Pi.smul_apply, smul_eq_mul]
+
+    simp only [A, mulVec, dotProduct, map_sum, map_smul]
+    change _ = (Finsupp.applyAddHom p) (∑ q, u q • b.repr ⟨E (e q), (e q).2⟩)
+    rw [map_sum]
+    simp only [Finsupp.applyAddHom_apply, Finsupp.smul_apply, smul_eq_mul]
     exact Finset.sum_congr rfl fun q _ => mul_comm _ _
   have hinj : ∀ u u' : Fin (Module.finrank k W) → k, (∑ q, u q • e q : W) = ∑ q, u' q • e q → u = u' := fun u u' h => by
     have := congrArg (fun t => ⇑(e.repr t)) h

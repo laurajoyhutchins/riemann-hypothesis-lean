@@ -1,5 +1,55 @@
-import Formalism.PieriBlockIdeals.StatementLP
-import Formalism.PieriBlockIdeals.PieriColumnMinors.BinaryFormsExample
+module
+
+public import Formalism.PieriBlockIdeals.StatementLP
+public import Mathlib.CategoryTheory.Category.Basic
+public import Formalism.PieriBlockIdeals.PieriColumnMinors.Symmetrization
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace Formalism.CohomologicalDescent.LP
 
@@ -204,14 +254,12 @@ end Form
 
 theorem lpc_formMod {K P M : Type} {q : ℕ} [Field K] [LinearOrder K] [IsStrictOrderedRing K] [AddCommGroup M] [Module K M]
     [DecidableEq P] [Fintype P] (EM : Fin q → Fin q → Module.End K M) (B : LinearMap.BilinForm K M) (n : ℕ) (h : FormMod EM B)
-    (j : ℕ) : FormMod (Dpart K EM j : Fin q → Fin q → Module.End K (Tens (Fin q) P M n)) (tensForm n B) where
-  gl := lpc_Dpart_glrel K h.gl j
-  symm := by
-    intro x y
+    (j : ℕ) : FormMod (Dpart K EM j : Fin q → Fin q → Module.End K (Tens (Fin q) P M n)) (tensForm n B) := by
+  refine ⟨lpc_Dpart_glrel K h.gl j, ?_, ?_, ?_, ?_⟩
+  · intro x y
     rw [lpc_form_apply, lpc_form_apply]
     exact Finset.sum_congr rfl fun g _ => h.symm _ _
-  pos := by
-    intro x hx
+  · intro x hx
     obtain ⟨g, hg⟩ : ∃ g, x g ≠ 0 := by
       by_contra hc
       push Not at hc
@@ -222,15 +270,14 @@ theorem lpc_formMod {K P M : Type} {q : ℕ} [Field K] [LinearOrder K] [IsStrict
     by_cases h0 : x g' = 0
     · simp [h0]
     · exact (h.pos _ h0).le
-  adj := by
-    intro a b x y
+  · intro a b x y
     unfold Dpart
-    simp only [LinearMap.add_apply, map_add, LinearMap.sum_apply, map_sum, lpc_form_unitY]
+
+    simp only [LinearMap.add_apply, map_add (f := _), LinearMap.sum_apply, map_sum, lpc_form_unitY]
     congr 1
     rw [lpc_form_apply, lpc_form_apply]
     exact Finset.sum_congr rfl fun g _ => h.adj a b _ _
-  diag := by
-    intro a
+  · intro a
     rw [eq_top_iff]
     intro z _
     have hz : z = ∑ g, LinearMap.single K (fun _ : Fin n → Fin q × P => M) g (z g) := by
@@ -254,7 +301,7 @@ theorem lpc_formMod {K P M : Type} {q : ℕ} [Field K] [LinearOrder K] [IsStrict
       · simp [hg]
     · simp
     · intro m1 m2 h1 h2
-      rw [map_add]
+      rw [map_add (f := _)]
       exact Submodule.add_mem _ h1 h2
 
 theorem tensor_tower : TensTower := by

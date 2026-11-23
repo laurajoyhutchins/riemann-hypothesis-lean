@@ -1,4 +1,60 @@
-import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.CardSumNormFibres
+module
+
+public import Mathlib.Basic.Real.Basic
+public import Mathlib.LinearAlgebra.Matrix.GeneralLinearGroup.Defs
+public import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.CardSumNormFibres
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.Matrix.GeneralLinearGroup.Card
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open NumberField Module
 
@@ -38,7 +94,8 @@ theorem exists_refl {n : Type*} [Fintype n] [DecidableEq n] (σ : k ≃+* k)
     rw [ha1]; exact sub_ne_zero.mpr (Ne.symm hxy)
   have hsa0 : σ a ≠ 0 := by simpa using ha0
   have hsa : σ a = 1 - ∑ i, σ (x i) * y i := by
-    rw [ha1]; simp [map_sum, hσ, mul_comm]
+    set_option synthInstance.maxHeartbeats 100000 in
+      rw [ha1]; simp [map_sum, hσ, mul_comm]
   have hn : ∑ i, σ (u i) * u i = a + σ a := by
     rw [hsa, ha1]
     simp only [hu, Pi.sub_apply, map_sub, sub_mul, mul_sub, Finset.sum_sub_distrib, hx, hy]
@@ -127,14 +184,6 @@ def emb {m : ℕ} (Y : Matrix (Fin m) (Fin m) k) : Matrix (Fin (m + 1)) (Fin (m 
   Matrix.of fun i j =>
     Fin.cases (Fin.cases 1 (fun _ => 0) j) (fun i' => Fin.cases 0 (fun j' => Y i' j') j) i
 
-@[simp] theorem emb_zero_zero {m : ℕ} (Y : Matrix (Fin m) (Fin m) k) : emb Y 0 0 = 1 := rfl
-@[simp] theorem emb_zero_succ {m : ℕ} (Y : Matrix (Fin m) (Fin m) k) (j : Fin m) :
-    emb Y 0 j.succ = 0 := rfl
-@[simp] theorem emb_succ_zero {m : ℕ} (Y : Matrix (Fin m) (Fin m) k) (i : Fin m) :
-    emb Y i.succ 0 = 0 := rfl
-@[simp] theorem emb_succ_succ {m : ℕ} (Y : Matrix (Fin m) (Fin m) k) (i j : Fin m) :
-    emb Y i.succ j.succ = Y i j := rfl
-
 theorem one_succ_succ {m : ℕ} (i j : Fin m) :
     (1 : Matrix (Fin (m + 1)) (Fin (m + 1)) k) i.succ j.succ = (1 : Matrix (Fin m) (Fin m) k) i j := by
   simp [Matrix.one_apply]
@@ -143,12 +192,12 @@ theorem emb_unitary {m : ℕ} (σ : k ≃+* k) (Y : Matrix (Fin m) (Fin m) k) (h
     cj σ (emb Y) * emb Y = 1 := by
   ext i j
   refine Fin.cases ?_ (fun i' => ?_) i <;> refine Fin.cases ?_ (fun j' => ?_) j
-  · simp [Matrix.mul_apply, Fin.sum_univ_succ, cj_apply]
-  · simp [Matrix.mul_apply, Fin.sum_univ_succ, cj_apply, (Fin.succ_ne_zero j').symm]
-  · simp [Matrix.mul_apply, Fin.sum_univ_succ, cj_apply, Fin.succ_ne_zero i']
+  · simp [emb, Matrix.mul_apply, Fin.sum_univ_succ, cj_apply]
+  · simp [emb, Matrix.mul_apply, Fin.sum_univ_succ, cj_apply, (Fin.succ_ne_zero j').symm]
+  · simp [emb, Matrix.mul_apply, Fin.sum_univ_succ, cj_apply, Fin.succ_ne_zero i']
   · have := congrFun (congrFun h i') j'
     rw [one_succ_succ, ← this]
-    simp [Matrix.mul_apply, Fin.sum_univ_succ, cj_apply]
+    simp [emb, Matrix.mul_apply, Fin.sum_univ_succ, cj_apply]
 
 theorem eq_emb {m : ℕ} (σ : k ≃+* k) (Z : Matrix (Fin (m + 1)) (Fin (m + 1)) k)
     (h : cj σ Z * Z = 1) (h0 : Z 0 0 = 1) (hs : ∀ i : Fin m, Z i.succ 0 = 0) :
@@ -162,10 +211,10 @@ theorem eq_emb {m : ℕ} (σ : k ≃+* k) (Z : Matrix (Fin (m + 1)) (Fin (m + 1)
   constructor
   · ext i j
     refine Fin.cases ?_ (fun i' => ?_) i <;> refine Fin.cases ?_ (fun j' => ?_) j
-    · simp [h0]
-    · simp [hrow]
-    · simp [hs]
-    · simp
+    · simp [emb, h0]
+    · simp [emb, hrow]
+    · simp [emb, hs]
+    · simp [emb]
   · ext i j
     have := congrFun (congrFun h i.succ) j.succ
     rw [one_succ_succ] at this
@@ -181,7 +230,7 @@ theorem card_succ {m : ℕ} (σ : k ≃+* k) (hσ : ∀ x, σ (σ x) = x) (hne :
   have hg' : ∀ x, g x * cj σ (g x) = 1 := fun x => mul_eq_one_comm.mp (hg x)
   have hcol : ∀ x (Y : Matrix (Fin m) (Fin m) k) i, (g x * emb Y) i 0 = x.1 i := by
     intro x Y i
-    simp [Matrix.mul_apply, Fin.sum_univ_succ, hgc]
+    simp [emb, Matrix.mul_apply, Fin.sum_univ_succ, hgc]
   let Φ : {x : Fin (m + 1) → k // ∑ i, σ (x i) * x i = 1} ×
       {X : Matrix (Fin m) (Fin m) k // cj σ X * X = 1} →
       {X : Matrix (Fin (m + 1)) (Fin (m + 1)) k // cj σ X * X = 1} := fun p =>

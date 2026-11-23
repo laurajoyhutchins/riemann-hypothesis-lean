@@ -1,11 +1,62 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.AvgVanish
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LocallyConstantCompactSupportUnipotent
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.MirabolicDoubleCosetDecompositionStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.MirabolicCellStructureData
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ProjectionToTwistedEigenfunctionSupport
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.MirabolicFourierExpansion
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.EqZeroOfEigOfMemTwKer
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.AvgVanish
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.PolyBall
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.EqZeroOfEigOfMemTwKer
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsMemTwKerPolyBall
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsRepsSumEqZero
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LocallyConstantCompactSupportUnipotent
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.MirabolicCellStructureData
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.MirabolicDoubleCosetDecompositionStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.MirabolicFourierExpansion
+import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ThetaOpenMirabolic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -16,16 +67,16 @@ namespace GlobalTheory.CompanionTheory.BZPhiPG.LocO
 
 variable {k : Type} [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k]
 
-variable (k) in
 
+variable (k) in
 def vEl (i t : ℕ) (v : Fin ((i + 1) + t + 1) → k) : Mir k ((i + 1) + t + 1) :=
   unipIn k ((i + 1) + t + 1) (Multiplicative.ofAdd v)
 
 def ap (i t : ℕ) (c : Fin (i + 1) → k) (d : Fin (t + 1) → k) : Fin ((i + 1) + t + 1) → k :=
   Fin.append (m := i + 1) (n := t + 1) c d
 
-variable (k) in
 
+variable (k) in
 def cEl (i t : ℕ) (c : Fin (i + 1) → k) : Mir k ((i + 1) + t + 1) := vEl k i t (ap i t c 0)
 
 theorem vEl_add (i t : ℕ) (v w : Fin ((i + 1) + t + 1) → k) : vEl k i t (v + w) = vEl k i t v * vEl k i t w :=
@@ -195,7 +246,7 @@ theorem sigX_cEl {i t : ℕ} (τ : MRep k (i + 1)) (σ : GRep k (t + 1)) (c : Fi
   rw [pgProj_cEl]
   induction w using TensorProduct.induction_on with
   | zero => simp
-  | add x y hx hy => rw [map_add, map_add, hx, hy]
+  | add x y hx hy => rw [map_add (f := _), map_add (f := _), hx, hy]
   | tmul a b =>
     refine (extTensor_tmul _ _ _ a b).trans ?_
     have h1 : (σ.tw (-((i + 1 + 1 : ℕ) : ℝ) / 2)).ρ 1 b = b := by rw [map_one]; rfl
@@ -311,7 +362,7 @@ theorem mem_twKer_of_qO {i t : ℕ} (ψ : AddChar k Circle) (τ : MRep k (i + 1)
     induction x using TensorProduct.induction_on with
     | zero => simp
     | add x y hx hy =>
-      rw [map_add]
+      rw [map_add (f := _)]
       exact Submodule.add_mem _ hx hy
     | tmul w b =>
       rw [LinearMap.rTensor_tmul]
@@ -334,6 +385,7 @@ theorem continuous_ap (i t : ℕ) :
   · simp only [ap, Fin.append_right]
     fun_prop
 
+set_option synthInstance.maxHeartbeats 100000 in
 def psiHom (i t : ℕ) (y : Mir k ((i + 1) + t + 1)) :
     Multiplicative (Fin (i + 1) → k) × Multiplicative (Fin (t + 1) → k) →* Mir k ((i + 1) + t + 1) where
   toFun p := y⁻¹ * vEl k i t (ap i t p.1.toAdd p.2.toAdd) * y

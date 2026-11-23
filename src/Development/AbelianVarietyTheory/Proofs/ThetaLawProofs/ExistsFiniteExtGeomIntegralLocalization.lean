@@ -1,11 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.KeyFormula.GeomIntSelf
-import Development.AbelianVarietyTheory.Statements.FundamentalDomains.AtOfNumberField
-import Development.AbelianVarietyTheory.Statements.ThetaLevelCharacters.MemThetaLevelCharDimZero
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ValCalc
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.GeometricallyIntegralOfIsIntegralOfIsAlgClosed
-import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.IsRegularRingOfSmooth
-import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.IsRegularOfSupportDimQuotientAddLengthLe
+module
+
+public import Development.AbelianVarietyTheory.Definitions.KeyFormula.GeomIntSelf
+public import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.IsRegularRingOfSmooth
+public import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.IsRegularOfSupportDimQuotientAddLengthLe
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.GeometricallyIntegralOfIsIntegralOfIsAlgClosed
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Development.AbelianVarietyTheory.Definitions.AbelianSchemeLaws.FirstCohomologyVanishesSpecOfIsLocalRing
+import Development.AbelianVarietyTheory.Definitions.ModuliSpaces.GoodClass
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor
 open scoped CategoryTheory.Obj TensorProduct
@@ -98,7 +142,11 @@ theorem isDomain_tensor_of_closure (k Ω S : Type) [Field k] [Field Ω] [IsAlgCl
     [Algebra.IsAlgebraic k Ω] [CommRing S] [Algebra k S] [Algebra.FiniteType k S] [IsDomain (Ω ⊗[k] S)]
     (F : Type) [Field F] [Algebra k F] : IsDomain (F ⊗[k] S) := by
   let L := AlgebraicClosure F
-  let j : Ω →ₐ[k] L := IsAlgClosed.lift
+  let j : Ω →ₐ[k] L := (by
+    refine @_root_.IsAlgClosed.lift _ _ _ _ _ _ _ _ _ _ _ ?_ ?_ ?_
+    solve_by_elim* (maxDepth := 2) only [*,
+      @_root_.DivisionSemiring.to_moduleIsTorsionFree,
+      @_root_.Algebra.IsIntegral.isAlgebraic, @_root_.inferInstance])
   letI : Algebra Ω L := j.toRingHom.toAlgebra
   haveI : IsScalarTower k Ω L := IsScalarTower.of_algebraMap_eq fun x => (j.commutes x).symm
   haveI := isDomain_tensor_of_isAlgClosed Ω (Ω ⊗[k] S) L
@@ -150,7 +198,7 @@ theorem geomInt_away_baseChange (K k Ω R : Type) [Field K] [Field k] [Field Ω]
     induction x using TensorProduct.induction_on with
     | zero => simp
     | tmul a r => simp [φ, Algebra.smul_def]
-    | add x y hx hy => simp only [TensorProduct.tmul_add, map_add, hx, hy]
+    | add x y hx hy => simp only [TensorProduct.tmul_add, map_add (f := _), hx, hy]
   refine geomInt_away k Ω (k ⊗[K] R) e he (fun h => h0 ?_) (fun x y hxy => ?_)
   · rw [← hφ, h, map_zero]
   · have h1 := congrArg φ hxy
@@ -182,14 +230,14 @@ theorem exists_finite_level (K C R : Type) [Field K] [Field C] [Algebra K C] [Co
       induction e using TensorProduct.induction_on with
       | zero => simp
       | tmul a r => rfl
-      | add x y hx hy => simp only [map_add, hx, hy]
+      | add x y hx hy => simp only [map_add (f := _), hx, hy]
     refine ⟨k₁ ⊔ k₂, sup_le h₁ h₂,
       (Algebra.TensorProduct.map (IntermediateField.inclusion (le_sup_left : k₁ ≤ k₁ ⊔ k₂))
         (AlgHom.id K R) : k₁ ⊗[K] R →ₐ[K] _) e₁ +
       (Algebra.TensorProduct.map (IntermediateField.inclusion (le_sup_right : k₂ ≤ k₁ ⊔ k₂))
         (AlgHom.id K R) : k₂ ⊗[K] R →ₐ[K] _) e₂,
       inferInstance, ?_⟩
-    rw [map_add, key, key]
+    rw [map_add (f := _), key, key]
 
 theorem exists_geomInt_component : ∀ (K : Type) [Field K] [NumberField K] [Algebra K ℂ] (R : Type) [CommRing R] [Algebra K R] [Algebra.Smooth K R] (p : R →ₐ[K] ℂ), ∃ (k : IntermediateField K ℂ) (e : k ⊗[K] R), FiniteDimensional K k ∧ IsIdempotentElem e ∧ Algebra.TensorProduct.lift k.val p (fun _ _ => Commute.all _ _) e = 1 ∧ GeomInt k (Localization.Away e) := by
   intro K _ _ _ R _ _ _ p
@@ -212,7 +260,7 @@ theorem exists_geomInt_component : ∀ (K : Type) [Field K] [NumberField K] [Alg
     induction x using TensorProduct.induction_on with
     | zero => simp
     | tmul a r => rfl
-    | add x y hx hy => simp only [map_add, hx, hy]
+    | add x y hx hy => simp only [map_add (f := _), hx, hy]
   refine ⟨k, e, hfin, he, ?_, ?_⟩
   · rw [← hπ]
     exact (IsIdempotentElem.iff_eq_zero_or_one.1 (he'.map π)).resolve_left hP

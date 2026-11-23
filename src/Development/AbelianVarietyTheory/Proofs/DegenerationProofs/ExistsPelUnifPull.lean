@@ -1,21 +1,63 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsDescOfPoints
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsQkPullEquiv
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.GenRelNeZero
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsWitOfPull
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.QkToAkDescendsAlongBaseChange
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.QkToAkUInvariantUnderFieldEmbedding
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ArcDataSpecialiseAtUniformiser
-import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.RelationsAreFunctions
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Degenerations.HomExtSt
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.HasArcDataIff
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.PullCub
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.GtBaseChangeSt
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.OLinBaseChangeSt
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.SecBaseChangeAnySt
+public import Development.AbelianVarietyTheory.Definitions.ThetaMetrics.MemNonzeroLocusIffPowFn
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsQkPullEquiv
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.GenRelNeZero
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExistsRingActionOfIsPullDeg
 import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.NonemptyCubicalPull
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.QkToAkDescendsAlongBaseChange
 import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.TauBimultOfIsPullDeg
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExistsRingActionOfIsPullDeg
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.RigidSys
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.CubeVal
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.IsNsmul
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.QkToAkU
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.TwistBCPf
-import Development.AbelianVarietyTheory.Definitions.Degenerations.AdmissiblePadicIntMaximalIdeal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.OneArc
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.RigIsoCongr
+
+@[expose] public section
+
 open CategoryTheory CategoryTheory.Limits MonoidalCategory CartesianMonoidalCategory MonObj AlgebraicGeometry NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Out ReciprocityTheory.ChartRestriction.G.Geo.Tor
 open scoped CategoryTheory.Obj
@@ -27,7 +69,7 @@ namespace GlobalTheory.ArcDataDescent
 
 variable {E : Type} [Field E] [NumberField E] [IsCMField E] {H : Host E}
 
-set_option maxHeartbeats 1600000 in
+
 
 theorem exists_pelUnif_pull (hC : CubePullSt) (hP : PolBaseChangeSt) (hU : UnifBaseChangeSt) (h5 : Laws5)
     {R R' : Type} [CommRing R] [IsDomain R] [CommRing R'] [IsDomain R'] {I : Ideal R} {I' : Ideal R'}
@@ -40,8 +82,63 @@ theorem exists_pelUnif_pull (hC : CubePullSt) (hP : PolBaseChangeSt) (hU : UnifB
         hD.e.hom ≫ (Over.pullback (specOf g)).map (P.oD.onB.act x)) := by
   letI := H.starRing
   have hO := polOActPull
-  obtain ⟨PP', cub, sym, adj, prim, m₁, hm₁⟩ := sabPull hC (spMap g) t
-  let t' : SAB H (Sp R') := ⟨(Over.pullback (spMap g)).obj t.G, IsSemiAbelian.pullback _ t.G t.semi,
+  have hsemi : IsSemiAbelian ((Over.pullback (spMap g)).obj t.G) := by
+    refine ⟨?_, ?_, ?_, ?_, ?_, ?_⟩
+    · have := t.semi.comm; infer_instance
+    · have := t.semi.smooth; change Smooth (pullback.snd t.G.hom (spMap g)); infer_instance
+    · have := t.semi.separated; change IsSeparated (pullback.snd t.G.hom (spMap g)); infer_instance
+    · have := t.semi.quasiCompact; change QuasiCompact (pullback.snd t.G.hom (spMap g)); infer_instance
+    · have := t.semi.geomConnected; change GeometricallyConnected (pullback.snd t.G.hom (spMap g)); infer_instance
+    · intro Ω _ _ q
+      obtain ⟨ext⟩ := t.semi.fibres Ω (q ≫ spMap g)
+      exact ⟨torusExtOfIso (pullCompIso q (spMap g) t.G) ext⟩
+  have pull_isLB {X Y : Scheme.{0}} {L : LB X} (hL : L.IsLB) (F : Y ⟶ X) : (L.pull F).IsLB := by
+    refine { cover := top_le_iff.1 ?_, g_self := ?_, cocycle := ?_ }
+    · intro y _
+      obtain ⟨i, hi⟩ := exists_chart hL (F y)
+      exact TopologicalSpace.Opens.mem_iSup.2 ⟨fun _ => i, mem_pull.2 hi⟩
+    · intro J
+      refine unit_ext fun y hy => ?_
+      rw [gm_res (𝟙 Y) y _ hy, map_one, gm_pull_g L F (𝟙 Y) y J J hy hy]
+      exact gm_self hL _ y (mem_pull.1 hy)
+    · intro I J K
+      refine unit_ext fun y hy => ?_
+      rw [map_mul, gm_res (𝟙 Y) y _ hy, gm_res (𝟙 Y) y _ hy, gm_res (𝟙 Y) y _ hy, gm_pull_g L F (𝟙 Y) y I J hy.1.1 hy.1.2,
+        gm_pull_g L F (𝟙 Y) y J K hy.1.2 hy.2, gm_pull_g L F (𝟙 Y) y I K hy.1.1 hy.2]
+      exact gm_cocycle hL _ y (mem_pull.1 hy.1.1) (mem_pull.1 hy.1.2) (mem_pull.1 hy.2)
+  have hpull : ∃ (PP' : RigLB ((Over.pullback (spMap g)).obj t.G)) (cub : CubicalStr _ PP')
+      (sym : PP'.IsSymmetric) (adj : _) (prim : _)
+      (m : SABMap ⟨(Over.pullback (spMap g)).obj t.G, hsemi,
+        OAct.pullback _ t.G t.act, PP', cub, sym, adj, prim⟩ t (spMap g)),
+      m.φ = pullback.fst t.G.hom (spMap g) := by
+    have h := isGrpPullback_pullback t.G (spMap g)
+    obtain ⟨hL, hr, ⟨c', hc'⟩, hs⟩ := hC _ _ t.G _ (cubeMapOf h) t.PP t.cub
+    have hact : ∀ a, ((OAct.pullback (spMap g) t.G t.act).act a).left ≫ pullback.fst t.G.hom (spMap g) =
+        pullback.fst t.G.hom (spMap g) ≫ (t.act.act a).left := fun a => pullback.lift_fst _ _ _
+    have pa : ∀ {T : Over (Sp R')} (x : T ⟶ (Over.pullback (spMap g)).obj t.G) a,
+        pushPt h.1.w (x ≫ (OAct.pullback (spMap g) t.G t.act).act a) = pushPt h.1.w x ≫ t.act.act a := fun x a =>
+      Over.OverMorphism.ext (by
+        show (x.left ≫ _) ≫ _ = (x.left ≫ _) ≫ _
+        rw [Category.assoc, hact, Category.assoc])
+    refine ⟨(cubeMapOf h).rigLB t.PP hL hr, c', hs t.sym, fun a => ?_, ?_, ⟨cubeMapOf h, h, rfl, hact, hc'⟩, rfl⟩
+    · let U := lift (pushPt h.1.w (fst ((Over.pullback (spMap g)).obj t.G) ((Over.pullback (spMap g)).obj t.G)))
+        (pushPt h.1.w (snd ((Over.pullback (spMap g)).obj t.G) ((Over.pullback (spMap g)).obj t.G)))
+      refine LBIso.chartPull (chartPullLinComb t.PP.L _ _ _ _ U.left fun I => psum_push h _ _ U (fun i => ?_) I.down)
+        (chartPullLinComb t.PP.L _ _ _ _ U.left fun I => psum_push h _ _ U (fun i => ?_) I.down) (t.adj a)
+      · fin_cases i
+        · exact (pa _ a).trans (by simp [U])
+        · simp [U]
+      · fin_cases i
+        · simp [U]
+        · exact (pa _ _).trans (by simp [U])
+    · let U := pushPt h.1.w (𝟙 ((Over.pullback (spMap g)).obj t.G))
+      refine LBIso.chartPull (chartPullPull t.PP.L U.left)
+        (chartPullLinComb t.PP.L _ _ _ _ U.left fun I => psum_push h _ _ U (fun i => ?_) I.down) t.prim
+      fin_cases i
+      · simp [U]
+      · exact (congrArg (pushPt h.1.w) (Category.id_comp _).symm).trans (pa _ _)
+  obtain ⟨PP', cub, sym, adj, prim, m₁, hm₁⟩ := hpull
+  let t' : SAB H (Sp R') := ⟨(Over.pullback (spMap g)).obj t.G, hsemi,
     OAct.pullback _ t.G t.act, PP', cub, sym, adj, prim⟩
   let m₀ : SABMap t' t (spMap g) := m₁
   have hm₀ : m₀.φ = pullback.fst t.G.hom (spMap g) := hm₁
@@ -181,7 +278,7 @@ variable {D : Datum H} {l : Level H} {Xo : Moduli D l} {c : Coeff l} {O : Type} 
   {R V : Type} [CommRing R] [IsDomain R] [CommRing V] [IsDomain V] {I : Ideal R} {I' : Ideal V} {f : O' →+* R} {u : R}
   {χ : Sp R ⟶ Y.X} {t : SAB H (Sp R)} {g : R →+* V}
 
-set_option maxHeartbeats 1600000 in
+
 
 theorem toA_down (hL : Laws) (hR : AdmBase R I) (hV : AdmBase V I') (m : SABMap t Y.t χ) (P : PELUnif I t)
     (W : ArcWit Y a I' (g.comp f) (g u) (spMap g ≫ χ)) (hD : IsPullDeg g P.D.toPre W.P.D.toPre)
@@ -210,7 +307,8 @@ theorem toA_down (hL : Laws) (hR : AdmBase R I) (hV : AdmBase V I') (m : SABMap 
     rw [Category.assoc, Category.assoc, pullback.condition, reassoc_of% w₁, reassoc_of% w₂, Category.assoc]
     exact hj.symm
   obtain ⟨x', hx'⟩ := exists_genericPt W.P (F := F) (pullback.lift _ _ w₀ ≫ bc.inv.left) (by
-    rw [Category.assoc, Over.w bc.inv]; exact pullback.lift_snd _ _ _)
+    rw [Category.assoc, Over.w bc.inv]
+    exact pullback.lift_snd _ _ _)
   have hb : bc.inv.left ≫ bc.hom.left = 𝟙 _ := by rw [← Over.comp_left, Iso.inv_hom_id, Over.id_left]
   have hx : x'.left ≫ W.P.U.gen.inv.left ≫ pullback.fst W.t.G.hom (jK V) ≫ bc.hom.left ≫ pullback.fst t.G.hom (specOf g) =
       x.left ≫ P.U.gen.inv.left ≫ pullback.fst t.G.hom (jK R) := by
@@ -245,7 +343,7 @@ theorem pmaps_rig' {R R' : Type} [CommRing R] [IsDomain R] [CommRing R'] [IsDoma
   (maps_iff hD.w _ (fun _ => eSec D.P.A) _ D'.rig D.rig (specOf φ) _
     (rigPull_le (hD.e.hom.left ≫ pullback.fst D.P.A.hom (specOf φ)) (specOf φ) hD.he D.P.L) (fun _ => rfl)).1 hD.w_rig
 
-set_option maxHeartbeats 3200000 in
+
 
 theorem exists_match (hL : Laws) (h2 : Laws2) (hR : AdmBase R I) (hV : AdmBase V I') (hginj : Function.Injective g)
     (m : SABMap t Y.t χ) (P : PELUnif I t) (W : ArcWit Y a I' (g.comp f) (g u) (spMap g ≫ χ)) (hD : IsPullDeg g P.D.toPre W.P.D.toPre)
@@ -387,7 +485,7 @@ variable {E : Type} [Field E] [NumberField E] [IsCMField E] {H : Host E}
   {R V : Type} [CommRing R] [IsDomain R] [CommRing V] [IsDomain V] {I : Ideal R} {I' : Ideal V} {f : O' →+* R} {u : R}
   {χ : Sp R ⟶ Y.X} {t : SAB H (Sp R)} {g : R →+* V}
 
-set_option maxHeartbeats 3200000 in
+
 
 theorem agree (hL : Laws) (h2 : Laws2) (h5 : Laws5) (hR : AdmBase R I) (hV : AdmBase V I') (hf : Function.Injective f)
     (hg : Function.Injective g) (y : Sp (FractionRing R) ⟶ Xo.XF c) (hy : y ≫ Y.j = jK R ≫ χ) (m : SABMap t Y.t χ)

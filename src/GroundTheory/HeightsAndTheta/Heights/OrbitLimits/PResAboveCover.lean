@@ -1,6 +1,53 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.StatementsResAboveCover
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsNonvanishingDense
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsNonvanishingDense
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterRes
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Presheaf
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -11,23 +58,23 @@ open MvPolynomial Topology Filter ReciprocityTheory.ChartRestriction.G.Geo
 
 variable {K : Type} [Fintype K] {ι : K → Type} [∀ k, Fintype (ι k)]
 
-omit [Fintype K] [∀ k, Fintype (ι k)] in
 
+omit [Fintype K] [∀ k, Fintype (ι k)] in
 theorem ResAboveCover.sameOrbit_symm {z z' : (Σ k, ι k) → ℂ} (h : SameOrbit z z') : SameOrbit z' z := by
   obtain ⟨c, hc, rfl⟩ := h
   refine ⟨fun k => (c k)⁻¹, fun k => inv_ne_zero (hc k), funext fun p => ?_⟩
   simp [← mul_assoc, inv_mul_cancel₀ (hc p.1)]
 
-omit [Fintype K] [∀ k, Fintype (ι k)] in
 
+omit [Fintype K] [∀ k, Fintype (ι k)] in
 theorem ResAboveCover.sameOrbit_trans {a b d : (Σ k, ι k) → ℂ} (h₁ : SameOrbit a b)
     (h₂ : SameOrbit b d) : SameOrbit a d := by
   obtain ⟨c, hc, rfl⟩ := h₁
   obtain ⟨c', hc', rfl⟩ := h₂
   exact ⟨fun k => c k * c' k, fun k => mul_ne_zero (hc k) (hc' k), funext fun p => by simp [mul_assoc]⟩
 
-omit [Fintype K] [∀ k, Fintype (ι k)] in
 
+omit [Fintype K] [∀ k, Fintype (ι k)] in
 theorem ResAboveCover.sameOrbit_of_tendsto {α : Type*} {l : Filter α} [l.NeBot]
     {v u : α → (Σ k, ι k) → ℂ} {v₀ u₀ : (Σ k, ι k) → ℂ}
     (hv : Tendsto v l (𝓝 v₀)) (hu : Tendsto u l (𝓝 u₀))
@@ -60,8 +107,8 @@ theorem ResAboveCover.sameOrbit_of_tendsto {α : Type*} {l : Filter α} [l.NeBot
     rw [div_mul_eq_mul_div, eq_div_iff (hi k)]
     exact hcross k j
 
-omit [Fintype K] in
 
+omit [Fintype K] in
 theorem ResAboveCover.tendsto_lift {P J : Ideal (MRing ι)} {e : ℕ} (R : AnLogRes P J e) (x : R.X) :
     Tendsto (R.lift x) (𝓝 x) (𝓝 (R.lift x x)) := by
   refine tendsto_pi_nhds.2 fun p => ?_
@@ -75,8 +122,8 @@ theorem ResAboveCover.tendsto_lift {P J : Ideal (MRing ι)} {e : ℕ} (R : AnLog
     simp [hy]
   exact (h₁.congr h₂).tendsto
 
-omit [Fintype K] in
 
+omit [Fintype K] in
 theorem ResAboveCover.limit {P J : Ideal (MRing ι)} {e : ℕ} (R : AnLogRes P J e) {α : Type*}
     {l : Filter α} [l.NeBot] {v : α → (Σ k, ι k) → ℂ} {x : α → R.X} {v₀ : (Σ k, ι k) → ℂ}
     {x₀ : R.X} (hv : Tendsto v l (𝓝 v₀)) (hx : Tendsto x l (𝓝 x₀))
@@ -91,8 +138,8 @@ theorem ResAboveCover.limit {P J : Ideal (MRing ι)} {e : ℕ} (R : AnLogRes P J
   refine ⟨ResAboveCover.sameOrbit_of_tendsto hv ((ResAboveCover.tendsto_lift R x₀).comp hx)
     (h₂.mono fun a h => h.2) hv₀ (R.mem x₀ x₀ (R.mem_U x₀)).1, h₂⟩
 
-omit [Fintype K] in
 
+omit [Fintype K] in
 theorem ResAboveCover.exists_limit {P J : Ideal (MRing ι)} {e : ℕ} (R : AnLogRes P J e) {α : Type*}
     {l : Filter α} [l.NeBot] {v : α → (Σ k, ι k) → ℂ} {v₀ : (Σ k, ι k) → ℂ}
     (hv : Tendsto v l (𝓝 v₀)) (hv₀ : ∀ k, ∃ i, v₀ ⟨k, i⟩ ≠ 0)
@@ -128,46 +175,5 @@ theorem ResAboveCover.surj_all (hND : HilbertSamuel.NonvanishingDense.Statement)
   obtain ⟨-, -, x₀, -, -, h, -⟩ := ResAboveCover.exists_limit R (v := fun w => w)
     (tendsto_id.mono_left nhdsWithin_le_nhds) hv.1 hex
   exact ⟨x₀, h⟩
-
-theorem ResAboveCover.mem_resAbove {P J : Ideal (MRing ι)} {e n : ℕ} (R : AnLogRes P J e)
-    (Ψ : (((k : K) → ι k) → ℂ) →ₗ[ℂ] (Fin (n + 1) → ℂ)) {y : Fin n → ℂ} {z : (Σ k, ι k) → ℂ}
-    (hz : Ψ (segre z) = Fin.cons 1 y) {x : R.X} (h : SameOrbit z (R.lift x x)) :
-    x ∈ resAbove R Ψ y (segre z) := by
-  obtain ⟨c, hc, hl⟩ := ResAboveCover.sameOrbit_symm h
-  have ht : (∏ k, c k) ≠ 0 := Finset.prod_ne_zero_iff.2 fun k _ => hc k
-  have hseg : segre (R.lift x x) = (∏ k, c k) • segre z := by
-    rw [hl]
-    funext i
-    simp [segre, Finset.prod_mul_distrib]
-  have hΨ : Ψ (segre (R.lift x x)) = (∏ k, c k) • (Fin.cons 1 y : Fin (n + 1) → ℂ) := by
-    rw [hseg, map_smul, hz]
-  refine ⟨funext fun i => ?_, ?_⟩
-  · simp only [projCoord, hΨ, Pi.smul_apply, smul_eq_mul, Fin.cons_succ, Fin.cons_zero, mul_one]
-    field_simp
-  · show (Ψ (segre (R.lift x x)) 0)⁻¹ • segre (R.lift x x) = segre z
-    rw [hΨ, hseg, smul_smul]
-    simp only [Pi.smul_apply, Fin.cons_zero, smul_eq_mul, mul_one, inv_mul_cancel₀ ht, one_smul]
-
-theorem ResAboveCover.proof (hND : HilbertSamuel.NonvanishingDense.Statement) :
-    ResAboveCover.Statement := by
-  intro K _ ι _ P J n R Ψ hP y z hz hzy V' hV'
-  by_contra hcon
-  let T : Set ((Σ k, ι k) → ℂ) := {v | v ∈ mcPts P ∧ ¬ ∃ x ∈ resAbove R Ψ y (segre z),
-    ∃ y₁ ∈ V' x ∩ R.U x, SameOrbit v (R.lift x y₁)}
-  have : (𝓝[T] z).NeBot := by
-    rw [← mem_closure_iff_nhdsWithin_neBot, mem_closure_iff_nhds]
-    intro N hN
-    by_contra hN'
-    refine hcon ⟨N, hN, fun v hv => ?_⟩
-    by_contra hbad
-    exact hN' ⟨v, hv.2, hv.1, hbad⟩
-  obtain ⟨F, x, x₀, hFl, hx, hz₀, hev⟩ := ResAboveCover.exists_limit R (l := 𝓝[T] z)
-    (v := fun w => w) (tendsto_id.mono_left nhdsWithin_le_nhds) hz.1
-    (eventually_nhdsWithin_of_forall fun w hw => ResAboveCover.surj_all hND P J R hP w hw.1)
-  have hx₀ : x₀ ∈ resAbove R Ψ y (segre z) := ResAboveCover.mem_resAbove R Ψ hzy hz₀
-  have hV : ∀ᶠ a in (F : Filter _), x a ∈ V' x₀ := hx (hV' x₀ hx₀)
-  have hT : ∀ᶠ a in (F : Filter _), a ∈ T := hFl self_mem_nhdsWithin
-  obtain ⟨a, ⟨hU₁, hso⟩, hVa, haT⟩ := (hev.and (hV.and hT)).exists
-  exact haT.2 ⟨x₀, hx₀, x a, ⟨hVa, hU₁⟩, hso⟩
 
 end GroundTheory.Heights₂.Heights.Targets

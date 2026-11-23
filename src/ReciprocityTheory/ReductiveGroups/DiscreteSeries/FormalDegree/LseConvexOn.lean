@@ -1,4 +1,57 @@
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.EigenvectorUnitaryMulStar
+module
+
+public import Mathlib.Analysis.Convex.Function
+public import Mathlib.Analysis.SpecialFunctions.Log.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.BigOperators.Field
+public import Mathlib.Analysis.Convex.SpecificFunctions.Basic
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.CasimirCoefficients.IsClosedEmbeddingToM
+
+@[expose] public section
 
 noncomputable section
 
@@ -71,23 +124,6 @@ theorem lse_one_le (w y : ι → ℝ) (hw0 : ∀ i, 0 ≤ w i) (hw1 : ∑ i, w i
     _ ≤ ∑ i, w i * Real.exp (y i) :=
         Finset.sum_le_sum (fun i _ => mul_le_mul_of_nonneg_left
           (by linarith [Real.add_one_le_exp (y i)]) (hw0 i))
-
-theorem lse_upper (w y : ι → ℝ) (hw0 : ∀ i, 0 ≤ w i) (hw1 : ∑ i, w i = 1)
-    (hw2 : ∑ i, w i * y i = 0) (hy : ∀ i, |y i| ≤ 1) :
-    Real.log (∑ i, w i * Real.exp (y i)) ≤ ∑ i, w i * y i ^ 2 := by
-  have hpos : 0 < ∑ i, w i * Real.exp (y i) := by simpa using lse_pos w y hw0 hw1 1
-  have hle : ∑ i, w i * Real.exp (y i) ≤ 1 + ∑ i, w i * y i ^ 2 := by
-    calc ∑ i, w i * Real.exp (y i) ≤ ∑ i, w i * (1 + y i + y i ^ 2) :=
-          Finset.sum_le_sum (fun i _ => mul_le_mul_of_nonneg_left
-            (by
-              have h := abs_le.mp (Real.abs_exp_sub_one_sub_id_le (hy i))
-              linarith [h.2]) (hw0 i))
-      _ = 1 + ∑ i, w i * y i ^ 2 := by
-          simp only [mul_add, mul_one, Finset.sum_add_distrib, hw1, hw2, add_zero]
-  calc Real.log (∑ i, w i * Real.exp (y i)) ≤ Real.log (1 + ∑ i, w i * y i ^ 2) :=
-        Real.log_le_log hpos hle
-    _ ≤ (1 + ∑ i, w i * y i ^ 2) - 1 := Real.log_le_sub_one_of_pos (by linarith)
-    _ = ∑ i, w i * y i ^ 2 := by ring
 
 theorem lse_lower (w y : ι → ℝ) (hw0 : ∀ i, 0 ≤ w i) (hw1 : ∑ i, w i = 1)
     (hw2 : ∑ i, w i * y i = 0) {ep : ℝ} (he0 : 0 ≤ ep) (he1 : ep ≤ 1)

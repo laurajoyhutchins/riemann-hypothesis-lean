@@ -1,7 +1,56 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.Intersections.ExistsFunFieldMulEq
-import GroundTheory.HeightsAndTheta.Heights.Intersections.ArithVarZero
-import GroundTheory.HeightsAndTheta.Heights.Intersections.NotIsHorizontalOfDimOne
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.ExistsFunFieldMulEq
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.ArithVarZero
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.NotIsHorizontalOfDimOne
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.LocalProperties.Reduced
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.Inter
@@ -22,8 +71,8 @@ theorem toFrac_eq_zero {P : Ideal (MRing ι)} [P.IsPrime] {f : MRing ι} : toFra
   rw [RingHom.comp_apply, ← map_zero (algebraMap (MRing ι ⧸ P) (FractionRing (MRing ι ⧸ P))),
     (IsFractionRing.injective (MRing ι ⧸ P) _).eq_iff, Ideal.Quotient.eq_zero_iff_mem]
 
-omit [Fintype K] in
 
+omit [Fintype K] in
 theorem isMultiHomog_X_single [DecidableEq K] (k : K) (i : ι k) :
     IsMultiHomog (X ⟨k, i⟩ : MRing ι) (Pi.single k 1) := by
   intro m hm k'
@@ -146,6 +195,7 @@ theorem chartHom_mul {P : Ideal (MRing ι)} (j : ∀ k, ι k) (r : (Σ k, ι k) 
   rw [chartHom_coe]
   conv_lhs => rw [f.as_sum]
   conv_rhs => rw [f.as_sum]
+
   rw [map_sum, map_sum, Finset.sum_mul]
   refine Finset.sum_congr rfl fun μ hμ => ?_
   have hdeg := hf μ hμ
@@ -165,8 +215,8 @@ theorem chartHom_mul {P : Ideal (MRing ι)} (j : ∀ k, ι k) (r : (Σ k, ι k) 
 
 end regularityEmbedding_holds
 
-open regularityEmbedding_holds in
 
+open regularityEmbedding_holds in
 theorem regularityEmbedding_holds.proof : regularityEmbedding_holds.Statement := by
   intro K _ ι _ P R hP hR hRu
   classical
@@ -174,7 +224,7 @@ theorem regularityEmbedding_holds.proof : regularityEmbedding_holds.Statement :=
   have hne : ∀ t ∈ mcPts P, ∀ (v : MRing ι) (a : K → ℕ), IsMultiHomog v a → v ∉ P →
       eval t (map (Int.castRingHom ℂ) v) ≠ 0 := fun t ht v a hv hvP =>
     eval_ne_zero_of_dimOne arithVarZero hP
-      (A := HermLine.ofMetrics (fun k => fsMetric (ι k)) (fun k => (a k : ℤ))) ⟨a, fun _ => rfl, hv, hvP⟩ ht
+      (A := HermLine.ofMetrics (fun k => fsMetric (ι := ι k)) (fun k => (a k : ℤ))) ⟨a, fun _ => rfl, hv, hvP⟩ ht
   let σ : R → (funField P →+* ℂ) := fun t => sigmaAt P (t : (Σ k, ι k) → ℂ) (hR t t.2) (hne t (hR t t.2))
   have hσ : ∀ (t : R) (x : funField P) (u v : MRing ι),
       (x : FractionRing (MRing ι ⧸ P)) * toFrac P v = toFrac P u →

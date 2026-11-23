@@ -1,6 +1,48 @@
-import Formalism.SharpRestriction.LevelLetterCocycles.JointConditionsZpowers.RhoFam
-import Formalism.SharpRestriction.LevelLetterCocycles.JointConditionsZpowers.LocalErrorBoundPlaces
-import Formalism.SharpRestriction.LevelLetterCocycles.TwGood
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.JointConditionsZpowers.RhoFam
+public import Formalism.SharpRestriction.LevelLetterCocycles.JointConditionsZpowers.LocalErrorBoundPlaces
+public import Formalism.SharpRestriction.LevelLetterCocycles.TwGood
+public import Formalism.SharpRestriction.LevelLetterCocycles.EmbeddingTypes
+public import Formalism.SharpRestriction.LevelLetterCocycles.JointConditionsZpowers.TwentyWordsLeB
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -117,18 +159,6 @@ structure HubData (D : D7) where
   eta : ℕ
   I : TwIn D
 
-structure HubK where
-  C' : ℝ
-  A : ℝ
-  Ct0 : ℝ
-  CV : ℝ
-  constantFirstHub : ℝ
-  Q : MvPolynomial (Fin 3) ℕ
-  constantSecondHub : ℝ
-  CT : ℕ
-  C1 : ℝ
-  C5 : ℝ
-
 def StarAD (L : SizeData₂ D) (X : HubData D) : Prop :=
   ∀ i, Formalism.MainNotions.TwistedPlaces.TwLoc D i → D.nd.l i ∉ Formalism.MainNotions.TwistedPlaces.gset D → RangeAD L X.exc (D.nd.l i) → ∀ π ∈ D.nd.Zgood i,
     (D.nd.vcc i π : ℝ) ≤ (Br.sPi D.loc D.nbr i (X.ρ i) π : ℝ) + Formalism.MainNotions.TwistedPlaces.sumOver D (D.nd.l i) (X.len0 i π) +
@@ -137,10 +167,6 @@ def StarAD (L : SizeData₂ D) (X : HubData D) : Prop :=
 def BBLe (L : SizeData₂ D) (X : HubData D) (C5 : ℝ) : Prop :=
   ∀ i, Formalism.MainNotions.TwistedPlaces.TwLoc D i → D.nd.l i ∉ Formalism.MainNotions.TwistedPlaces.gset D → RangeAD L X.exc (D.nd.l i) → ∀ π ∈ D.nd.Zgood i,
     X.errorBoundHub i π ≤ C5 * D.R.f * D.R.n * (D.R.t : ℝ) ^ 2 * D.R.nV * (Formalism.MainNotions.TwistedPlaces.large₂ L) ^ 2
-
-def HubK.Le (K : HubK) (C : ℝ) : Prop :=
-  0 ≤ K.constantSecondHub ∧ 0 ≤ K.C5 ∧ K.C5 ≤ C ∧ FamilyRepresentationConstants.CG K.constantFirstHub K.Q ≤ C ∧ FamilyRepresentationConstants.CF K.C' K.A K.CV K.C1 ≤ C ∧
-    FamilyRepresentationConstants.CH K.constantSecondHub K.C1 ≤ C
 
 end Asm
 
@@ -196,14 +222,6 @@ structure StepAD (L : SizeData₂ D) (X : HubData D) : Prop where
       ∀ π ∈ D.nd.Zgood i, Formalism.MainNotions.EmbeddingTypes.admitted i (X.r i) (X.ρ i) π (X.dc i) ep (X.eS i) (X.c0 i) (X.cB i)
 
   goodR : ∀ i, GoodR D.nd i (X.r i)
-
-def InvariantsBoundConditions (L : SizeData₂ D) (X : HubData D) (c : ℝ) : Prop :=
-  ∀ i, Formalism.MainNotions.TwistedPlaces.TwLoc D i → D.nd.l i ∉ Formalism.MainNotions.TwistedPlaces.gset D → RangeAD L X.exc (D.nd.l i) →
-    (X.cB i : ℝ) ≤ c * D.R.t * D.R.n * D.R.nV * Formalism.MainNotions.TwistedPlaces.large₂ L ∧
-    (h0 D.nd i (X.dc i).col : ℝ) ≤ c * D.R.t ∧
-    (Formalism.MainNotions.TwistedPlaces.SplitK D (D.nd.l i) → ∀ u ∈ (X.dc i).col,
-      (X.c0 i u : ℝ) ≤ c * D.R.r * Formalism.MainNotions.TwistedPlaces.large₂ L ∧
-      ∀ π ∈ D.nd.Zgood i, (Br.h0W i u (X.ρ i) π : ℝ) ≤ c * (D.R.r : ℝ) ^ 2 * Formalism.MainNotions.TwistedPlaces.large₂ L)
 
 end Rows
 

@@ -1,5 +1,58 @@
-import Formalism.SharpRestriction.GrowthBounds.PathWeight
-import Formalism.SharpRestriction.GrowthBounds.TableLineDegreeFive
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.TableLineDegreeFive
+public import Formalism.SharpRestriction.GrowthBounds.PathWeight.GeneratorImageIsSymbol
+import Formalism.PolynomialDimension.DetMulEqSumAdjugate
+public import Formalism.SharpRestriction.GrowthBounds.PathWeight.CoeUntopDLeAlt
+public import Formalism.SharpRestriction.GrowthBounds.PathWeight.DvDegOtherMono
+public import Formalism.SharpRestriction.GrowthBounds.PathWeight.FixedSymbolFactorIntegral
+public import Formalism.SharpRestriction.GrowthBounds.PathWeight.GeOldest
+public import Formalism.SharpRestriction.GrowthBounds.PathWeight.LeadingDepthOneMemClosure
+public import Formalism.SharpRestriction.GrowthBounds.PathWeight.Lemma4OfRemainingStatements
+public import Formalism.SharpRestriction.GrowthBounds.PathWeight.LetterWeightPos
+public import Formalism.SharpRestriction.GrowthBounds.PathWeight.MdWeightMapDomain
+public import Formalism.SharpRestriction.GrowthBounds.PathWeight.SymbolGeneratorData
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -28,14 +81,6 @@ def OneSidedLemma4 (_D : Formalism.BasicNotions.D7) (CLa CD Csz : ℝ) : Prop :=
   ∀ (mon : Fin n' × Fin (r + K) →₀ ℕ), IsLabel p Fr mon → (∀ v ∈ mon.support, v.1 ∈ Fr.TT) →
   ∀ o : ℕ, (∀ m ∈ (monPh O K p Fr mon xi).support, normDeg r m = o) →
     Realisable p n' S.w n' r g c' o (MvPolynomial.map (algebraMap O (KK O)) (monPh O K p Fr mon xi))
-
-theorem lemma4_of_one_sided (D : Formalism.BasicNotions.D7) (CLa CD Csz : ℝ) (h : OneSidedLemma4 D CLa CD Csz) : Conclusion6 D CLa CD Csz := by
-  intro p n' r K _ _ _ _ O _ _ _ _ S hO hH Fr L₁ N₁ G' hV hT deg a Y c0 c'' cStar Dd hII c' g hg n obd xi dd hxi hdd
-    mon hmon hmonT o ho
-  refine h p n' r K O S hO hH Fr L₁ N₁ G' hV hT deg a Y c0 c'' cStar Dd hII g hg n obd xi dd hxi ?_ mon hmon hmonT o ho
-  intro j hj x hx hw
-  have := (abs_le.1 (hdd j hj x hx hw)).2
-  linarith
 
 def RestGeomU : Prop :=
   ∀ (p n' r : ℕ) [NeZero n'] (F : Frames n' r) (L₁ N₁ : ℕ), 13 ≤ p → 2 ≤ r → Even n' → F.Valid L₁ N₁ →
@@ -227,6 +272,7 @@ theorem one_sided_lemma4_of_interfaces (D : Formalism.BasicNotions.D7) (CLa CD C
       rw [← Finset.prod_mul_distrib]
       refine Finset.prod_congr rfl fun j hj => ?_
       rw [(hξ' i j (Finset.mem_range.1 hj)).1, map_mul, mul_comm]
+
     rw [e1, map_mul, map_mul, hPhe, map_monomial, map_one, map_sum]
     simp only [map_prod]
     rw [← hSg]

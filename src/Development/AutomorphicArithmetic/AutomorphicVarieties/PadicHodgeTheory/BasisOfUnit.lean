@@ -1,4 +1,57 @@
-import Mathlib
+module
+
+public import Mathlib.LinearAlgebra.FiniteDimensional.Defs
+public import Mathlib.RingTheory.TensorProduct.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.LinearAlgebra.Dimension.FreeAndStrongRankCondition
+public import Mathlib.RingTheory.Flat.Basic
+
+@[expose] public section
 
 open TensorProduct Module
 
@@ -22,15 +75,16 @@ theorem inv_tensor [FiniteDimensional Q E] (a : H → B ≃ₐ[Q] B)
       conv_rhs => rw [← b.sum_repr e, sum_tmul]
       refine Finset.sum_congr rfl fun i _ => ?_
       simp [φ, smul_tmul]
-    | add x y hx hy => simp only [map_add, tmul_add, Finset.sum_add_distrib, hx, hy]
+    | add x y hx hy => simp only [map_add (f := _), tmul_add, Finset.sum_add_distrib, hx, hy]
   have h2 : ∀ g i (y : E ⊗[Q] B), φ i ((a g).toLinearMap.lTensor E y) = a g (φ i y) := by
     intro g i y
     induction y using TensorProduct.induction_on with
     | zero => simp
     | tmul e c => simp [φ]
-    | add x y hx hy => simp only [map_add, hx, hy]
+    | add x y hx hy => simp only [map_add (f := _), hx, hy]
   choose c hc using fun i => ha (φ i z) fun g => by rw [← h2, hz]
   refine ⟨∑ i, b i ⊗ₜ[Q] c i, ?_⟩
+
   rw [← h1 z, map_sum]
   refine Finset.sum_congr rfl fun i _ => ?_
   rw [← hc]
@@ -50,21 +104,21 @@ theorem basis_of_unit [FiniteDimensional Q E] [Nontrivial B] (a : H → B ≃ₐ
     intro c z
     induction c using TensorProduct.induction_on with
     | zero => simp
-    | add c c' hc hc' => simp only [map_add, LinearMap.add_apply, hc, hc', add_mul]
+    | add c c' hc hc' => simp only [map_add (f := _), LinearMap.add_apply, hc, hc', add_mul]
     | tmul e f =>
       induction z using TensorProduct.induction_on with
       | zero => simp
-      | add z z' hz hz' => simp only [map_add, hz, hz', mul_add]
+      | add z z' hz hz' => simp only [map_add (f := _), hz, hz', mul_add]
       | tmul v b => simp [hS, j, Algebra.smul_def]
   have h2 : ∀ g z w, T g (z * w) = (a g).toLinearMap.lTensor E z * T g w := by
     intro g z w
     induction z using TensorProduct.induction_on with
     | zero => simp
-    | add c c' hc hc' => simp only [map_add, hc, hc', add_mul]
+    | add c c' hc hc' => simp only [map_add (f := _), hc, hc', add_mul]
     | tmul e f =>
       induction w using TensorProduct.induction_on with
       | zero => simp
-      | add z z' hz hz' => simp only [map_add, hz, hz', mul_add]
+      | add z z' hz hz' => simp only [map_add (f := _), hz, hz', mul_add]
       | tmul v b => simp [hT, mul_left_comm]
   obtain ⟨z, rfl⟩ : ∃ z, y = z * x := ⟨y * ↑hu.unit⁻¹, by simp [mul_assoc]⟩
   obtain ⟨c, hc⟩ := inv_tensor a ha z fun g => hu.mul_right_cancel (by
@@ -86,7 +140,7 @@ theorem unit_of_span (D : Submodule E (E ⊗[Q] B)) (hD : finrank E D = 1) {m : 
     intro c z
     induction z using TensorProduct.induction_on with
     | zero => simp
-    | add z z' hz hz' => simp only [map_add, hz, hz', mul_add]
+    | add z z' hz hz' => simp only [map_add (f := _), hz, hz', mul_add]
     | tmul v b => simp
   refine ⟨x, x.2, IsUnit.of_mul_eq_one (∑ i, e i • ((1 : E) ⊗ₜ[Q] b i)) ?_⟩
   rw [h, Finset.mul_sum]

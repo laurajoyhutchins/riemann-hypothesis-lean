@@ -1,4 +1,46 @@
-import Development.WeilBound.CoreStatements.PublishedTheorems.JacquetShalikaRigidity.ColumnConjugationMeasure
+module
+
+public import Development.WeilBound.CoreStatements.PublishedTheorems.JacquetShalikaRigidity.ColumnConjugationMeasure
+import GroundTheory.GlobalFields.TateThesis.IdeleMeasure
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -15,14 +57,14 @@ namespace ShellSummation
 
 set_option synthInstance.maxHeartbeats 400000
 
-variable {E : Type} [Field E] [NumberField E] [IsTotallyComplex E] {k : ℕ}
+variable {E : Type} [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] {k : ℕ}
 
-omit [IsTotallyComplex E] in
+omit [_root_.NumberField.IsTotallyComplex E] in
 theorem uu_eq_one {u : GA E k} {j : ℕ} (hj : k ≤ j) (hu : UU j u) : u = 1 :=
   Units.ext <| Matrix.ext fun i c => by rw [hu.2.2 i c (by omega), Units.val_one]
 
-omit [IsTotallyComplex E] in
 
+omit [_root_.NumberField.IsTotallyComplex E] in
 theorem map_wd (μ : Measure (GA E k)) [μ.IsMulLeftInvariant] (β : GA E k → ℝ≥0∞) (z : GA E k) :
     Measure.map (fun g => z * g) (μ.withDensity β) = μ.withDensity (fun g => β (z⁻¹ * g)) := by
   ext s hs
@@ -35,8 +77,8 @@ theorem map_wd (μ : Measure (GA E k)) [μ.IsMulLeftInvariant] (β : GA E k → 
       inv_mul_cancel_left]
   · rw [Set.indicator_of_notMem hx, Set.indicator_of_notMem (show x ∉ (fun g => z * g) ⁻¹' s from hx)]
 
-omit [IsTotallyComplex E] in
 
+omit [_root_.NumberField.IsTotallyComplex E] in
 theorem wt_shift {ν : Measure (GA E k)} (β : GA E k → ℝ≥0∞) (hβ : IsWt ν β) (z : GA E k)
     (hz : ∀ g, z * g = g * z) : IsWt ν (fun g => β (z⁻¹ * g)) := by
   refine ⟨hβ.1.comp (measurable_const_mul _), fun g => ?_⟩
@@ -46,9 +88,9 @@ theorem wt_shift {ν : Measure (GA E k)} (β : GA E k → ℝ≥0∞) (hβ : IsW
   simp only [hc]
   exact hβ.2 _
 
-omit [IsTotallyComplex E] [NumberField E] in
-variable (E k) in
 
+omit [_root_.NumberField.IsTotallyComplex E] [NumberField E] in
+variable (E k) in
 def shell (a : ℝ) (j : ℤ) : Set (GA E k) :=
   {g | Real.exp (a * j) ≤ Dt g ∧ Dt g < Real.exp (a * j) * Real.exp a}
 

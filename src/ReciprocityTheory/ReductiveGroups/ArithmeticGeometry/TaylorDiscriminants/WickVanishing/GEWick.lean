@@ -1,5 +1,54 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.GaugeExp
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.DofDApply
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.GaugeExp
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.WickOperatorVanishing
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -39,7 +88,7 @@ theorem iter_Cmul (D : PS k 1 d → PS k 1 d) (hD : ∀ (r : k) f, D (C r * f) =
 private theorem Dof_add' (v : Fin d → k) (f g : PS k 1 d) :
     Dof F v (f + g) = Dof F v f + Dof F v g := by
   first
-  | simp only [Dof, map_add, mul_add, Finset.sum_add_distrib]
+  | simp only [Dof, map_add (f := _), mul_add, Finset.sum_add_distrib]
   | simp [Dof, mul_add, Finset.sum_add_distrib]
 
 theorem foldr_add (L : List ι) (m : ι →₀ ℕ) (f g : PS k 1 d) :
@@ -81,11 +130,11 @@ theorem dmonOf_zero (m : ι →₀ ℕ) : DmonOf F u m (0 : PS k 1 d) = 0 := by
 
 theorem dpolyOf_eq_sum_of_subset (P : MvPolynomial ι k) (S : Finset (ι →₀ ℕ)) (hS : P.support ⊆ S)
     (f : PS k 1 d) :
-    DpolyOf F u P f = ∑ m ∈ S, C (MvPolynomial.coeff m P) * DmonOf F u m f := by
+    DpolyOf F u P f = ∑ m ∈ S, C (AddMonoidAlgebra.coeff P m) * DmonOf F u m f := by
   unfold DpolyOf
   refine Finset.sum_subset hS ?_
   intro m _ hm
-  have h0 : MvPolynomial.coeff m P = 0 := by simpa [MvPolynomial.mem_support_iff] using hm
+  have h0 : AddMonoidAlgebra.coeff P m = 0 := by simpa [MvPolynomial.mem_support_iff] using hm
   simp [h0]
 
 theorem dpolyOf_add_P (P Q : MvPolynomial ι k) (f : PS k 1 d) :
@@ -96,7 +145,7 @@ theorem dpolyOf_add_P (P Q : MvPolynomial ι k) (f : PS k 1 d) :
     dpolyOf_eq_sum_of_subset F u Q (P.support ∪ Q.support) (fun x hx => Finset.mem_union_right _ hx) f,
     ← Finset.sum_add_distrib]
   refine Finset.sum_congr rfl fun m _ => ?_
-  rw [MvPolynomial.coeff_add, map_add, add_mul]
+  rw [MvPolynomial.coeff_add, map_add (f := _), add_mul]
 
 theorem dpolyOf_smul_P (a : k) (P : MvPolynomial ι k) (f : PS k 1 d) :
     DpolyOf F u (a • P) f = C a * DpolyOf F u P f := by
@@ -149,7 +198,7 @@ section deg
 
 variable {ι : Type} [Fintype ι]
 
-def DegLt (n : ℕ) (P : MvPolynomial ι k) : Prop := ∀ m : ι →₀ ℕ, n ≤ m.degree → MvPolynomial.coeff m P = 0
+def DegLt (n : ℕ) (P : MvPolynomial ι k) : Prop := ∀ m : ι →₀ ℕ, n ≤ m.degree → AddMonoidAlgebra.coeff P m = 0
 
 theorem degLt_mono {a b : ℕ} (hab : a ≤ b) {P : MvPolynomial ι k} (h : DegLt a P) : DegLt b P :=
   fun m hm => h m (le_trans hab hm)
@@ -158,12 +207,13 @@ theorem degLt_pderiv {n : ℕ} {P : MvPolynomial ι k} (h : DegLt (n + 1) P) (l 
     DegLt n (MvPolynomial.pderiv l P) := by
   classical
   intro m hm
+
   rw [MvPolynomial.as_sum P, map_sum, MvPolynomial.coeff_sum]
   refine Finset.sum_eq_zero fun s hs => ?_
   rw [MvPolynomial.pderiv_monomial, MvPolynomial.coeff_monomial]
   by_cases hsm : s - Finsupp.single l 1 = m
   · rw [if_pos hsm]
-    have hc : MvPolynomial.coeff s P ≠ 0 := MvPolynomial.mem_support_iff.mp hs
+    have hc : AddMonoidAlgebra.coeff P s ≠ 0 := MvPolynomial.mem_support_iff.mp hs
     rcases Nat.eq_zero_or_pos (s l) with h0 | hpos
     · simp [h0]
     · exfalso
@@ -177,7 +227,7 @@ theorem degLt_pderiv {n : ℕ} {P : MvPolynomial ι k} (h : DegLt (n + 1) P) (l 
       have hdeg : s.degree = m.degree + 1 := by
         first
         | rw [← hs', Finsupp.degree_add, Finsupp.degree_single]
-        | rw [← hs', map_add, Finsupp.degree_single]
+        | rw [← hs', map_add (f := _), Finsupp.degree_single]
         | (rw [← hs']; simp [Finsupp.degree_add])
         | (rw [← hs']; simp)
       exact hc (h s (by omega))
@@ -283,7 +333,8 @@ theorem exp_cut (t : k) (q : PS k 1 d) (hq0 : constantCoeff q = 0) (N : ℕ) :
   refine ⟨C (t ^ (N + 1)) * PowerSeries.subst (t • q) R, ?_⟩
   unfold FB.expS
   rw [hexp]
-  simp only [key, map_add, map_sum, map_mul, map_pow, map_smul, hX]
+
+  simp only [key, map_add (f := _), map_sum, map_mul, map_pow, map_smul, hX]
   simp only [smul_pow, smul_smul, MvPowerSeries.smul_eq_C_mul, map_mul, map_pow]
   congr 1
   all_goals first
@@ -298,16 +349,18 @@ theorem wickExp_of (hH : HalfSt) : WickExpSt := by
     rw [show G * (q ^ (P.totalDegree + 1) * Y) = (G * Y) * q ^ (P.totalDegree + 1) by ring,
       half_pow hH F u c q hc hq0 hq1 hq2 (P.totalDegree + 1) P (G * Y), iterate_eq_zero,
       dpolyOf_zero_P, map_zero, mul_zero]
-  rw [hY, mul_add, dpolyOf_add_f, map_add, hrem, add_zero, Finset.mul_sum, dpolyOf_sum_f, map_sum]
+
+  rw [hY, mul_add, dpolyOf_add_f, map_add (f := _), hrem, add_zero, Finset.mul_sum, dpolyOf_sum_f, map_sum]
   unfold expSecond
+
   rw [dpolyOf_sum_P, map_sum]
   refine Finset.sum_congr rfl fun n _ => ?_
   rw [mul_left_comm G, dpolyOf_Cmul_f, map_mul, MvPowerSeries.constantCoeff_C,
     half_pow hH F u c q hc hq0 hq1 hq2 n P G, dpolyOf_smul_P, map_mul, MvPowerSeries.constantCoeff_C]
   ring
 
-open G2 in
 
+open G2 in
 theorem gauge_exp_identity (hA : ExpAddZeroConstant) (hE : ConstantCoeffSubstitution) (hG : CanonicalGaugeDiffBiadditive) (hQ : QuadraticFormDerivatives)
     (hH : HalfSt) : GaugeExpSt := by
   have hW := wickExp_of hH

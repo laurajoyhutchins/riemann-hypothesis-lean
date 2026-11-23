@@ -1,4 +1,59 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.NatCardEqPowLength
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.DimOfMinimal
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.IsMultiHomogXpow
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.ExistsPrimeFiltrationOfIsMultiHomogIdeal
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.MultAtEqCount
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.NatCardEqPowLength
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.NotRelevantOfDimZero
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.SupportSubsetMonoBox
+
+@[expose] public section
 
 noncomputable section
 
@@ -116,7 +171,7 @@ theorem hasymp_base {p : ℕ} (hp : p.Prime) {L : ℝ} (hL : L = Real.log p) {W 
   refine ⟨a₁, 0, le_refl 0, fun a ha => ?_⟩
   have hgeo : geoNum 0 W (fun _ k => (a k : ℤ)) =
       ((Module.length ℤ (MRing ι ⧸ dehomI W i)).toNat : ℤ) := by
-    rw [geoNum, dif_pos hWr]
+    rw [geoNum, dite_eq_left hWr]
     rfl
   have hc : (Nat.card (mPiece W a) : ℝ) =
       (p : ℝ) ^ (Module.length ℤ (MRing ι ⧸ dehomI W i)).toNat := by
@@ -129,49 +184,5 @@ theorem hasymp_base {p : ℕ} (hp : p.Prime) {L : ℝ} (hL : L = Real.log p) {W 
     ring
   rw [h0]
   simp
-
-theorem hilbert_multidegree_piece_divisor_sum
-    (hR4 : ∀ (n : ℕ) (V : Ideal (MRing ι)) (a : Fin (n + 1) → K → ℤ) (k : K) (i : ι k),
-      IsMultiProjPrime V → charOf V ≠ 0 →
-      ringKrullDim (MRing ι ⧸ V) = ((n + 1 + Fintype.card K : ℕ) : WithBot ℕ∞) →
-      (X ⟨k, i⟩ : MRing ι) ∉ V →
-      (a (Fin.last n) = fun k' => if k' = k then 1 else 0) →
-      geoNum (n + 1) V a = ∑ᶠ W' ∈ divSupp V (X ⟨k, i⟩),
-        (multAt (V ⊔ Ideal.span {(X ⟨k, i⟩ : MRing ι)}) W' : ℤ) * geoNum n W' (Fin.init a))
-    (hSymm : ∀ (n : ℕ) (V : Ideal (MRing ι)) (a : Fin n → K → ℤ) (σ : Equiv.Perm (Fin n)),
-      IsMultiProjPrime V → charOf V ≠ 0 →
-      ringKrullDim (MRing ι ⧸ V) = ((n + Fintype.card K : ℕ) : WithBot ℕ∞) →
-      geoNum n V (a ∘ σ) = geoNum n V a)
-    (W : Ideal (MRing ι)) (hW : IsMultiProjPrime W) (hp : (charOf W).Prime) (d : ℕ)
-    (hd : ringKrullDim (MRing ι ⧸ W) = ((d + Fintype.card K : ℕ) : WithBot ℕ∞)) :
-    ∃ (a₀ : ℕ) (C : ℝ), ∀ a : K → ℕ, (∀ k, a₀ ≤ a k) →
-      |Real.log (Nat.card (mPiece W a)) / Real.log (charOf W) -
-          (geoNum d W (fun _ k => (a k : ℤ)) : ℝ) / (d.factorial : ℝ)| ≤
-        C * ((∑ k, a k : ℕ) + 1 : ℝ) ^ d / ((∑ k, a k : ℕ) + 1 : ℝ) := by
-  have hmem : ((charOf W : ℕ) : MRing ι) ∈ W := natCast_mem_of_charOf W
-  obtain ⟨⟨a₀, C, hC, hA⟩, -⟩ := hasymp_all (L := Real.log (charOf W)) hp hR4 hSymm
-    (fun W' hW' hpW' hd' => hasymp_base hp rfl hW' hpW' hd') d W hW hmem hd
-  have hL : 0 < Real.log (charOf W) := Real.log_pos (by exact_mod_cast hp.one_lt)
-  refine ⟨a₀, C * d / Real.log (charOf W), fun a ha => ?_⟩
-  have h := hA a ha
-  simp only [lg, appr, tdeg] at h
-  generalize hT : ((∑ k, a k : ℕ) : ℝ) = T at h ⊢
-  generalize Real.log (Nat.card (mPiece W a)) = x at h ⊢
-  generalize (geoNum d W (fun _ k => (a k : ℤ)) : ℝ) = g at h ⊢
-  generalize Real.log (charOf W) = L at h hL ⊢
-  have hT0 : 0 ≤ T := by rw [← hT]; exact Nat.cast_nonneg _
-  have hT1 : 0 < T + 1 := by linarith
-  have hT1' : T + 1 ≠ 0 := hT1.ne'
-  have hL0 : L ≠ 0 := hL.ne'
-  have hf : (d.factorial : ℝ) ≠ 0 := by exact_mod_cast Nat.factorial_ne_zero d
-  have e1 : x / L - g / d.factorial = (x - L * g / d.factorial) / L := by
-    field_simp
-  have e2 : C * d / L * (T + 1) ^ d / (T + 1) = C * d * (T + 1) ^ (d - 1) / L := by
-    rcases d with _ | n
-    · simp
-    · rw [Nat.add_sub_cancel, pow_succ]
-      field_simp
-  rw [e1, abs_div, abs_of_pos hL, e2]
-  exact div_le_div_of_nonneg_right h hL.le
 
 end ReciprocityTheory.ChartRestriction.G.ArakelovGeometry

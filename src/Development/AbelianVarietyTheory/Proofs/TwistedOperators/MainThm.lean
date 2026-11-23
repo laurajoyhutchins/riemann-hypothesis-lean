@@ -1,4 +1,54 @@
-import Mathlib
+module
+
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.Analysis.InnerProductSpace.Basic
+public import Mathlib.GroupTheory.DoubleCoset
+public import Mathlib.MeasureTheory.Integral.Bochner.Basic
+public import Mathlib.Order.CompletePartialOrder
+import Aesop.Main
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.MeasureTheory.Integral.Bochner.Set
+
+@[expose] public section
 
 open MeasureTheory DoubleCoset
 
@@ -45,12 +95,12 @@ theorem main_thm : ∀ (G : Type) [inst : Group G] [inst_1 : TopologicalSpace G]
     intro i j hij
     by_contra hne
     have hj : x j ∈ doubleCoset (x i) (J : Set G) J := by
-      obtain ⟨u, hu, w, hw, e⟩ := (DoubleCoset.eq J J (x i) (x j)).1 hij
+      obtain ⟨u, hu, w, hw, e⟩ := (@DoubleCoset.eq _ _ J J (x i) (x j)).1 hij
       exact mem_doubleCoset.2 ⟨u, hu, w, hw, e⟩
     exact Set.disjoint_left.1 (hdisj hne) hj (mem_doubleCoset_self J J (x j))
   have hcls : ∀ i, Quotient.out (DoubleCoset.mk J J (x i)) ∈ doubleCoset (x i) (J : Set G) J := by
     intro i
-    obtain ⟨u, w, hu, hw, e⟩ := DoubleCoset.mk_out_eq_mul J J (x i)
+    obtain ⟨u, hu, w, hw, e⟩ := DoubleCoset.mk_out_eq_mul J J (x i)
     exact mem_doubleCoset.2 ⟨u, hu, w, hw, e⟩
   have hzero : ∀ c ∉ Set.range (fun i => DoubleCoset.mk J J (x i)),
       (m.real (doubleCoset (Quotient.out c) (J : Set G) J) : ℂ) * F (Quotient.out c) = 0 := by
@@ -59,7 +109,7 @@ theorem main_thm : ∀ (G : Type) [inst : Group G] [inst_1 : TopologicalSpace G]
     obtain ⟨i, hi⟩ := hsupp _ (right_ne_zero_of_mul h)
     refine hc ⟨i, ?_⟩
     show DoubleCoset.mk J J (x i) = c
-    rw [← DoubleCoset.out_eq' J J c]
+    rw [← DoubleCoset.out_eq' c]
     exact (DoubleCoset.mk_eq_of_doubleCoset_eq (doubleCoset_eq_of_mem hi)).symm
   refine (hinj.hasSum_iff hzero).1 ?_
   convert hsumI using 1

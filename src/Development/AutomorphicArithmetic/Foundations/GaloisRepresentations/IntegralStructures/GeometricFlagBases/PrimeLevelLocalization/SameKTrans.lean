@@ -1,5 +1,45 @@
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.IntegralStructures.GeometricFlagBases.PrimeLevelLocalization.PrimeProj
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.Plc
+module
+
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.IntegralStructures.GeometricFlagBases.PrimeLevelLocalization.PrimeProj
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.UnderEqIffConjPl
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.Plc
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -82,7 +122,7 @@ theorem pr_of_sameK {x : E} {w w' : Plc E} (h : SameK x w w') : pr w = pr w' :=
 
 end
 
-set_option maxHeartbeats 1000000 in
+
 theorem master (h : All) {E : Type} [Field E] [NumberField E] [IsCMField E] {l : ℕ} [Fact l.Prime] (ι : Qbar l ≃+* ℂ) {a : ℕ}
     (ha : Odd a) {d : ℕ} (hd : FieldOK E l d) {x : E} (hx : x ^ 2 = -(d : E)) {w₀ : Plc E} (h0 : ((l : ℕ) : 𝓞 E) ∈ w₀.asIdeal)
     {U : Submodule ℂ (UA E a → ℂ)} (hU : IsAutRepU U) (hTy : GlobalTheory.CongW.TyEll E l a w₀ U) (H C : Finset (Plc E))
@@ -163,14 +203,17 @@ theorem master (h : All) {E : Type} [Field E] [NumberField E] [IsCMField E] {l :
     · obtain ⟨m, hm⟩ := hM2 w σ' i hi
       exact ⟨⟨(m, (idx m : ℂ) * (satEig (Ideal.absNorm w.asIdeal) a B i * c ^ i)), Or.inr ⟨w, σ', i, B, hfr, hq, hst, hm, hB, rfl⟩, Or.inr ⟨w, σ', i, hw, hc, hm⟩⟩, hm, by
         simp only [θ, g, ϑ, c, map_mul, map_natCast]⟩
-    · have hq0 : 0 < normV w := Nat.pos_of_ne_zero (by
-        show Ideal.absNorm w.asIdeal ≠ 0
+    · have hnorm : normV w = Ideal.absNorm w.asIdeal := by
+        simp [normV, Ideal.absNorm_apply, Submodule.cardQuot_apply]
+      have hq0 : 0 < normV w := Nat.pos_of_ne_zero (by
+        rw [hnorm]
         rw [Ne, Ideal.absNorm_eq_zero_iff]; exact w.ne_bot)
       obtain ⟨e0, e1⟩ := h.roots (normV w) a hq0 B (h.card E a U w B hB) 1 c (fun i => ι (ϑ i)) fun i _ => by
-        simp only [ϑ, RingEquiv.apply_symm_apply, one_mul]; rfl
+        simp only [ϑ, RingEquiv.apply_symm_apply, one_mul, hnorm]
       refine ⟨fun h0 => ?_, ?_⟩
       · rw [h0, map_zero] at e0; exact zero_ne_one e0
       · rw [e0, ← e1]
+
         simp [crystallineComparison.heckePol, Polynomial.map_sum]
   refine ⟨{ p := p, D := S.D, G := S.G, L := S.L, sc := hsc, e := RingEquiv.refl E, n_eq := rfl, N := N, J := J, g := g, θ := θ,
             κ := V.κ, m := mOf x V.W V.jz, alg := V.kap.alg, lam := V.lam, anti := hanti, f := f, fn := hf,

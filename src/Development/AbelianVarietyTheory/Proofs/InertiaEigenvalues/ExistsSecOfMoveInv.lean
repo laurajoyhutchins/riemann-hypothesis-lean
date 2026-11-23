@@ -1,8 +1,66 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.ExistsSectionOneClassSeriesDescends
-import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.ShortThetaValueLinearInPolynomial
-import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.ChartIndependenceUnconditional
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.ExistsTestRingInjective
+module
+
+public import Formalism.LocalToGlobal.ProjectiveLattices.IsLevMove
+public import Formalism.LocalToGlobal.ProjectiveLattices.ThClass
+public import Formalism.LocalToGlobal.ProjectiveLattices.ThGerm
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.AdmissibleColumnsLeAndHarmonicMapCover
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.EvaluationLemmaForNablaLevels
+import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.ExistsFramedPointBaseChangeAlgHom
+import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.ExistsLevMoveOfFrOver
+import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.ExistsQuotEquiv
+import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.FramedPointBaseChangeLaws
+import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.FramedPointsLiftToLevelCoverStatement
+import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.ShortThetaValueExistsUniqueNaturalOfLaws
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.ShortThetaValueLinearInPolynomial
+import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.ShortThetaValueUnderLevelMove
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.ShortValTotOfPinned
+import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.ThetaValueWeightTriangularFrame
+public import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.ChartIndependenceUnconditional
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.ExistsTestRingInjective
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.LevelMapsRankZero
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.AllUniformizationLawsHold
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.FramedModuliAlgebraicLawsChartWeightIntegrality
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.FramedPointBaseChangeUniqueReflIff
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.FramedPointReducedFromTestRing
+import Formalism.LocalToGlobal.ProjectiveLattices.FrameCharts
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Out ReciprocityTheory.ChartRestriction.G.Geo.Tor Formalism.L2.Pj Formalism.MainNotions.ModuliIntegralCharts.H1
@@ -117,8 +175,8 @@ theorem evR_frBor {a : (E →+* ℂ) × ℕ → ℕ} {f : Rul Xo c} (hf : f ∈ 
   have hAT := GlobalTheory.Frames.allTest_of_secBaseChange GlobalTheory.firstFiveLaws.1.secBaseChange E H Dw l Xo c
   exact (GlobalTheory.borDesc_and_wtField E H Dw l Xo c).2 a n f hf k t y y' (hAT k y) (hAT k y') h
 
-open GlobalTheory.ShortDescent in
 
+open GlobalTheory.ShortDescent in
 theorem exists_sec_of_moveInv (d : DeltaDat Xo c n) (hlev : d.IsLev) {a : (E →+* ℂ) × ℕ → ℕ} {n' : ℕ}
     (G : Rul d.Xo₂ d.c₂) (hG : G ∈ sec d.Xo₂ d.c₂ a n') (hinv : MoveInv d G) :
     ∃ f ∈ sec Xo c a n', ∀ (k : Type) [Field k] [IsAlgClosed k] [Algebra c.F k] [Algebra d.c₂.F k],
@@ -144,7 +202,7 @@ theorem exists_sec_of_moveInv (d : DeltaDat Xo c n) (hlev : d.IsLev) {a : (E →
   · intro k _ _ _ _ hk y y₂ ho
     have hy := hAll k y
     conv_lhs => unfold evR evalAt
-    rw [dif_pos hy]
+    rw [dite_eq_left hy]
     exact (hd _ _).exists.choose_spec k hk _ y y₂ hy.choose_spec.choose_spec.choose_spec ho
 
 theorem exists_sec_theta [StarRing (𝓞 E)] (nab : NabV Xo c) (hnab : IsNab Xo c nab) (Λ : GenLat E n) (N : ℕ)
@@ -165,7 +223,7 @@ theorem exists_sec_theta [StarRing (𝓞 E)] (nab : NabV Xo c) (hnab : IsNab Xo 
   · have hy := hAll k y
     obtain ⟨v, hv, -⟩ := hex k y
     unfold evR evalAt
-    rw [dif_pos hy, hnat _ _ _ _ y hy.choose_spec.choose_spec.choose_spec _ v (hex _ _).exists.choose_spec hv]
+    rw [dite_eq_left hy, hnat _ _ _ _ y hy.choose_spec.choose_spec.choose_spec _ v (hex _ _).exists.choose_spec hv]
     exact hv
 
 theorem formula_eq {V F S Qt J : Type} [Field F] [CommRing S] [Algebra F S] [Fintype Qt] [Fintype J]
@@ -211,12 +269,14 @@ theorem sum_values_eq [StarRing (𝓞 E)] (nab : NabV Xo c) (hnab : IsNab Xo c n
         (Finset.univ.biUnion fun t => (P t).support) (Finset.subset_biUnion_of_mem (fun t => (P t).support) (Finset.mem_univ t)))
   apply hf.injective
   change φ _ = φ _
+
   simp only [map_sum, map_mul φ, hu _ _ _ (hv _), hu _ _ _ (hv' _), Finset.mul_sum _ _ (φ _)]
   rw [Finset.sum_comm, Finset.sum_comm (s := (Finset.univ : Finset T))]
   refine Finset.sum_congr rfl fun q _ => ?_
   rw [Finset.sum_comm, Finset.sum_comm (s := (Finset.univ : Finset T))]
   refine Finset.sum_congr rfl fun mo _ => ?_
   have e := congrArg φ (h q mo)
+
   simp only [map_sum, map_mul φ, φ.commutes] at e
   simp only [← _root_.mul_assoc (φ _), ← Finset.sum_mul, e]
 

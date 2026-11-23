@@ -1,5 +1,46 @@
-import Mathlib
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.FiniteEtaleModels.GalOfKer
+module
+
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.FiniteEtaleModels.GalOfKer
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.FiniteEtaleModels.IsEtIdealOfPlace
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -174,7 +215,7 @@ private theorem sys_ext_of_split {G : GDatum} {p : ℕ} {f : ℕ → G.La →+ G
       have hQd : Q n ∣ Q (n * m) := by
         rw [hQnm]
         exact dvd_mul_right _ _
-      have cQ : (Q n * Q m).Coprime p := Nat.Coprime.mul (hQp n hn) (hQp m hm)
+      have cQ : (Q n * Q m).Coprime p := Nat.Coprime.mul_left (hQp n hn) (hQp m hm)
       obtain ⟨s2a, s2b⟩ := s2 (Q n) (Q m) (hQpos n hn) (hQpos m hm) cQ
       refine ⟨fun x => eq_of_dv (key n hn _ ?_ ?_), keyZ n hn _ ?_ ?_⟩
       · have h := Dv.sub (Dv.of_dvd hPd (LP (n * m) hnm x)) (LP n hn x)
@@ -242,7 +283,7 @@ private theorem sys_ext_of_split {G : GDatum} {p : ℕ} {f : ℕ → G.La →+ G
         have h2 : Dv (Q n) (e₂ n • f (Q n) (x - y₀)) := Dv.of_int (hQ n hn) _
         have h3 : Dv (Q n) (f (Q n) y₀ - κ • x) := dv_of_eq ⟨z₀, hy⟩
         convert Dv.add (Dv.add h1 h2) h3 using 1
-        simp only [map_add, map_zsmul, map_sub, he₂ n hn]
+        simp only [map_add (f := _), map_zsmul, map_sub, he₂ n hn]
         module
   · intro n hn hnp x
     apply eq_of_dv

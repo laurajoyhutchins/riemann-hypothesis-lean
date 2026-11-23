@@ -1,14 +1,70 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.EqZeroOrEqOfPlaceIdem
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.RealIdemMulOfReal
+import Development.AbelianVarietyTheory.Counterexamples.HeightSurvey.StarPurelyImaginaryEqNeg
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.EventuallyFinEqOne
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ExistsNormaliseMeanSquareOfCocompact
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.MemLatOIffExistsActO
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.NotMemSpanOfCommute
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.OmVacuumEqSplitFacSmulSum
+import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.SelfDualLatticePairingDual
+import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ThetaNormSqSumHeisenbergTranslatesDistinctChars
+import Development.AbelianVarietyTheory.Proofs.HeightProofs.CocompactTensor
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsInvariantForm
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsIdempotentComponentOfGroupElement
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.ConjTupRefl
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsInvariantForm
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ThetaAtEqSumHeisOfFourierSum
-import Development.AbelianVarietyTheory.Definitions.Divisors.GenReads
 import Development.AbelianVarietyTheory.Definitions.ThetaValues.ExistsRootNotMem
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.OneMapOfOfExtends
-import Formalism.SharpRestriction.Divisibility.GeneratorPowers.ThExprUniqOfChartIndep2
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.GaussGLZero
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.EqZeroOrEqOfPlaceIdem
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsIdempotentComponentOfGroupElement
+import Formalism.LocalToGlobal.IndefiniteReal.ExistsChosenExtremalVector
+import Formalism.LocalToGlobal.IndefiniteReal.LinksDefs
+
+@[expose] public section
 
 noncomputable section
 
@@ -180,11 +236,13 @@ theorem exists_invariant_form_iso {Λ : AddSubgroup (WO S T)} {e : AE D} (he : I
         | mul_right B _ g hg ih =>
           obtain ⟨y', N, hy', rfl⟩ := hg
           refine ⟨fun y hy => ?_, ?_⟩
-          · rw [Module.End.mul_apply, LinearMap.sum_apply, map_sum, map_sum]
+          · set_option synthInstance.maxHeartbeats 100000 in
+              rw [Module.End.mul_apply, LinearMap.sum_apply, map_sum, map_sum]
             refine Finset.sum_nonneg fun k _ => ?_
             rw [heisL_apply, ← heisO_add_of_orth ψ S T (half_orth_iso he (isHalf_nsmul hy' k) hy)]
             exact ih.1 _ (isHalf_add (isHalf_nsmul hy' k) hy)
-          · rw [Module.End.mul_apply, LinearMap.sum_apply, map_sum, map_sum]
+          · set_option synthInstance.maxHeartbeats 100000 in
+              rw [Module.End.mul_apply, LinearMap.sum_apply, map_sum, map_sum]
             refine Finset.sum_pos' (fun k _ => ih.1 _ (isHalf_nsmul hy' k)) ⟨0, Finset.mem_range.2 N.succ_pos, ?_⟩
             rw [heisL_apply, zero_smul, heisO_zero]
             exact ih.2
@@ -257,6 +315,7 @@ theorem om_eq_smul_sum_iso {χS χT : (AE D)ˣ →* Circle} {om : GA D S × GA D
   obtain ⟨v₀, ⟨hv₀, hv₀Λ⟩, hv₀u⟩ := hRu 0 h0 (isHalf_zero e)
   have hv₀' : v₀ ∈ Λ := by rwa [zero_sub, neg_mem_iff] at hv₀Λ
   have hsum : ℓ (∑ u ∈ R, heisO ψ S T u f) = ℓ f := by
+
     rw [map_sum, Finset.sum_eq_single_of_mem v₀ hv₀, hf1 v₀ hv₀' (hR _ hv₀).2]
     intro u hu hne
     have huΛ : u ∉ Λ := fun huΛ => hne (hv₀u u ⟨hu, by rwa [zero_sub, neg_mem_iff]⟩)
@@ -307,7 +366,18 @@ theorem om_eq_sum_iso {χS χT : (AE D)ˣ →* Circle} {om : GA D S × GA D T �
       rintro _ ⟨γ, rfl⟩ w
       exact (congrArg norm (hf.quasi γ w)).trans (by rw [norm_mul, hψ.2.1, one_mul]))
   have hn : nrm2 μ 𝓕 (c • f) = 1 := hc μ 𝓕 hμ.1 hμ.2.1 hμ.2.2
-  have hcf := GlobalTheory.WeilVacMove.isTheta_smul c hf
+  have hcf : IsThetaFunO ψ S T (c • f) := {
+    quasi γ w := by
+      rw [Pi.smul_apply, Pi.smul_apply, hf.quasi, smul_eq_mul, smul_eq_mul, mul_left_comm]
+    level := by
+      obtain ⟨U, hU, h1⟩ := hf.level
+      refine ⟨U, hU, fun u hu h0 => ?_⟩
+      funext w
+      have e1 := congrFun (h1 u hu h0) w
+      unfold heisO at e1 ⊢
+      rw [Pi.smul_apply, Pi.smul_apply, smul_eq_mul, smul_eq_mul, mul_left_comm, e1]
+    cont := hf.cont.const_smul c
+    smooth k L h1 h2 w := contDiff_const.mul (hf.smooth k L h1 h2 w) }
   have hfix' : ∀ u ∈ Λ, IsHalf e u ∨ IsHalf (cA D e) u → heisO ψ S T u (c • f) = c • f := fun u hu hh => by
     rw [heisO_smul, hfix u hu hh]
   have h1 := hom _ hcf (fun u hu hh => hfix' u hu (Or.inl hh)) fun u hu hh => hfix' u hu (Or.inr hh)
@@ -406,7 +476,7 @@ theorem isHalf_add_left {m n : ℕ} {a b : AE D} (hab : a * b = 0) {u : Mx D m n
     IsHalf (a + b) u := fun i j => by
   rw [add_mul, hu i j, ← hu i j, ← mul_assoc, mul_comm b, hab, zero_mul, add_zero]
 
-set_option maxHeartbeats 1600000 in
+
 theorem splitLaw_add (hW : IsWeilDatumO ψ S T χS χT om) {a b : AE D} (ha : a * a = a) (hb : b * b = b)
     (hac : a * cA D a = 0) (hbc : b * cA D b = 0) (hab : a * b = 0) (habc : a * cA D b = 0)
     (la : SplitLaw ψ χS χT om a) (lb : SplitLaw ψ χS χT om b) : SplitLaw ψ χS χT om (a + b) := by
@@ -421,15 +491,15 @@ theorem splitLaw_add (hW : IsWeilDatumO ψ S T χS χT om) {a b : AE D} (ha : a 
   have ea : (a + cA D a) * (a + cA D a) = a + cA D a := by linear_combination ha + ha' + 2 * hac
   have eb : (b + cA D b) * (b + cA D b) = b + cA D b := by linear_combination hb + hb' + 2 * hbc
   have eab : (a + cA D a) * (b + cA D b) = 0 := by linear_combination hab + hab' + habc + hcab
-  obtain ⟨g₁, hg₁⟩ := cut_exists S g _ ea (by rw [RingHom.map_add, cc, add_comm])
-  obtain ⟨g₂, hg₂⟩ := cut_exists S g _ eb (by rw [RingHom.map_add, cc, add_comm])
+  obtain ⟨g₁, hg₁⟩ := cut_exists S g _ ea (by rw [RingHom.map_add (f := _), cc, add_comm])
+  obtain ⟨g₂, hg₂⟩ := cut_exists S g _ eb (by rw [RingHom.map_add (f := _), cc, add_comm])
   have hgg : g = g₁ * g₂ := by
     refine Subtype.ext (Units.ext ?_)
     show mt S g = mt S g₁ * mt S g₂
     rw [hg₁, hg₂, cut_mul _ _ eab]
     ext i j
     have := hg i j
-    rw [RingHom.map_add, Matrix.sub_apply] at this
+    rw [RingHom.map_add (f := _), Matrix.sub_apply] at this
     simp only [Matrix.add_apply, Matrix.smul_apply, smul_eq_mul]
     linear_combination -this
   obtain ⟨x₁, hx₁⟩ := exists_detAt ha S g₁
@@ -443,7 +513,7 @@ theorem splitLaw_add (hW : IsWeilDatumO ψ S T χS χT om) {a b : AE D} (ha : a 
     · rw [hg₂]
       exact idem_det hb (by rw [mul_add, hb, hbc, add_zero]) _
   refine ⟨r₁ * r₂, mul_pos hr₁ hr₂, fun ℓ hℓ f hf => ?_⟩
-  rw [RingHom.map_add] at hℓ
+  rw [RingHom.map_add (f := _)] at hℓ
   have e1 : om (g, 1) f = om (g₁, 1) (om (g₂, 1) f) := by
     rw [← Module.End.mul_apply, ← map_mul, Prod.mk_mul_mk, mul_one, ← hgg]
   rw [e1, l₁ ℓ (fun u hu => hℓ u (isHalf_add_left hab' hu)) _ (hW.om_pres _ _ hf),
@@ -472,7 +542,7 @@ theorem splitLaw_sum (hW : IsWeilDatumO ψ S T χS χT om) {e : AE D} (he : Glob
     generalize (∑ j ∈ P, es j) = b at *
     have hb' : cA D b * cA D b = cA D b := by rw [← RingHom.map_mul, hb]
     have hab' : cA D (es i) * cA D b = 0 := by rw [← RingHom.map_mul, hab, RingHom.map_zero]
-    rw [RingHom.map_add] at hec
+    rw [RingHom.map_add (f := _)] at hec
     have hbc : b * cA D b = 0 := by
       have : b * cA D b = (b * (es i + b)) * (cA D b * (cA D (es i) + cA D b)) := by
         rw [mul_add, mul_add, mul_comm b (es i), hab, hb, mul_comm (cA D b) (cA D (es i)), hab', hb', zero_add, zero_add]

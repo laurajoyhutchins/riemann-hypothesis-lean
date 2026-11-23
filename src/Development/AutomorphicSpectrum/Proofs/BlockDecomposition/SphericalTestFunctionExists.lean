@@ -1,6 +1,57 @@
-import Mathlib
-import Development.WeilBound.RepresentationTheoryGL.EisensteinSeries.SiegelEisensteinContinuation.IsEpCont
-import GroundTheory.AutomorphicForms.CuspidalDiscreteness.SiegelConj
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.EisensteinSeries.SiegelEisensteinContinuation.IsEpCont
+public import Mathlib.Analysis.SpecialFunctions.SmoothTransition
+import GroundTheory.GlobalFields.TateThesis.AdeleScaling
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.InnerProductSpace.Calculus
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Mathlib.Topology.UniformSpace.Uniformizable
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 set_option maxSynthPendingDepth 1
 set_option synthInstance.maxSize 1000
@@ -28,14 +79,14 @@ theorem contDiff_normAtPlace_sq (w : InfinitePlace k) :
       rw [normAtPlace_apply_of_isReal hw]
     rw [h]
     exact (contDiff_norm_sq ℝ).comp
-      ((contDiff_apply ℝ ℝ (⟨w, hw⟩ : {w : InfinitePlace k // w.IsReal})).comp contDiff_fst)
+      ((contDiff_apply ℝ (fun _ => ℝ) (⟨w, hw⟩ : {w : InfinitePlace k // w.IsReal})).comp contDiff_fst)
   · have hc : w.IsComplex := InfinitePlace.not_isReal_iff_isComplex.mp hw
     have h : (fun u : mixedSpace k => normAtPlace w u ^ 2) = fun u => ‖u.2 ⟨w, hc⟩‖ ^ 2 := by
       funext u
       rw [normAtPlace_apply_of_isComplex hc]
     rw [h]
     exact (contDiff_norm_sq ℝ).comp
-      ((contDiff_apply ℝ ℂ (⟨w, hc⟩ : {w : InfinitePlace k // w.IsComplex})).comp contDiff_snd)
+      ((contDiff_apply ℝ (fun _ => ℂ) (⟨w, hc⟩ : {w : InfinitePlace k // w.IsComplex})).comp contDiff_snd)
 
 theorem contDiff_q₀ : ContDiff ℝ (∞) (q₀ (k := k)) := by
   unfold q₀
@@ -46,7 +97,8 @@ theorem contDiff_qI {ι : Type} [Fintype ι] : ContDiff ℝ (∞) (qI (k := k) (
   unfold qI
   apply ContDiff.sum
   intro i _
-  have hi : ContDiff ℝ (∞) fun u : ι → mixedSpace k => u i := contDiff_apply ℝ (mixedSpace k) i
+  have hi : ContDiff ℝ (∞) fun u : ι → mixedSpace k => u i :=
+    contDiff_apply ℝ (fun _ => mixedSpace k) i
   exact (contDiff_q₀ (k := k)).comp hi
 
 theorem q₀_nonneg (u : mixedSpace k) : 0 ≤ q₀ u := by

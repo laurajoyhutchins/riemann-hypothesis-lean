@@ -1,6 +1,41 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.IsAbsIrrCharCompIff
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.StableIffCarrierEq
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.IsAbsIrrCharCompIff
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.StableIffCarrierEq
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -22,16 +57,16 @@ def face0 : Face3 X.toD7 (famR X I hX U Xg tr) where
   Sp _ := ⟨ℂ, inferInstance, inferInstance, fun u => u.elim, ⊥⟩
   Zsc _ := ⟨0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0⟩
 
-open Classical in
 
+open Classical in
 def MuOf (T : Top.TwDat X.B) (Wt : Set X.B.places.Pl) {U : Set I.ι} (mu : HeightOneSpectrum (𝓞 X.toD7.what₂.LL) → TupU I U)
     (twPl : Finset (HeightOneSpectrum (𝓞 X.toD7.what₂.LL))) : Prop :=
   ∀ w : X.B.places.Pl, (X.toD7.plEq w ∈ twPl ↔ w ∈ Wt) ∧
     I.xi (ixOf I U (mu (X.toD7.plEq w))) = if w ∈ Wt then T.xiTw I.C w else 1
 
+
 set_option genInjectivity false in
 set_option genSizeOfSpec false in
-
 structure Dat (T : Top.TwDat X.B) (Wt : Set X.B.places.Pl) : Type 1 where
   Xg : Finset (Gc X.B px → X.B.LL)
   tr : TrI X.B px
@@ -51,14 +86,14 @@ structure Dat (T : Top.TwDat X.B) (Wt : Set X.B.places.Pl) : Type 1 where
 
 attribute [instance] Dat.alg
 
-variable {X I hX} in
 
+variable {X I hX} in
 abbrev Dat.F {T : Top.TwDat X.B} {Wt : Set X.B.places.Pl} (z : Dat X I hX T Wt) : Face3 X.toD7 (famR X I hX (usedOf I T Wt) z.Xg z.tr) :=
   face0 X I hX (usedOf I T Wt) z.Xg z.tr
 
+
 set_option genInjectivity false in
 set_option genSizeOfSpec false in
-
 structure RowsAre (T : Top.TwDat X.B) (Wt : Set X.B.places.Pl) (ix : X.C.Tup ≃ I.ι) (p0 : BaseLevelRowSide X.toD7) : Type 1 where
   z : Dat X I hX T Wt
   intersectionNumber_baseChange : Holds z.R z.F
@@ -66,8 +101,8 @@ structure RowsAre (T : Top.TwDat X.B) (Wt : Set X.B.places.Pl) (ix : X.C.Tup ≃
   Z : ReadL z.R z.F p0 Y
   tup_ix : ∀ t, ix (Y.tup t) = ixOf I (usedOf I T Wt) t
 
-variable {X I hX} in
 
+variable {X I hX} in
 def Dat.W1 {T : Top.TwDat X.B} {Wt : Set X.B.places.Pl} (z : Dat X I hX T Wt)
     (F0 : HeightOneSpectrum (𝓞 X.toD7.what₂.LL) → Fin X.toD7.R.m → ℝ) : Set X.B.places.Pl :=
   {w | ∃ j, ∃ w' ∈ ({X.toD7.plEq w, Formalism.DivisionValues.conjPl (X.toD7.plEq w)} : Set (HeightOneSpectrum (𝓞 X.toD7.what₂.LL))),

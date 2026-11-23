@@ -1,6 +1,14 @@
-import Mathlib.Analysis.Normed.Operator.Extend
-import Mathlib.Analysis.InnerProductSpace.Subspace
-import Mathlib.LinearAlgebra.Finsupp.LinearCombination
+module
+
+public import Mathlib.Analysis.Complex.Basic
+public import Mathlib.Analysis.InnerProductSpace.Defs
+import Mathlib.Algebra.Order.Field.Power
+public import Mathlib.Analysis.InnerProductSpace.Basic
+public import Mathlib.Analysis.Normed.Operator.Extend
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.TypeStar
+
+@[expose] public section
 
 noncomputable section
 

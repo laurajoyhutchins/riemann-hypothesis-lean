@@ -1,12 +1,53 @@
-import Mathlib
-import ReciprocityTheory.ClassFieldTheory.LocalClassField.ExistsIntEKMulVbar
-import ReciprocityTheory.ClassFieldTheory.LocalClassField.GalBasic
-import ReciprocityTheory.ClassFieldTheory.LocalClassField.ExistsDvdQKPowSubOne
-import ReciprocityTheory.ClassFieldTheory.LocalClassField.InflationH2InjectiveOfSameRamification
-import ReciprocityTheory.ClassFieldTheory.LocalClassField.BrBound
-import ReciprocityTheory.ClassFieldTheory.LocalClassField.InvRes
+module
+
+public import ReciprocityTheory.ClassFieldTheory.LocalClassField.ExistsIntEKMulVbar
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ClassFieldTheory.LocalClassField.BrBound
 import ReciprocityTheory.ClassFieldTheory.LocalClassField.EqZeroOfMemBrKerOfCoprime
-import ReciprocityTheory.ClassFieldTheory.LocalClassField.FinCoh
+import ReciprocityTheory.ClassFieldTheory.LocalClassField.GalBasic
+public import ReciprocityTheory.ClassFieldTheory.LocalClassField.InflationH2InjectiveOfSameRamification
+public import ReciprocityTheory.ClassFieldTheory.LocalClassField.InvRes
+
+@[expose] public section
 
 namespace ReciprocityTheory.DiscreteGroups.LocalClassField
 
@@ -56,9 +97,9 @@ theorem inflation_unramified_closure_h2_bijective (hK : FiniteDimensional ℚ_[p
   rw [BrKer_eq_BrLK_Kn hK hL h] at hx
   exact BrLK_mono (Kn_le_Kur (degLK_pos hL)) hx
 
+
 open Classical in
 variable (p K) in
-
 noncomputable def invBr : Br p K →+ QZ :=
   if h : ∃ f : Br p K →+ QZ, ∀ x, f ((layerInf p K (MaximalUnramifiedExtension p K)).hom.H 2 x) = invUr p K x then h.choose else 0
 
@@ -70,7 +111,7 @@ theorem invBr_layerInf (hK : FiniteDimensional ℚ_[p] K) (x : (urT p K).H 2) :
     show invUr p K (e.symm (e x)) = _
     rw [LinearEquiv.symm_apply_apply]
   unfold invBr
-  rw [dif_pos h]
+  rw [dite_eq_left h]
   exact h.choose_spec x
 
 theorem invBr_bijective (hK : FiniteDimensional ℚ_[p] K) : Bijective (invBr p K) := by
@@ -90,8 +131,5 @@ theorem invBr_res (hK : FiniteDimensional ℚ_[p] K) (hL : FiniteDimensional ℚ
   obtain ⟨y, hy, hinv⟩ := exists_res_ur hK hL h z
   rw [hy, invBr_layerInf hL, invBr_layerInf hK, hinv]
 
-variable (p K) in
-
-noncomputable def h2EquivBrauer : H2 (kbarRep p K) ≃+ Br p K := (lowEquiv2 (kbarT p K)).symm.toAddEquiv
 
 end ReciprocityTheory.DiscreteGroups.LocalClassField

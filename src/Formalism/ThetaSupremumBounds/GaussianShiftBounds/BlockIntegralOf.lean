@@ -1,6 +1,53 @@
-import Mathlib
-import Formalism.LogFactorialBounds.LogFactorialSandwich
-import Formalism.ThetaSupremumBounds.StatementA
+module
+
+public import Formalism.ThetaSupremumBounds.StatementA
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Finset MeasureTheory
 open scoped ComplexConjugate Real
@@ -64,7 +111,7 @@ theorem placeBound (r : ℕ) (ν sv : Fin r → ℝ) (Q : ℝ) (hν : ∀ i, 0 �
   have hT : ∏ i, (sv i ^ ν i * Real.exp (-(a * sv i ^ 2) / 2)) ≤
       Real.exp ((∑ i, ph (ν i)) / 2) * Real.exp (-(N * Real.log a) / 2) := by
     calc _ ≤ ∏ i, (Real.exp (ph (ν i) / 2) * Real.exp (-(ν i * Real.log a) / 2)) :=
-          Finset.prod_le_prod (fun i _ => mul_nonneg (Real.rpow_nonneg (hs i) _) (Real.exp_pos _).le)
+          Finset.prod_le_prod₀ (fun i _ => mul_nonneg (Real.rpow_nonneg (hs i) _) (Real.exp_pos _).le)
             (fun i _ => hterm i)
       _ = _ := by
           rw [Finset.prod_mul_distrib, ← Real.exp_sum, ← Real.exp_sum, Finset.sum_div, hN,
@@ -140,7 +187,7 @@ theorem blockIntegral_of (hG : GaussCoord) : BlockIntegral := by
           rw [Finset.prod_mul_distrib, ← he]; ring
       _ ≤ S * ∏ τ, (Real.exp (1 / 2) * Real.exp ((∑ i, ph (ν τ i)) / 2) *
             Real.exp (-(1 / ((∑ i, ν τ i) + 1)) * (nsq fun x => u (τ, x)) / 2)) :=
-          mul_le_mul_of_nonneg_left (Finset.prod_le_prod (fun τ _ => mul_nonneg
+          mul_le_mul_of_nonneg_left (Finset.prod_le_prod₀ (fun τ _ => mul_nonneg
             (Finset.prod_nonneg fun i _ => Real.rpow_nonneg (hs τ _ i) _) (Real.exp_pos _).le)
             fun τ _ => hplace τ) hS
       _ = _ := by rw [hexp, Finset.prod_mul_distrib, hC, mul_assoc]

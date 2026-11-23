@@ -1,6 +1,49 @@
-import Development.WeilBound.ThetaLifts.EigenvalueEndgame.EigenKilling.ConeIntegralFactorisation
-import Development.WeilBound.ThetaLifts.EigenvalueEndgame.TowerCodimensionTwo
-import Development.WeilBound.ThetaLifts.ConeHypotheses.PureEqPureA
+module
+
+public import Development.WeilBound.ThetaLifts.EigenvalueEndgame.EigenKilling.ConeIntegralFactorisation
+public import Development.AbelianVarietyTheory.Definitions.Divisors.MatchingOfParts
+public import Development.WeilBound.ThetaLifts.ConeHypotheses.PureEqPureA
+public import Development.WeilBound.ThetaLifts.EigenvalueEndgame.TowerCodimensionTwo
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -72,6 +115,14 @@ theorem small (hS : SmallAny) (hM : SoMove) (hZ : EvZero) (hP : TriplePair) (hT 
 theorem alphaZero_of (hI : ThKEnd.Iwa) (hC : CTBasic) (hA : IAut) (hU : UnipEx) (hL : Low) (hPx : PairEx) (hP : TriplePair)
     (hZ : EvZero) (hAn : GenAniso) (hS : SmallAny) (hM : SoMove) (hSt : PolStab) (h0 : IZero) : AlphaZero := by
   intro F E _ _ _ _ _ σ B a a' G X om om' hT hp0 hq d₁ W₁ H' i₀ i₁ r s hH _ f hf fa fb hs
+  have polData_le : ∀ {n d : ℕ} {Y : Spc F E n} {W : Spc F E d} {M : Model σ Y W},
+      M.IsGood B.ψ → PolData B M ≤ schA F _ := by
+    intro n d Y W M hM
+    refine Submodule.span_le.2 ?_
+    rintro _ ⟨f, -, φ, h1, h2, rfl⟩
+    obtain ⟨g, hg, e⟩ := pure_eq_pureA hM φ h1 h2
+    rw [e]
+    exact pureA_mem f hg
   obtain ⟨hp, hp', -⟩ := hP F E σ B a a' G X om om' hT
   obtain ⟨h1, h2, hW₁⟩ := (hL F E σ B _ _ G.W W₁ H' i₀ i₁ _ _ hT.base hH).2 hT.geo.hW
   have haB := hT.geo.aBig
@@ -101,6 +152,14 @@ theorem alphaZero_of (hI : ThKEnd.Iwa) (hC : CTBasic) (hA : IAut) (hU : UnipEx) 
 theorem betaZero_of (hI : ThKEnd.Iwa) (hC : CTBasic) (hA : IAut) (hU : UnipEx) (hL : Low) (hPx : PairEx) (hP : TriplePair)
     (hZ : EvZero) (hAn : GenAniso) (hB : BigAny) (h0 : IZero) : BetaZero := by
   intro F E _ _ _ _ _ σ B a a' G X om om' hT hq0 hp1 d₁ W₁ H' i₀ i₁ hH f hf fa fb hs
+  have polData_le : ∀ {n d : ℕ} {Y : Spc F E n} {W : Spc F E d} {M : Model σ Y W},
+      M.IsGood B.ψ → PolData B M ≤ schA F _ := by
+    intro n d Y W M hM
+    refine Submodule.span_le.2 ?_
+    rintro _ ⟨f, -, φ, h1, h2, rfl⟩
+    obtain ⟨g, hg, e⟩ := pure_eq_pureA hM φ h1 h2
+    rw [e]
+    exact pureA_mem f hg
   obtain ⟨hp, hp', hw⟩ := hP F E σ B a a' G X om om' hT
   obtain ⟨h1, h2, hW₁⟩ := (hL F E σ B _ _ G.W W₁ H' i₀ i₁ _ _ hT.base hH).2 hT.geo.hW
   have hlt := hT.geo.lt
@@ -179,6 +238,15 @@ theorem polStab_of (hR : KReal) (hF : KFin) (hM : MatchEx) (hS : MatchStab) : Po
   obtain ⟨R, hR⟩ := hR F E σ B a a' G X om om' hT
   obtain ⟨Rf, hF⟩ := hF F E σ B a a' G X om om' hT
   have hm : IsMatched B G X om om' R Rf := ⟨hT, hR, hF⟩
+  have polMatch_mem : ∀ {Φ Φ'}, PolMatch B G X R Rf Φ Φ' → Φ ∈ PolData B G.M ∧ Φ' ∈ PolData B G.M' := by
+    intro Φ Φ' h
+    obtain ⟨T, -, m, m', f, φ, f', φ', h1, h2, rfl, rfl, -⟩ := h
+    have cof : ∀ {P : Pl F → Prop}, (∀ v ∉ T, P v) → ∀ᶠ v in cofinite, P v := fun {P} hP =>
+      Filter.eventually_cofinite.2 (T.finite_toSet.subset fun v hv => by
+        by_contra h'
+        exact hv (hP v h'))
+    exact ⟨Submodule.sum_mem _ fun i _ => Submodule.subset_span ⟨f i, (h1 i).1, φ i, (h1 i).2.1, cof (h1 i).2.2, rfl⟩,
+      Submodule.sum_mem _ fun i _ => Submodule.subset_span ⟨f' i, (h2 i).1, φ' i, (h2 i).2.1, cof (h2 i).2.2, rfl⟩⟩
   obtain ⟨m1, m2, -⟩ := hM F E σ B a a' G X om om' R Rf hm
   refine ⟨fun Φ hΦ => ?_, fun Φ' hΦ' => ?_⟩
   · obtain ⟨Φ', h1, h2⟩ := m1 Φ hΦ

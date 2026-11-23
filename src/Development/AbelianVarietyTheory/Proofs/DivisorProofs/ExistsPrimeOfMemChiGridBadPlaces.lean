@@ -1,12 +1,68 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.BasePlaceNotMemChiGridBadPlaces
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.WeilRepresentationUnitaryPair
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsHeckeCharTrivOnRealSubfieldInfinityType
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HostCmEmbeddingProperties
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsCmAdeleUnitCharacterReadingHeckeChar
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.SupportedSubgroupSplitCommutePrimeIdempotents
-import Development.AutomorphicArithmetic.CyclotomicBounds.RootsOfUnity.ResidueEisenstein
-import Development.AutomorphicArithmetic.CyclotomicBounds.RootsOfUnity.WAddOneLtOfDvd
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.BasePlaceNotMemChiGridBadPlaces
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsTameLocOfResidue
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ContinuousInfIdele
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ContinuousOfTameLoc
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ContinuousOfValuedEq
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsCmAdeleUnitCharacterReadingHeckeChar
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsHeckeCharTrivOnRealSubfieldInfinityType
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsUnitOfRoot
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HostCmEmbeddingProperties
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.UnderEqIffConjPl
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.UnitOpenAndCongrOpen
+public import Development.AutomorphicArithmetic.CyclotomicBounds.RootsOfUnity.ResidueEisenstein
+public import Development.AutomorphicArithmetic.CyclotomicBounds.RootsOfUnity.WAddOneLtOfDvd
+import Formalism.LocalRingCardinality.RankBoundMonotoneInDimension
+import Formalism.LocalRingCardinality.SpanPowerMembership.LocAtA
+import Formalism.LocalToGlobal.Columns.AdelicLemmas
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.GroupTheory.FiniteAbelian.Duality
+import Mathlib.LinearAlgebra.FreeModule.IdealQuotient
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.Automorphisms.PlaceA
+import Std.Tactic.BVDecide.Normalize.Prop
+import ReciprocityTheory.NeutralLocalFields.LocalFieldComparison.HCFFromRecipA
+
+@[expose] public section
 
 noncomputable section
 
@@ -41,8 +97,8 @@ theorem continuous_of_level {v : HeightOneSpectrum (𝓞 L)} {θ : (v.adicComple
 theorem localIdele_inj (v : HeightOneSpectrum (𝓞 L)) : Function.Injective (localIdele L v) := fun x y h => by
   rw [← finEv_local_self v x, h, finEv_local_self]
 
-open Classical in
 
+open Classical in
 theorem exists_hecke_level {F : Type} [Field F] [NumberField F] [Algebra F L] {c : L ≃ₐ[F] L} {I : Type} [Fintype I]
     {φ : I → L →+* ℂ} (h : CMData F c φ) (e : I → ℤ) (S : Finset (HeightOneSpectrum (𝓞 L)))
     (θ : ∀ v : HeightOneSpectrum (𝓞 L), (v.adicCompletion L)ˣ →* ℂˣ) (hθc : ∀ v ∈ S, Continuous (θ v))
@@ -137,8 +193,8 @@ theorem lt_one_iff_le (t : v.adicCompletion L) : Valued.v t < 1 ↔ Valued.v t �
   rw [← WithZero.lt_mul_exp_iff_le WithZero.exp_ne_zero, ← WithZero.exp_add]
   simp
 
-open Classical in
 
+open Classical in
 def resInt (t : v.adicCompletion L) : 𝓞 L ⧸ v.asIdeal :=
   if h : Valued.v t ≤ 1 then Ideal.Quotient.mk v.asIdeal (ReciprocityTheory.Aut.adic_exists_approx v t h).choose else 0
 
@@ -152,7 +208,7 @@ theorem resInt_eq {t : v.adicCompletion L} {a : 𝓞 L} (ha : Valued.v (t - alge
     rw [← sub_add_cancel t (algebraMap (𝓞 L) (v.adicCompletion L) a)]
     exact Valuation.map_add_le _ ha.le (val_int_le v a)
   unfold resInt
-  rw [dif_pos ht]
+  rw [dite_eq_left ht]
   exact tame_mk_eq v (ReciprocityTheory.Aut.adic_exists_approx v t ht).choose_spec ha
 
 def oneUnits : Subgroup (v.adicCompletion L)ˣ where
@@ -191,10 +247,10 @@ def logOne : oneUnits v →* Multiplicative (𝓞 L ⧸ v.asIdeal) where
   map_mul' x y := by
     obtain ⟨a, ha⟩ := ReciprocityTheory.Aut.adic_exists_approx v _ (val_div_le v x.2)
     obtain ⟨b, hb⟩ := ReciprocityTheory.Aut.adic_exists_approx v _ (val_div_le v y.2)
-    rw [resInt_eq v ha, resInt_eq v hb, ← ofAdd_add, ← map_add]
+    rw [resInt_eq v ha, resInt_eq v hb, ← ofAdd_add, ← map_add (f := _)]
     congr 1
     refine resInt_eq v ?_
-    rw [Subgroup.coe_mul, Units.val_mul, map_add]
+    rw [Subgroup.coe_mul, Units.val_mul, map_add (f := _)]
     have h0 : unifC v ≠ 0 := Units.ne_zero _
     have hx : Valued.v (((x : (v.adicCompletion L)ˣ) : v.adicCompletion L) - 1) < 1 := x.2
     have hy := val_div_le v y.2
@@ -290,7 +346,7 @@ theorem exists_wild {p : ℕ} (hp : p.Prime) (hv : (p : 𝓞 L) ∈ v.asIdeal) :
       exact zero_ne_one this
     have ek : ((atFin v (Units.mk0 _ hk0) : (v.adicCompletion L)ˣ) : v.adicCompletion L) = 1 + unifC v := by
       show algebraMap L (v.adicCompletion L) (1 + _) = _
-      rw [map_add, map_one]
+      rw [map_add (f := _), map_one]
       rfl
     have hx' : atFin v (Units.mk0 _ hk0) ∈ oneUnits v := by
       show Valued.v (((atFin v (Units.mk0 _ hk0) : (v.adicCompletion L)ˣ) : v.adicCompletion L) - 1) < 1

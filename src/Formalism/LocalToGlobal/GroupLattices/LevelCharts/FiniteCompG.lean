@@ -1,5 +1,47 @@
-import Formalism.LocalToGlobal.GroupLattices.LevelGatherings.IdemMulCompl
-import Formalism.LocalToGlobal.GroupLattices.LevelGatherings.FiniteClassSetOfLe
+module
+
+public import Formalism.LocalToGlobal.GroupLattices.LevelGatherings.IdemMulCompl
+public import Formalism.LocalToGlobal.GroupLattices.LevelGatherings.FiniteClassSetOfLe
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -54,7 +96,7 @@ theorem trivG_rel (p : ℕ) (y : UPts σE J (FiniteAdeleRing (𝓞 F) F)) :
 theorem mk_trivG (p : ℕ) (y : UPts σE J (FiniteAdeleRing (𝓞 F) F)) :
     (Quotient.mk'' (trivG σE J p y) : compG σE J Uloc p) = Quotient.mk'' y := by
   symm
-  refine (DoubleCoset.eq _ _ y (trivG σE J p y)).2 ⟨1, Subgroup.one_mem _, y⁻¹ * trivG σE J p y, ?_, ?_⟩
+  refine (@DoubleCoset.eq _ _ _ _ y (trivG σE J p y)).2 ⟨1, Subgroup.one_mem _, y⁻¹ * trivG σE J p y, ?_, ?_⟩
   · exact Subgroup.mem_subgroupOf.2 (trivG_rel σE J Uloc p y)
   · rw [one_mul, mul_inv_cancel_left]
 

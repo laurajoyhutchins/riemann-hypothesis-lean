@@ -1,20 +1,47 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.NotDvdCardStabFrm
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.StatementWithTransposeOfBranching
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.AbsNormEqOfSplitFactor
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.HeckeUnit
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ValuationFinOrderApply
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ValLocCharUnit
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.UnfoldingIsGoodCyclotomicInvariantReferenceLatti
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.VolqExistsPow
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.IntOfHomAt
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ValuationLeOneOfPow
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.SubHalfRankInt
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.NuRowSuccEqWt
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsStdSplit
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.SmulMemLocPOfVal
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.JetLossOfFamilyFacts
-import Development.AbelianVarietyTheory.BlockTheory.ThetaLiftGeometry.KernelAwayPrimes
+module
+
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ValuationLeOneOfMemZmu
+public import Development.AbelianVarietyTheory.BlockTheory.ThetaLiftGeometry.KernelAwayPrimes
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.NuRowSuccEqWt
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.SubHalfRankInt
+import Formalism.LocalRingCardinality.SpanPowerMembership.ExampleLayerExistsGenerators
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -67,11 +94,12 @@ theorem sum_nuW_nonneg {X : Fields} {Pr : Primes X} {R : Ranks} (W : Wts X Pr.Wo
   rw [← h3, ← h1]
   omega
 
-theorem recWts_ok {D : D7} (EX : ErrX D) : (recWts EX).Ok where
-  row_ok τ := ⟨D.hc τ, rfl⟩
-  hc_row := recWts_row EX
-  u_first u u' τ h := (D.hcW_first u τ h).trans (D.hcW_first u' τ h).symm
-  u_last u u' τ h := (D.hcW_last u τ (by omega)).trans (D.hcW_last u' τ (by omega)).symm
+theorem recWts_ok {D : D7} (EX : ErrX D) : (recWts EX).Ok := by
+  exact
+    { row_ok τ := ⟨D.hc τ, rfl⟩
+      hc_row := recWts_row EX
+      u_first u u' τ h := (D.hcW_first u τ h).trans (D.hcW_first u' τ h).symm
+      u_last u u' τ h := (D.hcW_last u τ (by omega)).trans (D.hcW_last u' τ (by omega)).symm }
 
 theorem emb_star_piG {D : D7} (EX : ErrX D) (i : Fin 2) (τ : D.what₂.Tau) :
     (recFields D).emb τ (@star _ (recFields D).starE.toStar (((recPrimes EX).piG i : 𝓞 D.host.E) : D.host.E)) = tauPib EX i τ := by

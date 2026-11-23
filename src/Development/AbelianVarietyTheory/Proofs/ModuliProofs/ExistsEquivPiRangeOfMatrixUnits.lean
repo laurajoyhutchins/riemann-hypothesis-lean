@@ -1,10 +1,59 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.UnimodularSymplecticCoordinatesAndLatticeRank
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsSiegelForm
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.UniformisationConclusion
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.HeckeKer
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsHolPeriods
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.UnifUniqSt
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.Clauses
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ThetaUnifAV
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsSiegelForm
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.UnimodularSymplecticCoordinatesAndLatticeRank
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor
 open scoped CategoryTheory.Obj TensorProduct
@@ -20,6 +69,7 @@ theorem exists_equiv_pi_range_of_matrixUnits {R M n : Type} [CommRing R] [AddCom
   have hmem : ∀ u x, p u x ∈ LinearMap.range P := fun u x => by
     refine ⟨p u x, ?_⟩
     conv_rhs => rw [← hs x]
+
     simp [map_sum, hpq]
   let f : M →ₗ[R] (n → LinearMap.range P) :=
     LinearMap.pi fun u => (p u).codRestrict _ (hmem u)
@@ -33,6 +83,7 @@ theorem exists_equiv_pi_range_of_matrixUnits {R M n : Type} [CommRing R] [AddCom
       apply Subtype.ext
       rw [hf]
       obtain ⟨z, hz⟩ := (y u).2
+
       simp only [map_sum, hpq, Finset.sum_ite_eq, Finset.mem_univ, if_true]
       rw [← hz, hP]
   exact ⟨LinearEquiv.ofBijective f hb, hf, fun x => (hs x).symm⟩
@@ -57,6 +108,7 @@ theorem matrixUnits_apply {La : Type} [AddCommGroup La]
         refine Finset.sum_eq_zero fun u _ => if_neg ?_
         rintro ⟨rfl, rfl⟩; exact hij rfl
     simp only [← Module.End.mul_apply, ← map_mul]
+
     rw [← LinearMap.sum_apply, ← map_sum, this]; simp
   · rw [← Module.End.mul_apply, ← map_mul]; simp
 
@@ -103,6 +155,7 @@ theorem exists_form_range_matrixUnit {La : Type} [AddCommGroup La] (G : Matrix (
   have hE : ∀ x y, E x y = EF x (r (G⁻¹ * Matrix.single 0 0 1) y) := fun _ _ => rfl
   have hsum : ∀ x y, EF x y = ∑ u, ∑ v, G u v * E (φ x u) (φ y v) := fun x y => by
     conv_lhs => rw [hφ' x, hφ' y]
+
     simp only [map_sum, LinearMap.sum_apply, form_matrixUnits_eq G EF r hdet hadj, hE]
     rw [Finset.sum_comm]
   have hfix : ∀ x : LinearMap.range (r (Matrix.single 0 0 1)), r (Matrix.single 0 0 1) x = x := by
@@ -179,6 +232,7 @@ theorem polarised_lattice_eighth_power :
     (fun z => by
       have : ∑ u, F (Matrix.single u 0 1) ∘ₗ F (Matrix.single 0 u 1) = LinearMap.id := by
         refine LinearMap.ext_on_range hspanC fun x => ?_
+
         simp only [LinearMap.sum_apply, LinearMap.comp_apply, hF, ← map_sum, h2, LinearMap.id_apply]
       simpa using LinearMap.congr_fun this z)
     (fun z => by
@@ -266,6 +320,7 @@ theorem polarised_lattice_eighth_power :
     change G u v * E (φ x u) (φ y v) = G u v * omegaStd (bas.symm (φ x u)) (bas.symm (φ y v))
     rw [← hbas, LinearEquiv.apply_symm_apply, LinearEquiv.apply_symm_apply]
   · change bas.symm (φ (r a x) u) = ∑ v, a u v • bas.symm (φ x v)
+
     simp only [← map_smul, ← map_sum]
     refine congrArg bas.symm (Subtype.ext ?_)
     have : Matrix.single (0 : Fin 8) u (1 : ℤ) * a = ∑ v, a u v • Matrix.single (0 : Fin 8) v (1 : ℤ) := by
@@ -273,8 +328,9 @@ theorem polarised_lattice_eighth_power :
       by_cases hi : i = 0
       · subst hi; simp [Matrix.sum_apply, Matrix.single_apply]
       · simp [Matrix.sum_apply, Matrix.single_apply, hi, Ne.symm hi]
+
     rw [hφ, ← Module.End.mul_apply, ← map_mul, this, map_sum, LinearMap.sum_apply,
-      Submodule.coe_sum]
+    Submodule.coe_sum]
     refine Finset.sum_congr rfl fun v _ => ?_
     rw [map_zsmul, LinearMap.smul_apply, Submodule.coe_smul, hφ]
 

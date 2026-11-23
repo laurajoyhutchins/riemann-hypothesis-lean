@@ -1,30 +1,68 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.CInfGood
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.BcMapBcVec
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.FlatChernWeightEqOfIndependence
-import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.OnbMat
-import Development.AutomorphicSpectrum.Definitions.MetricPeriods.RegularFormsIsBundleProjectiveCover
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.TwistedDualRegularFormsFiniteCover
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.CuspOnto
-import Development.AutomorphicSpectrum.Definitions.MetricPeriods.AdelicGLLastRowAndDetModuleUnderLeftMultiplicati
-import Development.AutomorphicSpectrum.Definitions.DivisibilityTowers.GoodOrigin
-import Development.AutomorphicSpectrum.Statements.GeometryStatements.LamLevel
-import Development.AutomorphicSpectrum.Statements.GeometryStatements.ThmFlatA
-import Development.AutomorphicSpectrum.Statements.GeometryStatements.FlatDegree
-import Development.AutomorphicSpectrum.Statements.MetricStatements.SmallOnTower
-import Development.AutomorphicSpectrum.Statements.MetricStatements.RankBound
-import Development.AbelianVarietyTheory.Definitions.Foundations.IsProbabilityMeasureMuPart
-import Formalism.LocalToGlobal.ProjectiveLattices.CompHt
-import Formalism.LocalToGlobal.IndefiniteForms.IndefiniteTree.RealCubicMeans.LogMeanShares.LogMeanStatements.HSClaim
-import Formalism.LocalToGlobal.IndefiniteForms.IndefiniteTree.RealCubicMeans.LogMeanShares.LogMeanStatements.ShareLow
-import Formalism.LocalToGlobal.IndefiniteForms.IndefiniteTree.RealCubicMeans.LogMeanShares.LogMeanStatements.LineDegreeClosedFormula
-import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.SpecFirstDetFormNeZero
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.SectionsGenericIndicators
-import Development.AbelianVarietyTheory.Proofs.GenericRegularity.ExistsBijectiveKappa
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsEquivComp
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.GeometricLiftsOfFrames
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.CoefficientFieldAlgClosedInFunctionFieldsOfPerio
-import Formalism.LocalToGlobal.ProjectiveLattices.TieGenDense
+module
+
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.CInfGood
+public import Formalism.LocalToGlobal.ProjectiveLattices.CompHt
+public import Development.AbelianVarietyTheory.BlockTheory.ExistenceTori.DeltaDatumCombinedCoefficient
+public import Development.AbelianVarietyTheory.Proofs.GenericRegularity.CountableFractionRingMvPolynomial
+public import Development.AbelianVarietyTheory.Proofs.GenericRegularity.EvCEqZeroIffRdUEqZero
+public import Development.AbelianVarietyTheory.Proofs.GenericRegularity.ExistsBijectiveKappa
+import Development.AbelianVarietyTheory.Proofs.GenericRegularity.KapFgTrdeg
+import Development.AbelianVarietyTheory.Proofs.GenericRegularity.MemRangeOfIsAlgebraicRatFun
+import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.IsDomainAndIsIntegrallyClosedAtPrimeOfSmoothOfCo
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsEquivComp
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsRingHomComplexCompEqOfCountable
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.CoefficientFieldAlgClosedInFunctionFieldsOfPerio
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.GeometricLiftsOfFrames
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.SectionsGenericIndicators
+import Formalism.LocalToGlobal.ProjectiveLattices.CompFin
+import Formalism.LocalToGlobal.ProjectiveLattices.FreeBridge
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Algebraic.Cardinality
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.GGConn
+public import Development.AbelianVarietyTheory.Definitions.Foundations.IsProbabilityMeasureMuPart
+public import Development.AbelianVarietyTheory.Definitions.ShimuraVarieties.IsOpenOfMemIrreducibleComponentsOfFinite
+import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.DefiniteFormStabilizerFiniteAwayFromP
+
+@[expose] public section
+
 open NumberField IsDedekindDomain MeasureTheory Filter Topology
 open Formalism.L2.Pj ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Geo ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.FD ReciprocityTheory.ChartRestriction.G.AR.Up ReciprocityTheory.ChartRestriction.G.AR.Inst Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.L2.Theta
 open GlobalTheory.CompanionTheory.Ar GlobalTheory.CompanionTheory.Ar.Rec
@@ -83,7 +121,7 @@ theorem aeval_mem_weight_zero_sections {f : Rul Xo c} (hf : f ∈ Formalism.L2.P
     Polynomial.aeval f P ∈ Formalism.L2.Pj.sec Xo c 0 0 := by
   induction P using Polynomial.induction_on' with
   | add p q hp hq =>
-    rw [map_add]
+    rw [map_add (f := _)]
     exact add_mem hp hq
   | monomial n a =>
     rw [Polynomial.aeval_monomial, ← Algebra.smul_def]
@@ -92,7 +130,7 @@ theorem aeval_mem_weight_zero_sections {f : Rul Xo c} (hf : f ∈ Formalism.L2.P
 theorem rdU_apply {σ : c.F →+* ℂ} (V : Unf Xo c σ r) (f : Rul Xo c) (k : V.Comp) (x : (V.X k).dom) :
     rdU V f k x = toC (evR Xo c f (V.un k x)) := by
   simp only [rdU, LinearMap.coe_mk, AddHom.coe_mk]
-  rw [dif_pos x.2]
+  rw [dite_eq_left x.2]
 
 theorem exists_two_emb {K Ω : Type} [Field K] [CharZero K] [Countable K] [Field Ω] [Countable Ω] [Algebra K Ω]
     (σ : K →+* ℂ) (a : Ω) (ha : IsAlgebraic K a) (hne : a ∉ (algebraMap K Ω).range) :
@@ -150,7 +188,7 @@ theorem basePt_genFr (h : GenFrEx Xo c) (Z : Comp Xo c) :
     show Spec.map _ = Spec.map _ ≫ Spec.map _
     rw [← Spec.map_comp, ← CommRingCat.ofHom_comp]
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem exists_fn (h : GenFrEx Xo c) (Z : Comp Xo c) (r₀ : kap Z) (hr : IsIntegral c.F r₀) :
     ∃ f ∈ Formalism.L2.Pj.sec Xo c 0 0, evC h Z f = algebraMap (kap Z) (Om Z) r₀ := by
@@ -198,7 +236,7 @@ theorem exists_fn (h : GenFrEx Xo c) (Z : Comp Xo c) (r₀ : kap Z) (hr : IsInte
 
 theorem fnAlgClosed_of_card {σ : c.F →+* ℂ} (V : Unf Xo c σ r) (hσ : GoodEmb c σ) (hV : IsUnf V) (h : GenFrEx Xo c)
     (hone : ∀ k x, FromTest (K := c.F) (fun S _ _ => FrPt Xo c S) (fun φ y z => FrMap φ y z) (V.un k x))
-    (hgen : GenFromTest Xo c h) (hcard : Nat.card (Comp Xo c) = Fintype.card V.Comp) : FnAlgClosed Xo c := by
+    (hgen : GenFromTest Xo c h) (hcard : Nat.card (Comp Xo c) = Fintype.card V.Comp) : FnAlgClosed (Xo := Xo) (c := c) := by
   classical
   have hlies : ∀ k : V.Comp, ∃ Z : Comp Xo c, ∀ x : (V.X k).dom, GlobalTheory.AllWt.LiesOn Z (V.un k x) :=
     GlobalTheory.UnifComp.exists_liesOn (Formalism.L2.PjFree.Unf.ofPj V) hV
@@ -221,7 +259,7 @@ theorem fnAlgClosed_of_card {σ : c.F →+* ℂ} (V : Unf Xo c σ r) (hσ : Good
   obtain ⟨φ₁, φ₂, hφ⟩ : ∃ φ₁ φ₂ : Om Z →ₐ[c.F] CAt σ, φ₁ a ≠ φ₂ a := exists_two_emb σ a ha hne
   obtain ⟨r₀, rfl⟩ := GlobalTheory.GeomIrr.mem_range_of_isAlgebraic_ratFun a (ha.tower_top (kap Z))
   have hr : IsIntegral c.F r₀ :=
-    (isIntegral_algebraMap_iff (algebraMap (kap Z) (Om Z)).injective).1 ha.isIntegral
+    (isIntegral_algebraMap_iff ).1 ha.isIntegral
   obtain ⟨f, hf, hev⟩ := exists_fn h Z r₀ hr
   have hread := (GlobalTheory.GenericReading.embedding_read_at_frame E H Dw l Xo c σ r V hσ hV h Z).2
   have key : ∀ φ : Om Z →ₐ[c.F] CAt σ, ∃ (k : V.Comp) (x : (V.X k).dom), q k = Z ∧
@@ -276,11 +314,11 @@ theorem fnAlgClosed_of_card {σ : c.F →+* ℂ} (V : Unf Xo c σ r) (hσ : Good
 
 end CompOver
 
-open CompOver in
 
+open CompOver in
 theorem comp_over : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (H : ReciprocityTheory.ChartRestriction.G.Geo.Tor.Host E) (Dw : Datum H) (l : Level H) (Xo : Moduli Dw l) (c : Coeff l) (r : ℕ) (U : ∀ σ : c.F →+* ℂ, Unf Xo c σ r) (h : GenFrEx Xo c) (e : Comp Xo c → Rul Xo c), CompLaws U h e → ∀ σ, GoodEmb c σ → ∃ κ : Comp Xo c ≃ (U σ).Comp, (∀ Z k, Over (U σ) (e Z) k ↔ k = κ Z) ∧ ∀ Z k, k ≠ κ Z → ∀ y ∈ ((U σ).X k).dom, rdU (U σ) (e Z) k y = 0 ∧ ∀ a, ∀ f ∈ cuspOn U h a Z, rdU (U σ) f k y = 0 := by
   intro E _ _ _ H Dw l Xo c r U h e hL σ hσ
-  have hF : FnAlgClosed Xo c :=
+  have hF : FnAlgClosed (Xo := Xo) (c := c) :=
     fnAlgClosed_of_card (U c.F.val.toRingHom) rfl (hL.unf _ rfl) h (hL.unTest _ rfl) hL.genT hL.comps
   have hU := hL.unf σ hσ
   obtain ⟨κ, hb, ht, -⟩ := GlobalTheory.CompBij.exists_bijection (U σ) hσ hU hF h

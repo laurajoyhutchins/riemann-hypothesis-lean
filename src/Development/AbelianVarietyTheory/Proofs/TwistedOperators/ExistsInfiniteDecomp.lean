@@ -1,9 +1,59 @@
-import Mathlib
-import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.SelfReciprocalLocalField
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.QuadraticClassFieldTheory
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.EtaProdEqOfEverywhereNormDiv
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsUniqueIsConjAt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.HDiscAA
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.QuadraticClassFieldTheory
+public import Development.AbelianVarietyTheory.Definitions.Foundations.NotIsSplitOfIsInertAt
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ExistsSupersetMemSUnits
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.UnitNormFormAtOddPlace
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.EtaProdEqOfEverywhereNormDiv
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsBasisOfIsQuadraticExtension
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsEverywhereNormDivOfEtaProdEqOne
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IndexTwoOfFiniteReal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.NumberField.Completion.LiesOverInstances
+public import Mathlib.NumberTheory.NumberField.Completion.Ramification
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.Valuation.LocalSubring
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.HDiscAA
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -73,8 +123,8 @@ theorem exists_finite_decomp :
     exact dif_pos w.2
   · simpa using GlobalTheory.LFun.complMap_mem w.2 ha
 
-open scoped NumberField.LiesOver in
 
+open scoped NumberField.LiesOver in
 theorem exists_infinite_decomp :
     ∃ ψ : ∀ (v : InfinitePlace F) (w : {w : InfinitePlace K // w.comap (algebraMap F K) = v}),
       v.Completion ⊗[F] K →+* w.1.Completion,
@@ -85,10 +135,7 @@ theorem exists_infinite_decomp :
       w.1.LiesOver v := fun v w => ⟨congrArg Subtype.val w.2⟩
   haveI : ∀ w : InfinitePlace K, IsScalarTower F K w.Completion := fun w =>
     .of_algebraMap_eq fun x => by
-      apply InfinitePlace.Completion.ext
-      rw [InfinitePlace.Completion.algebraMap_toCompletion, InfinitePlace.Completion.algebraMap_toCompletion,
-        UniformSpace.Completion.algebraMap_def, UniformSpace.Completion.algebraMap_def]
-      rfl
+      simp [AbsoluteValue.Completion.algebraMap_def, WithAbs.algebraMap_right_apply]
   let φ : ∀ (v : InfinitePlace F) (w : {w : InfinitePlace K // w.comap (algebraMap F K) = v}),
       v.Completion ⊗[F] K →ₐ[v.Completion] w.1.Completion := fun v w =>
     Algebra.TensorProduct.lift (Algebra.ofId _ _) (IsScalarTower.toAlgHom F K _) fun _ _ => Commute.all _ _
@@ -135,8 +182,8 @@ section Local
 
 variable {F K}
 
-omit [NumberField F] [NumberField K] in
 
+omit [NumberField F] [NumberField K] in
 theorem form_iff {A ι : Type} [CommRing A] [Algebra F A] {B : ι → Type} [∀ i, CommRing (B i)]
     [∀ i, Algebra K (B i)] (ψ : ∀ i, A ⊗[F] K →+* B i) (h1 : ∀ i x, ψ i (1 ⊗ₜ x) = algebraMap K _ x)
     (hb : Function.Bijective fun y i => ψ i y) (d : K) (x : A ⊗[F] K) :

@@ -1,14 +1,68 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.ArchimedeanThetaValues.ModelsAt
-import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.ArcDatumSectionValueCoeffEqFourierJacobi
-import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.EqZeroOfSumSq
-import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.ArchBoundFlow
-import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.LetterSquaredLengthLeFlowHeightStatement
-import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.CmMetrisedLineLengthsEqSectionLieNormsStatement
-import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.NormalisedTrivialisationNormOneComplexReadingStatement
-import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.IsTauCanonicalIffOfIsPullDegTauBimultStatement
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.QuadraticCoefficientForms
-import Formalism.LocalToGlobal.CMDeterminantIdeals.CMIdealValuations.AbsNormSpanGalois
+module
+
+public import Development.AbelianVarietyTheory.Definitions.ArchimedeanThetaValues.ModelsAt
+public import Formalism.LocalToGlobal.ProjectiveLattices.NormsFree
+public import Development.AbelianVarietyTheory.Counterexamples.ModuliSurvey.MemOfPowEqInt
+public import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.ArcDatumSectionValueCoeffEqFourierJacobi
+public import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.ArchBoundFlow
+public import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.CmMetrisedLineLengthsEqSectionLieNormsStatement
+import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.DegenerationDataBaseChangesExistPid
+public import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.EqZeroOfSumSq
+public import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.IsTauCanonicalIffOfIsPullDegTauBimultStatement
+import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.LaurentCoeffSectionValueArcEqFourierJacobi
+import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.LaurentCoeffSectionValueArcEqFourierJacobiStatement
+public import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.LetterSquaredLengthLeFlowHeightStatement
+import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.NonemptyUnifWitnessDataOfIsUnfStatement
+public import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.NormalisedTrivialisationNormOneComplexReadingStatement
+import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.TorusExtExponentialDerivativeBijectiveTangentStatement
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.RelabelEmbeddingsGoodBijectiveConjCompat
+public import Formalism.LocalToGlobal.CMDeterminantIdeals.CMIdealValuations.AbsNormSpanGalois
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Topology.Algebra.MvPolynomial
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.RigidSys
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.FlowCoefficientBounds
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.QuadraticCoefficientForms
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory CategoryTheory.Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField IsDedekindDomain
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.FD ReciprocityTheory.ChartRestriction.G.FreeQuotientRank
@@ -114,6 +168,7 @@ theorem cfOf_le {K₁ : Type} [Field K₁] [Algebra c.F K₁] (d : ArcDatum Xo c
   set P := arcNum (evR Xo c F d.yF) with hP
   let G : MvPolynomial (ArcLt Dw) ℂ := ∑ m ∈ P.support, MvPolynomial.monomial m (em ((P.coeff m).coeff d.jj))
   have hG : ∀ x, MvPolynomial.eval x G = ajAt d em F x := fun x => by
+
     simp only [G, map_sum, MvPolynomial.eval_monomial, ajAt, Finsupp.prod, hP]
   have hc : G.coeff d.μ = em (cfOf d.yF d.μ d.jj F) := by
     simp only [G, MvPolynomial.coeff_sum, MvPolynomial.coeff_monomial, Finset.sum_ite_eq', cfOf, ← hP]
@@ -195,9 +250,9 @@ theorem const_le (r : ℕ) {La c₁ T C : ℝ} (hLa : 1 ≤ La) (hT : 0 < T) (hC
       _ = _ := by ring
   have b2 : ∏ τ : E →+* ℂ, ∏ i : Fin (Dw.mult τ), h τ i ^ ((a (τ, (i : ℕ)) : ℝ) / 2) ≤ e ^ absA Dw a := by
     rw [absA, ← Finset.prod_pow_eq_pow_sum]
-    refine Finset.prod_le_prod (fun τ _ => Finset.prod_nonneg fun i _ => Real.rpow_nonneg (h0 τ i) _) fun τ _ => ?_
+    refine Finset.prod_le_prod₀ (fun τ _ => Finset.prod_nonneg fun i _ => Real.rpow_nonneg (h0 τ i) _) fun τ _ => ?_
     rw [← Finset.prod_pow_eq_pow_sum]
-    refine Finset.prod_le_prod (fun i _ => Real.rpow_nonneg (h0 τ i) _) fun i _ => ?_
+    refine Finset.prod_le_prod₀ (fun i _ => Real.rpow_nonneg (h0 τ i) _) fun i _ => ?_
     exact hsq _ _ _ (h0 τ i) he0.le ((hh τ i).trans (by gcongr))
   refine (mul_le_mul b1 b2 (Finset.prod_nonneg fun τ _ => Finset.prod_nonneg fun i _ =>
     Real.rpow_nonneg (h0 τ i) _) (by positivity)).trans (le_of_eq ?_)
@@ -233,8 +288,9 @@ theorem line_pos {K₁ : Type} [Field K₁] [NumberField K₁] [Algebra c.F K₁
     · rw [h]; exact (h2 _).1.2 em
 
 theorem norm_cfOf_le : Known → ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (H : ReciprocityTheory.ChartRestriction.G.Geo.Tor.Host E) (Dw : Datum H) (l : Level H) (Xo : Moduli Dw l) (c : Coeff l) (K₁ : Type) [Field K₁] [NumberField K₁] [Algebra c.F K₁] (d : ArcDatum Xo c K₁) (n' : ℕ) (La c₁ : ℝ) (s : CMIn d.a d.e d.th d.jj n' La c₁) (em : K₁ →+* ℂ) (r : ℕ) (U : Unf Xo c (em.comp (algebraMap c.F K₁)) r) (xi S : ℝ) (a' : (E →+* ℂ) × ℕ → ℕ) (n : ℕ), Std d → 1 ≤ La → GoodEmb c (em.comp (algebraMap c.F K₁)) → IsUnf U → (∀ k (τ : E →+* ℂ), ‖τ (U.X k).ξ0‖ = xi) → Dom a' n → (∀ k, TransvIn (U.X k) l.M' (laU U a' n k)) → ∀ F ∈ sec Xo c a' n, 0 ≤ S → (∀ k, ∀ y ∈ (U.X k).dom, lieFac Dw xi a' * (U.X k).pnorm (laU U a' n k) (rdU U F k) y ≤ S) → ‖em (cfOf d.yF d.μ d.jj F)‖ * (s.valLine d.μ n).n em ≤ S * Real.exp (4 * Real.pi + GlobalTheory.ArcCM.archP E r La c₁ * ((absA Dw a' : ℝ) + (fdeg E : ℝ) * n)) := by
-  intro hK E _ _ _ H Dw l Xo c K₁ _ _ _ d n' La c₁ s em r U xi S a' n ⟨hover, ⟨y₀, hy₀, hc⟩, hpush⟩ hLa hgood hunf
+  intro hK E _ _ _ H Dw l Xo c K₁ _ _ _ d n' La c₁ s em r U xi S a' n hstd hLa hgood hunf
     hxi hdom htv F hF hS0 hS
+  obtain ⟨hover, ⟨y₀, hy₀, hc⟩, hpush⟩ := hstd
   have h1 := hK.laws
   have h2 := hK.laws2
   have hev := hK.ev E H Dw l Xo c
@@ -315,6 +371,7 @@ theorem norm_cfOf_le : Known → ∀ (E : Type) [Field E] [NumberField E] [IsCMF
           unfold Datum.mult
           split_ifs <;> omega
         exact_mod_cast this
+
       rw [← herm_single Hm, ← hLz, map_sum]
       have := herm_sum_le hH'.2.1 (fun j => L (x ⟨τ, (i, j)⟩ • z₁ τ j))
         (b := (La * Real.sqrt (max 1 c₁)) ^ 2 / Real.pi) fun j => by

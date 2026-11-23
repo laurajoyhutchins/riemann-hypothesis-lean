@@ -1,4 +1,54 @@
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TailIntegrals.GoodRowsProjectorApplyEqSum
+module
+
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TailIntegrals.GoodRowsProjectorApplyEqSum
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -50,7 +100,7 @@ private lemma liftVec_apply_of_edge (u : Fin (2 * r' + k + 1) → ℂ) (i : Fin 
 private lemma liftVec_apply_succ (u : Fin (2 * r' + k + 1) → ℂ) (a : Fin (2 * r' + k + 1)) :
     liftVec k 1 r' u ⟨a.val + 1, by omega⟩ = u a := by
   simp only [liftVec, Fin.val_mk]
-  rw [dif_pos (by omega)]
+  rw [dite_eq_left (by omega)]
   exact congrArg u (Fin.ext (by show a.val + 1 - 1 = a.val; omega))
 
 private lemma Hpk_one_add_apply_succ_succ (a b : Fin (2 * r' + k + 1)) :
@@ -153,7 +203,7 @@ private lemma mulVec_bvec_eq_col_fun {m : ℕ} (H : Matrix (Fin m) (Fin m) ℂ) 
 private lemma phiV'_one_add_zero_eq_first_basis_e0_vec : phiV' k (1 + r') 0 = e0 k r' := by
   funext i
   simp only [phiV', phiV]
-  rw [dif_pos (by first | simp | (rw [Fin.val_zero]; omega))]
+  rw [dite_eq_left (by first | simp | (rw [Fin.val_zero]; omega))]
   rw [mulVec_bvec_eq_col_fun]
   simp only [e0, bvec, Pi.single_apply, Hpk, esI, eI, a0, Fin.val_mk, Fin.ext_iff, Fin.val_zero]
   (try split_ifs) <;> (first | rfl | omega)
@@ -301,12 +351,12 @@ private lemma phiV_one_add_sc_eq_liftVec (b : Fin (r' + 1)) :
   by_cases hb : b.val < r'
   · have h1 : (sc r' b).val < 1 + r' := by omega
     simp only [phiV]
-    rw [dif_pos h1, dif_pos hb]
+    rw [dite_eq_left h1, dite_eq_left hb]
     simp only [liftVec, bvec, Pi.single_apply, esI, hs, Fin.val_mk, Fin.ext_iff, and_false, false_and, and_true, true_and]
     (try split_ifs) <;> (first | rfl | omega)
   · have h1 : ¬ (sc r' b).val < 1 + r' := by omega
     simp only [phiV]
-    rw [dif_neg h1, dif_neg hb]
+    rw [dite_eq_right h1, dite_eq_right hb]
     simp only [liftVec, epsV, bvec, Pi.smul_apply, Pi.add_apply, Pi.single_apply, wI, Fin.val_mk,
       Fin.ext_iff, and_false, false_and, and_true, true_and, Fin.val_zero, Fin.val_last]
     (try split_ifs) <;> (first | rfl | omega | simp)
@@ -340,7 +390,7 @@ private lemma lev_apply_succ_succ (g : Mat k r') (a b : Fin (2 * r' + k + 1)) :
     ιLev k 1 r' g ⟨a.val + 1, by omega⟩ ⟨b.val + 1, by omega⟩ = g a b := by
   first
   | (simp [ιLev]; done)
-  | (simp only [ιLev, Fin.val_mk]; rw [dif_pos (by omega), dif_pos (by omega)]; rfl)
+  | (simp only [ιLev, Fin.val_mk]; rw [dite_eq_left (by omega), dite_eq_left (by omega)]; rfl)
 
 private lemma w0_apply_succ_succ (c : ℂ) (a b : Fin (2 * r' + k + 1)) :
     w0 k r' c ⟨a.val + 1, by omega⟩ ⟨b.val + 1, by omega⟩ = if a = b then 1 else 0 := by
@@ -406,11 +456,11 @@ private lemma w0_mul_lev_mulVec_e0_eq_smul_es0 (c : ℂ) (g : Mat k r') :
     · have hq : ¬ (1 ≤ (eI k (1 + r') (a0 r')).val ∧
           (eI k (1 + r') (a0 r')).val < 2 * r' + k + 1 + 1) := by
         simp [eI, a0]
-      rw [dif_pos hp, dif_neg hq, if_neg]
+      rw [dite_eq_left hp, dite_eq_right hq, if_neg]
       intro hh
       rw [hh] at hp
       simp [eI, a0] at hp
-    · rw [dif_neg hp]
+    · rw [dite_eq_right hp]
   have h2 : w0 k r' c *ᵥ e0 k r' = c • es0 k r' := by
     funext i
     simp only [e0, es0]

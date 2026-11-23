@@ -1,5 +1,64 @@
-import Mathlib
-import GroundTheory.PAdicHodge.GaloisOnCp
+module
+
+public import Mathlib.NumberTheory.Padics.Complex
+public import Mathlib.RingTheory.Trace.Defs
+import Mathlib.Algebra.Lie.OfAssociative
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+public import Mathlib.FieldTheory.Relrank
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.RingTheory.Trace.Basic
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.PAdicHodge
@@ -50,7 +109,7 @@ theorem normTraceF_add (y z : Ω) : normTraceF F (y + z) = normTraceF F y + norm
   have h1 := e ⟨y, hy⟩
   have h2 := e ⟨z, hz⟩
   have h3 := e (⟨y, hy⟩ + ⟨z, hz⟩)
-  rw [LinearMap.map_add, add_div, ← h1, ← h2] at h3
+  rw [LinearMap.map_add (f := _), add_div, ← h1, ← h2] at h3
   exact h3
 
 theorem normTraceF_smul (a : F) (y : Ω) : normTraceF F (a • y) = a * normTraceF F y := by
@@ -68,15 +127,8 @@ def normTraceFₗ : Ω →ₗ[F] F where
 
 def normTraceₗ : Ω →ₗ[F] Ω := (Algebra.linearMap F Ω).comp (normTraceFₗ F)
 
-@[simp] theorem normTraceFₗ_apply (y : Ω) : normTraceFₗ F y = normTraceF F y := rfl
-
-@[simp] theorem normTraceₗ_apply (y : Ω) : normTraceₗ F y = normTrace F y := rfl
-
 theorem normTrace_add (y z : Ω) : normTrace F (y + z) = normTrace F y + normTrace F z :=
   map_add (normTraceₗ F) y z
-
-theorem normTrace_sub (y z : Ω) : normTrace F (y - z) = normTrace F y - normTrace F z :=
-  map_sub (normTraceₗ F) y z
 
 @[simp] theorem normTrace_zero : normTrace F (0 : Ω) = 0 := map_zero (normTraceₗ F)
 

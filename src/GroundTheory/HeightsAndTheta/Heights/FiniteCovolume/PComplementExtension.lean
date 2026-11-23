@@ -1,5 +1,50 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.FiniteCovolume.StatementsComplementExtension
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.FiniteCovolume.StatementsComplementExtension
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GroundTheory.Heights₂.Heights.FiniteCovolume
 
@@ -48,7 +93,7 @@ theorem toSesq_split (hp : IsHyperbolicPair h v w) (a b a' b' : E) (z z' : hypCo
   obtain ⟨hvz', hwz'⟩ := mem_hypComplement.1 z'.2
   have hzv := toSesq_swap_eq_zero hvz
   have hzw := toSesq_swap_eq_zero hwz
-  simp only [map_add, LinearMap.map_smulₛₗ, LinearMap.add_apply, LinearMap.smul_apply, map_smul,
+  simp only [map_add (f := _), LinearMap.map_smulₛₗ, LinearMap.add_apply, LinearMap.smul_apply, map_smul,
     smul_eq_mul, toSesq_v_v hp, toSesq_w_w hp, toSesq_v_w hp, toSesq_w_v hp, hvz', hwz', hzv, hzw]
   ring
 
@@ -65,14 +110,14 @@ theorem toSesq_w_extMap (hp : IsHyperbolicPair h v w)
     (m : hypComplement h v w →ₗ[E] hypComplement h v w) (x : W) :
     h.toSesq w (extMap hp m x) = h.toSesq w x := by
   have := (mem_hypComplement.1 (m (proj hp x)).2).2
-  simp only [extMap_apply, map_add, map_smul, smul_eq_mul, toSesq_w_w hp, toSesq_w_v hp, this]
+  simp only [extMap_apply, map_add (f := _), map_smul, smul_eq_mul, toSesq_w_w hp, toSesq_w_v hp, this]
   ring
 
 theorem toSesq_v_extMap (hp : IsHyperbolicPair h v w)
     (m : hypComplement h v w →ₗ[E] hypComplement h v w) (x : W) :
     h.toSesq v (extMap hp m x) = h.toSesq v x := by
   have := (mem_hypComplement.1 (m (proj hp x)).2).1
-  simp only [extMap_apply, map_add, map_smul, smul_eq_mul, toSesq_v_v hp, toSesq_v_w hp, this]
+  simp only [extMap_apply, map_add (f := _), map_smul, smul_eq_mul, toSesq_v_v hp, toSesq_v_w hp, this]
   ring
 
 theorem proj_extMap (hp : IsHyperbolicPair h v w)

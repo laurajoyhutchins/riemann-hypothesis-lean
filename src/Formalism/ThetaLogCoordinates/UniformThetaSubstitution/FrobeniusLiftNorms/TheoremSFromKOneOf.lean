@@ -1,7 +1,58 @@
-import Mathlib
-import Formalism.ThetaLogCoordinates.UniformThetaSubstitution.CyclicPowerClassOfExpEquiv
-import Formalism.ThetaLogCoordinates.UniformThetaSubstitution.FrobeniusLiftNorms.TopsChoicePartB
-import Lemmata.GeneralBFactRightExtra.Imports
+module
+
+public import Formalism.ThetaLogCoordinates.UniformThetaSubstitution.CyclicPowerClassOfExpEquiv
+public import Formalism.FormalGroupWitt.FormalGroupWittProofs.IntegralSubstVector
+import Formalism.GaussJetBounds.GaussJetProofs.SubstitutionWeightBound
+public import Formalism.ThetaLogCoordinates.UniformThetaSubstitution.FrobeniusLiftNorms.TopsChoicePartB
+public import Lemmata.GeneralBFactRightExtra.Imports
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.Normed.Ring.Ultra
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Formalism.FormalGroupWitt.FormalGroupWittProofs.SolveV
+public import Formalism.GaussJetBounds.GaussJetProofs.LogarithmWeightComparison
+public import Formalism.ThetaLogCoordinates.UniformThetaSubstitution.FrobeniusLiftNorms.TopsChoicePartA
+
+@[expose] public section
 
 noncomputable section
 
@@ -29,18 +80,15 @@ theorem pinv_le_one (p : ℕ) : (p : ℝ)⁻¹ ≤ 1 := Nat.cast_inv_le_one p
 
 theorem integral_add {f g : MvPowerSeries ι K} (hf : Integral f) (hg : Integral g) :
     Integral (f + g) := fun n => by
-  rw [map_add]
+  rw [map_add (f := _)]
   exact (IsUltrametricDist.norm_add_le_max _ _).trans (max_le (hf n) (hg n))
 
 theorem integral_neg {f : MvPowerSeries ι K} (hf : Integral f) : Integral (-f) := fun n => by
   rw [map_neg, norm_neg]; exact hf n
 
-theorem integral_sub {f g : MvPowerSeries ι K} (hf : Integral f) (hg : Integral g) :
-    Integral (f - g) := by
-  rw [sub_eq_add_neg]; exact integral_add hf (integral_neg hg)
-
 theorem integral_sum {α : Type} (s : Finset α) (F : α → MvPowerSeries ι K)
     (h : ∀ a ∈ s, Integral (F a)) : Integral (∑ a ∈ s, F a) := fun n => by
+
   rw [map_sum]
   exact IsUltrametricDist.norm_sum_le_of_forall_le_of_nonneg zero_le_one fun a ha => h a ha n
 
@@ -78,19 +126,14 @@ theorem small_mul {c : ℝ} (hc : 0 ≤ c) {a h : MvPowerSeries ι K} (ha : Inte
 theorem cg_refl (p : ℕ) (f : MvPowerSeries ι K) : Cg p f f := fun n => by
   rw [sub_self, map_zero, norm_zero]; exact pinv_nonneg p
 
-theorem cg_of_eq {p : ℕ} {f g : MvPowerSeries ι K} (h : f = g) : Cg p f g := h ▸ cg_refl p f
-
-theorem cg_symm {p : ℕ} {f g : MvPowerSeries ι K} (h : Cg p f g) : Cg p g f := fun n => by
-  rw [← neg_sub, map_neg, norm_neg]; exact h n
-
 theorem cg_trans {p : ℕ} {f g k : MvPowerSeries ι K} (h1 : Cg p f g) (h2 : Cg p g k) :
     Cg p f k := fun n => by
-  rw [← sub_add_sub_cancel f g k, map_add]
+  rw [← sub_add_sub_cancel f g k, map_add (f := _)]
   exact (IsUltrametricDist.norm_add_le_max _ _).trans (max_le (h1 n) (h2 n))
 
 theorem cg_add {p : ℕ} {f g f' g' : MvPowerSeries ι K} (h1 : Cg p f g) (h2 : Cg p f' g') :
     Cg p (f + f') (g + g') := fun n => by
-  rw [add_sub_add_comm, map_add]
+  rw [add_sub_add_comm, map_add (f := _)]
   exact (IsUltrametricDist.norm_add_le_max _ _).trans (max_le (h1 n) (h2 n))
 
 theorem cg_sub {p : ℕ} {f g f' g' : MvPowerSeries ι K} (h1 : Cg p f g) (h2 : Cg p f' g') :
@@ -101,20 +144,21 @@ theorem cg_sub {p : ℕ} {f g f' g' : MvPowerSeries ι K} (h1 : Cg p f g) (h2 : 
 
 theorem cg_sum {p : ℕ} {α : Type} (s : Finset α) (F G : α → MvPowerSeries ι K)
     (h : ∀ a ∈ s, Cg p (F a) (G a)) : Cg p (∑ a ∈ s, F a) (∑ a ∈ s, G a) := fun n => by
+
   rw [← Finset.sum_sub_distrib, map_sum]
   exact IsUltrametricDist.norm_sum_le_of_forall_le_of_nonneg (pinv_nonneg p) fun a ha => h a ha n
 
 theorem integral_of_cg {p : ℕ} {f g : MvPowerSeries ι K} (h : Cg p f g) (hg : Integral g) :
     Integral f := fun n => by
   have e : f = (f - g) + g := by ring
-  rw [e, map_add]
+  rw [e, map_add (f := _)]
   exact (IsUltrametricDist.norm_add_le_max _ _).trans
     (max_le ((h n).trans (pinv_le_one p)) (hg n))
 
 theorem cg_mul {p : ℕ} {f g f' g' : MvPowerSeries ι K} (hf : Integral f) (hg' : Integral g')
     (h1 : Cg p f g) (h2 : Cg p f' g') : Cg p (f * f') (g * g') := fun n => by
   have e : f * f' - g * g' = f * (f' - g') + g' * (f - g) := by ring
-  rw [e, map_add]
+  rw [e, map_add (f := _)]
   exact (IsUltrametricDist.norm_add_le_max _ _).trans
     (max_le (small_mul (pinv_nonneg p) hf h2 n) (small_mul (pinv_nonneg p) hg' h1 n))
 
@@ -238,6 +282,7 @@ def posW [NeZero ν] (p : ℕ) (w : ZMod (2 * ν) → K) (ab : Fin r0 × Fin r1)
 
 theorem constantCoeff_linW [NeZero ν] (w : ZMod (2 * ν) → K) (ab : Fin r0 × Fin r1) :
     MvPowerSeries.constantCoeff (linW w ab) = 0 := by
+
   simp [linW, map_sum]
 
 theorem coeff_posW [NeZero ν] (p : ℕ) (w : ZMod (2 * ν) → K) (ab : Fin r0 × Fin r1)
@@ -245,6 +290,7 @@ theorem coeff_posW [NeZero ν] (p : ℕ) (w : ZMod (2 * ν) → K) (ab : Fin r0 
     MvPowerSeries.coeff n (posW p w ab) = ∑ l ∈ range (n.degree + 1), (-1) ^ l *
       MvPowerSeries.coeff n (∑ s : ZMod (2 * ν), MvPowerSeries.C (w (s + 2 * (l : ZMod (2 * ν)))) *
         (MvPowerSeries.X (s, ab) : MvPowerSeries (ZV ν r0 r1) K) ^ ((p ^ 2) ^ l)) := by
+
   simp only [posW, map_sum, MvPowerSeries.coeff_C_mul, coeff_sPos, Finset.mul_sum]
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun l _ => ?_
@@ -444,6 +490,7 @@ theorem sum_dual {K ι : Type} [Field K] {ν r0 r1 : ℕ} [NeZero ν] (a b : Fin
       intro s
       have : ∑ r, MvPowerSeries.C (a r s) * P s ab * (MvPowerSeries.C (b r s') * Q s' ab) =
           MvPowerSeries.C (∑ r, a r s * b r s') * (Q s' ab * P s ab) := by
+
         rw [map_sum, Finset.sum_mul]
         exact Finset.sum_congr rfl fun r _ => by rw [map_mul]; ring
       rw [this, h]
@@ -502,6 +549,7 @@ theorem integral_sSub {p : ℕ} (hp : p.Prime) (hn : ‖(p : K)‖ = (p : ℝ)�
 
 theorem constantCoeff_hhS {p : ℕ} (hp : p ≠ 0) (u : ZMod (2 * ν) → K) :
     MvPowerSeries.constantCoeff (hhS (r0 := r0) (r1 := r1) p u) = 0 := by
+
   simp [hhS, map_sum, constantCoeff_sPos hp]
 
 theorem subst_hh_eq_sum {τ E : Type} [Fintype E] (p : ℕ) (c c' : K)
@@ -512,6 +560,7 @@ theorem subst_hh_eq_sum {τ E : Type} [Fintype E] (p : ℕ) (c c' : K)
   have hC : ∀ r : K, MvPowerSeries.substAlgHom hs (MvPowerSeries.C r) = MvPowerSeries.C r :=
     fun r => (MvPowerSeries.substAlgHom hs).commutes r
   rw [hh1, ← MvPowerSeries.coe_substAlgHom hs]
+
   simp only [map_sum, map_sub, map_mul, map_pow, hC, MvPowerSeries.substAlgHom_X]
 
 theorem hhS_eq {p : ℕ} {om oms : Fin ν → ZMod (2 * ν) → K}
@@ -642,6 +691,7 @@ theorem constantCoeff_Gser {K : Type} [Field K] {p : ℕ} (hp : p ≠ 0) (c c' :
 theorem constantCoeff_Gtot {K E : Type} [Field K] [Fintype E] {p : ℕ} (hp : p ≠ 0)
     (c c' ϖ : K) : MvPowerSeries.constantCoeff (Gtot (E := E) p c c' ϖ) = 0 := by
   unfold Gtot
+
   rw [map_sum]
   refine Finset.sum_eq_zero fun e _ => ?_
   have h0 : ∀ a : Fin 2, MvPowerSeries.constantCoeff (MvPowerSeries.C ϖ *
@@ -658,6 +708,7 @@ theorem subst_Gtot {K E : Type} [Field K] [Fintype E] (p : ℕ) (c c' ϖ : K) :
       (MvPowerSeries.X x : MvPowerSeries (Bool × E) K)) :=
     MvPowerSeries.hasSubst_of_constantCoeff_zero fun x => by simp
   unfold Gtot
+
   rw [← MvPowerSeries.coe_substAlgHom hψ, map_sum]
   refine Finset.sum_congr rfl fun e _ => ?_
   rw [MvPowerSeries.coe_substAlgHom hψ, MvPowerSeries.subst_comp_subst_apply

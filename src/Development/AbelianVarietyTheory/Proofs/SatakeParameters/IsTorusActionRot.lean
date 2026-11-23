@@ -1,6 +1,44 @@
-import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.IsTypeIsRealConst
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DelDbarCommPullbackOfSmoothDelDbar
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.IsTypeIsRealConst
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -14,26 +52,7 @@ namespace GlobalTheory.CxForm.HolAtlas
 
 variable {M : Type} [TopologicalSpace M] {n k : ℕ} (A : HolAtlas M n)
 
-structure IsTorusAction (act : (Fin k → UnitAddCircle) → M → M) : Prop where
-
-  cont : Continuous fun p : (Fin k → UnitAddCircle) × M => act p.1 p.2
-
-  smooth : ∀ i j, ContDiffOn ℝ ∞
-    (fun q : (Fin k → ℝ) × V n => A.e i (act (fun a => ((q.1 a : ℝ) : UnitAddCircle)) ((A.e j).symm q.2)))
-    {q | q.2 ∈ (A.e j).target ∧ act (fun a => ((q.1 a : ℝ) : UnitAddCircle)) ((A.e j).symm q.2) ∈ (A.e i).source}
-
-  holo : ∀ t, A.IsHolo A (act t)
-
-  zero : ∀ y, act 0 y = y
-
-  add : ∀ s t y, act (s + t) y = act s (act t y)
-
-def torusAvg (act : (Fin k → UnitAddCircle) → M → M) (α : A.Fld) : A.Fld := fun x =>
-  ∑ S, (∫ t, (bas n).repr (A.pullback A (act t) α x) S) • bas n S
-
 def TypeGe (p : ℕ) (α : A.Fld) : Prop :=
   ∀ x S, (bas n).repr (α x) S ≠ 0 → p ≤ (S.filter (·.val < n)).card
-
-def rot (t : Fin 1 → UnitAddCircle) (v : V 1) : V 1 := (AddCircle.toCircle (t 0) : ℂ) • v
 
 end GlobalTheory.CxForm.HolAtlas

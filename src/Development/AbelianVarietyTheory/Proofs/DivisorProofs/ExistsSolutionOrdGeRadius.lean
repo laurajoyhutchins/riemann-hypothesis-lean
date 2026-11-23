@@ -1,7 +1,55 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.WeightedSumBounds.PeriodValuationTheory
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.WeightedSumBounds.WtSubOneLe
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.WeightedSumBounds.FactorialWeightedSumBound
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Presheaf
 import Development.AbelianVarietyTheory.Definitions.Foundations.IsSatFrame
+
+@[expose] public section
 
 open MvPowerSeries ReciprocityTheory.PGsh ReciprocityTheory.ChartRestriction.G.Sh GlobalTheory.FGDepth
 
@@ -66,7 +114,7 @@ theorem agree_mul {D : ℕ} {g g' h h' : MvPowerSeries (Fin M) C} (hg0 : constan
   rw [Finset.HasAntidiagonal.mem_antidiagonal] at hβγ
   dsimp only
   have hdeg : Finsupp.degree β + Finsupp.degree γ = Finsupp.degree α := by
-    rw [← hβγ, map_add]
+    rw [← hβγ, map_add (f := _)]
   by_cases hβ : β = 0
   · subst hβ
     simp only [MvPowerSeries.coeff_zero_eq_constantCoeff_apply, hg0, hg0', zero_mul]
@@ -239,7 +287,7 @@ theorem coeff_Phi {p : ℕ} {c : Fin d → ℕ → Fin d → C} (hc0 : ∀ a, c 
   have h0 : ∑ a, c a 0 b * coeff α (t a ^ (p ^ 0)) = coeff α (t b) := by
     simp only [hc0, pow_zero, pow_one, Pi.single_apply, ite_mul, one_mul, zero_mul,
       Finset.sum_ite_eq, Finset.mem_univ, if_true]
-  simp only [Phi, map_add, map_sub, hl, Finset.sum_range_succ', h0]
+  simp only [Phi, map_add (f := _), map_sub, hl, Finset.sum_range_succ', h0]
   ring
 
 def iterT (p : ℕ) (c : Fin d → ℕ → Fin d → C) (z : Fin d → MvPowerSeries (Fin M) C) :
@@ -331,7 +379,7 @@ theorem lgSum_limT (b : Fin d) : lgSum p c (limT p c z) b = z b := by
   have h2 : coeff α (Phi p c z (iterT p c z (Finsupp.degree α + 1)) b) =
       coeff α (iterT p c z (Finsupp.degree α + 1) b) :=
     (agree_iterT hp hc0 hz (Finsupp.degree α + 1) b α (Nat.lt_succ_self _)).symm
-  simp only [Phi, map_add, map_sub] at h2
+  simp only [Phi, map_add (f := _), map_sub] at h2
   rw [h1]
   linear_combination -h2
 

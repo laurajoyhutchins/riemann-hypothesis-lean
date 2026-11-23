@@ -1,13 +1,56 @@
-import Development.AutomorphicArithmetic.Foundations.Convolution.GeneralizedMeasures.HeckeFinAlt
-import Development.AutomorphicArithmetic.Foundations.Convolution.GeneralizedMeasures.ClopenTest
-import Development.AutomorphicArithmetic.Foundations.Convolution.GeneralizedMeasures.InfAtFinEmb
-import Development.AutomorphicArithmetic.Foundations.Convolution.GeneralizedMeasures.LocAll
-import Development.AutomorphicArithmetic.Foundations.Convolution.GeneralizedMeasures.BcPoly
-import Development.AutomorphicArithmetic.Foundations.Convolution.GeneralizedMeasures.MatchOne
+module
+
+public import Development.AutomorphicArithmetic.Foundations.Convolution.GeneralizedMeasures.HeckeFinAlt
+import Development.AbelianVarietyTheory.Definitions.Divisors.LineOppositeParabolicUnitaryLeviSectionEq
+import Development.AbelianVarietyTheory.Definitions.Divisors.T2SpaceGeneralLinearGroup
+public import Development.AutomorphicArithmetic.Foundations.Convolution.GeneralizedMeasures.BcPoly
+public import Development.AutomorphicArithmetic.Foundations.Convolution.GeneralizedMeasures.ClopenTest
+public import Development.AutomorphicArithmetic.Foundations.Convolution.GeneralizedMeasures.InfAtFinEmb
+public import Development.AutomorphicArithmetic.Foundations.Convolution.GeneralizedMeasures.LocAll
+public import Development.AutomorphicArithmetic.Foundations.Convolution.GeneralizedMeasures.MatchOne
 import Development.AutomorphicArithmetic.Foundations.Convolution.GeneralizedMeasures.PolyMem
-import Development.AutomorphicArithmetic.Foundations.Convolution.GeneralizedMeasures.WordHt
-import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.MatchOfScale
-import Development.AutomorphicArithmetic.Foundations.Convolution.LocalGroupAnalysis.G1St
+public import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.MatchOfScale
+public import Development.AutomorphicArithmetic.Foundations.Convolution.LocalGroupAnalysis.G1St
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Separation.Connected
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MeasureTheory NumberField IsDedekindDomain MvPolynomial Filter
 open GroundTheory.Automorphic GroundTheory.Automorphic.Reduction GroundTheory.Automorphic.RightCosetSpace
@@ -52,7 +95,7 @@ private theorem prodFn_test {F E : Type} [Field F] [NumberField F] [Field E] [Nu
   haveI : Fintype (PlacesOver E v) := Fintype.ofFinite _
   have e : prodFn h = fun g => ∏ w, h w (cmp w g) := funext fun g => finprod_eq_prod_of_fintype _
   rw [e]
-  refine ⟨continuous_finset_prod _ fun w _ => (hc w).1.comp (cmp_cont w), ?_⟩
+  refine ⟨continuous_finsetProd _ fun w _ => (hc w).1.comp (cmp_cont w), ?_⟩
   haveI : T2Space (CompletionsOver E v) := Pi.t2Space
   haveI : T2Space (GL (Fin n) (CompletionsOver E v)) := Units.instT2Space
   haveI : R1Space (GL (Fin n) (CompletionsOver E v)) := T2Space.r1Space
@@ -98,7 +141,7 @@ private theorem mono_split {E : Type} [Field E] [NumberField E] {n : ℕ} (κ : 
     (hβ : ∀ x ∈ β.support, x.1 ∈ κ) : ∃ p : Pl E → MvPolynomial (Fin n) ℂ, (∀ w ∈ κ, (p w).totalDegree ≤ β.degree) ∧
       ∏ w ∈ κ, atPl w (p w) = monomial β 1 := by
   refine ⟨fun w => ∏ i, X i ^ β (w, i), fun w _ => ?_, ?_⟩
-  · refine (totalDegree_finset_prod _ _).trans ?_
+  · refine (totalDegree_finsetProd _ _).trans ?_
     simp only [totalDegree_X_pow]
     have h1 : ∑ i, β (w, i) = ∑ x ∈ Finset.univ.image (fun i : Fin n => (w, i)), β x := by
       rw [Finset.sum_image]; intro a _ b _ h; exact (Prod.ext_iff.1 h).2
@@ -110,7 +153,7 @@ private theorem mono_split {E : Type} [Field E] [NumberField E] {n : ℕ} (κ : 
         (fun _ _ => pow_zero _)]
 
 private theorem sup_mono {F K : Type} [Field F] [NumberField F] [Field K] [NumberField K] [Algebra F K] {n : ℕ} {q : Pl F}
-    {w₀ : PlacesOver K q} {ν : Fin n → ℤ} {j : ℕ} {Y Y' : ℝ} {f : normOneGL K n → ℂ} (h : Sup w₀ ν j Y f) (hY : Y ≤ Y') :
+    {w₀ : PlacesOver K q} {ν : Fin n → ℤ} {j : ℕ} {Y Y' : ℝ} {f : normOneGL (K := K) (n := n) → ℂ} (h : Sup w₀ ν j Y f) (hY : Y ≤ Y') :
     Sup w₀ ν j Y' f := fun g hg => ⟨(h g hg).1.trans hY, (h g hg).2⟩
 
 private theorem under_eq {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] {v : Pl F}
@@ -121,7 +164,7 @@ private theorem onInf_test {K : Type} [Field K] [NumberField K] {n : ℕ} (β : 
     Continuous (onInf β) ∧ HasCompactSupport (onInf β) :=
   ⟨β.continuous.comp (archEquiv K n).continuous, β.hasCompactSupport.comp_homeomorph (archEquiv K n).toHomeomorph⟩
 
-set_option maxHeartbeats 1000000 in
+
 theorem UpperTheory.ConvolutionTheory.GM.termEx :
     LocUnit → TermEx := by
   intro hU F E _ _ _ _ _ _ _ _ σ hσ hp n hn μE iμE μF iμF θ q w₀ q₀ hq νE _ νF _ aE aF ci hci hA

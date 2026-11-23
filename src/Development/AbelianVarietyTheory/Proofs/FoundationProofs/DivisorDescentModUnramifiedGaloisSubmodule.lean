@@ -1,15 +1,65 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ExistsUniqueIdeleOfLinearEquivQuotientLocal
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.WithZeroEqOfLeExpIff
+module
+
+public import Mathlib.RingTheory.DedekindDomain.Factorization
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.WithZeroEqOfLeExpIff
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+public import Mathlib.NumberTheory.RamificationInertia.Galois
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RingTheory.DedekindDomain.AdicValuation.Ramification
+
+@[expose] public section
 
 open IsDedekindDomain
 open scoped nonZeroDivisors
 
 namespace GlobalTheory.DivisorDescent
 
+
 open IsDedekindDomain in
 open scoped nonZeroDivisors Pointwise in
-
 theorem _root_.GlobalTheory.DivisorDescent.exists_pow_eq_of_dvd_count {R L : Type} [CommRing R] [IsDedekindDomain R]
     [Field L] [Algebra R L] [IsFractionRing R L] (N : ℕ) (I : FractionalIdeal R⁰ L) (hI : I ≠ 0)
     (h : ∀ v : HeightOneSpectrum R, (N : ℤ) ∣ FractionalIdeal.count L v I) :
@@ -30,9 +80,9 @@ theorem _root_.GlobalTheory.DivisorDescent.exists_pow_eq_of_dvd_count {R L : Typ
   refine finprod_congr fun v => ?_
   rw [← zpow_natCast, ← zpow_mul, mul_comm, Int.mul_ediv_cancel' (h v)]
 
+
 open IsDedekindDomain in
 open scoped nonZeroDivisors Pointwise in
-
 theorem _root_.GlobalTheory.DivisorDescent.exists_pow_class {A : Type} [CommRing A]
     [IsDedekindDomain A] (N : ℕ)
     (hCl : ∀ c : ClassGroup A, ∃ d, c = d ^ N) (a : Ideal A) (ha : a ≠ ⊥) :
@@ -141,7 +191,7 @@ private theorem count_galois_conj_spanSingleton {A₀ R K₀ L : Type} [CommRing
   have hgb : g b ≠ 0 := g.map_ne_zero_iff.mpr hb0
   have hσa : σ (algebraMap R L a) = algebraMap R L (g a) := (algebraMap_galRestrict_apply A₀ σ a).symm
   have hσb : σ (algebraMap R L b) = algebraMap R L (g b) := (algebraMap_galRestrict_apply A₀ σ b).symm
-  rw [map_div₀, hσa, hσb, count_spanSingleton_div v' haL hbL,
+  rw [map_div₀ σ, hσa, hσb, count_spanSingleton_div v' haL hbL,
     count_spanSingleton_div v (by simpa using hga) (by simpa using hgb),
     count_spanSingleton_algebraMap_eq_count_factors v' ha0, count_spanSingleton_algebraMap_eq_count_factors v' hb0,
     count_spanSingleton_algebraMap_eq_count_factors v hga, count_spanSingleton_algebraMap_eq_count_factors v hgb,
@@ -186,15 +236,16 @@ private theorem count_algebraMap_of_unramified_lemma_6 {A₀ R K₀ L : Type} [C
     · rw [hP]
       exact hQ
   have hv := HeightOneSpectrum.intValuation_liesOver P Q f
-  rw [he, pow_one, HeightOneSpectrum.intValuation_if_neg _ hf,
+  rw [← Ideal.ramificationIdx'_eq_ramificationIdx P.asIdeal Q.asIdeal P.ne_bot, he, pow_one,
+    HeightOneSpectrum.intValuation_if_neg _ hf,
     HeightOneSpectrum.intValuation_if_neg _ hfR] at hv
   rw [IsScalarTower.algebraMap_apply A₀ R L, count_spanSingleton_algebraMap_eq_count_factors Q hfR,
     count_spanSingleton_algebraMap_eq_count_factors P hf]
   exact_mod_cast (neg_injective (WithZero.exp_injective hv)).symm
 
+
 open IsDedekindDomain in
 open scoped nonZeroDivisors Pointwise in
-
 theorem _root_.GlobalTheory.DivisorDescent.descent_submodule : ∀ (A₀ R K₀ L : Type) [CommRing A₀]
     [IsDedekindDomain A₀] [CommRing R] [IsDedekindDomain R] [Field K₀] [Field L]
     [Algebra A₀ K₀] [IsFractionRing A₀ K₀] [Algebra R L] [IsFractionRing R L] [Algebra A₀ R]

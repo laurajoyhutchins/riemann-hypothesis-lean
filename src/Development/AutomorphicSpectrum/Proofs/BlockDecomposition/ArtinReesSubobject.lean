@@ -1,9 +1,51 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.PowSubSuccLe
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SubobjectLeIffAffineSections
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SecsMapArrow
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IdealPowerSubobjectSections
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SubobjectPullbackSections
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.PowSubSuccLe
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IdealPowerSubobjectSections
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SubobjectPullbackSections
+public import GroundTheory.ArithmeticGeometry.SchemeCohomology.ProperCohomology.ReesSheafBase
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 open CategoryTheory CategoryTheory.Limits AlgebraicGeometry GroundTheory.Arith.SchemeCoh GlobalTheory.CompanionTheory.GE
 
 set_option autoImplicit false
@@ -77,7 +119,7 @@ lemma resF_mem_pow (F : X.Modules) {U V : X.Opens} (h : V ≤ U) (n : ℕ) (m : 
     rw [← map_toFunctions_res h]
     exact Ideal.mem_map_of_mem _ ha
   · intro x y hx hy
-    rw [map_add]
+    rw [map_add (f := _)]
     exact add_mem hx hy
 
 end GlobalTheory.CompanionTheory.GE.ArtinRees
@@ -97,7 +139,7 @@ lemma sat_add (F : X.Modules) {V : X.Opens} (f : Γ(X, V)) (P : Submodule Γ(X, 
   obtain ⟨e₁, z₁, hz₁, hr₁⟩ := h₁
   obtain ⟨e₂, z₂, hz₂, hr₂⟩ := h₂
   refine ⟨e₁ + e₂, f ^ e₂ • z₁ + f ^ e₁ • z₂, add_mem (P.smul_mem _ hz₁) (P.smul_mem _ hz₂), ?_⟩
-  rw [map_add, resF_smul, resF_smul, hr₁, hr₂, smul_smul, smul_smul, smul_add, map_pow, map_pow,
+  rw [map_add (f := _), resF_smul, resF_smul, hr₁, hr₂, smul_smul, smul_smul, smul_add, map_pow, map_pow,
     pow_add, mul_comm (resO (X.basicOpen_le f) f ^ e₂)]
 
 lemma exists_res_eq_of_mem_pow (F : X.Modules) [F.IsQuasicoherent] {V : X.Opens} (hV : IsAffineOpen V)
@@ -224,8 +266,8 @@ end GlobalTheory.CompanionTheory.GE.ArtinRees
 
 namespace GlobalTheory.CompanionTheory.GE
 
-open GlobalTheory.CompanionTheory.GE.ArtinRees in
 
+open GlobalTheory.CompanionTheory.GE.ArtinRees in
 theorem artinRees_uniform {A : Type} [CommRing A] [IsNoetherianRing A] (I : Ideal A) {X : Scheme.{0}}
     [X.Over (Spec (.of A))] [IsLocallyNoetherian X] [CompactSpace X] {E : X.Modules}
     (hE : IsCoherent E) (D : Subobject E) (hD : (D : X.Modules).IsQuasicoherent) :

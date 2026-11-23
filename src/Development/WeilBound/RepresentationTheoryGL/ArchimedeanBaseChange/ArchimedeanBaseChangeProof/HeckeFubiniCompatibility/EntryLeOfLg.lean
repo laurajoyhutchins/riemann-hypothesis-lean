@@ -1,4 +1,50 @@
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.HeckeFubiniCompatibility.CompatFub
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.HeckeFubiniCompatibility.CompatFub
+import GroundTheory.AutomorphicForms.ReductionMeasure
+import GroundTheory.GlobalFields.Adele.Topology
+import GroundTheory.GlobalFields.TateThesis.IdeleMeasure
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.CStarAlgebra.ContinuousLinearMap
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Separation.Connected
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -98,6 +144,7 @@ theorem ent_mul (M : KMod n) (A B : M.V →L[ℂ] M.V) (i j : Ix M) :
     ((stdOrthonormalBasis ℂ M.V).sum_repr' _).symm
   rw [ContinuousLinearMap.mul_apply]
   conv_lhs => rw [hx]
+
   rw [map_sum, inner_sum]
   refine Finset.sum_congr rfl fun m _ => ?_
   rw [map_smul, inner_smul_right, mul_comm]
@@ -160,6 +207,7 @@ theorem entA_convK [MeasurableSpace (G n)] [BorelSpace (G n)] (μ : Measure (G n
 
 theorem mulF_fin [MeasurableSpace (Hf E a b)] [BorelSpace (Hf E a b)] (ν : Measure (Hf E a b)) [ν.IsHaarMeasure]
     {κ : Type} [Fintype κ] {ψ ψ' : Matrix κ κ (Hf E a b → ℂ)} (hψ : IsFinM ψ) (hψ' : IsFinM ψ') : IsFinM (mulF ν ψ ψ') := by
+  set_option synthInstance.maxHeartbeats 400000 in
   intro x y
   refine ⟨continuous_finsetSum _ fun z _ => ?_, ?_⟩
   · have e : (fun g => ∫ h, ψ x z h * ψ' z y (h⁻¹ * g) ∂ν) =
@@ -216,8 +264,8 @@ theorem mulM_tens (D : Dom E a b) [MeasurableSpace (G a)] [BorelSpace (G a)] [Me
 
 end PMul
 
-open PMul in
 
+open PMul in
 theorem tensMul : TensMul := fun _ _ _ _ _ _ D _ _ _ _ _ _ μa _ μb _ ν _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ hC hka hkb hka'
     hkb' hψ hψ' => ⟨mulF_fin ν hψ hψ', mulM_tens D μa μb ν hC hka hkb hka' hkb' hψ hψ'⟩
 

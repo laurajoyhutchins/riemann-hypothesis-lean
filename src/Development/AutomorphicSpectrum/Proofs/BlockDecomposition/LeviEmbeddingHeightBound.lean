@@ -1,12 +1,50 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CommuteRtOfMemZalg
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ModerateGrowthConvolutionIntegral
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.OneMemGoodCT
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ModerateGrowthConvolutionIntegral
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField GlobalTheory.CuspRep GlobalTheory.CompanionTheory.CTFin Matrix
 
 noncomputable section
 namespace GlobalTheory.CompanionTheory.CTFin.Slice1.Height
-variable {E : Type} [Field E] [NumberField E] [IsTotallyComplex E] {r s : ℕ}
+variable {E : Type} [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] {r s : ℕ}
 
 theorem norm_one_le : ‖(1 : Cinf E)‖ ≤ 1 := by
   exact (pi_norm_le_iff_of_nonneg zero_le_one).2 fun i => by simp
@@ -19,7 +57,18 @@ theorem norm_lev_le (y : GL (Fin r) (Cinf E)) :
   refine (pi_norm_le_iff_of_nonneg (by positivity)).2 fun i =>
     (pi_norm_le_iff_of_nonneg (by positivity)).2 fun j => ?_
   change ‖((lev (Cinf E) r s (y, 1) : GL _ _) : Matrix _ _ (Cinf E)) i j‖ ≤ _
-  rw [GlobalTheory.SmGL.val_emb₂]
+  have hv : ((lev (Cinf E) r s (y, 1) : GL _ _) : Matrix _ _ (Cinf E)) =
+      Matrix.reindex (GlobalTheory.SmGL.stdSum (rfl : r + s = r + s))
+        (GlobalTheory.SmGL.stdSum (rfl : r + s = r + s))
+        (Matrix.fromBlocks y.val 0 0 (1 : Matrix (Fin s) (Fin s) (Cinf E))) := by
+    ext i j
+    obtain ⟨a, rfl⟩ := (GlobalTheory.SmGL.stdSum (rfl : r + s = r + s)).surjective i
+    obtain ⟨b, rfl⟩ := (GlobalTheory.SmGL.stdSum (rfl : r + s = r + s)).surjective j
+    simp only [Matrix.reindex_apply, Matrix.submatrix_apply, Equiv.symm_apply_apply]
+    rcases a with a | a <;> rcases b with b | b <;>
+      simp [lev, GlobalTheory.SmGL.emb₂, GlobalTheory.SmGL.leviEmb,
+        GlobalTheory.SmGL.leviTwo, GlobalTheory.SmGL.two, Matrix.blockDiagonal'_apply]
+  rw [hv]
   simp only [Matrix.reindex_apply, Matrix.submatrix_apply]
   generalize (GlobalTheory.SmGL.stdSum (rfl : r + s = r + s)).symm i = i'
   generalize (GlobalTheory.SmGL.stdSum (rfl : r + s = r + s)).symm j = j'
@@ -47,7 +96,7 @@ theorem height_lev_le (y : GL (Fin r) (Cinf E)) :
 
 end GlobalTheory.CompanionTheory.CTFin.Slice1.Height
 
-theorem GlobalTheory.CompanionTheory.CTFin.Slice1.height_lev_mul_le : ∀ (E : Type) [Field E] [NumberField E] [IsTotallyComplex E] (r s : ℕ) (c : GL (Fin (r + s)) (Cinf E)), ∃ B : ℝ, 0 ≤ B ∧ ∀ y : GL (Fin r) (Cinf E), height (lev (Cinf E) r s (y, 1) * c) ≤ B * height y := by
+theorem GlobalTheory.CompanionTheory.CTFin.Slice1.height_lev_mul_le : ∀ (E : Type) [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] (r s : ℕ) (c : GL (Fin (r + s)) (Cinf E)), ∃ B : ℝ, 0 ≤ B ∧ ∀ y : GL (Fin r) (Cinf E), height (lev (Cinf E) r s (y, 1) * c) ≤ B * height y := by
   intro E _ _ _ r s c
   have hb : 0 ≤ GlobalTheory.CompanionTheory.GrowthConv.bnd c := by
     unfold GlobalTheory.CompanionTheory.GrowthConv.bnd

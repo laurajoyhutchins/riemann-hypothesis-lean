@@ -1,7 +1,48 @@
-import Development.AutomorphicArithmetic.Foundations.Convolution.PowerSumTraces.CuspidalMultiplicityOneTotallyComplex
-import Development.AutomorphicArithmetic.TwistedTraces.ExistsSignedOrthonormalBasisOfIsCompl
-import Development.AutomorphicArithmetic.TwistedTraces.TrFormDefiniteOnArchSkewArchHerm
-import GroundTheory.AutomorphicForms.AutomorphicFormSpaces.GKStableCartan
+module
+
+public import Development.AutomorphicArithmetic.Foundations.Convolution.PowerSumTraces.CuspidalMultiplicityOneTotallyComplex
+public import Development.AutomorphicArithmetic.TwistedTraces.ExistsSignedOrthonormalBasisOfIsCompl
+public import Development.AutomorphicArithmetic.TwistedTraces.TrFormDefiniteOnArchSkewArchHerm
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MeasureTheory NumberField GroundTheory.Automorphic GroundTheory.Automorphic.Reduction GroundTheory.Automorphic.RightCosetSpace
 open GroundTheory.Automorphic.AutomorphicForm GroundTheory.Automorphic.CuspidalSpectrum UpperTheory.ConvolutionTheory.C Polynomial Topology
@@ -17,11 +58,11 @@ theorem UpperTheory.exists_signed_basis_lieSubalgebra_exp_compact :
   let B : LinearMap.BilinForm ℝ (isExpLieAlgebra K n).lieSubalgebra :=
     LinearMap.mk₂ ℝ (fun X Y => trForm K n X Y)
       (fun X₁ X₂ Y => by
-        simp only [hmk, mat_coe_add, Matrix.add_mul, Matrix.trace_add, map_add])
+        simp only [hmk, mat_coe_add, Matrix.add_mul, Matrix.trace_add, map_add (f := _)])
       (fun r X Y => by
         simp only [hmk, mat_coe_smul, Matrix.smul_mul, Matrix.trace_smul, map_smul])
       (fun X Y₁ Y₂ => by
-        simp only [hmk, mat_coe_add, Matrix.mul_add, Matrix.trace_add, map_add])
+        simp only [hmk, mat_coe_add, Matrix.mul_add, Matrix.trace_add, map_add (f := _)])
       (fun r X Y => by
         simp only [hmk, mat_coe_smul, Matrix.mul_smul, Matrix.trace_smul, map_smul])
   have hB : ∀ X Y, B X Y = trForm K n X Y := fun _ _ => rfl

@@ -1,4 +1,49 @@
-import Formalism.MahlerMeasure.LevelSum
+module
+
+public import Formalism.MahlerMeasure.LevelSum
+public import Mathlib.NumberTheory.Padics.PadicIntegers
+public import Mathlib.Order.CompletePartialOrder
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace Formalism.GM.M
 
@@ -42,10 +87,6 @@ def GlStable (p : ℕ) [Fact p.Prime] {N r : ℕ} (LL : Letters N) (j : ℕ)
 noncomputable def gSpan (p : ℕ) [Fact p.Prime] {N r : ℕ} (LL : Letters N) (j : ℕ)
     (F : MvPolynomial (Fin N × Fin r) ℚ_[p]) : Submodule ℚ_[p] (MvPolynomial (Fin N × Fin r) ℚ_[p]) :=
   sInf {S | F ∈ S ∧ GlStable p LL j S}
-
-def FirstLE (p : ℕ) [Fact p.Prime] {N r : ℕ} [NeZero r] (LL : Letters N) (j : ℕ) (M : WithTop ℤ)
-    (F : MvPolynomial (Fin N × Fin r) ℚ_[p]) : Prop :=
-  ∀ G ∈ gSpan p LL j F, ∀ m ∈ G.support, ((wt LL j 0 m : ℤ) : WithTop ℤ) ≤ M
 
 noncomputable def YCond (p : ℕ) [Fact p.Prime] {N r : ℕ} [NeZero r] (LL : Letters N) (j : ℕ) (M : WithTop ℤ) :
     Submodule ℚ_[p] (MvPolynomial (Fin N × Fin r) ℚ_[p]) :=
@@ -99,7 +140,5 @@ noncomputable def goodCount (p : ℕ) [Fact p.Prime] {Vs : Type} [AddCommGroup V
 noncomputable def bad (p : ℕ) [Fact p.Prime] {Vs : Type} [AddCommGroup Vs] [Module ℤ_[p] Vs]
     (be : Vs → Vs → ℚ_[p]) (L : Submodule ℤ_[p] Vs) (D : ℤ) : ℕ :=
   Module.finrank ℤ_[p] L - goodCount p be L D
-
-noncomputable def lg (p : ℕ) (nmax r : ℕ) : ℝ := Real.logb p (4 * nmax + r) + 1
 
 end Formalism.GM.M

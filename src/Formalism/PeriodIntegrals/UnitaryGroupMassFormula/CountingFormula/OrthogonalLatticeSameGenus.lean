@@ -1,6 +1,47 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.CountingFormula.MassConstUniqueOne
-import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.ExistsClassReps
+module
+
+public import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.LocalDensityRatio
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField Module
 open Classical
@@ -38,10 +79,6 @@ def IsHzReps (h1 : V1 →ₗ⋆[K] V1 →ₗ[K] K) (z : V1) (s : Finset (Submodu
   (∀ M ∈ s, IsGlueLat h1 z M) ∧
     ∀ M, IsGlueLat h1 z M → ∃! M', M' ∈ s ∧ ∃ σ ∈ hz h1 z, Formalism.HermitianLatticesTheory.gmap σ M' = M
 
-def glueOf (h1 : V1 →ₗ⋆[K] V1 →ₗ[K] K) (z : V1) (L : Submodule (𝓞 K) (wPerp h1 z)) :
-    Set (Submodule (𝓞 K) V1) :=
-  {M | IsGlueLat h1 z M ∧ l0 h1 z M = L}
-
 end Glue
 
 def GlueHyp (K F : Type) [Field K] [NumberField K] [StarRing K] [Field F] [NumberField F] [Algebra F K]
@@ -50,57 +87,4 @@ def GlueHyp (K F : Type) [Field K] [NumberField K] [StarRing K] [Field F] [Numbe
   Formalism.HermitianLatticesTheory.IsCMUnram K ∧ IsFixF K F ∧ h1.IsSymm ∧ h1 z z = -((t : ℕ) : K) ∧ 0 < t ∧
     IsTotPosDef (hPerp h1 z)
 
-def OrthogonalLatticeSameGenus : Prop :=
-  ∀ (K F : Type) [Field K] [NumberField K] [StarRing K] [Field F] [NumberField F] [Algebra F K]
-    (V1 : Type) [AddCommGroup V1] [Module K V1] [FiniteDimensional K V1] [Module (𝓞 K) V1]
-    [IsScalarTower (𝓞 K) K V1] (h1 : V1 →ₗ⋆[K] V1 →ₗ[K] K) (z : V1) (t : ℕ),
-    GlueHyp K F h1 z t → ∀ M M' : Submodule (𝓞 K) V1, IsGlueLat h1 z M → IsGlueLat h1 z M' →
-      l0 h1 z M' ∈ Formalism.HermitianLatticesTheory.genus (hPerp h1 z) (l0 h1 z M)
-
-def OrbitSum : Prop :=
-  ∀ (K F : Type) [Field K] [NumberField K] [StarRing K] [Field F] [NumberField F] [Algebra F K]
-    (V1 : Type) [AddCommGroup V1] [Module K V1] [FiniteDimensional K V1] [Module (𝓞 K) V1]
-    [IsScalarTower (𝓞 K) K V1] (h1 : V1 →ₗ⋆[K] V1 →ₗ[K] K) (z : V1) (t : ℕ),
-    GlueHyp K F h1 z t → ∀ M₀ : Submodule (𝓞 K) V1, IsGlueLat h1 z M₀ →
-      (∀ M, IsGlueLat h1 z M → l0 h1 z M ∈ Formalism.HermitianLatticesTheory.genus (hPerp h1 z) (l0 h1 z M₀)) →
-      (∀ L ∈ Formalism.HermitianLatticesTheory.genus (hPerp h1 z) (l0 h1 z M₀), (glueOf h1 z L).Finite) →
-      ∀ s, IsHzReps h1 z s → ∀ c, Formalism.ThetaLiftIndependence.IsClassReps (hPerp h1 z) (l0 h1 z M₀) c →
-        ∑ M ∈ s, ((Nat.card (stabZ h1 z M) : ℝ))⁻¹ =
-          ∑ L ∈ c, (Nat.card (glueOf h1 z L) : ℝ) / (Nat.card (Formalism.ThetaLiftIndependence.autL (hPerp h1 z) L) : ℝ)
-
-def GlueCard : Prop :=
-  ∀ (K F : Type) [Field K] [NumberField K] [StarRing K] [Field F] [NumberField F] [Algebra F K]
-    (V1 : Type) [AddCommGroup V1] [Module K V1] [FiniteDimensional K V1] [Module (𝓞 K) V1]
-    [IsScalarTower (𝓞 K) K V1] (h1 : V1 →ₗ⋆[K] V1 →ₗ[K] K) (z : V1) (t : ℕ),
-    GlueHyp K F h1 z t → ∀ M₀ : Submodule (𝓞 K) V1, IsGlueLat h1 z M₀ →
-      ∀ L ∈ Formalism.HermitianLatticesTheory.genus (hPerp h1 z) (l0 h1 z M₀), (Nat.card (glueOf h1 z L) : ℝ) = glueT K F t
-
-def LamOff : Prop :=
-  ∀ (K F : Type) [Field K] [NumberField K] [StarRing K] [Field F] [NumberField F] [Algebra F K]
-    (V1 : Type) [AddCommGroup V1] [Module K V1] [FiniteDimensional K V1] [Module (𝓞 K) V1]
-    [IsScalarTower (𝓞 K) K V1] (h1 : V1 →ₗ⋆[K] V1 →ₗ[K] K) (z : V1) (t : ℕ),
-    GlueHyp K F h1 z t → ∀ M : Submodule (𝓞 K) V1, IsGlueLat h1 z M →
-      ∀ 𝔭 : Ideal (𝓞 F), 𝔭.IsMaximal → ((t : ℕ) : 𝓞 F) ∉ 𝔭 → lamP (hPerp h1 z) (l0 h1 z M) 𝔭 = 1
-
-def LamAt : Prop :=
-  ∀ (K F : Type) [Field K] [NumberField K] [StarRing K] [Field F] [NumberField F] [Algebra F K]
-    (V1 : Type) [AddCommGroup V1] [Module K V1] [FiniteDimensional K V1] [Module (𝓞 K) V1]
-    [IsScalarTower (𝓞 K) K V1] (h1 : V1 →ₗ⋆[K] V1 →ₗ[K] K) (z : V1) (t : ℕ),
-    GlueHyp K F h1 z t → ∀ M : Submodule (𝓞 K) V1, IsGlueLat h1 z M →
-      ∀ 𝔭 : Ideal (𝓞 F), 𝔭.IsMaximal → ((t : ℕ) : 𝓞 F) ∈ 𝔭 →
-        lamP (hPerp h1 z) (l0 h1 z M) 𝔭 =
-          (Ideal.absNorm 𝔭 : ℝ) ^ ((finrank K (wPerp h1 z) - 1) * vT F t 𝔭) *
-            (1 - etaF K F 𝔭 ^ finrank K (wPerp h1 z) *
-              (Ideal.absNorm 𝔭 : ℝ) ^ (-(finrank K (wPerp h1 z) : ℤ))) /
-            (1 - etaF K F 𝔭 * (Ideal.absNorm 𝔭 : ℝ)⁻¹)
-
-def OrthogonalLatticeIntegral : Prop :=
-  ∀ (K F : Type) [Field K] [NumberField K] [StarRing K] [Field F] [NumberField F] [Algebra F K]
-    (V1 : Type) [AddCommGroup V1] [Module K V1] [FiniteDimensional K V1] [Module (𝓞 K) V1]
-    [IsScalarTower (𝓞 K) K V1] (h1 : V1 →ₗ⋆[K] V1 →ₗ[K] K) (z : V1) (t : ℕ),
-    GlueHyp K F h1 z t → ∀ M : Submodule (𝓞 K) V1, IsGlueLat h1 z M →
-      Submodule.IsLattice K (l0 h1 z M) ∧ Formalism.HermitianLatticesTheory.IsIntegralLat (hPerp h1 z) (l0 h1 z M)
-
 end PI.UnitaryGroupMassFormula.CntFormula.RowsMassW
-
-example {K : Type} [Field K] [StarRing K] {V1 : Type} [AddCommGroup V1] [Module K V1] (h1 : V1 →ₗ⋆[K] V1 →ₗ[K] K) (z : V1) (x y : PI.UnitaryGroupMassFormula.CntFormula.RowsMassW.wPerp h1 z) : PI.UnitaryGroupMassFormula.CntFormula.RowsMassW.hPerp h1 z x y = h1 x y := rfl

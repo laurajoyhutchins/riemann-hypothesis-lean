@@ -1,6 +1,50 @@
+module
+
+public import Formalism.PeriodIntegrals.BesselMapUniq
+public import Formalism.SharpRestriction.CuspSpanNormBounds.RelevantZeroGramTerms
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
 import Formalism.SharpRestriction.CuspSpanNormBounds.BesselBoundFamilyOfDoubleCoset
-import Formalism.SharpRestriction.CuspSpanNormBounds.BridgeCSB
-import Formalism.HermitianCurvature.BesselNonvanishingReduction
+import Formalism.SharpRestriction.CuspSpanNormBounds.LeadMinorK
+import Formalism.SharpRestriction.CuspSpanNormBounds.OnePlaceEstimates
+public import Formalism.SharpRestriction.ParConsts
+
+@[expose] public section
 
 open MeasureTheory Matrix Finset
 open scoped InnerProductSpace
@@ -35,25 +79,6 @@ theorem isBesselMapSm_iff {k r : ℕ} {H : Type} [NormedAddCommGroup H] [InnerPr
   simp only [PI.BesselMapUniq.IsBesselMapSm, Formalism.MainNotions.S.IsBesselMapSm, PI.BesselMapUniq.IsCWCont,
     Formalism.MainNotions.S.IsCWCont, dsigW_eq]
   exact Iff.rfl
-
-def GapNearParameters (Cg0 : ℝ) : Prop :=
-  ∀ (D : D7) (Ch Cg Cq : ℝ), Cg0 ≤ Cg → 1 ≤ Cq → ∀ (L : LocBessel D.R.k D.R.rS) (lam0 μ : Fin (2 * D.R.rS + D.R.k + 1) → ℝ)
-    (ka b κ : ℝ), NearbyChamberParameters D Ch Cg Cq L lam0 μ ka b κ →
-    ∃ h : ℝ, Formalism.QuantumDeterminants.GapAtLeast L.ε μ h ∧ Formalism.FourierDecayAlt.ThreeDimData.GapOK D.R.k D.R.rS h
-
-theorem c_ne_zero {D : D7} {Ch Cg Cq : ℝ} {L : LocBessel D.R.k D.R.rS} {lam0 μ : Fin (2 * D.R.rS + D.R.k + 1) → ℝ}
-    {ka b κ : ℝ} (hN : NearbyChamberParameters D Ch Cg Cq L lam0 μ ka b κ) : L.c ≠ 0 := by
-  obtain ⟨hκ, hL, -, -⟩ := hN
-  have hc : L.c = cOfDpsi (κ : ℂ) := hL.2.2.1
-  have hka : 0 < ka := hL.2.2.2.2.2.1.2.2.2.1
-  have hκ0 : κ ≠ 0 := by
-    rcases hκ with h | h
-    · rw [h]; exact one_ne_zero
-    · rw [h]; exact hka.ne'
-  rw [hc, cOfDpsi]
-  have : (κ : ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr hκ0
-  have hI : Complex.I ≠ 0 := Complex.I_ne_zero
-  simp [this, hI]
 
 section Family
 

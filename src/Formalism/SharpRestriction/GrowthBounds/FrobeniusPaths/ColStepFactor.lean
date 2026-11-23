@@ -1,4 +1,48 @@
-import Formalism.SharpRestriction.GrowthBounds.FrobeniusPaths.ColumnKernelComponentsIntegral
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.FrobeniusPaths.ColumnKernelComponentsIntegral
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -13,8 +57,8 @@ variable {N r K : ℕ}
 def condUS (LL : LiftLetters (Fin N)) (i : Fin N) (b : Fin (r + K)) : Prop :=
   (LL.vec i = true ∧ r ≤ b.val) ∨ (LL.vec i = false ∧ b.val < r)
 
-open Classical in
 
+open Classical in
 def nomL (R : Type) [CommRing R] (LL : LiftLetters (Fin N)) (mu : Fin (N + 1) → Fin (r + K) → ℤ) (c : ℤ) (i : Fin N) :
     Fin (r + K) → MvPolynomial (Fin N × Fin (r + K)) R :=
   fun b => if (condUS LL i b ↔ IsCostly mu c i) then X (i, b) else 0
@@ -27,8 +71,8 @@ def SgW (R : Type) [CommRing R] (LL : LiftLetters (Fin N)) (mu : Fin (N + 1) →
       colStep c (colH (mu ⟨j, by omega⟩) c) (colH (mu ⟨j + 1, by omega⟩) c) (nomL R LL mu c ⟨j, h⟩) (SgW R LL mu c j)
     else SgW R LL mu c j
 
-open Classical in
 
+open Classical in
 def oS (p : ℕ) (pos : Fin N → ℤ) (mu : Fin (N + 1) → Fin (r + K) → ℤ) (c : ℤ) (j : ℕ) (s : ℤ) : ℕ :=
   ∑ i : Fin N, if i.val < j ∧ IsCostly mu c i then p ^ (s - pos i).toNat else 0
 
@@ -113,7 +157,7 @@ lemma sum_factor {ι' : Type*} (W : R) (π : R →+* R') (s : Finset ι') (e : �
     obtain ⟨u, h3, h4⟩ := H m (Finset.mem_insert_self m s)
     refine ⟨(-1) ^ e m * u + Y, ?_, ?_⟩
     · rw [Finset.sum_insert hm, h1, mul_assoc, h3]; ring
-    · rw [Finset.sum_insert hm, ← h2, map_add, map_mul, h4, map_pow, map_neg, map_one]; ring
+    · rw [Finset.sum_insert hm, ← h2, map_add (f := _), map_mul, h4, map_pow, map_neg, map_one]; ring
 
 lemma colStep_factor (W : R) (π : R →+* R') (c : ℤ) (hP hN : ℕ) (hne : hP ≠ hN) (y : Fin k → R)
     (V : Finset (Fin k) → R) (n' : Fin k → R') (S' : Finset (Fin k) → R')
@@ -141,7 +185,7 @@ lemma piR_ker {σ : Type} (S : UniformizedDVR p O) (Y : MvPolynomial σ O)
   have : C S.w ∣ Y := by
     rw [MvPolynomial.C_dvd_iff_dvd_coeff]
     intro m
-    have h1 : IsLocalRing.residue O (Y.coeff m) = 0 := by rw [← coeff_map, h, coeff_zero]
+    have h1 : IsLocalRing.residue O (Y.coeff m) = 0 := by rw [← coeff_map, h]; simp
     rw [IsLocalRing.residue_eq_zero_iff, S.w_irr.maximalIdeal_eq, Ideal.mem_span_singleton] at h1
     exact h1
   exact this
@@ -246,7 +290,7 @@ theorem Inv_main [CharP (FF O) p] (S : UniformizedDVR p O) (LL : LiftLetters (Fi
           have eV : ∀ J, MvPolynomial.map (IsLocalRing.residue O) ((Y1 J) ^ p) =
               piS p O LL.pos s0 (SgW ℤ LL mu c j J) := by
             intro J
-            rw [map_pow, hY2, ← piS_frob p LL.pos (s0 - 1) s0 (by omega) _ (fun v hv => hs1 v.1 hv.1 hv.2) _
+            rw [map_pow, hY2, ← piS_frob p LL.pos (s0 - 1) s0 (by omega) {v : Fin N × Fin (r + K) | v.1.val < j ∧ IsUsed mu c v.1} (fun v hv => hs1 v.1 hv.1 hv.2) _
               (SgW_supported LL mu c j J), e1, pow_one]
           have pair : ∀ m J', (condUS LL ⟨j, h⟩ m ∨ SgW ℤ LL mu c j J' = 0) →
               ∃ u, yO S.w LL ⟨j, h⟩ m * (Y1 J') ^ p = C S.w * u ∧

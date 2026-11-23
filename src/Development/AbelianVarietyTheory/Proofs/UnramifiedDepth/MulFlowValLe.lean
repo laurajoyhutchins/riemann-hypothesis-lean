@@ -1,5 +1,54 @@
-import Mathlib
+module
+
+public import Formalism.IncomingBounds.IncomingBound
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
 import Formalism.DropLevelBounds.Statement
+public import Mathlib.Algebra.BigOperators.Ring.Finset
+public import Mathlib.Algebra.Order.BigOperators.Group.Finset
+
+@[expose] public section
+
 open Formalism.UnitaryBoundIntegral Formalism.IncomingBounds
 
 namespace GlobalTheory.FlowScaling
@@ -82,61 +131,5 @@ lemma maxFlow_mul (hl : 1 ≤ l) {c : ℝ} {D : ZMod d → ℝ} (hc : 0 ≤ c) (
   · have := mul_maxFlow_le (c := c⁻¹) (D := fun a => c * D a) (D' := D) hl (inv_nonneg.2 hc)
       (fun a => mul_nonneg hc (hD a)) (fun a => by rw [inv_mul_cancel_left₀ hc0.ne'])
     rwa [inv_mul_le_iff₀ hc0] at this
-
-theorem fScale : FScale := by
-  intro l d _ hl c D hc hD
-  unfold Fnum
-  rw [maxFlow_mul (by omega) hc hD, ← Finset.mul_sum]
-  ring
-
-theorem thetaShift : ThetaShift := by
-  intro l d _ hl _ _ n T θ w W th hT hw hW hth hθ
-  have hl1 : 1 ≤ l := by omega
-  have hl3 : (3 : ℝ) ≤ l := by exact_mod_cast hl
-  have hn : (0 : ℝ) ≤ n := Nat.cast_nonneg n
-  have hθ0 : 0 ≤ θ := (hth 0).1.trans (hth 0).2
-  have hW0 : ∀ a, 0 ≤ W a := fun a => by
-    have h1 : 0 ≤ T * W a := by
-      rw [hW a]
-      exact mul_nonneg (hw a).le (by linarith [(hth a).2])
-    exact (mul_nonneg_iff_of_pos_left hT).1 h1
-  have hnw : ∀ a, 0 ≤ (n : ℝ) * w a := fun a => mul_nonneg hn (hw a).le
-  have h1 : (1 - θ) * maxFlow l d (fun a => (n : ℝ) * w a) ≤
-      maxFlow l d (fun a => T * ((n : ℝ) * W a)) := by
-    refine mul_maxFlow_le hl1 (by linarith) hnw fun a => ?_
-    have e : T * ((n : ℝ) * W a) = (1 - th a) * ((n : ℝ) * w a) := by
-      rw [mul_left_comm, hW a]; ring
-    rw [e]
-    exact mul_le_mul_of_nonneg_right (by linarith [(hth a).2]) (hnw a)
-  have h2 : maxFlow l d (fun a => (n : ℝ) * w a) ≤ (∑ a, (n : ℝ) * w a) / l :=
-    maxFlow_le_div hl1 hnw
-  have h3 : ∑ a, T * ((n : ℝ) * W a) ≤ ∑ a, (n : ℝ) * w a := by
-    refine Finset.sum_le_sum fun a _ => ?_
-    have e : T * ((n : ℝ) * W a) = (1 - th a) * ((n : ℝ) * w a) := by
-      rw [mul_left_comm, hW a]; ring
-    rw [e]
-    exact mul_le_of_le_one_left (hnw a) (by linarith [(hth a).1])
-  have hg : 0 ≤ gam l := div_nonneg (by linarith) (by nlinarith)
-  have h4 := mul_le_mul_of_nonneg_left h3 hg
-  have h5 := mul_le_mul_of_nonneg_left h2 hθ0
-  have h6 : 0 ≤ θ * ((∑ a, (n : ℝ) * w a) / l) :=
-    mul_nonneg hθ0 (div_nonneg (Finset.sum_nonneg fun a _ => hnw a) (by linarith))
-  have h7 : 6 * θ * n * (∑ a, w a) / l = 6 * (θ * ((∑ a, (n : ℝ) * w a) / l)) := by
-    rw [← Finset.mul_sum]; ring
-  rw [← fScale l d (by omega) T (fun a => (n : ℝ) * W a) hT.le
-    (fun a => mul_nonneg hn (hW0 a)), h7]
-  unfold Fnum
-  linarith
-
-theorem thetaConst : ThetaConst := by
-  intro n m D T hm hD hT h
-  have hm' : (0 : ℝ) < m := by exact_mod_cast hm
-  have hn : (0 : ℝ) ≤ n := Nat.cast_nonneg n
-  rw [div_le_iff₀ hm'] at h
-  have e : 6 * ((D + 4) / T) * n = 6 * (D + 4) * n / T := by ring
-  rw [e, div_le_iff₀ hT]
-  nlinarith [mul_nonneg hn (sub_nonneg.2 hD)]
-
-theorem main : FScale ∧ ThetaShift ∧ ThetaConst := ⟨fScale, thetaShift, thetaConst⟩
 
 end GlobalTheory.FlowScaling

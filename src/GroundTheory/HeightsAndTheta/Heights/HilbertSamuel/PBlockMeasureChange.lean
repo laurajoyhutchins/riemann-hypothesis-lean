@@ -1,8 +1,55 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsBlockMeasureChange
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsSupBoundBlock
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.SupBoundCountLattice
-import GroundTheory.HeightsAndTheta.Heights.MatrixCharts.DetIneq
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsBlockMeasureChange
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsSupBoundBlock
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.SupBoundCountLattice
+public import GroundTheory.HeightsAndTheta.Heights.MatrixCharts.DetIneq
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.SupBoundCountIntegrals
+import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsSupBoundCount
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.HilbertSamuel
@@ -89,8 +136,8 @@ theorem det_le {r : ℕ} {G G' : Matrix (Fin r) (Fin r) ℝ} (hG : G.IsHermitian
 
 end BlockMeasureChange
 
-open BlockMeasureChange in
 
+open BlockMeasureChange in
 theorem BlockMeasureChange.proof (hS : SupBoundBlock.Statement) : BlockMeasureChange.Statement := by
   intro D K _ _ ι _ Ω _ _ d d' hy hk hA
   obtain ⟨C, hC, hsup⟩ := sup_one_le hS d
@@ -119,10 +166,10 @@ theorem BlockMeasureChange.proof (hS : SupBoundBlock.Statement) : BlockMeasureCh
       rw [hy, hk]; exact hex
     have e1 : blockChi d n = -(1 / 2) *
         Real.log (blockGram d n (fun j => map (Int.castRingHom ℚ) (f j))).det := by
-      rw [blockChi, dif_pos hex, hbf]
+      rw [blockChi, dite_eq_left hex, hbf]
     have e2 : blockChi d' n = -(1 / 2) *
         Real.log (blockGram d' n (fun j => map (Int.castRingHom ℚ) (f j))).det := by
-      rw [blockChi, dif_pos hex', hsame _ _ hy hk hex', hbf]
+      rw [blockChi, dite_eq_left hex', hsame _ _ hy hk hex', hbf]
     set G := blockGram d n (fun j => map (Int.castRingHom ℚ) (f j))
     set G' := blockGram d' n (fun j => map (Int.castRingHom ℚ) (f j))
     have hnR : (1 : ℝ) ≤ n := by exact_mod_cast hn

@@ -1,11 +1,63 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsSBArgs
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GridMovedTensorBoundedSupportLocallyConstantStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FlatTensorDependsBelowAndSmallTranslationInvariaStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FlatTensorSupportBoundedByUniformizerPowStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FlatTensorVanishesUnlessLastRowBoundedStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsFinsetCosetRepsBoundedHalfPointsStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IndicatorSmallCosetHalfIsSchwartzBruhatStatement
+module
+
+public import Formalism.DoubleCosetMeasures.StatementZ
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsSBArgs
+public import Development.AbelianVarietyTheory.Definitions.Divisors.InvVolConjLevelOne
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsFinsetCosetRepsBoundedHalfPointsStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsIdempotentSumAuxiliaryPlaces
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FiniteUnfSupportOfNeOne
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FlatTensorDependsBelowAndSmallTranslationInvariaStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FlatTensorSupportBoundedByUniformizerPowStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FlatTensorVanishesUnlessLastRowBoundedStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HasCompactSupportFlatIntegrand
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IndicatorSmallCosetHalfIsSchwartzBruhatStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MemGlLatCongOfSmul
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MemMatLatSmulBlockLat
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.UnderMemAndPlaceAboveEqOfMem
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ValuationLeOneOfMem
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.PadicIsNonarchimedeanLocalField
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.NsmulProjectionXColumnsMemSelfDualLattice
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ParahoricLevelLiftsExist
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -274,7 +326,7 @@ theorem frAt_neg (w : Pl D.host.E) {a b : ℕ} (β' : GL (Fin b) (Lev.EAf D)) (�
 theorem colAt_eq (S : GridChoice W U) (t : T) (w : Pl D.host.E) (x : ∀ j : Fin D.R.m, WO (G.V (.top j)) (G.V (.top (j + 1))))
     {j : ℕ} (h : j < D.R.m) : S.colAt t w x j = (frAt w (S.βp (j + 1)) (S.βp j) (x ⟨j, h⟩)).submatrix
       (Fin.cast (topRank_eq G t w h)) (Fin.cast (topRank_eq G t w h.le)) := by
-  rw [GridChoice.colAt, dif_pos h, frAt, Comparison₂.fr, Matrix.map_mul, Matrix.map_mul, ← map_inv]
+  rw [GridChoice.colAt, dite_eq_left h, frAt, Comparison₂.fr, Matrix.map_mul, Matrix.map_mul, ← map_inv]
   rfl
 
 theorem rowAt_eq (S : GridChoice W U) (t : T) (w : Pl D.host.E)
@@ -284,7 +336,7 @@ theorem rowAt_eq (S : GridChoice W U) (t : T) (w : Pl D.host.E)
       (Fin.cast (rank_vertex G t w (X := (i + 1, D.R.m)) ⟨h, le_rfl⟩)) := by
   have e1 : Matrix.map (y ⟨i, h⟩) ((cpt w).comp (toEAf D)) = ((y ⟨i, h⟩).map (toEAf D)).map (cpt (D := D) w) := by
     ext; rfl
-  rw [GridChoice.rowAt, dif_pos h, e1, Comparison₂.coord_map]
+  rw [GridChoice.rowAt, dite_eq_left h, e1, Comparison₂.coord_map]
   rfl
 
 theorem colAt_add (S : GridChoice W U) (t : T) (w : Pl D.host.E) (x a : ∀ j : Fin D.R.m, WO (G.V (.top j)) (G.V (.top (j + 1)))) :
@@ -311,8 +363,8 @@ section Abstract
 variable {ι κ : Type} [Fintype ι] [DecidableEq ι] [Fintype κ] [DecidableEq κ] {A : ι → Type} [∀ j, AddCommGroup (A j)]
   {B : κ → Type} [∀ i, AddCommGroup (B i)]
 
-open Classical in
 
+open Classical in
 theorem sum_reps_eq (SA : ∀ j, A j → Prop) (SB : ∀ i, B i → Prop) (BA : ∀ j, A j → Prop) (BB : ∀ i, B i → Prop)
     (hSA : ∀ j a b, SA j a → SA j b → SA j (a - b)) (hSB : ∀ i a b, SB i a → SB i b → SB i (a - b))
     (R : ∀ j, Finset (A j)) (R' : ∀ i, Finset (B i))
@@ -384,8 +436,8 @@ theorem exists_idemSum_locPl' {μ₀ : T} (hL : L.Is μ₀) (G : GridData L sc) 
     | exact GlobalTheory.ParahoricLift.exists_isIdemAt fun h => (hL.Q_pl t w b).2 w b ((GlobalTheory.IdemSupport.isConjPl_iff _ _).2 h)
     | exact GlobalTheory.ParahoricLift.exists_isIdemAt fun h => (hL.Q_pl t w b).2 w b ((GlobalTheory.IdemSupport.isConjPl_iff _ _).1 h)
 
-variable (G) in
 
+variable (G) in
 def finDatOf (t : T) (p : Pair T) {e : AE D} (he : IsIdemSum e (locPl G t)) (f : WO (G.pS p) (G.pT p) → ℂ)
     (hf : IsSBHalf e (latO (G.pS p) (G.pT p) (G.latS p : Set _) (G.latT p : Set _) fun _ => True) f) : FinDatum G t p :=
   { FinDatum.ind G t p (locPl G t) (fun _ hw => (Good.locPl_cases hw).elim (fun h => .inl h.1)
@@ -456,12 +508,34 @@ theorem isLattice_grid_succ (G : GridData L sc) {i : ℕ} (hi : i + 1 ≤ D.R.m)
 theorem isLattice_X {μ₀ : T} (hL : L.Is μ₀) : Submodule.IsLattice D.host.E L.ΛX := by
   obtain ⟨c, hc⟩ := hL.βX
   obtain ⟨h1, h2⟩ := GlobalTheory.ParahoricLift.base_lattice hc
-  exact ⟨h1, h2⟩
+  exact Submodule.IsLattice.of_fg D.host.E h1
 
 theorem isLattice_grid_zero {μ₀ : T} (hL : L.Is μ₀) (G : GridData L sc) :
     Submodule.IsLattice D.host.E (G.Λ (.grid 0 D.R.m)) := by
   have key : ∀ X : LSp D, X = ⟨D.sp.X', L.ΛX⟩ → Submodule.IsLattice D.host.E X.lat := by
     rintro _ rfl; exact isLattice_X hL
+  exact key (columnBlock L D.R.m) (colY_m L)
+
+theorem isFullLattice_top (G : GridData L sc) {j : ℕ} (hj : j ≤ D.R.m) :
+    Submodule.IsFullLattice D.host.E (G.Λ (.top j)) :=
+  GlobalTheory.ProjXCols.selfDual_isFullLattice _ _
+    (G.isV (X := .top j) hj fun _ e => by cases e).sd
+
+theorem isFullLattice_grid_succ (G : GridData L sc) {i : ℕ} (hi : i + 1 ≤ D.R.m) :
+    Submodule.IsFullLattice D.host.E (G.Λ (.grid (i + 1) D.R.m)) :=
+  GlobalTheory.ProjXCols.selfDual_isFullLattice _ _
+    (G.isV (X := .grid (i + 1) D.R.m) ⟨hi, le_rfl⟩ fun j e => by injection e with h1; omega).sd
+
+theorem isFullLattice_X {μ₀ : T} (hL : L.Is μ₀) : Submodule.IsFullLattice D.host.E L.ΛX := by
+  obtain ⟨c, hc⟩ := hL.βX
+  obtain ⟨hfg, hspan⟩ := GlobalTheory.ParahoricLift.base_lattice hc
+  letI : Submodule.IsLattice D.host.E L.ΛX := Submodule.IsLattice.of_fg D.host.E hfg
+  exact ⟨hspan⟩
+
+theorem isFullLattice_grid_zero {μ₀ : T} (hL : L.Is μ₀) (G : GridData L sc) :
+    Submodule.IsFullLattice D.host.E (G.Λ (.grid 0 D.R.m)) := by
+  have key : ∀ X : LSp D, X = ⟨D.sp.X', L.ΛX⟩ → Submodule.IsFullLattice D.host.E X.lat := by
+    rintro _ rfl; exact isFullLattice_X hL
   exact key (columnBlock L D.R.m) (colY_m L)
 
 end Lat
@@ -475,19 +549,21 @@ theorem isSBHalf_cosLoc_top (S : GridChoice W U) (t : T) {e : AE D} (he : IsIdem
     IsSBHalf e (latO (G.pS (.top t j)) (G.pT (.top t j)) (G.latS (.top t j) : Set _) (G.latT (.top t j) : Set _) fun _ => True)
       (cosLoc (locPl G t) e (S.βp (j + 1)) (S.βp j) N r) :=
   GlobalTheory.T.indicator_smallCoset_half_isSchwartzBruhat (G.V (.top j)) (G.V (.top (j + 1))) (G.Λ (.top j)) (G.Λ (.top (j + 1))) (S.βp j) (S.βp (j + 1)) (locPl G t) e N r
-    (isLattice_top G j.2.le) (isLattice_top G j.2) (S.βp_is j j.2.le) (S.βp_is (j + 1) j.2) he hr
+    (by first | exact isFullLattice_top G j.2.le | exact (isFullLattice_top G j.2.le).toIsLattice)
+    (by first | exact isFullLattice_top G j.2 | exact (isFullLattice_top G j.2).toIsLattice) (S.βp_is j j.2.le) (S.βp_is (j + 1) j.2) he hr
 
 theorem isSBHalf_cosLoc_chi {μ₀ : T} (hL : L.Is μ₀) (S : GridChoice W U) (t : T) {e : AE D} (he : IsIdemSum e (locPl G t))
     (N : ℕ) (i : Fin D.R.m) {r : WO (G.pS (.chi i D.R.m)) (G.pT (.chi i D.R.m))} (hr : IsHalf e r) :
     IsSBHalf e (latO (G.pS (.chi i D.R.m)) (G.pT (.chi i D.R.m)) (G.latS (.chi i D.R.m : Pair T) : Set _)
       (G.latT (.chi i D.R.m : Pair T) : Set _) fun _ => True)
       (cosLoc (locPl G t) e (S.B.β i D.R.m) (S.B.β (i + 1) D.R.m) N r) := by
-  have hT : Submodule.IsLattice D.host.E (G.Λ (.grid i D.R.m)) := by
+  have hT : Submodule.IsFullLattice D.host.E (G.Λ (.grid i D.R.m)) := by
     rcases i with ⟨_ | i, hi⟩
-    · exact isLattice_grid_zero hL G
-    · exact isLattice_grid_succ G hi.le
+    · exact isFullLattice_grid_zero hL G
+    · exact isFullLattice_grid_succ G hi.le
   exact GlobalTheory.T.indicator_smallCoset_half_isSchwartzBruhat (G.pS (.chi i D.R.m)) (G.pT (.chi i D.R.m)) (G.Λ (.grid (i + 1) D.R.m)) (G.Λ (.grid i D.R.m))
-    (S.B.β (i + 1) D.R.m) (S.B.β i D.R.m) (locPl G t) e N r (isLattice_grid_succ G i.2) hT
+    (S.B.β (i + 1) D.R.m) (S.B.β i D.R.m) (locPl G t) e N r (by first | exact isFullLattice_grid_succ G i.2 | exact (isFullLattice_grid_succ G i.2).toIsLattice)
+    (by first | exact hT | exact hT.toIsLattice)
     (S.B.isFrame_β hL i.2 le_rfl) (S.B.isFrame_β hL i.2.le le_rfl) he hr
 
 end SBs
@@ -496,7 +572,7 @@ section Main
 
 variable {D : D7} {T : Type} {L : LevCh D T} {sc : Consts} {G : GridData L sc} {W : G.Weil} {U : Set T}
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem GridChoice.exists_isCosExpansion {μ₀ : T} (hL : L.Is μ₀) (S : GridChoice W U) (t : T) (Φ : G.Datum)
     (hde : Nat.Coprime D.host.pde (D.host.QS * D.host.q) ∧ Nat.Coprime D.host.pde' (D.host.QS * D.host.q))
@@ -598,7 +674,7 @@ theorem GridChoice.exists_isCosExpansion {μ₀ : T} (hL : L.Is μ₀) (S : Grid
   · intro d' hd'
     obtain ⟨κ, -, rfl⟩ := Finset.mem_image.1 (Finsupp.mapDomain_support hd')
     refine ⟨rX κ, rY κ, fun j => (hR1 j _ (κ.1 j).2).1, fun i => (hR1' i _ (κ.2 i).2).1, fun j => rfl, fun i => rfl, ?_⟩
-    rw [Finsupp.mapDomain_apply hinj]
+    rw [Finsupp.mapDomain_apply_of_injective hinj]
     rfl
 
 theorem GridChoice.sumOK_flat_fin_ex {μ₀ : T} (hL : L.Is μ₀) (S : GridChoice W U) (t : T) (Φ : G.Datum)

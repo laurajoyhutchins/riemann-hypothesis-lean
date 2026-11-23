@@ -1,6 +1,54 @@
-import Mathlib
-import Formalism.PairingDivisors.StatementA
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsFinSetSplitPlacesCoprimeConductor
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.EntireEqOfHalfPlane
+public import Mathlib.NumberTheory.LSeries.RiemannZeta
+import Mathlib.Algebra.AffineMonoid.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+public import Mathlib.NumberTheory.EulerProduct.DirichletLSeries
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+public import Mathlib.NumberTheory.RamificationInertia.Basic
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.Ideal.Int
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open NumberField IsDedekindDomain GlobalTheory.CMVal
 
 noncomputable section
@@ -129,7 +177,7 @@ theorem prod_fac_le_zeta (T : Finset Nat.Primes) : ∏ p ∈ T, fac ((p : ℕ) :
   filter_upwards [Filter.eventually_ge_atTop T] with T' hT
   rw [← Finset.prod_sdiff hT]
   have h1 : 1 ≤ ∏ p ∈ T' \ T, fac ((p : ℕ) : ℝ) :=
-    by simpa using Finset.prod_le_prod (s := T' \ T) (f := fun _ => (1:ℝ)) (fun _ _ => zero_le_one) (fun p _ => one_le_fac (by exact_mod_cast p.2.two_le))
+    by simpa using Finset.prod_le_prod₀ (s := T' \ T) (f := fun _ => (1:ℝ)) (fun _ _ => zero_le_one) (fun p _ => one_le_fac (by exact_mod_cast p.2.two_le))
   have h0 : 0 ≤ ∏ p ∈ T, fac ((p : ℕ) : ℝ) :=
     Finset.prod_nonneg fun p _ => le_trans zero_le_one (one_le_fac (by exact_mod_cast p.2.two_le))
   nlinarith
@@ -150,10 +198,10 @@ theorem prod_fac_absNorm_le (F : Finset (HeightOneSpectrum (𝓞 E))) :
   let g : HeightOneSpectrum (𝓞 E) → Nat.Primes := fun v => ⟨ratPrime v, ratPrime_prime v⟩
   have hg2 : ∀ v, (2 : ℝ) ≤ ((g v : ℕ) : ℝ) := fun v => by exact_mod_cast (ratPrime_prime v).two_le
   have step1 : ∏ v ∈ F, fac (Ideal.absNorm v.asIdeal : ℝ) ≤ ∏ v ∈ F, fac ((g v : ℕ) : ℝ) :=
-    Finset.prod_le_prod (fun v _ => le_trans zero_le_one (one_le_fac (le_trans (hg2 v) (by exact_mod_cast ratPrime_le_absNorm v))))
+    Finset.prod_le_prod₀ (fun v _ => le_trans zero_le_one (one_le_fac (le_trans (hg2 v) (by exact_mod_cast ratPrime_le_absNorm v))))
       (fun v _ => fac_anti (hg2 v) (by exact_mod_cast ratPrime_le_absNorm v))
   rw [Finset.prod_comp (fun p : Nat.Primes => fac ((p : ℕ) : ℝ)) g] at step1
-  refine le_trans step1 (le_trans (Finset.prod_le_prod (g := fun p : Nat.Primes => fac ((p : ℕ) : ℝ) ^ Module.finrank ℚ E) (fun p _ => ?_) (fun p _ => ?_)) ?_)
+  refine le_trans step1 (le_trans (Finset.prod_le_prod₀ (g := fun p : Nat.Primes => fac ((p : ℕ) : ℝ) ^ Module.finrank ℚ E) (fun p _ => ?_) (fun p _ => ?_)) ?_)
   · exact pow_nonneg (le_trans zero_le_one (one_le_fac (by exact_mod_cast p.2.two_le))) _
   · refine pow_le_pow_right₀ (one_le_fac (by exact_mod_cast p.2.two_le)) ?_
     have : (F.filter fun v => g v = p) = F.filter fun v => ratPrime v = (p : ℕ) := by
@@ -174,9 +222,6 @@ theorem norm_heckeL_le (E : Type) [Field E] [NumberField E] (χ : HChar E) (Λ :
   refine le_of_tendsto' h' fun F => ?_
   simp only [Function.comp_apply]
   refine le_trans (Finset.norm_prod_le _ _) (le_trans ?_ (prod_fac_absNorm_le F))
-  exact Finset.prod_le_prod (fun v _ => norm_nonneg _) (fun v _ => norm_eulerFactor_le hU hS v)
+  exact Finset.prod_le_prod₀ (fun v _ => norm_nonneg _) (fun v _ => norm_eulerFactor_le hU hS v)
 
 end GlobalTheory.HeckeLBound
-
-example : ∀ (E : Type) [Field E] [NumberField E] (χ : HChar E) (Λ : ℂ → ℂ) (S : ℂ), IsUnitary χ → IsHeckeL χ Λ → 3 / 2 ≤ S.re → ‖Λ S‖ ≤ ‖riemannZeta (3 / 2)‖ ^ Module.finrank ℚ E :=
-  GlobalTheory.HeckeLBound.norm_heckeL_le

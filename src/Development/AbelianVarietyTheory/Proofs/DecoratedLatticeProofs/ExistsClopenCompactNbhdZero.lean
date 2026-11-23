@@ -1,7 +1,60 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.IntegralFiniteAdeleCompactClosedMultiples
+module
+
+public import Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow
+public import Formalism.SharpRestriction.GlobalSchurBounds.GeneralLinearActions.GenusMassVolumes
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.IntegralFiniteAdeleCompactClosedMultiples
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.ModerateGrowthSchwartz
+import Development.AbelianVarietyTheory.Definitions.Foundations.AestronglyMeasurableQuotMeasureIffLift
+import Development.AbelianVarietyTheory.Definitions.Foundations.EventuallyEqOfIsPreconnected
+import Development.AbelianVarietyTheory.Definitions.Foundations.IsIwasawaOfIsCompact
+import Development.AbelianVarietyTheory.Definitions.LatticeFrames.HeckeFormNSOfHeckeForm
+import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.CovolOneIntegralAdd
+import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.MixSDblDecZero
 import Development.AbelianVarietyTheory.PublishedTheorems.SiegelWeil₂.SiegelWeilUnitarySchrodinger
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.HalfData
+import Formalism.LocalRingCardinality.DataTheta
+import Formalism.LocalToGlobal.BesselHermitianTheta.NoncompactGapAtLeastRange
+import Formalism.LocalToGlobal.IndefiniteReal.LocalNewformFunction
+import Formalism.LocalToGlobal.ProjectiveLattices.ErealAddIInf
+
+@[expose] public section
+
 open scoped Matrix NNReal ComplexConjugate TensorProduct
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.L2.Theta Formalism.L2.Pj Formalism.IndefR.Datum MeasureTheory IsDedekindDomain NumberField
 open GlobalTheory.AutomorphicL2Unitary GlobalTheory.AdelicU GlobalTheory.Doubling GlobalTheory.Cont GlobalTheory.MixModel GlobalTheory.Core.Rk.SWLaw GlobalTheory.Core.Rk.SW GlobalTheory.StdUnn
@@ -38,22 +91,20 @@ section Tens
 
 variable (F : Type) [Field F] [NumberField F] (E : Type) [Field E] [Algebra F E] [FiniteDimensional F E]
 
-local notation "A" => FiniteAdeleRing (𝓞 F) F
+noncomputable def coordEquiv : ((Af F) ⊗[F] E) ≃ₗ[(Af F)] (Module.Free.ChooseBasisIndex F E → (Af F)) :=
+  (Algebra.TensorProduct.basis (Af F) (Module.Free.chooseBasis F E)).equivFun
 
-noncomputable def coordEquiv : (A ⊗[F] E) ≃ₗ[A] (Module.Free.ChooseBasisIndex F E → A) :=
-  (Algebra.TensorProduct.basis A (Module.Free.chooseBasis F E)).equivFun
-
-local instance : IsModuleTopology A (A ⊗[F] E) := ⟨rfl⟩
+local instance : IsModuleTopology (Af F) ((Af F) ⊗[F] E) := ⟨rfl⟩
 
 theorem continuous_coordEquiv : Continuous (coordEquiv F E) :=
   IsModuleTopology.continuous_of_linearMap (coordEquiv F E).toLinearMap
 
 theorem continuous_coordEquiv_symm : Continuous (coordEquiv F E).symm := by
-  haveI : ContinuousAdd (A ⊗[F] E) := IsModuleTopology.toContinuousAdd A _
-  haveI : ContinuousSMul A (A ⊗[F] E) := IsModuleTopology.toContinuousSMul A _
+  haveI : ContinuousAdd ((Af F) ⊗[F] E) := IsModuleTopology.toContinuousAdd (Af F) _
+  haveI : ContinuousSMul (Af F) ((Af F) ⊗[F] E) := IsModuleTopology.toContinuousSMul (Af F) _
   exact IsModuleTopology.continuous_of_linearMap (coordEquiv F E).symm.toLinearMap
 
-def intTens : Set (A ⊗[F] E) := coordEquiv F E ⁻¹' Set.univ.pi (fun _ => intAf F)
+noncomputable def intTens : Set ((Af F) ⊗[F] E) := coordEquiv F E ⁻¹' Set.univ.pi (fun _ => intAf F)
 
 theorem isClopen_intTens : IsClopen (intTens F E) :=
   ⟨(isClosed_set_pi fun _ _ => isClosed_intAf F).preimage (continuous_coordEquiv F E),
@@ -71,7 +122,7 @@ theorem isCompact_intTens : IsCompact (intTens F E) := by
     rw [LinearEquiv.apply_symm_apply]
     exact hy
 
-theorem zero_mem_intTens : (0 : A ⊗[F] E) ∈ intTens F E := by
+theorem zero_mem_intTens : (0 : (Af F) ⊗[F] E) ∈ intTens F E := by
   intro i _
   rw [map_zero]
   exact zero_mem_intAf F

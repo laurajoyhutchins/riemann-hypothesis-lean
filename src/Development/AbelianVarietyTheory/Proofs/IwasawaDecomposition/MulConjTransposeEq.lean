@@ -1,8 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.FirstIndexEqOfUnfolded
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.FirstIndexEqOfUnfolded
+public import Mathlib.Data.Matrix.ColumnRowPartitioned
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsMoebZero
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsOpenAndFderivMoebI
 import Development.AbelianVarietyTheory.Proofs.TorusHaarMeasure.ExistsIntMulIntegral
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsOpenAndFderivMoebI
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsMoebZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.KaUnfoldPf
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.KaUnfoldPfB
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.OrthoStatementPf
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -99,10 +146,10 @@ theorem mul_conjTranspose_eq {g : GL (Fin p ⊕ Fin q) ℂ} (hg : g ∈ Upq p q)
   ext a b
   have e : ∀ a c, fromRows G.toBlocks₁₂ G.toBlocks₂₂ a c = G a (Sum.inr c) := by
     rintro (a | a) c <;> rfl
-  simp only [Jpq, Matrix.add_apply, Matrix.smul_apply, mul_apply, conjTranspose_apply, Fintype.sum_sum_type, e,
-    fromBlocks_apply₁₁, fromBlocks_apply₁₂, fromBlocks_apply₂₁, fromBlocks_apply₂₂, one_apply, Matrix.neg_apply,
+  simp only [Jpq, Matrix.add_apply, Matrix.smul_apply, Matrix.mul_apply, conjTranspose_apply, Fintype.sum_sum_type, e,
+    fromBlocks_apply₁₁, fromBlocks_apply₁₂, fromBlocks_apply₂₁, fromBlocks_apply₂₂, Matrix.neg_apply,
     Matrix.zero_apply]
-  simp
+  simp [Matrix.one_apply]
   ring
 
 theorem continuousAt_majMat {w : Matrix (Fin p) (Fin q) ℂ} (hw : w ∈ hcDom p q) : ContinuousAt majMat w := by
@@ -134,7 +181,7 @@ theorem exists_bound {w : Matrix (Fin p) (Fin q) ℂ} (hw : w ∈ hcDom p q) :
   rw [← e, ← mul_conjTranspose_eq hg] at hw'
   refine Real.le_sqrt_of_sq_le (le_trans ?_ hw'.le)
   have e2 : (g.1 * g.1ᴴ).trace = ((∑ a, ∑ b, ‖g.1 a b‖ ^ 2 : ℝ) : ℂ) := by
-    simp [trace, mul_apply, Complex.mul_conj']
+    simp [trace, Matrix.mul_apply, Complex.mul_conj']
   rw [e2, Complex.norm_real]
   refine le_trans ?_ (le_abs_self _)
   exact (Finset.single_le_sum (f := fun b => ‖g.1 a b‖ ^ 2) (fun _ _ => by positivity) (Finset.mem_univ b)).trans
@@ -142,7 +189,7 @@ theorem exists_bound {w : Matrix (Fin p) (Fin q) ℂ} (hw : w ∈ hcDom p q) :
 
 theorem norm_mul_mul_le {n : Type} [Fintype n] (A M B : Matrix n n ℂ) {C : ℝ} (h : ∀ a b, ‖M a b‖ ≤ C) (a b : n) :
     ‖(A * M * B) a b‖ ≤ ∑ d, (∑ c, ‖A a c‖ * C) * ‖B d b‖ := by
-  simp only [mul_apply]
+  simp only [Matrix.mul_apply]
   refine (norm_sum_le _ _).trans (Finset.sum_le_sum fun d _ => ?_)
   rw [norm_mul]
   refine mul_le_mul_of_nonneg_right ((norm_sum_le _ _).trans (Finset.sum_le_sum fun c _ => ?_)) (norm_nonneg _)
@@ -219,10 +266,12 @@ theorem exists_isFD : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (r 
     Subtype.coe_image_subset _ _, fun z hz => ?_, ?_⟩
   · obtain ⟨γ, h⟩ := h1 ⟨flat z, hz⟩
     exact ⟨_, ⟨γ, γ.2, rfl⟩, _, h, rfl⟩
-  · convert measure_empty (μ := muD Tau j (r - j))
-    refine Set.eq_empty_of_forall_notMem ?_
-    rintro _ ⟨⟨v, hv, rfl⟩, _, ⟨γ, hγ, rfl⟩, ⟨w, hw, e⟩, hne⟩
-    have e' : w = a ⟨γ, hγ⟩ v := Subtype.ext e
-    exact hne (congrArg (fun v => unflat v.1) (h2 v hv ⟨γ, hγ⟩ (e' ▸ hw)))
+  · have he : {z | z ∈ Subtype.val '' F ∧ ∃ γ ∈ gammaU X hj κ,
+        flat (moebI γ (unflat z)) ∈ Subtype.val '' F ∧ moebI γ (unflat z) ≠ unflat z} = ∅ := by
+      refine Set.eq_empty_of_forall_notMem ?_
+      rintro _ ⟨⟨v, hv, rfl⟩, _, ⟨γ, hγ, rfl⟩, ⟨w, hw, e⟩, hne⟩
+      have e' : w = a ⟨γ, hγ⟩ v := Subtype.ext e
+      exact hne (congrArg (fun v => unflat v.1) (h2 v hv ⟨γ, hγ⟩ (e' ▸ hw)))
+    rw [he, measure_empty]
 
 end GlobalTheory.BoundedFundDomain

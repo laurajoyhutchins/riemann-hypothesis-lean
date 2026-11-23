@@ -1,5 +1,55 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.FrobeniusSmoothVectors.EpresDefs
-import Development.AutomorphicArithmetic.AutomorphicVarieties.FrobeniusSmoothVectors.AlgTwist
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.FrobeniusSmoothVectors.EpresDefs
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.FrobeniusSmoothVectors.AlgTwist
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.AdicCompletion.Noetherian
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open IsLocalRing Matrix UpperTheory.V.Alg UpperTheory.V.U3 UpperTheory.V.Fr
 
@@ -71,7 +121,7 @@ private theorem tau_B (τ : S.R →ₐ[O] S.R)
       · rw [hm, e]; simp
       · exact h2 v i g
     | algebraMap r => exact τ.commutes r
-    | add a b _ _ ha hb => rw [map_add, ha, hb]
+    | add a b _ _ ha hb => rw [map_add (f := _), ha, hb]
     | mul a b _ _ ha hb => rw [map_mul, ha, hb]
   have hloc : (maximalIdeal S.R).map τ ≤ maximalIdeal S.R := by
     rw [Ideal.map_le_iff_le_comap]
@@ -106,7 +156,7 @@ private theorem ex_tauA : ∃ τ : S.A →ₐ[O] S.A,
       · rw [h1']
         exact mul_mem (pow_mem (neg_mem (one_mem _)) _) (S.r_mem g i j)
     | algebraMap r => rw [τ.commutes r]; exact S.A.algebraMap_mem r
-    | add a b _ _ ha hb => rw [map_add]; exact add_mem ha hb
+    | add a b _ _ ha hb => rw [map_add (f := τ)]; exact add_mem ha hb
     | mul a b _ _ ha hb => rw [map_mul]; exact mul_mem ha hb
   let τA : S.A →ₐ[O] S.A := (τ.comp S.A.val).codRestrict S.A fun a => hA a a.2
   have e1 : ∀ g i j, τA (S.u.r g i j) = sg S.A (pw i j) * S.u.r g i j := fun g i j =>
@@ -131,14 +181,14 @@ private theorem ex_tauA : ∃ τ : S.A →ₐ[O] S.A,
     have := map_sg (τA : S.A →+* S.A) (pw i j)
     rw [RingHom.coe_coe] at this
     rw [this, sg_sq, one_mul]
-  · rw [map_add, map_add, qa, qb]
+  · rw [map_add (f := _), map_add (f := _), qa, qb]
   · rw [map_mul, map_mul, qa, qb]
   · rw [e1, pw, ← neg_one_zpow_sg]
     rcases Int.even_or_odd (w 3 i - w 3 j) with h | h
     · rw [h.neg_one_zpow]; simp
     · exact sub_mem (Ideal.mul_mem_left _ _ (Ideal.subset_span ⟨g, i, j, h, rfl⟩))
         (Ideal.subset_span ⟨g, i, j, h, rfl⟩)
-  · rw [map_add, add_sub_add_comm]; exact add_mem qa qb
+  · rw [map_add (f := _), add_sub_add_comm]; exact add_mem qa qb
   · have : τA (a * b) - a * b = (τA a - a) * τA b + a * (τA b - b) := by rw [map_mul]; ring
     rw [this]
     exact add_mem (Ideal.mul_mem_right _ _ qa) (Ideal.mul_mem_left _ _ qb)

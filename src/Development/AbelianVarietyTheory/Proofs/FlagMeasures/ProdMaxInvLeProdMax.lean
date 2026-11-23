@@ -1,5 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.IsNormalFormStabilizerMeasure
+module
+
+public import Mathlib.Analysis.SpecialFunctions.Pow.Real
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.MatrixOfBesselTwoSidedAction
+import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.UpperOff
+import Formalism.FormalDegreeBessel.StatementWR
+import Formalism.SharpRestriction.CuspSpanNormBounds.Point
+
+@[expose] public section
 
 open MeasureTheory Matrix Formalism.QuantumDeterminants Formalism.MainNotions.S GlobalTheory.SgInf GlobalTheory.Amp
 open scoped InnerProductSpace ENNReal
@@ -27,7 +77,7 @@ theorem fold_max_le_prod_max {n : ℕ} (x : Fin n → ℝ) :
   have hone : ∀ s : Finset (Fin n), (1 : ℝ) ≤ ∏ l ∈ s, max 1 (x l) := by
     intro s
     calc (1 : ℝ) = ∏ _l ∈ s, (1 : ℝ) := Finset.prod_const_one.symm
-      _ ≤ ∏ l ∈ s, max 1 (x l) := Finset.prod_le_prod (fun _ _ => zero_le_one) (fun l _ => hge l)
+      _ ≤ ∏ l ∈ s, max 1 (x l) := Finset.prod_le_prod₀ (fun _ _ => zero_le_one) (fun l _ => hge l)
   refine (Finset.fold_max_le _).2 ⟨hone _, fun l _ => ?_⟩
   rw [← Finset.mul_prod_erase _ _ (Finset.mem_univ l)]
   calc x l ≤ max 1 (x l) * 1 := by rw [mul_one]; exact le_max_right _ _
@@ -48,23 +98,23 @@ theorem prod_fold_inv_le {ι : Type} [Fintype ι] {n : ℕ} (P : ℝ) (hP : 1 �
     rcases hD l with h0 | ⟨hpos, hprod⟩
     · calc ∏ v, max 1 (Dm v l)⁻¹ = ∏ _v : ι, (1 : ℝ) :=
             Finset.prod_congr rfl fun v _ => by simp [h0 v]
-        _ ≤ ∏ v, P * sg v := Finset.prod_le_prod (fun _ _ => zero_le_one) (fun v _ => hPsg v)
+        _ ≤ ∏ v, P * sg v := Finset.prod_le_prod₀ (fun _ _ => zero_le_one) (fun v _ => hPsg v)
     · calc ∏ v, max 1 (Dm v l)⁻¹ ≤ ∏ v, max 1 (Dm v l) :=
             prod_max_inv_le_prod_max (fun v => Dm v l) hpos hprod
         _ ≤ ∏ v, P * sg v := by
-          refine Finset.prod_le_prod (fun _ _ => le_trans zero_le_one (le_max_left _ _)) (fun v _ => ?_)
+          refine Finset.prod_le_prod₀ (fun _ _ => le_trans zero_le_one (le_max_left _ _)) (fun v _ => ?_)
           have h1 : Dm v l / P ≤ sg v := by
             rw [hsg v]; exact (Finset.le_fold_max _).2 (Or.inr ⟨l, Finset.mem_univ _, le_rfl⟩)
           refine max_le (hPsg v) ?_
           calc Dm v l = P * (Dm v l / P) := by field_simp
             _ ≤ P * sg v := mul_le_mul_of_nonneg_left h1 hP0.le
   calc ∏ v, De v ≤ ∏ v, ∏ l, max 1 (Dm v l)⁻¹ := by
-        refine Finset.prod_le_prod (fun v _ => ?_) (fun v _ => ?_)
+        refine Finset.prod_le_prod₀ (fun v _ => ?_) (fun v _ => ?_)
         · rw [hDe v]; exact le_trans zero_le_one ((Finset.le_fold_max _).2 (Or.inl le_rfl))
         · rw [hDe v]; exact fold_max_le_prod_max (fun l => (Dm v l)⁻¹)
     _ = ∏ l, ∏ v, max 1 (Dm v l)⁻¹ := Finset.prod_comm
     _ ≤ ∏ _l : Fin n, ∏ v, P * sg v :=
-        Finset.prod_le_prod (fun l _ => Finset.prod_nonneg fun v _ => le_trans zero_le_one (le_max_left _ _))
+        Finset.prod_le_prod₀ (fun l _ => Finset.prod_nonneg fun v _ => le_trans zero_le_one (le_max_left _ _))
           (fun l _ => hcol l)
     _ = ∏ v, (P * sg v) ^ n := by
         rw [Finset.prod_const, Finset.card_univ, Fintype.card_fin, Finset.prod_pow]

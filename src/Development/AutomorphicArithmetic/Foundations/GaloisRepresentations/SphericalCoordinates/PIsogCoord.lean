@@ -1,7 +1,47 @@
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.SphericalCoordinates.LevelChange
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GramFiberMeasuresChangeOfForm
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsLevelEqKN
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsCommonPosDenominatorOfIsCompactFiniteAdeleStatement
+module
+
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.SphericalCoordinates.LevelChange
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsCommonPosDenominatorOfIsCompactFiniteAdeleStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsLevelEqKN
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GramFiberMeasuresChangeOfForm
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor GlobalTheory GlobalTheory.PELU GlobalTheory.UPel.HT GlobalTheory.UPel.HT.Gen
@@ -37,6 +77,7 @@ private theorem exists_bound (k : Module.End (AfP p) (AfP p ⊗[ℚ] VQ D)) :
     let f : D.La →+ (AfP p ⊗[ℚ] VQ D) :=
       ((c • k).toAddMonoidHom).comp (AddMonoidHom.mk' (inAf D) GammaUniq.inAf_add)
     have hf : ∀ y, f y = (c • k) (inAf D y) := fun y => rfl
+
     rw [← hf, ← b.sum_repr x, map_sum]
     refine AddSubgroup.sum_mem _ (fun j _ => ?_)
     rw [map_zsmul]
@@ -68,7 +109,7 @@ variable (L : Link D G)
 
 private theorem rd_add (x : (AfP p ⊗[ℚ] G.C)ˣ) (g : G.GAf) (u w : VQ D) :
     rd L x g (u + w) = rd L x g u + rd L x g w := by
-  simp only [rd, TensorProduct.tmul_add, map_add]
+  simp only [rd, TensorProduct.tmul_add, map_add (f := _)]
 
 private theorem rd_nsmul (x : (AfP p ⊗[ℚ] G.C)ˣ) (g : G.GAf) (n : ℕ) (w : VQ D) :
     rd L x g (n • w) = n • rd L x g w := by
@@ -91,7 +132,7 @@ private theorem coord_of (x : (AfP p ⊗[ℚ] G.C)ˣ) {N : ℕ} {D' : PLat D.O D
   obtain ⟨u, hu⟩ := h a
   have hmem : rd L x g (j u) ∈ LaHat D := (hc.1 (j u)).mp ⟨0, u, by simp⟩
   refine ⟨w - rd L x g (j u), sub_mem hw hmem, ?_⟩
-  rw [hu, map_add, map_nsmul, rd_add, rd_nsmul] at he
+  rw [hu, map_add (f := _), map_nsmul, rd_add, rd_nsmul] at he
   rw [smul_sub, ← add_sub_assoc, ← he, add_sub_cancel_right]
 
 end UpperTheory.Gal.W2.IsogenyReduction
@@ -109,11 +150,11 @@ theorem UpperTheory.Gal.W2.isogCoord_of :
   obtain ⟨lift, hlift⟩ : ∃ lift : D''.La → D'.La, ∀ u'', inc (lift u'') = d • u'' :=
     ⟨fun u'' => (hd u'').choose, fun u'' => (hd u'').choose_spec⟩
   have hlift_add : ∀ a b, lift (a + b) = lift a + lift b := fun a b =>
-    hinc (by rw [map_add, hlift, hlift, hlift, smul_add])
+    hinc (by rw [map_add (f := _), hlift, hlift, hlift, smul_add])
   have hlift_inc : ∀ u, lift (inc u) = d • u := fun u => hinc (by rw [hlift, map_nsmul])
   obtain ⟨j'', hj''⟩ : ∃ j'' : D''.La →+ VQ D, ∀ u'', j'' u'' = (d : ℚ)⁻¹ • j (lift u'') :=
     ⟨AddMonoidHom.mk' (fun u'' => (d : ℚ)⁻¹ • j (lift u''))
-      (fun a b => by simp only [hlift_add, map_add, smul_add]), fun _ => rfl⟩
+      (fun a b => by simp only [hlift_add, map_add (f := _), smul_add]), fun _ => rfl⟩
   have hj''d : ∀ u'', (d : ℚ) • j'' u'' = j (lift u'') := by
     intro u''
     rw [hj'', smul_smul, mul_inv_cancel₀ hd', one_smul]
@@ -161,7 +202,7 @@ theorem UpperTheory.Gal.W2.isogCoord_of :
     intro w
     constructor
     · rintro ⟨m, u'', hm, hmw⟩
-      refine (hloc w).mp ⟨d * m, lift u'', Nat.Coprime.mul hdp hm, ?_⟩
+      refine (hloc w).mp ⟨d * m, lift u'', Nat.Coprime.mul_left hdp hm, ?_⟩
       rw [mul_smul, hmw, ← hj''d, Nat.cast_smul_eq_nsmul]
     · intro hw
       obtain ⟨m, u, hm, hmw⟩ := (hloc w).mpr hw
@@ -182,9 +223,9 @@ theorem UpperTheory.Gal.W2.isogCoord_of :
     have hrm : rd L (trivX B) h₂ (j'' e) ∈ LaHat D := ((hR₂ n hn hnp).1 (j'' e)).mp ⟨0, e, by simp⟩
     refine ⟨w₂ + rd L (trivX B) h₂ (j'' e) - wT, sub_mem (add_mem hw₂m hrm) hwTm, -w₃, neg_mem hw₃m, ?_⟩
     have eA : rd L (trivX B) h₂ (j (f n a)) = L.actG (h₂⁻¹ * h₃) (inAf D a) + n • L.actG (h₂⁻¹ * h₃) w₃ := by
-      rw [rd_eq L (trivX B) h₃ h₂, hw₃, map_add, map_nsmul]
+      rw [rd_eq L (trivX B) h₃ h₂, hw₃, map_add (f := _), map_nsmul]
     have eB : rd L (trivX B) h₂ (j (f n a)) = inAf D b + n • w₂ + n • rd L (trivX B) h₂ (j'' e) := by
-      rw [← hj''inc, he, map_add, map_nsmul, rd_add, rd_nsmul, hw₂]
+      rw [← hj''inc, he, map_add (f := _), map_nsmul, rd_add, rd_nsmul, hw₂]
     have e1 := eA.symm.trans eB
     rw [eq_sub_of_add_eq e1, hT]
     simp only [smul_add, smul_sub, map_neg, smul_neg]

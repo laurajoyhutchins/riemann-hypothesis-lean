@@ -1,5 +1,55 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.AutomorphicFormSpaces.ConstantTerm
+module
+
+public import GroundTheory.AutomorphicForms.AutomorphicFormSpaces.ConstantTerm
+public import GroundTheory.AutomorphicForms.AutomorphicFormSpaces.Uniform
+public import GroundTheory.AutomorphicForms.GKModules.ZKFinite
+public import Mathlib.RepresentationTheory.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Finiteness.Lattice
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Topology Filter Set
 open scoped NumberField.AdeleRing
@@ -19,9 +69,6 @@ def rightTranslateL (a : AdelicGLn.AdelicGL K n) :
   toFun := rightTranslate a
   map_add' _ _ := rfl
   map_smul' _ _ := rfl
-
-@[simp] theorem rightTranslateL_apply (a : AdelicGLn.AdelicGL K n) (φ : AdelicGLn.AdelicGL K n → ℂ) :
-    rightTranslateL a φ = rightTranslate a φ := rfl
 
 abbrev archPart (g : AdelicGLn.AdelicGL K n) : archGroup K n :=
   archEquiv K n (AdelicGLn.prodEquiv K n g).1
@@ -257,21 +304,17 @@ theorem IsKFinite.rightTranslate_finEmb {φ : AdelicGLn.AdelicGL K n → ℂ} (h
 
 theorem IsAutomorphicForm.rightTranslate_finEmb {φ : AdelicGLn.AdelicGL K n → ℂ}
     (hφ : IsAutomorphicForm φ) (h : AdelicGLn.FiniteAdelicGL K n) :
-    IsAutomorphicForm (rightTranslate (finEmb K n h) φ) where
-  isLeftInvariant := hφ.isLeftInvariant.translate _
-  isSmooth := hφ.isSmooth.rightTranslate_finEmb h
-  isKFinite := IsKFinite.rightTranslate_finEmb hφ.isSmooth hφ.isKFinite h
-  isZFinite := hφ.isZFinite.map_rtFin h
-  hasModerateGrowth := hφ.hasModerateGrowth.translate _
+    IsAutomorphicForm (rightTranslate (finEmb K n h) φ) :=
+  ⟨hφ.isLeftInvariant.translate _, hφ.isSmooth.rightTranslate_finEmb h,
+    IsKFinite.rightTranslate_finEmb hφ.isSmooth hφ.isKFinite h, hφ.isZFinite.map_rtFin h,
+    hφ.hasModerateGrowth.translate _⟩
 
 theorem IsAutomorphicForm.rightTranslate_infEmb {φ : AdelicGLn.AdelicGL K n → ℂ}
     (hφ : IsAutomorphicForm φ) {a : archGroup K n} (ha : a ∈ archCompact K n) :
-    IsAutomorphicForm (rightTranslate (infEmb K n a) φ) where
-  isLeftInvariant := hφ.isLeftInvariant.translate _
-  isSmooth := hφ.isSmooth.rightTranslate_infEmb a
-  isKFinite := hφ.isKFinite.rightTranslate_of_mem_maxCompact ha
-  isZFinite := hφ.isZFinite.map_rtInf a
-  hasModerateGrowth := hφ.hasModerateGrowth.translate _
+    IsAutomorphicForm (rightTranslate (infEmb K n a) φ) :=
+  ⟨hφ.isLeftInvariant.translate _, hφ.isSmooth.rightTranslate_infEmb a,
+    hφ.isKFinite.rightTranslate_of_mem_maxCompact ha, hφ.isZFinite.map_rtInf a,
+    hφ.hasModerateGrowth.translate _⟩
 
 theorem IsAutomorphicForm.rightTranslate_of_mem_maxCompact {φ : AdelicGLn.AdelicGL K n → ℂ}
     (hφ : IsAutomorphicForm φ) {k : AdelicGLn.AdelicGL K n} (hk : k ∈ maxCompact) :
@@ -288,7 +331,8 @@ variable (K n)
 def finRep : Representation ℂ (AdelicGLn.FiniteAdelicGL K n) (automorphicForms K n) where
   toFun h := (rightTranslateL (finEmb K n h)).restrict fun _ hφ => hφ.rightTranslate_finEmb h
   map_one' := LinearMap.ext fun φ => Subtype.ext (funext fun g => by
-    simp [GroundTheory.Automorphic.rightTranslate])
+    change φ.val (g * finEmb K n 1) = φ.val g
+    rw [map_one, mul_one])
   map_mul' h₁ h₂ := LinearMap.ext fun φ => Subtype.ext (funext fun g => by
     show (φ : AdelicGLn.AdelicGL K n → ℂ) (g * finEmb K n (h₁ * h₂)) =
       (φ : AdelicGLn.AdelicGL K n → ℂ) (g * finEmb K n h₁ * finEmb K n h₂)
@@ -297,7 +341,8 @@ def finRep : Representation ℂ (AdelicGLn.FiniteAdelicGL K n) (automorphicForms
 def archCompactRep : Representation ℂ (archCompact K n) (automorphicForms K n) where
   toFun k := (rightTranslateL (infEmb K n k)).restrict fun _ hφ => hφ.rightTranslate_infEmb k.2
   map_one' := LinearMap.ext fun φ => Subtype.ext (funext fun g => by
-    simp [GroundTheory.Automorphic.rightTranslate])
+    change φ.val (g * infEmb K n ((1 : archCompact K n) : archGroup K n)) = φ.val g
+    rw [OneMemClass.coe_one, map_one, mul_one])
   map_mul' k₁ k₂ := LinearMap.ext fun φ => Subtype.ext (funext fun g => by
     show (φ : AdelicGLn.AdelicGL K n → ℂ) (g * infEmb K n ((k₁ * k₂ : archCompact K n) : archGroup K n)) =
       (φ : AdelicGLn.AdelicGL K n → ℂ) (g * infEmb K n k₁ * infEmb K n k₂)
@@ -305,29 +350,14 @@ def archCompactRep : Representation ℂ (archCompact K n) (automorphicForms K n)
 
 variable {K n}
 
-@[simp] theorem coe_finRep_apply (h : AdelicGLn.FiniteAdelicGL K n) (φ : automorphicForms K n) :
-    ((finRep K n h φ : automorphicForms K n) : AdelicGLn.AdelicGL K n → ℂ) =
-      rightTranslate (finEmb K n h) (φ : AdelicGLn.AdelicGL K n → ℂ) := rfl
-
-@[simp] theorem coe_archCompactRep_apply (k : archCompact K n) (φ : automorphicForms K n) :
-    ((archCompactRep K n k φ : automorphicForms K n) : AdelicGLn.AdelicGL K n → ℂ) =
-      rightTranslate (infEmb K n k) (φ : AdelicGLn.AdelicGL K n → ℂ) := rfl
-
-theorem finRep_archCompactRep_comm (h : AdelicGLn.FiniteAdelicGL K n) (k : archCompact K n)
-    (φ : automorphicForms K n) :
-    finRep K n h (archCompactRep K n k φ) = archCompactRep K n k (finRep K n h φ) := by
-  apply Subtype.ext
-  funext g
-  simp only [coe_finRep_apply, coe_archCompactRep_apply, GroundTheory.Automorphic.rightTranslate,
-    mul_assoc, infEmb_mul_finEmb_comm]
-
 variable (K n)
 
 def finRepCusp : Representation ℂ (AdelicGLn.FiniteAdelicGL K n) (cuspForms K n) where
   toFun h := (rightTranslateL (finEmb K n h)).restrict fun _ hφ =>
     ⟨hφ.1.rightTranslate_finEmb h, hφ.2.translate _⟩
   map_one' := LinearMap.ext fun φ => Subtype.ext (funext fun g => by
-    simp [GroundTheory.Automorphic.rightTranslate])
+    change φ.val (g * finEmb K n 1) = φ.val g
+    rw [map_one, mul_one])
   map_mul' h₁ h₂ := LinearMap.ext fun φ => Subtype.ext (funext fun g => by
     show (φ : AdelicGLn.AdelicGL K n → ℂ) (g * finEmb K n (h₁ * h₂)) =
       (φ : AdelicGLn.AdelicGL K n → ℂ) (g * finEmb K n h₁ * finEmb K n h₂)
@@ -337,7 +367,8 @@ def archCompactRepCusp : Representation ℂ (archCompact K n) (cuspForms K n) wh
   toFun k := (rightTranslateL (infEmb K n k)).restrict fun _ hφ =>
     ⟨hφ.1.rightTranslate_infEmb k.2, hφ.2.translate _⟩
   map_one' := LinearMap.ext fun φ => Subtype.ext (funext fun g => by
-    simp [GroundTheory.Automorphic.rightTranslate])
+    change φ.val (g * infEmb K n ((1 : archCompact K n) : archGroup K n)) = φ.val g
+    rw [OneMemClass.coe_one, map_one, mul_one])
   map_mul' k₁ k₂ := LinearMap.ext fun φ => Subtype.ext (funext fun g => by
     show (φ : AdelicGLn.AdelicGL K n → ℂ) (g * infEmb K n ((k₁ * k₂ : archCompact K n) : archGroup K n)) =
       (φ : AdelicGLn.AdelicGL K n → ℂ) (g * infEmb K n k₁ * infEmb K n k₂)

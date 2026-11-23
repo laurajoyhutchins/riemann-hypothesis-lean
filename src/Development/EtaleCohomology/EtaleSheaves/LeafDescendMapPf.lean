@@ -1,4 +1,51 @@
-import Development.EtaleCohomology.EtaleSheaves.LeafDescendVCut
+module
+
+public import Development.EtaleCohomology.EtaleSheaves.LeafDescendVCut
+public import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 open CategoryTheory Limits AlgebraicGeometry Opposite LateralTheory.E.E4 LateralTheory.E.LeafDescendVCut
@@ -8,8 +55,6 @@ namespace LateralTheory.E.LeafDescendMapPf
 variable {k Ω : Type} [Field k] [Field Ω] [Algebra k Ω]
 
 abbrev J (R : Subalgebra k Ω) : Type := {S : Subalgebra k Ω // R ≤ S ∧ S.FG}
-
-instance (R : Subalgebra k Ω) : PartialOrder (J R) := inferInstanceAs (PartialOrder {S : Subalgebra k Ω // R ≤ S ∧ S.FG})
 
 instance (R : Subalgebra k Ω) : IsDirected (J R) (· ≤ ·) :=
   ⟨fun a b => ⟨⟨a.1 ⊔ b.1, le_sup_of_le_left a.2.1, a.2.2.sup b.2.2⟩, le_sup_left (a := a.1), le_sup_right (a := a.1)⟩⟩
@@ -65,8 +110,6 @@ def cocIsColimit (hR : R.FG) : IsColimit (coc R) := by
 def specLim (hR : R.FG) : IsLimit (Scheme.Spec.mapCone (coc R).op) :=
   isLimitOfPreserves Scheme.Spec (cocIsColimit R hR).op
 
-example (S : J R) : (Scheme.Spec.mapCone (coc R).op).π.app (op S) = toR S.1 := rfl
-
 end LateralTheory.E.LeafDescendMapPf
 
 namespace LateralTheory.E.LeafDescendMapPf
@@ -80,26 +123,12 @@ abbrev D : (J R)ᵒᵖ ⥤ Scheme.{0} where
   map_id S := by apply pullback.hom_ext <;> simp only [pullback.lift_fst, pullback.lift_snd, pullback.lift_fst_assoc, pullback.lift_snd_assoc, Category.assoc, Category.id_comp, Category.comp_id, Functor.const_obj_map, incl_incl, toR_incl, incl_self, incl_base, CategoryTheory.Functor.id_obj]
   map_comp f g := by apply pullback.hom_ext <;> simp only [pullback.lift_fst, pullback.lift_snd, pullback.lift_fst_assoc, pullback.lift_snd_assoc, Category.assoc, Category.id_comp, Category.comp_id, Functor.const_obj_map, incl_incl, toR_incl, incl_self, incl_base, CategoryTheory.Functor.id_obj]
 
-def tS : D R q ⟶ (Functor.const _).obj (Sp k) where
-  app S := pullback.snd _ _ ≫ Spec.map (CommRingCat.ofHom (algebraMap k S.unop.1))
-  naturality S T h := by
-    simp only [Functor.const_obj_map, Category.comp_id]
-    erw [pullback.lift_snd_assoc]
-    rw [Category.assoc, incl_base]
-    exact (Category.comp_id _).symm
-
 variable {C0 : Scheme.{0}} (c0 : C0 ⟶ Sp Ω) (v0 : C0 ⟶ D0) (hPB : IsPullback v0 c0 q (toR R))
 
 abbrev cone : Cone (D R q) where
   pt := C0
   π := { app S := pullback.lift v0 (c0 ≫ toR S.unop.1) (by rw [hPB.w, Category.assoc, toR_incl])
          naturality S T h := by apply pullback.hom_ext <;> (dsimp only [D]; simp only [pullback.lift_fst, pullback.lift_snd, pullback.lift_fst_assoc, pullback.lift_snd_assoc, Category.assoc, Category.id_comp, Category.comp_id, Functor.const_obj_map, incl_incl, toR_incl, incl_self, incl_base, CategoryTheory.Functor.id_obj]) <;> simp }
-
-instance (S : (J R)ᵒᵖ) [IsProper q] : CompactSpace ((D R q).obj S) := by
-  dsimp [D]; exact QuasiCompact.compactSpace_of_compactSpace (pullback.snd q _)
-
-instance (S : (J R)ᵒᵖ) [IsProper q] : QuasiSeparatedSpace ((D R q).obj S) := by
-  dsimp [D]; exact quasiSeparatedSpace_of_quasiSeparated (pullback.snd q _)
 
 lemma fstAff {S : Subalgebra k Ω} (h : R ≤ S) : IsAffineHom (pullback.fst q (incl h)) :=
   MorphismProperty.IsStableUnderBaseChange.of_isPullback (P := @IsAffineHom) (IsPullback.of_hasPullback q (incl h)).flip

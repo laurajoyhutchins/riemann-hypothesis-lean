@@ -1,4 +1,46 @@
-import Formalism.SharpRestriction.GrowthBounds.CoarseMultiplicity.LettersAtUpdate
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.CoarseMultiplicity.LettersAtUpdate
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -61,8 +103,8 @@ theorem cth_rename {τ : Type} (f : τ → σ) (hf : Function.Injective f) (x : 
     cth (f x) n (rename f y) = rename f (cth x n y) := by
   induction y using MvPolynomial.induction_on' with
   | monomial e c =>
-    rw [rename_monomial, cth_monomial, cth_monomial, rename_monomial, Finsupp.mapDomain_apply hf]
-  | add p q hp hq => rw [map_add, cth_add, cth_add, map_add, hp, hq]
+    rw [rename_monomial, cth_monomial, cth_monomial, rename_monomial, Finsupp.mapDomain_apply_of_injective hf]
+  | add p q hp hq => rw [map_add (f := _), cth_add, cth_add, map_add (f := _), hp, hq]
 
 theorem cth_X_pow (v : σ) (b z : ℕ) : cth v b ((X v : MvPolynomial σ K) ^ z) = (z.choose b) • (X v : MvPolynomial σ K) ^ z := by
   rw [X_pow_eq_monomial, cth_monomial, Finsupp.single_eq_same, one_mul, ← Nat.cast_smul_eq_nsmul K,
@@ -101,6 +143,7 @@ theorem Ehat_eq' {D : BlockData N} (hT : TieOK D) (i : Fin D.T.t) :
     D.Ehat O (r := r) i = X (scalZ N r D.T.t (Fin.castSucc i)) * X (scalS N r D.T.t (Fin.castSucc i)) +
       rename (chainEmb N r D.T.t) (pairP O r hT i) := by
   rw [Ehat_eq hT i]
+
   simp [pairP, map_sum, rename_X]
 
 theorem tieW_ne_tieE {D : BlockData N} (hT : TieOK D) (i i' : Fin D.T.t) : tieW hT i ≠ tieE hT i' := by
@@ -126,7 +169,7 @@ theorem nv_Eplus (D : BlockData N) {v : BVar N r D.T.t}
 theorem nv_xi {t b : ℕ} {v : BVar N r t} (h : ∀ c, v ≠ xiVar N r t c) {g : MvPolynomial (BVar N r t) (KK O)}
     (hg : g ∈ XiPolZ O N r t b) : v ∉ g.vars := by
   intro hv
-  obtain ⟨m, hm, hvm⟩ := (MvPolynomial.mem_vars v).1 hv
+  obtain ⟨m, hm, hvm⟩ := (MvPolynomial.mem_vars_iff_mem_support v).1 hv
   have h1 := (MvPolynomial.mem_restrictSupport_iff (KK O)).1 (Submodule.mem_inf.1 hg).1 hm
   obtain ⟨c, hc⟩ := h1.1 v hvm
   exact h c hc
@@ -143,7 +186,7 @@ theorem tail_chain (D : BlockData N) (jp : ℕ) (a0 : Fin N) (ha0 : a0 ≠ D.uPo
       ∀ μ ∈ F.support, μ (chainEmb N r D.T.t (a0, c)) = 0 := by
     intro F h μ hμ
     by_contra hne
-    exact h ((MvPolynomial.mem_vars _).2 ⟨μ, hμ, Finsupp.mem_support_iff.2 hne⟩)
+    exact h ((MvPolynomial.mem_vars_iff_mem_support _).2 ⟨μ, hμ, Finsupp.mem_support_iff.2 hne⟩)
   have hE : chainEmb N r D.T.t (a0, c) ∉ (D.Eplus O (r := r)).vars := by
     refine nv_Eplus D ?_ ?_ ?_ ?_
     · simp [chainEmb, scalZ]

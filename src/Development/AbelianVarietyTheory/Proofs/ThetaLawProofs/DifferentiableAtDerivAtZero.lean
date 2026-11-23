@@ -1,5 +1,56 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsLieBasis
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsLieBasis
+public import Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.LeviCivita
+public import Mathlib.NumberTheory.ModularForms.Discriminant
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.Matrix.FixedDetMatrices
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+public import Mathlib.NumberTheory.ModularForms.LevelOne.DimensionFormula
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -49,32 +100,6 @@ lemma _root_.GlobalTheory.JacobiDeriv.derivAtZero_add_one (τ : ℂ) :
   refine ⟨m, ?_⟩
   have hm' : ((n : ℂ) * (n + 1)) = (m : ℂ) + m := by exact_mod_cast hm
   linear_combination (π * I) * hm'
-
-theorem norm_term_eq (n : ℤ) (τ : ℂ) :
-    ‖jacobiTheta₂'_term n ((τ + 1) / 2) τ‖ =
-      2 * π * |(n : ℝ)| * Real.exp (-(π * (n * (n + 1)) * τ.im)) := by
-  rw [jacobiTheta₂'_term, norm_mul, norm_jacobiTheta₂_term]
-  congr 1
-  · simp [abs_of_pos Real.pi_pos]
-  · congr 1
-    simp
-    ring
-
-theorem norm_term_le {T : ℝ} (hT : 0 < T) (n : ℤ) {τ : ℂ} (hτ : T ≤ τ.im) :
-    ‖jacobiTheta₂'_term n ((τ + 1) / 2) τ‖ ≤
-      2 * π * (|(n : ℝ)| ^ 1 * Real.exp (-π * (T * n ^ 2 - 2 * (T / 2) * |(n : ℝ)|))) := by
-  rw [norm_term_eq, pow_one, mul_assoc]
-  have h0 : (0 : ℝ) ≤ n * (n + 1) := by
-    have : 0 ≤ n * (n + 1) := by
-      rcases le_or_gt 0 n with h | h
-      · positivity
-      · exact mul_nonneg_of_nonpos_of_nonpos h.le (by omega)
-    exact_mod_cast this
-  gcongr
-  have h1 := neg_abs_le (n : ℝ)
-  have h2 : π * (n * (n + 1)) * T ≤ π * (n * (n + 1)) * τ.im :=
-    mul_le_mul_of_nonneg_left hτ (mul_nonneg Real.pi_pos.le h0)
-  nlinarith [mul_le_mul_of_nonneg_left h1 (mul_pos Real.pi_pos hT).le]
 
 open Complex Filter in
 open scoped UpperHalfPlane MatrixGroups ModularForm Manifold Topology Real in
@@ -325,9 +350,9 @@ private lemma deriv_thetaChar_pow_eight_eq (τ : ℍ) :
   push_cast
   ring
 
+
 open Complex Filter in
 open scoped UpperHalfPlane MatrixGroups ModularForm Manifold Topology Real in
-
 theorem _root_.GlobalTheory.JacobiDeriv.deriv_thetaChar_pow_eight : ∀ τ : UpperHalfPlane,
     (deriv (fun z : ℂ => _root_.ReciprocityTheory.ChartRestriction.G.Geo.Tor.thetaChar (g := 1) !![(τ : ℂ)] ![1 / 2] ![1 / 2] ![z]) 0) ^ 8 =
       (2 * Real.pi : ℂ) ^ 8 * ModularForm.discriminant τ := by

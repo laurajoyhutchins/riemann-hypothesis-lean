@@ -1,26 +1,73 @@
-import Mathlib
-import Development.AutomorphicSpectrum.PublishedTheorems.Metrics₂.PoincareLelongInv
-import Development.AutomorphicSpectrum.PublishedTheorems.Metrics₂.PoincareLelong
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.BlowupProjections.BlowupProjStatement
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterRed
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterBridge
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterGood
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterDivSupp
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterFib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterSheet
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.PointsIntegrableOfResolutionStatement
+module
+
+public import Development.AutomorphicSpectrum.PublishedTheorems.Metrics₂.PoincareLelongInv
+public import Development.AutomorphicSpectrum.PublishedTheorems.Metrics₂.PoincareLelong
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.BlowupProjections.BlowupProjStatement
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.IsHorizontalTwist
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.FibreTwistEqUnionEmbeddingsStatement
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.FinitePrimesSumSquaresZeroStatement
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.HorizontalDivSuppTwistStatement
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.MultAtTwistQuadEqStatement
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.PointsIntegrableOfResolutionStatement
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.PtsIntegralConjLineEqStatement
 import Development.AutomorphicSpectrum.Proofs.MetricProofs.ResolutionExistsOfResolutionStatementStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.IsHorizontalTwist
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.FinitePrimesSumSquaresZeroStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.TwistIsPrimeStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.RingKrullDimTwistSuccStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.TwistIsMultiHomogIdealStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.MultAtTwistQuadEqStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.HorizontalDivSuppTwistStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.TwLineSmoothConjInvariantGlueStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.PtsIntegralConjLineEqStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.FibreTwistEqUnionEmbeddingsStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.TwistHeightIntegralDecompositionStatement
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.RingKrullDimTwistSuccStatement
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.TwLineSmoothConjInvariantGlueStatement
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.TwistHeightIntegralDecompositionStatement
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.TwistIsMultiHomogIdealStatement
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.TwistIsPrimeStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterBridge
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterDivSupp
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterFib
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterGood
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterRed
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 namespace GlobalTheory.CompanionTheory.Ar.Tw.Main
@@ -95,7 +142,7 @@ theorem isMultiHomog_inc {K : Type} [Fintype K] {ι : K → Type} [∀ k, Fintyp
     show ∑ i, (Finsupp.mapDomain oldIdx m0) ⟨some k, i⟩ = a k
     rw [← hs m0 hm0 k]
     refine Finset.sum_congr rfl fun i _ => ?_
-    exact Finsupp.mapDomain_apply (f := oldIdx (ι := ι)) oldIdx_injective m0 ⟨k, i⟩
+    exact Finsupp.mapDomain_apply_of_injective (f := oldIdx (ι := ι)) oldIdx_injective m0 ⟨k, i⟩
 
 theorem isSectionOn_twist {K : Type} [Fintype K] {ι : K → Type} [∀ k, Fintype (ι k)] {p : ℕ}
     {Q : Ideal (MRing ι)} {A : HermLine ι} {s : MRing ι} (hs : IsSectionOn Q A s) :
@@ -149,7 +196,7 @@ theorem twist_integral (hI : PtsIntegrableStatement) (hD : PtsIndepStatement)
     intro K' _ ι' _ P Φ M B t h1 h2 h3 h4 h5
     have hex : ∃ Φ : (((k : K') → ι' k) → ℂ) →ₗ[ℂ] (Fin (e + 1) → ℂ), IsGoodProj P Φ := ⟨Φ, h2⟩
     unfold ptsIntegral
-    rw [dif_pos hex]
+    rw [dite_eq_left hex]
     exact hD K' ι' P e _ Φ M B t h1 hex.choose_spec h2 h3 h4 h5
   rw [atOf hQ' hΨ hL' hA' hs', atOf hQ gp hL hA hs, atOf hQ gm hLc hAc hsc]
   have sp := GlobalTheory.T.twist_height_integral_decomposition K ι p Q e Ψ (fun j => twLine p (L j)) (twLine p A) L A s (vPlus p) hp hQ hQ' hΨ hL' hA' hs'

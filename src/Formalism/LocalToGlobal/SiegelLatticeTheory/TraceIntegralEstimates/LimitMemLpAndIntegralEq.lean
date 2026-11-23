@@ -1,4 +1,53 @@
-import Mathlib
+module
+
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.Analysis.InnerProductSpace.Basic
+public import Mathlib.MeasureTheory.Integral.Bochner.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.MeasureTheory.Function.L2Space
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -29,7 +78,7 @@ theorem lintegral_sq_eq {u : X → ℂ} (hu : MemLp u 2 μ) :
     ∫ x, ‖u x‖ ^ 2 ∂μ = (∫⁻ x, ‖u x‖ₑ ^ 2 ∂μ).toReal := by
   have h0 : 0 ≤ᵐ[μ] fun x => ‖u x‖ ^ 2 := ae_of_all _ fun x => by
     exact sq_nonneg _
-  rw [integral_eq_lintegral_of_nonneg_ae h0 (aestronglyMeasurable_norm_sq hu.1)]
+  rw [integral_eq_lintegral_of_nonneg_ae h0 (aestronglyMeasurable_norm_sq hu.aestronglyMeasurable)]
   congr 1
   exact lintegral_congr fun x => (enorm_sq_eq (u x)).symm
 
@@ -37,10 +86,10 @@ private theorem norm_conj_complex (z : ℂ) : ‖conj z‖ = ‖z‖ := Complex.
 
 theorem integrable_mul_conj {u v : X → ℂ} (hu : MemLp u 2 μ) (hv : MemLp v 2 μ) :
     Integrable (fun x => u x * conj (v x)) μ := by
-  have hu2 := (memLp_two_iff_integrable_sq_norm hu.1).1 hu
-  have hv2 := (memLp_two_iff_integrable_sq_norm hv.1).1 hv
+  have hu2 := (memLp_two_iff_integrable_sq_norm hu.aestronglyMeasurable).1 hu
+  have hv2 := (memLp_two_iff_integrable_sq_norm hv.aestronglyMeasurable).1 hv
   have hm : AEStronglyMeasurable (fun x => u x * conj (v x)) μ :=
-    hu.1.mul (Complex.continuous_conj.comp_aestronglyMeasurable hv.1)
+    hu.aestronglyMeasurable.mul (Complex.continuous_conj.comp_aestronglyMeasurable hv.aestronglyMeasurable)
   refine (hu2.add hv2).mono hm (ae_of_all _ fun x => ?_)
   show ‖u x * conj (v x)‖ ≤ ‖‖u x‖ ^ 2 + ‖v x‖ ^ 2‖
   rw [norm_mul, norm_conj_complex, Real.norm_of_nonneg (by positivity)]
@@ -56,8 +105,8 @@ private theorem mul_le_weighted_sq_add_half {a b t : ℝ} (ht : 0 < t) : a * b �
 
 theorem norm_integral_mul_conj_le {u v : X → ℂ} (hu : MemLp u 2 μ) (hv : MemLp v 2 μ) {t : ℝ} (ht : 0 < t) :
     ‖∫ x, u x * conj (v x) ∂μ‖ ≤ (t * ∫ x, ‖u x‖ ^ 2 ∂μ + (∫ x, ‖v x‖ ^ 2 ∂μ) / t) / 2 := by
-  have hu2 := (memLp_two_iff_integrable_sq_norm hu.1).1 hu
-  have hv2 := (memLp_two_iff_integrable_sq_norm hv.1).1 hv
+  have hu2 := (memLp_two_iff_integrable_sq_norm hu.aestronglyMeasurable).1 hu
+  have hv2 := (memLp_two_iff_integrable_sq_norm hv.aestronglyMeasurable).1 hv
   have hR : Integrable (fun x => (t * ‖u x‖ ^ 2 + ‖v x‖ ^ 2 / t) / 2) μ :=
     ((hu2.const_mul t).add (hv2.div_const t)).div_const 2
   have h1 : ∫ x, (t * ‖u x‖ ^ 2 + ‖v x‖ ^ 2 / t) / 2 ∂μ
@@ -101,15 +150,15 @@ theorem limit_memLp_and_integral_eq (f : ℕ → X → ℂ) (F g : X → ℂ) (h
     (hC : ∀ ε : ℝ≥0∞, 0 < ε → ∃ N, ∀ n ≥ N, ∀ m ≥ N, ∫⁻ x, ‖f m x - f n x‖ₑ ^ 2 ∂μ ≤ ε)
     {L : ℂ} (hL : Tendsto (fun n => ∫ x, f n x * conj (g x) ∂μ) atTop (𝓝 L)) :
     MemLp F 2 μ ∧ Integrable (fun x => F x * conj (g x)) μ ∧ ∫ x, F x * conj (g x) ∂μ = L := by
-  have hfm : ∀ n, AEStronglyMeasurable (f n) μ := fun n => (hf2 n).1
+  have hfm : ∀ n, AEStronglyMeasurable (f n) μ := fun n => (hf2 n).aestronglyMeasurable
   obtain ⟨N₀, hN₀⟩ := hC 1 one_pos
   have h0 := lintegral_enorm_sub_limit_sq_le hfm hpt N₀ N₀ (hN₀ N₀ le_rfl)
   have hsub0 : MemLp (fun x => F x - f N₀ x) 2 μ :=
-    memLp_two_of_lintegral (hFm.sub (hf2 N₀).1) (lt_of_le_of_lt h0 ENNReal.one_lt_top)
+    memLp_two_of_lintegral (hFm.sub (hf2 N₀).aestronglyMeasurable) (lt_of_le_of_lt h0 ENNReal.one_lt_top)
   have hF : MemLp F 2 μ := by
     have hadd := hsub0.add (hf2 N₀)
     convert hadd using 1
-    funext x
+    ext x
     simp
   have hFg : Integrable (fun x => F x * conj (g x)) μ := integrable_mul_conj hF hg
   refine ⟨hF, hFg, ?_⟩

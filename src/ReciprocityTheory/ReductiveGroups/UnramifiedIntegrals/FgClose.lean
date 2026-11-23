@@ -1,14 +1,60 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.KmuInclDenseRange
-import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.TchOfIntegral
-import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.SemilinNormPowSubPow
-import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.NormSqrtNegPowPrimeSqSub
-import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.FgHonH
+module
+
+public import Formalism.FormalGroupLog.Statement
+public import Formalism.LocalToGlobal.TorsionIntegrality.CMGoodModels.Statement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.CoeffOneSubstOfConstantCoeffEqZero
+public import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.EndIntegral
+import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.FgBasic
+public import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.FgFinA
+public import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.FgHonH
+public import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.FgLevel
 import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.FgMulN
-import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.FgFinA
+public import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.KmuInclDenseRange
+import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.NormSqrtNegPowPrimeSqSub
+import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.SemilinNormPowSubPow
 import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.ShortWIntModel
-import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.EndIntegral
-import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.FgLevel
+public import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.TchOfIntegral
+
+@[expose] public section
 
 noncomputable section
 
@@ -37,7 +83,8 @@ theorem cm3 : CM3 := by
     have := norm_natCast_of_coprime (K := MaximalUnramifiedExtension l) hσ.prime hσ.norm_l 2
       (by intro h; have := Nat.le_of_dvd (by norm_num) h; omega)
     simpa using this
-  have hlaw := curve_law (⟨g2, hg2⟩ : MaximalUnramifiedExtension l) ⟨g3, hg3⟩ hn2 hn3 h2
+  have hlaw := ReciprocityTheory.ChartRestriction.L1.curve_law
+    (⟨g2, hg2⟩ : MaximalUnramifiedExtension l) ⟨g3, hg3⟩ hn2 hn3 h2
   have hD : HD σ (lgS (⟨g2, hg2⟩ : MaximalUnramifiedExtension l) ⟨g3, hg3⟩) _
       ((uSer (⟨g2, hg2⟩ : MaximalUnramifiedExtension l) ⟨g3, hg3⟩).subst
         (C (⟨ι (omegaK d), ha'⟩ : MaximalUnramifiedExtension l) * lgS (⟨g2, hg2⟩ : MaximalUnramifiedExtension l) ⟨g3, hg3⟩))

@@ -1,8 +1,57 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.QLev
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.ProdDat
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.HeisenbergCombinationDisjointPlacesCommuteVacua
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.SelfDualLatticePairingDual
+module
+
+public import Development.AbelianVarietyTheory.Definitions.LatticeFrames.CombAtSingleZero
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.RealIdemMulOfReal
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.SelfDualLatticePairingDual
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.HeisenbergCombinationDisjointPlacesCommuteVacua
+import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.HomLatticeCompletionSelfAnnihilatorAtPlaces
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Development.AbelianVarietyTheory.Definitions.LatticeFrames.ExistsUnitarySupportedAtPlaceOfMulEqIdem
+import Development.AbelianVarietyTheory.Definitions.LatticeFrames.MiStarOfMid
+import Development.AbelianVarietyTheory.Definitions.LatticeFrames.UnitRatio
+import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.ValuationDetOfMemKO
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.FinTensMemLatO
+
+@[expose] public section
 
 set_option genSizeOfSpec false
 noncomputable section
@@ -42,9 +91,10 @@ theorem iso_mem {V ι J : Type} [AddCommGroup V] [Module ℂ V] (A : ι → V �
       have h1 : A i (z a + ∑ j ∈ s, z j) - l a i • (z a + ∑ j ∈ s, z j) ∈ U :=
         U.sub_mem (hU i _ hsum) (U.smul_mem _ hsum)
       have h2 : A i (z a + ∑ j ∈ s, z j) - l a i • (z a + ∑ j ∈ s, z j) = ∑ j ∈ s, (l j i - l a i) • z j := by
-        rw [map_add, map_sum, hz a (Finset.mem_insert_self a s), smul_add, Finset.smul_sum,
-          Finset.sum_congr rfl (fun j hj => hz j (Finset.mem_insert_of_mem hj) i), add_sub_add_comm, sub_self, zero_add,
-          ← Finset.sum_sub_distrib]
+
+        rw [map_add (f := _), map_sum, hz a (Finset.mem_insert_self a s), smul_add, Finset.smul_sum,
+        Finset.sum_congr rfl (fun j hj => hz j (Finset.mem_insert_of_mem hj) i), add_sub_add_comm, sub_self, zero_add,
+        ← Finset.sum_sub_distrib]
         exact Finset.sum_congr rfl fun j _ => (sub_smul _ _ _).symm
       rw [h2] at h1
       have h3 := ih (fun j => (l j i - l a i) • z j) (fun j hj i' => by
@@ -85,7 +135,7 @@ theorem symplOH_eq (S T : HSp D) (m y : WO S T) :
   unfold symplOH
   rw [GlobalTheory.SplitScalar.symplO_skew S T m y]
   have ha : (algebraMap D.host.F (AF D.host.F)) (1 / 2) + (algebraMap D.host.F (AF D.host.F)) (1 / 2) = 1 := by
-    rw [← map_add]; norm_num
+    rw [← map_add (f := _)]; norm_num
   linear_combination (symplO S T m y) * ha
 
 theorem heisO_eig (ψ : AddChar (AF D.host.F) ℂ) (S T : HSp D) {m y : WO S T} {f : WO S T → ℂ} {c : ℂ}
@@ -151,15 +201,15 @@ theorem vac_eigen (ψ : AddChar (AF D.host.F) ℂ) (hψ : IsStdChar D ψ (-1)) (
   have hsplit : ∀ u ∈ latO S T (LS : Set _) (LT : Set _) (fun _ => True),
       GlobalTheory.DisjComb.idem (· ∈ Q) • u ∈ latO S T (LS : Set _) (LT : Set _) (· ∈ Q) := fun u hu =>
     (GlobalTheory.DisjComb.split_latO ψ hψ hLS hLT (P := (· ∈ Q)) (P' := (· ∉ Q)) (fun p h h' => h' h) (hmono hu)).2.2.1
-  let G : AddSubgroup (WO S T) := H.comap (DistribMulAction.toAddMonoidHom (WO S T) (GlobalTheory.DisjComb.idem (· ∈ Q)))
+  let G : AddSubgroup (WO S T) := H.comap (DistribSMul.toAddMonoidHom (WO S T) (GlobalTheory.DisjComb.idem (· ∈ Q)))
   have hG : ∀ {u : WO S T}, u ∈ latO S T (LS : Set _) (LT : Set _) (fun _ => True) → u ∈ G := by
     intro u hu
     refine GlobalTheory.LatVac.le_of_two_of_half G (fun u hu => ?_) (fun e he u hu hh => ?_) hu
     · refine AddSubgroup.mem_comap.2 ?_
-      rw [DistribMulAction.toAddMonoidHom_apply, smul_comm]
+      rw [DistribSMul.toAddMonoidHom_apply, smul_comm]
       exact hHmem _ ⟨1, fun f hf => by rw [one_smul]; exact hf.2.1 _ (hsplit u hu)⟩
     · refine AddSubgroup.mem_comap.2 ?_
-      rw [DistribMulAction.toAddMonoidHom_apply]
+      rw [DistribSMul.toAddMonoidHom_apply]
       exact hHmem _ ⟨1, fun f hf => by rw [one_smul]; exact hf.2.2 e he _ (hsplit u hu) (GlobalTheory.DisjComb.isHalf_parts hh).1⟩
   have hH : ∀ m ∈ latO S T (LS : Set _) (LT : Set _) (· ∈ Q), m ∈ H := by
     intro m hm
@@ -223,6 +273,7 @@ theorem class_mem (ψ : AddChar (AF D.host.F) ℂ) (S T : HSp D) (Λ : AddSubgro
     rwa [sub_sub_cancel] at this
   have hz : ∀ C, ∀ m : Λ, hL ψ S T m (z C) = l C m • z C := by
     intro C m
+
     simp only [z, map_sum, map_smul, Finset.smul_sum]
     refine Finset.sum_congr rfl fun j hj => ?_
     have hjC : mk (y j) = C := (Finset.mem_filter.1 hj).2

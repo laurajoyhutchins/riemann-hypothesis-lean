@@ -1,10 +1,60 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.AbelianHeightsDuality.GelfandKazhdanDuality.IsCuspFormDualMap
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.HasSatakeGLOfIsSatVecGL
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.EventuallyMemFixed
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.AlgebraMapIntertwiningMapBijectiveOfIsSmooth
-import Formalism.LocalToGlobal.NumberFieldFamilies.ThetaCT
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.ImportsRestTail
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.NonemptyEquivOfRangeEq
+public import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.StrongMultiplicityOne
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SphericalHeckeValuesSameParameters
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsMultisetSatakeEigenvalueEqStatement
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.HasSatakeGLOfIsSatVecGL
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.HeckeVecMemFixed
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.AlgebraMapIntertwiningMapBijectiveOfIsSmooth
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.EventuallyMemFixed
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsFixedOfMemISup
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.ImportsRestTail
+public import Formalism.LocalToGlobal.NumberFieldFamilies.ThetaCT
+import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.FiniteCosetsInDoset
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -104,9 +154,9 @@ theorem countable_orbit {G M : Type} [Group G] [TopologicalSpace G] [IsTopologic
 
 section Cusp
 
-variable {E : Type} [Field E] [NumberField E] [IsTotallyComplex E] {a : ℕ}
+variable {E : Type} [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] {a : ℕ}
 
-omit [IsTotallyComplex E] in
+omit [_root_.NumberField.IsTotallyComplex E] in
 theorem secondCountable_GL : SecondCountableTopology (GL (Fin a) (Af E)) := by
   haveI := Formalism.L2.Fam.ThC.sc_Af E
   haveI : SecondCountableTopology (Matrix (Fin a) (Fin a) (Af E)) :=
@@ -138,6 +188,7 @@ theorem rank_cuspSub (π : CuspSub E a) : Module.rank ℂ π.V ≤ Cardinal.alep
     | lie X =>
       change lie E a X x ∈ _
       have e : lie E a X = ∑ i, b.repr X i • lie E a (b i) := by
+
         conv_lhs => rw [← b.sum_repr X, map_sum]
         simp only [map_smul]
       rw [e, LinearMap.sum_apply]
@@ -164,7 +215,8 @@ theorem heckeVec_dosetInd_eq_idem (hs : IsSmooth π) (hc : IsCompact (K : Set G)
   · refine Nat.cast_ne_zero.2 (Finset.card_ne_zero.2 ⟨(g : G ⧸ K), (hS _).2 ?_⟩)
     obtain ⟨k, hk⟩ := QuotientGroup.mk_out_eq_mul K g
     exact DoubleCoset.mem_doubleCoset.2 ⟨1, K.one_mem, k, k.2, by rw [hk, one_mul]⟩
-  · rw [← idem_of_mem hs hc (heckeVec_mem_fixed hK hm hz), heckeVec,
+  · set_option synthInstance.maxHeartbeats 100000 in
+      rw [← idem_of_mem hs hc (heckeVec_mem_fixed hK hm hz), heckeVec,
       finsum_eq_sum_of_support_subset (s := hfin.toFinset), map_sum, Nat.cast_smul_eq_nsmul, ← Finset.sum_const]
     · refine Finset.sum_congr rfl fun c hcS => ?_
       have h1 := (hS c).1 hcS
@@ -278,15 +330,15 @@ variable {E : Type} [Field E] [NumberField E] {w : HeightOneSpectrum (𝓞 E)} {
   {V : Type} [AddCommGroup V] [Module ℂ V]
 
 theorem exists_hasSatGL_of_scalar {π : Representation ℂ (GL (Fin n) (w.adicCompletion E)) V}
-    (hsc : ∀ h ∈ Hecke ℂ (KGL w n), ∃ c : ℂ, ∀ x ∈ fixed π (KGL w n), heckeVec π (KGL w n) h x = c • x)
-    (hs : GlobalTheory.LGrp.IsSpherical π (KGL w n)) : ∃ B, HasSatGL w π B := by
-  have hK : IsCommensurated (KGL w n) := Final.GLintComm E w n
+    (hsc : ∀ h ∈ Hecke ℂ (KGL w (n := n)), ∃ c : ℂ, ∀ x ∈ fixed π (KGL w (n := n)), heckeVec π (KGL w (n := n)) h x = c • x)
+    (hs : GlobalTheory.LGrp.IsSpherical π (KGL w (n := n))) : ∃ B, HasSatGL w π B := by
+  have hK : IsCommensurated (KGL w (n := n)) := Final.GLintComm E w n
   obtain ⟨ϖ, hu⟩ := exists_isUnifV w
   have h0 := ne_zero_of_isUnifV hu
   obtain ⟨x, hx, hx0⟩ := (Submodule.ne_bot_iff _).1 hs
   choose c hc using fun j => hsc _ (Tj_mem_hecke (n := n) hu j)
   have c0 : c 0 = 1 := by
-    have e : Tj ℂ n (Ov E w) ϖ 0 = dosetInd ℂ (KGL w n) 1 := by
+    have e : Tj ℂ n (Ov E w) ϖ 0 = dosetInd ℂ (KGL w (n := n)) 1 := by
       rw [Tj_eq h0]
       congr 1
     refine smul_left_injective ℂ hx0 ?_
@@ -294,7 +346,7 @@ theorem exists_hasSatGL_of_scalar {π : Representation ℂ (GL (Fin n) (w.adicCo
   have cn : c n ≠ 0 := by
     intro e
     have h1 := hc n x hx
-    have hTn : Tj ℂ n (Ov E w) ϖ n = dosetInd ℂ (KGL w n) (tor h0 fun _ => 1) := by
+    have hTn : Tj ℂ n (Ov E w) ϖ n = dosetInd ℂ (KGL w (n := n)) (tor h0 fun _ => 1) := by
       rw [Tj_eq h0]; simp
     rw [e, zero_smul, hTn, heckeVec_dosetInd (R := {tor h0 fun _ => 1}) hx, Finset.sum_singleton] at h1
     · exact hx0 (by simpa [← Module.End.mul_apply, ← map_mul] using congrArg (π (tor h0 fun _ => 1)⁻¹) h1)
@@ -314,7 +366,7 @@ theorem exists_hasSatGL_of_scalar {π : Representation ℂ (GL (Fin n) (w.adicCo
   rw [div_mul_cancel₀ _ h0] at e
   rw [e, hc j y hy, hBc j hj]
 
-variable [IsTotallyComplex E] {a : ℕ}
+variable [_root_.NumberField.IsTotallyComplex E] {a : ℕ}
 
 theorem isBiSimple_locRep (π : CuspSub E a) (w : HeightOneSpectrum (𝓞 E)) : IsBiSimple (π.locRep w) := by
   intro S h1 h2
@@ -352,11 +404,11 @@ theorem isBiSimple_locRep (π : CuspSub E a) (w : HeightOneSpectrum (𝓞 E)) : 
     rw [e, Submodule.map_top, Submodule.range_subtype]
 
 theorem exists_hasSatGL_locRep (π : CuspSub E a) (w : HeightOneSpectrum (𝓞 E))
-    (hs : GlobalTheory.LGrp.IsSpherical (π.locRep w) (KGL w a)) : ∃ B, HasSatGL w (π.locRep w) B :=
+    (hs : GlobalTheory.LGrp.IsSpherical (π.locRep w) (KGL w (n := a))) : ∃ B, HasSatGL w (π.locRep w) B :=
   exists_hasSatGL_of_scalar (fun h hh => exists_scalar (π.isSmooth_locRep w) (isOpen_isCompact_KGL w a).2
     (Final.GLintComm E w a) (Final.HeckeCommGL E w a ℂ) (isBiSimple_locRep π w) (rank_cuspSub π) h hh) hs
 
-theorem eventually_exists_hasSat : ∀ {E : Type} [Field E] [NumberField E] [IsTotallyComplex E] {a : ℕ},
+theorem eventually_exists_hasSat : ∀ {E : Type} [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] {a : ℕ},
     ∀ (π : CuspSub E a), ∀ᶠ w : HeightOneSpectrum (𝓞 E) in Filter.cofinite, ∃ B : Multiset ℂˣ, (CG.mk π).HasSat w B := by
   intro E _ _ _ a π
   obtain ⟨y, hy, h0⟩ := (Submodule.ne_bot_iff _).1 π.ne_bot

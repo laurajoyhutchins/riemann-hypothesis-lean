@@ -1,9 +1,50 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.ChartChg
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.DofDApply
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.CalcExp
-import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.ExpSNegMulExpS
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.MapDofIterate
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.CocycleRightZeroThd
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.MapDofIterate
+public import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.ExpSNegMulExpS
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.CalcExp
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.DofDApply
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -39,7 +80,7 @@ theorem along_mul_mem (hadd : ∀ a f g, D a (f + g) = D a f + D a g)
     rw [along_nil, map_mul]
     exact hSJ _ (hf [] (List.Sublist.refl _)) _ (hg [] (List.Sublist.refl _))
   | cons a w ih =>
-    rw [along_cons, hmul, along_add D hadd, map_add, mul_comm g]
+    rw [along_cons, hmul, along_add D hadd, map_add (f := _), mul_comm g]
     refine J.add_mem (ih _ _ ?_ ?_) (ih _ _ ?_ ?_)
     · exact fun v hv => hf v (hv.cons a)
     · exact fun v hv => hg (a :: v) (hv.cons_cons a)
@@ -65,7 +106,7 @@ theorem along_mul_exp (hadd : ∀ a f g, D a (f + g) = D a f + D a g)
     have h2 := ih (f * D a φ) (fun v hv => hJS _ (h1 v hv)) hφ'
     have h3 := ih (D a f) (fun v hv => hf (a :: v) (hv.cons_cons a)) hφ'
     have h4 := J.add_mem (J.add_mem h2 (h1 w (List.Sublist.refl _))) h3
-    rw [along_cons, along_cons, hmul, hE, along_add D hadd, map_add,
+    rw [along_cons, along_cons, hmul, hE, along_add D hadd, map_add (f := _),
       show f * (E * D a φ) = f * D a φ * E by ring, mul_comm E]
     convert h4 using 1
     ring
@@ -160,7 +201,7 @@ theorem dmonOf_mul_expS_congr : ∀ (R : Type) [CommRing R] (d : ℕ) (k : Type)
   obtain ⟨r, hr, e⟩ := key
   refine ⟨r, hr, ?_⟩
   have e' : algebraMap R k r = _ := e
-  rw [map_add, e']
+  rw [map_add (f := _), e']
   ring
 
 end GlobalTheory

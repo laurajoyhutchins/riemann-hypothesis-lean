@@ -1,14 +1,63 @@
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.JoinCastSucc
+public import Development.AbelianVarietyTheory.Definitions.Divisors.LinearIndependentPullChart
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BasisDetIntegralSpanEqOneStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DetSpanCommonDenominatorStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsMaxIdealSmulMemOfLtOfRelIndexNeZeroStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FinsumLogFinitePlaceEqNegLogAbsNormStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FinsumLogGaussAbsLeFractionalIdealIndexStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HermFamGramDetEqNormSqBasisDetMulStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RelIndexIdealSmulFractionalIdealEqAbsNormNumberFStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RelIndexSupSpanSingletonEqAbsNormStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SmulDetSpanSupLeDetSpanLatticeStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Matrix.PosDef
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.GeometryOfNumbers.LatticeCovolumes.ArakelovDegreeEqDegreeOfFamily
+import ReciprocityTheory.GeometryOfNumbers.LatticeCovolumes.DegStA
+import Development.AbelianVarietyTheory.Definitions.Divisors.HasBoundedPolesGlobalData
 import Development.AbelianVarietyTheory.Definitions.Divisors.HermSysHypOneLeLambdaZero
-import ReciprocityTheory.SemistableReduction.TorusL2CauchyInequality
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SmulDetSpanSupLeDetSpanLatticeStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsMaxIdealSmulMemOfLtOfRelIndexNeZeroStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RelIndexSupSpanSingletonEqAbsNormStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RelIndexIdealSmulFractionalIdealEqAbsNormNumberFStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BasisDetIntegralSpanEqOneStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DetSpanCommonDenominatorStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HermFamGramDetEqNormSqBasisDetMulStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FinsumLogFinitePlaceEqNegLogAbsNormStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FinsumLogGaussAbsLeFractionalIdealIndexStatement
+
+@[expose] public section
+
 open NumberField MvPolynomial ReciprocityTheory.MultiplicativeHeights ReciprocityTheory.GeometryOfNumbersTheory
 open GlobalTheory GlobalTheory.ChowHt GlobalTheory.Adelic GlobalTheory.HermTools GlobalTheory.HilbertSamuel GlobalTheory.HSChoice GlobalTheory.HSShort
 
@@ -70,7 +119,7 @@ theorem detSpan_relIndex_le : ∀ (F V : Type) [Field F] [NumberField F] [AddCom
   rw [← hmulA, ← hn, ← hmul]
   exact Nat.mul_le_mul hstep ih'
 
-theorem finPart_sub_mean_le_deg : ∀ (F V : Type) [Field F] [NumberField F] [AddCommGroup V] [Module F V] [Module (𝓞 F) V] [IsScalarTower (𝓞 F) F V] (nm : HermFam F V) (M : Submodule (𝓞 F) V) (d : ℕ) (b : Module.Basis (Fin d) F V), IsFull M → ∀ (τ : Type) (g : MvPolynomial τ F), g ≠ 0 → (∀ m, coeff m g ∈ Submodule.span (𝓞 F) {y | ∃ v : Fin d → V, (∀ i, v i ∈ M) ∧ y = b.det v}) → finPart g - mean F (fun σ => Real.log (nm.gram σ b).det.re) / 2 ≤ deg nm M := by
+theorem finPart_sub_mean_le_deg : ∀ (F V : Type) [Field F] [NumberField F] [AddCommGroup V] [Module F V] [Module (𝓞 F) V] [IsScalarTower (𝓞 F) F V] (nm : HermFam F V) (M : Submodule (𝓞 F) V) (d : ℕ) (b : Module.Basis (Fin d) F V), IsFull M → ∀ (τ : Type) (g : MvPolynomial τ F), g ≠ 0 → (∀ m, AddMonoidAlgebra.coeff g m ∈ Submodule.span (𝓞 F) {y | ∃ v : Fin d → V, (∀ i, v i ∈ M) ∧ y = b.det v}) → finPart g - mean F (fun σ => Real.log (nm.gram σ b).det.re) / 2 ≤ deg nm M := by
   intro F V _ _ _ _ _ _ nm M d b hM τ g hg hcoef
   classical
   have hfg := hM.fg
@@ -92,7 +141,7 @@ theorem finPart_sub_mean_le_deg : ∀ (F V : Type) [Field F] [NumberField F] [Ad
   have hdet : ∀ w : Fin r → V, b.det w = δ * β.det w := fun w => by
     rw [hδ, ← hβ, Module.Basis.det_apply, Module.Basis.det_apply, Module.Basis.det_apply, ← Matrix.det_mul,
       Module.Basis.toMatrix_mul_toMatrix]
-  have hcoef' : ∀ m, coeff m g / δ ∈ B := fun m => by
+  have hcoef' : ∀ m, AddMonoidAlgebra.coeff g m / δ ∈ B := fun m => by
     let φ : F →ₗ[𝓞 F] F := (LinearMap.mulLeft F δ⁻¹).restrictScalars (𝓞 F)
     have hmap : (Submodule.span (𝓞 F) {y | ∃ v : Fin r → V, (∀ i, v i ∈ M) ∧ y = b.det v}).map φ ≤ B := by
       rw [Submodule.map_span_le]
@@ -122,8 +171,12 @@ theorem finPart_sub_mean_le_deg : ∀ (F V : Type) [Field F] [NumberField F] [Ad
     intro σ
     rw [GlobalTheory.T.hermFam_gram_det_eq_normSq_basis_det_mul F V nm σ r b v, ← hδ]
     have hpos : 0 < (nm.gram σ ⇑b).det.re := by
-      have := (nm.posDef σ r b b.linearIndependent).det_pos
-      exact (Complex.pos_iff.mp this).1
+      open scoped ComplexOrder in
+      have hp := nm.posDef σ r b b.linearIndependent
+      unfold HermFam.gram
+      rw [hp.isHermitian.det_eq_prod_eigenvalues, ← RCLike.ofReal_prod]
+      change 0 < ∏ i, hp.isHermitian.eigenvalues i
+      exact Finset.prod_pos fun i _ => hp.eigenvalues_pos i
     have hn0 : 0 < Complex.normSq (σ δ) := Complex.normSq_pos.mpr ((map_ne_zero σ).mpr hδ0)
     rw [Complex.re_ofReal_mul, Real.log_mul hn0.ne' hpos.ne']
   have hsum := ds_sum_log_normSq_embeddings δ hδ0

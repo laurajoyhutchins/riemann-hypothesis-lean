@@ -1,13 +1,55 @@
-import Formalism.LocalToGlobal.InertKernelTheory.DefsFrONB
-import Formalism.LocalToGlobal.InertKernelTheory.InertCoprimeLemmas.KappaSelfDualFourthPowerLattice
-import Formalism.LocalToGlobal.InertKernelTheory.InertCoprimeLemmas.CurveIdealPrimeReduction
-import Formalism.LocalToGlobal.InertKernelTheory.InertCoprimeLemmas.IntBasis
-import Formalism.LocalToGlobal.InertKernelTheory.StatementAlgGr
-import Formalism.LocalToGlobal.InertKernelTheory.InertCoprimeLemmas.ReBase
-import Formalism.LocalToGlobal.TorsionIntegrality.UniformGaussModels.FinalFree
-import Formalism.LocalToGlobal.TorsionIntegrality.UniformGaussModels.OrthogonalGaussModels.HermitianBlockFrames.MemLatticeFourfoldOfMemDualLattice
-import Formalism.LocalToGlobal.GlobalTheory.GL3.PHfTrace
+module
+
+public import Formalism.LocalToGlobal.InertKernelTheory.DefsFrONB
+public import Formalism.LocalToGlobal.GlobalTheory.GL3.PHfTrace
+public import Formalism.LocalToGlobal.InertKernelTheory.InertCoprimeLemmas.CurveIdealPrimeReduction
+public import Formalism.LocalToGlobal.InertKernelTheory.InertCoprimeLemmas.IntBasis
+public import Formalism.LocalToGlobal.InertKernelTheory.InertCoprimeLemmas.KappaSelfDualFourthPowerLattice
 import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.AnalyticIdentityTheorems.QuasiPeriodConstUniqueOf
+public import Formalism.LocalToGlobal.TorsionIntegrality.UniformGaussModels.OrthogonalGaussModels.HermitianBlockFrames.MemLatticeFourfoldOfMemDualLattice
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 open scoped BigOperators ComplexConjugate
@@ -30,7 +72,7 @@ theorem lamOf_mem (cc : Ideal (𝓞 D.host.K)) (δ : ℂ) :
       add_mem' := fun {a b} ha hb => by
         obtain ⟨c, hc, rfl⟩ := ha
         obtain ⟨c', hc', rfl⟩ := hb
-        exact ⟨c + c', cc.add_mem hc hc', by push_cast; rw [map_add]; ring⟩
+        exact ⟨c + c', cc.add_mem hc hc', by push_cast; rw [map_add (f := _)]; ring⟩
       zero_mem' := ⟨0, cc.zero_mem, by simp⟩
       neg_mem' := fun {a} ha => by
         obtain ⟨c, hc, rfl⟩ := ha
@@ -61,7 +103,7 @@ theorem lamMM_mem (cc : Ideal (𝓞 D.host.K)) (δ : ℂ) :
         obtain ⟨a, ha, rfl⟩ := hx
         obtain ⟨a', ha', rfl⟩ := hy
         refine ⟨a + a', Submodule.add_mem _ ha ha', ?_⟩
-        funext τ; simp only [Pi.add_apply, map_add]; ring
+        funext τ; simp only [Pi.add_apply, map_add (f := _)]; ring
       zero_mem' := ⟨0, Submodule.zero_mem _, by funext τ; simp⟩
       neg_mem' := fun {x} hx => by
         obtain ⟨a, ha, rfl⟩ := hx
@@ -107,8 +149,8 @@ theorem ne_zero_of_coprime {n p : ℕ} (hp : p.Prime) (h : Nat.Coprime n p) : n 
 
 end FrRat
 
-open FrRat in
 
+open FrRat in
 theorem rational_coordinates : RatCoord := by
   intro D cc δ B hcc hδ p _ h5 hj g₁ hI hN hM b hb
   have hp : p.Prime := Fact.out
@@ -131,7 +173,7 @@ theorem rational_coordinates : RatCoord := by
     obtain ⟨c, -, hc⟩ := lamOf_mem D cc' 0 _ hω1
     have hω0 : B.L.ω₁ ≠ 0 := by simpa using B.L.indep.ne_zero 0
     exact hω0 (by rw [hc]; ring)
-  have hNA0 : N * A ≠ 0 := ne_zero_of_coprime hp (Nat.Coprime.mul hNc hcop)
+  have hNA0 : N * A ≠ 0 := ne_zero_of_coprime hp (Nat.Coprime.mul_left hNc hcop)
   have hlamM : B.lamM = lamMM D (TaylorLogMetric.lamOf D cc' δ') := by
     show lamMM D (TaylorLogMetric.lamOf D cc δ) = _
     rw [hlat]
@@ -171,7 +213,7 @@ theorem rational_coordinates : RatCoord := by
   set c : Fin 4 × D.what₂.Tau → Fin 4 → Fin (Fintype.card D.what₂.Tau) → D.host.K :=
     fun w i' m => (d w i' m : D.host.K) / ((s w i' * N * A : ℕ) : D.host.K) with hcdef
   have hS : ∀ w i', Nat.Coprime (s w i' * N * A) p := fun w i' =>
-    Nat.Coprime.mul (Nat.Coprime.mul (hs w i') hNc) hcop
+    Nat.Coprime.mul_left (Nat.Coprime.mul_left (hs w i') hNc) hcop
 
   have hX : ∀ w i', ∑ m, ((c w i' m : D.host.K) : D.host.E) * b m 0 0 = a w i' / ((N * A : ℕ) : D.host.E) := by
     intro w i'
@@ -188,6 +230,7 @@ theorem rational_coordinates : RatCoord := by
   have hc1 : ∀ w i' τ, g₁.symm (Pi.single w 1) (i', τ) =
       ∑ m, D.host.φ₀ ((c w i' m : D.host.K) : D.host.E) * TaylorLogMetric.embT D τ (b m 0 0) := by
     intro w i' τ
+
     rw [hau w i' τ, ← hX w i', map_sum]
     refine Finset.sum_congr rfl fun m _ => ?_
     rw [map_mul, IntegralOrthonormalChange.embT_K D τ _ (SetLike.coe_mem _)]
@@ -217,6 +260,7 @@ theorem rational_coordinates : RatCoord := by
     have hemb : ∀ w i' τ, TaylorLogMetric.embT D τ (∑ m, ((c w i' m : D.host.K) : D.host.E) * b m 0 0) =
         g₁.symm (Pi.single w 1) (i', τ) := by
       intro w i' τ
+
       rw [hc1, map_sum]
       refine Finset.sum_congr rfl fun m _ => ?_
       rw [map_mul, IntegralOrthonormalChange.embT_K D τ _ (SetLike.coe_mem _)]
@@ -242,6 +286,7 @@ theorem rational_coordinates : RatCoord := by
     have e4 := hH
     rw [Fintype.sum_prod_type] at e4
     apply D.host.φ₀.injective
+
     rw [map_sum, Finset.sum_congr rfl (fun i' _ => hG i'), e4]
     split_ifs <;> simp
 

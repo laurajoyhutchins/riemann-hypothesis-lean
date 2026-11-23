@@ -1,5 +1,58 @@
-import Formalism.LocalRingCardinality.DataCD
-import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.Upqcpt
+module
+
+public import Formalism.LocalRingCardinality.DataCD
+public import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.Upqcpt
+import Mathlib.Algebra.Order.Archimedean.Real.Hom
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Algebra.Group.Units
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -10,9 +63,9 @@ open scoped ENNReal NNReal
 
 variable (P Q : ℕ)
 
-abbrev MM : Type := Matrix (Fin P ⊕ Fin Q) (Fin P ⊕ Fin Q) ℂ
-
 local notation "J" => Formalism.UG.Jpq P Q
+
+abbrev MM : Type := Matrix (Fin P ⊕ Fin Q) (Fin P ⊕ Fin Q) ℂ
 
 instance instBorelLie : BorelSpace (lieU P Q) := ⟨rfl⟩
 instance instBorelU : BorelSpace (UpqT P Q) := ⟨rfl⟩
@@ -159,14 +212,16 @@ theorem exists_omegaLeb : ∃ lam : Measure (lieU P Q), IsOmegaLeb lam := by
       _ = 1 := by field_simp
   have hl : (t • lam0).IsAddHaarMeasure := Measure.IsAddHaarMeasure.nnreal_smul lam0 ht0
   refine ⟨t • lam0, hl, ?_⟩
+  have hmeas : Measurable (psiE P Q) := (psiE P Q).continuous.measurable
   rw [← psiE_coe]
-  rw [Measure.prod_smul_left, Measure.prod_smul_right, Measure.map_smul, Measure.map_smul]
+  rw [Measure.prod_smul_left, Measure.prod_smul_right,
+    Measure.map_smul _ hmeas.aemeasurable, Measure.map_smul _ hmeas.aemeasurable]
   show t • t • m = volume
   rw [hs, smul_smul, smul_smul, hts, one_smul]
 
 theorem isOpen_ballU (r : ℝ) : IsOpen (ballU P Q r) := by
   have : Continuous (fun X : lieU P Q => ∑ i, ∑ j, ‖(X : MM P Q) i j‖) :=
-    continuous_finset_sum _ fun i _ => continuous_finset_sum _ fun j _ =>
+    continuous_finsetSum _ fun i _ => continuous_finsetSum _ fun j _ =>
       (continuous_subtype_val.matrix_elem i j).norm
   exact isOpen_lt this continuous_const
 

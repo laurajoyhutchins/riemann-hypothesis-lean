@@ -1,6 +1,44 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.ChainParSucc
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.StepsOnto
+module
+
+public import Development.AbelianVarietyTheory.Definitions.LatticeFrames.ChainParSucc
+public import Development.AbelianVarietyTheory.Definitions.LatticeFrames.StepsOnto
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -29,33 +67,13 @@ def stepY (k : ℕ) : Step (comOf W) (stageY W k) (stageY W (k + 1)) := ⟨W.ωY
 
 def stepX : Step (comOf W) (stageY W (D.R.m - 1)) (stageX W) := ⟨W.ωX, W.vX, W.ItX, W.ioX⟩
 
-def TowerIsChain : Prop :=
-  (comOf W).Is ∧ (∀ j < D.R.m, (stageY W j).Is (comOf W) j) ∧ (stageX W).Is (comOf W) D.R.m ∧
-    (∀ k, k + 1 < D.R.m → (stepY W k).Is (k + 1)) ∧ (stepX W).Is D.R.m
-
 end OfTower
 
 def PiLocalization₂.InFlag (s : PiLocalization₂ D) (κ : GA D s.V) : Prop :=
   κ ∈ GfC s.V ∧ Lev.finE s.V κ ∈ Formalism.L2.DIV.parLev D.sp.cm s.V.gram s.β s.L
 
-def PiLocalization₂.ch (s : PiLocalization₂ D) (κ : GA D s.V) : ℂ := Lev.levChi s.V s.β (Lev.flagL s.L) κ
-
-def Moved {c : Com D} {s : PiLocalization₂ D} (κ : GA D s.V) (y y' : s.CC c) : Prop :=
-  ∀ w g, PiLocalization₂.val y' w g = (s.ch κ)⁻¹ * PiLocalization₂.val y w (g * κ)
-
 def SameBlock (s s' : PiLocalization₂ D) (κ : GA D s.V) (κ' : GA D s'.V) : Prop :=
   HEq (Formalism.L2.DIV.rTup s.β s.L (Lev.finE s.V κ)) (Formalism.L2.DIV.rTup s'.β s'.L (Lev.finE s'.V κ'))
-
-def PairLaw (D : D7) : Prop := ForStep D fun c _ s s' p => c.P.H = ⊥ → ∀ κ κ', s.InFlag κ → s'.InFlag κ' → SameBlock s s' κ κ' →
-  ∀ φ, p.ω (κ, κ') (p.pt φ) = (s.ch κ * (s'.ch κ')⁻¹) • p.pt φ
-
-def StepEqv (D : D7) : Prop := ForStep D fun c _ s s' p => c.P.H = ⊥ → ∀ κ κ', s.InFlag κ → s'.InFlag κ' → SameBlock s s' κ κ' →
-  ∀ y y' : s'.CC c, Moved κ' y y' → Moved κ (p.io y) (p.io y')
-
-def ActCC (D : D7) : Prop := ForStage D fun c _ s => c.P.H = ⊥ →
-  (∀ κ, s.InFlag κ → ∀ y : s.CC c, ∃ y', Moved κ y y') ∧ Lev.LiftsExist s.V s.β s.L
-
-example (s : PiLocalization₂ D) (κ : GA D s.V) : SameBlock s s κ κ := HEq.rfl
 
 end GlobalTheory.ChainOnto
 

@@ -1,5 +1,54 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerPairs.IsUnitDetOfMemGV
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerPairs.IsUnitDetOfMemGV
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Matrix
 
@@ -36,25 +85,25 @@ theorem expand_of_tail (z : Fin (2 * r + k + 1) → ℂ) (hz : inWb k r z) (b : 
     have hab : a ≠ b := Finset.ne_of_mem_erase ha
     rw [if_neg hab]
     by_cases hlt : a.val < b.val
-    · rw [dif_pos hlt]
+    · rw [dite_eq_left hlt]
       have har : a.val < r := by omega
       have hf : fvec k r z a = bvec (eI k r ⟨a.val, har⟩) := by simp [fvec, har]
       rw [hf]
       by_cases hia : i.val = a.val
-      · rw [dif_pos ⟨hlt, hia⟩]
+      · rw [dite_eq_left ⟨hlt, hia⟩]
         have hi : i = eI k r ⟨a.val, har⟩ := Fin.ext (by simp [eI, hia])
         subst hi
         simp [bvec]
-      · rw [dif_neg (fun h => hia h.2)]
+      · rw [dite_eq_right (fun h => hia h.2)]
         have hi : i ≠ eI k r ⟨a.val, har⟩ := fun h => hia (by rw [h]; simp [eI])
         simp [bvec, Pi.single_apply, hi]
-    · rw [dif_neg hlt, dif_neg (fun h => hlt h.1), zero_mul]
+    · rw [dite_eq_right hlt, dite_eq_right (fun h => hlt h.1), zero_mul]
   rw [Finset.sum_congr rfl hrest]
   by_cases hib : b.val ≤ i.val
   · rw [hy i hib, Finset.sum_eq_zero]
     · simp
     · intro a _
-      rw [dif_neg]
+      rw [dite_eq_right]
       omega
   · have hir : i.val < r := by omega
     have hfb : fvec k r z b i = 0 := by
@@ -68,9 +117,9 @@ theorem expand_of_tail (z : Fin (2 * r + k + 1) → ℂ) (hz : inWb k r z) (b : 
       · exact hz i (Or.inl hir)
     rw [hfb, mul_zero, zero_add]
     rw [Finset.sum_eq_single ⟨i.val, by omega⟩]
-    · rw [dif_pos ⟨by simp; omega, rfl⟩]
+    · rw [dite_eq_left ⟨by simp; omega, rfl⟩]
     · intro a _ ha
-      rw [dif_neg]
+      rw [dite_eq_right]
       rintro ⟨-, h2⟩
       exact ha (Fin.ext h2.symm)
     · intro ha
@@ -86,7 +135,7 @@ theorem coefOf_UT (y : Fin (r + 1) → Fin (2 * r + k + 1) → ℂ) :
     (Matrix.of fun a b => coefOf (k := k) b (y b) a) ∈ UTset (r + 1) := by
   refine ⟨fun a b hab => ?_, fun a => ?_⟩
   · simp only [Matrix.of_apply, coefOf, if_neg hab.ne']
-    rw [dif_neg (fun h => lt_asymm h (Fin.lt_def.1 hab))]
+    rw [dite_eq_right (fun h => lt_asymm h (Fin.lt_def.1 hab))]
   · simp [coefOf]
 
 theorem Sset_frame (z : Fin (2 * r + k + 1) → ℂ) (hz : StdZ k r z) (s : B.Mat k r) (hs : s ∈ Sset k r z) :

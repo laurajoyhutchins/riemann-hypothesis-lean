@@ -1,9 +1,50 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.ThetaValues.LeCovCoeff
-import Formalism.LocalToGlobal.ProjectiveLattices.ThClassPinsRec
-import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.MemOfForallLocP
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.TensorMapDescent
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.FFVMap
+module
+
+public import Development.AbelianVarietyTheory.Definitions.ThetaValues.LeCovCoeff
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.MemOfForallLocP
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ActPMemLocPNabStdOfIsBasisAt
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.TensorMapDescent
+import Formalism.GradedWeylDivisibility.DualWeylDominanceOf
+import Formalism.LocalToGlobal.Divisibility.CoefModLemmas
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.FFVMap
+
+@[expose] public section
 
 open NumberField MvPolynomial ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Geo.Tor Formalism.L2.Pj Formalism.BasicNotions Formalism.L2.DIV GlobalTheory.FieldBC
 
@@ -36,7 +77,7 @@ theorem cf_zero (φ : K' →+ K) : cf φ (0 : MvPolynomial σ K') = 0 := by
 theorem cf_smul_map {φ : K' →+ K} (hφ : ∀ a x, φ (j a * x) = a * φ x) (x : K') (Q : MvPolynomial σ K) :
     cf φ (x • map j Q) = φ x • Q := by
   ext m
-  rw [coeff_cf, coeff_smul, coeff_smul, coeff_map, smul_eq_mul, smul_eq_mul, mul_comm, hφ, mul_comm]
+  rw [coeff_cf, MvPolynomial.coeff_smul, MvPolynomial.coeff_smul, coeff_map, smul_eq_mul, smul_eq_mul, mul_comm, hφ, mul_comm]
 
 theorem map_smul' (a : K) (Q : MvPolynomial σ K) : map j (a • Q) = j a • map j Q := by
   rw [smul_eq_C_mul, smul_eq_C_mul, map_mul, map_C]
@@ -49,12 +90,12 @@ theorem cf_comm {φ : K' →+ K} (hφ : ∀ a x, φ (j a * x) = a * φ x)
     have e : (monomial m x : MvPolynomial σ K') = x • map j (monomial m 1) := by
       rw [map_monomial, map_one, smul_monomial, smul_eq_mul, mul_one]
     rw [e, map_smul, h, cf_smul_map j hφ, cf_smul_map j hφ, map_smul]
-  | add p q hp hq => rw [map_add, cf_add, cf_add, map_add, hp, hq]
+  | add p q hp hq => rw [map_add (f := _), cf_add, cf_add, map_add (f := _), hp, hq]
 
 theorem eq_sum_cf {I : Type} [Fintype I] (e : I → K') (φ : I → K' →+ K) (h : ∀ x, ∑ i, e i * j (φ i x) = x)
     (P : MvPolynomial σ K') : P = ∑ i, e i • map j (cf (φ i) P) := by
   ext m
-  simp only [coeff_sum, coeff_smul, coeff_map, coeff_cf, smul_eq_mul, h]
+  simp only [coeff_sum, MvPolynomial.coeff_smul, coeff_map, coeff_cf, smul_eq_mul, h]
 
 theorem exists_ext (T : MvPolynomial σ K →ₗ[K] MvPolynomial τ K) :
     ∃ T' : MvPolynomial σ K' →ₗ[K'] MvPolynomial τ K', ∀ Q, T' (map j Q) = map j (T Q) := by
@@ -65,7 +106,7 @@ theorem exists_ext (T : MvPolynomial σ K →ₗ[K] MvPolynomial τ K) :
       rw [smul_monomial, smul_eq_mul, mul_one]
     have e' : map j (monomial m 1) = basisMonomials σ K' m := by simp
     rw [e, map_smul', map_smul, map_smul, map_smul', e', Module.Basis.constr_basis]
-  | add p q hp hq => simp only [map_add, hp, hq]
+  | add p q hp hq => simp only [map_add (f := _), hp, hq]
 
 theorem cf_mem_VV {φ : K' →+ K} (hφ : ∀ a x, φ (j a * x) = a * φ x) {ι : Type} [Fintype ι] {n : ℕ}
     (lam : ι → DomWeight n) {F : Pol K' ι n} (hF : F ∈ VV K' lam) : cf φ F ∈ VV K lam := by
@@ -92,6 +133,7 @@ theorem cf_mem_HHa {φ : K' →+ K} (hφ : ∀ a x, φ (j a * x) = a * φ x) {T 
     intro t ht i i'
     rw [← cf_comm j hφ _ (lap r n K' 1 t (cc t) i i'), hh t ht i i', cf_zero]
     intro Q
+
     simp [lap, Matrix.one_apply, ite_smul, Finset.sum_ite_eq, LinearMap.sum_apply, pderiv_map, map_sum]
   · intro s i i' hlt t
     have := cf_comm j hφ (rowShift r n K s i i' t).toLinearMap (rowShift r n K' s i i' (j t)).toLinearMap ?_ P
@@ -101,7 +143,7 @@ theorem cf_mem_HHa {φ : K' →+ K} (hφ : ∀ a x, φ (j a * x) = a * φ x) {T 
       simp only [AlgHom.toLinearMap_apply]
       induction Q using MvPolynomial.induction_on with
       | C x => simp [rowShift]
-      | add p q hp hq => simp only [map_add, hp, hq]
+      | add p q hp hq => simp only [map_add (f := _), hp, hq]
       | mul_X p v hp =>
         simp only [map_mul, hp, map_X]
         congr 1
@@ -123,7 +165,7 @@ theorem polyAction_map {ι : Type} [Fintype ι] {n : ℕ} (lam : ι → DomWeigh
   have h2 : trAct g' (map j F) = map j (trAct g F) := by
     induction F using MvPolynomial.induction_on with
     | C x => simp [trAct]
-    | add p q hp hq => simp only [map_add, hp, hq]
+    | add p q hp hq => simp only [map_add (f := _), hp, hq]
     | mul_X p v hp =>
       simp only [map_mul, hp, map_X]
       congr 1
@@ -185,9 +227,11 @@ theorem exists_coords : ∃ (N : ℕ) (e : Fin N → 𝓞 K') (φ : Fin N → K'
   · have h0 : ∀ y : 𝓞 K', ∑ i, ((f (Pi.single i 1) : 𝓞 K') : K') * j (φ i y) = y := by
       intro y
       have h1 : y = ∑ i, g y i • f (Pi.single i 1) := by
+
         conv_lhs => rw [← show f (g y) = y from LinearMap.congr_fun hfg y, pi_eq_sum_univ' (g y), map_sum]
         simp only [map_smul]
       conv_rhs => rw [h1]
+
       simp only [hφ, map_sum, Algebra.smul_def, map_mul]
       refine Finset.sum_congr rfl fun i _ => ?_
       rw [mul_comm]; rfl
@@ -220,10 +264,11 @@ theorem gaStar_map (ga : Matrix (Fin n) (Fin n) E) (P : MvPolynomial (LtN Dw n) 
     Formalism.L2.Pj.gaStar c' ga (map (incF c c' hle) P) = map (incF c c' hle) (Formalism.L2.Pj.gaStar c ga P) := by
   induction P using MvPolynomial.induction_on with
   | C x => rw [map_C, Formalism.L2.Pj.gaStar, Formalism.L2.Pj.gaStar, aeval_C, aeval_C, algebraMap_eq, algebraMap_eq, map_C]
-  | add p q hp hq => simp only [map_add, hp, hq]
+  | add p q hp hq => simp only [map_add (f := _), hp, hq]
   | mul_X p v hp =>
     simp only [map_mul, hp, map_X]
     congr 1
+
     simp only [Formalism.L2.Pj.gaStar, aeval_X, letB, map_sum, map_mul, map_C, map_X]
     rfl
 
@@ -340,10 +385,11 @@ theorem exists_ioLFRec_over : ∀ (E : Type) [Field E] [NumberField E] [IsCMFiel
     have h9 : ∀ i, ∃ v ∈ nab0M c (fun t => embF c (pl t)) lam, io v = cf (φ i) P := fun i =>
       h8 ⟨cf_mem_HHa (incF c c' hle) (hφ i) hP.1, fun m => by rw [coeff_cf]; exact hint i _ (hP.2 m)⟩
     choose v hv hv' using h9
-    refine ⟨∑ i, (e i : c'.F) • up (v i), ?_, ?_⟩
-    · refine Submodule.sum_mem _ fun i _ => ?_
-      exact Submodule.smul_mem _ (e i) ((m1 (up (v i))).2 (map_mem_nabStd _ lam ((n1 _).1 (hv i))))
-    · rw [eq_sum_cf (incF c c' hle) _ φ hsum P, map_sum]
-      simp only [map_smul, hup, hv']
+    set_option synthInstance.maxHeartbeats 100000 in
+      refine ⟨∑ i, (e i : c'.F) • up (v i), ?_, ?_⟩
+      · refine Submodule.sum_mem _ fun i _ => ?_
+        exact Submodule.smul_mem _ (e i) ((m1 (up (v i))).2 (map_mem_nabStd _ lam ((n1 _).1 (hv i))))
+      · rw [eq_sum_cf (incF c c' hle) _ φ hsum P, map_sum]
+        simp only [map_smul, hup, hv']
 
 end GlobalTheory.IoExtend

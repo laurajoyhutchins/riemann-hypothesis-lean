@@ -1,7 +1,48 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.AtBase
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.NGData
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.LocalDiscriminantIsUnit
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.AtBase
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.NGData
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.LocalDiscriminantIsUnit
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -28,7 +69,7 @@ theorem isUnitary_of_span (H : HermSp M V) (g : V ≃ₗ[E] V) {S : Set V} (hS :
     induction hx using Submodule.span_induction with
     | mem x hx => exact h x hx y hy
     | zero => rw [map_zero, H.h_zero_left, H.h_zero_left]
-    | add x x' _ _ ih ih' => rw [map_add, H.h_add_left, H.h_add_left, ih, ih']
+    | add x x' _ _ ih ih' => rw [map_add (f := _), H.h_add_left, H.h_add_left, ih, ih']
     | smul a x _ ih => rw [map_smul, H.h_smul_left, H.h_smul_left, ih]
   have h2 : ∀ y x, H.h (g y) (g x) = H.h y x := by
     intro y x
@@ -36,7 +77,7 @@ theorem isUnitary_of_span (H : HermSp M V) (g : V ≃ₗ[E] V) {S : Set V} (hS :
     induction hy using Submodule.span_induction with
     | mem y hy => rw [H.h_herm, h1 x y hy, ← H.h_herm]
     | zero => rw [map_zero, H.h_zero_left, H.h_zero_left]
-    | add y y' _ _ ih ih' => rw [map_add, H.h_add_left, H.h_add_left, ih, ih']
+    | add y y' _ _ ih ih' => rw [map_add (f := _), H.h_add_left, H.h_add_left, ih, ih']
     | smul a y _ ih => rw [map_smul, H.h_smul_left, H.h_smul_left, ih]
   exact fun x y => h2 x y
 
@@ -49,7 +90,7 @@ theorem baseChange_mem_span (p : PlF D) {s : Set (VS D).V} {x : (VS D).V} (hx : 
   induction hx using Submodule.span_induction with
   | mem x hx => exact Submodule.subset_span ⟨x, hx, rfl⟩
   | zero => rw [map_zero]; exact Submodule.zero_mem _
-  | add x y _ _ ihx ihy => rw [map_add]; exact Submodule.add_mem _ ihx ihy
+  | add x y _ _ ihx ihy => rw [map_add (f := _)]; exact Submodule.add_mem _ ihx ihy
   | smul a x _ ih => rw [baseChange_smul₂]; exact Submodule.smul_mem _ _ ih
 
 theorem ext_bcP (p : PlF D) {f g : Vp D p →ₗ[(D.s.atP p).Ep] Vp D p} (h : ∀ x, f (baseChange₂ D p x) = g (baseChange₂ D p x)) :
@@ -65,6 +106,7 @@ theorem locEnd_bcP (p : PlF D) (φ : (VS D).V →ₗ[D.host.E] (VS D).V) (x : (V
   have e := congrFun (LinearMap.toMatrix_mulVec_repr (VS D).frame (VS D).frame φ x) i
   simp only [locEnd, Matrix.toLin'_apply, baseChange₂, AddMonoidHom.coe_mk, ZeroHom.coe_mk]
   rw [← e]
+
   simp only [Matrix.mulVec, dotProduct, Matrix.map_apply, map_sum, map_mul]
 
 def locEquiv (p : PlF D) (γ : (VS D).V ≃ₗ[D.host.E] (VS D).V) : Vp D p ≃ₗ[(D.s.atP p).Ep] Vp D p :=
@@ -89,6 +131,7 @@ theorem exists_dual {r : ℕ} (e : Fin r → (VS D).V) (he : LinearIndependent D
       intro y
       have h0 : f (φ y) = 0 := hle ⟨y, rfl⟩
       rw [LinearMap.pi_apply_eq_sum_univ] at h0
+
       rw [map_sum, LinearMap.sum_apply]
       rw [← h0]
       refine Finset.sum_congr rfl fun a _ => ?_
@@ -154,11 +197,11 @@ namespace GlobalTheory.LocExt
 
 variable {D : D7}
 
-theorem frame_castSucc {T : D.host.E} (F : LFlag (VS D) D.R.rS T) (a : Fin D.R.rS) :
+theorem frame_castSucc {T : D.host.E} (F : LFlag (D.sp.Y 0) D.R.rS T) (a : Fin D.R.rS) :
     frame F a.castSucc = F.fl.e a := by
   simp [frame, FlagG.fvec]
 
-theorem baseChange_flagVector_mem_span (Z : LocDat D) (p : PlF D) {T : D.host.E} (F : LFlag (VS D) D.R.rS T) (S : Set (Fin D.R.rS))
+theorem baseChange_flagVector_mem_span (Z : LocDat D) (p : PlF D) {T : D.host.E} (F : LFlag (D.sp.Y 0) D.R.rS T) (S : Set (Fin D.R.rS))
     (b : Fin D.R.rS) (hb : b ∈ S) :
     baseChange₂ D p (F.fl.e b) ∈ Submodule.span (D.s.atP p).Ep ((fun b : Fin D.R.rS => scaled Z p (frame F) b.castSucc) '' S) := by
   obtain ⟨u, hu⟩ := Formalism.L2.SG.Pf.BBTie.bt_frFac_unit Z p b.castSucc
@@ -167,7 +210,7 @@ theorem baseChange_flagVector_mem_span (Z : LocDat D) (p : PlF D) {T : D.host.E}
   rw [e]
   exact Submodule.smul_mem _ _ (Submodule.subset_span ⟨b, hb, rfl⟩)
 
-theorem bcP_Xsp_mem (Z : LocDat D) (p : PlF D) {T : D.host.E} (F : LFlag (VS D) D.R.rS T) {x : (VS D).V}
+theorem bcP_Xsp_mem (Z : LocDat D) (p : PlF D) {T : D.host.E} (F : LFlag (D.sp.Y 0) D.R.rS T) {x : (VS D).V}
     (hx : x ∈ Xsp F) : baseChange₂ D p x ∈ (locH Z p).X (scaled Z p (frame F)) := by
   have h := baseChange_mem_span p (s := Set.range F.fl.e) hx
   refine Submodule.span_le.2 ?_ h
@@ -176,7 +219,7 @@ theorem bcP_Xsp_mem (Z : LocDat D) (p : PlF D) {T : D.host.E} (F : LFlag (VS D) 
   rw [Set.image_univ] at this
   exact this
 
-theorem perp_le (Z : LocDat D) (p : PlF D) {T : D.host.E} (F : LFlag (VS D) D.R.rS T) {v : Vp D p}
+theorem perp_le (Z : LocDat D) (p : PlF D) {T : D.host.E} (F : LFlag (D.sp.Y 0) D.R.rS T) {v : Vp D p}
     (hv : v ∈ (locH Z p).perp ((locH Z p).X (scaled Z p (frame F)))) :
     v ∈ Submodule.span (D.s.atP p).Ep (baseChange₂ D p '' (orth (VS D) (Xsp F) : Set (VS D).V)) := by
   obtain ⟨es, hes⟩ := exists_dual F.fl.e F.fl.e_indep
@@ -194,12 +237,14 @@ theorem perp_le (Z : LocDat D) (p : PlF D) {T : D.host.E} (F : LFlag (VS D) D.R.
         induction hy using Submodule.span_induction with
         | mem y hy =>
           obtain ⟨c, rfl⟩ := hy
+
           simp [hw, map_sub, map_sum, map_smul, hes, Finset.sum_ite_eq]
         | zero => simp
-        | add y y' _ _ ih ih' => simp [map_add, ih, ih']
+        | add y y' _ _ ih ih' => simp [map_add (f := _), ih, ih']
         | smul a y _ ih => simp [map_smulₛₗ, ih]
       have e : baseChange₂ D p x - ∑ a, (locH Z p).h (baseChange₂ D p x) (baseChange₂ D p (F.fl.e a)) • baseChange₂ D p (es a) = baseChange₂ D p w := by
         show baseChange₂ D p x - ∑ a, LocFacts₂ Z.M p (baseChange₂ D p x) (baseChange₂ D p (F.fl.e a)) • baseChange₂ D p (es a) = _
+
         simp only [baseChangeAt_form Z.M p (Z.hcj p), brS, hw, map_sub, map_sum, baseChange_smul₂]
       rw [e]
       exact Submodule.subset_span ⟨w, hwo, rfl⟩
@@ -224,7 +269,7 @@ theorem perp_le (Z : LocDat D) (p : PlF D) {T : D.host.E} (F : LFlag (VS D) D.R.
   simpa [h0] using this
 
 theorem locEquiv_NU (Z : LocDat D) (p : PlF D) (γ : (VS D).V ≃ₗ[D.host.E] (VS D).V)
-    {T : D.host.E} (F : LFlag (VS D) D.R.rS T) (hN : γ ∈ Formalism.L2.SG.NGData.NRat F) :
+    {T : D.host.E} (F : LFlag (D.sp.Y 0) D.R.rS T) (hN : γ ∈ Formalism.L2.SG.NGData.NRat F) :
     locEquiv p γ ∈ NU (locH Z p) (scaled Z p (frame F)) := by
   obtain ⟨hiso, hfl, hperp⟩ := hN
   have hg : ∀ x, locEquiv p γ (baseChange₂ D p x) = baseChange₂ D p (γ x) := locEquiv_ext p γ
@@ -252,7 +297,7 @@ theorem locEquiv_NU (Z : LocDat D) (p : PlF D) (γ : (VS D).V ≃ₗ[D.host.E] (
     | zero => simp
     | add x y _ _ ihx ihy =>
       have e : locEquiv p γ (x + y) - (x + y) = (locEquiv p γ x - x) + (locEquiv p γ y - y) := by
-        rw [map_add]; abel
+        rw [map_add (f := _)]; abel
       rw [e]; exact Submodule.add_mem _ ihx ihy
     | smul c x _ ih =>
       rw [map_smul, ← smul_sub]; exact Submodule.smul_mem _ _ ih
@@ -261,7 +306,7 @@ end GlobalTheory.LocExt
 
 namespace GlobalTheory.LocExt
 
-theorem ext_isometry : ∀ (D : D7) (Z : LocDat D), ∀ (p : PlF D), ∀ γ ∈ Formalism.HermitianLatticesTheory.isom (VS D).hT, ∃ g, Ext p γ g ∧ LocNG.IsUnitary (locH Z p) g ∧ (∀ g', Ext p γ g' → g' = g) ∧ (∀ Λ : Submodule (𝓞 D.host.E) (VS D).V, LocNG.img (M := Z.M p) g (lattice₂ D Z.M p Λ) = lattice₂ D Z.M p (Formalism.HermitianLatticesTheory.gmap γ Λ)) ∧ ∀ {T : D.host.E} (F : LFlag (VS D) D.R.rS T), γ ∈ Formalism.L2.SG.NGData.NRat F → g ∈ NU (locH Z p) (scaled Z p (frame F)) := by
+theorem ext_isometry : ∀ (D : D7) (Z : LocDat D), ∀ (p : PlF D), ∀ γ ∈ Formalism.HermitianLatticesTheory.isom (VS D).hT, ∃ g, Ext p γ g ∧ LocNG.IsUnitary (locH Z p) g ∧ (∀ g', Ext p γ g' → g' = g) ∧ (∀ Λ : Submodule (𝓞 D.host.E) (VS D).V, LocNG.img (M := Z.M p) g (lattice₂ D Z.M p Λ) = lattice₂ D Z.M p (Formalism.HermitianLatticesTheory.gmap γ Λ)) ∧ ∀ {T : D.host.E} (F : LFlag (D.sp.Y 0) D.R.rS T), γ ∈ Formalism.L2.SG.NGData.NRat F → g ∈ NU (locH Z p) (scaled Z p (frame F)) := by
   intro D Z p γ hγ
   exact ⟨locEquiv p γ, locEquiv_ext p γ, locEquiv_unitary Z p γ hγ, fun g' h => locEquiv_unique p γ g' h,
     fun Λ => locEquiv_img Z p γ Λ, fun F hN => locEquiv_NU Z p γ F hN⟩

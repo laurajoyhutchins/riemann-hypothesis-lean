@@ -1,29 +1,60 @@
-import Mathlib
-import Formalism.PairingDivisors.StatementA
-import Formalism.PairingDivisors.StatementX
-import Formalism.QuotientMetricDivisors.HermitianTwistDivisors.ValBasic
-import Formalism.QuotientMetricDivisors.HermitianTwistDivisors.ProdFormula
+module
+
+public import Formalism.PairingDivisors.StatementH
+public import Formalism.QuotientMetricDivisors.HermitianTwistDivisors.ProdFormula
+public import Formalism.QuotientMetricDivisors.HermitianTwistDivisors.ValBasic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Module NumberField IsDedekindDomain Finset
 open Formalism.DivisionValues (vw lw conjPl)
 
 namespace Formalism.PairingDivisionLocalBalance
-
-theorem ratio_valuation : RatioVal := by
-  intro K _ _ _ w a a' g ha ha'
-  rw [div_eq_mul_inv, Formalism.DivisionValues.ValuationRepresentative.vw_mul w a a'⁻¹ ha (inv_ne_zero ha'), Formalism.DivisionValues.ValuationRepresentative.vw_inv]
-  ring
-
-theorem gaussValUnit : GaussUnit := by
-  intro K _ _ _ w G G' q hq h hv
-  have hq0 : (q : K) ≠ 0 := by exact_mod_cast (by omega : q ≠ 0)
-  have hG : (G : K) ≠ 0 := by intro h0; rw [h0, zero_mul] at h; exact hq0 h.symm
-  have hG' : (G' : K) ≠ 0 := by intro h0; rw [h0, mul_zero] at h; exact hq0 h.symm
-  have h1 := Formalism.DivisionValues.ValuationRepresentative.vw_mul w (G : K) (G' : K) hG hG'
-  rw [h, hv] at h1
-  have h2 := Formalism.DivisionValues.ValuationRepresentative.vw_int_nonneg w G
-  have h3 := Formalism.DivisionValues.ValuationRepresentative.vw_int_nonneg w G'
-  omega
 
 theorem vw_prod {K : Type} [Field K] [NumberField K] [StarRing K] (w : Pl K) {P : Type} (R : Finset P)
     (e : P → K) (he : ∀ q ∈ R, e q ≠ 0) : vw w (∏ q ∈ R, e q) = ∑ q ∈ R, vw w (e q) := by
@@ -35,16 +66,6 @@ theorem vw_prod {K : Type} [Field K] [NumberField K] [StarRing K] (w : Pl K) {P 
       Formalism.DivisionValues.ValuationRepresentative.vw_mul w _ _ (he a (Finset.mem_insert_self _ _))
         (Finset.prod_ne_zero_iff.mpr fun q hq => he q (Finset.mem_insert_of_mem hq)),
       ih fun q hq => he q (Finset.mem_insert_of_mem hq)]
-
-theorem upper_part_stays : UpperStays := by
-  intro K _ _ _ w P R y y' e B hy hyy he hB
-  have hy' : y' ≠ 0 := by intro h0; rw [h0, zero_mul] at hyy; exact hy hyy
-  have hp : ∏ q ∈ R, e q ≠ 0 := by intro h0; rw [h0, mul_zero] at hyy; exact hy hyy
-  have h1 := Formalism.DivisionValues.ValuationRepresentative.vw_mul w y' _ hy' hp
-  rw [← hyy, vw_prod w R e (fun q hq => (Finset.prod_ne_zero_iff.mp hp) q hq)] at h1
-  have h2 : 0 ≤ ∑ q ∈ R, vw w (e q) := Finset.sum_nonneg he
-  have h3 : vw w y' ≤ vw w y := by omega
-  exact le_trans (by exact_mod_cast h3) hB
 
 theorem sum_valuation_nat : SumValNat := by
   intro K _ _ _ _ n

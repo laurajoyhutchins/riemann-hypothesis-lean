@@ -1,4 +1,48 @@
-import CompanionTheory.HarishChandraModules.KFiniteAnalyticVectors.FundamentalDomainCusps.ShortIsot
+module
+
+public import CompanionTheory.HarishChandraModules.KFiniteAnalyticVectors.FundamentalDomainCusps.ShortIsot
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Dynamics.Ergodic.Action.Regular
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MeasureTheory Topology Filter Set
 open scoped ENNReal Pointwise
@@ -56,7 +100,8 @@ theorem fundamental_domain_inclusion : FundIn := by
     obtain ⟨_, ⟨i, rfl⟩, hi⟩ := mem_iUnion₂.1 this
     exact ⟨i, l, hl, hlm, hi⟩
   refine ⟨⋃ i, W i \ ⋃ j < i, S j, MeasurableSet.iUnion fun i => (hWo i).measurableSet.diff
-    (isOpen_biUnion fun j _ => hSo j).measurableSet, iUnion_subset fun i => sdiff_subset.trans inter_subset_left,
+    (isOpen_biUnion (s := {j : ℕ | j < i}) fun j _ => hSo j).measurableSet,
+    iUnion_subset fun i => sdiff_subset.trans inter_subset_left,
     fun m => ?_⟩
   have key : ∀ l : Λ, ∀ i, (l : N) * m ∈ W i \ ⋃ j < i, S j → i = Nat.find (hex m) := fun l i h => by
     refine ((Nat.find_eq_iff (hex m)).2 ⟨⟨l, l.2, h.1⟩, fun j hj hm => h.2 ?_⟩).symm
@@ -104,7 +149,7 @@ theorem averaging_of_fundamental_domain : FundIn → Avg := by
   have hE : MeasurableEmbedding (Subtype.val : N → G) := MeasurableEmbedding.subtype_coe hN.measurableSet
   have hP : IsProbabilityMeasure ((μ D)⁻¹ • μ.restrict D) :=
     ⟨by rw [Measure.smul_apply, Measure.restrict_apply_univ, smul_eq_mul, ENNReal.inv_mul_cancel hpos hfin]⟩
-  refine ⟨((μ D)⁻¹ • μ.restrict D).map Subtype.val, Measure.isProbabilityMeasure_map hE.measurable.aemeasurable,
+  refine ⟨((μ D)⁻¹ • μ.restrict D).map Subtype.val, (Measure.isProbabilityMeasure_map_iff hE.measurable.aemeasurable).2 hP,
     hE.ae_map_iff.2 (Measure.ae_smul_measure ((ae_restrict_mem hDm).mono fun x hx => hDV hx) _),
     fun u _ hu m₀ hm₀ y => ?_⟩
   rw [hE.integral_map, hE.integral_map, integral_smul_measure, integral_smul_measure]

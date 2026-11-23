@@ -1,5 +1,44 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsDatNeZero
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsDatNeZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -17,9 +56,12 @@ namespace GlobalTheory.PtExt.ContrMor
 variable {R : Type} [CommRing R] {A B : Over (Sp R)} [GrpObj A] [GrpObj B]
   {D : Type} [CommRing D] [Algebra R D] {D' : Type} [CommRing D'] [Algebra R D']
 
-theorem specOverOfAlgHom_pointWithZeroSecondCoord (φ : D →ₐ[R] D') (x : Pt A D) : spOver φ ≫ pt0 B x = pt0 B (spOver φ ≫ x) := by
+omit [GrpObj A] in
+theorem specOverOfAlgHom_pointWithZeroSecondCoord (φ : D →ₐ[R] D') (x : Pt A D) :
+    spOver φ ≫ pt0 B x = pt0 B (spOver φ ≫ x : Pt A D') := by
   simp [pt0, comp_lift, MonObj.comp_one]
 
+omit [GrpObj A] in
 theorem spOver_fst_ptV (v : epsR R ⟶ B) (hv : IsTangent v) (x : Pt A D) :
     spOver (TrivSqZeroExt.fstHom R D D) ≫ ptV v x = pt0 B x := by
   have k : spOver (TrivSqZeroExt.fstHom R D D) ≫ spOver (EpsWeil.epsMap R D) =
@@ -36,39 +78,42 @@ theorem spOver_fst_ptV (v : epsR R ⟶ B) (hv : IsTangent v) (x : Pt A D) :
   · simp only [ptV, pt0, comp_lift, lift_snd]
     rw [← Category.assoc, k, Category.assoc, (GrpTangent.isTangent_iff v).1 hv, MonObj.comp_one]
 
+omit [GrpObj A] [GrpObj B] in
 theorem spOver_epsHom_ptV (v : epsR R ⟶ B) (φ : D →ₐ[R] D') (x : Pt A D) :
-    spOver (epsHom φ) ≫ ptV v x = ptV v (spOver φ ≫ x) := by
+    spOver (epsHom φ) ≫ ptV v x = ptV v (spOver φ ≫ x : Pt A D') := by
   ext1
   · simp only [ptV, comp_lift, lift_fst, ← Category.assoc, spOver_comp]
     congr 2
-    ext c <;> simp [epsHom, DualNumber.lift_apply_apply]
+    ext c <;> simp [epsHom]
   · simp only [ptV, comp_lift, lift_snd, ← Category.assoc, spOver_comp]
     congr 2
     ext <;> simp only [AlgHom.comp_apply, EpsWeil.epsMap, epsHom, DualNumber.lift_apply_eps]
 
 def sHom (x : Pt A D) : trivAt (pt0 B x) ⟶ thickAt B x :=
-  (epsExt R D).secHom (pt0 B x).w (epsExt R D).i (epsExt R D).π_i
+  (epsExt R D).secHom (Pt.w (pt0 B x)) (epsExt R D).i (epsExt R D).π_i
 
 def iHom (v : epsR R ⟶ B) (hv : IsTangent v) (x : Pt A D) : trivAt (ptV v x) ⟶ thickAt B x :=
-  Thick.trivHom (AlgHom.id R _) (by
+  Thick.trivHom (T := thickAt B x) (AlgHom.id R (DualNumber D)) (by
     have := congrArg Over.Hom.left (spOver_fst_ptV v hv x)
     rw [Over.comp_left, PDiv.spOver_left] at this
     exact this)
 
-def aHom (φ : D →ₐ[R] D') (x : Pt A D) : trivAt (pt0 B x) ⟶ trivAt (pt0 B (spOver φ ≫ x)) :=
+def aHom (φ : D →ₐ[R] D') (x : Pt A D) :
+    trivAt (pt0 B x) ⟶ trivAt (pt0 B (spOver φ ≫ x : Pt A D')) :=
   Thick.trivHom φ (by
     have := congrArg Over.Hom.left (specOverOfAlgHom_pointWithZeroSecondCoord (B := B) φ x)
     rw [Over.comp_left, PDiv.spOver_left] at this
     exact this)
 
 def bHom (v : epsR R ⟶ B) (φ : D →ₐ[R] D') (x : Pt A D) :
-    trivAt (ptV v x) ⟶ trivAt (ptV v (spOver φ ≫ x)) :=
+    trivAt (ptV v x) ⟶ trivAt (ptV v (spOver φ ≫ x : Pt A D')) :=
   Thick.trivHom (epsHom φ) (by
     have := congrArg Over.Hom.left (spOver_epsHom_ptV v φ x)
     rw [Over.comp_left, PDiv.spOver_left] at this
     exact this)
 
-def τHom (φ : D →ₐ[R] D') (x : Pt A D) : thickAt B x ⟶ thickAt B (spOver φ ≫ x) :=
+def τHom (φ : D →ₐ[R] D') (x : Pt A D) :
+    thickAt B x ⟶ thickAt B (spOver φ ≫ x : Pt A D') :=
   (epsExt R D).thickHom (epsExt R D') (epsHom φ) φ
     (fun c ↦ by simp [epsHom, DualNumber.lift_apply_apply]) _ _ (by
     have := congrArg Over.Hom.left (specOverOfAlgHom_pointWithZeroSecondCoord (B := B) φ x)
@@ -79,7 +124,19 @@ end GlobalTheory.PtExt.ContrMor
 
 namespace GlobalTheory.PtExt.ContrMor
 
-theorem exists_contr : ∀ (R : Type) [CommRing R] (A B : Over (Sp R)) [GrpObj A] [GrpObj B] (v : epsR R ⟶ B), IsTangent v → (∀ (D : Type) [CommRing D] [Algebra R D] (D' : Type) [CommRing D'] [Algebra R D'] (φ : D →ₐ[R] D') (x : Pt A D), ∃ (s : trivAt (pt0 B x) ⟶ thickAt B x) (i : trivAt (ptV v x) ⟶ thickAt B x) (s' : trivAt (pt0 B (spOver φ ≫ x)) ⟶ thickAt B (spOver φ ≫ x)) (i' : trivAt (ptV v (spOver φ ≫ x)) ⟶ thickAt B (spOver φ ≫ x)) (a : trivAt (pt0 B x) ⟶ trivAt (pt0 B (spOver φ ≫ x))) (b : trivAt (ptV v x) ⟶ trivAt (ptV v (spOver φ ≫ x))) (τ : thickAt B x ⟶ thickAt B (spOver φ ≫ x)), (∀ r, s.φ r = TrivSqZeroExt.inl r) ∧ (∀ r, i.φ r = r) ∧ (∀ r, s'.φ r = TrivSqZeroExt.inl r) ∧ (∀ r, i'.φ r = r) ∧ (∀ r, a.φ r = φ r) ∧ (∀ r, b.φ r = epsHom φ r) ∧ (∀ r, τ.φ r = epsHom φ r)) ∧ ∀ z : C2 (O (dp0 R) ((A ⊗ B).hom ≫ 𝟙 _)), ∃ κ : Fn1 A, IsContr z v κ := by
+theorem exists_contr : ∀ (R : Type) [CommRing R] (A B : Over (Sp R)) [GrpObj A] [GrpObj B]
+    (v : epsR R ⟶ B), IsTangent v →
+    (∀ (D : Type) [CommRing D] [Algebra R D] (D' : Type) [CommRing D'] [Algebra R D']
+      (φ : D →ₐ[R] D') (x : Pt A D),
+      let y : Pt A D' := spOver φ ≫ x
+      ∃ (s : trivAt (pt0 B x) ⟶ thickAt B x) (i : trivAt (ptV v x) ⟶ thickAt B x)
+        (s' : trivAt (pt0 B y) ⟶ thickAt B y) (i' : trivAt (ptV v y) ⟶ thickAt B y)
+        (a : trivAt (pt0 B x) ⟶ trivAt (pt0 B y)) (b : trivAt (ptV v x) ⟶ trivAt (ptV v y))
+        (τ : thickAt B x ⟶ thickAt B y),
+        (∀ r, s.φ r = TrivSqZeroExt.inl r) ∧ (∀ r, i.φ r = r) ∧
+        (∀ r, s'.φ r = TrivSqZeroExt.inl r) ∧ (∀ r, i'.φ r = r) ∧
+        (∀ r, a.φ r = φ r) ∧ (∀ r, b.φ r = epsHom φ r) ∧ (∀ r, τ.φ r = epsHom φ r)) ∧
+    ∀ z : C2 (O (dp0 R) ((A ⊗ B).hom ≫ 𝟙 _)), ∃ κ : Fn1 A, IsContr z v κ := by
   intro R _ A B _ _ v hv
   refine ⟨fun D _ _ D' _ _ φ x ↦ ⟨sHom x, iHom v hv x, sHom _, iHom v hv _, aHom φ x, bHom v φ x, τHom φ x,
     fun _ ↦ rfl, fun _ ↦ rfl, fun _ ↦ rfl, fun _ ↦ rfl, fun _ ↦ rfl, fun _ ↦ rfl, fun _ ↦ rfl⟩, fun z ↦ ?_⟩

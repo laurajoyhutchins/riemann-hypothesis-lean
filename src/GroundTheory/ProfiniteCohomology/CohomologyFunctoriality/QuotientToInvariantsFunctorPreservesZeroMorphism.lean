@@ -1,6 +1,50 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.CohomologyFunctoriality
-import GroundTheory.ProfiniteCohomology.ContinuousCochains.LongExactSequence
+module
+
+public import GroundTheory.ProfiniteCohomology.CohomologyFunctoriality
+public import GroundTheory.ProfiniteCohomology.ContinuousCochains.LongExactSequence
+public import Mathlib.Algebra.Homology.HomologySequenceLemmas
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
@@ -35,7 +79,6 @@ noncomputable def cochainsShortComplexMapAlong :
     funext h
     exact congrArg (fun ψ => ψ.hom (((cochainsComplexι S.X₂).f n).hom x (⇑φ ∘ h))) α.comm₂₃
 
-@[reassoc]
 theorem δ_comp_cohomologyMapAlong (hS : S.ShortExact) (hT : T.ShortExact) (i j : ℕ)
     (hij : i + 1 = j) :
     δ hS i j hij ≫ cohomologyMapAlong (A := S.X₁) φ hφ α.τ₁ j =
@@ -61,13 +104,12 @@ instance isDiscreteRep_map_res_X₃ : IsDiscreteRep (X.map (Rep.resFunctor U.sub
 
 variable {X}
 
+
 omit [TopologicalSpace G] [IsTopologicalGroup G] [IsDiscreteRep X.X₁] [IsDiscreteRep X.X₂]
   [IsDiscreteRep X.X₃] in
-
 theorem shortExact_map_res (hX : X.ShortExact) : (X.map (Rep.resFunctor U.subtype)).ShortExact :=
   (Rep.shortExact_res U.subtype).2 hX
 
-@[reassoc]
 theorem δ_comp_cohomologyRes (hX : X.ShortExact) (i j : ℕ) (hij : i + 1 = j) :
     δ hX i j hij ≫ cohomologyRes X.X₁ U j =
       cohomologyRes X.X₃ U i ≫ δ (shortExact_map_res U hX) i j hij :=
@@ -81,8 +123,8 @@ section Inflation
 variable (X : ShortComplex (Rep.{u} k G)) [IsDiscreteRep X.X₁] [IsDiscreteRep X.X₂]
   [IsDiscreteRep X.X₃] (N : Subgroup G) [N.Normal]
 
-omit [TopologicalSpace G] [IsTopologicalGroup G] in
 
+omit [TopologicalSpace G] [IsTopologicalGroup G] in
 instance quotientToInvariantsFunctor_preservesZeroMorphisms :
     (Rep.quotientToInvariantsFunctor.{u} k N).PreservesZeroMorphisms where
   map_zero _ _ := by
@@ -112,7 +154,6 @@ noncomputable def mapQuotientToInvariantsResToSelf :
 
 variable {X}
 
-@[reassoc]
 theorem δ_comp_cohomologyInfl (hX : X.ShortExact)
     (hXN : (X.map (Rep.quotientToInvariantsFunctor k N)).ShortExact) (i j : ℕ)
     (hij : i + 1 = j) :

@@ -1,10 +1,66 @@
-import Mathlib
-import ReciprocityTheory.SemistableReduction.SemiAll
+module
+
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.ExistsFinsetTypesOfBoundedBases
+public import ReciprocityTheory.SemistableReduction.LatSemiSt
+public import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.CmApproximationTransference
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.ExistsThickPointHyperbolic
+import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.TraceHermNondegenerate
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.Matrix.Order
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.PackingSeparation
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.DiscriminantEstimates.DiscriminantTheorems.ScaledBoundInequality
+public import ReciprocityTheory.SemistableReduction.SemiAll
+import ReciprocityTheory.SemistableReduction.SemiDegAA
+import ReciprocityTheory.SemistableReduction.SemiDegH
 import ReciprocityTheory.SemistableReduction.SemiDegZ
-import ReciprocityTheory.SemistableReduction.LatTest
-import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.CmApproximationTransference
-import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.ExistsThickPointHyperbolic
-import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.ExistsFinsetTypesOfBoundedBases
+
+@[expose] public section
 
 open NumberField Matrix Module Submodule ReciprocityTheory.MultiplicativeHeights ComplexConjugate
 open ReciprocityTheory.ChartRestriction.G.FD (herm cc fdeg dE)
@@ -150,8 +206,8 @@ theorem two_mul_hq_le {S : HermForm K r} (M : Majorant S) (σ : K →+* ℂ) (x 
     (fun w _ => ?_) (Finset.mem_univ _)) zero_le_two
   exact (Complex.nonneg_iff.1 ((M.posDef _).posSemidef.dotProduct_mulVec_nonneg _)).1
 
-open CMTransference in
 
+open CMTransference in
 theorem exists_short_basis {S : HermForm K r} {L : Submodule (𝓞 K) (Fin r → K)}
     (hL : IsLattice L) (hsd : IsSelfDual S L) (M : Majorant S) {ε : ℝ} (hε : 0 < ε)
     (hmin : ∀ v ∈ L, v ≠ 0 → ε ≤ (∑ σ : K →+* ℂ, hq (M.H σ) (embVec σ v)) / 2) :
@@ -215,6 +271,7 @@ theorem exists_short_basis {S : HermForm K r} {L : Submodule (𝓞 K) (Fin r →
         obtain ⟨c, rfl⟩ := (mem_span_range_iff_exists_fun ℤ).1 ((hb y).2 hy)
         choose k hk using hk
         refine ⟨∑ j, c j * k j, ?_⟩
+
         rw [map_sum]
         simp only [map_zsmul, hk]
         simp
@@ -290,7 +347,8 @@ theorem exists_finset_submodule {R : Type} [CommRing R] [IsDedekindDomain R] {r 
         rw [mkQ_apply, Quotient.mk_eq_zero]
         exact ⟨m' ᵥ* N.adjugate, by
           rw [vecMulLinear_apply, vecMul_vecMul, adjugate_mul, vecMul_smul, vecMul_one]⟩
-      rw [mem_comap, h', map_add, h0, add_zero, map_sum]
+
+      rw [mem_comap, h', map_add (f := _), h0, add_zero, map_sum]
       refine sum_mem fun j _ => ?_
       rw [map_smul]
       exact smul_mem _ _ (subset_span ⟨j, rfl⟩)
@@ -606,42 +664,5 @@ theorem exists_finset_selfDual_classes_herm (G : Matrix (Fin r) (Fin r) K)
   refine ⟨𝒮, fun L hL => ⟨(h1 L hL).1, (hsd L).1 (h1 L hL).2⟩, fun L a b c => ?_, h3⟩
   obtain ⟨L₀, hL₀, γ, hγ, hm, -⟩ := h2 L a ((hsd L).2 ⟨b, c⟩)
   exact ⟨L₀, hL₀, γ, fun x y => by rw [← hermFormOf_h G hG, hγ, hermFormOf_h], hm⟩
-
-noncomputable def hyperbolicHermForm (K : Type) [Field K] [NumberField K] [IsCMField K] :
-    HermForm K 2 :=
-  hermFormOf !![0, 1; 1, 0] fun a b => by fin_cases a <;> fin_cases b <;> simp [cc]
-
-theorem isSelfDual_hyperbolicHermForm :
-    (hyperbolicHermForm K).h ![1, 0] ![1, 0] = 0 ∧ IsLattice (intLat K 2) ∧
-      IsSelfDual (hyperbolicHermForm K) (intLat K 2) := by
-  have hh : ∀ x y : Fin 2 → K,
-      (hyperbolicHermForm K).h x y = y 0 * cc (x 1) + y 1 * cc (x 0) := fun x y => by
-    rw [hyperbolicHermForm, hermFormOf_h]
-    simp [herm, Fin.sum_univ_two]
-  have hc : ∀ {x : K}, IsIntegral ℤ x → IsIntegral ℤ (cc x) := TraceDualMin.isIntegral_cc
-  have he : ∀ a : Fin 2, (Pi.single a 1 : Fin 2 → K) ∈ intLat K 2 := fun a =>
-    (mem_intLat _).2 fun b => isIntegralElt_iff.2 (by
-      rw [Pi.single_apply]
-      split_ifs
-      exacts [isIntegral_one, isIntegral_zero])
-  refine ⟨by simp [hh, cc], ⟨?_, ?_⟩, fun x hx y hy => ?_, fun x hx => ?_⟩
-  · refine Submodule.fg_pi fun _ => ?_
-    rw [Submodule.one_eq_span]
-    exact Submodule.fg_span_singleton 1
-  · rw [eq_top_iff, ← (Pi.basisFun K (Fin 2)).span_eq]
-    refine span_mono ?_
-    rintro _ ⟨a, rfl⟩
-    rw [Pi.basisFun_apply]
-    exact he a
-  · simp only [mem_intLat, isIntegralElt_iff] at hx hy ⊢
-    rw [hh]
-    exact ((hy 0).mul (hc (hx 1))).add ((hy 1).mul (hc (hx 0)))
-  · have h0 := hc (isIntegralElt_iff.1 (hx _ (he 0)))
-    have h1 := hc (isIntegralElt_iff.1 (hx _ (he 1)))
-    simp only [hh, cc] at h0 h1
-    refine (mem_intLat _).2 fun a => isIntegralElt_iff.2 ?_
-    fin_cases a
-    · simpa using h1
-    · simpa using h0
 
 end GlobalTheory

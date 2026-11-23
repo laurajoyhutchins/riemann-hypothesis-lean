@@ -1,6 +1,56 @@
-import Mathlib
-import Formalism.LocalToGlobal.IndefiniteReal.ConcretePkgSpec
-import Formalism.LocalToGlobal.IndefiniteReal.FWTie
+module
+
+public import Formalism.HermitianLattices.StatementMaj
+public import Formalism.LocalRingCardinality.DataHost
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Formalism.LocalRingCardinality.DataRows
+public import Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow
+import Formalism.LocalToGlobal.Divisibility.CoefMod
+public import Formalism.LocalToGlobal.Divisibility.LiftLat
+import Formalism.LocalToGlobal.IndefiniteForms.IndefSide
+import Formalism.LocalToGlobal.IndefiniteReal.ExistsChosenExtremalVector
+public import Formalism.LocalToGlobal.IndefiniteReal.LinksDefs
+import Formalism.LocalToGlobal.IndefiniteReal.PartsOrth
+import Formalism.QuotientMetricDivisors.Statement
+
+@[expose] public section
 
 noncomputable section
 
@@ -34,20 +84,6 @@ theorem maj_eq_zero {n : ℕ} (X : InfinitePlace K → Matrix (Fin n) (Fin n) �
 
 variable {Bs : DefBase K} {A : DefAmb Bs} (X : CxData A) {fc : DefSub A → DefFace Bs} (cr : Crd A fc) (b : Bool)
 
-def im (j : Bs.J) (v : InfinitePlace K) (x : Fin ((lv (fc X.zs) b).dZ j Bs.μ0) → K) : X.WC b j v :=
-  X.wC b j v (cpt v.embedding ((X.liftMat cr b j Bs.μ0).mulVec x))
-
-def ScalAt (j : Bs.J) (p : Bs.Ix) (v : InfinitePlace K) (l : ℝ) : Prop :=
-  ∀ x, X.tC cr b j Bs.μ0 (cpt Bs.v0.embedding x) ∈ X.Wp j p → ∀ y,
-    ⟪im X cr b j v x, im X cr b j v y⟫_ℂ =
-      ((l : ℝ) : ℂ) * Formalism.HermitianLatticesTheory.majAt (Pi.basisFun K _) ((lv (fc X.zs) b).XT j Bs.μ0) v x y
-
-def twist (S : ∀ b j v, X.WC b j v →ₗ[ℂ] X.WC b j v) (lam' : Bs.J → Bs.Tup → Bs.Ix → InfinitePlace K → ℝ) : CxData A :=
-  { X with bW := fun b j v k => S b j v (X.bW b j v k), lam := lam' }
-
-def shear {E : Type} [NormedAddCommGroup E] [InnerProductSpace ℂ E] (u u' : E) : E →ₗ[ℂ] E :=
-  LinearMap.id + (innerₛₗ ℂ u').smulRight u
-
 end Abstract
 
 section Concrete
@@ -56,9 +92,6 @@ attribute [local instance] Formalism.BasicNotions.Host.cmStar
 
 variable {D : D7} {G : Type} [Group G] [Fintype G] {Pl0 T0 : Type} {A : FamIn D.what₂.LL G Pl0 T0 D.R.m}
   {Ks : Type} [Field Ks] [NumberField Ks] [Algebra Ks D.what₂.LL] (R : RealDat D A Ks) (F : Face D A)
-
-def withJ (j' : ∀ i σ, (Fin (R.nW i) → D.what₂.LL) →ₛₗ[σ] (R.HW i σ).H) : RealDat D A Ks :=
-  { R with FW := fun i => { R.FW i with j := j' i } }
 
 end Concrete
 
@@ -70,28 +103,6 @@ open Formalism.IndefR.FWT Formalism.L2.Pj Formalism.MainNotions
 
 variable {D : D7} {G : Type} [Group G] [Fintype G] {Pl0 T0 : Type} {A : FamIn D.what₂.LL G Pl0 T0 D.R.m}
 
-set_option maxHeartbeats 1000000 in
-
-def fwTie_withJ {T : CoreJ D} [Algebra T.Q.c.F D.what₂.LL] {R : RealDat D A T.Q.c.F}
-    {κ : ∀ i : Fin D.R.m, WeightFamilies.Wt D ((i : ℕ) + 1)} {v₀ : ∀ (i : Fin D.R.m) (σ : D.what₂.LL →+* ℂ), (R.MW i σ).Vec}
-    (h : FWTie T R κ v₀) (j' : ∀ i σ, (Fin (R.nW i) → D.what₂.LL) →ₛₗ[σ] (R.HW i σ).H)
-    (hj : ∀ i σ, GoodEmb T.Q.c (σ.comp (algebraMap T.Q.c.F D.what₂.LL)) → j' i σ = (R.FW i).j σ) :
-    FWTie T (withJ R j') κ v₀ where
-  alg_eq := h.alg_eq
-  e := h.e
-  ks := h.ks
-  kap := h.kap
-  pt := h.pt
-  nrm_eq := h.nrm_eq
-  laws := h.laws
-  chiR := h.chiR
-  hv₀ := h.hv₀
-  x0 := h.x0
-  ev0 i σ hσ hV hn := (hj i σ hσ).trans (h.ev0 i σ hσ hV hn)
-  ev i σ hσ hV he f := by
-    have := h.ev i σ hσ hV he f
-    rw [← hj i σ hσ] at this
-    exact this
 
 end Comparison₂
 

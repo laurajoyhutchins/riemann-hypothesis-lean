@@ -1,5 +1,55 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.Statements
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.Statements
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.NumberTheory.BernoulliPolynomials
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.FieldNumbers
@@ -12,6 +62,7 @@ variable {K : Type}
 
 theorem totalDegree_aeval_le (g : K → MvPolynomial K ℚ) (hg : ∀ j, (g j).totalDegree ≤ 1)
     (P : MvPolynomial K ℚ) : (aeval g P).totalDegree ≤ P.totalDegree := by
+
   conv_lhs => rw [P.as_sum, map_sum]
   refine totalDegree_finsetSum_le fun α hα => ?_
   rw [aeval_monomial, algebraMap_eq]
@@ -48,7 +99,7 @@ theorem eval_aeval_X (y : K → ℚ) (k : K) (F : Polynomial ℚ) :
     eval y (Polynomial.aeval (X k) F) = F.eval (y k) := by
   induction F using Polynomial.induction_on with
   | C a => simp
-  | add p r hp hr => rw [map_add, map_add, hp, hr, Polynomial.eval_add]
+  | add p r hp hr => rw [map_add (f := _), map_add (f := _), hp, hr, Polynomial.eval_add]
   | monomial n a _ => simp
 
 theorem exists_antideriv (k : K) (q : MvPolynomial K ℚ) : ∃ P : MvPolynomial K ℚ,
@@ -94,6 +145,7 @@ theorem exists_antideriv (k : K) (q : MvPolynomial K ℚ) : ∃ P : MvPolynomial
   choose! P hPd hPe using key
   refine ⟨∑ α ∈ q.support, P α, totalDegree_finsetSum_le hPd, fun x => ?_⟩
   conv_rhs => rw [q.as_sum]
+
   simp only [map_sum, ← Finset.sum_sub_distrib]
   exact Finset.sum_congr rfl fun α hα => hPe α hα x
 
@@ -111,7 +163,7 @@ theorem eval_aeval_freeze (s : Finset K) (N x : K → ℚ) (P : MvPolynomial K �
     eval x (aeval (freeze s N) P) = eval (fun j => if j ∈ s then x j else N j) P := by
   induction P using MvPolynomial.induction_on with
   | C a => simp
-  | add p r hp hr => rw [map_add, map_add, hp, hr, map_add]
+  | add p r hp hr => rw [map_add (f := _), map_add (f := _), hp, hr, map_add (f := _)]
   | mul_X p j hp =>
     simp only [map_mul, hp, aeval_X, eval_X, freeze]
     split_ifs <;> simp
@@ -153,7 +205,7 @@ theorem proof : PolyOfDiffs.Statement := by
       (h (Function.update x k t) : ℚ) - eval (fun j => (Function.update x k t j : ℚ)) (P k) =
       (h x : ℚ) - eval (fun j => (x j : ℚ)) (P k) := by
     intro k x hx hxk t ht
-    induction t, ht using Int.le_induction with
+    induction t, ht using Int.leInduction with
     | base => rw [← hxk, Function.update_eq_self]
     | succ t ht ih =>
       have hy : N ≤ Function.update x k (t + 1) := by
@@ -200,7 +252,7 @@ theorem proof : PolyOfDiffs.Statement := by
         have c1 : ∀ t : Finset K, (fun j => ((pathPt N t m j : ℤ) : ℚ)) =
             fun j => if j ∈ t then (m j : ℚ) else (N j : ℚ) := by
           intro t; funext j; simp only [pathPt]; split_ifs <;> rfl
-        rw [map_sub, map_add, eval_aeval_freeze, eval_aeval_freeze, ← hQ m hm, ← c1, ← c1]
+        rw [map_sub, map_add (f := _), eval_aeval_freeze, eval_aeval_freeze, ← hQ m hm, ← c1, ← c1]
         linarith
   obtain ⟨Q, hQd, hQ⟩ := key Finset.univ
   refine ⟨Q, hQd, ?_⟩

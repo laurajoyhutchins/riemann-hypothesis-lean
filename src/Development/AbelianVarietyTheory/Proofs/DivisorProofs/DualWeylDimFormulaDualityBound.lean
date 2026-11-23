@@ -1,9 +1,53 @@
-import Mathlib
+module
+
+public import Formalism.PolynomialDimension.WeylDim
+public import Development.AbelianVarietyTheory.Definitions.Foundations.ExistsUnitaryMulTriangular
+public import Formalism.SharpRestriction.GrowthBounds.HermitianTensor.PbSmithLam
+public import Formalism.SharpRestriction.GrowthBounds.ScaleEdges.WeylDimShift
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
 import Development.AbelianVarietyTheory.Definitions.Divisors.IsAdelicOne
-import Formalism.LocalToGlobal.CMDeterminantIdeals.StatementG
-import Formalism.PolynomialDimension.WeylDim
-import Formalism.SharpRestriction.GrowthBounds.HermitianTensor.PbSmithLam
-import Formalism.SharpRestriction.GrowthBounds.ScaleEdges.WeylDimShift
+import Development.AbelianVarietyTheory.Definitions.Foundations.ExistsFlatSecRankZero
+import Development.AbelianVarietyTheory.Definitions.Foundations.IsProbabilityMeasureMuPart
+import Formalism.LocalToGlobal.ProjectiveLattices.ErealAddIInf
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Module Formalism.BasicNotions Formalism.L2.Pj GlobalTheory.DualWeyl GlobalTheory.AllWt GlobalTheory.FlatLine GlobalTheory.DefPt MvPolynomial
 open scoped Matrix
@@ -66,8 +110,8 @@ theorem weylDim_le (n : ℕ) (la : Fin n → ℕ) (hla : Antitone la) (w : ℤ) 
     rw [← Finset.sum_pair (f := fun k => |((la k : ℤ) : ℝ) - w|) hij]
     exact Finset.sum_le_sum_of_subset_of_nonneg (Finset.subset_univ _) fun k _ _ => abs_nonneg _
   rw [hcast, ← prod_ite_lt]
-  refine Finset.prod_le_prod (fun i _ => Finset.prod_nonneg fun j _ => ?_)
-    fun i _ => Finset.prod_le_prod (fun j _ => ?_) fun j _ => ?_
+  refine Finset.prod_le_prod₀ (fun i _ => Finset.prod_nonneg fun j _ => ?_)
+    fun i _ => Finset.prod_le_prod₀ (fun j _ => ?_) fun j _ => ?_
   · split_ifs with hij
     · have hd : ((i : ℕ) : ℝ) + 1 ≤ ((j : ℕ) : ℝ) := by exact_mod_cast (Fin.lt_def.mp hij)
       have ha : (la j : ℝ) ≤ la i := by exact_mod_cast hla hij.le

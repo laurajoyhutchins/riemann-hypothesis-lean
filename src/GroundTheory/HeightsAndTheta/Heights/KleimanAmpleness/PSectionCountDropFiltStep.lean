@@ -1,6 +1,53 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.SectionCountDropFiltStepSt
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.TwistAlg
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.SectionCountDropFiltStepSt
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.TwistAlg
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.Kleiman
@@ -29,7 +76,7 @@ theorem exists_frac_of_mem_idealMod {J : Ideal (Poly S N)} {I : Chart x} {z : Ω
     refine ⟨h * t' + t * h', t * t', d + d', J.add_mem (J.mul_mem_right _ hh) (J.mul_mem_left _ hh'),
       mul_mem ht ht', (hhd.mul htd').add (htd.mul hhd'), htd.mul htd', ?_⟩
     rw [div_add_div _ _ (eval_ne_zero_of_mem_monos I ht) (eval_ne_zero_of_mem_monos I ht')]
-    simp only [map_add, map_mul]
+    simp only [map_add (f := _), map_mul]
   · rintro a _ _ ⟨h, t, d, hh, ht, hhd, htd, rfl⟩
     obtain ⟨f, s, e, hs, hf, hse, ha⟩ := a.2
     refine ⟨f * h, s * t, e + d, J.mul_mem_left _ hh, mul_mem hs ht, hf.mul hhd, hse.mul htd, ?_⟩
@@ -48,13 +95,14 @@ theorem idealMod_sup_span_le {J₁ : Ideal (Poly S N)}
   obtain ⟨j, hj, cg, hcg, hjc⟩ := Submodule.mem_sup.mp hf
   obtain ⟨c, rfl⟩ := Ideal.mem_span_singleton'.mp hcg
   have hf' : f = homogeneousComponent d j + homogeneousComponent d (c * g) := by
-    rw [← map_add, hjc, homogeneousComponent_of_mem ((mem_homogeneousSubmodule _ _).mpr hfd),
+    rw [← map_add (f := _), hjc, homogeneousComponent_of_mem ((mem_homogeneousSubmodule _ _).mpr hfd),
       if_pos rfl]
-  rw [SetLike.mem_coe, hf', map_add, add_div]
+  rw [SetLike.mem_coe, hf', map_add (f := _), add_div]
   refine Submodule.add_mem_sup (Submodule.subset_span ⟨_, s, d, hJ j hj d, hs,
     homogeneousComponent_isHomogeneous d j, hsd, rfl⟩) ?_
+
   rw [show c * g = ∑ k ∈ Finset.range (c.totalDegree + 1), homogeneousComponent k c * g by
-    rw [← Finset.sum_mul, sum_homogeneousComponent], map_sum, map_sum, Finset.sum_div]
+  rw [← Finset.sum_mul, sum_homogeneousComponent], map_sum, map_sum, Finset.sum_div]
   refine Submodule.sum_mem _ fun k _ ↦ ?_
   rw [homogeneousComponent_of_mem ((mem_homogeneousSubmodule _ _).mpr
     ((homogeneousComponent_isHomogeneous k c).mul hg))]

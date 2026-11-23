@@ -1,6 +1,55 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.LocalClassFormation.OrderBound
-import GroundTheory.TateCohomology.InfRes
+module
+
+public import GroundTheory.TateCohomology.InfRes
+public import GroundTheory.ProfiniteCohomology.GaloisCohomology.UnitsInflationCochainsFHomApply
+public import GroundTheory.ProfiniteCohomology.GaloisCohomology.IsZeroGroupCohomologyQuotientToInvariantsGalAdd
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.EffectiveEpi.Comp
+import Mathlib.CategoryTheory.ExtremalEpi
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
@@ -22,10 +71,6 @@ def galRestrictScalars : Gal(M/F) →* Gal(M/K) where
   toFun σ := σ.restrictScalars K
   map_one' := rfl
   map_mul' _ _ := rfl
-
-@[simp]
-theorem galRestrictScalars_apply (σ : Gal(M/F)) (x : M) : galRestrictScalars K F M σ x = σ x :=
-  rfl
 
 theorem galRestrictScalars_injective : Function.Injective (galRestrictScalars K F M) :=
   fun _ _ h => AlgEquiv.ext fun x => DFunLike.congr_fun h x
@@ -88,11 +133,6 @@ noncomputable def galFixingEquiv : Gal(M/F) ≃* galFixing K F M :=
   (MonoidHom.ofInjective (galRestrictScalars_injective K F M)).trans
     (MulEquiv.subgroupCongr (range_galRestrictScalars K F M))
 
-omit [FiniteDimensional K M] [IsGalois K M] in
-@[simp]
-theorem coe_galFixingEquiv_apply (σ : Gal(M/F)) (x : M) :
-    (galFixingEquiv K F M σ : Gal(M/K)) x = σ x :=
-  rfl
 
 noncomputable def galFixingCohomologyIso (n : ℕ) :
     groupCohomology (galUnits.{u} F M) n ≅

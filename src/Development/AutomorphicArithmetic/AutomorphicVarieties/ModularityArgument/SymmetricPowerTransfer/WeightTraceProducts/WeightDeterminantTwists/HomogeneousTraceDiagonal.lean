@@ -1,4 +1,60 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.WeightTraceProducts.MemHomogeneousExponentsOneBlock
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.WeightTraceProducts.ThFacts
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.WeightTraceProducts.MemHomogeneousExponentsOneBlock
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.Eigenspace.Triangularizable
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.LinearAlgebra.Eigenspace.Basic
+
+@[expose] public section
 
 open Polynomial UpperTheory.V.Z.Sym.Wt
 
@@ -36,7 +92,8 @@ private theorem tri (d : ℕ) : ∀ (V : Type) [AddCommGroup V] [Module ℂ V] [
       simp only [hb']
       rw [Submodule.coe_sum] at this
       exact this.symm
-    rw [e, map_sum, Finsupp.finset_sum_apply]
+
+    rw [e, map_sum, Finsupp.finsetSum_apply]
     refine Finset.sum_eq_zero fun k _ => ?_
     rw [map_smul, Module.Basis.repr_self, Finsupp.smul_apply, Finsupp.single_apply]
     split_ifs with hk
@@ -60,21 +117,21 @@ private theorem homogeneous_trace_conj {d : ℕ} (n : ℕ) (g Q : GL (Fin d) ℂ
   rw [e, LinearMap.trace_mul_comm, ← e, ← mul_assoc, mul_inv_cancel, one_mul]
 
 open MvPolynomial in
-private theorem cont_coeff {σ ι : Type} [Fintype ι] (F : ι → ℂ → MvPolynomial σ ℂ) (h : ∀ i m, Continuous fun t => coeff m (F i t))
-    (s : Multiset ι) : ∀ m, Continuous fun t => coeff m (s.map fun i => F i t).prod := by
+private theorem cont_coeff {σ ι : Type} [Fintype ι] (F : ι → ℂ → MvPolynomial σ ℂ) (h : ∀ i m, Continuous fun t => (F i t).coeff m)
+    (s : Multiset ι) : ∀ m, Continuous fun t => ((s.map fun i => F i t).prod).coeff m := by
   classical
   induction s using Multiset.induction_on with
   | empty => exact fun m => continuous_const
   | cons a s ih =>
     intro m
     simp only [Multiset.map_cons, Multiset.prod_cons, MvPolynomial.coeff_mul]
-    exact continuous_finset_sum _ fun p _ => (h a _).mul (ih _)
+    exact continuous_finsetSum _ fun p _ => (h a _).mul (ih _)
 
 open MvPolynomial in
 private theorem homogeneous_trace_diagonal {d : ℕ} (n : ℕ) (g : GL (Fin d) ℂ) (h : ∀ i j, i ≠ j → g i j = 0) :
     tr1 d n g = MvPolynomial.eval (fun i => g i i) (hsymm (Fin d) ℂ n) := by
   classical
-  have e : ∀ m : Unit × Fin d →₀ ℕ, coeff m (sbs (fun _ : Unit => g) (MvPolynomial.monomial m 1)) = ∏ i, g i i ^ m ((), i) := fun m => by
+  have e : ∀ m : Unit × Fin d →₀ ℕ, AddMonoidAlgebra.coeff (sbs (fun _ : Unit => g) (MvPolynomial.monomial m 1)) m = ∏ i, g i i ^ m ((), i) := fun m => by
     have : sbs (fun _ : Unit => g) (MvPolynomial.monomial m 1) = MvPolynomial.monomial m (∏ i, g i i ^ m ((), i)) := by
       refine MvPolynomial.funext fun x => ?_
       have a : act (fun _ : Unit => g) x = fun p => x p * g p.2 p.2 := funext fun p =>
@@ -83,6 +140,7 @@ private theorem homogeneous_trace_diagonal {d : ℕ} (n : ℕ) (g : GL (Fin d) �
         Finsupp.prod_fintype _ _ (by simp)]
       simp [Fintype.prod_prod_type, mul_pow, Finset.prod_mul_distrib, mul_comm]
     rw [this, MvPolynomial.coeff_monomial, if_pos rfl]
+
   rw [symPowTrace_eq_sum_coeff, hsymm, map_sum]
   simp only [e]
   symm
@@ -110,7 +168,7 @@ private theorem homogeneous_trace_triangular {d : ℕ} (n : ℕ) (g : GL (Fin d)
   let γ : ℂ → GL (Fin d) ℂ := fun t => Matrix.GeneralLinearGroup.mkOfDetNeZero _ (hd t)
   have hc : Continuous fun t => tr1 d n (γ t) := by
     simp only [symPowTrace_eq_sum_coeff]
-    refine continuous_finset_sum _ fun m _ => ?_
+    refine continuous_finsetSum _ fun m _ => ?_
     have := cont_coeff (fun (p : Unit × Fin d) t => ∑ j, MvPolynomial.X (p.1, j) * MvPolynomial.C (A t j p.2)) (fun p m => by
       simp only [MvPolynomial.coeff_sum, mul_comm (MvPolynomial.X _), MvPolynomial.coeff_C_mul, A, Matrix.of_apply]
       fun_prop) m.toMultiset m

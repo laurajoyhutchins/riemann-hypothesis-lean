@@ -1,6 +1,54 @@
-import Formalism.SharpRestriction.GrowthBounds.RootWeights.WeightProjectionDiagonalApplyEqSmul
-import Formalism.SharpRestriction.GrowthBounds.RootWeights.InvariantProjectionExtremalFormula
-import Lemmata.GeneralBFactLeftAltForm.MQ
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.RootWeights.OperatorsKillInvariantProjection
+public import Mathlib.Algebra.Module.Lattice.Full
+public import Lemmata.GeneralBFactLeftAltForm.MQ
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.SharpRestriction.GrowthBounds.CovariantDegrees
+
+@[expose] public section
 
 noncomputable section
 
@@ -15,52 +63,50 @@ variable {O : Type} [CommRing O] [IsDomain O] [IsDiscreteValuationRing O]
   {W : Type} [AddCommGroup W] [Module (KK O) W] [Module O W] [IsScalarTower O (KK O) W]
 
 theorem exists_clear_denominators_alt (M : Submodule O W) (y : W) (hy : y ∈ MQ (K := KK O) M) : ∃ a : O, a ≠ 0 ∧ a • y ∈ M := by
-  first | exact Bl.general_b_fact_left_alt_form.goal1 .. | (apply Bl.general_b_fact_left_alt_form.goal1 <;> assumption) | (intros; apply Bl.general_b_fact_left_alt_form.goal1 <;> assumption) | (apply @Bl.general_b_fact_left_alt_form.goal1 <;> assumption) | (intros; apply @Bl.general_b_fact_left_alt_form.goal1 <;> assumption) | (apply @Bl.general_b_fact_left_alt_form.goal1 <;> first | assumption | infer_instance)
+  apply Bl.general_b_fact_left_alt_form.goal1
+  exact hy
 
 def latticeInter (M : Submodule O W) (L : Submodule (KK O) W) : Submodule O L :=
   M.comap (L.subtype.restrictScalars O)
 
-theorem mem_latticeInter_iff (M : Submodule O W) (L : Submodule (KK O) W) (x : L) : x ∈ latticeInter M L ↔ (x : W) ∈ M := Iff.rfl
-
 theorem latticeInter_isLattice (M : Submodule O W) (hfg : M.FG) (hMQ : MQ (K := KK O) M = ⊤) (L : Submodule (KK O) W) :
-    Submodule.IsLattice (KK O) (latticeInter M L) where
-  fg := by
-    have hN : IsNoetherian O M := isNoetherian_of_fg_of_noetherian M hfg
+    Submodule.IsFullLattice (KK O) (latticeInter M L) := by
+  refine { toIsLattice := Submodule.IsLattice.of_fg (KK O) ?_, span_eq_top := ?_ }
+  · have hN : IsNoetherian O M := isNoetherian_of_fg_of_noetherian M hfg
     refine Submodule.fg_of_fg_map_injective (L.subtype.restrictScalars O) (fun x y h => Subtype.ext h) ?_
     refine (isNoetherian_submodule.1 hN) _ ?_
     rintro _ ⟨x, hx, rfl⟩
     exact hx
-  span_eq_top := by
-    rw [eq_top_iff]
+  · apply top_unique
     intro x _
     obtain ⟨a, ha, hax⟩ := exists_clear_denominators_alt M (x : W) (by rw [hMQ]; trivial)
-    have ha1 : algebraMap O (KK O) a ≠ 0 := by
-      simpa using (IsFractionRing.injective O (KK O)).ne ha
-    have h1 : a • x ∈ latticeInter M L := hax
-    have h2 : x = (algebraMap O (KK O) a)⁻¹ • (a • x) := by
-      rw [← algebraMap_smul (KK O) a x, smul_smul, inv_mul_cancel₀ ha1, one_smul]
-    rw [h2]
-    exact Submodule.smul_mem _ _ (Submodule.subset_span h1)
-
+    have ha' : algebraMap O (KK O) a ≠ 0 :=
+      (map_ne_zero_iff _ (IsFractionRing.injective O (KK O))).2 ha
+    have hx : a • x ∈ latticeInter M L := hax
+    have hspan := (Submodule.span (KK O) (latticeInter M L : Set L)).smul_mem
+      (algebraMap O (KK O) a)⁻¹ (Submodule.subset_span hx)
+    rwa [← algebraMap_smul (KK O) a x, inv_smul_smul₀ ha'] at hspan
 end lat
 
 theorem lattice_adapted_basis_exists : LatticeAdaptedBasisExists := by
   intro O _ _ _ W _ _ _ _ _ M hfg hMQ L
-  haveI := latticeInter_isLattice M hfg hMQ L
-  haveI : Module.Finite O (latticeInter M L) := Module.Finite.iff_fg.2 (Submodule.IsLattice.fg (A := KK O))
+  have := latticeInter_isLattice M hfg hMQ L
+  have := Submodule.IsLattice.finite (KK O) (latticeInter M L)
+  have := Submodule.IsLattice.free (KK O) (latticeInter M L)
   let bO := Module.finBasis O (latticeInter M L)
-  refine ⟨_, bO.extendOfIsLattice (KK O), fun i => ?_, fun x hx i => ?_⟩
-  · rw [Module.Basis.extendOfIsLattice_apply]
+  refine ⟨_, bO.extendOfIsFullLattice (KK O), fun i => ?_, fun x hx i => ?_⟩
+  · rw [Module.Basis.extendOfIsFullLattice_apply]
     exact (bO i).2
-  · obtain ⟨c, hc⟩ : ∃ c : Fin _ → O, x = ∑ j, (algebraMap O (KK O) (c j)) • (bO.extendOfIsLattice (KK O)) j := by
+  · obtain ⟨c, hc⟩ : ∃ c : Fin _ → O, x = ∑ j, (algebraMap O (KK O) (c j)) • (bO.extendOfIsFullLattice (KK O)) j := by
       refine ⟨fun j => bO.repr ⟨x, hx⟩ j, ?_⟩
       have h2 := congrArg (fun z : latticeInter M L => (z : L)) (bO.sum_repr ⟨x, hx⟩)
       simp only [Submodule.coe_sum, Submodule.coe_smul_of_tower] at h2
       refine h2.symm.trans (Finset.sum_congr rfl fun j _ => ?_)
-      rw [Module.Basis.extendOfIsLattice_apply, algebraMap_smul]
+      rw [Module.Basis.extendOfIsFullLattice_apply, algebraMap_smul]
     refine ⟨c i, ?_⟩
+
     rw [hc, map_sum]
     simp only [map_smul, Module.Basis.coord_apply, Module.Basis.repr_self, Finsupp.single_apply, smul_eq_mul,
-      mul_ite, mul_one, mul_zero, Finset.sum_ite_eq', Finset.mem_univ, if_true]
+      mul_ite, mul_one, mul_zero, Finset.sum_ite_eq', Finset.mem_univ, ite_true]
 
 end Formalism.MainNotions.G.GLWeightTheory

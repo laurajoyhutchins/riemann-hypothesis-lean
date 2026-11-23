@@ -1,7 +1,58 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsHolPeriods
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.Signature
-import Development.AbelianVarietyTheory.Definitions.ArchimedeanThetaValues.IsCoprimeTwoSubRtTwoAddRt
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.TwoWeightEqOneAddRoot
+public import Development.AbelianVarietyTheory.Definitions.ArchimedeanThetaValues.IsCoprimeTwoSubRtTwoAddRt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.FreeModule.IdealQuotient
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 namespace GlobalTheory.NormMod
 
@@ -103,7 +154,7 @@ theorem exists_isUnit_neg (σ : R →+* R) (htop : Ideal.span {a | σ a = -a} = 
       have hb := hs b (Finset.mem_insert_self _ _)
       obtain ⟨k, hk, hδk⟩ := exists_pow_sub_one_mem (δ ^ 2)
       refine ⟨δ + (1 - (δ ^ 2) ^ k) * b, ?_, fun P hp h => ?_⟩
-      · simp only [map_add, map_mul, map_sub, map_pow, map_one, hδ, hb, neg_sq]
+      · simp only [map_add (f := _), map_mul, map_sub, map_pow, map_one, hδ, hb, neg_sq]
         ring
       · have h1 : δ ∈ P := by
           by_contra h1
@@ -150,7 +201,7 @@ theorem exists_norm_eq (σ : R →+* R) (htop : Ideal.span {a | σ a = -a} = ⊤
   have hy' : σ y = y := hy
   have h' : x ^ 2 - δ ^ 2 * y ^ 2 = ν := congrArg Subtype.val h
   refine ⟨x + y * δ, ?_⟩
-  rw [map_add, map_mul, hx', hy', hδ]
+  rw [map_add (f := _), map_mul, hx', hy', hδ]
   linear_combination h'
 
 end Finite
@@ -178,7 +229,7 @@ theorem span_sub_bar : Ideal.span (Set.range fun b : 𝓞 E => b - H.bar b) = �
       rw [hL, Algebra.TensorProduct.lmul'_apply_tmul, ← mul_sub]
       exact Ideal.mul_mem_left _ _ (Ideal.subset_span ⟨y, rfl⟩)
     | add x y hx hy =>
-      rw [map_add, map_add]
+      rw [map_add (f := _), map_add (f := _)]
       convert Ideal.add_mem _ hx hy using 1
       ring
   have h2 := congrArg L
@@ -296,14 +347,14 @@ theorem exists_norm_mod_level (l : Level H) (ν : ℤ) :
     obtain ⟨c, hc, rfl⟩ := (Ideal.mem_map_iff_of_surjective (H.bar : 𝓞 E →+* 𝓞 E) H.bar.surjective).1 hb
     simpa using hc
   have hab' := congrArg H.bar hab
-  rw [map_add, map_one] at hab'
+  rw [map_add (f := _), map_one] at hab'
   refine ⟨b + ν * a, ?_, ?_⟩
   · rw [← Ideal.mem_span_singleton, ← l.prod]
     have h := Ideal.add_mem _
       (Ideal.mul_mem_left _ (1 - (ν : 𝓞 E)) (Ideal.mul_mem_mul hb' hb))
       (Ideal.mul_mem_left _ ((ν : 𝓞 E) ^ 2 - ν) (Ideal.mul_mem_mul ha ha'))
     convert h using 1
-    rw [map_add, map_mul, map_intCast]
+    rw [map_add (f := _), map_mul, map_intCast]
     linear_combination (ν : 𝓞 E) * (H.bar a + H.bar b) * hab + (ν : 𝓞 E) * hab'
   · convert l.Mb.mul_mem_left ((ν : 𝓞 E) - 1) ha using 1
     linear_combination hab

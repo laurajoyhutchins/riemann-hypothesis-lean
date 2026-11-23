@@ -1,5 +1,57 @@
-import Mathlib
-import Development.WeilBound.ThetaLifts.LatticeBasics.LocDistA
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.HilbertNinetyQuotientHomEqIff
+public import Development.WeilBound.ThetaLifts.LatticeBasics.LocDistA
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Filter Topology GlobalTheory.WeilM Matrix
 
@@ -17,19 +69,21 @@ theorem det_blk (a : k) (b : Fin d → k) (h : Matrix (Fin d) (Fin d) k) : (blk 
   simp [this]
 
 theorem mul_blk_zero {m : Type} (X : Matrix m (Fin (d + 1)) k) (a : k) (b : Fin d → k) (h : Matrix (Fin d) (Fin d) k) (i : m) :
-    (X * blk a b h) i 0 = X i 0 * a := by simp [mul_apply, Fin.sum_univ_succ, blk]
+    (X * blk a b h) i 0 = X i 0 * a := by simp [Matrix.mul_apply, Fin.sum_univ_succ, blk]
 
 theorem mul_blk_succ {m : Type} (X : Matrix m (Fin (d + 1)) k) (a : k) (b : Fin d → k) (h : Matrix (Fin d) (Fin d) k) (i : m)
     (j : Fin d) : (X * blk a b h) i j.succ = X i 0 * b j + ∑ s, X i s.succ * h s j := by
-  simp [mul_apply, Fin.sum_univ_succ, blk]
+  simp [Matrix.mul_apply, Fin.sum_univ_succ, blk]
 
 theorem blk_comm (a : k) (b b' : Fin d → k) (hb : b = (a - 1) • b') :
     blk a 0 1 * blk 1 b' 1 = blk 1 b 1 * (blk 1 b' 1 * blk a 0 1) := by
   subst hb
+  have hsum (f : Fin d → k) (j : Fin d) : ∑ x, f x * (1 : Matrix (Fin d) (Fin d) k) x j = f j := by
+    simpa [Matrix.vecMul, dotProduct] using congrFun (Matrix.vecMul_one f) j
   ext i j
   rw [← Matrix.mul_assoc]
   refine Fin.cases ?_ (fun j => ?_) j <;> simp only [mul_blk_zero, mul_blk_succ] <;>
-    refine Fin.cases ?_ (fun i => ?_) i <;> simp [blk, one_apply]
+    refine Fin.cases ?_ (fun i => ?_) i <;> simp [blk, hsum, one_apply]
   ring
 
 def chE (X : Matrix (Fin (n + 1)) (Fin (d + 1)) k) : ((Fin (n + 1) → k) × (Fin d → k)) × Matrix (Fin n) (Fin d) k :=
@@ -54,10 +108,12 @@ theorem chE_chR (y : ((Fin (n + 1) → k) × (Fin d → k)) × Matrix (Fin n) (F
 
 theorem chE_unip (X : Matrix (Fin (n + 1)) (Fin (d + 1)) k) (hX : X 0 0 ≠ 0) (b : Fin d → k) :
     chE (X * blk 1 b 1) = (((chE X).1.1, (chE X).1.2 + b), (chE X).2) := by
+  have hsum (f : Fin d → k) (j : Fin d) : ∑ x, f x * (1 : Matrix (Fin d) (Fin d) k) x j = f j := by
+    simpa [Matrix.vecMul, dotProduct] using congrFun (Matrix.vecMul_one f) j
   refine Prod.ext (Prod.ext ?_ ?_) ?_
   · ext i; simp [chE, mul_blk_zero]
-  · ext j; simp [chE, mul_blk_zero, mul_blk_succ, one_apply]; field_simp; ring
-  · ext i j; simp [chE, mul_blk_zero, mul_blk_succ, one_apply]; field_simp; ring
+  · ext j; simp [chE, mul_blk_zero, mul_blk_succ, hsum, one_apply]; field_simp; ring
+  · ext i j; simp [chE, mul_blk_zero, mul_blk_succ, hsum, one_apply]; field_simp; ring
 
 theorem chE_levi (X : Matrix (Fin (n + 1)) (Fin (d + 1)) k) (h : Matrix (Fin d) (Fin d) k) :
     chE (X * blk 1 0 h) = (((chE X).1.1, (chE X).1.2 ᵥ* h), (chE X).2 * h) := by
@@ -68,7 +124,7 @@ theorem chE_levi (X : Matrix (Fin (n + 1)) (Fin (d + 1)) k) (h : Matrix (Fin d) 
     exact Finset.sum_congr rfl fun s _ => by ring
   · ext i j
     simp only [chE, mul_blk_zero, mul_blk_succ, of_apply, Pi.zero_apply, mul_zero, zero_add, mul_one, Finset.sum_div]
-    rw [mul_apply, Finset.mul_sum, ← Finset.sum_sub_distrib]
+    rw [Matrix.mul_apply, Finset.mul_sum, ← Finset.sum_sub_distrib]
     exact Finset.sum_congr rfl fun s _ => by simp only [of_apply]; ring
 
 def Deg {m : Type} (X : Matrix m (Fin d) k) : Prop := ∃ v ≠ 0, X *ᵥ v = 0
@@ -97,7 +153,7 @@ theorem sb_right {m : Type} {φ : Matrix m (Fin d) k → ℂ} (hφ : φ ∈ SB _
 
 theorem cont_chE : ContinuousOn (chE (k := k) (n := n) (d := d)) {X | X 0 0 ≠ 0} := by
   have h : ∀ j : Fin d, ContinuousOn (fun X : Matrix (Fin (n + 1)) (Fin (d + 1)) k => X 0 j.succ / X 0 0) {X | X 0 0 ≠ 0} :=
-    fun j => ContinuousOn.div (by fun_prop) (by fun_prop) fun _ h => h
+    fun j => ContinuousOn.div₀ (by fun_prop) (by fun_prop) fun _ h => h
   refine ContinuousOn.prodMk (ContinuousOn.prodMk (by fun_prop) (continuousOn_pi.2 h))
     (continuousOn_pi.2 fun i => continuousOn_pi.2 fun j => ?_)
   exact ContinuousOn.sub (by fun_prop) (ContinuousOn.mul (by fun_prop) (h j))

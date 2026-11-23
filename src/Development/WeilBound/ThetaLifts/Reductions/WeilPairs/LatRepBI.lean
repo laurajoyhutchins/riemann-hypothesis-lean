@@ -1,4 +1,54 @@
-import Development.WeilBound.ThetaLifts.Reductions.WeilPairs.LatRepBS
+module
+
+public import Development.WeilBound.ThetaLifts.Reductions.WeilPairs.LatRepBS
+import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.MemRangeOfOneTmulMem
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsHalfAbstract
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HeisenbergCMRealLineAddNoPhase
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.InertPrimeNotDvdRelIndexSplitPlace
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ThetaFunctionHeisenbergInvariant
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.AdelicCompletionFractionalIdealProperties
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.FiniteAdeleStrongApproximationModNat
+public import Development.WeilBound.ThetaLifts.Reductions.WeilPairs.LatRepB_A
+public import Development.WeilBound.ThetaLifts.Reductions.WeilPairs.SumFourEqTrace
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -57,19 +107,19 @@ theorem approx {k : ℕ} (hk : 0 < k) {z : Af F ⊗[F] E} (hz : z ∈ hatO (F :=
     refine ⟨algebraMap (𝓞 F) (𝓞 E) x * t, pairA F 0 β ⊗ₜ[F] (t : E),
       AddSubgroup.subset_closure ⟨β, hβ, _, ⟨t, rfl⟩, rfl⟩,
       AddSubgroup.subset_closure ⟨β, hβ, _, ⟨sgOF σ t, rfl⟩, rfl⟩, ?_⟩
-    rw [hx, map_add, map_nsmul]
+    rw [hx, map_add (f := _), map_nsmul]
     exact GlobalTheory.SplitIndex.tmul_split β (x : F) k (t : E)
   | zero => exact ⟨0, 0, by rw [map_zero]; exact zero_mem _,
       by rw [map_zero, map_zero]; exact zero_mem _, by simp⟩
   | add x x' _ _ h h' =>
     obtain ⟨r, s, h1, h2, rfl⟩ := h
     obtain ⟨r', s', h1', h2', rfl⟩ := h'
-    refine ⟨r + r', s + s', by rw [map_add]; exact add_mem h1 h1',
-      by rw [map_add, map_add]; exact add_mem h2 h2', ?_⟩
-    rw [← map_add]
+    refine ⟨r + r', s + s', by rw [map_add (f := _)]; exact add_mem h1 h1',
+      by rw [map_add (f := _), map_add (f := _)]; exact add_mem h2 h2', ?_⟩
+    rw [← map_add (f := _)]
     congr 1
     push_cast
-    rw [map_add, smul_add]
+    rw [map_add (f := _), smul_add]
     abel
   | neg x _ h =>
     obtain ⟨r, s, h1, h2, rfl⟩ := h
@@ -89,7 +139,7 @@ theorem split_mem (h : IsCMExt F E σ) {e : AEF F E} (hee : e * e = e)
   obtain ⟨r, s, hs, hs', hz⟩ := approx (σ := σ) hq.pos heI
   have h0 : finPartF F E (e - (incAF F E (r : E) + q • s)) = 0 := by rw [map_sub, ← hz, sub_self]
   have h0' := finPart_cAF_zero (σ := σ) h0
-  rw [map_sub, map_add, map_nsmul, GlobalTheory.HeisLineF.cAF_incAF, ← coe_sgOF] at h0'
+  rw [map_sub, map_add (f := _), map_nsmul, GlobalTheory.HeisLineF.cAF_incAF, ← coe_sgOF] at h0'
   refine GlobalTheory.SplitIndex.core_split ((incAF F E).comp (algebraMap (𝓞 E) E)) _
     (fun a => finPartF F E a ∈ hatO (F := F) E) (fun a ha u hu => int_smul_mem ha hu)
     (fun r => AddSubgroup.subset_closure ⟨1, fun v => GlobalTheory.AdLat.adele_one_integral F v, _, ⟨r, rfl⟩, rfl⟩)
@@ -143,7 +193,7 @@ theorem idx_main (h : IsCMExt F E σ) {JS : Matrix (Fin nS) (Fin nS) E} {JT : Ma
   have hcI : finPartF F E (cAF σ e) ∈ hatO (F := F) E :=
     GlobalTheory.AdIdem.mem_hat_of_idempotent F E _ (by rw [← map_mul, hcc])
   have hcI' : finPartF F E (1 - (e + cAF σ e)) ∈ hatO (F := F) E := by
-    rw [map_sub, map_add, map_one]
+    rw [map_sub, map_add (f := _), map_one]
     exact sub_mem (GlobalTheory.AdLat.one_tmul_mem_adelicCompletionOfElementSet F ⟨1, map_one _⟩) (add_mem heI hcI)
   refine GlobalTheory.SplitIndex.not_dvd_of_saturated _ _ (hfin (g, k)) hq fun x hx hqx => ?_
   refine GlobalTheory.SplitIndex.mem_of_parts _ e (cAF σ e) x (split_mem h he.1 hf hec hq hin hqx)

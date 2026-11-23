@@ -1,10 +1,57 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.StarDepthToFunNonneg
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.EllEqOfInRCone
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsCommonDenominatorStrictnessSmoothFan
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsMultCellsAmongOfIsPolyFan
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.PolyFanFaceCutByIntLinearFormIsCell
+module
+
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsBaryStageStart
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsStrictIff
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.CellGeneratorMemConeOfSmulCombinationStatement
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.CellGeneratorsSmulMemOtherCellConeStatement
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsCommonDenominatorStrictnessSmoothFan
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsFinRepsProjectiveFinrankLeNumberFieldStatement
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsMultCellsAmongOfIsPolyFan
 import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LinearFormFromFinsupp
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.NonnegSumSmulIntBilinFormToRealMemPsdCone
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.PolyFanFaceCutByIntLinearFormIsCell
+public import Mathlib.Algebra.Group.Submonoid.Finsupp
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HomExtNormalSt
+
+@[expose] public section
+
 open NumberField ReciprocityTheory.ChartRestriction.G.Geo.Tor GlobalTheory.Toroidal GlobalTheory.LocM GlobalTheory.TorRef GlobalTheory.PolFan GlobalTheory.PolCell
 
 noncomputable section
@@ -23,7 +70,7 @@ theorem toReal_nsmul (k : ℕ) (β : LinearMap.BilinForm ℤ X) : toReal (k • 
   LinearMap.ext₂ fun a b => by simp [toReal]
 
 theorem toReal_mem_psdCone {β : LinearMap.BilinForm ℤ X} (hβ : β ∈ balForms bar X) (hp : ∀ y, 0 ≤ β y y) :
-    toReal β ∈ psdCone bar X := by
+    toReal β ∈ psdCone (bar := bar) (X := X) := by
   have := ConeSub.sum_smul_toReal_mem_psdCone O bar X 1 ![β] ![1] (fun i => by fin_cases i; simpa using hβ)
     (fun i y => by fin_cases i; simpa using hp y) (fun i => by fin_cases i; simp)
   simpa using this
@@ -94,7 +141,7 @@ theorem le_of_mem_closure (hP : IsPolyFanOn bar φ X) {m N : ℕ} {ℓ : LinearM
     · have h1 := evalZ_add_ge hP hx.1 hx.2.1 hy.1 hy.2.1
       have h2 := mul_le_mul_of_nonneg_left h1 (Nat.cast_nonneg (α := ℝ) N)
       rw [mul_add] at h2
-      rw [map_add, Int.cast_add]
+      rw [map_add (f := _), Int.cast_add]
       linarith [hx.2.2, hy.2.2]
 
 theorem strictWith_of_ratCone (hP : IsPolyFanOn bar φ X) {m n N : ℕ} {ℓ : LinearMap.BilinForm ℤ X →ₗ[ℤ] ℤ}
@@ -138,7 +185,7 @@ theorem perModule_bound (hP : IsPolyFanOn bar φ X) : ∃ N₀ : ℕ, ∀ (m : �
   let D : Finset (LinearMap.BilinForm ℤ X) → ℕ := fun T =>
     if h : ∃ (N : ℕ) (ℓ : LinearMap.BilinForm ℤ X →ₗ[ℤ] ℤ), 0 < N ∧ StrictWith bar φ N ℓ (uT T) then h.choose else 0
   refine ⟨hS.toFinset.powerset.sup D, fun m δ hδ => ?_⟩
-  have hB : ∑ i, (1 : ℝ) • toReal (δ i) ∈ psdCone bar X :=
+  have hB : ∑ i, (1 : ℝ) • toReal (δ i) ∈ psdCone (bar := bar) (X := X) :=
     ConeSub.sum_smul_toReal_mem_psdCone O bar X m δ (fun _ => 1) hδ.mem hδ.nonneg (fun _ => zero_le_one)
   obtain ⟨e, m', γ, c, hγ, hγS, hc, hsum⟩ := hcov _ hB
   set γ' : Fin m' → LinearMap.BilinForm ℤ X := fun j => pull e.symm.toLinearMap (γ j) with hγ'def
@@ -257,6 +304,7 @@ theorem faceCut_data (hP : IsPolyFanOn bar φ X) [Module.Finite ℤ X] {m m' : �
         · linarith
       obtain ⟨k, c, hk, hkc⟩ := hF.2.2 (γ j) (hγ.mem j) (hγ.nonneg j) he
       have hk0 : h (k • γ j) = 0 := by
+
         rw [hkc, map_sum]
         refine Finset.sum_eq_zero fun i _ => ?_
         rw [map_nsmul, (hh.2 (s i)).2 ⟨i, rfl⟩, smul_zero]

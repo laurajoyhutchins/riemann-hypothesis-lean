@@ -1,7 +1,52 @@
-import Mathlib
-import Development.WeilBound.ThetaLifts.LatticeBasics.HypothesesE
-import Development.WeilBound.ThetaLifts.LatticeBasics.UnfoldC
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.WeilTensorModels
+public import Mathlib.Algebra.FiniteSupport.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.Foundations.IsIwasawaOfIsCompact
+public import Development.AbelianVarietyTheory.Definitions.Foundations.T2SpaceTensorProductFiniteExtension
 import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.EmbBar
+import Development.WeilBound.ThetaLifts.LatticeBasics.UnfoldA
+
+@[expose] public section
+
 open scoped TensorProduct NNReal Matrix
 open NumberField IsDedekindDomain MeasureTheory Filter Topology Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes
 open GlobalTheory.WeilM GlobalTheory.AdelicU GlobalTheory.LFun GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels GlobalTheory.ThK.Dbl
@@ -12,7 +57,7 @@ noncomputable section
 
 namespace GlobalTheory.CompanionTheory.GodementH.Den
 
-theorem local_exponent {F : Type} [Field F] [NumberField F] (v : Pl F) {y : F} (hy : y ≠ 0) :
+theorem local_exponent {F : Type} [Field F] [NumberField F] (v : Pl (F := F)) {y : F} (hy : y ≠ 0) :
     ∃ e : ℕ, v.valuation F y ≤ WithZero.exp (e : ℤ) ∧
       max 1 ‖algebraMap F (Fv F v) y‖₊ = (Ideal.absNorm v.asIdeal : ℝ≥0) ^ e := by
   have ha : v.valuation F y ≠ 0 := (Valuation.ne_zero_iff _).2 hy
@@ -24,7 +69,7 @@ theorem local_exponent {F : Type} [Field F] [NumberField F] (v : Pl F) {y : F} (
   have hval : WithZeroMulInt.toNNReal (HeightOneSpectrum.absNorm_ne_zero v) (WithZero.exp n) =
       (Ideal.absNorm v.asIdeal : ℝ≥0) ^ n := by
     rw [WithZeroMulInt.toNNReal_neg_apply _ WithZero.exp_ne_zero]
-    simp [WithZero.exp]
+    rw [WithZero.log_exp]
   refine ⟨n.toNat, ?_, ?_⟩
   · rw [hn]
     exact WithZero.exp_le_exp.2 (Int.self_le_toNat n)
@@ -54,7 +99,7 @@ theorem finite_mulSupport {F : Type} [Field F] [NumberField F] {y : F} (hy : y �
   rw [h2, max_self]
 
 theorem denominator_le (F : Type) [Field F] [NumberField F] (y : F) :
-    ∃ m : ℕ, 0 < m ∧ (m : ℝ≥0) ≤ ∏ᶠ v : Pl F, max 1 ‖algebraMap F (Fv F v) y‖₊ ∧
+    ∃ m : ℕ, 0 < m ∧ (m : ℝ≥0) ≤ ∏ᶠ v : Pl (F := F), max 1 ‖algebraMap F (Fv F v) y‖₊ ∧
       IsIntegral ℤ ((m : F) * y) := by
   classical
   by_cases hy : y = 0
@@ -62,7 +107,7 @@ theorem denominator_le (F : Type) [Field F] [NumberField F] (y : F) :
     exact ⟨1, one_pos, by simp, by simpa using isIntegral_zero⟩
   choose e he1 he2 using fun v : Pl F => local_exponent v hy
   have hfin := finite_mulSupport hy
-  set S : Finset (Pl F) := hfin.toFinset with hS
+  set S : Finset (Pl (F := F)) := hfin.toFinset with hS
   set b : Ideal (𝓞 F) := ∏ v ∈ S, v.asIdeal ^ e v with hb
   have hb0 : b ≠ ⊥ := by
     rw [hb, ← Ideal.zero_eq_bot, Finset.prod_ne_zero_iff]
@@ -74,7 +119,7 @@ theorem denominator_le (F : Type) [Field F] [NumberField F] (y : F) :
   · rw [finprod_eq_prod_of_mulSupport_subset _ (s := S) (by simp [hS])]
     simp only [he2]
     simp [hb, map_prod, map_pow]
-  · have key : ∀ v : Pl F, v.valuation F ((Ideal.absNorm b : F) * y) ≤ 1 := by
+  · have key : ∀ v : Pl (F := F), v.valuation F ((Ideal.absNorm b : F) * y) ≤ 1 := by
       intro v
       have hmem : ((Ideal.absNorm b : ℕ) : 𝓞 F) ∈ v.asIdeal ^ e v := by
         by_cases hv : v ∈ S

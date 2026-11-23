@@ -1,5 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.HeckeTateFunctionalEquationCM
+module
+
+public import Mathlib.RingTheory.DedekindDomain.AdicValuation.Completion
+public import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.HeckeTateFunctionalEquationCM
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -52,21 +96,6 @@ theorem exists_int_approx (w : HeightOneSpectrum (𝓞 E)) {x : w.adicCompletion
   refine Valuation.map_add_le _ ?_ hb'
   rw [valued_algebraMap]
   exact hy.le
-
-theorem locK_congr {χ : HChar E} {w : HeightOneSpectrum (𝓞 E)} {a : ℕ} (hχ : LevelLe χ w a) {y y' : Eˣ}
-    (hy : w.valuation E (y : E) = 1) (hy' : w.valuation E (y' : E) = 1)
-    (hd : w.valuation E ((y : E) - y') ≤ WithZero.exp (-(a : ℤ))) : χ.locK w y = χ.locK w y' := by
-  have h1 : χ.loc w (atFin w (y * y'⁻¹)) = 1 := by
-    have e : ((atFin w (y * y'⁻¹) : (w.adicCompletion E)ˣ) : w.adicCompletion E) =
-        algebraMap E (w.adicCompletion E) ((y : E) / y') := by
-      simp [atFin, div_eq_mul_inv]
-    refine hχ _ ?_ ?_
-    · rw [IsUnitAt, e, valued_algebraMap, map_div₀, hy, hy', div_one]
-    · rw [e, ← map_one (algebraMap E (w.adicCompletion E)), ← map_sub, valued_algebraMap, div_sub_one y'.ne_zero,
-        map_div₀, hy', div_one]
-      exact hd
-  rw [map_mul, map_inv, map_mul, map_inv, mul_inv_eq_one] at h1
-  exact h1
 
 end GlobalTheory.GaussModulus
 

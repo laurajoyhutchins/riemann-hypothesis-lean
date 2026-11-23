@@ -1,5 +1,48 @@
-import Formalism.LocalToGlobal.GlobalTheory.GL6.LatticeInclusionOfDecompGlob
-import Formalism.LocalToGlobal.GlobalTheory.GL6.PBwLocBases
+module
+
+public import Formalism.LocalToGlobal.HermitianForms.PrkSmul
+public import Formalism.LocalRingCardinality.Lemmas
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.SharpRestriction.GlobalSchurBounds.ProductFirstZerothParts
+
+@[expose] public section
 
 noncomputable section
 
@@ -60,52 +103,5 @@ theorem bwG_inv_mem (w : D.what₂.places.Pl) {r : 𝓞 D.what₂.LL} (hr : r �
   have hv : (D.plEq w).valuation D.what₂.LL (algebraMap (𝓞 D.what₂.LL) D.what₂.LL r) = 1 :=
     ((D.plEq w).valuation_eq_one_iff_notMem).2 hr
   exact (D.val_nonneg_iff w _).2 (by rw [map_inv₀, hv, inv_one])
-
-def BwBasisInd (Tt : FormsTied D u) : Prop :=
-  ∀ w, OverT D u w → ∀ i (hi : i ≤ D.R.m) (c : (D.mem u).C.cls i) (B B₂ : GL (Fin (D.R.N i)) D.host.E),
-    IsLocBasis (D.mem u).A.T (Ld D u i hi c : Set _) B → IsLocBasis (D.mem u).A.T (Ld D u i hi c : Set _) B₂ →
-    ∀ Q ∈ Formalism.L2.Forms.IntSpan D w ((D.fm u).lam i), ∃ Q₂ ∈ Formalism.L2.Forms.IntSpan D w ((D.fm u).lam i), ∀ z,
-      fnOf _ (shiftOf (lamT u i)) (atInf (embT D) (B⁻¹ : GL (Fin (D.R.N i)) D.host.E).1) Q ((Tt.val i hi).eY z) =
-        fnOf _ (shiftOf (lamT u i)) (atInf (embT D) (B₂⁻¹ : GL (Fin (D.R.N i)) D.host.E).1) Q₂ ((Tt.val i hi).eY z)
-
-theorem bwLocGlob_of_ind (Tt : FormsTied D u) (hI : BwBasisInd D u Tt) : BwLocGlob D u Tt := by
-  intro w hw i hi y hy
-  show y ∈ locW D.what₂.places w ((D.fm u).lat i).L
-  rw [D.mem_locW_iff]
-  obtain ⟨-, -, hsp⟩ := (D.fm u).lat_good i
-  obtain ⟨d, hd, hdy⟩ := Formalism.L2.DIV.lc_exists_smul_mem ((D.fm u).lat i).L (x := y) (by rw [hsp]; trivial)
-  obtain ⟨t, ht, htw⟩ := Formalism.L2.DIV.lc_primeTo d hd (D.plEq w)
-  refine ⟨t, ht, ?_⟩
-  refine ((Tt.val i hi).lat _).2 fun w' c B hB => ?_
-  by_cases hw' : w' = w
-  · subst hw'
-    obtain ⟨B₀, hB₀, Q, hQ, hyQ⟩ := hy c
-    have hB' : IsLocBasis (D.mem u).A.T (Ld D u i hi c : Set _) B := by
-      rw [bwG_Ld_coe, ← hw]
-      exact hB
-    obtain ⟨Q₂, hQ₂, he⟩ := hI w' hw i hi c B₀ B hB₀ hB' Q hQ
-    refine ⟨_, bwG_intSpan_smul D w' _ _ (bwG_int_mem D w' t) hQ₂, fun z => ?_⟩
-    rw [← algebraMap_smul D.what₂.LL t y, LinearMap.map_smulₛₗ, Pi.smul_apply, Pi.smul_apply, hyQ z, he z,
-      LinearMap.map_smul]
-    rfl
-  · have hne : D.plEq w' ≠ D.plEq w := fun h => hw' (D.plEq.injective h)
-    obtain ⟨r, hr, k, hk⟩ := htw _ hne
-    obtain ⟨P, hP, hdP⟩ := ((Tt.val i hi).lat _).1 hdy w' c B hB
-    have hr0 : algebraMap (𝓞 D.what₂.LL) D.what₂.LL r ≠ 0 := by
-      intro h
-      apply hr
-      have : r = 0 := FaithfulSMul.algebraMap_injective (𝓞 D.what₂.LL) D.what₂.LL (by rw [h, map_zero])
-      rw [this]
-      exact zero_mem _
-    have e : t • y = ((algebraMap (𝓞 D.what₂.LL) D.what₂.LL r)⁻¹ * algebraMap (𝓞 D.what₂.LL) D.what₂.LL k) • (d • y) := by
-      rw [← algebraMap_smul D.what₂.LL t y, ← algebraMap_smul D.what₂.LL d y, smul_smul]
-      congr 1
-      have hk' := congrArg (algebraMap (𝓞 D.what₂.LL) D.what₂.LL) hk
-      rw [map_mul, map_mul] at hk'
-      field_simp
-      rw [mul_comm, hk', mul_comm]
-    refine ⟨_, bwG_intSpan_smul D w' _ _ (mul_mem (bwG_inv_mem D w' hr) (bwG_int_mem D w' k)) hP, fun z => ?_⟩
-    rw [e, LinearMap.map_smulₛₗ, Pi.smul_apply, Pi.smul_apply, hdP z, LinearMap.map_smul]
-    rfl
 
 end Formalism.L2.GlobalTheoryTheory.LocalLatticeBases

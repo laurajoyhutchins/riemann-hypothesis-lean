@@ -1,6 +1,56 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsHolPeriods
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.Signature
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.Signature
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.TwoWeightEqOneAddRoot
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 open NumberField Matrix
 open scoped nonZeroDivisors TensorProduct
@@ -27,18 +77,6 @@ theorem _root_.GlobalTheory.DatumCoord.eq_of_trace_int {c d : E}
   rw [zsmul_eq_mul, mul_assoc, inv_mul_cancel₀ hne, mul_one,
     show (y : E) = algebraMap ℚ E y by simp, Algebra.trace_algebraMap] at key
   simp [hy, Module.finrank_pos.ne'] at key
-
-theorem exists_coord (M : Type) [AddCommGroup M] [Module (𝓞 E) M] [Module.Finite (𝓞 E) M]
-    (r : ℕ) (hr : Module.finrank (𝓞 E) M = r) :
-    ∃ φ : M →ₗ[𝓞 E] (Fin r → E), IsBaseChange E φ := by
-  have hb := TensorProduct.isBaseChange (𝓞 E) M E
-  have hl := (isLocalizedModule_iff_isBaseChange (𝓞 E)⁰ E _).2 hb
-  have h1 : Module.finrank E (E ⊗[𝓞 E] M) = r := by
-    rw [IsLocalization.finrank_eq E (𝓞 E)⁰ le_rfl,
-      IsLocalizedModule.finrank_eq (𝓞 E)⁰ (TensorProduct.mk (𝓞 E) E M 1) le_rfl, hr]
-  let e := (Module.finBasisOfFinrankEq E (E ⊗[𝓞 E] M) h1).equivFun
-  exact ⟨e.toLinearMap.restrictScalars (𝓞 E) ∘ₗ TensorProduct.mk (𝓞 E) E M 1,
-    IsBaseChange.of_equiv e fun _ => rfl⟩
 
 variable [IsCMField E]
 
@@ -67,9 +105,9 @@ private lemma exists_trace_mul_eq_of_addMonoidHom (f : 𝓞 E →+ ℤ) :
   rw [h1]
   exact congrArg (fun w : 𝓞 E →ₗ[ℤ] ℚ => w a) huv
 
+
 open NumberField Matrix in
 open scoped nonZeroDivisors TensorProduct in
-
 theorem _root_.GlobalTheory.exists_herm_coord_of_datum :
     ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (H : _root_.ReciprocityTheory.ChartRestriction.G.Geo.Tor.Host E) (D : _root_.ReciprocityTheory.ChartRestriction.G.Geo.Tor.Datum H) (ξ : E),
       _root_.ReciprocityTheory.ChartRestriction.G.FD.cc ξ = -ξ → ξ ≠ 0 → ∀ r : ℕ, r = D.p + D.q →
@@ -86,9 +124,9 @@ theorem _root_.GlobalTheory.exists_herm_coord_of_datum :
   have hsmul : ∀ (b : 𝓞 E) x y, h0 (b • x) y = b * h0 x y := fun b x y => huniq _ _ fun a => by
     rw [hh0, ← mul_assoc, ← map_mul, hh0, smul_smul]
   have hadd : ∀ x x' y, h0 (x + x') y = h0 x y + h0 x' y := fun x x' y => huniq _ _ fun a => by
-    rw [hh0, mul_add, map_add, hh0, hh0]; simp [smul_add]
+    rw [hh0, mul_add, map_add (f := _), hh0, hh0]; simp [smul_add]
   have hadd' : ∀ x y y', h0 x (y + y') = h0 x y + h0 x y' := fun x y y' => huniq _ _ fun a => by
-    rw [mul_add, map_add, hh0, hh0, hh0, map_add, Int.cast_add]
+    rw [mul_add, map_add (f := _), hh0, hh0, hh0, map_add (f := _), Int.cast_add]
   let σ : E ≃ₐ[ℚ] E := (IsCMField.complexConj E).restrictScalars ℚ
   have hσ : ∀ e, σ e = _root_.ReciprocityTheory.ChartRestriction.G.FD.cc e := fun e => rfl
   have hσσ : ∀ e, σ (σ e) = e := fun e => by simp [σ]
@@ -98,7 +136,7 @@ theorem _root_.GlobalTheory.exists_herm_coord_of_datum :
     Algebra.trace_eq_of_algEquiv σ e
   have hanti : ∀ u v, D.EF u v = - D.EF v u := fun u v => by
     have h := D.alt (u + v)
-    simp only [map_add, LinearMap.add_apply, D.alt u, D.alt v] at h
+    simp only [map_add (f := _), LinearMap.add_apply, D.alt u, D.alt v] at h
     omega
   have hsmul' : ∀ (b : 𝓞 E) x y, h0 x (b • y) = σ b * h0 x y := fun b x y => huniq _ _ fun a => by
     rw [hh0, ← hbb b, ← D.adj, smul_smul, ← hh0, hbb]

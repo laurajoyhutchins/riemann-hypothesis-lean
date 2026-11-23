@@ -1,4 +1,63 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.BigOperators.Finprod
+public import Mathlib.Algebra.Module.Pi
+public import Mathlib.Basic.Complex.Basic
+public import Mathlib.GroupTheory.Index
+public import Mathlib.LinearAlgebra.Span.Defs
+public import Mathlib.Topology.Algebra.Group.Defs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.BigOperators.GroupWithZero.Action
+public import Mathlib.Algebra.Module.Submodule.Basic
+public import Mathlib.Topology.Algebra.OpenSubgroup
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -136,6 +195,7 @@ theorem avgOver_comp_linearMap (hf : AvgFinite K f) {W' : Type*} [AddCommGroup W
       exact congrArg T (hk y)
   have : ((rightStab f).subgroupOf K).FiniteIndex := ⟨hf⟩
   let _ := Fintype.ofFinite (K ⧸ (rightStab f).subgroupOf K)
+
   rw [avgOver_eq_avgSub hle hf, avgOver, avgSub_eq_sum, avgSub_eq_sum, map_smul, map_sum]
 
 theorem avgOver_comp_mul_left (h x : G) :
@@ -205,20 +265,6 @@ theorem avgOver_comp_mul_right (hf : AvgFinite K f) {k : G} (hk : k ∈ K) :
   funext x
   rw [avgOver_eq_avgSub hN2 hNi, avgOver_eq_avgSub hN1 hNi]
   exact avgSub_comp_mul_right_of_normal hNi hN1 hk x
-
-theorem avgOver_of_forall (h : ∀ k ∈ K, ∀ y, f (y * k) = f y) : avgOver K f = f := by
-  classical
-  have hle : (⊤ : Subgroup K) ≤ (rightStab f).subgroupOf K := fun k _ => h k k.2
-  have hi : (⊤ : Subgroup K).index ≠ 0 := by rw [Subgroup.index_top]; exact one_ne_zero
-  have : (⊤ : Subgroup K).FiniteIndex := ⟨hi⟩
-  let _ := Fintype.ofFinite (K ⧸ (⊤ : Subgroup K))
-  funext x
-  rw [avgOver_eq_avgSub hle hi, avgSub_eq_sum]
-  have hterm : ∀ q : K ⧸ (⊤ : Subgroup K), f (x * ((Quotient.out q : K) : G)) = f x :=
-    fun q => h _ (Quotient.out q).2 x
-  rw [Fintype.sum_congr _ _ hterm, Finset.sum_const, Finset.card_univ,
-    ← Nat.card_eq_fintype_card, ← Subgroup.index, Subgroup.index_top, one_smul, Nat.cast_one,
-    inv_one, one_smul]
 
 theorem avgOver_add {g : G → W} (hf : AvgFinite K f) (hg : AvgFinite K g) :
     avgOver K (f + g) = avgOver K f + avgOver K g := by
@@ -348,8 +394,8 @@ theorem relIndex_ne_zero_of_isCompact_of_isOpen {K L : Subgroup G} (hK : IsCompa
   have := Subgroup.quotient_finite_of_isOpen (L.subgroupOf K) hopen
   exact Subgroup.index_ne_zero_of_finite
 
-omit [AddCommGroup W] [Module ℂ W] in
 
+omit [AddCommGroup W] [Module ℂ W] in
 theorem avgFinite_of_isOpen {K U : Subgroup G} {f : G → W} (hK : IsCompact (K : Set G))
     (hU : IsOpen (U : Set G)) (hUf : U ≤ rightStab f) : AvgFinite K f :=
   relIndex_ne_zero_of_isCompact_of_isOpen hK (Subgroup.isOpen_mono hUf hU)
@@ -402,13 +448,6 @@ theorem relVol_eq_relIndex_mul {K₀ K L : Subgroup G} (hLK : L ≤ K) (hL : L.r
       _ = (K₀.relIndex K : ℝ) / (K.relIndex K₀) := by
             rw [mul_div_mul_left _ _ hc']
   exact key.symm
-
-theorem relVol_map_conj (g : G) (K₀ K : Subgroup G) :
-    relVol (K₀.map (MulAut.conj g).toMonoidHom) (K.map (MulAut.conj g).toMonoidHom) =
-      relVol K₀ K := by
-  have hinj : Function.Injective (MulAut.conj g).toMonoidHom := (MulAut.conj g).injective
-  unfold relVol
-  rw [Subgroup.relIndex_map_map_of_injective _ _ hinj, Subgroup.relIndex_map_map_of_injective _ _ hinj]
 
 end Volume
 

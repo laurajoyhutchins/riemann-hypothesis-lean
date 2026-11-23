@@ -1,5 +1,57 @@
-import Formalism.SharpRestriction.GrowthBounds.MultisetValuation.SmulMemLatOf
-import Formalism.SubspaceCounting.SubspaceCountingProofs.TypeIIDown
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.MultisetValuation.SmulMemLatOf
+public import Formalism.SharpRestriction.GrowthBounds.MultisetValuation.CountLoc
+public import Formalism.SubspaceCounting.SubspaceCountingProofs.TypeIIDown
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -190,7 +242,7 @@ theorem core (p n' : ℕ) (h : Res (p : W) F) (hq : Nat.card F = p ^ n') (N g i 
   choose T hT using hex
   let Tl : (Fin N → W) →ₗ[W] (Fin (N + g) → W) :=
     { toFun := T
-      map_add' := fun a b => injB (by rw [map_add, hT, hT, hT, map_add, Matrix.mulVec_add])
+      map_add' := fun a b => injB (by rw [map_add (f := _), hT, hT, hT, map_add (f := _), Matrix.mulVec_add])
       map_smul' := fun c a => injB (by
         rw [RingHom.id_apply, map_smul, hT, hT, map_smul, Matrix.mulVec_smul]) }
   let Mf : Matrix (Fin (N + g)) (Fin N) F :=
@@ -200,8 +252,9 @@ theorem core (p n' : ℕ) (h : Res (p : W) F) (hq : Nat.card F = p ^ n') (N g i 
     intro w
     funext r
     rw [LinearMap.pi_apply_eq_sum_univ Tl w]
+
     simp only [red_apply, f, Mf, Matrix.mulVecLin_apply, Matrix.mulVec, dotProduct, Matrix.of_apply,
-      Finset.sum_apply, Pi.smul_apply, smul_eq_mul, map_sum, map_mul]
+    Finset.sum_apply, Pi.smul_apply, smul_eq_mul, map_sum, map_mul]
     exact Finset.sum_congr rfl fun c _ => mul_comm _ _
   have redSurj : ∀ (m : ℕ) (u : Fin m → F), ∃ w : Fin m → W, red F m w = u := by
     intro m u

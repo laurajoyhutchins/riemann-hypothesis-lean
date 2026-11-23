@@ -1,5 +1,63 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.Antisymmetric.Statements
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.Antisymmetric.Statements
+public import Mathlib.Analysis.Normed.Module.Basic
+public import Mathlib.LinearAlgebra.FiniteDimensional.Defs
+public import Mathlib.Topology.Algebra.MvPolynomial
+public import Mathlib.Topology.ContinuousMap.Algebra
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Archimedean.Real.Hom
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.Module.Projective
+public import Mathlib.Analysis.Normed.Operator.Basic
+public import Mathlib.LinearAlgebra.FiniteDimensional.Basic
+public import Mathlib.Topology.Algebra.Module.FiniteDimension
+public import Mathlib.Topology.ContinuousMap.Compact
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -14,40 +72,37 @@ def antisymEvalOn {T : Type*} {N : ℕ} (Ω : Set (T × Fin N → ℝ)) :
   map_add' p q := by ext x; simp
   map_smul' c p := by ext x; simp
 
-@[simp] lemma antisymEvalOn_apply {T : Type*} {N : ℕ} (Ω : Set (T × Fin N → ℝ))
-    (p : MvPolynomial (T × Fin N) ℝ) (x : Ω) : antisymEvalOn Ω p x = eval (x : T × Fin N → ℝ) p :=
-  rfl
-
 lemma abs_coeff_le_sum_abs_coeff {σ : Type*} (p : MvPolynomial σ ℝ) (m : σ →₀ ℕ) :
-    |coeff m p| ≤ ∑ m' ∈ p.support, |coeff m' p| := by
+    |p.coeff m| ≤ ∑ m' ∈ p.support, |p.coeff m'| := by
   by_cases hm : m ∈ p.support
-  · exact Finset.single_le_sum (f := fun m' => |coeff m' p|) (fun _ _ => abs_nonneg _) hm
+  · exact Finset.single_le_sum (f := fun m' => |p.coeff m'|) (fun _ _ => abs_nonneg _) hm
   · rw [notMem_support_iff.1 hm, abs_zero]
     exact Finset.sum_nonneg (fun _ _ => abs_nonneg _)
 
 lemma exists_uniform_coeff_bound {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
     [FiniteDimensional ℝ E] {σ : Type*} (G : E →ₗ[ℝ] MvPolynomial σ ℝ) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ (y : E) (m : σ →₀ ℕ), |coeff m (G y)| ≤ C * ‖y‖ := by
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ (y : E) (m : σ →₀ ℕ), |(G y).coeff m| ≤ C * ‖y‖ := by
   let b := Module.finBasis ℝ E
   let c : Fin (Module.finrank ℝ E) → (E →L[ℝ] ℝ) := fun i => LinearMap.toContinuousLinearMap (b.coord i)
-  refine ⟨∑ i, ‖c i‖ * ∑ m' ∈ (G (b i)).support, |coeff m' (G (b i))|,
+  refine ⟨∑ i, ‖c i‖ * ∑ m' ∈ (G (b i)).support, |(G (b i)).coeff m'|,
     Finset.sum_nonneg fun i _ => mul_nonneg (norm_nonneg _)
       (Finset.sum_nonneg fun _ _ => abs_nonneg _), fun y m => ?_⟩
   have hy : G y = ∑ i, b.repr y i • G (b i) := by
     conv_lhs => rw [← b.sum_repr y]
+
     rw [map_sum]
     simp only [map_smul]
   rw [hy, coeff_sum, Finset.sum_mul]
   refine (Finset.abs_sum_le_sum_abs _ _).trans (Finset.sum_le_sum fun i _ => ?_)
-  rw [coeff_smul, smul_eq_mul, abs_mul]
+  rw [MvPolynomial.coeff_smul, smul_eq_mul, abs_mul]
   have h1 : |b.repr y i| ≤ ‖c i‖ * ‖y‖ := by
     have := (c i).le_opNorm y
     simpa [c, Real.norm_eq_abs] using this
-  calc |b.repr y i| * |coeff m (G (b i))|
-      ≤ (‖c i‖ * ‖y‖) * ∑ m' ∈ (G (b i)).support, |coeff m' (G (b i))| :=
+  calc |b.repr y i| * |(G (b i)).coeff m|
+      ≤ (‖c i‖ * ‖y‖) * ∑ m' ∈ (G (b i)).support, |(G (b i)).coeff m'| :=
         mul_le_mul h1 (abs_coeff_le_sum_abs_coeff _ _) (abs_nonneg _)
           (mul_nonneg (norm_nonneg _) (norm_nonneg _))
-    _ = ‖c i‖ * (∑ m' ∈ (G (b i)).support, |coeff m' (G (b i))|) * ‖y‖ := by ring
+    _ = ‖c i‖ * (∑ m' ∈ (G (b i)).support, |(G (b i)).coeff m'|) * ‖y‖ := by ring
 
 theorem AntisymStability.proof (hB1 : AntisymDivisible.Statement) : AntisymStability.Statement := by
   intro T _ _ N j Om hOm
@@ -75,7 +130,7 @@ theorem AntisymStability.proof (hB1 : AntisymDivisible.Statement) : AntisymStabi
   have hvan : ∀ x ∈ Ω, eval x ((P' - Q : antisymSpace T N j) : MvPolynomial (T × Fin N) ℝ) = 0 := by
     intro x hx
     have := congrArg (fun f : C(Ω, ℝ) => f ⟨x, hx⟩) hker
-    simpa [Φ] using this
+    simpa [Φ, antisymEvalOn] using this
   obtain ⟨l, hl, hPl⟩ := hB1 T N j _ (P' - Q).2 (fun τ a b ha hb => by
     obtain ⟨_, _, O, hO, hne, hOsub⟩ := hOm τ a b ha hb
     refine ⟨O, hO, hne, fun x hx => hvan x ?_⟩
@@ -93,8 +148,8 @@ theorem AntisymStability.proof (hB1 : AntisymDivisible.Statement) : AntisymStabi
     have hx' := hx
     simp only [hΩdef, Set.mem_iUnion] at hx'
     obtain ⟨τ, a, b, ⟨ha, hb⟩, hxO⟩ := hx'
-    simpa [Φ, P', Real.norm_eq_abs] using hbd τ a b ha hb x hxO
-  calc |coeff m (Q : MvPolynomial (T × Fin N) ℝ)| ≤ C * ‖y‖ := hC y m
+    simpa [Φ, P', antisymEvalOn, Real.norm_eq_abs] using hbd τ a b ha hb x hxO
+  calc |(Q : MvPolynomial (T × Fin N) ℝ).coeff m| ≤ C * ‖y‖ := hC y m
     _ ≤ C * M := mul_le_mul_of_nonneg_left hy hC0
 
 end GroundTheory.Heights₂.Heights

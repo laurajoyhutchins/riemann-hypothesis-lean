@@ -1,6 +1,59 @@
-import Mathlib
-import ReciprocityTheory.SemistableReduction.ComapInclusionIsLocalHom
-import ReciprocityTheory.SemistableReduction.AlgebraicIndependentOfDerivations
+module
+
+public import ReciprocityTheory.SemistableReduction.ComapInclusionIsLocalHom
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.SemistableReduction.AlgebraicIndependentOfDerivations
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 namespace ReciprocityTheory.MultiplicativeHeights
 
@@ -13,10 +66,10 @@ section CoeffDer
 variable {K Ω σ : Type*} [CommRing K] [CommRing Ω] [Algebra K Ω]
 
 noncomputable def coeffMap (δ : Derivation K Ω Ω) (P : MvPolynomial σ Ω) : MvPolynomial σ Ω :=
-  ∑ n ∈ P.support, monomial n (δ (coeff n P))
+  ∑ n ∈ P.support, monomial n (δ (AddMonoidAlgebra.coeff P n))
 
 theorem coeff_coeffMap (δ : Derivation K Ω Ω) (P : MvPolynomial σ Ω) (n : σ →₀ ℕ) :
-    coeff n (coeffMap δ P) = δ (coeff n P) := by
+    AddMonoidAlgebra.coeff (coeffMap δ P) n = δ (AddMonoidAlgebra.coeff P n) := by
   classical
   unfold coeffMap
   rw [coeff_sum]
@@ -27,7 +80,7 @@ theorem coeff_coeffMap (δ : Derivation K Ω Ω) (P : MvPolynomial σ Ω) (n : �
       rw [coeff_monomial, if_neg hb]
     · intro hn
       exact absurd h hn
-  · have h0 : coeff n P = 0 := by
+  · have h0 : AddMonoidAlgebra.coeff P n = 0 := by
       by_contra hc
       exact h (mem_support_iff.mpr hc)
     rw [h0, map_zero]
@@ -46,12 +99,12 @@ theorem coeffMap_monomial (δ : Derivation K Ω Ω) (n : σ →₀ ℕ) (a : Ω)
 theorem coeffMap_add (δ : Derivation K Ω Ω) (P Q : MvPolynomial σ Ω) :
     coeffMap δ (P + Q) = coeffMap δ P + coeffMap δ Q := by
   ext m
-  simp only [coeff_add, coeff_coeffMap, map_add]
+  simp only [MvPolynomial.coeff_add, coeff_coeffMap, map_add (f := _)]
 
 theorem coeffMap_smul (δ : Derivation K Ω Ω) (k : K) (P : MvPolynomial σ Ω) :
     coeffMap δ (k • P) = k • coeffMap δ P := by
   ext m
-  rw [coeff_coeffMap, coeff_smul, coeff_smul, coeff_coeffMap,
+  rw [coeff_coeffMap, AddMonoidAlgebra.coeff_smul_apply, AddMonoidAlgebra.coeff_smul_apply, coeff_coeffMap,
     Derivation.map_smul]
 
 theorem coeffMap_mul (δ : Derivation K Ω Ω) (P Q : MvPolynomial σ Ω) :
@@ -125,7 +178,8 @@ private theorem coeffDer_linearCombinationPoly_apply {K Ω : Type*} [CommRing K]
     [Algebra K Ω] {D m : ℕ} (δ : Derivation K Ω Ω) (x : Fin m → Ω) (b : Fin D) :
     coeffDer (σ := ReciprocityTheory.MultiplicativeHeights.SVars D m) δ (yPoly x b) =
       -∑ k, X (Sum.inr (b.succ, k)) * C (δ (x k)) := by
-  simp only [yPoly, map_neg, map_sum, Derivation.leibniz, coeffDer_X,
+  set_option synthInstance.maxHeartbeats 100000 in
+    simp only [yPoly, map_neg, map_sum, Derivation.leibniz, coeffDer_X,
     coeffDer_C, smul_eq_mul, mul_zero, add_zero]
 
 private theorem restrictScalars_pderiv_apply {K Ω σ : Type*} [CommRing K] [CommRing Ω]
@@ -134,8 +188,8 @@ private theorem restrictScalars_pderiv_apply {K Ω σ : Type*} [CommRing K] [Com
       pderiv w f := by
   exact congrFun (Derivation.coe_restrictScalars K _) f
 
-set_option maxHeartbeats 800000 in
 
+set_option maxHeartbeats 800000 in
 private theorem det_sum_X_mul_C_ne_zero_of_dual_family {Ω : Type*} [Field Ω] {D m : ℕ} (y : Fin D → Fin m → Ω)
     (J : Fin D → Fin m) (hy : ∀ a b, y a (J b) = if a = b then 1 else 0) :
     (Matrix.of fun a b : Fin D =>
@@ -156,8 +210,8 @@ private theorem det_sum_X_mul_C_ne_zero_of_dual_family {Ω : Type*} [Field Ω] {
   rw [h0, map_zero, hmap, Matrix.det_one] at h1
   exact zero_ne_one h1
 
-set_option maxHeartbeats 800000 in
 
+set_option maxHeartbeats 800000 in
 theorem gFam_indep {K Ω : Type*} [Field K] [CharZero K] [Field Ω] [Algebra K Ω] {D m : ℕ}
     (x : Fin m → Ω) (J : Fin D → Fin m) (δ : Fin D → Derivation K Ω Ω)
     (hδ : ∀ a b, δ a (x (J b)) = if a = b then 1 else 0) :

@@ -1,4 +1,45 @@
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LastRowMulRowGLInv
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LastRowMulRowGLInv
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.WeilBound.CoreStatements.PublishedTheorems.JacquetShalikaRigidity.SphOff
+
+@[expose] public section
+
 open NumberField IsDedekindDomain MeasureTheory Matrix Topology Filter GlobalTheory.CuspGeneric GlobalTheory.CuspRep PositivityTheory.jumpWindows PositivityTheory.AdelicQuotientData GroundTheory.Automorphic.FourierWhittaker GlobalTheory.CompanionTheory.CutOff
 open scoped ContDiff
 
@@ -8,14 +49,14 @@ namespace GlobalTheory.CompanionTheory.CutOff
 
 set_option linter.unusedSectionVars false
 
-variable {E : Type} [Field E] [NumberField E] [IsTotallyComplex E] {k : ℕ}
+variable {E : Type} [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] {k : ℕ}
 
 theorem contDiff_lastEnt : ContDiff ℝ ∞ (lastEnt : (Fin k → Cinf E) → Cinf E) := by
   unfold lastEnt
   refine ContDiff.sum fun c _ => ?_
   by_cases h : (c : ℕ) + 1 = k
   · simp only [if_pos h]
-    exact contDiff_apply ℝ (Cinf E) c
+    exact contDiff_apply ℝ (fun _ : Fin k => Cinf E) c
   · simp only [if_neg h]
     exact contDiff_const
 
@@ -45,7 +86,7 @@ theorem contDiffOn_tauM :
     · simp only [rowI, if_pos hc]
       exact hinv
     · simp only [rowI, if_neg hc]
-      exact ((contDiff_apply ℝ (Cinf E) c).contDiffOn.mul hinv).neg
+      exact ((contDiff_apply ℝ (fun _ : Fin k => Cinf E) c).contDiffOn.mul hinv).neg
   · have e : ∀ x : Fin k → Cinf E, tauM x i c = (1 : Matrix (Fin k) (Fin k) (Cinf E)) i c :=
       fun x => rowM_apply_ne _ i c hi
     simp only [e]
@@ -63,7 +104,7 @@ theorem rt_inv_eq_orb (φ : XB E k) {x : Fin k → Cinf E} (h : IsUnit (lastEnt 
   have hu := tauM_isUnit h
   have e : hu.unit = (rowGL x)⁻¹ := Units.ext (by
     rw [IsUnit.unit_spec]; exact (rowGL_inv_val h).symm)
-  rw [orb, dif_pos hu, e]
+  rw [orb, dite_eq_left hu, e]
   change _ = Rt E k (infGL E k (rowGL x)⁻¹) φ
   rw [map_inv (infGL E k)]
 

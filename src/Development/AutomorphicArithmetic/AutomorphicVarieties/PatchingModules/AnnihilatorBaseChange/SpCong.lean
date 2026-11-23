@@ -1,4 +1,52 @@
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PatchingModules.ThetaCoefficientMapEq
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.IsCplAtSelf
 import Development.AutomorphicArithmetic.AutomorphicVarieties.PatchingModules.AnnihilatorBaseChange.SpecializationMapCompUniversalSection
+
+@[expose] public section
 
 open IsLocalRing Matrix Filter UpperTheory.V.Alg UpperTheory.V.W UpperTheory.V.AlgebraTools UpperTheory.V.Pa UpperTheory.V.Pa.Core
 open scoped TensorProduct
@@ -55,7 +103,7 @@ private theorem UpperTheory.V.Pa.Core.spCong_kill (hI : (I • ⊤ : Submodule R
   rw [← Submodule.Quotient.mk_smul, Submodule.Quotient.mk_eq_zero]
   refine UpperTheory.V.Pa.Core.spCong_killI I a M hI _ ?_ w
   obtain ⟨b, hb, c, hc, rfl⟩ := Submodule.mem_sup.1 hz
-  rw [map_add, (RingHom.mem_ker).1 hb, zero_add, ← UpperTheory.V.Pa.Core.spCong_map f I]
+  rw [map_add (f := _), (RingHom.mem_ker).1 hb, zero_add, ← UpperTheory.V.Pa.Core.spCong_map f I]
   exact Ideal.mem_map_of_mem (f : A →+* S) hc
 
 private theorem UpperTheory.V.Pa.Core.spCong_smul (f : A →ₐ[R] S) (z : A) (x : A ⊗[R] M) :
@@ -63,7 +111,7 @@ private theorem UpperTheory.V.Pa.Core.spCong_smul (f : A →ₐ[R] S) (z : A) (x
   induction x using TensorProduct.induction_on with
   | zero => simp
   | tmul t m => simp [TensorProduct.smul_tmul']
-  | add x y hx hy => simp only [smul_add, map_add, hx, hy]
+  | add x y hx hy => simp only [smul_add, map_add (f := _), hx, hy]
 
 private theorem UpperTheory.V.Pa.Core.spCong_ker (hI : (I • ⊤ : Submodule R M) ≤ a • ⊤) (f : A →ₐ[R] S)
     (f' : A →ₐ[R] S') (hf : Function.Surjective f)
@@ -85,7 +133,7 @@ private theorem UpperTheory.V.Pa.Core.spCong_ker (hI : (I • ⊤ : Submodule R 
       rw [← UpperTheory.V.Pa.Core.spCong_map f' a]
       exact Ideal.mem_map_of_mem (f' : A →+* S') hz
     · rintro _ _ ⟨x, rfl, hx⟩ ⟨y, rfl, hy⟩
-      exact ⟨x + y, map_add _ _ _, by rw [map_add]; exact Submodule.add_mem _ hx hy⟩
+      exact ⟨x + y, map_add _ _ _, by rw [map_add (f := _)]; exact Submodule.add_mem _ hx hy⟩
   have h2 : ∀ w : (LinearMap.ker f.toLinearMap) ⊗[R] M,
       f'.toLinearMap.rTensor M ((LinearMap.ker f.toLinearMap).subtype.rTensor M w) ∈
         (a.map (algebraMap R S') • ⊤ : Submodule S' (S' ⊗[R] M)) := by
@@ -97,7 +145,7 @@ private theorem UpperTheory.V.Pa.Core.spCong_ker (hI : (I • ⊤ : Submodule R 
       rw [← Submodule.Quotient.mk_smul, Submodule.Quotient.mk_eq_zero] at h
       simpa [TensorProduct.smul_tmul'] using h
     | add x y hx hy =>
-      rw [map_add, map_add]
+      rw [map_add (f := _), map_add (f := _)]
       exact Submodule.add_mem _ hx hy
   obtain ⟨x', hx', hm⟩ := h1 _ hx
   have hex := rTensor_exact M (LinearMap.exact_subtype_ker_map f.toLinearMap) hf

@@ -1,7 +1,57 @@
-import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.HermitianForms.SelfAdjointForms.FixK
-import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.HermitianForms.UnitaryLattices.IsotropicAtoms.InvSmulEqOfSmulEq
-import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.HermitianForms.TransversalSums.ContinuousBlkAtApply
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.HermitianPsdIsotropicRadicalStatement
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.HermitianForms.SelfAdjointForms.FixK
+public import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.HermitianForms.AvgData
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.HermitianPsdIsotropicRadicalStatement
+public import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.HermitianForms.TransversalSums.ContinuousBlkAtApply
+public import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.HermitianForms.TransversalSums.SumTranslateTransversal
+public import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.HermitianForms.UnitaryLattices.IsotropicAtoms.ChartRestriction
+public import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.HermitianForms.UnitaryLattices.IsotropicAtoms.FinSumFinEquivSymmDite
+public import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.HermitianForms.UnitaryLattices.IsotropicAtoms.InvSmulEqOfSmulEq
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -44,10 +94,6 @@ theorem form_avg_self (hB : Lv ψ h π s B) (ξ : Fin (m + 1) → k) {A : AddSub
   rw [avg_idem hB ξ hA v] at e1
   exact e1
 
-theorem dens_at {A₀ : AddSubgroup (Fin (m + 1) → k)} {B' : V →ₗ[ℂ] V →ₗ⋆[ℂ] ℂ} (hD : IsDens ψ h π A₀ B B')
-    (v w : V) : ∃ A₁, IsLat A₁ ∧ A₀ ≤ A₁ ∧ ∀ A, IsLat A → A₁ ≤ A →
-      B' v w = ((A₀.relIndex A : ℕ) : ℂ) * B (avg ψ h π (xi0 k m) A v) w := hD v w
-
 theorem dens_psd (hB : Lv ψ h π s B) {A₀ : AddSubgroup (Fin (m + 1) → k)} (hA₀ : IsLat A₀) {B' : V →ₗ[ℂ] V →ₗ⋆[ℂ] ℂ}
     (hD : IsDens ψ h π A₀ B B') : IsPsd B' := by
   refine ⟨fun v w => ?_, fun v => ?_⟩
@@ -77,7 +123,7 @@ theorem twKer_colEl_stable (hB : Lv ψ h π s B) (x : Fin (m + 1) → k) {z : V}
     congr 2
     simp [mul_assoc]
   | zero => rw [map_zero]; exact Submodule.zero_mem _
-  | add a b _ _ ha hb => rw [map_add]; exact Submodule.add_mem _ ha hb
+  | add a b _ _ ha hb => rw [map_add (f := _)]; exact Submodule.add_mem _ ha hb
   | smul c a _ ha => rw [map_smul]; exact Submodule.smul_mem _ c ha
 
 theorem avg_twKer (hB : Lv ψ h π s B) (ξ : Fin (m + 1) → k) {A : AddSubgroup (Fin (m + 1) → k)} (hA : IsLat A) {z : V}
@@ -111,7 +157,7 @@ theorem dens_kills (hB : Lv ψ h π s B) {A₀ : AddSubgroup (Fin (m + 1) → k)
       simp only [Units.val_mul, toUnits_val]
       rw [mul_comm ((lvlChar k ψ N (m + 2) u' : ℂˣ) : ℂ)]
       abel
-    rw [hsplit, map_add, LinearMap.add_apply, map_smul, LinearMap.smul_apply,
+    rw [hsplit, map_add (f := _), LinearMap.add_apply, map_smul, LinearMap.smul_apply,
       dens_kills2 hB hD (twKer_colEl_stable hB x (Submodule.subset_span ⟨u', v₀, rfl⟩)) w, zero_add]
     obtain ⟨A₁, hA₁, -, e₁⟩ := hD (π (colEl k m N h x) v₀ - ((ψ (xi0 k m ⬝ᵥ x) : Circle) : ℂ) • v₀) w
     obtain ⟨Ax, hAx1, hAx2, hxA⟩ := exists_lat_mem (m + 1) x
@@ -121,7 +167,7 @@ theorem dens_kills (hB : Lv ψ h π s B) {A₀ : AddSubgroup (Fin (m + 1) → k)
         (AddSubgroup.mem_sup_right hxA), neg_smul, ← sub_eq_add_neg, sub_self, map_zero, LinearMap.zero_apply,
       mul_zero, smul_zero]
   | zero => intro w; simp
-  | add a b _ _ ha hb => intro w; rw [map_add, LinearMap.add_apply, ha w, hb w, add_zero]
+  | add a b _ _ ha hb => intro w; rw [map_add (f := _), LinearMap.add_apply, ha w, hb w, add_zero]
   | smul c a _ ha => intro w; rw [map_smul, LinearMap.smul_apply, ha w, smul_zero]
 
 theorem dens_rad (hB : Lv ψ h π s B) {A₀ : AddSubgroup (Fin (m + 1) → k)} (hA₀ : IsLat A₀) {B' : V →ₗ[ℂ] V →ₗ⋆[ℂ] ℂ}

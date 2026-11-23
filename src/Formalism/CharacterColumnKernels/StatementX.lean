@@ -1,26 +1,55 @@
-import Formalism.CharacterColumnKernels.Statement
+module
+
+public import Formalism.CharacterColumnKernels.Statement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Finset Polynomial
 
 noncomputable section
 
 namespace Formalism.NG
-
-def StatHomQuot : Prop :=
-  ∀ (R O M NN : Type*) [Ring R] [CommRing O] [AddCommGroup M] [Module R M] [Module O M]
-    [SMulCommClass R O M] [AddCommGroup NN] [Module R NN]
-    (g : Type) [Fintype g] [DecidableEq g] (Θ : Matrix g g R) (n : g → NN),
-    Submodule.span R (Set.range n) = ⊤ → (∀ i, ∑ j, Θ i j • n j = 0) →
-    (∀ φ : NN →ₗ[R] M, (fun j => φ (n j)) ∈ LinearMap.ker (relMap O M Θ)) ∧
-    Function.Injective (fun (φ : NN →ₗ[R] M) (j : g) => φ (n j)) ∧
-    Module.length O (NN →ₗ[R] M) ≤ Module.length O (LinearMap.ker (relMap O M Θ))
-
-def StatDeltaValO : Prop :=
-  ∀ (O : Type*) [CommRing O] [IsDomain O] [IsDiscreteValuationRing O] (l : ℕ) [Fact l.Prime],
-    l ≠ 2 → ¬ IsUnit (l : O) → ∀ (u : Oˣ) (w t : ℕ),
-    IsDiscreteValuationRing.addVal O
-        (delta (fun i : Fin (t + 1) => (u : O) * (1 + (l : O)) ^ (w + (i : ℕ)))) =
-      IsDiscreteValuationRing.addVal O (l : O) * ((t + padicValNat l t.factorial : ℕ) : ℕ∞)
 
 def matEnd (O M : Type*) [CommRing O] [AddCommGroup M] [Module O M] (d : Type*) [Fintype d]
     [DecidableEq d] : Matrix d d O →+* Module.End O (d → M) where
@@ -53,36 +82,6 @@ instance : Module R (LatQ O d ρ) :=
   Module.compHom (d → KO O) ((matEnd O (KO O) d).comp ρ)
 
 end LatQ
-
-def StatKerHomBlock : Prop :=
-  ∀ (R O : Type*) [Ring R] [CommRing O] [IsDomain O] [IsDiscreteValuationRing O]
-    (g d : Type) [Fintype g] [DecidableEq g] [Fintype d] [DecidableEq d]
-    (ρ : R →+* Matrix d d O) [SMulCommClass R O (LatQ O d ρ)] (Θ : Matrix g g R),
-    Module.length O (LinearMap.ker (matQ O (bigMat ρ Θ))) =
-      Module.length O (Coker Θ →ₗ[R] LatQ O d ρ)
-
-def StatEopCorner : Prop :=
-  ∀ (T A V : Type*) [CommRing T] [Ring A] [Algebra T A] [AddCommGroup V] [Module A V]
-    (e x : A) (t : ℕ) (r : Fin (t + 1) → T), e * e = e → e * x = x → x * e = x →
-    e * aeval x (∏ i, (X - C (r i))) * e = 0 →
-    (x * (e * Eop x r * e) = algebraMap T A (r 0) * (e * Eop x r * e)) ∧
-    ((e * Eop x r * e) * (e * Eop x r * e) = algebraMap T A (delta r) * (e * Eop x r * e)) ∧
-    (e * (e * Eop x r * e) * e = e * Eop x r * e) ∧
-    (∀ v : V, e • v = 0 → (e * Eop x r * e) • v = 0)
-
-def EopAt {T A : Type*} [CommRing T] [Ring A] [Algebra T A] (x : A) {t : ℕ} (r : Fin (t + 1) → T)
-    (i : Fin (t + 1)) : A :=
-  aeval x (∏ k ∈ univ.erase i, (X - C (r k)))
-
-def StatEijZero : Prop :=
-  ∀ (T A : Type*) [CommRing T] [Ring A] [Algebra T A] (x : A) (t : ℕ) (r : Fin (t + 1) → T),
-    Roots x r → ∀ i j : Fin (t + 1), i ≠ j → EopAt x r i * EopAt x r j = 0
-
-def StatLenCoker : Prop :=
-  ∀ (O : Type*) [CommRing O] [IsDomain O] [IsDiscreteValuationRing O] (ι : Type) [Fintype ι]
-    [DecidableEq ι] (A : Matrix ι ι O),
-    Module.length O ((ι → O) ⧸ LinearMap.range (Matrix.mulVecLin A)) =
-      IsDiscreteValuationRing.addVal O A.det
 
 def StatKerHomRect : Prop :=
   ∀ (R O : Type*) [Ring R] [CommRing O] [IsDomain O] [IsDiscreteValuationRing O]

@@ -1,6 +1,51 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.GramSubstitutionIntegral.IntegralSubst
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.BiadditiveCubes.ConstantCoeffLogEqZero
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.GramSubstitutionIntegral.IntegralSubst
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -40,10 +85,6 @@ private theorem cc_subst_lemma {κ : Type*} {a : MvPowerSeries κ ℂ_[p]}
   · intro d hd
     simp [map_pow, ha, zero_pow hd]
 
-theorem cc_psubst {f : PowerSeries ℂ_[p]} (hf : PowerSeries.constantCoeff f = 0)
-    {a : MvPowerSeries σ ℂ_[p]} (ha : MvPowerSeries.constantCoeff a = 0) :
-    MvPowerSeries.constantCoeff (PowerSeries.subst a f) = 0 := (cc_subst_lemma ha f).trans hf
-
 variable {l ex ph : PowerSeries ℂ_[p]}
 
 theorem cc_l (hD : Data l ex ph) : PowerSeries.constantCoeff l = 0 := by
@@ -56,9 +97,6 @@ theorem cc_lg (hD : Data l ex ph) {a : MvPowerSeries σ ℂ_[p]} (ha : MvPowerSe
 
 theorem cc_pt (hD : Data l ex ph) {x : MvPowerSeries σ ℂ_[p]} (hx : MvPowerSeries.constantCoeff x = 0) :
     MvPowerSeries.constantCoeff (pt ex x) = 0 := (cc_subst_lemma hx ex).trans hD.1
-
-theorem cc_phAt (hD : Data l ex ph) {a : MvPowerSeries σ ℂ_[p]} (ha : MvPowerSeries.constantCoeff a = 0) :
-    MvPowerSeries.constantCoeff (phAt ph a) = 0 := (cc_subst_lemma ha ph).trans hD.2.2
 
 private theorem inv_lemma_2 {κ : Type*} {l ex : PowerSeries ℂ_[p]}
     (hex : PowerSeries.constantCoeff ex = 0) (hl : PowerSeries.subst ex l = PowerSeries.X)
@@ -74,7 +112,7 @@ theorem lg_pt (hD : Data l ex ph) {x : MvPowerSeries σ ℂ_[p]} (hx : MvPowerSe
 theorem cc_add (hD : Data l ex ph) {a b : MvPowerSeries σ ℂ_[p]} (ha : MvPowerSeries.constantCoeff a = 0)
     (hb : MvPowerSeries.constantCoeff b = 0) : MvPowerSeries.constantCoeff (add l ex a b) = 0 := by
   show MvPowerSeries.constantCoeff (pt ex (lg l a + lg l b)) = 0
-  exact cc_pt hD (by rw [map_add, cc_lg hD ha, cc_lg hD hb, add_zero])
+  exact cc_pt hD (by rw [map_add (f := _), cc_lg hD ha, cc_lg hD hb, add_zero])
 
 theorem cc_mulBy (hD : Data l ex ph) (c : ℂ_[p]) {a : MvPowerSeries σ ℂ_[p]}
     (ha : MvPowerSeries.constantCoeff a = 0) : MvPowerSeries.constantCoeff (mulBy l ex c a) = 0 := by
@@ -102,13 +140,13 @@ theorem subst_phAt (hs : MvPowerSeries.HasSubst s) {a : MvPowerSeries τ ℂ_[p]
 
 private theorem subst_add_gram_substitution_integral (hs : MvPowerSeries.HasSubst s) (f g : MvPowerSeries τ ℂ_[p]) :
     MvPowerSeries.subst s (f + g) = MvPowerSeries.subst s f + MvPowerSeries.subst s g := by
-  rw [← MvPowerSeries.coe_substAlgHom hs, map_add]
+  rw [← MvPowerSeries.coe_substAlgHom hs, map_add (f := _)]
 
 theorem subst_add' (hD : Data l ex ph) (hs : MvPowerSeries.HasSubst s) {a b : MvPowerSeries τ ℂ_[p]}
     (ha : MvPowerSeries.constantCoeff a = 0) (hb : MvPowerSeries.constantCoeff b = 0) :
     MvPowerSeries.subst s (add l ex a b) = add l ex (MvPowerSeries.subst s a) (MvPowerSeries.subst s b) := by
   have hab : MvPowerSeries.constantCoeff (lg l a + lg l b) = 0 := by
-    rw [map_add, cc_lg hD ha, cc_lg hD hb, add_zero]
+    rw [map_add (f := _), cc_lg hD ha, cc_lg hD hb, add_zero]
   show MvPowerSeries.subst s (pt ex (lg l a + lg l b)) =
     pt ex (lg l (MvPowerSeries.subst s a) + lg l (MvPowerSeries.subst s b))
   rw [subst_pt hs hab, subst_add_gram_substitution_integral hs, subst_lg hD hs ha, subst_lg hD hs hb]

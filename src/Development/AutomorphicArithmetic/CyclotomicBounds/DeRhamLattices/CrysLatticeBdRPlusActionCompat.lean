@@ -1,10 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ZAEqAlgebraMapPt
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.MemSpanOfPowMul
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.BdRpToBdR
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ImageDeRhamEqEisensteinPowMulOfComponents
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsIsCrisPOfIsCrisDR
-import Development.AutomorphicArithmetic.CyclotomicBounds.DeRhamLattices.ExistsTensorBdRActionOnLatticeBdR
+module
+
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ZAEqAlgebraMapPt
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.BdRpToBdR
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsIsCrisPOfIsCrisDR
+public import Development.AutomorphicArithmetic.CyclotomicBounds.DeRhamLattices.ExistsTensorBdRActionOnLatticeBdR
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
+
 open Formalism Formalism.BasicNotions Formalism.BasicNotions.Loc Formalism.WeaklyAdmissibleFiltrations TensorProduct PowerSeries GlobalTheory.Prism GlobalTheory.BK GlobalTheory.BKReal GlobalTheory.BKGal GlobalTheory.Per Matrix
 open scoped Formalism.Per
 open GlobalTheory.BKGal.HatVal
@@ -24,11 +63,11 @@ private theorem actDRG {Z Q O P D V R : Type} [CommRing Z] [CommRing Q] [CommRin
     (y : O ⊗[Z] P) (w : V ⊗[Q] R) : A y w = B (d y) w := by
   induction w using TensorProduct.induction_on with
   | zero => simp only [map_zero]
-  | add v w hv hw => simp only [map_add, hv, hw]
+  | add v w hv hw => simp only [map_add (f := _), hv, hw]
   | tmul v c =>
     induction y using TensorProduct.induction_on with
     | zero => simp only [map_zero, AddMonoidHom.zero_apply]
-    | add x x' hx hx' => simp only [map_add, AddMonoidHom.add_apply, hx, hx']
+    | add x x' hx hx' => simp only [map_add (f := _), AddMonoidHom.add_apply, hx, hx']
     | tmul o b => rw [hd, hA, hB, hg]
 
 private theorem actCrisG {Z Q O P D M V R : Type} [CommRing Z] [CommRing Q] [CommRing O] [Algebra Z O]
@@ -45,16 +84,16 @@ private theorem actCrisG {Z Q O P D M V R : Type} [CommRing Z] [CommRing Q] [Com
     (b : O ⊗[Z] P) (z : (O ⊗[Z] P) ⊗[O] M) : Y (b • z) = B (d b) (Y z) := by
   induction z using TensorProduct.induction_on with
   | zero => simp only [smul_zero, map_zero]
-  | add v w hv hw => simp only [smul_add, map_add, hv, hw]
+  | add v w hv hw => simp only [smul_add, map_add (f := _), hv, hw]
   | tmul u x =>
     rw [TensorProduct.smul_tmul', smul_eq_mul]
     induction b using TensorProduct.induction_on with
     | zero => simp only [zero_mul, zero_tmul, map_zero, AddMonoidHom.zero_apply]
-    | add y y' hy hy' => simp only [add_mul, add_tmul, map_add, AddMonoidHom.add_apply, hy, hy']
+    | add y y' hy hy' => simp only [add_mul, add_tmul, map_add (f := _), AddMonoidHom.add_apply, hy, hy']
     | tmul o' b' =>
       induction u using TensorProduct.induction_on with
       | zero => simp only [mul_zero, zero_tmul, map_zero]
-      | add y y' hy hy' => simp only [mul_add, add_tmul, map_add, hy, hy']
+      | add y y' hy hy' => simp only [mul_add, add_tmul, map_add (f := _), hy, hy']
       | tmul o b =>
         rw [Algebra.TensorProduct.tmul_mul_tmul, hY, hY, hd, hB, map_mul, hs, hg b']
 

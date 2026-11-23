@@ -1,7 +1,60 @@
-import Mathlib
-import Formalism.LocalRingCardinality.DataHost
-import Formalism.FrobeniusOrbits.HostCorollaries
-import Formalism.DirichletDensity.HostDensityArith
+module
+
+public import Formalism.LocalRingCardinality.DataHost
+public import Mathlib.Algebra.AffineMonoid.Basic
+public import Formalism.DirichletDensity.DirichletDensityProofs.QuadDiscr
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+public import Mathlib.Data.Int.Lemmas
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+public import Mathlib.NumberTheory.NumberField.Discriminant.Different
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -58,10 +111,6 @@ theorem conj_b : H.conj H.sqrtMinusD = - H.sqrtMinusD := by
   rw [H.gal_sqd, show H.gal H.conj = R.cc from H.gal.apply_symm_apply _]
   simp [Formalism.HC.Frame.cc, c0]
 
-theorem sqrt_d_pos : 0 < Real.sqrt H.d := by
-  obtain ⟨-, hd, -⟩ := H.hyp
-  exact Real.sqrt_pos.2 (by exact_mod_cast hd.pos)
-
 theorem b_ne_zero : H.sqrtMinusD ≠ 0 := by
   obtain ⟨-, hd, -⟩ := H.hyp
   intro h
@@ -112,7 +161,7 @@ theorem different_quad (K : Type) [Field K] [NumberField K] (a : ℤ) (x : K)
     (minpoly.eq_of_irreducible_of_monic hirr hev hmon).symm
   have hrank : Module.finrank ℚ K = 2 := by
     have := IntermediateField.adjoin.finrank (K := ℚ) (x := x) (.of_finite ℚ x)
-    rw [hmin, natDegree_X_pow_sub_C, hadj, IntermediateField.finrank_top'] at this
+    rw [hmin, natDegree_X_pow_sub_C _, hadj, IntermediateField.finrank_top'] at this
     exact this
   obtain ⟨c, hc⟩ : ∃ c : ℤ, a = 4 * c + 1 := ⟨a / 4, by omega⟩
   have hcK : (a : K) = 4 * c + 1 := by rw [hc]; push_cast; ring

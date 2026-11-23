@@ -1,8 +1,50 @@
-import Development.WeilBound.ThetaLifts.LeviDeterminants.GrowDef
-import Development.WeilBound.ThetaLifts.LeviDeterminants.GrowSobA
-import Development.WeilBound.ThetaLifts.LeviDeterminants.GrowSobB
-import Development.WeilBound.ThetaLifts.LeviDeterminants.GrowSplit
+module
+
+public import Development.WeilBound.ThetaLifts.LeviDeterminants.GrowDef
+public import Development.WeilBound.ThetaLifts.LeviDeterminants.GrowSplit
 import Development.AbelianVarietyTheory.Proofs.HeightProofs.ExistsCompactAdeleRingModNumberField
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.LcscAdelicUnitaryGroup
+public import Development.WeilBound.ThetaLifts.LeviDeterminants.GrowSobA
+public import Development.WeilBound.ThetaLifts.LeviDeterminants.GrowSobB
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -17,7 +59,7 @@ variable {F : Type} [Field F] [NumberField F] {κ : Type} [Fintype κ]
 def lineA (a : V F κ) : ℝ →+ (κ → AF F) where
   toFun t := splitE F κ (t • a, 0)
   map_zero' := by rw [zero_smul]; exact map_zero (splitE F κ)
-  map_add' s t := by rw [← map_add, Prod.mk_add_mk, add_zero, add_smul]
+  map_add' s t := by rw [← map_add (f := _), Prod.mk_add_mk, add_zero, add_smul]
 
 theorem schr_lineA (ψ : AddChar (AF F) ℂ) (a : V F κ) (t : ℝ) (Θ : (κ → AF F) → ℂ) (x : κ → AF F) :
     schr ψ (emb (t • ((a, 0) : V F κ × V F κ))) Θ x = Θ (x + lineA a t) := by
@@ -77,10 +119,11 @@ theorem slice {D : ℕ} (b : Module.Basis (Fin D) ℝ (V F κ)) : ∃ μ, IsHaar
     have : ∑ i, lineA (b i) (t i) = J (t, 0) := by
       rw [hJ, Module.Basis.equivFun_symm_apply]
       change ∑ i, splitE F κ (t i • b i, 0) = _
+
       rw [← map_sum]
       congr 1
       exact Prod.ext (by rw [Prod.fst_sum]) (by rw [Prod.snd_sum]; simp)
-    rw [this, ← map_add, Prod.mk_add_mk, add_zero]
+    rw [this, ← map_add (f := _), Prod.mk_add_mk, add_zero]
   simp only [e1]
   rw [lintegral_add_left_eq_self (fun t => G (J (t, y))) t₀, ENNReal.coe_toNNReal (ENNReal.inv_ne_top.2 h0), hint,
     lintegral_prod (fun p => G (J p)) (hG.comp c1).measurable.aemeasurable]
@@ -90,7 +133,7 @@ theorem slice {D : ℕ} (b : Module.Basis (Fin D) ℝ (V F κ)) : ∃ μ, IsHaar
     rw [← lintegral_const_mul' _ _ hSc.measure_lt_top.ne]
     refine lintegral_mono fun z => ?_
     have hTm : MeasurableSet ((fun y' => y' + -y) ⁻¹' S) :=
-      hSc.isClosed.measurableSet.preimage (continuous_add_right (-y)).measurable
+      hSc.isClosed.measurableSet.preimage (continuous_id.add continuous_const).measurable
     calc ν S * G (J (z, y)) = ∫⁻ y', ((fun y' => y' + -y) ⁻¹' S).indicator (fun _ => G (J (z, y))) y' ∂ν := by
           rw [lintegral_indicator_const hTm, measure_preimage_add_right, mul_comm]
       _ ≤ _ := by
@@ -100,7 +143,7 @@ theorem slice {D : ℕ} (b : Module.Basis (Fin D) ℝ (V F κ)) : ∃ μ, IsHaar
             rw [show m • u = a + -y from e]
             abel
           have : J (z, a) = J (z, y) + (m : AF F) • J (0, u) := by
-            rw [Nat.cast_smul_eq_nsmul, ← map_nsmul, ← map_add, ha']
+            rw [Nat.cast_smul_eq_nsmul, ← map_nsmul, ← map_add (f := _), ha']
             simp
           change G (J (z, y)) = G (J (z, a))
           rw [this, hinv]

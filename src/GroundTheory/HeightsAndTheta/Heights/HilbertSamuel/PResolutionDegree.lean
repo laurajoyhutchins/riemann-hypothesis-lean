@@ -1,10 +1,54 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsResolutionDegree
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsPullFSExtension
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.ResolutionPotentials
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.AnResBridge
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsProjFSMass
-import ReciprocityTheory.AnalyticForms.PotentialTheory.Stokes
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsResolutionDegree
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsPullFSExtension
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsProjFSMass
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.AnResBridge
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.ResolutionPotentials
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.AnalyticForms.PotentialTheory.Stokes
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.AMixSt
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.HilbertSamuel
@@ -56,7 +100,8 @@ theorem smooth_logRatio_resPt (d : HSMDatum D Ω κ) {m₀ m₁ : ConeMetric ℂ
   obtain ⟨c, hc, hcy⟩ := d.R.compat ((d.R.A.chart j).symm y') ((d.R.A.chart j).symm y)
     ((d.R.A.chart j).symm y') ⟨d.R.mem_U _, hy'.2.2⟩
   change logRatio m₀ m₁ (d.R.lift ((d.R.A.chart j).symm y') ((d.R.A.chart j).symm y')) = _
-  rw [hcy, gbamix_logRatio_deg c _ hc]
+  rw [hcy]
+  exact gbamix_logRatio_deg (m₀ := m₀) (m₁ := m₁) c _ hc
 
 theorem mInt_resPot_eq (d : HSMDatum D Ω κ) {m₀ m₁ : ConeMetric ℂ (Ix κ)} (g : d.R.X → ℝ) :
     mInt d.R.A (fun _ => resPot d m₁) g =
@@ -75,7 +120,9 @@ theorem mInt_resPot_eq (d : HSMDatum D Ω κ) {m₀ m₁ : ConeMetric ℂ (Ix κ
   change Real.log (m₁.ρ (d.R.lift ((d.R.A.chart j).symm y) ((d.R.A.chart j).symm y'))) =
     Real.log (m₀.ρ (d.R.lift ((d.R.A.chart j).symm y) ((d.R.A.chart j).symm y'))) +
       logRatio m₀ m₁ (d.R.lift ((d.R.A.chart j).symm y') ((d.R.A.chart j).symm y'))
-  rw [hcy, gbamix_logRatio_deg c _ hc, logRatio, Real.log_div h₁.ne' h₀.ne']
+  rw [hcy, gbamix_logRatio_deg (m₀ := m₀) (m₁ := m₁) c
+    (d.R.lift ((d.R.A.chart j).symm y) ((d.R.A.chart j).symm y')) hc,
+    logRatio, Real.log_div h₁.ne' h₀.ne']
   ring
 
 theorem mass_eq (d : HSMDatum D Ω κ) {m₀ m₁ : ConeMetric ℂ (Ix κ)} (h₀ : IsSmoothMetric m₀)

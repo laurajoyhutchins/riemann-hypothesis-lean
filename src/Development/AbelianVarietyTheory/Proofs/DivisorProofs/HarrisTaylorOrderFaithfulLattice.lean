@@ -1,5 +1,59 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.NotCompactOfMEqOne
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.NotCompactOfMEqOne
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+public import Mathlib.NumberTheory.Padics.RingHoms
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor GlobalTheory.UPel.HT
 open scoped TensorProduct
@@ -206,7 +260,7 @@ theorem GlobalTheory.HTFaith.faithful : ∀ (p : ℕ) [Fact p.Prime] (D : Global
     obtain ⟨a, z, hz⟩ := GlobalTheory.HTFaith.approx p D.O (φ.symm (Matrix.of B))
     refine ⟨a, ?_⟩
     have h1 : φ (a ⊗ₜ 1) = Matrix.of B - (p : ℤ) • φ z := by
-      rw [← map_zsmul, ← φ.apply_symm_apply (Matrix.of B), hz, map_add]; abel
+      rw [← map_zsmul, ← φ.apply_symm_apply (Matrix.of B), hz, map_add (f := _)]; abel
     ext i j
     rw [hΦ, h1, Matrix.map_apply, Matrix.sub_apply, Matrix.smul_apply, map_sub, hπ, sub_zero, Matrix.of_apply]
     exact hB i j
@@ -214,7 +268,7 @@ theorem GlobalTheory.HTFaith.faithful : ∀ (p : ℕ) [Fact p.Prime] (D : Global
     intro r
     obtain ⟨s, rfl⟩ := Ideal.Quotient.mk_surjective r
     obtain ⟨c, z, hz⟩ := GlobalTheory.HTFaith.approx p (𝓞 D.F) s
-    exact ⟨c, by rw [hz, map_add, hπ, add_zero]⟩
+    exact ⟨c, by rw [hz, map_add (f := _), hπ, add_zero]⟩
   have hscal : ∀ c : 𝓞 D.F, Φ (algebraMap _ _ c) = Matrix.scalar _ (π (c ⊗ₜ 1)) := by
     intro c
     rw [hΦ]
@@ -228,6 +282,7 @@ theorem GlobalTheory.HTFaith.faithful : ∀ (p : ℕ) [Fact p.Prime] (D : Global
   choose E hE using fun k l => hsurj (Matrix.single k l 1)
   let y := ∑ k, E k i * x' * E j k
   have hy : Φ y = Matrix.scalar _ (Φ x' i j) := by
+
     simp only [y, map_sum, map_mul, hE, Matrix.single_mul_mul_single, _root_.one_mul, _root_.mul_one]
     ext a b
     rw [Matrix.sum_apply]

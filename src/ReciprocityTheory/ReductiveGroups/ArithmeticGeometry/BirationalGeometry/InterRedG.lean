@@ -1,4 +1,51 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterRedF
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.IsIntersectionFamily
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import ReciprocityTheory.AnalyticForms.PotentialTheory.IsPotentialOfFun
+
+@[expose] public section
 
 noncomputable section
 
@@ -31,7 +78,7 @@ theorem isMultiHomog_secOf (i : ∀ k, ι k) (b : K → ℕ) : IsMultiHomog (sec
   intro m hm k
   rw [secOf_eq, MvPolynomial.support_monomial, if_neg one_ne_zero, Finset.mem_singleton] at hm
   subst hm
-  simp only [Finsupp.finset_sum_apply]
+  simp only [Finsupp.finsetSum_apply]
   rw [Finset.sum_comm]
   simp only [blockDeg_single]
   simp
@@ -43,25 +90,6 @@ theorem secOf_not_mem {P : Ideal (MRing ι)} (hP : P.IsPrime) {i : ∀ k, ι k}
   obtain ⟨k, -, hk⟩ := (Ideal.IsPrime.prod_mem_iff (hp := hP)).1 h
   exact hi k (hP.mem_of_pow_mem _ hk)
 
-def eLine : HermLine ι := HermLine.ofWeight (fun _ => -1) (fun _ _ _ => rfl)
-
 end Alg
-
-def GeoCutStatement : Prop :=
-  ∀ (K : Type) [Fintype K] (ι : K → Type) [∀ k, Fintype (ι k)] (P : Ideal (MRing ι)) (n : ℕ)
-    (s : MRing ι) (b : K → ℕ) (a : Fin n → K → ℤ) (p : ℕ),
-    IsArithVar P (n + 2) → IsMultiHomog s b → s ∉ P → p.Prime →
-    ∑ᶠ V ∈ divSupp P (C (p : ℤ)), (multAt (P ⊔ Ideal.span {C (p : ℤ)}) V : ℝ) *
-        (geoNum (n + 1) V (Fin.snoc a fun k => (b k : ℤ)) : ℝ) =
-      ∑ᶠ (W) (_ : W ∈ divSupp P s ∧ IsHorizontal W), (multAt (P ⊔ Ideal.span {s}) W : ℝ) *
-        ∑ᶠ V ∈ divSupp W (C (p : ℤ)), (multAt (W ⊔ Ideal.span {C (p : ℤ)}) V : ℝ) *
-          (geoNum n V a : ℝ)
-
-def DegreeBaseStatement : Prop :=
-  ∀ (K : Type) [Fintype K] (ι : K → Type) [∀ k, Fintype (ι k)] (P : Ideal (MRing ι))
-    (L : Fin 0 → HermLine ι) (p : ℕ), IsArithVar P 1 → p.Prime →
-    ptsIntegral P (pot L) (fun _ => 1) =
-      ∑ᶠ V ∈ divSupp P (C (p : ℤ)),
-        (multAt (P ⊔ Ideal.span {C (p : ℤ)}) V : ℝ) * (geoNum 0 V (fun j => (L j).a) : ℝ)
 
 end ReciprocityTheory.ChartRestriction.G.Geo

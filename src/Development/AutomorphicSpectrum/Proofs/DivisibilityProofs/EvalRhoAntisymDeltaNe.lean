@@ -1,14 +1,52 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Statements.GeometryStatements.AgreementPos
-import Development.AutomorphicSpectrum.Definitions.DivisibilityTowers.RefLinked
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterSt
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.KillNoneFormPoly
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.FlagVarietyBoundaryDimensionDropStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.ProportionalStatement
-import Development.AutomorphicSpectrum.Proofs.DivisibilityProofs.RealTowerArithAgreementStatement
-import Development.AutomorphicSpectrum.Proofs.DivisibilityProofs.RealTowerGeometricAgreementStatement
-import Development.AutomorphicSpectrum.Proofs.DivisibilityProofs.FlagDegreePolynomialEvalStatement
-import Development.AutomorphicSpectrum.Proofs.DivisibilityProofs.FlagHeightPolynomialEvalStatement
+module
+
+public import Development.AutomorphicSpectrum.Definitions.MetricPeriods.MetricsProjectionFormulaNef
+public import GroundTheory.HeightsAndTheta.Heights.Antisymmetric.Statements
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.KillNoneFormPoly
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.FrameDefinitions.PermFinTwoUniv
+
+@[expose] public section
 
 noncomputable section
 
@@ -26,7 +64,7 @@ theorem eval_formPoly_none_zero {σ : Type} [Fintype σ] (n : ℕ) (a : (Fin n �
     intro Q
     induction Q using MvPolynomial.induction_on with
     | C r => simp
-    | add p q hp hq => simp only [map_add, hp, hq]
+    | add p q hp hq => simp only [map_add (f := _), hp, hq]
     | mul_X p o hp =>
       rw [map_mul, map_mul, map_mul, hp]
       cases o <;> simp
@@ -73,66 +111,5 @@ theorem Realis_PB_gapS_zero {K : Type} [Fintype K] {ι : K → Type} [∀ k, Fin
 theorem AnSys_degPoly_gapS_zero {D : ℕ} {σ : Type} [Fintype σ] (S : PB.AnSys D (Option σ)) (c : σ → ℝ) :
     eval (fun o : Option σ => o.elim 0 c) S.degPoly = eval c (S.comap some).degPoly :=
   eval_formPoly_none_zero _ _ c
-
-theorem real_tower_I8 : PB.Antisymmetry → PB.AgreementPos → PB.Inputs → ∀ II : IntersectionSystem,
-    IsFullIntersectionSystem II → ∀ (Ψ : Type) [Fintype Ψ] [DecidableEq Ψ] (N : ℕ) [Nonempty Ψ] (T : RootTower Ψ N)
-    (R : RealTower T), R.Squares II → T.I8 II (hhFl Ψ N II) := by
-  intro hA hAg hIn II hII Ψ _ _ N _ T R hSq B hB c τ a b hab hbj lam
-  have hN : 2 ≤ N := by
-    have h1 := T.j_pos
-    have h2 := T.j_lt
-    omega
-  have hjN : T.j ≤ N := T.j_lt.le
-  have hdim : dimFl Ψ N = antisymDegree Ψ N := by
-    simp [dimFl, antisymDegree, Nat.choose_two_right]
-  have harith : IsArithVar (PFl Ψ N) (dimFl Ψ N + 1) := hdim ▸ (GlobalTheory.T.flag_variety_boundary_dimension_drop Ψ N hN).1
-  obtain ⟨d, S', K, _, ι, _, P, Re', ⟨F⟩, hPB, hdeg⟩ := hSq B c
-  obtain ⟨⟨c₀, hc₀, hfl⟩, hprop⟩ := GlobalTheory.T.proportional' hIn Ψ N T.j hN hjN
-  obtain ⟨-, hv⟩ := hprop (d + 1) S' F.dim F.unif
-  have hnpos : 0 < R.n c := (GlobalTheory.T.real_tower_arith_agreement hIn II hII Ψ N (T.M B c) (R.Sys c) (R.n c) (R.tie B c) lam 0).1
-  have hn0 : (R.n c : ℝ) ≠ 0 := Nat.cast_ne_zero.2 hnpos.ne'
-
-  have hvol : (R.n c : ℝ) * T.vol c = PB.volOf S' := by
-    have h1 := GlobalTheory.T.real_tower_geometric_agreement hIn II hII Ψ N (T.M 2 c) (R.Sys c) (R.n c) (R.tie 2 c) (rhoWt : Wt Ψ N) 0
-    have h2 := GlobalTheory.T.flag_degree_polynomial_eval hIn II hII Ψ N (rhoWt : Wt Ψ N) hN
-    have hρ : flagDeg (rhoWt : Wt Ψ N) ≠ 0 := by
-      rw [← h2, hfl, eval_mul, eval_C]
-      exact mul_ne_zero hc₀.ne' eval_rho_antisymDelta_ne
-    have h3 : eval (PB.gapS (fun x : Ψ × Fin N => (rhoWt : Wt Ψ N) x.1 x.2) (0 / ((T.M 2 c).kA : ℝ))) (R.Sys c).degPoly =
-        PB.volOf S' * flagDeg (rhoWt : Wt Ψ N) := by
-      rw [zero_div]
-      have e : PB.gapS (fun x : Ψ × Fin N => (rhoWt : Wt Ψ N) x.1 x.2) 0 =
-          fun o => o.elim 0 (PB.gap fun x : Ψ × Fin N => (rhoWt : Wt Ψ N) x.1 x.2) := rfl
-      rw [e, AnSys_degPoly_gapS_zero, ← hdeg, ← PB.eval_toWt_gap, hv, eval_mul, eval_C, h2]
-    rw [h3, linA_zero_pow] at h1
-    unfold RootTower.vol
-    rw [← mul_div_assoc, h1, mul_div_cancel_right₀ _ hρ]
-
-  have hpos : 0 < (R.Sys c).t₀ := ((R.Sys c).reg none).1
-  have hconv : ∀ w, Tendsto (fun t => (R.tie B c).Re.num II t w) (𝓝[>] 0) (𝓝 ((R.tie B c).Re.limNum II w)) := by
-    obtain ⟨C₃, s₀, -, h⟩ := hAg hIn (dimFl Ψ N) (Option (Ψ × Fin N)) (R.Sys c) 0 hpos
-    exact (h II hII _ _ _ (R.tie B c).Re).1
-  have hnum : ∀ mu : Wt Ψ N, (R.n c : ℝ) * T.PPc II B c (linRoot mu ^ (dimFl Ψ N + 1)) =
-      eval (fun x : Ψ × Fin N => mu x.1 x.2) (PB.toWt (Re'.PB II)) := by
-    intro mu
-    have h1 := ((GlobalTheory.T.real_tower_arith_agreement hIn II hII Ψ N (T.M B c) (R.Sys c) (R.n c) (R.tie B c) mu 0).2.2 hconv hpos).2
-    rw [zero_div, linA_zero_pow] at h1
-    have e : PB.gapS (fun x : Ψ × Fin N => mu x.1 x.2) 0 =
-        fun o => o.elim 0 (PB.gap fun x : Ψ × Fin N => mu x.1 x.2) := rfl
-    rw [e, Realis_PB_gapS_zero, ← PB.eval_toWt_gap] at h1
-    rw [hPB]
-    exact h1
-  have hh : ∀ mu : Wt Ψ N, hhFl Ψ N II (linRoot mu ^ (dimFl Ψ N + 1)) =
-      eval (fun x : Ψ × Fin N => mu x.1 x.2) (PB.hFlPoly Ψ N II) :=
-    fun mu => GlobalTheory.T.flag_height_polynomial_eval II hII Ψ N mu hN harith
-
-  have hQ := (hA hIn II hII Ψ N T.j d hN S' K ι P Re' F).2 (Equiv.swap (τ, a) (τ, b))
-    ⟨τ, a, b, hab, by omega, rfl⟩
-  have hE := congrArg (eval fun x : Ψ × Fin N => lam x.1 x.2) hQ
-  rw [eval_rename, ← swapWt_uncurry] at hE
-  simp only [map_sub, map_neg, smul_eval] at hE
-  rw [← hnum, ← hnum, ← hh, ← hh, ← hvol] at hE
-  apply mul_left_cancel₀ hn0
-  linear_combination hE
 
 end GlobalTheory.CompanionTheory.Ar.Top

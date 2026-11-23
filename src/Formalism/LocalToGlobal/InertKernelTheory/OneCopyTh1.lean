@@ -1,7 +1,46 @@
-import Formalism.LocalToGlobal.InertKernelTheory.DefsMM
-import Formalism.LocalToGlobal.InertKernelTheory.StatementIota
-import Formalism.LocalToGlobal.TorsionIntegrality.UniformGaussModels.UniformGaussModelConditionEquivalent
-import Formalism.LocalToGlobal.TorsionIntegrality.UniformGaussModels.UniformGaussModelCondition
+module
+
+public import Formalism.LocalToGlobal.InertKernelTheory.DefsMM
+public import Formalism.LocalToGlobal.InertKernelTheory.StatementIota
+public import Formalism.LocalToGlobal.TorsionIntegrality.UniformGaussModels.UniformGaussModelConditionEquivalent
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -44,36 +83,5 @@ def CoordTie : Prop :=
         liftT D (MvPowerSeries.map (ι : ℂ →+* ℂ_[p])
           (Formalism.L2.Th1.H.taylorMv (Formalism.L2.Th1.H.opU (Formalism.L2.Th1.H.matH (hOne B.L D.what₂.Tau)) (fun τ => s τ 0 0) B.thMM))) ∧
       ∃ N : ℕ, 0 < N ∧ ¬ p ∣ N ∧ (N : ℂ) • (fun τ => s τ 0 0) ∈ B.lamM
-
-def ModelTie : Prop :=
-  ∀ (D : D7) (cc : Ideal (𝓞 D.host.K)) (δ : ℂ) (B : Base D cc δ), IsCurveIdeal D cc → IsDiscriminantTwelfthRootOfIdealLattice D cc δ →
-    ∀ (p : ℕ) [Fact p.Prime], 5 ≤ p → jacobiSym (-(D.host.d : ℤ)) p = -1 →
-    ∀ (lam : Qbar →+* ℂ_[p]) (ι : ℂ ≃+* ℂ_[p]), IotaExt lam ι →
-    ∀ g2 g3 ε s2 : MaximalUnramifiedExtension p, IsLTNorm p B.L ι g2 g3 s2 ε → ‖g2‖ ≤ 1 → ‖g3‖ ≤ 1 →
-      ‖(g2 : ℂ_[p]) ^ 3 - 27 * (g3 : ℂ_[p]) ^ 2‖ = 1 → ‖ε‖ = 1 →
-      (∀ n, ‖PowerSeries.coeff n (thetaS p g2 g3 ε)‖ ≤ 1) →
-    ∀ (C : WeierstrassCurve.VariableChange ℂ_[p]) (wq : PowerSeries ℂ_[p]),
-      IsModel lam B.tor.abelian₂ C → IsWq (C • wModel lam B.tor.abelian₂) wq →
-      PowerSeries.constantCoeff (phL p g2 g3 s2 ε) = 0 ∧
-      ∃ h Uu : PowerSeries ℂ_[p], PowerSeries.constantCoeff h = 0 ∧ (∀ n, IsIntP (PowerSeries.coeff n h)) ∧
-        ‖PowerSeries.coeff 1 h‖ = 1 ∧
-        PowerSeries.C (((C.u⁻¹ : ℂ_[p]ˣ) : ℂ_[p])) * (flog (C • wModel lam B.tor.abelian₂) wq).subst h =
-          Formalism.InvariantFactorPaths.G7.lgF ℂ_[p] p ∧
-        (∀ n, IsIntP (PowerSeries.coeff n Uu)) ∧
-        (ePhi1 lam B.tor.abelian₂ C wq)⁻¹.subst h = Uu * (Formalism.DworkPowerSeriesWeights.mvExp (phL p g2 g3 s2 ε) : PowerSeries ℂ_[p])
-
-def ReadChange : Prop :=
-  ∀ (D : D7) (p : ℕ) [Fact p.Prime], 5 ≤ p → ∀ (lam : Qbar →+* ℂ_[p]) (Λ : AddSubgroup ℂ)
-    (C : WeierstrassCurve.VariableChange ℂ_[p]) (wq : PowerSeries ℂ_[p]) (ph h Uu : PowerSeries ℂ_[p]),
-    PowerSeries.constantCoeff ph = 0 →
-    PowerSeries.constantCoeff h = 0 → (∀ n, IsIntP (PowerSeries.coeff n h)) → ‖PowerSeries.coeff 1 h‖ = 1 →
-    PowerSeries.C (((C.u⁻¹ : ℂ_[p]ˣ) : ℂ_[p])) * (flog (C • wModel lam Λ) wq).subst h = Formalism.InvariantFactorPaths.G7.lgF ℂ_[p] p →
-    (∀ n, IsIntP (PowerSeries.coeff n Uu)) →
-    (ePhi1 lam Λ C wq)⁻¹.subst h = Uu * (Formalism.DworkPowerSeriesWeights.mvExp ph : PowerSeries ℂ_[p]) →
-    ∀ (r : ℕ) (v : Fin r → (D.what₂.Tau × Fin 1 × Fin 1 → ℂ_[p])) (e : D.what₂.Tau ≃ Fin r)
-      (F : MvPowerSeries D.what₂.Tau ℂ_[p]),
-      Formalism.DworkPowerSeriesWeights.Integral (Formalism.DworkPowerSeriesWeights.mvExp (Formalism.L2.Th1.E.phSum ph : MvPowerSeries D.what₂.Tau ℂ_[p]) *
-        ReadTh1 p (fun τ j => v (e j) (τ, 0, 0)) F) →
-      IntegralMv (atLogV D lam Λ C wq v (liftT D F) * ePh lam Λ C wq r)
 
 end Formalism.L2.KerInert

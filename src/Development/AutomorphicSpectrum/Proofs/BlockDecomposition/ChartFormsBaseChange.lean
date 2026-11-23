@@ -1,7 +1,52 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.HodgeSurjectivity.NLeA
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.AlgebraMapConeRing
-import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsAlgHomOfIsBaseChange
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.AlgebraMapConeRing
+public import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsAlgHomOfIsBaseChange
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+
+@[expose] public section
 
 set_option autoImplicit false
 noncomputable section
@@ -11,7 +56,7 @@ namespace RelBC
 open TensorProduct
 
 theorem multilinear_mem_of_span {R ι M N : Type*} [CommRing R] [Fintype ι] [DecidableEq ι] [AddCommGroup M] [Module R M]
-    [AddCommGroup N] [Module R N] (f : MultilinearMap R (fun _ : ι => M) N) (X : ι → Set M) (T : Submodule R N)
+    [AddCommGroup N] [Module R N] (f : (ι → M) →ₘₗ[R] N) (X : ι → Set M) (T : Submodule R N)
     (h : ∀ w : ι → M, (∀ i, w i ∈ X i) → f w ∈ T) (v : ι → M)
     (hv : ∀ i, v i ∈ Submodule.span R (X i)) : f v ∈ T := by
   have key : ∀ (s : Finset ι) (w : ι → M), (∀ i ∈ s, w i ∈ Submodule.span R (X i)) → (∀ i, i ∉ s → w i ∈ X i) →
@@ -58,15 +103,13 @@ theorem isBaseChange_of_pushout {P Q R₀ R M N : Type*} [CommRing P] [CommRing 
       φ.liftBaseChange R ∘ (Algebra.IsPushout.cancelBaseChange P Q R₀ R M).symm := by
     funext z
     induction z with
-    | zero => simp
-    | add x y hx hy => simp only [Function.comp_apply, map_add] at hx hy ⊢; rw [hx, hy]
+    | add x y hx hy => simp only [Function.comp_apply, map_add (f := _)] at hx hy ⊢; rw [hx, hy]
     | tmul s m => simp [e]
   have hb : Function.Bijective (φ.liftBaseChange R) := by
     have : (φ.liftBaseChange R : R ⊗[R₀] M → N) = hφ.equiv := by
       funext z
       induction z with
-      | zero => simp
-      | add x y hx hy => simp only [map_add, hx, hy]
+      | add x y hx hy => simp only [map_add (f := _), hx, hy]
       | tmul s m => simp
     rw [this]
     exact hφ.equiv.bijective
@@ -86,8 +129,7 @@ theorem isBaseChange_restrict {P Q U M V N : Type*} [CommRing P] [CommRing Q] [A
   have hc : ∀ z : Q ⊗[P] U, j (g.liftBaseChange Q z) = hf.equiv (u.lTensor Q z) := by
     intro z
     induction z with
-    | zero => simp
-    | add x y hx hy => simp only [map_add, hx, hy]
+    | add x y hx hy => simp only [map_add (f := _), hx, hy]
     | tmul s m => simp [hg]
   have hinj : Function.Injective (g.liftBaseChange Q) := fun x y h => by
     have h2 := congrArg j h
@@ -160,7 +202,6 @@ theorem isBaseChange_core {P Q R₀ R M N U V : Type*} [CommRing P] [CommRing Q]
   refine mem_span_of_mem_span (Set.range (algebraMap R₀ R)) (fun r => ?_) _ ?_ (hs v)
   · have hpo : IsBaseChange Q (IsScalarTower.toAlgHom P R₀ R).toLinearMap := Algebra.IsPushout.out
     induction r using hpo.inductionOn with
-    | zero => exact Submodule.zero_mem _
     | tmul m => exact Submodule.subset_span ⟨m, rfl⟩
     | smul s n h => exact Submodule.smul_mem _ s h
     | add a b ha hb => exact Submodule.add_mem _ ha hb
@@ -236,7 +277,7 @@ theorem relOm_le_span {K R₀ R : Type} [CommRing K] [CommRing R₀] [CommRing R
       exact ⟨hDy y hy, hWs y hy⟩
     | zero => exact ⟨by rw [map_zero]; exact W.zero_mem, fun ω => by rw [zero_smul]; exact W.zero_mem⟩
     | add x y _ _ hx hy =>
-      exact ⟨by rw [map_add]; exact W.add_mem hx.1 hy.1, fun ω => by rw [add_smul]; exact W.add_mem (hx.2 ω) (hy.2 ω)⟩
+      exact ⟨by rw [map_add (f := _)]; exact W.add_mem hx.1 hy.1, fun ω => by rw [add_smul]; exact W.add_mem (hx.2 ω) (hy.2 ω)⟩
     | smul c x _ hx =>
       refine ⟨?_, fun ω => ?_⟩
       · rw [smul_eq_mul, Derivation.leibniz]
@@ -281,7 +322,6 @@ theorem isBaseChange_relOm {K P Q R₀ R : Type} [CommRing K] [CommRing P] [Comm
   have hD : ∀ ω : Ω[R⁄K], ω ∈ Submodule.span R (Set.range fun h => KaehlerDifferential.D K R (θ h)) := by
     intro ω
     induction ω using h1.inductionOn with
-    | zero => exact Submodule.zero_mem _
     | smul s n h => exact Submodule.smul_mem _ s h
     | add a b ha hb => exact Submodule.add_mem _ ha hb
     | tmul m =>
@@ -293,7 +333,7 @@ theorem isBaseChange_relOm {K P Q R₀ R : Type} [CommRing K] [CommRing P] [Comm
         rw [KaehlerDifferential.map_D]
         exact Submodule.subset_span ⟨y, rfl⟩
       | zero => rw [map_zero]; exact Submodule.zero_mem _
-      | add x y _ _ hx hy => rw [map_add]; exact Submodule.add_mem _ hx hy
+      | add x y _ _ hx hy => rw [map_add (f := _)]; exact Submodule.add_mem _ hx hy
       | smul c x _ hx =>
         rw [map_smul, ← algebraMap_smul R c]
         exact Submodule.smul_mem _ _ hx
@@ -307,7 +347,7 @@ theorem isBaseChange_relOm {K P Q R₀ R : Type} [CommRing K] [CommRing P] [Comm
       obtain ⟨v, rfl⟩ := hx
       rw [GlobalTheory.exteriorPowerMapOver_ιMulti, omMap_ιMulti]
     | zero => rw [map_zero, map_zero]
-    | add x y _ _ hx hy => rw [map_add, map_add, hx, hy]
+    | add x y _ _ hx hy => rw [map_add (f := _), map_add (f := _), hx, hy]
     | smul c x _ hx =>
       rw [map_smul, omMap_smul, hx]
       exact (algebraMap_smul R c _).symm

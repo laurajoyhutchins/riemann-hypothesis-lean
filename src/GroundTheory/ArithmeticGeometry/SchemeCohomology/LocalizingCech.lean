@@ -1,6 +1,51 @@
-import Mathlib
-import GroundTheory.ArithmeticGeometry.SchemeCohomology.ConsCompSuccAboveZero
-import GroundTheory.ArithmeticGeometry.SchemeCohomology.Cartan
+module
+
+public import GroundTheory.ArithmeticGeometry.SchemeCohomology.ConsCompSuccAboveZero
+public import Mathlib.Order.CompletePartialOrder
+public import GroundTheory.ArithmeticGeometry.SchemeCohomology.Cartan
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Arith.SchemeCoh
@@ -11,8 +56,8 @@ universe u
 
 variable {X : TopCat.{u}} {P : (Opens X)ᵒᵖ ⥤ AddCommGrpCat.{u}} {R : Type u} [CommRing R]
 
-variable (P) in
 
+variable (P) in
 structure LocalizingAction (D : R → Opens X) where
 
   act : R → ∀ W : Opens X, P.obj (op W) →+ P.obj (op W)
@@ -74,6 +119,7 @@ lemma actC_apply (r : R) (n : ℕ) (σ : Cochain P U n) (i : Fin (n + 1) → ι)
 lemma d_actC (r : R) (n : ℕ) (σ : Cochain P U n) :
     d P U n (actC A U r n σ) = actC A U r (n + 1) (d P U n σ) := by
   funext i
+
   simp only [actC_apply, d_apply, map_sum, map_zsmul, A.res_act]
 
 lemma le_cons {n : ℕ} (j : ι) (I : Fin (n + 1) → ι) :
@@ -145,8 +191,9 @@ theorem exists_d_eq_pow_smul [Fintype ι] {n : ℕ} (σ : Cochain P (D ∘ h) (n
       refine Finset.sum_congr rfl fun k _ => ?_
       rw [Fin.val_succ, pow_succ, mul_neg_one, neg_smul, neg_neg,
         res_congr P _ σ (cons_comp_succAbove_succ j J k) _ (le_cons_comp _ j J k)]
+
     rw [map_sub, d_apply, map_sum, A.res_act, sub_eq_zero, Finset.sum_congr rfl (fun k _ => e1 k),
-      e0, map_sum]
+    e0, map_sum]
     refine Finset.sum_congr rfl fun k _ => ?_
     rw [map_zsmul]
   have hkill : ∀ J : Fin (n + 2) → ι, ∃ M : ℕ,
@@ -163,8 +210,8 @@ theorem exists_d_eq_pow_smul [Fintype ι] {n : ℕ} (σ : Cochain P (D ∘ h) (n
   rw [map_sub, sub_eq_zero, ← A.act_mul, ← pow_add] at hMJ
   exact hMJ
 
-include A in
 
+include A in
 theorem cechAcyclic_of_localizingAction [Finite ι] (g : R) (hcov : ⨆ i, D (h i) = D g) :
     CechAcyclic P (D ∘ h) := by
   classical
@@ -177,6 +224,7 @@ theorem cechAcyclic_of_localizingAction [Finite ι] (g : R) (hcov : ⨆ i, D (h 
   let T : Cochain P (D ∘ h) n := ∑ j, actC A (D ∘ h) (c j * h j ^ (N0 - N j)) n (τ j)
   have hT : d P _ n T = actC A (D ∘ h) (g ^ L) (n + 1) σ := by
     funext J
+
     simp only [T, map_sum, d_actC, hτ]
     refine (Finset.sum_apply J _ _).trans ?_
     change ∑ j, A.act _ _ (A.act _ _ (σ J)) = A.act (g ^ L) _ (σ J)

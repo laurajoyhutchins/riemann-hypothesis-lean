@@ -1,8 +1,48 @@
-import Mathlib
-import Formalism.WeaklyAdmissibleFiltrations.Statement
-import Formalism.CoboundaryTransfers.Statement
-import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
-import Development.AbelianVarietyTheory.BlockTheory.NonGaloisCusps.UnitDualParts
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.NonGaloisCusps.UnitDualParts
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 namespace GlobalTheory.Survey.UnitsOfFieldRootsOfUnity
@@ -43,7 +83,7 @@ theorem _root_.GlobalTheory.Survey.UnitsOfFieldRootsOfUnity.symm_act (h : _root_
       (T.ρ g ((_root_.GlobalTheory.Survey.UnitsOfFieldRootsOfUnity.sumEquiv i i' h).symm z).1,
         T'.ρ g ((_root_.GlobalTheory.Survey.UnitsOfFieldRootsOfUnity.sumEquiv i i' h).symm z).2) := by
   apply (_root_.GlobalTheory.Survey.UnitsOfFieldRootsOfUnity.sumEquiv i i' h).injective
-  rw [LinearEquiv.apply_symm_apply, _root_.GlobalTheory.Survey.UnitsOfFieldRootsOfUnity.sumEquiv_apply, i.equiv, i'.equiv, ← map_add,
+  rw [LinearEquiv.apply_symm_apply, _root_.GlobalTheory.Survey.UnitsOfFieldRootsOfUnity.sumEquiv_apply, i.equiv, i'.equiv, ← map_add (f := _),
     ← _root_.GlobalTheory.Survey.UnitsOfFieldRootsOfUnity.sumEquiv_apply i i' h, Prod.mk.eta, LinearEquiv.apply_symm_apply]
 
 def pr₁ (h : IsSumLat i i') : LatHom T''.L T.L where
@@ -106,7 +146,7 @@ theorem sum_N {T T' T'' : LocLat G Qp LL O} (hT : IsCrys PD T.ρ)
   · intro hz
     have h1 := W.map_N (pr₁ i i' h) hT'' hT _ hz
     have h2 := W.map_N (pr₂ i i' h) hT'' hT' _ hz
-    rw [map_add, ← W.map_comp, ← W.map_comp] at h1 h2
+    rw [map_add (f := _), ← W.map_comp, ← W.map_comp] at h1 h2
     rw [show latComp (pr₁ i i' h) i = latId T from latHom_ext e1, W.map_id,
       map_of_zero (latComp (pr₁ i i' h) i') e2, add_zero] at h1
     rw [show latComp (pr₂ i i' h) i' = latId T' from latHom_ext e4, W.map_id,
@@ -132,7 +172,7 @@ theorem sumFor_of_crys
       simp only [LinearMap.coprod_apply] at hxy
       have h1 := congrArg (W.map (pr₁ i i' h)) hxy
       have h2 := congrArg (W.map (pr₂ i i' h)) hxy
-      rw [map_add, ← W.map_comp, ← W.map_comp, map_zero] at h1 h2
+      rw [map_add (f := _), ← W.map_comp, ← W.map_comp, map_zero] at h1 h2
       rw [show latComp (pr₁ i i' h) i = latId T from latHom_ext fun a => by
           simpa [latComp, latId] using (key a 0).1, W.map_id,
         map_of_zero (latComp (pr₁ i i' h) i') (fun a => by simpa [latComp] using (key 0 a).1),
@@ -156,10 +196,10 @@ theorem sumFor_of_crys
   refine ⟨LinearEquiv.ofBijective _ hbij, fun x y => rfl, fun x y => ?_, fun g x y => ?_,
     fun x y => sum_N hT hT' (hc T T' T'' i i' h hT hT') i i' h x y⟩
   · change W.φD T'' (W.map i x + W.map i' y) = W.map i _ + W.map i' _
-    rw [map_add, ← W.map_φ, ← W.map_φ]
+    rw [map_add (f := _), ← W.map_φ, ← W.map_φ]
     rfl
   · change W.γD T'' g (W.map i x + W.map i' y) = W.map i _ + W.map i' _
-    rw [map_add, ← W.map_γ, ← W.map_γ]
+    rw [map_add (f := _), ← W.map_γ, ← W.map_γ]
     rfl
 
 end GlobalTheory.Survey.UnitsOfFieldRootsOfUnity

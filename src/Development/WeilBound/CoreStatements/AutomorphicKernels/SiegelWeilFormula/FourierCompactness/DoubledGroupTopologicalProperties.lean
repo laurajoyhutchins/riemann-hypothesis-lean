@@ -1,9 +1,54 @@
-import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.AuxiliaryPrimeFunction
-import Development.WeilBound.CoreStatements.AutomorphicKernels.EisensteinSeriesG2.UnitsBorelSpace.BorelSpaceDoubledGroup
-import Development.WeilBound.CoreStatements.AutomorphicKernels.EisensteinSeriesG2.BlockTriangularFrames.SiegelParabolicEqStabiliserCols
-import Development.AbelianVarietyTheory.Proofs.HeightProofs.MeanSquareAddFundamentalDomainOfCocompact
-import Development.AbelianVarietyTheory.Proofs.HeightProofs.ExistsNhdsZeroPrincipalEqZero
+module
+
+public import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.AuxiliaryPrimeFunction
+public import Development.WeilBound.CoreStatements.AutomorphicKernels.EisensteinSeriesG2.AdelicHomeomorphisms.IsTopologicalGroupG2
+public import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.ExistsIsFundamentalDomainAndQuotMeasureEq
 import Development.AbelianVarietyTheory.Proofs.HeightProofs.ExistsCompactAdeleRingModNumberField
+import Development.AbelianVarietyTheory.Proofs.HeightProofs.ExistsNhdsZeroPrincipalEqZero
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.MeanSquareAddFundamentalDomainOfCocompact
+import Development.WeilBound.CoreStatements.AutomorphicKernels.EisensteinSeriesG2.UnitsBorelSpace.BorelSpaceDoubledGroup
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Dynamics.Ergodic.Action.Regular
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 set_option linter.unusedSectionVars false
 
@@ -30,12 +75,12 @@ instance mxTAG {p q : ℕ} : IsTopologicalAddGroup (Mx F E p q) :=
 
 instance mxBorel {p q : ℕ} : BorelSpace (Mx F E p q) := inferInstanceAs (BorelSpace (Fin p → Fin q → AE F E))
 
-variable (F E) in
 
+variable (F E) in
 abbrev bsE : Module.Basis (Fin (Module.finrank F E)) F E := Module.finBasis F E
 
-variable (F E) in
 
+variable (F E) in
 abbrev bsA : Module.Basis (Fin (Module.finrank F E)) (AF F) (AE F E) := Algebra.TensorProduct.basis (AF F) (bsE F E)
 
 theorem inclR_eq (x : E) : inclR (F := F) (AF F) x = (1 : AF F) ⊗ₜ[F] x := rfl
@@ -75,19 +120,19 @@ theorem exists_compact_AE : ∃ C : Set (AE F E), IsCompact C ∧ ∀ z : AE F E
     refine ⟨(bsE F E).equivFun.symm (-y),
       (bsA F E).equivFun (inclR (F := F) (AF F) ((bsE F E).equivFun.symm (-y)) + z), ?_, ?_⟩
     · intro k _
-      rw [(bsA F E).equivFun_apply, map_add, Finsupp.add_apply, coord_inclR, hx, map_neg, neg_add_eq_sub]
+      rw [(bsA F E).equivFun_apply, map_add (f := _), Finsupp.add_apply, coord_inclR, hx, map_neg, neg_add_eq_sub]
       exact hy k
     · exact LinearEquiv.symm_apply_apply _ _
 
-variable (F E) in
 
+variable (F E) in
 def ratMx (p q : ℕ) : AddSubgroup (Mx F E p q) :=
   AddSubgroup.closure (Set.range fun X : Matrix (Fin p) (Fin q) E => incM F X)
 
 theorem ratM_eq {σ : E →ₐ[F] E} (d : SD σ) : d.ratM = ratMx F E d.m d.n := rfl
 
 theorem incM_add {α β : Type} (X Z : Matrix α β E) : incM F (X + Z) = incM F X + incM F Z := by
-  simp [incM, Matrix.map_add]
+  simp [incM, Matrix.map_add (f := _)]
 
 theorem incM_neg {α β : Type} (X : Matrix α β E) : incM F (-X) = -incM F X := by
   simp [incM, Matrix.map_neg]

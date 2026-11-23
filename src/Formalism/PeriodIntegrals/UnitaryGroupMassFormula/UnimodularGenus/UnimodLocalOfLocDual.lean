@@ -1,23 +1,61 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.UnimodularGenus.StdLatEqSpan
-import Formalism.HermitianLattices.StatementMass
-import Formalism.HermitianLattices.HermitianLatticesProofs.LocDual
+module
+
+public import Formalism.HermitianLattices.StatementMass
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.UnimodularGenus.Development
+public import Formalism.HermitianLattices.HermitianLatticesProofs.LocDual
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open NumberField
 
 noncomputable section
 
 namespace PI.UG.W
-
-example (E : Type) [Field E] [NumberField E] [StarRing E] : PI.UG.IsCMUnram E ↔ Formalism.HermitianLatticesTheory.IsCMUnram E := Iff.rfl
-
-example (E : Type) [Field E] [NumberField E] [StarRing E] (n : ℕ) (p : Ideal (𝓞 E)) (N : Submodule (𝓞 E) (Sp E n)) :
-    IsUnimodularAt (hStd E n) p N ↔ Formalism.HermitianLatticesTheory.IsUnimodularAt (hStd E n) p N := Iff.rfl
-
-example (E : Type) [Field E] [NumberField E] [StarRing E] (n : ℕ) (p : Ideal (𝓞 E)) (N : Submodule (𝓞 E) (Sp E n)) :
-    (∃ g ∈ isom (hStd E n), gmap g (loc (K := E) p (stdLat E n)) = loc (K := E) p N) ↔
-    (∃ g ∈ Formalism.HermitianLatticesTheory.isom (hStd E n), Formalism.HermitianLatticesTheory.gmap g (Formalism.HermitianLatticesTheory.loc (K := E) p (stdLat E n)) = Formalism.HermitianLatticesTheory.loc (K := E) p N) :=
-  Iff.rfl
 
 theorem stdLat_isOrtho (E : Type) [Field E] [NumberField E] [StarRing E] (n : ℕ) :
     Formalism.HermitianLatticesTheory.IsOrthoLattice (hStd E n) (stdLat E n) n := by
@@ -57,8 +95,10 @@ theorem unimodLocal_of_locDual (hLD : Formalism.HermitianLatticesTheory.LocDual)
   have hsymm : (hStd E n).IsSymm := by
     first
       | (refine ⟨fun x y => ?_⟩
+
          simp [hStd, map_sum, starRingEnd_apply, star_mul', mul_comm])
       | (intro x y
+
          simp [hStd, map_sum, starRingEnd_apply, star_mul', mul_comm])
   have hstar : ∀ r : 𝓞 E, star (algebraMap (𝓞 E) E r) ∈ Set.range (algebraMap (𝓞 E) E) := by
     intro r

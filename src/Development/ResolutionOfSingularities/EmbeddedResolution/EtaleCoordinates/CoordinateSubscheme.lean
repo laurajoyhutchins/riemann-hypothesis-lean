@@ -1,12 +1,52 @@
-import Mathlib
-import Development.ResolutionOfSingularities.EmbeddedResolution.EtaleCoordinates.ChartRing
-import Development.ResolutionOfSingularities.EmbeddedResolution.EtaleCoordinates.EtaleCoordinates
-import Development.ResolutionOfSingularities.EmbeddedResolution.EtaleCoordinates.EtaleChartExistence
-import Development.ResolutionOfSingularities.EmbeddedResolution.EtaleCoordinates.StrictNormalCrossings
-import Development.ResolutionOfSingularities.EmbeddedResolution.DerivativeIdeal.DerivativeIdealSheaf
+module
+
+public import Development.ResolutionOfSingularities.EmbeddedResolution.EtaleCoordinates.ChartRing
 import Development.ResolutionOfSingularities.Foundations.Schemes.IdealSheafData
-import Development.ResolutionOfSingularities.Foundations.BlowupUniversalProperty
-import Development.ResolutionOfSingularities.EmbeddedResolution.ResolutionOfSingularities
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.AlgebraicGeometry.QuasiAffine
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 universe u
 
 open CategoryTheory Opposite AlgebraicGeometry TopologicalSpace
@@ -19,7 +59,7 @@ theorem isAffineOpen_preimage_subschemeι {X : Scheme.{u}} (Z : X.IdealSheafData
     (hU : IsAffineOpen U) : IsAffineOpen (Z.subschemeι ⁻¹ᵁ U) :=
   hU.preimage Z.subschemeι
 
-private theorem card_compl_eq_sub (m : ℕ) (S : Finset (Fin m)) : Sᶜ.card = m - S.card := by
+theorem card_compl_eq_sub (m : ℕ) (S : Finset (Fin m)) : Sᶜ.card = m - S.card := by
   rw [Finset.card_compl, Fintype.card_fin]
 
 def complOrderEmb (m : ℕ) (S : Finset (Fin m)) : Fin (m - S.card) ↪o Fin m :=
@@ -68,7 +108,7 @@ theorem renameCompl_C (k : Type u) [Field k] (m : ℕ) (S : Finset (Fin m)) (a :
       (MvPolynomial.C a) = MvPolynomial.C a
   simp
 
-private def substZeroOnFinset (k : Type u) [Field k] (m : ℕ) (S : Finset (Fin m))
+def substZeroOnFinset (k : Type u) [Field k] (m : ℕ) (S : Finset (Fin m))
     (j : ULift.{u} (Fin m)) : MvPolynomial (ULift.{u} (Fin (m - S.card))) k :=
   if h : j.down ∈ S then 0
   else MvPolynomial.X (ULift.up.{u} (Classical.choose (exists_complOrderEmb_eq m S h)))
@@ -80,7 +120,7 @@ def setCoordsZero (k : Type u) [Field k] (m : ℕ) (S : Finset (Fin m)) :
 theorem setCoordsZero_X_of_mem (k : Type u) [Field k] (m : ℕ) (S : Finset (Fin m)) {j : Fin m}
     (hj : j ∈ S) : setCoordsZero k m S (MvPolynomial.X (ULift.up.{u} j)) = 0 := by
   have h1 : setCoordsZero k m S (MvPolynomial.X (ULift.up.{u} j)) = substZeroOnFinset k m S (ULift.up.{u} j) :=
-    MvPolynomial.aeval_X _ _
+    by simp [setCoordsZero, MvPolynomial.aeval_X]
   rw [h1]
   exact dif_pos hj
 
@@ -90,7 +130,8 @@ theorem setCoordsZero_X_complOrderEmb (k : Type u) [Field k] (m : ℕ) (S : Fins
       MvPolynomial.X (ULift.up.{u} i) := by
   have hnot : complOrderEmb m S i ∉ S := complOrderEmb_notMem m S i
   have h1 : setCoordsZero k m S (MvPolynomial.X (ULift.up.{u} (complOrderEmb m S i)))
-      = substZeroOnFinset k m S (ULift.up.{u} (complOrderEmb m S i)) := MvPolynomial.aeval_X _ _
+      = substZeroOnFinset k m S (ULift.up.{u} (complOrderEmb m S i)) := by
+    simp [setCoordsZero, MvPolynomial.aeval_X]
   have h2 : substZeroOnFinset k m S (ULift.up.{u} (complOrderEmb m S i))
       = MvPolynomial.X (ULift.up.{u} (Classical.choose (exists_complOrderEmb_eq m S hnot))) :=
     dif_neg hnot
@@ -177,14 +218,13 @@ theorem etale_quotientMap {P A : Type u} [CommRing P] [CommRing A] {f : P →+* 
       fun _ => rfl⟩
   have hleft : ∀ t : ((P ⧸ I) ⊗[P] A), ψ (φ t) = t := by
     intro t
-    refine TensorProduct.induction_on t ?_ ?_ ?_
-    · simp
+    refine TensorProduct.inductionOn t ?_ ?_
     · intro q a
       obtain ⟨x, rfl⟩ := Ideal.Quotient.mk_surjective q
       rw [hφ, hqm, ← map_mul (Ideal.Quotient.mk (Ideal.map f I)), hψ]
       exact hb x a
     · intro u v hu hv
-      rw [map_add, map_add, hu, hv]
+      rw [map_add (f := _), map_add (f := _), hu, hv]
   have hsurj : Function.Surjective φ := by
     intro b
     obtain ⟨a, rfl⟩ := Ideal.Quotient.mk_surjective b
@@ -259,10 +299,20 @@ theorem etale_quotientMk_comp_renameCompl (k : Type u) [Field k] (m : ℕ) (S : 
     exact bijective_quotientMk_comp_renameCompl k m S
   · exact etale_quotientMap hf (mvPolynomialCoordIdeal k m S)
 
+def EtaleChart.restrictCompat {X : Scheme.{u}} {k : Type u} [Field k]
+    {p : X ⟶ Spec (CommRingCat.of k)} {U : X.Opens} {m : ℕ} (c : EtaleChart p U m)
+    {V : X.Opens} (hVU : V ≤ U) : EtaleChart p V m where
+  map := X.homOfLE hVU ≫ c.map
+  comp_struct := by
+    rw [Category.assoc, c.comp_struct, ← Category.assoc, Scheme.homOfLE_ι]
+  isEtale := by
+    have := c.isEtale
+    infer_instance
+
 theorem EtaleChart.coord_restrict {X : Scheme.{u}} {k : Type u} [Field k]
     {p : X ⟶ Spec (CommRingCat.of k)} {U V : X.Opens} {m : ℕ} (c : EtaleChart p U m)
     (hVU : V ≤ U) (j : Fin m) :
-    (c.restrict hVU).coord j = (X.presheaf.map (homOfLE hVU).op).hom (c.coord j) := by
+    (c.restrictCompat hVU).coord j = (X.presheaf.map (homOfLE hVU).op).hom (c.coord j) := by
   have key : ∀ {A B C D : (Opens ↥X)ᵒᵖ} {R : CommRingCat.{u}} (f : R ⟶ X.presheaf.obj A)
       (α : A ⟶ B) (β : B ⟶ D) (γ : A ⟶ C) (δ : C ⟶ D) (z : R),
       (X.presheaf.map β).hom ((f ≫ X.presheaf.map α).hom z)
@@ -273,7 +323,7 @@ theorem EtaleChart.coord_restrict {X : Scheme.{u}} {k : Type u} [Field k]
         ((congrArg X.presheaf.map (Quiver.Hom.unop_inj (Subsingleton.elim _ _))).trans
           (X.presheaf.map_comp γ δ))
     exact congrArg (fun g : X.presheaf.obj A ⟶ X.presheaf.obj D => g.hom (f.hom z)) h
-  simp [EtaleChart.restrict, EtaleChart.coord]
+  simp [EtaleChart.restrictCompat, EtaleChart.coord]
   all_goals
     first
       | rfl
@@ -513,8 +563,10 @@ theorem EtaleChart.etale_homOfVector_restrictToSubschemeCoords (c : EtaleChart p
 def EtaleChart.restrictToSubscheme (c : EtaleChart p U m) (hU : IsAffineOpen U)
     (Z : X.IdealSheafData) (S : Finset (Fin m)) (h : restrictIdeal Z U = c.coordIdeal S) :
     EtaleChart (Z.subschemeι ≫ p) (Z.subschemeι ⁻¹ᵁ U) (m - S.card) :=
-  EtaleChart.ofCoords (Z.subschemeι ≫ p) (Z.subschemeι ⁻¹ᵁ U) (c.restrictToSubschemeCoords Z S)
-    (c.etale_homOfVector_restrictToSubschemeCoords hU Z S h)
+  { map := AffineSpace.homOfVector ((Z.subschemeι ⁻¹ᵁ U).ι ≫ (Z.subschemeι ≫ p))
+      (c.restrictToSubschemeCoords Z S)
+    comp_struct := by simp
+    isEtale := c.etale_homOfVector_restrictToSubschemeCoords hU Z S h }
 
 theorem EtaleChart.restrictToSubscheme_coord (c : EtaleChart p U m) (hU : IsAffineOpen U)
     (Z : X.IdealSheafData) (S : Finset (Fin m)) (h : restrictIdeal Z U = c.coordIdeal S)
@@ -523,9 +575,7 @@ theorem EtaleChart.restrictToSubscheme_coord (c : EtaleChart p U m) (hU : IsAffi
       (Z.subschemeι.appLE U (Z.subschemeι ⁻¹ᵁ U) le_rfl).hom (c.coord (complOrderEmb m S i)) := by
   have hmapeq : (c.restrictToSubscheme hU Z S h).map =
       AffineSpace.homOfVector ((Z.subschemeι ⁻¹ᵁ U).ι ≫ (Z.subschemeι ≫ p))
-        (c.restrictToSubschemeCoords Z S) :=
-    EtaleChart.ofCoords_map (Z.subschemeι ≫ p) (Z.subschemeι ⁻¹ᵁ U)
-      (c.restrictToSubschemeCoords Z S) (c.etale_homOfVector_restrictToSubschemeCoords hU Z S h)
+        (c.restrictToSubschemeCoords Z S) := rfl
   have hcoord : ((c.restrictToSubscheme hU Z S h).map.appTop).hom
       (AffineSpace.coord (Spec (CommRingCat.of k))
         (ULift.up i : ULift.{u} (Fin (m - S.card))))
@@ -557,7 +607,7 @@ private theorem restrictToSubscheme_map_appTop_coord (c : EtaleChart p U m)
         (AffineSpace.coord (Spec (CommRingCat.of k)) (ULift.up i)) =
       (Z.subschemeι ⁻¹ᵁ U).topIso.inv.hom
         ((Z.subschemeι.appLE U (Z.subschemeι ⁻¹ᵁ U) le_rfl).hom (c.coord (complOrderEmb m S i))) := by
-  simp [EtaleChart.restrictToSubscheme, EtaleChart.ofCoords_map,
+  simp [EtaleChart.restrictToSubscheme,
     EtaleChart.restrictToSubschemeCoords]
 
 theorem EtaleChart.restrictToSubscheme_coordIdeal_singleton (c : EtaleChart p U m)

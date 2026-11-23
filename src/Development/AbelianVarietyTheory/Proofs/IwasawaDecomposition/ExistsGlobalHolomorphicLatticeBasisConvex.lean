@@ -1,6 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsLatBasisZero
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.SpanPeriodLatticeComplexSemiAbelianEqTopStatement
+module
+
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsLatBasisZero
+public import Mathlib.Topology.Covering.Basic
+import Mathlib.Algebra.Order.Archimedean.Real.Hom
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.Convex.Contractible
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+public import Mathlib.Topology.Homotopy.Lifting
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -36,7 +85,7 @@ theorem eq_zero_of_rip_self {v : Fin g → ℂ} (h : rip v v = 0) : v = 0 := by
 
 theorem continuous_rip : Continuous fun q : (Fin g → ℂ) × (Fin g → ℂ) => rip q.1 q.2 := by
   simp only [rip_apply]
-  refine continuous_finset_sum _ fun k _ => Complex.continuous_re.comp ?_
+  refine continuous_finsetSum _ fun k _ => Complex.continuous_re.comp ?_
   exact ((continuous_apply k).comp continuous_snd).mul
     (Complex.continuous_conj.comp ((continuous_apply k).comp continuous_fst))
 
@@ -51,6 +100,7 @@ theorem det_gram_ne_zero {l : Fin r → Fin g → ℂ} (hl : LinearIndependent �
   have hs : ∀ a, rip (l a) (∑ i, v i • l i) = 0 := by
     intro a
     have := congrFun hv0 a
+
     simpa [Matrix.vecMul, dotProduct, gram, map_sum] using this
   have hz : (∑ i, v i • l i) = 0 := by
     apply eq_zero_of_rip_self
@@ -66,6 +116,7 @@ theorem coord_eq {l y : Fin r → Fin g → ℂ} (hl : LinearIndependent ℝ l) 
     (hy : ∀ j, y j = ∑ i, c j i • l i) : coord l y = c := by
   have : pair l y = c * gram l := by
     ext j a
+
     simp [pair, gram, Matrix.mul_apply, hy j, map_sum]
   rw [coord, this]
   exact Matrix.mul_nonsing_inv_cancel_right _ _ (isUnit_iff_ne_zero.2 (det_gram_ne_zero hl))
@@ -186,7 +237,7 @@ theorem continuous_of_act {T : Type*} [TopologicalSpace T] {l y : T → Fin r �
   exact ((IsLocallyConstant.desc M GLZ.mat hlc GLZ.mat_injective)).continuous
 
 theorem continuous_act (m : Matrix (Fin r) (Fin r) ℤ) : Continuous (act m : (Fin r → Fin g → ℂ) → _) :=
-  continuous_pi fun j => continuous_finset_sum _ fun i _ => (continuous_apply i).const_smul (m j i)
+  continuous_pi fun j => continuous_finsetSum _ fun i _ => (continuous_apply i).const_smul (m j i)
 
 variable {n : ℕ}
 

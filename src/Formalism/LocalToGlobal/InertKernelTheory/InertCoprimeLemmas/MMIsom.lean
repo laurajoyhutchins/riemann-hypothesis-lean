@@ -1,10 +1,63 @@
-import Formalism.LocalToGlobal.InertKernelTheory.DefsMMIsom
-import Formalism.LocalToGlobal.InertKernelTheory.InertCoprimeLemmas.ReBase
-import Formalism.LocalToGlobal.TorsionIntegrality.UniformGaussModels.FinalFree
-import Formalism.LocalToGlobal.InertKernelTheory.DefsFrONB
-import Formalism.LocalToGlobal.InertKernelTheory.InertCoprimeLemmas.UnitSubstOfLoc
-import Formalism.LocalToGlobal.InertKernelTheory.InertCoprimeLemmas.TestVectorMemSchwartzBruhat
-import Formalism.LocalToGlobal.InertKernelTheory.InertCoprimeLemmas.AlgTrans
+module
+
+public import Formalism.LocalToGlobal.InertKernelTheory.DefsMMIsom
+public import Formalism.LocalToGlobal.InertKernelTheory.DefsFrONB
+public import Formalism.LocalToGlobal.InertKernelTheory.OneCopyTh1S
+public import Formalism.LocalToGlobal.InertKernelTheory.InertCoprimeLemmas.AlgTrans
+public import Formalism.LocalToGlobal.InertKernelTheory.InertCoprimeLemmas.KappaSelfDualFourthPowerLattice
+public import Formalism.LocalToGlobal.InertKernelTheory.InertCoprimeLemmas.ReBase
+public import Formalism.LocalToGlobal.InertKernelTheory.InertCoprimeLemmas.TestVectorMemSchwartzBruhat
+public import Formalism.LocalToGlobal.InertKernelTheory.InertCoprimeLemmas.UnitSubstOfLoc
+import Formalism.LocalToGlobal.KernelLattices.KernelLocalFactors.BaseEx
+import Formalism.LocalToGlobal.KernelLattices.KernelLocalFactors.SelfDualLatticeNorms.IsTorsionPointStandardCM
+import Formalism.LocalToGlobal.KernelLattices.KernelLocalFactors.StdOK
+public import Formalism.LocalToGlobal.TorsionIntegrality.UniformGaussModels.FinalFree
+import Formalism.SharpRestriction.GlobalSchurBounds.GlobalRankLatticeProofs.UnitTraceSumBounds.FamilyLogGammaSmallHolds
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 open scoped BigOperators Matrix
@@ -125,8 +178,8 @@ theorem norm_natCast_cp {p : ℕ} [Fact p.Prime] (ι : ℂ ≃+* ℂ_[p]) (s : �
 
 end MMIsom
 
-open MMIsom in
 
+open MMIsom in
 theorem frameONB_of (hLB : LocBasisMM) (hRC : RatCoord) (hFC : FixConj) : FrameONB := by
   intro D cc δ B hcc hδ p _ h5 hj lam ι hι g₁ hiso hidx hidx2 σ hσ γ B' hF σp hσp
   obtain ⟨b, hb, hG, hE⟩ := hLB D p h5 hj lam
@@ -140,7 +193,7 @@ theorem frameONB_of (hLB : LocBasisMM) (hRC : RatCoord) (hFC : FixConj) : FrameO
     refine ⟨x + y, ?_⟩
     show TaylorLogMetric.lamC lam (D.host.φ₀ ((x + y : D.host.K) : D.host.E)) =
       TaylorLogMetric.lamC lam (D.host.φ₀ (x : D.host.E)) + TaylorLogMetric.lamC lam (D.host.φ₀ (y : D.host.E))
-    rw [← htE', ← htE', ← htE', IntermediateField.coe_add, map_add]
+    rw [← htE', ← htE', ← htE', IntermediateField.coe_add, map_add (f := _)]
   have hSr_mul : ∀ a ∈ Sr, ∀ b ∈ Sr, a * b ∈ Sr := by
     rintro _ ⟨x, rfl⟩ _ ⟨y, rfl⟩
     refine ⟨x * y, ?_⟩
@@ -173,6 +226,7 @@ theorem frameONB_of (hLB : LocBasisMM) (hRC : RatCoord) (hFC : FixConj) : FrameO
     have h := congrFun (congrFun hM' x) y
     rw [Matrix.mul_apply, Matrix.one_apply] at h
     have h2 := congrArg (MaximalUnramifiedExtension p).subtype h
+
     rw [map_sum] at h2
     simp only [map_mul, apply_ite (MaximalUnramifiedExtension p).subtype, map_one, map_zero] at h2
     rw [Matrix.mul_apply, Matrix.one_apply]
@@ -182,8 +236,9 @@ theorem frameONB_of (hLB : LocBasisMM) (hRC : RatCoord) (hFC : FixConj) : FrameO
     have h := congrFun (congrFun hM' x) y
     rw [Matrix.mul_apply, Matrix.one_apply] at h
     have h2 := congrArg (fun z => (MaximalUnramifiedExtension p).subtype (σ z)) h
+
     simp only [map_sum, map_mul, apply_ite σ, apply_ite (MaximalUnramifiedExtension p).subtype, map_one, map_zero,
-      Matrix.transpose_apply, Matrix.map_apply, hσσ] at h2
+    Matrix.transpose_apply, Matrix.map_apply, hσσ] at h2
     rw [Matrix.mul_apply, Matrix.one_apply]
     exact h2
 
@@ -207,6 +262,7 @@ theorem frameONB_of (hLB : LocBasisMM) (hRC : RatCoord) (hFC : FixConj) : FrameO
 
   have hfr : ∀ i' τ w, ∑ j, B' τ j * gc (i', j) w = ∑ m, Bb τ m * Cm (i', m) w := by
     intro i' τ w
+
     rw [hF.2 i' τ w, hc w i' τ, map_sum]
     refine Finset.sum_congr rfl fun m _ => ?_
     rw [map_mul, iota_lamC lam ι hι (JetIntegrality.test_vector_mem_schwartz_bruhat (D := D) _),
@@ -265,6 +321,7 @@ theorem frameONB_of (hLB : LocBasisMM) (hRC : RatCoord) (hFC : FixConj) : FrameO
     refine Matrix.ext fun w w' => ?_
     rw [Matrix.sum_apply, Matrix.one_apply]
     have h := congrArg tE (hcG w w')
+
     simp only [map_sum, map_mul, apply_ite tE, map_one, map_zero] at h
     rw [← h]
     refine Finset.sum_congr rfl fun i' _ => ?_

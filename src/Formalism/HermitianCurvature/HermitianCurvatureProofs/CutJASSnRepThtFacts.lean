@@ -1,7 +1,61 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutJASSnRepCut
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutJASSnRepCut
+public import Formalism.HermitianCurvature.FrameExists2
+import Formalism.FormalDegreeBessel.FormalDegreeRatio.UnitaryWeylNormalHolds
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.DifferentialOperatorBracket
 import Formalism.HermitianCurvature.HermitianCurvatureProofs.ExistsFrameTwo
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.cut_TypeNormMeas_TC
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.DifferentialOperatorBracket
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.LieBracketMultiplication
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.ParametersUPrimeForULower
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.RestrictionIrrelevantDoubleLevelOperator
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.cut_TypeNormMeas_TC
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Formalism.REAL Formalism.QuantumDeterminants Formalism.FourierDecayAlt NumberField
 open scoped ComplexConjugate Matrix
@@ -461,11 +515,13 @@ theorem trace_move (U V : Wq →L[ℂ] Wp) (B₁ B₂ : Wq →L[ℂ] Wq) (hB : �
       = ∑ i, ∑ j, inner ℂ (b j) (B₁ (b i)) * inner ℂ (U (b i)) (V (b j)) := by
         refine Finset.sum_congr rfl fun i _ => ?_
         conv_lhs => rw [hexp (B₁ (b i))]
+
         simp only [map_sum, map_smul, inner_sum, inner_smul_right]
     _ = ∑ j, ∑ i, inner ℂ (b j) (B₁ (b i)) * inner ℂ (U (b i)) (V (b j)) := Finset.sum_comm
     _ = ∑ j, inner ℂ (U (B₂ (b j))) (V (b j)) := by
         refine Finset.sum_congr rfl fun j _ => ?_
         conv_rhs => rw [hexp (B₂ (b j))]
+
         simp only [map_sum, map_smul, sum_inner, inner_smul_left]
         refine Finset.sum_congr rfl fun i _ => ?_
         congr 1
@@ -608,8 +664,10 @@ theorem tht_eqv (hz : inWb k r z) (hT : 0 < Tz k r z) (hR : Qr.IsRepW k r z π)
   rw [tht_indep hz hT hR hz' hT' hR' hF (frame_uw hh hF) hF' (frame_uw hh' hF')]
   conv_rhs => rw [← sandw_apply (π h) (π' h'⁻¹)]
   unfold tht
+
   rw [ContinuousLinearMap.sum_apply, ContinuousLinearMap.sum_apply, map_sum]
   refine Finset.sum_congr rfl fun p _ => ?_
+
   rw [ContinuousLinearMap.sum_apply, ContinuousLinearMap.sum_apply, map_sum]
   refine Finset.sum_congr rfl fun q _ => ?_
   rw [ContinuousLinearMap.smul_apply, ContinuousLinearMap.smul_apply, map_smul]
@@ -630,8 +688,10 @@ theorem thtA_eqv (hz : inWb k r z) (hT : 0 < Tz k r z) (hR : Qr.IsRepW k r z π)
   rw [thtA_indep hz hT hR hz' hT' hR' hF (frame_uw hh hF) hF' (frame_uw hh' hF')]
   conv_rhs => rw [← sandw_apply (π h) (π' h'⁻¹)]
   unfold thtA
+
   rw [ContinuousLinearMap.sum_apply, ContinuousLinearMap.sum_apply, map_sum]
   refine Finset.sum_congr rfl fun p _ => ?_
+
   rw [ContinuousLinearMap.sum_apply, ContinuousLinearMap.sum_apply, map_sum]
   refine Finset.sum_congr rfl fun q _ => ?_
   rw [ContinuousLinearMap.smul_apply, ContinuousLinearMap.smul_apply, map_smul]

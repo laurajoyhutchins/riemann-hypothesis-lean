@@ -1,14 +1,58 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Jets.ColValMonomial
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.SubstMapAlgebraMap
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.InvariantDerivAlongEndo
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.MapDofIterate
-import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.ExistsFormalBiextMap
-import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.GermEvalOneStandardPointSelf
-import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.IsNilpotentOfMemKerJetTruncR
-import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.ExistsGoodConst
-import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.IsExtensionPullOver
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.UniversalCharts.DualLiftInjective
+module
+
+public import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.GermEvalOneStandardPointSelf
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.DegExp
+public import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.ExistsFormalBiextMap
+public import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.FormalSecondPointDerivativeSecondCoordinate
+public import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.IsNilpotentOfMemKerJetTruncR
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.InvariantDerivAlongEndo
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.MapDofIterate
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.SubstMapAlgebraMap
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.DofDApply
+
+@[expose] public section
 
 noncomputable section
 
@@ -34,7 +78,7 @@ theorem fnVal_const (p : Spec (CommRingCat.of A) ⟶ X) (π : X ⟶ Spec (CommRi
   rw [hp, ← Category.comp_id (Spec.map _), fnVal_specMap θ _ ⊤ le_top]
   congr 1
   unfold fnVal
-  rw [dif_pos (show ⊤ ≤ (𝟙 (Spec (CommRingCat.of R)) : _ ⟶ _) ⁻¹ᵁ ⊤ from le_top)]
+  rw [dite_eq_left (show ⊤ ≤ (𝟙 (Spec (CommRingCat.of R)) : _ ⟶ _) ⁻¹ᵁ ⊤ from le_top)]
   have e : (𝟙 (Spec (CommRingCat.of R)) : _ ⟶ _).appLE ⊤ ⊤ le_top = 𝟙 _ := by
     simp [Scheme.Hom.appLE]
   rw [e]
@@ -129,6 +173,7 @@ theorem dof_baseChange (hJ : JetAlgSt) (hRep : RepSt) (hSer : SerSt) [IsLocalRin
       fnVal r.left (π ⁻¹ᵁ U) (∑ i, resTop _ (scal G'.hom (c i)) * (π.app U).hom (s i)) =
         ∑ i, algebraMap R A (c i) * fnVal r.left (π ⁻¹ᵁ U) ((π.app U).hom (s i)) := by
     intro A _ _ r hr
+
     rw [fnVal_eq_fnValHom _ _ hr, map_sum]
     refine Finset.sum_congr rfl fun i _ => ?_
     rw [map_mul, ← fnVal_eq_fnValHom _ _ hr, ← fnVal_eq_fnValHom _ _ hr,
@@ -149,6 +194,7 @@ theorem dof_baseChange (hJ : JetAlgSt) (hRep : RepSt) (hSer : SerSt) [IsLocalRin
         rw [h0 m]
         exact top_le_preimage_comp (toUnit _ : sp (R₀ := R) R ⟶ _).left _ _ hU'
     refine ⟨h₁, (val _ (y m) h₁).trans ?_⟩
+
     rw [hΨ, map_sum, ← hτ, map_sum]
     refine Finset.sum_congr rfl fun i _ => ?_
     rw [map_mul, map_mul, ← hΨ (MvPowerSeries.map _ _), hτ (ev _ _), ← (hser i n a y hy m).2]

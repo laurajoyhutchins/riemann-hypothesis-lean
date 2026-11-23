@@ -1,24 +1,64 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsArtinianRingTsze
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GroupObjectLiftDividedPowers
-import Development.AbelianVarietyTheory.Definitions.Divisors.NotCompactOfMEqOne
-import Development.AbelianVarietyTheory.Definitions.Divisors.InfUniv
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SumProjSingle
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsArtinianRingTsze
+public import Development.AbelianVarietyTheory.Definitions.Divisors.NotCompactOfMEqOne
+public import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.CanonicalOfAbelianDeRham
+public import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.CrystallinePull2SumCup
+import Development.AbelianVarietyTheory.Definitions.Divisors.IsLocalRingTrivSqZeroExt
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CrystalGluedHodgeGraphIsotropicOfDirectionsStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CrystalGluedHodgeGraphLieConditionOfDirectionsStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CrystalGluedHodgeGraphOrderStableOfDirectionsStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsIsComplCrystalGluedHodgeGraphFiltrationStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsSqZeroLiftRealisingKs
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HarrisTaylorExistsDeRhamPairing
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HarrisTaylorExistsLiftOrderActionHodgeSummandStatement
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HarrisTaylorExistsPolarisationBundleLiftStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HarrisTaylorLiftLieOfHodgeSummandLieStatement
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HarrisTaylorLieMultiplicitySquareZeroLiftStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HarrisTaylorLiftHodgeSummandAdmissibleStableStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HarrisTaylorLiftHodgeSummandCrystallineLieStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HarrisTaylorLiftHodgeSummandIsotropicStatement
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HarrisTaylorLiftLieOfHodgeSummandLieStatement
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HarrisTaylorPrimeToPLevelLiftSquareZeroStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HarrisTaylorLiftHodgeSummandAdmissibleStableStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HarrisTaylorLiftHodgeSummandIsotropicStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HarrisTaylorLiftHodgeSummandCrystallineLieStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsIsComplCrystalGluedHodgeGraphFiltrationStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MemHodgeFiltrationIffReductionGluedFiltrationStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CrystalGluedHodgeGraphOrderStableOfDirectionsStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CrystalGluedHodgeGraphIsotropicOfDirectionsStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CrystalGluedHodgeGraphLieConditionOfDirectionsStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsSqZeroLiftRealisingKs
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HarrisTaylorExistsDeRhamPairing
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MemHodgeFiltrationIffReductionGluedFiltrationStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor
 open GlobalTheory.UPel.Sm GlobalTheory.Cris GlobalTheory.DeRham
@@ -45,39 +85,9 @@ theorem GlobalTheory.HTGlue.exists_obj_of_summand (p : ℕ) [Fact p.Prime] (D : 
         d - ∑ i, w i ∈ E)
     (s : Sp C ⟶ Sp R) (hs : s = spMap tR) :
     ∃ (o : GlobalTheory.UPel.HT.Obj b N s) (m : GlobalTheory.UPel.HT.ObjMap o₀ o (spMap π)), liftFil (divided₂ hsq) m.cart = E := by
-  subst hs
-  obtain ⟨A, _, i, h, act, hA, hE, hact⟩ := GlobalTheory.T.harrisTaylor_exists_lift_orderAction_hodge_summand p D R b N C C₀ π hπ hsq tR o₀ E hEc hEf hEs
-  haveI : IsCommMonObj A := hA.comm
-  subst hE
-  obtain ⟨P, φ₂, hP, r1, r2, hsym, hamp, hker, hros, hsq2, hpol⟩ :=
-    GlobalTheory.T.harrisTaylor_exists_polarisation_bundle_lift p D R b N C C₀ π hπ hsq tR o₀ A i h hA act hact hEi
-  obtain ⟨eta, e1, e2, e3, e4, e5⟩ :=
-    GlobalTheory.T.harrisTaylor_primeToP_level_lift_squareZero p D R b N C C₀ π hπ hsq tR o₀ A i h hA act hact hNp P φ₂ hP hsq2 hpol
-  exact ⟨{ A := A
-           ab := hA
-           act := act
-           P := P
-           isLB := hP
-           rig₁ := r1
-           rig₂ := r2
-           symm := hsym
-           ample := hamp
-           kerP := hker
-           rosati := hros
-           lie := fun R' _ β x hx v hv => GlobalTheory.T.harrisTaylor_lift_lie_of_hodge_summand_lie p D R b N C C₀ π hπ hsq tR o₀ A i h hA act hact hEl R' β x hx v hv
-           lieRank := fun k _ _ x β hx j => GlobalTheory.T.harrisTaylor_lieMultiplicity_squareZeroLift p D R b N C C₀ π hπ hsq tR o₀ A i h act hact k x β hx j
-           eta := eta
-           eta_add := e1
-           eta_lin := e2
-           eta_ker := e3
-           geom := e4 },
-    { φ := i
-      φ₂ := φ₂
-      cart := h
-      sq := hsq2
-      act := hact
-      pol := hpol
-      eta := e5 }, rfl⟩
+  exact GlobalTheory.T.harrisTaylor_exists_squareZero_lift_of_filtration
+    p D R b N hNp C C₀ π hπ hsq tR s (spMap π ≫ spMap tR)
+    hs (congrArg (spMap π ≫ ·) hs.symm) o₀ E hEc hEf hEs hEi hEl
 
 theorem GlobalTheory.HTGlue.isFilLiftV_of_eq {k : Type} [Field k] {d : ℕ} {A₀ : Over (Sp k)} [GrpObj A₀] (hA : IsAbelianScheme A₀)
     {A : Over (Sp (TrivSqZeroExt k (Fin d → k)))} [GrpObj A] {i : A₀.left ⟶ A.left}
@@ -88,56 +98,77 @@ theorem GlobalTheory.HTGlue.isFilLiftV_of_eq {k : Type} [Field k] {d : ℕ} {A�
   obtain ⟨e, he, hc⟩ := GlobalTheory.HTGlue.exists_mem_glueFil A₀ hA f hx
   exact ⟨e, hh ▸ he, hc⟩
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem GlobalTheory.HTGlue.exists_glue : ∀ (p : ℕ) [Fact p.Prime] (D : GlobalTheory.UPel.HT.Datum p) (R : Type) [CommRing R] (b : GlobalTheory.UPel.HT.Base D R) (N : ℕ), 3 ≤ N → N.Coprime p → ∀ (k : Type) [Field k] [IsAlgClosed k] (t : Sp k ⟶ Sp R) (o₀ : GlobalTheory.UPel.HT.Obj b N t), ∀ (d : ℕ) (f : Fin d → (HdR o₀.A →ₗ[k] HdR o₀.A)), (∀ j, ∃ (o' : GlobalTheory.UPel.HT.Obj b N (spMap (algebraMap k (DualNumber k)) ≫ t)) (m' : GlobalTheory.UPel.HT.ObjMap o₀ o' (spMap (TrivSqZeroExt.fstHom k k k).toRingHom)), ∀ x ∈ Fil o₀.A, IsFilLift m'.cart x (f j x)) → ∃ (o : GlobalTheory.UPel.HT.Obj b N (spMap (algebraMap k (TrivSqZeroExt k (Fin d → k))) ≫ t)) (m : GlobalTheory.UPel.HT.ObjMap o₀ o (spMap (TrivSqZeroExt.fstHom k k (Fin d → k)).toRingHom)), ∀ x ∈ Fil o₀.A, GlobalTheory.FODef.IsFilLiftV m.cart x (LinearMap.pi fun j => f j x) := by
   intro p _ D R _ b N hN hNp k _ _ t o₀ d f hdef
+  obtain ⟨tk, ht⟩ : ∃ tk : R →+* k, t = spMap tk :=
+    ⟨(Spec.preimage t).hom, (Spec.map_preimage t).symm⟩
   rcases Nat.eq_zero_or_pos d with rfl | hd
-  ·
-
-    obtain ⟨tk, ht⟩ : ∃ tk : R →+* k, t = spMap tk := ⟨(Spec.preimage t).hom, by simp [spMap]⟩
-    obtain ⟨φ, hφ⟩ := GlobalTheory.UPel.HT.CorrForm.exists_isCorrForm_obj p D R b N hN hNp k t o₀
+  · obtain ⟨φ, hφ⟩ := GlobalTheory.UPel.HT.CorrForm.exists_isCorrForm_obj p D R b N hN hNp k t o₀
     exact GlobalTheory.UPel.HT.exists_sqZero_lift_realising_ks p D R b N hN hNp k t o₀ tk ht φ hφ 0 f (fun j => j.elim0)
-  haveI : IsArtinianRing (TrivSqZeroExt k (Fin d → k)) := GlobalTheory.HTGlue.isArtinianRing_tsze k d
-  haveI : Module.Finite k (DualNumber k) :=
+  have : IsArtinianRing (TrivSqZeroExt k (Fin d → k)) := GlobalTheory.HTGlue.isArtinianRing_tsze k d
+  have : Module.Finite k (DualNumber k) :=
     Module.Finite.of_surjective ((Algebra.linearMap k (DualNumber k)).coprod (TrivSqZeroExt.inrHom k k))
-      (fun x => ⟨(x.fst, x.snd), by ext <;> simp [TrivSqZeroExt.algebraMap_eq_inl]⟩)
-  haveI : IsArtinianRing (DualNumber k) := IsArtinianRing.of_finite k _
-  obtain ⟨tk, ht⟩ : ∃ tk : R →+* k, t = spMap tk := ⟨(Spec.preimage t).hom, by simp [spMap]⟩
-  set tR : R →+* TrivSqZeroExt k (Fin d → k) := (algebraMap k (TrivSqZeroExt k (Fin d → k))).comp tk with htR
-  have hs : t = spMap (TrivSqZeroExt.fstHom k k (Fin d → k)).toRingHom ≫ spMap tR := by
-    rw [ht, ← GlobalTheory.Cris.spMap_comp]
-    all_goals (congr 1 <;> ext x <;> simp [tR])
-  subst hs
+      (fun x => ⟨(x.fst, x.snd), TrivSqZeroExt.inl_fst_add_inr_snd_eq x⟩)
+  have : IsArtinianRing (DualNumber k) := IsArtinianRing.of_finite k _
+  set tR : R →+* TrivSqZeroExt k (Fin d → k) := (algebraMap k (TrivSqZeroExt k (Fin d → k))).comp tk
   choose o' m' hm' using hdef
-  have hsε : spMap (algebraMap k (DualNumber k)) ≫
-      (spMap (TrivSqZeroExt.fstHom k k (Fin d → k)).toRingHom ≫ spMap tR) =
-      spMap ((algebraMap k (TrivSqZeroExt k k)).comp tk) := by
+  have hsε : spMap (algebraMap k (DualNumber k)) ≫ t =
+      spMap ((algebraMap k (DualNumber k)).comp tk) := by
     rw [ht, ← GlobalTheory.Cris.spMap_comp]
-  have hs₀ : spMap (TrivSqZeroExt.fstHom k k (Fin d → k)).toRingHom ≫ spMap tR =
+  have hs₀ : t =
       spMap (TrivSqZeroExt.fstHom k k k).toRingHom ≫ spMap ((algebraMap k (TrivSqZeroExt k k)).comp tk) := by
     rw [ht, ← GlobalTheory.Cris.spMap_comp]
-    all_goals (congr 1 <;> ext x <;> simp)
+    congr 1
   have hsurε : Function.Surjective (TrivSqZeroExt.fstHom k k k).toRingHom :=
-    fun a => ⟨TrivSqZeroExt.inl a, by simp⟩
-  have n1 := fun j => GlobalTheory.T.harrisTaylor_lift_hodge_summand_admissible_stable p D R b N (DualNumber k) k (TrivSqZeroExt.fstHom k k k).toRingHom hsurε (GlobalTheory.FODef.sqZero k k) ((algebraMap k (TrivSqZeroExt k k)).comp tk) (spMap (algebraMap k (DualNumber k)) ≫ (spMap (TrivSqZeroExt.fstHom k k (Fin d → k)).toRingHom ≫ spMap tR)) (spMap (TrivSqZeroExt.fstHom k k (Fin d → k)).toRingHom ≫ spMap tR) o₀ (o' j) (m' j) hsε hs₀
-  have n2 := fun j => GlobalTheory.T.harrisTaylor_lift_hodge_summand_isotropic p D R b N (DualNumber k) k (TrivSqZeroExt.fstHom k k k).toRingHom hsurε (GlobalTheory.FODef.sqZero k k) ((algebraMap k (TrivSqZeroExt k k)).comp tk) (spMap (algebraMap k (DualNumber k)) ≫ (spMap (TrivSqZeroExt.fstHom k k (Fin d → k)).toRingHom ≫ spMap tR)) (spMap (TrivSqZeroExt.fstHom k k (Fin d → k)).toRingHom ≫ spMap tR) o₀ (o' j) (m' j) hsε hs₀
-  have n3 := fun j => GlobalTheory.T.harrisTaylor_lift_hodge_summand_crystalline_lie p D R b N (DualNumber k) k (TrivSqZeroExt.fstHom k k k).toRingHom hsurε (GlobalTheory.FODef.sqZero k k) ((algebraMap k (TrivSqZeroExt k k)).comp tk) (spMap (algebraMap k (DualNumber k)) ≫ (spMap (TrivSqZeroExt.fstHom k k (Fin d → k)).toRingHom ≫ spMap tR)) (spMap (TrivSqZeroExt.fstHom k k (Fin d → k)).toRingHom ≫ spMap tR) o₀ (o' j) (m' j) hsε hs₀
-  have hmem : ∀ j, ∀ x ∈ Fil o₀.A, ∃ e ∈ liftFil (divided₂ (GlobalTheory.FODef.sqZero k k)) (m' j).cart,
-      ∀ c, e ((GlobalTheory.FODef.constMorV k k o₀.A).pull c) = TrivSqZeroExt.inl (x c) + TrivSqZeroExt.inr (f j x c) :=
-    fun j x hx => GlobalTheory.HTGlue.isFilLift_coords (m' j).cart (hm' j x hx)
-  have hab := o₀.ab
-  have htk : spMap (TrivSqZeroExt.fstHom k k (Fin d → k)).toRingHom ≫ spMap tR = spMap tk := ht
-  have g1 := GlobalTheory.T.exists_isCompl_crystalGluedHodgeGraphFiltration p D R b N k tk _ o₀ htk d f
-  have g2 := GlobalTheory.T.mem_hodgeFiltration_iff_reduction_gluedFiltration p D R b N k tk _ o₀ htk d f
-  have g3 := GlobalTheory.T.crystalGluedHodgeGraph_order_stable_of_directions p D R b N k tk _ o₀ htk d f _ (fun j => (n1 j).1) (fun j => (n1 j).2.1) hmem (fun j => (n1 j).2.2)
-  have g4 := GlobalTheory.T.crystalGluedHodgeGraph_isotropic_of_directions p D R b N k tk _ o₀ htk d f _ (fun j => (n1 j).1) (fun j => (n1 j).2.1) hmem (fun j => (n1 j).2.2) n2
-  have g5 := GlobalTheory.T.crystalGluedHodgeGraph_lie_condition_of_directions p D R b N k tk _ o₀ htk d hd f _ (fun j => (n1 j).1) (fun j => (n1 j).2.1) hmem (fun j => (n1 j).2.2) n3
+    fun a => ⟨TrivSqZeroExt.inl a, rfl⟩
+  have hAdmissible := fun j => GlobalTheory.T.harrisTaylor_lift_hodge_summand_admissible_stable
+    p D R b N (DualNumber k) k (TrivSqZeroExt.fstHom k k k).toRingHom
+    hsurε (GlobalTheory.FODef.sqZero k k) ((algebraMap k (TrivSqZeroExt k k)).comp tk)
+    (spMap (algebraMap k (DualNumber k)) ≫ t) t o₀ (o' j) (m' j) hsε hs₀
+  have hDirectionIso := fun j => GlobalTheory.T.harrisTaylor_lift_hodge_summand_isotropic
+    p D R b N (DualNumber k) k (TrivSqZeroExt.fstHom k k k).toRingHom
+    hsurε (GlobalTheory.FODef.sqZero k k) ((algebraMap k (TrivSqZeroExt k k)).comp tk)
+    (spMap (algebraMap k (DualNumber k)) ≫ t) t o₀ (o' j) (m' j) hsε hs₀
+  have hDirectionLie := fun j => GlobalTheory.T.harrisTaylor_lift_hodge_summand_crystalline_lie
+    p D R b N (DualNumber k) k (TrivSqZeroExt.fstHom k k k).toRingHom
+    hsurε (GlobalTheory.FODef.sqZero k k) ((algebraMap k (TrivSqZeroExt k k)).comp tk)
+    (spMap (algebraMap k (DualNumber k)) ≫ t) t o₀ (o' j) (m' j) hsε hs₀
+  have hmem (j : Fin d) (x : HdR o₀.A) (hx : x ∈ Fil o₀.A) :=
+    GlobalTheory.HTGlue.isFilLift_coords (m' j).cart (hm' j x hx)
+  have hCompl (j : Fin d) := (hAdmissible j).1
+  have hRed (j : Fin d) := (hAdmissible j).2.1
+  have hStable (j : Fin d) := (hAdmissible j).2.2
+  have hGluedCompl := GlobalTheory.T.exists_isCompl_crystalGluedHodgeGraphFiltration p D R b N k tk t o₀ ht d f
+  have hGluedRed := GlobalTheory.T.mem_hodgeFiltration_iff_reduction_gluedFiltration p D R b N k tk t o₀ ht d f
+  -- Match the filtration hypotheses without unfolding the crystalline modules.
+  have hGluedStable := GlobalTheory.T.crystalGluedHodgeGraph_order_stable_of_directions p D R b N k tk t o₀ ht d f
+    (fun j => liftFil (divided₂ (GlobalTheory.FODef.sqZero k k)) (m' j).cart)
+    (by with_reducible exact hCompl) (by with_reducible exact hRed)
+    (by with_reducible exact hmem) (by with_reducible exact hStable)
+  have hGluedIso := GlobalTheory.T.crystalGluedHodgeGraph_isotropic_of_directions p D R b N k tk t o₀ ht d f
+    (fun j => liftFil (divided₂ (GlobalTheory.FODef.sqZero k k)) (m' j).cart)
+    (by with_reducible exact hCompl) (by with_reducible exact hRed)
+    (by with_reducible exact hmem) (by with_reducible exact hStable) (by with_reducible exact hDirectionIso)
+  have hGluedLie := GlobalTheory.T.crystalGluedHodgeGraph_lie_condition_of_directions p D R b N k tk t o₀ ht d hd f
+    (fun j => liftFil (divided₂ (GlobalTheory.FODef.sqZero k k)) (m' j).cart)
+    (by with_reducible exact hCompl) (by with_reducible exact hRed)
+    (by with_reducible exact hmem) (by with_reducible exact hStable) (by with_reducible exact hDirectionLie)
   have hsurC : Function.Surjective (TrivSqZeroExt.fstHom k k (Fin d → k)).toRingHom :=
-    fun a => ⟨TrivSqZeroExt.inl a, by simp⟩
-  have hst : spMap (algebraMap k (TrivSqZeroExt k (Fin d → k))) ≫
-      (spMap (TrivSqZeroExt.fstHom k k (Fin d → k)).toRingHom ≫ spMap tR) = spMap tR := by
+    fun a => ⟨TrivSqZeroExt.inl a, rfl⟩
+  have hst : spMap (algebraMap k (TrivSqZeroExt k (Fin d → k))) ≫ t = spMap tR := by
     rw [ht, ← GlobalTheory.Cris.spMap_comp]
-  obtain ⟨o, m, hm⟩ := GlobalTheory.HTGlue.exists_obj_of_summand p D R b N hNp _ k _ hsurC (GlobalTheory.FODef.sqZero k (Fin d → k))
-    tR o₀ (GlobalTheory.HTGlue.glueFil o₀.A f) g1 g2 g3 g4 g5 _ hst
-  exact ⟨o, m, fun x hx => GlobalTheory.HTGlue.isFilLiftV_of_eq hab m.cart f hm hx⟩
+  have hs₀C : t = spMap (TrivSqZeroExt.fstHom k k (Fin d → k)).toRingHom ≫
+      (spMap (algebraMap k (TrivSqZeroExt k (Fin d → k))) ≫ t) := by
+    rw [hst, ht, ← GlobalTheory.Cris.spMap_comp]
+    congr 1
+  have hObj := GlobalTheory.T.harrisTaylor_exists_squareZero_lift_of_filtration p D R b N hNp
+    (TrivSqZeroExt k (Fin d → k)) k (TrivSqZeroExt.fstHom k k (Fin d → k)).toRingHom
+    hsurC (GlobalTheory.FODef.sqZero k (Fin d → k)) tR
+    (spMap (algebraMap k (TrivSqZeroExt k (Fin d → k))) ≫ t) t hst hs₀C o₀
+    (GlobalTheory.HTGlue.glueFil o₀.A f)
+    (by with_reducible exact hGluedCompl) (by with_reducible exact hGluedRed) (by with_reducible exact hGluedStable)
+    (by with_reducible exact hGluedIso) (by with_reducible exact hGluedLie)
+  obtain ⟨o, m, hm⟩ := hObj
+  exact ⟨o, m, fun x hx => GlobalTheory.HTGlue.isFilLiftV_of_eq o₀.ab m.cart f hm hx⟩

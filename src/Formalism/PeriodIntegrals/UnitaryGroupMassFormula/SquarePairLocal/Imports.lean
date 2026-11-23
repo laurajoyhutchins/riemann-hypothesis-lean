@@ -1,5 +1,53 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.SquarePairLocal.IntAtOfDivAtZero
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.SquarePairLocal.SqPairLocalOfSteps
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.SquarePairLocal.IntAtOfDivAtZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RingTheory.Ideal.Norm.AbsNorm
+
+@[expose] public section
 
 noncomputable section
 open NumberField Matrix
@@ -195,7 +243,7 @@ theorem locMat : LocMat := by
       smul_eq_mul, map_sub, map_mul, map_pow, hσϖ]
   have hA : M.j.mapMatrix (Ym + (Ym.map (cj E))ᵀ - 1) =
       (M.j M.ϖ ^ (2 * k + K)) • (-(Zm + (Zm.map M.σ)ᵀ)) := by
-    rw [map_sub, map_add, map_one, hYcj, hYj, hs, heS]
+    rw [map_sub, map_add (f := _), map_one, hYcj, hYj, hs, heS]
     simp only [smul_neg, smul_add]
     abel
   have hcT : ((algebraMap (𝓞 E) E).mapMatrix Ym)ᴴ =
@@ -209,7 +257,7 @@ theorem locMat : LocMat := by
     rw [map_sub, map_mul]
   have hpl : (algebraMap (𝓞 E) E).mapMatrix Ym + ((algebraMap (𝓞 E) E).mapMatrix Ym)ᴴ - 1 =
       (algebraMap (𝓞 E) E).mapMatrix (Ym + (Ym.map (cj E))ᵀ - 1) := by
-    rw [hcT, map_sub, map_add, map_one]
+    rw [hcT, map_sub, map_add (f := _), map_one]
   have hdetA : ∀ (A : Matrix (Fin N) (Fin N) (𝓞 E)) (V : Matrix (Fin N) (Fin N) M.R),
       M.j.mapMatrix A = (M.j M.ϖ ^ (2 * k + K)) • V →
       ∀ a c, ∃ s : 𝓞 E, s ∉ Q ∧ ∃ w : 𝓞 E, s * A a c = M.ϖ ^ K * w := by

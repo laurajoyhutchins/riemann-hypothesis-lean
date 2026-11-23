@@ -1,10 +1,61 @@
-import Mathlib
-import CompanionTheory.SpectralGeometry.CountingDefinitions.AdelicEulerProducts.IsEulerProd
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.CoordinateHaarMeasure
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.TensorLocallyCompactRing
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.InfiniteAdelesLocalRingTotallyReal
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.CompletionIsLocalRing
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.LinearChangeEulerProductStatement
+module
+
+public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.CoordinateHaarMeasure
+public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.CompletionIsLocalRing
+public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.InfiniteAdelesLocalRingTotallyReal
+public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.LinearChangeEulerProductStatement
+import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.TensorLocallyCompactRingStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.Countable
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open HeckeCharacterZeroLocus.SiegelWeilU GlobalTheory.CompanionTheory.SW NumberField IsDedekindDomain MeasureTheory Topology
 open scoped TensorProduct ENNReal NNReal Matrix
 
@@ -23,9 +74,8 @@ variable (R : Type) [CommRing R] [Algebra F R]
 theorem sigR_smul (σ : E →ₐ[F] E) (r : R) (y : R ⊗[F] E) :
     sigR R σ (r • y) = r • sigR R σ y := by
   induction y with
-  | zero => simp
   | tmul s e => simp [TensorProduct.smul_tmul', HaarCoord.sigR_tmul]
-  | add a b ha hb => simp only [smul_add, map_add, ha, hb]
+  | add a b ha hb => simp only [smul_add, map_add (f := _), ha, hb]
 
 variable {d n : ℕ}
 
@@ -170,9 +220,8 @@ theorem phi_tmul (r : F) (e : E) : phi R (r ⊗ₜ[F] e) = algebraMap F R r ⊗�
 
 theorem phi_sig (σ : E →ₐ[F] E) (y : F ⊗[F] E) : phi R (sigR F σ y) = sigR R σ (phi R y) := by
   induction y with
-  | zero => simp
   | tmul r e => rw [HaarCoord.sigR_tmul, phi_tmul, phi_tmul, HaarCoord.sigR_tmul]
-  | add a b ha hb => simp only [map_add, ha, hb]
+  | add a b ha hb => simp only [map_add (f := _), ha, hb]
 
 theorem phi_incl (e : E) : phi R (inclR F e) = inclR R e := by
   have h1 : inclR F e = (1 : F) ⊗ₜ[F] e := rfl
@@ -181,6 +230,7 @@ theorem phi_incl (e : E) : phi R (inclR F e) = inclR R e := by
 
 theorem offE_map (b : Module.Basis (Fin d) F E) (x : Idx n d → F) (p) :
     phi R (offE F b x p) = offE R b (fun i => algebraMap F R (x i)) p := by
+
   simp [offE, map_sum, phi_tmul]
 
 theorem psi_map (σ : E →ₐ[F] E) (b : Module.Basis (Fin d) F E) (x : Idx n d → F) :
@@ -294,7 +344,7 @@ theorem continuous_tmul [IsTopologicalRing R] [ContinuousAdd (R ⊗[F] E)]
 theorem continuous_offE [IsTopologicalRing R] [ContinuousAdd (R ⊗[F] E)]
     [ContinuousSMul R (R ⊗[F] E)] (b : Module.Basis (Fin d) F E) (p) :
     Continuous fun x : Idx n d → R => offE R b x p :=
-  continuous_finset_sum _ fun k _ => (continuous_tmul R (b k)).comp (continuous_apply _)
+  continuous_finsetSum _ fun k _ => (continuous_tmul R (b k)).comp (continuous_apply _)
 
 theorem continuous_psi [IsTopologicalRing R] [ContinuousAdd (R ⊗[F] E)]
     [ContinuousSMul R (R ⊗[F] E)] {σ : E →ₐ[F] E} (hsig : Continuous (sigR R σ))
@@ -371,7 +421,8 @@ theorem map_eq_of_coord {σ : E →ₐ[F] E} (hcm : IsCMExt F E σ)
   rw [hτeq, ← Measure.map_map K.continuous.measurable (hT.measurable.comp K.symm.continuous.measurable),
     ← Measure.map_map hT.measurable K.symm.continuous.measurable, hc _ hμ, Measure.map_smul,
     Measure.map_map K.continuous.measurable K.symm.continuous.measurable]
-  simp
+  · simp
+  · exact K.continuous.measurable.aemeasurable
 
 end Main
 

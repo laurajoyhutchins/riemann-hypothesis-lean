@@ -1,7 +1,65 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.CuspidalExponentialDecay
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.DiscriminantEstimates.DiscriminantTheorems.ScaledBoundInequality
-import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.ImportsAlt
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.Signature
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.ImportsAlt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.Eigenspace.Matrix
+public import Mathlib.LinearAlgebra.Matrix.Charpoly.Eigs
+public import Mathlib.LinearAlgebra.Matrix.Gershgorin
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.DiscriminantEstimates.DiscriminantTheorems.ScaledBoundInequality
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Analysis.InnerProductSpace.GramMatrix
+public import Mathlib.LinearAlgebra.Eigenspace.Basic
+
+@[expose] public section
 
 open NumberField ReciprocityTheory.ChartRestriction.G.FD
 open Matrix hiding gram
@@ -62,7 +120,7 @@ theorem norm_gram_sign_sub_le {r : ℕ} (j : Fin r → ℂ) (hj : ∀ a, ‖j a�
   have h2 : ‖(diagonal j * z.map star) a b‖ ≤ δ := by
     rw [diagonal_mul, norm_mul, hj, one_mul, map_apply, norm_star]; exact hz _ _
   have h3 : ‖(zᵀ * diagonal j * z.map star) a b‖ ≤ r * (δ * δ) := by
-    rw [mul_apply]
+    rw [Matrix.mul_apply]
     refine (norm_sum_le _ _).trans ?_
     have := Finset.sum_le_card_nsmul Finset.univ
       (fun k => ‖(zᵀ * diagonal j) a k * z.map star k b‖) (δ * δ) fun k _ => by
@@ -125,6 +183,7 @@ theorem gram_eq_transpose_mul_mul_map_star {r : ℕ} (τ : E →+* ℂ) (G : Mat
   ext a b
   simp only [gram, hermC, ReciprocityTheory.ChartRestriction.G.FD.col, of_apply, mul_apply, transpose_apply, map_apply,
     Finset.sum_mul]
+  simp only [Matrix.mul_apply, Matrix.transpose_apply, Matrix.map_apply, Finset.sum_mul]
   rw [Finset.sum_comm]
   rfl
 
@@ -155,7 +214,7 @@ theorem dmin_rmul_near_one {r : ℕ} (X : Data E r) (x : Frame X.Ψ r)
       rw [add_sub_cancel]; rfl
     rw [h1, gram_mul_eq_transpose_mul_gram_mul, hx]
     refine norm_gram_sign_sub_le j hj1 _ hδ (by nlinarith) (fun a b => ?_) a b
-    simpa [mat, one_apply] using hA τ a b
+    simpa [mat, Matrix.one_apply] using hA τ a b
   have hmin : ∀ (τ : X.Ψ) {i : ℕ} {e : Fin i → Fin r}, Function.Injective e →
       0 < ((∏ a, j (e a)) * ((gram τ.1 X.Gm (mat (rmul x A) τ)).submatrix e e).det).re ∧
       |Real.log ‖(∏ a, j (e a)) * ((gram τ.1 X.Gm (mat (rmul x A) τ)).submatrix e e).det‖| ≤
@@ -209,7 +268,7 @@ omit [NumberField E] [IsCMField E] in
 theorem rmul_one_frame {Ψ : Finset (E →+* ℂ)} {r : ℕ} (x : Frame Ψ r) :
     rmul x (fun _ a b => if a = b then 1 else 0) = x := by
   funext τ a b
-  simp [rmul, mat, mul_apply]
+  simp [rmul, mat, Matrix.mul_apply, Matrix.one_apply]
 
 omit [NumberField E] [IsCMField E] in
 theorem differentiable_rmul_add {Ψ : Finset (E →+* ℂ)} {r : ℕ} (x I : Frame Ψ r) :
@@ -218,7 +277,7 @@ theorem differentiable_rmul_add {Ψ : Finset (E →+* ℂ)} {r : ℕ} (x I : Fra
   have : (fun z : Frame Ψ r => rmul x (I + z) τ a b) =
       fun z => ∑ k, x τ a k * (I τ k b + z τ k b) := by
     funext z
-    simp [rmul, mat, mul_apply]
+    simp [rmul, mat, Matrix.mul_apply]
   rw [this]
   fun_prop
 

@@ -1,14 +1,74 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.UnitaryAdelicCharacterTrivialOfLocal
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsCongLevelIntG
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MemLsB
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.StandardLatticeDoubleCosetClassesStabilisers
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.MemLatOIffExistsActO
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.SelfDualLatticesConsecutiveStep
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsIsEtaTildeUnramified
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsNonzeroStandardThetaLineReadAdelic
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FinitePartRationalTensorZeroAtPrimeIffPlaceIdemStatement
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FockVacuumRealRestrictionGaussianEntire
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HeisenbergTranslateFixesThetaDeepLevel
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.InertPrimeIffNonSplitPlaceIdempotentStatement
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.InvDifferentLatticeProductHermitianIsSelfDualStatement
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.InvSmulMemRationalHomLatticeScaledOfNormScaleStatement
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsVacuumMovedThetaVacuum
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MemLatticeOIffScaleMulFinitePartMemIdealLatticeStatement
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.NormPeriodSq
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsNonzeroStandardThetaLineReadAdelic
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HeisenbergTranslateFixesThetaDeepLevel
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.UnitaryAdelicCharacterTrivialOfLocal
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsIsEtaTildeUnramified
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.WeilOperatorLatticeStabiliserFixesVacuumNonsplit
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.VacuumUnderAdelicPairUnitModulusFactor
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MemLatticeOIffScaleMulFinitePartMemIdealLatticeStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FinitePartRationalTensorZeroAtPrimeIffPlaceIdemStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.InertPrimeIffNonSplitPlaceIdempotentStatement
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ThetaEqZeroOfReal
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ThetaOfUnitVacuum
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ActAApply
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsBaseChangeFiniteAdeleRingEquiv
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsFinitePlaceIdempotentBaseChangeAdeles
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.InducedTypeThetaGenusOnePermutesStatement
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ThetaLatticeImageRationalHomLattice
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ThetaSpaceSelfDualPairAtMostLineStatement
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.VacuumUnderAdelicPairModulusOne
+import Development.AbelianVarietyTheory.Proofs.SatakeParameters.SupportedSubgroupSplitCommutePrimeIdempotents
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IsSelfDualImageOrthonormalFrameLattice
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.WeilOperatorLatticeStabiliserFixesVacuumNonsplit
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 open NumberField MeasureTheory IsDedekindDomain
 open scoped Classical
@@ -82,7 +142,7 @@ def inertInt (D : D7) : NonUnitalSubring (AE D) where
   carrier := {z | infPart D z = 0 ∧ finPart D z ∈ intAE D ∧
     ∀ v ε, IsPlaceIdem D v ε → ¬ NonSplitAt D v ε → algebraMap (AF D.host.F) (AE D) ε * z = 0}
   zero_mem' := ⟨RingHom.map_zero _, by rw [RingHom.map_zero]; exact zero_mem _, fun _ _ _ _ => mul_zero _⟩
-  add_mem' := fun {a b} ha hb => ⟨by rw [RingHom.map_add, ha.1, hb.1, add_zero], by rw [RingHom.map_add]; exact add_mem ha.2.1 hb.2.1,
+  add_mem' := fun {a b} ha hb => ⟨by rw [RingHom.map_add (f := _), ha.1, hb.1, add_zero], by rw [RingHom.map_add (f := _)]; exact add_mem ha.2.1 hb.2.1,
     fun v ε h h' => by rw [mul_add, ha.2.2 v ε h h', hb.2.2 v ε h h', add_zero]⟩
   neg_mem' := fun {a} ha => ⟨by rw [RingHom.map_neg, ha.1, neg_zero], by rw [RingHom.map_neg]; exact neg_mem ha.2.1,
     fun v ε h h' => by rw [mul_neg, ha.2.2 v ε h h', neg_zero]⟩
@@ -94,7 +154,7 @@ theorem mul_mem_inertInt {f : AE D} (hf : finPart D f ∈ intAE D) : ∀ z ∈ i
   fun z hz => ⟨by rw [RingHom.map_mul, hz.1, mul_zero], by rw [RingHom.map_mul]; exact GlobalTheory.HostAdeleIso.intAE_mul_mem D hf hz.2.1,
     fun v ε h h' => by rw [mul_left_comm, hz.2.2 v ε h h', mul_zero]⟩
 
-set_option maxHeartbeats 800000 in
+
 
 theorem congrGroup_le (V : HSp D) (H : Subgroup (GA D V)) (hH : IsClosed (H : Set (GA D V)))
     (hpl : ∀ v ε, NonSplitAt D v ε → ∀ g ∈ congrGroup V (inertInt D), SuppPl ε V g → g ∈ H) :
@@ -205,7 +265,7 @@ theorem finQ_mt_mem {V : HSp D} {g : GA D V} (hg : g ∈ congrGroup V (inertInt 
     finQ D (mt V g i j) ∈ Formalism.MainNotions.StandardLatticesGL3.OhE D := by
   have e : mt V g i j = (mt V g - 1) i j + (1 : Matrix (Fin V.rank) (Fin V.rank) (AE D)) i j := by
     rw [Matrix.sub_apply, sub_add_cancel]
-  rw [e, RingHom.map_add]
+  rw [e, RingHom.map_add (f := _)]
   refine add_mem ((finQ_mem_iff _).2 (hg i j).1.2.1) ?_
   rw [Matrix.one_apply]
   split_ifs

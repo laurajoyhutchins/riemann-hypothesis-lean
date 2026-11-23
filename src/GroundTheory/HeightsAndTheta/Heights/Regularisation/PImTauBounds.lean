@@ -1,5 +1,55 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.Regularisation.Statements
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.Regularisation.Statements
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+public import Mathlib.Analysis.Real.Pi.Bounds
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.Regular
@@ -55,7 +105,7 @@ theorem quad_upper_core {Z : Type*} [TopologicalSpace Z] {g : ℕ} {K : Set Z} (
     continuous_snd.dotProduct (continuous_fst.matrix_mulVec continuous_snd)
   have hc : ContinuousOn (fun p : Z × (Fin g → ℝ) => p.2 ⬝ᵥ M p.1 *ᵥ p.2)
       (K ×ˢ unitSphereDot g) :=
-    hΦ.comp_continuousOn ((hM.comp continuous_fst.continuousOn fun p hp => hp.1).prodMk
+    hΦ.comp_continuousOn ((hM.comp continuous_fst.continuousOn fun p (hp : p ∈ K ×ˢ unitSphereDot g) => hp.1).prodMk
       continuous_snd.continuousOn)
   obtain ⟨A, hA⟩ := (hK.prod (isCompact_unitSphereDot g)).exists_bound_of_continuousOn hc
   refine ⟨max A 0, le_max_right _ _, fun z hz v => ?_⟩
@@ -85,7 +135,7 @@ theorem quad_lower_core {Z : Type*} [TopologicalSpace Z] {g : ℕ} {K W : Set Z}
   have hFc : ∀ m, ContinuousOn (F m) (W ×ˢ Set.univ) := by
     intro m
     have hQ : ContinuousOn (fun p : Z × (Fin g → ℝ) => p.2 ⬝ᵥ M p.1 *ᵥ p.2) (W ×ˢ Set.univ) :=
-      hΦ.comp_continuousOn ((hM.comp continuous_fst.continuousOn fun p hp => hp.1).prodMk
+      hΦ.comp_continuousOn ((hM.comp continuous_fst.continuousOn fun p (hp : p ∈ W ×ˢ Set.univ) => hp.1).prodMk
         continuous_snd.continuousOn)
     have hS' : Continuous fun p : Z × (Fin g → ℝ) => p.2 ⬝ᵥ S *ᵥ p.2 :=
       continuous_snd.dotProduct (continuous_const.matrix_mulVec continuous_snd)
@@ -121,7 +171,7 @@ theorem quad_lower_core {Z : Type*} [TopologicalSpace Z] {g : ℕ} {K W : Set Z}
       nlinarith [hm0 m]
     · have hs : 0 < u ⬝ᵥ S *ᵥ u := by
         refine lt_of_le_of_ne (hSnn u) (fun h => hSu ?_)
-        have := (hS.dotProduct_mulVec_zero_iff u).mp
+        have := (hS.dotProduct_mulVec_zero_iff (x := u)).mp
         simp only [star_trivial] at this
         exact this h.symm
       obtain ⟨m, hm⟩ := exists_nat_gt ((1 - u ⬝ᵥ M z *ᵥ u) / (u ⬝ᵥ S *ᵥ u))
@@ -197,7 +247,7 @@ theorem ImTauBounds.proof (h0 : Tau0Holomorphic.Statement) (h1 : KernelPositive.
     rw [hSv0, dotProduct_zero] at h
     have hi := (Finset.sum_eq_zero_iff_of_nonneg (fun j _ => hBnn j v)).mp h.symm i
       (Finset.mem_univ i)
-    have := ((hBpsd i).dotProduct_mulVec_zero_iff v).mp
+    have := ((hBpsd i).dotProduct_mulVec_zero_iff (x := v)).mp
     simp only [star_trivial] at this
     exact this hi
   obtain ⟨L, ε, hε, hlow⟩ := quad_lower_core hK isOpen_ball hKW Mz hMc S hS hpos

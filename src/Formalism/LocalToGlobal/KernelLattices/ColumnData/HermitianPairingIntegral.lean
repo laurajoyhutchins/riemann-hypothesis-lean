@@ -1,9 +1,47 @@
-import Mathlib
-import Formalism.LocalToGlobal.KernelLattices.ColumnData
-import Formalism.LocalToGlobal.KernelLattices.ColumnData.HfArith
-import Formalism.FrobeniusOrbits.FrobeniusOrbitsProofs.OrdUnimod
-import Lemmata.PowMulVecEigenvalue.PowMulVecEig
-import Lemmata.GeneralBFactThirdBis.Imports
+module
+
+public import Formalism.LocalToGlobal.KernelLattices.ColumnData.HfArith
+public import Formalism.LocalToGlobal.KernelLattices.ColumnData.LinkThIndep
+public import Lemmata.GeneralBFactThirdBis.Imports
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -56,7 +94,7 @@ theorem sE_add_left {N N' : ℕ} (A A' B : Matrix (Fin N') (Fin N) D.host.E) :
 
 theorem sE_add_right {N N' : ℕ} (A B B' : Matrix (Fin N') (Fin N) D.host.E) :
     sE D A (B + B') = sE D A B + sE D A B' := by
-  simp only [sE, Matrix.add_apply, map_add, mul_add, Finset.sum_add_distrib]
+  simp only [sE, Matrix.add_apply, map_add (f := _), mul_add, Finset.sum_add_distrib]
 
 theorem sE_zero_left {N N' : ℕ} (B : Matrix (Fin N') (Fin N) D.host.E) : sE D 0 B = 0 := by
   simp [sE]
@@ -97,8 +135,9 @@ theorem sE_hom_gen {N N' : ℕ} (L : Submodule (𝓞 D.host.E) (Fin N → D.host
     rw [hL.2.2]
     intro x hx
     have h1 : stdH D.host.E N x (Bs *ᵥ y) = stdH D.host.E N' (B *ᵥ x) y := by
+
       simp only [stdH, CU.star_conj D, Matrix.mulVec, dotProduct, hBs, Matrix.of_apply, map_sum,
-        map_mul, Finset.mul_sum]
+      map_mul, Finset.mul_sum]
       rw [Finset.sum_comm]
       refine Finset.sum_congr rfl fun i _ => ?_
       rw [Finset.sum_mul]
@@ -143,7 +182,7 @@ def TrOK (z : D.host.E) : Prop :=
 theorem trOK_zero : TrOK D 0 := fun o => by rw [mul_zero, map_zero]; exact isIntegral_zero
 
 theorem trOK_add {z w : D.host.E} (hz : TrOK D z) (hw : TrOK D w) : TrOK D (z + w) :=
-  fun o => by rw [mul_add, map_add]; exact (hz o).add (hw o)
+  fun o => by rw [mul_add, map_add (f := _)]; exact (hz o).add (hw o)
 
 theorem trOK_mul {z : D.host.E} (hz : TrOK D z) (o' : 𝓞 D.host.E) : TrOK D ((o' : D.host.E) * z) :=
   fun o => by

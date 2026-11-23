@@ -1,7 +1,56 @@
-import Development.WeilBound.ThetaLifts.FrameEstimates.SqAllC
-import Development.WeilBound.ThetaLifts.FrameEstimates.ThickFrames
-import Development.WeilBound.ThetaLifts.FrameEstimates.ContinuousMixedSymm
-import Development.WeilBound.ThetaLifts.FrameEstimates.RankIffRight
+module
+
+public import Development.WeilBound.ThetaLifts.FrameEstimates.SquareIntegrableWeilRange
+public import Development.WeilBound.ThetaLifts.FrameEstimates.ContinuousMixedSymm
+public import Development.WeilBound.ThetaLifts.FrameEstimates.Parity
+public import Development.WeilBound.ThetaLifts.FrameEstimates.RankIffRight
+public import Development.WeilBound.ThetaLifts.FrameEstimates.SqAllC
+public import Development.WeilBound.ThetaLifts.FrameEstimates.ThickFrames
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.FinPartIdemMulMemIff
+
+@[expose] public section
 
 noncomputable section
 
@@ -35,8 +84,8 @@ theorem latSum_mono {τ : ∀ w : InfinitePlace F, EmbOver E w} {C C' : Set (Ten
     rw [if_neg hx]
     exact sq_maj_nonneg _ _ _ _
 
-variable (B om) in
 
+variable (B om) in
 def Qb (N : ℕ) (Φ : SInf F (Fin n × Fin d) → Fn F n d) : Prop :=
   (∀ f, Φ f ∈ schA F (Fin n × Fin d)) ∧ ∃ (p : Seminorm ℂ (SInf F (Fin n × Fin d))) (C : Set (Ten F E n d)), Continuous p ∧
     IsCompact C ∧ ∀ f g h, ‖theta om (Φ f) g h‖ₑ ^ 2 ≤ ENNReal.ofReal (p f) ^ 2 * latSum B.emb C N (fullRank E n d) g h
@@ -93,9 +142,9 @@ theorem theta_neg (hP : Parity) (hp : IsPair B M χX χW om r s r' s') {Φ : Fn 
   unfold theta
   rw [smul_right_injective _ hc0 e1, thetaSum_neg]
 
-set_option maxHeartbeats 800000 in
-open scoped Classical in
 
+
+open scoped Classical in
 theorem qb_piece (hP : Parity) (hS : CoefSum) (hE : CoefEq) (hB : CoefBd) (hp : IsPair B M χX χW om r s r' s') (N : ℕ)
     {φ : (Fin n × Fin d → Af F) → ℂ} (hφ : φ ∈ SB _)
     (h0 : ∀ (f : SInf F (Fin n × Fin d)) (μ : Measure (Fin n × Fin d → AF F)), μ.IsAddHaarMeasure → ∀ z : Ten F E n d,

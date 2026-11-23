@@ -1,5 +1,45 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.DetUpMatSub
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.JacobianCoordinates
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -16,34 +56,6 @@ theorem dl_diagonal {r : ℕ} (c : Fin (r + 1) → ℂ) (l : ℕ) (h : l ≤ r +
   unfold Dl
   simp only [dif_pos h, Matrix.submatrix_diagonal _ _ (Fin.castLE_injective h), Matrix.det_diagonal,
     Function.comp_apply]
-
-theorem continuous_dl {r : ℕ} (l : ℕ) : Continuous fun Z : MZ r => Dl (Z : Matrix (Fin (r + 1)) (Fin (r + 1)) ℂ) l := by
-  unfold Dl
-  by_cases h : l ≤ r + 1
-  · simp only [dif_pos h]
-    fun_prop
-  · simp only [dif_neg h]
-    exact continuous_const
-
-theorem continuous_gv {r : ℕ} (T T' : ℝ) : Continuous fun Z : MZ r => Gv T T' (Z : Matrix (Fin (r + 1)) (Fin (r + 1)) ℂ) := by
-  have h1 := continuous_dl (r := r) (r + 1)
-  have h2 := continuous_dl (r := r) r
-  unfold Gv
-  fun_prop
-
-theorem continuous_diag (r : ℕ) : Continuous fun c : Fin (r + 1) → ℂ => (Matrix.diagonal c : MZ r) := by
-  exact Continuous.matrix_diagonal continuous_id
-
-theorem measurable_wt (r k : ℕ) (T T' : ℝ) : Measurable fun c : Fin (r + 1) → ℂ => wtLoc k T T' c := by
-  have h1 : Continuous fun c : Fin (r + 1) → ℂ => Gv T T' (Matrix.diagonal c : MZ r) :=
-    (continuous_gv T T').comp (continuous_diag r)
-  have h2 := h1.measurable
-  have h3 : ∀ l, Measurable fun c : Fin (r + 1) → ℂ => Dl (Matrix.diagonal c : MZ r) l :=
-    fun l => ((continuous_dl l).comp (continuous_diag r)).measurable
-  unfold wtLoc
-  unfold JacV
-  unfold modC
-  fun_prop
 
 theorem dcLoc_eq (r : ℕ) : dcLoc (r := r) = (2 : ℝ≥0∞) ^ (r + 1) • (volume : Measure (Fin (r + 1) → ℂ)) := by
   haveI : SigmaFinite ((2 : ℝ≥0∞) • (volume : Measure ℂ)) := by rw [two_smul]; infer_instance

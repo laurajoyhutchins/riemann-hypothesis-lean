@@ -1,6 +1,51 @@
-import Development.AutomorphicArithmetic.Foundations.IwahoriReduction.LangPolynomials.FixedIntegersIsUnitOfNotMemPrimeSpan
-import Development.AutomorphicArithmetic.Foundations.IwahoriReduction.LangPolynomials.WdVal
-import Development.AbelianVarietyTheory.Definitions.Foundations.FrobLiftWittClosure
+module
+
+public import Development.AutomorphicArithmetic.Foundations.IwahoriReduction.LangPolynomials.FixedIntegersIsUnitOfNotMemPrimeSpan
+public import Development.AbelianVarietyTheory.Definitions.Foundations.FrobLiftWittClosure
+public import Development.AutomorphicArithmetic.Foundations.IwahoriReduction.LangPolynomials.WdVal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Formalism.ConjugateSelfDual ReciprocityTheory.Gal Formalism.MainNotions.N GlobalTheory.GalOfCusp UpperTheory.V UpperTheory.V.Af UpperTheory.V.HV GlobalTheory.Ord2 GlobalTheory.KZ GlobalTheory.Col UpperTheory.Kd.C7
 
@@ -117,6 +162,7 @@ private theorem nl_nrm {R : Type} [CommRing R] (p : ℕ) [hp : Fact p.Prime] (m 
       refine Finset.sum_congr rfl fun i' _ => ?_
       rw [hb i']
       rfl
+
     rw [e, map_sum]
     simp [Finsupp.single_apply]
   rw [Model.nrm_ev p m hm hu h, hn]
@@ -146,6 +192,7 @@ theorem UpperTheory.Kd.C7.pNormLev :
       = ∑ i, phi l hl0 ((ψ.mapMatrix M) i jx) * PowerSeries.X ^ (i : ℕ) := by
     intro jx
     have := congrArg ψ (hG jx)
+
     rw [map_mul, map_pow, hψX, map_sum] at this
     rw [hψ, this]
     refine Finset.sum_congr rfl fun i _ => ?_
@@ -190,9 +237,9 @@ theorem UpperTheory.Kd.C7.pNormLev :
   have hrow : ∀ k (jx : Fin l), pv P (w k) * (w k - 1) ^ (jx : ℕ)
       = ∑ i, pv (G jx i) (ζ m) * (w k - 1) ^ (i : ℕ) := by
     intro k jx
-    have := congrArg (Polynomial.eval₂ (R0 A).subtype (w k)) (hG jx)
-    simp only [Polynomial.eval₂_mul, Polynomial.eval₂_pow, Polynomial.eval₂_sub, Polynomial.eval₂_X,
-      Polynomial.eval₂_one, Polynomial.eval₂_finset_sum] at this
+    have := congrArg (Polynomial.eval₂RingHom (R0 A).subtype (w k)) (hG jx)
+    simp only [map_mul, map_pow, map_sub, map_one, map_sum] at this
+    simp only [Polynomial.coe_eval₂RingHom, Polynomial.eval₂_X] at this
     rw [show pv P (w k) = Polynomial.eval₂ (R0 A).subtype (w k) P from rfl, this]
     refine Finset.sum_congr rfl fun i _ => ?_
     rw [← hwpow k, ← hev]

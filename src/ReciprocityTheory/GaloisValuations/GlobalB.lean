@@ -1,4 +1,72 @@
-import ReciprocityTheory.GaloisValuations.GlobalA
+module
+
+public import Mathlib.FieldTheory.KrullTopology
+public import Mathlib.NumberTheory.NumberField.Basic
+public import Mathlib.Order.CompletePartialOrder
+public import Mathlib.RingTheory.DedekindDomain.Ideal.Lemmas
+public import Mathlib.RingTheory.Flat.FaithfullyFlat.Basic
+public import Mathlib.RingTheory.Flat.TorsionFree
+public import Mathlib.RingTheory.Henselian
+public import Mathlib.RingTheory.Invariant.Defs
+public import Mathlib.RingTheory.RegularLocalRing.Defs
+public import Mathlib.RingTheory.SimpleRing.Principal
+public import Mathlib.RingTheory.Valuation.ValuationSubring
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.FieldTheory.Galois.Profinite
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.Invariant.Profinite
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.Valuation.LocalSubring
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.GaloisValuations.GlobalA
+public import Mathlib.FieldTheory.Finite.Basic
+public import Mathlib.FieldTheory.Galois.Infinite
+
+@[expose] public section
 
 set_option linter.style.haveILetI false
 
@@ -50,7 +118,8 @@ theorem exists_den (F : Type*) [Field F] [NumberField F] [Algebra F Ω] [IsAlgCl
     have h1 : (1 : E) ∈ M * M⁻¹ := by rw [hMM]; exact FractionalIdeal.one_mem_one _
     have e2 : M * M⁻¹ = M⁻¹ ⊔ FractionalIdeal.spanSingleton _ x' * M⁻¹ := by
       simp only [M, add_mul, one_mul, FractionalIdeal.sup_eq_add]
-    rw [e2, ← FractionalIdeal.mem_coe, FractionalIdeal.coe_sup, Submodule.mem_sup] at h1
+    rw [e2, ← FractionalIdeal.mem_coeToSubmodule, FractionalIdeal.coeToSubmodule_sup,
+      Submodule.mem_sup] at h1
     obtain ⟨α, hα, z, hz, e⟩ := h1
     obtain ⟨β, hβ, rfl⟩ := FractionalIdeal.mem_singleton_mul.mp hz
     exact ⟨α, hα, β, hβ, e⟩
@@ -118,14 +187,9 @@ theorem smul_valuation_lt_one_iff (g : Ω ≃ₐ[F] Ω) (A : ValuationSubring Ω
     ValuationSubring.mem_pointwise_smul_iff_inv_smul_mem, AlgEquiv.smul_def, map_inv₀,
     map_eq_zero_iff _ (g⁻¹ : Ω ≃ₐ[F] Ω).injective]
 
-omit [NumberField F] [IsAlgClosure F Ω] in
-theorem smul_le_one_of_isIntegral (g : Ω ≃ₐ[F] Ω) {A : ValuationSubring Ω}
-    (hA : ∀ b : Ω, IsIntegral ℤ b → b ∈ A) {b : Ω} (hb : IsIntegral ℤ b) : b ∈ g • A := by
-  rw [ValuationSubring.mem_pointwise_smul_iff_inv_smul_mem, AlgEquiv.smul_def]
-  exact hA _ (hb.map ((g⁻¹ : Ω ≃ₐ[F] Ω).toAlgHom.restrictScalars ℤ))
+
 
 variable (F Ω) in
-
 abbrev IntCl := integralClosure (𝓞 F) Ω
 
 theorem valuation_le_one_intCl (A : ValuationSubring Ω) (b : IntCl F Ω) :
@@ -185,8 +249,8 @@ section profinite
 
 variable {F Ω : Type*} [Field F] [NumberField F] [Field Ω] [Algebra F Ω] [IsAlgClosure F Ω]
 
-variable (F Ω) in
 
+variable (F Ω) in
 theorem continuousSMul_intCl :
     @ContinuousSMul (Ω ≃ₐ[F] Ω) (IntCl F Ω) _ _ ⊥ := by
   letI : TopologicalSpace (IntCl F Ω) := ⊥
@@ -203,8 +267,8 @@ theorem continuousSMul_intCl :
   rw [← h]
   exact Subtype.ext hg
 
-variable (F Ω) in
 
+variable (F Ω) in
 theorem isInvariant_intCl : Algebra.IsInvariant (𝓞 F) (IntCl F Ω) (Ω ≃ₐ[F] Ω) := by
   refine ⟨fun b hb => ?_⟩
   have hfix : ∀ σ : Ω ≃ₐ[F] Ω, σ (b : Ω) = b := fun σ => congrArg Subtype.val (hb σ)
@@ -246,9 +310,7 @@ theorem exists_frob_over {A : ValuationSubring Ω} {v : HeightOneSpectrum (𝓞 
   set Q := primeBelow (F := F) A with hQ
   haveI : v.asIdeal.IsMaximal := v.isMaximal
   haveI : Q.LiesOver v.asIdeal := ⟨(under_primeBelow hA).symm⟩
-  haveI : Q.IsMaximal := Ideal.isMaximal_of_isIntegral_of_isMaximal_comap (R := 𝓞 F) Q
-    (by rw [show Ideal.comap (algebraMap (𝓞 F) (IntCl F Ω)) Q = v.asIdeal from
-      under_primeBelow hA]; exact v.isMaximal)
+  haveI : Q.IsMaximal := Ideal.IsMaximal.of_liesOver_isMaximal Q v.asIdeal
   letI : Field (IntCl F Ω ⧸ Q) := Ideal.Quotient.field Q
   letI : Field (𝓞 F ⧸ v.asIdeal) := Ideal.Quotient.field v.asIdeal
   letI : Fintype (𝓞 F ⧸ v.asIdeal) := Fintype.ofFinite _

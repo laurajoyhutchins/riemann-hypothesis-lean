@@ -1,7 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.IsLatMeasurableConst
-import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.SummableLatticeExpNegPiMulNormSqDiv
-import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.IntegrableMonomialMulConjComplexGaussian
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.IsLatMeasurableConst
+public import Mathlib.Topology.Separation.CompletelyRegular
+public import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.IntegrableMonomialMulConjComplexGaussian
+public import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.SummableLatticeExpNegPiMulNormSqDiv
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gaussian.FourierTransform
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Development.AbelianVarietyTheory.Definitions.ThetaMetrics.ExistsLinearIndependentNormLeSuccMin
+
+@[expose] public section
 
 open MeasureTheory NumberField Matrix Finset Formalism.MainNotions.S GlobalTheory.Count GlobalTheory.FlagMeas GlobalTheory.FlagBase
 
@@ -11,9 +59,9 @@ namespace GlobalTheory.FlagBase.PoissonV
 
 variable (ι κ : Type) [Fintype ι] [Fintype κ]
 
+
 open MeasureTheory NumberField Matrix Finset in
 variable (ι κ : Type) [Fintype ι] [Fintype κ] in
-
 theorem _root_.GlobalTheory.FlagBase.PoissonV.measurePreserving_curry :
     MeasurePreserving (MeasurableEquiv.curry ι κ ℂ) volume volume := by
   have h : MeasurePreserving (MeasurableEquiv.curry ι κ ℂ).symm volume volume := by
@@ -40,8 +88,6 @@ def coords : EuclideanSpace ℂ (ι × κ) ≃L[ℝ] (ι → κ → ℂ) :=
       left_inv := fun _ => rfl
       right_inv := fun _ => rfl }
 
-theorem coords_apply (x : EuclideanSpace ℂ (ι × κ)) (w : ι) (a : κ) : coords ι κ x w a = x (w, a) := rfl
-
 open MeasureTheory NumberField Matrix Finset in
 variable (ι κ : Type) [Fintype ι] [Fintype κ] in
 theorem _root_.GlobalTheory.FlagBase.PoissonV.measurePreserving_coords :
@@ -55,40 +101,11 @@ theorem _root_.GlobalTheory.FlagBase.PoissonV.norm_sq_coords (x : EuclideanSpace
   rw [EuclideanSpace.norm_sq_eq, Fintype.sum_prod_type]
   rfl
 
-theorem inner_coords (x y : EuclideanSpace ℂ (ι × κ)) :
-    ∑ w, (coords ι κ x w ⬝ᵥ star (coords ι κ y w)).re = inner ℝ x y := by
-  rw [PiLp.inner_apply, Fintype.sum_prod_type]
-  refine Finset.sum_congr rfl fun w _ => ?_
-  rw [dotProduct, Complex.re_sum]
-  refine Finset.sum_congr rfl fun a _ => ?_
-  simp [coords_apply, Complex.inner]
-  ring
-
 end GlobalTheory.FlagBase.PoissonV
 
 namespace GlobalTheory.FlagBase
 
 open PoissonV
-
-theorem mem_dualAt (E : Type) [Field E] [NumberField E] (j : ℕ) (L : Submodule ℤ (VecInf E j))
-    (y : VecInf E j) : y ∈ dualAt E j L ↔ ∀ x ∈ L, ∃ z : ℤ, ∑ w, (x w ⬝ᵥ y w).re = z := by
-  refine ⟨fun h => ?_, fun h => Submodule.subset_span h⟩
-  induction h using Submodule.span_induction with
-  | mem y hy => exact hy
-  | zero => exact fun x _ => ⟨0, by simp⟩
-  | add a b _ _ ha hb =>
-    intro x hx
-    obtain ⟨m, hm⟩ := ha x hx
-    obtain ⟨n, hn⟩ := hb x hx
-    exact ⟨m + n, by simp [dotProduct_add, Finset.sum_add_distrib, hm, hn]⟩
-  | smul c a _ ha =>
-    intro x hx
-    obtain ⟨m, hm⟩ := ha x hx
-    refine ⟨c * m, ?_⟩
-    rw [Int.cast_mul, ← hm, Finset.mul_sum]
-    refine Finset.sum_congr rfl fun w _ => ?_
-    rw [Pi.smul_apply, dotProduct_smul]
-    simp
 
 open MeasureTheory NumberField Matrix Finset in
 variable (ι κ : Type) [Fintype ι] [Fintype κ] in
@@ -100,8 +117,8 @@ private theorem inner_toLp_conj_eq_sum_re_dotProduct (u : EuclideanSpace ℂ (ι
   simp [_root_.GlobalTheory.FlagBase.PoissonV.coords, dotProduct, Complex.re_sum, Complex.mul_re]
   congr 1 <;> exact Finset.sum_congr rfl fun w _ => Finset.sum_congr rfl fun a _ => mul_comm _ _
 
-open MeasureTheory NumberField Matrix Finset in
 
+open MeasureTheory NumberField Matrix Finset in
 theorem _root_.GlobalTheory.FlagBase.poisson_gaussV (E : Type) [Field E] [NumberField E] (j : ℕ)
     (L : Submodule ℤ (_root_.GlobalTheory.FlagBase.VecInf E j))
     [DiscreteTopology L] (hL : IsZLattice ℝ L) :

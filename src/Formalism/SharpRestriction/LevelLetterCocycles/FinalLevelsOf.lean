@@ -1,4 +1,45 @@
-import Formalism.SharpRestriction.LevelLetterCocycles.MapEvalPsPi
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.MapEvalPsPi
+public import Formalism.DistinguishedUnitIdeals.FinalArcProps
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -60,29 +101,29 @@ theorem finalLevels_of {T : LocLat G Qp LL O} {C : Coord W (baseIdOf hR) T} {c :
     (hs : LevSteps Hy ϖ j M g G₀ Sz η kind b e) :
     E.FinalLevels (latOf C) c ell H (lvData Hy ((baseIdOf hR).Bs.ff' ell j M g) kind b η)
       (lvModel Hy ((baseIdOf hR).Bs.ff' ell j M g) kind b η) ϖ (W.χΓ W.gam) j M g G₀ Sz η kind b e lam
-      (UL lam kind b η) where
-  kind_eq := fun _ _ => rfl
-  b_eq := fun _ _ => rfl
-  η_eq := rfl
-  k1b := hs.k1b
-  hasU := fun _ _ => rfl
-  k1c := hs.k1c
-  k1d := hs.k1d
-  unitsAt := hs.unitsAt
-  compl := hs.compl
-  filt := hs.filt
-  jumps := hs.jumps
-  mem := hs.mem
-  locReg := hs.locReg
-  pa1b := hs.pa1b
-  equiv := hs.equiv
-  span := hs.span
-  ind := hs.ind
-  flDef := fun _ _ _ => Iff.rfl
-  locLIs := hs.locLIs
-  lamInd := hs.lamInd
-  lamSpan := hs.lamSpan
-  uIs := fun _ _ _ => Iff.rfl
+      (UL lam kind b η) :=
+  { kind_eq := fun _ _ => rfl
+    b_eq := fun _ _ => rfl
+    η_eq := rfl
+    k1b := hs.k1b
+    hasU := fun _ _ => rfl
+    k1c := hs.k1c
+    k1d := hs.k1d
+    unitsAt := hs.unitsAt
+    compl := hs.compl
+    filt := hs.filt
+    jumps := hs.jumps
+    mem := hs.mem
+    locReg := hs.locReg
+    pa1b := hs.pa1b
+    equiv := hs.equiv
+    span := hs.span
+    ind := hs.ind
+    flDef := fun _ _ _ => Iff.rfl
+    locLIs := hs.locLIs
+    lamInd := hs.lamInd
+    lamSpan := hs.lamSpan
+    uIs := fun _ _ _ => Iff.rfl }
 
 section ThetaShiftProofs
 

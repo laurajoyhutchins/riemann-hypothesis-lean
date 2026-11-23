@@ -1,5 +1,54 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.TraceFormulas.LatDefs
+module
+
+public import ReciprocityTheory.ReductiveGroups.TraceFormulas.LatDefs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.Padics.ProperSpace
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.MetricSpace.Ultra.TotallySeparated
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -25,7 +74,7 @@ theorem padicCoeff_of_finite {p : ℕ} [Fact p.Prime] {O : Type} [CommRing O] [I
     rw [← map_natCast (algebraMap ℤ_[p] O), Ne, ← map_zero (algebraMap ℤ_[p] O), hinj.eq_iff]
     exact_mod_cast (Fact.out : p.Prime).ne_zero
   have hpm : (p : O) ∈ maximalIdeal O := by
-    have hmax := Ideal.isMaximal_comap_of_isIntegral_of_isMaximal (R := ℤ_[p]) (maximalIdeal O)
+    have hmax := Ideal.isMaximal_under_of_isIntegral_of_isMaximal (R := ℤ_[p]) (maximalIdeal O)
     have hc : (maximalIdeal O).comap (algebraMap ℤ_[p] O) = maximalIdeal ℤ_[p] :=
       IsLocalRing.eq_maximalIdeal hmax
     rw [← map_natCast (algebraMap ℤ_[p] O), ← Ideal.mem_comap, hc, PadicInt.maximalIdeal_eq_span_p]
@@ -123,9 +172,11 @@ theorem exists_pow_mul_mem {ϖ : O'} (hϖ : Irreducible ϖ) (a : FractionRing O'
   rw [hn, map_mul, map_mul, mul_assoc, mul_comm (algebraMap O' (FractionRing O') (s : O')) a]
   exact congrArg _ h
 
-theorem fracB_basis {ϖ : O'} (hϖ : Irreducible ϖ) : SubmodulesRingBasis (fracB ϖ) where
-  inter i j := ⟨max i j, le_inf (fracB_anti ϖ (le_max_left _ _)) (fracB_anti ϖ (le_max_right _ _))⟩
-  leftMul a i := by
+theorem fracB_basis {ϖ : O'} (hϖ : Irreducible ϖ) : SubmodulesRingBasis (fracB ϖ) := by
+  refine { inter := ?_, leftMul := ?_, mul := ?_ }
+  · intro i j
+    exact ⟨max i j, le_inf (fracB_anti ϖ (le_max_left _ _)) (fracB_anti ϖ (le_max_right _ _))⟩
+  · intro a i
     obtain ⟨n, c, hc⟩ := exists_pow_mul_mem hϖ a
     refine ⟨i + n, ?_⟩
     rintro _ ⟨x, hx, rfl⟩
@@ -139,11 +190,12 @@ theorem fracB_basis {ϖ : O'} (hϖ : Irreducible ϖ) : SubmodulesRingBasis (frac
       ← map_mul]
     congr 1
     ring
-  mul i := ⟨i, by
+  · intro i
+    refine ⟨i, ?_⟩
     rintro _ ⟨x, hx, y, hy, rfl⟩
     obtain ⟨c, rfl⟩ := mem_fracB.1 hx
     obtain ⟨d, rfl⟩ := mem_fracB.1 hy
-    exact mem_fracB.2 ⟨c * d * ϖ ^ i, by show _ * _ = _; rw [← map_mul]; congr 1; ring⟩⟩
+    exact mem_fracB.2 ⟨c * d * ϖ ^ i, by show _ * _ = _; rw [← map_mul]; congr 1; ring⟩
 
 end FracTopology
 
@@ -172,7 +224,7 @@ theorem exists_fracTop (O' : Type) [CommRing O'] [IsDomain O'] [IsDiscreteValuat
     rintro _ ⟨z, hz, rfl⟩
     rw [hm] at hz
     show f (x + z) - f x ∈ fracB ϖ i
-    rw [map_add, add_sub_cancel_left]
+    rw [map_add (f := _), add_sub_cancel_left]
     exact algebraMap_mem_fracB.2 hz
   have hopen : IsOpenMap f := by
     refine IsOpenMap.of_nhds_le fun x => ?_
@@ -184,7 +236,7 @@ theorem exists_fracTop (O' : Type) [CommRing O'] [IsDomain O'] [IsDiscreteValuat
     refine ⟨x + c * ϖ ^ n, hn ⟨c * ϖ ^ n, ?_, rfl⟩, ?_⟩
     · rw [hm]
       exact Dvd.intro_left c rfl
-    · rw [map_add, ← hc, add_sub_cancel]
+    · rw [map_add (f := _), ← hc, add_sub_cancel]
   refine ⟨τK, inferInstance, continuousSMul_of_algebraMap O' (FractionRing O') hcont, ⟨?_⟩⟩
   exact Topology.IsOpenEmbedding.of_continuous_injective_isOpenMap hcont
     (IsFractionRing.injective O' (FractionRing O')) hopen

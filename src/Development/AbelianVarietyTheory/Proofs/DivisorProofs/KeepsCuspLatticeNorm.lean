@@ -1,13 +1,58 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.NormNegCmConstantEqAtAllEmbeddings
-import Development.AbelianVarietyTheory.Definitions.Divisors.MemLevEigenIffTransl
-import Development.AbelianVarietyTheory.Definitions.Foundations.CanonicalExponents
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.KeepsCuspOfIsUnifAt
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LevelMoveStabiliserCharacterDet
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsUnitaryPart
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.NormNegCmConstantEqAtAllEmbeddings
+public import Development.AbelianVarietyTheory.Definitions.Divisors.MemLevEigenIffTransl
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RightTranslationLiftEqLevelMoveUnitConst
+import Development.AbelianVarietyTheory.Counterexamples.LevelGroupExamples.OrthonormalBaseFrameNeg
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IsLocalRingTrivSqZeroExt
+public import Development.AbelianVarietyTheory.Definitions.Foundations.CanonicalExponents
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsPinnedOfIsUnf
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsUnitaryPart
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LevelMoveStabiliserCharacterDet
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.KeepsCuspOfIsUnifAt
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.VolPairExAndFinVol
 import Development.AbelianVarietyTheory.Proofs.JetHarmonics.IntegralFramedPointOfLevelMove
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.OnlySecondOfFormLaws
-import Development.AbelianVarietyTheory.Proofs.HeightProofs.VolPairExAndFinVol
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.FiniteDimensionalOfLeHolSub
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.OnlySecondOfFormLaws
+import Formalism.LocalToGlobal.GlobalTheory.GL5.FamilyMassVolumeIdentityOfClassDecomp
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -149,7 +194,7 @@ theorem exists_induces (V : HSp D) {ι : Dw.La →ₗ[𝓞 D.host.E] (Fin V.rank
   · obtain ⟨w, hw, e⟩ := h3 k a ha
     exact ⟨-w, neg_mem hw, by rw [neg_nsmul, ← e, neg_sub]; exact (add_sub_cancel _ _).symm⟩
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem petE_transl {Xo : Moduli Dw l} {c : Coeff l} {σ : c.F →+* ℂ} {r : ℕ} {U : Unf Xo c σ r} {V : HSp D}
     (hs : V.SigOK) (hr : V.rank = r) {dict : GA D V → Σ k, Frame (U.X k).Ψ r}
@@ -171,12 +216,35 @@ theorem petE_transl {Xo : Moduli Dw l} {c : Coeff l} {σ : c.F →+* ℂ} {r : �
     pnorm_eq_of_unit _ _ _ _ (hu g)
   unfold petE
   simp only [hN]
-  rw [← eLpNorm_right V hs κ (fun g => ‖rdU U f (dict g).1 (dict g).2‖) fun a ha h => by
+  have hΦ : ∀ a ∈ GQ V, ∀ h, ‖rdU U f (dict (a * h)).1 (dict (a * h)).2‖ =
+      ‖rdU U f (dict h).1 (dict h).2‖ := fun a ha h => by
     obtain ⟨a', ha', e₁⟩ := hD.1 a ha h
     have := (GlobalTheory.CuspSecFin.mem_SS_of_mem_holSub _ _ hfc (dict h).1).1.1.2.2 a' ha' _ (hD.2.2.2.1 h)
     rw [hχ _ _ ha', one_mul] at this
     rw [e₁]
-    exact congrArg norm this]
+    exact congrArg norm this
+  have hright : eLpNorm' (fun q : AutQ V => ‖rdU U f (dict (q.out * κ)).1 (dict (q.out * κ)).2‖) 2 (muQ1 V) =
+      eLpNorm' (fun q : AutQ V => ‖rdU U f (dict q.out).1 (dict q.out).2‖) 2 (muQ1 V) := by
+    obtain ⟨hP, hV⟩ := GlobalTheory.FinalJoin2.volPairEx_and_finVol D V hs
+    have hR := ((GlobalTheory.CoreLawsCompare.invProb_iff V hP hV _).2 rfl).2
+    have hmap : (muQ1 V).map (rightEquiv V κ) = muQ1 V := Measure.ext fun s hs => by
+      rw [MeasurableEquiv.map_apply]
+      exact hR κ _ (fun _ => rfl) s hs
+    have hout : ∀ g, ‖rdU U f (dict (autMk V g).out).1 (dict (autMk V g).out).2‖ =
+        ‖rdU U f (dict g).1 (dict g).2‖ := fun g => by
+      have e : (QuotientGroup.rightRel (GQ V)) g (autMk V g).out := Quotient.exact (Quotient.out_eq (autMk V g)).symm
+      rw [QuotientGroup.rightRel_apply] at e
+      rw [← hΦ _ e g, inv_mul_cancel_right]
+    unfold eLpNorm'
+    conv_rhs => rw [← hmap, lintegral_map_equiv]
+    congr 1
+    apply lintegral_congr
+    intro q
+    dsimp only
+    have he : rightEquiv V κ q = autMk V (q.out * κ) := by
+      exact (congrArg (rightEquiv V κ) (Quotient.out_eq q)).symm
+    rw [he, hout]
+  rw [← hright]
   congr 1
   funext q
   obtain ⟨hx, δ, hc, e₁⟩ := GlobalTheory.StabMove.exists_carries (V := V) (W := V) rfl rfl rfl (dict := dict) ι hU hW hL hth
@@ -198,8 +266,8 @@ open GlobalTheory.IndefiniteRowSideFullHecke.LevelStructureAutomorphisms (LevelA
 open scoped TensorProduct
 open GlobalTheory GlobalTheory.CovTop
 
+
 attribute [local instance] Formalism.BasicNotions.Host.cmStar in
-set_option maxHeartbeats 1000000 in
 
 theorem GlobalTheory.LevelIsometry.keeps_cusp_lattice_norm : ∀ (D : D7) (T : CoreJ D), LawsJ T → ∀ j : ℕ, 1 ≤ (T.Q.Dw j).p → 1 ≤ (T.Q.Dw j).q → 2 < Module.finrank ℚ D.host.E / 2 → InR D j → ∀ (Y : Deep T.toCore j) (e : ℕ) (o : ℝ), Y.Good e o → ∀ G : WTZ D.host.E, Even G.2 → KeepsCusp Y.U G ∧ ∀ (γ : LevelAut (T.Q.Dw j) Y.d.l₂) (f g : Y.V G), (g : Rul Y.d.Xo₂ Y.d.c₂) = pull Y.d.Xo₂ Y.d.c₂ γ f → (f ∈ AllWt.latW Y.U G → g ∈ AllWt.latW Y.U G) ∧ ∀ σ, Y.nrm G σ g = Y.nrm G σ f := by
   intro D T hT j hp _ _ hj Y e o hY G hG
@@ -231,6 +299,6 @@ theorem GlobalTheory.LevelIsometry.keeps_cusp_lattice_norm : ∀ (D : D7) (T : C
     obtain ⟨x₀, -, _, g', e, F, ik, φ, th', hth', hL⟩ := hpin _ hσ
     have := GlobalTheory.LevelIsometry.petE_transl (D.sp.W_sig j) hr hσ (hY.unf _ hσ) hpq hA hW hι hL hth' hD (hY.unit _ hσ) hG
       (hχ _ hσ) γ⁻¹ (AllWt.mem_cuspW.1 f.2).1 ((AllWt.mem_cuspW.1 f.2).2 _ hσ)
-    show _ * (AllWt.petE _ _ _ _ (rdU _ (g : Rul Y.d.Xo₂ Y.d.c₂))).toReal = _
+    show _ * (AllWt.petE _ _ _ _ (rdU (Y.U (goodOf Y.d.c₂ σ)) (g : Rul Y.d.Xo₂ Y.d.c₂))).toReal = _
     rw [hg]
     exact congrArg (fun t : ENNReal => AllWt.lieFacZ (T.Q.Dw j) (xiR D) G * t.toReal) this

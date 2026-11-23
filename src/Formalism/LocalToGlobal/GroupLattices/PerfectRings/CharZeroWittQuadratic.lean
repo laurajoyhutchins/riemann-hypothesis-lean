@@ -1,6 +1,58 @@
-import Formalism.LocalToGlobal.GroupLattices.PerfectRings.GoodRingWittExtension
-import Formalism.LocalToGlobal.GroupLattices.PerfectRings.IsLocalRingOfComplete
-import Formalism.LocalToGlobal.GroupLattices.LevelGatherings.StdSubPlacesConst
+module
+
+public import Formalism.LocalToGlobal.GroupLattices.PerfectRings.JOInjective
+public import Formalism.LocalToGlobal.GroupLattices.LevelGatherings.StdSubPlacesConst
+public import Mathlib.NumberTheory.NumberField.Basic
+public import Mathlib.RingTheory.DedekindDomain.AdicValuation.Valuation
+public import Mathlib.RingTheory.Henselian
+public import Mathlib.RingTheory.RegularLocalRing.Defs
+import Formalism.LocalRingCardinality.SpanPowerMembership.GatRing
+import Formalism.LocalToGlobal.GroupLattices.PerfectRings.AlgebraMapFinite
+public import Formalism.LocalToGlobal.GroupLattices.PerfectRings.IsLocalRingOfComplete
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.Complete
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -137,7 +189,7 @@ theorem wU_mem_max : wU p n ∈ maximalIdeal (OO p n) := by
 theorem under_max (L : Type) [Field L] [Algebra (KO p n) L] [FiniteDimensional (KO p n) L] [Algebra (OO p n) L]
     [IsScalarTower (OO p n) (KO p n) L] :
     (maximalIdeal (OL p n L)).comap (algebraMap (OO p n) (OL p n L)) = maximalIdeal (OO p n) :=
-  IsLocalRing.eq_maximalIdeal (Ideal.isMaximal_comap_of_isIntegral_of_isMaximal (maximalIdeal _))
+  IsLocalRing.eq_maximalIdeal (Ideal.isMaximal_comap_of_isIntegral_of_isMaximal (algebraMap _ _) (RingHom.Finite.to_isIntegral (RingHom.finite_algebraMap.mpr (IntCl.finite (OO p n) (KO p n) L))) (maximalIdeal _))
 
 theorem p_mem_max (L : Type) [Field L] [Algebra (KO p n) L] [FiniteDimensional (KO p n) L] [Algebra (OO p n) L]
     [IsScalarTower (OO p n) (KO p n) L] : (p : OL p n L) ∈ maximalIdeal (OL p n L) := by

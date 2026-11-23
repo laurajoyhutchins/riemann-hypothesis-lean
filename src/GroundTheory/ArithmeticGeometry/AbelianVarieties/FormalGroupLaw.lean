@@ -1,5 +1,62 @@
-import Mathlib
-import GroundTheory.ArithmeticGeometry.AbelianVarieties.FormalGroup
+module
+
+public import GroundTheory.ArithmeticGeometry.AbelianVarieties.FormalGroup
+public import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
+public import Mathlib.RingTheory.FormalGroup.Basic
+public import Mathlib.RingTheory.Henselian
+public import Mathlib.RingTheory.RegularLocalRing.Defs
+public import Mathlib.RingTheory.SimpleRing.Principal
+public import GroundTheory.LocalFields.FormalGroups.Basics
+import Mathlib.Algebra.AffineMonoid.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 namespace GroundTheory.Arith.Abelian
 
@@ -22,14 +79,15 @@ theorem equation_of_zwPoly {z w : K} (h : zwPoly V z w = 0) (hw : w ≠ 0) :
 
 variable [V.IsElliptic]
 
-open Classical in
 
+open scoped Classical in
+open Classical in
 noncomputable def zwPoint (z w : K) : V.toAffine.Point :=
   if h : zwPoly V z w = 0 ∧ w ≠ 0 then Point.mk (equation_of_zwPoly V h.1 h.2) else 0
 
 theorem zwPoint_of {z w : K} (h : zwPoly V z w = 0) (hw : w ≠ 0) :
     zwPoint V z w = Point.mk (equation_of_zwPoly V h hw) := by
-  rw [zwPoint, dif_pos ⟨h, hw⟩]
+  rw [zwPoint, dite_eq_left ⟨h, hw⟩]
 
 theorem secant_spec [DecidableEq K] [Infinite K] {z₁ w₁ z₂ w₂ l n b z₃ w₃ : K}
     (h₁ : zwPoly V z₁ w₁ = 0) (h₂ : zwPoly V z₂ w₂ = 0) (hw₁ : w₁ ≠ 0) (hw₂ : w₂ ≠ 0)
@@ -285,8 +343,9 @@ theorem pointOf_injective {u u' : MvPowerSeries τ R} (hu : MvPowerSeries.consta
   rw [e, div_left_inj' hw'] at h1
   exact hι h1
 
-open Classical in
 
+open scoped Classical in
+open Classical in
 theorem pointOf_add [Nonempty τ] {u₁ u₂ : MvPowerSeries τ R}
     (h₁ : MvPowerSeries.constantCoeff u₁ = 0) (h₂ : MvPowerSeries.constantCoeff u₂ = 0)
     (hu₁ : u₁ ≠ 0) (hu₂ : u₂ ≠ 0) (hx : u₁ * wAt W u₂ ≠ u₂ * wAt W u₁) :
@@ -329,14 +388,14 @@ theorem pointOf_add [Nonempty τ] {u₁ u₂ : MvPowerSeries τ R}
   have rb : secantB (W.map MvPowerSeries.C) l * b = 1 := by
     rw [hl, hb]
     have := congrArg ψ (mul_invOfUnit_one (constantCoeff_secantB W))
-    simpa only [secantB, map_add, map_mul, map_pow, map_one, WeierstrassCurve.map_a₂,
+    simpa only [secantB, map_add (f := _), map_mul, map_pow, map_one, WeierstrassCurve.map_a₂,
       WeierstrassCurve.map_a₄, WeierstrassCurve.map_a₆, ψC] using this
   have rz₃ : z₃ = -u₁ - u₂ - secantA (W.map MvPowerSeries.C) l n * b := by
     rw [hz₃, thirdZ, hl, hn, hb]
-    simp only [secantA, map_sub, map_neg, map_mul, map_add, map_pow, map_ofNat, ψX0, ψX1, ψC,
+    simp only [secantA, map_sub, map_neg, map_mul, map_add (f := _), map_pow, map_ofNat, ψX0, ψX1, ψC,
       WeierstrassCurve.map_a₁, WeierstrassCurve.map_a₂, WeierstrassCurve.map_a₃,
       WeierstrassCurve.map_a₄, WeierstrassCurve.map_a₆]
-  have rw₃ : w₃ = l * z₃ + n := by rw [hw₃, thirdW, map_add, map_mul]
+  have rw₃ : w₃ = l * z₃ + n := by rw [hw₃, thirdW, map_add (f := _), map_mul]
   have re : (1 - MvPowerSeries.C W.a₁ * z₃ - MvPowerSeries.C W.a₃ * w₃) * e = 1 := by
     rw [hz₃, hw₃, he]
     have := congrArg ψ (mul_invOfUnit_one (constantCoeff_negDen W))
@@ -358,9 +417,9 @@ theorem pointOf_add [Nonempty τ] {u₁ u₂ : MvPowerSeries τ R}
     linear_combination h
   have hz₃' : ι z₃ = -ι u₁ - ι u₂ - secantA V (ι l) (ι n) * ι b := by
     rw [rz₃, map_sub, map_sub, map_neg, map_mul, map_secantA, map_C_map_algebraMap]
-  have hw₃' : ι w₃ = ι l * ι z₃ + ι n := by rw [rw₃, map_add, map_mul]
+  have hw₃' : ι w₃ = ι l * ι z₃ + ι n := by rw [rw₃, map_add (f := _), map_mul]
   obtain ⟨h₃, hw₃0, hsum⟩ := secant_spec V (zwPoly_curveFrac W τ h₁) (zwPoly_curveFrac W τ h₂)
-    hw₁ hw₂ (by rw [rl₁, map_add, map_mul]) (by rw [rl₂, map_add, map_mul]) hb' hx' hz₃' hw₃'
+    hw₁ hw₂ (by rw [rl₁, map_add (f := _), map_mul]) (by rw [rl₂, map_add (f := _), map_mul]) hb' hx' hz₃' hw₃'
   have he' : (1 - V.a₁ * ι z₃ - V.a₃ * ι w₃) * ι e = 1 := by
     have := congrArg ι re
     rwa [map_mul, map_sub, map_sub, map_mul, map_mul, map_one] at this
@@ -448,8 +507,9 @@ variable {R : Type*} [CommRing R] [IsDomain R] (W : WeierstrassCurve R) [Fact (W
 
 attribute [local instance] isDomain_mvPowerSeries
 
-open Classical in
 
+open scoped Classical in
+open Classical in
 theorem pointOf_add_of_coeff {τ : Type*} [Nonempty τ] {u₁ u₂ : MvPowerSeries τ R}
     (h₁ : MvPowerSeries.constantCoeff u₁ = 0) (h₂ : MvPowerSeries.constantCoeff u₂ = 0)
     {i₁ i₂ i₃ i₄ : τ} (hi₁ : MvPowerSeries.coeff (Finsupp.single i₁ 1) u₁ ≠ 0)
@@ -567,7 +627,7 @@ theorem coeff_single_addSeries (i : Fin 2) :
   have h := MvPowerSeries.coeff_of_lt_order (d := Finsupp.single i 1)
     (lt_of_lt_of_le (by simp) (two_le_order_addSeries_sub W))
   rw [map_sub, sub_eq_zero] at h
-  rw [h, map_add, coeff_single_X, coeff_single_X]
+  rw [h, map_add (f := _), coeff_single_X, coeff_single_X]
   fin_cases i <;> simp
 
 def univFormalGroup : FormalGroup (MvPolynomial (Fin 5) ℤ) where
@@ -600,11 +660,6 @@ instance : (formalGroup W).IsComm where
     congr 1
     funext i
     fin_cases i <;> simp
-
-theorem formalGroup_map {S : Type*} [CommRing S] (f : R →+* S) :
-    (formalGroup W).map f = formalGroup (W.map f) := by
-  ext1
-  simp [map_addSeries]
 
 end FormalGroupLaw
 

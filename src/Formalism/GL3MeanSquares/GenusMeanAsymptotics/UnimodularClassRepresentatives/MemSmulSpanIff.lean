@@ -1,4 +1,60 @@
-import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.ExistsDualBound
+module
+
+public import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.ApplyMemSmul
+public import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.AlgebraMapIntCastSmul
+public import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.ExistsBasisLocF
+public import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.ExistsMulDvdUnif
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.DedekindDomain.PID
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField Module
 
@@ -11,8 +67,8 @@ variable {V : Type} [AddCommGroup V] [Module K V] [FiniteDimensional K V] [Modul
   [IsScalarTower (𝓞 K) K V]
 
 open LocalSpans in
-theorem exists_smith {A₀ B₀ : Submodule (𝓞 K) V} (hA₀ : Submodule.IsLattice K A₀)
-    (hB₀ : Submodule.IsLattice K B₀) {𝔭 : Ideal (𝓞 F)} (h𝔭 : 𝔭.IsMaximal) :
+theorem exists_smith {A₀ B₀ : Submodule (𝓞 K) V} (hA₀ : Submodule.IsFullLattice K A₀)
+    (hB₀ : Submodule.IsFullLattice K B₀) {𝔭 : Ideal (𝓞 F)} (h𝔭 : 𝔭.IsMaximal) :
     ∃ (a b : Basis (Fin (finrank K V)) K V) (e : Fin (finrank K V) → 𝓞 K) (c : 𝓞 K),
       c ≠ 0 ∧ (∀ i, e i ≠ 0) ∧
       locF 𝔭 (Submodule.span (𝓞 K) (Set.range a)) = locF 𝔭 A₀ ∧
@@ -61,11 +117,11 @@ theorem exists_smith {A₀ B₀ : Submodule (𝓞 K) V} (hA₀ : Submodule.IsLat
     rw [hfA, ← hfB, (Submodule.comapSubtypeEquivOfLe hN').finrank_eq,
       (Submodule.equivMapOfInjective μ hμi MB).finrank_eq]
   obtain ⟨b', α, ab', hab⟩ := Submodule.exists_smith_normal_form_of_rank_eq (Basis.span hliA) hfN
-  have hlatA : Submodule.IsLattice K MA :=
-    { fg := Submodule.fg_span (Set.finite_range _)
+  have hlatA : Submodule.IsFullLattice K MA :=
+    { toIsLattice := Submodule.IsLattice.of_fg K (Submodule.fg_span (Set.finite_range _))
       span_eq_top := by
-        rw [eq_top_iff, ← a0.span_eq]
-        exact Submodule.span_mono Submodule.subset_span }
+        change Submodule.span K (Submodule.span (RP K 𝔭) (Set.range a0) : Set V) = ⊤
+        rw [Submodule.span_span_of_tower, a0.span_eq] }
   let a := b'.extendOfIsLattice K
   have ha : ∀ i, a i = (b' i : V) := fun i => Basis.extendOfIsLattice_apply K b' i
   have hα0 : ∀ i, α i ≠ 0 := fun i h0 => by
@@ -165,7 +221,7 @@ theorem mem_smul_span_iff {κ : Type} [Fintype κ] (a : Basis κ K V) {𝔭 : Id
       rw [← algebraMap_smul K, map_smul, Finsupp.smul_apply, smul_eq_mul]
       simpa using h2
     | add x _ y _ hx hy =>
-      rw [map_add, Finsupp.add_apply]
+      rw [map_add (f := _), Finsupp.add_apply]
       exact (pK K 𝔭 k).add_mem hx hy
   · intro hx
     rw [← a.sum_repr x]
@@ -185,6 +241,7 @@ theorem mem_endL_iff {κ : Type} [Fintype κ] [DecidableEq κ] (a : Basis κ K V
     rw [LinearMap.toMatrix_apply]
     exact (mem_smul_span_iff a h𝔭 k _).1 (hD _ (basis_mem_locF a 𝔭 j)) i
   · intro hD x hx
+
     rw [← a.sum_repr x, map_sum]
     refine Submodule.sum_mem _ fun j _ => ?_
     rw [map_smul]
@@ -202,8 +259,10 @@ theorem mem_sesqL_iff (hF : IsFixF K F) {κ : Type} [Fintype κ] (a : Basis κ K
   · intro hs i j
     exact hs _ (basis_mem_locF a 𝔭 i) _ (basis_mem_locF a 𝔭 j)
   · intro hs x hx y hy
+
     rw [← a.sum_repr x, ← a.sum_repr y, map_sum]
     refine Submodule.sum_mem _ fun j _ => ?_
+
     rw [map_sum, LinearMap.sum_apply]
     refine Submodule.sum_mem _ fun i _ => ?_
     rw [map_smul, LinearMap.map_smulₛₗ, LinearMap.smul_apply, smul_eq_mul, smul_eq_mul]

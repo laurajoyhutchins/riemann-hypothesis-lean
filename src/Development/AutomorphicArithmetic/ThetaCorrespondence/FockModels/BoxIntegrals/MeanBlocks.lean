@@ -1,6 +1,51 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.MeanTransport
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.WeilOperatorOneVariablePreservesSqNormOrthogonal
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.MeanTransport
+import Development.AbelianVarietyTheory.Proofs.HeightProofs.IsTopologicalRingAE
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ContinuousHermPart
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.LatticeFrames.IsThetaFam
+import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.ExistsHeightLeTwoMulQuotHeight
+import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.WittSmallGroupEmbeddingMemPointwiseStabilizerIso
+
+@[expose] public section
+
 noncomputable section
 open scoped Matrix NNReal ENNReal ComplexConjugate TensorProduct Topology
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.L2.Theta Formalism.L2.Pj Formalism.IndefR.Datum MeasureTheory Filter
@@ -85,7 +130,7 @@ theorem mem_rat_iff {a b : ℕ} (x : Mx D a b) : x ∈ ratMx D a b ↔ ∀ i j, 
     exact ⟨Matrix.of η, by ext i j; exact hη i j⟩
 
 theorem blk_rat (hn : ρ + p = n) (u : hermA D p × (Mx D ρ p × hermA D ρ)) :
-    blk hn u ∈ ratHerm D n ↔ u ∈ (ratHerm D p).prod ((ratMx D ρ p).prod (ratHerm D ρ)) := by
+    blk (D := D) hn u ∈ ratHerm D n ↔ u ∈ (ratHerm D p).prod ((ratMx D ρ p).prod (ratHerm D ρ)) := by
   show (bT hn u.2.2 u.2.1 u.1).1 ∈ ratMx D n n ↔ u.1.1 ∈ ratMx D p p ∧ u.2.1 ∈ ratMx D ρ p ∧ u.2.2.1 ∈ ratMx D ρ ρ
   simp only [mem_rat_iff]
   constructor
@@ -122,9 +167,10 @@ theorem setIntegral_box {A B : Type} [TopologicalSpace A] [TopologicalSpace B] [
 
 end GlobalTheory.CompanionTheory.PcFc.MeanBlocks
 
+open scoped Pointwise in
 open GlobalTheory.CompanionTheory.PcFc.MeanBlocks in
-set_option synthInstance.maxHeartbeats 400000 in
-set_option maxHeartbeats 1000000 in
+
+
 theorem GlobalTheory.CompanionTheory.PcFc.mean_blocks : ∀ {D : D7} {n ρ p : ℕ} (hn : ρ + p = n) (m : Meas D ρ p) {lam : Measure (hermA D n)} {𝓖 : Set (hermA D n)}, IsCovolOneH lam 𝓖 → ∀ {lp : Measure (hermA D p)} {𝓖p : Set (hermA D p)}, IsCovolOneH lp 𝓖p → ∀ Φ : hermA D n → ℂ, Continuous Φ → IsPer Φ → ∫ b in 𝓖, Φ b ∂lam = ∫ y in 𝓖p, ∫ x in m.𝓕, ∫ z in m.𝓖, Φ (bT hn z x y) ∂m.lz ∂m.μ ∂lp := by
   intro D n ρ p hn m lam 𝓖 hl lp 𝓖p hp Φ hΦ hper
   obtain ⟨hl1, hl2, hl3⟩ := hl
@@ -148,7 +194,7 @@ theorem GlobalTheory.CompanionTheory.PcFc.mean_blocks : ∀ {D : D7} {n ρ p : �
     exact TopologicalSpace.separableSpace_iff_countable.1 inferInstance
   haveI := cH n
   haveI : Countable ((ratHerm D p).prod ((ratMx D ρ p).prod (ratHerm D ρ))) :=
-    Function.Injective.countable (f := fun u => (⟨blk hn u.1, (blk_rat hn u.1).2 u.2⟩ : ratHerm D n))
+    Function.Injective.countable (f := fun u => (⟨blk (D := D) hn u.1, (blk_rat hn u.1).2 u.2⟩ : ratHerm D n))
       fun u v h => Subtype.ext ((blk hn).injective (congrArg Subtype.val h))
   obtain ⟨K, hK, hcov⟩ := (GlobalTheory.CompanionTheory.HermVol.isCoLat_herm (D := D) (r := n)).2
   obtain ⟨C, hC⟩ := hK.exists_bound_of_continuousOn hΦ.continuousOn
@@ -159,11 +205,42 @@ theorem GlobalTheory.CompanionTheory.PcFc.mean_blocks : ∀ {D : D7} {n ρ p : �
   haveI : (m.μ.prod m.lz).IsAddHaarMeasure := inferInstance
   haveI : (lp.prod (m.μ.prod m.lz)).IsAddHaarMeasure := inferInstance
   have hin : m.μ.prod m.lz (m.𝓕 ×ˢ m.𝓖) = 1 := by rw [Measure.prod_prod, hx3, hz3, one_mul]
-  have hc : Continuous fun u => Φ (blk hn u) := hΦ.comp (blk hn).continuous
+  have hc : Continuous fun u => Φ (blk (D := D) hn u) := hΦ.comp (blk hn).continuous
+  have prodDomain {A B : Type} [AddGroup A] [AddGroup B] [MeasurableSpace A] [MeasurableSpace B]
+      {Γ : AddSubgroup A} {Δ : AddSubgroup B} {μ : Measure A} {ν : Measure B}
+      [SFinite μ] [SFinite ν] {s : Set A} {t : Set B}
+      (hs : IsAddFundamentalDomain Γ s μ) (ht : IsAddFundamentalDomain Δ t ν) :
+      IsAddFundamentalDomain (Γ.prod Δ) (s ×ˢ t) (μ.prod ν) := by
+    refine ⟨hs.nullMeasurableSet.prod ht.nullMeasurableSet, ?_, ?_⟩
+    · have hfst := (Measure.quasiMeasurePreserving_fst (μ := μ) (ν := ν)).ae hs.ae_covers
+      have hsnd := (Measure.quasiMeasurePreserving_snd (μ := μ) (ν := ν)).ae ht.ae_covers
+      filter_upwards [hfst, hsnd] with u hu hv
+      obtain ⟨g, hg⟩ := hu
+      obtain ⟨h, hh⟩ := hv
+      exact ⟨⟨((g : A), (h : B)), AddSubgroup.mem_prod.2 ⟨g.2, h.2⟩⟩, hg, hh⟩
+    · intro g h hne
+      have translate_prod (u : A × B) :
+          u +ᵥ (s ×ˢ t) = (u.1 +ᵥ s) ×ˢ (u.2 +ᵥ t) := by
+        ext v
+        simp only [Set.mem_vadd_set_iff_neg_vadd_mem, Set.mem_prod]
+        rfl
+      change μ.prod ν (((g : A × B) +ᵥ (s ×ˢ t)) ∩ ((h : A × B) +ᵥ (s ×ˢ t))) = 0
+      simp only [translate_prod, Set.prod_inter_prod, Measure.prod_prod]
+      let g₁ : Γ := ⟨(g : A × B).1, (AddSubgroup.mem_prod.1 g.2).1⟩
+      let h₁ : Γ := ⟨(h : A × B).1, (AddSubgroup.mem_prod.1 h.2).1⟩
+      let g₂ : Δ := ⟨(g : A × B).2, (AddSubgroup.mem_prod.1 g.2).2⟩
+      let h₂ : Δ := ⟨(h : A × B).2, (AddSubgroup.mem_prod.1 h.2).2⟩
+      by_cases he : g₁ = h₁
+      · have hne₂ : g₂ ≠ h₂ := fun he₂ =>
+          hne (Subtype.ext (Prod.ext (congrArg Subtype.val he) (congrArg Subtype.val he₂)))
+        have hzero : ν (((g : A × B).2 +ᵥ t) ∩ ((h : A × B).2 +ᵥ t)) = 0 := ht.aedisjoint hne₂
+        rw [hzero, mul_zero]
+      · have hzero : μ (((g : A × B).1 +ᵥ s) ∩ ((h : A × B).1 +ᵥ s)) = 0 := hs.aedisjoint he
+        rw [hzero, zero_mul]
   have key := mean_transport _ (ratHerm D n) (blk hn) (blk_rat hn) (lp.prod (m.μ.prod m.lz)) lam
-    (GlobalTheory.WeilSliceUnit.isAddFundamentalDomain_prod hp2 (GlobalTheory.WeilSliceUnit.isAddFundamentalDomain_prod hx2 hz2)) hl2
+    (prodDomain hp2 (prodDomain hx2 hz2)) hl2
     (by rw [Measure.prod_prod, hp3, hin, one_mul]) hl3 Φ hper
   rw [← key, setIntegral_box lp _ hp3 hin _ hc fun u => hb _]
   refine integral_congr_ae (.of_forall fun y => ?_)
-  exact setIntegral_box m.μ m.lz hx3 hz3 (fun v => Φ (blk hn (y, v))) (hc.comp (continuous_const.prodMk continuous_id))
+  exact setIntegral_box m.μ m.lz hx3 hz3 (fun v => Φ (blk (D := D) hn (y, v))) (hc.comp (continuous_const.prodMk continuous_id))
     fun u => hb _

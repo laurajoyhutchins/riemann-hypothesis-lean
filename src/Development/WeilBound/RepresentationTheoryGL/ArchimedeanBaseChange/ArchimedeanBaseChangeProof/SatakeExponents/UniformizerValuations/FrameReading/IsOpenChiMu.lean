@@ -1,6 +1,57 @@
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.SatakeExponents.UniformizerValuations.FrameReading.PScKey
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.SatakeExponents.UniformizerValuations.FrameReading.PScFin
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.SatakeExponents.UniformizerValuations.FrameReading.PScLin
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.SatakeExponents.UniformizerValuations.FrameReading.JoinType
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.UNInjective
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsIrreducibleFixed
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ConstantTermLocallyConstant
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.HkMemFixed
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.RelIndexEqCard
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SmVecTranslate
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.SatakeExponents.UniformizerValuations.FrameReading.PScFin
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.SatakeExponents.UniformizerValuations.FrameReading.PScKey
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.SatakeExponents.UniformizerValuations.FrameReading.PScLin
+import GroundTheory.LocalFields.PadicLogSeries
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DgMatOne
+import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.SatakeExponents.FiniteDiscreteFamilies.PeakCone
+
+@[expose] public section
 
 noncomputable section
 open NumberField IsDedekindDomain Matrix Filter
@@ -8,7 +59,7 @@ open GlobalTheory.CuspRep GlobalTheory.PRep Formalism.UG Formalism.BasicNotions 
 open PositivityTheory.Rg.BcB.E PositivityTheory.Rg.BcB.SpectralAccumulation PositivityTheory.Rg.BcB.G8 PositivityTheory.Rg.BcB.F.RS PositivityTheory.Rg.BcN.F2
 open scoped Classical TensorProduct
 attribute [local instance] GlobalTheory.LocalData.complRel GlobalTheory.LocalData.isLocalField
-set_option synthInstance.maxHeartbeats 200000
+
 
 namespace PositivityTheory.Rg.BcB.F.Tail.PSc
 
@@ -20,7 +71,7 @@ theorem smVec_add {x y : V} (hx : SmVec ρ x) (hy : SmVec ρ y) : SmVec ρ (x + 
   obtain ⟨U, hU, hxU⟩ := hx
   obtain ⟨U', hU', hyU⟩ := hy
   refine ⟨U ⊓ U', hU.inter hU', mem_fixed_iff'.2 fun g hg => ?_⟩
-  rw [map_add, mem_fixed_iff'.1 hxU g (Subgroup.mem_inf.1 hg).1, mem_fixed_iff'.1 hyU g (Subgroup.mem_inf.1 hg).2]
+  rw [map_add (f := _), mem_fixed_iff'.1 hxU g (Subgroup.mem_inf.1 hg).1, mem_fixed_iff'.1 hyU g (Subgroup.mem_inf.1 hg).2]
 
 theorem smVec_smul (c : ℂ) {x : V} (hx : SmVec ρ x) : SmVec ρ (c • x) := by
   obtain ⟨U, hU, hxU⟩ := hx
@@ -114,9 +165,9 @@ theorem core {n a b : ℕ} (h : a + b = n) (w : Pl E) (μ : (w.adicCompletion E)
     (hρτ : ∀ g v, ρ g v = ((χμ g : ℂˣ) : ℂ) • τ g v) (c₀ : ℂ)
     (e : GLw n w → ℂ)
     (hphiMu : ∀ x y g, phiMu h w μ e x y g = c₀ * ((χμ g : ℂˣ) : ℂ) * phi3 h w e x y g)
-    (K' : Subgroup (GLw n w)) (hK'o : IsOpen (K' : Set (GLw n w))) (hK'le : K' ≤ GlobalTheory.LFun.KGL w n)
-    (hnorm : ∀ k ∈ GlobalTheory.LFun.KGL w n, ∀ k' ∈ K', k * k' * k⁻¹ ∈ K')
-    (X : Finset (GLw n w)) (hXK : ∀ x ∈ X, x ∈ GlobalTheory.LFun.KGL w n) (hX : ∀ k ∈ GlobalTheory.LFun.KGL w n, ∃! x ∈ X, x⁻¹ * k ∈ K')
+    (K' : Subgroup (GLw n w)) (hK'o : IsOpen (K' : Set (GLw n w))) (hK'le : K' ≤ GlobalTheory.LFun.KGL w (n := n))
+    (hnorm : ∀ k ∈ GlobalTheory.LFun.KGL w (n := n), ∀ k' ∈ K', k * k' * k⁻¹ ∈ K')
+    (X : Finset (GLw n w)) (hXK : ∀ x ∈ X, x ∈ GlobalTheory.LFun.KGL w (n := n)) (hX : ∀ k ∈ GlobalTheory.LFun.KGL w (n := n), ∃! x ∈ X, x⁻¹ * k ∈ K')
     (hHk : IsHk K' e) (L : Subgroup (GLw a w × GLw b w)) (hLo : IsOpen (L : Set (GLw a w × GLw b w)))
     (G : X → H E a b → ℂ) (hG : ∀ x, G x ∈ S ∧ G x ∈ fixed (pairRt a b w) L) (k : ℕ)
     (hne : (matS h w μ e X)^[k + 1] G ≠ 0) {V₂ : Type} [AddCommGroup V₂] [Module ℂ V₂]
@@ -176,6 +227,7 @@ theorem core {n a b : ℕ} (h : a + b = n) (w : Pl E) (μ : (w.adicCompletion E)
         c₀ * ∑ y : X, hint (K2 a b w) (fun g => phi3 h w e x y g * lw (ρ g (Λ j (F y)))) := by
     intro j F hF x lw
     show lw (Λ j (∑ y : X, actP w (phiMu h w μ e x y) (F y))) = _
+
     rw [map_sum, map_sum, Finset.mul_sum]
     refine Finset.sum_congr rfl fun y _ => ?_
     obtain ⟨U₁, hU₁o, hFU₁⟩ := (hF y).2
@@ -215,7 +267,7 @@ theorem core {n a b : ℕ} (h : a + b = n) (w : Pl E) (μ : (w.adicCompletion E)
     | zero => exact hu₁
     | succ i ih =>
       rw [Function.iterate_succ_apply']
-      exact (((PositivityTheory.Rg.BcN.F2.Final.hkAlg _ _) K' e e hHk hHk).2.2 _ _ _ ih).1
+      exact (GlobalTheory.CompanionTheory.HeckeFix.hk_mem_fixed _ _ K' e hHk _ _ _ ih).1
   have hrun : ∀ i (x : X), Λ j ((matS h w μ e X)^[i + 1] G x) =
       c₀ ^ (i + 1) • ((hk (GlobalTheory.SmGL.ind₂ (GlobalTheory.SmGL.stdSum h) ρ) K' e)^[i] u₁).1.1 x := by
     intro i
@@ -260,7 +312,7 @@ end PositivityTheory.Rg.BcB.F.Tail.PSc
 namespace PositivityTheory.Rg.BcB.F.Tail
 
 open PSc in
-set_option maxHeartbeats 1000000 in
+
 theorem rReadS_c : RReadS := by
   intro hRM hJM hLoc E _ _ _ n a b h μ s₁ s₂ Pa Pb D hC w K' X L e P m G hK'o hK'le hnorm hXK hX hLo hHk hkill hdim
     hG hne

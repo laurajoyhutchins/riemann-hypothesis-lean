@@ -1,4 +1,48 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SquareIntegrability.L2NormFundamentalDomain
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SquareIntegrability.L2NormFundamentalDomain
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SquareIntegrability.PolyDerivMonomialOne
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SquareIntegrability.SplitSt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace ReciprocityTheory.ChartRestriction.G.I2
 
@@ -48,11 +92,13 @@ end Expand
 section PD
 variable (X : PT E) (bs : Fin nb → Block E n X.dim)
 
-open Classical in
 
+open Classical in
 def lst (T : Choice bs) : List (Fin n × Vsp X.dim) :=
-  (Multiset.map (letter bs T) Finset.univ.val).toList.map
-    (fun l => (l.1, EuclideanSpace.single l.2 (1 : ℂ)))
+  by
+    classical
+    exact (Multiset.map (letter bs T) Finset.univ.val).toList.map
+      (fun l => (l.1, EuclideanSpace.single l.2 (1 : ℂ)))
 
 theorem prod_X_letter (T : Choice bs) :
     (∏ t : Slot bs, MvPolynomial.X (letter bs T t) : MvPolynomial (Letter n X.dim) ℂ) =
@@ -63,6 +109,7 @@ theorem prod_X_letter (T : Choice bs) :
 theorem toMultiset_letters (T : Choice bs) :
     Finsupp.toMultiset (∑ t : Slot bs, Finsupp.single (letter bs T t) 1) =
       Multiset.map (letter bs T) Finset.univ.val := by
+
   rw [map_sum]
   simp only [Finsupp.toMultiset_single, one_nsmul]
   rw [Finset.sum_eq_multiset_sum]
@@ -96,16 +143,6 @@ theorem polyDeriv_determinantPoly_tensor (s : Fin n → (Fin 1 → Vsp X.dim) �
   rw [Pi.zero_apply, itD_col (hs k)]
   rfl
 
-open Classical in
-
-theorem colL_coe (T : Choice bs) (k : Fin n) :
-    ((colL (lst X bs T) k : List (Vsp X.dim)) : Multiset (Vsp X.dim)) =
-      ((Multiset.map (letter bs T) Finset.univ.val).filter (fun l => l.1 = k)).map
-        (fun l => EuclideanSpace.single l.2 (1 : ℂ)) := by
-  rw [colL, lst, List.filter_map, List.map_map, ← Multiset.map_coe]
-  conv_rhs => rw [← Multiset.coe_toList (Multiset.map (letter bs T) Finset.univ.val),
-    Multiset.filter_coe, Multiset.map_coe]
-  rfl
 
 end PD
 

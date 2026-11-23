@@ -1,6 +1,54 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.CutOneGeneratorSt
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.PPrimeFiltrationPoint
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.CutOneGeneratorSt
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.CutNonemptySt
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.PPrimeFiltrationPoint
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.Kleiman
@@ -21,6 +69,7 @@ theorem coe_aeval_ratio_mem_idealMod {pp : Ideal (Poly k N)}
     ((aeval (ratio (S := k) hj) p : chartRing k x (singleChart hj)) : Ω) ∈
       idealMod (x := x) pp (singleChart hj) := by
   rw [← sum_homogeneousComponent p]
+
   rw [map_sum, AddSubmonoidClass.coe_finsetSum]
   refine Submodule.sum_mem _ fun d _ => Submodule.subset_span ?_
   exact ⟨homogeneousComponent d p, X j ^ d, d, hh p hp d,
@@ -44,7 +93,7 @@ theorem coe_aeval_ratio_mul_mem_span {L : SubSystem k x Ω} {s : Ω} {j : Fin (N
     field_simp
   | zero => simp
   | add a b _ _ ha hb =>
-    rw [map_add, Subalgebra.coe_add, add_mul]
+    rw [map_add (f := _), Subalgebra.coe_add, add_mul]
     exact Submodule.add_mem _ ha hb
   | smul g z _ hz =>
     rw [smul_eq_mul, map_mul, Subalgebra.coe_mul, mul_assoc]
@@ -68,7 +117,7 @@ theorem sub_le_twist_sup_span {pp : Ideal (Poly k N)}
     rw [div_self hj, one_pow]
   have hsplit : ℓ = ((aeval (ratio (S := k) hj) p : chartRing k x (singleChart hj)) : Ω) * ℓ +
       ((aeval (ratio (S := k) hj) z : chartRing k x (singleChart hj)) : Ω) * ℓ := by
-    rw [← add_mul, ← Subalgebra.coe_add, ← map_add, hpz, h1, one_mul]
+    rw [← add_mul, ← Subalgebra.coe_add, ← map_add (f := _), hpz, h1, one_mul]
   rw [hsplit]
   refine Submodule.add_mem_sup (Submodule.subset_span ?_) (coe_aeval_ratio_mul_mem_span hj hz hℓ)
   exact ⟨_, coe_aeval_ratio_mem_idealMod hh hj hp, ℓ, hℓ, rfl⟩

@@ -1,14 +1,65 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.DropPlInsert
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.UnramifiedLocalPairActsOnVacuaByHeisenbergComb
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.HoweUnramifiedAllVacua
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsUnramifiedLocalPairOfInertWeilDatum
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.HyperspecialFixesAllChainVacuaAtInertPrime
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.SplittingCharactersUnramifiedOffLevels
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.LevelOperatorsAtPrimeOffLevelDatum
+module
+
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.DropPlInsert
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.RealLowestKTypeCoeffSquareIntegrable
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ActOMemFinSub
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsDeltaPsi
+public import Development.AbelianVarietyTheory.PublishedTheorems.GaloisGeometry₂.HoweUnram
+public import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.IdemSum
+public import Formalism.LocalToGlobal.IndefiniteReal.LinksStage
+import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.EventuallyFinEqOne
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HyperspecialFixesVacuaGoodInertPlace
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.FockVectorsChainIsVacuumOffThetaLevels
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.HoweUnramifiedAllVacua
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.HyperspecialFixesAllChainVacuaAtInertPrime
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.LevelOperatorsAtPrimeOffLevelDatum
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.PiEqOfFinPart
+import Development.AbelianVarietyTheory.Proofs.SatakeParameters.SplittingCharactersUnramifiedOffLevelsStatement
 import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ThetaVacuumHeckeIdentitySplitPlace
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.FockVectorsChainIsVacuumOffThetaLevels
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HyperspecialFixesVacuaGoodInertPlace
+import Development.AbelianVarietyTheory.Proofs.SatakeParameters.UnramifiedLocalPairActsOnVacuaByHeisenbergComb
+import Formalism.LocalRingCardinality.SpanPowerMembership.LocAtA
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.MainNotions.S MeasureTheory IsDedekindDomain NumberField Matrix
 open Formalism.L2.Theta Formalism.L2.DIV Formalism.L2.Indef
 open Formalism.IndefR.Lev Formalism.IndefR.Mult Formalism.IndefR.Datum Formalism.IndefR.Cx Formalism.IndefR.Links
@@ -65,6 +116,7 @@ theorem rel_transfer (hp : LocPair ϖ σ q δ JS JT ψ ρ ω) {ι : Type} [Finty
     have := hST (Pi.single k 1)
     simpa [T, T'] using this
   have := congrArg B h0
+
   rw [map_sum, map_zero] at this
   simpa only [hB _ _ (ht _), e] using this
 
@@ -89,6 +141,7 @@ theorem exists_killed (hp : LocPair ϖ σ q δ JS JT ψ ρ ω) (𝒜 : Set (Modu
   have hAv : ∀ s, LocVac ρ s → LocVac ρ (A s) := fun s hs u hu => by rw [← h𝒜 A hA, hs u hu]
   have h0 : ∑ k, ρ (x k) (l (A (t k)) • w) = 0 := by
     have e := congrArg (fun z => B (A z)) hs
+
     simp only [hf A hA, map_zero, map_sum, h𝒜 A hA] at e
     rw [← e]
     exact Finset.sum_congr rfl fun k _ => (hB _ _ (hAv _ (hW (ht k)))).symm
@@ -131,6 +184,7 @@ theorem howe_killed (hH : HoweUnram) (hp : LocPair ϖ σ q δ JS JT ψ ρ ω) (�
   have e : f = ∑ j, ∑ k, ρ (x k) (l j (t k) • (b j : M)) := by
     rw [Finset.sum_comm, ← hsum]
     refine Finset.sum_congr rfl fun k _ => ?_
+
     rw [← map_sum]
     congr 1
     have := congrArg Subtype.val (b.sum_repr ⟨t k, htW k⟩)
@@ -152,10 +206,13 @@ theorem howe_killed (hH : HoweUnram) (hp : LocPair ϖ σ q δ JS JT ψ ρ ω) (�
         (congrArg (ρ _) (hp.fix g 1 hg hone s hs))⟩
     choose mv hmv using hn
     have e1 : ∑ k, ρ (mv (x k)) (t k) = ∑ k, ρ (x k) (t k) := by
+
       rw [hsum, ← hK g hg, ← hsum, map_sum]
       exact Finset.sum_congr rfl fun k _ => (hmv _ _ (ht k).1).symm
     have e2 := congrArg B e1
+
     simp only [map_sum, hB _ _ (ht _).1, LinearMap.smulRight_apply] at e2
+
     rw [map_sum]
     exact (Finset.sum_congr rfl fun k _ => hmv _ _ ((vacSub ρ).smul_mem _ hb.1)).trans e2
 
@@ -167,7 +224,7 @@ open GlobalTheory.InertLoc GlobalTheory.SplitScalar GlobalTheory.FinWeilO
 
 variable {D : D7}
 
-set_option maxHeartbeats 800000 in
+
 
 theorem exists_pair (ψ : AddChar (AF D.host.F) ℂ) (S T : HSp D) (χS χT : (AE D)ˣ →* Circle)
     (om : GA D S × GA D T →* Module.End ℂ (WO S T → ℂ)) (P : Pl D.host.E) (hW : IsWeilDatumO ψ S T χS χT om)
@@ -387,7 +444,7 @@ theorem pure_one {ι X : Type} (A : ι → (X → ℂ) → (X → ℂ)) (f : X �
   rw [this, pureTensorL, Module.Basis.constr_basis]
   simp [opPow]
 
-set_option maxHeartbeats 1600000 in
+
 
 theorem step_inert : GlobalTheory.Hk3.HoweUnram → ∀ (D : D7) (G : Type) [Group G] [Fintype G] (Pl0 T : Type) (A : FamIn D.what₂.LL G Pl0 T D.R.m) (Ks : Type) [Field Ks] [NumberField Ks] [Algebra Ks D.what₂.LL] (R : RealDat D A Ks) (F : Face D A), GlobalTheory.LiftRows.Given R F → R.FullP → ∀ (i : Fin D.R.m) (t : T) (Sb : Finset (HeightOneSpectrum (𝓞 D.host.F))) (v : HeightOneSpectrum (𝓞 D.host.F)), v ∈ Sb → (∀ ε, IsPlaceIdem D v ε → ∀ e, IsSplitIdem D e → e * algebraMap (AF D.host.F) (AE D) ε = 0) → (∀ PP, PP ∈ R.Pg ∨ PP ∈ R.Q t → ¬ GlobalTheory.DownLift.GenFinite.Over PP v) → ∀ (f : WO (Vc D i) (Wc D i) → ℂ), GlobalTheory.DownLift.GenFinite.TypeIn R i t Sb f → GlobalTheory.DownLift.GenFinite.CleanIn R i t Sb f → GlobalTheory.DownLift.GenFinite.LikeOff R i t Sb f → f ∈ Submodule.span ℂ (GlobalTheory.DownLift.GenFinite.StepGen R i t (GlobalTheory.DownLift.GenFinite.dropPl Sb v)) := by
   intro hH D G _ _ Pl0 T A Ks _ _ _ R F hG hFP i t Sb v hv hns hoff f hT hCl hL
@@ -477,6 +534,7 @@ theorem step_inert : GlobalTheory.Hk3.HoweUnram → ∀ (D : D7) (G : Type) [Gro
       ∑ u : c.support, Finsupp.single ((1 - e) • (u : WO (Vc D i) (Wc D i))) (a u * c u)
     have e2 : ∀ φ, (c'.sum fun u z => z • heisO R.ψ (Vc D i) (Wc D i) u φ) =
         ∑ u : c.support, a u • (c u • heisL R.ψ _ _ ((1 - e) • (u : WO (Vc D i) (Wc D i)))) φ := fun φ => by
+
       rw [← Finsupp.linearCombination_apply ℂ, map_sum]
       refine Finset.sum_congr rfl fun u _ => ?_
       rw [Finsupp.linearCombination_single, mul_smul]

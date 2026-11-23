@@ -1,6 +1,49 @@
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.MapMemA
-import Development.AbelianVarietyTheory.BlockTheory.NonGaloisCusps.ImageStableDegreeBounds
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.PowerSeriesExistsUniqueDecompOverFrobeniusLikeEnStatement
+module
+
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.MapMemA
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.PowerSeriesVecReduceModUMulVec
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.PowerSeriesExistsUniqueDecompOverFrobeniusLikeEnStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open PowerSeries GlobalTheory.BK Matrix GlobalTheory.LiftCoker
 
 noncomputable section
@@ -12,6 +55,7 @@ theorem map_decomp_frob {O K : Type} [CommRing O] [NormedField K] [Algebra O K] 
     (h : f = ∑ j : Fin l, X ^ j.val * PowerSeries.expand l (Fact.out : l.Prime).ne_zero (g j)) :
     PowerSeries.map (algebraMap O K) f =
       ∑ j : Fin l, X ^ j.val * frob K l (PowerSeries.map (algebraMap O K) (g j)) := by
+
   rw [h, map_sum]
   refine Finset.sum_congr rfl fun j _ => ?_
   rw [map_mul, map_pow, map_X, map_expand]
@@ -19,8 +63,8 @@ theorem map_decomp_frob {O K : Type} [CommRing O] [NormedField K] [Algebra O K] 
 
 theorem colon_map_frob_le : ∀ (O K : Type) [CommRing O] [NormedField K] [IsUltrametricDist K] [Algebra O K]
     [IsUnitBall O K] (l : ℕ) [Fact l.Prime] (ι κ : Type) [Fintype ι] [Fintype κ] (G : Matrix κ ι K⟦X⟧),
-    colon O K (G.map (frob K l)) ≤
-      (colon O K G).map (PowerSeries.expand l (Fact.out : l.Prime).ne_zero) := by
+    colon (O := O) (K := K) (G.map (frob K l)) ≤
+      (colon (O := O) (K := K) G).map (PowerSeries.expand l (Fact.out : l.Prime).ne_zero) := by
   intro O K _ _ _ _ _ l _ ι κ _ _ G β hβ
   have hl2 : 2 ≤ l := (Fact.out : l.Prime).two_le
   have decO : ∀ f : O⟦X⟧, ∃! g : Fin l → O⟦X⟧,
@@ -30,7 +74,7 @@ theorem colon_map_frob_le : ∀ (O K : Type) [CommRing O] [NormedField K] [IsUlt
     GlobalTheory.T.powerSeries_existsUnique_decomp_over_frobeniusLike_endo l hl2 (frob K l) (fun f m => coeff_frob l f m)
   obtain ⟨b, hb, -⟩ := decO β
   have hbK := map_decomp_frob (K := K) l hb
-  have key : ∀ j, b j ∈ colon O K G := by
+  have key : ∀ j, b j ∈ colon (O := O) (K := K) G := by
     intro j w hw
     obtain ⟨M, hM, hMeq⟩ := hβ (frobV l w) (fun i => frob_mem_A l (hw i))
     have lift : ∀ k, ∃ μ : O⟦X⟧, PowerSeries.map (algebraMap O K) μ = M k := fun k => by
@@ -54,6 +98,7 @@ theorem colon_map_frob_le : ∀ (O K : Type) [CommRing O] [NormedField K] [IsUlt
         ∑ j : Fin l, X ^ j.val *
           frob K l ((G *ᵥ fun k => PowerSeries.map (algebraMap O K) (c k j)) i) := by
       rw [e1]
+
       simp only [Matrix.mulVec, dotProduct, Matrix.map_apply, hMk, Finset.mul_sum, map_sum, map_mul]
       rw [Finset.sum_comm]
       refine Finset.sum_congr rfl fun j _ => Finset.sum_congr rfl fun k _ => ?_

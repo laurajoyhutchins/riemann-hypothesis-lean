@@ -1,21 +1,65 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.IsSncPatchRat
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.EmbedsGeneric
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.BlowupProjections.BlowupProjStatement
+module
+
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.UnitAtOfMulRight
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsSncModel
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsCompletedStrictHens
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.BoundaryGeneratorUnitStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.BoundaryPointsCoordsStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ChartPrimeGivesComponentStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ComponentGivesChartPrimeStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.KaehlerBasisAdjoinInverseStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LocalizationsEqualBasicOpensStatement
 import Development.AutomorphicSpectrum.Proofs.GeometryProofs.RegAtIsLocalRingIsFractionRingStalk
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.IsUnitIffUnitAt
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.CharZeroCentreOfComplex
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.RegularRingDeterminesComponentStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.UnitAtOfMulRight
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ChartPrimeGivesComponentStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ComponentGivesChartPrimeStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LocalizationsEqualBasicOpensStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.SmoothAdjoinInverseStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.KaehlerBasisAdjoinInverseStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.SncPatchBoundaryUnitsStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.BoundaryGeneratorUnitStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.SncModelFromLocalPatchesStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.BoundaryPointsCoordsStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.RegularRingDeterminesComponentStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.SmoothAdjoinInverseStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.SncModelFromLocalPatchesStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.SncPatchBoundaryUnitsStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Geo ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.Semi GlobalTheory.CompanionTheory.Ar GlobalTheory.CompanionTheory.Ar.SncBase
 
@@ -162,9 +206,10 @@ end GlobalTheory.CompanionTheory.Ar.SncBase.Mdl
 
 namespace GlobalTheory.CompanionTheory.Ar.SncBase
 
-open Mdl in
 
+open Mdl in
 theorem exists_isSncModel_of_patches : ∀ (Ω : Type) [Field Ω] [CharZero Ω] (X : Scheme.{0}) (ξ : Sp Ω ⟶ X) (N : ℕ) (x : Fin (N + 1) → Ω) (e : ℕ) (B : Set (Cpt ξ)), CoordTie ℤ ξ x → (∀ p ∈ B, Char0 ξ p) → (∀ p, Char0 ξ p → ∃ (A : Subalgebra ℚ Ω) (z : Fin e → A) (n : ℕ) (q : Ideal A), IsSncPatch (Pts ξ) (regAt ξ '' B) e A z n ∧ q.IsPrime ∧ IsLocAt A q (regAt ξ p)) → ∃ bd : Ideal (MRing (fun _ : Unit => Fin (N + 1))), Cmp.IsSncModel (fun p : (Σ _ : Unit, Fin (N + 1)) => x p.2) e bd ∧ ∀ (z : Spec (CommRingCat.of ℂ) ⟶ X) w, CoordsAt ξ (fun p : (Σ _ : Unit, Fin (N + 1)) => x p.2) z w → (w ∈ mcPts bd ↔ ∃ h : genPt ξ ⤳ centre z, (⟨centre z, h⟩ : Cpt ξ) ∈ B) := by
+  open Mdl in
   intro Ω _ _ X ξ N x e B hT hB hP
   have hcov := fun c p hp hc => exists_patch (B := B) hT hP c p hp hc
   have hsep : ∀ c (p : Cpt ξ), Char0 ξ p → InChart ξ x c p → p ∉ B →

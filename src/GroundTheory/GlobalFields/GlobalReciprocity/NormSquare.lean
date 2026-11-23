@@ -1,16 +1,57 @@
-import Mathlib
-import GroundTheory.GlobalFields.GlobalReciprocity.InfKerDegreeLeOfLeSupZhatField
-import GroundTheory.LocalFields.AbstractLocalReciprocity.Functoriality
-import GroundTheory.GlobalFields.NormResidueSymbol.Functorial
+module
+
+public import GroundTheory.GlobalFields.GlobalReciprocity.InfKerDegreeLeOfLeSupZhatField
+public import GroundTheory.GlobalFields.NormResidueSymbol.Functorial
+public import GroundTheory.GlobalFields.NormResidueSymbol.Cyclotomic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 namespace GroundTheory.Global
 
 open NumberField IntermediateField GroundTheory.LocalField.Abstract
 open scoped GroundTheory.LocalField.Abstract
 
-local notation "ℚ̄" => AlgebraicClosure ℚ
-
 noncomputable section
+
+local notation "ℚ̄" => AlgebraicClosure ℚ
 
 namespace IdeleClassLimit
 
@@ -21,8 +62,8 @@ section Kernel
 variable (K L : FiniteSubfield) [hKL : Fact (K ≤ L)]
   [(L.1.fixingSubgroup.subgroupOf K.1.fixingSubgroup).Normal]
 
-omit [(L.1.fixingSubgroup.subgroupOf K.1.fixingSubgroup).Normal] in
 
+omit [(L.1.fixingSubgroup.subgroupOf K.1.fixingSubgroup).Normal] in
 theorem normClass_ideleClassNorm (c : IdeleClassGroup L.1) :
     normClass K L (FiniteSubfield.ideleClassNorm hKL.out c) = 1 := by
   change (QuotientGroup.mk (fixedEquiv K (FiniteSubfield.ideleClassNorm hKL.out c)) :
@@ -35,7 +76,7 @@ theorem abstractSymbol_ideleClassNorm_eq_one (c : IdeleClassGroup L.1) :
   rw [abstractSymbol_apply, normClass_ideleClassNorm, map_one, map_one]
 
 theorem exists_abstractSymbol_eq (c : IdeleClassGroup K.1) :
-    ∃ g : K.1.fixingSubgroup, abstractSymbol K L c = Abelianization.of (restrictHom g) := by
+    ∃ g : K.1.fixingSubgroup, abstractSymbol K L c = Group.Abelianization.of (restrictHom g) := by
   obtain ⟨σ, hσ⟩ := QuotientGroup.mk_surjective (abstractSymbol K L c)
   obtain ⟨g, rfl⟩ := restrictHom_surjective (F := K) (E := L) σ
   exact ⟨g, hσ.symm⟩
@@ -48,9 +89,9 @@ variable {K L K' L' : FiniteSubfield} [hKL : Fact (K ≤ L)]
   [(L.1.fixingSubgroup.subgroupOf K.1.fixingSubgroup).Normal] [hKL' : Fact (K' ≤ L')]
   [(L'.1.fixingSubgroup.subgroupOf K'.1.fixingSubgroup).Normal]
 
+
 omit [(L.1.fixingSubgroup.subgroupOf K.1.fixingSubgroup).Normal]
   [(L'.1.fixingSubgroup.subgroupOf K'.1.fixingSubgroup).Normal] in
-
 theorem normTateZero_normClass (hK : K ≤ K') (hL : L ≤ L') (c : IdeleClassGroup K'.1) :
     normTateZero (openSubgroup_le hK) (openSubgroup_le hL) (openSubgroup_le hKL'.out)
         (openSubgroup_le hKL.out) (normClass K' L' c) =
@@ -62,22 +103,22 @@ theorem normTateZero_normClass (hK : K ≤ K') (hL : L ≤ L') (c : IdeleClassGr
   exact congrArg _ (norm_fixedEquiv hK c)
 
 theorem abstractSymbol_ideleClassNorm (hK : K ≤ K') (hL : L ≤ L') (c : IdeleClassGroup K'.1)
-    (g : K'.1.fixingSubgroup) (hg : abstractSymbol K' L' c = Abelianization.of (restrictHom g)) :
+    (g : K'.1.fixingSubgroup) (hg : abstractSymbol K' L' c = Group.Abelianization.of (restrictHom g)) :
     abstractSymbol K L (FiniteSubfield.ideleClassNorm hK c) =
-      Abelianization.of (restrictHom (⟨g, IntermediateField.fixingSubgroup_le
+      Group.Abelianization.of (restrictHom (⟨g, IntermediateField.fixingSubgroup_le
         (show K.1 ≤ K'.1 from hK) g.2⟩ : K.1.fixingSubgroup)) := by
   set D := classFieldTheory.toClassFieldData
   have e : (reciprocityEquiv K' L').symm (normClass K' L' c) =
-      Abelianization.of (QuotientGroup.mk (s := (L'.openSubgroup : Subgroup (ℚ̄ ≃ₐ[ℚ] ℚ̄)).subgroupOf
+      Group.Abelianization.of (QuotientGroup.mk (s := (L'.openSubgroup : Subgroup (ℚ̄ ≃ₐ[ℚ] ℚ̄)).subgroupOf
         K'.openSubgroup) g) := by
     apply (quotientGaloisEquiv K' L').abelianizationCongr.injective
-    rw [abelianizationCongr_of, quotientGaloisEquiv_mk]
+    rw [Group.abelianizationCongr_of, quotientGaloisEquiv_mk]
     exact hg
   rw [abstractSymbol_apply, ← normTateZero_normClass hK hL c]
   have h2 := D.reciprocityAbEquiv_symm_normTateZero classFieldTheory.classFieldAxiom
     (openSubgroup_le hKL.out) (openSubgroup_le hKL'.out) (openSubgroup_le hK) (openSubgroup_le hL)
     (normClass K' L' c)
-  rw [h2, e, Abelianization.map_of, Abelianization.map_of, galRestrict_mk]
+  rw [h2, e, Group.Abelianization.map_of, Group.Abelianization.map_of, galRestrict_mk]
   rfl
 
 instance isScalarTower_of_fact {F E M : FiniteSubfield} [Fact (F ≤ E)] [Fact (E ≤ M)] [Fact (F ≤ M)] :
@@ -87,10 +128,10 @@ instance isScalarTower_of_fact {F E M : FiniteSubfield} [Fact (F ≤ E)] [Fact (
 theorem abstractSymbol_ideleClassNorm_eq_map [hK : Fact (K ≤ K')] [Fact (L ≤ L')] [Fact (K ≤ L')]
     (c : IdeleClassGroup K'.1) :
     abstractSymbol K L (FiniteSubfield.ideleClassNorm hK.out c) =
-      Abelianization.map ((AlgEquiv.restrictNormalHom (F := K.1) (K₁ := L'.1) L.1).comp
+      Group.Abelianization.map ((AlgEquiv.restrictNormalHom (F := K.1) (K₁ := L'.1) L.1).comp
         (restrictScalarsHom (L' := L'.1) K.1)) (abstractSymbol K' L' c) := by
   obtain ⟨g, hg⟩ := exists_abstractSymbol_eq K' L' c
-  rw [abstractSymbol_ideleClassNorm hK.out (Fact.out : L ≤ L') c g hg, hg, Abelianization.map_of]
+  rw [abstractSymbol_ideleClassNorm hK.out (Fact.out : L ≤ L') c g hg, hg, Group.Abelianization.map_of]
   congr 1
   refine AlgEquiv.ext fun x ↦ Subtype.ext ?_
   have h := congrArg (fun z : L'.1 ↦ (z : ℚ̄))

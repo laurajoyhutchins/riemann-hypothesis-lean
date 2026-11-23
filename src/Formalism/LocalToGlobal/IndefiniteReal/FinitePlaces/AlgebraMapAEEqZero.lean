@@ -1,8 +1,52 @@
-import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.SbHalfHalfInd
-import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.FinPartDetAtInvInt
-import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.FstACoordOfInfPart
-import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.IdemSum
-import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.VacExA
+module
+
+public import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.SbHalfHalfInd
+public import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.FinPartDetAtInvInt
+import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.FinPartPhiE
+public import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.FstACoordOfInfPart
+import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.IdemUniq
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -61,6 +105,7 @@ theorem eps_orth {P : Finset (Formalism.L2.DIV.Pl D.host.E)} {e : AE D} {es : Fo
     (hes : ∀ PP ∈ P, Formalism.L2.NTheta.IsIdemAt (es PP) PP) (he : e = ∑ PP ∈ P, es PP) {v : HeightOneSpectrum (𝓞 D.host.F)}
     (hv : ∀ PP ∈ P, belowPl PP ≠ v) :
     (e + cA D e) * algebraMap (AF D.host.F) (AE D) (sA v 1) = 0 := by
+
   rw [he, map_sum, ← Finset.sum_add_distrib, Finset.sum_mul]
   refine Finset.sum_eq_zero fun PP hPP => ?_
   have h1 : es PP * phiE (belowPl PP) 1 = es PP := idemAt_eps (hes PP hPP)
@@ -75,6 +120,7 @@ theorem eps_absorb {P : Finset (Formalism.L2.DIV.Pl D.host.E)} {e : AE D} {es : 
     algebraMap (AF D.host.F) (AE D) (sA (belowPl PP) 1) * (e + cA D e) =
       algebraMap (AF D.host.F) (AE D) (sA (belowPl PP) 1) := by
   have hsum : e + cA D e = ∑ Q ∈ P, phiE (D := D) (belowPl Q) 1 := by
+
     rw [he, map_sum, ← Finset.sum_add_distrib]
     exact Finset.sum_congr rfl fun Q hQ => below_of_idemAt (hes Q hQ)
   change phiE (D := D) (belowPl PP) 1 * (e + cA D e) = phiE (D := D) (belowPl PP) 1
@@ -130,7 +176,7 @@ theorem two_not_mem_of_inert {v : HeightOneSpectrum (𝓞 D.host.F)}
   rw [he0, map_zero, add_zero] at hse
   exact sA_one_ne_zero v (algebraMap_AE_eq_zero hse.symm)
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem loc_fix (hSL : SplitLin D) (hPM : PlaceModelAt D) (hSOI : SplitOrInert D) {ψ : AddChar (AF D.host.F) ℂ}
     {S T : HSp D} {χS χT : (AE D)ˣ →* Circle} {om : GA D S × GA D T →* Module.End ℂ (WO S T → ℂ)}

@@ -1,6 +1,56 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SubPairRight
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ThickeningRestrictionCompatibleOpens
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SubPairRight
+public import Development.AbelianVarietyTheory.Definitions.QuasicoherentCohomology.IsGradedMapLinearCombination
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ThickeningRestrictionCompatibleOpens
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Development.AbelianVarietyTheory.Definitions.ThetaMetrics.TwistingSheafOneChartEqPreimageStandardChart
+import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.ExistsSmulEqMapOfIsCompactOfIsQuasiSeparated
+import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.FormalAlgebraisation.GEClosedProj
+
+@[expose] public section
+
 open CategoryTheory CategoryTheory.Limits AlgebraicGeometry ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Out ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor GlobalTheory GlobalTheory.AbLaw PositivityTheory.FormalThickening
 open GlobalTheory.ProjSpace GlobalTheory.QCoh.Qcqs GlobalTheory.Cartier GlobalTheory.CompanionTheory.FormalAlg GlobalTheory.CompanionTheory.FormalAlg.Lift
 
@@ -129,8 +179,8 @@ theorem nvl_redL (L : ∀ e, LB (Y e).left) (w : ∀ e, LB.Iso (L e) ((L (e + 1)
   show SecOn.congr (hL e).1 hP (w e) (hL e).2 V' ((SecOn.congr (hL e).1 hP (w e) (hL e).2 V').symm _) = _
   exact (SecOn.congr (hL e).1 hP (w e) (hL e).2 V').apply_symm_apply _
 
-include hβ in
 
+include hβ in
 theorem surjective_beta (e : ℕ) : Function.Surjective (β e) := by
   have hf : Function.Surjective (Ideal.Quotient.factor (Ideal.pow_le_pow_right (Nat.le_succ (e + 1))) :
       R ⧸ I ^ (e + 1 + 1) →+* R ⧸ I ^ (e + 1)) := Ideal.Quotient.factor_surjective _
@@ -248,6 +298,7 @@ theorem exists_pow_mul_eq_algebraMap {A B : Type} [CommRing A] [CommRing B] [Alg
       rw [this]; simp
   choose! a ha using hterm
   refine ⟨∑ i ∈ Finset.range (K + 1), a i, ?_⟩
+
   rw [map_sum, Finset.sum_congr rfl ha, hc, add_comm (algebraMap A B f), add_pow, Finset.sum_mul]
   refine Finset.sum_congr rfl fun i hi => ?_
   ring
@@ -327,11 +378,6 @@ def genPow (τ : SecOn (pw N d) V) (y : SecOn (pw N (-d)) V)
       have e := congrArg (· ^ n) (genU_rel τ y hy i j hi hj hij)
       simp only [mul_zpow, ← zpow_mul, ← map_zpow] at e
       exact congrArg Units.val e)
-
-@[simp] theorem coord_genPow (τ : SecOn (pw N d) V) (y : SecOn (pw N (-d)) V)
-    (hy : secMulOn rfl τ y = oneOn N (add_neg_cancel d) V) (n c : ℤ) (hc : c = d * n) (i : N.ι) :
-    GlobalTheory.LB.coord (L := pw N c) (genPow τ y hy n c hc) i =
-      ((genU τ y hy i ^ n : Γ(X, V ⊓ N.U i)ˣ) : Γ(X, V ⊓ N.U i)) := rfl
 
 end Core
 end GlobalTheory.CompanionTheory.FormalAlg.Lift

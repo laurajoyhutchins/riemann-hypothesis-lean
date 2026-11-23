@@ -1,15 +1,62 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.KronHolPsiStatementHolds
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.PoinStatementPfI
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.ExhaustStatementPfA
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.MeasurePreservingCurry
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LintegralFlagDensityFibreBoundedDomain
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LeadingMinorFlagDensityGlueLowerUnitriangular
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LeadingMinorBlockDecomposition
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LintegralPiFibreMeasurePreserving
+module
+
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsBlockOrderedSumEquivTrueIndex
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsOpenAndFderivMoebI
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LeadingMinorBlockDecomposition
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LeadingMinorFlagDensityGlueLowerUnitriangular
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LintegralFlagDensityFibreBoundedDomain
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LintegralPiFibreMeasurePreserving
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.MeasurePreservingCurry
 import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.MeasurePreservingFlagFibreChartCoordinates
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsOpenAndFderivMoebI
-import Development.AbelianVarietyTheory.Proofs.TorusHaarMeasure.ExistsMixedProj
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.MeasurePreservingGlueLowerUnitriangularBlocksStatement
+public import Development.AbelianVarietyTheory.Proofs.TorusHaarMeasure.ExistsMixedProj
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.Real.Pi.Bounds
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.MeasureTheory.Measure.Lebesgue.VolumeOfBalls
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.ExhaustFStatementPfC
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.ExhaustStatementPfA
+
+@[expose] public section
 
 open NumberField ReciprocityTheory.ChartRestriction.G.FD ReciprocityTheory.ChartRestriction.G.AR.Inst ReciprocityTheory.ChartRestriction.G.AR.Up ReciprocityTheory.L2DbarEstimates MeasureTheory
 open Matrix Formalism.DegreeFormula Formalism.MJ GlobalTheory.TrueCx GlobalTheory.FlagFibre
@@ -129,7 +176,7 @@ namespace GlobalTheory.KernelIntegral
 
 variable {E : Type} [Field E] [NumberField E] [IsCMField E] {r : ℕ}
 
-def cube (p q : ℕ) : Set (Fin p × Fin q → ℂ) := Set.univ.pi fun _ => Metric.closedBall (0 : ℂ) 1
+noncomputable def cube (p q : ℕ) : Set (Fin p × Fin q → ℂ) := Set.univ.pi fun _ => Metric.closedBall (0 : ℂ) 1
 
 theorem fibre_bound (X : Data E r) {j : ℕ} (hj : j ≤ r) (hp : X.p0 = r - j) {bb : ℝ} (hbb : (r : ℝ) ≤ bb)
     (v : Fin j × Fin (r - j) → ℂ) :
@@ -167,7 +214,7 @@ theorem lintegral_x0F_le (X : Data E r) {j : ℕ} (hj : j ≤ r) (hp : X.p0 = r 
   have hDm : Measurable D := (measurable_dens _).ennreal_ofReal
   have hφm : Measurable φ := Finset.measurable_prod _ fun t _ => (measurable_wt _ _ _).comp (measurable_pi_apply t)
   have hGm : Measurable G :=
-    (hφm.comp (measurable_pi_lambda _ fun t => (measurable_base _).comp (measurable_pi_apply t))).mul
+    (hφm.comp (Measurable.of_eval fun t => (measurable_base _).comp (measurable_pi_apply t))).mul
       (Finset.measurable_prod _ fun t _ => hDm.comp (measurable_pi_apply t))
   have hco := GlobalTheory.FlagFibre.measurePreserving_coords_sorted E r X X.Ψ κ
   have hdm : Measurable fun z => ENNReal.ofReal (densF X (x0F X) z) := by
@@ -224,7 +271,7 @@ theorem one_div_flagConst_le (m : ℕ) : 1 / flagConst m ≤ Real.pi ^ (m * m) :
     have e : (Real.pi ^ (m * m))⁻¹ = ∏ _i ∈ Finset.range m, (Real.pi ^ m)⁻¹ := by
       rw [Finset.prod_const, Finset.card_range, pow_mul, inv_pow]
     rw [e, flagConst]
-    refine Finset.prod_le_prod (fun _ _ => by positivity) fun i hi => ?_
+    refine Finset.prod_le_prod₀ (fun _ _ => by positivity) fun i hi => ?_
     have hi' : i ≤ m := (Finset.mem_range.1 hi).le
     have h1 : (1 : ℝ) ≤ i.factorial := by exact_mod_cast i.factorial_pos
     calc (Real.pi ^ m)⁻¹ ≤ (Real.pi ^ i)⁻¹ :=

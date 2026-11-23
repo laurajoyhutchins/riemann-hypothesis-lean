@@ -1,5 +1,46 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.RowFrameCoherence
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.RowFrameCoherence
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -14,6 +55,7 @@ section HS
 variable {Wq Wp : Type} [NormedAddCommGroup Wq] [InnerProductSpace ℂ Wq] [FiniteDimensional ℂ Wq]
   [NormedAddCommGroup Wp] [InnerProductSpace ℂ Wp] [FiniteDimensional ℂ Wp]
 
+omit [FiniteDimensional ℂ Wp] in
 theorem norm_hsEmb_sq_sum (A : Wq →L[ℂ] Wp) :
     ‖hsEmb A‖ ^ 2 = ∑ i, ‖A (stdOrthonormalBasis ℂ Wq i)‖ ^ 2 := by
   rw [PiLp.norm_sq_eq_of_L2]
@@ -22,8 +64,8 @@ theorem norm_hsEmb_sq_sum (A : Wq →L[ℂ] Wp) :
 theorem sum_norm_sq_indep {ι ι' : Type} [Fintype ι] [Fintype ι'] (A : Wq →L[ℂ] Wp)
     (e : OrthonormalBasis ι ℂ Wq) (e' : OrthonormalBasis ι' ℂ Wq) :
     ∑ i, ‖A (e i)‖ ^ 2 = ∑ i, ‖A (e' i)‖ ^ 2 := by
-  haveI : CompleteSpace Wq := FiniteDimensional.complete ℂ Wq
-  haveI : CompleteSpace Wp := FiniteDimensional.complete ℂ Wp
+  have : CompleteSpace Wq := FiniteDimensional.completeSpace ℂ Wq
+  have : CompleteSpace Wp := FiniteDimensional.completeSpace ℂ Wp
 
   have key : ∀ {κ : Type} [Fintype κ] (b : OrthonormalBasis κ ℂ Wq),
       ∑ i, ‖A (b i)‖ ^ 2 = ∑ k, ‖(ContinuousLinearMap.adjoint A) (stdOrthonormalBasis ℂ Wp k)‖ ^ 2 := by
@@ -56,18 +98,22 @@ theorem norm_hsEmb_conj (U : Wp ≃ₗᵢ[ℂ] Wp) (U' : Wq ≃ₗᵢ[ℂ] Wq) (
 def opOf (x : HS Wq Wp) : Wq →L[ℂ] Wp :=
   ∑ i, (innerSL ℂ (stdOrthonormalBasis ℂ Wq i)).smulRight (x i)
 
+omit [FiniteDimensional ℂ Wp] in
 theorem opOf_apply (x : HS Wq Wp) (e : Wq) :
     opOf x e = ∑ i, inner ℂ (stdOrthonormalBasis ℂ Wq i) e • x i := by
   simp [opOf]
 
+omit [FiniteDimensional ℂ Wp] in
 theorem hsEmb_opOf (x : HS Wq Wp) : hsEmb (opOf x) = x := by
   ext j
   simp [hsEmb, opOf_apply, orthonormal_iff_ite.mp (stdOrthonormalBasis ℂ Wq).orthonormal]
 
+omit [FiniteDimensional ℂ Wp] in
 theorem opOf_hsEmb (A : Wq →L[ℂ] Wp) : opOf (hsEmb A) = A := by
   ext e
   rw [opOf_apply]
   conv_rhs => rw [← (stdOrthonormalBasis ℂ Wq).sum_repr' e]
+
   simp [hsEmb, map_sum, map_smul]
 
 def opOfL : HS Wq Wp →ₗ[ℂ] (Wq →L[ℂ] Wp) where
@@ -158,7 +204,7 @@ theorem classFrameC_of
             (Formalism.L2.SG.RealObj.unscaledOperatorAtPointRepresentative X u u' 1 i0 i0' νq (Formalism.L2.SG.PairVal.ptOf s.1.toTerm))) := by
     congr 1
     funext s
-    simp only [liftVec]
+    unfold liftVec
     rw [hs s]
     simp only [map_smul, ClassFrameOperators.conjL_hsEmb, smul_smul]
     congr 1

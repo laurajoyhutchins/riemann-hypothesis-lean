@@ -1,8 +1,50 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.ScalarEquivalenceGeneral.ScalarFactorEqOneOfLe
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.BetaUniqueness.GramNondeg
+module
+
+public import Formalism.SharpRestriction.CuspSpanNormBounds.IsPrimitiveSub
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.BetaUniqueness.GramNondeg
 import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.BetaUniqueness.Lemmas
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.ScalarEquivalenceGeneral.ScalarFactorEqOneOfLe
 import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.ScalarPairOrthogonal.XLeOrthXplus
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -93,14 +135,14 @@ theorem zt_mem (F : LFlag S r T) (F' : LFlag S r T') : F.zt ∈ UUE Λ F F' ∧ 
     unfold UU
     exact Submodule.mem_sup_right (Submodule.mem_span_singleton_self _)
 
-theorem xplus_le (hΛ : Submodule.IsLattice E Λ) (F : LFlag S r T) (F' : LFlag S r T') (hz : F.zt = F.fl.z) :
+theorem xplus_le (hΛ : Submodule.IsFullLattice E Λ) (F : LFlag S r T) (F' : LFlag S r T') (hz : F.zt = F.fl.z) :
     Xplus F ≤ UUE Λ F F' := by
   change F.fl.X ⊔ Submodule.span E {F.fl.z} ≤ _
   refine sup_le (PI.UnitaryGroupMassFormula.BetaLUniq.Xsp_le_UUE S Λ hΛ F F') ?_
   rw [Submodule.span_le, Set.singleton_subset_iff, ← hz]
   exact (zt_mem (Λ := Λ) F F').1
 
-theorem xplus_le' (hΛ : Submodule.IsLattice E Λ) (F : LFlag S r T) (F' : LFlag S r T') (hz' : F'.zt = F'.fl.z) :
+theorem xplus_le' (hΛ : Submodule.IsFullLattice E Λ) (F : LFlag S r T) (F' : LFlag S r T') (hz' : F'.zt = F'.fl.z) :
     Xplus F' ≤ UUE Λ F F' := by
   change F'.fl.X ⊔ Submodule.span E {F'.fl.z} ≤ _
   refine sup_le (PI.UnitaryGroupMassFormula.BetaLUniq.Xsp_le_UUE' S Λ hΛ F F') ?_
@@ -127,9 +169,9 @@ theorem ylift_rev (hTh : Th Λ F F' F'' β = Hp Λ F F') {y : S.V} (hy : y ∈ Y
     PI.UnitaryGroupMassFormula.ScalEquivGen.memOrthQ.mp (PI.UnitaryGroupMassFormula.ScalEquivGen.orthAntiQ (PI.UnitaryGroupMassFormula.ScalEquivGen.XspLeXplusQ F) hy2) _ hp.1.2
   show S.hT p.1 y = 0
   have e : p.1 = (p.1 - p.2) + p.2 := by abel
-  rw [e, map_add, LinearMap.add_apply, e1, e2, add_zero]
+  rw [e, map_add (f := _), LinearMap.add_apply, e1, e2, add_zero]
 
-variable (hΛ : Submodule.IsLattice E Λ) (hz : F.zt = F.fl.z) (hz' : F'.zt = F'.fl.z) (hz'' : F''.zt = F''.fl.z)
+variable (hΛ : Submodule.IsFullLattice E Λ) (hz : F.zt = F.fl.z) (hz' : F'.zt = F'.fl.z) (hz'' : F''.zt = F''.fl.z)
 include hΛ hz hz' hz''
 
 theorem firstNormal_transport (hT : T ≠ 0) (hTh : Th'' Λ F F' F'' β = Hp Λ F F'') (hSc : IsScalar Λ F F' F'' β)
@@ -274,22 +316,22 @@ theorem secondNormal_transport (hT' : T' ≠ 0) (hi : β ∈ Formalism.Hermitian
   have hzz'' : S.hT F''.fl.z F''.fl.z = S.hT F'.fl.z F'.fl.z := by rw [← hβz, hi]
   have k1 : ∀ b, S.hT (F''.fl.e b) (a • F.fl.z + -x₃) = 0 := by
     intro b
-    rw [hx2, map_add, map_add, map_smul, (orth_xplus_iff F'').1 hbyO |>.1 b, F''.fl.z_orth b,
+    rw [hx2, map_add (f := _), map_add (f := _), map_smul, (orth_xplus_iff F'').1 hbyO |>.1 b, F''.fl.z_orth b,
       e_X F''.fl b hx'', smul_zero, zero_add, add_zero]
   have k2 : S.hT F''.fl.z (a • F.fl.z + -x₃) = 1 := by
-    rw [hx2, map_add, map_add, map_smul, (orth_xplus_iff F'').1 hbyO |>.2, z_X F''.fl hx'', hzz'', smul_eq_mul,
+    rw [hx2, map_add (f := _), map_add (f := _), map_smul, (orth_xplus_iff F'').1 hbyO |>.2, z_X F''.fl hx'', hzz'', smul_eq_mul,
       hc, inv_mul_cancel₀ hzz, zero_add, add_zero]
   refine ⟨fun b => ?_, ?_, ?_⟩
   · rw [hswap, k1 b, star_zero]
   · rw [hswap, k2, star_one]
   · have hs : β.symm F''.fl.z = F'.fl.z := by rw [← hβz]; simp
-    rw [hx2, map_add, map_add, map_smul, LinearEquiv.symm_apply_apply, hs, hy]
+    rw [hx2, map_add (f := _), map_add (f := _), map_smul, LinearEquiv.symm_apply_apply, hs, hy]
     have : x₁ - c • F'.fl.z + c • F'.fl.z + β.symm x'' - x₁ = β.symm x'' := by abel
     rw [this]
     exact symm_X hβe hx''
 
-omit hz hz' hz'' hΛ in
 
+omit hz hz' hz'' hΛ in
 theorem orthogonal_transport (hTh : Th'' Λ F F' F'' β = Hp Λ F F'') {y₂ : S.V} (hy : y₂ ∈ Hp Λ F F'') :
     ∃ y₁ ∈ Hp Λ F F', y₁ - y₂ ∈ Xsp F ∧ β y₁ - y₂ ∈ Xsp F'' := by
   rw [← hTh] at hy

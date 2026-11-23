@@ -1,5 +1,48 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerVolume.DensVGen
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerVolume.DensVGen
+import Aesop.Main
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -13,13 +56,6 @@ variable {V X Y : Type} [AddCommGroup V] [TopologicalSpace V] [IsTopologicalAddG
   [MeasurableSpace V] [OpensMeasurableSpace V]
   [TopologicalSpace X] [MeasurableSpace X] [OpensMeasurableSpace X] [T2Space X]
   {μ : Measure V} {f : V → Y} {ι : X → Y} {ν : Measure X}
-
-def DensCos (μ : Measure V) (f : V → Y) (ι : X → Y) (ν : Measure X) (U : Set V) : Prop :=
-  ∀ x ∈ U, ∃ N ∈ 𝓝 (0 : V), ∀ y, y - x ∈ N → ∀ Λ : AddSubgroup V, IsOpen (Λ : Set V) →
-    IsCompact (Λ : Set V) → (Λ : Set V) ⊆ N → ∃ g : X → ℝ, Continuous g ∧
-      ∀ S : Set X, IsCompact S →
-        ∫ v in f ⁻¹' (ι '' S), {z | z - y ∈ Λ}.indicator (fun _ => (1 : ℝ)) v ∂μ =
-          ∫ b in S, g b ∂ν
 
 theorem hasDens_zero : HasDens μ f ι ν (fun _ => 0) (fun _ => 0) :=
   ⟨integrable_zero _ _ _, continuous_const, fun S _ => by simp⟩
@@ -52,8 +88,8 @@ def DensCosB (B : AddSubgroup V → Prop) (μ : Measure V) (f : V → Y) (ι : X
         ∫ v in f ⁻¹' (ι '' S), {z | z - y ∈ Λ}.indicator (fun _ => (1 : ℝ)) v ∂μ =
           ∫ b in S, g b ∂ν
 
-omit [IsTopologicalAddGroup V] in
 
+omit [IsTopologicalAddGroup V] in
 def IsCOBasis (B : AddSubgroup V → Prop) : Prop :=
   ∀ N ∈ 𝓝 (0 : V), ∃ Λ : AddSubgroup V, B Λ ∧ IsOpen (Λ : Set V) ∧ IsCompact (Λ : Set V) ∧
     (Λ : Set V) ⊆ N
@@ -180,14 +216,6 @@ theorem densLC_of_cosB [IsFiniteMeasureOnCompacts μ] [IsFiniteMeasureOnCompacts
       exact QuotientAddGroup.eq.2 (by rw [neg_add_eq_sub]; exact hxy)
   rw [heq] at hsum
   exact ⟨_, hsum.2.1, hsum.2.2⟩
-
-theorem densLC_of_cos [IsFiniteMeasureOnCompacts μ] [IsFiniteMeasureOnCompacts ν] (U : Set V)
-    (hNA : HasCOSub V) (h : DensCos μ f ι ν U) : DensOn (IsLCcOn U) μ f ι ν := by
-  refine densLC_of_cosB U (fun _ => True) (fun N hN => ?_) (fun x hx => ?_)
-  · obtain ⟨Λ, ho, hc, hs⟩ := hNA N hN
-    exact ⟨Λ, trivial, ho, hc, hs⟩
-  · obtain ⟨N, hN, hd⟩ := h x hx
-    exact ⟨N, hN, fun y hy Λ _ ho hc hs => hd y hy Λ ho hc hs⟩
 
 end Cos
 

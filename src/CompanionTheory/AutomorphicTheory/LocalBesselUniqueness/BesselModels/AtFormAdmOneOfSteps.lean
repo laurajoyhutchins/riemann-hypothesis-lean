@@ -1,12 +1,62 @@
-import CompanionTheory.HarishChandraModules.BesselParameterIntegrals.BesselOrbitConvolutions.BesselNonvanishingReduction
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.L2NormScaling
+module
+
+public import CompanionTheory.HarishChandraModules.BesselParameterIntegrals.BesselOrbitConvolutions.BesselNonvanishingReduction
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.L2NormScaling
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.SmoothAdd
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.UhMeasurableSet
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MeasureTheory Matrix Finset
 open scoped InnerProductSpace ENNReal NNReal ComplexConjugate
 
 noncomputable section
 
-set_option maxHeartbeats 1600000
+
 
 namespace CompanionTheory.Lime.BM
 
@@ -24,9 +74,6 @@ def UniqGap : Prop :=
       PI.BesselMapUniq.IsBesselMapSm (k := k) (r := r) z (PI.BesselMapUniq.psiGen k r z c) σ π B₁ →
       PI.BesselMapUniq.IsBesselMapSm (k := k) (r := r) z (PI.BesselMapUniq.psiGen k r z c) σ π B₂ →
       ∃ a b : ℂ, (a ≠ 0 ∨ b ≠ 0) ∧ ∀ v ∈ PI.UpqRep.smoothVecs (k := k) (r := r) σ, a • B₁ v + b • B₂ v = 0
-
-theorem uniqGap_of_uniq (h : PI.BesselMapUniq.BesselMapUniq) : UniqGap :=
-  fun k r ε lam _ H _ _ σ z c u Wp _ _ π _ _ _ => h k r ε lam H σ z c u Wp π
 
 def Shape : Prop :=
   CompanionTheory.D.Upq.BesselFunctionalConstruction.Inputs → ∀ (k r : ℕ) (ε : Fin (2 * r + k + 1) → Bool) (lam : Fin (2 * r + k + 1) → ℝ) (h : ℝ)
@@ -49,15 +96,6 @@ def DDFormOne : Prop :=
     Side k r ε lam h σ w0 z c u π μW μN μG νq →
     DDForm z c π μW μN μG νq σ w0
 
-def AtFormOne : Prop :=
-  CompanionTheory.D.Upq.BesselFunctionalConstruction.Inputs → ∀ (k r : ℕ) (ε : Fin (2 * r + k + 1) → Bool) (lam : Fin (2 * r + k + 1) → ℝ) (h : ℝ)
-    (H : Type) [NormedAddCommGroup H] [InnerProductSpace ℂ H] [CompleteSpace H] (σ : Mx k r → (H →L[ℂ] H)) (w0 : H)
-    (Wp : Type) [NormedAddCommGroup Wp] [InnerProductSpace ℂ Wp] [CompleteSpace Wp] [FiniteDimensional ℂ Wp]
-    (z : Fin (2 * r + k + 1) → ℂ) (c : ℂ) (u : Fin k → ℝ) (π : Mx k r → (Wp →L[ℂ] Wp))
-    (μW μN μG νq : Measure (Formalism.QuantumDeterminants.Mt k r)),
-    Side k r ε lam h σ w0 z c u π μW μN μG νq →
-    AtForm z c π μW μN μG νq σ
-
 def AtFormAdmOne : Prop :=
   CompanionTheory.D.Upq.BesselFunctionalConstruction.Inputs → ∀ (k r : ℕ) (ε : Fin (2 * r + k + 1) → Bool) (lam : Fin (2 * r + k + 1) → ℝ) (h : ℝ)
     (H : Type) [NormedAddCommGroup H] [InnerProductSpace ℂ H] [CompleteSpace H] (σ : Mx k r → (H →L[ℂ] H)) (w0 : H)
@@ -69,9 +107,6 @@ def AtFormAdmOne : Prop :=
 
 def DDFormOneOfSteps : Prop :=
   PsiConst → SchurH → NormInv → GrowthS → GrowthG → CompanionTheory.D.Upq.BesselFunctionalConstruction.DecDD → CompanionTheory.D.Upq.BesselFunctionalConstruction.BeConv → CompanionTheory.D.Upq.BesselFunctionalConstruction.NormIdSm → CompanionTheory.D.Upq.BesselFunctionalConstruction.BeBessel → Shape → DDFormOne
-
-def AtFormOneOfSteps : Prop :=
-  SchurH → CompanionTheory.D.Upq.BesselFunctionalConstruction.BeConv → CompanionTheory.D.Upq.BesselFunctionalConstruction.NormIdSm → CompanionTheory.D.Upq.BesselFunctionalConstruction.BeBessel → Shape → CompanionTheory.D.Upq.BesselFunctionalConstruction.KFinForm → CompanionTheory.D.Upq.BesselFunctionalConstruction.ZeroCase → AtFormOne
 
 def AtFormAdmOneOfSteps : Prop :=
   SchurH → CompanionTheory.D.Upq.BesselFunctionalConstruction.BeConv → CompanionTheory.D.Upq.BesselFunctionalConstruction.NormIdSm → CompanionTheory.D.Upq.BesselFunctionalConstruction.BeBessel → Shape → CompanionTheory.D.Upq.BesselFunctionalConstruction.KFinForm → CompanionTheory.D.Upq.BesselFunctionalConstruction.ZeroCase → CompanionTheory.D.Upq.BesselFunctionalConstruction.ZeroCaseDD → AtFormAdmOne

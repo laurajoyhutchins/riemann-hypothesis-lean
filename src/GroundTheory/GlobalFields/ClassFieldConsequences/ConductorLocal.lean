@@ -1,8 +1,52 @@
-import Mathlib
-import GroundTheory.GlobalFields.ClassFieldConsequences.RayClassField
-import GroundTheory.GlobalFields.IdeleGroups.LocalConditionIndex
-import GroundTheory.GlobalFields.TateThesis.LocalConductor
-import GroundTheory.GlobalFields.TateThesis.ConductorIdeal
+module
+
+public import GroundTheory.GlobalFields.ClassFieldConsequences.CongruenceSubgroupLeStandardOpenSubgroup
+public import GroundTheory.GlobalFields.NormResidueSymbol.RangeFiniteLocalNormLeKerLocalSymbol
+public import GroundTheory.GlobalFields.ClassFieldConsequences.RayClassFieldLocal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+
+@[expose] public section
 
 namespace GroundTheory.Global
 
@@ -14,14 +58,6 @@ variable {K : Type*} [Field K] [NumberField K]
 
 namespace Modulus
 
-omit [NumberField K] in
-
-theorem ext' {𝔪 𝔫 : Modulus K} (hi : 𝔪.ideal = 𝔫.ideal) (hr : 𝔪.real = 𝔫.real) : 𝔪 = 𝔫 := by
-  cases 𝔪
-  cases 𝔫
-  cases hi
-  cases hr
-  rfl
 
 instance : Dvd (Modulus K) :=
   ⟨fun 𝔪 𝔫 ↦ 𝔪.ideal ∣ 𝔫.ideal ∧ 𝔪.real ⊆ 𝔫.real⟩
@@ -36,8 +72,11 @@ theorem dvd_refl' (𝔪 : Modulus K) : 𝔪 ∣ 𝔪 :=
 
 theorem ideal_dvd_ideal_iff {𝔪 𝔫 : Modulus K} :
     𝔪.ideal ∣ 𝔫.ideal ↔ ∀ v, 𝔪.exponent v ≤ 𝔫.exponent v := by
-  rw [← Ideal.finprod_heightOneSpectrum_pow_multiplicity 𝔪.ideal_ne_bot]
-  exact finprod_asIdeal_pow_dvd_iff 𝔪.finite_support_exponent 𝔫.ideal_ne_bot
+  have he (𝔞 : Modulus K) (v : HeightOneSpectrum (𝓞 K)) :
+      𝔞.exponent v = multiplicity v.asIdeal 𝔞.ideal := by
+    simp [exponent, FiniteMultiplicity.of_prime_left v.prime 𝔞.ideal_ne_bot]
+  simpa only [he, Ideal.finprod_heightOneSpectrum_pow_multiplicity 𝔪.ideal_ne_bot] using
+    (finprod_asIdeal_pow_dvd_iff 𝔪.finite_support_exponent 𝔫.ideal_ne_bot)
 
 end Modulus
 

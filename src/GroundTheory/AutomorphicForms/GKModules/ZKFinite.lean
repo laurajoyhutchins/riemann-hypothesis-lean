@@ -1,5 +1,55 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.GKModules.RightRegular
+module
+
+public import GroundTheory.AutomorphicForms.GKModules.RightRegular
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Finiteness.Lattice
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GroundTheory.Automorphic
 
@@ -26,7 +76,7 @@ noncomputable def AdLie (g : G) : h.lieSubalgebra →ₗ⁅ℝ⁆ h.lieSubalgebr
   map_add' X Y := by
     apply Subtype.ext
     show ((h.Ad g (h.ofLie X + h.ofLie Y) : 𝔤) : 𝔸) = _
-    rw [map_add]; rfl
+    rw [map_add (f := _)]; rfl
   map_smul' r X := by
     apply Subtype.ext
     show ((h.Ad g (r • h.ofLie X) : 𝔤) : 𝔸) = _
@@ -143,11 +193,11 @@ theorem rightTranslate_comp_rightUAction (a : G) (u : UniversalEnvelopingAlgebra
 
 variable (K : Subgroup G)
 
-def zkSpan (f : h.smoothFuns (F := F)) : Submodule ℂ (h.smoothFuns (F := F)) :=
+noncomputable def zkSpan (f : h.smoothFuns (F := F)) : Submodule ℂ (h.smoothFuns (F := F)) :=
   Submodule.span ℂ (range fun p : h.centerU × K =>
     h.rightUAction (p.1 : UniversalEnvelopingAlgebra ℝ h.lieSubalgebra) (h.rightTranslateEnd (p.2 : G) f))
 
-def zSpan (f : h.smoothFuns (F := F)) : Submodule ℂ (h.smoothFuns (F := F)) :=
+noncomputable def zSpan (f : h.smoothFuns (F := F)) : Submodule ℂ (h.smoothFuns (F := F)) :=
   Submodule.span ℂ ((fun z => h.rightUAction z f) '' (h.centerU : Set _))
 
 theorem self_mem_zkSpan (f : h.smoothFuns (F := F)) : f ∈ h.zkSpan K f :=
@@ -191,7 +241,7 @@ theorem finiteDimensional_zkSpan (f : h.smoothFuns (F := F))
       rw [zSpan, Submodule.span_le]
       rintro _ ⟨z, hz, rfl⟩
       dsimp only
-      rw [SetLike.mem_coe, map_add]
+      rw [SetLike.mem_coe, map_add (f := _)]
       exact Submodule.add_mem_sup (Submodule.subset_span ⟨z, hz, rfl⟩)
         (Submodule.subset_span ⟨z, hz, rfl⟩)
     | smul c x _ hx =>
@@ -214,6 +264,7 @@ theorem finiteDimensional_zkSpan (f : h.smoothFuns (F := F))
     rw [Submodule.coe_sum]
     simp only [Submodule.coe_smul]
   simp only [SetLike.mem_coe]
+
   rw [e, map_sum]
   refine Submodule.sum_mem _ fun i _ => ?_
   rw [map_smul]
@@ -229,7 +280,7 @@ theorem rightUAction_mem_zkSpan (f : h.smoothFuns (F := F))
     rw [← Module.End.mul_apply, ← map_mul]
     exact Submodule.subset_span ⟨(⟨z * z', Subalgebra.mul_mem _ hz z'.2⟩, k), rfl⟩
   | zero => simp
-  | add x y _ _ hx hy => rw [map_add]; exact Submodule.add_mem _ hx hy
+  | add x y _ _ hx hy => rw [map_add (f := _)]; exact Submodule.add_mem _ hx hy
   | smul c x _ hx => rw [map_smul]; exact Submodule.smul_mem _ c hx
 
 theorem rightTranslate_mem_zkSpan (f : h.smoothFuns (F := F)) (k' : K)
@@ -244,7 +295,7 @@ theorem rightTranslate_mem_zkSpan (f : h.smoothFuns (F := F)) (k' : K)
     rw [e, ← Module.End.mul_apply (h.rightTranslateEnd (k' : G)), rightTranslateEnd_mul]
     exact Submodule.subset_span ⟨(⟨_, h.AdU_mem_centerU (k' : G) z.2⟩, k' * k), rfl⟩
   | zero => simp
-  | add x y _ _ hx hy => rw [map_add]; exact Submodule.add_mem _ hx hy
+  | add x y _ _ hx hy => rw [map_add (f := _)]; exact Submodule.add_mem _ hx hy
   | smul c x _ hx => rw [map_smul]; exact Submodule.smul_mem _ c hx
 
 theorem rightDeriv_mem_of_isKStable {V : Submodule ℂ (h.smoothFuns (F := F))}

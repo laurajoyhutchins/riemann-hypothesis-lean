@@ -1,5 +1,47 @@
-import Mathlib
-import Formalism.LocalToGlobal.IndefiniteReal.TransferStatement
+module
+
+public import Formalism.LocalToGlobal.IndefiniteReal.TransferStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Module NumberField IsDedekindDomain
 
@@ -81,7 +123,7 @@ def Core : Prop :=
         CoreData (τ s) H₀ χ₀ H χ γ δ c Γ
 
 def Metric : Prop :=
-  ∀ (K : Type) [Field K] [NumberField K] [IsTotallyComplex K] [StarRing K]
+  ∀ (K : Type) [Field K] [NumberField K] [_root_.NumberField.IsTotallyComplex K] [StarRing K]
     (G : Type) [Group G] [Fintype G]
     (V : Type) [AddCommGroup V] [Module K V] [Module (𝓞 K) V] [IsScalarTower (𝓞 K) K V]
     (ι : Type) [Fintype ι] [DecidableEq ι] (b : Basis ι K V)
@@ -93,21 +135,12 @@ def Metric : Prop :=
     ∀ (H : Subgroup G) (χ : H →* (𝓞 K)ˣ) (g : G) (v : InfinitePlace K),
       opNormAt b X b X v (epP H χ ρ ∘ₗ ρ g) ≤ 1
 
-def UnitOfNorm : Prop :=
-  ∀ (K : Type) [Field K] [NumberField K] [IsTotallyComplex K] [StarRing K]
-    (G : Type) [Group G] [Fintype G]
-    (V : Type) [AddCommGroup V] [Module K V] [Module (𝓞 K) V] [IsScalarTower (𝓞 K) K V]
-    (ι : Type) [Fintype ι] [DecidableEq ι] (b : Basis ι K V)
-    (X : InfinitePlace K → Matrix ι ι ℂ) (ρ : Representation K G V),
-    (∀ (g : G) (v : InfinitePlace K) (x : V),
-      Formalism.HermitianLatticesTheory.normAt b X v (ρ g x) = Formalism.HermitianLatticesTheory.normAt b X v x) → IsUnitaryRep b X ρ
-
 def LiftChar : Prop :=
   ∀ (K : Type) [Field K] [NumberField K] (H : Type) [Group H] [Finite H] (χ : H →* Kˣ),
     ∃ χ' : H →* (𝓞 K)ˣ, ∀ h, (((χ' h : (𝓞 K)ˣ) : 𝓞 K) : K) = ((χ h : Kˣ) : K)
 
 def AllPartsTransfer : Prop :=
-  ∀ (K : Type) [Field K] [NumberField K] [IsTotallyComplex K] [StarRing K] (G : Type) [Group G]
+  ∀ (K : Type) [Field K] [NumberField K] [_root_.NumberField.IsTotallyComplex K] [StarRing K] (G : Type) [Group G]
     [Fintype G] (S : Type) [Fintype S] (T : S → Type) [∀ s, AddCommGroup (T s)]
     [∀ s, Module K (T s)] [∀ s, FiniteDimensional K (T s)] (τ : ∀ s, Representation K G (T s))
     (H₀ : Subgroup G) (χ₀ : H₀ →* (𝓞 K)ˣ) (H : Subgroup G) (χ : H →* (𝓞 K)ˣ),
@@ -117,56 +150,5 @@ def AllPartsTransfer : Prop :=
         (X : InfinitePlace K → Matrix ι ι ℂ) (ρ : Representation K G V),
         (∀ v, IsUnit (X v).det) → IsUnitaryRep b X ρ →
         ∀ A : Submodule (𝓞 K) V, IsGLat ρ A → TransferLatticeConditions τ H₀ χ₀ H χ b X ρ A
-
-def matAct {K : Type} [Field K] {V : Type} [AddCommGroup V] [Module K V] {n : ℕ}
-    (Γ : Matrix (Fin n) (Fin n) K) : (Fin n → V) →ₗ[K] (Fin n → V) :=
-  LinearMap.pi fun i => ∑ j, Γ i j • LinearMap.proj j
-
-def IdxBasic : Prop :=
-  ∀ (K : Type) [Field K] [NumberField K] (w : HeightOneSpectrum (𝓞 K))
-    (V : Type) [AddCommGroup V] [Module K V] [Module (𝓞 K) V] [IsScalarTower (𝓞 K) K V],
-    (∀ M N P : Submodule (𝓞 K) V, M.FG → N.FG → P.FG →
-      Submodule.span K (M : Set V) = Submodule.span K (N : Set V) →
-      Submodule.span K (N : Set V) = Submodule.span K (P : Set V) →
-      idxW w M N + idxW w N P = idxW w M P) ∧
-    (∀ M N : Submodule (𝓞 K) V, N ≤ M → 0 ≤ idxW w M N) ∧
-    (∀ (W : Type) [AddCommGroup W] [Module K W] [Module (𝓞 K) W] [IsScalarTower (𝓞 K) K W]
-      (φ : V →ₗ[K] W) (M N : Submodule (𝓞 K) V),
-      Submodule.span K (M : Set V) = Submodule.span K (N : Set V) →
-      Set.InjOn φ (Submodule.span K (M : Set V) : Set V) →
-      idxW w (M.map (φ.restrictScalars (𝓞 K))) (N.map (φ.restrictScalars (𝓞 K))) = idxW w M N) ∧
-    (∀ (S : Type) [Fintype S] (M N : S → Submodule (𝓞 K) V), (∀ s, (M s).FG) → (∀ s, (N s).FG) →
-      (∀ s, Submodule.span K (M s : Set V) = Submodule.span K (N s : Set V)) →
-      iSupIndep (fun s => Submodule.span K (M s : Set V)) →
-      idxW w (⨆ s, M s) (⨆ s, N s) = ∑ s, idxW w (M s) (N s)) ∧
-    (∀ (n : ℕ) (M N : Submodule (𝓞 K) V), M.FG → N.FG →
-      Submodule.span K (M : Set V) = Submodule.span K (N : Set V) →
-      idxW w (Submodule.pi Set.univ fun _ : Fin n => M) (Submodule.pi Set.univ fun _ : Fin n => N) =
-        n * idxW w M N)
-
-def IdxDet : Prop :=
-  ∀ (K : Type) [Field K] [NumberField K] (w : HeightOneSpectrum (𝓞 K))
-    (V : Type) [AddCommGroup V] [Module K V] [Module (𝓞 K) V] [IsScalarTower (𝓞 K) K V]
-    (M : Submodule (𝓞 K) V), M.FG →
-    (∀ d : 𝓞 K, d ≠ 0 →
-      idxW w M (M.map ((((d : K) • LinearMap.id : V →ₗ[K] V)).restrictScalars (𝓞 K))) =
-        (rkK M : ℤ) * vW w d) ∧
-    ∀ (n : ℕ) (Γ : Matrix (Fin n) (Fin n) (𝓞 K)), Γ.det ≠ 0 →
-      idxW w (Submodule.pi Set.univ fun _ : Fin n => M)
-        ((Submodule.pi Set.univ fun _ : Fin n => M).map
-          ((matAct (V := V) (Γ.map (algebraMap (𝓞 K) K))).restrictScalars (𝓞 K))) =
-        (rkK M : ℤ) * vW w Γ.det
-
-def ProdFormula : Prop :=
-  ∀ (K : Type) [Field K] [NumberField K],
-    (∀ w : HeightOneSpectrum (𝓞 K), 0 ≤ lW w) ∧
-    (∀ d : 𝓞 K, d ≠ 0 → {w : HeightOneSpectrum (𝓞 K) | vW w d ≠ 0}.Finite ∧
-      meanLog d = ∑ᶠ w : HeightOneSpectrum (𝓞 K), lW w * (vW w d : ℝ)) ∧
-    ∀ N : ℕ, 0 < N → meanLog (N : 𝓞 K) = Real.log N
-
-def GammaBound : Prop :=
-  ∀ (K : Type) [Field K] [NumberField K] (n N : ℕ) (Γ : Matrix (Fin n) (Fin n) (𝓞 K)),
-    0 < N → n ^ 2 ≤ N → Γ.det ≠ 0 →
-    (∀ i j (σ : K →+* ℂ), ‖σ ((Γ i j : 𝓞 K) : K)‖ ≤ (N : ℝ) ^ 3) → GammaOK Γ (Real.log N)
 
 end Formalism.IndefR.LatticeTransfer

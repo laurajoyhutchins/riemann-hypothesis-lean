@@ -1,18 +1,54 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.ModelSmall
-import Development.AutomorphicSpectrum.Statements.TowerExistence.GoodTowerExistsX
-import Development.AutomorphicSpectrum.Definitions.MetricPeriods.VolumeInputs
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.OverLaUnique
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterNamed
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterSt
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LabelSigBijective
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IntMemModelSmall
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ProdZpowLe
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.GeoReadOfGeo
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.SectionsGenericIndicators
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.RootOriginFrameSectionBound
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.FrameLawsOfModuli
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.GoodOriginComponentSectionsStatement
+module
+
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ProdZpowLe
+public import Development.AbelianVarietyTheory.Definitions.RegularCharts.Reframe
+public import Development.AutomorphicSpectrum.Definitions.DivisibilityTowers.GoodOrigin
+import Development.AbelianVarietyTheory.Definitions.Divisors.IsHomogeneousCompIdeal
+public import Development.AbelianVarietyTheory.Proofs.GenericRegularity.EvaluationLawsGenericFramesAtlasHold
+import Development.AbelianVarietyTheory.Proofs.GenericRegularity.FrameBorelGroupoidProperties
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.FrameLawsOfModuli
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.GoodOriginComponentSectionsStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.RootOriginFrameSectionBound
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.FrMapComp
+public import Development.AbelianVarietyTheory.Definitions.RegularCharts.ModelAt
+import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.DefiniteFormStabilizerFiniteAwayFromP
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Filter Topology
 open Formalism.L2.Pj ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Geo ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.FD Formalism.BasicNotions Formalism.MainNotions
 open GlobalTheory.CompanionTheory.Ar GlobalTheory.CompanionTheory.Ar.Rec GlobalTheory.CompanionTheory.Ar.Plug
@@ -25,6 +61,8 @@ namespace GlobalTheory.CompanionTheory.Ar.Plug.FinLink
 variable {E : Type} [Field E] [NumberField E] [IsCMField E] {H : ReciprocityTheory.ChartRestriction.G.Geo.Tor.Host E} {Dw : Datum H}
   {l : Level H} {Xo : Moduli Dw l} {c : Coeff l}
 
+attribute [local instance 1100] Subalgebra.algebra in
+attribute [local instance 100] IntermediateField.instAlgebraSubtypeMem in
 theorem chart_value {h : GenFrEx Xo c} (C : GlobalTheory.Reg.FChart h) {L : Type} [Field L] [Algebra c.F L]
     (ψ : C.R →ₐ[c.F] L) (z w : FrPt Xo c L) (t : Ix Dw → Lˣ) (hz : FrMap ψ C.y z) (hb : FrBor t z w)
     {a : WZ E} {g : Rul Xo c} (hg : g ∈ GlobalTheory.CompanionTheory.Ar.Rec.secZ Xo c a) :
@@ -37,7 +75,7 @@ theorem chart_value {h : GenFrEx Xo c} (C : GlobalTheory.Reg.FChart h) {L : Type
     intro T _ _ p χ u v hv
     have hft : FromTest (K := c.F) (fun S _ _ => FrPt Xo c S) (fun φ y z => FrMap φ y z) v := ⟨p, χ, u, hv⟩
     unfold evR evalAt
-    rw [dif_pos hft]
+    rw [dite_eq_left hft]
     exact hWD g hg.1 T _ p _ χ _ u v hft.choose_spec.choose_spec.choose_spec hv
   have hbor : ∀ {T : Type} [CommRing T] [IsReduced T] [Algebra c.F T] (t : Ix Dw → Tˣ) (v v' : FrPt Xo c T), FrBor t v v' →
       evR Xo c g v' = ((∏ i, t i ^ GlobalTheory.CompanionTheory.Ar.Rec.exZ Dw a i : Tˣ) : T) * evR Xo c g v := by
@@ -140,6 +178,7 @@ theorem exists_ratio {h : GenFrEx Xo c} (hT : GenFromTest Xo c h) {Z : Comp Xo c
     · rw [evC_mul_geometry]; exact mul_ne_zero h1 h2
     · rw [evC_mul_geometry, evC_mul_geometry, ← e1, ← e2]; ring
 
+attribute [local instance 100] IntermediateField.instAlgebraSubtypeMem in
 theorem frame_of_birOn {h : GenFrEx Xo c} (hT : GenFromTest Xo c h) {Z : Comp Xo c} {L : Type} [Field L]
     [Algebra c.F L] (y : FrPt Xo c L) (φ : Om Z →ₐ[c.F] L) (t : Ix Dw → Lˣ)
     (hrd : ∀ (a : WZ E), ∀ f ∈ GlobalTheory.CompanionTheory.Ar.Rec.secZ Xo c a,

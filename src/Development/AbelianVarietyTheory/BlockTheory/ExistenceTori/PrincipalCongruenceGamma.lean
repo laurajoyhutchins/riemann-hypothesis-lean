@@ -1,6 +1,42 @@
-import Mathlib
-import Formalism.LocalToGlobal.ProjectiveLattices.CuspidalL2Subspace
-import Formalism.LocalToGlobal.ProjectiveLattices.FamilyUniformisationBasePointOrthogonalBis
+module
+
+public import Formalism.LocalToGlobal.ProjectiveLattices.CuspidalL2Subspace
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -54,18 +90,7 @@ variable {D : D7}
 def GamAt (T : Core D) (j : ℕ) (σ : T.Q.c.F →+* ℂ) : Prop :=
   ∀ k : (T.U j σ).Comp, princ ((T.U j σ).X k) T.Q.l.M ≤ ((T.U j σ).X k).Γ
 
-def GamEqAt (T : Core D) (j : ℕ) (σ : T.Q.c.F →+* ℂ) : Prop :=
-  ∀ k : (T.U j σ).Comp, ((T.U j σ).X k).Γ = princ ((T.U j σ).X k) T.Q.l.M
-
 def Gam (T : Core D) : Prop :=
   ∀ j, InR D j → ∀ σ : T.Q.c.F →+* ℂ, GoodEmb T.Q.c σ → GamAt T j σ
-
-def GamEq (T : Core D) : Prop :=
-  ∀ j, InR D j → ∀ σ : T.Q.c.F →+* ℂ, GoodEmb T.Q.c σ → GamEqAt T j σ
-
-theorem GamEqAt.gamAt {T : Core D} {j : ℕ} {σ : T.Q.c.F →+* ℂ} (h : GamEqAt T j σ) : GamAt T j σ :=
-  fun k => (h k).ge
-
-theorem GamEq.gam {T : Core D} (h : GamEq T) : Gam T := fun j hj σ hσ => (h j hj σ hσ).gamAt
 
 end GlobalTheory.IndefiniteRowSideFullHecke.PrincipalCongruenceGamma

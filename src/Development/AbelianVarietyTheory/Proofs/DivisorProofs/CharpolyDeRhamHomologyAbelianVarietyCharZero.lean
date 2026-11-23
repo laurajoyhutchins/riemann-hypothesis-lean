@@ -1,21 +1,71 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsKSValueOneOfRetraction
-import Development.AbelianVarietyTheory.BlockTheory.AbelianSchemeLaw.SemiAbelianSchemes
-import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsDimEqOne
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsCharpolyBcMapIff
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CharpolyEqOfIsogenyIntertwines
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AbelianSchemeFirstDeRhamStructure
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PeriodComparisonHolds
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HomomorphismDescendsToAlgebraic
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AbelianSchemeDescendsToFinitelyGeneratedSubring
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AbelianVarietyHomDescendsAlgClosedCharZero
-import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.ExistsLinearOfIsMonHom
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IsKSValueOneOfRetraction
+public import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsDimEqOne
+public import Mathlib.RingTheory.Etale.Weakly
+public import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+public import Mathlib.RingTheory.Flat.TorsionFree
+public import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.ExistsSymmetricVeryAmple
+import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.IsProjOverIffIsProperAndExistsIsAmpleLB
+public import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.ExistsLinearOfIsMonHom
+import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.IsAbelianSchemeAndExtendOfGenericHoms
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AbelianSchemeDescendsToFinitelyGeneratedSubring
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AbelianSchemeFirstDeRhamStructure
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AbelianVarietyHomDescendsAlgClosedCharZero
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BcObjIsAbelianScheme
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CharpolyEqOfIsogenyIntertwines
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsRealMultiplicationUniformization
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsCharpolyBcMapIff
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PeriodComparisonHolds
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PowerSumsVanishAtPlaces
 import Development.AbelianVarietyTheory.Proofs.ModuliProofs.EqZeroOfFderivEqZero
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PowerSumsVanishAtPlaces
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SeparatesOnSmoothOfPair
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.LinCombTrivG
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.BCTools
+public import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.NonemptyRingHomComplex
+import Mathlib.Algebra.MvPolynomial.Cardinal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Matrix.FiniteDimensional
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Algebraic.Cardinality
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
 import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsGrpPullbackFactor
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor GlobalTheory.Cris GlobalTheory.DeRham
 open scoped TensorProduct CategoryTheory.Obj
@@ -36,8 +86,7 @@ theorem charpoly_of_bijective {R K M V : Type*} [CommRing R] [Field K] [Algebra 
     obtain ⟨z, rfl⟩ := e.surjective v
     rw [LinearEquiv.conj_apply_apply, e.symm_apply_apply]
     induction z with
-    | zero => simp
-    | add x y hx hy => simp only [map_add, hx, hy]
+    | add x y hx hy => simp only [map_add (f := _), hx, hy]
     | tmul x m =>
       have : x ⊗ₜ[R] m = x • ((1 : K) ⊗ₜ[R] m) := by simp [TensorProduct.smul_tmul']
       rw [this, map_smul, map_smul, map_smul, map_smul]
@@ -86,7 +135,8 @@ theorem exists_isGrpPullback_baseChange {K : Type} (L : Type) [Field K] [Field L
 
 theorem charpoly_of_pullback {K L : Type} [Field K] [Field L] [Algebra K L] (B₀ : AbVar K) (B : AbVar L)
     {φ : B.X.left ⟶ B₀.X.left} (h : IsGrpPullback B.X B₀.X (spMap (algebraMap K L)) φ) (f₀ : B₀ ⟶ B₀) (f : B ⟶ B)
-    (e : φ ≫ f₀.hom.left = f.hom.left ≫ φ) : AbVar.charpoly f = AbVar.charpoly f₀ := by
+    (e : φ ≫ f₀.hom.left = f.hom.left ≫ φ) :
+    AbVar.charpoly (End.of f) = AbVar.charpoly (End.of f₀) := by
   obtain ⟨q, h', hq⟩ := exists_isGrpPullback_baseChange L f₀
   obtain ⟨i, hi, hφ⟩ := grpPullback_iso h h'
   let u : B ⟶ AbVar.baseChange L B₀ := AbVar.Hom.mk i.hom
@@ -94,8 +144,8 @@ theorem charpoly_of_pullback {K L : Type} [Field K] [Field L] [Algebra K L] (B�
     have : IsIso i.hom.left := ⟨⟨i.inv.left, by rw [← Over.comp_left, i.hom_inv_id, Over.id_left],
       by rw [← Over.comp_left, i.inv_hom_id, Over.id_left]⟩⟩
     exact ⟨inferInstanceAs (IsFinite i.hom.left), inferInstanceAs (Surjective i.hom.left)⟩
-  rw [← AbVar.charpoly_bcMap K L B₀ f₀]
-  refine AbVar.charpoly_eq_of_isogeny_intertwines L B _ u f _ hu (AbVar.hom_ext ?_)
+  rw [← AbVar.charpoly_bcMap K L B₀ (End.of f₀)]
+  refine AbVar.charpoly_eq_of_isogeny_intertwines L B _ u (End.of f) _ hu (Subtype.ext ?_)
   change f.hom ≫ i.hom = i.hom ≫ (AbVar.bcMap L f₀).hom
   apply Over.OverMorphism.ext
   apply h'.1.hom_ext
@@ -103,7 +153,8 @@ theorem charpoly_of_pullback {K L : Type} [Field K] [Field L] [Algebra K L] (B�
   · rw [Over.w, Over.w]
 
 theorem charpoly_push_complex (B : AbVar ℂ) (f : B ⟶ B) [Module.Finite ℂ (HdR B.X)] :
-    LinearMap.charpoly (push (dp0 ℂ) (𝟙 _) f.hom) = (AbVar.charpoly f).map (Int.castRingHom ℂ) := by
+    LinearMap.charpoly (push (dp0 ℂ) (𝟙 _) f.hom) =
+      (AbVar.charpoly (End.of f)).map (Int.castRingHom ℂ) := by
   obtain ⟨L, hL, ⟨u⟩⟩ : ∃ L : LB B.X.left, L.IsLB ∧ Nonempty (HolUnif B.X L B.dim) := by
     have := B.ab.proper
     obtain ⟨H, m, s, hH, hs, -⟩ := GlobalTheory.SymVeryAmple.exists_symmetric_veryAmple ℂ B.X B.ab
@@ -189,6 +240,7 @@ theorem exists_countable_model (k : Type) [Field k] [CharZero k] [IsAlgClosed k]
     (Subfield.cardinalMk_closure_le_max _).trans (max_le (Cardinal.mk_le_aleph0_iff.2 hSc) le_rfl)
   let K : IntermediateField F k := algebraicClosure F k
   haveI : IsAlgClosed K := (algebraicClosure.isAlgClosure F k).isAlgClosed
+  haveI : Module.IsTorsionFree F K := DivisionSemiring.to_moduleIsTorsionFree
   have hK : Countable K := Cardinal.mk_le_aleph0_iff.1
     ((Algebra.IsAlgebraic.cardinalMk_le_max F K).trans (max_le hF le_rfl))
   let j : S →+* K := S.subtype.codRestrict K fun x => K.algebraMap_mem (⟨x, Subfield.subset_closure x.2⟩ : F)
@@ -209,7 +261,8 @@ theorem exists_countable_model (k : Type) [Field k] [CharZero k] [IsAlgClosed k]
 
 theorem charpoly_push : ∀ (k : Type) [Field k] [CharZero k] [IsAlgClosed k]
     (B : GlobalTheory.AV.AbVar k) (f : B ⟶ B) [Module.Finite k (HdR B.X)],
-    LinearMap.charpoly (push (dp0 k) (𝟙 _) f.hom) = (GlobalTheory.AV.AbVar.charpoly f).map (Int.castRingHom k) := by
+    LinearMap.charpoly (push (dp0 k) (𝟙 _) f.hom) =
+      (GlobalTheory.AV.AbVar.charpoly (End.of f)).map (Int.castRingHom k) := by
   intro k _ _ _ B f _
   obtain ⟨K, _, _, _, B₀, f₀, φ, hφ, he⟩ := exists_countable_model k B f
   haveI : CharZero K := (RingHom.charZero_iff (algebraMap K k).injective).2 inferInstance
@@ -221,7 +274,8 @@ theorem charpoly_push : ∀ (k : Type) [Field k] [CharZero k] [IsAlgClosed k]
   have h3 := charpoly_push_of_pullback B₀ _ hq f₀ _ hq'
   have h4 := charpoly_push_complex (AbVar.baseChange ℂ B₀) (AbVar.bcMap ℂ f₀)
   rw [AbVar.charpoly_bcMap] at h4
-  have h5 : LinearMap.charpoly (push (dp0 K) (𝟙 _) f₀.hom) = (AbVar.charpoly f₀).map (Int.castRingHom K) := by
+  have h5 : LinearMap.charpoly (push (dp0 K) (𝟙 _) f₀.hom) =
+      (AbVar.charpoly (End.of f₀)).map (Int.castRingHom K) := by
     apply Polynomial.map_injective (algebraMap K ℂ) σ.injective
     rw [← h3, h4, Polynomial.map_map]
     exact congrArg (Polynomial.map · _) (RingHom.ext_int _ _)

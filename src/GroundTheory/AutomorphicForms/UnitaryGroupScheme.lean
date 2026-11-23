@@ -1,5 +1,48 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.HermitianSpaces
+module
+
+public import GroundTheory.AutomorphicForms.HermitianSpaces
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GroundTheory.Automorphic
 
@@ -9,8 +52,8 @@ section Transport
 
 variable {ι : Type*} [Fintype ι] [DecidableEq ι] {A B : Type*} [CommRing A] [CommRing B]
 
-omit [DecidableEq ι] in
 
+omit [DecidableEq ι] in
 theorem map_unitaryExpr (φ : A →+* B) {sA : A →+* A} {sB : B →+* B}
     (hs : ∀ x, φ (sA x) = sB (φ x)) (H M : Matrix ι ι A) :
     ((M.map sA)ᵀ * H * M).map φ = ((M.map φ).map sB)ᵀ * H.map φ * M.map φ := by
@@ -67,8 +110,8 @@ variable {F E R S T}
 @[simp]
 theorem conjBase_tmul (r : R) (e : E) : conjBase F E R (r ⊗ₜ e) = r ⊗ₜ conj F E e := rfl
 
-variable (E) in
 
+variable (E) in
 noncomputable def tensorMap (f : R →ₐ[F] S) : R ⊗[F] E →ₐ[F] S ⊗[F] E :=
   Algebra.TensorProduct.map f (AlgHom.id F E)
 
@@ -79,10 +122,9 @@ theorem tensorMap_tmul (f : R →ₐ[F] S) (r : R) (e : E) :
 
 theorem tensorMap_conjBase (f : R →ₐ[F] S) (z : R ⊗[F] E) :
     tensorMap E f (conjBase F E R z) = conjBase F E S (tensorMap E f z) := by
-  induction z using TensorProduct.induction_on with
-  | zero => simp
+  induction z using TensorProduct.inductionOn with
   | tmul r e => rw [conjBase_tmul, tensorMap_tmul, tensorMap_tmul, conjBase_tmul]
-  | add x y hx hy => simp only [map_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
 
 omit [Algebra.IsQuadraticExtension F E] in
 theorem tensorMap_includeRight (f : R →ₐ[F] S) (e : E) :
@@ -90,14 +132,7 @@ theorem tensorMap_includeRight (f : R →ₐ[F] S) (e : E) :
       (Algebra.TensorProduct.includeRight e : S ⊗[F] E) := by
   simp [Algebra.TensorProduct.includeRight_apply]
 
-omit [Algebra.IsQuadraticExtension F E] in
-theorem tensorMap_id : tensorMap E (AlgHom.id F R) = AlgHom.id F (R ⊗[F] E) :=
-  Algebra.TensorProduct.map_id
 
-omit [Algebra.IsQuadraticExtension F E] in
-theorem tensorMap_comp (f : R →ₐ[F] S) (g : S →ₐ[F] T) :
-    tensorMap E (g.comp f) = (tensorMap E g).comp (tensorMap E f) :=
-  Algebra.TensorProduct.ext' fun _ _ => rfl
 
 end BaseChange
 
@@ -114,12 +149,6 @@ noncomputable def unitaryPoints : Subgroup (GL ι (R ⊗[F] E)) :=
 
 variable {F E H R S T}
 
-theorem mem_unitaryPoints {g : GL ι (R ⊗[F] E)} :
-    g ∈ unitaryPoints F E H R ↔
-      ((g : Matrix ι ι (R ⊗[F] E)).map (conjBase F E R))ᵀ *
-        H.map (Algebra.TensorProduct.includeRight : E →ₐ[F] R ⊗[F] E) * g =
-      H.map (Algebra.TensorProduct.includeRight : E →ₐ[F] R ⊗[F] E) := Iff.rfl
-
 omit [Algebra.IsQuadraticExtension F E] [Fintype ι] [DecidableEq ι] in
 theorem map_includeRight_tensorMap (f : R →ₐ[F] S) :
     (H.map (Algebra.TensorProduct.includeRight : E →ₐ[F] R ⊗[F] E)).map
@@ -130,31 +159,13 @@ theorem map_includeRight_tensorMap (f : R →ₐ[F] S) :
   funext e
   exact tensorMap_includeRight f e
 
-variable (F E H) in
 
+variable (F E H) in
 noncomputable def unitaryMap (f : R →ₐ[F] S) : unitaryPoints F E H R →* unitaryPoints F E H S :=
   ((Matrix.GeneralLinearGroup.map
       ((tensorMap E f : R ⊗[F] E →ₐ[F] S ⊗[F] E) : R ⊗[F] E →+* S ⊗[F] E)).comp
     (unitaryPoints F E H R).subtype).codRestrict _ fun g =>
     map_mem_unitaryGroupMatrix _ (tensorMap_conjBase f) (map_includeRight_tensorMap f) g.2
-
-theorem unitaryMap_apply (f : R →ₐ[F] S) (g : unitaryPoints F E H R) :
-    ((unitaryMap F E H f g : GL ι (S ⊗[F] E)) : Matrix ι ι (S ⊗[F] E)) =
-      ((g : GL ι (R ⊗[F] E)) : Matrix ι ι (R ⊗[F] E)).map (tensorMap E f) := rfl
-
-theorem unitaryMap_id : unitaryMap F E H (AlgHom.id F R) = MonoidHom.id _ := by
-  ext g : 1
-  apply Subtype.ext; apply Units.ext
-  rw [unitaryMap_apply, tensorMap_id]
-  rfl
-
-theorem unitaryMap_comp (f : R →ₐ[F] S) (g : S →ₐ[F] T) :
-    unitaryMap F E H (g.comp f) = (unitaryMap F E H g).comp (unitaryMap F E H f) := by
-  ext x : 1
-  apply Subtype.ext; apply Units.ext
-  rw [MonoidHom.comp_apply, unitaryMap_apply, unitaryMap_apply, unitaryMap_apply, tensorMap_comp,
-    Matrix.map_map]
-  rfl
 
 end Points
 
@@ -167,16 +178,6 @@ universe u
 variable (F E : Type u) [Field F] [CommRing E] [Algebra F E] [Algebra.IsQuadraticExtension F E]
   {ι : Type u} [Fintype ι] [DecidableEq ι]
 
-noncomputable def unitaryFunctor (H : Matrix ι ι E) : CommAlgCat.{u} F ⥤ GrpCat.{u} where
-  obj R := GrpCat.of (unitaryPoints F E H R)
-  map f := GrpCat.ofHom (unitaryMap F E H f.hom)
-  map_id R := by
-    rw [CommAlgCat.hom_id, unitaryMap_id]
-    rfl
-  map_comp f g := by
-    rw [CommAlgCat.hom_comp, unitaryMap_comp]
-    rfl
-
 end Functor
 
 section Rational
@@ -185,11 +186,10 @@ variable {F E H}
 
 theorem lid_conjBase (z : F ⊗[F] E) :
     Algebra.TensorProduct.lid F E (conjBase F E F z) = conj F E (Algebra.TensorProduct.lid F E z) := by
-  induction z using TensorProduct.induction_on with
-  | zero => simp
+  induction z using TensorProduct.inductionOn with
   | tmul r e =>
     simp only [conjBase_tmul, Algebra.TensorProduct.lid_tmul, map_smul]
-  | add x y hx hy => simp only [map_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
 
 omit [Algebra.IsQuadraticExtension F E] [Fintype ι] [DecidableEq ι] in
 theorem map_includeRight_lid :
@@ -201,8 +201,8 @@ theorem map_includeRight_lid :
   funext e
   simp [Algebra.TensorProduct.includeRight_apply]
 
-variable (F E H) in
 
+variable (F E H) in
 noncomputable def unitaryPointsRationalEquiv :
     unitaryPoints F E H F ≃* unitaryGroupMatrix (conjHom F E) H :=
   unitaryGroupMatrixCongr ((Algebra.TensorProduct.lid F E).toRingEquiv)
@@ -210,8 +210,8 @@ noncomputable def unitaryPointsRationalEquiv :
 
 variable {V : Type*} [AddCommGroup V] [Module E V]
 
-variable (F E) in
 
+variable (F E) in
 noncomputable def unitaryPointsRationalEquivHermitian (h : HermitianForm F E V)
     (v : Basis ι E V) : unitaryPoints F E (gram h.toSesq v) F ≃* h.unitaryGroup :=
   (unitaryPointsRationalEquiv F E (gram h.toSesq v)).trans (unitaryGroupEquivMatrix h v).symm

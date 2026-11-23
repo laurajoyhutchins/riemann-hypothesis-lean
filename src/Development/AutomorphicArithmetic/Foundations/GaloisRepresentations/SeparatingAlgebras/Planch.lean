@@ -1,4 +1,54 @@
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.SeparatingAlgebras.StLocB
+module
+
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.SeparatingAlgebras.StLocB
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MeasureTheory GroundTheory.Automorphic GroundTheory.Automorphic.Spherical UpperTheory.Gal.Gen
 
@@ -30,7 +80,7 @@ private theorem sum_norm_sq_le_integral_of_plancherel {G : Type} [Group G] {n : 
       funext θ
       rw [← hA θ g⁻¹, Finset.mul_sum, Finset.sum_mul]
       exact Finset.sum_congr rfl fun g' _ => by ring
-    have hsum := integral_finset_sum T fun g' _ =>
+    have hsum := integral_finsetSum T fun g' _ =>
       hI (fun θ => (mr : ℂ) * f g' * (φ θ (g⁻¹ * g') * D θ))
         (continuous_const.mul ((hφc _).mul hDc))
     rw [e, hsum]
@@ -62,7 +112,7 @@ private theorem sum_norm_sq_le_integral_of_plancherel {G : Type} [Group G] {n : 
           congr 1
           exact Finset.sum_congr rfl fun g hg => by rw [h1 g hg]
       _ = c * ∫ θ, (mr : ℂ) * ∑ g ∈ T, starRingEnd ℂ (f g) * (S θ * φ θ g⁻¹ * D θ) := by
-          have hsum := integral_finset_sum T fun g _ =>
+          have hsum := integral_finsetSum T fun g _ =>
             hI (fun θ => starRingEnd ℂ (f g) * (S θ * φ θ g⁻¹ * D θ))
               (continuous_const.mul ((hSc.mul (hφc _)).mul hDc))
           rw [integral_const_mul, hsum]
@@ -78,6 +128,7 @@ private theorem sum_norm_sq_le_integral_of_plancherel {G : Type} [Group G] {n : 
           calc (mr : ℂ) * ∑ g ∈ T, starRingEnd ℂ (f g) * (S θ * φ θ g⁻¹ * D θ)
               = S θ * D θ * starRingEnd ℂ ((mr : ℂ) * ∑ g ∈ T, f g * φ θ g) := by
                 simp_rw [hθ]
+
                 rw [map_mul, map_sum, Complex.conj_ofReal]
                 simp_rw [map_mul]
                 rw [Finset.mul_sum, Finset.mul_sum, Finset.mul_sum]

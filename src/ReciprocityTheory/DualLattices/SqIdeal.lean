@@ -1,7 +1,63 @@
-import ReciprocityTheory.DualLattices.PrimeHopfOrderStatement
-import ReciprocityTheory.DualLattices.ImportsAlt
-import ReciprocityTheory.DualLattices.VdetLeOfSpanLe
-import ReciprocityTheory.DualLattices.FourierMapSmulLambdaWeight
+module
+
+public import ReciprocityTheory.DualLattices.PrimeHopfOrderStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.DualLattices.FourierMapSmulLambdaWeight
+public import ReciprocityTheory.DualLattices.ImportsAlt
+import ReciprocityTheory.DualLattices.VIntCastLtOneOfDvd
+public import ReciprocityTheory.DualLattices.VdetLeOfSpanLe
+public import Mathlib.Analysis.Real.Sqrt
+public import Mathlib.RingTheory.RootsOfUnity.PrimitiveRoots
+
+@[expose] public section
 
 noncomputable section
 
@@ -321,15 +377,10 @@ theorem u3 : PrimeHopfOrderStatement := by
       simpa [ZMod.natCast_zmod_val] using h
     convert hmem using 1
     funext a
-    simp only [Finset.sum_apply, Pi.smul_apply, Pi.sub_apply, Pi.one_apply, Algebra.smul_def,
-      Pi.mul_apply, Pi.algebraMap_apply, hr, hs0, mul_one]
+    simp only [Finset.sum_apply, Pi.smul_apply, Pi.sub_apply, Pi.one_apply]
+    simp only [Algebra.smul_def, hr, hs0, mul_one]
     by_cases ha : a = 0
-    · subst ha
-      rw [hω0, mul_zero]
-      symm
-      apply Finset.sum_eq_zero
-      intro k _
-      simp [hr, hs0, Algebra.smul_def]
+    · simp [ha, hω0]
     · have h1' : ∑ k, wt ω k * BA (k * a) j0 = ω a * ∑ b, wt ω b * BA b j0 :=
         sum_wt_mul_comp_mul_eq hωpow hω1 hωmul a ha (fun b => BA b j0)
       have h2' : ∑ k, wt ω k = ω a * ∑ b, wt ω b := by

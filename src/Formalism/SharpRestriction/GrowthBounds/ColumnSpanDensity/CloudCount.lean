@@ -1,4 +1,53 @@
-import Formalism.SharpRestriction.GrowthBounds.ColumnSpanDensity.FactorsLEOfFintype
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.ColumnSpanDensity.FactorsLEOfFintype
+import Formalism.SharpRestriction.GrowthBounds.ColumnSpanDensity.LatticeCountPrimeMonoLevel
+public import Formalism.SharpRestriction.GrowthBounds.ColumnSpanDensity.NLeDAll
+import Formalism.SharpRestriction.GrowthBounds.ColumnSpanDensity.RhoLowerBoundOfEdgeCount
+import Formalism.SharpRestriction.GrowthBounds.ColumnSpanDensity.RhoSumBoundOfMapsSplitting
+import Formalism.SharpRestriction.GrowthBounds.ColumnSpanDensity.RhoUpperBoundOfEdgeCount
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.PolynomialDimension.WeylDim
+
+@[expose] public section
 
 noncomputable section
 
@@ -114,9 +163,11 @@ theorem cloud_count (hS : LemmaSMat) (hRet : LatRetract) (hBP : BePerfect) (hD3 
       congr 1
       rw [Matrix.mul_smul, Matrix.mul_one, Matrix.smul_mul, hPP]
     · show be p 1 Hp (∑ k, algebraMap R.O R.Kf (P' i k) • io (x1 k)) (y2 b) = _
+
       rw [be_sum_left, Matrix.fromBlocks_apply₁₂, Matrix.mul_apply, map_sum]
       exact Finset.sum_congr rfl fun k _ => by rw [hNm, map_mul, Matrix.of_apply]
     · show be p 1 Hp (x2 a) (∑ k, P'' k l • tt k) = _
+
       rw [be_sum, Matrix.fromBlocks_apply₂₁, Matrix.mul_apply, map_sum]
       exact Finset.sum_congr rfl fun k _ => by rw [hBm, map_mul, Matrix.of_apply]
     · show be p 1 Hp (x2 a) (y2 b) = _
@@ -130,6 +181,7 @@ theorem cloud_count (hS : LemmaSMat) (hRet : LatRetract) (hBP : BePerfect) (hD3 
     have : ∑ l, be p 1 Hp (Xb i) (Yb l) * algebraMap R.O R.Kf (M l j) = algebraMap R.O R.Kf
         ((Matrix.fromBlocks (z1 • (1 : Matrix (Fin s) (Fin s) R.O)) (P' * Matrix.of Nm) (Matrix.of Bm * P'')
           (z2 • (1 : Matrix (Fin n2) (Fin n2) R.O)) * M) i j) := by
+
       rw [Matrix.mul_apply, map_sum]
       exact Finset.sum_congr rfl fun l _ => by rw [hGb, map_mul]
     rw [this, hblk, Matrix.smul_apply, Matrix.one_apply, smul_eq_mul]
@@ -154,6 +206,7 @@ theorem cloud_count (hS : LemmaSMat) (hRet : LatRetract) (hBP : BePerfect) (hD3 
   have hFgg : ∀ i j, be p 1 Hp (io (Fg i)) (gg j) = if i = j then algebraMap R.O R.Kf (z1 * z2) else 0 := by
     intro i j
     have e1 : io (Fg i) = ∑ k, algebraMap R.O R.Kf (P i k) • io (x1 k) := by
+
       simp only [Fg, map_sum, map_smul]
     rw [e1, be_mat R Hp (fun k => io (x1 k)) y2 (Matrix.of Nm) (fun k k' => hNm k k') P Q i j, hPQ,
       Matrix.smul_apply, Matrix.one_apply, smul_eq_mul]

@@ -1,5 +1,48 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.PowerSeriesOneAddConstMulXMulInv
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.PowerSeriesOneAddConstMulXMulInv
+public import Mathlib.NumberTheory.Padics.MahlerBasis
+public import Mathlib.RingTheory.PowerSeries.Binomial
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 namespace GlobalTheory.IndefiniteRowSideFullHecke.FrobeniusBinomialReduction
@@ -35,10 +78,6 @@ def IsCyclotomic (R : RingPG k l) (ι : k⸨X⸩ →ₐ[k] k⸨X⸩) : Prop :=
   (∀ x, ι (R.φ x) = frobπ k l (ι x)) ∧
   (∀ x, ι (R.γ x) = gamπ k l (ι x))
 
-def IsPsi (l : ℕ) [Fact l.Prime] [CharP k l] (ι : k⸨X⸩ →ₐ[k] k⸨X⸩) (ψ₀ : k⸨X⸩ →ₗ[k] k⸨X⸩) : Prop :=
-  ∀ (a : k⸨X⸩) (x : ℕ → k⸨X⸩),
-    ι a = ∑ j ∈ Finset.range l, (1 + vv k) ^ j * frobπ k l (x j) → ι (ψ₀ a) = x 0
-
 def PsiRing (R : RingPG k l) (ψ₀ : k⸨X⸩ →ₗ[k] k⸨X⸩) : Prop :=
   (∀ a b, ψ₀ (R.φ a * b) = a * ψ₀ b) ∧ ψ₀ 1 = 1 ∧ (∀ a, ψ₀ (R.γ a) = R.γ (ψ₀ a)) ∧
   ∀ a : ℤ, 2 - (l : ℤ) ≤ a → a ≤ 1 →
@@ -56,36 +95,6 @@ def PsiShift (l : ℕ) (g ψ : V →ₗ[k] V) (M : Submodule k⟦X⟧ V) : Prop 
   ∀ a : ℤ, 2 - (l : ℤ) ≤ a → a ≤ 0 → (fun x => g x - x) '' kerPsi ψ M a = kerPsi ψ M (a + 1)
 
 end Modules
-
-def LemmaPsi : Prop :=
-  ∀ {k : Type} [Field k] {l : ℕ} [Fact l.Prime] [CharP k l], 5 ≤ l →
-  ∀ (R : RingPG k l) (ι : k⸨X⸩ →ₐ[k] k⸨X⸩), IsCyclotomic R ι →
-  ∃ ψ₀ : k⸨X⸩ →ₗ[k] k⸨X⸩, IsPsi l ι ψ₀ ∧ PsiRing R ψ₀ ∧
-    ∀ {n : ℕ} [NeZero n] {V : Type} [AddCommGroup V] [Module k⸨X⸩ V] [Module k⟦X⟧ V] [Module k V]
-      [IsScalarTower k⟦X⟧ k⸨X⸩ V] [IsScalarTower k k⸨X⸩ V] [IsScalarTower k k⟦X⟧ V]
-      [FiniteDimensional k⸨X⸩ V] (D : ModPG R n V),
-      ∃ ψ : ZMod n → V →ₗ[k] V,
-        (∀ i a x, ψ i (a • D.φ i x) = ψ₀ a • x) ∧
-        (∀ i x, ψ i (D.γ i x) = D.γ (i - 1) (ψ i x)) ∧
-        ∀ (i : ZMod n) (M₀ : Submodule k⟦X⟧ V), IsLat M₀ → CondC (D.γ (i - 1)) M₀ →
-          PsiShift l (D.γ i) (ψ i) (pull (D.φ i) M₀)
-
-def LemmaPsiStep : Prop :=
-  ∀ {k : Type} [Field k] {l : ℕ} [Fact l.Prime] [CharP k l], 5 ≤ l →
-  ∀ (R : RingPG k l) (ι : k⸨X⸩ →ₐ[k] k⸨X⸩), IsCyclotomic R ι →
-  ∃ ψ₀ : k⸨X⸩ →ₗ[k] k⸨X⸩, IsPsi l ι ψ₀ ∧ PsiRing R ψ₀ ∧
-    ∀ {V : Type} [AddCommGroup V] [Module k⸨X⸩ V] [Module k⟦X⟧ V] [Module k V]
-      [IsScalarTower k⟦X⟧ k⸨X⸩ V] [IsScalarTower k k⸨X⸩ V] [IsScalarTower k k⟦X⟧ V]
-      [FiniteDimensional k⸨X⸩ V] (f g₀ g₁ : V →ₗ[k] V),
-      Semi R.φ f → Submodule.span k⸨X⸩ (Set.range f) = ⊤ → Semi R.γ g₀ → Semi R.γ g₁ →
-      (∀ x, f (g₀ x) = g₁ (f x)) →
-      ∃ ψ : V →ₗ[k] V,
-        (∀ a x, ψ (a • f x) = ψ₀ a • x) ∧ (∀ x, ψ (g₁ x) = g₀ (ψ x)) ∧
-        ∀ M₀ : Submodule k⟦X⟧ V, IsLat M₀ → CondC g₀ M₀ → PsiShift l g₁ ψ (pull f M₀)
-
-def CyclotomicExists : Prop :=
-  ∀ (k : Type) [Field k] (l : ℕ) [Fact l.Prime] [CharP k l], 5 ≤ l →
-    ∃ (R : RingPG k l) (ι : k⸨X⸩ →ₐ[k] k⸨X⸩), IsCyclotomic R ι
 
 theorem binomPow_natCast (k : Type) [Field k] (l : ℕ) [Fact l.Prime] [CharP k l] (m : ℕ) :
     binomPow k l (m : ℤ_[l]) = (1 + PowerSeries.X) ^ m := by

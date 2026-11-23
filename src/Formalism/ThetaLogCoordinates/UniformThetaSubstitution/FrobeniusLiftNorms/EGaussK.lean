@@ -1,7 +1,62 @@
-import Mathlib
-import Formalism.ThetaLogCoordinates.UniformThetaSubstitution.StatementE
-import Formalism.ThetaLogCoordinates.UniformThetaSubstitution.StatementGK
-import Formalism.ThetaLogCoordinates.UniformThetaSubstitution.KernelFromKOne
+module
+
+public import Formalism.ThetaLogCoordinates.UniformThetaSubstitution.StatementGK
+public import Formalism.ThetaLogCoordinates.UniformThetaSubstitution.ThmSUniform
+public import Formalism.GaussJetBounds.GaussJetProofs.FJEval
+public import Formalism.GaussJetBounds.GaussJetProofs.GField
+public import Formalism.GaussJetBounds.GaussJetProofs.Labels
+public import Formalism.ThetaLogCoordinates.UniformThetaSubstitution.FrobeniusLiftNorms.EChain
+public import Formalism.ThetaLogCoordinates.UniformThetaSubstitution.FrobeniusLiftNorms.EGauss
+public import Formalism.ThetaLogCoordinates.UniformThetaSubstitution.FrobeniusLiftNorms.EKernel
+public import Formalism.ThetaLogCoordinates.UniformThetaSubstitution.FrobeniusLiftNorms.NormLiftLeOne
+public import Formalism.ThetaLogCoordinates.UniformThetaSubstitution.FrobeniusLiftNorms.OmegaOfTraceDuality
+public import Formalism.ThetaLogCoordinates.UniformThetaSubstitution.KOneConsequence
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -47,7 +102,7 @@ theorem reduce (K₁ : Type) [NormedField K₁] [IsUltrametricDist K₁] [CharZe
         (sf : Fin C → ZMod (2 * ν)) (T : ∀ c, Fin (l c) → Fin r0 → K)
         (I' : ∀ c, Fin (l c) → Fin r1),
         EntryHyp p ν r0 r1 C u' F' TT ξ e l T ∧
-        (∀ n, ‖MvPolynomial.coeff n (frameJet colN hts hp I F)‖ ≤
+        (∀ n, ‖AddMonoidAlgebra.coeff (frameJet colN hts hp I F) n‖ ≤
           ‖jetPair (entryOp ξ e l sf T I') F'‖) ∧
         alN e = alG TT colN hts ∧ capN sf = capG TT colN hts ∧ lsN l sf = lsG TT colN hts ∧
         ∀ (J : Finset (Fin r1)) (i : ℕ), 1 ≤ i →
@@ -96,8 +151,9 @@ theorem reduce (K₁ : Type) [NormedField K₁] [IsUltrametricDist K₁] [CharZe
     rw [← hgauss, ← hop]
     unfold frameJet
     rw [Formalism.DworkPowerSeriesWeights.eval₂_jetPairPoly, map_prod]
+
     simp only [Formalism.DworkPowerSeriesWeights.ringMap_minorProd, map_sum, map_mul, MvPolynomial.map_C, MvPolynomial.map_X,
-      MvPolynomial.coe_eval₂Hom, MvPolynomial.eval₂_X]
+    MvPolynomial.coe_eval₂Hom, MvPolynomial.eval₂_X]
     exact le_rfl
 
 theorem norm_unif_pow {K : Type} [NormedField K] {p : ℕ} [hp : Fact p.Prime]

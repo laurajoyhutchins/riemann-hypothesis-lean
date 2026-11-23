@@ -1,5 +1,54 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerOrbitVolume.LocDensSAChar
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerOrbitVolume.LocDensSAChar
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -8,39 +57,6 @@ open NumberField Complex
 namespace PI.VolStabSW
 
 namespace ChLiftW
-
-theorem int_valued_zero {Y : Type*} [TopologicalSpace Y] [PreconnectedSpace Y] (ψ : Y → ℝ)
-    (hψ : Continuous ψ) (hint : ∀ p, ∃ n : ℤ, ψ p = n) (a : Y) (ha : ψ a = 0) (p : Y) :
-    ψ p = 0 := by
-  obtain ⟨n, hn⟩ := hint p
-  by_contra hne
-  rw [hn] at hne
-  have hn0 : n ≠ 0 := by exact_mod_cast hne
-  rcases lt_or_gt_of_ne hn0 with hlt | hgt
-  · have hiv := isPreconnected_univ.intermediate_value (Set.mem_univ p) (Set.mem_univ a) hψ.continuousOn
-    have hle : (n : ℝ) ≤ -1 := by
-      have h' : n ≤ -1 := by omega
-      exact_mod_cast h'
-    have hm : (-1 / 2 : ℝ) ∈ Set.Icc (ψ p) (ψ a) := by
-      rw [hn, ha]; constructor <;> linarith
-    obtain ⟨q, -, hq⟩ := hiv hm
-    obtain ⟨m, hm'⟩ := hint q
-    rw [hm'] at hq
-    have h2 : ((2 * m : ℤ) : ℝ) = -1 := by push_cast; linarith
-    have h3 : 2 * m = -1 := by exact_mod_cast h2
-    omega
-  · have hiv := isPreconnected_univ.intermediate_value (Set.mem_univ a) (Set.mem_univ p) hψ.continuousOn
-    have hle : (1 : ℝ) ≤ n := by
-      have h' : 1 ≤ n := by omega
-      exact_mod_cast h'
-    have hm : (1 / 2 : ℝ) ∈ Set.Icc (ψ a) (ψ p) := by
-      rw [hn, ha]; constructor <;> linarith
-    obtain ⟨q, -, hq⟩ := hiv hm
-    obtain ⟨m, hm'⟩ := hint q
-    rw [hm'] at hq
-    have h2 : ((2 * m : ℤ) : ℝ) = 1 := by push_cast; linarith
-    have h3 : 2 * m = 1 := by exact_mod_cast h2
-    omega
 
 theorem lift_normed {W : Type*} [NormedAddCommGroup W] [NormedSpace ℝ W] (χ : W → ℂ)
     (hc : Continuous χ) (hadd : ∀ x y, χ (x + y) = χ x * χ y) (h0 : χ 0 = 1) :
@@ -194,7 +210,7 @@ theorem lift_homeo {X W : Type*} [AddCommGroup X] [TopologicalSpace X] [NormedAd
     rw [he, Homeomorph.apply_symm_apply, Homeomorph.apply_symm_apply, Homeomorph.apply_symm_apply]
   obtain ⟨ℓ', hℓc, hℓ⟩ := lift_normed (fun w => χ (e.symm w)) (hc.comp e.symm.continuous)
     (fun w w' => by simp only [hsadd, hadd]) (by simp only [hs0, h0])
-  refine ⟨AddMonoidHom.mk' (fun x => ℓ' (e x)) (fun x y => by simp only [he, map_add]),
+  refine ⟨AddMonoidHom.mk' (fun x => ℓ' (e x)) (fun x y => by simp only [he, map_add (f := _)]),
     hℓc.comp e.continuous, fun x => ?_⟩
   have h1 := hℓ (e x)
   simp only [Homeomorph.symm_apply_apply] at h1
@@ -218,8 +234,8 @@ theorem addChar_sum {ι A : Type*} [AddCommMonoid A] (χ : AddChar A ℂ) (s : F
 
 end ChLiftW
 
-open Classical in
 
+open Classical in
 def sgl {F : Type} [Field F] (v : InfinitePlace F) (t : v.Completion) : InfiniteAdeleRing F :=
   Pi.single v t
 
@@ -254,9 +270,9 @@ theorem chLift_holds : ChLift := by
   refine ⟨AddMonoidHom.mk' (fun x => ∑ v, ℓ v (x v)) (fun x y => ?_), ?_, fun x => ?_⟩
   · rw [← Finset.sum_add_distrib]
     refine Finset.sum_congr rfl fun v _ => ?_
-    rw [← map_add]
+    rw [← map_add (f := _)]
     rfl
-  · exact continuous_finset_sum _ fun v _ => (hℓc v).comp (continuous_apply v)
+  · exact continuous_finsetSum _ fun v _ => (hℓc v).comp (continuous_apply v)
   · show χ x = Complex.exp (∑ v, ℓ v (x v))
     conv_lhs => rw [← sum_sgl x]
     rw [ChLiftW.addChar_sum, Complex.exp_sum]

@@ -1,6 +1,50 @@
-import Mathlib
-import Development.AbelianVarietyTheory.BlockTheory.TorsionBlocks.LatticeConditions
-import Development.AbelianVarietyTheory.BlockTheory.TorsionBlocks.TwistedTriples
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.TorsionBlocks.LatticeConditions
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.MetricSpace.Ultra.TotallySeparated
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -12,7 +56,7 @@ namespace GlobalTheory.TwistedSelmerCompare
 theorem natCast_mem_maximalIdeal {l : ℕ} [Fact l.Prime] (O : Type) [CommRing O] [IsLocalRing O]
     [Algebra ℤ_[l] O] [Module.Finite ℤ_[l] O] : (l : O) ∈ IsLocalRing.maximalIdeal O := by
   have h : ((IsLocalRing.maximalIdeal O).comap (algebraMap ℤ_[l] O)).IsMaximal :=
-    Ideal.isMaximal_comap_of_isIntegral_of_isMaximal _
+    Ideal.isMaximal_under_of_isIntegral_of_isMaximal (R := ℤ_[l]) _
   have h2 := IsLocalRing.eq_maximalIdeal h
   have h3 : (l : ℤ_[l]) ∈ IsLocalRing.maximalIdeal ℤ_[l] := by
     rw [PadicInt.maximalIdeal_eq_span_p]; exact Ideal.mem_span_singleton_self _
@@ -29,7 +73,7 @@ theorem padicInt_hom_ext {l : ℕ} [Fact l.Prime] {O : Type} [CommRing O] [IsLoc
   have hz : z = (z.appr n : ℤ_[l]) + c * (l : ℤ_[l]) ^ n := by rw [hc]; ring
   have : f z - g z = (f c - g c) * (l : O) ^ n := by
     rw [hz]
-    simp only [map_add, map_mul, map_pow, map_natCast]
+    simp only [map_add (f := _), map_mul, map_pow, map_natCast]
     ring
   rw [this]
   exact Ideal.mul_mem_left _ _ (Ideal.pow_mem_pow hl n)
@@ -52,7 +96,7 @@ theorem crystallineCocycle_transport_conjugation {l : ℕ} [Fact l.Prime] (P : L
     intro g y
     induction y using TensorProduct.induction_on with
     | zero => simp
-    | add a b ha hb => simp only [map_add, ha, hb]
+    | add a b ha hb => simp only [map_add (f := _), ha, hb]
     | tmul v b =>
       change q (matRep M₁ (θ g) v) ⊗ₜ[ℚ_[l]] P.actQ σ ((P.PD K₁).actB (θ g) b) =
         matRep M₂ g (q v) ⊗ₜ[ℚ_[l]] (P.PD K₂).actB g (P.actQ σ b)
@@ -62,7 +106,7 @@ theorem crystallineCocycle_transport_conjugation {l : ℕ} [Fact l.Prime] (P : L
   refine ⟨⟨continuous_pi fun j => hpc.comp ((continuous_apply j).comp (hc1.comp hθ)), fun g h => ?_⟩,
     T x, fun g => ?_⟩
   · change q (c (θ (g * h))) = q (c (θ g)) + matRep M₂ g (q (c (θ h)))
-    rw [map_mul, hc2, map_add, hq]
+    rw [map_mul, hc2, map_add (f := _), hq]
   · rw [← hT, ← map_sub, ← hx]
     change q (c (θ g)) ⊗ₜ[ℚ_[l]] (1 : P.R.B) = q (c (θ g)) ⊗ₜ[ℚ_[l]] P.actQ σ 1
     rw [map_one]

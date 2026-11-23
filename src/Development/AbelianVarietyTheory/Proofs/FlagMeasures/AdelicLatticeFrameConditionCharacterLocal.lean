@@ -1,9 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.SelfDualAt
-import Formalism.LocalToGlobal.HermitianForms.TiedStep
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.IntegralExtensionFiniteAdelesBasicProperties
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.SelfDualAt
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.AdelicLatticeCarryIffForallPlace
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.IntegralExtensionFiniteAdelesBasicProperties
 import Development.AbelianVarietyTheory.Proofs.FlagMeasures.MemAdelicSpanOfLatticeIffForallPlace
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.AdelicLatticeCarryIffForallPlace
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.LocalToGlobal.HermitianForms.IsLocBasis
+
+@[expose] public section
 
 open Formalism.BasicNotions Formalism.UG Formalism.L2.Forms NumberField IsDedekindDomain Matrix GlobalTheory.St.G
 open scoped TensorProduct
@@ -43,6 +88,7 @@ omit [NumberField E] in
 theorem prV_sum_IE [DecidableEq (HeightOneSpectrum (𝓞 F))] (S : Finset (HeightOneSpectrum (𝓞 F)))
     (u : ∀ v : HeightOneSpectrum (𝓞 F), E ⊗[F] v.adicCompletion F) (w : HeightOneSpectrum (𝓞 F)) (hw : w ∈ S) :
     prV (E := E) w (∑ v ∈ S, afsplitIE v (u v)) = u w := by
+
   rw [map_sum, Finset.sum_eq_single w]
   · exact afsplit_prV_IE w (u w)
   · intro v _ hvw
@@ -54,6 +100,7 @@ omit [NumberField E] in
 theorem prV_sum_IE_not (S : Finset (HeightOneSpectrum (𝓞 F)))
     (u : ∀ v : HeightOneSpectrum (𝓞 F), E ⊗[F] v.adicCompletion F) (w : HeightOneSpectrum (𝓞 F)) (hw : w ∉ S) :
     prV (E := E) w (∑ v ∈ S, afsplitIE v (u v)) = 0 := by
+
   rw [map_sum]
   exact Finset.sum_eq_zero fun v hv => afsplit_prV_IE_ne v w (fun h => hw (h ▸ hv)) (u v)
 
@@ -127,7 +174,7 @@ private theorem afsplitIE_mem_OAd' (v : HeightOneSpectrum (𝓞 F)) {a : E ⊗[F
     rw [Algebra.TensorProduct.one_def, afsplitIE_tmul]
     exact Subring.subset_closure (Or.inr ⟨⟨_, hone⟩, rfl⟩)
   | add x y _ _ hx hy =>
-    rw [map_add]
+    rw [map_add (f := _)]
     exact Subring.add_mem _ hx hy
   | neg x _ hx =>
     rw [map_neg]
@@ -260,6 +307,7 @@ theorem hR_incl (σ : E →ₐ[F] E) (J : Matrix (Fin n) (Fin n) E) (x y : Fin n
   have key : ∀ e : E, sigR σ (Ad F) (inclE (F := F) (Ad F) e) = inclE (F := F) (Ad F) (σ e) := by
     intro e
     simp [sigR, inclE]
+
   simp only [hR, hform, map_sum, map_mul, Matrix.map_apply, key]
   rfl
 
@@ -287,7 +335,7 @@ private theorem sigR_mem_intAE' (σ : E →ₐ[F] E) {a : E ⊗[F] Ad F} (ha : a
 
 private theorem hform_add_left_flag_measures {A : Type} [CommRing A] {ι : Type} [Fintype ι] (τ : A →+* A)
     (J : Matrix ι ι A) (u w x : ι → A) : hform τ J (u + w) x = hform τ J u x + hform τ J w x := by
-  simp only [hform, Pi.add_apply, map_add, add_mul, Finset.sum_add_distrib]
+  simp only [hform, Pi.add_apply, map_add (f := _), add_mul, Finset.sum_add_distrib]
 
 private theorem hform_smul_left_flag_measures' {A : Type} [CommRing A] {ι : Type} [Fintype ι] (τ : A →+* A)
     (J : Matrix ι ι A) (a : A) (u x : ι → A) : hform τ J (a • u) x = τ a * hform τ J u x := by
@@ -335,6 +383,7 @@ theorem prV_hR (σ : E →ₐ[F] E) (J : Matrix (Fin n) (Fin n) E) (v : HeightOn
     prV (E := E) v (hR σ J (Ad F) x y) = hR σ J (v.adicCompletion F) (prVec v x) (prVec v y) := by
   have key : ∀ a, prV (E := E) v (sigR σ (Ad F) a) = sigR σ (v.adicCompletion F) (prV (E := E) v a) :=
     fun a => RingHom.congr_fun (afsplit_prV_comp_sigR σ v) a
+
   simp only [hR, hform, map_sum, map_mul, Matrix.map_apply, key, afsplit_prV_inclE, prVec]
 
 theorem prV_supSum (σ : E →ₐ[F] E) (J : Matrix (Fin n) (Fin n) E) (v : HeightOneSpectrum (𝓞 F)) {k : ℕ}
@@ -343,6 +392,7 @@ theorem prV_supSum (σ : E →ₐ[F] E) (J : Matrix (Fin n) (Fin n) E) (v : Heig
       supSum (hR σ J (v.adicCompletion F)) (fun j => prVec v (b j)) (fun j => prVec v (bd j))
         (bc (prV (E := E) v) y).1 := by
   unfold supSum
+
   rw [map_sum]
   refine Finset.sum_congr rfl fun i _ => ?_
   split_ifs with hi
@@ -440,6 +490,7 @@ theorem chi_local (Fr : AdFrame σ J (hat F L) (gp 0 * gp 1) k) (hp : ∀ i, (gp
   have hrest : (1 - ∑ v ∈ S, afsplitEps E v) * a ∈ OAd F E := by
     apply IntAd.mem_of_local
     intro w
+
     rw [map_mul, map_sub, map_one, map_sum]
     by_cases hw : w ∈ S
     · rw [Finset.sum_eq_single w (fun v _ hvw => afsplit_prV_eps_ne v w (Ne.symm hvw))

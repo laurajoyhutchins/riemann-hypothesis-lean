@@ -1,14 +1,56 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.ExistsUnitarySupportedAtPlaceOfMulEqIdem
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.PlacesToAdeles
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.WeilCharacterSplitPlaceExistsContinuousNontriviaStatement
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.HeisenbergFrameHalfInverseStatement
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.MatrixIntegralOfAddCharTraceDualStatement
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.ExistsSchrodingerIntertwinerIntegralMatricesStatement
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.SchwartzBruhatMatrixTranslationModulationIrreducStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.LatticeFrames.ExistsUnitarySupportedAtPlaceOfMulEqIdem
+import Development.AbelianVarietyTheory.Counterexamples.HeightSurvey.StarPurelyImaginaryEqNeg
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.EventuallyFinEqOne
 import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.IsSelfDualCLatFrame
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.EventuallyFinEqOne
 import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.RealIdemMulOfReal
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.ExistsSchrodingerIntertwinerIntegralMatricesStatement
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.HeisenbergFrameHalfInverseStatement
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.MatrixIntegralOfAddCharTraceDualStatement
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.SchwartzBruhatMatrixTranslationModulationIrreducStatement
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.WeilCharacterSplitPlaceExistsContinuousNontriviaStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.L2.Theta Formalism.IndefR.Datum MeasureTheory Matrix ValuativeRel GlobalTheory.MixModel GlobalTheory.MixPer GlobalTheory.Unf GlobalTheory.SplitWeil GlobalTheory.RootEx GlobalTheory.LocMod
@@ -144,16 +186,49 @@ theorem localModel_uniq_transport_exist : ∀ (D : D7) (k : Type) [Field k] [Val
     have hstd : IsCharAF D.host.F ψ := hψ.1
     refine ⟨Tm, ⟨fun Φ => ?_, fun x Φ Φ' h => htr x Φ Φ' h, fun y hy Φ Φ' h =>
       hmo ⟨y, (GlobalTheory.PlaceModel.isHalf_iff S T).1 hy⟩ Φ Φ' h⟩, hvac⟩
+    have hfin {a : WO S T} (ha : a.map (infPart D) = 0) {f : WO S T → ℂ}
+        (hf : IsThetaFunO ψ S T f) : IsThetaFunO ψ S T (heisO ψ S T a f) := by
+      simpa using GlobalTheory.FinTranslate.isTheta_sum_heisO_fin D ψ S T hstd f hf
+        Unit Finset.univ (fun _ => a) (fun _ => 1) (fun _ _ => ha)
+    have hzero : IsThetaFunO ψ S T 0 := by
+      refine ⟨?_, ?_, continuous_const, ?_⟩
+      · intro γ w; simp only [Pi.zero_apply, mul_zero]
+      · exact ⟨⊤, isOpen_univ, fun u _ _ => by funext w; simp only [heisO, Pi.zero_apply, mul_zero]⟩
+      · intro k L _ _ w; exact contDiff_const
+    have hadd {f g : WO S T → ℂ} (hf : IsThetaFunO ψ S T f) (hg : IsThetaFunO ψ S T g) :
+        IsThetaFunO ψ S T (f + g) := by
+      refine ⟨?_, ?_, hf.cont.add hg.cont, ?_⟩
+      · intro γ w; simp only [Pi.add_apply, hf.quasi, hg.quasi, mul_add]
+      · obtain ⟨U, hU, h1⟩ := hf.level
+        obtain ⟨U', hU', h2⟩ := hg.level
+        refine ⟨U ⊓ U', hU.inter hU', fun u hu h0 => ?_⟩
+        funext w
+        have e1 := congrFun (h1 u hu.1 h0) w
+        have e2 := congrFun (h2 u hu.2 h0) w
+        unfold heisO at e1 e2 ⊢
+        rw [Pi.add_apply, Pi.add_apply, mul_add, e1, e2]
+      · intro k L h1 h2 w; exact (hf.smooth k L h1 h2 w).add (hg.smooth k L h1 h2 w)
+    have hsmul (c : ℂ) {f : WO S T → ℂ} (hf : IsThetaFunO ψ S T f) :
+        IsThetaFunO ψ S T (c • f) := by
+      refine ⟨?_, ?_, hf.cont.const_smul c, ?_⟩
+      · intro γ w; rw [Pi.smul_apply, Pi.smul_apply, hf.quasi, smul_eq_mul, smul_eq_mul, mul_left_comm]
+      · obtain ⟨U, hU, h1⟩ := hf.level
+        refine ⟨U, hU, fun u hu h0 => ?_⟩
+        funext w
+        have e1 := congrFun (h1 u hu h0) w
+        unfold heisO at e1 ⊢
+        rw [Pi.smul_apply, Pi.smul_apply, smul_eq_mul, smul_eq_mul, mul_left_comm, e1]
+      · intro k L h1 h2 w; exact contDiff_const.mul (hf.smooth k L h1 h2 w)
     have hs := hspan Φ
     generalize Tm Φ = g at hs
     induction hs using Submodule.span_induction with
     | mem _ hw =>
       obtain ⟨w, rfl⟩ := hw
-      exact GlobalTheory.FinTranslate.isTheta_heisO_fin hstd (GlobalTheory.SplitScalar.half_fin hsplit (hup w.1).1)
-        (GlobalTheory.FinTranslate.isTheta_heisO_fin hstd
+      exact hfin (GlobalTheory.SplitScalar.half_fin hsplit (hup w.1).1)
+        (hfin
           (GlobalTheory.SplitScalar.half_fin (GlobalTheory.SplitScalar.isSplitIdem_conj hsplit) (hZ w.2)) hf₀)
-    | zero => exact GlobalTheory.WeilVacMove.isTheta_zero
-    | add _ _ _ _ h1 h2 => exact GlobalTheory.WeilVacMove.isTheta_add h1 h2
-    | smul c _ _ h1 => exact GlobalTheory.WeilVacMove.isTheta_smul c h1
+    | zero => exact hzero
+    | add _ _ _ _ h1 h2 => exact hadd h1 h2
+    | smul c _ _ h1 => exact hsmul c h1
 
 end GlobalTheory.LocModU

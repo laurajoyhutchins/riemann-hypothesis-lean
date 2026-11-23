@@ -1,14 +1,65 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.ExistsUniqueLeftBasisCoordsAdicCompletion
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.AbelianPartLatticeEigenCompat
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.CuspCorrespondenceBound
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LieLatticeEvalFractionField
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LieLatticeStableUnderAction
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LatticeEigenVectorBundleStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LabelEmbeddingInjectiveStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LieOmegaLatticeVectorBundleStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.SandwichPointOverFieldExtStatement
+module
+
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IntegralClosureHeightEqOneOfLiesOver
+public import Mathlib.Algebra.AffineMonoid.Basic
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.AbelianPartLatticeEigenCompat
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.CuspCorrespondenceBound
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.IsExcisionNbhdAway
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LabelEmbeddingInjectiveStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LatticeEigenVectorBundleStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LieLatticeEvalFractionField
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LieLatticeStableUnderAction
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LieOmegaLatticeVectorBundleStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.SandwichPointOverFieldExtStatement
 import Development.WeilBound.CoreStatements.HodgeTatePoints.GhModelGeo
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.Eigenspace.Pi
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.GenMapFromSpecStalk
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField Matrix Filter Topology
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Geo ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.Semi
 open GroundTheory.Heights₂.Heights.LowerBoundFree GlobalTheory.CompanionTheory.Ar GlobalTheory.CompanionTheory.Ar.Cusp
@@ -92,11 +143,11 @@ theorem value_cp (hg : IsCptGen ξ) {F : Type} [Field F] [CharZero F] {z : Spec 
     have hp0 : NeZero (p : F) := ⟨Nat.cast_ne_zero.2 hp.ne_zero⟩
     have h3 := value_aeval hg hv ((Polynomial.cyclotomic p ℤ).comp (Polynomial.X + 1)) (by
       rw [Polynomial.aeval_comp]
-      simp only [map_add, Polynomial.aeval_X, map_one, sub_add_cancel]
+      simp only [map_add (f := _), Polynomial.aeval_X, map_one, sub_add_cancel]
       rw [aeval_cyclotomic]
       exact hζ.isRoot_cyclotomic hp.pos)
     rw [Polynomial.aeval_comp] at h3
-    simp only [map_add, Polynomial.aeval_X, map_one] at h3
+    simp only [map_add (f := _), Polynomial.aeval_X, map_one] at h3
     rw [aeval_cyclotomic] at h3
     exact Polynomial.isRoot_cyclotomic_iff.1 h3
 
@@ -160,8 +211,8 @@ theorem val_mem_eig {s : CMType H ⊕ CMType H} {σ : 𝓞 E →+* R} (hσ : ∀
   rw [mem_eigSp.1 he a] at h1
   exact MC.inj (h1.unique 𝔐.tie.gen h2)
 
-include hact in
 
+include hact in
 theorem off_S (σ : CMType H ⊕ CMType H → (𝓞 E →+* R)) (hσ : ∀ s a, ValAt 𝔐.ξ z (𝔐.emb s a) (σ s a))
     (hinj : Function.Injective fun s => (algebraMap R C).comp (σ s)) (hS : ∀ p ∈ S, IsUnit (p : R))
     (hd : IsUnit (((discr E).natAbs : ℕ) : R)) (s : CMType H ⊕ CMType H) :
@@ -225,8 +276,8 @@ theorem off_S (σ : CMType H ⊕ CMType H → (𝓞 E →+* R)) (hσ : ∀ s a, 
   obtain ⟨x', h1, h2⟩ := key e (hs1 ▸ he)
   rwa [MC.inj (hw.unique hξ h2)]
 
-include hact in
 
+include hact in
 theorem on_S {p : ℕ} (hpS : p ∈ S) (κ : Ω) (hfree : HT.HTFree 𝔐 p) (hsand : HT.Sandwich 𝔐 p κ)
     (v : Valuation C NNReal) (hv : v.Integers R) (hvp : v (p : C) < 1) (s : CMType H ⊕ CMType H)
     (σ : 𝓞 E →+* R) (hσ : ∀ a, ValAt 𝔐.ξ z (𝔐.emb s a) (σ a)) (κz : R) (hκ : ValAt 𝔐.ξ z κ κz) :

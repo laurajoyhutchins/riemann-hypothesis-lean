@@ -1,7 +1,47 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.MapCSmulMulVec
-import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.OneAddXMulDerivativeBin
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.MapCSmulMulVec
+public import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -43,7 +83,7 @@ def coord (R : Fr l O) (jE : (ZMod n → R.EE) →ₐ[O] W.EE) (T : LocLat G Qp 
   map_add' x y := by
     rw [← Finset.sum_add_distrib]
     refine Finset.sum_congr rfl fun k _ => ?_
-    rw [← add_smul, ← map_add]; rfl
+    rw [← add_smul, ← map_add (f := _)]; rfl
   map_smul' c x := by
     rw [RingHom.id_apply, Finset.smul_sum]
     refine Finset.sum_congr rfl fun k _ => ?_
@@ -56,7 +96,7 @@ theorem coord_apply (R : Fr l O) (jE : (ZMod n → R.EE) →ₐ[O] W.EE) (T : Lo
 def DDinv (T : LocLat G Qp LL O) : Submodule O (W.DD T) where
   carrier := {x | ∀ δ ∈ W.DelF, W.γD T δ x = x}
   zero_mem' := fun δ _ => map_zero _
-  add_mem' := fun ha hb δ hδ => by rw [map_add, ha δ hδ, hb δ hδ]
+  add_mem' := fun ha hb δ hδ => by rw [map_add (f := _), ha δ hδ, hb δ hδ]
   smul_mem' := fun c a ha δ hδ => by rw [map_smul, ha δ hδ]
 
 def wachDeltaInvariantCoboundaries (T : LocLat G Qp LL O) : Submodule O (W.DD T × W.DD T) :=

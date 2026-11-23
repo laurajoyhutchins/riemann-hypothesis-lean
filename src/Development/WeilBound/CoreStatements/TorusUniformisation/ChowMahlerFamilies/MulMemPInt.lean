@@ -1,9 +1,55 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.TorusUniformisation.ChowMahlerFamilies.IsDerAt0
-import Development.WeilBound.CoreStatements.HodgeTatePoints.CntCoord
-import Development.WeilBound.CoreStatements.HodgeTatePoints.RaChar
-import Development.WeilBound.CoreStatements.HodgeTatePoints.DetUpdateRowDiagonal
-import ReciprocityTheory.DualLattices.HasLenCokerDet
+module
+
+public import Development.WeilBound.CoreStatements.TorusUniformisation.ChowMahlerFamilies.IsDerAt0
+public import Development.WeilBound.CoreStatements.HodgeTatePoints.RaCoord
+public import Development.WeilBound.CoreStatements.HodgeTatePoints.RaCpaf
+public import Development.WeilBound.CoreStatements.HodgeTatePoints.CntCoord
+import Development.WeilBound.CoreStatements.HodgeTatePoints.FormMemLin
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import ReciprocityTheory.DualLattices.ProdDvdOfIso
+import ReciprocityTheory.DualLattices.SumValCoord
+
+@[expose] public section
 
 open ReciprocityTheory.PGsh.L2 ReciprocityTheory.PGsh.Up GlobalTheory.CompanionTheory.Ar.GR PositivityTheory.HtPt.Ra
 open scoped Matrix
@@ -136,6 +182,7 @@ theorem der_tl (hv : v.Integers R) (hp : v (p : C) < 1) (hD : IsDerAt0 _ Dv) (hW
     simp only [Submodule.coe_smul, Pi.smul_apply, Algebra.smul_def, hr k hk, Pi.pow_apply, Pi.sub_apply, Pi.one_apply]
     ring
   have h1m : 1 ∈ Finset.Ico 1 p := Finset.mem_Ico.2 ⟨le_rfl, (Fact.out : p.Prime).one_lt⟩
+
   rw [e, map_sum, Finset.sum_eq_single_of_mem 1 h1m]
   · have : r 1 = 1 := hv.hom_inj (by rw [hr 1 h1m]; simp)
     rw [this, one_smul]
@@ -220,6 +267,7 @@ theorem small_gen (hv : v.Integers R) (hp1 : v (p : C) < 1) (AA : HopfOrder (C :
     simp
   refine ⟨fun j => ⟨X j, hX j⟩, hu, fun g => ?_, fun g hg => ?_⟩
   · obtain ⟨c, rfl⟩ := hexp g
+
     rw [map_sum]
     refine Submodule.sum_mem _ fun α _ => ?_
     rw [map_smul]
@@ -253,6 +301,7 @@ theorem small_gen (hv : v.Integers R) (hp1 : v (p : C) < 1) (AA : HopfOrder (C :
       refine v.map_sum_le fun y _ => ?_
       rw [map_mul]
       exact (mul_le_of_le_one_left zero_le (hv.map_le_one _)).trans (hg y)
+
     rw [map_sum]
     refine Finset.sum_eq_zero fun α _ => ?_
     rw [map_smul]

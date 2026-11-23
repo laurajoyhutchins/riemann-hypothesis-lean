@@ -1,5 +1,43 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.RankPosOfLeaves
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.RankPosOfLeaves
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -19,7 +57,7 @@ theorem subset_hull (S : Set (Sm E N)) : S ⊆ (hull S : Submodule ℂ (Sm E N))
   rintro U ⟨hS, -⟩
   exact hS hφ
 
-theorem hull_le {S : Set (Sm E N)} {U : Submodule ℂ (Sm E N)} (hS : S ⊆ U) (hU : IsStable U) : hull S ≤ U :=
+theorem hull_le {S : Set (Sm E N)} {U : Submodule ℂ (Sm E N)} (hS : S ⊆ U) (hU : _root_.GlobalTheory.CuspRep.IsStable U) : hull S ≤ U :=
   sInf_le ⟨hS, hU⟩
 
 theorem hull_ne_bot {S : Set (Sm E N)} {φ : Sm E N} (hφ : φ ∈ S) (h0 : φ ≠ 0) : hull S ≠ ⊥ := by
@@ -28,7 +66,7 @@ theorem hull_ne_bot {S : Set (Sm E N)} {φ : Sm E N} (hφ : φ ∈ S) (h0 : φ �
   rw [h] at h1
   exact h0 ((Submodule.mem_bot ℂ).1 h1)
 
-theorem exists_ne_of_hull {S : Set (Sm E N)} (hst : IsStable (hull S)) (T : Sm E N →ₗ[ℂ] Sm E N)
+theorem exists_ne_of_hull {S : Set (Sm E N)} (hst : _root_.GlobalTheory.CuspRep.IsStable (hull S)) (T : Sm E N →ₗ[ℂ] Sm E N)
     (he : ∀ o, ∀ χ ∈ hull S, T (act o χ) = act o (T χ)) {ψ : Sm E N} (hψ : ψ ∈ hull S) (hT : T ψ ≠ 0) :
     ∃ φ ∈ S, T φ ≠ 0 := by
   by_contra hcon
@@ -36,7 +74,7 @@ theorem exists_ne_of_hull {S : Set (Sm E N)} (hst : IsStable (hull S)) (T : Sm E
     intro φ hφ
     by_contra h
     exact hcon ⟨φ, hφ, h⟩
-  have hK : IsStable (hull S ⊓ LinearMap.ker T) := by
+  have hK : _root_.GlobalTheory.CuspRep.IsStable (hull S ⊓ LinearMap.ker T) := by
     intro o χ hχ
     refine Submodule.mem_inf.2 ⟨hst o χ hχ.1, ?_⟩
     have h0 : T χ = 0 := LinearMap.mem_ker.1 hχ.2

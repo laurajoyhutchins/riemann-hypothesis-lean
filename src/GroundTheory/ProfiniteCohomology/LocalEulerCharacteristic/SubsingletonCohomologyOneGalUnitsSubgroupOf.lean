@@ -1,8 +1,56 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.LocalEulerCharacteristic.ConjAction
-import GroundTheory.ProfiniteCohomology.ClassFormations.Corestriction
-import GroundTheory.ProfiniteCohomology.LocalClassFormationAlt
-import GroundTheory.ProfiniteCohomology.GaloisCohomology.Kummer
+module
+
+public import GroundTheory.ProfiniteCohomology.ClassFormationDefs
+public import GroundTheory.ProfiniteCohomology.GaloisCohomology.UnitsInflationCochainsFHomApply
+public import GroundTheory.ProfiniteCohomology.InflationRestriction.CohomologyResMemCohomologyConjInvariants
+public import Mathlib.FieldTheory.IsSepClosed
+public import Mathlib.NumberTheory.LocalField.Basic
+public import GroundTheory.ProfiniteCohomology.ClassFormations.Corestriction
+public import GroundTheory.ProfiniteCohomology.GaloisCohomology.Kummer
+public import GroundTheory.ProfiniteCohomology.LocalClassFormationAlt
+public import GroundTheory.ProfiniteCohomology.LocalEulerCharacteristic.ConjAction
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.FieldTheory.Galois.Profinite
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
@@ -16,8 +64,8 @@ section Formation
 variable {k G : Type u} [CommRing k] [Group G] [TopologicalSpace G] [IsTopologicalGroup G]
   [CompactSpace G] {C : Rep.{u} k G} [IsDiscreteRep C]
 
-omit [CompactSpace G] in
 
+omit [CompactSpace G] in
 theorem cohomologyRes_subgroupOf_surjective {U V : OpenSubgroup G} (h : V ≤ U) (n : ℕ)
     (hs : Function.Surjective (cohomologyResLE C (show (V : Subgroup G) ≤ U from h) n).hom) :
     Function.Surjective
@@ -35,7 +83,7 @@ theorem ClassFormation.cohomologyConj_two_eq_id (F : ClassFormation C) {U V : Op
     (h : V ≤ U) [((V : Subgroup G).subgroupOf (U : Subgroup G)).Normal] (g : (U : Subgroup G)) :
     cohomologyConj (Rep.res (U : Subgroup G).subtype C) ((V : Subgroup G).subgroupOf U) 2 g = 𝟙 _ := by
   refine ModuleCat.hom_ext (LinearMap.ext fun y => ?_)
-  obtain ⟨x, rfl⟩ := cohomologyRes_subgroupOf_surjective h 2 (F.cohomologyResLE_surjective h) y
+  obtain ⟨x, rfl⟩ := cohomologyRes_subgroupOf_surjective h 2 (ClassFormation.cohomologyResLE_surjective F h) y
   exact congrArg (fun φ => φ.hom x) (cohomologyRes_comp_cohomologyConj (Rep.res (U : Subgroup G).subtype C)
     ((V : Subgroup G).subgroupOf U) 2 g)
 
@@ -83,8 +131,8 @@ theorem kummerSequenceResRes_shortExact (hl : (l : K) ≠ 0) (U : Subgroup Gal(K
     (kummerSequenceResRes (K := K) (Ksep := Ksep) l U N).ShortExact :=
   shortExact_map_res N (shortExact_map_res U (kummerSequence_shortExact l hl))
 
-omit [ValuativeRel K] [TopologicalSpace K] [IsNonarchimedeanLocalField K] in
 
+omit [ValuativeRel K] [TopologicalSpace K] [IsNonarchimedeanLocalField K] in
 theorem subsingleton_cohomology_one_galUnits_subgroupOf {U V : OpenSubgroup Gal(Ksep/K)} (h : V ≤ U) :
     Subsingleton (cohomology (Rep.res ((V : Subgroup Gal(Ksep/K)).subgroupOf U).subtype
       (Rep.res (U : Subgroup Gal(Ksep/K)).subtype (galUnits.{0} K Ksep))) 1) := by

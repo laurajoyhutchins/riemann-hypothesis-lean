@@ -1,9 +1,49 @@
-import Mathlib
-import Development.WeilBound.RepresentationTheoryGL.TwistedFactors.LocalBaseChange.StrictDominanceCasselman.IsStrictlyDominant
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.HeckeOperatorExists
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.HeckeOperatorJacquetEigenRight
-import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.ValuationDetOfMemKO
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsJLeviMulJPlus
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.TwistedFactors.LocalBaseChange.StrictDominanceCasselman.IsStrictlyDominant
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsJLeviMulJPlus
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.HeckeOperatorExists
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.HeckeOperatorJacquetEigenRight
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -73,8 +113,11 @@ theorem leviEmb_leviProj_mem_Km {N m : ℕ} (hm : 1 ≤ m) (e : (Σ a, μ a) ≃
   by_cases h : a = b
   · subst h
     have := (mem_Km_iff N hm _).1 hp (e ⟨a, i⟩) (e ⟨a, j⟩)
-    rwa [leviEmb_apply_same, leviProj_apply]
-  · rw [leviEmb_apply_ne k e _ h, one_ne e h]
+    simpa [leviEmb, Matrix.blockDiagonal'_apply_eq] using this
+  · have hz : ((leviEmb k e (leviProj k e p) : GL (Fin N) k) : Matrix (Fin N) (Fin N) k)
+        (e ⟨a, i⟩) (e ⟨b, j⟩) = 0 := by
+      simp [leviEmb, Matrix.blockDiagonal'_apply, h]
+    rw [hz, one_ne e h]
     simp
 
 theorem exists_factor {N m : ℕ} (hm : 1 ≤ m) (e : (Σ a, μ a) ≃ Fin N) {x : GL (Fin N) k}
@@ -84,7 +127,32 @@ theorem exists_factor {N m : ℕ} (hm : 1 ≤ m) (e : (Σ a, μ a) ≃ Fin N) {x
   obtain ⟨c, hc, hp⟩ := exists_mul_mem_parab hm e (inv_mem hx)
   have hq : (x⁻¹ * c)⁻¹ ∈ parab k e := inv_mem hp
   have hqK : (x⁻¹ * c)⁻¹ ∈ Zls.Km k N m := inv_mem (mul_mem (inv_mem hx) hc.1)
-  obtain ⟨u, hu, hqu⟩ := exists_levi_mul_unip k e ⟨_, hq⟩
+  have hs : ∀ (g : Levi k μ) a (i j : μ a),
+      ((leviEmb k e g : GL (Fin N) k) : Matrix (Fin N) (Fin N) k) (e ⟨a, i⟩) (e ⟨a, j⟩) =
+        (g a : Matrix (μ a) (μ a) k) i j := by
+    intro g a i j
+    simp [leviEmb, Matrix.blockDiagonal'_apply_eq]
+  have hn : ∀ (g : Levi k μ) {a b : α}, a ≠ b → ∀ (i : μ a) (j : μ b),
+      ((leviEmb k e g : GL (Fin N) k) : Matrix (Fin N) (Fin N) k) (e ⟨a, i⟩) (e ⟨b, j⟩) = 0 := by
+    intro g a b h i j
+    simp [leviEmb, Matrix.blockDiagonal'_apply, h]
+  let p : parab k e := ⟨_, hq⟩
+  have hL : leviEmb k e (leviProj k e p) ∈ parab k e :=
+    mem_parab_iff.2 fun a b i j h => hn _ h.ne' i j
+  let L : parab k e := ⟨_, hL⟩
+  have hproj : leviProj k e L = leviProj k e p := by
+    funext a
+    ext i j
+    simp only [leviProj_apply]
+    exact hs _ _ _ _
+  have hu : ((L⁻¹ * p : parab k e) : GL (Fin N) k) ∈ unipRad k e := by
+    change ((L⁻¹ * p : parab k e) : GL (Fin N) k) ∈ (leviProj k e).ker.map (parab k e).subtype
+    refine ⟨L⁻¹ * p, MonoidHom.mem_ker.2 ?_, rfl⟩
+    rw [map_mul, map_inv, hproj, inv_mul_cancel]
+  let u : GL (Fin N) k := ((L⁻¹ * p : parab k e) : GL (Fin N) k)
+  have hqu : (x⁻¹ * c)⁻¹ = leviEmb k e (leviProj k e p) * u := by
+    change (p : GL (Fin N) k) = (L : GL (Fin N) k) * ((L⁻¹ * p : parab k e) : GL (Fin N) k)
+    simp
   have hd := leviEmb_leviProj_mem_Km hm e ⟨_, hq⟩ hqK
   refine ⟨c, hc, _, ⟨hd, ⟨_, rfl⟩⟩, u, ⟨?_, hu⟩, ?_⟩
   · have : u = (leviEmb k e (leviProj k e ⟨_, hq⟩))⁻¹ * (x⁻¹ * c)⁻¹ := by

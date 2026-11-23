@@ -1,5 +1,64 @@
-import ReciprocityTheory.DualLattices.EigPowEqOne
-import ReciprocityTheory.DualLattices.IsAdicCompleteOfBasis
+module
+
+public import Mathlib.Algebra.Polynomial.AlgebraMap
+public import Mathlib.NumberTheory.Padics.PadicIntegers
+public import ReciprocityTheory.DualLattices.IsUnitOfNotMem
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.DualLattices.EigPowEqOne
+public import ReciprocityTheory.DualLattices.IsAdicCompleteOfBasis
+public import Mathlib.Algebra.CharP.Frobenius
+public import Mathlib.LinearAlgebra.Matrix.Charpoly.Basic
+public import Mathlib.LinearAlgebra.Matrix.Charpoly.Coeff
+public import Mathlib.RingTheory.AdjoinRoot
+
+@[expose] public section
 
 noncomputable section
 
@@ -85,7 +144,7 @@ theorem seed (p : ℕ) [Fact p.Prime] (hv : v.Integers R) (hpv : v (algebraMap R
       have e1 : AdjoinRoot.mk f (Q0 ^ m0 - 1) = ((r ^ (N + 1 + 1) + 1 - r ^ (N + 1)) ^ p ^ s) ^ m0 - 1 := by
         rw [map_sub, map_pow, hQ0, map_one]
       rw [e1, ← Ideal.Quotient.eq_zero_iff_mem]
-      simp only [map_pow, map_add, map_sub, map_one]
+      simp only [map_pow, map_add (f := _), map_sub, map_one]
       rw [sub_eq_zero]
       exact hw
     obtain ⟨t, ht⟩ := Ideal.mem_span_singleton'.1 hmem
@@ -115,7 +174,7 @@ theorem seed (p : ℕ) [Fact p.Prime] (hv : v.Integers R) (hpv : v (algebraMap R
       rw [this, mul_zero]
     have hevr : ev r = sg j a + c := by
       show ev (AdjoinRoot.root f + (c : S)) = _
-      rw [map_add, map_intCast]
+      rw [map_add (f := _), map_intCast]
       simp only [ev]
       rw [AdjoinRoot.lift_root]
     have hb : sg j (aeval a Q) = ev (AdjoinRoot.mk f Q) := by
@@ -180,8 +239,8 @@ theorem pair (p : ℕ) [Fact p.Prime] (hp2 : p ≠ 2) (hv : v.Integers R)
   obtain ⟨c, hci, hcj⟩ := hc
   obtain ⟨b, m, s, hm0, hmp, hbm, hbres⟩ := seed p hv hpv ρ εT sg heig a c
   refine ⟨b, m, hm0, hmp, hbm, fun heq => h ?_⟩
-  have hri : res hv (sg i a + c) = yi + c := by rw [map_add, map_intCast]
-  have hrj : res hv (sg j a + c) = yj + c := by rw [map_add, map_intCast]
+  have hri : res hv (sg i a + c) = yi + c := by rw [map_add (f := _), map_intCast]
+  have hrj : res hv (sg j a + c) = yj + c := by rw [map_add (f := _), map_intCast]
   rw [hbres j hj (by rwa [hrj]), hbres i hi (by rwa [hri]), hri, hrj, ← pow_mul, mul_comm,
     pow_mul] at heq
   have hcfix : ∀ k : ℕ, ((c : R ⧸ mI hv)) ^ p ^ k = c := by

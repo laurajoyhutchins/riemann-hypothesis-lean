@@ -1,7 +1,46 @@
-import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.GeometricallyConnectedOfIsIsoRestrict
-import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsIsLocModelIsPrimeOf
-import Development.AbelianVarietyTheory.Definitions.Divisors.NotDominatesTopPlace
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsIsLocModelIsPrimeOf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 open CategoryTheory AlgebraicGeometry TopologicalSpace
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor
 open GlobalTheory GlobalTheory.Cartier GlobalTheory.TopForm GlobalTheory.Discrepancy GlobalTheory.FieldPair
@@ -161,7 +200,7 @@ theorem formOrd_place (E : Place c) {n : ℕ} (η : Forms c n) :
       have := isFormOrd_place e.symm (symm_apply e he) ha
       rw [place_symm_place, formMap_symm_formMap e] at this
       exact h ⟨a, this⟩
-    rw [Place.formOrd, Place.formOrd, dif_neg h, dif_neg h']
+    rw [Place.formOrd, Place.formOrd, dite_eq_right h, dite_eq_right h']
 
 theorem ordQ_place (E : Place c) (φ : K →₀ ℚ) :
     (place e he E).ordQ (Finsupp.mapDomain e φ) = E.ordQ φ := by
@@ -206,7 +245,7 @@ theorem formMap_ne_zero_iff {n : ℕ} (η : Forms c n) :
   map_ne_zero_iff _ (formMap_bijective e (RingHom.ext he) n).1
 
 theorem mapDomain_apply_zero (φ : K →₀ ℚ) : Finsupp.mapDomain e φ 0 = φ 0 := by
-  have := Finsupp.mapDomain_apply e.injective φ 0
+  have := Finsupp.mapDomain_apply_of_injective e.injective φ 0
   rwa [map_zero] at this
 
 theorem klt_iff {n : ℕ} (R : Subring K) (η : Forms c n) (φ : K →₀ ℚ) :
@@ -233,19 +272,18 @@ theorem effAt_iff {n : ℕ} (R : Subring K) (η : Forms c n) (φ : K →₀ ℚ)
   · rw [← disc_place e he]
     exact h _ ((isPrimeOf_place e he E R).2 hE)
 
-include he in
 
-theorem isLocModel_map {R : Subring K} (h : IsLocModel c R) : IsLocModel c' (R.map e.toRingHom) where
-  const_mem a := ⟨c a, h.const_mem a, he a⟩
-  isLocalRing := by
-    haveI := h.isLocalRing
-    exact (e.subringMap (s := R)).isLocalRing
-  essFiniteType := by
-    have h3 := h.essFiniteType.comp (RingHom.FiniteType.of_surjective
-      (e.subringMap (s := R)).toRingHom (e.subringMap (s := R)).surjective).essFiniteType
-    convert h3 using 1
+include he in
+theorem isLocModel_map {R : Subring K} (h : IsLocModel c R) : IsLocModel c' (R.map e.toRingHom) := by
+  let eR := e.subringMap (s := R)
+  refine ⟨fun a => ⟨c a, h.const_mem a, he a⟩, ?_, ?_, ?_⟩
+  · have := h.isLocalRing
+    exact eR.isLocalRing
+  · have hcomp := h.essFiniteType.comp
+      (RingHom.FiniteType.of_surjective eR.toRingHom eR.surjective).essFiniteType
+    convert hcomp using 1
     exact RingHom.ext fun a => Subtype.ext (he a).symm
-  frac f := by
+  · intro f
     obtain ⟨a, ha, b, hb, hb0, hab⟩ := h.frac (e.symm f)
     refine ⟨e a, ⟨a, ha, rfl⟩, e b, ⟨b, hb, rfl⟩, (map_ne_zero e).2 hb0, ?_⟩
     rw [← hab, map_mul, e.apply_symm_apply]
@@ -259,8 +297,8 @@ theorem isLocModel_iff (R : Subring K) : IsLocModel c R ↔ IsLocModel c' (R.map
     simp [Subring.mem_map]
   rwa [hR] at h'
 
-include he in
 
+include he in
 theorem trBasis_map {n : ℕ} {x : Fin n → K} (h : TrBasis c x) : TrBasis c' (e ∘ x) := by
   letI := c.toAlgebra
   letI := c'.toAlgebra

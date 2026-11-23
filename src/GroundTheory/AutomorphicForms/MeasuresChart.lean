@@ -1,6 +1,60 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.MeasuresModulus
-import GroundTheory.AutomorphicForms.LocallyProfinite
+module
+
+public import GroundTheory.AutomorphicForms.MeasuresModulus
+public import Mathlib.MeasureTheory.Group.ModularCharacter
+import GroundTheory.AutomorphicForms.GLnLocal
+public import GroundTheory.AutomorphicForms.LocallyProfinite
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Compactness.Paracompact
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Topology.LocallyConstant.Basic
+
+@[expose] public section
 
 namespace GroundTheory.Automorphic
 
@@ -71,6 +125,17 @@ variable (μ₀ : Measure (ι → F)) [μ₀.IsAddHaarMeasure]
 
 theorem map_mul_left_comap (g : G) :
     map (g * ·) (μ₀.comap C.toFun) = (C.leftModulus g)⁻¹ • μ₀.comap C.toFun := by
+  haveI : SecondCountableTopology F := by
+    letI := IsTopologicalAddGroup.rightUniformSpace F
+    haveI := isUniformAddGroup_of_addCommGroup (G := F)
+    letI : (Valued.v (R := F)).RankOne :=
+      { hom' := ValuativeRel.IsRankLeOne.nonempty.some.emb (R := F).comp
+          MonoidWithZeroHom.ValueGroup₀.embedding
+        strictMono' := ValuativeRel.IsRankLeOne.nonempty.some.strictMono.comp
+          MonoidWithZeroHom.ValueGroup₀.embedding_strictMono }
+    open scoped Valued in
+    haveI : ProperSpace F := .of_nontriviallyNormedField_of_weaklyLocallyCompactSpace F
+    exact secondCountable_of_proper
   ext s hs
   rw [map_apply (continuous_const_mul g).measurable hs, C.measurableEmbedding.comap_apply,
     Measure.smul_apply, C.measurableEmbedding.comap_apply, image_preimage_mul_left,
@@ -79,6 +144,17 @@ theorem map_mul_left_comap (g : G) :
 
 theorem map_mul_right_comap (h : G) :
     map (· * h) (μ₀.comap C.toFun) = (C.rightModulus h)⁻¹ • μ₀.comap C.toFun := by
+  haveI : SecondCountableTopology F := by
+    letI := IsTopologicalAddGroup.rightUniformSpace F
+    haveI := isUniformAddGroup_of_addCommGroup (G := F)
+    letI : (Valued.v (R := F)).RankOne :=
+      { hom' := ValuativeRel.IsRankLeOne.nonempty.some.emb (R := F).comp
+          MonoidWithZeroHom.ValueGroup₀.embedding
+        strictMono' := ValuativeRel.IsRankLeOne.nonempty.some.strictMono.comp
+          MonoidWithZeroHom.ValueGroup₀.embedding_strictMono }
+    open scoped Valued in
+    haveI : ProperSpace F := .of_nontriviallyNormedField_of_weaklyLocallyCompactSpace F
+    exact secondCountable_of_proper
   ext s hs
   rw [map_apply (continuous_mul_const h).measurable hs, C.measurableEmbedding.comap_apply,
     Measure.smul_apply, C.measurableEmbedding.comap_apply, image_preimage_mul_right,
@@ -118,6 +194,7 @@ theorem leftModulus_mul (g h : G) : C.leftModulus (g * h) = C.leftModulus g * C.
     simp [mul_assoc]
   rw [e2, C.map_mul_left_comap μ₀ h, Measure.map_smul, C.map_mul_left_comap μ₀ g, smul_smul]
     at e1
+  all_goals try exact (continuous_const_mul g).measurable.aemeasurable
   have := C.eq_of_smul_comap_eq μ₀ e1
   rw [← mul_inv] at this
   rw [mul_comm]
@@ -135,6 +212,7 @@ theorem rightModulus_mul (g h : G) :
     simp [mul_assoc]
   rw [e2, C.map_mul_right_comap μ₀ g, Measure.map_smul, C.map_mul_right_comap μ₀ h, smul_smul]
     at e1
+  all_goals try exact (continuous_mul_const h).measurable.aemeasurable
   have := C.eq_of_smul_comap_eq μ₀ e1
   rw [← mul_inv] at this
   exact inv_injective this.symm
@@ -156,8 +234,6 @@ noncomputable def rightModulusHom : G →* ℝ≥0 where
   map_mul' := C.rightModulus_mul
 
 @[simp] theorem leftModulusHom_apply (g : G) : C.leftModulusHom g = C.leftModulus g := rfl
-
-@[simp] theorem rightModulusHom_apply (g : G) : C.rightModulusHom g = C.rightModulus g := rfl
 
 theorem leftModulus_eq_one_of_preimage {g : G} {s : Set G} (hs : MeasurableSet s)
     (hgs : (g * ·) ⁻¹' s = s) (h0 : μ₀.comap C.toFun s ≠ 0) (hT : μ₀.comap C.toFun s ≠ ∞) :

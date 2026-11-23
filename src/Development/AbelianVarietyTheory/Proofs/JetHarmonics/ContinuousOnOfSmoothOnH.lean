@@ -1,10 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Jets.SumIoPrAlt
-import Development.AbelianVarietyTheory.BlockTheory.JetGauges.SmoothDecompositionForms
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ContinuousRepSmoothOnUH
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CasimirEigenvalueCoefficients
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.ContinuousMulMt
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.CapelliEigenvalues.HeckeMultiplication
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Jets.SumIoPrAlt
+public import Development.AbelianVarietyTheory.BlockTheory.JetGauges.SmoothDecompositionForms
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.ContinuousMulMt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Matrix Finset PI.UpqRep
 open scoped InnerProductSpace ContDiff
@@ -17,16 +58,6 @@ open GlobalTheory.IndefiniteRowSideFullHecke.SmoothDecompositionForms (HRep IsSm
   tensSmooth tensAct tensForm pureT contr LieWord Mx Ix)
 
 variable {k r : ℕ}
-
-def toRep (R : HRep k r) : BranchingSupport.Rep k r where
-  H := R.H
-  σ := R.σ
-
-def repEquiv (k r : ℕ) : HRep k r ≃ {R : BranchingSupport.Rep k r // IsURepOn (BranchingSupport.GG k r) R.σ} where
-  toFun R := ⟨toRep R, R.isURep⟩
-  invFun R := { H := R.1.H, σ := R.1.σ, isURep := R.2 }
-  left_inv _ := rfl
-  right_inv _ := rfl
 
 theorem isURepOn_of_isDS {R : BranchingSupport.Rep k r} {ε : Ix k r → Bool} {μ : Ix k r → ℝ} (h : R.IsDS ε μ) :
     IsURepOn (BranchingSupport.GG k r) R.σ := by
@@ -48,19 +79,9 @@ theorem isURepOn_of_isDS {R : BranchingSupport.Rep k r} {ε : Ix k r → Bool} {
     have := (hc v).comp h3.continuousOn hmaps
     simpa only [Function.comp_def, e] using this
 
-def dsEquiv (ε : Ix k r → Bool) (μ : Ix k r → ℝ) :
-    {R : HRep k r // R.IsDiscrete ε μ} ≃ {R : BranchingSupport.Rep k r // R.IsDS ε μ} where
-  toFun R := ⟨toRep R.1, R.2⟩
-  invFun R := ⟨{ H := R.1.H, σ := R.1.σ, isURep := isURepOn_of_isDS R.2 }, R.2⟩
-  left_inv _ := rfl
-  right_inv _ := rfl
-
 section Smooth
 
 attribute [local instance] Matrix.normedAddCommGroup Matrix.normedSpace
-
-theorem smul_mem (R : HRep k r) (a : ℂ) {v : R.H} (hv : v ∈ R.smooth) : a • v ∈ R.smooth :=
-  Formalism.FourierDecayAlt.P.DDSmoothness.smooth_smul a hv
 
 end Smooth
 
@@ -68,37 +89,9 @@ section Tensor
 
 variable {ι κ : Type} [Fintype ι] [DecidableEq ι] [Fintype κ] [DecidableEq κ]
 
-theorem single_mem (R : HRep k r) (c : ι) {v : R.H} (hv : v ∈ R.smooth) : Pi.single c v ∈ tensSmooth ι R := by
-  intro d
-  by_cases h : d = c
-  · subst h; simpa using hv
-  · simpa [Pi.single_eq_of_ne h] using GlobalTheory.IndefiniteRowSideFullHecke.SmoothDecompositionForms.zero_mem_smooth R
-
-def sumOf {E E' : Type} [AddCommMonoid E'] (P : ι → E → E') (x : ι → E) : E' := ∑ c, P c (x c)
-
-def compOf {E E' : Type} [Zero E] (A : (ι → E) → E') (c : ι) (v : E) : E' := A (Pi.single c v)
-
-def Linked (R R' : HRep k r) (P : ι → R.H → R'.H) (A : (ι → R.H) → R'.H) : Prop :=
-  (∀ c, P c 0 = 0) ∧ ∀ x ∈ tensSmooth ι R, A x = ∑ c, P c (x c)
-
-theorem Linked.comp {R R' : HRep k r} {P : ι → R.H → R'.H} {A : (ι → R.H) → R'.H} (h : Linked R R' P A) (c : ι)
-    {v : R.H} (hv : v ∈ R.smooth) : P c v = A (Pi.single c v) := by
-  rw [h.2 _ (single_mem R c hv), Finset.sum_eq_single c (fun d _ hd => by simp [Pi.single_eq_of_ne hd, h.1])
-    (by simp)]
-  simp
-
 variable {ρ : Mx k r → Matrix ι ι ℂ} {Γ : Matrix ι ι ℂ} {R : HRep k r} {Rs : κ → HRep k r}
   {io : ∀ I, (Rs I).H → ι → R.H} {pr : ∀ I, ι → R.H → (Rs I).H} {p : ∀ I, (ι → R.H) → (Rs I).H} {ep : κ → ℝ}
 
-attribute [local instance] Matrix.normedAddCommGroup Matrix.normedSpace in
-theorem continuousOn_of_smoothOnH {n : ℕ} {H : Matrix (Fin n) (Fin n) ℂ} {f : Matrix (Fin n) (Fin n) ℂ → ℂ}
-    (hf : SmoothOnH H f) : ContinuousOn f (UH H) := by
-  intro g₀ hg₀
-  obtain ⟨U, F, hU, hg, hF, hag⟩ := hf g₀ hg₀
-  have h1 : ContinuousAt F g₀ := hF.continuousOn.continuousAt (hU.mem_nhds hg)
-  refine h1.continuousWithinAt.congr_of_eventuallyEq ?_ (hag g₀ hg hg₀)
-  filter_upwards [mem_nhdsWithin_of_mem_nhds (hU.mem_nhds hg), self_mem_nhdsWithin] with g h1 h2
-  exact hag g h1 h2
 
 end Tensor
 

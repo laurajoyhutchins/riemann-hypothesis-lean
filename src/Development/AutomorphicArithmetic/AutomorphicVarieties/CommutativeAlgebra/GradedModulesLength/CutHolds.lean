@@ -1,5 +1,54 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.GradedModulesLength.ToDegInjective
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.GradedModulesLength.IftSubstLow
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.GradedModulesLength.ToDegInjective
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.GradedModulesLength.IftSubstLow
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open IsLocalRing Filter Formalism.MainNotions.V.Pf.V2.Calc UpperTheory.V.Alg UpperTheory.V.Alg.M
 
@@ -14,7 +63,7 @@ private theorem lin_mul {E τ : Type} [CommRing E] (i : τ) (f g : MvPowerSeries
   · rw [h1, MvPowerSeries.coeff_zero_eq_constantCoeff_apply, hf, zero_mul]
   · have h2 : p.2 = 0 := by
       have hd := congrArg Finsupp.degree h
-      rw [map_add, Finsupp.degree_single] at hd
+      rw [map_add (f := _), Finsupp.degree_single] at hd
       have : Finsupp.degree p.1 ≠ 0 := fun h0 => h1 ((Finsupp.degree_eq_zero_iff _).1 h0)
       exact (Finsupp.degree_eq_zero_iff _).1 (by omega)
     rw [h2, MvPowerSeries.coeff_zero_eq_constantCoeff_apply, hg, mul_zero]
@@ -34,7 +83,7 @@ private theorem lin_sat {O A τ : Type} [CommRing O] [IsDomain O] [CommRing A] [
     refine Submodule.mul_induction_on hg (fun a ha b hb => ?_) (fun a b ha hb => ?_)
     · rw [map_mul]
       exact lin_mul i _ _ (by rw [hc, (RingHom.mem_ker).1 ha, map_zero]) (by rw [hc, (RingHom.mem_ker).1 hb, map_zero])
-    · rw [map_add, map_add, ha, hb, add_zero]
+    · rw [map_add (f := _), map_add (f := _), ha, hb, add_zero]
   have h2 := key _ (by rwa [sq] at h)
   rw [lin_smul] at h2
   exact (mul_eq_zero.1 h2).resolve_left fun h0 => hc0 (IsFractionRing.injective O (FractionRing O) (by rw [h0, map_zero]))
@@ -77,6 +126,7 @@ private theorem lin_span {O A τ : Type} [CommRing O] [IsDomain O] [CommRing A] 
   have hsat : (∑ k, a k • Z k) - c • g ∈ satSq x := by
     rw [← Submodule.Quotient.eq]
     show (satSq x).mkQ _ = (satSq x).mkQ _
+
     rw [map_sum, map_smul, ← ha]
     simp only [map_smul]
   have hc' : algebraMap O (FractionRing O) c ≠ 0 := fun h0 =>
@@ -84,8 +134,10 @@ private theorem lin_span {O A τ : Type} [CommRing O] [IsDomain O] [CommRing A] 
   refine ⟨fun k => (algebraMap O (FractionRing O) c * MvPowerSeries.coeff (Finsupp.single i 1) (φ f))⁻¹ *
     algebraMap O (FractionRing O) (a k), fun i' => ?_⟩
   have h1 := lin_sat x φ h.const i' _ hsat
+
   rw [map_sub, map_sub, sub_eq_zero, lin_smul, map_sum, map_sum, hgl] at h1
   simp only [lin_smul] at h1
+
   simp only [map_sum, map_smul, smul_eq_mul, mul_assoc]
   rw [← Finset.mul_sum, h1, MvPowerSeries.coeff_X]
   by_cases hii : i' = i

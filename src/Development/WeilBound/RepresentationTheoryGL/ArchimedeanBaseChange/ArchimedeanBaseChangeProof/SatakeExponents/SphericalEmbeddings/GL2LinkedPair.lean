@@ -1,6 +1,59 @@
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.SatakeExponents.SphericalEmbeddings.GL2Intertwining
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.NoUnramTwistOfNoInert
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsTorusEigenformOfCompactTorusEigenvector
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.SatakeExponents.SphericalEmbeddings.StageLift
+public import GroundTheory.LocalFields.PadicLogSeries
+public import Development.AbelianVarietyTheory.Definitions.Divisors.T2SpaceGeneralLinearGroup
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.NonemptyEquivOfRangeEq
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsTorusEigenformOfCompactTorusEigenvector
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.NoUnramTwistOfNoInert
+public import Development.AutomorphicSpectrum.Proofs.GlobalProofs.BernsteinZelevinskyFiniteness
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.SatakeExponents.SphericalEmbeddings.GL2Intertwining
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -96,7 +149,7 @@ theorem kinj_of_form {m : ℕ} (α : Fin m → ℂˣ)
   have hc := GlobalTheory.LocGL.isCompl_fixed_twKer (π := iP (k := k) α) (isSmooth_parInd _ _) (H := KO k (Fin m)) GlobalTheory.SplitFlip.isCompact_KO
   have htw : ∀ x ∈ twKer (iP (k := k) α) (KO k (Fin m)) 1, l x = 0 := by
     intro x hx
-    refine Submodule.span_induction (p := fun x _ => l x = 0) ?_ (map_zero l) (fun a b _ _ ha hb => by rw [map_add, ha, hb, add_zero])
+    refine Submodule.span_induction (p := fun x _ => l x = 0) ?_ (map_zero l) (fun a b _ _ ha hb => by rw [map_add (f := _), ha, hb, add_zero])
       (fun c a _ ha => by rw [map_smul, ha, smul_zero]) hx
     rintro _ ⟨g, w, rfl⟩
     show l ((iP (k := k) α) (g : GL (Fin m) k) w - ((1 : KO k (Fin m) →* ℂˣ) g : ℂ) • w) = 0
@@ -108,7 +161,7 @@ theorem kinj_of_form {m : ℕ} (α : Fin m → ℂˣ)
     apply hl
     ext x
     obtain ⟨a, ha, b, hb, rfl⟩ := Submodule.mem_sup.1 (hc.sup_eq_top ▸ Submodule.mem_top (x := x))
-    rw [map_add, h a ha, htw b hb, add_zero]
+    rw [map_add (f := _), h a ha, htw b hb, add_zero]
     rfl
   have hw0 : w ≠ 0 := fun h => hlw (by rw [h, map_zero])
   have e := PositivityTheory.Rg.BcB.N3.GL2Intertwining.kline α hv hw
@@ -135,7 +188,7 @@ theorem key_law (a b : ℂˣ) (hL : unrChar k a = unrChar k b * absPow k 1) (t :
   rw [e]
   linear_combination -((unrChar k b t : ℂ) * (absPow k (1 / 2) t : ℂ)) * e2
 
-set_option maxHeartbeats 1000000 in
+
 theorem linked (a b : ℂˣ) (hL : unrChar k a = unrChar k b * absPow k 1) :
     ∃ T : (iP (k := k) ![a, b]).IntertwiningMap (iP (k := k) ![b, a]), KInj k T := by
   set χ : kˣ →* ℂˣ := unrChar k b * absPow k (1 / 2) with hχdef
@@ -225,7 +278,7 @@ theorem linked (a b : ℂˣ) (hL : unrChar k a = unrChar k b * absPow k 1) :
     have h1 : g' = 0 := by
       have h3 : Ψ.toLinearEquiv g' = 0 := this
       calc g' = Ψ.toLinearEquiv.symm (Ψ.toLinearEquiv g') := (Ψ.toLinearEquiv.symm_apply_apply g').symm
-        _ = 0 := by rw [h3, map_zero]
+        _ = 0 := by rw [h3, Ψ.toLinearEquiv.symm.map_zero]
     have h2 := congrArg (fun f : IndSp (points (Fin 2)) (contra ρ) => ((f.1.1 1 : smoothPart ρ.dual) : Module.Dual ℂ ℂ) 1) h1
     simp [g', constInd_apply, ℓ0] at h2
   have hK : ∀ kk ∈ KO k (Fin 2), ∀ f, l (iP (k := k) ![a, b] kk f) = l f := by
@@ -239,7 +292,7 @@ theorem linked (a b : ℂˣ) (hL : unrChar k a = unrChar k b * absPow k 1) :
   let T0 : IndSp (points (Fin 2)) ρ →ₗ[ℂ] IndSp (points (Fin 2)) ((ofChar (torusChar fun i => unrChar k (![b, a] i))).comp
       (leviTorus k (Fin 2)).symm.toMonoidHom) :=
     { toFun := fun f => l f • g
-      map_add' := fun x y => by rw [map_add, add_smul]
+      map_add' := fun x y => by rw [map_add (f := _), add_smul]
       map_smul' := fun c x => by rw [map_smul, smul_eq_mul, mul_smul, RingHom.id_apply] }
   refine ⟨⟨T0, fun h => ?_⟩, ?_⟩
   · refine LinearMap.ext fun f => ?_

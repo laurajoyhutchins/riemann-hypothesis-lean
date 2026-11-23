@@ -1,5 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Jets.CmLatticeCommutatorPairingPowEqOneOfGoodLift
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Jets.CmLatticeCommutatorPairingPowEqOneOfGoodLift
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 open PowerSeries GlobalTheory.MomOne
@@ -19,7 +67,7 @@ theorem norm_zc (a : ℤ_[q]) : ‖zc a‖ = ‖a‖ := by
 
 theorem coeff_DT (f : ℂ_[q]⟦X⟧) (n : ℕ) :
     coeff n (DT f) = coeff (n + 1) f * (n + 1) + coeff n f * n := by
-  rw [DT, add_mul, one_mul, map_add, coeff_derivative]
+  rw [DT, add_mul, one_mul, map_add (f := _), coeff_derivative]
   cases n with
   | zero => simp
   | succ n => rw [coeff_succ_X_mul, coeff_derivative]; simp
@@ -64,7 +112,7 @@ theorem ode_unique (c : ℂ_[q]) (h : ℂ_[q]⟦X⟧) {f g : ℂ_[q]⟦X⟧} (hf
   | succ n ih =>
     have h1 := congrArg (coeff n) hf
     have h2 := congrArg (coeff n) hg
-    rw [coeff_DT, map_add, coeff_C_mul] at h1 h2
+    rw [coeff_DT, map_add (f := _), coeff_C_mul] at h1 h2
     have h3 : ((n : ℂ_[q]) + 1) ≠ 0 := by exact_mod_cast n.succ_ne_zero
     apply mul_right_cancel₀ h3
     rw [ih] at h1
@@ -88,12 +136,12 @@ theorem DT_subst_mulS (a : ℤ_[q]) (f : ℂ_[q]⟦X⟧) :
   have hs := hasSubst_mulS a
   have h2 := DT_mulS a
   have h1 : (DT f).subst (mulS a : ℂ_[q]⟦X⟧) =
-      (1 + mulS a) * (derivative ℂ_[q] f).subst (mulS a : ℂ_[q]⟦X⟧) := by
-    rw [DT, ← coe_substAlgHom hs, map_mul, map_add, map_one, substAlgHom_X]
+      (1 + mulS a) * (derivative f).subst (mulS a : ℂ_[q]⟦X⟧) := by
+    rw [DT, ← coe_substAlgHom hs, map_mul, map_add (f := _), map_one, substAlgHom_X]
   rw [h1]
   unfold DT at h2 ⊢
   rw [derivative_subst hs]
-  linear_combination ((derivative ℂ_[q] f).subst (mulS a : ℂ_[q]⟦X⟧)) * h2
+  linear_combination ((derivative f).subst (mulS a : ℂ_[q]⟦X⟧)) * h2
 
 theorem constantCoeff_subst_mulS (a : ℤ_[q]) {f : ℂ_[q]⟦X⟧} (hf : constantCoeff f = 0) :
     constantCoeff (f.subst (mulS a : ℂ_[q]⟦X⟧)) = 0 := by
@@ -119,7 +167,7 @@ theorem mulS_subst (a b : ℤ_[q]) :
   have hs := hasSubst_mulS b
   have hz : zc (a * b) = zc a * zc b := by simp [zc_eq]
   refine ode_unique (zc (a * b)) (C (zc (a * b))) ?_ ?_ ?_
-  · rw [DT_subst_mulS, DT_mulS, ← coe_substAlgHom hs, map_mul, map_add, map_one, hz, map_mul]
+  · rw [DT_subst_mulS, DT_mulS, ← coe_substAlgHom hs, map_mul, map_add (f := _), map_one, hz, map_mul]
     have : (substAlgHom hs : ℂ_[q]⟦X⟧ →ₐ[ℂ_[q]] ℂ_[q]⟦X⟧) (C (zc a)) = C (zc a) :=
       (substAlgHom hs : ℂ_[q]⟦X⟧ →ₐ[ℂ_[q]] ℂ_[q]⟦X⟧).commutes (zc a)
     rw [this]

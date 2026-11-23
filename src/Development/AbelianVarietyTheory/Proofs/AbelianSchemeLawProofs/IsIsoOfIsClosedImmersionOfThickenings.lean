@@ -1,6 +1,58 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.DegExp
-import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.ExistsBasicOpenEqZeroOfMemIInfPowSmul
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.DegUnif
+public import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.ExistsBasicOpenEqZeroOfMemIInfPowSmul
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.AlgebraicGeometry.Morphisms.WeaklyEtale
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits MonoidalCategory CartesianMonoidalCategory AlgebraicGeometry
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Out
@@ -11,10 +63,10 @@ namespace GlobalTheory
 
 namespace ThickeningClosed
 
+
 open CategoryTheory CategoryTheory.Limits MonoidalCategory CartesianMonoidalCategory AlgebraicGeometry in
 open scoped CategoryTheory.Obj in
 attribute [local instance] Over.cartesianMonoidalCategory in
-
 theorem _root_.GlobalTheory.ThickeningClosed.ker_ideal_le_ker {X Z : Scheme.{0}} (ι : Z ⟶ X) {U : X.Opens}
     (hU : IsAffineOpen U) {D : CommRingCat.{0}} (ψ : Γ(X, U) ⟶ D) (l : Spec D ⟶ Z)
     (hl : l ≫ ι = Spec.map ψ ≫ hU.fromSpec) :
@@ -77,10 +129,10 @@ theorem _root_.GlobalTheory.ThickeningClosed.exists_mul_eq_zero_of_mem {X : Sche
   obtain ⟨⟨m, n, rfl⟩, hm⟩ := (IsLocalization.map_eq_zero_iff (Submonoid.powers f) _ a).mp h0
   exact ⟨f ^ n, fun h ↦ hfq (q.2.mem_of_pow_mem n h), hm⟩
 
+
 open CategoryTheory CategoryTheory.Limits MonoidalCategory CartesianMonoidalCategory AlgebraicGeometry in
 open scoped CategoryTheory.Obj in
 attribute [local instance] Over.cartesianMonoidalCategory in
-
 theorem _root_.GlobalTheory.ThickeningClosed.mem_of_thickenings {R : Type} [CommRing R] (I : Ideal R)
     {X Z : Scheme.{0}} [IsLocallyNoetherian X] (f : X ⟶ Spec (CommRingCat.of R)) (ι : Z ⟶ X)
     (h : ∀ n : ℕ, ∃ l : pullback f (_root_.ReciprocityTheory.ChartRestriction.G.Out.thick R I n) ⟶ Z, l ≫ ι = pullback.fst f (_root_.ReciprocityTheory.ChartRestriction.G.Out.thick R I n))
@@ -167,10 +219,10 @@ theorem _root_.GlobalTheory.ThickeningClosed.mem_of_thickenings {R : Type} [Comm
     rw [map_mul, map_zero] at h0
     exact (hu.mul_right_eq_zero).mp h0
 
+
 open CategoryTheory CategoryTheory.Limits MonoidalCategory CartesianMonoidalCategory AlgebraicGeometry in
 open scoped CategoryTheory.Obj in
 attribute [local instance] Over.cartesianMonoidalCategory in
-
 theorem _root_.GlobalTheory.ThickeningClosed.noZeroDivisors_fiber {R C : Type} [CommRing R] [CommRing C]
     [Algebra R C] {X : Scheme.{0}} (f : X ⟶ Spec (CommRingCat.of R))
     (j : Spec (CommRingCat.of C) ⟶ X) [IsOpenImmersion j]
@@ -199,10 +251,10 @@ theorem _root_.GlobalTheory.ThickeningClosed.noZeroDivisors_fiber {R C : Type} [
 
 end ThickeningClosed
 
+
 open CategoryTheory CategoryTheory.Limits MonoidalCategory CartesianMonoidalCategory AlgebraicGeometry in
 open scoped CategoryTheory.Obj in
 attribute [local instance] Over.cartesianMonoidalCategory in
-
 theorem _root_.GlobalTheory.isIso_of_isClosedImmersion_of_thickenings :
     ∀ (R : Type) [CommRing R] [IsNoetherianRing R] (I : Ideal R), I ≤ Ideal.jacobson ⊥ →
       ∀ (H : Over (Spec (CommRingCat.of R))) [Flat H.hom] [LocallyOfFiniteType H.hom]

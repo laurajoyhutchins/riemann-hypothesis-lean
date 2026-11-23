@@ -1,10 +1,56 @@
-import Mathlib
-import Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow
-import Formalism.LocalRingCardinality.AdicCompletionLocal.LocTied
-import Formalism.SharpRestriction.LevelLetterCocycles.ChainRows
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.BlochKatoRightExact
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsComponentEquiv
-import Development.AutomorphicSpectrum.Proofs.NonGaloisProofs.LinearRelationExactSequenceDimStatement
+module
+
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsComponentEquiv
+public import Formalism.SharpRestriction.LevelLetterCocycles.LocalSituation
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.BlochKatoRightExact
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ConcretePeriodDeRhamModuleFinrankLeStatement
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CrystallineCoboundaryLift
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CrystallineCoboundaryLiftStatement
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsBlochKatoCocycleOfCrysDeRhamPairStatement
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.FontaineInequalityDcrisFiniteConcreteRingsStatement
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.TensorFundamentalExactSequenceCrystallineStatement
+public import Development.AutomorphicSpectrum.Proofs.NonGaloisProofs.LinearRelationExactSequenceDimStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -78,8 +124,8 @@ def bMap : (↥(Dcris PD ρ) × ↥(DdR PD ρ ⊓ FilV PD (LL := LL) (V := V) 0)
     ⟨ιV PD (LL := LL) (V := V) p.1 - p.2, Submodule.sub_mem _ (GlobalTheory.DRFil.ιV_mem_DdR PD ρ p.1.2) p.2.2.1⟩)
   map_add' p q := by
     ext
-    · simp only [Prod.fst_add, Submodule.coe_add, map_add]; abel
-    · simp only [Prod.fst_add, Prod.snd_add, Submodule.coe_add, map_add]; abel
+    · simp only [Prod.fst_add, Submodule.coe_add, map_add (f := _)]; abel
+    · simp only [Prod.fst_add, Prod.snd_add, Submodule.coe_add, map_add (f := _)]; abel
   map_smul' c p := by
     ext
     · simp [smul_sub]
@@ -96,9 +142,9 @@ def relR : Submodule LL ((↥(Dcris PD ρ) × ↥(DdR PD ρ)) × FiniteCohomolog
   add_mem' := by
     rintro p q ⟨x, y, c, hy, h1, h2, h3, h4⟩ ⟨x', y', c', hy', h1', h2', h3', h4'⟩
     refine ⟨x + x', y + y', c + c', add_mem hy hy', ?_, ?_, fun g => ?_, ?_⟩
-    · simp only [Prod.fst_add, Submodule.coe_add, map_add, ← h1, ← h1']; abel
-    · simp only [Prod.fst_add, Prod.snd_add, Submodule.coe_add, map_add, ← h2, ← h2']; abel
-    · simp only [Submodule.coe_add, Pi.add_apply, add_tmul, h3, h3', map_add]; abel
+    · simp only [Prod.fst_add, Submodule.coe_add, map_add (f := _), ← h1, ← h1']; abel
+    · simp only [Prod.fst_add, Prod.snd_add, Submodule.coe_add, map_add (f := _), ← h2, ← h2']; abel
+    · simp only [Submodule.coe_add, Pi.add_apply, add_tmul, h3, h3', map_add (f := _)]; abel
     · simp only [Prod.snd_add, ← h4, ← h4']; rfl
   zero_mem' := ⟨0, 0, 0, zero_mem _, by simp, by simp, by simp, rfl⟩
   smul_mem' := by

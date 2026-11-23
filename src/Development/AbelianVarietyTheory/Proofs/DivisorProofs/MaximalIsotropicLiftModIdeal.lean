@@ -1,4 +1,55 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.Algebra.Operations
+public import Mathlib.Algebra.Module.Projective
+public import Mathlib.RingTheory.Finiteness.Defs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.LinearAlgebra.Projection
+public import Mathlib.RingTheory.Finiteness.Cardinality
+public import Mathlib.RingTheory.Ideal.Operations
+
+@[expose] public section
 
 namespace GlobalTheory
 
@@ -15,7 +66,7 @@ theorem isotropic_summand_lift : ∀ (R : Type) [CommRing R] (I : Ideal R) (D : 
       simp only [map_smul, LinearMap.smul_apply, smul_eq_mul]
       exact I.mul_mem_right _ hr
     · intro x z hx hz
-      simp only [map_add, LinearMap.add_apply]
+      simp only [map_add (f := _), LinearMap.add_apply]
       exact I.add_mem hx hz
   have hφII : ∀ a ∈ I • (⊤ : Submodule R D), ∀ b ∈ I • (⊤ : Submodule R D), φ a b = 0 := by
     intro a ha b hb
@@ -25,7 +76,7 @@ theorem isotropic_summand_lift : ∀ (R : Type) [CommRing R] (I : Ideal R) (D : 
       have : φ m b ∈ I := by rw [hskew]; exact I.neg_mem (hφI b hb m)
       exact hII r hr _ this
     · intro x z hx hz
-      simp only [map_add, LinearMap.add_apply, hx, hz, add_zero]
+      simp only [map_add (f := _), LinearMap.add_apply, hx, hz, add_zero]
   have hsmul0 : ∀ r ∈ I, ∀ w ∈ I • (⊤ : Submodule R D), r • w = 0 := by
     intro r hr w hw
     refine Submodule.smul_induction_on (p := fun w => r • w = 0) hw ?_ ?_
@@ -66,15 +117,17 @@ theorem isotropic_summand_lift : ∀ (R : Type) [CommRing R] (I : Ideal R) (D : 
     · intro r hr m _
       rw [map_smul]; exact hsmul0 r hr _ (hTr m)
     · intro x w hx hw
-      rw [map_add, hx, hw, add_zero]
+      rw [map_add (f := _), hx, hw, add_zero]
   have hTT : ∀ y, T (T y) = 0 := fun y => hTI _ (hTr y)
   have hkey0 : ∀ x y, φ x (T y) = -c * B x y := by
     intro x y
     have hBx : B x y = ∑ i, s x i * B (e i) y := by
       conv_lhs => rw [hexp x]
+
       simp [map_sum, LinearMap.sum_apply, smul_eq_mul]
     have h0 : ∑ i, B (e i) y * (s x i - φ x (z i)) = 0 :=
       Finset.sum_eq_zero fun i _ => hII _ (hBI _ _) _ (hz' i x)
+
     rw [hT, map_sum, hBx]
     simp only [map_smul, smul_eq_mul]
     rw [Finset.mul_sum]
@@ -95,7 +148,7 @@ theorem isotropic_summand_lift : ∀ (R : Type) [CommRing R] (I : Ideal R) (D : 
   · exact (Submodule.orderIsoMapComap u).isCompl hFN
   · rintro _ ⟨x, hx, rfl⟩ _ ⟨y, hy, rfl⟩
     show φ (u x) (u y) = 0
-    rw [hu, hu, map_add, map_add, LinearMap.add_apply, LinearMap.add_apply]
+    rw [hu, hu, map_add (f := _), map_add (f := _), LinearMap.add_apply, LinearMap.add_apply]
     have h1 := hkey x hx y hy
     have h2' := hkey y hy x hx
     have h3 := hskew (T x) y

@@ -1,4 +1,59 @@
-import ReciprocityTheory.SemistableReduction.SphereLogIntegrableStatement
+module
+
+public import ReciprocityTheory.SemistableReduction.SphereLogIntegrableStatement
+public import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.MeasureTheory.Measure.RegularityCompacts
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+public import Mathlib.Topology.Algebra.MvPolynomial
+import Mathlib.Topology.Sheaves.Init
+import Mathlib.Topology.UniformSpace.Uniformizable
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 namespace ReciprocityTheory.MultiplicativeHeights
 
@@ -37,7 +92,7 @@ theorem ae_eval_ne_zero_of_ne_zero_fin : ∀ (m : ℕ) (f : MvPolynomial (Fin m)
       have hQ : Polynomial.map (MvPolynomial.eval s) P ≠ 0 := by
         intro h
         apply hs
-        have := congrArg (fun q => Polynomial.coeff q k) h
+        have := congrArg (fun q => _root_.AddMonoidAlgebra.coeff (M := ℕ) q k) h
         simpa [Polynomial.coeff_map] using this
       have hfin : ({y : ℂ | Polynomial.eval y (Polynomial.map (MvPolynomial.eval s) P) = 0}).Finite :=
         Polynomial.finite_setOfPred_isRoot hQ
@@ -45,7 +100,7 @@ theorem ae_eval_ne_zero_of_ne_zero_fin : ∀ (m : ℕ) (f : MvPolynomial (Fin m)
       rw [measure_eq_zero_iff_ae_notMem] at hnull
       filter_upwards [hnull] with y hy
       have hc : (e.symm (y, s) : Fin (m + 1) → ℂ) = Fin.cons y s := by
-        simp [e, MeasurableEquiv.piFinSuccAbove_symm_apply]; rfl
+        simp [e, MeasurableEquiv.piFinSuccAbove_symm_apply]
       rw [hc, MvPolynomial.eval_eq_eval_mv_eval']
       exact hy
     have := he.quasiMeasurePreserving.ae key
@@ -178,7 +233,7 @@ theorem ae_toSphere (B n : ℕ) (a : Fin B → ℕ) (F : MvPolynomial (Fin B × 
       Measure.pi fun _ : Fin B => (volume : Measure E).restrict {0}ᶜ := by
     rw [Measure.pi_map_pi (hμ := hmSF) (fun _ => measurable_subtype_coe.aemeasurable)]
     exact congrArg _ (funext hmap)
-  have hGm : Measurable G := measurable_pi_lambda _ fun b => measurable_subtype_coe.comp
+  have hGm : Measurable G := Measurable.of_eval fun b => measurable_subtype_coe.comp
     (measurable_pi_apply b)
   have hzero : (Measure.pi fun _ : Fin B =>
       (volume : Measure E).comap (Subtype.val : ({0}ᶜ : Set E) → E))

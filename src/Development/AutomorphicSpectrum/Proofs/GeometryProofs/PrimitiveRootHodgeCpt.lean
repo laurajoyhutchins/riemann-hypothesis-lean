@@ -1,11 +1,61 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.GlobalSectionsRankAlgClosed
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IntegralClosureHeightEqOneOfLiesOver
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.GlueApplyOfNotInFibre
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.GenWeil
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExistsGenericWeilPairing
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.TateIsoPullbackEquiv
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ProjectiveModuleModNBasisStatement
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.GlobalSectionsRankAlgClosed
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IntegralClosureHeightEqOneOfLiesOver
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.GenWeil
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsFullLevelAt
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsPushEquiv
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.WeilIsGrpPullbackOfCommute
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExistsGenericWeilPairing
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ProjectiveModuleModNBasisStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.TateIsoPullbackEquiv
+import Mathlib.Algebra.AffineMonoid.Basic
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Geo ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.Semi GlobalTheory.CompanionTheory.Ar
 open GroundTheory.Heights₂.Heights.IndefiniteRowSideFullHecke.NumbersDVR.Bundles
@@ -128,9 +178,9 @@ theorem torsion_of_tate {E : Type} [Field E] [NumberField E] [IsCMField E] (H : 
     exact ⟨((w⁻¹ : (ZMod N)ˣ) : ZMod N), by rw [← hw]; exact w.mul_inv⟩
   let e : (Fin (D.p + D.q) → 𝓞 E) →+ (Fin (D.p + D.q) → 𝓞 E) →+ ZMod N :=
     AddMonoidHom.mk' (fun x => AddMonoidHom.mk' (fun x' => (u : ZMod N) * ((D.EF (φ x) (φ x') : ℤ) : ZMod N))
-      fun a b => by simp only [map_add, Int.cast_add, mul_add]) fun a b => by
+      fun a b => by simp only [map_add (f := _), Int.cast_add, mul_add]) fun a b => by
       ext y
-      simp [map_add, mul_add, LinearMap.add_apply]
+      simp [map_add (f := _), mul_add, LinearMap.add_apply]
   have he : ∀ x x', e x x' = (u : ZMod N) * ((D.EF (φ x) (φ x') : ℤ) : ZMod N) := fun _ _ => rfl
   have hevk : ∀ a, (I.ev N a).left = spMap iK ≫ (ev a).left := fun a => by rw [← hev a]; rfl
   have hkill : ∀ (x : Fin (D.p + D.q) → 𝓞 E), ∀ b, ev (φ x + N • b) = ev (φ x) := by
@@ -141,11 +191,11 @@ theorem torsion_of_tate {E : Type} [Field E] [NumberField E] [IsCMField E] (H : 
     intro x c
     obtain ⟨y, b, hb⟩ := hφ1 c
     refine ⟨y, ?_, b, hb⟩
-    rw [hb, map_add, map_nsmul]
+    rw [hb, map_add (f := _), map_nsmul]
     simp
   have hcastL : ∀ x b c, ((D.EF (x + N • b) c : ℤ) : ZMod N) = ((D.EF x c : ℤ) : ZMod N) := by
     intro x b c
-    rw [map_add, map_nsmul]
+    rw [map_add (f := _), map_nsmul]
     simp
   have hwell : ∀ (ψ₀ : (Fin (D.p + D.q) → 𝓞 E) →+ ZMod N) x b, φ x = N • b → ψ₀ x = 0 := by
     intro ψ₀ x b h
@@ -154,7 +204,7 @@ theorem torsion_of_tate {E : Type} [Field E] [NumberField E] [IsCMField E] (H : 
     simp
   refine ⟨fun x => ev (φ x), e, fun x x' => by
     show ev (φ (x + x')) = ev (φ x) * ev (φ x')
-    rw [map_add, hadd], fun a x => by
+    rw [map_add (f := _), hadd], fun a x => by
     show ev (φ (a • x)) = ev (φ x) ≫ t.act.act a
     rw [map_smul, hlin], ?_, ?_, ?_, ?_,
     ?_, ?_⟩
@@ -199,12 +249,12 @@ theorem torsion_of_tate {E : Type} [Field E] [NumberField E] [IsCMField E] (H : 
       rw [map_sub] at h0
       exact sub_eq_zero.1 h0
     let ψ : D.La →+ ZMod N := AddMonoidHom.mk' (fun m => ψ₀ (s m)) fun m m' => by
-      rw [← map_add]
+      rw [← map_add (f := _)]
       refine hsub _ _ (b m + b m' - b (m + m')) ?_
       have h1 := hsb (m + m')
       have h2 := hsb m
       have h3 := hsb m'
-      rw [map_add]
+      rw [map_add (f := _)]
       rw [smul_sub, smul_add]
       have h4 : φ (s (m + m')) = m + m' - N • b (m + m') := by rw [eq_sub_iff_add_eq]; exact h1.symm
       rw [h4]

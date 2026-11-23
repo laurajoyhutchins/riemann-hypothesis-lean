@@ -1,7 +1,56 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.SpectralOperatorNorms.ChebyshevNormEstimates.RepsRight
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.UnipotentBlockMatrices.ClosedKernelMinors.LocFin
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.SpectralOperatorNorms.ChebyshevNormEstimates.RepsRight
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.SpectralOperatorNorms.KillExempt
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.SpectralOperatorNorms.ChebyshevNormEstimates.HeckeP
 import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.UnipotentBlockMatrices.ClosedKernelMinors.DenseCc
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.SpectralOperatorNorms.ChebyshevNormEstimates.HeckeP
+import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.UnipotentBlockMatrices.ClosedKernelMinors.HpSpec
+import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.UnipotentBlockMatrices.ClosedKernelMinors.LocFin
+public import GroundTheory.AutomorphicForms.MultiplicityOne.FiniteAdelicHaar
+import GroundTheory.AutomorphicForms.RealIwasawaIntegration
+import GroundTheory.GlobalFields.Adele.Topology
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MeasureTheory NumberField IsDedekindDomain MvPolynomial Filter Topology
 open GroundTheory.Automorphic GroundTheory.Automorphic.Reduction GroundTheory.Automorphic.RightCosetSpace
@@ -96,6 +145,7 @@ theorem act_of {H V : Type} [NormedAddCommGroup H] [InnerProductSpace ℂ H] [No
     exact h1.trans (by simp)
   refine ⟨Finsupp.onFinset T (fun t => if t ∈ T then U t else 0) fun t ht => by_contra fun hn => ht (if_neg hn), 0,
     ⟨continuous_const, HasCompactSupport.zero⟩, fun x => ?_, fun z => ?_⟩
+
   · rw [Finsupp.onFinset_sum (g := fun (t : ℝ) (c : V →L[ℂ] V) => c.compLpL 2 volume (sh V t x)) _ fun t => h0 _, hc, add_zero, h, map_sum]
     exact Finset.sum_congr rfl fun t ht => by rw [if_pos ht]
   · rw [Finsupp.onFinset_sum (g := fun (t : ℝ) (c : V →L[ℂ] V) => Complex.exp (z * t) • c) _ fun t => smul_zero _]
@@ -107,7 +157,8 @@ theorem ofin_apply {n : ℕ} (μ : Measure (G1 K n)) [μ.IsHaarMeasure] (m : Mea
   UnitaryRep.integrated_ccToL1_apply _ m e w
 
 set_option maxHeartbeats 2000000 in
-theorem actEx [IsTotallyComplex K] (μ : Measure (G1 K (2 + 2))) [μ.IsHaarMeasure] {μ₂ : Measure (G1 K 2)} [μ₂.IsHaarMeasure]
+set_option synthInstance.maxHeartbeats 200000 in
+theorem actEx [_root_.NumberField.IsTotallyComplex K] (μ : Measure (G1 K (2 + 2))) [μ.IsHaarMeasure] {μ₂ : Measure (G1 K 2)} [μ₂.IsHaarMeasure]
     {τ₁ τ₂ : Submodule ℂ (L2 μ₂)} (h₁ : CuspIrr μ₂ τ₁) (h₂ : CuspIrr μ₂ τ₂) {D : TypeDat K (2 + 2)} {d : ℕ} (A : Line μ τ₁ τ₂ D d)
     {Kf : Subgroup GF} (hL : D.Level Kf) (hle : Kf ≤ AdelicGLn.integralFiniteGL K (2 + 2)) (m : Measure GF) [m.IsHaarMeasure]
     (e : TF K (2 + 2)) (he : ∀ k ∈ Kf, ∀ h, e (k * h) = e h ∧ e (h * k) = e h) :
@@ -167,7 +218,8 @@ theorem actEx [IsTotallyComplex K] (μ : Measure (G1 K (2 + 2))) [μ.IsHaarMeasu
     simp only [flat, map_mul, ← mul_assoc, hHk _ k hk, fix_inv hL hle (hsec v).2 _ hk]
   have hs : A.sec ((∑ t ∈ T, Complex.exp (z * t) • U t) v) = fun x => ∑ t ∈ T, Complex.exp (z * t) * A.sec (U t v) x := by
     funext x
-    rw [ContinuousLinearMap.sum_apply, map_sum, Finset.sum_apply]
+    set_option synthInstance.maxHeartbeats 100000 in
+      rw [ContinuousLinearMap.sum_apply, map_sum, Finset.sum_apply]
     exact Finset.sum_congr rfl fun t _ => by rw [ContinuousLinearMap.smul_apply, map_smul, Pi.smul_apply, smul_eq_mul]
   refine h1.trans ?_
   rw [flat, hs]
@@ -181,7 +233,7 @@ theorem ofin_adj {n : ℕ} (μ : Measure (G1 K n)) [μ.IsHaarMeasure] (m : Measu
     (e.hasCompactSupport.comp_homeomorph (Homeomorph.inv _)).comp_left (g := starRingEnd ℂ) (map_zero _)⟩
   refine ⟨e', fun _ => rfl, ?_⟩
   suffices hs : UnitaryRep.involution m (UnitaryRep.ccToL1 m e) = UnitaryRep.ccToL1 m e' from
-    (UnitaryRep.adjoint_integrated ((rightRegularRep (rationalGLOne K n) μ).compHom (MultiplicityOne.finProj K n)
+    (UnitaryRep.adjoint_integrated ((rightRegularRep (rationalGLOne (K := K) (n := n)) μ).compHom (MultiplicityOne.finProj K n)
       MultiplicityOne.continuous_finProj) m (UnitaryRep.ccToL1 m e)).trans (congrArg _ hs)
   have h1 : (UnitaryRep.ccToL1 m e : _ → ℂ) =ᵐ[m] e := MemLp.coeFn_toLp _
   have h2 : (UnitaryRep.ccToL1 m e' : _ → ℂ) =ᵐ[m] e' := MemLp.coeFn_toLp _

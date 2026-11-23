@@ -1,12 +1,56 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Statements.HeckeThetaIntegrals.HkSupSizedOfHkSup
-import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.SplitLinearModelNorm
-import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.UnramifiedCharacter
-import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.HeckePrimeDetection
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.SqrtDivMulEqSqrtMul
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ThetaTraceRead
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BaseFrameOfRealizationModels
-import Development.AbelianVarietyTheory.Proofs.TorusSplitting.EtaComparisonIffForall
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.SplitLinearModelNorm
+public import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.UnramifiedCharacter
+public import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.HeckePrimeDetection
+public import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.RealPoints
+public import Formalism.LocalToGlobal.IndefiniteReal.FWExist
+public import Formalism.SharpRestriction.CuspSpanNormBounds.BesselShellMomentBounds
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BaseFrameOfRealizationModels
+public import Development.AbelianVarietyTheory.Proofs.TorusSplitting.EtaComparisonIffForall
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ThetaTraceRead
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.SqrtDivMulEqSqrtMul
+
+@[expose] public section
 
 open Formalism.BasicNotions Formalism.MainNotions Formalism.BasicNotions.TH Formalism.L2.Theta Formalism.L2.DIV Formalism.IndefR Formalism.IndefR.Links Formalism.IndefR.FWT Formalism.L2.Pj
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
@@ -46,7 +90,7 @@ theorem perVec_add (Wt : UnfAt U k x) (v w : Fin r → D.host.E) : perVec Wt (v 
   funext j
   simp only [perVec, Pi.add_apply]
   unfold perFr
-  split_ifs <;> simp [he, Matrix.mulVec_add, hermC, map_add, mul_add, Finset.sum_add_distrib]
+  split_ifs <;> simp [he, Matrix.mulVec_add, hermC, map_add (f := _), mul_add, Finset.sum_add_distrib]
 
 theorem perVec_smul (Wt : UnfAt U k x) (q : ℚ) (v : Fin r → D.host.E) : perVec Wt (q • v) = q • perVec Wt v := by
   have he : ∀ τ : D.host.E →+* ℂ, Data.emb τ (q • v) = (q : ℂ) • Data.emb τ v := fun τ => by
@@ -121,8 +165,8 @@ theorem cancel {ι : Type} [Fintype ι] {u ph K K' μ q w : ℂ} {e θ : ι → 
 
 end GlobalTheory.HeckeGenConst
 
-open GlobalTheory.HeckeGenConst GlobalTheory.IndefiniteRowSideFullHecke.OrthonormalLatticeThetaValues in
 
+open GlobalTheory.HeckeGenConst GlobalTheory.IndefiniteRowSideFullHecke.OrthonormalLatticeThetaValues in
 theorem GlobalTheory.HeckeGenConst.generator_constant : ∀ (D : D7), GlobalTheory.IndefiniteRowSideFullHecke.HeckePrimeDetection.HeckePointLaws → GlobalTheory.IndefiniteRowSideFullHecke.SplitLinearModelNorm.SplitLinearModel D → GlobalTheory.IndefiniteRowSideFullHecke.UnramifiedCharacter.VacFixed D →
     ∀ (G : Type) [Group G] [Fintype G] (Pl0 T0 : Type) (A : FamIn D.what₂.LL G Pl0 T0 D.R.m)
     (T : CoreJ D) [Algebra T.Q.c.F D.what₂.LL] (R : RealDat D A T.Q.c.F) (F : Face D A)
@@ -163,8 +207,9 @@ theorem GlobalTheory.HeckeGenConst.generator_constant : ∀ (D : D7), GlobalTheo
   have h2 := GlobalTheory.HeckeGeoRead.theta_trace_read D hHk hSL hVF G Pl0 T0 A T R F κ v₀ hLev hGrp hFam hMod hThP hTie i σ hσ hV
     P p k α Rc hS h hx a ha C z hz hx' t ht hb ph b hph hbON hpin γ' hγ' hfr' Wt' Y' e he Δ hΔ X (fun _ => perVec Wt' v) hz'
   have h1 := hpin (h * a) γ' hγ' hfr' hx' Wt' Y' X (fun _ => perVec Wt' v) hz'
+
   rw [thetaAt_eq, show ((1 : GA D (Vc D i)), γ' * (h * a)) = (1, γ' * h) * (1, a) by simp [mul_assoc], map_mul,
-    Module.End.mul_apply, hom, map_smul, map_sum, Pi.smul_apply, Finset.sum_apply, smul_eq_mul] at h1
+  Module.End.mul_apply, hom, map_smul, map_sum, Pi.smul_apply, Finset.sum_apply, smul_eq_mul] at h1
   obtain ⟨τ⟩ : Nonempty D.what₂.Tau := ⟨D.eTau.symm (Classical.arbitrary _)⟩
   have h3 := cancel (fun h0 => by simp [h0] at hph) (pow_ne_zero k (Units.ne_zero _)) (fun _ => hv) h1 h2
   rw [(hTie.kap i τ).2.2, hkScal, one_mul, map_pow, map_inv₀, map_natCast, inv_pow (muAt T R i P)]

@@ -1,5 +1,52 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.SameGenericSymm
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.SameGenericSymm
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -50,7 +97,7 @@ def polyNumHom {r : ℕ} (deg : Fin r → K → ℤ) : MvPolynomial (Fin r) ℤ 
       polyNum_eq_of_subset I V n deg P (P.support ∪ Q.support) Finset.subset_union_left,
       polyNum_eq_of_subset I V n deg Q (P.support ∪ Q.support) Finset.subset_union_right,
       ← Finset.sum_add_distrib]
-    simp only [coeff_add, add_mul]
+    simp only [MvPolynomial.coeff_add, add_mul]
 
 theorem polyNumHom_apply {r : ℕ} (deg : Fin r → K → ℤ) (Q : MvPolynomial (Fin r) ℤ) :
     polyNumHom I V n deg Q = polyNum I V n deg Q := rfl
@@ -79,7 +126,7 @@ theorem monoList_append {N r : ℕ} (d : Fin N → K → ℤ) (Y : Fin r → K �
     funext s
     have h1 : (Fin.castLE (Nat.le_add_right N r) s) = Fin.castAdd r s := rfl
     simp only [id, h1, Finsupp.add_apply,
-      Finsupp.mapDomain_apply (Fin.castAdd_injective N r), Fin.append_left]
+      Finsupp.mapDomain_apply_of_injective (Fin.castAdd_injective N r), Fin.append_left]
     rw [Finsupp.mapDomain_of_notMem_range, add_zero]
     rintro ⟨j, hj⟩
     have := congrArg Fin.val hj
@@ -88,7 +135,7 @@ theorem monoList_append {N r : ℕ} (d : Fin N → K → ℤ) (Y : Fin r → K �
   · congr 1
     funext s
     simp only [id, Finsupp.add_apply,
-      Finsupp.mapDomain_apply (Fin.natAdd_injective r N), Fin.append_right]
+      Finsupp.mapDomain_apply_of_injective (Fin.natAdd_injective r N), Fin.append_right]
     rw [Finsupp.mapDomain_of_notMem_range, zero_add]
     rintro ⟨j, hj⟩
     have := congrArg Fin.val hj
@@ -125,6 +172,7 @@ theorem polyNum_mul_monomial {N r : ℕ} (d : Fin N → K → ℤ) (Y : Fin r �
     polyNum I V e (Fin.append d Y) (rename (Fin.castAdd r) A * rename (Fin.natAdd N) (monomial ν 1)) =
       ∑ α ∈ A.support, A.coeff α * listNum I V e (monoList d α ++ monoList Y ν) := by
   conv_lhs => rw [as_sum A]
+
   rw [map_sum, Finset.sum_mul, ← polyNumHom_apply, map_sum]
   refine Finset.sum_congr rfl fun α _ => ?_
   rw [rename_monomial, rename_monomial, monomial_mul, polyNumHom_apply, polyNum_monomial,
@@ -136,6 +184,7 @@ theorem polyNum_mul_eq_sum {N r : ℕ} (d : Fin N → K → ℤ) (Y : Fin r → 
       ∑ ν ∈ R.support, R.coeff ν *
         polyNum I V e (Fin.append d Y) (rename (Fin.castAdd r) A * rename (Fin.natAdd N) (monomial ν 1)) := by
   conv_lhs => rw [as_sum R]
+
   rw [map_sum, Finset.mul_sum, ← polyNumHom_apply, map_sum]
   refine Finset.sum_congr rfl fun ν _ => ?_
   have : monomial ν (R.coeff ν) = R.coeff ν • monomial ν (1 : ℤ) := by
@@ -177,6 +226,7 @@ theorem segreFlagIndep_homogeneous_implies_general (h : IndefiniteRowSideFullHec
           (rename (Fin.castAdd r) (homogeneousComponent c G) * rename (Fin.natAdd N) R) := by
     intro d
     conv_lhs => rw [← sum_homogeneousComponent G]
+
     rw [map_sum, Finset.sum_mul, ← polyNumHom_apply, map_sum]
     rfl
   rw [hsplit, hsplit]
@@ -207,7 +257,7 @@ theorem segreFlagIndep_homogeneous_implies_general (h : IndefiniteRowSideFullHec
       have hdeg : α.degree = c := by
         have := hGc (mem_support_iff.mp hα)
         rwa [Finsupp.degree_eq_weight_one]
-      rw [listNum, dif_neg, mul_zero]
+      rw [listNum, dite_eq_right, mul_zero]
       rw [List.length_append, length_monoList, hdeg]
       exact hce
     rw [hzero, hzero]

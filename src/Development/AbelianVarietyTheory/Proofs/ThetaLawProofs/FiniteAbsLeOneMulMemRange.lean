@@ -1,8 +1,66 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SymplecticGenerators.IsPluriharmonicSiegel
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SymplecticGenerators.SymplecticCharacters.GenMain
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SymplecticGenerators.SymplecticCharacters.OfRealVecHalfVec
-import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.SndFDerivAddSndFDerivIEqZeroOfHarmonicAtLine
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SymplecticGenerators.IsPluriharmonicSiegel
+public import Mathlib.Analysis.Complex.UpperHalfPlane.FunctionsBoundedAtInfty
+public import Mathlib.Analysis.Complex.UpperHalfPlane.Manifold
+public import Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.LeviCivita
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SymplecticGenerators.SymplecticCharacters.SpGenStatement
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SymplecticGenerators.SymplecticCharacters.SubConjTransposeOfSymm
+public import Development.AbelianVarietyTheory.Definitions.ThetaMetrics.ExistsEventuallyNormRiemannThetaTermLe
+public import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.SndFDerivAddSndFDerivIEqZeroOfHarmonicAtLine
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.AlgebraicTopology.FundamentalGroupoid.SimplyConnected
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+public import Mathlib.NumberTheory.ModularForms.LevelOne.Basic
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SymplecticGenerators.SymplecticCharacters.GenCol
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SymplecticGenerators.SymplecticCharacters.OfRealVecHalfVec
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.NumberTheory.ModularForms.Basic
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SymplecticGenerators.SymplecticCharacters.GenBase
+
+@[expose] public section
 
 noncomputable section
 
@@ -95,19 +153,19 @@ theorem spInvariant_partialInv (hH : IsSpInvariant g H) (e : Fin g)
   have : σ * jAut (spPJ e) τ = nAut (spPJ e) τ := by
     have e1 : jAut (spPJ e) τ = 1 - single e e (1 : ℂ) * (τ + 1) := by
       ext i k
-      by_cases hi : e = i <;> simp [jAut_eq, cMat, spPJ, toBlocks₂₁, toBlocks₂₂, mul_apply,
-        one_apply, single_apply, ite_and, hi]
+      by_cases hi : e = i <;> simp [jAut_eq, cMat, spPJ, toBlocks₂₁, toBlocks₂₂, Matrix.mul_apply,
+        Matrix.one_apply, single_apply, ite_and, hi]
     have e2 : nAut (spPJ e) τ = τ + single e e (1 : ℂ) * (1 - τ) := by
       ext i k
-      by_cases hi : e = i <;> simp [nAut_eq, cMat, spPJ, toBlocks₁₁, toBlocks₁₂, mul_apply,
-        one_apply, single_apply, ite_and, hi]
+      by_cases hi : e = i <;> simp [nAut_eq, cMat, spPJ, toBlocks₁₁, toBlocks₁₂, Matrix.mul_apply,
+        Matrix.one_apply, single_apply, ite_and, hi]
     ext i k
     rw [e1, e2, Matrix.mul_sub, Matrix.mul_one, ← Matrix.mul_assoc]
     have := h i k
     by_cases hi : i = e
     · subst hi
-      simpa [mul_apply, single_apply, ite_and, one_apply] using this
-    · simpa [mul_apply, single_apply, ite_and, one_apply, hi, Ne.symm hi] using this
+      simpa [Matrix.mul_apply, single_apply, ite_and, Matrix.one_apply] using this
+    · simpa [Matrix.mul_apply, single_apply, ite_and, Matrix.one_apply, hi, Ne.symm hi] using this
   have e2 : σ = spAct (spPJ e) τ := by
     rw [spAct_eq, ← this, Matrix.mul_nonsing_inv_cancel_right _ _ hj]
   rw [e2]
@@ -150,8 +208,8 @@ theorem finite_abs_le_one_mul_mem_range {c : ℝ} (hc : c ≠ 0) :
     exact (mul_le_of_le_one_right (abs_nonneg c) hx).trans (Int.le_ceil _)
   exact abs_le.1 (by exact_mod_cast h1)
 
-include hZs hZe hZ in
 
+include hZs hZe hZ in
 theorem eq_on_rankOneCurve_of_integral (hol : IsHoloSiegel g H) (hH : IsSpInvariant g H)
     (hb : ∀ c : ℝ, 0 < c → ∃ K : ℝ, ∀ τ ∈ SiegelH (Fin g),
       (τ.map Complex.im - c • (1 : Matrix (Fin g) (Fin g) ℝ)).PosSemidef → ‖H τ‖ ≤ K)
@@ -216,9 +274,9 @@ theorem eq_on_rankOneCurve_of_integral (hol : IsHoloSiegel g H) (hH : IsSpInvari
         push_cast
         rfl
       have hZe' : ∀ i, Z e i = 0 := fun i => (hZs.apply i e).trans (hZe i)
-      simp only [rkU_val, mul_apply, map_apply, Matrix.add_apply, transpose_apply, rankOneCurve,
+      simp only [rkU_val, Matrix.mul_apply, map_apply, Matrix.add_apply, transpose_apply, rankOneCurve,
         of_apply, h3]
-      simp [one_apply, vecMulVec_apply, Pi.single_apply, add_mul, mul_add, Finset.sum_add_distrib,
+      simp [Matrix.one_apply, vecMulVec_apply, Pi.single_apply, add_mul, mul_add, Finset.sum_add_distrib,
         hZe, hZe', hu, hRe, R₁, hR.apply j e]
       ring
   · rintro _ ⟨R, u, hu, hR, -, -, -, -, rfl⟩
@@ -227,7 +285,7 @@ theorem eq_on_rankOneCurve_of_integral (hol : IsHoloSiegel g H) (hH : IsSpInvari
       refine differentiable_pi.2 fun i => differentiable_pi.2 fun j => ?_
       simp only [rankOneCurve, of_symm_apply, of_apply]
       fun_prop
-    refine (hol.comp hd.differentiableOn fun s (hs : 0 < s.im) =>
+    refine (hol.comp (s := {s : ℂ | 0 < s.im}) hd.differentiableOn fun s (hs : 0 < s.im) =>
       of_symm_mem_phDom (rankOneCurve_mem hZs hZ hR hu hs)).congr fun s hs => ?_
     simp only [Function.comp_apply, UpperHalfPlane.ofComplex_apply_of_im_pos hs,
       Equiv.apply_symm_apply, phSym_eq_self_of_isSymm (rankOneCurve_mem hZs hZ hR hu hs).1]
@@ -312,8 +370,8 @@ theorem tendsto_floor_nat_mul_div (x : ℝ) :
     rw [div_le_iff₀ hn]
     linarith [Int.floor_le ((n + 1 : ℝ) * x)]
 
-include hZs hZe hZ in
 
+include hZs hZe hZ in
 theorem eq_on_rankOneCurve (hol : IsHoloSiegel g H) (hH : IsSpInvariant g H)
     (hb : ∀ c : ℝ, 0 < c → ∃ K : ℝ, ∀ τ ∈ SiegelH (Fin g),
       (τ.map Complex.im - c • (1 : Matrix (Fin g) (Fin g) ℝ)).PosSemidef → ‖H τ‖ ≤ K)
@@ -471,7 +529,7 @@ theorem fderiv_vecMulVec_eq_zero (hol : IsHoloSiegel g H) (hH : IsSpInvariant g 
       (U.val.map (Int.cast : ℤ → ℂ))ᵀ) i e).im : ℂ)) = U.val.map (Int.cast : ℤ → ℂ) *ᵥ w := by
     ext i
     rw [Matrix.mul_assoc]
-    simp [hw, mul_apply, mulVec, dotProduct, imC]
+    simp [hw, Matrix.mul_apply, mulVec, dotProduct, imC]
   have hd : HasDerivAt (fun s : ℂ => (of.symm τ + s • of.symm (vecMulVec w w) : Fin g → Fin g → ℂ))
       (of.symm (vecMulVec w w)) 0 := by
     simpa using ((hasDerivAt_id (0 : ℂ)).smul_const
@@ -516,7 +574,7 @@ theorem siegel_eq_of_bounded (hol : IsHoloSiegel g H) (hH : IsSpInvariant g H)
       rw [← hM 1 i]
       congr 1
       ext a b
-      simp [vecMulVec_apply, single_apply, one_apply, ite_and]
+      simp [vecMulVec_apply, single_apply, Matrix.one_apply, ite_and]
       split_ifs <;> rfl
     have h2 : ∀ i j, M (single i j 1) + M (single j i 1) = 0 := fun i j => by
       by_cases hij : i = j
@@ -527,13 +585,14 @@ theorem siegel_eq_of_bounded (hol : IsHoloSiegel g H) (hH : IsSpInvariant g H)
           (by simp [hij])).val i l : ℂ)) =
           single i i 1 + single j j 1 + (single i j 1 + single j i 1) := by
         ext a b
-        simp only [rkU_val, vecMulVec_apply, single_apply, one_apply, ite_and, Matrix.add_apply,
+        simp only [rkU_val, vecMulVec_apply, single_apply, Matrix.one_apply, ite_and, Matrix.add_apply,
           Pi.single_apply, eq_comm (b := j)]
         split_ifs <;> norm_num
       rwa [e, map_add, map_add, map_add, h1, h1, zero_add, zero_add] at h
     have h3 : ∀ S : Matrix (Fin g) (Fin g) ℂ, S.IsSymm → M S = 0 := fun S hS => by
       have e1 : M S = ∑ i, ∑ j, S i j * M (single i j 1) := by
         conv_lhs => rw [matrix_eq_sum_single S]
+
         simp only [map_sum, ← smul_eq_mul, ← map_smul, smul_single]
         simp
       have e2 : M S = ∑ i, ∑ j, S i j * M (single j i 1) := by

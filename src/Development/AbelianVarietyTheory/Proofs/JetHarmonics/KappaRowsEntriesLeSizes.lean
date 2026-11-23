@@ -1,6 +1,50 @@
-import Mathlib
+module
+
+public import Formalism.LocalToGlobal.ProjectiveLattices.PartitionExtendByZeroAntitone
+public import Formalism.SharpRestriction.Divisibility.AbelianOpenPart.OEOsInjective
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
 import Development.AbelianVarietyTheory.Definitions.Jets.CmQuadraticFormEqAlternatingForm
 import Development.AbelianVarietyTheory.Definitions.Jets.TwoPlaces
+import Formalism.LocalToGlobal.Divisibility.Numbers
+import Formalism.LocalToGlobal.IndefiniteForms.IndefSide
+import Formalism.LocalToGlobal.IndefiniteForms.IndefiniteTree.DepthCond
+import Formalism.LocalToGlobal.IndefiniteForms.IndefiniteTree.ExampleSatisfiesConditionsAtFive
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PlaceDivisors.StChartF
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Formalism.BasicNotions Formalism.MainNotions Formalism.MainNotions.DIV.Cons Formalism.L2.DIV Formalism.L2.Pj Formalism.L2.Indef Formalism.L2.Indef.Tree Formalism.L2.Indef.Tree.DepthCond Formalism.DivisionValues Formalism.EigenvalueLevelCeiling
 open ReciprocityTheory.ChartRestriction.G.Geo.Tor (Datum Level Moduli Coeff)
@@ -25,7 +69,7 @@ theorem kappa_entries_le : ∀ (D : D7) (L : SizeData₂ D) (Pm : ParameterChoic
     have e2 := (hK j h1 h2 τ).1 i
     rw [← e1, DV.aPlusQ_eq] at e2
     unfold DV.eQ at e2
-    rw [dif_pos ⟨h1, h2⟩] at e2
+    rw [dite_eq_left ⟨h1, h2⟩] at e2
     have e3 := congrArg (fun q : ℚ => (q : ℝ)) e2
     push_cast at e3
     unfold kaR
@@ -33,16 +77,16 @@ theorem kappa_entries_le : ∀ (D : D7) (L : SizeData₂ D) (Pm : ParameterChoic
   refine ⟨fun i hi => ?_, fun i hi => ?_, fun i => ?_⟩
   · have b := big i
     unfold DV.sigPar at b
-    rw [dif_pos hi] at b
+    rw [dite_eq_left hi] at b
     have a1 := (L.cloud_v τ ⟨i.1, hi⟩).2
     unfold wj
-    rw [dif_pos (by omega : j - 1 < D.R.m)]
+    rw [dite_eq_left (by omega : j - 1 < D.R.m)]
     linarith
   · have b := big i
     have hi2 : i.1 < D.R.k + j - 1 := i.2
     have hb : i.1 - (D.R.k - 1) < D.R.m := by omega
     unfold DV.sigPar at b
-    rw [dif_neg (by omega), dif_pos hb] at b
+    rw [dite_eq_right (by omega), dite_eq_left hb] at b
     have a2 := (abs_le.1 (L.be_close τ ⟨i.1 - (D.R.k - 1), hb⟩ ⟨j - 1, by omega⟩)).1
     push_cast at a2 b
     linarith
@@ -51,7 +95,7 @@ theorem kappa_entries_le : ∀ (D : D7) (L : SizeData₂ D) (Pm : ParameterChoic
     have e2 := (hK j h1 h2 τ).2 (Fin.rev i)
     have hi := (Fin.rev i).2
     unfold DV.aMinusQ DV.eQ at e2
-    rw [dif_pos (by omega), dif_pos ⟨h1, h2⟩] at e2
+    rw [dite_eq_left (by omega), dite_eq_left ⟨h1, h2⟩] at e2
     have a2 := (abs_le.1 (L.be_close τ ⟨j + (Fin.rev i).1, by omega⟩ ⟨j - 1, by omega⟩)).2
     have a8 : (0 : ℝ) ≤ (Fin.rev i).1 := Nat.cast_nonneg _
     have e3 := congrArg (fun q : ℚ => (q : ℝ)) e2

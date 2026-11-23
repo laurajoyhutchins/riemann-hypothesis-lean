@@ -1,5 +1,53 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.LocalEulerCharacteristic.InnerConj
+module
+
+public import GroundTheory.ProfiniteCohomology.LocalEulerCharacteristic.InnerConj
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
@@ -197,6 +245,7 @@ theorem conjHomotopyFun_spec (n : ℕ) (φ : (Fin (n + 1) → Γ) → A) :
       A.ρ g (ψ fun l => g⁻¹ * F l * g) -
         A.ρ (F 0) (∑ i ∈ range (n + 1), (-1 : k) ^ i •
           ψ (prismSeq g i fun l => F (l + 1))) := by
+
     rw [sum_range_succ', map_sum]
     simp only [prismSeq_zero_zero, prismSeq_succ_zero, prismSeq_succ_succ, pow_zero, one_smul,
       map_smul]
@@ -257,8 +306,8 @@ theorem continuous_prismTuple (i n : ℕ) : Continuous fun γ : Fin n → Γ => 
   · exact continuous_const
   · exact (continuous_const.mul (continuous_tupleSeq_apply _)).mul continuous_const
 
-omit [IsDiscreteRep A] in
 
+omit [IsDiscreteRep A] in
 theorem isLocallyConstant_conjHomotopyFun {n : ℕ} {φ : (Fin (n + 1) → Γ) → A}
     (hφ : IsLocallyConstant φ) : IsLocallyConstant (conjHomotopyFun A g n φ) := by
   have e : conjHomotopyFun A g n φ =

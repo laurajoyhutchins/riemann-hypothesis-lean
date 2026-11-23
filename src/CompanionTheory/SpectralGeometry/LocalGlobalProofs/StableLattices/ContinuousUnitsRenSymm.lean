@@ -1,7 +1,50 @@
-import Mathlib
-import CompanionTheory.RealGroups.DiscreteSeries.DiscreteSeriesClassification.DiscreteSeriesExhaustion.SimpleDistinctness.ScalarCharacterOfL2Embedding
-import CompanionTheory.RealGroups.DiscreteSeries.DiscreteSeriesClassification.KTypesAbove
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.GlobalTheory.ExistsExpUnitary
+module
+
+public import CompanionTheory.RealGroups.DiscreteSeries.DiscreteSeriesClassification.DiscreteSeriesExhaustion.SimpleDistinctness.ScalarCharacterOfL2Embedding
+public import CompanionTheory.RealGroups.DiscreteSeries.DiscreteSeriesClassification.KTypesAbove
+public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.GlobalTheory.ExistsExpUnitary
+import Formalism.SharpRestriction.CuspSpanNormBounds.UnimodularSchurMeasures.RightRegularIsometricMultiplicative
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Matrix Finset PI.UpqRep
 open scoped InnerProductSpace
@@ -27,9 +70,8 @@ lemma ren_ren_symm (r : Equiv.Perm (Fin n)) (g : Matrix (Fin n) (Fin n) ℂ) : r
   ext i j; simp [ren]
 
 lemma ren_Jm (ε : Fin n → Bool) (r : Equiv.Perm (Fin n)) : Jm (ε ∘ r) = ren r (Jm ε) := by
-  unfold Jm
-  rw [ren, Matrix.submatrix_diagonal_equiv]
-  rfl
+  delta Jm
+  exact (Matrix.submatrix_diagonal_equiv (fun a => if ε a then (1 : ℂ) else -1) r).symm
 
 lemma ren_diag (r : Equiv.Perm (Fin n)) (d : Fin n → ℂ) : ren r (diagonal d) = diagonal (d ∘ r) :=
   Matrix.submatrix_diagonal_equiv d r
@@ -239,16 +281,7 @@ lemma unitsRen_symm_val (r : Equiv.Perm (Fin n)) (g : (Matrix (Fin n) (Fin n) �
   ext i j; simp [unitsRen, ren]
 
 lemma continuous_unitsRen (r : Equiv.Perm (Fin n)) : Continuous (unitsRen r) := by
-  refine Units.continuous_iff.2 ⟨?_, ?_⟩
-  · have : (Units.val ∘ unitsRen r) = ren r ∘ Units.val := by
-      funext g; exact unitsRen_val r g
-    rw [this]
-    exact (continuous_ren r).comp Units.continuous_val
-  · have : (fun g => (((unitsRen r g)⁻¹ : (Matrix (Fin n) (Fin n) ℂ)ˣ) : Matrix (Fin n) (Fin n) ℂ)) =
-        fun g : (Matrix (Fin n) (Fin n) ℂ)ˣ => ren r ((g⁻¹ : (Matrix (Fin n) (Fin n) ℂ)ˣ) : Matrix (Fin n) (Fin n) ℂ) := by
-      funext g; rw [← map_inv, unitsRen_val]
-    rw [this]
-    exact (continuous_ren r).comp (Units.continuous_val.comp continuous_inv)
+  exact Continuous.units_map (Matrix.reindexAlgEquiv ℂ ℂ r.symm).toMulEquiv.toMonoidHom (continuous_ren r)
 
 lemma continuous_unitsRen_symm (r : Equiv.Perm (Fin n)) : Continuous (unitsRen r).symm := by
   have : ((unitsRen r).symm : _ → _) = unitsRen r.symm := by
@@ -284,7 +317,7 @@ lemma memLp_ren (ε : Fin n → Bool) (r : Equiv.Perm (Fin n)) {f : Formalism.RE
   have he := continuous_ujRen ε r
   have hes := continuous_ujRen_symm ε r
   let hm : Formalism.REAL.UJ ε ≃ₜ Formalism.REAL.UJ (ε ∘ r) := ⟨e.toEquiv, he, hes⟩
-  haveI hH : (Measure.map e (Formalism.REAL.muG ε)).IsHaarMeasure := MulEquiv.isHaarMeasure_map (Formalism.REAL.muG ε) e he hes
+  have hH : (Measure.map e (Formalism.REAL.muG ε)).IsHaarMeasure := MulEquiv.isHaarMeasure_map (Formalism.REAL.muG ε) e he hes
   have hs := Measure.isMulLeftInvariant_eq_smul (Measure.map e (Formalism.REAL.muG ε)) (Formalism.REAL.muG (ε ∘ r))
   have h1 : MemLp f 2 (Measure.map e (Formalism.REAL.muG ε)) := by
     rw [hs, ENNReal.smul_def]

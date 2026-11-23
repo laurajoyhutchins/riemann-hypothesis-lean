@@ -1,7 +1,54 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.DualProjApply
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterFS
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.AMassStA
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.DualProjApply
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.AMassStA
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterFS
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -19,9 +66,10 @@ theorem segre_const (z : (Σ _ : Unit, T) → ℂ) (t : T) :
     segre (ι := dualBlocks T) z (fun _ => t) = z ⟨(), t⟩ := by
   simp [segre]
 
+
+open scoped Classical in
 omit [Fintype T] [DecidableEq T] in
 open Classical in
-
 theorem recover_planePt {i : ℕ} {F : HermLattice K i} (b : Module.Basis T ℤ (dualLattice F))
     (hb : Function.Bijective (Matrix.mulVecLin (dualEmbMatrix b))) (σ : K →+* ℂ) (v : Fin i → ℂ) :
     dualRecover b hb (fun t => dualPlanePt b σ v ⟨(), t⟩) =
@@ -31,15 +79,15 @@ theorem recover_planePt {i : ℕ} {F : HermLattice K i} (b : Module.Basis T ℤ 
   simp [Matrix.mulVec, dotProduct, dualEmbMatrix, dualPlanePt,
     Fintype.sum_prod_type]
 
-omit [Fintype T] [DecidableEq T] in
 
+omit [Fintype T] [DecidableEq T] in
 theorem proj_segre_planePt {i : ℕ} {F : HermLattice K i} (b : Module.Basis T ℤ (dualLattice F))
     (hb : Function.Bijective (Matrix.mulVecLin (dualEmbMatrix b))) (σ : K →+* ℂ) (v : Fin i → ℂ) :
     dualProj b hb (segre (dualPlanePt b σ v)) = v := by
   funext j
   simp only [dualProj_apply, segre_const, recover_planePt]
-  rw [Finset.sum_eq_single σ (fun τ _ hτ => if_neg hτ) (by simp)]
-  exact if_pos rfl
+  rw [Finset.sum_eq_single σ (fun τ _ hτ => ite_eq_right hτ) (by simp)]
+  exact ite_eq_left rfl
 
 theorem h_eq (hOn : DualPtsOnPlane.Statement) {D : ℕ} {F : HermLattice K (D + 1)}
     (hF : ∀ σ, F.metric σ = 1) (b : Module.Basis T ℤ (dualLattice F))
@@ -71,7 +119,7 @@ theorem sheetDensity_eq (hOn : DualPtsOnPlane.Statement) {D : ℕ} {F : HermLatt
     sheetDensity (dualIdeal b) (dualProj b hb) (fun _ z => Real.log ((dualLine F b hb).h z))
       (fun _ => 1) y w = maDensity (fun _ : Fin D => gbPot) y := by
   unfold sheetDensity
-  rw [dif_pos h, one_mul]
+  rw [dite_eq_left h, one_mul]
   apply maDensity_congr_of_eventuallyEq
   intro j
   filter_upwards [h.choose_spec.2] with y' hy'
@@ -96,10 +144,10 @@ theorem fibre_eq (hOn : DualPtsOnPlane.Statement) (hOf : DualPtsOfPlane.Statemen
       funext ⟨τ, j⟩
       by_cases hτ : τ = σ
       · subst hτ
-        rw [if_pos rfl, ← hΨ]
+        rw [ite_eq_left rfl, ← hΨ]
         simp only [dualProj_apply, segre_const]
         exact (Finset.sum_eq_single τ (fun τ' _ h' => hσ τ' h' j) (by simp)).symm
-      · rw [if_neg hτ]
+      · rw [ite_eq_right hτ]
         exact hσ τ hτ j
     have h1 := (dualRecover b hb).injective hW
     funext ⟨u, t⟩
@@ -109,8 +157,8 @@ theorem fibre_eq (hOn : DualPtsOnPlane.Statement) (hOf : DualPtsOfPlane.Statemen
     have hv : (Fin.cons 1 y : Fin (D + 1) → ℂ) ≠ 0 := fun h0 => by simpa using congrFun h0 0
     exact ⟨_, hOf K (D + 1) F T b hb σ _ hv, rfl, proj_segre_planePt b hb σ _⟩
 
-omit [Fintype T] [DecidableEq T] in
 
+omit [Fintype T] [DecidableEq T] in
 theorem planePt_injective {D : ℕ} {F : HermLattice K (D + 1)} (b : Module.Basis T ℤ (dualLattice F))
     (hb : Function.Bijective (Matrix.mulVecLin (dualEmbMatrix b))) (y : Fin D → ℂ) :
     Function.Injective fun σ : K →+* ℂ => segre (ι := dualBlocks T) (dualPlanePt b σ (Fin.cons 1 y)) := by
@@ -140,8 +188,8 @@ theorem isSheet_planePt (hOf : DualPtsOfPlane.Statement) {D : ℕ} {F : HermLatt
 
 end StandardDualMassAtPoint
 
-open StandardDualMassAtPoint in
 
+open StandardDualMassAtPoint in
 theorem DualStdMassAt.proof (hOn : DualPtsOnPlane.Statement) (hOf : DualPtsOfPlane.Statement) :
     DualStdMassAt.Statement := by
   intro K _ _ D F T _ _ b hb hF

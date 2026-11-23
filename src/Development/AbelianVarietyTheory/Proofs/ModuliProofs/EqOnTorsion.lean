@@ -1,22 +1,58 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.UniformisationConclusion
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.HeckeKer
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.RigidSys
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.Splits
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.GtBaseChangeSt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ThetaUnifAV
-import Development.AbelianVarietyTheory.Definitions.ModuliSpaces.TopAmpExists
-import Development.AbelianVarietyTheory.Statements.SemistableTorsion.ArcFamSt
-import Development.AbelianVarietyTheory.Definitions.Degenerations.HomExtSt
-import Development.AbelianVarietyTheory.Definitions.ModuliSpaces.FiniteHomogeneousInf
-import Development.AbelianVarietyTheory.Statements.SemistableTorsion.ImmersedBy
-import Development.AbelianVarietyTheory.Statements.SemistableTorsion.UTorsSt
-import Development.AbelianVarietyTheory.PublishedTheorems.SemistableReduction₂.SemistableReductionSt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ThetaCore
+module
+
+public import Development.AbelianVarietyTheory.Definitions.ModuliSpaces.TopAmpExists
+public import Development.AbelianVarietyTheory.Definitions.ThetaMetrics.MemNonzeroLocusIffPowFn
+public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.FormallyUnramifiedOfTangentMapInjective
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.FixTorsionOfForallGeometric
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
 import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.AmplePt
 import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.SabMapCubical
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.CubePullbacks.CubePull
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.FixTorsionOfForallGeometric
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.CubePullbacks.CubePull
+import Development.AbelianVarietyTheory.Definitions.ModuliSpaces.GoodClass
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor
@@ -102,8 +138,50 @@ theorem GlobalTheory.fullObj_rigid : Out.Laws → ∀ (E : Type) [Field E] [Numb
     refine GlobalTheory.eq_id_of_forall_geometric_fibre hL.globalFns t'.G hA θ.hom (IsMonHom.one_hom θ.hom) fun p => ?_
     have := hc p
     let j : Sp (S'.residueField p) ⟶ S' := S'.fromSpecResidueField p
-    obtain ⟨PP', cub, sym, adj, prim, m, -⟩ := sabPull Out.CubePf.cubePull j t'
-    generalize (⟨(Over.pullback j).obj t'.G, IsSemiAbelian.pullback _ t'.G t'.semi,
+    have hsemi : IsSemiAbelian ((Over.pullback j).obj t'.G) := by
+      refine ⟨?_, ?_, ?_, ?_, ?_, ?_⟩
+      · have := t'.semi.comm; infer_instance
+      · have := t'.semi.smooth; change Smooth (pullback.snd t'.G.hom j); infer_instance
+      · have := t'.semi.separated; change IsSeparated (pullback.snd t'.G.hom j); infer_instance
+      · have := t'.semi.quasiCompact; change QuasiCompact (pullback.snd t'.G.hom j); infer_instance
+      · have := t'.semi.geomConnected; change GeometricallyConnected (pullback.snd t'.G.hom j); infer_instance
+      · intro Ω _ _ q
+        obtain ⟨E⟩ := t'.semi.fibres Ω (q ≫ j)
+        exact ⟨torusExtOfIso (pullCompIso q j t'.G) E⟩
+    have hPull : ∃ (PP' : RigLB ((Over.pullback j).obj t'.G))
+        (cub : CubicalStr _ PP') (sym : PP'.IsSymmetric) (adj : _) (prim : _)
+        (m : SABMap ⟨(Over.pullback j).obj t'.G, hsemi,
+          OAct.pullback j t'.G t'.act, PP', cub, sym, adj, prim⟩ t' j),
+        m.φ = pullback.fst t'.G.hom j := by
+      have h := isGrpPullback_pullback t'.G j
+      obtain ⟨hL, hr, ⟨c', hc'⟩, hs⟩ := Out.CubePf.cubePull _ _ t'.G _ (cubeMapOf h) t'.PP t'.cub
+      have hact : ∀ a, ((OAct.pullback j t'.G t'.act).act a).left ≫ pullback.fst t'.G.hom j =
+          pullback.fst t'.G.hom j ≫ (t'.act.act a).left := fun a => pullback.lift_fst _ _ _
+      have pa : ∀ {T : Over (Sp (S'.residueField p))} (x : T ⟶ (Over.pullback j).obj t'.G) a,
+          pushPt h.1.w (x ≫ (OAct.pullback j t'.G t'.act).act a) = pushPt h.1.w x ≫ t'.act.act a := fun x a =>
+        Over.OverMorphism.ext (by
+          show (x.left ≫ _) ≫ _ = (x.left ≫ _) ≫ _
+          rw [Category.assoc, hact, Category.assoc])
+      refine ⟨(cubeMapOf h).rigLB t'.PP hL hr, c', hs t'.sym, fun a => ?_, ?_,
+        ⟨cubeMapOf h, h, rfl, hact, hc'⟩, rfl⟩
+      · let U := lift (pushPt h.1.w (fst ((Over.pullback j).obj t'.G) ((Over.pullback j).obj t'.G)))
+          (pushPt h.1.w (snd ((Over.pullback j).obj t'.G) ((Over.pullback j).obj t'.G)))
+        refine LBIso.chartPull (chartPullLinComb t'.PP.L _ _ _ _ U.left fun I => psum_push h _ _ U (fun i => ?_) I.down)
+          (chartPullLinComb t'.PP.L _ _ _ _ U.left fun I => psum_push h _ _ U (fun i => ?_) I.down) (t'.adj a)
+        · fin_cases i
+          · exact (pa _ a).trans (by simp [U])
+          · simp [U]
+        · fin_cases i
+          · simp [U]
+          · exact (pa _ _).trans (by simp [U])
+      · let U := pushPt h.1.w (𝟙 ((Over.pullback j).obj t'.G))
+        refine LBIso.chartPull (chartPullPull t'.PP.L _)
+          (chartPullLinComb t'.PP.L _ _ _ _ U.left fun I => psum_push h _ _ U (fun i => ?_) I.down) t'.prim
+        fin_cases i
+        · simp [U]
+        · exact (congrArg (pushPt h.1.w) (Category.id_comp _).symm).trans (pa _ _)
+    obtain ⟨PP', cub, sym, adj, prim, m, -⟩ := hPull
+    generalize (⟨(Over.pullback j).obj t'.G, hsemi,
       OAct.pullback _ t'.G t'.act, PP', cub, sym, adj, prim⟩ : SAB H _) = t'' at m
     obtain ⟨a, ha⟩ := sabComp pullCubComp E H _ _ _ _ _ _ _ _ ν m
     obtain ⟨b, hb⟩ := sabComp pullCubComp E H _ _ _ _ _ _ _ _ ν' m

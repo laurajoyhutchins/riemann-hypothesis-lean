@@ -1,6 +1,52 @@
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.PolyApproxZeroPadic
+module
+
+public import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.PolyApproxZeroPadic
+public import Mathlib.NumberTheory.Padics.Complex
+public import Mathlib.Topology.Instances.Matrix
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.IsPsCharOne
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.FiniteSemisimple
+import Formalism.SharpRestriction.LevelLetterCocycles.DataN
+
+@[expose] public section
+
 open Formalism.MainNotions.N GlobalTheory.Cong GlobalTheory.PsChar
 
 namespace GlobalTheory.Cong
@@ -10,7 +56,7 @@ theorem continuous_aeval_comp {Γ k : Type} [TopologicalSpace Γ] [CommRing k] [
     Continuous fun u : Γ → Γ => MvPolynomial.aeval (f ∘ u) P := by
   induction P using MvPolynomial.induction_on with
   | C a => simpa using continuous_const
-  | add p q hp hq => simp only [map_add]; exact hp.add hq
+  | add p q hp hq => simp only [map_add (f := _)]; exact hp.add hq
   | mul_X p j hp =>
     simp only [map_mul, MvPolynomial.aeval_X, Function.comp_apply]
     exact hp.mul (hf.comp (continuous_apply j))
@@ -42,7 +88,7 @@ theorem polyApprox_of_denseRange : ∀ (l : ℕ) [Fact l.Prime] (Γ : Type) [Gro
   let F : (Γ → Γ) → PadicAlgCl l := fun u =>
     MvPolynomial.aeval (T ∘ u) P - ∑ η ∈ s, c η * MvPolynomial.aeval (trc (ρ η) ∘ u) P
   have hF : Continuous F := by
-    refine (continuous_aeval_comp T hT P).sub (continuous_finset_sum _ fun η hη => ?_)
+    refine (continuous_aeval_comp T hT P).sub (continuous_finsetSum _ fun η hη => ?_)
     exact continuous_const.mul (continuous_aeval_comp _ (htr η hη) P)
   have key : ‖F id‖ ≤ ε := by
     refine (DenseRange.piMap (fun _ : Γ => hx)).induction_on (p := fun u => ‖F u‖ ≤ ε) id

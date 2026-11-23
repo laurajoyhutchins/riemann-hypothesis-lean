@@ -1,5 +1,52 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.Algebra.Hom
+public import Mathlib.LinearAlgebra.TensorProduct.Map
+public import Mathlib.RingTheory.Ideal.Span
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
 import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.WittExactSequences.IsCompl
+public import Mathlib.LinearAlgebra.Quotient.Basic
+
+@[expose] public section
 
 open TensorProduct CrystallineSemistableComparison.D
 open scoped LaurentPolynomial
@@ -42,7 +89,7 @@ theorem main : ∀ (R : Type) [CommRing R] (r : ℕ → R) (M : ℕ) (N : Type) 
       apply key
       have e : g (s (y + y') - (s y + s y')) =
           (y - g (s y)) + (y' - g (s y')) - (y + y' - g (s (y + y'))) := by
-        simp only [map_sub, map_add]; ring
+        simp only [map_sub, map_add (f := _)]; ring
       rw [e]
       exact I.sub_mem (I.add_mem (hs y) (hs y')) (hs _)
     have hsmul : ∀ (c : R) (y : T), r k • s (c • y) - c • (r k • s y) ∈ P := by
@@ -57,7 +104,7 @@ theorem main : ∀ (R : Type) [CommRing R] (r : ℕ → R) (M : ℕ) (N : Type) 
     let L : T →ₗ[R] B ⧸ P :=
       { toFun := fun y => P.mkQ (r k • s y)
         map_add' := fun y y' => by
-          rw [← map_add]
+          rw [← map_add (f := _)]
           exact (Submodule.Quotient.eq P).mpr (hadd y y')
         map_smul' := fun c y => by
           simp only [RingHom.id_apply]
@@ -85,7 +132,7 @@ theorem main : ∀ (R : Type) [CommRing R] (r : ℕ → R) (M : ℕ) (N : Type) 
         have e' : (g.toLinearMap) b = g b := rfl
         rw [e', e]
         exact I.neg_mem (hs _)
-      | add a b ha hb => rw [map_add, map_add, ha, hb, smul_add]
+      | add a b ha hb => rw [map_add (f := _), map_add (f := _), ha, hb, smul_add]
     rw [← hcomp w, hw, map_zero]
 
 end GlobalTheory.CompanionTheory.TensCompl

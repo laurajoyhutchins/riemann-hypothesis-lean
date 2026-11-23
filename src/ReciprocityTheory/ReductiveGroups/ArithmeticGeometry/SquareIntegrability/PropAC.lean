@@ -1,5 +1,60 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SquareIntegrability.PropAB
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SquareIntegrability.RCauchy
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SquareIntegrability.GaussianTailBound
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SquareIntegrability.PropABSt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+public import Mathlib.Analysis.Calculus.SmoothSeries
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SquareIntegrability.PropAB
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SquareIntegrability.RCauchy
+
+@[expose] public section
 
 namespace ReciprocityTheory.ChartRestriction.G.I2
 
@@ -122,6 +177,7 @@ theorem pa_opNorm_le (L : EuclideanSpace ℂ ι →L[ℂ] ℂ) :
     simp [Pi.single_apply, mul_ite, Finset.sum_ite_eq]
   calc ‖L v‖ = ‖∑ j, v j • L (EuclideanSpace.single j 1)‖ := by
         conv_lhs => rw [hv]
+
         rw [map_sum]
         simp only [map_smul]
     _ ≤ ∑ j, ‖v j‖ * ‖L (EuclideanSpace.single j 1)‖ :=
@@ -138,7 +194,7 @@ theorem pa_fderiv_bound {κ : Type} (G : κ → EuclideanSpace ℂ ι → ℂ) (
   intro k y hy
   refine pa_cauchy1 (hG k) y j fun t ht => hu k _ ?_
   calc ‖y + t • EuclideanSpace.single j (1 : ℂ)‖ ≤ ‖y‖ + ‖t • EuclideanSpace.single j (1 : ℂ)‖ := norm_add_le _ _
-    _ = ‖y‖ + 1 := by rw [norm_smul, EuclideanSpace.norm_single, ht, norm_one, mul_one]
+    _ = ‖y‖ + 1 := by rw [norm_smul, PiLp.norm_single, ht, norm_one, mul_one]
     _ ≤ R + 1 := by linarith
 
 theorem pa_fderiv_norm {κ : Type} (G : κ → EuclideanSpace ℂ ι → ℂ) (hG : ∀ k, Differentiable ℂ (G k))
@@ -177,8 +233,8 @@ theorem pa_contDiff_of_diff {S : EuclideanSpace ℂ ι → ℂ} (hS : Differenti
   have h2 : ContDiff ℂ (⊤ : ℕ∞) (S ∘ e.symm) := contDiff_of_differentiable h1
   have h3 := h2.comp e.contDiff
   convert h3 using 1
-  funext v
-  simp
+  funext x
+  exact congrArg S (e.symm_apply_apply x).symm
 
 theorem pa_iter_tsum (n : ℕ) : ∀ {κ : Type} (G : κ → EuclideanSpace ℂ ι → ℂ),
     (∀ k, ContDiff ℂ (⊤ : ℕ∞) (G k)) →
@@ -247,6 +303,7 @@ theorem Hf_add_right (a b c : EuclideanSpace ℂ ι) : Hf a (b + c) = Hf a b + H
   simp [Hf, mul_add, Finset.sum_add_distrib]
 
 theorem Hf_swap (a b : EuclideanSpace ℂ ι) : Hf b a = (starRingEnd ℂ) (Hf a b) := by
+
   simp [Hf, map_sum, mul_comm]
 
 theorem pa_factor (q : ℕ) (v g g' : EuclideanSpace ℂ ι) (kk : ℤ) (hkk : (Hf g' g).im = kk) :

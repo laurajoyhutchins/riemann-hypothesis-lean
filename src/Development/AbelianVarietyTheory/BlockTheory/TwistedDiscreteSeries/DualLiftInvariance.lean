@@ -1,8 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.HasConductorMulShift
+module
+
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.HasConductorMulShift
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.Data.Matrix.ColumnRowPartitioned
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MeasureTheory ValuativeRel Matrix IsLocalRing
-open scoped Pointwise
+open scoped Classical Pointwise
 
 noncomputable section
 namespace GlobalTheory.IndefiniteRowSideFullHecke.AppendedVectorData
@@ -18,13 +65,13 @@ def InDual (L : Submodule 𝒪[k] (n → k)) (η : n → k) : Prop := ∀ y ∈ 
 def Lifts (L : Submodule 𝒪[k] (n → k)) (F : n → k) (f : Module.Dual 𝓀[k] (Red L)) : Prop :=
   ∀ y : L, ∃ s : 𝒪[k], (s : k) = F ⬝ᵥ (y : n → k) ∧ residue 𝒪[k] s = f (Red.mk L y)
 
-open Classical in
 
+open Classical in
 def cosetInd (q : Unif k) (L : Submodule 𝒪[k] (n → k)) (f : Module.Dual 𝓀[k] (Red L)) (η : n → k) : ℂ :=
   if ∃ F : n → k, Lifts L F f ∧ InDual L (η - q.inv • F) then 1 else 0
 
-open Classical in
 
+open Classical in
 def datum (q : Unif k) (P : Pair k n') (LY : Submodule 𝒪[k] (n → k)) (x₀ : Matrix n n' k) (y : n → k) : ℂ :=
   if (∀ z ∈ P.ker, x₀ *ᵥ z ∈ LY) ∧ q.inv • y + x₀ *ᵥ P.vec ∈ LY then 1 else 0
 
@@ -37,8 +84,8 @@ def qvec (q : Unif k) (P : Pair k n') : Red P.ker :=
 
 def resUnit (ε : 𝒪[k]ˣ) : 𝓀[k]ˣ := Units.map (residue 𝒪[k]).toMonoidHom ε
 
-open Classical in
 
+open Classical in
 def term (q : Unif k) (χ : AddChar 𝓀[k] ℂ) (ε : 𝓀[k]ˣ) (P : Pair k n') (LY : Submodule 𝒪[k] (n → k))
     (fW : Module.Dual 𝓀[k] (Red LY)) (x₀ : Matrix n n' k) : ℂ :=
   if h : ∀ z ∈ P.ker, x₀ *ᵥ z ∈ LY then
@@ -46,8 +93,8 @@ def term (q : Unif k) (χ : AddChar 𝓀[k] ℂ) (ε : 𝓀[k]ˣ) (P : Pair k n'
       ⟨x₀ *ᵥ (q.1 • P.vec), h _ (Pair.smul_mem_ker q.mem_max P.hasVal_vec.mem)⟩)))
   else 0
 
-open Classical in
 
+open Classical in
 def compInd (L : Submodule 𝒪[k] (n' → k)) (LY : Submodule 𝒪[k] (n → k)) (f' : Module.Dual 𝓀[k] (Red L))
     (fW : Module.Dual 𝓀[k] (Red LY)) (x₀ : Matrix n n' k) : ℂ :=
   if ∃ h : ∀ z ∈ L, x₀ *ᵥ z ∈ LY, ∀ z : L, fW (Red.mk LY ⟨x₀ *ᵥ z, h z z.2⟩) = f' (Red.mk L z) then 1 else 0
@@ -60,12 +107,12 @@ def mainDatum (q : Unif k) (χ : AddChar 𝓀[k] ℂ) (ε : 𝓀[k]ˣ) (P : Pair
 def lastKer (L : Submodule 𝒪[k] (n'' → k)) : Submodule 𝒪[k] (n'' ⊕ Fin 1 → k) :=
   L.map (inX k n'' 1) ⊔ Submodule.span 𝒪[k] {avec k n'' 1 1}
 
+
 open MeasureTheory ValuativeRel Matrix IsLocalRing in
 open scoped Pointwise in
 variable {k : Type} [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k]
   {n n' n'' : Type} [Fintype n] [Fintype n'] [Fintype n''] in
 omit [Fintype n''] in
-
 theorem _root_.GlobalTheory.IndefiniteRowSideFullHecke.AppendedVectorData.mem_lastKer {L : Submodule 𝒪[k] (n'' → k)} {y : n'' ⊕ Fin 1 → k} :
     y ∈ _root_.GlobalTheory.IndefiniteRowSideFullHecke.AppendedVectorData.lastKer L ↔ y ∘ Sum.inl ∈ L ∧ y (Sum.inr 0) ∈ 𝒪[k] := by
   unfold _root_.GlobalTheory.IndefiniteRowSideFullHecke.AppendedVectorData.lastKer
@@ -90,12 +137,12 @@ theorem _root_.GlobalTheory.IndefiniteRowSideFullHecke.AppendedVectorData.mem_la
     · fin_cases i
       simp [_root_.GlobalTheory.LatPair.inX, _root_.GlobalTheory.LatPair.avec, Subring.smul_def]
 
+
 open MeasureTheory ValuativeRel Matrix IsLocalRing in
 open scoped Pointwise in
 variable {k : Type} [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k]
   {n n' n'' : Type} [Fintype n] [Fintype n'] [Fintype n''] in
 omit [Fintype n''] in
-
 theorem _root_.GlobalTheory.IndefiniteRowSideFullHecke.AppendedVectorData.lastKer_eq (q : _root_.GlobalTheory.LatPair.Unif k)
     (L : Submodule 𝒪[k] (n'' → k)) :
     _root_.GlobalTheory.IndefiniteRowSideFullHecke.AppendedVectorData.lastKer L = _root_.GlobalTheory.LatPair.gluedLat q 1 2 L 0 := by
@@ -109,16 +156,18 @@ theorem _root_.GlobalTheory.IndefiniteRowSideFullHecke.AppendedVectorData.lastKe
   · rintro ⟨s, h1, h2⟩
     exact ⟨by simpa using h1, (h2 0).1 (by norm_num)⟩
 
+
 open MeasureTheory ValuativeRel Matrix IsLocalRing in
 open scoped Pointwise in
 variable {k : Type} [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k]
   {n n' n'' : Type} [Fintype n] [Fintype n'] [Fintype n''] in
 omit [Fintype n''] in
-
-theorem _root_.GlobalTheory.IndefiniteRowSideFullHecke.AppendedVectorData.isGlue_last (q : _root_.GlobalTheory.LatPair.Unif k) (L : Submodule 𝒪[k] (n'' → k)) [L.IsLattice k] :
+theorem _root_.GlobalTheory.IndefiniteRowSideFullHecke.AppendedVectorData.isGlue_last (q : _root_.GlobalTheory.LatPair.Unif k) (L : Submodule 𝒪[k] (n'' → k)) [L.IsFullLattice k] :
     _root_.GlobalTheory.LatPair.IsGlue (_root_.GlobalTheory.IndefiniteRowSideFullHecke.AppendedVectorData.lastKer L) (q.inv • _root_.GlobalTheory.LatPair.avec k n'' 1 1) := by
   rw [_root_.GlobalTheory.LatPair.isGlue_iff q]
-  refine ⟨_root_.GlobalTheory.IndefiniteRowSideFullHecke.AppendedVectorData.lastKer_eq q L ▸ _root_.GlobalTheory.LatPair.gluedLat_isLattice q 1 2 L 0, ?_, ?_⟩
+  refine ⟨?_, ?_, ?_⟩
+  · rw [lastKer_eq q L]
+    exact gluedLat_isLattice q 1 2 L 0
   · rw [_root_.GlobalTheory.IndefiniteRowSideFullHecke.AppendedVectorData.mem_lastKer]
     rintro ⟨-, h⟩
     have hinv : (((q : 𝒪[k]) : k))⁻¹ ∈ 𝒪[k] := by
@@ -135,7 +184,8 @@ theorem _root_.GlobalTheory.IndefiniteRowSideFullHecke.AppendedVectorData.isGlue
       exact L.zero_mem
     · simpa [_root_.GlobalTheory.LatPair.avec] using one_mem 𝒪[k]
 
-def lastPair (q : Unif k) (L : Submodule 𝒪[k] (n'' → k)) [L.IsLattice k] : Pair k (n'' ⊕ Fin 1) :=
+omit [Fintype n''] in
+def lastPair (q : Unif k) (L : Submodule 𝒪[k] (n'' → k)) [L.IsFullLattice k] : Pair k (n'' ⊕ Fin 1) :=
   glue (isGlue_last q L)
 
 variable [MeasurableSpace k]
@@ -162,7 +212,7 @@ variable (k : Type) [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchim
 
 def TransformFormula : Prop :=
   ∀ (q : Unif k) (ψ : AddChar k Circle) (hψ : HasConductor ψ 1) (ε : 𝒪[k]ˣ) (μ : Measure (n → k))
-    [μ.IsAddHaarMeasure] (P : Pair k n') (LY : Submodule 𝒪[k] (n → k)) [LY.IsLattice k],
+    [μ.IsAddHaarMeasure] (P : Pair k n') (LY : Submodule 𝒪[k] (n → k)) [LY.IsFullLattice k],
     (∀ x₀ y, datum q P LY x₀ y = latInd (gluedS q 1 P.ker P.vec) LY (withCol x₀ y)) ∧
     0 < volQ μ q LY ∧
     ∀ (x₀ : Matrix n n' k) (η : n → k),
@@ -172,7 +222,7 @@ def TransformFormula : Prop :=
 
 def Decomposition : Prop :=
   ∀ (q : Unif k) (ψ : AddChar k Circle) (hψ : HasConductor ψ 1) (ε : 𝒪[k]ˣ)
-    (P : Pair k n') (LY : Submodule 𝒪[k] (n → k)) [LY.IsLattice k],
+    (P : Pair k n') (LY : Submodule 𝒪[k] (n → k)) [LY.IsFullLattice k],
     (∀ (fW : Module.Dual 𝓀[k] (Red LY)) (x₀ : Matrix n n' k),
       latInd P.ker LY x₀ = ∑ᶠ f' : Module.Dual 𝓀[k] (Red P.ker), compInd P.ker LY f' fW x₀ ∧
       term q (resChar ψ hψ q) (resUnit ε) P LY fW x₀ = ∑ᶠ f' : Module.Dual 𝓀[k] (Red P.ker),
@@ -194,7 +244,7 @@ def Decomposition : Prop :=
 
 def ClassSumFormula : Prop :=
   ∀ (q : Unif k) (ψ : AddChar k Circle) (hψ : HasConductor ψ 1) (ε : 𝒪[k]ˣ)
-    (L : Submodule 𝒪[k] (n' → k)) [L.IsLattice k] (Q : Pair k n)
+    (L : Submodule 𝒪[k] (n' → k)) [L.IsFullLattice k] (Q : Pair k n)
     (M : Type) [AddCommGroup M] [Module ℂ M] (φ : Form k n' M), φ ∈ Mram k n' M →
     (∀ x₀ : Matrix n n' k,
       ∑ P ∈ withKer L, mainDatum q (resChar ψ hψ q) (resUnit ε) P Q x₀ • φ P =
@@ -205,15 +255,15 @@ def ClassSumFormula : Prop :=
         θ (φ P) (mainDatum q (resChar ψ hψ q) (resUnit ε) P Q) =
           θ (dia (resUnit ε) (FFStar q (resChar ψ hψ q) φ) P') (phiOne P' Q)
 
-open Classical in
 
+open Classical in
 def LastStep : Prop :=
-  ∀ (q : Unif k) (LY : Submodule 𝒪[k] (n → k)) [LY.IsLattice k] (L'' : Submodule 𝒪[k] (n'' → k)) [L''.IsLattice k],
+  ∀ (q : Unif k) (LY : Submodule 𝒪[k] (n → k)) [LY.IsFullLattice k] (L'' : Submodule 𝒪[k] (n'' → k)) [L''.IsFullLattice k],
     (∀ (fW : {f : Module.Dual 𝓀[k] (Red LY) // f ≠ 0}) (x' : Matrix n'' n k) (η : n → k),
       phiOne (ofDual LY fW) (lastPair q L'') (withRow x' η) =
         latInd LY L'' x' * (if Lifts LY (q.1 • η) fW.1 then 1 else 0) ∧
       phiOne (ofDual LY fW) (lastPair q L'') (withRow x' η) = latInd LY L'' x' * cosetInd q LY fW.1 η) ∧
-    ∀ (ψ : AddChar k Circle) (hψ : HasConductor ψ 1) (ε : 𝒪[k]ˣ) (L : Submodule 𝒪[k] (n' → k)) [L.IsLattice k]
+    ∀ (ψ : AddChar k Circle) (hψ : HasConductor ψ 1) (ε : 𝒪[k]ˣ) (L : Submodule 𝒪[k] (n' → k)) [L.IsFullLattice k]
       (M : Type) [AddCommGroup M] [Module ℂ M] (φ : Form k n' M), φ ∈ Mram k n' M →
       ∀ (x' : Matrix n'' n k) (η : n → k),
         (∀ x₀ : Matrix n n' k,
@@ -247,18 +297,6 @@ section Examples
 
 variable {k : Type} [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k]
   {n n' n'' : Type} [Fintype n] [Fintype n'] [Fintype n'']
-
-example (q : Unif k) (L : Submodule 𝒪[k] (n'' → k)) [L.IsLattice k] :
-    (lastPair q L).ker = lastKer L ∧ (lastPair q L).HasVal (q.inv • avec k n'' 1 1) 1 :=
-  ⟨glue_ker _, glue_hasVal _⟩
-
-example (q : Unif k) (P : Pair k n') (LY : Submodule 𝒪[k] (n → k)) : datum q P LY 0 0 = 1 :=
-  if_pos ⟨fun _ _ => by simp, by simp⟩
-
-example (q : Unif k) (L : Submodule 𝒪[k] (n → k)) : cosetInd q L 0 0 = 1 :=
-  if_pos ⟨0, fun _ => ⟨0, by simp, by simp⟩, fun _ _ => by simp⟩
-
-example : (resUnit (-1 : 𝒪[k]ˣ) : 𝓀[k]) = -1 := by simp [resUnit]
 
 end Examples
 

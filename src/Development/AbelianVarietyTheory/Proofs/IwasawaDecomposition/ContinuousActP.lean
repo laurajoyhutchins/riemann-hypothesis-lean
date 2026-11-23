@@ -1,8 +1,48 @@
-import Mathlib
-import Formalism.LocalToGlobal.Divisibility.CoefModLemmas
-import Formalism.LocalToGlobal.Columns.CoefModB
+module
+
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.TensorMapDescent
+import Formalism.GradedWeylDivisibility.DualWeylDominanceOf
+import Formalism.LocalToGlobal.Columns.CoefficientsModP.PairingNondegenerateHolds
 import Formalism.LocalToGlobal.Columns.PolyFnLemmas
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.TensorMapDescent
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -59,6 +99,7 @@ theorem bcVV_span {K : Type} [Field K] (φ : K →+* ℂ) (lam : ι → DomWeigh
   rintro _ ⟨i, rfl⟩
   obtain ⟨F, hF, e⟩ := GlobalTheory.Proof.TensorMapDescent.bVVfun_desc φ lam i
   have : bVV ℂ lam i = bcVV φ lam ⟨F, hF⟩ := Subtype.ext ((bVV_coe ℂ lam i).trans e)
+
   rw [this, ← (bVV K lam).sum_repr ⟨F, hF⟩, map_sum]
   refine Submodule.sum_mem _ fun j _ => ?_
   rw [map_smulₛₗ]
@@ -90,13 +131,14 @@ theorem continuous_actP {X : Type} [TopologicalSpace X] (lam : ι → DomWeight 
     intro x
     rw [key]
     conv_lhs => rw [P.as_sum]
+
     simp only [map_sum, map_monomial]
     refine Finset.sum_congr rfl fun m _ => ?_
     rw [← smul_eq_mul, ← map_smul, smul_monomial, smul_eq_mul, mul_one]
     rfl
   simp only [actP, LinearMap.smul_apply, AlgHom.toLinearMap_apply, map_smul, smul_eq_mul, h2, detTw_eq]
-  refine Continuous.mul (continuous_finset_prod _ fun τ _ => (hg τ).matrix_det.zpow₀ _ fun x => Or.inl ?_)
-    (continuous_finset_sum _ fun m _ => (P.coeff m).continuous.mul continuous_const)
+  refine Continuous.mul (continuous_finsetProd _ fun τ _ => (hg τ).matrix_det.zpow₀ _ fun x => Or.inl ?_)
+    (continuous_finsetSum _ fun m _ => (P.coeff m).continuous.mul continuous_const)
   exact ((Matrix.isUnit_iff_isUnit_det _).1 (g x τ).isUnit).ne_zero
 
 def gramOf (B : ι → GL (Fin n) ℂ) : ι → Matrix (Fin n) (Fin n) ℂ :=
@@ -164,7 +206,7 @@ theorem continuous_HV {X : Type} [TopologicalSpace X] (g : X → ι → GL (Fin 
     funext x
     exact ((stdOrthonormalBasis ℂ (HV lam B)).sum_repr' _).symm
   rw [this]
-  exact continuous_finset_sum _ fun i _ => (continuous_actP lam g hg _ _).smul continuous_const
+  exact continuous_finsetSum _ fun i _ => (continuous_actP lam g hg _ _).smul continuous_const
 
 end Poly
 

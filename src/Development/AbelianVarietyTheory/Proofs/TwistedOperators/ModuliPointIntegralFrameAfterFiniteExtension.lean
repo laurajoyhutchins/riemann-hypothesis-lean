@@ -1,23 +1,77 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IsTranslSum
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ModelExistsAfterBaseChange
-import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.TateIsoExistsAlgClosed
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsModelPushInvertibleOverCompleteDVR
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.IntFrExtOfGoodLevel
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.FramedPointReducedFromTestRing
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.CompactifiedModuliPartOne
+module
+
+public import Formalism.LocalToGlobal.ProjectiveLattices.CoreProofs
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsLieBasis
+public import Development.AbelianVarietyTheory.Counterexamples.ModuliSurvey.ExistsGoodLevel
+public import Development.AbelianVarietyTheory.Definitions.CMLattices.IsDiffOf
+public import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.AbelianSchemeLawsUnconditional
+public import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.LawsFieldsSeparately
+import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.RelAmpleOfLocallyOnBase
+public import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.ExistsEqNsmul
+public import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.TateIsoExistsAlgClosed
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ModelExistsAfterBaseChange
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.CompactifiedModuliPartOne
 import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsModuliSchemePolarizedAbelianLevel
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsPushEquiv
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.IsAbelianSchemeOfIsGrpPullback
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ObjIsAbelianSchemeDimRigidifiedSym
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.PushEquivSymmLeft
 import Development.AbelianVarietyTheory.Proofs.ModuliProofs.RaisedModelFiniteCoverAmpleFrames
-import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.LawsFieldsSeparately
-import Development.AbelianVarietyTheory.Counterexamples.ModuliSurvey.ExistsGoodLevel
-import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.ExistsCdvrFiniteExtension
-import Formalism.LocalToGlobal.ProjectiveLattices.IntFrExtM
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.WeilIsGrpPullbackOfCommute
+public import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.ExistsCdvrFiniteExtension
+import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.TorsionRationalOverFiniteExtensionLevelStructure
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsModelPushInvertibleOverCompleteDVR
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.FramedPointReducedFromTestRing
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.IntFrExtOfGoodLevel
+import Formalism.LocalToGlobal.ProjectiveLattices.ExtPtUnique
+import Formalism.LocalToGlobal.ProjectiveLattices.GenFrPf
 import Formalism.LocalToGlobal.ProjectiveLattices.LieFreePf
 import Formalism.LocalToGlobal.ProjectiveLattices.ThetaFramePf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.AbelianSchemeGerms
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.AmplePt
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.BCRing
 import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.CubePullbacks.CubePull
+import Development.AbelianVarietyTheory.BlockTheory.AbelianSchemeLaw.HomExtendsOverDVR
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.VecMulMapEqZero
+
+@[expose] public section
 
 set_option autoImplicit false
-set_option synthInstance.maxHeartbeats 400000
+
 
 noncomputable section
 
@@ -30,8 +84,8 @@ namespace GlobalTheory.AnyLevelFrame
 
 variable {E : Type} [Field E] [NumberField E] [IsCMField E] {H : Host E} {D : Datum H} {l l₂ : Level H}
 
-open RationalTorsion in
 
+open RationalTorsion in
 theorem exists_obj_of_rational {B B₂ K Ω : Type} [CommRing B] [CommRing B₂] [Field K] [CharZero K] [Field Ω]
     [IsAlgClosed Ω] {b : Base l B} {b₂ : Base l₂ B₂} (b₀ : B →+* K) (j : B₂ →+* K) (σ : K →+* Ω)
     {s : Sp K ⟶ Sp B} (hs : s = spMap b₀) (o : Obj D l b s) (hA₂ : l₂.A = 1) (hρ : j b₂.ρ = b₀ b.ρ)
@@ -104,6 +158,41 @@ theorem exists_obj_level (c : Coeff l) (c₂ : Coeff l₂) (hle : c.F ≤ c₂.F
     ∃ (L : Type) (_ : Field L) (_ : Algebra k L) (_ : FiniteDimensional k L) (j₂ : c₂.F →+* L)
       (o₂ : Obj D l₂ (baseKA l₂) (spMap (j₂.comp (IntermediateField.inclusion c₂.le).toRingHom))),
       Nonempty (SABMap o₂.t o.t (spMap (algebraMap k L))) := by
+  let objOfSABMap {E : Type} [Field E] [NumberField E] [IsCMField E] {H : Host E} {D : Datum H} {l : Level H}
+      {B : Type} [CommRing B] {b : Base l B} {S S' : Scheme.{0}} {s : S ⟶ Sp B} {f : S' ⟶ S}
+      (o : Obj D l b s) {t' : SAB H S'} (m : SABMap t' o.t f) : Obj D l b (f ≫ s) :=
+    open GlobalTheory.ObjPull in
+      have hL : LBIso t'.PP.L (o.t.PP.L.pull m.cm.F) := by
+        obtain ⟨w, hw, -⟩ := m.lin
+        exact ⟨w, hw⟩
+      have hpr := o.proper
+      have hp := GlobalTheory.PolPull.pol_pull_of_relAmple_local GlobalTheory.AmpleLocal.relAmple_of_locally
+        S S' o.t.G t'.G f m.cm.F o.t.PP.L t'.PP.L o.t.PP.isLB t'.PP.isLB
+        (AbelianSchemeGerms.isAbelianScheme_of_proper o.t.G o.t.semi) m.cart hL
+      { t := t'
+        proper := MorphismProperty.of_isPullback (P := @IsProper) m.cart.1 hpr
+        ample := hp.2.1 o.ample
+        ktriv := hp.2.2 o.ktriv
+        eta := fun a => GlobalTheory.ObjPull.secPull m.cart (o.eta a)
+        eta_add := fun a c => by rw [o.eta_add, map_mul]
+        eta_ker := fun a ha => by rw [o.eta_ker a ha, map_one]
+        etaA := fun a => GlobalTheory.ObjPull.secPull m.cart (o.etaA a)
+        etaA_add := fun a c => by rw [o.etaA_add, map_mul]
+        etaA_ker := fun a => by rw [o.etaA_ker a, map_one]
+        geom := fun k _ _ x β hx => by
+          obtain ⟨hdet, I, hI, hA, hM⟩ := o.geom k (x ≫ f) β (by rw [Category.assoc, hx])
+          refine ⟨fun τ => ?_, tateMove (pushEquiv m.cart (Over.mk x)) (fun c g => ?_) (fun n g g' c hc => ?_) I,
+            hI, fun a => ?_, fun a ha => ?_⟩
+          · rw [GlobalTheory.LiePull.lieMult_pull _ S S' o.t.G t'.G f m.cm.F o.t.act t'.act m.cart m.act k x τ,
+              GlobalTheory.LiePull.lieMult_pull _ S S' o.t.G t'.G f m.cm.F o.t.act t'.act m.cart m.act k x τ]
+            exact hdet τ
+          · apply Over.OverMorphism.ext
+            show (g.left ≫ _) ≫ _ = (g.left ≫ _) ≫ _
+            rw [Category.assoc, m.act, Category.assoc]
+          · exact (GlobalTheory.weilIs_grpPullback_of_comm S S' o.t.G t'.G f m.cm.F o.t.PP.L t'.PP.L o.t.PP.isLB t'.PP.isLB
+              m.cart hL (Over.mk x) n g g' _ _ _ rfl rfl).2 hc
+          · exact (MulEquiv.eq_symm_apply _).2 ((pushEquiv_secPull m.cart _ _).trans (hA a))
+          · exact (MulEquiv.eq_symm_apply _).2 ((pushEquiv_secPull m.cart _ _).trans (hM a ha)) }
   have hM : 0 < l₂.M' := Nat.lcm_pos (lt_of_lt_of_le (by norm_num) l₂.three_le) l₂.A_pos
   haveI := c₂.fin
   obtain ⟨F, _, _, _, _⟩ : ∃ (F : Type) (_ : Field F) (_ : Algebra k F), IsAlgClosed F ∧ Algebra.IsAlgebraic k F :=
@@ -113,7 +202,11 @@ theorem exists_obj_level (c : Coeff l) (c₂ : Coeff l₂) (hle : c.F ≤ c₂.F
     letI : Algebra c.F c₂.F := (IntermediateField.inclusion hle).toRingHom.toAlgebra
     letI : Algebra c.F F := ((algebraMap k F).comp io).toAlgebra
     haveI : Algebra.IsAlgebraic c.F c₂.F := Algebra.IsAlgebraic.tower_top (K := ℚ) c.F
-    let τ : c₂.F →ₐ[c.F] F := IsAlgClosed.lift
+    let τ : c₂.F →ₐ[c.F] F := (by
+      refine @_root_.IsAlgClosed.lift _ _ _ _ _ _ _ _ _ _ _ ?_ ?_ ?_
+      solve_by_elim* (maxDepth := 2) only [*,
+        @_root_.DivisionSemiring.to_moduleIsTorsionFree,
+        @_root_.Algebra.IsIntegral.isAlgebraic, @_root_.inferInstance])
     exact ⟨τ, fun a => τ.commutes a⟩
   obtain ⟨T, hT, hT'⟩ := LevelRaise.exists_finite_set o hM (K := k) (F := F) (𝟙 _)
   obtain ⟨U, hU⟩ := (Module.Finite.fg_top (R := ℚ) (M := c₂.F))
@@ -161,14 +254,14 @@ theorem exists_obj_level (c : Coeff l) (c₂ : Coeff l₂) (hle : c.F ≤ c₂.F
       exact (congrArg (spMap (algebraMap L F) ≫ ·) (m.cart.1.lift_fst _ _ _)).trans
         (hq.trans (Category.id_comp _))
     · rw [Over.w, Over.w]
-  obtain ⟨o₂, ho₂⟩ := exists_obj_of_rational (b₂ := baseKA l₂)
+  obtain ⟨o₂, ho₂⟩ := exists_obj_of_rational (b₂ := baseKA l₂) (s := spMap (algebraMap k L) ≫ s)
     ((algebraMap k L).comp (io.comp (IntermediateField.inclusion c.le).toRingHom))
     (j.comp (IntermediateField.inclusion c₂.le).toRingHom) (algebraMap L F)
-    (by rw [hs, TorsionRat.sp_comp]) (ModelCompare.objOfSABMap o m) hA
+    (by rw [hs, TorsionRat.sp_comp]) (objOfSABMap o m) hA
     hρ hrat
   exact ⟨L, inferInstance, inferInstance, inferInstance, j, o₂, ho₂ ▸ ⟨m⟩⟩
 
-set_option maxHeartbeats 400000 in
+
 
 theorem exists_intFr {Xo : Moduli D l} {c : Coeff l} (T : CDVR) (io : c.F →+* T.Fr) (x : Sp T.Fr ⟶ Xo.X)
     (hx : letI := io.toAlgebra; x ≫ Xo.s = sOf c T.Fr) (G : SAB H (Sp T.V)) (t' : SAB H (Sp T.Fr))
@@ -299,6 +392,41 @@ theorem exists_intFr {Xo : Moduli D l} {c : Coeff l} (T : CDVR) (io : c.F →+* 
 
 theorem intFrExt : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (H : Host E) (Dw : Datum H) (l : Level H) (Xo : Moduli Dw l) (c : Coeff l), 1 ≤ Dw.p + Dw.q → IntFrExt Xo c := by
   intro E _ _ _ H D l Xo c hpq T io hfin x hx
+  let objOfSABMap {E : Type} [Field E] [NumberField E] [IsCMField E] {H : Host E} {D : Datum H} {l : Level H}
+      {B : Type} [CommRing B] {b : Base l B} {S S' : Scheme.{0}} {s : S ⟶ Sp B} {f : S' ⟶ S}
+      (o : Obj D l b s) {t' : SAB H S'} (m : SABMap t' o.t f) : Obj D l b (f ≫ s) :=
+    open GlobalTheory.ObjPull in
+      have hL : LBIso t'.PP.L (o.t.PP.L.pull m.cm.F) := by
+        obtain ⟨w, hw, -⟩ := m.lin
+        exact ⟨w, hw⟩
+      have hpr := o.proper
+      have hp := GlobalTheory.PolPull.pol_pull_of_relAmple_local GlobalTheory.AmpleLocal.relAmple_of_locally
+        S S' o.t.G t'.G f m.cm.F o.t.PP.L t'.PP.L o.t.PP.isLB t'.PP.isLB
+        (AbelianSchemeGerms.isAbelianScheme_of_proper o.t.G o.t.semi) m.cart hL
+      { t := t'
+        proper := MorphismProperty.of_isPullback (P := @IsProper) m.cart.1 hpr
+        ample := hp.2.1 o.ample
+        ktriv := hp.2.2 o.ktriv
+        eta := fun a => GlobalTheory.ObjPull.secPull m.cart (o.eta a)
+        eta_add := fun a c => by rw [o.eta_add, map_mul]
+        eta_ker := fun a ha => by rw [o.eta_ker a ha, map_one]
+        etaA := fun a => GlobalTheory.ObjPull.secPull m.cart (o.etaA a)
+        etaA_add := fun a c => by rw [o.etaA_add, map_mul]
+        etaA_ker := fun a => by rw [o.etaA_ker a, map_one]
+        geom := fun k _ _ x β hx => by
+          obtain ⟨hdet, I, hI, hA, hM⟩ := o.geom k (x ≫ f) β (by rw [Category.assoc, hx])
+          refine ⟨fun τ => ?_, tateMove (pushEquiv m.cart (Over.mk x)) (fun c g => ?_) (fun n g g' c hc => ?_) I,
+            hI, fun a => ?_, fun a ha => ?_⟩
+          · rw [GlobalTheory.LiePull.lieMult_pull _ S S' o.t.G t'.G f m.cm.F o.t.act t'.act m.cart m.act k x τ,
+              GlobalTheory.LiePull.lieMult_pull _ S S' o.t.G t'.G f m.cm.F o.t.act t'.act m.cart m.act k x τ]
+            exact hdet τ
+          · apply Over.OverMorphism.ext
+            show (g.left ≫ _) ≫ _ = (g.left ≫ _) ≫ _
+            rw [Category.assoc, m.act, Category.assoc]
+          · exact (GlobalTheory.weilIs_grpPullback_of_comm S S' o.t.G t'.G f m.cm.F o.t.PP.L t'.PP.L o.t.PP.isLB t'.PP.isLB
+              m.cart hL (Over.mk x) n g g' _ _ _ rfl rfl).2 hc
+          · exact (MulEquiv.eq_symm_apply _).2 ((pushEquiv_secPull m.cart _ _).trans (hA a))
+          · exact (MulEquiv.eq_symm_apply _).2 ((pushEquiv_secPull m.cart _ _).trans (hM a ha)) }
   have hC := ReciprocityTheory.ChartRestriction.G.Out.CubePf.cubePull
   have hT : Out.SecTwistSt := GlobalTheory.lawsFieldsSeparately.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.1
   haveI : CharZero T.Fr := algebraRat.charZero _
@@ -306,12 +434,12 @@ theorem intFrExt : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (H : H
   obtain ⟨c₂, hle⟩ := GlobalTheory.RaisedAmple.exists_coeff c l₂
   obtain ⟨X₂⟩ := GlobalTheory.Moduli.moduli_scheme_exists E H D l₂ hpq
   obtain ⟨t₀, ⟨m₀⟩⟩ := exists_sab x Xo.univ.t
-  obtain ⟨L, _, _, _, j₂, o₂, ⟨n₂⟩⟩ := exists_obj_level c c₂ hle hA io hx (ModelCompare.objOfSABMap Xo.univ m₀)
+  obtain ⟨L, _, _, _, j₂, o₂, ⟨n₂⟩⟩ := exists_obj_level c c₂ hle hA io hx (objOfSABMap Xo.univ m₀)
   obtain ⟨T', i, r, ψ, -, hr, hv, hψ, -, hfin'⟩ := GlobalTheory.PlaceExtField.exists_cdvr_finite_extension T L
   have hfin'' := hfin' hfin
   refine ⟨T', i, r, hr, hv, hfin'', ?_⟩
   obtain ⟨t₃, ⟨n₃⟩⟩ := exists_sab (spMap ψ.toRingHom) o₂.t
-  let o₃ := ModelCompare.objOfSABMap o₂ n₃
+  let o₃ := objOfSABMap o₂ n₃
   obtain ⟨x₂, ⟨hx₂, ⟨mu⟩⟩, -⟩ := X₂.rep _ _ inferInstance o₃
   let io₂ : c₂.F →+* T'.Fr := ψ.toRingHom.comp j₂
   have : Finite (IsLocalRing.ResidueField T'.V) := hfin''
@@ -339,7 +467,7 @@ theorem intFrExt : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (H : H
   obtain ⟨a₄, -⟩ := sabComp pullCubComp E H _ _ _ Xo.univ.t t₀ t' _ _ m₀ a₃
   have e₂ : ((𝟙 _ ≫ spMap ψ.toRingHom) ≫ spMap (algebraMap T.Fr L)) ≫ x = spMap i ≫ x := by
     rw [Category.id_comp, TorsionRat.sp_comp, show ψ.toRingHom.comp (algebraMap T.Fr L) = i from RingHom.ext hψ]
-  refine exists_intFr T' (i.comp io) (spMap i ≫ x) ?_ G t' (e₂ ▸ a₄) m2 θ hθ w2 σ' gr2 hcl hgen
+  refine exists_intFr (Xo := Xo) (c := c) T' (i.comp io) (spMap i ≫ x) ?_ G t' (e₂ ▸ a₄) m2 θ hθ w2 σ' gr2 hcl hgen
   rw [Category.assoc, hx, sOf, sOf, TorsionRat.sp_comp]
 
 end GlobalTheory.AnyLevelFrame

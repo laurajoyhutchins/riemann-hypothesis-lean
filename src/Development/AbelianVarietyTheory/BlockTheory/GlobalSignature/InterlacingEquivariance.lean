@@ -1,7 +1,46 @@
-import Mathlib
-import Formalism.LocalToGlobal.Columns.FiniteSumNonzeroLargeDepth
-import Formalism.LocalToGlobal.Columns.CoefColLemmas
-import Formalism.SharpRestriction.Divisibility.PrimeDegreeVariant
+module
+
+public import Formalism.LocalToGlobal.Columns.FiniteSumNonzeroLargeDepth
+public import Formalism.SharpRestriction.Divisibility.PrimeDegreeVariant
+public import Formalism.LocalToGlobal.Columns.CoefColLemmas
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MvPolynomial NumberField
 
@@ -48,25 +87,9 @@ def Integrality : Prop :=
   ∀ (K : Type) [Field K] [NumberField K] (ι : Type) [Fintype ι] (N n : ℕ) (hN : N = n + 1)
     (lam : ι → DomWeight N) (sg : ι → DomWeight n), Br.BrIntegral K hN lam sg
 
-def Homogeneity : Prop :=
-  ∀ (K : Type) [Field K] [CharZero K] (ι : Type) [Fintype ι] (N n : ℕ) (hN : N = n + 1)
-    (lam : ι → DomWeight N) (sg : ι → DomWeight n),
-    (∀ τ, Br.Interlace hN (lam τ) (sg τ)) → (∀ τ, Br.SameShift (lam τ) (sg τ)) →
-    ∀ t : ι → Kˣ,
-      Br.brStd hN lam sg ∘ₗ (rhoK lam fun τ => (Formalism.MainNotions.PrimeDegreeVariant.lastGL K N (t τ))⁻¹) = Br.brAt hN lam sg (fun τ => (t τ : K)) ∧
-      Br.brAt hN lam sg (fun τ => (t τ : K)) =
-        ((∏ τ, t τ ^ (-((∑ i, (lam τ).w i) - ∑ i, (sg τ).w i)) : Kˣ) : K) • Br.brStd hN lam sg
-
 def Members : Prop :=
   ∀ (X : Fields) (Word : Type) (R : Ranks) (W : Wts X Word R), W.Ok → ∀ (u : Word) (τ : X.Tau),
     Br.Interlace (N_m_succ R) (W.lamTrue u R.m τ) (W.sgTrue τ) ∧ Br.SameShift (W.lamTrue u R.m τ) (W.sgTrue τ)
-
-def Statement : Prop := OnePlace ∧ Equivariance ∧ Integrality ∧ Homogeneity ∧ Members
-
-def Transposed : Prop :=
-  ∀ (N n : ℕ) (hN : N = n + 1) (lam : DomWeight N) (sg : DomWeight n),
-    Br.Interlace hN lam sg → Br.SameShift lam sg →
-      ∃ io, Formalism.MainNotions.PrimeDegreeVariant.IsIota hN.symm lam sg io ∧ Formalism.MainNotions.PrimeDegreeVariant.IsTranspose lam sg io (brOne ℂ hN lam sg)
 
 def Tensor : Prop :=
   ∀ (K : Type) [Field K] [CharZero K] (ι : Type) [Fintype ι] (N n : ℕ) (hN : N = n + 1)
@@ -75,43 +98,8 @@ def Tensor : Prop :=
     ∀ (f : ι → MvPolynomial (Fin N × Fin N) K) (G : VV K lam), (∀ τ, f τ ∈ nablaSq K N (lam τ)) → (G : Pol K ι N) = ten f →
       ((Br.brStd hN lam sg G : VV K sg) : Pol K ι n) = ten fun τ => brOne K hN (lam τ) (sg τ) (f τ)
 
-def BaseChange : Prop :=
-  ∀ (K K' : Type) [Field K] [CharZero K] [Field K'] (φ : K →+* K') (N n : ℕ) (hN : N = n + 1)
-    (lam : DomWeight N) (sg : DomWeight n), Br.Interlace hN lam sg → Br.SameShift lam sg →
-    ∀ f ∈ nablaSq K N lam, brOne K' hN lam sg (map φ f) = map φ (brOne K hN lam sg f)
-
-def iotaNormSq {N n : ℕ} (hN : N = n + 1) (lam : DomWeight N) (sg : DomWeight n) : ℝ :=
-  ((Formalism.MainNotions.PrimeDegreeVariant.cBr hN.symm lam sg : ℤ) : ℝ) ^ 2 *
-    (normFock lam (Formalism.MainNotions.PrimeDegreeVariant.xi ℂ hN.symm lam sg) (Formalism.MainNotions.PrimeDegreeVariant.xi ℂ hN.symm lam sg)).re
-
-def ExactNorm : Prop :=
-  ∀ (N n : ℕ) (hN : N = n + 1) (lam : DomWeight N) (sg : DomWeight n),
-    Br.Interlace hN lam sg → Br.SameShift lam sg →
-      (∀ a : ℂˣ, IsGreatest
-        {r : ℝ | ∃ f ∈ delSq ℂ N lam,
-          (normFock lam (sqAct ℂ N lam (Formalism.MainNotions.PrimeDegreeVariant.lastGL ℂ N a) f) (sqAct ℂ N lam (Formalism.MainNotions.PrimeDegreeVariant.lastGL ℂ N a) f)).re = 1 ∧
-          r = (normFock sg (brOne ℂ hN lam sg f) (brOne ℂ hN lam sg f)).re}
-        ((‖(a : ℂ)‖ ^ 2) ^ (-Br.nBr lam sg) * iotaNormSq hN lam sg)) ∧
-      iotaNormSq hN lam sg ≤ Formalism.MainNotions.PrimeDegreeVariant.brBd hN.symm lam sg ^ 2 ∧
-      (Br.d0 hN lam sg = 0 → iotaNormSq hN lam sg = 1)
-
-def StatementSharp : Prop := Statement ∧ Transposed ∧ Tensor ∧ BaseChange ∧ ExactNorm
-
-theorem brAt_eq {K : Type} [Field K] {ι : Type} [Fintype ι] {N n : ℕ} (hN : N = n + 1)
-    (lam : ι → DomWeight N) (sg : ι → DomWeight n) (t : ι → Kˣ) :
-    Br.brAt hN lam sg (fun τ => (t τ : K)) =
-      ((∏ τ, t τ ^ (-((∑ i, (lam τ).w i) - ∑ i, (sg τ).w i)) : Kˣ) : K) • Br.brStd hN lam sg := by
-  simp [Br.brAt, Br.nBr]
-
 theorem members_sameShift {X : Fields} {Word : Type} {R : Ranks} (W : Wts X Word R) (hW : W.Ok) (u : Word) (τ : X.Tau) :
     Br.SameShift (W.lamTrue u R.m τ) (W.sgTrue τ) :=
   (lamTrue_sgTrue_detShift W hW u τ).symm
-
-example : ∃ (lam : DomWeight 3) (sg : DomWeight 2),
-    Br.Interlace (by rfl : 3 = 2 + 1) lam sg ∧ Br.SameShift lam sg ∧ Br.d0 (by rfl : 3 = 2 + 1) lam sg = 1 := by
-  refine ⟨⟨![2, 0, -1], by decide⟩, ⟨![1, -1], by decide⟩, ?_, ?_, ?_⟩
-  · unfold Br.Interlace; decide
-  · unfold Br.SameShift; decide
-  · decide
 
 end GlobalTheory.IndefiniteRowSideFullHecke.InterlacingEquivariance

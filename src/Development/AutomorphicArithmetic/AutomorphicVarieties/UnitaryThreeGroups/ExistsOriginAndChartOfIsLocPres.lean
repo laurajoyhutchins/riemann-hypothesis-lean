@@ -1,4 +1,56 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeGroups.MopBase
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeGroups.ConjStable
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeGroups.IsLocPres
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeGroups.MopBase
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AutomorphicArithmetic.AutomorphicVarieties.HeightAndVanishing.DirichletPrimeToLPartMulLPowerPart
+
+@[expose] public section
+
 open Matrix IsLocalRing UpperTheory.V.U3 UpperTheory.V.Alg UpperTheory.V.HV UpperTheory.V.U3.Mop
 
 private theorem lc_wcomp_mul (O : Type) [CommRing O] {σ X : Type} [AddCommGroup X] (wt : σ → X)
@@ -12,7 +64,7 @@ private theorem lc_wcomp_mul (O : Type) [CommRing O] {σ X : Type} [AddCommGroup
     have hp' := Finset.HasAntidiagonal.mem_antidiagonal.1 hp
     by_cases h2 : Finsupp.weight wt p.2 = w
     · rw [coeff_wcomp, if_pos]
-      rw [← h, ← hp', map_add, h2, add_sub_cancel_right]
+      rw [← h, ← hp', map_add (f := _), h2, add_sub_cancel_right]
     · rw [he _ h2, mul_zero, mul_zero]
   · symm
     refine Finset.sum_eq_zero fun p hp => ?_
@@ -21,7 +73,7 @@ private theorem lc_wcomp_mul (O : Type) [CommRing O] {σ X : Type} [AddCommGroup
     · rw [coeff_wcomp, if_neg, zero_mul]
       intro h1
       apply h
-      rw [← hp', map_add, h1, h2, sub_add_cancel]
+      rw [← hp', map_add (f := _), h1, h2, sub_add_cancel]
     · rw [he _ h2, mul_zero]
 
 private theorem lc_wcomp_self (O : Type) [CommRing O] {σ X : Type} [AddCommGroup X] (wt : σ → X)
@@ -39,6 +91,7 @@ private theorem lc_inv {E τ ι : Type} [CommRing E] [Fintype ι] [DecidableEq �
   have h3 : B' * A = 1 := by
     ext1 a c
     have e : (B' * A) a c = wcomp E w (u a - u c) ((B * A) a c) := by
+
       rw [Matrix.mul_apply, Matrix.mul_apply, map_sum]
       refine Finset.sum_congr rfl fun b _ => ?_
       rw [lc_wcomp_mul E w (hA b c)]
@@ -60,7 +113,7 @@ private theorem lc_JMJ {R : Type} [CommRing R] (M : Matrix (Fin 3) (Fin 3) R) (a
   fin_cases a <;> fin_cases b <;>
     simp [Matrix.mul_apply, Fin.sum_univ_three, Jmat, Fin.rev]
 
-private theorem lc_emb {E τ : Type} [CommRing E] (w : τ → ℤ) (x : GG 3 (MvPowerSeries τ E))
+private theorem lc_emb {E τ : Type} [CommRing E] (w : τ → ℤ) (x : GG (m := 3) (R := MvPowerSeries τ E))
     (hx : ∀ a b, x.mat a b ∈ wtPart E w (wt a b)) (a b : Fin 3 ⊕ Fin 3) :
     emb x a b ∈ wtPart E w (wt6 a - wt6 b) := by
   have hθ : ∀ a b, (theta x.left : Matrix (Fin 3) (Fin 3) (MvPowerSeries τ E)) a b ∈ wtPart E w (wt1 a - wt1 b) := by

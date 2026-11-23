@@ -1,5 +1,66 @@
-import ReciprocityTheory.AnalyticForms.PotentialTheory.StokesC
-import ReciprocityTheory.AnalyticForms.PotentialTheory.ContDiffAtOfIsPotential
+module
+
+public import ReciprocityTheory.AnalyticForms.PlurisubharmonicFunctions.PartsSt
+public import ReciprocityTheory.AnalyticForms.PotentialTheory.IsPotentialPullbackStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.AnalyticForms.PotentialTheory.ContDiffAtOfIsPotential
+public import ReciprocityTheory.AnalyticForms.PotentialTheory.IntegrableOnTargetOfTsupport
+public import ReciprocityTheory.AnalyticForms.PotentialTheory.PotentialContDiffAt
+public import ReciprocityTheory.AnalyticForms.PotentialTheory.StokesA
+public import ReciprocityTheory.AnalyticForms.PotentialTheory.StokesB
+public import ReciprocityTheory.AnalyticForms.PotentialTheory.StokesC
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Analysis.Calculus.ContDiff.Basic
+public import Mathlib.Analysis.Calculus.FDeriv.Mul
+public import Mathlib.MeasureTheory.Integral.Bochner.Set
+
+@[expose] public section
 
 namespace ReciprocityTheory.AnForm.M
 
@@ -83,8 +144,8 @@ variable [CompactSpace X] [T2Space X] (A : FinHolAtlas (e + 1) X) (Φ : Fin e �
   (hΦ : ∀ i, IsPotential A (Φ i)) (j : Fin A.n) (G : Set X) (hGo : IsOpen G)
   (hG : G ⊆ (A.chart j).source) (x0 : Fin e → X) (hGU : ∀ i, G ⊆ (Φ i).U (x0 i))
 
-include hΦ hGo hG hGU in
 
+include hΦ hGo hG hGU in
 theorem st_partsHyp_piece (w ψ : X → ℝ) (hw : A.Smooth w) (hψ : A.Smooth ψ)
     (hψG : tsupport ψ ⊆ G) :
     PartsHyp (fun i => (Φ i).φ (x0 i) ∘ (A.chart j).symm)
@@ -116,14 +177,14 @@ theorem st_partsHyp_piece (w ψ : X → ℝ) (hw : A.Smooth w) (hψ : A.Smooth �
     rw [(A.chart j).left_inv hxs]
     exact hψG hx
   refine ⟨hUo, ?_, ?_, htsK.trans hKU, ?_, fun i => ?_⟩
-  · exact (((hψ j).mono fun y hy => ⟨hy.1, Set.mem_univ _⟩).congr
+  · exact (((hψ j).mono fun y (hy : y ∈ (A.chart j).target ∩ (A.chart j).symm ⁻¹' G) => ⟨hy.1, Set.mem_univ _⟩).congr
       fun y hy => Set.indicator_of_mem hy.1 _).of_le h3
   · exact hK.of_isClosed_subset (isClosed_tsupport _) htsK
-  · exact ((hw j).mono fun y hy => ⟨hy.1, Set.mem_univ _⟩).of_le h3
-  · exact (((hΦ i).1 (x0 i) j).mono fun y hy => ⟨hy.1, hGU i hy.2⟩).of_le h3
+  · exact ((hw j).mono fun y (hy : y ∈ (A.chart j).target ∩ (A.chart j).symm ⁻¹' G) => ⟨hy.1, Set.mem_univ _⟩).of_le h3
+  · exact (((hΦ i).1 (x0 i) j).mono fun y (hy : y ∈ (A.chart j).target ∩ (A.chart j).symm ⁻¹' G) => ⟨hy.1, hGU i hy.2⟩).of_le h3
+
 
 include hΦ hGo hG hGU in
-
 theorem st_nonpos_piece (hP : PartsStatement) (v θ : X → ℝ) (hv : A.Smooth v)
     (hθ : A.Smooth θ) (hθG : tsupport θ ⊆ G) :
     mInt A (Fin.cons (LocPot.ofFun v) Φ) (fun x => θ x * v x) =
@@ -262,7 +323,7 @@ private theorem mInt_finset_sum [CompactSpace X] [T2Space X] {d : ℕ} (A : FinH
   | insert a s ha ih =>
     have h := mIntLinear A Ψ hΨ 1 (f a) (fun x => ∑ m ∈ s, f m x)
       (mIntegrableCont A Ψ hΨ _ (hf a))
-      (mIntegrableCont A Ψ hΨ _ (continuous_finset_sum _ fun m _ => hf m))
+      (mIntegrableCont A Ψ hΨ _ (continuous_finsetSum _ fun m _ => hf m))
     simp only [one_mul] at h
     simp only [Finset.sum_insert ha]
     rw [h, ih]
@@ -317,7 +378,7 @@ theorem st_byPartsNonpos_of (hP : PartsStatement) (hN : GradDensNonnegStatement)
     refine setIntegral_nonneg hUo.measurableSet fun y hy => mul_nonneg ?_ ?_
     · exact Set.indicator_nonneg (fun z _ => hθ0 m _) y
     · exact hN e _ _ _ hUo
-        (fun i => (((hΦ i).1 (x0 m i) (j m)).mono fun z hz => ⟨hz.1, hGU m i hz.2⟩).of_le h2)
+        (fun i => (((hΦ i).1 (x0 m i) (j m)).mono fun z (hz : z ∈ (A.chart (j m)).target ∩ (A.chart (j m)).symm ⁻¹' G m) => ⟨hz.1, hGU m i hz.2⟩).of_le h2)
         (fun i z hz ξ => hpsh i (x0 m i) (j m) z ⟨hz.1, hGU m i hz.2⟩ ξ) y hy
   rw [hsplit, Finset.sum_congr rfl fun m _ => hpiece m, Finset.sum_add_distrib, hsum2, add_zero,
     Finset.sum_neg_distrib]

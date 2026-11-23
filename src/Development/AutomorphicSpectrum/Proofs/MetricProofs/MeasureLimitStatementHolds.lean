@@ -1,18 +1,74 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.StatementsMuMeasureLimit
-import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.PMuMeasureLimit
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.StatementsMuMeasureLimit
+public import ReciprocityTheory.AnalyticForms.LeviForms.IsRegFamilyInhabitStatement
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.ExistsMeasurableDominatingFunctionStatement
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.LocalHolomorphicSectionOfPotentialStatement
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.LocalSectionOfPotentialOnModelStatement
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.MixedIntegralModelFormulaStatement
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.MixedIntegralTendstoOffDivisorStatement
+import Development.AutomorphicSpectrum.Proofs.MetricProofs.RegularChartDataPropertiesStatement
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.RegularizedWeightPshAndBoundsStatement
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.RegularizedWeightTendstoC2Statement
+public import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.PMuMeasureLimit
+import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.PMuRegSmooth
+import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.PTopNPoly
 import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.PVertFactorPos
 import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.PVertFactorSmooth
-import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.PMuRegSmooth
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Complex.Analytic
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.AnalyticForms.PlurisubharmonicFunctions.MdiscSt
 import ReciprocityTheory.AnalyticForms.PotentialTheory.MaMeasureA
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.MixedIntegralTendstoOffDivisorStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.ExistsMeasurableDominatingFunctionStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.LocalSectionOfPotentialOnModelStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.RegularChartDataPropertiesStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.LocalHolomorphicSectionOfPotentialStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.MixedIntegralModelFormulaStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.RegularizedWeightPshAndBoundsStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.RegularizedWeightTendstoC2Statement
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterBridgeB
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -54,7 +110,7 @@ theorem holo_eval {σ : Type} {A : FinHolAtlas e X} {V : Set X} {s : X → σ �
   | add p q hp hq =>
     intro j y hy
     show AnalyticAt ℂ (fun x => eval (s ((A.chart j).symm x)) (p + q)) y
-    simp only [map_add]
+    simp only [map_add (f := _)]
     exact (hp j y hy).add (hq j y hy)
   | mul_X p i hp =>
     intro j y hy
@@ -493,7 +549,7 @@ theorem muMeasureLimit : GroundTheory.Heights₂.Heights.LowerBoundFree.MuMeasur
   · have h0 : ∀ (φ : Fin D.n → ((Σ k, ι k) → ℂ) → ℝ) (g : ((Σ k, ι k) → ℂ) → ℝ),
         ptsIntegral (e := D.n) (mCoordIdeal D.y) φ g = 0 := fun φ g => by
       unfold ptsIntegral
-      rw [dif_neg hΨ]
+      rw [dite_eq_right hΨ]
     have hd : degMu X.H = 0 := h0 _ _
     have hg : ∀ t, geomDeg (mCoordIdeal D.y) (muReg X.H X.S B t) D.n = 0 := fun t => h0 _ _
     refine ⟨?_, ?_⟩
@@ -505,7 +561,7 @@ theorem muMeasureLimit : GroundTheory.Heights₂.Heights.LowerBoundFree.MuMeasur
         ptsIntegral (e := D.n) (mCoordIdeal D.y) φ g =
           ptsIntegralAt (mCoordIdeal D.y) hΨ.choose φ g := fun φ g => by
       unfold ptsIntegral
-      rw [dif_pos hΨ]
+      rw [dite_eq_left hΨ]
     obtain ⟨G, Cg, hm, hb, hG⟩ := GlobalTheory.T.cuspWeight_factors_through_measurable_log_bounded II Ψ K ι Ω E D O Lt X
     have hCg : ∀ x ∈ X.S.R.Yo, |G x / 2| ≤ |Cg| + |Cg| * Real.log (X.S.R.r x) := by
       intro x hx

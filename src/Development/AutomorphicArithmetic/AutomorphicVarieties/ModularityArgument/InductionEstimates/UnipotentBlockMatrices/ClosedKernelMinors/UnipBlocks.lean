@@ -1,5 +1,51 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.UnipotentBlockMatrices.UnipotentBlockPairs
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.UnipotentBlockMatrices.ClosedKernelMinors.BlkInvVal
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.UnipotentBlockMatrices.UnipotentBlockPairs
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.UnipotentBlockMatrices.ClosedKernelMinors.BlkInvVal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open MeasureTheory NumberField Set Filter Topology
 open GroundTheory.Automorphic GroundTheory.Automorphic.Reduction GroundTheory.Automorphic.RightCosetSpace
@@ -60,7 +106,7 @@ private theorem dec {a b : ℕ} {R : Type} [CommRing R] (g : GL (Fin (a + b)) R)
 private theorem of_low {K : Type} [Field K] [NumberField K] (s : G1 K (2 + 2))
     (h : ((s : AdelicGLn.AdelicGL K (2 + 2)).val.submatrix finSumFinEquiv finSumFinEquiv).toBlocks₂₁ = 0)
     (h' : ((s : AdelicGLn.AdelicGL K (2 + 2))⁻¹.val.submatrix finSumFinEquiv finSumFinEquiv).toBlocks₂₁ = 0) :
-    ∃ X m₁ m₂ t, s = nn X * lv m₁ m₂ t := by
+    ∃ X m₁ m₂ t, s = unipOne (K := K) (n := 2 + 2) 2 X * lv m₁ m₂ t := by
   obtain ⟨hlv, -, -, -, hdet, -⟩ := blkLaws (K := K)
   obtain ⟨a, d, -, -, X, hX⟩ := dec (s : AdelicGLn.AdelicGL K (2 + 2)) h h'
   refine ⟨X, retractOne a, retractOne d, Real.log (detModule K 2 a).1, ?_⟩
@@ -80,7 +126,8 @@ private theorem of_low {K : Type} [Field K] [NumberField K] (s : G1 K (2 + 2))
     rw [Real.exp_neg, Real.exp_log (detModule K 2 a).2]
     rfl
   refine Subtype.ext ?_
-  rw [Subgroup.coe_mul, hlv, z1, z2, coe_retractOne, coe_retractOne, inv_mul_cancel_right, inv_mul_cancel_right]
+  rw [Subgroup.coe_mul, coe_unipOne, hlv, z1, z2, coe_retractOne, coe_retractOne,
+    inv_mul_cancel_right, inv_mul_cancel_right]
   exact hX
 
 private theorem low_borel {K : Type} [Field K] [NumberField K] {b : AdelicGLn.AdelicGL K (2 + 2)} (hb : b ∈ adelicBorel) :
@@ -92,7 +139,9 @@ private theorem low_borel {K : Type} [Field K] [NumberField K] {b : AdelicGLn.Ad
   omega
 
 theorem UpperTheory.V.Z.InvariantSubmoduleMonicPolynomial.iwa :
-    ∀ {K : Type} [Field K] [NumberField K] (g : G1 K (2 + 2)), ∃ (X : UPos (2 + 2) 2 → 𝔸[K]) (m₁ m₂ : G1 K 2) (t : ℝ), ∃ k ∈ KG K (2 + 2), g = nn X * lv m₁ m₂ t * k := by
+    ∀ {K : Type} [Field K] [NumberField K] (g : G1 K (2 + 2)),
+      ∃ (X : UPos (2 + 2) 2 → 𝔸[K]) (m₁ m₂ : G1 K 2) (t : ℝ),
+        ∃ k ∈ KG K (2 + 2), g = unipOne (K := K) (n := 2 + 2) 2 X * lv m₁ m₂ t * k := by
   intro K _ _ g
   obtain ⟨b, hb, k, hk, e⟩ := exists_adelicBorel_mul_maxCompact (g : AdelicGLn.AdelicGL K (2 + 2))
   let k' : G1 K (2 + 2) := ⟨k, maxCompact_le_normOneGL hk⟩

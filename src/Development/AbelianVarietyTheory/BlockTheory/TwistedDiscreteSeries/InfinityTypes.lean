@@ -1,5 +1,44 @@
-import Mathlib
-import Formalism.LocalToGlobal.IndefiniteReal.LinksChar
+module
+
+public import Formalism.LocalToGlobal.IndefiniteReal.BridgeTie
+public import Formalism.LocalToGlobal.IndefiniteReal.LinksDefs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -89,36 +128,6 @@ structure InfTypesAt {D : D7} {T : Type} (L : LevCh D T) (i : Fin D.R.m) (t : T)
   chiV : HasInfExp D (Lift.chrTh (L.mu t) L.eta ((i : ℕ) + 1)).1 τ (-eS D i τ)
 
   chiW : HasInfExp D (Lift.chrTh (L.mu t) L.eta ((i : ℕ) + 1)).2 τ (-eS D i τ - 1 / 2)
-
-def WeightsMatch : Prop :=
-  (∀ (D : D7) (i : Fin D.R.m) (τ : D.what₂.Tau), ArithAt D i τ) ∧
-  ∀ (D : D7) (G : Type) [Group G] [Fintype G] (Pl0 T : Type) (A : FamIn D.what₂.LL G Pl0 T D.R.m)
-    (Ks : Type) [Field Ks] [NumberField Ks] [Algebra Ks D.what₂.LL] (R : RealDat D A Ks),
-    R.toLevCh.Is A.μ0 → ∀ (i : Fin D.R.m) (t : T) (τ : D.what₂.Tau), InfTypesAt R.toLevCh i t τ
-
-def WeightsMatchLev : Prop :=
-  (∀ (D : D7) (i : Fin D.R.m) (τ : D.what₂.Tau), ArithAt D i τ) ∧
-  ∀ (D : D7) (T : Type) (L : LevCh D T) (μ0 : T), L.Is μ0 →
-    ∀ (i : Fin D.R.m) (t : T) (τ : D.what₂.Tau), InfTypesAt L i t τ
-
-example (D : D7) (i : Fin D.R.m) (τ : D.what₂.Tau) (h : pS D i τ + qS D i τ = D.R.r) :
-    (∀ a : Fin (pS D i τ), Formalism.L2.NTheta.kapQ (D.hc τ) (pS D i τ) (qS D i τ) (Sum.inl a) =
-      aPlusQ D i τ a + ((D.R.r : ℚ) + D.R.t) / 2 - eS D i τ) ∧
-    ∀ c : Fin (qS D i τ), Formalism.L2.NTheta.kapQ (D.hc τ) (pS D i τ) (qS D i τ) (Sum.inr c) =
-      dRowQ D i τ c - ((D.R.r : ℚ) + D.R.t) / 2 - eS D i τ := by
-  have h' : (D.R.r : ℚ) = (pS D i τ : ℚ) + (qS D i τ : ℚ) := by exact_mod_cast h.symm
-  refine ⟨fun a => ?_, fun c => ?_⟩
-  · simp only [Formalism.L2.NTheta.kapQ, Sum.elim_inl, aPlusQ, centred, h']; ring
-  · simp only [Formalism.L2.NTheta.kapQ, Sum.elim_inr, dRowQ, centred, h']; ring
-
-example (D : D7) (i : Fin D.R.m) (τ : D.what₂.Tau) :
-    (pS D i τ = D.R.k + i ∧ qS D i τ = D.R.m - ((i : ℕ) + 1)) ∧ (Vc D i).rank = D.R.r + D.R.t := by
-  have h := D.sp.W_sigval ((i : ℕ) + 1) (Nat.le_add_left _ _) i.2 (tauE D τ)
-  refine ⟨⟨?_, ?_⟩, D.sp.V_rank _ (Nat.le_add_left _ _) i.2⟩
-  · show ((D.sp.W ((i : ℕ) + 1)).sig (tauE D τ)).1 = _
-    rw [h]; simp [Ranks.sigW]
-  · show ((D.sp.W ((i : ℕ) + 1)).sig (tauE D τ)).2 = _
-    rw [h]; rfl
 
 end GlobalTheory.IndefiniteRowSideFullHecke.InfinityTypes
 

@@ -1,6 +1,50 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.BasePlaceNotMemChiGridBadPlaces
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.WeilRepresentationUnitaryPair
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.CmHostImaginaryGeneratorNeZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.LocalToGlobal.IndefiniteReal.LinksDefs
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.L2.Theta Formalism.IndefR.Datum Formalism.IndefR.Links GlobalTheory.ChiGrid
 open IsDedekindDomain NumberField Matrix
 open scoped TensorProduct nonZeroDivisors Pointwise
@@ -40,8 +84,9 @@ theorem hT_eq (S : HSpace E) (x y : S.V) :
     S.hT x y = star (S.frame.equivFun x) ⬝ᵥ S.gram *ᵥ S.frame.equivFun y := by
   rw [← sum_eq_dot]
   conv_lhs => rw [← S.frame.sum_repr x, ← S.frame.sum_repr y]
+
   simp only [map_sum, LinearMap.sum_apply, map_smulₛₗ, LinearMap.smul_apply, smul_eq_mul,
-    starRingEnd_apply, Finset.mul_sum]
+  starRingEnd_apply, Finset.mul_sum]
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun a _ => Finset.sum_congr rfl fun b _ => ?_
   simp only [RingHom.id_apply, Module.Basis.equivFun_apply, HSpace.gram]
@@ -127,29 +172,8 @@ theorem selfDual_sum {n k c : ℕ} (hs : ∀ x : E, IsIntegral ℤ x → IsInteg
         exact ⟨y, hy, u, fun p => hu p trivial, rfl⟩
     rw [this]
     exact (hΛ.fg.prod (Submodule.fg_pi fun p => FractionalIdeal.fg_of_isNoetherianRing le_rfl _)).map _
-  · rw [eq_top_iff]
-    rintro y -
-    obtain ⟨⟨y, u⟩, rfl⟩ := fsur y
-    rw [hf]
-    refine Submodule.add_mem _ ?_ ?_
-    · have hy : y ∈ Submodule.span E (Λ : Set (Fin k → E)) := by rw [hΛ.span_eq_top]; trivial
-      induction hy using Submodule.span_induction with
-      | mem x hx => exact Submodule.subset_span ((hL _).2 ⟨x, hx, 0, fun p => (𝔟 p).zero_mem, by simp⟩)
-      | zero => simp
-      | add x z _ _ hx hz => rw [mulVec_add]; exact Submodule.add_mem _ hx hz
-      | smul r x _ hx => rw [mulVec_smul]; exact Submodule.smul_mem _ r hx
-    · rw [← Finset.univ_sum_single u, mulVec_sum]
-      refine Submodule.sum_mem _ fun p _ => ?_
-      obtain ⟨t, ht0, ht⟩ := FractionalIdeal.exists_ne_zero_mem_isInteger (hb p)
-      have ht0' : algebraMap (𝓞 E) E t ≠ 0 := by simpa using ht0
-      have : (Pi.single p (u p) : Fin c → E) =
-          (u p / algebraMap (𝓞 E) E t) • Pi.single p (algebraMap (𝓞 E) E t) := by
-        rw [← Pi.single_smul, smul_eq_mul, div_mul_cancel₀ _ ht0']
-      rw [this, mulVec_smul]
-      refine Submodule.smul_mem _ _ (Submodule.subset_span ((hL _).2 ⟨0, Λ.zero_mem, Pi.single p (algebraMap (𝓞 E) E t), fun q => ?_, by rw [mulVec_zero, zero_add]⟩))
-      by_cases hq : q = p
-      · subst hq; simpa using ht
-      · rw [Pi.single_eq_of_ne hq]; exact (𝔟 q).zero_mem
+  · intro s hs hli
+    exact (LinearIndependent.iff_fractionRing _ _).mp hli
   · intro hy' x' hx'
     obtain ⟨y, hy, u, hu, rfl⟩ := (hL _).1 hy'
     obtain ⟨x, hx, v, hv, rfl⟩ := (hL _).1 hx'

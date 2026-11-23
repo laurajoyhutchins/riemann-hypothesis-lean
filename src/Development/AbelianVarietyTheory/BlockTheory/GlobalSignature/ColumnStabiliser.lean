@@ -1,6 +1,45 @@
-import Mathlib
-import Formalism.LocalRingCardinality.DataLevelD
-import Formalism.SharpRestriction.GlobalSchurBounds.StandardLattice
+module
+
+public import Formalism.SharpRestriction.GlobalSchurBounds.StandardLattice
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -40,27 +79,6 @@ def ColStabTrivialAt (D : D7) (Lv : LevelData D) (u : D.what₂.Word) : Prop :=
 
 def ColStabTrivial : Prop :=
   ∀ (D : D7) (Lv : LevelData D) (u : D.what₂.Word), ColStabTrivialAt D Lv u
-
-example (D : D7) : GBig D ↔ ∃ i : Fin 2, 2 * D.R.f * D.R.k + 1 < D.host.g i := by
-  unfold GBig
-  exact exists_congr fun i => by omega
-
-example (h : ColStabTrivial) (D : D7) (Lv : LevelData D) (u : D.what₂.Word) (hg : GBig D)
-    (hs : ∀ i : Fin 2, SplitsF D (D.host.g i)) (c : (D.mem u).C.cls 0)
-    (γ : (D.mem u).C.stab 0 c) : γ = 1 := by
-  let _ := D.host.cmStar
-  have hb := h D Lv u hg hs ((Lv u).y c)
-  have hr := ((Lv u).stabI_range c ((Lv u).stabI c γ).1 ((Lv u).stabI c γ).2).1 ⟨γ, rfl⟩
-  have hm : ((Lv u).stabI c γ).1 ∈ colStab D Lv u ((Lv u).y c) := by
-    rw [mem_colStab]
-    refine ⟨((Lv u).stabI c γ).2, ?_⟩
-    obtain ⟨x, hx, hx'⟩ := hr
-    rw [← hx']
-    simpa [mul_assoc] using hx
-  rw [hb, Subgroup.mem_bot] at hm
-  apply (Lv u).stabI_inj c
-  rw [map_one]
-  exact Subtype.ext hm
 
 theorem map_colStab (D : D7) (Lv : LevelData D) (u : D.what₂.Word) :
     letI := D.host.cmStar

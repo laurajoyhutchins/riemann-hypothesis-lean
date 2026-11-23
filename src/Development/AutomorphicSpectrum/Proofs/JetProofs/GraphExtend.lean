@@ -1,8 +1,59 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.JetCones.SymCapRev
-import Formalism.RealPlaceAnalysis.ThirdArithmeticHolds
-import Formalism.RealPlaceAnalysis.FinalF
-import Development.AutomorphicSpectrum.Proofs.JetProofs.EvFirst
+module
+
+public import Development.AutomorphicSpectrum.Definitions.JetCones.SymCapRev
+public import Formalism.RealPlaceAnalysis.StatementA
+public import Mathlib.LinearAlgebra.FiniteDimensional.Defs
+public import Development.AutomorphicSpectrum.Proofs.JetProofs.EvFirst
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Formalism.PeriodIntegrals.UpqRep
+public import Mathlib.Analysis.InnerProductSpace.Orthogonal
+public import Mathlib.Analysis.InnerProductSpace.Projection.Basic
+
+@[expose] public section
 
 open GlobalTheory.CompanionTheory.AlgRepEndIrreducible PI.UpqRep Matrix
 open scoped InnerProductSpace
@@ -32,7 +83,7 @@ theorem graph_extend {n : ℕ} {ε : Fin n → Bool} {V V' : Type} [NormedAddCom
     ∃ T : V →ₗ[ℂ] V', (∀ g ∈ G, T g.1 = g.2) ∧ KMap ε D D' T := by
   let A : G →ₗ[ℂ] V := (LinearMap.fst ℂ V V').comp G.subtype
   have hA : Function.Injective A := by
-    rw [injective_iff_map_eq_zero]
+    set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
     intro g hg
     have h1 : g.1.1 = 0 := hg
     exact Subtype.ext (Prod.ext h1 (hG _ g.2 h1))
@@ -43,7 +94,7 @@ theorem graph_extend {n : ℕ} {ε : Fin n → Bool} {V V' : Type} [NormedAddCom
   have key : ∀ g ∈ G, ∀ z ∈ Uᗮ, T (g.1 + z) = g.2 := by
     intro g hg z hz
     have h1 : U.orthogonalProjectionOnto (g.1 + z) = e ⟨g, hg⟩ := by
-      rw [map_add, Submodule.orthogonalProjectionOnto_eq_zero_iff.2 hz, add_zero]
+      rw [map_add (f := _), Submodule.orthogonalProjectionOnto_eq_zero_iff.2 hz, add_zero]
       exact Submodule.orthogonalProjectionOnto_mem_subspace_eq_self (e ⟨g, hg⟩)
     show ((e.symm (U.orthogonalProjectionOnto (g.1 + z)) : G) : V × V').2 = g.2
     rw [h1, e.symm_apply_apply]
@@ -59,7 +110,7 @@ theorem graph_extend {n : ℕ} {ε : Fin n → Bool} {V V' : Type} [NormedAddCom
   have h1 := key _ (hst a b hab _ g.2) _ hz'
   have h2 := key _ g.2 _ hz
   have h3 : A g = g.1.1 := rfl
-  rw [h3, h2, map_add]
+  rw [h3, h2, map_add (f := _)]
   exact h1
 
 theorem hwmap : ∀ (n : ℕ) (ε : Fin n → Bool) (V V' : Type) [NormedAddCommGroup V] [InnerProductSpace ℂ V] [FiniteDimensional ℂ V] [NormedAddCommGroup V'] [InnerProductSpace ℂ V'] (D : Fin n → Fin n → Module.End ℂ V) (D' : Fin n → Fin n → Module.End ℂ V') (μ : Fin n → ℝ) (v : V) (v' : V'), KRel ε D → KRel ε D' → KAdj ε D → KAdj ε D' → Formalism.REAL.KHighest ε D μ v → Formalism.REAL.KHighest ε D' μ v' → v ≠ 0 → ∃ T : V →ₗ[ℂ] V', T v = v' ∧ KMap ε D D' T := by

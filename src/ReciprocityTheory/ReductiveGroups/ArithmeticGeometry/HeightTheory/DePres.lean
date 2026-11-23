@@ -1,5 +1,57 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.HDiscBDefs
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.SupportFreeOfBlockSubstInvariant
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.HDiscBDefs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.MvPolynomial.IrreducibleQuadratic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.SupportFreeOfBlockSubstInvariant
+public import Mathlib.Algebra.MvPolynomial.Funext
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.ScaleMultiHomogeneous
+
+@[expose] public section
 
 namespace ReciprocityTheory.ChartRestriction.G.T0
 
@@ -31,7 +83,7 @@ private theorem eq_of_aeval_block_zero_eq {D N : ℕ} (P Q : KTp K D N)
     induction R using MvPolynomial.induction_on
     · simp
     · rename_i p q hp hq
-      simp only [map_add, hp, hq]
+      simp only [map_add (f := _), hp, hq]
     · rename_i p v hp
       simp only [map_mul, MvPolynomial.aeval_X]
       rw [hp]
@@ -133,8 +185,9 @@ private theorem sH_comp_eq_of_X_eq (hd : d.AxH 𝒜) (h : d.S1)
     e M.det = (e : KTf K d.D d.N →+* KTf K d.D d.N) M.det from fun _ => rfl, RingHom.map_det]
   congr 1
   ext k l
+
   simp only [RingHom.mapMatrix_apply, Matrix.map_apply, Matrix.of_apply, map_sum,
-    RingEquiv.coe_toRingHom]
+  RingEquiv.coe_toRingHom]
   refine Finset.sum_congr rfl fun c _ => ?_
   obtain ⟨τ, hτ⟩ : ∃ τ : OmS (Ω c) d.D d.N ≃+* OmS (Ω c) d.D d.N,
       τ = IsFractionRing.ringEquivOfRingEquiv (β c).toRingEquiv := ⟨_, rfl⟩
@@ -164,7 +217,7 @@ private theorem sH_comp_eq_of_X_eq (hd : d.AxH 𝒜) (h : d.S1)
     · rename_i a
       rw [← MvPolynomial.algebraMap_eq, AlgEquiv.commutes, AlgHom.commutes, hK]
     · rename_i p q hp hq
-      simp only [map_add, hp, hq]
+      simp only [map_add (f := _), hp, hq]
     · rename_i p v hp
       simp only [map_mul, hp, hXc v]
   have hL : ∀ q : KTp K d.D d.N,
@@ -221,7 +274,7 @@ theorem de_pres (hd : d.AxH 𝒜) (h : d.S1) : ∃ a b : KTp K d.D d.N, d.IsPres
       rw [show d.sH c (MvPolynomial.C a) = algebraMap K (OmS (Ω c) d.D d.N) a from
         MvPolynomial.aeval_C _ _, hKC, MvPolynomial.aeval_C, MvPolynomial.algebraMap_apply]
     · rename_i p q hp hq
-      simp only [map_add, hp, hq]
+      simp only [map_add (f := _), hp, hq]
     · rename_i p v hp
       rw [map_mul (d.sH c), hp]
       simp only [map_mul, MvPolynomial.aeval_X]

@@ -1,4 +1,45 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.RigidArc
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.TwoWeightEqOneAddRoot
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -37,27 +78,5 @@ def AbLocusOneSt : Prop :=
 
 def ProjProperSt : Prop :=
   ∀ (R : Type) [CommRing R] (X : Scheme.{0}) (f : X ⟶ Sp R), IsProjOver f → IsProper f
-
-def OneArcSt : Prop :=
-  ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (H : Host E) (D : Datum H) (l : Level H) (Xo : Moduli D l)
-    (c : Coeff l) (k : Type) [Field k] (bF : c.F →+* k) (a : ArcIn D l (RingHom.id c.F) k bF)
-    (O₀ O O' : Type) [CommRing O₀] [CommRing O] [CommRing O'] (β₀ : O₀ →+* c.F) (β : O →+* c.F) (β' : O' →+* c.F)
-    (b : O₀ →+* O) (b' : O₀ →+* O') (Yg : Model Xo c β₀) (Y : Model Xo c β) (Y' : Model Xo c β'),
-    β.comp b = β₀ → β'.comp b' = β₀ → Mono (spMap β') → Dominates Yg Y b → Dominates Yg Y' b' →
-    ∀ (χ : Sp (PowerSeries k) ⟶ Y.X)
-      (W : ArcWit Y (a.restrict β) (Ideal.span {PowerSeries.X}) (PowerSeries.C (R := k)) PowerSeries.X χ)
-      (y : Sp (FractionRing (PowerSeries k)) ⟶ Xo.XF c),
-      χ ≫ Y.s = spMap (PowerSeries.C (R := k)) ≫ spMap (bF.comp β) → y ≫ Y.j = Out.jK (PowerSeries k) ≫ χ →
-      y ≫ pullback.snd _ _ = Out.jK (PowerSeries k) ≫ spMap (PowerSeries.C (R := k)) ≫ spMap bF →
-      ∃ (χ' : Sp (PowerSeries k) ⟶ Y'.X)
-        (W' : ArcWit Y' (a.restrict β') (Ideal.span {PowerSeries.X}) (PowerSeries.C (R := k)) PowerSeries.X χ'),
-        χ' ≫ Y'.s = spMap (PowerSeries.C (R := k)) ≫ spMap (bF.comp β') ∧ y ≫ Y'.j = Out.jK (PowerSeries k) ≫ χ' ∧
-        (∀ x, χ' x ∈ abLocus Y'.t.G ↔ χ x ∈ abLocus Y.t.G) ∧ W'.t = W.t ∧ HEq W'.P W.P ∧ HEq W'.φ W.φ ∧
-        HEq W'.w W.w ∧ HEq W'.e W.e ∧
-        ∀ (T : Scheme.{0}) (g : T ⟶ W.t.G.left) (g' : T ⟶ W'.t.G.left) (g₁ : T ⟶ Y.oF.t.G.left)
-          (g₂ : T ⟶ Y'.oF.t.G.left) (τ : T ⟶ Sp (FractionRing (PowerSeries k))), HEq g' g →
-          g ≫ W.t.G.hom = τ ≫ Out.jK (PowerSeries k) → g₁ ≫ Y.oF.t.G.hom = τ ≫ y → g ≫ W.m.φ = g₁ ≫ Y.m.φ →
-          g₁ ≫ Y.m0.toSABMap.φ = g₂ ≫ Y'.m0.toSABMap.φ → g₁ ≫ Y.oF.t.G.hom = g₂ ≫ Y'.oF.t.G.hom →
-          g' ≫ W'.m.φ = g₂ ≫ Y'.m.φ
 
 end ReciprocityTheory.ChartRestriction.G.Geo.Tor

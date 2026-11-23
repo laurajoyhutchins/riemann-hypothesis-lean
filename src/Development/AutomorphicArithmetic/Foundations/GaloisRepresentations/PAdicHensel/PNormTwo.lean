@@ -1,5 +1,46 @@
-import Mathlib
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.PAdicHensel.PadicUnitNorm
+module
+
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.PAdicHensel.PadicUnitNorm
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.DefiniteUnitaryClassSetFinite
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Matrix GlobalTheory.UPel.HT GlobalTheory.LKTrip GlobalTheory.LKMid GlobalTheory.LKDef GlobalTheory.CuspRep GlobalTheory.UnitaryBC UpperTheory.Gal.W2.Seed UpperTheory.Gal.G1
 open scoped TensorProduct
 
@@ -13,7 +54,7 @@ theorem UpperTheory.Gal.G1.pNormTwo :
   have hcfE : algebraMap F E cf = (A.c : E) := rfl
   have hcint : IsIntegral ℤ cf := by
     have h : IsIntegral ℤ (algebraMap F E cf) := by rw [hcfE]; exact A.c.2
-    exact (isIntegral_algebraMap_iff (algebraMap F E).injective).1 h
+    exact (isIntegral_algebraMap_iff ).1 h
   let c0 : 𝓞 F := ⟨cf, hcint⟩
   have hc0 : ((c0 : 𝓞 F) : F) = cf := rfl
   have hc0ne : c0 ≠ 0 := by
@@ -39,7 +80,7 @@ theorem UpperTheory.Gal.G1.pNormTwo :
       have := congrArg (fun t : 𝓞 E => (t : E)) A.tr_eq
       simpa using this
     show algebraMap E _ _ + algebraMap E _ _ = _
-    rw [← map_add, h, map_intCast]
+    rw [← map_add (f := _), h, map_intCast]
   have hprod : ω' * ωb = (A.nm : FiniteAdeleRing (𝓞 E) E) := by
     have h : (A.ω : E) * ((A.bar A.ω : 𝓞 E) : E) = (A.nm : E) := by
       have := congrArg (fun t : 𝓞 E => (t : E)) A.nm_eq
@@ -48,15 +89,15 @@ theorem UpperTheory.Gal.G1.pNormTwo :
     rw [← map_mul, h, map_intCast]
   have hnorm : ∀ s t, (ι s + ι t * ω') * cF E (ι s + ι t * ω') = ι (qf A.tr A.nm s t) := by
     intro s t
-    rw [map_add, map_mul, hcι, hcι, hcω]
-    simp only [qf, map_add, map_mul, map_pow, map_intCast]
+    rw [map_add (f := _), map_mul, hcι, hcι, hcω]
+    simp only [qf, map_add (f := _), map_mul, map_pow, map_intCast]
     linear_combination (ι s * ι t) * hsum + (ι t) ^ 2 * hprod
   have hcalg : algebraMap E (FiniteAdeleRing (𝓞 E) E) (A.c : E) =
       ι (algebraMap F (FiniteAdeleRing (𝓞 F) F) ((c0 : 𝓞 F) : F)) := by
     rw [GlobalTheory.AdeleBaseChange.adMap_algebraMap]
     rfl
   refine ⟨ι (a 0) + ι (a 1) * ω', ι (a 2) + ι (a 3) * ω', ?_, ?_⟩
-  · rw [hnorm, hnorm, hcalg, ← map_add, ← map_mul, ha1, map_one]
+  · rw [hnorm, hnorm, hcalg, ← map_add (f := _), ← map_mul, ha1, map_one]
   · intro w q hq hG hqw
     let v : HeightOneSpectrum (𝓞 F) := w.under (𝓞 F)
     have hqv : (q : 𝓞 F) ∈ v.asIdeal := by
@@ -84,9 +125,9 @@ theorem UpperTheory.Gal.G1.pNormTwo :
     have hωbi : pLoc E w ωb ∈ w.adicCompletionIntegers E :=
       HeightOneSpectrum.coe_mem_adicCompletionIntegers w (A.bar A.ω)
     have hform : ∀ i j, pLoc E w (ι (a i) + ι (a j) * ω') ∈ w.adicCompletionIntegers E := fun i j => by
-      rw [map_add, map_mul]
+      rw [map_add (f := _), map_mul]
       exact add_mem (hιi i) (mul_mem (hιi j) hωi)
     have hformc : ∀ i j, pLoc E w (cF E (ι (a i) + ι (a j) * ω')) ∈ w.adicCompletionIntegers E := fun i j => by
-      rw [map_add, map_mul, hcι, hcι, hcω, map_add, map_mul]
+      rw [map_add (f := _), map_mul, hcι, hcι, hcω, map_add (f := _), map_mul]
       exact add_mem (hιi i) (mul_mem (hιi j) hωbi)
     exact ⟨hform 0 1, hform 2 3, hformc 0 1, hformc 2 3⟩

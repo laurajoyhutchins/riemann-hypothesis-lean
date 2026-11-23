@@ -1,5 +1,45 @@
-import Mathlib
-import Formalism.LocalToGlobal.Columns.FiniteSumNonzeroLargeDepth
+module
+
+public import Formalism.LocalToGlobal.Columns.FiniteSumNonzeroLargeDepth
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open scoped ComplexOrder
 
@@ -52,14 +92,6 @@ def BrNorm : Prop :=
   ∀ (g t : ι → K) (T : ℝ), 0 < T → (∀ τ, ((‖s (t τ)‖ ^ 2 : ℝ) : ℂ) * s (g τ) = (T : ℂ)) →
     NormConcl s hN lam sg (fun τ => sumGram N (G' τ) (g τ)) G' t T
 
-def BrNormUnitFrame : Prop :=
-  ∀ (K : Type) [Field K] [StarRing K] (s : K →+* ℂ), (∀ x, s (star x) = star (s x)) →
-  ∀ (ι : Type) [Fintype ι] (N n : ℕ) (hN : N = n + 1) (lam : ι → DomWeight N) (sg : ι → DomWeight n),
-    (∀ τ, Interlace hN (lam τ) (sg τ)) → (∀ τ, SameShift (lam τ) (sg τ)) →
-  ∀ (G' : ι → Matrix (Fin n) (Fin n) K), (∀ τ, ((G' τ).map s).PosDef) →
-  ∀ (t : ι → K) (T : ℝ), 0 < T → (∀ τ, ‖s (t τ)‖ ^ 2 = T) →
-    NormConcl s hN lam sg (fun τ => sumGram N (G' τ) 1) G' t T
-
 theorem brSq_eq {ι : Type} [Fintype ι] {N n : ℕ} (hN : N = n + 1) (lam : ι → DomWeight N) (sg : ι → DomWeight n) {T : ℝ}
     (hT : 0 < T) : brSq hN lam sg T = T ^ (-∑ τ, nBr (lam τ) (sg τ)) * orthSq hN lam sg := by
   unfold brSq orthSq
@@ -70,33 +102,10 @@ theorem brSq_eq {ι : Type} [Fintype ι] {N n : ℕ} (hN : N = n + 1) (lam : ι 
   | empty => simp
   | cons a S ha ih => rw [Finset.prod_cons, Finset.sum_cons, zpow_add₀ hT.ne', ih]
 
-def dOne {N n : ℕ} (hN : N = n + 1) (lam : DomWeight N) (sg : DomWeight n) : ℤ :=
-  ∑ i : Fin n, min (lam.w (iC hN i) - lam.w (iS hN i)) (d0 hN lam sg)
-
-def OrthBound : Prop :=
-  ∀ (ι : Type) [Fintype ι] (N n : ℕ) (hN : N = n + 1) (lam : ι → DomWeight N) (sg : ι → DomWeight n),
-    (∀ τ, Interlace hN (lam τ) (sg τ)) →
-  ∀ a : ℝ, (∀ τ, (((lam τ).spread : ℤ) : ℝ) ≤ 2 * a) →
-    0 < orthSq hN lam sg ∧
-    Real.log (orthSq hN lam sg) ≤
-      ∑ τ, (2 * ((N : ℝ) - 1) * ((dOne hN (lam τ) (sg τ) : ℤ) : ℝ) + (N : ℝ) * ((N : ℝ) - 1) / 2) * Real.log (2 * a)
-
 def wtOneZero : DomWeight 2 := ⟨![1, 0], by
   intro i j hij
   fin_cases i <;> fin_cases j <;> simp_all⟩
 
 def wtZero : DomWeight 1 := ⟨fun _ => 0, fun _ _ _ => le_rfl⟩
-
-example : Interlace (N := 2) (n := 1) rfl wtOneZero wtZero ∧ SameShift wtOneZero wtZero ∧ nBr wtOneZero wtZero = 1 ∧
-    ((1 : Matrix (Fin 1) (Fin 1) ℂ).map (RingHom.id ℂ)).PosDef ∧
-    ((‖(RingHom.id ℂ) 2‖ ^ 2 : ℝ) : ℂ) * (RingHom.id ℂ) 1 = ((4 : ℝ) : ℂ) := by
-  refine ⟨?_, ?_, ?_, ?_, ?_⟩
-  · intro i
-    fin_cases i
-    simp [aBr, bBr, wtOneZero, wtZero, iS, iC]
-  · simp [SameShift, DomWeight.detShift, wtOneZero, wtZero]
-  · simp [nBr, wtOneZero, wtZero]
-  · simpa using (Matrix.PosDef.one : (1 : Matrix (Fin 1) (Fin 1) ℂ).PosDef)
-  · simp; norm_num
 
 end GlobalTheory.IndefiniteRowSideFullHecke.ScaledCoisometryNorms

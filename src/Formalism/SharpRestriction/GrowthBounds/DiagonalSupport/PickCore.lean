@@ -1,4 +1,50 @@
-import Formalism.SharpRestriction.GrowthBounds.DiagonalSupport.PickVal
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.DiagonalSupport.PickDefs
+public import Formalism.SharpRestriction.GrowthBounds.DiagonalSupport.DecompositionOfThreeParts
+public import Formalism.SharpRestriction.GrowthBounds.DiagonalSupport.PickLem
+public import Formalism.SharpRestriction.GrowthBounds.DiagonalSupport.PickVal
+import Formalism.SharpRestriction.GrowthBounds.RootWeights.ValuationNonnegIffIntegral
+public import Formalism.SharpRestriction.GrowthBounds.TwistedSubstitution.MemLin
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -113,6 +159,7 @@ theorem pick_core (p : ℕ) [hpF : Fact p.Prime] {n' r K m : ℕ} [NeZero n'] [N
         padicValRat.mul (mul_ne_zero (mul_ne_zero ha hb) hc) (hgpU bp0).1,
         padicValRat.mul (mul_ne_zero ha hb) hc, padicValRat.mul ha hb, (hgnU bn0).2, (hgpU bp0).2,
         padicValRat.of_nat, padicValRat.of_nat, padicValRat.of_nat, padicValRat.of_nat] at h
+      rw [← Nat.padicValNat_def, ← Nat.padicValNat_def, ← Nat.padicValNat_def, ← Nat.padicValNat_def] at h
       exact fact_arith _ _ _ _ h
     have hfactR : (padicValNat p (expFact mo0) : ℝ) = (padicValNat p (cstOf Fr p Dt.nL rho dPl dNo) : ℝ) +
         padicValNat p (expFact bp0) + padicValNat p (expFact bn0) := by exact_mod_cast hfactV

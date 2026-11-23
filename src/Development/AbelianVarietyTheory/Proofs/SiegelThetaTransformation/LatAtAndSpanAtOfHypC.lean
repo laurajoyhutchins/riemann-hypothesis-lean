@@ -1,19 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IsBaseClassLevelAdapted
-import Development.AbelianVarietyTheory.Definitions.ThetaValues.GamAt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.SpanInst
-import Formalism.LocalToGlobal.ProjectiveLattices.CuspFormsFiniteDimensionalOf
-import Formalism.LocalToGlobal.ProjectiveLattices.FreeBridge
-import Formalism.LocalToGlobal.ProjectiveLattices.TieUpA
-import Formalism.SharpRestriction.GenusPolyhedralBounds.RelativeIndexClassSets.AdmissibleModuleIffLatticeQuotients
-import Formalism.SharpRestriction.GenusPolyhedralBounds.RelativeIndexClassSets.WeightedPrimeSumBound
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.GamAtOfLawsCore
-import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.WeightModuleIsLatticeOfShortSeriesSpan
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.LatOfLamSt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Proofs.ToricGeometry.ShiftSingleInt
+import Formalism.LocalToGlobal.ProjectiveLattices.ErealAddIInf
+import Formalism.SharpRestriction.GenusPolyhedralBounds.RelativeIndexClassSets.ExistsPowSmulMemBall
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.OnbPerp
+
+@[expose] public section
 
 open NumberField ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.FD Formalism.L2.Pj Formalism.BasicNotions Formalism.MainNotions Formalism.MainNotions.WeightAlgebra Formalism.MainNotions.Gaps GlobalTheory
 
-set_option maxHeartbeats 1000000
-set_option synthInstance.maxHeartbeats 400000
+
+
 
 namespace GlobalTheory.RunLat
 
@@ -31,19 +65,5 @@ theorem spanAt_of_shortG {D : D7} {B : WeightFamilies.Prov D} {P : ModuliIntegra
   show Submodule.span _ _ = ⊤
   rw [eq_top_iff, ← hspan]
   exact Submodule.span_mono fun x hx => thc_le_shortTh X s w (hSh hx)
-
-theorem latAt_and_spanAt_of_hypC : ∀ (D : D7) (T : Top D) (h : LawsP T) (j : ℕ) (hj : InR D j) (large₂ : SizeData₂ D) (H : KHyp) (C2 A2 CR Bx CT : ℝ) (S : Scal (recB h.toLawsCore)) (ka wL wF : WeightFamilies.Wt D j) (Tn nP nW : ℕ) (h0 : ℝ) (nus : IsDedekindDomain.HeightOneSpectrum (𝓞 (recB h.toLawsCore).KO) → ℝ), EtaleWeightGaps.HypC large₂ (recPlus h j hj) H C2 A2 CR Bx CT S ka wL wF Tn nP nW h0 nus → EtaleWeightGaps.LatAt (recB h.toLawsCore) j ka ∧ ∀ u ∈ ({wF, (recPlus h j hj).wF0 wL wF, ka} : Set (WeightFamilies.Wt D j)), PullbackSections.SpanAt (recPlus h j hj) u := by
-  intro D T h j hj large₂ H C2 A2 CR Bx CT S ka wL wF Tn nP nW h0 nus hC
-  obtain ⟨hPar, -, hScal, -, hH2, -, -, -⟩ := hC
-  obtain ⟨-, -, -, hsK, -, po, -, -, PLam, -, -, hF, hF0, hK⟩ := hScal
-  have hSpK : PullbackSections.SpanAt (recPlus h j hj) ka := spanAt_of_shortG _ _ _ _ hK
-  refine ⟨GlobalTheory.latAt_record D _ h.toLawsCore (GlobalTheory.RunIn.gamAt_of_lawsCore' D _ h.toLawsCore) large₂ H.CA hPar
-    j ka _ (recPlus h j hj) S wL wF hsK hSpK hH2, ?_⟩
-  intro u hu
-  simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hu
-  rcases hu with rfl | rfl | rfl
-  · exact spanAt_of_shortG _ _ _ _ hF
-  · exact spanAt_of_shortG _ _ _ _ hF0
-  · exact hSpK
 
 end GlobalTheory.RunLat

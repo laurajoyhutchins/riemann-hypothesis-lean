@@ -1,6 +1,53 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.CuspidalDiscreteness.SummandsAreCuspForms
+module
+
+public import GroundTheory.AutomorphicForms.AutomorphicFormSpaces.GKStable
+public import GroundTheory.AutomorphicForms.CuspidalDiscreteness.CuspFormsDecay
+public import GroundTheory.AutomorphicForms.CuspidalDiscreteness.SummandsMeasure
 import GroundTheory.AutomorphicForms.DixmierMalliavinBasic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -23,18 +70,18 @@ theorem ringEquiv_posIdele (r : ℝ) (hr : 0 < r) :
   · show Completion.extensionEmbeddingOfIsReal w.2 ((posIdele (K := K) r hr : 𝔸[K]).1 w) = r
     rw [← GroundTheory.Global.IdeleGroup.coe_infiniteProj, infiniteProj_posIdele]
     show Completion.extensionEmbeddingOfIsReal w.2 (GroundTheory.Global.posRealElem w.1 (r ^ w.1.mult)) = r
-    rw [GroundTheory.Global.posRealElem, dif_pos w.2, w.2.mult_eq_one, pow_one,
+    rw [GroundTheory.Global.posRealElem, dite_eq_left w.2, w.2.mult_eq_one, pow_one,
       ← Completion.ringEquivRealOfIsReal_apply, RingEquiv.apply_symm_apply]
   · show Completion.extensionEmbedding w.1 ((posIdele (K := K) r hr : 𝔸[K]).1 w) = (r : ℂ)
     rw [← GroundTheory.Global.IdeleGroup.coe_infiniteProj, infiniteProj_posIdele]
     show Completion.extensionEmbedding w.1 (GroundTheory.Global.posRealElem w.1 (r ^ w.1.mult)) = r
     have hc : ¬ w.1.IsReal := not_isReal_iff_isComplex.2 w.2
-    rw [GroundTheory.Global.posRealElem, dif_neg hc, mult, if_neg hc,
+    rw [GroundTheory.Global.posRealElem, dite_eq_right hc, mult, if_neg hc,
       ← Completion.ringEquivComplexOfIsComplex_apply (not_isReal_iff_isComplex.1 hc),
       RingEquiv.apply_symm_apply, Real.sqrt_sq hr.le]
 
-variable (K n) in
 
+variable (K n) in
 def centralExp : ℝ := ((n * Module.finrank ℚ K : ℝ))⁻¹
 
 theorem coe_zInf (s : {r : ℝ // 0 < r}) :
@@ -53,8 +100,8 @@ theorem coe_zInf (s : {r : ℝ // 0 < r}) :
   · rw [Matrix.diagonal_apply_ne _ hab, Matrix.diagonal_apply_ne _ hab]
     exact map_zero _
 
-variable (K n) in
 
+variable (K n) in
 def centralZ : (isExpLieAlgebra K n).lieSubalgebra :=
   ⟨algebraMap ℝ (ArchMatrix K n) (centralExp K n), Submodule.mem_top⟩
 
@@ -152,7 +199,7 @@ theorem apply_mul_centralSection {φ : cuspForms K n} {c : ℂ}
   rw [← hfs, ← hconst, ← mul_assoc, ← Complex.exp_add]
   simp
 
-theorem eq_zero_of_cuspFormLp_eq_zero (μ : MeasureTheory.Measure (normOneGL K n)) [μ.IsHaarMeasure]
+theorem eq_zero_of_cuspFormLp_eq_zero (μ : MeasureTheory.Measure (normOneGL (K := K) (n := n))) [μ.IsHaarMeasure]
     {φ : cuspForms K n} {c : ℂ} (hφ : lieActionCusp K n (centralZ K n) φ = c • φ)
     (h0 : cuspToL2 μ φ = 0) : φ = 0 := by
   rw [cuspToL2_eq_zero_iff] at h0

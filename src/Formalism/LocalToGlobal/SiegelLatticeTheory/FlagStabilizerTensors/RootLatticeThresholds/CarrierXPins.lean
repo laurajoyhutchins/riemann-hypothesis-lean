@@ -1,5 +1,55 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RootLatticeThresholds.CarrierXLeafPin
+module
+
+public import Mathlib.Basic.Real.Basic
+public import Formalism.LocalRingCardinality.DataHost
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.ParametersTermRelations
+import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.PoincareConstantEq
+import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RootLatticeThresholds.BaseOfCore
+import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RootLatticeThresholds.BuiltPf
+import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RootLatticeThresholds.ConjDiEqSelf
+import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RootLatticeThresholds.PolynomialLeDecayThreshold
+import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.SpectralTiesReal
+import Formalism.SharpRestriction.CuspSpanNormBounds.Point
+
+@[expose] public section
 
 noncomputable section
 
@@ -17,65 +67,49 @@ attribute [local instance] Formalism.BasicNotions.Host.cmStar
 theorem ac_le (c Cl L : ℝ) (r k f : ℕ) (hCl : 1000 + |c| ≤ Cl) (hf : 2 ≤ f) (hL : 1 / 2 ≤ L) :
     max (c * ((r : ℝ) + 1) ^ 2 * ((r : ℝ) * ((2 * r + k + 1 : ℕ) : ℝ) + 1)) 0 ≤
       Cl * ((2 * r + k + 1 : ℕ) : ℝ) ^ 19 * (f : ℝ) ^ 5 * L / 2 := by
+  let n : ℝ := ((2 * r + k + 1 : ℕ) : ℝ)
+  let p : ℝ := ((r : ℝ) + 1) ^ 2 * ((r : ℝ) * n + 1)
+  change max (c * ((r : ℝ) + 1) ^ 2 * ((r : ℝ) * n + 1)) 0 ≤
+    Cl * n ^ 19 * (f : ℝ) ^ 5 * L / 2
+  rw [mul_assoc c]
+  change max (c * p) 0 ≤ _
   have hr0 : (0 : ℝ) ≤ r := r.cast_nonneg
-  have hk0 : (0 : ℝ) ≤ k := k.cast_nonneg
-  have hn : ((2 * r + k + 1 : ℕ) : ℝ) = 2 * (r : ℝ) + k + 1 := by push_cast; ring
-  rw [hn]
-  have hn1 : (1 : ℝ) ≤ 2 * (r : ℝ) + k + 1 := by linarith
-  have hrn : (r : ℝ) + 1 ≤ 2 * (r : ℝ) + k + 1 := by linarith
-  have hCl0 : 0 ≤ Cl := by linarith [abs_nonneg c]
-  have hf' : (2 : ℝ) ≤ f := by exact_mod_cast hf
-  have hf5 : (32 : ℝ) ≤ (f : ℝ) ^ 5 := by
-    have := pow_le_pow_left₀ (by norm_num : (0 : ℝ) ≤ 2) hf' 5
-    norm_num at this
-    linarith
-  have hP0 : 0 ≤ ((r : ℝ) + 1) ^ 2 * ((r : ℝ) * (2 * (r : ℝ) + k + 1) + 1) := by positivity
-  have hn19 : 0 ≤ (2 * (r : ℝ) + k + 1) ^ 19 := by positivity
-  have hP : ((r : ℝ) + 1) ^ 2 * ((r : ℝ) * (2 * (r : ℝ) + k + 1) + 1) ≤ 2 * (2 * (r : ℝ) + k + 1) ^ 19 := by
-    have h1 : ((r : ℝ) + 1) ^ 2 ≤ (2 * (r : ℝ) + k + 1) ^ 2 := pow_le_pow_left₀ (by positivity) hrn 2
-    have h2 : (r : ℝ) * (2 * (r : ℝ) + k + 1) + 1 ≤ 2 * (2 * (r : ℝ) + k + 1) ^ 2 := by
-      linarith [mul_nonneg hr0 hk0, mul_nonneg hr0 hr0, mul_nonneg hk0 hk0]
-    have h3 : (2 * (r : ℝ) + k + 1) ^ 4 ≤ (2 * (r : ℝ) + k + 1) ^ 19 := pow_le_pow_right₀ hn1 (by norm_num)
-    calc ((r : ℝ) + 1) ^ 2 * ((r : ℝ) * (2 * (r : ℝ) + k + 1) + 1)
-        ≤ (2 * (r : ℝ) + k + 1) ^ 2 * (2 * (2 * (r : ℝ) + k + 1) ^ 2) :=
-          mul_le_mul h1 h2 (by positivity) (by positivity)
-      _ = 2 * (2 * (r : ℝ) + k + 1) ^ 4 := by ring
-      _ ≤ 2 * (2 * (r : ℝ) + k + 1) ^ 19 := by linarith
-  have hA : 0 ≤ Cl * (2 * (r : ℝ) + k + 1) ^ 19 := mul_nonneg hCl0 hn19
-  have hRHS : 8 * (Cl * (2 * (r : ℝ) + k + 1) ^ 19) ≤
-      Cl * (2 * (r : ℝ) + k + 1) ^ 19 * (f : ℝ) ^ 5 * L / 2 := by
-    have hfl : (32 : ℝ) * (1 / 2) ≤ (f : ℝ) ^ 5 * L := mul_le_mul hf5 hL (by norm_num) (by positivity)
-    have := mul_le_mul_of_nonneg_left hfl hA
-    linarith
-  apply max_le
-  · have hcP : c * (((r : ℝ) + 1) ^ 2 * ((r : ℝ) * (2 * (r : ℝ) + k + 1) + 1)) ≤
-        |c| * (2 * (2 * (r : ℝ) + k + 1) ^ 19) :=
-      (mul_le_mul_of_nonneg_right (le_abs_self c) hP0).trans
-        (mul_le_mul_of_nonneg_left hP (abs_nonneg c))
-    have hcl : |c| * (2 * (r : ℝ) + k + 1) ^ 19 ≤ Cl * (2 * (r : ℝ) + k + 1) ^ 19 :=
-      mul_le_mul_of_nonneg_right (by linarith) hn19
-    have e : c * ((r : ℝ) + 1) ^ 2 * ((r : ℝ) * (2 * (r : ℝ) + k + 1) + 1) =
-        c * (((r : ℝ) + 1) ^ 2 * ((r : ℝ) * (2 * (r : ℝ) + k + 1) + 1)) := by ring
-    rw [e]
-    linarith
-  · linarith
-
-def XPins : Prop :=
-  ∀ (CA C0 CG CDel cT Cb' Cg cb Cw cTf CT C0f C' Cl : ℝ)
-    (D : D7) (L : SizeData₂ D) (T : STies D) (u u' : D.what₂.Word) (e : InfinitePlace D.host.E ≃ D.what₂.Tau)
-    (τ : D.what₂.Tau) (Cp Th' : ℝ)
-    (i0 i0' : ∀ _ : InfinitePlace T.X.B.I.F, Fin D.R.k) (νq : T.X.B.I.Ginf → Measure T.X.B.I.Ginf),
-    u ≠ u' → 1000 + |Formalism.FourierDecayAlt.P.orbital_integral_converges.choose| ≤ Cl → 1801 ≤ D.R.k →
-    Formalism.MainNotions.S.Cnt.Hyp0 D L C' Cl Cg cb Cw cTf CT C0f → PlaceTie T.X e →
-    J.SzHyp (gOf D e) CA C0 CG CDel cT Cb' L.sc.b Cp Th' (deOf D τ u) (deOf D τ u')
-      (D.mem u).A.T (D.mem u').A.T (D.duS u) (D.duS u') (lOf D (deOf D τ u) (deOf D τ u')) →
-    (∀ v, i0 v = i0' v) → PtRepExists T.X u u' 1 i0 i0' → NuQPin T.X u u' νq →
-    ∃ (θ : ℝ) (Ch : Choice T.X θ) (hB : WuBessel Ch) (a b : ∀ j : Fin (nfE D), T.X.B.H (tauE T.X e j))
-      (ξ : ∀ j : Fin (nfE D), T.X.Vloc u (tauE T.X e j)) (ξ' : ∀ j : Fin (nfE D), T.X.Vloc u' (tauE T.X e j)),
-      HypTT D u u' ∧ 0 < Tr D u ∧ 0 < Tr D u' ∧
-      (∀ j, GoodW D (e (plE D j)) u u' θ (locW Ch u u' (e (plE D j)))) ∧
-      (∀ j, GoodS D (lamD D (e (plE D j))) (locS hB u u' (e (plE D j)))) ∧
-      (∀ j, CoefPin hB u u' (e (plE D j)) (a j) (b j) (ξ j) (ξ' j) 1) ∧
-      (∀ j, sclOf hB u u' (e (plE D j)) ≠ 0) ∧ (∀ j, cOf hB u (e (plE D j)) ≠ 0)
+  have hrn : (r : ℝ) + 1 ≤ n := by
+    change (r : ℝ) + 1 ≤ ((2 * r + k + 1 : ℕ) : ℝ)
+    rw [← Nat.cast_one, ← Nat.cast_add, Nat.cast_le]
+    omega
+  have hn1 : 1 ≤ n := (le_add_of_nonneg_left hr0).trans hrn
+  have hn0 : 0 ≤ n := zero_le_one.trans hn1
+  have htail0 : 0 ≤ (r : ℝ) * n + 1 := add_nonneg (mul_nonneg hr0 hn0) zero_le_one
+  have htail : (r : ℝ) * n + 1 ≤ n ^ 2 := calc
+    _ ≤ (r : ℝ) * n + n := add_le_add_right hn1 _
+    _ = ((r : ℝ) + 1) * n := by rw [add_mul, one_mul]
+    _ ≤ n ^ 2 := by rw [pow_two]; exact mul_le_mul_of_nonneg_right hrn hn0
+  have hp0 : 0 ≤ p := mul_nonneg (pow_nonneg (add_nonneg hr0 zero_le_one) 2) htail0
+  have hp : p ≤ n ^ 19 := calc
+    p ≤ n ^ 2 * n ^ 2 :=
+      mul_le_mul (pow_le_pow_left₀ (add_nonneg hr0 zero_le_one) hrn 2) htail
+        htail0 (pow_nonneg hn0 2)
+    _ = n ^ 4 := (pow_add n 2 2).symm
+    _ ≤ n ^ 19 := pow_le_pow_right₀ hn1 (by norm_num)
+  have hc : |c| ≤ Cl := (le_add_of_nonneg_left (by norm_num : (0 : ℝ) ≤ 1000)).trans hCl
+  have hCl0 : 0 ≤ Cl := (abs_nonneg c).trans hc
+  have hf' : (2 : ℝ) ≤ (f : ℝ) := by
+    simpa only [Nat.cast_ofNat] using (Nat.cast_le (α := ℝ)).2 hf
+  have hf4 : (4 : ℝ) ≤ (f : ℝ) ^ 5 :=
+    (show (4 : ℝ) ≤ (2 : ℝ) ^ 5 by norm_num).trans (pow_le_pow_left₀ zero_le_two hf' 5)
+  have hfactor : 1 ≤ (f : ℝ) ^ 5 * L / 2 := by
+    apply (le_div_iff₀ (zero_lt_two : (0 : ℝ) < 2)).2
+    rw [one_mul]
+    calc
+      (2 : ℝ) = 4 * (1 / 2) := by norm_num
+      _ ≤ (f : ℝ) ^ 5 * L :=
+        mul_le_mul hf4 hL (div_nonneg zero_le_one zero_le_two) (pow_nonneg f.cast_nonneg 5)
+  have hbase0 : 0 ≤ Cl * n ^ 19 := mul_nonneg hCl0 (pow_nonneg hn0 19)
+  have hscaled : Cl * n ^ 19 ≤ Cl * n ^ 19 * (f : ℝ) ^ 5 * L / 2 := by
+    rw [mul_assoc (Cl * n ^ 19), mul_div_assoc]
+    exact le_mul_of_one_le_right hbase0 hfactor
+  exact max_le ((mul_le_mul ((le_abs_self c).trans hc) hp hp0 hCl0).trans hscaled)
+    (hbase0.trans hscaled)
 
 end Formalism.L2.SG.Pf.CarrierXAll

@@ -1,6 +1,48 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsPullConeDegree
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PBlockImageHilb
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsPullConeDegree
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PBlockImageHilb
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.HilbertSamuel
@@ -16,8 +58,8 @@ section Lemmas
 variable {K : Type} [Fintype K] [DecidableEq K] {ι : K → Type} [∀ k, Fintype (ι k)] {Ω : Type} [Field Ω]
   [CharZero Ω]
 
-omit [CharZero Ω] in
 
+omit [CharZero Ω] in
 theorem isWeightedHomogeneous_of_isMultiHomog {f : MvPolynomial (Σ k, ι k) ℚ} {a : K → ℕ}
     (hf : IsMultiHomog f a) : IsWeightedHomogeneous (NumbersDVR.blockWeight ι) f a := by
   intro m hm
@@ -25,22 +67,22 @@ theorem isWeightedHomogeneous_of_isMultiHomog {f : MvPolynomial (Σ k, ι k) ℚ
   rw [weight_blockWeight_apply]
   exact hf m (mem_support_iff.mpr hm) k
 
-omit [CharZero Ω] in
 
+omit [CharZero Ω] in
 theorem isMultiHomog_of_isWeightedHomogeneous {f : MvPolynomial (Σ k, ι k) ℚ} {a : K → ℕ}
     (hf : IsWeightedHomogeneous (NumbersDVR.blockWeight ι) f a) : IsMultiHomog f a := by
   intro m hm k
   rw [← weight_blockWeight_apply, hf (mem_support_iff.mp hm)]
 
-omit [DecidableEq K] [CharZero Ω] in
 
+omit [DecidableEq K] [CharZero Ω] in
 theorem prod_X_pow_eq_monomial (a : K → ℕ) :
     (∏ k, MvPolynomial.X k ^ a k : MvPolynomial K Ω) = monomial (Finsupp.equivFunOnFinite.symm a) 1 := by
   rw [monomial_eq, C_1, one_mul, Finsupp.prod_fintype _ _ (fun i => by simp)]
   simp
 
 theorem coeff_mConeMapQ (y : (Σ k, ι k) → Ω) (f : MvPolynomial (Σ k, ι k) ℚ) (n : K → ℕ) :
-    coeff (Finsupp.equivFunOnFinite.symm n) (mConeMapQ y f) =
+    AddMonoidAlgebra.coeff (mConeMapQ y f) (Finsupp.equivFunOnFinite.symm n) =
       aeval y (weightedHomogeneousComponent (NumbersDVR.blockWeight ι) n f) := by
   induction f using MvPolynomial.induction_on' with
   | monomial m r =>
@@ -50,10 +92,10 @@ theorem coeff_mConeMapQ (y : (Σ k, ι k) → Ω) (f : MvPolynomial (Σ k, ι k)
     by_cases h : n = Finsupp.weight (NumbersDVR.blockWeight ι) m
     · rw [if_pos h, if_pos (by rw [h])]
     · rw [if_neg h, if_neg (fun h' => h (Finsupp.equivFunOnFinite.symm.injective h').symm), map_zero]
-  | add p q hp hq => rw [map_add, coeff_add, hp, hq, map_add, map_add]
+  | add p q hp hq => rw [map_add (f := _), MvPolynomial.coeff_add, hp, hq, map_add (f := _), map_add (f := _)]
+
 
 omit [DecidableEq K] [CharZero Ω] in
-
 theorem exists_dvd_monomial (N : ℕ) (hne : ∀ k, Nonempty (ι k)) (μ : (Σ k, ι k) →₀ ℕ)
     (hμ : ∀ k, N * Fintype.card (ι k) ≤ ∑ i, μ ⟨k, i⟩) (r : ℚ) :
     ∃ c : ∀ k, ι k, (∏ k, (X ⟨k, c k⟩ : MvPolynomial (Σ k, ι k) ℚ)) ^ N ∣ monomial μ r := by
@@ -82,7 +124,7 @@ theorem proof : PullConeDegree.Statement := by
     rw [g.as_sum]
     refine Ideal.sum_mem _ fun μ hμ => ?_
     obtain ⟨c, hc⟩ := exists_dvd_monomial N hne μ
-      (fun k => by rw [hg μ hμ k]; have := hd k; omega) (coeff μ g)
+      (fun k => by rw [hg μ hμ k]; have := hd k; omega) (AddMonoidAlgebra.coeff g μ)
     exact Ideal.mem_of_dvd _ hc (hN c)
   have hI : coneNullIdeal y L = RingHom.ker (mConeMapQ y) ⊔
       Ideal.span (Set.range fun j => map (Int.castRingHom ℚ) (L j)) := by
@@ -100,12 +142,13 @@ theorem proof : PullConeDegree.Statement := by
       ← algebraMap_int_eq, aeval_map_algebraMap]
   have hψg : mConeMapQ y g =
       ∑ j, mConeMapQ y (b j) * monomial (Finsupp.equivFunOnFinite.symm e) (aeval y (L j)) := by
-    rw [← huv, map_add, RingHom.mem_ker.mp hu, zero_add, ← hb, map_sum]
+
+    rw [← huv, map_add (f := _), RingHom.mem_ker.mp hu, zero_add, ← hb, map_sum]
     simp only [map_mul, hmapL]
 
   refine ⟨fun j => weightedHomogeneousComponent (NumbersDVR.blockWeight ι) (d - e) (b j),
     fun j => isMultiHomog_of_isWeightedHomogeneous (weightedHomogeneousComponent_isWeightedHomogeneous _ _), ?_⟩
-  have hc := congrArg (coeff (Finsupp.equivFunOnFinite.symm d)) hψg
+  have hc := congrArg (AddMonoidAlgebra.coeff · (Finsupp.equivFunOnFinite.symm d)) hψg
   rw [mConeMapQ_eq y (isWeightedHomogeneous_of_isMultiHomog hg), prod_X_pow_eq_monomial, C_mul_monomial, mul_one,
     coeff_monomial, if_pos rfl, coeff_sum] at hc
   rw [hc]

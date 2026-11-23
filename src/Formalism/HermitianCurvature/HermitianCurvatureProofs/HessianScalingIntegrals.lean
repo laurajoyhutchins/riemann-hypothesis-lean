@@ -1,8 +1,57 @@
-import Formalism.HermitianCurvature.ThetaExistenceInductiveFromPieces
+module
+
+public import Formalism.HermitianCurvature.ThetaExistenceInductiveFromPieces
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
-open Matrix Formalism.DoubleCosetMeasures Formalism.FourierDecayAlt.A5 Formalism.FourierDecayAlt.A6 Filter Topology
+open Matrix Formalism.DoubleCosetMeasures Formalism.FourierDecayAlt.A5 Formalism.FourierDecayAlt.A6 Filter Topology Classical
 
 namespace Formalism.FourierDecayAlt.P.HessianScalingIntegrals
 
@@ -142,8 +191,8 @@ theorem amp_const (Λ₁ : AddSubgroup K) {m : ℕ} (A : (Fin m → K) → ℂ) 
   have := hA (fun _ => z) (fun k => x k - z) hx
   rw [← this]; congr 1; ext k; simp
 
-open Classical in
 
+open Classical in
 theorem root_piece [TopologicalSpace K] (R : Subring K) (ψ : AddChar K ℂ) (m : ℕ) (γ : Kˣ → ℂ)
     (hγ : IsGamma R ψ m γ) (Λ₁ : AddSubgroup K) (B Λ : Submodule R K)
     (hB : IsLat B.toAddSubgroup) (hΛ : IsLat Λ.toAddSubgroup) (hΛB : Λ ≤ B)
@@ -225,9 +274,9 @@ theorem ball_iff (B : AddSubgroup K) {m : ℕ} (x l : Fin m → K) (z : K) (hl :
 
 end Formalism.FourierDecayAlt.P.HessianScalingIntegrals
 
+
 open Formalism.FourierDecayAlt.P.HessianScalingIntegrals in
 open Classical in
-
 theorem Formalism.FourierDecayAlt.P.stationaryPhaseOfSteps : Formalism.FourierDecayAlt.A6.StationaryAssemble := by
   intro hNS hMorse hRef hMod hRF _ _ _ _ _ hRS hSM hGA _ K _ _ _ R ψ hD hn m hm γ hγ L₀ Λ₁ Q hL₀ hΛ₁
     hQ hQu
@@ -288,13 +337,13 @@ theorem Formalism.FourierDecayAlt.P.stationaryPhaseOfSteps : Formalism.FourierDe
     have h1 : (∃ z : Kˣ, z ^ (m + 1) = D' ∧ ∀ k, (x + l) k - (z : K) ∈ B.toAddSubgroup) ↔
         ∃ z : Kˣ, z ^ (m + 1) = D' ∧ ∀ k, x k - (z : K) ∈ B.toAddSubgroup :=
       exists_congr fun z => and_congr_right fun _ =>
-        ball_iff B.toAddSubgroup x l z fun k => hΛ'B (hl k)
+        Formalism.FourierDecayAlt.P.HessianScalingIntegrals.ball_iff B.toAddSubgroup x l z fun k => hΛ'B (hl k)
     simp only [hFoff]
     rw [if_congr h1 rfl (hF' x l hl)]
   have hFzInv : ∀ z : Kˣ, LatInvN Λ'.toAddSubgroup (Fz z) := by
     intro z x l hl
     have h1 : (∀ k, (x + l) k - (z : K) ∈ B) ↔ ∀ k, x k - (z : K) ∈ B :=
-      ball_iff B.toAddSubgroup x l z fun k => hΛ'B (hl k)
+      Formalism.FourierDecayAlt.P.HessianScalingIntegrals.ball_iff B.toAddSubgroup x l z fun k => hΛ'B (hl k)
     simp only [hFz]
     rw [if_congr h1 (hF' x l hl) rfl]
   have hFoffSupp : ∀ x, Foff x ≠ 0 → ∀ i, x i ∈ L₀ := by
@@ -309,11 +358,11 @@ theorem Formalism.FourierDecayAlt.P.stationaryPhaseOfSteps : Formalism.FourierDe
     intro h0
     apply hx
     simp only [hFz, h0, ite_self]
-  have hS0 := fin_supp Λ'.toAddSubgroup L₀ hΛ'.1 hL₀.2 m
+  have hS0 := Formalism.FourierDecayAlt.P.HessianScalingIntegrals.fin_supp Λ'.toAddSubgroup L₀ hΛ'.1 hL₀.2 m
   have hsplit : intK R Λ'.toAddSubgroup m F = intK R Λ'.toAddSubgroup m Foff +
       ∑ z ∈ hfin.toFinset, intK R Λ'.toAddSubgroup m (Fz z) := by
-    rw [intK_eq_sum R _ L₀ m hS0 F hFsupp, intK_eq_sum R _ L₀ m hS0 Foff hFoffSupp]
-    simp_rw [fun z => intK_eq_sum R _ L₀ m hS0 (Fz z) (hFzSupp z)]
+    rw [Formalism.FourierDecayAlt.P.HessianScalingIntegrals.intK_eq_sum R _ L₀ m hS0 F hFsupp, Formalism.FourierDecayAlt.P.HessianScalingIntegrals.intK_eq_sum R _ L₀ m hS0 Foff hFoffSupp]
+    simp_rw [fun z => Formalism.FourierDecayAlt.P.HessianScalingIntegrals.intK_eq_sum R _ L₀ m hS0 (Fz z) (hFzSupp z)]
     rw [← Finset.mul_sum, ← mul_add, Finset.sum_comm, ← Finset.sum_add_distrib]
     congr 1
     exact Finset.sum_congr rfl fun y _ => hdec _
@@ -337,6 +386,6 @@ theorem Formalism.FourierDecayAlt.P.stationaryPhaseOfSteps : Formalism.FourierDe
   refine Finset.sum_congr rfl fun z hz => ?_
   have hz' : z ^ (m + 1) = D' := by simpa using hz
   have hzq : (z : K) ^ (m + 1) ∈ Q := by rw [hzQ z hz']; exact hD'
-  exact root_piece R ψ m γ hγ Λ₁ B Λ' hB hΛ' hΛ'B (fun b hb => (hBV hb).2) A hA.2 t z (D' : K)
+  exact Formalism.FourierDecayAlt.P.HessianScalingIntegrals.root_piece R ψ m γ hγ Λ₁ B Λ' hB hΛ' hΛ'B (fun b hb => (hBV hb).2) A hA.2 t z (D' : K)
     (hzQ z hz') ⟨(hMod K R ψ hD z t).1, (hMod K R ψ hD t z).1, (hMod K R ψ hD z t).2⟩
     (hG t z ht.2 hzq) (hM B hB (fun b hb => (hBV hb).1.1) z hzq) (hFzInv z)

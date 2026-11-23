@@ -1,6 +1,57 @@
-import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.KurComplete
-import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.GramExists
-import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.KummerThetaLogarithms.NormLeInvOfLtOne
+module
+
+public import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.GramExists
+public import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.BiextensionHypothesesOfLevelOne
+import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.KummerThetaLogarithms.ExponentialSpecification
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 open scoped BigOperators
@@ -11,93 +62,7 @@ open Formalism.InvariantFactorPaths.G7 (lgF at1 UnrOK)
 
 namespace OrbitCoverLemmas
 
-theorem odd_gen {K : Type} [Field K] {l : ℕ} (hl : 2 ≤ l) {ι : Type} [Fintype ι]
-    (M : ι → ι → K) (e : K) (w : ι → K) (h : ∀ r, e * w r = ∑ r', M r' r * w r') :
-    MvPowerSeries.subst (fun x : Bool × ι => if x.1 = true then
-        PowerSeries.subst (∑ r, MvPowerSeries.C (M x.2 r) * at1 (true, r) (lgF K l)) (expF K l)
-        else (MvPowerSeries.X x : MvPowerSeries (Bool × ι) K))
-        (∑ r, MvPowerSeries.C (w r) * at1 (true, r) (lgF K l)) =
-      MvPowerSeries.C e * ∑ r, MvPowerSeries.C (w r) * at1 (true, r) (lgF K l) := by
-  have hE := expSpec K l hl
-  have hsum0 : ∀ r', MvPowerSeries.constantCoeff
-      (∑ r, MvPowerSeries.C (M r' r) * at1 ((true, r) : Bool × ι) (lgF K l)) = 0 := by
-    intro r'
-    rw [map_sum]
-    refine Finset.sum_eq_zero fun r _ => ?_
-    rw [map_mul, Pair.constantCoeff_inVar_eq_zero _ (Pair.cc_lgF hl), mul_zero]
-  obtain ⟨φ, hφdef⟩ : ∃ φ : Bool × ι → MvPowerSeries (Bool × ι) K, φ = fun x : Bool × ι =>
-      if x.1 = true then
-        PowerSeries.subst (∑ r, MvPowerSeries.C (M x.2 r) * at1 (true, r) (lgF K l)) (expF K l)
-        else (MvPowerSeries.X x : MvPowerSeries (Bool × ι) K) := ⟨_, rfl⟩
-  rw [← hφdef]
-  have hφ0 : ∀ x, MvPowerSeries.constantCoeff (φ x) = 0 := by
-    intro x
-    rw [hφdef]
-    dsimp only
-    split_ifs
-    · exact Pair.cc_ps (hsum0 _) hE.1
-    · simp
-  have hφ : MvPowerSeries.HasSubst φ := MvPowerSeries.hasSubst_of_constantCoeff_zero hφ0
-  rw [Pair.subst_sum hφ, Finset.mul_sum]
-  have h1 : ∀ r', MvPowerSeries.subst φ
-      (MvPowerSeries.C (w r') * at1 (true, r') (lgF K l)) =
-      MvPowerSeries.C (w r') *
-        ∑ r, MvPowerSeries.C (M r' r) * at1 (true, r) (lgF K l) := by
-    intro r'
-    rw [TorusDerivation.subst_C_mul hφ, Pair.subst_single_var hφ]
-    congr 1
-    have e : φ (true, r') = PowerSeries.subst
-        (∑ r, MvPowerSeries.C (M r' r) * at1 (true, r) (lgF K l)) (expF K l) := by
-      rw [hφdef]
-      exact if_pos rfl
-    rw [e, Pair.ps_comp (hsum0 r') hE.1, hE.2.1,
-      PowerSeries.subst_X (PowerSeries.HasSubst.of_constantCoeff_zero (hsum0 r'))]
-  simp only [h1, Finset.mul_sum]
-  rw [Finset.sum_comm]
-  refine Finset.sum_congr rfl fun r _ => ?_
-  rw [← mul_assoc, ← map_mul, h r, map_sum, Finset.sum_mul]
-  refine Finset.sum_congr rfl fun r' _ => ?_
-  rw [map_mul]
-  ring
-
-theorem iter_sum {K : Type} [Field K] (σ : K →+* K) (k : ℕ) {ι : Type} [Fintype ι] (f g : ι → K) :
-    σ^[k] (∑ r, f r * g r) = ∑ r, σ^[k] (f r) * σ^[k] (g r) := by
-  have hpw : ∀ x, σ^[k] x = (σ ^ k) x := fun x => by rw [RingHom.coe_pow]
-  rw [hpw, map_sum]
-  refine Finset.sum_congr rfl fun r _ => ?_
-  rw [← hpw, iterate_map_mul]
-
 end OrbitCoverLemmas
-
-theorem eigenOdd_conj (K : Type) [Field K] (l d : ℕ) [NeZero d] (σ : K →+* K) (hl : 2 ≤ l)
-    (ι : Type) [Fintype ι] (om oms : ι → K) (b : K) (c : ι → ι → K)
-    (hc : ∀ r r', σ (σ (c r' r)) = c r' r)
-    (hact : ∀ r, b * oms r = ∑ r', c r' r * oms r') (s : ZMod d) (hs : s.val % 2 = 1) :
-    MvPowerSeries.subst (fun x : Bool × ι => if x.1 = true then
-        PowerSeries.subst (∑ r, MvPowerSeries.C (σ (c x.2 r)) * at1 (true, r) (lgF K l)) (expF K l)
-        else (MvPowerSeries.X x : MvPowerSeries (Bool × ι) K)) (zXY l σ om oms s) =
-      MvPowerSeries.C (σ^[s.val] b) * zXY l σ om oms s := by
-  have hs' : ¬ s.val % 2 = 0 := by omega
-  unfold zXY
-  rw [if_neg hs']
-  refine OrbitCoverLemmas.odd_gen hl (fun r' r => σ (c r' r)) _ _ fun r => ?_
-  rw [← iterate_map_mul, hact r, OrbitCoverLemmas.iter_sum]
-  refine Finset.sum_congr rfl fun r' _ => ?_
-  rw [InverseCommuting.iter_odd (hc r r') hs']
-
-theorem eigenOdd_plain (K : Type) [Field K] (l d : ℕ) [NeZero d] (σ : K →+* K) (hl : 2 ≤ l)
-    (ι : Type) [Fintype ι] (om oms : ι → K) (b : K) (c : ι → ι → K)
-    (hc : ∀ r r', σ (σ (c r' r)) = c r' r)
-    (hact : ∀ r, b * oms r = ∑ r', σ (c r' r) * oms r') (s : ZMod d) (hs : s.val % 2 = 1) :
-    MvPowerSeries.subst (fun x : Bool × ι => if x.1 = true then
-        PowerSeries.subst (∑ r, MvPowerSeries.C (c x.2 r) * at1 (true, r) (lgF K l)) (expF K l)
-        else (MvPowerSeries.X x : MvPowerSeries (Bool × ι) K)) (zXY l σ om oms s) =
-      MvPowerSeries.C (σ^[s.val] b) * zXY l σ om oms s := by
-  have h := eigenOdd_conj K l d σ hl ι om oms b (fun r' r => σ (c r' r))
-    (fun r r' => by rw [hc]) hact s hs
-  simpa only [hc] using h
-
-theorem odd_eigenspace : EigenOdd := eigenOdd_plain
 
 namespace OrbitCoverLemmas
 

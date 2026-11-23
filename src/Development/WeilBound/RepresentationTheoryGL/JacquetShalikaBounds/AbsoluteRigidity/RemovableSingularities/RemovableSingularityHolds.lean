@@ -1,4 +1,55 @@
-import Development.WeilBound.RepresentationTheoryGL.JacquetShalikaBounds.AbsoluteRigidity.NewtonLow
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.JacquetShalikaBounds.AbsoluteRigidity.NewtonLow
+public import Mathlib.Analysis.Calculus.DSlope
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+public import Mathlib.Analysis.Complex.RemovableSingularity
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Analysis.Analytic.ChangeOrigin
+public import Mathlib.Analysis.Analytic.Constructions
+public import Mathlib.Analysis.Calculus.FDeriv.Analytic
+public import Mathlib.Analysis.Complex.CauchyIntegral
+
+@[expose] public section
 
 noncomputable section
 
@@ -26,22 +77,26 @@ theorem analyticAt_dslope {f : ℂ → ℂ} {z : ℂ} (h1 : AnalyticAt ℂ f 1) 
     rw [dslope_of_ne _ hw, slope_def_module]
 
 theorem analytic_D {G : ℂ → ℂ} (hG : ∀ σ : ℝ, 0 < σ → AnalyticAt ℂ G σ) :
-    ∀ j, ∀ σ : ℝ, 0 < σ → AnalyticAt ℂ (D G j) σ
-  | 0 => hG
-  | j + 1 => fun σ hσ => by
-      have h1 := analytic_D hG j 1 one_pos
-      simp only [Complex.ofReal_one] at h1
-      exact analyticAt_dslope h1 (analytic_D hG j σ hσ)
+    ∀ j, ∀ σ : ℝ, 0 < σ → AnalyticAt ℂ (D G j) σ := by
+  intro j
+  induction j with
+  | zero => exact hG
+  | succ j ih =>
+      intro σ hσ
+      have h1 : AnalyticAt ℂ (D G j) (1 : ℂ) := ih 1 one_pos
+      rw [D]
+      exact analyticAt_dslope h1 (ih σ hσ)
 
-theorem factor (G : ℂ → ℂ) : ∀ j, (∀ i < j, D G i 1 = 0) → ∀ z, G z = (z - 1) ^ j * D G j z
-  | 0, _, z => by simp [D]
-  | j + 1, h, z => by
-      have ih := factor G j (fun i hi => h i (by omega)) z
-      have e := sub_smul_dslope (D G j) 1 z
-      rw [h j (by omega), sub_zero, smul_eq_mul] at e
-      rw [ih, ← e]
-      simp only [D]
-      ring
+theorem factor (G : ℂ → ℂ) : ∀ j, (∀ i < j, D G i 1 = 0) → ∀ z, G z = (z - 1) ^ j * D G j z := by
+  intro j
+  induction j with
+  | zero => intro _ z; simp [D]
+  | succ j ih =>
+      intro h z
+      have e : (z - 1) * D G (j + 1) z = D G j z := by
+        rw [D, ← smul_eq_mul]
+        exact sub_smul_dslope_of_zero (h j (Nat.lt_succ_self j)) z
+      rw [ih (fun i hi => h i (Nat.lt_succ_of_lt hi)) z, pow_succ, mul_assoc, e]
 
 end RemovableSingularityAlt
 
@@ -59,7 +114,7 @@ theorem removable_singularity_holds : Remov := by
       rcases Nat.lt_succ_iff_lt_or_eq.1 hi with hi | rfl
       · exact hprev i hi
       ·
-        have hfac := factor G i hprev
+        have hfac : ∀ z : ℂ, G z = (z - 1) ^ i * D G i z := factor G i hprev
         have hc : ContinuousAt (D G i) 1 := by
           have := (han i 1 one_pos).continuousAt
           simpa using this

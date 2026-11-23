@@ -1,5 +1,51 @@
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.HeckeFubiniCompatibility.CompatFub
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LengthContinuousProperSublevel
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.HeckeFubiniCompatibility.EntZero
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.IsotropicMahlerBounds.OnlyIsotropic
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LengthContinuousProperSublevel
+import GroundTheory.AutomorphicForms.GLnLocal
+import GroundTheory.GlobalFields.LocalFieldAtPlace
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -170,7 +216,8 @@ theorem pTest_entry_le {y : G n} {R : ℝ} (h : lg y.val ≤ R) (i j : Fin n) :
 
 theorem pTest_posLog_sup_le {ι : Type} (f : ι → ℝ) (hf0 : ∀ i, 0 ≤ f i) {R : ℝ} (hR : 0 ≤ R)
     (hf : ∀ i, f i ≤ Real.exp R) : Real.posLog (⨆ i, f i) ≤ R := by
-  have h := Real.posLog_le_posLog (Real.iSup_nonneg hf0) (Real.iSup_le hf (Real.exp_pos R).le)
+  have h := Real.posLog_le_posLog (neg_one_lt_zero.le.trans (Real.iSup_nonneg hf0))
+    (Real.iSup_le hf (Real.exp_pos R).le)
   have e : Real.posLog (Real.exp R) = R := by simp [Real.posLog, hR]
   linarith
 
@@ -299,8 +346,5 @@ theorem pTest_main {E : Type} [Field E] [NumberField E] [IsCMField E] {a b : ℕ
       (pTest_prod_finGL fb u₂ g.2).2]
     simp only [hFin, map_mul, pTest_gFin_finGL, Prod.mk_mul_mk, one_mul, mul_one] at k₁ k₂ ⊢
     exact ⟨by rw [k₁], by rw [k₂]⟩
-
-theorem test2 : Test2 := fun E _ _ _ a b fa fb ψ R r U hR ha hb hψs hUo hψU hsz hr₁ hr₂ =>
-  (pTest_main fa fb ψ R r U hR ha hb hψs hUo hψU hsz hr₁ hr₂).1
 
 end PositivityTheory.Rg.BcB.CG

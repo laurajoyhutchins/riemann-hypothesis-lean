@@ -1,8 +1,50 @@
-import Mathlib
-import Formalism.LocalToGlobal.IndefiniteReal.DatumVec
-import Development.AbelianVarietyTheory.Counterexamples.HeightSurvey.StarPurelyImaginaryEqNeg
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.IsOpenNsmulAdelicCompletionOfVectorSet
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ExistsInverseChart
+module
+
+public import Formalism.LocalToGlobal.IndefiniteReal.DatumVec
+public import Development.AbelianVarietyTheory.Counterexamples.HeightSurvey.StarPurelyImaginaryEqNeg
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ExistsInverseChart
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.IsOpenNsmulAdelicCompletionOfVectorSet
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -25,7 +67,7 @@ theorem smul_eq_zero_of_inf {a : AE D} (h : infPart D a = 0) : eInf D • a = 0 
     intro a
     induction a using TensorProduct.induction_on with
     | zero => simp only [smul_zero, map_zero]
-    | add a b ha hb => rw [smul_add, ha, hb, RingHom.map_add, map_add]
+    | add a b ha hb => rw [smul_add, ha, hb, RingHom.map_add (f := _), map_add (f := _)]
     | tmul a x =>
       rw [TensorProduct.smul_tmul']
       have : eInf D • a = LinearMap.inl D.host.F (Ainf D.host.F) (Af D.host.F) (fstA D.host.F a) :=
@@ -41,7 +83,7 @@ theorem smul_eq_self_of_fin {a : AE D} (h : finPart D a = 0) : eInf D • a = a 
     intro a
     induction a using TensorProduct.induction_on with
     | zero => simp only [smul_zero, map_zero]
-    | add a b ha hb => rw [smul_add, ha, hb, RingHom.map_add, map_add]
+    | add a b ha hb => rw [smul_add, ha, hb, RingHom.map_add (f := _), map_add (f := _)]
     | tmul a x =>
       rw [TensorProduct.smul_tmul']
       have : (1 - eInf D) • a = LinearMap.inr D.host.F (Ainf D.host.F) (Af D.host.F) (sndA D.host.F a) :=
@@ -55,18 +97,18 @@ theorem smul_eq_self_of_fin {a : AE D} (h : finPart D a = 0) : eInf D • a = a 
 theorem cA_smul (c : AF D.host.F) (a : AE D) : cA D (c • a) = c • cA D a := by
   induction a using TensorProduct.induction_on with
   | zero => simp only [smul_zero, map_zero]
-  | add a b ha hb => rw [smul_add, RingHom.map_add, RingHom.map_add, ha, hb, smul_add]
+  | add a b ha hb => rw [smul_add, RingHom.map_add (f := _), RingHom.map_add (f := _), ha, hb, smul_add]
   | tmul a x => rfl
 
 variable (S T : HSp D)
 
 theorem symplOH_add_left (x x' y : WO S T) : symplOH S T (x + x') y = symplOH S T x y + symplOH S T x' y := by
   unfold symplOH symplO hO
-  simp only [Matrix.add_apply, mul_add, Finset.sum_add_distrib, map_add]
+  simp only [Matrix.add_apply, mul_add, Finset.sum_add_distrib, map_add (f := _)]
 
 theorem symplOH_add_right (x y y' : WO S T) : symplOH S T x (y + y') = symplOH S T x y + symplOH S T x y' := by
   unfold symplOH symplO hO
-  simp only [Matrix.add_apply, mul_add, add_mul, Finset.sum_add_distrib, map_add]
+  simp only [Matrix.add_apply, mul_add, add_mul, Finset.sum_add_distrib, map_add (f := _)]
 
 theorem symplOH_smul_left (c : AF D.host.F) (x y : WO S T) : symplOH S T (c • x) y = c * symplOH S T x y := by
   have h : hO S T (c • x) y = c • hO S T x y := by
@@ -103,6 +145,7 @@ theorem hO_herm (x y : WO S T) : cA D (hO S T x y) = hO S T y x := by
     rw [hG] at this
     exact congrFun (congrFun this b) a
   unfold hO
+
   simp only [map_sum, map_mul, GlobalTheory.DualPairCheck.cA_cA, cA_incA, hI, gram_star]
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun _ _ => Finset.sum_congr rfl fun _ _ => ?_
@@ -144,8 +187,8 @@ theorem continuous_symplOH (u : WO S T) : Continuous fun w : WO S T => symplOH S
   have ht : Continuous (Algebra.trace (AF D.host.F) (AE D)) := IsModuleTopology.continuous_of_linearMap _
   unfold symplOH symplO hO
   refine continuous_const.mul (ht.comp (continuous_const.mul ?_))
-  refine continuous_finset_sum _ fun a _ => continuous_finset_sum _ fun b _ => continuous_finset_sum _ fun c _ =>
-    continuous_finset_sum _ fun d _ => continuous_const.mul ?_
+  refine continuous_finsetSum _ fun a _ => continuous_finsetSum _ fun b _ => continuous_finsetSum _ fun c _ =>
+    continuous_finsetSum _ fun d _ => continuous_const.mul ?_
   exact (continuous_apply a).comp (continuous_apply d)
 
 theorem ker_mem_nhds {F : Type} [Field F] [NumberField F] {ψ : AddChar (AF F) ℂ} (hc : Continuous ψ)

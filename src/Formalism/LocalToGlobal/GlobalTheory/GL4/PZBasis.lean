@@ -1,9 +1,54 @@
-import Mathlib
-import Formalism.LocalToGlobal.GlobalTheory.GL4.PColStd
-import Formalism.LocalToGlobal.GlobalTheory.GL4.KronDetScalar
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StandardSlopeBound.Inhabit
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StandardSlopeBound.GramMatrixDuality
-import Formalism.LocalToGlobal.Columns.CoefficientsModP
+module
+
+public import Formalism.LocalToGlobal.GlobalTheory.GL4.KronDetScalar
+public import Formalism.LocalToGlobal.GlobalTheory.GL4.PColSlopeEq
+public import Formalism.GradedWeylDivisibility.FockSpaceTableaux.LClosedeqLemmas
+public import Formalism.LocalToGlobal.Columns.CoefficientsModP
+import Formalism.LocalToGlobal.Columns.PolyFnLemmas
+public import Formalism.LocalToGlobal.GlobalTheory.GL4.PColStd
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StandardSlopeBound.GramMatrixDuality
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StandardSlopeBound.Inhabit
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StandardSlopeBound.NablaOperatorBasis
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 open Module MvPolynomial
 open scoped Matrix TensorProduct
@@ -43,11 +88,13 @@ theorem li_semilin_gen {K F V M ι κ : Type} [Field K] [Field F] [AddCommGroup 
   have hexp : ∀ a' ∈ s, e (v a') = ∑ i ∈ T, σ (b.repr (v a') i) • e (b i) := by
     intro a' ha'
     conv_lhs => rw [hx_eq (v a') (hsub a' ha')]
+
     rw [map_sum]
     simp only [map_smulₛₗ]
   have hfv : ∀ a' ∈ s, f (v a') = ∑ i ∈ T, b.repr (v a') i * f (b i) := by
     intro a' ha'
     conv_lhs => rw [hx_eq (v a') (hsub a' ha')]
+
     rw [map_sum]
     simp only [map_smul, smul_eq_mul]
   have hcoef : ∀ i ∈ T, ∑ a' ∈ s, g a' * σ (b.repr (v a') i) = 0 := by
@@ -70,6 +117,7 @@ theorem li_semilin_gen {K F V M ι κ : Type} [Field K] [Field F] [AddCommGroup 
     _ = ∑ a' ∈ s, g a' * σ (∑ i ∈ T, b.repr (v a') i * f (b i)) :=
         Finset.sum_congr rfl fun a' ha' => by rw [hfv a' ha']
     _ = ∑ i ∈ T, σ (f (b i)) * ∑ a' ∈ s, g a' * σ (b.repr (v a') i) := by
+
         simp only [map_sum, map_mul, Finset.mul_sum]
         rw [Finset.sum_comm]
         refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun a' _ => ?_
@@ -134,6 +182,7 @@ theorem span_int (hν : Antitone ν) (e : Basis (Fin r) ℤ (weyl ℤ N N le_rfl
     have hx : applyWord ℤ w (hw ℤ le_rfl ν) ∈ weyl ℤ N N le_rfl ν := Submodule.subset_span ⟨w, rfl⟩
     have h := congrArg (fun y : weyl ℤ N N le_rfl ν => MvPolynomial.map (Int.castRingHom F) (y : MvPolynomial (Fin N × Fin N) ℤ))
       (e.sum_repr (⟨applyWord ℤ w (hw ℤ le_rfl ν), hx⟩ : weyl ℤ N N le_rfl ν))
+
     simp only [Submodule.coe_sum, Submodule.coe_smul, map_sum] at h
     rw [SetLike.mem_coe]
     show applyWord F w (hw F le_rfl ν) ∈ _
@@ -174,6 +223,7 @@ theorem prodZ_span : Submodule.span ℤ (Set.range (prodZ lam e)) = Submodule.sp
       exact this.symm
     rw [SetLike.mem_coe]
     unfold Formalism.MainNotions.flipTwoThree.ten
+
     rw [Finset.prod_congr rfl (fun τ _ => by rw [hfτ τ, map_sum]), Finset.prod_univ_sum, Fintype.piFinset_univ]
     refine Submodule.sum_mem _ fun I _ => ?_
     have : (∏ τ, rename (Prod.mk τ) ((e τ).repr ⟨f τ, hf τ⟩ (I τ) • (e τ (I τ) : MvPolynomial (Fin n × Fin n) ℤ))) =

@@ -1,4 +1,49 @@
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TailIntegrals.GaNonneg
+module
+
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TailIntegrals.InductiveHeisenbergInputs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TailIntegrals.GaNonneg
+
+@[expose] public section
 
 noncomputable section
 
@@ -14,24 +59,7 @@ namespace XI
 private theorem lintegral_prod_le_lintegral_lintegral {α β : Type*} [MeasurableSpace α] [MeasurableSpace β]
     (μ : Measure α) (ν : Measure β) (f : α × β → ℝ≥0∞) :
     ∫⁻ p, f p ∂(μ.prod ν) ≤ ∫⁻ x, ∫⁻ y, f (x, y) ∂ν ∂μ := by
-  obtain ⟨g, hgm, hgle, hgeq⟩ := exists_measurable_le_lintegral_eq (μ.prod ν) f
-  rw [hgeq]
-  have e : μ.prod ν = Measure.bind μ (fun x => Measure.map (Prod.mk x) ν) := by
-    first
-      | exact Measure.prod_def μ ν
-      | rw [Measure.prod_def]
-      | rw [Measure.prod]
-  rw [e]
-  first
-    | rw [Measure.bind, Measure.lintegral_join hgm.aemeasurable]
-    | (unfold Measure.bind; rw [Measure.lintegral_join hgm.aemeasurable])
-    | rw [Measure.bind, Measure.lintegral_join hgm]
-  calc ∫⁻ m, ∫⁻ p, g p ∂m ∂(Measure.map (fun x => Measure.map (Prod.mk x) ν) μ)
-      ≤ ∫⁻ x, ∫⁻ p, g p ∂(Measure.map (Prod.mk x) ν) ∂μ :=
-        lintegral_map_le (fun m : Measure (α × β) => ∫⁻ p, g p ∂m) _
-    _ ≤ ∫⁻ x, ∫⁻ y, g (x, y) ∂ν ∂μ := lintegral_mono fun x => lintegral_map_le g (Prod.mk x)
-    _ ≤ ∫⁻ x, ∫⁻ y, f (x, y) ∂ν ∂μ :=
-        lintegral_mono fun x => lintegral_mono fun y => hgle (x, y)
+  exact lintegral_prod_le f
 
 private theorem side {k r : ℕ} (s : Fin (r + 1) → ℝ) (hs : ∀ l, 0 ≤ s l) (z : Fin (2 * r + k + 1) → ℂ)
     (μW μN : Measure (Mt k r)) (hW : IsHaarOn (UWset k r z) μW)
@@ -49,7 +77,7 @@ private theorem side {k r : ℕ} (s : Fin (r + 1) → ℝ) (hs : ∀ l, 0 ≤ s 
     ⟨_, Finset.prod_nonneg fun l _ => Real.rpow_nonneg (pow_nonneg (by linarith) _) _, rfl⟩
   have hlam : Continuous (fun m : Mt k r => lam k r z (Matrix.of m)) := by
     unfold lam ell
-    refine Complex.continuous_re.comp (continuous_const.mul (continuous_finset_sum _ fun a _ => ?_))
+    refine Complex.continuous_re.comp (continuous_const.mul (continuous_finsetSum _ fun a _ => ?_))
     split_ifs with ha
     · first
         | (simp only [Matrix.of_apply]; fun_prop)

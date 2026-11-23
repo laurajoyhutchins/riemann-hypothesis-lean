@@ -1,5 +1,54 @@
-import Mathlib
+module
+
+public import Mathlib.RingTheory.RootsOfUnity.PrimitiveRoots
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+public import Mathlib.RingTheory.RootsOfUnity.CyclotomicUnits
+public import Mathlib.RingTheory.RootsOfUnity.Lemmas
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
 import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.LatNormGrLatNeZeroOfSpan
+public import Mathlib.Algebra.BigOperators.Associated
+
+@[expose] public section
+
 open Module NumberField GlobalTheory.CompanionTheory.Ar.HT
 
 namespace GlobalTheory.CompanionTheory.Ar.HT
@@ -19,30 +68,5 @@ theorem primRoot_sub_one_pow_associated {O : Type*} [CommRing O] [IsDomain O] {p
     exact this.neg_right
   rw [h, Finset.prod_const, Finset.card_range] at h2
   simpa using h2
-
-theorem val_primRoot_sub_one : ∀ (C : Type) [Field C] (v : Valuation C NNReal) (O : Type) [CommRing O] [Algebra O C] (hv : v.Integers O) (p : ℕ) [Fact p.Prime] (ζ : O), IsPrimitiveRoot (algebraMap O C ζ) p → v (p : C) < 1 → v (algebraMap O C (ζ - 1)) ^ (p - 1) = v (p : C) ∧ (ζ - 1) ∣ (p : O) ∧ algebraMap O C (ζ - 1) ≠ 0 ∧ (v (p : C) = (p : NNReal)⁻¹ → -Real.log (v (algebraMap O C (ζ - 1))) = Real.log p / ((p : ℝ) - 1)) := by
-  intro C _ v O _ _ hv p hp ζ hζ _
-  have hp := hp.out
-  have h2 := hp.two_le
-  have : IsDomain O := hv.hom_inj.isDomain (algebraMap O C)
-  have hζO : IsPrimitiveRoot ζ p := hζ.of_map_of_injective hv.hom_inj
-  have ha := primRoot_sub_one_pow_associated hp hζO
-  have h1 : v (algebraMap O C (ζ - 1)) ^ (p - 1) = v (p : C) := by
-    obtain ⟨u, hu⟩ := ha
-    have := congrArg (fun x => v (algebraMap O C x)) hu
-    simp only [map_mul, map_pow, map_natCast, hv.one_of_isUnit u.isUnit, mul_one] at this
-    exact this
-  refine ⟨h1, (dvd_pow_self _ (by omega)).trans ha.dvd, ?_, fun hvp => ?_⟩
-  · rw [map_sub, map_one, sub_ne_zero]
-    exact hζ.ne_one hp.one_lt
-  · rw [hvp] at h1
-    have h3 := congrArg (fun x : NNReal => Real.log (x : ℝ)) h1
-    simp only [NNReal.coe_pow, Real.log_pow, NNReal.coe_inv, Real.log_inv, NNReal.coe_natCast] at h3
-    rw [Nat.cast_sub hp.one_le, Nat.cast_one] at h3
-    have h4 : (p : ℝ) - 1 ≠ 0 := by
-      have : (2 : ℝ) ≤ p := by exact_mod_cast h2
-      linarith [this] |> fun (h : (0:ℝ) < (p:ℝ) - 1) => h.ne'
-    rw [eq_div_iff h4]
-    linarith
 
 end GlobalTheory.CompanionTheory.Ar.HT

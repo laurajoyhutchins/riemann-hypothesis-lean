@@ -1,4 +1,48 @@
-import Formalism.GradedWeylDivisibility.StatementA
+module
+
+public import Formalism.GradedWeylDivisibility.StatementA
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MvPolynomial
 
@@ -16,7 +60,7 @@ def colLex (r n : ℕ) : MonomialOrder (Fin r × Fin n) where
       map_add' := fun a b => by
         show toLex (Finsupp.domCongr (cmIdx r n) (a + b)) =
           toLex (Finsupp.domCongr (cmIdx r n) a) + toLex (Finsupp.domCongr (cmIdx r n) b)
-        rw [map_add]; rfl }
+        rw [map_add (f := _)]; rfl }
   toSyn_monotone := fun a b h => Finsupp.toLex_monotone (α := Fin (n * r)) (N := ℕ)
     (show Finsupp.domCongr (cmIdx r n) a ≤ Finsupp.domCongr (cmIdx r n) b from fun i => h _)
 
@@ -43,7 +87,7 @@ def pairW {r n : ℕ} (l j : Fin n) : Fin r × Fin n → (Fin r × Fin n →₀ 
 def peel {B : Type*} [CommRing B] {r n : ℕ} (l j : Fin n) (a0 : Fin r) (k : ℕ)
     (g : MvPolynomial (Fin r × Fin n) B) : MvPolynomial (Fin r × Fin n) B :=
   ∑ m ∈ g.support.filter (fun m => m (a0, l) = k),
-    monomial ((m.erase (a0, l)).erase (a0, j)) (coeff m g)
+    monomial ((m.erase (a0, l)).erase (a0, j)) (AddMonoidAlgebra.coeff g m)
 
 open scoped MonomialOrder
 
@@ -142,19 +186,9 @@ def StandardMonomialSpanDomain : Prop :=
       {f | ∃ (K : ℕ) (sz : Fin K → ℕ) (hsz : ∀ k, sz k ≤ n) (I : ∀ k, Fin (sz k) → Fin r),
         shapeDeg sz = ν ∧ f = bideterminant B sz hsz I}
 
-def ColLexInitMinorOf : Prop := MinorExpLt → ColLexInitMinor
-def ColumnLexBideterminantOf : Prop := ColLexInitMinor → ColumnLexBideterminant
-def SSYTExistsOf : Prop := SSYTPeel → SSYTExists
-def PeelDegBoundOf : Prop := EvalDeg → PeelDegBound
-def TwoColumnOf : Prop := PeelDecomp → PeelHomog → PeelLead → PeelDegBound → TwoColumn
-def LeadInterlacedOf : Prop := CompDeg → LeadComp → TwoColumn → LeadInterlaced
-
 def SMSAssembly : Prop :=
   ColumnLexBideterminant → ColSums → SSYTExists → LeadInterlaced → StandardMonomialSpanDomain
 
 def StandardMonomialSpanOf : Prop := StandardMonomialSpanDomain → StandardMonomialSpan
-
-example : ((cmIdx 2 3 (1, 2) : Fin (3 * 2)) : ℕ) = 5 := by decide
-example : ((cmIdx 3 2 (2, 0) : Fin (2 * 3)) : ℕ) = 2 := by decide
 
 end Formalism.GradedWeylDivisibility

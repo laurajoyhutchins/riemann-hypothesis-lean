@@ -1,18 +1,63 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.ArchimedeanThetaValues.FinLocalCutAt
-import Development.AbelianVarietyTheory.Definitions.RegularCharts.ModelAt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.UnifUniqSt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.RigidSys
-import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.ExistsFinSiteNormEqZpowSiteAlg
-import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.ExistsLiftOpen
-import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.LcoeffPolyConstMul
-import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.BcRigidAtOfIntModel
-import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.RecordAtOfIsArcFr
-import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.ExistsNormalFormArcDatumFramedPointRootOfUnity
+module
+
+public import Development.AbelianVarietyTheory.Definitions.ArchimedeanThetaValues.FinLocalCutAt
+public import Development.AbelianVarietyTheory.Definitions.RegularCharts.ModelAt
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.SecBaseChangeAnySt
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.IsSmulPtSmulPt
+public import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.BcRigidAtOfIntModel
+public import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.ExistsFinSiteNormEqZpowSiteAlg
+public import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.ExistsLiftOpen
+public import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.ExistsNormalFormArcDatumFramedPointRootOfUnity
 import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.ExistsUniqueConstantTangentVectorsAlongArc
-import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.DegenerationDataBaseChangesExistPid
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.CorrOfValFieldExtension
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.IsSmulPtSmulPt
+public import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.LcoeffPolyConstMul
+public import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.RecordAtOfIsArcFr
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.CorrOfValFieldExtension
+import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.NonemptyCubicalPull
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.OneArc
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.RigidSys
+
+@[expose] public section
 
 noncomputable section
 
@@ -68,7 +113,17 @@ theorem gtTanR_of_isAdd {ν ν' ν'' : GtPt D (epsR R)} (h : ν.IsAdd ν' ν'') 
   refine (gtTanR_iff ν'').2 ⟨by rw [hb, MonObj.comp_mul, h₁, h₁', _root_.mul_one], fun χ y J hJ => ?_⟩
   have e := (val_mul hJ _ _ _).symm.trans ((val_corr hJ (h.2 χ) (origin R).left).trans (val_mul hJ _ _ _))
   have c := val_cub D.cub (origin R) hJ (DegPre.cT D (epsR R) χ) ν.b ν'.b
-  rw [h₁', (isCub_cubV D.cub hJ).face₃] at c
+  have c' := congrArg (fun z => cubV D.cub y J ((origin R) ≫ DegPre.cT D (epsR R) χ)
+    ((origin R) ≫ ν.b) z) h₁'
+  have cz (x x' : Over.mk (𝟙 (Sp R)) ⟶ D.P.A) : cubV D.cub y J x x' 1 = 1 := by
+    have hm : lift x (lift x' 1) = lift x x' ≫ faceMap (G := D.P.A) 2 := by
+      simp [faceMap, x2, pzero, Hom.one_def]
+    refine Eq.trans ?_ ((val_corr (hJ := hJ) (D.cub.face 2) (lift x x').left).trans (val_one _))
+    refine Eq.trans ?_ (val_pull (hJ := hJ) ..).symm
+    show val D.cub.t (lift x (lift x' 1)).left y J = _
+    rw [hm, Over.comp_left]
+    all_goals rfl
+  have c := c.trans (c'.trans (cz _ _))
   have e' := (congrArg₂ (· * ·) rfl c).symm.trans (e.trans (congrArg₂ (· * ·) (h₂ χ y J hJ) (h₂' χ y J hJ)))
   simpa using e'
 
@@ -85,8 +140,13 @@ theorem gtTanR_of_letBC {K K' : Type} [Field K] [Field K'] {f : K →+* K'} {D :
     {p : IsPullDeg f D D'} {ν : GtPt D (epsR K)} {ν' : GtPt D' (epsR K')} (h : LetBC p ν ν') (ht : GtTanR ν') :
     GtTanR ν := by
   obtain ⟨h₁, h₂⟩ := (gtTanR_iff ν').1 ht
-  rw [ArcQBC.letBC_iff] at h
-  have sq : (origin K').left ≫ spMap (dualMap f) = spMap f ≫ (origin K).left := ArcQBC.dual_fst f
+  have h : ν'.b.left ≫ prj p = spMap (Formalism.L2.Pj.dualMap f) ≫ ν.b.left ∧ ∀ χ,
+      (∀ i, DegPre.gtφT D' (epsR K') ν'.b χ i ≫ prj p = spMap (Formalism.L2.Pj.dualMap f) ≫ DegPre.gtφT D (epsR K) ν.b (p.xe χ) i) ∧
+      PMaps p.w _ _ DegPre.gtε (ν'.s χ) (ν.s (p.xe χ)) (spMap (Formalism.L2.Pj.dualMap f)) := ⟨h.1, fun χ => ⟨(h.2 χ).1, (maps_iff p.w _ _ _ (ν'.s χ) (ν.s (p.xe χ)) _ _
+    (GeneratorPullback.pullAlong_le _ _ _ _ _ (h.2 χ).1) (fun _ => rfl)).1 (h.2 χ).2⟩⟩
+  have sq : (origin K').left ≫ spMap (Formalism.L2.Pj.dualMap f) = spMap f ≫ (origin K).left := by
+    refine (spMap_comp _ _).symm.trans (Eq.trans (congrArg spMap ?_) (spMap_comp _ _))
+    exact RingHom.ext fun x => by simp [Formalism.L2.Pj.dualMap]
   have : Flat (spMap f) := by
     refine (HasRingHomProperty.Spec_iff (P := @Flat)).2 ?_
     exact RingHom.Flat.of_isField (Field.toIsField K) _

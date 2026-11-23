@@ -1,5 +1,57 @@
-import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.ExistsNormRepresentation
-import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.IsUnimodularAtIffVd
+module
+
+public import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.ExistsNormRepresentation
+public import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.AlgebraMapNeZeroOfMemHcompl
+public import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.LocalDensityRatio
+import Formalism.HermitianLattices.HermitianLatticesProofs.LocBasic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField
 
@@ -200,7 +252,7 @@ theorem exists_isUnif (hF : IsFixF K F) {P : Ideal (𝓞 K)}
         conjO K u + algebraMap (𝓞 F) (𝓞 K) π₀ * conjO K r := by
       apply IsFractionRing.injective (𝓞 K) K
       rw [hcv]
-      simp only [map_add, map_mul, star_add, star_mul', hπfix, hcu, hcr]
+      simp only [map_add (f := _), map_mul, star_add, star_mul', hπfix, hcu, hcr]
     have hvH : u + algebraMap (𝓞 F) (𝓞 K) π₀ * r ∈ Formalism.HermitianLatticesTheory.hcompl (K := K) P := by
       apply Submonoid.subset_closure
       refine ⟨hvP, fun t ht => ?_⟩
@@ -216,7 +268,7 @@ theorem exists_isUnif (hF : IsFixF K F) {P : Ideal (𝓞 K)}
     have e : 1 + algebraMap (𝓞 K) K (algebraMap (𝓞 F) (𝓞 K) π₀) *
         (algebraMap (𝓞 K) K r / algebraMap (𝓞 K) K u) =
         algebraMap (𝓞 K) K (u + algebraMap (𝓞 F) (𝓞 K) π₀ * r) / algebraMap (𝓞 K) K u := by
-      rw [map_add, map_mul]
+      rw [map_add (f := _), map_mul]
       field_simp
     rw [e]
     refine ⟨div_ne_zero hvK huK, div_mem_locRing hPp _ hu, ?_⟩
@@ -269,7 +321,7 @@ theorem exists_isUnif (hF : IsFixF K F) {P : Ideal (𝓞 K)}
       calc z = z * algebraMap (𝓞 F) (𝓞 K) 1 := by rw [map_one, mul_one]
         _ = _ := by
           rw [h1]
-          simp only [map_add, map_mul]
+          simp only [map_add (f := _), map_mul]
           ring
     rw [hz2]
     exact Ideal.add_mem _ (Ideal.mul_mem_left _ _ hzN) (Ideal.mul_mem_left _ _ hi2)

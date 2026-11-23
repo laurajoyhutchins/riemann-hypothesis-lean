@@ -1,4 +1,50 @@
-import ReciprocityTheory.GaloisValuations.SeparatedDvrSecondCohomologyMem
+module
+
+public import ReciprocityTheory.GaloisValuations.SeparatedDvrSecondCohomologyMem
+public import Mathlib.LinearAlgebra.Quotient.Bilinear
+public import Mathlib.Topology.Algebra.Module.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace ReciprocityTheory.Gal
 
@@ -37,7 +83,7 @@ def cupCocycleZ1Z1 (hrho' : ContAction rho') : Z1 rho →ₗ[R] Z1 rho' →ₗ[R
         have hy := y.2.2 h k
         dsimp only
         rw [← hbe, hx, hy, map_mul, Module.End.mul_apply]
-        simp only [map_add, LinearMap.add_apply]
+        simp only [map_add (f := _), LinearMap.add_apply]
         abel⟩)
     (fun x x' y => Subtype.ext (funext fun p => by simp))
     (fun r x y => Subtype.ext (funext fun p => by simp))
@@ -60,7 +106,7 @@ def cupProductH1H1 (hrho' : ContAction rho') : H1 rho →ₗ[R] H1 rho' →ₗ[R
       obtain ⟨g, h⟩ := p
       have e := hm g
       simp only [Submodule.coe_subtype] at e
-      simp only [d1_apply, Submodule.coe_subtype, cupCocycleZ1Z1_apply, e, ← hbe, y.2.2 g h, map_add,
+      simp only [d1_apply, Submodule.coe_subtype, cupCocycleZ1Z1_apply, e, ← hbe, y.2.2 g h, map_add (f := _),
         map_sub, LinearMap.sub_apply]
       abel)
     (fun y hy => by
@@ -88,7 +134,7 @@ def cupCocycleH0Z2 : H0 rho →ₗ[R] Z2 rho' →ₗ[R] Z2 rhoP :=
     (fun m f => ⟨fun p => b m.1 (f.1 p), hb.comp (continuous_const.prodMk f.2.1),
       fun g h k => by
         have e := congrArg (b m.1) (f.2.2 g h k)
-        simp only [map_sub, map_add, map_zero] at e
+        simp only [map_sub, map_add (f := _), map_zero] at e
         rw [← hbe, (mem_riemannRochSpace_iff_regularAt_everywhere rho m.1).1 m.2 g]
         exact e⟩)
     (fun m m' f => Subtype.ext (funext fun p => by simp))
@@ -120,7 +166,7 @@ def cupCocycleZ2H0 : Z2 rho →ₗ[R] H0 rho' →ₗ[R] Z2 rhoP :=
     (fun f m => ⟨fun p => b (f.1 p) m.1, hb.comp (f.2.1.prodMk continuous_const),
       fun g h k => by
         have e := congrArg (b.flip m.1) (f.2.2 g h k)
-        simp only [map_sub, map_add, map_zero, LinearMap.flip_apply] at e
+        simp only [map_sub, map_add (f := _), map_zero, LinearMap.flip_apply] at e
         rw [← (mem_riemannRochSpace_iff_regularAt_everywhere rho' m.1).1 m.2 g, hbe, (mem_riemannRochSpace_iff_regularAt_everywhere rho' m.1).1 m.2 g] at e
         exact e⟩)
     (fun f f' m => Subtype.ext (funext fun p => by simp))
@@ -145,7 +191,7 @@ def cupProductH2H0 : H2 rho →ₗ[R] H0 rho' →ₗ[R] H2 rhoP :=
       have e := congrFun hcf (g, h)
       simp only [Submodule.coe_subtype] at e
       have hm := (mem_riemannRochSpace_iff_regularAt_everywhere rho' m.1).1 m.2 g
-      simp only [d1_apply, Submodule.coe_subtype, cupCocycleZ2H0_apply, ← e, map_add, map_sub,
+      simp only [d1_apply, Submodule.coe_subtype, cupCocycleZ2H0_apply, ← e, map_add (f := _), map_sub,
         LinearMap.add_apply, LinearMap.sub_apply]
       rw [← hbe, hm])
 
@@ -190,15 +236,6 @@ instance continuousConstSMul_quotient (N : Submodule R M) : ContinuousConstSMul 
   ⟨fun c => by
     rw [(Submodule.isQuotientMap_mkQ N).continuous_iff]
     exact (Submodule.isQuotientMap_mkQ N).continuous.comp (continuous_const_smul c)⟩
-
-def toQuotientH1 : H1 rhoD →ₗ[R] H1 (rhoD.quotient Mplus hMplus) :=
-  mapH1 rhoD (rhoD.quotient Mplus hMplus) Mplus.mkQ (continuous_mkQ Mplus) (fun _ _ => rfl)
-
-def greenbergSelmer : Submodule R (H1 rhoD) :=
-  LinearMap.ker ((resH1 (rhoD.quotient Mplus hMplus) J.subtype continuous_subtype_val).comp
-    (toQuotientH1 rhoD Mplus hMplus))
-
-def strictGreenbergSelmer : Submodule R (H1 rhoD) := LinearMap.ker (toQuotientH1 rhoD Mplus hMplus)
 
 end Inertia
 

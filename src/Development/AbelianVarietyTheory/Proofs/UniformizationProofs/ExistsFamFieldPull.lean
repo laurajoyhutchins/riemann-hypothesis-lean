@@ -1,10 +1,54 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.UnifUniqSt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ValCalc
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsMonHomOfMul
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.FamMod
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExistsUniqueSecPull
-import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.ExistsBoxPullGen
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.PhiGenPf
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.UnifBaseChangeSt
+public import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.ExistsBoxPullGen
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExistsUniqueSecPull
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.OneArc
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.RigIsoCongr
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -160,7 +204,7 @@ theorem deltaφ_pr (k : ℕ) (α mu : D'.X) (a : Fin 4 ⊕ Fin 4) :
     DegPre.deltaφ D' F k α mu a ≫ prA hD = Θ ≫ DegPre.deltaφ D F k (hD.xe α) (hD.xe mu) a := by
   rcases a with a | a
   · refine (famφ_pr hD F hT h₁ h₂ (α + k • mu) a).trans ?_
-    rw [map_add, map_nsmul]; rfl
+    rw [map_add (f := _), map_nsmul]; rfl
   · show ((DegPre.trF D' F mu).left ≫ DegPre.famφ D' F α a) ≫ _ =
       Θ ≫ (DegPre.trF D F (hD.xe mu)).left ≫ DegPre.famφ D F (hD.xe α) a
     rw [Category.assoc, famφ_pr hD F hT h₁ h₂, ← Category.assoc, trF_pr hD F hT h₁ h₂, Category.assoc]
@@ -201,7 +245,7 @@ theorem famMult_pr (k : ℕ) (α mu : D'.X) (y : Sp F) {J J'} (hJ : Good D.P.L y
         (vK D'.rigK y J')⁻¹) * vK D'.rigK y J' ^ k := BoxFamily.famMult_val F hJ' k _ _ _
   have p := BoxFamily.prod_delta_zero F D' k α mu (wGerm (Z := Sp F) hD.w y J J')
   refine m.trans (Eq.trans ?_ (congrArg₂ (· * ·) p m').symm)
-  rw [← map_add, vψ, vψ, vψ, vρ]
+  rw [← map_add (f := _), vψ, vψ, vψ, vρ]
   apply Additive.ofMul.injective
   simp only [ofMul_mul, ofMul_inv, ofMul_pow]
   module
@@ -247,7 +291,7 @@ theorem pull_fe (hG : GlobalFnsSt) (k : ℕ) (s : Fam D F k)
   have e₄ : sval (s.s (hD.xe (α + k • mu))) (𝟙 _ ≫ Θ) y J =
       sval (s.s (hD.xe α)) ((𝟙 _ ≫ (DegPre.trF D' F mu).left) ≫ Θ) y J * (val u (𝟙 _ ≫ Θ) y J).val := by
     have := (secRel_iff D.P.isLB _ _ _ _ _ _ _ _ _ u).1 (s.fe _ _ u hu hc) _ (𝟙 _ ≫ Θ) y J hJ
-    rw [map_add, map_nsmul, this, Category.assoc, Category.assoc, trF_pr hD F hT h₁ h₂]
+    rw [map_add (f := _), map_nsmul, this, Category.assoc, Category.assoc, trF_pr hD F hT h₁ h₂]
   have e₅ : (∏ a, wGerm hD.w y J J' (𝟙 _ ≫ DegPre.deltaφ D' F k α mu a) ^ DegPre.deltaε k a) =
       (∏ a, wGerm hD.w y J J' (𝟙 _ ≫ DegPre.famφ D' F (α + k • mu) a) ^ DegPre.famε k a) *
       (∏ a, wGerm hD.w y J J' ((𝟙 _ ≫ (DegPre.trF D' F mu).left) ≫ DegPre.famφ D' F α a) ^ DegPre.famε k a)⁻¹ := by

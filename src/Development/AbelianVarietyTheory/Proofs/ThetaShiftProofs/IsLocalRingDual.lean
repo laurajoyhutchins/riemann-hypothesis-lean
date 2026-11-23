@@ -1,9 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.ArchimedeanThetaValues.IsThetaL2NormSquared
-import Development.AbelianVarietyTheory.Definitions.RegularCharts.ModelAt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.UnifUniqSt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ExistsZeroGt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ToStkAInjective
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ToStkAInjective
+public import Development.AbelianVarietyTheory.Definitions.ArchimedeanThetaValues.IsFramedPointChangedByLetters
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Formalism.LocalToGlobal.ProjectiveLattices.ArchimedeanQuadraticData.ArcLineFunctions.ArcSPin
+
+@[expose] public section
 
 noncomputable section
 
@@ -11,6 +54,7 @@ namespace GlobalTheory.TorusTangent
 
 open AlgebraicGeometry CategoryTheory CategoryTheory.Limits NumberField MonoidalCategory CartesianMonoidalCategory MonObj
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.FD Formalism.L2.Pj Formalism.L2.PjFree Formalism.L2.Pj.QAt GlobalTheory.ArcQ GlobalTheory.Frames
+open Formalism.L2.Pj (dualMap)
 open scoped LaurentSeries
 
 section Val
@@ -22,11 +66,11 @@ theorem valR_spMap (ρ : A →+* B) (x : Sp A ⟶ X) (U : X.Opens) (hx : ⊤ ≤
   have hx' : ⊤ ≤ (spMap ρ ≫ x) ⁻¹ᵁ U := fun p _ => hx (x := spMap ρ p) trivial
   have h3 : (spMap ρ).appLE ⊤ ⊤ le_rfl = (spMap ρ).appTop := by
     rw [Scheme.Hom.appTop, Scheme.Hom.app_eq_appLE]; rfl
-  rw [valR, valR, dif_pos hx, dif_pos hx', ← Scheme.Hom.appLE_comp_appLE (spMap ρ) x U ⊤ ⊤ hx le_rfl, h3]
+  rw [valR, valR, dite_eq_left hx, dite_eq_left hx', ← Scheme.Hom.appLE_comp_appLE (spMap ρ) x U ⊤ ⊤ hx le_rfl, h3]
   exact congrArg (fun q => q.hom ((x.appLE U ⊤ hx).hom f)) (Scheme.ΓSpecIso_naturality (CommRingCat.ofHom ρ))
 
 theorem isUnit_valR (x : Sp A ⟶ X) (U : X.Opens) (hx : ⊤ ≤ x ⁻¹ᵁ U) (f : Γ(X, U)ˣ) : IsUnit (valR x U f.val) := by
-  rw [valR, dif_pos hx]
+  rw [valR, dite_eq_left hx]
   exact (f.isUnit.map _).map _
 
 theorem gm_spMap (ρ : A →+* B) (x : Sp A ⟶ X) (U : X.Opens) (hx : ⊤ ≤ x ⁻¹ᵁ U) (z : Sp B) (f : Γ(X, U)ˣ) :
@@ -37,7 +81,7 @@ theorem gm_spMap (ρ : A →+* B) (x : Sp A ⟶ X) (U : X.Opens) (hx : ⊤ ≤ x
 theorem valR_id_top (c : Γ(Sp A, ⊤)) : valR (𝟙 (Sp A)) ⊤ c = (Scheme.ΓSpecIso (CommRingCat.of A)).hom.hom c := by
   have h : (𝟙 (Sp A) : Sp A ⟶ Sp A).appLE ⊤ ⊤ le_top = 𝟙 _ := by
     simp [Scheme.Hom.appLE]
-  rw [valR, dif_pos (show ⊤ ≤ (𝟙 (Sp A)) ⁻¹ᵁ ⊤ from le_top)]
+  rw [valR, dite_eq_left (show ⊤ ≤ (𝟙 (Sp A)) ⁻¹ᵁ ⊤ from le_top)]
   show (Scheme.ΓSpecIso (CommRingCat.of A)).hom.hom (((𝟙 (Sp A) : Sp A ⟶ Sp A).appLE ⊤ ⊤ le_top).hom _) = _
   rw [h]; rfl
 
@@ -249,7 +293,7 @@ theorem valR_oneAdd (a : A) : valR (𝟙 _) ⊤ (oneAdd a).val = 1 + TrivSqZeroE
 theorem existsUnique_tan [IsLocalRing A] (φ : D.X →+ A) : ∃! ν : Out.GtPt D (epsR A),
     GtTanR ν ∧ ν.b = Out.DegPre.zeroT D (epsR A) ∧ ∀ x, Dlog ν x (φ x) := by
   obtain ⟨ν, hb, hv⟩ := exists_pt (D := D) (T := epsR A) (fun x => oneAdd (φ x)) fun x y => by
-    rw [map_add, oneAdd_add]
+    rw [map_add (f := _), oneAdd_add]
   refine ⟨ν, ⟨?_, hb, fun x => (dlog_iff_hasVal ν hb x (hv x) _).2 (by rw [valR_oneAdd]; simp)⟩, ?_⟩
   · obtain ⟨g₀, h₀, v₀⟩ := exists_pt (D := D) (T := Over.mk (𝟙 (Sp A))) (fun _ => 1) fun _ _ => (_root_.mul_one _).symm
     refine ⟨g₀, ⟨h₀, fun x => corr_of_val D.P.isLB fun y J hJ => ?_⟩, ?_, fun x => corr_of_val D.P.isLB fun y J hJ => ?_⟩

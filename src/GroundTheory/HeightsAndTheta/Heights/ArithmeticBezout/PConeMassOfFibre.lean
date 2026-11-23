@@ -1,8 +1,58 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.StatementsConeFibreAverage
-import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.PConeIntegralMass
-import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.LogIntPoly
-import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.PPointLine
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.StatementsConeFibreAverage
+public import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.PConeIntegralMass
+public import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.LogIntPoly
+public import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.PPointLine
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+public import Mathlib.Topology.MetricSpace.HausdorffDimension
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -37,6 +87,7 @@ theorem homogeneousComponent_aeval_coordPlaneSubst (m k d : ℕ) (f : MvPolynomi
     rw [homogeneousComponent_of_mem ((mem_homogeneousSubmodule _ _).2 he)]
     exact if_congr eq_comm rfl rfl
   conv_lhs => rw [← sum_homogeneousComponent f]
+
   rw [map_sum, map_sum]
   simp_rw [hterm]
   rw [Finset.sum_ite_eq']
@@ -46,14 +97,14 @@ theorem homogeneousComponent_aeval_coordPlaneSubst (m k d : ℕ) (f : MvPolynomi
     rw [homogeneousComponent_eq_zero _ _ (by omega), map_zero]
 
 theorem isProjPrime_coordPlaneIdeal {m : ℕ} (hm : 0 < m) (k : ℕ) :
-    IsProjPrime (coordPlaneIdeal m k) where
-  isPrime := RingHom.ker_isPrime _
-  isHomog f hf d := by
+    IsProjPrime (coordPlaneIdeal m k) := by
+  refine ⟨RingHom.ker_isPrime (aeval (coordPlaneSubst m k)), ?_, ?_⟩
+  · intro f hf d
     rw [coordPlaneIdeal, RingHom.mem_ker] at hf ⊢
     rw [← homogeneousComponent_aeval_coordPlaneSubst, hf, map_zero]
-  isRelevant := ⟨Fin.castAdd k ⟨0, hm⟩, by
+  · refine ⟨Fin.castAdd k ⟨0, hm⟩, ?_⟩
     rw [coordPlaneIdeal, RingHom.mem_ker, aeval_X, coordPlaneSubst, Fin.append_left]
-    exact X_ne_zero _⟩
+    exact X_ne_zero _
 
 theorem pointOf_std {n : ℕ} (y : EuclideanSpace ℂ (Fin n)) :
     (HermNorm.std n).pointOf y = fun i => y i := by

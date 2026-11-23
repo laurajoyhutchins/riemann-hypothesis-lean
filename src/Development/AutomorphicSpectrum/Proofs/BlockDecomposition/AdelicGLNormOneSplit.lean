@@ -1,8 +1,48 @@
-import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.CuspDiscreteDecompositionGL
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.NotIsFinitePartOfBot
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.CuspDiscreteDecompositionOfTraceClass
-import GroundTheory.AutomorphicForms.CuspidalDiscreteness
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.BaseChangeDefiniteUnitary
+public import GroundTheory.AutomorphicForms.ReductionMahler
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.T2SpaceAdelicGeneralLinearGroupNumberField
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.IsCompactOperatorOfIsHilbertSchmidt
+
+@[expose] public section
 
 open NumberField MeasureTheory Topology GlobalTheory.AutomorphicL2Unitary GlobalTheory.DiscreteSum GlobalTheory.OpTrace GlobalTheory.CuspRep GlobalTheory.CuspRep.CuspidalL2GL GlobalTheory.UnitaryBC
 
@@ -12,7 +52,7 @@ namespace GlobalTheory.CompanionTheory.SplitHomeo
 
 open GroundTheory.Automorphic GroundTheory.Global
 
-variable {E : Type} [Field E] [NumberField E] [IsTotallyComplex E] {a : ℕ}
+variable {E : Type} [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] {a : ℕ}
 
 theorem continuous_splitCentre : Continuous (splitCentre E a) := by
   have e : splitCentre E a = fun t : ℝ =>
@@ -24,15 +64,15 @@ theorem continuous_splitCentre : Continuous (splitCentre E a) := by
   change Continuous fun x : Ad E => Matrix.diagonal fun _ : Fin a => x
   exact (continuous_pi fun _ => continuous_id).matrix_diagonal
 
-variable (E) in
 
+variable (E) in
 def expIdele (t : ℝ) : IdeleGroup E := infId E (expU fun _ : InfinitePlace E => (t : ℂ))
 
 theorem pInf_expIdele (t : ℝ) (w : InfinitePlace E) :
     pInf E (expIdele E t : Ad E) w = Complex.exp t := by
   have h : ∀ x, pInf E (sInf E x) = x := fun x => (infEq E).symm_apply_apply x
   change pInf E (1 - sInf E 1 + sInf E _) w = _
-  simp only [map_add, map_sub, map_one, h, sub_self, zero_add]
+  simp only [map_add (f := _), map_sub, map_one, h, sub_self, zero_add]
   rfl
 
 theorem pFin_expIdele (t : ℝ) : pFin E (expIdele E t : Ad E) = 1 := by
@@ -82,13 +122,13 @@ theorem coeff_ne_zero (ha : 0 < a) : (a * Module.finrank ℚ E : ℝ) ≠ 0 :=
   mul_ne_zero (Nat.cast_ne_zero.2 ha.ne') (Nat.cast_ne_zero.2 Module.finrank_pos.ne')
 
 theorem splitCentre_neg_mul_mem (ha : 0 < a) (g : GA E a) :
-    splitCentre E a (-splitDeg E a g) * g ∈ Reduction.normOneGL E a := by
+    splitCentre E a (-splitDeg E a g) * g ∈ Reduction.normOneGL (K := E) (n := a) := by
   have hc := coeff_ne_zero (E := E) ha
   have hpos := (IdeleGroup.ideleModule E (AdelicGLn.det E a g)).2
   rw [Reduction.mem_normOneGL, map_mul, map_mul, Positive.val_mul, ideleModule_det_splitCentre,
     mul_neg, splitDeg, mul_div_cancel₀ _ hc, Real.exp_neg, Real.exp_log hpos, inv_mul_cancel₀ hpos.ne']
 
-theorem splitDeg_splitCentre_mul (ha : 0 < a) (x : Reduction.normOneGL E a) (t : ℝ) :
+theorem splitDeg_splitCentre_mul (ha : 0 < a) (x : Reduction.normOneGL (K := E) (n := a)) (t : ℝ) :
     splitDeg E a (splitCentre E a t * (x : GA E a)) = t := by
   have hc := coeff_ne_zero (E := E) ha
   have hx : (IdeleGroup.ideleModule E (AdelicGLn.det E a (x : GA E a)) : ℝ) = 1 :=
@@ -100,8 +140,8 @@ theorem splitCentre_neg_mul_self (t : ℝ) (g : GA E a) :
     splitCentre E a (-t) * (splitCentre E a t * g) = g := by
   rw [← mul_assoc, ← splitCentre_add, neg_add_cancel, splitCentre_zero, one_mul]
 
-theorem exists_homeomorph (E : Type) [Field E] [NumberField E] [IsTotallyComplex E] (a : ℕ) (ha : 0 < a) :
-    ∃ e : Reduction.normOneGL E a × ℝ ≃ₜ GA E a, ∀ x t, e (x, t) = splitCentre E a t * (x : GA E a) := by
+theorem exists_homeomorph (E : Type) [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] (a : ℕ) (ha : 0 < a) :
+    ∃ e : Reduction.normOneGL (K := E) (n := a) × ℝ ≃ₜ GA E a, ∀ x t, e (x, t) = splitCentre E a t * (x : GA E a) := by
   refine ⟨{
     toFun := fun p => splitCentre E a p.2 * (p.1 : GA E a)
     invFun := fun g => (⟨splitCentre E a (-splitDeg E a g) * g, splitCentre_neg_mul_mem ha g⟩, splitDeg E a g)

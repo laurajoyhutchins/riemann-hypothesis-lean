@@ -1,28 +1,71 @@
-import Mathlib
-import Formalism.LocalToGlobal.CharacterGerms.NondegenerateCharts
-import Formalism.LocalToGlobal.CharacterGerms.RowTieSelf
-import Formalism.LocalToGlobal.CharacterGerms.BlockAdmissibleChart
-import Formalism.LocalToGlobal.CharacterGerms.NegMem
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PlaceDivisors.StChartF
-import Development.AbelianVarietyTheory.Definitions.TeichmullerDepth.HasTeich
-import Formalism.LocalToGlobal.CharacterGerms.RowTieAdm
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.SCMain
-import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.IntSOfMulEqOne
-import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.HasGaugeAdjointTeichmullerEndSelfConjugatePlace
-import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.ExistsAdjointIntegralEndOfLadicLimit
+module
+
+public import Formalism.LocalToGlobal.CharacterGerms.RowTieSelf
+public import Development.AbelianVarietyTheory.Definitions.TeichmullerDepth.HasTeich
+public import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.AdmissibleRowsValueEqRowGaugeStatement
+public import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.ConstantCoeffDerivationPolynomialEqJetAt0Statement
+public import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.DiagonalSplitStatement
+public import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.ExistsAdjointIntegralEndOfLadicLimit
+public import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.ExistsEndomorphismPairW0Statement
 import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.ExistsIntegralEndOfLadicActionLimitStatement
-import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.ExistsLadicSeparatingSequenceEmbeddingsStatement
-import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.DiagonalSplitStatement
-import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.ExistsIntegralSeriesFrameEqProdRowsStatement
-import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.ExistsEndomorphismPairW0Statement
-import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.GaugeBiadditiveSymmAdjointIntegralEndStatement
-import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.InvariantDerivationsConstantInLogCoordinatesStatement
-import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.ConstantCoeffDerivationPolynomialEqJetAt0Statement
-import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.JetAt0ProdSubstDisjointVariablesStatement
-import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.AdmissibleRowsValueEqRowGaugeStatement
-import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.IntegralGermEqGaugedFormalGroupLawExpIntegralStatement
-import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.HasGaugeAdjointLieProjectorsSelfConjugatePlaceStatement
+public import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.ExistsIntegralSeriesFrameEqProdRowsStatement
+public import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.ExistsLadicSeparatingSequenceEmbeddingsStatement
+public import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.GaugeBiadditiveSymmAdjointIntegralEndStatement
+public import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.HasGaugeAdjointLieProjectorsSelfConjugatePlaceStatement
+import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.HasGaugeAdjointTeichmullerEndSelfConjugatePlace
+public import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.IntegralGermEqGaugedFormalGroupLawExpIntegralStatement
+public import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.InvariantDerivationsConstantInLogCoordinatesStatement
 import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.IsIntegralGaugedFormalGroupLawSelfConjugateSquarStatement
+public import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.JetAt0ProdSubstDisjointVariablesStatement
+import Formalism.LocalToGlobal.CharacterGerms.ConstMemTypeSetOfNonneg
+public import Formalism.LocalToGlobal.CharacterGerms.RowTieAdm
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.LiftXEqRename
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.SCMain
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open scoped BigOperators
 open NumberField Formalism.IncomingBounds Formalism.L2.FormalSeriesBounds Formalism.L2.Pj GlobalTheory.RowLaw GlobalTheory.RowVal ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.Geo.Tor.Germ
@@ -232,6 +275,7 @@ theorem glue (ex : Pt C 1 dd) (hex : ∀ i, constantCoeff (ex i) = 0) (hl : PS C
     show _ = subst (fun j : Fin dd => linCol pl u (pl (ρ, x.1), j)) (un1 (ex x.2))
     congr 1
     funext j
+
     rw [linCol_pl, ← coe_substAlgHom (hRS ρ), map_sum]
     refine Finset.sum_congr rfl fun w _ => ?_
     rw [map_smul, coe_substAlgHom, subst_X (hRS ρ)]
@@ -244,11 +288,13 @@ theorem glue (ex : Pt C 1 dd) (hex : ∀ i, constantCoeff (ex i) = 0) (hl : PS C
     rw [Subsingleton.elim q.1 0]
     rfl
   have hc1 : constantCoeff (k • ∑ b : Fin n, ev (n := n) ![pt C dd b] hl) = 0 := by
+
     rw [constantCoeff_smul, map_sum, Finset.sum_eq_zero, smul_zero]
     intro b _
     rw [hcb]
     exact constantCoeff_subst_zero (fun _ => constantCoeff_X _) hl'
   have hc2 : constantCoeff (k • ∑ col : Fin 2, inCol col (un1 hl)) = 0 := by
+
     rw [constantCoeff_smul, map_sum, Finset.sum_eq_zero, smul_zero]
     intro b _
     exact constantCoeff_subst_zero (fun _ => constantCoeff_X _) hl'
@@ -261,6 +307,7 @@ theorem glue (ex : Pt C 1 dd) (hex : ∀ i, constantCoeff (ex i) = 0) (hl : PS C
     have hS := hasSubst_of_constantCoeff_zero (hG0 ρ)
     rw [subst_comp_subst_apply heS (hRS ρ)]
     simp only [hE1]
+
     rw [subst_mul hS, subst_mvExp (hG0 ρ) hc2, ← coe_substAlgHom hS, map_smul, map_sum]
     simp only [coe_substAlgHom, teichSelf_subst_inCol _ (hG0 ρ)]
   simp only [hR]
@@ -273,6 +320,7 @@ theorem glue (ex : Pt C 1 dd) (hex : ∀ i, constantCoeff (ex i) = 0) (hl : PS C
   · unfold FB.expS
     rw [← mvExp_eq_subst hc1, subst_mvExp hE0 hc1, ← mvExp_sum]
     · congr 1
+
       rw [← Finset.smul_sum, ← coe_substAlgHom hES, map_smul, map_sum]
       congr 1
       have h1 : ∀ b : Fin n, substAlgHom hES (ev (n := n) ![pt C dd b] hl) = subst (fun j => E (b, j)) (un1 hl) := by
@@ -294,6 +342,7 @@ theorem glue (ex : Pt C 1 dd) (hex : ∀ i, constantCoeff (ex i) = 0) (hl : PS C
       rw [h2]
       exact subst_zero_of_cc hl'
     · intro ρ
+
       rw [constantCoeff_smul, map_sum, Finset.sum_eq_zero, smul_zero]
       intro b _
       exact constantCoeff_subst_zero (fun _ => hE0 _) hl'
@@ -316,10 +365,11 @@ theorem valEqSelf : ∀ (C : Type) [Field C] [CharZero C] (V : VF C) (O : Type) 
     refine GlobalTheory.T.invariantDerivations_constant_in_logCoordinates C V O dd Y n _ (linCol pl u) (cc_linCol pl u) _ _ _ ?_
     intro b j
     obtain ⟨ρ, col, hpl, h0, h1⟩ := hco ℓ hℓ
-    have h2 : ∀ x, MvPowerSeries.pderiv C x (linCol pl u (b, j)) =
+    have h2 : ∀ x, MvPowerSeries.pderiv (R := C) x (linCol pl u (b, j)) =
         MvPowerSeries.C (∑ col : Fin 2, if pl (x.1, col) = b then u x.2 (col, j) else 0) := by
       intro x
       unfold linCol
+
       rw [map_sum, Finset.sum_eq_single x]
       · rw [Derivation.map_smul, MvPowerSeries.pderiv_X_self, MvPowerSeries.smul_eq_C_mul, mul_one]
       · intro y _ hy
@@ -330,6 +380,7 @@ theorem valEqSelf : ∀ (C : Type) [Field C] [CharZero C] (V : VF C) (O : Type) 
       have := congrFun h1 (col', j)
       simpa [Finset.sum_apply, hu] using this.symm
     simp only [h2, MvPowerSeries.smul_eq_C_mul, ← map_mul]
+
     rw [← map_sum, Fintype.sum_prod_type, Finset.sum_eq_single ρ]
     · simp only [Finset.mul_sum, mul_ite, mul_zero]
       rw [Finset.sum_comm]
@@ -349,6 +400,7 @@ theorem valEqSelf : ∀ (C : Type) [Field C] [CharZero C] (V : VF C) (O : Type) 
     unfold FBChart.nab nabValN
     rw [hjet, ← hQ, Fintype.prod_empty, Fintype.prod_empty, RF.jetAt0_one, cc_subst hE0, one_mul]
     refine ReciprocityTheory.ChartRestriction.G.TB.SCPf.cc_expS _ ?_
+
     rw [MvPowerSeries.constantCoeff_smul, map_sum, Finset.sum_eq_zero, smul_zero]
     intro b _
     refine constantCoeff_subst_zero (fun q => ?_) hl0

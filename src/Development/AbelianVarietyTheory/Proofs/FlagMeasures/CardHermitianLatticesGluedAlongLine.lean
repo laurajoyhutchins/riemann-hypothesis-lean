@@ -1,9 +1,64 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.ChartGen
-import Development.AbelianVarietyTheory.PublishedTheorems.DiscreteSeriesUnitary₂.MaxMass
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.HermitianLatticeDiscriminantOrderNeZeroUnimodula
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.LatticeQuotientGensAndIntermediateCount
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.WittExtensionTotallyDefiniteHermitian
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.ChartGen
+public import Formalism.HermitianLattices.StatementMass
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.HermitianLatticeDiscriminantOrderNeZeroUnimodula
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.LatticeQuotientGensAndIntermediateCount
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.WittExtensionTotallyDefiniteHermitian
+import Formalism.HermitianLattices.HermitianLatticesProofs.DualBasic
+import Formalism.HermitianLattices.HermitianLatticesProofs.DualLattice
+import Formalism.HermitianLattices.HermitianLatticesProofs.GenusCovol
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Presheaf
+
+@[expose] public section
+
 open NumberField Matrix GlobalTheory.Mass Formalism.HermitianLatticesTheory
 open scoped ENNReal Classical
 
@@ -26,8 +81,9 @@ variable {K W : Type} [Field K] [NumberField K] [AddCommGroup W] [Module K W]
   [FiniteDimensional K W] [Module (𝓞 K) W] [IsScalarTower (𝓞 K) K W]
 
 theorem exists_gen (h1 : Module.finrank K W = 1) {B C : Submodule (𝓞 K) W}
-    (hB : Submodule.IsLattice K B) (hBC : B ≤ C) (hC : C.FG) :
+    (hB : Submodule.IsFullLattice K B) (hBC : B ≤ C) (hC : C.FG) :
     ∃ y, C = B ⊔ Submodule.span (𝓞 K) {y} := by
+  letI : StarRing K := starRingOfComm
   obtain ⟨t, ht, e⟩ := (LatticeGens.gens_and_count K W B C hBC
     (DiscOrder.idxN_ne_zero hB hC)).1 hC
   rw [h1] at ht
@@ -37,13 +93,13 @@ theorem exists_gen (h1 : Module.finrank K W = 1) {B C : Submodule (𝓞 K) W}
   · exact ⟨y, by simpa using e⟩
 
 theorem encard_between (h1 : Module.finrank K W = 1) {B : Submodule (𝓞 K) W}
-    (hB : Submodule.IsLattice K B) (T : 𝓞 K) (hT : T ≠ 0) :
+    (hB : Submodule.IsFullLattice K B) (T : 𝓞 K) (hT : T ≠ 0) :
     {C : Submodule (𝓞 K) W | B ≤ C ∧ ∀ x ∈ C, T • x ∈ B}.encard ≤
       ((Ideal.absNorm (Ideal.span {T}) : ℕ) : ℕ∞) := by
   set D : Submodule (𝓞 K) W := B.comap (LinearMap.lsmul (𝓞 K) W T) with hD
   have hTK : algebraMap (𝓞 K) K T ≠ 0 := by simpa using hT
   have hinj : Function.Injective (LinearMap.lsmul (𝓞 K) W T) := by
-    rw [injective_iff_map_eq_zero]
+    set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
     intro x hx
     have : algebraMap (𝓞 K) K T • x = 0 := by rw [algebraMap_smul]; exact hx
     exact (smul_eq_zero.1 this).resolve_left hTK
@@ -80,7 +136,8 @@ theorem encard_between (h1 : Module.finrank K W = 1) {B : Submodule (𝓞 K) W}
     exact sub_mem (B.smul_mem k hyD) ha
   have hn : Ideal.absNorm (Ideal.span {T}) ≠ 0 := by
     rw [Ne, Ideal.absNorm_eq_zero_iff, Ideal.span_singleton_eq_bot]; exact hT
-  have hcard : Nat.card (𝓞 K ⧸ Ideal.span {T}) = Ideal.absNorm (Ideal.span {T}) := rfl
+  have hcard : Nat.card (𝓞 K ⧸ Ideal.span {T}) = Ideal.absNorm (Ideal.span {T}) :=
+    (Ideal.absNorm_eq_natCard _).symm
   have : Finite (𝓞 K ⧸ Ideal.span {T}) := Nat.finite_of_card_ne_zero (by rwa [hcard])
   calc _ ≤ (Φ '' Set.univ).encard := Set.encard_le_encard hsub
     _ ≤ (Set.univ : Set (𝓞 K ⧸ Ideal.span {T})).encard := Set.encard_image_le _ _
@@ -138,7 +195,7 @@ theorem main : ∀ (K V : Type) [Field K] [NumberField K] [StarRing K] [AddCommG
       (Submodule.projectionOnto (perp h U) U hc.symm).restrictScalars (𝓞 K)
     have hπ : ∀ (u : U) (w : perp h U), π ((u : V) + (w : V)) = w := by
       intro u w
-      simp only [π, LinearMap.restrictScalars_apply, map_add]
+      simp only [π, LinearMap.restrictScalars_apply, map_add (f := _)]
       rw [Submodule.projectionOnto_apply_right, Submodule.projectionOnto_apply_left, zero_add]
     set B' := L.map π with hB'
     have mB' : ∀ w : perp h U, w ∈ B' ↔ ∃ u : U, (u : V) + (w : V) ∈ L := by
@@ -151,9 +208,9 @@ theorem main : ∀ (K V : Type) [Field K] [NumberField K] [StarRing K] [AddCommG
         exact ⟨_, hu, hπ u w⟩
     have hBB' : B ≤ B' := fun w hw => (mB' w).2 ⟨0, by simpa using (mB w).1 hw⟩
     have hB'fg : B'.FG := hL.1.fg.map π
-    have hB'l : Submodule.IsLattice K B' :=
-      haveI := hB.1
-      Submodule.IsLattice.of_le_of_isLattice_of_fg K hBB' hB'fg
+    have hB'l : Submodule.IsFullLattice K B' := by
+      letI := hB.1
+      exact Submodule.IsFullLattice.of_le_of_fg K hBB' hB'fg
     have mC : ∀ x : perp h U, x ∈ dual (hRes h (perp h U)) B' ↔ (x : V) ∈ dual h L := by
       intro x
       rw [dualBasic_mem_dual, dualBasic_mem_dual]
@@ -161,12 +218,12 @@ theorem main : ∀ (K V : Type) [Field K] [NumberField K] [StarRing K] [AddCommG
       · intro H v hv
         obtain ⟨u, w, rfl⟩ := hdec v
         have := H w ((mB' w).2 ⟨u, hv⟩)
-        rw [map_add, LinearMap.add_apply, horth, zero_add]
+        rw [map_add (f := _), LinearMap.add_apply, horth, zero_add]
         exact this
       · intro H w hw
         obtain ⟨u, hu⟩ := (mB' w).1 hw
         have := H _ hu
-        rw [map_add, LinearMap.add_apply, horth, zero_add] at this
+        rw [map_add (f := _), LinearMap.add_apply, horth, zero_add] at this
         exact this
     have hgen := hg B' hBB' hB'fg
     obtain ⟨a, ha⟩ := (mB' (g B')).1
@@ -175,7 +232,7 @@ theorem main : ∀ (K V : Type) [Field K] [NumberField K] [StarRing K] [AddCommG
       rw [hAd, dualBasic_mem_dual]
       intro u hu
       have := hL.2 _ ((mA u).1 hu) _ ha
-      rw [map_add, horth, add_zero] at this
+      rw [map_add (f := _), horth, add_zero] at this
       exact this
     refine ⟨(dual (hRes h (perp h U)) B', Submodule.Quotient.mk ⟨a, haA⟩), ⟨⟨?_, ?_⟩, trivial⟩, ?_⟩
     · intro w hw

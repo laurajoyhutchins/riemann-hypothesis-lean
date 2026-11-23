@@ -1,22 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Statements.PlaceShiftStatements.NormSmall
-import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.WeilTensorModels
-import Development.AbelianVarietyTheory.Definitions.Divisors.DiscreteSeriesHermitianUnique
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsFinPt
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.IntegralFundamentalDomainEqSumDoubleCoset
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DefiniteBottomTowerConstantsDifferByFactor
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.CompAtMtOfMemGfC
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ThetaIntegrandIntegrable
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IsCompactParahoricLevelAndContainsLifts
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.MeasureToRealEqMass
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ClassSumIntegral
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AdelicFormsFiniteStabilisers
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.MeasurePreservingMulRightOfMem
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.GenusMassSignature
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.AdelicUnitaryTopology
-import Formalism.LocalToGlobal.IndefiniteReal.LevelTypeEquivalence.LevelADef
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.UnitaryDoubleCosetClassesFiniteCardLe
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsFiniteAdelicPointUnitaryGroupGramOne
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsFiniteAdelicPointUnitaryGroupGramOne
+public import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.UnitCharTriangle
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.DefiniteUnitaryClassSetFinite
+public import Formalism.LocalToGlobal.Columns.AdelicLemmas
+import Formalism.SharpRestriction.GlobalSchurBounds.Joints
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.Divisors.CmHostImaginaryGeneratorNeZero
+import Development.AbelianVarietyTheory.Definitions.Divisors.FinitePrimesUnder
+import Development.AbelianVarietyTheory.Definitions.Divisors.FlatTensorVacuum
+import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.ExistsMatchOver
+import Formalism.LocalToGlobal.IndefiniteForms.IndefiniteTree.RealCubicMeans.LeafBounds.IntegralLeaf.LeafINTFree
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.IndefR Formalism.IndefR.Datum Formalism.IndefR.Links Formalism.L2.Theta IsDedekindDomain NumberField Finset MeasureTheory
 open Formalism.MainNotions.TaylorLogMetric Formalism.MainNotions.StandardLatticesGL3 Formalism.L2.Indef.Tree.ArchimedeanLeafBounds.Cuts
 open Formalism.DivisionValues (vw)
@@ -37,7 +70,7 @@ theorem transport {G H : Type} [Group G] [Group H] (π : G →* H) (Γ J : Subgr
       ∀ x, {γ : G | γ ∈ Γ ∧ (gx x)⁻¹ * γ * gx x ∈ J}.ncard =
         Nat.card {γ : H // γ ∈ Δ ∧ (x.out)⁻¹ * γ * x.out ∈ K} := by
   refine ⟨fun g => ⟨DoubleCoset.mk Δ K (π g), ?_, ?_⟩, fun x => ?_⟩
-  · obtain ⟨δ, k, hδ, hk, e⟩ := DoubleCoset.mk_out_eq_mul Δ K (π g)
+  · obtain ⟨δ, hδ, k, hk, e⟩ := DoubleCoset.mk_out_eq_mul Δ K (π g)
     obtain ⟨γ, hγ, rfl⟩ := hsurj δ hδ
     refine ⟨γ⁻¹, inv_mem hγ, (gx (DoubleCoset.mk Δ K (π g)))⁻¹ * γ * g, (hJ _).2 ?_, by group⟩
     rw [map_mul, map_mul, map_inv, hgx, e]
@@ -45,7 +78,7 @@ theorem transport {G H : Type} [Group G] [Group H] (π : G →* H) (Γ J : Subgr
     rw [this]
     exact inv_mem hk
   · rintro x ⟨γ, hγ, k, hk, e⟩
-    rw [← DoubleCoset.out_eq' _ _ x, DoubleCoset.eq]
+    rw [← DoubleCoset.out_eq' x, DoubleCoset.eq]
     refine ⟨π γ, hmap γ hγ, π k, (hJ k).1 hk, ?_⟩
     rw [e, map_mul, map_mul, hgx]
   · rw [← Nat.card_coe_set_eq]
@@ -76,7 +109,7 @@ theorem finT_sigR (y : AF D.host.F ⊗[D.host.F] D.host.E) :
     finT D (sigR (AF D.host.F) D.sp.cm.sig y) = sigR (Af D.host.F) D.sp.cm.sig (finT D y) := by
   induction y using TensorProduct.induction_on with
   | zero => simp only [map_zero]
-  | add a b ha hb => simp only [map_add, ha, hb]
+  | add a b ha hb => simp only [map_add (f := _), ha, hb]
   | tmul x a => rfl
 
 theorem finQ_sigR (y : AF D.host.F ⊗[D.host.F] D.host.E) :

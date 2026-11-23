@@ -1,4 +1,61 @@
-import Formalism.EllipticTorsion.WChordSeries
+module
+
+public import Formalism.EllipticTorsion.WChordSeries
+public import Mathlib.RingTheory.MvPowerSeries.Inverse
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.Finsupp.WellFounded
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open PowerSeries
 
@@ -514,7 +571,7 @@ lemma linearCoeff_chordCoeffQuadratic (hw : WFixed W w) (i : Fin 2) : (L i) (C2 
   have hn1 := nu_L hw
   have hss := mul_vanishing_order_two hs0 hs1 (lam w)
   rw [C2, c2, pow_two]
-  simp only [map_add, (cc_L_mul_eq_zero_of_vanishing hs0 hs1 _).2 i, (cc_L_mul_eq_zero_of_vanishing hn0 hn1 _).2 i,
+  simp only [map_add (f := _), (cc_L_mul_eq_zero_of_vanishing hs0 hs1 _).2 i, (cc_L_mul_eq_zero_of_vanishing hn0 hn1 _).2 i,
     (cc_L_mul_eq_zero_of_vanishing hss.1 hss.2 _).2 i, add_zero]
 
 lemma constantCoeff_thirdParam (hw : WFixed W w) : cc (z3 W w) = 0 := by
@@ -735,7 +792,7 @@ lemma chord (hU : WSubstUnique.{u}) (hw : WFixed W w) :
     ((algebraMap (MvPowerSeries (Fin 2) K) (FractionRing (MvPowerSeries (Fin 2) K))) (Wi w 0)) ((algebraMap (MvPowerSeries (Fin 2) K) (FractionRing (MvPowerSeries (Fin 2) K))) (Wi w 1)) ((algebraMap (MvPowerSeries (Fin 2) K) (FractionRing (MvPowerSeries (Fin 2) K))) (w3 W w))
     ((algebraMap (MvPowerSeries (Fin 2) K) (FractionRing (MvPowerSeries (Fin 2) K))) (lam w)) ((algebraMap (MvPowerSeries (Fin 2) K) (FractionRing (MvPowerSeries (Fin 2) K))) (nu w)) ((algebraMap (MvPowerSeries (Fin 2) K) (FractionRing (MvPowerSeries (Fin 2) K))) (F2 W w)) ((algebraMap (MvPowerSeries (Fin 2) K) (FractionRing (MvPowerSeries (Fin 2) K))) (wF W w))
     ((algebraMap (MvPowerSeries (Fin 2) K) (FractionRing (MvPowerSeries (Fin 2) K))) (dd W w))
-    (by rw [← hv0, map_add, map_mul]) (by rw [← hv1, map_add, map_mul]) (by rw [w3, map_add, map_mul])
+    (by rw [← hv0, map_add (f := _), map_mul]) (by rw [← hv1, map_add (f := _), map_mul]) (by rw [w3, map_add (f := _), map_mul])
     (by
       have := congrArg (algebraMap (MvPowerSeries (Fin 2) K) (FractionRing (MvPowerSeries (Fin 2) K))) he1
       simpa [C3, C2, map_lineCoeffCubic, map_lineCoeffQuadratic, hCa,

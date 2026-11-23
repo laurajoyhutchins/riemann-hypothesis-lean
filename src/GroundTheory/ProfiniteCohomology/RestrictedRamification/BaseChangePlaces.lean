@@ -1,6 +1,56 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.RestrictedRamification.LocalMaps
-import GroundTheory.ProfiniteCohomology.GlobalClassFormation.LocalLimits.IsScalarTowerFiniteSubfieldAlgebraicClosure
+module
+
+public import GroundTheory.GlobalFields.SemilocalAlgebras.Finite
+import GroundTheory.GlobalFields.CompletionAtPlace.Integers
+public import GroundTheory.ProfiniteCohomology.GlobalClassFormation.LocalLimits.IsScalarTowerFiniteSubfieldAlgebraicClosure
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
@@ -69,8 +119,8 @@ theorem pi_single_algebraMap_completionsOver {w : PlacesOver L v} [DecidableEq (
     simp
   · simp [hu]
 
-open Classical in
 
+open Classical in
 def completionEmbeddingOfAlgHom :
     (placeOfAlgHom j).1.adicCompletion L →ₐ[v.adicCompletion F]
       AlgebraicClosure (v.adicCompletion F) where
@@ -78,7 +128,7 @@ def completionEmbeddingOfAlgHom :
   map_one' := tensorLiftOfAlgHom_single_placeOfAlgHom j
   map_mul' x y := by rw [Pi.single_mul, map_mul]
   map_zero' := by rw [Pi.single_zero, map_zero]
-  map_add' x y := by rw [Pi.single_add, map_add]
+  map_add' x y := by rw [Pi.single_add, map_add (f := _)]
   commutes' a := by
     rw [pi_single_algebraMap_completionsOver, map_mul, AlgHom.commutes,
       tensorLiftOfAlgHom_single_placeOfAlgHom,
@@ -149,7 +199,7 @@ theorem finiteDimensional_adicCompletion_of_placesOver (w : PlacesOver L v) :
     FiniteDimensional (v.adicCompletion F) (w.1.adicCompletion L) :=
   Module.finite_of_finrank_pos (by
     rw [finrank_eq_ramificationIdx_mul_inertiaDeg]
-    exact Nat.mul_pos (Ideal.ramificationIdx_pos w.1.asIdeal (𝓞 F))
+    exact Nat.mul_pos (Ideal.ramificationIdx_pos (R := 𝓞 F) w.1.asIdeal)
       (Ideal.inertiaDeg_pos w.1.asIdeal (𝓞 F)))
 
 theorem exists_placeOfAlgHom_eq (w : PlacesOver L v) :

@@ -1,4 +1,48 @@
-import Formalism.SharpRestriction.GrowthBounds.ChartComparison
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.ChartComparison
+import Formalism.LocalToGlobal.GroupLattices.TiedFamilies.TieDim
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -30,7 +74,7 @@ theorem noZero_Xsp [IsFractionRing G.O G.Kf] : NoZeroSMulDivisors G.O G.P.Xsp :=
   by_cases hc : c = 0
   · exact Or.inl hc
   refine Or.inr (MvPolynomial.ext _ _ fun m => ?_)
-  have h1 := congrArg (MvPolynomial.coeff m) hx
+  have h1 := congrArg (AddMonoidAlgebra.coeff · m) hx
   rw [MvPolynomial.coeff_smul, MvPolynomial.coeff_zero, Algebra.smul_def] at h1
   rw [MvPolynomial.coeff_zero]
   exact (mul_eq_zero.1 h1).resolve_left fun h0 => hc (IsFractionRing.injective G.O G.Kf (by rw [h0, map_zero]))
@@ -89,8 +133,8 @@ theorem fin_Fi (M : MemberForms D.what₂.LL D.what₂.embLL D.what₂.places D.
   rw [← (M.emb_basis i).2]
   exact FiniteDimensional.span_of_finite ℂ (Set.finite_range _)
 
-open Classical in
 
+open Classical in
 def chs (S : StepIn M i hi G) : Finset S.Ch :=
   Finset.univ.image S.chOf ∪ Finset.univ.image fun a : G.comp => (S.eC.symm a).1
 
@@ -140,11 +184,6 @@ theorem finrank_Fi (S : StepIn M i hi G) : finrank ℂ (M.Fi i) = ∑ β ∈ chs
 def ChartRank (S : StepIn M i hi G) : Prop :=
   ∀ β, finrank ℂ (FiB S β) = finrank G.O (gatCh G fun a : S.cmpt β => S.eC ⟨β, a⟩).M
 
-theorem card_of [IsFractionRing G.O G.Kf] [Module.Finite G.O G.M] (S : StepIn M i hi G) (hR : ChartRank S) :
-    Fintype.card (M.lat i).ι = finrank G.O G.M := by
-  rw [card_eq_finrank, finrank_Fi S, finrank_M_sigma G S.cmpt S.eC (chs S) (cmpt_mem S)]
-  exact Finset.sum_congr rfl fun β _ => hR β
-
 theorem card_le [IsFractionRing G.O G.Kf] [Module.Finite G.O G.M] (S : StepIn M i hi G) (e : D.what₂.LL →+* G.Kf)
     (H : ∀ β, S.Core e β) (hS : BlockRationalityField) (w : D.what₂.places.Pl) (hw : S.okW w) (hloc : S.ValIntJ e w) :
     Fintype.card (M.lat i).ι ≤ finrank G.O G.M := by
@@ -174,13 +213,6 @@ end Forms
 
 variable {D : D7} {Tw : TwForms D} {u : D.what₂.Word} {μ : D.what₂.Tup} {w : D.what₂.places.Pl}
   {h : GIdx D.host (D.mem u).A.T (D.what₂.places.resChar w)} {Fl : Fills (D.gat u w h)} {Lv : Levels Fl}
-
-theorem card_of_charts (I : CmpJIn Tw u μ w h Lv) (Gt : GatTies D) (hfin : ∀ j, j + 1 ≤ D.R.m → (gatJ Lv (j + 1)).FinClasses)
-    (hR : ∀ j hj, ChartRank (I.at' j hj).st) (j : ℕ) (hj : j + 1 ≤ D.R.m) :
-    Fintype.card ((I.at' j hj).M.lat (j + 1)).ι = Module.finrank (D.gat u w h).O (gatJ Lv (j + 1)).M := by
-  have : IsFractionRing (gatJ Lv (j + 1)).O (gatJ Lv (j + 1)).Kf := ((D.gat u w h).P.setting (plc Gt u w h)).frac_O
-  have : Module.Finite (gatJ Lv (j + 1)).O (gatJ Lv (j + 1)).M := mfin_of Gt u w h Lv (j + 1) (hfin j hj)
-  exact card_of (I.at' j hj).st (hR j hj)
 
 theorem card_of_charts_ge (c : LatCmp D) (I : CmpJIn Tw u μ w h Lv) (Gt : GatTies D) (hS : BlockRationalityField)
     (core : ∀ j hj β, (I.at' j hj).st.Core (c.embW u w h) β) (ok : ∀ j hj, (I.at' j hj).st.okW w)

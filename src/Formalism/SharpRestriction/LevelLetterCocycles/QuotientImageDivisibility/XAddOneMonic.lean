@@ -1,4 +1,57 @@
-import Mathlib
+module
+
+public import Mathlib.RingTheory.PowerSeries.Substitution
+public import Mathlib.RingTheory.PowerSeries.WeierstrassPreparation
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.CharP.Algebra
+public import Mathlib.Algebra.CharP.Lemmas
+public import Mathlib.RingTheory.LocalRing.ResidueField.Basic
+
+@[expose] public section
 
 noncomputable section
 open Classical
@@ -55,7 +108,7 @@ private theorem algHom_coe_polynomial_eq_of_X_eq {A B : Type} [CommRing A] [Comm
           | simp [PowerSeries.algebraMap_eq]
         rw [e, AlgHom.commutes, AlgHom.commutes]
      refine Polynomial.induction_on r (fun a => hC a) (fun p q hp hq => ?_) (fun n a _ => ?_)
-     · rw [Polynomial.coe_add, map_add, map_add, hp, hq]
+     · rw [Polynomial.coe_add, map_add (f := _), map_add (f := _), hp, hq]
      · rw [Polynomial.coe_mul, Polynomial.coe_pow, Polynomial.coe_X, map_mul, map_mul, map_pow,
          map_pow, h, hC])
 
@@ -85,7 +138,7 @@ theorem Zs_res : PowerSeries.map (IsLocalRing.residue O) (Zs p m) = PowerSeries.
     first
     | infer_instance
     | exact charP_of_injective_algebraMap' (IsLocalRing.ResidueField O) p
-  simp only [Zs, map_sub, map_pow, map_add, map_one, PowerSeries.map_X]
+  simp only [Zs, map_sub, map_pow, map_add (f := _), map_one, PowerSeries.map_X]
   first
   | (rw [add_pow_char_pow]; simp)
   | (rw [add_pow_expChar_pow]; simp)
@@ -232,7 +285,7 @@ theorem evR_subst {x y : F} (hx : Polynomial.aeval x (Zp (O := O) p m) = 0)
       f = Zs p m * q + (r : PowerSeries O) :=
     ⟨_, _, (f.isWeierstrassDivision_weierstrassDiv_weierstrassMod
       (Zs_res_ne p m hlm)).eq_mul_add⟩
-  rw [hψ, hf, map_add, map_add, map_mul, map_mul, hS, evR_Zs p m hlm hy, hpoly]
+  rw [hψ, hf, map_add (f := _), map_add (f := _), map_mul, map_mul, hS, evR_Zs p m hlm hy, hpoly]
   simp
 
 end EvF

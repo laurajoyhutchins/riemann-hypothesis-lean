@@ -1,7 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.FieldValuesMemFixedField
-import Formalism.LocalToGlobal.Columns.PathCountSymmetricHolds
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.SameCfgRefl
+module
+
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.SameCfgRefl
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.CmQuadraticFormEqAlternatingForm
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.StableIffCarrierEq
+import Formalism.LocalToGlobal.HilbertRowConditions.CenterIdempotentAction
+import Formalism.LocalToGlobal.IndefiniteForms.IndefSide
+import Formalism.LocalToGlobal.IndefiniteReal.LinksDefs
+import Formalism.LocalToGlobal.IndefiniteReal.RecTie
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.MainNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.MainNotions.S MeasureTheory IsDedekindDomain NumberField Matrix Formalism.L2.Theta Formalism.L2.DIV Formalism.L2.Indef Formalism.IndefR Formalism.IndefR.Links Formalism.IndefR.Mult Formalism.IndefR.Datum Formalism.IndefR.Cx
 open scoped TensorProduct InnerProductSpace
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
@@ -30,8 +74,8 @@ theorem finite_piG (P : Pre) :
   intro g hg i _
   exact ⟨RingOfIntegers.isIntegral_coe _, hg i⟩
 
-open Classical in
 
+open Classical in
 def chiOf {P : Pre} (f : Top.Fr P) : Fin P.R.m → HeightOneSpectrum (𝓞 P.host.E) → 𝓞 P.host.E → ℂ :=
   fun j w y => if h : (f.P.Div 0 w ∨ f.P.Div 1 w) ∧ (y : P.host.E) ≠ 0 ∧ IsUnit (Ideal.Quotient.mk w.asIdeal y) then
     ((((f.mu0 j).locK w (Units.mk0 (y : P.host.E) h.2.1))⁻¹ : ℂˣ) : ℂ) else 0
@@ -51,11 +95,11 @@ theorem chiC_eq {B : Base} {px : PreX B.toPre} (I : Col2.ColIn B px) (h : I.Ok) 
         subst hy0
         haveI : w.asIdeal.IsPrime := w.isPrime
         exact hu.ne_zero (map_zero _)
-      rw [dif_pos hw, dif_pos hu, dif_pos ⟨hv.1 hw, hy, hu⟩]
+      rw [dite_eq_left hw, dite_eq_left hu, dite_eq_left ⟨hv.1 hw, hy, hu⟩]
       have ht := (h.ch_tied.mu0 j).atg ⟨w, hw⟩ (Units.mk0 _ hy) y hu.unit rfl (by simp)
       rw [Units.val_inv_eq_inv_val, ht, Units.val_inv_eq_inv_val, map_inv₀, inv_inv]
-    · rw [dif_pos hw, dif_neg hu, dif_neg (fun h' => hu h'.2.2)]
-  · rw [dif_neg hw, dif_neg (fun h' => hw (hv.2 h'.1))]
+    · rw [dite_eq_left hw, dite_eq_right hu, dite_eq_right (fun h' => hu h'.2.2)]
+  · rw [dite_eq_right hw, dite_eq_right (fun h' => hw (hv.2 h'.1))]
 
 def ramPl {P : Pre} (ξ : Formalism.L2.Host.HChar P.host.E) : Set (HeightOneSpectrum (𝓞 P.host.F)) :=
   {v | ∃ a : Neutral.B1.Ideles P.host.E, Col2.finAf P.host.F P.host.E a ∈ inertAt P.host.E v ∧ ξ.1 a ≠ 1}
@@ -76,8 +120,8 @@ theorem qprime_eq_of_reads {F E K : Type} [Field F] [NumberField F] [Field E] [N
     rw [h a, h1]
     simp
 
-open Classical in
 
+open Classical in
 def qBound {P : Pre} (ξ : Formalism.L2.Host.HChar P.host.E) : Set (HeightOneSpectrum (𝓞 P.host.E)) :=
   if (ramPl ξ).Finite then {Q | ∃ v ∈ ramPl ξ, Ideal.under (𝓞 P.host.F) Q.asIdeal = v.asIdeal} else ∅
 
@@ -121,7 +165,7 @@ theorem qC_of_not_mem {B : Base} {px : PreX B.toPre} (I : Col2.ColIn B px) {ξ :
     (hξ : ξ ∉ Set.range I.xi) : qC I ξ = ∅ := by
   classical
   unfold qC
-  rw [dif_neg fun ⟨a, ha⟩ => hξ ⟨a, ha⟩]
+  rw [dite_eq_right fun ⟨a, ha⟩ => hξ ⟨a, ha⟩]
 
 theorem finite_qFns {P : Pre} {Ξ : Set (Formalism.L2.Host.HChar P.host.E)} (hΞ : Ξ.Finite) :
     {q : Formalism.L2.Host.HChar P.host.E → Finset (HeightOneSpectrum (𝓞 P.host.E)) |

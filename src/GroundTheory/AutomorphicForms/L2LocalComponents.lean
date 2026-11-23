@@ -1,6 +1,49 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.L2LocalComponents.LocalComponents
-import GroundTheory.AutomorphicForms.L2LocalComponents.NonEmpty
+module
+
+public import GroundTheory.AutomorphicForms.L2LocalComponents.CuspSmooth
+public import GroundTheory.AutomorphicForms.L2LocalComponents.Summand
+public import GroundTheory.AutomorphicForms.L2LocalComponents.NonEmpty
+import GroundTheory.AutomorphicForms.CuspidalDiscreteness
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MeasureTheory
 
@@ -16,15 +59,11 @@ variable {K : Type*} [Field K] [NumberField K] {n : ℕ}
 
 namespace CuspidalAutomorphicRepresentation
 
-variable {μ : Measure (Reduction.normOneGL K n)} [μ.IsHaarMeasure]
+variable {μ : Measure (Reduction.normOneGL (K := K) (n := n))} [μ.IsHaarMeasure]
 
 def ofL2Summand (V : Submodule ℂ (CuspL2 μ)) [CompleteSpace V] (hV : (cuspRepT μ).IsInvariant V)
     (hirr : ((cuspRepT μ).restrict V hV).IsIrreducible) : CuspidalAutomorphicRepresentation K n :=
   ofSummand V hV hirr (summandCuspForms_ne_bot μ V hV hirr)
-
-@[simp] theorem carrier_ofL2Summand (V : Submodule ℂ (CuspL2 μ)) [CompleteSpace V]
-    (hV : (cuspRepT μ).IsInvariant V) (hirr : ((cuspRepT μ).restrict V hV).IsIrreducible) :
-    (ofL2Summand V hV hirr).carrier = summandCuspForms V := rfl
 
 theorem topologicalClosure_map_ofL2Summand (V : Submodule ℂ (CuspL2 μ)) [CompleteSpace V]
     (hV : (cuspRepT μ).IsInvariant V) (hirr : ((cuspRepT μ).restrict V hV).IsIrreducible) :
@@ -40,12 +79,7 @@ end CuspidalAutomorphicRepresentation
 
 open CuspidalAutomorphicRepresentation
 
-variable {μ : Measure (Reduction.normOneGL K n)} [μ.IsHaarMeasure]
-
-def L2SummandIsSupercuspidalAt (V : Submodule ℂ (CuspL2 μ)) [CompleteSpace V] (hV : (cuspRepT μ).IsInvariant V)
-    (hirr : ((cuspRepT μ).restrict V hV).IsIrreducible)
-    (v : IsDedekindDomain.HeightOneSpectrum (NumberField.RingOfIntegers K)) : Prop :=
-  (ofL2Summand V hV hirr).IsSupercuspidalAt v
+variable {μ : Measure (Reduction.normOneGL (K := K) (n := n))} [μ.IsHaarMeasure]
 
 end AutomorphicForm
 
@@ -55,7 +89,7 @@ open AutomorphicForm
 
 variable {K : Type*} [Field K] [NumberField K] {n : ℕ}
 
-variable (μ : Measure (Reduction.normOneGL K n)) [μ.IsHaarMeasure]
+variable (μ : Measure (Reduction.normOneGL (K := K) (n := n))) [μ.IsHaarMeasure]
 
 theorem exists_cuspForm_mem_of_ne_bot {W : Submodule ℂ (CuspL2 μ)} (hWc : IsClosed (W : Set (CuspL2 μ)))
     (hW : (cuspRepT μ).IsInvariant W) (hW0 : W ≠ ⊥) :

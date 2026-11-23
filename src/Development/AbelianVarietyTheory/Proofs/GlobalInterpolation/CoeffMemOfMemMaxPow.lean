@@ -1,15 +1,51 @@
-import Mathlib
-import Formalism.SharpRestriction.ValuationFrobeniusEpsilon.LiftInvariantsFinrankEq
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.CoeffXMulPart
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.MonomialOneMem
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.MaximalIdealLeFiltOne
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.FiltLePow
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.NoethLocalHausdorff
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.Imports
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ImportsAlt
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.EqXMulShiftAdd
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.MemPowOfCoeffMem
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ImportsBis
+module
+
+public import Formalism.SharpRestriction.ValuationFrobeniusEpsilon.LiftInvariantsFinrankEq
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.Imports
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.MemPowOfCoeffMem
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.NoethLocalHausdorff
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.MvPowerSeries.Equiv
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -20,10 +56,6 @@ namespace GlobalTheory.PsCNL
 section Division
 
 variable {σ : Type} {O : Type} [CommRing O]
-
-def divX (i : σ) (f : MvPowerSeries σ O) : MvPowerSeries σ O := fun m => coeff (Finsupp.single i 1 + m) f
-
-def remX (i : σ) (f : MvPowerSeries σ O) : MvPowerSeries σ O := fun m => if m i = 0 then coeff m f else 0
 
 end Division
 
@@ -72,6 +104,3 @@ theorem psCNL : ∀ (O : Type) [CommRing O] [IsLocalRing O] (C : TR O) (n : ℕ)
         rw [← residue_eq_zero_iff, map_sub, ha', sub_self] }
 
 end GlobalTheory.PsCNL
-
-open Formalism.BasicNotions.V1 IsLocalRing in
-example : ∀ (O : Type) [CommRing O] [IsLocalRing O] (C : TR O) (n : ℕ), ∃ (_ : IsLocalRing (MvPowerSeries (Fin n) C.C)), IsCNL O (MvPowerSeries (Fin n) C.C) ∧ ∀ x : MvPowerSeries (Fin n) C.C, x ∈ maximalIdeal (MvPowerSeries (Fin n) C.C) ↔ MvPowerSeries.constantCoeff x ∈ maximalIdeal C.C := GlobalTheory.PsCNL.psCNL

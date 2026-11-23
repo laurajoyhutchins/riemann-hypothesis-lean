@@ -1,7 +1,43 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.GoodReductionCondition
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.MultW
-import Formalism.SharpRestriction.DesignExistsOfChoices
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.ReadPk
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Definitions.Divisors.TwistedPlacesOfCondition
+public import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.ColumnCompatibleSelection
+public import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.LocalLanglandsGL
+
+@[expose] public section
 
 noncomputable section
 
@@ -24,35 +60,9 @@ open Formalism.BasicNotions Formalism.MainNotions GlobalTheory.EX GlobalTheory.E
 
 variable (Q : V4.Slot) (Lk : LkT Bundle)
 
-def CovolumeBound' : Prop := Row Q Lk (Ind.EvWC (Bd := Bundle) (fun _ => True) fun C CH _ _ _ b =>
-  ((b.B.Q.Rl.toCx3 b.B.Q.F).data b.B.Q.F.cr false).L3 (b.B.Q.Rl.num b.B.Q.F C CH))
-
-def FunctorialityCondition : Prop := Row Q Lk (Ind.EvWC (Bd := Bundle) (fun Fm => DIVinN Fm) fun C CH _ _ _ b =>
-  ((b.B.Q.Rl.toCx3 b.B.Q.F).data b.B.Q.F.cr false).FUN (b.B.Q.Rl.num b.B.Q.F C CH))
-
-def GeometricWeakCompatibility : Prop := Row Q Lk (AtAll fun D O c (b : Bundle D O c) => ∃ t : b.Comparison₂, Ind.PIota D O c (b.part t) ∧
-  GlobalTheory.ExportPin.ClassSumPin (b.part t).pt ∧ (b.part t).pt.Ties ∧ GlobalTheory.BigOn.More (b.part t).pt)
-
 def NL (𝒞 : FamClass) : Prop := Closed 𝒞 fun Fm _ => Formalism.MainNotions.LinkN Fm
 
 variable {hL : GlobalTheory.Published.LocalLanglandsGL}
-
-structure Open0 (p : Prm hL) : Prop where
-  hPA : RL.At p R1.PeriodAdmissibilityAtBundlePoints
-  hLamP : RL.At p R1.LambdaPositivityAtBundlePoints
-  hDivG : RL.At p R1.DivisorConditionAtBundlePoints
-  hDcPtG : RL.At p R1.DecompositionConditionAtBundlePoints
-  selJ : RL.At p R1.JSelectionAtBundlePoints
-  tie : RL.At p RL.Row_tie
-  lab : RL.At p RL.LabelCondition
-  good : RL.At p RL.GoodReductionCondition
-  geo : RL.At p GeometricWeakCompatibility
-  mi : RL.At p RL.MultiplicityCondition'
-  kap : RL.At p RL.KappaCondition
-  df : RL.At p RL.DifferentialCondition
-
-theorem geometricWeakTies_of_strong {CF : ℝ} (h : RL.GeometricBoundCondition Q Lk CF) : GeometricWeakCompatibility Q Lk :=
-  Row.imp h fun _ _ _ t _ Fm hc x hx i => let ⟨a, b, c, d, _, e, _⟩ := t Fm hc x hx i; ⟨a, b, c, d, e⟩
 
 end GlobalTheory.Fc.S0
 

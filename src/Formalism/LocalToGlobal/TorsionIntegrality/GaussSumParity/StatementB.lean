@@ -1,7 +1,49 @@
-import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.StatementA
-import Formalism.GaussJetBounds.StatementX
-import Formalism.GaussJetBounds.StatementU
-import Formalism.ThetaLogCoordinates.UniformThetaSubstitution.StatementGK
+module
+
+public import Formalism.GaussJetBounds.StatementP
+public import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.TrDual
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Formalism.GaussJetBounds.StatementS
+public import Formalism.GaussJetBounds.StatementU
+
+@[expose] public section
 
 noncomputable section
 open scoped BigOperators
@@ -75,26 +117,6 @@ def OneLetterHalf : Prop :=
         MvPowerSeries.subst (fun _ : ZMod 2 => lgF K0 l)
           (beMean (d := 2) l σ be0 (fun _ : Unit => (1 : K0)) (fun _ => 1) ζ))
 
-def SingleLetterThetaFactorization : Prop :=
-  ∀ (K0 K : Type) [NormedField K0] [IsUltrametricDist K0] [CharZero K0] [NormedField K]
-    [IsUltrametricDist K] [CharZero K] (l N0 N1 : ℕ) (σ : K0 →+* K0) (j : K0 →+* K),
-    UnrOK K0 l σ → (∀ a, ‖j a‖ = ‖a‖) →
-    ∀ F : MvPowerSeries (Fin 2) K0, IsLawOfLog l F → ∀ be0 : MvPowerSeries (Fin 2) K0, F1 F be0 →
-    F2 l σ be0 → ∀ ζ : K0, IsPrimitiveRoot ζ (l ^ 2 - 1) →
-    ∀ ph : PowerSeries K0,
-      Simeq (MvPowerSeries.C (2 : K0) * ph)
-        (MvPowerSeries.subst (fun _ : Fin 2 => (PowerSeries.X : PowerSeries K0)) be0) →
-    ∀ U0 Φ : MvPowerSeries (Fin N0 × Fin N1) K, Integral U0 →
-      MvPowerSeries.constantCoeff Φ = 0 →
-      Simeq Φ (∑ x : Fin N0 × Fin N1, at1 x (PowerSeries.map j ph)) →
-      ∃ U : MvPowerSeries (Fin N0 × Fin N1) K, Integral U ∧
-        ∀ g : Fin N0 × Fin N1 → MvPowerSeries (Fin N0 × Fin N1) K,
-          (∀ y, MvPowerSeries.constantCoeff (g y) = 0) →
-          (∀ y, MvPowerSeries.subst g (oneLog (K := K) l y) = MvPowerSeries.X y) →
-          MvPowerSeries.subst (fun x => at1 x (expF K l)) (mvExp (-Φ) * U0) =
-            thetaOne g U (-1) 1 (MvPowerSeries.map j
-              (beMean (d := 2) l σ be0 (fun _ : Unit => (1 : K0)) (fun _ => 1) ζ))
-
 def OmOKOf : Prop :=
   ∀ (K0 K : Type) [NormedField K0] [IsUltrametricDist K0] [CharZero K0] [NormedField K]
     (l ν : ℕ) [NeZero ν] (σ : K0 →+* K0) (j : K0 →+* K), UnrOK K0 l σ → (∀ a, ‖j a‖ = ‖a‖) →
@@ -106,69 +128,5 @@ def ThetaInZIsSSub : Prop :=
     (om oms : Fin ν → K0) (Tht : MvPowerSeries (Bool × Fin ν × Fin r0 × Fin r1) K),
     thetaInZ (d := 2 * ν) l j σ om oms Tht =
       MvPowerSeries.subst (Formalism.InvariantFactorPaths.G7.sSub (conjJ j σ om) (conjJ j σ oms) (expF K l)) Tht
-
-def ThmAEntryOfF : Prop :=
-  ∀ (l : ℕ) [Fact l.Prime] (K0 : Type) [NormedField K0] [IsUltrametricDist K0] [CharZero K0]
-    (σ : K0 →+* K0), UnrOK K0 l σ → ∀ (j : K0 →+* ℂ_[l]), (∀ a, ‖j a‖ = ‖a‖) →
-    ∀ F : MvPowerSeries (Fin 2) K0, IsLawOfLog l F → ∀ be0 : MvPowerSeries (Fin 2) K0, F1 F be0 →
-    F2 l σ be0 →
-    ∀ (d N0 N1 : ℕ) [NeZero d], 2 ≤ d → Even d →
-    ∀ (ι : Type) [Fintype ι] [DecidableEq ι] (om oms : ι → K0), OwOK d σ om oms →
-      TrDual d σ om oms → (∃ ζ : K0, IsPrimitiveRoot ζ (l ^ d - 1)) →
-    ∀ U0 Φ : MvPowerSeries (Bool × ι × Fin N0 × Fin N1) ℂ_[l], Integral U0 →
-      MvPowerSeries.constantCoeff Φ = 0 → Simeq Φ (sumE (MvPowerSeries.map j be0)) →
-    ∀ (TT : Finset (ZMod d)) (colN : ZMod d → ℕ) (p : ∀ s, Fin (colN s) → ℕ)
-      (hp : ∀ s c, p s c ≤ N0), (∀ s c, 1 ≤ p s c) → ∀ (I : ∀ s c, Fin (p s c) → Fin N1),
-    ∀ (nu1 nu2 size : ZMod d → ℕ), (∀ s, nu1 s = colN s) →
-      (∀ s, nu2 s = (Finset.univ.filter (fun c => 2 ≤ p s c)).card) → (∀ s, size s = ∑ c, p s c) →
-    ∀ a : ℕ, 1 ≤ a → (∀ s, size s ≤ a) → 2 * Real.logb l a + 2 ≤ (N0 : ℝ) - 1 →
-    ∀ δ : MvPolynomial (ZMod d × Fin N0 × Fin N0) ℂ_[l] →ₗ[ℂ_[l]] ℂ_[l],
-      (∀ P ∈ nablaO (K := ℂ_[l]) colN p hp, ‖δ P‖ ≤ 1) →
-      ‖δ (frameJet colN p hp I (thetaInZ l j σ om oms (mvExp (-Φ) * U0)))‖ ≤
-        ‖(l : ℂ_[l])‖ ^ ((∑ s ∈ TT, (topTerm l d TT nu1 nu2 s -
-            gam l * (Wcap l d TT nu1 nu2 size s : ℝ))) +
-          Fnum l d (fun s => (Dl d TT nu1 size s : ℝ)) -
-          ((d : ℝ) * N0 * N1) * (Real.logb l (a : ℝ) + 1))
-
-def ThmAGaussOfF : Prop :=
-  ∀ (l : ℕ) [Fact l.Prime] (K0 : Type) [NormedField K0] [IsUltrametricDist K0] [CharZero K0]
-    (σ : K0 →+* K0), UnrOK K0 l σ → ∀ (j : K0 →+* ℂ_[l]), (∀ a, ‖j a‖ = ‖a‖) →
-    ∀ F : MvPowerSeries (Fin 2) K0, IsLawOfLog l F → ∀ be0 : MvPowerSeries (Fin 2) K0, F1 F be0 →
-    F2 l σ be0 →
-    ∀ (d N0 N1 : ℕ) [NeZero d], 2 ≤ d → Even d →
-    ∀ (ι : Type) [Fintype ι] [DecidableEq ι] (om oms : ι → K0), OwOK d σ om oms →
-      TrDual d σ om oms → (∃ ζ : K0, IsPrimitiveRoot ζ (l ^ d - 1)) →
-    ∀ U0 Φ : MvPowerSeries (Bool × ι × Fin N0 × Fin N1) ℂ_[l], Integral U0 →
-      MvPowerSeries.constantCoeff Φ = 0 → Simeq Φ (sumE (MvPowerSeries.map j be0)) →
-    ∀ (TT : Finset (ZMod d)) (colN : ZMod d → ℕ) (p : ∀ s, Fin (colN s) → ℕ)
-      (hp : ∀ s c, p s c ≤ N0), (∀ s c, 1 ≤ p s c) → ∀ (I : ∀ s c, Fin (p s c) → Fin N1),
-    ∀ (nu1 nu2 size : ZMod d → ℕ), (∀ s, nu1 s = colN s) →
-      (∀ s, nu2 s = (Finset.univ.filter (fun c => 2 ≤ p s c)).card) → (∀ s, size s = ∑ c, p s c) →
-    ∀ a : ℕ, 1 ≤ a → (∀ s, size s ≤ a) → 2 * Real.logb l a + 2 ≤ (N0 : ℝ) - 1 →
-    ∀ n : (ZMod d × Fin N0 × Fin N0) →₀ ℕ,
-      ‖MvPolynomial.coeff n (frameJet colN p hp I (thetaInZ l j σ om oms (mvExp (-Φ) * U0)))‖ ≤
-        ‖(l : ℂ_[l])‖ ^ ((∑ s ∈ TT, (topTerm l d TT nu1 nu2 s -
-            gam l * (Wcap l d TT nu1 nu2 size s : ℝ))) +
-          Fnum l d (fun s => (Dl d TT nu1 size s : ℝ)) -
-          ((d : ℝ) * N0 * N1) * (Real.logb l (a : ℝ) + 1))
-
-def OneLetterGaussOfF : Prop :=
-  ∀ (l : ℕ) [Fact l.Prime] (K0 : Type) [NormedField K0] [IsUltrametricDist K0] [CharZero K0]
-    (σ : K0 →+* K0), UnrOK K0 l σ → ∀ (j : K0 →+* ℂ_[l]), (∀ a, ‖j a‖ = ‖a‖) →
-    ∀ F : MvPowerSeries (Fin 2) K0, IsLawOfLog l F → ∀ be0 : MvPowerSeries (Fin 2) K0, F1 F be0 →
-    F2 l σ be0 →
-    (∃ ζ : K0, IsPrimitiveRoot ζ (l ^ 2 - 1)) →
-    ∀ ph : PowerSeries K0,
-      Simeq (MvPowerSeries.C (2 : K0) * ph)
-        (MvPowerSeries.subst (fun _ : Fin 2 => (PowerSeries.X : PowerSeries K0)) be0) →
-    ∀ (N0 N1 C : ℕ) (U0 Φ : MvPowerSeries (Fin N0 × Fin N1) ℂ_[l]), Integral U0 →
-      MvPowerSeries.constantCoeff Φ = 0 →
-      Simeq Φ (∑ x : Fin N0 × Fin N1, at1 x (PowerSeries.map j ph)) →
-    ∀ (p : Fin C → ℕ) (hp : ∀ c, p c ≤ N0) (I : ∀ c, Fin (p c) → Fin N1) (a : ℕ), 1 ≤ a →
-      (∑ c, p c) ≤ a → ∀ n : (Fin N0 × Fin N0) →₀ ℕ,
-      ‖MvPolynomial.coeff n (frameJetOne p hp I
-          (MvPowerSeries.subst (fun x => at1 x (expF ℂ_[l] l)) (mvExp (-Φ) * U0)))‖ ≤
-        ‖(l : ℂ_[l])‖ ^ (rho l * ((∑ c, p c : ℕ) : ℝ) -
-          ((N0 : ℝ) * N1) * (Real.logb l (a : ℝ) + 1))
 
 end Formalism.L2.Th1.D

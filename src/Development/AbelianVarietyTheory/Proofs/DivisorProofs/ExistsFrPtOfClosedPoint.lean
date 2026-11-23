@@ -1,16 +1,58 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsPreimmersionFst
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IntegralModelDomainOverInclusion
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IntegralPointModelOverDvr
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TangentBasisMapCompatible
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EmbeddingSectionCompatibility
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsDvrOverHeightOne
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PropertyOfCodimOneLocalUnits
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsLocalUnitOfDvrUnit
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FormalGroupDeterminantPowDepthBasisChangeInvariaStatement
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.TanLinOfCombLinear
-import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.IntegralOfFrChg
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DetMulExpandAlt
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsPreimmersionFst
+public import Development.AbelianVarietyTheory.Counterexamples.HeightSurvey.MatchingNotVacuous
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IsLocalRingTrivSqZeroExt
+import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.MemRangeOfForallHeightEqOneOfIsReflexive
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DetMulExpandAlt
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsDvrOverHeightOne
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IntegralFrameExtensionExists
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IntegralPointModelOverDvr
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ProjectionStatementHolds
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PropertyOfCodimOneLocalUnits
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ChartFlagBaseHolds
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LocalSystemBasesNonempty
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LocalSystemModelMap
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.IsCombAtGMulVec
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.SemiAbelianDvrExtensionsIsoCompatible
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.CubePullbacks.CubePull
+
+@[expose] public section
 
 set_option autoImplicit false
 open CategoryTheory Limits AlgebraicGeometry NumberField IsDedekindDomain
@@ -66,8 +108,8 @@ theorem exists_minor_dvd : ∀ (V : Type) [CommRing V] [IsDomain V] [ValuationRi
     obtain ⟨J, hJ⟩ := exists_dvd_sum _ _ (e ▸ h0)
     exact ⟨J, e ▸ hJ⟩
 
-open GlobalTheory.HartogsUnit in
 
+open GlobalTheory.HartogsUnit in
 theorem exists_nat_mul_mem : ∀ (A : Type) [CommRing A] [IsDomain A] [IsIntegrallyClosed A] [IsNoetherianRing A] [CharZero A] (a : FractionRing A), (∀ (T : CDVR) (α : A →+* T.V) (ι : FractionRing A →+* T.Fr), Function.Injective α → (∀ x, ι (algebraMap A (FractionRing A) x) = algebraMap T.V T.Fr (α x)) → (∀ n : ℕ, 0 < n → IsUnit (n : T.V)) → ι a ∈ (algebraMap T.V T.Fr).range) → ∃ (m : ℕ) (b : A), 0 < m ∧ algebraMap A (FractionRing A) b = (m : FractionRing A) * a := by
   intro A _ _ _ _ _ a h
   classical
@@ -180,6 +222,7 @@ theorem eig_of_comb (hv : ∀ i, IsTanAtG t x (v i)) {s : 𝓞 E →+* S} (he : 
     rw [← GlobalTheory.ShFam.Pad.Pull.eig_iff]
     exact he i b
   rw [GlobalTheory.ShFam.Pad.Pull.eig_iff]
+
   simp only [map_sum, map_smul, h1, Finset.smul_sum]
   exact Finset.sum_congr rfl fun i _ => smul_comm _ _ _
 
@@ -200,8 +243,8 @@ theorem comb_vecMul (hv : ∀ i, IsTanAtG t x (v i)) {n : ℕ} {q : Fin n → (S
 
 end Tan
 
+
 open GlobalTheory.LocM.BaseMdl in
-set_option maxHeartbeats 1000000 in
 
 theorem exists_change {E : Type} [Field E] [NumberField E] [IsCMField E] {H : ReciprocityTheory.ChartRestriction.G.Geo.Tor.Host E}
     {Dw : Datum H} {l : Level H} {Xo : Moduli Dw l} {c : Coeff l} {O : Type} [CommRing O] {β : O →+* c.F}
@@ -225,8 +268,8 @@ theorem exists_change {E : Type} [Field E] [NumberField E] [IsCMField E] {H : Re
       congr 2
       exact ι.comp_algebraMap.symm
   choose a ha using fun i => (y'.basis σ (z.u σ i) (hzy ▸ z.tan σ i) (z.eig σ i)).exists
-  choose w hw1 hw2 hw3 using h.1
-  choose w' hw1' hw2' hw3' using h'.1
+  choose w hw1 hw2 hw3 using (fun i => h.1 i)
+  choose w' hw1' hw2' hw3' using (fun i => h'.1 i)
   have hbt := (isTanBasis_bc he (ι.toRingHom.comp φ)).1
   have hq2 : ∀ j, (spMap (dualMap ι.toRingHom) ≫ w j) ≫ Y.oF.t.G.hom =
       spMap (algebraMap k (DualNumber k)) ≫ GlobalTheory.AllWt.ptF z := fun j => by
@@ -290,7 +333,7 @@ theorem value_map : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (H : 
   have k1 := hL.2 k z y' hy'Z hzy a₁ a₂ ha₁ ha₂
   rw [GlobalTheory.FlagTan.evR_frMap hL.1 hm] at k1
   have k2 : (M₁'.submatrix id I).det = a₁.det * ι (M₁.submatrix id I).det := by
-    rw [AlgHom.map_det, ← Matrix.det_mul, hM₁]; rfl
+    rw [hM₁, AlgHom.map_det, ← Matrix.det_mul]; rfl
   have k3 : ι (C₂.submatrix J id).det = (C₂'.submatrix J id).det * a₂.det := by
     rw [AlgHom.map_det, ← Matrix.det_mul]
     congr 1
@@ -299,8 +342,8 @@ theorem value_map : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (H : 
   rw [map_mul, map_mul, k2, k3]
   linear_combination (ι (M₁.submatrix id I).det * (C₂'.submatrix J id).det) * k1
 
+
 open GlobalTheory.ModelFrameCompare MonObj in
-set_option maxHeartbeats 1000000 in
 
 theorem images_eigenBasis {E : Type} [Field E] [NumberField E] [IsCMField E] {H : ReciprocityTheory.ChartRestriction.G.Geo.Tor.Host E}
     {Dw : Datum H} {l : Level H} {Xo : Moduli Dw l} {c : Coeff l} (Y : Model Xo c (algebraMap (𝓞 c.F) c.F))
@@ -319,7 +362,7 @@ theorem images_eigenBasis {E : Type} [Field E] [NumberField E] [IsCMField E] {H 
           (w ≫ Y.m0.toSABMap.φ)) := by
   let _ := io.toAlgebra
   obtain ⟨G₂, ⟨m⟩⟩ : ∃ G : SAB H (Sp T.V), Nonempty (SABMap G Y.t xV) := by
-    obtain ⟨PP', cub, sym, adj, prim, m, -⟩ := sabPull ReciprocityTheory.ChartRestriction.G.Out.CubePf.cubePull xV Y.t
+    obtain ⟨PP', cub, sym, adj, prim, m, -⟩ := ReciprocityTheory.ChartRestriction.G.Geo.Tor.sabPull ReciprocityTheory.ChartRestriction.G.Out.CubePf.cubePull xV Y.t
     exact ⟨_, ⟨m⟩⟩
   obtain ⟨t₂, n₀, n₂, m', -, h2⟩ := GlobalTheory.ThetaFrameCheck.genFibre_tied Xo c T _ _ Y xV yy hxV G₂ m
   obtain ⟨n₁, hn₁⟩ := sabComp pullCubComp E H _ _ _ Xo.univ.t Y.oF.t t₂ _ yy Y.m0.toSABMap m'

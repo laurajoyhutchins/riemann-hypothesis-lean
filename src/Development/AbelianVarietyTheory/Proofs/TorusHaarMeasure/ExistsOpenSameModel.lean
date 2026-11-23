@@ -1,17 +1,72 @@
-import Mathlib
-import Formalism.LocalToGlobal.ProjectiveLattices.CurveAsm
-import Formalism.LocalToGlobal.ProjectiveLattices.TieUpC
-import Formalism.LocalToGlobal.ProjectiveLattices.SupNDataOfNonneg
-import Formalism.LocalToGlobal.ProjectiveLattices.AxHInst
-import Formalism.LocalToGlobal.ProjectiveLattices.FreeBridge
+module
+
+public import Formalism.LocalToGlobal.ProjectiveLattices.HasDataCondition
+public import Formalism.LocalToGlobal.ProjectiveLattices.IsGenFrGenFr
+public import Formalism.LocalToGlobal.ProjectiveLattices.UnFree
+public import Formalism.LocalToGlobal.ProjectiveLattices.XcLat
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.TheoremA
+public import Development.AbelianVarietyTheory.Proofs.CharacterTheory.ExistsHolomorphicFamily
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.ContinuousRmulPair
+public import Development.AbelianVarietyTheory.Proofs.GenericRegularity.EvaluationLawsGenericFramesAtlasHold
+public import Development.AbelianVarietyTheory.Proofs.GenericRegularity.ExistsHolomorphicPeriodsAdaptedStatement
+public import Development.AbelianVarietyTheory.Proofs.GenericRegularity.ExistsIdempotentWeightZeroSectionOfComponent
+public import Development.AbelianVarietyTheory.Proofs.GenericRegularity.FnFGFnTrdeg
+import Development.AbelianVarietyTheory.Proofs.GenericRegularity.FrameBorelGroupoidProperties
+public import Development.AbelianVarietyTheory.Proofs.GenericRegularity.IdemMulMemCusp
+public import Development.AbelianVarietyTheory.Proofs.GenericRegularity.ImNegOfFramePeriodVectorStatement
+public import Development.AbelianVarietyTheory.Proofs.GenericRegularity.PeriodEqTriangularOrthonormalStatement
+import Development.AbelianVarietyTheory.Proofs.GenericRegularity.SectionEqZeroOfGenericFramedPointValues
+public import Development.AbelianVarietyTheory.Proofs.GenericRegularity.SupCLeISupGeneric
+public import Development.AbelianVarietyTheory.Proofs.GenericRegularity.TriangularFrameChangeOfTriangularPeriodStatement
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.DenseMvPolynomialEvalNeZero
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.ExistsEmbeddingsOverInjective
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.FramedPointBaseChangeUniqueReflIff
+public import Formalism.LocalToGlobal.ProjectiveLattices.FreeBridge
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.PTNonempty
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.FrMapComp
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Development.AbelianVarietyTheory.Definitions.RegularCharts.ModelAt
+public import Development.AbelianVarietyTheory.Definitions.RegularCharts.Reframe
 import Development.AbelianVarietyTheory.Definitions.UpperBounds.PhRec
-import Development.AbelianVarietyTheory.Proofs.GenericRegularity.SupCLeISupGeneric
-import Development.AbelianVarietyTheory.Proofs.GenericRegularity.FrameNormsContinuousOnHolomorphicFramedFamily
-import Development.AbelianVarietyTheory.Proofs.CharacterTheory.ExistsHolomorphicFamily
-import Development.AbelianVarietyTheory.Proofs.GenericRegularity.ExistsIdempotentWeightZeroSectionOfComponent
-import Development.AbelianVarietyTheory.Proofs.GenericRegularity.IdemMulMemCusp
-import Development.AbelianVarietyTheory.Proofs.GenericRegularity.FnFGFnTrdeg
-import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.ContinuousRmulPair
+import Formalism.SharpRestriction.GenusPolyhedralBounds.RelativeIndexClassSets.ExistsPowSmulMemBall
+
+@[expose] public section
 
 noncomputable section
 
@@ -65,6 +120,7 @@ theorem exists_model (U : Formalism.L2.PjFree.Unf Xo c σ r) (hU : Formalism.L2.
   obtain ⟨k, x, t, ht⟩ := hU.2.2.1 w
   exact ⟨k, algOf P hP, w, x, t, hw, ht⟩
 
+attribute [local instance 100] IntermediateField.instAlgebraSubtypeMem in
 theorem exists_comp (U : Formalism.L2.PjFree.Unf Xo c σ r) (hσ : Formalism.L2.PjFree.GoodEmb c σ)
     (hU : Formalism.L2.PjFree.IsUnf U) (h : GenFrEx Xo c) (k : U.Comp) : ∃ Z, CarriesGeneric U h k Z := by
   classical
@@ -188,8 +244,8 @@ end Free
 
 open NumberField IsDedekindDomain Formalism.BasicNotions Formalism.MainNotions Formalism.MainNotions.WeightAlgebra Formalism.MainNotions.Gaps.EtaleWeightGaps Formalism.L2.Pj ReciprocityTheory.ChartRestriction.G.Geo.Tor GlobalTheory.BigRec
 
-set_option maxHeartbeats 4000000 in
-set_option synthInstance.maxHeartbeats 400000 in
+
+
 
 theorem comp_read_on_model : ∀ (D : D7) (T : Top D) (h : LawsP T) (j : ℕ) (hj : InR D j) (hG : GenFrEx (T.Q.Xo j) T.Q.c) (σ : T.Q.c.F →+* ℂ), GoodEmb T.Q.c σ → (∀ Z : Comp (T.Q.Xo j) T.Q.c, ∃ k : (T.U j σ).Comp, ∀ (u : WeightFamilies.Wt D j) (F : (recB h.toLawsCore).Cusp j u), evC hG Z F.1 = 0 ↔ ∀ x ∈ ((T.U j σ).X k).dom, rdU (T.U j σ) F.1 k x = 0) ∧ ∀ k : (T.U j σ).Comp, ∃ Z : Comp (T.Q.Xo j) T.Q.c, ∀ (u : WeightFamilies.Wt D j) (F : (recB h.toLawsCore).Cusp j u), evC hG Z F.1 = 0 ↔ ∀ x ∈ ((T.U j σ).X k).dom, rdU (T.U j σ) F.1 k x = 0 := by
   intro D T h j hj hG σ hσ

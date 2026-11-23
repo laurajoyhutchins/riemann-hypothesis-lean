@@ -1,5 +1,47 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IsCliff
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IsCliff
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.RealDescent.RealLeviDescent.IsCoreMod
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -26,8 +68,8 @@ theorem wtR_injective : Function.Injective (wtR : (Fin n → ℤ) → Fin n → 
   have := congrFun h a
   simpa [wtR] using this
 
-open Classical in
 
+open Classical in
 def harmZ (lam : Fin n → ℤ) : Finset (Fin n → ℤ) :=
   ((univ : Finset (Fin n → Fin n)).filter fun lev => IsLev lam fun a => (lev a : ℕ)).image
     fun lev => muZ lam fun a => (lev a : ℕ)
@@ -42,8 +84,8 @@ theorem harmSet_eq (lam : Fin n → ℤ) : harmSet lam = (harmZ lam).image wtR :
 def hwOf {M : Type*} [AddCommGroup M] [Module ℂ M] (G : Fin n → Fin n → Module.End ℂ M) (μ : Fin n → ℝ) :
     Submodule ℂ M where
   carrier := {v | Formalism.REAL.KHighest (fun _ => true) G μ v}
-  add_mem' {x y} hx hy := ⟨fun a => by rw [map_add, hx.1 a, hy.1 a, smul_add],
-    fun a b hab he => by rw [map_add, hx.2 a b hab he, hy.2 a b hab he, add_zero]⟩
+  add_mem' {x y} hx hy := ⟨fun a => by rw [map_add (f := _), hx.1 a, hy.1 a, smul_add],
+    fun a b hab he => by rw [map_add (f := _), hx.2 a b hab he, hy.2 a b hab he, add_zero]⟩
   zero_mem' := ⟨fun a => by simp, fun a b _ _ => by simp⟩
   smul_mem' c x hx := ⟨fun a => by rw [map_smul, hx.1 a, smul_comm],
     fun a b hab he => by rw [map_smul, hx.2 a b hab he, smul_zero]⟩

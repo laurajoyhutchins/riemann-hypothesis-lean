@@ -1,4 +1,55 @@
-import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.CompactOrbits.Descent.OpenSlices.OpenSlice
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.CompactOrbits.LocStep
+public import GroundTheory.AutomorphicForms.GLnLocal
+public import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.CompactOrbits.Descent.SliceVanishing.IsClosedGzS
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -67,12 +118,6 @@ theorem val_mul_le {A B : Matrix (Fin n) (Fin n) k} {α β : ValueGroupWithZero 
   refine Valuation.map_sum_le _ fun l _ => ?_
   rw [Valuation.map_mul]
   exact mul_le_mul' (hA i l) (hB l j)
-
-theorem mul_mem_Lat {Z : Subalgebra k (Matrix (Fin n) (Fin n) k)} {h x : Matrix (Fin n) (Fin n) k}
-    (hh : h ∈ Lat Z 0) {m : ℕ} (hx : x ∈ Lat Z m) : h * x ∈ Lat Z m := by
-  refine ⟨fun a ha => ?_, fun i j => ?_⟩
-  · rw [← mul_assoc, hh.1 a ha, mul_assoc, hx.1 a ha, mul_assoc]
-  · simpa using val_mul_le hh.2 hx.2 i j
 
 private theorem exists_mat_scale (A : Matrix (Fin n) (Fin n) k) :
     ∃ a : ℕ, 1 ≤ a ∧ ∀ i j, valuation k (pi k) ^ a * valuation k (A i j) ≤ 1 := by
@@ -154,9 +199,6 @@ theorem Lat_add (Z : Subalgebra k (Matrix (Fin n) (Fin n) k)) (m r : ℕ) :
     · rw [smulA_apply, Matrix.mul_smul, Matrix.smul_mul, hy1 a ha]
     · rw [smulA_apply, Matrix.smul_apply, smul_eq_mul, Valuation.map_mul, map_pow, pow_add]
       exact mul_le_mul' le_rfl (hy2 i j)
-
-theorem smulA_injective {c : k} (hc : c ≠ 0) : Function.Injective (smulA (n := n) c) :=
-  fun _ _ h => smul_right_injective _ hc h
 
 theorem conjA_inv_conjA (g : GL (Fin n) k) (x : Matrix (Fin n) (Fin n) k) : conjA g⁻¹ (conjA g x) = x := by
   simp [mul_assoc]

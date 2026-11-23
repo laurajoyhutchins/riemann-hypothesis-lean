@@ -1,8 +1,42 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ThetaEqB
-import Development.AbelianVarietyTheory.Definitions.Divisors.DiscreteSeriesHermitianUnique
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.HoweDualityUnitary
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.HoweDualityReal
+module
+
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ThetaEqB
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.MainNotions.S MeasureTheory IsDedekindDomain NumberField Matrix
 open Formalism.L2.Theta Formalism.L2.DIV Formalism.L2.Indef Formalism.DivisionValues
@@ -44,10 +78,10 @@ theorem polMatch_onto : ∀ {F E : Type} [Field F] [NumberField F] [Field E] [Nu
   have hφ'SB : ∀ i v, φ' i v ∈ GlobalTheory.WeilM.SB _ := by
     intro i v
     by_cases hv : v ∈ T
-    · simp only [φ', if_pos hv]; exact hφ₀ i v
-    · simp only [φ', if_neg hv]; exact hvac' v
+    · simpa only [φ', ite_eq_left hv] using hφ₀ i v
+    · simpa only [φ', ite_eq_right hv] using hvac' v
   have hφ'out : ∀ i, ∀ v ∉ T, φ' i v = G.M'.vac v := by
-    intro i v hv; simp only [φ', if_neg hv]
+    intro i v hv; simp only [φ', ite_eq_right hv]
   have hpure : ∀ i, GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.pure (c i • f i) (φ i) = c i • (g i : (Fin a × Fin (a + a') → AF F) → ℂ) := by
     intro i
     rw [hg i]
@@ -62,9 +96,10 @@ theorem polMatch_onto : ∀ {F E : Type} [Field F] [NumberField F] [Field E] [Nu
   · exact Finset.sum_congr rfl fun i _ => (hpure i).symm
   · refine Finset.sum_congr rfl fun i _ => ?_
     rw [hf'eq i]
-    congr 2
+    apply congrArg (fun z => R.p (c i • f i) ⊗ₜ[ℂ] z)
+    apply congrArg (PiTensorProduct.tprod ℂ)
     funext v
-    simp only [φ', if_pos v.2]
+    simp only [φ', ite_eq_left v.property]
     exact (hφ₀eq i v).symm
 
 end GlobalTheory.SquareAgree

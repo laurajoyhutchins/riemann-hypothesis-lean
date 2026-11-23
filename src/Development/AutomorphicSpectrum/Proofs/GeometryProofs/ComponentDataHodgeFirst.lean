@@ -1,10 +1,53 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.BdryChart
-import ReciprocityTheory.AnalyticForms.PlurisubharmonicFunctions.IsPshLocallyIntegrableStatement
-import Development.AutomorphicSpectrum.Statements.GeometryStatements.FlatDegree
-import Development.AutomorphicSpectrum.Statements.GeometryStatements.NineGeoU
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ValAtIffValueAtStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HodgeCompDescentFourth
+module
+
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsPeriodAtRestrict
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AutomorphicSpectrum.Definitions.MetricPeriods.ExistsIntSmulIsAdicIntegralInTensorBasis
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField Matrix Filter Topology
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Geo ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.Semi
 open GroundTheory.Heights₂.Heights.LowerBoundFree GlobalTheory.CompanionTheory.Ar GlobalTheory.CompanionTheory.Ar.Cusp
@@ -81,9 +124,9 @@ private theorem isValueAt_add' {K : Type} {Jt : K → Type} [∀ k, Fintype (Jt 
     isMultiHomog_mul_geometry hh hh', ?_, ?_, ?_, ?_⟩
   · rw [add_comm d d']; exact isMultiHomog_mul_geometry hg' hh
   · rw [map_mul]; exact mul_ne_zero hy hy'
-  · simp only [map_mul, map_add, hgs, hgs']; ring
+  · simp only [map_mul, map_add (f := _), hgs, hgs']; ring
   · simp only [map_mul]; exact mul_ne_zero hw hw'
-  · simp only [map_mul, map_add]; rw [div_add_div _ _ hw hw']; ring
+  · simp only [map_mul, map_add (f := _)]; rw [div_add_div _ _ hw hw']; ring
 
 private theorem isValueAt_mul' {K : Type} {Jt : K → Type} [∀ k, Fintype (Jt k)] {Ω : Type} [Field Ω]
     {y : (k : K) × Jt k → Ω} {w : (k : K) × Jt k → ℂ} {s s' : Ω} {v v' : ℂ}
@@ -113,7 +156,7 @@ private theorem isValueAt_aeval_segreCoord_div {K : Type} [Fintype K] {Jt : K �
     · simp
     · simp
     · simp
-  | add p q hp hq => simpa only [map_add] using isValueAt_add' hp hq
+  | add p q hp hq => simpa only [map_add (f := _)] using isValueAt_add' hp hq
   | mul_X p i hp =>
     rw [map_mul, map_mul]
     refine isValueAt_mul' hp ?_
@@ -175,7 +218,7 @@ theorem nonempty_muFrameAt : ∀ (E : Type) [Field E] [NumberField E] [IsCMField
     | add p q hp hq =>
       obtain ⟨s, hs1, hs2⟩ := hp
       obtain ⟨s', hs1', hs2'⟩ := hq
-      exact ⟨s + s', by rw [map_add, map_add, hs1, hs1'], by rw [map_add, map_add, hs2, hs2']⟩
+      exact ⟨s + s', by rw [map_add (f := _), map_add (f := _), hs1, hs1'], by rw [map_add (f := _), map_add (f := _), hs2, hs2']⟩
     | mul_X p i hp =>
       obtain ⟨s, hs1, hs2⟩ := hp
       refine ⟨s * ∏ k, t ⟨k, i k⟩, ?_, ?_⟩
@@ -190,6 +233,7 @@ theorem nonempty_muFrameAt : ∀ (E : Type) [Field E] [NumberField E] [IsCMField
         rw [Finset.prod_div_distrib]
   obtain ⟨s, hs1, hs2⟩ := hval (∑ l, Q l * P l - 1)
   have hz : genMap Or.𝔐.ξ ⟨centre z, Or.𝔐.all _⟩ s = 0 := by
+
     rw [hs1, map_sub, map_sum, map_one]
     simp only [map_mul, hP, hQ]
     rw [hsum, sub_self]
@@ -197,6 +241,7 @@ theorem nonempty_muFrameAt : ∀ (E : Type) [Field E] [NumberField E] [IsCMField
   have hW : ∑ l, MvPolynomial.aeval (fun c' => (∏ k, w ⟨k, c' k⟩) / ∏ k, w ⟨k, ch k⟩) (Q l) *
       MvPolynomial.aeval (fun c' => (∏ k, w ⟨k, c' k⟩) / ∏ k, w ⟨k, ch k⟩) (P l) = 1 := by
     have h2 := hs2
+
     rw [hs0, map_zero, map_sub, map_sum, map_one] at h2
     simp only [map_mul] at h2
     exact sub_eq_zero.mp h2.symm

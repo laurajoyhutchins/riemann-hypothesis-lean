@@ -1,8 +1,61 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.AevalElimEqRenameLinearSubstitution
-import ReciprocityTheory.SemistableReduction.TorusL2CauchyInequality
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.AevalElimEqRenameLinearSubstitution
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.NatDegreeLeAndCoeffProdPow
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.MvPolynomial.IrreducibleQuadratic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.ContinuousTorusPoint
+import ReciprocityTheory.SemistableReduction.GaussAbsMulOfMonomialOrder
 import ReciprocityTheory.SemistableReduction.LagrangeIdealLiftsFact
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.ContinuousTorusPoint
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.NatDegreeLeAndCoeffProdPow
+import ReciprocityTheory.SemistableReduction.TorusL2CauchyInequality
+public import Mathlib.NumberTheory.NumberField.ProductFormula
+
+@[expose] public section
 
 namespace ReciprocityTheory.ChartRestriction.G.T0
 
@@ -41,7 +94,7 @@ theorem coeffIn_add_alt (i : V) (k : ℕ) (p q : MvPolynomial V R) :
     coeffIn_eq_sum i k q (p.support ∪ q.support) Finset.subset_union_right,
     ← Finset.sum_add_distrib]
   refine Finset.sum_congr rfl fun s _ => ?_
-  split_ifs <;> simp [MvPolynomial.coeff_add, map_add]
+  split_ifs <;> simp [MvPolynomial.coeff_add, map_add (f := _)]
 
 theorem polyIn_monomial_of_eq_zero (i : V) (t : V →₀ ℕ) (ht : t i = 0) (a : R) :
     asPolyInVar i (MvPolynomial.monomial t a) = Polynomial.C (MvPolynomial.monomial t a) := by
@@ -75,13 +128,14 @@ theorem coeffIn_eq_polyIn_coeff (i : V) (k : ℕ) (P : MvPolynomial V R) :
     by_cases h : u i = k
     · rw [if_pos h, if_pos h.symm]
     · rw [if_neg h, if_neg (Ne.symm h)]
-  · rw [coeffIn_add_alt, map_add, Polynomial.coeff_add, hp, hq]
+  · rw [coeffIn_add_alt, map_add (f := _), Polynomial.coeff_add, hp, hq]
 
 theorem coeffIn_map {S : Type*} [CommRing S] (φ : R →+* S) (hφ : Function.Injective φ) (i : V)
     (k : ℕ) (P : MvPolynomial V R) :
     ReciprocityTheory.MultiplicativeHeights.coeffIn i k (MvPolynomial.map φ P) =
       MvPolynomial.map φ (ReciprocityTheory.MultiplicativeHeights.coeffIn i k P) := by
   unfold ReciprocityTheory.MultiplicativeHeights.coeffIn
+
   rw [MvPolynomial.support_map_of_injective _ hφ, map_sum]
   refine Finset.sum_congr rfl fun s _ => ?_
   rw [MvPolynomial.map_monomial, MvPolynomial.coeff_map]
@@ -161,7 +215,7 @@ theorem polyIn_substitution_leading {D N : ℕ} (f : KTp K D N) (a : Fin (D + 1)
   rw [hEG]
   conv_lhs => rw [f.as_sum]
   conv_rhs => rw [f.as_sum]
-  rw [map_sum, map_sum]
+  rw [MvPolynomial.aeval_sum, map_sum (MvPolynomial.rename _)]
   refine ⟨Polynomial.natDegree_sum_le_of_forall_le _ _ fun s hs => (hterm s hs).1, ?_⟩
   rw [Polynomial.finsetSum_coeff]
   exact Finset.sum_congr rfl fun s hs => (hterm s hs).2

@@ -1,4 +1,47 @@
-import Formalism.SharpRestriction.GrowthBounds.TwistedSubstitution.Lemma5aMonomial
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.ScaleEdges.SymbolRealisableBound
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.SharpRestriction.GrowthBounds.DualFockLinear.IsMultiHom
+
+@[expose] public section
 
 noncomputable section
 
@@ -20,11 +63,6 @@ def pairSet (O : Type) [CommRing O] (r K : ℕ) [NeZero r] [NeZero K] {n' : ℕ}
             ((M x + m x : ℤ) : WithTop ℤ) ≤ valS LZ {y | y ≤ x} A) ∧
         geR (valS LZ {y | y < x} A) (th x)) ∧
       P = plEmb O r K A * nmEmb O r K G}
-
-theorem XX'_le_span (O : Type) [CommRing O] (r K : ℕ) [NeZero r] [NeZero K] {n' : ℕ} [NeZero n'] (F : Frames n' r)
-    (j : ℤ) (m : ℤ → ℤ) (th o : ℤ → ℝ) {x : SegRing O r K} (hx : x ∈ XX' O r K F j m th o) :
-    x ∈ Submodule.span O (pairSet O r K F j m th) :=
-  (Submodule.mem_inf.1 hx).1
 
 section Multi
 
@@ -129,51 +167,5 @@ theorem symbol_spaces_le_pair_span (CLa : ℝ) (p n' : ℕ) [NeZero n'] (O : Typ
     (hx : x ∈ symbolSpaces CLa p n' O r K F deg L₁ Ns mS a Y j) :
     x ∈ Submodule.span O (pairSet O r K F j (g2mg p n' r K F deg mS Y j) (g2th p n' F deg j)) :=
   (Submodule.mem_inf.1 hx).1
-
-def Lemma5aGeneratorProductsAt (C CLa : ℝ) : Prop :=
-  ∀ (p : ℕ) (W Qq O Kf : Type) [CommRing W] [IsDomain W] [IsDiscreteValuationRing W] [Field Qq] [Algebra W Qq]
-    [CommRing O] [IsDomain O] [IsDiscreteValuationRing O] [Field Kf] [Algebra O Kf]
-    (ι : Qq →+* Kf) (σ : Qq ≃+* Qq) (j : W →+* O) (w : O)
-    (n' m r : ℕ) [Fact p.Prime] [NeZero n'] (TT : Finset (Fin n')) (L₁ L₂ : ℕ) (de h x : ℝ)
-    (lam0 : Fin n' → Fin (m + 1) → ℤ) (aT bT : Fin n' → ℤ) (a Y : ℝ) (cpp c0 Dp cStar : ℕ)
-    (K : ℕ) [NeZero r] [NeZero K] (hk : m + 1 = r + K) (hrk : r ≤ m + 1) (F : Frames n' r) (nb : ℕ)
-    (B : Fin nb → RRing O n' (r + K)),
-    DataII C CLa p W Qq O Kf ι σ j w n' m r TT L₁ L₂ de h x lam0 aT bT a Y cpp c0 Dp cStar K F nb B →
-    ∀ (xs : ℤ → SegRing O r K),
-      (∀ i : ℕ, i < F.J → xs i ∈ pairSet O r K F (i : ℤ)
-        (g2mg p n' r K F (flatDeg lam0) (mStar p F (r + K) (orbitWindowCount r de h x) (p ^ goodG' r de h x)
-          (cPrime n' r TT.card c0 cpp cStar)) Y (i : ℤ)) (g2th p n' F (flatDeg lam0) (i : ℤ))) →
-    ∀ l : Fin n' × Fin (r + K) →₀ ℕ, IsLabel p F l →
-    ∀ ga ∈ (SPR O p F hrk (cPrime n' r TT.card c0 cpp cStar) (p ^ goodG' r de h x)).support,
-      MemAtG 0 (1 / 8) p O hk F (flatDeg lam0) Y (orbitWindowCount r de h x) (goodG' r de h x) (cPrime n' r TT.card c0 cpp cStar)
-        (symG p O hk F l ga xs)
-
-theorem monomialAt_of_generatorProductsAt (C CLa : ℝ) (h : Lemma5aGeneratorProductsAt C CLa) : Lemma5aMonomialAt C CLa := by
-  intro p W Qq O Kf _ _ _ _ _ _ _ _ _ _ ι σ j w n' m r _ _ TT L₁ L₂ de h' x lam0 aT bT a Y cpp c0 Dp cStar K _ _ hk hrk
-    F nb B hD b ga hga
-  have hGen := hD.2.2.2.1.choose_spec.2 b
-  obtain ⟨xs, hxs, l, hl, hB, -⟩ := hGen
-  have e1 : MvPolynomial.map (algebraMap O (KK O)) (rename (castV hk) (B b) * monomial ga 1) =
-      symG p O hk F l ga xs := by rw [hB]; rfl
-  rw [e1]
-  let mS : ℕ := mStar p F (r + K) (orbitWindowCount r de h' x) (p ^ goodG' r de h' x) (cPrime n' r TT.card c0 cpp cStar)
-  let Sj : ℤ → Set (SegRing O r K) := fun jj =>
-    pairSet O r K F jj (g2mg p n' r K F (flatDeg lam0) mS Y jj) (g2th p n' F (flatDeg lam0) jj)
-  have hspan : ∀ i : ℕ, i < F.J → xs i ∈ Submodule.span O (Sj i) := fun i _ =>
-    symbol_spaces_le_pair_span CLa p n' O r K F (flatDeg lam0) L₁ (min (orbitWindowCount r de h' x) (2 * TT.card)) mS a Y (i : ℤ) (hxs i)
-  exact symG_span p O hk F (memSub 0 (1 / 8) p O hk F (flatDeg lam0) Y (orbitWindowCount r de h' x) (goodG' r de h' x)
-      (cPrime n' r TT.card c0 cpp cStar)) Sj l ga
-    (fun xs' hxs' => h p W Qq O Kf ι σ j w n' m r TT L₁ L₂ de h' x lam0 aT bT a Y cpp c0 Dp cStar K hk hrk F nb B hD
-      xs' hxs' l hl ga hga)
-    xs hspan
-
-def Lemma5aGeneratorProducts (D : Formalism.BasicNotions.D7) (CLa Ck Crk Cdeg : ℝ) : Prop :=
-  tableLineDegreeFive.admitted D CLa Ck Crk Cdeg → ∃ C₁ : ℝ, 0 < C₁ ∧ ∀ C : ℝ, C₁ ≤ C → Lemma5aGeneratorProductsAt C CLa
-
-theorem monomial_of_generatorProducts (D : Formalism.BasicNotions.D7) (CLa Ck Crk Cdeg : ℝ) (h : Lemma5aGeneratorProducts D CLa Ck Crk Cdeg) :
-    Lemma5aMonomial D CLa Ck Crk Cdeg := by
-  intro hA
-  obtain ⟨C1, hC1, hst⟩ := h hA
-  exact ⟨C1, hC1, fun C hC => monomialAt_of_generatorProductsAt C CLa (hst C hC)⟩
 
 end Formalism.MainNotions.TestSideWords

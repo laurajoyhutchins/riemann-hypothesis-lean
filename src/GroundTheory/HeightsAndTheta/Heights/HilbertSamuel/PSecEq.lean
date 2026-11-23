@@ -1,8 +1,59 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsSecEq
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PSectionBounded
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PUpperNormalisation
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.AssemblyBase
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsSecEq
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.Objects
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PSectionBounded
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PUpperNormalisation
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.AssemblyBase
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.HilbertSamuel
@@ -17,8 +68,8 @@ namespace SecEqProof
 
 variable {K : Type} [Fintype K] {ι : K → Type} [∀ k, Fintype (ι k)] {Ω : Type} [Field Ω]
 
-variable (ι) in
 
+variable (ι) in
 abbrev Mono (a : K → ℕ) : Type := {μ : (Σ k, ι k) → ℕ // ∀ k, ∑ i, μ ⟨k, i⟩ = a k}
 
 theorem Mono.le {a : K → ℕ} (μ : Mono ι a) (p : Σ k, ι k) : μ.1 p ≤ a p.1 := by
@@ -59,6 +110,7 @@ theorem homog_prod {J : Type} (s : Finset J) (f : J → MRing ι) (d : J → K �
 theorem homog_bind₁ {a : K → ℕ} {N : ℕ} (φ : Fin (N + 1) → MRing ι) (hφ : ∀ j, IsMultiHomog (φ j) a)
     {f : MvPolynomial (Fin (N + 1)) ℤ} {n : ℕ} (hf : f.IsHomogeneous n) :
     IsMultiHomog (bind₁ φ f) (fun k => n * a k) := by
+
   rw [f.as_sum, map_sum]
   refine SectionBounded.homog_sum _ fun m hm => ?_
   rw [bind₁_monomial]
@@ -171,8 +223,8 @@ theorem piece_le_secM (y : (Σ k, ι k) → Ω) {a : K → ℕ} {N : ℕ} (e : M
 
 end SecEqProof
 
-open SecEqProof in
 
+open SecEqProof in
 theorem SecEq.proof : SecEq.Statement := by
   intro K _ ι _ Ω _ y a ha hy
   classical

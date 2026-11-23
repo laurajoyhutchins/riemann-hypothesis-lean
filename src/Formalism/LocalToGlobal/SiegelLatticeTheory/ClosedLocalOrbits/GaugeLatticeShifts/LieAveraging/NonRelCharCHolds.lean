@@ -1,7 +1,51 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.NilradicalLatticeZMemSpan
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.Vanish
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.HermitianETransportInvariant
 import Formalism.LocalRingCardinality.RankBoundMonotoneInDimension
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.LieAveraging.LiePowRPerp
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.LieAveraging.LiePowRPerp
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.NilradicalLatticeZMemSpan
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -48,7 +92,8 @@ def Φ (v : InfinitePlace X.B.I.F) (y : D.host.E) : ℂ := X.B.I.φ v (X.ιE.sym
 theorem Φ_add (v) (a b : D.host.E) : Φ X v (a + b) = Φ X v a + Φ X v b := by
   simp [Φ]
 theorem Φ_sum (v) {ι : Type} (s : Finset ι) (f : ι → D.host.E) : Φ X v (∑ i ∈ s, f i) = ∑ i ∈ s, Φ X v (f i) := by
-  simp [Φ, map_sum]
+  set_option synthInstance.maxHeartbeats 100000 in
+    simp [Φ, map_sum]
 theorem Φ_star (v) (a : D.host.E) : Φ X v (star a) = star (Φ X v a) := by
   have hb : star a = D.host.conj a := Formalism.BasicNotions.bridge_star_holds _ _ a
   have h1 : X.ιE.symm (star a) = star (X.ιE.symm a) := by
@@ -113,15 +158,15 @@ theorem trace_zero (X : HidaSetting D) {y : D.host.E} (hy : y + star y = 0) : Al
   · exact absurd h5 two_ne_zero
   · exact h5
 
-open Formalism.L2.SG.TermOp.Vanish in
 
+open Formalism.L2.SG.TermOp.Vanish in
 theorem nonRelCharC_holds : NonRelCharC := by
   intro D X Yf u u' t ht
   have hiso : t.lin ∈ Formalism.HermitianLatticesTheory.isom (VS D).hT := t.rep.2.2.1
   have hisoF : ∀ a b, (VS D).hT (t.lin a) (t.lin b) = (VS D).hT a b := hiso
   set F' := mapFlag t.lin hiso (X.Fu u') with hF'
   have hfr : t.frame = ⟨F', t.lin (X.Fu u').z⟩ := by
-    unfold GTerm.frame mapLF; rw [dif_pos hiso]; rfl
+    unfold GTerm.frame mapLF; rw [dite_eq_left hiso]
   have hnr : ¬ Relevant D.host.F (X.Fu u) F' := by
     intro h; apply ht
     unfold GTerm.relevant TermDef.Term.relevant TermDef.IsRel

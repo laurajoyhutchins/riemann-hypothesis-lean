@@ -1,6 +1,59 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IsHeatZero
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SquareIntegrability.GCauchyStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.FirstCoordinateAdmissible
+import Mathlib.Algebra.AffineMonoid.Basic
+import Mathlib.Algebra.AffineMonoid.UniqueSums
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.Charpoly.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Matrix Complex NumberField GlobalTheory.SW Filter Topology
 open ReciprocityTheory.ChartRestriction.G.FD (cc herm)
@@ -10,10 +63,10 @@ namespace GlobalTheory.SW.SplitPrime
 
 open Polynomial
 
+
 open Matrix Complex NumberField Filter Topology in
 open scoped ComplexConjugate ComplexOrder Real Classical in
 open Polynomial in
-
 theorem _root_.GlobalTheory.SW.SplitPrime.exists_prim_den (E : Type) [Field E] [NumberField E] :
     ∃ (θ : 𝓞 E) (d : ℤ), d ≠ 0 ∧ Algebra.adjoin ℚ {(θ : E)} = ⊤ ∧
       ∀ a : 𝓞 E, ∃ g : ℤ[X], (d : 𝓞 E) * a = aeval θ g := by
@@ -85,7 +138,7 @@ private theorem exists_prime_dvd_eval_not_dvd_of_natDegree_pos (h : ℤ[X]) (hh 
     rw [hr, Ne, comp_eq_zero_iff]
     rintro (h0 | ⟨-, h1⟩)
     · exact hq0 h0
-    · have := congrArg (coeff · 1) h1
+    · have := congrArg (AddMonoidAlgebra.coeff · 1) h1
       simp only [coeff_C_mul_X, coeff_C] at this
       simp at this
       exact this.elim hc hM
@@ -142,7 +195,7 @@ private theorem span_prime_sup_span_proper_of_dvd_norm {E : Type} [Field E] [Num
     rcases hu with h | h <;> omega
   · set I := Ideal.span {x}
     have hcard : Nat.card (𝓞 E ⧸ I) = (Algebra.norm ℤ x).natAbs := by
-      rw [← Ideal.absNorm_span_singleton]; exact (Nat.add_zero _).symm
+      rw [← Ideal.absNorm_span_singleton]; exact (Ideal.absNorm_eq_natCard I).symm
     have hne : (Algebra.norm ℤ x).natAbs ≠ 0 := by
       rw [Int.natAbs_ne_zero, Ne, Algebra.norm_eq_zero_iff]; exact hx
     haveI : Finite (𝓞 E ⧸ I) := Nat.finite_of_card_ne_zero (hcard ▸ hne)
@@ -154,7 +207,7 @@ private theorem span_prime_sup_span_proper_of_dvd_norm {E : Type} [Field E] [Num
       rw [← nsmul_eq_mul, ← hz]; exact addOrderOf_nsmul_eq_zero z
     have hunit : (Ideal.Quotient.mk I y) * (p : 𝓞 E ⧸ I) = 1 := by
       have := congrArg (Ideal.Quotient.mk I) hab
-      rw [map_add, Ideal.Quotient.eq_zero_iff_mem.mpr hb, add_zero, map_one, map_mul,
+      rw [map_add (f := _), Ideal.Quotient.eq_zero_iff_mem.mpr hb, add_zero, map_one, map_mul,
         map_natCast] at this
       exact this
     have hz0 : z = 0 := by
@@ -163,10 +216,10 @@ private theorem span_prime_sup_span_proper_of_dvd_norm {E : Type} [Field E] [Num
     rw [hz0, addOrderOf_zero] at hz
     exact hp.one_lt.ne hz
 
+
 open Matrix Complex NumberField Filter Topology in
 open scoped ComplexConjugate ComplexOrder Real Classical in
 open Polynomial in
-
 theorem _root_.GlobalTheory.SW.SplitPrime.exists_degree_one {E : Type} [Field E] [NumberField E] (θ : 𝓞 E)
     (hθ : θ ≠ 0) (d : ℤ) (hd : d ≠ 0) (hden : ∀ a : 𝓞 E, ∃ g : ℤ[X], (d : 𝓞 E) * a = aeval θ g)
     (N : ℤ) (hN : N ≠ 0) :
@@ -220,15 +273,15 @@ theorem _root_.GlobalTheory.SW.SplitPrime.exists_degree_one {E : Type} [Field E]
   simp only [eq_intCast, Int.cast_mul]
   rw [← hga, ← map_intCast (Ideal.Quotient.mk P) v, ← map_mul, ← mul_assoc, map_mul, hv', one_mul]
 
+
 open Matrix Complex NumberField Filter Topology in
 open scoped ComplexConjugate ComplexOrder Real Classical in
 open Polynomial in
-
 theorem _root_.GlobalTheory.SW.SplitPrime.absNorm_prime {E : Type} [Field E] [NumberField E]
     (P : Ideal (𝓞 E)) (hP : P.IsMaximal)
     (hs : Function.Surjective (Int.castRingHom (𝓞 E ⧸ P))) : (Ideal.absNorm P).Prime := by
   letI := Ideal.Quotient.field P
-  have hN : Ideal.absNorm P = Nat.card (𝓞 E ⧸ P) := Nat.add_zero _
+  have hN : Ideal.absNorm P = Nat.card (𝓞 E ⧸ P) := Ideal.absNorm_eq_natCard P
   obtain ⟨p, hp⟩ := CharP.exists (𝓞 E ⧸ P)
   haveI := hp
   have hp' : p.Prime := (CharP.char_is_prime_or_zero (𝓞 E ⧸ P) p).resolve_right (by
@@ -244,10 +297,10 @@ theorem _root_.GlobalTheory.SW.SplitPrime.absNorm_prime {E : Type} [Field E] [Nu
   rw [hN, ← Nat.card_congr (Equiv.ofBijective _ hbij), Nat.card_zmod]
   exact hp'
 
+
 open Matrix Complex NumberField Filter Topology in
 open scoped ComplexConjugate ComplexOrder Real Classical in
 open Polynomial in
-
 theorem _root_.GlobalTheory.SW.SplitPrime.exists_goodPrime : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E]
     (m : ℕ), 0 < m → ∃ (q : ℕ) (P : Ideal (𝓞 E)), _root_.GlobalTheory.SW.GoodPrime m q P := by
   intro E _ _ _ m hm

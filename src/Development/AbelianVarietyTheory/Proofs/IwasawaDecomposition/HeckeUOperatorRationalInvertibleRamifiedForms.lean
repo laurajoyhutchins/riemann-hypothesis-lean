@@ -1,19 +1,71 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.CmQuadraticFormEqAlternatingForm
-import Formalism.LocalToGlobal.HermitianColumns.SymAll
-import Formalism.LocalToGlobal.GroupLattices.DownNaturalLevelZero
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.GlESymmApply
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FinsumPairsAboveEqAffineHyperplaneStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.EqZeroOfUpSumOfNormStatement
+module
+
+public import Formalism.LocalToGlobal.HermitianColumns.SymAll
+public import Formalism.LocalToGlobal.GroupLattices.DownNaturalLevelZero
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.GlESymmApply
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.AssembleLattice
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.SpreadLe
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.AdelicFormValuesNearPointSpecStatement
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.DownwardLevelMoveReachesKernelLatticeStatement
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.EqZeroOfUpSumOfNormStatement
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsEquivariantLocalPairMapAdelicStatement
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FinsumPairsAboveEqAffineHyperplaneStatement
 import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LevelPrimeUnramifiedUniformizerStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsEquivariantLocalPairMapAdelicStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.UpwardLevelMoveIncidenceOfPairsStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.DownwardLevelMoveReachesKernelLatticeStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.AdelicFormValuesNearPointSpecStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.UpwardOperatorMemAdelicFormsStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.UpwardHeckeOperatorCommuteDiamondStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.UpwardOperatorPreservesRationalityStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.RamifiedFormsCommensurableOfUStableInjectiveStatement
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.RamifiedFormsCommensurableOfUStableInjectiveStatement
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.UpwardHeckeOperatorCommuteDiamondStatement
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.UpwardLevelMoveIncidenceOfPairsStatement
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.UpwardOperatorMemAdelicFormsStatement
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.UpwardOperatorPreservesRationalityStatement
+import Formalism.LocalToGlobal.GlobalTheory.GL6.PSplitT
+import Formalism.LocalToGlobal.HermitianForms.FramesLemmas
+public import Formalism.LocalToGlobal.HermitianForms.TransportT
+import Formalism.SharpRestriction.GlobalSchurBounds.ProductFirstZerothParts
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.CmQuadraticFormEqAlternatingForm
+import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.SetUnipotentTranslate
+import Development.AutomorphicArithmetic.PrimeDiscriminants.Scales
+import Formalism.LocalToGlobal.UnitaryNorms.IsUnitaryNormOf
+
+@[expose] public section
 
 open Formalism.BasicNotions Formalism.L2.Forms Formalism.UG Formalism.L2.GlobalTheoryTheory.LocalLatticeBases NumberField IsDedekindDomain Matrix GlobalTheory.LevelHecke
 open scoped TensorProduct
@@ -32,7 +84,7 @@ theorem eq_zero_of_reps (S : StepLevel F E σ J T f bad) (emb : ι → E →+* �
     (hy : Function.Surjective (fun c => (Quotient.mk'' (y c) : Cls S))) (g) (hg : g ∈ AdFun S emb)
     (h0 : ∀ c, g (y c) = 0) (x : GA σ J) : g x = 0 := by
   obtain ⟨c, hc⟩ := hy (Quotient.mk'' x)
-  obtain ⟨a, ha, b, hb, hab⟩ := (DoubleCoset.eq _ _ (y c) x).1 hc
+  obtain ⟨a, ha, b, hb, hab⟩ := (@DoubleCoset.eq _ _ _ _ (y c) x).1 hc
   obtain ⟨γ, hγ, e⟩ := Subgroup.mem_subgroupOf.1 ha
   funext s
   obtain ⟨s', hs'⟩ := exists_isTr' emb γ s
@@ -103,7 +155,7 @@ variable (v : (D.mem u).A.vT)
 
 include hp hy
 
-set_option maxHeartbeats 2000000 in
+
 
 theorem uop_rs (g) (hg : g ∈ AdFun T.cls0.lev (embT D)) :
     LT.Uop D u 0 v (rs T g) = rs T (upAd (T.atT.res v) (((D.mem u).A.T : ℕ) : 𝓞 D.host.E) (T.atT.eV v).1 p g) := by
@@ -143,7 +195,7 @@ theorem uop_mem (φ : LT.Fn D u 0) (hφ : φ ∈ (D.fm u).Fi 0) : LT.Uop D u 0 v
   rw [uop_rs T v p hp hy g hg.1, mem_Fi T]
   exact ⟨_, GlobalTheory.T.upwardOperator_mem_adelicForms _ _ _ _ _ _ _ _ _ T.cls0.lev (embT D) _ (T.atT.eV v).2 _ p (level_places_not_bad T.atT v) hp _ _ _ g hg, rfl⟩
 
-set_option maxHeartbeats 1000000 in
+
 theorem uop_rho (hok : ∀ x, (p x).Ok (T.atT.res v)) (φ : LT.Fn D u 0) (hφ : φ ∈ (D.fm u).Fi 0) (v' : (D.mem u).A.vT) (a : ((D.mem u).A.Fv v')ˣ) :
     (D.mem u).A.rhoT v' a (LT.Uop D u 0 v φ) = LT.Uop D u 0 v ((D.mem u).A.rhoT v' a φ) := by
   obtain ⟨g, hg, rfl⟩ := (mem_Fi T φ).1 hφ
@@ -169,9 +221,10 @@ theorem uop_ram (hok : ∀ x, (p x).Ok (T.atT.res v)) (φ : LT.Fn D u 0) (hφ : 
   show (D.mem u).A.Nm v' _ = 0
   unfold ColumnsAtT.Nm at h2 ⊢
   rw [LinearMap.sum_apply] at h2 ⊢
+
   rw [Finset.sum_congr rfl (fun a _ => uop_rho T v p hp hy hok φ h1 v' a), ← map_sum, h2, map_zero]
 
-set_option maxHeartbeats 2000000 in
+
 theorem uop_inj (φ : LT.Fn D u 0) (hφ : φ ∈ (D.mem u).A.Mram) (h0 : LT.Uop D u 0 v φ = 0) : φ = 0 := by
   classical
   have h1 : φ ∈ (D.fm u).Fi 0 := by rw [(D.fm u).Fi_zero]; exact hφ.1

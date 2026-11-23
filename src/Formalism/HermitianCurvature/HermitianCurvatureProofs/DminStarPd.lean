@@ -1,6 +1,57 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.ZinvBound
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.HomogeneityNaturalDegree
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.UnipotentCorrectionU1.WeightBoundMultiplicative
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.ZinvBound
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.HomogeneityNaturalDegree
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.SplLen
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Matrix Set
 open scoped ComplexConjugate ContDiff Topology
@@ -18,11 +69,6 @@ variable {k r : ℕ}
 lemma gf_pd (k r : ℕ) (z z' : Fin (2 * r + k + 1) → ℂ) :
     U.IsPolyDeg (2 * r + 2) (fun g : Mat k r => ((Gf k r z z' g : ℝ) : ℂ)) := by
   exact gram_function_polynomial k r z z'
-
-lemma dmin_pd (k r : ℕ) (z z' : Fin (2 * r + k + 1) → ℂ) (l : Fin (r + 2)) :
-    U.IsPolyDeg (2 * r + 2) (fun g : Mat k r => Dmin k r z z' g l) := by
-  obtain ⟨q, hq, he⟩ := minor_polynomial_property k r z z' l
-  exact ⟨q, hq.trans (by have := l.isLt; omega), he⟩
 
 section fac
 
@@ -87,7 +133,7 @@ private lemma dw_const_smul {F : Type*} [NormedAddCommGroup F] [NormedSpace ℂ 
     show Dx x (Dw w (fun g => c • f g)) g = c • Dx x (Dw w f) g
     rw [ih, Dx_eq, Dx_eq]
     first
-    | exact deriv_const_smul' c (f := fun t => Dw w f (crv x g t))
+    | exact deriv_const_smul_field c (f := fun t => Dw w f (crv x g t))
     | exact deriv_const_smul' (f := fun t => Dw w f (crv x g t)) c
     | simp [deriv_const_smul']
 
@@ -134,9 +180,7 @@ lemma ubl_fib (D : RealPlaceData k r Wp Wq) (E : Mat k r → C6.EndH Wp Wq) (hE 
       (le_abs_self _).trans (Finset.single_le_sum (f := fun j => |Cf j|)
         (fun j _ => abs_nonneg _) (Finset.mem_range.2 hi))
     have hnorm : ‖(((v.map nz).prod : ℝ) : ℂ)‖ = |(v.map nz).prod| := by
-      first
-      | simp
-      | rw [Complex.norm_real, Real.norm_eq_abs]
+      rw [Complex.norm_real, Real.norm_eq_abs]
     rw [hnorm]
     calc |(v.map nz).prod| * ‖dLR u (v' ++ v.map nrm) E g‖
         ≤ |(v.map nz).prod| * (Cf (u.length + (v' ++ v.map nrm).length) *

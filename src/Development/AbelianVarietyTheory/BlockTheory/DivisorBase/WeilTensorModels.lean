@@ -1,9 +1,47 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.HilbertNinetyQuotientHomEqIff
-import Development.AbelianVarietyTheory.Definitions.Divisors.RankEqCardIffExistsFrameMatrixFirstColumnBlock
-import Development.AbelianVarietyTheory.Definitions.Foundations.GLintEqKOAndPrincEqKOne
-import Development.AbelianVarietyTheory.Definitions.Foundations.NotIsSplitOfIsInertAt
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.HilbertNinetyQuotientHomEqIff
+public import Development.AbelianVarietyTheory.Definitions.Divisors.RankEqCardIffExistsFrameMatrixFirstColumnBlock
+public import Development.AbelianVarietyTheory.Definitions.Foundations.GLintEqKOAndPrincEqKOne
+public import Development.AbelianVarietyTheory.Definitions.Foundations.NotIsSplitOfIsInertAt
 import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.LcscAdelicUnitaryGroup
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -15,12 +53,12 @@ open GlobalTheory.WeilM GlobalTheory.AdelicU GlobalTheory.LFun
 
 variable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E]
 
-variable (F E) in
 
+variable (F E) in
 abbrev AE : Type := AF F ⊗[F] E
 
-variable (F) in
 
+variable (F) in
 abbrev Pl : Type := HeightOneSpectrum (𝓞 F)
 
 scoped instance lcAdele : LocallyCompactSpace (AF F) := GlobalTheory.AdelicUnitaryTop.locallyCompact_adele F
@@ -41,8 +79,8 @@ local instance borelFv (v : Pl F) : BorelSpace (Fv F v) := ⟨rfl⟩
 
 def cA (σ : E →ₐ[F] E) : AE F E →ₐ[AF F] AE F E := Algebra.TensorProduct.map (AlgHom.id (AF F) (AF F)) σ
 
-variable (F) in
 
+variable (F) in
 def incM {m n : Type} (J : Matrix m n E) : Matrix m n (AE F E) := J.map (inclR (F := F) (AF F))
 
 abbrev UA (σ : E →ₐ[F] E) {n : ℕ} (J : Matrix (Fin n) (Fin n) E) : Type := UG (cA σ) (incM F J)
@@ -58,12 +96,12 @@ def ht {σ : E →ₐ[F] E} {n : ℕ} {J : Matrix (Fin n) (Fin n) E} (g : UA σ 
 
 def qht {σ : E →ₐ[F] E} {n : ℕ} {J : Matrix (Fin n) (Fin n) E} (g : UA σ J) : ℝ≥0 := ⨅ γ : ratU σ J, ht (γ.1 * g)
 
-variable (F) in
 
+variable (F) in
 def evI (a : AF F) : mixedEmbedding.mixedSpace F := InfiniteAdeleRing.ringEquiv_mixedSpace F a.1
 
-variable (F) in
 
+variable (F) in
 def realAd (t : ℝ) : AF F :=
   LinearMap.inl F (Ainf F) (Af F) ((InfiniteAdeleRing.ringEquiv_mixedSpace F).symm (algebraMap ℝ _ t))
 
@@ -82,9 +120,9 @@ def ActsD {R κ : Type} [Zero R] [Fintype κ] (ev : AF F → R) (T : ℝ → ((�
     (φ φ₁ : (κ → R) → ℂ) : Prop :=
   ∀ r, Rest ev φ r → ∀ x, HasDerivAt (fun t => T t (tens ev φ r) x) (tens ev φ₁ r x) 0
 
+
 open scoped Classical in
 variable (F) in
-
 abbrev SInf (κ : Type) [Fintype κ] : Type := SchwartzMap (κ → mixedEmbedding.mixedSpace F) ℂ
 
 def pure {κ : Type} [Fintype κ] (f : SInf F κ) (φ : ∀ v : Pl F, (κ → Fv F v) → ℂ) : (κ → AF F) → ℂ :=
@@ -104,8 +142,8 @@ def psiLoc (ψ : AddChar (AF F) ℂ) (v : Pl F) (x : Fv F v) : ℂ := ψ (Linear
 def PsiUnr (ψ : AddChar (AF F) ℂ) (v : Pl F) : Prop :=
   ∀ x : Fv F v, (∀ y ∈ v.adicCompletionIntegers F, psiLoc ψ v (x * y) = 1) ↔ x ∈ v.adicCompletionIntegers F
 
-variable (F E) in
 
+variable (F E) in
 abbrev Chr : Type := (AE F E)ˣ →* Circle
 
 def chrW (χ : Chr F E) {v : Pl F} (τ : E →ₐ[F] Fv F v) : (Fv F v)ˣ →* ℂˣ :=
@@ -120,8 +158,8 @@ def unifAt (v : Pl F) : (Fv F v)ˣ := (GlobalTheory.SplitFlip.exists_isUnif (k :
 
 def condExp {v : Pl F} (ν : (Fv F v)ˣ →* ℂˣ) : ℕ := sInf {c | GlobalTheory.SplitFlip.CondLE (unifAt v) c ν}
 
-open Classical in
 
+open Classical in
 def gauss (ψ : AddChar (AF F) ℂ) {v : Pl F} (ν : (Fv F v)ˣ →* ℂˣ) : ℂ :=
   ∑ y : (GlobalTheory.SplitFlip.Res (Fv F v) (condExp ν))ˣ,
     if h : ((Quotient.out y.1 : (ValuativeRel.valuation (Fv F v)).integer) : Fv F v) = 0 then 0 else
@@ -131,12 +169,12 @@ def gauss (ψ : AddChar (AF F) ℂ) {v : Pl F} (ν : (Fv F v)ˣ →* ℂˣ) : �
 def eps (ψ : AddChar (AF F) ℂ) {v : Pl F} (ν : (Fv F v)ˣ →* ℂˣ) (s : ℤ) : ℂ :=
   (Ideal.absNorm v.asIdeal : ℂ) ^ (-(condExp ν : ℤ) * s) * gauss ψ ν * (ν (unifAt v) : ℂ) ^ condExp ν
 
-variable (E) in
 
+variable (E) in
 def SplitsFully (v : Pl F) : Prop := ((v.asIdeal.under ℤ).primesOver (𝓞 E)).ncard = Module.finrank ℚ E
 
-variable (F E) in
 
+variable (F E) in
 structure Base where
 
   ψ : AddChar (AF F) ℂ
@@ -155,8 +193,8 @@ structure Base where
 
   τ₁ : E →ₐ[F] Fv F v₁
 
-variable (F E) in
 
+variable (F E) in
 structure Spc (n : ℕ) where
 
   J : Matrix (Fin n) (Fin n) E
@@ -177,28 +215,28 @@ def IsCartan {n : ℕ} (M θ : Matrix (Fin n) (Fin n) ℂ) : Prop :=
 
 variable {σ : E →ₐ[F] E}
 
-variable (σ) in
 
+variable (σ) in
 structure Spc.IsHerm (B : Base F E) {n : ℕ} (X : Spc F E n) (r s : ℕ) : Prop where
   herm : ∀ i j, σ (X.J j i) = X.J i j
   sig : ∀ w, HasSig (X.J.map (B.emb w).1) r s
-  lat : X.L.IsLattice E
+  lat : X.L.IsFullLattice E
   dual : ∀ y, y ∈ X.L ↔ ∀ x ∈ X.L, IsIntegral ℤ (form σ X.J y x)
   cartan : ∀ w, IsCartan (X.J.map (B.emb w).1) (X.θ w)
   bas : ∀ v : B.P, IsSplitBasis (B.τ v) X.L (X.bas v)
 
-variable (σ) in
 
+variable (σ) in
 structure Spc.IsSkew (B : Base F E) {n : ℕ} (X : Spc F E n) (r s : ℕ) : Prop where
   skew : ∀ i j, σ (X.J j i) = -X.J i j
   sig : ∀ w, HasSig (Complex.I • X.J.map (B.emb w).1) r s
-  lat : X.L.IsLattice E
+  lat : X.L.IsFullLattice E
   dual : ∀ y, y ∈ X.L ↔ ∀ x ∈ X.L, ∀ o : 𝓞 E, IsIntegral ℤ (Algebra.trace ℚ E (o * form σ X.J y x))
   cartan : ∀ w, IsCartan (Complex.I • X.J.map (B.emb w).1) (X.θ w)
   bas : ∀ v : B.P, IsSplitBasis (B.τ v) X.L (X.bas v)
 
-variable (σ) in
 
+variable (σ) in
 structure Model {n d : ℕ} (X : Spc F E n) (W : Spc F E d) where
 
   co : Darboux (symp (R := AF F) (cA σ) (-1) (incM F X.J) (incM F W.J)) (Fin n × Fin d)
@@ -209,8 +247,8 @@ structure Model {n d : ℕ} (X : Spc F E n) (W : Spc F E d) where
 
   dom : Set (UA σ X.J)
 
-variable (σ) in
 
+variable (σ) in
 abbrev Rep {n d : ℕ} (X : Spc F E n) (W : Spc F E d) : Type :=
   UA σ X.J × UA σ W.J →* Module.End ℂ ((Fin n × Fin d → AF F) → ℂ)
 
@@ -218,8 +256,8 @@ section Pair
 
 variable {n d : ℕ} {X : Spc F E n} {W : Spc F E d}
 
-variable (X W) in
 
+variable (X W) in
 def latAtV (v : Pl F) : AddSubgroup (Matrix (Fin n) (Fin d) (AE F E)) :=
   AddSubgroup.closure {z | ∃ a : AF F, At (evFin F v) a ∧ evFin F v a ∈ v.adicCompletionIntegers F ∧
     ∃ x ∈ X.L, ∃ y ∈ W.L, z = a • incM F (Matrix.vecMulVec x y)}
@@ -291,17 +329,17 @@ def Model.I (M : Model σ X W) (om : Rep σ X W) (Φ : (Fin n × Fin d → AF F)
 def Model.Conv (M : Model σ X W) (om : Rep σ X W) (Φ : (Fin n × Fin d → AF F) → ℂ) : Prop :=
   ∀ h, IntegrableOn (fun g => theta om Φ g h) M.dom M.μ
 
-variable (σ X) in
 
+variable (σ X) in
 def UAt {R : Type} [Zero R] (ev : AF F → R) : Set (UA σ X.J) := {g | At ev (mat g - 1)}
 
-variable (σ X) in
 
+variable (σ X) in
 def KInf (τ : ∀ w : InfinitePlace F, EmbOver E w) : Set (UA σ X.J) :=
   {k | k ∈ UAt σ X (evI F) ∧ ∀ w, Commute ((mat k).map (piInf (τ w))) (X.θ w)}
 
-variable (σ X) in
 
+variable (σ X) in
 def Lines : Set (Multiplicative ℝ →* UA σ X.J) := {γ | Continuous γ ∧ ∀ t, γ t ∈ UAt σ X (evI F)}
 
 def augAt (om : Rep σ X W) (v : Pl F) : Submodule ℂ ((Fin n × Fin d → Fv F v) → ℂ) :=
@@ -309,8 +347,8 @@ def augAt (om : Rep σ X W) (v : Pl F) : Submodule ℂ ((Fin n × Fin d → Fv F
 
 end Pair
 
-variable (σ) in
 
+variable (σ) in
 structure Geo (a a' : ℕ) where
 
   p : ℕ
@@ -327,8 +365,8 @@ structure Geo (a a' : ℕ) where
 
   M' : Model σ V' W
 
-variable (F E) in
 
+variable (F E) in
 structure Chars where
 
   α : Chr F E
@@ -341,12 +379,12 @@ structure Chars where
 
 def Chars.ν (X : Chars F E) : Chr F E := X.α / X.β
 
-open Classical in
 
+open Classical in
 def Chars.T (X : Chars F E) : Finset (Pl F) := X.S₀ ∪ X.Q
 
-variable (σ) in
 
+variable (σ) in
 structure Base.IsGood (B : Base F E) : Prop where
   cm : IsCMExt F E σ
   galois : IsGalois ℚ E
@@ -392,8 +430,8 @@ structure IsTriple (B : Base F E) (G : Geo σ a a') (X : Chars F E) (om : Rep σ
   weil : G.M.IsWeil B.ψ X.β (X.β / X.α) om
   weil' : G.M'.IsWeil B.ψ X.α (X.α / X.β) om'
 
-variable (F) in
 
+variable (F) in
 structure RealMaps (a a' : ℕ) : Type 1 where
 
   Pi : Type
@@ -404,8 +442,8 @@ structure RealMaps (a a' : ℕ) : Type 1 where
 
   p' : SInf F (Fin a' × Fin (a + a')) →ₗ[ℂ] Pi
 
-variable (F) in
 
+variable (F) in
 structure FinMaps (a a' : ℕ) : Type 1 where
 
   Pi : Pl F → Type
@@ -513,8 +551,8 @@ def Coinv : Prop :=
 
 end Maps
 
-variable (E) in
 
+variable (E) in
 structure Plane (n n₁ : ℕ) where
 
   x : Fin n → E
@@ -527,8 +565,8 @@ structure Plane (n n₁ : ℕ) where
 
 def skip (i₀ i₁ j : ℕ) : ℕ := if j < i₀ then j else if j + 1 < i₁ then j + 1 else j + 2
 
-variable (σ) in
 
+variable (σ) in
 structure Plane.IsAdapted (B : Base F E) {n n₁ : ℕ} (H : Plane E n n₁) (Y : Spc F E n) (Y₁ : Spc F E n₁) (i₀ i₁ : ℕ) :
     Prop where
   rank : n = n₁ + 2
@@ -547,15 +585,15 @@ structure Plane.IsAdapted (B : Base F E) {n n₁ : ℕ} (H : Plane E n n₁) (Y 
     (i.1 = i₁ → ∀ r, (Y.bas v).1 r i = B.τ v (H.y r)) ∧
     ∀ j : Fin n₁, i.1 = skip i₀ i₁ j → ∀ r, (Y.bas v).1 r i = (H.ι.map (B.τ v) * (Y₁.bas v).1) r j
 
-open Classical in
 
+open Classical in
 def stepFac (B : Base F E) (X : Chars F E) (e₁ e₂ s : ℤˣ) (𝔟 𝔠 : FractionalIdeal (𝓞 E)⁰ E) (z : ℤ) : ℂ :=
   ((idealVal X.ν 𝔟 ^ (e₁ : ℤ) * idealVal X.ν 𝔠 ^ (e₂ : ℤ) : ℂˣ) : ℂ) *
     ∏ v : B.P with v.1 ∈ X.T, (chrW X.ν (B.τ v) (Units.map (Int.castRingHom _).toMonoidHom s) : ℂ) *
       eps B.ψ (chrW X.ν (B.τ v)) z
 
-variable (σ) in
 
+variable (σ) in
 def StepBeta (e₁ e₂ s : ℤˣ) : Prop :=
   ∀ (B : Base F E) (a b : ℕ) (G : Geo σ a (b + 2)) (G₁ : Geo σ a b) (H : Plane E (b + 2) b)
     (H' : Plane E (a + (b + 2)) (a + b)) (R : RealMaps F a (b + 2)) (R₁ : RealMaps F a b),
@@ -566,8 +604,8 @@ def StepBeta (e₁ e₂ s : ℤˣ) : Prop :=
         ∃ u : ℂ, u * (C * stepFac B X e₁ e₂ s H.𝔟 H'.𝔟 (-(((a - (b + 2)) / 2 : ℕ) : ℤ))) = 1 ∧
           c * charL X.ν (X.S₀ : Set (Pl F)) ((((a - (b + 2)) / 2 : ℕ) : ℂ) + 1) = u * c₁
 
-variable (σ) in
 
+variable (σ) in
 def StepAlpha (e₁ e₂ s : ℤˣ) : Prop :=
   ∀ (B : Base F E) (b a' : ℕ) (G : Geo σ (b + 2) a') (G₁ : Geo σ b a') (H : Plane E (b + 2) b)
     (H' : Plane E (b + 2 + a') (b + a')) (R : RealMaps F (b + 2) a') (R₁ : RealMaps F b a'),
@@ -590,16 +628,6 @@ def ThetaIntegralsAgree : Prop :=
     StepBeta σ e₁ e₂ s) ∧
   ∃ e₁ e₂ s : ℤˣ, ∀ (F E : Type) [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] (σ : E →ₐ[F] E),
     StepAlpha σ e₁ e₂ s
-
-example : (List.range 4).map (skip 1 4) = [0, 2, 3, 5] := by decide
-
-example : HasSig (1 : Matrix (Fin 1) (Fin 1) ℂ) 1 0 ∧ IsCartan (1 : Matrix (Fin 1) (Fin 1) ℂ) 1 := by
-  refine ⟨⟨rfl, Matrix.of fun _ _ => 1, ?_⟩, by simp, by simp, fun x hx => ?_⟩
-  · ext (i | i) (j | j)
-    · simp [Matrix.mul_apply, Subsingleton.elim i j]
-    all_goals first | exact i.elim0 | exact j.elim0
-  · have : x 0 ≠ 0 := fun h => hx (funext fun i => by rw [Subsingleton.elim i 0]; exact h)
-    simpa [dotProduct, Complex.mul_conj, ← Complex.normSq_apply] using Complex.normSq_pos.2 this
 
 end GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels
 

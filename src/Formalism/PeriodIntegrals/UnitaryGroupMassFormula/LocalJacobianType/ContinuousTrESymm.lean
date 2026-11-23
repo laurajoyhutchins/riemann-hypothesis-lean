@@ -1,7 +1,58 @@
-import Mathlib
-import Formalism.PeriodIntegrals.LocJacTyp
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.HaarFibreUniqueness.SdExCore
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.HaarFibreUniqueness.SdExChar
+module
+
+public import Formalism.PeriodIntegrals.LocJacTyp
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicLocalCompactness.AdeleLC
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicLocalCompactness.T2SpaceTensorProductFiniteExtension
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerOrbitVolume.DensFibV
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -61,7 +112,7 @@ theorem exists_gens : ∃ (m : ℕ) (w : Fin m → Fv F v ⊗[F] E), (∀ k, w k
     | add a b _ _ ha hb =>
       have e : inclR (F := F) (Fv F v) (((a + b : 𝓞 E)) : E) =
           inclR (F := F) (Fv F v) (a : E) + inclR (F := F) (Fv F v) (b : E) := by
-        simp [map_add]
+        simp [map_add (f := _)]
       show inclR (F := F) (Fv F v) (((a + b : 𝓞 E)) : E) ∈ _
       rw [e]
       exact Submodule.add_mem _ ha hb
@@ -155,7 +206,7 @@ theorem isOpen_oev : IsOpen (OEv (E := E) v) :=
 
 def trC : (Fv F v ⊗[F] E) →ₗ[Fv F v] (Fin (Module.finrank F E) → Fv F v) where
   toFun y i := Algebra.trace (Fv F v) (Fv F v ⊗[F] E) (bas (E := E) v i * y)
-  map_add' x y := by funext i; simp [mul_add, map_add]
+  map_add' x y := by funext i; simp [mul_add, map_add (f := _)]
   map_smul' c x := by funext i; simp [map_smul]
 
 theorem trC_apply (y : Fv F v ⊗[F] E) (i : Fin (Module.finrank F E)) :
@@ -172,6 +223,7 @@ theorem trC_injective : Function.Injective (trC (E := E) v) := by
     funext i
     have h1 := congrFun hy i
     rw [trC_apply, ← (bas (E := E) v).sum_equivFun y, Finset.mul_sum] at h1
+
     simp only [mul_smul_comm, map_sum, map_smul, smul_eq_mul] at h1
     rw [Pi.zero_apply] at h1
     rw [Pi.zero_apply, ← h1, Matrix.mulVec, dotProduct]

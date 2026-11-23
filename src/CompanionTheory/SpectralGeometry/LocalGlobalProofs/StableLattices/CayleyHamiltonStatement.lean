@@ -1,7 +1,58 @@
-import Mathlib
-import CompanionTheory.RealGroups.DiscreteSeries.DiscreteSeriesClassification.DiscreteSeriesExhaustion.HeckeAlgebraActions.BackStable
+module
+
+public import CompanionTheory.RealGroups.DiscreteSeries.DiscreteSeriesClassification.DiscreteSeriesExhaustion.HeckeAlgebraActions.BackStable
+public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.StableLattices.QuantumDeterminantTensorStatement
 import Formalism.RealPlaceAnalysis.ThirdArithmeticHolds
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.StableLattices.QuantumDeterminantTensorStatement
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.LinearAlgebra.Dual.Lemmas
+
+@[expose] public section
 
 noncomputable section
 
@@ -42,6 +93,7 @@ theorem eq_zero_of_eval (R : A[X]) (h : ∀ y : ℂ, R.eval (algebraMap ℂ A y)
   have hr : ∀ y, r.eval y = 0 := by
     intro y
     have hy := congrArg φ (h y)
+
     rw [eval_eq_sum, sum_def, map_sum, map_zero] at hy
     rw [← hy]
     simp only [r, eval_finsetSum, eval_monomial]
@@ -49,8 +101,17 @@ theorem eq_zero_of_eval (R : A[X]) (h : ∀ y : ℂ, R.eval (algebraMap ℂ A y)
     rw [← map_pow, ← Algebra.commutes, ← Algebra.smul_def, map_smul, smul_eq_mul, mul_comm]
   have h0 : r = 0 := Polynomial.funext (by simpa using hr)
   have hc : r.coeff k = φ (R.coeff k) := by
-    simp only [r, finsetSum_coeff, coeff_monomial, Finset.sum_ite_eq', mem_support_iff]
-    by_cases hk : R.coeff k = 0 <;> simp [hk]
+    classical
+    simp only [r, finsetSum_coeff]
+    rw [Finset.sum_eq_single k]
+    · simp [coeff_monomial]
+    · intro i hi hik
+      simp [coeff_monomial, hik]
+    · intro hk
+      have hk0 : R.coeff k = 0 := by
+        by_contra hne
+        exact hk (mem_support_iff.mpr hne)
+      simp [coeff_monomial, hk0]
   rw [← hc, h0, coeff_zero]
 
 def PolF (f : ℂ → A) : Prop := ∃ p : A[X], ∀ y : ℂ, p.eval (algebraMap ℂ A y) = f y
@@ -106,7 +167,7 @@ theorem polF_qdet {n : ℕ} (E : Fin n → Fin n → A) (c : ℂ) : PolF fun y :
 theorem eval_map_hom {B : Type*} [Ring B] (f : A →+* B) (p : A[X]) (x : A) :
     (p.map f).eval (f x) = f (p.eval x) := by
   induction p using Polynomial.induction_on' with
-  | add p q hp hq => simp only [Polynomial.map_add, eval_add, hp, hq, map_add]
+  | add p q hp hq => simp only [Polynomial.map_add (f := _), eval_add, hp, hq, map_add (f := _)]
   | monomial k a => simp only [map_monomial, eval_monomial, map_mul, map_pow]
 
 theorem prod_smul_ofFn {m : ℕ} (s : ℂ) (f : Fin m → A) :
@@ -137,6 +198,7 @@ theorem commute_qdet_om (M : GMod n) (u : ℂ) : Commute ((qdet M.E u).compLeft 
   have hc : ∀ (a : Fin n) (x : M.V), qdet M.E u (M.E a b x) = M.E a b (qdet M.E u x) := fun a x =>
     LinearMap.congr_fun (qDetCentral _ n M.E M.gl u a b) x
   show (qdet M.E u) (om M f b) = ∑ a, M.E a b (qdet M.E u (f a))
+
   rw [om_apply, map_sum]
   simp only [hc]
 
@@ -160,10 +222,10 @@ theorem root (H : QdetTens) (M : GMod n) (c : ℂ) (pC : (Module.End ℂ (Fin n 
       have h := H n M (y + c)
       have e1 : algebraMap ℂ (Module.End ℂ (Fin n → M.V)) y + (algebraMap ℂ _ c + om M) =
           (y + c) • (1 : Module.End ℂ (Fin n → M.V)) + om M := by
-        rw [← add_assoc, ← map_add, Algebra.algebraMap_eq_smul_one]
+        rw [← add_assoc, ← map_add (f := _), Algebra.algebraMap_eq_smul_one]
       have e2 : algebraMap ℂ (Module.End ℂ (Fin n → M.V)) y + (algebraMap ℂ _ (c + 1) + om M) =
           (y + c + 1) • (1 : Module.End ℂ (Fin n → M.V)) + om M := by
-        rw [← add_assoc, ← map_add, Algebra.algebraMap_eq_smul_one, add_assoc]
+        rw [← add_assoc, ← map_add (f := _), Algebra.algebraMap_eq_smul_one, add_assoc]
       rw [e1, e2]
       exact h
   have hom : Commute (om M) (-om M - algebraMap ℂ _ c) :=
@@ -176,7 +238,7 @@ theorem root (H : QdetTens) (M : GMod n) (c : ℂ) (pC : (Module.End ℂ (Fin n 
   simp only [eval_add, eval_X, eval_C, eval_zero] at ht
   have a1 : -om M - algebraMap ℂ _ c + (algebraMap ℂ _ c + om M) = 0 := by abel
   have a2 : -om M - algebraMap ℂ _ c + (algebraMap ℂ _ (c + 1) + om M) = 1 := by
-    rw [map_add, map_one]; abel
+    rw [map_add (f := _), map_one]; abel
   rw [a1, a2] at ht
   simpa using ht.symm
 
@@ -207,7 +269,7 @@ theorem cayleyHam_of (H : QdetTens) : CayleyHam := by
   have hQy : ∀ y : ℂ, Q.eval (algebraMap ℂ _ y) = Formalism.QuantumDeterminants.capP χ y • (1 : Module.End ℂ (Fin n → M.V)) := by
     intro y
     rw [hQ]
-    simp only [← map_add]
+    simp only [← map_add (f := _)]
     rw [← Algebra.algebraMap_eq_smul_one]
     have h := map_list_prod (algebraMap ℂ (Module.End ℂ (Fin n → M.V))) (List.ofFn fun i => y + χ i)
     rw [List.map_ofFn] at h

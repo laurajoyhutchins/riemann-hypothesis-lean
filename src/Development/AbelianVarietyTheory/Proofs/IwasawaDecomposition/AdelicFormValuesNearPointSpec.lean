@@ -1,5 +1,47 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.GlESymmApply
+module
+
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.GlESymmApply
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.LocalToGlobal.GlobalTheory.GL6.Statement
+
+@[expose] public section
 
 open Formalism.BasicNotions Formalism.L2.Forms Formalism.UG Formalism.L2.GlobalTheoryTheory.LocalLatticeBases NumberField IsDedekindDomain Matrix GlobalTheory.LevelHecke
 open scoped TensorProduct
@@ -38,7 +80,7 @@ theorem val_self {ι : Type} [Fintype ι] (S : StepLevel F E σ J T f bad) (emb 
     (x η : GA σ J) (hη : AtV v η) : valAt v p g x (p (x * η)) = g (x * η) := by
   have h : ∃ η', AtV v η' ∧ p (x * η') = p (x * η) := ⟨η, hη, rfl⟩
   unfold valAt
-  rw [dif_pos h]
+  rw [dite_eq_left h]
   obtain ⟨h1, h2⟩ := h.choose_spec
   generalize h.choose = η0 at h1 h2
   have e : x * η = x * η0 * (η0⁻¹ * η) := by group
@@ -61,12 +103,12 @@ theorem valAt_spec : ∀ (F E : Type) [Field F] [NumberField F] [Field E] [Numbe
         refine h ⟨η⁻¹ * η', atV_mul (atV_inv hη) h1, ?_⟩
         rw [← h2]; congr 1; group
       unfold valAt
-      rw [dif_neg h, dif_neg h']
+      rw [dite_eq_right h, dite_eq_right h']
   · have hδv : AtV v δ := hδ.1
     by_cases h : ∃ η', AtV v η' ∧ p (x * η') = q
     · have hR : valAt v p (fun y => g (y * δ)) x q = g (x * h.choose * δ) := by
         unfold valAt
-        rw [dif_pos h]
+        rw [dite_eq_left h]
       obtain ⟨h1, h2⟩ := h.choose_spec
       rw [hR]
       generalize h.choose = η0 at h1 h2
@@ -81,6 +123,6 @@ theorem valAt_spec : ∀ (F E : Type) [Field F] [NumberField F] [Field E] [Numbe
         rw [Pr.dil_dil, Pr.dil_dil, inv_mul_cancel₀ ha, Pr.dil_one, Pr.dil_one] at h4
         exact h4.symm
       unfold valAt
-      rw [dif_neg h, dif_neg h']
+      rw [dite_eq_right h, dite_eq_right h']
 
 end GlobalTheory.LevelHecke.ValAt

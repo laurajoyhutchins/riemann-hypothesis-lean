@@ -1,5 +1,59 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsBlockImageInverse
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsBlockImageInverse
+import Mathlib.Algebra.AffineMonoid.UniqueSums
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.HilbertSamuel
@@ -120,8 +174,8 @@ theorem isMultiHomog_blockDeg_mul [DecidableEq K] {k₀ : K} {f g : MRing ι} {n
     IsMultiHomog (f * g) (blockDeg k₀ (n + m)) := by
   have := isMultiHomog_mul hf hg
   convert this using 1
-  funext k
-  simp only [blockDeg, Pi.add_apply]
+  ext k
+  simp only [blockDeg, Pi.add_apply, Finset.sum_apply]
   split_ifs <;> simp
 
 theorem isMultiHomog_blockDeg_prod [DecidableEq K] {k₀ : K} {α : Type*} (s : Finset α) {f : α → MRing ι}
@@ -129,8 +183,8 @@ theorem isMultiHomog_blockDeg_prod [DecidableEq K] {k₀ : K} {α : Type*} (s : 
     IsMultiHomog (∏ t ∈ s, f t) (blockDeg k₀ (∑ t ∈ s, n t)) := by
   have := isMultiHomog_prod s hf
   convert this using 1
-  funext k
-  simp only [blockDeg, Finset.sum_apply]
+  ext k
+  simp only [blockDeg, Pi.add_apply, Finset.sum_apply]
   split_ifs <;> simp
 
 theorem aeval_smul {S : Type*} [CommRing S] [Algebra ℤ S] {f : MRing ι} {a : K → ℕ} (hf : IsMultiHomog f a) (c : K → S)
@@ -218,6 +272,7 @@ theorem mem_coordIdeal_iff {r : ℕ} (x : Ix (Fin r) → Ω) {F : MRing (GlobalT
 
 theorem aeval_linear {σ α : Type*} [Fintype α] {S : Type*} [CommRing S] [Algebra ℤ S] (v : σ → S)
     (A : α → ℤ) (q : α → σ) : aeval v (∑ j, C (A j) * X (q j) : MvPolynomial σ ℤ) = ∑ j, (A j : S) * v (q j) := by
+
   simp [map_sum]
 
 theorem sum_mul_sum {α β γ : Type*} [Fintype β] [Fintype γ] {S : Type*} [CommRing S] (N : Matrix α β ℤ)
@@ -230,9 +285,9 @@ end Forms
 
 end BlockImageInverse
 
-set_option maxHeartbeats 1000000 in
-open BlockImageInverse in
 
+
+open BlockImageInverse in
 theorem BlockImageInverse.proof : BlockImageInverse.Statement := by
   intro D K _ _ ι _ Ω _ _ y k₀ r M N x J hA hB hI _ hJ hJy
   classical
@@ -344,6 +399,7 @@ theorem BlockImageInverse.proof : BlockImageInverse.Statement := by
     rw [aeval_bind₁]
     refine aeval_congr_block hP fun i => ?_
     rw [hσ0, hv i]
+
     simp [map_sum]
 
   set e := n₀ + 1 + ∑ k, (nn k (c k) + ∑ i, nn k i) with he
@@ -359,11 +415,13 @@ theorem BlockImageInverse.proof : BlockImageInverse.Statement := by
     intro z
     rw [aeval_bind₁]
     refine congrArg (fun φ => aeval φ F) (funext fun j => ?_)
+
     simp [hρ, blockMapC, map_sum]
   have hFx : aeval x F = aeval y Bf := hF ▸ heval hBH x y fun i => hI.2 i
   have hGy : aeval y (bind₁ ρ F) = aeval x F := by
     rw [aeval_bind₁]
     refine congrArg (fun φ => aeval φ F) (funext fun j => ?_)
+
     simp [hρ, hI.1 j, map_sum]
 
   obtain ⟨Q, hQ⟩ : ∃ Q : ∀ k, ι k → MRing ι, Q = fun k i => gg k i * ∏ i' ∈ Finset.univ.erase i, hh k i' :=
@@ -494,6 +552,7 @@ theorem BlockImageInverse.proof : BlockImageInverse.Statement := by
     obtain ⟨z, hz⟩ : ∃ z : (Σ k, ι k) → ℂ, z = fun p => aeval u (τ p) := ⟨_, rfl⟩
     have hzk₀ : ∀ i, z ⟨k₀, i⟩ = ∑ j, (N i j : ℂ) * u j := by
       intro i
+
       simp [hz, hτ, hσ0, map_sum]
     have hzB : aeval z Bf = aeval u F := by
       rw [hF]

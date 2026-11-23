@@ -1,6 +1,55 @@
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.QuotientVanishing.QuotIntegralZero
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.HeckeFubiniCompatibility.TrMulComm
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.HeckeFubiniCompatibility.PSplit
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.QuotientVanishing.QuotIntegralZero
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.HeckeFubiniCompatibility.EntZero
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.HeckeFubiniCompatibility.PSplit
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.HeckeFubiniCompatibility.TrMulComm
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Mathlib.Topology.UniformSpace.Uniformizable
+import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.QuotientVanishing.QuotVanish
+
+@[expose] public section
 
 noncomputable section
 
@@ -89,7 +138,7 @@ theorem slice {φ : GA E n → ℂ} (hφ : Continuous φ) (hc : HasCompactSuppor
   rw [map_mul, gInf_embInf, hg', mul_one]
 
 omit [IsCMField E] in
-theorem isTest_add [IsTotallyComplex E] {φ ψ : GA E n → ℂ} (hφ : IsTest φ) (hψ : IsTest ψ) : IsTest fun x => φ x + ψ x := by
+theorem isTest_add [_root_.NumberField.IsTotallyComplex E] {φ ψ : GA E n → ℂ} (hφ : IsTest φ) (hψ : IsTest ψ) : IsTest fun x => φ x + ψ x := by
   obtain ⟨U, hU, hUφ⟩ := hφ.level
   obtain ⟨U', hU', hUψ⟩ := hψ.level
   refine ⟨hφ.cont.add hψ.cont, hφ.supp.add hψ.supp, U ⊓ U', by rw [Subgroup.coe_inf]; exact hU.inter hU',
@@ -98,7 +147,7 @@ theorem isTest_add [IsTotallyComplex E] {φ ψ : GA E n → ℂ} (hφ : IsTest �
   exact ⟨by rw [(hUφ u hu.1 g).1, (hUψ u hu.2 g).1], by rw [(hUφ u hu.1 g).2, (hUψ u hu.2 g).2]⟩
 
 omit [IsCMField E] in
-theorem isTest_smul [IsTotallyComplex E] {φ : GA E n → ℂ} (c : ℂ) (hφ : IsTest φ) : IsTest fun x => c * φ x := by
+theorem isTest_smul [_root_.NumberField.IsTotallyComplex E] {φ : GA E n → ℂ} (c : ℂ) (hφ : IsTest φ) : IsTest fun x => c * φ x := by
   obtain ⟨U, hU, hUφ⟩ := hφ.level
   refine ⟨continuous_const.mul hφ.cont, hφ.supp.mono fun x hx => right_ne_zero_of_mul hx, U, hU,
     fun u hu g => ?_⟩

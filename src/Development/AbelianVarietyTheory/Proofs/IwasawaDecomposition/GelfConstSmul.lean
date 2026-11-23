@@ -1,12 +1,49 @@
-import Mathlib
-import Formalism.LocalToGlobal.BesselHermitianTheta.AllTied
-import Formalism.LocalToGlobal.IndefiniteReal.DatumVec
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.AdelicDataRowMeasureScaleTrivialTuple
-import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IsWeakOfDatum
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.ExistsNormLeHeightPow
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsSmoothAutomorphicFunctionTranslateAtRealPlace
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsQuadOfPlane
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LintegralEqOfNorms
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.ExistsNormLeHeightPow
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LintegralEqOfNorms
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.DifferentiableOneP
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -159,38 +196,32 @@ structure IsKerSys (θ : InfF D) (V W : HSp D) {M : Type} [AddCommGroup M] [Modu
 def swapKer {V W : HSp D} {M : Type} [AddCommGroup M] [Module ℂ M] (κ : M →ₗ[ℂ] (GA D V → GA D W → ℂ)) :
     M →ₗ[ℂ] (GA D W → GA D V → ℂ) where
   toFun f h g := κ f g h
-  map_add' f f' := by rw [map_add]; rfl
+  map_add' f f' := by rw [map_add (f := _)]; rfl
   map_smul' c f := by rw [map_smul]; rfl
 
 theorem IsKerSys.swap {θ : InfF D} {V W : HSp D} {M : Type} [AddCommGroup M] [Module ℂ M]
-    {κ : M →ₗ[ℂ] (GA D V → GA D W → ℂ)} (h : IsKerSys θ V W κ) : IsKerSys θ W V (swapKer κ) where
-  cont f := (h.cont f).comp continuous_swap
-  left f γ hγ δ hδ g g' := h.left f δ hδ γ hγ g' g
-  level f := by
+    {κ : M →ₗ[ℂ] (GA D V → GA D W → ℂ)} (h : IsKerSys θ V W κ) : IsKerSys θ W V (swapKer κ) := by
+  refine ⟨fun f => (h.cont f).comp continuous_swap, fun f γ hγ δ hδ g g' =>
+    h.left f δ hδ γ hγ g' g, ?_, ?_, ?_, ?_, ?_⟩
+  · intro f
     obtain ⟨U, U', hU, hU', hk⟩ := h.level f
     exact ⟨U', U, hU', hU, fun k hk1 hk2 k' hk1' hk2' g g' => hk k' hk1' hk2' k hk1 hk2 g' g⟩
-  growth := by
-    obtain ⟨N, hN⟩ := h.growth
+  · obtain ⟨N, hN⟩ := h.growth
     refine ⟨N, fun f => ?_⟩
     obtain ⟨C, hC⟩ := hN f
     refine ⟨C, fun g g' => ?_⟩
     have hb := hC g' g
     rw [mul_comm (height θ V g' : ℝ)] at hb
     exact hb
-  derV τ X hX f := by
+  · intro τ X hX f
     obtain ⟨f', hf'⟩ := h.derW τ X hX f
     exact ⟨f', fun g g' => hf' g' g⟩
-  derW τ X hX f := by
+  · intro τ X hX f
     obtain ⟨f', hf'⟩ := h.derV τ X hX f
     exact ⟨f', fun g g' => hf' g' g⟩
-  cap τ := by
+  · intro τ
     obtain ⟨a, b, ha, hb, hab⟩ := h.cap τ
     exact ⟨b, a, fun k f g' => hb k f g', fun k f g => ha k f g, hab.symm⟩
-
-def constKer (V W : HSp D) : ℂ →ₗ[ℂ] (GA D V → GA D W → ℂ) where
-  toFun c _ _ := c
-  map_add' _ _ := rfl
-  map_smul' _ _ := rfl
 
 def OmCont (ψ : AddChar (AF D.host.F) ℂ) (S T : HSp D) (om : GA D S × GA D T →* Module.End ℂ (WO S T → ℂ)) : Prop :=
   ∀ f, IsThetaFunO ψ S T f → ∀ w, Continuous fun p : GA D S × GA D T => om p f w

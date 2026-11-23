@@ -1,5 +1,61 @@
-import Mathlib
+module
+
+public import Mathlib.FieldTheory.Galois.Basic
+public import Mathlib.RingTheory.Valuation.ValuationSubring
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+public import Mathlib.RingTheory.Invariant.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AbelianVarietyTheory.Definitions.Foundations.ExpUpper
 import Development.AbelianVarietyTheory.Proofs.FoundationProofs.DiagMod
+public import Mathlib.Algebra.BigOperators.Field
+
+@[expose] public section
+
 open scoped MatrixGroups TensorProduct
 open Matrix GlobalTheory.KZ GlobalTheory.KZ.ES
 
@@ -24,7 +80,7 @@ def core (F : Type) [Field F] [Algebra F L] (W₁ W₂ : ValuationSubring L) : S
     rw [map_mul]; exact ⟨mul_mem (ha σ).1 (hb σ).1, mul_mem (ha σ).2 (hb σ).2⟩
   one_mem' σ := by rw [map_one]; exact ⟨one_mem _, one_mem _⟩
   add_mem' ha hb σ := by
-    rw [map_add]; exact ⟨add_mem (ha σ).1 (hb σ).1, add_mem (ha σ).2 (hb σ).2⟩
+    rw [map_add (f := _)]; exact ⟨add_mem (ha σ).1 (hb σ).1, add_mem (ha σ).2 (hb σ).2⟩
   zero_mem' σ := by rw [map_zero]; exact ⟨zero_mem _, zero_mem _⟩
   neg_mem' ha σ := by rw [map_neg]; exact ⟨neg_mem (ha σ).1, neg_mem (ha σ).2⟩
 
@@ -227,9 +283,11 @@ private lemma mem_of_mem_of_inv_core_mem [FiniteDimensional F L] (W₁ W₂ U U'
   have hsS : s ∈ _root_.GlobalTheory.ValConj.core F W₁ W₂ := by
     intro σ
     have hσs : σ s = ∑ j ∈ Finset.range k, algebraMap F L (a j) * σ x ^ j / σ x ^ k := by
+
       simp [hs, map_sum, map_div₀, map_mul, map_pow, AlgEquiv.commutes]
     have hσrel : ∑ j ∈ Finset.range (n + 1), algebraMap F L (a j) * σ x ^ j = 0 := by
       have := congrArg σ hrel
+
       simpa [map_sum, map_mul, map_pow, AlgEquiv.commutes] using this
     have hσx : σ x ≠ 0 := by simpa using hx0
     rw [hσs]
@@ -243,13 +301,13 @@ private lemma mem_of_mem_of_inv_core_mem [FiniteDimensional F L] (W₁ W₂ U U'
     rw [← U.valuation_le_one_iff, map_inv₀, h1, inv_one]
   exact (valuation_lt_one_iff_inv_not_mem' U' s hs0).1 h2 (hcen s hsS hs0 hsU)
 
+
 open scoped MatrixGroups TensorProduct in
 open Matrix in
 open Finset in
 open scoped Pointwise in
 variable {F L : Type} [Field F] [Field L] [Algebra F L] in
 open scoped Pointwise in
-
 theorem _root_.GlobalTheory.KZ.ES.exists_conj_of_same_trace : ∀ (F L : Type) [Field F] [Field L]
     [Algebra F L] [FiniteDimensional F L] [IsGalois F L] (W₁ W₂ : ValuationSubring L),
     (∀ a : F, algebraMap F L a ∈ W₁ ↔ algebraMap F L a ∈ W₂) →

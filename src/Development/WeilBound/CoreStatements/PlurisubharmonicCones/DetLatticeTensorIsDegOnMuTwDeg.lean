@@ -1,10 +1,61 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.PlurisubharmonicCones.ExistsUnitOfSum
-import Development.WeilBound.CoreStatements.PlurisubharmonicCones.ComponentDataHeightIdentity
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ComponentDataHodgeSecond
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.IntersectionSystemHodgeDegree
+module
+
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.ExistsUniqueLeftBasisCoordsAdicCompletion
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.PotentialsBoundedRegSettingEqReference
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ComponentDataHodgeSecond
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.IntersectionSystemHodgeDegree
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.NotInFibreOfIsUnit
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.PairLatticeSumComapStatement
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.SegreChartBundleStatement
 import Development.AutomorphicSpectrum.Proofs.GeometryProofs.SumLatticeWedgeComapStatement
 import Development.AutomorphicSpectrum.Proofs.GeometryProofs.TensorWedgeDetChangeStatement
+public import Development.WeilBound.CoreStatements.PlurisubharmonicCones.ComponentDataHeightIdentity
+public import Development.WeilBound.CoreStatements.PlurisubharmonicCones.DeterminantLatticeGenerator
+public import Development.WeilBound.CoreStatements.PlurisubharmonicCones.DeterminantLatticeGradedTensor
+public import Development.WeilBound.CoreStatements.PlurisubharmonicCones.ExistsUnitOfSum
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.SpecializesOfUnits
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory NumberField Matrix
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Geo ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.Semi
@@ -69,8 +120,10 @@ theorem local_frame (Or : CptOrigin Y S₀ Dc Hd) {bb : ∀ τ, Fin Dc.N → W �
       refine (Submodule.Quotient.eq (Hd.F τ)).1 ?_
       have := ht τ k
       simp_rw [← map_smul] at this
+
       rw [← map_sum] at this
       exact this.symm
+
     rw [Or.F_eq τ, Submodule.mem_comap, map_sub, map_sum] at h1
     rw [← sub_eq_zero]
     refine (Submodule.disjoint_def.1 (MuIndep.blocks_disjoint Or τ)) _ ?_
@@ -99,8 +152,13 @@ theorem local_change (Or : CptOrigin Y S₀ Dc Hd) (B : ℕ) (hpr : ∀ p ∈ S�
       unitAt Or.𝔐.ξ q ((∏ τ, (A τ).det) / ∏ p ∈ Dc.SB B,
         (MvPolynomial.aeval Dc.y (Dc.vnum p) / MvPolynomial.aeval Dc.y (Dc.vden p) * chartMono Dc.y ch (-Dc.vdeg p))) := by
   have hS : ∀ p ∈ Dc.SB B, p ∈ Dc.S := fun p hp => (Finset.mem_filter.1 hp).1
-  have P := fun s => GlobalTheory.T.lattice_patch_at_primes Or.𝔐.X Ω Or.𝔐.ξ Or.𝔐.Li (S₀ ∪ Dc.SB B) (Or.𝔐.dR s) (fun p => Or.𝔐.HT p s) q hpr
-  have P₀ := fun s => GlobalTheory.T.lattice_patch_at_primes Or.𝔐.X Ω Or.𝔐.ξ Or.𝔐.Li S₀ (Or.𝔐.dR s) (fun p => Or.𝔐.HT p s) q Or.𝔐.S_prime
+  have patch_values (S : Finset ℕ) (s : CMType H ⊕ CMType H) (hprime : ∀ p ∈ S, p.Prime) :
+      ((∀ p ∈ S, ¬ InFibre Or.𝔐.ξ p q) → Lat.patch S (Or.𝔐.dR s) (fun p => Or.𝔐.HT p s) q = Or.𝔐.dR s q) ∧
+      ∀ p ∈ S, InFibre Or.𝔐.ξ p q → Lat.patch S (Or.𝔐.dR s) (fun p => Or.𝔐.HT p s) q = Or.𝔐.HT p s q := by
+    exact ⟨fun h => Lat.patch_of_not S _ _ h, fun p hp h => Lat.patch_of_unique S _ _ hp h
+      fun p' hp' h' => inFibre_unique (hprime p hp) (hprime p' hp') h h'⟩
+  have P := fun s => patch_values (S₀ ∪ Dc.SB B) s hpr
+  have P₀ := fun s => patch_values S₀ s Or.𝔐.S_prime
   have hoff : ∀ p ∈ Dc.SB B, ¬ InFibre Or.𝔐.ξ p q → unitAt Or.𝔐.ξ q
       (MvPolynomial.aeval Dc.y (Dc.vnum p) / MvPolynomial.aeval Dc.y (Dc.vden p) * chartMono Dc.y ch (-Dc.vdeg p)) :=
     fun p hp h => unit_off_fibre hq (Dc.vertical p (hS p hp)) h

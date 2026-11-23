@@ -1,9 +1,45 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.HtValOnSubset
-import Development.AbelianVarietyTheory.Definitions.Divisors.NormNegCmConstantEqAtAllEmbeddings
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ModuliLawsOfPrincipalLevelFieldOfDefinitionStatement
-import Development.AbelianVarietyTheory.Counterexamples.ModuliSurvey.W0EqOfRtEq
-import Formalism.LocalToGlobal.ProjectiveLattices.RealPtMain
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.HtValOnSubset
+public import Development.AbelianVarietyTheory.Definitions.Divisors.NormNegCmConstantEqAtAllEmbeddings
+public import Development.AbelianVarietyTheory.Definitions.Divisors.UnifOfSpaceEq
+public import Development.AbelianVarietyTheory.Counterexamples.ModuliSurvey.W0EqOfRtEq
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ModuliLawsOfPrincipalLevelFieldOfDefinitionStatement
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.LevelGoodAndSign
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Module Formalism.BasicNotions Formalism.L2.Pj ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.FD GlobalTheory.AllWt GlobalTheory.FlatLine GlobalTheory.CompHt GlobalTheory.FlatCore GlobalTheory.CovTop
 
@@ -19,24 +55,25 @@ theorem goodAt_of_mul {E : Type} [Field E] [NumberField E] [IsCMField E] {H : Re
   exact (GlobalTheory.HostProbe.goodAt_iff l hp).1 (hl p hp) i hi
 
 theorem levLaws (D : D7) (T : CoreJ D) (j : ℕ) (Y : Deep T.toCore j) (e : ℕ) (o : ℝ) (hT : LawsJ T) (hj : InR D j)
-    (hG : Y.Good e o) : GlobalTheory.LevGeo.Laws D j Y.d.Xo₂ Y.d.c₂ Y.U Y.dict where
-  inR := hj
-  host := (GlobalTheory.LevGeo.laws_core D T j hT hj).host
-  dat := (GlobalTheory.LevGeo.laws_core D T j hT hj).dat
-  levA := hG.lev.2
-  unf := hG.unf
-  chiTriv := hG.chiTriv
-  dictU := by
-    intro σ hσ
-    obtain ⟨th, hr, hth, hd⟩ := hG.dictU σ hσ
-    refine ⟨Y.Kf, th, hr, ?_, hth, hd, hG.unit σ hσ⟩
-    have h₁ := hG.lev.1
-    unfold DeltaDat.IsLev at h₁
-    have h₂ := hT.toLawsM.pins.2.1
-    unfold Par.PinLevel at h₂
-    rw [h₁.2.1, h₂.1]
-    exact hG.levelK
-  modelW := hG.modelW
+    (hG : Y.Good e o) : GlobalTheory.LevGeo.Laws D j Y.d.Xo₂ Y.d.c₂ Y.U Y.dict := by
+  refine
+    { inR := hj
+      host := hT.toLawsM.pins.1
+      dat := hT.toLawsM.pins.2.2.2 j hj
+      levA := hG.lev.2
+      unf := hG.unf
+      chiTriv := hG.chiTriv
+      dictU := ?_
+      modelW := hG.modelW }
+  intro σ hσ
+  obtain ⟨th, hr, hth, hd⟩ := hG.dictU σ hσ
+  refine ⟨Y.Kf, th, hr, ?_, hth, hd, hG.unit σ hσ⟩
+  have h₁ := hG.lev.1
+  unfold DeltaDat.IsLev at h₁
+  have h₂ := hT.toLawsM.pins.2.1
+  unfold Par.PinLevel at h₂
+  rw [h₁.2.1, h₂.1]
+  exact hG.levelK
 
 theorem laws_deep : ∀ (D : D7) (T : CoreJ D) (j : ℕ) (Y : Deep T.toCore j) (e : ℕ) (o : ℝ),
     LawsJ T → InR D j → Y.Good e o → Laws Y.U (xiR D) := by

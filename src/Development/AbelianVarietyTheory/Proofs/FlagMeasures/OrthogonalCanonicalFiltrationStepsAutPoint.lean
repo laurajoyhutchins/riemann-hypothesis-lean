@@ -1,9 +1,66 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.LayerProd
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.LayerProd
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.AutPointLatticeIntersectionSelfDualProperties
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.AutPointMajorantFramesGiveMajorants
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.CanonicalLatticeFiltrationSizeProperties
+import Formalism.HarderNarasimhan.HarderNarasimhanProofs.DiscreteSpanOfLinIndep
+import Formalism.HarderNarasimhan.HarderNarasimhanProofs.DualPl
+import Formalism.HarderNarasimhan.HarderNarasimhanProofs.ExistsSmulMemOfFinrankEq
+public import Formalism.HarderNarasimhan.HarderNarasimhanProofs.Rerealize
+import Formalism.HarderNarasimhan.HarderNarasimhanProofs.ShiftInvariance
+import Formalism.HarderNarasimhan.HarderNarasimhanProofs.SizeMu
+import Formalism.HarderNarasimhan.HarderNarasimhanProofs.SlopeIneqMean
 import Formalism.HarderNarasimhan.ShiftInvariance
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.AutPointLatticeIntersectionSelfDualProperties
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.AutPointMajorantFramesGiveMajorants
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.CanonicalLatticeFiltrationSizeProperties
+import Formalism.LatticeSlopes.ExistsSaturatedSlopeEqMuMax
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open GlobalTheory.Count Formalism.MainNotions.S Formalism.HN Formalism.REAL Matrix NumberField MeasureTheory Finset
 
@@ -125,7 +182,7 @@ theorem sat_inf {V ι : Type} [AddCommGroup V] [Module K V] [Module (𝓞 K) V] 
     exact fun z hz => hz.2
   exact h5 (Submodule.subset_span hx)
 
-theorem perp_key [IsTotallyComplex K] {J : Matrix (Fin n) (Fin n) K}
+theorem perp_key [_root_.NumberField.IsTotallyComplex K] {J : Matrix (Fin n) (Fin n) K}
     (hJ : Formalism.UG.IsHerm (starRingEnd K) J) (hdet : J.det ≠ 0)
     (hs : ∀ (φ : K →+* ℂ) (a : K), φ (star a) = starRingEnd ℂ (φ a))
     (X : InfinitePlace K → Matrix (Fin n) (Fin n) ℂ) (hX : ∀ v, IsUnit (X v).det)
@@ -190,12 +247,12 @@ end Form
 
 section Slope
 
-variable {K V ι : Type} [Field K] [NumberField K] [StarRing K] [IsTotallyComplex K]
+variable {K V ι : Type} [Field K] [NumberField K] [StarRing K] [_root_.NumberField.IsTotallyComplex K]
   [AddCommGroup V] [Module K V] [Module (𝓞 K) V] [IsScalarTower (𝓞 K) K V] [Fintype ι]
   [DecidableEq ι] (b : Module.Basis ι K V) (X : InfinitePlace K → Matrix ι ι ℂ)
 
-variable (K) in
 
+variable (K) in
 def cK : ℝ := Real.log 2 / 2 - logDisc K / (2 * (Module.finrank ℚ K : ℝ))
 
 def nd (N : Submodule (𝓞 K) V) : ℝ :=
@@ -241,12 +298,12 @@ theorem htQ_eq (hX : ∀ v, IsUnit (X v).det) (N S : Submodule (𝓞 K) V) (hN :
   push_cast
   ring
 
-omit [IsTotallyComplex K] [IsScalarTower (𝓞 K) K V] in
+omit [_root_.NumberField.IsTotallyComplex K] [IsScalarTower (𝓞 K) K V] in
 theorem sat_mono {A N S : Submodule (𝓞 K) V} (hS : IsSat (Formalism.HermitianLatticesTheory.realize b X) A S)
     (h1 : S ≤ N) (h2 : N ≤ A) : IsSat (Formalism.HermitianLatticesTheory.realize b X) N S :=
   ⟨h1, shiftInv_zl_mono _ h1, fun x hx => hS.2.2 x (shiftInv_zl_mono _ h2 hx)⟩
 
-omit [IsTotallyComplex K] in
+omit [_root_.NumberField.IsTotallyComplex K] in
 theorem rk_lt (hX : ∀ v, IsUnit (X v).det) {A N S : Submodule (𝓞 K) V} (hA : A.FG)
     (hS : IsSat (Formalism.HermitianLatticesTheory.realize b X) A S) (h1 : S < N) (h2 : N ≤ A) :
     (rk (Formalism.HermitianLatticesTheory.realize b X) S : ℝ) < rk (Formalism.HermitianLatticesTheory.realize b X) N := by
@@ -285,7 +342,7 @@ theorem largest_bound (hX : ∀ v, IsUnit (X v).det) {N M : Submodule (𝓞 K) V
   unfold nd
   linarith
 
-omit [IsTotallyComplex K] in
+omit [_root_.NumberField.IsTotallyComplex K] in
 theorem sat_inf_sat (hX : ∀ v, IsUnit (X v).det) {A P Q : Submodule (𝓞 K) V}
     (hP : IsSat (Formalism.HermitianLatticesTheory.realize b X) A P) (hQ : IsSat (Formalism.HermitianLatticesTheory.realize b X) A Q) :
     IsSat (Formalism.HermitianLatticesTheory.realize b X) A (P ⊓ Q) := by

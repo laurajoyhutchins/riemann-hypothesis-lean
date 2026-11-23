@@ -1,5 +1,65 @@
-import ReciprocityTheory.AnalyticForms.LeviForms.IsRegFamilyInhabitStatement
-import ReciprocityTheory.AnalyticForms.PotentialTheory.PshShiftA
+module
+
+public import Mathlib.Algebra.Polynomial.Derivative
+public import Mathlib.Analysis.Calculus.ContDiff.Defs
+public import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+public import ReciprocityTheory.AnalyticForms.MaIntEmpty
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Analysis.Calculus.ContDiff.Comp
+public import Mathlib.Analysis.Calculus.Deriv.Comp
+public import Mathlib.Analysis.Calculus.Deriv.Inv
+public import Mathlib.Analysis.Calculus.Deriv.Mul
+public import Mathlib.Analysis.Calculus.Deriv.Polynomial
+public import Mathlib.Analysis.Complex.RealDeriv
+public import Mathlib.Analysis.SpecialFunctions.Log.Deriv
+public import Mathlib.LinearAlgebra.Matrix.Charpoly.Coeff
+
+@[expose] public section
 
 namespace ReciprocityTheory.AnForm.P
 
@@ -95,14 +155,14 @@ theorem cf_apply {α β : Type*} (n : ℕ) (P : Matrix α β ℂ[X]) (i : α) (j
 theorem cf_mul {α β γ : Type*} [Fintype β] (n : ℕ) (P : Matrix α β ℂ[X]) (Q : Matrix β γ ℂ[X]) :
     cf n (P * Q) = ∑ x ∈ Finset.HasAntidiagonal.antidiagonal n, cf x.1 P * cf x.2 Q := by
   ext i j
-  simp only [cf, Matrix.map_apply, Matrix.mul_apply, Polynomial.finset_sum_coeff, Polynomial.coeff_mul,
+  simp only [cf, Matrix.map_apply, Matrix.mul_apply, Polynomial.finsetSum_coeff, Polynomial.coeff_mul,
     Matrix.sum_apply]
   exact Finset.sum_comm
 
 theorem cf_mapC_mul {α β γ : Type*} [Fintype β] (n : ℕ) (A : Matrix α β ℂ)
     (P : Matrix β γ ℂ[X]) : cf n (A.map C * P) = A * cf n P := by
   ext i j
-  simp only [cf, Matrix.map_apply, Matrix.mul_apply, Polynomial.finset_sum_coeff, Polynomial.coeff_C_mul]
+  simp only [cf, Matrix.map_apply, Matrix.mul_apply, Polynomial.finsetSum_coeff, Polynomial.coeff_C_mul]
 
 theorem coeff_X_mul_C (a : ℂ) (n : ℕ) : (X * C a).coeff n = if n = 1 then a else 0 := by
   rw [mul_comm, Polynomial.coeff_C_mul_X]
@@ -184,7 +244,7 @@ theorem coeff2_det_of {n : Type*} [Fintype n] [DecidableEq n] (P : Matrix n n �
   simp only [show ¬ (4 ≤ 2) by norm_num, show (2 ≤ 2) by norm_num, if_false, if_true, Nat.sub_self,
     add_zero, Polynomial.coeff_one, show (2 : ℕ) ≠ 0 by norm_num, if_false, zero_add]
   congr 1
-  rw [Matrix.trace, Polynomial.finset_sum_coeff]
+  rw [Matrix.trace, Polynomial.finsetSum_coeff]
   refine Finset.sum_congr rfl fun a _ => ?_
   rw [Matrix.diag_apply, hK, Matrix.diagonal_mul, Polynomial.coeff_C_mul, hN]
   simp [Polynomial.coeff_divX, cf]

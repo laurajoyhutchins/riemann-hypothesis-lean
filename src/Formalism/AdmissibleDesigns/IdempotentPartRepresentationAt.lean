@@ -1,6 +1,52 @@
-import Formalism.AdmissibleDesigns.RowTopOf
-import Formalism.AdmissibleDesigns.FiniteClassesLocalEq
-import Formalism.AdmissibleDesigns.EKSymmCont
+module
+
+public import Formalism.AdmissibleDesigns.FiniteClassesContinuousLattice
+public import Formalism.SharpRestriction.LevelLetterCocycles.GoodCongruenceDataOf
+public import Formalism.WachLatticeTwists.CoprimeLiftBounds.CoprimeLiftProofs.FirstSummandActionMem
+public import Formalism.WachLatticeTwists.RamifiedBlockRings.DistinctEigenvalueCornerPerturbation
+import Formalism.AdmissibleDesigns.CoboundaryMemFiniteClasses
+public import Formalism.AdmissibleDesigns.ExistsWildInertiaCyclotomicGenerator
+public import Formalism.AdmissibleDesigns.FiniteClassesLocalEq
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 variable [hT2Core : Fact ReciprocityTheory.ChartRestriction.T2.Core]
 
@@ -43,47 +89,6 @@ section Fin
 
 variable {O : Type} [CommRing O] [IsDomain O] [IsDiscreteValuationRing O] {X' d : Type} [Fintype d] [DecidableEq d]
   {R' : Subalgebra O (X' → Matrix d d (FractionRing O))}
-
-theorem r_free [Module.Finite O R'] : Module.Free O R' := by
-  haveI h1 : NoZeroSMulDivisors O (FractionRing O) := ⟨fun {c x} h => by
-    rw [Algebra.smul_def] at h
-    rcases mul_eq_zero.1 h with hc | hx
-    · exact Or.inl ((IsFractionRing.injective O (FractionRing O)) (by rw [hc, map_zero]))
-    · exact Or.inr hx⟩
-  haveI h2a : NoZeroSMulDivisors O (d → FractionRing O) := Pi.noZeroSMulDivisors _
-  haveI h2 : NoZeroSMulDivisors O (Matrix d d (FractionRing O)) := Pi.noZeroSMulDivisors _
-  haveI h3 : NoZeroSMulDivisors O (X' → Matrix d d (FractionRing O)) := Pi.noZeroSMulDivisors _
-  haveI h4 : NoZeroSMulDivisors O R' := ⟨fun {c x} h => by
-    have h' : c • (x : X' → Matrix d d (FractionRing O)) = 0 := congrArg Subtype.val h
-    rcases smul_eq_zero.1 h' with hc | hx
-    · exact Or.inl hc
-    · exact Or.inr (Subtype.ext hx)⟩
-  exact Module.free_of_finite_type_torsion_free'
-
-theorem idempotent_part_finite [Module.Finite O R'] (e₁ : R') : Module.Finite O (FirstSummandSubmodule O e₁) := by
-  exact Module.Finite.of_injective (FirstSummandSubmodule O e₁).subtype Subtype.val_injective
-
-theorem idempotent_part_free [Module.Finite O R'] (e₁ : R') : Module.Free O (FirstSummandSubmodule O e₁) := by
-  haveI := idempotent_part_finite (O := O) (R' := R') e₁
-  haveI h1 : NoZeroSMulDivisors O (FractionRing O) := ⟨fun {c x} h => by
-    rw [Algebra.smul_def] at h
-    rcases mul_eq_zero.1 h with hc | hx
-    · exact Or.inl ((IsFractionRing.injective O (FractionRing O)) (by rw [hc, map_zero]))
-    · exact Or.inr hx⟩
-  haveI h2a : NoZeroSMulDivisors O (d → FractionRing O) := Pi.noZeroSMulDivisors _
-  haveI h2 : NoZeroSMulDivisors O (Matrix d d (FractionRing O)) := Pi.noZeroSMulDivisors _
-  haveI h3 : NoZeroSMulDivisors O (X' → Matrix d d (FractionRing O)) := Pi.noZeroSMulDivisors _
-  haveI h4 : NoZeroSMulDivisors O R' := ⟨fun {c x} h => by
-    have h' : c • (x : X' → Matrix d d (FractionRing O)) = 0 := congrArg Subtype.val h
-    rcases smul_eq_zero.1 h' with hc | hx
-    · exact Or.inl hc
-    · exact Or.inr (Subtype.ext hx)⟩
-  haveI h5 : NoZeroSMulDivisors O (FirstSummandSubmodule O e₁) := ⟨fun {c x} h => by
-    have h' : c • (x : R') = 0 := congrArg Subtype.val h
-    rcases smul_eq_zero.1 h' with hc | hx
-    · exact Or.inl hc
-    · exact Or.inr (Subtype.ext hx)⟩
-  exact Module.free_of_finite_type_torsion_free'
 
 end Fin
 
@@ -129,9 +134,9 @@ theorem locC_apply {n : ℕ} (hn : K.plOf i dc n ∈ placesOver D.host.E (D.nd.l
   rw [← KLift.heO_br i dc hn]
   rfl
 
+
 set_option maxHeartbeats 2000000 in
 set_option synthInstance.maxHeartbeats 400000 in
-
 theorem rowSub_at
     (hr' : ∀ g x', ((Dd.r g : Dd.R') : Dd.X' → Matrix (Fin D.R.nV) (Fin D.R.nV) (FractionRing (D.nd.O i))) x' =
       (rO D.nd i r (Dd.p x') g).map (algebraMap (D.nd.O i) (FractionRing (D.nd.O i))))
@@ -177,8 +182,8 @@ theorem rowSub_at
     { toFun := fun v j => e ((Λ (KLift.untr e v)) q.1 q.2 j)
       map_add' := fun v w => funext fun j => by
         show e ((Λ (KLift.untr e v + KLift.untr e w)) q.1 q.2 j) = _
-        rw [map_add]
-        simp [map_add]
+        rw [map_add (f := _)]
+        simp [map_add (f := _)]
       map_smul' := fun c v => funext fun j => by
         show e ((Λ (e.symm c • KLift.untr e v)) q.1 q.2 j) = c * e ((Λ (KLift.untr e v)) q.1 q.2 j)
         rw [smulK]
@@ -200,7 +205,8 @@ theorem rowSub_at
           (TruncatedSeriesCountingIdentities.locC (TruncatedSeriesCountingIdentities.CoefExt.self i _ hn) (rDuO D.nd i r (Dd.p q.1)) g).mulVec (Ψ q v) j := by
       intro γ hγ
       rw [hΛe, hγ]
-      simp only [Matrix.mulVec, dotProduct, locC_apply i dc hn, Matrix.smul_apply, Matrix.mul_apply, smul_eq_mul,
+      set_option synthInstance.maxHeartbeats 100000 in
+        simp only [Matrix.mulVec, dotProduct, locC_apply i dc hn, Matrix.smul_apply, Matrix.mul_apply, smul_eq_mul,
         Finset.mul_sum, map_sum, map_mul, Matrix.map_apply, rDuO, twistM, dualM, MonoidHom.coe_mk, OneHom.coe_mk,
         Matrix.transpose_apply, Ψ, LinearMap.coe_mk, AddHom.coe_mk]
       refine Finset.sum_congr rfl fun b _ => ?_

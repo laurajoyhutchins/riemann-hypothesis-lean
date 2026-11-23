@@ -1,6 +1,51 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.Intersections.ImportsMoreRest
-import GroundTheory.HeightsAndTheta.Heights.Intersections.PBlockRatioAlg
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.ImportsMoreRest
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.StatementsBlockRatioAlg
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.PBlockRatioAlg
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -15,22 +60,22 @@ variable {K : Type} [Fintype K] {ι : K → Type} [∀ k, Fintype (ι k)]
   {K' : Type} [Fintype K'] {ι' : K' → Type} [∀ k, Fintype (ι' k)]
   {v : (Σ k, ι k) → (Σ k', ι' k')} {P' : Ideal (MRing ι')}
 
-omit [Fintype K] [∀ k, Fintype (ι k)] [Fintype K'] [∀ k, Fintype (ι' k)] in
 
+omit [Fintype K] [∀ k, Fintype (ι k)] [Fintype K'] [∀ k, Fintype (ι' k)] in
 theorem aeval_rename_eq (G : GenFibre v P') (A : MRing ι) :
     aeval G.x' (rename v A) = algebraMap G.Φ G.Φ' (aeval G.x A) := by
   rw [aeval_rename]
   have h : G.x' ∘ v = algebraMap G.Φ G.Φ' ∘ G.x := funext G.compat
   rw [h, MvPolynomial.aeval_algebraMap_apply]
 
-omit [Fintype K] [∀ k, Fintype (ι k)] [Fintype K'] [∀ k, Fintype (ι' k)] in
 
+omit [Fintype K] [∀ k, Fintype (ι k)] [Fintype K'] [∀ k, Fintype (ι' k)] in
 theorem aeval_eq_zero_of_mem (G : GenFibre v P') {f : MRing ι'} (hf : f ∈ P') : aeval G.x' f = 0 := by
   rw [← G.genericFibre_ker_target] at hf
   exact hf
 
-omit [Fintype K] [∀ k, Fintype (ι k)] [Fintype K'] [∀ k, Fintype (ι' k)] in
 
+omit [Fintype K] [∀ k, Fintype (ι k)] [Fintype K'] [∀ k, Fintype (ι' k)] in
 theorem aeval_ne_zero_of_not_mem (G : GenFibre v P') {f : MRing ι} (hf : f ∉ imageZ v P') : aeval G.x f ≠ 0 := by
   rw [← G.ker_x] at hf
   exact hf
@@ -52,8 +97,8 @@ theorem coeffPoly_coeff_last {F : Type} [Field F] {m : ℕ} (a : Fin (m + 1) →
 
 end ChartFiniteness
 
-open ChartFiniteness in
 
+open ChartFiniteness in
 theorem ArithmeticIntersectionChartFinite.of_blockRatioAlg (hR : BlockRatioAlg.Statement) : ArithmeticIntersectionChartFinite.Statement := by
   intro K _ ι _ K' _ ι' _ κ v P' n G j hv hP' hP hj
   apply IntermediateField.finiteDimensional_adjoin
@@ -73,9 +118,11 @@ theorem ArithmeticIntersectionChartFinite.of_blockRatioAlg (hR : BlockRatioAlg.S
     rw [h0, Polynomial.coeff_zero] at this
     exact aeval_ne_zero_of_not_mem G hAm this.symm
   · have hsum := aeval_eq_zero_of_mem G hmem
+
     simp only [map_sum, map_mul, map_pow, aeval_X, aeval_rename_eq] at hsum
     have hpow : G.x' c ^ m ≠ 0 := pow_ne_zero _ hc0
     unfold coeffPoly
+
     simp only [map_sum, map_mul, map_pow, Polynomial.aeval_C, Polynomial.aeval_X]
     apply (mul_left_inj' hpow).mp
     rw [zero_mul, Finset.sum_mul, ← hsum]

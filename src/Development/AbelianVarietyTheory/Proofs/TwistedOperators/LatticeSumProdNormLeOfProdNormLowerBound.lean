@@ -1,4 +1,73 @@
-import Mathlib
+module
+
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.Analysis.Normed.Lp.MeasurableSpace
+public import Mathlib.LinearAlgebra.Complex.FiniteDimensional
+public import Mathlib.MeasureTheory.Integral.Bochner.Basic
+public import Mathlib.MeasureTheory.Integral.IntegrableOn
+public import Mathlib.MeasureTheory.Measure.Haar.OfBasis
+public import Mathlib.Topology.Separation.CompletelyRegular
+import Aesop.Main
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+public import Mathlib.Analysis.Complex.ExponentialBounds
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.MeasureTheory.Constructions.HaarToSphere
+public import Mathlib.MeasureTheory.Integral.Pi
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Analysis.Calculus.Deriv.Add
+public import Mathlib.Analysis.Calculus.Deriv.Comp
+public import Mathlib.Analysis.Calculus.Deriv.Inv
+public import Mathlib.Analysis.Calculus.Deriv.Mul
+public import Mathlib.Analysis.Calculus.Deriv.Pow
+public import Mathlib.Analysis.SpecialFunctions.JapaneseBracket
+public import Mathlib.MeasureTheory.Integral.IntegralEqImproper
+
+@[expose] public section
 
 open MeasureTheory Metric Set Finset Filter Topology
 
@@ -182,7 +251,7 @@ lemma sum_prod_inv_one_add_norm_pow_le (ι : Type) [Fintype ι] (n : ℕ) (hn : 
       rw [inv_mul_le_iff₀ (by norm_num)]
       linarith
     calc ∏ τ, h (w τ) ≤ ∏ τ, (c * h (u τ)) :=
-          Finset.prod_le_prod (fun τ _ => hh0 _) fun τ _ => this τ
+          Finset.prod_le_prod₀ (fun τ _ => hh0 _) fun τ _ => this τ
       _ = c ^ d * G u := by rw [Finset.prod_mul_distrib, Finset.prod_const, Finset.card_univ]
   have hbox : ∀ w, (∏ τ, h (w τ)) * vb ^ d ≤ ∫ u in B w, c ^ d * G u := by
     intro w
@@ -240,7 +309,7 @@ theorem lattice_sum_le : ∀ (ι : Type) [Fintype ι] [Nonempty ι] (n : ℕ)
     have hne0 : w - w' ≠ 0 := sub_ne_zero.2 hne
     have h1 := hΛ _ hmem hne0
     have h2 : ∏ τ, ‖(w - w') τ‖ ≤ 1 :=
-      Finset.prod_le_one (fun τ _ => norm_nonneg _) fun τ _ => (hcon τ).le
+      Finset.prod_le_one₀ (fun τ _ => norm_nonneg _) fun τ _ => (hcon τ).le
     linarith
   have hP := sum_prod_inv_one_add_norm_pow_le ι n hn s hsep
   set d := Fintype.card ι with hd
@@ -261,7 +330,7 @@ theorem lattice_sum_le : ∀ (ι : Type) [Fintype ι] [Nonempty ι] (n : ℕ)
     rw [Finset.prod_inv_distrib]
     have h1 := hΛ w (hs w hw).1 (hs w hw).2
     have h2 : ∏ τ, ‖w τ‖ ≤ ∏ τ, (1 + ‖w τ‖) :=
-      Finset.prod_le_prod (fun τ _ => norm_nonneg _) fun τ _ => by linarith
+      Finset.prod_le_prod₀ (fun τ _ => norm_nonneg _) fun τ _ => by linarith
     exact inv_anti₀ hR0 (h1.trans h2)
   calc ∑ w ∈ s, ∏ τ, (((1 + ‖w τ‖) / 3) ^ (2 * n + 5))⁻¹
       ≤ ∑ w ∈ s, K ^ d * (∏ τ, ((1 + ‖w τ‖) ^ (2 * n + 4))⁻¹) * R⁻¹ := Finset.sum_le_sum hterm

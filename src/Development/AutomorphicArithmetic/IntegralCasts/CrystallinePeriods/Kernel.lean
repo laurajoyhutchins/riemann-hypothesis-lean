@@ -1,5 +1,59 @@
-import Mathlib
-import Development.AutomorphicArithmetic.IntegralCasts.CrystallinePeriods.TruncLogEqOfPowEqZero
+module
+
+public import Development.AutomorphicArithmetic.IntegralCasts.CrystallinePeriods.TruncLogEqOfPowEqZero
+public import Mathlib.FieldTheory.IsAlgClosed.Basic
+public import Mathlib.RingTheory.IntegralClosure.IntegrallyClosed
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.RingTheory.LocalRing.ResidueField.Basic
+
+@[expose] public section
 
 noncomputable section
 
@@ -70,7 +124,6 @@ theorem exists_pow_eq_of_isAlgClosed {R : Type u} [CommRing R] [IsDomain R] [IsI
 namespace Tilt
 
 variable (p R) in
-
 def sharpEquiv : Tilt p R ≃* Perfection R p :=
   (Perfection.quotientMulEquiv p (span {(p : R)})).symm
 
@@ -213,8 +266,8 @@ theorem coeff_zero_xi (ϖ : PFlat p R) : (xi ϖ).coeff 0 = -ϖ.1 := by
   rw [xi, map_sub, map_natCast]
   simp
 
-omit [IsAdicComplete (span {(p : R)}) R] in
 
+omit [IsAdicComplete (span {(p : R)}) R] in
 theorem isUnit_iff_isUnit_coeff (x : Ainf p R) : IsUnit x ↔ IsUnit (x.coeff 0) := by
   refine ⟨fun h => h.map WittVector.constantCoeff, fun h => ?_⟩
   obtain ⟨c, hc⟩ := p_dvd_sub_teich x
@@ -248,10 +301,6 @@ theorem xi_ne_zero [CharZero R] (ϖ : PFlat p R) : xi ϖ ≠ 0 := by
   exact (Fact.out : p.Prime).ne_zero h2
 
 variable [ValuationRing R]
-
-theorem isUnit_iff_isUnit_theta (x : Ainf p R) : IsUnit x ↔ IsUnit (theta p R x) := by
-  rw [isUnit_iff_isUnit_coeff, Tilt.isUnit_iff_isUnit_untilt, ← Tilt.isUnit_iff_isUnit_coeff (p := p),
-    ← mk_theta, Tilt.isUnit_iff_isUnit_coeff]
 
 theorem theta_surjective [IsAlgClosed (FractionRing R)] : Function.Surjective (theta p R) := by
   intro a
@@ -315,16 +364,6 @@ theorem xi_pow_dvd_of_forall (ϖ : PFlat p R) {n : ℕ} {x : Ainf p R}
       ⟨y - xi ϖ ^ n * b, by linear_combination -e⟩
     exact ⟨a', b, mul_left_cancel₀ (xi_ne_zero ϖ) (by linear_combination e)⟩
 
-theorem mem_span_xi_pow_of_forall (ϖ : PFlat p R) {n : ℕ} {x : Ainf p R}
-    (h : ∀ k : ℕ, x ∈ span {(p : Ainf p R)} ^ k ⊔ span {xi ϖ} ^ n) : x ∈ span {xi ϖ} ^ n := by
-  rw [Ideal.span_singleton_pow, mem_span_singleton]
-  refine xi_pow_dvd_of_forall ϖ fun k => ?_
-  have := h k
-  rw [Ideal.span_singleton_pow, Ideal.span_singleton_pow, ← Ideal.span_insert,
-    Ideal.mem_span_pair] at this
-  obtain ⟨a, b, e⟩ := this
-  exact ⟨a, b, by linear_combination -e⟩
-
 theorem eq_zero_of_forall_xi_pow_dvd (ϖ : PFlat p R) {x : Ainf p R}
     (h : ∀ n : ℕ, xi ϖ ^ n ∣ x) : x = 0 := by
   refine eq_zero_of_forall_pow_dvd (p : Ainf p R) fun k => ?_
@@ -343,13 +382,6 @@ theorem eq_zero_of_forall_xi_pow_dvd (ϖ : PFlat p R) {x : Ainf p R}
     rw [pow_succ']
     exact mul_dvd_mul_left _ (ih fun n =>
       xi_pow_dvd_of_dvd_p_pow_mul ϖ (k := 1) (by simpa using h n))
-
-theorem iInf_span_xi_pow (ϖ : PFlat p R) : ⨅ n : ℕ, span {xi ϖ} ^ n = ⊥ := by
-  rw [eq_bot_iff]
-  intro x hx
-  refine eq_zero_of_forall_xi_pow_dvd ϖ fun n => ?_
-  have := Ideal.mem_iInf.1 hx n
-  rwa [Ideal.span_singleton_pow, mem_span_singleton] at this
 
 end Ainf
 
@@ -397,9 +429,10 @@ theorem associated_xi_omega (ϖ : PFlat p R) {ε : tateModule p R} (hε : IsPrim
       Tilt.isUnit_iff_isUnit_coeff] at h3
     exact not_isUnit_zero h3
   have h4 := congrArg (WittVector.map (p := p) ρ) ha
+
   simp only [omega, xi, map_sum, map_pow, map_mul, map_sub, map_natCast,
-    WittVector.map_teichmuller, h1, h2, map_one, one_pow, Finset.sum_const, Finset.card_range,
-    nsmul_eq_mul, mul_one, WittVector.teichmuller_zero, sub_zero] at h4
+  WittVector.map_teichmuller, h1, h2, map_one, one_pow, Finset.sum_const, Finset.card_range,
+  nsmul_eq_mul, mul_one, WittVector.teichmuller_zero, sub_zero] at h4
   have h5 : WittVector.map (p := p) ρ a = 1 :=
     mul_left_cancel₀ (WittVector.p_nonzero p _) (h4.symm.trans (mul_one _).symm)
   have h6 : ρ (a.coeff 0) = 1 := by
@@ -415,12 +448,6 @@ theorem exists_teich_sub_one_eq (ϖ : PFlat p R) {ε : tateModule p R} (hε : Is
   refine ⟨u * (teich p (tateRoot ε) - 1), by rw [← mul_assoc, hu, omega_mul], ?_⟩
   rw [map_mul, map_sub, map_one, theta_teich]
   exact mul_ne_zero (u.isUnit.map _).ne_zero (sub_ne_zero.2 hε)
-
-theorem ker_theta_eq_span_omega [IsAlgClosed (FractionRing R)] {ε : tateModule p R}
-    (hε : IsPrimitive ε) : RingHom.ker (theta p R) = span {omega ε} := by
-  obtain ⟨ϖ⟩ : Nonempty (PFlat p R) := inferInstance
-  rw [ker_theta ϖ, Ideal.span_singleton_eq_span_singleton]
-  exact associated_xi_omega ϖ hε
 
 end Ainf
 
@@ -483,12 +510,6 @@ theorem algebraMap_mem_kerTheta_pow_iff (ϖ : PFlat p R) (n : ℕ) (x : Ainf p R
   rw [map_mul, map_mul, hy, ← h, map_pow (algebraMap (Ainf p R) (AinfInv p R)) (p : Ainf p R),
     map_natCast]
   ring
-
-theorem comap_kerTheta_pow (ϖ : PFlat p R) (n : ℕ) :
-    (kerTheta p R ^ n).comap (algebraMap (Ainf p R) (AinfInv p R)) = span {Ainf.xi ϖ} ^ n := by
-  ext x
-  rw [Ideal.mem_comap, algebraMap_mem_kerTheta_pow_iff ϖ, Ideal.span_singleton_pow,
-    mem_span_singleton]
 
 theorem eq_zero_of_forall_mem_kerTheta_pow (ϖ : PFlat p R) {x : AinfInv p R}
     (h : ∀ n : ℕ, x ∈ kerTheta p R ^ n) : x = 0 := by

@@ -1,5 +1,56 @@
-import Mathlib
-import Formalism.PairingDivisors.StatementN
+module
+
+public import Formalism.PairingDivisors.StatementN
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.NumberTheory.LSeries.RiemannZeta
+public import Mathlib.NumberTheory.NumberField.CMField
+public import Mathlib.NumberTheory.NumberField.ClassNumber
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+public import Mathlib.Analysis.Normed.Module.Connected
+public import Mathlib.Analysis.PSeriesComplex
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -61,18 +112,6 @@ theorem IsClassZeta.eqOn {C : ClassGroup (𝓞 F)} {Z Z' : ℂ → ℂ} (h : IsC
   filter_upwards [ho'.mem_nhds (show (2 : ℂ) ∈ {s : ℂ | 1 < s.re} by simp)] with s hs
   exact (h.2 s hs).unique (h'.2 s hs)
 
-theorem IsZetaValues.unique {k : ℕ} (hk : 1 ≤ k) {z z' : ClassGroup (𝓞 F) → ℚ} (h : IsZetaValues k z)
-    (h' : IsZetaValues k z') : z = z' := by
-  funext C
-  obtain ⟨Z, hZ, e⟩ := h C
-  obtain ⟨Z', hZ', e'⟩ := h' C
-  have hne : (1 - (k : ℂ)) ∈ ({1}ᶜ : Set ℂ) := by
-    have : (k : ℂ) ≠ 0 := by exact_mod_cast (by omega : k ≠ 0)
-    simpa using this
-  have := hZ.eqOn hZ' hne
-  rw [e, e'] at this
-  exact_mod_cast this
-
 theorem mMin_mem {l : ℕ} (hl : 1 ≤ l) (n : ℕ) : ∃ a : ℕ, 2 ≤ a ∧ a.Coprime l ∧ mMin l n = padicValNat l (a ^ n - 1) :=
   Nat.sInf_mem (s := {m | ∃ a : ℕ, 2 ≤ a ∧ a.Coprime l ∧ m = padicValNat l (a ^ n - 1)})
     ⟨_, l + 1, by omega, by simp, rfl⟩
@@ -84,19 +123,6 @@ theorem LocalBound.mMin_eq {k : ℕ} {z : ClassGroup (𝓞 F) → ℚ} {l : ℕ}
   · exact h.2.2.2 h1
   · exact h.2.2.1 h1 h2
   · exact h.2.1 h1 h2
-
-example : denomExp 2 (-1 / 24) = 3 ∧ denomExp 3 (-1 / 24) = 1 ∧ denomExp 2 0 = 0 := by
-  have h2 : padicValNat 2 24 = 3 := by
-    rw [show 24 = 2 ^ 3 * 3 by norm_num, padicValNat.mul (by norm_num) (by norm_num), padicValNat.prime_pow,
-      padicValNat.eq_zero_of_not_dvd (by norm_num)]
-  have h3 : padicValNat 3 24 = 1 := by
-    rw [show 24 = 3 ^ 1 * 8 by norm_num, padicValNat.mul (by norm_num) (by norm_num), padicValNat.prime_pow,
-      padicValNat.eq_zero_of_not_dvd (by norm_num)]
-  have hn : (-1 / 24 : ℚ).num = -1 := by norm_num
-  have hd : (-1 / 24 : ℚ).den = 24 := by norm_num
-  refine ⟨?_, ?_, by simp [denomExp]⟩
-  · simp only [denomExp, padicValRat, hn, hd, h2]; simp [padicValInt]
-  · simp only [denomExp, padicValRat, hn, hd, h3]; simp [padicValInt]
 
 theorem pir_rat : IsPrincipalIdealRing (𝓞 ℚ) :=
   IsPrincipalIdealRing.of_surjective Rat.ringOfIntegersEquiv.symm.toRingHom Rat.ringOfIntegersEquiv.symm.surjective
@@ -139,12 +165,5 @@ theorem isClassZeta_rat (C : ClassGroup (𝓞 ℚ)) : IsClassZeta C riemannZeta 
   refine (hg.hasSum_iff (f := fun n : ℕ => (n : ℂ) ^ (-s)) hr).2 ?_
   rw [zeta_eq_tsum_one_div_nat_cpow hs]
   simpa only [Complex.cpow_neg, one_div] using (Complex.summable_one_div_nat_cpow.2 hs).hasSum
-
-example : IsZetaValues (F := ℚ) 2 (fun _ => -1 / 12) := fun C => ⟨_, isClassZeta_rat C, by
-  have h := riemannZeta_neg_nat_eq_bernoulli 1
-  have hb : bernoulli 2 = 1 / 6 := by rw [bernoulli_eq_bernoulli'_of_ne_one (by decide), bernoulli'_two]
-  rw [show (1 + 1 : ℕ) = 2 from rfl, hb] at h
-  rw [show (1 - ((2 : ℕ) : ℂ)) = -((1 : ℕ) : ℂ) by norm_num, h]
-  norm_num⟩
 
 end GlobalTheory.IndefiniteRowSideFullHecke.ZetaValueIdeals

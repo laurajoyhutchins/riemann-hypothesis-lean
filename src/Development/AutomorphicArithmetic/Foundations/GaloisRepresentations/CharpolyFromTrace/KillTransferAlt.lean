@@ -1,5 +1,54 @@
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.CharpolyFromTrace.LimitEig
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.TypeConditions.WeightsConj
+module
+
+public import Mathlib.Basic.Complex.Basic
+public import Mathlib.LinearAlgebra.Trace
+public import Mathlib.RepresentationTheory.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.ExistsNotCongPow
+import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.PolyApproxZeroPadic
+public import Formalism.ConjugateSelfDual.Statement
+import Formalism.SharpRestriction.LevelLetterCocycles.LocCoh
+import ReciprocityTheory.GaloisValuations.GlobalA
+
+@[expose] public section
 
 noncomputable section
 
@@ -13,12 +62,6 @@ section Weil
 variable {E Ω : Type} [Field E] [NumberField E] [Field Ω] [Algebra E Ω] [IsAlgClosure E Ω]
   {A : ValuationSubring Ω} {w : HeightOneSpectrum (𝓞 E)} {h : IsPlaceOver A w}
 
-structure IneRel (x y : WD h) : Prop where
-  pol : ∀ s, x.charPol (ineIncl h s) = y.charPol (ineIncl h s)
-  eig : ∀ ξ, EigZero y ξ → EigZero x ξ
-
-theorem IneRel.refl (x : WD h) : IneRel x x := ⟨fun _ => rfl, fun _ k => k⟩
-
 end Weil
 
 def KillTransfer : Prop :=
@@ -26,30 +69,5 @@ def KillTransfer : Prop :=
     [FiniteDimensional ℂ V'] (ρ : Representation ℂ I V) (ρ' : Representation ℂ I V'), (Set.range ρ).Finite →
     (∀ s, LinearMap.trace ℂ V (ρ s) = LinearMap.trace ℂ V' (ρ' s)) →
     ∀ x : MonoidAlgebra ℂ I, ρ'.asAlgebraHom x = 0 → ρ.asAlgebraHom x = 0
-
-def SplitOff : Prop :=
-  ∀ (E Ω : Type) [Field E] [NumberField E] [Field Ω] [Algebra E Ω] [IsAlgClosure E Ω] (A : ValuationSubring Ω)
-    (w : HeightOneSpectrum (𝓞 E)) (h : IsPlaceOver A w) (V : Type) [AddCommGroup V] [Module ℂ V] [FiniteDimensional ℂ V]
-    (z : WDRep h V) (c : G E Ω → ℂ) (γ : ↥(Ine (F := E) A)) (q : ℂ[X]), q.eval (c γ) ≠ 0 →
-    (∀ (g : Weil h) (s : ↥(Ine (F := E) A)), c (ineConj g s) = c s) →
-    (∀ s : ↥(Ine (F := E) A), (z.ρ (ineIncl h s) - c s • 1) * aeval (z.ρ (ineIncl h γ)) q = 0) →
-    (∀ s : ↥(Ine (F := E) A), aeval (z.ρ (ineIncl h γ)) q * (z.ρ (ineIncl h s) - c s • 1) = 0) →
-    (∀ v, (∀ s : ↥(Ine (F := E) A), z.ρ (ineIncl h s) v = c s • v) → z.N v = 0) →
-    UpperTheory.GalN.SplW c ((z.ρ (ineIncl h γ)).charpoly.rootMultiplicity (c γ)) (WD.mk z)
-
-def SplOfRel : Prop :=
-  ∀ (E Ω : Type) [Field E] [NumberField E] [Field Ω] [Algebra E Ω] [IsAlgClosure E Ω] (A : ValuationSubring Ω)
-    (w : HeightOneSpectrum (𝓞 E)) (h : IsPlaceOver A w) (x y : WD h), IneRel x y →
-    ∀ (u : WD h) (c : G E Ω → ℂ) (t : ℕ), ∀ γ ∈ Ine (F := E) A, ((y.lpSum u).inePol γ).rootMultiplicity (c γ) ≤ t →
-      UpperTheory.GalN.SplW c t (y.lpSum u) → UpperTheory.GalN.SplW c t (x.lpSum u)
-
-def CommWild : Prop :=
-  ∀ (E Ω : Type) [Field E] [NumberField E] [Field Ω] [Algebra E Ω] [IsAlgClosure E Ω] (A : ValuationSubring Ω) (s s' : G E Ω), s ∈ Ine (F := E) A →
-    s' ∈ Ine (F := E) A → ∀ z : Ω, z ≠ 0 → A.valuation ((s * s' * s⁻¹ * s'⁻¹) z / z - 1) < 1
-
-def AwOfRel : Prop :=
-  ∀ (E Ω : Type) [Field E] [NumberField E] [Field Ω] [Algebra E Ω] [IsAlgClosure E Ω] (A : ValuationSubring Ω)
-    (w : HeightOneSpectrum (𝓞 E)) (h : IsPlaceOver A w) (x y : WD h), x.lpDim = y.lpDim → (y.unr → x = y) →
-    (UpperTheory.GalS.TmW y → IneRel x y) → UpperTheory.GalS.Aw x y
 
 end UpperTheory.Gal.NearKilling

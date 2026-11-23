@@ -1,8 +1,50 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.GlobalClassFormation.LocalDegrees.Layers
-import GroundTheory.ProfiniteCohomology.GlobalClassFormation.LocalDegrees.Decomposition
-import GroundTheory.GlobalFields.SemilocalAlgebras.Finite
-import GroundTheory.GlobalFields.CompletionAtPlace.Galois
+module
+
+public import GroundTheory.ProfiniteCohomology.GlobalClassFormation.LocalDegrees.Layers
+public import GroundTheory.ProfiniteCohomology.GlobalClassFormation.LocalDegrees.Decomposition
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
@@ -12,33 +54,13 @@ open NumberField IntermediateField GroundTheory.Global GroundTheory.Global.Cyclo
 
 open scoped GroundTheory.LocalField.Abstract Pointwise GroundTheory.Global.SemiLocal
 
-local notation "ℚ̄" => AlgebraicClosure ℚ
-
 noncomputable section
 
 namespace CyclotomicLayer
 
+local notation "ℚ̄" => AlgebraicClosure ℚ
+
 section TotallyReal
-
-theorem isReal_zhatLayer (r : ℕ+) (φ : (zhatLayer r).1 →+* ℂ) : ComplexEmbedding.IsReal φ := by
-  let _ : Algebra (zhatLayer r).1 ℂ := φ.toAlgebra
-  have : Algebra.IsAlgebraic (zhatLayer r).1 ℚ̄ := Algebra.IsAlgebraic.tower_top (K := ℚ) (zhatLayer r).1
-  let ι : ℚ̄ →ₐ[(zhatLayer r).1] ℂ := IsAlgClosed.lift
-  obtain ⟨σ, hσ⟩ := exists_algEquiv_conj ι.toRingHom
-  have hdeg : σ ∈ (degreeMod r).ker := by
-    rw [MonoidHom.mem_ker, degreeMod, MonoidHom.comp_apply, degree_of_isComplexConjugation ⟨_, hσ⟩,
-      map_one]
-  rw [ComplexEmbedding.isReal_iff]
-  ext x
-  rw [ComplexEmbedding.conjugate_coe_eq]
-  have hx : σ (x : ℚ̄) = x := (mem_fixedField_iff _ _).1 x.2 σ hdeg
-  have h1 : ι (x : ℚ̄) = φ x := ι.commutes x
-  have h2 := hσ (x : ℚ̄)
-  simp only [AlgHom.toRingHom_eq_coe, RingHom.coe_coe, hx, h1] at h2
-  exact h2.symm
-
-instance isTotallyReal_zhatLayer (r : ℕ+) : IsTotallyReal (zhatLayer r).1 :=
-  ⟨fun _ => InfinitePlace.isReal_iff.2 (isReal_zhatLayer r _)⟩
 
 end TotallyReal
 
@@ -152,8 +174,9 @@ theorem exists_dvd_finrank_cyclotomicLayer (K : FiniteSubfield) (S : Finset (Hei
     {m : ℕ} (hm : m ≠ 0) :
     ∃ r : ℕ+, ∀ v ∈ S, ∀ w : SemiLocal.PlacesOver (cyclotomicLayer K r).1 v,
       m ∣ Module.finrank (v.adicCompletion K.1) (w.1.adicCompletion (cyclotomicLayer K r).1) := by
-  choose n hn using fun (v : HeightOneSpectrum (𝓞 K.1)) (q : Nat.Primes) =>
+  have h (v : HeightOneSpectrum (𝓞 K.1)) (q : Nat.Primes) :=
     exists_mem_stabilizer_toZModPow_degreeComponent_ne_zero (K := K) v q
+  choose n hn using h
   let N : ℕ := S.sup fun v =>
     m.primeFactors.attach.sup fun q => n v ⟨q.1, Nat.prime_of_mem_primeFactors q.2⟩
   obtain ⟨r, hr⟩ : ∃ r : ℕ+, (r : ℕ) = m ^ (N + 1) :=

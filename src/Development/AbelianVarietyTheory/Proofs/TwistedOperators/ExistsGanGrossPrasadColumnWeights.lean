@@ -1,5 +1,48 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.NonemptyInvFunEquiv
+module
+
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.NonemptyInvFunEquiv
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open MvPolynomial GlobalTheory.IndefiniteRowSideFullHecke.MinorOrderedEntries GlobalTheory.OneFunctional Formalism.BasicNotions GlobalTheory.Branching
 open scoped TensorProduct DirectSum
@@ -8,16 +51,25 @@ namespace GlobalTheory.OneFunctional.ColumnWeights
 
 theorem getD_flatMap_append {α : Type} (F : α → List ℚ) (s : ℕ) (hF : ∀ a, (F a).length = s) (t : List ℚ) :
     ∀ (l : List α) (j q : ℕ) (hj : j < l.length), q < s →
-      (l.flatMap F ++ t).getD (j * s + q) 0 = (F l[j]).getD q 0
-  | [], j, q, hj, _ => by simp at hj
-  | a :: l, 0, q, _, hq => by
-    rw [List.flatMap_cons, List.append_assoc, zero_mul, zero_add, List.getD_append _ _ _ _ (by rw [hF]; exact hq)]
-    rfl
-  | a :: l, j + 1, q, hj, hq => by
-    rw [List.flatMap_cons, List.append_assoc, List.getD_append_right _ _ _ _ (by rw [hF]; nlinarith), hF]
-    have e : (j + 1) * s + q - s = j * s + q := by rw [add_mul]; omega
-    rw [e, getD_flatMap_append F s hF t l j q (by simpa using hj) hq]
-    rfl
+      (l.flatMap F ++ t).getD (j * s + q) 0 = (F l[j]).getD q 0 := by
+  intro l
+  induction l with
+  | nil =>
+    intro j q hj _
+    simp at hj
+  | cons a l ih =>
+    intro j q hj hq
+    cases j with
+    | zero =>
+      rw [List.flatMap_cons, List.append_assoc, zero_mul, zero_add,
+        List.getD_append _ _ _ _ (by rw [hF]; exact hq)]
+      rfl
+    | succ j =>
+      rw [List.flatMap_cons, List.append_assoc,
+        List.getD_append_right _ _ _ _ (by rw [hF]; nlinarith), hF]
+      have e : (j + 1) * s + q - s = j * s + q := by rw [add_mul]; omega
+      rw [e]
+      exact ih j q (by simpa using hj) hq
 
 theorem flatMap_sublist {α β : Type} (F G : α → List β) (h : ∀ a, (F a).Sublist (G a)) :
     ∀ l : List α, (l.flatMap F).Sublist (l.flatMap G)
@@ -59,10 +111,13 @@ theorem ent_succ (Q : Entries S) (hQ : Q.Good) (j : ℕ) (hj : j + 1 < S.nC S.m)
   rw [← h1, ← h2] at h
   exact_mod_cast h
 
-theorem ent_add (Q : Entries S) (hQ : Q.Good) (j : ℕ) : ∀ d : ℕ, j + d < S.nC S.m → ent Q (j + d) + d ≤ ent Q j
-  | 0, _ => by simp
-  | d + 1, h => by
-    have h1 := ent_add Q hQ j d (by omega)
+theorem ent_add (Q : Entries S) (hQ : Q.Good) (j : ℕ) : ∀ d : ℕ, j + d < S.nC S.m → ent Q (j + d) + d ≤ ent Q j := by
+  intro d
+  induction d with
+  | zero => simp
+  | succ d ih =>
+    intro h
+    have h1 := ih (by omega)
     have h2 := ent_succ Q hQ (j + d) (by omega)
     rw [← add_assoc]
     push_cast

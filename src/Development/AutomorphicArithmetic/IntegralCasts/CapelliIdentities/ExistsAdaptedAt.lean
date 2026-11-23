@@ -1,10 +1,55 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.MetricPeriods.IsEigFrames
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.IntEmbInjective
-import Development.AutomorphicSpectrum.Definitions.MetricPeriods.IsFundSet
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.SignatureBlockDiagonal
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.HermitianPositiveSymplectic
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.TraceEqSumReCmType
+module
+
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.IntEmbInjective
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.HermitianPositiveSymplectic
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.SignatureBlockDiagonal
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.TraceEqSumReCmType
+import Mathlib.Algebra.Order.Archimedean.Real.Hom
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 namespace UpperTheory.Reformulated.B.Gwb8
 
@@ -75,8 +120,9 @@ private theorem per_act (C : LatEmb F) (R : RiemLat E g Λ) (a : 𝓞 E) (y : Ψ
 private theorem sesq_emb (C : LatEmb F) (τ : Ψ) (x y : Λ) :
     embOf (F.σ τ) (C.h.toSesq (C.e y) (C.e x)) = star (C.vec y τ) ⬝ᵥ (C.gr τ *ᵥ C.vec x τ) := by
   rw [sesq_eq_sum C.h.toSesq (Pi.basisFun E (Fin (j + j')))]
+
   simp only [map_sum, map_mul, embedding_conj, Pi.basisFun_repr, dotProduct, mulVec, Finset.mul_sum,
-    LatEmb.gr, LatEmb.vec, Matrix.map_apply, Pi.star_apply, mul_assoc]
+  LatEmb.gr, LatEmb.vec, Matrix.map_apply, Pi.star_apply, mul_assoc]
   rfl
 
 private theorem per_im (C : LatEmb F) (R : RiemLat E g Λ) (hR : R.form = F.form)
@@ -142,7 +188,7 @@ private theorem per_single (C : LatEmb F) (R : RiemLat E g Λ) (τ : Ψ) (a : �
     R.B a (C.perExt R (Pi.single τ y)) =
       (F.σ τ a).re • C.perExt R (Pi.single τ y) +
         (F.σ τ a).im • C.perExt R (Pi.single τ (Complex.I • y)) := by
-  rw [← per_act, ← map_smul, ← map_smul, ← map_add]
+  rw [← per_act, ← map_smul, ← map_smul, ← map_add (f := _)]
   congr 1
   funext τ'
   by_cases h : τ' = τ

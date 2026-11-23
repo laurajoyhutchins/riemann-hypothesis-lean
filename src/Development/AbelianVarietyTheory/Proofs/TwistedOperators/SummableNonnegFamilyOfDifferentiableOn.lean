@@ -1,4 +1,54 @@
-import Mathlib
+module
+
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.Analysis.Calculus.FDeriv.Defs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Analysis.Analytic.Basic
+public import Mathlib.Analysis.Analytic.IsolatedZeros
+public import Mathlib.Analysis.Analytic.OfScalars
+public import Mathlib.Analysis.Complex.CauchyIntegral
+
+@[expose] public section
 
 open Filter Topology
 
@@ -22,7 +72,7 @@ theorem summable_nonneg_family_of_differentiableOn {ι : Type} (c : ι → ℝ) 
     exact Complex.summable_ofReal.mp h
   have hfib : ∀ m : ℕ, Summable (fun i : n ⁻¹' {m} => c i) := by
     intro m
-    have h1 := (hsum0.subtype (n ⁻¹' {m})).mul_right (t0 ^ m)⁻¹
+    have h1 := (hsum0.subtype (fun i => n i = m)).mul_right (t0 ^ m)⁻¹
     refine h1.congr fun i => ?_
     have hi : n i.val = m := i.2
     simp only [Function.comp_apply]
@@ -82,7 +132,7 @@ theorem summable_nonneg_family_of_differentiableOn {ι : Type} (c : ι → ℝ) 
     rw [← NNReal.coe_lt_coe, coe_nnnorm, Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg hx0]
     show x < ρ
     linarith
-  have hxmem : (x : ℂ) ∈ EMetric.ball (0 : ℂ) (ρn : ENNReal) := by
+  have hxmem : (x : ℂ) ∈ Metric.eball (0 : ℂ) (ρn : ENNReal) := by
     show edist (x : ℂ) 0 < ρn
     rw [edist_zero_right, enorm_eq_nnnorm]
     exact_mod_cast hxn

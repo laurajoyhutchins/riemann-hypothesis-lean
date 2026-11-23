@@ -1,7 +1,50 @@
-import Mathlib
-import GroundTheory.GlobalFields.TateThesis.HeckeChar
-import GroundTheory.GlobalFields.TateThesis.ArchCharsUnitary
-import GroundTheory.GlobalFields.IdeleGroups.UnitBound
+module
+
+public import GroundTheory.GlobalFields.TateThesis.HeckeChar
+public import GroundTheory.GlobalFields.IdeleGroups.UnitBound
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.NumberField.ClassNumber
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Topology Filter NumberField IsDedekindDomain Function Complex
 open scoped NumberField.AdeleRing
@@ -24,20 +67,15 @@ def complexUnitsHom {w : InfinitePlace K} (hw : w.IsComplex) : ℂˣ →ₜ* (w.
   toMonoidHom := Units.map ((ringEquivComplexOfIsComplex hw).symm : ℂ →+* w.Completion).toMonoidHom
   continuous_toFun := Units.continuous_map (isometryEquivComplexOfIsComplex hw).symm.continuous
 
-omit [NumberField K] in
-theorem extensionEmbeddingOfIsReal_realUnitsHom {w : InfinitePlace K} (hw : w.IsReal) (x : ℝˣ) :
-    extensionEmbeddingOfIsReal hw ((realUnitsHom hw x : (w.Completion)ˣ) : w.Completion) = x := by
-  rw [← ringEquivRealOfIsReal_apply]
-  exact (ringEquivRealOfIsReal hw).apply_symm_apply _
+
 
 omit [NumberField K] in
-
 theorem realUnitsHom_surjective {w : InfinitePlace K} (hw : w.IsReal) (a : (w.Completion)ˣ) :
     realUnitsHom hw (Units.map (ringEquivRealOfIsReal hw : w.Completion →+* ℝ).toMonoidHom a) = a :=
   Units.ext ((ringEquivRealOfIsReal hw).symm_apply_apply _)
 
-omit [NumberField K] in
 
+omit [NumberField K] in
 theorem complexUnitsHom_surjective {w : InfinitePlace K} (hw : w.IsComplex) (a : (w.Completion)ˣ) :
     complexUnitsHom hw
       (Units.map (ringEquivComplexOfIsComplex hw : w.Completion →+* ℂ).toMonoidHom a) = a :=
@@ -96,7 +134,6 @@ theorem ofInfinite_eq_prod (x : (InfiniteAdeleRing K)ˣ) :
   simp only [ofInfinite_map_infiniteAdeleSingle]
 
 variable (K) in
-
 def infinitePositive : Subgroup (InfiniteAdeleRing K)ˣ where
   carrier := {x | ∀ (w : InfinitePlace K) (hw : w.IsReal),
     0 < InfinitePlace.Completion.extensionEmbeddingOfIsReal hw ((x : InfiniteAdeleRing K) w)}
@@ -127,7 +164,6 @@ theorem mem_infinitePositive {x : (InfiniteAdeleRing K)ˣ} :
   Iff.rfl
 
 variable (K) in
-
 def infiniteSign : (InfiniteAdeleRing K)ˣ →* ({w : InfinitePlace K // w.IsReal} → SignTypeˣ) :=
   MonoidHom.pi fun w ↦ (Units.map (signHom : ℝ →*₀ SignType).toMonoidHom).comp
     ((Units.map (InfinitePlace.Completion.extensionEmbeddingOfIsReal w.2 :
@@ -140,8 +176,8 @@ theorem infiniteSign_apply_val (x : (InfiniteAdeleRing K)ˣ) (w : {w : InfiniteP
         ((x : InfiniteAdeleRing K) w.1)) :=
   rfl
 
-omit [NumberField K] in
 
+omit [NumberField K] in
 theorem infinitePositive_eq_ker : infinitePositive K = (infiniteSign K).ker := by
   ext x
   rw [mem_infinitePositive, MonoidHom.mem_ker]
@@ -160,7 +196,6 @@ instance : (infinitePositive K).FiniteIndex := by
   exact Subgroup.finiteIndex_ker _
 
 variable (K) in
-
 def rayGroup (𝔪 : Ideal (𝓞 K)) : Subgroup (IdeleGroup K) :=
   (diagonal K).range ⊔ (idealLevel 𝔪).map ofFinite ⊔ (infinitePositive K).map ofInfinite
 
@@ -227,7 +262,6 @@ end IdeleGroup
 open IdeleGroup
 
 variable (K) in
-
 abbrev RayClassGroup (𝔪 : Ideal (𝓞 K)) : Type _ := IdeleGroup K ⧸ rayGroup K 𝔪
 
 theorem RayClassGroup.finite {𝔪 : Ideal (𝓞 K)} (h𝔪 : 𝔪 ≠ ⊥) : Finite (RayClassGroup K 𝔪) := by
@@ -276,12 +310,6 @@ def realComponent {w : InfinitePlace K} (hw : w.IsReal) : ℝˣ →ₜ* Circle :
 
 def complexComponent {w : InfinitePlace K} (hw : w.IsComplex) : ℂˣ →ₜ* Circle :=
   (χ.infiniteComponent w).comp (complexUnitsHom hw)
-
-def realParam {w : InfinitePlace K} (hw : w.IsReal) : Fin 2 × ℝ :=
-  (existsUnique_realUnits_circle (χ.realComponent hw)).exists.choose
-
-def complexParam {w : InfinitePlace K} (hw : w.IsComplex) : ℤ × ℝ :=
-  (existsUnique_complexUnits_circle (χ.complexComponent hw)).exists.choose
 
 end HeckeCharacter
 

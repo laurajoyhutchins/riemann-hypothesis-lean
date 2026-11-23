@@ -1,26 +1,72 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.PStokesLimitTTop
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.BlowupProjections.BlowupProjStatement
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterNamed
-import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.PMuRegSmooth
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.BlowupProjections.BlowupProjStatement
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.LogRatio
+public import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.StatementsTopNMixed
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterSt
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.IntersectionNumberTelescopingStatement
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.LocalHolomorphicSectionOfPotentialStatement
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.LocalOrbitChartStatement
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.LocalSectionOfPotentialOnModelStatement
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.LocalSectionVerticalFactorStatement
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.MixedIntegralLimitOnModelStatement
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.PshDoublePositivePotentialStatement
+import Development.AutomorphicSpectrum.Proofs.MetricProofs.RegularChartDataPropertiesStatement
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.RegularizedHodgeMetricFormulaStatement
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.RegularizedWeightPshAndBoundsStatement
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.RegularizedWeightTendstoC2Statement
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.RegularizedWeightUniformOnCompactStatement
 import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.PHermExtend
 import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.PHoloInjDerivInj
-import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.PVertFactorSmooth
-import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.PVertFactorPos
+import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.PMuRegSmooth
 import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.PProjSmoothAlong
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.LocalSectionOfPotentialOnModelStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.LocalOrbitChartStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.LocalHolomorphicSectionOfPotentialStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.RegularizedWeightPshAndBoundsStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.RegularizedWeightTendstoC2Statement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.RegularChartDataPropertiesStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.LogRatio
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.IntersectionNumberTelescopingStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.RegularizedWeightUniformOnCompactStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.PshDoublePositivePotentialStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.RegularizedHodgeMetricFormulaStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.LocalSectionVerticalFactorStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.MixedIntegralLimitOnModelStatement
+import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.PVertFactorPos
+import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.PVertFactorSmooth
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open MvPolynomial MeasureTheory Filter Topology ReciprocityTheory.AnForm ReciprocityTheory.AnForm.M ReciprocityTheory.ChartRestriction.G.Geo GroundTheory.Heights₂.Heights.LowerBoundFree GlobalTheory.CompanionTheory.Ar.Giv.Mix
 
@@ -227,8 +273,8 @@ end
 
 end Mix
 
-open Mix in
 
+open Mix in
 theorem mixed_limit : ReciprocityTheory.ChartRestriction.G.Geo.ResK.ResKStatement → TopNMixedLimit.Statement := by
   intro _ II Ψ _ _ K _ ι _ Ω _ _ E _ _ D O Lt _ _ _ X B hII _ k hk
   obtain ⟨Θ, hΘ, hrel⟩ := GlobalTheory.T.local_holomorphic_section_of_potential K ι (mCoordIdeal D.y) D.n X.M D.A' D.A'_pos.1

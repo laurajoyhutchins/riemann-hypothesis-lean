@@ -1,6 +1,52 @@
-import Formalism.CharacterColumnKernels.StatementPsi
-import Formalism.CharacterColumnKernels.IdempotentNormalForms.ColKer
-import Formalism.CharacterColumnKernels.IdempotentNormalForms.CupKillAdm
+module
+
+public import Formalism.CharacterColumnKernels.StatementPsi
+public import Formalism.CharacterColumnKernels.IdempotentNormalForms.ColKer
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Finset Classical
 
@@ -34,7 +80,7 @@ theorem colPsiKer : StatColPsiKer := by
             (((⟨x, hx⟩ : Ymod r χ E)), (0 : (l : ι) → A × (Fin (j l) → A) × A)) +
             (((⟨z, hz⟩ : Ymod r χ E)), (0 : (l : ι) → A × (Fin (j l) → A) × A)) :=
           Prod.ext rfl (add_zero 0).symm
-        rw [e, Submodule.Quotient.mk_add, map_add, ihx, ihz, add_zero]
+        rw [e, Submodule.Quotient.mk_add, map_add (f := _), ihx, ihz, add_zero]
       | smul a x hx ih =>
         have e : (((⟨a • x, Submodule.smul_mem _ a hx⟩ : Ymod r χ E)),
             (0 : (l : ι) → A × (Fin (j l) → A) × A)) =
@@ -73,9 +119,11 @@ theorem cobColumn : StatCobColumn := by
       (E - algebraMap T' A (∑ g ∈ s, t g * ((χ g : T'ˣ) : T'))) * E := by
     rw [hy₁def]
     simp only [Submodule.coe_sum, Submodule.coe_smul, smul_eq_mul, yg, Submodule.coe_mk]
+
     rw [Finset.sum_congr rfl (fun g _ => hterm g), ← Finset.sum_mul, Finset.sum_sub_distrib, ← hE,
-      ← map_sum]
+    ← map_sum]
   have hFy : Fl y₁ = -(δO • v) := by
+
     rw [hy₁def, map_sum]
     have hgen : ∀ g ∈ s, Fl (algebraMap T' A (t g * ((χ g : T'ˣ) : T')) • yg g) =
         (t g • r g) • v - (t g * ((χ g : T'ˣ) : T')) • v := by

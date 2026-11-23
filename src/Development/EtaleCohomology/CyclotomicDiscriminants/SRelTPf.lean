@@ -1,6 +1,65 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ClassCounting.LemmaKOfSteps
-import Development.EtaleCohomology.CyclotomicDiscriminants.SZcTPf
-import Development.EtaleCohomology.CyclotomicDiscriminants.SChainPf
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ClassCounting.LemmaKOfSteps
+public import Development.EtaleCohomology.CyclotomicDiscriminants.SChainPf
+public import Development.EtaleCohomology.CyclotomicDiscriminants.SZcTPf
+import Mathlib.Algebra.AffineMonoid.Basic
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.PUnit
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Algebra.Ring.BooleanRing
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.EffectiveEpi.Comp
+import Mathlib.CategoryTheory.ExtremalEpi
+import Mathlib.CategoryTheory.Monoidal.Mon
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RepresentationTheory.FiniteIndex
+public import Mathlib.RepresentationTheory.Homological.GroupHomology.LongExactSequence
+public import Mathlib.RepresentationTheory.Homological.GroupHomology.Shapiro
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Data.ZMod.Units
+
+@[expose] public section
 
 noncomputable section
 namespace LateralTheory.Q.SRelT
@@ -80,6 +139,7 @@ theorem Gen.rel {M : Type} [AddCommGroup M] {r : ℕ} (h : Gen M r) (l : ℕ) (h
   obtain ⟨m, t, h1, h2⟩ := key _ n rfl ht hn
   refine ⟨m, t, h1, ?_⟩
   have := congrArg f h2
+
   simpa [map_sum, hy] using this
 
 theorem exists_prim {k : Type} [CommRing k] {q : ℕ} [NeZero q] (F : ZMod q → k) (hF : ∑ j, F j = 0) :
@@ -291,11 +351,13 @@ theorem rel_bd (k G : Type) [CommRing k] [Group G] (m r l : ℕ) (hl : 2 ≤ l)
   obtain ⟨y, hy⟩ := (ShortComplex.moduleCat_exact_iff _).1 ex (∑ i, n i • c i) (by
     refine Eq.trans ?_ h2
     show (π A (m + 1)).hom (∑ i, n i • c i) = ∑ i, n i • (π A (m + 1)).hom (c i)
+
     simp only [map_sum, map_zsmul])
   refine ⟨y, ?_⟩
   rw [← d_eq_bd, ← HomologicalComplex.toCycles_i]
   have hy' : (toCycles A (m + 2) (m + 1)).hom y = ∑ i, n i • c i := hy
   show (iCycles A (m + 1)).hom ((toCycles A (m + 2) (m + 1)).hom y) = _
+
   rw [hy', map_sum]
   refine Finset.sum_congr rfl fun i _ => ?_
   rw [map_zsmul, Int.cast_smul_eq_zsmul]

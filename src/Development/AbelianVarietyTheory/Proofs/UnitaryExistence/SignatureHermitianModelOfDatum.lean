@@ -1,7 +1,56 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsHolPeriods
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.Signature
-import Development.AbelianVarietyTheory.Definitions.ThetaMetrics.MemIffConjugateNotMem
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.Signature
+public import Development.AbelianVarietyTheory.Definitions.ThetaMetrics.MemIffConjugateNotMem
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.TwoWeightEqOneAddRoot
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.Matrix.Order
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Algebra.Star.UnitaryStarAlgAut
+public import Mathlib.Analysis.Matrix.Hermitian
+
+@[expose] public section
 
 open NumberField Matrix
 open scoped nonZeroDivisors TensorProduct ComplexConjugate ComplexOrder MatrixOrder
@@ -93,7 +142,7 @@ theorem exists_diag_of_involution {r m n : ℕ} (hr : r = m + n) (G K : Matrix (
         (Uᴴ * T * U).submatrix σ σ := by
       have e : Uᴴ * T * U = (P⁻¹ * U)ᴴ * G * (P⁻¹ * U) := by
         rw [hT, conjTranspose_mul]; simp only [mul_assoc]
-      rw [e]; ext a b; simp [mul_apply]
+      rw [e]; ext a b; simp [Matrix.mul_apply]
     rw [this, hD, submatrix_diagonal_equiv]
     congr 1; funext a; exact hσ a
 
@@ -175,6 +224,7 @@ theorem trace_real_blocks {ι : Type} [Fintype ι] {r : ℕ} (N : ι → Matrix 
       (((toLin' (N τ)).restrictScalars ℝ) ∘ₗ LinearMap.proj τ) := by
     refine LinearMap.ext fun u => funext fun τ => ?_
     simp [hf, Finset.sum_apply, Pi.single_apply]
+
   rw [this, map_sum]
   refine Finset.sum_congr rfl fun τ _ => ?_
   rw [LinearMap.trace_comp_comm', LinearMap.comp_assoc, LinearMap.proj_comp_single_same,
@@ -211,6 +261,7 @@ theorem span_integers_eq_top (Φ : CMType E) :
   let δ : Φ → ℂ := fun τ => f (Pi.single τ 1) - Complex.I * f (Pi.single τ Complex.I)
   have key : ∀ z : Φ → ℂ, f z = ∑ τ, (z τ * δ τ).re := by
     intro z
+
     conv_lhs => rw [← Finset.univ_sum_single z, map_sum]
     refine Finset.sum_congr rfl fun τ _ => ?_
     have : (Pi.single τ (z τ) : Φ → ℂ) =
@@ -218,7 +269,7 @@ theorem span_integers_eq_top (Φ : CMType E) :
       rw [← Pi.single_smul, ← Pi.single_smul, ← Pi.single_add]
       congr 1
       simp
-    rw [this, map_add, map_smul, map_smul]
+    rw [this, map_add (f := _), map_smul, map_smul]
     simp [δ]
   have hδ : δ = 0 := Φ.eq_zero_of_sum_re_eq_zero δ fun a => by
     rw [← key (fun τ => τ.1 (a : E))]
@@ -276,7 +327,7 @@ theorem hermC_eq {r : ℕ} (τ : E →+* ℂ) (G : Matrix (Fin r) (Fin r) E) (u 
 theorem gram_eq {r : ℕ} (τ : E →+* ℂ) (G : Matrix (Fin r) (Fin r) E)
     (N : Matrix (Fin r) (Fin r) ℂ) : FD.gram τ G (N.map conj) = Nᴴ * G.map τ * N := by
   ext a b
-  simp only [FD.gram, FD.hermC, FD.col, of_apply, map_apply, mul_apply, conjTranspose_apply,
+  simp only [FD.gram, FD.hermC, FD.col, of_apply, map_apply, Matrix.mul_apply, Matrix.conjTranspose_apply,
     Finset.sum_mul, Complex.conj_conj, RCLike.star_def]
   exact Finset.sum_comm
 
@@ -303,7 +354,7 @@ theorem realMap_realAct (a : 𝓞 E) (x : ℝ ⊗[ℤ] D.La) :
     realMap D Φ φ (realAct D a x) = (fun τ : Φ => τ.1 (a : E)) • realMap D Φ φ x := by
   induction x using TensorProduct.induction_on with
   | zero => simp
-  | add x y hx hy => simp only [map_add, hx, hy, smul_add]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy, smul_add]
   | tmul t x =>
     funext τ i
     simp only [realAct, LinearMap.baseChange_tmul, DistribSMul.toLinearMap_apply, realMap_tmul,
@@ -350,13 +401,13 @@ theorem baseChange_EF (ξ : E) (Gm : Matrix (Fin r) (Fin r) E)
   induction x using TensorProduct.induction_on with
   | zero => simp
   | add x x' hx hx' =>
-    simp only [map_add, LinearMap.add_apply, hx, hx', Pi.add_apply, add_dotProduct, mul_add,
+    simp only [map_add (f := _), LinearMap.add_apply, hx, hx', Pi.add_apply, add_dotProduct, mul_add,
       Complex.add_re, Finset.sum_add_distrib]
   | tmul t x =>
     induction y using TensorProduct.induction_on with
     | zero => simp
     | add y y' hy hy' =>
-      simp only [map_add, hy, hy', Pi.add_apply, star_add, mulVec_add, dotProduct_add, mul_add,
+      simp only [map_add (f := _), hy, hy', Pi.add_apply, star_add, mulVec_add, dotProduct_add, mul_add,
         Complex.add_re, Finset.sum_add_distrib]
     | tmul s y =>
       have h1 : ((D.EF x y : ℤ) : ℝ) = ∑ τ : Φ, 2 * (τ.1 (ξ * FD.herm Gm (φ x) (φ y))).re := by
@@ -366,8 +417,9 @@ theorem baseChange_EF (ξ : E) (Gm : Matrix (Fin r) (Fin r) E)
       have h2 : realMap D Φ φ (t ⊗ₜ x) τ ⬝ᵥ (Gm.map τ.1) *ᵥ star (realMap D Φ φ (s ⊗ₜ y) τ) =
           ((t * s : ℝ) : ℂ) * τ.1 (FD.herm Gm (φ x) (φ y)) := by
         rw [← hermC_eq]
+
         simp only [FD.hermC, FD.herm, realMap_tmul, map_sum, map_mul, FD.cc,
-          IsCMField.complexEmbedding_complexConj, Finset.mul_sum, Complex.conj_ofReal]
+        IsCMField.complexEmbedding_complexConj, Finset.mul_sum, Complex.conj_ofReal]
         refine Finset.sum_congr rfl fun a _ => Finset.sum_congr rfl fun b _ => ?_
         push_cast
         ring
@@ -387,7 +439,7 @@ theorem exists_complexStructure (ξ : E) (Gm : Matrix (Fin r) (Fin r) E)
   obtain ⟨J, hJ2, hJinv, hJpos, hJ⟩ := D.dom
   have hform := baseChange_EF D Φ φ ξ Gm hEF
   have hinj : Function.Injective (realMap D Φ φ) := by
-    rw [injective_iff_map_eq_zero]
+    set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
     intro x hx
     by_contra h
     have := hJpos x h
@@ -414,7 +466,7 @@ theorem exists_complexStructure (ξ : E) (Gm : Matrix (Fin r) (Fin r) E)
       rw [hJe, he, he, ← realMap_realAct, ← realMap_realAct, ← he, ← he, hJe]
       exact congrArg e (LinearMap.congr_fun (hA a).1 x)
     · intro c c' h h' u
-      rw [add_smul, map_add, h, h', add_smul]
+      rw [add_smul, map_add (f := _), h, h', add_smul]
     · intro t c h u
       rw [smul_assoc, map_smul, h, smul_assoc]
   obtain ⟨M, hM⟩ := exists_blocks (e.conj J) hcomm

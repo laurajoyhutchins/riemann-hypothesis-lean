@@ -1,5 +1,48 @@
-import Formalism.LocalToGlobal.ProjectiveLattices.ThGerm
-import Formalism.SharpRestriction.Divisibility.GeneratorPowers.GermFunPf
+module
+
+public import Formalism.LocalToGlobal.ProjectiveLattices.ThGerm
+public import Formalism.SharpRestriction.Divisibility.GeneratorPowers.GermFunPf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -62,7 +105,7 @@ private theorem mem_degLE_lemma [Fintype ι] [DecidableEq ι] (k : ℕ) (e : ι 
 
 private theorem coeff_psTrunc_lemma_2 [Fintype ι] [DecidableEq ι] (k : ℕ) (g : MvPowerSeries ι R)
     (e : ι →₀ ℕ) :
-    MvPolynomial.coeff e (psTrunc k g) = if e.degree ≤ k then MvPowerSeries.coeff e g else 0 := by
+    AddMonoidAlgebra.coeff (psTrunc k g) e = if e.degree ≤ k then MvPowerSeries.coeff e g else 0 := by
   unfold psTrunc
   rw [MvPolynomial.coeff_sum]
   simp only [MvPolynomial.coeff_monomial]
@@ -98,8 +141,8 @@ theorem exists_ps_of_jets [Fintype ι] [DecidableEq ι] (a : ∀ m, Jet R ι m)
       have h2 : orig R ι ^ (l + 1) ≤ orig R ι ^ (k + 1) := Ideal.pow_le_pow_right (by omega)
       have h3 := Ideal.add_mem _ (h2 h1) ih
       rwa [sub_add_sub_cancel] at h3
-  obtain ⟨f, hf⟩ : ∃ f : MvPowerSeries ι R, ∀ e, MvPowerSeries.coeff e f = MvPolynomial.coeff e (p e.degree) :=
-    ⟨fun e => MvPolynomial.coeff e (p e.degree), fun e => rfl⟩
+  obtain ⟨f, hf⟩ : ∃ f : MvPowerSeries ι R, ∀ e, MvPowerSeries.coeff e f = AddMonoidAlgebra.coeff (p e.degree) e :=
+    ⟨fun e => AddMonoidAlgebra.coeff (p e.degree) e, fun e => rfl⟩
   refine ⟨f, fun k => ?_⟩
   rw [← hp k]
   unfold psJet
@@ -151,7 +194,7 @@ theorem sL_copy1 (m : ℕ) (g : Fin d → MvPowerSeries (Fin 1 × Fin d) R) :
 
 private theorem const_psTrunc_lemma_3 {κ : Type} [Fintype κ] [DecidableEq κ] (k : ℕ) (g : MvPowerSeries κ R) :
     MvPolynomial.constantCoeff (psTrunc k g) = MvPowerSeries.coeff 0 g := by
-  rw [show MvPolynomial.constantCoeff (psTrunc k g) = MvPolynomial.coeff 0 (psTrunc k g) from rfl,
+  rw [show MvPolynomial.constantCoeff (psTrunc k g) = AddMonoidAlgebra.coeff (psTrunc k g) 0 from rfl,
     coeff_psTrunc_lemma_2, if_pos (by simp)]
 
 theorem sL_trunc (m : ℕ) (g : Fin d → MvPowerSeries (Fin 1 × Fin d) R) :

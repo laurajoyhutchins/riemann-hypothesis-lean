@@ -1,13 +1,61 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsProjOverWeierstrass
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.MumfordConstruction
-import Development.AbelianVarietyTheory.Definitions.Degenerations.AdmissibleBaseOfCompleteDvr
-import Development.AbelianVarietyTheory.Definitions.ArchimedeanThetaValues.ToMatrixTrFormBaseChange
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsEquivStdSymp
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BasisApply
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.UnitaryStandardLatticeAlternatingFormBijectiveStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.UnitaryStandardLatticeFormComplexStructureBaseChStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RepTraceEqMulTraceStatement
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BasisApply
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.TwoWeightEqOneAddRoot
+public import Development.AbelianVarietyTheory.Definitions.ArchimedeanThetaValues.ToMatrixTrFormBaseChange
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RepTraceEqMulTraceStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.UnitaryStandardLatticeAlternatingFormBijectiveStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.UnitaryStandardLatticeFormComplexStructureBaseChStatement
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsEquivStdSymp
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsToricRankOne
+public import Mathlib.RingTheory.Flat.TorsionFree
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj IsLocalRing NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Out ReciprocityTheory.ChartRestriction.G.Geo.Tor
 open scoped CategoryTheory.Obj
@@ -54,7 +102,9 @@ instance : Module.Projective (𝓞 E) (Lat ρ g) := by
   exact Module.Flat.projective_of_finitePresentation
 
 theorem cx_cx (x : Lat ρ g) : cx ρ g (cx ρ g x) = -x := by
-  ext i k <;> simp [cx_apply, neg_apply]
+  apply funext
+  intro i
+  apply Prod.ext <;> funext k <;> simp [cx_apply, neg_apply]
 
 theorem form_cx_cx (S : Matrix (Fin r) (Fin r) ℤ) (x y : Lat ρ g) :
     form ρ g S (cx ρ g x) (cx ρ g y) = form ρ g S x y := by
@@ -62,7 +112,9 @@ theorem form_cx_cx (S : Matrix (Fin r) (Fin r) ℤ) (x y : Lat ρ g) :
   refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => by ring
 
 theorem cx_smul (a : 𝓞 E) (x : Lat ρ g) : cx ρ g (a • x) = a • cx ρ g x := by
-  ext i k <;> simp [cx_apply, smul_apply, Prod.fst_sum, Prod.snd_sum, Finset.sum_apply]
+  apply funext
+  intro i
+  apply Prod.ext <;> funext k <;> simp [cx_apply, smul_apply, Prod.fst_sum, Prod.snd_sum, Finset.sum_apply]
 
 theorem form_self (S : Matrix (Fin r) (Fin r) ℤ) (hS : S.transpose = S) (x : Lat ρ g) : form ρ g S x x = 0 := by
   have hS' : ∀ i j, S j i = S i j := fun i j => by rw [← Matrix.transpose_apply S i j, hS]
@@ -150,11 +202,11 @@ theorem dom_exists (hpos : (S.map (Int.cast : ℤ → ℝ)).PosDef)
     rfl
   · induction x using TensorProduct.induction_on with
     | zero => simp
-    | add x x' hx hx' => simp only [map_add, LinearMap.add_apply, hx, hx']
+    | add x x' hx hx' => simp only [map_add (f := _), LinearMap.add_apply, hx, hx']
     | tmul c m =>
       induction y using TensorProduct.induction_on with
       | zero => simp
-      | add y y' hy hy' => simp only [map_add, hy, hy']
+      | add y y' hy hy' => simp only [map_add (f := _), hy, hy']
       | tmul d n =>
         simp only [LinearMap.baseChange_tmul, LinearMap.BilinForm.baseChange_tmul]
         rw [form_cx_cx]
@@ -162,7 +214,7 @@ theorem dom_exists (hpos : (S.map (Int.cast : ℤ → ℝ)).PosDef)
       refine LinearMap.ext fun x => ?_
       induction x using TensorProduct.induction_on with
       | zero => simp
-      | add x x' hx hx' => simp only [map_add, hx, hx']
+      | add x x' hx hx' => simp only [map_add (f := _), hx, hx']
       | tmul c m =>
         have h1 : c ⊗ₜ[ℤ] m = c • ((1 : ℝ) ⊗ₜ[ℤ] m) := by
           rw [TensorProduct.smul_tmul', smul_eq_mul, _root_.mul_one]

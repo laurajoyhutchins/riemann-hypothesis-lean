@@ -1,8 +1,55 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.LowerCoordinateProd
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.MulVecBvecApply
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.SigmaFiniteOfHaar
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.RearrSymm
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.BigCellDiagonalMap
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.LowerCoordinateProd
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.MulVecBvecApply
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.StrictUpperNeg
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.AdjugateBlockSingleLastColumn
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.BigCellDiagonalMap
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.DirectionsInParabolic
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.HeisenbergLeviConjugationMeasure
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.LowerParabolicCoordinates
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Matrix MeasureTheory Formalism.REAL Formalism.QuantumDeterminants Formalism.FourierDecayAlt Formalism.FourierDecayAlt.U
 open scoped ComplexConjugate
@@ -22,7 +69,7 @@ theorem blkU_uMap (z : Fin (2 * r + k + 1) → ℂ) (g : B.Mat k r) :
     blkU (C2.uMap k r z g) = Matrix.of fun a b => g (eI k r a) (eI k r b) := by
   ext a b
   simp only [blkU, Matrix.submatrix_apply, C2.uMap, Matrix.of_apply]
-  rw [dif_pos (by simp), fvec_low z b.castSucc (by simp), herm_bvec_esI', mulVec_bvec_apply]
+  rw [dite_eq_left (by simp), fvec_low z b.castSucc (by simp), herm_bvec_esI', mulVec_bvec_apply]
   rfl
 
 theorem muP_Rn_blk (W : Matrix (Fin r) (Fin r) ℂ) (y : U.RC k r 0) (a b : Fin r) :
@@ -83,21 +130,6 @@ theorem simpleUp_mul {m : ℕ} {A B : Matrix (Fin m) (Fin m) ℂ} (hA : A ∈ C2
           simp [b]; omega
         rw [hB.1 c b hc', mul_zero]
   · simp
-
-theorem simpleUp_inv {m : ℕ} {A : Matrix (Fin m) (Fin m) ℂ} (hA : A ∈ C2.UTset m) :
-    C2.simpleUp A⁻¹ = -C2.simpleUp A := by
-  have hAi := Formalism.FourierDecayAlt.P.C2x2.ut_inv hA
-  have hdet : IsUnit A.det := by rw [StabilizerDisintegration.UC.det_UT hA]; exact isUnit_one
-  have h := simpleUp_mul hA hAi
-  rw [Matrix.mul_nonsing_inv _ hdet] at h
-  have h1 : C2.simpleUp (1 : Matrix (Fin m) (Fin m) ℂ) = 0 := by
-    unfold C2.simpleUp
-    refine Finset.sum_eq_zero fun a _ => ?_
-    split_ifs with h'
-    · rw [Matrix.one_apply_ne]; intro e; have := congrArg Fin.val e; simp at this
-    · rfl
-  rw [h1] at h
-  linear_combination (-1 : ℂ) * h
 
 theorem gaXi_zero (σ : Equiv.Perm (Fin r)) (d : Fin r → ℂ) (ξ : U.Xi k r 0 0 σ) (γ : B.Mat k 0) :
     U.gaXi k 0 σ d ξ (fun a => a.elim0) γ =

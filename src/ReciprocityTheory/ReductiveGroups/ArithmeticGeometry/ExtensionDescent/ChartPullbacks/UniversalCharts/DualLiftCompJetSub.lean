@@ -1,4 +1,52 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.UniversalCharts.RestrictDiagCompInclFst
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.UniversalCharts.DualLiftInjective
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.CoassocSimps
+import Mathlib.RingTheory.MvPolynomial.IrreducibleQuadratic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -20,6 +68,7 @@ private theorem jetAug_zR_lemma {κ : Type} {m : ℕ} (j : κ) : jetAug R κ m (
 
 theorem sum_smul_zR_mem {a : ℕ} (m : ℕ) (c : Fin a → R) :
     ∑ i, c i • zR (R := R) m i ∈ RingHom.ker (jetAug R (Fin a) m) := by
+
   rw [RingHom.mem_ker, map_sum]
   refine Finset.sum_eq_zero (fun i _ => ?_)
   rw [map_smul, jetAug_zR_lemma i, smul_zero]
@@ -29,7 +78,7 @@ theorem sum_single {a : ℕ} (c : Fin a → R) : ∑ i, c i • Pi.single i (1 :
   simp [Pi.single_apply]
 
 def jetSub {a b : ℕ} (T : (Fin a → R) →ₗ[R] (Fin b → R)) (m : ℕ) : JetR R (Fin b) m →ₐ[R] JetR R (Fin a) m :=
-  jetLift R (RingHom.ker (jetAug R (Fin a) m)) (ker_jetAug_pow (Fin a) m)
+  jetLift (R := R) (RingHom.ker (jetAug R (Fin a) m)) (ker_jetAug_pow (Fin a) m)
     (fun k => ∑ i, T (Pi.single i 1) k • zR m i) (fun k => sum_smul_zR_mem m _)
 
 theorem jetSub_zR {a b : ℕ} (T : (Fin a → R) →ₗ[R] (Fin b → R)) (m : ℕ) (k : Fin b) :
@@ -53,6 +102,7 @@ theorem jetSub_comp {a b c : ℕ} (T : (Fin a → R) →ₗ[R] (Fin b → R)) (S
     (jetSub S m).comp (jetSub T m) = jetSub (T.comp S) m := by
   apply jet_ext_lemma_2
   intro k
+
   rw [AlgHom.comp_apply, jetSub_zR, jetSub_zR, map_sum]
   simp_rw [map_smul, jetSub_zR, Finset.smul_sum, smul_smul]
   rw [Finset.sum_comm]
@@ -60,6 +110,7 @@ theorem jetSub_comp {a b c : ℕ} (T : (Fin a → R) →ₗ[R] (Fin b → R)) (S
   rw [← Finset.sum_smul]
   congr 1
   conv_rhs => rw [LinearMap.comp_apply, ← sum_single (S (Pi.single j 1))]
+
   simp [map_sum, map_smul, Finset.sum_apply, mul_comm]
 
 theorem jetAug_comp_jetSub {a b : ℕ} (T : (Fin a → R) →ₗ[R] (Fin b → R)) (m : ℕ) :
@@ -79,12 +130,14 @@ theorem trunc_comp_jetSub {a b : ℕ} (T : (Fin a → R) →ₗ[R] (Fin b → R)
     (jetTruncR R (Fin a) m).comp (jetSub T (m + 1)) = (jetSub T m).comp (jetTruncR R (Fin b) m) := by
   apply jet_ext_lemma_2
   intro k
+
   simp only [AlgHom.comp_apply, jetSub_zR, trunc_zR_lemma_3, map_sum, map_smul]
 
 theorem zero_comp_jetSub {a b : ℕ} (T : (Fin a → R) →ₗ[R] (Fin b → R)) (m : ℕ) :
     (jetZeroR R (Fin a) m).comp (jetSub T m) = (jetSub T 0).comp (jetZeroR R (Fin b) m) := by
   apply jet_ext_lemma_2
   intro k
+
   simp only [AlgHom.comp_apply, jetSub_zR, zero_zR_lemma_4, map_sum, map_smul]
 
 private theorem sum_inr_lemma_5 {I : Type} (s : Finset I) (f : I → R) :
@@ -99,10 +152,12 @@ theorem dualLift_comp_jetSub {a b : ℕ} (T : (Fin a → R) →ₗ[R] (Fin b →
     (dualLift c).comp (jetSub T 1) = dualLift (T c) := by
   apply jet_ext_lemma_2
   intro k
+
   simp only [AlgHom.comp_apply, jetSub_zR, map_sum, map_smul, dualLift_zR]
   simp_rw [← TrivSqZeroExt.inr_smul, sum_inr_lemma_5]
   congr 1
   conv_rhs => rw [← sum_single c]
+
   simp [map_sum, map_smul, Finset.sum_apply, mul_comm]
 
 variable {G : Over (Spec (CommRingCat.of R))} [GrpObj G]

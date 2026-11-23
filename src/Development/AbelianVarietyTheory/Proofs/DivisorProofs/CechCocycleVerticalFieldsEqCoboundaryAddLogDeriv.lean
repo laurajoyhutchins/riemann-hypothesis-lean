@@ -1,9 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.DenseInterior
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CechGluingOfKodairaSpencerRelation
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.DenseInterior
+public import Development.AbelianVarietyTheory.Definitions.ThetaMetrics.MemRangeCompIffOfIsClosedImmersion
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CechCocycleEqCoboundaryAddLogDerivativesAffineStatement
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DerivativeCechCocycleInvariantVectorFieldIsCobou
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsAffineHomOfField
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TranslateUnique
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.VerticalVectorFieldUniqueCombinationBasisStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CechCocycleEqCoboundaryAddLogDerivativesAffineStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.VerticalVectorFieldUniqueCombinationBasisStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -44,7 +86,7 @@ theorem exists_coboundary_add_dlog : ∀ (E : Type) [Field E] [NumberField E] [I
     · rw [← resG_appLE U (inf_le_left.trans (hWU i)) h3 r, (he i i'').2.2 _ _ h3 le_rfl, hev, map_zero]
     · intro O hO f
       rw [← hcoc i i' i'' O hO f, hc i i' O (hO.trans h1) f, hc i' i'' O (hO.trans h2) f]
-      simp only [map_add, resG_resG', add_mul, Finset.sum_add_distrib]
+      simp only [map_add (f := _), resG_resG', add_mul, Finset.sum_add_distrib]
     · intro O hO f
       rw [hc i i'' O (hO.trans h3) f]
       simp only [resG_resG']
@@ -64,9 +106,10 @@ theorem exists_coboundary_add_dlog : ∀ (E : Type) [Field E] [NumberField E] [I
           ∑ b, φ (θ a b) * ((valR (w b) _ (t.PP.L.g (j i) (j i')).val).snd *
             valR g₀ _ (t.PP.L.g (j i) (j i'))⁻¹.val) * (valR (w a) O f).snd := by
       intro a
+
       rw [valR_mul _ _ hgO, valR_res _ hO hgO, hdv a O (hO.trans hPU) f S φ g₀ (w a) hg hgO (hw a), hθ a i i',
-        valR_add _ _ hgP, GlobalTheory.CechInv.valR_sub _ _ hgP, valR_res _ _ hgP, valR_res _ _ hgP, valR_eq _ _ hgP,
-        map_sum, add_mul, sub_mul, Finset.sum_mul]
+      valR_add _ _ hgP, GlobalTheory.CechInv.valR_sub _ _ hgP, valR_res _ _ hgP, valR_res _ _ hgP, valR_eq _ _ hgP,
+      map_sum, add_mul, sub_mul, Finset.sum_mul]
       refine congrArg (_ + ·) (Finset.sum_congr rfl fun b _ => ?_)
       rw [← valR_eq _ _ hgP, valR_mul _ _ hgP, valR_mul _ _ hgP, valR_base U _ hg hgP, valR_res _ _ hgP,
         hdv b _ hPU _ S φ g₀ (w b) hg hgP (hw b),
@@ -74,11 +117,13 @@ theorem exists_coboundary_add_dlog : ∀ (E : Type) [Field E] [NumberField E] [I
     have hsm : ∀ k (hk : O ≤ W k), valR g₀ O (∑ a, smulFld (hh a k) (dd a) O f) =
         ∑ a, valR g₀ (W k) (hh a k) * (valR (w a) O f).snd := by
       intro k hk
+
       rw [valR_eq _ _ hgO, map_sum]
       refine Finset.sum_congr rfl fun a _ => ?_
       rw [← valR_eq _ _ hgO, smulFld_of_le hk, valR_mul _ _ hgO, valR_res _ hk hgO,
         hdv a O (hk.trans (hWU k)) f S φ g₀ (w a) hg hgO (hw a)]
     beta_reduce
+
     rw [hc i i' O hO f, GlobalTheory.CechInv.valR_sub _ _ hgO, hsm i hO1, hsm i' hO2, valR_eq _ _ hgO, map_sum]
     simp only [← valR_eq _ _ hgO, key, Matrix.of_apply, Finset.sum_add_distrib, Finset.sum_sub_distrib]
 

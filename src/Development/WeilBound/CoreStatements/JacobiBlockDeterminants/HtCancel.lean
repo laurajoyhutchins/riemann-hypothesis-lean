@@ -1,6 +1,59 @@
-import Development.WeilBound.CoreStatements.MultihomogeneousSquares.AntisymmetryFibreSquares
-import Development.WeilBound.CoreStatements.HomogeneousNonvanishing.HodgeCompactPullback
-import Development.AutomorphicSpectrum.Proofs.DivisibilityProofs.HodgeComponentFactorPointStatement
+module
+
+public import Development.WeilBound.CoreStatements.MultihomogeneousSquares.AntisymmetryFibreSquares
+public import Development.AutomorphicSpectrum.Proofs.DivisibilityProofs.HodgeComponentFactorPointStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.AbelianSchemePointObjectStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.DualMapOfFieldExtensionStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.EigenspaceFieldExtensionStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.FullTorsionPullbackStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.GenMapStalkMap
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LatticeFlagFieldExtensionStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LieLatticeDominantCompat
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LieModelPullbackMap
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.RegAtNoetherianModelNoetherianStatement
+public import Development.WeilBound.CoreStatements.HomogeneousNonvanishing.HeightPullbackDominatingMap
+public import Development.WeilBound.CoreStatements.HomogeneousNonvanishing.HodgeCompactPullback
+import Development.WeilBound.CoreStatements.HomogeneousNonvanishing.LatticeIntegrallyClosedTorsion
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.PullCub
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor GlobalTheory.CompanionTheory.Ar GlobalTheory.CompanionTheory.Ar.HcptPullK
@@ -15,7 +68,7 @@ theorem ht_cancel {E : Type} [Field E] [NumberField E] [IsCMField E] {H : Host E
   subst e
   exact sabCancel pullCubCancel E H _ _ _ _ _ _ _ _ m n
 
-set_option maxHeartbeats 1000000 in
+
 theorem stHt : SquareStatements.StHt := by
   intro E _ _ _ H D l Xo c Y S Ω Ω' _ _ K K' _ _ J J' _ _ y y' A A' h i j ⟨hdom, hf, hcst, hext, hjo⟩ hR _ hvb
   haveI : CharZero Ω := charZero_of_injective_ringHom A.cst.injective
@@ -32,7 +85,7 @@ theorem stHt : SquareStatements.StHt := by
   have hgen := A.tie.gen
   have hgen' := A'.tie.gen
   obtain ⟨mh, hmh⟩ := ht_cancel A.m A'.m hf
-  obtain ⟨j₀, hj₀⟩ := GlobalTheory.T.lie_model_pullback_map A.X A'.X Ω Ω' A.ξ A'.ξ h i A.t.G A'.t.G mh.φ A.Li A'.Li A.M A'.M hdom mh.cart
+  obtain ⟨j₀, hj₀⟩ := GlobalTheory.CompanionTheory.Ar.LieJ.exists_map A.X A'.X Ω Ω' A.ξ A'.ξ h i A.t.G A'.t.G mh.φ A.Li A'.Li A.M A'.M hdom mh.cart
   have hjj : ∀ w, j w = j₀ w := fun w => by
     apply A'.M.inj
     apply Over.OverMorphism.ext
@@ -41,13 +94,21 @@ theorem stHt : SquareStatements.StHt := by
       show _ = (A'.M.pt (j₀ w)).left ≫ A'.m.φ
       rw [hmh, ← Category.assoc (A'.M.pt (j₀ w)).left, hj₀ w, Category.assoc]
     · rw [Over.w, Over.w]
-  have hj : ∀ e, (A'.M.pt (j e)).left ≫ mh.φ = Spec.map (CommRingCat.ofHom (dualMap i)) ≫ (A.M.pt e).left :=
+  have hj : ∀ e, (A'.M.pt (j e)).left ≫ mh.φ = Spec.map (CommRingCat.ofHom (GlobalTheory.CompanionTheory.Ar.dualMap i)) ≫ (A.M.pt e).left :=
     fun e => by rw [hjj e]; exact hj₀ e
   have hsm : Smooth A.t.G.hom := A.t.semi.smooth
-  obtain ⟨-, hspan, -⟩ := GlobalTheory.T.lie_lattice_dominant_compat A.X A'.X Ω Ω' A.ξ A'.ξ h i A.t.G A'.t.G mh.φ A.Li A'.Li A.M A'.M j hgen hgen' hdom
+  obtain ⟨-, hspan, -⟩ := GlobalTheory.CompanionTheory.Ar.LiePull.main A.X A'.X Ω Ω' A.ξ A'.ξ h i A.t.G A'.t.G mh.φ A.Li A'.Li A.M A'.M j hgen hgen' hdom
     mh.cart hsm hj
-  have hρj := GlobalTheory.T.lie_model_pullback_action A.X A'.X Ω Ω' A.ξ A'.ξ h i A.t.G A'.t.G mh.φ A.Li A'.Li A.M A'.M j (𝓞 E) A.t.act.act A'.t.act.act A.ρ A'.ρ
-    hdom mh.cart hj A.act A'.act (fun a => mh.act a)
+  have hρj : ∀ a e, A'.ρ a (j e) = j (A.ρ a e) := by
+    intro a e
+    apply A'.M.inj
+    rw [A'.act a (j e)]
+    apply Over.OverMorphism.ext
+    apply mh.cart.1.hom_ext
+    · simp only [Over.comp_left, Category.assoc, mh.act a]
+      rw [← Category.assoc, hj e, hj (A.ρ a e), A.act a e, Over.comp_left]
+      simp only [Category.assoc]
+    · rw [Over.w, Over.w]
   obtain ⟨jd, hjd⟩ := GlobalTheory.T.dual_map_of_field_extension Ω Ω' i A.Li A'.Li j hext hspan
   have hW : ∀ s, eigSp A'.ρ ((i.comp A.cst).comp (labelEmb c s)) = Submodule.span Ω' (j '' (A.Vgen s : Set A.Li)) := fun s =>
     GlobalTheory.T.eigenspace_field_extension E Ω Ω' i A.Li A'.Li j A.ρ A'.ρ (A.emb s) hext hspan hρj

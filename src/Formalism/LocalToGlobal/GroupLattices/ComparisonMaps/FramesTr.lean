@@ -1,5 +1,49 @@
-import Formalism.LocalToGlobal.GroupLattices.ComparisonMaps.ValUniqOf
-import Formalism.LocalToGlobal.GroupLattices.ComparisonMaps.YvRatOfValRat
+module
+
+public import Formalism.LocalToGlobal.GroupLattices.ComparisonMaps.YvRatOfValRat
+public import Formalism.LocalToGlobal.GroupLattices.ComparisonMaps.CmpLApply
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -62,7 +106,7 @@ theorem cmpC_inj (hc : ∀ τ x, emb τ (σ x) = starRingEnd ℂ (emb τ x)) (he
     have h' : ∃ Q, IsVal S emb embLL G A pos embV yc x i
         (fun v => colSpan (G.P.W v) (g v : Matrix (Fin (G.P.m + 1)) (Fin (G.P.m + 1)) (G.P.Qq v))) Q := ⟨Q, hQ⟩
     unfold valC
-    rw [dif_pos h']
+    rw [dite_eq_left h']
     exact Classical.choose_spec h'
   have h0 : valC S emb embLL G A pos embV yc x i
       (fun v => colSpan (G.P.W v) (g v : Matrix (Fin (G.P.m + 1)) (Fin (G.P.m + 1)) (G.P.Qq v))) = 0 := by
@@ -83,7 +127,7 @@ private theorem isVal_add {x y : V} {i : G.comp} {L : G.P.Tup} {Q Q' : XR G.P LL
     IsVal S emb embLL G A pos embV yc (x + y) i L (Q + Q') := by
   unfold IsVal at *
   refine ⟨Submodule.add_mem _ h.1 h'.1, fun g hg c γ hγ κ hpt z z' hz => ?_⟩
-  simp only [map_add, Pi.add_apply, mul_add]
+  simp only [map_add (f := _), Pi.add_apply, mul_add]
   rw [h.2 g hg c γ hγ κ hpt z z' hz, h'.2 g hg c γ hγ κ hpt z z' hz]
 
 private theorem isVal_smul {x : V} {i : G.comp} {L : G.P.Tup} {Q : XR G.P LL} (a : LL)
@@ -101,7 +145,7 @@ private theorem isVal_valC_of_isLatTup (hex : ValEx S emb embLL G A pos embV yc)
     (hL : G.P.IsLatTup L) : IsVal S emb embLL G A pos embV yc x i L (valC S emb embLL G A pos embV yc x i L) := by
   have h' := hex x i L hL
   unfold valC
-  rw [dif_pos h']
+  rw [dite_eq_left h']
   exact Classical.choose_spec h'
 
 theorem cmpC_li (hc : ∀ τ x, emb τ (σ x) = starRingEnd ℂ (emb τ x)) (hex : ValEx S emb embLL G A pos embV yc)
@@ -140,14 +184,15 @@ theorem cmpC_li (hc : ∀ τ x, emb τ (σ x) = starRingEnd ℂ (emb τ x)) (hex
     intro k
     apply hw s (fun a => β.repr (g a) k)
     ext i L m
-    have h1 := congrArg (MvPolynomial.coeff m) (congrFun (congrFun hg i) L.1)
+    have h1 := congrArg (AddMonoidAlgebra.coeff · m) (congrFun (congrFun hg i) L.1)
     simp only [Finset.sum_apply, Pi.smul_apply, MvPolynomial.coeff_sum, MvPolynomial.coeff_smul,
       smul_eq_mul, Pi.zero_apply, MvPolynomial.coeff_zero, cmpC, if_pos L.2, MvPolynomial.coeff_map] at h1
     have h2 := congrArg (fun y => β.repr y k) h1
-    simp only [map_sum, map_zero, Finsupp.coe_finset_sum, Finset.sum_apply, Finsupp.coe_zero, Pi.zero_apply,
-      hsm, map_smul, Finsupp.smul_apply, smul_eq_mul] at h2
+
+    simp only [map_sum, map_zero, Finset.sum_apply', Finset.sum_apply, Finsupp.coe_zero, Pi.zero_apply,
+    hsm, map_smul, Finsupp.smul_apply, smul_eq_mul] at h2
     simp only [Finset.sum_apply, Pi.smul_apply, MvPolynomial.coeff_sum, MvPolynomial.coeff_smul,
-      smul_eq_mul, Pi.zero_apply, MvPolynomial.coeff_zero]
+      smul_eq_mul, Pi.zero_apply, AddMonoidAlgebra.coeff_zero, Finsupp.zero_apply]
     rw [← h2]
     exact Finset.sum_congr rfl fun a _ => mul_comm _ _
   have h4 : β.repr (g a) = 0 := Finsupp.ext fun k => key k a ha

@@ -1,7 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.IsCoType
-import Formalism.LocalToGlobal.Columns.HeckeSp
-import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.ValuationDetOfMemKO
+module
+
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.BorelParam
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.ValuationDetOfMemKO
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -20,14 +68,15 @@ def lowU (ν : Matrix D A k) : GL (A ⊕ D) k where
 
 theorem val_lowU (ν : Matrix D A k) : (lowU ν).1 = fromBlocks 1 0 ν 1 := rfl
 
-open Classical in
 
+open Classical in
 def blockDet (j : GL (A ⊕ D) k) : kˣ :=
   if h : j.1.toBlocks₂₂.det ≠ 0 then Units.mk0 _ h else 1
 
 theorem val_emb_one (m : GL D k) :
     (emb₂ k (Equiv.refl (A ⊕ D)) (1, m)).1 = fromBlocks 1 0 0 m.1 := by
-  rw [val_emb₂]; simp
+  classical
+  ext (i | i) (j | j) <;> simp [emb₂, leviEmb, leviTwo, two, Matrix.reindex_apply, Matrix.submatrix_apply, Matrix.blockDiagonal'_apply]
 
 theorem blockDet_lowU_emb (ν : Matrix D A k) (m : GL D k) :
     blockDet (lowU ν * emb₂ k (Equiv.refl (A ⊕ D)) (1, m)) = GeneralLinearGroup.det m := by
@@ -35,7 +84,7 @@ theorem blockDet_lowU_emb (ν : Matrix D A k) (m : GL D k) :
     rw [Units.val_mul, val_emb_one, val_lowU, fromBlocks_multiply]; simp
   have h0 : (lowU ν * emb₂ k (Equiv.refl (A ⊕ D)) (1, m)).1.toBlocks₂₂.det ≠ 0 := by
     rw [h]; exact (GeneralLinearGroup.det m).ne_zero
-  rw [blockDet, dif_pos h0]; ext; rw [Units.val_mk0, h, GeneralLinearGroup.val_det_apply]
+  rw [blockDet, dite_eq_left h0]; ext; rw [Units.val_mk0, h, GeneralLinearGroup.val_det_apply]
 
 theorem emb_mul_lowU (m : GL D k) (ν : Matrix D A k) :
     emb₂ k (Equiv.refl (A ⊕ D)) (1, m) * lowU ν = lowU (m.1 * ν) * emb₂ k (Equiv.refl (A ⊕ D)) (1, m) := by
@@ -93,8 +142,8 @@ theorem emb_mem {κ : GL D k} (h : κ ∈ KO k D) : emb₂ k (Equiv.refl (A ⊕ 
     · exact zero_mem _
     · exact h2 i j
 
-variable (k D) in
 
+variable (k D) in
 def mLat : AddSubgroup (D → k) where
   carrier := {v | ∀ i, valuation k (v i) < 1}
   add_mem' ha hb i := by simpa using Valuation.map_add_lt _ (ha i) (hb i)

@@ -1,11 +1,57 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.PartFixed
-import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.IsVacFOfIsVacVec
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.WittAnisotropicGroupNormalizesFlagUnipotent
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.VsizeNonneg
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.UnitaryQuotientHeightLeOfNoShortVectorStatement
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.LeAdelicVectorSizeProductMulUnitaryQuotientHeighStatement
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ModerateGrowthOfHasCompactSupport
+module
+
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.VsizeNonneg
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.ExistsHeightLeTwoMulQuotHeight
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.WittSmallGroupEmbeddingMemPointwiseStabilizerIso
+public import Mathlib.Data.Matrix.ColumnRowPartitioned
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ModerateGrowthOfHasCompactSupport
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.LeAdelicVectorSizeProductMulUnitaryQuotientHeighStatement
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.UnitaryQuotientHeightLeOfNoShortVectorStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.Divisors.CmHostImaginaryGeneratorNeZero
+import Development.AbelianVarietyTheory.Definitions.Divisors.NatCastSmulMemHatL
+import Development.AbelianVarietyTheory.Definitions.LatticeFrames.IsThetaFam
+import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.OffQOfSizeRows
+import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.TowerEx
+import Formalism.LocalToGlobal.IndefiniteReal.LinksDefs
+
+@[expose] public section
 
 noncomputable section
 
@@ -26,6 +72,7 @@ theorem exists_minor_ne_zero [Nontrivial R] {ι m : Type} [Fintype ι] [Decidabl
       ext i k; simp [Matrix.mul_apply, Finset.sum_apply]
     rw [e1]
     change Matrix.detRowAlternating.toMultilinearMap (fun i => ∑ j, L i j • M j) = _
+
     rw [MultilinearMap.map_sum]
     refine Finset.sum_congr rfl fun r _ => ?_
     rw [MultilinearMap.map_smul_univ]
@@ -136,8 +183,8 @@ attribute [local instance] Formalism.BasicNotions.Host.cmStar
 
 variable {D : D7}
 
-open Classical in
 
+open Classical in
 def nInf (w : InfinitePlace D.host.F) (z : AE D) : ℝ≥0 :=
   Finset.univ.sup fun τ : EmbOver D.host.E w => ‖infEmb τ (compInf D.host.F D.host.E w z)‖₊
 
@@ -179,6 +226,7 @@ theorem nInf_minor_le (w : InfinitePlace D.host.F) {K : ℝ≥0} (he : ∀ i j, 
     exact mul_le_mul' (nInf_le_iff.1 le_rfl τ) (nInf_le_iff.1 le_rfl τ)
   · rw [RingHom.map_one, RingHom.map_one, nnnorm_one]
   · simp only [nInf, RingHom.map_neg, nnnorm_neg]
+
   · rw [map_sum, map_sum]
     refine (nnnorm_sum_le _ _).trans ((Finset.sum_le_card_nsmul _ _ c fun i _ => nInf_le_iff.1 (h i) τ).trans ?_)
     rw [nsmul_eq_mul, Finset.card_univ]
@@ -195,6 +243,7 @@ theorem nFin_minor_le (v : HeightOneSpectrum (𝓞 D.host.F)) {K : ℝ≥0} (he 
     (fun ι _ f c h => ?_) g.1 e i₀ x r (H := htFin D.host.F v (bc (compFin D.host.F D.host.E v) g)) (fun i j => ?_) he hi
     (vFin_le_iff.1 le_rfl)).trans_eq ?_
   · simp only [nFin, RingHom.map_neg, absFin_neg]
+
   · rw [one_mul, nFin, map_sum]
     exact absFin_sum_le _ v _ _ fun i _ => h i
   · exact (absFin_le_normFin D.host.F v (bc (compFin D.host.F D.host.E v) g).1 i j).trans (le_htOf _ _)

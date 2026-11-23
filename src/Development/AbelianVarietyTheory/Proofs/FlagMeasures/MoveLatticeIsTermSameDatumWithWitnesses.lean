@@ -1,11 +1,56 @@
-import Mathlib
-import Formalism.SharpRestriction.CuspSpanNormBounds.FractionFieldToGenericStalkAlgebraMapEq
-import Development.AbelianVarietyTheory.Definitions.Foundations.IsHermND
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.ComplementReferenceCompactSubgroup
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsIsometryOfSameTrace
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.ComplementReferenceCompactSubgroup
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.EichlerMapMemUnipotentCharacterStatement
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsIsometryOfSameTrace
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.HermitianDoubleCosetFramesDatumMovePropertiesStatement
 import Development.AbelianVarietyTheory.Proofs.FlagMeasures.HermitianDoubleCosetTermBasicFacts
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.EichlerMapMemUnipotentCharacterStatement
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.HermitianDoubleCosetFramesDatumMovePropertiesStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.Valuation.Extension
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open ValuativeRel Formalism.MainNotions.S.Loc GlobalTheory.HL MeasureTheory
 open scoped Pointwise ENNReal Classical
@@ -31,6 +76,7 @@ theorem h_zero_l (y : S.V) : S.h 0 y = 0 := by simp [Frames.h, hf]
 theorem h_zero_r (y : S.V) : S.h y 0 = 0 := by simp [Frames.h, hf]
 theorem h_symm (v w : S.V) : S.h w v = L.cj (S.h v w) := by
   have h' : ∀ i j, L.cj (S.Hm j i) = S.Hm i j := fun i j => congrFun (congrFun S.herm.1 i) j
+
   simp only [Frames.h, hf, map_sum, map_mul, L.cj_cj, h']
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => by ring
@@ -82,17 +128,7 @@ theorem isSD_smul {g : S.GLV} (hg : g ∈ isomG L S.Hm) {Λ : Submodule L.O S.V}
     IsSD L S.Hm (g • Λ) := by
   refine ⟨⟨?_, ?_⟩, fun y => ?_⟩
   · exact h.1.1.map _
-  · rw [eq_top_iff]
-    intro v _
-    have h1 : g⁻¹ v ∈ Submodule.span E (Λ : Set S.V) := by rw [h.1.2]; trivial
-    have h2 := Submodule.apply_mem_span_image_of_mem_span (g : S.V →ₗ[E] S.V) h1
-    have h3 : (g : S.V →ₗ[E] S.V) (g⁻¹ v) = v := app_inv S g v
-    rw [h3] at h2
-    refine Submodule.span_mono ?_ h2
-    rintro _ ⟨w, hw, rfl⟩
-    exact (mem_smul S g Λ _).2 (by
-      have : g⁻¹ ((g : S.V →ₗ[E] S.V) w) = w := inv_app S g w
-      rw [this]; exact hw)
+  · rw [Submodule.coe_pointwise_smul, Submodule.span_smul, h.1.2, smul_top]
   · rw [mem_smul, ← h.2]
     constructor
     · intro H x hx
@@ -211,7 +247,7 @@ theorem main : ∀ {F : Type} [Field F] [ValuativeRel F] [TopologicalSpace F] [I
     apply inTh_tr S hm
     obtain ⟨c, hc, ec⟩ := hc
     have e : n₀ (x + x') = (x + x') + algebraMap F E S.th • (-(c • (u + s • x))) := by
-      rw [map_add, hfx, e₀, eich_def, hx'u, ec]; module
+      rw [map_add (f := _), hfx, e₀, eich_def, hx'u, ec]; module
     rw [e]
     exact inTh_add S hb ⟨_, Λ.neg_mem (smulO S hc (Λ.add_mem hu hs1)), rfl⟩
   have hu₁ : -u ∈ n₀⁻¹ • Λ := by

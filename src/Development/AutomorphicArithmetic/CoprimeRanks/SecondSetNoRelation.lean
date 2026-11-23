@@ -1,7 +1,52 @@
-import Formalism.LocalRingCardinality.DataHost
-import Formalism.SharpRestriction.RamificationFrobenius.TotientGaloisClasses.ExplicitFormulaErrorOfHostConditions
-import Formalism.SharpRestriction.RamificationFrobenius.TotientGaloisClasses.HostFacts
-import Formalism.SharpRestriction.RamificationFrobenius.TotientGaloisClasses.FrameFacts
+module
+
+public import Formalism.LocalRingCardinality.DataHost
+import Mathlib.Algebra.AffineMonoid.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+public import Mathlib.NumberTheory.PrimesCongruentOne
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open NumberField Formalism.FrobeniusOrbits Formalism.TwoAdicCyclotomicDecomposition Formalism.HC Formalism.BasicNotions
 open scoped Pointwise
@@ -80,10 +125,6 @@ def HostNF.ofHost {R : Ranks} (H : Formalism.BasicNotions.Host R) : HostNF R :=
     qd_big := H.qd_big, sqq := H.sqq, sqq_sq := H.sqq_sq, gal_sqq := H.gal_sqq, φ₀ := H.φ₀, φ₀_mem := H.φ₀_mem
     𝔟 := H.𝔟, 𝔟_spec := H.𝔟_spec, 𝔟_stable := H.𝔟_stable, ch := { H with } }
 
-theorem HostNF.toHost_ofHost {R : Ranks} (H : Formalism.BasicNotions.Host R) : (HostNF.ofHost H).toHost = H := rfl
-
-theorem HostNF.ofHost_toHost {R : Ranks} (N : HostNF R) : HostNF.ofHost N.toHost = N := rfl
-
 theorem exists_cmType {φ : Frame} (H : HostAx φ) : ∃ ψ : H.E →+* ℂ, ψ ∈ H.toHostRaw.cmType := by
   have h := H.der.cmType.2.1
   have := φ.ord_pos
@@ -152,12 +193,6 @@ theorem nonempty_choices {φ : Frame} (H : HostRaw φ) : Nonempty (Choices φ H)
       second_set_range := by simp
       second_set_no_relation := by simp [NoRel]
       CT2 := 0 }⟩
-
-structure PairAt (T : HType) (X : ℝ) (q d : ℕ) : Prop where
-  hyp : HostHyp q d
-  log_q : T.z X / 2 < Real.log q ∧ Real.log q ≤ T.z X
-  log_d : T.z' X / 2 < Real.log d ∧ Real.log d ≤ T.z' X
-  split : ∀ p : ℕ, p.Prime → p ≠ 2 → (p : ℝ) ≤ T.z X → jacobiSym (-(d : ℤ)) p = 1
 
 end HostParam.Seam
 

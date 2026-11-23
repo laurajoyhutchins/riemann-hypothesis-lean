@@ -1,6 +1,56 @@
-import Mathlib
-import GroundTheory.GlobalFields.ComplexMultiplication.ReductionDegree
-import GroundTheory.GlobalFields.ComplexMultiplication.DifferentialConstantField
+module
+
+public import GroundTheory.GlobalFields.ComplexMultiplication.DifferentialConstantField
+public import GroundTheory.GlobalFields.ComplexMultiplication.ReductionIsogenyMap
+public import Mathlib.Algebra.TrivSqZeroExt.Basic
+import GroundTheory.GlobalFields.ComplexMultiplication.ReductionComp
+public import GroundTheory.GlobalFields.ComplexMultiplication.ReductionDegree
+import Mathlib.Algebra.DualNumber
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GroundTheory.Global
 
@@ -24,7 +74,7 @@ theorem invCoeff_smul_mul (c : E.toAffine.FunctionField) (η : KaehlerDifferenti
 
 theorem invDeriv_add (f g : E.toAffine.FunctionField) :
     invDeriv E (f + g) = invDeriv E f + invDeriv E g := by
-  rw [invDeriv, map_add, invCoeff_add]; rfl
+  rw [invDeriv, map_add (f := _), invCoeff_add]; rfl
 
 theorem invDeriv_mul (f g : E.toAffine.FunctionField) :
     invDeriv E (f * g) = f * invDeriv E g + g * invDeriv E f := by
@@ -244,7 +294,7 @@ theorem algebraMap_gaussDeriv (g : gaussRing W) :
       · rw [dualMap_fst, invDerivHom_fst, fst_add, fst_inl, fst_inr, add_zero, algebraMap_gaussX]
       · rw [dualMap_snd, invDerivHom_snd, snd_add, snd_inl, snd_inr, zero_add, invDeriv_genX,
           gaussDX]
-        simp only [map_add, map_mul, map_ofNat, algebraMap_gaussX, algebraMap_gaussY,
+        simp only [map_add (f := _), map_mul, map_ofNat, algebraMap_gaussX, algebraMap_gaussY,
           algebraMap_gauss_const]
         rfl
     · simp only [RingHom.comp_apply, gaussDual_algebraMap, gaussDualA_Y]
@@ -254,7 +304,7 @@ theorem algebraMap_gaussDeriv (g : gaussRing W) :
       · rw [dualMap_fst, invDerivHom_fst, fst_add, fst_inl, fst_inr, add_zero, algebraMap_gaussY]
       · rw [dualMap_snd, invDerivHom_snd, snd_add, snd_inl, snd_inr, zero_add, invDeriv_genY,
           gaussDY]
-        simp only [map_add, map_sub, map_mul, map_pow, map_ofNat, algebraMap_gaussX,
+        simp only [map_add (f := _), map_sub, map_mul, map_pow, map_ofNat, algebraMap_gaussX,
           algebraMap_gaussY, algebraMap_gauss_const]
         rfl
   have := congrArg (fun f => (f g).snd) key
@@ -283,7 +333,7 @@ theorem gaussResidue_gaussDeriv (g : gaussRing W) :
       ext
       · rw [dualMap_fst, invDerivHom_fst, fst_add, fst_inl, fst_inr, add_zero]; rfl
       · rw [dualMap_snd, invDerivHom_snd, snd_add, snd_inl, snd_inr, zero_add, gaussResidue_gaussX, invDeriv_genX, gaussDX]
-        simp only [map_add, map_mul, map_ofNat, RingHom.comp_apply, gaussResidue_gaussX,
+        simp only [map_add (f := _), map_mul, map_ofNat, RingHom.comp_apply, gaussResidue_gaussX,
           gaussResidue_gaussY, gaussResidue_residue_algebraMap]
         rfl
     · simp only [RingHom.comp_apply, gaussDual_algebraMap, gaussDualA_Y]
@@ -292,7 +342,7 @@ theorem gaussResidue_gaussDeriv (g : gaussRing W) :
       ext
       · rw [dualMap_fst, invDerivHom_fst, fst_add, fst_inl, fst_inr, add_zero]; rfl
       · rw [dualMap_snd, invDerivHom_snd, snd_add, snd_inl, snd_inr, zero_add, gaussResidue_gaussY, invDeriv_genY, gaussDY]
-        simp only [map_add, map_sub, map_mul, map_pow, map_ofNat, RingHom.comp_apply,
+        simp only [map_add (f := _), map_sub, map_mul, map_pow, map_ofNat, RingHom.comp_apply,
           gaussResidue_gaussX, gaussResidue_gaussY, gaussResidue_residue_algebraMap]
         rfl
   have := congrArg (fun f => (f g).snd) key
@@ -308,7 +358,7 @@ variable {𝒪 : Type u} [CommRing 𝒪] [IsDomain 𝒪] [IsDiscreteValuationRin
   (K : Type u) [Field K] [Algebra 𝒪 K] [IsFractionRing 𝒪 K] (W W' : WeierstrassCurve 𝒪)
   [W.IsElliptic] [W'.IsElliptic] (φ : Isogeny (W.baseChange K) (W'.baseChange K))
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem exists_invConst_reduceIsogeny :
     ∃ c : 𝒪, algebraMap 𝒪 K c = invConst φ ∧
@@ -322,7 +372,7 @@ theorem exists_invConst_reduceIsogeny :
   have hu_res : gaussResidue W (residue _ u) = 2 * gaussResidue W (residue _ y) +
       algebraMap (ResidueField 𝒪) _ (W'.map (residue 𝒪)).a₁ * gaussResidue W (residue _ x) +
         algebraMap (ResidueField 𝒪) _ (W'.map (residue 𝒪)).a₃ := by
-    simp only [hu_def, map_add, map_mul, map_ofNat, gaussResidue_residue_algebraMap]
+    simp only [hu_def, map_add (f := _), map_mul, map_ofNat, gaussResidue_residue_algebraMap]
     rfl
   have hu_ne : gaussResidue W (residue _ u) ≠ 0 := by
     have hg := (reduceIsogeny K W W' φ).isGenPt
@@ -332,7 +382,7 @@ theorem exists_invConst_reduceIsogeny :
     apply hd
     apply (genEval (W'.map (residue 𝒪)) _ hg).toRingHom.injective
     rw [map_zero, ← h0, hu_res]
-    simp only [AlgHom.toRingHom_eq_coe, RingHom.coe_coe, map_add, map_mul, map_ofNat,
+    simp only [AlgHom.toRingHom_eq_coe, RingHom.coe_coe, map_add (f := _), map_mul, map_ofNat,
       AlgHom.commutes, genEval_genX, genEval_genY]
     rfl
   have hu : IsUnit u := by
@@ -343,7 +393,7 @@ theorem exists_invConst_reduceIsogeny :
       algebraMap (gaussRing W) _ (gaussDeriv K W x) := by
     rw [algebraMap_gaussDeriv, ← isogCoeff_mul φ hφ]
     congr 1
-    simp only [hu_def, map_add, map_mul, map_ofNat, algebraMap_gauss_const]
+    simp only [hu_def, map_add (f := _), map_mul, map_ofNat, algebraMap_gauss_const]
     rfl
   set v : gaussRing W := gaussDeriv K W x * ↑hu.unit⁻¹ with hv_def
   have hv : algebraMap (gaussRing W) (W.baseChange K).toAffine.FunctionField v = isogCoeff φ := by

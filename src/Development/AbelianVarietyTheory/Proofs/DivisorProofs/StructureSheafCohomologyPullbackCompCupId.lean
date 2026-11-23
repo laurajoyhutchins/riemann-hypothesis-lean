@@ -1,7 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.AxesVanishingStructureSheafDegOne
-import Development.AbelianVarietyTheory.Definitions.AbelianSchemeLaws.IsScalarTowerOfAlgebraMapEq
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.AbelianHodgeDeRham
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.AxesVanishingStructureSheafDegOne
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CechTripleRestrictCompositeInjectiveSecond
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CommaDescentInjectiveStatement
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FormPowSmulEqZeroOfResBasicOpen
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GlueCommaOfBasis
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HasLocOAff
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsLocalizationOfData
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.OneCocycleCoboundaryCommaLocalBasis
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RestrictGlob1Bijective
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RestrictPull1InjectiveOfSepGlue
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SepOfFactoringCover
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -40,8 +88,8 @@ variable {R R' R'' : Type} [CommRing R] [CommRing R'] [CommRing R''] {X X' X'' :
   {s : X ⟶ Sp R} {s' : X' ⟶ Sp R'} {s'' : X'' ⟶ Sp R''} {σ : R →+* R'} {τ : R' →+* R''}
   {ψ : X'' ⟶ X'} {φ : X' ⟶ X}
 
-variable (ψ φ) in
 
+variable (ψ φ) in
 theorem cechTripleRestrictComposite_comp_pairRestrict (s'' : X'' ⟶ Sp R'') :
     (∀ c : HO1 s'', (cechTripleRestrictComposite ψ φ s'').pull1 ((pairRes (ψ ≫ φ) s'').pull1 c) =
       (CoefMap.restrict (OAff s'') (cechTripleProjFirstThird ψ φ ⋙ pairFst (ψ ≫ φ))).pull1 c) ∧
@@ -57,8 +105,8 @@ theorem cechTripleRestrictComposite_comp_pairRestrict (s'' : X'' ⟶ Sp R'') :
   · rw [← pullGlob1_comp]
     exact pullGlob1_eq_of_natTrans _ _ { app U := 𝟙 _ } (fun U b ↦ mp_id (OAff s'') _ b) c
 
-variable (ψ φ) in
 
+variable (ψ φ) in
 theorem cechTripleRestrictComposite_injective_cohomology_forms (s'' : X'' ⟶ Sp R'') :
     Function.Injective (cechTripleRestrictComposite ψ φ s'').pull1 ∧ Function.Injective (cechTripleRestrictComposite ψ φ s'').pull2 ∧
       Function.Injective (pullGlob1 (cechTripleRestrictComposite ψ φ s'')) := by
@@ -131,8 +179,8 @@ theorem tri_res_pullO (h' : ψ ≫ s' = s'' ≫ spMap τ) :
   · rw [← pullGlob1_comp, ← pullGlob1_comp]
     exact pullGlob1_eq_of_natTrans _ _ { app U := 𝟙 _ } (fun U b ↦ by erw [mp_id]) a
 
-variable (ψ φ) in
 
+variable (ψ φ) in
 theorem tri_res_resO (s'' : X'' ⟶ Sp R'') :
     (∀ a : HO1 s'', (cechTripleRestrictFirst ψ φ s'').pull1 ((pairRes ψ s'').pull1 a) =
       (cechTripleRestrictComposite ψ φ s'').pull1 ((pairRes (ψ ≫ φ) s'').pull1 a)) ∧

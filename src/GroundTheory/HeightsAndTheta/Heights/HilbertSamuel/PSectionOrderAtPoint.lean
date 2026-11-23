@@ -1,8 +1,57 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsSectionOrderAtPoint
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PLocalRep
-import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.CoordinateIdeals.MemMCoordIdealOfAevalEqZero
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.MultihomogeneousIdeals.MemDivSuppOfDivCycleNeZero
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsSectionOrderAtPoint
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.LengthCokerEqKerAddDimOneOrderSum
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PLocalRep
+public import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.CoordinateIdeals.MemMCoordIdealOfAevalEqZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.MultihomogeneousIdeals.MemDivSuppOfDivCycleNeZero
+public import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.CoordinateIdeals
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.HilbertSamuel
@@ -205,10 +254,10 @@ omit [Fintype K] in
 theorem isMultiHomog_pow' {f : MRing ι} {d : K → ℕ} (hf : IsMultiHomog f d) (m : ℕ) :
     IsMultiHomog (f ^ m) (m • d) := by
   induction m with
-  | zero => simpa using LocalRep.isMultiHomog_C (ι := ι) 1
+  | zero => simpa using LowerBoundFree.isMultiHomog_C_zero (ι := ι) 1
   | succ m ih =>
     rw [pow_succ, succ_nsmul]
-    exact LocalRep.isMultiHomog_mul ih hf
+    exact LowerBoundFree.isMultiHomog_mul ih hf
 
 omit [Fintype K] in
 theorem isMultiHomog_sum' {β : Type*} (s : Finset β) (f : β → MRing ι) {d : K → ℕ}
@@ -218,7 +267,7 @@ theorem isMultiHomog_sum' {β : Type*} (s : Finset β) (f : β → MRing ι) {d 
   | empty => simpa using LowerBoundFree.isMultiHomog_zero (ι := ι) d
   | insert b s hb ih =>
     rw [Finset.sum_insert hb]
-    exact LocalRep.isMultiHomog_add (hf b (Finset.mem_insert_self b s))
+    exact LowerBoundFree.isMultiHomog_add (hf b (Finset.mem_insert_self b s))
       (ih fun j hj => hf j (Finset.mem_insert_of_mem hj))
 
 theorem exists_rel (y : (Σ k, ι k) → Ω) (c : ∀ k, ι k) (hyc : ∀ k, y ⟨k, c k⟩ ≠ 0) {t : Ω}
@@ -277,7 +326,8 @@ theorem exists_rel (y : (Σ k, ι k) → Ω) (c : ∀ k, ι k) (hyc : ∀ k, y �
       ring
     have hp' : t ^ n + ∑ i ∈ Finset.range n, (algebraMap (chartRingZ y c) Ω) (p.coeff i) * t ^ i = 0 :=
       hp
-    rw [map_add, map_sum, Finset.sum_congr rfl hsum, ← Finset.mul_sum]
+
+    rw [map_add (f := _), map_sum, Finset.sum_congr rfl hsum, ← Finset.mul_sum]
     simp only [map_mul, map_pow, map_prod, aeval_X, ← htB]
     rw [mul_pow]
     linear_combination ((∏ k, y ⟨k, c k⟩ ^ N k) * aeval y B ^ n) * hp'

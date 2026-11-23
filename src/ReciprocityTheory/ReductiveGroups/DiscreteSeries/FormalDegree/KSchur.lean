@@ -1,5 +1,53 @@
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.PmatIsHermitian
+module
+
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.PmatIsHermitian
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.InnerProductSpace.Trace
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.Eigenspace.Triangularizable
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.CasimirCoefficients.KFacts
 import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.KinstSecondCountable
+
+@[expose] public section
 
 noncomputable section
 
@@ -20,15 +68,21 @@ lemma muK_univ_ne_zero (ε : Fin n → Bool) : muK ε Set.univ ≠ 0 := ((ENNRea
 
 lemma muK_univ_ne_top (ε : Fin n → Bool) : muK ε Set.univ ≠ ⊤ := ((ENNReal.toReal_pos_iff.mp (muK_univ_pos ε)).2).ne
 
-instance dk_isProb (ε : Fin n → Bool) : IsProbabilityMeasure (dk ε) :=
-  ⟨by simp [dk]⟩
+instance dk_isProb (ε : Fin n → Bool) : IsProbabilityMeasure (dk ε) := by
+  rw [dk_def]
+  letI : IsFiniteMeasure (muK ε) := ⟨(muK_univ_ne_top ε).lt_top⟩
+  letI : NeZero (muK ε) := ⟨Measure.measure_univ_ne_zero.mp (muK_univ_ne_zero ε)⟩
+  exact isProbabilityMeasureSMul (μ := muK ε)
 
 instance dk_left (ε : Fin n → Bool) : (dk ε).IsMulLeftInvariant := by
-  unfold dk; infer_instance
+  rw [dk_def]
+  letI := kf_isHaar ε
+  exact MeasureTheory.isMulLeftInvariant_smul (μ := muK ε) (muK ε Set.univ)⁻¹
 
 instance dk_right (ε : Fin n → Bool) : (dk ε).IsMulRightInvariant := by
-  have := muK_rightInvariant ε
-  unfold dk; infer_instance
+  rw [dk_def]
+  letI := muK_rightInvariant ε
+  exact MeasureTheory.isMulRightInvariant_smul (μ := muK ε) (muK ε Set.univ)⁻¹
 
 lemma muK_inv (ε : Fin n → Bool) : Measure.map (fun x : KG ε => x⁻¹) (muK ε) = muK ε := by
   haveI := muK_rightInvariant ε
@@ -41,22 +95,18 @@ lemma muK_inv (ε : Fin n → Bool) : Measure.map (fun x : KG ε => x⁻¹) (muK
   have huniv : ν Set.univ = muK ε Set.univ := by
     rw [hν, Measure.map_apply measurable_inv MeasurableSet.univ, Set.preimage_univ]
   rw [e] at huniv
-  rw [Measure.smul_apply, ENNReal.smul_def, smul_eq_mul] at huniv
-  have hc : (ν.haarScalarFactor (muK ε) : ℝ≥0∞) = 1 := by
-    have h2 := congrArg (· / muK ε Set.univ) huniv
-    rwa [ENNReal.mul_div_cancel_right (muK_univ_ne_zero ε) (muK_univ_ne_top ε),
-      ENNReal.div_self (muK_univ_ne_zero ε) (muK_univ_ne_top ε)] at h2
-  have hc' : ν.haarScalarFactor (muK ε) = 1 := by exact_mod_cast hc
-  rw [e, hc', one_smul]
+  rw [smul_apply, ENNReal.smul_def, smul_eq_mul] at huniv
+  have hc : (ν.haarScalarFactor (muK ε) : ℝ≥0∞) = 1 :=
+    (ENNReal.mul_eq_right (muK_univ_ne_zero ε) (muK_univ_ne_top ε)).mp huniv
+  rw [e, ENNReal.coe_eq_one.mp hc, one_smul]
 
 lemma dk_inv (ε : Fin n → Bool) : Measure.map (fun x : KG ε => x⁻¹) (dk ε) = dk ε := by
-  unfold dk
-  rw [Measure.map_smul, muK_inv]
+  rw [dk_def, Measure.map_smul _ measurable_inv.aemeasurable, muK_inv]
 
 end CompactHaarProbability
 
-open CompactHaarProbability in
 
+open CompactHaarProbability in
 theorem dk_props (ε : Fin n → Bool) :
     IsProbabilityMeasure (dk ε) ∧ (∀ k : KG ε, Measure.map (fun x => k * x) (dk ε) = dk ε) ∧
       (∀ k : KG ε, Measure.map (fun x => x * k) (dk ε) = dk ε) ∧
@@ -150,8 +200,8 @@ lemma int_conj (T : KType ε Λ) (P : T.V →L[ℂ] T.V) (k : KG ε) :
 
 end CompactHaarProbability
 
-open CompactHaarProbability in
 
+open CompactHaarProbability in
 theorem kschur_op {ε : Fin n → Bool} {Λ : Fin n → ℝ} (T : KType ε Λ) (v : T.V) :
     ((Module.finrank ℂ T.V : ℝ) : ℂ) •
         ∫ k, T.op k * (innerSL ℂ v).smulRight v * T.op k⁻¹ ∂(dk ε) =
@@ -195,8 +245,8 @@ theorem kschur_op {ε : Fin n → Bool} {Λ : Fin n → ℝ} (T : KType ε Λ) (
     ring
   rw [hc, smul_smul, key]
 
-open CompactHaarProbability in
 
+open CompactHaarProbability in
 theorem kschur_coef {ε : Fin n → Bool} {Λ : Fin n → ℝ} (T : KType ε Λ) (u v : T.V) :
     (Module.finrank ℂ T.V : ℝ) * ∫ k, ‖⟪u, T.op k v⟫_ℂ‖ ^ 2 ∂(dk ε) = ‖v‖ ^ 2 * ‖u‖ ^ 2 := by
   set P : T.V →L[ℂ] T.V := (innerSL ℂ v).smulRight v with hP

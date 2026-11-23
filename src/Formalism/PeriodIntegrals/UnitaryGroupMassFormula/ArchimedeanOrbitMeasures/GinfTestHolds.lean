@@ -1,7 +1,47 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.NcRealPf
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.ArchimedeanOrbitMeasures.AinfValueOf
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.MassComputations.ContinuousSplitA
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.ArchimedeanOrbitMeasures.AinfValueOf
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.MassComputations.StrongApproxN
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.NcRealPf
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.MassComputations.ContinuousSplitA
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -13,8 +53,13 @@ open MeasureTheory Formalism.BasicNotions Formalism.L2.SG.HidaSetting Formalism.
 theorem ginfTest_holds : GinfTest := by
   intro D X hb FdN FdN' u u' hX
   obtain ⟨K, hK, h0, -⟩ := muInf_compact_pos X
-  have hc := MassDataMassesW.continuous_toInf X hb
-  have hm := MassDataMassesW.measurable_toInf X hb
+  have hc : Continuous (X.toInf hb) := by
+    unfold Formalism.L2.SG.HidaSetting.HidaSetting.toInf
+    exact continuous_fst.comp ((MassDataMassesW.continuous_splitA _ _).comp
+      ((Formalism.L2.SG.AdBridge.toHA X.B.I hb).continuous.comp (continuous_id.prodMk continuous_const)))
+  have hm : Measurable (X.toInf hb) := by
+    haveI : BorelSpace (HA (Ainf X.B.I.F) X.B.I.cm.sig X.B.I.J) := ⟨rfl⟩
+    exact hc.measurable
   have hG : X.measG.μGinf = (Formalism.L2.SG.ProjRows.muInf X.B.I).map (X.toInf hb) := hX.1.2.1
   have : X.measG.μGinf.IsHaarMeasure := X.measG_norm.2.1
   refine ⟨toMeasurable X.measG.μGinf (X.toInf hb '' K), measurableSet_toMeasurable _ _, ?_, ?_⟩ <;>
@@ -33,7 +78,20 @@ def HinfFin : Prop :=
 
 theorem htotInf_of (hF : HinfFin) : HtotInf := by
   intro D X hb FdN FdN' u u' hX
-  have e1 : (X.measW u').μHinf Set.univ = X.muH u' Set.univ := (MassDataMassesW.volHTie_holds X hb u' hX.1).symm
+  have e1 : (X.measW u').μHinf Set.univ = X.muH u' Set.univ := by
+    have hc : Continuous (X.toInf hb) := by
+      unfold Formalism.L2.SG.HidaSetting.HidaSetting.toInf
+      exact continuous_fst.comp ((MassDataMassesW.continuous_splitA _ _).comp
+        ((Formalism.L2.SG.AdBridge.toHA X.B.I hb).continuous.comp (continuous_id.prodMk continuous_const)))
+    have hm : Measurable (X.toInf hb) := by
+      haveI : BorelSpace (HA (Ainf X.B.I.F) X.B.I.cm.sig X.B.I.J) := ⟨rfl⟩
+      exact hc.measurable
+    have h := (hX.1.2.2.2 u').2
+    have h1 := congrArg (fun m => m Set.univ) h
+    rw [Measure.map_apply hm MeasurableSet.univ, Set.preimage_univ] at h1
+    rw [← h1]
+    unfold Formalism.L2.SG.Measures.amb
+    rw [Measure.map_apply measurable_subtype_coe MeasurableSet.univ, Set.preimage_univ]
   refine ⟨e1, Measure.measure_univ_pos.2 (X.muH_haar u').2.1, e1 ▸ hF X hb FdN FdN' u u' hX⟩
 
 theorem hinfFin_of (hC : MassDataMassesW.HinfCompact) : HinfFin := by

@@ -1,12 +1,50 @@
-import Mathlib
-import Development.ResolutionOfSingularities.Foundations.Blowup.BlowupBasic
-import Development.ResolutionOfSingularities.Foundations.Blowup.BlowupExistence
-import Development.ResolutionOfSingularities.EmbeddedResolution.IteratedBlowups.BlowupSequenceRelations
-import Development.ResolutionOfSingularities.EmbeddedResolution.IteratedBlowups.BlowupSequenceBasic
-import Development.ResolutionOfSingularities.EmbeddedResolution.StrictTransformCharts.BlowupFlatBaseChange
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MarkedBlowupSequence.IdealBlowupSequence
-import Development.ResolutionOfSingularities.Foundations.BlowupUniversalProperty
-import Development.ResolutionOfSingularities.EmbeddedResolution.ResolutionOfSingularities
+module
+
+public import Development.ResolutionOfSingularities.EmbeddedResolution.IteratedBlowups.BlowupSequenceRelations
+public import Development.ResolutionOfSingularities.EmbeddedResolution.IteratedBlowups.BlowupSequenceBasic
+public import Development.ResolutionOfSingularities.EmbeddedResolution.StrictTransformCharts.BlowupFlatBaseChange
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 universe u
 
 open CategoryTheory AlgebraicGeometry CategoryTheory.Limits Opposite
@@ -28,27 +66,25 @@ instance instIsIsoStructMapZero (s : SequenceOfBlowups X) : IsIso (s.projectionT
   rw [s.projectionToBase_zero]
   infer_instance
 
-@[reassoc, simp]
 theorem pullbackTransitionMap_comp_fst (s : SequenceOfBlowups X) {X' : Scheme.{u}} (φ : X' ⟶ X) {i i' : ℕ}
     (h : i ≤ i') :
     s.pullbackTransitionMap φ h ≫ pullback.fst φ (s.projectionToBase i) = pullback.fst φ (s.projectionToBase i') :=
   s.pullbackTransitionMap_fst φ h
 
-@[reassoc, simp]
 theorem pullbackTransitionMap_comp_snd (s : SequenceOfBlowups X) {X' : Scheme.{u}} (φ : X' ⟶ X) {i i' : ℕ}
     (h : i ≤ i') :
     s.pullbackTransitionMap φ h ≫ pullback.snd φ (s.projectionToBase i) =
       pullback.snd φ (s.projectionToBase i') ≫ s.transitionMap h :=
   s.pullbackTransitionMap_snd φ h
 
-private theorem pullbackTransitionMap_refl (s : SequenceOfBlowups X) {X' : Scheme.{u}} (φ : X' ⟶ X)
+theorem pullbackTransitionMap_refl (s : SequenceOfBlowups X) {X' : Scheme.{u}} (φ : X' ⟶ X)
     {a : ℕ} (h : a ≤ a) :
     s.pullbackTransitionMap φ h = 𝟙 (pullback φ (s.projectionToBase a)) := by
   refine pullback.hom_ext ?_ ?_
   · rw [s.pullbackTransitionMap_fst, Category.id_comp]
   · rw [s.pullbackTransitionMap_snd, s.transitionMap_self_eq_id, Category.comp_id, Category.id_comp]
 
-private theorem pullbackTransitionMap_eq_comp (s : SequenceOfBlowups X) {X' : Scheme.{u}} (φ : X' ⟶ X)
+theorem pullbackTransitionMap_eq_comp (s : SequenceOfBlowups X) {X' : Scheme.{u}} (φ : X' ⟶ X)
     {a b c : ℕ} (hba : b ≤ a) (hcb : c ≤ b) (hca : c ≤ a) :
     s.pullbackTransitionMap φ hca = s.pullbackTransitionMap φ hba ≫ s.pullbackTransitionMap φ hcb := by
   refine pullback.hom_ext ?_ ?_
@@ -59,18 +95,9 @@ private theorem pullbackTransitionMap_eq_comp (s : SequenceOfBlowups X) {X' : Sc
 def baseChangeTower (s : SequenceOfBlowups X) {X' : Scheme.{u}} (φ : X' ⟶ X) : ℕᵒᵖ ⥤ Scheme.{u} where
   obj i := pullback φ (s.projectionToBase i.unop)
   map {_ _} f := s.pullbackTransitionMap φ (leOfHom f.unop)
-  map_id i := pullbackTransitionMap_refl s φ (leOfHom (𝟙 i).unop)
-  map_comp {_ _ _} f g :=
-    pullbackTransitionMap_eq_comp s φ (leOfHom f.unop) (leOfHom g.unop) (leOfHom (f ≫ g).unop)
-
-@[simp]
-theorem baseChangeTower_obj (s : SequenceOfBlowups X) {X' : Scheme.{u}} (φ : X' ⟶ X) (i : ℕ) :
-    (s.baseChangeTower φ).obj (op i) = pullback φ (s.projectionToBase i) := rfl
-
-@[simp]
-theorem baseChangeTower_map (s : SequenceOfBlowups X) {X' : Scheme.{u}} (φ : X' ⟶ X) {i i' : ℕ}
-    (h : i ≤ i') :
-    (s.baseChangeTower φ).map (homOfLE h).op = s.pullbackTransitionMap φ h := rfl
+  map_id i := by exact pullbackTransitionMap_refl s φ (leOfHom (𝟙 i).unop)
+  map_comp {_ _ _} f g := by
+    exact pullbackTransitionMap_eq_comp s φ (leOfHom f.unop) (leOfHom g.unop) (leOfHom (f ≫ g).unop)
 
 theorem isIso_pullback_fst_projectionToBase_zero (s : SequenceOfBlowups X) {X' : Scheme.{u}} (φ : X' ⟶ X) :
     IsIso (pullback.fst φ (s.projectionToBase 0)) := by
@@ -91,10 +118,6 @@ def baseChangeTowerObjZeroIso (s : SequenceOfBlowups X) {X' : Scheme.{u}} (φ : 
     (s.baseChangeTower φ).obj (op 0) ≅ X' :=
   @asIso Scheme.{u} _ _ _ (pullback.fst φ (s.projectionToBase 0)) (s.isIso_pullback_fst_projectionToBase_zero φ)
 
-@[simp]
-theorem baseChangeTowerObjZeroIso_hom (s : SequenceOfBlowups X) {X' : Scheme.{u}} (φ : X' ⟶ X) :
-    (s.baseChangeTowerObjZeroIso φ).hom = pullback.fst φ (s.projectionToBase 0) := rfl
-
 theorem isPullback_pullbackTransitionMap (s : SequenceOfBlowups X) {X' : Scheme.{u}} (φ : X' ⟶ X) (i : ℕ) :
     IsPullback (pullback.snd φ (s.projectionToBase (i + 1))) (s.pullbackTransitionMap φ (Nat.le_succ i))
       (s.transitionMapSucc i) (pullback.snd φ (s.projectionToBase i)) := by
@@ -114,7 +137,7 @@ theorem isPullback_pullbackTransitionMap (s : SequenceOfBlowups X) {X' : Scheme.
     exact (IsPullback.of_hasPullback φ (s.projectionToBase (i + 1))).flip
   exact sq.of_bot hsnd t
 
-private theorem isBlowupAlongIdealSheaf_baseChangeTower_map (s : SequenceOfBlowups X) {X' : Scheme.{u}} (φ : X' ⟶ X)
+theorem isBlowupAlongIdealSheaf_baseChangeTower_map (s : SequenceOfBlowups X) {X' : Scheme.{u}} (φ : X' ⟶ X)
     [AlgebraicGeometry.Flat φ] (i : ℕ) (hi : i < s.length) :
     Blowup.IsBlowupAlongIdealSheaf ((s.baseChangeTower φ).map (homOfLE (Nat.le_succ i)).op)
       ((s.center i).comap (pullback.snd φ (s.projectionToBase i))) :=
@@ -127,16 +150,11 @@ def baseChange (s : SequenceOfBlowups X) {X' : Scheme.{u}} (φ : X' ⟶ X) [Alge
   tower := s.baseChangeTower φ
   isoZero := s.baseChangeTowerObjZeroIso φ
   center i := (s.center i).comap (pullback.snd φ (s.projectionToBase i))
-  isBlowup i hi := isBlowupAlongIdealSheaf_baseChangeTower_map s φ i hi
+  isBlowup i hi := by exact isBlowupAlongIdealSheaf_baseChangeTower_map s φ i hi
 
 @[simp]
 theorem baseChange_length (s : SequenceOfBlowups X) {X' : Scheme.{u}} (φ : X' ⟶ X)
     [AlgebraicGeometry.Flat φ] : (s.baseChange φ).length = s.length := rfl
-
-@[simp]
-theorem baseChange_schemeAt (s : SequenceOfBlowups X) {X' : Scheme.{u}} (φ : X' ⟶ X)
-    [AlgebraicGeometry.Flat φ] (i : ℕ) :
-    (s.baseChange φ).schemeAt i = pullback φ (s.projectionToBase i) := rfl
 
 @[simp]
 theorem baseChange_blowupMorphism (s : SequenceOfBlowups X) {X' : Scheme.{u}} (φ : X' ⟶ X)

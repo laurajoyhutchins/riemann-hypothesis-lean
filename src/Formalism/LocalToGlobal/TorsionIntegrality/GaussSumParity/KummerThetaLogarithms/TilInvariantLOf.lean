@@ -1,7 +1,57 @@
-import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.BiextensionPointsIntegral
-import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.KummerThetaLogarithms.SubstFirstCoboundaryThree
-import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.KummerThetaLogarithms.EqZeroOfPowEqOne
-import Formalism.ThetaLogCoordinates.UniformThetaSubstitution.FinalS
+module
+
+public import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.BiextensionPointsIntegral
+public import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.StatementA
+public import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.KummerThetaLogarithms.EqZeroOfPowEqOne
+public import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.KummerThetaLogarithms.SubstFirstCoboundaryThree
+public import Formalism.ThetaLogCoordinates.UniformThetaSubstitution.FinalS
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 open scoped BigOperators
@@ -119,6 +169,7 @@ lemma linEL_sum (σ : K →+* K) {ι : Type} [Fintype ι] (a y : ι → K)
   refine Finset.sum_congr rfl fun s _ => ?_
   by_cases hs : s.val % 2 = 0
   · simp only [if_pos hs]
+
     rw [← RingHom.coe_pow, map_sum, map_sum, Finset.sum_mul]
     refine Finset.sum_congr rfl fun i _ => ?_
     rw [map_mul, RingHom.coe_pow, iter_even (ha i) hs, map_mul]
@@ -137,6 +188,7 @@ lemma linOL_sum (σ : K →+* K) {ι : Type} [Fintype ι] (a y : ι → K)
   · simp only [if_pos hs]
     simp
   · simp only [if_neg hs]
+
     rw [← RingHom.coe_pow, map_sum, map_sum, Finset.sum_mul]
     refine Finset.sum_congr rfl fun i _ => ?_
     rw [map_mul, RingHom.coe_pow, iter_odd (ha i) hs, map_mul]
@@ -178,6 +230,7 @@ theorem dual_expansion : DualExpand := by
   refine ⟨fun r r' => ?_, fun r => ?_, fun r' => ?_⟩
   · have hc : σ^[d] (x * oms r * om r') = x * oms r * om r' := by
       rw [iterate_map_mul, iterate_map_mul, hx, (hfix r).2, (hfix r').1]
+
     rw [map_sum, map_sum]
     rw [← (Equiv.subRight (2 : ZMod d)).sum_comp
       (fun s : ZMod d => σ (σ (if s.val % 2 = 0 then σ^[s.val] (x * oms r * om r') else 0)))]
@@ -336,10 +389,5 @@ theorem MeanSimeqL_of : TilInvariantL → MeanSimeqL := by
   unfold Simeq
   rw [e]
   exact hlam
-
-theorem TilInvariant_of : TilInvariantL → LetterShift → TilInvariant := by
-  intro hTI hLS K _ _ _ l d _ σ hU hd2 hd F hF be0 hF1 hF2 ι _ _ om oms hOw hT u hu
-  exact hTI K l d σ hU hd2 hd F hF be0 hF1 hF2 ι om oms hOw hT u hu (ZMod d) (letLog l)
-    (hLS K l d σ hU.1).2.1
 
 end Formalism.L2.Th1.D

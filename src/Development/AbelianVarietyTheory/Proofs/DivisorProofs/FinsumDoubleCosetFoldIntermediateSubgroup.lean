@@ -1,6 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.PointSide
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FinsumFiberwiseOfFiniteSupportComplex
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.PointSide
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FinsumFiberwiseOfFiniteSupportComplex
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open GlobalTheory.LKCount
 
@@ -20,7 +63,7 @@ noncomputable def foldMap (Γ' T K : Subgroup G) (hΓT : Γ' ≤ T) (y : G)
     {q : DoubleCoset.Quotient (Γ' : Set G) (K : Set G) //
       DoubleCoset.mk T K (Quotient.out q) = DoubleCoset.mk T K y} :=
   ⟨DoubleCoset.mk Γ' K (((Quotient.out p : T) : G) * y), by
-    obtain ⟨g, k, hg, hk, he⟩ := DoubleCoset.mk_out_eq_mul Γ' K (((Quotient.out p : T) : G) * y)
+    obtain ⟨g, hg, k, hk, he⟩ := DoubleCoset.mk_out_eq_mul Γ' K (((Quotient.out p : T) : G) * y)
     rw [he, DoubleCoset.eq]
     refine ⟨(g * ((Quotient.out p : T) : G))⁻¹, T.inv_mem (T.mul_mem (hΓT hg) (Quotient.out p).2),
       k⁻¹, K.inv_mem hk, by group⟩⟩
@@ -47,13 +90,13 @@ private lemma foldMap_bijective' (Γ' T K : Subgroup G) (hΓT : Γ' ≤ T) (y : 
   · intro p p' h
     have h' : DoubleCoset.mk Γ' K (((Quotient.out p : T) : G) * y) =
         DoubleCoset.mk Γ' K (((Quotient.out p' : T) : G) * y) := congrArg Subtype.val h
-    obtain ⟨γ, hγ, k, hk, he⟩ := (DoubleCoset.eq Γ' K _ _).1 h'
+    obtain ⟨γ, hγ, k, hk, he⟩ := DoubleCoset.eq.mp h'
     have hmem : y * k * y⁻¹ = ((Quotient.out p : T) : G)⁻¹ * γ⁻¹ * ((Quotient.out p' : T) : G) := by
       rw [eq_mul_inv_of_mul_eq he]; group
     have hT : y * k * y⁻¹ ∈ T := by
       rw [hmem]
       exact T.mul_mem (T.mul_mem (T.inv_mem (Quotient.out p).2) (T.inv_mem (hΓT hγ))) (Quotient.out p').2
-    rw [← DoubleCoset.out_eq' _ _ p, ← DoubleCoset.out_eq' _ _ p', DoubleCoset.eq]
+    rw [← DoubleCoset.out_eq' p, ← DoubleCoset.out_eq' p', DoubleCoset.eq]
     refine ⟨⟨γ, hΓT hγ⟩, by rw [Subgroup.mem_subgroupOf]; exact hγ, ⟨y * k * y⁻¹, hT⟩, ?_, ?_⟩
     · rw [Subgroup.mem_subgroupOf, Subgroup.mem_inf, mem_map_conj_iff_inv_mul_mul_mem']
       refine ⟨hT, ?_⟩
@@ -64,15 +107,15 @@ private lemma foldMap_bijective' (Γ' T K : Subgroup G) (hΓT : Γ' ≤ T) (y : 
       rw [eq_mul_inv_of_mul_eq he]
       group
   · rintro ⟨q, hq⟩
-    obtain ⟨t, ht, k, hk, hqe⟩ := (DoubleCoset.eq T K _ _).1 hq.symm
+    obtain ⟨t, ht, k, hk, hqe⟩ := DoubleCoset.eq.mp hq.symm
     refine ⟨DoubleCoset.mk (Γ'.subgroupOf T) ((T ⊓ K.map (MulAut.conj y).toMonoidHom).subgroupOf T)
       ⟨t, ht⟩, ?_⟩
     apply Subtype.ext
     change DoubleCoset.mk Γ' K (((Quotient.out (DoubleCoset.mk (Γ'.subgroupOf T)
       ((T ⊓ K.map (MulAut.conj y).toMonoidHom).subgroupOf T) ⟨t, ht⟩) : T) : G) * y) = q
-    obtain ⟨γ, h, hγ, hh, hout⟩ := DoubleCoset.mk_out_eq_mul (Γ'.subgroupOf T)
+    obtain ⟨γ, hγ, h, hh, hout⟩ := DoubleCoset.mk_out_eq_mul (Γ'.subgroupOf T)
       ((T ⊓ K.map (MulAut.conj y).toMonoidHom).subgroupOf T) ⟨t, ht⟩
-    rw [hout, ← DoubleCoset.out_eq' Γ' K q, DoubleCoset.eq]
+    rw [hout, ← DoubleCoset.out_eq' q, DoubleCoset.eq]
     rw [Subgroup.mem_subgroupOf] at hγ
     rw [Subgroup.mem_subgroupOf, Subgroup.mem_inf, mem_map_conj_iff_inv_mul_mul_mem'] at hh
     refine ⟨(γ : G)⁻¹, Γ'.inv_mem hγ, (y⁻¹ * h * y)⁻¹ * k, K.mul_mem (K.inv_mem hh.2) hk, ?_⟩
@@ -137,11 +180,11 @@ theorem _root_.GlobalTheory.finsum_fold_intermediate : ∀ {G : Type} [Group G] 
     (B := DoubleCoset.Quotient (T : Set G) (K : Set G))
     (fun q => DoubleCoset.mk T K (Quotient.out q)) _ hsupp).trans (finsum_congr fun y' => ?_)
   set y := Quotient.out y'
-  have hy' : DoubleCoset.mk T K y = y' := DoubleCoset.out_eq' T K y'
+  have hy' : DoubleCoset.mk T K y = y' := DoubleCoset.out_eq' y'
   have hfib : ∀ q : DoubleCoset.Quotient (Γ' : Set G) (K : Set G),
       DoubleCoset.mk T K (Quotient.out q) = DoubleCoset.mk T K y → F (Quotient.out q) = F y := by
     intro q hq
-    obtain ⟨t, ht, k, hk, hqe⟩ := (DoubleCoset.eq T K _ _).1 hq.symm
+    obtain ⟨t, ht, k, hk, hqe⟩ := DoubleCoset.eq.mp hq.symm
     rw [hqe, hF t ht y k hk]
   let e : DoubleCoset.Quotient ((Γ'.subgroupOf T : Subgroup T) : Set T)
       (((T ⊓ K.map (MulAut.conj y).toMonoidHom).subgroupOf T : Subgroup T) : Set T) →
@@ -164,7 +207,7 @@ theorem _root_.GlobalTheory.finsum_fold_intermediate : ∀ {G : Type} [Group G] 
       ((Nat.card ((Γ'.subgroupOf T) ⊓ ((T ⊓ K.map (MulAut.conj y).toMonoidHom).subgroupOf T).map
         (MulAut.conj (Quotient.out p)).toMonoidHom : Subgroup T) : ℕ) : ℂ)⁻¹ * F y := by
     intro p
-    obtain ⟨γ, k, hγ, hk, hg⟩ := DoubleCoset.mk_out_eq_mul Γ' K (((Quotient.out p : T) : G) * y)
+    obtain ⟨γ, hγ, k, hk, hg⟩ := DoubleCoset.mk_out_eq_mul Γ' K (((Quotient.out p : T) : G) * y)
     have hval : (e p).1 = DoubleCoset.mk Γ' K (((Quotient.out p : T) : G) * y) := rfl
     rw [card_subgroupOf_inf_map_conj_eq Γ' T K hΓT, hval, hg, card_inf_map_conj_mul_mul_eq Γ' K hγ hk,
       show γ * (((Quotient.out p : T) : G) * y) * k = (γ * ((Quotient.out p : T) : G)) * y * k by group,

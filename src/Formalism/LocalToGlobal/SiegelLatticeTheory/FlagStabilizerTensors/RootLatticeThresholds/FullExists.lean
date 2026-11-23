@@ -1,9 +1,57 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.PoincareConstantEq
-import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.InHHAlg
-import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.ConcreteLevelAdelicSubset
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedVolumeStatements.LevelSubgroupProperties
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedVolumeStatements.GenericRatioOfBoundHolds
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.PoincareConstantEq
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.InHHAlg
+import Formalism.LocalRingCardinality.RankBoundMonotoneInDimension
+import Formalism.LocalRingCardinality.SpanPowerMembership.LocAtA
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedVolumeStatements.GenericRatioOfBoundHolds
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedVolumeStatements.LevelSubgroupProperties
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.ConcreteLevelAdelicSubset
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -218,15 +266,13 @@ def Eqv (Λ Λ' : Submodule (𝓞 D.host.E) (VS D).V) : Prop :=
 def dc (hK : X.LevelSubgroupCharacter) (h h' : Hfin X u) : Prop :=
   ∃ (g : Gam X u) (κ : Ku X u hK), h' = iotaF X u g * h * (κ : Hfin X u)
 
-theorem dc_equiv (hK : X.LevelSubgroupCharacter) : Equivalence (dc X u hK) where
-  refl h := ⟨1, 1, by simp⟩
-  symm := by
-    rintro h h' ⟨g, κ, rfl⟩
+theorem dc_equiv (hK : X.LevelSubgroupCharacter) : Equivalence (dc X u hK) := by
+  refine ⟨fun h => ⟨1, 1, by simp⟩, ?_, ?_⟩
+  · rintro h h' ⟨g, κ, rfl⟩
     refine ⟨g⁻¹, κ⁻¹, ?_⟩
     simp only [map_inv, Subgroup.coe_inv]
     group
-  trans := by
-    rintro h h' h'' ⟨g, κ, rfl⟩ ⟨g', κ', rfl⟩
+  · rintro h h' h'' ⟨g, κ, rfl⟩ ⟨g', κ', rfl⟩
     refine ⟨g' * g, κ * κ', ?_⟩
     simp only [map_mul, Subgroup.coe_mul]
     group
@@ -336,9 +382,6 @@ def RowStepsC : Prop :=
 
 def TRExistsC : Prop := ∀ (D : D7) (X : HidaSetting D), X.LevelSubgroupCharacter → ∃ TR : TypedRed X, ∀ v, TR.psi0 v ≠ 1
 
-def FundNC : Prop :=
-  ∀ (D : D7) (X : HidaSetting D), X.LevelSubgroupCharacter → ∀ u : D.what₂.Word, ∃ FN : Set X.B.I.Ginf, IsSFund X.B.I (NOinf X u) FN
-
 def LocC : Prop :=
   ∀ D : D7, ∃ (δ : ∀ p : Formalism.MainNotions.S.LocalSplitGroups.PlF D, (D.s.atP p).Fp)
     (M : ∀ p : Formalism.MainNotions.S.LocalSplitGroups.PlF D, Formalism.MainNotions.S.Loc.Model (D.s.atP p).Fp (D.s.atP p).Ep),
@@ -346,20 +389,6 @@ def LocC : Prop :=
     ∀ (p : Formalism.MainNotions.S.LocalSplitGroups.PlF D) (i : Fin 2), ((D.host.g i : ℕ) : 𝓞 D.host.F) ∈ p.asIdeal →
       δ p = (D.s.atP p).ιF (((D.host.g 0 : ℕ) : D.host.F) * ((D.host.g 1 : ℕ) : D.host.F) /
         ((D.host.g i : ℕ) : D.host.F))
-
-theorem fullExists_of (h1 : TRExistsC) (hR : RowStepsC) (h3 : FundNC) (h4 : LocC) : FullExists := by
-  intro D X hK
-  obtain ⟨TR, hTR⟩ := h1 D X hK
-  have h2 : ∀ u : D.what₂.Word, ∃ what₂ : Finset (Submodule (𝓞 D.host.E) (VS D).V), IsRowReps D (X.Fu u) what₂ ∧
-      (∀ Λ ∈ what₂, Formalism.L2.SG.Saturated.IsSplitRow D (X.Fu u) Λ) ∧ ∃ cs : ColSys X u what₂, ColReps hK cs := by
-    intro u
-    obtain ⟨a0, a1, a2, a3, a4, a5, a6⟩ := hR D X hK u
-    exact rowsCols_of X u hK a0 a1 a2 a3 a4 a5 a6
-  choose what₂ hrows hsplit cs hcs using h2
-  choose Dt hDt using fun u => repsExist X u
-  choose FN hFN using h3 D X hK
-  obtain ⟨δ, M, hag, hpin⟩ := h4 D
-  exact ⟨⟨hK, TR, hTR, what₂, hrows, hsplit, cs, hcs, Dt, hDt, FN, hFN, δ, M, hag, hpin⟩⟩
 
 section R0
 
@@ -515,9 +544,6 @@ theorem rowStepsC_of (h : RowStepsC') : RowStepsC := fun D X hK u =>
 theorem volPosC_of' (h2 : NOCountC) (h3 : NOCofiniteC) (h4 : HFiniteC) : VolPosC :=
   volPosC_of noSubC h2 h3 h4
 
-theorem fullExists_of' (h1 : TRExistsC) (hR : RowStepsC') (h3 : FundNC) (h4 : LocC) : FullExists :=
-  fullExists_of h1 (rowStepsC_of hR) h3 h4
-
 section R6a
 
 variable {D : D7} (X : HidaSetting D)
@@ -587,8 +613,9 @@ theorem hT_expand (x y : (VS D).V) :
     (VS D).hT x y =
       ∑ i, ∑ j, star (X.bas.equivFun x i) * (X.bas.equivFun y j * (VS D).hT (X.bas i) (X.bas j)) := by
   conv_lhs => rw [← X.bas.sum_equivFun x, ← X.bas.sum_equivFun y]
+
   simp only [map_sum, LinearMap.map_smulₛₗ, LinearMap.sum_apply, LinearMap.smul_apply, map_smul, smul_eq_mul,
-    starRingEnd_apply, Finset.mul_sum]
+  starRingEnd_apply, Finset.mul_sum]
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
   ring
@@ -732,15 +759,6 @@ theorem noCountC : NOCountC := fun _ X u => noCount X u
 
 theorem volPosC_of'' (h3 : NOCofiniteC) (h4 : HFiniteC) : VolPosC := volPosC_of' noCountC h3 h4
 
-def RowStepsC'' : Prop :=
-  ∀ (D : D7) (X : HidaSetting D) (hK : X.LevelSubgroupCharacter) (u : D.what₂.Word),
-    LatRowLat X u ∧ LatSurj X u ∧ LatInj X u ∧ ClassFin X u hK
-
-theorem fullExists_of'' (h1 : TRExistsC) (hR : RowStepsC'') (h4 : LocC) : FullExists :=
-  fullExists_of' h1 (fun D X hK u =>
-    let ⟨a2, a3, a4, a5⟩ := hR D X hK u
-    ⟨latSub X u, latRow_of X u a2, a3, a4, a5, gamIsom_of X (inclInj_holds X) u⟩) fundNC_holds h4
-
 theorem classFin_of {D : D7} (X : HidaSetting D) (u : D.what₂.Word) (hK : X.LevelSubgroupCharacter)
     (h : Formalism.L2.SG.PoincareInHH.Cut.ClassFin X u hK) : ClassFin X u hK := by
   haveI : Finite (Formalism.L2.SG.ColsDim.Classes (iotaF X u) (Ku X u hK)) := h
@@ -754,10 +772,5 @@ theorem classFin_of {D : D7} (X : HidaSetting D) (u : D.what₂.Word) (hK : X.Le
 def LatticeRowBijectionClassFinite : Prop :=
   ∀ (D : D7) (X : HidaSetting D) (hK : X.LevelSubgroupCharacter) (u : D.what₂.Word),
     LatRowLat X u ∧ LatSurj X u ∧ LatInj X u ∧ Formalism.L2.SG.PoincareInHH.Cut.ClassFin X u hK
-
-theorem full_exists_of_lattice_steps (h1 : TRExistsC) (hR : LatticeRowBijectionClassFinite) (h4 : LocC) : FullExists :=
-  fullExists_of'' h1 (fun D X hK u =>
-    let ⟨a2, a3, a4, a5⟩ := hR D X hK u
-    ⟨a2, a3, a4, classFin_of X u hK a5⟩) h4
 
 end Formalism.L2.SG.Pf

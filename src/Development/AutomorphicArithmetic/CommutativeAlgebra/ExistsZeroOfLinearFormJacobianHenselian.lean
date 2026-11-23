@@ -1,13 +1,66 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.MvPolynomial.PDeriv
+public import Mathlib.RingTheory.Henselian
+public import Development.AutomorphicArithmetic.CommutativeAlgebra.ExistsCommonZeroOfJacobianIsUnitHenselian
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
 import Development.AutomorphicArithmetic.CommutativeAlgebra.EtaleCohomology.GoodRoot
-import Development.AutomorphicArithmetic.CommutativeAlgebra.ExistsCommonZeroOfJacobianIsUnitHenselian
+
+@[expose] public section
 
 noncomputable section
 open IsLocalRing UpperTheory.Et
 
 private lemma UpperTheory.eval_zero_pderiv {R : Type} [CommRing R] {n : ℕ} (j : Fin n)
     (P : MvPolynomial (Fin n) R) :
-    MvPolynomial.eval 0 (MvPolynomial.pderiv j P) = MvPolynomial.coeff (Finsupp.single j 1) P := by
+    MvPolynomial.eval 0 (MvPolynomial.pderiv j P) = AddMonoidAlgebra.coeff P (Finsupp.single j 1) := by
   rw [MvPolynomial.eval_zero, MvPolynomial.constantCoeff_eq]
   induction P using MvPolynomial.induction_on' with
   | monomial s a =>
@@ -31,7 +84,7 @@ private lemma UpperTheory.eval_zero_pderiv {R : Type} [CommRing R] {n : ℕ} (j 
             exact hk
       · rfl
   | add p q hp hq =>
-    rw [map_add, MvPolynomial.coeff_add, MvPolynomial.coeff_add, hp, hq]
+    rw [map_add (f := _), MvPolynomial.coeff_add, MvPolynomial.coeff_add, hp, hq]
 
 theorem UpperTheory.exists_zero_of_linear_form_jacobian_henselian :
     ∀ (A E : Type) [CommRing A] [HenselianLocalRing A] [CommRing E] [Algebra A E] (n : ℕ) (Φ : MvPolynomial (Fin n) E) (L : E →ₗ[A] (Fin n → A)),
@@ -40,8 +93,8 @@ theorem UpperTheory.exists_zero_of_linear_form_jacobian_henselian :
       ∃ x : Fin n → A, (∀ j, x j ∈ maximalIdeal A) ∧ L (MvPolynomial.eval (fun j => algebraMap A E (x j)) Φ) = 0 := by
   intro A E _ _ _ _ n Φ L h0 h1
   let G : Fin n → MvPolynomial (Fin n) E → MvPolynomial (Fin n) A := fun i P =>
-    ∑ d ∈ P.support, MvPolynomial.monomial d (L (MvPolynomial.coeff d P) i)
-  have hG : ∀ i d P, MvPolynomial.coeff d (G i P) = L (MvPolynomial.coeff d P) i := by
+    ∑ d ∈ P.support, MvPolynomial.monomial d (L (AddMonoidAlgebra.coeff P d) i)
+  have hG : ∀ i d P, AddMonoidAlgebra.coeff (G i P) d = L (AddMonoidAlgebra.coeff P d) i := by
     intro i d P
     simp only [G, MvPolynomial.coeff_sum, MvPolynomial.coeff_monomial, Finset.sum_ite_eq']
     split_ifs with h
@@ -51,7 +104,7 @@ theorem UpperTheory.exists_zero_of_linear_form_jacobian_henselian :
   have hGadd : ∀ i p q, G i (p + q) = G i p + G i q := by
     intro i p q
     ext d
-    rw [MvPolynomial.coeff_add, hG, hG, hG, MvPolynomial.coeff_add, map_add, Pi.add_apply]
+    rw [MvPolynomial.coeff_add, hG, hG, hG, MvPolynomial.coeff_add, map_add (f := _), Pi.add_apply]
   have key : ∀ i (x : Fin n → A) (P : MvPolynomial (Fin n) E),
       MvPolynomial.eval x (G i P) = L (MvPolynomial.eval (fun j => algebraMap A E (x j)) P) i := by
     intro i x P
@@ -67,7 +120,7 @@ theorem UpperTheory.exists_zero_of_linear_form_jacobian_henselian :
       rw [hp, ← Algebra.commutes, ← Algebra.smul_def, map_smul]
       simp [mul_comm]
     | add p q hp hq =>
-      rw [hGadd, map_add, map_add, map_add, Pi.add_apply, hp, hq]
+      rw [hGadd, map_add (f := _), map_add (f := _), map_add (f := _), Pi.add_apply, hp, hq]
   let F : Fin n → MvPolynomial (Fin n) A := fun i => G i Φ
   have hF0 : ∀ i, MvPolynomial.eval 0 (F i) ∈ maximalIdeal A := by
     intro i

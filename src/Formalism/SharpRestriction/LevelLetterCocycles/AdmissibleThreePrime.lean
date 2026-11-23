@@ -1,6 +1,44 @@
-import Mathlib
-import Formalism.SharpRestriction.LevelLetterCocycles.ArithmeticCylinders
-import Formalism.SharpRestriction.LevelLetterCocycles.ExistsInertiaCharpolyFactorOfTameType
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.ArithmeticCylinders
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -48,28 +86,5 @@ def LabelDegreeHypotheses (D : D7) : Prop :=
             ι (Formalism.CyclotomicNorms.primeToPart (D.nd.l i)
               (algebraMap (ZMod (D.host.g k)) (Formalism.CyclotomicNorms.Fbar (D.host.g k))
                 ((D.nd.chiT k v j : (ZMod (D.host.g k))ˣ) : ZMod (D.host.g k)))) ^ e₂)
-
-def Adm3p (D : D7) : Prop := SumRepresentations.tieLab D ∧ LabelDegreeHypotheses D
-
-def ThreePrimeTheorem (D : D7) : Prop := Adm3p D → TheoremThreePrime D
-
-def PlaceLawConstantSix {D : D7} (A : ArithmeticCylinders.AllRows D) : Prop := ArithmeticCylinders.PlaceLawIdempotents A 6
-
-def GLarge (D : D7) : Prop := ∀ k : Fin 2, 2 * D.R.r ≤ D.host.g k
-
-def VecData {D : D7} (A : ArithmeticCylinders.AllRows D) : Prop :=
-  ∀ (k : Fin 2) (v : D.nd.PlG k), ∃ ψ₀ : AddChar (ZMod (D.host.g k)) ℂ, ψ₀ ≠ 1 ∧
-    (A.eVec k v = ArithmeticCylinders.eUk D k ψ₀ ∨ A.eVec k v = ArithmeticCylinders.eJk D k ψ₀)
-
-def AdmCylindersL {D : D7} (A : ArithmeticCylinders.AllRows D) : Prop := ArithmeticCylinders.ConclusionL D ∧ GLarge D ∧ VecData A
-
-def PlaceLawTheorem {D : D7} (A : ArithmeticCylinders.AllRows D) : Prop := AdmCylindersL A → PlaceLawConstantSix A
-
-theorem place_law_theorem_holds {D : D7} (A : ArithmeticCylinders.AllRows D) : PlaceLawTheorem A :=
-  fun ⟨hL, hg, hV⟩ => ArithmeticCylinders.place_law_of_statement A hL hg hV
-
-theorem place_law_idempotents_six_of_lifting {D : D7} (A : ArithmeticCylinders.AllRows D) (hS : ArithmeticCylinders.LiftingLemmasStatement D) (hq : ArithmeticCylinders.admLq D) (hg : GLarge D)
-    (hV : VecData A) : ArithmeticCylinders.PlaceLawIdempotents A 6 :=
-  place_law_theorem_holds A ⟨hS hq, hg, hV⟩
 
 end Formalism.MainNotions.AdmissibleThreePrime

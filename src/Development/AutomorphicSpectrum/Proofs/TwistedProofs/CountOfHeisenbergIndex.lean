@@ -1,5 +1,56 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.HasLenOfLatLen
+module
+
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.HasLenOfLatLen
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open GlobalTheory.InertZeta Formalism.UG Matrix
 
 noncomputable section
@@ -67,6 +118,7 @@ theorem exists_int_lift (hH : Heis) (hU : IsUnramInv ϖ σ q) (ρ : Fin N → L)
     rw [hU.2.1]
     exact hx
   have hσs : σ (-∑ j, ρ j * σ (ρ j.rev)) = -∑ j, ρ j * σ (ρ j.rev) := by
+
     rw [map_neg, map_sum]
     congr 1
     simp only [map_mul, hσσ]
@@ -213,7 +265,7 @@ theorem count (hH : Heis) (hL : LatIndex) (hT : TraceIndex) : Count := by
       refine ⟨by simpa using hzcorner, ?_⟩
       have h1 := (mem_traceZero.mp (Quotient.out t : traceZero σ (ϖ ^ f)).2).2
       have h2 := (mem_traceZero.mp (Quotient.out t' : traceZero σ (ϖ ^ f)).2).2
-      simp only [AddSubgroup.coe_add, AddSubgroup.coe_neg, map_add, map_neg]
+      simp only [AddSubgroup.coe_add, AddSubgroup.coe_neg, map_add (f := _), map_neg]
       linear_combination -h1 + h2)
     rw [htt]
   have hsurjG : Function.Surjective G := by

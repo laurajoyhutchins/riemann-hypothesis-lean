@@ -1,4 +1,49 @@
-import Mathlib
+module
+
+public import Mathlib.AlgebraicGeometry.Sites.SmallAffineZariski
+public import Mathlib.Combinatorics.Quiver.ReflQuiver
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits Opposite
 
@@ -34,9 +79,9 @@ lemma res_mem_gen_of_mem {V W W' : X.Opens} (h : W ≤ V) (h' : W' ≤ W) (T : S
   map_gen_le F α h h' T ⟨b, hb, rfl⟩
 
 lemma gen_eq_adjoin {V W : X.Opens} (h : W ≤ V) (T : Set (F.obj (op V))) :
-    letI := (α.app (op W)).hom.toAlgebra
-    gen F α h T = (Algebra.adjoin Γ(X, W) ((F.map (homOfLE h).op).hom '' T)).toSubring := by
-  letI := (α.app (op W)).hom.toAlgebra
+    (letI := (α.app (op W)).hom.toAlgebra
+     gen F α h T = (Algebra.adjoin Γ(X, W) ((F.map (homOfLE h).op).hom '' T)).toSubring) := by
+  let := (α.app (op W)).hom.toAlgebra
   rw [Algebra.adjoin_eq_ring_closure]
   rfl
 
@@ -69,7 +114,6 @@ lemma res_mem_sub {W W₁ : X.Opens} (h : W₁ ≤ W) {b : F.obj (op W)} (hb : b
 def subMap (W : X.Opens) : Γ(X, W) →+* sub F α V T W :=
   (α.app (op W)).hom.codRestrict _ (algebraMap_mem_sub F α V T W)
 
-@[simps obj]
 def subFunctor : X.AffineZariskiSiteᵒᵖ ⥤ CommRingCat where
   obj W := CommRingCat.of (sub F α V T W.unop.1)
   map {W W₁} f := CommRingCat.ofHom
@@ -108,8 +152,8 @@ lemma subIncl_injective (W : X.AffineZariskiSiteᵒᵖ) : Function.Injective ((s
 lemma isLocalizationAway
     (hα : ((Scheme.AffineZariskiSite.toOpensFunctor X).op.whiskerLeft α).Coequifibered)
     {W : X.Opens} (hW : IsAffineOpen W) (f : Γ(X, W)) :
-    letI := (F.map (homOfLE (X.basicOpen_le f)).op).hom.toAlgebra
-    IsLocalization.Away ((α.app (op W)).hom f) (F.obj (op (X.basicOpen f))) :=
+    (letI := (F.map (homOfLE (X.basicOpen_le f)).op).hom.toAlgebra
+     IsLocalization.Away ((α.app (op W)).hom f) (F.obj (op (X.basicOpen f)))) :=
   Scheme.AffineZariskiSite.coequifibered_iff_forall_isLocalizationAway.mp hα ⟨W, hW⟩ f
 
 end GlobalTheory.QcSub

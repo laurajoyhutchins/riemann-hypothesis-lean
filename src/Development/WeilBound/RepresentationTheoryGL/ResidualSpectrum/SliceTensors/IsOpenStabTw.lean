@@ -1,9 +1,51 @@
-import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.SliceTensors.PSatCore
-import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.SliceTensors.PSatTw
-import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.SliceTensors.EventuallySatV
-import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.SliceTensors.ExistsHasInfCharGL
-import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.SliceTensors.PProjA
-import GroundTheory.PAdicHodge.AInfGalois
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.SliceTensors.TwistedSlicesSquareIntegrable
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.DiscreteAutomorphicRepGLExistsLocalComponent
+public import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.SliceTensors.EventuallySatV
+public import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.SliceTensors.ExistsHasInfCharGL
+public import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.SliceTensors.PProjA
+public import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.SliceTensors.PSatCore
+public import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.SliceTensors.PSatTw
+import GroundTheory.GlobalFields.LocalFieldAtPlace
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CapelliLeviFactorizationSum
+
+@[expose] public section
 
 noncomputable section
 
@@ -16,7 +58,7 @@ namespace SatakeInductionStabiliserOpen
 
 open SatakeVectors PInfInd2A
 
-variable {E : Type} [Field E] [NumberField E] [IsTotallyComplex E]
+variable {E : Type} [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E]
 
 theorem isOpen_stab_tw {m : ℕ} {V : Submodule ℂ (Sm E m)} (hV : IsDiscrete V) (z : ℂ) (w : HeightOneSpectrum (𝓞 E)) :
     ∀ ψ ∈ tw V z, IsOpen {g : GL (Fin m) (w.adicCompletion E) | finRep E m (locGL E m w g) ψ = ψ} := by
@@ -68,7 +110,7 @@ theorem satInd2_holds : SatInd2 := by
       Subtype.val_injective hsat
   have hFB : GlobalTheory.LFun.IsSatVecGL w ((finRep E (r + s)).comp (locGL E (r + s) w)) (f φ) B :=
     hsatD.map (f ∘ₗ V.subtype) (fun g v => hfe (.fin (locGL E (r + s) w g)) v.1 v.2) hF0
-  have hFK : ∀ k ∈ GlobalTheory.LFun.KGL w (r + s), finRep E (r + s) (locGL E (r + s) w k) (f φ) = f φ := fun k hk =>
+  have hFK : ∀ k ∈ GlobalTheory.LFun.KGL w (n := (r + s)), finRep E (r + s) (locGL E (r + s) w k) (f φ) = f φ := fun k hk =>
     GlobalTheory.LGrp.mem_fixed.1 hFB.2.1 k hk
   have h : ∑ i, (![r, s] : Fin 2 → ℕ) i = r + s := GlobalTheory.CompanionTheory.CTFin.CapFactor.two_sum _
   have hcore := isSatVecGL_of_ind (n := ![r, s]) h (blkV (tw V₁ z₁) (tw V₂ z₂))
@@ -95,7 +137,7 @@ theorem satInd2_holds : SatInd2 := by
   have hBeq := GlobalTheory.LFun.IsSatVecGL.unique hFB hcore
   have q0 : ((Ideal.absNorm w.asIdeal : ℕ) : ℂ) ≠ 0 :=
     Nat.cast_ne_zero.2 (NumberField.HeightOneSpectrum.one_lt_absNorm w).ne_bot
-  rw [hBeq, Fin.sum_univ_two, Multiset.map_add]
+  rw [hBeq, Fin.sum_univ_two, Multiset.map_add (f := _)]
   congr 1
   · change ((B₁.map (· * qU w (-z₁))).map (· * qU w ((modExp (fun i => Fin (![r, s] i)) 0 : ℂ) / 2))).map
       (fun b : ℂˣ => (b : ℂ)) = _

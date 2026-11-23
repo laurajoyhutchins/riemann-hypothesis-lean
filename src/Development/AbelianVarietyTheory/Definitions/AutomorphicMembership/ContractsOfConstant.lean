@@ -1,6 +1,47 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.IsEqnIffGeneratesAtInv
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.NonemptyHomologyEquiv
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.IsEqnIffGeneratesAtInv
+public import Development.AbelianVarietyTheory.Definitions.Divisors.MemSubPtsCutBaseChangeIff
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -62,12 +103,6 @@ theorem BasePointFree.not_isBasePoint (h : D.BasePointFree V) (x : X) : ¬ D.IsB
 theorem BasePointFree.exists_ne_zero (h : D.BasePointFree V) : ∃ f ∈ V, f ≠ 0 :=
   have ⟨f, hf, h'⟩ := h.2 (genericPoint X); ⟨f, hf, h'.ne_zero⟩
 
-theorem VanishesOn.eq_zero {f : X.functionField} (h : D.VanishesOn f Set.univ) : f = 0 :=
-  by_contra fun hf => (vanishesAt_iff.1 (h _ trivial)).2 (D.generatesAt_genericPoint hf)
-
-theorem Eff.vanishesOn_one_iff (h : D.Eff) {Z : Set X} : D.VanishesOn 1 Z ↔ Z ⊆ D.supp :=
-  forall₂_congr fun _ _ => h.mem_supp_iff.symm
-
 theorem IsEqn.generatesAt_aeval_iff {x : X} {u : X.functionFieldˣ} (h : D.IsEqn x u) {ι : Type}
     (b : ι → X.functionField) {d : ℕ} {g : MvPolynomial ι k} (hg : g.IsHomogeneous d) :
     (d • D).GeneratesAt x (aeval b g) ↔ UnitAt x (aeval (fun i => b i * u) g) := by
@@ -110,14 +145,14 @@ variable {k : Type} [Field k] {S : LinSys k} [IsIntegral S.Y] [Algebra k S.Y.fun
 
 def ratSet : Set S.Y.functionField := Set.range fun j => h.rat (S.b j)
 
-omit [Algebra k S.Y.functionField] [IsScalarTower k Γ(S.Y, ⊤) S.Y.functionField] in
 
+omit [Algebra k S.Y.functionField] [IsScalarTower k Γ(S.Y, ⊤) S.Y.functionField] in
 theorem mem_of_mem_ratSet : ∀ f ∈ h.ratSet, f ∈ D.sections := by
   rintro _ ⟨j, rfl⟩
   exact h.rat_mem _
 
-omit [Algebra k S.Y.functionField] [IsScalarTower k Γ(S.Y, ⊤) S.Y.functionField] in
 
+omit [Algebra k S.Y.functionField] [IsScalarTower k Γ(S.Y, ⊤) S.Y.functionField] in
 theorem basePointFree_iff : D.BasePointFree h.ratSet ↔ S.BasePointFree := by
   refine ⟨fun hb => eq_top_iff.2 fun x _ => ?_, fun hb => ⟨h.mem_of_mem_ratSet, fun x => ?_⟩⟩
   · obtain ⟨_, ⟨j, rfl⟩, hj⟩ := hb.2 x
@@ -156,48 +191,6 @@ theorem noContract_iff (hb : S.BasePointFree) (bd : Set S.Y) :
     forall₄_congr fun y _ y' _ => by rw [imp_iff_right (hn y), imp_iff_right (hn y'), sameImage_iff]
   exact ⟨fun c C h₁ h₂ h₃ h₄ => (e C).not.1 (c.2 C h₁ h₂ h₃ h₄),
     fun c => ⟨h.mem_of_mem_ratSet, fun C h₁ h₂ h₃ h₄ => (e C).not.2 (c C h₁ h₂ h₃ h₄)⟩⟩
-
-theorem ratioField_resPt : S.ratioField (resPt (genericPoint S.Y)) =
-    (ratioField k h.ratSet).toSubfield.map (S.Y.residue (genericPoint S.Y)).hom := by
-  set ρ : S.Y.functionField →+* S.Y.residueField (genericPoint S.Y) :=
-    (S.Y.residue (genericPoint S.Y)).hom
-  have hi := gen_mem (S.mem_chartAt (ptOf (resPt (genericPoint S.Y))))
-  have e₁ (a : k) : S.baseHom (resPt (genericPoint S.Y)) a = ρ (algebraMap k _ a) := by
-    rw [← S.valR_algebraMap, projSys.valR_resPt _ ⊤ trivial,
-      IsScalarTower.algebraMap_apply k Γ(S.Y, ⊤) S.Y.functionField]
-    rfl
-  have e₂ (i j : Fin S.N) : S.coords (resPt (genericPoint S.Y)) i /
-      S.coords (resPt (genericPoint S.Y)) j = ρ (h.rat (S.b i) / h.rat (S.b j)) := by
-    rw [← mul_div_mul_right _ _ (r _).ne_zero, h.rat_mul _ _ hi, h.rat_mul _ _ hi, map_div₀]
-    exact congrArg₂ (· / ·) (projSys.valR_resPt _ _ hi _) (projSys.valR_resPt _ _ hi _)
-  refine le_antisymm (Subfield.closure_le.2 ?_) (Subfield.gc_map_comap ρ _ _ |>.2
-    (Subfield.closure_le.2 ?_))
-  · rintro _ (⟨a, rfl⟩ | ⟨i, j, rfl⟩)
-    · exact ⟨_, (ratioField k h.ratSet).algebraMap_mem a, (e₁ a).symm⟩
-    · refine ⟨_, ?_, (e₂ i j).symm⟩
-      by_cases h0 : h.rat (S.b j) = 0
-      · rw [h0, div_zero]
-        exact (ratioField k h.ratSet).zero_mem
-      · exact IntermediateField.subset_adjoin _ _ ⟨_, ⟨i, rfl⟩, _, ⟨j, rfl⟩, h0, rfl⟩
-  · rintro _ (⟨a, rfl⟩ | ⟨_, ⟨i, rfl⟩, _, ⟨j, rfl⟩, -, rfl⟩)
-    · exact Subfield.subset_closure (Or.inl ⟨a, e₁ a⟩)
-    · exact Subfield.subset_closure (Or.inr ⟨i, j, (e₂ i j).symm⟩)
-
-theorem birational_iff : D.Birational k h.ratSet ↔ (∃ j, S.b j ≠ 0) ∧ S.Birational := by
-  have e : ratioField k h.ratSet = ⊤ ↔ S.ratioField (resPt (genericPoint S.Y)) = ⊤ := by
-    rw [h.ratioField_resPt]
-    refine ⟨fun e => eq_top_iff.2 fun a _ => ?_, fun e => eq_top_iff.2 fun a _ => ?_⟩
-    · obtain ⟨a, rfl⟩ := S.Y.residue_surjective _ a
-      exact ⟨a, e.ge trivial, rfl⟩
-    · obtain ⟨b, hb, e'⟩ := e.ge (Subfield.mem_top ((S.Y.residue (genericPoint S.Y)).hom a))
-      exact RingHom.injective (R := S.Y.functionField) _ e' ▸ hb
-  constructor
-  · rintro ⟨-, ⟨_, ⟨j, rfl⟩, hj⟩, ht⟩
-    exact ⟨⟨j, fun e => hj (by simp only [e, map_zero])⟩, _, genericPoint_spec S.Y, e.1 ht⟩
-  · rintro ⟨⟨j, hj⟩, η, hη, ht⟩
-    obtain rfl := (genericPoint_spec S.Y).eq hη
-    exact ⟨h.mem_of_mem_ratSet, ⟨_, ⟨j, rfl⟩, fun e => hj (h.rat_injective (e.trans (map_zero _).symm))⟩,
-      e.2 ht⟩
 
 end Presents
 

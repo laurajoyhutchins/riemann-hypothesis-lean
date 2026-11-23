@@ -1,19 +1,65 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsCExtComplex
-import Development.AbelianVarietyTheory.Definitions.Divisors.SymTupOne
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.KeyFormulaUnitOverNormalBaseOfFamilyUnitOfTraits
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DvdOfDvdInAllCompleteDVRNormalNoetherian
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LineBundleIsoOfCompatibleRationalLocalUnits
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.KeyValuesDetOmegaDeltaUnitAffineOpensStatement
-import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.KeyFamOne
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.UniformisationTriplesCompleteDVRTorsion
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.GenericPointsOpenIntegralCover
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ClsLinCombSingle
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsCompleteDvrSplitExt
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.SymTupOne
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.CubePullbacks.CubePull
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IsPolAVSectionInverseImage
+public import Development.AbelianVarietyTheory.Definitions.Divisors.UnifAlong
+import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.PolBaseChangeOfRelAmpleLocal
+import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.MemRangeOfForallHeightEqOneOfIsReflexive
+import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.RangeSubsetAbLocusOfIsProper
 import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.GenericPointMemModuliOfMeetsAbelianLocus
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.SabPull
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsCExtComplex
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsCompleteDvrSplitExt
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsKeyDatumAbelianLocusPointStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.KeyDatumFibreOfComposableBaseChangeStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.KeyDatumPullbackBaseChangeLieBasisStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.KeyFormulaUnitOverNormalBaseOfFamilyUnitOfTraits
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.KeyValuesDetOmegaDeltaUnitAffineOpensStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LineBundleIsoOfCompatibleRationalLocalUnits
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.RangeAlgebraMapEqIInfDiscreteValuationSubring
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.GenericPointsOpenIntegralCover
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.UniformisationTriplesCompleteDVRTorsion
+public import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.KeyFamOne
+import Mathlib.Algebra.MvPolynomial.Cardinal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Algebraic.Cardinality
+import Mathlib.RingTheory.Localization.Cardinality
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
 import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.AmplePt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.CubePullbacks.CubePull
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Out ReciprocityTheory.ChartRestriction.G.Geo.Tor
 open GlobalTheory GlobalTheory.KeyCl GlobalTheory.Ex GlobalTheory.KeyEven GlobalTheory.MBLow
@@ -24,8 +70,8 @@ noncomputable section
 
 namespace GlobalTheory.UMin.KeySmall
 
-open Cardinal in
 
+open Cardinal in
 theorem mk_adicCompletion_le {D : Type} [CommRing D] (I : Ideal D) (h : #D ≤ 𝔠) : #(AdicCompletion I D) ≤ 𝔠 := by
   have hs : ∀ a : AdicCompletion I D, ∃ s : ℕ → D, ∀ n, a.val n = Submodule.Quotient.mk (s n) := fun a => by
     choose s hs using fun n => Submodule.Quotient.mk_surjective _ (a.val n)
@@ -36,8 +82,8 @@ theorem mk_adicCompletion_le {D : Type} [CommRing D] (I : Ideal D) (h : #D ≤ �
   rw [← Cardinal.power_def, Cardinal.mk_nat]
   exact (Cardinal.power_le_power_right h).trans_eq Cardinal.continuum_power_aleph0
 
-open Cardinal in
 
+open Cardinal in
 theorem dvd_of_forall_small : ∀ (R : Type) [CommRing R] [IsDomain R] [IsNoetherianRing R] [IsIntegrallyClosed R] [CharZero R],
     #R ≤ 𝔠 → ∀ a b : R, b ≠ 0 → (∀ (V : Type) [CommRing V] [IsDomain V] [IsLocalRing V], GlobalTheory.LN.CDvr V → #V ≤ 𝔠 →
       ∀ φ : R →+* V, Function.Injective φ → φ b ∣ φ a) → b ∣ a := by
@@ -101,8 +147,8 @@ theorem dvd_of_map_dvd {V W : Type} [CommRing V] [IsDomain V] [ValuationRing V] 
   obtain ⟨u, rfl⟩ := isUnit_of_map_unit g c hu
   exact ⟨↑u⁻¹, by rw [hc, _root_.mul_assoc, Units.mul_inv, _root_.mul_one]⟩
 
-open Cardinal in
 
+open Cardinal in
 theorem mem_range_of_small_traits {A : Type} [CommRing A] [IsDomain A] [IsNoetherianRing A] [IsIntegrallyClosed A] [CharZero A]
     (hA : #A ≤ 𝔠) (f : A) (hf : f ≠ 0) (b : Localization.Away f)
     (H : ∀ (V : Type) [CommRing V] [IsDomain V] [IsLocalRing V], GlobalTheory.LN.CDvr V → #V ≤ 𝔠 →
@@ -186,8 +232,8 @@ theorem pullT_iso {S S' : Scheme.{0}} (f : S' ⟶ S) (t : SAB H S) {L : LB t.G.l
   have e'' := LBIso.trans i₁ i₂ hL' e' h'
   exact LBIso.trans i₀ i₁ hL' e e''
 
-open Cardinal in
 
+open Cardinal in
 theorem key_unit_split (κ : Rule) (hR : Rule4 κ) (W : Type) [CommRing W] [IsDomain W] [IsDiscreteValuationRing W] [CharZero W]
     (hc : IsAdicComplete (IsLocalRing.maximalIdeal W) W) (hW : #W ≤ 𝔠) (t : SAB H (Sp W))
     (hS : ∃ E' : SplitExt (Sp (IsLocalRing.ResidueField W)),
@@ -207,8 +253,8 @@ theorem key_unit_split (κ : Rule) (hR : Rule4 κ) (W : Type) [CommRing W] [IsDo
   obtain ⟨U, -⟩ := GlobalTheory.LN.uDvrSt_holds E H W hW' t hp hS
   exact key_unit_trait κ hR W hc hW t.G L σ x y t.semi ⟨U.D, U.A, U.U, by rw [U.bundle]; exact hL⟩ hy hσ hk0
 
-open Cardinal in
 
+open Cardinal in
 theorem key_unit_normal (κ : Rule) (hR : Rule4 κ) (A : Type) [CommRing A] [IsDomain A] [IsNoetherianRing A]
     [IsIntegrallyClosed A] [CharZero A] (hA : #A ≤ 𝔠) (t : SAB H (Sp A)) (L : RigLB t.G) (hL : LBIso t.PP.L L.L)
     (σ : L.L.Sec) (x : KeyIn (FractionRing A)) (y : Fin x.P.g → (epsR A ⟶ t.G))
@@ -314,8 +360,8 @@ theorem germ_lbPow_g' {S : Scheme.{0}} (M : LB S) (n : ℕ) (j j' : (lbPow M n).
   erw [Units.coe_map, Units.coe_map]
   exact TopCat.Presheaf.germ_res_apply _ _ _ _ _
 
-open Cardinal in
 
+open Cardinal in
 theorem key_sab {E : Type} [Field E] [NumberField E] [IsCMField E] {H : Host E} (S : Scheme.{0}) [IsIntegral S]
     (t : SAB H S) (g : ℕ) (δ : LB S) (σ : (CechPic.tens t.PP.L (δ.pull t.G.hom)).Sec) (hg : 1 ≤ g)
     (hN : Geo.Tor.IsNormalScheme S) (hn : IsLocallyNoetherian S) (h0 : CharZero Γ(S, ⊤))
@@ -365,8 +411,8 @@ theorem cls_det_zero {X : Scheme.{0}} (F : X.Modules) (h : (VB.det F 0).IsLB) : 
     rfl)
   simp [e]
 
-open Cardinal in
 
+open Cardinal in
 theorem mk_le_of_lft {k A : Type} [Field k] [CommRing A] (hk : #k ≤ 𝔠) (s : Sp A ⟶ Sp k) [LocallyOfFiniteType s] :
     #A ≤ 𝔠 := by
   obtain ⟨φ, rfl⟩ := Spec.map_surjective s
@@ -387,7 +433,7 @@ theorem nzFib_of_geom {S : Scheme.{0}} {G : Over S} {L : LB G.left} (σ : L.Sec)
   · rw [← Scheme.Hom.comp_apply, hy, Scheme.Hom.comp_apply]
     exact Scheme.fromSpecResidueField_apply _ _
   · have hle : ⊤ ≤ y ⁻¹ᵁ L.U j := fun z _ => hj ⟨z, rfl⟩
-    rw [valF, dif_pos hle] at hv
+    rw [valF, dite_eq_left hle] at hv
     have hu : IsUnit ((y.appLE (L.U j) ⊤ hle).hom (σ.f j)) :=
       (isUnit_map_iff (Scheme.ΓSpecIso (CommRingCat.of K)).commRingCatIsoToRingEquiv _).1 (isUnit_iff_ne_zero.2 hv)
     have hb := (Sp K).basicOpen_of_isUnit hu

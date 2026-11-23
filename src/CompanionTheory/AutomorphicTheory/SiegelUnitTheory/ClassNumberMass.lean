@@ -1,8 +1,44 @@
-import Mathlib
-import Formalism.LocalToGlobal.GlobalTheory.GL5.PacketStatementOfIndependence
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.AdelicQuotientVolumeEqOfSignatureRankIndep
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.VolumeRatio
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.UnitaryVolumeEqRankMassAllSignatures
+module
+
+public import Formalism.SharpRestriction.GlobalSchurBounds.MassRatioUnfoldedOfTheoremTwo
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.VolumeRatio
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace CompanionTheory.HU
 
@@ -16,19 +52,5 @@ def SiegelOneAll : Prop :=
       Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes.IsHermND σ J → SW1b2 F E σ M J
 
 theorem hU_of (h : SiegelOneAll) (D : D7) : RT.MassRatioUnderVolume D := GlobalTheory.VolRatioFromSecondClause.volumeRatio h D
-
-theorem volSigIndep_of_hU (h : ∀ D, RT.MassRatioUnderVolume D) (D : D7) : VolSigIndep D := by
-  refine GlobalTheory.Glob.volMeas_fundDomain_eq_of_tiedIndep (fun D hT W W₀ P Q P₀ Q₀ hW hW₀ hs hs₀ hr => ?_) D
-  have h2 := volumeMass_of_unfolding D (h D hT)
-  have e1 := Formalism.BasicNotions.sig_sum W hW D.host.φ₀
-  have e2 := Formalism.BasicNotions.sig_sum W₀ hW₀ D.host.φ₀
-  rw [hs] at e1
-  rw [hs₀] at e2
-  rw [GlobalTheory.Glob.vol_eq_massI_all_sig D hT h2 W P Q hW hs, GlobalTheory.Glob.vol_eq_massI_all_sig D hT h2 W₀ P₀ Q₀ hW₀ hs₀]
-  congr 1
-  simp only at e1 e2
-  omega
-
-theorem volSigIndep_of (h : SiegelOneAll) (D : D7) : VolSigIndep D := volSigIndep_of_hU (hU_of h) D
 
 end CompanionTheory.HU

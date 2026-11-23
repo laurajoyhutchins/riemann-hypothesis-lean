@@ -1,7 +1,63 @@
-import ReciprocityTheory.AnalyticForms.MaIntEmpty
-import ReciprocityTheory.AnalyticForms.PlurisubharmonicFunctions.MdiscSt
-import ReciprocityTheory.AnalyticForms.PlurisubharmonicFunctions.ComplexHessianIsHermitianOfContDiffAt
-import ReciprocityTheory.AnalyticForms.PlurisubharmonicFunctions.CovLog
+module
+
+public import ReciprocityTheory.AnalyticForms.MaIntEmpty
+public import Mathlib.Analysis.Calculus.ContDiff.Defs
+public import Mathlib.MeasureTheory.Integral.IntegrableOn
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+public import Mathlib.RingTheory.Complex
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.AnalyticForms.PlurisubharmonicFunctions.ComplexHessianIsHermitianOfContDiffAt
+public import ReciprocityTheory.AnalyticForms.PlurisubharmonicFunctions.CovLog
+public import ReciprocityTheory.AnalyticForms.PlurisubharmonicFunctions.MdiscSt
+public import Mathlib.Analysis.Calculus.FDeriv.RestrictScalars
+public import Mathlib.MeasureTheory.Function.Jacobian
+public import Mathlib.RingTheory.Norm.Transitivity
+
+@[expose] public section
 
 namespace ReciprocityTheory.AnForm.A
 
@@ -14,20 +70,10 @@ variable {D E : ℕ}
 def jacC (τ : (Fin D → ℂ) → (Fin E → ℂ)) (z : Fin D → ℂ) : Matrix (Fin E) (Fin D) ℂ :=
   Matrix.of fun a k => fderiv ℂ τ z (Pi.single k 1) a
 
-theorem jacC_id (z : Fin D → ℂ) : jacC (id : (Fin D → ℂ) → (Fin D → ℂ)) z = 1 := by
-  ext a k
-  simp only [jacC, Matrix.of_apply, fderiv_id, ContinuousLinearMap.coe_id', id_eq,
-    Matrix.one_apply, Pi.single_apply]
-
 theorem jacC_eq_toMatrix' (τ : (Fin D → ℂ) → (Fin E → ℂ)) (z : Fin D → ℂ) :
     jacC τ z = LinearMap.toMatrix' (fderiv ℂ τ z : (Fin D → ℂ) →ₗ[ℂ] (Fin E → ℂ)) := by
   ext a k
   rw [LinearMap.toMatrix'_apply]
-  rfl
-
-theorem jacC_mulVec (τ : (Fin D → ℂ) → (Fin E → ℂ)) (z w : Fin D → ℂ) :
-    jacC τ z *ᵥ w = fderiv ℂ τ z w := by
-  rw [jacC_eq_toMatrix', LinearMap.toMatrix'_mulVec]
   rfl
 
 theorem det_jacC (τ : (Fin D → ℂ) → (Fin D → ℂ)) (z : Fin D → ℂ) :
@@ -66,10 +112,6 @@ theorem hessC_add_log_norm (φ : (Fin D → ℂ) → ℝ) (g : (Fin D → ℂ) �
     (hφ : ContDiffAt ℝ 2 φ z) (hg : AnalyticAt ℂ g z) (hz : g z ≠ 0) :
     hessC (fun w => φ w + Real.log ‖g w‖) z = hessC φ z := by
   exact hessC_add_log_norm' φ g z hφ hg hz
-
-theorem hessC_re_analytic (G : (Fin D → ℂ) → ℂ) (z : Fin D → ℂ) (hG : AnalyticAt ℂ G z) :
-    hessC (fun w => (G w).re) z = 0 := by
-  exact hessC_re_analytic' G z hG
 
 theorem hessC_add_re_analytic (φ : (Fin D → ℂ) → ℝ) (G : (Fin D → ℂ) → ℂ) (z : Fin D → ℂ)
     (hφ : ContDiffAt ℝ 2 φ z) (hG : AnalyticAt ℂ G z) :
@@ -132,23 +174,6 @@ theorem integrableOn_image_iff_analytic {F : Type*} [NormedAddCommGroup F] [Norm
       abs_of_nonneg (Complex.normSq_nonneg _)]
   rw [integrableOn_image_iff_integrableOn_abs_det_fderiv_smul volume hU.measurableSet hd hinj f]
   simp_rw [hdet]
-
-theorem maInt_comp (φ : Fin D → (Fin D → ℂ) → ℝ) (g : (Fin D → ℂ) → ℝ)
-    (τ : (Fin D → ℂ) → (Fin D → ℂ)) (U U' : Set (Fin D → ℂ)) (hU : IsOpen U) (hU' : IsOpen U')
-    (hτ : AnalyticOnNhd ℂ τ U) (hinj : Set.InjOn τ U) (himg : τ '' U = U')
-    (hφ : ∀ k, ContDiffOn ℝ 2 (φ k) U') :
-    maInt (fun k => φ k ∘ τ) (g ∘ τ) U = maInt φ g U' := by
-  unfold maInt
-  rw [← himg, integral_image_eq_integral_normSq_det_smul τ U hU hτ hinj]
-  first
-    | apply setIntegral_congr_fun hU.measurableSet
-    | apply setIntegral_congr hU.measurableSet
-  intro z hz
-  have hz' : τ z ∈ U' := himg ▸ Set.mem_image_of_mem τ hz
-  have hc : ∀ k, ContDiffAt ℝ 2 (φ k) (τ z) := fun k => (hφ k).contDiffAt (hU'.mem_nhds hz')
-  simp only [Function.comp_apply, smul_eq_mul]
-  rw [maDens_comp φ τ z (hτ z hz) hc]
-  ring
 
 theorem hessC_sum_normSq (z : Fin D → ℂ) :
     hessC (fun w => ∑ i, Complex.normSq (w i)) z = 1 := by

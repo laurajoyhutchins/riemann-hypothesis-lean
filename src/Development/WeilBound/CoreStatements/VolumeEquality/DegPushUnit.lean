@@ -1,8 +1,52 @@
-import Development.WeilBound.CoreStatements.VolumeEquality.DegPushDefs
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PDivCycleMul
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.Cartier
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PGenericProjClosureDivisor
-import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.Assembly
+module
+
+public import Development.WeilBound.CoreStatements.VolumeEquality.DegPushDefs
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.Cartier
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PDivCycleMul
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PGenericProjClosureDivisor
+public import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.Assembly
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+public import Mathlib.RingTheory.Valuation.LocalSubring
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -21,7 +65,7 @@ def locSub {S L : Type} [CommRing S] [Field L] (φ : S →+* L) (W : Ideal S) [h
   add_mem' := by
     rintro x y ⟨a, s, hs, h⟩ ⟨b, t, ht, h'⟩
     exact ⟨a * t + b * s, s * t, fun e => (hW.mem_or_mem e).elim hs ht, by
-      rw [map_add, map_mul, map_mul, map_mul, ← h, ← h']; ring⟩
+      rw [map_add (f := _), map_mul, map_mul, map_mul, ← h, ← h']; ring⟩
   zero_mem' := ⟨0, 1, (Ideal.ne_top_iff_one W).1 hW.ne_top, by simp⟩
   neg_mem' := by
     rintro x ⟨a, s, hs, h⟩
@@ -71,7 +115,7 @@ theorem exists_rel {S L : Type} [CommRing S] [Field L] (φ : S →+* L) (W : Ide
     have hq := Polynomial.modByMonic_add_div q p
     have hev : x ^ m = Polynomial.aeval x (q %ₘ p) := by
       have := congrArg (Polynomial.aeval x) hq
-      simp only [map_add, map_mul, hpx', zero_mul, add_zero] at this
+      simp only [map_add (f := _), map_mul, hpx', zero_mul, add_zero] at this
       rw [this]
       simp [q]
     have hdeg : (q %ₘ p).natDegree < n := Polynomial.natDegree_modByMonic_lt _ hpm hp1
@@ -167,7 +211,7 @@ theorem rep_of_mem (y : (Σ b, ι b) → Ω) {t : Ω} (ht : t ∈ fnField k y) :
     by simp, by simp⟩
   change Q t
   unfold fnField at ht
-  refine IntermediateField.adjoin_induction k (p := fun t _ => Q t) ?_ ?_ ?_ ?_ ?_ ht
+  refine IntermediateField.adjoin_induction k (motive := fun t _ => Q t) ?_ ?_ ?_ ?_ ?_ ht
   · rintro x ⟨p, q, hpq, rfl⟩
     by_cases hq : y q = 0
     · simpa [hq] using hzero
@@ -184,7 +228,7 @@ theorem rep_of_mem (y : (Σ b, ι b) → Ω) {t : Ω} (ht : t ∈ fnField k y) :
       by simpa using mul_ne_zero hG1ne hG2ne, ?_⟩
     · rw [add_comm d1 d2]
       exact IsWeightedHomogeneous.mul hF2 hG1
-    · simp only [map_add, map_mul]
+    · simp only [map_add (f := _), map_mul]
       linear_combination aeval y G2 * h1 + aeval y G1 * h2
   · rintro a - ⟨d, F, G, hF, hG, hGne, h⟩
     by_cases ha : a = 0
@@ -271,7 +315,7 @@ private theorem zpow_mem_valuationSubring_of_unit {L : Type} [Field L] (V : Valu
     rw [zpow_negSucc, ← inv_pow]
     exact V.pow_mem h2 _
 
-set_option maxHeartbeats 400000 in
+
 open UnitZ in
 theorem unitZero : PtDim → UnitZero := by
   intro hpt k _ Ω _ _ K _ ι _ y n a b hy htop hval

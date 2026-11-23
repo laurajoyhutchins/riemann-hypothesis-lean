@@ -1,5 +1,51 @@
-import Mathlib
-import Formalism.SharpRestriction.LevelLetterCocycles.RepresentationCongruences.InvSubOneSqLeInv
+module
+
+public import Mathlib.Analysis.SpecialFunctions.Log.Base
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -151,7 +197,7 @@ private theorem mul_div_sub_one_sq_eq_mul_add_sq (v L y : ℝ) (hy : y = (L - 1)
   rw [← key, hy, inv_pow]
   ring
 
-set_option maxHeartbeats 800000 in
+
 
 theorem rr_le (l : ℕ) (hl : 11 ≤ l) (h w S η H H₁ : ℕ) (hη : η + 1 ≤ h)
     (hH : H ≤ h + η) (hH₁ : H₁ ≤ w + S + η) (s r : ℝ)
@@ -243,7 +289,7 @@ theorem sig_le (l : ℕ) (hl : 11 ≤ l) (h w S η : ℕ) (h1 : 1 ≤ h) (hG : w
   unfold Sg
   linarith
 
-set_option maxHeartbeats 800000 in
+
 
 theorem Aa_cut_le (l : ℕ) (hl : 11 ≤ l) (h w S η H H₁ H₂ : ℕ) (hη : η + 1 ≤ h)
     (hH : H ≤ h + η) (hH₁ : H₁ ≤ h + η) (hH₂ : H₂ ≤ w + S + η) (s A : ℝ)
@@ -294,7 +340,7 @@ theorem Aa_cut_le (l : ℕ) (hl : 11 ≤ l) (h w S η H H₁ H₂ : ℕ) (hη : 
   unfold Sg
   linarith
 
-set_option maxHeartbeats 800000 in
+
 
 theorem Aa_le (l : ℕ) (hl : 11 ≤ l) (h w S η H H₁ : ℕ) (hη : η + 1 ≤ h)
     (hH : H ≤ h + η) (hH₁ : H₁ ≤ h + η) (s A : ℝ)
@@ -337,50 +383,5 @@ theorem Aa_le (l : ℕ) (hl : 11 ≤ l) (h w S η H H₁ : ℕ) (hη : η + 1 �
   have d6 := mul_le_mul_of_nonneg_left hzy' hc3
   unfold Sg
   linarith
-
-theorem A_le (l : ℕ) (hl : 11 ≤ l) (h η H : ℕ) (hH : H ≤ h + η) (A : ℝ)
-    (hA : A ≤ (H : ℝ) / ((l : ℝ) - 1) + 1) :
-    A ≤ ((h : ℝ) + η) / ((l : ℝ) - 1) + 1 := by
-  have hL : (11:ℝ) ≤ l := by exact_mod_cast hl
-  have h1 : (0:ℝ) < (l:ℝ) - 1 := by linarith
-  have hHr : (H:ℝ) ≤ (h:ℝ) + η := by exact_mod_cast hH
-  have e1 : (H:ℝ) / ((l:ℝ) - 1) = (H:ℝ) * ((l:ℝ) - 1)⁻¹ := div_eq_mul_inv _ _
-  have e2 : ((h:ℝ) + η) / ((l:ℝ) - 1) = ((h:ℝ) + η) * ((l:ℝ) - 1)⁻¹ := div_eq_mul_inv _ _
-  have p : (0:ℝ) ≤ ((l:ℝ) - 1)⁻¹ := inv_nonneg.mpr h1.le
-  have := mul_le_mul_of_nonneg_right hHr p
-  linarith
-
-private theorem mul_two_mul_sub_one_div_sq_eq (v L y : ℝ) (hy : y = (L - 1)⁻¹)
-    (eLy : L * y = 1 + y) : v * (2 * L - 1) / (L - 1) ^ 2 = v * (2 * y + y ^ 2) := by
-  have key : (2 * L - 1) * y ^ 2 = 2 * y + y ^ 2 := by linear_combination (2 * y) * eLy
-  rw [← key, hy, inv_pow]
-  ring
-
-theorem K6 (l : ℕ) (hl : 11 ≤ l) (b w S η H : ℕ) (hηb : 20 * η ≤ b) (hSb : 20 * S ≤ b)
-    (hwb : 20 * w ≤ b) (hH : H ≤ b + 2 * η + S)
-    (hsm : 40 * Sg l (b + η + S) w S η ≤ (b : ℝ) / 4) (a : ℕ)
-    (ha : (a : ℝ) ≤ (H : ℝ) * (2 * l - 1) / ((l : ℝ) - 1) ^ 2 + cW l H + 1) :
-    2 * a + η + 1 ≤ b := by
-  have hL : (11:ℝ) ≤ l := by exact_mod_cast hl
-  obtain ⟨x, hx⟩ : ∃ x : ℝ, x = (l:ℝ)⁻¹ := ⟨_, rfl⟩
-  obtain ⟨y, hy⟩ : ∃ y : ℝ, y = ((l:ℝ) - 1)⁻¹ := ⟨_, rfl⟩
-  obtain ⟨z, hz⟩ : ∃ z : ℝ, z = ((l:ℝ) - 2)⁻¹ := ⟨_, rfl⟩
-  obtain ⟨eLx, eLy, eLz, px, py, pz, hx1, hy1, hz1, hyx, hzx, iy⟩ := reciprocal_bounds_of_eleven_le hL hx hy hz
-  have hg' := logb_two_mul_natCast_nonneg_of_eleven_le l (b + η + S) hl
-  have t1 : 0 ≤ ((b + η + S : ℕ) : ℝ) / (l:ℝ) ^ 2 := by positivity
-  have t2 : 0 ≤ ((w:ℝ) + S + η) / l := by positivity
-  unfold Sg at hsm
-  have hb160 : (160:ℝ) ≤ b := by linarith
-  have hb1 : 1 ≤ b := by exact_mod_cast (show (1:ℝ) ≤ b by linarith)
-  have hc := cW_le l hl (b + η + S) η H (by omega) (by omega)
-  have hfrac : (H:ℝ) * (2 * l - 1) / ((l:ℝ) - 1) ^ 2 ≤ (H:ℝ) * (21 / 100) := by
-    rw [mul_two_mul_sub_one_div_sq_eq _ _ _ hy eLy]
-    refine mul_le_mul_of_nonneg_left ?_ (Nat.cast_nonneg _)
-    nlinarith [mul_le_mul_of_nonneg_left hy1 py.le]
-  have hHr : (H:ℝ) ≤ b + 2 * η + S := by exact_mod_cast hH
-  have hηr : 20 * (η:ℝ) ≤ b := by exact_mod_cast hηb
-  have hSr : 20 * (S:ℝ) ≤ b := by exact_mod_cast hSb
-  have key : 2 * (a:ℝ) + η + 1 ≤ b := by linarith
-  exact_mod_cast key
 
 end Formalism.MainNotions.N.FrobeniusPowerSeries

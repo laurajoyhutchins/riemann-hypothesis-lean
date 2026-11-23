@@ -1,16 +1,56 @@
-import Mathlib
-import Development.AutomorphicArithmetic.Foundations.Convolution.SphericalIdeles.SphConj
-import Development.AutomorphicArithmetic.Foundations.Convolution.SphericalIdeles.LiftAll
-import Development.AutomorphicArithmetic.Foundations.Convolution.SphericalIdeles.SmoEq
-import Development.AutomorphicArithmetic.Foundations.Convolution.SphericalIdeles.PowSat
-import Development.AutomorphicArithmetic.Foundations.Convolution.TraceSplitting.PowTwist
-import Development.AutomorphicArithmetic.Foundations.Convolution.TraceSplitting.CarryLift
-import Development.AutomorphicArithmetic.Foundations.Convolution.TraceSplitting.FamParts
-import Development.AutomorphicArithmetic.Foundations.Convolution.TraceSplitting.CoreLift
-import Development.AutomorphicArithmetic.Foundations.Convolution.CentreSplitting.ExTwist
+module
+
+public import Development.AutomorphicArithmetic.Foundations.Convolution.SphericalIdeles.SphConj
+public import Development.AutomorphicArithmetic.Foundations.Convolution.BlockEvaluation.Ci
 import Development.AutomorphicArithmetic.Foundations.Convolution.CentreSplitting.ExCusp
-import Development.AutomorphicArithmetic.Foundations.Convolution.CentreSplitting.SSatIff
-import Development.AutomorphicArithmetic.Foundations.Convolution.NormCharacterPowers.NormCharPowHolds
+public import Development.AutomorphicArithmetic.Foundations.Convolution.CentreSplitting.ExTwist
+public import Development.AutomorphicArithmetic.Foundations.Convolution.NormCharacterPowers.NormCharPowHolds
+public import Development.AutomorphicArithmetic.Foundations.Convolution.SphericalIdeles.LiftAll
+public import Development.AutomorphicArithmetic.Foundations.Convolution.SphericalIdeles.PowSat
+public import Development.AutomorphicArithmetic.Foundations.Convolution.SphericalIdeles.SmoEq
+import Development.AutomorphicArithmetic.Foundations.Convolution.TraceSplitting.CarryLift
+import Development.AutomorphicArithmetic.Foundations.Convolution.TraceSplitting.CoreLift
+import Development.AutomorphicArithmetic.Foundations.Convolution.TraceSplitting.FamParts
+import Development.AutomorphicArithmetic.Foundations.Convolution.TraceSplitting.Places
+import Development.AutomorphicArithmetic.Foundations.Convolution.TraceSplitting.PowTwist
+import Development.WeilBound.RepresentationTheoryGL.JacquetShalikaBounds.AbsoluteRigidity.SatakeTwists.SatakeTwistHolds
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MeasureTheory NumberField IsDedekindDomain Filter
 open GroundTheory.Automorphic GroundTheory.Automorphic.Reduction
@@ -20,14 +60,15 @@ open UpperTheory.V.Published UpperTheory.CBC PositivityTheory.RgJS
 section SlopeTestRemainingChoices
 
 variable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E]
-  [IsTotallyComplex F] [IsTotallyComplex E] {n : ℕ}
+  [_root_.NumberField.IsTotallyComplex F] [_root_.NumberField.IsTotallyComplex E] {n : ℕ}
 
 private theorem bc_tw {χ : HChar F} {χ' : HChar E} {s : ℂ} (h : IsPow χ s) (h' : IsPow χ' s)
     (π : CuspSub F n) (P : CuspSub E n) (H : WeakBC (Cusp.cx π).sat (Cusp.cx P).sat) :
     WeakBC (Cusp.cx (π.twist χ)).sat (Cusp.cx (P.twist χ')).sat := by
   refine Filter.Eventually.mono H fun w hw f hf => ?_
   obtain ⟨B, hB, hB'⟩ := hw f hf
-  have hf' : Ideal.absNorm w.asIdeal = Ideal.absNorm (w.under (𝓞 F)).asIdeal ^ f := hf
+  have hf' : Ideal.absNorm w.asIdeal = Ideal.absNorm (w.under (𝓞 F)).asIdeal ^ f := by
+    simpa only [normV, Ideal.absNorm_apply, Submodule.cardQuot_apply] using hf
   have hv : χ'.val w = χ.val (w.under (𝓞 F)) ^ f := by
     apply Units.ext
     rw [Units.val_pow_eq_pow_val, (Sph.powSat F χ s h _).2, (Sph.powSat E χ' s h' w).2, hf', Nat.cast_pow,
@@ -46,8 +87,10 @@ private theorem same_sat [IsGalois F E] (hp : (Module.finrank F E).Prime) (π : 
     ∀ᶠ w : Pl E in cofinite, ∃ B, sat w B ∧ sat' w B := by
   have hN := (places F E hp).2.2.2.2.1
   filter_upwards [H, H'] with w a b
-  obtain ⟨B, hB, hB'⟩ := a _ (hN w)
-  obtain ⟨C, hC, hC'⟩ := b _ (hN w)
+  have hn : normV w = normV (w.under (𝓞 F)) ^ resDeg F w := by
+    simpa only [normV, Ideal.absNorm_apply, Submodule.cardQuot_apply] using hN w
+  obtain ⟨B, hB, hB'⟩ := a _ hn
+  obtain ⟨C, hC, hC'⟩ := b _ hn
   obtain rfl := hB.unique hC
   exact ⟨_, hB', hC'⟩
 

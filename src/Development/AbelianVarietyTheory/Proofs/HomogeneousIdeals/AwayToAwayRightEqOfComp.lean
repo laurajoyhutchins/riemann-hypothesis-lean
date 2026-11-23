@@ -1,5 +1,46 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.ExistsResEqOfUnitInChart
+module
+
+public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.ExistsResEqOfUnitInChart
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -23,14 +64,14 @@ variable {R : Type} [CommRing R] {G : Over (Spec (CommRingCat.of R))} [GrpObj G]
 abbrev tanExp (v : Fin n → (epsR R ⟶ G)) (s : Fin n → S) : sp (R₀ := R) (DualNumber S) ⟶ G :=
   lieExp v (fun i => (inr (s i) : DualNumber S)) (fun _ => TrivSqZeroExt.inr_mul_inr _ _ _)
 
-variable (S) in
 
+variable (S) in
 def IsLieBasisOver (v : Fin n → (epsR R ⟶ G)) : Prop :=
   (∀ s s' : Fin n → S, tanExp v s = tanExp v s' → s = s') ∧
     ∀ w : sp (R₀ := R) (DualNumber S) ⟶ G, IsTanOver w → ∃ s, w = tanExp v s
 
-variable (A) in
 
+variable (A) in
 def ExpBij (v : Fin n → (epsR R ⟶ G)) : Prop :=
   ∀ J : Ideal A, J ^ 2 = ⊥ →
     (∀ (c c' : Fin n → A), (∀ i, c i ∈ J) → (∀ i, c' i ∈ J) → ∀ hc hc',
@@ -149,6 +190,7 @@ theorem expBij_of_unitInChart (hv : ∀ i, IsTangent (v i)) (hS : UnitInChart G 
       intro d l
       simp only [Finset.mul_sum, ← mul_assoc, ← map_mul]
       rw [Finset.sum_comm]
+
       simp only [← Finset.sum_mul, ← map_sum]
       have : ∀ k, ∑ i, a i l * (χ (β i)).snd k = (Pi.single k 1 : Fin n → S) l :=
         fun k => congrFun (hδ k) l
@@ -167,8 +209,9 @@ theorem expBij_of_unitInChart (hv : ∀ i, IsTangent (v i)) (hS : UnitInChart G 
     have := hτ A φ (α.comp u) (fun b b' => mul_eq_zero_of_sq hJ (hφ b) (hφ b')) b
     rw [AlgHom.comp_apply, vecTo_apply, hχu', ← sub_eq_iff_eq_add']
     refine this.trans ?_
+
     simp only [AlgHom.comp_apply, ha, map_sum, map_mul, c, Finset.mul_sum, Finset.sum_mul,
-      mul_assoc]
+    mul_assoc]
     exact Finset.sum_comm
 
 theorem awayToAwayRight_eq_of_comp (f g : A)
@@ -248,8 +291,8 @@ theorem expBij_of_span {s : Set A} (hs : Ideal.span s = ⊤)
     rw [ed, comp_lieExp]
     exact lieExp_congr _ (fun i => (hc i f).symm) _ _
 
-variable (A) in
 
+variable (A) in
 theorem expBij (hv : IsLieBasis v) : ExpBij A v := by
   refine expBij_of_span
     (s := Algebra.ofId R A '' {g : R | UnitInChart G (Localization.Away g)}) ?_ ?_

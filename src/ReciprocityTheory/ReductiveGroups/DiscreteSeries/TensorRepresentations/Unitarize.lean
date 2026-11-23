@@ -1,8 +1,57 @@
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TensorRepresentations.PtrScalar
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.CasimirCoefficients.PsiExistsStatement
-import Formalism.SharpRestriction.CuspSpanNormBounds.RelevantZeroGramTerms
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TensorRepresentations.UnitarizeD
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.AnalyticVectors.Closure
+module
+
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TensorRepresentations.UnitarizeC
+public import Formalism.RealPlaceAnalysis.RealPlaceTaylor.ModularCharacterEqOneOnExpHermitian
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.AnalyticVectors.Closure
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TensorRepresentations.UnitarizeA
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TensorRepresentations.UnitarizeD
+
+@[expose] public section
 
 noncomputable section
 
@@ -90,13 +139,13 @@ theorem tens_unitarize (dual : Bool) {lam : Fin n → ℝ} {H : Type*} [NormedAd
     ∑ j, ∑ ξ, pr (Formalism.REAL.muG ε) (u j ξ (P f)) (u j ξ (P g))
   let Q : (Fin n → D) →ₗ⋆[ℂ] (Fin n → D) →ₗ[ℂ] ℂ := LinearMap.mk₂'ₛₗ (starRingEnd ℂ) (RingHom.id ℂ) Q0
     (fun f f' g => by
-      simp only [Q0, map_add, hu_add, ← Finset.sum_add_distrib]
+      simp only [Q0, map_add (f := _), hu_add, ← Finset.sum_add_distrib]
       exact Finset.sum_congr rfl fun j _ => Finset.sum_congr rfl fun ξ _ =>
         pr_add_left (hLP f j ξ) (hLP f' j ξ) (hLP g j ξ))
     (fun a f g => by
       simp only [Q0, map_smul, hu_smul, pr_smul_left, Finset.mul_sum, smul_eq_mul, starRingEnd_apply])
     (fun f g g' => by
-      simp only [Q0, map_add, hu_add, ← Finset.sum_add_distrib]
+      simp only [Q0, map_add (f := _), hu_add, ← Finset.sum_add_distrib]
       exact Finset.sum_congr rfl fun j _ => Finset.sum_congr rfl fun ξ _ =>
         pr_add_right (hLP f j ξ) (hLP g j ξ) (hLP g' j ξ))
     (fun a f g => by
@@ -183,10 +232,10 @@ theorem tens_unitarize (dual : Bool) {lam : Fin n → ℝ} {H : Type*} [NormedAd
         (1 / 2 : ℂ) * Q (mx (tensF dual E) (Matrix.single a b 1 - Z) f) g +
         (Complex.I / 2) * Q (mx (tensF dual E) (Complex.I • (Matrix.single a b 1 + Z)) f) g := by
       rw [hTab]
-      simp only [LinearMap.add_apply, LinearMap.smul_apply, map_add, map_smulₛₗ, smul_eq_mul,
+      simp only [LinearMap.add_apply, LinearMap.smul_apply, map_add (f := _), map_smulₛₗ, smul_eq_mul,
         starRingEnd_apply, s1, s2]
     have e2 := congrArg (fun A : Module.End ℂ (Fin n → D) => Q f (A g)) hTba
-    simp only [LinearMap.add_apply, LinearMap.smul_apply, LinearMap.neg_apply, map_add, map_smul, map_neg,
+    simp only [LinearMap.add_apply, LinearMap.smul_apply, LinearMap.neg_apply, map_add (f := _), map_smul, map_neg,
       smul_eq_mul] at e2
     rw [e1, hskew _ hX1 f hf g hg, hskew _ hX2 f hf g hg]
     linear_combination (-1 : ℂ) * e2

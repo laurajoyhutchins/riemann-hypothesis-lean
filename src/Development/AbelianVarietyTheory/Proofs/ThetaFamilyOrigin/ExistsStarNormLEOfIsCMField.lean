@@ -1,5 +1,57 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Statements.TorsionEndomorphisms.EndDeterminedOnTorsion
+module
+
+public import Development.AbelianVarietyTheory.Statements.TorsionEndomorphisms.EndDeterminedOnTorsion
+public import Mathlib.NumberTheory.NumberField.CMField
+public import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -59,10 +111,12 @@ theorem casimir {ι : Type} [Fintype ι] [DecidableEq ι] (e : Module.Basis ι �
     intro y
     rw [Algebra.trace_eq_matrix_trace e y]
     simp only [Matrix.trace, Matrix.diag, Algebra.leftMulMatrix_eq_repr_mul]
+
     rw [hc, Finset.sum_mul, map_sum]
     refine Finset.sum_congr rfl fun i _ => ?_
     rw [smul_mul_assoc, map_smul, mul_assoc, mul_comm y (e i)]
     conv_lhs => rw [← e.sum_repr (e i * y)]
+
     rw [Finset.mul_sum, map_sum, Finset.sum_eq_single i]
     · rw [mul_smul_comm, map_smul, smul_eq_mul, smul_eq_mul]
       field_simp [hd i]
@@ -90,11 +144,11 @@ theorem exists_rat_bound (hσ : ∀ x, σ (σ x) = x) (hp : ∀ x, x ≠ 0 → 0
     rw [← Algebra.trace_eq_of_algEquiv σ (σ v * u), map_mul σ, hσ, mul_comm]
   obtain ⟨e, he⟩ := LinearMap.BilinForm.exists_orthogonal_basis
     (B := LinearMap.mk₂ ℚ (fun u v : E => Algebra.trace ℚ E (σ u * v))
-      (fun a b c => by rw [map_add, add_mul, map_add])
+      (fun a b c => by rw [map_add (f := _), add_mul, map_add (f := _)])
       (fun r a b => by
         rw [show σ (r • a) = r • σ a by rw [Rat.smul_def, Rat.smul_def, map_mul, map_ratCast],
           smul_mul_assoc, map_smul])
-      (fun a b c => by rw [mul_add, map_add])
+      (fun a b c => by rw [mul_add, map_add (f := _)])
       (fun r a b => by rw [mul_smul_comm, map_smul]))
     (LinearMap.isSymm_def.mpr fun u v => by simp only [LinearMap.mk₂_apply, RingHom.id_apply]; exact hsym u v)
   rw [LinearMap.isOrthoᵢ_def] at he
@@ -128,7 +182,7 @@ theorem exists_rat_bound (hσ : ∀ x, σ (σ x) = x) (hp : ∀ x, x ≠ 0 → 0
     refine ⟨2 * a + 2 * b, ?_⟩
     have h : ((2 * a + 2 * b : ℚ) : E) - σ (u + v) * (u + v) =
         ((2 : ℚ) : E) * ((a : E) - σ u * u) + ((2 : ℚ) : E) * ((b : E) - σ v * v) + σ (u - v) * (u - v) := by
-      rw [map_add, map_sub]
+      rw [map_add (f := _), map_sub]
       push_cast
       ring
     rw [h]
@@ -201,8 +255,8 @@ theorem trace_conj_mul_pos [IsCMField E] (x : E) (hx : x ≠ 0) :
 
 end StarNormBound
 
-open StarNormBound in
 
+open StarNormBound in
 theorem exists_starNormLE_of_isCMField : ∀ (E : Type) [Field E] [NumberField E] [NumberField.IsCMField E]
     [StarRing (NumberField.RingOfIntegers E)],
     (∀ a : NumberField.RingOfIntegers E, ((star a : NumberField.RingOfIntegers E) : E) =

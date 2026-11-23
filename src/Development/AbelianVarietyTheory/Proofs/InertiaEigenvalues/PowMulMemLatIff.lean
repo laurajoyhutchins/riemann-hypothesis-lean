@@ -1,10 +1,50 @@
-import Mathlib
-import Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow
-import Formalism.SharpRestriction.LevelLetterCocycles.LocalSituation
-import Formalism.LocalRingCardinality.AdicCompletionLocal.LocTied
-import Development.AbelianVarietyTheory.Definitions.Foundations.HTBasis
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.ExpStar
-import Development.AbelianVarietyTheory.CrystallinePeriods.RingIface
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.LocalSituation
+public import Development.AbelianVarietyTheory.Definitions.Foundations.HTBasis
+public import Development.AbelianVarietyTheory.CrystallinePeriods.RingIface
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -54,7 +94,7 @@ def Lat (M n : ℕ) : AddSubgroup P.R.BdR where
     rintro b b' ⟨a, ha⟩ ⟨a', ha'⟩
     refine ⟨a + a', ?_⟩
     have := add_mem ha ha'
-    rw [mul_add, map_add]
+    rw [mul_add, map_add (f := _)]
     convert this using 1
     ring
   neg_mem' := by
@@ -237,20 +277,10 @@ theorem Lifts.act {w : Ainf l} {c : ↥(K0 K)} (h : Lifts AI K w c) {g : GQ l}
   rw [io_act, h.io_eq, P.actQdR_Om]
   exact congrArg (oB P) (hg c)
 
-theorem Lifts.add {w w' : Ainf l} {c c' : ↥(K0 K)} (h : Lifts AI K w c) (h' : Lifts AI K w' c') :
-    Lifts AI K (w + w') (c + c') := by
-  unfold Lifts at h h' ⊢
-  rw [map_add, map_add, h, h']
-
 theorem Lifts.sub {w w' : Ainf l} {c c' : ↥(K0 K)} (h : Lifts AI K w c) (h' : Lifts AI K w' c') :
     Lifts AI K (w - w') (c - c') := by
   unfold Lifts at h h' ⊢
   rw [map_sub, map_sub, h, h']
-
-theorem Lifts.mul {w w' : Ainf l} {c c' : ↥(K0 K)} (h : Lifts AI K w c) (h' : Lifts AI K w' c') :
-    Lifts AI K (w * w') (c * c') := by
-  unfold Lifts at h h' ⊢
-  rw [map_mul, map_mul, h, h']
 
 theorem Lifts.unique {w w' : Ainf l} {c : ↥(K0 K)} (h : Lifts AI K w c) (h' : Lifts AI K w' c) :
     w = w' := AI.ιA_inj (h.trans h'.symm)
@@ -271,11 +301,11 @@ theorem Solv.add {q q' : Ainf l} (h : Solv AI K s g U q) (h' : Solv AI K s g U q
   obtain ⟨p, r, rfl, h1, h2⟩ := h
   obtain ⟨p', r', rfl, h1', h2'⟩ := h'
   refine ⟨fun k => p k + p' k, fun k => r k + r' k, rfl, fun k h hh => ?_, fun k => ?_⟩
-  · rw [map_add, h1 k h hh, h1' k h hh]
+  · rw [map_add (f := _), h1 k h hh, h1' k h hh]
   · have a := h2 k
     have a' := h2' k
     unfold Step at a a' ⊢
-    rw [map_add]
+    rw [map_add (f := _)]
     linear_combination a + a'
 
 theorem Solv.mul {q w : Ainf l} (h : Solv AI K s g U q) (hg : AI.actW g w = w)

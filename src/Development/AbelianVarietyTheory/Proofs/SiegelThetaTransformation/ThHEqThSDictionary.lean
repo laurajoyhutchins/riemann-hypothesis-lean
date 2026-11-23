@@ -1,5 +1,60 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IsHeatZero
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.FirstCoordinateAdmissible
+public import Mathlib.RingTheory.Flat.FaithfullyFlat.Algebra
+public import Mathlib.RingTheory.Flat.TorsionFree
+public import Mathlib.RingTheory.Henselian
+public import Mathlib.RingTheory.RegularLocalRing.Defs
+public import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open Matrix Complex NumberField GlobalTheory.SW Filter Topology
 open ReciprocityTheory.ChartRestriction.G.FD (cc herm)
 open scoped ComplexConjugate ComplexOrder Real
@@ -37,7 +92,7 @@ theorem _root_.GlobalTheory.SW.Dict.isSB_comp {K K' κ ι κ' ι' : Type} [Field
   · intro x y hy
     have h3 := _root_.GlobalTheory.SW.Dict.intM_nsmul D' (h1 y hy)
     have h4 := hper (e x) _ h3
-    simp only [map_add, map_nsmul]
+    simp only [map_add (f := _), map_nsmul]
     rw [← h4, smul_smul, smul_smul]
     congr 2
     ring_nf
@@ -206,6 +261,7 @@ theorem _root_.GlobalTheory.SW.Dict.quad_tauOf (Z : _root_.GlobalTheory.SW.CM Ψ
       2 * ∑ τ : Ψ, _root_.GlobalTheory.SW.Dict.vec τ.1 m ⬝ᵥ Z τ *ᵥ
         fun a => conj (_root_.GlobalTheory.SW.Dict.vec τ.1 m a) := by
   rw [two_mul]
+
   simp only [dotProduct, mulVec, _root_.GlobalTheory.SW.tauOf, _root_.GlobalTheory.SW.Dict.vec, Matrix.of_apply, map_sum, map_mul, hm, Fintype.sum_prod_type, Finset.mul_sum, Finset.sum_mul, mul_add, add_mul, Finset.sum_add_distrib]
   congr 1
   ·
@@ -243,6 +299,7 @@ theorem _root_.GlobalTheory.SW.Dict.lin_zetaOf (z z' : _root_.GlobalTheory.SW.CM
     m ⬝ᵥ _root_.GlobalTheory.SW.zetaOf Ψ z z' k =
       ∑ τ : Ψ, (_root_.GlobalTheory.SW.Dict.vec τ.1 m ⬝ᵥ z τ k +
         z' τ k ⬝ᵥ fun a => conj (_root_.GlobalTheory.SW.Dict.vec τ.1 m a)) := by
+
   simp only [dotProduct, _root_.GlobalTheory.SW.zetaOf, _root_.GlobalTheory.SW.Dict.vec, map_sum, map_mul, hm, Fintype.sum_prod_type, Finset.mul_sum, Finset.sum_mul, mul_add, Finset.sum_add_distrib]
   rw [Finset.sum_comm (s := (Finset.univ : Finset Ψ))]
   simp only [Finset.sum_comm (s := (Finset.univ : Finset Ψ))]
@@ -257,8 +314,9 @@ theorem _root_.GlobalTheory.SW.Dict.map_ofQ (σ : E →+* ℂ)
     (m : Matrix (Fin n) (_root_.GlobalTheory.SW.QI E N) ℚ) (k : Fin n) (a : Fin N) :
     σ (_root_.GlobalTheory.SW.ofQ m k a) =
       _root_.GlobalTheory.SW.Dict.vec σ (_root_.GlobalTheory.SW.qv (m k)) a := by
+
   simp only [_root_.GlobalTheory.SW.ofQ, Matrix.of_apply, map_sum,
-    _root_.GlobalTheory.SW.Dict.vec, _root_.GlobalTheory.SW.qv]
+  _root_.GlobalTheory.SW.Dict.vec, _root_.GlobalTheory.SW.qv]
   refine Finset.sum_congr rfl fun j _ => ?_
   rw [Rat.smul_def, map_mul, map_ratCast, mul_comm]
 
@@ -348,8 +406,9 @@ theorem _root_.GlobalTheory.SW.Dict.tauOf_mem (hΨ : _root_.GlobalTheory.SW.IsTy
       funext a; simp
     have hconjT : v τ ⬝ᵥ (Z τ)ᴴ *ᵥ (fun a => conj (v τ a)) =
         conj (v τ ⬝ᵥ Z τ *ᵥ fun a => conj (v τ a)) := by
+
       simp only [dotProduct, mulVec, conjTranspose_apply, map_sum, map_mul, Complex.star_def,
-        Complex.conj_conj, Finset.mul_sum]
+      Complex.conj_conj, Finset.mul_sum]
       rw [Finset.sum_comm]
       exact Finset.sum_congr rfl fun _ _ => Finset.sum_congr rfl fun _ _ => by ring
     rw [hstar]
@@ -389,6 +448,7 @@ theorem _root_.GlobalTheory.SW.Dict.tauOf_mem (hΨ : _root_.GlobalTheory.SW.IsTy
         simp only [hvdef, _root_.GlobalTheory.SW.Dict.vec,
           ComplexEmbedding.conjugate_coe_eq, Pi.zero_apply] at h1
         have h2 := congrArg conj h1
+
         simpa [map_sum, hm] using h2
     apply hx
     funext p
@@ -421,9 +481,9 @@ end
 
 end GlobalTheory.SW.Dict
 
+
 open Matrix Complex NumberField Filter Topology in
 open scoped ComplexConjugate ComplexOrder Real in
-
 theorem _root_.GlobalTheory.SW.thH_eq_thS_dictionary : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (Ψ : Finset (E →+* ℂ)), _root_.GlobalTheory.SW.IsType Ψ → ∀ (n N : ℕ), Function.Bijective (_root_.GlobalTheory.SW.ofQ : Matrix (Fin n) (_root_.GlobalTheory.SW.QI E N) ℚ → Matrix (Fin n) (Fin N) E) ∧ (∀ Z ∈ _root_.GlobalTheory.SW.Hn Ψ N, _root_.GlobalTheory.SW.tauOf Ψ Z ∈ _root_.GlobalTheory.SW.Siegel (_root_.GlobalTheory.SW.QI E N)) ∧ (∀ ζ : Fin n → _root_.GlobalTheory.SW.QI E N → ℂ, ∃ z z' : _root_.GlobalTheory.SW.CM Ψ n N, _root_.GlobalTheory.SW.zetaOf Ψ z z' = ζ) ∧ (∀ (φ : Matrix (Fin n) (Fin N) E → ℂ) Z z z', _root_.GlobalTheory.SW.thH Ψ φ Z z z' = _root_.GlobalTheory.SW.thS (fun m => φ (_root_.GlobalTheory.SW.ofQ m)) (_root_.GlobalTheory.SW.tauOf Ψ Z) (_root_.GlobalTheory.SW.zetaOf Ψ z z')) ∧ ∀ φ : Matrix (Fin n) (Fin N) E → ℂ, _root_.GlobalTheory.SW.IsSB φ ↔ _root_.GlobalTheory.SW.IsSB (fun m : Matrix (Fin n) (_root_.GlobalTheory.SW.QI E N) ℚ => φ (_root_.GlobalTheory.SW.ofQ m)) := by
   intro E _ _ _ Ψ hΨ n N
   exact ⟨(_root_.GlobalTheory.SW.Dict.ofQEquiv E n N).bijective,

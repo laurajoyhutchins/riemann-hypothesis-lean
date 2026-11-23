@@ -1,8 +1,67 @@
-import Mathlib
+module
+
+public import Mathlib.RingTheory.PowerSeries.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AbelianVarietyTheory.Definitions.Divisors.HasQIff
 import Development.AbelianVarietyTheory.Definitions.Divisors.ZetaActRefl
+import Development.AbelianVarietyTheory.Definitions.Foundations.ExpUpper
 import Development.AbelianVarietyTheory.Definitions.Foundations.MemRingOfInR
-import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.ModQPrin
-import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.ModJTau
+public import Mathlib.Algebra.Polynomial.Derivative
+public import Mathlib.Algebra.Polynomial.Div
+public import Mathlib.Algebra.Polynomial.Identities
+import Mathlib.Geometry.Manifold.StructureGroupoid
+public import Mathlib.NumberTheory.ModularForms.EisensteinSeries.Basic
+import Mathlib.NumberTheory.ModularForms.SlashActions
+public import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.ModDefs
+
+@[expose] public section
+
 open scoped UpperHalfPlane MatrixGroups ModularForm Manifold BigOperators
 open GlobalTheory.QFam GlobalTheory.WpFam GlobalTheory.KZ GlobalTheory.FN
 open ReciprocityTheory.ChartRestriction.L1 (DD jT IsMF)
@@ -42,7 +101,7 @@ theorem exists_finset_coeff_mem_closure :
     apply hR0; rw [Polynomial.eq_C_of_natDegree_eq_zero h, hRb, map_zero]
   obtain ⟨D, hD⟩ : ∃ D, D = Polynomial.derivative R := ⟨_, rfl⟩
   have hD0 : D ≠ 0 := by
-    haveI : IsAddTorsionFree (PowerSeries L) := IsAddTorsionFree.of_isTorsionFree L _
+    haveI : HasUniqueDiv (PowerSeries L) := IsAddTorsionFree.of_isTorsionFree L _
     intro h; rw [hD] at h; exact hdeg (Polynomial.natDegree_eq_zero_of_derivative_eq_zero h)
   have hDc : ∀ i, D.coeff i ∈ RA := by
     intro i; rw [hD, Polynomial.coeff_derivative]
@@ -80,7 +139,7 @@ theorem exists_finset_coeff_mem_closure :
       v = PowerSeries.mk fun k => PowerSeries.coeff (n + k) b := ⟨_, rfl⟩
   have hbuv : b = u + PowerSeries.X ^ n * v := by
     ext k
-    rw [map_add, PowerSeries.coeff_X_pow_mul', hu, hv]
+    rw [map_add (f := _), PowerSeries.coeff_X_pow_mul', hu, hv]
     simp only [PowerSeries.coeff_mk]
     by_cases h1 : k < n
     · rw [if_pos h1, if_neg (by omega), add_zero]
@@ -108,7 +167,7 @@ theorem exists_finset_coeff_mem_closure :
       PowerSeries.X ^ (n + n) * (k * v ^ 2 - w * v) := by
     rw [hk]; ring
   have hc2 := congrArg (PowerSeries.coeff (n + m)) key
-  rw [map_zero, map_add, map_add, PowerSeries.coeff_X_pow_mul', PowerSeries.coeff_X_pow_mul',
+  rw [map_zero, map_add (f := _), map_add (f := _), PowerSeries.coeff_X_pow_mul', PowerSeries.coeff_X_pow_mul',
     if_pos (by omega), if_neg (by omega), add_zero, Nat.add_sub_cancel_left] at hc2
   have hFv : PowerSeries.coeff m (F * v) = c * PowerSeries.coeff n b := by
     rw [PowerSeries.coeff_mul, Finset.sum_eq_single (m, 0)]

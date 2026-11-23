@@ -1,8 +1,60 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsUnitNormOne
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SquaringOpenAtOneOfCompleteTwoNeZero
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.HermitianFormFiniteZerosOnLineCmExt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+public import Mathlib.Topology.Algebra.Module.Cardinality
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
 import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.NotIsCompactUnivFv
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsUnitNormOne
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.HermitianFormFiniteZerosOnLineCmExt
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SquaringOpenAtOneOfCompleteTwoNeZero
+
+@[expose] public section
 
 noncomputable section
 
@@ -26,6 +78,7 @@ theorem sigR_algebraMap' (σ : E →ₐ[F] E) (k : K) :
 
 theorem hR_incl (σ : E →ₐ[F] E) {M : ℕ} (J : Matrix (Fin M) (Fin M) E) (x y : Fin M → E) :
     hR K σ J (fun i => inclR K (x i)) (fun i => inclR K (y i)) = inclR K (hE σ J x y) := by
+
   simp [hR, hE, Formalism.UG.hform, JR, map_sum, map_mul, sigR_inclR']
 
 theorem hermitianGramDetTwoVectorsTensor_incl (σ : E →ₐ[F] E) {M : ℕ} (J : Matrix (Fin M) (Fin M) E) (x y : Fin M → E) :
@@ -36,11 +89,12 @@ theorem sigR_sigR {σ : E →ₐ[F] E} (hσ : ∀ e, σ (σ e) = e) (u : K ⊗[F
   induction u using TensorProduct.induction_on with
   | zero => simp
   | tmul k e => simp [sigR, hσ]
-  | add a b ha hb => simp only [map_add, ha, hb]
+  | add a b ha hb => simp only [map_add (f := _), ha, hb]
 
 theorem sigR_hR {σ : E →ₐ[F] E} (hσ : ∀ e, σ (σ e) = e) {M : ℕ} {J : Matrix (Fin M) (Fin M) E}
     (hJ : ∀ i j, σ (J j i) = J i j) (a b : Fin M → K ⊗[F] E) :
     sigR K σ (hR K σ J a b) = hR K σ J b a := by
+
   simp only [hR, Formalism.UG.hform, map_sum, map_mul, sigR_sigR K hσ, JR, Matrix.map_apply, sigR_inclR', hJ]
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
@@ -60,7 +114,7 @@ theorem exists_lam [NumberField F] [NumberField E] {σ : E →ₐ[F] E} (h : IsC
   have hφ' : ∀ e, algebraMap F E (φ' e) = e + σ e := by
     intro e
     obtain ⟨f, hf⟩ := GlobalTheory.HermLineZeros.exists_of_fixed h (e + σ e)
-      (by rw [map_add, GlobalTheory.HermLineZeros.conj_invol h, add_comm])
+      (by rw [map_add (f := _), GlobalTheory.HermLineZeros.conj_invol h, add_comm])
     have h1 : φ' e = φ (e + σ e) := rfl
     rw [h1, ← hf]
     have := LinearMap.congr_fun hφ f
@@ -73,7 +127,7 @@ theorem exists_lam [NumberField F] [NumberField E] {σ : E →ₐ[F] E} (h : IsC
     have h2 : sigR K σ (k ⊗ₜ[F] e) = k ⊗ₜ[F] σ e := rfl
     rw [h2, ← TensorProduct.tmul_add, ← hφ', Algebra.algebraMap_eq_smul_one, ← TensorProduct.smul_tmul]
     simp [Algebra.TensorProduct.algebraMap_apply]
-  | add a b ha hb => rw [map_add, map_add, map_add, ← ha, ← hb]; abel
+  | add a b ha hb => rw [map_add (f := _), map_add (f := _), map_add (f := _), ← ha, ← hb]; abel
 
 theorem two_ne_zero' (F₀ K₀ : Type) [Field F₀] [CharZero F₀] [Field K₀] [Algebra F₀ K₀] : (2 : K₀) ≠ 0 := by
   have : (2 : K₀) = algebraMap F₀ K₀ 2 := (map_ofNat (algebraMap F₀ K₀) 2).symm
@@ -101,7 +155,7 @@ theorem continuous_hR {X : Type} [TopologicalSpace X] (σ : E →ₐ[F] E) {M : 
     {f g : X → Fin M → K ⊗[F] E} (hf : Continuous f) (hg : Continuous g) :
     Continuous fun t => hR K σ J (f t) (g t) := by
   unfold hR Formalism.UG.hform
-  refine continuous_finset_sum _ fun i _ => continuous_finset_sum _ fun j _ => ?_
+  refine continuous_finsetSum _ fun i _ => continuous_finsetSum _ fun j _ => ?_
   exact (((continuous_sigR K σ).comp ((continuous_apply i).comp hf)).mul continuous_const).mul
     ((continuous_apply j).comp hg)
 
@@ -271,14 +325,14 @@ theorem approx : ∀ (F E : Type) [Field F] [NumberField F] [Field E] [NumberFie
       simp only [wε, hR, GlobalTheory.HermLineZeros.hform_expand]
       rw [hsig]
       ring
-    rw [e1, map_add, map_add, hlamsmul, hlamsmul, hlamsmul, hlamA]
+    rw [e1, map_add (f := _), map_add (f := _), hlamsmul, hlamsmul, hlamsmul, hlamA]
     ring
 
   set P : Polynomial K := Polynomial.X ^ 2 + Polynomial.C (lam (hR K σ J w xb + hR K σ J xb w)) * Polynomial.X
     + Polynomial.C (lam (hR K σ J w w)) with hP
   have hP0 : P ≠ 0 := by
     intro h0
-    have := congrArg (fun p => Polynomial.coeff p 2) h0
+    have := congrArg (fun p => _root_.AddMonoidAlgebra.coeff (M := ℕ) p 2) h0
     simp [hP, Polynomial.coeff_X, Polynomial.coeff_C] at this
   have hZ : {ε : K | P.IsRoot ε}.Countable := (Polynomial.finite_setOf_isRoot hP0).countable
   have hD : Dense {ε : K | P.IsRoot ε}ᶜ := hZ.dense_compl K

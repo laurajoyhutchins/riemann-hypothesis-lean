@@ -1,8 +1,61 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StZariskiObjects
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StPolyGermPointPow
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.GradientAtPoint
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.EvalSmulOfIsHomogeneous
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StPolyGermPointPow
+public import Mathlib.RingTheory.MvPolynomial.Homogeneous
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.EvalSmulOfIsHomogeneous
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.GradientAtPoint
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.MvPolynomial.Ideal
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.MvPolynomial.Funext
+public import Mathlib.Algebra.MvPolynomial.Monad
+public import Mathlib.Analysis.Calculus.FDeriv.Analytic
+public import Mathlib.Topology.Algebra.Polynomial
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.IndefiniteRowSideFullHecke.ComplexSets
@@ -99,7 +152,7 @@ theorem mem_pow_ker_of_isBigO {k : ℕ} {q : MvPolynomial σ ℂ}
     rw [hq'def, show (eval y : MvPolynomial σ ℂ →+* ℂ) = eval₂Hom (RingHom.id ℂ) y from rfl, eval₂Hom_bind₁]
     have hfun : (fun i => eval₂Hom (RingHom.id ℂ) y (X i + C (w i))) = y + w := by
       ext i
-      simp only [map_add, eval₂Hom_X', eval₂Hom_C, RingHom.id_apply, Pi.add_apply]
+      simp only [map_add (f := _), eval₂Hom_X', eval₂Hom_C, RingHom.id_apply, Pi.add_apply]
     rw [hfun]
     rfl
 
@@ -115,6 +168,7 @@ theorem mem_pow_ker_of_isBigO {k : ℕ} {q : MvPolynomial σ ℂ}
       intro t
       rw [← hev]
       conv_rhs => rw [← sum_homogeneousComponent q']
+
       simp only [P, Polynomial.eval_finsetSum, Polynomial.eval_monomial, map_sum]
       refine Finset.sum_congr rfl fun e _ => ?_
       rw [eval_smul_of_isHomogeneous (homogeneousComponent_isHomogeneous e q'), mul_comm]
@@ -126,15 +180,19 @@ theorem mem_pow_ker_of_isBigO {k : ℕ} {q : MvPolynomial σ ℂ}
       refine (hq.comp_tendsto hT).trans (IsBigO.of_bound (‖v‖ ^ k) (Eventually.of_forall fun t => ?_))
       simp [norm_smul, mul_pow, mul_comm]
     have hc := coeff_eq_zero_of_isBigO hPO d hd
-    simp only [P, Polynomial.finsetSum_coeff, Polynomial.coeff_monomial, Finset.sum_ite_eq', if_pos hdT] at hc
+    simp only [P, Polynomial.finsetSum_coeff, Polynomial.coeff_monomial,
+      Finsupp.single_apply, Finset.sum_ite_eq', if_pos hdT] at hc
     simpa using hc
   have hmem : q' ∈ idealOfVars σ ℂ ^ k := by
     refine (mem_pow_idealOfVars_iff' k q').mpr fun x hx => ?_
-    have := congrArg (coeff x) (hcomp _ hx)
-    rwa [coeff_homogeneousComponent, if_pos rfl, coeff_zero] at this
+    have := congrArg (AddMonoidAlgebra.coeff · x) (hcomp _ hx)
+    simpa [coeff_homogeneousComponent, AddMonoidAlgebra.coeff] using this
   have hback : bind₁ (fun i => X i - C (w i)) q' = q := by
     rw [hq'def, bind₁_bind₁]
-    simp [bind₁_X_right]
+    have hfun : (fun i => bind₁ (fun i => X i - C (w i)) (X i + C (w i) : MvPolynomial σ ℂ)) = X := by
+      funext i
+      rw [map_add, bind₁_X_right, bind₁_C_right, sub_add_cancel]
+    rw [hfun, bind₁_X_left, AlgHom.id_apply]
   have := Ideal.mem_map_of_mem (bind₁ (fun i => (X i - C (w i) : MvPolynomial σ ℂ))) hmem
   rw [Ideal.map_pow, idealOfVars, Ideal.map_span, ← Set.range_comp, hback] at this
   rw [GroundTheory.Heights₂.Heights.GradientAtPoint.ker_eval_eq_span]

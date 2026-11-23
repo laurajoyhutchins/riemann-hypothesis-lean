@@ -1,7 +1,47 @@
-import Formalism.LocalToGlobal.ProjectiveLattices.IsCombAt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.HasArcDataIff
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.IsNsmul
-import Formalism.LocalToGlobal.ProjectiveLattices.VAtVNeBot
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.HasArcDataIff
+public import Formalism.LocalToGlobal.ProjectiveLattices.VAtVNeBot
+public import Mathlib.RingTheory.LaurentSeries
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -87,19 +127,6 @@ def IsArcPt3At (Y : Model Xo c β) {K₁ : Type} [Field K₁] [Algebra c.F K₁]
         ∀ j (h : (Xo.univ.t.PP.L.pull m1.φ).U j ≤ g ⁻¹ᵁ (PPx yF.x).U (fun _ => j PUnit.unit)),
           s1.f j = (g.appLE _ _ h).hom (yF.s.f (fun _ => j PUnit.unit))
 
-def IsArcPt3 (Y : Model Xo c β) {K₁ : Type} [Field K₁] [Algebra c.F K₁] {b : O →+* K₁} (a : ArcIn Dw l β K₁ b)
-    (χ : Sp (PowerSeries K₁) ⟶ Y.X)
-    (W : ArcWit Y a (Ideal.span {PowerSeries.X}) (PowerSeries.C (R := K₁)) PowerSeries.X χ)
-    [Algebra c.F (ArcS Dw K₁)] (yF : FrPt Xo c (ArcS Dw K₁)) : Prop :=
-  ∃ th : a.D₀.P.L.Sec, IsArcPt3At Y a χ W yF th
-
-def IsArcPt (Y : Model Xo c β) {K₁ : Type} [Field K₁] [Algebra c.F K₁] {b : O →+* K₁} (a : ArcIn Dw l β K₁ b)
-    (χ : Sp (PowerSeries K₁) ⟶ Y.X)
-    (W : ArcWit Y a (Ideal.span {PowerSeries.X}) (PowerSeries.C (R := K₁)) PowerSeries.X χ)
-    (e : ∀ τ : E →+* ℂ, Fin (Dw.mult τ) → ReciprocityTheory.ChartRestriction.G.Out.GtPt a.D₀ (epsR K₁))
-    [Algebra c.F (ArcS Dw K₁)] (yF : FrPt Xo c (ArcS Dw K₁)) : Prop :=
-  IsArcPointPowerSeries Y a χ W e yF ∧ IsArcPt3 Y a χ W yF
-
 def ArcLieBasis {Y : Model Xo c β} {K₁ : Type} [Field K₁] [Algebra c.F K₁] {b : O →+* K₁} {a : ArcIn Dw l β K₁ b}
     {χ : Sp (PowerSeries K₁) ⟶ Y.X}
     (W : ArcWit Y a (Ideal.span {PowerSeries.X}) (PowerSeries.C (R := K₁)) PowerSeries.X χ)
@@ -112,18 +139,5 @@ def ArcLieBasis {Y : Model Xo c β} {K₁ : Type} [Field K₁] [Algebra c.F K₁
           spMap (epsScaleR (PowerSeries.C (R := K₁) (algebraMap c.F K₁ (embK c τ x)))) ≫ w.left
       (∀ k, IsTangent (v τ k) ∧ eig (v τ k)) ∧
       ∀ w, IsTangent w → eig w → ∃! cf : Fin (Dw.mult τ) → PowerSeries K₁, IsLieComb cf (v τ) w
-
-def ArcPtExSt : Prop :=
-  ∀ (O : Type) [CommRing O] (β : O →+* c.F) (Y : Model Xo c β) (K₁ : Type) [Field K₁] [Algebra c.F K₁]
-    (b : O →+* K₁) (a : ArcIn Dw l β K₁ b) (χ : Sp (PowerSeries K₁) ⟶ Y.X)
-    (W : ArcWit Y a (Ideal.span {PowerSeries.X}) (PowerSeries.C (R := K₁)) PowerSeries.X χ)
-    (e : ∀ τ : E →+* ℂ, Fin (Dw.mult τ) → ReciprocityTheory.ChartRestriction.G.Out.GtPt a.D₀ (epsR K₁)) [Algebra c.F (ArcS Dw K₁)],
-    (∃ r z : O, ((β r : c.F) : ℂ) = H.rt0 ∧ ((β z : c.F) : ℂ) = zeta l.A) →
-    χ ≫ Y.s = spMap (PowerSeries.C (R := K₁)) ≫ spMap b →
-    (∀ x : Sp (PowerSeries K₁), PowerSeries.X ∉ x.asIdeal → χ x ∈ Set.range Y.j) →
-    (∀ r : O, algebraMap c.F K₁ (β r) = b r) →
-    (∀ r : c.F, algebraMap c.F (ArcS Dw K₁) r = arcι Dw K₁ (PowerSeries.C (R := K₁) (algebraMap c.F K₁ r))) →
-    ArcLieBasis W e →
-    ∃ yF : FrPt Xo c (ArcS Dw K₁), IsArcPt Y a χ W e yF
 
 end Formalism.L2.Pj

@@ -1,4 +1,55 @@
-import Formalism.LocalToGlobal.CharacterGerms.RowTieValCr
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.CocycleRightZeroThd
+public import Formalism.LocalToGlobal.CharacterGerms.ConstantCoeffSinglePointZero
+public import Formalism.LocalToGlobal.CharacterGerms.ConstantCoeffTripleSubstitution
+import Formalism.LocalToGlobal.CharacterGerms.LemmaMLin
+import Formalism.LocalToGlobal.CharacterGerms.SubstSubst
+public import Formalism.LocalToGlobal.CharacterGerms.ValuationEqPairOfUnitGerm
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import Formalism.LocalToGlobal.CharacterGerms.PullbackLogCoordsEvalZero
+
+@[expose] public section
 
 noncomputable section
 
@@ -13,7 +64,7 @@ namespace VP
 
 variable {C : Type} [Field C] [CharZero C] {V : VF C} {O : Type} [CommRing O] [StarRing O] {dd : ℕ} {τ τ' : Type}
 
-def lin1 {σ : Type} (f : MvPowerSeries σ C) (j : σ) : C := MvPowerSeries.constantCoeff (MvPowerSeries.pderiv C j f)
+def lin1 {σ : Type} (f : MvPowerSeries σ C) (j : σ) : C := MvPowerSeries.constantCoeff (MvPowerSeries.pderiv (R := C) j f)
 
 theorem linear_coeff_eq_coeff_single {σ : Type} (f : MvPowerSeries σ C) (j : σ) : lin1 f j = MvPowerSeries.coeff (Finsupp.single j 1) f := by
   unfold lin1
@@ -128,21 +179,21 @@ theorem lin_of_add (f : MvPowerSeries (Fin dd) C) (h0 : MvPowerSeries.constantCo
     f = ∑ j, lin1 f j • (MvPowerSeries.X j : MvPowerSeries (Fin dd) C) := by
   have cS : ∀ m : Fin dd, MvPowerSeries.constantCoeff
       (MvPowerSeries.X ((0 : Fin 2), m) + MvPowerSeries.X ((1 : Fin 2), m) : PS C 2 dd) = 0 := fun m => by
-    rw [map_add, cc_X, cc_X, add_zero]
+    rw [map_add (f := _), cc_X, cc_X, add_zero]
   set K : Fin 2 × Fin dd → MvPowerSeries (Fin dd) C := P2 MvPowerSeries.X (fun _ => 0) with hK
   have cK : ∀ q, MvPowerSeries.constantCoeff (K q) = 0 := constantCoeff_pair_substitution (fun _ => cc_X _) (fun _ => map_zero _)
-  have hder : ∀ i, MvPowerSeries.pderiv C i f = MvPowerSeries.C (lin1 f i) := by
+  have hder : ∀ i, MvPowerSeries.pderiv (R := C) i f = MvPowerSeries.C (lin1 f i) := by
     intro i
-    have h := congrArg (fun G => MvPowerSeries.subst K (MvPowerSeries.pderiv C ((1 : Fin 2), i) G)) hadd
+    have h := congrArg (fun G => MvPowerSeries.subst K (MvPowerSeries.pderiv (R := C) ((1 : Fin 2), i) G)) hadd
     beta_reduce at h
-    rw [map_add, pderiv_subst (og cS), pderiv_subst (og fun _ => cc_X _), pderiv_subst (og fun _ => cc_X _),
+    rw [map_add (f := _), pderiv_subst (og cS), pderiv_subst (og fun _ => cc_X _), pderiv_subst (og fun _ => cc_X _),
       subst_add' cK, subst_sum cK, subst_sum cK, subst_sum cK] at h
-    have h1 : ∀ m, MvPowerSeries.subst K (MvPowerSeries.pderiv C ((1 : Fin 2), i)
+    have h1 : ∀ m, MvPowerSeries.subst K (MvPowerSeries.pderiv (R := C) ((1 : Fin 2), i)
         (MvPowerSeries.X ((0 : Fin 2), m) + MvPowerSeries.X ((1 : Fin 2), m) : PS C 2 dd) *
         MvPowerSeries.subst (fun m : Fin dd => (MvPowerSeries.X ((0 : Fin 2), m) + MvPowerSeries.X ((1 : Fin 2), m) : PS C 2 dd))
-          (MvPowerSeries.pderiv C m f)) = if m = i then MvPowerSeries.pderiv C i f else 0 := by
+          (MvPowerSeries.pderiv (R := C) m f)) = if m = i then MvPowerSeries.pderiv (R := C) i f else 0 := by
       intro m
-      rw [map_add, MvPowerSeries.pderiv_X_of_ne (fun hh => by simpa using (Prod.ext_iff.1 hh).1), zero_add]
+      rw [map_add (f := _), MvPowerSeries.pderiv_X_of_ne (fun hh => by simpa using (Prod.ext_iff.1 hh).1), zero_add]
       by_cases hm : m = i
       · subst hm
         rw [MvPowerSeries.pderiv_X_self, one_mul, subst_subst cS cK, if_pos rfl]
@@ -155,16 +206,16 @@ theorem lin_of_add (f : MvPowerSeries (Fin dd) C) (h0 : MvPowerSeries.constantCo
         rw [this, MvPowerSeries.subst_self]
         rfl
       · rw [MvPowerSeries.pderiv_X_of_ne (fun hh => hm (Prod.ext_iff.1 hh).2), zero_mul, subst_zero' cK, if_neg hm]
-    have h2 : ∀ m, MvPowerSeries.subst K (MvPowerSeries.pderiv C ((1 : Fin 2), i)
+    have h2 : ∀ m, MvPowerSeries.subst K (MvPowerSeries.pderiv (R := C) ((1 : Fin 2), i)
         (MvPowerSeries.X ((0 : Fin 2), m) : PS C 2 dd) *
         MvPowerSeries.subst (fun m : Fin dd => (MvPowerSeries.X ((0 : Fin 2), m) : PS C 2 dd))
-          (MvPowerSeries.pderiv C m f)) = 0 := by
+          (MvPowerSeries.pderiv (R := C) m f)) = 0 := by
       intro m
       rw [MvPowerSeries.pderiv_X_of_ne (fun hh => by simpa using (Prod.ext_iff.1 hh).1), zero_mul, subst_zero' cK]
-    have h3 : ∀ m, MvPowerSeries.subst K (MvPowerSeries.pderiv C ((1 : Fin 2), i)
+    have h3 : ∀ m, MvPowerSeries.subst K (MvPowerSeries.pderiv (R := C) ((1 : Fin 2), i)
         (MvPowerSeries.X ((1 : Fin 2), m) : PS C 2 dd) *
         MvPowerSeries.subst (fun m : Fin dd => (MvPowerSeries.X ((1 : Fin 2), m) : PS C 2 dd))
-          (MvPowerSeries.pderiv C m f)) = if m = i then MvPowerSeries.C (lin1 f i) else 0 := by
+          (MvPowerSeries.pderiv (R := C) m f)) = if m = i then MvPowerSeries.C (lin1 f i) else 0 := by
       intro m
       by_cases hm : m = i
       · subst hm
@@ -180,6 +231,7 @@ theorem lin_of_add (f : MvPowerSeries (Fin dd) C) (h0 : MvPowerSeries.constantCo
       Finset.sum_congr rfl fun m _ => h3 m, Finset.sum_const_zero, zero_add, Finset.sum_ite_eq', Finset.sum_ite_eq'] at h
     simpa using h
   ext μ
+
   rw [map_sum]
   simp only [map_smul, smul_eq_mul, MvPowerSeries.coeff_X]
   by_cases hμ : μ = 0
@@ -211,7 +263,7 @@ theorem lin_of_add (f : MvPowerSeries (Fin dd) C) (h0 : MvPowerSeries.constantCo
       rw [if_neg, mul_zero]
       intro h
       have hd := congrArg Finsupp.degree h
-      rw [map_add, Finsupp.degree_single, Finsupp.degree_single] at hd
+      rw [map_add (f := _), Finsupp.degree_single, Finsupp.degree_single] at hd
       exact hν ((Finsupp.degree_eq_zero_iff _).1 (by omega))
 
 end VP

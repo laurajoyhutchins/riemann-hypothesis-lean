@@ -1,8 +1,51 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.HodgeTateResidues.IsEtaleFirstChernUntwisted
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.BocksteinBaseChange.DatPull
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.ZariskiEtaleLifting.MapUSharp
-import Development.WeilBound.RepresentationTheoryGL.PeriodRingBases.PeriodRingUnits.DieudonneManinBasisModification
+module
+
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.HodgeTateResidues.IsEtaleFirstChernUntwisted
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.BocksteinBaseChange.DatPull
+public import Development.WeilBound.RepresentationTheoryGL.PeriodRingBases.PeriodRingUnits.DieudonneManinBasisModification
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.BocksteinBaseChange.RedGalBase
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
@@ -86,19 +129,19 @@ end Pd
 
 variable {l : ℕ} [Fact l.Prime] {K : IntermediateField ℚ_[l] (PadicAlgCl l)}
 
-variable (l) in
 
+variable (l) in
 def TFil : Prop := ∀ (A : PAlg l) (n : ℕ), A.cris n (tA l) ∈ B.JJ false A n
 
 def TT (P : PAlg l ⥤ Type) (r n : ℕ) : SubF (modF (AcrEl P n)) where
-  S T := { carrier := {x | (show T.1.obj.Acr n from x) ∈ Pb.pdP (B.DD false T.1.obj n) r}
-           add_mem' := fun hx hy => (Pb.pdP (B.DD false T.1.obj n) r).add_mem hx hy
-           zero_mem' := (Pb.pdP (B.DD false T.1.obj n) r).zero_mem
-           smul_mem' := fun a _ hx => (Pb.pdP (B.DD false T.1.obj n) r).mul_mem_left (T.1.obj.cris n a) hx }
-  map_mem φ _ hx := Pb.dividedPowerFiltration_map (B.dd_map false φ.1.hom n) r hx
+  S T := { carrier := {x | (show T.obj.obj.Acr n from x) ∈ Pb.pdP (B.DD false T.obj.obj n) r}
+           add_mem' := fun hx hy => (Pb.pdP (B.DD false T.obj.obj n) r).add_mem hx hy
+           zero_mem' := (Pb.pdP (B.DD false T.obj.obj n) r).zero_mem
+           smul_mem' := fun a _ hx => (Pb.pdP (B.DD false T.obj.obj n) r).mul_mem_left (T.obj.obj.cris n a) hx }
+  map_mem φ _ hx := Pb.dividedPowerFiltration_map (B.dd_map false φ.hom.hom n) r hx
 
-theorem mem_TT {P : PAlg l ⥤ Type} {r n : ℕ} {T : El P} {x : T.1.obj.Acr n} :
-    x ∈ (TT P r n).S T ↔ x ∈ Pb.pdP (B.DD false T.1.obj n) r := Iff.rfl
+theorem mem_TT {P : PAlg l ⥤ Type} {r n : ℕ} {T : El P} {x : T.obj.obj.Acr n} :
+    x ∈ (TT P r n).S T ↔ x ∈ Pb.pdP (B.DD false T.obj.obj n) r := Iff.rfl
 
 theorem mem_pdS {b : Base} {L : b.Fun} {Λ : Type} [CommRing Λ] {c : Λ →+* b.R} {r : ℕ} {T : Thick L} {x : T.B} :
     x ∈ (B.pdS L c r).S T ↔ x ∈ Pb.pdP T.δ r := Iff.rfl
@@ -109,8 +152,8 @@ def βMorF {O : Type} [CommRing O] (F : B.Fn O) (κ : O →+* OC l) (r n : ℕ) 
     mem_TT.2 ((mem_pdS (T := B.gObj F κ false n ((B.jE _).obj T))).1 hx)
 
 def tMor (ht : TFil l) (P : PAlg l ⥤ Type) (r n : ℕ) : CH.Mor (modF (AcrEl P n)) (TT P r n).fn (RingHom.id _) :=
-  mulTo (tA l ^ r) (TT P r n) fun T (x : T.1.obj.Acr n) => mem_TT.2 (by
-    have := Ideal.mul_mem_right x _ (pow_mem_pdP (B.DD false T.1.obj n) (ht T.1.obj n) r)
+  mulTo (tA l ^ r) (TT P r n) fun T (x : T.obj.obj.Acr n) => mem_TT.2 (by
+    have := Ideal.mul_mem_right x _ (pow_mem_pdP (B.DD false T.obj.obj n) (ht T.obj.obj n) r)
     rw [← map_pow] at this
     exact this)
 
@@ -156,12 +199,12 @@ def IsLift (e : E.EtFam l K) {M : Model l K} (r : ℕ) {j : ℕ} (v : M.T j) (x 
   Comp x ∧ ∀ n, (βMorF (B.schFn M.p) (okToOC l K) r n).pull j (x n) =
     (tMor ht ((B.schFn M.p).pt (okToOC l K)) r n).pull j (e M n j (v.lev n))
 
-variable (l) in
 
+variable (l) in
 def zA : ℤ_[l] →+* Acris l := (algebraMap (AInf ℂ_[l] l) (ACris.ACris ℂ_[l] l)).comp (IsPerfectoidField.padicIntToWitt l)
 
-variable (l) in
 
+variable (l) in
 def θA : Acris l →+* ℂ_[l] := (θD l).comp (ACris.iota ℂ_[l] l)
 
 structure Half1 (Lf : ∀ {M : Model l K} (r : ℕ) {j : ℕ}, M.T j → Fam M r j → Prop) : Prop where
@@ -183,7 +226,7 @@ structure Half1 (Lf : ∀ {M : Model l K} (r : ℕ) {j : ℕ}, M.T j → Fam M r
   c1 : ∀ (M : Model l K) (D : E.LineData M.X), Etale D.f → sSup (Pb.𝒱D D) = ⊤ → ∀ (r : E.Roots l) (v : M.T 2), IsEtaleFirstChernUntwisted r D v →
     ∃ x, IsFirstChernClassInFamily D x ∧ Lf 1 v x
 
-set_option maxHeartbeats 1000000 in
+
 
 structure Half2 (γ : ∀ {M : Model l K} {r j : ℕ}, Fam M r j → ∀ a, Module.Dual K (Hdg M.q a j) →+ ℂ_[l]) : Prop where
   add : ∀ {M : Model l K}, M.Sm → ∀ {r j : ℕ} (x y : Fam M r j), Comp x → Comp y → ∀ a, γ (x + y) a = γ x a + γ y a

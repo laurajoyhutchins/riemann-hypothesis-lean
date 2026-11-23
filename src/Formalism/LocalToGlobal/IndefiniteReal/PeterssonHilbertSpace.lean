@@ -1,4 +1,48 @@
-import Formalism.LocalToGlobal.IndefiniteReal.ScalarOnPartsFull
+module
+
+public import Formalism.LocalToGlobal.IndefiniteReal.ScalarOnPartsFull
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -22,12 +66,16 @@ section Gen
 variable {N : Type} [AddCommGroup N] [Module ℂ N] {C : Submodule ℂ N} {ip : N → N → ℂ}
 
 theorem isHermPos_scale (h : IsHermPos C ip) {s : ℝ} (hs : 0 < s) :
-    IsHermPos C (fun x y => (s : ℂ) * ip x y) where
-  fd := h.fd
-  add x x' y := by simp only [h.add x x' y, mul_add]
-  smul a x y := by simp only [h.smul a x y]; ring
-  herm x y := by simp only [map_mul, Complex.conj_ofReal, h.herm x y]
-  pos x hx := by
+    IsHermPos C (fun x y => (s : ℂ) * ip x y) := by
+  refine ⟨h.fd, ?_, ?_, ?_, ?_⟩
+  · intro x x' y
+    simp only [h.add x x' y, mul_add]
+  · intro a x y
+    simp only [h.smul a x y]
+    ring
+  · intro x y
+    simp only [map_mul, Complex.conj_ofReal, h.herm x y]
+  · intro x hx
     simp only [Complex.re_ofReal_mul]
     exact mul_pos hs (h.pos x hx)
 
@@ -43,7 +91,7 @@ theorem IsHermPos.map_equiv {N' : Type} [AddCommGroup N'] [Module ℂ N'] (h : I
     infer_instance
   · intro x x' y
     show ip (e.symm ((x : N') + x')) (e.symm y) = ip (e.symm x) (e.symm y) + ip (e.symm x') (e.symm y)
-    rw [map_add]
+    rw [map_add (f := _)]
     exact h.add ⟨_, hm x⟩ ⟨_, hm x'⟩ ⟨_, hm y⟩
   · intro s x y
     show ip (e.symm (s • (x : N'))) (e.symm y) = starRingEnd ℂ s * ip (e.symm x) (e.symm y)
@@ -154,7 +202,7 @@ theorem isHermPos_mult (hθ : IsInfFam θ) (hfin : HCFinite θ M J χ)
     intro T T' c h
     have hex : ∃ c, IsMultIP M μ 𝓕 T T' c := ⟨c, h⟩
     unfold ipM
-    rw [dif_pos hex]
+    rw [dite_eq_left hex]
     exact huniq _ _ _ _ hex.choose_spec h
   have hE : ∀ x y : Mult θ M J χ, ∃ c, IsMultIP M μ 𝓕 x y c := fun x y => hS hθ hH hF _ x.2 _ y.2
   refine ⟨hfd, ?_, ?_, ?_, ?_⟩
@@ -217,18 +265,6 @@ theorem isHermPos_multT (hθ : IsInfFam θ) (hfin : HCFinite θ M J χ)
     (hS : SchurMult θ M J χ μ 𝓕) (hH : μ.IsHaarMeasure) (hF : IsFundamentalDomain (GQ V) 𝓕 μ)
     (hP : PetPos V μ 𝓕) (hne : SmNonzero M) : IsHermPos (MultT θ M J χ) (ipMT' M μ 𝓕) :=
   (isHermPos_mult M μ 𝓕 θ J χ hθ hfin hU hS hH hF hP hne).map_equiv PiTensorProduct.lift
-
-theorem isHermPos_ipW {W : HSp D}
-    {κ : ∀ τ : D.what₂.Tau, Fin (W.sig (tauE D τ)).1 ⊕ Fin (W.sig (tauE D τ)).2 → ℤ}
-    (M : DSModel W (parW W κ)) (μ : Measure (GA D W)) (𝓕 : Set (GA D W)) (C : Submodule ℂ (MMap M))
-    (hdim : ∀ τ, 0 < dimK _ _ (κ τ)) (h : IsHermPos C (ipM M μ 𝓕)) : IsHermPos C (ipW M μ 𝓕) := by
-  have hs : (0 : ℝ) < ∏ τ, ((dimK _ _ (κ τ) : ℚ) : ℝ) :=
-    Finset.prod_pos fun τ _ => by exact_mod_cast hdim τ
-  have he : ipW M μ 𝓕 = fun x y => ((∏ τ, ((dimK _ _ (κ τ) : ℚ) : ℝ) : ℝ) : ℂ) * ipM M μ 𝓕 x y := by
-    funext x y
-    simp [ipW]
-  rw [he]
-  exact isHermPos_scale h hs
 
 end MultSec
 

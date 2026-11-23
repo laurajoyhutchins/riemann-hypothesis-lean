@@ -1,6 +1,53 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.PartialDerivativeMinors.PMinorAff
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.MsMul
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.PartialDerivativeMinors.PMinorAff
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.MsMul
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.Derivation.Lie
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -85,6 +132,7 @@ lemma lap_apply (t : H) (P : PolyXZ H N0 N1) :
 lemma pw_lfo (t : H) (c : ℕ × Fin N1) (a : Fin N0) (b : Fin N1) :
     pderiv (Sum.inr ((true, t), a, b)) (lfo (N0 := N0) t c) = 0 := by
   unfold lfo
+
   rw [map_sum]
   apply Finset.sum_eq_zero
   intro a' _
@@ -106,6 +154,7 @@ lemma pz_lfo (t : H) (c : ℕ × Fin N1) (a : Fin N0) (b : Fin N1) :
       simp only [Sum.inr.injEq, Prod.mk.injEq] at e
       exact h ⟨e.2.1, e.2.2⟩
   unfold lfo
+
   rw [map_sum, Finset.sum_congr rfl (fun a' _ => key a')]
   by_cases hb : b = c.2
   · subst hb
@@ -159,6 +208,7 @@ lemma zf_dRow (t : H) (r : ℕ) (b : Fin N1) (h : PolyXZ H N0 N1)
     (hh : ∀ a b, pderiv (Sum.inr ((false, t), a, b)) h = 0) :
     ∀ a b', pderiv (Sum.inr ((false, t), a, b')) (dRow (N0 := N0) t r b h) = 0 := by
   intro a b'
+
   rw [dRow_apply, map_sum]
   apply Finset.sum_eq_zero
   intro a' _
@@ -167,8 +217,9 @@ lemma zf_dRow (t : H) (r : ℕ) (b : Fin N1) (h : PolyXZ H N0 N1)
 
 lemma dRow_comm (t : H) (r : ℕ) (b : Fin N1) (r' : ℕ) (b' : Fin N1) (P : PolyXZ H N0 N1) :
     dRow (N0 := N0) t r b (dRow t r' b' P) = dRow t r' b' (dRow t r b P) := by
+
   simp only [dRow_apply, map_sum, Derivation.leibniz, pd_inr_X_inl, smul_eq_mul, mul_zero,
-    Finset.sum_const_zero, add_zero, Finset.mul_sum]
+  Finset.sum_const_zero, add_zero, Finset.mul_sum]
   rw [Finset.sum_comm]
   apply Finset.sum_congr rfl
   intro a _
@@ -281,7 +332,7 @@ lemma lap_tm_zero (t : H) (n : ℕ) :
         obtain ⟨L', h', k', rfl, h1, h2, h3⟩ := hx
         exact ih L' h' k' h1 h2 (by have := relL_lt h3; omega)
       | zero => exact map_zero _
-      | add x y _ _ hx hy => rw [map_add, hx, hy, add_zero]
+      | add x y _ _ hx hy => rw [map_add (f := _), hx, hy, add_zero]
       | smul a x _ hx => rw [map_smul, hx, smul_zero]
     exact key _ (gf_mem t L h k hh hk)
 
@@ -385,7 +436,7 @@ theorem pLapForms : PLapForms := by
       rw [e]
       exact lap_tm_zero t n L g d (fun a b => hg a b) hd (by rw [e1, e2]; omega)
     | zero => rw [zero_mul, map_zero]
-    | add x y _ _ hx hy => rw [add_mul, map_add, hx, hy, add_zero]
+    | add x y _ _ hx hy => rw [add_mul, map_add (f := _), hx, hy, add_zero]
     | smul r x _ hx => rw [smul_mul_assoc, map_smul, hx, smul_zero]
   exact key _ hF
 

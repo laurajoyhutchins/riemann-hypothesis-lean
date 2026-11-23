@@ -1,4 +1,54 @@
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.LaplaceOperators.CapelliIdentity.Expand
+module
+
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.LaplaceOperators.CapelliIdentity.CapelliCentralStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.LaplaceOperators.CapelliIdentity.Expand
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -34,7 +84,7 @@ theorem isGlRep_tensV {n : ℕ} (E : Fin n → Fin n → Module.End ℂ M) (hE :
   refine LinearMap.ext fun f => funext fun e => ?_
   have h := LinearMap.congr_fun (hE a b c d) (f e)
   simp only [LinearMap.sub_apply, Module.End.mul_apply] at h
-  simp only [LinearMap.sub_apply, Module.End.mul_apply, tensV_apply', map_add, Pi.sub_apply]
+  simp only [LinearMap.sub_apply, Module.End.mul_apply, tensV_apply', map_add (f := _), Pi.sub_apply]
   by_cases hbc : b = c <;> by_cases hda : d = a <;>
     simp only [hbc, hda, if_true, if_false, LinearMap.zero_apply, Pi.zero_apply, tensV_apply'] at h ⊢ <;>
     split_ifs <;> simp_all <;> (rw [← sub_eq_zero] at h ⊢; convert h using 1; abel)
@@ -53,7 +103,7 @@ theorem isGlRep_tensVd {n : ℕ} (E : Fin n → Fin n → Module.End ℂ M) (hE 
 theorem casimir_tensV {n : ℕ} (E : Fin n → Fin n → Module.End ℂ M) (f : Fin n → M) :
     casimir (tensV E) f = (fun d => casimir E (f d)) + ((n : ℂ) • f + (2 : ℂ) • eeV E f) := by
   funext e
-  simp only [casimir, LinearMap.sum_apply, Finset.sum_apply, Module.End.mul_apply, tensV_apply', map_add,
+  simp only [casimir, LinearMap.sum_apply, Finset.sum_apply, Module.End.mul_apply, tensV_apply', map_add (f := _),
     Pi.add_apply, Pi.smul_apply, eeV_apply', Finset.sum_add_distrib]
   simp only [apply_ite (E _ _), map_zero, Finset.sum_ite_eq, Finset.mem_univ, if_true]
   have hx : ∀ g : Fin n → Fin n → M, (∑ x, ∑ x_1, if e = x then g x x_1 else 0) = ∑ x_1, g e x_1 := by
@@ -108,6 +158,7 @@ theorem eeV_nnPlus {m : ℕ} (E : Fin (m + 1) → Fin (m + 1) → Module.End ℂ
     rw [h2] at h
     rw [neg_smul, eq_neg_iff_add_eq_zero]; exact h
   rw [eeV_apply', Pi.smul_apply]
+
   simp only [nnPlus, map_sum, map_smul, Finset.smul_sum]
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun c _ => ?_
@@ -140,6 +191,7 @@ theorem eeVd_nnMinus {m : ℕ} (E : Fin (m + 1) → Fin (m + 1) → Module.End �
     rw [h2] at h
     rw [neg_smul, eq_neg_iff_add_eq_zero]; exact h
   rw [eeVd_apply', Pi.smul_apply]
+
   simp only [nnMinus, map_sum, map_smul, Finset.smul_sum]
   rw [Finset.sum_comm, ← Finset.sum_neg_distrib]
   refine Finset.sum_congr rfl fun c _ => ?_

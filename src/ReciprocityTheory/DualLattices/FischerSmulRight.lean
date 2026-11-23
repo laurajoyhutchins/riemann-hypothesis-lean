@@ -1,4 +1,53 @@
-import ReciprocityTheory.DualLattices.FischerAdjointStatement
+module
+
+public import ReciprocityTheory.DualLattices.FischerAdjointStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -49,21 +98,21 @@ theorem fw_add_single (B : Fin ν × ι →₀ ℕ) (v : Fin ν × ι) :
 
 theorem fischer_eq_sum (P Q : MvPolynomial (Fin ν × ι) ℂ) (S : Finset (Fin ν × ι →₀ ℕ))
     (hS : P.support ⊆ S) :
-    fischer P Q = ∑ A ∈ S, coeff A P * starRingEnd ℂ (coeff A Q) * fw A := by
+    fischer P Q = ∑ A ∈ S, AddMonoidAlgebra.coeff P A * starRingEnd ℂ (AddMonoidAlgebra.coeff Q A) * fw A := by
   have key : ∀ T : Finset (Fin ν × ι →₀ ℕ), P.support ⊆ T →
-      ∑ A ∈ T, coeff A P * starRingEnd ℂ (coeff A Q) * fw A
-        = ∑ A ∈ P.support, coeff A P * starRingEnd ℂ (coeff A Q) * fw A := by
+      ∑ A ∈ T, AddMonoidAlgebra.coeff P A * starRingEnd ℂ (AddMonoidAlgebra.coeff Q A) * fw A
+        = ∑ A ∈ P.support, AddMonoidAlgebra.coeff P A * starRingEnd ℂ (AddMonoidAlgebra.coeff Q A) * fw A := by
     intro T hT
     symm
     apply Finset.sum_subset hT
     intro A _ hA
-    have h0 : coeff A P = 0 := by simpa [MvPolynomial.mem_support_iff] using hA
+    have h0 : AddMonoidAlgebra.coeff P A = 0 := by simpa [MvPolynomial.mem_support_iff] using hA
     simp [h0]
   calc fischer P Q
-      = ∑ A ∈ P.support, coeff A P * starRingEnd ℂ (coeff A Q) * fw A := by
+      = ∑ A ∈ P.support, AddMonoidAlgebra.coeff P A * starRingEnd ℂ (AddMonoidAlgebra.coeff Q A) * fw A := by
         unfold fischer
         exact key _ (fun x hx => Finset.mem_union_left _ hx)
-    _ = ∑ A ∈ S, coeff A P * starRingEnd ℂ (coeff A Q) * fw A := (key S hS).symm
+    _ = ∑ A ∈ S, AddMonoidAlgebra.coeff P A * starRingEnd ℂ (AddMonoidAlgebra.coeff Q A) * fw A := (key S hS).symm
 
 theorem fischer_add_left (P P' Q : MvPolynomial (Fin ν × ι) ℂ) :
     fischer (P + P') Q = fischer P Q + fischer P' Q := by
@@ -104,7 +153,7 @@ theorem fischer_add_right (P Q Q' : MvPolynomial (Fin ν × ι) ℂ) :
     fischer_eq_sum P Q P.support (Finset.Subset.refl _),
     fischer_eq_sum P Q' P.support (Finset.Subset.refl _), ← Finset.sum_add_distrib]
   refine Finset.sum_congr rfl fun A _ => ?_
-  rw [MvPolynomial.coeff_add, map_add]
+  rw [MvPolynomial.coeff_add, map_add (f := _)]
   ring
 
 theorem fischer_smul_right (c : ℂ) (P Q : MvPolynomial (Fin ν × ι) ℂ) :
@@ -136,7 +185,7 @@ theorem fischer_sum_left {α : Type*} (s : Finset α) (f : α → MvPolynomial (
     rw [Finset.sum_insert ha, Finset.sum_insert ha, fischer_add_left, ih]
 
 theorem fischer_C_left (c : ℂ) (Q : MvPolynomial (Fin ν × ι) ℂ) :
-    fischer (C c) Q = c * starRingEnd ℂ (coeff 0 Q) := by
+    fischer (C c) Q = c * starRingEnd ℂ (AddMonoidAlgebra.coeff Q 0) := by
   have hsub : (C c : MvPolynomial (Fin ν × ι) ℂ).support ⊆ {0} := by
     intro A hA
     rw [MvPolynomial.mem_support_iff, MvPolynomial.coeff_C] at hA
@@ -148,25 +197,25 @@ theorem fischer_C_left (c : ℂ) (Q : MvPolynomial (Fin ν × ι) ℂ) :
 
 private theorem fischer_eq_sum_of_support_subset (P Q : MvPolynomial (Fin ν × ι) ℂ)
     (S : Finset (Fin ν × ι →₀ ℕ)) (hS : Q.support ⊆ S) :
-    fischer P Q = ∑ A ∈ S, coeff A P * starRingEnd ℂ (coeff A Q) * fw A := by
+    fischer P Q = ∑ A ∈ S, AddMonoidAlgebra.coeff P A * starRingEnd ℂ (AddMonoidAlgebra.coeff Q A) * fw A := by
   have key : ∀ T : Finset (Fin ν × ι →₀ ℕ), Q.support ⊆ T →
-      ∑ A ∈ T, coeff A P * starRingEnd ℂ (coeff A Q) * fw A
-        = ∑ A ∈ Q.support, coeff A P * starRingEnd ℂ (coeff A Q) * fw A := by
+      ∑ A ∈ T, AddMonoidAlgebra.coeff P A * starRingEnd ℂ (AddMonoidAlgebra.coeff Q A) * fw A
+        = ∑ A ∈ Q.support, AddMonoidAlgebra.coeff P A * starRingEnd ℂ (AddMonoidAlgebra.coeff Q A) * fw A := by
     intro T hT
     symm
     apply Finset.sum_subset hT
     intro A _ hA
-    have h0 : coeff A Q = 0 := by simpa [MvPolynomial.mem_support_iff] using hA
+    have h0 : AddMonoidAlgebra.coeff Q A = 0 := by simpa [MvPolynomial.mem_support_iff] using hA
     simp [h0]
   calc fischer P Q
-      = ∑ A ∈ Q.support, coeff A P * starRingEnd ℂ (coeff A Q) * fw A := by
+      = ∑ A ∈ Q.support, AddMonoidAlgebra.coeff P A * starRingEnd ℂ (AddMonoidAlgebra.coeff Q A) * fw A := by
         unfold fischer
         exact key _ (fun x hx => Finset.mem_union_right _ hx)
-    _ = ∑ A ∈ S, coeff A P * starRingEnd ℂ (coeff A Q) * fw A := (key S hS).symm
+    _ = ∑ A ∈ S, AddMonoidAlgebra.coeff P A * starRingEnd ℂ (AddMonoidAlgebra.coeff Q A) * fw A := (key S hS).symm
 
 private theorem fischer_monomial_right (P : MvPolynomial (Fin ν × ι) ℂ)
     (m : Fin ν × ι →₀ ℕ) (b : ℂ) :
-    fischer P (monomial m b) = coeff m P * starRingEnd ℂ b * fw m := by
+    fischer P (monomial m b) = AddMonoidAlgebra.coeff P m * starRingEnd ℂ b * fw m := by
   rw [fischer_eq_sum_of_support_subset P (monomial m b) {m} MvPolynomial.support_monomial_subset,
     Finset.sum_singleton, MvPolynomial.coeff_monomial, if_pos rfl]
 
@@ -196,6 +245,6 @@ theorem fischer_mul_X (P Q : MvPolynomial (Fin ν × ι) ℂ) (v : Fin ν × ι)
       rw [hv]
       simp
   next Q₁ Q₂ h₁ h₂ =>
-    rw [fischer_add_right, map_add, fischer_add_right, h₁, h₂]
+    rw [fischer_add_right, map_add (f := _), fischer_add_right, h₁, h₂]
 
 end ReciprocityTheory.PGsh

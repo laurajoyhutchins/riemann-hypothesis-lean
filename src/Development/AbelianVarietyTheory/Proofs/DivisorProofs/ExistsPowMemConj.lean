@@ -1,6 +1,48 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsRootSelectionUnitaryRankOne
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.NatDegreeMinpolyLeBaseChange
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsRootSelectionUnitaryRankOne
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.NatDegreeMinpolyLeBaseChange
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -24,7 +66,7 @@ theorem jM_root (P : Pair G) : jM P (AdjoinRoot.root P.pol) = P.γ := by
   rw [← AdjoinRoot.mk_X, jM_mk, aeval_X]
 
 theorem jM_injective (P : Pair G) : Function.Injective (jM P) := by
-  rw [injective_iff_map_eq_zero]
+  set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
   intro a ha
   obtain ⟨f, rfl⟩ := AdjoinRoot.mk_surjective a
   rw [jM_mk] at ha
@@ -51,7 +93,7 @@ theorem sh_mul (x y : G.C) : sh G (x * y) = sh G y * sh G x := by
 
 theorem sh_one : sh G (1 : G.C) = 1 := by simp [sh]
 
-theorem sh_add (x y : G.C) : sh G (x + y) = sh G x + sh G y := by simp [sh, map_add]
+theorem sh_add (x y : G.C) : sh G (x + y) = sh G x + sh G y := by simp [sh, map_add (f := _)]
 
 theorem sh_zero : sh G (0 : G.C) = 0 := by simp [sh]
 
@@ -123,7 +165,7 @@ def iM (P : Pair G) : FM P →ₐ[ℚ] FM P where
   map_mul' a b := jM_injective P (by
     rw [mul_comm (iMf P a), jM_iMf, map_mul, map_mul, jM_iMf, jM_iMf, iC_mul])
   map_zero' := jM_injective P (by rw [jM_iMf, map_zero, iC_zero])
-  map_add' a b := jM_injective P (by rw [jM_iMf, map_add, map_add, jM_iMf, jM_iMf, iC_add])
+  map_add' a b := jM_injective P (by rw [jM_iMf, map_add (f := _), map_add (f := _), jM_iMf, jM_iMf, iC_add])
   commutes' q := jM_injective P (by rw [jM_iMf, jM_algQ, iC_algQ])
 
 theorem jM_iM (P : Pair G) (a : FM P) : jM P (iM P a) = iC P (jM P a) := jM_iMf P a
@@ -148,15 +190,9 @@ theorem exists_pow_mem_conj {H : Type} [Group H] (K K₀ : Subgroup H) (g y : H)
     (hy : y ∈ K.map (MulAut.conj g).toMonoidHom) :
     ∃ m : ℕ, 0 < m ∧ y ^ m ∈ K₀.map (MulAut.conj g).toMonoidHom := by
   obtain ⟨k, hk, rfl⟩ := hy
-  obtain ⟨m, hm0, -, hm⟩ := Subgroup.exists_pow_mem_of_index_ne_zero hK.2 (⟨k, hk⟩ : K)
+  obtain ⟨m, hm0, -, hm⟩ := Subgroup.exists_pow_mem_of_index_ne_zero
+    (H := K₀.subgroupOf K) hK.2.relIndex_ne_zero (⟨k, hk⟩ : K)
   refine ⟨m, hm0, k ^ m, ?_, by simp [map_pow]⟩
   simpa [Subgroup.mem_subgroupOf] using hm
-
-instance numberField (P : Pair G) [Fact (Irreducible P.pol)] : NumberField (FM P) := by
-  haveI : CharZero (FM P) := charZero_of_injective_algebraMap (algebraMap G.F (FM P)).injective
-  haveI : Module.Finite G.F (FM P) :=
-    (AdjoinRoot.powerBasis (minpoly.ne_zero (IsIntegral.of_finite G.F (P.γ : G.C)))).finite
-  haveI : Module.Finite ℚ (FM P) := Module.Finite.trans G.F (FM P)
-  exact ⟨⟩
 
 end GlobalTheory.StabFin

@@ -1,11 +1,56 @@
-import Formalism.SharpRestriction.LevelLetterCocycles.LocalCorollaryOfDeRham
-import Formalism.SharpRestriction.LevelLetterCocycles.Realised2Pf
-import Development.AutomorphicArithmetic.BlochKatoExtensions.BkExtHolds
-import Formalism.SharpRestriction.LevelLetterCocycles.LevelKernelDetection.PfUTieRec
-import Formalism.SharpRestriction.LevelLetterCocycles.LevelKernelDetection.PfComplMax
-import Formalism.SharpRestriction.LevelLetterCocycles.BaseChangeEveryTheory
-import Formalism.SharpRestriction.LevelLetterCocycles.UsedLocalConclusion
-import Formalism.SharpRestriction.LevelLetterCocycles.BoundedNumeratorPowerSummability
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.InvariantsGenerators
+public import Formalism.SharpRestriction.LevelLetterCocycles.MapEvalPsPi
+public import Formalism.SharpRestriction.LevelLetterCocycles.SecondComparisonInCoordinates
+public import Development.AutomorphicArithmetic.BlochKatoExtensions.BkExtHolds
+public import Formalism.LocalRingCardinality.SpanPowerMembership.NDLocE
+public import Formalism.SharpRestriction.LevelLetterCocycles.BaseChangeEveryTheory
+public import Formalism.SharpRestriction.LevelLetterCocycles.BoundedNumeratorPowerSummability
+import Formalism.SharpRestriction.LevelLetterCocycles.FrobeniusPowUniformizerFactorisation
+public import Formalism.SharpRestriction.LevelLetterCocycles.LevelKernelDetection.PfComplMax
+public import Formalism.SharpRestriction.LevelLetterCocycles.LevelKernelDetection.PfUTieRec
+public import Formalism.SharpRestriction.LevelLetterCocycles.LocalCorollaryOfDeRham
+public import Formalism.SharpRestriction.LevelLetterCocycles.Realised2Pf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Formalism.SharpRestriction.LevelLetterCocycles.CrystallineLiftingEveryOrdering
+
+@[expose] public section
 
 noncomputable section
 
@@ -21,7 +66,7 @@ def levBOfSit {l : ℕ} [Fact l.Prime] {P : LocPrime l} {AI : LocAinf l P} {K : 
   mem := S.tie.levB_mem
   supp := S.tie.levB_supp
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem local_theorem_of_inputs (D : D7) (HW : HWOf D.loc) (F : FonOf D.loc D.locA HW)
     (Cm : CmpOf D.loc D.locA HW F) (C : ℝ)

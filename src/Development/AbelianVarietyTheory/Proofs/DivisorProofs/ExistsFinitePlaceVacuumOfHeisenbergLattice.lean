@@ -1,18 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsNotRelZero
-import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.UnitaryConjugation
-import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.WeilTensorModels
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SquareTriple
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SquareStanding
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LatAtVAtStable
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ContinuousAtPlace
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.VacFn
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HeisenbergLatticeVacuumFnApplyAddStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SchroedingerOperatorHeisenbergLatticeVacuumEigenStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HeisenbergLatticeVacuumFnHasCompactSupportStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsLocallyConstantHeisenbergLatticeVacuumFunctionStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsDotProductRepresentationCompactCharacterLoStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AdelicHeisenbergActsByLocalSchrodingerStatement
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LatAtVAtStable
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ContinuousAtPlace
+import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsGivenStageEqOne
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AdelicHeisenbergActsByLocalSchrodingerStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsDotProductRepresentationCompactCharacterLoStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HeisenbergLatticeVacuumFnApplyAddStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HeisenbergLatticeVacuumFnHasCompactSupportStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsLocallyConstantHeisenbergLatticeVacuumFunctionStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SchroedingerOperatorHeisenbergLatticeVacuumEigenStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.L2.Theta Formalism.IndefR.Datum Formalism.IndefR.Links
 open IsDedekindDomain NumberField MeasureTheory Matrix
@@ -34,7 +70,7 @@ namespace GlobalTheory.HeisLatVac
 
 open GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels (At Acts)
 
-theorem exists_local_vac {F : Type} [Field F] [NumberField F] (v : GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.Pl F) {κ : Type} [Fintype κ]
+theorem exists_local_vac {F : Type} [Field F] [NumberField F] (v : GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.Pl (F := F)) {κ : Type} [Fintype κ]
     (ψ₀ : AddChar (Fv F v) ℂ) (hc : Continuous ψ₀) (hne : ψ₀ ≠ 1)
     (Λ : AddSubgroup ((κ → Fv F v) × (κ → Fv F v))) (ho : IsOpen (Λ : Set ((κ → Fv F v) × (κ → Fv F v))))
     (hk : IsCompact (Λ : Set ((κ → Fv F v) × (κ → Fv F v))))
@@ -64,7 +100,7 @@ theorem exists_local_vac {F : Type} [Field F] [NumberField F] (v : GlobalTheory.
       _ = 1 := by rw [← AddChar.map_add_eq_mul, neg_add_cancel, AddChar.map_zero_eq_one]
   let L : AddSubgroup (κ → Fv F v) := Λ.comap (AddMonoidHom.inr (κ → Fv F v) (κ → Fv F v))
   let L' : AddSubgroup (κ → Fv F v) := Λ.comap ((AddMonoidHom.inr (κ → Fv F v) (κ → Fv F v)).comp
-    (DistribMulAction.toAddMonoidHom (κ → Fv F v) (⅟(2 : Fv F v))))
+    (DistribSMul.toAddMonoidHom (κ → Fv F v) (⅟(2 : Fv F v))))
   have hL : IsCompact (L : Set (κ → Fv F v)) := by
     have e : (L : Set (κ → Fv F v)) = Prod.snd '' ((Λ : Set ((κ → Fv F v) × (κ → Fv F v))) ∩ {u | u.1 = 0}) := by
       ext y
@@ -89,7 +125,7 @@ theorem exists_local_vac {F : Type} [Field F] [NumberField F] (v : GlobalTheory.
     (fun y hy hy' => by
       have e := h2 _ hy'
       simp only [AddMonoidHom.coe_comp, Function.comp_apply, AddMonoidHom.inr_apply,
-        DistribMulAction.toAddMonoidHom_apply, Prod.mk_add_mk, add_zero] at e
+        DistribSMul.toAddMonoidHom_apply, Prod.mk_add_mk, add_zero] at e
       rwa [← add_smul, invOf_two_add_invOf_two, one_smul] at e)
   have hx : ∀ y : κ → Fv F v, ((0 : κ → Fv F v), y) ∈ Λ → χ (0, y) = ψ₀ (x₀ ⬝ᵥ y) := fun y hy => hx₀ y hy
   refine ⟨vacFn ψ₀ Λ χ x₀, ⟨GlobalTheory.T.isLocallyConstant_heisenberg_lattice_vacuum_function v ψ₀ hc Λ ho χ x₀ hco hx h2, GlobalTheory.T.heisenbergLatticeVacuumFn_hasCompactSupport v ψ₀ Λ χ x₀ hk⟩, ?_,
@@ -106,7 +142,7 @@ namespace GlobalTheory.HeisLatVac
 
 theorem exists_vac_of_lattice : ∀ {F : Type} [Field F] [NumberField F] {W : Type} [AddCommGroup W] [Module (AF F) W]
     {B : W → W → AF F} {κ : Type} [Fintype κ] (co : GlobalTheory.WeilM.Darboux B κ) (ψ : AddChar (AF F) ℂ)
-    (v : GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.Pl F), Continuous ψ → GlobalTheory.LatVac.psiAt ψ v ≠ 1 →
+    (v : GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.Pl (F := F)), Continuous ψ → GlobalTheory.LatVac.psiAt ψ v ≠ 1 →
     ∀ Γ : AddSubgroup W, (∀ γ ∈ Γ, GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.At (GlobalTheory.AdelicU.evFin F v) γ) →
     (∀ a ∈ v.adicCompletionIntegers F, ∀ γ ∈ Γ, GlobalTheory.LatVac.liftV v a • γ ∈ Γ) →
     IsOpen ((Γ.map (GlobalTheory.LatVac.locCo co v) : AddSubgroup ((κ → Fv F v) × (κ → Fv F v))) : Set ((κ → Fv F v) × (κ → Fv F v))) →
@@ -166,19 +202,43 @@ theorem exists_vac_of_lattice : ∀ {F : Type} [Field F] [NumberField F] {W : Ty
     (by rw [← map_zero (GlobalTheory.LatVac.locCo co v), hχ 0 (zero_mem _), hc0])
     (by
       rintro _ ⟨γ, hγ, rfl⟩ _ ⟨γ', hγ', rfl⟩
-      rw [← map_add, hχ _ (add_mem hγ hγ'), hχ _ hγ, hχ _ hγ', hcoc γ hγ γ' hγ']
+      rw [← map_add (f := _), hχ _ (add_mem hγ hγ'), hχ _ hγ, hχ _ hγ', hcoc γ hγ γ' hγ']
       congr 1
+      have at_mul_left (x : AF F) {y : AF F}
+          (hy : GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.At (GlobalTheory.AdelicU.evFin F v) y) :
+          GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.At (GlobalTheory.AdelicU.evFin F v) (x * y) := fun u hu => by
+        rw [smul_eq_mul, mul_left_comm, show u * y = 0 from hy u hu, mul_zero]
+      have at_sub {x y : AF F}
+          (hx : GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.At (GlobalTheory.AdelicU.evFin F v) x)
+          (hy : GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.At (GlobalTheory.AdelicU.evFin F v) y) :
+          GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.At (GlobalTheory.AdelicU.evFin F v) (x - y) := fun u hu => by
+        rw [smul_sub, hx u hu, hy u hu, sub_self]
+      have at_sum : ∀ (s : Finset κ) {f : κ → AF F},
+          (∀ i ∈ s, GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.At (GlobalTheory.AdelicU.evFin F v) (f i)) →
+          GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.At (GlobalTheory.AdelicU.evFin F v) (∑ i ∈ s, f i) := by
+        intro s f h
+        induction s using Finset.induction_on with
+        | empty => simp only [Finset.sum_empty]; exact fun u _ => smul_zero u
+        | insert a s ha ih =>
+          rw [Finset.sum_insert ha]
+          exact fun u hu => by rw [smul_add, h a (Finset.mem_insert_self a s) u hu,
+            ih (fun i hi => h i (Finset.mem_insert_of_mem hi)) u hu, add_zero]
+      have evFin_invOf_two : GlobalTheory.AdelicU.evFin F v (⅟(2 : AF F)) = ⅟(2 : Fv F v) := by
+        refine (invOf_eq_right_inv ?_).symm
+        have h : GlobalTheory.AdelicU.evFin F v (2 * ⅟(2 : AF F)) = 1 := by rw [mul_invOf_self, map_one]
+        rwa [map_mul, map_ofNat] at h
       have hA : GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.At (GlobalTheory.AdelicU.evFin F v) (⅟(2 : AF F) * B γ γ') := by
         rw [co.form]
-        refine GlobalTheory.VacAny.at_mul_left _ (GlobalTheory.VacAny.at_sub ?_ ?_)
-        · exact GlobalTheory.VacAny.at_sum _ fun i _ => GlobalTheory.VacAny.at_mul_left _ (hAtE _ (hAt _ hγ') i).2
-        · exact GlobalTheory.VacAny.at_sum _ fun i _ => GlobalTheory.VacAny.at_mul_left _ (hAtE _ (hAt _ hγ) i).2
-      rw [hψloc _ hA, co.form, map_mul, GlobalTheory.VacAny.evFin_invOf_two, map_sub]
+        refine at_mul_left _ (at_sub ?_ ?_)
+        · exact at_sum _ fun i _ => at_mul_left _ (hAtE _ (hAt _ hγ') i).2
+        · exact at_sum _ fun i _ => at_mul_left _ (hAtE _ (hAt _ hγ) i).2
+      rw [hψloc _ hA, co.form, map_mul, evFin_invOf_two, map_sub]
+
       simp only [dotProduct, map_sum, map_mul]
       rfl)
     (by
       rintro _ ⟨γ, hγ, rfl⟩
-      rw [← map_add, hχ _ (add_mem hγ hγ)]
+      rw [← map_add (f := _), hχ _ (add_mem hγ hγ)]
       have e : γ + γ = GlobalTheory.LatVac.liftV v 2 • γ := by
         have h := hAt γ hγ (GlobalTheory.LatVac.liftV v 2 - 2)
           (by rw [map_sub, GlobalTheory.LatVac.evFin_liftV, map_ofNat, sub_self])

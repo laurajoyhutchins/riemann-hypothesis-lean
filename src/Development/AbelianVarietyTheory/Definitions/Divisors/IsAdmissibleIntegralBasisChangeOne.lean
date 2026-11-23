@@ -1,5 +1,51 @@
-import Mathlib
-import GroundTheory.FunctionField.PlaceBridge
+module
+
+public import Mathlib.Basic.Real.Basic
+public import Mathlib.FieldTheory.IsAlgClosed.Basic
+public import Mathlib.RingTheory.PowerSeries.Basic
+public import Mathlib.RingTheory.Valuation.ValuationSubring
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import GroundTheory.FunctionField.PlaceDefs
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -63,88 +109,17 @@ namespace Lib
 open scoped WithZero
 open IsDedekindDomain GroundTheory.FunctionField
 
-theorem isFF_iff : IsFF k F ↔ IsFunctionField k F := ⟨fun h => ⟨h⟩, fun h => h.1⟩
-
-def toRing (v : Nef.Place k F) : GroundTheory.FunctionField.Place k F where
-  ring := v.1.valuationSubring
-  ne_top h := by
-    obtain ⟨x, hx⟩ := v.2.1 (WithZero.exp 1)
-    have hm : x ∈ v.1.valuationSubring := h ▸ ValuationSubring.mem_top _
-    rw [Valuation.mem_valuationSubring_iff, hx, ← WithZero.exp_zero, WithZero.exp_le_exp] at hm
-    omega
-  algebraMap_mem c := by
-    rw [Valuation.mem_valuationSubring_iff]
-    by_cases hc : c = 0
-    · simp [hc]
-    · exact (v.2.2 c hc).le
-
-theorem valuation_toRing [IsFunctionField k F] (v : Nef.Place k F) : (toRing v).valuation = v.1 :=
-  valuation_eq_of_isEquiv (Valuation.isEquiv_iff_val_le_one.2 fun {x} => (toRing v).valuation_le_one_iff x)
-    (toRing v).valuation_surjective v.2.1
-
-def placeEquiv [IsFunctionField k F] : Nef.Place k F ≃ GroundTheory.FunctionField.Place k F where
-  toFun := toRing
-  invFun w := ⟨w.valuation, w.valuation_surjective, fun _ hc => w.valuation_algebraMap' hc⟩
-  left_inv v := Subtype.ext (valuation_toRing v)
-  right_inv w := GroundTheory.FunctionField.Place.ext (by
-    ext x
-    exact w.valuation_le_one_iff x)
-
-theorem ord_toRing [IsFunctionField k F] (v : Nef.Place k F) (x : F) : (toRing v).ord x = ord v x := by
-  rw [GroundTheory.FunctionField.Place.ord, valuation_toRing, ord]
-
-open scoped Classical in
-
-def atPlace {n : ℕ} (v : Nef.Place k F) (d : Fin n → F) : Nef.Place k F → Matrix (Fin n) (Fin n) F :=
-  fun u => if u = v then Matrix.diagonal d else 1
 
 section Line
 
 variable (k)
 
-open scoped Classical in
-
-def atInf : Nef.Place k (RatFunc k) :=
-  ⟨RatFunc.inftyValuation k, fun y => by
-    rcases eq_or_ne y 0 with rfl | hy
-    · exact ⟨0, map_zero _⟩
-    · exact ⟨RatFunc.X ^ WithZero.log y, by rw [RatFunc.inftyValuation.X_zpow, WithZero.exp_log hy]⟩,
-    fun c hc => RatFunc.inftyValuation.C k hc⟩
 
 variable {k}
-
-def atPrime (u : HeightOneSpectrum k[X]) : Nef.Place k (RatFunc k) :=
-  ⟨u.valuation (RatFunc k), u.valuation_surjective _, fun c hc => by
-    rw [IsScalarTower.algebraMap_apply k k[X] (RatFunc k)]
-    exact (u.valuation_of_algebraMap _).trans (HeightOneSpectrum.intValuation_eq_one_iff.2 fun hm =>
-      u.isPrime.ne_top (Ideal.eq_top_of_isUnit_mem _ hm ((IsUnit.mk0 c hc).map _)))⟩
-
-def primeOf {f : k[X]} (hf : Irreducible f) : HeightOneSpectrum k[X] where
-  asIdeal := Ideal.span {f}
-  isPrime := (Ideal.span_singleton_prime hf.ne_zero).2 hf.prime
-  ne_bot := by simpa using hf.ne_zero
-
-def placeX (k : Type) [Field k] : Nef.Place k (RatFunc k) := atPrime (primeOf (Polynomial.irreducible_X (R := k)))
 
 end Line
 
 section Product
-
-theorem sum_ramificationIdx [IsAlgClosed k] {E : Type} [Field E] [Algebra k E] [Algebra F E] [IsScalarTower k F E]
-    [IsFunctionField k F] [IsFunctionField k E] [FiniteDimensional F E] [Algebra.IsSeparable F E]
-    (v : GroundTheory.FunctionField.Place k F) :
-    ∑ w ∈ (v.finite_liesOver (K' := E)).toFinset, w.ramificationIdx v = Module.finrank F E := by
-  rw [← v.sum_ramificationIdx_mul_inertiaDeg (K' := E)]
-  refine Finset.sum_congr rfl fun w _ => ?_
-  have d1 : v.deg = 1 := by
-    have : Algebra.IsIntegral k v.ResidueField := Algebra.IsIntegral.of_finite _ _
-    exact (LinearEquiv.ofBijective (Algebra.linearMap k v.ResidueField)
-      IsAlgClosed.algebraMap_bijective_of_isIntegral).finrank_eq.symm.trans (Module.finrank_self k)
-  have d2 : w.deg = 1 := by
-    have : Algebra.IsIntegral k w.ResidueField := Algebra.IsIntegral.of_finite _ _
-    exact (LinearEquiv.ofBijective (Algebra.linearMap k w.ResidueField)
-      IsAlgClosed.algebraMap_bijective_of_isIntegral).finrank_eq.symm.trans (Module.finrank_self k)
-  simp [GroundTheory.FunctionField.Place.inertiaDeg, d1, d2]
 
 end Product
 

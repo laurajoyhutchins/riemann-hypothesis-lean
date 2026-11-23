@@ -1,9 +1,48 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.OverLatticeIffSelfDualOverBase
-import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.CsGlob
-import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.Afsplit
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.IsPrincipalIdealRingSemiLoc
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.MulVecMemLocLatIffOfFrame
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.GlobalSignature.SplittingProjection
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.IsPrincipalIdealRingSemiLoc
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.MulVecMemLocLatIffOfFrame
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ValuedAlgebraMapLtOneIff
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Matrix Formalism.UG Formalism.BasicNotions GlobalTheory.IndefiniteRowSideFullHecke.SplittingProjection
 open scoped TensorProduct
@@ -16,9 +55,9 @@ theorem _root_.GlobalTheory.DualFrame.hform_eq_dot {A n : Type} [CommRing A] [Fi
     (x y : n → A) : _root_.Formalism.UG.hform σ J x y = (fun i => σ (x i)) ⬝ᵥ (J *ᵥ y) := by
   simp [_root_.Formalism.UG.hform, dotProduct, mulVec, Finset.mul_sum, mul_assoc]
 
+
 open NumberField IsDedekindDomain Matrix in
 open scoped TensorProduct in
-
 theorem _root_.GlobalTheory.DualFrame.hform_mulVec {A n : Type} [CommRing A] [Fintype n] (σ : A →+* A) (J B : Matrix n n A)
     (u y : n → A) : _root_.Formalism.UG.hform σ J (B *ᵥ u) y = (fun i => σ (u i)) ⬝ᵥ ((_root_.Formalism.UG.cT σ B * J) *ᵥ y) := by
   rw [_root_.GlobalTheory.DualFrame.hform_eq_dot, ← mulVec_mulVec, _root_.Formalism.UG.cT,
@@ -28,9 +67,9 @@ theorem _root_.GlobalTheory.DualFrame.hform_mulVec {A n : Type} [CommRing A] [Fi
   rw [RingHom.map_mulVec]
   rfl
 
+
 open NumberField IsDedekindDomain Matrix in
 open scoped TensorProduct in
-
 theorem _root_.GlobalTheory.DualFrame.mem_dualSet_of_mem_span {E n : Type} [Field E] [NumberField E] [Fintype n] (σ : E →+* E)
     (J : Matrix n n E) (L : Submodule (𝓞 E) (n → E)) {y : n → E}
     (hy : y ∈ Submodule.span (𝓞 E) (_root_.Formalism.BasicNotions.dualSet σ J L)) : y ∈ _root_.Formalism.BasicNotions.dualSet σ J L := by
@@ -132,9 +171,9 @@ private theorem mulVec_mem_latticeCompletion_iff {F E : Type} [Field F] [NumberF
     refine Submodule.sum_mem _ fun j _ => ?_
     exact hsmul _ (mul_mem (hy j) hu) _ (hgen _ (hcol j))
 
+
 open NumberField IsDedekindDomain Matrix in
 open scoped TensorProduct in
-
 theorem _root_.GlobalTheory.DualFrame.exists_dual_frames (F E : Type) [Field F] [NumberField F] [Field E] [NumberField E]
     [Algebra F E] (σ : E →ₐ[F] E) (k : ℕ) (J : Matrix (Fin k) (Fin k) E) (hJ : IsUnit J.det)
     (Λ : Submodule (𝓞 E) (Fin k → E)) (hfin : Module.Finite (𝓞 E) Λ)

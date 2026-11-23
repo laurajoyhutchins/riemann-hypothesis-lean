@@ -1,9 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsSmoothVector
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IsSmoothVector
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ExistsInverseChart
 import Development.AbelianVarietyTheory.Proofs.HeightProofs.ExistsIsArchimedeanAdeleChartOfRealChart
-import Development.AbelianVarietyTheory.Proofs.HeightProofs.ExistsRealPointUnitaryWithComponents
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ExistsInverseChart
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.LcscAdelicUnitaryGroup
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.ExistsRealPointUnitaryWithComponents
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.LcscAdelicUnitaryGroup
+import Formalism.LocalToGlobal.BesselHermitianTheta.LemmasWeil
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 noncomputable section
 
@@ -27,7 +70,7 @@ theorem cT_one_add (c : A →+* A) {N J : Matrix (Fin n) (Fin n) A} (hN : N * N 
     Formalism.UG.cT c (1 + a • N) * J * (1 + a • N) = J + (c a + a) • (J * N) := by
   have e : Formalism.UG.cT c (1 + a • N) = 1 + c a • Formalism.UG.cT c N := by
     ext i j
-    simp only [Formalism.UG.cT, transpose_apply, map_apply, Matrix.add_apply, Matrix.smul_apply, smul_eq_mul, map_add,
+    simp only [Formalism.UG.cT, transpose_apply, map_apply, Matrix.add_apply, Matrix.smul_apply, smul_eq_mul, map_add (f := _),
       map_mul, Matrix.one_apply, eq_comm (a := i)]
     split_ifs <;> simp
   rw [e, Matrix.add_mul, Matrix.one_mul, Matrix.smul_mul, hJ, ← Matrix.mul_smul]
@@ -48,8 +91,9 @@ theorem nil_adj (c : A →+* A) (hc : ∀ a, c (c a) = a) (x : Fin n → A) (J :
     (hJ : ∀ i j, c (J i j) = J j i) :
     Formalism.UG.cT c (vecMulVec x ((fun i => c (x i)) ᵥ* J)) * J = J * vecMulVec x ((fun i => c (x i)) ᵥ* J) := by
   ext i j
+
   simp only [Formalism.UG.cT, transpose_apply, map_apply, Matrix.mul_apply, vecMulVec_apply, vecMul, dotProduct, map_mul,
-    map_sum, hc, hJ, Finset.mul_sum, Finset.sum_mul]
+  map_sum, hc, hJ, Finset.mul_sum, Finset.sum_mul]
   rw [Finset.sum_comm]
   exact Finset.sum_congr rfl fun _ _ => Finset.sum_congr rfl fun _ _ => by ring
 
@@ -70,7 +114,7 @@ theorem anti_eq [CharZero F] {δ : E} (hδ : σ δ = -δ) (hsp : ∀ x : E, ∃ 
     (a : R ⊗[F] E) (ha : sigR R σ a + a = 0) : ∃ s : R, a = s ⊗ₜ[F] δ := by
   obtain ⟨a₀, a₁, rfl⟩ := GlobalTheory.FockCompare.RealChart.tensor_span δ hsp a
   refine ⟨a₁, ?_⟩
-  rw [map_add, sigR_tmul, sigR_tmul, hδ, map_one, TensorProduct.tmul_neg] at ha
+  rw [map_add (f := _), sigR_tmul, sigR_tmul, hδ, map_one, TensorProduct.tmul_neg] at ha
   have h2 : (2 : F) • (a₀ ⊗ₜ[F] (1 : E)) = 0 := by
     rw [two_smul, ← ha]; abel
   rw [(smul_eq_zero_iff_right two_ne_zero).1 h2, zero_add]
@@ -286,6 +330,7 @@ theorem archM_eq {θ : InfFam D} (hθ : IsInfFam θ) {V : HSp D} (ξ : Fin V.ran
   have e2 : ∀ x, ((θ τ).comp (infPart D)) (incA D x) = tauE D τ x := comp_incA hθ τ
   have e3 : ∀ x, tauE D τ ((D.sp.cm.sig : D.host.E →+* D.host.E) x) = star (tauE D τ x) := tauE_star τ
   rw [Matrix.map_apply, Matrix.map_apply, e2]
+
   simp only [vecMulVec_apply, vecMul, dotProduct, map_mul, map_sum, e3, Pi.star_apply, gramAt, Matrix.map_apply]
 
 theorem mem_ZI {V : HSp D} {ξ : Fin V.rank → D.host.E} (h : IsoVec V ξ) (z : GA D V) :
@@ -304,7 +349,7 @@ theorem inZe_archM {θ : InfFam D} (hθ : IsInfFam θ) {V : HSp D} {ξ : Fin V.r
     InZe (gramAt D V τ) (fun i => tauE D τ (ξ i)) (archM V (θ τ) z) := by
   obtain ⟨a, h1, e⟩ := exists_skew h hz
   have h2 := congrArg (fun a => θ τ (infPart D a)) h1
-  simp only [RingHom.map_add, RingHom.map_zero] at h2
+  simp only [RingHom.map_add (f := _), RingHom.map_zero] at h2
   rw [comp_cA hθ] at h2
   refine ⟨(θ τ (infPart D a)).im, ?_⟩
   rw [archM_eq hθ ξ z a e τ]
@@ -327,8 +372,8 @@ theorem exists_lift {θ : InfFam D} (hθ : IsInfFam θ) {V : HSp D} {ξ : Fin V.
     refine hσ.ext _ ?_ fun τ => ?_
     · have e : finPart D (cA D a) = sigR (GlobalTheoryTheory.GenusMassVolumes.Af D.host.F) D.sp.cm.sig (finPart D a) :=
         LiftUnitary.snd_sigR D.sp.cm.sig a
-      rw [RingHom.map_add, e, hf, RingHom.map_zero, add_zero]
-    · rw [RingHom.map_add, RingHom.map_add, comp_cA hθ, hi]
+      rw [RingHom.map_add (f := _), e, hf, RingHom.map_zero, add_zero]
+    · rw [RingHom.map_add (f := _), RingHom.map_add (f := _), comp_cA hθ, hi]
       simp
   obtain ⟨z, hz⟩ : ∃ z : GA D V, (matHom V z).1 = 1 + a • (nilM V ξ).map (incA D) :=
     ⟨tv (AF D.host.F) D.sp.cm.sig (nilM_sq h) (nilM_adj V ξ) a hsk, rfl⟩

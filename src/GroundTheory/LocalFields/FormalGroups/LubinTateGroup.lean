@@ -1,9 +1,61 @@
-import Mathlib
-import GroundTheory.LocalFields.FormalGroups.LubinTate
+module
+
+public import GroundTheory.LocalFields.FormalGroups.LubinTate
+public import GroundTheory.LocalFields.FormalGroups.Basics
+import Batteries.Tactic.PrintPrefix
+import GroundTheory.LocalFields.FormalGroups.Truncation
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Presheaf
+
+@[expose] public section
 
 namespace GroundTheory.LocalField.FormalGroup
 
 open MvPowerSeries
+
+#print prefix GroundTheory.LocalField.FormalGroup.Hom
 
 section Composition
 
@@ -80,9 +132,9 @@ variable {A : Type*} [CommRing A]
 
 structure FormalModule (F : FormalGroup A) [F.IsComm] where
 
-  smul : A →+* Hom F F
+  smul : A →+* GroundTheory.LocalField.FormalGroup.Hom (R := A) (F := F) (G := F)
 
-  linearCoeff_smul : ∀ a, linearCoeff F (smul a) = a
+  linearCoeff_smul : ∀ a, PowerSeries.coeff 1 (smul a).toPowerSeries = a
 
 end FormalModule
 
@@ -93,6 +145,7 @@ variable {A : Type*} [CommRing A] [IsDomain A] [IsDiscreteValuationRing A]
 
 theorem subst_linearForm {σ τ : Type*} [Fintype τ] {v : τ → MvPowerSeries σ A} (hv : HasSubst v)
     (a : τ → A) : subst v (sum₂ a) = ∑ j, C (a j) * v j := by
+
   rw [sum₂, ← coe_substAlgHom hv, map_sum]
   simp only [map_mul, coe_substAlgHom, subst_C, subst_X hv]
 
@@ -116,13 +169,6 @@ theorem single_zero_ne_single_one :
   intro h
   have := congrArg (fun d => d 0) h
   simp at this
-
-theorem substEach_fin_two (g : PowerSeries A) :
-    (substEach g : Fin 2 → MvPowerSeries (Fin 2) A) =
-      ![PowerSeries.subst (X 0 : MvPowerSeries (Fin 2) A) g,
-        PowerSeries.subst (X 1 : MvPowerSeries (Fin 2) A) g] := by
-  funext i
-  fin_cases i <;> rfl
 
 variable (hπ : Irreducible π)
 include hπ
@@ -207,33 +253,6 @@ theorem lubinTateFormalGroup_toPowerSeries (hf : IsLubinTateSeries π f) :
 instance (hf : IsLubinTateSeries π f) : (lubinTateFormalGroup hπ hf).IsComm :=
   ⟨lubinTateLift_comm hπ hf⟩
 
-noncomputable def lubinTateEndo (hf : IsLubinTateSeries π f) :
-    Hom (lubinTateFormalGroup hπ hf) (lubinTateFormalGroup hπ hf) where
-  toPowerSeries := f
-  constantCoeff_eq_zero := hf.constantCoeff_eq_zero
-  map_add := by
-    have := subst_lubinTateLift hπ hf hf (![1, 1] : Fin 2 → A)
-    rw [substEach_fin_two] at this
-    exact this
-
-theorem eq_lubinTateFormalGroup (hf : IsLubinTateSeries π f) (F : FormalGroup A) (φ : Hom F F)
-    (hφ : φ.toPowerSeries = f) : F = lubinTateFormalGroup hπ hf := by
-  apply FormalGroup.ext
-  refine eq_lubinTateLift hπ hf hf (![1, 1] : Fin 2 → A) ?_ ?_
-  · have h2 := two_le_order_higher F
-    have e : higher F = F.toPowerSeries - X 0 - X 1 := rfl
-    rwa [e, sub_sub, ← one_mul (X 0 : MvPowerSeries (Fin 2) A), ← one_mul (X 1 : MvPowerSeries (Fin 2) A),
-      ← map_one (C : A →+* MvPowerSeries (Fin 2) A), ← linearForm_fin_two] at h2
-  · have := φ.map_add
-    rw [hφ] at this
-    rw [substEach_fin_two]
-    exact this
-
-theorem existsUnique_formalGroup (hf : IsLubinTateSeries π f) :
-    ∃! F : FormalGroup A, ∃ φ : Hom F F, φ.toPowerSeries = f :=
-  ⟨lubinTateFormalGroup hπ hf, ⟨lubinTateEndo hπ hf, rfl⟩,
-    fun F ⟨φ, hφ⟩ => eq_lubinTateFormalGroup hπ hf F φ hφ⟩
-
 end LubinTate
 
 section LubinTateHom
@@ -283,7 +302,8 @@ theorem lubinTateHom_map_add (hf : IsLubinTateSeries π f) (hg : IsLubinTateSeri
   · rw [subst_linearForm_one_one (by simp) (by simp), linearForm_fin_two]
 
 noncomputable def lubinTateHom (hf : IsLubinTateSeries π f) (hg : IsLubinTateSeries π g) (a : A) :
-    Hom (lubinTateFormalGroup hπ hg) (lubinTateFormalGroup hπ hf) where
+    GroundTheory.LocalField.FormalGroup.Hom (R := A) (F := lubinTateFormalGroup hπ hg)
+      (G := lubinTateFormalGroup hπ hf) where
   toPowerSeries := lubinTateLift hπ hf hg fun _ : Unit => a
   constantCoeff_eq_zero := constantCoeff_lubinTateLift hπ hf hg _
   map_add := lubinTateHom_map_add hπ hf hg a
@@ -337,7 +357,7 @@ theorem lubinTateHom_add (a b : A) :
       fin_cases j <;> simpa [lubinTateHom_toPowerSeries] using isLubinTateLift_lubinTateLift hπ hf hg _)
   refine (eq_lubinTateLift_of hπ hf hg hS ?_).symm
   rw [subst_linearForm_one_one (constantCoeff_linearForm _) (constantCoeff_linearForm _)]
-  simp only [sum₂, Finset.univ_unique, Finset.sum_singleton, map_add]
+  simp only [sum₂, Finset.univ_unique, Finset.sum_singleton, map_add (f := _)]
   ring
 
 theorem lubinTateHom_mul (a b : A) :
@@ -382,19 +402,9 @@ noncomputable def lubinTateEndRingHom :
   map_zero' := lubinTateHom_zero hπ hf hf
   map_add' a b := lubinTateHom_add hπ hf hf a b
 
-theorem lubinTateEndRingHom_apply (a : A) : lubinTateEndRingHom hπ hf a = lubinTateHom hπ hf hf a :=
-  rfl
-
-noncomputable def lubinTateFormalModule : FormalModule (lubinTateFormalGroup hπ hf) where
-  smul := lubinTateEndRingHom hπ hf
-  linearCoeff_smul a := coeff_one_lubinTateHom hπ hf hf a
-
 noncomputable def lubinTateIso (u : Aˣ) :
     Iso (lubinTateFormalGroup hπ hg) (lubinTateFormalGroup hπ hf) :=
   Iso.ofIsUnit (lubinTateHom hπ hf hg u) (by rw [coeff_one_lubinTateHom]; exact u.isUnit)
-
-theorem lubinTateIso_hom (u : Aˣ) : (lubinTateIso hπ hf hg u).hom = lubinTateHom hπ hf hg u :=
-  rfl
 
 end LubinTateHom
 

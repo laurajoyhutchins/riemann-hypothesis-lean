@@ -1,13 +1,45 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Foundations.SmoothPartStable
-import Development.AutomorphicArithmetic.AutomorphicVarieties.HeckeAlgebras.ContinuousTorusCharacter
-import Development.AutomorphicArithmetic.AutomorphicVarieties.HeckeAlgebras.Distinct
-import Development.AutomorphicArithmetic.AutomorphicVarieties.HeckeAlgebras.OrdinaryHeckeCharacters.IwMemMul
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.Brauer
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IwahoriTraceOfBorelCasselman
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.FixedSubgroup
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.CongruenceSubgroupEventually
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.DiagonalConjugateMem
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.HeckeAlgebras.Distinct
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.CongruenceSubgroupEventually
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.DiagonalConjugateMem
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 private theorem unif_lt (k : Type) [Field k] [ValuativeRel k] [TopologicalSpace k]
     [IsNonarchimedeanLocalField k] :
@@ -26,20 +58,7 @@ private theorem unif_lt (k : Type) [Field k] [ValuativeRel k] [TopologicalSpace 
 private theorem diagT_val (k : Type) [Field k] (n : ℕ) (t : Fin n → kˣ) :
     ((GlobalTheory.SmGL.diagT k (Fin n) t : GL (Fin n) k) : Matrix (Fin n) (Fin n) k)
       = Matrix.diagonal (fun i => (t i : k)) := by
-  generalize hD : Matrix.diagonal (fun i => (t i : k)) = D
-  have h1 : ∀ i, D i i = t i := fun i => by rw [← hD, Matrix.diagonal_apply_eq]
-  have h2 : ∀ i j, i ≠ j → D i j = 0 := fun i j h => by rw [← hD, Matrix.diagonal_apply_ne _ h]
-  have key : ∀ (d : DecidableEq (Fin n)) (i j : Fin n),
-      @Matrix.blockDiagonal' (Fin n) (fun _ => Unit) (fun _ => Unit) k d _
-        (fun a : Fin n => ((Matrix.GeneralLinearGroup.scalar Unit (t a) : GL Unit k) : Matrix Unit Unit k)) ⟨i, ()⟩ ⟨j, ()⟩ = D i j := by
-    intro d i j
-    by_cases h : i = j
-    · subst h
-      rw [Matrix.blockDiagonal'_apply_eq, h1]
-      simp
-    · rw [Matrix.blockDiagonal'_apply_ne _ _ _ h, h2 i j h]
-  ext i j
-  exact key (fun a b => Classical.propDecidable _) i j
+  exact GlobalTheory.SmGL.val_diagT k t
 
 private theorem unipB_spec (k : Type) [Field k] (n : ℕ) (g : GL (Fin n) k)
     (hg : g ∈ GlobalTheory.SmGL.unipB k (Fin n)) :

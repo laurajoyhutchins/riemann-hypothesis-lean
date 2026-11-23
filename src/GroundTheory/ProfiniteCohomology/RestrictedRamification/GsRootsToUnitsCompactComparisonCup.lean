@@ -1,20 +1,68 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.RestrictedRamification.BaseCupFormula
-import GroundTheory.ProfiniteCohomology.RestrictedRamification.BaseCupGlobal
-import GroundTheory.ProfiniteCohomology.RestrictedRamification.IsDiscreteRepResIntRepTrivGs
-import GroundTheory.ProfiniteCohomology.RestrictedRamification.BaseClassIdele
-import GroundTheory.ProfiniteCohomology.RestrictedRamification.BaseKummerDelta
+module
+
+public import GroundTheory.ProfiniteCohomology.RestrictedRamification.IsDiscreteRepResIntRepTrivGs
+public import GroundTheory.ProfiniteCohomology.RestrictedRamification.BaseClassIdele
+public import GroundTheory.ProfiniteCohomology.RestrictedRamification.BaseKummerDelta
+public import GroundTheory.ProfiniteCohomology.RestrictedRamification.BaseCupKummer
+public import GroundTheory.ProfiniteCohomology.RestrictedRamification.BaseFormal
+public import GroundTheory.ProfiniteCohomology.RestrictedRamification.BaseKummer
+public import GroundTheory.ProfiniteCohomology.RestrictedRamification.MkFiniteEmbeddingGlobalUniformizer
+public import GroundTheory.ProfiniteCohomology.RestrictedRamification.BaseCupFormula
+public import GroundTheory.ProfiniteCohomology.RestrictedRamification.BaseCupGlobal
+import GroundTheory.ProfiniteCohomology.RestrictedRamification.BaseCupNat
+import GroundTheory.ProfiniteCohomology.RestrictedRamification.ClassFieldGSPresentation
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
 
 open CategoryTheory MonoidalCategory IsDedekindDomain NumberField GroundTheory.Global GroundTheory.GroupCoh GroundTheory.Global.IdeleGroup
 
-local notation "ℚ̄" => AlgebraicClosure ℚ
-
 attribute [local instance 2000] Rep.hV2
 
 noncomputable section
+
+local notation "ℚ̄" => AlgebraicClosure ℚ
 
 variable {K : FiniteSubfield} (S : Set (HeightOneSpectrum (𝓞 K.1)))
   (ιs : ∀ v : S, ℚ̄ →ₐ[K.1] AlgebraicClosure ((v : HeightOneSpectrum (𝓞 K.1)).adicCompletion K.1)) (n : ℕ)
@@ -24,9 +72,9 @@ omit [NeZero n] in
 theorem linearMap_apply_add_apply {R M N P : Type*} [CommRing R] [AddCommGroup M] [AddCommGroup N] [AddCommGroup P]
     [Module R M] [Module R N] [Module R P] (f : M →ₗ[R] N →ₗ[R] P) (a b : M) (c : N) :
     f (a + b) c = f a c + f b c := by
-  rw [map_add, LinearMap.add_apply]
+  rw [map_add (f := _), LinearMap.add_apply]
 
-set_option maxHeartbeats 1600000 in
+
 
 theorem gsRootsToUnitsCompact_comparison_cup (h : gsUnitsCompact S ιs 1)
     (x : cohomology (zmodRep.{0} (galUnramifiedOutside K.1 ℚ̄ S) n) 1) :
@@ -55,7 +103,7 @@ theorem gsRootsToUnitsCompact_comparison_cup (h : gsUnitsCompact S ιs 1)
     compactCup (gsFinFamily S ιs) (gsZmodPairing S n) (gsZmodPairingᵥ S ιs n) (gsZmodPairing_hμ S ιs n)
       (show 2 + 1 = 3 from rfl) w x) ea'))).trans eb
 
-set_option maxHeartbeats 1600000 in
+
 
 theorem gsRootsToUnitsCompact_cup_eq (ℓ k : ℕ) (hℓ : ℓ.Prime) (hnk : n = ℓ ^ k)
     (hS : ∀ v : HeightOneSpectrum (𝓞 K.1), ((ℓ : ℕ) : 𝓞 K.1) ∈ v.asIdeal → v ∈ S)
@@ -111,14 +159,14 @@ theorem prod_ofFinite_eq {M : Type*} [CommMonoid M] (f : S → M) :
   congr
   exact Subsingleton.elim _ _
 
-omit [NeZero n] in
 
+omit [NeZero n] in
 theorem sPresentation_fst (a : ∀ w : S, ((w : HeightOneSpectrum (𝓞 K.1)).adicCompletion K.1)ˣ) :
     sPresentation S (a, 1) = ∏ w : S, SIdeleClassGroup.mk S (finiteEmbedding (w : HeightOneSpectrum (𝓞 K.1)) (a w)) := by
   rw [sPresentation_apply, toAdd_one, map_zero, toMul_zero, mul_one, placesIdele_apply, map_prod]
   exact prod_ofFinite_eq S _
 
-set_option maxHeartbeats 1600000 in
+
 
 theorem zmodToQZ_charEquiv_gsUnitsClass
     (χ : ContinuousMonoidHom (galUnramifiedOutside K.1 ℚ̄ S) (Multiplicative (ZMod n))) (d : GsUnitsDatum S) :

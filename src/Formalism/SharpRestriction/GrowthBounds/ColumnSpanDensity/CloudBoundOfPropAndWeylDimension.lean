@@ -1,5 +1,53 @@
-import Formalism.SharpRestriction.GrowthBounds.ColumnSpanDensity.FinrankLetter
-import Formalism.SharpRestriction.GrowthBounds.ColumnSpanDensity.DensityNumericalFacts
+module
+
+public import Formalism.PolynomialDimension.DigitClassSize
+public import Formalism.PolynomialDimension.WeylDim
+public import Formalism.SharpRestriction.GrowthBounds.ColumnSpanDensity.RhoLowerBoundLargeConductor
+public import Formalism.PolynomialDimension.MultinomialDepth.WeylDimPosOfAntitone
+public import Formalism.SharpRestriction.GrowthBounds.ColumnSpanDensity.FinrankLetter
+import Formalism.SharpRestriction.GrowthBounds.ColumnSpanDensity.FinrankTensor
+public import Formalism.SharpRestriction.GrowthBounds.ColumnSpanDensity.LatticeCountPrimeMonoLevel
+import Formalism.SharpRestriction.GrowthBounds.ColumnSpanDensity.RhoLowerBoundOfEdgeCount
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -45,11 +93,11 @@ theorem cwt_lower (m A c B : ℕ) (μ : Fin m → ℤ) (hμ : Antitone μ) (h0 :
   have hc0 : (0 : ℝ) ≤ c := Nat.cast_nonneg c
   have h1 : (∏ j : Fin m, ((A : ℝ) + ((j : ℕ) : ℝ) + 1) / (((j : ℕ) : ℝ) + 1)) ≤
       ∏ j : Fin m, ((A : ℝ) + c - (μ j : ℝ) + ((j : ℕ) : ℝ) + 1) / (((j : ℕ) : ℝ) + 1) :=
-    Finset.prod_le_prod (fun j _ => by positivity)
+    Finset.prod_le_prod₀ (fun j _ => by positivity)
       (fun j _ => div_le_div_of_nonneg_right (by linarith [hμc j]) (by positivity))
   have h2 : (∏ j : Fin m, ((B : ℝ) + (m : ℝ) - ((j : ℕ) : ℝ)) / ((m : ℝ) - ((j : ℕ) : ℝ))) ≤
       ∏ j : Fin m, ((μ j : ℝ) + B + (m : ℝ) - ((j : ℕ) : ℝ)) / ((m : ℝ) - ((j : ℕ) : ℝ)) :=
-    Finset.prod_le_prod (fun j _ => div_nonneg (by linarith [hj j]) (hj j).le)
+    Finset.prod_le_prod₀ (fun j _ => div_nonneg (by linarith [hj j]) (hj j).le)
       (fun j _ => div_le_div_of_nonneg_right (by linarith [hμc j]) (hj j).le)
   have h3 : ((A : ℝ) + B + m + 1) / ((m : ℝ) + 1) ≤ ((A : ℝ) + c + B + m + 1) / ((m : ℝ) + 1) :=
     div_le_div_of_nonneg_right (by linarith) (by positivity)
@@ -121,9 +169,9 @@ private theorem prod_univ_eq_prod_subtype_of_eq_one_off {n' : ℕ} (TT : Finset 
 theorem dimV_flat (hW : WeylV) {p n' : ℕ} (R : RS p n') (mm : ℕ) {TT : Finset (Fin n')} (A B : TT → ℕ) :
     ((dimV R.Kf (flatW (mm + 1) A B) : ℕ) : ℚ) = ∏ s : TT, (dimHar (mm + 1) (A s) (B s) : ℚ) := by
   rw [dimV_weyl hW R mm _ (flatW_dom mm A B)]
-  rw [prod_univ_eq_prod_subtype_of_eq_one_off TT _ (fun s hs => by rw [lamAt_flat, dif_neg hs])]
+  rw [prod_univ_eq_prod_subtype_of_eq_one_off TT _ (fun s hs => by rw [lamAt_flat, dite_eq_right hs])]
   refine Finset.prod_congr rfl fun s _ => ?_
-  rw [lamAt_flat, dif_pos s.2]
+  rw [lamAt_flat, dite_eq_left s.2]
 
 theorem dimV_tops (hW : WeylV) {p n' : ℕ} (R : RS p n') (mm : ℕ) (TT : Finset (Fin n'))
     (lam0 : Fin n' → Fin (mm + 1 + 1) → ℤ) (hdom : IsDominant lam0) (hz : ∀ s, s ∉ TT → lam0 s = 0) :
@@ -264,13 +312,13 @@ theorem cloud_bound_of_prop_and_weyl_dimension (hP : CloudLowerBoundWeyl) (hW : 
   have P1 : (∏ s : TT, (weylDim mm (cloudAt lam0 s.val) : ℝ)) * ∏ s : TT, (dimHar (mm + 1) (A s) (B s) : ℝ) ≤
       ∏ s : TT, (weylDim (mm + 2) (lamAt lam0 s.val) : ℝ) := by
     rw [← Finset.prod_mul_distrib]
-    exact Finset.prod_le_prod (fun s _ => hc0 s) (fun s _ => (hF s).2.1)
+    exact Finset.prod_le_prod₀ (fun s _ => hc0 s) (fun s _ => (hF s).2.1)
   have P2 : ∏ s : TT, (weylDim (mm + 2) (lamAt lam0 s.val) : ℝ) ≤
       E * ((∏ s : TT, (weylDim mm (cloudAt lam0 s.val) : ℝ)) * ∏ s : TT, (dimHar (mm + 1) (A s) (B s) : ℝ)) := by
     calc ∏ s : TT, (weylDim (mm + 2) (lamAt lam0 s.val) : ℝ)
         ≤ ∏ s : TT, ((1 + t0) ^ (2 * mm + 1) *
             ((weylDim mm (cloudAt lam0 s.val) : ℝ) * (dimHar (mm + 1) (A s) (B s) : ℝ))) :=
-          Finset.prod_le_prod (fun s _ => (hc0 s).trans (hF s).2.1) (fun s _ => (hF s).2.2)
+          Finset.prod_le_prod₀ (fun s _ => (hc0 s).trans (hF s).2.1) (fun s _ => (hF s).2.2)
       _ = E * ((∏ s : TT, (weylDim mm (cloudAt lam0 s.val) : ℝ)) * ∏ s : TT, (dimHar (mm + 1) (A s) (B s) : ℝ)) := by
           rw [Finset.prod_mul_distrib, Finset.prod_mul_distrib, Finset.prod_const, Finset.card_univ,
             Fintype.card_coe, ← pow_mul]
@@ -278,7 +326,7 @@ theorem cloud_bound_of_prop_and_weyl_dimension (hP : CloudLowerBoundWeyl) (hW : 
       E * ∏ s : TT, (dimHar (mm + 1) (A s) (B s) : ℝ) := by
     calc ∏ s : TT, (dimHar (mm + 1) (A s + 2 * ccl) (B s + 2 * ccl) : ℝ)
         ≤ ∏ s : TT, ((1 + t0) ^ (2 * mm + 1) * (dimHar (mm + 1) (A s) (B s) : ℝ)) :=
-          Finset.prod_le_prod (fun s _ => Nat.cast_nonneg _) (fun s _ => hG s)
+          Finset.prod_le_prod₀ (fun s _ => Nat.cast_nonneg _) (fun s _ => hG s)
       _ = E * ∏ s : TT, (dimHar (mm + 1) (A s) (B s) : ℝ) := by
           rw [Finset.prod_mul_distrib, Finset.prod_const, Finset.card_univ, Fintype.card_coe, ← pow_mul]
   have hx : (((2 * mm + 1) * TT.card : ℕ) : ℝ) * t0 ≤ ep := by

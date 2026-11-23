@@ -1,5 +1,46 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.NefFibOfIsNef
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsIsClosedImmersionGenericPoint
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import ReciprocityTheory.L2DbarEstimates.PlurisubharmonicCharts.DerivDerivNonposOfIsLocalMax
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -52,33 +93,11 @@ theorem SemiPos.pow (hL : L.SemiPos D) (m : ℕ) : (L.pow m).SemiPos D := fun σ
   Weight.SemiPosReg.of_mul _ (L.cInf σ) (hL σ) ((m : ℤ) : ℝ) (by positivity) (fun j => j PUnit.unit)
     (fun _ _ h => mem_pow_iff.1 h) fun j y => (L.φ σ).zpow_φ (m : ℤ) j y
 
-theorem semiPos_dual_pow_zero (hL : L.SemiPos D) : ((L.pow 0).dual).SemiPos D := fun σ =>
-  Weight.SemiPosReg.of_mul _ (L.cInf σ) (hL σ) 0 le_rfl (fun j => j PUnit.unit)
-    (fun _ _ h => (mem_pow_iff (n := ((0 : ℕ) : ℤ))).1 h) fun j y =>
-      (congrArg (fun t : ℝ => -t) ((L.φ σ).zpow_φ ((0 : ℕ) : ℤ) j y)).trans (by simp)
-
 end HermLB
 
 namespace ArInt
 
 variable {ι : Type} [Fintype ι]
-
-theorem semiPos_zp {L : HermLB p} (hL : L.SemiPos D) {n : ℤ} (hn : 0 ≤ n) : (zp L n).SemiPos D := by
-  have h0 : (-n).toNat = 0 := Int.toNat_eq_zero.2 (by omega)
-  unfold zp
-  rw [h0]
-  exact (hL.pow _).tens (HermLB.semiPos_dual_pow_zero hL)
-
-theorem semiPos_comb (ι : Type) [Fintype ι] (L : ι → HermLB p) (n : ι → ℤ) (D : ℕ)
-    (hL : ∀ i, (L i).SemiPos D) (hn : ∀ i, 0 ≤ n i) : (comb L n).SemiPos D := by
-  unfold comb
-  induction (Finset.univ : Finset ι).toList with
-  | nil => exact (HermLB.isNef_triv p D).semiPos
-  | cons i l ih => exact (semiPos_zp (hL i) (hn i)).tens ih
-
-example : ∀ {k : Type} [CommRing k] {X : Scheme.{0}} {p : X ⟶ Sp k} (ι : Type) [Fintype ι]
-    (L : ι → GlobalTheory.HermLB p) (n : ι → ℤ) (D : ℕ), (∀ i, (L i).SemiPos D) → (∀ i, 0 ≤ n i) →
-    (GlobalTheory.ArInt.comb L n).SemiPos D := @semiPos_comb
 
 end ArInt
 

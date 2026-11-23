@@ -1,23 +1,67 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.BranchesAlongOfIrreducible
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.SqRepTopVecOfUnitriangular
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.NonemptyInvFunEquiv
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsPiTensorShuffleEquivStatement
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.PiTensorMapSurjectiveAndKerStatement
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ContractsTensorProductChainStatement
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.TensorRepresentationIntertwinerCompatStatement
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ContractsOfIsoDirectSumStatement
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.NonemptyInvFunDualTprodEquivStatement
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IsoOuterDualStatement
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IsoTwistDetIrrShiftStatement
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IsoUnitaryIrrepConjDualStatement
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.UnitaryIrrepCompConjIsoDualStatement
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.FockOnePlaceIsoDirectSumPartitionsStatement
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.OuterTensorFockOnePlaceIsoUnitaryFockStatement
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.OuterIrrIsoWeylRepStatement
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsGanGrossPrasadRowWeightsStatement
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsGanGrossPrasadColumnWeightsStatement
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.StrictInterlaceGanGrossPrasadBigSmallStatement
+module
+
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.NonemptyInvFunEquiv
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.BranchesAlongOfIrreducible
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IsIrreducibleSmallRepUnitary
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ContractsOfIsoDirectSumStatement
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ContractsTensorProductChainStatement
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsGanGrossPrasadColumnWeightsStatement
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsGanGrossPrasadRowWeightsStatement
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsPiTensorShuffleEquivStatement
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.FockOnePlaceIsoDirectSumPartitionsStatement
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IsoOuterDualStatement
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IsoTwistDetIrrShiftStatement
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IsoUnitaryIrrepConjDualStatement
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.NonemptyInvFunDualTprodEquivStatement
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.OuterIrrIsoWeylRepStatement
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.OuterTensorFockOnePlaceIsoUnitaryFockStatement
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.PiTensorMapSurjectiveAndKerStatement
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.StrictInterlaceGanGrossPrasadBigSmallStatement
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.TensorRepresentationIntertwinerCompatStatement
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.UnitaryIrrepCompConjIsoDualStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.CoassocSimps
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MvPolynomial GlobalTheory.IndefiniteRowSideFullHecke.MinorOrderedEntries GlobalTheory.OneFunctional Formalism.BasicNotions GlobalTheory.Branching
 open scoped TensorProduct DirectSum
@@ -36,10 +80,10 @@ theorem Contracts.outer {ι H G : Type} [Fintype ι] [DecidableEq ι] [Monoid H]
   obtain ⟨h1, h2⟩ := GlobalTheory.T.piTensorProduct_map_surjective_and_dual_vanishes ι _ _ π hs
   refine ⟨PiTensorProduct.map π ∘ₗ e.toLinearMap, h1.comp e.surjective, fun h g f v => ?_, fun l hl x hx => ?_⟩
   · induction f using PiTensorProduct.induction_on with
-    | add a b ha hb => simp only [map_add, TensorProduct.add_tmul, ha, hb]
+    | add a b ha hb => simp only [map_add (f := _), TensorProduct.add_tmul, ha, hb]
     | smul_tprod c f =>
       induction v using PiTensorProduct.induction_on with
-      | add a b ha hb => simp only [map_add, TensorProduct.tmul_add, ha, hb]
+      | add a b ha hb => simp only [map_add (f := _), TensorProduct.tmul_add, ha, hb]
       | smul_tprod d v =>
         simp [outer_apply, outer₂_apply, TensorProduct.smul_tmul, TensorProduct.tmul_smul, hE, he]
   · obtain ⟨x, rfl⟩ := e.symm.surjective x
@@ -85,9 +129,8 @@ theorem finrank_invFun_outer {ι H : Type} [Fintype ι] [DecidableEq ι] [Monoid
     · have hl' : l ∈ invFun ((ρ τ).tprod (σ τ)) := by
         intro k z
         induction z with
-        | zero => simp
         | tmul a b => exact hl k a b
-        | add a b ha hb => simp only [map_add, ha, hb]
+        | add a b ha hb => simp only [map_add (f := _), ha, hb]
       obtain ⟨c, hc⟩ := hε ⟨l, hl'⟩
       have : c • ε.1 = l := congrArg Subtype.val hc
       rw [← this, LinearMap.smul_apply, hx, smul_zero]
@@ -97,12 +140,11 @@ theorem finrank_invFun_outer {ι H : Type} [Fintype ι] [DecidableEq ι] [Monoid
   have hε : ε ∈ invFun ((outer ρ).tprod (outer σ)) := by
     intro k z
     induction z with
-    | zero => simp
     | tmul a b =>
       have := he k 1 a b
       rw [map_one] at this
       exact congrArg (PiTensorProduct.constantBaseRingEquiv ι ℂ) this
-    | add a b ha hb => simp only [map_add, ha, hb]
+    | add a b ha hb => simp only [map_add (f := _), ha, hb]
   obtain ⟨z, hz⟩ := hs' 1
   refine finrank_eq_one_iff'.2 ⟨⟨ε, hε⟩, fun e => ?_, fun l => ⟨l.1 z, Subtype.ext (LinearMap.ext fun x => ?_)⟩⟩
   · have : ε = 0 := congrArg Subtype.val e

@@ -1,4 +1,53 @@
-import Mathlib
+module
+
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.Analysis.Distribution.SchwartzSpace.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Filter Topology
 
@@ -21,7 +70,7 @@ theorem eq_zero_of_forall_nhds {V : Type} [NormedAddCommGroup V] [NormedSpace �
     rw [Metric.mem_ball, dist_eq_norm, add_sub_cancel_left, norm_smul, Real.norm_of_nonneg htpos.le]
     nlinarith [norm_nonneg z]
   have h1 := hb _ hmem
-  rw [map_add, LinearMap.add_apply, map_smul, LinearMap.smul_apply, h0, zero_add, smul_eq_mul] at h1
+  rw [map_add (f := _), LinearMap.add_apply, map_smul, LinearMap.smul_apply, h0, zero_add, smul_eq_mul] at h1
   exact (mul_eq_zero.mp h1).resolve_left htpos.ne'
 
 theorem main {V : Type} [NormedAddCommGroup V] [NormedSpace ℝ V] [FiniteDimensional ℝ V]
@@ -37,7 +86,7 @@ theorem main {V : Type} [NormedAddCommGroup V] [NormedSpace ℝ V] [FiniteDimens
       map_add' := by
         intro p q
         funext y
-        simp only [Prod.fst_add, Prod.snd_add, map_add, Complex.ofReal_add, Pi.add_apply]
+        simp only [Prod.fst_add, Prod.snd_add, map_add (f := _), Complex.ofReal_add, Pi.add_apply]
         ring
       map_smul' := by
         intro s p
@@ -106,10 +155,10 @@ theorem main {V : Type} [NormedAddCommGroup V] [NormedSpace ℝ V] [FiniteDimens
   let m : V →ₗ[ℝ] V →ₗ[ℝ] ℂ := LinearMap.mk₂ ℝ
     (fun a y => (-(2 * Real.pi * Complex.I)) * ((T y (W a).1 : ℝ) : ℂ) +
       Complex.I * ((-(2 * Real.pi * Complex.I)) * ((T y (W a).2 : ℝ) : ℂ)))
-    (by intro a₁ a₂ y; simp only [map_add, Prod.fst_add, Prod.snd_add, Complex.ofReal_add]; ring)
+    (by intro a₁ a₂ y; simp only [map_add (f := _), Prod.fst_add, Prod.snd_add, Complex.ofReal_add]; ring)
     (by intro s a y; simp only [map_smul, Prod.smul_fst, Prod.smul_snd, smul_eq_mul, Complex.ofReal_mul,
       Complex.real_smul]; ring)
-    (by intro a y₁ y₂; simp only [map_add, LinearMap.add_apply, Complex.ofReal_add]; ring)
+    (by intro a y₁ y₂; simp only [map_add (f := _), LinearMap.add_apply, Complex.ofReal_add]; ring)
     (by intro s a y; simp only [map_smul, LinearMap.smul_apply, smul_eq_mul, Complex.ofReal_mul,
       Complex.real_smul]; ring)
   refine ⟨m, fun a y => ?_⟩

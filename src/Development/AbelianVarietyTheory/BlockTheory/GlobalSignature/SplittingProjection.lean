@@ -1,8 +1,43 @@
-import Mathlib
-import Formalism.LocalRingCardinality.DataLevel
-import Formalism.LocalRingCardinality.DataLevelD
-import Formalism.SatakeDualWeyl.StatementC
-import Formalism.SharpRestriction.GlobalSchurBounds.StandardLattice
+module
+
+public import Formalism.SharpRestriction.GlobalSchurBounds.StandardLattice
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -41,24 +76,6 @@ def partOf {n : Type} (p : E ⊗[F] v.adicCompletion F →+* v.adicCompletion F)
 abbrev locLat {n : Type} [Fintype n] [DecidableEq n] (v : HeightOneSpectrum (𝓞 F))
     (Λ : Submodule (𝓞 E) (n → E)) : Submodule (intV E v) (n → E ⊗[F] v.adicCompletion F) :=
   latS (F := F) (v.adicCompletion F) (intV E v) Λ
-
-theorem mem_primeOf_prP {σ : E →ₐ[F] E} (hφ : IsSplitting σ v φ) (a : intV E v) :
-    a ∈ primeOf (prP φ) ↔ Valued.v (prP φ a) < 1 := by
-  refine ⟨fun h => ?_, fun h => Ideal.subset_span h⟩
-  induction h using Submodule.span_induction with
-  | mem x hx => exact hx
-  | zero => simp
-  | add x y _ _ hx hy =>
-    rw [Subring.coe_add, map_add]
-    exact lt_of_le_of_lt (Valuation.map_add _ _ _) (max_lt hx hy)
-  | smul c x _ hx =>
-    have hc : Valued.v (prP φ c) ≤ 1 := ((hφ.2.2 c).1 c.2).1
-    rw [smul_eq_mul, Subring.coe_mul, map_mul, map_mul]
-    exact mul_lt_one_of_nonneg_of_lt_one_right hc zero_le' hx
-
-theorem primeOf_prP_ne_top {σ : E →ₐ[F] E} (hφ : IsSplitting σ v φ) : primeOf (prP φ) ≠ ⊤ := by
-  rw [Ideal.ne_top_iff_one, mem_primeOf_prP φ hφ]
-  simp
 
 end Local
 
@@ -126,20 +143,11 @@ def HasOverLattice (L : ColLevel R F E sp gp C A clsLat) : Prop :=
     (∀ v, L.Uloc v ≤ levelVL sp.cm.sig sp.gram0 v N) ∧
     L.U ≤ levelAfL sp.cm.sig sp.gram0 N
 
-def IndexAtT (L : ColLevel R F E sp gp C A clsLat) : Prop :=
-  ∀ N, IsOverLattice L N → ∀ (v : HeightOneSpectrum (𝓞 F)) (h : (A.T : 𝓞 F) ∈ v.asIdeal) φ,
-    LocalAtT L N v h φ → (L.Uloc v).relIndex (levelVL sp.cm.sig sp.gram0 v N) = A.T ^ R.k - 1
-
 end Level
 
 def SelfDualOverBase : Prop :=
   ∀ (D : D7) (Lv : LevelData D) (u : D.what₂.Word),
     letI := D.host.cmStar
     Formalism.MainNotions.StandardLattice.SplitsF D (D.mem u).A.T → HasOverLattice (Lv u)
-
-def IndexOverBase : Prop :=
-  ∀ (D : D7) (Lv : LevelData D) (u : D.what₂.Word),
-    letI := D.host.cmStar
-    Formalism.MainNotions.StandardLattice.SplitsF D (D.mem u).A.T → IndexAtT (Lv u)
 
 end GlobalTheory.IndefiniteRowSideFullHecke.SplittingProjection

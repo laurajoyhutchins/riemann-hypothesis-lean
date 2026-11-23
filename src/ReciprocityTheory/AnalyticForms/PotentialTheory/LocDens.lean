@@ -1,7 +1,57 @@
-import ReciprocityTheory.AnalyticForms.PotentialTheory.IsPotentialPullbackStatement
-import ReciprocityTheory.AnalyticForms.PlurisubharmonicFunctions.LintegralImageEqLintegralNormSqDetMul
-import ReciprocityTheory.AnalyticForms.PlurisubharmonicFunctions.MdiscSt
-import ReciprocityTheory.AnalyticForms.PlurisubharmonicFunctions.MdiscPos
+module
+
+public import ReciprocityTheory.AnalyticForms.PotentialTheory.IsPotentialPullbackStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.Geometry.Manifold.IsManifold.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.AnalyticForms.PlurisubharmonicFunctions.ComplexHessianIsHermitianOfContDiffAt
+public import ReciprocityTheory.AnalyticForms.PlurisubharmonicFunctions.LintegralImageEqLintegralNormSqDetMul
+
+@[expose] public section
 
 namespace ReciprocityTheory.AnForm.M
 
@@ -86,8 +136,8 @@ theorem maDens_continuousOn {D : ℕ} (φ : Fin D → (Fin D → ℂ) → ℝ) (
   have hH : ∀ k, ContinuousOn (hessC (φ k)) V := fun k => hessC_continuousOn (φ k) V hV (hφ k)
   unfold maDens mdisc
   refine continuousOn_const.mul (Complex.continuous_re.comp_continuousOn ?_)
-  refine continuousOn_const.mul (continuousOn_finset_sum _ fun S _ => continuousOn_const.mul ?_)
-  exact (continuous_id.matrix_det).comp_continuousOn (continuousOn_finset_sum _ fun k _ => hH k)
+  refine continuousOn_const.mul (continuousOn_finsetSum _ fun S _ => continuousOn_const.mul ?_)
+  exact (continuous_id.matrix_det).comp_continuousOn (continuousOn_finsetSum _ fun k _ => hH k)
 
 theorem locDensCont : LocDensContStatement := by
   intro e X _ A Φ hΦ j y0 hy0
@@ -166,38 +216,15 @@ theorem re_star_dot_hessC {D : ℕ} (φ : (Fin D → ℂ) → ℝ) (z x : Fin D 
           (H (E i) (Complex.I • E j) - H (Complex.I • E i) (E j))) / 4 := by
     unfold levi
     rw [← hH, hIw, hw]
-    simp only [map_sum, map_add, map_smul, ContinuousLinearMap.sum_apply,
-      ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply, ContinuousLinearMap.coe_smul',
-      Pi.smul_apply, smul_eq_mul]
+
+    simp only [map_sum, map_add (f := _), map_smul, ContinuousLinearMap.sum_apply,
+    ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply, ContinuousLinearMap.coe_smul',
+    Pi.smul_apply, smul_eq_mul]
     simp only [Finset.mul_sum, ← Finset.sum_add_distrib, Finset.sum_div]
     rw [Finset.sum_comm]
     refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
     ring
   rw [hL, hR]
-
-theorem hessC_posDef {D : ℕ} (φ : (Fin D → ℂ) → ℝ) (z : Fin D → ℂ) (hφ : ContDiffAt ℝ 2 φ z)
-    (hpos : ∀ w : Fin D → ℂ, w ≠ 0 → 0 < levi φ z w) : (hessC φ z).PosDef := by
-  have hH := ReciprocityTheory.AnForm.A.hessC_isHermitian φ z hφ
-  refine Matrix.PosDef.of_dotProduct_mulVec_pos hH fun x hx => ?_
-  have hw : star x ≠ 0 := star_ne_zero.2 hx
-  have him := hH.im_star_dotProduct_mulVec_self x
-  rw [Complex.lt_def]
-  refine ⟨?_, ?_⟩
-  · rw [Complex.zero_re, re_star_dot_hessC]
-    exact hpos _ hw
-  · rw [Complex.zero_im]
-    exact him.symm
-
-theorem locDensPos : LocDensPosStatement := by
-  intro e X _ A Φ hΦ hpos j y hy
-  have hPD : ∀ i, (hessC (fun y' => (Φ i).φ ((A.chart j).symm y) ((A.chart j).symm y')) y).PosDef :=
-    fun i => hessC_posDef _ y (potSmoothAt A (Φ i) (hΦ i) _ j ⟨hy, (Φ i).mem_U _⟩)
-      (fun w hw => hpos i _ j y ⟨hy, (Φ i).mem_U _⟩ w hw)
-  have hm := (ReciprocityTheory.AnForm.A.mdisc_pos_of_posDef
-    (fun i => hessC (fun y' => (Φ i).φ ((A.chart j).symm y) ((A.chart j).symm y')) y) hPD).2
-  have hpi : 0 < (2 / Real.pi) := div_pos two_pos Real.pi_pos
-  have hf : (0 : ℝ) < (e.factorial : ℝ) := by exact_mod_cast Nat.factorial_pos e
-  exact mul_pos (mul_pos hf (pow_pos hpi e)) hm
 
 end
 

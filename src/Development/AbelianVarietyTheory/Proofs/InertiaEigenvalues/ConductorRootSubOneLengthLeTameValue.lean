@@ -1,10 +1,54 @@
-import Mathlib
-import Formalism.SharpRestriction.LevelLetterCocycles.JointConditionsZpowers.CommutingEndomorphismCondition
-import Formalism.LocalRingCardinality.DataNChTie
-import Formalism.SharpRestriction.LevelLetterCocycles.VKEqOfFrac
-import Formalism.CharacterColumnKernels.IdempotentNormalForms.LengthKerOfDetEqZero
-import Formalism.SharpRestriction.LevelLetterCocycles.EndomorphismIndexBound
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.MemZpowersOfTameGen
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.JointConditionsZpowers.CommutingEndomorphismCondition
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.MemZpowersOfTameGen
+public import Formalism.CharacterColumnKernels.IdempotentNormalForms.LengthKerOfDetEqZero
+import Formalism.SharpRestriction.LevelLetterCocycles.CommutingEndomorphismPreservesInvariants
+public import Formalism.SharpRestriction.LevelLetterCocycles.EndomorphismIndexBound
+public import Formalism.SharpRestriction.LevelLetterCocycles.VKEqOfFrac
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -193,7 +237,9 @@ theorem l_mem_maximalIdeal {D : Formalism.BasicNotions.D7} {N : NData D.R D.host
   obtain ⟨P, hP, hPc⟩ := Ideal.exists_ideal_over_maximal_of_isIntegral (S := X.Ok i k')
     (IsLocalRing.maximalIdeal (X.O i))
     (by rw [(RingHom.injective_iff_ker_eq_bot _).1 (X.Ok_inj i k')]; exact bot_le)
-  rw [← IsLocalRing.eq_maximalIdeal hP, ← map_natCast (algebraMap (X.O i) (X.Ok i k')), ← Ideal.mem_comap, hPc]
+  rw [← IsLocalRing.eq_maximalIdeal hP, ← map_natCast (algebraMap (X.O i) (X.Ok i k')), ← Ideal.mem_comap]
+  change ((X.l i : ℕ) : X.O i) ∈ Ideal.under (X.O i) P
+  rw [hPc]
   exact X.O_l i
 
 section Main

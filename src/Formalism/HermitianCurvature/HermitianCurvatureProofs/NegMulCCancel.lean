@@ -1,7 +1,58 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CornerBlockActionInvariant
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.HermitianFormRankZeroApply
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.GaXiSplit
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.Imports
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.BigCellInversePair
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CornerBlockActionInvariant
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.EmbeddedGroupMeasurePreserving
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.NormDiagonalEntryDilationGeneratorLeOne
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.PsiNormalization
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.RegularisedPairingViaPhase
 import Formalism.HermitianCurvature.HermitianCurvatureProofs.SigmaFiniteOfHaar
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.HermitianFormRankZeroApply
 import Formalism.HermitianCurvature.HermitianCurvatureProofs.StrictUpperNeg
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.Countable
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Matrix MeasureTheory
 
@@ -23,8 +74,8 @@ def muXP (Bj : B.RealPlaceData k ρ Wp Wq) : Measure (XP k p ρ) := (Bj.μW.prod
 def GoodP (Bj : B.RealPlaceData k ρ Wp Wq) (x : XP k p ρ) : Prop :=
   (Matrix.of x.1.1 : B.Mat k ρ) ∈ UWset k ρ Bj.z ∧ (Matrix.of x.1.2 : B.Mat k ρ) ∈ Nset k ρ
 
-open Classical in
 
+open Classical in
 def sP (Bj : B.RealPlaceData k ρ Wp Wq) (x : XP k p ρ) : B.Mat k (p + ρ) :=
   if GoodP Bj x then
     U.Rn k p ρ (-x.2) * U.embG k p ρ ((Matrix.of x.1.1 : B.Mat k ρ)⁻¹ * (Matrix.of x.1.2 : B.Mat k ρ)⁻¹)
@@ -66,7 +117,6 @@ variable {k p ρ : ℕ}
 
 local instance bsS : BorelSpace ((G.UT p → ℂ) × (Fin p → ℝ)) := Prod.borelSpace
 local instance bsRC : BorelSpace (U.RC k p ρ) := Prod.borelSpace
-local instance bsRC2 : BorelSpace (U.RC k p ρ × U.RC k p ρ) := Prod.borelSpace
 
 theorem psi_rn_mulC (z : Fin (2 * ρ + k + 1) → ℂ) (hz : inWb k ρ z) (x y : U.RC k p ρ) :
     psi k (p + ρ) (liftVec k p ρ z) cStd (U.Rn k p ρ (StabilizerDisintegration.HC.mulC x y)) =

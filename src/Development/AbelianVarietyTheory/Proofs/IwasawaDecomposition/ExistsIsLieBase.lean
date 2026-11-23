@@ -1,9 +1,43 @@
-import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.MumfordProportionality
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.TriIff
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.HodgeGramEqRiemann
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.SmoothOfAlgClosedUnif
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsLieEigenpartsFrameFamilyOverVariety
+module
+
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.TriIff
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.HodgeGramEqRiemann
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -36,13 +70,13 @@ def cxOf (e : F ≃+* c.F) (σ : c.F →+* ℂ) {X : Var F} {j : X.X ⟶ gen Z}
 
 variable {σ : c.F →+* ℂ} {r : ℕ}
 
-open Classical in
 
+open Classical in
 def unfFam (U : Formalism.L2.PjFree.Unf Xo c σ r) : ∀ σ' : c.F →+* ℂ, Formalism.L2.PjFree.Unf Xo c σ' r := fun σ' =>
   if h : σ = σ' then h ▸ U else { Comp := Empty, X := fun k => k.elim, un := fun k => k.elim }
 
-variable (Z) in
 
+variable (Z) in
 def hodgeMet (U : Formalism.L2.PjFree.Unf Xo c σ r) : EigMet Z σ :=
   EigMet.hodge (unfFam U) (2 * Real.pi) Real.two_pi_pos (Classical.arbitrary (EigMet Z σ))
 
@@ -52,8 +86,8 @@ def FrameAt (e : F ≃+* c.F) {X : Var F} {j : X.X ⟶ gen Z} (f₀ : EigFrame Z
     (ψ : X.X.presheaf.stalk (under y) →+* ℂ), y.1 = spMap ψ ≫ stalkPt X (under y) ∧
       fz.Coord (algebraMap (X.X.presheaf.stalk (under y)) X.X.functionField) f₀ (A₀ * A⁻¹) ∧ fz.IsMap ψ g
 
-open Classical in
 
+open Classical in
 def lieGram (e : F ≃+* c.F) (U : Formalism.L2.PjFree.Unf Xo c σ r) {X : Var F} {j : X.X ⟶ gen Z}
     (hj : j ≫ genStr Z ≫ spMap e.toRingHom = X.str) (f₀ : EigFrame Z (constF e X) (genericPt X ≫ j ≫ genι Z))
     (A₀ : Mat Dw.mult X.Fn) (A : Mat Dw.mult X.Fn) (y : CxPts X.str (σ.comp e.toRingHom)) : Mat Dw.mult ℂ :=

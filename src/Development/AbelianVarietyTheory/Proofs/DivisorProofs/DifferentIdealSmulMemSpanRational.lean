@@ -1,4 +1,57 @@
-import Mathlib
+module
+
+public import Mathlib.NumberTheory.NumberField.Basic
+public import Mathlib.RingTheory.DedekindDomain.Different
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open NumberField
 
 namespace GlobalTheory
@@ -44,6 +97,7 @@ theorem exists_trace_dual_system (K L : Type) [Field K] [NumberField K] [Field L
         simp only [LinearMap.sum_apply, LinearMap.smulRight_apply, hf, algebraMap_smul]
         conv_lhs => rw [ha]
         change algebraMap (𝓞 L) L _ = _
+
         rw [map_sum]
         refine Finset.sum_congr rfl fun i _ => ?_
         exact (IsScalarTower.toAlgHom (𝓞 K) (𝓞 L) L).toLinearMap.map_smul _ _)
@@ -66,6 +120,7 @@ private theorem exists_integral_traceDual_expansion (K L : Type) [Field K] [Numb
     have hb := LinearMap.congr_fun hh b
     simp only [LinearMap.comp_apply, LinearMap.id_apply] at hb
     conv_lhs => rw [← hb, ← Finset.univ_sum_single (h b)]
+
     simp only [map_sum]
     refine Finset.sum_congr rfl fun k _ => ?_
     rw [show (Pi.single k (h b k) : Fin N → 𝓞 K) = h b k • Pi.single k 1 by
@@ -88,6 +143,7 @@ private theorem exists_integral_traceDual_expansion (K L : Type) [Field K] [Numb
       algebraMap (𝓞 L) L b = ∑ k, ψ k (algebraMap (𝓞 L) L b) • algebraMap (𝓞 L) L (e k) := by
     intro b
     conv_lhs => rw [hdec b]
+
     rw [map_sum]
     refine Finset.sum_congr rfl fun k _ => ?_
     rw [hψ, Algebra.smul_def, map_mul, ← IsScalarTower.algebraMap_apply (𝓞 K) (𝓞 L) L,
@@ -118,14 +174,16 @@ private theorem exists_integral_traceDual_expansion (K L : Type) [Field K] [Numb
     have h1 : Algebra.trace K L (y * u) = ∑ k, Algebra.trace K L (algebraMap (𝓞 L) L (e k) * y) *
         Algebra.trace K L (c k * u) := by
       conv_lhs => rw [hexp u]
+
       simp only [Finset.mul_sum, mul_smul_comm, map_sum, map_smul, smul_eq_mul, hc]
       exact Finset.sum_congr rfl fun k _ => by rw [mul_comm y]; ring
+
     simp only [map_sub, map_sum, map_smul, LinearMap.sub_apply, LinearMap.sum_apply,
-      LinearMap.smul_apply, Algebra.traceForm_apply, smul_eq_mul, h1]
+    LinearMap.smul_apply, Algebra.traceForm_apply, smul_eq_mul, h1]
     rw [sub_eq_zero]
 
-open NumberField in
 
+open NumberField in
 theorem _root_.GlobalTheory.differentIdeal_smul_mem_span_rational :
     ∀ (K L : Type) [Field K] [NumberField K] [Field L] [NumberField L] [Algebra K L] [IsGalois K L] (n : ℕ) (M : Submodule (𝓞 L) (Fin n → L)), (∀ (σ : L ≃ₐ[K] L), ∀ x ∈ M, (fun i => σ (x i)) ∈ M) → ∀ d ∈ differentIdeal (𝓞 K) (𝓞 L), ∀ x ∈ M, d • x ∈ Submodule.span (𝓞 L) {y : Fin n → L | y ∈ M ∧ ∃ y0 : Fin n → K, y = fun i => algebraMap K L (y0 i)} := by
   intro K L _ _ _ _ _ _ n M hM d hd x hx

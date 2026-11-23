@@ -1,6 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.NuInRange
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.CoordMapBasisFun
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.NuInRange
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.CoordMapBasisFun
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Matrix.Order
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -16,6 +61,7 @@ variable {K V M ι : Type} [Field K] [AddCommGroup V] [Module K V] [AddCommGroup
 
 theorem map_eq_sum (x : V) : e x = ∑ i, σ (b.repr x i) • e (b i) := by
   conv_lhs => rw [← b.sum_repr x]
+
   rw [map_sum]
   exact Finset.sum_congr rfl (fun i _ => LinearMap.map_smulₛₗ e _ _)
 
@@ -29,6 +75,7 @@ theorem exists_extension (h : LinearIndependent ℂ (fun i => e (b i))) {N : Typ
     rw [h1, h.repr_eq_single i _ rfl]
     simp
   refine ⟨F, fun x => ?_⟩
+
   rw [map_eq_sum e b, map_eq_sum g b, map_sum]
   simp [hb]
 
@@ -89,7 +136,8 @@ theorem mem_span_ker (h : LinearIndependent ℂ (fun i => e (b i))) {S : Type} [
       obtain ⟨i, rfl⟩ := hψ
       refine ⟨?_, ?_⟩
       · simp only [← hN, hSx, hP, LinearMap.comp_apply]
-        rw [← map_sum e, ← map_sum s, ← map_add]
+
+        rw [← map_sum e, ← map_sum s, ← map_add (f := _)]
         congr 1
         have : ∑ v, LinearMap.single K (fun _ : S => V) v (N v (b i)) = N' (b i) := by
           funext w; simp [N', Finset.sum_apply, Pi.single_apply]
@@ -97,8 +145,8 @@ theorem mem_span_ker (h : LinearIndependent ℂ (fun i => e (b i))) {S : Type} [
       · rw [hP]; exact Submodule.subset_span ⟨p (b i), hp _, rfl⟩
     | zero => simp
     | add x y _ _ hx hy =>
-      refine ⟨?_, by rw [map_add]; exact Submodule.add_mem _ hx.2 hy.2⟩
-      simp only [map_add, Finset.sum_add_distrib]
+      refine ⟨?_, by rw [map_add (f := _)]; exact Submodule.add_mem _ hx.2 hy.2⟩
+      simp only [map_add (f := _), Finset.sum_add_distrib]
       conv_lhs => rw [hx.1, hy.1]
       abel
     | smul a x _ hx =>

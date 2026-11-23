@@ -1,11 +1,57 @@
-import Mathlib
-import Formalism.LocalRingCardinality.AdicCompletionLocal.LocTied
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.ConvZero
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.SandZero
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.PeriodDiscExtensionTateElement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CompleteSpaceFinExt
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.NormCoeffSubstLe
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.LocAinfUntiltEpsOneEqZeta
+module
+
+public import Formalism.LocalRingCardinality.AdicCompletionLocal.LocTied
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.ConvZero
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.PeriodDiscExtensionTateElement
+public import Mathlib.Algebra.CharP.IntermediateField
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CompleteSpaceFinExt
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.LocAinfUntiltEpsOneEqZeta
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.NormCoeffSubstLe
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.MetricSpace.Ultra.TotallySeparated
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -26,7 +72,7 @@ theorem norm_sub_one_lt {ζ : ↥LL.1} (h : ∃ j : ℕ, IsPrimitiveRoot ζ (l ^
     exact ⟨_, by rw [hr, mul_assoc, mul_assoc]⟩
   have h1 := congrArg (algebraMap ↥(OL LL) ↥LL.1) hr
   have hzz : algebraMap ↥(OL LL) ↥LL.1 z = ζ := rfl
-  simp only [sub_add_cancel, map_pow, map_add, map_mul, map_sub, map_one, map_natCast, hzz, hj.pow_eq_one,
+  simp only [sub_add_cancel, map_pow, map_add (f := _), map_mul, map_sub, map_one, map_natCast, hzz, hj.pow_eq_one,
     one_pow] at h1
   have h2 : (ζ - 1) ^ l ^ j = -((l : ↥LL.1) * algebraMap ↥(OL LL) ↥LL.1 r) := by linear_combination -h1
   have h3 : ‖(l : ↥LL.1)‖ < 1 := by
@@ -48,8 +94,8 @@ theorem prim_pow {ζ : ↥LL.1} (h : ∃ j : ℕ, IsPrimitiveRoot ζ (l ^ j)) (a
 
 theorem prim_one : ∃ k : ℕ, IsPrimitiveRoot (1 : ↥LL.1) (l ^ k) := prim_of_pow (j := 0) (one_pow _)
 
-open Classical in
 
+open Classical in
 def pt (ζ : ↥LL.1) : ↥LL.1 := if ∃ j : ℕ, IsPrimitiveRoot ζ (l ^ j) then ζ else 1
 
 theorem pt_of {ζ : ↥LL.1} (h : ∃ j : ℕ, IsPrimitiveRoot ζ (l ^ j)) : pt ζ = ζ := if_pos h
@@ -99,6 +145,8 @@ def convAlg (LL : FinExt l) (n : ℕ) : Subalgebra ↥LL.1 (LetA ↥LL.1 n) wher
 
 variable {n : ℕ}
 
+attribute [local instance 1100] Subalgebra.algebra
+
 def exFun (i : ZMod n) (ζ : ↥LL.1) (f : ↥(convAlg LL n)) : PowerSeries ↥LL.1 :=
   ((conv_expansion l LL (pt ζ) (norm_sub_one_lt (prim_pt ζ))).1 (f.1 i) (f.2 i)).exists.choose
 
@@ -129,11 +177,17 @@ def evalAlg {S : Type} [CommRing S] [Algebra ↥LL.1 S] (J : LetA ↥LL.1 n → 
     (hadd : ∀ a b, (∀ i, Conv (a i)) → (∀ i, Conv (b i)) → J (a + b) = J a + J b)
     (hmul : ∀ a b, (∀ i, Conv (a i)) → (∀ i, Conv (b i)) → J (a * b) = J a * J b)
     (hsmul : ∀ (c : ↥LL.1) a, (∀ i, Conv (a i)) → J (c • a) = c • J a) (hone : J 1 = 1) :
-    ↥(convAlg LL n) →ₐ[↥LL.1] S :=
-  AlgHom.ofLinearMap
-    { toFun := fun a => J a.1
-      map_add' := fun a b => hadd _ _ a.2 b.2
-      map_smul' := fun c a => hsmul c _ a.2 } hone fun a b => hmul _ _ a.2 b.2
+    ↥(convAlg LL n) →ₐ[↥LL.1] S where
+  toFun a := J a.1
+  map_one' := hone
+  map_zero' := by
+    simpa using hsmul 0 1 (1 : ↥(convAlg LL n)).2
+  map_add' a b := hadd _ _ a.2 b.2
+  map_mul' a b := hmul _ _ a.2 b.2
+  commutes' c := by
+    change J (algebraMap ↥LL.1 (LetA ↥LL.1 n) c) = algebraMap ↥LL.1 S c
+    rw [Algebra.algebraMap_eq_smul_one, Algebra.algebraMap_eq_smul_one,
+      hsmul c 1 (1 : ↥(convAlg LL n)).2, hone]
 
 variable {P : LocPrime l} {K : FinExt l} {s : ℕ} {Γ : GamS P K s LL}
 
@@ -154,7 +208,7 @@ theorem rescale_pt (c ζ : ↥LL.1) : PowerSeries.rescale c (PowerSeries.C ζ * 
   simp only [PowerSeries.coeff_C_mul, PowerSeries.coeff_rescale]
   rw [mul_left_comm]
 
-set_option maxHeartbeats 1600000 in
+
 theorem subst_γ {R : WSer Γ} (h : LevExp R) (g : Γ.Gam) (i : ZMod (Module.finrank ℚ_[l] ↥(K0 K)))
     (ζ : ↥LL.1) (j a : ℕ) (hζ : IsPrimitiveRoot ζ ((P.PD K).p ^ j))
     (hv : (j : WithTop ℚ) ≤ P.v LL (algebraMap ↥(OL LL) ↥LL.1 (Γ.χΓ g : ↥(OL LL)) - (a : ↥LL.1)))
@@ -210,6 +264,7 @@ theorem ζQ_pow (P : LocPrime l) (s : ℕ) : P.ζQ s ^ l ^ s = 1 := by
   | zero => simp [P.ζQ_zero]
   | succ s ih => rw [pow_succ', pow_mul, P.ζQ_succ, ih]
 
+set_option synthInstance.maxHeartbeats 100000 in
 theorem unit_pi {AI : LocAinf l P} (T : LocTied l P AI) {R : WSer Γ} (I : IoS AI R)
     (β : RA LL →+* ↥LL.1 ⊗[ℚ_[l]] P.R.B) (hβ : IsBeta AI β) : IsUnit (β (I.io letπ)) := by
   rw [I.io_π, hβ]
@@ -219,7 +274,7 @@ theorem unit_pi {AI : LocAinf l P} (T : LocTied l P AI) {R : WSer Γ} (I : IoS A
 theorem l_pow_inv_ne (s : ℕ) : (((l : ℚ_[l]) ^ s)⁻¹) ≠ 0 :=
   inv_ne_zero (pow_ne_zero _ (by exact_mod_cast (Fact.out : l.Prime).ne_zero))
 
-set_option maxHeartbeats 1600000 in
+
 
 theorem exists_disc (l : ℕ) [Fact l.Prime] (P : LocPrime l) (AI : LocAinf l P) (T : LocTied l P AI)
     (K : FinExt l) (s : ℕ) (LL : FinExt l) (_ : Good K s LL) (Γ : GamS P K s LL) (R : WSer Γ) (I : IoS AI R)

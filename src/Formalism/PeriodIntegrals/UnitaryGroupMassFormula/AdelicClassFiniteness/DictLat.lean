@@ -1,5 +1,50 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicClassFiniteness.DictPlan
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicClassFiniteness.DictPlan
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 namespace PIW.AdelClassFin
@@ -21,7 +66,7 @@ theorem DictLat.hhat_zero_right (I : AutInst) (y : Fin I.n → I.E ⊗[I.F] Af I
 
 theorem DictLat.hhat_add_left (I : AutInst) (y y' z : Fin I.n → I.E ⊗[I.F] Af I.F) :
     hhat I (y + y') z = hhat I y z + hhat I y' z := by
-  simp only [hhat, Formalism.UG.hform, Pi.add_apply, map_add, add_mul, Finset.sum_add_distrib]
+  simp only [hhat, Formalism.UG.hform, Pi.add_apply, map_add (f := _), add_mul, Finset.sum_add_distrib]
 
 theorem DictLat.hhat_smul_left (I : AutInst) (y z : Fin I.n → I.E ⊗[I.F] Af I.F)
     (r : I.E ⊗[I.F] Af I.F) :
@@ -46,7 +91,8 @@ theorem DictLat.sigR_one_tmul (I : AutInst) (a : Af I.F) :
 
 theorem DictLat.hhat_iv (I : AutInst) (v w : Fin I.n → I.E) :
     hhat I (iv I v) (iv I w) = Formalism.UG.inclE (F := I.F) (Af I.F) (Formalism.UG.hform (starRingEnd I.E) I.J v w) := by
-  simp [hhat, iv, Formalism.UG.hform, DictLat.sigR_inclE, map_sum, map_mul, starRingEnd_apply]
+  set_option synthInstance.maxHeartbeats 100000 in
+    simp [hhat, iv, Formalism.UG.hform, DictLat.sigR_inclE, map_sum, map_mul, starRingEnd_apply]
 
 theorem DictLat.inclE_int (I : AutInst) {e : I.E} (he : e ∈ (algebraMap (𝓞 I.E) I.E).range) :
     Formalism.UG.inclE (F := I.F) (Af I.F) e ∈ IntAf I.F I.E := by
@@ -76,7 +122,7 @@ theorem DictLat.sigR_int (I : AutInst) {r : I.E ⊗[I.F] Af I.F} (hr : r ∈ Int
 
 theorem DictLat.iv_add (I : AutInst) (v w : Fin I.n → I.E) : iv I (v + w) = iv I v + iv I w := by
   funext i
-  simp [iv, map_add]
+  simp [iv, map_add (f := _)]
 
 theorem DictLat.iv_zero (I : AutInst) : iv I (0 : Fin I.n → I.E) = 0 := by
   funext i
@@ -268,8 +314,5 @@ theorem lHatDual_of (h₁ : DInter) (h₂ : LDenom) (h₃ : LDense) (h₄ : LHat
   have hz' : z = iv I ((m : I.E)⁻¹ • l) + y' := by rw [hiv, sub_add_cancel]
   rw [hz']
   exact I.Lf.add_mem (DictLat.iv_mem I hv) hy'
-
-theorem lHatDual_of_D (h₁ : DInter) (h₂ : DDenom) (h₃ : DDense) : LHatDual := by
-  exact lHatDual_of h₁ (lDenom_of h₂) (lDense_of h₃) dual_hat_integral
 
 end PIW.AdelClassFin

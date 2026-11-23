@@ -1,4 +1,48 @@
-import Formalism.LocalToGlobal.PairingIndexBounds.ModelLatticeMoves.IsBichar
+module
+
+public import Formalism.LocalToGlobal.PairingIndexBounds.ModelLatticeMoves.IsBichar
+public import Mathlib.GroupTheory.Index
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 open scoped BigOperators
@@ -38,17 +82,6 @@ def Moves : Prop :=
       ∀ (SA : Finset A) (SB : Finset B), IsRepsG A₀ A₁ SA → IsRepsG B₀ B₁ SB → (SB.card : k) ≠ 0 →
         ∃ h : ind (A₁ : Set A) ∈ Sch c A₀,
           ∑ a ∈ SA, ∑ b ∈ SB, WA a (WB b θ) = (SB.card : k) • Xi ⟨ind (A₁ : Set A), h⟩
-
-def Fourier : Prop :=
-  ∀ (k : Type) [Field k] (A B T : Type) [AddCommGroup A] [AddCommGroup B] [AddCommGroup T] [Module k T]
-    (c : B → A → k) (WA : A → T →ₗ[k] T) (WB : B → T →ₗ[k] T), IsBichar c → IsHeis c WA WB →
-    ∀ (A₀ A₂ : AddSubgroup A) (B₀ B₂ : AddSubgroup B) (θ : T) (Xi : Sch c A₀ →ₗ[k] T), IsXi c WA WB A₀ θ Xi →
-      A₂ ≤ A₀ → (∀ b, b ∈ B₀ ↔ ∀ a ∈ A₀, c b a = 1) → (∀ b, b ∈ B₂ ↔ ∀ a ∈ A₂, c b a = 1) →
-      (∀ a ∈ A₀, (∀ b ∈ B₂, c b a = 1) → a ∈ A₂) →
-      ∀ (SA : Finset A) (SB : Finset B), IsRepsG A₂ A₀ SA → IsRepsG B₀ B₂ SB → (SB.card : k) ≠ 0 →
-      ∀ Φ : A → k, (∀ t, t ∉ A₀ → Φ t = 0) → (∀ t, ∀ s ∈ A₂, Φ (t + s) = Φ t) →
-        ∃ h : Φ ∈ Sch c A₀, Xi ⟨Φ, h⟩ =
-          ∑ b ∈ SB, (((SB.card : k))⁻¹ * ∑ t ∈ SA, Φ t * (c b t)⁻¹) • WB b θ
 
 def IndexDual : Prop :=
   ∀ (k : Type) [Field k] (A B : Type) [AddCommGroup A] [AddCommGroup B] (c : B → A → k), IsBichar c →

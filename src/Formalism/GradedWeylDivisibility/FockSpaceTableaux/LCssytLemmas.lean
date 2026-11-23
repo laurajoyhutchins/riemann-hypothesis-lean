@@ -1,74 +1,52 @@
-import Formalism.GradedWeylDivisibility.StatementC
+module
+
+public import Formalism.GradedWeylDivisibility.StatementC
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MvPolynomial Finset
 
 noncomputable section
 
 namespace Formalism.GradedWeylDivisibility
-
-theorem lcssyt_card_initial {n : ℕ} (P : Fin n → Prop) [DecidablePred P]
-    (hP : ∀ t t' : Fin n, t' ≤ t → P t → P t') (t : Fin n) :
-    t.val < (univ.filter P).card ↔ P t := by
-  constructor
-  · intro h
-    by_contra hPt
-    have hsub : univ.filter P ⊆ Iio t := by
-      intro t' ht'
-      simp only [mem_filter, mem_univ, true_and] at ht'
-      simp only [mem_Iio]
-      by_contra hle
-      exact hPt (hP t' t (not_lt.mp hle) ht')
-    have := card_le_card hsub
-    rw [Fin.card_Iio] at this
-    omega
-  · intro hPt
-    have hsub : Iic t ⊆ univ.filter P := by
-      intro t' ht'
-      simp only [mem_Iic] at ht'
-      simp only [mem_filter, mem_univ, true_and]
-      exact hP t t' ht' hPt
-    have := card_le_card hsub
-    rw [Fin.card_Iic] at this
-    omega
-
-theorem lcssyt_colExp_apply_lt {r n h : ℕ} (c : Fin h → Fin r) (hh : h ≤ n) (a : Fin r) (t : Fin n)
-    (ht : t.val < h) : colExp c hh (a, t) = if c ⟨t.val, ht⟩ = a then 1 else 0 := by
-  unfold colExp
-  rw [Finsupp.finset_sum_apply, Finset.sum_eq_single ⟨t.val, ht⟩]
-  · rw [Finsupp.single_apply]
-    congr 1
-    apply propext
-    constructor
-    · intro he; exact (Prod.ext_iff.mp he).1
-    · intro he; exact Prod.ext he (Fin.ext rfl)
-  · intro p _ hp
-    rw [Finsupp.single_apply, if_neg]
-    intro he
-    apply hp
-    have := congrArg (fun x => x.2.val) he
-    exact Fin.ext (by simpa using this)
-  · simp
-
-theorem lcssyt_colExp_apply_ge {r n h : ℕ} (c : Fin h → Fin r) (hh : h ≤ n) (a : Fin r) (t : Fin n)
-    (ht : ¬ t.val < h) : colExp c hh (a, t) = 0 := by
-  unfold colExp
-  rw [Finsupp.finset_sum_apply]
-  refine Finset.sum_eq_zero fun p _ => ?_
-  rw [Finsupp.single_apply, if_neg]
-  intro he
-  apply ht
-  have := congrArg (fun x => x.2.val) he
-  simp only [Fin.coe_castLE] at this
-  omega
-
-theorem lcssyt_colExp_sum_lt {r n h : ℕ} (c : Fin h → Fin r) (hh : h ≤ n) (S : Finset (Fin r)) (t : Fin n)
-    (ht : t.val < h) : ∑ b ∈ S, colExp c hh (b, t) = if c ⟨t.val, ht⟩ ∈ S then 1 else 0 := by
-  simp only [lcssyt_colExp_apply_lt c hh _ t ht]
-  exact Finset.sum_ite_eq S (c ⟨t.val, ht⟩) (fun _ => 1)
-
-theorem lcssyt_colExp_sum_ge {r n h : ℕ} (c : Fin h → Fin r) (hh : h ≤ n) (S : Finset (Fin r)) (t : Fin n)
-    (ht : ¬ t.val < h) : ∑ b ∈ S, colExp c hh (b, t) = 0 := by
-  simp [lcssyt_colExp_apply_ge c hh _ t ht]
 
 theorem lcssyt_shapeDeg_cons {n K : ℕ} (h : ℕ) (sz : Fin K → ℕ) (t : Fin n) :
     shapeDeg (Fin.cons h sz : Fin (K + 1) → ℕ) t = (if t.val < h then 1 else 0) + shapeDeg sz t := by

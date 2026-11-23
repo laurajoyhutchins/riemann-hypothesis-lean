@@ -1,7 +1,46 @@
-import Mathlib
-import CompanionTheory.SpectralGeometry.CountingDefinitions.VoronoiMeans.VorFunEvalEqFineMean
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.ConvexCones.VorFunValueLe
+module
+
+public import CompanionTheory.SpectralGeometry.CountingDefinitions.VoronoiMeans.VorFunEvalEqFineMean
+public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.ConvexCones.VorFunValueLe
 import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.HostGeneratorPowFourTraceNormModEight
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HomExtNormalSt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -30,7 +69,7 @@ theorem exists_least_points {X : Type} [AddCommGroup X] {n : ℕ} (r : (Fin n �
   obtain ⟨d, rfl⟩ := hr x
   have h := hm y (a y + (((1 : ℕ) : ℤ) + 1) • d) (by rw [redV_add_smul, ha])
   have e : r (a y + (((1 : ℕ) : ℤ) + 1) • d) = r (a y) + (r d + r d) := by
-    rw [map_add, map_smul, show (((1 : ℕ) : ℤ) + 1) = 2 by norm_num, two_smul]
+    rw [map_add (f := _), map_smul, show (((1 : ℕ) : ℤ) + 1) = 2 by norm_num, two_smul]
   rw [e] at h
   simp only [toReal, LinearMap.compr₂_apply, Algebra.linearMap_apply, eq_intCast]
   exact_mod_cast h
@@ -39,7 +78,7 @@ theorem apply_eq_zero_of_self {X : Type} [AddCommGroup X] (β : LinearMap.BilinF
     (hβ : ∀ y, 0 ≤ β y y) {z : X} (hz : β z z = 0) (w : X) : β z w = 0 := by
   by_contra ht
   have h := hβ (w + (-(β w w + 1) * β z w) • z)
-  simp only [map_add, LinearMap.add_apply, map_smul, LinearMap.smul_apply, smul_eq_mul, hz, hs w z] at h
+  simp only [map_add (f := _), LinearMap.add_apply, map_smul, LinearMap.smul_apply, smul_eq_mul, hz, hs w z] at h
   have h1 : 1 ≤ β z w * β z w := mul_self_pos.2 ht
   have h2 := hβ w
   nlinarith
@@ -55,7 +94,7 @@ theorem eq_zero_of_covers {X : Type} [AddCommGroup X] (β : LinearMap.BilinForm 
       obtain ⟨i, x, rfl⟩ := hc z
       obtain ⟨m, hm⟩ := ih x w
       refine ⟨m, ?_⟩
-      simp only [map_add, LinearMap.add_apply, apply_eq_zero_of_self β hs hβ (h0 i) w, hm]
+      simp only [map_add (f := _), LinearMap.add_apply, apply_eq_zero_of_self β hs hβ (h0 i) w, hm]
       ring
   refine LinearMap.ext₂ fun z w => ?_
   refine Int.eq_zero_of_abs_lt_dvd (hdiv (β z w).natAbs z w) ?_

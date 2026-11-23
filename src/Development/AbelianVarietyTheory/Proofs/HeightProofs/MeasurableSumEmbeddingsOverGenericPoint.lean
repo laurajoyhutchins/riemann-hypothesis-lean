@@ -1,14 +1,67 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.ValuationResidueLemmas
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.AlgebraMapOLInjective
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.NormOrderStatement
+module
+
+public import Mathlib.FieldTheory.Separable
+public import Mathlib.MeasureTheory.Constructions.BorelSpace.Complex
+public import Mathlib.RingTheory.Henselian
+public import Mathlib.RingTheory.RegularLocalRing.Defs
+public import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+public import Mathlib.Topology.Algebra.MvPolynomial
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.CharP.Algebra
+public import Mathlib.FieldTheory.PrimitiveElement
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.TheoremA
+
+@[expose] public section
+
 open NumberField ReciprocityTheory.ChartRestriction.G.T0
 open scoped TensorProduct
 
 namespace GlobalTheory
 
-open Polynomial in
 
+open Polynomial in
 theorem finsum_embeddings_over_eq_sum_roots {F L : Type} [Field F] [Field L] [Algebra F L]
     [Algebra.IsSeparable F L] (pb : PowerBasis F L) (τ : F →+* ℂ) {δ : ℕ} (r : Fin δ → ℂ)
     (hr : ∏ i, (X - C (r i)) = (minpoly F pb.gen).map τ) (g : (L →+* ℂ) → ℝ) (g' : ℂ → ℝ)
@@ -76,16 +129,16 @@ theorem measurable_sum_embeddings_over_generic_point :
     exact (MvPolynomial.continuous_eval _).measurable
   have hev : ∀ f, Measurable (ev f) := fun f => (hpm _).div (hpm _)
   let cf : (σ → ℂ) → Fin pb.dim → ℂ := fun t i => ev ((minpoly F pb.gen).coeff i) t
-  have hcf : Measurable cf := measurable_pi_lambda _ fun i => hev _
+  have hcf : Measurable cf := Measurable.of_eval fun i => hev _
   let G : (σ → ℂ) → ℂ → ℝ := fun t z =>
     Nf fun i => ∑ l : Fin pb.dim, ev (pb.basis.repr (b i) l) t * z ^ (l : ℕ)
   refine ⟨fun t => ∑ k, G t (ρ (cf t) k), ?_, ?_⟩
-  · refine Finset.measurable_sum _ fun k _ => hNf.comp (measurable_pi_lambda _ fun i => ?_)
+  · refine Finset.measurable_sum _ fun k _ => hNf.comp (Measurable.of_eval fun i => ?_)
     refine Finset.measurable_sum _ fun l _ => (hev _).mul (Measurable.pow_const ?_ _)
     exact (measurable_pi_apply k).comp (hρm.comp hcf)
   · intro t ht
     have hinj : Function.Injective (MvPolynomial.eval₂Hom sg t : R →+* ℂ) := by
-      rw [injective_iff_map_eq_zero]
+      set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
       intro p hp
       by_contra h
       exact ht p h hp
@@ -115,14 +168,16 @@ theorem measurable_sum_embeddings_over_generic_point :
     · rw [hρ]
       have hmon : (minpoly F pb.gen).Monic := minpoly.monic pb.isIntegral_gen
       conv_rhs => rw [hmon.as_sum, pb.natDegree_minpoly]
-      rw [Polynomial.map_add, Polynomial.map_pow, Polynomial.map_X, Polynomial.map_sum,
-        Finset.sum_range]
+
+      rw [Polynomial.map_add (f := _), Polynomial.map_pow, Polynomial.map_X, Polynomial.map_sum,
+      Finset.sum_range]
       simp [cf, hτ]
     · intro P hP
       show Nf _ = Nf _
       congr 1
       funext i
       conv_lhs => rw [← pb.basis.sum_repr (b i)]
+
       rw [map_sum]
       refine Finset.sum_congr rfl fun l _ => ?_
       rw [Algebra.smul_def, map_mul, pb.basis_eq_pow, map_pow, ← hτ, ← hP]

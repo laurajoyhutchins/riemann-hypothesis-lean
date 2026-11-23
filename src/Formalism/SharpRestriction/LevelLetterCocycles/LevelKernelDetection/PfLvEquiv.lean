@@ -1,4 +1,48 @@
-import Formalism.SharpRestriction.LevelLetterCocycles.FinalLevelsOf
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.MapEvalPsPi
+import Formalism.DistinguishedUnitIdeals.DistinguishedOrderProofs.Graded
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -22,6 +66,7 @@ theorem Pf_LvEquiv_grdB_mul (τ : Ks ≃ₐ[LL] Ks) (a : LLˣ) (x y : HahnSeries
   ext i
   rw [HahnSeries.coeff_mul (x := grdB τ a x)]
   change algebraMap LL Ks ((a ^ i : LLˣ) : LL) * τ ((x * y).coeff i) = _
+
   rw [HahnSeries.coeff_mul, map_sum, Finset.mul_sum]
   symm
   refine (Finset.sum_subset (fun ij h => ?_) (fun ij hb hs => ?_)).trans (Finset.sum_congr rfl ?_)
@@ -76,8 +121,8 @@ variable {G : Type} [Group G] [TopologicalSpace G] {Qp K₀ K : Type} [Field Qp]
     {v : AddValuation LL (WithTop ℚ)} {n : ℕ} [NeZero n] {W : LocWach PD LL O v n}
     {Lb : LevB W} {hR : Ring9 W} {uZ : ℤ_[PD.p]ˣ} {ιZ : ℤ_[PD.p] →+* O}
 
-open Classical in
 
+open Classical in
 def Pf_LvEquiv_Φ (W : LocWach PD LL O v n) (s : ℕ) (D : Type) [AddCommGroup D] [Module LL D] :
     KsW W s ⊗[LL] D ≃ₗ[LL] (Rs LL PD.p s → D) :=
   (TensorProduct.comm LL (KsW W s) D).trans (TensorProduct.piScalarRight LL LL D (Rs LL PD.p s))
@@ -101,7 +146,7 @@ theorem Pf_LvEquiv_Φ_rTensor (s : ℕ) (D : Type) [AddCommGroup D] [Module LL D
     simp [Pf_LvEquiv_Φ, TensorProduct.piScalarRightHom_tmul, precomp_apply]
   | add z z' hz hz' =>
     funext ζ
-    rw [map_add, map_add, hz, hz', map_add]
+    rw [map_add (f := _), map_add (f := _), hz, hz', map_add (f := _)]
     rfl
 
 variable {T : LocLat G Qp LL O} {c : ZMod n}

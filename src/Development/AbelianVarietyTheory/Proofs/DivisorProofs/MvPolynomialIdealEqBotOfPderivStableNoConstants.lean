@@ -1,4 +1,51 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.MvPolynomial.PDeriv
+public import Mathlib.RingTheory.Ideal.Defs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.RingTheory.Ideal.Lattice
+
+@[expose] public section
 
 namespace GlobalTheory
 
@@ -26,7 +73,7 @@ theorem mvPolynomial_ideal_eq_bot_of_pderiv_stable :
       have hdeg : (m.sum fun _ e => e) = n := by rw [← h, totalDegree, hmd]
       obtain ⟨i, hi⟩ : ∃ i, m i ≠ 0 := by
         by_contra hcon
-        push_neg at hcon
+        push Not at hcon
         have hm0 : m = 0 := Finsupp.ext hcon
         subst hm0
         simp at hdeg
@@ -35,8 +82,9 @@ theorem mvPolynomial_ideal_eq_bot_of_pderiv_stable :
       have hQne : pderiv i P ≠ 0 := by
         intro h0
         have hc := coeff_pderiv (i := i) P (m - single i 1)
-        rw [h0, coeff_zero, sub_add_single_one_cancel hi] at hc
-        have hcm : coeff m P ≠ 0 := MvPolynomial.mem_support_iff.mp hm
+        rw [h0, AddMonoidAlgebra.coeff_zero, Finsupp.zero_apply,
+          sub_add_single_one_cancel hi] at hc
+        have hcm : AddMonoidAlgebra.coeff P m ≠ 0 := MvPolynomial.mem_support_iff.mp hm
         have hk : (((m - single i 1 : Fin r →₀ ℕ) i : ℕ) : R) + 1 ≠ 0 :=
           Nat.cast_add_one_ne_zero _
         exact (mul_ne_zero hcm hk) hc.symm

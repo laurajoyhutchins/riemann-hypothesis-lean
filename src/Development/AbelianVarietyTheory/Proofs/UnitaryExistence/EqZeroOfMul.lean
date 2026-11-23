@@ -1,9 +1,60 @@
-import Mathlib
-import Formalism.LocalToGlobal.ProjectiveLattices.ThClassPinsRec
-import Development.AbelianVarietyTheory.BlockTheory.ExistenceTori.CoefficientSpaceWeights
-import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.ThetaLetterEquivConjugate
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.GeneralLinearGroupCharEqOneOfDetEqOne
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.FiniteNotIsUnitOneAddSmul
+module
+
+public import Mathlib.NumberTheory.NumberField.CMField
+public import Mathlib.RingTheory.MvPolynomial.IrreducibleQuadratic
+public import Mathlib.RingTheory.SimpleRing.Principal
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.FiniteNotIsUnitOneAddSmul
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.GeneralLinearGroupCharEqOneOfDetEqOne
+import Mathlib.Algebra.AffineMonoid.UniqueSums
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 set_option autoImplicit false
 noncomputable section
@@ -72,7 +123,7 @@ theorem scalar_eq {c v f₀ g₀ f₁ g₁ : ℚ → K} {N : ℕ} (hN : N ≠ 0)
       fun i _ => mul_mem (pow_mem hf₀ i) (pow_mem hvg _)
     convert this using 1
     funext s
-    simp
+    simp only [Finset.sum_apply, Pi.mul_apply, Pi.pow_apply]
   have a₀ : ∀ s, f₀ s - v s * g₀ s = 0 := by
     refine eq_zero_of_mul (s₀ := 0) (sub_mem hf₀ hvg) hS (fun s => ?_) ?_
     · rw [mul_comm]
@@ -123,15 +174,16 @@ theorem aeval_mem {σ σ' ι : Type} [Fintype ι] (r : ℚ → σ → ι → K) 
   induction P using MvPolynomial.induction_on generalizing ℓ with
   | C a => simpa using const_mem _
   | add p q hp hq =>
-    simp only [map_add]
+    simp only [map_add (f := _)]
     exact add_mem (hp ℓ) (hq ℓ)
   | mul_X p x hp =>
     have := Subalgebra.sum_mem (ratFn K) (t := Finset.univ) fun j _ =>
       mul_mem (hr x j) (hp (ℓ ∘ₗ LinearMap.mulRight K (MvPolynomial.X (y x j))))
     convert this using 1
     funext s
-    simp only [map_mul, MvPolynomial.aeval_X, Finset.mul_sum, map_sum, Finset.sum_apply, Pi.mul_apply,
+    simp only [Finset.sum_apply, Pi.mul_apply, map_mul, MvPolynomial.aeval_X, map_sum,
       LinearMap.comp_apply, LinearMap.mulRight_apply]
+    rw [Finset.mul_sum, map_sum]
     refine Finset.sum_congr rfl fun j _ => ?_
     rw [mul_left_comm, ← MvPolynomial.smul_eq_C_mul, map_smul, smul_eq_mul]
 
@@ -214,9 +266,11 @@ theorem exists_curve (K : Type) [Field K] [CharZero K] (γ : Matrix (Fin n) (Fin
     have := sub_mem (add_mem hm hm) (const_mem (σ ((1 : Matrix (Fin n) (Fin n) E) i j)))
     convert this using 1
     funext s
-    simp only [Pi.sub_apply, Pi.add_apply, ← e]
-    simp only [two_mul, Matrix.sub_apply, Matrix.add_apply, map_sub, map_add]
-    rfl
+    simp only [two_mul, Matrix.sub_apply, Matrix.add_apply, map_sub, map_add (f := _),
+      Pi.sub_apply, Pi.add_apply]
+    have he := congrArg (fun M : Matrix (Fin n) (Fin n) K => M i j) (e s)
+    change σ ((1 + s • S)⁻¹ i j) = (σ.mapMatrix (1 + s • S))⁻¹ i j at he
+    simpa only [map_add (f := σ.mapMatrix)] using congrArg (fun x : K => x + x - σ ((1 : Matrix (Fin n) (Fin n) E) i j)) he
 
 theorem exists_scalar (γ : Matrix (Fin n) (Fin n) E) : ∃ z : E, star z * z = 1 ∧ IsUnit (1 + z • γ) := by
   obtain ⟨θ', h0, hθ⟩ := GenusSelfDual.exists_imaginary_integer E

@@ -1,4 +1,63 @@
-import Mathlib
+module
+
+public import Mathlib.Analysis.Calculus.ContDiff.Defs
+public import Mathlib.Analysis.InnerProductSpace.Basic
+public import Mathlib.MeasureTheory.Group.Measure
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+public import Mathlib.Analysis.Calculus.InverseFunctionTheorem.FDeriv
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Analysis.Calculus.ContDiff.Basic
+public import Mathlib.Analysis.Calculus.ContDiff.Comp
+public import Mathlib.Analysis.Calculus.ContDiff.Operations
+public import Mathlib.Analysis.Calculus.ContDiff.RCLike
+public import Mathlib.Analysis.Normed.Module.FiniteDimension
+public import Mathlib.MeasureTheory.Function.Jacobian
+public import Mathlib.MeasureTheory.Measure.Haar.Unique
+
+@[expose] public section
 
 noncomputable section
 
@@ -32,7 +91,7 @@ private theorem isAddHaarMeasure_map_restrict_slab {n m : ℕ} (μ : Measure (Fi
     exact isOpen_lt (by fun_prop) continuous_const
   have hAm : Measurable A := A.continuous.measurable
   have key : ∀ x t, x + R t - R (A (x + R t)) = x - R (A x) := by
-    intro x t; rw [map_add, hAR, map_add]; abel
+    intro x t; rw [map_add (f := _), hAR, map_add (f := _)]; abel
   have happ : ∀ S, MeasurableSet S →
       Measure.map A (μ.restrict {x | ‖x - R (A x) - (p - R (A p))‖ < r}) S
         = μ (A ⁻¹' S ∩ {x | ‖x - R (A x) - (p - R (A p))‖ < r}) := by
@@ -67,7 +126,7 @@ private theorem isAddHaarMeasure_map_restrict_slab {n m : ℕ} (μ : Measure (Fi
         = (fun x => x + R t) ⁻¹' (A ⁻¹' S ∩ {x | ‖x - R (A x) - (p - R (A p))‖ < r}) := by
       ext x
       simp only [Set.mem_preimage, Set.mem_inter_iff, Set.mem_setOf_eq]
-      rw [key x t, map_add, hAR, add_comm t (A x)]
+      rw [key x t, map_add (f := _), hAR, add_comm t (A x)]
     rw [hset, measure_preimage_add_right]
   · intro O hO hne
     rw [happ O hO.measurableSet]
@@ -75,7 +134,7 @@ private theorem isAddHaarMeasure_map_restrict_slab {n m : ℕ} (μ : Measure (Fi
     have hopen : IsOpen (A ⁻¹' O ∩ {x | ‖x - R (A x) - (p - R (A p))‖ < r}) :=
       (hO.preimage A.continuous).inter hZ
     have hA1 : A (R y + (p - R (A p))) = y := by
-      rw [map_add, map_sub, hAR, hAR, sub_self, add_zero]
+      rw [map_add (f := _), map_sub, hAR, hAR, sub_self, add_zero]
     have hmem : R y + (p - R (A p)) ∈ A ⁻¹' O ∩ {x | ‖x - R (A x) - (p - R (A p))‖ < r} := by
       refine ⟨?_, ?_⟩
       · show A (R y + (p - R (A p))) ∈ O
@@ -86,7 +145,7 @@ private theorem isAddHaarMeasure_map_restrict_slab {n m : ℕ} (μ : Measure (Fi
         rw [e, norm_zero]; exact hr
     exact hopen.measure_ne_zero μ ⟨_, hmem⟩
 
-set_option maxHeartbeats 800000 in
+
 
 theorem submLB_holds : SubmLB := by
   intro n m μ ν hμ hν f hf x0 hsurj W hW hx0W
@@ -96,11 +155,11 @@ theorem submLB_holds : SubmLB := by
   rw [← hAdef] at hsurj
   obtain ⟨R, hAR⟩ := exists_clm_rightInverse_of_surjective A hsurj
   have hfd : HasStrictFDerivAt f A x0 := by
-    rw [hAdef]; exact hf.contDiffAt.hasStrictFDerivAt (by norm_num)
+    rw [hAdef]; exact hf.hasStrictFDerivAt (by norm_num)
   obtain ⟨h, hhdef⟩ : ∃ h : (Fin n → ℝ) → (Fin n → ℝ),
       h = fun x => x + R (f x - A x) + (R (A x0) - R (f x0)) := ⟨_, rfl⟩
   have hfh : ∀ x, f x = A (h x) + (f x0 - A x0) := by
-    intro x; rw [hhdef]; simp only [map_add, map_sub, hAR]; abel
+    intro x; rw [hhdef]; simp only [map_add (f := _), map_sub, hAR]; abel
   have hhx0 : h x0 = x0 := by
     rw [hhdef]; simp only [map_sub]; abel
   have hC : ContDiff ℝ 1 h := by

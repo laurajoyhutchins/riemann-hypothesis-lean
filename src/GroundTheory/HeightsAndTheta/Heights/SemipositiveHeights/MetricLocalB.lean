@@ -1,8 +1,53 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.RationalSections.ThmISt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterDivSupp
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterExtLocal
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterRedG
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.RationalSections.ThmISt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterDivSupp
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterExtLocal
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterPCProof
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterRedF
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterRedG
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -37,17 +82,23 @@ theorem induct (I : Ideal (MRing ι) → (n : ℕ) → (Fin n → HermLine ι) �
       unfold recR
       congr 1
       · refine finsum_mem_congr rfl fun W hW => ?_
-        congr 1
-        split_ifs with hWh
-        · have hWa : IsArithVar W n :=
-            (divSuppArith K ι P n C (secOf i b) W hP ⟨b, hC, hs, hsP⟩ hW).1 hWh
+        by_cases hWh : IsHorizontal W
+        · have hWa : IsArithVar W n := by
+            have hWmin := hW.1
+            have hWmh := isMultiHomogIdeal_of_mem_minimalPrimes hP.2.1.2.1 hs hWmin
+            refine ⟨hP.1, ⟨hWmin.1.1, hWmh, hW.2⟩, hWh, ?_⟩
+            have := hPp
+            have hdim := dim_quot_minimal_add_one P W (secOf i b) hsP hWmin
+            rw [hP.2.2.2, show n + 1 + Fintype.card K = n + Fintype.card K + 1 by omega] at hdim
+            exact withBot_eq_of_add_one hdim
           have hPW : P ≤ W := le_trans le_sup_left hW.1.1.2
-          exact induct I hI n W (Fin.init L) (Fin.init L') hWa (fun j => hL j.castSucc)
+          have e := induct I hI n W (Fin.init L) (Fin.init L') hWa (fun j => hL j.castSucc)
             (fun j => hL' j.castSucc) (fun j => ha j.castSucc)
             (fun j z hz => hh j.castSucc z ⟨hz.1, fun f hf => hz.2 f (hPW hf)⟩)
+          simp only [ite_eq_left hWh, e]
         · have e : (fun j => (Fin.init L j).a) = fun j => (Fin.init L' j).a :=
             funext fun j => ha j.castSucc
-          rw [e]
+          simp only [ite_eq_right hWh, e]
       · unfold arInt
         exact (ptsLocal K ι P n 0 _ _ _ _
           (fun j z hz => congrArg Real.log (hh j.castSucc z hz))
@@ -78,13 +129,8 @@ theorem induct (I : Ideal (MRing ι) → (n : ℕ) → (Fin n → HermLine ι) �
         show A.h z * B.h z = A'.h z * B.h z
         rw [hA, hA', hh (Fin.last n) z hz])
     have k2 := key B B b hBa hBa hB hB (fun _ _ => rfl)
-    calc I P (n + 1) L = I P (n + 1) (Fin.snoc (Fin.init L) A) := by rw [hA, Fin.snoc_init_self]
-      _ = I P (n + 1) (Fin.snoc (Fin.init L) (A.tensor B)) - I P (n + 1) (Fin.snoc (Fin.init L) B) := by
-          rw [e1]; ring
-      _ = I P (n + 1) (Fin.snoc (Fin.init L') (A'.tensor B)) - I P (n + 1) (Fin.snoc (Fin.init L') B) := by
-          rw [k1, k2]
-      _ = I P (n + 1) (Fin.snoc (Fin.init L') A') := by rw [e1']; ring
-      _ = I P (n + 1) L' := by rw [hA', Fin.snoc_init_self]
+    rw [e1, e1', k2] at k1
+    simpa only [hA, hA', Fin.snoc_init_self] using add_right_cancel k1
 
 end MetricLocalB
 

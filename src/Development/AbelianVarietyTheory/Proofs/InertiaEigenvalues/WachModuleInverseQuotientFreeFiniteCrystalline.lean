@@ -1,11 +1,59 @@
-import Mathlib
-import Formalism.SharpRestriction.LevelLetterCocycles.UsedLocalConclusion
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.NotFullBot
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.SaturatedAndIsogenyInvariant
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.WachInclusionXQFrobenius
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.RingsCyclotomic
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.GeomSumOneAddPrime
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.DvrComplete
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.NotFullBot
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.MemEurOfTeichmullerSeries
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.MkMemAdmissibleAtIffCocycle
+public import Formalism.SharpRestriction.LevelLetterCocycles.DeltaInvariantLattices
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.DvrComplete
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.GeomSumOneAddPrime
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.RingsCyclotomic
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.SaturatedAndIsogenyInvariant
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.WachInclusionXQFrobenius
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.PowerSeries.WeierstrassPreparation
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Formalism.WeaklyAdmissibleFiltrations Formalism.BasicNotions Formalism.BasicNotions.Loc TensorProduct GlobalTheory.NL Formalism.MainNotions.DeltaInvariantLattices
 
@@ -62,8 +110,9 @@ theorem finite_of_killed {R A M : Type*} [CommRing R] [CommRing A] [Algebra R A]
 theorem coe_poly_eq_sum {O : Type} [CommRing O] (D : ℕ) (r : Polynomial O) (hr : r.degree < D) :
     (r : PowerSeries O) = ∑ k ∈ Finset.range D, r.coeff k • (PowerSeries.X : PowerSeries O) ^ k := by
   ext m
+
   simp only [Polynomial.coeff_coe, map_sum, PowerSeries.coeff_smul, PowerSeries.coeff_X_pow, smul_eq_mul,
-    mul_ite, mul_one, mul_zero, Finset.sum_ite_eq, Finset.mem_range]
+  mul_ite, mul_one, mul_zero, Finset.sum_ite_eq, Finset.mem_range]
   split_ifs with hm
   · rfl
   · exact Polynomial.coeff_eq_zero_of_degree_lt (lt_of_lt_of_le hr (by exact_mod_cast not_lt.1 hm))
@@ -124,7 +173,7 @@ theorem QQ_pow_map_ne {l : ℕ} [Fact l.Prime] {O : Type} [CommRing O] [IsLocalR
     exact (IsLocalRing.residue_eq_zero_iff _).2 ((IsLocalRing.mem_maximalIdeal _).2 hl)
   have hl1 : ((l : ℕ) : PowerSeries (IsLocalRing.ResidueField O)) = 0 := by
     rw [← map_natCast (PowerSeries.C (R := IsLocalRing.ResidueField O)), hl0, map_zero]
-  rw [map_pow, hb, map_add, map_mul, map_natCast, map_pow, PowerSeries.map_X, hl1, zero_mul, add_zero,
+  rw [map_pow, hb, map_add (f := _), map_mul, map_natCast, map_pow, PowerSeries.map_X, hl1, zero_mul, add_zero,
     ← pow_mul]
   exact pow_ne_zero _ PowerSeries.X_ne_zero
 
@@ -194,38 +243,42 @@ theorem finite_quo (T : LocLat G Qp LL O) (q : LetA O n)
   simp only [Submodule.mem_comap, Submodule.subtype_apply, Submodule.coe_smul_of_tower]
   exact x.2
 
+private theorem free_finite_of_Q [IsDomain O] [IsDiscreteValuationRing O]
+    [IsAdicComplete (IsLocalRing.maximalIdeal O) O] {l : ℕ} [Fact l.Prime] [Algebra ℤ_[l] O]
+    (hp : PD.p = l) (hl : ¬ IsUnit (l : O)) (T : LocLat G Qp LL O)
+    (hsat : wachSaturated W T) (s : ℕ) (hs : 1 ≤ s) (y : ℕ)
+    (hQ : ∀ i, W.Q i = GlobalTheory.Cyc.QQ l O s) :
+    Module.Free O (quo W T (invN W T (W.Q ^ y)) (W.N T)) ∧
+      Module.Finite O (quo W T (invN W T (W.Q ^ y)) (W.N T)) := by
+  have := PD.finK₀
+  have hn : NeZero (Module.finrank Qp K₀) := ⟨Module.finrank_pos.ne'⟩
+  have : NeZero n := W.n_eq.symm ▸ hn
+  have hQy : W.Q ^ y = fun _ => GlobalTheory.Cyc.QQ l O s ^ y := by
+    funext i
+    rw [Pi.pow_apply, hQ]
+  have hunit : IsUnit (algebraMap (LetA O n) W.EE (W.Q ^ y)) := by
+    rw [map_pow]
+    exact (GlobalTheory.NL.IoXQ.isUnit_Q W).pow y
+  obtain ⟨Fs, hFs⟩ := div_letters n (GlobalTheory.Cyc.QQ l O s ^ y) (QQ_pow_map_ne hl s hs y)
+  have hfin := finite_quo W T (W.Q ^ y) hunit Fs (by rw [hQy]; exact hFs)
+  have hnonunit : ¬ IsUnit (PD.p : O) := hp.symm ▸ hl
+  have := torsionFree_quo W hnonunit T hsat (invN W T (W.Q ^ y))
+  exact ⟨Module.free_of_finite_type_torsion_free', hfin⟩
+
 end Generic
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 400000 in
 
+set_option maxHeartbeats 16000000 in
+set_option synthInstance.maxHeartbeats 4000000 in
 theorem quo_free_finite : ∀ (D : Formalism.BasicNotions.D7) (HW : HWOf D.loc) (F : FonOf D.loc D.locA HW) (l : ℕ) [Fact l.Prime] (K : FinExt l) (s : ℕ) (LL : FinExt l) (h : Good K s LL), let W := (HW l).W K s LL h; ∀ T : Lt K LL, IsCrys ((D.loc l).PD K) T.ρ → ∀ y : ℕ, Module.Free ↥(OL LL) (quo W T (invN W T (W.Q ^ y)) (W.N T)) ∧ Module.Finite ↥(OL LL) (quo W T (invN W T (W.Q ^ y)) (W.N T)) := by
   intro D HW F l _ K s LL h W T hT y
   obtain ⟨hdvr, hcomp, hl⟩ := GlobalTheory.FinExtIntegers.dvr_complete LL
-  haveI := hdvr
-  haveI := ((D.loc l).PD K).finK₀
-  haveI : NeZero (Module.finrank ℚ_[l] ↥(K0 K)) := ⟨Module.finrank_pos.ne'⟩
   have hQ : ∀ i, W.Q i = GlobalTheory.Cyc.QQ l ↥(OL LL) s := by
-    obtain ⟨_, _, _, _, _, hQ, _⟩ := GlobalTheory.NL.CycRing.rings_cyclotomic D HW l K s LL h
-    exact hQ
-  have hQy : W.Q ^ y = fun _ => GlobalTheory.Cyc.QQ l ↥(OL LL) s ^ y := by
-    funext i
-    rw [Pi.pow_apply, hQ]
-  have hunit : IsUnit (algebraMap (AA K LL) W.EE (W.Q ^ y)) := by
-    have := ((GlobalTheory.NL.IoXQ.main D HW F l K s LL h).2.2.2.2.2.2 0).2
-    rw [pow_zero, AlgHom.one_apply] at this
-    rw [map_pow]
-    exact this.pow y
-  have hp : ¬ IsUnit ((((D.loc l).PD K).p : ℕ) : ↥(OL LL)) := by
-    rw [(D.loc l).PD_p K]
-    exact hl
-  have hsat := (GlobalTheory.NL.Isog.saturated_and_isogeny_invariant D HW F l K s LL h).1 T hT
-  haveI := hcomp
-  obtain ⟨Fs, hFs⟩ := div_letters (Module.finrank ℚ_[l] ↥(K0 K)) (GlobalTheory.Cyc.QQ l ↥(OL LL) s ^ y)
-    (QQ_pow_map_ne hl s h.1 y)
-  haveI hfin : Module.Finite ↥(OL LL) (quo W T (invN W T (W.Q ^ y)) (W.N T)) :=
-    finite_quo W T (W.Q ^ y) hunit Fs (by rw [hQy]; exact hFs)
-  haveI := torsionFree_quo W hp T hsat (invN W T (W.Q ^ y))
-  exact ⟨Module.free_of_finite_type_torsion_free', hfin⟩
+    obtain ⟨_, hχ⟩ := GlobalTheory.NL.CycRing.rings_cyclotomic D HW l K s LL h
+    exact hχ.2.2.2.2.1
+  have hsat : wachSaturated W T :=
+    (GlobalTheory.NL.Isog.saturated_and_isogeny_invariant D HW F l K s LL h).1 T hT
+  clear_value W
+  exact free_finite_of_Q W ((D.loc l).PD_p K) hl T hsat s h.1 y hQ
 
 end GlobalTheory.NL.QuoFree

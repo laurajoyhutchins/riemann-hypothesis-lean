@@ -1,7 +1,55 @@
-import Mathlib
-import GroundTheory.PAdicHodge.ACrisBdRGalois
-import GroundTheory.PAdicHodge.BdRTGalois
-import GroundTheory.PAdicHodge.BdRField
+module
+
+public import GroundTheory.PAdicHodge.BdRField
+public import GroundTheory.PAdicHodge.ACrisBdR
+public import GroundTheory.PAdicHodge.ACrisGalois
+public import GroundTheory.PAdicHodge.ACrisLog
+public import GroundTheory.PAdicHodge.TateCpTwist
+public import GroundTheory.PAdicHodge.UntiltFrobeniusEquivSymmEpsilonNeOne
+public import GroundTheory.PAdicHodge.ACrisBdRGalois
+import GroundTheory.PAdicHodge.ACrisBdRInj
+import GroundTheory.PAdicHodge.ACrisPhi
+public import GroundTheory.PAdicHodge.BdRTGalois
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -122,7 +170,7 @@ def zD : ℤ_[l] →+* BdR l := ((algebraMap (BdRp l) (BdR l)).comp (aD l)).comp
 def θD : BdRp l →+* ℂ_[l] := IsPerfectoidField.thetaBDeRhamPlusField (K := ℂ_[l]) l
 
 def φB : Bcris l →+* Bcris l :=
-  Loc2.map (ACris.phi ℂ_[l] l) (map_natCast _ l) (l : Acris) (Loc2.isUnit_left _ _)
+  Loc2.map (ACris.phi (K := ℂ_[l]) (p := l)) (map_natCast _ l) (l : Acris) (Loc2.isUnit_left _ _)
     (ACris.phi_periodT_eq_mul (untilt_epsilon (p := l)))
 
 def FilD (a : ℤ) : Submodule (BdRp l) (BdR l) := IsPerfectoidField.fil ℂ_[l] l a

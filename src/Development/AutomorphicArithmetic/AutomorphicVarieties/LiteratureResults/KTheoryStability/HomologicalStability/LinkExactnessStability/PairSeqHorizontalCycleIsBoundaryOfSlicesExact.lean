@@ -1,5 +1,50 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.LinkExactAff
+module
+
+public import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.LinkExactAff
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -28,7 +73,7 @@ theorem incl_apply (w w' : List W) (z : List V →₀ ℤ) (l : List V) :
   by_cases h : w = w'
   · subst h
     rw [if_pos rfl]
-    exact Finsupp.mapDomain_apply (pair_injective w) z l
+    exact Finsupp.mapDomain_apply_of_injective (pair_injective w) z l
   · rw [if_neg h]
     apply Finsupp.mapDomain_notin_range
     rintro ⟨l', hl'⟩
@@ -49,7 +94,7 @@ theorem hbd_incl (w : List W) (z : List V →₀ ℤ) : hbd V W (incl w z) = inc
 theorem decomp (x : List V × List W →₀ ℤ) :
     x = ∑ w ∈ x.support.image Prod.snd, incl w (proj w x) := by
   ext ⟨l, w'⟩
-  rw [Finsupp.finset_sum_apply]
+  rw [Finsupp.finsetSum_apply]
   simp only [incl_apply, proj_apply]
   rw [Finset.sum_ite_eq']
   split_ifs with h
@@ -70,6 +115,7 @@ theorem dblRow_exact : ∀ (V W : Type) (D : Set (List V × List W)) (a b : ℕ)
   set T := x.support.image Prod.snd with hT
   have h1 : hbd V W x = ∑ w ∈ T, incl w (bd V (proj w x)) := by
     conv_lhs => rw [decomp x]
+
     rw [map_sum]
     simp only [hbd_incl]
     rfl
@@ -77,7 +123,7 @@ theorem dblRow_exact : ∀ (V W : Type) (D : Set (List V × List W)) (a b : ℕ)
     intro w hw
     ext l
     have := congrArg (fun z => z (l, w)) h1
-    simp only [h0, Finsupp.coe_zero, Pi.zero_apply, Finsupp.finset_sum_apply, incl_apply] at this
+    simp only [h0, Finsupp.coe_zero, Pi.zero_apply, Finsupp.finsetSum_apply, incl_apply] at this
     rw [Finset.sum_ite_eq', if_pos hw] at this
     simpa using this.symm
   have hslice : ∀ w ∈ T, ∃ y ∈ chains {l | (l, w) ∈ D} (a + 1), bd V y = proj w x := by
@@ -101,7 +147,8 @@ theorem dblRow_exact : ∀ (V W : Type) (D : Set (List V × List W)) (a b : ℕ)
     obtain ⟨h2, h3⟩ := hyw w hw hl
     obtain ⟨z0, hz0, rfl⟩ := Finset.mem_image.1 hw
     exact ⟨h2, h3, (hsupp z0 hz0).2.2⟩
-  · rw [map_sum]
+  · set_option synthInstance.maxHeartbeats 100000 in
+      rw [map_sum]
     simp only [hbd_incl]
     conv_rhs => rw [decomp x]
     refine Finset.sum_congr rfl fun w hw => ?_

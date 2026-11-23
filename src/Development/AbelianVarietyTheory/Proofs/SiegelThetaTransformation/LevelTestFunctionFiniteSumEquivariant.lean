@@ -1,11 +1,57 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IsSystem
-import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IsHeatZero
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.HMatMulVecPerCrd
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.WeilActionPreservesThetaAndInnerProduct
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.TensorLatticeSelfDualSemicharacterIndex
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.TensorLatticeVacuaExistUnique
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.LevelStructurePropertiesStatement
+module
+
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.TensorLatticeSelfDualSemicharacterIndex
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.HMatMulVecPerCrd
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.LevelStructurePropertiesStatement
+import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.RationalSchwartzBruhatAlgebraIntegralLinearStatement
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.TensorLatticeVacuaExistUnique
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.WeilActionPreservesThetaAndInnerProduct
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.FreeModule.IdealQuotient
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.HermitianTraceFormVanishing
+
+@[expose] public section
 
 open Matrix Complex NumberField MeasureTheory GlobalTheory GlobalTheory.SW GlobalTheory.ThFr ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.FD
 open scoped ComplexConjugate ComplexOrder Real Classical
@@ -42,8 +88,8 @@ theorem mul_smul_mem {A B : Lt E r} {s : 𝓞 E} (hf : ∀ v ∈ A, s • v ∈ 
     (𝔪 : Ideal (𝓞 E)) {u : Fin r → E} (hu : u ∈ 𝔪 • A) : s • u ∈ 𝔪 • B :=
   map_smul_mem (LinearMap.lsmul (𝓞 E) _ s) hf 𝔪 hu
 
-variable (X) in
 
+variable (X) in
 def Near (𝔪 : Ideal (𝓞 E)) (N : Lt E r) : Prop :=
   ∃ s : 𝓞 E, IsCoprime (Ideal.span {s}) 𝔪 ∧ (∀ v ∈ N, s • v ∈ X.Λ) ∧ ∀ v ∈ X.Λ, s • v ∈ N
 
@@ -361,10 +407,10 @@ theorem exists_reps (idx : Fin g ≃ X.Ψ × Fin r) (hs : IsSympl X bas) (he : E
         · exact zero_mem _
     refine ⟨y, hy, ⟨Matrix.of k', by ext i j; exact hk' i j, fun i => ?_⟩, fun k hk => ?_⟩
     · have := hc (Fin.castLE hn i)
-      rw [dif_pos (show ((Fin.castLE hn i : Fin n) : ℕ) < r from i.2)] at this
+      rw [dite_eq_left (show ((Fin.castLE hn i : Fin n) : ℕ) < r from i.2)] at this
       exact this
     · have := hc k
-      rwa [dif_neg (not_lt.2 hk)] at this
+      rwa [dite_eq_right (not_lt.2 hk)] at this
   choose f h1 h2 h3 using H
   refine ⟨f, h1, fun i j h => Subtype.ext (hu _ _ _ (h2 i) (red_congr (fun a => h _) (h2 j))),
     fun y hy => ?_, fun i => ?_⟩
@@ -383,7 +429,7 @@ theorem exists_reps (idx : Fin g ≃ X.Ψ × Fin r) (hs : IsSympl X bas) (he : E
       exact Submodule.smul_mem_smul
         (Ideal.Quotient.eq.1 (congrFun (congrFun (ha.trans hb.symm) j) _)) (D.β_mem j)
     · exact cong_trans (h0 k (not_lt.1 hk)) (cong_symm (h3 κ k (not_lt.1 hk)))
-  · rw [Level.dat, dif_pos ⟨⟨i, h2 i⟩, h3 i⟩]
+  · rw [Level.dat, dite_eq_left ⟨⟨i, h2 i⟩, h3 i⟩]
     exact hlam _
 
 theorem finite_J (D : Level X) : Finite D.J := by

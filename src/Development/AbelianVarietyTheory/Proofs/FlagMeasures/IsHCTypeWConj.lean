@@ -1,5 +1,48 @@
-import Mathlib
+module
+
+public import Formalism.SharpRestriction.CuspSpanNormBounds.RelevantZeroGramTerms
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
 import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.LinMulti
+
+@[expose] public section
 
 noncomputable section
 
@@ -9,29 +52,6 @@ open scoped InnerProductSpace
 namespace GlobalTheory.ConjTypeW
 
 variable {V : Type} [NormedAddCommGroup V] [InnerProductSpace ℂ V] [FiniteDimensional ℂ V]
-
-def cc (a : V) : EuclideanSpace ℂ (Fin (Module.finrank ℂ V)) :=
-  WithLp.toLp 2 fun i => star ((stdOrthonormalBasis ℂ V).repr a i)
-
-def ccInv (x : EuclideanSpace ℂ (Fin (Module.finrank ℂ V))) : V :=
-  (stdOrthonormalBasis ℂ V).repr.symm (WithLp.toLp 2 fun i => star (x i))
-
-theorem cc_apply (a : V) (i) : cc a i = star ((stdOrthonormalBasis ℂ V).repr a i) := rfl
-
-theorem ccInv_cc (a : V) : ccInv (cc a) = a := by
-  simp [ccInv, cc_apply]
-
-theorem cc_ccInv (x : EuclideanSpace ℂ (Fin (Module.finrank ℂ V))) : cc (ccInv x) = x := by
-  ext i
-  simp [ccInv, cc_apply]
-
-theorem cc_add (a b : V) : cc (a + b) = cc a + cc b := by
-  ext i
-  simp [cc_apply]
-
-theorem cc_smul (s : ℂ) (a : V) : cc (s • a) = star s • cc a := by
-  ext i
-  simp [cc_apply]
 
 variable {k : ℕ}
 
@@ -54,29 +74,11 @@ theorem lowK_neg_rev (u : Fin k → ℝ) :
 
 variable {H : Type} [NormedAddCommGroup H] [InnerProductSpace ℂ H]
 
-def tor (θ : Fin k → ℝ) : Matrix (Fin k) (Fin k) ℂ := Matrix.diagonal fun a => Complex.exp ((θ a : ℂ) * Complex.I)
-
-def revM (k : ℕ) : Matrix (Fin k) (Fin k) ℂ := (1 : Matrix (Fin k) (Fin k) ℂ).submatrix Fin.revPerm id
-
 end GlobalTheory.ConjTypeW
 
 namespace GlobalTheory.ConjTypeW
 
 variable {V : Type} [NormedAddCommGroup V] [InnerProductSpace ℂ V] [FiniteDimensional ℂ V]
-
-theorem ccInv_add (x y : EuclideanSpace ℂ (Fin (Module.finrank ℂ V))) :
-    (ccInv (x + y) : V) = ccInv x + ccInv y := by
-  rw [← cc_ccInv x, ← cc_ccInv y, ← cc_add, ccInv_cc, ccInv_cc, ccInv_cc]
-
-theorem ccInv_smul (s : ℂ) (x : EuclideanSpace ℂ (Fin (Module.finrank ℂ V))) :
-    (ccInv (s • x) : V) = star s • ccInv x := by
-  conv_lhs => rw [← cc_ccInv x, ← star_star s, ← cc_smul, ccInv_cc]
-
-def tr (T : V →L[ℂ] V) : EuclideanSpace ℂ (Fin (Module.finrank ℂ V)) →L[ℂ] EuclideanSpace ℂ (Fin (Module.finrank ℂ V)) :=
-  LinearMap.toContinuousLinearMap
-    { toFun := fun x => cc (T (ccInv x))
-      map_add' := fun x y => by simp only [ccInv_add, map_add, cc_add]
-      map_smul' := fun s x => by simp only [ccInv_smul, map_smul, cc_smul, star_star, RingHom.id_apply] }
 
 end GlobalTheory.ConjTypeW
 

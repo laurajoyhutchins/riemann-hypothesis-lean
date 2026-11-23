@@ -1,5 +1,58 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.EntireApplyEqOfPeriodicOfSpanReal
+module
+
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.Analysis.Complex.Exponential
+public import Mathlib.LinearAlgebra.FiniteDimensional.Defs
+public import Mathlib.Algebra.Module.ZLattice.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+public import Mathlib.Analysis.Complex.BranchLogRoot
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.Convex.Contractible
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+public import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.AlgebraicTopology.FundamentalGroupoid.SimplyConnected
+
+@[expose] public section
 
 open Set Filter Topology Complex
 
@@ -17,25 +70,6 @@ theorem exists_continuous_cexp_eq {f : V → ℂ} (hf : Continuous f) (h0 : ∀ 
   obtain ⟨q, hq, hq'⟩ := Complex.exists_continuousOn_eqOn_exp_comp hU isOpen_univ
     hf.continuousOn (by rintro ⟨v, -, hv⟩; exact h0 v hv)
   exact ⟨q, continuousOn_univ.1 hq, fun v => hq' (mem_univ v)⟩
-
-theorem differentiable_of_continuous_of_cexp {q : V → ℂ} (hq : Continuous q)
-    (hf : Differentiable ℂ fun v => cexp (q v)) : Differentiable ℂ q := by
-  intro x
-  have hc : Continuous fun v => (q v - q x).im := by fun_prop
-  have hev : ∀ᶠ v in 𝓝 x, (q v - q x).im ∈ Ioo (-Real.pi) Real.pi :=
-    hc.continuousAt.eventually_mem (isOpen_Ioo.mem_nhds (by simp [Real.pi_pos]))
-  have he : q =ᶠ[𝓝 x] fun v => q x + log (cexp (q v) * cexp (-q x)) := by
-    filter_upwards [hev] with v hv
-    rw [← exp_add, ← sub_eq_add_neg, log_exp hv.1 hv.2.le]
-    ring
-  refine DifferentiableAt.congr_of_eventuallyEq ?_ he
-  refine DifferentiableAt.const_add _ (DifferentiableAt.clog ((hf x).mul_const _) ?_)
-  simp [← exp_add]
-
-theorem exists_differentiable_cexp_eq {f : V → ℂ} (hf : Differentiable ℂ f) (h0 : ∀ v, f v ≠ 0) :
-    ∃ q : V → ℂ, Differentiable ℂ q ∧ ∀ v, cexp (q v) = f v := by
-  obtain ⟨q, hq, hq'⟩ := exists_continuous_cexp_eq hf.continuous h0
-  exact ⟨q, differentiable_of_continuous_of_cexp hq (by simpa only [hq'] using hf), hq'⟩
 
 theorem apply_eq_of_continuous_of_cexp_eq_one {X : Type*} [TopologicalSpace X]
     [PreconnectedSpace X] {φ : X → ℂ} (hφ : Continuous φ) (h : ∀ x, cexp (φ x) = 1) (x y : X) :

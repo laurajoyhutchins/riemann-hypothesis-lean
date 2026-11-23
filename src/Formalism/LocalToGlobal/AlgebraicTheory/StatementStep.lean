@@ -1,5 +1,48 @@
-import Formalism.LocalToGlobal.Divisibility.JetBounds.PlaceInputAllEntries
-import Formalism.LocalToGlobal.ExponentGrids.IntegerShiftClosedExponent
+module
+
+public import Formalism.LocalToGlobal.Divisibility.JetBounds.IsExpansion
+public import Formalism.LocalToGlobal.IndefiniteForms.IndefSide
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Formalism.LocalToGlobal.Divisibility.ClassSum
+public import Formalism.LocalToGlobal.ExponentGrids.IntegerShiftClosedExponent
+
+@[expose] public section
 
 open Module NumberField IsDedekindDomain
 open scoped BigOperators
@@ -21,21 +64,5 @@ def GAt {K : Type} [Field K] [NumberField K] [StarRing K] {Bs : DefBase K} {Df :
     ColsInt X w (Nu : Set (Fin (Dc.a u) → K)) ∧ RowsInt X w (Df.Mt t : Set (Fin (Df.nV t) → K)) ∧
     LastInt X ∧ UnitsInt X ∧ StabDvd X D j1 ∧ ¬ g ∣ D ∧
     ∀ π j, ‖X.e π j‖ * ‖ι pb‖ ^ (Dg j) * ‖(g : ℂ_[g])‖ ^ (Rg j) ≤ 1
-
-def ColBoundOfPaths : Prop :=
-  ∀ (K : Type) [Field K] [NumberField K] [StarRing K] (Bs : DefBase K) (Df : DefSide Bs) (Dc : DefCols Df) (u : Dc.Mem)
-    (t : Bs.Tup) (Nu : Submodule (𝓞 K) (Fin (Dc.a u) → K)) (w : HeightOneSpectrum (𝓞 K)) (g : ℕ) [Fact g.Prime] (pb : K)
-    (Dg : Bs.J → ℕ) (Rg : Bs.J → ℝ), PlOver g w → pb ≠ 0 → GAt Dc u t Nu w g pb Dg Rg →
-    PerBd Dc u Nu t w (-(∑ j, (Dg j : ℝ) * (vw w pb : ℝ)) - (∑ j, Rg j) * (vw w (g : K) : ℝ)) ∧
-    ∀ (Jx : Type) (sx : Finset Jx) (nn : Jx → K) (cg : K) (E0 : ℝ),
-      colRhs sx g nn cg E0 w ≤ -(∑ j, (Dg j : ℝ) * (vw w pb : ℝ)) - (∑ j, Rg j) * (vw w (g : K) : ℝ) →
-      PerBd Dc u Nu t w (colRhs sx g nn cg E0 w)
-
-def ColRhsLe : Prop :=
-  ∀ (K : Type) [Field K] [NumberField K] (w : HeightOneSpectrum (𝓞 K)) (g : ℕ), PlOver g w →
-  ∀ (J : Type) [Fintype J] (pb cg : K) (Dg : J → ℕ) (Rg : J → ℝ) (E0 : ℝ), pb ≠ 0 → (∃ k : ℕ, 0 < k ∧ cg ^ k = 1) →
-    ∑ j, Rg j ≤ E0 →
-    colRhs Finset.univ g (fun j => pb ^ Dg j) cg E0 w ≤
-      -(∑ j, (Dg j : ℝ) * (vw w pb : ℝ)) - (∑ j, Rg j) * (vw w (g : K) : ℝ)
 
 end Formalism.L2.AlgTh

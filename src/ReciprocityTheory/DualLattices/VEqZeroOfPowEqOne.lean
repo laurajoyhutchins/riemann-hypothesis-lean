@@ -1,4 +1,52 @@
-import Mathlib
+module
+
+public import Mathlib.Basic.Real.Basic
+public import Mathlib.Data.ZMod.Basic
+public import Mathlib.RingTheory.MvPowerSeries.Substitution
+public import Mathlib.RingTheory.PowerSeries.Basic
+public import Mathlib.RingTheory.Valuation.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace ReciprocityTheory.PGsh
 
@@ -93,41 +141,6 @@ structure MuAction {v : AddValuation C (WithTop ℝ)} {d : ℕ} (G : LogFGL v d)
   mul_const : ∀ z a, constantCoeff (mul z a) = 0
   lg_mul : ∀ z, z ^ (p ^ h - 1) = 1 → ∀ a,
     subst (mul z) (G.lg a) = (z ^ (p ^ (ty a).val)) • G.lg a
-
-def additive (v : AddValuation C (WithTop ℝ)) (d : ℕ) : LogFGL v d where
-  lg a := X a
-  lg_const a := by simp
-  lg_lin a b := by
-    rw [coeff_X]
-    by_cases h : a = b
-    · subst h; simp
-    · have : Finsupp.single b 1 ≠ Finsupp.single a 1 := by
-        intro e; exact h (Finsupp.single_left_injective one_ne_zero e).symm
-      simp [h, this]
-  F a := X (Sum.inl a) + X (Sum.inr a)
-  F_int a α := by
-    unfold IsIntV
-    rw [map_add]
-    refine le_trans (le_min ?_ ?_) (v.map_add _ _) <;> (rw [coeff_X]; split_ifs <;> simp)
-  F_const a := by simp
-  lg_F a := by
-    rw [subst_X (hasSubst_of_constantCoeff_zero (by simp)),
-      subst_X (hasSubst_of_constantCoeff_zero (by simp)),
-      subst_X (hasSubst_of_constantCoeff_zero (by simp))]
-
-def additiveMu (v : AddValuation C (WithTop ℝ)) (d p h : ℕ) (hph : p ^ h - 1 ≠ 0)
-    (ty : Fin d → ZMod h) : MuAction (additive v d) p h ty where
-  mul z a := (z ^ (p ^ (ty a).val)) • X a
-  mul_int z hz a α := by
-    unfold IsIntV
-    rw [coeff_smul, coeff_X]
-    split_ifs
-    · rw [mul_one, v.map_pow, v_eq_zero_of_pow_eq_one hph hz, smul_zero]
-    · simp
-  mul_const z a := by simp
-  lg_mul z hz a := by
-    simp only [additive]
-    rw [subst_X (hasSubst_of_constantCoeff_zero (by simp))]
 
 def expComp [CharZero C] (Ω : C) (lg : PowerSeries C) : PowerSeries C :=
   PowerSeries.mk fun m => ∑ n ∈ Finset.range (m + 1),

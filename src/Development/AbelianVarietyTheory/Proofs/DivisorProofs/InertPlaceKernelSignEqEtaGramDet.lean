@@ -1,7 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ConjRelEquiv
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.UnramifiedQuadraticNormsTraceUniformizerFacts
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GramMatrixTraceFormBasisChange
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ConjRelEquiv
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GramMatrixTraceFormBasisChange
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.UnramifiedQuadraticNormsTraceUniformizerFacts
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open NumberField GlobalTheory.UnitaryBC IsDedekindDomain Matrix Polynomial GlobalTheory.CuspRep Formalism.UG GlobalTheory.BCT GlobalTheory.KapLat
 open scoped Classical
 
@@ -21,7 +68,7 @@ theorem model_aeval_mulVec {K : UQ} {L : Type} [Field L] (e : K.E ≃+* L) {B : 
     ext i
     simp [Matrix.mulVec, dotProduct, Matrix.one_apply]
   | add p q hp hq =>
-    rw [map_add, add_mul, map_add, hp, hq, Polynomial.map_add, map_add, Matrix.add_mulVec]
+    rw [map_add (f := _), add_mul, map_add (f := _), hp, hq, Polynomial.map_add (f := _), map_add (f := _), Matrix.add_mulVec]
   | monomial k a h =>
     have h1 : aeval u (C a * X ^ (k + 1)) = aeval u (C a * X ^ k) * u := by
       rw [pow_succ, ← mul_assoc, Polynomial.aeval_mul, aeval_X]
@@ -78,7 +125,7 @@ theorem kapSign_eq_eta_gramDet : ∀ (E : Type) [Field E] [NumberField E] [IsCMF
   have hunit : IsUnit (aeval u₂ P₁) := by
     obtain ⟨a, b, hab⟩ := hsep.isCoprime.map (Polynomial.mapRingHom e.symm.toRingHom)
     have h := congrArg (aeval u₂) hab
-    simp only [Polynomial.coe_mapRingHom, map_add, map_mul, map_one] at h
+    simp only [Polynomial.coe_mapRingHom, map_add (f := _), map_mul, map_one] at h
     rw [hF₂.2.1, mul_zero, add_zero] at h
     exact ⟨⟨aeval u₂ P₁, aeval u₂ a, by rw [mul_comm]; exact h, h⟩, rfl⟩
   have hker : ∀ y : (B₁.prod B₂).A, aeval γ.val Q₁ *ᵥ ψ y = 0 ↔ y.2 = 0 := by
@@ -110,7 +157,7 @@ theorem kapSign_eq_eta_gramDet : ∀ (E : Type) [Field E] [NumberField E] [IsCMF
     rw [hV₁, LinearMap.mem_ker, Matrix.toLin'_apply, hker]
   let ψ₁ : B₁.A →+ (Fin n → w.adicCompletion E) :=
     AddMonoidHom.mk' (fun z => ψ (show (B₁.prod B₂).A from (z, 0))) (fun z z' => by
-      rw [← map_add]
+      rw [← map_add (f := _)]
       congr 1
       exact Prod.ext rfl (show (0 : B₂.A) = 0 + 0 by simp))
   have hψ₁ : ∀ z, ψ₁ z = ψ (show (B₁.prod B₂).A from (z, 0)) := fun z => rfl
@@ -132,6 +179,7 @@ theorem kapSign_eq_eta_gramDet : ∀ (E : Type) [Field E] [NumberField E] [IsCMF
     rw [hψ₁, h3, ψ.apply_symm_apply]
   have hsum : ∀ g : Fin m → K.E, ψ₁ (∑ i, g i • a' i) = ∑ i, e (g i) • (v i : Fin n → w.adicCompletion E) := by
     intro g
+
     rw [map_sum]
     simp only [hψ₁s, hva]
   have hli : LinearIndependent K.E a' := by

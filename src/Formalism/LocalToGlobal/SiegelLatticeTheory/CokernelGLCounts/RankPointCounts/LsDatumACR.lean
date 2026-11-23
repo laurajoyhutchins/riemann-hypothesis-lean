@@ -1,5 +1,48 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.LsDatumAGP
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.LsDatumACut
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.HermitianW0SpanZero
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.LsDatumA
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.LsDatumAInj
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -20,7 +63,7 @@ def GamG (t : Term V M r) (g : Fin (r + 1) → V) : Set (DDt H t × H.Wb g) :=
 
 theorem mkW_add {g : Fin (r + 1) → V} (a b : V) (ha : a ∈ H.perp (H.X g)) (hb : b ∈ H.perp (H.X g)) :
     H.mkW g ⟨a + b, Submodule.add_mem _ ha hb⟩ = H.mkW g ⟨a, ha⟩ + H.mkW g ⟨b, hb⟩ := by
-  rw [← map_add]
+  rw [← map_add (f := _)]
   rfl
 
 theorem mkW_sub {g : Fin (r + 1) → V} (a b : V) (ha : a ∈ H.perp (H.X g)) (hb : b ∈ H.perp (H.X g)) :
@@ -112,7 +155,7 @@ theorem claimR_side (t₁ t₂ : Term V M r) (Λ₂ : Submodule M.L.O V)
       have haMM : a ∈ MMsharp H t₂ := hpart t₂ Λ₂ hsd₂ hMM₂ a b ha hb (by rw [hab]; exact hx₂Λ)
       obtain ⟨u', hu'U, hu'p, hχu⟩ := hC2 u₁ (spanMM_le_U H t₁ u₁.2.1) hu₁
       have e1 : χ (H.mkW g₁ ⟨(u₁ : V) + n₁, hx₁p⟩) = H.mkW g₂ ⟨u', hu'p⟩ + H.mkW g₂ ⟨ψ n₁, hW₂ (ψ n₁).2⟩ := by
-        rw [mkW_add H _ _ hu₁ (hW₁ n₁.2), map_add, hχu, hC1]
+        rw [mkW_add H _ _ hu₁ (hW₁ n₁.2), map_add (f := _), hχu, hC1]
       have e2 : H.mkW g₂ x₂ = H.mkW g₂ ⟨a, hap⟩ + H.mkW g₂ ⟨b, hW₂ hb⟩ := by
         rw [← mkW_add H _ _ hap (hW₂ hb)]
         exact mkW_congr H _ _ hab.symm
@@ -194,7 +237,7 @@ theorem claimR_side (t₁ t₂ : Term V M r) (Λ₂ : Submodule M.L.O V)
         rwa [show (u₂ : V) + ψ n₁ + ((ψ ⟨b₁, hb₁⟩ : V) - ψ n₁) = u₂ + ψ ⟨b₁, hb₁⟩ by abel] at this
       have hx₂p : (u₂ : V) + ψ ⟨b₁, hb₁⟩ ∈ H.perp (H.X g₂) := Submodule.add_mem _ hu₂ (hW₂ (ψ ⟨b₁, hb₁⟩).2)
       refine ⟨⟨_, hx₂p⟩, hx₂Λ, ?_⟩
-      rw [mkW_add H _ _ hu₂ (hW₂ (ψ ⟨b₁, hb₁⟩).2), ← hC1 ⟨b₁, hb₁⟩, ← hue.2, ← map_add,
+      rw [mkW_add H _ _ hu₂ (hW₂ (ψ ⟨b₁, hb₁⟩).2), ← hC1 ⟨b₁, hb₁⟩, ← hue.2, ← map_add (f := _),
         ← mkW_add H _ _ ha₁p (hW₁ hb₁)]
       exact congrArg χ (mkW_congr H _ _ hab₁)
     · rintro _ ⟨x₂, hx₂Λ, rfl⟩
@@ -220,7 +263,7 @@ theorem claimR_side (t₁ t₂ : Term V M r) (Λ₂ : Submodule M.L.O V)
         rwa [Submodule.coe_sub, show (u₁ : V) + n₁ + ((bb : V) - n₁) = u₁ + bb by abel] at this
       have hx₁p : (u₁ : V) + bb ∈ H.perp (H.X g₁) := Submodule.add_mem _ hu₁ (hW₁ bb.2)
       refine ⟨_, ⟨⟨_, hx₁p⟩, hx₁Λ, rfl⟩, ?_⟩
-      rw [mkW_add H _ _ hu₁ (hW₁ bb.2), map_add, hue.2, hC1]
+      rw [mkW_add H _ _ hu₁ (hW₁ bb.2), map_add (f := _), hue.2, hC1]
       rw [← mkW_add H _ _ hap (hW₂ (ψ bb).2)]
       exact mkW_congr H _ _ (by rw [hψbb, hab])
 

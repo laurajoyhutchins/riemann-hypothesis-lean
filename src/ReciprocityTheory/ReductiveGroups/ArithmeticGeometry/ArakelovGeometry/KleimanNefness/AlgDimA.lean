@@ -1,9 +1,59 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.KleimanNefness.AlgDimSt
-import ReciprocityTheory.CommutativeAlgebra.PolynomialHeights.HeightAddRingKrullDimQuotientMvPolynomialField
-import ReciprocityTheory.CommutativeAlgebra.WeakRegularity.RingKrullDimQuotientAddOneLeOfLt
-import ReciprocityTheory.CommutativeAlgebra.CohenMacaulay.LocDim
-import ReciprocityTheory.CommutativeAlgebra.CohenMacaulay.Bridge
-import ReciprocityTheory.CommutativeAlgebra.SaturatedChains.DimFormulaOfSurjective
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.KleimanNefness.AlgDimSt
+public import ReciprocityTheory.CommutativeAlgebra.ChainConnInDim
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+public import Mathlib.RingTheory.Ideal.KrullsHeightTheorem
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.CommutativeAlgebra.CohenMacaulay.Bridge
+public import ReciprocityTheory.CommutativeAlgebra.CohenMacaulay.LocDim
+public import ReciprocityTheory.CommutativeAlgebra.PolynomialHeights.HeightAddRingKrullDimQuotientMvPolynomialField
+import ReciprocityTheory.CommutativeAlgebra.PolynomialHeights.PolyCM
+public import ReciprocityTheory.CommutativeAlgebra.SaturatedChains.DimFormulaOfSurjective
+public import Mathlib.RingTheory.Ideal.Height
+
+@[expose] public section
 
 noncomputable section
 
@@ -11,36 +61,10 @@ namespace ReciprocityTheory.ChartRestriction.G.ArakelovGeometry.KH.KrullDimensio
 
 open ReciprocityTheory.CA
 
-theorem lt_of_add_one_le_fin (x y : WithBot ℕ∞) (n : ℕ) (hx : x ≠ ⊥) (hxn : x ≤ n)
-    (h : x + 1 ≤ y) : x < y := by
-  induction x using WithBot.recBotCoe with
-  | bot => exact absurd rfl hx
-  | coe a =>
-  induction y using WithBot.recBotCoe with
-  | bot => exact absurd h (by simp)
-  | coe b =>
-  norm_cast at h hxn ⊢
-  induction a using ENat.recTopCoe with
-  | top => exact absurd hxn (by simp)
-  | coe a =>
-  induction b using ENat.recTopCoe with
-  | top => exact WithTop.coe_lt_top a
-  | coe b =>
-  norm_cast at h ⊢
-
 theorem ringKrullDim_quotient_ne_bot {R : Type*} [CommRing R] (I : Ideal R) (hI : I ≠ ⊤) :
     ringKrullDim (R ⧸ I) ≠ ⊥ := by
   have : Nontrivial (R ⧸ I) := Ideal.Quotient.nontrivial_iff.mpr hI
   exact ne_bot_of_le_ne_bot (by simp) ringKrullDim_nonneg_of_nontrivial
-
-theorem dimLt' : DimLtStatement := by
-  intro F _ σ _ V W hV hW hVW
-  have h1 := ReciprocityTheory.CA.Link.ringKrullDim_quotient_add_one_le_of_lt hVW
-  have h2 : ringKrullDim (MvPolynomial σ F ⧸ W) ≤ (Fintype.card σ : ℕ) := by
-    refine (ringKrullDim_quotient_le W).trans (le_of_eq ?_)
-    rw [MvPolynomial.ringKrullDim_of_isNoetherianRing, ringKrullDim_eq_zero_of_field,
-      Nat.card_eq_fintype_card, zero_add]
-  exact lt_of_add_one_le_fin _ _ _ (ringKrullDim_quotient_ne_bot W hW.ne_top) h2 h1
 
 theorem isCM_atPrime_of_le {S : Type*} [CommRing S] (𝔐 W : Ideal S) [𝔐.IsPrime] [W.IsPrime]
     (h : IsCM (Localization.AtPrime 𝔐)) (hle : W ≤ 𝔐) : IsCM (Localization.AtPrime W) := by

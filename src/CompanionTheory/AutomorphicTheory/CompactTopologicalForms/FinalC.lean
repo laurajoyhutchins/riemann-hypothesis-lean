@@ -1,7 +1,58 @@
-import CompanionTheory.AutomorphicTheory.CompactTopologicalForms.FinalS
-import CompanionTheory.AutomorphicTheory.DiscreteGroupWaves.NFDomC
-import CompanionTheory.AutomorphicTheory.LocalBesselUniqueness.NFJCutFF
-import CompanionTheory.AutomorphicTheory.LocalBesselUniqueness.NFHatProdKBS
+module
+
+public import CompanionTheory.AutomorphicTheory.DiscreteGroupWaves.NFCoreC
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.OnePointBasisFundamentalDomainVolume
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.ThmBpAtEqOfShiftR
+public import CompanionTheory.AutomorphicTheory.CompactTopologicalForms.FinalS
+public import CompanionTheory.AutomorphicTheory.CompactTopologicalForms.JacobiFieldSquareIntegrable
+public import CompanionTheory.AutomorphicTheory.DiscreteGroupWaves.NFDomC
+public import CompanionTheory.AutomorphicTheory.DiscreteGroupWaves.NFTopFormCpt
+public import CompanionTheory.AutomorphicTheory.LocalBesselUniqueness.NFHatProdKBS
+public import CompanionTheory.AutomorphicTheory.LocalBesselUniqueness.NFJCutFF
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CptCopy2
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutBPEqShift
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutMainCpt
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutNFTopPtw
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutSETopFinal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace Formalism.FourierDecayAlt.P.CutBP.CompactFormNormalFormDomination
 
@@ -16,8 +67,8 @@ theorem nfTopIdAll_of_dom (h3 : NFTopDomAll) : NFTopIdAll :=
 theorem nfTopDomAll_of_tieC (hT : CompanionTheory.NFCpt.NFTieHatC) : NFTopDomAll :=
   CompanionTheory.NFCpt.nfTopDomAll_of_C hT LimitNormalForms.normal_form_hat_product_bessel LimitNormalForms.normal_form_jacobi_cutoff
 
-attribute [local instance] Matrix.normedAddCommGroup Matrix.normedSpace in
 
+attribute [local instance] Matrix.normedAddCommGroup Matrix.normedSpace in
 theorem thmBpAt_dom (h3 : NFTopDomAll)
     (Cb C₃ CΛ C₀ : ℝ) (hC₃ : 0 ≤ C₃) (hCΛ : 0 ≤ CΛ) (hC₀ : 1 / 2 ≤ C₀) :
     ∃ C₄ c₃ Cc Cc' Cc'' : ℝ, ∀ (Wp Wq : Type) [NormedAddCommGroup Wp] [InnerProductSpace ℂ Wp] [NormedAddCommGroup Wq]
@@ -62,8 +113,8 @@ open scoped ENNReal
 
 noncomputable section
 
-attribute [local instance] Matrix.normedAddCommGroup Matrix.normedSpace in
 
+attribute [local instance] Matrix.normedAddCommGroup Matrix.normedSpace in
 theorem thmBpAt_eqR_dom (h3 : NFTopDomAll)
     (Cb C₃ CΛ C₀ : ℝ) (hC₃ : 0 ≤ C₃) (hCΛ : 0 ≤ CΛ) (hC₀ : 1 / 2 ≤ C₀) :
     ∃ C₄ c₃ Cc Cc' Cc'' : ℝ, ∀ (P : M.Par) (Wp Wq : Type)

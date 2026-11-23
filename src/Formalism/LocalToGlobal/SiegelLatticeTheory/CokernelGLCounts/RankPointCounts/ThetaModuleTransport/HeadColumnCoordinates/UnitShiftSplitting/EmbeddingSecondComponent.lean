@@ -1,5 +1,51 @@
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.ThetaModuleTransport.HeadColumnCoordinates.DeterminantUnitTheta.GSteps
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.ThetaModuleTransport.HeadColumnCoordinates.UnitShiftSplitting.ExistsUnitShift
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.ThetaModuleTransport.HeadColumnCoordinates.DeterminantUnitTheta.GSteps
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.ThetaModuleTransport.HeadColumnCoordinates.UnitShiftSplitting.ExistsUnitShift
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.LsDatumA
+
+@[expose] public section
 
 noncomputable section
 
@@ -36,7 +82,7 @@ def cmp1 : (Ix r → M.L.O) →+ (Fin (r + 1) → M.R) where
     rw [e_rOf]; simp [c1]
   map_add' Y W := by
     funext a; apply Subtype.ext; apply g.e.injective
-    simp only [Pi.add_apply, Subring.coe_add, map_add, e_rOf, c1, Prod.fst_add]
+    simp only [Pi.add_apply, Subring.coe_add, map_add (f := _), e_rOf, c1, Prod.fst_add]
     refine Prod.ext ?_ ?_ <;> simp; ring
 
 def cmp2 : (Ix r → M.L.O) →+ (Fin (r + 1) → M.R) where
@@ -46,7 +92,7 @@ def cmp2 : (Ix r → M.L.O) →+ (Fin (r + 1) → M.R) where
     rw [e_rOf]; simp [c2]
   map_add' Y W := by
     funext a; apply Subtype.ext; apply g.e.injective
-    simp only [Pi.add_apply, Subring.coe_add, map_add, e_rOf, c2, Prod.snd_add]
+    simp only [Pi.add_apply, Subring.coe_add, map_add (f := _), e_rOf, c2, Prod.snd_add]
     refine Prod.ext ?_ ?_ <;> simp; ring
 
 theorem embedding_firstComponent (Y : Ix r → M.L.O) (a : Fin (r + 1)) :
@@ -124,7 +170,7 @@ theorem iota_cmp (Y : Ix r → M.L.O) : iota1 hs (cmp1 hs Y) + iota2 hs (cmp2 hs
   funext i
   apply Subtype.ext
   apply g.e.injective
-  rw [Pi.add_apply, Subring.coe_add, map_add, e_iota2]
+  rw [Pi.add_apply, Subring.coe_add, map_add (f := _), e_iota2]
   rcases i with a | a
   · rw [e_iota1_inl, e_iota1_inl, embedding_firstComponent, embedding_secondComponent]
     ext <;> simp
@@ -135,28 +181,20 @@ theorem iotaOne_add (l w : Fin (r + 1) → M.R) : iota1 hs (l + w) = iota1 hs l 
   funext i
   apply Subtype.ext
   apply g.e.injective
-  rw [Pi.add_apply, Subring.coe_add, map_add]
+  rw [Pi.add_apply, Subring.coe_add, map_add (f := _)]
   rcases i with a | a
-  · rw [e_iota1_inl, e_iota1_inl, e_iota1_inl, Pi.add_apply, Subring.coe_add, map_add]
+  · rw [e_iota1_inl, e_iota1_inl, e_iota1_inl, Pi.add_apply, Subring.coe_add, map_add (f := _)]
     ext <;> simp
-  · rw [e_iota1_inr, e_iota1_inr, e_iota1_inr, Pi.add_apply, Subring.coe_add, map_add]
+  · rw [e_iota1_inr, e_iota1_inr, e_iota1_inr, Pi.add_apply, Subring.coe_add, map_add (f := _)]
     ext <;> simp <;> ring
 
 theorem iotaTwo_add (l w : Fin (r + 1) → M.R) : iota2 hs (l + w) = iota2 hs l + iota2 hs w := by
   funext i
   apply Subtype.ext
   apply g.e.injective
-  rw [Pi.add_apply, Subring.coe_add, map_add, e_iota2, e_iota2, e_iota2, iotaOne_add, Pi.add_apply,
+  rw [Pi.add_apply, Subring.coe_add, map_add (f := _), e_iota2, e_iota2, e_iota2, iotaOne_add, Pi.add_apply,
     Subring.coe_add, map_add]
   ext <;> simp
-
-def splitE : (Ix r → M.L.O) ≃+ (Fin (r + 1) → M.R) × (Fin (r + 1) → M.R) where
-  toFun Y := (cmp1 hs Y, cmp2 hs Y)
-  invFun p := iota1 hs p.1 + iota2 hs p.2
-  left_inv Y := iota_cmp hs Y
-  right_inv p := by
-    simp only [map_add, firstComponent_iotaOne, secondComponent_iotaOne, firstComponent_iotaTwo, secondComponent_iotaTwo, add_zero, zero_add]
-  map_add' Y W := by simp only [map_add, Prod.mk_add_mk]
 
 theorem firstComponent_smul (c : M.L.O) (Y : Ix r → M.L.O) : cmp1 hs (c • Y) = dgR hs (c1 g c) • cmp1 hs Y := by
   funext a

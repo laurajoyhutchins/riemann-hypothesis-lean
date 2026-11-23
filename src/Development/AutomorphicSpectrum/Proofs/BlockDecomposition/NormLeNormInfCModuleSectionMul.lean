@@ -1,12 +1,67 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.AutomorphicKernels.EisensteinSeriesG2.RankOneEisenstein.Theta2Integral
-import GroundTheory.GlobalFields.TateThesis.TateThetaDecay
+module
+
+public import GroundTheory.GlobalFields.Adele.IntegersLattice
+public import GroundTheory.GlobalFields.TateThesis.IdeleMeasureNormOne
+public import GroundTheory.GlobalFields.TateThesis.AdelePoisson
+public import GroundTheory.GlobalFields.TateThesis.AdelePoissonUniform
+import GroundTheory.GlobalFields.TateThesis.AdeleScaling
+public import GroundTheory.GlobalFields.TateThesis.TateThetaDecay
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import GroundTheory.AutomorphicForms.GL2.SummableNormIffAndTsumEqCoset2
+import GroundTheory.AutomorphicForms.LocallyProfinite
+public import GroundTheory.GlobalFields.TateThesis.AdeleIdealMeasure
+import GroundTheory.AutomorphicForms.GL2.GodementSection
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 open NumberField NumberField.mixedEmbedding IsDedekindDomain IsDedekindDomain.HeightOneSpectrum
   Matrix MeasureTheory Filter Topology
 open scoped NumberField.AdeleRing SchwartzMap Classical nonZeroDivisors Pointwise
-open PositivityTheory.EisRk1 GroundTheory.Global GroundTheory.Automorphic GroundTheory.Automorphic.Adele2
+open GroundTheory.Global GroundTheory.Automorphic GroundTheory.Automorphic.Adele2
   GroundTheory.Automorphic.GodementSection IdeleGroup
 
 set_option synthInstance.maxSize 1000
@@ -17,7 +72,7 @@ noncomputable section
 
 variable {K : Type*} [Field K] [NumberField K]
 
-def infC (a : 𝔸[K]) : mixedSpace K := homeomorphMixedSpace K a.1
+def infC (a : 𝔸[K]) : mixedSpace K := GroundTheory.Global.homeomorphMixedSpace K a.1
 
 theorem infC_mul (a b : 𝔸[K]) : infC (a * b) = infC a * infC b :=
   homeomorphMixedSpace_mul _ _
@@ -71,34 +126,11 @@ theorem exists_ideal_of_isCompact {S : Set 𝔸ᶠ[K]} (hS : IsCompact S) :
     rw [mixedEmbedding.norm_eq_norm, Rat.cast_abs, hξN, abs_mul, abs_inv]
     exact le_mul_of_one_le_left (by positivity) (one_le_abs_norm_of_ne_zero hr'0)
 
-theorem decay_real_bound {A B Z X₀ X₁ t κ : ℝ} {k n r : ℕ} (hA : 0 ≤ A) (hB : 0 < B) (hX₀ : 0 < X₀)
-    (hX₁ : 0 < X₁) (ht : 0 < t) (hκ : 0 < κ) (h₀ : X₀ / B ≤ Z) (h₁ : X₁ / B ≤ Z)
-    (h₂ : t * κ ≤ Z ^ n) :
-    A * (Z ^ (k + k + n * r))⁻¹ ≤
-      (t ^ r)⁻¹ * (A * B ^ (k + k) * (κ ^ r)⁻¹ * ((X₀ ^ k)⁻¹ * (X₁ ^ k)⁻¹)) := by
-  have hY₀ : 0 < X₀ / B := div_pos hX₀ hB
-  have hY₁ : 0 < X₁ / B := div_pos hX₁ hB
-  have htκ : 0 < t * κ := mul_pos ht hκ
-  have g₀ : (Z ^ k)⁻¹ ≤ ((X₀ / B) ^ k)⁻¹ := inv_anti₀ (pow_pos hY₀ k) (pow_le_pow_left₀ hY₀.le h₀ k)
-  have g₁ : (Z ^ k)⁻¹ ≤ ((X₁ / B) ^ k)⁻¹ := inv_anti₀ (pow_pos hY₁ k) (pow_le_pow_left₀ hY₁.le h₁ k)
-  have g₂ : ((Z ^ n) ^ r)⁻¹ ≤ ((t * κ) ^ r)⁻¹ :=
-    inv_anti₀ (pow_pos htκ r) (pow_le_pow_left₀ htκ.le h₂ r)
-  have hZ : 0 < Z := hY₀.trans_le h₀
-  calc A * (Z ^ (k + k + n * r))⁻¹ = A * ((Z ^ k)⁻¹ * (Z ^ k)⁻¹ * ((Z ^ n) ^ r)⁻¹) := by
-        rw [pow_add, pow_add, pow_mul, mul_inv, mul_inv]
-    _ ≤ A * (((X₀ / B) ^ k)⁻¹ * ((X₁ / B) ^ k)⁻¹ * ((t * κ) ^ r)⁻¹) := by
-        refine mul_le_mul_of_nonneg_left ?_ hA
-        exact mul_le_mul (mul_le_mul g₀ g₁ (by positivity) (by positivity)) g₂ (by positivity)
-          (by positivity)
-    _ = (t ^ r)⁻¹ * (A * B ^ (k + k) * (κ ^ r)⁻¹ * ((X₀ ^ k)⁻¹ * (X₁ ^ k)⁻¹)) := by
-        rw [div_pow, div_pow, inv_div, inv_div, mul_pow, mul_inv, pow_add]
-        field_simp
-
 theorem norm_le_norm_infC_moduleSection_mul (w : InfinitePlace K) {t : {x : ℝ // 0 < x}}
     (ht : 1 ≤ (t : ℝ)) (x : mixedSpace K) :
-    ‖x‖ ≤ ‖infC ((moduleSection w t : IdeleGroup K) : 𝔸[K]) * x‖ := by
-  set e := infC ((moduleSection w t : IdeleGroup K) : 𝔸[K])
-  set e' := infC ((moduleSection w t⁻¹ : IdeleGroup K) : 𝔸[K])
+    ‖x‖ ≤ ‖infC ((moduleSection w t : NumberField.IdeleGroup (𝓞 K) K) : 𝔸[K]) * x‖ := by
+  set e := infC ((moduleSection w t : NumberField.IdeleGroup (𝓞 K) K) : 𝔸[K])
+  set e' := infC ((moduleSection w t⁻¹ : NumberField.IdeleGroup (𝓞 K) K) : 𝔸[K])
   have hee : e' * e = 1 := by
     rw [← infC_mul, ← Units.val_mul, ← map_mul, inv_mul_cancel, map_one, Units.val_one]
     simp only [infC, homeomorphMixedSpace_apply]
@@ -114,7 +146,7 @@ theorem norm_le_norm_infC_moduleSection_mul (w : InfinitePlace K) {t : {x : ℝ 
     _ ≤ ‖e * x‖ := norm_mul_le_of_normAtPlace_le_one he' _
 
 theorem norm_infC_moduleSection (w : InfinitePlace K) (t : {x : ℝ // 0 < x}) :
-    mixedEmbedding.norm (infC ((moduleSection w t : IdeleGroup K) : 𝔸[K])) = t := by
+    mixedEmbedding.norm (infC ((moduleSection w t : NumberField.IdeleGroup (𝓞 K) K) : 𝔸[K])) = t := by
   have h := mixedEmbedding_norm_toInfinite (moduleSection w t)
   rw [infiniteModule_moduleSection] at h
   exact h

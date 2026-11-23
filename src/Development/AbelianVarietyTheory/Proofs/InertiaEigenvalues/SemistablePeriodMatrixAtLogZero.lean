@@ -1,15 +1,62 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.TrivIsCr
-import Formalism.SharpRestriction.LevelLetterCocycles.LocCoh
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.TwistStep
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.AcrisTorsionFreeComplete
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.DeRhamPotSemistable
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsSemistablePeriodMatrixOfIsSemistable
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsFrobeniusMatrixCrystallineModuleOverWitt
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.TrivIsCr
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.AcrisTorsionFreeComplete
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.EqOfPowEqOneOfNormSubLt
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsFrobeniusMatrixCrystallineModuleOverWitt
 import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsPowMulUnramifiedEqWittBcris
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.PeriodRingCoreCrystallineDeRhamInvariants
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsSemistablePeriodMatrixOfIsSemistable
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.PeriodRingCoreCrystallineDeRhamInvariants
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsKurOfActStFixed
 import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.KummerNotCoboundary
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsKurOfActStFixed
+import Mathlib.Algebra.AffineMonoid.UniqueSums
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.PolyApproxZeroPadic
+
+@[expose] public section
+
 open Formalism Formalism.BasicNotions Formalism.BasicNotions.Loc Formalism.WeaklyAdmissibleFiltrations TensorProduct PowerSeries GlobalTheory.Prism GlobalTheory.BKReal GlobalTheory.Per GlobalTheory.BSP GlobalTheory.MemLoc GlobalTheory.Pst GlobalTheory.BKLim GlobalTheory.Cong Matrix
 open scoped Formalism.Per NNReal
 
@@ -46,6 +93,7 @@ theorem mmap_sum_smul {S S' F : Type} [CommRing S] [CommRing S'] [FunLike F S S'
     (N : ℕ) (a : ℕ → S) (X : ℕ → Matrix (Fin d) (Fin d) S) :
     (∑ k ∈ Finset.range N, a k • X k).map f = ∑ k ∈ Finset.range N, f (a k) • (X k).map f := by
   ext i j
+
   simp [Matrix.sum_apply, map_sum]
 
 theorem pow_eq_zero_field {k : Type} [Field k] (x : Matrix (Fin d) (Fin d) k) (hx : IsNilpotent x) : x ^ d = 0 := by
@@ -109,7 +157,9 @@ theorem Phi_fixed (hQQ : Qm * Qi = 1)
       (A.map (phiSt P)).map (actSt P (g : GQ l)) = (A.map (actSt P (g : GQ l))).map (phiSt P) := by
     intro A; ext i j; simp [phiSt_actSt]
   have hRφ : ((R g).map (algebraMap ℚ_[l] (Bst P))).map (phiSt P) = (R g).map (algebraMap ℚ_[l] (Bst P)) := by
-    ext i j; simp
+    apply Matrix.ext
+    intro i j
+    exact (phiSt P).commutes (R g i j)
   constructor
   · rw [mmap_mul, hc, inv_act P R Qm Qi hQQ hQ g, Matrix.mul_assoc, ← hRφ, ← mmap_mul, hQ g]
   · rw [mmap_mul, hc, inv_act P R Qm Qi hQQ hQ g, mmap_mul, hRφ, Matrix.mul_assoc, hQ g]
@@ -127,7 +177,9 @@ theorem const_of_fixed {K : FinExt l}
       simpa using congrFun (congrFun (hY ⟨g, hg⟩) i) j
   choose y hy using h
   refine ⟨Matrix.of y, ?_, ?_⟩
-  · ext i j; simp [hy]
+  · apply Matrix.ext
+    intro i j
+    exact (hy i j).symm
   · intro g; ext i j
     have h1 := congrFun (congrFun (hY g) i) j
     simp only [Matrix.map_apply] at h1
@@ -173,7 +225,7 @@ theorem ev_phiSt (b : P.R.B)
 
 theorem taylor_sum (r s : P.R.B) (p : Bst P) (N : ℕ) (hN : p.natDegree < N) :
     Polynomial.eval (s + r) p = ∑ k ∈ Finset.range N,
-      (s ^ k * algebraMap ℚ_[l] P.R.B ((k.factorial : ℚ_[l])⁻¹)) * Polynomial.eval r (derivative^[k] p) := by
+      (s ^ k * algebraMap ℚ_[l] P.R.B ((k.factorial : ℚ_[l])⁻¹)) * Polynomial.eval r (Polynomial.derivative^[k] p) := by
   rw [← Polynomial.taylor_eval, Polynomial.eval_eq_sum_range' (by rwa [Polynomial.natDegree_taylor])]
   refine Finset.sum_congr rfl fun k _ => ?_
   rw [Polynomial.taylor_coeff, mul_comm, mul_assoc]
@@ -229,7 +281,8 @@ theorem period_matrix_at_zero : ∀ (l : ℕ) [Fact l.Prime] (K : FinExt l) (bk 
     have h1 := congrArg (fun A => Matrix.map A eg) (hQ' g)
     simp only [mmap_mul] at h1
     have e1 : ((R g).map (algebraMap ℚ_[l] (Bst P))).map eg = (R g).map (algebraMap ℚ_[l] P.R.B) := by
-      ext i j; simp [heg]
+      ext i j
+      simp only [Matrix.map_apply, heg, Polynomial.coe_evalRingHom, Polynomial.algebraMap_apply, Polynomial.eval_C]
     have e2 : (Qm.map (actSt P (g : GQ l))).map eg = U₀.map (P.actQ (g : GQ l)) := by
       ext i j
       simp only [Matrix.map_apply, heg, Polynomial.coe_evalRingHom, hU₀, hev0]

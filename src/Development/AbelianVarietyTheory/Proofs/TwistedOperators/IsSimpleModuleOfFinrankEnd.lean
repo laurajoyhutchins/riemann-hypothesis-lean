@@ -1,8 +1,55 @@
-import Mathlib
-import Formalism.LocalToGlobal.Divisibility.GoodPartHermitianSpec
+module
+
+public import Mathlib.RepresentationTheory.Character
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RepresentationTheory.Maschke
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.LabelDatum
-import Development.AbelianVarietyTheory.Proofs.CharacterTheory.IsCharOfIsPrimitiveRoot
-import Development.AbelianVarietyTheory.Proofs.CharacterTheory.IsCharacterOverSubfieldOfRepresentation
+
+@[expose] public section
+
 open GlobalTheory.GLq Polynomial
 open scoped Classical
 
@@ -51,36 +98,5 @@ theorem isIrreducible_of_norm_one {k G V : Type} [Field k] [CharZero k] [Group G
   refine isSimpleModule_of_finrank_end (k := k) ?_
   rw [← h]
   exact (Representation.IntertwiningMap.equivAlgEnd (ρ := ρ)).toLinearEquiv.finrank_eq.symm
-
-theorem isAbsIrrChar_of_isIrr : ∀ (K : Type) [Field K] (σ : K →+* ℂ) (G : Type) [Group G] [Fintype G] (χ : G → K), IsIrr (fun t => σ (χ t)) → Formalism.L2.DIV.IsAbsIrrChar χ := by
-  intro K _ σ G _ _ χ h
-  obtain ⟨V, hV, hχ⟩ := h
-  haveI : CharZero K := σ.charZero
-  letI : Algebra K ℂ := σ.toAlgebra
-  let τ : AlgebraicClosure K →ₐ[K] ℂ := IsAlgClosed.lift
-  letI : Algebra (AlgebraicClosure K) ℂ := τ.toRingHom.toAlgebra
-  have hτ : ∀ x : K, algebraMap (AlgebraicClosure K) ℂ (algebraMap K (AlgebraicClosure K) x) = σ x :=
-    fun x => τ.commutes x
-  have hinj : Function.Injective (algebraMap (AlgebraicClosure K) ℂ) := RingHom.injective _
-  have hm : Nat.card G ≠ 0 := Nat.card_pos.ne'
-  haveI : NeZero (Nat.card G) := ⟨hm⟩
-  haveI : NeZero (Nat.card G : AlgebraicClosure K) := ⟨Nat.cast_ne_zero.2 hm⟩
-  obtain ⟨ζ, hζ⟩ := HasEnoughRootsOfUnity.exists_primitiveRoot (AlgebraicClosure K) (Nat.card G)
-  have hch : GlobalTheory.BI.IsChar ℂ ℂ (fun t => σ (χ t)) := by
-    have h := (GlobalTheory.BI.isChar_and_isIrrChar_of_rep ℂ ℂ G V V.ρ).1
-    have e : (fun t => σ (χ t)) = fun g => algebraMap ℂ ℂ (Representation.character V.ρ g) := by
-      funext g
-      exact (hχ g).symm
-    rw [e]
-    exact h
-  obtain ⟨n, ρ, hρ⟩ := GlobalTheory.BI.isChar_of_isPrimitiveRoot (AlgebraicClosure K) ℂ (Nat.card G) ζ hm hζ G
-    (fun g => pow_card_eq_one') _ hch
-  have hρ' : ∀ t, ρ.character t = algebraMap K (AlgebraicClosure K) (χ t) := fun t =>
-    hinj (by rw [hτ]; exact (hρ t).symm)
-  refine ⟨n, ρ, isIrreducible_of_norm_one ρ (hinj ?_), hρ'⟩
-  have hn := (FDRep.simple_iff_char_is_norm_one V).1 hV
-  rw [map_natCast, ← hn, map_sum]
-  refine Finset.sum_congr rfl fun g _ => ?_
-  rw [map_mul, hρ', hρ', hτ, hτ, hχ, hχ]
 
 end GlobalTheory.AbsIrrDescent

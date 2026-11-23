@@ -1,4 +1,48 @@
-import Development.WeilBound.ThetaLifts.TowerModels.PlaneForm
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.WeilTensorModels
+public import Development.WeilBound.ThetaLifts.TowerModels.PlaneForm
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -48,24 +92,11 @@ theorem fg_comap {V W : Type} [AddCommGroup V] [Module (𝓞 E) V] [AddCommGroup
   Submodule.fg_of_fg_map_injective f hf (hL.of_le (Submodule.map_comap_le f L))
 
 theorem isLattice_comap (n n₁ : ℕ) (L : Submodule (𝓞 E) (Fin n → E)) (ι : Matrix (Fin n) (Fin n₁) E)
-    (P : Matrix (Fin n₁) (Fin n) E) (hP : P * ι = 1) (hL : L.IsLattice E) :
-    (L.comap ((Matrix.mulVecLin ι).restrictScalars (𝓞 E))).IsLattice E where
-  fg := fg_comap _ (fun u u' e => by
+    (P : Matrix (Fin n₁) (Fin n) E) (hP : P * ι = 1) (hL : L.IsFullLattice E) :
+    (L.comap ((Matrix.mulVecLin ι).restrictScalars (𝓞 E))).IsLattice E :=
+  Submodule.IsLattice.of_fg E (fg_comap _ (fun u u' e => by
     have := congrArg (P *ᵥ ·) (show ι *ᵥ u = ι *ᵥ u' from e)
-    simpa [Matrix.mulVec_mulVec, hP] using this) L hL.fg
-  span_eq_top := by
-    rw [eq_top_iff]
-    intro u _
-    obtain ⟨t, ht⟩ := multiple_mem_span_of_mem_localization_span (𝓞 E)⁰ E (L : Set (Fin n → E)) (ι *ᵥ u)
-      (by rw [hL.span_eq_top]; trivial)
-    rw [Submodule.span_eq] at ht
-    have h0 : ((t : 𝓞 E) : E) ≠ 0 := by simpa using nonZeroDivisors.coe_ne_zero t
-    have : u = ((t : 𝓞 E) : E)⁻¹ • (((t : 𝓞 E) : E) • u) := by rw [inv_smul_smul₀ h0]
-    rw [this]
-    refine Submodule.smul_mem _ _ (Submodule.subset_span ?_)
-    change ι *ᵥ (((t : 𝓞 E) : E) • u) ∈ L
-    rw [Matrix.mulVec_smul]
-    exact ht
+    simpa [Matrix.mulVec_mulVec, hP] using this) L hL.fg)
 
 theorem exists_ideal (n : ℕ) (L : Submodule (𝓞 E) (Fin n → E)) (hL : L.IsLattice E) (x : Fin n → E) (hx : x ≠ 0) :
     ∃ 𝔟 : FractionalIdeal (𝓞 E)⁰ E, ∀ s : E, s ∈ 𝔟 ↔ s • x ∈ L :=

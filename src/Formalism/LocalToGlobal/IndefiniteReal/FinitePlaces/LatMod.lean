@@ -1,11 +1,52 @@
-import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.IdemFin
+module
+
+public import Formalism.LocalToGlobal.IndefiniteReal.LocalNewformFunction
+public import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.IdemUniq
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.L2.Theta IsDedekindDomain NumberField Polynomial
 open scoped TensorProduct
 
-set_option synthInstance.maxHeartbeats 160000
+
 
 namespace Formalism.IndefR.Fin
 
@@ -27,7 +68,7 @@ theorem mul_pairA (x : AF D.host.F) (α : Af D.host.F) :
 theorem finPart_tmul (x : AF D.host.F) (z : D.host.E) : finPart D (x ⊗ₜ[D.host.F] z) = sndA D.host.F x ⊗ₜ[D.host.F] z :=
   rfl
 
-set_option maxHeartbeats 800000 in
+
 
 theorem mul_gen (a : AE D) (α : Af D.host.F) (m : D.host.E) :
     a * (pairA D.host.F 0 α ⊗ₜ[D.host.F] m) =
@@ -37,7 +78,7 @@ theorem mul_gen (a : AE D) (α : Af D.host.F) (m : D.host.E) :
   | tmul x z =>
     rw [Algebra.TensorProduct.tmul_mul_tmul, mul_pairA, finPart_tmul, Algebra.TensorProduct.tmul_mul_tmul, mul_one,
       jF_tmul, Algebra.TensorProduct.tmul_mul_tmul, mul_one]
-  | add x y hx hy => rw [add_mul, hx, hy, map_add, add_mul, map_add, add_mul]
+  | add x y hx hy => rw [add_mul, hx, hy, map_add (f := _), add_mul, map_add (f := _), add_mul]
 
 theorem gen_mem (S T : HSp D) (ΛS : Submodule (𝓞 D.host.E) (Fin S.rank → D.host.E))
     (ΛT : Submodule (𝓞 D.host.E) (Fin T.rank → D.host.E)) {α : Af D.host.F} (hα : α ∈ intAf D.host.F)
@@ -47,7 +88,7 @@ theorem gen_mem (S T : HSp D) (ΛS : Submodule (𝓞 D.host.E) (Fin S.rank → D
       latO S T (ΛS : Set (Fin S.rank → D.host.E)) (ΛT : Set (Fin T.rank → D.host.E)) (fun _ => True) :=
   AddSubgroup.subset_closure ⟨α, hα, fun _ h => absurd trivial h, c, hc, s, hs, t, ht, rfl⟩
 
-set_option maxHeartbeats 1600000 in
+
 theorem jF_gen_mem (S T : HSp D) (ΛS : Submodule (𝓞 D.host.E) (Fin S.rank → D.host.E))
     (ΛT : Submodule (𝓞 D.host.E) (Fin T.rank → D.host.E)) {z : Af D.host.F ⊗[D.host.F] D.host.E} (hz : z ∈ intAE D)
     {c : D.host.E} (hc : c ∈ D.host.AA) {s : Fin S.rank → D.host.E} (hs : s ∈ ΛS) {t : Fin T.rank → D.host.E}
@@ -78,7 +119,7 @@ theorem jF_gen_mem (S T : HSp D) (ΛS : Submodule (𝓞 D.host.E) (Fin S.rank �
         ((1 : AF D.host.F) ⊗ₜ[D.host.F] (c * t i * ∑ k, star (s k) * S.gram k j)) : WO S T) =
         (Matrix.of fun i j => jF D x * ((1 : AF D.host.F) ⊗ₜ[D.host.F] (c * t i * ∑ k, star (s k) * S.gram k j))) +
         (Matrix.of fun i j => jF D y * ((1 : AF D.host.F) ⊗ₜ[D.host.F] (c * t i * ∑ k, star (s k) * S.gram k j))) := by
-      ext i j; rw [Matrix.add_apply, Matrix.of_apply, Matrix.of_apply, Matrix.of_apply, map_add, add_mul]
+      ext i j; rw [Matrix.add_apply, Matrix.of_apply, Matrix.of_apply, Matrix.of_apply, map_add (f := _), add_mul]
     rw [hm]; exact add_mem hx hy
   | neg x _ hx =>
     have hm : (Matrix.of fun i j => jF D (-x) *
@@ -87,7 +128,7 @@ theorem jF_gen_mem (S T : HSp D) (ΛS : Submodule (𝓞 D.host.E) (Fin S.rank �
       ext i j; rw [Matrix.neg_apply, Matrix.of_apply, Matrix.of_apply, map_neg, neg_mul]
     rw [hm]; exact neg_mem hx
 
-set_option maxHeartbeats 1600000 in
+
 
 theorem latO_smul_mem (S T : HSp D) (ΛS : Submodule (𝓞 D.host.E) (Fin S.rank → D.host.E))
     (ΛT : Submodule (𝓞 D.host.E) (Fin T.rank → D.host.E)) {a : AE D} (ha : finPart D a ∈ intAE D) {u : WO S T}

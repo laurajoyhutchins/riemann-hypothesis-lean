@@ -1,7 +1,54 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.TensorProductTheorem.NonemptyAdelicDecomposition
-import GroundTheory.AutomorphicForms.CuspidalDiscreteness.CuspFormsDecay
-import GroundTheory.AutomorphicForms.CuspidalDiscreteness.SummandsMeasure
+module
+
+public import GroundTheory.AutomorphicForms.CuspidalDiscreteness.CuspFormsDecay
+public import GroundTheory.AutomorphicForms.CuspidalDiscreteness.SummandsMeasure
+public import GroundTheory.AutomorphicForms.AutomorphicFormSpaces.GKStable
+import GroundTheory.AutomorphicForms.CuspidalDiscreteness.CuspFormsSiegel
+import GroundTheory.AutomorphicForms.DixmierMalliavinBasic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+public import Mathlib.Analysis.Calculus.Deriv.Star
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -79,11 +126,6 @@ theorem finRepCusp_mem_centralCuspForms (h : AdelicGLn.FiniteAdelicGL K n) {φ :
   rw [mul_assoc]
   exact hφ s _
 
-variable (K n) in
-
-abbrev centralCusp : AdelicGKModule K n (centralCuspForms K n) :=
-  cuspSubmodule K n (centralCuspForms K n) (fun X _ hφ => ρ_mem_centralCuspForms X hφ)
-    (fun k _ hφ => σ_mem_centralCuspForms k hφ) (fun h _ hφ => finRepCusp_mem_centralCuspForms h hφ)
 
 theorem exists_norm_le_of_mem_centralCuspForms {φ : cuspForms K n} (hφ : φ ∈ centralCuspForms K n) :
     ∃ C : ℝ, ∀ x, ‖(φ : AdelicGLn.AdelicGL K n → ℂ) x‖ ≤ C := by
@@ -93,7 +135,7 @@ theorem exists_norm_le_of_mem_centralCuspForms {φ : cuspForms K n} (hφ : φ �
   rw [hφ s y]
   exact hC y hy
 
-def toOne (g : AdelicGLn.AdelicGL K n) : Reduction.normOneGL K n :=
+def toOne (g : AdelicGLn.AdelicGL K n) : Reduction.normOneGL (K := K) (n := n) :=
   ⟨g * (Reduction.centralSection K n (Reduction.detModule K n g))⁻¹,
     mul_centralSection_detModule_inv_mem g⟩
 
@@ -108,7 +150,7 @@ theorem apply_mul_toOne {φ : cuspForms K n} (hφ : φ ∈ centralCuspForms K n)
   rw [coe_toOne, ← map_inv, ← mul_assoc]
   exact apply_mul_centralSection_of_mem hφ _ _
 
-variable (μ : Measure (Reduction.normOneGL K n)) [μ.IsHaarMeasure]
+variable (μ : Measure (Reduction.normOneGL (K := K) (n := n))) [μ.IsHaarMeasure]
 
 theorem cuspFormLp_rightTranslate_eq_rep {φ ψ : cuspForms K n} (hφ : φ ∈ centralCuspForms K n)
     (g : AdelicGLn.AdelicGL K n)
@@ -140,7 +182,7 @@ theorem eq_zero_of_petersson_inner_self_eq_zero {φ : cuspForms K n} (hφ : φ �
   have h0 : cuspToL2 μ φ = 0 := inner_self_eq_zero.1 h
   exact injOn_cuspToL2 μ (hφ : _) (fun s x => rfl) (h0.trans (map_zero (cuspToL2 μ)).symm)
 
-local notation "Γ₁" => Reduction.rationalGLOne K n
+local notation "Γ₁" => Reduction.rationalGLOne (K := K) (n := n)
 
 theorem petersson_inner_eq_integral_quotient (φ ψ : cuspForms K n) :
     inner ℂ (cuspToL2 μ φ) (cuspToL2 μ ψ) =
@@ -158,7 +200,7 @@ def quotTr (φ : cuspForms K n) (g : AdelicGLn.AdelicGL K n) : RightCosetSpace �
     rw [mul_assoc]
     exact φ.2.1.isLeftInvariant γ _
 
-theorem quotTr_mk (φ : cuspForms K n) (g : AdelicGLn.AdelicGL K n) (y : Reduction.normOneGL K n) :
+theorem quotTr_mk (φ : cuspForms K n) (g : AdelicGLn.AdelicGL K n) (y : Reduction.normOneGL (K := K) (n := n)) :
     quotTr φ g (mk Γ₁ y) = (φ : AdelicGLn.AdelicGL K n → ℂ) ((y : AdelicGLn.AdelicGL K n) * g) := rfl
 
 theorem quotTr_one (φ : cuspForms K n) : quotTr φ 1 = cuspQuot φ.2.1.isLeftInvariant := by

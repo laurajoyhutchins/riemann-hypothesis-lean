@@ -1,6 +1,56 @@
-import Mathlib
-import Formalism.PeriodIntegrals.VolFromSW
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicLocalCompactness.T2SpaceTensorProductFiniteExtension
+module
+
+public import Formalism.SharpRestriction.GlobalSchurBounds.GeneralLinearActions.GenusMassVolumes
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicLocalCompactness.T2SpaceTensorProductFiniteExtension
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicLocalCompactness.AdeleLC
+
+@[expose] public section
 
 noncomputable section
 
@@ -79,6 +129,7 @@ theorem linIndep_of_isUnit_det (σ : E →ₐ[F] E) {M n : ℕ} (J : Matrix (Fin
   have key : ∀ b, ∑ a, g a * gramR R σ J X b a = 0 := by
     intro b
     have e := congrArg (hLin R σ J (X b)) hg
+
     rw [map_sum, map_zero] at e
     simp only [map_smul, smul_eq_mul] at e
     exact e
@@ -103,7 +154,7 @@ private theorem continuous_sigR_stabilizer_orbit_volume (σ : E →ₐ[F] E) : C
     induction z using TensorProduct.induction_on with
     | zero => simp
     | tmul r e => simp [sigR, LinearMap.baseChange_tmul]
-    | add a b ha hb => rw [map_add, map_add, ha, hb]
+    | add a b ha hb => rw [map_add (f := _), map_add (f := _), ha, hb]
   rw [e]
   exact IsModuleTopology.continuous_of_linearMap _
 
@@ -113,7 +164,7 @@ theorem continuous_hR (σ : E →ₐ[F] E) {M : ℕ} (J : Matrix (Fin M) (Fin M)
   haveI : IsTopologicalRing (R ⊗[F] E) := IsModuleTopology.isTopologicalRing R (R ⊗[F] E)
   have hs := continuous_sigR_stabilizer_orbit_volume (F := F) (E := E) R σ
   unfold hR Formalism.UG.hform
-  exact continuous_finset_sum _ fun i _ => continuous_finset_sum _ fun j _ =>
+  exact continuous_finsetSum _ fun i _ => continuous_finsetSum _ fun j _ =>
     ((hs.comp ((continuous_apply i).comp continuous_fst)).mul continuous_const).mul
       ((continuous_apply j).comp continuous_snd)
 
@@ -124,7 +175,7 @@ theorem continuous_gramR_apply (σ : E →ₐ[F] E) {M n : ℕ} (J : Matrix (Fin
   have hs := continuous_sigR_stabilizer_orbit_volume (F := F) (E := E) R σ
   show Continuous fun X : Fin n → Fin M → R ⊗[F] E => hR R σ J (X a) (X b)
   unfold hR Formalism.UG.hform
-  exact continuous_finset_sum _ fun i _ => continuous_finset_sum _ fun j _ =>
+  exact continuous_finsetSum _ fun i _ => continuous_finsetSum _ fun j _ =>
     ((hs.comp ((continuous_apply i).comp (continuous_apply a))).mul continuous_const).mul
       ((continuous_apply j).comp (continuous_apply b))
 
@@ -170,7 +221,7 @@ theorem sigR_invol (σ : E →ₐ[F] E) (hσ : ∀ x, σ (σ x) = x) (x : R ⊗[
   induction x using TensorProduct.induction_on with
   | zero => simp
   | tmul r e => simp [sigR, hσ]
-  | add a b ha hb => rw [map_add, map_add, ha, hb]
+  | add a b ha hb => rw [map_add (f := _), map_add (f := _), ha, hb]
 
 theorem gramR_mem (σ : E →ₐ[F] E) (hσ : ∀ x, σ (σ x) = x) {M n : ℕ}
     (J : Matrix (Fin M) (Fin M) E) (hJ : ∀ i j, σ (J j i) = J i j)
@@ -179,6 +230,7 @@ theorem gramR_mem (σ : E →ₐ[F] E) (hσ : ∀ x, σ (σ x) = x) {M n : ℕ}
     simp [JR, inclR, sigR, hJ]
   show ∀ a b, sigR R σ (gramR R σ J X b a) = gramR R σ J X a b
   intro a b
+
   simp only [gramR, hR, Formalism.UG.hform, map_sum, map_mul]
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun p _ => Finset.sum_congr rfl fun q _ => ?_
@@ -210,15 +262,6 @@ end Arch
 section Glue
 
 variable {F E : Type} [Field F] [Field E] [Algebra F E] (R : Type) [CommRing R] [Algebra F R]
-
-theorem isUnit_det_hermOf (σ : E →ₐ[F] E) {n : ℕ} (T : Matrix (Fin n) (Fin n) E)
-    (hT : ∀ a b, σ (T b a) = T a b) (hdet : T.det ≠ 0) :
-    IsUnit ((hermOf R σ T hT : Matrix (Fin n) (Fin n) (R ⊗[F] E)).det) := by
-  show IsUnit (T.map (inclR R)).det
-  have e := RingHom.map_det (inclR (F := F) R) T
-  rw [show (inclR (F := F) R).mapMatrix T = T.map (inclR R) from rfl] at e
-  rw [← e]
-  exact (isUnit_iff_ne_zero.2 hdet).map _
 
 def gramH (σ : E →ₐ[F] E) (hσ : ∀ x, σ (σ x) = x) {M n : ℕ} (J : Matrix (Fin M) (Fin M) E)
     (hJ : ∀ i j, σ (J j i) = J i j) (X : Fin n → Fin M → R ⊗[F] E) : HermR R σ n :=

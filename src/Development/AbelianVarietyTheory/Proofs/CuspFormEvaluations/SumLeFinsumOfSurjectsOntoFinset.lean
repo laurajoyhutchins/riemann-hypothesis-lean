@@ -1,30 +1,74 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.ThetaValues.ThConst
-import Development.AbelianVarietyTheory.Definitions.ThetaValues.IsBlockProd
-import Development.AbelianVarietyTheory.Definitions.TorusSections.IsTorusOf
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.ThetaValCAlpha
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.AnChart
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.SupGenTies
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.ThetaWeightBounds
-import Formalism.LocalToGlobal.ProjectiveLattices.SupNDataOfNonneg
-import Formalism.SharpRestriction.Divisibility.GeneratorPowers.ThExprUniqOfChartIndep2
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.SecBaseChangeAnySt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.HolomorphicFamilies.SupGenTies
-import Development.AbelianVarietyTheory.Proofs.TorusSplitting.GCauchyHolds
-import Development.AbelianVarietyTheory.Proofs.TorusSplitting.SemicharUnitFrame
-import Development.AbelianVarietyTheory.Proofs.TorusSplitting.AppellHumbertSectionEntireWithFactor
-import Development.AbelianVarietyTheory.Proofs.TorusSplitting.ThetaFunctionTorusL2Norm
-import Development.AbelianVarietyTheory.Proofs.TorusSplitting.RelabellingGoodEmbeddingIsTypeFn
-import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.ThetaRuleValuePeriods
-import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.PolyDerivLevelSqEqAlpha
-import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.HmEqDiagonal
-import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.ExistsTorusOfRows
-import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.IsTorusAtOfIsTorusOf
-import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.PolyDerivProdFockEqTranslate
-import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.IsPiActLOfIsTorusOf
-import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.IsRepsLevelTranslates
-import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.DatumNsmulEqZero
-import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.DeterminantBlockProductRenameTorusPolynomial
+module
+
+public import Development.AbelianVarietyTheory.Definitions.ThetaValues.ThConst
+public import Development.AbelianVarietyTheory.Definitions.ThetaValues.IsBlockProd
+public import Development.AbelianVarietyTheory.Definitions.TorusSections.IsTorusOf
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.ThetaValCAlpha
+public import Formalism.SharpRestriction.Divisibility.GeneratorPowers.ThExprUniqOfChartIndep2
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.IsotropicCoefficientSplitting
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.NonemptyUnitAt
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SquareIntegrability.TorusAt
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.DatumNsmulEqZero
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.DeterminantBlockProductRenameTorusPolynomial
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.ExistsTorusOfRows
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.HmEqDiagonal
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.IsPiActLOfIsTorusOf
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.IsRepsLevelTranslates
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.IsTorusAtOfIsTorusOf
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.PolyDerivLevelSqEqAlpha
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.PolyDerivProdFockEqTranslate
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.ThetaRuleValuePeriods
+public import Development.AbelianVarietyTheory.Proofs.TorusSplitting.AppellHumbertSectionEntireWithFactor
+public import Development.AbelianVarietyTheory.Proofs.TorusSplitting.GCauchyHolds
+public import Development.AbelianVarietyTheory.Proofs.TorusSplitting.RelabellingGoodEmbeddingIsTypeFn
+public import Development.AbelianVarietyTheory.Proofs.TorusSplitting.SemicharUnitFrame
+public import Development.AbelianVarietyTheory.Proofs.TorusSplitting.ThetaFunctionTorusL2Norm
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Calculus.ContDiff.WithLp
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.FreeModule.IdealQuotient
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.HolomorphicFamilies.SupGenTies
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -158,7 +202,7 @@ theorem differentiable_translate (X : I2.PT E) (q n : ℕ) (π : I2.Vsp X.dim �
     unfold I2.s0
     have hk : ∀ k : Fin n, Differentiable ℂ fun v : Fin n → I2.Vsp X.dim => s fun _ => π (v k) := fun k =>
       hs.comp (differentiable_pi.2 fun _ => hπ.comp (differentiable_apply k))
-    exact fun v => (HasFDerivAt.finset_prod fun k _ => (hk k v).hasFDerivAt).differentiableAt
+    exact fun v => (HasFDerivAt.finsetProd fun k _ => (hk k v).hasFDerivAt).differentiableAt
   have h1 : Differentiable ℂ fun v : Fin n → I2.Vsp X.dim => I2.HC v b := by
     unfold I2.HC I2.Hf
     fun_prop
@@ -185,8 +229,8 @@ theorem theta_law {H : Host E} {Dw : Datum H} {l : Geo.Tor.Level H} {Xo : Moduli
   refine ⟨h1, fun a z => ?_⟩
   rw [h2, GlobalTheory.semichar_unit_frame Xo c σ r U hU k x W Wu hu a, Int.cast_negOnePow]
 
-open Classical in
 
+open Classical in
 theorem value_torus {H : Host E} {Dw : Datum H} (T : I2.PT E) {g n : ℕ} (e : Fin g ≃ Lt1 Dw)
     (ψ : (Fin g → ℂ) ≃ₗ[ℂ] I2.Vsp T.dim) (Hm : Matrix (Fin g) (Fin g) ℂ) (θ : (Fin g → ℂ) → ℂ)
     (hH : ∀ z w, I2.Hf (ψ z) (ψ w) = hermForm Hm z w) (hθ : Differentiable ℂ θ)
@@ -306,7 +350,7 @@ theorem thetaRule_sum_lower : ChartIndepSt2 → ∀ (E : Type) [Field E] [Number
     (fun v hv => by
       obtain ⟨b, rfl⟩ := (hT.2.2.2.1 v).1 hv
       obtain ⟨a, e, rfl⟩ := hms b
-      exact ⟨a, ψ (W.Pm e), (hT.2.2.2.1 _).2 ⟨_, rfl⟩, by rw [map_add, map_add, hnat, hmk]⟩)
+      exact ⟨a, ψ (W.Pm e), (hT.2.2.2.1 _).2 ⟨_, rfl⟩, by rw [map_add (f := _), map_add (f := _), hnat, hmk]⟩)
     x2 hx2a hx2b n
   obtain ⟨κ, hκ, hκm⟩ := exists_kappa c σ hP hP0 hhom (fun τ => relab c σ τ ((H.bar α : 𝓞 E) : E)) l.M
     (fun τ => normSq_emb_bar α l.M hα _)

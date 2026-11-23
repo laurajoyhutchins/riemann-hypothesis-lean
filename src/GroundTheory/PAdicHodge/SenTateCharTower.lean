@@ -1,8 +1,55 @@
-import Mathlib
-import GroundTheory.LocalFields.ConductorMatch
-import GroundTheory.PAdicHodge.FieldOfNormsCyclBase
-import GroundTheory.PAdicHodge.FieldOfNormsRam
-import GroundTheory.PAdicHodge.SenTateCharUnits
+module
+
+public import GroundTheory.LocalFields.ConductorMatch
+public import GroundTheory.PAdicHodge.FieldOfNormsCyclBase
+public import GroundTheory.PAdicHodge.SenTateCharUnits
+public import GroundTheory.LocalFields.Examples
+public import GroundTheory.LocalFields.LocalArtinMap
+public import GroundTheory.PAdicHodge.GaloisOnCp
+public import Mathlib.RingTheory.PicardGroup
+import GroundTheory.LocalFields.ConductorReciprocity
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.MetricSpace.Ultra.TotallySeparated
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -90,14 +137,20 @@ theorem map_mem_charTower (hη : Continuous η) {k : ℕ} (σ : Gal(PadicAlgCl p
 
 section CFT
 
+local instance : ValuativeExtension ℚ_[p] (PadicAlgCl p) := by
+  refine ⟨fun {a b} ↦ ?_⟩
+  rw [vle_iff_norm_le, PadicAlgCl.norm_extends, PadicAlgCl.norm_extends,
+    Valuation.Compatible.vle_iff_le (v := Padic.mulValuation),
+    GroundTheory.LocalField.Padic.mulValuation_le_iff_norm_le]
+
 variable (K) [FiniteDimensional ℚ_[p] K]
 
 def artinGal (n : ℕ) : Subgroup Gal(PadicAlgCl p/K) :=
   ((unitFiltrationUnits K n).map (localArtinMap K (PadicAlgCl p))).comap
     (AlgEquiv.restrictNormalHom (maximalAbelianExtension K (PadicAlgCl p)))
 
-variable (η) in
 
+variable (η) in
 def artinImage (n : ℕ) : Subgroup ℤ_[p]ˣ := (artinGal K n).map η
 
 variable {K}
@@ -109,8 +162,8 @@ variable (η) in
 theorem artinImage_antitone : Antitone (artinImage K η) := fun _ _ h =>
   Subgroup.map_mono (artinGal_antitone h)
 
-omit [FiniteDimensional ℚ_[p] K] in
 
+omit [FiniteDimensional ℚ_[p] K] in
 theorem restrictAb_restrictNormalHom (E : IntermediateField K (PadicAlgCl p)) [Normal K E]
     (h : E ≤ maximalAbelianExtension K (PadicAlgCl p)) (ρ : Gal(PadicAlgCl p/K)) :
     restrictAb E h (AlgEquiv.restrictNormalHom (maximalAbelianExtension K (PadicAlgCl p)) ρ) =
@@ -118,14 +171,14 @@ theorem restrictAb_restrictNormalHom (E : IntermediateField K (PadicAlgCl p)) [N
   ext x
   rw [restrictAb_apply, AlgEquiv.restrictNormalHom_apply, AlgEquiv.restrictNormalHom_apply]
 
-omit [FiniteDimensional ℚ_[p] K] in
 
+omit [FiniteDimensional ℚ_[p] K] in
 theorem eq_one_of_mem_fixingSubgroup_maximalAbelianExtension (hη : Continuous η)
     {ρ : Gal(PadicAlgCl p/K)}
     (hρ : ρ ∈ (maximalAbelianExtension K (PadicAlgCl p)).fixingSubgroup) : η ρ = 1 := by
   rw [fixingSubgroup_maximalAbelianExtension] at hρ
   have hker : (commutator Gal(PadicAlgCl p/K)).topologicalClosure ≤ η.ker := by
-    refine Subgroup.topologicalClosure_minimal _ (Abelianization.commutator_subset_ker η) ?_
+    refine Subgroup.topologicalClosure_minimal _ (Group.Abelianization.commutator_le_ker η) ?_
     rw [MonoidHom.coe_ker]
     exact isClosed_singleton.preimage hη
   exact hker hρ

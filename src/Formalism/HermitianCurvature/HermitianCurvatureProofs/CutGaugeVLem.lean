@@ -1,9 +1,60 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutGaugeCut
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutGaugeCut
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutGaugeGRawSmooth
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.NFRadRedA
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.RestrictionIrrelevantDoubleLevelOperator
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.TwoByOneBlock
 import Formalism.HermitianCurvature.HermitianCurvatureProofs.WeylCellConjTransposeMulApply
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.RestrictionIrrelevantDoubleLevelOperator
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.VectorVanishesBigCell
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.AdjointLeibnizExpansion
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutGaugeGRawSmooth
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Formalism.REAL Formalism.QuantumDeterminants Formalism.FourierDecayAlt
 
@@ -40,8 +91,6 @@ theorem famR_sub {Φ Ψ : Q.Fn P.k P.r (Wq →L[ℂ] Wp)} (hΦ : FamR P Bs Dc Φ
   rw [sub_eq_add_neg]
   exact famR_add hΦ (famR_neg hΨ)
 
-theorem famR_zero (hΦ : FamR P Bs Dc (fun _ _ => 0)) : FamR P Bs Dc 0 := hΦ
-
 theorem famR_opL {Φ : Q.Fn P.k P.r (Wq →L[ℂ] Wp)} (hΦ : FamR P Bs Dc Φ) (a : Fin P.r) (j : Fin 6) :
     FamR P Bs Dc (Q.crd (opL a j) Φ) :=
   ⟨hΦ.1, hΦ.2.1, hΦ.2.2.1, Formalism.FourierDecayAlt.P.family_operators Wp Wq P.k P.r Bs.z Bs.z' Bs.π Bs.π' (Fin.last P.r) Dc Φ
@@ -67,9 +116,6 @@ def Lin (v : PiLp 2 (fun _ : Fin (Module.finrank ℂ Wq) => Wp)) : (Wq →L[ℂ]
   toFun A := inner ℂ v (B.hsVec A)
   map_add' A C := by rw [hsV_add, inner_add_right]
   map_smul' a A := by rw [hsV_smul, inner_smul_right]; rfl
-
-theorem Lin_apply (v : PiLp 2 (fun _ : Fin (Module.finrank ℂ Wq) => Wp)) (A : Wq →L[ℂ] Wp) :
-    Lin v A = inner ℂ v (B.hsVec A) := rfl
 
 variable (P : M.Par)
 
@@ -291,7 +337,7 @@ theorem trR_pb (hpl : Q.IsPlace P Bs.z Bs.z' Bs.π Bs.π') (hk : 2 ≤ P.k) (he 
   simp only [rawR, Q.crd, pbOp, if_pos hc, wirtBar]
   have key : ∀ X : Wq →L[ℂ] Wp, inner ℂ (B.hsVec (e ρ q.1.2)) (B.hsVec X) = Lin (B.hsVec (e ρ q.1.2)) X :=
     fun _ => rfl
-  simp only [key, map_smul, map_add, smul_eq_mul]
+  simp only [key, map_smul, map_add (f := _), smul_eq_mul]
   ring
 
 theorem trR_mul (hpl : Q.IsPlace P Bs.z Bs.z' Bs.π Bs.π') (hk : 2 ≤ P.k) (he : IsFrameB P Bs e)

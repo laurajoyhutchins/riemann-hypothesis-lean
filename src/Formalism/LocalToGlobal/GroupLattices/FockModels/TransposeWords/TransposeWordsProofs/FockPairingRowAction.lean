@@ -1,4 +1,56 @@
-import Formalism.LocalToGlobal.GroupLattices.FockModels.TransposeWords.FockPairingHighestWeight
+module
+
+public import Formalism.LocalToGlobal.GroupLattices.FockModels.TransposeWords.FockPairingHighestWeight
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open MvPolynomial
 
@@ -120,11 +172,11 @@ lemma tsact_rowAct_X (G : Matrix (Fin r) (Fin r) R) (v : Fin r × Fin n) :
   simp [rowAct]
 
 lemma tsact_coeff_zero (G : Matrix (Fin r) (Fin r) R) (h : MvPolynomial (Fin r × Fin n) R) :
-    coeff 0 (rowAct R G h) = coeff 0 h := by
+    AddMonoidAlgebra.coeff (rowAct R G h) 0 = AddMonoidAlgebra.coeff h 0 := by
   show MvPolynomial.constantCoeff (rowAct R G h) = MvPolynomial.constantCoeff h
   induction h using MvPolynomial.induction_on
   next a => simp [rowAct]
-  next p q hp hq => simp only [map_add, hp, hq]
+  next p q hp hq => simp only [map_add (f := _), hp, hq]
   next p v hp => simp [hp, rowAct]
 
 lemma tsact_chain (G : Matrix (Fin r) (Fin r) R) (b : Fin r) (s : Fin n) (h : MvPolynomial (Fin r × Fin n) R) :
@@ -132,11 +184,12 @@ lemma tsact_chain (G : Matrix (Fin r) (Fin r) R) (b : Fin r) (s : Fin n) (h : Mv
   classical
   induction h using MvPolynomial.induction_on with
   | C a => simp [rowAct]
-  | add p q hp hq => simp only [map_add, hp, hq, smul_add, Finset.sum_add_distrib]
+  | add p q hp hq => simp only [map_add (f := _), hp, hq, smul_add, Finset.sum_add_distrib]
   | mul_X p v hp =>
     obtain ⟨c, t⟩ := v
     have hL : pderiv (b, s) (∑ d : Fin r, C (G c d) * X (d, t) : MvPolynomial (Fin r × Fin n) R)
         = if t = s then C (G c b) else 0 := by
+
       rw [map_sum]
       simp only [pderiv_C_mul, pderiv_X, Pi.single_apply, Prod.mk.injEq]
       by_cases hts : t = s
@@ -150,7 +203,7 @@ lemma tsact_chain (G : Matrix (Fin r) (Fin r) R) (b : Fin r) (s : Fin n) (h : Mv
       · subst hts
         simp [apply_ite, Finset.sum_ite_eq, smul_eq_C_mul, mul_comm]
       · simp [hts]
-    simp only [map_mul, Derivation.leibniz, smul_eq_mul, map_add, tsact_rowAct_X, hL, hp]
+    simp only [map_mul, Derivation.leibniz, smul_eq_mul, map_add (f := _), tsact_rowAct_X, hL, hp]
     simp only [smul_add, Finset.sum_add_distrib]
     rw [hR]
     simp only [Finset.mul_sum, Finset.sum_mul, mul_smul_comm]
@@ -166,7 +219,7 @@ theorem fock_pairing_row_action : FockRRowAct := by
     rw [h1, C_apply, tsact_monomial_left, tsact_monomial_left, tsact_coeff_zero]
   | add p q hp hq =>
     intro Q
-    rw [map_add, tsact_add_left, tsact_add_left, hp, hq]
+    rw [map_add (f := _), tsact_add_left, tsact_add_left, hp, hq]
   | mul_X p v hp =>
     intro Q
     rw [map_mul, tsact_rowAct_X, Finset.mul_sum, tsact_sum_left, tsact_X_mul, tsact_chain, tsact_sum_right]

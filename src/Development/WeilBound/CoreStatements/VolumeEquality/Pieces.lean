@@ -1,14 +1,60 @@
-import Development.WeilBound.CoreStatements.VolumeEquality.RootBr
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LocalRingPointsExistsUnique
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.NormalSchemeCoordsInjectiveStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.RingOfIntegersHomInjective
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ConstantsValueOverPointStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HolomorphicCoordsOfGenericPointStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.FibreLatticeBaseChangeConjStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.CuspVolumeLimitStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.MultiprojectivePointsNonemptyStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.ExistsGroupDictionaryStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.ExistsFundamentalSetStatement
+module
+
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsSheetCover
+public import Development.WeilBound.CoreStatements.VolumeEquality.RootBranches
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ConstantsValueOverPointStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HolomorphicCoordsOfGenericPointStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LocalRingPointsExistsUnique
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.MemAbLocusIff
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.NormalSchemeCoordsInjectiveStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.RingOfIntegersHomInjective
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.MultiprojectivePointsNonemptyStatement
+public import Development.WeilBound.CoreStatements.VolumeEquality.RootBr
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.SetTheory.ZFC.PSet
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.AbProj
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.OneArc
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -121,11 +167,11 @@ structure Sheets (FF : Fin B.np → Set (Fin Dc.n → ℂ)) (d : Fin B.np → �
   z_coords : ∀ m, ∀ t ∈ V m, CoordsAt Or.𝔐.ξ Dc.y (z m t) (γ m t)
   z_over : ∀ m, ∀ t ∈ V m, z m t ≫ Or.𝔐.f = B.pt (pc m) t
 
-open Classical in
 
+open Classical in
 def nSheets (U : Y.X.Opens) (k : Fin B.np) : ℕ := if ∃ t ∈ GlobalTheory.CompanionTheory.Ar.Cusp.ballDom (B.F k).q, ⊤ ≤ B.pt k t ⁻¹ᵁ U then Or.deg else 0
 
-set_option maxHeartbeats 1600000 in
+
 theorem exists_sheets (h1 : HolNull) (h2 : ChartMeets) (h3 : RootBranches) (h4 : CoverRoots) (h5 : LocInj)
     (FF : Fin B.np → Set (Fin Dc.n → ℂ)) (hF : ∀ k, (B.F k).IsFundSet (B.Γ k) (FF k)) :
     ∃ U : Y.X.Opens, genPt Or.𝔐.ξ₀ ∈ U ∧ (∀ p : Sp ℂ ⟶ Y.X, ⊤ ≤ p ⁻¹ᵁ U → genPt Or.𝔐.ξ₀ ⤳ centre p) ∧

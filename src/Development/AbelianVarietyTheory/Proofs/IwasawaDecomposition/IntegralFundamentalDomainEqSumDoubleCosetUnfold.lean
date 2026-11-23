@@ -1,5 +1,58 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.IntegralFundamentalDomainEqSumDoubleCoset
+module
+
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.Analysis.InnerProductSpace.Basic
+public import Mathlib.MeasureTheory.Group.FundamentalDomain
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.IntegralFundamentalDomainEqSumDoubleCoset
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open MeasureTheory
 open scoped InnerProductSpace
 
@@ -10,6 +63,9 @@ theorem tsum_indicator_coset_complex {G : Type} [Group G] (Γ K : Subgroup G) (a
     ∑' γ : Γ, ((fun y => a⁻¹ * y) ⁻¹' (K : Set G)).indicator (1 : G → ℂ) (γ • x)
       = ({γ : G | γ ∈ Γ ∧ a⁻¹ * γ * a ∈ K}.ncard : ℂ) *
         {x : G | ∃ γ ∈ Γ, ∃ k ∈ K, x = γ * a * k}.indicator 1 x := by
+  letI : TopologicalSpace G := ⊥
+  letI : DiscreteTopology G := ⟨rfl⟩
+  letI : IsTopologicalGroup G := isTopologicalGroup_of_discreteTopology
   have h := congrArg ENNReal.toReal (GlobalTheory.Ker.tsum_indicator_coset Γ K a hfin x)
   rw [ENNReal.tsum_toReal_eq (fun γ => by
     by_cases hγ : γ • x ∈ (fun y => a⁻¹ * y) ⁻¹' (K : Set G)
@@ -43,7 +99,7 @@ theorem unfold_coset (ν : Measure G) [ν.IsMulLeftInvariant] (Γ K : Subgroup G
   set n := {γ : G | γ ∈ Γ ∧ a⁻¹ * γ * a ∈ K}.ncard with hndef
   have hA : MeasurableSet A := (hK.preimage (continuous_const.mul continuous_id)).measurableSet
   have hC : MeasurableSet C := (GlobalTheory.Ker.isOpen_doubleCoset_of_isOpen Γ K hK a).measurableSet
-  have hn : n ≠ 0 := ((Set.ncard_pos hfin).2 ⟨1, Γ.one_mem, by simpa using K.one_mem⟩).ne'
+  have hn : n ≠ 0 := ((Set.ncard_pos hfin).2 ⟨1, Γ.one_mem, by simp⟩).ne'
   have hcount : ∀ x, ∑' γ : Γ, A.indicator (1 : G → ENNReal) (γ • x) = (n : ENNReal) * C.indicator 1 x :=
     GlobalTheory.Ker.tsum_indicator_coset Γ K a hfin
   have hcountC : ∀ x, ∑' γ : Γ, A.indicator (1 : G → ℂ) (γ • x) = (n : ℂ) * C.indicator 1 x :=
@@ -61,7 +117,7 @@ theorem unfold_coset (ν : Measure G) [ν.IsMulLeftInvariant] (Γ K : Subgroup G
     have : f (γ • x) = f x := hfl γ γ.2 x
     by_cases hx : γ • x ∈ A
     · rw [Set.indicator_of_mem hx, Set.indicator_of_mem hx, Pi.one_apply, one_mul, this]
-    · rw [Set.indicator_of_notMem hx, Set.indicator_of_notMem hx, zero_mul, enorm_zero]
+    · rw [Set.indicator_of_notMem hx, Set.indicator_of_notMem hx, zero_mul, eNorm_zero]
   have hmeasγ : ∀ γ : Γ, AEStronglyMeasurable (fun x => A.indicator f (γ • x)) (ν.restrict 𝓖) := by
     intro γ
     exact (hφ.aestronglyMeasurable.comp_quasiMeasurePreserving
@@ -70,7 +126,7 @@ theorem unfold_coset (ν : Measure G) [ν.IsMulLeftInvariant] (Γ K : Subgroup G
     (h𝓖.lintegral_eq_tsum'' (fun x => ‖A.indicator f x‖ₑ)).symm
   have hlin2 : ∑' γ : Γ, ∫⁻ x in 𝓖, ‖A.indicator f (γ • x)‖ₑ ∂ν
       = (n : ENNReal) * ∫⁻ x in C, ‖f x‖ₑ ∂(ν.restrict 𝓖) := by
-    rw [← lintegral_tsum (fun γ => (hmeasγ γ).enorm)]
+    rw [← lintegral_tsum (fun γ => (hmeasγ γ).eNorm)]
     simp_rw [hptE, ENNReal.tsum_mul_right, hcount]
     rw [← lintegral_indicator hC, ← lintegral_const_mul' _ _ (ENNReal.natCast_ne_top n)]
     refine lintegral_congr fun x => ?_
@@ -79,7 +135,7 @@ theorem unfold_coset (ν : Measure G) [ν.IsMulLeftInvariant] (Γ K : Subgroup G
     · simp [Set.indicator_of_notMem hx]
   have hCU : C = ⋃ γ : Γ, (fun x => (γ : G) * x) ⁻¹' A := by
     ext x
-    simp only [hCdef, hAdef, Set.mem_setOf_eq, Set.mem_iUnion, Set.mem_preimage, SetLike.mem_coe]
+    simp only [hCdef, hAdef, Set.mem_ofPred_eq, Set.mem_iUnion, Set.mem_preimage, SetLike.mem_coe]
     constructor
     · rintro ⟨γ, hγ, k, hk, rfl⟩
       refine ⟨⟨γ⁻¹, Γ.inv_mem hγ⟩, ?_⟩
@@ -124,7 +180,7 @@ theorem integral_fundamentalDomain_eq_sum_unfold : ∀ (G : Type) [Group G] [Top
   have hC : ∀ i, MeasurableSet (C i) := fun i =>
     (GlobalTheory.Ker.isOpen_doubleCoset_of_isOpen Γ Ω hΩ (h i)).measurableSet
   have hpos : ∀ i, {γ : G | γ ∈ Γ ∧ (h i)⁻¹ * γ * h i ∈ Ω}.ncard ≠ 0 := fun i =>
-    ((Set.ncard_pos (hfin i)).2 ⟨1, Γ.one_mem, by simpa using Ω.one_mem⟩).ne'
+    ((Set.ncard_pos (hfin i)).2 ⟨1, Γ.one_mem, by simp⟩).ne'
   have hpre : ∀ i, (fun y => h i * y) ⁻¹' ((fun y => (h i)⁻¹ * y) ⁻¹' (Ω : Set G)) = Ω := by
     intro i; ext k; simp
   have hA : ∀ i, IntegrableOn f ((fun y => (h i)⁻¹ * y) ⁻¹' (Ω : Set G)) ν := by
@@ -152,10 +208,10 @@ theorem integral_fundamentalDomain_eq_sum_unfold : ∀ (G : Type) [Group G] [Top
     (integrable_indicator_iff (hC i)).2 (hU i).1
   refine ⟨?_, ?_⟩
   · rw [IntegrableOn, hF]
-    exact integrable_finset_sum _ fun i _ => hint i
+    exact integrable_finsetSum _ fun i _ => hint i
   · have h1 : ∫ x in 𝓖, f x ∂ν = ∫ x in 𝓖, ∑ i, (C i).indicator f x ∂ν := by
       conv_lhs => rw [hF]
-    rw [h1, integral_finset_sum _ fun i _ => hint i]
+    rw [h1, integral_finsetSum _ fun i _ => hint i]
     refine Finset.sum_congr rfl fun i _ => ?_
     rw [integral_indicator (hC i), ← hAint i, ← (hU i).2]
     have : (({γ : G | γ ∈ Γ ∧ (h i)⁻¹ * γ * h i ∈ Ω}.ncard : ℕ) : ℂ) ≠ 0 := by

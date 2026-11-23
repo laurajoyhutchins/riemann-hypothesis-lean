@@ -1,5 +1,51 @@
-import Development.WeilBound.ThetaLifts.EigenvalueEndgame.UnipotentGroups.IsFrPlane
-import Development.WeilBound.ThetaLifts.CartanFactorisation.IntegrableOnRight
+module
+
+public import Development.WeilBound.ThetaLifts.EigenvalueEndgame.UnipotentGroups.UnipUGood
+public import Development.WeilBound.ThetaLifts.CartanFactorisation.IntegrableOnRight
+public import Development.WeilBound.ThetaLifts.EigenvalueEndgame.UnipotentGroups.ContinuousExpG
+public import Development.WeilBound.ThetaLifts.EigenvalueEndgame.UnipotentGroups.IsFrPlane
+import Development.WeilBound.ThetaLifts.TowerModels.LeviAd
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.Divisors.MatchingOfParts
+
+@[expose] public section
 
 noncomputable section
 
@@ -17,18 +63,6 @@ open PositivityTheory.ThKG.Tow.Levi
 section Abs
 
 variable {G : Type} [Group G] [TopologicalSpace G] [IsTopologicalGroup G] [MeasurableSpace G] [BorelSpace G]
-
-theorem abs_uniq [LocallyCompactSpace G] [SecondCountableTopology G] {Γ : Subgroup G} [Countable Γ] {μ μ' : Measure G}
-    [μ.IsHaarMeasure] [μ'.IsHaarMeasure] {𝓕 𝓕' : Set G} (h2 : IsFundamentalDomain Γ 𝓕 μ) (h3 : μ 𝓕 = 1)
-    (k2 : IsFundamentalDomain Γ 𝓕' μ') (k3 : μ' 𝓕' = 1) {f : G → ℂ} (hf : ∀ γ ∈ Γ, ∀ x, f (γ * x) = f x) :
-    ∫ u in 𝓕, f u ∂μ = ∫ u in 𝓕', f u ∂μ' := by
-  have e := Measure.isMulLeftInvariant_eq_smul μ' μ
-  have k4 : IsFundamentalDomain _ 𝓕 μ' := h2.mono (by rw [e]; exact Measure.smul_absolutelyContinuous)
-  have k5 := k4.measure_eq k2
-  rw [k3, e, Measure.smul_apply, h3, ENNReal.smul_def, smul_eq_mul, mul_one, ENNReal.coe_eq_one] at k5
-  rw [k5, one_smul] at e
-  subst e
-  exact h2.setIntegral_eq k2 fun γ x => hf γ γ.2 x
 
 theorem abs_conj {Γ N N₂ : Subgroup G} {γ : G} (hγ : γ ∈ Γ) (hN : ∀ u, u ∈ N₂ ↔ γ * u * γ⁻¹ ∈ N) (μ : Measure N) (𝓕 : Set N)
     [μ.IsHaarMeasure] (h2 : IsFundamentalDomain (Γ.subgroupOf N) 𝓕 μ) : ∃ (μ₂ : Measure N₂) (𝓕₂ : Set N₂), μ₂.IsHaarMeasure ∧
@@ -80,14 +114,6 @@ theorem ct_inv (hN : UnipGood (unip σ W H)) {f c : UA σ W.J → ℂ} (hf : IsA
   rw [hc μ 𝓕 h1 h2 h3, hc μ 𝓕 h1 h2 h3,
     ← PositivityTheory.ThKF.L2.integral_right h2 (fun v => f (v.1 * h)) (fun γ hγ x => by rw [Subgroup.coe_mul, mul_assoc]; exact hf.2 _ hγ _) ⟨u, hu⟩]
   simp only [Subgroup.coe_mul, mul_assoc]
-
-theorem exists_ct (hN : UnipGood (unip σ W H)) {f : UA σ W.J → ℂ} (hf : IsAut f) : ∃ c, IsCT H f c := by
-  obtain ⟨μ, 𝓕, h1, h2, h3⟩ := hN.ex
-  have := hN.cnt
-  have := hN.lc
-  have := hN.sc
-  exact ⟨fun h => ∫ u in 𝓕, f (u.1 * h) ∂μ, fun μ' 𝓕' k1 k2 k3 h => abs_uniq h2 h3 k2 k3 fun γ hγ x => by
-    rw [Subgroup.coe_mul, mul_assoc]; exact hf.2 _ hγ _⟩
 
 theorem exists_abs_gt : ∃ t : (AE F E)ˣ, 1 < (absE F E t : ℝ) := by
   obtain ⟨w⟩ : Nonempty (InfinitePlace F) := inferInstance

@@ -1,15 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsFramedChartSnc
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsSectionOfChg
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsDerivAt0CompLinear
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EigFrameMatch
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PerValMulWedgeCoord
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsVecEquiv
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ComplexPointsComponentSamePeriodSpaceStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsStalkFactor
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsSectionOfChg
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.PerValNeZero
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ComplexPointsComponentSamePeriodSpaceStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EigFrameMatch
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsFramedChartSnc
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsVecEquiv
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsDerivAt0CompLinear
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PerValMulWedgeCoord
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsFrPtOfEigFrame
 import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsPeriodsInFrameOffBoundary
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.PeriodLinearAlgebraHodgeSequenceExact
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsStalkFactor
 import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HorizontalCoordinateLatticeIsometryDetOne
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExponentialDerivativeAtZeroIsTangent
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -62,7 +102,7 @@ theorem exists_lev {s s' : Sp ℂ ⟶ Sp (KA l)} {o : Obj D l (baseKA l) s} {o' 
     refine eq_zero_of_real_smul_mem u'.Λ fun r => ?_
     rw [smul_sub, ← map_smul φ, ← map_smul T, ← map_smul T', ← map_smul φ]
     exact sub_mem_of_ex_eq u' ((hact a _ _ (hT _)).trans (hT' _).symm)
-  let F : Di.La →ₗ[𝓞 E] Di.La := ⟨⟨f, fun a b => i2 (by rw [map_add, hf, hf, hf, map_add, map_add])⟩, hsm⟩
+  let F : Di.La →ₗ[𝓞 E] Di.La := ⟨⟨f, fun a b => i2 (by rw [map_add (f := _), hf, hf, hf, map_add (f := _), map_add (f := _)])⟩, hsm⟩
   have hb : Function.Bijective F := by
     refine ⟨fun a b h => i1 (φ.injective ?_), fun b => ?_⟩
     · rw [← hf, ← hf]; exact congrArg P' h
@@ -76,16 +116,16 @@ theorem exists_lev {s s' : Sp ℂ ⟶ Sp (KA l)} {o : Obj D l (baseKA l) s} {o' 
     have hm := Submodule.smul_mem_smul hr (Submodule.mem_top (R := 𝓞 E) (x := a₀))
     obtain ⟨e, he⟩ := (r2 _).1 (sub_mem_of_ex_eq u' ((heta _ _ (e1 _ hm)).trans (e2 _ hm).symm))
     have h1 : F (t (r • a₀)) = t (r • a₀) + l.M • e := i2 (by
-      rw [map_add, map_nsmul, he, map_smul φ, ← hf, ← smul_sub, ← Nat.cast_smul_eq_nsmul ℝ, smul_inv_smul₀ hM,
+      rw [map_add (f := _), map_nsmul, he, map_smul φ, ← hf, ← smul_sub, ← Nat.cast_smul_eq_nsmul ℝ, smul_inv_smul₀ hM,
         add_sub_cancel]
       rfl)
     obtain ⟨k, hk⟩ : l.M ∣ l.M' := Nat.dvd_lcm_left _ _
     refine ⟨e + k • (F (r • e₀) - r • e₀), ?_⟩
-    rw [smul_add, ← map_smul t, smul_comm r l.M', map_add, h1, map_nsmul, hk, mul_smul, mul_smul, smul_add, smul_sub,
+    rw [smul_add, ← map_smul t, smul_comm r l.M', map_add (f := _), h1, map_nsmul, hk, mul_smul, mul_smul, smul_add, smul_sub,
       smul_sub]
     abel
   · rintro a b ⟨e, he⟩ ⟨e', he'⟩
-    exact ⟨e + e', by rw [map_add, he, he', smul_add]; abel⟩
+    exact ⟨e + e', by rw [map_add (f := _), he, he', smul_add]; abel⟩
 
 variable {Xo : Moduli D l} {c : Coeff l} {O : Type} [CommRing O] {β : O →+* c.F} {Y : Model Xo c β}
 
@@ -179,6 +219,7 @@ theorem exists_data {U : Set (Xo.XF c)} {τ : E →+* ℂ} {e : c.F →+* ℂ} {
   · rw [← u.full]
     exact congrArg _ (Set.ext fun z => (hmk.2.1 z).symm)
   · show h (P v) = _
+
     rw [hPQ, map_sum]
     simp only [map_smul]
   · obtain ⟨v₀, k1, k2, k3⟩ := hW ⟨τ, k⟩

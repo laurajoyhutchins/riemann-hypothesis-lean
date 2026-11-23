@@ -1,16 +1,64 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IsWeakOfDatum
-import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IsHeatZero
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.ExistsSymplecticBasisOfSelfD
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsCharOfTrace
-import Development.AbelianVarietyTheory.Proofs.HeightProofs.EmbeddingXiZeroNeZero
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.StdCharFinitePartRationalEqExpTrace
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.RationalHermitianRankOneLatticeSelfDual
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.SmulMemOfIsIntegral
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IsWeakOfDatum
+public import Formalism.LocalToGlobal.ProjectiveLattices.HostInt
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.RationalHermitianRankOneLatticeSelfDual
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.StdCharFinitePartRationalEqExpTrace
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.EmbeddingXiZeroNeZero
+import Development.AbelianVarietyTheory.Proofs.HermitianTraceForms.TraceFormDualOneTraceFormDual
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsCharOfTrace
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.ExistsSymplecticBasisOfSelfD
 import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.ExistsInvariantNatLengthLattice
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.HolomorphicFamilies.ModelLatA
-import Formalism.LocalRingCardinality.SpanPowerMembership.Spaces
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.SmulMemOfIsIntegral
 import Formalism.LocalToGlobal.BesselHermitianTheta.LemmasSign
+import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.FactPrincipalDatum
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.HolomorphicFamilies.ModelLatA
+import Std.Tactic.BVDecide.Normalize.BitVec
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.FinTensMemLatO
+
+@[expose] public section
 
 noncomputable section
 
@@ -219,6 +267,65 @@ theorem exists_ctx : ∀ (D : D7) (S T : HSp D) (p q : ℕ) (L : Lt D.host.E T.r
   have hmem : ∀ σ, σ ∈ Ψ ↔ ∃ τ, tauE D τ = ComplexEmbedding.conjugate σ := fun σ => by
     simp only [hΨ, Finset.mem_image, Finset.mem_univ, true_and]
     exact exists_congr fun τ => ⟨fun h => by rw [← h, hcc], fun h => by rw [h, hcc]⟩
+  have hfull : ∀ (V : HSp D) (Λ : Submodule (𝓞 D.host.E) (Fin V.rank → D.host.E)),
+      IsSelfDualC V Λ → Submodule.IsFullLattice D.host.E Λ := by
+    intro V Λ hΛ
+    haveI : Submodule.IsLattice D.host.E Λ := hΛ.1
+    refine ⟨?_⟩
+    obtain ⟨s, hs⟩ := hΛ.1.fg
+    apply eq_top_iff.mpr
+    intro y _
+    let f : (Fin V.rank → D.host.E) → D.host.E := fun x =>
+      ∑ i, ∑ j, star (x i) * V.gram i j * y j
+    obtain ⟨a, ha⟩ := IsLocalization.exist_integer_multiples (nonZeroDivisors (𝓞 D.host.E)) s f
+    have ha0 : (algebraMap (𝓞 D.host.E) D.host.E a) ≠ 0 := by
+      exact (FaithfulSMul.algebraMap_injective _ _).ne (mem_nonZeroDivisors_iff_ne_zero.mp a.2)
+    let P : Submodule (𝓞 D.host.E) (Fin V.rank → D.host.E) := {
+      carrier := {x | ∃ b : 𝓞 D.host.E, (b : D.host.E) = (algebraMap (𝓞 D.host.E) D.host.E a) * f x}
+      zero_mem' := by refine ⟨0, ?_⟩; simp [f]
+      add_mem' := by
+        rintro x z ⟨b, hb⟩ ⟨c, hc⟩
+        refine ⟨b + c, ?_⟩
+        change (b : D.host.E) + c = _
+        rw [hb, hc]
+        simp [f, map_add, add_mul, Finset.sum_add_distrib, mul_add]
+      smul_mem' := by
+        rintro c x ⟨b, hb⟩
+        refine ⟨RingOfIntegers.mapRingHom (starRingEnd D.host.E) c * b, ?_⟩
+        simp only [map_mul, hb, f, Pi.smul_apply, Algebra.smul_def, map_mul, RingOfIntegers.mapRingHom_apply, star_mul]
+        simp only [Finset.mul_sum]
+        apply Finset.sum_congr rfl
+        intro i _
+        apply Finset.sum_congr rfl
+        intro j _
+        change star (c : D.host.E) * _ = _
+        ring }
+    have hsP : (s : Set (Fin V.rank → D.host.E)) ⊆ P := by
+      intro x hx
+      obtain ⟨b, hb⟩ := ha x hx
+      exact ⟨b, by simpa [Algebra.smul_def] using hb⟩
+    have hy : (algebraMap (𝓞 D.host.E) D.host.E a) • y ∈ Λ := by
+      apply (hΛ.2 _).2
+      intro x hx
+      have hxP : x ∈ P := (hs ▸ Submodule.span_le.mpr hsP) hx
+      obtain ⟨b, hb⟩ := hxP
+      refine ⟨b, ?_⟩
+      rw [hb]
+      dsimp only [f, Pi.smul_apply]
+      simp only [smul_eq_mul, Finset.mul_sum]
+      apply Finset.sum_congr rfl
+      intro i _
+      apply Finset.sum_congr rfl
+      intro j _
+      ring
+    have hy' : (algebraMap (𝓞 D.host.E) D.host.E a) • y ∈ Submodule.span D.host.E (Λ : Set (Fin V.rank → D.host.E)) :=
+      Submodule.subset_span hy
+    have := (Submodule.span D.host.E (Λ : Set (Fin V.rank → D.host.E))).smul_mem
+      (algebraMap (𝓞 D.host.E) D.host.E a)⁻¹ hy' 
+    change (algebraMap (𝓞 D.host.E) D.host.E a)⁻¹ •
+      ((algebraMap (𝓞 D.host.E) D.host.E a) • y) ∈ _ at this
+    rw [← smul_assoc, smul_eq_mul, inv_mul_cancel₀ ha0, one_smul] at this
+    exact this
   obtain ⟨X, hXΨ, hG, hp, hΛ, -, hκ, -⟩ := GlobalTheory.FlagData.exists_data GlobalTheory.latMinkowski D.host.E T.rank p 3 (3 * N)
     Ψ T.gramᵀ (mulAA D L) D.host.xi0 (2 * D.host.xi0)
     (fun σ => by
@@ -237,7 +344,7 @@ theorem exists_ctx : ∀ (D : D7) (S T : HSp D) (p q : ℕ) (L : Lt D.host.E T.r
         · exact hB τ
         · rw [← IsCMField.complexEmbedding_complexConj]
           exact congrArg _ (GlobalTheory.LatVac.gram_star T a b))
-    (mulAA_fg hL.1.fg) (mulAA_span hL.1.span_eq_top) le_rfl (conj_xi0_alt D) (cmHost_imaginaryGenerator_ne_zero hP D) (Or.inl rfl)
+    (mulAA_fg hL.1.fg) (mulAA_span (hfull T L hL).span_eq_top) le_rfl (conj_xi0_alt D) (cmHost_imaginaryGenerator_ne_zero hP D) (Or.inl rfl)
     (fun σ hσ => by
       obtain ⟨τ, -, rfl⟩ := Finset.mem_image.1 hσ
       have := xi_zero_im_pos D τ

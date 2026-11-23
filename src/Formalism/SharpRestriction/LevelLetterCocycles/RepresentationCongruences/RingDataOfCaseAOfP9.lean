@@ -1,5 +1,50 @@
-import Formalism.SharpRestriction.LevelLetterCocycles.RepresentationCongruences.GammaPi0EqPi0MulUnit
-import Formalism.SharpRestriction.LevelLetterCocycles.FrobeniusPowUniformizerFactorisation
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.RepresentationCongruences.GammaPi0EqPi0MulUnit
+public import Formalism.SharpRestriction.LevelLetterCocycles.FrobeniusPowUniformizerFactorisation
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PowerSeries.NoZeroDivisors
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -125,11 +170,11 @@ theorem cc_φpow (hR : RD W) (m : ℕ) (i : ZMod n) : constantCoeff ((W.φA ^ m)
 theorem ps_letter (m : ℕ) (i : ZMod n) :
     ps W m i = (W.φA ^ m) W.π₀ i + C ((PD.p : ℕ) : O) := by
   show ((W.φA ^ m) (W.π₀ + ((PD.p : ℕ) : LetA O n))) i = _
-  simp only [map_add, map_natCast, Pi.add_apply, Pi.natCast_apply]
+  simp only [map_add (f := _), map_natCast, Pi.add_apply, Pi.natCast_apply]
 
 theorem dist_ps (hR : RD W) (m : ℕ) (hD : ∀ i, ((W.φA ^ m) W.π₀ i).map (IsLocalRing.residue O) ≠ 0)
     (i : ZMod n) : (ps W m i).map (IsLocalRing.residue O) ≠ 0 := by
-  rw [ps_letter, map_add, PowerSeries.map_C]
+  rw [ps_letter, map_add (f := _), PowerSeries.map_C]
   intro h0
   have hcc : ∀ f : PowerSeries O, PowerSeries.constantCoeff (PowerSeries.map (IsLocalRing.residue O) f) =
       IsLocalRing.residue O (PowerSeries.constantCoeff f) := by
@@ -138,7 +183,7 @@ theorem dist_ps (hR : RD W) (m : ℕ) (hD : ∀ i, ((W.φA ^ m) W.π₀ i).map (
       PowerSeries.coeff_zero_eq_constantCoeff_apply]
   have hc : IsLocalRing.residue O ((PD.p : ℕ) : O) = 0 := by
     have := congrArg PowerSeries.constantCoeff h0
-    rw [map_add, PowerSeries.constantCoeff_C, hcc, cc_φpow hR m i, map_zero, zero_add, map_zero] at this
+    rw [map_add (f := _), PowerSeries.constantCoeff_C, hcc, cc_φpow hR m i, map_zero, zero_add, map_zero] at this
     exact this
   rw [hc, map_zero, add_zero] at h0
   exact hD i h0
@@ -200,6 +245,7 @@ theorem sat_A_core (hR : RD W) (hp0 : ((PD.p : ℕ) : O) ≠ 0) {f z y : LetA O 
   have hS : ∀ δ' ∈ W.DelF, ∀ x : PowerSeries O,
       W.γ₀ δ' (∑ δ ∈ W.DelF, W.γ₀ δ x) = ∑ δ ∈ W.DelF, W.γ₀ δ x := by
     intro δ' hδ' x
+
     rw [map_sum]
     refine Finset.sum_nbij' (fun δ => δ' * δ) (fun δ => δ'⁻¹ * δ) ?_ ?_ ?_ ?_ ?_
     · intro a ha
@@ -232,13 +278,13 @@ theorem sat_A_core (hR : RD W) (hp0 : ((PD.p : ℕ) : O) ≠ 0) {f z y : LetA O 
     rw [hγ]
     show W.γ₀ δ W.π₀₁ = W.π₀₁
     unfold Formalism.BasicNotions.LocWach.π₀₁
-    rw [map_add, map_sub, map_one, map_natCast, hS δ hδ]
+    rw [map_add (f := _), map_sub, map_one, map_natCast, hS δ hδ]
   have hps : ∀ m, ps W m ∈ W.AΔ := by
     intro m
     rw [memΔ]
     intro δ hδ
     show W.γA δ ((W.φA ^ m) (qA W)) = (W.φA ^ m) (qA W)
-    rw [hcommP, qA, lA, map_add, map_natCast, (memΔ _).1 hπ₀ δ hδ]
+    rw [hcommP, qA, lA, map_add (f := _), map_natCast, (memΔ _).1 hπ₀ δ hδ]
   have hPi : PiPs W ≤ W.AΔ.toSubmonoid := by
     unfold PiPs
     rw [Submonoid.closure_le]

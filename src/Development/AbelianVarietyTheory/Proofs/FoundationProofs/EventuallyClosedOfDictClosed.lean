@@ -1,8 +1,64 @@
-import Mathlib
-import Formalism.LocalRingCardinality.RankBoundMonotoneInDimension
-import Development.AbelianVarietyTheory.BlockTheory.TorsionBlocks.WeightDictionaryLifting
+module
+
+public import Formalism.WeaklyAdmissibleFiltrations.Statement
+public import Mathlib.FieldTheory.Minpoly.Field
+public import Mathlib.RingTheory.SimpleRing.Principal
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.SecondTwistSmallIffExactlyAtAndFinClause
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.BlockTheory.TorsionBlocks.JumpDictionary
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.SecondTwistSmallIffExactlyAtAndFinClause
+public import Formalism.SharpRestriction.ParConsts
+
+@[expose] public section
 
 noncomputable section
 
@@ -47,15 +103,16 @@ theorem finrank_eq_sum_emb (hcard : Fintype.card (K →ₐ[Qp] LL) = finrank Qp 
     induction z using TensorProduct.induction_on with
     | zero => simp
     | tmul a c => rw [hΨ]; exact U.smul_mem _ (hU c x hx)
-    | add y z hy hz => rw [map_add]; exact U.add_mem hy hz
+    | add y z hy hz => rw [map_add (f := _)]; exact U.add_mem hy hz
   have hΨE : ∀ τ z, ∀ x ∈ E τ, Ψ z x = Φ z τ • x := by
     intro τ z x hx
     induction z using TensorProduct.induction_on with
     | zero => simp
     | tmul a c => rw [hΨ, hΦ, ((hE τ x).1 hx).2 c, smul_smul]
-    | add y z hy hz => simp only [map_add, LinearMap.add_apply, Pi.add_apply, hy, hz, add_smul]
+    | add y z hy hz => simp only [map_add (f := _), LinearMap.add_apply, Pi.add_apply, hy, hz, add_smul]
   choose e he using fun τ : K →ₐ[Qp] LL => hsurj (Pi.single τ 1)
   have he1 : ∑ τ, e τ = 1 := hinj (by
+
     rw [map_sum, map_one]
     simp only [he]
     exact Finset.univ_sum_single (fun _ => (1 : LL)))
@@ -76,9 +133,11 @@ theorem finrank_eq_sum_emb (hcard : Fintype.card (K →ₐ[Qp] LL) = finrank Qp 
       invFun := fun y => ⟨∑ τ, (y τ : M), U.sum_mem fun τ _ => ((hE τ _).1 (y τ).2).1⟩
       left_inv := fun x => Subtype.ext (by
         change ∑ τ, Ψ (e τ) x = x
+
         rw [← LinearMap.sum_apply, ← map_sum, he1, map_one, Module.End.one_apply])
       right_inv := fun y => funext fun τ => Subtype.ext (by
         change Ψ (e τ) (∑ σ, (y σ : M)) = y τ
+
         rw [map_sum, Finset.sum_eq_single τ]
         · rw [hΨE τ _ _ (y τ).2, he]; simp
         · intro σ _ h
@@ -99,12 +158,12 @@ theorem finrank_eq_one_of_jump {L M : Type} [Field L] [AddCommGroup M] [Module L
     Submodule.eq_of_le_of_finrank_eq (anti a) (by have := h a; rw [if_neg ha] at this; omega)
   have hlo : ∀ a ≤ a₀, F a = F a₀ := by
     intro a ha
-    induction a, ha using Int.le_induction_down with
+    induction a, ha using Int.leInductionDown with
     | base => rfl
     | pred a ha ih => rw [← ih, ← hs (a - 1) (by omega), sub_add_cancel]
   have hhi : ∀ a, a₀ + 1 ≤ a → F a = F (a₀ + 1) := by
     intro a ha
-    induction a, ha using Int.le_induction with
+    induction a, ha using Int.leInduction with
     | base => rfl
     | succ a ha ih => rw [← ih, hs a (by omega)]
   have h1 : U = F a₀ := le_antisymm (fun x hx => by
@@ -148,7 +207,7 @@ theorem filV_sep (x : V ⊗[Qp] BdR) (hx : ∀ a, x ∈ FilV PD (LL := LL) (V :=
       rw [equivFinsuppOfBasisLeft_apply_tmul_apply]
       exact ((PD.Fil a).restrictScalars Qp).smul_mem _ c.2
     exact this
-  | add y z hy hz => rw [map_add, map_add, Finsupp.add_apply]; exact Submodule.add_mem _ hy hz
+  | add y z hy hz => rw [map_add (f := _), map_add (f := _), Finsupp.add_apply]; exact Submodule.add_mem _ hy hz
 
 theorem finrank_ddR_of_one_jump [FiniteDimensional Qp K] (hcard : Fintype.card (K →ₐ[Qp] LL) = finrank Qp K)
     (ρ : Representation LL G V)
@@ -183,7 +242,7 @@ theorem finrank_ddR_of_one_jump [FiniteDimensional Qp K] (hcard : Fintype.card (
     induction x using TensorProduct.induction_on with
     | zero => simp
     | tmul v b => simp [m, hm, actVdR]
-    | add y z hy hz => simp only [map_add, hy, hz]
+    | add y z hy hz => simp only [map_add (f := _), hy, hz]
   rw [finrank_eq_sum_emb hcard m (DdR PD ρ) (fun c x hx => (hD _).2 fun g => by rw [hc, (hD x).1 hx g])
     (DdRE PD ρ) (fun τ x => by
       simp only [DdRE, Submodule.mem_inf, Submodule.mem_iInf, LinearMap.mem_ker, LinearMap.sub_apply,
@@ -195,60 +254,11 @@ end Periods
 
 variable (D : D7)
 
-theorem embOver_true (ρ : D.what₂.Tau) :
-    JumpDictionary.embOver D ρ true = (starRingEnd ℂ).comp (WeightDictionaryLifting.embOf D ρ) :=
-  RingHom.ext fun x => D.host.conjE_apply (WeightDictionaryLifting.embOf D ρ) x
-
-theorem conj_conj (φ : D.host.E →+* ℂ) : (starRingEnd ℂ).comp ((starRingEnd ℂ).comp φ) = φ :=
-  RingHom.ext fun x => by simp
-
-theorem conj_mem_iff (φ : D.host.E →+* ℂ) :
-    (starRingEnd ℂ).comp φ ∈ D.host.cmType ↔
-      φ ∉ D.host.cmType := by
-  have h0 : D.host.φ₀ (D.host.sqd) = _ := D.host.φ₀_mem
-  have hd : (0 : ℝ) < Real.sqrt D.host.d := Real.sqrt_pos.2 (by exact_mod_cast D.host.hyp.2.1.pos)
-  have hs : ((Real.sqrt D.host.d : ℝ) : ℂ) ^ 2 = (D.host.d : ℂ) := by
-    rw [← Complex.ofReal_pow, Real.sq_sqrt (Nat.cast_nonneg _)]; simp
-  have h1 : (D.host.sqd) ^ 2 = -(D.host.d : D.host.E) :=
-    D.host.φ₀.injective (by rw [map_pow, h0, mul_pow, hs, map_neg, map_natCast]; simp)
-  have h2 : φ (D.host.sqd) ^ 2 =
-      (Complex.I * (Real.sqrt D.host.d : ℂ)) ^ 2 := by
-    rw [← map_pow, h1, mul_pow, hs, map_neg, map_natCast]; simp
-  simp only [Formalism.HC.HostRaw.cmType, Set.mem_setOf_eq, RingHom.comp_apply]
-  have hne : Complex.I * (Real.sqrt D.host.d : ℂ) ≠ -(Complex.I * (Real.sqrt D.host.d : ℂ)) := fun h => by
-    have := congrArg Complex.im h
-    simp only [Complex.neg_im, Complex.I_mul_im, Complex.ofReal_re] at this
-    linarith
-  have hc : starRingEnd ℂ (Complex.I * (Real.sqrt D.host.d : ℂ)) = -(Complex.I * (Real.sqrt D.host.d : ℂ)) := by
-    rw [map_mul, Complex.conj_I, Complex.conj_ofReal, neg_mul]
-  rcases sq_eq_sq_iff_eq_or_eq_neg.1 h2 with h | h
-  · rw [h, hc]
-    exact ⟨fun h' => absurd h'.symm hne, fun h' => absurd rfl h'⟩
-  · rw [h, map_neg, hc, neg_neg]
-    exact ⟨fun _ h' => hne h'.symm, fun _ => rfl⟩
-
-theorem exists_embOver (φ : D.host.E →+* ℂ) : ∃ ρ b, φ = JumpDictionary.embOver D ρ b := by
-  have key : ∀ ψ ∈ D.host.cmType, ∃ ρ, ψ = WeightDictionaryLifting.embOf D ρ := by
-    intro ψ hψ
-    obtain ⟨g, rfl⟩ := (factEmb D.R D.host).1.2 ψ
-    refine ⟨D.eTau.symm ⟨g, ((factEmb D.R D.host).2 g).1 hψ⟩, ?_⟩
-    simp [WeightDictionaryLifting.embOf]
-  by_cases h : φ ∈ D.host.cmType
-  · obtain ⟨ρ, hρ⟩ := key φ h
-    exact ⟨ρ, false, hρ⟩
-  · obtain ⟨ρ, hρ⟩ := key _ ((conj_mem_iff D φ).2 h)
-    exact ⟨ρ, true, by rw [embOver_true, ← hρ, conj_conj]⟩
-
 section Local
 
 variable (i : D.nd.Loc) (w : HeightOneSpectrum (𝓞 D.host.E)) (hw : w ∈ placesOver D.host.E (D.nd.l i))
 
 end Local
-
-def EtaParam : Prop :=
-  ∀ (_ : D.nd.Loc) (ρ : D.what₂.Tau),
-    D.naut.infG D.naut.etaTinv (JumpDictionary.embOver D ρ false) = {-(1 / 2 : ℂ)} ∧
-    D.naut.infG D.naut.etaTinv (JumpDictionary.embOver D ρ true) = {(1 / 2 : ℂ)}
 
 section Family
 

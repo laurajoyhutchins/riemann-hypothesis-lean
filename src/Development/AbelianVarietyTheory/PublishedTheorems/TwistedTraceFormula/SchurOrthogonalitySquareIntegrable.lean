@@ -1,8 +1,54 @@
-import Mathlib
-import Formalism.SharpRestriction.CuspSpanNormBounds.RelevantZeroGramTerms
-import Formalism.RealPlaceAnalysis.RealPlaceTaylor.ModularCharacterEqOneOnExpHermitian
-import Development.AbelianVarietyTheory.Proofs.HeightProofs.HilbertSchurUnitaryIrreducibleScalar
-import Development.AbelianVarietyTheory.Proofs.HeightProofs.SchurOrthogonalityIndefiniteUnitaryGroup
+module
+
+public import Mathlib.Analysis.CStarAlgebra.Module.Constructions
+public import Mathlib.Analysis.Normed.Lp.ProdLp
+public import Mathlib.MeasureTheory.Integral.Bochner.Basic
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.HilbertSchurUnitaryIrreducibleScalar
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.SchurOrthogonalityIndefiniteUnitaryGroup
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.MeasureTheory.Function.L2Space
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MeasureTheory
 open scoped InnerProductSpace
@@ -37,7 +83,8 @@ theorem isInvInvariant_of_unimodular {G : Type*} [Group G] [TopologicalSpace G] 
   let c : ENNReal := Measure.haarScalarFactor μ.inv μ
   have hc : μ.inv = c • μ := Measure.isMulLeftInvariant_eq_smul_of_regular μ.inv μ
   have h1 : Measure.map Inv.inv (Measure.map Inv.inv μ) = c ^ 2 • μ := by
-    rw [← Measure.inv_def μ, hc, Measure.map_smul, ← Measure.inv_def μ, hc, smul_smul, pow_two]
+    rw [← Measure.inv_def μ, hc, Measure.map_smul c continuous_inv.measurable.aemeasurable,
+      ← Measure.inv_def μ, hc, smul_smul, pow_two]
   have μeq : μ = c ^ 2 • μ := by
     rw [Measure.map_map continuous_inv.measurable continuous_inv.measurable] at h1
     simpa only [inv_involutive, Function.Involutive.comp_self, Measure.map_id] using h1
@@ -65,7 +112,7 @@ def coefGraph (μ : Measure G) (π : G → (H →L[ℂ] H)) (w : H) :
     intro a b ha hb
     change ((a.snd + b.snd : Lp ℂ 2 μ) : G → ℂ) =ᵐ[μ] fun g => ⟪w, π g (a.fst + b.fst)⟫_ℂ
     filter_upwards [Lp.coeFn_add a.snd b.snd, ha, hb] with g h1 h2 h3
-    rw [h1, Pi.add_apply, h2, h3, map_add, inner_add_right]
+    rw [h1, Pi.add_apply, h2, h3, map_add (f := _), inner_add_right]
   smul_mem' := by
     intro c a ha
     change ((c • a.snd : Lp ℂ 2 μ) : G → ℂ) =ᵐ[μ] fun g => ⟪w, π g (c • a.fst)⟫_ℂ
@@ -185,25 +232,6 @@ theorem memLp_coef [CompleteSpace H] [MeasurableMul G] [MeasurableInv G] [μ.IsM
     rw [SchurOrth.inner_rep π hπ, inv_inv]
     exact inner_conj_symm _ _
   exact memLp_coef_right π hπ hirr hw₀ h2 v
-
-example [MeasurableSpace Circle] [BorelSpace Circle] : ∃ π : Circle →* (ℂ →L[ℂ] ℂ),
-    (∀ g, π g 1 = g) ∧ (∀ g v, ‖π g v‖ = ‖v‖) ∧ (∀ v, Continuous fun g => π g v) ∧
-    (∀ S : Submodule ℂ ℂ, IsClosed (S : Set ℂ) → (∀ g, ∀ v ∈ S, π g v ∈ S) → S = ⊥ ∨ S = ⊤) ∧
-    ∃ v₀ w₀ : ℂ, v₀ ≠ 0 ∧ w₀ ≠ 0 ∧
-      MemLp (fun g => ⟪w₀, π g v₀⟫_ℂ) 2 (Measure.haar : Measure Circle) := by
-  let π : Circle →* (ℂ →L[ℂ] ℂ) :=
-    { toFun := fun g => (g : ℂ) • (1 : ℂ →L[ℂ] ℂ)
-      map_one' := by simp
-      map_mul' := fun a b => by simp [smul_smul, mul_comm] }
-  have hπ : ∀ g v, π g v = (g : ℂ) * v := fun g v => rfl
-  have hc : ∀ v, Continuous fun g => π g v := fun v => by
-    simp only [hπ]
-    exact continuous_subtype_val.mul continuous_const
-  refine ⟨π, fun g => by simp [hπ], fun g v => by rw [hπ, norm_mul, Circle.norm_coe, one_mul], hc,
-    fun S _ _ => Ideal.eq_bot_or_top S, 1, 1, one_ne_zero, one_ne_zero, ?_⟩
-  refine MemLp.of_bound (continuous_const.inner (hc 1)).aestronglyMeasurable 1
-    (Filter.Eventually.of_forall fun g => ?_)
-  rw [hπ, mul_one, RCLike.inner_apply, map_one, mul_one, Circle.norm_coe]
 
 end SqIntRep
 

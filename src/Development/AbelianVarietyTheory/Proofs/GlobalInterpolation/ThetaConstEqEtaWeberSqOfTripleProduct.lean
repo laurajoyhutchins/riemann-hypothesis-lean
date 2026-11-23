@@ -1,7 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.BlockTheory.GlobalSignature.ThetaConstantWeber
-import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.ThetaLine
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.DifferentiableOddTheta
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.GlobalSignature.ThetaConstantWeber
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.DifferentiableOddTheta
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open Complex
 open UpperHalfPlane hiding I
 open scoped Real
@@ -146,7 +190,7 @@ private lemma thetaConst_zero_zero_eq_eta_mul_weberF_sq (hTP : _root_.GlobalTheo
     refine ((hΘ.mul hA).unique ?_).trans (sq _).symm
     convert hB.mul hB using 1
     funext n
-    simp only [Odd.neg_pow (⟨n, rfl⟩ : Odd (2 * n + 1)),
+    rw [Odd.neg_pow (⟨n, by ring⟩ : Odd (2 * n + 1)),
       Even.neg_pow (⟨n + 1, by ring⟩ : Even (2 * n + 2)), ← pow_mul]
     ring
   have e₂ : cexp (2 * ↑Real.pi * I * (((τ : ℂ) + 1) / 2)) = -q := by
@@ -189,8 +233,6 @@ private lemma thetaConst_zero_one_eq_eta_mul_weberF₁_sq (hTP : _root_.GlobalTh
       (∏' n : ℕ, (1 - q ^ (n + 1))) ^ 2 := by
     refine ((hΘ.mul hA).unique ?_).trans (sq _).symm
     convert hB.mul hB using 1
-    funext n
-    simp only [← pow_mul]
     ring
   have e₂ : cexp (2 * ↑Real.pi * I * ((τ : ℂ) / 2)) = q := by
     rw [hqdef]; congr 1; ring
@@ -225,7 +267,7 @@ private lemma thetaConst_one_zero_eq_eta_mul_weberF₂_sq (hTP : _root_.GlobalTh
   have hg : HasProd (fun n : ℕ => 1 + q ^ (2 * n))
       (2 * ∏' k : ℕ, (1 + q ^ (2 * k + 2))) := by
     have h := HasProd.zero_mul (f := fun n : ℕ => 1 + q ^ (2 * n)) (by
-      convert hC using 2 with n; ring_nf)
+      convert hC using 2 with n)
     convert h using 1; norm_num
   have hA := hasProd_one_sub_pow_succ_of_norm_lt_one (y := q ^ 2) (by rw [norm_pow]; nlinarith [norm_nonneg q])
   have hD := hasProd_one_sub_pow_succ_of_norm_lt_one (y := q ^ 4) (by
@@ -234,15 +276,11 @@ private lemma thetaConst_one_zero_eq_eta_mul_weberF₂_sq (hTP : _root_.GlobalTh
       (∏' n : ℕ, (1 - (q ^ 4) ^ (n + 1))) * (2 * ∏' k : ℕ, (1 + q ^ (2 * k + 2))) := by
     refine hθ.unique ?_
     convert hD.mul hg using 1
-    funext n
-    simp only [← pow_mul]
     ring
   have h₂ : (∏' n : ℕ, (1 - (q ^ 2) ^ (n + 1))) * (∏' k : ℕ, (1 + q ^ (2 * k + 2))) =
       ∏' n : ℕ, (1 - (q ^ 4) ^ (n + 1)) := by
     refine (hA.mul hC).unique ?_
     convert hD using 1
-    funext n
-    simp only [← pow_mul]
     ring
   have hc : ((√2 : ℝ) : ℂ) ^ 2 = 2 := by
     rw [← Complex.ofReal_pow, Real.sq_sqrt (by norm_num)]; norm_num

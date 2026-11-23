@@ -1,8 +1,56 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HeightComparison.HeightOrbitCenterChart
-import GroundTheory.HeightsAndTheta.Heights.HeightComparison.POrbitChartMax
-import GroundTheory.HeightsAndTheta.Heights.HeightComparison.POrbitCenterMemIff
-import GroundTheory.HeightsAndTheta.Heights.HeightComparison.POrbitCenterDivSuppLemmas
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HeightComparison.HeightOrbitCenterChart
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PMinimalPrimeMultiHomog
+public import GroundTheory.HeightsAndTheta.Heights.HeightComparison.POrbitCenterDivSuppLemmas
+public import GroundTheory.HeightsAndTheta.Heights.HeightComparison.POrbitCenterMemIff
+public import GroundTheory.HeightsAndTheta.Heights.HeightComparison.POrbitChartMax
+import GroundTheory.HeightsAndTheta.Heights.HeightComparison.POrbitCurve
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.IsMultiHomogIdealSpanSingleton
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -22,7 +70,7 @@ theorem OrbitCenterChart.proof : OrbitCenterChart.Statement := by
     have hJ : NumbersDVR.IsMultiHomogIdeal (ι := blockIdx n) (orbitIdeal x ⊔ Ideal.span {s}) := by
       intro f hf b
       obtain ⟨p, hp, t, ht, rfl⟩ := Submodule.mem_sup.mp hf
-      rw [map_add]
+      rw [map_add (f := _)]
       exact Submodule.add_mem_sup (OrbitCurve.weightedHomogeneousComponent_mem_orbitIdeal x hp b)
         (NumbersDVR.isMultiHomogIdeal_span_singleton (e := a) hsa' t ht b)
     exact NumbersDVR.MinimalPrimeMultiHomog.proof ℤ ι (blockIdx n) _ V hJ hVmin
@@ -36,8 +84,9 @@ theorem OrbitCenterChart.proof : OrbitCenterChart.Statement := by
 
   have hVzero : ∀ f ∈ V, aeval (dehomCoords (genPt V) c) f = 0 := by
     intro f hf
+
     rw [← sum_weightedHomogeneousComponent (w := coordDeg n) f,
-      finsum_eq_sum _ (weightedHomogeneousComponent_finsupp f), map_sum]
+    finsum_eq_sum _ (weightedHomogeneousComponent_finsupp f), map_sum]
     refine Finset.sum_eq_zero fun b _ ↦ ?_
     exact (aeval_dehomCoords_of_homog (genPt V) c
       (weightedHomogeneousComponent_isWeightedHomogeneous b f)).trans

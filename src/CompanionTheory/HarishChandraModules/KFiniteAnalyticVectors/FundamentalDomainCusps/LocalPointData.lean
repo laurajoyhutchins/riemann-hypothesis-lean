@@ -1,6 +1,54 @@
-import CompanionTheory.HarishChandraModules.KFiniteAnalyticVectors.FundamentalDomainCusps.LogNormEstimates
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicClassFiniteness.DictGen
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CasimirReductionTheory.OneParameterDerivatives.TauReduction.BlockGramReduction.MemIntegersOfMemIntAd
+module
+
+public import CompanionTheory.HarishChandraModules.KFiniteAnalyticVectors.FundamentalDomainCusps.ShortIsot
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicClassFiniteness.DictPlan
+public import CompanionTheory.HarishChandraModules.KFiniteAnalyticVectors.FundamentalDomainCusps.LogNormEstimates
+import Formalism.LocalToGlobal.SiegelLatticeTheory.CasimirReductionTheory.OneParameterDerivatives.TauReduction.BlockGramReduction.EmbeddingLinearIndependent
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CasimirReductionTheory.OneParameterDerivatives.TauReduction.BlockGramReduction.MemIntegersOfMemIntAd
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicClassFiniteness.DictGen
+public import Formalism.SatakeDualWeyl.KpqSubgroupCompact
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.LocalToGlobal.SiegelLatticeTheory.CasimirReductionTheory.OneParameterDerivatives.TauReduction.Imports
+
+@[expose] public section
 
 open Matrix MeasureTheory NumberField Topology Module
 open scoped TensorProduct
@@ -13,6 +61,7 @@ open Formalism.MainNotions.S Formalism.MainNotions.LeviCoordinates Formalism.L2.
 
 theorem atV_sum (I : AutInst) (v : InfinitePlace I.F) {d : ℕ} (a : Fin d → I.E) (w : Fin d → Fin I.n → I.E) :
     atV I v (∑ i, a i • w i) = ∑ i, I.φ v (a i) • atV I v (w i) := by
+
   simp only [atV, ← mulVec_smul, ← mulVec_sum]; congr 1; funext i; simp [map_sum]
 
 theorem exists_near (I : AutInst) : ∃ C : ℝ, 0 < C ∧ ∀ β : InfinitePlace I.F → ℂ,
@@ -23,8 +72,9 @@ theorem exists_near (I : AutInst) : ∃ C : ℝ, 0 < C ∧ ∀ β : InfinitePlac
   · rw [integralBasis_apply]; exact RingOfIntegers.isIntegral_coe _
   · have e : β v - I.φ v (∑ k, (⌊b.repr β k⌋ : I.E) * integralBasis I.E k) =
         ∑ k, ((Int.fract (b.repr β k) : ℝ) : ℂ) * b k v := by
+
       rw [show β v = (∑ k, b.repr β k • b k) v by rw [b.sum_repr β], map_sum, Finset.sum_apply,
-        ← Finset.sum_sub_distrib]
+      ← Finset.sum_sub_distrib]
       refine Finset.sum_congr rfl fun k _ => ?_
       rw [Int.fract, map_mul, map_intCast, Pi.smul_apply, Complex.real_smul]
       simp only [b, embeddingBasis_apply]
@@ -93,6 +143,7 @@ theorem exists_sandwich (I : AutInst) : ∃ c : ℕ, 1 ≤ c ∧ (∀ l ∈ I.L,
 theorem iv_mulVec (I : AutInst) (A : Matrix (Fin I.n) (Fin I.n) I.E) (l : Fin I.n → I.E) :
     A.map (Formalism.UG.inclE (F := I.F) (Af I.F)) *ᵥ iv I l = iv I (A *ᵥ l) := by
   funext i
+
   simp [iv, mulVec, dotProduct, map_sum]
 
 theorem cong_Lf (I : AutInst) {c g : ℕ} (h1 : ∀ l ∈ I.L, (c : I.E) • l ∈ IntV I) (h2 : ∀ u ∈ IntV I, (c : I.E) • u ∈ I.L)

@@ -1,7 +1,54 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.GeometricLemmaModular
-import GroundTheory.AutomorphicForms.GeometricLemmaCharacters
-import GroundTheory.AutomorphicForms.JacquetAdmissible
+module
+
+public import GroundTheory.AutomorphicForms.GeometricLemmaModular
+public import GroundTheory.AutomorphicForms.GeometricLemmaCharacters
+public import GroundTheory.AutomorphicForms.JacquetAdmissible
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -119,14 +166,14 @@ theorem prod_refine_split (h : Refines β γ) (g : Fin n × Fin n → ℝ≥0) :
     intro ij _ h1 h2
     exact h1.ne h2.1
 
-variable (F n β γ) in
 
+variable (F n β γ) in
 def modularRefineLeft : leviPar F n β γ →* ℝ≥0 :=
   (modularCharacter : blockUpper F n γ →* ℝ≥0).comp
     (Subgroup.inclusion (leviPar_le_blockUpper_right F))
 
-variable (F n β γ) in
 
+variable (F n β γ) in
 def modularRefineRight : leviPar F n β γ →* ℝ≥0 :=
   (modularCharacter : blockUpper F n β →* ℝ≥0).comp
     (Subgroup.inclusion (leviPar_le_blockUpper_left F)) *
@@ -154,15 +201,15 @@ theorem modularCharacter_refine (h : Refines β γ) (q : leviPar F n β γ) :
   exact prod_refine_split h fun ij =>
     modulus ((uniformizer F : F) ^ μ ij.1) / modulus ((uniformizer F : F) ^ μ ij.2)
 
-variable (F n β γ) in
 
+variable (F n β γ) in
 def sqrtModularLeviPar : leviPar F n β γ →* ℂ where
   toFun q := ((NNReal.sqrt (modularCharacter q) : ℝ) : ℂ)
   map_one' := by simp
   map_mul' p q := by simp [NNReal.sqrt_mul]
 
-variable (F n β γ) in
 
+variable (F n β γ) in
 def invSqrtModularLeviPar : leviPar F n β γ →* ℂ where
   toFun q := (sqrtModularLeviPar F n β γ q)⁻¹
   map_one' := by simp
@@ -176,10 +223,6 @@ theorem sqrtModularLeviPar_ne_zero (q : leviPar F n β γ) : sqrtModularLeviPar 
 theorem sqrtModularLeviPar_mul_inv (q : leviPar F n β γ) :
     sqrtModularLeviPar F n β γ q * invSqrtModularLeviPar F n β γ q = 1 :=
   mul_inv_cancel₀ (sqrtModularLeviPar_ne_zero q)
-
-theorem sqrtModular_ne_zero {α : Type*} [LinearOrder α] {β : Fin n → α} (p : blockUpper F n β) :
-    sqrtModular F n β p ≠ 0 :=
-  left_ne_zero_of_mul_eq_one (sqrtModular_mul_invSqrtModular p)
 
 theorem sqrtModular_refine (h : Refines β γ) (q : leviPar F n β γ) :
     sqrtModular F n γ ⟨q, q.2.2⟩ =
@@ -214,16 +257,16 @@ section LeviJacquet
 
 variable {β γ : Fin n → ℕ} {W : Type*} [AddCommGroup W] [Module ℂ W]
 
-variable (F) in
 
+variable (F) in
 def Refines.leviToLeviPar (h : Refines β γ) : levi F n γ →* leviPar F n β γ :=
   Subgroup.inclusion (h.levi_le_leviPar F)
 
 theorem Refines.coe_leviToLeviPar (h : Refines β γ) (m : levi F n γ) :
     ((h.leviToLeviPar F m : leviPar F n β γ) : GL (Fin n) F) = m := rfl
 
-variable (F) in
 
+variable (F) in
 def Refines.leviIncl (h : Refines β γ) : levi F n γ →* levi F n β :=
   Subgroup.inclusion (h.levi_le F)
 
@@ -233,8 +276,8 @@ theorem Refines.coe_leviIncl (h : Refines β γ) (m : levi F n γ) :
 theorem Refines.continuous_leviIncl (h : Refines β γ) : Continuous (h.leviIncl F) :=
   continuous_subtype_val.subtype_mk _
 
-variable (β γ) in
 
+variable (β γ) in
 abbrev LeviJacquetModule (σ : Representation ℂ (levi F n β) W) : Type _ :=
   Representation.Coinvariants (σ.comp (leviUnipotent F n β γ).subtype)
 
@@ -334,10 +377,6 @@ theorem jacquetStagesMap_mk_mk (h : Refines β γ) (v : V) :
     jacquetStagesMap π h (Representation.Coinvariants.mk _ (Representation.Coinvariants.mk _ v)) =
       Representation.Coinvariants.mk _ v := rfl
 
-theorem jacquetStagesInv_mk (h : Refines β γ) (v : V) :
-    jacquetStagesInv π h (Representation.Coinvariants.mk _ v) =
-      Representation.Coinvariants.mk _ (Representation.Coinvariants.mk _ v) := rfl
-
 def jacquetStagesLinearEquiv (h : Refines β γ) :
     LeviJacquetModule β γ (jacquetRep F n β π) ≃ₗ[ℂ] JacquetModule F n γ π :=
   LinearEquiv.ofLinearMap (f := jacquetStagesMap π h) (g := jacquetStagesInv π h)
@@ -360,10 +399,6 @@ def jacquetStages (h : Refines β γ) :
     congr 1
     rw [mul_comm]
     exact key.symm
-
-theorem jacquetStages_mk (h : Refines β γ) (v : V) :
-    jacquetStages π h (Representation.Coinvariants.mk _ (Representation.Coinvariants.mk _ v)) =
-      Representation.Coinvariants.mk _ v := rfl
 
 end Stages
 

@@ -1,6 +1,47 @@
-import Formalism.SharpRestriction.GrowthBounds.MonomialFactorials.BePhiAddLeft
-import Formalism.SharpRestriction.GrowthBounds.MonomialFactorials.FinrankLjjSpan
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.MonomialFactorials.BePhiAddLeft
+public import Formalism.SharpRestriction.GrowthBounds.MonomialFactorials.RestRankLProved
 import Formalism.MahlerMeasure.MahlerMeasureProofs.TheoremM
+public import Formalism.SharpRestriction.GrowthBounds.MonomialFactorials.FinrankLjjSpan
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -46,14 +87,14 @@ theorem xi_mem_spanZ (n : ℕ) (g : MvPolynomial (Formalism.GM.M.BVar N r G.T.t)
   obtain ⟨hs, hint⟩ := Submodule.mem_inf.1 hg
   rw [Submodule.restrictScalars_mem, MvPolynomial.mem_restrictSupport_iff] at hs
   obtain ⟨g0, hg0⟩ := hint
-  have hc : ∀ m, coeff m g = algebraMap ℤ_[p] ℚ_[p] (coeff m g0) := by
+  have hc : ∀ m, AddMonoidAlgebra.coeff g m = algebraMap ℤ_[p] ℚ_[p] (AddMonoidAlgebra.coeff g0 m) := by
     intro m
     rw [← hg0]
     simp [MvPolynomial.coeff_map]
   rw [g.as_sum]
   refine Submodule.sum_mem _ fun m hm => ?_
   obtain ⟨hsupp, hsum⟩ := hs hm
-  have hmono : monomial m (coeff m g) = (coeff m g0) • monomial m (1 : ℚ_[p]) := by
+  have hmono : monomial m (AddMonoidAlgebra.coeff g m) = (AddMonoidAlgebra.coeff g0 m) • monomial m (1 : ℚ_[p]) := by
     rw [hc m, smul_monomial, Algebra.smul_def, mul_one]
   rw [hmono]
   exact Submodule.smul_mem _ _ (Submodule.subset_span ⟨m, mem_xiMons_of G n m hsupp hsum, rfl⟩)
@@ -84,7 +125,7 @@ theorem Ljj_fg (j : Fin G.T.t → ℕ) (jp : ℕ) : (Ljj p (r := r) G j jp).FG :
         rw [mul_smul_comm]
         exact Submodule.smul_mem _ c hu
     | zero => simp
-    | add u v _ _ hu hv => rw [map_add, add_mul]; exact Submodule.add_mem _ hu hv
+    | add u v _ _ hu hv => rw [map_add (f := _), add_mul]; exact Submodule.add_mem _ hu hv
     | smul c u _ hu =>
       have : rename (Formalism.GM.M.chainEmb N r G.T.t) (c • u) = c • rename (Formalism.GM.M.chainEmb N r G.T.t) u := by
         rw [← algebraMap_smul ℚ_[p] c u, ← algebraMap_smul ℚ_[p] c (rename (Formalism.GM.M.chainEmb N r G.T.t) u)]

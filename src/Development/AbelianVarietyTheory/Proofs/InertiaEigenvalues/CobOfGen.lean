@@ -1,9 +1,52 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.H2EquivOfTorsionCharacter
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.FieldTheory.Galois.Profinite
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.H1MapSubgroup
+import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.IsDualDualRep
+import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.IsTameInertiaElementAtTwistPrime
 import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsFCocIff
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.PoitouTateNineTermTransgressionZeroApply
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.CohDimTwoLocalOfLocalFiniteness
 import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.ContinuousCycMod
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.H2EquivOfTorsionCharacter
+import Formalism.SharpRestriction.LevelLetterCocycles.BlochKatoPhases
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Formalism.ConjugateSelfDual ReciprocityTheory.Gal Formalism.BasicNotions Formalism.MainNotions.BlochKatoReduction Formalism.MainNotions.BlochKatoReduction.Gen GlobalTheory.TwSys GlobalTheory.SelFun GlobalTheory.Published GlobalTheory.ResSel GlobalTheory.ResDual
 
@@ -11,8 +54,8 @@ noncomputable section
 
 namespace GlobalTheory.LocalH2Injective
 
-open GlobalTheory.TateTop in
 
+open GlobalTheory.TateTop in
 theorem cob_of_gen {l : ℕ} [Fact l.Prime] {Γ : Type} [Group Γ] [TopologicalSpace Γ]
     [ContinuousMul Γ] [CompactSpace Γ] {χ : Γ →* ℤ_[l]ˣ} (hχ : Continuous fun g => (χ g : ℤ_[l]))
     (hG : ∀ r, ∃ c, GlobalTheory.TateTop.Gen χ (r + 1) c)
@@ -48,7 +91,7 @@ theorem cob_of_gen {l : ℕ} [Fact l.Prime] {Γ : Type} [Group Γ] [TopologicalS
     apply hfM
     have e := hcoc.2 g h k
     rw [← hfz] at e
-    simpa only [map_sub, map_add, map_smul, map_zero] using e
+    simpa only [map_sub, map_add (f := _), map_smul, map_zero] using e
   obtain ⟨g0, hg0⟩ := hG r
   obtain ⟨x, b, hb, hzb⟩ := (hg0 B' hB').2.1 z hzc
   have hx : fM x = 0 := by
@@ -57,9 +100,9 @@ theorem cob_of_gen {l : ℕ} [Fact l.Prime] {Γ : Type} [Group Γ] [TopologicalS
     intro p
     have h2 : fM (z p) = cob χ cM p := congrFun hfz p
     calc g0 p • fM x = fM (z p) - fM (cob χ b p) := by
-          rw [hzb p, map_add, map_smul, add_sub_cancel_right]
+          rw [hzb p, map_add (f := _), map_smul, add_sub_cancel_right]
       _ = cob χ cM p - cob χ (fun g => fM (b g)) p := by
-          rw [h2]; simp only [cob, map_add, map_sub, map_smul]
+          rw [h2]; simp only [cob, map_add (f := _), map_sub, map_smul]
       _ = cob χ (fun g => cM g - fM (b g)) p := by
           simp only [cob, smul_sub]; abel
   have hx0 : x = 0 := hfM (by rw [hx, map_zero])

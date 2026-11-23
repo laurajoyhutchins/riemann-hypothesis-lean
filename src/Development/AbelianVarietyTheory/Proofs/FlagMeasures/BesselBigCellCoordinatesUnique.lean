@@ -1,12 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.Dchart
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.UnipotentRadicalBlockUnitriangularFlagStatement
-import Formalism.FormalDegreeBessel.FinalG
-import Formalism.FormalDegreeBessel.FinalBF
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CompactGroupHaarExists
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.OppositeWeylSubgroupClosed
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.LongWeylElement
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.TwoByOneBlock
+module
+
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.Dchart
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.UnipotentRadicalBlockUnitriangularFlagStatement
+public import Formalism.FormalDegreeBessel.FormalDegreeRatio.BFCell
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.TwoByOneBlock
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.UpperOff
+
+@[expose] public section
 
 open MeasureTheory Matrix Filter Topology Formalism.QuantumDeterminants Formalism.MainNotions.S GlobalTheory.SgInf GlobalTheory.Amp GlobalTheory.CellDens
 open scoped InnerProductSpace ENNReal
@@ -75,22 +115,22 @@ theorem bigCell_support (k r : ℕ) (c : Fin r → ℂ) (μ : Matrix (Fin (k + 1
   have hj := j.isLt
   simp only [bigCell]
   by_cases h1 : j.val < r
-  · rw [dif_pos h1]
+  · rw [dite_eq_left h1]
     split_ifs with h3
     · exfalso
       have hv : i.val = 2 * r + k - j.val := by subst h3; rfl
       unfold lev at h
       split_ifs at h <;> omega
     · rfl
-  · rw [dif_neg h1]
+  · rw [dite_eq_right h1]
     by_cases h2 : j.val ≤ r + k
-    · rw [dif_pos h2]
+    · rw [dite_eq_left h2]
       split_ifs with h3
       · exfalso
         unfold lev at h
         split_ifs at h <;> omega
       · rfl
-    · rw [dif_neg h2]
+    · rw [dite_eq_right h2]
       split_ifs with h3
       · exfalso
         unfold lev at h
@@ -101,7 +141,7 @@ theorem bigCell_entry (k r : ℕ) (c : Fin r → ℂ) (μ : Matrix (Fin (k + 1))
     bigCell k r c μ (esI k r a) (eI k r a) = c a := by
   have h1 : (eI k r a).val < r := a.isLt
   simp only [bigCell]
-  rw [dif_pos h1]
+  rw [dite_eq_left h1]
   exact if_pos rfl
 
 private theorem lev_mono' (k r : ℕ) (i j : Fin (2 * r + k + 1)) (h : j.val ≤ i.val) :
@@ -160,7 +200,7 @@ private theorem bigCell_mid_apply (k r : ℕ) (c : Fin r → ℂ) (m j : Fin (2 
     (h2 : j.val ≤ r + k) : bigCell k r c 1 m j = if m = j then 1 else 0 := by
   by_cases hm : Formalism.FourierDecayAlt.P.TwoByOneBlock.mid k r m
   · exact Formalism.FourierDecayAlt.P.TwoByOneBlock.bc_one_mid c m j hm ⟨h1, h2⟩
-  · rw [Formalism.FourierDecayAlt.P.TwoByOneBlock.bc_mid_col c 1 m j ⟨h1, h2⟩, dif_neg hm, if_neg]
+  · rw [Formalism.FourierDecayAlt.P.TwoByOneBlock.bc_mid_col c 1 m j ⟨h1, h2⟩, dite_eq_right hm, if_neg]
     intro hmj
     subst hmj
     exact hm ⟨h1, h2⟩

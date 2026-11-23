@@ -1,5 +1,48 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LaurentVarUnit
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LaurentVarUnit
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+
+@[expose] public section
 
 noncomputable section
 open CategoryTheory Limits AlgebraicGeometry Opposite Simplicial
@@ -31,13 +74,17 @@ private theorem map_rowDifferential_of_commute_faces_lemma {E E' : _root_.Global
     (p : ℕ) (y : _root_.GlobalTheory.EtC.H R (_root_.GlobalTheory.EtC.disc.obj (E.obj (op ⦋p⦌))) F s) :
     φ (p + 1) (_root_.GlobalTheory.EtC.GmStep.rowD R E F s p y) =
       _root_.GlobalTheory.EtC.GmStep.rowD R E' F' s' p (φ p y) := by
-  simp only [_root_.GlobalTheory.EtC.GmStep.rowD, AddMonoidHom.finset_sum_apply,
-    AddMonoidHom.smul_apply, map_sum, map_zsmul, hc]
+  change φ (p + 1) ((AddMonoidHom.eval y) (∑ j : Fin (p + 2),
+      ((-1 : ℤ) ^ (j : ℕ)) • pull R (disc.map (E.δ j)) F s)) =
+    (AddMonoidHom.eval (φ p y)) (∑ j : Fin (p + 2),
+      ((-1 : ℤ) ^ (j : ℕ)) • pull R (disc.map (E'.δ j)) F' s')
+  simp only [map_sum, map_zsmul]
+  exact Finset.sum_congr rfl fun j _ => congrArg (fun x => ((-1 : ℤ) ^ (j : ℕ)) • x) (hc p j y)
+
 
 open CategoryTheory Limits AlgebraicGeometry Opposite Simplicial in
 variable (R : Type) [CommRing R] in
 variable {R} in
-
 theorem _root_.GlobalTheory.EtC.GmStep.rowExact_transfer {E E' : _root_.GlobalTheory.EtC.Spc}
     {F F' : _root_.GlobalTheory.EtC.Shv R} {s s' : ℤ}
     (φ : ∀ p : ℕ, _root_.GlobalTheory.EtC.H R (_root_.GlobalTheory.EtC.disc.obj (E.obj (op ⦋p⦌))) F s →+
@@ -99,16 +146,16 @@ theorem _root_.GlobalTheory.EtC.GmStep.laurentMap_coeff {A B : Type} [CommRing A
     (p : LaurentPolynomial A) :
     (_root_.GlobalTheory.EtC.GmStep.laurentMap f p).coeff = Finsupp.mapRange f f.map_zero p.coeff := by
   refine LaurentPolynomial.induction_on' p (fun p q hp hq => ?_) (fun n a => ?_)
-  · rw [map_add, AddMonoidAlgebra.coeff_add, AddMonoidAlgebra.coeff_add, hp, hq,
+  · rw [map_add (f := _), AddMonoidAlgebra.coeff_add, AddMonoidAlgebra.coeff_add, hp, hq,
       Finsupp.mapRange_add (map_add f)]
   · rw [map_mul, _root_.GlobalTheory.EtC.GmStep.laurentMap_C, _root_.GlobalTheory.EtC.GmStep.laurentMap_T,
       ← LaurentPolynomial.single_eq_C_mul_T, ← LaurentPolynomial.single_eq_C_mul_T,
       AddMonoidAlgebra.coeff_single, AddMonoidAlgebra.coeff_single, Finsupp.mapRange_single]
 
+
 open CategoryTheory Limits AlgebraicGeometry Opposite Simplicial in
 variable (R : Type) [CommRing R] in
 variable {R} in
-
 theorem _root_.GlobalTheory.EtC.GmStep.laurentMap_isIntegral {A B : Type} [CommRing A] [CommRing B] (f : A →+* B)
     (hf : f.IsIntegral) : (_root_.GlobalTheory.EtC.GmStep.laurentMap f).IsIntegral := by
   letI := (_root_.GlobalTheory.EtC.GmStep.laurentMap f).toAlgebra
@@ -125,10 +172,10 @@ theorem _root_.GlobalTheory.EtC.GmStep.laurentMap_isIntegral {A B : Type} [CommR
   · rw [← _root_.GlobalTheory.EtC.GmStep.laurentMap_T f n]
     exact isIntegral_algebraMap
 
+
 open CategoryTheory Limits AlgebraicGeometry Opposite Simplicial in
 variable (R : Type) [CommRing R] in
 variable {R} in
-
 theorem _root_.GlobalTheory.EtC.GmStep.laurentMap_ker {A B : Type} [CommRing A] [CommRing B]
     (f : A →+* B) (hk : RingHom.ker f ≤ nilradical A) :
     RingHom.ker (_root_.GlobalTheory.EtC.GmStep.laurentMap f) ≤ nilradical (LaurentPolynomial A) := by
@@ -145,10 +192,10 @@ theorem _root_.GlobalTheory.EtC.GmStep.laurentMap_ker {A B : Type} [CommRing A] 
   refine Ideal.mul_mem_right _ _ ?_
   exact mem_nilradical.mpr ((mem_nilradical.mp (hk (RingHom.mem_ker.mpr (hc n)))).map _)
 
+
 open CategoryTheory Limits AlgebraicGeometry Opposite Simplicial in
 variable (R : Type) [CommRing R] in
 variable {R} in
-
 theorem _root_.GlobalTheory.EtC.GmStep.spec_integral_surj {A B : Type} [CommRing A] [CommRing B]
     (φ : A →+* B) (hi : φ.IsIntegral) (hk : RingHom.ker φ ≤ nilradical A) :
     IsIntegralHom (Spec.map (CommRingCat.ofHom φ)) ∧ Surjective (Spec.map (CommRingCat.ofHom φ)) := by
@@ -188,7 +235,7 @@ def rowOne (q : ℕ) (i : ℤ) (k : ℕ) :
   toFun a := (cup q (pull _ (disc.map ((cechC A A').app (op ⦋k⦌))) (tw q (i - 1)) 0 a)
     (pull _ (augK A A' k) (tw q 1) 1 (kum q (laurentVar A)))).cast (by ring) (by ring)
   map_zero' := by simp only [map_zero, AddMonoidHom.zero_apply]; exact GmPhi.cast_zero _ _
-  map_add' a b := by simp only [map_add, AddMonoidHom.add_apply]; exact GmPhi.cast_add _ _ _ _
+  map_add' a b := by simp only [map_add (f := _), AddMonoidHom.add_apply]; exact GmPhi.cast_add _ _ _ _
 
 end GlobalTheory.EtC.GmStep
 

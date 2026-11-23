@@ -1,13 +1,52 @@
-import Mathlib
-import Development.ResolutionOfSingularities.Foundations.Blowup.BlowupExistence
-import Development.ResolutionOfSingularities.Foundations.Blowup.BlowupProperties
-import Development.ResolutionOfSingularities.EmbeddedResolution.IteratedBlowups.ClopenRestriction
-import Development.ResolutionOfSingularities.EmbeddedResolution.IteratedBlowups.BlowupSequenceRelations
-import Development.ResolutionOfSingularities.Foundations.Blowup.StrictTransform
-import Development.ResolutionOfSingularities.Foundations.Schemes.SchemeMorphismProperties
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MarkedBlowupSequence.BlowupSequenceData
-import Development.ResolutionOfSingularities.Foundations.BlowupUniversalProperty
-import Development.ResolutionOfSingularities.EmbeddedResolution.ResolutionOfSingularities
+module
+
+public import Development.ResolutionOfSingularities.Foundations.Blowup.BlowupExistence
+public import Development.ResolutionOfSingularities.Foundations.Blowup.BlowupProperties
+public import Development.ResolutionOfSingularities.EmbeddedResolution.IteratedBlowups.BlowupSequenceRelations
+public import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MarkedBlowupSequence.BlowupSequenceData
+public import Development.ResolutionOfSingularities.Foundations.Schemes.SchemeMorphismProperties
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 universe u
 
 open CategoryTheory AlgebraicGeometry TopologicalSpace
@@ -102,7 +141,8 @@ private theorem exists_closedImmersion_blowup_imageIdealSheaf_of_lt_length (hres
   have : AlgebraicGeometry.IsLocallyNoetherian A := inferInstance
   exact exists_closedImmersion_blowup_of_isBlowupAlongIdealSheaf hres σ (s.center n) (s.map n) (s.isBlowup n hn) hc
 
-private def embeddingIntoAmbientBlowup (hres : FunctorialResolution.Blowup.StrictTransformIsBlowupOfClosedSubscheme.{u})
+@[no_expose]
+def embeddingIntoAmbientBlowup (hres : FunctorialResolution.Blowup.StrictTransformIsBlowupOfClosedSubscheme.{u})
     (hno : BlowupPreservesNoetherian.{u}) {S : Scheme.{u}} (s : BlowupSequenceData S)
     (n : ℕ) (hn : n < s.length) (A : Scheme.{u}) (σ : s.obj n ⟶ A)
     (hσ : AlgebraicGeometry.IsClosedImmersion σ) (hA : AlgebraicGeometry.IsNoetherian A)
@@ -141,15 +181,15 @@ private theorem ker_embeddingIntoBlowupImageIdealSheaf (hres : FunctorialResolut
         (imageIdealSheaf σ (s.center n)) σ.ker :=
   (exists_closedImmersion_blowup_imageIdealSheaf_of_lt_length hres hno s n hn A σ hσ hA hc).choose_spec.2.2
 
-private def ambientEmbeddingZero {S X : Scheme.{u}} (ι : S ⟶ X)
+def ambientEmbeddingZero {S X : Scheme.{u}} (ι : S ⟶ X)
     [AlgebraicGeometry.IsClosedImmersion ι] [AlgebraicGeometry.IsNoetherian X]
     (s : BlowupSequenceData S) : AmbientEmbedding s 0 where
   ambient := X
   emb := s.isoZero.hom ≫ ι
-  emb_isClosedImmersion := isClosedImmersion_isoObjZero_hom_comp ι s
+  emb_isClosedImmersion := by exact isClosedImmersion_isoObjZero_hom_comp ι s
   isNoetherian_ambient_of_le_length := fun _ => inferInstance
 
-private def ambientEmbeddingSucc (hres : FunctorialResolution.Blowup.StrictTransformIsBlowupOfClosedSubscheme.{u})
+def ambientEmbeddingSucc (hres : FunctorialResolution.Blowup.StrictTransformIsBlowupOfClosedSubscheme.{u})
     (hno : BlowupPreservesNoetherian.{u}) {S : Scheme.{u}} (s : BlowupSequenceData S)
     (hcen : ∀ i, i < s.length → ∀ T ∈ irreducibleComponents ↥(s.obj i),
         ¬ T ⊆ ((s.center i).support : Set ↥(s.obj i)))
@@ -159,10 +199,12 @@ private def ambientEmbeddingSucc (hres : FunctorialResolution.Blowup.StrictTrans
     ⟨{ ambient := Blowup.blowup (imageIdealSheaf st.emb (s.center n))
        emb := embeddingIntoAmbientBlowup hres hno s n h st.ambient st.emb st.emb_isClosedImmersion
          (st.isNoetherian_ambient_of_le_length (Nat.le_of_lt h)) (hcen n h)
-       emb_isClosedImmersion := isClosedImmersion_embeddingIntoBlowupImageIdealSheaf hres hno s n h st.ambient st.emb
-         st.emb_isClosedImmersion (st.isNoetherian_ambient_of_le_length (Nat.le_of_lt h)) (hcen n h)
-       isNoetherian_ambient_of_le_length := fun _ =>
-         isNoetherian_blowup_of_isNoetherian hno (st.isNoetherian_ambient_of_le_length (Nat.le_of_lt h))
+       emb_isClosedImmersion := by
+         exact isClosedImmersion_embeddingIntoBlowupImageIdealSheaf hres hno s n h st.ambient st.emb
+           st.emb_isClosedImmersion (st.isNoetherian_ambient_of_le_length (Nat.le_of_lt h)) (hcen n h)
+       isNoetherian_ambient_of_le_length := by
+         intro _
+         exact isNoetherian_blowup_of_isNoetherian hno (st.isNoetherian_ambient_of_le_length (Nat.le_of_lt h))
            (imageIdealSheaf st.emb (s.center n)) },
      Blowup.blowup.proj (imageIdealSheaf st.emb (s.center n))⟩
   else
@@ -179,7 +221,7 @@ private theorem isBlowupAlongIdealSheaf_succAmbientEmbeddingMorphism (hres : Fun
     (n : ℕ) (st : AmbientEmbedding s n) (h : n < s.length) :
     Blowup.IsBlowupAlongIdealSheaf (ambientEmbeddingSucc hres hno s hcen n st).2 (imageIdealSheaf st.emb (s.center n)) := by
   unfold ambientEmbeddingSucc
-  rw [dif_pos h]
+  rw [dite_eq_left h]
   exact Blowup.blowup.isBlowupAlongIdealSheaf_proj _
 
 private theorem succAmbientEmbedding_comp_blowupMorphism (hres : FunctorialResolution.Blowup.StrictTransformIsBlowupOfClosedSubscheme.{u})
@@ -191,10 +233,10 @@ private theorem succAmbientEmbedding_comp_blowupMorphism (hres : FunctorialResol
       s.map n ≫ st.emb := by
   unfold ambientEmbeddingSucc
   by_cases h : n < s.length
-  · rw [dif_pos h]
+  · rw [dite_eq_left h]
     exact embeddingIntoBlowupImageIdealSheaf_comp_proj hres hno s n h st.ambient st.emb st.emb_isClosedImmersion
       (st.isNoetherian_ambient_of_le_length (Nat.le_of_lt h)) (hcen n h)
-  · rw [dif_neg h]
+  · rw [dite_eq_right h]
     exact Category.id_comp _
 
 private theorem ker_succAmbientEmbedding_eq_strictTransform (hres : FunctorialResolution.Blowup.StrictTransformIsBlowupOfClosedSubscheme.{u})
@@ -206,11 +248,11 @@ private theorem ker_succAmbientEmbedding_eq_strictTransform (hres : FunctorialRe
       Blowup.strictTransform (ambientEmbeddingSucc hres hno s hcen n st).2
         (imageIdealSheaf st.emb (s.center n)) st.emb.ker := by
   unfold ambientEmbeddingSucc
-  rw [dif_pos h]
+  rw [dite_eq_left h]
   exact ker_embeddingIntoBlowupImageIdealSheaf hres hno s n h st.ambient st.emb st.emb_isClosedImmersion
     (st.isNoetherian_ambient_of_le_length (Nat.le_of_lt h)) (hcen n h)
 
-private def ambientEmbedding {S X : Scheme.{u}} (ι : S ⟶ X)
+def ambientEmbedding {S X : Scheme.{u}} (ι : S ⟶ X)
     [AlgebraicGeometry.IsClosedImmersion ι] [AlgebraicGeometry.IsNoetherian X]
     (s : BlowupSequenceData S) (hres : FunctorialResolution.Blowup.StrictTransformIsBlowupOfClosedSubscheme.{u})
     (hno : BlowupPreservesNoetherian.{u})
@@ -220,7 +262,7 @@ private def ambientEmbedding {S X : Scheme.{u}} (ι : S ⟶ X)
   Nat.rec (motive := fun n => AmbientEmbedding s n) (ambientEmbeddingZero ι s)
     (fun m st => (ambientEmbeddingSucc hres hno s hcen m st).1) n
 
-private def ambientEmbeddingSuccMap {S X : Scheme.{u}} (ι : S ⟶ X)
+def ambientEmbeddingSuccMap {S X : Scheme.{u}} (ι : S ⟶ X)
     [AlgebraicGeometry.IsClosedImmersion ι] [AlgebraicGeometry.IsNoetherian X]
     (s : BlowupSequenceData S) (hres : FunctorialResolution.Blowup.StrictTransformIsBlowupOfClosedSubscheme.{u})
     (hno : BlowupPreservesNoetherian.{u})
@@ -229,7 +271,7 @@ private def ambientEmbeddingSuccMap {S X : Scheme.{u}} (ι : S ⟶ X)
     (ambientEmbedding ι s hres hno hcen (n + 1)).ambient ⟶ (ambientEmbedding ι s hres hno hcen n).ambient :=
   (ambientEmbeddingSucc hres hno s hcen n (ambientEmbedding ι s hres hno hcen n)).2
 
-private theorem isBlowupAlongIdealSheaf_ambientBlowupMorphism {S X : Scheme.{u}} (ι : S ⟶ X)
+theorem isBlowupAlongIdealSheaf_ambientBlowupMorphism {S X : Scheme.{u}} (ι : S ⟶ X)
     [AlgebraicGeometry.IsClosedImmersion ι] [AlgebraicGeometry.IsNoetherian X]
     (s : BlowupSequenceData S) (hres : FunctorialResolution.Blowup.StrictTransformIsBlowupOfClosedSubscheme.{u})
     (hno : BlowupPreservesNoetherian.{u})
@@ -269,14 +311,6 @@ theorem ambientBlowupSequence_length {S X : Scheme.{u}} (ι : S ⟶ X)
     (hcen : ∀ i, i < s.length → ∀ T ∈ irreducibleComponents ↥(s.obj i),
         ¬ T ⊆ ((s.center i).support : Set ↥(s.obj i))) :
     (ambientBlowupSequence ι s hres hno hcen).length = s.length := rfl
-
-theorem ambientBlowupSequence_schemeAt_zero {S X : Scheme.{u}} (ι : S ⟶ X)
-    [AlgebraicGeometry.IsClosedImmersion ι] [AlgebraicGeometry.IsNoetherian X]
-    (s : BlowupSequenceData S) (hres : FunctorialResolution.Blowup.StrictTransformIsBlowupOfClosedSubscheme.{u})
-    (hno : BlowupPreservesNoetherian.{u})
-    (hcen : ∀ i, i < s.length → ∀ T ∈ irreducibleComponents ↥(s.obj i),
-        ¬ T ⊆ ((s.center i).support : Set ↥(s.obj i))) :
-    (ambientBlowupSequence ι s hres hno hcen).obj 0 = X := rfl
 
 theorem ambientBlowupSequence_isoObjZero {S X : Scheme.{u}} (ι : S ⟶ X)
     [AlgebraicGeometry.IsClosedImmersion ι] [AlgebraicGeometry.IsNoetherian X]

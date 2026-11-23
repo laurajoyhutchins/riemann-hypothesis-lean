@@ -1,4 +1,45 @@
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsUnimodMod
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IsUnimodMod
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 open IsLocalRing GlobalTheory.Toroidal GlobalTheory.LocM GlobalTheory.PolFan GlobalTheory.Poinc
 
 namespace GlobalTheory.Poinc.Span
@@ -60,7 +101,7 @@ lemma dvd_all {s r : ℕ} (W : Matrix (Fin s) (Fin s) ℤ) (N : ℕ) [NeZero N]
     exact hcop.dvd_of_dvd_mul_left h
   intro x z
   have e : 2 * b x z = b (x + z) (x + z) - b x x - b z z := by
-    simp only [map_add, LinearMap.add_apply, hb z x]
+    simp only [map_add (f := _), LinearMap.add_apply, hb z x]
     ring
   have h : (N : ℤ) ∣ 2 * b x z := by
     rw [e]; exact dvd_sub (dvd_sub (hxx _) (hxx x)) (hxx z)
@@ -81,9 +122,9 @@ lemma pow_dvd_all {s r : ℕ} (W : Matrix (Fin s) (Fin s) ℤ) (N : ℕ) [NeZero
     intro b hb h0 x z
     have hd := dvd_all W N hε μ hμ b hb h0
     let b' : LinearMap.BilinForm ℤ (Fin r → ℤ) := LinearMap.mk₂ ℤ (fun x z => b x z / N)
-      (fun m₁ m₂ n => by simp only [map_add, LinearMap.add_apply, Int.add_ediv_of_dvd_left (hd m₁ n)])
+      (fun m₁ m₂ n => by simp only [map_add (f := _), LinearMap.add_apply, Int.add_ediv_of_dvd_left (hd m₁ n)])
       (fun c m n => by simp only [map_smul, LinearMap.smul_apply, smul_eq_mul, Int.mul_ediv_assoc c (hd m n)])
-      (fun m n₁ n₂ => by simp only [map_add, Int.add_ediv_of_dvd_left (hd m n₁)])
+      (fun m n₁ n₂ => by simp only [map_add (f := _), Int.add_ediv_of_dvd_left (hd m n₁)])
       (fun c m n => by simp only [map_smul, smul_eq_mul, Int.mul_ediv_assoc c (hd m n)])
     have hbb : ∀ x z, b x z = N * b' x z := fun x z => by
       simp only [b', LinearMap.mk₂_apply]; exact (Int.mul_ediv_cancel' (hd x z)).symm

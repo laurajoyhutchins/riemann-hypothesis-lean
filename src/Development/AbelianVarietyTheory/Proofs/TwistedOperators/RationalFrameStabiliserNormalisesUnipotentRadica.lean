@@ -1,5 +1,48 @@
-import Mathlib
+module
+
+public import Formalism.LocalToGlobal.BesselHermitianTheta.TiedWeil
+import Formalism.LocalToGlobal.ProjectiveLattices.HalfOneAddSqrtNegIsIntegral
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
 import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.AdjointIsotropicDecomposition
+import Formalism.LocalToGlobal.IndefiniteReal.IndefiniteWeightData
+import Formalism.LocalToGlobal.IndefiniteReal.LinksDefs
+
+@[expose] public section
 
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.L2.Theta Formalism.IndefR Formalism.IndefR.Links Formalism.IndefR.Mult Formalism.IndefR.Datum MeasureTheory NumberField Matrix
 open GlobalTheory.IndefiniteRowSideFullHecke.AdjointIsotropicDecomposition
@@ -12,8 +55,6 @@ namespace GlobalTheory.FrameStab
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
 
 variable {D : D7}
-
-local infixl:70 " ⋆ₘ " => HMul.hMul
 
 theorem incA_injective (D : D7) : Function.Injective (incA D) :=
   Algebra.TensorProduct.includeRight_injective (NumberField.AdeleRing.algebraMap_injective (𝓞 D.host.F) D.host.F)
@@ -28,17 +69,17 @@ theorem mt_mul_inv (W : HSp D) (g : GA D W) : Formalism.L2.Theta.mt W g * Formal
   rw [← mt_mul]; simp [Formalism.L2.Theta.mt]
 
 theorem mt_mul_frame (W : HSp D) {s : ℕ} (L : Matrix (Fin W.rank) (Fin s) D.host.E) (n : GA D W) (hn : n ∈ NI W L) :
-    Formalism.L2.Theta.mt W n ⋆ₘ L.map (incA D) = L.map (incA D) := by
+    Formalism.L2.Theta.mt W n * L.map (incA D) = L.map (incA D) := by
   induction hn using Subgroup.closure_induction with
   | mem g hg =>
-    have h1 : (Formalism.L2.Theta.mt W g - 1) ⋆ₘ L.map (incA D) = 0 := hg.1
+    have h1 : (Formalism.L2.Theta.mt W g - 1) * L.map (incA D) = 0 := hg.1
     rw [Matrix.sub_mul, Matrix.one_mul, sub_eq_zero] at h1
     exact h1
   | one => simp [Formalism.L2.Theta.mt]
   | mul x y _ _ hx hy => rw [mt_mul, Matrix.mul_assoc, hy, hx]
   | inv x _ hx =>
-    calc Formalism.L2.Theta.mt W x⁻¹ ⋆ₘ L.map (incA D)
-        = Formalism.L2.Theta.mt W x⁻¹ ⋆ₘ (Formalism.L2.Theta.mt W x ⋆ₘ L.map (incA D)) := by rw [hx]
+    calc Formalism.L2.Theta.mt W x⁻¹ * L.map (incA D)
+        = Formalism.L2.Theta.mt W x⁻¹ * (Formalism.L2.Theta.mt W x * L.map (incA D)) := by rw [hx]
       _ = L.map (incA D) := by rw [← Matrix.mul_assoc, mt_inv_mul, Matrix.one_mul]
 
 theorem mt_conj_sub_one (W : HSp D) (γ m : GA D W) : Formalism.L2.Theta.mt W (γ * m * γ⁻¹) - 1 =
@@ -46,21 +87,21 @@ theorem mt_conj_sub_one (W : HSp D) (γ m : GA D W) : Formalism.L2.Theta.mt W (�
   rw [mt_mul, mt_mul, Matrix.mul_sub, Matrix.sub_mul, Matrix.mul_one, mt_mul_inv]
 
 theorem conj_sub_one_kills_frame_of_fixed (W : HSp D) {s : ℕ} (L : Matrix (Fin W.rank) (Fin s) D.host.E) (γ m : GA D W)
-    (hΓiL : Formalism.L2.Theta.mt W γ⁻¹ ⋆ₘ L.map (incA D) = L.map (incA D))
-    (h1 : (Formalism.L2.Theta.mt W m - 1) ⋆ₘ L.map (incA D) = 0) :
-    (Formalism.L2.Theta.mt W (γ * m * γ⁻¹) - 1) ⋆ₘ L.map (incA D) = 0 := by
+    (hΓiL : Formalism.L2.Theta.mt W γ⁻¹ * L.map (incA D) = L.map (incA D))
+    (h1 : (Formalism.L2.Theta.mt W m - 1) * L.map (incA D) = 0) :
+    (Formalism.L2.Theta.mt W (γ * m * γ⁻¹) - 1) * L.map (incA D) = 0 := by
   rw [mt_conj_sub_one, Matrix.mul_assoc, hΓiL, Matrix.mul_assoc, h1, Matrix.mul_zero]
 
 theorem rowFrame_mul_conj_sub_one_eq_zero_of_fixed (W : HSp D) {s : ℕ} (P : Matrix (Fin s) (Fin W.rank) D.host.E) (γ m : GA D W)
-    (hPΓ : P.map (incA D) ⋆ₘ Formalism.L2.Theta.mt W γ = P.map (incA D))
-    (h2 : P.map (incA D) ⋆ₘ (Formalism.L2.Theta.mt W m - 1) = 0) :
-    P.map (incA D) ⋆ₘ (Formalism.L2.Theta.mt W (γ * m * γ⁻¹) - 1) = 0 := by
+    (hPΓ : P.map (incA D) * Formalism.L2.Theta.mt W γ = P.map (incA D))
+    (h2 : P.map (incA D) * (Formalism.L2.Theta.mt W m - 1) = 0) :
+    P.map (incA D) * (Formalism.L2.Theta.mt W (γ * m * γ⁻¹) - 1) = 0 := by
   rw [mt_conj_sub_one, ← Matrix.mul_assoc, ← Matrix.mul_assoc, hPΓ, h2, Matrix.zero_mul]
 
 theorem conj_unipotentRadical_kernelCondition_of_rationalFixed (W : HSp D) {s : ℕ} (L : Matrix (Fin W.rank) (Fin s) D.host.E) (P : Matrix (Fin s) (Fin W.rank) D.host.E)
     (γ m : GA D W) (γ₀ γi : Matrix (Fin W.rank) (Fin W.rank) D.host.E)
     (hγ₀ : Formalism.L2.Theta.mt W γ = γ₀.map (incA D)) (hγγi : γ₀ * γi = 1) (hPγi : P * γi = P)
-    (hΓL : Formalism.L2.Theta.mt W γ ⋆ₘ L.map (incA D) = L.map (incA D))
+    (hΓL : Formalism.L2.Theta.mt W γ * L.map (incA D) = L.map (incA D))
     (h3 : ∀ x : Fin W.rank → D.host.E, P *ᵥ x = 0 → ∃ a : Fin s → AE D,
         (Formalism.L2.Theta.mt W m - 1) *ᵥ (fun i => incA D (x i)) = L.map (incA D) *ᵥ a)
     (x : Fin W.rank → D.host.E) (hx : P *ᵥ x = 0) : ∃ a : Fin s → AE D,
@@ -114,23 +155,23 @@ theorem stab : ∀ (D : D7) (W : HSp D) (s : ℕ) (L : Matrix (Fin W.rank) (Fin 
     calc P * γi = P * γ₀ * γi := by rw [hPγ]
       _ = P := by rw [Matrix.mul_assoc, hγγi, Matrix.mul_one]
 
-  have hΓL : Formalism.L2.Theta.mt W γ ⋆ₘ L.map (incA D) = L.map (incA D) := by
+  have hΓL : Formalism.L2.Theta.mt W γ * L.map (incA D) = L.map (incA D) := by
     rw [hγ₀, ← Matrix.map_mul, hL]
-  have hΓiL : Formalism.L2.Theta.mt W γ⁻¹ ⋆ₘ L.map (incA D) = L.map (incA D) := by
-    calc Formalism.L2.Theta.mt W γ⁻¹ ⋆ₘ L.map (incA D)
-        = Formalism.L2.Theta.mt W γ⁻¹ ⋆ₘ (Formalism.L2.Theta.mt W γ ⋆ₘ L.map (incA D)) := by rw [hΓL]
+  have hΓiL : Formalism.L2.Theta.mt W γ⁻¹ * L.map (incA D) = L.map (incA D) := by
+    calc Formalism.L2.Theta.mt W γ⁻¹ * L.map (incA D)
+        = Formalism.L2.Theta.mt W γ⁻¹ * (Formalism.L2.Theta.mt W γ * L.map (incA D)) := by rw [hΓL]
       _ = L.map (incA D) := by rw [← Matrix.mul_assoc, mt_inv_mul, Matrix.one_mul]
-  have hPΓ : P.map (incA D) ⋆ₘ Formalism.L2.Theta.mt W γ = P.map (incA D) := by
+  have hPΓ : P.map (incA D) * Formalism.L2.Theta.mt W γ = P.map (incA D) := by
     rw [hγ₀, ← Matrix.map_mul, hPγ]
-  have hPΓi : P.map (incA D) ⋆ₘ Formalism.L2.Theta.mt W γ⁻¹ = P.map (incA D) := by
-    calc P.map (incA D) ⋆ₘ Formalism.L2.Theta.mt W γ⁻¹
-        = P.map (incA D) ⋆ₘ Formalism.L2.Theta.mt W γ ⋆ₘ Formalism.L2.Theta.mt W γ⁻¹ := by rw [hPΓ]
+  have hPΓi : P.map (incA D) * Formalism.L2.Theta.mt W γ⁻¹ = P.map (incA D) := by
+    calc P.map (incA D) * Formalism.L2.Theta.mt W γ⁻¹
+        = P.map (incA D) * Formalism.L2.Theta.mt W γ * Formalism.L2.Theta.mt W γ⁻¹ := by rw [hPΓ]
       _ = P.map (incA D) := by rw [Matrix.mul_assoc, mt_mul_inv, Matrix.mul_one]
 
   have key : NI W L ≤ (NI W L).comap (MulAut.conj γ).toMonoidHom := by
     refine (Subgroup.closure_le _).2 fun m hm => ?_
-    have h1 : (Formalism.L2.Theta.mt W m - 1) ⋆ₘ L.map (incA D) = 0 := hm.1
-    have h2 : P.map (incA D) ⋆ₘ (Formalism.L2.Theta.mt W m - 1) = 0 := by
+    have h1 : (Formalism.L2.Theta.mt W m - 1) * L.map (incA D) = 0 := hm.1
+    have h2 : P.map (incA D) * (Formalism.L2.Theta.mt W m - 1) = 0 := by
       have := hm.2.1
       rw [hP, hσ, hG]; exact this
     have h3 : ∀ x : Fin W.rank → D.host.E, P *ᵥ x = 0 → ∃ a : Fin s → AE D,

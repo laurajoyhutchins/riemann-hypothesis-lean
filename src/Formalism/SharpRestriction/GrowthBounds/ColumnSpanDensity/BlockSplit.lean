@@ -1,12 +1,63 @@
-import Mathlib
+module
+
+public import Mathlib.RingTheory.DiscreteValuationRing.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.LinearAlgebra.FreeModule.PID
+public import Mathlib.RingTheory.DiscreteValuationRing.TFAE
+
+@[expose] public section
 
 namespace Formalism.MainNotions.flipOneThree.Pf.KP
-
-def BlockSplit : Prop :=
-  ∀ {O : Type} [CommRing O] [IsDomain O] [IsDiscreteValuationRing O] {J : Type} [Fintype J] (n : ℕ) (z : O), z ≠ 0 →
-    ∀ (A : J → Matrix (Fin n) (Fin n) O), ∑ j, A j = z • (1 : Matrix (Fin n) (Fin n) O) →
-    ∃ ν : J → ℕ, n ≤ ∑ j, ν j ∧ ∀ j, ∃ (P : Matrix (Fin (ν j)) (Fin n) O) (Q : Matrix (Fin n) (Fin (ν j)) O),
-      P * A j * Q = z • (1 : Matrix (Fin (ν j)) (Fin (ν j)) O)
 
 open Module
 
@@ -23,7 +74,7 @@ private theorem bsp_one (n : ℕ) (z : O) (A : Matrix (Fin n) (Fin n) O) :
         P * A * Q = z • (1 : Matrix (Fin ν) (Fin ν) O) := by
   classical
   haveI : ValuationRing O :=
-    ((IsDiscreteValuationRing.TFAE O (IsDiscreteValuationRing.not_isField O)).out 0 1).mp
+    ((IsDiscreteValuationRing.TFAE O (IsDiscreteValuationRing.not_isField O)).out 1 2).mp
       (inferInstance : IsDiscreteValuationRing O)
   obtain ⟨m, S⟩ := Submodule.smithNormalForm (Pi.basisFun O (Fin n))
     (LinearMap.range (Matrix.mulVecLin A))
@@ -132,9 +183,5 @@ theorem blockSplit {J : Type} [Fintype J] (n : ℕ) (z : O) (hz : z ≠ 0)
         exact_mod_cast hle
     _ ≤ Fintype.card (Σ j, Fin (ν j)) := Fintype.card_range_le V
     _ = ∑ j, ν j := by simp [Fintype.card_sigma]
-
-theorem blockSplitting_holds : BlockSplit := by
-  intro O _ _ _ J _ n z hz A h
-  exact blockSplit n z hz A h
 
 end Formalism.MainNotions.flipOneThree.Pf.KP

@@ -1,16 +1,68 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsNotRelZero
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ValuationLeOneOfMem
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.UnderMemAndPlaceAboveEqOfMem
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsNotRelZero
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.UnderMemAndPlaceAboveEqOfMem
+import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.AddNsmulResidueAssoc
+import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.MemRangeOfOneTmulMem
+import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.SmulMemLatO
+import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ThetaAtEqSumHeisOfFourierSum
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsIdempotentSumAuxiliaryPlaces
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ValuationLeOneOfMem
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.EqZeroOrEqOfPlaceIdem
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsNsmulIntMemLatO
+import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.Levelaf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.L2.Theta Formalism.IndefR.Datum Formalism.IndefR.Links
 open IsDedekindDomain NumberField MeasureTheory Matrix
-open scoped TensorProduct
+open scoped TensorProduct nonZeroDivisors
 
-set_option synthInstance.maxHeartbeats 400000
-set_option maxHeartbeats 800000
+
+
 
 namespace GlobalTheory.FunObj.LocTensor
 
@@ -166,10 +218,72 @@ theorem locM_add {a b : ℕ} (β : GL (Fin a) (Formalism.IndefR.Lev.EAf D)) (β'
 theorem cpt_idemSum {e : AE D} {P : Finset (Pl D.host.E)} (he : IsIdemSum e P) {Q : Pl D.host.E} (hQ : Q ∉ P) :
     cpt Q (toEAf D e) = 0 := by
   obtain ⟨⟨es, hes, rfl⟩, -⟩ := he
+
   rw [map_sum, map_sum]
   exact Finset.sum_eq_zero fun P' hP => (cpt_of_isIdemAt (hes P' hP)).2 Q fun h => hQ (h ▸ hP)
 
-theorem exists_mult (hS : Submodule.IsLattice D.host.E ΛS) (hT : Submodule.IsLattice D.host.E ΛT) {e : AE D}
+private theorem selfDual_isFullLattice {D : D7} : ∀ (V : HSp D) (Λ : Submodule (𝓞 D.host.E) (Fin V.rank → D.host.E)),
+    IsSelfDualC V Λ → Submodule.IsFullLattice D.host.E Λ := by
+  intro V Λ hΛ
+  haveI : Submodule.IsLattice D.host.E Λ := hΛ.1
+  refine ⟨?_⟩
+  obtain ⟨s, hs⟩ := hΛ.1.fg
+  apply eq_top_iff.mpr
+  intro y _
+  let f : (Fin V.rank → D.host.E) → D.host.E := fun x =>
+    ∑ i, ∑ j, star (x i) * V.gram i j * y j
+  obtain ⟨a, ha⟩ := IsLocalization.exist_integer_multiples (nonZeroDivisors (𝓞 D.host.E)) s f
+  have ha0 : (algebraMap (𝓞 D.host.E) D.host.E a) ≠ 0 := by
+    exact (FaithfulSMul.algebraMap_injective _ _).ne (mem_nonZeroDivisors_iff_ne_zero.mp a.2)
+  let P : Submodule (𝓞 D.host.E) (Fin V.rank → D.host.E) := {
+    carrier := {x | ∃ b : 𝓞 D.host.E, (b : D.host.E) = (algebraMap (𝓞 D.host.E) D.host.E a) * f x}
+    zero_mem' := by refine ⟨0, ?_⟩; simp [f]
+    add_mem' := by
+      rintro x z ⟨b, hb⟩ ⟨c, hc⟩
+      refine ⟨b + c, ?_⟩
+      change (b : D.host.E) + c = _
+      rw [hb, hc]
+      simp [f, map_add, add_mul, Finset.sum_add_distrib, mul_add]
+    smul_mem' := by
+      rintro c x ⟨b, hb⟩
+      refine ⟨RingOfIntegers.mapRingHom (starRingEnd D.host.E) c * b, ?_⟩
+      simp only [map_mul, hb, f, Pi.smul_apply, Algebra.smul_def, map_mul, RingOfIntegers.mapRingHom_apply, star_mul]
+      simp only [Finset.mul_sum]
+      apply Finset.sum_congr rfl
+      intro i _
+      apply Finset.sum_congr rfl
+      intro j _
+      change star (c : D.host.E) * _ = _
+      ring }
+  have hsP : (s : Set (Fin V.rank → D.host.E)) ⊆ P := by
+    intro x hx
+    obtain ⟨b, hb⟩ := ha x hx
+    exact ⟨b, by simpa [Algebra.smul_def] using hb⟩
+  have hy : (algebraMap (𝓞 D.host.E) D.host.E a) • y ∈ Λ := by
+    apply (hΛ.2 _).2
+    intro x hx
+    have hxP : x ∈ P := (hs ▸ Submodule.span_le.mpr hsP) hx
+    obtain ⟨b, hb⟩ := hxP
+    refine ⟨b, ?_⟩
+    rw [hb]
+    dsimp only [f, Pi.smul_apply]
+    simp only [smul_eq_mul, Finset.mul_sum]
+    apply Finset.sum_congr rfl
+    intro i _
+    apply Finset.sum_congr rfl
+    intro j _
+    ring
+  have hy' : (algebraMap (𝓞 D.host.E) D.host.E a) • y ∈ Submodule.span D.host.E (Λ : Set (Fin V.rank → D.host.E)) :=
+    Submodule.subset_span hy
+  have := (Submodule.span D.host.E (Λ : Set (Fin V.rank → D.host.E))).smul_mem
+    (algebraMap (𝓞 D.host.E) D.host.E a)⁻¹ hy' 
+  change (algebraMap (𝓞 D.host.E) D.host.E a)⁻¹ •
+    ((algebraMap (𝓞 D.host.E) D.host.E a) • y) ∈ _ at this
+  rw [← smul_assoc, smul_eq_mul, inv_mul_cancel₀ ha0, one_smul] at this
+  exact this
+
+
+theorem exists_mult (hS : Submodule.IsFullLattice D.host.E ΛS) (hT : Submodule.IsFullLattice D.host.E ΛT) {e : AE D}
     {P : Finset (Pl D.host.E)} (he : IsIdemSum e P) (β : GL (Fin T.rank) (Formalism.IndefR.Lev.EAf D))
     (β' : GL (Fin S.rank) (Formalism.IndefR.Lev.EAf D)) (n : Pl D.host.E → ℕ) : ∃ k : ℕ, 0 < k ∧
       (∀ u ∈ latO S T ΛS ΛT fun _ => True, ∀ w ∈ P, GivenAdm.CongM (unifAt w ^ n w) (locM β β' w (k • u))) ∧
@@ -244,8 +358,8 @@ theorem exists_tensor {S' T' : HSp D} {ΛS' : Submodule (𝓞 D.host.E) (Fin S'.
   classical
   obtain ⟨T₁, t0, t1⟩ := exists_model hS hT he h₀
   obtain ⟨T₂, -, t2⟩ := exists_model hS' hT' he h₀'
-  obtain ⟨k, hk, a1, a2⟩ := exists_mult hS.1 hT.1 he β₁ β₂ n
-  obtain ⟨l, hl, b1, b2⟩ := exists_mult hS'.1 hT'.1 he β₃ β₄ n
+  obtain ⟨k, hk, a1, a2⟩ := exists_mult (selfDual_isFullLattice S ΛS hS) (selfDual_isFullLattice T ΛT hT) he β₁ β₂ n
+  obtain ⟨l, hl, b1, b2⟩ := exists_mult (selfDual_isFullLattice S' ΛS' hS') (selfDual_isFullLattice T' ΛT' hT') he β₃ β₄ n
   have z : ∀ {a b : ℕ} (β β') (w), GivenAdm.CongM (unifAt w ^ n w) (locM β β' w (0 : Mx D a b)) := fun β β' w i j => by
     rw [left_eq_add.1 ((congrArg _ (add_zero 0)).symm.trans (locM_add β β' w 0 0)), Matrix.zero_apply, map_zero]
     exact zero_le

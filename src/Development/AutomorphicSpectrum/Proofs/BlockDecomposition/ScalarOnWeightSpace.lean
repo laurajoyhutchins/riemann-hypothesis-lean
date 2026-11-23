@@ -1,9 +1,63 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.InjectiveWedgeHighestCoefficient
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.StableLattices.SumOfLevelSizesEqStatement
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.StableLattices.StandardBlocksLevelSumStatement
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.StableLattices.FreeAlgebraActionOnSubquotientStatement
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.ImportsBisSide
+module
+
+public import Mathlib.Algebra.BigOperators.Group.Finset.Defs
+public import Mathlib.Basic.Real.Basic
+public import Mathlib.Order.Interval.Finset.Nat
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.ImportsBisSide
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.StableLattices.Bdy
+import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.BaseChangeDefiniteUnitary
+import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.IsNormalisedOfIsDiscrete
+import Development.AutomorphicArithmetic.IntegralCasts.IsOpenStabOfMemNhds
+import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.ArchimedeanGelfandKernels.IsMultZero
+import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.RealDescent.RealLeviDescent.IsCoreMod
+import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.RealDescent.RealLoc
+import Formalism.RealPlaceAnalysis.StatementA
+
+@[expose] public section
 
 noncomputable section
 
@@ -89,55 +143,6 @@ end Alg
 section Spaces
 
 variable {V : Type} [AddCommGroup V] [Module ℂ V]
-
-def cycQ (lev : Fin n → ℕ) (E1 E2 : Fin n → Fin n → Module.End ℂ V) (j : ℕ) : Submodule ℂ (Cq n V) where
-  carrier := {x | SuppQ (inUL lev) x ∧ DegQ j x ∧ bdq E1 E2 x = 0}
-  add_mem' := by
-    rintro x y ⟨h1, h2, h3⟩ ⟨g1, g2, g3⟩
-    refine ⟨fun A hA i hi => ?_, fun A hA => ?_, by rw [map_add, h3, g3, add_zero]⟩
-    · by_cases hx : x A = 0
-      · have hy : y A ≠ 0 := fun hy => hA (by simp [hx, hy])
-        exact g1 A hy i hi
-      · exact h1 A hx i hi
-    · by_cases hx : x A = 0
-      · have hy : y A ≠ 0 := fun hy => hA (by simp [hx, hy])
-        exact g2 A hy
-      · exact h2 A hx
-  zero_mem' := ⟨fun A hA => absurd rfl hA, fun A hA => absurd rfl hA, map_zero _⟩
-  smul_mem' := by
-    rintro c x ⟨h1, h2, h3⟩
-    have hne : ∀ A, (c • x) A ≠ 0 → x A ≠ 0 := fun A hA hx => hA (by simp [hx])
-    exact ⟨fun A hA => h1 A (hne A hA), fun A hA => h2 A (hne A hA), by rw [map_smul, h3, smul_zero]⟩
-
-def bdyQ (lev : Fin n → ℕ) (E1 E2 : Fin n → Fin n → Module.End ℂ V) (j : ℕ) : Submodule ℂ (Cq n V) where
-  carrier := {x | ∃ w : Cq n V, SuppQ (inUL lev) w ∧ DegQ (j + 1) w ∧ bdq E1 E2 w = x}
-  add_mem' := by
-    rintro _ _ ⟨x, h1, h2, rfl⟩ ⟨y, g1, g2, rfl⟩
-    refine ⟨x + y, fun A hA i hi => ?_, fun A hA => ?_, map_add _ _ _⟩
-    · by_cases hx : x A = 0
-      · have hy : y A ≠ 0 := fun hy => hA (by simp [hx, hy])
-        exact g1 A hy i hi
-      · exact h1 A hx i hi
-    · by_cases hx : x A = 0
-      · have hy : y A ≠ 0 := fun hy => hA (by simp [hx, hy])
-        exact g2 A hy
-      · exact h2 A hx
-  zero_mem' := ⟨0, fun A hA => absurd rfl hA, fun A hA => absurd rfl hA, map_zero _⟩
-  smul_mem' := by
-    rintro c _ ⟨x, h1, h2, rfl⟩
-    have hne : ∀ A, (c • x) A ≠ 0 → x A ≠ 0 := fun A hA hx => hA (by simp [hx])
-    exact ⟨c • x, fun A hA => h1 A (hne A hA), fun A hA => h2 A (hne A hA), map_smul _ _ _⟩
-
-abbrev HQ (lev : Fin n → ℕ) (E1 E2 : Fin n → Fin n → Module.End ℂ V) (j : ℕ) : Type :=
-  cycQ lev E1 E2 j ⧸ (bdyQ lev E1 E2 j).comap (cycQ lev E1 E2 j).subtype
-
-abbrev levL (lev : Fin n → ℕ) (E1 E2 : Fin n → Fin n → Module.End ℂ V) (x : Bool × Fin n × Fin n) :
-    Module.End ℂ (Cq n V) :=
-  if lev x.2.1 = lev x.2.2 then (if x.1 then c1 E1 E2 x.2.1 x.2.2 else c2 E1 E2 x.2.1 x.2.2) else 0
-
-abbrev fam {W : Type} [AddCommGroup W] [Module ℂ W]
-    (ρ : FreeAlgebra ℂ (Bool × Fin n × Fin n) →ₐ[ℂ] Module.End ℂ W) (s : Bool) (p q : Fin n) : Module.End ℂ W :=
-  ρ (FreeAlgebra.ι ℂ (s, p, q))
 
 end Spaces
 

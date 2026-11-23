@@ -1,16 +1,56 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.MirabolicDerivatives.SegmentCuspLines.ProdIrrFiniteLength
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.GeometricLemmaFiltration
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.IrreducibleAdmissibleGL
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.NormalisedParabolicInductionReindexEquiv
+module
+
+public import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.MirabolicDerivatives.SegmentCuspLines.ProdIrrFiniteLength
+public import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.IrreducibleAdmissibleGL
+public import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.ZelevinskyJacquet.ZelevinskyCosocles.GKLocal
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsEquivProdIrrTw
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.NormalisedParabolicInductionReindexEquiv
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.SmoothContragredientIrreducibleAndReflexive
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.EquivContra
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.InvTransposeInvTranspose
 import Development.AbelianVarietyTheory.Proofs.TwistedOperators.LowerEquivUpperSwap
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ParIndJacPlacing
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.EquivContra
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ContragredientProductIrreducible
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsEquivProdIrrTw
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.SmoothContragredientIrreducibleAndReflexive
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.InvTransposeInvTranspose
-import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.ZelevinskyJacquet.ZelevinskyCosocles.GKLocal
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ParIndJacPlacing
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ContragredientProductIrreducible
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.ZelevinskyJacquet.ZelevinskyCosocles.LUnlinkedComm
+
+@[expose] public section
 
 noncomputable section
 
@@ -27,12 +67,12 @@ section Inv
 
 variable {n : Type} [Fintype n] [DecidableEq n]
 
-omit [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] in
 
+omit [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] in
 theorem invT_invT (g : GL n k) : invT (invT g) = g := Units.ext (transpose_transpose _)
 
-omit [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] in
 
+omit [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] in
 theorem det_invT (g : GL n k) :
     GeneralLinearGroup.det (invT g) = (GeneralLinearGroup.det g)⁻¹ := by
   rw [← map_inv]
@@ -50,15 +90,15 @@ section Levi
 variable {α n : Type} {m : α → Type} [Fintype α] [LinearOrder α] [∀ a, Fintype (m a)]
   [∀ a, DecidableEq (m a)] [Fintype n] [DecidableEq n] {W : Type} [AddCommGroup W] [Module ℂ W]
 
-variable (k m) in
 
+variable (k m) in
 def leviInvT : Levi k m →* Levi k m where
   toFun g a := invT (g a)
   map_one' := funext fun _ => map_one _
   map_mul' _ _ := funext fun _ => map_mul _ _ _
 
-omit [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] [Fintype α] [LinearOrder α] in
 
+omit [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] [Fintype α] [LinearOrder α] in
 theorem leviInvT_leviInvT (g : Levi k m) : leviInvT k m (leviInvT k m g) = g :=
   funext fun _ => invT_invT _
 
@@ -68,14 +108,14 @@ theorem deltaHalf_leviInvT (g : Levi k m) : deltaHalf k m (leviInvT k m g) = (de
   show absPow k _ (GeneralLinearGroup.det (invT (g a))) = _
   rw [det_invT, map_inv]
 
-omit [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] [Fintype α] [∀ a, Fintype (m a)] [∀ a, DecidableEq (m a)] in
 
+omit [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] [Fintype α] [∀ a, Fintype (m a)] [∀ a, DecidableEq (m a)] in
 theorem invT_mem_parab {e : (Σ a, m a) ≃ n} {p : GL n k} (hp : p ∈ parabLower k e) :
     invT p ∈ parab k e :=
   mem_parab_iff.2 fun a b i j hab => (mem_parabLower_iff k).1 (inv_mem hp) b a j i hab
 
-omit [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] [Fintype α] [∀ a, Fintype (m a)] [∀ a, DecidableEq (m a)] in
 
+omit [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] [Fintype α] [∀ a, Fintype (m a)] [∀ a, DecidableEq (m a)] in
 theorem invT_mem_parabLower {e : (Σ a, m a) ≃ n} {q : GL n k} (hq : q ∈ parab k e) :
     invT q ∈ parabLower k e :=
   (mem_parabLower_iff k).2 fun a b i j hab => mem_parab_iff.1 (inv_mem hq) b a j i hab
@@ -122,8 +162,8 @@ section Two
 variable {a b n : Type} [Fintype a] [DecidableEq a] [Fintype b] [DecidableEq b] [Fintype n] [DecidableEq n]
   {W : Type} [AddCommGroup W] [Module ℂ W]
 
-variable (k a b) in
 
+variable (k a b) in
 def invTProd : GL a k × GL b k →* GL a k × GL b k := MonoidHom.prodMap invT invT
 
 theorem ind₂Lower_equiv_comp_invT (e : a ⊕ b ≃ n) (ρ : Representation ℂ (GL a k × GL b k) W) :
@@ -192,7 +232,7 @@ theorem nonempty_ind₂_equiv_multiProd {N : ℕ} {d : Fin 2 → ℕ} (hd : ∑ 
   subst h
   exact nonempty_prod₂_equiv_multiProd hd π
 
-theorem nonempty_ind₂_contra_equiv (hA : GlobalTheory.Published.IrreducibleAdmissibleGL) (F : Fin 2 → IrrGL k) {N : ℕ}
+theorem nonempty_ind₂_contra_equiv (hA : GlobalTheory.Published.IrreducibleAdmissibleGL) (F : Fin 2 → IrrGL (k := k)) {N : ℕ}
     (hd : ∑ a, (F a).1 = N) (h : (F 0).1 + (F 1).1 = N) :
     Nonempty ((ind₂ (stdSum h) (extTensor (contra (F 0).rep) (contra (F 1).rep))).Equiv
       (contra (prodIrr F hd))) := by
@@ -201,7 +241,7 @@ theorem nonempty_ind₂_contra_equiv (hA : GlobalTheory.Published.IrreducibleAdm
   have E₃ := GlobalTheory.CompanionTheory.ContraProd.contra_prodIrr_multiProd hA F hd
   exact E₂.elim fun e₂ => E₃.elim fun e₃ => ⟨e₂.trans e₃⟩
 
-theorem prodIrr_swap_of_isIrreducible (hA : GlobalTheory.Published.IrreducibleAdmissibleGL) (F G : Fin 2 → IrrGL k)
+theorem prodIrr_swap_of_isIrreducible (hA : GlobalTheory.Published.IrreducibleAdmissibleGL) (F G : Fin 2 → IrrGL (k := k))
     (e₀ : G 0 = F 1) (e₁ : G 1 = F 0) {N : ℕ} (hd : ∑ a, (F a).1 = N) (hd' : ∑ a, (G a).1 = N)
     (hX : (prodIrr F hd).IsIrreducible) (hY : (prodIrr G hd').IsIrreducible) :
     Nonempty ((prodIrr F hd).Equiv (prodIrr G hd')) := by
@@ -210,7 +250,7 @@ theorem prodIrr_swap_of_isIrreducible (hA : GlobalTheory.Published.IrreducibleAd
   have h'' : (F 1).1 + (F 0).1 = N := by rw [← e₀, ← e₁]; exact h'
   have E₁ := nonempty_ind₂_equiv_multiProd (d := fun a => (F a).1) hd h fun a => (F a).rep
   have E₂ := nonempty_ind₂_contra_equiv hA G hd' h'
-  have E₃ : ∀ (u v : IrrGL k), u = F 1 → v = F 0 → ∀ h₁ : u.1 + v.1 = N,
+  have E₃ : ∀ (u v : IrrGL (k := k)), u = F 1 → v = F 0 → ∀ h₁ : u.1 + v.1 = N,
       Nonempty ((ind₂ (stdSum h'') (extTensor (contra (F 1).rep) (contra (F 0).rep))).Equiv
         (ind₂ (stdSum h₁) (extTensor (contra u.rep) (contra v.rep)))) := by
     rintro _ _ rfl rfl _

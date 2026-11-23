@@ -1,4 +1,51 @@
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LatticeColumns.InGMulInt
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LatticeColumns.InGMulInt
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LatticeIndices.ImAInModPSplit
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LatticeColumns.FirstProjMkVecEqMulVec
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LatticeColumns.SecondProjWeightVectorZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -233,7 +280,7 @@ theorem bwd_coords (hW : WClause X hb u p θ Q) (x : KvH X u p.1) (Bo : Matrix (
     rw [hsum, neg_neg]
     exact hG2 s
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem bwd_col (hLB : LatBasis X p θ (reindex₂ X p Q)) (hε : θ (epsP X p) = (1, 0))
     (hW : WClause X hb u p θ Q) (x : KvH X u p.1) (Bo : Matrix (Fin D.R.k) (Fin D.R.k) (Op X p))
@@ -263,6 +310,7 @@ theorem bwd_col (hLB : LatBasis X p θ (reindex₂ X p Q)) (hε : θ (epsP X p) 
   have hpr2v : ∀ j, pr2 θ (PI.FinKW.vecV X.B.I p.1 (X.bw j)) = 0 := fun j => secondProj_weight_vector_zero X p θ hε j
   have hpr2y : pr2 θ y = 0 := secondProj_mulVec_zero X p θ _ _ (hpr2v i)
   have hpr2z : pr2 θ z = 0 := by
+
     rw [hz, map_sub, map_sum, secondProj_mulVec_zero X p θ _ _ hpr2y, zero_sub, neg_eq_zero]
     refine Finset.sum_eq_zero fun j _ => ?_
     rw [LinearMap.map_smul_of_tower, secondProj_mulVec_zero X p θ _ _ (hpr2v j), smul_zero]

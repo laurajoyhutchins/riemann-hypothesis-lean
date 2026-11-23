@@ -1,8 +1,44 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.SameDegreeZeroFormsSelf
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.ECure
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.ColDictIsomReTr
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FinXSpectralRedivisionFullChoices
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.SameDegreeZeroFormsSelf
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.ColDictIsomReTr
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -16,7 +52,7 @@ attribute [local instance] Formalism.BasicNotions.Host.cmStar
 
 variable {D : D7} (Z : New D)
 
-set_option maxHeartbeats 4000000
+
 
 def SPack.re {F : ∀ u, Forms0 D u} (P : SPack D F) {F' : ∀ u, Forms0 (reD D Z) u} (h : SameForms0LevelsAndValues Z F F')
     (hF : FinX (reY Z P.Y)) : SPack (reD D Z) F' where
@@ -43,18 +79,10 @@ section API
 
 variable {F : ∀ u, Forms0 D u} (P : SPack D F) {F' : ∀ u, Forms0 (reD D Z) u} (h : SameForms0LevelsAndValues Z F F') (hF : FinX (reY Z P.Y))
 
-theorem SPack.re_ψ : HEq (P.re Z h hF).ψ P.ψ := (by with_unfolding_all exact (HEq.refl P.ψ :))
-
 end API
 
 theorem conjHH_eEECre {X : HidaSetting D} (G : GoodOp X) (x : EEC X G) :
     conjHH (reX Z X) (reG Z G) (eEECre Z G x) = eHHre Z X (conjHH X G x) := (by with_unfolding_all exact (Eq.refl (eHHre Z X (conjHH X G x)) :))
-
-example {X : HidaSetting D} (G : GoodOp X) :
-    Module.finrank ℂ (EEC X G) = Module.finrank ℂ (EEC (reX Z X) (reG Z G)) := (eEECre Z G).toLinearEquiv.finrank_eq
-
-example {F : ∀ u, Forms0 D u} (P : SPack D F) {F' : ∀ u, Forms0 (reD D Z) u} (h : SameForms0LevelsAndValues Z F F') (hF : FinX (reY Z P.Y)) :
-    (P.re Z h hF).X.B.I = Formalism.L2.SG.InstExistsPf.instOf D := (by with_unfolding_all exact (P.inst :))
 
 theorem exists_sameF_ofDiv (N : ∀ u, Submodule (𝓞 D.what₂.LL) (D.div.Nu u).V) (ht : D.what₂.Word → ℝ) (F : ∀ u, Forms0 D u) :
     ∃ F' : ∀ u, Forms0 (reD D (New.ofDiv D N ht)) u, SameForms0LevelsAndValues (New.ofDiv D N ht) F F' := by
@@ -68,12 +96,6 @@ theorem exists_sameF_ofDiv (N : ∀ u, Submodule (𝓞 D.what₂.LL) (D.div.Nu u
   · exact (by with_unfolding_all exact (Eq.refl (F u).cls0.lev :))
   · exact (by with_unfolding_all exact (Eq.refl (F u).cls0.y :))
   · exact (by with_unfolding_all exact (Eq.refl (F u).val0.eY :))
-
-theorem SPack.exists_re_ofDiv (N : ∀ u, Submodule (𝓞 D.what₂.LL) (D.div.Nu u).V) (ht : D.what₂.Word → ℝ) {F : ∀ u, Forms0 D u}
-    (P : SPack D F) :
-    ∃ (F' : ∀ u, Forms0 (reD D (New.ofDiv D N ht)) u) (P' : SPack (reD D (New.ofDiv D N ht)) F'),
-      P'.X = reX (New.ofDiv D N ht) P.X :=
-  (exists_sameF_ofDiv N ht F).elim fun F' h => ⟨F', P.re _ h (finX_reY D _ P.X P.Y P.fin), rfl⟩
 
 end GlobalTheory.Mem.SRe
 

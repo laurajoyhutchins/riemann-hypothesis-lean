@@ -1,18 +1,64 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.EigLat
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsCocharLie
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsGrpPullback
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.SABBaseChangeSt
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsGrpPullback
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.LieModel
+public import Mathlib.RingTheory.DedekindDomain.Basic
+public import Mathlib.RingTheory.DiscreteValuationRing.Basic
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.AbelianSchemeQuotients.IsAbelianScheme
+public import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.ExistsUniqueHomExtensionSemiAbelian
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExistsLieModel
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.IsExcisionNbhdAway
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LieModelExistsUniqueSemilinear
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LieModelFunctorialMap
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LieModelPullbackEquivalence
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.TangentVectorExtendsDvrStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.EffectiveEpi.Comp
+import Mathlib.CategoryTheory.ExtremalEpi
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
 import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.BCTools
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.SabComp
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.SabPull
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LieModelExistsUniqueSemilinear
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LieModelPullbackEquivalence
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LieModelFunctorialMap
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExistsLieModel
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.IsExcisionNbhdAway
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.TangentVectorExtendsDvrStatement
-import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.ExistsUniqueHomExtensionSemiAbelian
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsCocharLie
+
+@[expose] public section
 
 open CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj AlgebraicGeometry NumberField
 open scoped CategoryTheory.Obj
@@ -28,7 +74,7 @@ theorem exists_generic_model {O K : Type} [CommRing O] [Field K] (c : O →+* K)
     (M : LieModel G (𝟙 _) E) :
     ∃ (EK : Type) (_ : AddCommGroup EK) (_ : Module K EK) (MK : LieModel GK (𝟙 _) EK)
       (N : LieModel G (spMap c ≫ 𝟙 _) EK) (j : E →ₛₗ[c] EK),
-      (∀ x, (MK.pt x).left ≫ φ = (N.pt x).left) ∧ ∀ e, M.Lifts c (𝟙 G.left) e (N.pt (j e)) := by
+      (∀ x, (MK.pt x).left ≫ φ = (N.pt x).left) ∧ ∀ e, ((N.pt (j e)).left ≫ (𝟙 G.left) = ReciprocityTheory.ChartRestriction.G.Geo.Tor.spMap (GlobalTheory.CompanionTheory.Ar.dualMap c) ≫ (M.pt e).left) := by
   obtain ⟨EK, i1, i2, ⟨N⟩⟩ := lieModel_exists (Sp O) G K (spMap c ≫ 𝟙 _)
   have hx : spMap c ≫ 𝟙 (Sp O) = 𝟙 (Sp K) ≫ spMap c := by simp
   have gen : ∀ (y : Sp K ⟶ Sp O), spMap c ≫ 𝟙 (Sp O) = y →
@@ -92,7 +138,7 @@ theorem exists_tangent_dvr_semiabelian {O T K : Type} [CommRing O] [CommRing T] 
     (h' : IsGrpPullback GK' G' (spMap ((algebraMap T K).comp a)) φ') (q : GK ⟶ GK') [IsMonHom q]
     (x : Sp T ⟶ Sp O) (hx : x = 𝟙 (Sp T) ≫ spMap a)
     (t : epsAt x ⟶ G) (ht : IsTanAt G _ t) (v : epsAt (𝟙 (Sp K)) ⟶ GK)
-    (hv : v.left ≫ φ = spMap (dualMap (algebraMap T K)) ≫ t.left) :
+    (hv : v.left ≫ φ = spMap (GlobalTheory.CompanionTheory.Ar.dualMap (algebraMap T K)) ≫ t.left) :
     ∃ w : epsAt x ⟶ G', IsTanAt G' _ w ∧
       (v ≫ q).left ≫ φ' = spMap (dualMap (algebraMap T K)) ≫ w.left := by
   subst hx
@@ -160,14 +206,14 @@ theorem exists_tangent_dvr {O T K : Type} [CommRing O] [CommRing T] [IsDomain T]
     (h : IsGrpPullback GK G (spMap ((algebraMap T K).comp a)) φ)
     (h' : IsGrpPullback GK' G' (spMap ((algebraMap T K).comp a)) φ') (q : GK ⟶ GK') [IsMonHom q]
     (t : epsAt (spMap a ≫ 𝟙 _) ⟶ G) (ht : IsTanAt G _ t) (v : epsAt (𝟙 (Sp K)) ⟶ GK)
-    (hv : v.left ≫ φ = spMap (dualMap (algebraMap T K)) ≫ t.left) :
+    (hv : v.left ≫ φ = spMap (GlobalTheory.CompanionTheory.Ar.dualMap (algebraMap T K)) ≫ t.left) :
     ∃ w : epsAt (spMap a ≫ 𝟙 _) ⟶ G', IsTanAt G' _ w ∧
       (v ≫ q).left ≫ φ' = spMap (dualMap (algebraMap T K)) ≫ w.left :=
   exists_tangent_dvr_semiabelian a G G' GK GK' φ φ' hG hG' h h' q _ (by simp) t ht v hv
 
 theorem lifts_id {S : Scheme.{0}} {G : Over S} [GrpObj G] {R R' : Type} [CommRing R] [CommRing R'] {x : Sp R ⟶ S}
     {E : Type} [AddCommGroup E] [Module R E] (M : LieModel G x E) (c : R →+* R') (e : E)
-    (v : epsAt (spMap c ≫ x) ⟶ G) (h : M.Lifts c (𝟙 G.left) e v) :
+    (v : epsAt (spMap c ≫ x) ⟶ G) (h : (v.left ≫ (𝟙 G.left) = ReciprocityTheory.ChartRestriction.G.Geo.Tor.spMap (GlobalTheory.CompanionTheory.Ar.dualMap c) ≫ (M.pt e).left)) :
     v.left = spMap (dualMap c) ≫ (M.pt e).left :=
   (Category.comp_id _).symm.trans h
 
@@ -230,7 +276,7 @@ theorem exists_local {O K : Type} [CommRing O] [IsDedekindDomain O] [Field K] [A
       (algebraMap O _) G G' GK GK' φ φ' hG hG' h h' q t ht v hv
     exact ⟨w, hw, huv.trans hw'⟩
 
-theorem hom_maps_lie : ∀ (O K : Type) [CommRing O] [IsDedekindDomain O] [Field K] [Algebra O K] [IsFractionRing O K] (G G' : Over (Sp O)) [GrpObj G] [GrpObj G'] (GK GK' : Over (Sp K)) [GrpObj GK] [GrpObj GK'] (φ : GK.left ⟶ G.left) (φ' : GK'.left ⟶ G'.left), IsSemiAbelian G → IsSemiAbelian G' → IsGrpPullback GK G (spMap (algebraMap O K)) φ → IsGrpPullback GK' G' (spMap (algebraMap O K)) φ' → ∀ (q : GK ⟶ GK') [IsMonHom q] (E : Type) [AddCommGroup E] [Module O E] (E' : Type) [AddCommGroup E'] [Module O E'] (M : LieModel G (𝟙 _) E) (M' : LieModel G' (𝟙 _) E'), ∃ f : E →ₗ[O] E', ∀ (e : E) (v : epsAt (𝟙 (Sp K)) ⟶ GK), M.Lifts (algebraMap O K) φ e v → M'.Lifts (algebraMap O K) φ' (f e) (v ≫ q) := by
+theorem hom_maps_lie : ∀ (O K : Type) [CommRing O] [IsDedekindDomain O] [Field K] [Algebra O K] [IsFractionRing O K] (G G' : Over (Sp O)) [GrpObj G] [GrpObj G'] (GK GK' : Over (Sp K)) [GrpObj GK] [GrpObj GK'] (φ : GK.left ⟶ G.left) (φ' : GK'.left ⟶ G'.left), IsSemiAbelian G → IsSemiAbelian G' → IsGrpPullback GK G (spMap (algebraMap O K)) φ → IsGrpPullback GK' G' (spMap (algebraMap O K)) φ' → ∀ (q : GK ⟶ GK') [IsMonHom q] (E : Type) [AddCommGroup E] [Module O E] (E' : Type) [AddCommGroup E'] [Module O E'] (M : LieModel G (𝟙 _) E) (M' : LieModel G' (𝟙 _) E'), ∃ f : E →ₗ[O] E', ∀ (e : E) (v : epsAt (𝟙 (Sp K)) ⟶ GK), (v.left ≫ φ = ReciprocityTheory.ChartRestriction.G.Geo.Tor.spMap (GlobalTheory.CompanionTheory.Ar.dualMap (algebraMap O K)) ≫ (M.pt e).left) → ((v ≫ q).left ≫ φ' = ReciprocityTheory.ChartRestriction.G.Geo.Tor.spMap (GlobalTheory.CompanionTheory.Ar.dualMap (algebraMap O K)) ≫ (M'.pt (f e)).left) := by
   intro O K _ _ _ _ _ G G' _ _ GK GK' _ _ φ φ' hG hG' h h' q _ E _ _ E' _ _ M M'
   have := hG.comm
   have := hG'.comm
@@ -270,7 +316,7 @@ theorem hom_maps_lie : ∀ (O K : Type) [CommRing O] [IsDedekindDomain O] [Field
   refine ⟨{ toFun := f, map_add' := ?_, map_smul' := ?_ }, fun e v hv => ?_⟩
   · intro a b
     apply hinj
-    simp only [hf, map_add]
+    simp only [hf, map_add (f := _)]
   · intro r a
     apply hinj
     simp only [hf, map_smulₛₗ, RingHom.id_apply]

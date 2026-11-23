@@ -1,8 +1,50 @@
-import Development.WeilBound.ThetaLifts.LeviDeterminants.EqZeroOfTheta
-import Development.WeilBound.ThetaLifts.LeviDeterminants.MCSpan
-import Development.WeilBound.ThetaLifts.LeviDeterminants.MixedModels.RealSt
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EqOfComponentTensorAdelicFunctionEq
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsAdelicSchwartzNeZeroAtOriginStatement
+module
+
+public import Development.WeilBound.ThetaLifts.LeviDeterminants.EqZeroOfTheta
+public import Development.WeilBound.ThetaLifts.LeviDeterminants.MixedModels.RealSt
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EqOfComponentTensorAdelicFunctionEq
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsAdelicSchwartzNeZeroAtOriginStatement
+public import Development.WeilBound.ThetaLifts.LeviDeterminants.MCSpan
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open scoped TensorProduct NNReal Matrix
 open NumberField IsDedekindDomain MeasureTheory Filter Topology Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes
@@ -14,7 +56,7 @@ namespace PositivityTheory.ThKF0
 variable {F : Type} [Field F] [NumberField F] {κ : Type} [Fintype κ]
 
 theorem surjOn_of_pure (e : ((κ → AF F) → ℂ) →ₗ[ℂ] ((κ → AF F) → ℂ)) (ei : SInf F κ →L[ℂ] SInf F κ)
-    (ev : ∀ v : Pl F, ((κ → Fv F v) → ℂ) →ₗ[ℂ] ((κ → Fv F v) → ℂ)) (hi : Function.Surjective ei)
+    (ev : ∀ v : Pl (F := F), ((κ → Fv F v) → ℂ) →ₗ[ℂ] ((κ → Fv F v) → ℂ)) (hi : Function.Surjective ei)
     (hSB : ∀ v, Set.SurjOn (ev v) (SB (κ → Fv F v) : Set _) (SB (κ → Fv F v) : Set _))
     (hstd : ∀ᶠ v in cofinite, ev v (Set.indicator {x | ∀ i, x i ∈ v.adicCompletionIntegers F} 1) =
       Set.indicator {x | ∀ i, x i ∈ v.adicCompletionIntegers F} 1)
@@ -81,7 +123,19 @@ theorem tw_bij (hA : PositivityTheory.Mix.AdelSt) {ψ : AddChar (AF F) ℂ} (hψ
     exact hne ((ha Ψ hΨ).trans (by rw [a0, zero_smul]))
   have h1 : ∀ Φ ∈ schA F κ, (a⁻¹ • e') (e Φ) = Φ := fun Φ hΦ => by
     rw [LinearMap.smul_apply, show e' (e Φ) = a • Φ from ha Φ hΦ, smul_smul, inv_mul_cancel₀ a0, one_smul]
-  refine ⟨e, _, h, h'.smul (inv_ne_zero a0), ⟨h.maps, fun x hx y hy hxy => ?_, hs⟩, h1, fun Φ hΦ => ?_⟩
+  have hscaled : Tw ψ d₁ d (a⁻¹ • e') := by
+    constructor
+    · exact fun Φ hΦ => Submodule.smul_mem _ _ (h'.maps Φ hΦ)
+    · intro w Φ hΦ
+      rw [LinearMap.smul_apply, LinearMap.smul_apply, h'.Heisenberg₂ w Φ hΦ, rho_smul]
+    · intro l hl g hg
+      obtain ⟨T, hT⟩ := h'.adm l hl g hg
+      refine ⟨a⁻¹ • T, fun f => ?_⟩
+      rw [LinearMap.comp_smul, LinearMap.smul_apply, hT, ContinuousLinearMap.smul_apply]
+    ·
+      obtain ⟨Φ, hΦ, h0⟩ := h'.ne
+      exact ⟨Φ, hΦ, smul_ne_zero (inv_ne_zero a0) h0⟩
+  refine ⟨e, _, h, hscaled, ⟨h.maps, fun x hx y hy hxy => ?_, hs⟩, h1, fun Φ hΦ => ?_⟩
   · rw [← h1 x hx, hxy, h1 y hy]
   · obtain ⟨Ψ, hΨ, rfl⟩ := hs hΦ
     rw [h1 Ψ hΨ]

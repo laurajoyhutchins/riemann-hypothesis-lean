@@ -1,18 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LiftCharactersAgreeOverEnlargedBase
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LawsJEnl
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ChiROfEnlarged
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.CoreBaseFramesEqModelFramesEnlargedCoefficientBa
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.EnlargedBaseReadingZeroWithoutEvaluationProperty
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.KapMoved
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.KsFormBaseChangeCrd
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.AlgebraMapEqOtoLLEOOfPin
-import Development.AutomorphicArithmetic.UnitTensorPairings.ExtVecPairingIndepOfBaseSamePre
-import Development.AutomorphicArithmetic.UnitTensorPairings.CuspEvalPropertyIndepOfBaseSamePre
-import Development.AutomorphicArithmetic.UnitTensorPairings.LocalCuspNormsIndepOfBaseSamePre
-import Development.AutomorphicArithmetic.UnitTensorPairings.CuspCoreDatumTransportOfSamePre
-import Development.AutomorphicArithmetic.UnitTensorPairings.CuspFormCoordsIdentificationOfSamePre
-import Development.AutomorphicArithmetic.UnitTensorPairings.PointEquivFamilyTransportOfSamePre
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.PlaceModelImp
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.CrdOver
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.AlgebraMapEqOtoLLEOOfPin
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ChiROfEnlarged
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.CoreBaseFramesEqModelFramesEnlargedCoefficientBa
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.EnlargedBaseReadingZeroWithoutEvaluationProperty
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.KapMoved
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.KsFormBaseChangeCrd
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LawsJEnl
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LiftCharactersAgreeOverEnlargedBase
+public import Development.AutomorphicArithmetic.UnitTensorPairings.CuspCoreDatumTransportOfSamePre
+public import Development.AutomorphicArithmetic.UnitTensorPairings.CuspEvalPropertyIndepOfBaseSamePre
+public import Development.AutomorphicArithmetic.UnitTensorPairings.CuspFormCoordsIdentificationOfSamePre
+public import Development.AutomorphicArithmetic.UnitTensorPairings.ExtVecPairingIndepOfBaseSamePre
+public import Development.AutomorphicArithmetic.UnitTensorPairings.LocalCuspNormsIndepOfBaseSamePre
+public import Development.AutomorphicArithmetic.UnitTensorPairings.PointEquivFamilyTransportOfSamePre
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -22,7 +59,7 @@ open scoped TensorProduct InnerProductSpace ComplexOrder
 attribute [local instance] Formalism.BasicNotions.Host.cmStar Formalism.IndefR.principalLevelFrame.instCMHostI
 open GlobalTheory.Mem GlobalTheory.Mem.Col2 GlobalTheory.Mem.Top GlobalTheory.Mem.Top.GroupRetwisting GlobalTheory.Mem.Top.Bl GlobalTheory.Mem.R3 GlobalTheory.Mem.R3.Rw GlobalTheory.Mem.R3.Tr
 open Formalism.IndefR.FWT Formalism.L2.Pj Formalism.IndefR.Mult GlobalTheory.RealGeo
-set_option maxHeartbeats 4000000
+
 
 namespace UpperTheory.Mem.GeoExt
 

@@ -1,19 +1,69 @@
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalMassType.Development
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalMassOrder.Development
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
-namespace PI.LocMassTypL
-
 open Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.L2.SG.Sub Formalism.L2.SG.LocVol NumberField IsDedekindDomain
-  PI.LocMassTypW
 open scoped TensorProduct
+
+namespace PI.LocMassTypW
+
+def LatOfGlob : Prop :=
+  ∀ {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E]
+    (v : HeightOneSpectrum (𝓞 F)) {n : ℕ} (Λ : Set (Fin n → E)),
+    (∃ L : Submodule (𝓞 E) (Fin n → E), Submodule.IsFullLattice E L ∧ (L : Set (Fin n → E)) = Λ) →
+    LocMassOrdW.IsLatLoc v Λ
+
+end PI.LocMassTypW
+
+namespace PI.LocMassTypL
 
 section Rat
 
 variable {F E : Type} [Field F] [Field E] [Algebra F E] (R : Type) [CommRing R] [Algebra F R] {n : ℕ}
 
 theorem ratV_add (x y : Fin n → E) : ratV (F := F) R (x + y) = ratV (F := F) R x + ratV (F := F) R y := by
-  funext i; simp [ratV, map_add]
+  funext i; simp [ratV, map_add (f := _)]
 
 theorem ratV_zero : ratV (F := F) R (0 : Fin n → E) = 0 := by
   funext i; simp [ratV]
@@ -31,11 +81,11 @@ theorem ratV_smul (a : E) (x : Fin n → E) :
 
 end Rat
 
-theorem local_lattice_of_global : LatOfGlob := by
+theorem local_lattice_of_global : PI.LocMassTypW.LatOfGlob := by
   intro F E _ _ _ _ _ v n Λ hL
   obtain ⟨L, hL, hLΛ⟩ := hL
   classical
-  obtain ⟨S, hS⟩ := hL.fg
+  obtain ⟨S, hS⟩ := hL.toIsLattice.fg
   let b := NumberField.RingOfIntegers.basis E
   set T : Set (Fin n → E) := Set.range (fun p : Module.Free.ChooseBasisIndex ℤ (𝓞 E) × S =>
     (b p.1 : 𝓞 E) • (p.2 : Fin n → E)) with hT
@@ -83,7 +133,7 @@ theorem local_lattice_of_global : LatOfGlob := by
     intro y _
     rw [pi_eq_sum_univ y]
     refine Submodule.sum_mem _ fun i _ => Submodule.smul_mem _ _ ?_
-    have := hspan (fun j => if i = j then (1 : E) else 0) (by rw [hL.span_eq_top]; trivial)
+    have := hspan (fun j => if i = j then (1 : E) else 0) (by simp [hL.span_eq_top])
     convert this using 1
     funext j
     by_cases hij : i = j <;> simp [ratV, hij]

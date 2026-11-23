@@ -1,9 +1,66 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.LengthCommensurableSpanSpanOfDetNeZero
-import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.LengthBaseChangeQuotientOfMapMaximalIdeal
-import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.LengthRestrictScalarsEqSumInertiaDegOfSubset
-import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.MapSpanBaseChangeEquivSubmoduleOf
-import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.IsDiscreteValuationRingLocalizationOfIsDedekindD
+module
+
+public import Mathlib.RingTheory.DedekindDomain.AdicValuation.Valuation
+public import Mathlib.RingTheory.KrullDimension.PID
+public import Mathlib.RingTheory.OrderOfVanishing.Basic
+public import Mathlib.RingTheory.RamificationInertia.Inertia
+public import Mathlib.RingTheory.RegularLocalRing.Defs
+public import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.IsDiscreteValuationRingLocalizationOfIsDedekindD
+public import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.LengthCommensurableSpanSpanOfDetNeZero
+public import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.LengthRestrictScalarsEqSumInertiaDegOfSubset
+public import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.MapSpanBaseChangeEquivSubmoduleOf
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RingTheory.Localization.NormTrace
+
+@[expose] public section
 
 open Module IsDiscreteValuationRing IsDedekindDomain TensorProduct Pointwise
 
@@ -24,11 +81,11 @@ variable {R : Type*} [CommRing R] [IsDomain R] [IsDiscreteValuationRing R]
   {V : Type*} [AddCommGroup V] [Module K V] [Module R V] [IsScalarTower R K V]
   {ι : Type*} [Fintype ι] [DecidableEq ι]
 
+
 omit [IsDomain R] [IsDiscreteValuationRing R] [IsDomain A] [IsDiscreteValuationRing A]
   [IsFractionRing A L] [IsLocalHom (algebraMap R A)] in
 variable (R K L) in
 include K L in
-
 theorem faithfulSMul_of_tower : FaithfulSMul R A := by
   rw [faithfulSMul_iff_algebraMap_injective]
   have h : Function.Injective (algebraMap R L) := by
@@ -180,22 +237,22 @@ private theorem dvr_localization (P : HeightOneSpectrum S) :
     IsDiscreteValuationRing (Localization.AtPrime P.asIdeal) :=
   IsLocalization.AtPrime.isDiscreteValuationRing_of_dedekind_domain S P.ne_bot _
 
-include R K L in
 
+include R K L in
 theorem not_isField_of_finite : ¬ IsField S := by
   have := faithfulSMul_of_tower R K S L
   rw [← Algebra.IsIntegral.isField_iff_isField (FaithfulSMul.algebraMap_injective R S)]
   exact not_isField R
 
-include R in
 
+include R in
 theorem finite_heightOneSpectrum : Finite (HeightOneSpectrum S) := by
   have := finite_maximalSpectrum_of_finite R S
   exact Finite.of_injective (fun P : HeightOneSpectrum S => (⟨P.asIdeal, P.isMaximal⟩ :
     MaximalSpectrum S)) fun P Q h => HeightOneSpectrum.ext (congrArg MaximalSpectrum.asIdeal h)
 
-include R S in
 
+include R S in
 theorem finrank_field_pos : 0 < finrank K L := by
   have := faithfulSMul_of_tower R K S L
   rw [IsFractionRing.finrank_eq R K S L]
@@ -235,8 +292,8 @@ private theorem log_ordFrac_norm_algebraMap {x : S} (hx : x ≠ 0) :
   push_cast
   exact Finset.sum_congr rfl fun P _ => by rw [hm', mul_comm]; rfl
 
-variable {L} in
 
+variable {L} in
 theorem log_ordFrac_norm_eq_sum {x : L} (hx : x ≠ 0) :
     WithZero.log (Ring.ordFrac R (Algebra.norm K x)) =
       ∑ P : HeightOneSpectrum S,
@@ -267,20 +324,5 @@ variable {F : Type*} [Field F] [LinearOrder F] [IsStrictOrderedRing F] [FloorRin
 end Semilocal
 
 end ExtField
-
-example {K L : Type*} [Field K] [Field L] [Algebra K L] {a : L} (ha : a ≠ 0) :
-    ∃ W₀ : Submodule K (K × K), W₀ ≠ ⊥ ∧ W₀ ≠ ⊤ ∧ LinearMap.ker ((LinearMap.pi fun _ : Fin 1 =>
-      (LinearMap.fst K K K).smulRight a).liftBaseChange L) = W₀.baseChange L := by
-  refine ⟨LinearMap.ker (LinearMap.fst K K K), ?_, ?_, ?_⟩
-  · rw [Submodule.ne_bot_iff]
-    exact ⟨(0, 1), rfl, by simp⟩
-  · intro h
-    simpa using (h ▸ Submodule.mem_top : (1, 0) ∈ LinearMap.ker (LinearMap.fst K K K))
-  · refine ExtField.ker_liftBaseChange_eq_of_finrank_le _ (fun x hx => ?_) ?_
-      (θ := fun _ => (1, 0)) (by simpa using ha)
-    · funext i
-      simpa [ha] using hx
-    · rw [((LinearMap.fst K K K).quotKerEquivOfSurjective LinearMap.fst_surjective).finrank_eq]
-      simp
 
 end GlobalTheory

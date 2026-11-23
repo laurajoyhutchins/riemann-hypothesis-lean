@@ -1,7 +1,54 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.PtCellUniq
-import Formalism.HermitianCurvature.StatementC
-import Formalism.SharpRestriction.CuspSpanNormBounds.LeadMinorK
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.PtCellUniq
+public import Formalism.HermitianCurvature.StatementC
+public import Formalism.SharpRestriction.CuspSpanNormBounds.LeadMinorK
+public import Mathlib.LinearAlgebra.Matrix.Permutation
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -178,13 +225,18 @@ theorem FH_append (r : ℕ) : ∀ (L1 L2 : List (ℂ × ℕ)) (b : ℕ),
 
 theorem FA_pre (k r : ℕ) (hk : 1 ≤ k) (GG : ℝ) : ∀ (L : List (ℂ × ℕ)) (b : ℕ), 1 ≤ b →
     b + (L.map Prod.snd).sum ≤ r + 1 → (∀ x ∈ L, 1 ≤ x.2) →
-    FA k r GG b L = FH r b L * (L.map fun x => ‖x.1‖ ^ x.2).prod ^ (2 * (k - 1))
-  | [], _, _, _, _ => by simp [FA, FH]
-  | (c, s) :: L, b, hb, hs, hL => by
+    FA k r GG b L = FH r b L * (L.map fun x => ‖x.1‖ ^ x.2).prod ^ (2 * (k - 1)) := by
+  intro L
+  induction L with
+  | nil => simp [FA, FH]
+  | cons head L ih =>
+    obtain ⟨c, s⟩ := head
+    intro b hb hs hL
     simp only [List.map_cons, List.sum_cons] at hs
     have hs1 : 1 ≤ s := hL (c, s) (by simp)
-    have ih := FA_pre k r hk GG L (b + s) (by omega) (by omega) (fun x hx => hL x (by simp [hx]))
-    simp only [FA, FH, List.map_cons, List.prod_cons, ih]
+    have htail := ih (b + s) (by omega) (by omega)
+      (fun x hx => hL x (List.mem_cons_of_mem _ hx))
+    simp only [FA, FH, List.map_cons, List.prod_cons, htail]
     rw [if_neg (by omega)]
     have he : (2 * (s : ℤ) * (Formalism.FourierDecayAlt.C.Mlev k r (b + s - 1) + s - 3)) =
         ((2 * s * (2 * (r + 1 - (b + s - 1)) + s - 1) + s * (2 * (k - 1)) : ℕ) : ℤ) := by

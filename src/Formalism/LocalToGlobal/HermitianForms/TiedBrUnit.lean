@@ -1,4 +1,47 @@
-import Formalism.LocalToGlobal.HermitianForms.TiedBr
+module
+
+public import Formalism.LocalToGlobal.HermitianForms.LastCoordinateUniformizerVectorSpansOrthogonalLi
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -65,34 +108,5 @@ theorem iXm_mulVec_injective : Function.Injective (iXm D).mulVec := by
   exact iXc_injective D h
 
 variable {D}
-
-theorem vector_quotient_not_in_range {u : D.what₂.Word} (Tf : FormsTied D u) (x : Fin (D.R.N D.R.m - 1) → D.host.E) :
-    iXm D *ᵥ x ≠ fun i => Tf.til.z0 i / ((D.mem u).A.T : D.host.E) := by
-  letI := D.host.cmStar
-  obtain ⟨a, ha⟩ := Tf.til.lastCoordinateUniformizerVector_spans_orthogonal_line
-  have hT : ((D.mem u).A.T : D.host.E) ≠ 0 := Nat.cast_ne_zero.mpr (D.mem u).A.T_prime.ne_zero
-  have ha0 : a ≠ 0 := by
-    rintro rfl
-    have h := Tf.til.hermitianForm_lastCoordinateUniformizerVector_self
-    rw [ha, zero_smul] at h
-    simp [Formalism.UG.hform] at h
-    exact hT h.symm
-  intro hx
-  simp only [iXm, LinearMap.toMatrix'_mulVec] at hx
-  have hc : iXc D x = (a / ((D.mem u).A.T : D.host.E)) • zc D := by
-    rw [hx]; funext i; rw [ha]; simp [Pi.smul_apply, smul_eq_mul]; ring
-  unfold iXc zc at hc
-  simp only [LinearMap.coe_comp, Function.comp_apply, LinearEquiv.coe_coe, ← map_smul,
-    EmbeddingLike.apply_eq_iff_eq] at hc
-  have h1 := D.sp.z_orth ((D.sp.X'.frame.equivFun.trans
-      (LinearEquiv.funCongrLeft D.host.E D.host.E (finCongr (rankP D)).symm)).symm x)
-  rw [hc, LinearMap.map_smulₛₗ, LinearMap.smul_apply, smul_eq_mul] at h1
-  rcases mul_eq_zero.mp h1 with h2 | h2
-  · exact div_ne_zero ha0 hT ((map_eq_zero _).mp h2)
-  · exact D.sp.z_anis h2
-
-theorem bZ_isUnit {u : D.what₂.Word} (Tf : FormsTied D u) : IsUnit (bZ u Tf.til.z0).det :=
-  isUnit_det_cols (Formalism.MainNotions.product_first_zeroth_parts.Nm_succ D.R) (iXm D) (fun i => Tf.til.z0 i / ((D.mem u).A.T : D.host.E))
-    (iXm_mulVec_injective D) (vector_quotient_not_in_range Tf)
 
 end Formalism.L2.Forms

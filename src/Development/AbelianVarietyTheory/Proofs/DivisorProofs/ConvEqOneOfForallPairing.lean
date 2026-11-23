@@ -1,7 +1,59 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.ToSpanSingletonConstGenInjective
-import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.ExistsCounitEqOneMulEqZeroOfIsNilpotent
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsUniqueAlgEquivOfCompatibleQuotient
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.ToSpanSingletonConstGenInjective
+public import Mathlib.RingTheory.HopfAlgebra.Convolution
+public import Mathlib.RingTheory.RootsOfUnity.PrimitiveRoots
+public import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.NatCardAlgHomEqFinrankOfIsReducedOfIsFractionRin
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsUniqueAlgEquivOfCompatibleQuotient
+public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.ExistsCounitEqOneMulEqZeroOfIsNilpotent
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.RootsOfUnity.AlgebraicallyClosed
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.RingTheory.RootsOfUnity.EnoughRootsOfUnity
+public import Mathlib.RingTheory.RootsOfUnity.Minpoly
+
+@[expose] public section
 
 noncomputable section
 
@@ -49,8 +101,8 @@ theorem natCard_pts : Nat.card (A →ₐ[O] O) = finrank C (C ⊗[O] A) := by
   rw [Nat.card_congr (Equiv.ofBijective _ (comp_ofId_bijective O C A)),
     Nat.card_congr (AlgHom.liftEquiv O C A C), natCard_algHom_eq_finrank_of_etale]
 
-include C in
 
+include C in
 theorem eq_of_forall_pts [Module.Flat O A] {a b : A} (h : ∀ x : A →ₐ[O] O, x a = x b) :
     a = b := by
   have := etale_of_hopfAlgebra C (C ⊗[O] A)
@@ -277,8 +329,8 @@ instance TateOver.isTorsionFree : IsTorsionFree ℤ_[p] (G.TateOver B) := by
   rw [PadicInt.unitCoeff_spec ha, mul_smul] at h
   exact key _ t ((Units.isUnit _).smul_eq_zero.1 h)
 
-variable (G) in
 
+variable (G) in
 def tateLevel (n : ℕ) : G.Tate →+ Additive (WithConv (G.A n →ₐ[O] O)) where
   toFun t := Additive.ofMul (t.conv n)
   map_zero' := rfl
@@ -424,8 +476,8 @@ theorem pairing_flip_bijective : Function.Bijective (pairing G O).flip := by
         rw [pow_one, ← LinearMap.flip_apply (pairing G O), ← hz, LinearMap.smul_apply]⟩
     rwa [pow_one] at h
 
-variable (p O) in
 
+variable (p O) in
 theorem exists_primitive_system : ∃ ζ : ℕ → O, ζ 0 = 1 ∧ (∀ n, ζ (n + 1) ^ p = ζ n) ∧
     ∀ n, IsPrimitiveRoot (ζ n) (p ^ n) := by
   have hp : p.Prime := Fact.out

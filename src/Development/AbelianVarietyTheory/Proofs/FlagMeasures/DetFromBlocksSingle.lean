@@ -1,5 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.SymmetricFlagBasisVectorsApplyCentre
+module
+
+public import Mathlib.LinearAlgebra.Matrix.Determinant.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.CmStarOfIsCMUnram
+import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.FlagPairDefinitePartLattice
+public import Formalism.FlagUnipotentLattices.MemOfOrthogonalAnisotropic
+
+@[expose] public section
 
 open Formalism.HermitianLatticeCounting.S6 GlobalTheory.HermLat GlobalTheory.SA Matrix
 
@@ -73,37 +123,5 @@ theorem det_fromBlocks_last {r : ℕ} (A B : Matrix (Fin (r + 1)) (Fin (r + 1)) 
 end Det
 
 variable {K V : Type} [Field K] [StarRing K] [AddCommGroup V] [Module K V] {H : HermSpace K V} {r : ℕ}
-
-theorem B_e_e (F : FlagD H r) (a b : Fin (r + 1)) :
-    H.B (F.e a) (F.e b) = diagonal (fun a => if a = Fin.last r then -F.T else 0) a b := by
-  induction a using Fin.lastCases <;> induction b using Fin.lastCases
-  · simp [F.zz]
-  · rename_i b
-    simp [B_eq_zero_comm.1 (F.zperp b), diagonal_apply, (Fin.castSucc_ne_last b).symm]
-  · rename_i a
-    simp [F.zperp a, diagonal_apply, Fin.castSucc_ne_last]
-  · rename_i a b
-    simp [F.iso a b, diagonal_apply, Fin.castSucc_ne_last]
-
-theorem gram_eq_fromBlocks (F F' : FlagD H r) :
-    Gram F F' = fromBlocks (diagonal fun a => if a = Fin.last r then -F.T else 0) (Zhat F F') (Zhat F F')ᴴ
-      (diagonal fun a => if a = Fin.last r then -F'.T else 0) := by
-  ext (a | a) (b | b)
-  · exact B_e_e F a b
-  · rfl
-  · exact (H.herm _ _).symm
-  · exact B_e_e F' a b
-
-theorem det_gram (F F' : FlagD H r) : (Gram F F').det = (-1) ^ (r + 1) * Gval F F' := by
-  rw [gram_eq_fromBlocks, det_fromBlocks_last, ← conjTranspose_submatrix, det_conjTranspose, det_conjTranspose]
-  rfl
-
-theorem gram_det_statement : LemmaG := fun _ _ _ _ _ _ _ _ F F' => det_gram F F'
-
-theorem isTransv_iff_gval : ∀ (K V : Type) [Field K] [StarRing K] [AddCommGroup V] [Module K V]
-    [FiniteDimensional K V] (H : HermSpace K V) (r : ℕ) (F F' : FlagD H r), IsTransv F F' ↔ Gval F F' ≠ 0 := by
-  intro K V _ _ _ _ _ H r F F'
-  rw [isTransv_iff_gram, det_gram]
-  simp
 
 end GlobalTheory.SA.TransvG

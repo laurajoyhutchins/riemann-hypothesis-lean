@@ -1,6 +1,59 @@
-import Development.WeilBound.CoreStatements.HodgeTatePoints.IsFractionRingOfIntegers
-import Development.WeilBound.CoreStatements.HodgeTatePoints.FinrankWAddConj
-import Development.WeilBound.CoreStatements.HodgeTatePoints.GeneratesDiffMap
+module
+
+public import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.IsCompactUnitaryPointsAtPlaceFstMemCompact
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.DifferentGeneratorDualIntegral
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.ExistsDiffGenerator
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.ExistsTotallyRealEvenNegPlacesLocalNorm
+public import Development.WeilBound.CoreStatements.HodgeTatePoints.FinrankWAddConj
+public import Development.WeilBound.CoreStatements.HodgeTatePoints.GeneratesDiffMap
+public import Development.WeilBound.CoreStatements.HodgeTatePoints.IsFractionRingOfIntegers
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+public import Mathlib.RingTheory.Ideal.KrullsHeightTheorem
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -59,7 +112,7 @@ theorem red_omHT_bc : ∀ (A K : Type) [CommRing A] [IsDomain A] [IsNoetherianRi
     refine LinearMap.ext fun t => ?_
     induction t using TensorProduct.induction_on with
     | zero => rw [map_zero, map_zero]
-    | add x y hx hy => rw [map_add, map_add, hx, hy]
+    | add x y hx hy => rw [map_add (f := _), map_add (f := _), hx, hy]
     | tmul o z =>
       have : o ⊗ₜ[A] z = o • ((1 : O) ⊗ₜ[A] z) := by simp [TensorProduct.smul_tmul']
       rw [this, map_smul, map_smul, hj₁, LinearMap.comp_apply j₀, LinearMap.baseChange_tmul, hj₀']
@@ -91,8 +144,29 @@ theorem red_omHT_bc : ∀ (A K : Type) [CommRing A] [IsDomain A] [IsNoetherianRi
   · rw [LinearMap.comp_apply, hs, hj₁]
     exact congrArg ι (Subtype.ext e.symm)
   · have hl := (pt_om_block C v O hv E c hc κ' N V Ω' P σ').2.2.1
+    have hfull : (latIn (P.omHT σ') (P.Ωsp σ')).IsFullLattice C := by
+      refine { toIsLattice := hl, span_eq_top := ?_ }
+      apply eq_top_iff.mpr
+      intro x _
+      have hx : (x : Ω') ∈ Submodule.span C (P.om : Set Ω') := by
+        rw [P.om_lat.span_eq_top]
+        trivial
+      obtain ⟨a, ha, hay⟩ := exists_smul_mem_of_mem_span_val hv P.om hx
+      obtain ⟨z, hz, hze⟩ := P.κ_mem (a • (x : Ω')) hay
+      have hm : (algebraMap O C κ' * a) • x ∈ latIn (P.omHT σ') (P.Ωsp σ') := by
+        change (algebraMap O C κ' * a) • (x : Ω') ∈ P.omHT σ'
+        refine ⟨P.ht z, ⟨z, hz, rfl⟩, ?_⟩
+        rw [hze, ← algebraMap_smul C, smul_smul]
+        change eigProj P.ρΩ σ' ((algebraMap O C κ' * a) • (x : Ω')) = _
+        rw [map_smul, LatBasic.eigProj_of_mem x.2]
+      have hm' := Submodule.subset_span hm (R := C)
+      have hn : algebraMap O C κ' * a ≠ 0 := mul_ne_zero P.κ_ne ha
+      have := (Submodule.span C (latIn (P.omHT σ') (P.Ωsp σ') : Set (P.Ωsp σ'))).smul_mem
+        (algebraMap O C κ' * a)⁻¹ hm'
+      rw [smul_smul, inv_mul_cancel₀ hn, one_smul] at this
+      exact this
     rw [← finrank_baseChange_flat (O := O), ← LinearMap.finrank_range_of_inj hinj, hrange,
-      ← finrank_lattice _ hl]
+      ← finrank_lattice _ hfull]
     have e : (latIn (P.omHT σ') (P.Ωsp σ')).map ((P.Ωsp σ').subtype.restrictScalars O) =
         P.omHT σ' := by
       rw [LatBasic.map_latIn]

@@ -1,5 +1,54 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsGenericFlag
+module
+
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsGenericFlag
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 noncomputable section
 
@@ -10,11 +59,6 @@ open AlgebraicGeometry CategoryTheory
 variable {X : Scheme.{0}} {Ω : Type} [Field Ω]
 
 variable {ξ : Spec (CommRingCat.of Ω) ⟶ X} {E : Type} [AddCommGroup E] [Module Ω E]
-
-theorem isFlagVBOn_frame {r : ℕ} (b : Fin r → E) (hb : LinearIndependent Ω b) (T : Set (Cpt ξ)) :
-    Lat.IsFlagVBOn (fun p => Submodule.span (regAt ξ p) (Set.range b) : Lat ξ E) T b := by
-  intro p _
-  exact ⟨⊤, trivial, b, fun _ => rfl, fun q _ _ => And.intro hb rfl⟩
 
 theorem not_mem_flagStep {r : ℕ} (b : Fin r → E) (hb : LinearIndependent Ω b) (i : Fin r) :
     b i ∉ flagStep Ω b i := by
@@ -72,29 +116,6 @@ theorem gr_isGenAt {r : ℕ} (L : Lat ξ E) (b b₀ : Fin r → E) (p : Cpt ξ) 
     rw [hLp]
     exact Submodule.subset_span ⟨i, rfl⟩
 
-theorem exists_gen {r : ℕ} (L : Lat ξ E) (T : Set (Cpt ξ)) (b₀ : Fin r → E) (h : L.IsFlagVBOn T b₀)
-    (p : Cpt ξ) (hp : p ∈ T) (i : Fin r) : ∃ c, (L.gr b₀ i).IsGenAt p c := by
-  obtain ⟨U, hpU, b, hF, hfr⟩ := h p hp
-  have hL := hfr p hp hpU
-  have hmem : b i ∈ flagStep Ω b₀ ((i : ℕ) + 1) := by
-    rw [← hF]
-    exact Submodule.subset_span ⟨i, Nat.lt_add_one _, rfl⟩
-  have hsub : b₀ '' {k : Fin r | (k : ℕ) < (i : ℕ) + 1} ⊆
-      insert (b₀ i) (b₀ '' {k : Fin r | (k : ℕ) < i}) := by
-    rintro _ ⟨k, hk, rfl⟩
-    rcases (Nat.lt_add_one_iff.mp hk).lt_or_eq with h' | h'
-    · exact Set.mem_insert_of_mem _ ⟨k, h', rfl⟩
-    · rw [Fin.ext h']
-      exact Set.mem_insert _ _
-  have hmem' : b i ∈ Submodule.span Ω (insert (b₀ i) (b₀ '' {k : Fin r | (k : ℕ) < i})) :=
-    Submodule.span_mono hsub hmem
-  rw [Submodule.span_insert] at hmem'
-  obtain ⟨y, hy, z, hz, hyz⟩ := Submodule.mem_sup.mp hmem'
-  obtain ⟨a, rfl⟩ := Submodule.mem_span_singleton.mp hy
-  refine ⟨a, gr_isGenAt L b b₀ p hL hF i a ?_⟩
-  rw [← hyz, add_sub_cancel_left]
-  exact hz
-
 theorem zpow_ratio (Λ : Lat ξ Ω) (p : Cpt ξ) (s t : Ω) (hs : Λ.IsGenAt p s) (ht : Λ.IsGenAt p t) (n : ℤ) :
     (t / s) ^ n ∈ regAt ξ p := by
   obtain ⟨hs0, hsp⟩ := hs
@@ -132,73 +153,5 @@ theorem tens_isGenAt {I : Type} [Fintype I] (Λ : I → Lat ξ Ω) (a : I → �
     refine Finset.prod_congr rfl fun i _ => ?_
     rw [← mul_zpow, div_mul_cancel₀ _ (hs i).1]
   · exact Submodule.span_mono (Set.singleton_subset_iff.mpr ⟨s, hs, rfl⟩)
-
-theorem grTens_exists_gen {S : Type} [Fintype S] {r : S → ℕ} (L : S → Lat ξ E) (b₀ : ∀ σ, Fin (r σ) → E)
-    (a : (Σ σ, Fin (r σ)) → ℤ) (T : Set (Cpt ξ)) (h : ∀ σ, (L σ).IsFlagVBOn T (b₀ σ)) (p : Cpt ξ) (hp : p ∈ T) :
-    ∃ c, (Lat.grTens L b₀ a).IsGenAt p c := by
-  have hq : ∀ q : Σ σ, Fin (r σ), ∃ c, ((L q.1).gr (b₀ q.1) q.2).IsGenAt p c :=
-    fun q => exists_gen (L q.1) T (b₀ q.1) (h q.1) p hp q.2
-  choose s hs using hq
-  exact ⟨_, tens_isGenAt _ a p s hs⟩
-
-def jPlane (Ω : Type) [Field Ω] : (Fin 2 → Ω) →+ (Fin 2 → RatFunc Ω) :=
-  ((algebraMap Ω (RatFunc Ω)).toAddMonoidHom).compLeft (Fin 2)
-
-theorem isGenericFlag_plane :
-    IsGenericFlag (Ω := Ω) (Ω' := RatFunc Ω) (jPlane Ω) (S := Unit) (r := fun _ => 2) (fun _ => ⊤)
-      (fun _ => ![![1, RatFunc.X], ![0, 1]]) 1 := by
-  have hj : ∀ (v : Fin 2 → Ω) (m : Fin 2), jPlane Ω v m = algebraMap Ω (RatFunc Ω) (v m) :=
-    fun _ _ => rfl
-  have hU : ∀ (ι : Type) (hι : Unique ι) (x : ι → RatFunc Ω), x default = RatFunc.X →
-      AlgebraicIndependent Ω x := by
-    intro ι hι x hx
-    rw [algebraicIndependent_unique_type_iff, hx]
-    exact RatFunc.transcendental_X
-  have key : ∀ K : IntermediateField Ω (RatFunc Ω), RatFunc.X ∈ K →
-      Module.finrank K (RatFunc Ω) = 1 := by
-    intro K hK
-    have hK' : K = ⊤ := by
-      rw [eq_top_iff, ← RatFunc.adjoin_X]
-      exact IntermediateField.adjoin_simple_le_iff.mpr hK
-    subst hK'
-    exact IntermediateField.finrank_top
-  refine ⟨fun _ => ⇑(Pi.basisFun Ω (Fin 2)), fun _ => !![1, 0; RatFunc.X, 1],
-    fun _ => ⟨(Pi.basisFun Ω (Fin 2)).linearIndependent, (Pi.basisFun Ω (Fin 2)).span_eq⟩,
-    ?_, ?_, ?_, ?_, ?_, ?_, ?_, Nat.one_pos, ?_⟩
-  · intro a e
-    ext m
-    simp [hj, map_mul]
-  · intro _
-    convert (Pi.basisFun (RatFunc Ω) (Fin 2)).linearIndependent using 1
-    all_goals first
-      | rfl
-      | (ext k m
-         fin_cases k <;> fin_cases m <;> simp [hj])
-  · intro _
-    refine LinearIndependent.pair_iff.mpr fun s t h => ?_
-    have h0 := congrFun h 0
-    have h1 := congrFun h 1
-    simp at h0 h1
-    subst h0
-    simpa using h1
-  · intro _ k
-    fin_cases k <;> simp
-  · intro _ l k h
-    fin_cases l <;> fin_cases k <;> simp at h ⊢
-  · intro _ i
-    congr 1
-    ext k m
-    fin_cases k <;> fin_cases m <;> simp [hj, Fin.sum_univ_two, Finset.sum_apply]
-  · refine hU _ ?_ _ ?_
-    · refine ⟨⟨⟨(), ⟨(1, 0), by decide⟩⟩⟩, ?_⟩
-      rintro ⟨⟨⟩, ⟨⟨l, k⟩, h⟩⟩
-      fin_cases l <;> fin_cases k <;> first | rfl | exact absurd h (by decide)
-    · rfl
-  · exact key _ (IntermediateField.subset_adjoin _ _ ⟨⟨(), (1, 0)⟩, by simp⟩)
-
-theorem not_isGenericFlag_self {E' : Type} [AddCommGroup E'] [Module Ω E'] (j : E →+ E') (V : Unit → Submodule Ω E)
-    (b₀ : Unit → Fin 2 → E') (d : ℕ) : ¬ IsGenericFlag (Ω' := Ω) j (r := fun _ => 2) V b₀ d := by
-  rintro ⟨c, u, -, -, -, -, -, -, -, hai, -, -⟩
-  exact hai.transcendental ⟨(), ⟨(1, 0), by decide⟩⟩ (isAlgebraic_algebraMap (R := Ω) (A := Ω) _)
 
 end GlobalTheory.CompanionTheory.Ar.FlagModel

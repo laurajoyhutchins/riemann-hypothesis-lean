@@ -1,4 +1,62 @@
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicIndexEquality.Commensurated
+module
+
+public import Mathlib.Algebra.Field.IsField
+public import Mathlib.LinearAlgebra.Dimension.Finrank
+public import Mathlib.RingTheory.TensorProduct.Maps
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.LinearAlgebra.Dimension.StrongRankCondition
+public import Mathlib.LinearAlgebra.FiniteDimensional.Lemmas
+public import Mathlib.RingTheory.TensorProduct.Free
+
+@[expose] public section
 
 noncomputable section
 
@@ -55,7 +113,7 @@ theorem exists_split (hnf : ¬ IsField (K ⊗[F] E)) :
     rw [LinearIndependent.pair_iff]
     intro s t hst
     have h' := congrArg σ hst
-    simp only [map_add, map_smul, map_one, hσα, map_zero, smul_neg] at h'
+    simp only [map_add (f := _), map_smul, map_one, hσα, map_zero, smul_neg] at h'
     have ht : (2 * t) • α = 0 := by
       rw [mul_smul, two_smul]
       linear_combination hst - h'
@@ -144,7 +202,7 @@ theorem exists_split (hnf : ¬ IsField (K ⊗[F] E)) :
   have hsA : sigT σ A = -A := by
     rw [hAdef, sigT_tmul_one, hσα, TensorProduct.tmul_neg]
   have hse : sigT σ e = 1 - e := by
-    rw [he, map_mul, map_add, map_one, map_mul, hsA]
+    rw [he, map_mul, map_add (f := _), map_one, map_mul, hsA]
     simp only [a2i, aci, sigT_algebraMap]
     linear_combination h2i
 
@@ -159,7 +217,7 @@ theorem exists_split (hnf : ¬ IsField (K ⊗[F] E)) :
       map_zero' := by simp
       map_add' := by
         intro p q
-        simp only [Prod.fst_add, Prod.snd_add, map_add]
+        simp only [Prod.fst_add, Prod.snd_add, map_add (f := _)]
         ring }
   have hψ : ∀ p, ψ p = algebraMap K (K ⊗[F] E) p.1 * e + algebraMap K (K ⊗[F] E) p.2 * (1 - e) :=
     fun p => rfl
@@ -175,7 +233,7 @@ theorem exists_split (hnf : ¬ IsField (K ⊗[F] E)) :
     rw [h1, map_one, sub_self] at this
     exact hnt this
   have hinj : Function.Injective ψ := by
-    rw [injective_iff_map_eq_zero]
+    set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
     intro p hp
     rw [hψ] at hp
     have h1 : algebraMap K (K ⊗[F] E) p.1 * e = 0 := by
@@ -193,7 +251,7 @@ theorem exists_split (hnf : ¬ IsField (K ⊗[F] E)) :
     obtain ⟨x, y, rfl⟩ := hdec r
     refine ⟨(x + y * c, x - y * c), ?_⟩
     rw [hψ, he]
-    simp only [map_add, map_sub, map_mul]
+    simp only [map_add (f := _), map_sub, map_mul]
     linear_combination (algebraMap K (K ⊗[F] E) y * (ac - A) + 2 * algebraMap K (K ⊗[F] E) y * A) * h2i +
       (2 * algebraMap K (K ⊗[F] E) y * a2i * A) * hci
   let Ψ : K × K ≃+* K ⊗[F] E := RingEquiv.ofBijective ψ ⟨hinj, hsurj⟩
@@ -201,7 +259,7 @@ theorem exists_split (hnf : ¬ IsField (K ⊗[F] E)) :
   intro r
   obtain ⟨p, rfl⟩ := hsurj r
   have : sigT σ (ψ p) = ψ p.swap := by
-    rw [hψ, hψ, map_add, map_mul, map_mul, sigT_algebraMap, sigT_algebraMap, map_sub, map_one, hse]
+    rw [hψ, hψ, map_add (f := _), map_mul, map_mul, sigT_algebraMap, sigT_algebraMap, map_sub, map_one, hse]
     simp only [Prod.fst_swap, Prod.snd_swap]
     ring
   have hΨ : ∀ q, Ψ.symm (ψ q) = q := fun q => Ψ.symm_apply_apply q

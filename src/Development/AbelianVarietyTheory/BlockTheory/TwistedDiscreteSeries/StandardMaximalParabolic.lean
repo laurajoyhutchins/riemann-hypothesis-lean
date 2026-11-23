@@ -1,7 +1,44 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Foundations.ContinuousOfMemCcSmooth
-import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.LeviEmbMemNormalizerLower
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.EmbedsLevelZeroDepthZero
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.ContinuousOfMemCcSmooth
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.EmbedsLevelZeroDepthZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MeasureTheory ValuativeRel GlobalTheory.SmGL GlobalTheory.SplitWeil
 
@@ -58,23 +95,5 @@ theorem mem_stdMaxParab {R : Type} [CommRing R] {a b r : ℕ} (h : a + b = r) {g
   have e1 : stdSum h (Sum.inr ⟨i - a, by omega⟩) = i := Fin.ext (by simp; omega)
   have e2 : stdSum h (Sum.inl ⟨j, hj⟩) = j := Fin.ext (by simp)
   rwa [e1, e2] at this
-
-example {R : Type} [CommRing R] {a b r : ℕ} (h : a + b = r) :
-    ∃ P N : Subgroup (GL (Fin r) R), IsParabRad P N ∧ ∃ g₀, P ≤ conjBy g₀ (stdMaxParab R h) := by
-  have h' : ∑ i, ![a, b] i = r := by simpa using h
-  refine ⟨_, _, ⟨2, ![a, b], h', 1, rfl, rfl⟩, 1, fun g hg => ?_⟩
-  rw [mem_conjBy] at hg ⊢
-  rw [stdMaxParab, mem_parab_two]
-  intro j i
-  have := mem_parab_iff.1 hg 1 0 j i (by decide)
-  have e1 : stdBlocks ![a, b] h' ⟨1, j⟩ = stdSum h (Sum.inr j) :=
-    Fin.ext (((stdBlocks_val ![a, b] h' 1 j).trans (congrArg (· + (j : ℕ)) (Fin.sum_univ_one _))).trans
-      (stdSum_inr h j).symm)
-  have e2 : stdBlocks ![a, b] h' ⟨0, i⟩ = stdSum h (Sum.inl i) :=
-    Fin.ext (((stdBlocks_val ![a, b] h' 0 i).trans (zero_add _)).trans (stdSum_inl h i).symm)
-  exact e1 ▸ e2 ▸ this
-
-example {Q : Type} [Group Q] (H : Subgroup Q) : ¬ NoFixed (Representation.trivial ℂ Q ℂ) H :=
-  fun h => one_ne_zero (h 1 fun _ _ => rfl)
 
 end GlobalTheory.IndefiniteRowSideFullHecke.StandardMaximalParabolic

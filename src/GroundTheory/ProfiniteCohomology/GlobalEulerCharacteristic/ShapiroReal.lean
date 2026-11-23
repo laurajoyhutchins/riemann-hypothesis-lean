@@ -1,16 +1,61 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.GlobalEulerCharacteristic.ShapiroCoind
-import GroundTheory.ProfiniteCohomology.GlobalEulerCharacteristic.DefsForms
-import GroundTheory.ProfiniteCohomology.RealPlaces.VanishingMackeyPlaces
+module
+
+public import Mathlib
+public import GroundTheory.ProfiniteCohomology.RealPlaces.VanishingMackey
+public import GroundTheory.ProfiniteCohomology.GlobalEulerCharacteristic.ShapiroCoind
+import GroundTheory.ProfiniteCohomology.MackeyFormula
+import GroundTheory.ProfiniteCohomology.RealPlaces.LocalDualityPlace
+public import GroundTheory.ProfiniteCohomology.RealPlaces.VanishingMackeyPlaces
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
 
 open CategoryTheory NumberField IsDedekindDomain GroundTheory.Global
 
-local notation "ℚ̄" => AlgebraicClosure ℚ
-
 noncomputable section
+
+local notation "ℚ̄" => AlgebraicClosure ℚ
 
 variable {K : FiniteSubfield} (S : Set (HeightOneSpectrum (𝓞 K.1)))
   {L : FiniteSubfield} [Fact (K ≤ L)]
@@ -68,8 +113,8 @@ theorem finrank_eq_sum_index_mackeySubgroup (v : {v : InfinitePlace K.1 // v.IsR
   rw [Finset.prod_congr rfl fun d _ => hs d, Finset.prod_pow_eq_pow_sum] at hM
   exact Nat.pow_right_injective le_rfl hM
 
-open scoped Classical in
 
+open scoped Classical in
 theorem index_mackeySubgroup_realFamily (v : {v : InfinitePlace K.1 // v.IsReal})
     (d : MackeyDoubleCoset (gsOpenSubgroup S hL : Subgroup (galUnramifiedOutside K.1 ℚ̄ S))
       (gsRealFamily S ιr v).toMonoidHom) :
@@ -82,8 +127,8 @@ theorem index_mackeySubgroup_realFamily (v : {v : InfinitePlace K.1 // v.IsReal}
   · rw [eq_bot_of_ne_top_realGal v _ h, Subgroup.index_bot, Nat.card_eq_fintype_card,
       card_realGal_eq_two v.1 v.2]
 
-open scoped Classical in
 
+open scoped Classical in
 theorem finrank_mul_card_real_eq_sum_index :
     Module.finrank K.1 L.1 * Nat.card {v : InfinitePlace K.1 // v.IsReal} =
       ∑ p : Σ v : {v : InfinitePlace K.1 // v.IsReal},
@@ -94,8 +139,8 @@ theorem finrank_mul_card_real_eq_sum_index :
   rw [Fintype.sum_sigma, Finset.sum_congr rfl fun v _ => (finrank_eq_sum_index_mackeySubgroup S hL ιr v).symm,
     Finset.sum_const, Finset.card_univ, smul_eq_mul, Nat.card_eq_fintype_card, mul_comm]
 
-open scoped Classical in
 
+open scoped Classical in
 theorem sum_index_eq_card_top_add :
     ∑ p : Σ v : {v : InfinitePlace K.1 // v.IsReal},
         MackeyDoubleCoset (gsOpenSubgroup S hL : Subgroup (galUnramifiedOutside K.1 ℚ̄ S))
@@ -169,6 +214,7 @@ theorem card_infinitePlace_add_card :
     Nat.card_eq_of_bijective (realMemberPlace S ιr hL)
       ⟨realMemberPlace_injective S ιr hL, realMemberPlace_surjective S ιr hL⟩
   have hsum := (finrank_mul_card_real_eq_sum_index S hL ιr).trans (sum_index_eq_card_top_add S hL ιr)
+  set_option synthInstance.maxHeartbeats 200000 in
   exact count_places_arith (card_infinitePlace_eq_real_add_complex K).1
     (card_infinitePlace_eq_real_add_complex L).1 htop hsum (card_infinitePlace_eq_real_add_complex K).2
     (card_infinitePlace_eq_real_add_complex L).2 (Module.finrank_mul_finrank ℚ K.1 L.1)

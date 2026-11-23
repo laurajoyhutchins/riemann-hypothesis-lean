@@ -1,4 +1,52 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.Polynomial.AlgebraMap
+public import Mathlib.LinearAlgebra.TensorProduct.Tower
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open Polynomial
 open scoped TensorProduct
 
@@ -27,7 +75,7 @@ theorem baseChange_polynomial_kills_descent (Ks L0 KB WK ι : Type) [Field Ks] [
     induction z using TensorProduct.induction_on with
     | zero => simp
     | tmul x w => simp [TensorProduct.smul_tmul', hRt]
-    | add x y hx hy => simp only [smul_add, map_add, hx, hy]
+    | add x y hx hy => simp only [smul_add, map_add (f := _), hx, hy]
 
   set B0 := LinearMap.baseChange L0 T0 with hB0
   set B := LinearMap.baseChange KB T0 with hB
@@ -36,7 +84,7 @@ theorem baseChange_polynomial_kills_descent (Ks L0 KB WK ι : Type) [Field Ks] [
     induction z using TensorProduct.induction_on with
     | zero => simp
     | tmul x w => simp [hB0, hB, hRt]
-    | add x y hx hy => simp only [map_add, hx, hy]
+    | add x y hx hy => simp only [map_add (f := _), hx, hy]
   have hRpow : ∀ (n : ℕ) z, R ((B0 ^ n) z) = (B ^ n) (R z) := by
     intro n
     induction n with
@@ -48,7 +96,7 @@ theorem baseChange_polynomial_kills_descent (Ks L0 KB WK ι : Type) [Field Ks] [
     intro p z
     induction p using Polynomial.induction_on' with
     | add p r hp hr =>
-      simp only [Polynomial.map_add, map_add, LinearMap.add_apply, hp, hr]
+      simp only [Polynomial.map_add (f := _), map_add (f := _), LinearMap.add_apply, hp, hr]
     | monomial n c =>
       rw [Polynomial.map_monomial, Polynomial.aeval_monomial, Polynomial.aeval_monomial]
       simp only [Module.End.mul_apply, Module.algebraMap_end_apply, hRs, hRpow]
@@ -57,8 +105,9 @@ theorem baseChange_polynomial_kills_descent (Ks L0 KB WK ι : Type) [Field Ks] [
       (∑ g ∈ s, rd (a g) • LinearMap.baseChange KB (ρ g)) (c ⊗ₜ[Ks] f)
         = c • R ((∑ g ∈ s, a g • LinearMap.baseChange L0 (ρ g)) ((1 : L0) ⊗ₜ[Ks] f)) := by
     intro c f
+
     simp only [LinearMap.sum_apply, LinearMap.smul_apply, LinearMap.baseChange_tmul, map_sum,
-      hRs, hRt, map_one, Finset.smul_sum]
+    hRs, hRt, map_one, Finset.smul_sum]
     refine Finset.sum_congr rfl fun g _ => ?_
     simp only [TensorProduct.smul_tmul', smul_eq_mul, mul_one]
     rw [mul_comm]
@@ -67,6 +116,6 @@ theorem baseChange_polynomial_kills_descent (Ks L0 KB WK ι : Type) [Field Ks] [
   | zero => simp
   | tmul c f =>
     rw [hE, map_smul, hRq, hq _ ⟨_, rfl⟩, map_zero, smul_zero]
-  | add x y hx hy => rw [map_add, map_add, hx, hy, add_zero]
+  | add x y hx hy => rw [map_add (f := _), map_add (f := _), hx, hy, add_zero]
 
 end GlobalTheory

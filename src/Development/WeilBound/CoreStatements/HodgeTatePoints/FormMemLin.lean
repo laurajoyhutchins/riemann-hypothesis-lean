@@ -1,9 +1,61 @@
-import Mathlib
-import ReciprocityTheory.DualLattices.CotangentSurjective
-import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.IsTight
-import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.StepOrderRes
-import ReciprocityTheory.DualLattices.ExistsSmulMemOfMemSpan
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.ComapFgOfValuationRing
+module
+
+public import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.IsTight
+public import Mathlib.FieldTheory.IsAlgClosed.Basic
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.ComapFgOfValuationRing
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open ReciprocityTheory.PGsh.L2 ReciprocityTheory.PGsh.Up GlobalTheory.CompanionTheory.Ar.GR
 open scoped Matrix
@@ -18,8 +70,8 @@ def formR (p : ℕ) (ι : Type) [Fintype ι] : (ι → R) →ₗ[R] ((ι → ZMo
   map_add' l l' := by ext x; simp [add_mul, Finset.sum_add_distrib]
   map_smul' c l := by ext x; simp [Finset.mul_sum, mul_assoc]
 
-variable (C) in
 
+variable (C) in
 def toC (X : Type) : (X → R) →ₗ[R] (X → C) := (Algebra.linearMap R C).compLeft X
 
 variable {R}
@@ -29,11 +81,11 @@ theorem mem_pInt {p : ℕ} {z : C} : z ∈ pInt (C := C) R p ↔ ∃ r : R, z = 
   exact ⟨fun ⟨r, h⟩ => ⟨r, h.symm⟩, fun ⟨r, h⟩ => ⟨r, h.symm⟩⟩
 
 theorem afLat_eq (p : ℕ) {ι : Type} [Fintype ι] (M : Submodule R ((ι → ZMod p) → C)) :
-    afLat p M = (M ⊔ pFun R p _).comap (toC C R _ ∘ₗ formR R p ι) := by
+    afLat p M = (M ⊔ pFun R p _).comap (toC (C := C) R _ ∘ₗ formR R p ι) := by
   ext l
   rw [Submodule.mem_comap, Submodule.mem_sup]
   change (∃ g ∈ M, ∀ x, g x - algebraMap R C (∑ i, l i * ((x i).val : R)) ∈ pInt R p) ↔ _
-  have hf : (toC C R _ ∘ₗ formR R p ι) l = fun x => algebraMap R C (∑ i, l i * ((x i).val : R)) := rfl
+  have hf : (toC (C := C) R _ ∘ₗ formR R p ι) l = fun x => algebraMap R C (∑ i, l i * ((x i).val : R)) := rfl
   rw [hf]
   constructor
   · rintro ⟨g, hg, h⟩
@@ -54,9 +106,9 @@ theorem afLat_eq (p : ℕ) {ι : Type} [Fintype ι] (M : Submodule R ((ι → ZM
     exact neg_mem hx
 
 theorem form_mem_lin (p : ℕ) [NeZero p] {ι : Type} [Fintype ι] (l : ι → R) :
-    (toC C R _ ∘ₗ formR R p ι) l ∈ linFun (C := C) R p (ι → ZMod p) := by
+    (toC (C := C) R _ ∘ₗ formR R p ι) l ∈ linFun (C := C) R p (ι → ZMod p) := by
   rw [linFun, Submodule.mem_inf]
-  have hf : (toC C R _ ∘ₗ formR R p ι) l = fun x => algebraMap R C (∑ i, l i * ((x i).val : R)) := rfl
+  have hf : (toC (C := C) R _ ∘ₗ formR R p ι) l = fun x => algebraMap R C (∑ i, l i * ((x i).val : R)) := rfl
   rw [hf]
   refine ⟨fun x => ⟨∑ i, l i * ((x i).val : R), rfl⟩, ?_⟩
   intro x y
@@ -116,12 +168,12 @@ theorem aflat_fg : ∀ (p : ℕ) [Fact p.Prime] (C : Type) [Field C] [IsAlgClose
           exact ⟨c, Or.inl hc.symm⟩ }
   rw [afLat_eq, Submodule.comap_comp]
   apply comap_fg_of_valuationRing
-  have hinj : Function.Injective (toC C R (ι → ZMod p)) := by
+  have hinj : Function.Injective (toC (C := C) R (ι → ZMod p)) := by
     intro f g h
     funext x
     exact hv.hom_inj (congrFun h x)
-  apply Submodule.fg_of_fg_map_injective (toC C R (ι → ZMod p)) hinj
-  have hle : AA.carrier ⊔ pFun R p (ι → ZMod p) ≤ LinearMap.range (toC C R (ι → ZMod p)) := by
+  apply Submodule.fg_of_fg_map_injective (toC (C := C) R (ι → ZMod p)) hinj
+  have hle : AA.carrier ⊔ pFun R p (ι → ZMod p) ≤ LinearMap.range (toC (C := C) R (ι → ZMod p)) := by
     apply sup_le
     · intro f hf
       have hi := AA.le_int hf
@@ -138,7 +190,7 @@ theorem aflat_fg : ∀ (p : ℕ) [Fact p.Prime] (C : Type) [Field C] [IsAlgClose
   · obtain ⟨B, _, hB⟩ := AA.lat
     rw [hB]
     exact Submodule.fg_span (Set.finite_range _)
-  · have hP : pFun R p (ι → ZMod p) = Submodule.map ((p : R) • toC C R (ι → ZMod p)) ⊤ := by
+  · have hP : pFun R p (ι → ZMod p) = Submodule.map ((p : R) • toC (C := C) R (ι → ZMod p)) ⊤ := by
       ext f
       simp only [Submodule.mem_map, Submodule.mem_top, true_and]
       rw [pFun, Submodule.mem_pi]
@@ -157,7 +209,7 @@ theorem aflat_fg : ∀ (p : ℕ) [Fact p.Prime] (C : Type) [Field C] [IsAlgClose
 theorem afquot : ∀ (p : ℕ) [Fact p.Prime] (C : Type) [Field C] [IsAlgClosed C] [CharZero C] (v : Valuation C NNReal) (R : Type) [CommRing R] [Algebra R C], v.Integers R → v (p : C) < 1 → ∀ (ι : Type) [Fintype ι] [DecidableEq ι] (AA : HopfOrder (C := C) R (ι → ZMod p)), Nonempty (AFQuot p AA.carrier ≃ₗ[R] ((ι → R) ⧸ afLat p AA.carrier)) := by
   intro p _ C _ _ _ v R _ _ hv hp ι _ _ AA
   haveI : NeZero p := ⟨(Fact.out : p.Prime).ne_zero⟩
-  let φ := toC C R (ι → ZMod p) ∘ₗ formR R p ι
+  let φ := toC (C := C) R (ι → ZMod p) ∘ₗ formR R p ι
   let K := Submodule.comap (linFun (C := C) R p (ι → ZMod p)).subtype (afFun p AA.carrier ⊔ pFun (C := C) R p (ι → ZMod p))
   let ψ : (ι → R) →ₗ[R] linFun (C := C) R p (ι → ZMod p) := LinearMap.codRestrict _ φ (fun l => form_mem_lin p l)
   let f := K.mkQ ∘ₗ ψ

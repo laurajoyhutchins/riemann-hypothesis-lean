@@ -1,6 +1,50 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.RemainderTerms.Statements
-import GroundTheory.HeightsAndTheta.Heights.RemainderTerms.StatementsSchur
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.RemainderTerms.StatementsSchur
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.RestTerms
@@ -32,7 +76,7 @@ theorem SchSchurAtRootsOfUnity.proof (h1 : SchSchurRowsToK.Statement)
     · have hi : (i : ℕ) < r := lt_of_le_of_lt (Fin.le_def.mp hij) hj
       rw [dif_pos hi, dif_pos hj]
       exact hanti (Fin.le_def.mpr (Fin.le_def.mp hij))
-    · rw [dif_neg hj]; exact Nat.zero_le _
+    · rw [dite_eq_right hj]; exact Nat.zero_le _
 
   have hsum' : ∑ i, nu' i = k := by
     set g : ℕ → ℕ := fun i => if h : i < r then nu ⟨i, h⟩ else 0 with hg
@@ -51,7 +95,7 @@ theorem SchSchurAtRootsOfUnity.proof (h1 : SchSchurRowsToK.Statement)
         simp at this; omega
       · rfl
     have hgr : ∀ i, r ≤ i → g i = 0 := by
-      intro i hi; simp only [hg]; rw [dif_neg (by omega)]
+      intro i hi; simp only [hg]; rw [dite_eq_right (by omega)]
     have e3 : ∑ i ∈ range k, g i = ∑ i ∈ range (r + k), g i :=
       Finset.sum_subset (Finset.range_mono (by omega)) fun i _ hni =>
          hgk i (not_lt.mp (fun h => hni (Finset.mem_range.mpr h)))
@@ -81,7 +125,7 @@ theorem SchSchurAtRootsOfUnity.proof (h1 : SchSchurRowsToK.Statement)
     refine Finset.card_bij'
       (fun i hi => ⟨i, by
         simp only [Finset.mem_filter, Finset.mem_univ, true_and, hnu'] at hi
-        by_contra h; rw [dif_neg h] at hi; omega⟩)
+        by_contra h; rw [dite_eq_right h] at hi; omega⟩)
       (fun i hi => ⟨i, by
         simp only [Finset.mem_filter, Finset.mem_univ, true_and] at hi
         exact hplace i (by omega)⟩) ?_ ?_ ?_ ?_

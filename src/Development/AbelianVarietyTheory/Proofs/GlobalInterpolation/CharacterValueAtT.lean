@@ -1,20 +1,67 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.MaxVSpanSingleton
+module
+
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.MaxVSpanSingleton
+public import Development.AbelianVarietyTheory.BlockTheory.GlobalSignature.CharacterValuation
+public import Development.AbelianVarietyTheory.Definitions.Foundations.AbsCharNotUnitary
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.AbsNormSpanInvol
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ConjPConjP
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ExistsComapPrime
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ExistsPowLocKMulInf
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ExistsPowPrincipal
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ExistsSupportedIdele
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.MaxVDetLat
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.NormalFormAtPrime
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.RingHomEqOfComapEqUnramifiedDegreeOne
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.SpanImageLeOf
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.StarDetMulDetMem
+public import Formalism.LocalRingCardinality.SpanPowerMembership.Places
 import Formalism.LocalToGlobal.Columns.BaseLemmas
-import Formalism.LocalRingCardinality.SpanPowerMembership.Places
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.NormalFormAtPrime
-import Development.AbelianVarietyTheory.Definitions.Foundations.AbsCharNotUnitary
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ExistsSupportedIdele
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ExistsPowLocKMulInf
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.RingHomEqOfComapEqUnramifiedDegreeOne
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.StarDetMulDetMem
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.MaxVDetLat
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.AbsNormSpanInvol
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ExistsPowPrincipal
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.LocCharEqZpowMul
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.SpanImageLeOf
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ConjPConjP
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ExistsComapPrime
+import Mathlib.Algebra.AffineMonoid.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.FreeModule.IdealQuotient
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain WithZero
 
@@ -168,16 +215,6 @@ theorem exists_over (K : Type) [Field K] [NumberField K] {p : ℕ} (hp : p.Prime
   exact ⟨⟨M, hM.isPrime, Ring.ne_bot_of_isMaximal_of_not_isField hM (RingOfIntegers.not_isField K)⟩,
     hle (Ideal.mem_span_singleton_self _)⟩
 
-theorem natCast_notMem_of_ne {a p : ℕ} (ha : a.Prime) (hp : p.Prime) (h : a ≠ p)
-    (w : HeightOneSpectrum (𝓞 E)) (hw : ((p : ℕ) : 𝓞 E) ∈ w.asIdeal) : ((a : ℕ) : 𝓞 E) ∉ w.asIdeal := by
-  intro hT
-  obtain ⟨x, y, e⟩ := Nat.isCoprime_iff_coprime.2 ((Nat.coprime_primes ha hp).2 h)
-  apply one_notMem w
-  have e' : (x : 𝓞 E) * (a : 𝓞 E) + (y : 𝓞 E) * (p : 𝓞 E) = 1 := by
-    exact_mod_cast congrArg (Int.cast : ℤ → 𝓞 E) e
-  rw [← e']
-  exact Ideal.add_mem _ (Ideal.mul_mem_left _ _ hT) (Ideal.mul_mem_left _ _ hw)
-
 end Val
 
 section See
@@ -264,15 +301,16 @@ theorem finrank_E (hX : X.Ok) : Module.finrank ℚ X.E = 2 * X.f := by
 variable {Pr : Primes X}
 
 theorem splitOver_vT (hX : X.Ok) (hPr : Pr.Ok) (u : Pr.Word) {P : HeightOneSpectrum (𝓞 X.E)} (hP : P ∈ Pr.vT u) :
-    SplitOver (Pr.T u) P where
-  prime := hPr.T_prime u
-  norm := hPr.vT_norm u P hP
-  unram := GlobalTheory.SplitUnram.natCast_notMem_sq X.E X.conjO (Pr.piT u) (Pr.T u) (cO_cO (E := X.E)) (hPr.T_prime u) (hPr.piT_norm u) (hPr.piT_cop u)
-    (by rw [finrank_E hX, ← hPr.vT_card u]; rfl) (hPr.vT_norm u) P hP
-  ne := fun e => conj_piT_notMem hPr u ⟨P, hP⟩ (by
+    SplitOver (Pr.T u) P := by
+  refine ⟨hPr.T_prime u, hPr.vT_norm u P hP, ?_, ?_⟩
+  · exact GlobalTheory.SplitUnram.natCast_notMem_sq X.E X.conjO (Pr.piT u) (Pr.T u) (cO_cO (E := X.E))
+      (hPr.T_prime u) (hPr.piT_norm u) (hPr.piT_cop u)
+      (by rw [finrank_E hX, ← hPr.vT_card u]; rfl) (hPr.vT_norm u) P hP
+  · intro e
+    apply conj_piT_notMem hPr u ⟨P, hP⟩
     have := decoFin_mem_of_mem_divs hP
     rw [e, mem_conjP] at this
-    exact this)
+    exact this
 
 theorem val_q_vG (hX : X.Ok) (hPr : Pr.Ok) {P : HeightOneSpectrum (𝓞 X.E)} (hP : P ∈ Pr.vGs) :
     P.valuation X.E (Formalism.L2.Col.qOf P : X.E) = exp (-1 : ℤ) := by
@@ -294,7 +332,7 @@ variable {D : D7} {X : Fields} {s : Seam D X} {χ : TaylorLogMetric.IdE D → �
 
 theorem desc_spec {K : Type} [Field K] (σ : K →+* ℂ) {z : ℂ} (h : ∃ k, σ k = z) : σ (desc σ z) = z := by
   unfold desc
-  rw [dif_pos h]
+  rw [dite_eq_left h]
   exact h.choose_spec
 
 theorem desc_map {K : Type} [Field K] (σ : K →+* ℂ) (k : K) : desc σ (σ k) = k :=
@@ -676,7 +714,7 @@ theorem eq_or_eq_conjP (hX : Z.X.Ok) {P Q : HeightOneSpectrum (𝓞 Z.X.E)} (hP 
   rw [hM, IntermediateField.mem_bot] at h2
   obtain ⟨x, hx⟩ := h2
   have h3 : IsIntegral ℤ x := by
-    rw [← isIntegral_algebraMap_iff (algebraMap Z.X.F Z.X.E).injective, hx]
+    rw [← isIntegral_algebraMap_iff (B := Z.X.E), hx]
     exact RingOfIntegers.isIntegral_coe _
   obtain ⟨r, h4⟩ : ∃ r : 𝓞 Z.X.F, algebraMap (𝓞 Z.X.F) (𝓞 Z.X.E) r = a * cO Z.X.E a := ⟨⟨x, h3⟩, RingOfIntegers.ext hx⟩
   have h5 : r ∈ P.asIdeal.under (𝓞 Z.X.F) := by
@@ -770,9 +808,32 @@ theorem muAtT_unit (hZ : Z.Ok) (ht : Z.Ch.Tied Z.sig0 (fun j τ => (Z.W.row τ).
   have key : ∀ (cq : Z.X.K) (ψ : (𝓞 Z.X.E ⧸ P.1.asIdeal)ˣ →* Z.X.Kˣ),
       P.1.valuation Z.X.E (Formalism.L2.Col.qOf P.1 : Z.X.E) = exp (-1 : ℤ) → w.valuation Z.X.K cq = 1 →
       w.valuation Z.X.K (LocE.locChar (Formalism.L2.Col.qOf P.1) cq ψ a) = 1 := by
-    intro cq ψ h1 h2
-    obtain ⟨z, ζ, hζ, e⟩ := GlobalTheory.LocCharVal.locChar_eq_zpow_mul Z.X.E Z.X.K P.1 _ cq ψ a h1 ha
-    rw [e, map_mul, map_zpow₀, h2, unit_of_finOrder hζ, one_zpow, one_mul]
+    intro cq ψ hqval hcq
+    let q := Formalism.L2.Col.qOf P.1
+    have hv : P.1.valuation Z.X.E a ≠ 0 := by simpa using ha
+    have hex : ∃ z : ℤ, IsUnit (redP P.1 (a / (q : Z.X.E) ^ z)) := by
+      let z := -log (P.1.valuation Z.X.E a)
+      let b := a / (q : Z.X.E) ^ z
+      have hb : P.1.valuation Z.X.E b = 1 := by
+        dsimp only [b, z]
+        rw [map_div₀, map_zpow₀, hqval, ← exp_zsmul]
+        simp [exp_log hv, hv]
+      have hb0 : b ≠ 0 := by
+        intro e
+        rw [e, map_zero] at hb
+        exact zero_ne_one hb
+      have hred := reduction_mul ((intAt_iff b).2 hb.le)
+        ((intAt_iff b⁻¹).2 (by rw [map_inv₀, hb, inv_one]))
+      rw [mul_inv_cancel₀ hb0] at hred
+      have hone : redP P.1 (1 : Z.X.E) = 1 := by simpa using reduction_coe P.1 1
+      rw [hone] at hred
+      exact ⟨z, IsUnit.of_mul_eq_one _ hred.symm⟩
+    have hu : IsUnit (redP P.1 (a / (q : Z.X.E) ^ LocE.vP P.1 q a)) := Classical.epsilon_spec hex
+    have : Finite (𝓞 Z.X.E ⧸ P.1.asIdeal) := Ideal.finiteQuotientOfFreeOfNeBot _ P.1.ne_bot
+    have hψ : IsOfFinOrder (ψ hu.unit) := MonoidHom.isOfFinOrder ψ (isOfFinOrder_of_finite _)
+    change w.valuation Z.X.K (LocE.locChar q cq ψ a) = 1
+    rw [LocE.locChar, LocE.unitV, dite_eq_left hu, map_mul, map_zpow₀, hcq,
+      unit_of_finOrder hψ, one_zpow, one_mul]
   unfold muAtT
   by_cases hP : P.1 ∈ Z.Pr.vGs
   · refine key _ _ (val_q_vG hZ.fields hZ.primes hP) ?_
@@ -790,7 +851,7 @@ theorem muAtT_unit (hZ : Z.Ok) (ht : Z.Ch.Tied Z.sig0 (fun j τ => (Z.W.row τ).
     have hd := Proof.NormalFormAtPrime.degOne_of_split hZ.fields.rankE hgood.1 hgood.2.1 (P := P.1) (e ▸ hsel v)
     refine key _ _ (val_natCast_of_notMem_sq (Ideal.absNorm_mem _) hd.2) ?_
     have hg : ∀ k, ((Z.Pr.g k : ℕ) : 𝓞 Z.X.E) ∉ P.1.asIdeal := fun k h => hG k v ((natCast_mem_sel hsel v _).1 (e ▸ h)) hv
-    rw [if_neg hP, muqT, dif_pos i.2, Units.val_mul, Units.val_inv_eq_inv_val, Units.val_inv_eq_inv_val, map_mul, map_inv₀, map_inv₀,
+    rw [if_neg hP, muqT, dite_eq_left i.2, Units.val_mul, Units.val_inv_eq_inv_val, Units.val_inv_eq_inv_val, map_mul, map_inv₀, map_inv₀,
       hq, muVal_unit hZ ht i hg hTP hw]
     simp
 

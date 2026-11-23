@@ -1,6 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Foundations.IsRootOne
-import Development.AbelianVarietyTheory.Definitions.Foundations.EigenOfTwoStep
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.IsRootOne
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open GlobalTheory.KZ GlobalTheory.KZ.H3 Matrix
 open scoped MatrixGroups TensorProduct
@@ -30,7 +75,7 @@ theorem C_mul_mon (R : Type) [CommRing R] (w : ℕ) (i : Fin (w + 1)) (c : R) :
   rw [mon_eq, MvPolynomial.C_mul_monomial, mul_one]
 
 theorem coeff_sum_mon (R : Type) [CommRing R] (w : ℕ) (c : Fin (w + 1) → R) (j : Fin (w + 1)) :
-    MvPolynomial.coeff (ex w j) (∑ i, MvPolynomial.C (c i) * mon R w i) = c j := by
+    AddMonoidAlgebra.coeff (∑ i, MvPolynomial.C (c i) * mon R w i) (ex w j) = c j := by
   rw [MvPolynomial.coeff_sum]
   simp_rw [C_mul_mon, MvPolynomial.coeff_monomial]
   rw [Finset.sum_eq_single j]
@@ -48,12 +93,12 @@ theorem mon_hom (R : Type) [CommRing R] (w : ℕ) (i : Fin (w + 1)) : (mon R w i
   exact h
 
 theorem hom_expand (R : Type) [CommRing R] (w : ℕ) (p : MvPolynomial (Fin 2) R) (hp : p.IsHomogeneous w) :
-    p = ∑ i : Fin (w + 1), MvPolynomial.C (MvPolynomial.coeff (ex w i) p) * mon R w i := by
+    p = ∑ i : Fin (w + 1), MvPolynomial.C (AddMonoidAlgebra.coeff p (ex w i)) * mon R w i := by
   ext d
   by_cases hd : ∃ j : Fin (w + 1), ex w j = d
   · obtain ⟨j, rfl⟩ := hd
     rw [coeff_sum_mon]
-  · have h0 : MvPolynomial.coeff d p = 0 := by
+  · have h0 : AddMonoidAlgebra.coeff p d = 0 := by
       apply hp.coeff_eq_zero
       intro hdeg
       apply hd
@@ -96,13 +141,14 @@ theorem map_mon (R : Type) [CommRing R] (w : ℕ) (i : Fin (w + 1)) :
 
 end GlobalTheory.KZ.MonExp
 
-open GlobalTheory.KZ.MonExp in
 
-theorem GlobalTheory.KZ.H3.mon_expand : ∀ (R : Type) [CommRing R] (w : ℕ), (∀ (m : Matrix (Fin 2) (Fin 2) ℤ) (k : Fin (w + 1)), slP m (mon R w k) = ∑ i, MvPolynomial.C ((cf w m i k : ℤ) : R) * mon R w i) ∧ (∀ p : MvPolynomial (Fin 2) R, p.IsHomogeneous w → p = ∑ i : Fin (w + 1), MvPolynomial.C (MvPolynomial.coeff (Finsupp.single 0 (i : ℕ) + Finsupp.single 1 (w - (i : ℕ))) p) * mon R w i) ∧ (∀ i, (mon R w i).IsHomogeneous w) ∧ (∀ (u : Fin 2 → R) (i : Fin (w + 1)), MvPolynomial.eval u (mon R w i) = u 0 ^ (i : ℕ) * u 1 ^ (w - (i : ℕ))) ∧ (∀ c : Fin (w + 1) → R, ∑ i, MvPolynomial.C (c i) * mon R w i = 0 → c = 0) := by
+open GlobalTheory.KZ.MonExp in
+theorem GlobalTheory.KZ.H3.mon_expand : ∀ (R : Type) [CommRing R] (w : ℕ), (∀ (m : Matrix (Fin 2) (Fin 2) ℤ) (k : Fin (w + 1)), slP m (mon R w k) = ∑ i, MvPolynomial.C ((cf w m i k : ℤ) : R) * mon R w i) ∧ (∀ p : MvPolynomial (Fin 2) R, p.IsHomogeneous w → p = ∑ i : Fin (w + 1), MvPolynomial.C (AddMonoidAlgebra.coeff p (Finsupp.single 0 (i : ℕ) + Finsupp.single 1 (w - (i : ℕ)))) * mon R w i) ∧ (∀ i, (mon R w i).IsHomogeneous w) ∧ (∀ (u : Fin 2 → R) (i : Fin (w + 1)), MvPolynomial.eval u (mon R w i) = u 0 ^ (i : ℕ) * u 1 ^ (w - (i : ℕ))) ∧ (∀ c : Fin (w + 1) → R, ∑ i, MvPolynomial.C (c i) * mon R w i = 0 → c = 0) := by
   intro R _ w
   refine ⟨?_, fun p hp => hom_expand R w p hp, mon_hom R w, ?_, ?_⟩
   · intro m k
     have hz := hom_expand ℤ w _ (polySlash_monomial_isHomogeneous w m k)
+
     rw [← map₃, hz, map_sum]
     refine Finset.sum_congr rfl fun i _ => ?_
     rw [map_mul, MvPolynomial.map_C, map_mon]

@@ -1,11 +1,60 @@
-import Mathlib
-import Formalism.SharpRestriction.CuspSpanNormBounds.FractionFieldToGenericStalkAlgebraMapEq
-import Development.AbelianVarietyTheory.Definitions.Foundations.IsHermND
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.ComplementReferenceCompactSubgroup
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.EichlerIsometry
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.DualInterSelfDualHermitianLatticeSubspace
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.ComplementReferenceCompactSubgroup
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.DualInterSelfDualHermitianLatticeSubspace
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.EichlerIsometry
 import Development.AbelianVarietyTheory.Proofs.FlagMeasures.IsPrincipalIdealRingOfHenselian
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.SpanToLePerp
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.SpanToLePerp
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open ValuativeRel Formalism.MainNotions.S.Loc GlobalTheory.HL MeasureTheory
 open scoped Pointwise ENNReal Classical
 
@@ -69,8 +118,8 @@ theorem expand {x : S.V} (hx : x ∈ S.spanTo g r) :
   simp only [hf_sum_l, hf_smul_l, dual]
   simp [Fin.sum_univ_castSucc, h0]
 
-include gram dual iso in
 
+include gram dual iso in
 theorem exists_move [IsNonarchimedeanLocalField F] [CharZero F] (y : Fin r → S.V)
     (dy : ∀ a j, hf L S.Hm (g a) (y j) = if a = j.castSucc then 1 else 0)
     (iy : ∀ i j, hf L S.Hm (y i) (y j) = 0) (m : ℕ) :
@@ -138,8 +187,8 @@ theorem exists_move [IsNonarchimedeanLocalField F] [CharZero F] (y : Fin r → S
           simp
     · exact ⟨n, hn, hg, fun j _ => h j (by have := j.2; omega)⟩
 
-include gram dual iso in
 
+include gram dual iso in
 theorem core [IsNoetherianRing L.O] (Λ : Submodule L.O S.V) (hfg : Λ.FG)
     (hsd : ∀ y, (∀ x ∈ Λ, hf L S.Hm x y ∈ L.O) ↔ y ∈ Λ) (hg : ∀ b, g b ∈ Λ) (hgs : ∀ j, gs j ∈ Λ)
     (c : S.V) (hc : c ∈ Λ) (hc' : ∀ b, hf L S.Hm (g b) c = if b = Fin.last r then 1 else 0) :
@@ -281,6 +330,7 @@ theorem lift_of_frame [IsNonarchimedeanLocalField F] [CharZero F] (Λ : Submodul
     rw [e1, e2]
     linear_combination (-hf L S.Hm (c i.castSucc) (c j.castSucc)) * hσ2
   have hyΛ : ∀ j, n (y j) ∈ Λ := fun j => by
+
     simp only [hy, map_sub, map_sum, map_smul]
     refine sub_mem (hcΛ _) (sum_mem_O S _ _ (fun i => mul_mem hσ ?_) fun i => (hng _).1)
     rw [← hni]; exact hint _ (hcΛ _) _ (hcΛ _)
@@ -300,7 +350,10 @@ theorem lift_of_frame [IsNonarchimedeanLocalField F] [CharZero F] (Λ : Submodul
     (fun z => by
       rw [hmem, ← hΛ.2]
       refine ⟨fun h x hx => ?_, fun h x hx => ?_⟩
-      · have := h ((n * m).symm x) ((hmem _).2 (by simpa using hx))
+      · have := h ((n * m).symm x) ((hmem _).2 (by
+          change (n * m) ((n * m).symm x) ∈ Λ
+          rw [LinearEquiv.apply_symm_apply]
+          exact hx))
         rwa [← hNi, LinearEquiv.apply_symm_apply] at this
       · rw [← hNi]; exact h _ ((hmem _).1 hx))
     (fun b => (hmem _).2 (by change n (m (g b)) ∈ Λ; rw [hmg]; exact (hng b).1))

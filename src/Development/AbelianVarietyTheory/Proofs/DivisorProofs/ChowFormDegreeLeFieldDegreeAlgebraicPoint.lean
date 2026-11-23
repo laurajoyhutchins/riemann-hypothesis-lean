@@ -1,8 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.AevalEqZeroOfMemConeIdeal
-import Development.AbelianVarietyTheory.Definitions.ThetaMetrics.ExistsAlgebraicIndependentGenericPoint
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ProjPointIdealMemProjComponentsOfIsProjPureDim
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsFormDegreeLeHilbertDegreeEvalNeZero
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.AevalEqZeroOfMemConeIdeal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -76,10 +117,12 @@ private theorem coord_ne_zero_of_vanishes_on_coneIdeal {K Ω : Type} [Field K] [
   have hyh : aeval y h = 0 := by
     have : aeval y h = Polynomial.aeval (y i) m := by
       rw [Polynomial.aeval_eq_sum_range]
+
       simp [hh, map_sum, hy, Algebra.smul_def]
       rfl
     rw [this, minpoly.aeval]
   have hzh := hzI h ((_root_.GlobalTheory.CompHt.mem_coneIdeal_of_isHomogeneous y hhom).mpr hyh)
+
   rw [hh, map_sum, Finset.sum_eq_single r] at hzh
   · have h2 : z i = 0 ∧ ¬m.natDegree = 0 := by simpa [hzj, hmon.coeff_natDegree, r] using hzh
     exact h2.1
@@ -113,7 +156,7 @@ private theorem exists_algHom_adjoin_of_ker_le {K Ω : Type} [Field K] [Field Ω
     apply Subtype.ext
     simp [e, φ]
   rw [hX]
-  simp only [lift, AlgHom.comp_apply, AlgEquiv.toAlgHom_eq_coe, AlgEquiv.coe_algHom,
+  simp only [lift, AlgHom.comp_apply, AlgEquiv.coe_toAlgHom,
     AlgEquiv.symm_apply_apply, Ideal.Quotient.liftₐ_apply, Ideal.Quotient.lift_mk]
   exact aeval_X w i
 
@@ -123,6 +166,7 @@ private theorem aeval_smul_eq_pow_mul_of_isHomogeneous {K Ω : Type} [Field K] [
     aeval (c • x) φ = c ^ n * aeval x φ := by
   conv_lhs => rw [φ.as_sum]
   conv_rhs => rw [φ.as_sum]
+
   rw [map_sum, map_sum, Finset.mul_sum]
   refine Finset.sum_congr rfl fun m hm => ?_
   have hdeg := hφ (mem_support_iff.mp hm)
@@ -145,13 +189,16 @@ private theorem aeval_inv_smul_eq_zero_of_mem_coneIdeal_zero {K Ω : Type} [Fiel
     simpa [hdD] using (isHomogeneous_X_pow j (D - d)).mul (homogeneousComponent_isHomogeneous d g)
   have hyh : aeval y h = 0 := by
     have : aeval y h = aeval y (∑ d ∈ Finset.range (D + 1), homogeneousComponent d g) := by
+
       simp [hh, map_sum, hy]
     rw [this, sum_homogeneousComponent, hg]
   have hzh : aeval z h = 0 :=
     hzI h ((_root_.GlobalTheory.CompHt.mem_coneIdeal_of_isHomogeneous y hhom).mpr hyh)
   have hc : z j ^ D ≠ 0 := pow_ne_zero _ hz
   refine (mul_eq_zero.mp ?_).resolve_left hc
+
   rw [← sum_homogeneousComponent g, map_sum, Finset.mul_sum]
+
   rw [hh, map_sum] at hzh
   rw [← hzh]
   refine Finset.sum_congr rfl fun d hd => ?_
@@ -173,6 +220,7 @@ private theorem det_multiplication_form_eq_zero_of_sum_eq_zero {K L A : Type} [F
   refine ⟨fun k => ρ (b k), ?_, ?_⟩
   · intro h0
     have h1 : ρ 1 = 0 := by
+
       rw [← b.sum_repr 1, map_sum]
       refine Finset.sum_eq_zero fun l _ => ?_
       rw [map_smul, show ρ (b l) = 0 from congrFun h0 l, smul_zero]
@@ -181,6 +229,7 @@ private theorem det_multiplication_form_eq_zero_of_sum_eq_zero {K L A : Type} [F
     have hcol : ∀ i, ∑ l, algebraMap K L (LinearMap.toMatrix b b (Algebra.lmul K A (Y i)) l k) *
         ρ (b l) = ρ (Y i) * ρ (b k) := by
       intro i
+
       rw [← map_mul, ← b.sum_repr (Y i * b k), map_sum]
       refine Finset.sum_congr rfl fun l _ => ?_
       rw [map_smul, Algebra.smul_def, LinearMap.toMatrix_apply]
@@ -201,10 +250,10 @@ private theorem det_multiplication_form_eq_zero_of_sum_eq_zero {K L A : Type} [F
           rw [hcol]; ring
       _ = 0 := by rw [hu, zero_mul]
 
+
 set_option autoImplicit false in
 open MvPolynomial in
 variable {K Ω : Type} [Field K] [Field Ω] [Algebra K Ω] {N : ℕ} in
-
 theorem _root_.GlobalTheory.CompHt.PointUp.le_finrank_of_isChowFormInt : ∀ (K : Type) [Field K] (N δ : ℕ) (y : Fin N → AlgebraicClosure K)
     (j : Fin N) (f : MvPolynomial (Fin (0 + 1) × Fin N) K), y j = 1 → _root_.GlobalTheory.ChowHt.IsChowFormInt (_root_.GlobalTheory.CompHt.coneIdeal K y) 0 δ f →
     δ ≤ Module.finrank K (IntermediateField.adjoin K (Set.range y)) := by

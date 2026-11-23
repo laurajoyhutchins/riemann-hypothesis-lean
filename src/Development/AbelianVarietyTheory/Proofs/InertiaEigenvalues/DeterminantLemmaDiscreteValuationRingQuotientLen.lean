@@ -1,6 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.GlobalCore
-import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.LengthCommensurableSpanSpanOfDetNeZero
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.GlobalCore
+public import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.LengthCommensurableSpanSpanOfDetNeZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.OrderOfVanishing.Noetherian
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Formalism Formalism.MainNotions Formalism.BasicNotions Formalism.BasicNotions.Loc Formalism.MainNotions.N Formalism.WeaklyAdmissibleFiltrations NumberField IsDedekindDomain Formalism.ConjugateSelfDual ReciprocityTheory.Gal Module GlobalTheory.Pass GlobalTheory.Cut
 open IsDiscreteValuationRing
@@ -40,23 +86,23 @@ theorem exists_C_mul_primitive {σ : Type} (F : MvPolynomial σ O) :
   have h2 : G.coeff m = 1 := by
     apply mul_left_cancel₀ hc
     rw [← h1, mul_one]
-  have h3 := congrArg (MvPolynomial.coeff m) h0
+  have h3 := congrArg (AddMonoidAlgebra.coeff · m) h0
   rw [MvPolynomial.coeff_map, h2] at h3
   simp at h3
 
 theorem length_quot_le_of_coeff_prod {σ J : Type} [Fintype J] (F : J → MvPolynomial σ O) (x : J → σ → O)
-    (I : Ideal O) (h : ∀ m, MvPolynomial.coeff m (∏ j, F j) ∈ I) :
+    (I : Ideal O) (h : ∀ m, AddMonoidAlgebra.coeff (∏ j, F j) m ∈ I) :
     Module.length O (O ⧸ I) ≤ ∑ j, addVal O (MvPolynomial.eval (x j) (F j)) := by
   classical
   choose c G hF hG using fun j => exists_C_mul_primitive (F j)
   have h1 : MvPolynomial.map (IsLocalRing.residue O) (∏ j, G j) ≠ 0 := by
     rw [map_prod]
     exact Finset.prod_ne_zero_iff.2 fun j _ => hG j
-  obtain ⟨m, hm⟩ : ∃ m, MvPolynomial.coeff m (MvPolynomial.map (IsLocalRing.residue O) (∏ j, G j)) ≠ 0 := by
+  obtain ⟨m, hm⟩ : ∃ m, AddMonoidAlgebra.coeff (MvPolynomial.map (IsLocalRing.residue O) (∏ j, G j)) m ≠ 0 := by
     by_contra! hh
     exact h1 (MvPolynomial.ext _ _ fun m => by simpa using hh m)
   rw [MvPolynomial.coeff_map] at hm
-  have hu : IsUnit (MvPolynomial.coeff m (∏ j, G j)) := by
+  have hu : IsUnit (AddMonoidAlgebra.coeff (∏ j, G j) m) := by
     by_contra hn
     exact hm ((IsLocalRing.residue_eq_zero_iff _).2 hn)
   have h2 : (∏ j, F j) = MvPolynomial.C (∏ j, c j) * ∏ j, G j := by
@@ -146,10 +192,6 @@ theorem addVal_det_le_length {ι V : Type} [Fintype ι] [DecidableEq ι] [AddCom
     rw [Matrix.mulVecLin_apply, RingHom.map_mulVec]
     exact h5
 
-omit [IsDiscreteValuationRing O] in
-theorem matKO_mk {k : ℕ} (A : Matrix (Fin k) (Fin k) O) (y : Fin k → FractionRing O) :
-    matKO A (Submodule.Quotient.mk y) =
-      Submodule.Quotient.mk ((A.map (algebraMap O (FractionRing O))).mulVec y) := rfl
 
 omit [IsDiscreteValuationRing O] in
 theorem mk_eq_zero_iff {k : ℕ} (y : Fin k → FractionRing O) :
@@ -198,7 +240,7 @@ theorem exists_relations {A : Type} [Ring A] [Algebra O A] {d : ℕ} (ψ : A →
         obtain ⟨θ, hθ, h⟩ := hv a
         obtain ⟨θ', hθ', h'⟩ := hw a
         refine ⟨θ + θ', Rel.add_mem hθ hθ', fun q a' b => ?_⟩
-        rw [Pi.add_apply, map_add, Matrix.add_apply, h, h']
+        rw [Pi.add_apply, map_add (f := _), Matrix.add_apply, h, h']
         split_ifs <;> simp
       zero_mem' := fun a => ⟨0, Rel.zero_mem, fun q a' b => by simp⟩
       smul_mem' := by
@@ -220,6 +262,7 @@ theorem exists_relations {A : Type} [Ring A] [Algebra O A] {d : ℕ} (ψ : A →
   choose θ hθ hθr using fun (p : Fin g) (a : Fin d) => hrN (p, a) a
   have hM : (Matrix.of fun (pa qb : Fin g × Fin d) => ψ ((∑ a, θ pa.1 a) qb.1) pa.2 qb.2) = Matrix.of r := by
     ext ⟨p, a⟩ ⟨q, b⟩
+
     simp [Finset.sum_apply, map_sum, Matrix.sum_apply, hθr]
   refine ⟨fun p => ∑ a, θ p a, fun p => Rel.sum_mem fun a _ => hθ p a, ?_⟩
   rw [hM]
@@ -247,6 +290,7 @@ theorem exists_relations {A : Type} [Ring A] [Algebra O A] {d : ℕ} (ψ : A →
           (LinearMap.proj q : (Fin g → KOG O d) →ₗ[O] KOG O d)) (π y) =
         (stdG O (FractionRing O) d).mkQ
           (∑ q, ((ψ (t q)).map (algebraMap O (FractionRing O))).mulVec fun b => y (q, b)) := by
+
       rw [LinearMap.sum_apply, map_sum]
       rfl
     rw [h1, Submodule.mkQ_apply, mk_eq_zero_iff]
@@ -256,7 +300,7 @@ theorem exists_relations {A : Type} [Ring A] [Algebra O A] {d : ℕ} (ψ : A →
     rw [hc, Fintype.sum_prod_type, Finset.sum_apply]
     rfl
 
-theorem length_quot_le_sum_length : ∀ (O : Type) [CommRing O] [IsDomain O] [IsDiscreteValuationRing O] (A : Type) [Ring A] [Algebra O A] (J : Type) [Fintype J] (d : J → ℕ) (ψ : ∀ j, A →ₐ[O] Matrix (Fin (d j)) (Fin (d j)) O), (∀ j, Function.Surjective (ψ j)) → ∀ (g : ℕ) (Rel : Submodule A (Fin g → A)) (I : Ideal O), (∀ (n : ℕ) (θ : Fin n → Fin g → Fin g → A), (∀ k p, θ k p ∈ Rel) → ∀ m : Fin n →₀ ℕ, MvPolynomial.coeff m (∏ j, Matrix.det (Matrix.of fun (pa qb : Fin g × Fin (d j)) => ∑ k, (MvPolynomial.X k : MvPolynomial (Fin n) O) * MvPolynomial.C (ψ j (θ k pa.1 qb.1) pa.2 qb.2))) ∈ I) → Module.length O (O ⧸ I) ≤ ∑ j, Module.length O ↥(⨅ θ ∈ Rel, LinearMap.ker (∑ q : Fin g, (matKO (ψ j (θ q))).comp (LinearMap.proj q : (Fin g → KOG O (d j)) →ₗ[O] KOG O (d j)))) := by
+theorem length_quot_le_sum_length : ∀ (O : Type) [CommRing O] [IsDomain O] [IsDiscreteValuationRing O] (A : Type) [Ring A] [Algebra O A] (J : Type) [Fintype J] (d : J → ℕ) (ψ : ∀ j, A →ₐ[O] Matrix (Fin (d j)) (Fin (d j)) O), (∀ j, Function.Surjective (ψ j)) → ∀ (g : ℕ) (Rel : Submodule A (Fin g → A)) (I : Ideal O), (∀ (n : ℕ) (θ : Fin n → Fin g → Fin g → A), (∀ k p, θ k p ∈ Rel) → ∀ m : Fin n →₀ ℕ, AddMonoidAlgebra.coeff (∏ j, Matrix.det (Matrix.of fun (pa qb : Fin g × Fin (d j)) => ∑ k, (MvPolynomial.X k : MvPolynomial (Fin n) O) * MvPolynomial.C (ψ j (θ k pa.1 qb.1) pa.2 qb.2))) m ∈ I) → Module.length O (O ⧸ I) ≤ ∑ j, Module.length O ↥(⨅ θ ∈ Rel, LinearMap.ker (∑ q : Fin g, (matKO (ψ j (θ q))).comp (LinearMap.proj q : (Fin g → KOG O (d j)) →ₗ[O] KOG O (d j)))) := by
   intro O _ _ _ A _ _ J _ d ψ hψ g Rel I hI
   classical
   choose Θ hΘ hle using fun j => exists_relations (ψ j) (hψ j) Rel

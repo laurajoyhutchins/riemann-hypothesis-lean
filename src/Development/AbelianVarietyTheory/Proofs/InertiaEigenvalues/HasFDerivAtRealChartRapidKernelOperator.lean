@@ -1,19 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IdeleModuleDetDiagUnitsPosIdele
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsSiegelSetDiagNormOne
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CuspRapidDecaySiegelGLOfFinite
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AutomorphicFormsFiniteGL
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EqZeroOfMemWeakIn
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RealLieSmoothingMemSmoothAdelicFunctions
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LieDerivativeRealLieSmoothingEqDensity
-import Development.AbelianVarietyTheory.Definitions.Divisors.MemL2OfSmoothVector
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsAddHaarMeasureVolumeLie
-import GroundTheory.AutomorphicForms.ReductionFinite
-import Development.AbelianVarietyTheory.Definitions.Divisors.MemMspan
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.DecaysOfMemSmoothSpan
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.WordAppendSingle
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.KSpan
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.NormToLMulLe
+module
+
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.WordAppendSingle
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IsRapidInf
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.NormToLMulLe
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 open NumberField Matrix MeasureTheory GlobalTheory.CuspRep GlobalTheory.CuspRep.CuspidalL2GL GlobalTheory.UnitaryBC GroundTheory.Global GroundTheory.Global.IdeleGroup
 open scoped Pointwise
 
@@ -21,7 +51,7 @@ noncomputable section
 
 namespace GlobalTheory.MSpanDecay.KernelDeriv
 
-variable {E : Type} [Field E] [NumberField E] [IsTotallyComplex E] {a : ℕ}
+variable {E : Type} [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] {a : ℕ}
 
 theorem fderiv_chart_apply {G : GA E a → ℂ} (hG : G ∈ Sm E a) (g : GA E a) (u : GL (Fin a) (Cinf E)) (V : Lie E a) :
     fderiv ℝ (chart G g) (toL u.val) V = lieD (toL ((u⁻¹).val * Matrix.of V)) G (g * infGL E a u) := by
@@ -168,7 +198,7 @@ theorem norm_fderiv_comp_le {G : GA E a → ℂ} (hG : G ∈ Sm E a) (g : GA E a
         mul_le_mul s3 hR hr0 (by positivity)
     _ = _ := by rw [mul_pow, pow_succ h (N + 1)]; ring
 
-theorem hasFDerivAt_chart_kernel : ∀ (E : Type) [Field E] [NumberField E] [IsTotallyComplex E] (a : ℕ) (G : GA E a → ℂ)
+theorem hasFDerivAt_chart_kernel : ∀ (E : Type) [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] (a : ℕ) (G : GA E a → ℂ)
     (X : Type) [MeasurableSpace X] (ν : Measure X) [SFinite ν] (k : X → ℂ) (γ : X → GL (Fin a) (Cinf E)),
     GlobalTheory.JSW.IsRapidInf ν k γ → GlobalTheory.MSpanDecay.Good G → ∀ (g : GA E a) (y : GL (Fin a) (Cinf E)),
     ∃ L : Lie E a →L[ℝ] ℂ, HasFDerivAt (chart (fun g : GA E a => ∫ x, k x * G (g * infGL E a (γ x)) ∂ν) g) L
@@ -199,7 +229,7 @@ theorem hasFDerivAt_chart_kernel : ∀ (E : Type) [Field E] [NumberField E] [IsT
     rw [chart_val]
     congr 1
     funext x
-    simp only [F]
+    dsimp only [F]
     rw [hrm, hcG, chart_val, map_mul, mul_assoc]
   have heq : chart (fun g : GA E a => ∫ x, k x * G (g * infGL E a (γ x)) ∂ν) g =ᶠ[nhds (toL y.val)]
       fun w => ∫ x, F w x ∂ν := by
@@ -285,7 +315,6 @@ theorem hasFDerivAt_chart_kernel : ∀ (E : Type) [Field E] [NumberField E] [IsT
   rw [ContinuousLinearMap.integral_apply hF'int]
   congr 1
   funext x
-  simp only [F']
   rw [ContinuousLinearMap.smul_apply, ContinuousLinearMap.comp_apply, hrm, hcG, fderiv_chart_apply hsm g, smul_eq_mul]
   congr 3
   change ((y * γ x)⁻¹).val * (Matrix.of Z * (γ x).val) = ((γ x)⁻¹).val * ((y⁻¹).val * Matrix.of Z) * (γ x).val

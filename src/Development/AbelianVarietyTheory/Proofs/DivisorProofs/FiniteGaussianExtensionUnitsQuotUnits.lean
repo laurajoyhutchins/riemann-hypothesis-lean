@@ -1,10 +1,60 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IrreducibleXSqAddOne
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.GroupTheory.FiniteAbelian.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.NumberField.Units.DirichletTheorem
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.OmegaFactorization
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.PartialZetaFunctionalEquation
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.KFacDifferentiable
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HeckeEisensteinConstantTermPartDifferentiableOn
-import ReciprocityTheory.Chebotarev.EulerSum
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IrreducibleXSqAddOne
+
+@[expose] public section
+
 open NumberField Complex Polynomial
 open scoped nonZeroDivisors ContDiff
 open GlobalTheory.IndefiniteRowSideFullHecke.OmegaFactorization GlobalTheory.HeckeTwo
@@ -16,7 +66,7 @@ namespace GlobalTheory.GaussExt.UnitIdx
 variable (F : Type) [Field F] [NumberField F] [NumberField.IsTotallyReal F]
 
 theorem aeval_neg_ii : aeval (-ii F) (X ^ 2 + 1 : F[X]) = 0 := by
-  simp only [map_add, map_pow, aeval_X, map_one, neg_sq, ii_sq F]; ring
+  simp only [map_add (f := _), map_pow, aeval_X, map_one, neg_sq, ii_sq F]; ring
 
 def conj : Ext F →ₐ[F] Ext F := AdjoinRoot.liftAlgHom (X ^ 2 + 1 : F[X]) (Algebra.ofId F (Ext F)) (-ii F)
   (by have := aeval_neg_ii F; rwa [aeval_def] at this)
@@ -52,7 +102,7 @@ theorem ii_ne_zero : ii F ≠ 0 := by
 theorem mem_range_of_conj_eq (x : Ext F) (hx : conj F x = x) : ∃ a : F, algebraMap F (Ext F) a = x := by
   obtain ⟨a, b, rfl⟩ := exists_repr F x
   refine ⟨a, ?_⟩
-  simp only [map_add, map_mul, conj_algebraMap, conj_ii] at hx
+  simp only [map_add (f := _), map_mul, conj_algebraMap, conj_ii] at hx
   have h2 : (2 : Ext F) * algebraMap F (Ext F) b * ii F = 0 := by linear_combination -hx
   have hb : algebraMap F (Ext F) b = 0 := by
     rcases mul_eq_zero.1 h2 with h | h
@@ -107,7 +157,7 @@ theorem pow_mem_range (u : (𝓞 (Ext F))ˣ) :
     rw [map_pow, ← this, ← mul_pow, mul_assoc, mul_comm (conj F y), hcxy, mul_one]
   obtain ⟨a, ha⟩ := mem_range_of_conj_eq F _ hfix
   have hai : IsIntegral ℤ a := by
-    refine (isIntegral_algebraMap_iff (algebraMap F (Ext F)).injective).1 ?_
+    refine (isIntegral_algebraMap_iff (B := Ext F)).1 ?_
     rw [ha]; exact (RingOfIntegers.isIntegral_coe _).pow m
 
   have hfix' : conj F (y ^ m) = y ^ m := by
@@ -115,7 +165,7 @@ theorem pow_mem_range (u : (𝓞 (Ext F))ˣ) :
     rw [e, map_inv₀, hfix]
   obtain ⟨b, hb⟩ := mem_range_of_conj_eq F _ hfix'
   have hbi : IsIntegral ℤ b := by
-    refine (isIntegral_algebraMap_iff (algebraMap F (Ext F)).injective).1 ?_
+    refine (isIntegral_algebraMap_iff (B := Ext F)).1 ?_
     rw [hb]; exact (RingOfIntegers.isIntegral_coe _).pow m
   have hab : a * b = 1 := by
     apply (algebraMap F (Ext F)).injective

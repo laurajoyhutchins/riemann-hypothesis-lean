@@ -1,6 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TrPApply
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.NormIteratedFDerivRemCompLe
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TrPApply
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.NormIteratedFDerivRemCompLe
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Calculus.BumpFunction.FiniteDimension
+import Mathlib.Analysis.Calculus.ContDiff.Bounds
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.Normed.Operator.Prod
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Analysis.Calculus.BumpFunction.Basic
+
+@[expose] public section
 
 noncomputable section
 
@@ -119,7 +167,7 @@ theorem norm_iteratedFDeriv_comp_le (e : A →L[ℝ] B) (he : ‖e‖ ≤ 1) (f 
   calc ‖iteratedFDeriv ℝ i f (e x)‖ * ∏ _j : Fin i, ‖e‖
       ≤ ‖iteratedFDeriv ℝ i f (e x)‖ * 1 := by
         gcongr
-        exact Finset.prod_le_one (fun _ _ => norm_nonneg _) fun _ _ => he
+        exact Finset.prod_le_one₀ (fun _ _ => norm_nonneg _) fun _ _ => he
     _ = _ := mul_one _
 
 theorem exists_schwartz_prod (f₁ : 𝓢(A, ℂ)) (f₂ : 𝓢(B, ℂ)) :
@@ -219,6 +267,7 @@ theorem exists_hadamard [FiniteDimensional ℝ Y] (P : Submodule ℝ Y) (f : �
       ext
       · simp [B₁, Prod.fst_sum, h4]
       · simp [B₁, Prod.snd_sum, h4]
+
     rw [← map_neg, h3, map_sum]
     exact Finset.sum_congr rfl fun j _ => by rw [map_smul, hK, Complex.real_smul]
   have hcK : ∀ j, Continuous fun s : ℝ => K j ((B₀ + s • B₁) x) := fun j => by
@@ -226,16 +275,16 @@ theorem exists_hadamard [FiniteDimensional ℝ Y] (P : Submodule ℝ Y) (f : �
     simp only [ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply]
     fun_prop
   have hI := intervalIntegral.integral_eq_sub_of_hasDerivAt (a := (0 : ℝ)) (b := 1) (fun s _ => hd s)
-    ((continuous_finset_sum _ fun j _ => continuous_const.mul (hcK j)).intervalIntegrable _ _)
-  rw [intervalIntegral.integral_finset_sum (f := fun j s => (L j x : ℂ) * K j ((B₀ + s • B₁) x)) fun j _ =>
+    ((continuous_finsetSum _ fun j _ => continuous_const.mul (hcK j)).intervalIntegrable _ _)
+  rw [intervalIntegral.integral_finsetSum (f := fun j s => (L j x : ℂ) * K j ((B₀ + s • B₁) x)) fun j _ =>
     (continuous_const.mul (hcK j)).intervalIntegrable _ _] at hI
   simp only [intervalIntegral.integral_const_mul, ← hg] at hI
   rw [hI, hB, hB, hH, hH]
   have h5 : f (x - π x) = 0 := hf _ (by rw [hπ, sub_sub_cancel]; exact (q x).2)
   simp [h5, hχ]
 
-open Complex GlobalTheory.CharFormDeriv in
 
+open Complex GlobalTheory.CharFormDeriv in
 theorem apply_linear_mul (T : 𝓢(Y, ℂ) →L[ℂ] ℂ) (L : Y →L[ℝ] ℝ)
     (hT : ∀ t : ℝ, ∀ f f' : 𝓢(Y, ℂ), (∀ x, f' x = Complex.exp ((I * t) * (L x : ℂ)) * f x) → T f' = T f)
     (f g : 𝓢(Y, ℂ)) (hg : ∀ x, g x = (L x : ℂ) * f x) : T g = 0 := by
@@ -295,6 +344,7 @@ theorem eq_of_eqOn : ∀ {Y : Type} [NormedAddCommGroup Y] [NormedSpace ℝ Y] [
     ext x
     rw [hu, SchwartzMap.sum_apply]
     exact Finset.sum_congr rfl fun j _ => (hv j x).symm
+
   rw [← sub_eq_zero, ← map_sub, e, map_sum]
   refine Finset.sum_eq_zero fun j _ => apply_linear_mul ℓ (L j) (fun t a b hab => ?_) (u j) (v j) (hv j)
   refine h ((-t / (2 * Real.pi)) • (L j : Y →ₗ[ℝ] ℝ)) (fun p hp => by simp [hL j p hp]) a b (funext fun x => ?_)

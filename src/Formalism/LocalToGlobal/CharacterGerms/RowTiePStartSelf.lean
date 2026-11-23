@@ -1,9 +1,56 @@
-import Formalism.LocalToGlobal.CharacterGerms.RowTiePPTSelfEx
-import Formalism.LocalToGlobal.CharacterGerms.RowTiePProjFB
-import Formalism.LocalToGlobal.CharacterGerms.RowTiePLSmallMain
-import Formalism.LocalToGlobal.CharacterGerms.RowTiePOActLog
-import Formalism.LocalToGlobal.CharacterGerms.RowTiePCartSelfSt
-import Formalism.LocalToGlobal.CharacterGerms.RowTiePAllStart
+module
+
+public import Formalism.LocalToGlobal.CharacterGerms.RowTiePPTSelfEx
+public import Formalism.LocalToGlobal.CharacterGerms.RowTiePOActLog
+public import Formalism.LocalToGlobal.CharacterGerms.CoeffSubstEqSum
+import Formalism.LocalToGlobal.CharacterGerms.ConstMemTypeSetOfNonneg
+public import Formalism.LocalToGlobal.CharacterGerms.EndomorphismLimitIntegral
+import Formalism.LocalToGlobal.CharacterGerms.RowTieCartAdd
+import Formalism.LocalToGlobal.CharacterGerms.RowTieCartFB
+public import Formalism.LocalToGlobal.CharacterGerms.RowTiePAllStart
+public import Formalism.LocalToGlobal.CharacterGerms.RowTiePLSmallMain
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 noncomputable section
 
@@ -33,12 +80,9 @@ theorem maximal_of_valuation_ge_one {a : C} (h : V.Ge 1 a) : V.MM a := by
   rw [WithTop.coe_zero] at h0
   exact lt_of_lt_of_le h0 h
 
-theorem le_pow_succ {l : ℕ} (hl : 2 ≤ l) : ∀ n : ℕ, n + 1 ≤ l ^ (n + 1)
-  | 0 => by simpa using (by omega : 1 ≤ l)
-  | n + 1 => by
-    have ih := le_pow_succ hl n
-    rw [pow_succ]
-    nlinarith
+theorem le_pow_succ {l : ℕ} (hl : 2 ≤ l) : ∀ n : ℕ, n + 1 ≤ l ^ (n + 1) := by
+  intro n
+  exact Nat.le_of_lt (Nat.lt_pow_self hl)
 
 theorem dvd_of_ge (em : ZMod d → (O →+* C)) (ε : O) (hεI : ∀ a, V.Ge 0 (em a ε))
     (hεx : ∀ x : O, (∀ a, V.MM (em a x)) → ∃ y, ε * x = (V.l : O) * y) :
@@ -140,6 +184,7 @@ theorem subst_lg_comp (Y : FBChart C V O dd) (φ : Pt C 1 dd) (hφ0 : ∀ i, MvP
         rw [OActLog.log_endo Y.B.G Y.lg Y.lg_lin Y.lg_add φ hφ0 hhom x]
     _ = ∑ j, OActLog.linM φ x j • MvPowerSeries.subst Q (Y.lg j) := by
         simp only [← MvPowerSeries.smul_eq_C_mul]
+
         rw [← MvPowerSeries.coe_substAlgHom hQS, map_sum]
         simp only [map_smul]
 
@@ -201,7 +246,7 @@ theorem allStartSelf_of (hLie : ProjLieSelfSt) : AllStartSelfSt := by
     have e1 : Y.lg j = MvPowerSeries.X ((0 : Fin 1), j) + (Y.lg j - MvPowerSeries.X ((0 : Fin 1), j)) := by ring
     have h0 := AllStart.coeff_one_subst (Y.lg j - MvPowerSeries.X ((0 : Fin 1), j))
       (fun μ hμ => by rw [map_sub, Y.lg_lin j μ hμ, sub_self]) P hP0
-    rw [e1, MvPowerSeries.subst_add hPS, MvPowerSeries.subst_X hPS, map_add, h0, add_zero]
+    rw [e1, MvPowerSeries.subst_add hPS, MvPowerSeries.subst_X hPS, map_add (f := _), h0, add_zero]
     simp [P, MvPowerSeries.coeff_C_mul, MvPowerSeries.coeff_X]
   let b : ℕ → I0 → C := fun n => Classical.choose (hEspan (a n))
   have hb : ∀ n, linAct E (a n) = ∑ c, b n c • p.e c := fun n => Classical.choose_spec (hEspan (a n))
@@ -245,6 +290,7 @@ theorem allStartSelf_of (hLie : ProjLieSelfSt) : AllStartSelfSt := by
     rw [h1, StartSelf.subst_lg_comp Y (Φ col) (hΦ0 col) (hΦhom col) Q hQ0 x]
     simp only [h2]
     refine PowerSeries.ext fun n => ?_
+
     simp only [map_sum, map_smul, smul_eq_mul, PowerSeries.coeff_mk]
     exact hkey n col x
   let RHS : I0 → PowerSeries C := fun q =>

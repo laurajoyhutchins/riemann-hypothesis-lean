@@ -1,6 +1,54 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.StepFormCptAllOfStepFormAll
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.HerAnalyticFOfCls
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.TransferWordEntriesMem
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.StepFormCptAllOfStepFormAll
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.TransferWordEntriesMem
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.HerAnalyticFOfCls
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.MeasurableOfContinuousOnZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.IsCompactZetaLe
+
+@[expose] public section
 
 open Matrix MeasureTheory Filter Topology
 
@@ -25,8 +73,8 @@ def LCptAt (Φ : RadSp k r z z' π π') (c : Fin r → ℂ) : Prop :=
   ∃ U : Set (Fin r → ℂ), IsOpen U ∧ c ∈ U ∧ ∃ K : Set (Mx k r), IsCompact K ∧ K ⊆ {g | 0 < GGl k r z z' g} ∧
     ∀ c' ∈ U, VanOut Φ c' K
 
-variable (k r z z' π π') in
 
+variable (k r z z' π π') in
 def lcSub : Submodule ℂ (RadSp k r z z' π π') where
   carrier := {Φ | ∀ c ∈ OmX r, LCptAt Φ c}
   zero_mem' := fun c _ => ⟨Set.univ, isOpen_univ, trivial, ∅, isCompact_empty, Set.empty_subset _,
@@ -50,13 +98,6 @@ theorem lcSub_le_cptSub : lcSub k r z z' π π' ≤ cptSub k r z z' π π' := by
   intro Φ hΦ c hc
   obtain ⟨U, hU, hcU, K, hKc, hKG, hK0⟩ := hΦ c hc
   exact ⟨K, hKc, hKG, hK0 c hcU⟩
-
-theorem fn_van (X : ActualOps k r z z' π π') (j : Fin 6) (Φ : RadSp k r z z' π π') (c : Fin r → ℂ)
-    (K : Set (Mx k r)) (h : VanOut Φ c K) : VanOut (X.fn j Φ) c K := by
-  intro g hg hgK
-  by_cases hx : ((c, g) : (Fin r → ℂ) × Mx k r) ∈ DomR k r z z'
-  · rw [X.fn_apply j Φ (c, g) hx, h g hg hgK, smul_zero]
-  · exact (X.fn j Φ).2.1 (c, g) hx
 
 theorem mul_van {W : Module.End ℂ (RadSp k r z z' π π')} {m : (Fin r → ℂ) → Mx k r → ℂ} (hW : multiplicationOperator W m)
     (Φ : RadSp k r z z' π π') (c : Fin r → ℂ) (K : Set (Mx k r)) (h : VanOut Φ c K) : VanOut (W Φ) c K := by
@@ -111,12 +152,6 @@ theorem op_van (X : ActualOps k r z z' π π') (l : Fin r) (i : Fin 6) (Φ : Rad
   apply opL_eq_zero_of_eventually
   filter_upwards [hU.mem_nhds hc] with c' hc'
   exact h c' hc' g hg hgK
-
-theorem fn_lc (X : ActualOps k r z z' π π') (j : Fin 6) :
-    ∀ Φ ∈ lcSub k r z z' π π', X.fn j Φ ∈ lcSub k r z z' π π' := by
-  intro Φ hΦ c hc
-  obtain ⟨U, hU, hcU, K, hKc, hKG, hK0⟩ := hΦ c hc
-  exact ⟨U, hU, hcU, K, hKc, hKG, fun c' hc' => fn_van X j Φ c' K (hK0 c' hc')⟩
 
 theorem t_lc (X : ActualOps k r z z' π π') (Y : ℂ) (a b : Fin 2) :
     ∀ Φ ∈ lcSub k r z z' π π', X.t Y a b Φ ∈ lcSub k r z z' π π' := by

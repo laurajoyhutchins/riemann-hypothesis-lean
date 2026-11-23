@@ -1,7 +1,54 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeGroups.ConjStable
-import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeGroups.AdRepBaseLiftApply
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PrimitiveFrobeniusFixed.QocEquiv
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CharacterLevelBounds.ShaFamMono
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeGroups.ConjStable
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CharacterLevelBounds.ShaFamMono
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PrimitiveFrobeniusFixed.QocEquiv
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeGroups.AdRepBaseLiftApply
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 open NumberField Formalism.ConjugateSelfDual ReciprocityTheory.Gal Matrix
 open UpperTheory.V UpperTheory.V.Base UpperTheory.V.U3
@@ -13,7 +60,7 @@ private theorem shaInj_phi {O W : Type} [CommRing O] [AddCommGroup W] [Module O 
   refine ⟨fun w' => if h : ∃ y : O, w' = y • w then Ideal.Quotient.mk _ h.choose else 0, fun y => ?_⟩
   have h : ∃ y' : O, y • w = y' • w := ⟨y, rfl⟩
   dsimp only
-  rw [dif_pos h, Ideal.Quotient.eq, Ideal.mem_span_singleton, ← hw, sub_smul, ← h.choose_spec, sub_self]
+  rw [dite_eq_left h, Ideal.Quotient.eq, Ideal.mem_span_singleton, ← hw, sub_smul, ← h.choose_spec, sub_self]
 
 private theorem continuous_and_cocycle_eq_of_z1U_whole_group {O Γ W : Type} [CommRing O] [Group Γ] [TopologicalSpace Γ] [IsTopologicalGroup Γ]
     [AddCommGroup W] [Module O W] [TopologicalSpace W] [DiscreteTopology W] [IsTopologicalAddGroup W]
@@ -92,7 +139,7 @@ private theorem shaInj_norm {O Γ W : Type} [CommRing O] [Group Γ] [Topological
     have hz := continuous_and_cocycle_eq_of_z1U_whole_group α z
     refine ⟨?_, ?_, ?_, ((u⁻¹ : Oˣ) : O) • z.1 ⟨δ, trivial⟩, fun g => hL z g⟩
     · rw [IsLocallyConstant.iff_continuous]
-      exact hz.1.sub ((((hz.1.comp (continuous_mul_right δ)).sub hz.1).sub continuous_const).const_smul _)
+      exact hz.1.sub ((((hz.1.comp (continuous_mul_const δ)).sub hz.1).sub continuous_const).const_smul _)
     · intro g h
       rw [hL, hL, hL, hz.2 g h, map_mul, Units.val_mul, mul_smul, smul_sub, smul_sub]
       abel
@@ -246,7 +293,7 @@ private theorem shaInj_gen {O Γ H W X : Type} [CommRing O] [IsDomain O] [IsLoca
     intro u v hu hv y
     obtain ⟨yu, rfl⟩ := hgen u hu
     obtain ⟨yv, rfl⟩ := hgen v hv
-    rw [smul_smul, ← add_smul, hφ, hφ, hφ, map_add, map_mul]
+    rw [smul_smul, ← add_smul, hφ, hφ, hφ, map_add (f := _), map_mul]
   have hφinj : ∀ u : W, b • u = 0 → φ u = 0 → u = 0 := by
     intro u hu h
     obtain ⟨y, rfl⟩ := hgen u hu
@@ -264,7 +311,7 @@ private theorem shaInj_gen {O Γ H W X : Type} [CommRing O] [IsDomain O] [IsLoca
     funext g
     have e := hφadd _ _ (htor x g) (htor y g) 1
     rw [one_smul, map_one, one_mul] at e
-    simp only [Submodule.coe_add, map_add, Pi.add_apply]
+    simp only [Submodule.coe_add, map_add (f := _), Pi.add_apply]
     rw [e, shaInj_mat_add]
   · rw [injective_iff_map_eq_zero]
     intro x hx
@@ -334,7 +381,7 @@ private theorem shaInj_gen {O Γ H W X : Type} [CommRing O] [IsDomain O] [IsLoca
       rw [hm _ (MonoidHom.mem_range.mpr ⟨h, rfl⟩), hαΨ, smul_smul, ← sub_smul, hφ, map_sub, map_mul, map_neg]
       ring
 
-set_option maxHeartbeats 1000000 in
+
 theorem UpperTheory.V.U3.sha_inj_gen {Ω : Type} [Field Ω] [Algebra ℚ Ω] {l : ℕ} [Fact l.Prime] {O : Type} [CommRing O]
     [IsDomain O] [IsDiscreteValuationRing O] [Algebra ℤ_[l] O] [Module.Finite ℤ_[l] O] {H : Type} [Group H]
     [TopologicalSpace H] (e n : ℕ) (θ : G ℚ Ω →* Oˣ) (η : G ℚ Ω →* ℤˣ) (N : Set (G ℚ Ω)) (ι : H →* G ℚ Ω)

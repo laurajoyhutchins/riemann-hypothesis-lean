@@ -1,6 +1,47 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.PerRowC
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.FlagFramesSameGradedDefinitePartLatticeEq
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.PerRowC
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.FlagFramesSameGradedDefinitePartLatticeEq
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 open scoped Classical
@@ -62,7 +103,7 @@ theorem T_eq {K V : Type} [Field K] [StarRing K] [AddCommGroup V] [Module K V] {
   have hG : G.e (Fin.last r) = F.e (Fin.last r) + x := by rw [hxdef]; abel
   have h1 := G.zz
   rw [hG] at h1
-  simp only [map_add, LinearMap.add_apply, hxz, hzx, hxx, F.zz, add_zero] at h1
+  simp only [map_add (f := _), LinearMap.add_apply, hxz, hzx, hxx, F.zz, add_zero] at h1
   exact (neg_inj.1 h1).symm
 
 end GlobalTheory.TypeAsm.HasLabelling
@@ -93,7 +134,7 @@ theorem labC : LabC := by
       simp only [labT, if_pos hl]
       exact hnf l hl'
     unfold GlobalTheory.DegCnt.NF.nD
-    rw [dif_pos hl', hDl l hl', nloc_eq, hlab, norm_star, hd, frameExp_cast _ _ hl']
+    rw [dite_eq_left hl', hDl l hl', nloc_eq, hlab, norm_star, hd, frameExp_cast _ _ hl']
   refine ⟨hjT, ?_, ?_, ?_, ?_⟩
   · have hz : N.F.e (Fin.last D.R.rS) - (F0 X u).e (Fin.last D.R.rS) ∈ (F0 X u).X := hN.2.1 (Fin.last _)
     have h1 : ((N.T : ℕ) : D.host.E) = ((Tu D u : ℕ) : D.host.E) := by
@@ -127,10 +168,10 @@ theorem labC : LabC := by
     unfold GlobalTheory.DegAsm.lab
     by_cases hl : l ≤ jT t
     · have hl' : l ≤ D.R.rS + 1 := by omega
-      rw [dif_pos ⟨hl, hl'⟩]
+      rw [dite_eq_left ⟨hl, hl'⟩]
       simp only [labT, if_pos hl]
       rw [hnf l hl', star_star]
-    · rw [dif_neg (fun h => hl h.1)]
+    · rw [dite_eq_right (fun h => hl h.1)]
       simp only [labT, if_neg hl, star_zero]
 
 end GlobalTheory.TypeAsm

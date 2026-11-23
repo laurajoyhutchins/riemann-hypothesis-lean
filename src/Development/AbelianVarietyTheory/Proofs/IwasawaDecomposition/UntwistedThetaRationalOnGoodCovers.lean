@@ -1,11 +1,68 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.SeriesRatSOf
-import Development.AbelianVarietyTheory.BlockTheory.NonGaloisCusps.TwistSeries
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.ExistsUniqueHcharOfFiniteOrder
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.SerIntAtOfSeriesRat
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExtLinearIndependent
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsConjIdempotentSumOverLevelStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.CharacterQuotientValuesInEmbeddingFieldStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.SeriesRatSOf
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsCcIsEquivAtSerOfOneMapRowOfFive
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExtLinearIndependent
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CoreConstantsEqVacuumIdentityUpToPhaseStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsLettersHarmMemHHa
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.HarmonicMapExtremalVectorEqPhaseSmulLettersStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsRatConstMul
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.LowestWeightVectorsAtRows
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ReferenceTupleSecondSplittingCharacterStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.SerIntAtOfSeriesRat
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.UniformisedCoverIsDictionaryFrameCompatibleStatement
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.VacuumIdentityConstantsCoverOfDominantPinsStatement
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.CharacterQuotientValuesInEmbeddingFieldStatement
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsConjIdempotentSumOverLevelStatement
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsThetaFunOOfThetaAt
+import Development.AbelianVarietyTheory.Proofs.JetHarmonics.WeightExponentsEmbeddingsDegree
+import Formalism.LocalToGlobal.ProjectiveLattices.ModelAt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Development.AbelianVarietyTheory.BlockTheory.NonGaloisCusps.TwistSeries
+public import Development.AbelianVarietyTheory.Definitions.Divisors.MarkAd
+public import Development.AbelianVarietyTheory.Definitions.Divisors.OfCore
+public import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IMemSiegel
+public import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IsSystem
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.BaseIntSet
+
+@[expose] public section
 
 open NumberField Matrix Complex IsDedekindDomain
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.FD GlobalTheory GlobalTheory.ThFr GlobalTheory.Dict GlobalTheory.AdTh GlobalTheory.ClsVal
@@ -15,7 +72,7 @@ open Formalism.BasicNotions Formalism.MainNotions Formalism.BasicNotions.TH Form
 open GlobalTheory.SingleDatum GlobalTheory.CoverRead GlobalTheory.IndefiniteRowSideFullHecke.RationalRayLevels
 open scoped TensorProduct Classical
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
-set_option synthInstance.maxHeartbeats 400000
+
 open GlobalTheory.LevelSeries
 
 noncomputable section
@@ -27,7 +84,7 @@ theorem exists_of_mem_ratVec {D : D7} {G : Type} [Group G] [Fintype G] {Pl0 T0 :
     (R : RealDat D A Ks) (i : Fin D.R.m) {c0L : VsV D i D.what₂.LL →ₛₗ[D.what₂.embLL] (R.cV i).W}
     {c0 : VsV D i ℂ →ₗ[ℂ] (R.cV i).W} (hc : CoefficientBaseChange R i D.what₂.embLL (RingHom.id ℂ) c0L c0) (k : Subfield ℂ)
     {w : (R.cV i).W} (hw : w ∈ ratVec R i c0L k) :
-    ∃ v : VsV D i ℂ, (∀ m, MvPolynomial.coeff m (v : Formalism.L2.DIV.Pol ℂ D.what₂.Tau (Vc D i).rank) ∈ k) ∧ w = c0 v := by
+    ∃ v : VsV D i ℂ, (∀ m, AddMonoidAlgebra.coeff (v : Formalism.L2.DIV.Pol ℂ D.what₂.Tau (Vc D i).rank) m ∈ k) ∧ w = c0 v := by
   induction hw using Submodule.span_induction with
   | mem x hx =>
     obtain ⟨v, hv, rfl⟩ := hx
@@ -50,13 +107,15 @@ theorem sum_mem_ratForms {D : D7} {T : CoreJ D} {j : ℕ} {σ : T.Q.c.F →+* �
     ∑ k, β k • C.rd a (fs k) ∈ C.ratForms a n := by
   choose b hb using fun k => RingHom.mem_range.1 (hβ k)
   refine ⟨∑ k, b k • fs k, ⟨sum_mem fun k _ => (sec _ _ _ _).smul_mem _ (hf k).1, ?_⟩, ?_⟩
-  · rw [map_sum]
-    exact sum_mem fun k _ => by rw [map_smulₛₗ]; exact Submodule.smul_mem _ _ (hf k).2
-  · simp only [Cover.rd, map_sum, map_smulₛₗ, hb, Finset.smul_sum]
-    refine Finset.sum_congr rfl fun k _ => ?_
-    rw [RingHom.id_apply, smul_comm]
+  · set_option synthInstance.maxHeartbeats 100000 in
+      rw [map_sum]
+      exact sum_mem fun k _ => by rw [map_smulₛₗ]; exact Submodule.smul_mem _ _ (hf k).2
+  · set_option synthInstance.maxHeartbeats 100000 in
+      simp only [Cover.rd, map_sum, map_smulₛₗ, hb, Finset.smul_sum]
+      refine Finset.sum_congr rfl fun k _ => ?_
+      rw [RingHom.id_apply, smul_comm]
 
-set_option maxHeartbeats 2000000 in
+
 
 theorem untwRatS : UntwRatS := by
   intro D G _ _ Pl0 T0 A T _ R F κ v₀ hL hLev hG hFam hMod hTh hTie i hV hFP hstd gramR c0R c0L hFT u hu

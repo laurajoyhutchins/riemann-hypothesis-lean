@@ -1,8 +1,50 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Foundations.ValuedAlgebraMapEqOne
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.ValuedAlgebraMapEqOne
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
-open NumberField IsDedekindDomain
+open NumberField IsDedekindDomain GlobalTheory.Mem.Chr
 namespace GlobalTheory.Mem.Chr.Model
 variable (L : Type) [Field L] [NumberField L]
 
@@ -20,9 +62,6 @@ theorem localIdele_snd_ne (v w : HeightOneSpectrum (𝓞 L)) (h : w ≠ v) (x : 
     (x : v.adicCompletion L) w = 1
   exact Pi.mulSingle_eq_of_ne h _
 
-theorem localIdele_fst (v : HeightOneSpectrum (𝓞 L)) (x : (v.adicCompletion L)ˣ) :
-    ((localIdele L v x : Ideles L) : AdeleRing (𝓞 L) L).1 = 1 := rfl
-
 theorem infIdele_fst_self (w : InfinitePlace L) (x : (w.Completion)ˣ) :
     ((infIdele L w x : Ideles L) : AdeleRing (𝓞 L) L).1 w = x := by
   classical
@@ -34,40 +73,6 @@ theorem infIdele_fst_ne (w u : InfinitePlace L) (h : u ≠ w) (x : (w.Completion
   classical
   change Pi.mulSingle (M := fun u : InfinitePlace L => u.Completion) w (x : w.Completion) u = 1
   exact Pi.mulSingle_eq_of_ne h _
-
-theorem infIdele_snd (w : InfinitePlace L) (x : (w.Completion)ˣ) :
-    ((infIdele L w x : Ideles L) : AdeleRing (𝓞 L) L).2 = 1 := rfl
-
-theorem localIdele_injective (v : HeightOneSpectrum (𝓞 L)) : Function.Injective (localIdele L v) := by
-  intro x y hxy
-  apply Units.ext
-  have h := congrArg (fun z : Ideles L => (z : AdeleRing (𝓞 L) L).2 v) hxy
-  simpa only [localIdele_snd_self] using h
-
-theorem infIdele_injective (w : InfinitePlace L) : Function.Injective (infIdele L w) := by
-  intro x y hxy
-  apply Units.ext
-  have h := congrArg (fun z : Ideles L => (z : AdeleRing (𝓞 L) L).1 w) hxy
-  simpa only [infIdele_fst_self] using h
-
-theorem diagUnits_injective : Function.Injective (diagUnits L) := by
-  intro a b hab
-  apply Units.ext
-  apply NumberField.AdeleRing.algebraMap_injective (R := 𝓞 L) (K := L)
-  exact congrArg (fun z : Ideles L => (z : AdeleRing (𝓞 L) L)) hab
-
-theorem diagUnits_snd (v : HeightOneSpectrum (𝓞 L)) (a : Lˣ) :
-    ((diagUnits L a : Ideles L) : AdeleRing (𝓞 L) L).2 v = algebraMap L (v.adicCompletion L) a := rfl
-
-theorem infIdele_continuous (w : InfinitePlace L) : Continuous (infIdele L w) := by
-  classical
-  exact Continuous.units_map _ ((continuous_mulSingle w).prodMk continuous_const)
-
-example : IsTopologicalGroup (Ideles L) := inferInstance
-example : CommGroup (Ideles L) := inferInstance
-
-theorem diagUnits_fst (w : InfinitePlace L) (a : Lˣ) :
-    ((diagUnits L a : Ideles L) : AdeleRing (𝓞 L) L).1 w = algebraMap L w.Completion a := rfl
 
 theorem finSingle_continuous (v : HeightOneSpectrum (𝓞 L)) : Continuous (finSingle L v) := by
   classical
@@ -90,30 +95,5 @@ theorem finSingle_continuous (v : HeightOneSpectrum (𝓞 L)) : Continuous (finS
 
 theorem localIdele_continuous (v : HeightOneSpectrum (𝓞 L)) : Continuous (localIdele L v) := by
   exact Continuous.units_map _ (continuous_const.prodMk (finSingle_continuous L v))
-
-theorem diagUnits_eq_localIdele (v : HeightOneSpectrum (𝓞 L)) (a : Lˣ) (x : (v.adicCompletion L)ˣ)
-    (h : diagUnits L a = localIdele L v x) : a = 1 := by
-  obtain ⟨w⟩ := (inferInstance : Nonempty (InfinitePlace L))
-  have h1 := congrArg (fun z : Ideles L => (z : AdeleRing (𝓞 L) L).1 w) h
-  simp only [diagUnits_fst, localIdele_fst] at h1
-  apply Units.ext
-  apply (algebraMap L w.Completion).injective
-  rw [h1, Units.val_one, map_one]
-  rfl
-
-theorem localIdele_eq_infIdele (v : HeightOneSpectrum (𝓞 L)) (w : InfinitePlace L) (x : (v.adicCompletion L)ˣ)
-    (y : (w.Completion)ˣ) (h : localIdele L v x = infIdele L w y) : x = 1 ∧ y = 1 := by
-  have h1 := congrArg (fun z : Ideles L => (z : AdeleRing (𝓞 L) L).2 v) h
-  have h2 := congrArg (fun z : Ideles L => (z : AdeleRing (𝓞 L) L).1 w) h
-  simp only [localIdele_snd_self, infIdele_snd, localIdele_fst, infIdele_fst_self] at h1 h2
-  exact ⟨Units.ext (h1.trans rfl), Units.ext (h2.symm.trans rfl)⟩
-
-theorem diagUnits_neg_one_ne : diagUnits L (-1) ≠ 1 := by
-  intro h
-  have h1 : (-1 : Lˣ) = 1 := diagUnits_injective L (h.trans (map_one _).symm)
-  have h2 : ((-1 : Lˣ) : L) = ((1 : Lˣ) : L) := congrArg Units.val h1
-  simp only [Units.val_neg, Units.val_one] at h2
-  have h3 : (2 : L) = 0 := by linear_combination -h2
-  exact two_ne_zero h3
 
 end GlobalTheory.Mem.Chr.Model

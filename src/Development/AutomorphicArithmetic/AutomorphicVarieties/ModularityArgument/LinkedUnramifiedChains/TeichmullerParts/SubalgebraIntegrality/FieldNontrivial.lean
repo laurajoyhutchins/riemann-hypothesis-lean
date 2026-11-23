@@ -1,11 +1,48 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.LinkedUnramifiedChains.TeichmullerParts.HodgeTateFromSandwich
-import Development.AutomorphicArithmetic.AutomorphicVarieties.HeckeAlgebras.OrdinaryHeckeCharacters.HiComm
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.LinkedUnramifiedChains.TeichmullerParts.HodgeTateFromSandwich
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.LinkedUnramifiedChains.TeichmullerParts.UnramifiedTrivialInertialType
+import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.ExistsUniqueSpecializes
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.HeckeAlgebras.OrdinaryHeckeCharacters.HiComm
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.ExistsSemi
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
 import Mathlib.LinearAlgebra.Eigenspace.Pi
-import Mathlib.LinearAlgebra.Eigenspace.Triangularizable
-import Mathlib.RingTheory.Support
-import Mathlib.RingTheory.LocalRing.ResidueField.Ideal
-import Mathlib.RingTheory.Flat.FaithfullyFlat.Basic
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.ExistsSemi
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 open Polynomial TensorProduct
 
@@ -167,7 +204,7 @@ private theorem joint_ne [IsAlgClosed K] [Module.Finite A M] [Algebra A K] (hK :
   · intro b v
     induction v using TensorProduct.induction_on with
     | zero => simp
-    | add u v hu hv => simp only [map_add, hu, hv, smul_add]
+    | add u v hu hv => simp only [map_add (f := _), hu, hv, smul_add]
     | tmul k m =>
       rw [LinearMap.baseChange_tmul, TensorProduct.mapOfCompatibleSMul_tmul, TensorProduct.mapOfCompatibleSMul_tmul]
       exact (TensorProduct.tmul_smul b k m).trans (algebraMap_smul K b _).symm
@@ -195,7 +232,7 @@ private theorem joint_gen {I : Type} (g : I → B)
       obtain ⟨b1, rfl, m1⟩ := h1
       obtain ⟨b2, rfl, m2⟩ := h2
       refine ⟨b1 + b2, act_add lam M hs b1 b2, ?_⟩
-      rw [act_add, LinearMap.baseChange_add, map_add]
+      rw [act_add, LinearMap.baseChange_add, map_add (f := _)]
       exact ge_add (act_comm lam M hs b1 b2) m1 m2
     | mul _ _ _ _ h1 h2 =>
       obtain ⟨b1, rfl, m1⟩ := h1
@@ -235,7 +272,7 @@ private theorem mu_eq [IsAlgClosed K] [Module.Finite A M] [Module.Free A M] {I :
   have tr := transport ι Ψ hk hi _ hr (fun i => (actL lam M hs (g i)).baseChange K) γ (fun i v => by
     induction v using TensorProduct.induction_on with
     | zero => simp
-    | add u v hu hv => simp only [map_add, hu, hv]
+    | add u v hu hv => simp only [map_add (f := _), hu, hv]
     | tmul k m => rw [LinearMap.baseChange_tmul, ht, ht, map_smul, ← hop]; rfl) fun i => y (g i)
   subst hZ
   refine ⟨fun h0 => hne ?_, congrArg Cardinal.toNat tr⟩

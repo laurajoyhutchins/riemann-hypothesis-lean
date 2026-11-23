@@ -1,14 +1,51 @@
-import Mathlib
-import Formalism.LocalToGlobal.UnitaryNorms.CharTied
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.PlacesBelowSplitCoprimeConductorOfAdmissible
+module
+
+public import Formalism.LocalToGlobal.UnitaryNorms.CharTied
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.PlacesBelowSplitCoprimeConductorOfAdmissible
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
 open NumberField IsDedekindDomain ReciprocityTheory.Gal Formalism.ConjugateSelfDual Formalism.BasicNotions Formalism.MainNotions Formalism.FrobeniusOrbits Formalism.L2.Host GlobalTheory.CMVal GlobalTheory.ToricDenom
 
 namespace GlobalTheory.LamTie
-
-instance (priority := low) framePsiFintype (φ : Formalism.HC.Frame) : Fintype φ.Psi := Fintype.ofFinite _
 
 section Host
 
@@ -110,20 +147,6 @@ def IsLamTie0 (Z : LamDat D) : Prop :=
 end Record
 
 section Examples
-
-example {R : Ranks} (H : Formalism.BasicNotions.Host R) (g : R.Psi) (x : H.E) : phi H g x = (starRingEnd ℂ) (embPsi H g x) := rfl
-
-example {R : Ranks} (H : Formalism.BasicNotions.Host R) (w0 : HeightOneSpectrum (𝓞 H.E)) : (below w0).asIdeal ∣ cond0 H w0 := Dvd.intro_left _ rfl
-
-example {D : D7} (Z : LamDat D) (l : ℕ) (j a : Fin D.R.m) : Z.lam0 l j a * Z.chi a = Z.C.mu0 j * Z.C.delAt l :=
-  inv_mul_cancel_right _ _
-
-example {D : D7} (Z : LamDat D) (hZ : Z.Ok) (j a : Fin D.R.m) (s : ℕ) (hs : s ≤ BlochKatoReduction.Gen.NFun D.R + 1) (g : D.R.Psi) :
-    (Z.kap j a s g : ℤ) = ⌊eExp D j g⌋ + Z.c a g - s := by
-  have h := hZ.big j a g
-  have h1 : ((BlochKatoReduction.Gen.NFun D.R : ℤ) + 1 - Z.c a g) ≤ ⌊eExp D j g⌋ := Int.le_floor.2 (by push_cast; linarith)
-  have h2 : (s : ℤ) ≤ (BlochKatoReduction.Gen.NFun D.R : ℤ) + 1 := by exact_mod_cast hs
-  exact Int.toNat_of_nonneg (by omega)
 
 end Examples
 

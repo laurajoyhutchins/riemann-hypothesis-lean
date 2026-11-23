@@ -1,7 +1,63 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.WeilDeligneParamMonodromyEqZeroIff
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.TeichmullerInertiaLabelCondition
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsEquivOfMapEq
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.WeilDeligneParamMonodromyEqZeroIff
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.TeichmullerInertiaLabelCondition
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsTameGenAtOfValuationSubring
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.FixedOfPowFixed
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ValuationApplyOfWild
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.FieldTheory.Galois.Profinite
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Eigenspace.Minpoly
+public import Mathlib.LinearAlgebra.Matrix.Charpoly.Eigs
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Algebra.ClopenNhdofOne
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.MetricSpace.Ultra.TotallySeparated
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -48,7 +104,7 @@ theorem exists_exp_eq {R : Type*} [Ring R] [Algebra ℚ R] {u : R} (hu : IsNilpo
   obtain ⟨y, hy, e⟩ := exists_exp_eq_comm k (AdjoinRoot.root (X ^ (k + 1) : ℚ[X])) (by
     rw [← AdjoinRoot.mk_X, ← map_pow, AdjoinRoot.mk_self])
   refine ⟨f y, hy.map f, ?_⟩
-  rw [← map_exp hy f, e, map_add, map_one, hf, add_sub_cancel]
+  rw [← map_exp hy f, e, map_add (f := _), map_one, hf, add_sub_cancel]
 
 theorem exists_pow_unipotent {K n : Type*} [Field K] [IsAlgClosed K] [Fintype n] [DecidableEq n]
     {P M : GL n K} {q : ℕ} (hq : 1 < q) (hPM : P * M * P⁻¹ = M ^ q) :
@@ -101,8 +157,8 @@ section Small
 
 variable {K n : Type*} [NormedField K] [IsUltrametricDist K] [Fintype n] [DecidableEq n]
 
-omit [DecidableEq n] in
 
+omit [DecidableEq n] in
 theorem norm_mul_apply_le {X Y : Matrix n n K} {a b : ℝ} (ha : 0 ≤ a) (hb : 0 ≤ b)
     (hX : ∀ i j, ‖X i j‖ ≤ a) (hY : ∀ i j, ‖Y i j‖ ≤ b) (i j : n) : ‖(X * Y) i j‖ ≤ a * b := by
   rw [Matrix.mul_apply]
@@ -270,8 +326,8 @@ theorem exists_open_normal {V : Set (G E Ω)} (hV : V ∈ nhds 1) :
 
 variable {r : G E Ω →* GL n (Qbar l)}
 
-omit [NumberField E] [IsAlgClosure E Ω] in
 
+omit [NumberField E] [IsAlgClosure E Ω] in
 theorem near_mem_nhds (hr : Continuous fun g => (r g : Matrix n n (Qbar l))) {ε : ℝ} (hε : 0 < ε) :
     {g | ∀ i j, ‖((r g : Matrix n n (Qbar l)) - 1) i j‖ < ε} ∈ nhds (1 : G E Ω) := by
   refine IsOpen.mem_nhds ?_ (by simpa using fun _ _ => hε)
@@ -372,35 +428,35 @@ section Laws
 variable (hl : ((l : ℕ) : 𝓞 E) ∉ w.asIdeal) (ι : Qbar l ≃+* ℂ)
   (hr : Continuous fun g => (r g : Matrix n n (Qbar l)))
 
-include hl hr in
 
+include hl hr in
 theorem isWDOf_wdOf : IsWDOf ι r (wdOf h hl ι r) := by
   obtain ⟨x, hx⟩ := (exists_isWDOf_iff (h := h) (ι := ι) hl (isTameChar_tameL h hl)).mpr
     (exists_isMonodromy h hl (isTameChar_tameL h hl) hr)
   rwa [hx.wdOf_eq hl]
 
-include hr in
 
+include hr in
 theorem unr_wdOf_iff : (wdOf h hl ι r).unr ↔ ∀ σ ∈ Ine (F := E) A, r σ = 1 :=
   (exists_isMonodromy h hl (isTameChar_tameL h hl) hr).choose_spec.unr_wdOf_iff hl
     (isTameChar_tameL h hl) ι
 
-include hr in
 
+include hr in
 theorem charPol_wdOf (g : Weil h) :
     (wdOf h hl ι r).charPol g = (r g : Matrix n n (Qbar l)).charpoly.map ι.toRingHom :=
   (exists_isMonodromy h hl (isTameChar_tameL h hl) hr).choose_spec.charPol_wdOf hl
     (isTameChar_tameL h hl) ι g
 
-include hr in
 
+include hr in
 theorem inePol_wdOf {σ : G E Ω} (hσ : σ ∈ Ine (F := E) A) :
     (r σ : Matrix n n (Qbar l)).charpoly.map ι.toRingHom = (wdOf h hl ι r).inePol σ := by
   rw [WD.inePol_of_mem_Ine _ hσ, charPol_wdOf hl ι hr, coe_ineIncl]
 
+
 open Pointwise in
 omit [IsAlgClosure E Ω] in
-
 theorem MonodromyThm.isFrob_conj {q : ℕ} {g σ : G E Ω} (hσ : IsFrob (g • A) q σ) :
     IsFrob A q (g⁻¹ * σ * g) := by
   have hm : ∀ x, g x ∈ g • A ↔ x ∈ A := fun x => ValuationSubring.smul_mem_pointwise_smul_iff
@@ -415,8 +471,8 @@ theorem MonodromyThm.isFrob_conj {q : ℕ} {g σ : G E Ω} (hσ : IsFrob (g • 
     rwa [e, valuation_lt_one_iff', ← map_inv₀, hm, hm, map_eq_zero_iff _ g.injective,
       ← valuation_lt_one_iff'] at h1
 
-include hr in
 
+include hr in
 theorem frobEig_wdOf (hu : (wdOf h hl ι r).unr) {B : ValuationSubring Ω} {σ : G E Ω}
     (hB : IsPlaceOver B w) (hσ : IsFrob B (normV w) σ) :
     (r σ : Matrix n n (Qbar l)).charpoly.map ι.toRingHom =
@@ -430,8 +486,8 @@ theorem frobEig_wdOf (hu : (wdOf h hl ι r).unr) {B : ValuationSubring Ω} {σ :
   rw [map_mul, Units.val_mul, Matrix.charpoly_mul_comm, ← Units.val_mul, ← map_mul,
     mul_inv_cancel_left]
 
-include hr in
 
+include hr in
 theorem weilDeligneParam_monodromy_eq_zero_iff :
     (wdOf h hl ι r).mono0 ↔ (r '' (Ine (F := E) A : Set (G E Ω))).Finite := by
   have ht := isTameChar_tameL h hl
@@ -453,8 +509,8 @@ theorem weilDeligneParam_monodromy_eq_zero_iff :
 
 end Laws
 
-variable (h) in
 
+variable (h) in
 theorem wdOf_laws (hl : ((l : ℕ) : 𝓞 E) ∉ w.asIdeal) (ι : Qbar l ≃+* ℂ) {a : ℕ}
     (r : G E Ω →* GL (Fin a) (Qbar l)) :
     (wdOf h hl ι r).lpDim = a ∧

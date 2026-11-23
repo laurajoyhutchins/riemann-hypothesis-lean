@@ -1,5 +1,48 @@
-import Mathlib
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.SmoothRepresentationsGL.ExistsCombComb
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.SmoothRepresentationsGL.ExistsCombComb
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -84,7 +127,7 @@ private theorem img_nhds (U : OpenSubgroup (GL (Fin n) K)) :
   have hcs : @CompleteSpace (Matrix (Fin n) (Fin n) K) I.toMetricSpace.toPseudoMetricSpace.toUniformSpace :=
     inferInstanceAs (CompleteSpace (Fin n → Fin n → K))
   have h := (@Units.isOpenMap_val (Matrix (Fin n) (Fin n) K) I
-    (@instHasSummableGeomSeriesOfCompleteSpace _ I hcs)) _ U.isOpen
+    (@instHasSummableGeomSeriesOfCompleteSpace _ (@NormedRing.toNonUnitalNormedRing _ I) hcs)) _ U.isOpen
   exact h.mem_nhds ⟨1, U.one_mem, rfl⟩
 
 private theorem col_nhds (m : Fin n) (U : OpenSubgroup (GL (Fin n) K)) :
@@ -153,8 +196,9 @@ private theorem step_gen (hA : AvgChar) (ψ : AddChar K ℂ) (hψ : ∀ᶠ x in 
   have hLc : IsCompact (L : Set (Fin n → K)) := isCompact_univ_pi fun _ => hc
   let N : Set (Fin n → K) := {u | u ∈ L ∧ (∃ s ∈ U, s.val = colM m u) ∧ ψ (u m) = 1}
   have hN : N ∈ 𝓝 (0 : Fin n → K) := by
-    refine Filter.inter_mem (hLo.mem_nhds L.zero_mem) (Filter.inter_mem (col_nhds m U) ?_)
-    exact (continuous_apply m).continuousAt (x := (0 : Fin n → K)) hψ
+    have hψm : ∀ᶠ u in 𝓝 (0 : Fin n → K), ψ (u m) = 1 :=
+      (continuous_apply m).continuousAt (x := (0 : Fin n → K)) hψ
+    exact Filter.inter_mem (hLo.mem_nhds L.zero_mem) (Filter.inter_mem (col_nhds m U) hψm)
   let L₀ := AddSubgroup.closure N
   have hle : L₀ ≤ L := (AddSubgroup.closure_le _).2 fun u hu => hu.1
   have hL₀ : IsOpen (L₀ : Set (Fin n → K)) :=

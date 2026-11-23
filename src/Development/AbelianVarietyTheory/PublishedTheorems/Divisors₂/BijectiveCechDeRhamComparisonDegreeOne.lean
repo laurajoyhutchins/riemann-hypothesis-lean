@@ -1,6 +1,45 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.ComparisonMemCechHodgeFiltration
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.ExistsCrystalPairing
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.ComparisonMemCechHodgeFiltration
+public import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.ExistsCrystalPairing
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -71,39 +110,6 @@ def Data.self {R : Type} [CommRing R] {X : Scheme.{0}} (s : X ⟶ Sp R) (hs : Sm
   Data.ofQuot (dp0 R) (isDPNilpotent_bot R) (RingHom.id R) Function.surjective_id
     ((RingHom.injective_iff_ker_eq_bot _).1 fun _ _ h ↦ h) s s (𝟙 X) hs hs' hs''
     (by rw [Cris.spMap_id]; exact IsPullback.id_horiz s) s (by rw [Cris.spMap_id, Category.comp_id])
-
-def Data.sqLine {R : Type} [CommRing R] {I : Ideal R} (h : I ^ 2 = 0) : Data :=
-  Data.ofQuot (divided₂ h) (isDPNilpotent_squareZero h) (Ideal.Quotient.mk I) Ideal.Quotient.mk_surjective Ideal.mk_ker
-    (lineStr R) _ _ (by
-      rw [HasRingHomProperty.Spec_iff (P := @Smooth)]
-      have : Algebra.Smooth R (Polynomial R) := ⟨inferInstance, inferInstance⟩
-      exact RingHom.smooth_algebraMap.2 this) inferInstance inferInstance
-    (IsPullback.of_hasPullback _ _) _ rfl
-
-def Data.lineModFour : Data :=
-  Data.sqLine (R := ZMod 4) (I := Ideal.span {2}) (by
-    rw [Ideal.span_singleton_pow, Ideal.zero_eq_bot, Ideal.span_singleton_eq_bot]; decide)
-
-theorem Data.lineModFour_ideal : Data.lineModFour.I ≠ ⊥ ∧ Data.lineModFour.I ≠ ⊤ := by
-  change Ideal.span {(2 : ZMod 4)} ≠ ⊥ ∧ Ideal.span {(2 : ZMod 4)} ≠ ⊤
-  rw [Ne, Ne, Ideal.span_singleton_eq_bot, Ideal.span_singleton_eq_top]
-  decide
-
-theorem Data.lineModFour_nontrivial : Nontrivial (HH1 Data.lineModFour.s) := by
-  change Nontrivial (HH1 (lineStr (ZMod 4)))
-  refine ⟨⟨lineEquiv _ (Submodule.Quotient.mk ((Polynomial.X : Polynomial (ZMod 4)) •
-    KaehlerDifferential.D (ZMod 4) (Polynomial (ZMod 4)) Polynomial.X)), 0, ?_⟩⟩
-  rw [Ne, LinearEquiv.map_eq_zero_iff, Submodule.Quotient.mk_eq_zero]
-  rintro ⟨p, hp⟩
-  have f3 := congrArg (KaehlerDifferential.polynomialEquiv (ZMod 4)) hp
-  simp only [Derivation.coeFn_coe, map_smul, KaehlerDifferential.polynomialEquiv_D, Polynomial.derivative_X,
-    smul_eq_mul, mul_one] at f3
-  have := congrArg (Polynomial.coeff · 1) f3
-  simp only [Polynomial.coeff_derivative, Polynomial.coeff_X_one] at this
-  revert this
-  generalize p.coeff (1 + 1) = a
-  revert a
-  decide
 
 def affDiag (X : Scheme.{0}) : AffOp X ⥤ (Pair (𝟙 X))ᵒᵖ :=
   (Monotone.functor (f := fun U : X.affineOpens ↦ (⟨(U, U), le_rfl⟩ : Pair (𝟙 X))) fun _ _ h ↦

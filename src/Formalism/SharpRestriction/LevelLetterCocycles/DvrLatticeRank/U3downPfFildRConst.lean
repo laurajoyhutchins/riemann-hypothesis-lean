@@ -1,7 +1,53 @@
-import Formalism.SharpRestriction.LevelLetterCocycles.UpPositionHypothesis
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.DownSlotProposition
+public import Formalism.SharpRestriction.LevelLetterCocycles.DvrLatticeRank.FramePfPt
+public import Formalism.SharpRestriction.LevelLetterCocycles.DvrLatticeRank.U3upPfFilCAnti
+import Formalism.SharpRestriction.LevelLetterCocycles.FrobeniusPowUniformizerFactorisation
+import Formalism.SharpRestriction.LevelLetterCocycles.MapCompZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.Interval.Finset.Box
+import Mathlib.RingTheory.PowerSeries.Inverse
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
 import Formalism.SharpRestriction.LevelLetterCocycles.DvrLatticeRank.UnivLinkPfA
-import Formalism.SharpRestriction.LevelLetterCocycles.DvrLatticeRank.U3upPfFilCAnti
-import Formalism.SharpRestriction.LevelLetterCocycles.DvrLatticeRank.FramePfPt
+
+@[expose] public section
 
 noncomputable section
 
@@ -35,7 +81,7 @@ theorem u3downPf_series {LL : Type} [Field LL] (e e₁ P G A : PowerSeries LL) (
     · subst hk; simp
     · simp
   have hresc : rescale u A = C x₀ * rescale u (e ^ h) + X ^ (h + m) * (C (u ^ (h + m)) * rescale u D₁) := by
-    rw [hA', map_add, map_mul, map_mul, hRC, map_pow (rescale u) X (h + m), rescale_X, mul_pow]
+    rw [hA', map_add (f := _), map_mul, map_mul, hRC, map_pow (rescale u) X (h + m), rescale_X, mul_pow]
     simp only [map_pow]; ring
   have key : X ^ h * (C (u ^ h) * (rescale u e₁) ^ h * P * G) =
       X ^ h * (X ^ (h + m) * (e₁ ^ h * C (u ^ (h + m)) * rescale u D₁ - C (u ^ h) * (rescale u e₁) ^ h * D₁)) := by
@@ -241,7 +287,7 @@ theorem u3downPf_cc_π (c : ZMod n) (ζ : LL) (hζ : IsPrimitiveRoot ζ PD.p) :
   obtain ⟨E, hE0, -, hE⟩ := W.lev_π c ζ ⟨1, by simpa using hζ⟩
   have hζ1 : ζ ≠ 1 := hζ.ne_one PD.hp.one_lt
   have := congrArg PowerSeries.constantCoeff hE
-  rw [map_add, map_one, map_mul, PowerSeries.constantCoeff_C, hE0, mul_one] at this
+  rw [map_add (f := _), map_one, map_mul, PowerSeries.constantCoeff_C, hE0, mul_one] at this
   intro h0
   rw [h0, add_zero] at this
   exact hζ1 this.symm

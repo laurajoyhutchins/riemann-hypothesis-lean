@@ -1,8 +1,48 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.TraceFormula.GlobalTraceComparison.AutomorphicRepresentations.EvalBasis
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.ThetaCellCovers.KernelDiagonalIntegrableHolds
-import Development.DiscreteGroups.PiInvariants.CompactSupportTwists.PiInvTop
-import Development.DiscreteGroups.PiInvariants.CompactSupportTwists.PiVecExHolds
-import Development.DiscreteGroups.PiInvariants.CompactSupportTwists.PiSeenA
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.TraceFormula.GlobalTraceComparison.AutomorphicRepresentations.EvalBasis
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.T2SpaceAdelicGeneralLinearGroupNumberField
+public import Development.DiscreteGroups.PiInvariants.CompactSupportTwists.TsumEnormEq
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.ThetaCellCovers.AdmissibleLeHolds
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.ThetaCellCovers.KernelRowsColumnsSquareIntegrable
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 open UpperTheory.V.Z.Tf.GlobalTraceComparison.Pi DiscreteGroups.T1.G
 open NumberField IsDedekindDomain Matrix MeasureTheory
@@ -29,7 +69,34 @@ theorem UpperTheory.V.Z.Tf.GlobalTraceComparison.Pi.finGen_pf :
   refine ⟨⨆ p : ι × ι, W p.1 p.2, iSup_le fun p => hWle _ _, hfd, ?_⟩
   intro v hv i t
   choose ψ hψ u hu hu' hvu using hv
-  let X := PositivityTheory.Rg.BcB.E1.ctx PositivityTheory.Rg.BcB.E1.ratProper_holds s.D
+  let X : Ctx := by
+    haveI := CuspidalL2GL.t2Space_GA E n
+    haveI := CuspidalL2GL.t2Space_GA E 0
+    haveI := CuspidalL2GL.locallyCompactSpace_GA E n
+    haveI := CuspidalL2GL.locallyCompactSpace_GA E 0
+    haveI := CuspidalL2GL.secondCountableTopology_GA E n
+    haveI := CuspidalL2GL.secondCountableTopology_GA E 0
+    haveI := (ratProper_holds E n).2.1
+    haveI := (ratProper_holds E 0).2.1
+    exact { G := H E n 0
+            ms := borelH E n 0
+            bs := ⟨rfl⟩
+            μ := s.D.μ
+            haar := { toIsFiniteMeasureOnCompacts :=
+                        @isFiniteMeasureOnCompacts_of_isLocallyFiniteMeasure _ _ _ s.D.μ s.D.haar.2.2.2
+                      toIsMulLeftInvariant := s.D.haar.1
+                      toIsOpenPosMeasure := s.D.haar.2.2.1 }
+            Γ := ratH E n 0
+            cn := (((ratGL E n).prodMap (ratGL E 0)).rangeRestrict_surjective).countable
+            proper := by
+              intro C hC
+              have h1 := (ratProper_holds E n).2.2 _ (hC.image continuous_fst)
+              have h2 := (ratProper_holds E 0).2.2 _ (hC.image continuous_snd)
+              refine ((h1.prod h2).image ((ratGL E n).prodMap (ratGL E 0)).rangeRestrict).subset ?_
+              rintro ⟨_, γ, rfl⟩ hγ
+              exact ⟨γ, ⟨⟨_, hγ, rfl⟩, ⟨_, hγ, rfl⟩⟩, rfl⟩
+            F := s.D.F
+            fd := s.D.fd }
   have hform : ∀ j, ∀ (γ : ratH E n 0) (y : H E n 0), (ψ j).1 ((γ : H E n 0) * y).1 = (ψ j).1 y.1 := by
     intro j γ y
     obtain ⟨⟨γ₁, γ₂⟩, hγ⟩ := γ.2

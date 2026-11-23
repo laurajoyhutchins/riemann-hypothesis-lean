@@ -1,13 +1,59 @@
-import CompanionTheory.AutomorphicTheory.RankOneEstimates.DecSender
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.MultiplicityOne.ThmMOfXi
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.MultiplicityOne.FrameBlockWMem
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.MultiplicityOne.JDiagExists
-import CompanionTheory.AutomorphicTheory.PieriRules.PieriDegreeBounds.IsHaarOnIffGroupsUnitaryUnipotentImports
-import CompanionTheory.AutomorphicTheory.PieriRules.PieriDegreeBounds.BesselSubgroupParameterMeasurePreservingImports
-import CompanionTheory.AutomorphicTheory.PieriRules.PieriDegreeBounds.BesselCharacterUnipotentRadicalPropertiesImports
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.EqSmulOfTwoSided
-import CompanionTheory.AutomorphicTheory.PieriRules.PieriDegreeBounds.DiscreteSeriesUnitarySmoothBasicImports
+module
+
+public import Formalism.HermitianCurvature.BesselNonvanishingReduction
+public import CompanionTheory.AutomorphicTheory.RankOneEstimates.DecSender
+import CompanionTheory.HarishChandraModules.KFiniteAnalyticVectors.AdmissibleSmoothVectors.AdmissibleOfIwasawa
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.BesselCharacterUnipotentRadicalPropertiesStatement
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.BesselSubgroupParameterMeasurePreservingStatement
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.DiscreteSeriesUnitarySmoothBasicStatement
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.EqSmulOfTwoSided
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.IsHaarOnIffGroupsUnitaryUnipotentStatement
 import Formalism.HermitianCurvature.HermitianCurvatureProofs.ContinuousMulMt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.MultiplicityOne.FrameBlockWMem
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.MultiplicityOne.InHolds
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.MultiplicityOne.JBeConv
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.MultiplicityOne.JDiagExists
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.MultiplicityOne.ThmMOfXi
+
+@[expose] public section
 
 open Matrix MeasureTheory Formalism.FourierDecayAlt Formalism.FourierDecayAlt.ThreeDimData Formalism.QuantumDeterminants ReciprocityTheory.ChartRestriction.DS ReciprocityTheory.ChartRestriction.DS.Mult1
 open scoped InnerProductSpace ENNReal
@@ -17,17 +63,23 @@ noncomputable section
 namespace CompanionTheory.FamilyDerivativeExpansion.M1
 
 lemma haar_smul {k r : ℕ} {U : Set (B.Mat k r)} {μ : Measure (Mt k r)} (h : B.IsHaarOn U μ) {c : ℝ≥0∞} (h0 : c ≠ 0)
-    (h1 : c ≠ ⊤) : B.IsHaarOn U (c • μ) where
-  conc := by rw [Measure.smul_apply, h.conc, smul_zero]
-  left := fun a ha => by rw [Measure.map_smul, h.left a ha]
-  right := fun a ha => by rw [Measure.map_smul, h.right a ha]
-  finite_compact := fun K hK => by
-    rw [Measure.smul_apply, smul_eq_mul]
+    (h1 : c ≠ ⊤) : B.IsHaarOn U (c • μ) := by
+  refine ⟨?_, ?_, ?_, ?_, ?_⟩
+  · rw [smul_apply, h.conc, smul_zero]
+  · intro a ha
+    have hm : Continuous (lmulM a : Mt k r → Mt k r) :=
+      continuous_const.matrix_mul continuous_id
+    rw [Measure.map_smul c hm.measurable.aemeasurable, h.left a ha]
+  · intro a ha
+    have hm : Continuous (B.rmulF a : Mt k r → Mt k r) :=
+      continuous_id.matrix_mul continuous_const
+    rw [Measure.map_smul c hm.measurable.aemeasurable, h.right a ha]
+  · intro K hK
+    rw [smul_apply, smul_eq_mul]
     exact ENNReal.mul_lt_top h1.lt_top (h.finite_compact K hK)
-  ne_zero := fun e => h.ne_zero (by
-    have := congrArg (fun m : Measure (Mt k r) => m Set.univ) e
-    simp only [Measure.smul_apply, smul_eq_mul, Measure.coe_zero, Pi.zero_apply, mul_eq_zero] at this
-    exact Measure.measure_univ_eq_zero.1 (this.resolve_left h0))
+  · intro e
+    have he : c * μ Set.univ = 0 := congrArg (fun m : Measure (Mt k r) => m Set.univ) e
+    exact h.ne_zero (Measure.measure_univ_eq_zero.1 ((mul_eq_zero.1 he).resolve_left h0))
 
 theorem be_rank_one {k r : ℕ} (hk : 1 ≤ k) {ε : Fin (2 * r + k + 1) → Bool} {lam : Fin (2 * r + k + 1) → ℝ} {h : ℝ}
     {H : Type} [NormedAddCommGroup H] [InnerProductSpace ℂ H] [CompleteSpace H] {σ : Mx k r → (H →L[ℂ] H)}
@@ -55,7 +107,7 @@ theorem be_rank_one {k r : ℕ} (hk : 1 ≤ k) {ε : Fin (2 * r + k + 1) → Boo
       haarN := (GlobalTheory.T.isHaarOn_iff_groups_unitary_unipotent k r μN).2.1.1 hN }
   have hD : IsDiag D := ⟨hD0.z_eq, hD0.π_eq, rfl, by
     show ((μW Set.univ)⁻¹ • μW) Set.univ = 1
-    rw [Measure.smul_apply, smul_eq_mul, ENNReal.inv_mul_cancel hm0 hm1], hD0.irr⟩
+    rw [smul_apply, smul_eq_mul, ENNReal.inv_mul_cancel hm0 hm1], hD0.irr⟩
   obtain ⟨hU, hsq⟩ := TopTA.sqInt_of_DSHpk (σ := σ) hσ D.haarG
   have hm : thrStar ε + ((4 * (2 * r + k + 1) ^ 3 : ℕ) : ℝ) < h := by
     have := DecS.thr_le (n := 2 * r + k + 1) (by omega) ε
@@ -79,7 +131,7 @@ theorem be_rank_one {k r : ℕ} (hk : 1 ≤ k) {ε : Fin (2 * r + k + 1) → Boo
   obtain ⟨-, -, hT4, -, -, hae⟩ := hmp
   have hψ := GlobalTheory.T.besselCharacter_unipotentRadical_properties k r D.z cStd hz
   have e : μW.prod μN = μW Set.univ • D.μW.prod μN := by
-    haveI := hN.1
+    have := hN.1
     show _ = μW Set.univ • ((μW Set.univ)⁻¹ • μW).prod μN
     rw [Measure.prod_smul_left, smul_smul, ENNReal.mul_inv_cancel hm0 hm1, one_smul]
   refine ⟨fun w => ((√(μW Set.univ).toReal : ℝ) : ℂ) • l w, fun w hw v hv => ?_⟩
@@ -117,7 +169,7 @@ theorem be_rank_one {k r : ℕ} (hk : 1 ≤ k) {ε : Fin (2 * r + k + 1) → Boo
   ext ξ
   have hs : ((√(μW Set.univ).toReal : ℝ) : ℂ) * ((√(μW Set.univ).toReal : ℝ) : ℂ) = ((μW Set.univ).toReal : ℂ) := by
     rw [← Complex.ofReal_mul, Real.mul_self_sqrt ENNReal.toReal_nonneg]
-  simp only [rk1, ContinuousLinearMap.smul_apply, ContinuousLinearMap.smulRight_apply, innerSL_apply_apply,
+  simp only [rk1, smul_apply, ContinuousLinearMap.smulRight_apply, innerSL_apply_apply,
     inner_smul_left, Complex.conj_ofReal, smul_smul]
   rw [← Complex.coe_smul, smul_smul, ← hs]
   congr 1

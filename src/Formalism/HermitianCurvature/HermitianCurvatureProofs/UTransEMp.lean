@@ -1,5 +1,51 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.LowerCoordinateProd
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.MulVecBvecApply
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.StrictUpperNeg
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.LowerParabolicCoordinates
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.SubMulRight
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.Countable
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Matrix MeasureTheory Formalism.REAL Formalism.QuantumDeterminants Formalism.FourierDecayAlt Formalism.FourierDecayAlt.U
 
@@ -49,10 +95,10 @@ theorem ut_of_mem {A : Matrix (Fin r) (Fin r) ℂ} (hA : A ∈ C2.UTset r) : G.u
   ext i j
   simp only [G.upper, G.strictUpper, StabilizerDisintegration.utc, Matrix.add_apply, Matrix.of_apply, Matrix.one_apply]
   rcases lt_trichotomy i j with h | h | h
-  · rw [if_neg (ne_of_lt h), dif_pos h, zero_add]
+  · rw [if_neg (ne_of_lt h), dite_eq_left h, zero_add]
   · subst h
-    rw [if_pos rfl, dif_neg (lt_irrefl _), add_zero, hA.2 i]
-  · rw [if_neg (ne_of_gt h), dif_neg (not_lt.2 h.le), add_zero, hA.1 i j h]
+    rw [if_pos rfl, dite_eq_right (lt_irrefl _), add_zero, hA.2 i]
+  · rw [if_neg (ne_of_gt h), dite_eq_right (not_lt.2 h.le), add_zero, hA.1 i j h]
 
 theorem ut_inv_mem {A : Matrix (Fin r) (Fin r) ℂ} (hA : A ∈ C2.UTset r) : A⁻¹ ∈ C2.UTset r := by
   have hT : Matrix.BlockTriangular A id := fun i j hij => hA.1 i j hij
@@ -94,14 +140,14 @@ def uTransE (A : X → Matrix (Fin r) (Fin r) ℂ) (hA : ∀ x, A x ∈ C2.UTset
         Matrix.nonsing_inv_mul _ (ut_det (hA p.1)), Matrix.one_mul, StabilizerDisintegration.UC.utc_upper]
   measurable_toFun := by
     refine measurable_fst.prodMk ?_
-    refine measurable_pi_lambda _ fun q => ?_
+    refine Measurable.of_eval fun q => ?_
     simp only [StabilizerDisintegration.utc, Matrix.mul_apply]
     refine Finset.measurable_sum _ fun c _ => Measurable.mul ?_ ?_
     · exact (hAi _ _).comp measurable_fst
     · exact ((StabilizerDisintegration.UC.cont_upper.matrix_elem _ _).measurable).comp measurable_snd
   measurable_invFun := by
     refine measurable_fst.prodMk ?_
-    refine measurable_pi_lambda _ fun q => ?_
+    refine Measurable.of_eval fun q => ?_
     simp only [StabilizerDisintegration.utc, Matrix.mul_apply]
     refine Finset.measurable_sum _ fun c _ => Measurable.mul ?_ ?_
     · exact (hAc _ _).comp measurable_fst

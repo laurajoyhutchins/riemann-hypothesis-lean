@@ -1,7 +1,49 @@
-import Mathlib
-import Formalism.LocalToGlobal.Divisibility.DefGroup
-import Formalism.LocalToGlobal.Divisibility.GoodPartHermitianSpec
-import Development.AbelianVarietyTheory.Definitions.Divisors.SplitDoublingNBlock
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.SplitDoublingNBlock
+public import Mathlib.RepresentationTheory.Character
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.FreeModule.IdealQuotient
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -11,16 +53,16 @@ open Formalism.L2.DIV NumberField
 
 variable {E : Type} [Field E] [NumberField E]
 
+
 open NumberField in
 variable {E : Type} [Field E] [NumberField E] in
-
 theorem _root_.GlobalTheory.IndefiniteRowSideFullHecke.CuspidalProductMultiplicity.finite_kP (PP : _root_.Formalism.L2.DIV.Pl E) : Finite (_root_.Formalism.L2.DIV.kP PP) := by
   unfold _root_.Formalism.L2.DIV.kP
   exact Ideal.finiteQuotientOfFreeOfNeBot PP.asIdeal PP.ne_bot
 
+
 open NumberField in
 variable {E : Type} [Field E] [NumberField E] in
-
 theorem _root_.GlobalTheory.IndefiniteRowSideFullHecke.CuspidalProductMultiplicity.finite_boundedLevelClassGroupFamily (Pg : Finset (_root_.Formalism.L2.DIV.Pl E)) (r : ℕ) :
     Finite (_root_.Formalism.L2.DIV.G0 Pg r) := by
   haveI : ∀ PP : ↥Pg, Finite (_root_.Formalism.L2.DIV.kP PP.1) := fun PP =>
@@ -55,9 +97,6 @@ def MultSharp : Prop :=
     ∀ χ : G0 Pg r → K, IsProdCuspChar s Pg r χ →
       MultNear (PsharpSym Pg r ρ k ψ) χ (nbar Pg k) (8 * f * r / g) ∧
         MultNear (Psharp Pg r k ψ) χ (nbar Pg k) (8 * f * r / g)
-
-example {κ : Type} [Field κ] [Finite κ] {r d : ℕ} (b : Fin r → ℕ) (σ : Representation ℂ (blockTri (κ := κ) b) (Fin d → ℂ)) :
-    Module.Finite ℂ (Representation.coindV (blockTri (κ := κ) b).subtype σ) := inferInstance
 
 open NumberField in
 variable {E : Type} [Field E] [NumberField E] in

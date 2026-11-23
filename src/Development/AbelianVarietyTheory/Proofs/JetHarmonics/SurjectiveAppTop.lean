@@ -1,11 +1,62 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Jets.ColValMonomial
-import Development.AbelianVarietyTheory.Definitions.Jets.SurjectiveAppTopSqCube
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.VRatioGtStatement
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.TwistBC
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ThreePointSeriesExponentialOfDefect
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.StalkMapInjectiveOfFlat
-import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.SecLinIffComb
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Jets.ColValMonomial
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.TwistBC
+public import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.IsExtensionPullOver
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.PullExp
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.UnifBaseChangeSt
+public import Development.AbelianVarietyTheory.Definitions.Jets.SurjectiveAppTopSqCube
+import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.ExistsGoodConst
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.PowerSeriesExpIntegralCanonGaugeAdditiveSecond
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.StalkMapInjectiveOfFlat
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ThreePointSeriesExponentialOfDefect
+public import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.ExpansionCommutesPullbackCmEndoFourLeStatement
+public import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.PullAlLinearCombinationStatement
+public import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.SecLinIffComb
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.AlgebraicGeometry.Morphisms.SchemeTheoreticallyDominant
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.LBPull
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.PullUUnitsCompatGeneric
+
+@[expose] public section
 
 noncomputable section
 
@@ -67,8 +118,8 @@ variable {V : Type} [CommRing V] [IsDomain V] [IsDiscreteValuationRing V]
 omit [IsDomain V] [IsDiscreteValuationRing V] [GrpObj G] [IsCommMonObj G] in
 theorem endK_gK (f : G ⟶ G) : endK f ≫ gK = gK ≫ f.left := pullback.lift_fst _ _ _
 
-omit [IsDomain V] [IsDiscreteValuationRing V] [IsCommMonObj G] in
 
+omit [IsDomain V] [IsDiscreteValuationRing V] [IsCommMonObj G] in
 theorem exists_generic (Lr : RigLB G) (f : G ⟶ G) (N k : ℕ)
     (mu : LB.Gen (LB.LinComb Lr.L (K := Fin 2) ![𝟙 G.left, f.left] ![(N : ℤ), -1])) (hmu : mu.IsGen)
     (hn : ∀ (Z : Scheme.{0}) (r : Z ⟶ Spec (CommRingCat.of V)) (z : Z) (J), Good Lr.L z J →
@@ -94,8 +145,8 @@ theorem exists_generic (Lr : RigLB G) (f : G ⟶ G) (N k : ℕ)
   rw [val_pull hJ, val_pull hJ, vu' _ _ y J hJ, e, hn _ _ y J hJ, FrameGeo.val_powGen, FrameGeo.val_powGen,
     ← pow_mul, mul_comm]
 
-omit [IsDiscreteValuationRing V] [GrpObj G] [IsCommMonObj G] in
 
+omit [IsDiscreteValuationRing V] [GrpObj G] [IsCommMonObj G] in
 theorem sval_of_generic [Flat G.hom] {L : LB G.left} (hL : L.IsLB) (f : G ⟶ G) (N k : ℕ)
     (mu : LB.Gen (LB.LinComb L (K := Fin 2) ![𝟙 G.left, f.left] ![(N : ℤ), -1])) (hmu : mu.IsGen)
     (σ : H0 L k) (σ' : H0 L (k * N)) (t : V)
@@ -137,7 +188,7 @@ theorem gs_eq_germ_fnVal {A : Type} [CommRing A] {X : Scheme.{0}} (r : Spec (Com
     (h : ⊤ ≤ r ⁻¹ᵁ U) (a : Γ(X, U)) (z : Spec (CommRingCat.of A)) :
     gs r z U a = ((Spec (CommRingCat.of A)).presheaf.germ ⊤ z trivial).hom
       ((Scheme.ΓSpecIso (CommRingCat.of A)).inv.hom (fnVal r U a)) := by
-  rw [gs_eq r z U (h trivial), fnVal, dif_pos h]
+  rw [gs_eq r z U (h trivial), fnVal, dite_eq_left h]
   have e : ∀ b, (Scheme.ΓSpecIso (CommRingCat.of A)).inv.hom ((Scheme.ΓSpecIso (CommRingCat.of A)).hom.hom b) = b :=
     fun b => congrArg (fun q => q.hom b) (Scheme.ΓSpecIso (CommRingCat.of A)).hom_inv_id
   rw [e]
@@ -294,6 +345,7 @@ theorem germ_pullback : Laws → Laws4 → TwistBCSpanStatement → JetSer.JetAl
   · have eV : TWO.algVF (V := V) (F := F) = algebraMap V F := (IsScalarTower.algebraMap_eq V _ F).symm
     have czK := FramePull.cz1 (FramePull.constantCoeff_actK (k := F) y.B a)
     obtain ⟨Θ, hΘ, hΘ'⟩ := exists_evHom czK
+
     rw [hΘ, map_sum, Finset.sum_mul, Finset.mul_sum]
     refine Finset.sum_congr rfl fun i _ => ?_
     have e : (fun j i => MvPowerSeries.map (algebraMap V F) ((![y.B.A.act a] : Fin 1 → Pt V 1 y.d) j i)) =

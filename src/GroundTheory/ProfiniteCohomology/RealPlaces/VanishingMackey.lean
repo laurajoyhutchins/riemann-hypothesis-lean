@@ -1,10 +1,58 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.RealPlaces.GSDefs
-import GroundTheory.ProfiniteCohomology.RealPlaces.VanishingCriterion
-import GroundTheory.ProfiniteCohomology.MackeyFormula.Cohomology
-import GroundTheory.ProfiniteCohomology.PoincareDuality.Induced
-import GroundTheory.ProfiniteCohomology.RestrictedRamification.Dimension
-import GroundTheory.ProfiniteCohomology.RealPlaces.LocalDualityPlace
+module
+
+public import GroundTheory.ProfiniteCohomology.RealPlaces.GSDefs
+public import GroundTheory.ProfiniteCohomology.PoincareDuality.Induced
+public import GroundTheory.ProfiniteCohomology.RestrictedRamification.Brauer
+import GroundTheory.GlobalFields.CompletionAtPlace.Integers
+import GroundTheory.ProfiniteCohomology.Colimit
+public import GroundTheory.ProfiniteCohomology.LocalClassFormation.FiniteVanishing.Vanishing
+public import GroundTheory.ProfiniteCohomology.RealPlaces.LocalDualityPlace
+public import GroundTheory.ProfiniteCohomology.RealPlaces.VanishingCriterion
+public import GroundTheory.ProfiniteCohomology.RestrictedRamification.Dimension
+import GroundTheory.TateCohomology.CoindOne
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -95,8 +143,8 @@ variable {ψ W N} {n : ℕ}
       Subsingleton (cohomology (mackeyRep (W : Subgroup G) (ψ w).toMonoidHom N d.out) n))
 include h
 
-omit [CompactSpace G] [∀ w, CompactSpace (F w)] in
 
+omit [CompactSpace G] [∀ w, CompactSpace (F w)] in
 theorem injective_mackeyRealRes_iff :
     Function.Injective (mackeyRealRes ψ W N n) ↔ Function.Injective (mackeyTopRes ψ W N n) := by
   constructor
@@ -108,8 +156,8 @@ theorem injective_mackeyRealRes_iff :
   · intro hi c c' hcc
     exact hi (funext fun p => congrFun (congrFun hcc p.1.1) p.1.2)
 
-omit [CompactSpace G] [∀ w, CompactSpace (F w)] in
 
+omit [CompactSpace G] [∀ w, CompactSpace (F w)] in
 theorem surjective_mackeyRealRes_iff :
     Function.Surjective (mackeyRealRes ψ W N n) ↔ Function.Surjective (mackeyTopRes ψ W N n) := by
   classical
@@ -119,7 +167,7 @@ theorem surjective_mackeyRealRes_iff :
       if hd : mackeySubgroup (W : Subgroup G) (ψ w).toMonoidHom d.out = ⊤ then t ⟨⟨w, d⟩, hd⟩ else 0
     refine ⟨c, funext fun p => ?_⟩
     have := congrFun (congrFun hc p.1.1) p.1.2
-    rw [dif_pos p.2] at this
+    rw [dite_eq_left p.2] at this
     exact this
   · intro hs t
     obtain ⟨c, hc⟩ := hs fun p => t p.1.1 p.1.2
@@ -140,7 +188,16 @@ theorem subsingleton_cohomology_of_subsingleton_group [Subsingleton H] (A : Rep.
   suffices h : ∀ x : cohomology A n, x = 0 from ⟨fun x y => (h x).trans (h y).symm⟩
   intro x
   obtain ⟨U, hU⟩ := exists_card_smul_eq_zero A (by omega) x
-  have : Nat.card (H ⧸ (U : Subgroup H)) = 1 := Nat.card_unique
+  have htop : (U : Subgroup H) = ⊤ := by
+    ext g
+    simp only [Subgroup.mem_top, iff_true]
+    have : g = 1 := Subsingleton.elim _ _
+    rw [this]
+    exact Subgroup.one_mem _
+  have : Nat.card (H ⧸ (U : Subgroup H)) = 1 := by
+    rw [htop]
+    letI := QuotientGroup.subsingleton_quotient_top (G := H)
+    exact Nat.card_unique
   rwa [this, one_smul] at hU
 
 end Trivial

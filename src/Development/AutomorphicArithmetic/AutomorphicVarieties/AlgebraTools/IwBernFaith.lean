@@ -1,8 +1,62 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.HeckePairTop
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.HkDefs
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.IwUnitHk
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.IwSatakeIndep
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.IwDomMul
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.HeckePairTop
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.HkDefs
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.IwDomMul
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.IwSatakeIndep
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.IwUnitHk
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.MvPolynomial.IrreducibleQuadratic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open ValuativeRel Matrix GlobalTheory.SmGL GlobalTheory.SplitWeil UpperTheory.V.Hi UpperTheory.V.AlgebraTools
 
 namespace UpperTheory.V.AlgebraTools
@@ -45,7 +99,7 @@ private theorem abs_mono {n : ℕ} {A H : Type} [CommRing A] [Ring H] [Algebra A
       ∀ c : Fin n → ℤ, (∀ i j, i < j → c j + ((a + b).degree : ℤ) ≤ c i) →
         ∃ m : ℕ, T c * th (MvPolynomial.monomial (a + b) 1) = q ^ m • T (c + fun i => ((a + b) i : ℤ)) := by
     intro a b ha hb c hc
-    rw [map_add] at hc
+    rw [map_add (f := _)] at hc
     obtain ⟨m, hm⟩ := ha c fun i j hij => by
       have := hc i j hij
       push_cast at this
@@ -118,6 +172,7 @@ private theorem abs_faith {n : ℕ} {A H : Type} [CommRing A] [Ring H] [Algebra 
   have hli' := Fintype.linearIndependent_iff.1 (hli.comp f hf) (fun a => p.coeff a.1 * q ^ m a) (by
     have h0 : T c * (th p * e) = 0 := by rw [hp, mul_zero]
     rw [← h0]
+
     conv_rhs => rw [p.as_sum, ← Finset.sum_coe_sort, map_sum, Finset.sum_mul, Finset.mul_sum]
     refine Finset.sum_congr rfl fun a _ => ?_
     have : MvPolynomial.monomial a.1 (p.coeff a.1) = p.coeff a.1 • MvPolynomial.monomial a.1 (1 : A) := by

@@ -1,5 +1,49 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.LieEig
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.TwoWeightEqOneAddRoot
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.LieEig
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -18,11 +62,6 @@ variable {R : Type} [CommRing R] {G : Over (Spec (CommRingCat.of R))} [GrpObj G]
 def eigLat {O : Type} (act : O → (G ⟶ G)) [∀ a, IsMonHom (act a)] (χ : O → R) : Submodule R (Fin n → R) :=
   ⨅ a, LinearMap.ker (tmap hx (act a) - χ a • LinearMap.id)
 
-theorem eigLat_basis [IsDomain R] [IsPrincipalIdealRing R] {O : Type} (act : O → (G ⟶ G)) [∀ a, IsMonHom (act a)]
-    (χ : O → R) : ∃ k, Nonempty (Module.Basis (Fin k) R (eigLat hx act χ)) := by
-  obtain ⟨k, bk⟩ := Submodule.basisOfPid (Pi.basisFun R (Fin n)) (eigLat hx act χ)
-  exact ⟨k, ⟨bk⟩⟩
-
 def dualMapR {R R' : Type} [CommRing R] [CommRing R'] (φ : R →+* R') : DualNumber R →+* DualNumber R' where
   toFun a := TrivSqZeroExt.inl (φ a.fst) + TrivSqZeroExt.inr (φ a.snd)
   map_one' := by ext <;> simp
@@ -30,29 +69,5 @@ def dualMapR {R R' : Type} [CommRing R] [CommRing R'] (φ : R →+* R') : DualNu
   map_zero' := by ext <;> simp
   map_add' a b := by ext <;> simp
 
-def TanBCSt : Prop :=
-  ∀ (R R' : Type) [CommRing R] [IsLocalRing R] [CommRing R'] (φ : R →+* R') (G : Over (Spec (CommRingCat.of R))) [GrpObj G]
-    (n : ℕ)
-    (x : ∀ m : ℕ, sp (R₀ := R) (JetR R (Fin n) m) ⟶ G), IsUnivChart G n x →
-    letI := φ.toAlgebra
-    ∃ x' : ∀ m : ℕ, sp (R₀ := R') (JetR R' (Fin n) m) ⟶ (Over.pullback (Spec.map (CommRingCat.ofHom φ))).obj G,
-      IsUnivChart _ n x' ∧ ∀ c : Fin n → R,
-        (tvec (x := x') (φ ∘ c)).left ≫ pullback.fst _ _ =
-          Spec.map (CommRingCat.ofHom (dualMapR φ)) ≫ (tvec (x := x) c).left
-
-open ReciprocityTheory.ChartRestriction.G.Geo.Tor in
-
-def RankSt : Prop :=
-  ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (H : Host E) (D : Datum H) (V : Type) [CommRing V] [IsDomain V]
-    [IsDiscreteValuationRing V] [IsAdicComplete (IsLocalRing.maximalIdeal V) V] [CharZero V]
-    (G : SAB H (Spec (CommRingCat.of V))) (t' : SAB H (Spec (CommRingCat.of (FractionRing V))))
-    (_m2 : SABMap t' G (Spec.map (CommRingCat.ofHom (algebraMap V (FractionRing V)))))
-    (n : ℕ) (xc : ∀ m : ℕ, sp (R₀ := V) (JetR V (Fin n) m) ⟶ G.G) (hx : IsUnivChart G.G n xc) (χ : 𝓞 E →+* V) (ρ : V),
-    (∀ (k : Type) [Field k] [IsAlgClosed k] [Algebra (FractionRing V) k],
-      DetCond D t'.act (Spec.map (CommRingCat.ofHom (algebraMap (FractionRing V) k)))
-        (algebraMap (FractionRing V) k (algebraMap V (FractionRing V) ρ))) →
-    letI : ∀ a, IsMonHom (G.act.act a) := G.act.hom
-    (χ H.rt = ρ → Module.finrank V (eigLat hx G.act.act χ) = D.p) ∧
-      (χ H.rt ≠ ρ → Module.finrank V (eigLat hx G.act.act χ) = D.q)
 
 end ReciprocityTheory.ChartRestriction.G.Chart

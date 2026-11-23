@@ -1,5 +1,51 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.SmoothRep
+module
+
+public import GroundTheory.AutomorphicForms.SmoothRep
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -13,17 +59,17 @@ variable {N : Type*} [Group N] [TopologicalSpace N] [IsTopologicalGroup N]
   [LocallyCompactSpace N] [T2Space N] [TotallyDisconnectedSpace N]
   {V : Type*} [AddCommGroup V] [Module ℂ V] (ρ : Representation ℂ N V)
 
+
 omit [TopologicalSpace N] [IsTopologicalGroup N] [LocallyCompactSpace N] [T2Space N]
   [TotallyDisconnectedSpace N] in
-
 theorem coinvariantsKer_le_ker (K : Subgroup N) :
     coinvariantsKer ρ K ≤ Representation.Coinvariants.ker ρ := by
   refine Submodule.span_le.2 ?_
   rintro _ ⟨⟨k, v⟩, rfl⟩
   exact Representation.Coinvariants.sub_mem_ker (k : N) v
 
-omit [IsTopologicalGroup N] [LocallyCompactSpace N] [T2Space N] [TotallyDisconnectedSpace N] in
 
+omit [IsTopologicalGroup N] [LocallyCompactSpace N] [T2Space N] [TotallyDisconnectedSpace N] in
 theorem exists_mem_coinvariantsKer
     (hN : ∀ s : Finset N, ∃ K : Subgroup N, IsCompact (K : Set N) ∧ IsOpen (K : Set N) ∧
       ∀ x ∈ s, x ∈ K)
@@ -130,8 +176,8 @@ variable {G : Type*} [Group G] [TopologicalSpace G] [IsTopologicalGroup G]
   [LocallyCompactSpace G] [T2Space G] [TotallyDisconnectedSpace G]
   {V : Type*} [AddCommGroup V] [Module ℂ V] {ρ : Representation ℂ G V} {N M Nbar K : Subgroup G}
 
-omit [LocallyCompactSpace G] [T2Space G] [TotallyDisconnectedSpace G] in
 
+omit [LocallyCompactSpace G] [T2Space G] [TotallyDisconnectedSpace G] in
 theorem exists_fixedVectors_mk_eq_of_fixed (hρ : IsSmooth ρ) (hKc : IsCompact (K : Set G))
     (hKo : IsOpen (K : Set G))
     (hfact : ∀ k ∈ K, ∃ x ∈ K ⊓ N, ∃ y ∈ K ⊓ M, ∃ z ∈ K ⊓ Nbar, k = x * y * z)
@@ -180,6 +226,7 @@ theorem exists_fixedVectors_mk_eq_of_fixed (hρ : IsSmooth ρ) (hKc : IsCompact 
   set y : V := ∑ c : K ⧸ S.subgroupOf K, ρ ((Quotient.out c : K) : G) w with hy
   have hyK : y ∈ fixedVectors ρ K := by
     intro k hk
+
     rw [hy, map_sum]
     simp only [← Module.End.mul_apply, ← map_mul]
     calc ∑ c : K ⧸ S.subgroupOf K, ρ (k * ((Quotient.out c : K) : G)) w
@@ -191,13 +238,14 @@ theorem exists_fixedVectors_mk_eq_of_fixed (hρ : IsSmooth ρ) (hKc : IsCompact 
             (fun c => by rw [MulAction.toPerm_apply])
   have hyq : Representation.Coinvariants.mk (ρ.comp N.subtype) y =
       n • Representation.Coinvariants.mk (ρ.comp N.subtype) w := by
+
     rw [hy, map_sum, Finset.sum_congr rfl fun c _ => hterm _ (Quotient.out c).2,
-      Finset.sum_const, Finset.card_univ, ← Nat.cast_smul_eq_nsmul ℂ]
+    Finset.sum_const, Finset.card_univ, ← Nat.cast_smul_eq_nsmul ℂ]
   refine ⟨n⁻¹ • y, Submodule.smul_mem _ _ hyK, ?_⟩
   rw [map_smul, hyq, smul_smul, inv_mul_cancel₀ hn, one_smul]
 
-omit [LocallyCompactSpace G] [T2Space G] [TotallyDisconnectedSpace G] in
 
+omit [LocallyCompactSpace G] [T2Space G] [TotallyDisconnectedSpace G] in
 theorem exists_fixedVectors_mk_eq (hρ : IsAdmissible ρ) (hKc : IsCompact (K : Set G))
     (hKo : IsOpen (K : Set G))
     (hfact : ∀ k ∈ K, ∃ z ∈ K ⊓ Nbar, ∃ y ∈ K ⊓ M, ∃ x ∈ K ⊓ N, k = z * y * x)

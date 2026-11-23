@@ -1,6 +1,46 @@
-import Mathlib
-import Formalism.LocalToGlobal.ProjectiveLattices.ThClass
-import Formalism.LocalToGlobal.Divisibility.CoefMod
+module
+
+public import Formalism.LocalToGlobal.Divisibility.CoefMod
+public import Formalism.LocalToGlobal.ProjectiveLattices.IsThRule
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -43,8 +83,6 @@ def lamP (Dw : Datum H) (n : ℕ) {a : (E →+* ℂ) × ℕ → ℕ} (ha : IsPar
     simp only
     omega
 
-def dTw (Dw : Datum H) (e : Psi H → ℤ) (τ : Psi H) : ℤ := ((Dw.p : ℤ) - Dw.q - 1) / 2 - e τ
-
 variable {l : Level H} (Dw : Datum H) (c : Coeff l) (n : ℕ)
 
 def embPsi : Psi H → E →+* c.F := fun τ => embF c τ.1
@@ -56,20 +94,17 @@ abbrev CoefSp : Type := VV c.F (lamP Dw n ha d)
 def coefRep : GL (Fin n) E →* Module.End c.F (CoefSp Dw c n ha d) :=
   rhoVr (embPsi c) (lamP Dw n ha d)
 
-open Classical in
 
+open Classical in
 def coefAct (γ : Matrix (Fin n) (Fin n) E) : CoefSp Dw c n ha d →ₗ[c.F] CoefSp Dw c n ha d :=
   if h : IsUnit γ then coefRep Dw c n ha d h.unit else 0
 
 theorem coefAct_coe (g : GL (Fin n) E) :
     coefAct Dw c n ha d (g : Matrix (Fin n) (Fin n) E) = coefRep Dw c n ha d g := by
   unfold coefAct
-  rw [dif_pos g.isUnit, IsUnit.unit_of_val_units]
+  rw [dite_eq_left g.isUnit, IsUnit.unit_of_val_units]
 
 def vacChar (γ : Matrix (Fin n) (Fin n) E) : c.F := ∏ τ : Psi H, embPsi c τ γ.det ^ (-(d τ))
-
-def coefLat : Submodule (𝓞 c.F) (CoefSp Dw c n ha d) :=
-  nabAtr (embPsi c) (lamP Dw n ha d) (Formalism.L2.Pj.stdLat E n)
 
 theorem natW_anti {N : ℕ} (lam : DomWeight N) : Antitone lam.natW := by
   intro i j hij
@@ -77,55 +112,11 @@ theorem natW_anti {N : ℕ} (lam : DomWeight N) : Antitone lam.natW := by
   unfold DomWeight.natW
   exact Int.toNat_le_toNat (by omega)
 
-theorem ten_extremal_mem {K ι : Type} [Field K] [Fintype ι] {N : ℕ} (lam : ι → DomWeight N) :
-    ten (fun τ => extremal K N (lam τ)) ∈ VV K lam :=
-  Submodule.subset_span
-    ⟨fun τ => extremal K N (lam τ), fun τ => Formalism.GradedWeylDivisibility.hwMem K N N le_rfl _ (natW_anti (lam τ)), rfl⟩
-
-def extTen : CoefSp Dw c n ha d :=
-  ⟨ten fun τ => extremal c.F n (lamP Dw n ha d τ), ten_extremal_mem _⟩
-
-def TieAt (io : CoefSp Dw c n ha d →ₗ[c.F] MvPolynomial (LtN Dw n) c.F) : Prop :=
-  IoLF (Dw := Dw) c a io (coefAct Dw c n ha d) (vacChar c n d) (coefLat Dw c n ha d) (extTen Dw c n ha d)
-    (pG (Dw := Dw) c a n)
-
-open Classical in
-
-def ioMap : CoefSp Dw c n ha d →ₗ[c.F] MvPolynomial (LtN Dw n) c.F :=
-  if h : ∃ io, TieAt Dw c n ha d io then h.choose else 0
-
-def LFTieAt : Prop := Dw.p + Dw.q ≤ n → ∃ io, TieAt Dw c n ha d io
-
-def LFTieUniqueAt : Prop := ∀ io io', TieAt Dw c n ha d io → TieAt Dw c n ha d io' → io = io'
 
 end GlobalTheory.IndefiniteRowSideFullHecke.CoefficientSpaceWeights
 
 namespace GlobalTheory.IndefiniteRowSideFullHecke.CoefficientSpaceWeights
 
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Geo.Tor NumberField
-
-def LFTie : Prop :=
-  ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (H : ReciprocityTheory.ChartRestriction.G.Geo.Tor.Host E) (l : Level H) (Dw : Datum H)
-    (c : Coeff l) (n : ℕ) (a : (E →+* ℂ) × ℕ → ℕ) (ha : IsPartFam Dw a) (d : Psi H → ℤ), LFTieAt Dw c n ha d
-
-def LFTieUnique : Prop :=
-  ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (H : ReciprocityTheory.ChartRestriction.G.Geo.Tor.Host E) (l : Level H) (Dw : Datum H)
-    (c : Coeff l) (n : ℕ) (a : (E →+* ℂ) × ℕ → ℕ) (ha : IsPartFam Dw a) (d : Psi H → ℤ), LFTieUniqueAt Dw c n ha d
-
-def LFTieWeil : Prop :=
-  ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (H : ReciprocityTheory.ChartRestriction.G.Geo.Tor.Host E) (l : Level H) (Dw : Datum H)
-    (c : Coeff l) (n : ℕ) (a : (E →+* ℂ) × ℕ → ℕ) (ha : IsPartFam Dw a) (e : Psi H → ℤ),
-    Odd (Dw.p + Dw.q) → LFTieAt Dw c n ha (dTw Dw e)
-
-theorem LFTie.weil (h : LFTie) : LFTieWeil :=
-  fun E _ _ _ H l Dw c n a ha e _ => h E H l Dw c n a ha (dTw Dw e)
-
-example {E : Type} [Field E] [NumberField E] [IsCMField E] {H : ReciprocityTheory.ChartRestriction.G.Geo.Tor.Host E} {l : Level H}
-    (Dw : Datum H) (c : Coeff l) (n : ℕ) {a : (E →+* ℂ) × ℕ → ℕ} (ha : IsPartFam Dw a) (d : Psi H → ℤ) :
-    coefAct Dw c n ha d 1 = 1 ∧ vacChar c n d 1 = 1 := by
-  refine ⟨?_, by simp [vacChar]⟩
-  have := coefAct_coe Dw c n ha d 1
-  rw [map_one] at this
-  simpa using this
 
 end GlobalTheory.IndefiniteRowSideFullHecke.CoefficientSpaceWeights

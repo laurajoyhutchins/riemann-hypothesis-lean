@@ -1,4 +1,55 @@
-import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.EndoZInstance
+module
+
+public import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.EndoZInstance
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 open scoped BigOperators
@@ -89,7 +140,7 @@ theorem weierstrass_series_unique : IsWpUnique := by
   obtain ⟨-, -, hP⟩ := hP
   obtain ⟨-, -, hQ⟩ := hQ
   have hX : (X : PowerSeries K) ≠ 0 := X_ne_zero
-  have hdX : ∀ n : ℕ, X * derivative K ((X : PowerSeries K) ^ n) = (n : PowerSeries K) * X ^ n := by
+  have hdX : ∀ n : ℕ, X * derivative ((X : PowerSeries K) ^ n) = (n : PowerSeries K) * X ^ n := by
     intro n
     induction n with
     | zero => simp
@@ -103,23 +154,23 @@ theorem weierstrass_series_unique : IsWpUnique := by
     | zero => simp
     | succ n ih =>
       obtain ⟨E, hE⟩ := ih
-      have hD : X * (derivative K P - derivative K Q)
-          = X ^ n * ((n : PowerSeries K) * E + X * derivative K E) := by
+      have hD : X * (derivative P - derivative Q)
+          = X ^ n * ((n : PowerSeries K) * E + X * derivative E) := by
         rw [← map_sub, hE, Derivation.leibniz, smul_eq_mul, smul_eq_mul]
         linear_combination E * hdX n
-      have hc : ((n : PowerSeries K) * E + X * derivative K E)
-            * (-4 + X ^ 3 * (derivative K P + derivative K Q))
+      have hc : ((n : PowerSeries K) * E + X * derivative E)
+            * (-4 + X ^ 3 * (derivative P + derivative Q))
           = E * (4 * ((1 + X ^ 2 * P) ^ 2 + (1 + X ^ 2 * P) * (1 + X ^ 2 * Q) + (1 + X ^ 2 * Q) ^ 2)
               - C g2 * X ^ 4) := by
         apply mul_left_cancel₀ (pow_ne_zero (n + 2) hX)
         have hs := congrArg₂ (· - ·) hP hQ
         simp only [Formalism.L2.Th1.B.dz] at hs
         linear_combination hs
-          - X ^ 2 * (-4 + X ^ 3 * (derivative K P + derivative K Q)) * hD
+          - X ^ 2 * (-4 + X ^ 3 * (derivative P + derivative Q)) * hD
           + X ^ 2 * (4 * ((1 + X ^ 2 * P) ^ 2 + (1 + X ^ 2 * P) * (1 + X ^ 2 * Q)
               + (1 + X ^ 2 * Q) ^ 2) - C g2 * X ^ 4) * hE
       have h0 := congrArg constantCoeff hc
-      simp only [map_mul, map_add, map_sub, map_neg, map_pow, map_natCast, map_ofNat, map_one,
+      simp only [map_mul, map_add (f := _), map_sub, map_neg, map_pow, map_natCast, map_ofNat, map_one,
         constantCoeff_X, constantCoeff_C] at h0
       have h1 : (4 * (n : K) + 12) * constantCoeff E = 0 := by
         linear_combination -h0

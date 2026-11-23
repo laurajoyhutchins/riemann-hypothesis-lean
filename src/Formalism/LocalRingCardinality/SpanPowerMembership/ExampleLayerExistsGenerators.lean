@@ -1,11 +1,63 @@
-import Formalism.LocalRingCardinality.DataHost
-import Formalism.LocalRingCardinality.SpanPowerMembership.Primes
-import Formalism.LocalRingCardinality.DataSpaces
-import Formalism.LocalRingCardinality.SpanPowerMembership.ExampleRanksRankComplement
+module
+
+public import Formalism.LocalRingCardinality.DataHost
+public import Formalism.LocalRingCardinality.DataSpaces
+public import Formalism.LocalRingCardinality.SpanPowerMembership.ExampleRanksRankComplement
+public import Formalism.SharpRestriction.RamificationFrobenius.TotientGaloisClasses.NonemptyFieldAxiomsCyclicPow
 import Formalism.FrobeniusOrbits.HostCorollaries
-import Formalism.TameInertiaTowers.TowerFieldFoundations
-import Formalism.SharpRestriction.RamificationFrobenius.TotientGaloisClasses.FrameFacts
-import Formalism.SharpRestriction.RamificationFrobenius.TotientGaloisClasses.NonemptyFieldAxiomsCyclicPow
+public import Formalism.LocalRingCardinality.SpanPowerMembership.Primes
+public import Formalism.SharpRestriction.RamificationFrobenius.TotientGaloisClasses.FrameFacts
+import Formalism.TameInertiaTowers.CentralOrderTwo.Galois
+import Mathlib.Algebra.AffineMonoid.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -51,8 +103,6 @@ theorem emb_conj (φ : H.E →+* ℂ) (x : H.E) : φ (H.conj x) = starRingEnd �
 theorem star_eq_conj (x : H.E) : (letI := H.cmStar; star x) = H.conj x := by
   apply H.φ₀.injective
   rw [emb_star, emb_conj]
-
-theorem bridgeStar : Formalism.BasicNotions.bridge_star := fun _ H x => star_eq_conj H x
 
 theorem conj_aE : H.conj (H.sqq) = - H.sqq := by
   rw [H.gal_sqq]
@@ -102,26 +152,12 @@ variable {R : Ranks} (H : Host R)
 theorem q_mod_four : ∃ k : ℕ, H.q = 4 * k + 3 := ⟨H.q / 4, by have := H.hyp.2.2.1; omega⟩
 theorem d_mod_four : ∃ k : ℕ, H.d = 4 * k + 3 := ⟨H.d / 4, by have := H.hyp.2.2.2.1; omega⟩
 
-theorem isIntegral_halfA : IsIntegral ℤ ((1 + H.sqq) / 2) := by
-  obtain ⟨k, hk⟩ := q_mod_four H
-  exact isIntegral_half H.sqq k (by rw [aE_sq H, hk]; push_cast; ring)
-
 theorem isIntegral_halfB : IsIntegral ℤ ((1 + H.sqd) / 2) := by
   obtain ⟨k, hk⟩ := d_mod_four H
   exact isIntegral_half H.sqd k (by rw [bE_sq H, hk]; push_cast; ring)
 
-theorem isIntegral_halfA' : IsIntegral ℤ ((1 - H.sqq) / 2) := by
-  obtain ⟨k, hk⟩ := q_mod_four H
-  have h := isIntegral_half (-H.sqq) k (by rw [neg_sq, aE_sq H, hk]; push_cast; ring)
-  rwa [← sub_eq_add_neg] at h
-
-theorem isIntegral_halfB' : IsIntegral ℤ ((1 - H.sqd) / 2) := by
-  obtain ⟨k, hk⟩ := d_mod_four H
-  have h := isIntegral_half (-H.sqd) k (by rw [neg_sq, bE_sq H, hk]; push_cast; ring)
-  rwa [← sub_eq_add_neg] at h
-
 theorem conj_half (x : H.E) : H.conj ((1 + x) / 2) = (1 + H.conj x) / 2 := by
-  rw [map_div₀, map_add, map_one, map_ofNat]
+  rw [map_div₀, map_add (f := _), map_one, map_ofNat]
 
 theorem unram_at (P : Ideal (𝓞 H.E)) (hP : P.IsMaximal) :
     ∃ θ t : 𝓞 H.E, algebraMap (𝓞 H.E) H.E t = H.conj (algebraMap (𝓞 H.E) H.E θ) ∧ θ - t ∉ P := by
@@ -178,13 +214,6 @@ theorem exampleCMType_nonempty : (cmType ζ0 a0 b0 599).Nonempty := by
   rw [(Formalism.FrobeniusOrbits.Final.cmType 2 571 599 hostHyp0.toHypOdd L0 ζ0 a0 b0 layer0).2.1]
   positivity
 
-theorem exampleIdeal_principal_factor : ∃ 𝔟 : Ideal (𝓞 (hostE ζ0 a0 b0)),
-    differentIdeal (𝓞 (KinE ζ0 a0 b0)) (𝓞 (hostE ζ0 a0 b0)) =
-      𝔟 * (conjE (hypOdd_of_hostHyp hostHyp0) layer0 • 𝔟) ∧
-    𝔟 ⊔ conjE (hypOdd_of_hostHyp hostHyp0) layer0 • 𝔟 = ⊤ :=
-  Formalism.FrobeniusOrbits.hostPrincipal 2 571 599 hostHyp0 L0 ζ0 a0 b0 layer0 _
-    (galE_conjE (hypOdd_of_hostHyp hostHyp0) layer0)
-
 theorem top_primitive {K : Type} [Field K] [NumberField K] (m : ℕ) (hm : 1 < m) :
     ¬ (⊤ : Ideal (𝓞 K)) ≤ Ideal.span {(m : 𝓞 K)} := by
   intro h
@@ -212,7 +241,9 @@ def H0 : Host R0 where
   gal_sqq := Formalism.HC.D7.gal_sqq R0.toFrame hostHyp0 layer0
   QS_exact := Formalism.HC.D7.exact R0.toFrame exampleRanks_h_injective hostHyp0 (le_refl 2) layer0
   QS_le := (by norm_num : 2 ^ (2 + 2) ≤ 4 ^ 2)
-  o_pow := by rw [exampleRanks_o]; norm_num
+  o_pow := by
+    rw [exampleRanks_o, one_pow]
+    exact Nat.one_le_pow _ _ (by decide)
   q_ne_three := (by norm_num : (571 : ℕ) ≠ 3)
   qd_big := (by norm_num : 4 * 15 * 9 + 1 < 571 ∧ 4 * 15 * 9 + 1 < 599)
   splitBound := 2
@@ -299,7 +330,7 @@ theorem π0_mem_K : π0 ∈ H0.K := by
 
 theorem π0_norm : π0 * H0.conj π0 = (T0 : H0.E) := by
   unfold π0
-  rw [map_add, map_one, map_mul, map_natCast, conj_bE]
+  rw [map_add (f := _), map_one, map_mul, map_natCast, conj_bE]
   have h := exampleSqrt_sq
   unfold T0 e0
   push_cast
@@ -324,18 +355,5 @@ theorem π0_cong : π0O - 1 ∈ Ideal.span
   unfold e0
   push_cast
   ring
-
-theorem T_norm0 : ∃ π : 𝓞 H0.E, (π : H0.E) ∈ H0.K ∧
-    (π : H0.E) * H0.conj (π : H0.E) = (T0 : H0.E) ∧
-    (π - 1) ∈ Ideal.span {((H0.QS * H0.q * H0.d * (H0.g 0 * H0.g 1) ^ 2 : ℕ) : 𝓞 H0.E)} :=
-  ⟨π0O, π0_mem_K, π0_norm, π0_cong⟩
-
-theorem π0_star_norm : (letI := H0.cmStar; star π0 * π0) = (T0 : H0.E) := by
-  rw [star_eq_conj, mul_comm]
-  exact π0_norm
-
-theorem examplePrime_ge : 55 ≤ T0 := by
-  unfold T0
-  norm_num
 
 end Formalism.BasicNotions.Examples₂

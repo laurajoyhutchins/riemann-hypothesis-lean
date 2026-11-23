@@ -1,6 +1,49 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.StatementsDualStackedGraph
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PDualTopSimpleStacked
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.StatementsDualStackedGraph
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PDualTopSimpleStacked
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -57,9 +100,9 @@ theorem multAt_eq_of_mul_mem {K' : Type} [Fintype K'] {ι : K' → Type} [∀ k,
     {I J W : Ideal (MRing ι)} (hIJ : I ≤ J) {s : MRing ι} (hs : s ∉ W) (hsJ : ∀ x ∈ J, s * x ∈ I) :
     multAt I W = multAt J W := by
   by_cases hW : W.IsPrime
-  · rw [multAt, multAt, dif_pos hW, dif_pos hW]
+  · rw [multAt, multAt, dite_eq_left hW, dite_eq_left hW]
     exact congrArg ENat.toNat (length_localized_eq hIJ hs hsJ)
-  · rw [multAt, multAt, dif_neg hW, dif_neg hW]
+  · rw [multAt, multAt, dite_eq_right hW, dite_eq_right hW]
 
 theorem sup_le_of_mul_mem {A : Type*} [CommRing A] {I Q : Ideal A} (hQ : Q.IsPrime) {f g s : A} (hs : s ∉ Q)
     (hsg : s * g ∈ I ⊔ Ideal.span {f}) (hle : I ⊔ Ideal.span {f} ≤ Q) : I ⊔ Ideal.span {g} ≤ Q := by
@@ -118,8 +161,8 @@ theorem C_mul_first_not_mem {P : Ideal (MRing (dualBlocks T))} {a : T → ℤ} (
 
 end StackedGraphHorizontal
 
-open StackedGraphHorizontal in
 
+open StackedGraphHorizontal in
 theorem DualStackedGraphHorizontal.proof : DualStackedGraphHorizontal.Statement := by
   intro K _ _ i F F' T _ _ b b' a _ hab t W hhor
   have ha : ∀ t, a t ≠ 0 := by

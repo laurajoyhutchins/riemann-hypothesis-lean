@@ -1,5 +1,47 @@
-import Mathlib
-import Formalism.PieriBlockIdeals.LemmaDSkeletonUnit
+module
+
+public import Formalism.PieriBlockIdeals.LemmaDSkeletonUnit
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace Formalism.CohomologicalDescent.LC
 
@@ -18,17 +60,6 @@ def IsWt (K : Type*) {P M : Type*} {q n : ℕ} [Field K] [AddCommGroup M] [Modul
   Cas K EM 0 z = ((casVal lam2 : ℤ) : K) • z ∧ ∀ j : Fin n, xJM K EM j z = ((c j : ℤ) : K) • z
 
 def meas {n : ℕ} (col : Fin n → ℕ) : ℕ := ∑ l : Fin n, (n - l.val) * col l
-
-def ContentInj : Prop :=
-  ∀ (q : ℕ) (κ : Fin q → ℕ), Antitone κ → ∀ a b : Fin q,
-    ((κ a : ℤ) - (a.val : ℤ) = (κ b : ℤ) - (b.val : ℤ) → a = b) ∧
-      (casVal (κ + Pi.single a 1) = casVal (κ + Pi.single b 1) → a = b)
-
-def PathDet : Prop :=
-  ∀ (q n : ℕ) (lam2 tau tau' : Fin q → ℕ) (κ κ' : ℕ → Fin q → ℕ) (ρ ρ' : Fin n → Fin q),
-    IsPath n lam2 tau κ ρ → IsPath n lam2 tau' κ' ρ' →
-    (∀ m ≤ n, (∀ j : Fin n, j.val < m → cseq κ ρ j = cseq κ' ρ' j) → ∀ l ≤ m, κ l = κ' l) ∧
-      ((∀ j ≤ n, casVal (κ j) = casVal (κ' j)) → (∀ j ≤ n, κ j = κ' j) ∧ ρ = ρ' ∧ tau = tau')
 
 def SwapPath : Prop :=
   ∀ (q n : ℕ) (lam2 tau : Fin q → ℕ) (κ : ℕ → Fin q → ℕ) (ρ : Fin n → Fin q), IsPath n lam2 tau κ ρ →
@@ -121,21 +152,5 @@ def ColumnsFromPieri : Prop :=
     (⨆ tau, PathSpace K (P := P) EM n lam2 tau) = ⊤ →
     ∀ tau, (∃ b : Fin q, ∃ j < tau b, Fintype.card P < LD.colLen lam2 tau j) →
       ∀ z ∈ PathSpace K (P := P) EM n lam2 tau, toSym K z = 0
-
-def LemmaDSkeleton4 : Prop :=
-  ∀ (O K V P : Type) (q : ℕ) [CommRing O] [Field K] [CharZero K] [Algebra O K] [AddCommGroup V] [Module K V]
-    [Module O V] [IsScalarTower O K V] [DecidableEq P] [Fintype P] (S : HidaSetting K V P (Fin q))
-    (B : LinearMap.BilinForm K V) (n w : ℕ) (lam2 : Fin q → ℕ) (DelL : Submodule O S.W)
-    (xi : (P ⊕ Fin q → ℤ) →+ ℤ) (lam : P ⊕ Fin q → ℤ)
-    (l : ℕ) (e : ℕ) (i' : ℤ), l.Prime → (∀ m : ℤ, ¬ (l : ℤ) ∣ m → IsUnit (m : O)) →
-    S.w = (w : K) → (∀ b, lam2 b ≤ w) → Contra S B → Generated S → (∀ v : V, (∀ x : V, B x v = 0) → v = 0) →
-    (∀ b b', ∀ u ∈ DelL, S.EW b b' u ∈ DelL) →
-    (⨆ tau, PathSpace K (P := P) S.EW n lam2 tau) = ⊤ →
-    (∀ (α : P) (b : Fin q), 0 ≤ xi (Pi.single (Sum.inl α) 1 - Pi.single (Sum.inr b) 1)) →
-    (∀ κ, xi (lam - κ) ≤ i' → ∀ u ∈ NablaL S B DelL, (u : V) ∈ S.wt κ → (l : O) ^ e • u ∈ DelL) →
-    ∀ ν, ∑ α : P, ν (Sum.inl α) + (n : ℤ) = (Fintype.card P : ℤ) * (w : ℤ) → xi (lam - ν) ≤ i' →
-      ∀ v ∈ B.dualSubmodule (DeltaAll S DelL), v ∈ S.wt ν →
-      (l : O) ^ (e + padicValInt l (LD.Dn (Fintype.card P) w n lam2)) • v ∈ DeltaAll S DelL ∧
-        (l : O) ^ (e + padicValInt l (LD.Dn (Fintype.card P) w n lam2)) • v ∈ S.wt ν
 
 end Formalism.CohomologicalDescent.LC

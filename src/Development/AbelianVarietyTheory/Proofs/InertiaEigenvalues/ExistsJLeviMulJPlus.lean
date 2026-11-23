@@ -1,5 +1,47 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.EmbedsLevelZeroDepthZero
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.EmbedsLevelZeroDepthZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -11,16 +53,16 @@ variable {k : Type} [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchim
   {α n : Type} {m : α → Type} [Fintype α] [LinearOrder α] [∀ a, Fintype (m a)] [∀ a, DecidableEq (m a)]
   [Fintype n] [DecidableEq n]
 
+
 omit [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] [Fintype α] [LinearOrder α]
   [∀ a, Fintype (m a)] [Fintype n] in
-
 theorem one_same (e : (Σ a, m a) ≃ n) (a : α) (i j : m a) :
     (1 : Matrix n n k) (e ⟨a, i⟩) (e ⟨a, j⟩) = (1 : Matrix (m a) (m a) k) i j := by
   simp [Matrix.one_apply]
 
+
 omit [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] [Fintype α] [LinearOrder α]
   [∀ a, Fintype (m a)] [∀ a, DecidableEq (m a)] [Fintype n] in
-
 theorem one_ne (e : (Σ a, m a) ≃ n) {a b : α} (h : a ≠ b) (i : m a) (j : m b) :
     (1 : Matrix n n k) (e ⟨a, i⟩) (e ⟨b, j⟩) = 0 :=
   Matrix.one_apply_ne fun e' => h (congrArg Sigma.fst (e.injective e'))
@@ -111,13 +153,6 @@ theorem conj_mem_jPlus (e : (Σ a, m a) ≃ n) {d u : GL n k} (hd : d ∈ jLevi 
   exact ⟨(Subgroup.mem_normalizer_iff.1 (leviEmb_mem_normalizer k e g) u).1 hu.1,
     (KO k n).mul_mem ((KO k n).mul_mem h hu.2) ((KO k n).inv_mem h)⟩
 
-theorem conj_mem_jMinus (e : (Σ a, m a) ≃ n) {d c : GL n k} (hd : d ∈ jLevi k e) (hc : c ∈ jMinus k e) :
-    d * c * d⁻¹ ∈ jMinus k e := by
-  have h := jLevi_le_KOne e hd
-  obtain ⟨g, -, rfl⟩ := hd
-  exact ⟨(Subgroup.mem_normalizer_iff.1 (leviEmb_mem_normalizer_lower k e g) c).1 hc.1,
-    (KOne k n).mul_mem ((KOne k n).mul_mem h hc.2) ((KOne k n).inv_mem h)⟩
-
 theorem plus_levi_minus (e : (Σ a, m a) ≃ n) {g : GL n k} (hg : g ∈ proRad k e) :
     ∃ u ∈ jPlus k e, ∃ d ∈ jLevi k e, ∃ c ∈ jMinus k e, g = u * d * c := by
   obtain ⟨u, hu, x, hx, rfl⟩ := exists_jPlus_mul_KOne e hg
@@ -131,42 +166,5 @@ theorem levi_plus_minus (e : (Σ a, m a) ≃ n) {g : GL n k} (hg : g ∈ proRad 
     ∃ d ∈ jLevi k e, ∃ u ∈ jPlus k e, ∃ c ∈ jMinus k e, g = d * u * c := by
   obtain ⟨u, hu, d, hd, c, hc, rfl⟩ := plus_levi_minus e hg
   exact ⟨d, hd, _, conj_mem_jPlus e (inv_mem hd) hu, c, hc, by group⟩
-
-theorem plus_minus_levi (e : (Σ a, m a) ≃ n) {g : GL n k} (hg : g ∈ proRad k e) :
-    ∃ u ∈ jPlus k e, ∃ c ∈ jMinus k e, ∃ d ∈ jLevi k e, g = u * c * d := by
-  obtain ⟨u, hu, d, hd, c, hc, rfl⟩ := plus_levi_minus e hg
-  exact ⟨u, hu, _, conj_mem_jMinus e hd hc, d, hd, by group⟩
-
-theorem minus_levi_plus (e : (Σ a, m a) ≃ n) {g : GL n k} (hg : g ∈ proRad k e) :
-    ∃ c ∈ jMinus k e, ∃ d ∈ jLevi k e, ∃ u ∈ jPlus k e, g = c * d * u := by
-  obtain ⟨u, hu, d, hd, c, hc, h⟩ := plus_levi_minus e (inv_mem hg)
-  exact ⟨_, inv_mem hc, _, inv_mem hd, _, inv_mem hu, by rw [← inv_inv g, h]; group⟩
-
-theorem levi_minus_plus (e : (Σ a, m a) ≃ n) {g : GL n k} (hg : g ∈ proRad k e) :
-    ∃ d ∈ jLevi k e, ∃ c ∈ jMinus k e, ∃ u ∈ jPlus k e, g = d * c * u := by
-  obtain ⟨c, hc, d, hd, u, hu, rfl⟩ := minus_levi_plus e hg
-  exact ⟨d, hd, _, conj_mem_jMinus e (inv_mem hd) hc, u, hu, by group⟩
-
-theorem minus_plus_levi (e : (Σ a, m a) ≃ n) {g : GL n k} (hg : g ∈ proRad k e) :
-    ∃ c ∈ jMinus k e, ∃ u ∈ jPlus k e, ∃ d ∈ jLevi k e, g = c * u * d := by
-  obtain ⟨c, hc, d, hd, u, hu, rfl⟩ := minus_levi_plus e hg
-  exact ⟨c, hc, _, conj_mem_jPlus e hd hu, d, hd, by group⟩
-
-theorem proRad_factorisation (e : (Σ a, m a) ≃ n) :
-    proRad k e = KOne k n ⊔ jPlus k e ∧ jMinus k e ⊔ jLevi k e ⊔ jPlus k e = proRad k e ∧
-    ∀ g ∈ proRad k e,
-      ((∃ x ∈ KOne k n, ∃ u ∈ jPlus k e, g = x * u) ∧ ∃ u ∈ jPlus k e, ∃ x ∈ KOne k n, g = u * x) ∧
-      (∃ c ∈ jMinus k e, ∃ d ∈ jLevi k e, ∃ u ∈ jPlus k e, g = c * d * u) ∧
-      (∃ c ∈ jMinus k e, ∃ u ∈ jPlus k e, ∃ d ∈ jLevi k e, g = c * u * d) ∧
-      (∃ d ∈ jLevi k e, ∃ c ∈ jMinus k e, ∃ u ∈ jPlus k e, g = d * c * u) ∧
-      (∃ d ∈ jLevi k e, ∃ u ∈ jPlus k e, ∃ c ∈ jMinus k e, g = d * u * c) ∧
-      (∃ u ∈ jPlus k e, ∃ c ∈ jMinus k e, ∃ d ∈ jLevi k e, g = u * c * d) ∧
-      (∃ u ∈ jPlus k e, ∃ d ∈ jLevi k e, ∃ c ∈ jMinus k e, g = u * d * c) := by
-  refine ⟨proRad_eq_sup e, le_antisymm
-    (sup_le (sup_le (jMinus_le_proRad e) (jLevi_le_proRad e)) (jPlus_le_proRad e)) fun g hg => ?_, fun g hg =>
-    ⟨⟨exists_KOne_mul_jPlus e hg, exists_jPlus_mul_KOne e hg⟩, minus_levi_plus e hg, minus_plus_levi e hg,
-      levi_minus_plus e hg, levi_plus_minus e hg, plus_minus_levi e hg, plus_levi_minus e hg⟩⟩
-  obtain ⟨c, hc, d, hd, u, hu, rfl⟩ := minus_levi_plus e hg
-  exact Subgroup.mul_mem_sup (Subgroup.mul_mem_sup hc hd) hu
 
 end GlobalTheory.LocGL.IwahoriFactor

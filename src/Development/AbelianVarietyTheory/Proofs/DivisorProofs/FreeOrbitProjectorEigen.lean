@@ -1,6 +1,54 @@
+module
+
+public import Mathlib.RepresentationTheory.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Definitions.Divisors.IsAdelicOne
-import Formalism.LocalToGlobal.CMDeterminantIdeals.StatementG
-import Formalism.PolynomialDimension.WeylDim
+import Development.AbelianVarietyTheory.Definitions.Foundations.ExistsFlatSecRankZero
+import Development.AbelianVarietyTheory.Definitions.Foundations.ExistsUnitaryMulTriangular
+import Development.AbelianVarietyTheory.Definitions.Foundations.IsProbabilityMeasureMuPart
+import Formalism.LocalToGlobal.ProjectiveLattices.ErealAddIInf
+import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Module Formalism.BasicNotions Formalism.L2.Pj GlobalTheory.DualWeyl GlobalTheory.AllWt GlobalTheory.FlatLine GlobalTheory.DefPt MvPolynomial
 open scoped Matrix
 
@@ -55,6 +103,7 @@ theorem freeOrbit_projector_eigen : ∀ (K V G C : Type) [Field K] [AddCommGroup
   · intro f hf
     refine ⟨?_, ?_⟩
     · intro h
+
       simp only [map_sum, Finset.smul_sum]
       refine Finset.sum_congr rfl (fun o _ => ?_)
       refine Fintype.sum_equiv (Equiv.mulLeft h) _ _ (fun g => ?_)
@@ -78,12 +127,15 @@ theorem freeOrbit_projector_eigen : ∀ (K V G C : Type) [Field K] [AddCommGroup
           intro hZ
           obtain ⟨h1, h2⟩ := hinj g o g' o' ho ho' hZ
           exact hc ⟨h1.symm, h2.symm⟩
+
       rw [map_sum, Finset.sum_eq_single_of_mem o ho]
-      · rw [map_sum, Fintype.sum_eq_single g]
+      · set_option synthInstance.maxHeartbeats 100000 in
+          rw [map_sum, Fintype.sum_eq_single g]
         · rw [key o ho g, if_pos ⟨rfl, rfl⟩]
         · intro g' hg'
           rw [key o ho g', if_neg (fun h => hg' h.1)]
       · intro o' ho' hne
+
         rw [map_sum]
         refine Finset.sum_eq_zero (fun g' _ => ?_)
         rw [key o' ho' g', if_neg (fun h => hne h.2)]

@@ -1,8 +1,52 @@
-import Mathlib
-import Formalism.LocalToGlobal.HermitianForms.TiedTwGen
-import Formalism.LocalToGlobal.Columns.RecLevelTop
+module
+
+public import Formalism.LocalToGlobal.HermitianForms.TiedTwGen
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.MemStabGLAdeleIff
+public import Formalism.LocalToGlobal.Columns.RecLevelTop
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.LocalToGlobal.PairingIndexBounds.OrthogonalChartLevels.IsOrthCo
 import Formalism.SharpRestriction.GrowthBounds.ChartedClasses.ToLEInvApply
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.MemStabGLAdeleIff
+
+@[expose] public section
 
 noncomputable section
 
@@ -88,30 +132,16 @@ def moveLev : StepLevel F E σ J T f bad :=
 
 theorem mem_moveLev (x : GL (Fin n) (E ⊗[F] FiniteAdeleRing (𝓞 F) F)) : x ∈ (moveLev k).U ↔ k.1 * x * k.1⁻¹ ∈ S.U := Iff.rfl
 
-theorem moveLev_chi (x : (moveLev k).U) : (moveLev k).chi x = S.chi ⟨k.1 * x.1 * k.1⁻¹, x.2⟩ := rfl
-
 def toMoved (κ : S.U) : (moveLev k).U :=
   ⟨k.1⁻¹ * κ.1 * k.1, by
     have e : k.1 * (k.1⁻¹ * κ.1 * k.1) * k.1⁻¹ = κ.1 := by group
     rw [mem_moveLev, e]
     exact κ.2⟩
 
-theorem chi_toMoved (κ : S.U) : (moveLev k).chi (toMoved k κ) = S.chi κ := by
-  rw [moveLev_chi]
-  congr 1
-  apply Subtype.ext
-  show k.1 * (k.1⁻¹ * κ.1 * k.1) * k.1⁻¹ = κ.1
-  group
-
-theorem basePt_hatStab : HatStab S.Lb k.1 := fun z => ((inv_mem k.2.1).2 z).symm
-
-theorem latAd_basePt [StarRing E] (x : GL (Fin n) (E ⊗[F] FiniteAdeleRing (𝓞 F) F)) : latAd (x * k.1) S.Lb = latAd x S.Lb :=
-  latAd_stab x k.1 S.Lb (basePt_hatStab k)
-
 theorem cls_move_iff (x y : UPts σ J (FiniteAdeleRing (𝓞 F) F)) :
     (Quotient.mk'' (x * basePtU k) : Cls (moveLev k)) = Quotient.mk'' (y * basePtU k) ↔
       (Quotient.mk'' x : Cls S) = Quotient.mk'' y := by
-  refine (DoubleCoset.eq _ _ _ _).trans (Iff.trans ?_ (DoubleCoset.eq _ _ _ _).symm)
+  refine (@DoubleCoset.eq _ _ _ _ _ _).trans (Iff.trans ?_ (@DoubleCoset.eq _ _ _ _ _ _).symm)
   refine exists_congr fun g => and_congr_right fun _ => ⟨?_, ?_⟩
   · rintro ⟨κ, hκ, e⟩
     refine ⟨basePtU k * κ * (basePtU k)⁻¹, hκ, ?_⟩
@@ -152,13 +182,6 @@ theorem bij_move {cl : Type} {y : cl → UPts σ J (FiniteAdeleRing (𝓞 F) F)}
     have h := (cls_move_iff k _ _).2 hc
     rwa [inv_mul_cancel_right] at h
 
-example : (moveLev (1 : basePts S)).U = S.U := by
-  ext x
-  simp [mem_moveLev]
-
-example (κ : S.U) (h : ∀ v : HeightOneSpectrum (𝓞 F), (T : 𝓞 F) ∈ v.asIdeal → bc (prV (E := E) v) κ.1 = 1) : κ.1 ∈ basePts S :=
-  (mem_basePts_iff S _).2 ⟨((S.U_eq _).1 κ.2).1, fun v => S.Uloc_lev v (((S.U_eq _).1 κ.2).2 v), h⟩
-
 end Level
 
 section Chart
@@ -168,7 +191,7 @@ attribute [local instance] Formalism.BasicNotions.Host.cmStar
 variable {D : D7} {T : ℕ} {bad : Set (HeightOneSpectrum (𝓞 D.host.F))} {i : ℕ} {hi : i ≤ D.R.m} {cl : Type}
   {stab : cl → Type} [∀ c, Group (stab c)] {lat : cl → Submodule (𝓞 D.host.E) (Fin (D.R.N i) → D.host.E)}
 
-set_option maxHeartbeats 1000000 in
+
 
 def moveChart (K : LevelChart D T bad i hi stab lat) (k : basePts K.lev) : LevelChart D T bad i hi stab lat where
   lev := moveLev k

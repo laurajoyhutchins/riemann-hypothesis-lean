@@ -1,15 +1,51 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PlaceDivisors.StChartFH
-import ReciprocityTheory.DualLattices.TowerZeroSurjective
-import ReciprocityTheory.DualLattices.LinPairStatement
-import ReciprocityTheory.DualLattices.LengthDegreeAbelianVariety
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.UniversalCharts.LePreimageOfNil
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.Clauses
-import Development.AbelianVarietyTheory.Definitions.TeichmullerDepth.IsEigBasisIff
-import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.NEvalSqZero
-import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.IsUniversalChartOfFormalGroupChart
-import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.GermEvalOneStandardPointSelf
-import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.ExistsToJetEq
+module
+
+public import Development.AbelianVarietyTheory.Definitions.TeichmullerDepth.IsEigBasisIff
+public import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.ExistsToJetEq
+public import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.GermEvalOneStandardPointSelf
+public import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.IsUniversalChartOfFormalGroupChart
+public import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.EvBasicNEvalSubCoeffMem
+public import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.NEvalSqZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.Noetherian.Nilpotent
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 noncomputable section
@@ -121,6 +157,7 @@ private theorem psJet_eq_nv {R : Type} [CommRing R] {n d : ℕ} (m : ℕ) (f : P
       Ideal.Quotient.mk _ (∑ e : Fin n × Fin d → Fin (m + 1), MvPolynomial.monomial
         (Finsupp.equivFunOnFinite.symm fun i => (e i : ℕ)) (MvPowerSeries.coeff
         (Finsupp.equivFunOnFinite.symm fun i => (e i : ℕ)) f)) := by
+
     rw [h1, map_sum]
     refine Finset.sum_congr rfl fun e _ => ?_
     rw [MvPolynomial.monomial_eq, Finsupp.prod_fintype _ _ (fun i => pow_zero _), map_mul, map_prod]
@@ -129,9 +166,9 @@ private theorem psJet_eq_nv {R : Type} [CommRing R] {n d : ℕ} (m : ℕ) (f : P
   rw [h2]
   refine (GlobalTheory.JetSer.jet_mk_eq_iff m _ _).2 fun e he => ?_
   have hle : ∀ i, e i < m + 1 := fun i => lt_of_le_of_lt (Finsupp.le_degree i e) he
-  have hr : MvPolynomial.coeff e (∑ e : Fin n × Fin d → Fin (m + 1), MvPolynomial.monomial
+  have hr : AddMonoidAlgebra.coeff (∑ e : Fin n × Fin d → Fin (m + 1), MvPolynomial.monomial
         (Finsupp.equivFunOnFinite.symm fun i => (e i : ℕ)) (MvPowerSeries.coeff
-        (Finsupp.equivFunOnFinite.symm fun i => (e i : ℕ)) f)) = MvPowerSeries.coeff e f := by
+        (Finsupp.equivFunOnFinite.symm fun i => (e i : ℕ)) f)) e = MvPowerSeries.coeff e f := by
     have he0 : (Finsupp.equivFunOnFinite.symm fun i => ((⟨e i, hle i⟩ : Fin (m + 1)) : ℕ)) = e := by
       ext i; rfl
     rw [MvPolynomial.coeff_sum, Finset.sum_eq_single (fun i => (⟨e i, hle i⟩ : Fin (m + 1)))]

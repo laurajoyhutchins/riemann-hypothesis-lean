@@ -1,11 +1,68 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Foundations.ClassMassEqSumOfBijective
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsUnitaryClassRepTrivialAtCm
-import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.ClassSet
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.ClassMassEqSumOfBijective
+public import Formalism.HermitianLattices.StatementMass
+public import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.AfsplitB
+public import Formalism.SatakeDualWeyl.DefsCS
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.AlgebraMapApply
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.EpsMemLatSIff
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.UnitaryTranspose
 import Formalism.HermitianLattices.HermitianLatticesProofs.LocBasic
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.AlgebraMapApply
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.UnitaryTranspose
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.EpsMemLatSIff
+import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.AdelstabL
+import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.Afsplit
+public import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.Bridge
+public import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.ClassInjectiveOfSpanRecovery
+import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.CsApprox
+public import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.CsAsmHformSmulRight
+public import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.CsEasy
+public import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.CsEquiv
+import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.CsGlob
+public import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.CsSpan
+public import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.RationalPointsLeHolds
+import Formalism.SatakeDualWeyl.KpqSubgroupCompact
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -16,14 +73,8 @@ namespace GlobalTheory.Mass.Genus
 
 variable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] {n : ℕ}
 
-local notation "𝔸" => FiniteAdeleRing (𝓞 F) F
-local notation "𝒜" => E ⊗[F] FiniteAdeleRing (𝓞 F) F
-local notation "𝒮" => tensInt (F := F) (FiniteAdeleRing (𝓞 F) F) (intOE E) (intAd F)
-local notation "ιA" => inclE (F := F) (E := E) (FiniteAdeleRing (𝓞 F) F)
-local notation "𝓛" => latS (F := F) (FiniteAdeleRing (𝓞 F) F) 𝒮
 
 omit [NumberField F] [Algebra F E] in
-
 theorem exists_den (Λ N : Submodule (𝓞 E) (Fin n → E)) (hΛ : Λ.FG)
     (hN : Submodule.span E (N : Set (Fin n → E)) = ⊤) : ∃ m : ℤ, m ≠ 0 ∧ ∀ x ∈ Λ, m • x ∈ N := by
   obtain ⟨m', hm', hs⟩ := csGlob_single N hN
@@ -66,7 +117,8 @@ theorem mem_gmap (γ : GL (Fin n) E) (N : Submodule (𝓞 E) (Fin n → E)) (x :
 
 theorem exists_place (p : Ideal (𝓞 E)) (hp : p.IsMaximal) :
     ∃ v : HeightOneSpectrum (𝓞 F), p.comap (algebraMap (𝓞 F) (𝓞 E)) = v.asIdeal := by
-  have h : (p.comap (algebraMap (𝓞 F) (𝓞 E))).IsMaximal := Ideal.isMaximal_comap_of_isIntegral_of_isMaximal p
+  have h : (p.comap (algebraMap (𝓞 F) (𝓞 E))).IsMaximal :=
+    Ideal.isMaximal_under_of_isIntegral_of_isMaximal (R := 𝓞 F) p
   exact ⟨⟨_, h.isPrime, Ring.ne_bot_of_isMaximal_of_not_isField h (RingOfIntegers.not_isField F)⟩, rfl⟩
 
 theorem exists_over (v : HeightOneSpectrum (𝓞 F)) :
@@ -75,6 +127,11 @@ theorem exists_over (v : HeightOneSpectrum (𝓞 F)) :
   refine Ideal.exists_ideal_over_maximal_of_isIntegral v.asIdeal ?_
   rw [(RingHom.injective_iff_ker_eq_bot _).1 (FaithfulSMul.algebraMap_injective (𝓞 F) (𝓞 E))]
   exact bot_le
+
+local notation "𝔸" => FiniteAdeleRing (𝓞 F) F
+local notation "𝒜" => E ⊗[F] 𝔸
+local notation "ιA" => inclE (F := F) (E := E) 𝔸
+local notation "𝓛" => latS (F := F) 𝔸 (tensInt (F := F) 𝔸 (intOE E) (intAd F))
 
 theorem eps_glob {Λ : Submodule (𝓞 E) (Fin n → E)} (hΛ : Module.Finite (𝓞 E) Λ)
     (hsp : Submodule.span E (Λ : Set (Fin n → E)) = ⊤) (g : GL (Fin n) 𝒜) (e : 𝒜) (u : Fin n → 𝒜) :
@@ -117,8 +174,8 @@ theorem eps_congr (v : HeightOneSpectrum (𝓞 F)) {g h : GL (Fin n) 𝒜}
     afsplit_decomp] at this
   exact this
 
-omit [NumberField F] [NumberField E] in
 
+omit [NumberField F] [NumberField E] in
 theorem fixed_mem (σ : E →ₐ[F] E) (hr : Module.finrank F E = 2) (hne : ∃ z, σ z ≠ z) (e : E) (he : σ e = e) :
     ∃ a : F, algebraMap F E a = e := by
   obtain ⟨z, hz⟩ := hne
@@ -133,13 +190,16 @@ theorem fixed_mem (σ : E →ₐ[F] E) (hr : Module.finrank F E = 2) (hne : ∃ 
 variable {σ : E →ₐ[F] E} (hs : ∀ e, (σ : E →+* E) ((σ : E →+* E) e) = e) {J : Matrix (Fin n) (Fin n) E}
   {Λ : Submodule (𝓞 E) (Fin n → E)}
 
+local notation "Γ" => Subgroup.subgroupOf (ratPts σ J 𝔸) (UPts σ J 𝔸)
+local notation "𝒦" => Subgroup.subgroupOf (levelAfL σ J Λ) (UPts σ J 𝔸)
+
 theorem globLat_mem_genus (hfix : ∀ e : E, σ e = e → ∃ a : F, algebraMap F E a = e) (hne : ∃ z, σ z ≠ z)
     (hJ : IsHerm (σ : E →+* E) J) (hdet : J.det ≠ 0) (hΛ : Module.Finite (𝓞 E) Λ)
     (hsp : Submodule.span E (Λ : Set (Fin n → E)) = ⊤) (g : GL (Fin n) 𝒜) (hg : g ∈ UPts σ J 𝔸) :
     letI := starOfInv (σ : E →+* E) hs
     globLat g Λ ∈ Formalism.HermitianLatticesTheory.genus (formJ (σ : E →+* E) hs J 1) Λ := by
   letI := starOfInv (σ : E →+* E) hs
-  have hL := global_lattice_isLattice_holds F E (Fin n) Λ hΛ hsp g
+  have hL := csGlob_lattice Λ hΛ hsp g
   refine ⟨hL, fun p hp => ?_⟩
   obtain ⟨v, hv⟩ := exists_place (F := F) p hp
   obtain ⟨D, hD, hc⟩ := GlobalTheory.GenusCong.eps_mem_latS_iff F E n Λ hΛ hsp v
@@ -159,6 +219,7 @@ theorem exists_globLat_eq (hfix : ∀ e : E, σ e = e → ∃ a : F, algebraMap 
   letI := starOfInv (σ : E →+* E) hs
   obtain ⟨hL, hG⟩ := hN
   have hNf : Module.Finite (𝓞 E) N := Module.Finite.iff_fg.2 hL.fg
+  have hNsp : Submodule.span E (N : Set (Fin n → E)) = ⊤ := hL.span_eq_top
   have h1 : ∀ v : HeightOneSpectrum (𝓞 F), ∃ γ ∈ UJ (σ : E →+* E) J, ∀ x : Fin n → E,
       afsplitEps E v • (((bc ιA γ)⁻¹).1 *ᵥ fun i => ιA (x i)) ∈ 𝓛 Λ ↔
         (afsplitEps E v • fun i => ιA (x i)) ∈ 𝓛 N := by
@@ -168,9 +229,9 @@ theorem exists_globLat_eq (hfix : ∀ e : E, σ e = e → ∃ a : F, algebraMap 
     obtain ⟨γ, rfl⟩ := Formalism.UG.Final.HermBridgeSurj E (Fin n) _ u hu
     refine ⟨γ, (unitary_isometry_lattice_holds E _ hs (Fin n) J 1 one_ne_zero (map_one _) _).2 hu, fun x => ?_⟩
     rw [← map_inv, csEquiv_bc_mulVec, ← GlobalTheory.LocDict.mem_loc_iff F E σ hs hfix n Λ hΛ hsp v p hp.isPrime hv,
-      ← GlobalTheory.LocDict.mem_loc_iff F E σ hs hfix n N hNf hL.span_eq_top v p hp.isPrime hv, ← e, mem_gmap]
+      ← GlobalTheory.LocDict.mem_loc_iff F E σ hs hfix n N hNf hNsp v p hp.isPrime hv, ← e, mem_gmap]
   choose γ hγ hγ' using h1
-  obtain ⟨a, ha, haN⟩ := exists_den Λ N (Module.Finite.iff_fg.1 hΛ) hL.span_eq_top
+  obtain ⟨a, ha, haN⟩ := exists_den Λ N (Module.Finite.iff_fg.1 hΛ) hNsp
   obtain ⟨b, hb, hbΛ⟩ := exists_den N Λ hL.fg hsp
   have hfin : {v : HeightOneSpectrum (𝓞 F) | ((a * b : ℤ) : 𝓞 F) ∈ v.asIdeal}.Finite := by
     have hne : Ideal.span {((a * b : ℤ) : 𝓞 F)} ≠ 0 := by
@@ -179,7 +240,7 @@ theorem exists_globLat_eq (hfix : ∀ e : E, σ e = e → ∃ a : F, algebraMap 
     exact (Ideal.finite_factors hne).subset fun v hv => Ideal.dvd_span_singleton.2 hv
   obtain ⟨g, hg, g1, g2⟩ := exists_glue σ J (fun v => bc ιA (γ v))
     (fun v => rational_points_le_holds F E (Fin n) σ J 𝔸 ⟨γ v, hγ v, rfl⟩) hfin.toFinset
-  have hL' := global_lattice_isLattice_holds F E (Fin n) Λ hΛ hsp g
+  have hL' := csGlob_lattice Λ hΛ hsp g
   have key : ∀ p : Ideal (𝓞 E), p.IsMaximal →
       Formalism.HermitianLatticesTheory.loc (K := E) p (globLat g Λ) = Formalism.HermitianLatticesTheory.loc (K := E) p N := by
     intro p hp
@@ -188,7 +249,7 @@ theorem exists_globLat_eq (hfix : ∀ e : E, σ e = e → ∃ a : F, algebraMap 
     rw [GlobalTheory.LocDict.mem_loc_iff F E σ hs hfix n _ (Module.Finite.iff_fg.2 hL'.fg) hL'.span_eq_top v p hp.isPrime hv,
       eps_glob hΛ hsp]
     by_cases h : v ∈ hfin.toFinset
-    · rw [eps_congr v (g1 v h), hγ', GlobalTheory.LocDict.mem_loc_iff F E σ hs hfix n N hNf hL.span_eq_top v p hp.isPrime hv]
+    · rw [eps_congr v (g1 v h), hγ', GlobalTheory.LocDict.mem_loc_iff F E σ hs hfix n N hNf hNsp v p hp.isPrime hv]
     · rw [eps_congr v (g2 v h), inv_one, Units.val_one, Matrix.one_mulVec,
         ← GlobalTheory.LocDict.mem_loc_iff F E σ hs hfix n Λ hΛ hsp v p hp.isPrime hv]
       have hm : ((a * b : ℤ) : 𝓞 E) ∉ p := fun h' => h (hfin.mem_toFinset.2 (by
@@ -211,9 +272,6 @@ theorem exists_globLat_eq (hfix : ∀ e : E, σ e = e → ∃ a : F, algebraMap 
   have lg := (Formalism.HermitianLatticesTheory.locBasic (𝓞 E) E (Fin n → E) RingOfIntegers.coe_injective).2.2.1
   exact ⟨g, hg, le_antisymm (lg _ _ fun p hp => (key p hp).le) (lg _ _ fun p hp => (key p hp).ge)⟩
 
-local notation "Γ" => Subgroup.subgroupOf (ratPts σ J 𝔸) (UPts σ J 𝔸)
-local notation "𝒦" => Subgroup.subgroupOf (levelAfL σ J Λ) (UPts σ J 𝔸)
-
 theorem mk_eq_iff (hΛ : Module.Finite (𝓞 E) Λ) (hsp : Submodule.span E (Λ : Set (Fin n → E)) = ⊤)
     (g g' : UPts σ J 𝔸) :
     letI := starOfInv (σ : E →+* E) hs
@@ -223,7 +281,7 @@ theorem mk_eq_iff (hΛ : Module.Finite (𝓞 E) Λ) (hsp : Submodule.span E (Λ 
   letI := starOfInv (σ : E →+* E) hs
   constructor
   · intro h
-    obtain ⟨c, ⟨γ, hγ, e⟩, k, hk, rfl⟩ := (DoubleCoset.eq _ _ _ _).1 h
+    obtain ⟨c, ⟨γ, hγ, e⟩, k, hk, rfl⟩ := (@DoubleCoset.eq _ _ _ _ _ _).1 h
     refine ⟨glEquiv γ, (unitary_isometry_lattice_holds E _ hs (Fin n) J 1 one_ne_zero (map_one _) _).1 hγ, ?_⟩
     rw [← global_lattice_equiv_holds F E (Fin n) Λ γ g k hk.2, e]
     rfl
@@ -295,8 +353,8 @@ theorem card_stabAt (hΛ : Module.Finite (𝓞 E) Λ) (hsp : Submodule.span E (�
 
 end GlobalTheory.Mass.Genus
 
-open GlobalTheory.Mass.Genus Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes in
 
+open GlobalTheory.Mass.Genus Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes in
 theorem GlobalTheory.Mass.classMass_lattice_eq_genus_mass {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E]
     [Algebra F E] {σ : E →ₐ[F] E} {M : ℕ} {J : Matrix (Fin M) (Fin M) E} (hσ : IsCMExt F E σ) (hJ : IsHermND σ J)
     (hd : IsTotDef σ J) (hs : ∀ e, (σ : E →+* E) ((σ : E →+* E) e) = e) (Λ : Submodule (𝓞 E) (Fin M → E))
@@ -332,11 +390,11 @@ theorem GlobalTheory.Mass.classMass_lattice_eq_genus_mass {F E : Type} [Field F]
       exact hgen _ c.out.2
     · obtain ⟨g, hg, rfl⟩ := hsur N hN
       refine ⟨f (DoubleCoset.mk _ _ ⟨g, hg⟩), ⟨(Set.Finite.mem_toFinset _).2 ⟨_, rfl⟩,
-        (hmk _ ⟨g, hg⟩).1 (DoubleCoset.out_eq' _ _ _)⟩, ?_⟩
+        (hmk _ ⟨g, hg⟩).1 (DoubleCoset.out_eq' _)⟩, ?_⟩
       rintro N ⟨hN', h⟩
       obtain ⟨c, rfl⟩ := (Set.Finite.mem_toFinset _).1 hN'
       rw [← (hmk c.out ⟨g, hg⟩).2 h, DoubleCoset.out_eq']
-  rw [Formalism.HermitianLatticesTheory.mass, dif_pos hex]
+  rw [Formalism.HermitianLatticesTheory.mass, dite_eq_left hex]
   obtain ⟨h1, h2⟩ := hex.choose_spec
   set s := hex.choose
   choose g hg hgN using fun N : s => hsur N (h1 N N.2)
@@ -350,12 +408,12 @@ theorem GlobalTheory.Mass.classMass_lattice_eq_genus_mass {F E : Type} [Field F]
       ⟨N'.2, 1, one_mem _, csAsm_gmap_one _⟩)
   · obtain ⟨N, ⟨hN, h⟩, -⟩ := h2 _ (hgen _ c.out.2)
     refine ⟨⟨N, hN⟩, ?_⟩
-    rw [← DoubleCoset.out_eq' _ _ c]
+    rw [← DoubleCoset.out_eq' c]
     refine (hmk _ _).2 ?_
     simpa only [hgN] using h
 
-open Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes in
 
+open Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes in
 theorem GlobalTheory.Mass.unitaryMass_lattice_eq_genus_mass {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E]
     [Algebra F E] {σ : E →ₐ[F] E} {M : ℕ} {J : Matrix (Fin M) (Fin M) E} (hσ : IsCMExt F E σ) (hJ : IsHermND σ J)
     (hd : IsTotDef σ J) (hs : ∀ e, (σ : E →+* E) ((σ : E →+* E) e) = e) (Λ : Submodule (𝓞 E) (Fin M → E))

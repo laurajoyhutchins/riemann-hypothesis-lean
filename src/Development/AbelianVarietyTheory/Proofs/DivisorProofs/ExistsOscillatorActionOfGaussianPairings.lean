@@ -1,7 +1,56 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ContinuousFourierGau
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IntegralGauTwistedConv
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PowMulNormGauLe
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ContinuousFourierGau
+public import Mathlib.Analysis.CStarAlgebra.Module.Constructions
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IntegralGauTwistedConv
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PowMulNormGauLe
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.InnerProductSpace.Calculus
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.Real.Pi.Bounds
+import Mathlib.Analysis.SpecialFunctions.Gaussian.FourierTransform
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -58,7 +107,7 @@ theorem good_proj (hJ : ∀ x, J (J x) = -x) (h : IsHeis (omJ J) ρ) (x : B) : G
   simp only [proj_heis_proj hJ, gau_neg, norm_smul, mul_assoc]
 
 theorem sm_add {f f' : B} (hf : Sm ρ f) (hf' : Sm ρ f') : Sm ρ (f + f') := by
-  simpa only [Sm, map_add] using ContDiff.add hf hf'
+  simpa only [Sm, map_add (f := _)] using ContDiff.add hf hf'
 
 theorem sm_smul (a : ℂ) {f : B} (hf : Sm ρ f) : Sm ρ (a • f) := by
   simpa only [Sm, map_smul] using ContDiff.const_smul a hf
@@ -155,7 +204,7 @@ theorem intw_proj (hJ : ∀ x, J (J x) = -x) {h : IsHeis (omJ J) ρ} (h' : IsHei
 
 theorem intw_add {h : IsHeis (omJ J) ρ} (h' : IsHeis (omJ J) ρ') (hT : ∀ x, T (proj h x) = T x)
     {f f' : B} (hf : Good h f) (hf' : Good h f') : intw ρ' T ρ (f + f') = intw ρ' T ρ f + intw ρ' T ρ f' := by
-  simp only [intw, map_add]
+  simp only [intw, map_add (f := _)]
   exact integral_add (intw_integrable h' hT hf) (intw_integrable h' hT hf')
 
 theorem intw_smul (a : ℂ) (f : B) : intw ρ' T ρ (a • f) = a • intw ρ' T ρ f := by
@@ -199,7 +248,7 @@ variable {H : Type} [NormedAddCommGroup H] [InnerProductSpace ℂ H] [CompleteSp
 theorem inner_heis (hΦ : ∀ v f, ‖Φ (ρ v f)‖ = ‖Φ f‖) (v : V) (x y : B) :
     inner ℂ (Φ (ρ v x)) (Φ (ρ v y)) = inner ℂ (Φ x) (Φ y) := by
   rw [inner_eq_sum_norm_sq_div_four, inner_eq_sum_norm_sq_div_four]
-  simp only [← map_smul, ← map_add, ← map_sub, hΦ]
+  simp only [← map_smul, ← map_add (f := _), ← map_sub, hΦ]
 
 theorem inner_heis' (hJ : ∀ x, J (J x) = -x) (h : IsHeis (omJ J) ρ) (hΦ : ∀ v f, ‖Φ (ρ v f)‖ = ‖Φ f‖) (v : V)
     (x y : B) : inner ℂ (Φ x) (Φ (ρ v y)) = inner ℂ (Φ (ρ (-v) x)) (Φ y) := by

@@ -1,7 +1,56 @@
-import Mathlib
-import Development.WeilBound.ThetaLifts.Reductions.SiegelCore
-import Development.AbelianVarietyTheory.Proofs.CharacterTheory.InvariantSubspaceMobiusInverseCharpolyOfIrreduci
-import Formalism.GaloisIrreducibility.GaloisIrreducibilityProofs.RestrictRoots
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.IsSmoothModerateOfIsAutFunSm
+public import Development.AbelianVarietyTheory.Proofs.CharacterTheory.InvariantSubspaceMobiusInverseCharpolyOfIrreduci
+public import Formalism.GaloisIrreducibility.GaloisIrreducibilityProofs.RestrictRoots
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.Semisimple
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open NumberField MeasureTheory Matrix Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes GlobalTheory.AdelicU GlobalTheory.SiegelSet
 open Formalism.UG (cT)
 open scoped TensorProduct NNReal ENNReal
@@ -47,7 +96,7 @@ theorem exists_poly_proj {V : Type} [AddCommGroup V] [Module E V] [FiniteDimensi
     rw [map_mul, Module.End.mul_apply, hzW₁ x hx, map_zero]
   refine ⟨v * b, fun x => ?_, h1⟩
   obtain ⟨w, hw, w₁, hw₁, rfl⟩ := Submodule.mem_sup.mp (hc.sup_eq_top ▸ Submodule.mem_top (x := x))
-  rw [map_add, h1 w hw, h0 w₁ hw₁, add_zero]
+  rw [map_add (f := _), h1 w hw, h0 w₁ hw₁, add_zero]
   exact hw
 
 theorem exists_poly_proj_matrix {ι : Type} [Fintype ι] [DecidableEq ι]
@@ -224,7 +273,7 @@ theorem stab_iff (A : Matrix (Fin n) (Fin n) E) (X : Matrix (Fin n) (Fin r) E) (
       _ = ∑ u : {l : Fin r // l ≤ j}, X a u.1 * (if h : u.1 ≤ j then C ⟨u.1, h⟩ ⟨l, hl⟩ else 0) := by
         simp only [Matrix.mul_apply, Pj, Matrix.submatrix_apply, id]
         refine Finset.sum_congr rfl fun u _ => ?_
-        rw [dif_pos u.2]
+        rw [dite_eq_left u.2]
       _ = _ := h2.symm
 
 theorem exists_sel (X : Matrix (Fin n) (Fin r) E) {i a : Fin r} (h : i ≤ a) :

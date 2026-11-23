@@ -1,9 +1,44 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.CTSmallCone
-import Formalism.SharpRestriction.GlobalSchurBounds.GeneralLinearActions.GenusMassVolumes
-import Development.AbelianVarietyTheory.Definitions.Foundations.EventuallyNormFinLeOne
-import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.WeilTensorModels
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.ClosureSpanCoefficients
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.CTSmallCone
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.ClosureSpanCoefficients
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 theorem UpperTheory.Reformulated.B.OrthogonalGroupLemmas.aux1 :
     ∀ (F : Type) [inst : Field F] [inst_1 : NumberField F] {a b : Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes.AF F},
@@ -28,7 +63,7 @@ theorem UpperTheory.Reformulated.B.OrthogonalGroupLemmas.aux1 :
   · have h : GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.evI F (a + b) = GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.evI F a + GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.evI F b :=
       map_add (NumberField.InfiniteAdeleRing.ringEquiv_mixedSpace F) a.1 b.1
     rw [h, ha.1, hb.1, add_zero]
-  · rw [map_add]
+  · rw [map_add (f := _)]
     exact add_mem (ha.2 v) (hb.2 v)
 
 theorem UpperTheory.Reformulated.B.OrthogonalGroupLemmas.aux2 :
@@ -81,7 +116,7 @@ theorem UpperTheory.Reformulated.B.OrthogonalGroupLemmas.lat_gen :
       Submodule.IsLattice E Y.L →
         ∃ (m : ℕ) (x : Fin m → ↥Y.L),
           Submodule.span ℤ (Set.range x) = ⊤ ∧
-            ∀ (z : Fin n → GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.AE F E),
+            ∀ (z : Fin n → GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.AE (F := F) (E := E)),
               z ∈ GlobalTheory.ThK.latHat Y ↔
                 ∃ (a : Fin m → Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes.AF F),
                   (∀ (i : Fin m), a i ∈ UpperTheory.Reformulated.B.OrthogonalGroupLemmas.Oh F) ∧ ∑ i : Fin m, a i • GlobalTheory.ThK.incV F (↑(x i) : Fin n → E) = z := by
@@ -90,7 +125,7 @@ theorem UpperTheory.Reformulated.B.OrthogonalGroupLemmas.lat_gen :
   have h2 : Module.Finite ℤ Y.L := Module.Finite.trans (NumberField.RingOfIntegers E) Y.L
   obtain ⟨m, x, hx⟩ := Module.Finite.exists_fin (R := ℤ) (M := Y.L)
   refine ⟨m, x, hx, fun z => ?_⟩
-  let f : Y.L →+ (Fin n → GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.AE F E) :=
+  let f : Y.L →+ (Fin n → GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.AE (F := F) (E := E)) :=
     { toFun := fun l => GlobalTheory.ThK.incV F (l : Fin n → E)
       map_zero' := funext fun _ => map_zero (Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes.inclR (F := F) (E := E) (Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes.AF F))
       map_add' := fun a b => funext fun i =>

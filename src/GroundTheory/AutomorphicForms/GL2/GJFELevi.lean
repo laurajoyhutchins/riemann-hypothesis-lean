@@ -1,6 +1,62 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.GL2.GJFELeviMulti
-import GroundTheory.AutomorphicForms.InductionParabolic
+module
+
+public import Aesop.BuiltinRules
+public import GroundTheory.AutomorphicForms.GL2.IsAddHaarMeasureMatrixMeasureFinSq
+public import GroundTheory.AutomorphicForms.GL2.GJFELeviMulti
+import GroundTheory.AutomorphicForms.GL2.GJLocalZeta
+import GroundTheory.AutomorphicForms.LocallyProfinite
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.Countable
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.ExtremallyDisconnected
+import Mathlib.Topology.Sheaves.Init
+import Mathlib.Topology.UniformSpace.Uniformizable
+public import GroundTheory.AutomorphicForms.GL2.GJFELeviConv
+
+@[expose] public section
 
 noncomputable section
 
@@ -59,8 +115,8 @@ theorem isAdmissible_twist (hρ : IsAdmissible ρ) : IsAdmissible (twist (nnreal
     rw [fixedVectors_twist χ hχ ρ hKc]
     exact hρ.2 K hKc hKo⟩
 
-omit hχ in
 
+omit hχ in
 def subrepresentationTwistOrderIso :
     Subrepresentation (twist (nnrealCharC χ) ρ) ≃o Subrepresentation ρ where
   toFun S := ⟨S.toSubmodule, fun g v hv => by
@@ -178,8 +234,8 @@ theorem leviEquivPi_symm_mulSingle (a : Set.range β) :
   · rw [Pi.mulSingle_eq_of_ne hb]
     simp only [Units.val_one, Matrix.one_apply, blockIndicator, hk, if_neg hb, zpow_zero, hkl]
 
-variable (β) in
 
+variable (β) in
 def leviIdx (a : Set.range β) (k l : Fin (blockSize β a)) : LeviIndex n β :=
   ⟨((fiberFin β a k).1, (fiberFin β a l).1), by
     have hk := congrArg Subtype.val (fiberFin β a k).2
@@ -213,8 +269,8 @@ theorem prod_leviIndex {M : Type*} [CommMonoid M] (f : LeviIndex n β → M) :
   rw [← Fintype.prod_equiv (Equiv.ofBijective _ leviIdx_bijective) (fun p => f (leviIdx β p.1 p.2.1 p.2.2)) f
     (fun p => rfl), Fintype.prod_sigma]
 
-variable (β) in
 
+variable (β) in
 def blockTensor (φ : LeviIndex n β → F → ℂ) (a : Set.range β)
     (X : Matrix (Fin (blockSize β a)) (Fin (blockSize β a)) F) : ℂ :=
   ∏ p : Fin (blockSize β a) × Fin (blockSize β a), φ (leviIdx β a p.1 p.2) (X p.1 p.2)

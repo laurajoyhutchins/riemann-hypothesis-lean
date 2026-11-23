@@ -1,5 +1,55 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.SphericalSatake
+module
+
+public import GroundTheory.AutomorphicForms.SphericalSatake
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -13,8 +63,8 @@ namespace Spherical
 variable {F : Type*} [Field F] [ValuativeRel F] [TopologicalSpace F] [IsNonarchimedeanLocalField F]
   {n : ℕ}
 
-variable (F) in
 
+variable (F) in
 def Bdd (t : ℤ) (x : F) : Prop := valuation F x ≤ valuation F (uniformizer F : F) ^ t
 
 theorem valuation_uniformizer_pos : 0 < valuation F (uniformizer F : F) :=
@@ -151,6 +201,7 @@ theorem bdd_det_submatrix {A B : Matrix (Fin n) (Fin n) F} (hA : ∀ i j, A i j 
   rw [← det_transpose, hT]
   change Bdd F _ ((detRowAlternating : (Fin m → F) [⋀^Fin m]→ₗ[F] F).toMultilinearMap
     (fun j => ∑ l, (d l * B l (c j)) • vec l))
+
   rw [MultilinearMap.map_sum]
   refine bdd_sum _ fun p _ => ?_
   rw [MultilinearMap.map_smul_univ, smul_eq_mul]
@@ -186,8 +237,8 @@ theorem prod_zpow_uniformizer {ι : Type*} (s : Finset ι) (f : ι → ℤ) :
     rw [Finset.prod_insert ha, Finset.sum_insert ha, ih,
       zpow_add₀ (Cartan.uniformizer_ne_zero F)]
 
-variable (F n) in
 
+variable (F n) in
 def cartanType (g : GL (Fin n) F) : Fin n → ℤ :=
   (Cartan.existsUnique_mem_doubleCoset F n g).exists.choose
 
@@ -331,14 +382,14 @@ theorem satake_coeff (h : SphericalHecke μ (F := F) (n := n)) (l : Fin n → �
         if iwasawaExponent F n x.out = l then (h : HeckeAlgebra μ) x.out else 0 := by
   classical
   rw [satake, AddMonoidAlgebra.coeff_smul, Finsupp.smul_apply, AddMonoidAlgebra.coeff_sum,
-    Finsupp.finset_sum_apply, smul_eq_mul]
+    Finsupp.finsetSum_apply, smul_eq_mul]
   congr 1
   refine Finset.sum_congr rfl fun x _ => ?_
   rw [AddMonoidAlgebra.coeff_single, Finsupp.single_apply]
 
 theorem satakeHom_injective : Function.Injective (satakeHom μ (F := F) (n := n)) := by
   classical
-  rw [injective_iff_map_eq_zero]
+  set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
   intro h h0
   by_contra hne
   obtain ⟨g, hg⟩ : ∃ g, (h : HeckeAlgebra μ) g ≠ 0 := by

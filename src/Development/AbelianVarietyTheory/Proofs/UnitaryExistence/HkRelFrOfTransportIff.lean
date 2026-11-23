@@ -1,7 +1,58 @@
-import Mathlib
-import Formalism.LocalToGlobal.ProjectiveLattices.HeckeFr
-import Development.AbelianVarietyTheory.BlockTheory.ExistenceTori.FibrePushforward
-import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.IsReducedAlgebraOfSmoothOfIsNoetherianRing
+module
+
+public import Formalism.LocalToGlobal.ProjectiveLattices.HeckeFr
+public import Development.AbelianVarietyTheory.BlockTheory.ExistenceTori.FibrePushforward
+public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.IsReducedAlgebraOfSmoothOfIsNoetherianRing
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+public import Mathlib.AlgebraicGeometry.AlgClosed.Basic
+import Mathlib.AlgebraicGeometry.Morphisms.SchemeTheoreticallyDominant
+import Mathlib.AlgebraicGeometry.Morphisms.WeaklyEtale
+import Mathlib.AlgebraicGeometry.Sites.Fpqc
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.ExtremalEpi
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 noncomputable section
 
@@ -296,13 +347,6 @@ theorem level_ne_zero (l : Level H) : l.M' ≠ 0 :=
 
 end Level
 
-theorem pointHom_unique {Ω : Type} [Field Ω] [IsAlgClosed Ω] {p : ℕ} {x x' : Sp Ω ⟶ Xo.X}
-    {C : Subgroup (Over.mk x ⟶ Xo.univ.t.G)} {ψ : pullback Xo.univ.t.G.hom x ⟶ pullback Xo.univ.t.G.hom x'}
-    {f g : (Over.mk x ⟶ Xo.univ.t.G) →* (Over.mk x' ⟶ Xo.univ.t.G)} (hf : IsHkIsog p x x' C ψ f)
-    (hg : IsHkIsog p x x' C ψ g) : f = g :=
-  MonoidHom.ext fun a =>
-    sends_unique ((sends_conj_iff ψ _ _).2 (hf.2.2.1 a)) ((sends_conj_iff ψ _ _).2 (hg.2.2.1 a))
-
 theorem isog_iff {Ω : Type} [Field Ω] [IsAlgClosed Ω] {p : ℕ} (hp : p.Coprime l.M') (x x' : Sp Ω ⟶ Xo.X)
     (C : Subgroup (Over.mk x ⟶ Xo.univ.t.G)) (ψ : pullback Xo.univ.t.G.hom x ⟶ pullback Xo.univ.t.G.hom x') :
     (∃ ψp, IsHkIsog p x x' C ψ ψp) ↔ IsHeckeIsog p C (conj x x' ψ) := by
@@ -372,9 +416,6 @@ theorem lie_iff {Ω : Type} [Field Ω] {p : ℕ} (hp : (p : Ω) ≠ 0) {x x' : S
     · rw [← hpush, ← h, ← Category.assoc, eps_cancel (inv_mul_cancel₀ hp), Category.id_comp]
 
 variable {c : Coeff l} {𝔓 : Ideal (𝓞 E)} {p : ℕ}
-
-theorem idx_eq (h : IsSplitOff l 𝔓 p) (i : ℕ) (Ω : Type) [Field Ω] [IsAlgClosed Ω] [Algebra c.F Ω]
-    (y : FrPt Xo c Ω) : hkKer (Xo := Xo) 𝔓 p i Ω y = HeckeIdx Xo c h i Ω y := rfl
 
 theorem hkPt_iff (h : IsSplitOff l 𝔓 p) {Ω : Type} [Field Ω] [IsAlgClosed Ω] [Algebra c.F Ω]
     (sTr : ∀ (y z : FrPt Xo c Ω), (pullback Xo.univ.t.G.hom y.x ⟶ pullback Xo.univ.t.G.hom z.x) → Prop)

@@ -1,9 +1,46 @@
-import Mathlib
-import Formalism.HermitianCurvature.StatementPB
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.Measures
-import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.HidaSetting
-import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.PoincareInHH
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.Volumes
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.PoincareInHH
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.Volumes
+public import Formalism.HermitianCurvature.MemParahoricTimesPrincipalCongruenceIff
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -37,7 +74,7 @@ def typSet (g1 g2 : ℕ) : Finset (HeightOneSpectrum (𝓞 F)) :=
 theorem mem_typSet (g1 g2 : ℕ) (h1 : g1 ≠ 0) (h2 : g2 ≠ 0) (v : HeightOneSpectrum (𝓞 F)) :
     v ∈ typSet F g1 g2 ↔ IsTyped F g1 g2 v := by
   unfold typSet
-  rw [dif_pos (typed_finite F g1 g2 h1 h2), Set.Finite.mem_toFinset]
+  rw [dite_eq_left (typed_finite F g1 g2 h1 h2), Set.Finite.mem_toFinset]
   rfl
 
 abbrev TypP (g1 g2 : ℕ) : Type := ↥(typSet F g1 g2)
@@ -190,11 +227,6 @@ def massDataOf : Formalism.FourierDecayAlt.S3.MassData (TypP F g1 g2) :=
     n0c := (massDataPre σ J Λ k P P' Kpp Kpp1 Kpp2 MG MW MW' X0 g1 g2 du du' dπ dπ' vH vH' vN vN' L A).AA /
       (massDataPre σ J Λ k P P' Kpp Kpp1 Kpp2 MG MW MW' X0 g1 g2 du du' dπ dπ' vH vH' vN vN' L A).ρ0 }
 
-theorem inMass_massDataOf (h : massH σ J Λ P ≠ 0) :
-    (massDataOf σ J Λ k P P' Kpp Kpp1 Kpp2 MG MW MW' X0 g1 g2 du du' dπ dπ' vH vH' vN vN' L A).InMass := by
-  unfold Formalism.FourierDecayAlt.S3.MassData.InMass
-  exact div_mul_cancel₀ _ h
-
 end Gen
 
 section OfSetting
@@ -271,21 +303,6 @@ def InVolumesAt : Prop :=
       IsCompatT X.B.I.F X.B.I.E X.B.I.cm.sig X.B.I.n X.B.I.J X0 X.measG.μG (X.measG.μB X0) νB →
     covol (X.measW u).μN = 1 → covol (X.measW u').μN = 1 →
     (bOf X hb hK FdN FdN' u u' X0 L A).InVolumes
-
-def InFormAt : Prop :=
-  HypX X hb FdN FdN' u u' → (bOf X hb hK FdN FdN' u u' X0 L A).InForm
-
-def RealInputsAt (jn sd C Th : ℝ) : Prop :=
-  (bOf X hb hK FdN FdN' u u' X0 L A).InNu ∧ (bOf X hb hK FdN FdN' u u' X0 L A).InJacMod ∧
-    (bOf X hb hK FdN FdN' u u' X0 L A).InInfinity ∧
-    Formalism.FourierDecayAlt.PB.EnergyLink (bOf X hb hK FdN FdN' u u' X0 L A) jn sd C Th D.R.rS (Fintype.card (InfinitePlace X.B.I.F))
-
-def LinkAt {τ Rw I H H₁ : Type} [Fintype I] [NormedAddCommGroup H] [InnerProductSpace ℂ H]
-    [NormedAddCommGroup H₁] [InnerProductSpace ℂ H₁] (T : Formalism.FourierDecayAlt.PB.Terms τ Rw I H H₁) {ι : Type} [Fintype ι]
-    (G : Formalism.FourierDecayAlt.Sz.Glob ι) (de : ℕ → ℝ) : Prop :=
-  Formalism.FourierDecayAlt.PB.Link T (bOf X hb hK FdN FdN' u u' X0 L A) G de (D.mem u).A.T
-    (Module.finrank ℂ (Formalism.L2.SG.PoincareInHH.PoincareSetting.Cu X u hK))
-    (Module.finrank ℂ (Formalism.L2.SG.PoincareInHH.PoincareSetting.Cu X u' hK))
 
 end Stmts
 

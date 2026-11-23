@@ -1,24 +1,74 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsTorPartTorusExtension
-import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsToricRankOne
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.NonemptyTorusExtensionOfIsAlgClosed
-import Development.AbelianVarietyTheory.Statements.PlaceShiftStatements.IsE8ThetaStructure
-import Development.AbelianVarietyTheory.Statements.SemistableTorsion.ImmersedBy
-import Development.AbelianVarietyTheory.Statements.SemistableTorsion.UTorsSt
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsMulOfValLe
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PowFrameOne
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsThNeZero
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.JKCompEq
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsEmbFractionRingOfDominant
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SupIClosedPointEq
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.NonemptyPerpKerEquivHom
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsCompleteDvrCentre
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ClosureEqKerOfMeetsTorsionCosets
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsLabelMapTorsionCharacters
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.IsoFreePerpLabelKernelWeights
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.AllSixAbelianSchemeLawsHold
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.UTorsClosed
-import Development.AbelianVarietyTheory.Proofs.TorusSplitting.ExistsValuationClosure
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsTorPartTorusExtension
+public import Development.AbelianVarietyTheory.Statements.SemistableTorsion.ImmersedBy
+public import Development.AbelianVarietyTheory.Definitions.Degenerations.NormNatCastPadicAlgClOfCoprime
+public import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.ExistsUniqueWeilIs
+public import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.WeilIsAlternatingSkewNatural
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ClosureEqKerOfMeetsTorsionCosets
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsLabelMapTorsionCharacters
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.IsoFreePerpLabelKernelWeights
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsCompleteDvrCentre
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsEmbFractionRingOfDominant
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsMulOfValLe
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsThNeZero
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.JKCompEq
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.NonemptyPerpKerEquivHom
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PowFrameOne
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SupIClosedPointEq
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.WeilIsIffOfIsGrpPullbackComm
+import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.ExistsPowEqOfBaseChange
+public import Development.AbelianVarietyTheory.Proofs.TorusSplitting.ExistsValuationClosure
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.AllSixAbelianSchemeLawsHold
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.UTorsClosed
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.IsNatDiagIffIsDiag
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.SumMulEqZeroOfSumToReal
+import Development.AbelianVarietyTheory.Definitions.Divisors.IsProperToroidalModelStructureMap
+import Development.AbelianVarietyTheory.Definitions.Divisors.IsUnimodMod
+import Development.AbelianVarietyTheory.Definitions.Divisors.SharpOverIff
+import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.SiegelToroidalIntegral
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Out ReciprocityTheory.ChartRestriction.G.Geo.Tor
 open GlobalTheory.ZH
@@ -94,15 +144,46 @@ theorem labelMap : ∀ (o Ω : Type) [CommRing o] [Field Ω] [Algebra o Ω] [Ari
       rw [Pi.smul_apply, nsmul_eq_mul, ZMod.natCast_self, zero_mul]; rfl
     rw [← map_pow, ← ofAdd_nsmul, this, ofAdd_zero, map_one]
   choose P hP using fun a => honto _ (htors a)
+  letI := TorusExt.gtGroup D.toPre (AlgebraicClosure (FractionRing V))
   have hB := D.tau_bimult
+  open GlobalTheory.TorusExt ReciprocityTheory.ChartRestriction.G.DVR in
+  let iotaLocal : D.toPre.X →+ GtPtF D.toPre (AlgebraicClosure (FractionRing V)) := AddMonoidHom.mk'
+    (fun x => (GlobalTheory.TorusExt.exists_iota (F := AlgebraicClosure (FractionRing V)) hB x).choose) (by
+      intro x x'
+      obtain ⟨b, v⟩ := (GlobalTheory.TorusExt.isIota_iff_val _ _).1 (GlobalTheory.TorusExt.exists_iota (F := AlgebraicClosure (FractionRing V)) hB x).choose_spec
+      obtain ⟨b', v'⟩ := (GlobalTheory.TorusExt.isIota_iff_val _ _).1 (GlobalTheory.TorusExt.exists_iota (F := AlgebraicClosure (FractionRing V)) hB x').choose_spec
+      obtain ⟨b'', v''⟩ := (GlobalTheory.TorusExt.isIota_iff_val _ _).1 (GlobalTheory.TorusExt.exists_iota (F := AlgebraicClosure (FractionRing V)) hB (x + x')).choose_spec
+      refine (GlobalTheory.TorusExt.isAdd_iff_eq _ _ _).1 ((GlobalTheory.TorusExt.isAdd_iff_val _ _ _).2 ⟨by rw [b, b', b'', cPoint_add], fun χ y J hJ => ?_⟩)
+      have sym01 (a b c : TF (R := V) (AlgebraicClosure (FractionRing V)) ⟶ D.toPre.P.A) :
+          th D.toPre y J a b c = th D.toPre y J b a c := by
+        have e := (val_corr hJ D.toPre.cub.cubeSymmetric_swap_first (lift a (lift b c)).left).trans
+          (val_cub D.toPre.cub (lift a (lift b c)) hJ _ _ _)
+        refine e.trans ?_
+        congr 1 <;> simp [x3]
+      have sym12 (a b c : TF (R := V) (AlgebraicClosure (FractionRing V)) ⟶ D.toPre.P.A) :
+          th D.toPre y J a b c = th D.toPre y J a c b := by
+        have e := (val_corr hJ D.toPre.cub.cubeSymmetric_swap_last (lift a (lift b c)).left).trans
+          (val_cub D.toPre.cub (lift a (lift b c)) hJ _ _ _)
+        refine e.trans ?_
+        congr 1 <;> simp [x3]
+      rw [v χ y J hJ, v' χ y J hJ, v'' χ y J hJ, b, b', sym01, sym12]
+      exact tau_mul (𝟙 (TF (R := V) (AlgebraicClosure (FractionRing V)))) hJ hB x x' χ)
+  have hi (x : D.toPre.X) : GtPtF.IsIota x (iotaLocal x) := (GlobalTheory.TorusExt.exists_iota hB x).choose_spec
+  have hn (p : QkPt D.toPre (AlgebraicClosure (FractionRing V)) (S.r * S.N)) : (S.r * S.N) • p.g = iotaLocal p.y := by
+    obtain ⟨h, hn, hi'⟩ := p.eq
+    exact ((GlobalTheory.TorusExt.isNsmul_iff_eq _ _ _).1 hn).symm.trans (GlobalTheory.TorusExt.isIota_unique hi' (hi p.y))
   have wd : ∀ q q' : QkPt D.toPre (AlgebraicClosure (FractionRing V)) (S.r * S.N), f q = f q' →
       (QuotientAddGroup.mk q.y : D.toPre.X ⧸ (nsmulAddMonoidHom (S.r * S.N) : D.toPre.X →+ D.toPre.X).range) = QuotientAddGroup.mk q'.y := fun q q' e => by
     obtain ⟨z, hz, -⟩ := (heq q q').1 e
     exact QuotientAddGroup.eq.2 ⟨z, by rw [hz, neg_add_cancel_left]; rfl⟩
   have ftors : ∀ q, f q ^ (S.r * S.N) = 1 := LabelMap.pow_eq_one_of_qkAdd hB f (fun q q' e => (heq q q').2 e) hadd
   refine ⟨AddMonoidHom.mk' (fun a => QuotientAddGroup.mk (P a).y) fun a b => ?_, fun c => ?_, fun a pk x hx hφ => ?_⟩
-  · exact wd _ (TorusExt.qkAdd hB (P a) (P b)) (by
-      rw [hadd _ _ _ (TorusExt.qkAdd_qkAdd hB _ _), hP, hP, hP, ofAdd_add, map_mul])
+  · let q : QkPt D.toPre (AlgebraicClosure (FractionRing V)) (S.r * S.N) :=
+      ⟨(P a).y + (P b).y, (P a).g + (P b).g, iotaLocal ((P a).y + (P b).y),
+        (GlobalTheory.TorusExt.isNsmul_iff_eq _ _ _).2 (by rw [nsmul_add, hn, hn, map_add]), hi _⟩
+    apply wd _ q
+    rw [hadd _ _ _ (show QkAdd (P a) (P b) q from
+      ⟨q, rfl, (GlobalTheory.TorusExt.isAdd_iff_eq _ _ _).2 rfl, qk_equiv_refl hB q⟩), hP, hP, hP, ofAdd_add, map_mul]
   · obtain ⟨y, rfl⟩ := QuotientAddGroup.mk_surjective c
     obtain ⟨q, rfl⟩ := TorusExt.exists_qkPt (F := AlgebraicClosure (FractionRing V)) L.mulN (Or.inr L.polBaseChange) hB (Nat.pos_iff_ne_zero.1 hk) y
     obtain ⟨a, ha⟩ := hsurj' _ (ftors q)
@@ -125,9 +206,9 @@ theorem isoFree_perp : ∀ (o Ω : Type) [CommRing o] [Field Ω] [Algebra o Ω] 
   let ω : (AlgebraicClosure (FractionRing V))ˣ := Units.map y₀.toMonoidHom c₀
   have hω : IsPrimitiveRoot ω (S.r * S.N) := by
     have : NeZero ((S.r * S.N : ℕ) : AlgebraicClosure (FractionRing V)) := ⟨Nat.cast_ne_zero.2 hn.ne⟩
-    rw [← IsPrimitiveRoot.coe_units_iff, ← Polynomial.isRoot_cyclotomic_iff,
+    rw [← IsPrimitiveRoot.coe_units_iff, ← Polynomial.isRoot_cyclotomic_iff (R := AlgebraicClosure (FractionRing V)),
       ← Polynomial.map_cyclotomic _ (y₀.comp (algebraMap o S.R))]
-    exact (hζ.isRoot_cyclotomic hn.pos).map
+    exact Polynomial.IsRoot.map (y₀.comp (algebraMap o S.R)) (hζ.isRoot_cyclotomic hn.pos)
   have hy : (TFK (R := V) (AlgebraicClosure (FractionRing V))).hom ≫ spMap yK = spMap y₀ :=
     (Spec.map_comp (CommRingCat.ofHom yK) (CommRingCat.ofHom (algebraMap _ _))).symm
   let h : Over.mk ((TFK (R := V) (AlgebraicClosure (FractionRing V))).hom ≫ spMap yK) ⟶ baseOver (Sp S.R) :=
@@ -175,7 +256,7 @@ theorem isoFree_perp : ∀ (o Ω : Type) [CommRing o] [Field Ω] [Algebra o Ω] 
   obtain ⟨z, hz⟩ := QuotientAddGroup.eq.1 ((lab b q' hq').symm.trans e)
   have hz' : (S.r * S.N) • z = -q'.y + α := hz
   have := congrArg l hz'
-  rw [map_nsmul, nsmul_eq_mul, ZMod.natCast_self, zero_mul, map_add, map_neg] at this
+  rw [map_nsmul, nsmul_eq_mul, ZMod.natCast_self, zero_mul, map_add (f := _), map_neg] at this
   exact neg_add_eq_zero.1 this.symm
 
 theorem leastValuation_labels : ∀ (o Ω : Type) [CommRing o] [Field Ω] [Algebra o Ω] [ArithBase o Ω] (S : ThetaSys o Ω) (ρ : S.Real) (M : RatModel o Ω) (U₀ : M.Z.Opens) (EE : M.Lat S.J) (Zh : ZHOut ρ M U₀ EE), S.Big → S.Over₀ M U₀ → S.IsEE M U₀ EE → ∀ (V : Type) [CommRing V] [IsDomain V] [IsDiscreteValuationRing V] [CharZero V], IsAdicComplete (IsLocalRing.maximalIdeal V) V → ∀ (ξ : Sp V ⟶ M.Z), (∃ w, ξ w = genericPoint M.Z) → ∀ [IsCommMonObj ((Over.pullback ξ).obj Zh.G)] (D : DegData V (IsLocalRing.maximalIdeal V)) (A : PolAV (Sp (FractionRing V))) (U : Unif (IsLocalRing.maximalIdeal V) D A ((Over.pullback ξ).obj Zh.G)), LBIso U.LG.L (Zh.L.L.pull (pullback.fst Zh.G.hom ξ)) → (∀ y, PsiUnitOn D.toPre y (ξ ⁻¹' abLocus Zh.G)) → ∀ (emb : Ω →+* FractionRing V), (∀ (W : M.Z.Opens) (f : Γ(M.Z, W)), ξ (IsLocalRing.closedPoint V) ∈ W → emb (valF M.pt W f) = algebraMap V (FractionRing V) (valR ξ W f)) → ∃ yy : S.Gam →+ D.toPre.X ⧸ (nsmulAddMonoidHom (S.r * S.N) : D.toPre.X →+ D.toPre.X).range, Function.Surjective yy ∧ S.IsoFree (S.perp yy.ker) ∧ AddSubgroup.closure {a | S.th a ≠ 0 ∧ ∀ b, ∃ v : V, emb (S.th b) = algebraMap V (FractionRing V) v * emb (S.th a)} = yy.ker := by
@@ -242,3 +323,4 @@ theorem GlobalTheory.ThetaDvr.TorRank.rkAt_tt_equiv : ∀ (o Ω : Type) [CommRin
   rfl
 
 end Main
+

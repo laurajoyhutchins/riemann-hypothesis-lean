@@ -1,5 +1,57 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.TensorProductTheorem.Operators
+module
+
+public import GroundTheory.AutomorphicForms.TensorProductTheorem.Operators
+public import Mathlib.Order.CompletePartialOrder
+public import Mathlib.RepresentationTheory.Irreducible
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.Eigenspace.Triangularizable
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.LinearAlgebra.Eigenspace.Basic
+
+@[expose] public section
 
 noncomputable section
 
@@ -64,7 +116,7 @@ theorem mOrbitMap_mapDomain (ρ : Representation ℂ M V) (v : V) (h : M) (c : M
     mOrbitMap ρ v (Finsupp.mapDomain (h * ·) c) = ρ h (mOrbitMap ρ v c) := by
   induction c using Finsupp.induction_linear with
   | zero => simp [mOrbitMap]
-  | add c d hc hd => rw [Finsupp.mapDomain_add, map_add, hc, hd, map_add, map_add]
+  | add c d hc hd => rw [Finsupp.mapDomain_add, map_add (f := _), hc, hd, map_add (f := _), map_add (f := _)]
   | single g a => simp [Finsupp.mapDomain_single, mOrbitMap_single, map_mul]
 
 theorem linearForm_mOrbitMap (ρ : Representation ℂ M V) (v : V) (l : Dual ℂ V) (h : M)
@@ -142,18 +194,15 @@ theorem IsWinProj.apply_of_mem (he : IsWinProj ρ e) {v : V} (hv : v ∈ LinearM
   obtain ⟨w, rfl⟩ := hv
   exact he.idem w
 
-variable (ρ e) in
 
+variable (ρ e) in
 def winOp (m : M) : End ℂ (LinearMap.range e) :=
   LinearMap.codRestrict (LinearMap.range e) (e ∘ₗ ρ m ∘ₗ (LinearMap.range e).subtype)
     fun x => ⟨_, rfl⟩
 
+
 variable (ρ e) in
-
 def winOps : Set (End ℂ (LinearMap.range e)) := range (winOp ρ e)
-
-theorem winOp_apply (m : M) (x : LinearMap.range e) : (winOp ρ e m x : V) = e (ρ m x) :=
-  rfl
 
 theorem isSimpleUnder_winOps [ρ.IsIrreducible] (he : IsWinProj ρ e)
     (hne : LinearMap.range e ≠ ⊥) : IsSimpleUnder (winOps ρ e) := by
@@ -241,7 +290,7 @@ variable (e : End ℂ V) (N : Submodule ℂ V)
 def mGenKernel : Submodule ℂ (mGenSubrep ρ N).toSubmodule where
   carrier := {u | ∀ g, e (ρ g u) = 0}
   add_mem' {a b} ha hb g := by
-    simp only [mem_setOf_eq, Submodule.coe_add, map_add, ha g, hb g, add_zero]
+    simp only [mem_setOf_eq, Submodule.coe_add, map_add (f := _), ha g, hb g, add_zero]
   zero_mem' g := by simp
   smul_mem' c a ha g := by
     simp only [mem_setOf_eq, Submodule.coe_smul, map_smul, ha g, smul_zero]
@@ -348,8 +397,8 @@ theorem isIrreducible_mGenQuotRep (he : IsWinProj ρ e) (hNe : N ≤ LinearMap.r
     rw [← this]
     exact hu'
 
-variable (ρ e N) in
 
+variable (ρ e N) in
 def mGenQuotForm (l : Dual ℂ V) :
     Dual ℂ ((mGenSubrep ρ N).toSubmodule ⧸ mGenKernel ρ e N) :=
   (mGenKernel ρ e N).liftQ (l ∘ₗ e ∘ₗ (mGenSubrep ρ N).toSubmodule.subtype) fun u hu => by

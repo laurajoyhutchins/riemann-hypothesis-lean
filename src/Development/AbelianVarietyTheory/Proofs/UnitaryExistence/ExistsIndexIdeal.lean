@@ -1,5 +1,52 @@
-import Mathlib
-import Formalism.LocalToGlobal.ProjectiveLattices.ThShort
+module
+
+public import Formalism.LocalToGlobal.ProjectiveLattices.ThShort
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 set_option autoImplicit false
 noncomputable section
@@ -250,8 +297,9 @@ theorem bdd_of_unimod [IsCMField E] (Λ : GenLat E n) (h : Λ.Unimod) : Bdd Λ.L
     rw [hk u huL] at h0
     obtain ⟨φ⟩ : Nonempty (E →+* ℂ) := inferInstance
     have h1 := congrArg φ h0
+
     simp only [map_sum, map_mul, IsCMField.complexEmbedding_complexConj, map_zero,
-      ← Complex.normSq_eq_conj_mul_self] at h1
+    ← Complex.normSq_eq_conj_mul_self] at h1
     have h2 : ∑ j, Complex.normSq (φ (u j)) = 0 := by exact_mod_cast h1
     have h3 : ∀ j, u j = 0 := fun j => by
       have := (Finset.sum_eq_zero_iff_of_nonneg fun j _ => Complex.normSq_nonneg _).1 h2 j (Finset.mem_univ j)
@@ -296,7 +344,7 @@ theorem span_image_span (S : Set E) :
   induction hx using Submodule.span_induction with
   | mem x hx => exact Submodule.subset_span ⟨x, hx, rfl⟩
   | zero => simp
-  | add x y _ _ hx hy => rw [map_add]; exact Submodule.add_mem _ hx hy
+  | add x y _ _ hx hy => rw [map_add (f := _)]; exact Submodule.add_mem _ hx hy
   | smul b x _ hx => rw [map_smul_int]; exact Submodule.smul_mem _ _ hx
 
 theorem span_image_smul (𝔞 : Ideal (𝓞 E)) (N : Submodule (𝓞 E) E) :
@@ -311,7 +359,7 @@ theorem span_image_smul (𝔞 : Ideal (𝓞 E)) (N : Submodule (𝓞 E) E) :
       rw [Algebra.smul_def, map_mul]
       exact Submodule.mul_mem_mul (Submodule.subset_span ⟨a, ha, rfl⟩) (Submodule.subset_span ⟨y, hy, rfl⟩)
     · intro x y hx hy
-      rw [map_add]; exact Submodule.add_mem _ hx hy
+      rw [map_add (f := _)]; exact Submodule.add_mem _ hx hy
   · rw [Submodule.span_mul_span]
     apply Submodule.span_mono
     rintro _ ⟨_, ⟨a, ha, rfl⟩, _, ⟨y, hy, rfl⟩, rfl⟩

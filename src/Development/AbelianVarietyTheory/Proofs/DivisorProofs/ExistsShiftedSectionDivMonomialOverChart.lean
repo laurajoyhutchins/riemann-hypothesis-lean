@@ -1,12 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.HasDefect
-import Development.AbelianVarietyTheory.Definitions.Divisors.RigidForFan
-import Development.AbelianVarietyTheory.Definitions.Divisors.HasRigidChart
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.ToroidalCompactificationBis
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.PhiGenPf
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.HasDefect
+public import Development.AbelianVarietyTheory.Definitions.Divisors.RigidForFan
+public import Development.AbelianVarietyTheory.Definitions.Divisors.HasRigidChart
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExponentFormsSymmOfIsUnitTauOnToricChartStatement
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.SecLinOfSecScal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.LBPull
 import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.PullGenPf
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.SecLinOfSecScal
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExponentFormsSymmOfIsUnitTauOnToricChartStatement
+
+@[expose] public section
+
 open CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj AlgebraicGeometry NumberField IsLocalRing
 open scoped CategoryTheory.Obj Matrix TensorProduct
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Out ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor Formalism.L2.Pj
@@ -140,7 +180,7 @@ theorem nonneg_shift {X : Type} [AddCommGroup X] (g : LinearMap.BilinForm ℤ X)
   · subst h0
     have key : ∀ x : ℤ, 0 ≤ 2 * x * g mu α + g α α := fun x => by
       have := hnn (x • mu + α)
-      simp only [map_add, map_zsmul, LinearMap.add_apply, LinearMap.smul_apply, smul_eq_mul, hn, ← hs] at this
+      simp only [map_add (f := _), map_zsmul, LinearMap.add_apply, LinearMap.smul_apply, smul_eq_mul, hn, ← hs] at this
       push_cast at this
       linarith
     have h0 : g mu α = 0 := by
@@ -239,11 +279,31 @@ theorem exists_shift_div_monomial : ∀ (E : Type) [Field E] [NumberField E] [Is
     have hρm : ρ' ≫ (𝟙 P.D.toPre.P.A * cP P.D.toPre _ mu) = toUnit T' ≫ P.D.toPre.c mu := by
       rw [MonObj.comp_mul, Category.comp_id, comp_cP, hρ1, _root_.one_mul]
       rfl
-    have C : IsCub (cubV P.D.toPre.cub z J) := isCub_cubV (T := T') P.D.toPre.cub hJ
-    have c1 : cubN (cubV P.D.toPre.cub z J) e (ρ' ≫ cP P.D.toPre _ α) (ρ' ≫ cP P.D.toPre _ mu) ρ' = 1 := by
-      rw [hρ1]; exact C.N_one _ _ _
-    have c2 : cubV P.D.toPre.cub z J (ρ' ≫ cP P.D.toPre _ α) ρ' (ρ' ≫ cP P.D.toPre _ mu) = 1 := by
-      rw [hρ1]; exact C.face₂ _ _
+    have face (x y : T' ⟶ P.D.toPre.P.A) : cubV (T := T') P.D.toPre.cub z J 1 x y = 1 := by
+      have h := val_corr hJ (P.D.toPre.cub.face 0) (lift x y).left
+      rw [val_one] at h
+      refine Eq.trans ?_ h
+      refine Eq.trans ?_ (val_cub P.D.toPre.cub (lift x y) hJ (pzero _ _) (x2 _ 0) (x2 _ 1)).symm
+      congr 1 <;> simp [x2, pzero, Hom.one_def]
+    have swap01 (x y w : T' ⟶ P.D.toPre.P.A) :
+        cubV (T := T') P.D.toPre.cub z J x y w = cubV (T := T') P.D.toPre.cub z J y x w := by
+      have h := (val_corr hJ P.D.toPre.cub.cubeSymmetric_swap_first (lift x (lift y w)).left).trans
+        (val_cub P.D.toPre.cub (lift x (lift y w)) hJ _ _ _)
+      refine Eq.trans h ?_
+      congr 1 <;> simp [x3]
+    have swap12 (x y w : T' ⟶ P.D.toPre.P.A) :
+        cubV (T := T') P.D.toPre.cub z J x y w = cubV (T := T') P.D.toPre.cub z J x w y := by
+      have h := (val_corr hJ P.D.toPre.cub.cubeSymmetric_swap_last (lift x (lift y w)).left).trans
+        (val_cub P.D.toPre.cub (lift x (lift y w)) hJ _ _ _)
+      refine Eq.trans h ?_
+      congr 1 <;> simp [x3]
+    have c1 : cubN (cubV (T := T') P.D.toPre.cub z J) e (ρ' ≫ cP P.D.toPre _ α) (ρ' ≫ cP P.D.toPre _ mu) ρ' = 1 := by
+      rw [hρ1]
+      apply Finset.prod_eq_one
+      intro i hi
+      rw [swap12, swap01, face]
+    have c2 : cubV (T := T') P.D.toPre.cub z J (ρ' ≫ cP P.D.toPre _ α) ρ' (ρ' ≫ cP P.D.toPre _ mu) = 1 := by
+      rw [hρ1, swap01, face]
     have hv := hσu T' ρ' z J hJ
     rw [c1, c2, hρu, hρm, inv_one, _root_.one_mul, _root_.one_mul] at hv
     show sval σ₁u ρ'.left z J = _

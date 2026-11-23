@@ -1,6 +1,50 @@
+module
+
+public import ReciprocityTheory.GaloisValuations.Global
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.LengthCyclotomicBlockCocyclesLeSha
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.Valuation.LocalSubring
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.KummerTheory.Mk0IdMapCongr
+import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.SelmerTransport.RestrictionMemInvariantH1
 import Development.AutomorphicArithmetic.AutomorphicVarieties.PlacesOfRationals.GenLeOfFintype
-import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.KummerTheory.PlaceDict
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.LengthCyclotomicBlockCocyclesLeSha
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Formalism.ConjugateSelfDual ReciprocityTheory.Gal UpperTheory.V UpperTheory.V.Kum UpperTheory.V.B3
 
@@ -57,7 +101,61 @@ theorem UpperTheory.V.B3.placesQ :
     ∀ (p : ℕ) (A B : ValuationSubring Ω), p.Prime → A.valuation (p : Ω) < 1 → B.valuation (p : Ω) < 1 →
       ∃ g : G ℚ Ω, ∀ x ∈ Ine (F := ℚ) B, g⁻¹ * x * g ∈ Ine (F := ℚ) A := by
   intro Ω _ _ _
-  obtain ⟨hTop, hOver, hNe, hIff⟩ := placeDict ℚ Ω
+  have : CharZero Ω := charZero_of_injective_algebraMap (algebraMap ℚ Ω).injective
+  have val_top {x : Ω} (h : (⊤ : ValuationSubring Ω).valuation x < 1) : x = 0 := by
+    by_contra hx
+    have h1 : (⊤ : ValuationSubring Ω).valuation x⁻¹ ≤ 1 :=
+      (ValuationSubring.valuation_le_one_iff _ _).2 (ValuationSubring.mem_top _)
+    have h2 := mul_lt_one_of_nonneg_of_lt_one_left zero_le h h1
+    rw [← map_mul, mul_inv_cancel₀ hx, map_one] at h2
+    exact lt_irrefl _ h2
+  have int_le (A : ValuationSubring Ω) {b : Ω} (hb : IsIntegral ℤ b) :
+      A.valuation b ≤ 1 := by
+    have h : IsIntegral A b := hb.tower_top
+    obtain ⟨y, hy⟩ := IsIntegrallyClosed.isIntegral_iff.1 h
+    rw [A.valuation_le_one_iff, ← hy]
+    exact y.2
+  have hTop : Ine (F := ℚ) (⊤ : ValuationSubring Ω) = ⊥ := by
+    rw [eq_bot_iff]
+    intro g hg
+    rw [Subgroup.mem_bot]
+    ext x
+    have h := hg.2 x ((ValuationSubring.valuation_le_one_iff _ _).2 (ValuationSubring.mem_top _))
+    exact sub_eq_zero.1 (val_top h)
+  have hOver (A : ValuationSubring Ω) (hA : A ≠ ⊤) :
+      ∃ v : HeightOneSpectrum (𝓞 ℚ), IsPlaceOver A v := by
+    have hm : ∀ x : 𝓞 ℚ, algebraMap ℚ Ω (x : ℚ) ∈ A := fun x =>
+      (A.valuation_le_one_iff _).1 (int_le A (x.isIntegral_coe.map (algebraMap ℚ Ω).toIntAlgHom))
+    let f : 𝓞 ℚ →+* A := ((algebraMap ℚ Ω).comp (algebraMap (𝓞 ℚ) ℚ)).codRestrict A hm
+    let P : Ideal (𝓞 ℚ) := (IsLocalRing.maximalIdeal A).comap f
+    have hP : ∀ x : 𝓞 ℚ, A.valuation (algebraMap ℚ Ω (x : ℚ)) < 1 ↔ x ∈ P := fun x =>
+      (A.valuation_lt_one_iff (f x)).symm
+    refine ⟨⟨P, inferInstance, fun h0 => hA ?_⟩, hP⟩
+    rw [eq_top_iff]
+    intro x _
+    have : CharZero Ω := charZero_of_injective_algebraMap (algebraMap ℚ Ω).injective
+    have h1 : Algebra.IsAlgebraic ℤ ℚ := (IsFractionRing.comap_isAlgebraic_iff (A := ℤ) (K := ℚ) (C := ℚ)).2 inferInstance
+    have h2 : Algebra.IsAlgebraic ℤ Ω := Algebra.IsAlgebraic.trans ℤ ℚ Ω
+    obtain ⟨n, hn, hi⟩ := (h2.isAlgebraic x).exists_integral_multiple
+    have h3 : ¬ A.valuation (algebraMap ℚ Ω ((n : 𝓞 ℚ) : ℚ)) < 1 := by
+      rw [hP, h0, Ideal.mem_bot]
+      exact Int.cast_ne_zero.2 hn
+    have h4 : A.valuation (n : Ω) = 1 :=
+      le_antisymm (int_le A (isIntegral_algebraMap (R := ℤ) (x := n))) (by simpa using h3)
+    have h5 := int_le A hi
+    rw [zsmul_eq_mul, map_mul, h4, one_mul] at h5
+    exact (A.valuation_le_one_iff x).1 h5
+  have hNe (A : ValuationSubring Ω) (N : ℕ) (hN : N ≠ 0)
+      (h : A.valuation (N : Ω) < 1) : A ≠ ⊤ := by
+    intro he
+    subst A
+    exact hN (Nat.cast_eq_zero.1 (val_top h))
+  have hIff (A : ValuationSubring Ω) (v : HeightOneSpectrum (𝓞 ℚ)) (N : ℕ)
+      (hv : IsPlaceOver A v) : A.valuation (N : Ω) < 1 ↔ ((N : ℕ) : 𝓞 ℚ) ∈ v.asIdeal := by
+    have h := hv (N : 𝓞 ℚ)
+    have e : algebraMap ℚ Ω ((N : 𝓞 ℚ) : ℚ) = (N : Ω) := by simp
+    rw [← e]
+    exact h
   refine ⟨?_, ?_, ?_⟩
   · intro p hp
     obtain ⟨A, hA⟩ := exists_isPlaceOver (F := ℚ) Ω (vQ hp)

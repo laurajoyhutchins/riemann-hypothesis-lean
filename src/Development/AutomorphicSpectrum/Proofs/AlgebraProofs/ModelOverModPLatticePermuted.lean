@@ -1,14 +1,59 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.IsLatticeFamily
-import Development.AutomorphicSpectrum.Definitions.DivisibilityTowers.BundleChernComparison
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.DvrBundleStatementAStatement
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.DvrBundleStatementDStatement
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.LatticeFamiliesGlueToBundleStatement
+module
+
+public import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.IsLatticeFamily
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.ChartBundleIntersectionSymmetryStatement
 import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.ChartBundleProductStatement
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.LineBundleChartGenericComparisonStatement
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.ChartBundleIntersectionSymmetryStatement
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.LatticeFamilyInjectiveModelFactsStatement
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.DualBundleIntersectionStatement
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.DualBundleIntersectionStatement
+import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.DvrBundleStatementAStatement
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.DvrBundleStatementDStatement
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.LatticeFamiliesGlueToBundleStatement
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.LatticeFamilyInjectiveModelFactsStatement
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.LineBundleChartGenericComparisonStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open MvPolynomial GlobalTheory.CompanionTheory.Ar.Num GroundTheory.Heights₂.Heights.NumbersDVR
 open ReciprocityTheory.ChartRestriction.G.Geo (ChartBundle chartRing)
 open GroundTheory.Heights₂.Heights.IndefiniteRowSideFullHecke.NumbersDVR.Bundles (mseg mcIdeal chartMon joinCoord bcCoord pullDeg restrictChart fnField ck rootNum SameGeneric LatLE IsPull IsPullBC)
@@ -57,7 +102,7 @@ theorem mem_stepGraph {τ : Sg} {χ : F → Ω} {i : Fin n} {c : Ω} {m : Fin (r
 
 theorem mem_mulLat {V : Type} [AddCommGroup V] [Module Ω V] {c : Ω} {L : AddSubgroup V} {v : V} :
     v ∈ mulLat c L ↔ ∃ e ∈ L, v = c • e := by
-  simp only [mulLat, AddSubgroup.mem_map, DistribMulAction.toAddMonoidHom_apply]
+  simp only [mulLat, AddSubgroup.mem_map, DistribSMul.toAddMonoidHom_apply]
   constructor
   · rintro ⟨e, he, rfl⟩; exact ⟨e, he, rfl⟩
   · rintro ⟨e, he, rfl⟩; exact ⟨e, he, rfl⟩
@@ -216,6 +261,7 @@ theorem dotB_bijective (N : ℕ) : Function.Bijective (dotB (Ω := Ω) N).flip :
     refine ⟨fun i => f (Pi.single i 1), LinearMap.ext fun v => ?_⟩
     rw [LinearMap.flip_apply, dotB_apply]
     conv_rhs => rw [← Finset.univ_sum_single v]
+
     simp only [dotProduct, map_sum]
     refine Finset.sum_congr rfl fun i _ => ?_
     have e : Pi.single i (v i) = v i • (Pi.single i 1 : Fin N → Ω) := by

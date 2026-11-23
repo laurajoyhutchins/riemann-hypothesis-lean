@@ -1,6 +1,60 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.DiagMod
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsLevelMulPowOfInvariantModPow
+module
+
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.DiagMod
+public import Mathlib.FieldTheory.Galois.Basic
+public import Mathlib.RingTheory.Flat.FaithfullyFlat.Basic
+public import Mathlib.RingTheory.Flat.TorsionFree
+public import Mathlib.RingTheory.Henselian
+public import Mathlib.RingTheory.RegularLocalRing.Defs
+public import Mathlib.RingTheory.SimpleRing.Principal
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsLevelMulPowOfInvariantModPow
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open scoped MatrixGroups TensorProduct
 open Matrix GlobalTheory.KZ GlobalTheory.KZ.ES IntermediateField
@@ -58,7 +112,7 @@ theorem aut_eq_one_of_fix {F E : Type} [Field F] [Field E] [Algebra F E] (S : Se
   | algebraMap c => exact ρ.commutes c
   | add x y hx hy ihx ihy =>
     change ρ (⟨x, hx⟩ + ⟨y, hy⟩) = ⟨x, hx⟩ + ⟨y, hy⟩
-    rw [map_add, ihx, ihy]
+    rw [map_add (f := _), ihx, ihy]
   | inv x hx ihx =>
     change ρ (⟨x, hx⟩⁻¹) = ⟨x, hx⟩⁻¹
     rw [map_inv₀, ihx]
@@ -92,7 +146,7 @@ variable {Ω : Type} [Field Ω] [Algebra ℚ Ω] {ε : Ω →+* ℂ}
 def levSub (X : Tower Ω ε) (M : ℕ) : IntermediateField Ω X.K where
   carrier := {f | Lev X M f}
   mul_mem' := fun ha hb γ hγ => by rw [map_mul, ha γ hγ, hb γ hγ]
-  add_mem' := fun ha hb γ hγ => by rw [map_add, ha γ hγ, hb γ hγ]
+  add_mem' := fun ha hb γ hγ => by rw [map_add (f := _), ha γ hγ, hb γ hγ]
   algebraMap_mem' := fun c γ _ => AlgEquiv.commutes _ c
   inv_mem' := fun x hx γ hγ => by rw [map_inv₀, hx γ hγ]
 
@@ -143,7 +197,7 @@ theorem exists_orbit_poly (X : Tower Ω ε) (M₀ M : ℕ) (hM : 0 < M) :
   have hpmon : p.Monic := Polynomial.monic_prod_of_monic _ _ fun c _ => Polynomial.monic_X_pow_sub_C c hm.ne'
   have hpdeg : p.natDegree = S.card * m := by
     rw [Polynomial.natDegree_prod_of_monic _ _ fun c _ => Polynomial.monic_X_pow_sub_C c hm.ne']
-    simp [Polynomial.natDegree_X_pow_sub_C]
+    simp [Polynomial.natDegree_X_pow_sub_C _]
   have hpinv : ∀ δ ∈ CongruenceSubgroup.Gamma M₀, p.map (X.sl (ofSL δ) : X.K →+* X.K) = p := by
     intro δ hδ
     simp only [p, Polynomial.map_prod, Polynomial.map_sub, Polynomial.map_pow, Polynomial.map_X, Polynomial.map_C]

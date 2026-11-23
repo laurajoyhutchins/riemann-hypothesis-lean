@@ -1,7 +1,53 @@
-import Mathlib
-import Development.EtaleCohomology.EtaleSheaves.StandardChartsLineOne
-import GroundTheory.ArithmeticGeometry.SchemeCohomology.ProperCohomology.ProjSpaceHom
-import GroundTheory.ArithmeticGeometry.SchemeCohomology.ProjectiveCohomology.TwistingSheafCore
+module
+
+public import Development.EtaleCohomology.EtaleSheaves.StandardChartsLineOne
+public import GroundTheory.ArithmeticGeometry.SchemeCohomology.ProjectiveCohomology.TwistingSheafCore
+public import GroundTheory.ArithmeticGeometry.SchemeCohomology.ProperCohomology.ProjSpaceHom
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+public import GroundTheory.ArithmeticGeometry.SchemeCohomology.InvertibleSheaf
+public import GroundTheory.ArithmeticGeometry.SchemeCohomology.ProjSpace
+
+@[expose] public section
 
 open CategoryTheory Limits AlgebraicGeometry LateralTheory.E.t_E2Cut LateralTheory.E.StandardEtaleChartsMultivariableHensel
 
@@ -26,7 +72,7 @@ private theorem closure_chart (i j : Fin 2) (hij : i ≠ j) :
         eq_intCast MvPolynomial.C c, map_intCast]
       exact intCast_mem _ c
     | add p q hp hq =>
-      rw [map_add]
+      rw [map_add (f := _)]
       exact add_mem hp hq
     | mul_X p n hp =>
       rw [map_mul]
@@ -61,11 +107,17 @@ private theorem mul_res :
         (chartHom (A := ℤ) (n := 1) 0 (MvPolynomial.X 1)) *
       resR (inf_le_right : stdOpen ℤ 1 0 ⊓ stdOpen ℤ 1 1 ≤ stdOpen ℤ 1 1)
         (chartHom (A := ℤ) (n := 1) 1 (MvPolynomial.X 0)) = 1 := by
+  letI : CommRing (ringOn (projectiveSpace ℤ 1) (stdOpen ℤ 1 0 ⊓ stdOpen ℤ 1 1)) :=
+    inferInstanceAs (CommRing Γ(projectiveSpace ℤ 1, stdOpen ℤ 1 0 ⊓ stdOpen ℤ 1 1))
   have h := ProjTwist.ratio_mul_ratio' (𝒜 := grading ℤ 1) (X_mem (A := ℤ) (n := 1) 0)
     (X_mem (A := ℤ) (n := 1) 1) (X_mem (A := ℤ) (n := 1) 0)
-  rw [ProjTwist.ratio_self] at h
-  rw [chartHom_eq_ratio, chartHom_eq_ratio, mul_comm]
-  exact h.trans (map_one _)
+  rw [ProjTwist.ratio_self, map_one] at h
+  rw [← chartHom_eq_ratio, ← chartHom_eq_ratio] at h
+  change resR (inf_le_right : stdOpen ℤ 1 0 ⊓ stdOpen ℤ 1 1 ≤ stdOpen ℤ 1 1)
+      (chartHom (A := ℤ) (n := 1) 1 (MvPolynomial.X 0)) *
+    resR (inf_le_left : stdOpen ℤ 1 0 ⊓ stdOpen ℤ 1 1 ≤ stdOpen ℤ 1 0)
+      (chartHom (A := ℤ) (n := 1) 0 (MvPolynomial.X 1)) = 1 at h
+  exact (mul_comm _ _).trans h
 
 end UpperTheory.ProjectiveLineClosure
 

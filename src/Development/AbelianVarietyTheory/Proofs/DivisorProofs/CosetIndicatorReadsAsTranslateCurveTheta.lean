@@ -1,7 +1,61 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsApprox
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IdealIndicatorReadsNormPowMulIntertwinedVacuum
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ThetaTranslationIntertwinerUnitaryStatement
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsApprox
+import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.RealIdemMulOfReal
+import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.SelfDualLatticePairingDual
+import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.SmulMemLatO
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ConjSmulConjSmul
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HeisenbergFinitePointReadsClassicalTranslation
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IdealIndicatorReadsNormPowMulIntertwinedVacuum
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsSelfDualCOfSd
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.InducedTypeThetaGenusOnePermutes
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ThetaTranslationIntertwinerUnitaryStatement
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.VacuumUnderAdelicPairModulusOne
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IdempotentMulEqZeroOfOrthogonal
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IdempotentSumInfPartIntegralOneSubMem
+import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.IdemUniq
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 open NumberField IsDedekindDomain
 open scoped Classical Pointwise
@@ -69,7 +123,7 @@ private theorem half_add {e : AE D} {u : WO S T} (hue : IsHalf e u) (t : WO S T)
   rw [GlobalTheory.PlaceModel.isHalf_iff, GlobalTheory.PlaceModel.isHalf_iff]
   exact add_mem_cancel_right ((GlobalTheory.PlaceModel.isHalf_iff S T).1 hue)
 
-set_option maxHeartbeats 800000 in
+
 private theorem sb_cosInd (hc : D.host.ccK = ⊤) (hS : S.gram = 1) {e : AE D} {𝔪 : Ideal (𝓞 D.host.E)} (h : GoodMod e 𝔪) :
     IsSBHalf e (latO S T (stdL D S.rank : Set (Fin S.rank → D.host.E))
       (stdL D T.rank : Set (Fin T.rank → D.host.E)) fun _ => True) (cosInd e 𝔪 rfl rfl 0) := by
@@ -109,7 +163,7 @@ private theorem sb_cosInd (hc : D.host.ccK = ⊤) (hS : S.gram = 1) {e : AE D} {
     have h7 : ∀ i j, toEAf D ((t + n • u) i j) ∈ idGrp 𝔪 ↔ toEAf D (t i j) ∈ idGrp 𝔪 := fun i j => by
       have := inId_of_mem hc hS h h1 i j
       rw [h6 i j] at this
-      rw [Matrix.add_apply, RingHom.map_add]
+      rw [Matrix.add_apply, RingHom.map_add (f := _)]
       exact add_mem_cancel_right this
     rw [cosInd_zero, cosInd_zero]
     simp only [half_add h6, h7]
@@ -119,7 +173,7 @@ private theorem sb_cosInd (hc : D.host.ccK = ⊤) (hS : S.gram = 1) {e : AE D} {
       rw [← ht1 i j, RingHom.map_mul, (GlobalTheory.IdemSumIdeal.isIdemSum_props e SS c he).1, zero_mul]
     exact mem_of_inId hc hS mem_stdL FractionalIdeal.coeIdeal_le_one h0 ht2
 
-set_option maxHeartbeats 1600000 in
+
 
 private theorem fix_deep (hc : D.host.ccK = ⊤) (hs : Setup ψ θ S T ⊤ δ 1) {v : WO S T → ℂ}
     (hv : IsLatVac (heisO ψ S T) (latO S T (stdL D S.rank : Set (Fin S.rank → D.host.E))
@@ -170,11 +224,12 @@ private theorem fix_deep (hc : D.host.ccK = ⊤) (hs : Setup ψ θ S T ⊤ δ 1)
   rw [one_smul] at hvac
   have hT : ∑ q, heisO ψ S T (cA D e • finTens 1 (-z q)) v =
       (Fintype.card (B ⧸ A.addSubgroupOf B) : ℂ) • Tm (cosInd e 𝔪 rfl rfl 0) := by
+
     rw [← map_smul, show (Fintype.card (B ⧸ A.addSubgroupOf B) : ℂ) • cosInd e 𝔪 rfl rfl 0 =
-      ∑ q, fun t => ψ (symplO S T t (cA D e • finTens 1 (-z q))) * halfInd e
-        (latO S T (stdL D S.rank : Set (Fin S.rank → D.host.E))
-          (stdL D T.rank : Set (Fin T.rank → D.host.E)) fun _ => True) t from
-      funext fun t => by rw [Finset.sum_apply]; exact (sum_char hc hs h A B hA hB z hz hz' t).symm, map_sum]
+    ∑ q, fun t => ψ (symplO S T t (cA D e • finTens 1 (-z q))) * halfInd e
+      (latO S T (stdL D S.rank : Set (Fin S.rank → D.host.E))
+        (stdL D T.rank : Set (Fin T.rank → D.host.E)) fun _ => True) t from
+    funext fun t => by rw [Finset.sum_apply]; exact (sum_char hc hs h A B hA hB z hz hz' t).symm, map_sum]
     refine Finset.sum_congr rfl fun q _ => ?_
     rw [hTm.modul _ hSB _ fun i j => by rw [Matrix.smul_apply, smul_eq_mul, ← mul_assoc, hee], hvac]
   have hq : ∀ q, GlobalTheory.PlaceModel.heisL S T ψ (2 • (n • l)) (heisO ψ S T (cA D e • finTens 1 (-z q)) v) =
@@ -193,13 +248,14 @@ private theorem fix_deep (hc : D.host.ccK = ⊤) (hs : Setup ψ θ S T ⊤ δ 1)
     rw [h4, h5, one_smul] at h3
     exact h3
   have h6 := congrArg (GlobalTheory.PlaceModel.heisL S T ψ (2 • (n • l))) hT
+
   rw [map_sum, map_smul, Finset.sum_congr rfl fun q _ => hq q, hT] at h6
   exact (smul_right_injective _ (Nat.cast_ne_zero.2 Fintype.card_ne_zero) h6).symm
 
 end GlobalTheory.CosRead
 
 open GlobalTheory.CosRead GlobalTheory.LatVac GlobalTheory.IopRead in
-set_option maxHeartbeats 1600000 in
+
 theorem _root_.GlobalTheory.T.cosetIndicator_reads_as_translate_curveTheta : ∀ {D : D7} (ψ : AddChar (AF D.host.F) ℂ) (θ : InfFam D) (S T : HSp D) {a d : ℕ} (hS : S.rank = a) (hT : T.rank = d) (δ : ℂ),
   D.host.ccK = ⊤ → Setup ψ θ S T ⊤ δ 1 → ∀ v : WO S T → ℂ, IsVacO ψ θ S T (fun _ => 1) (fun _ => 1) (stdL D S.rank : Set (Fin S.rank → D.host.E)) (stdL D T.rank : Set (Fin T.rank → D.host.E)) v →
   ∀ G ∈ Th D (tor0 D ⊤ δ) (stdL D a) (stdL D d), Reads ψ θ hS hT ⊤ δ 1 G v → ∀ (e : AE D) (𝔪 : Ideal (𝓞 D.host.E)), GoodMod e 𝔪 →
@@ -263,7 +319,7 @@ theorem _root_.GlobalTheory.T.cosetIndicator_reads_as_translate_curveTheta : ∀
     funext t
     have h2 : ∀ i j, toEAf D ((t + e • finTens 1 (-z) : WO S T) i j) = toEAf D (t i j) - toEAf D e * eToEAf D (z i j) :=
       fun i j => by
-        rw [Matrix.add_apply, Matrix.smul_apply, smul_eq_mul, RingHom.map_add, RingHom.map_mul, sub_eq_add_neg, ← mul_neg,
+        rw [Matrix.add_apply, Matrix.smul_apply, smul_eq_mul, RingHom.map_add (f := _), RingHom.map_mul, sub_eq_add_neg, ← mul_neg,
           ← RingHom.map_neg]
         rfl
     rw [cosInd_zero]
@@ -277,9 +333,9 @@ theorem _root_.GlobalTheory.T.cosetIndicator_reads_as_translate_curveTheta : ∀
   have hx := GlobalTheory.LatticeStable.smul_mem_latO D S T _ _ _ _ hei _ hu
   have h5 : incA D (μ : D.host.E) • u = e • u + 2 • (n • (2 • (s • u))) := by
     refine Matrix.ext fun i j => GlobalTheory.SplitScalar.adele_ext ?_ ?_
-    · simp only [Matrix.add_apply, Matrix.smul_apply, smul_eq_mul, nsmul_eq_mul, RingHom.map_add, RingHom.map_mul, hu0,
+    · simp only [Matrix.add_apply, Matrix.smul_apply, smul_eq_mul, nsmul_eq_mul, RingHom.map_add (f := _), RingHom.map_mul, hu0,
         mul_zero, add_zero]
-    · simp only [Matrix.add_apply, Matrix.smul_apply, smul_eq_mul, nsmul_eq_mul, RingHom.map_add, RingHom.map_mul, hμ,
+    · simp only [Matrix.add_apply, Matrix.smul_apply, smul_eq_mul, nsmul_eq_mul, RingHom.map_add (f := _), RingHom.map_mul, hμ,
         map_natCast]
       push_cast
       ring
@@ -287,7 +343,7 @@ theorem _root_.GlobalTheory.T.cosetIndicator_reads_as_translate_curveTheta : ∀
   rw [hfd _ hl, ← h5] at h6
   have h7 : ψ (symplOH S T (e • u) (2 • (n • (2 • (s • u))))) = 1 := by
     have h8 : ∀ x w : WO S T, symplOH S T x (2 • w) = symplO S T x w := fun x w => by
-      rw [two_nsmul, symplOH, symplO_add_right, mul_add, ← add_mul, ← RingHom.map_add, add_halves, RingHom.map_one, one_mul]
+      rw [two_nsmul, symplOH, symplO_add_right, mul_add, ← add_mul, ← RingHom.map_add (f := _), add_halves, RingHom.map_one, one_mul]
     rw [h8]
     exact char_sympl_eq_one hs.std (sdC_std hs.gS) (sdC_std hs.gT) hx (nsmul_mem hl n)
   rw [h6, h7, one_smul]

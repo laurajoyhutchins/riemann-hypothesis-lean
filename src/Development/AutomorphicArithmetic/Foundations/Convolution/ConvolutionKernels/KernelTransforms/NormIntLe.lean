@@ -1,9 +1,52 @@
-import Development.AutomorphicArithmetic.Foundations.Convolution.TensFun
-import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.KernelTransforms.CommInt
-import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.KernelTransforms.AdjInt
-import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.KernelTransforms.Unimod
-import GroundTheory.AutomorphicForms.CuspidalProjection.OrthogonalProjectionOntoCompSubtypeL
-import GroundTheory.AutomorphicForms.CompactFormulaSums
+module
+
+public import Development.AutomorphicArithmetic.Foundations.Convolution.TensFun
+public import GroundTheory.AutomorphicForms.TraceFormulaConvolution
+public import GroundTheory.GlobalFields.Adele.Topology
+public import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.KernelTransforms.AdjInt
+public import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.KernelTransforms.CommInt
+public import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.KernelTransforms.Unimod
+public import GroundTheory.AutomorphicForms.CompactFormulaSums
+public import GroundTheory.AutomorphicForms.CuspidalProjection.OrthogonalProjectionOntoCompSubtypeL
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MeasureTheory NumberField IsDedekindDomain MvPolynomial
 open GroundTheory.Automorphic GroundTheory.Automorphic.Reduction GroundTheory.Automorphic.RightCosetSpace
@@ -33,7 +76,7 @@ private theorem int_add {G H : Type} [Group G] [TopologicalSpace G] [MeasurableS
     (μ : Measure G) [IsFiniteMeasureOnCompacts μ] (f g : CompactlySupportedContinuousMap G ℂ) :
     π.integrated μ (UnitaryRep.ccToL1 μ (f + g)) =
       π.integrated μ (UnitaryRep.ccToL1 μ f) + π.integrated μ (UnitaryRep.ccToL1 μ g) := by
-  rw [UnitaryRep.ccToL1_add, map_add]
+  rw [UnitaryRep.ccToL1_add, map_add (f := _)]
 
 private theorem int_smul {G H : Type} [Group G] [TopologicalSpace G] [MeasurableSpace G] [OpensMeasurableSpace G]
     [NormedAddCommGroup H] [InnerProductSpace ℂ H] [CompleteSpace H] (π : UnitaryRep G H)
@@ -53,7 +96,7 @@ private theorem int_commute {G G₁ H : Type} [Group G] [TopologicalSpace G] [Gr
   exact (UnitaryRep.comp_integrated_of_mem_intertwiners _ μ hT f).symm
 
 theorem UpperTheory.ConvolutionTheory.Tf.opAlg :
-    ∀ (K : Type) [Field K] [NumberField K] (n : ℕ) (μ : Measure (normOneGL K n)) [μ.IsHaarMeasure] (ν : Measure (archGroup K n)) [ν.IsHaarMeasure] (m : Measure (AdelicGLn.FiniteAdelicGL K n)) [m.IsHaarMeasure],
+    ∀ (K : Type) [Field K] [NumberField K] (n : ℕ) (μ : Measure (normOneGL (K := K) (n := n))) [μ.IsHaarMeasure] (ν : Measure (archGroup K n)) [ν.IsHaarMeasure] (m : Measure (AdelicGLn.FiniteAdelicGL K n)) [m.IsHaarMeasure],
       (∀ β β' : TI K n, Oinf μ ν (conv ν β β') = Oinf μ ν β ∘L Oinf μ ν β' ∧ Oinf μ ν (β + β') = Oinf μ ν β + Oinf μ ν β') ∧
       (∀ e e' : TF K n, Ofin μ m (conv m e e') = Ofin μ m e ∘L Ofin μ m e' ∧ Ofin μ m (e + e') = Ofin μ m e + Ofin μ m e') ∧
       (∀ (c : ℂ) (β : TI K n) (e : TF K n), Oinf μ ν (c • β) = c • Oinf μ ν β ∧ Ofin μ m (c • e) = c • Ofin μ m e) ∧
@@ -80,6 +123,6 @@ theorem UpperTheory.ConvolutionTheory.Tf.opAlg :
   · exact (Tf.adjInt _ _ _ m e e' h).1
   · exact norm_int_le _ ν β
   · exact norm_int_le _ m e
-  · exact (Tf.commInt _ _ _ _ (rightRegularRep (rationalGLOne K n) μ) (archP K n) continuous_archP
+  · exact (Tf.commInt _ _ _ _ (rightRegularRep (rationalGLOne (K := K) (n := n)) μ) (archP K n) continuous_archP
       (MultiplicityOne.finProj K n) MultiplicityOne.continuous_finProj ν m β e).2 hpq
   · exact int_commute _ (archP K n) continuous_archP ν _ (MultiplicityOne.finProj K n h) fun a => (hpq a h).symm

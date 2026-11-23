@@ -1,11 +1,57 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.ImportsMoreFurther
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.ClassListMapDomainPerm
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.ImportsMoreFurther
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.ClassListMapDomainPerm
 import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.IsVerticalDivOfIsVerticalDivisor
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PMinimalPrimeMultiHomog
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PCutByForm
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PRepresentative
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.MemMinimalPrimesOfDivCycleNeZero
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.MemMinimalPrimesOfDivCycleNeZero
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PCutByForm
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PMinimalPrimeMultiHomog
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PRepresentative
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Sub.Prod
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.GradedAlgebra.Radical
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.NumbersDVR
@@ -163,11 +209,11 @@ theorem divCycle_eq_of_unit_mul_sub_mem {P W : Ideal (MRing ι R)} (hW : W.IsPri
   unfold divCycle
   by_cases hc : W ∈ (P ⊔ Ideal.span {f}).minimalPrimes ∧ IsRelevant W
   · have hc' : W ∈ (P ⊔ Ideal.span {g}).minimalPrimes ∧ IsRelevant W := ⟨hmin.1 hc.1, hc.2⟩
-    rw [dif_pos hc, dif_pos hc']
+    rw [dite_eq_left hc, dite_eq_left hc']
     exact congrArg (fun n : ℕ∞ => ((n.toNat : ℕ) : ℤ)) hmult
   · have hc' : ¬ (W ∈ (P ⊔ Ideal.span {g}).minimalPrimes ∧ IsRelevant W) :=
       fun h'' => hc ⟨hmin.2 h''.1, h''.2⟩
-    rw [dif_neg hc, dif_neg hc']
+    rw [dite_eq_right hc, dite_eq_right hc']
 
 end Divisor
 
@@ -200,7 +246,7 @@ theorem VerticalDivisorCharacterisation.proof : VerticalDivisorCharacterisation.
       by_cases h2 : W ∈ (P ⊔ Ideal.span {g}).minimalPrimes ∧ IsRelevant W
       · exact key g β hβ h2.1 h2.2
       unfold divCycle
-      rw [dif_neg h1, dif_neg h2]
+      rw [dite_eq_right h1, dite_eq_right h2]
     · intro W hWp hPW hWr hϖW
       obtain ⟨W', hW'p, hW'h, hW'W, hW'max, hW'form⟩ := exists_multiHomog_core hWp
       have hPW' := hW'max P hP.multiHomog hPW

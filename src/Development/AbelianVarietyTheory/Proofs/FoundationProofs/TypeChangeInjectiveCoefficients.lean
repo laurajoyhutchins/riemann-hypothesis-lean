@@ -1,7 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.BlockTheory.TorsionBlocks.LatticeConditions
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.CrystallineCocycleTransportConjugation
-import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.LengthBaseChangeQuotientOfMapMaximalIdeal
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.TorsionBlocks.LatticeConditions
+public import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.LengthBaseChangeQuotientOfMapMaximalIdeal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.FieldTheory.Galois.Profinite
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Formalism.ConjugateSelfDual ReciprocityTheory.Gal Formalism.BasicNotions Formalism.BasicNotions.Loc Formalism.MainNotions Formalism.MainNotions.N GlobalTheory.IndefiniteRowSideFullHecke.LatticeConditions
 open scoped TensorProduct
@@ -38,6 +84,7 @@ theorem exists_gen_ind (O O' : Type) [CommRing O] [IsDomain O] [IsDiscreteValuat
   choose b hb using fun a => Ideal.Quotient.mk_surjective (B a)
   have hs : ∀ (s : Finset _) (r : _ → O), Ideal.Quotient.mk J (∑ a ∈ s, algebraMap O O' (r a) * b a) =
       ∑ a ∈ s, Ideal.Quotient.mk I (r a) • B a := fun s r => by
+
     rw [map_sum]
     refine Finset.sum_congr rfl fun a _ => ?_
     rw [map_mul, hb, Algebra.smul_def]
@@ -161,10 +208,12 @@ theorem sum_p' {x : A'} {t : Finset ι} (ht : ∀ a ∉ t, S.p a x = 0) :
 
 theorem p_sum (s : Finset ι) (m : ι → A) {a : ι} (ha : a ∈ s) :
     S.p a (∑ a' ∈ s, b a' • S.inc (m a')) = m a := by
+
   rw [map_sum, Finset.sum_eq_single_of_mem a ha fun a' _ h => S.p_ne _ _ _ h.symm, S.p_same]
 
 theorem p_sum_not (s : Finset ι) (m : ι → A) {a : ι} (ha : a ∉ s) :
     S.p a (∑ a' ∈ s, b a' • S.inc (m a')) = 0 := by
+
   rw [map_sum]
   exact Finset.sum_eq_zero fun a' h => S.p_ne _ _ _ fun e => ha (e ▸ h)
 
@@ -172,6 +221,7 @@ theorem p_comm (u : A →+ A) (u' : A' →ₗ[O'] A') (h : ∀ x, S.inc (u x) = 
     S.p a (u' x) = u (S.p a x) := by
   obtain ⟨s, hs, hx⟩ := S.sum_p x
   conv_lhs => rw [← hx]
+
   simp only [map_sum u', map_smul, ← h]
   by_cases ha : a ∈ s
   · exact S.p_sum s (fun a => u (S.p a x)) ha
@@ -208,7 +258,7 @@ theorem length_eq (hb : Gen O b) : Module.length O' A' = Module.length O' (O' �
       obtain ⟨d, hd, hx⟩ := S.tors x
       obtain ⟨s, r, c', rfl⟩ := hb d hd c
       refine ⟨∑ a ∈ s, Finsupp.single a (r a • x), ?_⟩
-      rw [← Finsupp.sum_finset_sum_index (by simp) (by simp [TensorProduct.tmul_add])]
+      rw [Finsupp.sum_finsetSum _ _ _ (by simp) (by simp [TensorProduct.tmul_add])]
       simp [TensorProduct.add_tmul, TensorProduct.sum_tmul, ← Algebra.smul_def, TensorProduct.smul_tmul, hx]
     | add x y hx hy =>
       obtain ⟨m, rfl⟩ := hx
@@ -216,6 +266,7 @@ theorem length_eq (hb : Gen O b) : Module.length O' A' = Module.length O' (O' �
       exact ⟨m + m', by rw [Finsupp.sum_add_index' (by simp) (by simp [TensorProduct.tmul_add])]⟩
   refine (LinearEquiv.ofBijective F ⟨(injective_iff_map_eq_zero _).2 fun t h => ?_, fun x => ?_⟩).length_eq.symm
   · obtain ⟨m, rfl⟩ := hl t
+
     simp only [Finsupp.sum, map_sum, hF] at h
     refine Finset.sum_eq_zero fun a ha => ?_
     rw [← S.p_sum m.support m ha, h, map_zero]
@@ -286,7 +337,7 @@ variable {Γ : Type} [Group Γ] [TopologicalSpace Γ] {ρ : Representation O Γ 
 def mapZ : Z1 ρ →+ Z1 ρ' where
   toFun z := ⟨φ ∘ z.1, (continuous_of_discreteTopology (f := φ)).comp z.2.1, fun g h => by
     simp only [Function.comp_apply]
-    rw [z.2.2, map_add, hφ]⟩
+    rw [z.2.2, map_add (f := _), hφ]⟩
   map_zero' := Subtype.ext (funext fun _ => map_zero φ)
   map_add' _ _ := Subtype.ext (funext fun _ => map_add φ _ _)
 
@@ -378,6 +429,7 @@ def Comp.h1 : Comp O b (H1 ρ) (H1 ρ') where
     · rw [mapH_mk, show mapZ (S.p a) (S.p_rep hi a) z = 0 from Subtype.ext (funext (h0 a ha))]
       rfl
     · simp only [mapH_mk, ← Submodule.Quotient.mk_smul]
+
       simp only [← Submodule.mkQ_apply, ← map_sum]
       refine congrArg _ (Subtype.ext (funext fun g => ?_))
       rw [← S.sum_p' fun a ha => h0 a ha g, Submodule.coe_sum, Finset.sum_apply]
@@ -486,6 +538,7 @@ theorem exists_comp_kog {ι : Type} {b : ι → O'} (hb : Gen O b) (hb' : Ind O 
   · rw [eq_top_iff]
     intro x _
     obtain ⟨v, rfl⟩ := Submodule.mkQ_surjective _ x
+
     rw [← Finset.univ_sum_single v, map_sum]
     exact sum_mem fun j _ => AddSubgroup.subset_closure ⟨j, _, rfl⟩
   · rintro _ ⟨j, y, rfl⟩
@@ -494,6 +547,7 @@ theorem exists_comp_kog {ι : Type} {b : ι → O'} (hb : Gen O b) (hb' : Ind O 
     refine ⟨s, fun a => Submodule.Quotient.mk
       (Pi.single j (algebraMap O (FractionRing O) (r a) / algebraMap O (FractionRing O) d)), ?_⟩
     simp only [LinearMap.toAddMonoidHom_coe, pushKO_mk, ← Submodule.Quotient.mk_smul]
+
     simp only [← Submodule.mkQ_apply, ← map_sum]
     refine (Submodule.Quotient.eq _).2 ⟨Pi.single j c', funext fun i => ?_⟩
     have h0 : algebraMap O' (FractionRing O') (algebraMap O O' d) ≠ 0 := by
@@ -504,7 +558,8 @@ theorem exists_comp_kog {ι : Type} {b : ι → O'} (hb : Gen O b) (hb' : Ind O 
         Pi.sub_apply, Finset.sum_apply, Pi.smul_apply, map_div₀, fracMap_alg]
       simp only [Algebra.smul_def]
       refine mul_left_cancel₀ h0 ?_
-      rw [mul_sub, hc, map_add, map_mul, map_sum, Finset.mul_sum, eq_sub_iff_add_eq, add_comm]
+
+      rw [mul_sub, hc, map_add (f := _), map_mul, map_sum, Finset.mul_sum, eq_sub_iff_add_eq, add_comm]
       congr 1
       refine Finset.sum_congr rfl fun a _ => ?_
       rw [map_mul]
@@ -521,6 +576,7 @@ theorem exists_comp_kog {ι : Type} {b : ι → O'} (hb : Gen O b) (hb' : Ind O 
       exact ⟨r, fun j => (congrFun hr j).trans (Algebra.smul_def d (v a j))⟩
     choose! r hr using this
     simp only [← hv, LinearMap.toAddMonoidHom_coe, pushKO_mk, ← Submodule.Quotient.mk_smul] at hm
+
     simp only [← Submodule.mkQ_apply, ← map_sum] at hm
     obtain ⟨u, hu⟩ := (Submodule.Quotient.mk_eq_zero _).1 hm
     have h1 : ∀ j, d ∣ r a j := fun j => by
@@ -529,6 +585,7 @@ theorem exists_comp_kog {ι : Type} {b : ι → O'} (hb : Gen O b) (hb' : Ind O 
       simp only [LinearMap.compLeft_apply, Function.comp_apply, Algebra.linearMap_apply,
         Finset.sum_apply, Pi.smul_apply] at h2
       simp only [Algebra.smul_def] at h2
+
       rw [map_mul, h2, map_sum, Finset.mul_sum]
       refine Finset.sum_congr rfl fun a ha => ?_
       rw [map_mul, ← fracMap_alg _ hg, hr a ha, map_mul, fracMap_alg]

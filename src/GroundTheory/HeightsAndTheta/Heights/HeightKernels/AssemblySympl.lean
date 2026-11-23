@@ -1,27 +1,71 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PSymplTop
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PSymplOmegaMem
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PSymplCons
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PSymplExtMem
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PSymplExtVecMul
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PSymplTwoRow
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PSymplGcd
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PSymplOrbit
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PSymplQuadDiag
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PSymplBoxVolume
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PSymplMinkowskiBox
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PSymplMinExists
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PSymplMinBound
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PSymplShortPrim
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PSymplGramMem
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PSymplFirstRow
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PSymplReduceMem
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PSymplReducePosDef
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PSymplReduceConj
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PSymplDetSchur
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PSymplReduceStep
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PSymplStep
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PSymplDetBound
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.StatementsSympl
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PSymplBoxVolume
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PSymplCons
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PSymplDetBound
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PSymplDetSchur
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PSymplExtMem
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PSymplExtVecMul
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PSymplFirstRow
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PSymplGcd
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PSymplGramMem
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PSymplMinBound
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PSymplMinExists
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PSymplMinkowskiBox
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PSymplOmegaMem
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PSymplOrbit
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PSymplQuadDiag
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PSymplReduceConj
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PSymplReduceMem
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PSymplReducePosDef
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PSymplReduceStep
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PSymplShortPrim
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PSymplStep
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PSymplTop
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PSymplTwoRow
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights

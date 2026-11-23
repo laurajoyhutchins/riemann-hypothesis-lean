@@ -1,8 +1,57 @@
-import Mathlib
-import Development.WeilBound.ThetaLifts.CartanFactorisation.ArchimedeanUnitIdempotentSmulMixedSpaceVecPairAs
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.WeilRepresentationPreservesSchwartz
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.StandardAdelicCharacterNontrivialAtPlaces
-import Development.WeilBound.ThetaLifts.CartanFactorisation.EqOfInner
+module
+
+public import Development.WeilBound.ThetaLifts.CartanFactorisation.ArchimedeanUnitIdempotentSmulMixedSpaceVecPairAs
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.WeilRepresentationPreservesSchwartz
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.StandardAdelicCharacterNontrivialAtPlaces
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.LcscAdelicUnitaryGroup
+import Formalism.LocalToGlobal.IndefiniteReal.PHeisFCA
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Algebra.Nonarchimedean.TotallyDisconnected
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Separation.Connected
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -120,6 +169,7 @@ theorem apply_pure {ψ : AddChar (AF F) ℂ} (hψ : IsStd ψ) (S : Module.End �
         simp only [e2, ← Finset.sum_mul]
         change _ = G _ * _
         field_simp
+
     rw [hsum, map_sum, Finset.sum_apply]
     refine Finset.sum_eq_zero fun z _ => ?_
     rw [map_sub, hS _ _ (pureA_mem f (hφ' z)), Pi.sub_apply, schr_mod]
@@ -132,7 +182,7 @@ theorem apply_pure {ψ : AddChar (AF F) ℂ} (hψ : IsStd ψ) (S : Module.End �
     (by show _ = (InfiniteAdeleRing.ringEquiv_mixedSpace F).symm _ + 0
         rw [add_zero]; exact (RingEquiv.symm_apply_apply _ _).symm) (zero_add (x i).2).symm
   have hg' : (fun u => g (u + z)) ∈ SB (κ → Af F) :=
-    ⟨hg.1.comp_continuous (continuous_add_right z), hg.2.comp_homeomorph (Homeomorph.addRight z)⟩
+    ⟨hg.1.comp_continuous (continuous_id.add continuous_const), hg.2.comp_homeomorph (Homeomorph.addRight z)⟩
   have e1 : schr ψ (finE2 F (z, 0)) (pureA F f g) = pureA F f fun u => g (u + z) := funext fun a => by
     rw [schr_tr]
     simp only [pureA]
@@ -164,7 +214,7 @@ theorem exists_lin {ψ : AddChar (AF F) ℂ} (hψ : IsStd ψ) (S : Module.End �
   have h : ∀ f : SInf F κ, ∀ g ∈ SB (κ → Af F), S (pureA F f g) = pureA F (T f) g := fun f g hg => by
     rw [apply_pure hψ S hS f h₀ h₁ hg, show ⇑(T f) = _ from funext (hT f)]
   refine ⟨⟨⟨T, fun a b => DFunLike.coe_injective (pureA_inj h₁ ?_)⟩, fun c a => DFunLike.coe_injective (pureA_inj h₁ ?_)⟩, h⟩
-  · rw [← h _ _ h₀, show ⇑(a + b) = ⇑a + ⇑b from rfl, pureA_add, map_add, h _ _ h₀, h _ _ h₀, ← pureA_add]
+  · rw [← h _ _ h₀, show ⇑(a + b) = ⇑a + ⇑b from rfl, pureA_add, map_add (f := _), h _ _ h₀, h _ _ h₀, ← pureA_add]
     rfl
   · rw [← h _ _ h₀, show ⇑(c • a) = c • ⇑a from rfl, pureA_smul, map_smul, h _ _ h₀, ← pureA_smul]
     rfl

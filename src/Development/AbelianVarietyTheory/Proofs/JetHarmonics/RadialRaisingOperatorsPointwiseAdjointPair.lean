@@ -1,12 +1,66 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Jets.SameFns
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.NormalFormActualOperatorsAlgebraicHypothesesStatement
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.RadialPairConstantsPointwiseAdjointBounded
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.DoubleCosetOfZetaEq
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ProjRaisingProjEqSmul
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.VanishAbstract
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.PairAtTAdjCut
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.UnipotentLevelZeroEqOne
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Jets.SameFns
+public import Formalism.HermitianCurvature.ActualZetaSmooth
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.DoubleCosetOfZetaEq
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.NormalFormActualOperatorsAlgebraicHypothesesStatement
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ProjRaisingProjEqSmul
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.RadialPairConstantsPointwiseAdjointBounded
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.VanishAbstract
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CsliceContinuous
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.ExistsFderivChiBound
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.HsInnerAddSmulRight
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.IsCompactZetaLe
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.MeasurableOfContinuousOnZero
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.NormalFormOrderZeroOfParts
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.PairAtTAdjCpt
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.SumPairAtStarMul
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.UnipotentLevelZeroEqOne
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+public import Mathlib.Analysis.Calculus.BumpFunction.FiniteDimension
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Formalism.FourierDecayAlt Formalism.FourierDecayAlt.R Formalism.FourierDecayAlt.Wd Formalism.FourierDecayAlt.Fr Formalism.REAL Formalism.QuantumDeterminants MeasureTheory GlobalTheory.HatNF
 open scoped ComplexConjugate InnerProductSpace ContDiff
@@ -61,7 +115,7 @@ def adjSub {μ : Measure (Mt k r)} (hμ : B.IsHaarOn (Q.Glev k r (Fin.last r)) �
     have h2 := pairAt_add_smul_left μ ((star a).1 Ψ) ((star b).1 Ψ) Φ c 1 (int_right hμ hc hKc hKG _ _ hΦ)
       (int_right hμ hc hKc hKG _ _ hΦ)
     simp only [one_smul, one_mul] at h1 h2
-    rw [h1, pairAt_swap μ _ Φ, h2, map_add, ← pairAt_swap, ← pairAt_swap]
+    rw [h1, pairAt_swap μ _ Φ, h2, map_add (f := _), ← pairAt_swap, ← pairAt_swap]
     exact congrArg₂ _ ha hb
   smul_mem' := by
     intro s b hb

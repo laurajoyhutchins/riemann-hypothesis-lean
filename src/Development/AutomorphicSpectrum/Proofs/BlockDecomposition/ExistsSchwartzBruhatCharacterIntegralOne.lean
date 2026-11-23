@@ -1,7 +1,59 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.AutomorphicKernels.BernsteinUnitaryProducts.BernsteinTheoremA.FrobeniusReciprocity.SupportedInIffOfFrob
-import GroundTheory.GlobalFields.TateThesis.NoSmallSubgroups
-import GroundTheory.AutomorphicForms.LocallyProfinite
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.MatrixMeasurableSpace
+public import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Separation.Connected
+import Mathlib.Topology.Sheaves.Init
+import Development.WeilBound.CoreStatements.AutomorphicKernels.BernsteinUnitaryProducts.BernsteinTheoremA.FrobeniusReciprocity.PullHomeoApply
+
+@[expose] public section
 
 noncomputable section
 
@@ -53,7 +105,7 @@ theorem exists_compact_open_subgroup_trivial {G : Type} [Group G] [TopologicalSp
   obtain ⟨N, hNc, hN1⟩ := exists_compact_mem_nhds (1 : G)
   have hW : interior N ∩ V ∈ 𝓝 (1 : G) :=
     Filter.inter_mem (interior_mem_nhds.mpr hN1) (hVo.mem_nhds h1V)
-  obtain ⟨s, hs, h1s, hsW⟩ := (loc_compact_Haus_tot_disc_of_zero_dim (H := G)).mem_nhds_iff.mp hW
+  obtain ⟨s, hs, h1s, hsW⟩ := (loc_compact_Haus_tot_disc_of_zero_dim (X := G)).mem_nhds_iff.mp hW
   have hsclo : IsClopen s := hs
   have hsc : IsCompact s :=
     hNc.of_isClosed_subset hsclo.isClosed
@@ -82,12 +134,12 @@ theorem exists_compact_open_subgroup_trivial {G : Type} [Group G] [TopologicalSp
         rw [inv_inv]
         exact ⟨(ha x hx).2, (ha x hx).1⟩ }
   have hHn : (H : Set G) ∈ 𝓝 (1 : G) := by
-    have hWW : W ∩ W⁻¹ ∈ 𝓝 (1 : G) := Filter.inter_mem hW1 (inv_mem_nhds_one G hW1)
+    have hWW : W ∩ {g | g⁻¹ ∈ W} ∈ 𝓝 (1 : G) := Filter.inter_mem hW1 (inv_mem_nhds_one G hW1)
     refine Filter.mem_of_superset hWW ?_
     rintro g ⟨hg, hg'⟩
     show ∀ x ∈ s, x * g ∈ s ∧ x * g⁻¹ ∈ s
     intro x hx
-    exact ⟨hWs (Set.mul_mem_mul hx hg), hWs (Set.mul_mem_mul hx (Set.mem_inv.mp hg'))⟩
+    exact ⟨hWs (Set.mul_mem_mul hx hg), hWs (Set.mul_mem_mul hx hg')⟩
   have hHo : IsOpen (H : Set G) := Subgroup.isOpen_of_mem_nhds H hHn
   have hHs : (H : Set G) ⊆ s := by
     intro g hg

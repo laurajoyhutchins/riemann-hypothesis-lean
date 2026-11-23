@@ -1,6 +1,51 @@
-import Formalism.LocalToGlobal.Columns.ChainFrmOk
-import Formalism.LocalToGlobal.Columns.ThetaOpenTwLevQ
-import Formalism.LocalToGlobal.Columns.ChainTwTop
+module
+
+public import Formalism.LocalToGlobal.Columns.TwQThetaOpen
+import Formalism.LocalRingCardinality.SpanPowerMembership.LocAtA
+public import Formalism.LocalToGlobal.Columns.TwQLevU
+public import Formalism.LocalToGlobal.GlobalTheory.GL1.CompactFixesLattice.AdeleIntA
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.FreeModule.IdealQuotient
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Module Matrix
 
@@ -138,7 +183,7 @@ section Pi
 theorem tfPiChar {K : Type} [Field K] {ι : Type} [Fintype ι] {G : ι → Type} [∀ i, Group (G i)] (H : ∀ i, Subgroup (G i))
     (lam : ∀ i, ↥(H i) →* Kˣ) (x : ↥(Subgroup.pi Set.univ H)) :
     piChar H lam x = ∏ i, lam i ⟨x.1 i, x.2 i (Set.mem_univ i)⟩ := by
-  simp only [piChar, MonoidHom.finset_prod_apply, MonoidHom.comp_apply]
+  simp only [piChar, MonoidHom.finsetProd_apply, MonoidHom.comp_apply]
   rfl
 
 end Pi
@@ -175,27 +220,6 @@ section Tw
 variable {X : Fields} {Pr : Primes X} {R : Ranks} (W : Wts X Pr.Word R) (Ch : Chars X Pr R.m)
   (sel : HeightOneSpectrum (𝓞 X.F) → HeightOneSpectrum (𝓞 X.E)) {S : Set ℕ} (mu : Tup X.F X.E X.K S) (cst : LocCst X (rowSG Pr sel mu)) (m2 : ℕ)
   (Λt : ∀ j, LevFam X.E X.K (R.N j) Pr.vGs) (Θt : ∀ j, LevQFam X.E X.K (R.N j) (QE sel (mu : Chr X.F X.E X.K)))
-
-theorem thetaOpen_twIdxTop (hc : cst.Ok) (hQg : ∀ P ∈ QE sel (mu : Chr X.F X.E X.K), P ∉ Pr.vGs) (hΘ : ∀ j, m2 + 1 < j → ThetaOpen (Θt j)) (j : ℕ)
-    (b : (twIdxTop Ch sel mu cst m2 Λt Θt).β j) : ThetaOpen ((twIdxTop Ch sel mu cst m2 Λt Θt).levQ j b) := by
-  unfold twIdxTop ChIdx.withTop at b ⊢
-  obtain ⟨ob, hob⟩ := b
-  cases ob with
-  | some b' =>
-    exact thetaOpen_twIdx (Ch := Ch) (sel := sel) (mu := mu) (cst := cst) hc hQg m2 j b'
-  | none =>
-    have hj : m2 + 1 < j := by
-      simp only [Option.isSome_none] at hob
-      by_contra hcon
-      have h1 : j ≤ m2 + 1 := by omega
-      simp [h1] at hob
-    exact hΘ j hj
-
-theorem chF_ok_twIdxTop (hX : X.Ok) (hc : cst.Ok) (hQg : ∀ P ∈ QE sel (mu : Chr X.F X.E X.K), P ∉ Pr.vGs) (hΘ : ∀ j, m2 + 1 < j → ThetaOpen (Θt j))
-    (u : Pr.Word) (j : ℕ) : (chF W sel mu (twIdxTop Ch sel mu cst m2 Λt Θt) u j).Ok :=
-  chF_ok_of_finIdx (W := W) (sel := sel) (mu := mu) (L := twIdxTop Ch sel mu cst m2 Λt Θt) hX u j
-    (fun b P => thetaOpen_finIdx _ (thetaOpen_twIdxTop Ch sel mu cst m2 Λt Θt hc hQg hΘ j b) P)
-    (fun b c => thetaOpen_root _ (thetaOpen_twIdxTop Ch sel mu cst m2 Λt Θt hc hQg hΘ j b) c)
 
 end Tw
 

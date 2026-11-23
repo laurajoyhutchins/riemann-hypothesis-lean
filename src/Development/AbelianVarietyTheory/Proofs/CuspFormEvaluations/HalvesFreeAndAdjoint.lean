@@ -1,15 +1,70 @@
-import Mathlib
-import Formalism.LocalToGlobal.ProjectiveLattices.ThShort
-import Development.AbelianVarietyTheory.Counterexamples.LevelGroupExamples.ZeroNotAdmissibleOfRankPos
+module
+
+public import Formalism.LocalToGlobal.ProjectiveLattices.ThShort
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.FundamentalDomainPointBound
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.ExistsQuotEquiv
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.FreeModule.IdealQuotient
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.CoassocSimps
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IMemSiegel
 import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IsStabForm
-import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.ExistsQuotEquiv
+public import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IsSystem
+import Development.AbelianVarietyTheory.Definitions.ThetaValues.PolyDerivSmulLetter
+import Formalism.LocalToGlobal.ProjectiveLattices.JFDFree
+
+@[expose] public section
 
 noncomputable section
 
 namespace GlobalTheory.ShortVal.Halves
 
-open scoped TensorProduct in
 
+open scoped TensorProduct in
 theorem nonempty_equiv_quot {R N : Type} [CommRing R] [IsDomain R] [AddCommGroup N] [Module R N]
     [Module.Finite R N] [Module.Projective R N] (I : Ideal R) [Finite (R ⧸ I)] (r : ℕ)
     (hr : Module.finrank R N = r) :
@@ -154,12 +209,12 @@ theorem cHalf_spec (I : Ideal (𝓞 E)) (hI : I ⊔ I.map (H.bar : 𝓞 E →+* 
     have h2 : c - 1 = -a := by rw [← hac]; ring
     rw [h2]; exact neg_mem ha
   unfold cHalf
-  rw [dif_pos h]
+  rw [dite_eq_left h]
   exact h.choose_spec
 
 theorem ef_swap (x y : Dw.La) : Dw.EF y x = -Dw.EF x y := by
   have h := Dw.alt (x + y)
-  simp only [map_add, LinearMap.add_apply, Dw.alt] at h
+  simp only [map_add (f := _), LinearMap.add_apply, Dw.alt] at h
   linarith
 
 theorem qRep_mk {K : Submodule (𝓞 E) Dw.La} (q : Dw.La ⧸ K) : Submodule.Quotient.mk (qRep q) = q := by
@@ -255,7 +310,7 @@ theorem exists_adjoint_halves (N : ℕ) (hN : N ≠ 0) (I : Ideal (𝓞 E))
     obtain ⟨a, rfl⟩ := Submodule.Quotient.mk_surjective _ p
     obtain ⟨b, rfl⟩ := Submodule.Quotient.mk_surjective _ q
     obtain ⟨b', rfl⟩ := Submodule.Quotient.mk_surjective _ q'
-    rw [← Submodule.Quotient.mk_add, hB, hB, hB, smul_add, map_add, Int.cast_add]
+    rw [← Submodule.Quotient.mk_add, hB, hB, hB, smul_add, map_add (f := _), Int.cast_add]
   have hbal : ∀ (r : 𝓞 E) p q, B p (r • q) = B (H.bar r • p) q := by
     intro r p q
     obtain ⟨a, rfl⟩ := Submodule.Quotient.mk_surjective _ p
@@ -367,7 +422,7 @@ theorem absNorm_conj {E : Type} [Field E] [NumberField E] [IsCMField E] (H : Hos
       NumberField.RingOfIntegers.rank, Int.natAbs_pow, Int.natAbs_natCast]
   have hdeg : Module.finrank ℚ E = 2 * fdeg E := by
     have h2 : Module.finrank ℚ E = Module.finrank ℚ (NumberField.maximalRealSubfield E) * 2 := by
-      rw [← Module.finrank_mul_finrank ℚ (NumberField.maximalRealSubfield E) E,
+      rw [← (letI : Module.Free (NumberField.maximalRealSubfield E) E := Module.Free.of_divisionRing _ _; Module.finrank_mul_finrank ℚ (NumberField.maximalRealSubfield E) E),
         Algebra.IsQuadraticExtension.finrank_eq_two (NumberField.maximalRealSubfield E) E]
     unfold fdeg
     omega
@@ -499,6 +554,7 @@ theorem norm_coeff_le : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (
     Nat.finite_of_card_ne_zero (by rw [card_laJ_eq_pd_pow_of_isLev hd]; exact pow_ne_zero _ hpd.ne')
   haveI : Fintype (Fin n → LaJ Xo c d) := Fintype.ofFinite _
   simp only [DeltaDat.w, map_mul, norm_mul, hz1, _root_.one_mul]
+
   rw [hph6 q, finsum_eq_sum_of_fintype, map_sum]
   refine (norm_sum_le _ _).trans ((Finset.sum_le_card_nsmul _ _ 1 fun x _ => ?_).trans ?_)
   · rw [map_mul, norm_mul, hζ, _root_.mul_one]

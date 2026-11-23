@@ -1,26 +1,51 @@
-import Development.AutomorphicArithmetic.ResidueCharacters.FamilyBoundAtTwoThreeOfLocalBounds
-import Development.AutomorphicArithmetic.ResidueCharacters.RowTwo
-import Development.AutomorphicArithmetic.ResidueCharacters.RowThree
-import Development.AutomorphicArithmetic.ResidueCharacters.ThreeHost
-import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.GoodReductionCondition
+module
+
+public import Formalism.SharpRestriction.ParamsHeightRankConstant
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.BoundAtTwoThreeFamily
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Formalism Formalism.ConjugateSelfDual ReciprocityTheory.Gal Formalism.BasicNotions Formalism.BasicNotions.Loc Formalism.MainNotions Formalism.MainNotions.N Formalism.WeaklyAdmissibleFiltrations GlobalTheory.NLink
 
 namespace UpperTheory.N
 
-theorem boundAtTwoThree_family_of_prints (hP : Hypotheses₂) {eps : ℝ} (Fm : FamP eps) : BoundAtTwoAndThreeForFamily Fm :=
-  family_bound_at_two_three_of_local_bounds three_ne_q (rowTwo hP) (rowThree hP) Fm
-
 theorem closed_of_all (𝒞 : FamClass) {P : ∀ {eps : ℝ}, FamP eps → ℝ → Prop} (h : ∀ {eps : ℝ} (Fm : FamP eps) (CH : ℝ), P Fm CH) :
     Closed 𝒞 P :=
   ⟨1, one_pos, fun _ _ _ => ⟨⟨0, fun _ => 0, fun _ => 0, fun _ => 0⟩, fun Fm CH _ _ => h Fm CH⟩⟩
-
-theorem rowN_of_all (h : ∀ {eps : ℝ} (Fm : FamP eps), BoundAtTwoAndThreeForFamily Fm) {hL : GlobalTheory.Published.LocalLanglandsGL} (p : GlobalTheory.Mem.Top.Bl.Prm hL) :
-    GlobalTheory.Fc.RL.At p (fun Q L => GlobalTheory.Fc.R1.PredicateAtBundlePoints Q L fun 𝒞 => Closed 𝒞 fun Fm _ => BoundAtTwoAndThreeForFamily Fm) :=
-  GlobalTheory.Fc.RL.At.of_row (GlobalTheory.Fc.Row.of_sel fun _ _ _ => closed_of_all _ fun Fm _ => h Fm)
-
-theorem boundAtTwoThree_at_prm_of_prints (hP : Hypotheses₂) {hL : GlobalTheory.Published.LocalLanglandsGL} (p : GlobalTheory.Mem.Top.Bl.Prm hL) :
-    GlobalTheory.Fc.RL.At p (fun Q L => GlobalTheory.Fc.R1.PredicateAtBundlePoints Q L fun 𝒞 => Closed 𝒞 fun Fm _ => BoundAtTwoAndThreeForFamily Fm) :=
-  rowN_of_all (fun Fm => boundAtTwoThree_family_of_prints hP Fm) p
 
 end UpperTheory.N

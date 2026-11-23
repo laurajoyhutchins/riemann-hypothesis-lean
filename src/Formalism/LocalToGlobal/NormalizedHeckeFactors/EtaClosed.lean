@@ -1,5 +1,45 @@
-import Formalism.LocalToGlobal.NormalizedHeckeFactors.HostConj
-import ReciprocityTheory.ReductiveGroups.LocalHeights.Imports
+module
+
+public import Formalism.LocalToGlobal.NormalizedHeckeFactors.HeckeStdTwOfStd
+public import Formalism.SharpRestriction.GlobalTheoremInputs
+public import CompanionTheory.AutomorphicTheory.HeckeStandardModules.InvMemRl
+public import Formalism.LocalToGlobal.NormalizedHeckeFactors.HostConj
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Formalism.BasicNotions NumberField
 
@@ -16,10 +56,5 @@ theorem linkEta_closed {eps : ℝ} (Fm : Formalism.MainNotions.FamP eps)
       HeckeTied (Fm.D x i) M) :
     Formalism.MainNotions.LinkEta Fm := by
   exact linkEtaTw_closed Fm hfam
-
-theorem etaN_eq_etaJ' {D : D7} {M : MtFam D} (T : NormalizedLocalCompatibility D M) (HT : HeckeTied D M) {j : ℕ}
-    {w : D.what₂.places.Pl} (h1 : 1 ≤ j) (h2 : j ≤ D.R.m) (hw : D.what₂.muAt w ≠ D.what₂.mu0) :
-    etaN T j w = D.what₂.etaJ j w :=
-  etaN_eq_etaJ_of_muAt_ne T ReciprocityTheory.ChartRestriction.L3H.heckeStd HT h1 h2 hw
 
 end Formalism.L2

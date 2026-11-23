@@ -1,8 +1,56 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.GL2.IdeleModuleDetOfMemMaxCompact
-import GroundTheory.AutomorphicForms.GL2.GJMatrixAdelic
-import GroundTheory.AutomorphicForms.ReductionIwasawa
-import GroundTheory.AutomorphicForms.ReductionHeight
+module
+
+public import GroundTheory.AutomorphicForms.GL2.GJMatrixAdelic
+public import GroundTheory.AutomorphicForms.ReductionIwasawa
+import GroundTheory.AutomorphicForms.NormDetDiagUnitsPosRealToUnits
+public import GroundTheory.AutomorphicForms.ReductionMahler
+import GroundTheory.AutomorphicForms.ReductionMeasure
+import GroundTheory.GlobalFields.IdeleGroups.UnitBound
+import GroundTheory.GlobalFields.TateThesis.AdeleScaling
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 set_option maxSynthPendingDepth 1
 
@@ -257,7 +305,7 @@ theorem map_vecMul_diagonal (d : Fin n → IdeleGroup K) :
   have hsm : ∀ i, Measurable fun y : 𝔸[K] => d i • y := fun i =>
     (Homeomorph.smul (d i)).continuous.measurable
   have hmeas : Measurable fun x : Fin n → 𝔸[K] => fun i => d i • x i :=
-    measurable_pi_lambda _ fun i => (hsm i).comp (measurable_pi_apply i)
+    Measurable.of_eval fun i => (hsm i).comp (measurable_pi_apply i)
   set c : Fin n → ℝ≥0 := fun i => Real.toNNReal ((IdeleGroup.ideleModule K (d i) : ℝ))⁻¹
   have hc : ∀ i, ENNReal.ofReal ((IdeleGroup.ideleModule K (d i) : ℝ))⁻¹ = (c i : ℝ≥0∞) :=
     fun i => rfl
@@ -329,7 +377,7 @@ theorem map_vecMul_adelicBorel' {b : GL (Fin n) 𝔸[K]}
     measurePreserving_vecMul_unitriangular (adeleMeasure K) u hlow hdiag
   have hDm : Measurable fun x : Fin n → 𝔸[K] => x ᵥ* D :=
     (continuous_id.matrix_vecMul continuous_const).measurable
-  rw [hcomp, ← map_map hmu.measurable hDm, map_vecMul_diagonal, Measure.map_smul, hmu.map_eq,
+  rw [hcomp, ← map_map hmu.measurable hDm, map_vecMul_diagonal, Measure.map_smul _ hmu.measurable.aemeasurable, hmu.map_eq,
     hdet]
   congr 1
   rw [← ENNReal.ofReal_prod_of_nonneg (fun i _ => inv_nonneg.2 (IdeleGroup.ideleModule K (d i)).2.le),
@@ -347,7 +395,7 @@ theorem map_vecMul_adeleMeasurePi (g : GL (Fin n) 𝔸[K]) :
     funext x
     simp only [Function.comp_apply, Units.val_mul, vecMul_vecMul]
   rw [hcomp, ← map_map (measurable_vecMul' k) (measurable_vecMul' b), map_vecMul_adelicBorel' hb,
-    Measure.map_smul, map_vecMul_maxCompact' hk, map_mul, map_mul,
+    Measure.map_smul _ (measurable_vecMul' k).aemeasurable, map_vecMul_maxCompact' hk, map_mul, map_mul,
     ideleModule_det_of_mem_maxCompact' hk, mul_one]
 
 end

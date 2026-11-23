@@ -1,6 +1,58 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.StatementsBridge
-import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.Statements
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.StatementsBridge
+public import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.Statements
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.LocalProperties.Reduced
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.NumbersDVR
@@ -57,7 +109,7 @@ theorem exists_homog_congr (i : ∀ k, ι k) (p : MRing ι F) :
     refine ⟨Np ⊔ Nq, fun N' hN => ?_⟩
     obtain ⟨a, ha, ha'⟩ := hp N' (le_sup_left.trans hN)
     obtain ⟨b, hb, hb'⟩ := hq N' (le_sup_right.trans hN)
-    exact ⟨a + b, IsWeightedHomogeneous.add ha hb, by rw [map_add, map_add, ha', hb']⟩
+    exact ⟨a + b, IsWeightedHomogeneous.add ha hb, by rw [map_add (f := _), map_add (f := _), ha', hb']⟩
   | mul_X p s hp =>
     obtain ⟨Np, hp⟩ := hp
     refine ⟨Np + blockWeight ι s, fun N' hN => ?_⟩
@@ -106,7 +158,7 @@ theorem dehom_monomial_mul (m : (Σ k, ι k) →₀ ℕ) :
   induction m using Finsupp.induction_linear with
   | zero => simp
   | add m m' hm hm' =>
-    rw [← mul_one (1 : F), ← monomial_mul, map_mul, map_mul, map_add, ← hm, ← hm']
+    rw [← mul_one (1 : F), ← monomial_mul, map_mul, map_mul, map_add (f := _), ← hm, ← hm']
     simp only [Pi.add_apply, pow_add, Finset.prod_mul_distrib]
     ring
   | single p n =>
@@ -122,10 +174,11 @@ theorem dehom_mul_of_isMultiHomog {h : MRing ι F} {a : K → ℕ} (hh : IsMulti
     dehom V i h * ∏ k, xc V ⟨k, i k⟩ ^ a k = cls V h := by
   conv_rhs => rw [h.as_sum]
   conv_lhs => rw [h.as_sum]
+
   rw [map_sum, map_sum, Finset.sum_mul]
   refine Finset.sum_congr rfl fun m hm => ?_
   have hw : Finsupp.weight (blockWeight ι) m = a := hh (mem_support_iff.mp hm)
-  have hmon : monomial m (coeff m h) = coeff m h • monomial m (1 : F) := by
+  have hmon : monomial m (AddMonoidAlgebra.coeff h m) = AddMonoidAlgebra.coeff h m • monomial m (1 : F) := by
     rw [smul_monomial, smul_eq_mul, mul_one]
   rw [hmon, map_smul, map_smul, smul_mul_assoc, ← hw, dehom_monomial_mul i hi]
 
@@ -139,8 +192,9 @@ theorem dehom_chartUnitIdeal {f : MRing ι F} (hf : f ∈ chartUnitIdeal i) : de
 
 theorem dehom_eq_zero_of_mem (hV : IsMultiHomogIdeal V) {f : MRing ι F} (hf : f ∈ V) :
     dehom V i f = 0 := by
+
   rw [← sum_weightedHomogeneousComponent (blockWeight ι) f,
-    finsum_eq_sum _ (weightedHomogeneousComponent_finsupp f), map_sum]
+  finsum_eq_sum _ (weightedHomogeneousComponent_finsupp f), map_sum]
   refine Finset.sum_eq_zero fun b _ => ?_
   have h1 := dehom_mul_of_isMultiHomog i hi
     (weightedHomogeneousComponent_isWeightedHomogeneous (w := blockWeight ι) (n := b) (φ := f))
@@ -172,9 +226,9 @@ end Dehom
 theorem finrank_chart_eq (V : Ideal (MRing ι F)) (hV : IsMultiProjPrime V) (i : ∀ k, ι k)
     (hi : ∀ k, (X ⟨k, i k⟩ : MRing ι F) ∉ V)
     (hfin : haveI := hV.isPrime; FiniteDimensional F (FieldNumbers.homFracDegZero V)) :
-    haveI := hV.isPrime
-    Module.finrank F (MRing ι F ⧸ ReciprocityTheory.ChartRestriction.G.AI.I1.chartIdeal V i) =
-      Module.finrank F (FieldNumbers.homFracDegZero V) := by
+    (haveI := hV.isPrime;
+      Module.finrank F (MRing ι F ⧸ ReciprocityTheory.ChartRestriction.G.AI.I1.chartIdeal V i) =
+        Module.finrank F (FieldNumbers.homFracDegZero V)) := by
   haveI := hV.isPrime
   set H := FieldNumbers.homFracDegZero V
   let ρ := Ideal.Quotient.liftₐ (ReciprocityTheory.ChartRestriction.G.AI.I1.chartIdeal V i) (dehom V i)

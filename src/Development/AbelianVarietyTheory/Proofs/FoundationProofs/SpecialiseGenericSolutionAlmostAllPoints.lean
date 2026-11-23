@@ -1,8 +1,61 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.DedekindFiniteTypeIdealCodimensionStatement
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsNeZeroForallPointExtendSubalgebraStatement
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.JetsMemSubalgebraOfFiniteTypeAlgebraStatement
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.MemMaximalPowOfJetsVanishStatement
+module
+
+public import Mathlib.FieldTheory.IsAlgClosed.Basic
+public import Mathlib.RingTheory.DedekindDomain.Basic
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.DedekindFiniteTypeIdealCodimensionStatement
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsNeZeroForallPointExtendSubalgebraStatement
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.JetsMemSubalgebraOfFiniteTypeAlgebraStatement
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.MemMaximalPowOfJetsVanishStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open Polynomial
 
 namespace GlobalTheory
@@ -80,6 +133,7 @@ theorem specialise_generic_solution : ∀ (k A : Type) [Field k] [IsAlgClosed k]
     apply GlobalTheory.T.mem_maximal_pow_of_jets_vanish k A N (Δ' i) hN
     · rw [hΔ' i 0 hN0, h01 i, hone]
     · intro l hl u w
+
       rw [hΔ' i l hl, hleib i l u w, map_sum]
       refine Finset.sum_congr rfl fun p hp => ?_
       have hp' : p < l + 1 := Finset.mem_range.1 hp
@@ -128,6 +182,7 @@ theorem specialise_generic_solution : ∀ (k A : Type) [Field k] [IsAlgClosed k]
     exact hunit _ (hy j0) hj0 (hTS _ (by simp [T])) this
   · apply (hφ f).2
     have : φ f = L (∑ j, y j * ξ (v j)) := by
+
       simp only [f, map_sum, map_smul, smul_eq_mul]
       refine Finset.sum_congr rfl fun j _ => ?_
       rw [hmul _ (hy j) _ (hξS _), hLξ]
@@ -136,6 +191,7 @@ theorem specialise_generic_solution : ∀ (k A : Type) [Field k] [IsAlgClosed k]
     apply hQpow i
     intro l hl
     have : Δ' i l f = L (∑ j, y j * Δ i l (v j)) := by
+
       simp only [f, map_sum, map_smul, smul_eq_mul]
       refine Finset.sum_congr rfl fun j _ => ?_
       rw [hmul _ (hy j) _ (hSΔ i l hl _), hΔ' i l hl]

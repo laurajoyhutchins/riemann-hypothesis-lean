@@ -1,6 +1,53 @@
-import Formalism.SharpRestriction.GrowthBounds.StatementOfDegreeAndBound
-import Formalism.SharpRestriction.GrowthBounds.GLWeightTheory
-import Formalism.SharpRestriction.GrowthBounds.FrobeniusPaths.AntitoneOfAppend
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.StatementOfDegreeAndBound
+public import Formalism.SharpRestriction.GrowthBounds.FrobeniusPaths.AntitoneOfAppend
+public import Formalism.SharpRestriction.GrowthBounds.RootWeights.DvrFractionFieldCharZeroPrime
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -29,7 +76,7 @@ lemma low_mul {f g : MvPolynomial σ R} {a b : ℕ} (hf : ∀ m ∈ f.support, a
     by_cases hx : x ∈ f.support
     · by_cases hy : y ∈ g.support
       · exfalso; apply hlt
-        rw [← hxy, map_add]
+        rw [← hxy, map_add (f := _)]
         exact add_le_add (hf x hx) (hg y hy)
       · rw [notMem_support_iff.1 hy, mul_zero]
     · rw [notMem_support_iff.1 hx, zero_mul]
@@ -45,7 +92,7 @@ lemma low_mul {f g : MvPolynomial σ R} {a b : ℕ} (hf : ∀ m ∈ f.support, a
       · by_cases hy : y ∈ g.support
         · have h1 := hf x hx
           have h2 := hg y hy
-          have h3 : Finsupp.weight w x + Finsupp.weight w y = a + b := by rw [← map_add, hxy, hm]
+          have h3 : Finsupp.weight w x + Finsupp.weight w y = a + b := by rw [← map_add (f := _), hxy, hm]
           rw [if_pos (by omega), if_pos (by omega)]
         · rw [notMem_support_iff.1 hy]; simp
       · rw [notMem_support_iff.1 hx]; simp
@@ -57,7 +104,7 @@ lemma low_mul {f g : MvPolynomial σ R} {a b : ℕ} (hf : ∀ m ∈ f.support, a
       rw [coeff_weightedHomogeneousComponent, coeff_weightedHomogeneousComponent]
       by_cases h1 : Finsupp.weight w x = a
       · by_cases h2 : Finsupp.weight w y = b
-        · exfalso; apply hm; rw [← hxy, map_add, h1, h2]
+        · exfalso; apply hm; rw [← hxy, map_add (f := _), h1, h2]
         · rw [if_neg h2, mul_zero]
       · rw [if_neg h1, zero_mul]
 

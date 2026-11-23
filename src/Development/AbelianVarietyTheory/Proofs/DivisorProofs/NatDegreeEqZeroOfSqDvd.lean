@@ -1,5 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsAdmissibleIntegralBasisChangeOne
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IsAdmissibleIntegralBasisChangeOne
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.PowerSeries.NoZeroDivisors
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open scoped IntermediateField Polynomial RatFunc
 open GlobalTheory.Nef
@@ -45,8 +95,8 @@ theorem natDegree_eq_zero_of_sq_dvd {F : Type} [Field F] [CharZero F] (f g : F[X
 
 end RatDilation
 
-open RatDilation in
 
+open RatDilation in
 theorem rat_dilation_eq_one (F : Type) [Field F] [CharZero F] (φ : PowerSeries F) (hr : IsRat φ)
     (h0 : PowerSeries.constantCoeff φ = 1) (h2 : PowerSeries.rescale 2 φ = φ ^ 2) : φ = 1 := by
   classical
@@ -75,11 +125,11 @@ theorem rat_dilation_eq_one (F : Type) [Field F] [CharZero F] (φ : PowerSeries 
   have key : p.comp (C (2:F) * X) * q ^ 2 = q.comp (C (2:F) * X) * p ^ 2 := by
     apply Polynomial.coe_inj.1
     have e := congrArg (PowerSeries.rescale (2:F)) hpq
-    rw [map_mul, h2, ← coe_comp_C_mul_X, ← coe_comp_C_mul_X] at e
+    rw [map_mul, h2, ← RatDilation.coe_comp_C_mul_X, ← RatDilation.coe_comp_C_mul_X] at e
     simp only [Polynomial.coe_mul, Polynomial.coe_pow]
     rw [← e, ← hpq]; ring
-  have dq := natDegree_eq_zero_of_sq_dvd q p hq hcop.symm key.symm
-  have dp := natDegree_eq_zero_of_sq_dvd p q hp hcop key
+  have dq := RatDilation.natDegree_eq_zero_of_sq_dvd q p hq hcop.symm key.symm
+  have dp := RatDilation.natDegree_eq_zero_of_sq_dvd p q hp hcop key
   rw [eq_C_of_natDegree_eq_zero dq, eq_C_of_natDegree_eq_zero dp] at hpq
   rw [Polynomial.coe_C, Polynomial.coe_C] at hpq
   have hc := congrArg PowerSeries.constantCoeff hpq
@@ -87,8 +137,8 @@ theorem rat_dilation_eq_one (F : Type) [Field F] [CharZero F] (φ : PowerSeries 
   rw [← hc] at hpq
   have ha : (PowerSeries.C (q.coeff 0) : PowerSeries F) ≠ 0 := by
     intro h
-    have h' := congrArg PowerSeries.constantCoeff h
-    rw [PowerSeries.constantCoeff_C, map_zero] at h'
+    have h0 : PowerSeries.C (q.coeff 0) = PowerSeries.C 0 := by simpa using h
+    have h' : q.coeff 0 = 0 := PowerSeries.C_injective h0
     apply hq; rw [eq_C_of_natDegree_eq_zero dq, h', C_0]
   exact mul_left_cancel₀ ha (hpq.trans (mul_one _).symm)
 

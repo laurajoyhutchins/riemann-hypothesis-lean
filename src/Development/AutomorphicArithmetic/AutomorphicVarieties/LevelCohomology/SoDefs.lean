@@ -1,6 +1,50 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.HeightAndVanishing.DirichletPrimeToLPartMulLPowerPart
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.ResMapBijective
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.ExistsPrimitiveRootPow
+module
+
+public import Formalism.GaloisCohomology.Statement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.SelmerTransport.RestrictionMemInvariantH1
+
+@[expose] public section
 
 noncomputable section
 
@@ -12,17 +56,6 @@ section Dat
 
 variable {k Ω : Type} [Field k] [NumberField k] [Field Ω] [Algebra k Ω] (l : ℕ) [Fact l.Prime]
   {O : Type} [CommRing O] [Algebra ℤ_[l] O]
-
-structure SoDat (S : Finset (HeightOneSpectrum (𝓞 k))) (e : ℕ) (ψ : G k Ω →* Oˣ)
-    (Θ : GS Ω (S : Set (HeightOneSpectrum (𝓞 k))) →* Oˣ) : Prop where
-  odd : l ≠ 2 ∨ IsTotallyComplex k
-  above : ContainsAbove S l
-  e_pos : 1 ≤ e
-  opn : IsOpen (ψ.ker : Set (G k Ω))
-  lift : Θ.comp (toGS Ω _) = Chr.Psi l (e + 1) ψ
-
-def locSum (e : ℕ) (ψ : G k Ω →* Oˣ) (S : Finset (HeightOneSpectrum (𝓞 k))) (A : S → ValuationSubring Ω) : ℕ∞ :=
-  ∑ v : S, Chr.h0 l e ψ (Dec (F := k) (A v))
 
 end Dat
 
@@ -53,9 +86,6 @@ structure IsLev (a : O) (θ : Γ →* Oˣ) (ρ : Representation O Γ M) : Prop w
 
 theorem isLev_lev {a : O} (ha : a ≠ 0) (θ : Γ →* Oˣ) : IsLev a θ (scalRep (Lev a) θ) := ⟨ha, ⟨LinearEquiv.refl O _⟩, fun g m => scalRep_apply (Lev a) θ g m⟩
 
-theorem IsLev.comp {a : O} {θ : Γ →* Oˣ} {ρ : Representation O Γ M} (h : IsLev a θ ρ) {D : Type} [Group D] (φ : D →* Γ) :
-    IsLev a (θ.comp φ) (ρ.comp φ : Representation O D M) := ⟨h.ne, h.cyc, fun g m => h.act (φ g) m⟩
-
 def Coc (θ : Γ →* Oˣ) (z : Γ → O) : Prop := ∀ g h, z (g * h) = z g + (θ g : O) * z h
 
 def CobOn (θ : Γ →* Oˣ) (z : Γ → O) (D : Subgroup Γ) : Prop :=
@@ -79,7 +109,7 @@ variable {R R' Γ N W : Type} [CommRing R] [CommRing R'] [Group Γ] [Topological
 
 def cocycleMapOfEquivariant : Z1 τ →+ Z1 σ where
   toFun z := ⟨fun g => ι (z.1 g), continuous_of_discreteTopology.comp z.2.1, fun g g' => by
-    simp only [z.2.2 g g', map_add, h]⟩
+    simp only [z.2.2 g g', map_add (f := _), h]⟩
   map_zero' := Subtype.ext (funext fun _ => map_zero ι)
   map_add' _ _ := Subtype.ext (funext fun _ => map_add ι _ _)
 

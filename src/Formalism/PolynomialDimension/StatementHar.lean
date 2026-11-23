@@ -1,4 +1,50 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.MvPolynomial.PDeriv
+public import Mathlib.LinearAlgebra.Matrix.GeneralLinearGroup.Defs
+public import Mathlib.RingTheory.MvPolynomial.IrreducibleQuadratic
+public import Mathlib.RingTheory.Valuation.ValuationSubring
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -57,9 +103,6 @@ def levelProj (A B j : ℕ) : PolXY K k →ₗ[K] PolXY K k :=
   ((((A + B + k - 2 * j + j - 1).choose j : ℕ) : K)⁻¹) •
     (hDiv K k j ∘ₗ harProj K k (A - j) (B - j) ∘ₗ ctrDiv K k j)
 
-def fischer (f g : PolXY K k) : K :=
-  ∑ m ∈ f.support, ((xFact m : K) * (yFact m : K)) * (coeff m f * coeff m g)
-
 variable {K k}
 
 def glAct (g : GL (Fin k) K) : PolXY K k →ₐ[K] PolXY K k :=
@@ -67,17 +110,12 @@ def glAct (g : GL (Fin k) K) : PolXY K k →ₐ[K] PolXY K k :=
     (fun i : Fin k => ∑ j : Fin k, C ((g : Matrix (Fin k) (Fin k) K) i j) * X (Sum.inl j))
     (fun i : Fin k => ∑ j : Fin k, C (((g⁻¹ : GL (Fin k) K) : Matrix (Fin k) (Fin k) K) j i) * X (Sum.inr j)))
 
-def GaussLat (R : Subring K) : Set (PolXY K k) := {f | ∀ m, coeff m f ∈ R}
+def GaussLat (R : Subring K) : Set (PolXY K k) := {f | ∀ m, AddMonoidAlgebra.coeff f m ∈ R}
 
-def FockLat (R : Subring K) : Set (PolXY K k) := {f | ∀ m, (xFact m : K) * coeff m f ∈ R}
+def FockLat (R : Subring K) : Set (PolXY K k) := {f | ∀ m, (xFact m : K) * AddMonoidAlgebra.coeff f m ∈ R}
 
 def DualLat (R : Subring K) : Set (PolXY K k) :=
-  {f | ∀ m, ((xFact m : K) * (yFact m : K)) * coeff m f ∈ R}
-
-def SqrtFockLat (R : Subring K) : Set (PolXY K k) :=
-  {f | ∀ m, ((xFact m : K) * (yFact m : K)) * coeff m f ^ 2 ∈ R}
-
-def SqrtGaussLat (R : Subring K) (n : ℕ) : Set (PolXY K k) := {f | ∀ m, (n : K) * coeff m f ^ 2 ∈ R}
+  {f | ∀ m, ((xFact m : K) * (yFact m : K)) * AddMonoidAlgebra.coeff f m ∈ R}
 
 def latOf (g : GL (Fin k) K) (S : Set (PolXY K k)) : Set (PolXY K k) := glAct g '' S
 
@@ -86,37 +124,6 @@ def PLocal (R : Subring K) (p : ℕ) : Prop := ∀ n : ℕ, ¬ p ∣ n → ((n :
 def SlTwo : Prop :=
   ∀ (K : Type) [Field K] [CharZero K] (k A B : ℕ) (f : PolXY K k), f ∈ PolAB K k A B →
     ctrF K k (hXY K k * f) - hXY K k * ctrF K k f = ((A + B + k : ℕ) : K) • f
-
-def SlTwoPower : Prop :=
-  ∀ (K : Type) [Field K] [CharZero K] (k a b i : ℕ), 1 ≤ k → ∀ w : PolXY K k, w ∈ HarAB K k a b →
-    ctrF K k (hXY K k ^ (i + 1) * w) = (((i + 1) * (a + b + k + i) : ℕ) : K) • (hXY K k ^ i * w)
-
-def DivPowerEigen : Prop :=
-  ∀ (K : Type) [Field K] [CharZero K] (k a b : ℕ), 1 ≤ k → ∀ w : PolXY K k, w ∈ HarAB K k a b →
-    (∀ i l : ℕ, hDiv K k l (ctrDiv K k l (hXY K k ^ i * w)) =
-        ((i.choose l * (a + b + k + i - 1).choose l : ℕ) : K) • (hXY K k ^ i * w)) ∧
-    (∀ j : ℕ, ctrDiv K k j (hDiv K k j w) = (((a + b + k + j - 1).choose j : ℕ) : K) • w)
-
-def FischerAdjoint : Prop :=
-  ∀ (K : Type) [Field K] [CharZero K] (k : ℕ) (f g : PolXY K k),
-    fischer K k (hXY K k * f) g = fischer K k f (ctrF K k g)
-
-def CtrSurj : Prop :=
-  ∀ (K : Type) [Field K] [CharZero K] (k A B : ℕ), 1 ≤ k → ∀ g : PolXY K k, g ∈ PolAB K k A B →
-    ∃ f ∈ PolAB K k (A + 1) (B + 1), ctrF K k f = g
-
-def HarDecomp : Prop :=
-  ∀ (K : Type) [Field K] [CharZero K] (k A B : ℕ), 1 ≤ k → ∀ f : PolXY K k, f ∈ PolAB K k A B →
-    ∃! w : Fin (min A B + 1) → PolXY K k,
-      (∀ j : Fin (min A B + 1), w j ∈ HarAB K k (A - (j : ℕ)) (B - (j : ℕ))) ∧
-        f = ∑ j : Fin (min A B + 1), hXY K k ^ (j : ℕ) * w j
-
-def HarDim : Prop :=
-  ∀ (K : Type) [Field K] [CharZero K] (k' A B : ℕ),
-    Module.finrank K (PolAB K (k' + 1) A B) = (A + k').choose k' * (B + k').choose k' ∧
-    Module.finrank K (HarAB K (k' + 1) (A + 1) (B + 1)) + (A + k').choose k' * (B + k').choose k' =
-      (A + 1 + k').choose k' * (B + 1 + k').choose k' ∧
-    HarAB K (k' + 1) A 0 = PolAB K (k' + 1) A 0 ∧ HarAB K (k' + 1) 0 B = PolAB K (k' + 1) 0 B
 
 def HarProj : Prop :=
   ∀ (K : Type) [Field K] [CharZero K] (k A B : ℕ), 1 ≤ k →
@@ -137,34 +144,6 @@ def LevelProj : Prop :=
     (∀ i ≤ min A B, ∀ j ≤ min A B, ∀ w : PolXY K k, w ∈ HarAB K k (A - i) (B - i) →
       levelProj K k A B j (hXY K k ^ i * w) = if i = j then hXY K k ^ i * w else 0)
 
-def Canonical : Prop :=
-  ∀ (K : Type) [Field K] [CharZero K] (k : ℕ) (g : GL (Fin k) K),
-    glAct g (hXY K k) = hXY K k ∧
-    (∀ f : PolXY K k, ctrF K k (glAct g f) = glAct g (ctrF K k f)) ∧
-    (∀ (A B : ℕ) (f : PolXY K k), f ∈ PolAB K k A B → glAct g f ∈ PolAB K k A B) ∧
-    (∀ (A B : ℕ) (f : PolXY K k), harProj K k A B (glAct g f) = glAct g (harProj K k A B f)) ∧
-    (∀ (A B j : ℕ) (f : PolXY K k), levelProj K k A B j (glAct g f) = glAct g (levelProj K k A B j f))
-
-def FockStable : Prop :=
-  ∀ (K : Type) [Field K] [CharZero K] (k : ℕ) (R : Subring K) (g : GL (Fin k) K) (l : ℕ) (f : PolXY K k),
-    f ∈ latOf g (FockLat R) →
-      hDiv K k l f ∈ latOf g (FockLat R) ∧ ctrDiv K k l f ∈ latOf g (FockLat R)
-
-def SqrtFockStable : Prop :=
-  ∀ (K : Type) [Field K] [CharZero K] (k : ℕ) (O : ValuationSubring K) (g : GL (Fin k) K) (l : ℕ)
-    (f : PolXY K k), f ∈ latOf g (SqrtFockLat O.toSubring) →
-      hDiv K k l f ∈ latOf g (SqrtFockLat O.toSubring) ∧ ctrDiv K k l f ∈ latOf g (SqrtFockLat O.toSubring)
-
-def BinomVal : Prop :=
-  ∀ p : ℕ, p.Prime →
-    (∀ n m : ℕ, padicValNat p (n.choose m) ≤ Nat.log p n) ∧
-    (∀ k A B l j : ℕ, 1 ≤ k → l ≤ min A B → j ≤ min A B →
-      (padicValNat p ((A + B + k - 2).choose l) : ℝ) ≤ Real.logb p ((A : ℝ) + B + k) ∧
-      (padicValNat p ((A + B + k - 2 * j + j - 1).choose j) : ℝ) ≤ Real.logb p ((A : ℝ) + B + k)) ∧
-    (∀ k A B a l j : ℕ, 1 ≤ k → A ≤ 8 * a → B ≤ 8 * a → l ≤ min A B → j ≤ min A B →
-      (padicValNat p ((A + B + k - 2).choose l) : ℝ) ≤ Real.logb p (8 * (a : ℝ) + k - 1) + 1 ∧
-      (padicValNat p ((A + B + k - 2 * j + j - 1).choose j) : ℝ) ≤ Real.logb p (8 * (a : ℝ) + k - 1) + 1)
-
 def FockProj : Prop :=
   ∀ (K : Type) [Field K] [CharZero K] (k A B p : ℕ) (R : Subring K) (g : GL (Fin k) K),
     1 ≤ k → p.Prime → PLocal R p → ∀ f : PolXY K k, f ∈ PolAB K k A B → f ∈ latOf g (FockLat R) →
@@ -172,28 +151,12 @@ def FockProj : Prop :=
       ∀ j ≤ min A B,
         ((p : K) ^ (2 * Nat.log p (A + B + k))) • levelProj K k A B j f ∈ latOf g (FockLat R)
 
-def SqrtFockProj : Prop :=
-  ∀ (K : Type) [Field K] [CharZero K] (k A B p : ℕ) (O : ValuationSubring K) (g : GL (Fin k) K),
-    1 ≤ k → p.Prime → PLocal O.toSubring p →
-    ∀ f : PolXY K k, f ∈ PolAB K k A B → f ∈ latOf g (SqrtFockLat O.toSubring) →
-      ((p : K) ^ Nat.log p (A + B + k)) • harProj K k A B f ∈ latOf g (SqrtFockLat O.toSubring) ∧
-      ∀ j ≤ min A B,
-        ((p : K) ^ (2 * Nat.log p (A + B + k))) • levelProj K k A B j f ∈ latOf g (SqrtFockLat O.toSubring)
-
 def FockGaussXY : Prop :=
   ∀ (K : Type) [Field K] [CharZero K] (k A B p : ℕ) (R : Subring K) (g : GL (Fin k) K),
     1 ≤ k → p.Prime → PLocal R p → ∀ f : PolXY K k, f ∈ PolAB K k A B →
       (f ∈ latOf g (FockLat R) → (A.factorial : K) • f ∈ latOf g (GaussLat R)) ∧
       (f ∈ latOf g (GaussLat R) →
         ((p : K) ^ ((k - 1) * Nat.log p A) * (A.factorial : K)⁻¹) • f ∈ latOf g (FockLat R))
-
-def SqrtFockGaussXY : Prop :=
-  ∀ (K : Type) [Field K] [CharZero K] (k A B p : ℕ) (O : ValuationSubring K) (g : GL (Fin k) K),
-    1 ≤ k → p.Prime → PLocal O.toSubring p → ∀ f : PolXY K k, f ∈ PolAB K k A B →
-      (f ∈ latOf g (SqrtFockLat O.toSubring) →
-        f ∈ latOf g (SqrtGaussLat O.toSubring (A.factorial * B.factorial))) ∧
-      (f ∈ latOf g (SqrtGaussLat O.toSubring (A.factorial * B.factorial)) →
-        ((p : K) ^ ((k - 1) * Nat.log p (A + B + k))) • f ∈ latOf g (SqrtFockLat O.toSubring))
 
 def GaussProj : Prop :=
   ∀ (K : Type) [Field K] [CharZero K] (k A B p : ℕ) (R : Subring K) (g : GL (Fin k) K),
@@ -207,21 +170,10 @@ def GaussProj : Prop :=
         ∀ j ≤ min A B,
           ((p : K) ^ ((k + 1) * Nat.log p (A + B + k))) • levelProj K k A B j f ∈ latOf g (DualLat R))
 
-def GaussProjText : Prop :=
-  ∀ (K : Type) [Field K] [CharZero K] (k A B a p e : ℕ) (R : Subring K) (g : GL (Fin k) K),
-    1 ≤ k → p.Prime → PLocal R p → A ≤ 8 * a → B ≤ 8 * a →
-    3 * (Real.logb p (8 * (a : ℝ) + k - 1) + 1) + 4 * (k : ℝ) * (Real.logb p (8 * (a : ℝ) + k - 1) + 1) ≤ (e : ℝ) →
-    ∀ f : PolXY K k, f ∈ PolAB K k A B → ∀ j ≤ min A B,
-      (f ∈ latOf g (GaussLat R) → ((p : K) ^ e) • levelProj K k A B j f ∈ latOf g (GaussLat R)) ∧
-      (f ∈ latOf g (DualLat R) → ((p : K) ^ e) • levelProj K k A B j f ∈ latOf g (DualLat R))
-
 def GaussLemmaH : Prop :=
   ∀ (K : Type) [Field K] [CharZero K] (k : ℕ) (O : ValuationSubring K) (g : GL (Fin k) K) (j : ℕ)
     (G : PolXY K k), 1 ≤ k →
       hXY K k ^ j * G ∈ latOf g (GaussLat O.toSubring) → G ∈ latOf g (GaussLat O.toSubring)
-
-def HPrime : Prop :=
-  ∀ (F : Type) [Field F] (k : ℕ), 2 ≤ k → Prime (hXY F k)
 
 def LevelLattice : Prop :=
   ∀ (K : Type) [Field K] [CharZero K] (k a b j : ℕ) (O : ValuationSubring K) (g : GL (Fin k) K), 1 ≤ k →

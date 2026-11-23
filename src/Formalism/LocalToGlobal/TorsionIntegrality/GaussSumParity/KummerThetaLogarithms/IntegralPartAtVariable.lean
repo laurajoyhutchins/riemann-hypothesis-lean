@@ -1,7 +1,59 @@
-import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.BiextensionHypothesesOfLevelOne
-import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.KummerThetaLogarithms.CoboundaryCommutesHomomorphism
-import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.StatementC
-import Formalism.ThetaLogCoordinates.UniformThetaSubstitution.FinalS
+module
+
+public import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.StatementC
+public import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.LetterShift
+public import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.BiextensionHypothesesOfLevelOne
+public import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.KummerThetaLogarithms.BiextensionHypothesesOfConditions
+import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.KummerThetaLogarithms.ExponentialSpecification
+import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.KummerThetaLogarithms.FirstMomentIdempotentLaw
+public import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.KummerThetaLogarithms.NormLeInvOfLtOne
+import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.KummerThetaLogarithms.SubstFirstCoboundaryThree
+import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.KummerThetaLogarithms.TilInvariantLOf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RingTheory.Polynomial.Cyclotomic.Basic
+
+@[expose] public section
 
 noncomputable section
 open scoped BigOperators
@@ -119,7 +171,7 @@ theorem inS_add (hU : UnrOK K l σ) (hF : IsLawOfLog l F) (hF1 : F1 F be0) {α �
   have hG := integral_part_at_variable hU.1 σ (0 : Fin 2)
   have hH := integral_part_at_variable hU.1 σ (1 : Fin 2)
   refine ⟨(IsUltrametricDist.norm_add_le_max _ _).trans (max_le hα.1 hβ.1), ?_, ?_⟩
-  · rw [map_add, map_add, hα.2.1, hβ.2.1]
+  · rw [map_add (f := _), map_add (f := _), hα.2.1, hβ.2.1]
   · rw [map_add σ, map_add C, map_add C, add_mul, add_mul]
     refine sim_trans (hadd1 _ _ _ (hmul α _ hα.1 hα.2.1 hG) (hmul β _ hβ.1 hβ.2.1 hG) hH) ?_
     refine sim_trans (sim_add hα.2.2 hβ.2.2) (sim_symm ?_)
@@ -179,7 +231,7 @@ theorem approx_one (hU : UnrOK K l σ) (hF : IsLawOfLog l F) (hB : BetaHyp l F b
       (not_le.2 (hc z (inS_root hU hB ((Polynomial.mem_nthRootsFinset hN 1).1 hz))))
   have h5 : (1 : ℝ) ≤ ‖∏ z ∈ Polynomial.nthRootsFinset (l ^ 2 - 1) (1 : K), (α - z)‖ := by
     rw [norm_prod]
-    have := Finset.prod_le_prod (s := Polynomial.nthRootsFinset (l ^ 2 - 1) (1 : K))
+    have := Finset.prod_le_prod₀ (s := Polynomial.nthRootsFinset (l ^ 2 - 1) (1 : K))
       (f := fun _ => (1 : ℝ)) (g := fun z : K => ‖α - z‖) (fun _ _ => zero_le_one) h4
     simpa using this
   rw [e, norm_mul] at h1

@@ -1,6 +1,52 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.CechPairings.CechAugRow
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.CechPairings.MapHComp
+module
+
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.CechPairings.InstAddCommGroup
+public import Mathlib.Algebra.Exact.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option backward.isDefEq.respectTransparency false
 open CategoryTheory Opposite CrystallineSemistableComparison CrystallineSemistableComparison.CH
 universe w w' w'' t t' v u v' u' v'' u''
@@ -26,9 +72,6 @@ theorem clsSurj {K : Cx.{w} R} {n : ℕ} (z : K.H n) : ∃ a ha, z = K.cls a ha 
 
 theorem cls_add {K : Cx.{w} R} {n : ℕ} (a b : K.X n) (ha : K.d n a = 0) (hb : K.d n b = 0) (h) :
     K.cls (a + b) h = K.cls a ha + K.cls b hb := rfl
-
-theorem cls_sub {K : Cx.{w} R} {n : ℕ} (a b : K.X n) (ha : K.d n a = 0) (hb : K.d n b = 0) (h) :
-    K.cls (a - b) h = K.cls a ha - K.cls b hb := rfl
 
 theorem cls_smul {K : Cx.{w} R} {n : ℕ} (r : R) (a : K.X n) (ha : K.d n a = 0) (h) :
     K.cls (r • a) h = r • K.cls a ha := rfl
@@ -115,8 +158,8 @@ noncomputable def dZ (f : Cx.Hom K L (RingHom.id R)) (g : Cx.Hom L M (RingHom.id
     have c₁ := conn_cyc f hf _ _ h₁
     have c₂ := conn_cyc f hf _ _ h₂
     rw [dfun_spec f g hf hfg hg _ _ y₁ x₁ c₁ e₁ h₁, dfun_spec f g hf hfg hg _ _ y₂ x₂ c₂ e₂ h₂,
-      dfun_spec f g hf hfg hg _ _ (y₁ + y₂) (x₁ + x₂) (by rw [map_add, c₁, c₂, add_zero])
-        (by rw [map_add, e₁, e₂]; rfl) (by rw [map_add, map_add, h₁, h₂])]
+      dfun_spec f g hf hfg hg _ _ (y₁ + y₂) (x₁ + x₂) (by rw [map_add (f := _), c₁, c₂, add_zero])
+        (by rw [map_add (f := _), e₁, e₂]; rfl) (by rw [map_add (f := _), map_add (f := _), h₁, h₂])]
     rfl
   map_smul' r m := by
     obtain ⟨y, x, e, h⟩ := lift_ex f g hfg hg m.1 m.2
@@ -409,7 +452,7 @@ theorem CrystallineSemistableComparison.P.res_2of3 : ∀ {R : Type} [CommRing R]
     obtain ⟨a0, ha0'⟩ := ka2 k hkc
     have e1 : b (i a0) = s • (s • y - b x') := by rw [hab, ha0', map_smul, hk]
     refine ⟨s • i a0 + s • s • x', ?_⟩
-    simp only [map_add, map_smul]
+    simp only [map_add (f := _), map_smul]
     rw [e1, pow3, smul_sub, smul_sub, sub_add_cancel]
   · have hMk := (kill_iff _ _).1 (mc3 n) (g.mapH (n + 1) z)
     rw [← map_smul (g.mapH (n + 1))] at hMk
@@ -574,17 +617,3 @@ theorem CrystallineSemistableComparison.P.ses_cochains : ∀ {R : Type} [CommRin
     funext s
     exact (he _ _).2 ⟨_, rfl⟩
   · exact ⟨fun s => (hs _ (y s)).choose, funext fun s => (hs _ (y s)).choose_spec⟩
-
-theorem CrystallineSemistableComparison.P.ses_sub : ∀ {R : Type} [CommRing R] {C : Type u} [Category.{v} C] {F : C ⥤ ModuleCat.{w} R} (S : SubF F), (∀ n, Function.Injective (S.inc.hom.f n)) ∧ (∀ n, Function.Exact (S.inc.hom.f n) (S.proj.hom.f n)) ∧ ∀ n, Function.Surjective (S.proj.hom.f n) := by
-  intro R _ C _ F S
-  refine ⟨fun n x y hxy => ?_, fun n y => ⟨fun hy => ?_, ?_⟩, fun n y => ?_⟩
-  · funext s
-    exact Subtype.val_injective (congrFun hxy s)
-  · refine ⟨fun s => ⟨y s, (Submodule.Quotient.mk_eq_zero _).1 (congrFun hy s)⟩, ?_⟩
-    funext s
-    rfl
-  · rintro ⟨x, rfl⟩
-    funext s
-    exact (Submodule.Quotient.mk_eq_zero _).2 (x _).2
-  · exact ⟨fun s => (Submodule.Quotient.mk_surjective _ (y s)).choose,
-      funext fun s => (Submodule.Quotient.mk_surjective _ (y s)).choose_spec⟩

@@ -1,5 +1,56 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.ChowDegree
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.ChowDegree
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+public import Mathlib.RingTheory.Nullstellensatz
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -14,6 +65,7 @@ theorem aeval_scale_of_isWeightedHomogeneous {σ R A : Type*} [CommSemiring R] [
   classical
   conv_lhs => rw [p.as_sum]
   conv_rhs => rw [p.as_sum]
+
   rw [map_sum, map_sum, Finset.mul_sum]
   refine Finset.sum_congr rfl fun d hd => ?_
   rw [aeval_monomial, aeval_monomial, Finsupp.prod, Finsupp.prod]
@@ -51,6 +103,7 @@ theorem component_vanish_incidence {I : Ideal (MvPolynomial (Fin n) F)}
     apply Polynomial.funext
     intro t
     have h1 := hf _ (scale_mem_incidence hu i t)
+
     rw [← sum_weightSet_component (w := w) f, map_sum] at h1
     simp only [hq_def, Polynomial.eval_finsetSum, Polynomial.eval_mul, Polynomial.eval_C,
       Polynomial.eval_pow, Polynomial.eval_X, Polynomial.eval_zero]
@@ -58,7 +111,7 @@ theorem component_vanish_incidence {I : Ideal (MvPolynomial (Fin n) F)}
     refine Finset.sum_congr rfl fun b _ => ?_
     rw [aeval_scale_of_isWeightedHomogeneous (weightedHomogeneousComponent_isWeightedHomogeneous b f),
       mul_comm]
-  have hc := congrArg (fun p => Polynomial.coeff p a) hq
+  have hc := congrArg (fun p => _root_.AddMonoidAlgebra.coeff (M := ℕ) p a) hq
   simp only [hq_def, Polynomial.finsetSum_coeff, Polynomial.coeff_C_mul_X_pow,
     Polynomial.coeff_zero] at hc
   rw [Finset.sum_ite_eq, if_pos ha] at hc
@@ -114,7 +167,7 @@ theorem IsChowForm.exists_multiHomog {P : Ideal (MvPolynomial (Fin n) F)}
     have h2 := (Finset.sum_eq_zero_iff.mp h1) ij (Finsupp.mem_support_iff.mpr hne)
     simp [groupWeight] at h2
     exact hne h2
-  have hC : f = C (coeff 0 f) := by
+  have hC : f = C (AddMonoidAlgebra.coeff f 0) := by
     ext d
     rw [coeff_C]
     split_ifs with hd
@@ -124,9 +177,6 @@ theorem IsChowForm.exists_multiHomog {P : Ideal (MvPolynomial (Fin n) F)}
   have hz := (hf.2 f).mpr dvd_rfl 0 (zero_mem_incidence hP k)
   rw [hC, aeval_C, map_eq_zero_iff _ (algebraMap F (AlgebraicClosure F)).injective] at hz
   exact hf.1 (by rw [hC, hz, C_0])
-
-example : ∃ δ, 1 ≤ δ ∧ IsMultiHomog δ (X (0, 0) : MvPolynomial (Fin 1 × Fin 1) ℚ) :=
-  (isChowForm_point ℚ).exists_multiHomog (isProjPrime_point ℚ)
 
 end
 

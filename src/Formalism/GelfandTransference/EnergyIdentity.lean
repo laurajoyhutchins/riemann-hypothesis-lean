@@ -1,61 +1,55 @@
-import Mathlib
+module
+
+public import Mathlib.Analysis.InnerProductSpace.Defs
+public import Mathlib.LinearAlgebra.FiniteDimensional.Defs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Analysis.InnerProductSpace.Basic
+
+@[expose] public section
 
 open Finset
 
 noncomputable section
 
 namespace Formalism.HadamardInequality
-
-def grass (F V : Type) [Field F] [AddCommGroup V] [Module F V] (u : ℕ) : Type :=
-  {U : Submodule F V // Module.finrank F U = u}
-
-def GrassFormula : Prop :=
-  ∀ (F V : Type) [Field F] [Fintype F] [AddCommGroup V] [Module F V] [FiniteDimensional F V]
-    (u : ℕ), u ≤ Module.finrank F V →
-    Nat.card (grass F V u) * ∏ i ∈ range u, (Fintype.card F ^ u - Fintype.card F ^ i) =
-      ∏ i ∈ range u, (Fintype.card F ^ Module.finrank F V - Fintype.card F ^ i)
-
-def GrassBound : Prop :=
-  ∀ (F V : Type) [Field F] [Fintype F] [AddCommGroup V] [Module F V] [FiniteDimensional F V]
-    (u : ℕ), u ≤ Module.finrank F V →
-    (Nat.card (grass F V u) : ℝ) ≤ 4 * (Fintype.card F : ℝ) ^ (u * (Module.finrank F V - u))
-
-def energy {m : ℕ} (u : Fin m → ℕ) : ℤ :=
-  ∑ j, (u j : ℤ) ^ 2 - ∑ j : Fin m, ∑ i : Fin m, if (i : ℕ) + 1 = j then (u i : ℤ) * u j else 0
-
-def EnergyIdentity : Prop :=
-  ∀ (m : ℕ) (u : Fin (m + 1) → ℕ),
-    2 * energy u = (u 0 : ℤ) ^ 2 +
-      (∑ j : Fin (m + 1), ∑ i : Fin (m + 1),
-        if (i : ℕ) + 1 = j then ((u j : ℤ) - u i) ^ 2 else 0) + (u (Fin.last m) : ℤ) ^ 2
-
-def EnergyPos : Prop :=
-  ∀ (m : ℕ) (u : Fin m → ℕ), u ≠ 0 → 1 ≤ energy u
-
-def ChainExponent : Prop :=
-  ∀ (m : ℕ) (u : Fin m → ℕ) (cs : Fin m → ℝ) (c : ℝ), (∀ j, c ≤ cs j) → u ≠ 0 →
-    1 + c * (∑ j, (u j : ℝ)) ≤ (∑ j, cs j * u j) + (energy u : ℝ)
-
-def qbinom (q : ℕ) : ℕ → ℕ → ℕ
-  | _, 0 => 1
-  | 0, _ + 1 => 0
-  | n + 1, k + 1 => qbinom q n k + q ^ (k + 1) * qbinom q n (k + 1)
-
-def QBinomialIdentity : Prop :=
-  ∀ q k : ℕ, ∑ i ∈ range (k + 1), (-1 : ℤ) ^ i * (q : ℤ) ^ Nat.choose i 2 * (qbinom q k i : ℤ) =
-    if k = 0 then 1 else 0
-
-def SubspaceCount : Prop :=
-  ∀ (F V : Type) [Field F] [Fintype F] [AddCommGroup V] [Module F V] [FiniteDimensional F V]
-    (i : ℕ), Nat.card (grass F V i) = qbinom (Fintype.card F) (Module.finrank F V) i
-
-def MoebiusSub : Prop :=
-  ∀ (F V : Type) [Field F] [Fintype F] [AddCommGroup V] [Module F V] [FiniteDimensional F V]
-    [Fintype V] (X : Submodule F V),
-    (∑ᶠ (U : Submodule F V) (_ : X ≤ U),
-      (-1 : ℤ) ^ (Module.finrank F V - Module.finrank F U) *
-        (Fintype.card F : ℤ) ^ Nat.choose (Module.finrank F V - Module.finrank F U) 2) =
-      if X = ⊤ then 1 else 0
 
 def succMin {E : Type} [NormedAddCommGroup E] [InnerProductSpace ℝ E] (M : Submodule ℤ E)
     (i : ℕ) : ℝ :=

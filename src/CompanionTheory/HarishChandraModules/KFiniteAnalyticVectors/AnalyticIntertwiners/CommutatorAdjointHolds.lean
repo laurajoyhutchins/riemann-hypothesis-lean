@@ -1,4 +1,60 @@
-import CompanionTheory.HarishChandraModules.KFiniteAnalyticVectors.AnalyticIntertwiners.NilpotentOfPowerTraces
+module
+
+public import CompanionTheory.HarishChandraModules.KFiniteAnalyticVectors.AnalyticIntertwiners.Clause1
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.BochnerInequality.CasValK
+public import CompanionTheory.HarishChandraModules.KFiniteAnalyticVectors.AnalyticIntertwiners.NilpotentOfPowerTraces
+import CompanionTheory.HarishChandraModules.KFiniteAnalyticVectors.AnalyticIntertwiners.SubquotientNontrivial
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+public import Mathlib.Analysis.Calculus.InverseFunctionTheorem.ContDiff
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.MatrixExponential
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.AnalyticVectors.ConjTransposeEqOfInG
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.AnalyticVectors.NcBound
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.AnalyticVectors.Taylor
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.AnalyticVectors.Unitary
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.AnalyticVectors.WeightBound
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.BochnerInequality.LayerBasic
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.DiscreteSeriesExistence.SmoothA
+
+@[expose] public section
 
 open Matrix Topology Filter
 open scoped InnerProductSpace NNReal ENNReal
@@ -23,6 +79,7 @@ theorem compact_sq_le_A (hU : IsInfUnitary ε E) (x : M) {a b : Fin n} (hab : ε
     rw [Module.End.mul_apply, hU a' b', adjSign, if_pos h.symm, one_mul, inner_self_eq_norm_sq]
   have hsum : RCLike.re (inner ℂ (casimirK ε E x) x) =
       ∑ a', ∑ b' ∈ Finset.univ.filter (fun b' => ε b' = ε a'), ‖E b' a' x‖ ^ 2 := by
+
     simp only [casimirK, LinearMap.sum_apply, sum_inner, map_sum]
     exact Finset.sum_congr rfl fun a' _ => Finset.sum_congr rfl fun b' hb' =>
       key a' b' (Finset.mem_filter.1 hb').2
@@ -291,7 +348,7 @@ theorem exists_series_A {H : Type} [NormedAddCommGroup H] [InnerProductSpace ℂ
       map_add' := fun X Y => SmDerA.actM_add _ (Matrix.of X) (Matrix.of Y)
       map_smul' := fun c X => SmDerA.actM_smul _ c (Matrix.of X) }
   let ev : Module.End ℂ (smD ε σ) →ₗ[ℂ] H := (smD ε σ).subtype ∘ₗ LinearMap.applyₗ v
-  let q : ∀ m : ℕ, MultilinearMap ℂ (fun _ : Fin m => Fin n → Fin n → ℂ) H := fun m =>
+  let q : ∀ m : ℕ, (Fin m → (Fin n → Fin n → ℂ)) →ₘₗ[ℂ] H := fun m =>
     ((m.factorial : ℂ)⁻¹) • ev.compMultilinearMap
       ((MultilinearMap.mkPiAlgebraFin ℂ m (Module.End ℂ (smD ε σ))).compLinearMap fun _ => act)
   have hq : ∀ m (Y : Fin m → Fin n → Fin n → ℂ), q m Y =
@@ -307,7 +364,7 @@ theorem exists_series_A {H : Type} [NormedAddCommGroup H] [InnerProductSpace ℂ
     rw [hq, norm_smul, norm_inv, Complex.norm_natCast, inv_mul_le_iff₀ hf]
     refine h.trans ?_
     have h2 : ∏ i, (l1 ∘ fun i => Matrix.of (Y i)) i ≤ ((n : ℝ) ^ 2) ^ m * ∏ i, ‖Y i‖ := by
-      refine (Finset.prod_le_prod (fun i _ => entrywise_l1_norm_nonneg _) fun i _ => entrywise_l1_norm_le (Y i)).trans (le_of_eq ?_)
+      refine (Finset.prod_le_prod₀ (fun i _ => entrywise_l1_norm_nonneg _) fun i _ => entrywise_l1_norm_le (Y i)).trans (le_of_eq ?_)
       rw [Finset.prod_mul_distrib, Finset.prod_const, Finset.card_univ, Fintype.card_fin]
     refine (mul_le_mul_of_nonneg_left h2 (by positivity)).trans (le_of_eq (by ring))
   let p : FormalMultilinearSeries ℂ (Fin n → Fin n → ℂ) H := fun m => (q m).mkContinuous _ (hqb m)

@@ -1,24 +1,84 @@
-import Mathlib
+module
+
+public import Mathlib.Analysis.Normed.Field.Basic
+public import Mathlib.NumberTheory.NumberField.Discriminant.Defs
+public import Mathlib.Topology.MetricSpace.Ultra.Basic
+import Mathlib.Algebra.AffineMonoid.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+public import Mathlib.Analysis.Normed.Ring.Ultra
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+public import Mathlib.NumberTheory.NumberField.Discriminant.Different
+public import Mathlib.NumberTheory.RamificationInertia.Basic
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Analysis.Normed.Group.Ultra
+
+@[expose] public section
+
 open NumberField
 
 namespace GlobalTheory.SplitEmbSep
 
-open NumberField in
 
+open NumberField in
 theorem _root_.GlobalTheory.SplitEmbSep.norm_le_one_of_isIntegral {C : Type*} [NormedField C] [IsUltrametricDist C]
     {x : C} (hx : IsIntegral ℤ x) : ‖x‖ ≤ 1 := by
   obtain ⟨p, hm, hp⟩ := hx
   by_contra h
   push_neg at h
   rw [← Polynomial.aeval_def, hm.as_sum] at hp
-  simp only [map_add, map_pow, Polynomial.aeval_X, map_sum, map_mul, Polynomial.aeval_C,
-    algebraMap_int_eq, eq_intCast, map_intCast] at hp
+
+  simp only [map_add (f := _), map_pow, Polynomial.aeval_X, map_sum, map_mul, Polynomial.aeval_C,
+  algebraMap_int_eq, eq_intCast, map_intCast] at hp
   set n := p.natDegree
   rcases Nat.eq_zero_or_pos n with hn | hn
   · rw [hn] at hp
     simp at hp
   have hs : (Finset.range n).Nonempty := Finset.nonempty_range_iff.mpr hn.ne'
-  obtain ⟨i, hi, hle⟩ := IsUltrametricDist.exists_norm_finset_sum_le_of_nonempty hs
+  obtain ⟨i, hi, hle⟩ := IsUltrametricDist.exists_norm_finsetSum_le_of_nonempty hs
     (fun i => ((p.coeff i : ℤ) : C) * x ^ i)
   have hxn : x ^ n = -∑ i ∈ Finset.range n, ((p.coeff i : ℤ) : C) * x ^ i :=
     eq_neg_of_add_eq_zero_left hp
@@ -34,25 +94,25 @@ theorem _root_.GlobalTheory.SplitEmbSep.norm_le_one_of_isIntegral {C : Type*} [N
   have h2 : ‖x‖ ^ i < ‖x‖ ^ n := pow_lt_pow_right₀ h (Finset.mem_range.mp hi)
   exact absurd h1 (not_le.mpr h2)
 
-open NumberField in
 
+open NumberField in
 theorem _root_.GlobalTheory.SplitEmbSep.norm_det_lt_one {C ι : Type*} [NormedField C] [IsUltrametricDist C]
     [Fintype ι] [DecidableEq ι] (M : Matrix ι ι C) (hM : ∀ i j, ‖M i j‖ ≤ 1) (k : ι)
     (hk : ∀ i, ‖M i k‖ < 1) : ‖M.det‖ < 1 := by
   rw [Matrix.det_apply]
-  obtain ⟨σ, -, hle⟩ := IsUltrametricDist.exists_norm_finset_sum_le_of_nonempty
+  obtain ⟨σ, -, hle⟩ := IsUltrametricDist.exists_norm_finsetSum_le_of_nonempty
     (Finset.univ_nonempty (α := Equiv.Perm ι))
     (fun σ => Equiv.Perm.sign σ • ∏ i, M (σ i) i)
   refine lt_of_le_of_lt hle ?_
   have hprod : ‖∏ i, M (σ i) i‖ < 1 := by
     rw [norm_prod, ← Finset.mul_prod_erase _ _ (Finset.mem_univ k)]
     exact mul_lt_one_of_nonneg_of_lt_one_left (norm_nonneg _) (hk _)
-      (Finset.prod_le_one (fun _ _ => norm_nonneg _) (fun i _ => hM _ _))
+      (Finset.prod_le_one₀ (fun _ _ => norm_nonneg _) (fun i _ => hM _ _))
   rcases Int.units_eq_one_or (Equiv.Perm.sign σ) with hs | hs <;>
     simpa [hs, Units.smul_def] using hprod
 
-open NumberField in
 
+open NumberField in
 theorem _root_.GlobalTheory.SplitEmbSep.one_le_norm_intCast {C : Type*} [NormedField C] [IsUltrametricDist C] {g : ℕ}
     (hg : g.Prime) (hgC : ‖(g : C)‖ < 1) {d : ℤ} (hd : ¬ (g : ℤ) ∣ d) : 1 ≤ ‖(d : C)‖ := by
   obtain ⟨a, b, hab⟩ :=
@@ -77,8 +137,8 @@ theorem _root_.GlobalTheory.SplitEmbSep.one_le_norm_intCast {C : Type*} [NormedF
       exact IsUltrametricDist.norm_intCast_le_one C b
     _ = ‖(d : C)‖ := one_mul _
 
-open NumberField in
 
+open NumberField in
 theorem _root_.GlobalTheory.SplitEmbSep.not_dvd_discr_of_split {g : ℕ} (hg : g.Prime) (E : Type*) [Field E]
     [NumberField E]
     (h : (Ideal.primesOver (Ideal.span {(g : ℤ)}) (𝓞 E)).ncard = Module.finrank ℚ E) :

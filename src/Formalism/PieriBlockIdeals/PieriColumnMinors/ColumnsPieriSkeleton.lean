@@ -1,25 +1,51 @@
-import Formalism.PieriBlockIdeals.LemmaDGradedOfPieriReal
-import Formalism.PieriBlockIdeals.PieriColumnMinors.LemmaDSkeletonFour
-import Formalism.PieriBlockIdeals.PieriColumnMinors.PieriGenerated
+module
+
+public import Formalism.PieriBlockIdeals.LemmaDGradedOfPieriReal
+public import Formalism.PieriBlockIdeals.PieriColumnMinors.LemmaDSkeletonFour
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace Formalism.CohomologicalDescent.ColumnMinorsFromPieri
 
 open Formalism.CohomologicalDescent.Symmetrization Formalism.CohomologicalDescent.BinaryFormsExample
-
-theorem lemma_d_skeleton_five : LemmaDSkeleton5 := by
-  intro O K V P q _ _ _ _ _ _ _ _ _ _ _ S B n w lam2 DelL xi lam l e i' hl hu h1 h2 h3 h4 hsym hpos hfd hdiag hhw h6 h8 h9
-  have hF : LP.FormMod S.EW (B.restrict S.W) :=
-    { gl := generators_satisfy_gl_relations S
-      symm := fun x y => hsym _ _
-      pos := fun x hx => hpos _ (fun h => hx (Subtype.ext h))
-      adj := fun a b x y => h3 _ _ _ _
-      diag := hdiag }
-  have h7 := LP.pieri_rule K P S.W q S.EW (B.restrict S.W) lam2 hF hhw n
-  have h5 : ∀ v : V, (∀ x : V, B x v = 0) → v = 0 := by
-    intro v hv
-    by_contra hne
-    exact absurd (hv v) (ne_of_gt (hpos v hne))
-  exact LC.lemma_d_skeleton_four O K V P q S B n w lam2 DelL xi lam l e i' hl hu h1 h2 h3 h4 h5 h6 h7 h8 h9
 
 theorem columns_real_of_pieri_real : ColumnsRealOfPieriReal := by
   intro hP p q w lam2 hanti hle n tau hcol z hz

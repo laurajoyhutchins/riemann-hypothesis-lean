@@ -1,8 +1,58 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.MackeyFormula
-import GroundTheory.ProfiniteCohomology.Shapiro
-import GroundTheory.ProfiniteCohomology.LocalEulerCharacteristic.InnerConj
-import GroundTheory.ProfiniteCohomology.CompactSupportCohomology.HomApplyHomApplyEqOfCompEq
+module
+
+public import GroundTheory.ProfiniteCohomology.CompactSupportCohomology.HomApplyHomApplyEqOfCompEq
+public import GroundTheory.ProfiniteCohomology.ContinuousCochains.Functoriality
+public import GroundTheory.ProfiniteCohomology.MackeyDefs
+public import GroundTheory.ProfiniteCohomology.ShapiroDefs
+public import GroundTheory.ProfiniteCohomology.ClassFormations.IsIsoCohomologyMapAlongResSubgroupOfHom
+public import GroundTheory.ProfiniteCohomology.CohomologyFunctoriality.Naturality
+public import GroundTheory.ProfiniteCohomology.LocalEulerCharacteristic.InnerConj
+public import GroundTheory.ProfiniteCohomology.MackeyFormula
+public import GroundTheory.ProfiniteCohomology.Shapiro
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import GroundTheory.ProfiniteCohomology.ContinuousCochains.LongExactSequence
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
@@ -47,11 +97,6 @@ variable [TopologicalSpace G] [IsTopologicalGroup G] [TopologicalSpace H]
 def mackeyConjₜ (x : G) : mackeySubgroup (V : Subgroup G) ι.toMonoidHom x →ₜ* (V : Subgroup G) :=
   ⟨mackeyConj (V : Subgroup G) ι.toMonoidHom x,
     continuous_mackeyConj V (continuous_toMonoidHom ι) x⟩
-
-@[simp]
-theorem mackeyConjₜ_toMonoidHom (x : G) :
-    (mackeyConjₜ V ι x).toMonoidHom = mackeyConj (V : Subgroup G) ι.toMonoidHom x :=
-  rfl
 
 end Conj
 
@@ -141,6 +186,7 @@ theorem mackeyCohomology_bijective (n : ℕ) :
     choose z hz using fun d => (hS d).2 (y d)
     refine ⟨∑ d, (I d).hom (z d), funext fun d' => ?_⟩
     change (mackeyCohomologyMap V ι N d'.out n).hom (∑ d, (I d).hom (z d)) = y d'
+
     rw [key, map_sum, Finset.sum_eq_single d']
     · rw [hom_apply_hom_apply_of_comp_eq (hIP d') (z d')]
       exact hz d'

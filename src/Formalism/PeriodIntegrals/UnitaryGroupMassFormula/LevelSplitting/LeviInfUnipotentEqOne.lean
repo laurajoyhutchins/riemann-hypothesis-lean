@@ -1,7 +1,54 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LevelSplitting.LevLSubPerp
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LevelSplitting.NCDefs
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LevelSplitting.ToMatrixLin
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LevelSplitting.LevLSubPerp
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LevelSplitting.NCDefs
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.SemidirectVolume.ProjHA
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LevelSplitting.RatVMemSpan
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LevelSplitting.ToMatrixLin
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.SemidirectVolume.ModVec
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -48,6 +95,7 @@ theorem cj_apply (U : Matrix (Fin r) (Fin r) (R ⊗[F] E)) (a b : Fin r) :
 
 theorem cj_mul (U V : Matrix (Fin r) (Fin r) (R ⊗[F] E)) : cj R σ U * cj R σ V = cj R σ (V * U) := by
   ext a b
+
   simp only [cj, Matrix.mul_apply, Matrix.of_apply, map_sum, map_mul]
   exact Finset.sum_congr rfl fun k _ => mul_comm _ _
 
@@ -113,6 +161,7 @@ theorem levU_mem (g : HA R σ J) : levU hσσ hJ hP g ∈ HR R σ J := by
   refine levL_uni H _ _ (fun b c => ?_) (fun b c => ?_) x y
   · calc ∑ a, sigR R σ (uT R σ J P g a b) * cj R σ (uI R σ J P g) a c
         = sigR R σ ((uI R σ J P g * uT R σ J P g) c b) := by
+
           rw [Matrix.mul_apply, map_sum]
           refine Finset.sum_congr rfl fun a _ => ?_
           rw [cj_apply, map_mul, mul_comm]
@@ -200,7 +249,7 @@ theorem pXv_of_span (H : (datR R σ J P T).Hyp) {x : Fin M → R ⊗[F] E}
     rw [PG.Dat.pXv_apply]
     simp [H.ef]
   | zero => simp
-  | add x y _ _ hx hy => rw [map_add, hx, hy]
+  | add x y _ _ hx hy => rw [map_add (f := _), hx, hy]
   | smul c x _ hx => rw [map_smul, hx]
 
 theorem pX_mem (x : Fin M → R ⊗[F] E) :
@@ -333,7 +382,7 @@ theorem levi_inf_unipotent_eq_one (u : HA R σ J) (hu : u ∈ Asub R σ J P) (hu
   intro x
   rw [lin_one]
   conv_lhs => rw [decomp (datR R σ J P T) x]
-  rw [map_add, map_add, hW _ (pV_mem_Wp H x),
+  rw [map_add (f := _), map_add (f := _), hW _ (pV_mem_Wp H x),
     PI.LevelKSplit.W.Glob.lin_fix_span u P.e hS _ (pX_mem x),
     PI.LevelKSplit.W.Glob.lin_fix_span u P.f hf _ (pXv_mem x)]
   exact (decomp (datR R σ J P T) x).symm
@@ -387,7 +436,7 @@ theorem H_comm_A (H : (datR R σ J P T).Hyp) (h u : HA R σ J) (hh : h ∈ Hsub 
   rw [lin_mul, lin_mul]
   conv_lhs => rw [decomp (datR R σ J P T) x]
   conv_rhs => rw [decomp (datR R σ J P T) x]
-  simp only [map_add]
+  simp only [map_add (f := _)]
   rw [hW _ (pV_mem_Wp H x), hW _ hWx, hhe _ (pX_mem x), hhf _ (pXv_mem x),
     hhe _ uE, hhf _ uF]
 

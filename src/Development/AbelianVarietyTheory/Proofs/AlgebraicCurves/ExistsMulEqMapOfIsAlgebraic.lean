@@ -1,7 +1,56 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.ValuationResidueLemmas
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.AlgebraMapOLInjective
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.NormOrderStatement
+module
+
+public import Mathlib.RingTheory.Henselian
+public import Mathlib.RingTheory.RegularLocalRing.Defs
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.LaTIsPrime
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.MvPolynomial.IrreducibleQuadratic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField ReciprocityTheory.ChartRestriction.G.T0
 open scoped TensorProduct
@@ -88,7 +137,7 @@ private lemma genericSection_baseChange_surjective_ker_lemma (K Ω : Type) [Fiel
     (hy₀ : y j₀ = 1) (hy : ∀ k, y (j₀.succAbove k) = x k) :
     let Φ₀ : _root_.ReciprocityTheory.ChartRestriction.G.T0.KTf K D N ⊗[K] Ω →ₐ[_root_.ReciprocityTheory.ChartRestriction.G.T0.KTf K D N] _root_.ReciprocityTheory.ChartRestriction.G.T0.OmS Ω D N :=
       Algebra.TensorProduct.lift (Algebra.ofId _ _) (IsScalarTower.toAlgHom K Ω _)
-        fun _ _ => Commute.all _ _
+        (fun _ _ => Commute.all _ _)
     Function.Surjective Φ₀ ∧ RingHom.ker Φ₀ = Ideal.span (Set.range fun i : Fin D =>
       (∑ j, algebraMap (_root_.ReciprocityTheory.ChartRestriction.G.T0.KTp K D N) (_root_.ReciprocityTheory.ChartRestriction.G.T0.KTf K D N) (X (i.succ, j)) ⊗ₜ[K] y j :
         _root_.ReciprocityTheory.ChartRestriction.G.T0.KTf K D N ⊗[K] Ω)) := by
@@ -124,7 +173,7 @@ private lemma genericSection_baseChange_surjective_ker_lemma (K Ω : Type) [Fiel
       congr 1
       rw [hcomp, hsh]
       rfl
-    | add z w hz hw => rw [map_add, map_add, hz, hw, map_add, map_add]
+    | add z w hz hw => rw [map_add (f := _), map_add (f := _), hz, hw, map_add (f := _), map_add (f := _)]
   have hinj : Function.Injective (algebraMap P OmS) := IsFractionRing.injective P (FractionRing P)
   have hX : ∀ q, Φ₀ (algebraMap KTp KTf (X q) ⊗ₜ (1 : Ω)) =
       algebraMap P OmS (_root_.GlobalTheory.sPolyImg j₀ x q) := by
@@ -140,7 +189,9 @@ private lemma genericSection_baseChange_surjective_ker_lemma (K Ω : Type) [Fiel
         show Φ₀ _ = _
         rw [hΦ₀, map_one, one_mul, IsScalarTower.algebraMap_apply Ω P OmS]
         rfl
-      | add p q hp hq => rw [map_add]; exact add_mem hp hq
+      | add p q hp hq =>
+        rw [map_add]
+        exact add_mem hp hq
       | mul_X p s hp =>
         rw [map_mul]
         refine mul_mem hp ?_
@@ -183,7 +234,7 @@ private lemma genericSection_baseChange_surjective_ker_lemma (K Ω : Type) [Fiel
         obtain ⟨c₂, hc₂, w₂, h₂⟩ := hw
         refine ⟨c₁ * c₂, mul_ne_zero hc₁ hc₂, (c₂ ⊗ₜ 1) * w₁ + (c₁ ⊗ₜ 1) * w₂, ?_⟩
         have h₃ : ∀ c : KTp, ι (c ⊗ₜ (1 : Ω)) = algebraMap KTp KTf c ⊗ₜ (1 : Ω) := fun c => rfl
-        simp only [map_add, map_mul]
+        simp only [map_add (f := _), map_mul]
         rw [← h₁, ← h₂, e, h₃, h₃]
         ring
     obtain ⟨c, hc, w, hw⟩ := hden z
@@ -207,6 +258,7 @@ private lemma genericSection_baseChange_surjective_ker_lemma (K Ω : Type) [Fiel
     exact Ideal.mul_mem_left _ _ hιw
   · rw [Ideal.span_le]
     rintro _ ⟨i, rfl⟩
+
     rw [SetLike.mem_coe, RingHom.mem_ker, map_sum]
     have h : ∀ j, Φ₀ (algebraMap KTp KTf (X (i.succ, j)) ⊗ₜ[K] y j) =
         algebraMap P OmS (_root_.GlobalTheory.sPolyImg j₀ x (i.succ, j) * C (y j)) := by
@@ -214,14 +266,12 @@ private lemma genericSection_baseChange_surjective_ker_lemma (K Ω : Type) [Fiel
       rw [hΦ₀, hcomp, hsh, map_mul, AlgHom.comp_apply, aeval_X,
         IsScalarTower.algebraMap_apply Ω P OmS]
       rfl
+
     rw [Finset.sum_congr rfl fun j _ => h j, ← map_sum]
     refine (congrArg (algebraMap P OmS) ?_).trans (map_zero _)
     simp [Fin.sum_univ_succAbove _ j₀, _root_.GlobalTheory.sPolyImg, hy₀, hy, Fin.succ_ne_zero]
 
-open NumberField in
-open scoped TensorProduct in
 open MvPolynomial in
-
 theorem _root_.GlobalTheory.genericSection_quotient : ∀ (K Ω K' : Type) [Field K] [Field Ω] [Algebra K Ω] (D N : ℕ) (j₀ : Fin (N + 1)) (x : Fin N → Ω) [Algebra (_root_.ReciprocityTheory.ChartRestriction.G.T0.KTf K D N) (_root_.ReciprocityTheory.ChartRestriction.G.T0.OmS Ω D N)] [FiniteDimensional (_root_.ReciprocityTheory.ChartRestriction.G.T0.KTf K D N) (_root_.ReciprocityTheory.ChartRestriction.G.T0.OmS Ω D N)] [Field K'] [Algebra K K'] [Algebra (_root_.ReciprocityTheory.ChartRestriction.G.T0.KTf K D N) K'] [IsScalarTower K (_root_.ReciprocityTheory.ChartRestriction.G.T0.KTf K D N) K'] (T : _root_.ReciprocityTheory.ChartRestriction.G.T0.TVar D N → K') (y : Fin (N + 1) → Ω), (∀ p : _root_.ReciprocityTheory.ChartRestriction.G.T0.KTp K D N, algebraMap (_root_.ReciprocityTheory.ChartRestriction.G.T0.KTf K D N) (_root_.ReciprocityTheory.ChartRestriction.G.T0.OmS Ω D N) (algebraMap (_root_.ReciprocityTheory.ChartRestriction.G.T0.KTp K D N) (_root_.ReciprocityTheory.ChartRestriction.G.T0.KTf K D N) p) = _root_.ReciprocityTheory.ChartRestriction.G.T0.sHom j₀ x p) → (∀ q, T q = algebraMap (_root_.ReciprocityTheory.ChartRestriction.G.T0.KTf K D N) K' (algebraMap (_root_.ReciprocityTheory.ChartRestriction.G.T0.KTp K D N) (_root_.ReciprocityTheory.ChartRestriction.G.T0.KTf K D N) (MvPolynomial.X q))) → y j₀ = 1 → (∀ k, y (j₀.succAbove k) = x k) → ∃ Φ : K' ⊗[K] Ω →+* K' ⊗[_root_.ReciprocityTheory.ChartRestriction.G.T0.KTf K D N] _root_.ReciprocityTheory.ChartRestriction.G.T0.OmS Ω D N, (∀ (a : K') (b : Ω), Φ (a ⊗ₜ[K] b) = a ⊗ₜ[_root_.ReciprocityTheory.ChartRestriction.G.T0.KTf K D N] algebraMap Ω (_root_.ReciprocityTheory.ChartRestriction.G.T0.OmS Ω D N) b) ∧ Function.Surjective Φ ∧ RingHom.ker Φ = Ideal.span (Set.range fun i : Fin D => (∑ j, T (i.succ, j) ⊗ₜ[K] y j : K' ⊗[K] Ω)) ∧ IsUnit (Φ (∑ j, T (0, j) ⊗ₜ[K] y j : K' ⊗[K] Ω)) := by
   intro K Ω K' _ _ _ D N j₀ x _ _ _ _ _ _ T y hcomp hT hy₀ hy
   haveI : IsScalarTower K (_root_.ReciprocityTheory.ChartRestriction.G.T0.KTf K D N) (_root_.ReciprocityTheory.ChartRestriction.G.T0.OmS Ω D N) := IsScalarTower.of_algebraMap_eq
@@ -257,6 +307,7 @@ theorem _root_.GlobalTheory.genericSection_quotient : ∀ (K Ω K' : Type) [Fiel
       have hP : (∑ j, _root_.ReciprocityTheory.ChartRestriction.G.T0.sHom (K := K) j₀ x (X (0, j)) * algebraMap Ω (_root_.ReciprocityTheory.ChartRestriction.G.T0.OmS Ω D N) (y j)) =
           algebraMap (MvPolynomial (_root_.ReciprocityTheory.ChartRestriction.G.T0.SVar D N) Ω) (_root_.ReciprocityTheory.ChartRestriction.G.T0.OmS Ω D N)
             (∑ j, _root_.GlobalTheory.sPolyImg j₀ x (0, j) * C (y j)) := by
+
         rw [map_sum]
         refine Finset.sum_congr rfl fun j _ => ?_
         unfold _root_.ReciprocityTheory.ChartRestriction.G.T0.sHom
@@ -274,6 +325,7 @@ theorem _root_.GlobalTheory.genericSection_quotient : ∀ (K Ω K' : Type) [Fiel
     have hsum : (M.toRingHom.comp e.symm.toRingHom) (∑ j, T (0, j) ⊗ₜ[K] y j) =
         Algebra.TensorProduct.includeRight
           (∑ j, _root_.ReciprocityTheory.ChartRestriction.G.T0.sHom (K := K) j₀ x (X (0, j)) * algebraMap Ω (_root_.ReciprocityTheory.ChartRestriction.G.T0.OmS Ω D N) (y j)) := by
+
       rw [map_sum, map_sum]
       refine Finset.sum_congr rfl fun j _ => ?_
       rw [hform, hT, Algebra.algebraMap_eq_smul_one, TensorProduct.smul_tmul, ← hcomp,

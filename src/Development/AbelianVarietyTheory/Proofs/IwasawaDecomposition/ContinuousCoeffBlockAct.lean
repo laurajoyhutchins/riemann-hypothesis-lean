@@ -1,21 +1,59 @@
-import Mathlib
-import Formalism.LocalToGlobal.IndefiniteReal.OneMapT
-import Formalism.LocalToGlobal.IndefiniteReal.ConcretePkgSpec
-import Formalism.LocalToGlobal.IndefiniteReal.FWExist
-import Formalism.LocalRingCardinality.DataExtra
-import Formalism.LocalRingCardinality.DataTies
-import Formalism.LocalToGlobal.Columns.CoefficientsModP.PairingNondegenerateHolds
-import Formalism.LocalToGlobal.Columns.CoefficientsModP.FkPderivBlockEmbNe
-import Formalism.LocalToGlobal.GlobalTheory.GL5.FamilyMassVolumeIdentityOfClassDecomp
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.EqBotOrTopOfTensor
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsReframeVStdOfPosDef
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsBoundUnitary
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.TensorMapDescent
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.SpanMapNabKDelK
-import Development.AbelianVarietyTheory.Proofs.HeightProofs.AtPlaceIffEqAtTau
+module
+
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.TensorMapDescent
+public import Formalism.LocalToGlobal.IndefiniteReal.ThPinsR
+public import Development.AbelianVarietyTheory.Counterexamples.RotationExamples.OneLeAPlLast
+public import Development.AbelianVarietyTheory.Definitions.ExistenceOfLattices.NegBaseElementImNegBaseEmbedding
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsBoundUnitary
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsReframeVStdOfPosDef
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.AtPlaceIffEqAtTau
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.EqBotOrTopOfTensor
 import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsIsInfFamFamily
-import Development.AbelianVarietyTheory.Definitions.ExistenceOfLattices.NegBaseElementImNegBaseEmbedding
-import Development.AbelianVarietyTheory.Counterexamples.RotationExamples.OneLeAPlLast
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.SpanMapNabKDelK
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.AdelicUnitaryExistsWithPrescribedParts
+import Formalism.GradedWeylDivisibility.DualWeylDominanceOf
+import Formalism.LocalToGlobal.Columns.CoefficientsModP.PairingNondegenerateHolds
+import Formalism.LocalToGlobal.Columns.PolyFnLemmas
+import Formalism.LocalToGlobal.GlobalTheory.GL5.FamilyMassVolumeIdentityOfClassDecomp
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open MvPolynomial Formalism.BasicNotions Formalism.L2.DIV
 open scoped Matrix ComplexOrder
@@ -113,6 +151,7 @@ variable [StarRing K] (hφ : ∀ x, φ (star x) = starRingEnd ℂ (φ x))
 include hφ
 
 theorem fockS_map {σ : Type} (f g : MvPolynomial σ K) : fockS (map φ f) (map φ g) = φ (fockS f g) := by
+
   rw [fockS_eq_sum _ _ f.support (support_map_subset _ _), fockS, map_sum]
   refine Finset.sum_congr rfl fun m _ => ?_
   simp [coeff_map, hφ]
@@ -154,8 +193,9 @@ theorem pairK_pos (lam : ι → DomWeight n) {G : ι → Matrix (Fin n) (Fin n) 
   have h2 : ∀ (P : VV ℂ lam →ₗ⋆[ℂ] VV ℂ lam →ₗ[ℂ] ℂ) (c : VVIdx lam → ℂ) (b : VVIdx lam → VV ℂ lam),
       P (∑ i, c i • b i) (∑ i, c i • b i) = star c ⬝ᵥ (Matrix.of fun i j => P (b i) (b j)) *ᵥ c := by
     intro P c b
+
     simp only [dotProduct, Matrix.mulVec, Matrix.of_apply, map_sum, LinearMap.sum_apply, LinearMap.map_smulₛₗ,
-      LinearMap.smul_apply, smul_eq_mul, Finset.mul_sum, Pi.star_apply, starRingEnd_apply, RingHom.id_apply]
+    LinearMap.smul_apply, smul_eq_mul, Finset.mul_sum, Pi.star_apply, starRingEnd_apply, RingHom.id_apply]
     rw [Finset.sum_comm]
     refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
     ring
@@ -183,7 +223,7 @@ def toHilb : VV ℂ lam ≃ₗ[ℂ] Hilb lam hG := LinearEquiv.refl ℂ (VV ℂ 
     by_cases hx : (toHilb lam hG).symm x = 0
     · simp [hx]
     · exact (Complex.le_def.1 (pairK_pos lam hG _ hx).le).1
-  add_left x y z := by rw [map_add, map_add, LinearMap.add_apply]
+  add_left x y z := by rw [map_add (f := _), map_add (f := _), LinearMap.add_apply]
   smul_left x y r := by rw [map_smul, LinearMap.map_smulₛₗ, LinearMap.smul_apply, smul_eq_mul]
   definite x hx := by
     by_contra h
@@ -213,11 +253,11 @@ theorem rhoH_toHilb (g : ι → GL (Fin n) ℂ) (x : VV ℂ lam) :
 omit [Fintype ι] in
 theorem continuous_coeff_blockAct {X : Type} [TopologicalSpace X] (M : X → ι → Matrix (Fin n) (Fin n) ℂ)
     (hM : ∀ τ, Continuous fun x => M x τ) (F : MvPolynomial (ι × Fin n × Fin n) ℂ) :
-    ∀ m, Continuous fun x => coeff m (Formalism.GradedWeylDivisibility.blockAct ℂ (M x) F) := by
+    ∀ m, Continuous fun x => AddMonoidAlgebra.coeff (Formalism.GradedWeylDivisibility.blockAct ℂ (M x) F) m := by
   classical
   induction F using MvPolynomial.induction_on with
   | C a => intro m; simp only [algHom_C]; exact continuous_const
-  | add p q hp hq => intro m; simp only [map_add, coeff_add]; exact (hp m).add (hq m)
+  | add p q hp hq => intro m; simp only [map_add (f := _), MvPolynomial.coeff_add]; exact (hp m).add (hq m)
   | mul_X p v hp =>
     intro m
     simp only [map_mul, coeff_mul]
@@ -231,7 +271,7 @@ theorem continuous_rhoH {X : Type} [TopologicalSpace X] (A : X → ι → GL (Fi
   obtain ⟨v, rfl⟩ := (toHilb lam hG).surjective v
   let L : Hilb lam hG →ₗ[ℂ] ((ι × Fin n × Fin n →₀ ℕ) → ℂ) :=
     LinearMap.pi fun m => lcoeff ℂ m ∘ₗ (VV ℂ lam).subtype ∘ₗ (toHilb lam hG).symm.toLinearMap
-  have hL : ∀ y m, L (toHilb lam hG y) m = coeff m (y : Pol ℂ ι n) := fun _ _ => rfl
+  have hL : ∀ y m, L (toHilb lam hG y) m = AddMonoidAlgebra.coeff (y : Pol ℂ ι n) m := fun _ _ => rfl
   have hk : LinearMap.ker L = ⊥ := by
     rw [LinearMap.ker_eq_bot']
     intro y hy
@@ -240,7 +280,7 @@ theorem continuous_rhoH {X : Type} [TopologicalSpace X] (A : X → ι → GL (Fi
     rw [this, map_zero]
   rw [(LinearMap.isClosedEmbedding_of_injective hk).isInducing.continuous_iff]
   refine continuous_pi fun m => ?_
-  simp only [Function.comp_apply, rhoH_toHilb, hL, rhoK_coe, actP, LinearMap.smul_apply, coeff_smul, smul_eq_mul,
+  simp only [Function.comp_apply, rhoH_toHilb, hL, rhoK_coe, actP, LinearMap.smul_apply, MvPolynomial.coeff_smul, smul_eq_mul,
     detTw_eq, AlgHom.toLinearMap_apply, trAct]
   refine Continuous.mul (continuous_finsetProd _ fun τ _ => (hA τ).matrix_det.zpow₀ _ fun x => Or.inl ?_)
     (continuous_coeff_blockAct _ (fun τ => (hA τ).matrix_transpose) _ m)

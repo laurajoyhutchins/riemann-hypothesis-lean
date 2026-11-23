@@ -1,7 +1,59 @@
-import Mathlib
-import GroundTheory.GlobalFields.TateThesis.AdeleMeasure
-import GroundTheory.GlobalFields.LocalFieldAtPlace
-import GroundTheory.GlobalFields.IdeleGroups.IdeleNorms
+module
+
+public import GroundTheory.GlobalFields.TateThesis.AdeleMeasure
+public import GroundTheory.GlobalFields.Adele.Topology
+public import Mathlib.MeasureTheory.Measure.Haar.DistribChar
+public import GroundTheory.GlobalFields.IdeleGroups.IdeleNorms
+import GroundTheory.GlobalFields.LocalAtPlace
+public import GroundTheory.GlobalFields.LocalFieldAtPlace
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GroundTheory.Global
 
@@ -38,7 +90,7 @@ theorem measure_eq_card_mul_measure_ker {A Q : Type*} [AddGroup A] [TopologicalS
         add_neg_cancel_left _ _⟩
       have : (⟨-(t (φ ⟨y, hy⟩) : A) + y, L.add_mem (L.neg_mem (t _).2) hy⟩ : L) =
           -t (φ ⟨y, hy⟩) + ⟨y, hy⟩ := rfl
-      rw [this, map_add, map_neg, ht, neg_add_cancel]
+      rw [this, map_add (f := _), map_neg, ht, neg_add_cancel]
     · rintro ⟨q, n, hn, rfl⟩
       obtain ⟨hnL, -⟩ := (hmemN n).1 hn
       exact L.add_mem (t q).2 hnL
@@ -74,13 +126,12 @@ theorem finiteAdeleEval_apply (x : HeightOneSpectrum (𝓞 K)) (a : 𝔸ᶠ[K]) 
     finiteAdeleEval x a = a x :=
   rfl
 
-open scoped Classical in
 
+open scoped Classical in
 theorem coe_prod_finiteSingleUnits_apply (T : Finset (HeightOneSpectrum (𝓞 K)))
     (f : ∀ v : HeightOneSpectrum (𝓞 K), (v.adicCompletion K)ˣ) (x : HeightOneSpectrum (𝓞 K)) :
     ((∏ v ∈ T, finiteSingleUnits v (f v) : (𝔸ᶠ[K])ˣ) : 𝔸ᶠ[K]) x =
       if x ∈ T then ((f x : (x.adicCompletion K)ˣ) : x.adicCompletion K) else 1 := by
-  classical
   rw [Units.coe_prod]
   rw [← finiteAdeleEval_apply, map_prod]
   simp only [finiteAdeleEval_apply, coe_finiteSingleUnits]
@@ -199,7 +250,7 @@ def residueAt (v : HeightOneSpectrum (𝓞 K)) :
     rw [← map_zero (IsLocalRing.residue (v.adicCompletionIntegers K))]
     rfl
   map_add' a b := by
-    rw [← map_add]
+    rw [← map_add (f := _)]
     rfl
 
 theorem residueAt_surjective (v : HeightOneSpectrum (𝓞 K)) :

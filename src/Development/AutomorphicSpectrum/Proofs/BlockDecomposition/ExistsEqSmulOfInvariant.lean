@@ -1,5 +1,50 @@
-import Mathlib
-import Development.WeilBound.RepresentationTheoryGL.RegularisedSiegelWeil.SingularNullSets.WeakApproximationFinitePlace
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.RegularisedSiegelWeil.SingularNullSets.WeakApproximationFinitePlace
+import Development.AbelianVarietyTheory.Definitions.Foundations.ExistsUniqueIsProdMeasureFinAway
+import Development.AbelianVarietyTheory.Proofs.HeightProofs.IsTopologicalRingAE
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.LcscAdelicUnitaryGroup
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.MeasureTheory.Measure.Decomposition.RadonNikodym
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -69,7 +114,7 @@ theorem exists_eq_smul_of_invariant {Γ Y : Type*} [MeasurableSpace Γ] [Measura
   have h3 : ∀ᵐ y ∂lam, ∀ᵐ g ∂m, ρ (T g y) = ρ y₀ := by
     filter_upwards [hOae] with y hy
     obtain ⟨φ, hφ, hyφ⟩ := htr y₀ hy₀O y hy
-    filter_upwards [hφ.ae hy₀] with g hg
+    filter_upwards [QuasiMeasurePreserving.ae hφ hy₀] with g hg
     rw [hyφ g, hg]
   have h4 : ∀ᵐ g ∂m, ∀ᵐ y ∂lam, ρ (T g y) = ρ y₀ :=
     (Measure.ae_ae_comm (p := fun g y => ρ (T g y) = ρ y₀) (hE _ measurable_const)).2 h3
@@ -215,15 +260,13 @@ theorem qmp_prodMap {X Y : Type*} [MeasurableSpace X] [MeasurableSpace Y] {μ : 
     [SFinite μ] [SFinite ν] {f : X → X} {g : Y → Y} (hf : Measure.QuasiMeasurePreserving f μ μ)
     (hg : Measure.QuasiMeasurePreserving g ν ν) :
     Measure.QuasiMeasurePreserving (Prod.map f g) (μ.prod ν) (μ.prod ν) := by
-  refine ⟨hf.measurable.prodMap hg.measurable, ?_⟩
-  rw [← Measure.map_prod_map μ ν hf.measurable hg.measurable]
-  exact hf.absolutelyContinuous.prod hg.absolutelyContinuous
+  exact QuasiMeasurePreserving.prodMap hf hg
 
 end GlobalTheory.CompanionTheory.OrbUniq
 
 namespace GlobalTheory.CompanionTheory.OrbUniq
 
-set_option maxHeartbeats 1600000 in
+
 
 theorem uniq_of_trans : IdemEx → NullSing → Trans → Uniq := by
   intro hI hN hT D r t V b₀ hb S e he ν ν' hν hν' hne

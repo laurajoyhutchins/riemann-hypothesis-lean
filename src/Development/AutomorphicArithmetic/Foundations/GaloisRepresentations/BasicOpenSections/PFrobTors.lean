@@ -1,5 +1,59 @@
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.BasicOpenSections.BaseFacts
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.TranscendenceTraces.AllHolds
+module
+
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.BasicOpenSections.BaseFacts
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TateTwistSectionsLocallyGeneratedStatement
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.TranscendenceTraces.ImgcSpec
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.TranscendenceTraces.IsolateSpecHolds
+import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.TranscendenceTraces.PImgBasic
+import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.TranscendenceTraces.PRpBasic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.RootsOfUnity.AlgebraicallyClosed
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import Mathlib.RingTheory.RootsOfUnity.EnoughRootsOfUnity
+
+@[expose] public section
 
 open CategoryTheory Limits AlgebraicGeometry GlobalTheory.EtC GlobalTheory.Et
 open UpperTheory.Gal.TranscendenceTraces (gp pt Wt fib IsWt nwt LocNml)
@@ -156,9 +210,9 @@ theorem UpperTheory.Gal.Mod.frobTors :
     (fam_sums m p f hp h hm) k
   have e2 := (TranscendenceTraces.trLin_holds m k 0).2.2 X 1 hm x
   rw [e1, one_smul] at e2
-  obtain ⟨a, ha⟩ := (TranscendenceTraces.rpBasic_holds _ (res _ (tw m 0)) X k).1 x
-  have h1 := (TranscendenceTraces.rpBasic_holds _ (res _ (tw m 0)) X k).2.2.2.1 X (absFrob X p f hp h) x a ha
-  have h2 := TranscendenceTraces.rpOp_holds _ _ (fam p f hp h (res _ (tw m 0))) k x a ha
+  obtain ⟨a, ha⟩ := (TranscendenceTraces.rpBasic_of _ (res _ (tw m 0)) X k).1 x
+  have h1 := (TranscendenceTraces.rpBasic_of _ (res _ (tw m 0)) X k).2.2.2.1 X (absFrob X p f hp h) x a ha
+  have h2 := (TranscendenceTraces.rpOp_of TranscendenceTraces.imgBasic_of) _ _ (fam p f hp h (res _ (tw m 0))) k x a ha
   rw [e2] at h2
-  refine ((TranscendenceTraces.rpBasic_holds _ _ X k).2.2.1 _ _ _ _ h1 h2).2.1 ?_
+  refine ((TranscendenceTraces.rpBasic_of _ _ X k).2.2.1 _ _ _ _ h1 h2).2.1 ?_
   exact (congrArg (fun e => Sec.res e a) (fk_self p f hp h)).symm

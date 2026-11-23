@@ -1,14 +1,53 @@
-import Mathlib
-import Formalism.LocalToGlobal.IndefiniteReal.ScalarOnPartsFull
-import Formalism.LocalToGlobal.IndefiniteReal.SubgroupCharExtensionOneApply
-import Formalism.LocalToGlobal.IndefiniteReal.OrthogonalComplementCharacterisation
-import Formalism.LocalToGlobal.IndefiniteReal.DatumVec
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ContDiffDerivSnoc
-import Development.AbelianVarietyTheory.Proofs.HeightProofs.DenomBound
-import Development.AbelianVarietyTheory.Proofs.HeightProofs.PolarConjTranspose
-import Development.AbelianVarietyTheory.Proofs.HeightProofs.HasSmoothLogNearOneOfIsUnitaryLieExpData
-import Development.AbelianVarietyTheory.Proofs.HeightProofs.SmoothInExponentialCoordsIffFirstSecondKind
-import Development.AbelianVarietyTheory.Proofs.HeightProofs.UnitaryLieGeneratorsRep
+module
+
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ContDiffDerivSnoc
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.PolarConjTranspose
+public import Development.AbelianVarietyTheory.BlockTheory.HeightDefect.WordDerivatives
+public import Development.AbelianVarietyTheory.Counterexamples.HeightSurvey.ConjAtFixedIff
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.HasSmoothLogNearOneOfIsUnitaryLieExpData
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.SmoothInExponentialCoordsIffFirstSecondKind
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.UnitaryLieGeneratorsRep
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+public import Mathlib.Analysis.Calculus.Deriv.Star
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -26,6 +65,7 @@ theorem map_gelfA_mem {A : Type} [Ring A] [Algebra ℂ A] {n : ℕ} {E : Fin n �
     (hs : ∀ a b, κ (E a b) ∈ Submodule.span ℂ (Set.range fun p : Fin n × Fin n => E p.1 p.2)) (k : ℕ) :
     κ (gelfA E k) ∈ Algebra.adjoin ℂ (Set.range (gelfA E)) := by
   have h1 : κ (gelfA E k) ∈ Algebra.adjoin ℂ (Set.range fun p : Fin n × Fin n => E p.1 p.2) := by
+
     rw [gelfA, map_sum]
     refine Subalgebra.sum_mem _ fun idx _ => ?_
     rw [map_list_prod]
@@ -129,13 +169,13 @@ theorem isUnit_of_UH (hJ : IsUnit J.det) {a : Matrix (Fin n) (Fin n) ℂ} (ha : 
   rw [det_mul] at this
   exact isUnit_of_mul_isUnit_right (this ▸ hJ)
 
-open Classical in
 
+open Classical in
 def secM (hJ : IsUnit J.det) (a : MAlg n) : UG J :=
   if h : a.mat ∈ Formalism.QuantumDeterminants.UH J then ⟨(isUnit_of_UH hJ h).unit, h⟩ else 1
 
 theorem secM_val (hJ : IsUnit J.det) {a : MAlg n} (h : a.mat ∈ Formalism.QuantumDeterminants.UH J) : (secM hJ a).1.1 = a.mat := by
-  rw [secM, dif_pos h]; rfl
+  rw [secM, dite_eq_left h]; rfl
 
 theorem unit_iffM (h : IsUnit J.det) (u : MAlg n) : sigM J u * u = 1 ↔ u.mat ∈ Formalism.QuantumDeterminants.UH J := by
   change J⁻¹ * u.matᴴ * J * u.mat = 1 ↔ u.matᴴ * J * u.mat = J
@@ -222,8 +262,8 @@ theorem Rder_mem {τ : D.what₂.Tau} {X : Matrix (Fin V.rank) (Fin V.rank) ℂ}
     have := (hF.2 _ (mul_mem hy (oneP_mem hX t)) τ' x).2 g hg g' hg'
     simpa only [mul_assoc] using this
 
-variable (θ V) in
 
+variable (θ V) in
 def rho (τ : D.what₂.Tau) (X : lieU (gramAt D V τ)) : Module.End ℂ (goodFun θ V) where
   toFun F := ⟨Rder θ V τ X.1 F.1, Rder_mem X.2 F.2⟩
   map_add' F F' := Subtype.ext ((GlobalTheory.MultMem.linOn_Rder X.2).2.1 _ F.2.1 _ F'.2.1)
@@ -288,7 +328,7 @@ theorem loc_ext (τ : D.what₂.Tau) {F F' : goodFun θ V} (h : ∀ x, loc τ x 
 
 theorem rho_add (τ : D.what₂.Tau) (X Y : lieU (gramAt D V τ)) : rho θ V τ (X + Y) = rho θ V τ X + rho θ V τ Y := by
   refine LinearMap.ext fun F => loc_ext τ fun x => ?_
-  rw [LinearMap.add_apply, map_add, loc_rho, loc_rho, loc_rho, ← LinearMap.add_apply, ← derOp_add]
+  rw [LinearMap.add_apply, map_add (f := _), loc_rho, loc_rho, loc_rho, ← LinearMap.add_apply, ← derOp_add]
   rfl
 
 theorem rho_smul (τ : D.what₂.Tau) (c : ℝ) (X : lieU (gramAt D V τ)) : rho θ V τ (c • X) = (c : ℂ) • rho θ V τ X := by
@@ -316,8 +356,8 @@ theorem star_mem_good {F : GA D V → ℂ} (hF : F ∈ goodFun θ V) : star F �
   ⟨fun k τs Xs hX g => Complex.conjCLE.contDiff.comp (hF.1 k τs Xs hX g),
     fun y hy τ x => ⟨congrArg star (hF.2 y hy τ x).1, fun g hg g' hg' => congrArg star ((hF.2 y hy τ x).2 g hg g' hg')⟩⟩
 
-variable (θ V) in
 
+variable (θ V) in
 def conjG : goodFun θ V →ₗ⋆[ℂ] goodFun θ V where
   toFun F := ⟨star F.1, star_mem_good F.2⟩
   map_add' F F' := Subtype.ext (star_add _ _)
@@ -325,8 +365,8 @@ def conjG : goodFun θ V →ₗ⋆[ℂ] goodFun θ V where
 
 theorem conjG_conjG (F : goodFun θ V) : conjG θ V (conjG θ V F) = F := Subtype.ext (star_star _)
 
-variable (θ V) in
 
+variable (θ V) in
 def kappa : Module.End ℂ (goodFun θ V) →+* Module.End ℂ (goodFun θ V) where
   toFun a := (conjG θ V).comp (a.comp (conjG θ V))
   map_one' := LinearMap.ext conjG_conjG
@@ -363,7 +403,7 @@ theorem exists_gelf_op (τ : D.what₂.Tau) : ∃ c : ℕ → Module.End ℂ (go
   obtain ⟨h1, h2⟩ := h _ (rho θ V τ) (rho_add τ) (rho_smul τ) (rho_bracket τ)
   refine ⟨_, map_gelfA_mem h1 (kappa θ V) (fun a => LinearMap.ext fun F => by simp only [kappa_apply, conjG_conjG])
     (fun a b => ?_), fun k F => ?_⟩
-  · rw [map_add, kappa_smul, kappa_rho, kappa_rho]
+  · rw [map_add (f := _), kappa_smul, kappa_rho, kappa_rho]
     exact add_mem (h2 _) (Submodule.smul_mem _ _ (h2 _))
   · rw [gelf, gelfA, LinearMap.sum_apply, Submodule.coe_sum]
     refine Finset.sum_congr rfl fun idx _ => ?_
@@ -371,7 +411,7 @@ theorem exists_gelf_op (τ : D.what₂.Tau) : ∃ c : ℕ → Module.End ℂ (go
     rw [RderC, conjAt, ← (hPQ _ _).1, ← (hPQ _ _).2]
     rfl
 
-theorem isAutFunSm_star {F : GA D V → ℂ} (h : IsAutFunSm θ V F) (hh : F ∈ homFun θ V) : IsAutFunSm θ V (star F) where
+theorem isAutFunSm_star {F : GA D V → ℂ} (h : IsAutFunSm θ V F) (hh : F ∈ homFun θ V) : IsAutFunSm θ V (star F) := {
   left γ hγ g := congrArg star (h.left γ hγ g)
   level := by
     obtain ⟨U, hU, e⟩ := h.level
@@ -414,7 +454,7 @@ theorem isAutFunSm_star {F : GA D V → ℂ} (h : IsAutFunSm θ V F) (hh : F ∈
       | nil => rfl
       | cons p l ih => rw [List.foldr_cons, ih, Rder_star, List.foldr_cons]
     rw [e, Pi.star_apply, norm_star]
-    exact hC g hg
+    exact hC g hg }
 
 end GlobalTheory.ConjMult
 

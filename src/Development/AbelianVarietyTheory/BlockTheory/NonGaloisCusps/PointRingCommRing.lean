@@ -1,7 +1,50 @@
-import Mathlib
-import Formalism.CoboundaryTransfers.Statement
-import Formalism.WeaklyAdmissibleFiltrations.Statement
-import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -43,9 +86,6 @@ instance PointRing.algebra (W : LocWach PD LL O v n) (i : ZMod n) (ζ : LL) :
     Algebra (LetA O n) (PointRing W i ζ) :=
   RingHom.toAlgebra (R := LetA O n) (S := PointRing W i ζ) (W.lev i ζ).toRingHom
 
-example (W : LocWach PD LL O v n) (i : ZMod n) (ζ : LL) (a : LetA O n) :
-    algebraMap (LetA O n) (PointRing W i ζ) a = W.lev i ζ a := rfl
-
 abbrev CompletedAt (W : LocWach PD LL O v n) (T : LocLat G Qp LL O) (i : ZMod n) (ζ : LL) : Type :=
   PointRing W i ζ ⊗[LetA O n] ↥(W.Nl T i)
 
@@ -53,11 +93,6 @@ def InCompletedAt (W : LocWach PD LL O v n) (T : LocLat G Qp LL O) (i : ZMod n) 
     (y : W.DD T) : Prop :=
   ∃ (k : ℕ) (hk : W.Q ^ k • y ∈ W.Nl T i) (w : CompletedAt W T i ζ),
     (1 : PointRing W i ζ) ⊗ₜ[LetA O n] (⟨W.Q ^ k • y, hk⟩ : ↥(W.Nl T i)) = W.Q ^ k • w
-
-example (W : LocWach PD LL O v n) (T : LocLat G Qp LL O) (i : ZMod n) (ζ : LL) (y : W.DD T)
-    (hy : y ∈ W.Nl T i) : InCompletedAt W T i ζ y :=
-  ⟨0, by simpa using hy, (1 : PointRing W i ζ) ⊗ₜ[LetA O n] ⟨W.Q ^ 0 • y, by simpa using hy⟩,
-    by simp⟩
 
 def HeightBounds (W : LocWach PD LL O v n) (T : LocLat G Qp LL O) (M h : ZMod n → ℕ) : Prop :=
   ∀ i : ZMod n,
@@ -83,8 +118,8 @@ def Sandwich (E : EtTie W RA RW inclR φR gR πA) (T : LocLat G Qp LL O) (M h : 
 
 end Generic
 
-open TensorProduct in
 
+open TensorProduct in
 theorem _root_.GlobalTheory.IndefiniteRowSideFullHecke.PointRingCommRing.letters_neZero {l : ℕ} [Fact l.Prime] (K : _root_.Formalism.BasicNotions.Loc.FinExt l) :
     NeZero (Module.finrank ℚ_[l] ↥(_root_.Formalism.BasicNotions.Loc.K0 K)) := by
   haveI : FiniteDimensional ℚ_[l] ↥(K : IntermediateField ℚ_[l] (_root_.Formalism.BasicNotions.Loc.Om l)) := K.2

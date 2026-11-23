@@ -1,6 +1,56 @@
-import ReciprocityTheory.DualLattices.IsFibreSq
-import ReciprocityTheory.DualLattices.ToSigmaAddFstZeroFst
-import ReciprocityTheory.DualLattices.SeriesState
+module
+
+public import ReciprocityTheory.DualLattices.SeriesState
+public import ReciprocityTheory.DualLattices.ModuliPointsState
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.DualLattices.IsFibreSq
+public import ReciprocityTheory.DualLattices.ToSigmaAddFstZeroFst
+public import Mathlib.Algebra.Algebra.Prod
+public import Mathlib.Algebra.Algebra.Subalgebra.Basic
+
+@[expose] public section
 
 noncomputable section
 
@@ -109,7 +159,7 @@ private lemma dualPair_exists_lhom_mu_pair {R : LAlg R₀} (Dp : DualPair R) (c 
   · exact Subtype.ext (AlgHom.ext fun d => rfl)
   · refine Subtype.ext (AlgHom.ext fun d => ?_)
     show Dp.fμ c d + Dp.fμ c' d - Dp.σ.1 (Dp.π.1 (Dp.fμ c d)) = Dp.fμ (c + c') d
-    simp only [DualPair.fμ, map_add, map_mul, map_sub, Dp.sect]
+    simp only [DualPair.fμ, map_add (f := _), map_mul, map_sub, Dp.sect]
     ring
   · intro r
     show (Dp.fμ c (Dp.σ.1 r), Dp.fμ c' (Dp.σ.1 r)) = (Dp.σ.1 r, Dp.σ.1 r)
@@ -260,7 +310,8 @@ private lemma exists_c (h1 : PairingPropertiesStatement B) {R : LAlg R₀} (Dp :
     have := congrArg Units.val h1z
     simpa using this
   have hmem : (z : (Dp.D : Type u)) - 1 ∈ RingHom.ker Dp.π.1 := by
-    rw [RingHom.mem_ker, map_sub, hz1, map_one, sub_self]
+    change Dp.π.1 ((z : (Dp.D : Type u)) - 1) = 0
+    rw [map_sub, hz1, map_one, sub_self]
   rw [Dp.ker_eq, Ideal.mem_span_singleton'] at hmem
   obtain ⟨d, hd⟩ := hmem
   have hd' : d - Dp.σ.1 (Dp.π.1 d) ∈ RingHom.ker Dp.π.1 := by
@@ -286,13 +337,13 @@ private lemma cf_add (h1 : PairingPropertiesStatement B) {R : LAlg R₀} (Dp : D
   obtain ⟨z, hz, ez⟩ := cf_spec h1 Dp N hN y hy v
   obtain ⟨z', hz', ez'⟩ := cf_spec h1 Dp N hN y hy v'
   obtain ⟨w, hw, ew⟩ := cf_spec h1 Dp N hN y hy (v + v')
-  rw [TensorProduct.add_tmul, map_add] at hw
+  rw [TensorProduct.add_tmul, map_add (f := _)] at hw
   have hwz := h1.2.2.1 Dp.D N _ _ _ z z' w hz hz' hw
   have h : (w : (Dp.D : Type u)) = z * z' := by rw [hwz, Units.val_mul]
   rw [ew, ez, ez'] at h
   apply sub_eq_zero.mp
   apply Dp.free
-  rw [map_sub, map_add]
+  rw [map_sub, map_add (f := _)]
   linear_combination h + (Dp.σ.1 (cf h1 Dp N hN y hy v) * Dp.σ.1 (cf h1 Dp N hN y hy v')) * Dp.η_sq
 
 private lemma cf_smul (h1 : PairingPropertiesStatement B) {R : LAlg R₀} (Dp : DualPair R) (N : ℕ)
@@ -358,8 +409,8 @@ private lemma part_c (h1 : PairingPropertiesStatement B) {R : LAlg R₀} (Dp : D
   obtain ⟨w, hw⟩ := h1.1 Dp.D N _ (B.map Dp.σ y + B.map Dp.σ y') hx
     (by rw [nsmul_add, hy1, hy2, add_zero])
   have hwz := h1.2.2.2.1 Dp.D N _ _ _ z z' w hz hz' hw
-  refine ⟨w, by rw [map_add]; exact hw, ?_⟩
-  rw [hwz, Units.val_mul, ez, ez', LinearMap.add_apply, map_add]
+  refine ⟨w, by rw [map_add (f := _)]; exact hw, ?_⟩
+  rw [hwz, Units.val_mul, ez, ez', LinearMap.add_apply, map_add (f := _)]
   linear_combination (Dp.σ.1 (h v) * Dp.σ.1 (h' v)) * Dp.η_sq
 
 end BX

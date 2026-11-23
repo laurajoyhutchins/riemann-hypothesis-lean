@@ -1,7 +1,50 @@
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.HeckeGaloisCriteria.OptInEqSome
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.HeckeGaloisCriteria.LengthLeOfSpan
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsTypeLocus
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsOfMemCcAt
+module
+
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.HeckeGaloisCriteria.OptInEqSome
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsTypeLocus
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.HeckeGaloisCriteria.LengthLeOfSpan
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.KrullDimension.PID
+import Mathlib.RingTheory.OrderOfVanishing.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Presheaf
+
+@[expose] public section
 
 noncomputable section
 
@@ -14,19 +57,6 @@ variable {D : D7} {c : CutD D}
 theorem mem_Zgood {i : (cut D c).nd.Loc} {x : (cut D c).nd.X i} : x ∈ (cut D c).nd.Zgood i ↔ x.1 ∈ D.nd.Zgood i.1 := by
   classical
   exact Finset.mem_subtype
-
-theorem mem_ZgoodN {i : (cut D c).nd.Loc} {x : (cut D c).nd.X i} :
-    x ∈ ZgoodN (cut D c).nd (cut D c).naut i ↔ x.1 ∈ ZgoodN D.nd D.naut i.1 :=
-  ((cut D c).Zgood_tie i x).symm.trans (mem_Zgood.trans (D.Zgood_tie i.1 x.1))
-
-theorem CutD.Good.hG (h : c.Good) (i : (cut D c).nd.Loc) : HG (cut D c).nd (cut D c).naut i := by
-  obtain ⟨x, hx⟩ := (h.keep i.1).1 i.2
-  exact ⟨⟨x, h.good _ x hx⟩, mem_ZgoodN.2 ((D.Zgood_tie i.1 x).1 hx)⟩
-
-abbrev qc (c : CutD D) (i : (cut D c).nd.Loc) :
-    FractionRing (D.nd.O i.1) ⊗[D.nd.O i.1] D.nd.Mt i.1 →ₗ[FractionRing (D.nd.O i.1)]
-      FractionRing (D.nd.O i.1) ⊗[D.nd.O i.1] cutM (D.nd.T i.1) (D.nd.act i.1) (c.Xs i.1) :=
-  qK (D.nd.T i.1) (D.nd.act i.1) (c.Xs i.1)
 
 theorem eta_le (h : c.Good) (i : (cut D c).nd.Loc) : D.nd.etaLoc i.1 ≤ (cut D c).nd.etaLoc i +
     (∑ x ∈ D.nd.Zgood i.1, D.nd.mult i.1 x : ℕ) * (padicValNat (D.nd.l i.1) D.what₂.restRowsFiniteGroupCard : ℚ) := by

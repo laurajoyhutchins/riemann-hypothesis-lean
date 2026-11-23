@@ -1,4 +1,57 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.Polynomial.AlgebraMap
+public import Mathlib.Analysis.SpecialFunctions.Log.Base
+public import Mathlib.NumberTheory.Padics.PadicVal.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Algebra.Polynomial.Div
+
+@[expose] public section
 
 noncomputable section
 
@@ -54,7 +107,7 @@ theorem smul_eq_zero_of_aeval_prod {O : Type*} [CommRing O] [IsDomain O] {V : Ty
       | (simp [h₂])
   have hev : ∀ k ∈ S₁, R.eval (c k) = d := by
     intro k hk
-    rw [hR, eval_mul, eval_finset_sum, eval_prod]
+    rw [hR, eval_mul, eval_finsetSum, eval_prod]
     rw [Finset.sum_eq_single k]
     · simp only [eval_mul, eval_C, eval_prod, eval_sub, eval_X]
       rw [he k hk]
@@ -146,23 +199,17 @@ private theorem card_filter_dvd_sub_mul_le_Icc_length_add (q : ℤ) (hq : 0 < q)
 private theorem padicValInt_eq_card_filter_pow_dvd (l : ℕ) [hl : Fact l.Prime] (N : ℕ) (t : ℤ) (ht : t ≠ 0)
     (htN : t.natAbs ≤ N) :
     padicValInt l t = ((Finset.range (Nat.log l N)).filter (fun k => (l : ℤ) ^ (k + 1) ∣ t)).card := by
-  show padicValNat l t.natAbs = _
-  have hn : t.natAbs ≠ 0 := Int.natAbs_ne_zero.mpr ht
-  have hdiv : ∀ k : ℕ, ((l : ℤ) ^ k ∣ t ↔ k ≤ padicValNat l t.natAbs) := by
+  have hdiv : ∀ k : ℕ, ((l : ℤ) ^ k ∣ t ↔ k ≤ padicValInt l t) := by
     intro k
-    rw [← Nat.cast_pow, ← padicValNat_dvd_iff_le hn]
-    first
-      | exact Int.natCast_dvd
-      | exact Int.ofNat_dvd_left
-      | exact Int.coe_nat_dvd_left
-  have hle : padicValNat l t.natAbs ≤ Nat.log l N := by
-    have h1 : l ^ padicValNat l t.natAbs ∣ t.natAbs := pow_padicValNat_dvd
-    have h2 : l ^ padicValNat l t.natAbs ≤ N := le_trans (Nat.le_of_dvd (Nat.pos_of_ne_zero hn) h1) htN
-    first
-      | exact Nat.le_log_of_pow_le hl.out.one_lt h2
-      | exact (Nat.pow_le_iff_le_log hl.out.one_lt (by omega)).1 h2
+    simpa only [ht, false_or] using (padicValInt_dvd_iff (p := l) k t)
+  have hle : padicValInt l t ≤ Nat.log l N := by
+    have hdvd : l ^ padicValInt l t ∣ t.natAbs := by
+      rw [← Int.natCast_dvd, Nat.cast_pow]
+      exact (hdiv _).2 le_rfl
+    have htpos : 0 < t.natAbs := Nat.pos_of_ne_zero (Int.natAbs_ne_zero.mpr ht)
+    exact Nat.le_log_of_pow_le hl.out.one_lt ((Nat.le_of_dvd htpos hdvd).trans htN)
   have hfilt : (Finset.range (Nat.log l N)).filter (fun k => (l : ℤ) ^ (k + 1) ∣ t) =
-      Finset.range (padicValNat l t.natAbs) := by
+      Finset.range (padicValInt l t) := by
     ext k
     rw [Finset.mem_filter, Finset.mem_range, Finset.mem_range, hdiv]
     omega

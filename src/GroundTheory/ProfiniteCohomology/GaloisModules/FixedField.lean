@@ -1,5 +1,51 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.GaloisModules.CoeGalRootsOfUnityHomApply
+module
+
+public import GroundTheory.ProfiniteCohomology.GaloisModules.CoeGalRootsOfUnityHomApply
+public import Mathlib.FieldTheory.Galois.Infinite
+public import Mathlib.RepresentationTheory.Invariants
+public import Mathlib.Topology.Algebra.OpenSubgroup
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GroundTheory.ProfCoh
 
@@ -26,12 +72,6 @@ def fixingOpenNormalSubgroup (E : FiniteGaloisIntermediateField K L) :
   toSubgroup := E.fixingSubgroup
   isOpen' := isOpen_fixingSubgroup_finiteGalois E
   isNormal' := normal_fixingSubgroup_finiteGalois E
-
-@[simp]
-theorem coe_fixingOpenNormalSubgroup
-    (E : FiniteGaloisIntermediateField K L) :
-    (fixingOpenNormalSubgroup E : Subgroup Gal(L/K)) = E.fixingSubgroup :=
-  rfl
 
 end FixingSubgroup
 
@@ -65,11 +105,6 @@ instance isGalois_fixedField_openNormalSubgroup :
 noncomputable def fixedFiniteGalois : FiniteGaloisIntermediateField K L where
   toIntermediateField := fixedField (U : Subgroup Gal(L/K))
 
-@[simp]
-theorem fixedFiniteGalois_toIntermediateField :
-    (fixedFiniteGalois U).toIntermediateField = fixedField (U : Subgroup Gal(L/K)) :=
-  rfl
-
 noncomputable def quotientEquivGal :
     Gal(L/K) ⧸ (U : Subgroup Gal(L/K)) ≃* Gal(fixedField (U : Subgroup Gal(L/K))/K) :=
   normalAutEquivQuotient (openNormalToClosed U)
@@ -79,15 +114,15 @@ theorem quotientEquivGal_mk_apply (σ : Gal(L/K)) (x : fixedField (U : Subgroup 
     ((quotientEquivGal U (σ : Gal(L/K) ⧸ (U : Subgroup Gal(L/K))) x : _) : L) = σ x :=
   AlgEquiv.restrictNormal_commutes σ _ x
 
-omit [IsGalois K L] in
 
+omit [IsGalois K L] in
 theorem mem_invariants_galAdd_iff (x : L) :
     x ∈ Representation.invariants ((galAdd K L).ρ.comp (U : Subgroup Gal(L/K)).subtype) ↔
       x ∈ fixedField (U : Subgroup Gal(L/K)) :=
   ⟨fun h σ => h σ, fun h σ => h σ⟩
 
-omit [IsGalois K L] in
 
+omit [IsGalois K L] in
 def invariantsGalAddEquiv :
     Representation.invariants ((galAdd K L).ρ.comp (U : Subgroup Gal(L/K)).subtype) ≃ₗ[K]
       fixedField (U : Subgroup Gal(L/K)) where
@@ -115,39 +150,9 @@ section Correspondence
 variable [IsGalois K L]
 
 @[simp]
-theorem fixingOpenNormalSubgroup_fixedFiniteGalois
-    (U : OpenNormalSubgroup Gal(L/K)) : fixingOpenNormalSubgroup (fixedFiniteGalois U) = U := by
-  ext σ
-  change σ ∈ (fixedField (U : Subgroup Gal(L/K))).fixingSubgroup ↔ σ ∈ (U : Subgroup Gal(L/K))
-  rw [fixingSubgroup_fixedField_openNormalSubgroup]
-
-@[simp]
 theorem fixedFiniteGalois_fixingOpenNormalSubgroup
     (E : FiniteGaloisIntermediateField K L) : fixedFiniteGalois (fixingOpenNormalSubgroup E) = E :=
   FiniteGaloisIntermediateField.val_injective (fixedField_fixingSubgroup E.toIntermediateField)
-
-noncomputable def openNormalSubgroupEquiv :
-    OpenNormalSubgroup Gal(L/K) ≃o (FiniteGaloisIntermediateField K L)ᵒᵈ where
-  toFun U := OrderDual.toDual (fixedFiniteGalois U)
-  invFun E := fixingOpenNormalSubgroup (OrderDual.ofDual E)
-  left_inv U := fixingOpenNormalSubgroup_fixedFiniteGalois U
-  right_inv E := fixedFiniteGalois_fixingOpenNormalSubgroup (OrderDual.ofDual E)
-  map_rel_iff' {U V} := by
-    change fixedField (V : Subgroup Gal(L/K)) ≤ fixedField (U : Subgroup Gal(L/K)) ↔ U ≤ V
-    rw [le_iff_le, fixingSubgroup_fixedField_openNormalSubgroup]
-    exact Iff.rfl
-
-@[simp]
-theorem openNormalSubgroupEquiv_apply (U : OpenNormalSubgroup Gal(L/K)) :
-    (OrderDual.ofDual (openNormalSubgroupEquiv U)).toIntermediateField =
-      fixedField (U : Subgroup Gal(L/K)) :=
-  rfl
-
-@[simp]
-theorem coe_openNormalSubgroupEquiv_symm_apply (E : FiniteGaloisIntermediateField K L) :
-    ((openNormalSubgroupEquiv.symm (OrderDual.toDual E) : OpenNormalSubgroup Gal(L/K)) :
-      Subgroup Gal(L/K)) = E.fixingSubgroup :=
-  rfl
 
 end Correspondence
 

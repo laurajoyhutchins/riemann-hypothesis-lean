@@ -1,5 +1,50 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.BlockAnti
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.UpperOff
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -80,13 +125,13 @@ theorem pEl_ee : pEl k r B S (eI k r a) (eI k r b) = if a = b then 1 else 0 := b
   split_ifs <;> first | rfl | (exfalso; simp only [eI, wI, esI, Fin.ext_iff] at *; omega)
 theorem pEl_ew : pEl k r B S (eI k r a) (wI k r j) = -(star (B a j) * sg k j) := by
   have := a.2; have := j.2
-  unfold pEl; rw [if_neg (eI_ne_wI _ _), dif_pos (by simp only [eI, wI]; omega), herm_bvec]
+  unfold pEl; rw [if_neg (eI_ne_wI _ _), dite_eq_left (by simp only [eI, wI]; omega), herm_bvec]
   simp [eI, wI]
 theorem pEl_es : pEl k r B S (eI k r a) (esI k r b) = S a b - herm (Hb k) (B b) (B a) / 2 := by
   have := a.2; have := b.2
   have hb : ∀ h, (⟨2 * r + k - (esI k r b).val, h⟩ : Fin r) = b := fun h => Fin.ext (by simp only [esI]; omega)
-  unfold pEl; rw [if_neg (eI_ne_esI _ _), dif_neg (by simp only [eI, esI]; omega),
-    dif_neg (by simp only [eI, esI]; omega), dif_pos (by simp only [eI, esI]; omega)]
+  unfold pEl; rw [if_neg (eI_ne_esI _ _), dite_eq_right (by simp only [eI, esI]; omega),
+    dite_eq_right (by simp only [eI, esI]; omega), dite_eq_left (by simp only [eI, esI]; omega)]
   simp only [hb]; rfl
 theorem pEl_we : pEl k r B S (wI k r i) (eI k r b) = 0 := by
   have := i.2; have := b.2
@@ -99,8 +144,8 @@ theorem pEl_ww : pEl k r B S (wI k r i) (wI k r j) = if i = j then 1 else 0 := b
 theorem pEl_ws : pEl k r B S (wI k r i) (esI k r b) = B b i := by
   have := i.2; have := b.2
   have hb : ∀ h, (⟨2 * r + k - (esI k r b).val, h⟩ : Fin r) = b := fun h => Fin.ext (by simp only [esI]; omega)
-  unfold pEl; rw [if_neg (wI_ne_esI _ _), dif_neg (by simp only [wI, esI]; omega),
-    dif_pos (by simp only [wI, esI]; omega)]
+  unfold pEl; rw [if_neg (wI_ne_esI _ _), dite_eq_right (by simp only [wI, esI]; omega),
+    dite_eq_left (by simp only [wI, esI]; omega)]
   simp only [hb]; simp [wI]
 theorem pEl_se : pEl k r B S (esI k r a) (eI k r b) = 0 := by
   have := a.2; have := b.2
@@ -156,19 +201,19 @@ variable (m : Matrix (Fin (k + 1)) (Fin (k + 1)) ℂ)
 
 theorem m_ww : mEmb k r m (wI k r i) (wI k r j) = m i j := by
   have := i.2; have := j.2
-  unfold mEmb; rw [dif_pos (by simp only [wI]; omega)]; simp [wI]
+  unfold mEmb; rw [dite_eq_left (by simp only [wI]; omega)]; simp [wI]
 theorem m_e (x : Fin (2 * r + k + 1)) : mEmb k r m (eI k r a) x = if eI k r a = x then 1 else 0 := by
   have := a.2
-  unfold mEmb; rw [dif_neg (by simp only [eI]; omega)]
+  unfold mEmb; rw [dite_eq_right (by simp only [eI]; omega)]
 theorem middleSpaceLeviEmbedding_apply_es_row (x : Fin (2 * r + k + 1)) : mEmb k r m (esI k r a) x = if esI k r a = x then 1 else 0 := by
   have := a.2
-  unfold mEmb; rw [dif_neg (by simp only [esI]; omega)]
+  unfold mEmb; rw [dite_eq_right (by simp only [esI]; omega)]
 theorem m_we : mEmb k r m (wI k r i) (eI k r b) = 0 := by
   have := b.2
-  unfold mEmb; rw [dif_neg (by simp only [eI]; omega), if_neg (wI_ne_eI _ _)]
+  unfold mEmb; rw [dite_eq_right (by simp only [eI]; omega), if_neg (wI_ne_eI _ _)]
 theorem m_ws : mEmb k r m (wI k r i) (esI k r b) = 0 := by
   have := b.2
-  unfold mEmb; rw [dif_neg (by simp only [esI]; omega), if_neg (wI_ne_esI _ _)]
+  unfold mEmb; rw [dite_eq_right (by simp only [esI]; omega), if_neg (wI_ne_esI _ _)]
 
 end entries
 
@@ -305,7 +350,7 @@ theorem skewM_unique (S : Matrix (Fin r) (Fin r) ℂ) (hS : Sᴴ = -S) :
       simp only [lt_irrefl, dite_false]
       apply Complex.ext <;> simp at this ⊢
       linarith
-    · rw [dif_neg h.not_gt, dif_pos h, hs, neg_neg]
+    · rw [dite_eq_right h.not_gt, dite_eq_left h, hs, neg_neg]
   · rintro ⟨s, t⟩ rfl
     ext q
     · simp [skewM, q.2]

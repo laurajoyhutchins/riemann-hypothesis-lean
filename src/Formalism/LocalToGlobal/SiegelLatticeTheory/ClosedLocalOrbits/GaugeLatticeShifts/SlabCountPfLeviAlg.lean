@@ -1,4 +1,50 @@
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.SlabCountPfLeviSteps
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.SlabCountPfLeviSteps
+import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.RegroupPfStabFlag
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -32,7 +78,7 @@ theorem orth_span_iff {T : Set (VS D).V} {v : (VS D).V} :
   induction hy using Submodule.span_induction with
   | mem y hy => exact h y hy
   | zero => simp
-  | add a b _ _ ha hb => rw [map_add, LinearMap.add_apply, ha, hb, add_zero]
+  | add a b _ _ ha hb => rw [map_add (f := _), LinearMap.add_apply, ha, hb, add_zero]
   | smul c a _ ha => rw [LinearMap.map_smulₛₗ, LinearMap.smul_apply, ha, smul_zero]
 
 variable {X} in
@@ -78,8 +124,11 @@ theorem piW_mem (x : (VS D).V) : piWL X u' x ∈ Wsp X u' := by
   rw [mem_W_iff, piW_apply]
   have hz := zz_ne X u'
   refine ⟨fun b => ?_, fun b => ?_, ?_⟩
+
   · simp [map_sub, map_sum, X.ee, X.ef, (X.zu_orth u' b).1, mul_ite, Finset.sum_ite_eq]
+
   · simp [map_sub, map_sum, fe, X.ff, (X.zu_orth u' b).2, mul_ite, Finset.sum_ite_eq]
+
   · simp [map_sub, map_sum, ze, zf, hz]
 
 theorem levi_projection_of_mem {w : (VS D).V} (hw : w ∈ Wsp X u') : piWL X u' w = w := by
@@ -180,7 +229,7 @@ theorem levi_preserves_z_orthogonal {σ : (VS D).V ≃ₗ[D.host.E] (VS D).V} (h
   have h0 := hσ.1 (X.zu u') w
   rw [((mem_W_iff X u').1 hw).2.2] at h0
   have e : σ (X.zu u') = X.zu u' + (σ (X.zu u') - X.zu u') := by abel
-  rw [e, map_add, LinearMap.add_apply,
+  rw [e, map_add (f := _), LinearMap.add_apply,
     (mem_orth'.1 (gd_orth hσ hσ' (W_le_orth X u' hw))) _ hσ.2.2, add_zero] at h0
   exact h0
 
@@ -198,8 +247,8 @@ theorem gd_W_sub {σ : (VS D).V ≃ₗ[D.host.E] (VS D).V} (hσ : Gd X u' σ) (h
 theorem gd_piW {σ : (VS D).V ≃ₗ[D.host.E] (VS D).V} (hσ : Gd X u' σ) {x : (VS D).V}
     (hx : x ∈ orth (VS D) (XS X)) : piWL X u' (σ x) = piWL X u' (σ (piWL X u' x)) := by
   have hr := sub_piW X u' hx
-  have e : σ x = σ (piWL X u' x) + σ (x - piWL X u' x) := by rw [← map_add]; congr 1; abel
-  rw [e, map_add, piW_XZ X u' (gd_xz hσ hr), add_zero]
+  have e : σ x = σ (piWL X u' x) + σ (x - piWL X u' x) := by rw [← map_add (f := _)]; congr 1; abel
+  rw [e, map_add (f := _), piW_XZ X u' (gd_xz hσ hr), add_zero]
 
 def psiL (σ : (VS D).V ≃ₗ[D.host.E] (VS D).V) : Wsp X u' →ₗ[D.host.E] Wsp X u' :=
   LinearMap.codRestrict (Wsp X u') ((piWL X u').comp (σ.toLinearMap.comp (Wsp X u').subtype))
@@ -221,7 +270,7 @@ theorem psiL_iso {σ : (VS D).V ≃ₗ[D.host.E] (VS D).V} (hσ : Gd X u' σ) (h
   have e2 : σ w' = p' + (σ w' - p') := by abel
   have hiso := hσ.1 w w'
   rw [e1, e2] at hiso
-  simp only [map_add, LinearMap.add_apply] at hiso
+  simp only [map_add (f := _), LinearMap.add_apply] at hiso
   rw [(mem_orth'.1 hp') _ h1, (mem_orth'.1 (xs_le_orth X h2)) _ h1, hconj (σ w' - p') p,
     (mem_orth'.1 hp) _ h2, map_zero, add_zero, add_zero, add_zero] at hiso
   exact hiso
@@ -322,8 +371,8 @@ theorem gd_of_point (hZ : SratZC) {σ : (VS D).V ≃ₗ[D.host.E] (VS D).V} {s :
 
 end LeviAlg
 
-open LeviAlg in
 
+open LeviAlg in
 theorem leviStabFinC_of (hWF : LeviWFinC) (hZ : SratZC) : LeviStabFinC := by
   intro D X Y u' Λ hΛ
   let G : Set ((VS D).V ≃ₗ[D.host.E] (VS D).V) := {σ | σ ∈ Formalism.HermitianLatticesTheory.isom (VS D).hT ∧

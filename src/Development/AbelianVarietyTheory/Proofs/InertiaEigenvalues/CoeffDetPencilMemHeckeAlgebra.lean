@@ -1,7 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.BlockTheory.NonGaloisCusps.ResidualConstruction
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.MemSpanRingCornerIdealModuleIff
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CoeffDetGenericSumMemHeckeAlgebraStatement
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.NonGaloisCusps.ResidualConstruction
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CoeffDetGenericSumMemHeckeAlgebraStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.MvPolynomial.IrreducibleQuadratic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Formalism.BasicNotions Formalism.MainNotions Formalism.MainNotions.N GlobalTheory.IndefiniteRowSideFullHecke.CongruenceModuleMatrices GlobalTheory.SpanRing
 
@@ -23,13 +67,14 @@ theorem coeff_aeval_of_isHomogeneous {R : Type} [CommRing R] {n : ℕ}
     (P : MvPolynomial (Fin 2) R) (h : P.IsHomogeneous n) (j : ℕ) :
     (MvPolynomial.aeval ![(Polynomial.X : Polynomial R), 1] P).coeff j =
       ∑ d ∈ Finset.finsuppAntidiag (Finset.univ : Finset (Fin 2)) n,
-        if d 0 = j then MvPolynomial.coeff d P else 0 := by
+        if d 0 = j then AddMonoidAlgebra.coeff P d else 0 := by
   conv_lhs => rw [MvPolynomial.as_sum P]
+
   rw [map_sum, Polynomial.finsetSum_coeff]
   have hterm : ∀ d : Fin 2 →₀ ℕ,
       (MvPolynomial.aeval ![(Polynomial.X : Polynomial R), 1]
-        (MvPolynomial.monomial d (MvPolynomial.coeff d P))).coeff j =
-        if d 0 = j then MvPolynomial.coeff d P else 0 := by
+        (MvPolynomial.monomial d (AddMonoidAlgebra.coeff P d))).coeff j =
+        if d 0 = j then AddMonoidAlgebra.coeff P d else 0 := by
     intro d
     rw [MvPolynomial.aeval_monomial, Finsupp.prod_fintype _ _ (by simp), Fin.prod_univ_two]
     simp [Polynomial.coeff_C_mul, Polynomial.coeff_X_pow, eq_comm]
@@ -38,7 +83,7 @@ theorem coeff_aeval_of_isHomogeneous {R : Type} [CommRing R] {n : ℕ}
   · intro d hd
     rw [Finset.mem_finsuppAntidiag]
     refine ⟨?_, by simp⟩
-    have hd' : MvPolynomial.coeff d P ≠ 0 := MvPolynomial.mem_support_iff.mp hd
+    have hd' : AddMonoidAlgebra.coeff P d ≠ 0 := MvPolynomial.mem_support_iff.mp hd
     have := h hd'
     simpa [Finsupp.weight_apply, Finsupp.sum_fintype] using this
   · intro d _ hd
@@ -72,7 +117,7 @@ theorem coeff_det_pencil_mem : ∀ {Γ X O : Type} [Group Γ] [CommRing O] {n : 
   have hfun : (fun x => (Matrix.det ((Polynomial.X : Polynomial O) • (a x).map (Polynomial.C (R := O)) +
       (b x).map (Polynomial.C (R := O)))).coeff j) =
       ∑ d ∈ Finset.finsuppAntidiag (Finset.univ : Finset (Fin 2)) n,
-        (fun x => if d 0 = j then MvPolynomial.coeff d (P x) else 0) := by
+        (fun x => if d 0 = j then AddMonoidAlgebra.coeff (P x) d else 0) := by
     funext x
     rw [hdet x, coeff_aeval_of_isHomogeneous _ (hhom x) j, Finset.sum_apply]
   rw [hfun]

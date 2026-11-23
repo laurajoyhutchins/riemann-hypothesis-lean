@@ -1,6 +1,51 @@
-import Mathlib
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.SphericalCoordinates.AlgebraEquivSetup.ApartOfNotMem
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.SphericalCoordinates.AlgebraEquivSetup.PRepEx
+module
+
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.SphericalCoordinates.AlgebraEquivSetup.ApartOfNotMem
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.SphericalCoordinates.AlgebraEquivSetup.CodiffUnit
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.SphericalCoordinates.AlgebraEquivSetup.PRepEx
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.CoassocSimps
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ProjectiveAutomorphicHecke.MapWopWmap
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Matrix GlobalTheory.UPel.HT GlobalTheory.LKTrip GlobalTheory.LKGeo GlobalTheory.LKMid GlobalTheory.LKDef GlobalTheory.CuspRep GlobalTheory.UnitaryBC UpperTheory.Gal.W2.Seed
 open UpperTheory.Gal.CertificateRingHomMap (GUf Gam0 AfQ Plc sim mat comp rat lev ZU)
 open scoped TensorProduct
@@ -34,7 +79,7 @@ private lemma beta_rep (rep : Matrix (Fin n) (Fin n) E →ₐ[ℚ] Module.End �
     (x : Matrix (Fin n) (Fin n) E) (z : ℚ ⊗[ℤ] (Fin n → 𝓞 E)) : β (rep x z) = x *ᵥ β z := by
   induction z using TensorProduct.induction_on with
   | zero => simp
-  | add a b ha hb => simp only [map_add, mulVec_add, ha, hb]
+  | add a b ha hb => simp only [map_add (f := _), mulVec_add, ha, hb]
   | tmul q v =>
     have hq : q ⊗ₜ[ℤ] v = q • ((1 : ℚ) ⊗ₜ[ℤ] v) := by
       rw [TensorProduct.smul_tmul']; simp
@@ -84,11 +129,11 @@ private lemma nu_act {R : Type} [CommRing R] [Algebra ℚ R]
     nu R β (actOn rep R y v) = μ y *ᵥ nu R β v := by
   induction y using TensorProduct.induction_on with
   | zero => simp
-  | add a b ha hb => simp only [map_add, LinearMap.add_apply, add_mulVec, ha, hb]
+  | add a b ha hb => simp only [map_add (f := _), LinearMap.add_apply, add_mulVec, ha, hb]
   | tmul r x =>
     induction v using TensorProduct.induction_on with
     | zero => simp
-    | add a b ha hb => simp only [map_add, mulVec_add, ha, hb]
+    | add a b ha hb => simp only [map_add (f := _), mulVec_add, ha, hb]
     | tmul r' z =>
       ext1 i
       rw [actOn_tmul, nu_tmul, hr]
@@ -110,7 +155,8 @@ private lemma nu_mem {p : ℕ} (β : ℚ ⊗[ℤ] (Fin n → 𝓞 E) ≃ₗ[ℚ]
       obtain ⟨a, x, ha, rfl⟩ := hz
       exact AddSubgroup.subset_closure ⟨a, x i, ha, by rw [nu_tmul, hβ]⟩
     | zero => simpa using zero_mem _
-    | add a b _ _ h1 h2 => rw [map_add]; exact add_mem h1 h2
+    | add a b _ _ h1 h2 =>
+      simpa only [map_add, Pi.add_apply] using add_mem h1 h2
     | neg a _ h => rw [map_neg]; exact neg_mem h
   · intro h
     have hs : ∀ i, ∀ w ∈ OHat p E, (nu (AfP p) β).symm (Pi.single i w) ∈
@@ -128,17 +174,21 @@ private lemma nu_mem {p : ℕ} (β : ℚ ⊗[ℤ] (Fin n → 𝓞 E) ≃ₗ[ℚ]
         · subst hj; simp
         · simp [hj]
       | zero => simpa using zero_mem _
-      | add a b _ _ h1 h2 => rw [Pi.single_add, map_add]; exact add_mem h1 h2
+      | add a b _ _ h1 h2 => rw [Pi.single_add, map_add (f := _)]; exact add_mem h1 h2
       | neg a _ h => rw [Pi.single_neg, map_neg]; exact neg_mem h
     have hv : v = ∑ i, (nu (AfP p) β).symm (Pi.single i (nu (AfP p) β v i)) := by
+
       rw [← map_sum, Finset.univ_sum_single]; simp
     rw [hv]
     exact sum_mem fun i _ => hs i _ (h i)
 
 end UpperTheory.Gal.W2.Seed.LatticeTensorCoordinates
 
-open UpperTheory.Gal.W2.Seed.LatticeTensorCoordinates in
-theorem UpperTheory.Gal.W2.Seed.pLatCoord :
+namespace UpperTheory.Gal.W2.Seed
+
+open LatticeTensorCoordinates
+
+theorem pLatCoord :
     RepLaws → LatCoord := by
   intro _ E _ _ _ A n p _ S μ hμ
   obtain ⟨β, hβ⟩ := pRepEx E n
@@ -150,3 +200,5 @@ theorem UpperTheory.Gal.W2.Seed.pLatCoord :
     exact nu_act μ hμ S.L.rep β hr (S.mx h) v
   · intro v
     exact nu_mem β hβ v
+
+end UpperTheory.Gal.W2.Seed

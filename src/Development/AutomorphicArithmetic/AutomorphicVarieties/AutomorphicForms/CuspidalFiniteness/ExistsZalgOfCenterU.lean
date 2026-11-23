@@ -1,10 +1,56 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.SiegelHeights.SiegelHeight
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.IsArchSmoothOfContDiffChart
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.ConstantTermEqZeroOfIsCuspidal
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.IsKFiniteTotallyRealModelOfIsKFinite
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.ModerateGrowthTotallyRealModelOfModerateGrowth
-import Development.AutomorphicArithmetic.AutomorphicVarieties.BuildingsResidueChars.MapCenterEnvelopingProductGLMemCapelliAlgebra
-import GroundTheory.AutomorphicForms.UnitaryAdmissible.CuspFinite
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.IsArchSmoothOfContDiffChart
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.ConstantTermEqZeroOfIsCuspidal
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.IsKFiniteTotallyRealModelOfIsKFinite
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.ModerateGrowthTotallyRealModelOfModerateGrowth
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.BuildingsResidueChars.MapCenterEnvelopingProductGLMemCapelliAlgebra
+public import GroundTheory.AutomorphicForms.UnitaryAdmissible.CuspFinite
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.CuspidalFiniteness.HasUnivOfStep
+public import GroundTheory.AutomorphicForms.UnitaryAdmissible.CuspCentral
+
+@[expose] public section
 
 noncomputable section
 
@@ -39,8 +85,8 @@ theorem uAction_lieEq (X : TR.Lie F a) (φ : TR.Sm F a) :
   simp only [archSlice_apply, one_mul, ← Fb.infEmb_grpEq, MulEquiv.apply_symm_apply]
   rfl
 
-open Classical in
 
+open Classical in
 theorem exists_stdBasis (F : Type) [Field F] [NumberField F] (a : ℕ) :
     ∃ b : Module.Basis (InfinitePlace F × Fin a × Fin a) ℝ (TR.Lie F a),
       ∀ l, b l = TR.toL (Matrix.single l.2.1 l.2.2 (Pi.single l.1 1)) := by
@@ -86,7 +132,7 @@ theorem exists_Zalg_of_centerU {z : UEnv F a} (hz : z ∈ (isExpLieAlgebra F a).
     { carrier := {p | ∀ φ, p.1 (toArch F a φ) = toArch F a (p.2 φ)}
       mul_mem' := fun {x y} hx hy φ => (congrArg x.1 (hy φ)).trans (hx _)
       add_mem' := fun {x y} hx hy φ => by
-        simp only [Prod.fst_add, Prod.snd_add, LinearMap.add_apply, map_add, hx φ, hy φ]
+        simp only [Prod.fst_add, Prod.snd_add, LinearMap.add_apply, map_add (f := _), hx φ, hy φ]
       algebraMap_mem' := fun c φ => (map_smul (toArch F a) c φ).symm }
   have hle : capAlg (fun v i j => uAction (UniversalEnvelopingAlgebra.ι ℝ (b.map (Fb.lieEq F a) (v, i, j)))) ≤
       (S ⊓ (TR.Zalg F a).comap (AlgHom.snd ℂ _ _)).map (AlgHom.fst ℂ _ _) := by
@@ -111,14 +157,19 @@ theorem isZFinite_toArch {φ : TR.Sm F a}
   obtain ⟨z', h1, h2⟩ := exists_Zalg_of_centerU hz
   exact ⟨_, Submodule.subset_span ⟨z', h1, rfl⟩, (h2 φ).symm⟩
 
-theorem isAutomorphicForm_of {φ : TR.Sm F a} (h : TR.IsAutForm φ) : IsAutomorphicForm φ.1 where
-  isLeftInvariant := h.left
-  isSmooth := ⟨(toArch F a φ).2, fun g => Filter.eventually_of_mem
-    (h.level.mem_nhds (show TR.finRep F a 1 φ = φ by rw [map_one]; rfl)) fun k hk => by
-      rw [Fb.finEmb_eq]; exact congrFun (congrArg Subtype.val hk) g⟩
-  isKFinite := UpperTheory.isKFinite_totallyRealModel_of_isKFinite F a φ h.level h.kfin
-  isZFinite := isZFinite_toArch h.zfin
-  hasModerateGrowth := UpperTheory.moderateGrowth_totallyRealModel_of_moderateGrowth F a φ h.left h.level h.growth
+theorem isAutomorphicForm_of {φ : TR.Sm F a} (h : TR.IsAutForm φ) : IsAutomorphicForm φ.1 := by
+  have hs : IsSmooth φ.1 := by
+    refine ⟨(toArch F a φ).2, fun g => ?_⟩
+    have hone : TR.finRep F a 1 φ = φ := by rw [map_one]; rfl
+    refine Filter.eventually_of_mem (h.level.mem_nhds hone) fun k hk => ?_
+    rw [Fb.finEmb_eq]
+    exact congrFun (congrArg Subtype.val hk) g
+  exact {
+    isLeftInvariant := h.left
+    isSmooth := hs
+    isKFinite := UpperTheory.isKFinite_totallyRealModel_of_isKFinite F a φ h.level h.kfin
+    isZFinite := isZFinite_toArch h.zfin
+    hasModerateGrowth := UpperTheory.moderateGrowth_totallyRealModel_of_moderateGrowth F a φ h.left h.level h.growth }
 
 theorem mem_cuspForms_of (φ : TR.Sm F a) (h : TR.IsCuspForm φ) : φ.1 ∈ cuspForms F a :=
   ⟨isAutomorphicForm_of h.1, UpperTheory.constantTerm_eq_zero_of_isCuspidal F a φ.1 h.1.left (isAutomorphicForm_of h.1).continuous h.2⟩
@@ -151,8 +202,9 @@ theorem eigenFinite_of (hc : ∀ φ : TR.Sm F a, TR.IsCuspForm φ → φ.1 ∈ c
   · rw [map_aeval_apply_of_intertwine incl (B := uAction (laplacianU F a (b.map (Fb.lieEq F a)))) (fun _ => rfl), hψ,
       ← map_aeval_apply_of_intertwine (toArch F a) (A := ∑ l, TR.lie F a (b l) * TR.lie F a (b l)), h3, map_zero, map_zero]
     intro m
+
     simp only [laplacianU, map_sum, map_mul, LinearMap.sum_apply, Module.End.mul_apply, Module.Basis.map_apply,
-      uAction_lieEq]
+    uAction_lieEq]
   · have hz : UnitaryAdmissible.centralZ F a = Fb.lieEq F a (e • TR.oneL F a) := by
       refine Subtype.ext ?_
       rw [map_smul, UnitaryAdmissible.coe_centralZ, Algebra.algebraMap_eq_smul_one, ← Fb.lieEq_oneL]

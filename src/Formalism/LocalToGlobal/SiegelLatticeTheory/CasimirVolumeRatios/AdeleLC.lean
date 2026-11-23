@@ -1,4 +1,56 @@
-import Mathlib
+module
+
+public import Mathlib.RingTheory.DedekindDomain.AdicValuation.Completion
+public import Mathlib.RingTheory.Henselian
+public import Mathlib.RingTheory.RegularLocalRing.Defs
+public import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import Mathlib.Topology.Algebra.Valued.LocallyCompact
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RingTheory.DedekindDomain.Factorization
+
+@[expose] public section
 
 noncomputable section
 
@@ -121,14 +173,14 @@ theorem toInt_valued (r : 𝓞 K) : Valued.v ((toInt v r : Valued.integer (v.adi
   show Valued.v (algebraMap K (v.adicCompletion K) (r : K)) = _
   rw [valued_algebraMap, HeightOneSpectrum.valuation_of_algebraMap]
 
-set_option synthInstance.maxHeartbeats 400000 in
+
 theorem mem_max_iff (y : Valued.integer (v.adicCompletion K)) :
     y ∈ IsLocalRing.maximalIdeal (Valued.integer (v.adicCompletion K)) ↔ Valued.v (y : v.adicCompletion K) < 1 := by
   rw [IsLocalRing.mem_maximalIdeal, mem_nonunits_iff,
     (Valuation.integer.integers (Valued.v : Valuation (v.adicCompletion K) _)).isUnit_iff_valuation_eq_one]
   exact ⟨fun h => lt_of_le_of_ne y.2 h, fun h => ne_of_lt h⟩
 
-set_option synthInstance.maxHeartbeats 400000 in
+
 theorem finite_residue : Finite (IsLocalRing.ResidueField (Valued.integer (v.adicCompletion K))) := by
   haveI := v.isMaximal
   let ψ := (IsLocalRing.residue (Valued.integer (v.adicCompletion K))).comp (toInt v)
@@ -159,7 +211,7 @@ theorem finite_residue : Finite (IsLocalRing.ResidueField (Valued.integer (v.adi
 theorem isClosed_integer : IsClosed (Valued.integer (v.adicCompletion K) : Set (v.adicCompletion K)) :=
   (Valued.integer (v.adicCompletion K)).toAddSubgroup.isClosed_of_isOpen (Valued.isOpen_integer _)
 
-set_option synthInstance.maxHeartbeats 400000 in
+
 theorem compactSpace_integer : CompactSpace (Valued.integer (v.adicCompletion K)) := by
   have : CompleteSpace (Valued.integer (v.adicCompletion K)) := (isClosed_integer v).completeSpace_coe
   haveI : IsDiscreteValuationRing (Valued.integer (v.adicCompletion K)) :=
@@ -176,12 +228,6 @@ theorem isOpen_integers : IsOpen (v.adicCompletionIntegers K : Set (v.adicComple
 
 instance locallyCompact_completion : LocallyCompactSpace (v.adicCompletion K) :=
   (isCompact_integers v).locallyCompactSpace_of_mem_nhds_of_addGroup ((isOpen_integers v).mem_nhds (zero_mem _))
-
-instance locallyCompact_finiteAdeles : LocallyCompactSpace (FiniteAdeleRing (𝓞 K) K) := by
-  haveI : Fact (∀ v : HeightOneSpectrum (𝓞 K), IsOpen (v.adicCompletionIntegers K : Set (v.adicCompletion K))) :=
-    ⟨fun v => isOpen_integers v⟩
-  exact RestrictedProduct.locallyCompactSpace_of_addGroup (fun v : HeightOneSpectrum (𝓞 K) => v.adicCompletion K)
-    (B := fun v => v.adicCompletionIntegers K) (Filter.Eventually.of_forall fun v => isCompact_integers v)
 
 end Formalism.L2.S.S7.AdeleLC
 

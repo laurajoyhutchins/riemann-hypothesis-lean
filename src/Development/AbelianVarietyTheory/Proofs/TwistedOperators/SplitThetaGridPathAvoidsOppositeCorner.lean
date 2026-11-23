@@ -1,5 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.RankEqCardIffExistsFrameMatrixFirstColumnBlock
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.RankEqCardIffExistsFrameMatrixFirstColumnBlock
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 namespace GlobalTheory.SplitFlip
 
@@ -9,19 +53,16 @@ theorem vertexDiff_tgt (e : Edge) : vertexDiff e.tgt = vertexDiff e.src + 1 := b
   cases e <;> simp [vertexDiff, Edge.src, Edge.tgt] <;> omega
 
 theorem IsPath.pairwise_vertexDiff : ∀ {γ : List Edge}, IsPath γ →
-    γ.Pairwise fun a b => vertexDiff a.src < vertexDiff b.src
-  | [], _ => List.Pairwise.nil
-  | [_], _ => List.pairwise_singleton _ _
-  | a :: b :: t, h => by
-    unfold IsPath at h
-    rw [List.isChain_cons_cons] at h
-    have ih := IsPath.pairwise_vertexDiff (γ := b :: t) h.2
-    have hab : vertexDiff a.src < vertexDiff b.src := by
-      rw [← h.1, vertexDiff_tgt]; omega
-    refine List.Pairwise.cons (fun c hc => ?_) ih
-    rcases List.mem_cons.1 hc with rfl | hc
-    · exact hab
-    · exact hab.trans (List.rel_of_pairwise_cons ih hc)
+    γ.Pairwise fun a b => vertexDiff a.src < vertexDiff b.src := by
+  intro γ h
+  let r : Edge → Edge → Prop := fun a b => vertexDiff a.src < vertexDiff b.src
+  let : Trans r r r := ⟨fun hab hbc => lt_trans hab hbc⟩
+  change γ.Pairwise r
+  apply List.IsChain.pairwise
+  refine List.IsChain.imp (fun {a b} hab => ?_) h
+  change vertexDiff a.src < vertexDiff b.src
+  rw [← hab, vertexDiff_tgt]
+  omega
 
 theorem IsPath.eq_of_vertexDiff_eq {γ : List Edge} (hγ : IsPath γ) {a b : Edge} (ha : a ∈ γ) (hb : b ∈ γ)
     (h : vertexDiff a.src = vertexDiff b.src) : a = b := by

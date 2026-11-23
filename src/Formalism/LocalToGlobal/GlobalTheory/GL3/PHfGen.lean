@@ -1,5 +1,43 @@
-import Mathlib
-import Formalism.LocalToGlobal.GlobalTheory.GL3.PIopNorm
+module
+
+public import Formalism.LocalToGlobal.GlobalTheory.GL3.PIopNorm
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -27,9 +65,6 @@ theorem good_neg {u : ℂ} (hu : Good D u) : Good D (-u) := by
   refine ⟨-a, -b, ?_, ?_⟩
   · rw [show -a - -b = -(a - b) by ring]; exact hab.neg
   · push_cast; ring
-
-theorem HfInt_iff (T : Tor D) (La' : AddSubgroup (VC D N N')) :
-    HfInt T La' ↔ ∀ x ∈ La', ∀ y ∈ La', Good D (Hf D T x y) := Iff.rfl
 
 theorem Hf_zero_left (T : Tor D) (y : VC D N N') : Hf D T 0 y = 0 := by simp [Hf]
 
@@ -117,9 +152,6 @@ theorem HfIntRec_of_gen (h : HfGenRec) : HfIntRec := by
   rintro x ⟨c, hc, A, hA', rfl⟩ y ⟨c', hc', B, hB', rfl⟩
   rw [Hf_smul]
   exact h D cc hcc δ hδ h0 N N' L L' hA c hc c' hc' A hA' B hB'
-
-theorem LinkThIndep_of_gen (hA : HfGenRec) (hB : SelfDualRec) : LinkThIndep :=
-  LinkThIndep_of_parts (HfIntRec_of_gen hA) hB
 
 end Formalism.L2.GlobalTheoryTheory.IntegralLatticeDensity
 

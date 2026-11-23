@@ -1,16 +1,61 @@
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.KunnethLefschetz.BasisOne
-import Development.EtaleCohomology.EtaleTrace.TorsionH0PointOfTwistCoverCocycle
-import Development.EtaleCohomology.EtaleTrace.PtCoverPf
-import Development.EtaleCohomology.EtaleTrace.TwZeroPfSplit
-import Development.EtaleCohomology.EtaleTrace.PrimSplitPf
-import Development.EtaleCohomology.EtaleTrace.CocEqPf
-import Development.EtaleCohomology.EtaleTrace.EtaleTateTwistSectionConstantOnPointsOfConnected
-import Development.EtaleCohomology.EtaleTrace.PtCovPf
-import Development.EtaleCohomology.EtaleTrace.TateTwistSectionConstantOnPointsOfTwLocPtCov
-import Development.EtaleCohomology.TateTwists.TwLocPfR
-import Development.EtaleCohomology.TateTwists.TwSecLocPfZarR
-import Development.EtaleCohomology.TateTwists.AlgPowPfR
-import Development.EtaleCohomology.TateTwists.TwTorsPfR
+module
+
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.KunnethLefschetz.BasisOne
+public import Development.EtaleCohomology.EtaleTrace.CocEqPf
+public import Development.EtaleCohomology.EtaleTrace.PrimSplitPf
+public import Development.EtaleCohomology.EtaleTrace.PtCovPf
+public import Development.EtaleCohomology.EtaleTrace.PtCoverPf
+public import Development.EtaleCohomology.EtaleTrace.TateTwistSectionConstantOnPointsOfTwLocPtCov
+public import Development.EtaleCohomology.EtaleTrace.TorsionH0PointOfTwistCoverCocycle
+public import Development.EtaleCohomology.EtaleTrace.TwZeroPfSplit
+public import Development.EtaleCohomology.TateTwists.AlgPowPfR
+public import Development.EtaleCohomology.TateTwists.TwTorsPfR
+import Mathlib.Algebra.Category.ModuleCat.FilteredColimits
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.TypeStar
+public import Development.EtaleCohomology.EtaleTrace.EtaleTateTwistSectionConstantOnPointsOfConnected
+
+@[expose] public section
 
 noncomputable section
 open CategoryTheory Limits AlgebraicGeometry GlobalTheory.EtC LateralTheory.EtaleTrace CochainComplex.HomComplex
@@ -67,7 +112,7 @@ private theorem exists_nsmul_eq_of_single_one_eq {q : ℕ} [NeZero q] {P N : Typ
       apply ULift.ext
       rw [ULift.down_natCast, ZMod.natCast_zmod_val]
     calc φ (Finsupp.single ξ c + g) = c • g0 + n • g0 := by
-          rw [map_add, ← Finsupp.smul_single_one, map_smul, h, hn]
+          rw [map_add (f := _), ← Finsupp.smul_single_one, map_smul, h, hn]
       _ = (c.down.val + n) • g0 := by
           rw [add_nsmul, ← Nat.cast_smul_eq_nsmul (ULift.{1, 0} (ZMod q)) c.down.val, ← hc]
 

@@ -1,12 +1,68 @@
-import Formalism.RealPlaceAnalysis.SmoothVectorGrowthBound
-import Formalism.RealPlaceAnalysis.RealPlaceTaylor.MemUnitaryGroupIffMulConjTranspose
-import Formalism.RealPlaceAnalysis.RealPlaceTaylor.ComplexificationHolds
+module
+
+public import Formalism.RealPlaceAnalysis.SmoothVectorGrowthBound
+public import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+public import Mathlib.Analysis.SpecialFunctions.SmoothTransition
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.SmoothOnGroupSum
+public import Formalism.RealPlaceAnalysis.RealPlaceTaylor.CartanInvolutionConjTransposeMul
+public import Formalism.RealPlaceAnalysis.RealPlaceTaylor.CasComm
+public import Formalism.RealPlaceAnalysis.RealPlaceTaylor.ComplexificationHolds
+public import Formalism.RealPlaceAnalysis.RealPlaceTaylor.ComplexifiedDerivativeCommutator
 import Formalism.RealPlaceAnalysis.RealPlaceTaylor.KoszulLowersPower
-import Formalism.RealPlaceAnalysis.RealPlaceTaylor.ModularCharacterEqOneOnExpHermitian
-import Formalism.RealPlaceAnalysis.RealPlaceTaylor.CartanInvolutionConjTransposeMul
-import Formalism.RealPlaceAnalysis.RealPlaceTaylor.ComplexifiedDerivativeCommutator
-import Formalism.RealPlaceAnalysis.RealPlaceTaylor.CasComm
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.SmoothOnGroupSum
+import Formalism.RealPlaceAnalysis.RealPlaceTaylor.MemUnitaryGroupIffMulConjTranspose
+public import Formalism.RealPlaceAnalysis.RealPlaceTaylor.ModularCharacterEqOneOnExpHermitian
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+public import Mathlib.Analysis.Calculus.Deriv.Star
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Presheaf
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open MeasureTheory Matrix Filter Topology
 open scoped ContDiff ENNReal
@@ -256,7 +312,7 @@ lemma lie_derivative_conj {f : Matrix (Fin n) (Fin n) ℂ → ℂ} (a b : Fin n)
   rw [lie_derivative_swap a b hf hg, lie_derivative_def, right_derivative_conj hf (real_part_single_mem ε a b) hg,
     right_derivative_conj hf (imaginary_part_single_mem ε a b) hg]
   have hs := signature_sign_mul_self ε a b
-  simp only [map_add, map_mul, map_neg, Complex.conj_ofReal, Complex.conj_I]
+  simp only [map_add (f := _), map_mul, map_neg, Complex.conj_ofReal, Complex.conj_I]
   linear_combination (starRingEnd ℂ (Rd (cpart1 ε (Matrix.single a b 1)) f g) +
     Complex.I * starRingEnd ℂ (Rd (cpart2 ε (Matrix.single a b 1)) f g)) * (-hs)
 
@@ -696,6 +752,7 @@ lemma sum_weighted_lie_derivative_bound (hl : HhLip) (hz : IntRdZero) {a : ℝ} 
         ∑ i, ∑ j, ((sgn ε i j : ℝ) : ℂ) * (radialWeight a R (toM g) * u (toM g) *
           starRingEnd ℂ (Eab ε j i (Eab ε i j u) (toM g))) := by
       intro g
+
       simp only [signedCasimirDifference, map_sum, map_mul, Complex.conj_ofReal]
       rw [Finset.mul_sum]
       refine Finset.sum_congr rfl fun i _ => ?_
@@ -1303,10 +1360,11 @@ lemma weight_vectors_stable (hsm : ∀ w ∈ W, SmoothOnG ε w)
 lemma lie_operator_word_mem_filtration (hsm : ∀ w ∈ W, SmoothOnG ε w)
     (hstab : ∀ w ∈ W, ∀ i j : Fin n, ε i = ε j → ∃ w' ∈ W, ∀ g, inUJ ε g → Eab ε i j w g = w' g)
     {c d : Fin n} (hcd : ε c = ε d) {m : SmoothFunctionsModGroup ε} (hm : m ∈ weightVectorsQuotient ε W) :
-    ∀ w : List (Fin n × Fin n), lieOperatorQuotient ε c d (wordActionQuotient ε w m) ∈ wordFiltration ε W w.length
-  | [] => word_mem_filtration (w := []) (weight_vectors_stable hsm hstab hm hcd) le_rfl
-  | p :: w => by
-    have ih := lie_operator_word_mem_filtration hsm hstab hcd hm w
+    ∀ w : List (Fin n × Fin n), lieOperatorQuotient ε c d (wordActionQuotient ε w m) ∈ wordFiltration ε W w.length := by
+  intro w
+  induction w with
+  | nil => exact word_mem_filtration (w := []) (weight_vectors_stable hsm hstab hm hcd) le_rfl
+  | cons p w ih =>
     have hgl := lie_operators_gl_relations (ε := ε) c d p.1 p.2
     have key : lieOperatorQuotient ε c d (lieOperatorQuotient ε p.1 p.2 (wordActionQuotient ε w m)) =
         lieOperatorQuotient ε p.1 p.2 (lieOperatorQuotient ε c d (wordActionQuotient ε w m)) +

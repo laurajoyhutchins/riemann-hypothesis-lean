@@ -1,6 +1,48 @@
-import Mathlib
-import Development.ResolutionOfSingularities.Foundations.Blowup.AffineBlowup
-import Development.ResolutionOfSingularities.Foundations.Blowup.ReesGrading
+module
+
+public import Development.ResolutionOfSingularities.Foundations.Blowup.AffineBlowup
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 open CategoryTheory AlgebraicGeometry
 
 noncomputable section
@@ -53,6 +95,7 @@ theorem exists_algebraMap_eq_polynomialEvalInvSelf (I : Ideal R) (φ : R →+* S
       Polynomial.eval₂
         (((algebraMap S (Localization.Away s)) : S →+* Localization.Away s).comp φ)
         (Localization.Away.invSelf s) (p : Polynomial R) := rfl
+
   rw [map_sum, hEval, Polynomial.eval₂_eq_sum_range]
   refine Finset.sum_congr rfl fun i _ => ?_
   rw [RingHom.comp_apply, hc i, map_mul, map_pow, mul_assoc, ← mul_pow,
@@ -70,7 +113,7 @@ theorem algebraMap_reesAlgebraLiftFun (I : Ideal R) (φ : R →+* S) (s : S)
       polynomialEvalInvSelf φ s (p : Polynomial R) :=
   (exists_algebraMap_eq_polynomialEvalInvSelf I φ s hI p).choose_spec
 
-private theorem reesAlgebraLiftFun_one (I : Ideal R) (φ : R →+* S) (s : S)
+theorem reesAlgebraLiftFun_one (I : Ideal R) (φ : R →+* S) (s : S)
     (hI : Ideal.map φ I = Ideal.span {s}) (hs : s ∈ nonZeroDivisors S) :
     reesAlgebraLiftFun I φ s hI hs 1 = 1 := by
   have hinj : Function.Injective (algebraMap S (Localization.Away s)) :=
@@ -79,7 +122,7 @@ private theorem reesAlgebraLiftFun_one (I : Ideal R) (φ : R →+* S) (s : S)
   rw [algebraMap_reesAlgebraLiftFun I φ s hI hs 1]
   simp
 
-private theorem reesAlgebraLiftFun_mul (I : Ideal R) (φ : R →+* S) (s : S)
+theorem reesAlgebraLiftFun_mul (I : Ideal R) (φ : R →+* S) (s : S)
     (hI : Ideal.map φ I = Ideal.span {s}) (hs : s ∈ nonZeroDivisors S)
     (p q : ↥(reesAlgebra I)) :
     reesAlgebraLiftFun I φ s hI hs (p * q) = reesAlgebraLiftFun I φ s hI hs p * reesAlgebraLiftFun I φ s hI hs q := by
@@ -94,7 +137,7 @@ private theorem reesAlgebraLiftFun_mul (I : Ideal R) (φ : R →+* S) (s : S)
       = (p : Polynomial R) * (q : Polynomial R) := rfl
   rw [map_mul, algebraMap_reesAlgebraLiftFun, algebraMap_reesAlgebraLiftFun, algebraMap_reesAlgebraLiftFun, hcoe, map_mul]
 
-private theorem reesAlgebraLiftFun_zero (I : Ideal R) (φ : R →+* S) (s : S)
+theorem reesAlgebraLiftFun_zero (I : Ideal R) (φ : R →+* S) (s : S)
     (hI : Ideal.map φ I = Ideal.span {s}) (hs : s ∈ nonZeroDivisors S) :
     reesAlgebraLiftFun I φ s hI hs 0 = 0 := by
   have hinj : Function.Injective (algebraMap S (Localization.Away s)) :=
@@ -103,7 +146,7 @@ private theorem reesAlgebraLiftFun_zero (I : Ideal R) (φ : R →+* S) (s : S)
   rw [algebraMap_reesAlgebraLiftFun I φ s hI hs 0]
   simp
 
-private theorem reesAlgebraLiftFun_add (I : Ideal R) (φ : R →+* S) (s : S)
+theorem reesAlgebraLiftFun_add (I : Ideal R) (φ : R →+* S) (s : S)
     (hI : Ideal.map φ I = Ideal.span {s}) (hs : s ∈ nonZeroDivisors S)
     (p q : ↥(reesAlgebra I)) :
     reesAlgebraLiftFun I φ s hI hs (p + q) = reesAlgebraLiftFun I φ s hI hs p + reesAlgebraLiftFun I φ s hI hs q := by
@@ -116,7 +159,7 @@ private theorem reesAlgebraLiftFun_add (I : Ideal R) (φ : R →+* S) (s : S)
   apply hinj
   have hcoe : ((p + q : ↥(reesAlgebra I)) : Polynomial R)
       = (p : Polynomial R) + (q : Polynomial R) := rfl
-  rw [map_add, algebraMap_reesAlgebraLiftFun, algebraMap_reesAlgebraLiftFun, algebraMap_reesAlgebraLiftFun, hcoe, map_add]
+  rw [map_add (f := _), algebraMap_reesAlgebraLiftFun, algebraMap_reesAlgebraLiftFun, algebraMap_reesAlgebraLiftFun, hcoe, map_add (f := _)]
 
 def reesAlgebraLift (I : Ideal R) (φ : R →+* S) (s : S)
     (hI : Ideal.map φ I = Ideal.span {s}) (hs : s ∈ nonZeroDivisors S) :

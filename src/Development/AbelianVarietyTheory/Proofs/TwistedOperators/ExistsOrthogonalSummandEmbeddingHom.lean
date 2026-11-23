@@ -1,9 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.ExistsRealFnNeZero
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.UnitaryEquivEqSmul
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IntegralEqFinClSumAvg
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IsMeasDefOfIsTermVol
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsContinuousAdelicUnitaryEmbedding
+module
+
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.ExistsRealFnNeZero
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.UnitaryEquivEqSmul
+public import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.ClassFunctionSumIntegral
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.OnePowNotMemHeightOneAsIdeal
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsContinuousAdelicUnitaryEmbedding
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IsMeasDefOfIsTermVol
+import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.IdemElt
+public import Formalism.LocalToGlobal.IndefiniteReal.LevelTypeEquivalence.LevelADef
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicLocalCompactness.T2SpaceTensorProductFiniteExtension
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.L2.Theta Formalism.IndefR Formalism.IndefR.Datum Formalism.IndefR.Links Formalism.L2.DIV
 open IsDedekindDomain NumberField MeasureTheory GlobalTheory.ChiGrid GlobalTheory.FunObj GlobalTheory.RealType
@@ -47,7 +91,7 @@ theorem exists_avg_form {H : Type} [Group H] [TopologicalSpace H] [IsTopological
     (hc v v').integrable_of_hasCompactSupport (isClosed_tsupport _).isCompact
   refine ⟨LinearMap.mk₂ ℂ (fun v v' => ∫ k, Λ (ρ k⁻¹ v) * Λ' (ρ' k⁻¹ v') ∂κ) ?_ ?_ ?_ ?_, fun v v' => rfl, ?_⟩
   · intro v₁ v₂ v'
-    simp only [map_add, add_mul]
+    simp only [map_add (f := _), add_mul]
     exact integral_add (hint _ _) (hint _ _)
   · intro c v v'
     simp only [map_smul, smul_eq_mul]
@@ -56,7 +100,7 @@ theorem exists_avg_form {H : Type} [Group H] [TopologicalSpace H] [IsTopological
     funext k
     ring
   · intro v v₁ v₂
-    simp only [map_add, mul_add]
+    simp only [map_add (f := _), mul_add]
     exact integral_add (hint _ _) (hint _ _)
   · intro c v v'
     simp only [map_smul, smul_eq_mul]
@@ -81,8 +125,8 @@ theorem exists_orthogonal_summand_embedding_hom {A B : HSp D} {c : ℕ} {ε : D.
   refine ⟨s, hs, fun h => ?_, hrat⟩
   exact ((hrel h _).1 ((embRel_iff d h _).2 rfl))
 
-variable (G) in
 
+variable (G) in
 theorem isV_last : (G.node (.grid D.R.m D.R.m)).IsV (rankV D D.R.m D.R.m) 0 := by
   have h := G.isV (X := .grid D.R.m D.R.m) ⟨le_rfl, le_rfl⟩ (by
     intro j hj
@@ -91,12 +135,12 @@ theorem isV_last : (G.node (.grid D.R.m D.R.m)).IsV (rankV D D.R.m D.R.m) 0 := b
     omega)
   simpa [Node.neg, Node.rank] using h
 
-variable (G) in
 
+variable (G) in
 theorem isDefinite_last : IsDefiniteSpace (G.V (.grid D.R.m D.R.m)) := GlobalTheory.RowClaim.TermVolDef.isDefiniteSpace_of_isV (isV_last G)
 
-variable (G) in
 
+variable (G) in
 theorem one_le_rank_last : 1 ≤ (G.V (.grid D.R.m D.R.m)).rank := by
   rw [(isV_last G).rank, rankV, sLen]
   have := D.R.two_le_m
@@ -105,13 +149,13 @@ private theorem isBlock_embGL' {n N : ℕ} (hN : N = n + 1) (g : GL (Fin n) ℂ)
     GlobalTheory.BranchFormula.IsBlock hN (Formalism.MainNotions.PrimeDegreeVariant.embGL ℂ n N hN.symm g : Matrix (Fin N) (Fin N) ℂ)
       (g : Matrix (Fin n) (Fin n) ℂ) 1 := by
   refine ⟨fun a b => ?_, fun a => ⟨?_, ?_⟩, ?_⟩
-  · rw [GlobalTheory.Branching.embGL_apply, dif_pos ⟨a.2, b.2⟩]
+  · rw [GlobalTheory.Branching.embGL_apply, dite_eq_left ⟨a.2, b.2⟩]
     rfl
-  · rw [GlobalTheory.Branching.embGL_apply, dif_neg (fun h => absurd h.2 (lt_irrefl _)),
+  · rw [GlobalTheory.Branching.embGL_apply, dite_eq_right (fun h => absurd h.2 (lt_irrefl _)),
       if_neg (fun h => (ne_of_lt a.2) (congrArg Fin.val h))]
-  · rw [GlobalTheory.Branching.embGL_apply, dif_neg (fun h => absurd h.1 (lt_irrefl _)),
+  · rw [GlobalTheory.Branching.embGL_apply, dite_eq_right (fun h => absurd h.1 (lt_irrefl _)),
       if_neg (fun h => (ne_of_lt a.2) (congrArg Fin.val h).symm)]
-  · rw [GlobalTheory.Branching.embGL_apply, dif_neg (fun h => absurd h.1 (lt_irrefl _)), if_pos rfl]
+  · rw [GlobalTheory.Branching.embGL_apply, dite_eq_right (fun h => absurd h.1 (lt_irrefl _)), if_pos rfl]
 
 variable {θ : InfFam D} (hθ : IsInfFam θ) (N : Std G U)
 include hθ

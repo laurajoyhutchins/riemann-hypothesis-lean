@@ -1,5 +1,44 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsPairingStdP
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsPairingStdP
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.Divisors.MatchingOfParts
+
+@[expose] public section
 
 open scoped SchwartzMap Matrix TensorProduct Classical
 open NumberField IsDedekindDomain MeasureTheory Filter Topology Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes
@@ -19,14 +58,15 @@ theorem trace_evI_heis {F : Type} [Field F] [NumberField F] [Invertible (2 : AF 
       trP F κ (locV x) (locV b) + trP F κ (locV a) (locV b) / 2 := by
   have hdot : ∀ y : κ → AF F, evIHom F (y ⬝ᵥ b) = ∑ i, locV y i * locV b i := by
     intro y
+
     simp only [dotProduct, map_sum, map_mul, locV, evI_eq_evIHom]
   have h2 : ∀ t : AF F, evIHom F (⅟(2 : AF F) * t) = (1 / 2 : ℝ) • evIHom F t := by
     intro t
     have h : (2 : ℝ) • evIHom F (⅟(2 : AF F) * t) = evIHom F t := by
-      rw [two_smul, ← map_add, ← two_mul, ← mul_assoc, mul_invOf_self, one_mul]
+      rw [two_smul, ← map_add (f := _), ← two_mul, ← mul_assoc, mul_invOf_self, one_mul]
     rw [← h, smul_smul]
     norm_num
-  rw [evI_eq_evIHom, map_add, h2, hdot, hdot, map_add, map_smul, trP, trP, smul_eq_mul]
+  rw [evI_eq_evIHom, map_add (f := _), h2, hdot, hdot, map_add (f := _), map_smul, trP, trP, smul_eq_mul]
   ring
 
 theorem acts_rho_of_at_inf : ∀ {F : Type} [Field F] [NumberField F] (ψ : AddChar (AF F) ℂ), IsStd ψ →
@@ -45,7 +85,7 @@ theorem acts_rho_of_at_inf : ∀ {F : Type} [Field F] [NumberField F] (ψ : AddC
     rw [smul_eq_mul, mul_add, h, mul_left_comm, h, mul_zero, add_zero]
   have hloc : (fun i => evI F ((x + (dc.e w).1) i)) = locV x + locV (dc.e w).1 := by
     funext i
-    simp only [Pi.add_apply, locV, evI_eq_evIHom, map_add]
+    simp only [Pi.add_apply, locV, evI_eq_evIHom, map_add (f := _)]
   simp only [Darboux.rho, schr, tens]
   rw [hψ.2.2 _ ht, trace_evI_heis, hr.1 x _ ha, hf, hloc, schrF]
   exact (mul_assoc _ _ _).symm

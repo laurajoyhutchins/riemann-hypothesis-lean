@@ -1,5 +1,44 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.GeneralizedEigenspaces.SmoothDepth.ContCoef
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.SplitPlaceUnitaryLocalPointsEquivGL
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.GeneralizedEigenspaces.SmoothDepth.ContCoef
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.ContinuousMapPFin
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.SplitPlaceUnitaryLocalPointsEquivGL
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 open NumberField IsDedekindDomain ValuativeRel GlobalTheory.CuspRep GlobalTheory.PRep GlobalTheory.UnitaryBC GlobalTheory.SmGL GlobalTheory.SplitWeil GlobalTheory.LocGL Formalism.BasicNotions
 open UpperTheory.V.W (Plc Lp)
@@ -9,7 +48,7 @@ attribute [local instance] GlobalTheory.LocalData.complRel GlobalTheory.LocalDat
 open UpperTheory.V.Z.Sym.Al
 
 private theorem exists_finPart {L : Type} [Field L] [NumberField L] [IsCMField L] {n : ℕ} :
-    ∃ p : UA L n → finU L n, Continuous p ∧ p 1 = 1 ∧ ∀ x, (p x : UA L n)⁻¹ * x ∈ infU L n := by
+    ∃ p : UA L n → finU (E := L) (n := n), Continuous p ∧ p 1 = 1 ∧ ∀ x, (p x : UA L n)⁻¹ * x ∈ infU L n := by
   have hfin : Continuous (finGL L n) :=
     Continuous.units_map _ (continuous_const.add (continuous_id.matrix_map
       (continuous_const.prodMk continuous_id : Continuous fun x : Af L => ((0, x) : InfiniteAdeleRing L × Af L))))
@@ -40,7 +79,7 @@ private theorem continuous_infC {L : Type} [Field L] [NumberField L] [IsCMField 
   exact continuous_pi fun v => hτ v.embedding
 
 private theorem infC_of_fin {L : Type} [Field L] [NumberField L] [IsCMField L] {n : ℕ} {k : UA L n}
-    (hk : k ∈ finU L n) : infC L n k = 1 :=
+    (hk : k ∈ finU (E := L) (n := n)) : infC L n k = 1 :=
   funext fun v => by
     change Matrix.GeneralLinearGroup.map (coord v.embedding) (cInf k) = 1
     rw [MonoidHom.mem_ker.1 hk, map_one]
@@ -50,10 +89,10 @@ theorem UpperTheory.V.Z.Sym.Al.coefAut :
         ∀ f : V →ₗ[ℂ] ℂ, IsAutFormU (f ∘ φ) := by
   intro L _ _ _ n V _ _ _ R hR U hU φ hφ f
   obtain ⟨p, hp, hp1, hp2⟩ := exists_finPart (L := L) (n := n)
-  have hU1 : {x : finU L n | (x : UA L n) ∈ U} ∈ nhds (1 : finU L n) := hU.2.mem_nhds U.one_mem
+  have hU1 : {x : finU (E := L) (n := n) | (x : UA L n) ∈ U} ∈ nhds (1 : finU (E := L) (n := n)) := hU.2.mem_nhds U.one_mem
 
   have hsm : ∀ᶠ z in nhds (1 : UA L n), ∀ g, φ (g * z) = R (infC L n z⁻¹) (φ g) := by
-    have hUp : {x : finU L n | (x : UA L n) ∈ U} ∈ nhds (p 1) := by rwa [hp1]
+    have hUp : {x : finU (E := L) (n := n) | (x : UA L n) ∈ U} ∈ nhds (p 1) := by rwa [hp1]
     filter_upwards [(hp.tendsto 1).eventually hUp] with z hz g
     have h1 := hφ.inf _ (hp2 z) (g * (p z : UA L n))
     rw [hφ.level _ hz g, mul_assoc, mul_inv_cancel_left] at h1
@@ -72,7 +111,7 @@ theorem UpperTheory.V.Z.Sym.Al.coefAut :
     have e := hg g0
     rw [mul_inv_cancel_left, mul_inv_rev, inv_inv] at e
     rw [Function.comp_apply, e]
-  · refine isOpen_stab_of_mem_nhds ((RU L n).comp (finU L n).subtype) _ ?_
+  · refine isOpen_stab_of_mem_nhds ((RU L n).comp (finU (E := L) (n := n)).subtype) _ ?_
     filter_upwards [hU1] with k hk
     funext g
     exact congrArg f (hφ.level _ hk g)

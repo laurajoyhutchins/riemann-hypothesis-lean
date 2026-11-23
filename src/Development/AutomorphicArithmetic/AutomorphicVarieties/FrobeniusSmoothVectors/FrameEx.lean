@@ -1,20 +1,59 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.FrobeniusSmoothVectors.EtaleSimplicialCochainSchemeSectionExtensionNatu
-import Development.AutomorphicArithmetic.AutomorphicVarieties.FrobeniusSmoothVectors.AuxwEx
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.FrobeniusSmoothVectors.FrobeniusSplitPrimeDatum
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.FrobeniusSmoothVectors.AuxwEx
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.FrobeniusSmoothVectors.ClrkTr
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.FrobeniusSmoothVectors.EtaleSimplicialCochainSchemeSectionExtensionNatu
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.FrobeniusSmoothVectors.FieldEx
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.FrobeniusSmoothVectors.FrobeniusGaloisFieldFourCompatibility
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.FrobeniusSmoothVectors.LinkEx
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.FrobeniusSmoothVectors.OkBasic
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.FrobeniusSmoothVectors.RankLeOfCardLe
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.FrobeniusSmoothVectors.Strict
 import Development.AutomorphicArithmetic.AutomorphicVarieties.FrobeniusSmoothVectors.Ufacts
-import Development.AutomorphicArithmetic.AutomorphicVarieties.FrobeniusSmoothVectors.FieldEx
-import Development.AutomorphicArithmetic.AutomorphicVarieties.FrobeniusSmoothVectors.LinkEx
-import Development.AutomorphicArithmetic.AutomorphicVarieties.FrobeniusSmoothVectors.OkBasic
-import Development.AutomorphicArithmetic.AutomorphicVarieties.FrobeniusSmoothVectors.Strict
-import Development.AutomorphicArithmetic.AutomorphicVarieties.FrobeniusSmoothVectors.FrobeniusGaloisFieldFourCompatibility
-import Development.AutomorphicArithmetic.AutomorphicVarieties.FrobeniusSmoothVectors.RankLeOfCardLe
-import Development.AutomorphicArithmetic.AutomorphicVarieties.FrobeniusSmoothVectors.ClrkTr
-import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisCochains.Imports
-import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisCochains.ToZModEqOne
-import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisCochains.EqOneOfPow
-import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisCochains.ResH1SurjectiveOfIsomorphism
-import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisCochains.B1p
-import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisCochains.PsiLocalPairEqLocal
-import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisCochains.CastToZModPowOne
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisCochains.B1p
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisCochains.CastToZModPowOne
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisCochains.EqOneOfPow
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisCochains.Imports
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisCochains.PsiLocalPairEqLocal
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisCochains.ResH1SurjectiveOfIsomorphism
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisCochains.ToZModEqOne
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 attribute [local instance 10000] DivisionSemiring.to_moduleIsTorsionFree
 
@@ -26,7 +65,7 @@ private theorem cycMod_emb (F Ω : Type) [Field F] [NumberField F] [Field Ω] [C
 private theorem one_of_cast (l : ℕ) [Fact l.Prime] (k : Type) [Field k] [CharP k l] (x : ℤ_[l])
     (h : ZMod.castHom (dvd_refl l) k (PadicInt.toZMod x) = 1) : PadicInt.toZModPow 1 x = 1 := by
   have h1 : x - 1 ∈ RingHom.ker (PadicInt.toZMod : ℤ_[l] →+* ZMod l) := by
-    rw [RingHom.mem_ker, map_sub, map_one, sub_eq_zero]
+    rw [RingHom.mem_ker, RingHom.map_sub, map_one, sub_eq_zero]
     exact (ZMod.castHom (dvd_refl l) k).injective (h.trans (map_one _).symm)
   rw [PadicInt.ker_toZMod, PadicInt.maximalIdeal_eq_span_p, ← pow_one (l : ℤ_[l]), ← PadicInt.ker_toZModPow,
     RingHom.mem_ker, map_sub, map_one, sub_eq_zero] at h1

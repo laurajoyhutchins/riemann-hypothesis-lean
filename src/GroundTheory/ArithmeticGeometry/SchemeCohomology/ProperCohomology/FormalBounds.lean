@@ -1,6 +1,50 @@
-import Mathlib
-import GroundTheory.ArithmeticGeometry.SchemeCohomology.ProperCohomology.FormalCechSmul
-import GroundTheory.ArithmeticGeometry.SchemeCohomology.ProperCohomology.FormalAlgebra
+module
+
+public import GroundTheory.ArithmeticGeometry.SchemeCohomology.ProperCohomology.FormalAlgebra
+public import GroundTheory.ArithmeticGeometry.SchemeCohomology.ProperCohomology.FormalCechLemmas
+public import GroundTheory.ArithmeticGeometry.SchemeCohomology.ProperCohomology.FormalCechSmul
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Arith.SchemeCoh
@@ -43,7 +87,7 @@ def reesΦ : cechH (reesPre I F) 𝔘 p →ₗ[reesAlgebra I]
   map_add' x y := by
     apply PolynomialModule.ext
     ext n
-    simp only [reesCoefPoly_coeff, PolynomialModule.coeff_add, Finsupp.add_apply, map_add]
+    simp only [reesCoefPoly_coeff, PolynomialModule.coeff_add, Finsupp.add_apply, map_add (f := _)]
   map_smul' r x := by
     apply PolynomialModule.ext
     ext N
@@ -69,12 +113,12 @@ lemma smul_cechK_le (n : ℕ) : I • cechK I 𝔘 p (F := F) n ≤ cechK I 𝔘
   refine ⟨cechH.linearMap 𝔘 A (idealPowMul I F a ha1) p z, ?_⟩
   have h := congrArg (fun f => f.hom) (show modulesAbMap (idealPowMul I F a ha1) ≫
       modulesAbMap (idealPowι I F (n + 1)) =
-      modulesAbMap (idealPowι I F n) ≫ smulAbRingHom F (algebraMap A Γ(X, ⊤) a) by
+      modulesAbMap (idealPowι I F n) ≫ (smulAbRingHom F (algebraMap A Γ(X, ⊤) a)).asHom by
     rw [← modulesAbMap_comp, idealPowMul_ι, modulesAbMap_comp]
     rfl)
   change cechHMap 𝔘 (modulesAbMap (idealPowι I F (n + 1))).hom p
       (cechHMap 𝔘 (modulesAbMap (idealPowMul I F a ha1)).hom p z) =
-    cechHMap 𝔘 (smulAbRingHom F (algebraMap A Γ(X, ⊤) a)).hom p
+    cechHMap 𝔘 (smulAbRingHom F (algebraMap A Γ(X, ⊤) a)).asHom.hom p
       (cechHMap 𝔘 (modulesAbMap (idealPowι I F n)).hom p z)
   rw [← cechHMap_comp, ← cechHMap_comp]
   exact congrArg (fun f => cechHMap 𝔘 f p z) h
@@ -92,6 +136,7 @@ lemma range_reesΦ :
     refine ⟨∑ n ∈ P.coeff.support, (reesIncFam I hF 𝔘 hU n).cechH p (y n), ?_⟩
     apply PolynomialModule.ext
     ext k
+
     rw [reesΦ_coeff, map_sum]
     simp_rw [reesCoefFam_reesIncFam]
     rw [Finset.sum_ite_eq']
@@ -99,8 +144,8 @@ lemma range_reesΦ :
     · exact hy k
     · exact (Finsupp.notMem_support_iff.1 hk).symm
 
-include hF hU in
 
+include hF hU in
 theorem exists_cechK_eq_pow_smul [IsProper (X ↘ Spec (.of A))] (hUtop : iSup 𝔘 = ⊤) :
     ∃ c, ∀ n, cechK I 𝔘 p (F := F) (n + c) = I ^ n • cechK I 𝔘 p c := by
   refine exists_eq_pow_smul_of_fg I (smul_cechK_le I 𝔘 p) ?_

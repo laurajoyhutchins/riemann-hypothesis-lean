@@ -1,4 +1,50 @@
-import Formalism.GradedWeylDivisibility.FinalD
+module
+
+public import Formalism.GradedWeylDivisibility.StatementB
+public import Formalism.GradedWeylDivisibility.FinalB
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MvPolynomial
 
@@ -50,7 +96,7 @@ def intQ (r n : ℕ) : MvPolynomial (Fin r × Fin n) ℤ →ₗ[ℤ] MvPolynomia
 def CoeffWord : Prop :=
   ∀ (R : Type) [CommRing R] (r n : ℕ) (ν : Fin n → ℕ) (F : MvPolynomial (Fin r × Fin n) R) (e : Fin r × Fin n →₀ ℕ),
     IsWeightedHomogeneous (colW r n) F ν → LowerTri e → (∀ s : Fin n, ∑ a : Fin r, e (a, s) = ν s) →
-      coeff e F = eval (idFrame R r n) (applyWord R (wordOf e) F)
+      AddMonoidAlgebra.coeff F e = eval (idFrame R r n) (applyWord R (wordOf e) F)
 
 def FockQHW : Prop :=
   ∀ (r n : ℕ) (hn : n ≤ r) (ν : Fin n → ℕ), Antitone ν → ∀ F ∈ dualWeyl ℚ r n ν,
@@ -62,7 +108,7 @@ def FockQWordAdj : Prop :=
 
 def LowerTriIntegral : Prop :=
   ∀ (r n : ℕ) (ν : Fin n → ℕ) (Q : MvPolynomial (Fin r × Fin n) ℚ), Q ∈ dualWeyl ℚ r n ν →
-    (∀ e : Fin r × Fin n →₀ ℕ, LowerTri e → ∃ z : ℤ, coeff e Q = z) →
+    (∀ e : Fin r × Fin n →₀ ℕ, LowerTri e → ∃ z : ℤ, AddMonoidAlgebra.coeff Q e = z) →
       ∃ Q' : MvPolynomial (Fin r × Fin n) ℤ, Q = intQ r n Q'
 
 def NablaEqDualWeyl : Prop :=
@@ -77,15 +123,7 @@ def FockQRowAct : Prop :=
   ∀ (r n : ℕ) (g : Matrix (Fin r) (Fin r) ℚ) (P Q : MvPolynomial (Fin r × Fin n) ℚ),
     fockQ (rowAct ℚ g P) Q = fockQ P (rowAct ℚ g.transpose Q)
 
-def NablaLDualWeylL : Prop :=
-  ∀ (r n : ℕ) (hn : n ≤ r) (ν : Fin n → ℕ), Antitone ν → ∀ g : Matrix (Fin r) (Fin r) ℚ, IsUnit g.det →
-    ∀ Q : MvPolynomial (Fin r × Fin n) ℚ,
-      Q ∈ nablaL ℤ ℚ r n ν (g⁻¹).transpose ↔
-        (Q ∈ dualWeyl ℚ r n ν ∧ ∀ P ∈ weyl ℤ r n hn ν,
-          ∃ z : ℤ, fockQ (rowAct ℚ g⁻¹ (intQ r n P)) Q = z * fockQ (hw ℚ hn ν) (hw ℚ hn ν))
-
 def NablaEqDualWeylOf : Prop := CoeffWord → FockQHW → FockQWordAdj → LowerTriIntegral → NablaEqDualWeyl
 def WeylEqDualNablaOf : Prop := NablaEqDualWeyl → WeylEqDualNabla
-def NablaLDualWeylLOf : Prop := NablaEqDualWeyl → FockQRowAct → NablaLDualWeylL
 
 end Formalism.GradedWeylDivisibility

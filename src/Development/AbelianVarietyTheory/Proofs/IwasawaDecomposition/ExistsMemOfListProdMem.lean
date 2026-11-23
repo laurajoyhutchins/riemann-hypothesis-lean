@@ -1,6 +1,55 @@
-import Mathlib
-import Formalism.LocalToGlobal.IndefiniteReal.GramCEqTranspose
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsSmulMemSpanIntegers
+module
+
+public import Formalism.LocalToGlobal.IndefiniteReal.GramCEqTranspose
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsSmulMemSpanIntegers
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain
 
@@ -130,7 +179,7 @@ theorem exists_pow_smul_mem_span (hL : WL →ₗ[LL] WL) (T : Finset WL) (hT : �
     induction hfs using Submodule.span_induction with
     | mem t ht => exact hnf t ht n (Finset.le_sup ht)
     | zero => rw [map_zero, smul_zero]; exact zero_mem _
-    | add x y _ _ hx hy => rw [map_add, smul_add]; exact add_mem hx hy
+    | add x y _ _ hx hy => rw [map_add (f := _), smul_add]; exact add_mem hx hy
     | smul a x _ hx =>
       rw [← algebraMap_smul Ks a x, hks, algebraMap_smul, smul_comm]
       exact A.MK.smul_mem a hx
@@ -139,7 +188,7 @@ theorem exists_pow_smul_mem_span (hL : WL →ₗ[LL] WL) (T : Finset WL) (hT : �
   induction hx using Submodule.span_induction with
   | mem f hf => exact Submodule.subset_span (h1 f hf)
   | zero => rw [map_zero, smul_zero]; exact zero_mem _
-  | add x y _ _ hx hy => rw [map_add, smul_add]; exact add_mem hx hy
+  | add x y _ _ hx hy => rw [map_add (f := _), smul_add]; exact add_mem hx hy
   | smul b x _ hx =>
     rw [LinearMap.map_smul_of_tower, smul_comm]
     exact Submodule.smul_mem _ b hx
@@ -151,14 +200,10 @@ section Prime
 variable {E : Type} [Field E] [NumberField E]
 
 theorem exists_mem_of_list_prod_mem (P : HeightOneSpectrum (𝓞 E)) :
-    ∀ l : List (𝓞 E), l.prod ∈ P.asIdeal → ∃ x ∈ l, x ∈ P.asIdeal
-  | [], h => absurd ((Ideal.eq_top_iff_one _).2 (by simpa using h)) P.isPrime.ne_top
-  | a :: l, h => by
-    rw [List.prod_cons] at h
-    rcases P.isPrime.mem_or_mem h with h | h
-    · exact ⟨a, List.mem_cons_self, h⟩
-    · obtain ⟨x, hx, hxP⟩ := exists_mem_of_list_prod_mem P l h
-      exact ⟨x, List.mem_cons_of_mem a hx, hxP⟩
+    ∀ l : List (𝓞 E), l.prod ∈ P.asIdeal → ∃ x ∈ l, x ∈ P.asIdeal := by
+  intro l
+  simpa only [Multiset.prod_coe, Multiset.mem_coe] using
+    (P.isPrime.multiset_prod_mem_iff_exists_mem (l : Multiset (𝓞 E))).mp
 
 theorem exists_prime_dvd_card (P : HeightOneSpectrum (𝓞 E)) :
     ∃ p : ℕ, p.Prime ∧ (p : 𝓞 E) ∈ P.asIdeal ∧ p ∣ Nat.card (𝓞 E ⧸ P.asIdeal) := by

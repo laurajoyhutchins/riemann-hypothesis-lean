@@ -1,6 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.ModuliSpaces.FiniteHomogeneousInf
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ProjectiveCokerOfIsLocallyConstantFinrankRange
+module
+
+public import Development.AbelianVarietyTheory.Definitions.ModuliSpaces.FiniteHomogeneousInf
+public import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.MapSpanBaseChangeEquivSubmoduleOf
+public import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.ProjectiveOfIsLocallyConstantFinrankFiber
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ProjectiveCokerOfIsLocallyConstantFinrankRange
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 open MvPolynomial Module
 open Function (Injective)
@@ -96,8 +145,6 @@ def formsBasis (R σ : Type) [CommRing R] (e : ℕ) :
   (basisRestrictSupport R {m : σ →₀ ℕ | m.degree = e}).map
     (LinearEquiv.ofEq _ _ (homogeneousSubmodule_eq_finsupp_supported σ R e).symm)
 
-theorem forms_free (e : ℕ) : Module.Free R (homogeneousSubmodule σ R e) := .of_basis (formsBasis R σ e)
-
 theorem forms_finite [Finite σ] (e : ℕ) : Module.Finite R (homogeneousSubmodule σ R e) :=
   Module.Finite.iff_fg.mpr (homogeneousSubmodule_fg _ _ _)
 
@@ -151,8 +198,7 @@ theorem map_cmp_ker_ev [Finite Hh] (B : Type) [CommRing B] [Algebra R B] (d : �
       eval (fun i => algebraMap R B (p h i)) (cmp B d z) := by
     intro z h
     induction z with
-    | zero => simp
-    | add x y hx hy => simp only [map_add, Pi.add_apply, hx, hy]
+    | add x y hx hy => simp only [map_add (f := _), Pi.add_apply, hx, hy]
     | tmul b F =>
       rw [cmp_tmul, smul_eval, LinearMap.baseChange_tmul, TensorProduct.piScalarRight_apply,
         TensorProduct.piScalarRightHom_tmul]
@@ -295,7 +341,6 @@ theorem map_vanIdeal_of_const_away [IsReduced R] [Finite σ] [Finite Hh] (d : �
   rw [← hx']
   convert h1 using 2
   · exact RingHom.ext fun F => (map_map _ _ F).symm
-  · rfl
 
 theorem dimDeg_eq_of_cutBy {K : Type} [Field K] {I : Ideal (MvPolynomial σ K)} {Q : Polynomial ℚ} {d : ℕ}
     {p : Hh → σ → K} (h : CutBy I Q d p) {e : ℕ} (he : e ≥ d) :

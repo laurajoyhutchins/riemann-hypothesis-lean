@@ -1,5 +1,50 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.LevelChainValuations.LatCDefs
+module
+
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.LevelChainValuations.LatCDefs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+
+@[expose] public section
 
 open GroundTheory.PAdicHodge Formalism.Per6 DividedPowers CrystallineSemistableComparison CrystallineSemistableComparison.Pb CrystallineSemistableComparison.Pb.Lat
 open Polynomial
@@ -114,7 +159,7 @@ theorem mem_sub_of_root (l M c m : ℕ) (hl : l ≠ 0) (hM : 2 * c ≤ M) (hnil 
   obtain ⟨z, hz⟩ := exists_root (E.map g) (g a) ((l : A f ξ l M) ^ c) yR (g v) (g e) (g w) m
     (hi (by rw [map_pow, hiy, hym, map_zero]))
     (by
-      rw [Polynomial.derivative_map, heval, ← map_mul, huv, map_add, map_mul, map_pow, map_natCast,
+      rw [Polynomial.derivative_map, heval, ← map_mul, huv, map_add (f := _), map_mul, map_pow, map_natCast,
         hξ']
       ring)
     (by rw [heval, hEa, map_mul, hξ'])
@@ -125,7 +170,7 @@ theorem mem_sub_of_root (l M c m : ℕ) (hl : l ≠ 0) (hM : 2 * c ≤ M) (hnil 
   have hu : IsUnit ((E.map f).derivative.eval (f a)) := by
     rw [Polynomial.derivative_map, Polynomial.eval_map, Polynomial.eval₂_at_apply]
     have h1 : f (E.derivative.eval a) * f v = (l : B) ^ c + f ξ * f w := by
-      rw [← map_mul, huv, map_add, map_mul, map_pow, map_natCast]
+      rw [← map_mul, huv, map_add (f := _), map_mul, map_pow, map_natCast]
     have hn : IsNilpotent (f ξ * f w) := ⟨m, by rw [mul_pow, hnil, zero_mul]⟩
     have h2 : IsUnit (f (E.derivative.eval a) * f v) := by
       rw [h1]; exact hn.isUnit_add_left_of_commute (hlB.pow c) (Commute.all _ _)
@@ -135,7 +180,7 @@ theorem mem_sub_of_root (l M c m : ℕ) (hl : l ≠ 0) (hM : 2 * c ≤ M) (hnil 
     exact ⟨m, by rw [hr, mul_pow, hnil, zero_mul]⟩
   have hn2 : IsNilpotent (i b - f a) := by
     have e1 : i b - f a = y0 * ((l : B) ^ c * i z) := by
-      rw [hb, map_add, map_mul, map_mul, map_pow, map_natCast, hig, hiy]; ring
+      rw [hb, map_add (f := _), map_mul, map_mul, map_pow, map_natCast, hig, hiy]; ring
     exact ⟨m, by rw [e1, mul_pow, hym, zero_mul]⟩
   have hαb := root_unique (E.map f) (f a) α (i b) hα hβ hu hn1 hn2
   rw [hαb]

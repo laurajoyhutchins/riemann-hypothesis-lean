@@ -1,5 +1,50 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.TermAttractorConstant.LeadMinorEMulUpper
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.TermDef
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.RelativeEquivalence.DCRelEquivAllHolds
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.TermAttractorConstant.LeadMinorEMulUpper
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.CoassocSimps
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -24,7 +69,7 @@ theorem sum_mem_X (F : FlagG S r T) (c : Fin r → E) :
 
 theorem coefX_sum (F : FlagG S r T) (c : Fin r → E) (i : Fin r) : F.coefX (∑ j, c j • F.e j) i = c i := by
   unfold FlagG.coefX
-  rw [dif_pos (sum_mem_X F c)]
+  rw [dite_eq_left (sum_mem_X F c)]
   rw [F.e_indep.repr_eq (l := Finsupp.equivFunOnFinite.symm c) (x := ⟨_, sum_mem_X F c⟩)
     (by simp [Finsupp.linearCombination_apply, Finsupp.sum_fintype])]
   simp
@@ -51,11 +96,12 @@ theorem coefX_transport (F₁ : FlagG S r T) (F₂ : FlagG S r T') (g : S.V ≃�
       have : v = ∑ j, c j • F₁.e j := by
         apply g.injective
         rw [← hc]
+
         simp [he, map_sum, map_smul]
       rw [this]
       exact sum_mem_X F₁ c
     unfold FlagG.coefX
-    rw [dif_neg hgv, dif_neg hv]
+    rw [dite_eq_right hgv, dite_eq_right hv]
 
 theorem ell_transport (F₁ : FlagG S r T) (F₂ : FlagG S r T') (g : S.V ≃ₗ[E] S.V)
     (hf : ∀ a, F₂.fvec a = g (F₁.fvec a)) (Y : S.V →ₗ[E] S.V) : F₂.ell (cg g Y) = F₁.ell Y := by
@@ -127,7 +173,7 @@ theorem z_mem_perp (F : FlagG S r T) : F.z ∈ perpS S F.X := by
     obtain ⟨i, rfl⟩ := hy
     exact F.z_orth i
   | zero => simp
-  | add y y' _ _ h1 h2 => rw [map_add, LinearMap.add_apply, h1, h2, add_zero]
+  | add y y' _ _ h1 h2 => rw [map_add (f := _), LinearMap.add_apply, h1, h2, add_zero]
   | smul c y _ h => rw [LinearMap.map_smulₛₗ, LinearMap.smul_apply, h, smul_zero]
 
 theorem X_le_Xa_r (F : FlagG S r T) : F.X ≤ F.Xa r := by

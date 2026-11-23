@@ -1,8 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.UnitCharTriangle
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.FirstStandardPairMemberHasThetaFunction
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.FinitePartMemLevelOfThetaDatumNeZero
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.DetIdlVal
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.UnitCharTriangle
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.FrameMatrixWeilPairActionLeftInvStatement
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IdempotentMulEqZeroOfOrthogonal
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.FirstStandardPairMemberHasThetaFunction
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.IndefR Formalism.IndefR.Datum Formalism.IndefR.Links Formalism.L2.Theta IsDedekindDomain NumberField
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
 
@@ -22,17 +65,19 @@ private theorem isIntM_mul {b a c : ℕ} {N : Matrix (Fin b) (Fin a) (Lev.EAf D)
 private theorem inId_mul {b a c : ℕ} {I : Ideal (𝓞 D.host.E)} {N : Matrix (Fin b) (Fin a) (Lev.EAf D)}
     {κ : Matrix (Fin a) (Fin c) (Lev.EAf D)} (hκ : IsIntM κ) (i : Fin b) (hN : ∀ l, GlobalTheory.IndefiniteRowSideFullHecke.UnitCharTriangle.InId I (N i l))
     (j : Fin c) : GlobalTheory.IndefiniteRowSideFullHecke.UnitCharTriangle.InId I ((N * κ) i j) := by
+  choose hInt hId using hN
   have hm : (N * κ) i j ∈ OO := by
     rw [Matrix.mul_apply]
-    exact Subring.sum_mem _ fun l _ => mul_mem (hN l).1 (hκ l j)
+    exact Subring.sum_mem _ fun l _ => mul_mem (hInt l) (hκ l j)
   refine ⟨hm, ?_⟩
-  have e : (⟨(N * κ) i j, hm⟩ : OO) = ∑ l, (⟨N i l, (hN l).1⟩ : OO) * ⟨κ l j, hκ l j⟩ := Subtype.ext (by
-    show (N * κ) i j = _
+  let entry (l : Fin a) : OO := (⟨N i l, hInt l⟩ : OO) * ⟨κ l j, hκ l j⟩
+  have e : (⟨(N * κ) i j, hm⟩ : OO) = ∑ l, entry l := by
+    apply Subtype.ext
+    change (N * κ) i j = (OO).subtype (∑ l, entry l)
     rw [Matrix.mul_apply]
-    push_cast
-    rfl)
+    exact (map_sum (OO).subtype entry Finset.univ).symm
   rw [e]
-  exact Ideal.sum_mem _ fun l _ => Ideal.mul_mem_right _ _ (hN l).2
+  exact Ideal.sum_mem _ fun l _ => Ideal.mul_mem_right _ _ (hId l)
 
 private theorem topL_mul {b a : ℕ} (N : Matrix (Fin b) (Fin a) (Lev.EAf D)) (κ : Matrix (Fin a) (Fin a) (Lev.EAf D)) :
     topL a (N * κ) = topL a N * κ := by
@@ -73,7 +118,7 @@ private theorem isUnitDet_mul {e : AE D} {S : Finset (Formalism.L2.DIV.Pl D.host
   · rw [_root_.mul_inv_rev, Units.val_mul, map_mul]
     exact mul_mem hy.2.2 hx.2.2
 
-set_option maxHeartbeats 1000000 in
+
 private theorem isUnitDet_div {e : AE D} {S : Finset (Formalism.L2.DIV.Pl D.host.E)} (he : IsIdemSum e S) {k : ℕ}
     {L κ : Matrix (Fin k) (Fin k) (Lev.EAf D)} (hκ : IsIntM κ) {z y : (AE D)ˣ} (hz : IsUnitDet e (L * κ) z)
     (hy : IsUnitDet e κ y) : IsUnitDet e L (z * y⁻¹) := by
@@ -102,10 +147,10 @@ private theorem unitChar_mul (ν : (AE D)ˣ →* Circle) {e : AE D} {S : Finset 
   unfold unitChar
   by_cases hL : ∃ x, IsUnitDet e L x
   · have hLκ : ∃ x, IsUnitDet e (L * κ) x := ⟨_, isUnitDet_mul he hL.choose_spec hy⟩
-    rw [dif_pos hL, dif_pos hLκ, isUnitDet_unique hLκ.choose_spec (isUnitDet_mul he hL.choose_spec hy), map_mul,
+    rw [dite_eq_left hL, dite_eq_left hLκ, isUnitDet_unique hLκ.choose_spec (isUnitDet_mul he hL.choose_spec hy), map_mul,
       _root_.mul_inv_rev, Circle.coe_mul]
   · have hLκ : ¬ ∃ x, IsUnitDet e (L * κ) x := fun ⟨z, hz⟩ => hL ⟨_, isUnitDet_div he hκ hz hy⟩
-    rw [dif_neg hL, dif_neg hLκ, mul_zero]
+    rw [dite_eq_right hL, dite_eq_right hLκ, mul_zero]
 
 private theorem half_act {e : AE D} (S T : HSp D) (g : GA D S) {x : WO S T} (h : IsHalf e x) :
     IsHalf e (actO S T g 1 x) := fun i j => by
@@ -134,8 +179,8 @@ private theorem st_int {n : ℕ} {β k : GL (Fin n) (Lev.EAf D)} (h : k ∈ Form
 end UpperTheory.standardActionStabilizer
 
 open UpperTheory.standardActionStabilizer in
-set_option synthInstance.maxHeartbeats 100000 in
-set_option maxHeartbeats 4000000 in
+
+
 theorem UpperTheory.stdFst_actO_of_mem_stabilizer :
     ∀ (D : D7) (S T : HSp D) (βS : GL (Fin S.rank) (Lev.EAf D)) (βT : GL (Fin T.rank) (Lev.EAf D)) (ν : (AE D)ˣ →* Circle) (e : AE D) (Z : Finset (Formalism.L2.DIV.Pl D.host.E)) (I : Ideal (𝓞 D.host.E)),
       IsIdemSum e Z → ∀ g : GA D S, Lev.finE S g ∈ Formalism.L2.DIV.St βS → ∀ y : (AE D)ˣ,

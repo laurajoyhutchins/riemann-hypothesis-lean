@@ -1,10 +1,60 @@
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.SumInnerBasisSqEqAdjoint
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.AdKMeasurePreserving
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.EigenvectorUnitaryMulStar
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.PBridge
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.PolarBasic
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.DetPPos
+module
+
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.PmatIsHermitian
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+public import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.Countable
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.MeasureTheory.Function.L2Space
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.EigenvectorUnitaryMulStar
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.KSchur
 import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.KinstSecondCountable
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.PBridge
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.PolarBasic
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.SumInnerBasisSqEqAdjoint
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.AdKMeasurePreserving
+
+@[expose] public section
 
 noncomputable section
 
@@ -67,7 +117,7 @@ theorem continuousAt_potential {ε : Fin n → Bool} (lam : Fin n → ℝ) (y : 
     have hc : Continuous (fun X : Matrix (Fin n) (Fin n) ℂ => (Del (NormedSpace.exp X) (i + 1)).re) :=
       Complex.continuous_re.comp ((continuous_leading_minor (i + 1)).comp continuous_matrix_exp)
     exact continuousAt_const.mul (hc.continuousAt.log (leading_minor_exp_re_pos y hi').ne')
-  exact tendsto_finset_sum _ key
+  exact tendsto_finsetSum _ key
 
 theorem continuous_potential_comp {ε : Fin n → Bool} (lam : Fin n → ℝ) {α : Type*} [TopologicalSpace α]
     {M : α → Matrix (Fin n) (Fin n) ℂ} (hM : Continuous M) (hp : ∀ a, ∃ y : PCoord ε → ℂ, M a = pmat y) :
@@ -155,15 +205,16 @@ theorem KType_continuous_op {ε : Fin n → Bool} {Λ : Fin n → ℝ} (T : KTyp
 
 theorem integrable_dk_of_continuous {ε : Fin n → Bool} {E : Type*} [NormedAddCommGroup E] {g : KG ε → E} (hg : Continuous g) :
     Integrable g (dk ε) := by
-  first
-  | exact hg.integrable_of_hasCompactSupport (HasCompactSupport.of_compactSpace g)
-  | exact (BoundedContinuousFunction.mkOfCompact ⟨g, hg⟩).integrable (dk ε)
+  letI := (dk_props ε).1
+  rw [← integrableOn_univ]
+  exact hg.continuousOn.integrableOn_compact isCompact_univ
 
 theorem fF_eq_integral {ε : Fin n → Bool} (lam : Fin n → ℝ) {Λ : Fin n → ℝ} (T : KType ε Λ)
     (X : Matrix (Fin n) (Fin n) ℂ) :
     fF ε lam T X = ((Module.finrank ℂ T.V : ℝ) : ℂ) • ∫ k, ((Real.exp (-Ph lam (toMK k⁻¹ * X * toMK k)) : ℝ) : ℂ) •
       (T.op k * projW T * T.op k⁻¹) ∂(dk ε) := by
-  unfold fF dk
+  delta fF
+  rw [dk_def]
   rw [integral_smul_measure, ← Complex.coe_smul, smul_smul]
   congr 1
   rw [ENNReal.toReal_inv]
@@ -265,7 +316,7 @@ theorem lemma6b {ε : Fin n → Bool} {lam : Fin n → ℝ} (T : KType ε (lowK 
         Finset.sum_le_sum (fun i _ => hv _)
     _ = (Module.finrank ℂ T.V : ℝ) * ∫ k, ∑ i, Real.exp (-Ph lam (toMK k⁻¹ * pmat z * toMK k)) ^ 2 *
           ‖⟪stdOrthonormalBasis ℂ T.V i, T.op k T.w⟫_ℂ‖ ^ 2 ∂(dk ε) := by
-        rw [integral_finset_sum univ (fun i _ => integrable_dk_of_continuous (hterm i)), Finset.mul_sum]
+        rw [MeasureTheory.integral_finsetSum univ (fun i _ => integrable_dk_of_continuous (hterm i)), Finset.mul_sum]
     _ = _ := by
         congr 1
         refine integral_congr_ae (Filter.Eventually.of_forall (fun k => ?_))

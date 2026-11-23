@@ -1,7 +1,50 @@
-import Development.AutomorphicArithmetic.Foundations.Convolution.SplitEigenfunctions.Entire
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.InvOneSubBound
-import GroundTheory.GlobalFields.AnalyticClassNumber.DirichletHecke
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.PairCases
+module
+
+public import Development.AutomorphicArithmetic.Foundations.Convolution.SplitEigenfunctions.Entire
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.InvOneSubBound
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.PairCases
+public import GroundTheory.GlobalFields.AnalyticClassNumber.DirichletHecke
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open NumberField IsDedekindDomain
 open Formalism.L2.Host Formalism.ConjugateSelfDual GlobalTheory.CuspRep UpperTheory.ConvolutionTheory.R2
@@ -82,7 +125,7 @@ private theorem arith (T : ℕ → PowerSeries ℂ) (h0 : ∀ p : ℕ, p.Prime �
       rw [Nat.prod_factorization_pow_eq_self hn]
     simp only [a, if_neg hn, Finsupp.prod]
     rw [norm_prod, ← hprod, Finsupp.prod, Nat.cast_prod, ← Finset.prod_pow]
-    refine Finset.prod_le_prod (fun _ _ => norm_nonneg _) fun p hp => ?_
+    refine Finset.prod_le_prod₀ (fun _ _ => norm_nonneg _) fun p hp => ?_
     have pp : p.Prime := Nat.prime_of_mem_primeFactors (by simpa using hp)
     have h2 : (2 : ℝ) ≤ p := by exact_mod_cast pp.two_le
     refine (hM p pp _).trans ?_
@@ -186,7 +229,7 @@ private noncomputable def Qi (a b c : ℂˣ) : PowerSeries ℂ :=
   (1 - PowerSeries.C ((a * c : ℂˣ) : ℂ) * PowerSeries.X) *
     (1 - PowerSeries.C ((b * c : ℂˣ) : ℂ) * PowerSeries.X) * (1 - PowerSeries.X ^ 2)
 
-variable [IsTotallyComplex E]
+variable [_root_.NumberField.IsTotallyComplex E]
 
 private def Den (P : CuspSub E 2) (χ : HChar ℚ) (v : H.P ℚ) (Q : PowerSeries ℂ) : Prop :=
   (∃ (w w' : H.P E) (α β α' β' : ℂˣ), w ≠ w' ∧ w.under (𝓞 ℚ) = v ∧ w'.under (𝓞 ℚ) = v ∧

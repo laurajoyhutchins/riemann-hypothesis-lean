@@ -1,5 +1,51 @@
-import Mathlib
-import Formalism.SatakeDualWeyl.Statement
+module
+
+public import Formalism.SatakeDualWeyl.Statement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -39,31 +85,15 @@ theorem h_smul_right (x y : n → A) (c : A) : D.h x (c • y) = c * D.h x y := 
 
 theorem h_sub_right (x y y' : n → A) : D.h x (y - y') = D.h x y - D.h x y' := (D.hL x).map_sub y y'
 
-theorem h_zero_right (x : n → A) : D.h x 0 = 0 := (D.hL x).map_zero
-
 theorem h_sum_right {ι : Type} (s : Finset ι) (x : n → A) (y : ι → n → A) :
     D.h x (∑ i ∈ s, y i) = ∑ i ∈ s, D.h x (y i) := map_sum (D.hL x) y s
 
 theorem h_add_left (x x' y : n → A) : D.h (x + x') y = D.h x y + D.h x' y := by
-  simp only [h, hform, Pi.add_apply, map_add, add_mul, Finset.sum_add_distrib]
+  simp only [h, hform, Pi.add_apply, map_add (f := _), add_mul, Finset.sum_add_distrib]
 
 theorem h_smul_left (x y : n → A) (c : A) : D.h (c • x) y = D.σA c * D.h x y := by
   simp only [h, hform, Pi.smul_apply, smul_eq_mul, map_mul, Finset.mul_sum]
   exact Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => by ring
-
-theorem h_zero_left (y : n → A) : D.h 0 y = 0 := by
-  simp [h, hform]
-
-theorem h_sub_left (x x' y : n → A) : D.h (x - x') y = D.h x y - D.h x' y := by
-  simp only [h, hform, Pi.sub_apply, map_sub, sub_mul, Finset.sum_sub_distrib]
-
-theorem h_sum_left {ι : Type} (s : Finset ι) (x : ι → n → A) (y : n → A) :
-    D.h (∑ i ∈ s, x i) y = ∑ i ∈ s, D.h (x i) y := by
-  classical
-  refine Finset.induction_on s ?_ ?_
-  · simp only [Finset.sum_empty, h_zero_left]
-  · intro a s ha ih
-    rw [Finset.sum_insert ha, Finset.sum_insert ha, h_add_left, ih]
 
 structure Hyp : Prop where
   σσ : ∀ x, D.σA (D.σA x) = x
@@ -78,6 +108,7 @@ structure Hyp : Prop where
 variable {D}
 
 theorem h_symm (H : D.Hyp) (x y : n → A) : D.h y x = D.σA (D.h x y) := by
+
   simp only [h, hform, map_sum, map_mul, H.σσ, H.herm]
   rw [Finset.sum_comm]
   exact Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => by ring
@@ -120,9 +151,6 @@ theorem pz_apply (v : n → A) : D.pz v = (D.tz * D.h D.z v) • D.z := by
 theorem pU_apply (v : n → A) : D.pU v = D.pX v + D.pXv v + D.pz v := rfl
 
 theorem pW_apply (v : n → A) : D.pW v = v - D.pU v := rfl
-
-theorem Pi_apply (S : (n → A) →ₗ[A] (n → A)) (v : n → A) :
-    D.Pi S v = D.pU v + D.pW (S (D.pW v)) := rfl
 
 variable {D}
 
@@ -188,10 +216,6 @@ theorem pW_f (H : D.Hyp) (b : Fin r) : D.pW (D.f b) = 0 := by
 
 theorem orthogonal_proj_normal_zero (H : D.Hyp) : D.pW D.z = 0 := by
   rw [pW_apply, pU_z_eq H, sub_self]
-
-theorem pW_pX (H : D.Hyp) (u : n → A) : D.pW (D.pX u) = 0 := by
-  rw [pX_apply, map_sum]
-  simp [pW_e H]
 
 end Dat
 

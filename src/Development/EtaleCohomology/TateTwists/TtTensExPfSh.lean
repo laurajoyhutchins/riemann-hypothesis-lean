@@ -1,4 +1,48 @@
-import Development.EtaleCohomology.TateTwists.TtTensExPfLoc
+module
+
+public import Development.EtaleCohomology.TateTwists.TtTensExPf
+public import Development.EtaleCohomology.TateTwists.TtTensExPfLoc
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 open CategoryTheory Limits AlgebraicGeometry Opposite GlobalTheory.EtC
 open scoped DirectSum TensorProduct
@@ -36,14 +80,15 @@ theorem tS_d {I J : Cx R} (T : TensPre I J) (U : Scheme.{0}) (w : ℤ) (x : Tens
 
 def shPair {I J : Cx R} (T : TensPre I J) : Pair I J (shK T) where
   mul U s t w h := (TensorProduct.mk _ _ _).compr₂ (tS T U w ∘ₗ DirectSum.lof (ULift.{1} R) {p : ℤ × ℤ // p.1 + p.2 = w} (fun p => Sec (I.X p.1.1) U ⊗[ULift.{1} R] Sec (J.X p.1.2) U) ⟨(s, t), h⟩)
-  nat g s t w h a b := by
-    simp only [LinearMap.compr₂_apply, TensorProduct.mk_apply, LinearMap.comp_apply, tS_nat]
-    congr 1
-    rw [Tens.res, DirectSum.lmap_lof, TensorProduct.map_tmul]
+  nat {V} {U} g s t w h a b := by
+    change Sec.res g (tS T U w (DirectSum.of _ ⟨(s, t), h⟩ (a ⊗ₜ b))) =
+      tS T V w (DirectSum.of _ ⟨(s, t), h⟩ (Sec.res g a ⊗ₜ Sec.res g b))
+    rw [tS_nat, Tens.res, DirectSum.lmap_of, TensorProduct.map_tmul]
   leibniz U s t w h a b := by
-    simp only [LinearMap.compr₂_apply, TensorProduct.mk_apply, LinearMap.comp_apply, DirectSum.lof_eq_of]
+    change Sec.map ((shK T).d w (w + 1))
+      (tS T U w (DirectSum.of _ ⟨(s, t), h⟩ (a ⊗ₜ b))) = _
     rw [tS_d, T.leibniz]
-    rw [map_add, Units.smul_def, Units.smul_def, map_zsmul]
+    simp only [map_add, Units.smul_def, map_zsmul]
     rfl
 
 theorem shPair_lift {I J : Cx R} (T : TensPre I J) (U : Scheme.{0}) (w : ℤ) :

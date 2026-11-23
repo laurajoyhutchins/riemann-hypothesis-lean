@@ -1,12 +1,43 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Statements.PlaceShiftStatements.NormSmall
-import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.WeilTensorModels
-import Development.AbelianVarietyTheory.Definitions.Divisors.DiscreteSeriesHermitianUnique
-import Development.AbelianVarietyTheory.Statements.PlaceShiftStatements.AuxiliaryPrimeNeTypePrime
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BottomTriangleConstantAtStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BottomTriangleConstantNormalizedStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ValuationProportionalityRatioLeBottomPairsStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ImportsExtraRest
+module
+
+public import Development.AbelianVarietyTheory.Statements.PlaceShiftStatements.NormSmall
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ImportsExtraRest
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -48,56 +79,15 @@ theorem lamC_div_norm {p : ℕ} [Fact p.Prime] {u₁ u₂ : ℂ} (h₁ : u₁ �
   have e : (⟨u₁ / u₂, h3⟩ : Qbar) = ⟨u₁, h₁⟩ / ⟨u₂, h₂⟩ := rfl
   have a := n₁ lam
   have b := n₂ lam
-  rw [lamC, dif_pos h₁] at a
-  rw [lamC, dif_pos h₂] at b
-  rw [lamC, dif_pos h3, e, map_div₀, norm_div, a, b, div_one]
+  rw [lamC, dite_eq_left h₁] at a
+  rw [lamC, dite_eq_left h₂] at b
+  rw [lamC, dite_eq_left h3, e, map_div₀, norm_div, a, b, div_one]
 
 end GlobalTheory.SqTop.BotConstPf
 
 namespace GlobalTheory.SqTop
 
 open BotConstPf
-
-theorem botConst_of_inputs : GlobalTheory.FunPr.Hypotheses₂ → GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.ThetaIntegralsAgree → GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.LocalMatching →
-    (∀ D, GlobalTheory.NormSum.Inp D) → BotSmall → LNe → BotConst := by
-  intro hPr hK hM hInp hS hL
-  refine gBig_imp (Model.gBig_and (Model.gBig_and (GlobalTheory.T.bottom_triangle_constant_at hPr hK hM hInp hS hL) (GlobalTheory.T.bottom_triangle_constant_normalized hPr hK hM hInp hS)) hS) ?_
-  intro D T Lc sc G μ₀ C x b hμ H
-  obtain ⟨⟨H1, H2⟩, hGood, htw, hSm⟩ := H
-  intro W S hψ hN i j t A A' WW X c0 δ t0 P₀ P₀' P P' z z' C' dl hX hc hB₀ hB hz hz' hz0 hz'0 hI
-  obtain ⟨hct, hc0, γ, hγ⟩ := H1 W S hψ hN i j t A A' WW X c0 hX hc
-  have hγ0 : γ ≠ 0 := by
-    rintro rfl
-    rw [map_zero, zero_mul] at hγ
-    exact hct hγ.symm
-  refine ⟨γ, hγ0, hc0, hγ, fun w hw => ?_⟩
-  obtain ⟨κ, hκ, H⟩ := H2 W S hψ hN i j A A' WW X c0 δ t0 hX hc
-  obtain ⟨-, hQn1, hmod⟩ := Model.base_tuple G hμ
-  obtain ⟨u₁, M, M', hu₁, hu₁q, hu₁n, hr₁⟩ := H t _ P P' hB
-  obtain ⟨u₂, N₁, N₂, hu₂, hu₂q, hu₂n, hr₂⟩ := H μ₀ _ P₀ P₀' (hmod ▸ hB₀)
-  obtain ⟨S', del, hE, hCo, -, rfl⟩ := hI
-  obtain ⟨p, hp, hpw⟩ := exists_prime_under w
-  haveI : Fact p.Prime := ⟨hp⟩
-  have hpQ : ¬ p ∣ Qn G t := fun hd => hw (by
-    obtain ⟨k, hk⟩ := hd
-    rw [hk, Nat.cast_mul]
-    exact Ideal.mul_mem_right _ _ hpw)
-  have hp1 : ¬ p ∣ Qn G μ₀ := by rw [hQn1]; exact hp.not_dvd_one
-  obtain ⟨hv, hvn⟩ := lamC_div_norm hu₁q hu₂q (hu₁n p hpQ) (hu₂n p hp1)
-  have hlev : padicValNat p (levQ G.pl * Qn G t) ≤ padicValNat p (levQ G.pl) := by
-    have h0 : levQ G.pl ≠ 0 := Finset.prod_ne_zero_iff.2 fun v _ =>
-      pow_ne_zero _ (Ideal.absNorm_eq_zero_iff.not.2 v.ne_bot)
-    rw [padicValNat.mul h0 (Model.Qn_ne_zero G t), padicValNat.eq_zero_of_not_dvd hpQ, add_zero]
-  have e1 := hB.rank
-  have e2 := hB₀.rank
-  have s1 := hSm δ t0 _ P P' t i j _ hB
-  have s2 := hSm δ t0 _ P₀ P₀' μ₀ i j _ hB₀
-  refine GlobalTheory.T.valuation_proportionalityRatio_le_bottomPairs D (bigN D) (maxWt D sc.cGap) (levQ G.pl) S' del _ (hInp D) hE hCo D.what₂.LL D.what₂.embLL w p hpw δ t0
-    (levQ G.pl * Qn G t) (levQ G.pl) hlev le_rfl P P' P₀ P₀' s1.1 s1.2 s2.1 s2.2 e1.2.2.2 e2.2.2.2
-    (κ * u₁ * c0 t) (κ * u₂ * c0 μ₀) (u₁ / u₂) M N₂ (fun h T => (hr₁ e1.2.2.2 h).1 T)
-    (fun h T' => (hr₂ e2.2.2.2 h).2 T') (mul_ne_zero (mul_ne_zero hκ hu₂) hc0) hv hvn γ z z' ?_ hz hz' hz0 hz'0
-  rw [← hγ]
-  field_simp
 
 end GlobalTheory.SqTop
 

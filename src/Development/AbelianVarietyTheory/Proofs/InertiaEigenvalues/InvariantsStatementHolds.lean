@@ -1,8 +1,58 @@
-import Mathlib
-import Formalism.SharpRestriction.LevelLetterCocycles.InvariantsGenerators
-import Formalism.SharpRestriction.LevelLetterCocycles.InvariantsIsoOfGenerators
-import Formalism.SharpRestriction.LevelLetterCocycles.ZlWCbInjective
-import Formalism.SharpRestriction.LevelLetterCocycles.NormLtOneIffToZMod
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.InvariantsIsoOfGenerators
+public import Formalism.SharpRestriction.LevelLetterCocycles.NormLtOneIffToZMod
+public import Formalism.SharpRestriction.LevelLetterCocycles.ZlWCbInjective
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.FieldTheory.Galois.Profinite
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.Monotonicity.Lemmas
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.MetricSpace.Ultra.TotallySeparated
+import Mathlib.Topology.Sheaves.Presheaf
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -52,10 +102,6 @@ theorem genFix_of_dense (S : Sit) (hT2 : ∀ T : LocLat S.G S.Qp S.LL S.O, T2Spa
   exact (hact g).2 (hall (Set.mem_univ g))
 
 variable {l : ℕ} [Fact l.Prime]
-
-local instance contMulLL (LL : FinExt l) : ContinuousMul ↥LL.1 :=
-  ⟨continuous_induced_rng.2 ((continuous_subtype_val.comp continuous_fst).mul
-    (continuous_subtype_val.comp continuous_snd))⟩
 
 local instance contAddLL (LL : FinExt l) : ContinuousAdd ↥LL.1 :=
   ⟨continuous_induced_rng.2 ((continuous_subtype_val.comp continuous_fst).add
@@ -166,7 +212,7 @@ theorem chiQ_cont (P : LocPrime l) : Continuous (fun h : GQ l => (P.χQ h : ℚ_
   haveI : FiniteDimensional ℚ_[l] E :=
     IntermediateField.adjoin.finiteDimensional (Algebra.IsIntegral.isIntegral _)
   have hU : IsOpen (E.fixingSubgroup : Set (GQ l)) := E.fixingSubgroup_isOpen
-  have hopen : IsOpen {h : GQ l | g⁻¹ * h ∈ E.fixingSubgroup} := hU.preimage (continuous_mul_left g⁻¹)
+  have hopen : IsOpen {h : GQ l | g⁻¹ * h ∈ E.fixingSubgroup} := hU.preimage (continuous_const_mul g⁻¹)
   filter_upwards [hopen.mem_nhds (by simp)] with h hh
   rw [dist_eq_norm]
   have hfix : (g⁻¹ * h) (P.ζQ (m + 1)) = P.ζQ (m + 1) :=

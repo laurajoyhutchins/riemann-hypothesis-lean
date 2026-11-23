@@ -1,6 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.SegmentRepresentation
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.NonemptyEquivContraOfChar
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.SegmentRepresentation
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.NonemptyEquivOfRangeEq
+import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.NotInSupportOfSubsingleton
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.NonemptyEquivContraOfChar
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.NonemptyEquivMultiProdOne
+
+@[expose] public section
 
 noncomputable section
 
@@ -18,10 +61,6 @@ def Concl {d : ℕ} (σ : Representation ℂ (GL (Fin d) k) V) (l : ℕ) : Prop 
     (∀ S' : Subrepresentation (multiProd (consecBlocks l d) (segTerm σ l)),
       S'.toRepresentation.IsIrreducible → S' = S) ∧
     Nonempty ((jac (consecBlocks l d) S.toRepresentation).Equiv (piTensor (segTerm σ l)))
-
-theorem segmentRepresentation_iff : SegmentRepresentation ↔
-    ∀ (k : Type) [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k]
-      (d l : ℕ), 0 < d → 0 < l → ∀ σ : IrrRep (GL (Fin d) k), IsCuspidal σ.ρ → Concl σ.ρ l := Iff.rfl
 
 def jacCongr {α n : Type} {m : α → Type} [Fintype α] [LinearOrder α] [∀ a, Fintype (m a)] [∀ a, DecidableEq (m a)]
     [Fintype n] [DecidableEq n] (e : (Σ a, m a) ≃ n) {π : Representation ℂ (GL n k) V}
@@ -73,58 +112,6 @@ theorem concl_two {χ : kˣ →* ℂˣ} (hχ : IsSmoothChar χ) : Concl (detRep 
       (ofChar (detLevi (consecBlocks 2 1) (χ * absPow k ((((2 : ℕ) : ℂ) - 1) / 2))))) := by
     rw [he]; exact φ
   exact (ProjLine.isSocle_of_le (isIrreducible_ofChar _) f hf h0 h).of_equiv (.refl _) (φ'.trans b)
-
-theorem single_block {d N : ℕ} (hN : N = d) (e : (Σ _ : Fin 1, Fin d) ≃ Fin N) (he : ∀ a i, (e ⟨a, i⟩ : ℕ) = i)
-    {π : Representation ℂ (GL (Fin d) k) V} (hπ : IsSmooth π) (hi : π.IsIrreducible) :
-    (multiProd e fun _ : Fin 1 => π).IsIrreducible ∧
-      Nonempty ((jac e (multiProd e fun _ : Fin 1 => π)).Equiv (piTensor fun _ : Fin 1 => π)) := by
-  subst hN
-  have he' : ∀ a i, e ⟨a, i⟩ = i := fun a i => Fin.ext (he a i)
-  obtain ⟨φ⟩ := nonempty_equiv_multiProd_one hπ e he'
-  refine ⟨isIrreducible_of_equiv φ hi, ⟨(jacCongr e φ.symm).trans ?_⟩⟩
-  have hU : twKer π (unipRad k e) 1 = ⊥ := by
-    refine Submodule.span_eq_bot.2 ?_
-    rintro _ ⟨u, v, rfl⟩
-    have : (u : GL (Fin N) k) = 1 := by
-      ext i j
-      have := (mem_unipRad.1 u.2).2 0 i j
-      rwa [he', he'] at this
-    simp [this]
-  let L := (PiTensorProduct.subsingletonEquiv (R := ℂ) (s := fun _ : Fin 1 => V) 0).symm
-  have hL : ∀ v, L v = PiTensorProduct.tprod ℂ fun _ => v := fun v => by
-    rw [LinearEquiv.symm_apply_eq]
-    simp
-  refine .mk ((Submodule.quotEquivOfEqBot _ hU).trans L) fun g => Submodule.linearMap_qext _ (LinearMap.ext fun v => ?_)
-  have hd : deltaHalf k (fun _ : Fin 1 => Fin N) g = 1 := by
-    simp [deltaHalf_apply, modExp, Finset.filter_singleton]
-  have hg : leviEmb k e g = g 0 := by
-    ext i j
-    have := leviEmb_apply_same k e g 0 i j
-    rwa [he', he'] at this
-  show L ((((deltaHalf k (fun _ : Fin 1 => Fin N) g)⁻¹ : ℂˣ) : ℂ) • π (leviEmb k e g) v) =
-    piTensor (fun _ : Fin 1 => π) g (L v)
-  rw [hd, hg, hL, hL, piTensor_tprod]
-  congr 1
-  funext a
-  rw [Subsingleton.elim a 0]
-  simp
-
-theorem concl_one {d : ℕ} (σ : IrrRep (GL (Fin d) k)) : Concl σ.ρ 1 := by
-  have h0 : segTerm σ.ρ 1 = fun _ => σ.ρ := funext fun a => by
-    have : detChar (Fin d) (absPow k (((a : ℕ) : ℂ))) = 1 := by
-      ext g; simp [Subsingleton.elim a 0]
-    rw [segTerm, this, twist_one]
-  obtain ⟨h1, h2⟩ := single_block (one_mul d) (consecBlocks 1 d)
-    (fun a i => by rw [consecBlocks_val]; simp) σ.smooth σ.irr
-  refine concl_of_isSocle (τ := multiProd (consecBlocks 1 d) fun _ : Fin 1 => σ.ρ) ?_ ?_
-  · rw [h0]; exact isSocle_self h1
-  · rw [h0]; exact h2
-
-example {χ : kˣ →* ℂˣ} (hχ : IsSmoothChar χ) :
-    IsCuspidal (IrrRep.det (Fin 1) χ hχ).ρ ∧ Concl (IrrRep.det (Fin 1) χ hχ).ρ 2 :=
-  ⟨isCuspidal_detRep_one hχ, concl_two hχ⟩
-
-example (p : ℕ) [Fact p.Prime] : Concl (detRep (Fin 1) (1 : ℚ_[p]ˣ →* ℂˣ)) 2 := concl_two isSmoothChar_one
 
 end GlobalTheory.SegmentRepModel
 

@@ -1,7 +1,56 @@
-import Development.WeilBound.CoreStatements.LocallyConstantCoinvariants.EqZeroOfLocW
-import Development.AutomorphicSpectrum.Proofs.MembershipProofs.ThetaSumTensorProduct
-import Development.AutomorphicSpectrum.Proofs.MembershipProofs.DblCoordUnique
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ProductFunctionOnSumCoordsMemAdelicSchwartzSpace
+module
+
+public import Development.WeilBound.CoreStatements.LocallyConstantCoinvariants.EqZeroOfLocW
+import Development.AbelianVarietyTheory.Definitions.Foundations.SecondCountableAndT2LocalField
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ProductFunctionOnSumCoordsMemAdelicSchwartzSpace
+public import Development.AutomorphicSpectrum.Proofs.MembershipProofs.DblCoordUnique
+public import Development.AutomorphicSpectrum.Proofs.MembershipProofs.ExistsEqMulApplyZero
+public import Development.AutomorphicSpectrum.Proofs.MembershipProofs.ThetaSumTensorProduct
+import Development.WeilBound.CoreStatements.LocallyConstantCoinvariants.KdMulRight
+import GroundTheory.LocalFields.PadicLogSeries
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 set_option linter.unusedSectionVars false
 
@@ -88,8 +137,8 @@ theorem acts_formula (hM : ModelEx) (hC : Cyc) (hA : AdSt) (hψ : IsStd ψ) (h :
   have hga : At (evFin F v) (((gd : GL (β ⊕ β) (AE F E)) : Matrix (β ⊕ β) (β ⊕ β) (AE F E)) - 1) := by
     rw [hgd, kd_at_matrix]
     rintro (i | i) (k | k) u hu
-    · simpa [one_apply] using kd_at_matrix.1 ha i k u hu
-    all_goals simp [one_apply]
+    · simpa [Matrix.one_apply, Sum.inl.injEq] using kd_at_matrix.1 ha i k u hu
+    all_goals simp [Matrix.one_apply]
   have hxp : x * p = gd * x := h.ug_ext hG2.uB (atm hxa hpa) (atm hga hxa) (by
     simp only [Subgroup.coe_mul, Units.val_mul, Matrix.map_mul, hx, hp, hgd, fromBlocks_map, hg,
       Matrix.map_zero _ (map_zero (piW t)), Matrix.map_one _ (map_zero (piW t)) (map_one _), X₀, P₀]

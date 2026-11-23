@@ -1,8 +1,69 @@
-import Mathlib
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.CrystallineOrdinaryIdeals.Imports
+module
+
+public import Mathlib.RingTheory.Finiteness.Defs
+import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.ResMapBijective
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.AdicCompletion.Noetherian
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+public import Mathlib.RingTheory.Noetherian.Nilpotent
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.FiniteCohomology
+import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeGroups.UnitaryThreeReflectionRight
+import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
+public import Mathlib.Algebra.MonoidAlgebra.Defs
+public import Mathlib.Algebra.Polynomial.AlgebraMap
+public import Mathlib.Algebra.Polynomial.Div
+public import Mathlib.RingTheory.AdjoinRoot
+import ReciprocityTheory.GaloisValuations.GlobalA
+
+@[expose] public section
 
 open Formalism.BasicNotions Formalism.BasicNotions.Loc ReciprocityTheory.Gal Module UpperTheory.V.Loc UpperTheory.V.U3 UpperTheory.V.Alg IsLocalRing Polynomial Topology
-set_option maxHeartbeats 1000000 in
+
 theorem _root_.GlobalTheory.T.exists_truncated_polynomial_thickening_fibre_square : ∀ {E B : Type} [Field E] [CommRing B] [Algebra E B] [Module.Finite E B] (π : B →ₐ[E] E), (∀ a, π a = 0 → IsNilpotent a) → ∀ J : ℕ, ∃ (C : Type) (_ : CommRing C) (_ : Algebra E C) (_ : Module.Finite E C) (T : Type) (_ : CommRing T) (_ : Algebra E T) (_ : Module.Finite E T) (πC : C →ₐ[E] E) (p₁ : T →ₐ[E] B) (p₂ : T →ₐ[E] C) (t : C), IsNilpotent t ∧ (∀ a, πC a = 0 → IsNilpotent a) ∧ (∀ a, π (p₁ a) = 0 → IsNilpotent a) ∧ π.comp p₁ = πC.comp p₂ ∧ (∀ b c, π b = πC c → ∃ s, p₁ s = b ∧ p₂ s = c) ∧ ∀ (P y : T) (j : ℕ) (v : Cˣ), j ≤ J → p₂ P = t ^ j * v → P * y = 0 → p₁ y = 0 := by
   intro E B _ _ _ _ π hπ J
   classical
@@ -57,7 +118,7 @@ theorem _root_.GlobalTheory.T.exists_truncated_polynomial_thickening_fibre_squar
     rw [hp1] at ha
     obtain ⟨r, hr⟩ : X ∣ q - C (q.coeff 0) := X_dvd_iff.mpr (by simp)
     have hq : q = C (q.coeff 0) + X * r := by rw [← hr]; ring
-    rw [hq, map_add, map_mul, AdjoinRoot.mk_X, AdjoinRoot.mk_C]
+    rw [hq, map_add (f := _), map_mul, AdjoinRoot.mk_X, AdjoinRoot.mk_C]
     exact Commute.isNilpotent_add (Commute.all _ _) ((hπ _ ha).map _)
       ⟨N, by rw [mul_pow, hrootB, zero_mul]⟩
   have hnilC : ∀ a, πC a = 0 → IsNilpotent a := by
@@ -77,9 +138,9 @@ theorem _root_.GlobalTheory.T.exists_truncated_polynomial_thickening_fibre_squar
     rw [hπC] at hbc
     refine ⟨AdjoinRoot.of _ b + AdjoinRoot.mk _ (q.map (algebraMap E B)) -
       AdjoinRoot.of _ (algebraMap E B (q.coeff 0)), ?_, ?_⟩
-    · rw [map_sub, map_add, ← AdjoinRoot.mk_C, ← AdjoinRoot.mk_C, hp1, hp1, hp1]
+    · rw [map_sub, map_add (f := _), ← AdjoinRoot.mk_C, ← AdjoinRoot.mk_C, hp1, hp1, hp1]
       simp
-    · rw [map_sub, map_add, hp2map, ← AdjoinRoot.mk_C, ← AdjoinRoot.mk_C, hp2, hp2]
+    · rw [map_sub, map_add (f := _), hp2map, ← AdjoinRoot.mk_C, ← AdjoinRoot.mk_C, hp2, hp2]
       simp [hbc]
   have hker : ∀ Q, p2 Q = 0 → Q ∈ I.map (AdjoinRoot.of ((X : B[X]) ^ N)) := by
     intro Q hQ
@@ -90,7 +151,7 @@ theorem _root_.GlobalTheory.T.exists_truncated_polynomial_thickening_fibre_squar
       exact (modByMonic_eq_zero_iff_dvd (monic_X_pow N)).mpr hQ
     have hmk : AdjoinRoot.mk ((X : B[X]) ^ N) q = AdjoinRoot.mk _ (q %ₘ (X ^ N)) := by
       conv_lhs => rw [← modByMonic_add_div q (X ^ N)]
-      rw [map_add, map_mul, AdjoinRoot.mk_self, zero_mul, add_zero]
+      rw [map_add (f := _), map_mul, AdjoinRoot.mk_self, zero_mul, add_zero]
     rw [hmk]
     have hin : q %ₘ (X ^ N) ∈ I.map (C : B →+* B[X]) := by
       rw [Ideal.mem_map_C_iff]

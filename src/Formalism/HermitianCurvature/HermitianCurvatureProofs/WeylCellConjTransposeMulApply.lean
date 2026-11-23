@@ -1,9 +1,63 @@
-import Formalism.HermitianCurvature.StatementQ
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.RegularisedPairingViaPhase
-import Formalism.FormalDegreeBessel.FormalDegreeRatio.UnitaryWeylNormalHolds
-import Formalism.FormalDegreeBessel.FormalDegreeRatio.GBasic
+module
+
+public import Formalism.HermitianCurvature.StatementQ
+public import Formalism.FormalDegreeBessel.FormalDegreeRatio.UnitaryWeylNormalHolds
+public import Formalism.FormalDegreeBessel.FormalDegreeRatio.GBasic
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.RegularisedPairingViaPhase
 import Formalism.RealPlaceAnalysis.RealPlaceTaylor.CartanInvolutionConjTransposeMul
 import Formalism.RealPlaceAnalysis.RealPlaceTaylor.ComplexifiedDerivativeCommutator
+import Mathlib.Algebra.Order.Archimedean.Real.Hom
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+public import Mathlib.Analysis.Calculus.Deriv.Prod
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.InnerProductSpace.Calculus
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Matrix Finset Filter Topology
 open scoped ContDiff
@@ -425,7 +479,7 @@ theorem fam_differentiableAt {Φ : Fn k r E} (h : SmoothFam k r i U₀ Φ) {x : 
   obtain ⟨U, F, hU, hxU, hF, hΦ⟩ := h x hx hxG
   exact (fam_hasFDerivAt hU hF hΦ hxU hxG).differentiableAt
 
-theorem cd_coord (a : Fin r) : ContDiff ℝ ∞ (fun c : Fin r → ℂ => c a) := contDiff_apply ℝ ℂ a
+theorem cd_coord (a : Fin r) : ContDiff ℝ ∞ (fun c : Fin r → ℂ => c a) := contDiff_apply ℝ (fun _ => ℂ) a
 
 theorem cd_coordBar (a : Fin r) : ContDiff ℝ ∞ (fun c : Fin r → ℂ => star (c a)) :=
   Complex.conjCLE.contDiff.comp (cd_coord a)
@@ -480,7 +534,7 @@ theorem opL_equiv (a : Fin r) (j : Fin 6) {f f' : (Fin r → ℂ) → E} (L : E 
   · show pbOp a f' c = L (pbOp a f c)
     unfold pbOp wirtBar
     split_ifs
-    · simp only [hfd, map_smul, map_add]
+    · simp only [hfd, map_smul, map_add (f := _)]
     · simp
   · show star (c a) • f' c = L (star (c a) • f c)
     rw [h0, map_smul]
@@ -863,7 +917,7 @@ theorem transfer_joint_smooth : Formalism.FourierDecayAlt.Q.TJointSmooth := by
 theorem family_operators : Formalism.FourierDecayAlt.Q.FamOps := by
   intro Wp Wq _ _ _ _ k r z z' π π' i Dc Φ _ _ hopen hΦ a j
   obtain ⟨hS, hFF⟩ := hΦ
-  have hS' := Qx3.sf_opL (fun x hx => hx.1) a j hS
+  have hS' := Qx3.sf_opL (by exact fun x hx => hx.1) a j hS
   refine ⟨hS', fun c hc => ?_⟩
   have hnear : ∀ g ∈ Dc c, ∀ᶠ c' in nhds c, c' ∈ OmX r ∧ g ∈ Dc c' := by
     intro g hg

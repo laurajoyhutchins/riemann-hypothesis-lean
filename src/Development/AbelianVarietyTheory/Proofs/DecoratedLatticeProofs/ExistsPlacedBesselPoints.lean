@@ -1,18 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.Framed
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.Placed
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.PlacedBy
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.ExistsNormLeHeightPow
-import Development.AbelianVarietyTheory.PublishedTheorems.DiscreteSeriesUnitary₂.DiscreteSeriesClassificationIff
-import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.ThmSOwn
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.ExistsTransportAdelicCorrection
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.BesselColumnFormCentralTranslation
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.RestrictedBlockUnipotentSymmetric
+module
+
+public import Formalism.LocalToGlobal.IndefiniteReal.LinksDefs
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.RestrictedBlockUnipotentSymmetric
 import Development.AbelianVarietyTheory.Proofs.SatakeParameters.LevelHyperspecialTrivialCharacterSplitsOffPlaces
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.LevelSubgroupConjFiniteMovesFrame
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.ExistsCentralAdaptedElementStatement
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.CentralAdaptedElementPropertyStatement
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.CentralAdaptedElementValueStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.LatticeFrames.MiStarOfMid
+import Development.AbelianVarietyTheory.Definitions.LatticeFrames.ThetaIdentityOfMapsAll
+import Development.AbelianVarietyTheory.Definitions.LatticeFrames.UnitRatio
+import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.LineOfGlued
+import Formalism.LocalToGlobal.HilbertRowConditions.IsHilbertCF
+
+@[expose] public section
 
 noncomputable section
 
@@ -42,42 +76,6 @@ theorem oneBlock_lev {D : D7} (V : Formalism.BasicNotions.TH.HSp D) (β : GL (Fi
   · unfold Lev.levChi levFn
     simp only [hs, hQ, Finset.range_zero, Finset.prod_empty, Finset.prod_const_one, mul_one]
 
-set_option maxHeartbeats 1000000 in
-
-theorem exists_isAt : ∀ {D : D7} {L : SizeData₂ D} {hT : GatTies D} {Gi : Formalism.MainNotions.G.Inst D L} {Gl : Formalism.MainNotions.G.LatInst D} {Kc : Formalism.MainNotions.G.Consts} {Yd : DivX D} {cX : ExtraC} {ex : Extra D L hT Gi Gl Kc Yd cX} (W : RealPack ex), PkHyp W → ∀ u (f : FamCh W u) (B : SBes W.S.X W.Q.instEq u W.Q.Rl.ψ (D.sp.X 0)), Placed f B → GlobalTheory.MiTop.Framed B → ∃ a₀ a, IsAt f B a₀ a := by
-  intro D L hT Gi Gl Kc Yd cX ex W hW u f B hP hF
-  obtain ⟨a₀, ha₀⟩ := GlobalTheory.Core.Mi.PinModel.exists_transport_adelic_correction (W.S.tr u)
-  obtain ⟨a, haf, hac, hSt⟩ := GlobalTheory.T.exists_central_adapted_element W hW u f B hP hF a₀ ha₀
-  have hM := GlobalTheory.T.central_adapted_element_property W hW u f B hP a₀ ha₀ a haf hac hSt
-  have hC := GlobalTheory.T.central_adapted_element_value W hW u f B hP a₀ ha₀ a haf hac hSt
-  have hb : (show GA D (D.sp.Y 0) from f.g.b 0) ∈ GfC (D.sp.Y 0) := by
-    obtain ⟨k, _, _, _, _, ι, v, o, n, G, pl, -, hv, ht, -⟩ := hP
-    have h1 := hv.b 0
-    rw [ht.b 0] at h1
-    exact h1
-  have hx : (iotaX W.S.X W.Q.instEq).symm (1, W.S.X.xu u) ∈ GfC (D.sp.Y 0) :=
-    (GlobalTheory.SeeConjRead.iotaX_fst_eq_one_iff W.S.X W.Q.instEq _).1 (by simp)
-  have htf : tOf f B a₀ a ∈ GfC (D.sp.Y 0) :=
-    mul_mem (mul_mem (inv_mem hx) (GlobalTheory.Core.Mi.CenAct.embA_mem_GfC B.d B.o (mul_mem ha₀.1 haf))) hb
-  have hn : (D.sp.Y 0).rank ≤ D.R.r := by
-    rw [rank_eq W.S.X W.Q.instEq, W.S.X.n_eq]
-  refine ⟨a₀, a, ha₀, haf, hac, htf, fun κ => ?_⟩
-  rw [inv_inv]
-  have h1 := GlobalTheory.FrameConj.levS_conj_frame (D.sp.Y 0) (show GL (Fin (D.sp.Y 0).rank) (Lev.EAf D) from (pk W).βY 0)
-    (show LevDat D.host.E ℂ (D.sp.Y 0).rank from GlobalTheory.LevZero.datZero W) (tOf f B a₀ a) htf κ
-  generalize tOf f B a₀ a * κ * (tOf f B a₀ a)⁻¹ = y at h1 ⊢
-  obtain ⟨h2, h3⟩ := oneBlock_lev (D.sp.Y 0) (GlobalTheory.LevZero.frAt f B a₀ a)
-    (show LevDat D.host.E ℂ (D.sp.Y 0).rank from GlobalTheory.LevZero.datZero W) hn rfl rfl y
-  have h4 : κ ∈ rJ W ↔ y ∈ levS (D.sp.Y 0) (GlobalTheory.LevZero.frAt f B a₀ a)
-    (show LevDat D.host.E ℂ (D.sp.Y 0).rank from GlobalTheory.LevZero.datZero W) := h1.1
-  have h5 : Lev.levChi (D.sp.Y 0) (GlobalTheory.LevZero.frAt f B a₀ a)
-    (show LevDat D.host.E ℂ (D.sp.Y 0).rank from GlobalTheory.LevZero.datZero W) y = rChi W κ := h1.2
-  rw [h2] at h4
-  refine ⟨h4.trans ⟨fun h => (hM y h.1 h.2.1).2 h.2.2, fun h => ?_⟩, fun hk => ?_⟩
-  · obtain ⟨hf, hs⟩ := (hSt y).2 ⟨h.1, h.2.1⟩
-    exact ⟨hf, hs, (hM y hf hs).1 h⟩
-  · obtain ⟨hf, hs, hp⟩ := h4.1 hk
-    exact (hC y hf hs hp ((hM y hf hs).2 hp)).trans (h3.symm.trans h5)
 
 end GlobalTheory.MiTop
 

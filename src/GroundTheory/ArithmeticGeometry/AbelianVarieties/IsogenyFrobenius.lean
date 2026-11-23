@@ -1,5 +1,63 @@
-import Mathlib
-import GroundTheory.ArithmeticGeometry.AbelianVarieties.Isogeny
+module
+
+public import GroundTheory.ArithmeticGeometry.AbelianVarieties.FunctionFieldPoint
+public import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic
+public import Mathlib.FieldTheory.Perfect
+public import Mathlib.FieldTheory.Relrank
+public import GroundTheory.ArithmeticGeometry.AbelianVarieties.Isogeny
+import GroundTheory.ArithmeticGeometry.AbelianVarieties.KernelCard
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Degree
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.FieldTheory.RatFunc.IntermediateField
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.LocalProperties.Reduced
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 namespace GroundTheory.Arith.Abelian
 
@@ -112,7 +170,7 @@ theorem Ψ₂Sq_eq_sq_of_two (h2 : p = 2) : E.Ψ₂Sq = (C E.a₁ * X + C E.a₃
   have h2X : (2 : F[X]) = 0 := by rw [← C_ofNat, h2F, C_0]
   have e : E.Ψ₂Sq = (C E.a₁ * X + C E.a₃) ^ 2 + 2 * (2 * X ^ 3 + C (2 * E.a₂) * X ^ 2 +
       C E.b₄ * X - C E.a₁ * C E.a₃ * X + C (2 * E.a₆)) := by
-    simp only [Ψ₂Sq, b₂, b₆, map_add, map_mul, map_pow, map_ofNat]
+    simp only [Ψ₂Sq, b₂, b₆, map_add (f := _), map_mul, map_pow, map_ofNat]
     ring
   rw [e, h2X, zero_mul, add_zero]
 
@@ -239,8 +297,8 @@ theorem relfinrank_powField : relfinrank F⟮genX E ^ p⟯ (powField E p) = 2 :=
     simp only [WeierstrassCurve.baseChange, WeierstrassCurve.map_a₁, WeierstrassCurve.map_a₂,
       WeierstrassCurve.map_a₃, WeierstrassCurve.map_a₄, WeierstrassCurve.map_a₆] at e
     have e' := congrArg (frobenius E.toAffine.FunctionField p) e
-    simp only [map_add, map_mul, map_pow, frobenius_def] at e'
-    simp only [q, map_sub, map_add, map_mul, map_pow, aeval_X, aeval_C, w,
+    simp only [map_add (f := _), map_mul, map_pow, frobenius_def] at e'
+    simp only [q, map_sub, map_add (f := _), map_mul, map_pow, aeval_X, aeval_C, w,
       IntermediateField.algebraMap_apply]
     linear_combination e'
   have hqdeg : q.natDegree = 2 := by simp only [q]; compute_degree!

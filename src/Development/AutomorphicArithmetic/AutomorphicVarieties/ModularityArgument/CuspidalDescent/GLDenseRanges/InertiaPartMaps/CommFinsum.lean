@@ -1,4 +1,45 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.CuspidalDescent.GLDenseRanges.EigBoxE
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.CuspidalDescent.GLDenseRanges.EigBoxE
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -11,7 +52,7 @@ open scoped Matrix TensorProduct
 
 attribute [local instance] GlobalTheory.LocalData.complRel GlobalTheory.LocalData.isLocalField
 
-set_option synthInstance.maxHeartbeats 200000
+
 
 namespace UpperTheory.V.Z.Desc.V0
 
@@ -40,7 +81,7 @@ private theorem iSup_pres {T : Module.End A M} {P : ℕ → Module.End A M} {S :
     exact hS _ hy
   · simp
   · intro y z hy hz
-    simp only [map_add]
+    simp only [map_add (f := _)]
     exact Submodule.add_mem _ hy hz
 
 end Gen
@@ -49,8 +90,8 @@ section Fr
 
 variable {Γ Ga Gp : Type} [Group Γ] [Group Ga] [Group Gp] (X : Frame Γ Ga Gp) {A : Type} [CommRing A] {m : ℕ}
 
-variable (A m) in
 
+variable (A m) in
 private abbrev R (g : Ga) : Module.End A (X.Fn A m) := rtr A (Ga × Gp) (Fin m → A) (g, 1)
 
 private theorem comm_rp (g : Ga) (p : Gp) : Commute (R X A m g) (X.rp A m p) := by
@@ -166,7 +207,7 @@ private theorem tr_MK {g : H.Ga} (hg : Norm H g) (a : H.Op → c.O) (K : H.Lev) 
       rw [map_smul]
       exact Submodule.smul_mem_smul hr (tr_Ord H θ hg K hy)
     · intro y z hy hz
-      rw [map_add]
+      rw [map_add (f := _)]
       exact Submodule.add_mem _ hy hz
   refine iSup_pres (fun n => ?_) hle h2'
   refine Commute.pow_right ?_ n
@@ -226,6 +267,7 @@ theorem UpperTheory.V.Z.Desc.V0.eEx :
   have hcomm : ∀ i f, E (H.op A i f) = H.op A i (E f) := by
     intro i f
     show opE ρ a (H.op A i f) = H.op A i (opE ρ a f)
+
     rw [opE_eq, opE_eq, map_sum]
     refine Finset.sum_congr rfl fun g hg => ?_
     rw [map_zsmul]

@@ -1,7 +1,52 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.OmHeightslockG
-import Development.WeilBound.CoreStatements.PluriharmonicCharts.PeriodGramConj
-import Development.WeilBound.CoreStatements.PluriharmonicCharts.IsOpenDet
+module
+
+public import Development.WeilBound.CoreStatements.PluriharmonicCharts.IsOpenDet
+public import Development.AutomorphicSpectrum.Definitions.MetricPeriods.FiniteEtaleSurjectiveOfPullback
+public import Mathlib.Data.Matrix.ColumnRowPartitioned
+public import Development.WeilBound.CoreStatements.PluriharmonicCharts.PeriodGramConj
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.Matrix.Order
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory NumberField Matrix ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Geo ReciprocityTheory.ChartRestriction.G.Geo.Tor GlobalTheory.CompanionTheory.Ar GlobalTheory.CompanionTheory.Ar.Top GlobalTheory.CompanionTheory.Ar.PB GlobalTheory.CompanionTheory.Ar.PB.BMx ReciprocityTheory.AnForm.M ReciprocityTheory.AnForm.P
 open ReciprocityTheory.ChartRestriction.G.Semi
@@ -30,7 +75,7 @@ private theorem sub_transpose_eq_fromRows_conj_fromBlocks {p q : ℕ} (A : Matri
     ext i (j | j) <;> simp [conjTranspose_apply]
   have h2 : fromBlocks (-Goᵀ) 0 0 Gw * fromRows (Bm.map (starRingEnd ℂ)) A =
       fromRows (-Goᵀ * Bm.map (starRingEnd ℂ)) (Gw * A) := by
-    ext (i | i) j <;> simp [mul_apply, Fintype.sum_sum_type]
+    ext (i | i) j <;> simp [Matrix.mul_apply, Fintype.sum_sum_type]
   have h3 : Bmᴴᵀ = Bm.map (starRingEnd ℂ) := by
     ext i j
     simp [conjTranspose_apply]
@@ -55,7 +100,7 @@ private theorem fromRows_mul_neg_inv_mul_transpose {p q : ℕ} (A : Matrix (Fin 
   have hDF : fromBlocks (-Goᵀ) 0 0 Gw * fromRows Goᵀ⁻¹ (0 : Matrix (Fin p) (Fin q) ℂ) =
       fromRows (-1) (0 : Matrix (Fin p) (Fin q) ℂ) := by
     have : Goᵀ * Goᵀ⁻¹ = 1 := mul_nonsing_inv _ hGu
-    ext (i | i) j <;> simp [mul_apply, Fintype.sum_sum_type, ← this]
+    ext (i | i) j <;> simp [Matrix.mul_apply, Fintype.sum_sum_type, ← this]
   have hW : Ψ * (Nm⁻¹ * fromRows Goᵀ⁻¹ (0 : Matrix (Fin p) (Fin q) ℂ)) = -Bmᵀ := by
     rw [hΨ, Matrix.mul_assoc, Matrix.mul_assoc, ← Matrix.mul_assoc Nm Nm⁻¹,
       mul_nonsing_inv _ hNu, Matrix.one_mul, hDF, hNh, fromCols_mul_fromRows]
@@ -93,7 +138,7 @@ private theorem gramOf_sigForm_submatrix_blockEquiv {p q : ℕ} (P : Matrix (Fin
     conjTranspose_submatrix, submatrix_submatrix, submatrix_submatrix, submatrix_diagonal_equiv]
   simp only [Equiv.symm_comp_self, submatrix_id_id]
   congr 2
-  ext (i | i) (j | j) <;> simp [diagonal_apply, sigForm, blockEquiv, one_apply] <;> split_ifs <;> simp
+  ext (i | i) (j | j) <;> simp [diagonal_apply, sigForm, blockEquiv, Matrix.one_apply] <;> split_ifs <;> simp
 
 theorem exists_periodMatrix {X : Type} [NormedAddCommGroup X] [NormedSpace ℂ X] {p q : ℕ} {B : Set X} (hB : IsOpen B)
     {u₀ : X} (hu₀ : u₀ ∈ B) {A : X → Matrix (Fin p) (Fin q ⊕ Fin p) ℂ} {Bm : X → Matrix (Fin q) (Fin q ⊕ Fin p) ℂ}
@@ -255,7 +300,8 @@ theorem exists_periodMatrix {X : Type} [NormedAddCommGroup X] [NormedSpace ℂ X
     have hsel : ∀ (W : Matrix (Fin q ⊕ Fin p) (Fin q) ℂ) (i : Fin p) (j : Fin q),
         (fromCols (0 : Matrix (Fin p) (Fin q) ℂ) (1 : Matrix (Fin p) (Fin p) ℂ) * W) i j = W (Sum.inr i) j := by
       intro W i j
-      simp [mul_apply, Fintype.sum_sum_type, one_apply]
+      simpa [Matrix.mul_apply, Fintype.sum_sum_type] using
+        congrFun (congrFun (Matrix.one_mul (W.submatrix Sum.inr id)) i) j
     have hAdQ1 : A u₀ * dM Q1f u₀ v = 0 := by
       ext i j
       rw [hA0, Matrix.mul_assoc, hsel]

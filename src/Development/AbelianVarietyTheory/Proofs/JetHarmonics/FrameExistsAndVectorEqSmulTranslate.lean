@@ -1,7 +1,59 @@
-import Mathlib
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.DifferentialOperatorBracket
-import Formalism.RealPlaceAnalysis.ThirdArithmeticHolds
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ExistsUnitaryWFrameToFrame
+module
+
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ExistsUnitaryWFrameToFrame
+public import Formalism.HermitianCurvature.StatementQ
+public import Formalism.FormalDegreeBessel.FormalDegreeRatio.GBasic
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.FrameCompletion
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.FrameExtension
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.HermitianFormRankFour
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open Matrix Formalism.QuantumDeterminants Formalism.FourierDecayAlt.Q Formalism.FourierDecayAlt.Qr
 open Formalism.REAL (qdet GlRel IsHW)
 
@@ -124,8 +176,9 @@ private theorem swapMat_mulVec' {k r : ℕ} (H : Matrix (Fin (2 * r + k + 1)) (F
   rw [swapMat_eq_one_add_sub_mul, add_mulVec, one_mulVec, ← mulVec_mulVec]
   congr 2
   funext c
-  simp only [mulVec, dotProduct, _root_.Formalism.QuantumDeterminants.herm, Matrix.mul_apply, _root_.Formalism.FourierDecayAlt.P.HermitianFormRankFour.colM, conjTranspose_apply, Matrix.of_apply,
-    Finset.sum_mul, Finset.mul_sum, mul_assoc]
+  simp only [Matrix.mulVec, dotProduct, Matrix.mul_apply, Matrix.conjTranspose_apply,
+    _root_.Formalism.FourierDecayAlt.P.HermitianFormRankFour.colM, Matrix.of_apply,
+    _root_.Formalism.QuantumDeterminants.herm, Finset.sum_mul, Finset.mul_sum, mul_assoc]
   exact Finset.sum_comm
 
 open Matrix in
@@ -184,8 +237,8 @@ private theorem swapMat_mem_UWset_of_isFrameOf {k r : ℕ} {z : Fin (2 * r + k +
         abel
     _ = H := by rw [hQ]; simp
 
-open Matrix in
 
+open Matrix in
 theorem _root_.GlobalTheory.frame_exists_and_vector_eq_smul_translate :
     ∀ (n r : ℕ) (z : (Fin (2 * r + (n + 1) + 1) → ℂ)), _root_.Formalism.QuantumDeterminants.inWb (n + 1) r z → 0 < _root_.Formalism.QuantumDeterminants.Tz (n + 1) r z →
       (∃ B : Fin (n + 1) → (Fin (2 * r + (n + 1) + 1) → ℂ), _root_.Formalism.FourierDecayAlt.Q.IsFrameOf (n + 1) r [z] B) ∧

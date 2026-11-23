@@ -1,7 +1,52 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HeightsOfSets.Extension
-import GroundTheory.HeightsAndTheta.Heights.ArithDegreeIdeal
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.ArithDegreeIdeal
+public import GroundTheory.HeightsAndTheta.Heights.HeightsOfSets.Extension
 import GroundTheory.HeightsAndTheta.Heights.HermitianDual
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -35,8 +80,8 @@ section Exact
 variable {A B C : Type*} [AddCommGroup A] [Module (𝓞 K) A] [AddCommGroup B] [Module (𝓞 K) B]
   [AddCommGroup C] [Module (𝓞 K) C] {i : A →ₗ[𝓞 K] B} {p : B →ₗ[𝓞 K] C}
 
-omit [NumberField K] in
 
+omit [NumberField K] in
 theorem finrank_eq_add_of_exact [Module.Finite (𝓞 K) A] [Module.Finite (𝓞 K) B]
     [Module.Finite (𝓞 K) C] (hi : Function.Injective i) (hp : Function.Surjective p)
     (hex : Function.Exact i p) :
@@ -53,8 +98,8 @@ theorem finrank_eq_add_of_exact [Module.Finite (𝓞 K) A] [Module.Finite (𝓞 
 
 variable {m n : Type*} [Fintype m] [Fintype n]
 
-omit [NumberField K] in
 
+omit [NumberField K] in
 theorem linearIndependent_sumElim_of_exact (hi : Function.Injective i) (hex : Function.Exact i p)
     {s' : m → A} {s'' : n → C} {u : n → B} (hu : ∀ j, p (u j) = s'' j)
     (hs' : LinearIndependent (𝓞 K) s') (hs'' : LinearIndependent (𝓞 K) s'') :
@@ -65,19 +110,21 @@ theorem linearIndependent_sumElim_of_exact (hi : Function.Injective i) (hex : Fu
   simp only [Sum.elim_inl, Sum.elim_inr] at hg
   have h2 : ∑ j, g (Sum.inr j) • s'' j = 0 := by
     have := congrArg p hg
-    simpa [map_add, map_sum, map_smul, hex.apply_apply_eq_zero, hu] using this
+
+    simpa [map_add (f := _), map_sum, map_smul, hex.apply_apply_eq_zero, hu] using this
   have hr := hs'' _ h2
   have h1 : ∑ k, g (Sum.inl k) • s' k = 0 := by
     apply hi
     simp only [hr, zero_smul, Finset.sum_const_zero, add_zero] at hg
+
     rw [map_sum, map_zero]
     simpa [map_smul] using hg
   have hl := hs' _ h1
   rintro (k | j)
   exacts [hl k, hr j]
 
-omit [NumberField K] in
 
+omit [NumberField K] in
 theorem card_quotient_sumElim_of_exact (hi : Function.Injective i) (hp : Function.Surjective p)
     (hex : Function.Exact i p) {s' : m → A} {s'' : n → C} {u : n → B} (hu : ∀ j, p (u j) = s'' j)
     (hs'' : LinearIndependent (𝓞 K) s'') :
@@ -102,10 +149,12 @@ theorem card_quotient_sumElim_of_exact (hi : Function.Injective i) (hp : Functio
         simp only [w, Sum.elim_inl, Sum.elim_inr] at hg
         have h2 : ∑ j, g (Sum.inr j) • s'' j = 0 := by
           have := congrArg p hg
-          simpa [map_add, map_sum, map_smul, hex.apply_apply_eq_zero, hu] using this
+
+          simpa [map_add (f := _), map_sum, map_smul, hex.apply_apply_eq_zero, hu] using this
         have hr := (Fintype.linearIndependent_iff.mp hs'') _ h2
         simp only [hr, zero_smul, Finset.sum_const_zero, add_zero] at hg
         have : i (∑ k, g (Sum.inl k) • s' k) = i x := by
+
           rw [← hg, map_sum]
           simp [map_smul]
         rw [← hi this]
@@ -128,6 +177,7 @@ theorem card_quotient_sumElim_of_exact (hi : Function.Injective i) (hp : Functio
           Submodule.mkQ_apply, Submodule.Quotient.mk_eq_zero] at hx
         obtain ⟨b, hb⟩ := (Submodule.mem_span_range_iff_exists_fun (𝓞 K)).mp hx
         have hy : x - ∑ j, b j • u j ∈ LinearMap.range i := by
+
           rw [← hex.linearMap_ker_eq, LinearMap.mem_ker, map_sub, map_sum]
           simp only [map_smul, hu, hb, sub_self]
         have hN : ∑ j, b j • u j ∈ N :=

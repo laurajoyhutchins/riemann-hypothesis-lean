@@ -1,18 +1,65 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Foundations.Imports
-import Development.AbelianVarietyTheory.Definitions.Divisors.HasQIff
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.HasQIff
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.SiegelFunctionHolomorphic
+public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.HasQExpansionModularForm
 import Development.AbelianVarietyTheory.Definitions.Foundations.MultipliableAndSgNeZero
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.SiegelFunctionHolomorphic
-import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.HasQExpansionModularForm
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+public import Mathlib.Analysis.Complex.TaylorSeries
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Log.Summable
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
 open scoped UpperHalfPlane MatrixGroups Manifold
 open GlobalTheory.Sieg GlobalTheory.QFam GlobalTheory.Sieg.Model GlobalTheory.Sieg.Hol PowerSeries
+local notation "𝕢" => Function.Periodic.qParam
 
 namespace GlobalTheory.Sieg.Gal
-
-local notation "𝕢" => Function.Periodic.qParam
 
 variable {σ : ℂ ≃+* ℂ} {h : ℝ} {f f' g g' : ℍ → ℂ}
 
@@ -187,6 +234,7 @@ theorem cj_tprod (hh : 0 < h) {e : ℕ → ℕ} (he : ∀ m, m ≤ e m) (w : ℂ
   refine ⟨_, hasQ_tprod hh he w, ?_⟩
   convert hasQ_tprod hh he (σ w) using 1
   ext n
+
   simp [map_sum]
 
 theorem geomProd_shift {q : ℂ} (hq : ‖q‖ < 1) (u : ℂ) : geomProd q u = (1 - q * u) * geomProd q (q * u) := by
@@ -281,25 +329,6 @@ end GlobalTheory.Sieg.Gal
 namespace GlobalTheory.Sieg
 
 open Gal
-
-theorem sg_coeff_galois : ∀ (c M a b d : ℕ) (σ : ℂ ≃+* ℂ), 0 < M → a < M → σ (ee (1 / (M : ℂ))) = ee ((d : ℂ) / M) → admitted c ![(a : ℚ) / M, (b : ℚ) / M] → admitted c ![(a : ℚ) / M, ((d * b : ℕ) : ℚ) / M] → ∃ (κ : ℚ) (A : ℕ → ℂ), HasQ M (fun τ => sg c ![(a : ℚ) / M, (b : ℚ) / M] τ * ee (-(κ : ℂ) * (τ : ℂ))) A ∧ HasQ M (fun τ => sg c ![(a : ℚ) / M, ((d * b : ℕ) : ℚ) / M] τ * ee (-(κ : ℂ) * (τ : ℂ))) (fun n => σ (A n)) := by
-  intro c M a b d σ hM _ hσ h1 h2
-  have hσ' : σ (ee ((b : ℂ) / M)) = ee (((d * b : ℕ) : ℂ) / M) := by
-    rw [show (b : ℂ) / M = b * (1 / M) by ring, ee_nat_mul, map_pow, hσ, ← ee_nat_mul]
-    congr 1; push_cast; ring
-  obtain ⟨k, φ, p, p'⟩ := rel_sg hM hσ' h1 h2
-  have e : ∀ τ : ℍ, ee (-((-(k : ℚ) / M : ℚ) : ℂ) * (τ : ℂ)) = Function.Periodic.qParam (M : ℝ) τ ^ k := fun τ => by
-    unfold ee Function.Periodic.qParam
-    rw [← Complex.exp_nat_mul]; congr 1; push_cast; ring
-  refine ⟨-(k : ℚ) / M, fun n => coeff n φ, ?_, ?_⟩
-  · rw [hasQ_iff]; intro τ
-    have := p τ
-    simp only [e, mul_comm (sg _ _ _)]
-    simpa only [Function.Periodic.qParam, Complex.ofReal_natCast] using this
-  · rw [hasQ_iff]; intro τ
-    have := p' τ
-    simp only [e, mul_comm (sg _ _ _)]
-    simpa only [Function.Periodic.qParam, Complex.ofReal_natCast, coeff_map, RingHom.coe_coe] using this
 
 theorem sg_coeff_galois_int : ∀ (c M a b d : ℕ) (σ : ℂ ≃+* ℂ), 0 < M → a < M → σ (ee (1 / (M : ℂ))) = ee ((d : ℂ) / M) → admitted c ![(a : ℚ) / M, (b : ℚ) / M] → admitted c ![(a : ℚ) / M, ((d * b : ℕ) : ℚ) / M] → ∃ (k : ℤ) (A : ℕ → ℂ), HasQ M (fun τ => sg c ![(a : ℚ) / M, (b : ℚ) / M] τ * ee (-((k : ℂ) / M) * (τ : ℂ))) A ∧ HasQ M (fun τ => sg c ![(a : ℚ) / M, ((d * b : ℕ) : ℚ) / M] τ * ee (-((k : ℂ) / M) * (τ : ℂ))) (fun n => σ (A n)) := by
   intro c M a b d σ hM _ hσ h1 h2

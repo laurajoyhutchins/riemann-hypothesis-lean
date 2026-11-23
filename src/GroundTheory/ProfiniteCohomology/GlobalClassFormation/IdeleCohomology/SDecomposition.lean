@@ -1,8 +1,51 @@
-import Mathlib
-import GroundTheory.GlobalFields.IdeleGroups.SIdeleGroups.Decomposition
-import GroundTheory.ProfiniteCohomology.GlobalClassFormation.IdeleCohomology.Infinite
-import GroundTheory.ProfiniteCohomology.GlobalClassFormation.IdeleCohomology.Integral
-import GroundTheory.ProfiniteCohomology.GlobalClassFormation.IdeleCohomology.ExistsSIdelesCohomologyEqZero
+module
+
+public import GroundTheory.GlobalFields.IdeleGroups.SIdeleGroups.Decomposition
+public import GroundTheory.ProfiniteCohomology.GlobalClassFormation.IdeleCohomology.Infinite
+public import GroundTheory.ProfiniteCohomology.GlobalClassFormation.IdeleCohomology.Integral
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
@@ -21,34 +64,23 @@ def homToSubrep (A : Rep.{u} k G) (W : Submodule k A) (hW : ∀ g, W ≤ W.comap
   Rep.ofHom ⟨LinearMap.codRestrict W f.hom.toLinearMap hf, fun g => LinearMap.ext fun b =>
     Subtype.ext (Rep.hom_comm_apply f g b)⟩
 
-@[simp]
-theorem homToSubrep_hom_apply (A : Rep.{u} k G) (W : Submodule k A)
-    (hW : ∀ g, W ≤ W.comap (A.ρ g)) {B : Rep.{u} k G} (f : B ⟶ A) (hf : ∀ b, f.hom b ∈ W)
-    (b : B) : ((homToSubrep A W hW f hf).hom b : A) = f.hom b :=
-  rfl
-
-theorem homToSubrep_comp_subtype (A : Rep.{u} k G) (W : Submodule k A)
-    (hW : ∀ g, W ≤ W.comap (A.ρ g)) {B : Rep.{u} k G} (f : B ⟶ A) (hf : ∀ b, f.hom b ∈ W) :
-    homToSubrep A W hW f hf ≫ Rep.subtype A W hW = f :=
-  rfl
-
 end Generic
 
 variable {K L : Type} [Field K] [NumberField K] [Field L] [NumberField L] [Algebra K L]
   (S : Finset (HeightOneSpectrum (𝓞 K)))
 
-variable (K L) in
 
+variable (K L) in
 noncomputable abbrev sIdeleRep : Rep ℤ Gal(L/K) :=
   (ideleRep K L).subrepresentation (sIdelesSubmodule K L S) (sIdelesSubmodule_stable K L S)
 
-variable (K) in
 
+variable (K) in
 abbrev SIndex : Type :=
   InfinitePlace K ⊕ ((S : Set (HeightOneSpectrum (𝓞 K))) ⊕ ↥(S : Set (HeightOneSpectrum (𝓞 K)))ᶜ)
 
-variable (L) in
 
+variable (L) in
 noncomputable def sComp : SIndex K S → Rep ℤ Gal(L/K)
   | .inl v => Rep.of (infiniteUnitsAboveRep L v)
   | .inr (.inl v) => Rep.of (finiteUnitsAboveRep L v.1)
@@ -58,18 +90,8 @@ def toSIdele (a : ↥(sIdelesSubmodule K L S)) :
     sIdeles (placesAbove L (S : Set (HeightOneSpectrum (𝓞 K)))) :=
   ⟨a.1.toMul, mem_sIdelesSubmodule.1 a.2⟩
 
-omit [NumberField K] in
-theorem toSIdele_add (a b : ↥(sIdelesSubmodule K L S)) : toSIdele S (a + b) = toSIdele S a * toSIdele S b :=
-  rfl
 
-omit [NumberField K] in
-theorem toSIdele_zero : toSIdele (L := L) S 0 = 1 :=
-  rfl
 
-omit [NumberField K] in
-theorem toSIdele_ρ (σ : Gal(L/K)) (a : ↥(sIdelesSubmodule K L S)) :
-    toSIdele S ((sIdeleRep K L S).ρ σ a) = σ • toSIdele S a :=
-  rfl
 
 omit [NumberField K] in
 theorem toSIdele_bijective : Function.Bijective (toSIdele (L := L) S) :=
@@ -182,14 +204,6 @@ theorem sEmbFin_comp_subtype (v : (S : Set (HeightOneSpectrum (𝓞 K)))) :
     sEmbFin (L := L) S v ≫ Rep.subtype _ _ _ = finiteEmbedAboveRep v.1 :=
   rfl
 
-theorem subtype_comp_infiniteProjAboveRep (v : InfinitePlace K) :
-    Rep.subtype _ _ _ ≫ infiniteProjAboveRep v = sProj (L := L) S (.inl v) :=
-  rfl
-
-theorem subtype_comp_finiteProjAboveRep (v : (S : Set (HeightOneSpectrum (𝓞 K)))) :
-    Rep.subtype _ _ _ ≫ finiteProjAboveRep v.1 = sProj (L := L) S (.inr (.inl v)) :=
-  rfl
-
 def productToFamily (p : SIdelesProduct L (S : Set (HeightOneSpectrum (𝓞 K)))) :
     ∀ i : SIndex K S, sComp L S i
   | .inl v => fun w => Additive.ofMul (p.1 v w)
@@ -254,10 +268,6 @@ instance mono_integerInclRep (v : HeightOneSpectrum (𝓞 K)) : Mono (integerInc
   have := integerUnitsAboveIncl_injective v h'
   funext w
   exact congrArg Additive.ofMul (congrFun this w)
-
-theorem integerEmbedAboveRep_eq (v : HeightOneSpectrum (𝓞 K)) :
-    integerEmbedAboveRep (L := L) v = integerInclRep v ≫ finiteEmbedAboveRep v :=
-  rfl
 
 theorem sIntegerProj_comp_integerInclRep (v : ↥(S : Set (HeightOneSpectrum (𝓞 K)))ᶜ) :
     sIntegerProj (L := L) S v ≫ integerInclRep v.1 =

@@ -1,5 +1,50 @@
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.InfinitesimalCharacterLimits.TwistStripLimits.BlockTypes
-import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.SliceTensors.PProjA
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.InfinitesimalCharacterLimits.AllLeaves
+public import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.SliceTensors.PExpTwA
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -56,7 +101,7 @@ theorem good_of_pos {N : ℕ} {t : Tr E N} (h : Tr.Pos t) (hz : ∀ z ∈ t.twis
     exact ⟨ih₁ h.1 fun z hz' => hz z (by simp [Tr.twists, hz']),
       ih₂ h.2 fun z hz' => hz z (by simp [Tr.twists, hz'])⟩
 
-theorem stable_of_pos {N : ℕ} {t : Tr E N} (h : Tr.Pos t) : t.AllLeaves fun _ V => IsStable V := by
+theorem stable_of_pos {N : ℕ} {t : Tr E N} (h : Tr.Pos t) : t.AllLeaves fun _ V => _root_.GlobalTheory.CuspRep.IsStable V := by
   induction t with
   | leaf V z' => exact h.2.stable
   | node t₁ t₂ ih₁ ih₂ => exact ⟨ih₁ h.1, ih₂ h.2⟩
@@ -99,7 +144,7 @@ theorem emb_trans {U U' : Submodule ℂ (Sm E N)} {P : Sm E N → Prop} (h₁ : 
   simp only [LinearMap.comp_apply]
   rw [he₁ o φ hφ, he₂ o _ (hf₁ φ hφ)]
 
-theorem emb_of_isoV {V V' : Submodule ℂ (Sm E N)} (hV : IsStable V) (h : IsoV V V') : Emb V (· ∈ V') := by
+theorem emb_of_isoV {V V' : Submodule ℂ (Sm E N)} (hV : _root_.GlobalTheory.CuspRep.IsStable V) (h : IsoV V V') : Emb V (· ∈ V') := by
   obtain ⟨T, hT⟩ := h
   obtain ⟨C, hC⟩ := Submodule.exists_isCompl V
   let p := Submodule.linearProjOfIsCompl V C hC
@@ -112,7 +157,7 @@ theorem emb_of_isoV {V V' : Submodule ℂ (Sm E N)} (hV : IsStable V) (h : IsoV 
     simp only [LinearMap.comp_apply, hp φ hφ, hp _ hψ, Submodule.subtype_apply, LinearEquiv.coe_coe]
     exact hT o ⟨φ, hφ⟩ ⟨act o φ, hψ⟩ rfl
 
-theorem isoV_of_common {V₁ V₂ V' : Submodule ℂ (Sm E N)} (hV₂ : IsStable V₂) (h₁ : IsoV V₁ V') (h₂ : IsoV V₂ V') :
+theorem isoV_of_common {V₁ V₂ V' : Submodule ℂ (Sm E N)} (hV₂ : _root_.GlobalTheory.CuspRep.IsStable V₂) (h₁ : IsoV V₁ V') (h₂ : IsoV V₂ V') :
     IsoV V₁ V₂ := by
   obtain ⟨T₁, hT₁⟩ := h₁
   obtain ⟨T₂, hT₂⟩ := h₂

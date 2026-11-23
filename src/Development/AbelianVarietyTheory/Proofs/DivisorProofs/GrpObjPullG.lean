@@ -1,5 +1,44 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExOfHodgeWt
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GapGeSubKapBase
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Definitions.Divisors.NormNegCmConstantEqAtAllEmbeddings
+
+@[expose] public section
+
 open CategoryTheory AlgebraicGeometry TopologicalSpace Limits NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor Formalism.L2.Pj Formalism.BasicNotions
 open ReciprocityTheory.ChartRestriction.G.Out (nonzeroLocus)
@@ -49,7 +88,7 @@ variable {Γ : Type} [Group Γ]
 
 def IsEqvAct {X' : Scheme.{0}} (ρ' : Γ →* Aut X') (G' : Over X') [GrpObj G'] (act' : OAct (𝓞 E) G')
     (m : Γ → (G'.left ⟶ G'.left)) : Prop :=
-  (∀ γ, IsGrpPullback G' G' (ρ' γ).hom (m γ)) ∧ (∀ γ a, (act'.act a).left ≫ m γ = m γ ≫ (act'.act a).left) ∧
+  (∀ γ, IsGrpPullback G' G' (ρ' γ).asIso.hom (m γ)) ∧ (∀ γ a, (act'.act a).left ≫ m γ = m γ ≫ (act'.act a).left) ∧
     ∀ γ₁ γ₂, m (γ₁ * γ₂) = m γ₂ ≫ m γ₁
 
 def MovesEta (TF : TorFlag Xo c) (Z : Comp Xo c) (ι : Γ →* LevelAut Dw l) (ρ : Γ →* Aut (V₀ TF.Y Z))
@@ -59,7 +98,7 @@ def MovesEta (TF : TorFlag Xo c) (Z : Comp Xo c) (ι : Γ →* LevelAut Dw l) (�
     ∀ w w' : V₀ TF.Y Z ⟶ G'.left, w ≫ G'.hom = ℓ → w' ≫ G'.hom = ℓ →
       w ≫ ψ = i₀ TF.Y Z ≫ (TF.Y.oF.eta b).left ≫ TF.Y.m.φ →
       w' ≫ ψ = i₀ TF.Y Z ≫ (TF.Y.oF.eta a).left ≫ TF.Y.m.φ →
-      w ≫ m γ = (ρ γ).hom ≫ w'
+      w ≫ m γ = (ρ γ).asIso.hom ≫ w'
 
 def IsTorsI (I : Ideal (𝓞 E)) {X' : Scheme.{0}} {G' : Over X'} [GrpObj G'] (act' : OAct (𝓞 E) G') {T : Over X'}
     (P : T ⟶ G') : Prop :=
@@ -71,7 +110,7 @@ def TorsLevel (I : Ideal (𝓞 E)) (ι : Γ →* LevelAut Dw l) {X' : Scheme.{0}
     (∀ P Q, IsTorsI I act' P → IsTorsI I act' Q → e (P * Q) = e P + e Q) ∧
     (∀ P (a : 𝓞 E), IsTorsI I act' P → e (P ≫ act'.act a) = a • e P) ∧
     (∀ P Q, IsTorsI I act' P → IsTorsI I act' Q → e P = e Q → P = Q) ∧
-    ∀ γ, t ≫ (ρ' γ).hom = t → ∀ P Q : Over.mk t ⟶ G', IsTorsI I act' P → Q.left = P.left ≫ m γ →
+    ∀ γ, t ≫ (ρ' γ).asIso.hom = t → ∀ P Q : Over.mk t ⟶ G', IsTorsI I act' P → Q.left = P.left ≫ m γ →
       e Q = ι γ (e P)
 
 end GlobalTheory.EqvAct

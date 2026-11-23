@@ -1,11 +1,59 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExistsSubMemEigW
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.SplitHermitianGeneratorsExistStatement
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.FamilyHodgeLatticeDataStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.IntersectionHiddenSecondStatement
+module
+
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExistsSubMemEigW
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.BundleDegreeEqSumValuationsStatement
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.FamilyHodgeLatticeDataStatement
 import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.FormalIsomorphismTransportStatement
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.BundleDegreeEqSumValuations
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.SubAndQuotientBundles
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.SplitHermitianGeneratorsExistStatement
+import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.SubAndQuotientBundlesStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.Valuation.AlgebraInstances
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Development.AutomorphicSpectrum.Definitions.AdelicLattices.FactPrimes
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor GlobalTheory.CompanionTheory.Ar GlobalTheory.CompanionTheory.Ar.Crv GlobalTheory.CompanionTheory.Ar.Conj GlobalTheory.CompanionTheory.Ar.Flat GlobalTheory.CompanionTheory.Ar.Fl
 open scoped CategoryTheory.Obj
@@ -45,13 +93,16 @@ theorem exists_quot_basis {r : ℕ} (x : Fin r → V)
   have hχ : ∀ a : O, χ a = ∑ k, ((b.repr a k : ℤ) : K) * χ (b k) := by
     intro a
     conv_lhs => rw [← b.sum_repr a]
+
     simp [map_sum, zsmul_eq_mul]
   have hρ : ∀ (a : O) (v : V), ρ a v = ∑ k, (b.repr a k : ℤ) • ρ (b k) v := by
     intro a v
     conv_lhs => rw [← b.sum_repr a]
+
     simp [map_sum, LinearMap.sum_apply]
   have hφx : ∀ (a : O) (j : Fin r), φ (ρ a (x j)) = χ a • Pi.single j (1 : K) := by
     intro a j
+
     rw [hρ, map_sum, hχ a, Finset.sum_smul]
     refine Finset.sum_congr rfl fun k _ => ?_
     have h := hφB (j, k)
@@ -89,6 +140,7 @@ theorem exists_quot_basis {r : ℕ} (x : Fin r → V)
   · simp [e, hψ]
   · rw [Basis.map_repr, LinearEquiv.trans_apply, LinearEquiv.symm_symm, he, Pi.basisFun_repr]
     simp_rw [← hB]
+
     rw [map_sum, Finset.sum_apply, Fintype.sum_prod_type, Finset.sum_eq_single j]
     · simp [hφB]
     · intro j' _ hj'
@@ -117,6 +169,7 @@ theorem isLatOf_quot {C : ACurve K} (i : C.I) {r : ℕ} {x : Fin r → V}
   · intro hw
     have h1 : χ 1 = ∑ k, ((b.repr 1 k : ℤ) : K) * χ (b k) := by
       conv_lhs => rw [← b.sum_repr 1]
+
       simp [map_sum, zsmul_eq_mul]
     refine ⟨∑ q : Fin r × J, (((b.repr 1 q.2 : ℤ) : K) * bq.repr w q.1) • ρ (b q.2) (x q.1),
       (hL _).2 ⟨fun q : Fin r × J => ((b.repr 1 q.2 : ℤ) : K) * bq.repr w q.1, fun q => ?_, rfl⟩, ?_⟩
@@ -248,6 +301,7 @@ theorem mem_stdLat_iff
         rw [hL]
         rfl
       refine ⟨fun q => (bA.repr u q : K), fun q => (Valuation.mem_valuationSubring_iff _ _).1 (bA.repr u q).2, ?_⟩
+
       conv_lhs => rw [← hu, ← bA.sum_repr u, map_sum, map_sum]
       refine Finset.sum_congr rfl fun q _ => ?_
       rw [map_smul, LinearMap.map_smul_of_tower, ← algebraMap_smul K]
@@ -307,8 +361,9 @@ private theorem quot_deg_lemma_4 {K : Type} [Field K] (C : ACurve K) {V : Type} 
       intro j
       rw [hbq1 i j]
       simp_rw [hb₀]
+
       rw [show (∑ l, N i j l • (eigSpan ρ χ).mkQ (x₀ l)) =
-          (eigSpan ρ χ).mkQ (∑ l, N i j l • x₀ l) by rw [map_sum]; simp only [map_smul]]
+        (eigSpan ρ χ).mkQ (∑ l, N i j l • x₀ l) by rw [map_sum]; simp only [map_smul]]
       rw [Submodule.mkQ_apply, Submodule.mkQ_apply, Submodule.Quotient.eq]
       exact hN i j
     have hM : b₀.toMatrix (bq i) = (N i).transpose := by

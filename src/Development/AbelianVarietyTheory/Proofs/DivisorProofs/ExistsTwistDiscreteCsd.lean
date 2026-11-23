@@ -1,7 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsUnifAt
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.ExpoConjOfIsCsd
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HeckeCharacterThetaInvariantExponent
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.BaseChangeDefiniteUnitary
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.Divisors.SimpleTwistedTraceFormulaStable
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Matrix Polynomial Filter GlobalTheory.CuspRep GlobalTheory.PRep Formalism.UG Formalism.BasicNotions GlobalTheory.UnitaryBC Formalism.L2.Host GlobalTheory.BCT
 open scoped Classical TensorProduct
 attribute [local instance] GlobalTheory.LocalData.complRel GlobalTheory.LocalData.isLocalField
@@ -10,7 +52,7 @@ noncomputable section
 
 namespace GlobalTheory.BCT.TwistDisc
 
-variable {E : Type} [Field E] [NumberField E] [IsTotallyComplex E] {a : ℕ}
+variable {E : Type} [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] {a : ℕ}
 
 theorem pow_val_apply (χ : HChar E) (k : ℕ) (x : _) : (χ ^ k).1 x = χ.1 x ^ k := rfl
 
@@ -55,14 +97,46 @@ theorem isSqInt_mulChi {χ : HChar E} (hu : χ.IsUnitary) (hs : ∀ t, chiDet a 
     exact hI
 
 theorem isDiscrete_map {χ : HChar E} (hu : χ.IsUnitary) (hs : ∀ t, chiDet a χ (splitCentre E a t) = 1)
-    {V : Submodule ℂ (Sm E a)} (hV : IsDiscrete V) : IsDiscrete (V.map (mulChi a χ).toLinearMap) where
-  aut := by rintro _ ⟨φ, hφ, rfl⟩; exact (hV.aut φ hφ).mulChi χ
-  sqInt := by rintro _ ⟨φ, hφ, rfl⟩; exact isSqInt_mulChi hu hs (hV.sqInt φ hφ)
-  stable := by
-    rintro o _ ⟨φ, hφ, rfl⟩
+    {V : Submodule ℂ (Sm E a)} (hV : IsDiscrete V) : IsDiscrete (V.map (mulChi a χ).toLinearMap) := by
+  refine { aut := ?_, sqInt := ?_, stable := ?_, ne_bot := ?_, irred := ?_ }
+  · rintro _ ⟨φ, hφ, rfl⟩
+    have h := hV.aut φ hφ
+    refine ⟨?_, ?_, ?_, ?_, ?_⟩
+    · intro γ g
+      simp [h.left, chiDet_ratGL]
+    · exact isOpen_stab_of_mem_nhds _ _ <| Filter.mem_of_superset
+        ((h.level.inter (isOpen_ker_chiDet χ)).mem_nhds ⟨by simp, by simp⟩) fun k hk => by
+          have h1 : rt E a (finGL E a k) φ = φ := hk.1
+          have h2 : chiDet a χ (finGL E a k) = 1 := hk.2
+          change rt E a (finGL E a k) (CuspRep.mulChi a χ φ) = CuspRep.mulChi a χ φ
+          rw [rt_mulChi, h1, h2, Units.val_one, one_smul]
+    · have := h.kfin
+      refine Submodule.finiteDimensional_of_le (S₂ := (Submodule.span ℂ (Set.range fun k => cptRep E a k φ)).map
+        (CuspRep.mulChi a χ).toLinearMap) (Submodule.span_le.2 ?_)
+      rintro _ ⟨k, rfl⟩
+      exact ⟨_, Submodule.smul_mem _ _ (Submodule.subset_span ⟨k, rfl⟩), (rt_mulChi χ _ φ).symm⟩
+    · have := h.zfin
+      refine Submodule.finiteDimensional_of_le (S₂ := (Submodule.span ℂ ((fun z : Module.End ℂ (Sm E a) => z φ) ''
+        Zalg E a)).map (CuspRep.mulChi a χ).toLinearMap) (Submodule.span_le.2 ?_)
+      rintro _ ⟨z, hz, rfl⟩
+      obtain ⟨z', h1, h2⟩ := Zalg_mulChi χ hz
+      exact ⟨_, Submodule.subset_span ⟨z', h1, rfl⟩, (h2 φ).symm⟩
+    · intro g
+      obtain ⟨C, N, h1⟩ := h.growth g
+      obtain ⟨C', N', h2⟩ := chiDet_growth (a := a) χ
+      refine ⟨C * (‖((chiDet a χ g : ℂˣ) : ℂ)‖ * C'), N + N', fun y => ?_⟩
+      change ‖(CuspRep.mulChi a χ φ).1 (g * infGL E a y)‖ ≤ _
+      rw [mulChi_apply, map_mul, Units.val_mul, norm_mul, norm_mul]
+      refine (mul_le_mul (h1 y) (mul_le_mul_of_nonneg_left (h2 y) (norm_nonneg _)) (by positivity)
+        ((norm_nonneg _).trans (h1 y))).trans_eq ?_
+      ring
+  · rintro _ ⟨φ, hφ, rfl⟩
+    exact isSqInt_mulChi hu hs (hV.sqInt φ hφ)
+  · rintro o _ ⟨φ, hφ, rfl⟩
     exact ⟨_, add_mem (V.smul_mem _ (hV.stable o φ hφ)) (V.smul_mem _ hφ), (act_mulChi χ o φ).symm⟩
-  ne_bot h := hV.ne_bot ((Submodule.map_eq_bot_iff (e := mulChi a χ)).1 h)
-  irred W hW hW' := by
+  · intro h
+    exact hV.ne_bot ((Submodule.map_eq_bot_iff (e := mulChi a χ)).1 h)
+  · intro W hW hW'
     have h := hV.irred (W.comap (mulChi a χ).toLinearMap) (fun φ hφ => by
       obtain ⟨ψ, h1, h2⟩ := hW hφ
       rwa [← (mulChi a χ).injective h2]) fun o φ hφ => by
@@ -93,7 +167,7 @@ theorem hasInfCharGL_map {V : Submodule ℂ (Sm E a)} {τ : E →+* ℂ} {m : Mu
   change cap τ u (mulChi a χ φ) = _ • mulChi a χ φ
   rw [cap_mulChi, h.2 _ φ hφ, map_smul, Multiset.map_map]
   congr 3
-  funext z
-  simp only [Function.comp_apply]; ring
+  ext x
+  simp [add_assoc, add_comm, add_left_comm]
 
 end GlobalTheory.BCT.TwistDisc

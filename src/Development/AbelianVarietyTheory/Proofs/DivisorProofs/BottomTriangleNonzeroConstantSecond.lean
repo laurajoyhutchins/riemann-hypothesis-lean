@@ -1,35 +1,93 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GoodIdemEmpty
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GoodIdemEmpty
+public import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.UnramifiedCharacter
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsCongLevelIntG
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.DetIdlVal
+public import Development.AbelianVarietyTheory.Statements.PlaceShiftStatements.NormSmall
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.CharIntegrable
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.ConjPlEqCP
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.WeilDataLines
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ApplyAt0Smul
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BottomTriangleLevelFixesVector
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ConjIdealIndicatorUnitBlockTranslateReadsWeilOpeStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CosetVecMemThetaSpace
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsAdelicThetaReadsCurveThetaFunctionStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsFinitePartZeroNeOfIsVacuumOrientedModelStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsMaximalLevelMovesStandardPairSupportToUnit
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FockVacuumRealRestrictionGaussianEntireStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FockVectorMinorProductOriginEqPeriodsJetStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GridLocalTensorPlacesCoprimeTwoQDStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HalfCosetIndicatorModIdealIsSchwartzBruhatHalfStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LevelIndicatorReadsNormPowerUnitVectorStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MovedThetaFunctionsReadOfMovedVacuumReadsStatement
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.NormPeriodSq
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.NormalisedVacuaRatioAlgebraicUnitEveryPrimeStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SquareNuCharConductorExponentsPosProdModulusStatement
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.StandardLatticeDoubleCosetClassesStabilisers
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsThetaFunctionStandardPairSecond
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsAdelicThetaReadsCurveThetaFunctionStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.WeilDatumFinitePartMovesVacuumAsThetaModelStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MovedThetaFunctionsReadOfMovedVacuumReadsStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FockVectorMinorProductOriginEqPeriodsJetStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AlphaHFinIdlIncU
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BottomTriangleLevelFixesVector
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsFiniteAdelicPointUnitaryGroupGramOne
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.WeilActionSchrodingerModelFiniteIdempotent
-import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.PlaceFinal
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.CharIntegrable
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FockJetsUnitVacuumEqUnitMulPeriodJets
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FockJetsUnitVacuumEqScaledThetaJets
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IsSelfDualEColLatOne
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ApplyAt0Smul
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CosetVecMemThetaSpace
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.CompAtMtOfMemGfC
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.StandardPairSecondUnitBlockCosetRootOfUnityStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.UnitBlockCosetIffMaximalLevelCongruentConjIdealStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.UnitVacuumEntireFactorIsThetaFunctionStandardStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.UnitaryCharFiniteIdeleEqHeckeCharValueStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.WeilDatumFinitePartMovesVacuumAsThetaModelStatement
 import Development.AbelianVarietyTheory.Proofs.FoundationProofs.DefiniteThetaPairTermsNormsIndependentRepresenta
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.InducedTypeThetaGenusOnePermutes
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IsSelfDualEColLatOne
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.SphericalPair
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ThetaSpaceSelfDualPairAtMostLine
 import Development.AbelianVarietyTheory.Proofs.FoundationProofs.VacuumUnderAdelicPairModulusOne
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.UnitaryCharFiniteIdeleEqHeckeCharValueStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.NormalisedVacuaRatioAlgebraicUnitEveryPrimeStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SquareNuCharConductorExponentsPosProdModulusStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GridLocalTensorPlacesCoprimeTwoQDStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HalfCosetIndicatorModIdealIsSchwartzBruhatHalfStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LevelIndicatorReadsNormPowerUnitVectorStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ConjIdealIndicatorUnitBlockTranslateReadsWeilOpeStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.StandardPairSecondUnitBlockCosetRootOfUnityStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsMaximalLevelMovesStandardPairSupportToUnit
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.UnitBlockCosetIffMaximalLevelCongruentConjIdealStatement
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsNsmulIntMemLatO
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IdempotentMulEqZeroOfOrthogonal
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.CompAtMtOfMemGfC
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.MemHomLatticeIffFrameStabilizerActMem
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.WeilActionSchrodingerModelFiniteIdempotent
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.WeilLatticeVacuumEqProdSplitPlaceFactors
+import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.CharLem
+import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.IdemUniq
+import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.LatSelf
+import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.PlaceFinal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsFiniteAdelicPointUnitaryGroupGramOne
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.IndefR Formalism.IndefR.Datum Formalism.IndefR.Links Formalism.L2.Theta IsDedekindDomain NumberField Finset MeasureTheory
 open Formalism.MainNotions.TaylorLogMetric Formalism.MainNotions.StandardLatticesGL3 Formalism.L2.Indef.Tree.ArchimedeanLeafBounds.Cuts
 open Formalism.DivisionValues (vw)
@@ -304,7 +362,7 @@ theorem weil_snd (hX : IsBottomTri W i j X) (s : T) :
   rw [← alpha_div_beta]
   exact hX.is.weil' s
 
-set_option maxHeartbeats 1600000 in
+
 
 theorem reads_datum (hI : GlobalTheory.NormSum.Inp D) {large₂ : SizeData₂ D} (hR : GlobalTheory.SqTop.Rec large₂) (hL : L.Is μ₀) (hX : IsBottomTri W i j X)
     (hβ : X.rW.β = 1) (hB : IsBottom G s i j (GlobalTheory.SqTop.modT G s) P P') (hS : A'.rank = P'.a) (hT : WW.rank = P'.d) {κ : ℂ}
@@ -326,7 +384,7 @@ theorem reads_datum (hI : GlobalTheory.NormSum.Inp D) {large₂ : SizeData₂ D}
   have hfr : Formalism.L2.DIV.IsFrame X.rA'.β (Formalism.L2.Col.stdLat D.host.E A'.rank) := hLS.eq_stdLat ▸ hX.is.rigA'.2.1
   have hee : X.e s * X.e s = X.e s := GlobalTheory.PlaceDatum.idemSum_mul_self he.1
   have hinf := GlobalTheory.PlaceDatum.infPart_cA (GlobalTheory.PlaceDatum.infPart_idemSum he.1)
-  have sb := GlobalTheory.T.halfCosetIndicatorModIdeal_isSchwartzBruhatHalf A' WW X.rA'.Λ X.rW.Λ hSd.1 hTd.1 _ hinf _ hm1
+  have sb := GlobalTheory.T.halfCosetIndicatorModIdeal_isSchwartzBruhatHalf A' WW X.rA'.Λ X.rW.Λ (GlobalTheory.PlaceVec.selfDual_isFullLattice A' X.rA'.Λ hSd) (GlobalTheory.PlaceVec.selfDual_isFullLattice WW X.rW.Λ hTd) _ hinf _ hm1
   have sb0 := sb 0 fun _ _ => mul_zero _
   have sb1 := sb (unitPt A' WW (cA D (X.e s)) A.rank) fun a b => by
     unfold unitPt
@@ -366,6 +424,7 @@ theorem reads_datum (hI : GlobalTheory.NormSum.Inp D) {large₂ : SizeData₂ D}
       (Circle.coe_ne_zero _) a2 sb1] at a1
     rwa [map_smul]
   have r5 := (reads_sum R hv r4).smul ζ₃
+
   rw [← Finset.smul_sum, ← hF, ← map_sum, ← map_smul, ← hsum, smul_smul] at r5
   refine ⟨ζ₃ * (ζ₂ * ζ₁), z3.mul (z2.mul z1), ?_⟩
   rw [hf, alpha_div_beta, hβ, show κ * (ζ₃ * (ζ₂ * ζ₁)) = ζ₃ * (ζ₂ * (κ * ζ₁)) by ring]
@@ -400,39 +459,6 @@ theorem ker'_eq (hI : GlobalTheory.NormSum.Inp D) (hc : D.host.ccK = ⊤) (hL : 
     GlobalTheory.OrientedHeis.om_fin_pureTensorO W.ψ A' WW _ _ (X.ω' s) hW W.θ hset.inf _ hg'.1 _ hg.1 _ _ _ _ _ _ hf.1]
   refine a2.trans ?_
   rw [P'.W.smul _ _ _ _ hF, GlobalTheory.FunObj.NormUniq.applyAt0_smul _ hc0, GlobalTheory.NormSum.Pair.term, mul_assoc]
-
-theorem kernel_eq_term : GlobalTheory.FunPr.Hypotheses₂ → GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.ThetaIntegralsAgree → GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.LocalMatching →
-    (∀ D, GlobalTheory.NormSum.Inp D) → GlobalTheory.SqTop.BotSmall →
-    GlobalTheory.SqTop.GBig fun {D} T _ _ G _ _ _ _ => ∀ (W : G.Weil), IsStdChar D W.ψ (-1) → ∀ (i j : Fin D.R.m) (A A' WW : HSp D)
-      (X : Tri T A A' WW) (δ t0 : ℂ), IsBottomTri W i j X → X.rW.β = 1 →
-      ∃ Ω₂ : ℂ, Ω₂ ≠ 0 ∧ ∀ (s : T) (Q : ℕ) (P P' : Pair D ⊤ δ t0 Q), IsBottom G s i j (GlobalTheory.SqTop.modT G s) P P' →
-        ∃ u : ℂ, u ≠ 0 ∧ u ∈ Qbar ∧ (∀ (p : ℕ) [Fact p.Prime], ¬ p ∣ GlobalTheory.SqTop.Qn G s → ∀ lam : Qbar →+* ℂ_[p], ‖lamC lam u‖ = 1) ∧
-          ∀ (ea : P'.a = A'.rank) (ed : P'.d = WW.rank) (h : GA D P'.d) (g : GA D WW), GlobalTheory.BotFormula.IsFinPt WW g h →
-            ∀ (x : GA D P'.a) (g' : GA D A'), GlobalTheory.BotFormula.IsFinPt A' g' x → ∀ T' : Tup D P'.a P'.d P'.n,
-              X.ker' W.ψ W.θ s (GlobalTheory.BotFormula.minorF ea ed T') g g' = Ω₂ * u * P'.term x h T' := by
-  intro _ _ _ hI _
-  refine ⟨0, fun _ _ _ => ⟨0, 0, fun _ _ D large₂ _ _ hR T Lc μ₀ hL G => ?_⟩⟩
-  intro W _ i j A A' WW X δ t0 hX hβ
-  have hc : D.host.ccK = ⊤ := hR.size.2.2.2.2.2.2.2.2.2.2.2.2.2
-  by_cases hex : ∃ (s : T) (Q : ℕ) (P P' : Pair D ⊤ δ t0 Q), IsBottom G s i j (GlobalTheory.SqTop.modT G s) P P'
-  · obtain ⟨s₀, Q₀, P₀, P₀', hB₀⟩ := hex
-    have s1 : X.rA'.s = fun _ => 1 := funext fun τ => (hX.std'.2.2 τ).1
-    have s3 : X.rW.s = fun _ => 1 := funext fun τ => (hX.stdW.2.2 τ).1
-    have hv := hX.is.isVac'
-    rw [s1, s3] at hv
-    obtain ⟨κ, hκ, hvac⟩ := vac_const (hI D) hc (setup hc hX P₀'.crv) P₀'.pt0 hX.std'.2.1 hX.stdW.2.1 hv
-    refine ⟨(∏ τ, GlobalTheory.NormExact.period D δ 1 τ ^ (P₀'.a * P₀'.n τ)) * κ,
-      mul_ne_zero (Finset.prod_ne_zero_iff.2 fun τ _ => pow_ne_zero _ (period_ne_zero P₀'.crv τ)) hκ, fun s Q P P' hB => ?_⟩
-    have hS : A'.rank = P'.a := hX.rank'.trans hB.rank.2.1.symm
-    have hT : WW.rank = P'.d := by rw [hB.rank.2.2.2, hB.rank.2.2.1, ← hX.rank, ← hX.rank', hX.is.rank]
-    obtain ⟨ζ, hζ, r1⟩ := hvac hS hT P'.e0 P'.vac P'.W.nz
-    obtain ⟨ζ', hζ', r2⟩ := reads_datum (hI D) hR hL hX hβ hB hS hT r1
-    have hu := hζ.mul hζ'.isAlgUnit
-    refine ⟨ζ * ζ', hu.1, hu.2.1, fun p _ _ lam => hu.2.2 p lam, fun ea ed h g hg x g' hg' T' => ?_⟩
-    obtain ⟨-, e1, -, e2, -⟩ := GlobalTheory.BottomReal.bottom_real_eq G hL hB₀ hB
-    rw [ker'_eq (hI D) hc hL hX hB ea ed (mul_ne_zero (mul_ne_zero hκ hζ.1) hζ'.ne_zero) r2 hg hg' T', e1, e2]
-    ring
-  · exact ⟨1, one_ne_zero, fun s Q P P' hB => absurd ⟨s, Q, P, P', hB⟩ hex⟩
 
 end GlobalTheory.BotSmallDict
 

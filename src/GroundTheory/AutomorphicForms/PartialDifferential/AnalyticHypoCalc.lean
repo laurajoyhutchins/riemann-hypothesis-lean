@@ -1,5 +1,53 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.PartialDifferential.AnalyticHypoBasic
+module
+
+public import GroundTheory.AutomorphicForms.PartialDifferential.AnalyticHypoBasic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+public import Mathlib.Analysis.Calculus.FDeriv.Symmetric
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GroundTheory.Automorphic.Sobolev
 
@@ -192,11 +240,6 @@ theorem norm_pderiv_le (f : 𝔼 → ℂ) (α : Fin n → ℕ) (x : 𝔼) :
         norm_dT_le f (mdir α) x
     _ = ‖iteratedFDeriv ℝ (mabs α) f x‖ := by simp [norm_mdir]
 
-theorem calc_sqrt_sum_sq_eq_norm {ι : Type*} [Fintype ι] (a : ι → ℝ) :
-    Real.sqrt (∑ i, a i ^ 2) = ‖(WithLp.toLp 2 a : EuclideanSpace ℝ ι)‖ := by
-  rw [EuclideanSpace.norm_eq]
-  simp
-
 theorem norm_le_sqrt_sum_basis {k : ℕ}
     (T : ContinuousMultilinearMap ℝ (fun _ : Fin k ↦ 𝔼) ℂ) :
     ‖T‖ ≤ Real.sqrt (∑ J : Fin k → Fin n, ‖T (fun l ↦ ev (J l))‖ ^ 2) := by
@@ -206,6 +249,7 @@ theorem norm_le_sqrt_sum_basis {k : ℕ}
     simpa [ev] using ((EuclideanSpace.basisFun (Fin n) ℝ).sum_repr (m l)).symm
   have hT : T m = ∑ J : Fin k → Fin n, (∏ l, m l (J l)) • T (fun l ↦ ev (J l)) := by
     conv_lhs => rw [show m = fun l ↦ ∑ i, (m l i) • ev i from funext hm]
+
     rw [T.map_sum]
     refine Finset.sum_congr rfl fun J _ ↦ ?_
     rw [T.map_smul_univ]
@@ -279,13 +323,6 @@ theorem hsD_add_sq {f : 𝔼 → ℂ} (hf : ContDiff ℝ ∞ f) (m k : ℕ) (x :
     refine Finset.sum_congr rfl fun i _ ↦ Finset.sum_congr rfl fun J _ ↦ ?_
     simp [Fin.snocEquiv, pdT_snoc hf]
 
-theorem hsD_pdT_le {f : 𝔼 → ℂ} (hf : ContDiff ℝ ∞ f) (m : ℕ) {k : ℕ} (I : Fin k → Fin n)
-    (x : 𝔼) : hsD m (pdT I f) x ≤ hsD (m + k) f x := by
-  refine (pow_le_pow_iff_left₀ (hsD_nonneg _ _ _) (hsD_nonneg _ _ _) two_ne_zero).1 ?_
-  rw [hsD_add_sq hf]
-  exact Finset.single_le_sum (f := fun I ↦ hsD m (pdT I f) x ^ 2)
-    (fun _ _ ↦ sq_nonneg _) (Finset.mem_univ I)
-
 def hsVec (k : ℕ) (f : 𝔼 → ℂ) (x : 𝔼) : EuclideanSpace ℂ (Fin k → Fin n) :=
   WithLp.toLp 2 (fun J ↦ pdT J f x)
 
@@ -308,12 +345,6 @@ theorem hsVec_const_mul {f : 𝔼 → ℂ} (hf : ContDiff ℝ ∞ f) (c : ℂ) (
   ext J
   simp [hsVec, pdT, dT_const_mul hf]
 
-theorem hsVec_sum {ι : Type*} (s : Finset ι) (F : ι → 𝔼 → ℂ)
-    (hF : ∀ i ∈ s, ContDiff ℝ ∞ (F i)) (k : ℕ) (x : 𝔼) :
-    hsVec k (fun y ↦ ∑ i ∈ s, F i y) x = ∑ i ∈ s, hsVec k (F i) x := by
-  ext J
-  simp [hsVec, pdT, dT_sum s F hF]
-
 theorem hsD_add_le {f g : 𝔼 → ℂ} (hf : ContDiff ℝ ∞ f) (hg : ContDiff ℝ ∞ g) (k : ℕ) (x : 𝔼) :
     hsD k (fun y ↦ f y + g y) x ≤ hsD k f x + hsD k g x := by
   simp_rw [hsD_eq_norm, hsVec_add hf hg]
@@ -327,12 +358,6 @@ theorem hsD_sub_le {f g : 𝔼 → ℂ} (hf : ContDiff ℝ ∞ f) (hg : ContDiff
 theorem hsD_const_mul {f : 𝔼 → ℂ} (hf : ContDiff ℝ ∞ f) (c : ℂ) (k : ℕ) (x : 𝔼) :
     hsD k (fun y ↦ c * f y) x = ‖c‖ * hsD k f x := by
   simp_rw [hsD_eq_norm, hsVec_const_mul hf, norm_smul]
-
-theorem hsD_sum_le {ι : Type*} (s : Finset ι) (F : ι → 𝔼 → ℂ)
-    (hF : ∀ i ∈ s, ContDiff ℝ ∞ (F i)) (k : ℕ) (x : 𝔼) :
-    hsD k (fun y ↦ ∑ i ∈ s, F i y) x ≤ ∑ i ∈ s, hsD k (F i) x := by
-  simp_rw [hsD_eq_norm, hsVec_sum s F hF]
-  exact norm_sum_le _ _
 
 end
 

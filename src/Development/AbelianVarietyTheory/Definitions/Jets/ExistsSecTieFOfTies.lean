@@ -1,9 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Jets.JetsOnCopiesCompatibleFrames
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.CocycleIdentityIso
-import Formalism.SharpRestriction.Divisibility.GeneratorPowers.H1algStatement
-import Formalism.SharpRestriction.GenusPolyhedralBounds.RelativeIndexClassSets.CombBound4Of
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.IsMixedOver
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.CocycleIdentityIso
+public import Formalism.LocalToGlobal.ProjectiveLattices.PlaceBelow
+public import Formalism.SharpRestriction.Divisibility.AbelianOpenPart.OEOsInjective
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.IsMixedOver
+public import Formalism.LocalToGlobal.ProjectiveLattices.HasDataCondition
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ValCalc
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Formalism.SharpRestriction.Divisibility.GeneratorPowers.ExpBijectiveUniformisation
+import Formalism.SharpRestriction.Divisibility.GeneratorPowers.GermCut
+import Formalism.SharpRestriction.Divisibility.GeneratorPowers.LemmaBStatement
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.LBLocal
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.WchartLePreimage
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.PlaceBoundSplitOfIntegral
+
+@[expose] public section
 
 set_option autoImplicit false
 noncomputable section
@@ -73,14 +117,6 @@ def SecTieF (q : ℕ) (σ : P.U.toUnifPre.SecGF F q)
           ((gv (isoCast (congrArg RigLB.L P.bundle).symm I.m2.φ I.w2) r z (fun _ => J₂ (r ≫ I.m2.φ)) j').val) ^ q
 variable {I P F xF}
 
-theorem PtTieF.base {x : TFK (R := T.V) F ⟶ P.A.A} {b : ptO Xo xF ⟶ Xo.univ.t.G} (h : PtTieF I P F xF x b) :
-    xF = spMap (algebraMap T.Fr F) ≫ (letI := io.toAlgebra; y.x) := by
-  letI := io.toAlgebra
-  obtain ⟨r, h1, h2, -⟩ := h
-  have hw : I.m1.φ ≫ Xo.univ.t.G.hom = I.t'.G.hom ≫ y.x := I.m1.cart.1.w
-  have hb : b.left ≫ Xo.univ.t.G.hom = xF := Over.w b
-  rw [← hb, ← h2, Category.assoc, hw, ← Category.assoc, h1]
-
 theorem SecTieF.base {q : ℕ} {σ : P.U.toUnifPre.SecGF F q}
     {hh : LB.Sec (LPow Xo.univ.t.G Xo.univ.t.PP.L (q : ℤ) (ptO Xo xF))} (h : SecTieF I P F xF q σ hh) :
     xF = spMap (algebraMap T.Fr F) ≫ (letI := io.toAlgebra; y.x) := h.1
@@ -103,7 +139,6 @@ def ShortBasis {X : Type} [AddCommGroup X] (Q : X → ℤ) (r : ℕ) (Φ M0 : �
   0 ≤ Φ ∧ ∃ b : Module.Basis (Fin r) ℤ X, (∀ j, (Q (b j) : ℝ) ≤ Φ) ∧
     ∀ j z, |((Q (b j + z) - Q (b j) - Q z : ℤ) : ℝ)| ≤ M0 * Q z
 
-theorem nrm_zero (Dw : Datum H) (c : Coeff l) (α : 𝓞 E) : nrm Dw c 0 α = 1 := by simp [nrm]
 end Num
 
 section Run
@@ -117,27 +152,6 @@ def RunNum (D : D7) {j : ℕ} (w : WeightFamilies.Wt D j) (c : ℝ) : Prop :=
     (j < D.R.m → ∀ i, (WeightAlgebra.DF w : ℝ) * (2 * Real.sqrt (2 * D.R.f * D.R.m)) < (D.host.g i : ℝ) ∧
       rr0 D * ((2 * D.R.f * D.R.m : ℝ) ^ 4 * w.n + 2 * (2 * D.R.f * D.R.m : ℝ) ^ 3) * (WeightAlgebra.DF w : ℝ) ^ 2 / (D.host.g i : ℝ) ≤ c)
 
-theorem runNum_cc (D : D7) (L : SizeData₂ D) {j : ℕ} (w : WeightFamilies.Wt D j) (C2 A2 CR : ℝ) (h1 : w.LastPos)
-    (h2 : D.R.f * D.R.r * (D.R.r + 1) ≤ w.n) (h3 : ∀ i, 4 * WeightAlgebra.DF w + 4 ≤ D.host.g i)
-    (h4 : rr0 D ≤ WeightFamilies.RRv D CR)
-    (h5 : (2 * D.R.f * D.R.m : ℝ) ^ 4 * w.n + 2 * (2 * D.R.f * D.R.m : ℝ) ^ 3 ≤ WeightFamilies.PPv D L C2 A2)
-    (h6 : ∀ i, (WeightAlgebra.DF w : ℝ) * (2 * Real.sqrt (2 * D.R.f * D.R.m)) < (D.host.g i : ℝ)) :
-    RunNum D w (WeightAlgebra.cc D L C2 A2 CR w) := by
-  have r0 : 0 ≤ rr0 D := by unfold rr0; positivity
-  have p0 : (0 : ℝ) ≤ (2 * D.R.f * D.R.m : ℝ) ^ 4 * w.n + 2 * (2 * D.R.f * D.R.m : ℝ) ^ 3 := by positivity
-  have hR := r0.trans h4
-  have hP := p0.trans h5
-  refine ⟨h1, ?_, h3, by unfold WeightAlgebra.cc; positivity, fun _ i => ⟨h6 i, ?_⟩⟩
-  · refine le_trans ?_ h2
-    rcases Nat.eq_zero_or_pos D.R.r with h | h
-    · simp [h]
-    · nlinarith [Nat.mul_le_mul_left (D.R.f * D.R.r) (show 2 ≤ D.R.r + 1 by omega)]
-  · have hq : WeightAlgebra.qq D ≤ D.host.g i := by
-      fin_cases i
-      exacts [min_le_left _ _, min_le_right _ _]
-    have hq0 : 0 < WeightAlgebra.qq D := lt_min (by have := h3 0; omega) (by have := h3 1; omega)
-    unfold WeightAlgebra.cc
-    gcongr
 variable {D : D7}
 
 def Oriented (T : Top D) (EX : ErrX D) : Prop := ∀ i, T.Q.l.Mb ≤ Ideal.span {piBarO EX i}

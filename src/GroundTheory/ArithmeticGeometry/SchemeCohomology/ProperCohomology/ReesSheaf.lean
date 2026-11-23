@@ -1,5 +1,50 @@
-import Mathlib
-import GroundTheory.ArithmeticGeometry.SchemeCohomology.ProperCohomology.ReesSections
+module
+
+public import GroundTheory.ArithmeticGeometry.SchemeCohomology.ProperCohomology.ReesSections
+public import GroundTheory.ArithmeticGeometry.SchemeCohomology.ProperCohomology.ReesSheafBase
+public import GroundTheory.ArithmeticGeometry.SchemeCohomology.ProperCohomology.ReesSubmodule
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Arith.SchemeCoh
@@ -19,8 +64,8 @@ variable {A : Type u} [CommRing A] {I : Ideal A} {X : Scheme.{u}} [X.Over (Spec 
 
 lemma sectionsModuleA_smul (a : A) (m : Γ(F, V)) : a • m = algV X V a • m := rfl
 
-variable (A) in
 
+variable (A) in
 def toPolyA (q : PolynomialModule Γ(X, V) Γ(F, V)) : PolynomialModule A Γ(F, V) :=
   PolynomialModule.ofCoeff A q.coeff
 
@@ -101,14 +146,14 @@ lemma targetToPolySec_ι_π (y : Γ((Scheme.Modules.pullback (reesPr I X)).obj F
   have h := congrArg (fun f => (Scheme.Modules.Hom.app f (reesPr I X ⁻¹ᵁ V)) y) (reesSheafπ_ι I F)
   exact h
 
-variable (I) in
 
+variable (I) in
 def reesSectionsMap (x : Γ(reesSheaf I F, reesPr I X ⁻¹ᵁ V)) : PolynomialModule A Γ(F, V) :=
   toPolyA A (thetaMap hF hV (targetToPolySec ((reesSheafι I F).app _ x)))
 
 lemma reesSectionsMap_add (x x' : Γ(reesSheaf I F, reesPr I X ⁻¹ᵁ V)) :
     reesSectionsMap I hF hV (x + x') = reesSectionsMap I hF hV x + reesSectionsMap I hF hV x' := by
-  rw [reesSectionsMap, map_add, targetToPolySec_add, map_add, toPolyA_add]
+  rw [reesSectionsMap, map_add (f := _), targetToPolySec_add, map_add (f := _), toPolyA_add]
   rfl
 
 lemma reesSectionsMap_zero : reesSectionsMap I hF hV 0 = 0 := by
@@ -140,7 +185,7 @@ lemma reesSectionsMap_mem (x : Γ(reesSheaf I F, reesPr I X ⁻¹ᵁ V)) :
     exact single_zero_mem_reesSubmodule I Γ(F, V) m
   | zero => rw [map_zero]; exact zero_mem _
   | add z z' _ _ hz hz' =>
-    rw [map_add, toPolyA_add]
+    rw [map_add (f := _), toPolyA_add]
     exact add_mem hz hz'
   | smul s z _ hz =>
     rw [theta₁_smul]
@@ -169,8 +214,8 @@ lemma reesSectionsMap_surjective (p : reesSubmodule I Γ(F, V)) :
   · rintro r z _ ⟨x, hx⟩
     exact ⟨reesInr I V r • x, by rw [reesSectionsMap_smul, hx]⟩
 
-variable (I) in
 
+variable (I) in
 def reesSectionsEquiv : Γ(reesSheaf I F, reesPr I X ⁻¹ᵁ V) ≃+ reesSubmodule I Γ(F, V) :=
   AddEquiv.ofBijective
     ({ toFun := fun x => ⟨reesSectionsMap I hF hV x, reesSectionsMap_mem hF hV x⟩

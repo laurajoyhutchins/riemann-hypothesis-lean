@@ -1,6 +1,49 @@
-import Mathlib
-import Formalism.LocalToGlobal.Columns.ChainInstY
-import Formalism.LocalToGlobal.KernelLattices.KernelLocalFactors.ThDistC
+module
+
+public import Formalism.LocalToGlobal.Columns.FiniteSumNonzeroLargeDepth
+public import Formalism.LocalToGlobal.Columns.ChainInstY
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain
 
@@ -15,7 +58,7 @@ section Frames
 variable {E : Type} [Field E] [NumberField E] [StarRing E]
 
 theorem liftFr_smul {n : ℕ} {ST SG : Finset (HeightOneSpectrum (𝓞 E))}
-    (d : DecoSet E n ST SG) (a : UF E n × GLG E n SG) (w : SG) :
+    (d : DecoSet (E := E) (n := n) (ST := ST) (SG := SG)) (a : UF E n × GLG (E := E) (n := n) (SG := SG)) (w : SG) :
     ∃ κ : ↥(GLint E n w.1), (a • d).1.liftFr w = a.1.1 * d.1.liftFr w * κ.1 ∧
       ∀ x ∈ stdAt E n w.1, redV w.1 (κ.1 x) = ((a.2 w)⁻¹ : GL (Fin n) (𝓞 E ⧸ w.1.asIdeal)).1.mulVec (redV w.1 x) := by
   set γ : Sp E n ≃ₗ[E] Sp E n := a.1.1 with hγ
@@ -54,11 +97,11 @@ theorem frsF_smul {u : Pr.Word} {j : ℕ} (p : ChPt (R := R) sel mu u j)
     (g : FrmG Λ Θ) (P : rowSG Pr sel mu) (hP : P.1 ∈ Pr.vGs) :
     ∃ κ : ↥(GLint X.E (R.N j) P.1), frsF sel mu (g • p) P = g.1.1 * frsF sel mu p P * κ.1 ∧
       ∀ x ∈ stdAt X.E (R.N j) P.1, redV P.1 (κ.1 x) =
-        (((g.2.1 : GLG X.E (R.N j) Pr.vGs) ⟨P.1, hP⟩)⁻¹ : GL _ _).1.mulVec (redV P.1 x) := by
-  have e : (g • p).deco = ((g.1, (g.2.1 : GLG X.E (R.N j) Pr.vGs)) : UF X.E (R.N j) × GLG X.E (R.N j) Pr.vGs) • p.deco := rfl
+        (((g.2.1 : GLG (E := X.E) (n := R.N j) (SG := Pr.vGs)) ⟨P.1, hP⟩)⁻¹ : GL _ _).1.mulVec (redV P.1 x) := by
+  have e : (g • p).deco = ((g.1, (g.2.1 : GLG (E := X.E) (n := R.N j) (SG := Pr.vGs))) : UF X.E (R.N j) × GLG (E := X.E) (n := R.N j) (SG := Pr.vGs)) • p.deco := rfl
   unfold frsF
-  rw [dif_pos hP, dif_pos hP, e]
-  exact liftFr_smul p.deco (g.1, (g.2.1 : GLG X.E (R.N j) Pr.vGs)) ⟨P.1, hP⟩
+  rw [dite_eq_left hP, dite_eq_left hP, e]
+  exact liftFr_smul p.deco (g.1, (g.2.1 : GLG (E := X.E) (n := R.N j) (SG := Pr.vGs))) ⟨P.1, hP⟩
 
 end Chain
 
@@ -67,7 +110,7 @@ section PhiT
 variable {E : Type} [Field E] [NumberField E] [StarRing E]
 
 theorem phiT_smul (K : Type) [Field K] {a b : ℕ} {ST SG SG' : Finset (HeightOneSpectrum (𝓞 E))}
-    (d : DecoSet E a ST SG) (d' : DecoSet E b ST SG') (γ : UF E a) (h : GLG E a SG) (γ' : UF E b) (h' : GLG E b SG')
+    (d : DecoSet (E := E) (n := a) (ST := ST) (SG := SG)) (d' : DecoSet (E := E) (n := b) (ST := ST) (SG := SG')) (γ : UF E a) (h : GLG (E := E) (n := a) (SG := SG)) (γ' : UF E b) (h' : GLG (E := E) (n := b) (SG := SG'))
     (x : HomE E a b) :
     phiT K ((γ, h) • d).1 ((γ', h') • d').1 (γ'.1.toLinearMap ∘ₗ x ∘ₗ γ.1.symm.toLinearMap) = phiT K d.1 d'.1 x := by
   have hat : ∀ (P : ST) y, y ∈ ((γ, h) • d).1.at P.1 ↔ γ.1.symm y ∈ d.1.at P.1 := fun P y => mem_localization_gmap _ _ _ _
@@ -95,7 +138,7 @@ theorem phiT_smul (K : Type) [Field K] {a b : ℕ} {ST SG SG' : Finset (HeightOn
   · rfl
 
 theorem phiT_add_mul (K : Type) [Field K] {a b : ℕ} {ST SG SG' : Finset (HeightOneSpectrum (𝓞 E))}
-    (d : DecoSet E a ST SG) (d' : DecoSet E b ST SG') (S : Finset (HeightOneSpectrum (𝓞 E))) (hS : ∀ P : ST, P.1 ∈ S)
+    (d : DecoSet (E := E) (n := a) (ST := ST) (SG := SG)) (d' : DecoSet (E := E) (n := b) (ST := ST) (SG := SG')) (S : Finset (HeightOneSpectrum (𝓞 E))) (hS : ∀ P : ST, P.1 ∈ S)
     (T : ℕ) (hT : ∀ P : ST, (T : 𝓞 E) ∈ P.1.asIdeal) (x z : HomE E a b)
     (hz : z ∈ mulLat T (homAt S d.1.N d'.1.N)) :
     phiT K d.1 d'.1 (x + z) = phiT K d.1 d'.1 x := by

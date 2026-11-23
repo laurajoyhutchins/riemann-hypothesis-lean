@@ -1,4 +1,54 @@
-import Formalism.LocalToGlobal.GroupLattices.PendingLemmas.CoeffOneLNe
+module
+
+public import Formalism.LocalToGlobal.GroupLattices.PendingLemmas.CoeffOneLNe
+import Formalism.SharpRestriction.AdmissibleParameterJoins.GandSp
+import Formalism.SharpRestriction.AdmissibleParameterJoins.GandSq
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.DiscreteValuationRing
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Filter Topology
 
@@ -104,10 +154,11 @@ theorem wToC_mem_Wp (x : WW p) : wToC p x ∈ Formalism.MainNotions.GL3Theta.Wp 
   obtain ⟨c, hc⟩ := WittVector.dvd_sub_sum_teichmuller_iterateFrobeniusEquiv_coeff x N
   refine ⟨wToC p (∑ i ∈ Finset.Iic N, (WittVector.teichmuller p
         (((_root_.frobeniusEquiv (kb p) p).symm ^ i) (x.coeff i)) * (p : WW p) ^ i)), ?_, ?_⟩
-  · rw [map_sum]
-    refine Subring.sum_mem _ fun i _ => ?_
-    rw [map_mul, map_pow, map_natCast]
-    exact Subring.mul_mem _ (wToC_teich_mem p _) (Subring.pow_mem _ (natCast_mem _ p) i)
+  · set_option synthInstance.maxHeartbeats 100000 in
+      rw [map_sum]
+      refine Subring.sum_mem _ fun i _ => ?_
+      rw [map_mul, map_pow, map_natCast]
+      exact Subring.mul_mem _ (wToC_teich_mem p _) (Subring.pow_mem _ (natCast_mem _ p) i)
   · rw [dist_eq_norm, ← map_sub, hc]
     refine lt_of_le_of_lt (norm_wToC_pow_mul p (N + 1) c) (lt_of_le_of_lt ?_ hN)
     exact pow_le_pow_of_le_one (r_nonneg p) (r_lt_one p).le (Nat.le_succ N)
@@ -232,6 +283,7 @@ theorem logF_map : PowerSeries.map (k0ToC p) (Formalism.MainNotions.FormalGroupS
   ext n
   rw [PowerSeries.coeff_map]
   unfold Formalism.MainNotions.FormalGroupSystem.logF Formalism.MainNotions.GL3Theta.logF
+
   rw [PowerSeries.coeff_mk, PowerSeries.coeff_mk, map_sum]
   refine Finset.sum_congr rfl fun j _ => ?_
   split_ifs <;> simp
@@ -352,7 +404,7 @@ theorem coeff_one_l (g : G1 p) (hW : IsWq g.W g.wq) : PowerSeries.coeff 1 g.l = 
   unfold G1.l flog
   rw [PowerSeries.coeff_mk, if_neg one_ne_zero, Nat.sub_self, PowerSeries.coeff_zero_eq_constantCoeff_apply]
   unfold omegaW
-  simp only [map_mul, map_sub, map_add, map_neg, map_pow, PowerSeries.constantCoeff_inv, PowerSeries.constantCoeff_X, h0]
+  simp only [map_mul, map_sub, map_add (f := _), map_neg, map_pow, PowerSeries.constantCoeff_inv, PowerSeries.constantCoeff_X, h0]
   simp
   rw [show PowerSeries.constantCoeff (2 : PowerSeries ℂ_[p]) = 2 from map_ofNat _ 2]
   exact mul_inv_cancel₀ two_ne_zero
@@ -428,7 +480,7 @@ theorem dX_mem_ratSub {f : PowerSeries ℂ_[p]} (hf : f ∈ ratSub p) : dX f ∈
   rw [mem_ratSub] at hf ⊢
   intro n
   obtain ⟨z, hz⟩ := hf (n + 1)
-  exact ⟨((n : K0 p) + 1) * z, by unfold dX; rw [PowerSeries.coeff_mk, map_mul, map_add, map_natCast, map_one, hz]⟩
+  exact ⟨((n : K0 p) + 1) * z, by unfold dX; rw [PowerSeries.coeff_mk, map_mul, map_add (f := _), map_natCast, map_one, hz]⟩
 
 theorem wq_mem_ratSub {W : WeierstrassCurve ℂ_[p]} {wq : PowerSeries ℂ_[p]} (hW : IsWq W wq)
     (h1 : W.a₁ ∈ Wp p) (h2 : W.a₂ ∈ Wp p) (h3 : W.a₃ ∈ Wp p) (h4 : W.a₄ ∈ Wp p) (h6 : W.a₆ ∈ Wp p) :

@@ -1,6 +1,51 @@
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.DilationUnipotentWeylMeasure
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
 import Formalism.HermitianCurvature.StatementJF
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.DilationUnipotentWeylMeasure
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.RegularisedPairingViaPhase
+public import Mathlib.MeasureTheory.Integral.Bochner.ContinuousLinearMap
+
+@[expose] public section
 
 open Matrix MeasureTheory Filter
 
@@ -52,55 +97,5 @@ namespace Formalism.FourierDecayAlt.P
 open Formalism.REAL Formalism.QuantumDeterminants Formalism.FourierDecayAlt.B Formalism.FourierDecayAlt.JF
 
 attribute [local instance] Matrix.normedAddCommGroup Matrix.normedSpace
-
-theorem theta_bessel_commute_of_parts : Formalism.FourierDecayAlt.JF.JThetaOfParts := by
-  intro hW hR k r Wp Wq _ _ _ _ _ _ D A m F Θ ho hT hF hC g hg
-  have hCk : CkOn (m : ℕ∞) (GV k r) F := hF.choose_spec.1
-  have hgG : g ∈ GV k r := hg.1
-  have key : ∀ T ∈ Θ, Integrable (fun p => xiP D p • Rw T.word (rho D p F) g) D.μSS ∧
-      Rw T.word (JF D F) g = ∫ p, xiP D p • Rw T.word (rho D p F) g ∂D.μSS := by
-    intro T hT'
-    have hvl : T.word.length ≤ m := (B5.len_le_order Θ hT').trans ho
-    set v' := T.word.map fun X => ((‖X‖⁻¹ : ℝ) : ℂ) • X with hv'
-    have hv'u : ∀ X ∈ v', unitLie k r X := by
-      intro X hX
-      obtain ⟨Y, hY, rfl⟩ := List.mem_map.1 hX
-      exact B4.nrm_unit (x := (false, Y)) (T.word_lie Y hY)
-    have hv'l : v'.length ≤ m := by rw [hv', List.length_map]; exact hvl
-    obtain ⟨hI, hE⟩ := (hW k r Wp Wq D A m F hT hF).2 [] v' (by simp) hv'u (by simpa using hv'l) g hg
-    simp only [List.map_nil] at hI hE
-    have hae : (fun p => xiP D p • rho D p (dLR [] (v'.map (AdR p)) F) g) =ᵐ[D.μSS]
-        fun p => xiP D p • Rw v' (rho D p F) g := by
-      filter_upwards [B5.ae_inSS D] with p hp
-      have := hR k r Wp Wq D m F p hp hCk [] v' (by simp) (fun X hX => (hv'u X hX).1) (by simpa using hv'l) g hgG
-      simp only [List.map_nil] at this
-      rw [← this]
-      rfl
-    have hI' : Integrable (fun p => xiP D p • Rw v' (rho D p F) g) D.μSS := hI.congr hae
-    have hfun : (fun p => xiP D p • Rw T.word (rho D p F) g) =
-        fun p => (B4.pn (B4.lr [] T.word) : ℝ) • (xiP D p • Rw v' (rho D p F) g) := by
-      funext p
-      rw [WordIntegralScaling.rw_scale T.word (rho D p F), Pi.smul_apply, smul_comm]
-    refine ⟨?_, ?_⟩
-    · rw [hfun]; exact hI'.smul (B4.pn (B4.lr [] T.word))
-    · rw [WordIntegralScaling.rw_scale T.word (JF D F), Pi.smul_apply, hfun, integral_smul]
-      congr 1
-      rw [← integral_congr_ae hae]
-      exact hE
-  have hCo : CkOn (opOrder Θ : ℕ∞) (GV k r) F := B5.ckOn_mono (by exact_mod_cast ho) hCk
-  have hRHS : JF D (opApply Θ F) g = ∫ p, xiP D p • opApply Θ (rho D p F) g ∂D.μSS := by
-    show (∫ p, xiP D p • rho D p (opApply Θ F) g ∂D.μSS) = _
-    refine integral_congr_ae ?_
-    filter_upwards [B5.ae_inSS D] with p hp
-    rw [hC p hp F hCo g hg]
-  rw [hRHS]
-  unfold opApply
-  simp only [WordIntegralScaling.smul_list]
-  obtain ⟨_, hsum⟩ := WordIntegralScaling.int_list D.μSS Θ (fun T => T.coef g)
-    (fun T p => xiP D p • Rw T.word (rho D p F) g) fun T hT' => (key T hT').1
-  rw [hsum]
-  congr 1
-  refine List.map_congr_left fun T hT' => ?_
-  rw [(key T hT').2]
 
 end Formalism.FourierDecayAlt.P

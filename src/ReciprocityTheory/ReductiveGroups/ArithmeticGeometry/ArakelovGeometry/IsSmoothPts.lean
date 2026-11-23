@@ -1,6 +1,47 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.IsIntersectionFamily
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.ProjDefs
-import ReciprocityTheory.GeometryOfNumbers.AsymptoticSequences.ClosingHS
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.IsIntersectionFamily
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -57,10 +98,11 @@ def IsSecBasis (x : J → Ω) (n : ℕ) {r : ℕ} (b : Fin r → MvPolynomial J 
     LinearIndependent ℤ (fun k => aeval x (b k)) ∧
     Submodule.span ℤ (Set.range fun k => aeval x (b k)) = sec ℤ x n
 
-open Classical in
 
-def chi (x : J → Ω) (m : ConeMetric ℂ J) (μ : Measure (J → ℂ)) (n : ℕ) : ℝ :=
-  if h : ∃ p : (Σ r : ℕ, Fin r → MvPolynomial J ℚ), IsSecBasis x n p.2 then
+open Classical in
+def chi (x : J → Ω) (m : ConeMetric (C := ℂ) (ι := J)) (μ : Measure (J → ℂ)) (n : ℕ) : ℝ := by
+  classical
+  exact if h : ∃ p : (Σ r : ℕ, Fin r → MvPolynomial J ℚ), IsSecBasis x n p.2 then
     l2Degree (K := ℚ) (fun _ => m) (fun _ => μ) n h.choose.2
   else 0
 
@@ -76,7 +118,8 @@ section Top
 
 variable {κ : Type} [Fintype κ]
 
-def _root_.ReciprocityTheory.ChartRestriction.G.Geo.HermLine.ofCone (m : ConeMetric ℂ (Ix κ)) : HermLine (GlobalTheory κ) where
+def _root_.ReciprocityTheory.ChartRestriction.G.Geo.HermLine.ofCone
+    (m : ConeMetric (C := ℂ) (ι := Ix κ)) : HermLine (GlobalTheory κ) where
   a := 1
   h := m.ρ
   pos z hz := m.pos z fun h0 => by
@@ -98,10 +141,11 @@ def AllFam.IsFamily (I : AllFam) : Prop :=
 
 variable {Ω : Type*} [Field Ω] [CharZero Ω]
 
-def top (I : AllFam) (x : Ix κ → Ω) (m : ConeMetric ℂ (Ix κ)) (D : ℕ) : ℝ :=
+def top (I : AllFam) (x : Ix κ → Ω) (m : ConeMetric (C := ℂ) (ι := Ix κ)) (D : ℕ) : ℝ :=
   I Unit (GlobalTheory κ) (coordIdeal ℤ x) (D + 1) fun _ => HermLine.ofCone m
 
-structure IsGood (D : ℕ) (x : Ix κ → Ω) (m : ConeMetric ℂ (Ix κ)) (μ : Measure (Ix κ → ℂ)) :
+structure IsGood (D : ℕ) (x : Ix κ → Ω) (m : ConeMetric (C := ℂ) (ι := Ix κ))
+    (μ : Measure (Ix κ → ℂ)) :
     Prop where
   arith : IsArithVar (ι := GlobalTheory κ) (coordIdeal ℤ x) (D + 1)
   indep : LinearIndependent ℚ x
@@ -110,10 +154,6 @@ structure IsGood (D : ℕ) (x : Ix κ → Ω) (m : ConeMetric ℂ (Ix κ)) (μ :
   conjM : IsConjInvariant m
   conjMu : μ.map conjPt = μ
   vol : IsVolumeOn (coordIdeal ℤ x) D μ
-
-def defect (I : AllFam) (D : ℕ) (x : Ix κ → Ω) (m : ConeMetric ℂ (Ix κ)) (μ : Measure (Ix κ → ℂ)) :
-    ℕ → ℝ :=
-  GeometryOfNumbersTheory.hsDefect D (chi x m μ) (top I x m D)
 
 end Top
 

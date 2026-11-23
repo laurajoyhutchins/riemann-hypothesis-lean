@@ -1,4 +1,49 @@
-import Mathlib
+module
+
+public import Mathlib.NumberTheory.NumberField.AdeleRing
+public import Mathlib.Topology.Algebra.Group.Units
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GroundTheory.Global
 
@@ -13,13 +58,6 @@ abbrev IdeleGroup : Type _ := (𝔸[K])ˣ
 
 namespace IdeleGroup
 
-theorem isEmbedding_val_inv :
-    IsEmbedding (fun x : IdeleGroup K ↦ ((x : 𝔸[K]), ((x⁻¹ : IdeleGroup K) : 𝔸[K]))) :=
-  ((Homeomorph.refl (𝔸[K])).prodCongr MulOpposite.opHomeomorph.symm).isEmbedding.comp
-    (Units.isEmbedding_embedProduct (M := 𝔸[K]))
-
-example : IsTopologicalGroup (IdeleGroup K) := inferInstance
-
 def prodEquiv :
     IdeleGroup K ≃ₜ* (InfiniteAdeleRing K)ˣ × (FiniteAdeleRing (𝓞 K) K)ˣ where
   toMulEquiv := MulEquiv.prodUnits
@@ -27,14 +65,6 @@ def prodEquiv :
     (β := FiniteAdeleRing (𝓞 K) K)).continuous_toFun
   continuous_invFun := (Homeomorph.prodUnits (α := InfiniteAdeleRing K)
     (β := FiniteAdeleRing (𝓞 K) K)).continuous_invFun
-
-@[simp]
-theorem prodEquiv_apply_fst (x : IdeleGroup K) :
-    ((prodEquiv K x).1 : InfiniteAdeleRing K) = (x : 𝔸[K]).1 := rfl
-
-@[simp]
-theorem prodEquiv_apply_snd (x : IdeleGroup K) :
-    ((prodEquiv K x).2 : FiniteAdeleRing (𝓞 K) K) = (x : 𝔸[K]).2 := rfl
 
 def toInfinite : IdeleGroup K →* (InfiniteAdeleRing K)ˣ :=
   (MonoidHom.fst _ _).comp (prodEquiv K).toMulEquiv.toMonoidHom
@@ -66,10 +96,6 @@ abbrev IdeleClassGroup : Type _ := IdeleGroup K ⧸ (IdeleGroup.diagonal K).rang
 
 namespace IdeleClassGroup
 
-example : CommGroup (IdeleClassGroup K) := inferInstance
-
-example : IsTopologicalGroup (IdeleClassGroup K) := inferInstance
-
 def mk : IdeleGroup K →* IdeleClassGroup K := QuotientGroup.mk' _
 
 theorem continuous_mk : Continuous (mk K) := QuotientGroup.continuous_mk
@@ -91,8 +117,8 @@ section Finite
 
 variable {K}
 
-open Classical in
 
+open Classical in
 def finiteAdeleSingle (v : HeightOneSpectrum (𝓞 K)) :
     v.adicCompletion K →* FiniteAdeleRing (𝓞 K) K where
   toFun x := RestrictedProduct.mulSingle
@@ -189,8 +215,8 @@ section Infinite
 
 variable {K}
 
-open Classical in
 
+open Classical in
 def infiniteAdeleSingle (w : InfinitePlace K) : w.Completion →* InfiniteAdeleRing K :=
   MonoidHom.mulSingle (fun u : InfinitePlace K ↦ u.Completion) w
 
@@ -250,8 +276,8 @@ theorem infiniteProj_infiniteEmbedding_of_ne {w u : InfinitePlace K} (h : u ≠ 
 @[simp]
 theorem coe_infiniteProj_diagonal (w : InfinitePlace K) (x : Kˣ) :
     ((infiniteProj w (diagonal K x) : (w.Completion)ˣ) : w.Completion) =
-      ((x : K) : w.Completion) :=
-  rfl
+      ((x : K) : w.Completion) := by
+  rw [coe_infiniteProj, coe_diagonal, AdeleRing.algebraMap_fst_apply]
 
 end Infinite
 

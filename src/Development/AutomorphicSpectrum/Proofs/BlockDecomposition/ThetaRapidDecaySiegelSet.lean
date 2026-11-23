@@ -1,13 +1,59 @@
-import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.WeilThetaConvergence
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.IsSmoothModerateOfIsAutFunSm
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.LintegralSiegelConeInvModulusLtTopWeilStatement
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsCompactAdele
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsSiegelDomainReduction
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LatticeSumDecayBoundStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IntegerCoordinatesBoundStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CompactAdelicDenominatorStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.InversePointTorusScalingStatement
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.IsSmoothModerateOfIsAutFunSm
+public import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.WeilSiegelFormulaUnitary
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsSiegelDomainReduction
+import Development.AbelianVarietyTheory.Proofs.HeightProofs.CmTypeRestrictRealSubfieldInfinitePlaceBijective
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CompactAdelicDenominatorStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IntegerCoordinatesBoundStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.InversePointTorusScalingStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LatticeSumDecayBoundStatement
+import Formalism.LocalToGlobal.ProjectiveLattices.HalfOneAddSqrtNegIsIntegral
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+public import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.ModerateGrowthSchwartz
+import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.CovolOneIntegralAdd
+
+@[expose] public section
+
 open scoped Matrix NNReal ENNReal ComplexConjugate TensorProduct
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.L2.Theta Formalism.L2.Pj Formalism.IndefR.Datum MeasureTheory
 open GlobalTheory.AutomorphicL2Unitary GlobalTheory.AdelicU GlobalTheory.Doubling GlobalTheory.Cont GlobalTheory.MixModel
@@ -44,6 +90,7 @@ theorem lattice_sum {F E : Type} [Field F] [NumberField F] [Field E] [NumberFiel
     choose y₁ hy₁ using fun j => hden (R i j) (Or.inr ⟨(i, j), rfl⟩)
     choose y₂ hy₂ using fun j => hden (ξ j 0) (Or.inl (Set.mem_iUnion.2 ⟨j, _, hξ, rfl⟩))
     refine ⟨∑ j, y₁ j * y₂ j, ?_⟩
+
     rw [Matrix.mul_apply, Finset.mul_sum, RingOfIntegers.coe_eq_algebraMap, map_sum]
     refine Finset.sum_congr rfl fun j _ => ?_
     rw [map_mul, ← RingOfIntegers.coe_eq_algebraMap, ← RingOfIntegers.coe_eq_algebraMap, ← hy₁ j, ← hy₂ j]
@@ -109,7 +156,7 @@ theorem lattice_sum {F E : Type} [Field F] [NumberField F] [Field E] [NumberFiel
         rw [Finset.prod_const, Finset.card_univ, hcard, inv_pow, ← pow_mul]
         refine inv_anti₀ (by positivity) (pow_le_pow_right₀ (by linarith) ?_)
         exact hN
-      exact h5.trans (Finset.prod_le_prod (fun _ _ => by positivity) fun p _ => h1 p)
+      exact h5.trans (Finset.prod_le_prod₀ (fun _ _ => by positivity) fun p _ => h1 p)
     · simp [h, Set.indicator_of_notMem hξ]
   refine (GlobalTheory.T.lattice_sum_decay_bound m b hbp h hinj hh).trans (le_of_eq ?_)
   rw [← ENNReal.ofReal_prod_of_nonneg fun p _ => by have := hbp p; positivity]
@@ -233,9 +280,9 @@ theorem count_main : ∀ (D : D7) (θ : InfFam D), IsInfFam θ → ∀ (V : HSp 
     rw [hA₂]; nlinarith
   calc (∏ i, (1 + K * (Cn * t i)) ^ f) * ((∏ i, (1 + K * (Cn * (t i)⁻¹)) ^ f) * ∏ _j : Fin V.rank, (1 + K * Cn) ^ f)
       ≤ (∏ i, A₁ ^ f * t i ^ f) * ((∏ _i : Fin r, A₂ ^ f) * ∏ _j : Fin V.rank, A₃ ^ f) := by
-        refine mul_le_mul (Finset.prod_le_prod (fun i _ => by have := ht0 i; positivity) fun i _ => h1 i) ?_ (by
+        refine mul_le_mul (Finset.prod_le_prod₀ (fun i _ => by have := ht0 i; positivity) fun i _ => h1 i) ?_ (by
           refine mul_nonneg (Finset.prod_nonneg fun i _ => by have := ht0 i; positivity) (Finset.prod_nonneg fun i _ => by positivity)) (Finset.prod_nonneg fun i _ => by have := ht0 i; positivity)
-        refine mul_le_mul_of_nonneg_right (Finset.prod_le_prod (fun i _ => by have := ht0 i; positivity) fun i _ => h2 i) (Finset.prod_nonneg fun i _ => by positivity)
+        refine mul_le_mul_of_nonneg_right (Finset.prod_le_prod₀ (fun i _ => by have := ht0 i; positivity) fun i _ => h2 i) (Finset.prod_nonneg fun i _ => by positivity)
     _ = (∏ _i : Fin r, A₁ ^ f) * (∏ _i : Fin r, A₂ ^ f) * (∏ _j : Fin V.rank, A₃ ^ f) * ∏ i, t i ^ f := by
         rw [Finset.prod_mul_distrib]; ring
 

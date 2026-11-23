@@ -1,5 +1,70 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.Central.Defs
+public import Mathlib.LinearAlgebra.FiniteDimensional.Defs
+public import Mathlib.RingTheory.TensorProduct.Maps
 import GroundTheory.Brauer.TensorSimple
+import Mathlib.Algebra.Lie.OfAssociative
+import Mathlib.Algebra.Module.Torsion.Prod
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Basis.MulOpposite
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+public import Mathlib.RingTheory.SimpleModule.WedderburnArtin
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.LinearAlgebra.Dimension.Constructions
+public import Mathlib.LinearAlgebra.Dimension.Finite
+public import Mathlib.RingTheory.Artinian.Defs
+public import Mathlib.RingTheory.Artinian.Module
+public import Mathlib.RingTheory.SimpleModule.Isotypic
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Brauer
@@ -87,8 +152,6 @@ instance : IsScalarTower K (A ⊗[K] Bᵐᵒᵖ) (Twist f) :=
     change bimoduleHom f (c • r) x.val = c • bimoduleHom f r x.val
     rw [map_smul]; rfl⟩
 
-@[simp] theorem val_of (x : A) : (of f x).val = x := rfl
-
 @[simp] theorem of_val (x : Twist f) : of f x.val = x := rfl
 
 variable {f} {g : B →ₐ[K] A}
@@ -141,11 +204,6 @@ theorem exists_unit_conj (f g : B →ₐ[K] A) :
   have h := (Twist.map_val e.toLinearMap (f x)).symm.trans (Twist.map_val_apply e.toLinearMap x)
   simp only [LinearEquiv.coe_coe, ← hu] at h
   simp only [Units.val_mk, Units.inv_mk, mul_assoc, h, ← mul_assoc v u, hvu, one_mul]
-
-theorem AlgEquiv.exists_unit_conj (σ : A ≃ₐ[K] A) :
-    ∃ a : Aˣ, ∀ x, σ x = a * x * ↑a⁻¹ := by
-  obtain ⟨a, ha⟩ := GroundTheory.Brauer.exists_unit_conj (AlgHom.id K A) σ.toAlgHom
-  exact ⟨a, fun x ↦ by simpa using ha x⟩
 
 end SkolemNoether
 

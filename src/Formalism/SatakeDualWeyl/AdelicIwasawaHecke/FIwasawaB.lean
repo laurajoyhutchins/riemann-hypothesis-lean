@@ -1,4 +1,53 @@
-import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.FIwasawaA
+module
+
+public import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.FIwasawaA
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Formalism.UG Matrix
 
@@ -65,6 +114,7 @@ theorem fIwasawa_E_un (hσ : ∀ x, σ (σ x) = x) (e z : Fin n → L) (c : L)
     exact Finset.sum_congr rfl fun j _ => by ring
   have Hsym : ∀ x y : Fin n → L, fIwasawaH σ y x = σ (fIwasawaH σ x y) := by
     intro x y
+
     simp only [fIwasawaH, map_sum, map_mul, hσ]
     exact (Fintype.sum_equiv Fin.revPerm _ _ fun j => by simp [mul_comm]).symm
   apply fIwasawa_un_of_isometry
@@ -107,11 +157,6 @@ theorem fIwasawa_int_inv (hσv : ∀ x, Valued.v (σ x) = Valued.v x) (M : Matri
   unfold fIwasawaInv
   exact fIwasawa_int_mul _ _ (fIwasawa_int_mul _ _ hJ hcT) hJ
 
-theorem fIwasawa_int_P (π : Equiv.Perm (Fin n)) : fIwasawaInt (fIwasawaP (L := L) π) := by
-  intro i j
-  simp only [fIwasawaP, Matrix.of_apply]
-  split_ifs <;> simp
-
 theorem fIwasawa_int_E (hσv : ∀ x, Valued.v (σ x) = Valued.v x) (e z : Fin n → L) (c : L)
     (he : ∀ i, Valued.v (e i) ≤ 1) (hz : ∀ i, Valued.v (z i) ≤ 1) (hc : Valued.v c ≤ 1) :
     fIwasawaInt (fIwasawaE σ e z c) := by
@@ -147,15 +192,6 @@ theorem fIwasawa_mk_mem_K (hσv : ∀ x, Valued.v (σ x) = Valued.v x) (M : Matr
   show RingHom.mapMatrix (intL L).subtype A = _
   rw [hA]
   exact (fIwasawa_mk_val σ M hM).symm
-
-theorem fIwasawa_K_int (k : GU σ n) (hk : k ∈ KU σ n) :
-    fIwasawaInt (((k : GL (Fin n) L) : Matrix (Fin n) (Fin n) L)) := by
-  intro i j
-  have h1 := Subgroup.mem_subgroupOf.1 hk
-  obtain ⟨k', hk'⟩ := (Subgroup.mem_inf.1 h1).2
-  rw [← hk']
-  show Valued.v (((k' : Matrix (Fin n) (Fin n) (intL L)) i j : intL L) : L) ≤ 1
-  exact (k' i j).2
 
 end FIwasawaInt
 

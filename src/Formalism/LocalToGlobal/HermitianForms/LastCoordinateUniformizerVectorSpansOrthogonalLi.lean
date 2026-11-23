@@ -1,4 +1,46 @@
-import Formalism.LocalToGlobal.HermitianForms.PrkSmul
+module
+
+public import Formalism.LocalToGlobal.HermitianForms.PrkSmul
+public import Formalism.LocalToGlobal.HermitianForms.PsiZeroNontrivialCharacter
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -53,7 +95,7 @@ abbrev FrP : Type := Frames (gramC (gramP D) (embT D))
 
 variable {D}
 
-set_option maxHeartbeats 1000000 in
+
 
 structure ClsPTied (u : D.what₂.Word) where
 
@@ -79,7 +121,7 @@ structure ClsPTied (u : D.what₂.Word) where
 def sgT (u : D.what₂.Word) : D.what₂.Tau → DomWeight (D.R.N D.R.m - 1) :=
   fun τ => shW ((D.fm u).sg τ) ((D.R.m * (D.R.t + 1) / 2 : ℕ) : ℤ)
 
-set_option maxHeartbeats 1000000 in
+
 
 structure ValPTied (u : D.what₂.Word) (K : ClsPTied u) where
 
@@ -104,7 +146,7 @@ structure ValPTied (u : D.what₂.Word) (K : ClsPTied u) where
       ∃ P ∈ IntSpan D w (D.fm u).sg, eW ((D.fm u).ptEmb x) c =
         fnOf _ (shiftOf (sgT u)) (atInf (embT D) (B⁻¹ : GL (Fin (D.R.N D.R.m - 1)) D.host.E).1) P
 
-set_option maxHeartbeats 1000000 in
+
 
 structure TilTied (u : D.what₂.Word) (A : AtTTied u) (K : ClsPTied u) (P : LvTied u A D.R.m le_rfl) where
   z0 : Fin (D.R.N D.R.m) → D.host.E
@@ -117,13 +159,13 @@ structure TilTied (u : D.what₂.Word) (A : AtTTied u) (K : ClsPTied u) (P : LvT
     (r : D.host.E) = hform (sigD D : D.host.E →+* D.host.E) (gramN D D.R.m le_rfl) z0 ((ga c).1.1 *ᵥ x.1) →
     (D.fm u).fv D.R.m v ((D.fm u).til c) (P.pr v _ x) = A.res v r
 
-set_option maxHeartbeats 4000000 in
+
 
 def TilBaseLat {u : D.what₂.Word} {A : AtTTied u} {K : ClsPTied u} {P : LvTied u A D.R.m le_rfl}
     (Tl : TilTied u A K P) (Km : ClsTied u D.R.m le_rfl) : Prop :=
   Km.lev.Lb = K.lev.Lb.map ((iXc D).restrictScalars (𝓞 D.host.E)) ⊔ Submodule.span (𝓞 D.host.E) {Tl.z0}
 
-set_option maxHeartbeats 4000000 in
+
 
 def TilBaseFv {u : D.what₂.Word} {A : AtTTied u} {K : ClsPTied u} {P : LvTied u A D.R.m le_rfl}
     (Tl : TilTied u A K P) (Km : ClsTied u D.R.m le_rfl)
@@ -136,7 +178,7 @@ def TilBaseFv {u : D.what₂.Word} {A : AtTTied u} {K : ClsPTied u} {P : LvTied 
     (r : D.host.E) = hform (sigD D : D.host.E →+* D.host.E) (gramN D D.R.m le_rfl) Tl.z0 x →
     fMe v (Km.lev.fT (A.eV v).1 (A.eV v).2 t) = A.res v r
 
-set_option maxHeartbeats 4000000 in
+
 
 structure TilAd {u : D.what₂.Word} {A : AtTTied u} {K : ClsPTied u} {P : LvTied u A D.R.m le_rfl}
     (Tl : TilTied u A K P) (Km : ClsTied u D.R.m le_rfl) where
@@ -146,7 +188,7 @@ structure TilAd {u : D.what₂.Word} {A : AtTTied u} {K : ClsPTied u} {P : LvTie
     bc (inclE (F := D.host.F) (FiniteAdeleRing (𝓞 D.host.F) D.host.F)) (Tl.ga c).1 * (Km.y ((D.fm u).til c)).1 =
       g * (ka c).1
 
-set_option maxHeartbeats 4000000 in
+
 
 def FrExt {u : D.what₂.Word} (z0 : Fin (D.R.N D.R.m) → D.host.E) {K : ClsPTied u} {Km : ClsTied u D.R.m le_rfl}
     {G : GLoc D.host.F D.host.E (sigD D) D.host.g} {a t nb sk fc a' t' nb' sk' fc' : ℕ} {zl zl' : Bool}

@@ -1,7 +1,59 @@
-import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.LocFEqLocFAdjoinCut
-import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.EqBlockOfFix
-import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.ExistsExactLift
-import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.RedEqOfSubMem
+module
+
+public import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.LocalDensitySixth
+public import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.AlgebraMapIntCastSmul
+public import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.EqBlockOfFix
+import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.ExistsBasisLocF
+public import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.ExistsExactLift
+public import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.LocFEqLocFAdjoinCut
+public import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.RedEqOfSubMem
+import Formalism.HermitianLattices.HermitianLatticesProofs.GenusCovol
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField Module Matrix
 
@@ -17,8 +69,8 @@ variable {K F V V' : Type} [Field K] [NumberField K] [StarRing K] [Field F] [Num
   [Module (𝓞 K) V'] [IsScalarTower (𝓞 K) K V']
 variable {h : V →ₗ⋆[K] V →ₗ[K] K} {h' : V' →ₗ⋆[K] V' →ₗ[K] K}
 
-omit [NumberField K] [FiniteDimensional K V] [FiniteDimensional K V'] in
 
+omit [NumberField K] [FiniteDimensional K V] [FiniteDimensional K V'] in
 def prodEquiv (S : VecSplit h h') : (K × V') ≃ₗ[K] V :=
   LinearEquiv.ofBijective ((LinearMap.toSpanSingleton K V S.x₀).coprod S.ι) (by
     constructor
@@ -89,7 +141,7 @@ theorem locF_span_consBasis (S : VecSplit h h') {κ : Type} (b' : Basis κ K V')
           exact Submodule.subset_span ⟨Sum.inr i, rfl⟩
         · simp
         · intro x y _ _ hx hy
-          rw [map_add]
+          rw [map_add (f := _)]
           exact Submodule.add_mem _ hx hy
         · intro a x _ hx
           have e : S.ι (a • x) = a • S.ι x := (S.ι.restrictScalars (𝓞 K)).map_smul a x
@@ -103,7 +155,7 @@ theorem locF_span_consBasis (S : VecSplit h h') {κ : Type} (b' : Basis κ K V')
 
 theorem akCount_split (hK : Formalism.HermitianLatticesTheory.IsCMUnram K) (hF : IsFixF K F) (hs : h.IsSymm)
     (hd : IsTotPosDef h) (S : VecSplit h h') (h1 : h S.x₀ S.x₀ = 1) {L : Submodule (𝓞 K) V}
-    (hL : Submodule.IsLattice K L) (hLi : Formalism.HermitianLatticesTheory.IsIntegralLat h L) (hx : S.x₀ ∈ L)
+    (hL : Submodule.IsFullLattice K L) (hLi : Formalism.HermitianLatticesTheory.IsIntegralLat h L) (hx : S.x₀ ∈ L)
     {𝔭 : Ideal (𝓞 F)} (h𝔭 : 𝔭.IsMaximal) (hv : vd h L 𝔭 ≤ 1) {k : ℕ} (hk : 1 ≤ k) :
     akCount h L 𝔭 k = nkCount h L 𝔭 k 1 * akCount h' (S.cut L) 𝔭 k := by
   classical
@@ -118,7 +170,7 @@ theorem akCount_split (hK : Formalism.HermitianLatticesTheory.IsCMUnram K) (hF :
     have hv' : v = c • S.x₀ + S.ι a := by
       rw [← prodEquiv_apply, ← hv, LinearEquiv.apply_symm_apply]
     have hc : h S.x₀ v = c := by
-      rw [hv', map_add, map_smul, h1, S.orth]
+      rw [hv', map_add (f := _), map_smul, h1, S.orth]
       simp
     have ha : π v = a := by rw [hπ, hv]
     rw [hc, ha]
@@ -141,9 +193,9 @@ theorem akCount_split (hK : Formalism.HermitianLatticesTheory.IsCMUnram K) (hF :
         exact (hdec v).symm
       rw [e, ← hc, algebraMap_smul]
       exact L.sub_mem hv (L.smul_mem c hx)
-  have hcutL : Submodule.IsLattice K (S.cut L) := by
+  have hcutL : Submodule.IsFullLattice K (S.cut L) := by
     rw [hcutEq]
-    refine ⟨hL.fg.map _, ?_⟩
+    refine { toIsLattice := Submodule.IsLattice.of_fg K (hL.fg.map _), span_eq_top := ?_ }
     rw [Submodule.map_coe]
     change Submodule.span K (π '' (L : Set V)) = ⊤
     rw [Submodule.span_image, hL.span_eq_top, Submodule.map_top, LinearMap.range_eq_top]
@@ -210,8 +262,9 @@ theorem akCount_split (hK : Formalism.HermitianLatticesTheory.IsCMUnram K) (hF :
     set w : ↥(locF 𝔭 (spanO bb)) := ∑ p, c p • Formalism.HermitianLattices.Ext.L3.PinG.bM bb 𝔭 p with hwdef
     have hred : Formalism.HermitianLattices.Ext.L3.PinG.red bb h𝔭 k w = x := by
       funext q
+
       simp [hwdef, map_sum, map_smul, Formalism.HermitianLattices.Ext.L3.PinG.red_bM, Pi.single_apply, hc,
-        Algebra.smul_def, Ideal.Quotient.algebraMap_eq]
+      Algebra.smul_def, Ideal.Quotient.algebraMap_eq]
       rcases q with ⟨⟩ | i <;> simp
     have hwL : (w : V) ∈ L := by
       rw [hwdef, Submodule.coe_sum]
@@ -225,7 +278,7 @@ theorem akCount_split (hK : Formalism.HermitianLatticesTheory.IsCMUnram K) (hF :
       have e := (Formalism.HermitianLattices.Ext.L3.integralBasisSpans.congrP_int h𝔭 k z 1).2 (by rw [map_one]; exact hform.symm)
       rwa [map_one, hz] at e
     obtain ⟨z', hz'L, hz'1, hz'd⟩ :=
-      Formalism.HermitianLattices.Ext.L3.PinF.exists_exact_lift hK hF hs hd hL hLi h𝔭 h1 hk hwL hcong
+      Formalism.HermitianLattices.Ext.L3.PinF.exists_exact_lift hK hF hs hd (by first | exact hL | exact hL.toIsLattice) hLi h𝔭 h1 hk hwL hcong
     obtain ⟨g, hg, hgx⟩ :=
       Formalism.HermitianLattices.Ext.L3.PinC.exists_aut_map hK hF hs hd S h1 hL hLi hx h𝔭 hv hz'L hz'1
     rw [← hbb] at hg

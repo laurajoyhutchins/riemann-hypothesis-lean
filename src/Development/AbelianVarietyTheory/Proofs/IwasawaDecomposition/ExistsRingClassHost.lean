@@ -1,10 +1,54 @@
-import Mathlib
-import Formalism.SharpRestriction.LevelLetterCocycles.DataN
-import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.GlintPrincRelIndexNeZero
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.ExistsUniqueHcharOfFiniteOrder
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FiniteIndexUnitIdlSup
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.ExistsUniqueHcharOfFiniteOrder
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.IsRationalUnitaryDeterminantMapRationalUnitaryTo
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsProdInfMulFinPart
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FiniteIndexUnitIdlSup
 import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IdeleCharacterTrivialOnLocalUnits
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsProdInfMulFinPart
+public import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.GlintPrincRelIndexNeZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Algebra.Valued.WithZeroMulInt
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.NeutralLocalFields.LocalFieldComparison.HCFFromRecipA
+
+@[expose] public section
 
 noncomputable section
 
@@ -88,7 +132,7 @@ theorem tame {l : ℕ} (hl : l.Prime) (hB : ∀ x : B, ∃ n : ℕ, x ^ (l ^ n) 
   have := pow_gcd_eq_one.2 ⟨hn, hk'⟩
   rwa [(hc.pow n k).gcd_eq_one, pow_one] at this
 
-theorem map_finPartI [IsTotallyComplex E] [Finite B] (ψ : Ideles E →* B) (a : Ideles E) :
+theorem map_finPartI [_root_.NumberField.IsTotallyComplex E] [Finite B] (ψ : Ideles E →* B) (a : Ideles E) :
     ψ (finPartI E a) = ψ a := by
   have hm : 0 < Nat.card B := Nat.card_pos
   have h2 : ∀ w : InfinitePlace E, ∃ y : w.Completion, y ^ Nat.card B = (a : AdeleRing (𝓞 E) E).1 w := fun w => by
@@ -105,7 +149,7 @@ theorem map_finPartI [IsTotallyComplex E] [Finite B] (ψ : Ideles E →* B) (a :
   have e : u ^ Nat.card B * finPartI E a = a := Units.ext (by rw [Units.val_mul, Units.val_pow_eq_pow_val, hu, hb])
   conv_rhs => rw [← e, map_mul, map_pow, pow_card_eq_one', one_mul]
 
-theorem map_congr_unit [IsTotallyComplex E] [Finite B] {l : ℕ} (hl : l.Prime) (hB : ∀ x : B, ∃ n : ℕ, x ^ (l ^ n) = 1)
+theorem map_congr_unit [_root_.NumberField.IsTotallyComplex E] [Finite B] {l : ℕ} (hl : l.Prime) (hB : ∀ x : B, ∃ n : ℕ, x ^ (l ^ n) = 1)
     (Q : Finset (HeightOneSpectrum (𝓞 E))) (ψ : Ideles E →* B) (hψ : IsOpen (ψ.ker : Set (Ideles E)))
     (hu : ∀ v, v ∉ Q ∨ v ∈ placesOver E l → ∀ x, IsUnitAt v x → ψ (localIdele E v x) = 1)
     {a : Ideles E} (ha : a ∈ unitIdl E) (hQ : ∀ v ∈ Q, Valued.v ((a : AdeleRing (𝓞 E) E).2 v - 1) < 1) :
@@ -260,7 +304,7 @@ theorem isRingKer_ringKer [(ringKer c l Q).FiniteIndex] : IsRingKer c l Q (ringK
     le_antisymm (sInf_le hK) (le_sInf fun K' hK' => (hmin (hK.inf hK') inf_le_left).trans inf_le_right)
   rwa [e]
 
-theorem finiteIndex_ringKer [IsTotallyComplex E] {a : Ideles E →* Gab E Ω} (ha : IsGlobalArtin a) (hl : l.Prime) :
+theorem finiteIndex_ringKer [_root_.NumberField.IsTotallyComplex E] {a : Ideles E →* Gab E Ω} (ha : IsGlobalArtin a) (hl : l.Prime) :
     (ringKer c l Q).FiniteIndex := by
   have hc : (commutator (G E Ω)).topologicalClosure ≤ (art c l Q).ker := by
     rw [ker_art]
@@ -315,7 +359,7 @@ theorem pow_eq_one [(ringKer c l Q).FiniteIndex] (x : RingClass c l Q) : ∃ n :
 end Galois
 
 theorem ringClass_laws (hA : GlobalTheory.Published.GlobalArtinReciprocity) (E Ω : Type) [Field E] [NumberField E]
-    [IsTotallyComplex E] [Field Ω] [Algebra E Ω] [IsAlgClosure E Ω] (c : Ω ≃+* Ω) (l : ℕ) (hl : l.Prime) :
+    [_root_.NumberField.IsTotallyComplex E] [Field Ω] [Algebra E Ω] [IsAlgClosure E Ω] (c : Ω ≃+* Ω) (l : ℕ) (hl : l.Prime) :
     (∀ Q : Finset (HeightOneSpectrum (𝓞 E)), Finite (RingClass c l Q)) ∧
     (∀ (Q : Finset (HeightOneSpectrum (𝓞 E))) (x : RingClass c l Q), ∃ n : ℕ, x ^ (l ^ n) = 1) ∧
     (∀ Q : Finset (HeightOneSpectrum (𝓞 E)), Function.Surjective (art c l Q)) ∧

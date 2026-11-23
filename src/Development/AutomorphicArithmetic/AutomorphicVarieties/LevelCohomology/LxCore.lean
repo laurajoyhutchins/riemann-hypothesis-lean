@@ -1,6 +1,62 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.LevelCohomology.ExistsPowDvdSubOfTwoPowDvdSubOne
-import Development.AutomorphicArithmetic.AutomorphicVarieties.LevelCohomology.TwoPowDvdSubOneOrAddOneOfPowTwoPow
-import Development.AutomorphicArithmetic.AutomorphicVarieties.LevelCohomology.SumFilterTwoPowRootsEqZeroOfSumEqZero
+module
+
+public import Mathlib.Algebra.Field.Defs
+public import Mathlib.Data.ZMod.Basic
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.LevelCohomology.ExistsPowDvdSubOfTwoPowDvdSubOne
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.LevelCohomology.SumFilterTwoPowRootsEqZeroOfSumEqZero
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.LevelCohomology.TwoPowDvdSubOneOrAddOneOfPowTwoPow
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Data.Nat.Totient
+public import Mathlib.Data.ZMod.Units
+public import Mathlib.FieldTheory.Finite.Basic
+
+@[expose] public section
 
 open Finset
 
@@ -168,7 +224,7 @@ theorem lx_core {k : Type} [Field k] (l : ℕ) [Fact l.Prime] [CharP k l] (hl : 
             rw [ZMod.intCast_zmod_eq_zero_iff_dvd]; exact_mod_cast h
           rw [hπ]; rw [Int.cast_add, Int.cast_natCast, Int.cast_one] at this; linear_combination this
       have hxs : x * (1 - s) = x + s := by
-        have := hker (x + 1) (by rw [map_add, hp', map_one, neg_add_cancel])
+        have := hker (x + 1) (by rw [map_add (f := _), hp', map_one, neg_add_cancel])
         linear_combination -this
       have hx' : x ≠ 1 := by
         rintro rfl
@@ -185,7 +241,7 @@ theorem lx_core {k : Type} [Field k] (l : ℕ) [Fact l.Prime] [CharP k l] (hl : 
         · intro hlt'
           apply hx1
           have := hsmall (x + s) (s - 1) (by omega) (by omega) (by
-            rw [map_add, hp', map_natCast, Nat.cast_sub (by omega)]; push_cast; ring)
+            rw [map_add (f := _), hp', map_natCast, Nat.cast_sub (by omega)]; push_cast; ring)
           rw [← hvs] at this
           exact add_right_cancel (ZMod.val_injective _ this)
   have hS := Finset.sum_congr rfl hT
@@ -200,7 +256,7 @@ theorem lx_core {k : Type} [Field k] (l : ℕ) [Fact l.Prime] [CharP k l] (hl : 
     rw [hz _ h] at hh
     simp at hh
   have hπ0 : π (1 + 2 ^ (m + e - 1)) = 1 := by
-    rw [map_add, map_one, map_pow, map_ofNat, add_eq_left]
+    rw [map_add (f := _), map_one, map_pow, map_ofNat, add_eq_left]
     have : ((2 ^ (m + e - 1) : ℕ) : ZMod (2 ^ m)) = 0 := by
       rw [ZMod.natCast_eq_zero_iff]; exact pow_dvd_pow 2 (by omega)
     exact_mod_cast this

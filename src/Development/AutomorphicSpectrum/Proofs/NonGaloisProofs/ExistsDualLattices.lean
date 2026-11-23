@@ -1,10 +1,65 @@
-import Mathlib
-import Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow
-import Formalism.LocalRingCardinality.AdicCompletionLocal.LocTied
-import Formalism.SharpRestriction.LevelLetterCocycles.ChainRows
+module
+
+public import Formalism.WeaklyAdmissibleFiltrations.Statement
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Matrix.FiniteDimensional
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
 import Development.AutomorphicSpectrum.Definitions.NonGaloisLines.TopLine
-import Development.AutomorphicSpectrum.Proofs.NonGaloisProofs.GoodOAdicCompleteCompactBasisStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsIntegralCyclotomicChar
+import Formalism.ConjugateSelfDual.Statement
+import Formalism.SharpRestriction.CuspSpanNormBounds.Point
+import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
+import Formalism.SharpRestriction.LevelLetterCocycles.LocCoh
+public import Mathlib.LinearAlgebra.FreeModule.PID
+public import Mathlib.RingTheory.Localization.Module
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Formalism Formalism.ConjugateSelfDual Formalism.BasicNotions Formalism.BasicNotions.Loc Formalism.MainNotions Formalism.MainNotions.N Formalism.WeaklyAdmissibleFiltrations Module GlobalTheory.CompanionTheory.LocDual
 
 namespace GlobalTheory.CompanionTheory.LocDual.Lat
@@ -82,7 +137,7 @@ theorem exists_dual (T : Submodule O V) (hfg : T.FG) (hfree : Module.Free O T)
   let bV : Basis ι LL V := Basis.mk hliL hsp
   have hbV : ∀ i, bV i = e i := fun i => Basis.mk_apply hliL hsp i
   have hinj : Function.Injective P.flip := by
-    rw [injective_iff_map_eq_zero]
+    set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
     intro y hy
     exact hr y fun x => by simpa using congrArg (fun f => f x) hy
   let φ : V' ≃ₗ[LL] Dual LL V := LinearMap.linearEquivOfInjective P.flip hinj
@@ -215,7 +270,7 @@ theorem exists_stable (hO : IsOpen (Set.range (algebraMap O LL)))
     | smul c x _ hx => rw [smul_comm]; exact T0.smul_mem c hx
   let φ : T →ₗ[O] T0 := (a • (LinearMap.id : V →ₗ[O] V)).restrict hTa
   have hφ : Function.Injective φ := by
-    rw [injective_iff_map_eq_zero]
+    set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
     intro x hx
     have h1 : a • (x : V) = 0 := congrArg Subtype.val hx
     rw [← algebraMap_smul LL a, smul_eq_zero] at h1
@@ -237,7 +292,7 @@ theorem exists_stable (hO : IsOpen (Set.range (algebraMap O LL)))
       refine Submodule.subset_span ⟨(h * g, i), ?_⟩
       simp [map_mul, Module.End.mul_apply]
     | zero => simp
-    | add x z _ _ hx hz => rw [map_add]; exact T.add_mem hx hz
+    | add x z _ _ hx hz => rw [map_add (f := _)]; exact T.add_mem hx hz
     | smul c x _ hx =>
       rw [LinearMap.map_smul_of_tower]
       exact T.smul_mem c hx
@@ -248,73 +303,5 @@ theorem exists_stable (hO : IsOpen (Set.range (algebraMap O LL)))
     exact Submodule.subset_span ⟨(1, i), by simp⟩
 
 end Stable
-
-theorem cyc_mem (D : D7) (l : ℕ) [Fact l.Prime] (K : FinExt l) (LL : Type) [Field LL]
-    [Algebra ℚ_[l] LL] [TopologicalSpace LL] (O : Type) [CommRing O] [Algebra O LL]
-    (hG : GoodO (Qp := ℚ_[l]) LL O) (g : ↥(GK K)) :
-    ((cycLL ((D.loc l).PD K) LL g : LLˣ) : LL) ∈ Set.range (algebraMap O LL) := by
-  obtain ⟨χ, hχ, -, -⟩ := GlobalTheory.Cyc.exists_integral_cyclotomicChar l (D.loc l)
-  obtain ⟨⟨hdom, hdvr, -⟩, -⟩ := id hG
-  haveI := hdom
-  haveI := hdvr
-  obtain ⟨ϖ, hϖ⟩ := IsDiscreteValuationRing.exists_irreducible O
-  have h := (GlobalTheory.T.goodO_adic_complete_compact_basis l LL O hG ϖ hϖ).2.2.2.2.2 ((χ (g : GQ l) : ℤ_[l]ˣ) : ℤ_[l])
-  rw [hχ, ← (D.loc l).PD_χ K g] at h
-  exact h
-
-theorem dual_lattices_exist : ∀ (D : D7) (l : ℕ) [Fact l.Prime] (K : FinExt l), cycIntCore ((D.loc l).PD K) ∧ ∀ (LL : Type) [Field LL] [Algebra ℚ_[l] LL] [TopologicalSpace LL] (O : Type) [CommRing O] [Algebra O LL], GoodO (Qp := ℚ_[l]) LL O → ∀ (A A' : GRep ↥(GK K) ℚ_[l] LL O) (P : A.V →ₗ[LL] A'.V →ₗ[LL] LL), IsDual1 ((D.loc l).PD K) A.ρ A'.ρ P → ∃ (LA : Lattice (O := O) A.ρ) (LA' : Lattice (O := O) A'.ρ), IsDualLat1 ((D.loc l).PD K) LA LA' P ∧ IsDualLat1 ((D.loc l).PD K) LA' LA P.flip := by
-  intro D l _ K
-  haveI : CompactSpace ↥(GK K) := by
-    haveI := K.2
-    exact isCompact_iff_compactSpace.1 (InfiniteGalois.fixingSubgroup_isClosed K.1).isCompact
-  refine ⟨?_, ?_⟩
-  · intro LL _ _ _ O _ _ hG
-    have hχ := cyc_mem D l K LL O hG
-    obtain ⟨⟨hdom, hdvr, hfr⟩, -⟩ := hG
-    haveI := hdom
-    haveI := hdvr
-    haveI := hfr
-    have hinj : Function.Injective (algebraMap O LL) := IsFractionRing.injective O LL
-    refine ⟨{ T := LinearMap.range (Algebra.linearMap O LL), stable := ?_, fg := ?_,
-              free := Module.Free.of_equiv (LinearEquiv.ofInjective (Algebra.linearMap O LL) hinj),
-              span := ?_ }, rfl⟩
-    · rintro g _ ⟨a, rfl⟩
-      obtain ⟨c, hc⟩ := hχ g
-      refine ⟨c * a, ?_⟩
-      change algebraMap O LL (c * a) = ((cycLL ((D.loc l).PD K) LL g : LLˣ) : LL) • algebraMap O LL a
-      rw [map_mul, hc, smul_eq_mul]
-    · rw [← Submodule.map_top]
-      exact Module.Finite.fg_top.map _
-    · rw [eq_top_iff]
-      intro x _
-      have h : (1 : LL) ∈ Submodule.span LL (LinearMap.range (Algebra.linearMap O LL) : Set LL) :=
-        Submodule.subset_span ⟨1, by simp⟩
-      simpa using Submodule.smul_mem _ x h
-  · intro LL _ _ _ O _ _ hG A A' P hP
-    have hχ := cyc_mem D l K LL O hG
-    obtain ⟨⟨hdom, hdvr, hfr⟩, -, -, htr, hop⟩ := hG
-    haveI := hdom
-    haveI := hdvr
-    haveI := hfr
-    haveI := htr
-    obtain ⟨LA⟩ := exists_stable (O := O) hop A.ρ A.cont
-    obtain ⟨T', hfg, hfree, hspan, h1, h2⟩ :=
-      exists_dual LA.T LA.fg LA.free LA.span P hP.2.2.1 hP.2.2.2
-    have hst : ∀ g, ∀ y ∈ T', A'.ρ g y ∈ T' := by
-      intro g y hy
-      refine (h1 _).2 fun x hx => ?_
-      obtain ⟨a, ha⟩ := (h1 y).1 hy (A.ρ g⁻¹ x) (LA.stable _ _ hx)
-      obtain ⟨c, hc⟩ := hχ g
-      refine ⟨c * a, ?_⟩
-      have h3 := hP.1 g (A.ρ g⁻¹ x) y
-      have h4 : A.ρ g (A.ρ g⁻¹ x) = x := by
-        rw [← Module.End.mul_apply, ← map_mul]
-        simp
-      rw [h4, ha, ← hc] at h3
-      rw [h3, map_mul]
-    refine ⟨LA, { T := T', stable := hst, fg := hfg, free := hfree, span := hspan }, ⟨hP, h1⟩,
-      ⟨fun g x y => hP.1 g y x, hP.2.2.1, hP.2.1, hP.2.2.2.symm⟩, ?_⟩
-    intro x
-    exact h2 x
 
 end GlobalTheory.CompanionTheory.LocDual.Lat

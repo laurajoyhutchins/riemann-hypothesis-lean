@@ -1,7 +1,47 @@
-import Mathlib
-import Formalism.LocalRingCardinality.RankBoundMonotoneInDimension
-import Development.AbelianVarietyTheory.BlockTheory.ThetaLiftGeometry.ShapeDegreeParity
-import Development.AbelianVarietyTheory.BlockTheory.ThetaLiftGeometry.TeichmullerFactorisation
+module
+
+public import Formalism.LocalRingCardinality.DataForced
+public import Formalism.SharpRestriction.GlobalSchurBounds.GeneralLinearActions.IsDiscriminantTwelfthRootOfIdealLattice
+public import Formalism.LocalRingCardinality.RankBoundMonotoneInDimension
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -22,19 +62,13 @@ def rhoH (τ : D.what₂.Tau) : D.host.E →+* ℂ_[l] :=
 
 theorem rhoH_apply (τ : D.what₂.Tau) (x : D.host.E) : rhoH D lam τ x = lamC lam (embT D τ x) := by
   unfold lamC
-  rw [dif_pos (embT_mem D τ x)]
+  rw [dite_eq_left (embT_mem D τ x)]
   rfl
 
 theorem coe_rhoH (τ : D.what₂.Tau) : (rhoH D lam τ : D.host.E → ℂ_[l]) = tauEmb D lam τ :=
   funext fun x => rhoH_apply D lam τ x
 
 def rhoC (τ : D.what₂.Tau) : D.host.E →+* ℂ_[l] := (rhoH D lam τ).comp (D.host.conj : D.host.E →+* D.host.E)
-
-theorem rhoC_apply (τ : D.what₂.Tau) (x : D.host.E) :
-    rhoC D lam τ x = lamC lam (embT D τ (D.host.conj x)) := rhoH_apply D lam τ _
-
-def parProj (r : Bool × HH D) (ε : ℕ) (y : D.what₂.Tau → ℂ_[l] × ℂ_[l]) : ZMod (nP D l) → ℂ_[l] :=
-  fun s => if s.val % 2 = ε then (y (tauPl D (posPl D l r s.val))).1 else 0
 
 end Emb
 
@@ -64,47 +98,5 @@ theorem tauPl_bijective (D : D7) : Function.Bijective (tauPl D) := by
       exact Subtype.ext (by simp [plGG, ht])
 
 def plEquiv (D : D7) : (Bool × HH D) ≃ D.what₂.Tau := Equiv.ofBijective _ (tauPl_bijective D)
-
-theorem plEquiv_apply (D : D7) (z : Bool × HH D) : plEquiv D z = tauPl D z := rfl
-
-theorem inertK_iff (D : D7) (l : ℕ) (hl : l.Prime) (h5 : 5 ≤ l) : GL3Theta.InertK D l ↔ (IsResidueClassZero D l ∨ IsSg D l) := by
-  have hq : jacobiSym (-(D.host.d : ℤ)) D.host.q = 1 := by
-    have := D.host.hyp
-    unfold Formalism.FrobeniusOrbits.HostHyp at this
-    tauto
-  have hd := D.host.hyp.2.1
-  unfold GL3Theta.InertK IsResidueClassZero IsSg Host.cls primeClass
-  have h2 : l ≠ 2 := by omega
-  by_cases hs : l ∈ D.host.small
-  · rw [if_pos hs, D.host.QS_split l hl h2 (Nat.dvd_of_mem_primeFactors hs)]; simp
-  rw [if_neg hs]
-  by_cases h1 : l = D.host.q
-  · rw [if_pos h1, h1, hq]; simp
-  rw [if_neg h1]
-  by_cases h3 : l = D.host.d
-  · rw [if_pos h3, h3]
-    have : jacobiSym (-(D.host.d : ℤ)) D.host.d = 0 := by
-      haveI : NeZero D.host.d := ⟨hd.ne_zero⟩
-      rw [jacobiSym.eq_zero_iff_not_coprime, Int.neg_gcd, Int.gcd_self]
-      simpa using hd.ne_one
-    rw [this]; simp
-  rw [if_neg h3]
-  have cop : Int.gcd (-(D.host.d : ℤ)) (l : ℤ) = 1 := by
-    rw [Int.neg_gcd, Int.gcd_natCast_natCast]
-    exact (Nat.coprime_primes hd hl).mpr (Ne.symm h3)
-  rcases jacobiSym.eq_one_or_neg_one cop with h | h
-  · rw [if_pos h, h]; simp
-  · rw [if_neg (by rw [h]; decide)]
-    split_ifs <;> simp [h]
-
-theorem case_iff (D : D7) (l : ℕ) (hl : l.Prime) : IndefiniteRowSideFullHecke.ShapeDegreeParity.CaseA D l ↔ IndefiniteRowSideFullHecke.TeichmullerFactorisation.InertNotConj D l := by
-  unfold IndefiniteRowSideFullHecke.ShapeDegreeParity.CaseA IndefiniteRowSideFullHecke.TeichmullerFactorisation.InertNotConj
-  exact and_congr_right fun h5 => and_congr_left' (inertK_iff D l hl h5)
-
-theorem even_nP (D : D7) (l : ℕ) (h : IndefiniteRowSideFullHecke.TeichmullerFactorisation.InertNotConj D l) : Even (nP D l) := by
-  unfold nP
-  split_ifs with hs
-  · exact even_two_mul _
-  · exact h.2.2 (h.2.1.resolve_right hs)
 
 end GlobalTheory.InertCompare

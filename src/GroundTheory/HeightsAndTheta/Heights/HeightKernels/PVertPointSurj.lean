@@ -1,7 +1,59 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.StatementsVertPointLengthSteps
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PCoordConeArithVar
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PSectionBounded
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.StatementsVertPointLengthSteps
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PCoordConeArithVar
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PSectionBounded
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -14,8 +66,8 @@ namespace VerticalPointSurjective
 
 variable {T : Type} [Fintype T]
 
-omit [Fintype T] in
 
+omit [Fintype T] in
 theorem ringHom_aeval {A A' : Type*} [CommRing A] [CommRing A'] [Algebra ℤ A] (f : A →+* A')
     (z : (Σ _ : Unit, T) → A) (g : MRing (fun _ : Unit => T)) :
     f (aeval z g) = aeval (fun p => f (z p)) g := by
@@ -30,6 +82,7 @@ theorem aeval_smul_of_homog {S : Type*} [CommRing S] {g : MRing (fun _ : Unit =>
   classical
   conv_lhs => rw [g.as_sum]
   conv_rhs => rw [g.as_sum]
+
   rw [map_sum, map_sum, Finset.mul_sum]
   refine Finset.sum_congr rfl fun m hm => ?_
   rw [aeval_monomial, aeval_monomial,
@@ -108,7 +161,7 @@ theorem formSet_add (y : (Σ _ : Unit, T) → K') (t : T) (Q : Ideal (MRing (fun
   have H3 := HilbertSamuel.SectionBounded.homog_add H1 H2
   rw [formSet, Set.mem_ofPred_eq]
   refine ⟨e1 + e2, _, H3, ?_, Q.add_mem (Q.mul_mem_right _ hQ1) (Q.mul_mem_right _ hQ2)⟩
-  rw [map_add, map_mul, map_mul, map_pow, map_pow, aeval_X, hv1, hv2, Subring.coe_add]
+  rw [map_add (f := _), map_mul, map_mul, map_pow, map_pow, aeval_X, hv1, hv2, Subring.coe_add]
   ring
 
 theorem formSet_zero (y : (Σ _ : Unit, T) → K') (t : T) (Q : Ideal (MRing (fun _ : Unit => T))) :
@@ -194,7 +247,8 @@ theorem le_of_minimal_prime_over_coord (y : (Σ _ : Unit, T) → K') (t : T) (ht
     have hcomap : (formIdeal y t ht Q).comap (algebraMap ℤ (curveRing y)) ≠ ⊥ :=
       Ideal.comap_ne_bot_of_integral_mem ha0 haIQ (Algebra.IsIntegral.isIntegral a)
     have : ((formIdeal y t ht Q).comap (algebraMap ℤ (curveRing y))).IsPrime := Ideal.IsPrime.comap _
-    exact Ideal.isMaximal_of_isIntegral_of_isMaximal_comap _ (IsPrime.to_maximal_ideal hcomap)
+    letI := hIQprime
+    exact Ideal.isMaximal_of_isIntegral_of_isMaximal_under _ (IsPrime.to_maximal_ideal hcomap)
   have hIQeq : formIdeal y t ht Q = m := hIQmax.eq_of_le hm.ne_top hIQm
 
   obtain ⟨S, hS, hWS⟩ := hWforms
@@ -241,13 +295,13 @@ theorem locLen_quot_eq_zero {R : Type*} [CommRing R] (m : Ideal R) [m.IsPrime] {
       exact Ideal.mul_mem_right _ _ (Ideal.mem_span_singleton_self a)
   have hsub : Subsingleton (LocalizedModule m.primeCompl (R ⧸ Ideal.span {a})) :=
     ⟨fun u v => by rw [key u, key v]⟩
-  rw [locLen, dif_pos ‹m.IsPrime›, Module.length_eq_zero_iff.mpr hsub]
+  rw [locLen, dite_eq_left ‹m.IsPrime›, Module.length_eq_zero_iff.mpr hsub]
   rfl
 
 end VerticalPointSurjective
 
-open VerticalPointSurjective in
 
+open VerticalPointSurjective in
 theorem VertPointSurj.proof (hC : CurveCharts.Statement) (hSQ : SectionQuotLocal.Statement) :
     VertPointSurj.Statement := by
   classical

@@ -1,5 +1,49 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LevelSplitting.SemiGen
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LevelSplitting.SemiGen
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -27,6 +71,7 @@ private theorem hL_apply_lemma (x y : n → A) : D.hL x y = D.h x y := rfl
 
 theorem h_e_pX (H : D.Hyp) (b : Fin r) (u : n → A) : D.h (D.e b) (D.pX u) = 0 := by
   rw [← hL_apply_lemma]
+
   simp only [pX, LinearMap.sum_apply, LinearMap.smulRight_apply, map_sum, map_smul]
   simp only [hL_apply_lemma, H.ee, smul_zero, Finset.sum_const_zero]
 
@@ -58,7 +103,7 @@ theorem pW_span (H : D.Hyp) {x : n → A} (hx : x ∈ Submodule.span A (Set.rang
   induction hx using Submodule.span_induction with
   | mem x hx => obtain ⟨a, rfl⟩ := hx; exact pW_e H a
   | zero => exact map_zero _
-  | add x x' _ _ h1 h2 => rw [map_add, h1, h2, add_zero]
+  | add x x' _ _ h1 h2 => rw [map_add (f := _), h1, h2, add_zero]
   | smul c x _ h1 => rw [map_smul, h1, smul_zero]
 
 theorem pX_mem_span (u : n → A) : D.pX u ∈ Submodule.span A (Set.range D.e) := by
@@ -89,7 +134,7 @@ theorem complement_proj_image {S : (n → A) →ₗ[A] (n → A)} (hW : D.MapW S
 theorem Pi_comp (H : D.Hyp) {S S' : (n → A) →ₗ[A] (n → A)} (hX : D.MapX S) (hW' : D.MapW S')
     (v : n → A) : D.Pi S (D.Pi S' v) = D.Pi (S ∘ₗ S') v := by
   have hw := isW_pW H v
-  simp only [Pi, LinearMap.add_apply, LinearMap.comp_apply, map_add, pU_pU H, pU_pW H, pW_pU H, pW_pW H,
+  simp only [Pi, LinearMap.add_apply, LinearMap.comp_apply, map_add (f := _), pU_pU H, pU_pW H, pW_pU H, pW_pW H,
     map_zero, add_zero, zero_add]
   rw [complement_proj_image hW' hw, map_sub, map_sub, pW_S_pX H hX, sub_zero]
 
@@ -134,9 +179,9 @@ theorem Pi_uni (H : D.Hyp) {S : (n → A) →ₗ[A] (n → A)} (hW : D.MapW S) (
       h_pX_left (hW w' hw').1, h_pX_right H (hW w hw).1, h_pX_left (fun b => h_e_pX H b (S w')), hU]
     simp
   have hPU : ∀ v, D.pU (D.Pi S v) = D.pU v := fun v => by
-    simp only [Pi, LinearMap.add_apply, LinearMap.comp_apply, map_add, pU_pU H, pU_pW H, add_zero]
+    simp only [Pi, LinearMap.add_apply, LinearMap.comp_apply, map_add (f := _), pU_pU H, pU_pW H, add_zero]
   have hPW : ∀ v, D.pW (D.Pi S v) = D.pW (S (D.pW v)) := fun v => by
-    simp only [Pi, LinearMap.add_apply, LinearMap.comp_apply, map_add, pW_pU H, pW_pW H, zero_add]
+    simp only [Pi, LinearMap.add_apply, LinearMap.comp_apply, map_add (f := _), pW_pU H, pW_pW H, zero_add]
   rw [h_dec H, hPU, hPU, hPW, hPW, key _ _ (isW_pW H x) (isW_pW H y), ← h_dec H]
 
 theorem h_e_S {S : (n → A) →ₗ[A] (n → A)} (hS : D.FixEZ S) (hU : D.Uni S) (b : Fin r)
@@ -150,8 +195,9 @@ theorem h_z_S {S : (n → A) →ₗ[A] (n → A)} (hS : D.FixEZ S) (hU : D.Uni S
 theorem Pi_of_fix (H : D.Hyp) {S : (n → A) →ₗ[A] (n → A)} (hS : D.FixEZ S)
     (hf : ∀ a, S (D.f a) = D.f a) (hU : D.Uni S) (v : n → A) : D.Pi S v = S v := by
   have hSU : S (D.pU v) = D.pU v := by
+
     simp only [pU, LinearMap.add_apply, pX, pXv, pz, LinearMap.sum_apply, LinearMap.smulRight_apply,
-      map_add, map_sum, map_smul, hS.1, hf, hS.2]
+    map_add, map_sum, map_smul, hS.1, hf, hS.2]
   have hw := isW_pW H v
   have h1 : ∀ a, D.h (D.e a) (S (D.pW v)) = 0 := fun a => by rw [h_e_S hS hU, hw.1]
   have h2 : ∀ a, D.h (D.f a) (S (D.pW v)) = 0 := fun a => by rw [← hf a, hU, hw.2.1]
@@ -163,7 +209,7 @@ theorem Pi_of_fix (H : D.Hyp) {S : (n → A) →ₗ[A] (n → A)} (hS : D.FixEZ 
   have hpW : D.pW (S (D.pW v)) = S (D.pW v) := by
     rw [show D.pW (S (D.pW v)) = S (D.pW v) - D.pU (S (D.pW v)) from rfl, hpUS, sub_zero]
   simp only [Pi, LinearMap.add_apply, LinearMap.comp_apply, hpW]
-  rw [← hSU, ← map_add]
+  rw [← hSU, ← map_add (f := _)]
   congr 1
   simp only [pW, LinearMap.sub_apply, LinearMap.id_apply]
   abel
@@ -201,14 +247,14 @@ theorem N_part (H : D.Hyp) {S : (n → A) →ₗ[A] (n → A)} (hX : D.MapX S) (
     simp only [pz, LinearMap.smulRight_apply, map_smul, ← smul_sub]
     exact Submodule.smul_mem _ _ hZ
   have hSv : S v = S (D.pU v) + S (D.pW v) := by
-    rw [← map_add]
+    rw [← map_add (f := _)]
     congr 1
     simp only [pW, LinearMap.sub_apply, LinearMap.id_apply]
     abel
   have e1 : S v - D.Pi S v =
       (S (D.pX v) - D.pX v) + (S (D.pz v) - D.pz v) + D.pX (S (D.pW v)) := by
     simp only [Pi, LinearMap.add_apply, LinearMap.comp_apply]
-    rw [complement_proj_image hW hw, hSv, hdec, map_add]
+    rw [complement_proj_image hW hw, hSv, hdec, map_add (f := _)]
     abel
   rw [e1]
   exact Submodule.add_mem _ (Submodule.add_mem _

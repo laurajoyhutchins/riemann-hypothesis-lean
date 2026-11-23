@@ -1,6 +1,47 @@
-import Formalism.SharpRestriction.GlobalSchurBounds.GlobalRankLatticeProofs.UnitTraceSumBounds.AddPtW
-import Formalism.SharpRestriction.GlobalSchurBounds.GlobalRankLatticeProofs.UnitTraceSumBounds.StmtEndIntWOfOkp
-import Formalism.SharpRestriction.GlobalSchurBounds.GlobalRankLatticeProofs.UnitTraceSumBounds.ReadWHolds
+module
+
+public import Formalism.SharpRestriction.GlobalSchurBounds.GlobalRankLatticeProofs.UnitTraceSumBounds.AddPtW
+public import Formalism.SharpRestriction.GlobalSchurBounds.GlobalRankLatticeProofs.UnitTraceSumBounds.ReadWHolds
+public import Formalism.SharpRestriction.GlobalSchurBounds.GlobalRankLatticeProofs.UnitTraceSumBounds.StmtEndIntWOfOkp
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace Formalism.MainNotions.Ext
 
@@ -44,31 +85,5 @@ theorem simeqW_of {σ : Type} {f g : MvPowerSeries σ ℂ_[p]} (hf : CoefWf f) (
   exact And.intro (by simpa using r0) (by simpa using rI)
 
 end
-
-theorem beW_of (HA : AddPtW) (HM : MulPtW) (D : D7)
-    (hs : ∀ (p : ℕ) [Fact p.Prime] (lam : Qbar →+* ℂ_[p]) (α : ℂ_[p] × ℂ_[p]), α ∈ OKp D lam → α.swap ∈ OKp D lam) :
-    StatementBilinearWitt D := by
-  intro hph _ hadd hend hbi hconj p _ cc δ g hAt hp5 hI hM
-  have hOk : g.Ok := hAt.2.2.2.2
-  have hF : IntegralW (g.add (Xv 0) (Xv 1) : MvPowerSeries (Fin 2) ℂ_[p]) := (hadd p cc δ g hAt).2 hM
-  have hg : CoefWf g.ph := hph p cc δ g hAt hp5 hI hM
-  have P : ∀ {σ : Type} (i : σ), PtW (Xv i : MvPowerSeries σ ℂ_[p]) := fun i => ptW_X i
-  have B : ∀ {σ : Type} {a b : MvPowerSeries σ ℂ_[p]}, PtW a → PtW b → CoefWf (g.be a b) :=
-    fun ha hb => coefWf_be HA g hOk hF hg ha hb
-  have S : ∀ {σ : Type} {a b : MvPowerSeries σ ℂ_[p]}, PtW a → PtW b → PtW (g.add a b) :=
-    fun {σ} {a} {b} ha hb => HA p g hOk hF σ a b ha hb
-  refine ⟨B (P (0 : Fin 2)) (P (1 : Fin 2)), ?_, ?_, ?_⟩
-  · exact simeqW_of (B (S (P (0 : Fin 3)) (P (1 : Fin 3))) (P (2 : Fin 3)))
-      (coefWf_add (B (P (0 : Fin 3)) (P (2 : Fin 3))) (B (P (1 : Fin 3)) (P (2 : Fin 3))))
-      (hbi p cc δ g hAt).1
-  · exact simeqW_of (B (P (0 : Fin 3)) (S (P (1 : Fin 3)) (P (2 : Fin 3))))
-      (coefWf_add (B (P (0 : Fin 3)) (P (1 : Fin 3))) (B (P (0 : Fin 3)) (P (2 : Fin 3))))
-      (hbi p cc δ g hAt).2
-  · intro α hα
-    have h1 : PtW (g.mulBy α.1 (Xv 0) : MvPowerSeries (Fin 2) ℂ_[p]) :=
-      HM p g hOk α.1 (hend p cc δ g hAt hp5 hI hM α hα) (Fin 2) _ (P 0)
-    have h2 : PtW (g.mulBy α.2 (Xv 1) : MvPowerSeries (Fin 2) ℂ_[p]) :=
-      HM p g hOk α.2 (hend p cc δ g hAt hp5 hI hM α.swap (hs p g.lam α hα)) (Fin 2) _ (P 1)
-    exact simeqW_of (B h1 (P (1 : Fin 2))) (B (P (0 : Fin 2)) h2) (hconj p cc δ g hAt (by omega) α hα)
 
 end Formalism.MainNotions.Ext

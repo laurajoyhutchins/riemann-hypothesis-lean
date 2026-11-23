@@ -1,5 +1,49 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.EllipticPartTestData
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.ExistsHasCls
+
+@[expose] public section
 
 open MeasureTheory Set Filter Polynomial NumberField IsDedekindDomain
 open GlobalTheory.AdelicU GlobalTheory.Orb GlobalTheory.AutomorphicL2Unitary Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes
@@ -16,13 +60,13 @@ theorem fld_induction (P : PPol σ n) (p : Fld P → Prop) (h0 : ∀ e, p (algeb
   obtain ⟨q, rfl⟩ := AdjoinRoot.mk_surjective (g := P.1) l
   induction q using Polynomial.induction_on with
   | C a => exact h0 a
-  | add a b ha hb => rw [map_add]; exact hadd _ _ ha hb
+  | add a b ha hb => rw [map_add (f := _)]; exact hadd _ _ ha hb
   | monomial k a ha => rw [pow_succ, ← mul_assoc, map_mul]; exact hmul _ ha
 
 theorem star_star (hσ : ∀ e, σ (σ e) = e) (P : PPol σ n) (l : Fld P) : star' P (star' P l) = l := by
   induction l using fld_induction with
   | h0 e => rw [star'_algebraMap, star'_algebraMap, hσ]
-  | hadd a b ha hb => rw [map_add, map_add, ha, hb]
+  | hadd a b ha hb => rw [map_add (f := _), map_add (f := _), ha, hb]
   | hmul a ha => rw [map_mul, map_mul, ha, star'_alpha, map_inv₀, star'_alpha, inv_inv]
 
 theorem trace_star (hσ : ∀ e, σ (σ e) = e) (P : PPol σ n) (l : Fld P) :
@@ -67,6 +111,7 @@ theorem hform_smul_right (c : A) (a b : Fin n → A) :
 
 theorem hform_symm (hs : ∀ e, s (s e) = e) (hJ : ∀ i j, s (J j i) = J i j) (a b : Fin n → A) :
     Formalism.UG.hform s J b a = s (Formalism.UG.hform s J a b) := by
+
   simp only [Formalism.UG.hform, map_sum, map_mul, hs, hJ]
   rw [Finset.sum_comm]
   exact Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => by ring
@@ -91,7 +136,7 @@ theorem exists_trace_form : ∀ (F E : Type) [Field F] [Field E] [CharZero E] [A
       rfl
     | hadd a b ha hb =>
       intro y y'
-      rw [add_mul, map_add, hform_add_left, ha, hb, map_add, add_mul, map_add, hform_add_right]
+      rw [add_mul, map_add (f := _), hform_add_left, ha, hb, map_add (f := _), add_mul, map_add (f := _), hform_add_right]
     | hmul a ha =>
       intro y y'
       rw [mul_assoc, ha, map_mul (star' P), star'_alpha, ← h1 (star' P a * (alpha P)⁻¹ * y) y']
@@ -99,7 +144,7 @@ theorem exists_trace_form : ∀ (F E : Type) [Field F] [Field E] [CharZero E] [A
       field_simp [alpha_ne_zero P]
   let f : Module.Dual E (Fld P) :=
     { toFun := fun y => Formalism.UG.hform s J (φ 1) (φ y)
-      map_add' := fun a b => by rw [map_add, hform_add_right]
+      map_add' := fun a b => by rw [map_add (f := _), hform_add_right]
       map_smul' := fun c a => by rw [map_smul, hform_smul_right]; rfl }
   have hnd := traceForm_nondegenerate E (Fld P)
   let x : Fld P := ((Algebra.traceForm E (Fld P)).toDual hnd).symm f

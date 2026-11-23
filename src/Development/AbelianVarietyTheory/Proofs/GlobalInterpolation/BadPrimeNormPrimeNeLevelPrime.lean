@@ -1,14 +1,56 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.KerIsTerm
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.LevelChainSharpColumnValuationOfPointKernelLiftL
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ValuationLeOneOfMemZmu
+module
+
+public import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.KerIsTerm
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.JetOpIntegral
 import Development.AbelianVarietyTheory.Proofs.SatakeParameters.AbsNormEqOfSplitFactor
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.HeckeUnit
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ValuationFinOrderApply
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.UnfoldingIsGoodCyclotomicInvariantReferenceLatti
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.VolqExistsPow
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.IntOfHomAt
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ValuationLeOneOfPow
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.HeckeUnit
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.IntOfHomAt
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.LastTwoStepsGuarded
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.NotDvdCardOfInjective
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.UnfoldingIsGoodCyclotomicInvariantReferenceLatti
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ValuationFinOrderApply
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ValuationLeOneOfMemZmu
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ValuationLeOneOfPow
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.VolqExistsPow
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.CoassocSimps
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 noncomputable section
 
@@ -21,8 +63,8 @@ section Generic
 
 variable {E K : Type} [Field E] [NumberField E] [StarRing E] [Field K] [NumberField K] {a b : ℕ} {P : HeightOneSpectrum (𝓞 E)}
 
-omit [StarRing E] in
 
+omit [StarRing E] in
 theorem awayAt_of_fnModAt {N : Submodule (𝓞 E) (Sp E a)} {N' : Submodule (𝓞 E) (Sp E b)} {Φ : HomE E a b → K}
     (hq : (qOf P).Prime) (h : FnModAt P N N' Φ) (w : HeightOneSpectrum (𝓞 K)) {B : ℕ} (hB : 1 ≤ B) : AwayAt P w B N N' Φ := by
   refine ⟨fun x => valuation_le_one_of_mem_Zmu w hq (h.2.2 x), fun x z hz => ?_⟩

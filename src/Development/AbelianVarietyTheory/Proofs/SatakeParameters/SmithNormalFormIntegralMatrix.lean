@@ -1,6 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisGeometry₂.HoweUnram
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.MemIntMat
+module
+
+public import Formalism.SatakeDualWeyl.StatementF
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 open Matrix
@@ -59,11 +107,6 @@ theorem isUnimod_permR {k : ℕ} (σ : Equiv.Perm (Fin k)) :
 def blk {m n : ℕ} (a : L) (A : Matrix (Fin m) (Fin n) L) : Matrix (Fin (m+1)) (Fin (n+1)) L :=
   Matrix.of fun i j => Fin.cases (Fin.cases a (fun _ => 0) j) (fun i' => Fin.cases 0 (fun j' => A i' j') j) i
 
-@[simp] theorem blk_zero_zero {m n : ℕ} (a : L) (A : Matrix (Fin m) (Fin n) L) : blk a A 0 0 = a := rfl
-@[simp] theorem blk_zero_succ {m n : ℕ} (a : L) (A : Matrix (Fin m) (Fin n) L) (j : Fin n) :
-    blk a A 0 j.succ = 0 := rfl
-@[simp] theorem blk_succ_zero {m n : ℕ} (a : L) (A : Matrix (Fin m) (Fin n) L) (i : Fin m) :
-    blk a A i.succ 0 = 0 := rfl
 @[simp] theorem blk_succ_succ {m n : ℕ} (a : L) (A : Matrix (Fin m) (Fin n) L) (i : Fin m) (j : Fin n) :
     blk a A i.succ j.succ = A i j := rfl
 
@@ -71,12 +114,12 @@ theorem blk_mul {m n k : ℕ} (a b : L) (A : Matrix (Fin m) (Fin n) L) (B : Matr
     blk a A * blk b B = blk (a * b) (A * B) := by
   ext i j
   refine Fin.cases ?_ (fun i => ?_) i <;> refine Fin.cases ?_ (fun j => ?_) j <;>
-    simp [Matrix.mul_apply, Fin.sum_univ_succ]
+    simp [blk, Matrix.mul_apply, Fin.sum_univ_succ]
 
 theorem blk_one {m : ℕ} : blk (1 : L) (1 : Matrix (Fin m) (Fin m) L) = 1 := by
   ext i j
   refine Fin.cases ?_ (fun i => ?_) i <;> refine Fin.cases ?_ (fun j => ?_) j <;>
-    simp [Matrix.one_apply, Fin.succ_ne_zero, (Fin.succ_ne_zero _).symm]
+    simp [blk, Matrix.one_apply, Fin.succ_ne_zero, (Fin.succ_ne_zero _).symm]
 
 theorem isUnimod_blk {m : ℕ} {P : Matrix (Fin m) (Fin m) L} (hP : IsUnimod P) : IsUnimod (blk (1 : L) P) := by
   obtain ⟨hP1, P', hP', hPP⟩ := hP
@@ -84,7 +127,7 @@ theorem isUnimod_blk {m : ℕ} {P : Matrix (Fin m) (Fin m) L} (hP : IsUnimod P) 
       ∀ i j, blk (1 : L) A i j ∈ Formalism.UG.intL L := by
     intro A hA i j
     refine Fin.cases ?_ (fun i => ?_) i <;> refine Fin.cases ?_ (fun j => ?_) j <;>
-      simp [Subring.one_mem, Subring.zero_mem, hA]
+      simp [blk, Subring.one_mem, Subring.zero_mem, hA]
   exact ⟨hint hP1, blk 1 P', hint hP', by rw [blk_mul, hPP, one_mul, blk_one]⟩
 
 def IsDiagF {m n : ℕ} (z : Matrix (Fin m) (Fin n) L) : Prop :=
@@ -144,9 +187,9 @@ theorem clear {m n : ℕ} (x : Matrix (Fin (m+1)) (Fin (n+1)) L) (hp : x 0 0 ≠
   refine ⟨1 - A, 1 - B, nilp_unimod A hAi hAA, nilp_unimod B hBi hBB, ?_⟩
   ext i j
   refine Fin.cases ?_ (fun i => ?_) i <;> refine Fin.cases ?_ (fun j => ?_) j
-  · rw [hz, hy]; simp [p]
-  · rw [hz, hy, hy]; simp [Fin.succ_ne_zero, p]; rw [mul_div_cancel₀ _ (show x 0 0 ≠ 0 from hp), sub_self]
-  · rw [hz, hy]; simp [Fin.succ_ne_zero, p]; rw [div_mul_cancel₀ _ (show x 0 0 ≠ 0 from hp), sub_self]
+  · rw [hz, hy]; simp [blk, p]
+  · rw [hz, hy, hy]; simp [blk, Fin.succ_ne_zero, p]; rw [mul_div_cancel₀ _ (show x 0 0 ≠ 0 from hp), sub_self]
+  · rw [hz, hy]; simp [blk, Fin.succ_ne_zero, p]; rw [div_mul_cancel₀ _ (show x 0 0 ≠ 0 from hp), sub_self]
   · simp
 
 theorem exists_diag : ∀ (m n : ℕ) (x : Matrix (Fin m) (Fin n) L),
@@ -198,8 +241,8 @@ theorem exists_diag : ∀ (m n : ℕ) (x : Matrix (Fin m) (Fin n) L),
       intro i j
       refine Fin.cases ?_ (fun i => ?_) i <;> refine Fin.cases ?_ (fun j => ?_) j <;> intro hij
       · exact absurd rfl hij
-      · simp
-      · simp
+      · simp [blk]
+      · simp [blk]
       · simp only [blk_succ_succ]
         exact hD i j (by simpa [Fin.val_succ] using hij)
 
@@ -213,12 +256,12 @@ theorem v_eq_ord {y : L} (hy : y ≠ 0) :
     Valued.v y = ((Multiplicative.ofAdd (-Formalism.UG.ordL y) : Multiplicative ℤ) : WithZero (Multiplicative ℤ)) := by
   have h : Valued.v y ≠ 0 := (Valuation.ne_zero_iff _).2 hy
   unfold Formalism.UG.ordL
-  rw [dif_neg h, neg_neg, ofAdd_toAdd, WithZero.coe_unzero]
+  rw [dite_eq_right h, neg_neg, ofAdd_toAdd, WithZero.coe_unzero]
 
 end GlobalTheory.Hk3.Smith
 
-open GlobalTheory.Hk3.Smith in
 
+open GlobalTheory.Hk3.Smith in
 theorem GlobalTheory.Hk3.smith_int_approx : ∀ (L : Type) [Field L] [Valued L (WithZero (Multiplicative ℤ))] (ϖ : L),
     Valued.v ϖ = ((Multiplicative.ofAdd (-1 : ℤ) : Multiplicative ℤ) : WithZero (Multiplicative ℤ)) →
     ∀ (n n' : ℕ) (x : Matrix (Fin n') (Fin n) L),

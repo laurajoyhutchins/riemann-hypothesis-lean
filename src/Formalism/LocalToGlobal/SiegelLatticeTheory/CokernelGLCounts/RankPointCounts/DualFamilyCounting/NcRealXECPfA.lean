@@ -1,5 +1,48 @@
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.NcRealXEC
-import Formalism.SharpRestriction.CuspSpanNormBounds.BridgeCSB
+module
+
+public import Formalism.SharpRestriction.CuspSpanNormBounds.BridgeCSB
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.LocalWeightCharts.NilpotentChartRightInverse
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -56,20 +99,20 @@ theorem dD_sq' (j : Fin (k + 1)) : dD k j j * dD k j j = 1 := by
   simp only [dD, Matrix.diagonal_apply_eq]; split_ifs <;> simp
 
 theorem chart_matrix_lower (x : CI k r → ℂ) {a b : Fin r} (h : b ≤ a) : (cA x - 1) a b = 0 := by
-  rw [Matrix.sub_apply, Matrix.one_apply]; unfold cA; rw [dif_neg (not_lt.2 h)]; split_ifs <;> simp
+  rw [Matrix.sub_apply, Matrix.one_apply]; unfold cA; rw [dite_eq_right (not_lt.2 h)]; split_ifs <;> simp
 
 theorem chart_matrix_upper (x : CI k r → ℂ) {a b : Fin r} (h : a < b) : (cA x - 1) a b = x (Sum.inl ⟨(a, b), h⟩) := by
-  rw [Matrix.sub_apply, Matrix.one_apply, if_neg (ne_of_lt h)]; unfold cA; rw [dif_pos h, sub_zero]
+  rw [Matrix.sub_apply, Matrix.one_apply, if_neg (ne_of_lt h)]; unfold cA; rw [dite_eq_left h, sub_zero]
 
 theorem cK_skew (x : CI k r → ℂ) (s : Fin r → ℝ) (a b : Fin r) : cK x s a b + star (cK x s b a) = 0 := by
   unfold cK
   rcases lt_trichotomy a b with h | h | h
-  · rw [dif_pos h, dif_neg (not_lt.2 h.le), dif_pos h, star_neg, star_star, add_neg_cancel]
+  · rw [dite_eq_left h, dite_eq_right (not_lt.2 h.le), dite_eq_left h, star_neg, star_star, add_neg_cancel]
   · subst h
-    rw [dif_neg (lt_irrefl _), dif_neg (lt_irrefl _), star_mul', Complex.star_def,
+    rw [dite_eq_right (lt_irrefl _), dite_eq_right (lt_irrefl _), star_mul', Complex.star_def,
       Complex.conj_ofReal, Complex.conj_I]
     ring
-  · rw [dif_neg (not_lt.2 h.le), dif_pos h, dif_pos h, neg_add_cancel]
+  · rw [dite_eq_right (not_lt.2 h.le), dite_eq_left h, dite_eq_left h, neg_add_cancel]
 
 section entries
 
@@ -238,8 +281,6 @@ def LJ : (J k r → ℝ) →ₗ[ℝ] Mx k r where
   toFun y := Lm (toC y)
   map_add' y y' := by rw [toC_add, Lm_add]
   map_smul' c y := by rw [toC_smul, Lm_smul]; rfl
-
-theorem LJ_apply (y : J k r → ℝ) : LJ y = Lm (toC y) := rfl
 
 theorem continuous_LJ : Continuous (LJ (k := k) (r := r)) := LinearMap.continuous_of_finiteDimensional _
 

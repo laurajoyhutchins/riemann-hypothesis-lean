@@ -1,4 +1,60 @@
-import Formalism.SharpRestriction.GrowthBounds.BinomialPolynomialIdentities.RestSplit
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.BinomialPolynomialIdentities.RestSplit
+public import Formalism.ThetaLogCoordinates.JacobiPathWeights.JacobiMinorProofs.UnitAndFieldPowerLemmas
+public import Formalism.ThetaLogCoordinates.JacobiPathWeights.StatementP
+public import Formalism.ThetaLogCoordinates.JacobiPathWeights.FinalP
+public import Formalism.ThetaLogCoordinates.JacobiPathWeights.JacobiMinorProofs.GoodWOfWeight
+public import Formalism.ThetaLogCoordinates.JacobiPathWeights.JacobiMinorProofs.LemmaA2indepOf
+import Formalism.ThetaLogCoordinates.JacobiPathWeights.JacobiMinorProofs.NormIndexCountBound
+public import Formalism.ThetaLogCoordinates.JacobiPathWeights.PathBasisTheorem
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -230,6 +286,7 @@ theorem restSplit : RestSplit := by
       ∑ β ∈ T, actI isVec i (Formalism.InvariantFactorPaths.GelfandTsetlinBases.genMat k n) (Formalism.InvariantFactorPaths.GelfandTsetlinBases.genMat k n)⁻¹
         (map (algebraMap k (GenField k n)) (Gc β)) * monomial β 1 := by
     conv_lhs => rw [h3]
+
     rw [map_sum, map_sum]
     refine Finset.sum_congr rfl fun β hβ => ?_
     rw [map_mul, map_mul, map_monomial, map_one, partialAction_monomial_later_letters _ _ _ _ β (hlow β hβ)]
@@ -243,10 +300,10 @@ theorem restSplit : RestSplit := by
     have := DominanceOrderLemmas.vars_act isVec (Formalism.InvariantFactorPaths.GelfandTsetlinBases.genMat k n) (Formalism.InvariantFactorPaths.GelfandTsetlinBases.genMat k n)⁻¹ hv0 x
       ((mem_vars_iff_mem_support (i := x)).2 ⟨d, hd, Finsupp.mem_support_iff.2 hne⟩)
     omega
-  have hcoef : coeff (e + β₀) (actI isVec i (Formalism.InvariantFactorPaths.GelfandTsetlinBases.genMat k n) (Formalism.InvariantFactorPaths.GelfandTsetlinBases.genMat k n)⁻¹
-        (map (algebraMap k (GenField k n)) G)) =
-      coeff e (actI isVec i (Formalism.InvariantFactorPaths.GelfandTsetlinBases.genMat k n) (Formalism.InvariantFactorPaths.GelfandTsetlinBases.genMat k n)⁻¹
-        (map (algebraMap k (GenField k n)) (Gc β₀))) := by
+  have hcoef : AddMonoidAlgebra.coeff (actI isVec i (Formalism.InvariantFactorPaths.GelfandTsetlinBases.genMat k n) (Formalism.InvariantFactorPaths.GelfandTsetlinBases.genMat k n)⁻¹
+        (map (algebraMap k (GenField k n)) G)) (e + β₀) =
+      AddMonoidAlgebra.coeff (actI isVec i (Formalism.InvariantFactorPaths.GelfandTsetlinBases.genMat k n) (Formalism.InvariantFactorPaths.GelfandTsetlinBases.genMat k n)⁻¹
+        (map (algebraMap k (GenField k n)) (Gc β₀))) e := by
     rw [hexp, coeff_sum, Finset.sum_eq_single β₀]
     · rw [coeff_mul_monomial, mul_one]
     · intro β hβ hne
@@ -277,10 +334,8 @@ theorem restSplit : RestSplit := by
       refine Finset.sum_eq_zero fun x hx => ?_
       have : ¬ x.1 < i := fun h => (Finsupp.mem_support_iff.1 hx) (hlow β₀ hβ₀ x h)
       simp [wtI, this]
-    rw [map_add, h0, add_zero]
+    rw [map_add (f := _), h0, add_zero]
   have hfin := hg (e + β₀) hmem (by rw [hw]; exact ha)
   rwa [hw] at hfin
-
-theorem restOne_of' (hW : RestWord) (hT : RestTop) : RestOne := restOne_of hW hT restSplit
 
 end Formalism.MainNotions.G.ColumnFamilies

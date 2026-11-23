@@ -1,7 +1,57 @@
-import Mathlib
+module
+
+public import Formalism.SharpRestriction.GlobalSchurBounds.GeneralLinearActions.GenusMassVolumes
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Definitions.Divisors.OneMemH0WeightZero
 import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.NotIsCompactUnivFv
-import GroundTheory.GlobalFields.IdeleGroups.IdeleNorms
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes GlobalTheory.QSA GlobalTheory.Published
 open Matrix
 open scoped Quaternion Topology TensorProduct
@@ -44,8 +94,8 @@ theorem compFin_ind (a : InfinitePlace F → ι) (b : HeightOneSpectrum (𝓞 F)
 
 end GlobalTheory.QSA.PickUnit
 
-open GlobalTheory.QSA.PickUnit in
 
+open GlobalTheory.QSA.PickUnit in
 theorem GlobalTheory.QSA.exists_idem_pick_unit : ∀ (F : Type) [Field F] [NumberField F] (ι : Type) [Fintype ι]
     (n u : ι → AF F), IsUnit (∑ i, u i * n i) → ∃ η : ι → AF F, (∀ i, η i * η i = η i) ∧
       (∀ i j, i ≠ j → η i * η j = 0) ∧ ∑ i, η i = 1 ∧ IsUnit (∑ i, η i * n i) := by
@@ -61,6 +111,7 @@ theorem GlobalTheory.QSA.exists_idem_pick_unit : ∀ (F : Type) [Field F] [Numbe
     by_contra h
     push_neg at h
     apply (hs.map (compInf w)).ne_zero
+
     rw [map_sum]
     exact Finset.sum_eq_zero fun i _ => by rw [map_mul, h i, mul_zero]
   have hfin : ∀ v : HeightOneSpectrum (𝓞 F), ∃ i, ∀ j, Valued.v (compFin v (n j)) ≤ Valued.v (compFin v (n i)) := by
@@ -90,12 +141,14 @@ theorem GlobalTheory.QSA.exists_idem_pick_unit : ∀ (F : Type) [Field F] [Numbe
     · intro v; rw [map_sum, map_one]; simp only [compFin_ind]; rw [Finset.sum_ite_eq]; simp
   · have hcInf : ∀ w, compInf w (∑ i, ind a b i * n i) = compInf w (n (a w)) := by
       intro w
+
       rw [map_sum, Finset.sum_eq_single (a w)]
       · rw [map_mul, compInf_ind, if_pos rfl, one_mul]
       · intro j _ hj; rw [map_mul, compInf_ind, if_neg (Ne.symm hj), zero_mul]
       · intro h; exact absurd (Finset.mem_univ _) h
     have hcFin : ∀ v, compFin v (∑ i, ind a b i * n i) = compFin v (n (b v)) := by
       intro v
+
       rw [map_sum, Finset.sum_eq_single (b v)]
       · rw [map_mul, compFin_ind, if_pos rfl, one_mul]
       · intro j _ hj; rw [map_mul, compFin_ind, if_neg (Ne.symm hj), zero_mul]
@@ -105,6 +158,7 @@ theorem GlobalTheory.QSA.exists_idem_pick_unit : ∀ (F : Type) [Field F] [Numbe
     · intro v h0
       rw [hcFin] at h0
       apply (hs.map (compFin v)).ne_zero
+
       rw [map_sum]
       refine Finset.sum_eq_zero fun j _ => ?_
       have h := hb v j
@@ -121,6 +175,7 @@ theorem GlobalTheory.QSA.exists_idem_pick_unit : ∀ (F : Type) [Field F] [Numbe
       rw [hcFin]
       refine le_antisymm (hv2 _).2 ?_
       have hv1' : Valued.v (compFin v (∑ i, u i * n i)) = 1 := hv1
+
       rw [← hv1', map_sum]
       refine Valuation.map_sum_le _ fun j _ => ?_
       rw [map_mul, map_mul]

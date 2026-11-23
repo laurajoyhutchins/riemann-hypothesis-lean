@@ -1,7 +1,43 @@
-import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.PseudoCoefficientUpqTrivial
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.DiscreteSeriesCharacter
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.LanglandsClassification
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.ExistsStandardIndModule
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -31,33 +67,6 @@ def PseudoCoeffSeparation : Prop :=
       (π : Matrix (Fin r) (Fin r) ℂ → (V →L[ℂ] V)) (hπ : IsIrrAdm ε π) (c : ℂ),
       HasTrace (repOp (groupRep ε hπ.2.1.1) μ f) c → c ≠ 0 →
         HasInfChar ε (fun a => (lam a : ℂ)) π ∧ (IsURepOn (UJset ε) π → UEquiv ε π D ∧ c = 1)
-
-theorem hasWideGaps_mul (r : ℕ) : HasWideGaps fun i : Fin r => -((r : ℤ) * (i : ℕ)) := by
-  refine ⟨fun i j h => ?_, fun i j h => ?_⟩
-  · have h1 : ((i : ℕ) : ℤ) < (j : ℕ) := by exact_mod_cast h
-    have h2 : (0 : ℤ) < r := by exact_mod_cast i.pos
-    simp only [neg_lt_neg_iff]
-    exact mul_lt_mul_of_pos_left h1 h2
-  · simp only [h]
-    push_cast
-    ring_nf
-    rfl
-
-example : ¬ HasWideGaps ![1, 0, -1] := fun h => by simpa using h.2 0 1 rfl
-
-theorem exists_data_rank_one (μ : Measure (UJ (allPos 1))) [μ.IsHaarMeasure] :
-    HasWideGaps (fun _ : Fin 1 => (0 : ℤ)) ∧
-      ∃ hD : IsDiscreteWithInfChar (allPos 1) (fun _ => 0) fun _ => ContinuousLinearMap.id ℂ ℂ,
-        ∃ f, IsPseudoCoeff (ujMat (allPos 1)) μ (ujRep hD.1.2.2.1) f ∧
-          ∃ hπ : IsIrrAdm (allPos 1) fun _ => ContinuousLinearMap.id ℂ ℂ,
-            HasTrace (repOp (groupRep (allPos 1) hπ.2.1.1) μ f) 1 := by
-  obtain ⟨h, f, -, hf⟩ := GlobalTheory.Published.pseudoCoefficientUpq_trivial 1 μ
-  refine ⟨⟨Subsingleton.strictAnti _, fun i j e => by omega⟩, ⟨h, fun v w _ _ => ?_⟩, f, hf,
-    ⟨h.2.1, ⟨h.2.2.1.1, h.2.2.1.2.2, fun _ _ _ => rfl, fun _ => inferInstance⟩, h.2.2.2.1⟩, hf.trace_self⟩
-  have := GlobalTheory.Dec.isZEigen_const (allPos 1) (inner ℂ w v)
-  convert this using 2 with a
-  · simp [Formalism.QuantumDeterminants.rhoStd]
-  · rfl
 
 end GlobalTheory.IndefiniteRowSideFullHecke.PseudoCoefficientSeparation
 

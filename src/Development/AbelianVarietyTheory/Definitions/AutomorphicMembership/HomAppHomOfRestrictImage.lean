@@ -1,7 +1,48 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.MultiplicationLatticeSecond
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.NonemptyOfModToModIso
-import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.ExactAndSurjectiveAppOfExactOfEpi
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.ToBidualNaturalityDualSheafTranspose
+public import Formalism.SharpRestriction.Divisibility.AbelianOpenPart.IsOpenPart
+public import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.ExistsUniqueLbIsoPullEqOfCoheightLeOne
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Formalism.SharpRestriction.Divisibility.AbelianOpenPart.AbelianAt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -31,7 +72,7 @@ def homIns {e : ι → Γ(F, U)} (he : IsFrame e) (h : V ≤ U) (i : ι) : Γ(G,
     simp only [LinearMap.smulRight_apply, Module.Basis.coord_apply, resM_smul, resM_resM]
     rw [← he.repr_resM]
   map_add' a b := VB.hom_ext fun W hW s => by
-    simp only [homApp_homMk, homApp_add, LinearMap.add_apply, LinearMap.smulRight_apply, map_add, smul_add]
+    simp only [homApp_homMk, homApp_add, LinearMap.add_apply, LinearMap.smulRight_apply, map_add (f := _), smul_add]
   map_smul' a b := VB.hom_ext fun W hW s => by
     simp only [homApp_homMk, homApp_smul, LinearMap.smul_apply, LinearMap.smulRight_apply, resM_smul, RingHom.id_apply]
     rw [smul_comm]
@@ -43,6 +84,7 @@ theorem sum_homIns {e : ι → Γ(F, U)} (he : IsFrame e) (h : V ≤ U) (ψ : Γ
     ∑ i, homIns he h i (homApp ψ le_rfl (resM F h (e i))) = ψ := by
   refine VB.hom_ext fun W hW s => ?_
   rw [homApp_sum, LinearMap.sum_apply]
+
   conv_rhs => rw [← (he.basis (hW.trans h)).sum_repr s, map_sum]
   refine Finset.sum_congr rfl fun i _ => ?_
   rw [homApp_homIns, map_smul, ← homApp_resM, resM_resM, IsFrame.basis_apply]
@@ -53,8 +95,9 @@ def homPi {e : ι → Γ(F, U)} (he : IsFrame e) (h : V ≤ U) : Γ(homMod F G, 
     (by
       classical
       refine LinearMap.ext fun n => funext fun j => ?_
+
       simp only [LinearMap.comp_apply, LinearMap.sum_apply, LinearMap.pi_apply, map_sum, homEval_apply,
-        LinearMap.proj_apply, LinearMap.id_apply, homApp_homIns, resM_self, Finset.sum_apply]
+      LinearMap.proj_apply, LinearMap.id_apply, homApp_homIns, resM_self, Finset.sum_apply]
       simp only [← he.basis_apply, Module.Basis.repr_self]
       simp [Finsupp.single_apply])
     (LinearMap.ext fun ψ => by
@@ -122,7 +165,7 @@ theorem appIm_res (φ : F.restrict U.ι ⟶ G.restrict U.ι) {T T' : U.toScheme.
 def homOfRestrict (φ : F.restrict U.ι ⟶ G.restrict U.ι) : Γ(homMod F G, U) :=
   homMk (fun W h =>
     { toFun s := resM G (image_preimage_ι h).ge (appIm φ (U.ι ⁻¹ᵁ W) (resM F (image_preimage_ι h).le s))
-      map_add' a b := by rw [map_add, map_add, map_add]
+      map_add' a b := by rw [map_add (f := _), map_add (f := _), map_add (f := _)]
       map_smul' a s := by
         rw [resM_smul, map_smul, resM_smul, resG_resG, resG_self, RingHom.id_apply] })
     fun W W' h h' s => by
@@ -133,11 +176,6 @@ def homOfRestrict (φ : F.restrict U.ι ⟶ G.restrict U.ι) : Γ(homMod F G, U)
 theorem homApp_homOfRestrict (φ : F.restrict U.ι ⟶ G.restrict U.ι) (h : W ≤ U) (s : Γ(F, W)) :
     homApp (homOfRestrict φ) h s =
       resM G (image_preimage_ι h).ge (appIm φ (U.ι ⁻¹ᵁ W) (resM F (image_preimage_ι h).le s)) := rfl
-
-theorem homApp_homOfRestrict_image (φ : F.restrict U.ι ⟶ G.restrict U.ι) (T : U.toScheme.Opens)
-    (h : U.ι ''ᵁ T ≤ U) (s : Γ(F, U.ι ''ᵁ T)) : homApp (homOfRestrict φ) h s = appIm φ T s := by
-  have hT : U.ι ⁻¹ᵁ U.ι ''ᵁ T ≤ T := (U.ι.preimage_image_eq T).le
-  rw [homApp_homOfRestrict, appIm_res φ hT, resM_resM, resM_self]
 
 theorem homOfRestrict_comp (φ : F.restrict U.ι ⟶ G.restrict U.ι) (ψ : G.restrict U.ι ⟶ H.restrict U.ι)
     (h : W ≤ U) (s : Γ(F, W)) :
@@ -185,7 +223,7 @@ theorem top_le_preimage_iff [IsLocalRing R] (z : Sp R ⟶ X) :
 def resForm (h : V ≤ U) {ε : Γ(X, V) →+* R} {ε' : Γ(X, U) →+* R} (hε : ∀ a, ε (resG X h a) = ε' a)
     (μ : Γ(F, V) →ₛₗ[ε] R) : Γ(F, U) →ₛₗ[ε'] R where
   toFun s := μ (resM F h s)
-  map_add' a b := by rw [map_add, map_add]
+  map_add' a b := by rw [map_add (f := _), map_add (f := _)]
   map_smul' a s := by rw [resM_smul, μ.map_smulₛₗ, hε]
 
 theorem exists_extend [F.IsQuasicoherent] (hU : IsAffineOpen U) (hV : IsAffineOpen V) (h : V ≤ U)
@@ -207,9 +245,9 @@ theorem form_ext [F.IsQuasicoherent] (hU : IsAffineOpen U) (hV : IsAffineOpen V)
   letI := QCoh.resModule F h
   haveI := QCoh.res_isScalarTower F h
   refine LinearMap.ext fun t => (QCoh.isBaseChange_resLinear F hU hV h).inductionOn t
-    (fun t => μ t = μ' t) (by simp) H (fun a t ht => ?_) fun a b ha hb => ?_
+    H (fun a t ht => ?_) fun a b ha hb => ?_
   · rw [μ.map_smulₛₗ, μ'.map_smulₛₗ, ht]
-  · rw [map_add, map_add, ha, hb]
+  · rw [map_add (f := _), map_add (f := _), ha, hb]
 
 def IsLineForm {A M : Type} [CommRing A] [AddCommGroup M] [Module A M] {ε : A →+* R} (μ₀ : M →ₛₗ[ε] R) : Prop :=
   μ₀ ≠ 0 ∧ ∀ μ : M →ₛₗ[ε] R, ∃ c : R, μ = c • μ₀
@@ -257,7 +295,7 @@ theorem exists_isGreatest {A M C : Type} [CommRing A] [AddCommGroup M] [Module A
   | mem x hx => exact hm₀ x (Finset.mem_insert_of_mem hx)
   | zero => simp
   | add x y _ _ hx hy =>
-    simp only [map_add]
+    simp only [map_add (f := _)]
     exact (IsUltrametricDist.norm_add_le_max _ _).trans (max_le hx hy)
   | smul a x _ hx =>
     simp only [ν.map_smulₛₗ, smul_eq_mul, norm_mul]
@@ -278,8 +316,8 @@ theorem isLocalRing_intO (C : Type) [NormedField C] [IsUltrametricDist C] : IsLo
 
 section Norm
 
-variable (X) in
 
+variable (X) in
 abbrev gen (p : ℕ) : X.Opens := X.basicOpen ((p : ℕ) : Γ(X, ⊤))
 
 def oneSec (V : X.Opens) : Γ(structureModule X, V) := (1 : Γ(X, V))
@@ -354,7 +392,7 @@ theorem nrmSet_eq [F.IsQuasicoherent] (hU : IsAffineOpen U) (h : ⊤ ≤ z ⁻¹
     obtain ⟨l₁, hl₁⟩ := exists_extend hU' hT h₂ (evz_res z hz h' h₂) lam
     obtain ⟨μ, hμ⟩ := exists_extend hT (isAffineOpen_inf_gen (p := p) hT) inf_le_left (evq_res z hp hz)
       { toFun m := (l₁ m : C.S)
-        map_add' a b := by rw [map_add]; rfl
+        map_add' a b := by rw [map_add (f := _)]; rfl
         map_smul' a m := by rw [l₁.map_smulₛₗ]; rfl }
     have h₃ : T ⊓ gen X p ≤ U ⊓ gen X p := inf_le_inf_right _ h₁
     refine ⟨resForm h₃ (evz_res (zq z) _ _ h₃) μ, fun m => ?_, ?_⟩
@@ -439,6 +477,7 @@ theorem isGreatest_nrmSet_hom [(homMod G F).IsQuasicoherent] {e : ι → Γ(G, U
   · rw [LinearMap.comp_apply, homEval_apply, homApp_res, e₀, ← hm]
     rfl
   · rintro r ⟨Λ, hΛ, rfl⟩
+
     rw [← sum_homIns he inf_le_left (resM _ inf_le_right ψ), map_sum]
     refine IsUltrametricDist.norm_sum_le_of_forall_le_of_nonneg
       (div_nonneg (hm ▸ norm_nonneg _) hpos.le) fun i _ => ?_

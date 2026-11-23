@@ -1,6 +1,43 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsThetaCompact
-import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsToricRankOne
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IsThetaCompact
+public import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsToricRankOne
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -31,52 +68,7 @@ def ThroughU {X : Scheme.{0}} (U₀ : M.Z.Opens) (u₀ : U₀.toScheme ⟶ X) (c
 
 variable {M}
 
-theorem OrdGe.mem_O {T : Trait F} {ξ : Sp T.V ⟶ M.Z} {x : Ω} {a : ℕ} (h : OrdGe M T ξ x a) :
-    x ∈ M.O ((jK T.V ≫ ξ) (IsLocalRing.closedPoint (FractionRing T.V))) :=
-  h.1
-
-theorem OrdEq.mem_O {T : Trait F} {ξ : Sp T.V ⟶ M.Z} {x : Ω} {a : ℕ} (h : OrdEq M T ξ x a) :
-    x ∈ M.O ((jK T.V ≫ ξ) (IsLocalRing.closedPoint (FractionRing T.V))) := by
-  by_contra hx
-  obtain ⟨w, hw⟩ := h
-  rw [RatModel.val_of_notMem _ hx] at hw
-  have h0 : (T.ϖ ^ a * (w : T.V)) = 0 :=
-    IsFractionRing.injective T.V (FractionRing T.V) (by rw [← hw, map_zero])
-  exact mul_ne_zero (pow_ne_zero _ T.irr.ne_zero) w.ne_zero h0
-
-theorem OrdGe.mono {T : Trait F} {ξ : Sp T.V ⟶ M.Z} {x : Ω} {a b : ℕ} (h : OrdGe M T ξ x a) (hba : b ≤ a) :
-    OrdGe M T ξ x b := by
-  obtain ⟨hx, w, hw⟩ := h
-  refine ⟨hx, T.ϖ ^ (a - b) * w, ?_⟩
-  rw [hw, ← mul_assoc, ← pow_add, Nat.add_sub_cancel' hba]
-
-theorem OrdGe.add {T : Trait F} {ξ : Sp T.V ⟶ M.Z} {x y : Ω} {a : ℕ} (hx : OrdGe M T ξ x a) (hy : OrdGe M T ξ y a) :
-    OrdGe M T ξ (x + y) a := by
-  obtain ⟨hx0, w, hw⟩ := hx
-  obtain ⟨hy0, w', hw'⟩ := hy
-  have hsp : ∀ v, (jK T.V ≫ ξ) v ⤳ (jK T.V ≫ ξ) (IsLocalRing.closedPoint (FractionRing T.V)) := fun v => by
-    rw [Subsingleton.elim v (IsLocalRing.closedPoint (FractionRing T.V))]
-  refine ⟨Subalgebra.add_mem _ hx0 hy0, w + w', ?_⟩
-  rw [RatModel.val_add hsp hx0 hy0, hw, hw', ← map_add, mul_add]
-
-theorem OrdGe.mul {T : Trait F} {ξ : Sp T.V ⟶ M.Z} {x y : Ω} {a b : ℕ} (hx : OrdGe M T ξ x a) (hy : OrdGe M T ξ y b) :
-    OrdGe M T ξ (x * y) (a + b) := by
-  obtain ⟨hx0, w, hw⟩ := hx
-  obtain ⟨hy0, w', hw'⟩ := hy
-  have hsp : ∀ v, (jK T.V ≫ ξ) v ⤳ (jK T.V ≫ ξ) (IsLocalRing.closedPoint (FractionRing T.V)) := fun v => by
-    rw [Subsingleton.elim v (IsLocalRing.closedPoint (FractionRing T.V))]
-  refine ⟨Subalgebra.mul_mem _ hx0 hy0, w * w', ?_⟩
-  rw [RatModel.val_mul hsp hx0 hy0, hw, hw', ← map_mul, pow_add]
-  congr 1
-  ring
-
 variable (M)
-
-def LocTuples {X : Scheme.{0}} (U₀ : M.Z.Opens) (u₀ : U₀.toScheme ⟶ X) (c : X ⟶ F.X) (φ : InvFun ℤ) (ι : ℕ) : Prop :=
-  ∃ (K : Type) (_ : Fintype K) (Jk : K → Type) (_ : ∀ k, Fintype (Jk k)) (t : ∀ k, Jk k → Ω),
-    (∀ k j, t k j ≠ 0) ∧ ∀ x : M.Z, ∃ k, ∀ (T : Trait F) (ξ : Sp T.V ⟶ M.Z), ThroughU M U₀ u₀ c T ξ →
-      ξ (IsLocalRing.closedPoint T.V) ⤳ x → ∃ a : ℕ, (a : ℝ) = ι * φ.evalZ T.β ∧
-        (∀ j, OrdGe M T ξ (t k j) a) ∧ ∃ j, OrdEq M T ξ (t k j) a
 
 end Ord
 

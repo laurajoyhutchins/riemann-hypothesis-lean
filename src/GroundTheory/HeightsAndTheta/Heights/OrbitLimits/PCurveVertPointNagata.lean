@@ -1,9 +1,58 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.StatementsCurveVertPointNagata
-import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.CurveCountObjects
-import GroundTheory.HeightsAndTheta.Heights.Intersections.PLocRingPow
-import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.CoordinateIdeals.MemMCoordIdealOfAevalEqZero
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.StatementsCurveVertPointNagata
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.PLocRingPow
+public import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.StatementsCurveVertPointLengthSteps
+public import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.CoordinateIdeals.MemMCoordIdealOfAevalEqZero
+public import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.CurveCountObjects
+import Mathlib.Algebra.MvPolynomial.Nilpotent
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
 import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterDivSupp
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.Targets
@@ -16,8 +65,8 @@ namespace CurveVerticalPointNagata
 
 variable {K : Type} [Fintype K] {ι : K → Type} [∀ k, Fintype (ι k)]
 
-omit [Fintype K] [∀ k, Fintype (ι k)] in
 
+omit [Fintype K] [∀ k, Fintype (ι k)] in
 theorem aeval_eq_eval₂ {S : Type*} [CommRing S] [Algebra ℤ S] (v : (Σ k, ι k) → S) (f : MRing ι) :
     aeval v f = eval₂ (Int.castRingHom S) v f := by
   rw [aeval_def, show algebraMap ℤ S = Int.castRingHom S from RingHom.ext_int _ _]
@@ -34,6 +83,7 @@ theorem aeval_mul_of_isMultiHomog {S : Type*} [CommRing S] [Algebra ℤ S] (r : 
   classical
   conv_lhs => rw [g.as_sum]
   conv_rhs => rw [g.as_sum]
+
   rw [map_sum, map_sum, Finset.sum_mul]
   refine Finset.sum_congr rfl fun m hm => ?_
   have hdeg := hg m hm
@@ -82,12 +132,12 @@ theorem coeff_aeval_C_mul_X {S : Type*} [CommRing S] [Algebra ℤ S] [Algebra �
     · rw [if_pos h, comp, ← h, Finsupp.coe_equivFunOnFinite_symm, hw.weightedHomogeneousComponent_same]
     · rw [if_neg h, comp, hw.weightedHomogeneousComponent_ne _ (fun e => h (by
         rw [← e, Finsupp.equivFunOnFinite_symm_coe])), map_zero]
-  | add p q hp hq => rw [map_add, coeff_add, hp, hq, comp, comp, comp, map_add, map_add]
+  | add p q hp hq => rw [map_add (f := _), MvPolynomial.coeff_add, hp, hq, comp, comp, comp, map_add (f := _), map_add (f := _)]
 
 end CurveVerticalPointNagata
 
-open CurveVerticalPointNagata in
 
+open CurveVerticalPointNagata in
 theorem CurveVertPointNagata.proof (hCh : CurveVertPointChart.Statement) : CurveVertPointNagata.Statement := by
   intro K _ ι _ Ω _ y s d hP hs hsP W hW c hc _ _ a b hb hab
   classical
@@ -206,8 +256,8 @@ theorem CurveVertPointNagata.proof (hCh : CurveVertPointChart.Statement) : Curve
     · intro h0
       by_contra hf
       obtain ⟨D, hD⟩ := Inter.LocRingPow.exists_component_not_mem hf
-      have h1 := congrArg (fun q => MvPolynomial.coeff (Finsupp.equivFunOnFinite.symm D) q) h0
-      simp only [MvPolynomial.coeff_zero] at h1
+      have h1 := congrArg (fun q => AddMonoidAlgebra.coeff q (Finsupp.equivFunOnFinite.symm D)) h0
+      simp only [MvPolynomial.coeff_zero, Finsupp.zero_apply] at h1
       rw [hψcoeff, Finsupp.coe_equivFunOnFinite_symm] at h1
       have h2 := congrArg φ h1
       rw [hφev _ _ (isMultiHomog_comp D f), map_zero, div_eq_zero_iff] at h2
@@ -215,7 +265,7 @@ theorem CurveVertPointNagata.proof (hCh : CurveVertPointChart.Statement) : Curve
         (h2.resolve_right (hycp D)))
     · intro hf
       ext n
-      rw [hψcoeff, MvPolynomial.coeff_zero]
+      rw [hψcoeff, MvPolynomial.coeff_zero, Finsupp.zero_apply]
       apply hφ
       rw [hφev _ _ (isMultiHomog_comp _ f),
         hformP _ _ (isMultiHomog_comp _ f) (Inter.LocRingPow.component_mem hPh hf _), zero_div, map_zero]
@@ -276,7 +326,7 @@ theorem CurveVertPointNagata.proof (hCh : CurveVertPointChart.Statement) : Curve
       | add p q hp hq =>
         obtain ⟨x, hx⟩ := hp
         obtain ⟨x', hx'⟩ := hq
-        exact ⟨x + x', by rw [map_add, hx, hx', map_add, map_add, map_add]⟩
+        exact ⟨x + x', by rw [map_add (f := _), hx, hx', map_add (f := _), map_add (f := _), map_add (f := _)]⟩
 
     have hC : ∀ q : Bm, ∃ x, Φ x = algebraMap (MvPolynomial K Bm) N (MvPolynomial.C q) := by
       intro q
@@ -307,7 +357,7 @@ theorem CurveVertPointNagata.proof (hCh : CurveVertPointChart.Statement) : Curve
         (fun p q hp hq => ?_) (fun p k hp => ?_)
       · obtain ⟨x, hx⟩ := hp
         obtain ⟨x', hx'⟩ := hq
-        exact ⟨x + x', by rw [map_add, hx, hx', map_add]⟩
+        exact ⟨x + x', by rw [map_add (f := _), hx, hx', map_add (f := _)]⟩
       · obtain ⟨x, hx⟩ := hp
         refine ⟨x * algebraMap (MRing ι) (Localization.AtPrime W) (X ⟨k, c k⟩ : MRing ι), ?_⟩
         rw [map_mul, hx, hΦ, hψX, map_mul]

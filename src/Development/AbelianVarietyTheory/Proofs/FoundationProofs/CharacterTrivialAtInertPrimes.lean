@@ -1,11 +1,56 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Foundations.NormSumPairRankZeroOfCurveCoordNorm
-import Formalism.PairingDivisors.StatementH
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ConjInvolutiveAndExistsHalfIdempotent
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsIdeleGenerator
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsRealSpanEqConjFixedPrimeMulRelNormStatement
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsHalfIdem
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsPrimeNatCastMem
+module
+
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsHalfIdem
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.CmFiniteAdeleIntegralSeparatedComplete
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ConjInvolutiveAndExistsHalfIdempotent
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsIdeleGenerator
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsPrimeNatCastMem
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsRealSpanEqConjFixedPrimeMulRelNormStatement
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.RationalPointsIntegralPointsMembership
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.UnitaryHeckeCharacterValues
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField Classical Formalism.BasicNotions Formalism.MainNotions Formalism.MainNotions.TaylorLogMetric Formalism.MainNotions.StandardLatticesGL3 GlobalTheory.NormSum
 open scoped BigOperators Pointwise
@@ -102,7 +147,7 @@ theorem exists_gen (B : Ideal (𝓞 D.host.E)) (hB : B ≠ ⊥) : ∃ y, Gen D B
   · rw [Ideal.span_singleton_le_iff_mem]
     have : (⟨y, hy⟩ : OhE D) = ∑ i, intInc D (b i) * ⟨w i, hw i⟩ := by
       apply Subtype.ext
-      rw [AddSubmonoidClass.coe_finset_sum]
+      rw [AddSubmonoidClass.coe_finsetSum]
       exact e
     rw [this]
     exact sum_mem fun i _ => Ideal.mul_mem_right _ _ (Ideal.mem_map_of_mem _ (hb i))
@@ -260,7 +305,7 @@ theorem character_trivial_at_inert : ∀ (D : D7) (N : ℕ), Even N → ∀ (χ 
     linear_combination h1 + h1' + 2 * h2
   have heO : 1 - (ε + sgA D ε) ∈ OhE D := sub_mem (one_mem _) (add_mem hε (VacMove.sgA_mem D hε))
   have hse : sgA D (1 - (ε + sgA D ε)) = 1 - (ε + sgA D ε) := by
-    rw [map_sub, map_add, map_one, hinv, add_comm]
+    rw [map_sub, map_add (f := _), map_one, hinv, add_comm]
   have hunr : ∀ y : (AE D)ˣ, (y : AE D) ∈ OhE D →
       (1 - (ε + sgA D ε)) * ((y⁻¹ : (AE D)ˣ) : AE D) ∈ OhE D → χ.f (proj _ he y) = 1 := by
     intro y hy hy'
@@ -283,7 +328,7 @@ theorem character_trivial_at_inert : ∀ (D : D7) (N : ℕ), Even N → ∀ (χ 
   · have : proj _ he (sgU D y) = sgU D (proj _ he y) := by
       ext
       change _ * sgA D y + _ = sgA D (_ * y + _)
-      rw [map_add, map_mul, hse, map_sub, map_one, hse]
+      rw [map_add (f := _), map_mul, hse, map_sub, map_one, hse]
     rw [MonoidHom.comp_apply, map_mul, this, χ.norm]
   · have h4 := eq_one_of_real hN χ a ha
     set t := Units.map (inc D).toMonoidHom a with ht
@@ -293,7 +338,7 @@ theorem character_trivial_at_inert : ∀ (D : D7) (N : ℕ), Even N → ∀ (χ 
     have : t = proj _ he t * (proj ε h1 t * sgU D (proj ε h1 t)) := by
       ext
       change (t : AE D) = (_ * t + _) * ((ε * t + _) * sgA D (ε * t + _))
-      rw [map_add, map_mul, map_sub, map_one, hst]
+      rw [map_add (f := _), map_mul, map_sub, map_one, hst]
       linear_combination ((t : AE D) - 1) ^ 2 * he -
         ((t : AE D) - 1) ^ 2 * (1 + (1 - (ε + sgA D ε)) * (t - 1)) * h2
     rw [this, map_mul, χ.norm, mul_one] at h4

@@ -1,4 +1,54 @@
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.SdBasisBot
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.SplitAtOf
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.SdBasisBot
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.ExistsIsomScale
+
+@[expose] public section
 
 open Module
 
@@ -47,6 +97,7 @@ private theorem linInd_lemma_6 {K V : Type} [Field K] [StarRing K] [AddCommGroup
   rw [linearIndependent_iff']
   intro s g hg i hi
   have h1 := congrArg (h (f i)) hg
+
   rw [map_sum, map_zero, Finset.sum_eq_single i] at h1
   · rw [map_smul, smul_eq_mul] at h1
     exact (mul_eq_zero.1 h1).resolve_right (hn i)
@@ -59,8 +110,10 @@ private theorem form_sum_lemma_7 {K V : Type} [Field K] [StarRing K] [AddCommGro
     {h : V →ₗ⋆[K] V →ₗ[K] K} {ι : Type} [Fintype ι] {b : ι → V}
     (ho : ∀ i j, i ≠ j → h (b i) (b j) = 0) (a c : ι → K) :
     h (∑ i, a i • b i) (∑ j, c j • b j) = ∑ i, star (a i) * c i * h (b i) (b i) := by
+
   rw [map_sum]
   refine Finset.sum_congr rfl fun i _ => ?_
+
   rw [map_smul, map_sum, LinearMap.sum_apply, Finset.sum_eq_single i]
   · rw [map_smulₛₗ, LinearMap.smul_apply, smul_eq_mul, smul_eq_mul, starRingEnd_apply]
     ring
@@ -82,18 +135,16 @@ private theorem isSD_lemma_8 {K V : Type} [Field K] [StarRing K] [AddCommGroup V
     {S : Subring K} (hS : IsHermSemilocal S) {h : V →ₗ⋆[K] V →ₗ[K] K} {ι : Type} [Fintype ι]
     [DecidableEq ι] {b : ι → V} (ho : ∀ i j, i ≠ j → h (b i) (b j) = 0)
     (hu : ∀ i, IsUnitIn S (h (b i) (b i))) :
-    IsSD S h (Submodule.span K (Set.range b)) (spanS S b) where
-  le := fun m hm => mem_span_lemma_4 hm
-  smul_mem := fun a ha m hm => smul_mem_lemma_2 ha hm
-  int := by
-    intro x hx y hy
+    IsSD S h (Submodule.span K (Set.range b)) (spanS S b) := by
+  refine ⟨⟨fun _ hm => mem_span_lemma_4 hm, fun _ ha _ hm => smul_mem_lemma_2 ha hm,
+    ?_, ?_⟩, ?_⟩
+  · intro x hx y hy
     rw [mem_iff_lemma] at hx hy
     obtain ⟨a, ha, rfl⟩ := hx
     obtain ⟨c, hc, rfl⟩ := hy
     rw [form_sum_lemma_7 ho]
     exact sum_mem fun i _ => S.mul_mem (S.mul_mem (hS.star_mem _ (ha i)) (hc i)) (hu i).2.1
-  span := by
-    intro x hx
+  · intro x hx
     obtain ⟨g, rfl⟩ := (Submodule.mem_span_range_iff_exists_fun K).1 hx
     choose T hTS hT0 hTg using fun i => hS.frac (g i)
     refine ⟨∏ i, T i, Finset.prod_ne_zero_iff.2 fun i _ => hT0 i, ?_⟩
@@ -104,12 +155,12 @@ private theorem isSD_lemma_8 {K V : Type} [Field K] [StarRing K] [AddCommGroup V
       exact S.mul_mem (S.prod_mem fun j _ => hTS j) (hTg i)
     · rw [Finset.smul_sum]
       simp only [smul_smul]
-  dual := by
-    intro x hx hdual
+  · intro x hx hdual
     obtain ⟨g, rfl⟩ := (Submodule.mem_span_range_iff_exists_fun K).1 hx
     rw [mem_iff_lemma]
     refine ⟨g, fun i => ?_, rfl⟩
     have h1 := hdual (b i) (mem_self_lemma_9 b i)
+
     rw [map_sum, Finset.sum_eq_single i] at h1
     · rw [map_smul, smul_eq_mul] at h1
       have h2 := S.mul_mem h1 (hu i).2.2
@@ -228,9 +279,11 @@ theorem uni_part {K V : Type} [Field K] [StarRing K] [AddCommGroup V] [Module K 
     obtain ⟨a, rfl⟩ := (Submodule.mem_span_range_iff_exists_fun K).1 hw
     have hne : ∀ p : {i // e i = e i₀}, (p : ι) ≠ j := fun p hq => hj (hq ▸ p.2)
     constructor
+
     · rw [map_sum, LinearMap.sum_apply]
       exact Finset.sum_eq_zero fun p _ => by
         rw [map_smulₛₗ, LinearMap.smul_apply, hbP, ho _ _ (hne p), smul_zero]
+
     · rw [map_sum]
       exact Finset.sum_eq_zero fun p _ => by
         rw [map_smul, hbP, ho _ _ (hne p).symm, smul_zero]

@@ -1,8 +1,55 @@
-import Formalism.AdmissibleDesigns.TheoremFromNormalizedOpenThree
-import Formalism.AdmissibleDesigns.LocRepTriv
-import Formalism.AdmissibleDesigns.ExistsLx
-import Formalism.AdmissibleDesigns.ContWRec
-import Formalism.AdmissibleDesigns.CohomZeroEquivContinuous
+module
+
+public import Formalism.AdmissibleDesigns.CohomZeroEquivContinuous
+public import Formalism.AdmissibleDesigns.InertiaActsTrivially
+public import Formalism.AdmissibleDesigns.KernelLengthHigherColumns
+public import Formalism.AdmissibleDesigns.MemImageOfTensorSum
+public import Formalism.AdmissibleDesigns.RankReductionIdempotentOne
+public import Formalism.AdmissibleDesigns.ContWRec
+public import Formalism.AdmissibleDesigns.EKSymmCont
+public import Formalism.AdmissibleDesigns.ExistsLx
+public import Formalism.AdmissibleDesigns.ExistsUnrDec
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Formalism.AdmissibleDesigns.PiEquiv2
+import Formalism.WachLatticeTwists.SplitClassesAll.Statement
+
+@[expose] public section
 
 variable [hT2Core : Fact ReciprocityTheory.ChartRestriction.T2.Core] [hH0Fin : Fact Formalism.MainNotions.N.K.H0.FinCore]
 
@@ -12,7 +59,7 @@ open Finset Classical Formalism.BasicNotions
 
 namespace Formalism.MainNotions.N.K.StA
 
-open Formalism.NG Formalism.RepresentationBoundsCohomology.BR Formalism.RepresentationBoundsCohomology.TorsionBoundCyclotomic Formalism.RepresentationBoundsCohomology.JL Formalism.RepresentationBoundsCohomology.JT Formalism.RepresentationBoundsCohomology.JS Formalism.RepresentationBoundsCohomology.SplitClassesAll Formalism.RepresentationBoundsCohomology.LocallyConstantCohomology Formalism.RepresentationBoundsCohomology.FIN
+open Formalism.NG Formalism.RepresentationBoundsCohomology.BR Formalism.RepresentationBoundsCohomology.TorsionBoundCyclotomic Formalism.RepresentationBoundsCohomology.JL Formalism.RepresentationBoundsCohomology.JT Formalism.RepresentationBoundsCohomology.SplitClassesAll Formalism.RepresentationBoundsCohomology.LocallyConstantCohomology Formalism.RepresentationBoundsCohomology.FIN
 open NumberField IsDedekindDomain Formalism.ConjugateSelfDual ReciprocityTheory.Gal Formalism.RepresentationBoundsCohomology.LOC
 open ReciprocityTheory.ChartRestriction.T2 (PadicCoeff FracTop IsFGTop cupFG)
 open Formalism.RepresentationBoundsCohomology.ringDataObjects (RingData RingDef)
@@ -51,11 +98,8 @@ theorem colUz : ∀ l (g : decs D.host.E (Aw i dc) (colIdx i dc l)),
   intro l g
   first
   | (show Dd.δO * KFin.uCol i dc l g = Dd.δO * KFin.u i dc l g
-     rw [KFin.u, dif_pos (show ((g : GE D.nd)) ∈ KFin.Γc i dc l from g.2)])
+     rw [KFin.u, dite_eq_left (show ((g : GE D.nd)) ∈ KFin.Γc i dc l from g.2)])
   | (simp [KFin.uz, KFin.uzOf, KFin.u, g.2])
-
-theorem colUnr (hA : EmbeddingTypes.UnramifiedTrivialH1f i dc) : KHf.UnrFin i dc Dd.δO (KFin.uz i dc Dd.δO) :=
-  KUnr.unrFin i dc Dd.δO hA
 
 theorem column_unramified_character : (∀ l, ∀ g ∈ QS.I i dc (colIdx i dc l), KFin.u i dc l (g : GE D.nd) = 0) ∧
     (∀ l, ∃ g ∈ (decs D.host.E (Aw i dc)) (colIdx i dc l), KFin.u i dc l g = 1) :=
@@ -63,8 +107,8 @@ theorem column_unramified_character : (∀ l, ∀ g ∈ QS.I i dc (colIdx i dc l
 
 variable [∀ k, SMulCommClass Dd.R' (D.nd.O i) (blockRestrictedRepresentationType (RepresentationBoundsCohomology.blk D.R) Dd.ρk k)]
 
-set_option maxHeartbeats 4000000 in
-set_option synthInstance.maxHeartbeats 400000 in
+
+
 
 theorem colLx_of_ringDef
     (hD : RingDef (D.nd.O i) (D.nd.T i) (RepresentationBoundsCohomology.repX D.nd r) π (chiU D.nd i 1) (epsU D.nd i) g0 eB e₁ s Dd)

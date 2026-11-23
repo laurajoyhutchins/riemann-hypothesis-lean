@@ -1,6 +1,49 @@
-import Development.AutomorphicArithmetic.Foundations.Convolution.BlockHeckeSlices.SliceShift
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ContinuousOfIsOpenStab
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.CapCommuteRtInfGL
+module
+
+public import Development.AutomorphicArithmetic.Foundations.Convolution.BlockHeckeSlices.SliceShift
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.CapCommuteRtInfGL
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ContinuousOfIsOpenStab
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.ArchimedeanCompact.AutomorphicFormsLeSm
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -10,7 +53,7 @@ open GroundTheory.Automorphic.CuspidalSpectrum UpperTheory.V.Cm
 
 namespace UpperTheory.ConvolutionTheory.BW
 
-variable {E : Type} [Field E] [NumberField E] [IsTotallyComplex E] {n : ℕ}
+variable {E : Type} [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] {n : ℕ}
 
 private theorem uc_ind {P : UC E n → Prop} (h1 : ∀ c : ℂ, P (algebraMap ℂ _ c)) (hι : ∀ X, P (ιC E n X))
     (hadd : ∀ x y, P x → P y → P (x + y)) (hmul : ∀ x y, P x → P y → P (x * y)) (u : UC E n) : P u := by
@@ -30,7 +73,7 @@ private theorem uc_fin (u : UC E n) (k : GL (Fin n) (Af E)) : Commute (uC E n u)
   induction u using uc_ind with
   | h1 c => rw [AlgHom.commutes]; exact Algebra.commutes c _
   | hι X => rw [uC_ιC]; exact lie_rt_fin X k
-  | hadd x y hx hy => rw [map_add]; exact hx.add_left hy
+  | hadd x y hx hy => rw [map_add (f := _)]; exact hx.add_left hy
   | hmul x y hx hy => rw [map_mul]; exact hx.mul_left hy
 
 private theorem uc_inf (y : GL (Fin n) (Cinf E)) (u : UC E n) :
@@ -46,7 +89,7 @@ private theorem uc_inf (y : GL (Fin n) (Cinf E)) (u : UC E n) :
   | hadd a b ha hb =>
     obtain ⟨a', ha⟩ := ha
     obtain ⟨b', hb⟩ := hb
-    exact ⟨a' + b', by rw [map_add, map_add, add_mul, mul_add, ha, hb]⟩
+    exact ⟨a' + b', by rw [map_add (f := _), map_add (f := _), add_mul, mul_add, ha, hb]⟩
   | hmul a b ha hb =>
     obtain ⟨a', ha⟩ := ha
     obtain ⟨b', hb⟩ := hb
@@ -74,7 +117,7 @@ private theorem uc_left (h : GA E n) (u : UC E n) : ∀ φ : Sm E n, (∀ g, φ.
     simp only [this]
   | hadd a b ha hb =>
     intro φ hφ g
-    rw [map_add]
+    rw [map_add (f := _)]
     exact congrArg₂ (· + ·) (ha φ hφ g) (hb φ hφ g)
   | hmul a b ha hb =>
     intro φ hφ g
@@ -110,7 +153,11 @@ private theorem lev_rt (g : GA E n) (ψ : Sm E n) (h : IsOpen (stab ψ : Set (GL
     rw [← Module.End.mul_apply, ← map_mul, e, map_mul, Module.End.mul_apply, hk']
 
 private theorem umg_zero : Umg (0 : Sm E n) :=
-  ⟨fun _ _ => rfl, by simp, 0, fun u => ⟨0, fun g => by simp⟩⟩
+  ⟨fun _ _ => rfl, by
+    have : {k | finRep E n k (0 : Sm E n) = 0} = Set.univ :=
+      Set.eq_univ_of_forall (fun k => map_zero _)
+    rw [this]
+    exact isOpen_univ, 0, fun u => ⟨0, fun g => by simp⟩⟩
 
 private theorem umg_add {φ ψ : Sm E n} (h : Umg φ) (h' : Umg ψ) : Umg (φ + ψ) := by
   refine ⟨fun γ g => congrArg₂ (· + ·) (h.left γ g) (h'.left γ g), ?_, ?_⟩
@@ -123,7 +170,7 @@ private theorem umg_add {φ ψ : Sm E n} (h : Umg φ) (h' : Umg ψ) : Umg (φ + 
     obtain ⟨C, hC⟩ := hM u
     refine ⟨|B| + |C|, fun g => ?_⟩
     have h1 := AutomorphicForm.one_le_height g
-    rw [map_add, add_mul]
+    rw [map_add (f := _), add_mul]
     refine (norm_add_le _ _).trans (add_le_add ((hB g).trans ?_) ((hC g).trans ?_))
     · exact mul_le_mul (le_abs_self _) (pow_le_pow_right₀ h1 (le_max_left _ _)) (by positivity) (abs_nonneg _)
     · exact mul_le_mul (le_abs_self _) (pow_le_pow_right₀ h1 (le_max_right _ _)) (by positivity) (abs_nonneg _)
@@ -170,7 +217,7 @@ private theorem umg_hk {φ : Sm E n} (h : Umg φ) (w : Pl E) (j : ℕ) : Umg (hk
 end UpperTheory.ConvolutionTheory.BW
 
 theorem UpperTheory.ConvolutionTheory.BW.umgOps :
-    ∀ (E : Type) [Field E] [NumberField E] [IsTotallyComplex E], UpperTheory.ConvolutionTheory.BW.UmgOps E := by
+    ∀ (E : Type) [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E], UpperTheory.ConvolutionTheory.BW.UmgOps E := by
   intro E _ _ _ n
   exact ⟨umg_zero, fun φ h => ⟨ContAut.continuous_of_isOpen_stab E n φ h.level, fun _ => umg_add h, umg_smul h,
     umg_uC h, umg_rt h, umg_hk h⟩⟩

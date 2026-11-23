@@ -1,6 +1,48 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.WittExactSequences.DesAcrZero
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.AcrisKummerUnits.ForD
+module
+
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.WittExactSequences.ObFacts
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.AcrisKummerUnits.ForD
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.WittExactSequences.DesAcrZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 set_option backward.isDefEq.respectTransparency false
 
@@ -11,45 +53,5 @@ namespace CrystallineSemistableComparison.D
 variable (l : ℕ) [Fact l.Prime]
 
 theorem out : Out l := out_of_rin l (CrystallineSemistableComparison.R.forD l)
-
-theorem not_isUnit_pFlat : ¬ IsUnit (pFlat l) := fun h => by
-  have := h.map (PreTilt.untilt (O := OC l) (p := l))
-  rw [untilt_pFlat] at this
-  exact (Fact.out : ¬ IsUnit (l : OC l)) this
-
-theorem inWm_rtW (k : ℕ) : InWm l (rtW l k) := by
-  intro i hi
-  cases i with
-  | zero =>
-    rw [rtW, WittVector.teichmuller_coeff_zero] at hi
-    have := hi.map (iterateFrobeniusEquiv (Ob l) l k)
-    rw [rt, RingEquiv.apply_symm_apply] at this
-    exact not_isUnit_pFlat l this
-  | succ i =>
-    rw [rtW, WittVector.teichmuller_coeff_pos l _ _ (Nat.succ_pos i)] at hi
-    exact not_isUnit_pFlat l (isUnit_of_dvd_unit (dvd_zero _) hi)
-
-theorem inWm_iff [IsLocalRing (Ob l)] (s : Ainf l) : InWm l s ↔ WittVector.map (IsLocalRing.residue (Ob l)) s = 0 := by
-  rw [WittVector.ext_iff]
-  refine forall_congr' fun i => ?_
-  rw [WittVector.map_coeff, WittVector.zero_coeff, IsLocalRing.residue_eq_zero_iff]
-  rfl
-
-theorem isLocalRing_Ob (h : ObFacts l) : IsLocalRing (Ob l) := by
-  obtain ⟨_, _, _⟩ := h
-  infer_instance
-
-theorem inWm_teichmuller_sub_one (h : ObFacts l) (x : Ob l) (hx : ¬ IsUnit (x - 1)) :
-    InWm l (WittVector.teichmuller l x - 1) := by
-  have := isLocalRing_Ob l h
-  have e : IsLocalRing.residue (Ob l) x = 1 := by
-    rw [← sub_eq_zero, ← map_one (IsLocalRing.residue (Ob l)), ← map_sub, IsLocalRing.residue_eq_zero_iff]
-    exact hx
-  rw [inWm_iff, map_sub, WittVector.map_teichmuller, e, map_one, map_one, sub_self]
-
-theorem InWm.mul_left (h : ObFacts l) (a : Ainf l) {s : Ainf l} (hs : InWm l s) : InWm l (a * s) := by
-  have := isLocalRing_Ob l h
-  rw [inWm_iff] at hs ⊢
-  rw [map_mul, hs, mul_zero]
 
 end CrystallineSemistableComparison.D

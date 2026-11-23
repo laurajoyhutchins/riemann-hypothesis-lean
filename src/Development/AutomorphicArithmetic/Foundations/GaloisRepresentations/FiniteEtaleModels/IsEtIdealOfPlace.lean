@@ -1,8 +1,47 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsEtPlace
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsHeckeMap
-import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsTjCorrDiagModel
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsEtLevOver
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsTjCorrDiagModel
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsEtLevOver
+public import Development.AbelianVarietyTheory.Definitions.ModuliSpaces.IsGaloisCover
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -24,15 +63,6 @@ def FinCover : Prop :=
 
 def FinModel : Prop :=
   ∀ (p : ℕ) [Fact p.Prime] (D : Datum p) (R : Type) [CommRing R] [IsNoetherianRing R] (b : Base D R) (N : ℕ), 3 ≤ N → N.Coprime p → ∀ (𝔞 : Ideal (𝓞 D.F)) (r : ℕ), IsEtIdeal b 𝔞 → ∀ M : Model b N, ∃ (E : EtModel b N 𝔞 r) (π : E.X ⟶ M.X) (ρ : LevGrp D 𝔞 r → (E.X ⟶ E.X)), π ≫ M.s = E.s ∧ Nonempty (ObjMap E.univ M.univ π) ∧ GlobalTheory.ZM.IsGaloisCover (LevGrp D 𝔞 r) ρ π
-
-def FinFet : Prop :=
-  ∀ (p : ℕ) [Fact p.Prime] (D : Datum p) (R : Type) [CommRing R] [IsNoetherianRing R] (b : Base D R) (N : ℕ), 3 ≤ N → N.Coprime p → ∀ (𝔞 : Ideal (𝓞 D.F)) (r : ℕ), IsEtIdeal b 𝔞 → ∀ (M : Model b N) (E : EtModel b N 𝔞 r) (π : E.X ⟶ M.X), π ≫ M.s = E.s → Nonempty (ObjMap E.univ M.univ π) → IsFinite π ∧ Etale π ∧ Surjective π
-
-def FinHecke : Prop :=
-  ∀ (p : ℕ) [Fact p.Prime] (D : Datum p) (R : Type) [CommRing R] [IsNoetherianRing R] (b : Base D R) (g : D.La →ₗ[D.O] D.La) (c k N : ℕ), c.Coprime p → k.Coprime p → 3 ≤ N → N.Coprime p → (∀ x y, D.EF (g x) (g y) = c * D.EF x y) → (∀ x, ∃ y, g y = k • x) → c ∣ k ^ 2 → ∀ (𝔞 : Ideal (𝓞 D.F)) (r : ℕ), IsEtIdeal b 𝔞 → ∀ (E : EtModel b N 𝔞 r) (E' : EtModel b (N * k) 𝔞 r), ∃ π : E'.X ⟶ E.X, π ≫ E.s = E'.s ∧ IsFinite π ∧ Etale π ∧ ∃ (o' : Obj b N E'.s) (ψ : E'.univ.A ⟶ o'.A), IsHecke g c k N E'.univ o' ψ ∧ ∃ m : ObjMap o' E.univ π, ∀ y, (E'.lv y ≫ ψ).left ≫ m.φ = π ≫ (E.lv y).left
-
-def FinForget : Prop :=
-  ∀ (p : ℕ) [Fact p.Prime] (D : Datum p) (R : Type) [CommRing R] [IsNoetherianRing R] (b : Base D R) (N N' : ℕ) (hd : N ∣ N') (hc : N'.Coprime p), 3 ≤ N → ∀ (𝔞 : Ideal (𝓞 D.F)) (r : ℕ), IsEtIdeal b 𝔞 → ∀ (E : EtModel b N 𝔞 r) (E' : EtModel b N' 𝔞 r), ∃ π : E'.X ⟶ E.X, π ≫ E.s = E'.s ∧ IsFinite π ∧ Etale π ∧ ∃ m : ObjMap (E'.univ.forget N hd hc) E.univ π, ∀ y, (E'.lv y).left ≫ m.φ = π ≫ (E.lv y).left
 
 def CrtMul : Prop :=
   ∀ (p : ℕ) [Fact p.Prime] (D : Datum p) (R : Type) [CommRing R] (b : Base D R) (N : ℕ) (S : Scheme.{0}) (s : S ⟶ Sp R) (o : Obj b N s) (𝔞 𝔟 : Ideal (𝓞 D.F)), 𝔞 ⊔ 𝔟 = ⊤ → ∀ (T : Over S) (l₁ l₂ : D.La → (T ⟶ o.A)),
@@ -56,14 +86,8 @@ def RepAll : Prop :=
 def PtAll : Prop :=
   ∀ (p : ℕ) [Fact p.Prime] (D : Datum p) (R : Type) [CommRing R] (b : Base D R) (N : ℕ) (𝔞 : Ideal (𝓞 D.F)) (r : ℕ), N.Coprime p → IsEtIdeal b 𝔞 → ∀ (S : Scheme.{0}) (s : S ⟶ Sp R) (o : Obj b N s) (k : Type) [Field k] [IsAlgClosed k] (x : Sp k ⟶ S), ∃ l : D.La → (Over.mk x ⟶ o.A), IsEtLevOver o 𝔞 r l
 
-def PPow : Prop :=
-  ∀ (p : ℕ) [Fact p.Prime] (D : Datum p) (R : Type) [CommRing R] (b : Base D R) (𝔞 : Ideal (𝓞 D.F)), IsEtIdeal b 𝔞 → ∃ e : ℕ, ((p ^ e : ℕ) : 𝓞 D.F) ∈ 𝔞
-
 def GrpFin : Prop :=
   ∀ (p : ℕ) [Fact p.Prime] (D : Datum p) (𝔞 : Ideal (𝓞 D.F)) (r : ℕ), 𝔞 ≠ ⊥ → Finite (D.La ⧸ wSub D 𝔞 r) ∧ Finite (LevGrp D 𝔞 r)
-
-def LevHecke : Prop :=
-  ∀ (p : ℕ) [Fact p.Prime] (D : Datum p) (R : Type) [CommRing R] (b : Base D R) (g : D.La →ₗ[D.O] D.La) (c k N : ℕ) (𝔞 : Ideal (𝓞 D.F)) (r : ℕ), k.Coprime p → (∃ e : ℕ, ((p ^ e : ℕ) : 𝓞 D.F) ∈ 𝔞) → ∀ (S : Scheme.{0}) (s : S ⟶ Sp R) (o : Obj b (N * k) s) (o' : Obj b N s) (ψ : o.A ⟶ o'.A) (lv : D.La → (𝟙_ (Over S) ⟶ o.A)), IsHecke g c k N o o' ψ → IsEtLev o 𝔞 r lv → IsEtLev o' 𝔞 r (fun y => lv y ≫ ψ)
 
 def PlaceOf : Prop :=
   ∀ (p : ℕ) [Fact p.Prime] (D : Datum p) (O : Type) [CommRing O] [IsDomain O] [IsDiscreteValuationRing O] [CharZero O] (b : Base D O)

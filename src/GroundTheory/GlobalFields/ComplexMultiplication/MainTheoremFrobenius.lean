@@ -1,10 +1,65 @@
-import Mathlib
+module
+
+public import GroundTheory.GlobalFields.ComplexMultiplication.MainTheoremReduction
+public import GroundTheory.GlobalFields.ComplexMultiplication.AlgebraicityHom
+public import GroundTheory.GlobalFields.ComplexMultiplication.BaseChangeField
+public import GroundTheory.GlobalFields.ComplexMultiplication.ClassGroupActionLattice
+public import GroundTheory.GlobalFields.ComplexMultiplication.InseparableFrobenius
+public import GroundTheory.GlobalFields.ComplexMultiplication.ReductionRespectsAdd
+public import GroundTheory.GlobalFields.ComplexMultiplication.WeberFunction
+public import Mathlib.NumberTheory.NumberField.Cyclotomic.Basic
+public import GroundTheory.GlobalFields.ComplexMultiplication.DegreeOneAutomorphismLift
+public import GroundTheory.GlobalFields.ComplexMultiplication.DegreeOneAutomorphismPoints
 import GroundTheory.GlobalFields.ComplexMultiplication.FrobeniusAtPrimes
-import GroundTheory.GlobalFields.ComplexMultiplication.DegreeOneAutomorphismPoints
-import GroundTheory.GlobalFields.ComplexMultiplication.DegreeOneAutomorphismLift
-import GroundTheory.GlobalFields.ComplexMultiplication.MainTheoremPointHom
-import GroundTheory.GlobalFields.ComplexMultiplication.MainTheoremReduction
-import GroundTheory.GlobalFields.ComplexMultiplication.TorsionReduction
+public import GroundTheory.GlobalFields.ComplexMultiplication.MainTheoremPointHom
+import GroundTheory.GlobalFields.ComplexMultiplication.ReductionAtPoint
+public import GroundTheory.GlobalFields.ComplexMultiplication.TorsionReduction
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Global
@@ -97,10 +152,10 @@ end Scaling
 section Main
 
 variable {K : Type} [Field K] [NumberField K] [Algebra K ℂ] (hK : finrank ℚ K = 2)
-  [IsTotallyComplex K] {L : IntermediateField K ℂ} [NumberField L]
+  [_root_.NumberField.IsTotallyComplex K] {L : IntermediateField K ℂ} [NumberField L]
 
-omit [NumberField K] [IsTotallyComplex K] in
 
+omit [NumberField K] [_root_.NumberField.IsTotallyComplex K] in
 theorem isPrimitiveRoot_localizationAt (𝔓 : HeightOneSpectrum (𝓞 L)) {ζ : L}
     (hζ : IsPrimitiveRoot ζ 12) :
     IsPrimitiveRoot (algebraMap (𝓞 L) (localizationAt L 𝔓) hζ.toInteger) 12 :=
@@ -109,9 +164,9 @@ theorem isPrimitiveRoot_localizationAt (𝔓 : HeightOneSpectrum (𝓞 L)) {ζ :
     rw [← IsScalarTower.algebraMap_apply, ← IsScalarTower.algebraMap_apply] at this
     exact RingOfIntegers.ext this)
 
-set_option maxHeartbeats 1000000 in
-include hK in
 
+
+include hK in
 theorem exists_vcPoint_pointHomOver_eq (𝔭 : HeightOneSpectrum (𝓞 K))
     (hv : (Ideal.absNorm 𝔭.asIdeal).Prime) (h5 : 5 ≤ Ideal.absNorm 𝔭.asIdeal)
     (𝔓 : HeightOneSpectrum (𝓞 L)) [𝔓.asIdeal.LiesOver 𝔭.asIdeal]

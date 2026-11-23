@@ -1,10 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AbelianSchemeLaws.FirstCohomologyVanishesSpecOfIsLocalRing
-import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.ExistsGenOfSmallExtension
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.CubeVal
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.UnifUniqSt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.IsNsmul
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.QkToAkU
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AbelianSchemeLaws.FirstCohomologyVanishesSpecOfIsLocalRing
+public import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.ExistsGenOfSmallExtension
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ValCalc
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits AlgebraicGeometry TopologicalSpace
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Out ReciprocityTheory.ChartRestriction.G.Geo.Tor
@@ -230,7 +269,7 @@ theorem split_cocycle {w : LB.Iso N' (N.pull F)} (hw : w.IsGen) (H : FirstCohomo
   clear_value χ
   obtain ⟨ψ, hψ⟩ := H I (fun a => F ⁻¹ᵁ V a) k' h'
     (eq_top_iff.2 fun y _ => Opens.mem_iSup.2 (cov (F y))) χ (fun a b d => gr_ext fun y hy => by
-      rw [map_add, gr_res, gr_res, map_mul, gr_res, gr_res, hχ, hχ, hχ]
+      rw [map_add (f := _), gr_res, gr_res, map_mul, gr_res, gr_res, hχ, hχ, hχ]
       have e₁ := hφ a b d y hy.1.1 hy.1.2 hy.2
       have e₂ := iso_rel hw y (h a hy.1.1) (h b hy.1.2) (h' a hy.1.1) (h' b hy.1.2)
       have e₃ := hi a y hy.1.1
@@ -314,7 +353,7 @@ theorem exists_sec_lift : ∀ (A A₀ A' : Type) [CommRing A] [CommRing A₀] [C
     obtain ⟨e₁, p₁, q₁⟩ := hφ i l y ⟨hi, hl⟩
     obtain ⟨e₂, p₂, q₂⟩ := hφ l m y ⟨hl, hm⟩
     obtain ⟨e₃, p₃, q₃⟩ := hφ i m y ⟨hi, hm⟩
-    rw [← q₁, ← q₂, ← q₃, ← stalkMap_gr, ← map_mul, ← map_add, ← sub_eq_zero, ← map_sub, ← hS]
+    rw [← q₁, ← q₂, ← q₃, ← stalkMap_gr, ← map_mul, ← map_add (f := _), ← sub_eq_zero, ← map_sub, ← hS]
     rw [hd] at p₁ p₂ p₃
     have c := gr_cocycle hN (𝟙 X) (j y) (h i hi) (h l hl) (h m hm)
     linear_combination p₃ - p₁ - gr (𝟙 X) (j y) (N.U (k i) ⊓ N.U (k l)) ⟨h i hi, h l hl⟩

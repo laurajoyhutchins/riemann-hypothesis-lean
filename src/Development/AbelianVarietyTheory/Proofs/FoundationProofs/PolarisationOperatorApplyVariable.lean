@@ -1,5 +1,57 @@
-import Mathlib
-import Development.AbelianVarietyTheory.BlockTheory.TorsionBlocks.BottomMinor
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.TorsionBlocks.BottomMinor
+public import Mathlib.Algebra.MvPolynomial.PDeriv
+import Mathlib.Algebra.AffineMonoid.UniqueSums
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open MvPolynomial Matrix Finset
 
@@ -31,6 +83,7 @@ theorem deriv_det {m : ℕ} (D : Derivation ℂ R R) (M : Matrix (Fin m) (Fin m)
     intro N
     rw [← det_transpose, det_apply']
     rfl
+
   simp only [key, map_sum]
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun σ _ => ?_
@@ -267,6 +320,7 @@ theorem capelli_step (hd : ∀ r j s c, d r j (x s c) = if r = s ∧ j = c then 
     rw [e1]
     simp only [e2]
     rw [Finset.sum_comm]
+
     simp only [Finset.sum_add_distrib, ← Finset.mul_sum, ← map_sum, ih', hcst, hv]
     rw [Fin.prod_univ_succ, Nat.cast_mul, ← hj, h0, e3]
     change _ = _ * c * _ * _
@@ -300,7 +354,7 @@ theorem cast_eps (ρ : Fin k → Fin k) :
 theorem det_eq_sum_eps (x : Fin k → Fin k → R) :
     (Matrix.of x).det = ∑ ρ : Fin k → Fin k, (eps ρ : R) * ∏ t, x (ρ t) t := by
   conv_lhs => rw [← Matrix.one_mul (Matrix.of x)]
-  simp only [det_apply', mul_apply, Finset.prod_univ_sum, Finset.mul_sum, Fintype.piFinset_univ]
+  simp only [det_apply', Matrix.mul_apply, Finset.prod_univ_sum, Finset.mul_sum, Fintype.piFinset_univ]
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun ρ _ => ?_
   rw [cast_eps, ← det_transpose, det_apply', Finset.sum_mul]
@@ -387,7 +441,7 @@ theorem fock_add_left (P P' Q : MvPolynomial σ ℂ) :
     fock_eq_sum P Q (P.support ∪ P'.support) Finset.subset_union_left,
     fock_eq_sum P' Q (P.support ∪ P'.support) Finset.subset_union_right, ← Finset.sum_add_distrib]
   refine Finset.sum_congr rfl fun m _ => ?_
-  rw [coeff_add]; ring
+  rw [MvPolynomial.coeff_add]; ring
 
 theorem fock_sum_left {ι : Type} (s : Finset ι) (P : ι → MvPolynomial σ ℂ) (Q : MvPolynomial σ ℂ) :
     Formalism.E.fock (∑ i ∈ s, P i) Q = ∑ i ∈ s, Formalism.E.fock (P i) Q := by
@@ -408,7 +462,7 @@ theorem fock_int_left (z : ℤ) (P Q : MvPolynomial σ ℂ) :
   have e : (z : MvPolynomial σ ℂ) = C (z : ℂ) := by simp
   rw [e, C_mul', fock_eq_sum _ Q P.support support_smul, Formalism.E.fock, Finset.mul_sum]
   refine Finset.sum_congr rfl fun m _ => ?_
-  rw [coeff_smul, smul_eq_mul]; ring
+  rw [MvPolynomial.coeff_smul, smul_eq_mul]; ring
 
 theorem fock_int_right (z : ℤ) (P Q : MvPolynomial σ ℂ) :
     Formalism.E.fock P ((z : MvPolynomial σ ℂ) * Q) = z * Formalism.E.fock P Q := by
@@ -444,7 +498,7 @@ theorem coeff_pderiv' (v : σ) (m : σ →₀ ℕ) (Q : MvPolynomial σ ℂ) :
     (pderiv v Q).coeff m = Q.coeff (m + Finsupp.single v 1) * (m v + 1) := by
   classical
   induction Q using MvPolynomial.induction_on' with
-  | add P₁ P₂ h₁ h₂ => simp only [map_add, coeff_add, h₁, h₂, add_mul]
+  | add P₁ P₂ h₁ h₂ => simp only [map_add (f := _), MvPolynomial.coeff_add, h₁, h₂, add_mul]
   | monomial b c =>
     rw [pderiv_monomial, coeff_monomial, coeff_monomial]
     by_cases h : b = m + Finsupp.single v 1

@@ -1,9 +1,60 @@
-import Mathlib
-import Formalism.LocalToGlobal.PairingIndexBounds.OrthogonalChartLevels.FdOfCharts
-import Formalism.LocalToGlobal.GroupLattices.PendingLemmas.InvarianceRepresentativesLaw
-import Formalism.LocalToGlobal.GroupLattices.PendingLemmas.InvarianceRepresentativesTrivial
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.NatCastMemOfPlace
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.MemHomLat
+module
+
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.MemHomLat
+public import Formalism.SharpRestriction.GrowthBounds.UnramifiedQuadraticSetting
+public import Mathlib.NumberTheory.NumberField.Completion.FinitePlace
+public import Mathlib.Order.CompletePartialOrder
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.LocalRingCardinality.SpanPowerMembership.GatRing
+import Formalism.LocalToGlobal.GroupLattices.PendingLemmas.WittFractionToCpAlgebraMap
+import Formalism.SharpRestriction.GrowthBounds.MultisetValuation.DescentCore
+
+@[expose] public section
 
 noncomputable section
 
@@ -126,7 +177,7 @@ theorem approx_of_mem_span {ϖ : W} (ρ : E →+* Qq)
     have e1 := congrFun (congrFun hM i) j
     have e2 := congrFun (congrFun hM' i) j
     simp only [Matrix.sub_apply, Matrix.map_apply, Matrix.smul_apply, smul_eq_mul] at e1 e2
-    simp only [Matrix.sub_apply, Matrix.add_apply, Matrix.map_apply, Matrix.smul_apply, smul_eq_mul, map_add]
+    simp only [Matrix.sub_apply, Matrix.add_apply, Matrix.map_apply, Matrix.smul_apply, smul_eq_mul, map_add (f := _)]
     linear_combination e1 + e2
   | smul c x _ hx =>
     obtain ⟨A, hA, M, hM⟩ := hx n
@@ -141,7 +192,7 @@ theorem approx_of_mem_span {ϖ : W} (ρ : E →+* Qq)
       rw [Matrix.smul_apply, ← map_mul]
       rfl
     rw [Matrix.sub_apply, Matrix.map_apply, e3, hxz]
-    simp only [Matrix.smul_apply, Matrix.map_apply, Matrix.sub_apply, smul_eq_mul, Algebra.smul_def, map_add,
+    simp only [Matrix.smul_apply, Matrix.map_apply, Matrix.sub_apply, smul_eq_mul, Algebra.smul_def, map_add (f := _),
       map_sub, map_mul, map_pow, pow_add] at e1 e2 ⊢
     linear_combination (algebraMap W Qq c) * e1 -
       algebraMap W Qq ϖ ^ n * algebraMap W Qq z * e2
@@ -171,8 +222,8 @@ end Neighbourhoods
 
 end ClosureLat
 
-open ClosureLat in
 
+open ClosureLat in
 theorem mem_closure_iff_map_mem_homLat {E : Type} [Field E] [NumberField E] (P : HeightOneSpectrum (𝓞 E)) {W Qq : Type}
     [CommRing W] [IsDomain W] [IsDiscreteValuationRing W] [Field Qq] [Algebra W Qq] [IsFractionRing W Qq] (p : ℕ)
     (hp : Irreducible (p : W)) (ρ : E →+* Qq)

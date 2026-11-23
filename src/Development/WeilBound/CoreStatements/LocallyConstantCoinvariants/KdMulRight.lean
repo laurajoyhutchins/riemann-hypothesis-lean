@@ -1,4 +1,46 @@
-import Development.WeilBound.CoreStatements.LocallyConstantCoinvariants.PfDictDef
+module
+
+public import Development.WeilBound.CoreStatements.LocallyConstantCoinvariants.PfDictDef
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 set_option linter.unusedSectionVars false
 
@@ -34,9 +76,6 @@ theorem kd_at_iff {M : Type} [AddCommGroup M] [Module (AF F) M] {z : M} : At (ev
 
 theorem at_sgl_smul {M : Type} [AddCommGroup M] [Module (AF F) M] (x : Fv F v) (z : M) : At (evFin F v) (sgl v x • z) :=
   fun u hu => by rw [smul_smul, mul_sgl, hu, zero_mul, map_zero, zero_smul]
-
-theorem _root_.GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.At.kd_eq_sgl {z : AF F} (h : At (evFin F v) z) : z = sgl v (evFin F v z) := by
-  rw [← kd_at_iff.1 h, smul_eq_mul, mul_comm, mul_sgl, mul_one, ev_sgl]
 
 theorem _root_.GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.At.kd_map {M N : Type} [AddCommGroup M] [Module (AF F) M] [AddCommGroup N] [Module (AF F) N] (f : M →ₗ[AF F] N) {z : M}
     (h : At (evFin F v) z) : At (evFin F v) (f z) := fun u hu => by rw [← map_smul, h u hu, map_zero]

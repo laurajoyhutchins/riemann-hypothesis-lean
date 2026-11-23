@@ -1,9 +1,56 @@
-import CompanionTheory.RealGroups.FormalDegrees.ArchimedeanFormalDegrees.HlamStable
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.IntMuCD
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.RhoNSubNab
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.KSchur
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.HaarMirror
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.CasimirCoefficients.ToMKMulInv
+module
+
+public import CompanionTheory.RealGroups.FormalDegrees.ArchimedeanFormalDegrees.HlamStable
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.CasimirCoefficients.ExpInPPosDef
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.CasimirCoefficients.ToMKMulInv
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.IntMuCD
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.KSchur
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.ProdSubLtEqFactorial
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.RhoNSubNab
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -55,8 +102,8 @@ theorem nd_hsOp_op {ε : Fin n → Bool} {Λ : Fin n → ℝ} (T : KType ε Λ) 
     have hU := (T.τ k).2
     have h1 : star (T.op k) * T.op k = 1 := hU.1
     have h2 : ⟪T.op k v, T.op k v⟫_ℂ = ⟪v, v⟫_ℂ := by
-      rw [← ContinuousLinearMap.adjoint_inner_right, ← ContinuousLinearMap.mul_apply,
-        ← ContinuousLinearMap.star_eq_adjoint, h1, ContinuousLinearMap.one_apply]
+      rw [← ContinuousLinearMap.adjoint_inner_right, ← mul_apply_eq_comp,
+        ← ContinuousLinearMap.star_eq_adjoint, h1, one_apply_eq_self]
     rw [inner_self_eq_norm_sq_to_K, inner_self_eq_norm_sq_to_K] at h2
     have h3 : ‖T.op k v‖ ^ 2 = ‖v‖ ^ 2 := by exact_mod_cast h2
     exact (pow_left_inj₀ (norm_nonneg _) (norm_nonneg _) two_ne_zero).1 h3
@@ -110,13 +157,15 @@ theorem nd_muCD_univ {ε : Fin n → Bool} (hq : q0 ε = 0) : muCD ε Set.univ =
   obtain ⟨s, hs⟩ := nd_const_sign hq
   have := nd_isEmpty hs
   have h := lintegral_muCD ε (fun _ => 1) measurable_const
-  rw [lintegral_one] at h
+  simp only [lintegral_one] at h
   rw [h, nd_cPQ hq, ENNReal.ofReal_one, one_mul]
   have hz : ∫⁻ z : PCoord ε → ℂ, ENNReal.ofReal (Jac z) = 1 := by
     simp only [nd_jac_one hs, ENNReal.ofReal_one, lintegral_one]
     rw [MeasureTheory.volume_pi, Measure.pi_of_empty]
     simp
-  simp only [one_mul, hz, lintegral_one, measure_univ]
+  simp only [one_mul, hz]
+  rw [lintegral_one]
+  exact (CompactHaarProbability.dk_isProb ε).measure_univ
 
 theorem nd_finrank {ε : Fin n → Bool} (hq : q0 ε = 0) {lam : Fin n → ℝ} (hl : StrictAnti lam)
     (T : KType ε (lowK ε lam)) : (Module.finrank ℂ T.V : ℝ) = dimVlam lam := by

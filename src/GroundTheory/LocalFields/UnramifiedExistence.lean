@@ -1,11 +1,59 @@
-import Mathlib
-import GroundTheory.LocalFields.Interface
-import GroundTheory.LocalFields.FiniteExtension
-import GroundTheory.LocalFields.Uniqueness
-import GroundTheory.LocalFields.Integers
-import GroundTheory.LocalFields.UnitsPowers
-import GroundTheory.LocalFields.UnramifiedRootsOfUnity
-import GroundTheory.LocalFields.UnramifiedGalois
+module
+
+public import GroundTheory.LocalFields.Interface
+public import Mathlib.RingTheory.RamificationInertia.Ramification
+public import Mathlib.RingTheory.RegularLocalRing.Defs
+public import Mathlib.RingTheory.RootsOfUnity.PrimitiveRoots
+public import Mathlib.RingTheory.SimpleRing.Principal
+public import GroundTheory.LocalFields.FiniteExtension
+public import GroundTheory.LocalFields.UnitsPowers
+public import GroundTheory.LocalFields.UnramifiedGalois
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RootsOfUnity.AlgebraicallyClosed
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import GroundTheory.LocalFields.Integers
+public import GroundTheory.LocalFields.Uniqueness
+public import Mathlib.RingTheory.RootsOfUnity.EnoughRootsOfUnity
+
+@[expose] public section
 
 noncomputable section
 
@@ -19,7 +67,7 @@ variable (K L : Type*) [Field K] [ValuativeRel K] [TopologicalSpace K] [IsNonarc
   [Field L] [ValuativeRel L] [TopologicalSpace L] [IsNonarchimedeanLocalField L]
   [Algebra K L] [ValuativeExtension K L] [FiniteDimensional K L]
 
-theorem card_residueField_of_unramified (h : ramificationIndex K L = 1) :
+theorem card_residueField_of_unramified (h : (_root_.Ideal.ramificationIdx (_root_.IsLocalRing.maximalIdeal (_root_.Valuation.integer (_root_.ValuativeRel.valuation L))) (_root_.Valuation.integer (_root_.ValuativeRel.valuation K))) = 1) :
     Nat.card 𝓀[L] = Nat.card 𝓀[K] ^ Module.finrank K L := by
   have := Fintype.ofFinite 𝓀[K]
   have := Fintype.ofFinite 𝓀[L]
@@ -33,8 +81,8 @@ section SeparableClosure
 variable {K : Type*} [Field K] [ValuativeRel K] [TopologicalSpace K] [IsNonarchimedeanLocalField K]
   {Ksep : Type*} [Field Ksep] [Algebra K Ksep]
 
-omit [ValuativeRel K] [TopologicalSpace K] [IsNonarchimedeanLocalField K] in
 
+omit [ValuativeRel K] [TopologicalSpace K] [IsNonarchimedeanLocalField K] in
 theorem adjoin_gen_eq_top (α : Ksep) : K⟮AdjoinSimple.gen K α⟯ = ⊤ := by
   apply map_injective K⟮α⟯.val
   rw [adjoin_map, Set.image_singleton, ← AlgHom.fieldRange_eq_map, fieldRange_val]
@@ -43,12 +91,12 @@ theorem adjoin_gen_eq_top (α : Ksep) : K⟮AdjoinSimple.gen K α⟯ = ⊤ := by
 def IsUnramifiedSubextension (E : IntermediateField K Ksep) : Prop :=
   FiniteDimensional K E ∧
     ∀ (_ : ValuativeRel E) (_ : TopologicalSpace E) (_ : IsNonarchimedeanLocalField E)
-      (_ : ValuativeExtension K E), ramificationIndex K E = 1
+      (_ : ValuativeExtension K E), (_root_.Ideal.ramificationIdx (_root_.IsLocalRing.maximalIdeal (_root_.Valuation.integer (_root_.ValuativeRel.valuation E))) (_root_.Valuation.integer (_root_.ValuativeRel.valuation K))) = 1
 
 theorem isUnramifiedSubextension_iff_exists (E : IntermediateField K Ksep) :
     IsUnramifiedSubextension E ↔ FiniteDimensional K E ∧
       ∃ (_ : ValuativeRel E) (_ : TopologicalSpace E) (_ : IsNonarchimedeanLocalField E)
-        (_ : ValuativeExtension K E), ramificationIndex K E = 1 := by
+        (_ : ValuativeExtension K E), (_root_.Ideal.ramificationIdx (_root_.IsLocalRing.maximalIdeal (_root_.Valuation.integer (_root_.ValuativeRel.valuation E))) (_root_.Valuation.integer (_root_.ValuativeRel.valuation K))) = 1 := by
   constructor
   · rintro ⟨hfin, h⟩
     exact ⟨hfin, (finiteExtensionStructure K E).rel, (finiteExtensionStructure K E).top,
@@ -62,11 +110,11 @@ theorem isUnramifiedSubextension_iff_exists (E : IntermediateField K Ksep) :
     obtain rfl := valuativeRel_unique K h₁ h₂ e₁ e₂
     exact h
 
-omit [TopologicalSpace K] [IsNonarchimedeanLocalField K] in
 
+omit [TopologicalSpace K] [IsNonarchimedeanLocalField K] in
 theorem IsUnramifiedSubextension.ramificationIndex_eq_one {E : IntermediateField K Ksep}
     (hE : IsUnramifiedSubextension E) [ValuativeRel E] [TopologicalSpace E]
-    [IsNonarchimedeanLocalField E] [ValuativeExtension K E] : ramificationIndex K E = 1 :=
+    [IsNonarchimedeanLocalField E] [ValuativeExtension K E] : (_root_.Ideal.ramificationIdx (_root_.IsLocalRing.maximalIdeal (_root_.Valuation.integer (_root_.ValuativeRel.valuation E))) (_root_.Valuation.integer (_root_.ValuativeRel.valuation K))) = 1 :=
   hE.2 inferInstance inferInstance inferInstance inferInstance
 
 theorem IsUnramifiedSubextension.isGalois {E : IntermediateField K Ksep}

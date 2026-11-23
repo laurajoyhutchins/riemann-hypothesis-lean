@@ -1,5 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.MonodromyZeroOfWeilDeligneRepClassIff
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.MonodromyZeroOfWeilDeligneRepClassIff
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.Eigenspace.Charpoly
+public import Mathlib.LinearAlgebra.TensorProduct.Prod
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -23,13 +71,13 @@ theorem iso_sum_tensor (a : WDRep h V) (b : WDRep h V') (c : WDRep h V'') :
     | tmul x y =>
       obtain ⟨x₁, x₂⟩ := x
       simp
-    | add x y hx hy => simp only [map_add, hx, hy]
+    | add x y hx hy => simp only [map_add (f := _), hx, hy]
   · induction v using TensorProduct.induction_on with
     | zero => simp only [map_zero]
     | tmul x y =>
       obtain ⟨x₁, x₂⟩ := x
       simp
-    | add x y hx hy => simp only [map_add, hx, hy]
+    | add x y hx hy => simp only [map_add (f := _), hx, hy]
 
 theorem iso_tw_tensor (a : WDRep h V) (c : WDRep h V') (s : ℝ) :
     ((a.tw s).tensor c).Iso ((a.tensor c).tw s) :=
@@ -44,20 +92,20 @@ theorem iso_tensor_assoc (a : WDRep h V) (b : WDRep h V') (c : WDRep h V'') :
   refine ⟨TensorProduct.assoc ℂ V V' V'', fun σ v => ?_, fun v => ?_⟩
   · induction v using TensorProduct.induction_on with
     | zero => simp
-    | add x y hx hy => simp only [map_add, hx, hy]
+    | add x y hx hy => simp only [map_add (f := _), hx, hy]
     | tmul x z =>
       induction x using TensorProduct.induction_on with
       | zero => simp
       | tmul x y => simp
-      | add x y hx hy => simp only [map_add, add_tmul, hx, hy]
+      | add x y hx hy => simp only [map_add (f := _), add_tmul, hx, hy]
   · induction v using TensorProduct.induction_on with
     | zero => simp
-    | add x y hx hy => simp only [map_add, hx, hy]
+    | add x y hx hy => simp only [map_add (f := _), hx, hy]
     | tmul x z =>
       induction x using TensorProduct.induction_on with
       | zero => simp
       | tmul x y => simp [tmul_add, add_tmul, add_assoc]
-      | add x y hx hy => simp only [map_add, add_tmul, hx, hy]
+      | add x y hx hy => simp only [map_add (f := _), add_tmul, hx, hy]
 
 theorem iso_zero_tensor (a : WDRep h V) (c : WDRep h V') [Subsingleton V] (b : WDRep h V'') [Subsingleton V''] :
     (a.tensor c).Iso b := by
@@ -93,11 +141,11 @@ theorem iso_tensor_line (a : WDRep h V) (c : WDRep h V') (hN : c.N = 0) (hd : fi
   · induction v using TensorProduct.induction_on with
     | zero => simp
     | tmul x y => simp [hρ]
-    | add x y hx hy => simp only [map_add, hx, hy]
+    | add x y hx hy => simp only [map_add (f := _), hx, hy]
   · induction v using TensorProduct.induction_on with
     | zero => simp
     | tmul x y => simp [hN]
-    | add x y hx hy => simp only [map_add, hx, hy]
+    | add x y hx hy => simp only [map_add (f := _), hx, hy]
 
 end WDRep
 
@@ -108,7 +156,7 @@ theorem lpChar_laws (a b c : WD h) (s : ℝ) :
     (a.lpTw s).lpChar c = (a.lpChar c).lpTw s ∧
     a.lpChar (c.lpTw s) = (a.lpChar c).lpTw s ∧
     (a.lpChar b).lpChar c = a.lpChar (b.lpChar c) ∧
-    (WD.lpZero h).lpChar c = WD.lpZero h ∧
+    (WD.lpZero (h := h)).lpChar c = WD.lpZero (h := h) ∧
     (c.unr → c.lpDim = 1 → c.frobEig = {1} → a.lpChar c = a) := by
   induction a using ind with
   | hP n a =>
@@ -145,7 +193,7 @@ theorem lpChar_laws_closed : ∀ (E Ω : Type) [Field E] [NumberField E] [Field 
     (a.lpTw s).lpChar c = (a.lpChar c).lpTw s ∧
     a.lpChar (c.lpTw s) = (a.lpChar c).lpTw s ∧
     (a.lpChar b).lpChar c = a.lpChar (b.lpChar c) ∧
-    (WD.lpZero h).lpChar c = WD.lpZero h ∧
+    (WD.lpZero (h := h)).lpChar c = WD.lpZero (h := h) ∧
     (c.unr → c.lpDim = 1 → c.frobEig = {1} → a.lpChar c = a) :=
   fun _ _ _ _ _ _ _ _ _ _ a b c s => WD.lpChar_laws a b c s
 

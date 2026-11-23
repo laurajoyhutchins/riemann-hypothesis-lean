@@ -1,5 +1,52 @@
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.UnitaryClassMass.PSurjP
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.UnitaryClassMass.LSSkeleton
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.UnitaryClassMass.LSSkeleton
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.UnitaryClassMass.PSurjH
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField PI.UJClassFin PI.UJClassMass Formalism.HermitianLatticesTheory IsDedekindDomain
 
@@ -16,7 +63,7 @@ def PatchF : Prop :=
     (σ : E →ₐ[F] E) (V : Type) [AddCommGroup V] [Module E V] [Module (𝓞 E) V]
     [IsScalarTower (𝓞 E) E V] [FiniteDimensional E V]
     (M : ℕ) (J : Matrix (Fin M) (Fin M) E) (b : Module.Basis (Fin M) E V) (L0 : Submodule (𝓞 E) V),
-    Submodule.IsLattice E L0 →
+    Submodule.IsFullLattice E L0 →
     (∀ y : Fin M → E, PI.UnitaryGroupMassFormula.UJClassFin.vinc (F := F) y ∈ latHat F E (crdOf b L0) → y ∈ crdOf b L0) →
     ∀ (γ : UJ (σ : E →+* E) J) (T : Finset (HeightOneSpectrum (𝓞 F))),
       ∃ g : HA (AF F) σ J, latSet σ J b L0 g =
@@ -28,7 +75,7 @@ def SemiApprox : Prop :=
     [IsScalarTower (𝓞 E) E V] [FiniteDimensional E V]
     (h : V →ₗ⋆[E] V →ₗ[E] E) (M : ℕ) (b : Module.Basis (Fin M) E V) (L0 : Submodule (𝓞 E) V),
     (∀ a, σ a = star a) → (∃ θ : E, σ θ ≠ θ) →
-    h.IsSymm → h.Nondegenerate → Submodule.IsLattice E L0 →
+    h.IsSymm → h.Nondegenerate → Submodule.IsFullLattice E L0 →
     ∀ N ∈ genus h L0, ∀ T : Finset (HeightOneSpectrum (𝓞 F)),
       ∃ γ : UJ (σ : E →+* E) (gramOf h b), ∀ v ∈ T,
         Floc v (gmap (linOf b (γ : GL (Fin M) E)) L0) = Floc v N
@@ -69,33 +116,14 @@ theorem finF (D : ℤ) (hD : D ≠ 0) :
 theorem interLocStd [FiniteDimensional E V] (N : Submodule (𝓞 E) V) (hN : Submodule.IsLattice E N) (x : V)
     (hx : ∀ p : Ideal (𝓞 E), p.IsMaximal → ∃ t : 𝓞 E, t ∉ p ∧ t • x ∈ N) : x ∈ N := by
   classical
-  have hfull : PI.LatLocGlob.IsFullLat E N := ⟨hN.fg, hN.span_eq_top⟩
-  let N' : Submodule (𝓞 E) V := N ⊔ Submodule.span (𝓞 E) {x}
-  have hfull' : PI.LatLocGlob.IsFullLat E N' := by
-    refine ⟨hN.fg.sup (Submodule.fg_span_singleton x), ?_⟩
-    apply eq_top_iff.2
-    rw [← hN.span_eq_top]
-    exact Submodule.span_mono (fun y hy => Submodule.mem_sup_left hy)
-  have hloc : ∀ p : Ideal (𝓞 E), p.IsMaximal → PI.LatLocGlob.loc p N' = PI.LatLocGlob.loc p N := by
-    intro p hp
-    haveI := hp.isPrime
-    ext y
-    constructor
-    · rintro ⟨s, hs, hsy⟩
-      obtain ⟨a, ha, z, hz, haz⟩ := Submodule.mem_sup.1 hsy
-      obtain ⟨r, rfl⟩ := Submodule.mem_span_singleton.1 hz
-      obtain ⟨t, ht, htx⟩ := hx p hp
-      refine ⟨t * s, fun h => (Ideal.IsPrime.mem_or_mem ‹_› h).elim ht hs, ?_⟩
-      rw [mul_smul, ← haz, smul_add, smul_comm t r x]
-      exact N.add_mem (N.smul_mem t ha) (N.smul_mem r htx)
-    · rintro ⟨s, hs, hsy⟩
-      exact ⟨s, hs, Submodule.mem_sup_left hsy⟩
-  obtain ⟨L, _, huniq⟩ := latLocGlob (𝓞 E) E V N hfull (fun p => PI.LatLocGlob.loc p N)
-    (fun p _ => ⟨N, hfull, rfl⟩) (Set.finite_empty.subset (fun p hp => hp.2 rfl))
-  have e1 : N = L := huniq N ⟨hfull, fun p _ => rfl⟩
-  have e2 : N' = L := huniq N' ⟨hfull', hloc⟩
-  have : x ∈ N' := Submodule.mem_sup_right (Submodule.mem_span_singleton_self x)
-  rwa [e2, ← e1] at this
+  by_contra hxN
+  have hproper : N.colon {x} ≠ ⊤ := by
+    intro htop
+    have hone : (1 : 𝓞 E) ∈ N.colon {x} := (Ideal.eq_top_iff_one _).1 htop
+    exact hxN (by simpa only [one_smul] using Submodule.mem_colon_singleton.1 hone)
+  obtain ⟨p, hp, hle⟩ := Ideal.exists_le_maximal _ hproper
+  obtain ⟨t, ht, htx⟩ := hx p hp
+  exact ht (hle (Submodule.mem_colon_singleton.2 htx))
 
 theorem interLocF [FiniteDimensional E V] (N : Submodule (𝓞 E) V) (hN : Submodule.IsLattice E N) (x : V)
     (hx : ∀ v : HeightOneSpectrum (𝓞 F), x ∈ Floc v N) : x ∈ N := by
@@ -137,7 +165,7 @@ theorem surjStep_of_F (hP : PatchF) (hS : SemiApprox) (hO : LSOne) : SurjStep :=
   have hout : ∀ v, v ∉ T → Floc v L0 = Floc v N := fun v hv => flocEq v L0 N D (hTm v hv) hDL hDN
   constructor
   · rintro ⟨h1, h2⟩
-    apply interLocF (F := F) N hN.1 x
+    apply interLocF (F := F) N hN.1.toIsLattice x
     intro v
     by_cases hv : v ∈ T
     · rw [← hγ v hv]

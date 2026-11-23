@@ -1,8 +1,47 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.FinPartIdemMulMemIff
+public import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.HalfLinearCocycle
+import Formalism.LocalToGlobal.ProjectiveLattices.PartitionExtendByZeroAntitone
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
 import Development.AbelianVarietyTheory.Proofs.TwistedOperators.RestrictedTensorBasePointNormSq
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.IsIntOv
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.FinPartIdemMulMemIff
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsPlaceChartOfSplitIdempotent
+
+@[expose] public section
 
 noncomputable section
 
@@ -28,7 +67,7 @@ theorem exists_eq_splitProj (φ : SplitProj D v) :
       rw [TensorProduct.smul_tmul', smul_eq_mul, mul_one]
     rw [splitProj_tmul, hax, map_smul, smul_eq_mul]
     rfl
-  | add y z hy hz => rw [map_add, map_add, hy, hz]
+  | add y z hy hz => rw [map_add (f := _), map_add (f := _), hy, hz]
 
 theorem isProjAt_iff (τ : D.host.E →ₐ[D.host.F] Fv D.host.F v) (PP : Formalism.L2.DIV.Pl D.host.E) :
     IsProjAt (D := D) (v := v) (splitProj τ) PP ↔ PP = splitPrime τ := by
@@ -50,7 +89,7 @@ theorem sigR_compFin {F E : Type} [Field F] [NumberField F] [Field E] [Algebra F
   induction z using TensorProduct.induction_on with
   | zero => simp only [map_zero]
   | tmul a x => simp [sigR, compFin]
-  | add y z hy hz => simp only [map_add, hy, hz]
+  | add y z hy hz => simp only [map_add (f := _), hy, hz]
 
 theorem compFin_cA (z : AE D) :
     sigR _ D.sp.cm.sig (compFin D.host.F D.host.E v z) = compFin D.host.F D.host.E v (cA D z) := by
@@ -114,7 +153,7 @@ theorem exists_emb {e : AE D} {PP : Formalism.L2.DIV.Pl D.host.E} (he : Formalis
   set y := compFin D.host.F D.host.E w e with hy
   have hy1 : y * y = y := by rw [hy, ← map_mul, hee]
   have hy2 : y + sigR _ D.sp.cm.sig y = 1 := by
-    rw [hy, compFin_cA, ← map_add, hsum', hε, GlobalTheory.EmbChart.compFin_tensAt]
+    rw [hy, compFin_cA, ← map_add (f := _), hsum', hε, GlobalTheory.EmbChart.compFin_tensAt]
   have hσy : sigR _ D.sp.cm.sig y = 1 - y := eq_sub_of_add_eq' hy2
 
   have hnf : ¬ IsField (Fv D.host.F w ⊗[D.host.F] D.host.E) := by

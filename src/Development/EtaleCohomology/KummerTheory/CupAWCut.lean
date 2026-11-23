@@ -1,8 +1,52 @@
-import Development.EtaleCohomology.KummerTheory.InjSlice
-import Development.EtaleCohomology.KummerTheory.CupAWCutEv
-import Development.EtaleCohomology.TateTwists.CupflipWdPf
-import Development.EtaleCohomology.TateTwists.CupflipAwExistsPfCochain
-import Development.EtaleCohomology.TateTwists.EtaleChainCochainExistsOfEvalData
+module
+
+public import Development.EtaleCohomology.KummerTheory.InjSlice
+public import Development.EtaleCohomology.KummerTheory.CupAWCutEv
+public import Development.EtaleCohomology.TateTwists.CupflipWdPf
+public import Development.EtaleCohomology.TateTwists.CupflipAwExistsPf
+public import Development.EtaleCohomology.TateTwists.CupflipAwExistsPfCochain
+public import Development.EtaleCohomology.TateTwists.EtaleChainCochainExistsOfEvalData
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+
+@[expose] public section
 
 noncomputable section
 open CategoryTheory Limits AlgebraicGeometry Opposite CochainComplex CochainComplex.HomComplex GlobalTheory.EtC
@@ -22,7 +66,7 @@ theorem ev_delta {m : ℤ} (hm : n + 1 = m) (α : Cochain ((chains R).obj E) I n
     rw [ev_delta_succ hm α p s t hs]
     congr 2
     refine Finset.sum_congr rfl fun i _ => ?_
-    rw [ev0, dif_pos]
+    rw [ev0, dite_eq_left]
 
 def pr (μ : Pair I J K) (α : Cochain ((chains R).obj E) I n) (β : Cochain ((chains R).obj E) J m) (w : ℤ) (U : Scheme.{0})
     (p q : ℕ) (y : Sx E p U) (z : Sx E q U) : Sec (K.X w) U :=
@@ -33,25 +77,27 @@ variable (μ : Pair I J K) (α : Cochain ((chains R).obj E) I n) (β : Cochain (
 theorem mul_ev {s t w : ℤ} (h : s + t = w) {p q : ℕ} (hs : -(p : ℤ) + n = s) (ht : -(q : ℤ) + m = t) (y : Sx E p U)
     (z : Sx E q U) : μ.mul U s t w h (ev α p s hs U y) (ev β q t ht U z) = pr μ α β w U p q y z := by
   subst hs ht
-  rw [pr, dif_pos h]
+  rw [pr, dite_eq_left h]
 
 theorem mul_bd_left {s t w : ℤ} (h : s + t = w) {p q : ℕ} (hs : -(p : ℤ) + (n + 1) = s) (ht : -(q : ℤ) + m = t) (y : Sx E p U)
     (z : Sx E q U) : μ.mul U s t w h (bd (ev0 α s U) p y) (ev β q t ht U z) = bd (fun a y => pr μ α β w U a q y z) p y := by
   cases p with
   | zero => simp [bd]
   | succ p =>
+
     simp only [bd, map_sum, map_zsmul, LinearMap.sum_apply, LinearMap.smul_apply]
     refine Finset.sum_congr rfl fun i _ => ?_
-    rw [ev0, dif_pos (by omega), mul_ev]
+    rw [ev0, dite_eq_left (by omega), mul_ev]
 
 theorem mul_bd_right {s t w : ℤ} (h : s + t = w) {p q : ℕ} (hs : -(p : ℤ) + n = s) (ht : -(q : ℤ) + (m + 1) = t) (y : Sx E p U)
     (z : Sx E q U) : μ.mul U s t w h (ev α p s hs U y) (bd (ev0 β t U) q z) = bd (fun b z => pr μ α β w U p b y z) q z := by
   cases q with
   | zero => simp [bd]
   | succ q =>
+
     simp only [bd, map_sum, map_zsmul]
     refine Finset.sum_congr rfl fun i _ => ?_
-    rw [ev0, dif_pos (by omega), mul_ev]
+    rw [ev0, dite_eq_left (by omega), mul_ev]
 
 theorem d_pr {w : ℤ} {p q : ℕ} (h : (-(p : ℤ) + n) + (-(q : ℤ) + m) = w) (y : Sx E p U) (z : Sx E q U) :
     Sec.map (K.d w (w + 1)) (pr μ α β w U p q y z) =
@@ -59,7 +105,7 @@ theorem d_pr {w : ℤ} {p q : ℕ} (h : (-(p : ℤ) + n) + (-(q : ℤ) + m) = w)
         (((n + 1).negOnePow : ℤˣ) : ℤ) • bd (fun a y => pr μ α β (w + 1) U a q y z) p y) +
       (((-(p : ℤ) + n).negOnePow : ℤˣ) : ℤ) • (pr μ α (δ m (m + 1) β) (w + 1) U p q y z -
         (((m + 1).negOnePow : ℤˣ) : ℤ) • bd (fun b z => pr μ α β (w + 1) U p b y z) q z) := by
-  rw [pr, dif_pos h, μ.leibniz, Units.smul_def]
+  rw [pr, dite_eq_left h, μ.leibniz, Units.smul_def]
   congr 1
   · rw [← mul_ev μ (δ n (n + 1) α) β (s := -(p : ℤ) + n + 1) (t := -(q : ℤ) + m) (by omega) (by omega) rfl,
       ev_delta rfl α p _ _ rfl, ← mul_bd_left μ α β (s := -(p : ℤ) + n + 1) (t := -(q : ℤ) + m) (by omega) (by omega) rfl,
@@ -81,14 +127,15 @@ theorem leibniz : LateralTheory.EtaleFoundations.cupflip_aw_leibniz := by
   obtain ⟨w, rfl⟩ : ∃ w, w' = w + 1 := ⟨w' - 1, by omega⟩
   have hw : -(M : ℤ) + k = w := by omega
   have hb : bd (ev0 γ (w + 1) U) M x = _ :=
-    (bd_congr (fun N y e => by rw [ev0, dif_pos (by omega), aw_eq h]) x).trans
+    (bd_congr (fun N y e => by rw [ev0, dite_eq_left (by omega), aw_eq h]) x).trans
       (bd_aw (pr μ α β (w + 1) U) (fun p => (((m * p).negOnePow : ℤˣ) : ℤ))
         (fun p => ((m.negOnePow * (m * p).negOnePow : ℤˣ) : ℤ)) (fun p => by
           push_cast
           rw [mul_add, mul_one, Int.negOnePow_add]
           rcases Int.units_eq_one_or m.negOnePow with e | e <;> simp [e]) M x)
+
   rw [ev_delta rfl γ M w _ hw, ev_add, ev_units_smul, aw_eq h, aw_eq h1, aw_eq h2, hb, Sec.map, map_sum,
-    Units.smul_def, Units.smul_def, Finset.smul_sum, Finset.smul_sum, ← Finset.sum_add_distrib, ← Finset.sum_add_distrib]
+  Units.smul_def, Units.smul_def, Finset.smul_sum, Finset.smul_sum, ← Finset.sum_add_distrib, ← Finset.sum_add_distrib]
   refine Finset.sum_congr rfl fun p _ => ?_
   have := p.2
   have hd := d_pr μ α β (w := w) (p := p) (q := M - p) (by omega) (x.sub 0 p (by omega)) (x.sub p (M - p) (by omega))
@@ -118,7 +165,7 @@ theorem wd_aw : LateralTheory.EtaleFoundations.cupflip_wd_aw := by
     fun α β β' γ γ' h h' N w hw U x => ?_⟩ <;>
   · rw [ev_add, h, h', ← Finset.sum_add_distrib]
     refine Finset.sum_congr rfl fun p _ => ?_
-    simp only [ev_add, map_add, LinearMap.add_apply, smul_add]
+    simp only [ev_add, map_add (f := _), LinearMap.add_apply, smul_add]
 
 theorem wd_cobdry : LateralTheory.EtaleFoundations.cupflip_wd_cobdry := by
   rintro R _ I J K μ E n m k hk α β γ h (⟨n', hn, η, hη⟩ | ⟨m', hm, η, hη⟩)

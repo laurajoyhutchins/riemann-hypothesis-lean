@@ -1,11 +1,61 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.FlagPairDefinitePartLattice
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.ChartGen
-import Development.AbelianVarietyTheory.PublishedTheorems.DiscreteSeriesUnitary₂.MaxMass
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.NormalFormDualOrthogonalLast
+module
+
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.HermFlagPairingCramerOfLeadingCoeffs
 import Development.AbelianVarietyTheory.Proofs.FlagMeasures.IsLocalizedModuleSubtype
 import Development.AbelianVarietyTheory.Proofs.FlagMeasures.MemOfForall
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.HermFlagPairingCramerOfLeadingCoeffs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open NumberField Formalism.HermitianLatticeCounting.S6 GlobalTheory.HermLat GlobalTheory.DegCnt
 open scoped Pointwise ENNReal Classical
 
@@ -401,7 +451,7 @@ theorem kill_ideal_V0 (N : NF H r) {Λ : Submodule (𝓞 K) V}
   obtain ⟨o₁, ho₁⟩ := Submodule.mem_one.1 hβ
   obtain ⟨o₂, ho₂⟩ := Submodule.mem_one.1 hβ2
   have ho : (γ₁ : K) * γ₂ * β = algebraMap (𝓞 K) K (-(δ * (γ₁ * o₁ + o₂))) := by
-    rw [map_neg, map_mul, map_add, map_mul, ho₁, ho₂, hδ]
+    rw [map_neg, map_mul, map_add (f := _), map_mul, ho₁, ho₂, hδ]
     show (γ₁ : K) * algebraMap (𝓞 K) K _ * β = -((δ : K) * ((γ₁ : K) * _ + _))
     rw [map_mul, map_natCast]
     show (γ₁ : K) * (_ * (δ : K)) * β = _
@@ -434,7 +484,9 @@ theorem kill_Th (N : NF H r) {Λ : Submodule (𝓞 K) V} (hU : IsUnimod H Λ) (h
         (x : K) * y / Dl N.F N.F' l hl ∈ (1 : Submodule (𝓞 K) K) ∧
         (x : K) * y / star (Dl N.F N.F' l hl) ∈ (1 : Submodule (𝓞 K) K)) :
     𝔠 ^ 3 • dual H (latTh N.F N.F' Λ) ≤ latTh N.F N.F' Λ := by
-  have hL := (isLatMod_top_bot_iff Λ).1 hU.1
+  have hL₀ := (isLatMod_top_bot_iff Λ).1 hU.1
+  have hL : Submodule.IsFullLattice K Λ :=
+    { toIsLattice := Submodule.IsLattice.of_fg K hL₀.1, span_eq_top := hL₀.2 }
   have hint : ∀ y ∈ Λ, ∀ x ∈ Λ, H.B y x ∈ (1 : Submodule (𝓞 K) K) := by
     intro y hy
     rw [← hU.2, mem_dual_iff] at hy
@@ -467,7 +519,9 @@ theorem kill_Th (N : NF H r) {Λ : Submodule (𝓞 K) V} (hU : IsUnimod H Λ) (h
       γ₁ • γ₂ • γ₃ • y ∈ latTh N.F N.F' Λ := by
     intro γ₁ h₁ γ₂ h₂ γ₃ h₃ y hy
     rw [mem_dual_iff] at hy
-    have hyW : y ∈ W := (Submodule.span_le.2 fun x hx => hx.2) hy.1
+    have hyW : y ∈ W :=
+      (show Submodule.span K (latTh N.F N.F' Λ : Set V) ≤ W from
+        Submodule.span_le.2 fun x hx => hx.2) hy.1
     have hx : ∀ x : ↥(Λ ⊓ rs (𝓞 K) W), IsIntegral ℤ (H.B x y) := by
       intro x
       rw [← mem_one_iff, ← H.herm]

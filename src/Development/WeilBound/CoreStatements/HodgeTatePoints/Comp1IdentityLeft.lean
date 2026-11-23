@@ -1,4 +1,58 @@
-import Development.WeilBound.CoreStatements.HodgeTatePoints.GermCompOneAssocOfConstantCoeffZero
+module
+
+public import Development.WeilBound.CoreStatements.HodgeTatePoints.GermCompOneAssocOfConstantCoeffZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.HasSubstEv
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.ChartChgPfTP
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.GaugeBilinearTermEqNegDoubleSum
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -40,12 +94,12 @@ theorem ax_right {f : PS R 2 d} (hf : AxOne f) {n : ℕ} {a : Pt R n d} (ha : Z 
 
 theorem bil_right (f : PS R 2 d) (m : ℕ) (i j : Fin d) :
     bil f m 1 i j = coeff (Finsupp.single ((0 : Fin 1), i) m)
-      (ev (n := 1) ![pt R d 0, 0] (pderiv R ((1 : Fin 2), j) f)) := by
+      (ev (n := 1) ![pt R d 0, 0] (pderiv ((1 : Fin 2), j) f)) := by
   rw [coeff_ev_zero_right, Finsupp.embDomain_single]
   have h0 : (Finsupp.single (eXv d ((0 : Fin 1), i)) m) ((1 : Fin 2), j) = 0 := by
     show (Finsupp.single ((0 : Fin 2), i) m) ((1 : Fin 2), j) = 0
-    simp [Finsupp.single_apply]
-  rw [← coeff_add_single _ _ h0]
+    simp
+  rw [coeff_pderiv, h0, Nat.cast_zero, zero_add, mul_one]
   rfl
 
 theorem bil_swap (f : PS R 2 d) (m n : ℕ) :
@@ -95,22 +149,22 @@ theorem axOne_comp {f : PS R 2 d} (hf : AxOne f) {φ ψ : Pt R 1 d} (hφ : Z φ)
     fin_cases j <;> simp [evalPoints_comp ZZb, evalPoints_coordinatePoint ZZb, germComp1_zero_of_noConstantCoeff hψ, Z_pt]
 
 theorem bil_dd (f : PS R 2 d) (i j : Fin d) :
-    bil f 1 1 i j = constantCoeff (pderiv R ((0 : Fin 2), i) (pderiv R ((1 : Fin 2), j) f)) := by
+    bil f 1 1 i j = constantCoeff (pderiv ((0 : Fin 2), i) (pderiv ((1 : Fin 2), j) f)) := by
   show coeff (Finsupp.single ((0 : Fin 2), i) 1 + Finsupp.single ((1 : Fin 2), j) 1) f = _
-  rw [coeff_add_single (Finsupp.single ((0 : Fin 2), i) 1) ((1 : Fin 2), j)
-    (by simp [Finsupp.single_apply]), coeff_single_one]
+  simp [← coeff_zero_eq_constantCoeff_apply, coeff_pderiv]
 
-theorem cc_d_ax {f : PS R 2 d} (hf : AxOne f) (p : Fin 2 × Fin d) : constantCoeff (pderiv R p f) = 0 := by
+theorem cc_d_ax {f : PS R 2 d} (hf : AxOne f) (p : Fin 2 × Fin d) : constantCoeff (pderiv p f) = 0 := by
   obtain ⟨k, l⟩ := p
-  rw [← coeff_single_one]
+  simp only [← coeff_zero_eq_constantCoeff_apply, coeff_pderiv, Finsupp.zero_apply,
+    Nat.cast_zero, zero_add, mul_one]
   fin_cases k
   · have h := coeff_ev_zero_right f (Finsupp.single ((0 : Fin 1), l) 1)
     rw [hf.2, Finsupp.embDomain_single, coeff_one,
-      if_neg (Finsupp.single_ne_zero.mpr one_ne_zero)] at h
+      ite_eq_right (Finsupp.single_ne_zero.mpr one_ne_zero)] at h
     exact h.symm
   · have h := coeff_ev_zero_left f (Finsupp.single ((0 : Fin 1), l) 1)
     rw [hf.1, Finsupp.embDomain_single, coeff_one,
-      if_neg (Finsupp.single_ne_zero.mpr one_ne_zero)] at h
+      ite_eq_right (Finsupp.single_ne_zero.mpr one_ne_zero)] at h
     exact h.symm
 
 theorem bil_comp {f : PS R 2 d} (hf : AxOne f) {φ ψ : Pt R 1 d} (hφ : Z φ) (hψ : Z ψ) :
@@ -118,10 +172,33 @@ theorem bil_comp {f : PS R 2 d} (hf : AxOne f) {φ ψ : Pt R 1 d} (hφ : Z φ) (
       (lin φ 1).transpose * bil f 1 1 * lin ψ 1 := by
   have ha : ZZ (![comp1 φ (pt R d 0), comp1 ψ (pt R d 1)] : Fin 2 → Pt R 2 d) :=
     cechDeRhamTotalCocyclesTwo (Z_comp1 hφ (Z_pt 0)) (Z_comp1 hψ (Z_pt 1))
+  have hfirst {m n : ℕ} {a : Fin m → Pt R n d} (hz : ZZ a) (t : Fin n × Fin d) (g : PS R m d) :
+      constantCoeff (pderiv t (ev a g)) =
+        ∑ p : Fin m × Fin d, constantCoeff (pderiv p g) * constantCoeff (pderiv t (a p.1 p.2)) := by
+    rw [ReciprocityTheory.ChartRestriction.G.TB.ChartChgPfTP.pderiv_ev a hz, map_sum]
+    refine Finset.sum_congr rfl fun p _ => ?_
+    rw [map_mul, cc_ev hz]
+  have hsecond {a : Fin 2 → Pt R 2 d} (hz : ZZ a) (s t : Fin 2 × Fin d) :
+      constantCoeff (pderiv s (pderiv t (ev a f))) =
+        ∑ p : Fin 2 × Fin d, (∑ q : Fin 2 × Fin d, constantCoeff (pderiv q (pderiv p f)) *
+          constantCoeff (pderiv s (a q.1 q.2))) * constantCoeff (pderiv t (a p.1 p.2)) := by
+    rw [ReciprocityTheory.ChartRestriction.G.TB.ChartChgPfTP.pderiv_ev a hz, map_sum, map_sum]
+    refine Finset.sum_congr rfl fun p _ => ?_
+    rw [Derivation.leibniz, smul_eq_mul, smul_eq_mul, map_add, map_mul, map_mul, cc_ev hz,
+      cc_d_ax hf, zero_mul, zero_add, hfirst hz, mul_comm]
+  have hcoord (χ : Pt R 1 d) (k l : Fin 2) (x y : Fin d) :
+      constantCoeff (pderiv (l, y) (comp1 χ (pt R d k) x)) = if k = l then lin χ 1 x y else 0 := by
+    classical
+    change constantCoeff (pderiv (l, y) (ev ![pt R d k] (χ x))) = _
+    rw [hfirst (cechDeRhamTotalCocyclesOne (Z_pt k)), Fintype.sum_prod_type, Fin.sum_univ_one]
+    by_cases h : k = l
+    · subst h
+      simp [pt, pderiv_X, Pi.single_apply, lin, ← coeff_zero_eq_constantCoeff_apply, coeff_pderiv]
+    · simp [pt, h]
   ext i j
-  rw [bil_dd, cc_dd_ev ha _ _ f (cc_d_ax hf)]
+  rw [bil_dd, hsecond ha]
   simp only [Matrix.mul_apply, Matrix.transpose_apply, Fintype.sum_prod_type, Fin.sum_univ_two,
-    Matrix.cons_val_zero, Matrix.cons_val_one, cc_d_comp1_pt]
+    Matrix.cons_val_zero, Matrix.cons_val_one, hcoord]
   simp [bil_dd, Finset.sum_mul]
   refine Finset.sum_congr rfl fun x _ => Finset.sum_congr rfl fun y _ => by ring
 
@@ -152,26 +229,31 @@ theorem bil_calc : ∀ (R : Type) [CommRing R] (d : ℕ) (f g : PS R 2 d) (φ ψ
 
 theorem lin_add (G : FGLaw R d) {a b : Pt R 1 d} (ha : Z a) (hb : Z b) :
     lin (G.add a b) 1 = lin a 1 + lin b 1 := by
-  have hF1 : ∀ i l, constantCoeff (pderiv R ((1 : Fin 2), l) (G.F i)) = if i = l then 1 else 0 := by
+  have hcoeff {σ : Type} (s : σ) (g : MvPowerSeries σ R) :
+      coeff (Finsupp.single s 1) g = constantCoeff (pderiv s g) := by
+    simp [← coeff_zero_eq_constantCoeff_apply, coeff_pderiv]
+  have hF1 : ∀ i l, constantCoeff (pderiv ((1 : Fin 2), l) (G.F i)) = if i = l then 1 else 0 := by
     intro i l
     have h := coeff_ev_zero_left (G.F i) (Finsupp.single ((0 : Fin 1), l) 1)
     rw [G.unit i, Finsupp.embDomain_single, coeff_X] at h
-    rw [← coeff_single_one]
+    rw [← hcoeff]
     refine h.symm.trans ?_
     by_cases h' : i = l
     · subst h'
       simp
     · simp [Finsupp.single_eq_single_iff, Ne.symm h', h']
-  have hF0 : ∀ i l, constantCoeff (pderiv R ((0 : Fin 2), l) (G.F i)) = if i = l then 1 else 0 := by
+  have hF0 : ∀ i l, constantCoeff (pderiv ((0 : Fin 2), l) (G.F i)) = if i = l then 1 else 0 := by
     intro i l
     have h2 := coeff_ev_swap' (G.F i) (Finsupp.single ((0 : Fin 2), l) 1)
     rw [G.comm i, Finsupp.embDomain_single] at h2
-    rw [← coeff_single_one, h2, ← hF1 i l, coeff_single_one]
+    rw [← hcoeff, h2, ← hF1 i l, hcoeff]
     rfl
   ext i j
   simp only [Matrix.add_apply, lin, FGLaw.add, addOf]
-  rw [coeff_single_one, coeff_single_one, coeff_single_one, cc_d_ev (cechDeRhamTotalCocyclesTwo ha hb),
-    Fintype.sum_prod_type, Fin.sum_univ_two]
+  rw [hcoeff, hcoeff, hcoeff,
+    ReciprocityTheory.ChartRestriction.G.TB.ChartChgPfTP.pderiv_ev _ (cechDeRhamTotalCocyclesTwo ha hb),
+    map_sum, Fintype.sum_prod_type, Fin.sum_univ_two]
+  simp only [map_mul, cc_ev (cechDeRhamTotalCocyclesTwo ha hb)]
   simp [hF0, hF1]
 
 variable {O : Type} [CommRing O] [StarRing O]
@@ -210,7 +292,7 @@ theorem act_zero_eq (B : FB R d O) : B.A.act 0 = 0 := by
         omega
       · exact Nat.zero_le _
     have hsum := congrArg Finsupp.degree (tsub_add_cancel_of_le hle)
-    rw [map_add, Finsupp.degree_single, he] at hsum
+    rw [map_add (f := _), Finsupp.degree_single, he] at hsum
     have hz : Finsupp.degree (e - Finsupp.single t 1) = 0 := by omega
     rw [Finsupp.degree_eq_zero_iff, tsub_eq_zero_iff_le] at hz
     exact le_antisymm hz hle

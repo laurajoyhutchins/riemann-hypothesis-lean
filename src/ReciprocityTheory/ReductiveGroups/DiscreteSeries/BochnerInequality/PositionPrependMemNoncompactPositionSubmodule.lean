@@ -1,5 +1,56 @@
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.BochnerInequality.Permute
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.BochnerInequality.LayerBasic
+module
+
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.BochnerInequality.Permute
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.BochnerInequality.CasValK
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -58,19 +109,23 @@ theorem rootWordProduct_cons {k : ℕ} (p : Fin n × Fin n) (κ : Fin k → Fin 
 theorem commutator_rootWordProduct (hE : IsGlRep E) (a b : Fin n) : ∀ {k : ℕ} (κ : Fin k → Fin n × Fin n),
     E a b * word E κ - word E κ * E a b =
       ∑ i, ((if (κ i).1 = b then word E (Function.update κ i (a, (κ i).2)) else 0) -
-        (if (κ i).2 = a then word E (Function.update κ i ((κ i).1, b)) else 0))
-  | 0, κ => by simp [rootWordProduct_zero]
-  | k + 1, κ => by
+        (if (κ i).2 = a then word E (Function.update κ i ((κ i).1, b)) else 0)) := by
+  intro k
+  induction k with
+  | zero =>
+    intro κ
+    simp [rootWordProduct_zero]
+  | succ k ih =>
+    intro κ
     refine Fin.consCases (fun p τ => ?_) κ
     rw [Fin.sum_univ_succ]
     simp only [Fin.cons_zero, Fin.cons_succ, Fin.update_cons_zero, ← Fin.cons_update,
       rootWordProduct_cons]
-    have ih := commutator_rootWordProduct hE a b τ
     have h0 := hE a b p.1 p.2
     have hsplit : E a b * (E p.1 p.2 * word E τ) - E p.1 p.2 * word E τ * E a b =
         (E a b * E p.1 p.2 - E p.1 p.2 * E a b) * word E τ +
           E p.1 p.2 * (E a b * word E τ - word E τ * E a b) := by noncomm_ring
-    rw [hsplit, h0, ih, Finset.mul_sum]
+    rw [hsplit, h0, ih τ, Finset.mul_sum]
     congr 1
     · have e1 : (b = p.1) = (p.1 = b) := propext eq_comm
       simp only [e1]
@@ -100,9 +155,9 @@ theorem positionTensorAction_apply (k : ℕ) (a b : Fin n) (F : Big n k M) (κ :
     bAct E k a b F κ = E a b (F κ) + ∑ i, factorAd (M := M) k i a b F κ := by
   rw [← coord_apply' k κ (bAct E k a b F)]
   first
-  | (simp only [bAct, LinearMap.add_apply, LinearMap.coeFn_sum, Finset.sum_apply, map_add, map_sum]
+  | (simp only [bAct, LinearMap.add_apply, LinearMap.coeFn_sum, Finset.sum_apply, map_add (f := _), map_sum]
      simp only [coord_apply', mAct_apply'])
-  | (simp only [bAct, LinearMap.add_apply, LinearMap.sum_apply, map_add, map_sum]
+  | (simp only [bAct, LinearMap.add_apply, LinearMap.sum_apply, map_add (f := _), map_sum]
      simp only [coord_apply', mAct_apply'])
 
 private theorem linearMap_apply_ite_zero (T : Module.End ℂ M) (c : Prop) [Decidable c] (x : M) :
@@ -142,9 +197,11 @@ theorem wordContraction_tensorAction (hE : IsGlRep E) (k : ℕ) (a b : Fin n) (F
     first
     | exact sub_eq_iff_eq_add'.mp h
     | (rw [← h]; abel)
+
   rw [wordContraction_apply, wordContraction_apply, map_sum]
-  simp only [positionTensorAction_apply, factorAd_apply', map_add, map_sum, map_sub,
-    linearMap_apply_ite_zero, hc, Finset.sum_add_distrib]
+
+  simp only [positionTensorAction_apply, factorAd_apply', map_add (f := _), map_sum, map_sub,
+  linearMap_apply_ite_zero, hc, Finset.sum_add_distrib]
   congr 1
   conv_lhs => rw [Finset.sum_comm]
   conv_rhs => rw [Finset.sum_comm]
@@ -160,16 +217,22 @@ theorem apply_mem_noncompactLayer_succ {k : ℕ} {a b : Fin n} (hab : ε a ≠ �
     (Submodule.mem_iSup_of_mem hab (Submodule.mem_map_of_mem hw)))
 
 theorem rootWordProduct_mem_noncompactLayer : ∀ {k : ℕ} (κ : Fin k → Fin n × Fin n),
-    (∀ i, ε (κ i).1 ≠ ε (κ i).2) → ∀ v ∈ V, word E κ v ∈ layer ε E V k
-  | 0, κ, _, v, hv => by rw [rootWordProduct_zero]; exact hv
-  | k + 1, κ, hκ, v, hv => by
+    (∀ i, ε (κ i).1 ≠ ε (κ i).2) → ∀ v ∈ V, word E κ v ∈ layer ε E V k := by
+  intro k
+  induction k with
+  | zero =>
+    intro κ _ v hv
+    rw [rootWordProduct_zero]
+    exact hv
+  | succ k ih =>
+    intro κ hκ v hv
     revert hκ
     refine Fin.consCases (fun p τ => ?_) κ
     intro hκ
     rw [rootWordProduct_cons, Module.End.mul_apply]
     have hp : ε p.1 ≠ ε p.2 := by simpa using hκ 0
     have hτ : ∀ i, ε (τ i).1 ≠ ε (τ i).2 := fun i => by simpa using hκ i.succ
-    exact apply_mem_noncompactLayer_succ hp (rootWordProduct_mem_noncompactLayer τ hτ v hv)
+    exact apply_mem_noncompactLayer_succ hp (ih τ hτ v hv)
 
 theorem mem_noncompactPositionSubmodule_iff' {k : ℕ} {F : Big n k M} :
     F ∈ ncV ε V k ↔ ∀ κ, F κ ∈ (if ∀ i, ε (κ i).1 ≠ ε (κ i).2 then V else ⊥) := by
@@ -193,6 +256,7 @@ def indexPairPrepend {k : ℕ} (p : Fin n × Fin n) (G : Big n k M) : Big n (k +
 
 theorem wordContraction_prepend {k : ℕ} (p : Fin n × Fin n) (G : Big n k M) :
     phi E (k + 1) (indexPairPrepend p G) = E p.1 p.2 (phi E k G) := by
+
   rw [wordContraction_apply, wordContraction_apply, map_sum]
   have hL : ∀ κ : Fin (k + 1) → Fin n × Fin n, word E κ ((indexPairPrepend p G) κ) =
       if κ 0 = p then word E κ (G (Fin.tail κ)) else 0 := by
@@ -241,8 +305,11 @@ theorem positionPrepend_mem_noncompactPositionSubmodule {k : ℕ} {p : Fin n × 
     rw [hv]; exact Submodule.zero_mem _
 
 theorem map_noncompactLayer_le_sup : ∀ (k : ℕ) (a b : Fin n), ε a ≠ ε b →
-    (layer ε E V k).map (E a b) ≤ layer ε E V k ⊔ (ncV ε V (k + 1)).map (phi E (k + 1))
-  | 0, a, b, hab => by
+    (layer ε E V k).map (E a b) ≤ layer ε E V k ⊔ (ncV ε V (k + 1)).map (phi E (k + 1)) := by
+  intro k
+  induction k with
+  | zero =>
+    intro a b hab
     rw [Submodule.map_le_iff_le_comap]
     intro v hv
     rw [Submodule.mem_comap]
@@ -255,7 +322,8 @@ theorem map_noncompactLayer_le_sup : ∀ (k : ℕ) (a b : Fin n), ε a ≠ ε b 
       rw [wordContraction_apply]; simp [G, rootWordProduct_zero]
     refine ⟨indexPairPrepend (a, b) G, positionPrepend_mem_noncompactPositionSubmodule hab hG, ?_⟩
     rw [wordContraction_prepend, hphi]
-  | k + 1, a, b, hab => by
+  | succ k ih =>
+    intro a b hab
     rw [Submodule.map_le_iff_le_comap]
     simp only [layer]
     refine sup_le ?_ (iSup_le fun c => iSup_le fun d => iSup_le fun hcd => ?_)
@@ -264,9 +332,9 @@ theorem map_noncompactLayer_le_sup : ∀ (k : ℕ) (a b : Fin n), ε a ≠ ε b 
     · rw [Submodule.map_le_iff_le_comap]
       intro w hw
       simp only [Submodule.mem_comap]
-      have h1 := map_noncompactLayer_le_sup k c d hcd (Submodule.mem_map_of_mem hw)
+      have h1 := ih c d hcd (Submodule.mem_map_of_mem hw)
       obtain ⟨u, hu, y, ⟨G, hG, rfl⟩, hsum⟩ := Submodule.mem_sup.1 h1
-      rw [← hsum, map_add]
+      rw [← hsum, map_add (f := _)]
       refine add_mem (Submodule.mem_sup_left (apply_mem_noncompactLayer_succ hab hu))
         (Submodule.mem_sup_right ⟨indexPairPrepend (a, b) G, positionPrepend_mem_noncompactPositionSubmodule hab hG, ?_⟩)
       rw [wordContraction_prepend]

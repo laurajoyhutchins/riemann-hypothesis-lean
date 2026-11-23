@@ -1,4 +1,53 @@
-import ReciprocityTheory.L2DbarEstimates.Mollifiers.HasCompactSupport
+module
+
+public import ReciprocityTheory.L2DbarEstimates.Mollifiers.MollifierL2LocTendsto
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Mathlib.Topology.UniformSpace.Uniformizable
+
+@[expose] public section
 
 namespace ReciprocityTheory.L2DbarEstimates.B
 
@@ -69,45 +118,5 @@ theorem moll_weakComm (E : Type*) [NormedAddCommGroup E] [NormedSpace ℝ E] [Fi
   ext y
   rw [hdφ, Complex.real_smul]
   ring
-
-theorem smooth_isWeakD (E : Type*) [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
-    [MeasurableSpace E] [BorelSpace E] (μ : Measure E) [μ.IsAddHaarMeasure] : SmoothWeakSt E μ := by
-  intro m c v g hg
-  have hgd : ∀ k, Differentiable ℝ (g k) := fun k => (hg k).differentiable (by simp)
-  have hgc : ∀ k, Continuous (fun x => fderiv ℝ (g k) x (v k)) := fun k =>
-    ((hg k).continuous_fderiv (by simp)).clm_apply continuous_const
-  refine ⟨fun k => (hg k).continuous.locallyIntegrable, ?_, ?_⟩
-  · have hc : Continuous (Dop c v g) := by
-      unfold Dop
-      exact continuous_finset_sum _ fun k _ => continuous_const.mul (hgc k)
-    exact hc.locallyIntegrable
-  · intro φ hφ hφc
-    have hφd : Differentiable ℝ φ := hφ.differentiable (by simp)
-    have hφ' : ∀ k, Continuous (fun x => fderiv ℝ φ x (v k)) := fun k =>
-      (hφ.continuous_fderiv (by simp)).clm_apply continuous_const
-    have hφ'c : ∀ k, HasCompactSupport (fun x => fderiv ℝ φ x (v k)) := fun k =>
-      (hφc.fderiv ℝ).comp_left (g := fun L : E →L[ℝ] ℂ => L (v k)) (by simp)
-    have int1 : ∀ k, Integrable (fun x => fderiv ℝ (g k) x (v k) * φ x) μ := fun k =>
-      ((hgc k).mul hφ.continuous).integrable_of_hasCompactSupport hφc.mul_left
-    have int2 : ∀ k, Integrable (fun x => g k x * fderiv ℝ φ x (v k)) μ := fun k =>
-      ((hg k).continuous.mul (hφ' k)).integrable_of_hasCompactSupport (hφ'c k).mul_left
-    have int3 : ∀ k, Integrable (fun x => g k x * φ x) μ := fun k =>
-      ((hg k).continuous.mul hφ.continuous).integrable_of_hasCompactSupport hφc.mul_left
-    have hibp : ∀ k, ∫ x, g k x * fderiv ℝ φ x (v k) ∂μ =
-        -∫ x, fderiv ℝ (g k) x (v k) * φ x ∂μ := fun k =>
-      integral_mul_fderiv_eq_neg_fderiv_mul_of_integrable (int1 k) (int2 k) (int3 k)
-        (fun x _ => hgd k x) (fun x _ => hφd x)
-    have hsum : ∫ x, Dop c v g x * φ x ∂μ =
-        ∑ k, c k * ∫ x, fderiv ℝ (g k) x (v k) * φ x ∂μ := by
-      simp only [Dop, Finset.sum_mul]
-      rw [integral_finset_sum _ fun k _ => by simpa [mul_assoc] using (int1 k).const_mul (c k)]
-      refine Finset.sum_congr rfl fun k _ => ?_
-      rw [← integral_const_mul]
-      congr 1
-      ext x
-      ring
-    rw [hsum, ← Finset.sum_neg_distrib]
-    refine Finset.sum_congr rfl fun k _ => ?_
-    rw [hibp k, mul_neg, neg_neg]
 
 end ReciprocityTheory.L2DbarEstimates.B

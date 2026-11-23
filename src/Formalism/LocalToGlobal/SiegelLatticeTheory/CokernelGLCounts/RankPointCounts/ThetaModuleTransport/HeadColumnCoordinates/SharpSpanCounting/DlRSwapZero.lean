@@ -1,4 +1,47 @@
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.ThetaModuleTransport.HeadColumnCoordinates.SharpSpanCounting.OmPMemSpan
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.ThetaModuleTransport.HeadColumnCoordinates.SharpSpanCounting.MemPerpSpanIff
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.ThetaModuleTransport.HeadColumnCoordinates.SharpSpanCounting.GraphTransport
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.ThetaModuleTransport.HeadColumnCoordinates.SharpSpanCounting.OmPMemSpan
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.LsDatumA
+
+@[expose] public section
 
 noncomputable section
 
@@ -20,14 +63,14 @@ theorem zhat_swap (f f' : Fin (r + 1) → V) :
 theorem dl_swap_full (f f' : Fin (r + 1) → V) :
     H.Dl f' f (r + 1) = M.L.cj (H.Dl f f' (r + 1)) := by
   unfold HermSp.Dl
-  rw [dif_pos le_rfl, dif_pos le_rfl, zhat_swap, Matrix.submatrix_map, ← Matrix.transpose_submatrix,
+  rw [dite_eq_left le_rfl, dite_eq_left le_rfl, zhat_swap, Matrix.submatrix_map, ← Matrix.transpose_submatrix,
     Matrix.transpose_map, Matrix.det_transpose]
   exact (RingHom.map_det (M.L.cj : E →+* E) _).symm
 
 theorem dl_swap_r (f f' : Fin (r + 1) → V) :
     H.Dl f' f r = M.L.cj (H.Dl f f' r) := by
   unfold HermSp.Dl
-  rw [dif_pos (Nat.le_succ r), dif_pos (Nat.le_succ r), zhat_swap, Matrix.submatrix_map,
+  rw [dite_eq_left (Nat.le_succ r), dite_eq_left (Nat.le_succ r), zhat_swap, Matrix.submatrix_map,
     ← Matrix.transpose_submatrix, Matrix.transpose_map, Matrix.det_transpose]
   exact (RingHom.map_det (M.L.cj : E →+* E) _).symm
 
@@ -44,7 +87,7 @@ theorem inv_swap (f f' : Fin (r + 1) → V) (hD : IsUnit (H.Dl f f' (r + 1))) (a
   have hdet : IsUnit (H.Zhat f f').det := by
     have e : H.Dl f f' (r + 1) = (H.Zhat f f').det := by
       unfold HermSp.Dl
-      rw [dif_pos le_rfl]
+      rw [dite_eq_left le_rfl]
       rfl
     rw [← e]
     exact hD
@@ -66,12 +109,13 @@ theorem h_omP_swap (f f' : Fin (r + 1) → V) (hD : IsUnit (H.Dl f f' (r + 1))) 
     H.h u (omP H f' f) = ∑ a, (H.Zhat f f')⁻¹ (Fin.last r) a * H.h u (f a) := by
   have hDl' : H.Dl f' f (r + 1) = (H.Zhat f' f).det := by
     unfold HermSp.Dl
-    rw [dif_pos le_rfl]
+    rw [dite_eq_left le_rfl]
     rfl
   have e1 : omP H f' f = ∑ b, (H.Zhat f' f)⁻¹ b (Fin.last r) • f b := by
     unfold omP HermSp.om'
     rw [Finset.smul_sum, hDl', Matrix.inv_def]
     simp only [smul_smul, Matrix.smul_apply, smul_eq_mul]
+
   rw [e1, H.h_herm, h_sum_left, map_sum]
   refine Finset.sum_congr rfl (fun a _ => ?_)
   rw [map_mul, ← H.h_herm, inv_swap H f f' hD, M.L.cj_cj]

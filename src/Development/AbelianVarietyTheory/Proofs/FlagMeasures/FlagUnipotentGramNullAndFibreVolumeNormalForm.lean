@@ -1,18 +1,61 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.IsNormalFormStabilizerMeasure
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.ExistsIsFolnerUWset
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.IsNormalFormStabilizerMeasure
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.ExistsIsFolnerUWset
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.CommonStabilizerSetEqRangeNormalFormStatement
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.FlagGramEqGramDetProjectionNormalFormStatement
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.FlagGramNumberNormalizedInvariance
 import Development.AbelianVarietyTheory.Proofs.FlagMeasures.IsotropicLeviEmbeddingHomomorphismProperties
 import Development.AbelianVarietyTheory.Proofs.FlagMeasures.IsotropicStabilizerRadicalStructure
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.SiegelHeightBoundSectionStatement
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.FlagGramEqGramDetProjectionNormalFormStatement
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.LintegralFlagUnipotentEqStabilizerTimesSectionStatement
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.MeasurableFlagGramNumberNormalizedIndicatorStatement
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.MeasurePreservingMulVec
 import Development.AbelianVarietyTheory.Proofs.FlagMeasures.NormalFormFlagZeroMiddleInverseMinorOrthogonal
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.CommonStabilizerSetEqRangeNormalFormStatement
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.SiegelHeightBoundSectionStatement
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.TwoMulPiPowLeFourPow
 import Development.AbelianVarietyTheory.Proofs.FlagMeasures.TwoSidedSizeFunctionPosInvariantContinuous
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.LintegralFlagUnipotentEqStabilizerTimesSectionStatement
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.MeasurePreservingMulVec
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.TwoMulPiPowLeFourPow
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.FlagGramNumberNormalizedInvariance
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.MeasurableFlagGramNumberNormalizedIndicatorStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.Countable
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.MeasureTheory.Measure.Lebesgue.VolumeOfBalls
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MeasureTheory Matrix Formalism.QuantumDeterminants Formalism.MainNotions.S GlobalTheory.SgInf GlobalTheory.Amp
 open scoped InnerProductSpace ENNReal
@@ -70,11 +113,36 @@ theorem ae_mem_range {k r j : ℕ} (β : Fin r → ℕ) {S : Set (Mat k r)} (hS 
     (h : Set.range (rEl k r j β) ⊆ S) : ∀ᵐ ρ ∂(lebR0 k r j β), Matrix.of ρ ∈ S := by
   unfold lebR0
   have hS' : IsClosed {x : Mt k r | Matrix.of x ∈ S} := hS
-  by_cases hm : AEMeasurable (fun q => (Matrix.of.symm (rEl k r j β q) : Mt k r))
-      (volume : Measure ((UTin β → ℂ) × PTop k r j))
-  · rw [ae_map_iff hm hS'.measurableSet]
-    exact Filter.Eventually.of_forall fun q => h ⟨q, rfl⟩
-  · rw [Measure.map_of_not_aemeasurable hm]; simp
+  have hu : Measurable fun x : UTin β → ℂ =>
+      (Matrix.of.symm (uEmb k r (upperIn β x)) : Mt k r) := by
+    have hU : Continuous (upperIn β) := by
+      refine continuous_pi fun a => continuous_pi fun b => ?_
+      simp only [upperIn, upper]
+      split_ifs <;> first | exact continuous_apply _ | exact continuous_const
+    have heq : ∀ x, (upperIn β x)⁻¹ = (upperIn β x).adjugate := fun x => by
+      rw [Matrix.inv_def, upperIn, UEmb.det_upper]; simp
+    refine measurable_pi_iff.2 fun a => measurable_pi_iff.2 fun b => Continuous.measurable ?_
+    simp only [Matrix.of_symm_apply, uEmb, heq]
+    split_ifs
+    · exact hU.matrix_elem _ _
+    · exact (hU.matrix_adjugate.matrix_elem _ _).star
+    · exact continuous_const
+    · exact continuous_const
+  have hp : Measurable fun q : PTop k r j => (Matrix.of.symm (pTop k r j q) : Mt k r) := by
+    refine measurable_pi_iff.2 fun a => measurable_pi_iff.2 fun b => Continuous.measurable ?_
+    simp only [Matrix.of_symm_apply, pTop, pOf, pEl, skewM, herm, bvec, dotProduct, Matrix.mulVec]
+    split_ifs <;> fun_prop
+  have hm : AEMeasurable (fun q => (Matrix.of.symm (rEl k r j β q) : Mt k r))
+      (volume : Measure ((UTin β → ℂ) × PTop k r j)) := by
+    unfold rEl
+    apply Measurable.aemeasurable
+    refine measurable_pi_iff.2 fun a => measurable_pi_iff.2 fun b => ?_
+    simp only [Matrix.of_symm_apply, Matrix.mul_apply]
+    exact Finset.measurable_sum _ fun i _ =>
+      (((measurable_pi_iff.1 (measurable_pi_iff.1 hu a)) i).comp measurable_fst).mul
+        (((measurable_pi_iff.1 (measurable_pi_iff.1 hp i)) b).comp measurable_snd)
+  rw [ae_map_iff hm hS'.measurableSet]
+  exact Filter.Eventually.of_forall fun q => h ⟨q, rfl⟩
 
 theorem N_sub_S {k r : ℕ} (z : Fin (2 * r + k + 1) → ℂ) {n : Mat k r} (hn : n ∈ Nset k r) : n ∈ Sset k r z :=
   ⟨1, (isClosedSub_UWset z).2.2.1, n, hn, (Matrix.one_mul n).symm⟩
@@ -128,7 +196,7 @@ theorem fibre_volume : ∀ (k r j : ℕ) (hj : j ≤ r) (z z' : (Fin (2 * r + k 
     filter_upwards [hae] with ρ hρ
     refine Set.indicator_of_notMem (fun hmem => hq ⟨⟨?_, trivial, trivial⟩, trivial⟩) _
     have hG : rmulM t (rmulM (sEl k r j β q) ρ) ∈ {x : Mt k r | Matrix.of x ∈ GG k r} := by
-      rw [Set.mem_setOf_eq, hassoc]; exact hmul _ hρ.1.1 _ (hst q)
+      rw [Set.mem_ofPred_eq, hassoc]; exact hmul _ hρ.1.1 _ (hst q)
     have h2 : Set.indicator {x : Mt k r | Matrix.of x ∈ GG k r}
       (fun x => Yj k r hj z z' g₀ (Matrix.of x)) (rmulM t (rmulM (sEl k r j β q) ρ)) = 0 := hmem
     rw [Set.indicator_of_mem hG, hassoc, hYρ q ρ hρ] at h2

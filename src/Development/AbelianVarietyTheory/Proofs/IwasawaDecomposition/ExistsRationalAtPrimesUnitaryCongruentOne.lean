@@ -1,7 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.RdLevOn
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.MemPrinCongOfSm
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.IsOpenNsmulAdelicCompletionOfVectorSet
+module
+
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.RdLevOn
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.MemPrinCongOfSm
+import Formalism.LocalRingCardinality.SpanPowerMembership.LocAtA
+import Formalism.LocalToGlobal.Columns.AdelicLemmas
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsPtOfOfDecoRaw
+
+@[expose] public section
 
 open scoped TensorProduct
 open NumberField IsDedekindDomain Formalism.BasicNotions Formalism.L2.Col Formalism.L2.DIV Formalism.UG GlobalTheory.Mem GlobalTheory.Mem.Col2 GlobalTheory.Mem.Col2.TypeLev Matrix Formalism.L2.Forms GlobalTheory.SeeSaw.TwLev
@@ -62,7 +104,7 @@ theorem exists_near_entry (x : AfE F E) (P : HeightOneSpectrum (𝓞 E)) {γ : W
     ∃ y : E, Valued.v (adAt F P x - algebraMap E _ y) < γ := by
   obtain ⟨y, N, r, hr, hN, e⟩ := exists_approx_small x {P} hγ
   refine ⟨y, ?_⟩
-  rw [e, map_add, adAt_inclE, add_sub_cancel_left]
+  rw [e, map_add (f := _), adAt_inclE, add_sub_cancel_left]
   exact valued_nat_mul_lt hr (hN P (by simp))
 
 theorem locM_sub_one_apply (w : HeightOneSpectrum (𝓞 E)) (x : GL (Fin n) (AfE F E)) (i j : Fin n) :
@@ -85,8 +127,8 @@ theorem inv_sub_one_apply {u : GL (Fin n) (AfE F E)} (hu : u ∈ UAd hc n) (i j 
   · rw [Matrix.one_apply_eq, map_one]
   · rw [Matrix.one_apply_ne h, Matrix.one_apply_ne h.symm, map_zero]
 
-include hc in
 
+include hc in
 theorem valued_nat_conj (w : HeightOneSpectrum (𝓞 E)) (m : ℕ) :
     Valued.v (algebraMap E (w.adicCompletion E) (m : E)) =
       Valued.v (algebraMap E ((conjPrime₂ w).adicCompletion E) (m : E)) := by
@@ -148,15 +190,19 @@ theorem glue_approx {Q : Finset (HeightOneSpectrum (𝓞 E))} (hQ : ∀ P ∈ Q,
   have h1 : G' * G = 1 := by
     ext i j
     refine PtExist.ad_ext fun w => ?_
+
     rw [Matrix.mul_apply, map_sum]
     simp only [map_mul, hG, hG']
     split_ifs with h h'
-    · simp only [← map_mul, ← map_sum]
+    · set_option synthInstance.maxHeartbeats 100000 in
+        simp only [← map_mul, ← map_sum]
       rw [← Matrix.mul_apply, hCi w h, hone]
-    · simp only [← map_mul, ← map_sum, ← star_mul, ← star_sum]
+    · set_option synthInstance.maxHeartbeats 100000 in
+        simp only [← map_mul, ← map_sum, ← star_mul, ← star_sum]
       rw [← Matrix.mul_apply, hCi _ h', hone, Matrix.one_apply, Matrix.one_apply]
       by_cases e : i = j <;> simp [e, eq_comm]
-    · simp only [← map_mul, ← map_sum]
+    · set_option synthInstance.maxHeartbeats 100000 in
+        simp only [← map_mul, ← map_sum]
       rw [← Matrix.mul_apply, Units.inv_mul]
   let g : GL (Fin n) (AfE F E) := ⟨G, G', mul_eq_one_comm.1 h1, h1⟩
   have hg : g ∈ UAd hc n := by
@@ -212,8 +258,8 @@ theorem glue_approx {Q : Finset (HeightOneSpectrum (𝓞 E))} (hQ : ∀ P ∈ Q,
 
 end Main
 
-open GlobalTheory.SeeSaw.TwLev.GlueApprox in
 
+open GlobalTheory.SeeSaw.TwLev.GlueApprox in
 theorem exists_ratAt_congOne : ∀ {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [StarRing E] [Algebra F E]
     (hc : CMData F E) {n : ℕ} [NeZero n] {Q : Finset (HeightOneSpectrum (𝓞 E))}, (∀ P ∈ Q, conjPrime₂ P ∉ Q) →
     ∀ (m : ℕ), 0 < m → (∀ P ∈ Q, ((m : ℕ) : 𝓞 E) ∈ P.asIdeal) → ∀ (z : GL (Fin n) (AfE F E)), z ∈ UAd hc n →

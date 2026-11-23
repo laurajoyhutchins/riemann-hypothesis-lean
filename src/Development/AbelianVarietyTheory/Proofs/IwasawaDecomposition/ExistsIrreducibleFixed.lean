@@ -1,15 +1,65 @@
-import Mathlib
-import Formalism.SharpRestriction.LevelLetterCocycles.DataN
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.IsUnitaryOfCharIff
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.FixedNeBotOfEquiv
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsEquivOfMapEq
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsIsLocCompAndIsLocLoc
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsFixedOfMemISup
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsPlaceOverMoveValConjPl
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.IsUnitaryOfCharIff
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsIsBorelSphRevInv
+public import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.ExistsSpanFormsNeBot
+public import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.LocalLanglandsGL
+import Development.AbelianVarietyTheory.Definitions.Divisors.EqOfHasValueAtInfinite
+import Development.AbelianVarietyTheory.Definitions.Divisors.T2SpaceGeneralLinearGroup
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.CapCommuteRtInfGL
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.CommuteCapOfCommuteEop
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ContinuousOfValuedEq
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.EquivOfISupRange
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsEquivOfMapEq
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsFixedOfMemISup
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsIsLocCompAndIsLocLoc
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HasInfCharInfCharOfCommute
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsPlaceOverMoveValConjPl
 import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.UnderEqIffConjPl
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsIsBorelSphRevInv
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsFixedIff
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IwasawaBlockTriangular
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsFixedIff
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IwasawaBlockTriangular
+public import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.FixedNeBotOfEquiv
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Development.AbelianVarietyTheory.Definitions.Foundations.IsUnitaryOfOrder
+
+@[expose] public section
 
 noncomputable section
 
@@ -88,14 +138,14 @@ variable {k k' : Type} [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarc
 
 def diagU (b : borel k (Fin n)) (i : Fin n) : kˣ := GeneralLinearGroup.det (leviProj k (points (Fin n)) b i)
 
-omit [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] in
 
+omit [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] in
 theorem val_diagU (b : borel k (Fin n)) (i : Fin n) : (diagU b i : k) = b.1.val i i := by
   rw [diagU, GeneralLinearGroup.val_det_apply, Matrix.det_unique]
   rfl
 
-variable (k) in
 
+variable (k) in
 def borelChar (α : Fin n → ℂˣ) : borel k (Fin n) →* ℂˣ :=
   (deltaHalf k (fun _ : Fin n => Unit) * (torusChar fun i => SmGL.unrChar k (α i)).comp
     (leviTorus k (Fin n)).symm.toMonoidHom).comp (leviProj k (points (Fin n)))
@@ -138,15 +188,15 @@ theorem exists_hasSatake (α : Fin n → ℂˣ) : ∃ π : IrrRep (GL (Fin n) k)
 
 def flip (j : k' →+* k) (n : ℕ) : GL (Fin n) k' →* GL (Fin n) k := invRevT.comp (GeneralLinearGroup.map j)
 
-omit [ValuativeRel k] [IsNonarchimedeanLocalField k] [ValuativeRel k'] [IsNonarchimedeanLocalField k'] in
 
+omit [ValuativeRel k] [IsNonarchimedeanLocalField k] [ValuativeRel k'] [IsNonarchimedeanLocalField k'] in
 theorem continuous_flip {j : k' →+* k} (hj : Continuous j) : Continuous (flip j n) :=
   Units.continuous_iff.2 ⟨continuous_matrix fun a b => hj.comp (Units.continuous_coe_inv.matrix_elem b.rev a.rev),
     continuous_matrix fun a b => hj.comp (Units.continuous_val.matrix_elem b.rev a.rev)⟩
 
+
 omit [ValuativeRel k] [IsNonarchimedeanLocalField k] [ValuativeRel k'] [IsNonarchimedeanLocalField k']
   [TopologicalSpace k] [TopologicalSpace k'] in
-
 theorem flip_surjective {j : k' →+* k} (hj : Function.Surjective j) : Function.Surjective (flip j n) := fun g => by
   let e := RingEquiv.ofBijective j ⟨j.injective, hj⟩
   refine ⟨GeneralLinearGroup.map e.symm.toRingHom (invRevT g), ?_⟩
@@ -212,13 +262,13 @@ section Par
 variable {E Ω : Type} [Field E] [NumberField E] [Field Ω] [Algebra E Ω] [IsAlgClosure E Ω]
   {A A' : ValuationSubring Ω} {w w' : HeightOneSpectrum (𝓞 E)} {a : ℕ}
 
-def locRec (hL : GlobalTheory.Published.LocalLanglandsGL) (h : IsPlaceOver A w) : IrrGL (w.adicCompletion E) → WD h :=
+def locRec (hL : GlobalTheory.Published.LocalLanglandsGL) (h : IsPlaceOver A w) : IrrGL (k := w.adicCompletion E) → WD h :=
   (hL.1 E Ω A w h).exists.choose
 
 theorem isRec_locRec (hL : GlobalTheory.Published.LocalLanglandsGL) (h : IsPlaceOver A w) : IsRec h (locRec hL h) :=
   (hL.1 E Ω A w h).exists.choose_spec
 
-variable {h : IsPlaceOver A w} {rc : IrrGL (w.adicCompletion E) → WD h}
+variable {h : IsPlaceOver A w} {rc : IrrGL (k := w.adicCompletion E) → WD h}
 
 theorem unr_iff (H : IsRec h rc) (σ : IrrRep (GL (Fin a) (w.adicCompletion E))) :
     (rc (cls σ)).unr ↔ IsSpherical σ.ρ := by
@@ -246,7 +296,7 @@ theorem exists_hasSatake_of_unr (H : IsRec h rc) {σ : IrrRep (GL (Fin a) (w.adi
   exact ⟨_, σ.irr, fixed_ne_bot_of_equiv φ hτ.2.1,
     (IsSubquotient.of_surjective φ.toIntertwiningMap φ.toLinearEquiv.surjective).trans hτ.2.2⟩
 
-variable [IsTotallyComplex E]
+variable [_root_.NumberField.IsTotallyComplex E]
 
 def locPar (hL : GlobalTheory.Published.LocalLanglandsGL) (π : CG E a) (h : IsPlaceOver A w) : WD h :=
   locRec hL h ⟨a, toCl (π.loc w)⟩
@@ -263,8 +313,8 @@ theorem lpDim_locPar (π : CG E a) (h : IsPlaceOver A w) : (locPar hL π h).lpDi
   obtain ⟨_, _, _, -, H⟩ := isRec_locRec hL h
   exact H.dim _
 
-include hF in
 
+include hF in
 theorem eventually_unr (π : CG E a) : ∀ᶠ w : HeightOneSpectrum (𝓞 E) in Filter.cofinite,
     ∀ (A : ValuationSubring Ω) (h : IsPlaceOver A w), (locPar hL π h).unr := by
   induction π using Quotient.inductionOn with | _ π =>
@@ -289,8 +339,8 @@ theorem locPar_ofChar (χ : HChar E) (h : IsPlaceOver A w) :
     locPar hL (CG.ofChar χ) h = locRec hL h (.ofChar (χ.loc w) (isSmoothChar_loc χ w)) :=
   locPar_mk hL (CG.isLoc_ofChar χ w) h
 
-include hF in
 
+include hF in
 theorem locPar_twist (π : CG E a) (χ : HChar E) (h : IsPlaceOver A w) :
     locPar hL (π.twist χ) h = (locPar hL π h).lpChar (locPar hL (CG.ofChar χ) h) := by
   induction π using Quotient.inductionOn with | _ π =>
@@ -300,8 +350,8 @@ theorem locPar_twist (π : CG E a) (χ : HChar E) (h : IsPlaceOver A w) :
   rw [locPar_ofChar, show locPar hL (Quotient.mk _ π) h = _ from locPar_mk hL hσ h, ← H.twist]
   exact congrArg _ (IrrGL.tw_of σ.ρ σ.smooth σ.irred _ _).symm
 
-include hF in
 
+include hF in
 theorem locPar_tw (π : CG E a) (χ : CG E 1) (h : IsPlaceOver A w) :
     locPar hL (π.tw χ) h = (locPar hL π h).lpChar (locPar hL χ h) := by
   rw [CG.tw, locPar_twist hL hF, CG.ofChar_toChar]
@@ -444,10 +494,7 @@ theorem map_jumps_iff {a : ℕ} {m : Multiset ℂ} (J : Multiset ℤ) :
     exact ⟨-n, by push_cast; linear_combination hn⟩
   exact ⟨h, Multiset.map_injective Int.cast_injective (e.trans (map_jumps h).symm)⟩
 
-example : jumps 2 {1 / 2, -1 / 2} = {0, 1} :=
-  (((map_jumps_iff (a := 2) {0, 1}).1 (by norm_num)).2).symm
-
-def jumpsInf {E Q : Type} [Field E] [NumberField E] [IsTotallyComplex E] [Field Q] (ι : Q ≃+* ℂ) {a : ℕ} (π : CGu E a)
+def jumpsInf {E Q : Type} [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] [Field Q] (ι : Q ≃+* ℂ) {a : ℕ} (π : CGu E a)
     (τ : E →+* Q) : Multiset ℤ := jumps a (π.infChar (ι.toRingHom.comp τ))
 
 def jumpsWt {E Q : Type} [Field E] [Field Q] (ι : Q ≃+* ℂ) (n : ℕ) (wt : (E →+* ℂ) → Multiset ℂ) (τ : E →+* Q) :
@@ -457,7 +504,7 @@ section Host
 
 open Formalism.BasicNotions
 
-set_option synthInstance.maxHeartbeats 400000
+
 
 variable {R : Ranks} {H : Formalism.BasicNotions.Host R} {Ω : Type} [Field Ω] [Algebra H.E Ω] [IsAlgClosure H.E Ω]
 

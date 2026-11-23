@@ -1,7 +1,56 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.LocModel
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.LsDatumBCut
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.LocalSplitTypeMixedSecond
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.LocModel
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.LsDatumBCut
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.LocalSplitTypeMixedSecond
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.AddedBlockKernelSupport
+import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.SupportLoc
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.ProductFormulaHaar.BasisEApply
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -69,17 +118,11 @@ theorem inv_int_loU {A : Matrix (Fin n) (Fin n) B} (h : IsLoU A) (hi : ∀ i j, 
 theorem inv_int_upU {A : Matrix (Fin n) (Fin n) B} (h : IsUpU A) (hi : ∀ i j, A i j ∈ R) : ∀ i j, A⁻¹ i j ∈ R :=
   Formalism.MainNotions.LocalModelPeriodLattices.isInt_inv_of R A hi 1 R.one_mem (by rw [det_upU h, mul_one])
 
-theorem mul_inv_loU {A : Matrix (Fin n) (Fin n) B} (h : IsLoU A) : A * A⁻¹ = 1 :=
-  Matrix.mul_nonsing_inv _ (by rw [det_loU h]; exact isUnit_one)
-
 theorem inv_mul_loU {A : Matrix (Fin n) (Fin n) B} (h : IsLoU A) : A⁻¹ * A = 1 :=
   Matrix.nonsing_inv_mul _ (by rw [det_loU h]; exact isUnit_one)
 
 theorem mul_inv_upU {A : Matrix (Fin n) (Fin n) B} (h : IsUpU A) : A * A⁻¹ = 1 :=
   Matrix.mul_nonsing_inv _ (by rw [det_upU h]; exact isUnit_one)
-
-theorem inv_mul_upU {A : Matrix (Fin n) (Fin n) B} (h : IsUpU A) : A⁻¹ * A = 1 :=
-  Matrix.nonsing_inv_mul _ (by rw [det_upU h]; exact isUnit_one)
 
 end GLR
 
@@ -168,8 +211,10 @@ theorem sameBlock_of : ∀ {E : Type} [CommRing E] (bs : List (Eˣ × ℕ+)) (cs
   | _, _, [], _ :: _, h, _, _, _, _, _ => by simp at h
   | _, _, _ :: _, [], h, _, _, _, _, _ => by simp at h
   | E, _, (t, s) :: bs, (t', s') :: cs, h, a, b, hab, ha, hb => by
-    simp only [List.map_cons, List.cons.injEq] at h
-    obtain ⟨hs, hrest⟩ := h
+    have hcons : (s : ℕ) :: bs.map (fun b => (b.2 : ℕ)) = s' :: cs.map Prod.snd := by
+      simpa only [List.map_cons] using h
+    have hs : (s : ℕ) = s' := List.head_eq_of_cons_eq hcons
+    have hrest : bs.map (fun b => (b.2 : ℕ)) = cs.map Prod.snd := List.tail_eq_of_cons_eq hcons
     simp only [List.map_cons, List.sum_cons] at ha hb
     have s1 : 1 ≤ s' := by rw [← hs]; exact s.pos
     simp only [pSt] at hab
@@ -408,7 +453,7 @@ theorem conj_upU (T T' : ℕ) (w : Point D.host.E (D.R.rS + 1)) (p : PlF D) (hA 
     have hσ : H.σ = sgF w := rfl
     have hne : H.σ a ≠ H.σ b := fun h => (ne_of_gt hba) (by rw [← H.σσ a, ← H.σσ b, h])
     unfold Loc.uUp
-    rw [if_neg hne, dif_neg]
+    rw [if_neg hne, dite_eq_right]
     rintro ⟨hlt, hsb⟩
     obtain ⟨a1, a2, a3, -, -⟩ := pBlock w.1 a.val (by rw [hsum]; exact a.2)
     obtain ⟨b1, b2, b3, -, -⟩ := pBlock w.1 b.val (by rw [hsum]; exact b.2)
@@ -543,7 +588,7 @@ theorem shift_isGL (T T' : ℕ) (w : Point D.host.E (D.R.rS + 1)) (p : PlF D) (h
   have hku : IsUnit ((D.s.atP p).ιE t + (((k : Fin 3) : ℕ) : (D.s.atP p).Ep)) := hc.choose_spec
   have hnsh : nSh ((D.s.atP p).ιE t) = ((k : Fin 3) : ℕ) := by unfold nSh; rw [dif_pos hc]
   have he : (D.s.atP p).ιE t + (((k : Fin 3) : ℕ) : (D.s.atP p).Ep) =
-      (D.s.atP p).ιE (t + (((k : Fin 3) : ℕ) : D.host.E)) := by rw [map_add, map_natCast]
+      (D.s.atP p).ιE (t + (((k : Fin 3) : ℕ) : D.host.E)) := by rw [map_add (f := _), map_natCast]
   have hne : t + (((k : Fin 3) : ℕ) : D.host.E) ≠ 0 := by
     intro h0'
     rw [he, h0', map_zero] at hku

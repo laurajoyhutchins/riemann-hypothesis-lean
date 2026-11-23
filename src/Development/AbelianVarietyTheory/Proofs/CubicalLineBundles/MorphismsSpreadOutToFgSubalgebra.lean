@@ -1,7 +1,60 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsHolPeriods
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.EigLatBasis
-import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.IsSchemeTheoreticallyDominantSpecOfInjective
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.EigLatBasis
+public import Mathlib.AlgebraicGeometry.Morphisms.SchemeTheoreticallyDominant
+public import Mathlib.CategoryTheory.Limits.Shapes.Pullback.Connected
+public import Mathlib.Order.CompletePartialOrder
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsCompletedStrictHens
+public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.IsSchemeTheoreticallyDominantSpecOfInjective
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+public import Mathlib.AlgebraicGeometry.AffineTransitionLimit
+import Mathlib.AlgebraicGeometry.Morphisms.WeaklyEtale
+import Mathlib.AlgebraicGeometry.Sites.Fpqc
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.ExtremalEpi
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.Finset.Functor
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.LinCombTrivG
+
+@[expose] public section
 
 noncomputable section
 
@@ -55,12 +108,6 @@ theorem bcMap_eq_id (f : R →ₐ[k] R) (e : ∀ x, f x = x) : bcMap pB f = 𝟙
   apply pullback.hom_ext
   · rw [bcMap_fst, Category.id_comp]
   · rw [bcMap_snd, Category.id_comp, show f = AlgHom.id k R from AlgHom.ext e]
-    exact (congrArg _ (Spec.map_id _)).trans (Category.comp_id _)
-
-theorem bcMap_id : bcMap pB (AlgHom.id k R) = 𝟙 _ := by
-  apply pullback.hom_ext
-  · rw [bcMap_fst, Category.id_comp]
-  · rw [bcMap_snd, Category.id_comp]
     exact (congrArg _ (Spec.map_id _)).trans (Category.comp_id _)
 
 theorem eq_bcMap (f : R →ₐ[k] A)
@@ -247,44 +294,6 @@ theorem dualMapR_injective {R A : Type} [CommRing R] [CommRing A] {f : R →+* A
     TrivSqZeroExt.snd_inl, TrivSqZeroExt.snd_inr, zero_add] at h₁ h₂
   exact TrivSqZeroExt.ext (hf h₁) (hf h₂)
 
-theorem exists_fg_tangents [LocallyOfFinitePresentation pZ] {ι : Type*} [Finite ι]
-    (v : ι → (Sp (DualNumber A) ⟶ Z))
-    (hv : ∀ i, v i ≫ pZ = spMap (algebraMap k (DualNumber A)))
-    (R₀ : Subalgebra k A) (hR₀ : R₀.FG) :
-    ∃ (R : Subalgebra k A) (w : ι → (Sp (DualNumber R) ⟶ Z)), R.FG ∧ R₀ ≤ R ∧
-      ∀ i, w i ≫ pZ = spMap (algebraMap k (DualNumber R)) ∧
-        spMap (dualMapR R.val.toRingHom) ≫ w i = v i := by
-  classical
-  obtain ⟨T, y, ⟨s, rfl⟩, -, h⟩ := exists_fg_points pZ v hv ⊥ Subalgebra.fg_bot
-  let R : Subalgebra k A := R₀ ⊔ Algebra.adjoin k
-    ((s.image TrivSqZeroExt.fst ∪ s.image TrivSqZeroExt.snd : Finset A) : Set A)
-  let g : DualNumber R →ₐ[k] DualNumber A :=
-    { dualMapR R.val.toRingHom with
-      commutes' := fun c ↦ by
-        ext <;> simp [dualMapR, TrivSqZeroExt.algebraMap_eq_inl'] }
-  have hg : Function.Injective g := dualMapR_injective Subtype.val_injective
-  have hle : Algebra.adjoin k (s : Set (DualNumber A)) ≤ g.range := by
-    refine Algebra.adjoin_le fun a ha ↦ ?_
-    have h₁ : a.fst ∈ R := (le_sup_right : _ ≤ R) (Algebra.subset_adjoin (by
-      simp only [Finset.coe_union, Finset.coe_image]
-      exact Or.inl ⟨a, ha, rfl⟩))
-    have h₂ : a.snd ∈ R := (le_sup_right : _ ≤ R) (Algebra.subset_adjoin (by
-      simp only [Finset.coe_union, Finset.coe_image]
-      exact Or.inr ⟨a, ha, rfl⟩))
-    refine ⟨TrivSqZeroExt.inl ⟨_, h₁⟩ + TrivSqZeroExt.inr ⟨_, h₂⟩, ?_⟩
-    ext <;> simp [g, dualMapR]
-  let e : Algebra.adjoin k (s : Set (DualNumber A)) →ₐ[k] DualNumber R :=
-    (AlgEquiv.ofInjective g hg).symm.toAlgHom.comp (Subalgebra.inclusion hle)
-  have he (a) : g (e a) = a := by
-    have := (AlgEquiv.ofInjective g hg).apply_symm_apply (Subalgebra.inclusion hle a)
-    exact congrArg Subtype.val this
-  refine ⟨R, fun i ↦ spMap e.toRingHom ≫ y i, hR₀.sup (Subalgebra.fg_adjoin_finset _),
-    le_sup_left, fun i ↦ ⟨?_, ?_⟩⟩
-  · rw [Category.assoc, (h i).1, spMap_algHom_comp]
-  · rw [← (h i).2, ← Category.assoc, ← Spec.map_comp, ← CommRingCat.ofHom_comp]
-    congr 3
-    exact RingHom.ext he
-
 theorem tangent_ext {R A : Type} [CommRing R] [CommRing A] (f : R →+* A) (hf : Function.Injective f)
     {S : Scheme.{0}} (s : Z ⟶ S) [IsSeparated s] {a b : Sp (DualNumber R) ⟶ Z} (h : a ≫ s = b ≫ s)
     (hab : spMap (dualMapR f) ≫ a = spMap (dualMapR f) ≫ b) : a = b :=
@@ -296,41 +305,10 @@ section Field
 
 variable {k A : Type} [Field k] [CommRing A] [Algebra k A] {B Z : Scheme.{0}} (pB : B ⟶ Sp k)
 
-theorem dominant_of_compatible (R : Subalgebra k A)
-    {j : pullback pB (spMap (algebraMap k A)) ⟶ pullback pB (spMap (algebraMap k R))}
-    (h₁ : j ≫ pullback.fst _ _ = pullback.fst _ _)
-    (h₂ : j ≫ pullback.snd _ _ = pullback.snd _ _ ≫ spMap R.val.toRingHom) :
-    QuasiCompact j ∧ IsSchemeTheoreticallyDominant j := by
-  obtain rfl := eq_bcMap pB R.val h₁ h₂
-  exact ⟨inferInstance, isSchemeTheoreticallyDominant_bcMap pB _ Subtype.val_injective⟩
-
-theorem hom_ext_of_compatible (R : Subalgebra k A)
-    {j : pullback pB (spMap (algebraMap k A)) ⟶ pullback pB (spMap (algebraMap k R))}
-    (h₁ : j ≫ pullback.fst _ _ = pullback.fst _ _)
-    (h₂ : j ≫ pullback.snd _ _ = pullback.snd _ _ ≫ spMap R.val.toRingHom)
-    {S : Scheme.{0}} (s : Z ⟶ S) [IsSeparated s]
-    {a b : pullback pB (spMap (algebraMap k R)) ⟶ Z} (h : a ≫ s = b ≫ s)
-    (hab : j ≫ a = j ≫ b) : a = b :=
-  have := (dominant_of_compatible pB R h₁ h₂).2
-  ExtUnique.hom_ext_of_dominant s h j hab
-
 end Field
 
 end GlobalTheory.Spread
 
 namespace GlobalTheory
-
-theorem morphisms_spread_out_to_fg_subalgebra (k : IntermediateField ℚ ℂ) (B Z : Scheme.{0})
-    (pB : B ⟶ Sp k) (pZ : Z ⟶ Sp k) [QuasiCompact pB] [QuasiSeparated pB]
-    [LocallyOfFinitePresentation pZ] (n : ℕ)
-    (φ : Fin n → (pullback pB (spMap (algebraMap k ℂ)) ⟶ Z))
-    (hφ : ∀ i, φ i ≫ pZ = pullback.fst _ _ ≫ pB) (R₀ : Subalgebra k ℂ) (hR₀ : R₀.FG) :
-    ∃ (R : Subalgebra k ℂ) (ψ : Fin n → (pullback pB (spMap (algebraMap k R)) ⟶ Z))
-      (j : pullback pB (spMap (algebraMap k ℂ)) ⟶ pullback pB (spMap (algebraMap k R))),
-      R.FG ∧ R₀ ≤ R ∧ j ≫ pullback.fst _ _ = pullback.fst _ _ ∧
-        j ≫ pullback.snd _ _ = pullback.snd _ _ ≫ spMap R.val.toRingHom ∧
-        ∀ i, ψ i ≫ pZ = pullback.fst _ _ ≫ pB ∧ j ≫ ψ i = φ i := by
-  obtain ⟨R, ψ, hR, hle, h⟩ := Spread.exists_fg_forall_comp_eq pB pZ φ hφ R₀ hR₀
-  exact ⟨R, ψ, Spread.bcMap pB R.val, hR, hle, Spread.bcMap_fst _ _, Spread.bcMap_snd _ _, h⟩
 
 end GlobalTheory

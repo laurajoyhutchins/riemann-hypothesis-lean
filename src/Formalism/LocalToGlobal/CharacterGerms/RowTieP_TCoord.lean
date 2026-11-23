@@ -1,5 +1,55 @@
-import Formalism.LocalToGlobal.CharacterGerms.RowTieValL
-import Formalism.LocalToGlobal.CharacterGerms.UncurryLogConstantCoeff
+module
+
+public import Formalism.LocalToGlobal.CharacterGerms.RowTieValL
+public import Formalism.LocalToGlobal.CharacterGerms.GeneralGermZero
+import Formalism.LocalToGlobal.CharacterGerms.AbstractGermZeroCondition
+import Formalism.LocalToGlobal.CharacterGerms.CoeffSingleSubstOfLowDegree
+import Formalism.LocalToGlobal.CharacterGerms.ConstMemTypeSetOfNonneg
+import Formalism.LocalToGlobal.CharacterGerms.RowTieCartAdd
+public import Formalism.LocalToGlobal.CharacterGerms.UncurryLogConstantCoeff
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 noncomputable section
 
@@ -32,6 +82,7 @@ theorem tcoord_abs {V : VF C} {d : ℕ} {I : Fin 2 → Type} [∀ g, Fintype (I 
     rw [hE]; simp only; rw [← hPt j]; exact constantCoeff_subst_zero ht0 (hP0 j)
   have hlin0 : ∀ i : κ, MvPowerSeries.constantCoeff
       (∑ c', X.u g c' i • (MvPowerSeries.X c' : MvPowerSeries (I g) C)) = 0 := fun i => by
+
     rw [map_sum]
     exact Finset.sum_eq_zero fun c' _ => by
       rw [MvPowerSeries.constantCoeff_smul, MvPowerSeries.constantCoeff_X, smul_zero]
@@ -47,24 +98,29 @@ theorem tcoord_abs {V : VF C} {d : ℕ} {I : Fin 2 → Type} [∀ g, Fintype (I 
     unfold RawChart.expPt
     congr 1
     funext i
+
     rw [← MvPowerSeries.coe_substAlgHom hXg, map_sum]
     simp only [map_smul, MvPowerSeries.coe_substAlgHom hXg, MvPowerSeries.subst_X hXg]
 
   set φ : I g → MvPowerSeries (I g) C := fun k => ∑ j, w j k • P j with hφ
   set t₂ : I g → MvPowerSeries (I g) C := fun k => ∑ j, w j k • E j with ht₂
   have hφ0 : ∀ k, MvPowerSeries.constantCoeff (φ k) = 0 := fun k => by
+
     rw [hφ]; simp only; rw [map_sum]
     exact Finset.sum_eq_zero fun j _ => by rw [MvPowerSeries.constantCoeff_smul, hP0 j, smul_zero]
   have ht₂0 : ∀ k, MvPowerSeries.constantCoeff (t₂ k) = 0 := fun k => by
+
     rw [ht₂]; simp only; rw [map_sum]
     exact Finset.sum_eq_zero fun j _ => by rw [MvPowerSeries.constantCoeff_smul, hE0 j, smul_zero]
   have hφI : ∀ k, IntS V (φ k) := fun k μ => by
+
     rw [hφ]; simp only; rw [map_sum]
     exact VF.Ge.sum fun j _ => by rw [MvPowerSeries.coeff_smul]; exact (hwI j k).mul_int (hPI j μ)
   have hL : (Matrix.of fun k c : I g => MvPowerSeries.coeff (Finsupp.single c 1) (φ k)) = (Matrix.of tan).transpose := by
     ext k c
     rw [Matrix.transpose_apply, Matrix.of_apply, Matrix.of_apply, hφ]
     simp only
+
     rw [map_sum]
     simp only [MvPowerSeries.coeff_smul, hPlin]
     have e : ∑ j, w j k * ∑ c', X.u g c' j * tan c c' = ∑ c', tan c c' * ∑ j, X.u g c' j * w j k := by
@@ -79,6 +135,7 @@ theorem tcoord_abs {V : VF C} {d : ℕ} {I : Fin 2 → Type} [∀ g, Fintype (I 
     intro k
     rw [MvPowerSeries.subst_X ht₂s, hφ, ht₂]
     simp only
+
     rw [← MvPowerSeries.coe_substAlgHom hts, map_sum]
     simp only [map_smul, MvPowerSeries.coe_substAlgHom hts, hPt]
     rfl
@@ -87,10 +144,12 @@ theorem tcoord_abs {V : VF C} {d : ℕ} {I : Fin 2 → Type} [∀ g, Fintype (I 
 
   set ℓ : I g → MvPowerSeries κ C := fun k => ∑ j, w j k • (MvPowerSeries.X j : MvPowerSeries κ C) with hℓ
   have hℓ0 : ∀ k, MvPowerSeries.constantCoeff (ℓ k) = 0 := fun k => by
+
     rw [hℓ]; simp only; rw [map_sum]
     exact Finset.sum_eq_zero fun j _ => by
       rw [MvPowerSeries.constantCoeff_smul, MvPowerSeries.constantCoeff_X, smul_zero]
   have hℓI : ∀ k, IntS V (ℓ k) := fun k μ => by
+
     rw [hℓ]; simp only; rw [map_sum]
     exact VF.Ge.sum fun j _ => by rw [MvPowerSeries.coeff_smul]; exact (hwI j k).mul_int (intS_X j μ)
   have hpt0 : ∀ x, MvPowerSeries.constantCoeff (X.expPt g x) = 0 := fun x => by
@@ -106,6 +165,7 @@ theorem tcoord_abs {V : VF C} {d : ℕ} {I : Fin 2 → Type} [∀ g, Fintype (I 
   funext k
   rw [hℓ, ht₂]
   simp only
+
   rw [← MvPowerSeries.coe_substAlgHom hpts, map_sum, ← MvPowerSeries.coe_substAlgHom hXg, map_sum]
   refine Finset.sum_congr rfl fun j _ => ?_
   rw [map_smul, map_smul, MvPowerSeries.coe_substAlgHom hpts, MvPowerSeries.subst_X hpts,
@@ -129,14 +189,6 @@ theorem tcoord_gen {V : VF C} {d : ℕ} {I : Fin 2 → Type} [∀ g, Fintype (I 
 end TCoord
 
 def TCoordSelfSt : Prop := AllSelf fun _ _ V _ _ _ _ X => ∀ Hc : ∀ g, X.CartHyp V g, RawChart.TCoordSt Hc
-
-theorem tcoordFB_holds : AllFB fun _ _ V _ _ _ _ X => ∀ Hc : ∀ g, X.CartHyp V g, RawChart.TCoordSt Hc := by
-  unfold AllFB
-  intro C _ _ V O _ _ dd Y d _ I _ p H S t ht g c
-  obtain ⟨w, hwI, hw⟩ := p.u_sat g
-  obtain ⟨P, hP0, hPI, hPlin, hPt⟩ := FormalGermZero.sys_P Y p (H g) (S g)
-  exact TCoord.tcoord_abs (Y.raw p) g w hwI hw (S g).tan (S g).unimod P hP0 hPI hPlin (t g) (ht g).1
-    (hPt (t g) (ht g)) c
 
 theorem tcoordSelf_holds : TCoordSelfSt := by
   unfold TCoordSelfSt AllSelf

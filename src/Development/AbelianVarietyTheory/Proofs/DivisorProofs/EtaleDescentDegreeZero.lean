@@ -1,10 +1,57 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PullSpMapComp
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IntegralSurjectionCechDescentTateTwistStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.PullHlComp
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DegreeZeroSectionClassProperties
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EtaleCohomologyPullbackEqZeroOfCechOneCocycle
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FreeEtaleModuleSheafHomEquivNaturalSections
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IntegralSurjectionCechDescentTateTwist
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsZeroChains
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SimplicialCochainClassesBasicProperties
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ChosenInjectiveResolutionEtaleSheafBasicProperti
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SpecWidePushoutIsoWidePullbackYoneda
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EtaleCohomologyPullbackEqZeroOfCechOneCocycle
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IndEtOfForallFinset
+public import Development.AbelianVarietyTheory.Definitions.Divisors.SecClass
+
+@[expose] public section
+
 open CategoryTheory Limits AlgebraicGeometry Opposite GlobalTheory.EtC CochainComplex CochainComplex.HomComplex Simplicial
 open scoped TensorProduct
 
@@ -18,41 +65,12 @@ end GlobalTheory.EtC.DescZero
 
 namespace GlobalTheory.EtC.DescZero
 
-theorem spec_integral_surj (A B : Type) [CommRing A] [CommRing B] (φ : A →+* B) (hi : φ.IsIntegral)
-    (hk : RingHom.ker φ ≤ nilradical A) :
-    IsIntegralHom (Spec.map (CommRingCat.ofHom φ)) ∧ Surjective (Spec.map (CommRingCat.ofHom φ)) := by
-  refine ⟨IsIntegralHom.SpecMap_iff.2 hi, ⟨fun (x : PrimeSpectrum A) => ?_⟩⟩
-  letI := φ.toAlgebra
-  haveI : Algebra.IsIntegral A B := ⟨hi⟩
-  have hle : (⊥ : Ideal B).comap (algebraMap A B) ≤ x.asIdeal := by
-    rw [← RingHom.ker_eq_comap_bot]
-    exact hk.trans (nilradical_le_prime x.asIdeal)
-  obtain ⟨Q, -, hQ, hQx⟩ := Ideal.exists_ideal_over_prime_of_isIntegral x.asIdeal ⊥ hle
-  have : x ∈ Set.range (PrimeSpectrum.comap φ) := ⟨⟨Q, hQ⟩, PrimeSpectrum.ext hQx⟩
-  exact this
-
-def incl2 (A B : Type) [CommRing A] [CommRing B] [Algebra A B] : Fin 2 → (B →+* B ⊗[A] B) :=
-  ![(Algebra.TensorProduct.includeLeft : B →ₐ[A] B ⊗[A] B).toRingHom,
-    (Algebra.TensorProduct.includeRight : B →ₐ[A] B ⊗[A] B).toRingHom]
-
 end GlobalTheory.EtC.DescZero
 
 namespace GlobalTheory.EtC.DescZero
 
 def cπ {Y X : Scheme.{0}} (f : Y ⟶ X) (n : ℕ) (k : Fin (n + 1)) : (cech f).obj (op ⦋n⦌) ⟶ (sch.obj Y).obj (op ⦋0⦌) :=
   WidePullback.π (fun _ : Fin (n + 1) => yoneda.map f) k
-
-theorem cech_δ0_π {Y X : Scheme.{0}} (f : Y ⟶ X) :
-    SimplicialObject.δ (cech f) (0 : Fin 2) ≫ cπ f 0 0 = cπ f (0 + 1) 1 :=
-  WidePullback.lift_π _ _ _ _ 0
-
-theorem cech_δ1_π {Y X : Scheme.{0}} (f : Y ⟶ X) :
-    SimplicialObject.δ (cech f) (1 : Fin 2) ≫ cπ f 0 0 = cπ f (0 + 1) 0 :=
-  WidePullback.lift_π _ _ _ _ 0
-
-theorem cechDiag_π {Y X : Scheme.{0}} (f : Y ⟶ X) :
-    (GlobalTheory.CechOne.cechDiag f).app (op ⦋0⦌) ≫ cπ f 0 0 = 𝟙 _ :=
-  WidePullback.lift_π _ _ _ _ 0
 
 end GlobalTheory.EtC.DescZero
 
@@ -67,7 +85,7 @@ private lemma spec_map_surjective_of_integral_ker_le_nilradical (A A' : Type) [C
   intro x
   let p : PrimeSpectrum A := x
   obtain ⟨Q, -, hQ, hQx⟩ := Ideal.exists_ideal_over_prime_of_isIntegral p.asIdeal (⊥ : Ideal A')
-    (by rw [← RingHom.ker_eq_comap_bot]; exact hker.trans (nilradical_le_prime _))
+    (by rw [Ideal.under_def, ← RingHom.ker_eq_comap_bot]; exact hker.trans (nilradical_le_prime _))
   exact ⟨(⟨Q, hQ⟩ : PrimeSpectrum A'), PrimeSpectrum.ext hQx⟩
 
 open CategoryTheory Limits AlgebraicGeometry Opposite CochainComplex CochainComplex.HomComplex Simplicial in
@@ -185,9 +203,9 @@ private lemma cechDiag_comp_cπ_eq_id {Y X : Scheme.{0}} (f : Y ⟶ X) :
   erw [WidePullback.lift_π]
   rfl
 
+
 open CategoryTheory Limits AlgebraicGeometry Opposite CochainComplex CochainComplex.HomComplex Simplicial in
 open scoped TensorProduct in
-
 theorem _root_.GlobalTheory.EtC.DescZero.desc_zero : ∀ (q : ℕ) [NeZero q] (A A' : Type) [CommRing A] [CommRing A'] [Algebra A A'],
     Algebra.IsIntegral A A' → RingHom.ker (algebraMap A A') ≤ nilradical A → IsUnit (q : A) →
     ∀ (j : ℤ) (b : _root_.GlobalTheory.EtC.Ht q (_root_.GlobalTheory.EtC.sp A') 0 j),

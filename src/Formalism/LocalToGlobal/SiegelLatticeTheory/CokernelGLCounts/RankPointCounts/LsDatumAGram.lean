@@ -1,6 +1,49 @@
-import Mathlib
-import Formalism.SharpRestriction.CuspSpanNormBounds.ThinScalesBound
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.LsDatumA
+module
+
+public import Formalism.SharpRestriction.CuspSpanNormBounds.ThinScalesBound
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -24,6 +67,7 @@ def hL (y : V) : V →ₗ[E] E where
 theorem h_sum_smul_left {ι : Type} [Fintype ι] (c : ι → E) (v : ι → V) (y : V) :
     H.h (∑ i, c i • v i) y = ∑ i, c i * H.h (v i) y := by
   show hL H y (∑ i, c i • v i) = _
+
   rw [map_sum]
   simp only [map_smul, smul_eq_mul]
   rfl
@@ -32,6 +76,7 @@ theorem h_sub_left (x x' y : V) : H.h (x - x') y = H.h x y - H.h x' y := (hL H y
 
 theorem h_sum_smul_right {ι : Type} [Fintype ι] (c : ι → E) (v : ι → V) (w : V) :
     H.h w (∑ i, c i • v i) = ∑ i, M.L.cj (c i) * H.h w (v i) := by
+
   rw [H.h_herm (∑ i, c i • v i) w, h_sum_smul_left, map_sum]
   refine Finset.sum_congr rfl (fun i _ => ?_)
   rw [map_mul, H.h_herm (v i) w]
@@ -148,10 +193,10 @@ theorem gram_det (f f' : Fin (r + 1) → V) (T T' : F) (hF : Formalism.MainNotio
     ∃ s : E, s * s = 1 ∧ (H.gram (Sum.elim f f')).det * s = H.Gdet f f' T T' := by
   classical
   have hdB : H.Dl f f' (r + 1) = (H.Zhat f f').det := by
-    rw [HermSp.Dl, dif_pos le_rfl]
+    rw [HermSp.Dl, dite_eq_left le_rfl]
     exact congrArg Matrix.det (Matrix.ext fun i j => rfl)
   have hdBr : H.Dl f f' r = ((H.Zhat f f').submatrix Fin.castSucc Fin.castSucc).det := by
-    rw [HermSp.Dl, dif_pos (by omega : r ≤ r + 1)]
+    rw [HermSp.Dl, dite_eq_left (by omega : r ≤ r + 1)]
     exact congrArg Matrix.det (Matrix.ext fun i j => rfl)
   haveI hBinv : Invertible (H.Zhat f f') := Matrix.invertibleOfIsUnitDet _ (hdB ▸ hD)
   have hcorner : cornerM (r := r) (-algebraMap F E T') * ⅟(H.Zhat f f') * cornerM (-algebraMap F E T) =

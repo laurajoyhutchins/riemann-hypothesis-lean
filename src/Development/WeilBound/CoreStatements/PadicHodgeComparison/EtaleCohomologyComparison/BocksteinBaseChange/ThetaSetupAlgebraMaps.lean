@@ -1,8 +1,48 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.BocksteinBaseChange.EtSide
+module
+
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.BocksteinBaseChange.EtSide
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 1000000
+
 
 noncomputable section
 
@@ -203,19 +243,19 @@ structure Pre (R : Per l K) where
         ∑ s, ∑ s', c M i (M.toV _ x) (b.coord s) * c M j (M.toV _ y) (b'.coord s') * R.o (φ (cupR M i j (b s) (b' s')))
   c1 : ∀ (M : Model l K), G M → ∀ d : ℕ, M.Conn d → ∃ v φ, R.IsU (R.tB ^ d * c M (2 * d) v φ)
 
-variable {G} in
 
+variable {G} in
 def Pre.Span (P : Pre G R) (M : Model l K) (n : ℕ) (S : Subring R.B) : Prop :=
   ∃ (r : ℕ) (w : Fin r → Module.Dual K (HdR M.q n) → R.B), (∀ i φ (σ : K.fixingSubgroup), R.σ σ (w i φ) = w i φ) ∧
     ∀ v, ∃ b : Fin r → R.B, (∀ i, b i ∈ S) ∧ ∀ φ, P.c M n v φ = ∑ i, b i * w i φ
 
-variable {G} in
 
+variable {G} in
 def Pre.Inj (P : Pre G R) (M : Model l K) (n : ℕ) : Prop :=
   ∀ {a : ℕ} (b : Module.Basis (Fin a) ℚ_[l] (M.V n)) (z : Fin a → R.B), (∀ φ, ∑ i, z i * P.c M n (b i) φ = 0) → z = 0
 
-variable {G} in
 
+variable {G} in
 def Pre.Strict (P : Pre G R) (M : Model l K) (n : ℕ) : Prop :=
   ∀ {a : ℕ} (b : Module.Basis (Fin a) ℚ_[l] (M.V n)) (z : Fin a → R.B),
     (∀ (r : ℕ) (φ : Module.Dual K (HdR M.q n)), (∀ x ∈ FilR M.q n (r + 1), φ x = 0) →

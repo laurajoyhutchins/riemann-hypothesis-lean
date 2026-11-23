@@ -1,6 +1,57 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.Graded
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.OrbitVanishingLocal
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsUniqueFixedPointOfAdicContraction
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.OrbitVanishingLocal
+public import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.PredMulSumPadicValNatFactorialAddCardLe
+public import Mathlib.RingTheory.MvPowerSeries.Rename
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsUniqueFixedPointOfAdicContraction
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open IsLocalRing MvPowerSeries UpperTheory.V.Alg
 
@@ -36,7 +87,7 @@ private theorem mul_mem_wtPart' {ι A G : Type} [CommRing A] [AddCommGroup G] (w
   · have hc : Finsupp.weight w' c ≠ j := by
       intro hc
       apply hn
-      rw [← hbc', map_add, hb, hc]
+      rw [← hbc', map_add (f := _), hb, hc]
     rw [hq' c hc, mul_zero]
   · rw [hp' b hb, zero_mul]
 
@@ -149,6 +200,7 @@ private theorem cs_lin [Fintype σ] (g : MvPowerSeries σ O) (h0 : constantCoeff
     ((2 : ℕ) : ℕ∞) ≤ (g - ∑ s, coeff (Finsupp.single s 1) g • X s).order := by
   classical
   refine MvPowerSeries.nat_le_order (fun d hd => ?_)
+
   simp only [map_sub, map_sum, coeff_smul, coeff_X, smul_eq_mul, mul_ite, mul_one, mul_zero]
   rcases (Nat.lt_succ_iff.mp hd).lt_or_eq with hlt | h1
   · have hd0 : d = 0 := (Finsupp.degree_eq_zero_iff d).mp (by omega)
@@ -174,7 +226,7 @@ private theorem cs_sat [IsDomain O] {A A' : Type} [CommRing A] [Algebra O A] [Co
 
 end
 
-set_option maxHeartbeats 800000 in
+
 theorem UpperTheory.V.Alg.chart_sum :
     ∀ (O X : Type) [CommRing O] [IsDomain O] [AddCommGroup X] (T : Type) [Fintype T] (B : T → Type) [∀ v, CommRing (B v)] [∀ v, Algebra O (B v)] (WB : ∀ v, WPres O X (B v)) (hB : ∀ v, (WB v).HasOrigin)
       (τ : T → Type) [∀ v, Fintype (τ v)] (wt : ∀ v, τ v → X) (φ : ∀ v, B v →ₐ[O] MvPowerSeries (τ v) (FractionRing O)), (∀ v, IsChart (WB v).part ((WB v).origin (hB v)) (wt v) (φ v)) →
@@ -303,12 +355,13 @@ theorem UpperTheory.V.Alg.chart_sum :
       have hm := GlobalTheory.algHom_mem_pow_of_le_order Φ hΦg hord
       have h2 := GlobalTheory.mem_germIdeal_pow_iff.mp hm (Finsupp.single i 1) (by simp)
       have h3 := hf1 i
-      rw [show g = ℓ + (g - ℓ) by ring, map_add, map_add, h2, add_zero] at h3
+      rw [show g = ℓ + (g - ℓ) by ring, map_add (f := _), map_add (f := _), h2, add_zero] at h3
       exact h3
     let ℓv : ∀ v, MvPowerSeries (WB v).σ O := fun v =>
       ∑ s, coeff (Finsupp.single (e ⟨v, s⟩) 1) g • MvPowerSeries.X s
     have hℓsum : ℓ = ∑ v, MvPowerSeries.rename (fun s => e ⟨v, s⟩) (ℓv v) := by
       rw [hℓ]
+
       simp only [ℓv, map_sum, map_smul, rename_X]
       rw [← Fintype.sum_sigma (fun p : Σ v, (WB v).σ =>
         coeff (Finsupp.single (e p) 1) g • MvPowerSeries.X (e p))]
@@ -349,6 +402,7 @@ theorem UpperTheory.V.Alg.chart_sum :
       have hc1 : ∀ k, coeff (Finsupp.single k 1) (φ v ((WB v).π (ℓv v))) = 0 := by
         intro k
         have h1 := hΦl ⟨v, k⟩
+
         rw [hℓsum, map_sum, map_sum, Finset.sum_eq_single v] at h1
         · rw [hca, cs_coeff_same] at h1
           exact h1
@@ -361,9 +415,10 @@ theorem UpperTheory.V.Alg.chart_sum :
       have hfin := cs_sat ((WB v).origin (hB v)) (W.origin hO) iv hiv hsat
       rwa [hivπ] at hfin
     have hl : W.π ℓ ∈ satSq (W.origin hO) := by
+
       rw [hℓsum, map_sum]
       exact Submodule.sum_mem _ (fun v _ => hv v)
-    rw [show g = ℓ + (g - ℓ) by ring, map_add]
+    rw [show g = ℓ + (g - ℓ) by ring, map_add (f := _)]
     exact Submodule.add_mem _ hl hq
   · intro v s
     rw [WPres.z, hψ, hΦX, hae]

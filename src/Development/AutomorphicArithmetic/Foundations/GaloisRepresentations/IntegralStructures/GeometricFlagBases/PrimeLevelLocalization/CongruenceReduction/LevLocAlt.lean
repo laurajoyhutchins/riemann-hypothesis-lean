@@ -1,4 +1,41 @@
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.IntegralStructures.GeometricFlagBases.PrimeLevelLocalization.PrimeProj
+module
+
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.IntegralStructures.GeometricFlagBases.PrimeLevelLocalization.PrimeProj
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -31,10 +68,10 @@ def CjEnt : Prop :=
 
 def CjInt : Prop :=
   ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (n : ℕ) (g : GUf E n) (w : Plc E),
-    (comp w g ∈ KGL w n → comp (cj w) g ∈ KGL (cj w) n → 0 < n →
+    (comp w g ∈ KGL w (n := n) → comp (cj w) g ∈ KGL (cj w) (n := n) → 0 < n →
       Valued.v (GroundTheory.Global.AdeleBaseChange.finiteAdeleMap ℚ E ((sim g : AfQˣ) : AfQ) w) = 1) ∧
-    (Valued.v (GroundTheory.Global.AdeleBaseChange.finiteAdeleMap ℚ E ((sim g : AfQˣ) : AfQ) w) = 1 → comp w g ∈ KGL w n →
-      comp (cj w) g ∈ KGL (cj w) n)
+    (Valued.v (GroundTheory.Global.AdeleBaseChange.finiteAdeleMap ℚ E ((sim g : AfQˣ) : AfQ) w) = 1 → comp w g ∈ KGL w (n := n) →
+      comp (cj w) g ∈ KGL (cj w) (n := n))
 
 def ShpOf : Prop :=
   Sides → ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (A : Arith E) (n : ℕ) (x : E), Gen A x → ∀ q : ℕ, q.Prime → A.SplitK q →
@@ -64,11 +101,11 @@ def TMult : Prop := AtSite fun _ _ _ _ _ _ p _ S F _ w _ i g =>
 
 def LocIdx : Prop :=
   ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (n : ℕ) (w : Plc E) (i : ℕ), i ≤ n → ∀ t : GLw n w, IsT w i t →
-    ∀ [w.asIdeal.IsMaximal], ((KGL w n).comap (MulAut.conj t).toMonoidHom).relIndex (KGL w n) =
+    ∀ [w.asIdeal.IsMaximal], ((KGL w (n := n)).comap (MulAut.conj t).toMonoidHom).relIndex (KGL w (n := n)) =
       Nat.card (crystallineComparison.Gr (𝓞 E ⧸ w.asIdeal) (Fin n → 𝓞 E ⧸ w.asIdeal) i)
 
 def LevLoc : Prop := AtSite fun _ _ _ _ _ n _ _ _ F _ w σ _ g =>
-  (∀ k, F.j k ∈ σ.K₀ → comp w k ∈ KGL w n) ∧ (∀ κ ∈ KGL w n, ∃ k, F.j k ∈ σ.K₀ ∧ comp w k = κ) ∧
-    ∀ k, F.j k ∈ σ.K₀ → (F.j (g * k * g⁻¹) ∈ σ.K₀ ↔ comp w (g * k * g⁻¹) ∈ KGL w n)
+  (∀ k, F.j k ∈ σ.K₀ → comp w k ∈ KGL w (n := n)) ∧ (∀ κ ∈ KGL w (n := n), ∃ k, F.j k ∈ σ.K₀ ∧ comp w k = κ) ∧
+    ∀ k, F.j k ∈ σ.K₀ → (F.j (g * k * g⁻¹) ∈ σ.K₀ ↔ comp w (g * k * g⁻¹) ∈ KGL w (n := n))
 
 end UpperTheory.Gal.Int.Geo.Pl.Tj

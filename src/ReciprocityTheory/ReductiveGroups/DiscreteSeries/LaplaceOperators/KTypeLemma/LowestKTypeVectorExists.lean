@@ -1,10 +1,59 @@
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.LaplaceOperators.KTypeLemma.TensorActionApplyDual
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.LaplaceOperators.KTypeLemma.IndicatorRholMem
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.LaplaceOperators.KTypeLemma.SASingle
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.LaplaceOperators.KTypeLemma.Transfer
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.DiscreteSeriesExistence.PropsEquivB
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.HighestWeights.OpEqExp
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.CasimirCoefficients.ToMKMulInv
+module
+
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.LaplaceOperators.KTypeLemma.TensorActionApplyDual
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.LaplaceOperators.KTypeLemma.IndicatorRholMem
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.AnalyticVectors.ConjTransposeEqOfInG
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.CasimirCoefficients.ToMKMulInv
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.DiscreteSeriesExistence.PropsEquivB
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.HighestWeights.OneParam
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.HighestWeights.OpEqExp
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.LaplaceOperators.KTypeLemma.EqZeroOfCoef
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.LaplaceOperators.KTypeLemma.SASingle
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.LaplaceOperators.KTypeLemma.Transfer
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.LaplaceOperators.KTypeLemma.TransferA
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.LaplaceOperators.KTypeLemma.DerivEntries
+
+@[expose] public section
 
 noncomputable section
 
@@ -77,7 +126,7 @@ theorem lowestKType_vector_exists (ε : Fin n → Bool) (lam : Fin n → ℝ)
       simp only [cpart2, Matrix.smul_mul, Matrix.mul_smul, Matrix.add_mul, Matrix.mul_add, hZ, hZ']⟩
     rw [← TRA.actM_single E a b, TRA.act_cpart (ε := ε), Submodule.coe_add, Submodule.coe_smul,
       hK _ k1, hK _ k2]
-    conv_rhs => rw [← ta_cpart_sum ε (Matrix.single a b 1), map_add, map_smul, _root_.add_apply,
+    conv_rhs => rw [← ta_cpart_sum ε (Matrix.single a b 1), map_add (f := _), map_smul, _root_.add_apply,
       _root_.smul_apply, map_add, map_smul]
   refine ⟨fun a => Subtype.ext ?_, fun a b hab he => Subtype.ext ?_⟩
   · rw [hC a a rfl, T.w_wt a, map_smul]; rfl
@@ -100,6 +149,7 @@ theorem lowestKType_trace_integral (ε : Fin n → Bool) (lam : Fin n → ℝ)
   funext c
   set w0 : H := (((ι.symm T.w : V) : D) : H) with hw0
   have hsT : sT E V x c = ∑ p ∈ x.support, if p.2 = c then wordE E p.1 (x p : D) else 0 := by
+
     conv_lhs => rw [← Finsupp.sum_single x, Finsupp.sum, map_sum, Finset.sum_apply]
     refine sum_congr rfl fun p _ => ?_
     rw [show p = (p.1, p.2) from rfl, sT_single, Pi.single_apply]
@@ -131,6 +181,7 @@ theorem lowestKType_trace_integral (ε : Fin n → Bool) (lam : Fin n → ℝ)
     rw [hsum fun p => ⟪ι v', rWord ε (p.1.map fun q =>
       (Matrix.single q.1 q.2 1 : Matrix (Fin n) (Fin n) ℂ)) (PsiM T μ) g
         (if p.2 = c then ι (x p) else 0)⟫_ℂ] at h2
+
     rw [hsT, ← h2, Submodule.coe_sum, map_sum, inner_sum]
     refine sum_congr rfl fun p _ => ?_
     split_ifs
@@ -150,7 +201,7 @@ theorem lowestKType_trace_integral (ε : Fin n → Bool) (lam : Fin n → ℝ)
         intro y
         induction y using Finsupp.induction_linear with
         | zero => simp
-        | add y y' h h' => simp only [map_add, Pi.add_apply, h, h']
+        | add y y' h h' => simp only [map_add (f := _), Pi.add_apply, h, h']
         | single p v =>
           have e0 : TRA.ei X 0 = 1 := by simp [TRA.ei]
           have e1 : TRA.wB (eMM μ) (phiMM μ) X 0 p.1 = wordE (eMM μ) p.1 (phiMM μ) := by
@@ -166,6 +217,7 @@ theorem lowestKType_trace_integral (ε : Fin n → Bool) (lam : Fin n → ℝ)
     hWord (adW ε k (p.1.map fun q => (Matrix.single q.1 q.2 1 : Matrix (Fin n) (Fin n) ℂ))) (PhiP μ) z
   have hXa : ∀ c', ∑ p ∈ x.support, TRA.ei X 1 c' p.2 * a p = 0 := fun c' => by
     rw [← hXi c']
+
     conv_rhs => rw [← Finsupp.sum_single x, Finsupp.sum, map_sum]
     refine sum_congr rfl fun p _ => ?_
     have e1 : TRA.evZ μ z (TRA.wB (eMM μ) (phiMM μ) X 1 p.1) = hWord (adW ε k (p.1.map fun q =>

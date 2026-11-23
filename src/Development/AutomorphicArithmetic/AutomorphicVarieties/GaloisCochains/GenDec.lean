@@ -1,6 +1,60 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisCochains.LocEuler
-import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisCochains.DecZhat
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.ChoiceFunction
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.ResMapBijective
+public import Mathlib.RingTheory.AdicCompletion.Noetherian
+public import Mathlib.RingTheory.Coalgebra.IsFrobenius
+public import Mathlib.RingTheory.HopfAlgebra.Basic
+public import ReciprocityTheory.Hypotheses.GalCoh
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisCochains.DecZhat
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisCochains.LocEuler
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.ChoiceFunction
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.FieldTheory.Galois.Profinite
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+public import Mathlib.RingTheory.ZMod.UnitsCyclic
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisCochains.GLinkQuot
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Formalism.ConjugateSelfDual ReciprocityTheory.Gal Module UpperTheory.V UpperTheory.V.Fr UpperTheory.V.GC
 
@@ -257,7 +311,7 @@ theorem UpperTheory.V.GC.genDec :
   obtain ⟨f1, f2⟩ := finrank_cocycles_trivial_mod_l (locDeg v) _ hω' e1 (by rw [e2 hv, e3])
   obtain ⟨n, hn⟩ : ∃ n, locDeg v = n + 1 := by
     have := v.isPrime
-    have h1 := Ideal.ramificationIdx_pos v.asIdeal ℤ
+    have h1 := Ideal.ramificationIdx_pos (R := ℤ) v.asIdeal
     have h2 := Ideal.inertiaDeg_pos v.asIdeal ℤ
     exact Nat.exists_eq_succ_of_ne_zero (Nat.mul_ne_zero h1.ne' h2.ne')
   rw [hn] at f2 ⊢

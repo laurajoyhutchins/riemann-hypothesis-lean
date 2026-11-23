@@ -1,8 +1,61 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LowFormOfEmb
-import Development.AbelianVarietyTheory.Definitions.Divisors.FormalDegreeUpperC
-import Development.AbelianVarietyTheory.Definitions.Divisors.RealisedChainTorusEq
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PrincipalLevelEigenpartsAndConjugateCharactersStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.FormalDegreeUpperC
+public import Development.AbelianVarietyTheory.Definitions.Divisors.RealisedChainTorusEq
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsFullLift
+import Development.AbelianVarietyTheory.Counterexamples.RotationExamples.LevelVectorSizeBounds
+public import Development.AbelianVarietyTheory.Counterexamples.RotationExamples.PhaseBreaksTargetParts
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AdelicScalarBase
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CoefInjective
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ConjugateTransposeMajorant
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsIsMultIPOfModel
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsTieCoordBase
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.InnerConjFormsEqCsumAt
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LowFormOfEmb
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MapConjTransposeTwist
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PrincipalLevelEigenpartsAndConjugateCharactersStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SpanEqTopOfTie
+public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.ExistsRingEquivOfIsTranscendenceBasis
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.NormLiftFormsFiniteGroupAction
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -31,8 +84,8 @@ theorem g_mem_six {F : Face D A} (h : GlobalTheory.Hk3.Core R F) {PP : Pl D.host
   have h2 : algebraMap (𝓞 D.host.K) (𝓞 D.host.E) (D.host.g k : ℕ) ∈ PP.asIdeal := h1
   simpa using h2
 
-open Classical in
 
+open Classical in
 theorem isConjChars_base_six {F : Face D A} (h : GlobalTheory.Hk3.Core R F) (i : Fin D.R.m) (t : T) :
     IsConjChars R i t (RingEquiv.refl ℂ) (R.toLevCh.mu t ((i : ℕ) + 1)) R.eta
       (fun PP => if PP ∈ R.Pg then (R.chi ((i : ℕ) + 1) PP)⁻¹ else R.xiR t PP) := by
@@ -71,8 +124,8 @@ theorem isConjChars_base_six {F : Face D A} (h : GlobalTheory.Hk3.Core R F) (i :
       rw [locK_eq_one hun a k hk ha, one_mul]
       exact h.lev.xiR t PP hq a k u hk hu
 
-open Classical in
 
+open Classical in
 theorem chr_base_six {F : Face D A} (h : GlobalTheory.Hk3.Core R F) (i : Fin D.R.m) (t : T) :
     chrOf (Vc D i) (R.βV i) (datV i R.Pg (R.Q t) R.triv
       (fun PP => if PP ∈ R.Pg then (R.chi ((i : ℕ) + 1) PP)⁻¹ else R.xiR t PP)) = (levEnv _ (R.βV i) (R.datVt i t)).χ := by
@@ -147,8 +200,8 @@ theorem isLevelVec_at_six (h : GlobalTheory.Hk3.Core R F) (i : Fin D.R.m) (σ : 
   simp only [omegaG_triv, hQ]
   exact hf
 
-open GlobalTheory.IndefiniteRowSideFullHecke.WeilGramSignature in
 
+open GlobalTheory.IndefiniteRowSideFullHecke.WeilGramSignature in
 theorem exists_full_lift_six (hA : GlobalTheory.LowRow.AdelC R F) (h : GlobalTheory.Hk3.Core R F) (i : Fin D.R.m) {b : ℝ} (hb : Sizes D i b)
     (ht : PrimeToHost R A.μ0) {σ : D.what₂.LL →+* ℂ} {s : ℂ ≃+* ℂ} (hσ : IsEmbOverK D σ s) {v : (R.MW i σ).Vec}
     (hv : IsExtVec (R.MW i σ) v) {c₀ μ' η' c c₁ H j th} (hd : IsConjDatum R i σ c₀ μ' η' c c₁ H j th) :
@@ -191,8 +244,8 @@ theorem parts_scalar_six (h : GlobalTheory.Hk3.Core R F) (i : Fin D.R.m) (σ : D
   have e2 := a.2.1 y (e.ge hy)
   exact (congrArg T e1).symm.trans e2
 
-open GlobalTheory.IndefiniteRowSideFullHecke.WeilGramSignature in
 
+open GlobalTheory.IndefiniteRowSideFullHecke.WeilGramSignature in
 theorem conjLift_lower_six (hA : GlobalTheory.LowRow.AdelC R F) (h : GlobalTheory.Hk3.Core R F) (i : Fin D.R.m) {b : ℝ} (hb : Sizes D i b)
     (ht : PrimeToHost R A.μ0) {σ : D.what₂.LL →+* ℂ} {s : ℂ ≃+* ℂ} (hσ : IsEmbOverK D σ s) {v : (R.MW i σ).Vec}
     (hv : IsExtVec (R.MW i σ) v) (hlog : logHookSum i (lab σ) = logHookSum i id) {c₀ μ' η' c c₁ H j th}
@@ -259,8 +312,8 @@ theorem lowForm_of_emb_six {s : ℕ} (hOk : A.fam.Ok s) (h : GlobalTheory.Hk3.Co
     exact mul_le_mul_of_nonneg_left k2 (inv_pos.2 k0).le
   exact (key _ _ _ _ _ _ _ (RealDat.nP_pos (F := F) false) rfl h2 h3 h5).trans h4.ge
 
-open Formalism.MainNotions.S Formalism.IndefR.Datum GlobalTheory.AdelicScalar GlobalTheory.LiftRows GlobalTheory.LowRow in
 
+open Formalism.MainNotions.S Formalism.IndefR.Datum GlobalTheory.AdelicScalar GlobalTheory.LiftRows GlobalTheory.LowRow in
 theorem lowForm_six : ∀ {D : D7} {G : Type} [Group G] [Fintype G] {Pl0 T : Type} {A : FamIn D.what₂.LL G Pl0 T D.R.m} {Ks : Type} [Field Ks] [NumberField Ks] [Algebra Ks D.what₂.LL] (R : RealDat D A Ks) (F : Face D A), ∀ (s : ℕ) (b : ℝ), AdelC R F → (∀ i, GalOut R i 1) → GlobalTheory.Hk3.Core R F → A.fam.Ok s → (∀ i σ, ∃ v : (R.MW i σ).Vec, IsExtVec (R.MW i σ) v) → R.LUnif → GlobalTheory.BigOn.BaseLinks R F → PrimeToHost R A.μ0 → (∀ i, Sizes D i b) → GlobalTheory.BigOn.LowForm R F b := by
   intro D G _ _ Pl0 T A Ks _ _ _ R F s b hA hG h hOk hv hU hB ht hb
   refine h.fam.tie.elim fun gramR a => a.elim fun c0R a => a.elim fun c0L hT => ?_

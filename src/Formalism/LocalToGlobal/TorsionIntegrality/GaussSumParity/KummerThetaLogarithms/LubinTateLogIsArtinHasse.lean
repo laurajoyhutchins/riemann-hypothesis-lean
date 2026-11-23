@@ -1,7 +1,60 @@
-import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.KurComplete
-import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.StatementE
-import Formalism.LocalToGlobal.TorsionIntegrality.WeierstrassTwoTorsion.FlowDouble
-import Formalism.LocalToGlobal.TorsionIntegrality.FrobeniusFibreCurves.FinalB
+module
+
+public import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.StatementE
+public import Formalism.LocalToGlobal.TorsionIntegrality.WeierstrassTwoTorsion.StatementJ
+public import Formalism.LocalToGlobal.TorsionIntegrality.FrobeniusFibreCurves.FinalB
+import Formalism.LocalToGlobal.TorsionIntegrality.FrobeniusFibreCurves.LogarithmicSubstitution.InVarAddInVarNeZero
+import Formalism.LocalToGlobal.TorsionIntegrality.FrobeniusFibreCurves.LogarithmicSubstitution.LogSigmaOnePullbackSpec
+public import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.KummerThetaLogarithms.SubstFirstCoboundaryThree
+public import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.TransportFirstLevel
+public import Formalism.LocalToGlobal.TorsionIntegrality.WeierstrassTwoTorsion.CubeThreeR
+public import Formalism.LocalToGlobal.TorsionIntegrality.WeierstrassTwoTorsion.FglInvariant
+import Formalism.LocalToGlobal.TorsionIntegrality.WeierstrassTwoTorsion.FlowTwoTorsionWp
+public import Formalism.LocalToGlobal.TorsionIntegrality.WeierstrassTwoTorsion.TwoTorsionU
+import Formalism.ThetaLogCoordinates.UniformThetaSubstitution.FrobeniusLiftNorms.TopsChoicePartA
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 open scoped BigOperators
@@ -83,7 +136,7 @@ theorem theta_homomorphism : ThetaHom := by
   have hsum : MvPowerSeries.constantCoeff
       (PowerSeries.subst (Formalism.L2.Th1.A.U₁ : MvPowerSeries (Fin 2) K) (logSer (shortW g2 g3)) +
         PowerSeries.subst (Formalism.L2.Th1.A.U₂ : MvPowerSeries (Fin 2) K) (logSer (shortW g2 g3))) = 0 := by
-    rw [map_add, Pair.cc_ps (by simp) hL0, Pair.cc_ps (by simp) hL0, add_zero]
+    rw [map_add (f := _), Pair.cc_ps (by simp) hL0, Pair.cc_ps (by simp) hL0, add_zero]
   have hFl : PowerSeries.subst F (lgF K l) = at1 0 (lgF K l) + at1 1 (lgF K l) := by
     unfold cob at hFc
     rw [sub_sub, sub_eq_zero] at hFc
@@ -246,10 +299,5 @@ theorem first_level_curve_holds : CurveExponentCoboundaryCocycle := by
   exact transport_first_level K l hl hn F hF (fgl (shortW g2 g3)) (thetaS l g2 g3 ε) (phCurve g2 g3 s2)
     (phFF l g2 g3 s2 ε) hLaw.1 hθ (theta_homomorphism K l hl hn F hF g2 g3 ε).2
     ⟨hO.1, hO.2.2.1, hO.2.2.2⟩ (phi_comparison K l hl g2 g3 s2 ε hε hθ)
-
-theorem biextension_hypotheses_curve : BHypCurve := by
-  intro K _ _ _ l d _ σ hU hd hev F hF g2 g3 s2 ε hg2 hg3 hε hθ ι _ om oms hO ζ hζ
-  exact biextension_hypotheses_of_level_one K l d σ hU hd hev F hF _
-    (first_level_curve_holds K l hU.1 hU.2.1 hU.2.2.1 F hF g2 g3 s2 ε hg2 hg3 hε hθ) ι om oms hO ζ hζ
 
 end Formalism.L2.Th1.D

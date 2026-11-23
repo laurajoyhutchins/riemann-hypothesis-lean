@@ -1,6 +1,51 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.LabelDatum
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsBilinCyclic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
 import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.IsMirClass
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsBilinCyclic
+
+@[expose] public section
 
 noncomputable section
 
@@ -73,8 +118,6 @@ theorem flipG_flipG {n : ℕ} (x : Gn g n) : flipG (flipG x) = x := by
   apply Units.ext
   simp only [flipG_coe, flip_flip]
 
-def flipE (n : ℕ) : Gn g n ≃ Gn g n := ⟨flipG, flipG, flipG_flipG, flipG_flipG⟩
-
 theorem flipG_conj {n : ℕ} (x : Gn g n) : ∃ p : Gn g n, flipG x = p * x * p⁻¹ := by
   obtain ⟨P, hP, hPx⟩ := flip_similar (x : Mt g n)
   refine ⟨hP.unit, Units.ext ?_⟩
@@ -85,7 +128,7 @@ theorem flipG_conj {n : ℕ} (x : Gn g n) : ∃ p : Gn g n, flipG x = p * x * p�
 
 theorem toG_coe {n : ℕ} (x : Gn g n) : toG (x : Mt g n) = x := by
   unfold toG
-  rw [dif_pos (Units.isUnit x)]
+  rw [dite_eq_left (Units.isUnit x)]
   exact Units.ext rfl
 
 theorem class_flip {n : ℕ} {α : Gn g n → ℂ} (hα : IsClass α) (M : Mt g n) :
@@ -93,7 +136,7 @@ theorem class_flip {n : ℕ} {α : Gn g n → ℂ} (hα : IsClass α) (M : Mt g 
   by_cases hM : IsUnit M
   · have e1 : toG M = hM.unit := by
       unfold toG
-      rw [dif_pos hM]
+      rw [dite_eq_left hM]
     have e2 : toG (flip M) = flipG hM.unit := by
       rw [← toG_coe (flipG hM.unit), flipG_coe, IsUnit.unit_spec]
     obtain ⟨p, hp⟩ := flipG_conj hM.unit
@@ -108,7 +151,7 @@ theorem class_flip {n : ℕ} {α : Gn g n → ℂ} (hα : IsClass α) (M : Mt g 
       rw [e]
       exact Units.isUnit _
     unfold toG
-    rw [dif_neg hM, dif_neg hF]
+    rw [dite_eq_right hM, dite_eq_right hF]
 
 theorem inPar_flip {a b : ℕ} (M : Mt g (a + b)) : InPar b (flip M) ↔ InPar a M := by
   constructor
@@ -126,7 +169,7 @@ theorem inPar_flip {a b : ℕ} (M : Mt g (a + b)) : InPar b (flip M) ↔ InPar a
 private lemma entN_of_lt {n : ℕ} (M : Mt g n) (x y : ℕ) (hx : x < n) (hy : y < n) :
     entN M x y = M ⟨x, hx⟩ ⟨y, hy⟩ := by
   unfold entN
-  rw [dif_pos ⟨hx, hy⟩]
+  rw [dite_eq_left ⟨hx, hy⟩]
 
 theorem tl_flip {a b : ℕ} (M : Mt g (a + b)) : tl b (flip M) = flip (br a b M) := by
   ext i j
@@ -142,7 +185,7 @@ theorem tl_flip {a b : ℕ} (M : Mt g (a + b)) : tl b (flip M) = flip (br a b M)
 private lemma entN_eq_apply_of_lt_of_lt {n : ℕ} (M : Mt g n) (x y : ℕ) (hx : x < n) (hy : y < n) :
     entN M x y = M ⟨x, hx⟩ ⟨y, hy⟩ := by
   unfold entN
-  rw [dif_pos ⟨hx, hy⟩]
+  rw [dite_eq_left ⟨hx, hy⟩]
 
 theorem br_flip {a b : ℕ} (M : Mt g (a + b)) : br b a (flip M) = flip (tl a M) := by
   ext i j

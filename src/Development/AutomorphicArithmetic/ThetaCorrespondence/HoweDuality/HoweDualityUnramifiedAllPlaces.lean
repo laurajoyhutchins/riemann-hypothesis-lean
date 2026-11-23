@@ -1,17 +1,64 @@
-import Mathlib
-import Development.AutomorphicArithmetic.ThetaCorrespondence.HoweDuality.Imports
-import Development.AutomorphicArithmetic.ThetaCorrespondence.HoweDuality.RelStable
-import Development.AutomorphicArithmetic.ThetaCorrespondence.HoweDuality.RadSph
-import Development.AutomorphicArithmetic.ThetaCorrespondence.HoweDuality.RadIrr
-import Development.AutomorphicArithmetic.ThetaCorrespondence.HoweDuality.KerV
-import Development.AutomorphicArithmetic.ThetaCorrespondence.HoweDuality.KerVp
-import Development.WeilBound.ThetaLifts.SphericalLattices.ExistsFixedSum
-import Development.WeilBound.ThetaLifts.SphericalLattices.HoweDuality
-import Development.WeilBound.ThetaLifts.SphericalSplitting.SphSplitGeo
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.MatchedMapsIntertwining
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.MatchedMapsGaussianKernel
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.TripleGeometryUnitaryStatement
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.MatchedMapsRealFiniteStatement
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.HoweDualityReal
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IsThetaSubGAlgDOne
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.AlgAtLeAlgD
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.RelInfAlt
+public import Development.AutomorphicArithmetic.ThetaCorrespondence.HoweDuality.FactorApply
+public import Development.WeilBound.ThetaLifts.SphericalLattices.HoweInert
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsLinearTensorPolyVacuumPureTensorsStatement
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.FirstMemberLieAlgebraPreservesPolynomialFockStatement
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.FirstMemberMaximalCompactPreservesPolynomialFockStatement
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.HoweDualityRealPlacesPolynomialVectorsSmallPairStatement
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.MatchedMapsGaussianKernel
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.RankSchwartzBruhatAdicCompletionPiLeAleph0
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.UnitaryDualPairGlobalToLocalTensorTransferStatement
+public import Development.AutomorphicArithmetic.ThetaCorrespondence.HoweDuality.Imports
+public import Development.AutomorphicArithmetic.ThetaCorrespondence.HoweDuality.KerV
+public import Development.AutomorphicArithmetic.ThetaCorrespondence.HoweDuality.KerVp
+public import Development.AutomorphicArithmetic.ThetaCorrespondence.HoweDuality.RadIrr
+public import Development.AutomorphicArithmetic.ThetaCorrespondence.HoweDuality.RadSph
+public import Development.AutomorphicArithmetic.ThetaCorrespondence.HoweDuality.RelStable
+public import Development.WeilBound.ThetaLifts.SphericalLattices.ExistsFixedSum
+public import Development.WeilBound.ThetaLifts.SphericalLattices.HoweDuality
+public import Development.WeilBound.ThetaLifts.SphericalLattices.ThetaSubSup
+public import Development.WeilBound.ThetaLifts.SphericalSplitting.SphSplitGeo
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes GlobalTheory.WeilM GlobalTheory.AdelicU GlobalTheory.LFun GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels
 open scoped TensorProduct
@@ -28,7 +75,7 @@ theorem sphTri : PositivityTheory.Sph.SphTri :=
 
 theorem locV {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] {σ : E →ₐ[F] E} {Bs : Base F E} {a a' : ℕ}
     {G : Geo σ a a'} {Xc : Chars F E} {om : Rep σ G.V G.W} {om' : Rep σ G.V' G.W} {R : RealMaps F a a'} {Rf : FinMaps F a a'}
-    (hM : IsMatched Bs G Xc om om' R Rf) (v : Pl F) :
+    (hM : IsMatched Bs G Xc om om' R Rf) (v : Pl (F := F)) :
     Stable (opFin om v) (relFin om v) ∧
       Rad (opFin om v) (relFin om v) (LinearMap.ker (Rf.p v ∘ₗ (SB (Fin a × Fin (a + a') → Fv F v)).subtype)) := by
   obtain ⟨ω, ρ, L⟩ := (PositivityTheory.Sph.locRep_tri hM.triple v).1
@@ -40,7 +87,7 @@ theorem locV {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [A
 
 theorem locVp {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] {σ : E →ₐ[F] E} {Bs : Base F E} {a a' : ℕ}
     {G : Geo σ a a'} {Xc : Chars F E} {om : Rep σ G.V G.W} {om' : Rep σ G.V' G.W} {R : RealMaps F a a'} {Rf : FinMaps F a a'}
-    (hM : IsMatched Bs G Xc om om' R Rf) (v : Pl F) :
+    (hM : IsMatched Bs G Xc om om' R Rf) (v : Pl (F := F)) :
     Stable (opFin om' v) (relFin om' v) ∧
       Rad (opFin om' v) (relFin om' v) (LinearMap.ker (Rf.p' v ∘ₗ (SB (Fin a' × Fin (a + a') → Fv F v)).subtype)) := by
   obtain ⟨ω, ρ, L⟩ := (PositivityTheory.Sph.locRep_tri hM.triple v).2
@@ -60,7 +107,7 @@ theorem stageVp : ∀ (F E : Type) [Field F] [NumberField F] [Field E] [NumberFi
       ∀ N : Submodule ℂ (GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.SInf F (Fin a' × Fin (a + a'))), GlobalTheory.Published.ThetaSubInf G.M' Bs.ψ Bs.emb om' N →
         N ≠ G.M'.Pol Bs.ψ Bs.emb → ∀ f ∈ N, R.p' f = 0) →
     ∀ N : Submodule ℂ ((Fin a' × Fin (a + a') → AF F) → ℂ), GlobalTheory.SquareAgree.IsThetaSubG G.M' Bs.ψ Bs.emb om' N →
-      ∀ T : Finset (Pl F), Xc.T ⊆ T →
+      ∀ T : Finset (Pl (F := F)), Xc.T ⊆ T →
         GlobalTheory.HoweGlobal.algAt G.M' Bs.ψ Bs.emb T ≤ N ∨
           ∀ Φ ∈ N, Φ ∈ GlobalTheory.HoweGlobal.algAt G.M' Bs.ψ Bs.emb T → PolMatch Bs G Xc R Rf 0 Φ := by
   intro F E _ _ _ _ _ σ Bs a a' G Xc om om' R Rf hM hreal N hN T hT
@@ -107,9 +154,11 @@ theorem stageVp : ∀ (F E : Type) [Field F] [NumberField F] [Field E] [NumberFi
       · simp only [dif_pos h]; exact (φ j ⟨v, h⟩).2
       · simp only [dif_neg h]; exact (hg.hM'.vac v).1
     · simp
-    · rw [map_sum]
+    · set_option synthInstance.maxHeartbeats 100000 in
+      rw [map_sum]
       exact Finset.sum_congr rfl fun j _ => hL _ _ _ (fun v h => by simp only [dif_pos h]) (fun v h => by simp only [dif_neg h])
-    · rw [LinearMap.mem_ker, map_sum] at ht0
+    · set_option synthInstance.maxHeartbeats 100000 in
+      rw [LinearMap.mem_ker, map_sum] at ht0
       rw [Fin.sum_univ_zero, ← ht0]
       refine Finset.sum_congr rfl fun j _ => ?_
       rw [TensorProduct.map_tmul, PiTensorProduct.map_tprod]

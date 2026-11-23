@@ -1,5 +1,47 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.GL2Classical.IsWeightLevelAdelicLift
+module
+
+public import GroundTheory.AutomorphicForms.GL2Classical.IsWeightLevelAdelicLift
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Mathlib.NumberTheory.ModularForms.SlashActions
+
+@[expose] public section
 
 open NumberField Matrix CongruenceSubgroup UpperHalfPlane ModularForm Filter Topology
 open scoped MatrixGroups ModularForm
@@ -22,41 +64,10 @@ theorem norm_archLift (f : ℍ → ℂ) {h : GL (Fin 2) ℝ} (hpos : 0 < h.det.v
     div_eq_mul_inv]
   ring
 
-theorem norm_adelicLift (f : ℍ → ℂ) (g : AdelicGL ℚ 2) :
-    ∃ z : ℍ, ‖adelicLift N k f g‖ = Real.sqrt z.im ^ k * ‖f z‖ :=
-  ⟨decompGL N g • I, norm_archLift f (decompGL_spec N g).1⟩
-
 theorem sqrt_zpow_eq_rpow {y : ℝ} (hy : 0 < y) (k : ℤ) : Real.sqrt y ^ k = y ^ ((k : ℝ) / 2) := by
   rw [Real.sqrt_eq_rpow, ← Real.rpow_intCast, ← Real.rpow_mul hy.le]
   congr 1
   ring
-
-theorem exists_bound_liftEquiv_cuspForm (f : CuspForm (Gamma0 N : Subgroup (GL (Fin 2) ℝ)) k) :
-    ∃ C, ∀ g, ‖(liftEquiv N k f.toSlashInvariantForm : AdelicGL ℚ 2 → ℂ) g‖ ≤ C := by
-  obtain ⟨C, hC⟩ := CuspFormClass.exists_bound f
-  refine ⟨C, fun g => ?_⟩
-  rw [liftEquiv_apply]
-  obtain ⟨z, hz⟩ := norm_adelicLift (N := N) (k := k) (f.toSlashInvariantForm : ℍ → ℂ) g
-  rw [hz]
-  have hy := z.im_pos
-  have hpow : 0 < z.im ^ ((k : ℝ) / 2) := Real.rpow_pos_of_pos hy _
-  have h1 : ‖(f.toSlashInvariantForm : ℍ → ℂ) z‖ ≤ C / z.im ^ ((k : ℝ) / 2) := hC z
-  rw [sqrt_zpow_eq_rpow hy]
-  calc z.im ^ ((k : ℝ) / 2) * ‖(f.toSlashInvariantForm : ℍ → ℂ) z‖
-      ≤ z.im ^ ((k : ℝ) / 2) * (C / z.im ^ ((k : ℝ) / 2)) :=
-        mul_le_mul_of_nonneg_left h1 hpow.le
-    _ = C := by field_simp
-
-theorem hasModerateGrowth_liftEquiv_cuspForm
-    (f : CuspForm (Gamma0 N : Subgroup (GL (Fin 2) ℝ)) k) :
-    HasModerateGrowth (liftEquiv N k f.toSlashInvariantForm : AdelicGL ℚ 2 → ℂ) := by
-  obtain ⟨C, hC⟩ := exists_bound_liftEquiv_cuspForm f
-  exact ⟨C, 0, fun g => by rw [pow_zero, mul_one]; exact hC g⟩
-
-theorem IsWeightLevel.eventually_finEmb {φ : AdelicGL ℚ 2 → ℂ} (hφ : IsWeightLevel N k φ)
-    (g : AdelicGL ℚ 2) : ∀ᶠ y in 𝓝 (1 : FiniteAdelicGL ℚ 2), φ (g * finEmb ℚ 2 y) = φ g :=
-  Filter.mem_of_superset ((isOpen_Gamma0Level N).mem_nhds (one_mem _)) fun y hy =>
-    hφ.right_level g y hy
 
 end GL2Classical
 

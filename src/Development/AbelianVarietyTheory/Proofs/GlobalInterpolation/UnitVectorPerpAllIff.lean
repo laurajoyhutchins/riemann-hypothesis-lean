@@ -1,8 +1,45 @@
-import Mathlib
-import Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow
-import Formalism.HermitianLattices.StatementLat
-import Development.AbelianVarietyTheory.BlockTheory.GlobalSignature.UnitVectorOrthogonal
-import Development.AbelianVarietyTheory.BlockTheory.GlobalSignature.SelfDualLatticeComplements
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.GlobalSignature.UnitVectorOrthogonal
+public import Development.AbelianVarietyTheory.BlockTheory.GlobalSignature.SelfDualLatticeComplements
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -13,11 +50,6 @@ open NumberField Formalism.BasicNotions GlobalTheory.IndefiniteRowSideFullHecke
 section General
 
 variable {E : Type} [Field E] [NumberField E] [StarRing E]
-
-theorem perp_eq (W : HSpace E) (x : W.V) : UnitVectorOrthogonal.perp W x = SelfDualLatticeComplements.perp W x := rfl
-
-theorem perpLat_eq (W : HSpace E) (L : Submodule (𝓞 E) W.V) (x : W.V) :
-    UnitVectorOrthogonal.perpLat W L x = L ⊓ (SelfDualLatticeComplements.perp W x).restrictScalars (𝓞 E) := rfl
 
 theorem selfDual_iff (W : HSpace E) (L : Submodule (𝓞 E) W.V) :
     UnitVectorOrthogonal.IsSelfDualLat W L ↔ SelfDualLatticeComplements.IsSelfDualLattice W L := Iff.rfl
@@ -34,8 +66,8 @@ theorem hasComplement_iff (W : HSpace E) (x : W.V) (M' P' Q' : ℕ) :
   · rintro ⟨L, W', ι, hL, hx, hk, hi, hr, hm, hs⟩
     exact ⟨L, (selfDual_iff W L).2 hL, hx, hs, W', ι, (ofKind_iff _ _ _ _).2 hk, hi, hr, hm⟩
 
-omit [NumberField E] [StarRing E] in
 
+omit [NumberField E] [StarRing E] in
 theorem forall_step_iff (P Q : ℕ) (C : E → ℕ → ℕ → Prop) :
     (∀ (β : E) (P' Q' : ℕ), SelfDualLatticeComplements.Step β P Q P' Q' → C β P' Q') ↔
       (1 ≤ P → C 1 (P - 1) Q) ∧ (1 ≤ Q → C (-1) P (Q - 1)) := by
@@ -56,37 +88,15 @@ theorem conclusion_iff (W : HSpace E) (M P Q : ℕ) :
     (fun β P' Q' => ∃ x : W.V, W.hD x x = β ∧ SelfDualLatticeComplements.HasComplement W x (M - 1) P' Q')]
   simp only [hasComplement_iff]
 
-theorem conclusionAll_iff (W : HSpace E) (M P Q : ℕ) :
-    ((1 ≤ P → (∃ x : W.V, W.hD x x = 1) ∧
-        ∀ x : W.V, W.hD x x = 1 → UnitVectorOrthogonal.HasComplement W x (M - 1) (P - 1) Q) ∧
-      (1 ≤ Q → (∃ x : W.V, W.hD x x = -1) ∧
-        ∀ x : W.V, W.hD x x = -1 → UnitVectorOrthogonal.HasComplement W x (M - 1) P (Q - 1))) ↔
-    ∀ (β : E) (P' Q' : ℕ), SelfDualLatticeComplements.Step β P Q P' Q' →
-      (∃ x : W.V, W.hD x x = β) ∧
-        ∀ x : W.V, W.hD x x = β → SelfDualLatticeComplements.HasComplement W x (M - 1) P' Q' := by
-  rw [forall_step_iff P Q
-    (fun β P' Q' => (∃ x : W.V, W.hD x x = β) ∧
-        ∀ x : W.V, W.hD x x = β → SelfDualLatticeComplements.HasComplement W x (M - 1) P' Q')]
-  simp only [hasComplement_iff]
-
 theorem over_iff : UnitVectorOrthogonal.UnitVectorPerpOver E ↔ SelfDualLatticeComplements.ExistsPerpOver E := by
   refine forall_congr' fun W => forall_congr' fun M => forall_congr' fun P =>
     forall_congr' fun Q => imp_congr (ofKind_iff W M P Q) (imp_congr Iff.rfl ?_)
   exact conclusion_iff W M P Q
 
-theorem overAll_iff : UnitVectorOrthogonal.UnitVectorPerpEveryOver E ↔ SelfDualLatticeComplements.ForallPerpOver E := by
-  refine forall_congr' fun W => forall_congr' fun M => forall_congr' fun P =>
-    forall_congr' fun Q => imp_congr (ofKind_iff W M P Q) (imp_congr Iff.rfl ?_)
-  exact conclusionAll_iff W M P Q
-
 end General
 
 theorem unitVectorPerp_iff (D : D7) : UnitVectorOrthogonal.UnitVectorPerp D ↔ SelfDualLatticeComplements.UnitVectorPerp D :=
   @over_iff D.host.E _ _ D.host.cmStar
-
-theorem unitVectorPerpAll_iff (D : D7) :
-    UnitVectorOrthogonal.UnitVectorPerpEvery D ↔ SelfDualLatticeComplements.UnitVectorPerpAll D :=
-  @overAll_iff D.host.E _ _ D.host.cmStar
 
 end GlobalTheory.UnitVectorPerpCompare
 

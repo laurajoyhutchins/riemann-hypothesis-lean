@@ -1,11 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.CuspDiscreteDecompositionOfTraceClass
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.UnifModGrowthOfIsUnifModerate
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.SetIntegralNormRmulLe
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ContinuousIntegralInvMulOfLocallyIntegrable
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsArchEquivEq
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.CcGASmoothAndRderMem
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ContinuousSetIntegralConstTermOn
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.IsHilbertSchmidtOfFiniteDimensional
+public import Mathlib.MeasureTheory.Function.L2Space
+public import Formalism.LocalRingCardinality.DataHost
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Formalism.LocalRingCardinality.DataTheta
+import Formalism.LocalToGlobal.BesselHermitianTheta.NoncompactGapAtLeastRange
+import Formalism.SharpRestriction.GlobalSchurBounds.GeneralLinearActions.GenusMassVolumes
+
+@[expose] public section
 
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.L2.Theta MeasureTheory Set Filter NumberField
 open scoped Topology ContDiff TensorProduct
@@ -38,6 +76,7 @@ theorem pointwise {X : Type} [MeasurableSpace X] {ν : Measure X}
   have hw2 : ∀ c, ‖w c‖ ^ 2 = ∑ j : s, ‖c j‖ ^ 2 := by
     intro c
     have h := hon.inner_sum c c Finset.univ
+
     rw [@norm_sq_eq_re_inner ℂ, h, map_sum]
     refine Finset.sum_congr rfl fun j _ => ?_
     rw [RCLike.conj_mul, ← RCLike.ofReal_pow, RCLike.ofReal_re]
@@ -46,6 +85,7 @@ theorem pointwise {X : Type} [MeasurableSpace X] {ν : Measure X}
   have hD : ∀ c ∈ D, ∀ᵐ x ∂ν, ‖∑ j : s, c j * T (e j) x‖ ≤ C * ‖w c‖ := by
     intro c _
     have hlin : T (w c) = ∑ j : s, c j • T (e j) := by
+
       simp only [w, map_sum, map_smul]
     have hsm : ∀ᵐ x ∂ν, ∀ j : s, (c j • T (e j) : Lp ℂ 2 ν) x = c j * T (e j) x := by
       rw [ae_all_iff]
@@ -99,19 +139,19 @@ theorem sum_le {X : Type} [MeasurableSpace X] {ν : Measure X} [IsFiniteMeasure 
     have hm : MemLp f ((2 : ℕ) : ENNReal) ν := by simpa using Lp.memLp f
     exact hm.integrable_norm_pow (by norm_num)
   calc ∑ i ∈ s, ‖T (e i)‖ ^ 2 = ∫ x, ∑ i ∈ s, ‖T (e i) x‖ ^ 2 ∂ν := by
-        rw [integral_finset_sum s fun i _ => hint (T (e i))]
+        rw [integral_finsetSum s fun i _ => hint (T (e i))]
         exact Finset.sum_congr rfl fun i _ => hn _
     _ ≤ ∫ _x, C ^ 2 ∂ν :=
-        integral_mono_ae (integrable_finset_sum s fun i _ => hint (T (e i)))
+        integral_mono_ae (integrable_finsetSum s fun i _ => hint (T (e i)))
           (integrable_const _) (pointwise e he T C hT s)
     _ = C ^ 2 * ν.real univ := by rw [integral_const, smul_eq_mul, mul_comm]
 
 end GlobalTheory.HSAbs
 
-open GlobalTheory.HSAbs in
 
+open GlobalTheory.HSAbs in
 theorem GlobalTheory.isHilbertSchmidt_of_ae_bounded : ∀ {X : Type} [MeasurableSpace X] {ν : Measure X} [IsFiniteMeasure ν] {H : Type} [NormedAddCommGroup H] [InnerProductSpace ℂ H] [CompleteSpace H] (T : H →L[ℂ] Lp ℂ 2 ν) (C : ℝ), (∀ v, ∀ᵐ x ∂ν, ‖T v x‖ ≤ C * ‖v‖) → GlobalTheory.OpTrace.IsHilbertSchmidt T := by
   intro X _ ν _ H _ _ _ T C hT
   unfold GlobalTheory.OpTrace.IsHilbertSchmidt
   refine summable_of_sum_le (c := C ^ 2 * ν.real univ) (fun i => sq_nonneg _) fun u => ?_
-  exact GlobalTheory.HSAbs.sum_le _ (GlobalTheory.OpTrace.stdBasis H).orthonormal T C hT u
+  exact GlobalTheory.HSAbs.sum_le _ (GlobalTheory.OpTrace.stdBasis (H := H)).orthonormal T C hT u

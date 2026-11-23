@@ -1,5 +1,55 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.StatementsDualStackedExcLinear
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.StatementsDualStackedExcLinear
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -43,7 +93,8 @@ theorem subst_comp {n : ℕ} (α : T → k) (M : T → Fin (n + 2) → k) (c : T
   apply ringHom_int_ext
   rintro ⟨⟨⟨⟩⟩ | ⟨⟨⟩⟩, t⟩
   · simp [linPointMap, subst]
-  · simp only [linPointMap, RingHom.comp_apply, coe_eval₂Hom, eval₂_X, AlgHom.toRingHom_eq_coe,
+  · set_option synthInstance.maxHeartbeats 100000 in
+    simp only [linPointMap, RingHom.comp_apply, coe_eval₂Hom, eval₂_X, AlgHom.toRingHom_eq_coe,
       RingHom.coe_coe, map_sum, map_mul, subst, aeval_X, aeval_C, algebraMap_eq, Option.elim]
     rw [Fin.sum_univ_succAbove _ j₀]
     simp only [Fin.insertNth_apply_same, Fin.insertNth_apply_succAbove, cutForms, map_sub, map_mul,
@@ -62,6 +113,7 @@ theorem subst_ellForm {n : ℕ} (M : T → Fin (n + 2) → k) (c : T) (j₀ : Fi
       · subst hj
         simp only [AlgHom.comp_apply, subst, aeval_X, Option.elim, Fin.insertNth_apply_same]
         rw [Ideal.Quotient.mkₐ_eq_mk, Ideal.Quotient.eq, Ideal.mem_span_singleton']
+
         simp only [liftBack, map_neg, map_sum, map_mul, rename_C, rename_X, Option.map_some]
         refine ⟨-C (M c j)⁻¹, ?_⟩
         have e : ∀ j' : Fin (n + 1), C (M c (j.succAbove j') / M c j) * X (some (j.succAbove j')) =
@@ -94,7 +146,7 @@ theorem C_mul_u_mem {m : ℕ} (α : T → k) (M : T → Fin m → k) (hα : Subm
     obtain ⟨t, rfl⟩ := hy
     exact ⟨graphFirst t, LinPrimeExample.linPointMap_first α M t⟩
   | zero => simp only [map_zero, zero_mul]; exact zero_mem _
-  | add y z _ _ hy hz => rw [map_add, add_mul]; exact add_mem hy hz
+  | add y z _ _ hy hz => rw [map_add (f := _), add_mul]; exact add_mem hy hz
   | smul a y _ hy => rw [map_zsmul, smul_mul_assoc]; exact zsmul_mem hy a
 
 theorem X_some_eq {m : ℕ} (M : T → Fin m → k) (hM : LinFormsIndep M) (j : Fin m) :
@@ -131,6 +183,7 @@ theorem X_some_eq {m : ℕ} (M : T → Fin m → k) (hM : LinFormsIndep M) (j : 
     _ = ∑ j', C (∑ t, g (fun t' => if t = t' then 1 else 0) j * M t j') * X (some j') := by
         simp_rw [hcoef]
     _ = ∑ t, C (g (fun t' => if t = t' then 1 else 0) j) * ellForm M t := by
+
         simp only [ellForm, map_sum, map_mul, Finset.sum_mul, Finset.mul_sum, mul_assoc]
         exact Finset.sum_comm
 
@@ -199,8 +252,8 @@ theorem key {n : ℕ} (α : T → k) (M : T → Fin (n + 2) → k) (hα : Submod
     linPointMap_graphSecond, hh', ← ha, map_pow]
   ring
 
-omit [Fintype T] in
 
+omit [Fintype T] in
 theorem cutForms_indep {n : ℕ} (M : T → Fin (n + 2) → k) (hM : LinFormsIndep M) (c : T) (j₀ : Fin (n + 2)) :
     LinFormsIndep (cutForms M c j₀) := by
   intro w hw
@@ -302,7 +355,7 @@ theorem main {n : ℕ} (α : T → k) (M : T → Fin (n + 2) → k) (hα : Submo
     · rintro rfl
       exact ⟨hMin, hRel⟩
   · unfold multAt
-    rw [dif_pos hWprime]
+    rw [dite_eq_left hWprime]
     have := hWprime
     have hsimple : IsSimpleModule (Localization.AtPrime W) (LocalizedModule W.primeCompl (MRing (stackedBlocks T) ⧸ J)) := by
       rw [isSimpleModule_iff_toSpanSingleton_surjective]

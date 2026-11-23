@@ -1,4 +1,53 @@
-import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.EndoZInstance
+module
+
+public import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.EndoZInstance
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Analysis.Calculus.IteratedDeriv.Lemmas
+public import Mathlib.Analysis.SpecialFunctions.ExpDeriv
+
+@[expose] public section
 
 noncomputable section
 open scoped BigOperators
@@ -16,7 +65,7 @@ theorem coeff_taylor0 (f : ℂ → ℂ) (n : ℕ) :
 theorem taylor0_add {f g : ℂ → ℂ} (hf : AnalyticAt ℂ f 0) (hg : AnalyticAt ℂ g 0) :
     taylor0 (fun z => f z + g z) = taylor0 f + taylor0 g := by
   ext n
-  rw [map_add, coeff_taylor0, coeff_taylor0, coeff_taylor0,
+  rw [map_add (f := _), coeff_taylor0, coeff_taylor0, coeff_taylor0,
     iteratedDeriv_fun_add hf.contDiffAt hg.contDiffAt, add_div]
 
 theorem taylor0_mul {f g : ℂ → ℂ} (hf : AnalyticAt ℂ f 0) (hg : AnalyticAt ℂ g 0) :
@@ -53,7 +102,7 @@ theorem taylor0_congr {f g : ℂ → ℂ} (h : f =ᶠ[nhds 0] g) : taylor0 f = t
   ext n
   rw [coeff_taylor0, coeff_taylor0, h.iteratedDeriv_eq]
 
-theorem taylor0_deriv (f : ℂ → ℂ) : taylor0 (deriv f) = derivative ℂ (taylor0 f) := by
+theorem taylor0_deriv (f : ℂ → ℂ) : taylor0 (deriv f) = derivative (taylor0 f) := by
   ext n
   rw [coeff_derivative, coeff_taylor0, coeff_taylor0, ← iteratedDeriv_succ', Nat.factorial_succ]
   have h3 : (n.factorial : ℂ) ≠ 0 := by exact_mod_cast n.factorial_ne_zero
@@ -107,7 +156,7 @@ theorem taylor0_inj {f g : ℂ → ℂ} (hf : AnalyticAt ℂ f 0) (hg : Analytic
   filter_upwards [ht] with z hz
   exact sub_eq_zero.mp hz
 
-theorem ode_zero {a Y : PowerSeries ℂ} (h : derivative ℂ Y = a * Y) (h0 : constantCoeff Y = 0) :
+theorem ode_zero {a Y : PowerSeries ℂ} (h : derivative Y = a * Y) (h0 : constantCoeff Y = 0) :
     Y = 0 := by
   have key : ∀ n, coeff n Y = 0 := by
     intro n
@@ -142,11 +191,11 @@ theorem taylor0_exp {f : ℂ → ℂ} (hf : AnalyticAt ℂ f 0) (h0 : f 0 = 0) :
     have := (hz.differentiableAt.hasDerivAt.cexp).deriv
     rw [mul_comm] at this
     exact this
-  have h1 : derivative ℂ (taylor0 fun z => Complex.exp (f z))
-      = derivative ℂ (taylor0 f) * taylor0 fun z => Complex.exp (f z) := by
+  have h1 : derivative (taylor0 fun z => Complex.exp (f z))
+      = derivative (taylor0 f) * taylor0 fun z => Complex.exp (f z) := by
     rw [← taylor0_deriv, taylor0_congr he, taylor0_mul hf.deriv hE, taylor0_deriv]
-  have h2 : derivative ℂ (Formalism.L2.Th1.B.fExp (taylor0 f))
-      = derivative ℂ (taylor0 f) * Formalism.L2.Th1.B.fExp (taylor0 f) := by
+  have h2 : derivative (Formalism.L2.Th1.B.fExp (taylor0 f))
+      = derivative (taylor0 f) * Formalism.L2.Th1.B.fExp (taylor0 f) := by
     unfold Formalism.L2.Th1.B.fExp
     rw [derivative_subst hS, derivative_exp, mul_comm]
   have h3 : constantCoeff (taylor0 fun z => Complex.exp (f z)) = 1 := by
@@ -159,8 +208,8 @@ theorem taylor0_exp {f : ℂ → ℂ} (hf : AnalyticAt ℂ f 0) (h0 : f 0 = 0) :
       rw [← coe_substAlgHom hS, map_one]
     have h7 : constantCoeff ((exp ℂ - 1).subst (taylor0 f) : PowerSeries ℂ) = 0 :=
       constantCoeff_subst_eq_zero hc _ (by simp)
-    rw [h5, subst_add hS, h6, map_add, map_one, h7, add_zero]
-  refine sub_eq_zero.mp (ode_zero (a := derivative ℂ (taylor0 f)) ?_ ?_)
+    rw [h5, subst_add hS, h6, map_add (f := _), map_one, h7, add_zero]
+  refine sub_eq_zero.mp (ode_zero (a := derivative (taylor0 f)) ?_ ?_)
   · rw [map_sub, h1, h2, mul_sub]
   · rw [map_sub, h3, h4, sub_self]
 

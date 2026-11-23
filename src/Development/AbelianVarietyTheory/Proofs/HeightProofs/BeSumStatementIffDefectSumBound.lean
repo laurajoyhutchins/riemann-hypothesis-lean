@@ -1,7 +1,56 @@
-import Mathlib
-import Formalism.LocalToGlobal.ProjectiveLattices.ArchimedeanQuadraticData.FinitePlaceArcs.BeSumStatement
-import Development.AbelianVarietyTheory.BlockTheory.HeightDefect.SchurLatticeConjugates
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.HolomorphicFamilies.PadicValNatAbsNormEqZero
+module
+
+public import Formalism.LocalToGlobal.ProjectiveLattices.ArchimedeanQuadraticData.FinitePlaceArcs.BeSumStatement
+public import Development.AbelianVarietyTheory.BlockTheory.HeightDefect.SchurLatticeConjugates
+import Mathlib.Algebra.GroupWithZero.Torsion
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.NumberField.ClassNumber
+public import Mathlib.NumberTheory.NumberField.Discriminant.Different
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.HolomorphicFamilies.PadicValNatAbsNormEqZero
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Pointwise Formalism.L2.Pj.QAt GlobalTheory.IndefiniteRowSideFullHecke.DifferentConjugateDefects
 
@@ -86,41 +135,6 @@ variable {E K : Type} [Field E] [NumberField E] [IsGalois ℚ E] [Field K] [Numb
 theorem vla_discAt (σ : E →+* K) (la : HeightOneSpectrum (𝓞 K)) :
     vla la (discAt E K) = Module.finrank ℚ E * ord_vw la (conjDifferent σ) := by
   rw [← conjDifferent_pow σ, vla_pow la (conjDifferent_ne_bot σ), ord_vw_eq_vla la (conjDifferent_ne_bot σ)]
-
-theorem finrank_mul_defectAt (σ : E →+* K) (n' : ℕ+) (a : ℕ) (la : HeightOneSpectrum (𝓞 K)) :
-    (Module.finrank ℚ E : ℝ) * defectAt_vw σ n' a la =
-      beOf E ((n' : ℕ) ^ Module.finrank ℚ E) a la := by
-  have h : mOf E ((n' : ℕ) ^ Module.finrank ℚ E) la = Module.finrank ℚ E *
-      max (ord_vw la (conjDifferent σ)) (ord_vw la (Ideal.span {((n' : ℕ) : 𝓞 K)})) := by
-    unfold mOf
-    rw [vla_discAt σ, Nat.cast_pow, ← Ideal.span_singleton_pow, vla_pow la (span_natCast_ne_bot n'),
-      ord_vw_eq_vla la (span_natCast_ne_bot n'), Nat.mul_max_mul_left]
-  unfold beOf defectAt_vw
-  rw [h]
-  push_cast
-  ring
-
-theorem defect_vw_eq_defectAt (σ : E →+* K) (n' : ℕ+) (a : ℕ) (la : HeightOneSpectrum (𝓞 K)) :
-    defect_vw E n' a la = defectAt_vw σ n' a la := by
-  refine le_antisymm (Finset.sup_le fun τ _ => le_of_eq ?_) (defectAt_vw_le σ n' a la)
-  have hn : (Module.finrank ℚ E : ℝ) ≠ 0 := Nat.cast_ne_zero.mpr Module.finrank_pos.ne'
-  have := (finrank_mul_defectAt τ n' a la).trans (finrank_mul_defectAt σ n' a la).symm
-  exact_mod_cast mul_left_cancel₀ hn this
-
-theorem finrank_mul_defect (hσ : Nonempty (E →+* K)) (n' : ℕ+) (a : ℕ)
-    (la : HeightOneSpectrum (𝓞 K)) :
-    (Module.finrank ℚ E : ℝ) * defect_vw E n' a la =
-      beOf E ((n' : ℕ) ^ Module.finrank ℚ E) a la := by
-  obtain ⟨σ⟩ := hσ
-  rw [defect_vw_eq_defectAt σ, finrank_mul_defectAt]
-
-theorem support_eq (hσ : Nonempty (E →+* K)) (n' : ℕ+) (a : ℕ) :
-    Function.support (defect_vw E (K := K) n' a) =
-      Function.support (beOf E (K := K) ((n' : ℕ) ^ Module.finrank ℚ E) a) := by
-  ext la
-  have hn : (Module.finrank ℚ E : ℝ) ≠ 0 := Nat.cast_ne_zero.mpr Module.finrank_pos.ne'
-  simp only [Function.mem_support, ← finrank_mul_defect hσ, ne_eq, mul_eq_zero, hn, false_or,
-    Nat.cast_eq_zero]
 
 end Galois
 

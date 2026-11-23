@@ -1,4 +1,59 @@
-import Mathlib
+module
+
+public import Mathlib.LinearAlgebra.LinearIndependent.Defs
+public import Mathlib.RingTheory.Ideal.Span
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.NoZeroSMulDivisors.Defs
+public import Mathlib.Data.Fintype.BigOperators
+public import Mathlib.LinearAlgebra.Basis.Basic
+public import Mathlib.LinearAlgebra.Dimension.Constructions
+public import Mathlib.LinearAlgebra.FreeModule.PID
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -35,8 +90,9 @@ theorem exists_basis_of_saturated {R : Type} [CommRing R] [IsDomain R] [IsPrinci
     rw [Fintype.sum_sum_type] at hg
     have hr : ∀ j, g (Sum.inr j) = 0 := by
       have h1 := congrArg S.mkQ hg
-      simp only [w', Sum.elim_inl, Sum.elim_inr, map_add, map_sum, map_smul, map_zero, Submodule.mkQ_apply,
-        hmk, hs', smul_zero, Finset.sum_const_zero, zero_add] at h1
+
+      simp only [w', Sum.elim_inl, Sum.elim_inr, map_add (f := _), map_sum, map_smul, map_zero, Submodule.mkQ_apply,
+      hmk, hs', smul_zero, Finset.sum_const_zero, zero_add] at h1
       exact Fintype.linearIndependent_iff.1 bQ.linearIndependent _ h1
     have hl : ∀ i, g (Sum.inl i) = 0 := by
       simp only [hr, zero_smul, Finset.sum_const_zero, add_zero, w', Sum.elim_inl] at hg
@@ -50,6 +106,7 @@ theorem exists_basis_of_saturated {R : Type} [CommRing R] [IsDomain R] [IsPrinci
     have ht : (∑ j, bQ.repr (Submodule.Quotient.mk (p := S) v) j • s' j) ∈ Submodule.span R (Set.range w') :=
       Submodule.sum_mem _ fun j _ => Submodule.smul_mem _ _ (Submodule.subset_span ⟨Sum.inr j, rfl⟩)
     have hvt : v - ∑ j, bQ.repr (Submodule.Quotient.mk (p := S) v) j • s' j ∈ S := by
+
       rw [← Submodule.Quotient.mk_eq_zero, ← Submodule.mkQ_apply, map_sub, map_sum]
       simp only [map_smul, Submodule.mkQ_apply, hs']
       rw [hv, sub_self]
@@ -70,6 +127,7 @@ theorem exists_basis_of_saturated {R : Type} [CommRing R] [IsDomain R] [IsPrinci
     · have hv : ∑ k, a k • b k = v := funext fun j => by simpa [Finset.sum_apply, smul_eq_mul] using ha j
       funext k
       rw [← hv]
+
       simp [map_sum, Module.Basis.repr_self, Finsupp.single_apply]
 
 end Formalism.L2.Pj.SatLin

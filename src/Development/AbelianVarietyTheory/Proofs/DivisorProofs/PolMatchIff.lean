@@ -1,6 +1,43 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.CTSmallCone
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsNatMulIntegralOfIsCompact
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.WeilTensorModels
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -24,24 +61,5 @@ def PolMatchOn (B : Base F E) (G : Geo σ a a') (X : Chars F E) (R : RealMaps F 
 theorem polMatch_iff (B : Base F E) (G : Geo σ a a') (X : Chars F E) (R : RealMaps F a a') (Rf : FinMaps F a a')
     (Φ : (Fin a × Fin (a + a') → AF F) → ℂ) (Φ' : (Fin a' × Fin (a + a') → AF F) → ℂ) :
     PolMatch B G X R Rf Φ Φ' ↔ ∃ T : Finset (Pl F), X.T ⊆ T ∧ PolMatchOn B G X R Rf T Φ Φ' := Iff.rfl
-
-theorem I'_sum {B : Base F E} {G : Geo σ a a'} {X : Chars F E} {om : Rep σ G.V G.W} {om' : Rep σ G.V' G.W}
-    (hT : IsTriple B G X om om') {ι : Type} (s : Finset ι) (Ψ : ι → (Fin a' × Fin (a + a') → AF F) → ℂ)
-    (hΨ : ∀ j ∈ s, Ψ j ∈ schA F (Fin a' × Fin (a + a'))) (hc : ∀ j ∈ s, G.M'.Conv om' (Ψ j)) (h : UA σ G.W.J) :
-    G.M'.I om' (∑ j ∈ s, Ψ j) h = ∑ j ∈ s, G.M'.I om' (Ψ j) h := by
-  have e : ∀ g, theta om' (∑ j ∈ s, Ψ j) g h = ∑ j ∈ s, theta om' (Ψ j) g h := by
-    intro g
-    simp only [theta, map_sum]
-    have hm : ∀ j ∈ s, om' (g, h) (Ψ j) ∈ schA F (Fin a' × Fin (a + a')) :=
-      fun j hj => hT.weil'.isUSplitting.pres _ _ (hΨ j hj)
-    induction s using Finset.induction_on with
-    | empty => simp [thetaSum]
-    | insert k s hk ih =>
-      rw [Finset.sum_insert hk, Finset.sum_insert hk,
-        thetaSum_add F (hm k (Finset.mem_insert_self _ _)) (Submodule.sum_mem _ fun j hj => hm j (Finset.mem_insert_of_mem hj)),
-        ih (fun j hj => hΨ j (Finset.mem_insert_of_mem hj)) (fun j hj => hc j (Finset.mem_insert_of_mem hj))
-          (fun j hj => hm j (Finset.mem_insert_of_mem hj))]
-  simp only [Model.I, e]
-  exact integral_finset_sum s fun j hj => hc j hj h
 
 end GlobalTheory.ThK.PolynomialMatching

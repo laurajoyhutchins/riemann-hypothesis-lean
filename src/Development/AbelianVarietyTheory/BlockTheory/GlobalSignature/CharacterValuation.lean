@@ -1,6 +1,44 @@
-import Mathlib
-import Formalism.LocalToGlobal.Columns.ScaledRamifiedLattice
-import Formalism.LocalToGlobal.KernelLattices.ThDistC
+module
+
+public import Formalism.LocalToGlobal.KernelLattices.ThDistC
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain nonZeroDivisors
 
@@ -53,10 +91,6 @@ def chiDet {n : ℕ} (N : Submodule (𝓞 X.E) (Sp X.E n)) : X.K :=
 def chiFK (a b : ℕ) (N : Submodule (𝓞 X.E) (Sp X.E a)) (N' : Submodule (𝓞 X.E) (Sp X.E b)) : X.K :=
   desc s.σ₀ (Base.chiFac χ a b (s.lat N) (s.lat N'))
 
-example {cc : Ideal (𝓞 D.host.K)} {δ : ℂ} (B : Base D cc δ) (cD : D.what₂.Tau → ℂ) (a b : ℕ)
-    (N : Submodule (𝓞 X.E) (Sp X.E a)) (N' : Submodule (𝓞 X.E) (Sp X.E b)) :
-    chiFK s χ a b N N' = desc (ambOf s B χ cD).σ₀ ((ambOf s B χ cD).chiF a b N N') := rfl
-
 end Chi
 
 section Rho
@@ -81,14 +115,6 @@ def rho' (i : ℕ) {n : ℕ} (N : Submodule (𝓞 Z.X.E) (Sp Z.X.E n)) (fr : Frs
 def sPrime (i : Fin Z.R.m) (τ : Z.X.Tau) : ℚ := sExp' Z.R ((Z.W.row τ).e i) (i.1 + 1)
 
 def sPlain (i : Fin Z.R.m) (τ : Z.X.Tau) : ℚ := sExp Z.R ((Z.W.row τ).e i) (i.1 + 1)
-
-theorem muAt_eq_muAtT (h : MuqTie Z.Ch sel mu cst) (i : ℕ) (hi : i < Z.R.m) :
-    muAt Z.Ch sel mu cst i = muAtT Z.Ch sel mu cst i := by
-  funext P
-  unfold muAt muAtT
-  by_cases hP : P.1 ∈ Z.Pr.vGs
-  · simp only [if_pos hP]
-  · simp only [if_neg hP, h i hi P hP]
 
 def PartA (u : Z.Pr.Word) : Prop :=
   ∀ P ∈ Z.Pr.vT u,
@@ -150,10 +176,6 @@ def CharValAtT : Prop :=
         (∀ w : HeightOneSpectrum (𝓞 Z.X.K), ((Z.Pr.T u : ℕ) : 𝓞 Z.X.K) ∈ w.asIdeal →
           PartBMu Z s χ sel mu cst u w i.1 ∧ PartC Z s χ sel mu cst u w i) ∧
         PartD Z s χ sel mu cst i.1
-
-example {E : Type} [Field E] [NumberField E] [StarRing E] (n p : ℕ) (SB : Finset (HeightOneSpectrum (𝓞 E))) :
-    StdOver p (stdLat E n) ∧ IsFrames (SB := SB) (stdLat E n) (fun _ => 1) :=
-  ⟨fun _ _ => rfl, fun _ _ => Iff.rfl⟩
 
 theorem UnitAt.ne_zero {K : Type} [Field K] [NumberField K] {w : HeightOneSpectrum (𝓞 K)} {x : K} (h : UnitAt w x) : x ≠ 0 := by
   rintro rfl

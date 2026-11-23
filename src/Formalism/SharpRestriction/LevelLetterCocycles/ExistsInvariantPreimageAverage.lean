@@ -1,8 +1,48 @@
-import Formalism.SharpRestriction.LevelLetterCocycles.LemmaGsOfLemGAB
-import Formalism.SharpRestriction.LevelLetterCocycles.ExistsMemMapEqSmul
-import Formalism.SharpRestriction.LevelLetterCocycles.SumSubEqSumIocOfSub
-import Formalism.SharpRestriction.LevelLetterCocycles.LetterConditionGlobal
-import Formalism.SharpRestriction.LevelLetterCocycles.LevelClauseOfOpenTool
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.LemmaGsOfLemGAB
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -78,7 +118,7 @@ theorem gammaD_idempotent_smul' (T : LocLat G Qp LL O) (g : W.Gam) (i : ZMod n) 
 theorem gammaA_q_of_mem_delta (hπΔ : W.π₀ ∈ W.AΔ) (δ : W.Gam) (hδ : δ ∈ W.DelF) :
     W.γA δ (Formalism.MainNotions.LiftingTheory.qp W) = Formalism.MainNotions.LiftingTheory.qp W := by
   unfold Formalism.MainNotions.LiftingTheory.qp
-  rw [map_add, (hπΔ : ∀ δ ∈ W.DelF, W.γA δ W.π₀ = W.π₀) δ hδ, map_natCast]
+  rw [map_add (f := _), (hπΔ : ∀ δ ∈ W.DelF, W.γA δ W.π₀ = W.π₀) δ hδ, map_natCast]
 
 theorem uniformizer_unit_and_delta_card (h9 : Formalism.MainNotions.DeltaInvariantLattices.P9W W) (hA : Formalism.MainNotions.LiftingTheory.CaseA W) {T : LocLat G Qp LL O}
     (hT : IsCrys PD T.ρ) :
@@ -105,7 +145,7 @@ theorem isUnit_q_of_uniformizer_unit (hπ : IsUnit (algebraMap (LetA O n) W.EE W
   obtain ⟨u, hu⟩ := hπ
   have h1 := (Ideal.mem_jacobson_bot.mp hj) (↑u⁻¹)
   unfold Formalism.MainNotions.LiftingTheory.qp
-  rw [map_add, map_natCast, ← hu]
+  rw [map_add (f := _), map_natCast, ← hu]
   have e : (u : W.EE) + ((PD.p : ℕ) : W.EE) = u * (((PD.p : ℕ) : W.EE) * ↑u⁻¹ + 1) := by
     rw [mul_add, mul_one, mul_left_comm, Units.mul_inv, mul_one, add_comm]
   rw [e]
@@ -117,7 +157,7 @@ theorem exists_derivation_gamma_sub (T : LocLat G Qp LL O) (hπ : IsUnit (algebr
   refine ⟨{ toFun := fun z => ((u⁻¹ : W.EEˣ) : W.EE) • (W.γ T z - z),
             map_add' := ?_, map_smul' := ?_ }, ?_⟩
   · intro a b
-    simp only [map_add, smul_sub, smul_add]
+    simp only [map_add (f := _), smul_sub, smul_add]
     abel
   · intro c z
     simp only [RingHom.id_apply]
@@ -217,6 +257,7 @@ theorem exists_invariant_preimage_average (hΔ : IsUnit ((W.DelF.card : ℕ) : O
   have hyN : r • s ∈ W.N T₁ := (W.N T₁).smul_mem r hsN
   have hsΔ : ∀ δ' ∈ W.DelF, W.γD T₁ δ' s = s := by
     intro δ' hδ'
+
     rw [hs, map_sum]
     refine Finset.sum_nbij' (δ' * ·) (δ'⁻¹ * ·) (fun a ha => hclos _ hδ' _ ha)
       (fun a ha => hclos _ (hinv _ hδ') _ ha) (fun a _ => by simp) (fun a _ => by simp) ?_
@@ -236,9 +277,10 @@ theorem exists_invariant_preimage_average (hΔ : IsUnit ((W.DelF.card : ℕ) : O
   have hterm : ∀ δ ∈ W.DelF, W.map F (W.γD T₁ δ y₀) = t := by
     intro δ hδ
     rw [hmγ, hF, ht δ hδ]
+
   rw [map_letA_smul_comm W F r s, hs, map_sum, Finset.sum_congr rfl hterm, Finset.sum_const,
-    ← Nat.cast_smul_eq_nsmul (LetA O n), smul_smul, hr, ← map_natCast (algebraMap O (LetA O n)),
-    ← map_mul, ← huc, Units.inv_mul, map_one, one_smul]
+  ← Nat.cast_smul_eq_nsmul (LetA O n), smul_smul, hr, ← map_natCast (algebraMap O (LetA O n)),
+  ← map_mul, ← huc, Units.inv_mul, map_one, one_smul]
 
 end SlopeTestRemainingChoices
 

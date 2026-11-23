@@ -1,5 +1,47 @@
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.BasicOpenSections.ResClosed
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.TranscendenceTraces.AllHolds
+module
+
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.BasicOpenSections.ResClosed
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 open CategoryTheory Limits AlgebraicGeometry GlobalTheory.EtC
 open UpperTheory.Gal.TranscendenceTraces (gp pt Wt fib IsWt nwt LocNml)
@@ -72,7 +114,7 @@ private theorem algebraMap_mem_maximal_of_mem_maximalIdeal (V : Type) [CommRing 
     [Algebra V A] [Algebra.IsIntegral V A] (m' : Ideal A) [m'.IsMaximal] {v : V}
     (hv : v ∈ IsLocalRing.maximalIdeal V) : algebraMap V A v ∈ m' := by
   have hc : (m'.comap (algebraMap V A)).IsMaximal :=
-    Ideal.isMaximal_comap_of_isIntegral_of_isMaximal m'
+    Ideal.isMaximal_under_of_isIntegral_of_isMaximal (R := V) m'
   rw [← IsLocalRing.eq_maximalIdeal hc] at hv
   exact hv
 
@@ -94,7 +136,7 @@ private theorem exists_idempotent_approx_at_maximal (V : Type) [CommRing V] [IsD
   set g := ((s.filter (fun α => f α ∈ m)).map f).prod with hg
   set h := ((s.filter (fun α => ¬ f α ∈ m)).map f).prod with hh
   have hgh : g * h = 0 := by
-    rw [hg, hh, ← Multiset.prod_add, ← Multiset.map_add, Multiset.filter_add_not, hprod]
+    rw [hg, hh, ← Multiset.prod_add, ← Multiset.map_add (f := _), Multiset.filter_add_not, hprod]
   have hhm : h ∉ m := prod_notMem m _ f (fun α hα => (Multiset.mem_filter.mp hα).2)
   have hgm : g ∈ m := by
     have hz : g * h ∈ m := by
@@ -190,7 +232,7 @@ theorem UpperTheory.Gal.Mod.hensSplit :
         refine ⟨β + γ, ?_⟩
         have hyz : y + z - algebraMap V A (β + γ) =
             (y - algebraMap V A β) + (z - algebraMap V A γ) := by
-          rw [map_add]
+          rw [map_add (f := _)]
           ring
         rw [hyz]
         exact (m ⊓ m').add_mem hβ hγ

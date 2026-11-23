@@ -1,8 +1,49 @@
-import Development.AutomorphicArithmetic.Foundations.Convolution.RealGroupAnalysis.Smooth
-import GroundTheory.AutomorphicForms.ReductionCore
+module
+
+public import Development.AutomorphicArithmetic.Foundations.Convolution.RealGroupAnalysis.ThetaLiftTrivialOrbitTermsVanish
+public import GroundTheory.AutomorphicForms.ReductionIwasawa
 import GroundTheory.AutomorphicForms.ReductionMeasure
-import GroundTheory.AutomorphicForms.HaarSK
-import GroundTheory.HeightsAndTheta.Theta.FundDomain
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+
+@[expose] public section
 
 noncomputable section
 
@@ -71,8 +112,6 @@ theorem cD_cD (s t : (A F)ˣ) (g : G1 F) : cD s (cD t g) = cD (s * t) g :=
 theorem cD_one (g : G1 F) : cD 1 g = g := gl_inj (by rw [gl_cD', dM_one]; group)
 theorem cD_nU (t : (A F)ˣ) (b : A F) : cD t (nU b) = nU (b * ((t⁻¹ : (A F)ˣ) : A F)) := by
   ext i j; fin_cases i <;> fin_cases j <;> simp [cD, nU]
-theorem cD_mD (t a : (A F)ˣ) : cD t (mD a) = mD a := by
-  ext i j; fin_cases i <;> fin_cases j <;> simp [cD, mD]
 theorem cD_sq (t : (A F)ˣ) (g : G1 F) : cD (t * t) g = (mD t)⁻¹ * g * mD t := by
   rw [← mD_inv]
   refine Subtype.ext ?_; rw [val_mul, val_mul]; ext i j; fin_cases i <;> fin_cases j <;>
@@ -117,11 +156,11 @@ instance : DiscreteTopology (Gam F) := by
     fun a b h => Subtype.ext (gl_inj (congrArg (·.1) h))
   exact (continuous_gl.comp continuous_subtype_val).subtype_mk _
 
-variable (F) in
 
+variable (F) in
 def Ks : Subgroup (G1 F) := (Reduction.maxCompact (K := F) (n := 2)).comap Matrix.SpecialLinearGroup.toGL
-variable (F) in
 
+variable (F) in
 def Bor : Subgroup (G1 F) := (Reduction.adelicBorel (K := F) (n := 2)).comap Matrix.SpecialLinearGroup.toGL
 
 def wt (a : (A F)ˣ) : ℝ≥0∞ := ENNReal.ofReal ((ab a)⁻¹ ^ 2)

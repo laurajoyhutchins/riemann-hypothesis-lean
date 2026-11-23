@@ -1,4 +1,49 @@
-import Development.WeilBound.RepresentationTheoryGL.CasimirAlgebra.KugaCoordinates.IsStarRep
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.CasimirAlgebra.KugaCoordinates.IsStarRep
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -10,17 +55,17 @@ namespace PositivityTheory.Rg.Cz.J
 section
 variable {E : Type} [Field E] [NumberField E]
 
-omit [NumberField E] in
 
+omit [NumberField E] in
 theorem atEmb_embedding (w : InfinitePlace E) (z : ℂ) : atEmb w.embedding z = (Pi.single w z : Cinf E) := by
   unfold atEmb; split_ifs <;> simp_all
 
-omit [NumberField E] in
 
+omit [NumberField E] in
 theorem coord_embedding (w : InfinitePlace E) (c : Cinf E) : coord w.embedding c = c w := by
   unfold coord; split_ifs <;> simp_all
 
-theorem coord_conj_embedding [IsTotallyComplex E] (w : InfinitePlace E) (c : Cinf E) :
+theorem coord_conj_embedding [_root_.NumberField.IsTotallyComplex E] (w : InfinitePlace E) (c : Cinf E) :
     coord (ComplexEmbedding.conjugate w.embedding) c = starRingEnd ℂ (c w) := by
   set τ := ComplexEmbedding.conjugate w.embedding
   have hs : ∀ z : ℂ, (Pi.single w z : Cinf E) = atEmb τ (starRingEnd ℂ z) := by
@@ -37,9 +82,10 @@ theorem coord_conj_embedding [IsTotallyComplex E] (w : InfinitePlace E) (c : Cin
     exact this
   have hc : c = ∑ v, (Pi.single v (c v) : Cinf E) := (Finset.univ_sum_single c).symm
   conv_lhs => rw [hc]
+
   rw [map_sum, Finset.sum_eq_single w (fun v _ hv => h0 v hv _) (by simp), hs, coord_atEmb]
 
-theorem sum_emb [IsTotallyComplex E] {R : Type*} [AddCommMonoid R] (f : (E →+* ℂ) → R) :
+theorem sum_emb [_root_.NumberField.IsTotallyComplex E] {R : Type*} [AddCommMonoid R] (f : (E →+* ℂ) → R) :
     ∑ τ, f τ = ∑ w : InfinitePlace E, (f w.embedding + f (ComplexEmbedding.conjugate w.embedding)) := by
   rw [← Finset.sum_fiberwise Finset.univ (fun τ => InfinitePlace.mk τ) f]
   refine Finset.sum_congr rfl fun w _ => ?_
@@ -81,15 +127,17 @@ theorem cxExpand_holds : CxExpand := by
       rw [← atEmb_embedding, atEmb_eq, atEmb_embedding, atEmb_embedding]
     rw [coord_embedding, coord_conj_embedding, hcx, hcx]
     simp only [atEmb_conj, map_one, Complex.conj_I, atEmb_embedding, Pi.single_neg, map_neg]
-    rw [hz, map_add, map_smul, map_smul, ← algebraMap_smul ℂ (c w).re, ← algebraMap_smul ℂ (c w).im]
+    rw [hz, map_add (f := _), map_smul, map_smul, ← algebraMap_smul ℂ (c w).re, ← algebraMap_smul ℂ (c w).im]
     generalize ψ i j (Pi.single w 1) = P
     generalize ψ i j (Pi.single w Complex.I) = Q
     conv_lhs => rw [← Complex.re_add_im (c w)]
-    simp only [map_add, map_mul, Complex.conj_ofReal, Complex.conj_I]
+    simp only [map_add (f := _), map_mul, Complex.conj_ofReal, Complex.conj_I]
     match_scalars <;> apply Complex.ext <;> simp <;> ring
   have hX : φ X = ∑ i, ∑ j, ψ i j (X i j) := by
+
     rw [show φ X = Φ (Matrix.of X) from rfl, Matrix.matrix_eq_sum_single (Matrix.of X), map_sum]
     refine Finset.sum_congr rfl fun i _ => ?_
+
     rw [map_sum]
     rfl
   rw [hX]
@@ -98,8 +146,9 @@ theorem cxExpand_holds : CxExpand := by
   refine Finset.sum_congr rfl fun i _ => ?_
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun j _ => ?_
+
   rw [sum_emb (fun τ => coord τ (X i j) • cx τ φ i j), Finset.sum_congr rfl fun w _ => key w i j (X i j), ← map_sum,
-    Finset.univ_sum_single]
+  Finset.univ_sum_single]
 
 end PositivityTheory.Rg.Cz.J
 

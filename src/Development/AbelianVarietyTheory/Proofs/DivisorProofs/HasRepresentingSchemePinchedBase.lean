@@ -1,31 +1,71 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.SameIdIff
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.ExistsCrystalPairing
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RepresentingSchemeOfFiniteSurjectiveLiftStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.UnitsPatch
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RepresentsAdditiveLineBundleFamiliesCompareStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsAdditiveFamilyOfPullbackFiniteSurjectiveStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ConductorSquareFlatBaseChangeSchemesStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PinchingSquareUnitsPatchStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsLineBundleLocalGeneratorNearFiniteSetStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsLocalGeneratorFiniteCoverNearPointStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsUnitLiftClosedSubschemeNearFibreStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsUnitRatioLocalGeneratorsCommonPullbackStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsLineBundlePinchedOfMatchingGeneratorsStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PinchedChartOffClosedPartFromBaseStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsAffineOpenSaturatedBasicOpenPreimageStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsAffineNbhdBasicOpenStandardSmoothStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PinchedChartsRestrictMatchingOpensStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PinchedChartsAffineOfSpectraStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PushoutQuotientSurjectiveKerEqMapStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsSubmersivePresentationAddZeroVariablesStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsGeneratorsAdaptedToQuotientGeneratorsStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsRelationsLiftVanishingConductorStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MemSpanRelationsConductorOfEvalEqZeroStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsSubOneMemMulKerNakayamaFlatStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsMvPolynomialLiftConductorCoeffsStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsStandardSmoothLocalizationAwayJacobianDvdStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsPushoutLocalizedPresentationBaseChangeStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.SameIdIff
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.UnitsPatch
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ConductorSquareFlatBaseChangeSchemesStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsAdditiveFamilyOfPullbackFiniteSurjectiveStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsAffineNbhdBasicOpenStandardSmoothStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsAffineOpenSaturatedBasicOpenPreimageStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsGeneratorsAdaptedToQuotientGeneratorsStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsLineBundleLocalGeneratorNearFiniteSetStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsLineBundlePinchedOfMatchingGeneratorsStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsLocalGeneratorFiniteCoverNearPointStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsMvPolynomialLiftConductorCoeffsStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsRelationsLiftVanishingConductorStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsSubOneMemMulKerNakayamaFlatStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsSubmersivePresentationAddZeroVariablesStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsUnitLiftClosedSubschemeNearFibreStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsUnitRatioLocalGeneratorsCommonPullbackStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsPushoutLocalizedPresentationBaseChangeStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsStandardSmoothLocalizationAwayJacobianDvdStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MemSpanRelationsConductorOfEvalEqZeroStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PinchedChartOffClosedPartFromBaseStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PinchedChartsAffineOfSpectraStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PinchedChartsRestrictMatchingOpensStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PinchingSquareUnitsPatchStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PushoutQuotientSurjectiveKerEqMapStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RepresentingSchemeOfFiniteSurjectiveLiftStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RepresentsAdditiveLineBundleFamiliesCompareStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.Limits.Shapes.Connected
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 noncomputable section
@@ -36,8 +76,8 @@ attribute [local instance] Over.cartesianMonoidalCategory
 
 namespace GlobalTheory.Pinch
 
-open MvPolynomial in
 
+open MvPolynomial in
 theorem exists_standardSmooth : ∀ (R : Type) [CommRing R] [IsNoetherianRing R] (R' : Type) [CommRing R'] [Algebra R R'] [Module.Finite R R'], Function.Injective (algebraMap R R') → ∀ c : Ideal R, (∀ x ∈ c, ∀ r : R', ∃ y ∈ c, algebraMap R R' y = algebraMap R R' x * r) → ∀ (g : ℕ) (C' D E : Type) [CommRing C'] [CommRing D] [CommRing E] (φ : R' →+* C') (δ : R ⧸ c →+* D) (π : C' →+* E) (ψ : D →+* E), φ.Smooth → δ.IsStandardSmoothOfRelativeDimension g → IsPushout (CommRingCat.ofHom (φ.comp (algebraMap R R'))) (CommRingCat.ofHom (Ideal.Quotient.mk c)) (CommRingCat.ofHom π) (CommRingCat.ofHom (ψ.comp δ)) → IsPushout (CommRingCat.ofHom (δ.comp (Ideal.Quotient.mk c))) (CommRingCat.ofHom (algebraMap R R')) (CommRingCat.ofHom ψ) (CommRingCat.ofHom (π.comp φ)) → ∃ (F : Type) (_ : CommRing F) (ε : R →+* F) (t : C') (α : F →+* Localization.Away t) (β : F →+* D) (τ : Localization.Away t →+* E), ε.IsStandardSmoothOfRelativeDimension g ∧ IsPushout (CommRingCat.ofHom ε) (CommRingCat.ofHom (algebraMap R R')) (CommRingCat.ofHom α) (CommRingCat.ofHom ((algebraMap C' (Localization.Away t)).comp φ)) ∧ IsPushout (CommRingCat.ofHom ε) (CommRingCat.ofHom (Ideal.Quotient.mk c)) (CommRingCat.ofHom β) (CommRingCat.ofHom δ) ∧ τ.comp (algebraMap C' (Localization.Away t)) = π ∧ τ.comp α = ψ.comp β := by
   intro R _ _ R' _ _ _ hinj c hc g C' D E _ _ _ φ δ π ψ hφ hδ h1 h2
   classical
@@ -75,7 +115,7 @@ theorem exists_standardSmooth : ∀ (R : Type) [CommRing R] [IsNoetherianRing R]
   letI : Fintype (κ ⊕ σ₀) := Fintype.ofFinite _
   let Δ : MvPolynomial (κ ⊕ ν₀) R := (Matrix.of fun s t ↦ pderiv (P.map s) (F t)).det
   have hΔ : aeval P.val (map (Ideal.Quotient.mk c) (Δ * (H + 1))) = P.jacobian := by
-    rw [map_mul, map_add, hH0, map_one, zero_add, _root_.mul_one, P.jacobian_eq_jacobiMatrix_det, P.algebraMap_apply,
+    rw [map_mul, map_add (f := _), hH0, map_one, zero_add, _root_.mul_one, P.jacobian_eq_jacobiMatrix_det, P.algebraMap_apply,
       RingHom.map_det]
     congr 2
     ext1 s t
@@ -84,7 +124,7 @@ theorem exists_standardSmooth : ∀ (R : Type) [CommRing R] [IsNoetherianRing R]
   have hu : IsUnit (aeval P.val (map (Ideal.Quotient.mk c) (Δ * (H + 1)))) := hΔ ▸ P.jacobian_isUnit
   obtain ⟨α, hα, hα'⟩ := GlobalTheory.T.isPushout_localized_presentation_baseChange R R' C' (Localization.Away (aeval ξ (map (algebraMap R R') (Δ * (H + 1))))) _ _
     (algebraMap R R') F (Δ * (H + 1)) ξ hsurj hF0 (fun G hG ↦ by
-      rw [map_mul, map_add, hH, map_one, sub_add_cancel, _root_.mul_assoc]
+      rw [map_mul, map_add (f := _), hH, map_one, sub_add_cancel, _root_.mul_assoc]
       exact Ideal.mul_mem_left _ _ (hs2 G hG)) inferInstance
   obtain ⟨β, hβ, hβ'⟩ := GlobalTheory.T.isPushout_localized_presentation_baseChange R (R ⧸ c) D D _ _ (Ideal.Quotient.mk c) F (Δ * (H + 1)) P.val
     P.aeval_val_surjective (fun s ↦ by rw [hF]; exact P.aeval_val_relation s)

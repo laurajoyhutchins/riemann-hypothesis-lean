@@ -1,5 +1,45 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.UnfoldingConstantsPos
+module
+
+public import Development.AbelianVarietyTheory.Definitions.LatticeFrames.UnfoldingConstantsPos
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Development.AbelianVarietyTheory.Definitions.LatticeFrames.RealisedChainTorusEq
+
+@[expose] public section
 
 noncomputable section
 
@@ -26,38 +66,11 @@ def eDiag (L C : ℝ) : ℝ := 8 * Real.exp (-(C * mfL D L)) + 6 * Real.exp (-(k
 def RankMu : Prop :=
   (d0 D u : ℝ) = ((D.mem u).A.duStar : ℝ) * (((D.mem u).A.T : ℝ) ^ D.R.k - 1) ^ D.R.f
 
-def Road1At : Prop := ∃ e δ : ℝ, DiagS D u e ∧ KerIncl D u ∧ RamBig D u δ ∧ 2 * e < 1 - δ
-
 def cK : ℝ := (c0 D.s u * c0 D.s u) ^ (-(1 / 2 : ℝ))
-
-def KerInclOn (Rw : Submodule ℂ D.s.HH) : Prop :=
-  ∃ FF : (D.mem u).A.Mram →ₗ[ℂ] D.s.Cu u, Function.Injective FF ∧
-    ∀ φ : (D.mem u).A.Mram, PhiC (D.mem u).C (D.mem u).A (D.mem u).P φ = 0 → ∀ y ∈ Rw, ⟪y, D.s.Pu u (FF φ)⟫_ℂ = 0
-
-def BadMass (Rw : Submodule ℂ D.s.HH) (η : ℝ) : Prop :=
-  cK D u * hsNormSq ((Rwᗮ).starProjection.comp (D.s.Pu u)) ≤ η * (d0 D u : ℝ)
-
-def Road2At : Prop :=
-  ∃ (Rw : Submodule ℂ D.s.HH) (e η δ : ℝ), 0 ≤ e ∧ 0 ≤ η ∧ DiagS D u e ∧ BadMass D u Rw η ∧ KerInclOn D u Rw ∧ RamBig D u δ ∧
-    2 * (Real.sqrt e + Real.sqrt η) ^ 2 < 1 - δ
 
 namespace Pts
 
 variable (F : Pts)
-
-def EvSome (Q : ℝ → ∀ D : D7, D.what₂.Word → Prop) : Prop := ∃ x₀ : ℝ, ∀ x, x₀ ≤ x → ∀ i : F.Ix x, ∃ u, Q x (F.D x i) u
-
-def EvAll (Q : ℝ → ∀ D : D7, D.what₂.Word → Prop) : Prop := ∃ x₀ : ℝ, ∀ x, x₀ ≤ x → ∀ (i : F.Ix x) u, Q x (F.D x i) u
-
-theorem EvAll.some {F : Pts} {Q : ℝ → ∀ D : D7, D.what₂.Word → Prop} (h : F.EvAll Q) : F.EvSome Q :=
-  let ⟨x₀, h⟩ := h; ⟨x₀, fun x hx i => ⟨(F.D x i).u₀, h x hx i _⟩⟩
-
-theorem EvAll.and {F : Pts} {Q Q' : ℝ → ∀ D : D7, D.what₂.Word → Prop} (h : F.EvAll Q) (h' : F.EvAll Q') :
-    F.EvAll fun x D u => Q x D u ∧ Q' x D u :=
-  let ⟨a, h⟩ := h; let ⟨b, h'⟩ := h'
-  ⟨max a b, fun x hx i u => ⟨h x (le_trans (le_max_left _ _) hx) i u, h' x (le_trans (le_max_right _ _) hx) i u⟩⟩
-
-theorem EvSome.rkAll {F : Pts} (h : F.EvSome fun _ D u => RK D u) : F.RKAll := h
 
 end Pts
 

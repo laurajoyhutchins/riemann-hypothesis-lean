@@ -1,10 +1,65 @@
-import Mathlib
-import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.MultiplicationKernelIdentity
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PreEig
-import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.IsSaturatedSubmoduleIffExistsIsComplOfValuationR
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FinrankAddValuationIntegerSubmoduleEqFinrankSpanStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AdjoinRootProdLinearFactorsLatticeFactsStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FiniteEigenFiltrationPiecesAddValIntStatement
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PreEig
+public import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.IsSaturatedSubmoduleIffExistsIsComplOfValuationR
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AdjoinRootProdLinearFactorsLatticeFactsStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FiniteEigenFiltrationPiecesAddValIntStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FinrankAddValuationIntegerSubmoduleEqFinrankSpanStatement
+import Mathlib.Algebra.GroupWithZero.Submonoid.CancelMulZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.Valuation.Extension
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.LinearAlgebra.Matrix.ToLinearEquiv
+
+@[expose] public section
+
 open GlobalTheory.IndefiniteRowSideFullHecke.MultiplicationKernelIdentity GlobalTheory.HermitianPreEigenvalues Polynomial Module
 
 noncomputable section
@@ -58,7 +113,8 @@ theorem linearIndependent_comb {ι κ : Type} [Fintype ι] [Fintype κ]
   have hzX : ∑ i, w (Sum.inl i) • x i ∈ preEig a Fil τ :=
     Submodule.sum_mem _ fun i _ => Submodule.smul_mem _ _ (hxX i)
   have hcomp : comp a N τ (∑ i, w (Sum.inl i) • x i + φ) = 0 := by
-    rw [map_add, map_sum, hφe]
+
+    rw [map_add (f := _), map_sum, hφe]
     simpa [map_smul] using hw
   have hzφ : ∑ i, w (Sum.inl i) • x i + φ ∈ Fil.restrictScalars (Int0 v) :=
     hE4 ⟨add_mem hzX (hE10 hφ), hcomp⟩
@@ -68,6 +124,7 @@ theorem linearIndependent_comb {ι κ : Type} [Fintype ι] [Fintype κ]
     (Submodule.Quotient.mk_eq_zero _).2 hz
   have hl : ∑ i, w (Sum.inl i) • l i = 0 := by
     apply Subtype.ext
+
     rw [map_sum] at hprojz
     simp only [map_smul, hx] at hprojz
     simpa using hprojz
@@ -95,6 +152,7 @@ theorem span_comb {ι κ : Type} [Fintype ι] [Fintype κ]
   have hl := congrArg Subtype.val (l.sum_repr ⟨proj a Fil z, hpz⟩)
   simp only [Submodule.coe_sum, Submodule.coe_smul] at hl
   have hsum : proj a Fil (z - ∑ i, l.repr ⟨proj a Fil z, hpz⟩ i • x i) = 0 := by
+
     rw [map_sub, map_sum]
     simp only [map_smul, hx]
     rw [hl, sub_self]
@@ -109,6 +167,7 @@ theorem span_comb {ι κ : Type} [Fintype ι] [Fintype κ]
   simp only [Sum.elim_inl, Sum.elim_inr]
   have h3 : comp a N τ (z - ∑ i, l.repr ⟨proj a Fil z, hpz⟩ i • x i) =
       comp a N τ z - ∑ i, l.repr ⟨proj a Fil z, hpz⟩ i • comp a N τ (x i) := by
+
     simp only [map_sub, map_sum, map_smul]
   exact eq_sub_iff_add_eq'.1 (h2.trans h3)
 
@@ -159,6 +218,7 @@ theorem exists_basis_image {ι : Type} [Fintype ι]
     have hm : ((∑ k, w k • h k : eigSub a τ (Fin N → RS a)) : Fin N → RS a) ∈
         eigSub a τ (Fin N → RS a) ⊓ LinearMap.ker (comp a N τ) := by
       refine Submodule.mem_inf.2 ⟨Subtype.mem _, ?_⟩
+
       rw [LinearMap.mem_ker, Submodule.coe_sum, map_sum]
       simpa [map_smul] using hw
     rw [hE6, Submodule.mem_bot] at hm
@@ -176,6 +236,7 @@ theorem exists_basis_image {ι : Type} [Fintype ι]
   have h1 := congrArg Subtype.val (h.sum_repr ⟨z, hz⟩)
   simp only [Submodule.coe_sum, Submodule.coe_smul] at h1
   have h2 := congrArg (comp a N τ) h1
+
   simp only [map_sum, map_smul] at h2
   simpa using h2
 
@@ -199,6 +260,7 @@ theorem exists_basis_eigSub (d : Int0 v) (hd : d ≠ 0)
   have hcomb : ∀ w : Fin N → Int0 v,
       comp a N τ (∑ i, w i • z i) = d • w := by
     intro w
+
     rw [map_sum]
     simp only [map_smul, hze]
     funext j
@@ -336,13 +398,13 @@ theorem detIdentity_of_relLen : ∀ (C : Type) [Field C] (v : AddValuation C (Wi
         rw [Submodule.Quotient.mk_eq_zero]
         exact hsat c z hc h0
   haveI := hfLie
-  haveI := GlobalTheory.free_of_finite_of_isTorsionFree_of_valuationRing (Int0 v)
-    (eigSub a τ ((Fin N → RS a) ⧸ Fil))
+  haveI := GlobalTheory.free_of_finite_of_isTorsionFree_of_valuationRing (R := Int0 v)
+    (M := eigSub a τ ((Fin N → RS a) ⧸ Fil))
 
   haveI := hfFil
   haveI hfQ : Module.Finite (Int0 v) (eigQuot a Fil τ) :=
     Module.Finite.map (Fil.restrictScalars (Int0 v)) (comp a N τ)
-  haveI := GlobalTheory.free_of_finite_of_isTorsionFree_of_valuationRing (Int0 v) (eigQuot a Fil τ)
+  haveI := GlobalTheory.free_of_finite_of_isTorsionFree_of_valuationRing (R := Int0 v) (M := eigQuot a Fil τ)
   have hrk : finrank (Int0 v) (eigQuot a Fil τ) = eigRank v a Fil τ :=
     GlobalTheory.T.finrank_int0_submodule_eq_finrank_span C v N (eigQuot a Fil τ) hfQ
   have bF := Module.finBasisOfFinrankEq (Int0 v) (eigQuot a Fil τ) hrk

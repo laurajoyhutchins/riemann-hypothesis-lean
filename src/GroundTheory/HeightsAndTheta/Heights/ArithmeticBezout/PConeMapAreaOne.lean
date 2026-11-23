@@ -1,10 +1,61 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.StatementsConeMapAreaOne
-import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.StatementsAreaFormulaInj
-import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.PConeIntegralMass
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.PFrameJacobianSum
-import ReciprocityTheory.AnalyticForms.AnalyticCharts.Osgood
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.VolumePreservingUncurry
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.StatementsConeMapAreaOne
+public import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.StatementsAreaFormulaInj
+public import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.PConeIntegralMass
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.VolumePreservingUncurry
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.PFrameJacobianSum
+import Mathlib.Algebra.Order.Archimedean.Real.Hom
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.Matrix.PosDef
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.MeasureTheory.Measure.Lebesgue.VolumeOfBalls
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+public import Mathlib.Topology.MetricSpace.HausdorffDimension
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.AnalyticForms.AnalyticCharts.Osgood
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -198,7 +249,7 @@ theorem aemeasurable_coneIntegrand {e n : ℕ} {U D : Set (Fin e → ℂ)}
     AEMeasurable (coneIntegrand v F) ((volume.restrict D).prod volume) := by
   have hvD : AEMeasurable v (volume.restrict D) := (hv.continuousOn.mono hDU).aemeasurable hD
   have hW : AEMeasurable (gramVecs v) (volume.restrict D) := by
-    refine aemeasurable_pi_lambda _ fun a => ?_
+    refine AEMeasurable.of_eval fun a => ?_
     refine Fin.cases ?_ (fun j => ?_) a
     · simpa [gramVecs] using hvD
     · simpa [gramVecs] using
@@ -264,8 +315,8 @@ theorem coordBall_eq (m k : ℕ) :
 
 end ConeMapAreaFormula
 
-open ConeMapAreaFormula in
 
+open ConeMapAreaFormula in
 theorem ConeMapAreaOne.proof (hA : AreaFormulaInj.Statement) : ConeMapAreaOne.Statement := by
   intro n e U D v F hU hD hDU hv hinj hF
   by_cases hn : e + 1 ≤ n

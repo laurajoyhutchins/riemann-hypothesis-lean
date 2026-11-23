@@ -1,4 +1,59 @@
-import Mathlib
+module
+
+public import Mathlib.LinearAlgebra.TensorProduct.Defs
+public import Mathlib.RingTheory.Finiteness.Defs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+public import Mathlib.RingTheory.TensorProduct.DirectLimitFG
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.BigOperators.Pi
+public import Mathlib.Algebra.Colimit.Finiteness
+public import Mathlib.Algebra.Exact.Basic
+public import Mathlib.LinearAlgebra.TensorProduct.Basic
+public import Mathlib.LinearAlgebra.TensorProduct.DirectLimit
+public import Mathlib.LinearAlgebra.TensorProduct.Finiteness
+public import Mathlib.LinearAlgebra.TensorProduct.Pi
+public import Mathlib.LinearAlgebra.TensorProduct.RightExactness
+public import Mathlib.RingTheory.Finiteness.Cardinality
+
+@[expose] public section
 
 open TensorProduct
 
@@ -57,12 +112,14 @@ theorem exists_system {A : Type} [CommRing A] (B : Type) [CommRing B] [Algebra A
   have hxsum : x = ∑ t, b t ⊗ₜ[A] kk t := by
     rw [hS, ← Finset.sum_coe_sort, ← Equiv.sum_comp e.symm]
   have hx' : ∑ t, b t ⊗ₜ[A] (kk t : Fin n → A) = (1 : B) ⊗ₜ[A] w := by
+
     rw [← hx, hxsum, map_sum]
     simp only [LinearMap.lTensor_tmul, Submodule.subtype_apply]
   refine ⟨n, S.card, fun s t => (kk t : Fin n → A) s, w, ⟨b, fun s => ?_⟩, ?_⟩
   · have hvec := congrFun (congrArg (TensorProduct.piScalarRight A B B (Fin n)) hx') s
+
     simp only [map_sum, TensorProduct.piScalarRight_apply, TensorProduct.piScalarRightHom_tmul,
-      Finset.sum_apply] at hvec
+    Finset.sum_apply] at hvec
     rw [Algebra.algebraMap_eq_smul_one]
     exact hvec
   · intro B₁ _ _ hy
@@ -70,14 +127,16 @@ theorem exists_system {A : Type} [CommRing A] (B : Type) [CommRing B] [Algebra A
     have h2 : ∑ t, y t ⊗ₜ[A] (kk t : Fin n → A) = (1 : B₁) ⊗ₜ[A] w := by
       apply (TensorProduct.piScalarRight A B₁ B₁ (Fin n)).injective
       funext s
+
       simp only [map_sum, TensorProduct.piScalarRight_apply, TensorProduct.piScalarRightHom_tmul,
-        Finset.sum_apply]
+      Finset.sum_apply]
       rw [← Algebra.algebraMap_eq_smul_one]
       exact hy s
     have h3 := congrArg (LinearMap.lTensor B₁ (Q'.subtype ∘ₗ π)) h2
     have hk : ∀ t, π (kk t : Fin n → A) = 0 := fun t => LinearMap.mem_ker.mp (kk t).2
+
     simp only [map_sum, LinearMap.lTensor_tmul, LinearMap.comp_apply, hk, hw, map_zero,
-      TensorProduct.tmul_zero, Finset.sum_const_zero, Submodule.subtype_apply] at h3
+    TensorProduct.tmul_zero, Finset.sum_const_zero, Submodule.subtype_apply] at h3
     exact h3.symm
 
 end GlobalTheory.CompanionTheory.EqCrit

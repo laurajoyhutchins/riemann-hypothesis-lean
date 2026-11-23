@@ -1,5 +1,63 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.ThetaMetrics.WeightedHomogeneousComponentMemElimIdeal
+module
+
+public import Development.AbelianVarietyTheory.Definitions.ThetaMetrics.WeightedHomogeneousComponentMemElimIdeal
+public import Mathlib.FieldTheory.IsAlgClosed.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.MvPolynomial.IrreducibleQuadratic
+public import Mathlib.RingTheory.Nullstellensatz
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open MvPolynomial
 
@@ -75,8 +133,8 @@ theorem exists_C_mul_X_pow_mem {R Ω σ : Type*} [CommRing R] [Field Ω] [IsAlgC
   let T := Submodule.span Ω ((fun v : n → R => φ ∘ v) '' S)
   have h1 : ∀ g ∈ I, π (map φ g) ∈ T := by
     intro g hg
-    refine Submodule.subset_span ⟨fun a => coeff a.1 g, ?_, ?_⟩
-    · have : L (fun a => coeff a.1 g) = homogeneousComponent d g := by
+    refine Submodule.subset_span ⟨fun a => AddMonoidAlgebra.coeff g a.1, ?_, ?_⟩
+    · have : L (fun a => AddMonoidAlgebra.coeff g a.1) = homogeneousComponent d g := by
         ext c
         rw [hL, coeff_sum, coeff_homogeneousComponent]
         split_ifs with hc
@@ -101,7 +159,7 @@ theorem exists_C_mul_X_pow_mem {R Ω σ : Type*} [CommRing R] [Field Ω] [IsAlgC
       have := h1 _ (I.mul_mem_left (monomial c 1) hg)
       rwa [map_mul, map_monomial, map_one] at this
     | zero => simp
-    | add x y _ _ hx hy => intro c; rw [mul_add, map_add]; exact T.add_mem (hx c) (hy c)
+    | add x y _ _ hx hy => intro c; rw [mul_add, map_add (f := _)]; exact T.add_mem (hx c) (hy c)
     | smul a x _ hx =>
       intro c
       induction a using MvPolynomial.induction_on' with
@@ -111,7 +169,7 @@ theorem exists_C_mul_X_pow_mem {R Ω σ : Type*} [CommRing R] [Field Ω] [IsAlgC
           simp
         rw [this, map_smul]
         exact T.smul_mem _ (hx _)
-      | add p q hp hq => rw [add_smul, mul_add, map_add]; exact T.add_mem hp hq
+      | add p q hp hq => rw [add_smul, mul_add, map_add (f := _)]; exact T.add_mem hp hq
   have hT : T = ⊤ := by
     rw [eq_top_iff, ← (Pi.basisFun Ω n).span_eq, Submodule.span_le]
     rintro _ ⟨a, rfl⟩
@@ -151,6 +209,7 @@ theorem aeval_smul_of_isHomogeneous {G : Type*} [CommRing G] [Algebra K G]
 theorem aeval_eq_zero_of_homogeneousComponent {G : Type*} [CommRing G] [Algebra K G]
     {g : MvPolynomial σ K} {ξ : σ → G} (h : ∀ n, aeval ξ (homogeneousComponent n g) = 0) :
     aeval ξ g = 0 := by
+
   rw [← sum_homogeneousComponent g, map_sum]
   exact Finset.sum_eq_zero fun n _ => h n
 
@@ -165,7 +224,7 @@ theorem aeval_smul_eq_zero {G : Type*} [CommRing G] [Algebra K G]
 theorem forall_aeval_eq_zero_iff [Fintype σ] {Ω : Type*} [Field Ω] [IsAlgClosed Ω] [Algebra K Ω]
     {p : Ideal (MvPolynomial σ K)} (hp : p.IsHomogeneous (homogeneousSubmodule σ K))
     (t : β × σ → Ω) :
-    (∀ f ∈ elimIdeal β p, aeval t f = 0) ↔
+    (∀ f ∈ elimIdeal (β := β) p, aeval t f = 0) ↔
       ∃ x : σ → Ω, x ≠ 0 ∧ (∀ g ∈ p, aeval x g = 0) ∧ ∀ i, ∑ j, t (i, j) * x j = 0 := by
   refine ⟨fun h => ?_, fun ⟨x, hx, hp, ht⟩ f hf => aeval_eq_zero_of_mem_elimIdeal hp hx ht hf⟩
   by_contra hc
@@ -193,7 +252,7 @@ theorem forall_aeval_eq_zero_iff [Fintype σ] {Ω : Type*} [Field Ω] [IsAlgClos
     eval₂Hom (map C) fun j => C (X j)
   have hs : s.comp (map C) = C := by
     ext1 <;> [ext1; skip] <;> simp [s, R]
-  have hle : I ≤ (incidenceIdeal β p).comap s := by
+  have hle : I ≤ (incidenceIdeal (β := β) p).comap s := by
     rw [Ideal.span_le]
     rintro _ (⟨g, hg, n, rfl⟩ | ⟨i, rfl⟩)
     · rw [SetLike.mem_coe, Ideal.mem_comap, ← RingHom.comp_apply, hs]

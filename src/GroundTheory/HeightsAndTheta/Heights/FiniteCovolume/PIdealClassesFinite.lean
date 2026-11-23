@@ -1,5 +1,53 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.FiniteCovolume.SecondCountableTopologyArchUnitary
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.FiniteCovolume.SecondCountableTopologyArchUnitary
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.Finset.Functor
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.NumberField.ClassNumber
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GroundTheory.Heights₂.Heights.FiniteCovolume
 
@@ -48,20 +96,19 @@ theorem IdealClassesFinite.proof (E) [Field E] [NumberField E] : IdealClassesFin
     have : b ≠ 0 := nonZeroDivisors.ne_zero hb0
     exact_mod_cast this
   have hint : ∀ x ∈ I, ∃ w : 𝓞 E, (w : E) = b * x := by
+    have hall : ∀ t : I, ∃ w : 𝓞 E, (w : E) = b * (t : E) := by
+      intro t
+      have ht : t ∈ AddSubsemigroup.closure (S : Set I) := by rw [hS]; trivial
+      induction ht using AddSubsemigroup.closure_induction with
+      | mem t ht =>
+        obtain ⟨w, hw⟩ := hb t (by simpa using Finset.mem_image_of_mem Subtype.val ht)
+        exact ⟨w, by rw [Algebra.smul_def] at hw; exact hw⟩
+      | add x y _ _ hx hy =>
+        obtain ⟨w, hw⟩ := hx
+        obtain ⟨v, hv⟩ := hy
+        exact ⟨w + v, by push_cast; linear_combination hw + hv⟩
     intro x hx
-    rw [← hS] at hx
-    induction hx using AddSubgroup.closure_induction with
-    | mem x hx =>
-      obtain ⟨w, hw⟩ := hb x hx
-      exact ⟨w, by rw [Algebra.smul_def] at hw; exact hw⟩
-    | zero => exact ⟨0, by simp⟩
-    | add x y _ _ hx hy =>
-      obtain ⟨w, hw⟩ := hx
-      obtain ⟨v, hv⟩ := hy
-      exact ⟨w + v, by push_cast; linear_combination hw + hv⟩
-    | neg x _ hx =>
-      obtain ⟨w, hw⟩ := hx
-      exact ⟨-w, by push_cast; linear_combination -hw⟩
+    exact hall ⟨x, hx⟩
   let 𝔞 := scaledIdeal I hI (b : E)
   have hmem : ∀ z ∈ I, ∀ w : 𝓞 E, (w : E) = b * z → w ∈ 𝔞 := by
     intro z hz w hw

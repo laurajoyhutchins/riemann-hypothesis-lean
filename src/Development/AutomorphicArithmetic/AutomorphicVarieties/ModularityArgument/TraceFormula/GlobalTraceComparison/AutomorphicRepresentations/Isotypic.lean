@@ -1,8 +1,48 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.TraceFormula.GlobalTraceComparison.AutomorphicRepresentations.SlotBasic
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.TraceFormula.GlobalTraceComparison.TraceAsymptotics.FinprodSplitAlt
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.TraceFormula.GlobalTraceComparison.TraceAsymptotics.HintTranslate
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.TraceFormula.GlobalTraceComparison.TraceAsymptotics.HintSph
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsIsSplitChartOfBasis
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.TraceFormula.GlobalTraceComparison.AutomorphicRepresentations.SlotBasic
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.TraceFormula.GlobalTraceComparison.TraceAsymptotics.SplitLineAlt
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsIsSplitChartOfBasis
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.TraceFormula.GlobalTraceComparison.TraceAsymptotics.HintSph
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.TraceFormula.GlobalTraceComparison.TraceAsymptotics.HintTranslate
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 noncomputable section
 
@@ -64,13 +104,13 @@ private theorem fn2_zero_apply_one_eq_fn1_bind (w : Pl E) (e : Ex (Fin (n + 1) �
   induction e generalizing g with
   | one =>
     show (K2 n 0 w : Set (GLw n w × GLw 0 w)).indicator (1 : GLw n w × GLw 0 w → ℂ) (g, 1) =
-      (KGL w n : Set (GLw n w)).indicator (1 : GLw n w → ℂ) g
-    by_cases h : g ∈ KGL w n
+      (KGL w (n := n) : Set (GLw n w)).indicator (1 : GLw n w → ℂ) g
+    by_cases h : g ∈ KGL w (n := n)
     · rw [Set.indicator_of_mem (show (g, (1 : GLw 0 w)) ∈ (K2 n 0 w : Set _) from
-        Subgroup.mem_prod.2 ⟨h, Subgroup.one_mem _⟩), Set.indicator_of_mem (show g ∈ (KGL w n : Set _) from h)]
+        Subgroup.mem_prod.2 ⟨h, Subgroup.one_mem _⟩), Set.indicator_of_mem (show g ∈ (KGL w (n := n) : Set _) from h)]
       rfl
     · rw [Set.indicator_of_notMem (fun h' => h (Subgroup.mem_prod.1 h').1),
-        Set.indicator_of_notMem (show g ∉ (KGL w n : Set _) from h)]
+        Set.indicator_of_notMem (show g ∉ (KGL w (n := n) : Set _) from h)]
   | gen p =>
     show Tj ℂ n (Ov E w) (unif w) p.1 g * Tj ℂ 0 (Ov E w) (unif w) p.2 1 = Tj ℂ n (Ov E w) (unif w) p.1 g
     rw [tj_zero, mul_one]
@@ -82,10 +122,10 @@ private theorem fn2_zero_apply_one_eq_fn1_bind (w : Pl E) (e : Ex (Fin (n + 1) �
     rw [iha, ihb]
   | mul a b iha ihb =>
     show hint (K2 n 0 w) (fun z => fn2 n 0 w a z * fn2 n 0 w b (z⁻¹ * (g, 1))) =
-      hint (KGL w n) fun z => fn1 n w (a.bind (toFirst n)) z * fn1 n w (b.bind (toFirst n)) (z⁻¹ * g)
+      hint (KGL w (n := n)) fun z => fn1 n w (a.bind (toFirst n)) z * fn1 n w (b.bind (toFirst n)) (z⁻¹ * g)
     have hA := UpperTheory.V.Z.Tf.GlobalTraceComparison.Asm.exHecke2 E n 0 w a
     have hB := UpperTheory.V.Z.Tf.GlobalTraceComparison.Asm.exHecke2 E n 0 w b
-    rw [hint_prod (KGL w n) (KGL w 0) _ fun c hc z => ?_]
+    rw [hint_prod (KGL w (n := n)) (KGL w (n := 0)) _ fun c hc z => ?_]
     · congr 1
       funext z
       rw [iha, ← ihb]

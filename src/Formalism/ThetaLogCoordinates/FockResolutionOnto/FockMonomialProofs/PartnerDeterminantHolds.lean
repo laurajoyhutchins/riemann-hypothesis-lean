@@ -1,7 +1,54 @@
-import Formalism.ThetaLogCoordinates.FockResolutionOnto.StatementA
-import Formalism.PolynomialDimension.MultinomialDepth.PartnerM
-import Formalism.MahlerMeasure.MahlerMeasureProofs.SmithZp
-import Formalism.MahlerMeasure.MahlerMeasureProofs.MeanGam
+module
+
+public import Formalism.ThetaLogCoordinates.FockResolutionOnto.StatementA
+public import Formalism.MahlerMeasure.MahlerMeasureProofs.MeanGam
+public import Formalism.MahlerMeasure.MahlerMeasureProofs.SmithZp
+public import Formalism.MahlerMeasure.MahlerMeasureProofs.TheoremM
+public import Formalism.PolynomialDimension.MultinomialDepth.PartnerM
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace Formalism.InvariantFactorPaths.L4
 
@@ -51,6 +98,7 @@ theorem partner_determinant_holds : PartnerDet := by
     have hWG : ∀ b, be u (g b) = dg i * V i b := by
       intro b
       have e1 : be u (g b) = ((W.map φ) * G) i b := by
+
         rw [Matrix.mul_apply, hu, map_sum, LinearMap.sum_apply]
         refine Finset.sum_congr rfl fun a _ => ?_
         rw [hsm, map_smul, LinearMap.smul_apply, smul_eq_mul]; rfl
@@ -59,6 +107,7 @@ theorem partner_determinant_holds : PartnerDet := by
         exact Matrix.map_one φ (map_zero φ) (map_one φ)
       rw [e1, hGUV, ← Matrix.mul_assoc, ← Matrix.mul_assoc, e2, Matrix.one_mul, Matrix.diagonal_mul]
     have hval : be u (∑ b, c b • g b) = dg i * ((∑ b, c b * V' i b : ℤ_[p]) : ℚ_[p]) := by
+
       rw [map_sum, PadicInt.coe_sum, Finset.mul_sum]
       refine Finset.sum_congr rfl fun b _ => ?_
       rw [hsm, map_smul, smul_eq_mul, hWG b, PadicInt.coe_mul]
@@ -74,7 +123,7 @@ theorem partner_determinant_holds : PartnerDet := by
   calc (p : ℝ) ^ (-(D * k)) = ∏ _i : Fin k, (p : ℝ) ^ (-D) := by
         rw [Finset.prod_const, Finset.card_univ, Fintype.card_fin, ← Real.rpow_mul_natCast hp0.le]
         congr 1; ring
-    _ ≤ ∏ i, ‖dg i‖ := Finset.prod_le_prod (fun _ _ => (Real.rpow_pos_of_pos hp0 _).le) fun i _ => hd i
+    _ ≤ ∏ i, ‖dg i‖ := Finset.prod_le_prod₀ (fun _ _ => (Real.rpow_pos_of_pos hp0 _).le) fun i _ => hd i
 
 section Gr
 variable {p : ℕ} [Fact p.Prime] {K r : ℕ} [NeZero r]
@@ -133,8 +182,8 @@ theorem graded_piece_bound_holds : GradedPieceBound := by
   have huI : u ∈ IntPol p (Fin (K + 1) × Fin r) := grLat_le_int LLw J M ρ w _ e hu
   have huP : u ∈ Pol p r LLw := grLat_le_pol LLw J M ρ w _ e hu
   have hne : u.support.Nonempty := by rwa [Finset.nonempty_iff_ne_empty, Ne, support_eq_empty]
-  obtain ⟨m, hm, hmax⟩ := Finset.exists_max_image u.support (fun m => ‖coeff m u‖) hne
-  set a := coeff m u with ha
+  obtain ⟨m, hm, hmax⟩ := Finset.exists_max_image u.support (fun m => ‖AddMonoidAlgebra.coeff u m‖) hne
+  set a := AddMonoidAlgebra.coeff u m with ha
   have ha0 : a ≠ 0 := mem_support_iff.mp hm
   have han : 0 < ‖a‖ := norm_pos_iff.mpr ha0
   have hmD : MultiDeg LLw m := by
@@ -144,13 +193,13 @@ theorem graded_piece_bound_holds : GradedPieceBound := by
   set u0 := a⁻¹ • u with hu0def
   have hu0I : u0 ∈ IntPol p (Fin (K + 1) × Fin r) := by
     refine Formalism.GM.TM.mem_intPol_of_norm _ fun m' => ?_
-    rw [hu0def, coeff_smul, smul_eq_mul, norm_mul, norm_inv, inv_mul_le_iff₀ han, mul_one]
+    rw [hu0def, MvPolynomial.coeff_smul, smul_eq_mul, norm_mul, norm_inv, inv_mul_le_iff₀ han, mul_one]
     by_cases hm' : m' ∈ u.support
     · exact hmax m' hm'
     · rw [notMem_support_iff.mp hm', norm_zero]; exact han.le
   have hu0X : u0 ∈ XX := XX.smul_mem _ (hGX u hu)
-  have hu0c : ‖coeff m u0‖ = 1 := by
-    rw [hu0def, coeff_smul, smul_eq_mul, ← ha, inv_mul_cancel₀ ha0, norm_one]
+  have hu0c : ‖AddMonoidAlgebra.coeff u0 m‖ = 1 := by
+    rw [hu0def, MvPolynomial.coeff_smul, smul_eq_mul, ← ha, inv_mul_cancel₀ ha0, norm_one]
   have huu0 : u = a • u0 := by rw [hu0def, smul_smul, mul_inv_cancel₀ ha0, one_smul]
   have hy : ((p : ℚ_[p]) ^ c) • u0 ∈ Gr := hSat u0 hu0X hu0I
   have hpc : ((p : ℚ_[p]) ^ c) ≠ 0 := pow_ne_zero _ hpQ

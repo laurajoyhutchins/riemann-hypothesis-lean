@@ -1,7 +1,53 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.PeriodRingComparison.CrystallinePeriodRings.AcrisNAlgebraMapAinf
-import Development.AutomorphicArithmetic.IntegralCasts.CrystallinePeriods.UniformContinuousConstSMulOfIsIsometricSMul
-import Development.WeilBound.CoreStatements.CrystallinePeriodRings.AinfMapSurjective
+module
+
+public import Development.WeilBound.CoreStatements.CrystallinePeriodRings.ExistsMapEqOfPowMul
+public import Development.WeilBound.CoreStatements.PeriodRingComparison.CrystallinePeriodRings.GammaEqDpow
+import Development.AutomorphicArithmetic.IntegralCasts.CrystallinePeriods.EqZeroOfPMulEqZero
+public import Development.WeilBound.CoreStatements.CrystallinePeriodRings.FrobAinfMapFrobenius
+public import Development.WeilBound.CoreStatements.PeriodRingComparison.CrystallinePeriodRings.AcrisNAlgebraMapAinf
+import GroundTheory.PAdicHodge.ACrisBdRInj
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.MetricSpace.Ultra.TotallySeparated
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -25,8 +71,21 @@ theorem coe_gOC (g : GQ l) (x : OC l) :
   smul_cp_eq l g x
 
 theorem tiltMap_gOC (g : GQ l) : Reformulated.AutPerF.Tilt.map l (gOC l g) = PositivityTheory.LocInh.galT g := by
-  refine RingHom.ext fun x => (PositivityTheory.LocInh.galT_ext fun n y hy => ⟨gOC l g y, coe_gOC l g y, ?_⟩).symm
-  rw [Reformulated.AutPerF.Tilt.coeff_map, hy, Ideal.quotientMap_mk]
+  refine RingHom.ext fun x => ?_
+  apply Perfection.ext
+  intro n
+  change PreTilt.coeff n (Reformulated.AutPerF.Tilt.map l (gOC l g) x) =
+    PreTilt.coeff n (PositivityTheory.LocInh.galT g x)
+  obtain ⟨y, hy⟩ := Ideal.Quotient.mk_surjective (PreTilt.coeff n x)
+  have h1 := PositivityTheory.LocInh.frob_coeff_tiltMap x n y hy.symm
+  have h2 : PreTilt.coeff n (PositivityTheory.LocInh.galT g x) = (Formalism.Per6.modPEquiv l).symm
+      (modPMap (galCp (Formalism.Per6.toBot g) : ℂ_[l] →+* ℂ_[l]) (AInf.norm_galCp_toRingHom (Formalism.Per6.toBot g))
+        (PreTilt.coeff n (Formalism.Per6.tiltMap l x))) := rfl
+  rw [h2, h1, modPMap_mk]
+  rw [Reformulated.AutPerF.Tilt.coeff_map, ← hy, Ideal.quotientMap_mk]
+  apply congrArg
+  apply Subtype.ext
+  exact coe_gOC l g y
 
 theorem ainfMap_gOC (g : GQ l) (a : Reformulated.AutPerF.Ainf l (OC l)) :
     Formalism.Per6.ainfMap l (Reformulated.AutPerF.Ainf.map l (gOC l g) a) =

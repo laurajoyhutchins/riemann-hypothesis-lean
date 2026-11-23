@@ -1,6 +1,53 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.PublishedTheorems.PoitouTateDuality.PtfsDefs
-import GroundTheory.ProfiniteCohomology.PoitouTate.PoitouTateNineTermGs
+module
+
+public import GroundTheory.ProfiniteCohomology.PoincareDuality.NsmulEqZeroOfNonemptyAddEquiv
+public import GroundTheory.ProfiniteCohomology.RestrictedRamification.BaseDefs
+public import Mathlib.RingTheory.PicardGroup
+public import ReciprocityTheory.Hypotheses.GalCoh
+public import GroundTheory.ProfiniteCohomology.CartierDual
+import GroundTheory.ProfiniteCohomology.RestrictedRamification.SUnits
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RootsOfUnity.AlgebraicallyClosed
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -60,8 +107,8 @@ variable {Γ H : Type} [Group Γ] [Group H] [TopologicalSpace Γ] [TopologicalSp
   (hM : ∀ g m, eM (ρ g m) = A.ρ (θ g) (eM m)) (rr : ZMod N ≃+ D.V)
   (hr : ∀ g c, D.ρ (θ g) (rr c) = rr ((χ g : ZMod N) * c))
 
-include hM hr in
 
+include hM hr in
 theorem dualGen : ∃ eD : TDual (ZMod N) M ≃+ (dualRep D A).V,
     (∀ g f, eD (twDual χ ρ g f) = (dualRep D A).ρ (θ g) (eD f)) ∧
       ∀ f m, (eD f : A.V →ₗ[ULift.{0} ℤ] D.V) (eM m) = rr (f m) := by
@@ -81,7 +128,7 @@ theorem dualGen : ∃ eD : TDual (ZMod N) M ≃+ (dualRep D A).V,
         rw [AddEquiv.apply_symm_apply, AddEquiv.apply_symm_apply]
       map_add' := fun f f' => LinearMap.ext fun a => by
         show rr ((f + f') (eM.symm a)) = rr (f (eM.symm a)) + rr (f' (eM.symm a))
-        rw [← map_add]
+        rw [← map_add (f := _)]
         rfl }
   refine ⟨eD, fun g f => ?_, fun f m => ?_⟩
   · refine LinearMap.ext fun a => ?_
@@ -102,7 +149,7 @@ theorem exists_root_of_primitive {L : Type} [Field L] {N : ℕ} (hN0 : N ≠ 0) 
       rw [Units.val_pow_eq_pow_val, IsUnit.unit_spec, hz.pow_eq_one, Units.val_one]))⟩,
     IsUnit.unit_spec _⟩
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem gsRoots_act_rootOf (Kf : FiniteSubfield) [NumberField Kf.1] [IsAlgClosure Kf.1 (AlgebraicClosure ℚ)]
     (S : Finset (HeightOneSpectrum (𝓞 Kf.1))) {l r : ℕ} [Fact l.Prime] [NeZero (l ^ r)]
@@ -159,7 +206,7 @@ theorem natCast_pow_not_mem (Kf : FiniteSubfield) (S : Finset (HeightOneSpectrum
   have : ((l : ℕ) : 𝓞 Kf.1) ^ r ∈ v.asIdeal := by simpa using h
   exact Finset.mem_coe.2 (hS v (v.isPrime.mem_of_pow_mem r this))
 
-set_option maxHeartbeats 1000000 in
+
 theorem dualCmp' (Kf : FiniteSubfield) [NumberField Kf.1] [IsAlgClosure Kf.1 (AlgebraicClosure ℚ)]
     (S : Finset (HeightOneSpectrum (𝓞 Kf.1))) {l r : ℕ} [Fact l.Prime] (hr : 0 < r)
     (ζ : AlgebraicClosure ℚ) (hζ : IsPrimitiveRoot ζ (l ^ r)) (hS : ContainsAbove S l)

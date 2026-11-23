@@ -1,9 +1,59 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Jets.CmLatticeCommutatorPairingPowEqOneOfGoodLift
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ConstantCoeffShiftS
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.CpTransportedTaylorSeriesInChartRingHomLaws
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.DvdAevalSubAevalTwo
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.UwEllipticFlow
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Jets.CmLatticeCommutatorPairingPowEqOneOfGoodLift
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ConstantCoeffShiftS
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.CpTransportedTaylorSeriesInChartRingHomLaws
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.DvdAevalSubAevalTwo
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.UwEllipticFlow
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.MvPolynomial.IrreducibleQuadratic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open PowerSeries GlobalTheory.MomOne
 open scoped ComplexConjugate BigOperators Topology
 
@@ -26,7 +76,7 @@ lemma bdd_add {f g : ℂ_[q]⟦X⟧} (hf : Bdd f) (hg : Bdd g) : Bdd (f + g) := 
   obtain ⟨A, hA⟩ := hf
   obtain ⟨B, hB⟩ := hg
   refine ⟨A + B, fun n => ?_⟩
-  rw [map_add]
+  rw [map_add (f := _)]
   exact (norm_add_le _ _).trans (add_le_add (hA n) (hB n))
 
 lemma bdd_mul {f g : ℂ_[q]⟦X⟧} (hf : Bdd f) (hg : Bdd g) : Bdd (f * g) := by
@@ -47,7 +97,7 @@ lemma shift_aeval {ζ : ℂ_[q]} (h : ‖ζ - 1‖ < 1) {u w : ℂ_[q]⟦X⟧} (
     simp only [MvPolynomial.aeval_C]
     exact ⟨bdd_C c, Shift.shiftS_C ζ c⟩
   | add p r hp hr =>
-    simp only [map_add]
+    simp only [map_add (f := _)]
     exact ⟨bdd_add hp.1 hr.1, by rw [Shift.shiftS_add h hp.1 hr.1, hp.2, hr.2]⟩
   | mul_X p i hp =>
     have hi : Bdd (![u, w] i) := by
@@ -72,7 +122,7 @@ lemma hat_eval (ι : ℂ ≃+* ℂ_[q]) {ℓ : ℂ_[q]⟦X⟧} (hℓ : constantC
     rw [h2]
     simp
   | add p r hp hr =>
-    simp only [map_add, MvPolynomial.eval₂_add]
+    simp only [map_add (f := _), MvPolynomial.eval₂_add]
     exact ⟨hp.1.add hr.1, by rw [(h1 _ _ hp.1 hr.1).1, hp.2, hr.2]⟩
   | mul_X p i hp =>
     have hi : AnalyticAt ℂ (fun z => ![F z, G z] i) 0 := by
@@ -84,8 +134,8 @@ lemma hat_eval (ι : ℂ ≃+* ℂ_[q]) {ℓ : ℂ_[q]⟦X⟧} (hℓ : constantC
     simp only [map_mul, MvPolynomial.aeval_X, MvPolynomial.eval₂_mul, MvPolynomial.eval₂_X]
     exact ⟨hp.1.mul hi, by rw [(h1 _ _ hp.1 hi).2.1, hp.2, hi2]⟩
 
-lemma one_add_X_mul_derivative_logS : (1 + X) * derivative ℂ_[q] (logS : ℂ_[q]⟦X⟧) = 1 := by
-  have hc : ∀ n, coeff n (derivative ℂ_[q] (logS : ℂ_[q]⟦X⟧)) = (-1) ^ n := by
+lemma one_add_X_mul_derivative_logS : (1 + X) * derivative (logS : ℂ_[q]⟦X⟧) = 1 := by
+  have hc : ∀ n, coeff n (derivative (logS : ℂ_[q]⟦X⟧)) = (-1) ^ n := by
     intro n
     have hk : ((n : ℂ_[q]) + 1) ≠ 0 := by exact_mod_cast Nat.succ_ne_zero n
     rw [coeff_derivative, logS, coeff_mk, if_neg (Nat.succ_ne_zero n)]
@@ -93,7 +143,7 @@ lemma one_add_X_mul_derivative_logS : (1 + X) * derivative ℂ_[q] (logS : ℂ_[
     field_simp
     ring
   ext n
-  rw [add_mul, one_mul, map_add]
+  rw [add_mul, one_mul, map_add (f := _)]
   cases n with
   | zero => rw [coeff_zero_X_mul, hc]; simp
   | succ n => rw [coeff_succ_X_mul, hc, hc, coeff_one, if_neg (Nat.succ_ne_zero n)]; ring
@@ -104,7 +154,7 @@ lemma constantCoeff_chart (ω : ℂ_[q]) : constantCoeff (C ω * logS : ℂ_[q]�
 lemma DT_hat (ι : ℂ ≃+* ℂ_[q]) (ω : ℂ_[q]) {G : ℂ → ℂ} (hG : AnalyticAt ℂ G 0) :
     DT (hat ι (C ω * logS) G) = C ω * hat ι (C ω * logS) (deriv G) := by
   obtain ⟨-, -, -, -, h5, -⟩ := TaylorRead.hat_laws q ι _ (constantCoeff_chart ω)
-  have hd : derivative ℂ_[q] (C ω * logS : ℂ_[q]⟦X⟧) = C ω * derivative ℂ_[q] logS := by
+  have hd : derivative (C ω * logS : ℂ_[q]⟦X⟧) = C ω * derivative logS := by
     rw [Derivation.leibniz]; simp
   rw [DT, h5 G hG, hd]
   linear_combination (C ω * hat ι (C ω * logS) (deriv G)) * one_add_X_mul_derivative_logS (q := q)
@@ -165,7 +215,7 @@ def IntLt (n : ℕ) (f : ℂ_[q]⟦X⟧) : Prop := ∀ m < n, ‖coeff m f‖ �
 
 lemma intLt_add {n : ℕ} {f g : ℂ_[q]⟦X⟧} (hf : IntLt n f) (hg : IntLt n g) : IntLt n (f + g) := by
   intro m hm
-  rw [map_add]
+  rw [map_add (f := _)]
   exact (IsUltrametricDist.norm_add_le_max _ _).trans (max_le (hf m hm) (hg m hm))
 
 lemma intLt_mul {n : ℕ} {f g : ℂ_[q]⟦X⟧} (hf : IntLt n f) (hg : IntLt n g) : IntLt n (f * g) := by

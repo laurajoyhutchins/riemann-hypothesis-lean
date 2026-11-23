@@ -1,6 +1,50 @@
-import Mathlib
-import Formalism.LocalToGlobal.Columns.RowFormsLemmas
-import Formalism.LocalToGlobal.Divisibility.ProjLemmas
+module
+
+public import Formalism.LocalToGlobal.Columns.GSetLemmas
+public import Formalism.LocalToGlobal.Columns.RowForms
+public import Formalism.LocalToGlobal.Columns.RowFormsLemmas
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Module
 
@@ -21,12 +65,13 @@ theorem rf_asAlgebraHom_eq (a : MonoidAlgebra K A) : ρ.asAlgebraHom a = ∑ t :
 
 theorem rf_coord_act (t : A) (φ : S.EqFun) :
     S.coordOf h S.outSec (ρ t φ) = ((S.toCSD h).actMat (S.repCSD h ρ) t).mulVec (S.coordOf h S.outSec φ) := by
-  have c : ∀ x, S.coordOf h S.outSec x = ⇑((S.toCSD h).basis.repr (S.res h x)) := fun x => rfl
+  have c : ∀ x, S.coordOf h S.outSec x = (S.toCSD h).basis.equivFun (S.res h x) := fun x => rfl
   have e1 : (S.repCSD h ρ) t (S.res h φ) = S.res h (ρ t φ) := by
     show (S.res h) (ρ t ((S.res h).symm (S.res h φ))) = _
     rw [LinearEquiv.symm_apply_apply]
   rw [c, c]
   unfold CSD.actMat
+  simp only [Basis.equivFun_apply]
   rw [LinearMap.toMatrix_mulVec_repr, e1]
 
 theorem rf_coord_ga (a : MonoidAlgebra K A) (φ : S.EqFun) :
@@ -36,9 +81,11 @@ theorem rf_coord_ga (a : MonoidAlgebra K A) (φ : S.EqFun) :
   have hsum : ∀ {m : ℕ} (M : A → Matrix (Fin m) (Fin m) K) (c : A → K) (v : Fin m → K),
       (∑ t, c t • M t).mulVec v = ∑ t, c t • (M t).mulVec v := by
     intro m M c v
+
     rw [← Matrix.toLin'_apply, map_sum, LinearMap.sum_apply]
     refine Finset.sum_congr rfl (fun t _ => ?_)
     rw [map_smul, LinearMap.smul_apply, Matrix.toLin'_apply]
+
   rw [rf_asAlgebraHom_eq, LinearMap.sum_apply, map_sum]
   unfold CSD.gaMat
   rw [hsum]

@@ -1,4 +1,56 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.LiteratureResults.KTheoryStability.ReductionBoundsTorsion.StokesSimplices.SumInsertNth
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.LiteratureResults.KTheoryStability.ReductionBoundsTorsion.StokesSimplices.SubSlice
+public import Mathlib.Analysis.Calculus.DifferentialForm.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.MeasureTheory.Function.LocallyIntegrable
+public import Mathlib.MeasureTheory.Integral.Bochner.Set
+
+@[expose] public section
 
 noncomputable section
 
@@ -22,7 +74,7 @@ lemma isCompact_Δ' (m : ℕ) : IsCompact (Δ m) := by
       simp only [Set.setOf_forall]
       exact isClosed_iInter fun j => isClosed_le continuous_const (continuous_apply j)
     have h2 : IsClosed {t : Fin m → ℝ | ∑ j, t j ≤ 1} :=
-      isClosed_le (continuous_finset_sum _ fun j _ => continuous_apply j) continuous_const
+      isClosed_le (continuous_finsetSum _ fun j _ => continuous_apply j) continuous_const
     exact h1.inter h2
   exact (isCompact_univ_pi fun _ => isCompact_Icc).of_isClosed_subset hcl hsub
 
@@ -90,7 +142,7 @@ theorem asm (hA : StokesSimplexSubdivision) (hH : SubHyp) (hS : SubSlice) (U : S
     (hφ r).continuousOn_fderiv_of_isOpen hU le_rfl
   set P : (Fin (q + 1) → ℝ) → V := fun t => y 0 + ∑ j, t j • (y j.succ - y 0) with hP
   have hPc : Continuous P :=
-    continuous_const.add (continuous_finset_sum _ fun j _ => (continuous_apply j).smul continuous_const)
+    continuous_const.add (continuous_finsetSum _ fun j _ => (continuous_apply j).smul continuous_const)
   have hW : IsOpen (P ⁻¹' U) := hU.preimage hPc
   have hΔW : Δ (q + 1) ⊆ P ⁻¹' U := fun t ht => hmem (q + 1) y hy t ht
   have hmeas : ∀ m, MeasurableSet (Δ m) := fun m => (isCompact_Δ' m).isClosed.measurableSet
@@ -143,7 +195,7 @@ theorem asm (hA : StokesSimplexSubdivision) (hH : SubHyp) (hS : SubSlice) (U : S
       ∫ t in Δ (q + 1), fderiv ℝ (fun z => ω z (i.removeNth fun j => y j.succ - y 0)) (P t)
         (y i.succ - y 0) := by
     show ∫ t in Δ (q + 1), extDeriv ω (P t) (fun j => y j.succ - y 0) = _
-    rw [setIntegral_congr_fun (hmeas _) hext, integral_finset_sum]
+    rw [setIntegral_congr_fun (hmeas _) hext, integral_finsetSum]
     · congr 1
       funext i
       rw [← integral_const_mul]
@@ -163,14 +215,15 @@ theorem asm (hA : StokesSimplexSubdivision) (hH : SubHyp) (hS : SubSlice) (U : S
       rw [← hA V q]
       congr 1
       funext j
-      simp only [Fin.succ_zero_eq_one, sub_sub_sub_cancel_right]
-    rw [e1, integral_finset_sum]
+      simp only [Fin.succ_zero_eq_one]
+      abel
+    rw [e1, integral_finsetSum]
     · congr 1
       funext i
       rw [integral_const_mul]
     · intro i _
       have hc : ContinuousOn (fun s : Fin q → ℝ => y 1 + ∑ j, s j • (y j.succ.succ - y 1)) (Δ q) :=
-        (continuous_const.add (continuous_finset_sum _ fun j _ =>
+        (continuous_const.add (continuous_finsetSum _ fun j _ =>
           (continuous_apply j).smul continuous_const)).continuousOn
       exact (continuousOn_const.mul ((hφc (i.removeNth fun j => y j.succ - y 0)).comp hc hQ)).integrableOn_compact (isCompact_Δ' _)
   rw [hR, Fin.sum_univ_succ]

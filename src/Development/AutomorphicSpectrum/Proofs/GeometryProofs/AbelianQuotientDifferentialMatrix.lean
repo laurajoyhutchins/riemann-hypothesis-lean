@@ -1,6 +1,51 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.SqMap
-import Formalism.SharpRestriction.Divisibility.GeneratorPowers.LinEig
+module
+
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.SqMap
+public import Formalism.SharpRestriction.Divisibility.GeneratorPowers.LinEig
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AutomorphicSpectrum.Definitions.AdelicLattices.FactPrimes
+import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.GermComp1ZeroPointLeft
+import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.IsSplitGaussChars
+
+@[expose] public section
 
 noncomputable section
 
@@ -48,11 +93,10 @@ theorem tanPt_add (F : Germ.FGLaw S d)
     rw [tanV_comp_jetMap]
     congr 1
     funext p
-    simp only [MvPolynomial.coeff_X]
     rw [Finset.sum_eq_single (i, p.2)]
     · simp
     · intro b _ hb
-      rw [if_neg (fun h => hb (Finsupp.single_left_injective one_ne_zero h).symm), zero_mul]
+      rw [MvPolynomial.coeff_X, if_neg (fun h => hb (Finsupp.single_left_injective one_ne_zero h).symm), zero_mul]
     · intro h; exact absurd (Finset.mem_univ _) h
   have hL : (tanV ψv : Jet S (Fin 2 × Fin d) (0 + 1) →ₐ[S] DualNumber S).comp
       (jetSubstP 1 fun p : Fin 1 × Fin d => psTrunc 1 (F.F p.2)) =
@@ -61,8 +105,8 @@ theorem tanPt_add (F : Germ.FGLaw S d)
     rw [tanV_comp_jetMap]
     congr 1
     funext p
-    have hco : ∀ s : Fin 2 × Fin d, MvPolynomial.coeff (Finsupp.single s 1)
-        (psTrunc 1 (F.F p.2) - MvPolynomial.C (MvPolynomial.constantCoeff (psTrunc 1 (F.F p.2)))) =
+    have hco : ∀ s : Fin 2 × Fin d, AddMonoidAlgebra.coeff (psTrunc 1 (F.F p.2) - MvPolynomial.C (MvPolynomial.constantCoeff (psTrunc 1 (F.F p.2))))
+        (Finsupp.single s 1) =
         if s.2 = p.2 then 1 else 0 := by
       intro s
       rw [MvPolynomial.coeff_sub, MvPolynomial.coeff_C, if_neg (Finsupp.single_ne_zero.2 one_ne_zero).symm,

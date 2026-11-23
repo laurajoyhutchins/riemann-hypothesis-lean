@@ -1,6 +1,53 @@
-import Mathlib
-import Formalism.GL3MeanSquares.LegendreCoefficient
-import Formalism.FormalGroupWitt.FormalGroupWittProofs.IntegralSubstVector
+module
+
+public import Formalism.GL3MeanSquares.LegendreCoefficient
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Data.Finset.MulAntidiagonal
+
+@[expose] public section
 
 noncomputable section
 
@@ -64,7 +111,7 @@ theorem expS_add (f g : MvPowerSeries σ K) (hf : MvPowerSeries.constantCoeff f 
     rfl
   have h0 : ∀ i : Fin 2, MvPowerSeries.constantCoeff (MvPowerSeries.X i : MvPowerSeries (Fin 2) K) = 0 :=
     fun i => MvPowerSeries.constantCoeff_X i
-  rw [← e1, ← subst_expS h hh _ (by rw [map_add, h0, h0, add_zero]), exp_biv,
+  rw [← e1, ← subst_expS h hh _ (by rw [map_add (f := _), h0, h0, add_zero]), exp_biv,
     MvPowerSeries.subst_mul hS, subst_expS h hh _ (h0 0), subst_expS h hh _ (h0 1), e2, e2]
   rfl
 
@@ -217,30 +264,6 @@ theorem integral_of_mul_eq_one [IsUltrametricDist K] {u v : MvPowerSeries σ K} 
           zero_le_one).trans (by norm_num)
   intro d
   exact key _ d rfl
-
-def CT (F : ℕ → MvPowerSeries σ K) (f : MvPowerSeries σ K) : Prop :=
-  ∀ n, Filter.Tendsto (fun k => MvPowerSeries.coeff n (F k)) Filter.atTop
-    (nhds (MvPowerSeries.coeff n f))
-
-theorem CT.mul {F G : ℕ → MvPowerSeries σ K} {f g : MvPowerSeries σ K} (hF : CT F f)
-    (hG : CT G g) : CT (fun k => F k * G k) (f * g) := by
-  classical
-  intro n
-  simp only [MvPowerSeries.coeff_mul]
-  apply tendsto_finset_sum
-  intro p _
-  exact (hF p.1).mul (hG p.2)
-
-theorem CT.pow {F : ℕ → MvPowerSeries σ K} {f : MvPowerSeries σ K} (hF : CT F f) (n : ℕ) :
-    CT (fun k => F k ^ n) (f ^ n) := by
-  induction n with
-  | zero =>
-    intro d
-    simp only [pow_zero]
-    exact tendsto_const_nhds
-  | succ n ih =>
-    simp only [pow_succ]
-    exact ih.mul hF
 
 theorem inLam_zero [IsUltrametricDist K] [Algebra ℚ K] : InLam (0 : MvPowerSeries σ K) := by
   refine ⟨map_zero _, ?_⟩

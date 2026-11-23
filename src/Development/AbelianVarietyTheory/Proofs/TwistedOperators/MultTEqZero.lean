@@ -1,8 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.SobolevContinuousFormGardingVector
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LocallyCompactSecondCountableT2
-import Development.AbelianVarietyTheory.Proofs.HeightProofs.HilbertSchurUnitaryIrreducibleScalar
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.MultiplicitySpaceEqZeroOfApplyNonzeroTensorZero
+module
+
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.EqZeroOfInnerSmooth
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.HilbertSchurUnitaryIrreducibleScalar
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.SobolevContinuousFormGardingVector
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.MultiplicitySpaceEqZeroOfApplyNonzeroTensorZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -69,8 +115,8 @@ theorem density {G H ι : Type} [Group G] [Fintype ι] [NormedAddCommGroup H] [I
         rw [← hback g u, hin]
         exact Submodule.inner_right_of_mem_orthogonal (hS _ u hu) (S.sub_starProjection_mem_orthogonal x)
       have h3 : amp (π g) x = amp (π g) (S.starProjection x) + amp (π g) (x - S.starProjection x) := by
-        rw [← map_add, add_sub_cancel]
-      rw [h3, map_add, Submodule.starProjection_eq_self_iff.2 h1,
+        rw [← map_add (f := _), add_sub_cancel]
+      rw [h3, map_add (f := _), Submodule.starProjection_eq_self_iff.2 h1,
         (Submodule.starProjection_apply_eq_zero_iff S).2 h2, add_zero]
     have hcomp : ∀ i j, ∃ c : ℂ, ∀ y : H,
         (S.starProjection (WithLp.toLp 2 (Pi.single j y))).ofLp i = c • y := by
@@ -98,11 +144,13 @@ theorem density {G H ι : Type} [Group G] [Fintype ι] [NormedAddCommGroup H] [I
         rw [WithLp.ofLp_sum, Finset.sum_apply]
         simp [Pi.single_apply]
       conv_lhs => rw [hz]
+
       rw [map_sum, WithLp.ofLp_sum, Finset.sum_apply]
       exact Finset.sum_congr rfl fun j _ => hc i j _
     have hPT : ∀ z, S.starProjection (amp T z) = amp T (S.starProjection z) := by
       intro z
       refine (WithLp.ext_iff 2).2 (funext fun i => ?_)
+
       rw [hPz, hamp, hPz, map_sum]
       simp only [hamp, map_smul]
     have hξS : ξ ∈ S := S0.le_topologicalClosure (Submodule.subset_span ⟨1, hone ξ⟩)
@@ -181,7 +229,7 @@ theorem density_sob {n : ℕ} {ε : Fin n → Bool} {H ι : Type} [Fintype ι] [
     let Gl : H →ₗ[ℂ] H :=
       { toFun := gard ε σ φ
         map_add' := fun w w' => by
-          simp only [gard, map_add, smul_add]
+          simp only [gard, map_add (f := _), smul_add]
           exact MeasureTheory.integral_add (hint w) (hint w')
         map_smul' := fun c w => by
           simp only [gard, map_smul, RingHom.id_apply]
@@ -274,11 +322,6 @@ private theorem sum_smul_T_update_eq_zero_of_sum_eq_zero {D : D7} {θ : D.what�
 variable {D : D7} {θ : D.what₂.Tau → (Ainf D.host.F ⊗[D.host.F] D.host.E →+* ℂ)} {V : HSp D}
   {S : D.what₂.Tau → SPar} {M : DSModel V S} {J : Set (GA D V)} {χ : GA D V → ℂ}
 
-theorem intersection_update_fsHerm_neg_one {T : MMap M} (hT : IsMultMap θ M J χ T) (τ : D.what₂.Tau) (A : M.sm τ →ₗ[ℂ] M.sm τ) {ι : Type} [Fintype ι]
-    (c : ι → ℂ) (v : ι → M.Vec) (h : ∑ i, c i • T (v i) = 0) :
-    ∑ i, c i • T (Function.update (v i) τ (A (v i τ))) = 0 := by
-  exact sum_smul_T_update_eq_zero_of_sum_eq_zero hT.equiv hT.cont τ A c v h
-
 private theorem sum_smul_T_map_eq_zero_of_sum_eq_zero {D : D7} {θ : D.what₂.Tau → (Ainf D.host.F ⊗[D.host.F] D.host.E →+* ℂ)} {V : HSp D}
     {S : D.what₂.Tau → SPar} {M : DSModel V S} {T : MMap M} (heq : ∀ τ, ∀ g ∈ Formalism.QuantumDeterminants.UH (gramAt D V τ), ∀ (v : M.Vec) (w : M.sm τ),
       (w : M.H τ) = M.rep τ g (v τ) → T (Function.update v τ w) = rTr V (atTau θ V τ g) (T v))
@@ -308,10 +351,6 @@ private theorem sum_smul_T_map_eq_zero_of_sum_eq_zero {D : D7} {θ : D.what₂.T
       simp only [hv]
       exact h1
   simpa using step Finset.univ
-
-theorem slots {T : MMap M} (hT : IsMultMap θ M J χ T) (A : ∀ τ, M.sm τ →ₗ[ℂ] M.sm τ) {ι : Type} [Fintype ι]
-    (c : ι → ℂ) (v : ι → M.Vec) (h : ∑ i, c i • T (v i) = 0) : ∑ i, c i • T (fun τ => A τ (v i τ)) = 0 := by
-  exact sum_smul_T_map_eq_zero_of_sum_eq_zero hT.equiv hT.cont A c v h
 
 private theorem sobCont_zero_twisted_operators {n : ℕ} {H : Type} [NormedAddCommGroup H] [InnerProductSpace ℂ H]
     (Lie : Set (Matrix (Fin n) (Fin n) ℂ)) (σ : Matrix (Fin n) (Fin n) ℂ → (H →L[ℂ] H)) :
@@ -392,6 +431,7 @@ theorem multT_eq_zero {u : (⨂[ℂ] τ, M.sm τ) →ₗ[ℂ] (GA D V → ℂ)} 
   have hxsum : x = ∑ a : f.support, f a • PiTensorProduct.tprod ℂ (a : M.Vec) := by
     rw [← hf, Finsupp.sum, ← Finset.sum_coe_sort]
   have h0 : ∑ a : f.support, f a • T a = 0 := by
+
     rw [hxsum, map_sum] at h
     simpa only [map_smul, huT] using h
   obtain ⟨w', hw'⟩ : ∃ w' : M.Vec, tprodInnerFun w' x ≠ 0 := by
@@ -410,6 +450,7 @@ theorem multT_eq_zero {u : (⨂[ℂ] τ, M.sm τ) →ₗ[ℂ] (GA D V → ℂ)} 
     MultilinearMap.map_smul_univ T (fun τ => ⟪w' τ, (a : M.Vec) τ⟫_ℂ) w
   simp only [hA, smul_smul, ← Finset.sum_smul] at h1
   have hs : ∑ a : f.support, f a * ∏ τ, ⟪w' τ, (a : M.Vec) τ⟫_ℂ = tprodInnerFun w' x := by
+
     rw [hxsum, map_sum]
     simp only [map_smul, tprodInnerFun_tprod, smul_eq_mul]
   rw [hs] at h1

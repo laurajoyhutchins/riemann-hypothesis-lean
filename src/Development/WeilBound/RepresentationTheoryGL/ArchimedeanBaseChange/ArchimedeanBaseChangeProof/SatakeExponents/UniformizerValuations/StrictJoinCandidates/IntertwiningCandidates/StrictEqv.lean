@@ -1,5 +1,43 @@
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.SatakeExponents.UniformizerValuations.StrictJoinCandidates.IntertwiningCandidates.StrictJoin
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.SatakeExponents.FiniteDiscreteFamilies.LocalCompatibilityGL.FixedMonoBo
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.SatakeExponents.UniformizerValuations.StrictJoinCandidates.IntertwiningCandidates.StrictJoin
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.SatakeExponents.FiniteDiscreteFamilies.LocalCompatibilityGL.FixedMonoBo
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -7,7 +45,7 @@ open NumberField IsDedekindDomain Matrix
 open GlobalTheory.CuspRep GlobalTheory.PRep Formalism.UG Formalism.BasicNotions GlobalTheory.UnitaryBC Formalism.L2.Host GlobalTheory.BCT PositivityTheory.Rg.BcB.F.F5 PositivityTheory.Rg.BcB.F.Tail PositivityTheory.Rg.BcB.SpectralAccumulation
 open scoped Classical
 
-set_option synthInstance.maxHeartbeats 200000
+
 
 attribute [local instance] GlobalTheory.LocalData.complRel GlobalTheory.LocalData.isLocalField
 
@@ -19,7 +57,7 @@ namespace StrictEquivalence
 
 variable {E : Type} [Field E] [NumberField E] [IsCMField E]
 
-theorem siso_symm (x y : Σ M : ℕ, Submodule ℂ (Sm E M)) (hx : IsStable x.2) (h : SIso x y) : SIso y x := by
+theorem siso_symm (x y : Σ M : ℕ, Submodule ℂ (Sm E M)) (hx : _root_.GlobalTheory.CuspRep.IsStable x.2) (h : SIso x y) : SIso y x := by
   obtain ⟨x1, x2⟩ := x
   obtain ⟨y1, y2⟩ := y
   obtain ⟨h, hI⟩ := h
@@ -50,7 +88,7 @@ theorem forall₂_trans_of {α : Type} {R : α → α → Prop} (hR : ∀ x y z,
   | _, _, _, List.Forall₂.cons hab htl, List.Forall₂.cons hbc htl' =>
       List.Forall₂.cons (hR _ _ _ hab hbc) (forall₂_trans_of hR htl htl')
 
-theorem parts_stable {n : ℕ} (P : Pre E n) : ∀ x ∈ parts P, IsStable x.2 := by
+theorem parts_stable {n : ℕ} (P : Pre E n) : ∀ x ∈ parts P, _root_.GlobalTheory.CuspRep.IsStable x.2 := by
   intro x hx
   rw [parts, List.mem_ofFn] at hx
   obtain ⟨i, rfl⟩ := hx
@@ -61,7 +99,7 @@ end StrictEquivalence
 open StrictEquivalence in
 theorem StrictEqv_holds : StrictEqv := by
   intro E _ _ _ n P P' P''
-  refine ⟨fun ⟨hF, hc, hm⟩ => ⟨forall₂_flip_of (p := fun x => IsStable x.2) (fun x y hx h => siso_symm x y hx h)
+  refine ⟨fun ⟨hF, hc, hm⟩ => ⟨forall₂_flip_of (p := fun x => _root_.GlobalTheory.CuspRep.IsStable x.2) (fun x y hx h => siso_symm x y hx h)
       (parts_stable P) hF, hc.symm, fun i => ?_⟩, fun ⟨hF, hc, hm⟩ ⟨hF', hc', hm'⟩ =>
       ⟨forall₂_trans_of siso_trans hF hF', hc.trans hc', fun i => ?_⟩⟩
   · rw [hm (Fin.cast hc.symm i)]

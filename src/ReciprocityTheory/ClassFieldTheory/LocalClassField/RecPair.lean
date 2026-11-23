@@ -1,6 +1,50 @@
-import Mathlib
-import ReciprocityTheory.ClassFieldTheory.LocalClassField.RecPairDefs
-import ReciprocityTheory.ClassFieldTheory.LocalClassField.RecPairA
+module
+
+public import ReciprocityTheory.ClassFieldTheory.LocalClassField.RecPairDefs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ClassFieldTheory.LocalClassField.RecPairA
+import ReciprocityTheory.GroupCohomology.DEqZeroOfMemB
+
+@[expose] public section
 
 namespace ReciprocityTheory.DiscreteGroups.LocalClassField
 
@@ -66,13 +110,13 @@ theorem IsPairClass.unique {a : Kˣ} {χ : charGrp (GK p K)} {c c' : Br p K}
 theorem isPairClass_pairBr (a : Kˣ) (χ : charGrp (GK p K)) :
     IsPairClass p K (ofK p K (Additive.ofMul a)) χ (pairBr p K a χ) := by
   unfold pairBr
-  rw [dif_pos (exists_isPairClass a χ)]
+  rw [dite_eq_left (exists_isPairClass a χ)]
   exact (exists_isPairClass a χ).choose_spec
 
 theorem pairBr_mul (a b : Kˣ) (χ : charGrp (GK p K)) :
     pairBr p K (a * b) χ = pairBr p K a χ + pairBr p K b χ := by
   refine IsPairClass.unique (isPairClass_pairBr (a * b) χ) ?_
-  rw [ofMul_mul, map_add]
+  rw [ofMul_mul, map_add (f := _)]
   exact (isPairClass_pairBr a χ).add_left (fun g => kbarT_rho_ofK g _) (isPairClass_pairBr b χ)
 
 theorem pairBr_add (a : Kˣ) (χ ψ : charGrp (GK p K)) :
@@ -81,11 +125,11 @@ theorem pairBr_add (a : Kˣ) (χ ψ : charGrp (GK p K)) :
 
 theorem pairK_mul (a b : Kˣ) (χ : charGrp (GK p K)) : pairK p K (a * b) χ = pairK p K a χ + pairK p K b χ := by
   unfold pairK
-  rw [pairBr_mul, map_add]
+  rw [pairBr_mul, map_add (f := _)]
 
 theorem pairK_add (a : Kˣ) (χ ψ : charGrp (GK p K)) : pairK p K a (χ + ψ) = pairK p K a χ + pairK p K a ψ := by
   unfold pairK
-  rw [pairBr_add, map_add]
+  rw [pairBr_add, map_add (f := _)]
 
 theorem pairK_one (χ : charGrp (GK p K)) : pairK p K 1 χ = 0 := by
   have h := pairK_mul 1 1 χ

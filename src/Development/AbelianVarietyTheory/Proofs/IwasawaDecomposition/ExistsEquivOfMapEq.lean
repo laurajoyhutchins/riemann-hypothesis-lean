@@ -1,5 +1,57 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.MonodromyZeroOfWeilDeligneRepClassIff
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.MonodromyZeroOfWeilDeligneRepClassIff
+import Mathlib.Algebra.AffineMonoid.UniqueSums
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Charpoly.ToMatrix
+import Mathlib.LinearAlgebra.Eigenspace.Semisimple
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -113,7 +165,8 @@ namespace WD
 open Unram
 
 theorem lpUnr_spec (m : Multiset ℂ) (hm : (0 : ℂ) ∉ m) :
-    unr (lpUnr h m) ∧ frobEig (lpUnr h m) = m ∧ lpDim (lpUnr h m) = Multiset.card m := by
+    unr (lpUnr (h := h) m) ∧ frobEig (lpUnr (h := h) m) = m ∧
+      lpDim (lpUnr (h := h) m) = Multiset.card m := by
   classical
   refine ⟨(unr_mk _).mpr (WDRep.unr_diag _), ?_, ?_⟩
   · rw [lpUnr, frobEig_diag]
@@ -197,9 +250,9 @@ theorem frobEig_char (a χ : WD h) (z : ℂ) (ha : unr a) (hχ : unr χ) (hz : f
   rw [Finset.map_val, Multiset.map_map]
   rfl
 
-theorem lpZero_unr : unr (lpZero h) := (unr_mk _).mpr (WDRep.unr_diag _)
+theorem lpZero_unr : unr (lpZero (h := h)) := (unr_mk _).mpr (WDRep.unr_diag _)
 
-theorem frobEig_zero : frobEig (lpZero h) = 0 := by
+theorem frobEig_zero : frobEig (lpZero (h := h)) = 0 := by
   rw [lpZero, frobEig_diag]; simp
 
 theorem frobEig_ne_zero (a : WD h) (ha : unr a) : (0 : ℂ) ∉ frobEig a := by
@@ -207,7 +260,7 @@ theorem frobEig_ne_zero (a : WD h) (ha : unr a) : (0 : ℂ) ∉ frobEig a := by
   rw [frobEig_diag]
   simp
 
-theorem unr_eq_lpUnr (a : WD h) (ha : unr a) : a = lpUnr h (frobEig a) := by
+theorem unr_eq_lpUnr (a : WD h) (ha : unr a) : a = lpUnr (h := h) (frobEig a) := by
   classical
   have h1 := (lpUnr_spec (h := h) _ (frobEig_ne_zero a ha)).2.1
   obtain ⟨n, c, hc⟩ := exists_diag ha
@@ -241,11 +294,11 @@ theorem unr_iff_ine (a : WD h) :
       rw [map_one] at h4
       exact sub_eq_zero.mp (End.eq_zero_of_isNilpotent_isSemisimple ⟨_, h3⟩ h4)
 
-variable (h) in
 
+variable (h) in
 theorem unramified_laws :
-    (∀ m : Multiset ℂ, (0 : ℂ) ∉ m → unr (lpUnr h m) ∧ frobEig (lpUnr h m) = m ∧
-      lpDim (lpUnr h m) = Multiset.card m) ∧
+    (∀ m : Multiset ℂ, (0 : ℂ) ∉ m → unr (lpUnr (h := h) m) ∧
+      frobEig (lpUnr (h := h) m) = m ∧ lpDim (lpUnr (h := h) m) = Multiset.card m) ∧
     (∀ a b : WD h, unr (lpSum a b) ↔ unr a ∧ unr b) ∧
     (∀ (a : WD h) (s : ℝ), unr (lpTw a s) ↔ unr a) ∧
     (∀ a χ : WD h, lpDim χ = 1 → unr a → unr χ → unr (lpChar a χ)) ∧
@@ -254,9 +307,9 @@ theorem unramified_laws :
       frobEig (lpTw a s) = (frobEig a).map (· * ((normV w : ℕ) : ℂ) ^ ((s : ℝ) : ℂ))) ∧
     (∀ (a χ : WD h) (c : ℂ), unr a → unr χ → lpDim χ = 1 → frobEig χ = {c} →
       frobEig (lpChar a χ) = (frobEig a).map (· * c)) ∧
-    unr (lpZero h) ∧
-    frobEig (lpZero h) = 0 ∧
-    (∀ a : WD h, unr a → a = lpUnr h (frobEig a)) ∧
+    unr (lpZero (h := h)) ∧
+    frobEig (lpZero (h := h)) = 0 ∧
+    (∀ a : WD h, unr a → a = lpUnr (h := h) (frobEig a)) ∧
     (∀ a : WD h, unr a → mono0 a) ∧
     (∀ a : WD h, unr a → (0 : ℂ) ∉ frobEig a) ∧
     (∀ a : WD h, unr a → Multiset.card (frobEig a) = lpDim a) ∧

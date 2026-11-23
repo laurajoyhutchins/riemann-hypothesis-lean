@@ -1,14 +1,54 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.GlobalClassFormation.IdeleLimits.NormalFixingSubgroupGaloisClosure
-import GroundTheory.ProfiniteCohomology.FilteredHomology
+module
+
+public import GroundTheory.ProfiniteCohomology.GlobalClassFormation.IdeleLimits.NormalFixingSubgroupGaloisClosure
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
 
 open CategoryTheory NumberField IntermediateField GroundTheory.Global GroundTheory.Global.AdeleBaseChange
   FiniteSubfield IdeleLimit
-
-local notation "ℚ̄" => AlgebraicClosure ℚ
 
 noncomputable section
 
@@ -21,8 +61,8 @@ variable {F E : FiniteSubfield} [Fact (K ≤ F)] [Fact (K ≤ E)] [Fact (F ≤ E
 
 instance : IsScalarTower K.1 F.1 E.1 := IsScalarTower.of_algebraMap_eq fun _ ↦ rfl
 
-variable (K F E) in
 
+variable (K F E) in
 def levelRestrict : (E.1 ≃ₐ[K.1] E.1) →* (F.1 ≃ₐ[K.1] F.1) :=
   AlgEquiv.restrictNormalHom (F := K.1) (K₁ := E.1) F.1
 
@@ -46,19 +86,14 @@ theorem ideleMap_smul (τ : E.1 ≃ₐ[K.1] E.1) (x : IdeleGroup F.1) :
   exact (ideleEquiv_ideleEmbedding_of_comm ((levelRestrict K F E τ : F.1 ≃ₐ[K.1] F.1) : F.1 ≃+* F.1)
     (τ : E.1 ≃+* E.1) (fun y ↦ (coe_levelRestrict_apply τ y).symm) x).symm
 
-variable (K F E) in
 
+variable (K F E) in
 def levelMap : Rep.res (levelRestrict K F E) (ideleRep K.1 F.1) ⟶ ideleRep K.1 E.1 :=
   Rep.ofHom ⟨(MonoidHom.toAdditive (ideleMap (Fact.out : F ≤ E))).toIntLinearMap,
     fun τ => LinearMap.ext fun x => congrArg Additive.ofMul (ideleMap_smul τ x.toMul)⟩
 
-@[simp]
-theorem levelMap_hom_apply (x : Additive (IdeleGroup F.1)) :
-    (levelMap K F E).hom x = Additive.ofMul (ideleMap (Fact.out : F ≤ E) x.toMul) :=
-  rfl
 
 variable (K F E) in
-
 def levelTransition (n : ℕ) : cohomology (ideleRep K.1 F.1) n ⟶ cohomology (ideleRep K.1 E.1) n :=
   cohomologyMapAlong (levelRestrict K F E) continuous_levelRestrict (levelMap K F E) n
 

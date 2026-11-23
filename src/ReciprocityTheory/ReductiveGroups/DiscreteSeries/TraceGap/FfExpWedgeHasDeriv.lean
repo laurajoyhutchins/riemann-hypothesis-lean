@@ -1,5 +1,65 @@
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TraceGap.AlgebraMapInvFf
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TensorRepresentations.HasDerivAtInvExpCurveEntry
+module
+
+public import Mathlib.Analysis.Calculus.Deriv.Basic
+public import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+public import Mathlib.Analysis.Normed.Algebra.Exponential
+public import Mathlib.Topology.Instances.Matrix
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TraceGap.IsPhysSet
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+public import Mathlib.Analysis.Calculus.Deriv.Prod
+public import Mathlib.Analysis.Calculus.Deriv.Star
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TensorRepresentations.HasDerivAtInvExpCurveEntry
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TraceGap.AdMatConjTranspose
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TraceGap.AdPhysDiagSingle
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Analysis.Calculus.Deriv.Add
+public import Mathlib.Analysis.Calculus.Deriv.Comp
+public import Mathlib.Analysis.Calculus.Deriv.Mul
+
+@[expose] public section
 
 noncomputable section
 
@@ -50,12 +110,16 @@ theorem isDer_sum {ι : Type*} (s : Finset ι) {O : ι → Module.End ℂ (Fock 
 
 theorem cpV_cmV_ιMulti (u w : Fin n × Fin n → ℂ) : ∀ (p : ℕ) (v : Fin p → (Fin n × Fin n → ℂ)),
     cpV u (cmV w (ExteriorAlgebra.ιMulti ℂ p v)) =
-      ∑ i, dualV w (v i) • ExteriorAlgebra.ιMulti ℂ p (Function.update v i u)
-  | 0, v => by
+      ∑ i, dualV w (v i) • ExteriorAlgebra.ιMulti ℂ p (Function.update v i u) := by
+  intro p
+  induction p with
+  | zero =>
+    intro v
     simp only [cmV, ExteriorAlgebra.ιMulti_zero_apply, CliffordAlgebra.contractLeft_one, map_zero]
     rw [Fin.sum_univ_zero]
-  | p + 1, v => by
-    have ih := cpV_cmV_ιMulti u w p (Matrix.vecTail v)
+  | succ p ih =>
+    intro v
+    specialize ih (Matrix.vecTail v)
     simp only [cmV, cpV, LinearMap.mulLeft_apply] at ih ⊢
     have hanti : ExteriorAlgebra.ι ℂ u * ExteriorAlgebra.ι ℂ (v 0) =
         -(ExteriorAlgebra.ι ℂ (v 0) * ExteriorAlgebra.ι ℂ u) :=
@@ -70,8 +134,7 @@ theorem cpV_cmV_ιMulti (u w : Fin n × Fin n → ℂ) : ∀ (p : ℕ) (v : Fin 
       rw [mul_smul_comm, ExteriorAlgebra.ιMulti_succ_apply,
         Function.update_of_ne (Fin.succ_ne_zero i).symm]
       congr 3
-      funext j
-      simp only [Matrix.vecTail, Function.comp_apply, Function.update_apply, Fin.succ_inj]
+      exact (Fin.tail_update_succ (q := v) (i := i) (y := u)).symm
 
 theorem isDer_cpV_cmV (u w : Fin n × Fin n → ℂ) :
     IsDer (cpV u * cmV w) (LinearMap.smulRight (dualV w) u) := by
@@ -201,7 +264,7 @@ theorem adPhys_one' (w : Fin n × Fin n → ℂ) : adPhys ε 1 w = w := by
   simp [adPhys, adMat_one]
 
 def wedgeCoord (p : ℕ) :
-    MultilinearMap ℂ (fun _ : Fin p => Fin n × Fin n → ℂ) (Finset (Fin (n * n)) → ℂ) :=
+    (Fin p → (Fin n × Fin n → ℂ)) →ₘₗ[ℂ] (Finset (Fin (n * n)) → ℂ) :=
   (fockBasis n).equivFun.toLinearMap.compMultilinearMap (ExteriorAlgebra.ιMulti ℂ p).toMultilinearMap
 
 theorem wedgeCoord_eq_sum (p : ℕ) (v : Fin p → (Fin n × Fin n → ℂ)) :
@@ -212,9 +275,10 @@ theorem wedgeCoord_eq_sum (p : ℕ) (v : Fin p → (Fin n × Fin n → ℂ)) :
     funext i y
     simp [Finset.sum_apply, Pi.single_apply]
   conv_lhs => rw [hv]
+
   rw [MultilinearMap.map_sum]
   refine Finset.sum_congr rfl fun r _ => ?_
-  rw [MultilinearMap.map_smul_univ]
+  simp only [MultilinearMap.map_smul_univ, RingHom.id_apply]
 
 theorem wedgeCoord_continuous (p : ℕ) : Continuous (wedgeCoord (n := n) p) := by
   have h : (wedgeCoord (n := n) p : (Fin p → (Fin n × Fin n → ℂ)) → (Finset (Fin (n * n)) → ℂ)) =
@@ -253,8 +317,9 @@ theorem ff_exp_wedge_hasDeriv {X : Matrix (Fin n) (Fin n) ℂ} (hX : Xᴴ = -X) 
   rw [hfun]
   convert h using 1
   all_goals try rfl
+
   rw [ContinuousLinearMap.coe_restrictScalars', ContinuousMultilinearMap.linearDeriv_apply, hc0, isDer_sgX,
-    map_sum]
+  map_sum]
   rfl
 
 theorem ff_exp_hasDeriv {X : Matrix (Fin n) (Fin n) ℂ} (hX : Xᴴ = -X) (f : Fock n) :
@@ -262,6 +327,7 @@ theorem ff_exp_hasDeriv {X : Matrix (Fin n) (Fin n) ℂ} (hX : Xᴴ = -X) (f : F
       ((fockBasis n).equivFun (sgX ε X f)) 0 := by
   have hf : f = ∑ S, (fockBasis n).repr f S • fockBasis n S := ((fockBasis n).sum_repr f).symm
   rw [hf]
+
   simp only [map_sum, map_smul]
   refine HasDerivAt.fun_sum fun S _ => ?_
   refine HasDerivAt.const_smul ((fockBasis n).repr f S) ?_

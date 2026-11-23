@@ -1,5 +1,56 @@
-import Mathlib
-import Formalism.DirichletDensity.Statement
+module
+
+public import Formalism.DirichletDensity.Statement
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField Polynomial Matrix
 
@@ -26,7 +77,7 @@ theorem quadDiscr_ne_one (K : Type) [Field K] [NumberField K] (a : ℤ) (x : K)
   have hint : IsIntegral ℚ x := .of_finite ℚ x
   have hrank : Module.finrank ℚ K = 2 := by
     have := IntermediateField.adjoin.finrank hint
-    rw [hmin, natDegree_X_pow_sub_C, hadj, IntermediateField.finrank_top'] at this
+    rw [hmin, natDegree_X_pow_sub_C _, hadj, IntermediateField.finrank_top'] at this
     exact this
   have htrq : ∀ q : ℚ, Algebra.trace ℚ K (algebraMap ℚ K q) = 2 * q := by
     intro q
@@ -37,7 +88,7 @@ theorem quadDiscr_ne_one (K : Type) [Field K] [NumberField K] (a : ℤ) (x : K)
     rw [← Algebra.smul_def, map_smul, smul_eq_mul]
   have htrx : Algebra.trace ℚ K x = 0 := by
     have hnc : (X ^ 2 - C (a : ℚ)).nextCoeff = 0 := by
-      rw [nextCoeff, natDegree_X_pow_sub_C, coeff_sub, coeff_X_pow, coeff_C]; norm_num
+      rw [nextCoeff, natDegree_X_pow_sub_C _, coeff_sub, coeff_X_pow, coeff_C]; norm_num
     rw [trace_eq_finrank_mul_minpoly_nextCoeff, hmin, hnc]; simp
   set ω : K := (1 + x) / 2 with hω
   have hω1 : ω = algebraMap ℚ K (1 / 2) + algebraMap ℚ K (1 / 2) * x := by
@@ -47,9 +98,9 @@ theorem quadDiscr_ne_one (K : Type) [Field K] [NumberField K] (a : ℤ) (x : K)
   have htr1 : Algebra.trace ℚ K 1 = 2 := by
     rw [show (1 : K) = algebraMap ℚ K 1 by simp, htrq]; norm_num
   have htrω : Algebra.trace ℚ K ω = 1 := by
-    rw [hω1, map_add, htrq, htrlin, htrx]; norm_num
+    rw [hω1, map_add (f := _), htrq, htrlin, htrx]; norm_num
   have htrωω : Algebra.trace ℚ K (ω * ω) = (1 + a) / 2 := by
-    rw [hω2, map_add, htrq, htrlin, htrx]; ring
+    rw [hω2, map_add (f := _), htrq, htrlin, htrx]; ring
   have hdisc : Algebra.discr ℚ ![(1 : K), ω] = a := by
     rw [Algebra.discr_def, Matrix.det_fin_two]
     simp only [Algebra.traceMatrix_apply, Algebra.traceForm_apply, Matrix.cons_val_zero,

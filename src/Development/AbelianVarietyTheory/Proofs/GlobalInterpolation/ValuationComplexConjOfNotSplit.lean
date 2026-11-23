@@ -1,6 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.BaseChangeDefiniteUnitary
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.BaseChangeDefiniteUnitary
 import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.WithZeroEqOfLeExpIff
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain GlobalTheory.UnitaryBC
 
@@ -47,7 +90,7 @@ theorem exists_valuation_lt_one {F : Type} [Field F] [NumberField F] (u : Height
       _ ≤ 1 * Valued.v p := by gcongr
       _ < 1 := by rw [one_mul]; exact hvp
   have hhalf : h2 + h2 = 1 := by
-    rw [hh2, ← map_add, ← map_one (algebraMap F (u.adicCompletion F))]
+    rw [hh2, ← map_add (f := _), ← map_one (algebraMap F (u.adicCompletion F))]
     congr 1
     norm_num
   have hkey : algebraMap F (u.adicCompletion F) (1 / 4 - c ^ 2 * a) = -z * (1 + z) := by
@@ -125,7 +168,7 @@ theorem isSplitAt_of_isSquare : ∀ (L : Type) [Field L] [NumberField L] [IsCMFi
   set x : L := 2⁻¹ + (c : L) * δ with hx
   have hcc : IsCMField.complexConj L (c : L) = c := IsCMField.complexConj_apply_eq_self L c
   have hx' : IsCMField.complexConj L x = 2⁻¹ - (c : L) * δ := by
-    rw [hx, map_add, map_mul, hcc, hconj, map_inv₀, map_ofNat]
+    rw [hx, map_add (f := _), map_mul, hcc, hconj, map_inv₀, map_ofNat]
     ring
   have hsum : x + IsCMField.complexConj L x = 1 := by
     rw [hx', hx]
@@ -139,7 +182,8 @@ theorem isSplitAt_of_isSquare : ∀ (L : Type) [Field L] [NumberField L] [IsCMFi
   have : w.asIdeal.LiesOver u.asIdeal := ⟨rfl⟩
   have hlt : w.valuation L (x * IsCMField.complexConj L x) < 1 := by
     rw [hprod, ← HeightOneSpectrum.valuation_liesOver L u w]
-    exact pow_lt_one₀ zero_le hc (Ideal.IsDedekindDomain.ramificationIdx'_ne_zero_of_liesOver w.asIdeal u.ne_bot)
+    exact pow_lt_one₀ zero_le hc
+      (Ideal.ramificationIdx_pos_of_isDedekindDomain' w.asIdeal u.ne_bot).ne'
   have heq := valuation_complexConj_of_not_split w hw x
   rw [map_mul, heq] at hlt
   have hx1 : w.valuation L x < 1 := by

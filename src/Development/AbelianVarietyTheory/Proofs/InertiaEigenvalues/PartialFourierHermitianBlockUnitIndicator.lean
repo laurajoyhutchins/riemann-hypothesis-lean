@@ -1,4 +1,59 @@
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.IsTestRep
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.FourierMatch
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.MeasureTheory.Integral.Pi
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Analysis.Normed.Group.Ultra
+public import Mathlib.Analysis.Normed.Module.FiniteDimension
+public import Mathlib.MeasureTheory.Group.Integral
+public import Mathlib.MeasureTheory.Integral.Bochner.Set
+
+@[expose] public section
+
 open GlobalTheory.JR Matrix MeasureTheory Filter Topology
 
 noncomputable section
@@ -72,7 +127,7 @@ theorem integral_ball_char (hU : Unram F E) [MeasurableSpace E] [BorelSpace E] (
       exact (mul_le_of_le_one_right (norm_nonneg _) hu1).trans hx₀y
     have hpos : 0 < ‖y‖ := by linarith
     refine integral_indicator_char_eq_zero μ _ _ (fun a b => ?_) (star (w * y⁻¹)) (fun z => ?_) ?_
-    · rw [star_add, add_mul, map_add, AddChar.map_add_eq_mul]
+    · rw [star_add, add_mul, map_add (f := _), AddChar.map_add_eq_mul]
     · have ht : ‖star (w * y⁻¹)‖ ≤ 1 := by
         rw [hU.norm_star, norm_mul, norm_inv, mul_inv_le_iff₀ hpos, one_mul]; exact hnw
       simp only [mem_closedBall_zero_iff]
@@ -108,6 +163,7 @@ theorem fourU_unitU : ∀ (F E : Type) [NontriviallyNormedField F] [Nontrivially
       · have e1 : unitU r F E (X.1, c, X.2.2) = 1 := by
           simp only [unitU]; rw [Set.indicator_of_mem (by exact ⟨h0.1, hc, h0.2⟩)]; rfl
         rw [e1, one_mul]
+
         simp only [dotProduct, Pi.star_apply, map_sum, addChar_sum]
         refine Finset.prod_congr rfl fun i _ => ?_
         rw [Set.indicator_of_mem (mem_closedBall_zero_iff.2 (hc i))]
@@ -115,7 +171,9 @@ theorem fourU_unitU : ∀ (F E : Type) [NontriviallyNormedField F] [Nontrivially
         obtain ⟨i, hi⟩ := hc
         have e1 : unitU r F E (X.1, c, X.2.2) = 0 := by
           simp only [unitU]
-          exact Set.indicator_of_notMem (fun h => (not_le.2 hi) (h.2.1 i)) _
+          apply Set.indicator_of_notMem
+          intro h
+          exact (not_le.2 hi) (h.2.1 i)
         rw [e1, zero_mul]
         refine (Finset.prod_eq_zero (Finset.mem_univ i) ?_).symm
         exact Set.indicator_of_notMem (fun h => (not_le.2 hi) (mem_closedBall_zero_iff.1 h)) _
@@ -127,7 +185,9 @@ theorem fourU_unitU : ∀ (F E : Type) [NontriviallyNormedField F] [Nontrivially
     simp [h0.1, h0.2]
   · have e : ∀ c : Fin r → E, unitU r F E (X.1, c, X.2.2) = 0 := fun c => by
       simp only [unitU]
-      exact Set.indicator_of_notMem (fun h => h0 ⟨h.1, h.2.2⟩) _
+      apply Set.indicator_of_notMem
+      intro h
+      exact h0 ⟨h.1, h.2.2⟩
     simp_rw [e, zero_mul, integral_zero]
 
 end GlobalTheory.JR.FourUnit

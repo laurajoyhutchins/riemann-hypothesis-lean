@@ -1,10 +1,54 @@
-import Mathlib
-import ReciprocityTheory.CommutativeAlgebra.ChainConnInDim
-import ReciprocityTheory.CommutativeAlgebra.SaturatedChains.IsSaturatedChain
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.ConnectedPrimeFields.IsWeaklyRegularPairModOneLeft
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.ConnectedPrimeFields.CorePowMem
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.ConnectedPrimeFields.ExistsSystemOfParameters
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.ConnectedPrimeFields.CplFinite
+module
+
+public import ReciprocityTheory.CommutativeAlgebra.ChainConnInDim
+public import Mathlib.RingTheory.AdicCompletion.Basic
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.ConnectedPrimeFields.CorePowMem
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.ConnectedPrimeFields.CplFinite
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.ConnectedPrimeFields.ExistsSystemOfParameters
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open IsLocalRing UpperTheory.V.AlgebraTools.Conn
 
@@ -40,7 +84,8 @@ private theorem base_exists_out {A R : Type} [CommRing A] [IsLocalRing A] [CommR
   have hmax : (P.comap (algebraMap A R)).IsMaximal := by
     rw [heq]
     exact maximalIdeal.isMaximal A
-  exact hm (Ideal.isMaximal_of_isIntegral_of_isMaximal_comap P hmax)
+  exact hm (Ideal.isMaximal_of_isIntegral_of_isMaximal_comap (algebraMap A R)
+    (RingHom.Finite.to_isIntegral (RingHom.finite_algebraMap.mpr inferInstance)) P hmax)
 
 private theorem base_ofList_le {A : Type} [CommRing A] {xs : List A} {I : Ideal A}
     (h : ∀ x ∈ xs, x ∈ I) : Ideal.ofList xs ≤ I :=
@@ -67,7 +112,7 @@ theorem UpperTheory.V.AlgebraTools.Conn.base :
   obtain ⟨y, hy, hyP⟩ := base_exists_out (A := A) P hP hPm
   obtain ⟨z, hz, hzQ⟩ := base_exists_out (A := A) Q hQ hQm
   have hcom : (maximalIdeal R).comap (algebraMap A R) = maximalIdeal A := by
-    haveI := Ideal.isMaximal_comap_of_isIntegral_of_isMaximal (R := A) (maximalIdeal R)
+    haveI := Ideal.isMaximal_comap_of_isIntegral_of_isMaximal (R := A) (algebraMap _ _) (RingHom.Finite.to_isIntegral (RingHom.finite_algebraMap.mpr inferInstance)) (maximalIdeal R)
     exact IsLocalRing.eq_maximalIdeal this
   have hmem : ∀ a ∈ maximalIdeal A, algebraMap A R a ∈ (b ⊔ c).radical := by
     intro a ha

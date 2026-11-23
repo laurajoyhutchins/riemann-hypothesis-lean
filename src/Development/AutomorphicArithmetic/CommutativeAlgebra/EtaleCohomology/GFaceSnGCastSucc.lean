@@ -1,5 +1,54 @@
-import Development.AutomorphicArithmetic.CommutativeAlgebra.EtaleCohomology.VanishOfExact
-import Development.AutomorphicArithmetic.CommutativeAlgebra.EtaleCohomology.FaceSnocCastSucc
+module
+
+public import Development.AutomorphicArithmetic.CommutativeAlgebra.EtaleCohomology.VanishOfExact
+public import Development.AutomorphicArithmetic.CommutativeAlgebra.EtaleCohomology.FaceSnocCastSucc
+import Mathlib.Algebra.Homology.ShortComplex.Ab
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.Abelian.FunctorCategory
+import Mathlib.CategoryTheory.Limits.Shapes.Countable
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 set_option backward.isDefEq.respectTransparency false
 
@@ -24,7 +73,8 @@ theorem exact_of_app (S : ShortComplex (Coef C))
 variable {P : C ⥤ Type}
 
 def snG {m : ℕ} {B : C} (g : Gen P m B) (z : P.obj B) (h : (P.map g.2) (g.1.obj (Fin.last m)).2 = z) : Gen P (m + 1) B :=
-  ⟨snoc g.1 (X := (⟨B, z⟩ : P.Elements)) ⟨g.2, h⟩, (snε g.1 (X := (⟨B, z⟩ : P.Elements)) ⟨g.2, h⟩).1⟩
+  let a : g.1.obj (Fin.last m) ⟶ P.elementsMk B z := Functor.Elements.homMk g.2 h
+  ⟨snoc g.1 a, (snε g.1 a).1⟩
 
 theorem snG_eq {m : ℕ} {B : C} (g : Gen P m B) {z : P.obj B} (h : (P.map g.2) (g.1.obj (Fin.last m)).2 = z) :
     snG g z h = snG g _ rfl := by
@@ -34,14 +84,14 @@ def sn {m : ℕ} {B : C} (g : Gen P m B) : Gen P (m + 1) B := snG g _ rfl
 
 theorem gFace_snG_last {m : ℕ} {B : C} (g : Gen P m B) (z : P.obj B) (h : (P.map g.2) (g.1.obj (Fin.last m)).2 = z) :
     gFace P (Fin.last (m + 1)) (snG g z h) = g :=
-  congrArg (fun p : (Σ t : ComposableArrows P.Elements m, t.obj (Fin.last m) ⟶ (⟨B, z⟩ : P.Elements)) =>
-    (⟨p.1, p.2.1⟩ : Gen P m B)) (gen_snoc_last g.1 (X := (⟨B, z⟩ : P.Elements)) ⟨g.2, h⟩)
+  congrArg (fun p : (Σ t : ComposableArrows P.Elements m, t.obj (Fin.last m) ⟶ P.elementsMk B z) =>
+    (⟨p.1, p.2.1⟩ : Gen P m B)) (gen_snoc_last g.1 (X := P.elementsMk B z) (Functor.Elements.homMk g.2 h))
 
 theorem gFace_snG_castSucc {m : ℕ} {B : C} (g : Gen P (m + 1) B) (z : P.obj B) (h : (P.map g.2) (g.1.obj (Fin.last (m + 1))).2 = z)
     (i : Fin (m + 2)) (h' : (P.map (gFace P i g).2) ((gFace P i g).1.obj (Fin.last m)).2 = z) :
     gFace P i.castSucc (snG g z h) = snG (gFace P i g) z h' :=
-  congrArg (fun p : (Σ t : ComposableArrows P.Elements (m + 1), t.obj (Fin.last (m + 1)) ⟶ (⟨B, z⟩ : P.Elements)) =>
-    (⟨p.1, p.2.1⟩ : Gen P (m + 1) B)) (gen_snoc_castSucc g.1 (X := (⟨B, z⟩ : P.Elements)) ⟨g.2, h⟩ i)
+  congrArg (fun p : (Σ t : ComposableArrows P.Elements (m + 1), t.obj (Fin.last (m + 1)) ⟶ P.elementsMk B z) =>
+    (⟨p.1, p.2.1⟩ : Gen P (m + 1) B)) (gen_snoc_castSucc g.1 (X := P.elementsMk B z) (Functor.Elements.homMk g.2 h) i)
 
 theorem gFace_sn_last {m : ℕ} {B : C} (g : Gen P m B) : gFace P (Fin.last (m + 1)) (sn g) = g := gFace_snG_last g _ rfl
 
@@ -54,16 +104,17 @@ theorem gFace_sn_castSucc {m : ℕ} {B : C} (g : Gen P (m + 1) B) (i : Fin (m + 
     exact congrArg (P.map g.2) e
   exact (gFace_snG_castSucc g _ rfl i h').trans (snG_eq _ h')
 
-def hh (B : C) (m : ℕ) : (L P m).obj B →+ (L P (m + 1)).obj B := (FreeAbelianGroup.map sn : FreeAbelianGroup (Gen P m B) →+ _)
+def hh (B : C) (m : ℕ) : (L P m).obj B →+ (L P (m + 1)).obj B := (FreeAddCommGroup.map sn : FreeAddCommGroup (Gen P m B) →+ _)
 
-theorem hh_of (B : C) (m : ℕ) (g : Gen P m B) : hh B m (FreeAbelianGroup.of g) = FreeAbelianGroup.of (sn g) :=
-  FreeAbelianGroup.map_of_apply _
+theorem hh_of (B : C) (m : ℕ) (g : Gen P m B) : hh B m (FreeAddCommGroup.of g) = FreeAddCommGroup.of (sn g) :=
+  FreeAddCommGroup.map_of_apply _
 
-def ofL {k : ℕ} {B : C} (g : Gen P k B) : (L P k).obj B := FreeAbelianGroup.of g
+def ofL {k : ℕ} {B : C} (g : Gen P k B) : (L P k).obj B := FreeAddCommGroup.of g
 
 theorem d_hh_of (B : C) (k : ℕ) (g : Gen P (k + 1) B) :
     ((dL P (k + 1)).app B).hom (hh B (k + 1) (ofL g)) = hh B k (((dL P k).app B).hom (ofL g)) + (-1 : ℤ) ^ (k + 2) • ofL g := by
   unfold ofL
+
   rw [hh_of, dL_of, dL_of, Fin.sum_univ_castSucc, map_sum]
   congr 1
   · refine Finset.sum_congr rfl fun i _ => ?_

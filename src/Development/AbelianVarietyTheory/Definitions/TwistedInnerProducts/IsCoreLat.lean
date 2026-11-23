@@ -1,6 +1,44 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.OffQOfSizeRows
-import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.ChainParSucc
+module
+
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.OffQOfSizeRows
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.ChainParSucc
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.CartFrSgn
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -79,13 +117,13 @@ def gridCom : Com D where
   χ := fun k => (G.ch.chi (D.R.m - k))⁻¹
   a := fun k τ => -(cen D sc.cGap τ (D.R.m - k) : ℚ)
 
-variable (G) in
 
+variable (G) in
 def IsCoreLat (i : ℕ) (r : ReLat (G.V (.core i))) : Prop :=
   GlobalTheory.AdelicU.frameLat r.sp = scaleLat ((D.host.AAbar * D.host.AA⁻¹) ^ i) (G.Λ (.core i))
 
-variable (G) in
 
+variable (G) in
 @[reducible] def gridStage (v : CoreVol G) (i : ℕ) (r : ReLat (G.V (.core i)))
     (M : DSModel (G.V (.core i)) (Node.par D sc.cGap (.core i))) : PiLocalization₂ D where
   V := r.sp
@@ -95,8 +133,8 @@ variable (G) in
   ν := (v i).μ
   fd := (v i).𝓕
 
-variable (G) in
 
+variable (G) in
 def IsOntoMod (i : ℕ) (x₀ : Matrix (Fin (G.V (.core i)).rank) (Fin (G.V (.core (i + 1))).rank) D.host.E) : Prop :=
   x₀ ∈ homLat (G.Λ (.core (i + 1))) (G.Λ (.core i)) ∧ ∃ y₀ ∈ homLat (G.Λ (.core i)) (G.Λ (.core (i + 1))),
     x₀ * y₀ - 1 ∈ G.modul • homLat (G.Λ (.core i)) (G.Λ (.core i))
@@ -152,8 +190,6 @@ def ChainEx : Prop := Gap fun {D} _ _ _ {G} W _ => ∀ v r₀ M₀, IsCoreLat G 
 def TopCols : Prop := All fun {D} _ _ {sc} {G} W _ =>
   ∀ M : DSModel (G.V (.core D.R.m)) (Node.par D sc.cGap (.core D.R.m)), ∀ y ∈ CoreForms G W.θ D.R.m M, ∀ w,
     ∃ c ∈ Cols G W.θ, ∃ ξ : Module.Dual ℂ (coefPlus G W.θ).W, y w = pairVec (coefPlus G W.θ) ξ c
-
-example (V : HSp D) : (ReLat.sp (V := V) ⟨V.L0, V.standardTuple_isLattice, V.baseLattice_isUnimodular⟩).gram = V.gram := rfl
 
 end GlobalTheory.CoreOnto
 

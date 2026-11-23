@@ -1,7 +1,45 @@
-import Mathlib
-import Formalism.HarderNarasimhan.ShiftInvariance
-import Development.AbelianVarietyTheory.BlockTheory.SiegelWeilLocal.SaturatedDuality
-import Development.AbelianVarietyTheory.BlockTheory.SiegelWeilLocal.SaturatedPerpDuality
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.SiegelWeilLocal.SaturatedPerpDuality
+public import Formalism.HarderNarasimhan.ShiftInvariance
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField
 
@@ -53,21 +91,5 @@ theorem htQ_pos (I : AutInst) (x : I.GA) (hfg : (lamX I x).FG) (S S' : Submodule
     (frm I x) (frm_det I x) (lamX I x) S hfg hS
   rw [(hq S' h hS').1]
   exact (Formalism.HN.plLat I.E _ κ b'' X'' hX'' _ ((fg_of_le_lamX I x hfg hS').map _)).2.2
-
-theorem lamX_ne_bot (I : AutInst) (x : I.GA) (hn : 1 ≤ I.n)
-    (h : ∀ S : Submodule (𝓞 I.E) (Fin I.n → I.E), GlobalTheory.IndefiniteRowSideFullHecke.SaturatedPerpDuality.SatIn I x S →
-      Formalism.HN.rkK (perpIn I x S) + Formalism.HN.rkK S = I.n) : lamX I x ≠ ⊥ := by
-  intro hb
-  have hsat : GlobalTheory.IndefiniteRowSideFullHecke.SaturatedPerpDuality.SatIn I x ⊥ := by
-    unfold GlobalTheory.IndefiniteRowSideFullHecke.SaturatedPerpDuality.SatIn Formalism.HN.IsSat Formalism.F.IsSaturated
-    rw [hb]
-    exact ⟨le_rfl, le_rfl, fun y hy _ => hy⟩
-  have hz : Formalism.HN.rkK (⊥ : Submodule (𝓞 I.E) (Fin I.n → I.E)) = 0 := by
-    unfold Formalism.HN.rkK
-    rw [Submodule.bot_coe, Submodule.span_singleton_eq_bot.mpr rfl]
-    simp
-  have h1 := h ⊥ hsat
-  rw [GlobalTheory.IndefiniteRowSideFullHecke.SaturatedPerpDuality.perpIn_bot, hb, hz] at h1
-  omega
 
 end GlobalTheory.StepDualityCompare

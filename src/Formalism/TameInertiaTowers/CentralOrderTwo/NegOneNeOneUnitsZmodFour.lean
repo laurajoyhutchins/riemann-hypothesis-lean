@@ -1,13 +1,64 @@
-import Mathlib
-import Formalism.TameInertiaTowers.StatementGroup
-import Formalism.TameInertiaTowers.CentralOrderTwo.TwoAdic
+module
+
+public import Formalism.TameInertiaTowers.StatementGroup
+public import Mathlib.RingTheory.IntegralDomain
+public import Formalism.TameInertiaTowers.CentralOrderTwo.TwoAdic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace Formalism.TwoAdicCyclotomicDecomposition
 
 lemma pv24 : padicValInt 2 ((5:ℤ) ^ 2 - 1) = 3 := by
   have h : ((5:ℤ) ^ 2 - 1) = ((2 ^ 3 * 3 : ℕ) : ℤ) := by norm_num
-  rw [h, padicValInt.of_nat, padicValNat.mul (show 2 ^ 3 ≠ 0 by norm_num) (show 3 ≠ 0 by norm_num),
-    padicValNat.prime_pow, padicValNat.eq_zero_of_not_dvd (show ¬ 2 ∣ 3 by norm_num)]
+  rw [h, padicValInt.of_nat, Nat.multiplicity_mul (show 2 ^ 3 ≠ 0 by norm_num)
+    (show 3 ≠ 0 by norm_num), Nat.multiplicity_prime_pow,
+    multiplicity_eq_zero_of_not_dvd (show ¬ 2 ∣ 3 by norm_num), add_zero]
 
 lemma five_unit_coe_int (n : ℕ) : ((u5 n : (ZMod (2 ^ n))ˣ) : ZMod (2 ^ n)) = ((5 : ℤ) : ZMod (2 ^ n)) := by simp [u5, ZMod.coe_unitOfCoprime]
 
@@ -32,8 +83,6 @@ lemma ord5 (m : ℕ) : orderOf (u5 (m + 2)) = 2 ^ m := by
       have h8 : (8:ℤ) ∣ 2 ^ (k + 1 + 2) := ⟨2 ^ k, by ring⟩
       have h3 := h8.trans h2
       omega
-
-lemma five_unit_coe_nat (n : ℕ) : ((u5 n : (ZMod (2 ^ n))ˣ) : ZMod (2 ^ n)) = ((5 : ℕ) : ZMod (2 ^ n)) := by simp [u5, ZMod.coe_unitOfCoprime]
 
 lemma unitsMap_five {a b : ℕ} (h : 2 ^ b ∣ 2 ^ a) : ZMod.unitsMap h (u5 a) = u5 b := by
   ext

@@ -1,4 +1,56 @@
-import Formalism.SharpRestriction.Divisibility.GeneratorPowers.PairEvaluation
+module
+
+public import Formalism.SharpRestriction.Divisibility.GeneratorPowers.PairEvaluation
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.MvPolynomial.IrreducibleQuadratic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -15,7 +67,7 @@ private theorem memIo_lemma {σ : Type} (n : ℕ) (p : MvPolynomial σ S) :
   mem_pow_idealOfVars_iff n p
 
 private theorem ccmem_lemma_2 {σ : Type} {n : ℕ} {p : MvPolynomial σ S} (hp : p ∈ Io S σ ^ (n + 1)) :
-    coeff 0 p = 0 := by
+    AddMonoidAlgebra.coeff p 0 = 0 := by
   by_contra hne
   have h := (memIo_lemma (n + 1) p).1 hp 0 (MvPolynomial.mem_support_iff.2 hne)
   simp [Finsupp.degree] at h
@@ -24,7 +76,7 @@ private theorem ccaeval_lemma_3 {σ τ : Type} (g : σ → MvPolynomial τ S) (h
     (p : MvPolynomial σ S) : constantCoeff (aeval g p) = constantCoeff p := by
   induction p using MvPolynomial.induction_on with
   | C a => simp only [aeval_C, algebraMap_eq, constantCoeff_C]
-  | add p q hp hq => simp only [map_add, hp, hq]
+  | add p q hp hq => simp only [map_add (f := _), hp, hq]
   | mul_X p i hp => simp only [map_mul, aeval_X, constantCoeff_X, hg, mul_zero]
 
 private theorem memcc_lemma_19 {σ : Type} {p : MvPolynomial σ S} (hp : constantCoeff p = 0) :
@@ -54,7 +106,7 @@ private theorem base_lemma_17 {σ τ : Type} (g g' : σ → MvPolynomial τ S)
   induction p using MvPolynomial.induction_on with
   | C a => simp only [aeval_C, sub_self, Submodule.zero_mem]
   | add p q hp hq =>
-    rw [map_add, map_add, add_sub_add_comm]
+    rw [map_add (f := _), map_add (f := _), add_sub_add_comm]
     exact Ideal.add_mem _ hp hq
   | mul_X p i hp =>
     rw [map_mul, map_mul, aeval_X, aeval_X]
@@ -77,7 +129,7 @@ private theorem subst_lemma_18 {σ τ : Type} (g g' : σ → MvPolynomial τ S) 
     refine Submodule.mul_induction_on hp ?_ ?_
     · intro a ha b hb
       obtain ⟨h1, h2⟩ := ih a ha
-      have hb0 : coeff 0 b = 0 := ccmem_lemma_2 (n := 0) (p := b) (by rwa [zero_add, pow_one])
+      have hb0 : AddMonoidAlgebra.coeff b 0 = 0 := ccmem_lemma_2 (n := 0) (p := b) (by rwa [zero_add, pow_one])
       have hb1 : aeval g b ∈ Io S τ ^ 1 := by
         apply memcc_lemma_19
         rw [ccaeval_lemma_3 g hcg]
@@ -103,9 +155,9 @@ private theorem subst_lemma_18 {σ τ : Type} (g g' : σ → MvPolynomial τ S) 
       obtain ⟨hx1, hx2⟩ := hx
       obtain ⟨hy1, hy2⟩ := hy
       constructor
-      · rw [map_add]
+      · rw [map_add (f := _)]
         exact Ideal.add_mem _ hx1 hy1
-      · rw [map_add, map_add, add_sub_add_comm]
+      · rw [map_add (f := _), map_add (f := _), add_sub_add_comm]
         exact Ideal.add_mem _ hx2 hy2
 
 private theorem ev2sub_lemma_25 {τ : Type} (u v u' v' : Fin d → MvPolynomial τ S)
@@ -156,7 +208,7 @@ private theorem ev2homog_lemma_23 {τ : Type} {p : MvPolynomial (Fin 2 × Fin d)
 private theorem zeroOf_lemma_26 {τ : Type} {p : MvPolynomial τ S} {j : ℕ} (hh : p.IsHomogeneous j)
     (hp : p ∈ Io S τ ^ (j + 1)) : p = 0 := by
   ext e
-  rw [coeff_zero]
+  change p.coeff e = 0
   by_contra he
   have h1 : Finsupp.weight 1 e = j := hh he
   have h2 := (memIo_lemma (j + 1) p).1 hp e (MvPolynomial.mem_support_iff.2 he)
@@ -188,7 +240,7 @@ theorem lead_biadd {P : MvPolynomial (Fin 2 × Fin d) S} {m j : ℕ} (hj1 : 1 �
     have hP' := hP
     rw [memIo_lemma] at hP' ⊢
     intro x hx
-    rw [MvPolynomial.mem_support_iff, coeff_sub, coeff_homogeneousComponent] at hx
+    rw [MvPolynomial.mem_support_iff, MvPolynomial.coeff_sub, coeff_homogeneousComponent] at hx
     split_ifs at hx with hxj
     · simp at hx
     · have hxQ : x ∈ (P - 1).support := by
@@ -269,9 +321,10 @@ private theorem monoDiag_lemma_4 {σ : Type} (s : σ → S) (e : σ →₀ ℕ) 
   ring
 
 private theorem coeffDiag_lemma_5 {σ : Type} (s : σ → S) (h : MvPolynomial σ S) (e : σ →₀ ℕ) :
-    coeff e (aeval (fun p => C (s p) * X p) h) = (e.prod fun p k => s p ^ k) * coeff e h := by
+    AddMonoidAlgebra.coeff (aeval (fun p => C (s p) * X p) h) e = (e.prod fun p k => s p ^ k) * AddMonoidAlgebra.coeff h e := by
   classical
   conv_lhs => rw [h.as_sum]
+
   rw [map_sum, coeff_sum]
   simp only [monoDiag_lemma_4, coeff_monomial]
   rw [Finset.sum_eq_single e]
@@ -310,13 +363,13 @@ private theorem comp_lemma_9 {σ τ υ : Type} (g : σ → MvPolynomial τ S) (r
     (p : MvPolynomial σ S) : aeval r (aeval g p) = aeval (fun i => aeval r (g i)) p := by
   induction p using MvPolynomial.induction_on with
   | C a => simp only [aeval_C, algebraMap_eq]
-  | add p q hp hq => simp only [map_add, hp, hq]
+  | add p q hp hq => simp only [map_add (f := _), hp, hq]
   | mul_X p i hp => simp only [map_mul, aeval_X, hp]
 
 private theorem aevalX_lemma_10 {σ : Type} (p : MvPolynomial σ S) : aeval X p = p := by
   induction p using MvPolynomial.induction_on with
   | C a => simp only [aeval_C, algebraMap_eq]
-  | add p q hp hq => simp only [map_add, hp, hq]
+  | add p q hp hq => simp only [map_add (f := _), hp, hq]
   | mul_X p i hp => simp only [map_mul, aeval_X, hp]
 
 private theorem wt_lemma_11 (e : Fin 2 × Fin d →₀ ℕ) :
@@ -346,7 +399,7 @@ private theorem aeval_double_fst_of_additive {h : MvPolynomial (Fin 2 × Fin d) 
     refine congrArg (fun f => aeval f h) ?_
     funext ⟨l, i⟩
     fin_cases l <;> simp [xs, hr, hk]
-  rw [e1, map_add, e2 0 (by decide), e2 1 (by decide)] at H
+  rw [e1, map_add (f := _), e2 0 (by decide), e2 1 (by decide)] at H
   exact H
 
 private theorem aeval_double_snd_of_symm {h : MvPolynomial (Fin 2 × Fin d) S}
@@ -369,18 +422,18 @@ private theorem aeval_double_snd_of_symm {h : MvPolynomial (Fin 2 × Fin d) S}
     fin_cases k <;> simp [xs, hG]
   have e3 : ev2 (h + h) (xs S d (1 : Fin 2)) (xs S d 0) = h + h := by
     unfold ev2 at hs ⊢
-    rw [map_add, hs]
+    rw [map_add (f := _), hs]
   rw [hs] at e1
   rw [e1, ← e2, h0, e3]
 
 private theorem row_degree_eq_one_of_aeval_double {h : MvPolynomial (Fin 2 × Fin d) S} (k : Fin 2)
     (hk : aeval (fun p : Fin 2 × Fin d => C (if p.1 = k then (2 : S) else 1) * X p) h = h + h)
-    (e : Fin 2 × Fin d →₀ ℕ) (he : coeff e h ≠ 0) : ∑ i, e (k, i) = 1 := by
+    (e : Fin 2 × Fin d →₀ ℕ) (he : AddMonoidAlgebra.coeff h e ≠ 0) : ∑ i, e (k, i) = 1 := by
   by_contra hne
   apply he
   apply cancel_lemma_6 hne
-  have H := congrArg (coeff e) hk
-  rw [coeffDiag_lemma_5, prod_ite_pow_eq_two_pow_sum, coeff_add] at H
+  have H := congrArg (AddMonoidAlgebra.coeff · e) hk
+  rw [coeffDiag_lemma_5, prod_ite_pow_eq_two_pow_sum, MvPolynomial.coeff_add] at H
   rw [H, two_mul]
 
 theorem zero_of_biadd {h : MvPolynomial (Fin 2 × Fin d) S} {j : ℕ} (hh : h.IsHomogeneous j) (hj2 : j ≠ 2)
@@ -388,7 +441,7 @@ theorem zero_of_biadd {h : MvPolynomial (Fin 2 × Fin d) S} {j : ℕ} (hh : h.Is
       ev2 h (xs S d 0) (xs S d 2) + ev2 h (xs S d 1) (xs S d 2))
     (hs : ev2 h (xs S d 1) (xs S d 0) = h) : h = 0 := by
   ext e
-  rw [coeff_zero]
+  change h.coeff e = 0
   by_contra he
   have h0 := row_degree_eq_one_of_aeval_double 0 (aeval_double_fst_of_additive hA1) e he
   have h1 := row_degree_eq_one_of_aeval_double 1 (aeval_double_snd_of_symm (aeval_double_fst_of_additive hA1) hs) e he
@@ -412,8 +465,8 @@ theorem stepNo2 {P : MvPolynomial (Fin 2 × Fin d) S} {m j : ℕ} (hj1 : 1 ≤ j
   · omega
   · exfalso
     have hxj : Finsupp.degree x = j := le_antisymm hge hle
-    have hcx := congrArg (coeff x) h0
-    rw [coeff_homogeneousComponent, if_pos hxj, coeff_zero] at hcx
+    have hcx := congrArg (AddMonoidAlgebra.coeff · x) h0
+    rw [coeff_homogeneousComponent, if_pos hxj, AddMonoidAlgebra.coeff_zero] at hcx
     exact (MvPolynomial.mem_support_iff.1 hx) hcx
 
 theorem eq_one_of_cube {P : MvPolynomial (Fin 2 × Fin d) S} {m : ℕ}
@@ -450,20 +503,20 @@ theorem const_one {P : MvPolynomial (Fin 2 × Fin d) S} {m : ℕ}
     (hF : ∀ i, fF i - (xs S d 0 i + xs S d 1 i) ∈ Io S (Fin 3 × Fin d) ^ 2)
     (hph1 : ev2 P fF (xs S d 2) - ev2 P (xs S d 0) (xs S d 2) * ev2 P (xs S d 1) (xs S d 2) ∈
       Io S (Fin 3 × Fin d) ^ (m + 1))
-    (hu : IsUnit (coeff 0 P)) : P - 1 ∈ Io S (Fin 2 × Fin d) ^ 1 := by
+    (hu : IsUnit (AddMonoidAlgebra.coeff P 0)) : P - 1 ∈ Io S (Fin 2 × Fin d) ^ 1 := by
   have hx : ∀ (k : Fin 3) (i : Fin d), constantCoeff (xs S d k i) = 0 := by
     intro k i
     simp [xs]
   have hfF : ∀ i, constantCoeff (fF i) = 0 := by
     intro i
-    have h2 : coeff 0 (fF i - (xs S d 0 i + xs S d 1 i)) = 0 := ccmem_lemma_2 (n := 1) (hF i)
-    rw [coeff_sub, coeff_add] at h2
-    have h0 : coeff 0 (xs S d 0 i) = 0 := hx 0 i
-    have h1 : coeff 0 (xs S d 1 i) = 0 := hx 1 i
+    have h2 : AddMonoidAlgebra.coeff (fF i - (xs S d 0 i + xs S d 1 i)) 0 = 0 := ccmem_lemma_2 (n := 1) (hF i)
+    rw [MvPolynomial.coeff_sub, MvPolynomial.coeff_add] at h2
+    have h0 : AddMonoidAlgebra.coeff (xs S d 0 i) 0 = 0 := hx 0 i
+    have h1 : AddMonoidAlgebra.coeff (xs S d 1 i) 0 = 0 := hx 1 i
     rw [h0, h1, add_zero, sub_zero] at h2
     exact h2
   have key : ∀ u v : Fin d → MvPolynomial (Fin 3 × Fin d) S, (∀ i, constantCoeff (u i) = 0) →
-      (∀ i, constantCoeff (v i) = 0) → constantCoeff (ev2 P u v) = coeff 0 P := by
+      (∀ i, constantCoeff (v i) = 0) → constantCoeff (ev2 P u v) = AddMonoidAlgebra.coeff P 0 := by
     intro u v hu hv
     rw [ev2, ccaeval_lemma_3]
     · rfl
@@ -474,11 +527,11 @@ theorem const_one {P : MvPolynomial (Fin 2 × Fin d) S} {m : ℕ}
   have h1 : constantCoeff (ev2 P fF (xs S d 2) - ev2 P (xs S d 0) (xs S d 2) * ev2 P (xs S d 1) (xs S d 2)) = 0 :=
     ccmem_lemma_2 hph1
   rw [map_sub, map_mul, key _ _ hfF (hx 2), key _ _ (hx 0) (hx 2), key _ _ (hx 1) (hx 2)] at h1
-  have h2 : coeff 0 P * (1 - coeff 0 P) = 0 := by linear_combination h1
+  have h2 : AddMonoidAlgebra.coeff P 0 * (1 - AddMonoidAlgebra.coeff P 0) = 0 := by linear_combination h1
   obtain ⟨v, hv⟩ := hu.exists_left_inv
-  have h3 : 1 - coeff 0 P = 0 := by
-    calc 1 - coeff 0 P = (v * coeff 0 P) * (1 - coeff 0 P) := by rw [hv, one_mul]
-      _ = v * (coeff 0 P * (1 - coeff 0 P)) := by ring
+  have h3 : 1 - AddMonoidAlgebra.coeff P 0 = 0 := by
+    calc 1 - AddMonoidAlgebra.coeff P 0 = (v * AddMonoidAlgebra.coeff P 0) * (1 - AddMonoidAlgebra.coeff P 0) := by rw [hv, one_mul]
+      _ = v * (AddMonoidAlgebra.coeff P 0 * (1 - AddMonoidAlgebra.coeff P 0)) := by ring
       _ = 0 := by rw [h2, mul_zero]
   rw [memIo_lemma]
   intro x hx
@@ -491,36 +544,11 @@ theorem const_one {P : MvPolynomial (Fin 2 × Fin d) S} {m : ℕ}
     exact hi ((Finset.sum_eq_zero_iff.1 hs) i (Finsupp.mem_support_iff.2 hi))
   subst hx0
   apply MvPolynomial.mem_support_iff.1 hx
-  rw [coeff_sub, coeff_zero_one]
+  rw [MvPolynomial.coeff_sub, coeff_zero_one]
   linear_combination -h3
 
-theorem aeval_diag_monomial {σ : Type} (s : σ → S) (e : σ →₀ ℕ) (a : S) :
-    aeval (fun p => C (s p) * X p) (monomial e a) = monomial e ((e.prod fun p k => s p ^ k) * a) := by
-  rw [aeval_monomial, algebraMap_eq, monomial_eq, C_mul]
-  simp only [Finsupp.prod, mul_pow, Finset.prod_mul_distrib, map_prod, map_pow]
-  ring
-
-theorem coeff_aeval_diag {σ : Type} (s : σ → S) (h : MvPolynomial σ S) (e : σ →₀ ℕ) :
-    coeff e (aeval (fun p => C (s p) * X p) h) = (e.prod fun p k => s p ^ k) * coeff e h := by
-  classical
-  conv_lhs => rw [h.as_sum]
-  rw [map_sum, coeff_sum]
-  simp only [aeval_diag_monomial, coeff_monomial]
-  rw [Finset.sum_eq_single e]
-  · rw [if_pos rfl]
-  · intro b _ hb
-    rw [if_neg hb]
-  · intro he
-    simp only [MvPolynomial.mem_support_iff, not_not] at he
-    rw [if_pos rfl, he, mul_zero]
-
-theorem prod_position (k : Fin 2) (e : Fin 2 × Fin d →₀ ℕ) :
-    (e.prod fun p n => (if p.1 = k then (2 : S) else 1) ^ n) = 2 ^ (∑ i, e (k, i)) := by
-  rw [Finsupp.prod_fintype _ _ (fun _ => pow_zero _), Fintype.prod_prod_type, Fin.prod_univ_two]
-  fin_cases k <;> simp [Finset.prod_pow_eq_pow_sum]
-
 private theorem coeffXX_lemma_15 (c : S) (a b : Fin 2 × Fin d) (e : Fin 2 × Fin d →₀ ℕ) :
-    coeff e (C c * (X a * X b)) = if Finsupp.single a 1 + Finsupp.single b 1 = e then c else 0 := by
+    AddMonoidAlgebra.coeff (C c * (X a * X b)) e = if Finsupp.single a 1 + Finsupp.single b 1 = e then c else 0 := by
   rw [X, X, monomial_mul, C_mul_monomial, coeff_monomial, mul_one, mul_one]
 
 private theorem one_lemma_16 (f : Fin d → ℕ) (hs : ∑ i, f i = 1) (i0 : Fin d) (h0 : f i0 ≠ 0) (i : Fin d) :
@@ -537,13 +565,13 @@ theorem bilin_of_biadd {h : MvPolynomial (Fin 2 × Fin d) S}
     (hA1 : ev2 h (fun i => xs S d (0 : Fin 3) i + xs S d 1 i) (xs S d 2) =
       ev2 h (xs S d 0) (xs S d 2) + ev2 h (xs S d 1) (xs S d 2))
     (hs : ev2 h (xs S d 1) (xs S d 0) = h) :
-    h = ∑ i, ∑ l, C (coeff (Finsupp.single ((0 : Fin 2), i) 1 + Finsupp.single ((1 : Fin 2), l) 1) h) *
+    h = ∑ i, ∑ l, C (AddMonoidAlgebra.coeff h (Finsupp.single ((0 : Fin 2), i) 1 + Finsupp.single ((1 : Fin 2), l) 1)) *
       (X ((0 : Fin 2), i) * X ((1 : Fin 2), l)) := by
   have h0 := aeval_double_fst_of_additive hA1
   have h1 := aeval_double_snd_of_symm h0 hs
   ext e
   simp only [coeff_sum, coeffXX_lemma_15]
-  by_cases hz : coeff e h = 0
+  by_cases hz : AddMonoidAlgebra.coeff h e = 0
   · rw [hz]
     symm
     refine Finset.sum_eq_zero (fun i _ => Finset.sum_eq_zero (fun l _ => ?_))

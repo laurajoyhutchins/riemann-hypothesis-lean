@@ -1,5 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FormGroupToPadicPointsDegreeOneEqUnitaryPoints
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FormGroupToPadicPointsDegreeOneEqUnitaryPoints
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.ClassFieldTheory.LocalClassField.UnrExtC
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open Matrix NumberField GlobalTheory.LKTrip GlobalTheory.LKRes GlobalTheory.LKMid GlobalTheory.LKCount GlobalTheory.LKCx GlobalTheory.TorCls
 open scoped TensorProduct Classical
 
@@ -172,7 +220,7 @@ theorem triv_of_idem {R : Type*} [Ring R] (σ : R →+* Rᵐᵒᵖ) (e B Bi : R)
     simp only [add_zero, zero_add]
     exact hef'
   refine ⟨inv B Bi hBi, inv Bi B hBi', ?_⟩
-  rw [map_add, map_mul, MulOpposite.unop_add, MulOpposite.unop_mul, hσe, hB, hσf]
+  rw [map_add (f := _), map_mul, MulOpposite.unop_add, MulOpposite.unop_mul, hσe, hB, hσf]
   have k2 : e * (B * e) = B * e := by rw [← mul_assoc, he B, mul_assoc, hee]
   have k3 : f * (B * f) = B * f := by rw [← mul_assoc, hfz B, mul_assoc, hff]
   have k4 : f * (B * (B * e)) = 0 := by rw [← mul_assoc B, ← he (B * B), ← mul_assoc, hfe, zero_mul]
@@ -222,7 +270,7 @@ theorem exists_idem (G : HTGroup p) : ∃ e : ℚ_[p] ⊗[ℚ] G.C, (∀ z, e * 
     | add x y hx hy => rw [mul_add, hx, hy, ← add_mul]
   have hstar : ∀ h k, (starT G.star ℚ_[p] (E h k)).unop = E h (-k) := by
     intro h k
-    simp only [E, map_add, MulOpposite.unop_add, starT_tmul, map_one, MulOpposite.unop_one, hδstar,
+    simp only [E, map_add (f := _), MulOpposite.unop_add, starT_tmul, map_one, MulOpposite.unop_one, hδstar,
       TensorProduct.tmul_neg, TensorProduct.neg_tmul]
   have hsub : ∀ h k, 1 - E h k = E (1 - h) (-k) := by
     intro h k

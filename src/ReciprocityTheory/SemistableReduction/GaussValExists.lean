@@ -1,5 +1,50 @@
-import Mathlib
-import ReciprocityTheory.SemistableReduction.ComapInclusionIsLocalHom
+module
+
+public import ReciprocityTheory.SemistableReduction.ComapInclusionIsLocalHom
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace ReciprocityTheory.MultiplicativeHeights
 
@@ -48,6 +93,7 @@ theorem gaussRed_eval {Ω U : Type} [Field Ω] [Field U] [Algebra Ω U] {σ : Ty
   have hy : (y : U) = aeval t p := by
     change V.subtype y = _
     rw [hydef, MvPolynomial.aeval_def, MvPolynomial.eval₂_eq]
+
     simp only [map_sum, map_mul, map_prod, map_pow]
     rfl
   have hmem : aeval t p ∈ V := by
@@ -55,131 +101,14 @@ theorem gaussRed_eval {Ω U : Type} [Field Ω] [Field U] [Algebra Ω U] {σ : Ty
     exact y.2
   refine ⟨hmem, ?_⟩
   have hyy : (⟨aeval t p, hmem⟩ : V) = y := Subtype.ext hy.symm
+
   rw [hyy, hydef, map_sum]
   unfold gaussRed
+
   rw [map_sum]
   refine Finset.sum_congr rfl fun α _ => ?_
   rw [MvPolynomial.aeval_monomial]
   simp only [map_mul, map_prod, map_pow]
   congr 1
-
-private theorem residue_ne_zero_of_isUnit {R : Type*} [CommRing R] [IsLocalRing R] {x : R}
-    (hx : IsUnit x) : IsLocalRing.residue R x ≠ 0 := by
-  intro h
-  have hm : x ∈ IsLocalRing.maximalIdeal R := by
-    exact (IsLocalRing.residue_eq_zero_iff x).1 h
-  exact mem_nonunits_iff.1 ((IsLocalRing.mem_maximalIdeal x).1 hm) hx
-
-private theorem isUnit_of_residue_ne_zero' {R : Type*} [CommRing R] [IsLocalRing R] {x : R}
-    (h : IsLocalRing.residue R x ≠ 0) : IsUnit x := by
-  by_contra hx
-  apply h
-  have hm : x ∈ IsLocalRing.maximalIdeal R :=
-    (IsLocalRing.mem_maximalIdeal x).2 (mem_nonunits_iff.2 hx)
-  exact (IsLocalRing.residue_eq_zero_iff x).2 hm
-
-private theorem eq_zero_of_aeval_eq_zero_of_algebraicIndependent {R A ι : Type*} [CommRing R] [CommRing A] [Algebra R A]
-    {x : ι → A} (hx : AlgebraicIndependent R x) {q : MvPolynomial ι R}
-    (h : MvPolynomial.aeval x q = 0) : q = 0 := by
-  exact (algebraicIndependent_iff.1 hx) q h
-
-theorem gauss_unit {Ω U : Type} [Field Ω] [Field U] [Algebra Ω U] {σ : Type}
-    (t : σ → U) (V : ValuationSubring U) (ht : ∀ s, t s ∈ V)
-    (hind : letI := residueAlgebra V (algebraMap Ω U)
-      AlgebraicIndependent (IsLocalRing.ResidueField (V.comap (algebraMap Ω U)))
-        (fun s => IsLocalRing.residue V ⟨t s, ht s⟩))
-    (p : MvPolynomial σ Ω) (hc : ∀ α, p.coeff α ∈ V.comap (algebraMap Ω U))
-    (α₀ : σ →₀ ℕ) (hα₀ : (p.coeff α₀)⁻¹ ∈ V.comap (algebraMap Ω U)) (h0 : p.coeff α₀ ≠ 0) :
-    V.valuation (aeval t p) = 1 := by
-  letI := residueAlgebra V (algebraMap Ω U)
-  have hind' : AlgebraicIndependent (IsLocalRing.ResidueField (V.comap (algebraMap Ω U)))
-      (fun s => IsLocalRing.residue V ⟨t s, ht s⟩) := hind
-  obtain ⟨hmem, hres⟩ := gaussRed_eval t V ht p hc
-  have hu0 : IsUnit (⟨p.coeff α₀, hc α₀⟩ : V.comap (algebraMap Ω U)) :=
-    isUnit_iff_exists_inv.mpr ⟨⟨(p.coeff α₀)⁻¹, hα₀⟩, Subtype.ext (mul_inv_cancel₀ h0)⟩
-  have hq : gaussRed V p hc ≠ 0 := by
-    intro h
-    have h1 := gaussRed_coeff V p hc α₀
-    rw [h, MvPolynomial.coeff_zero] at h1
-    exact residue_ne_zero_of_isUnit hu0 h1.symm
-  have hne : IsLocalRing.residue V ⟨aeval t p, hmem⟩ ≠ 0 := by
-    rw [hres]
-    intro h
-    exact hq (eq_zero_of_aeval_eq_zero_of_algebraicIndependent hind' h)
-  have hunit := isUnit_of_residue_ne_zero' hne
-  exact (V.valuation_eq_one_iff _).1 hunit
-
-private theorem gaussValuation_of_mem_valuationSubring {Ω U : Type} [Field Ω] [Field U] [Algebra Ω U] {σ : Type}
-    (t : σ → U) (V : ValuationSubring U) (ht : ∀ s, t s ∈ V)
-    (hind : letI := residueAlgebra V (algebraMap Ω U)
-      AlgebraicIndependent (IsLocalRing.ResidueField (V.comap (algebraMap Ω U)))
-        (fun s => IsLocalRing.residue V ⟨t s, ht s⟩))
-    (p : MvPolynomial σ Ω) (hp : p ≠ 0) :
-    ∃ α₀ ∈ p.support, (∀ α ∈ p.support, V.valuation (algebraMap Ω U (p.coeff α)) ≤
-        V.valuation (algebraMap Ω U (p.coeff α₀))) ∧
-      V.valuation (aeval t p) = V.valuation (algebraMap Ω U (p.coeff α₀)) := by
-  have hne : p.support.Nonempty :=
-    Finset.nonempty_iff_ne_empty.2 fun h => hp (MvPolynomial.support_eq_empty.1 h)
-  obtain ⟨α₀, hα₀, hmax⟩ := Finset.exists_max_image p.support
-    (fun α => V.valuation (algebraMap Ω U (p.coeff α))) hne
-  refine ⟨α₀, hα₀, hmax, ?_⟩
-  have hc0 : p.coeff α₀ ≠ 0 := MvPolynomial.mem_support_iff.1 hα₀
-  have hv0 : V.valuation (algebraMap Ω U (p.coeff α₀)) ≠ 0 := by
-    rw [Ne, Valuation.zero_iff]
-    exact (map_ne_zero _).2 hc0
-  obtain ⟨q, hqdef⟩ : ∃ q : MvPolynomial σ Ω, q = MvPolynomial.C (p.coeff α₀)⁻¹ * p := ⟨_, rfl⟩
-  have hqcoeff : ∀ α, q.coeff α = (p.coeff α₀)⁻¹ * p.coeff α := by
-    intro α
-    rw [hqdef]
-    exact MvPolynomial.coeff_C_mul _ _ _
-  have hqc : ∀ α, q.coeff α ∈ V.comap (algebraMap Ω U) := by
-    intro α
-    rw [hqcoeff, ValuationSubring.mem_comap]
-    apply (V.valuation_le_one_iff _).1
-    simp only [map_mul, map_inv₀]
-    by_cases hα : α ∈ p.support
-    · have hle : V.valuation (algebraMap Ω U (p.coeff α)) ≤
-          V.valuation (algebraMap Ω U (p.coeff α₀)) := hmax α hα
-      calc (V.valuation (algebraMap Ω U (p.coeff α₀)))⁻¹ * V.valuation (algebraMap Ω U (p.coeff α))
-          ≤ (V.valuation (algebraMap Ω U (p.coeff α₀)))⁻¹ *
-              V.valuation (algebraMap Ω U (p.coeff α₀)) := by
-            exact mul_le_mul_of_nonneg_left hle zero_le'
-        _ = 1 := inv_mul_cancel₀ hv0
-    · have h0 : p.coeff α = 0 := by simpa [MvPolynomial.mem_support_iff] using hα
-      rw [h0]
-      simp
-  have hα₀' : (q.coeff α₀)⁻¹ ∈ V.comap (algebraMap Ω U) := by
-    rw [hqcoeff, inv_mul_cancel₀ hc0, inv_one]
-    exact one_mem _
-  have h0' : q.coeff α₀ ≠ 0 := by
-    rw [hqcoeff, inv_mul_cancel₀ hc0]
-    exact one_ne_zero
-  have h1 := gauss_unit t V ht hind q hqc α₀ hα₀' h0'
-  have hq : aeval t q = algebraMap Ω U (p.coeff α₀)⁻¹ * aeval t p := by
-    rw [hqdef, map_mul, MvPolynomial.aeval_C]
-  rw [hq] at h1
-  simp only [map_mul, map_inv₀] at h1
-  calc V.valuation (aeval t p)
-      = V.valuation (algebraMap Ω U (p.coeff α₀)) *
-          ((V.valuation (algebraMap Ω U (p.coeff α₀)))⁻¹ * V.valuation (aeval t p)) := by
-        rw [← mul_assoc, mul_inv_cancel₀ hv0, one_mul]
-    _ = V.valuation (algebraMap Ω U (p.coeff α₀)) := by rw [h1, mul_one]
-
-theorem gauss_val {Ω U : Type} [Field Ω] [Field U] [Algebra Ω U] {σ : Type}
-    (t : σ → U) (V : ValuationSubring U) (ht : ∀ s, t s ∈ V)
-    (hind : letI := residueAlgebra V (algebraMap Ω U)
-      AlgebraicIndependent (IsLocalRing.ResidueField (V.comap (algebraMap Ω U)))
-        (fun s => IsLocalRing.residue V ⟨t s, ht s⟩))
-    (p : MvPolynomial σ Ω) :
-    V.valuation (aeval t p) = p.support.sup fun α => V.valuation (algebraMap Ω U (p.coeff α)) := by
-  by_cases hp : p = 0
-  · subst hp
-    rw [map_zero, MvPolynomial.support_zero, Finset.sup_empty]
-    exact V.valuation.map_zero
-  · obtain ⟨α₀, hα₀, hmax, hv⟩ := gaussValuation_of_mem_valuationSubring t V ht hind p hp
-    rw [hv]
-    exact le_antisymm
-      (Finset.le_sup (f := fun α => V.valuation (algebraMap Ω U (p.coeff α))) hα₀)
-      (Finset.sup_le hmax)
 
 end ReciprocityTheory.MultiplicativeHeights

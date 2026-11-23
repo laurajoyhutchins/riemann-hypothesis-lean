@@ -1,6 +1,52 @@
-import Mathlib
-import GroundTheory.GlobalFields.ComplexMultiplication.InseparableFrobenius
-import GroundTheory.GlobalFields.ComplexMultiplication.DualDescent
+module
+
+public import GroundTheory.GlobalFields.ComplexMultiplication.InseparableFrobenius
+public import GroundTheory.GlobalFields.ComplexMultiplication.DualDescent
+import GroundTheory.ArithmeticGeometry.AbelianVarieties.IsogenyFrobeniusSep
+public import GroundTheory.ArithmeticGeometry.AbelianVarieties.SupersingularPowField
+import GroundTheory.GlobalFields.ComplexMultiplication.DifferentialSeparable
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GroundTheory.Global
 
@@ -11,8 +57,8 @@ universe u
 variable {F : Type u} [Field F] {E E' : WeierstrassCurve F} [E.IsElliptic] [E'.IsElliptic] (p : ℕ)
   [hp : Fact p.Prime] [CharP F p]
 
-omit [E.IsElliptic] in
 
+omit [E.IsElliptic] in
 theorem exists_frobeniusPoint_eq {L : Type*} [Field L] [Algebra F L] [CharP L p] [PerfectRing L p]
     (P : ((frobeniusTwist E p).baseChange L).toAffine.Point) :
     ∃ R : (E.baseChange L).toAffine.Point, frobeniusPoint E p L R = P := by
@@ -70,7 +116,7 @@ theorem exists_comp_frobeniusIsogeny_eq (φ : Isogeny E E') (hφ : ¬ φ.IsSepar
     obtain ⟨R₁, e₁⟩ := exists_frobeniusPoint_eq (E := E) p (Point.map σ P₁)
     obtain ⟨R₂, e₂⟩ := exists_frobeniusPoint_eq (E := E) p (Point.map σ P₂)
     have e₃ : frobeniusPoint E p _ (R₁ + R₂) = Point.map σ (P₁ + P₂) := by
-      rw [frobeniusPoint_add, e₁, e₂, map_add]
+      rw [frobeniusPoint_add, e₁, e₂, map_add (f := _)]
     have gen : ∀ {R P} (hP : IsGenPt (frobeniusTwist E p) P)
         (e : frobeniusPoint E p (AlgebraicClosure L) R = Point.map σ P), IsGenPt E R :=
       fun hP e => (isGenPt_frobeniusPoint_iff E p _).mp (e ▸ isGenPt_map _ σ hP)
@@ -83,7 +129,7 @@ theorem exists_comp_frobeniusIsogeny_eq (φ : Isogeny E E') (hφ : ¬ φ.IsSepar
         ((isGenPt_frobeniusPoint_iff E p R).mpr (gen hP e))]
       exact key R _ _
     apply Point.map_injective (W' := E') σ
-    rw [map_add, step _ h₁ R₁ e₁, step _ h₂ R₂ e₂, step _ h₃ _ e₃]
+    rw [map_add (f := _), step _ h₁ R₁ e₁, step _ h₂ R₂ e₂, step _ h₃ _ e₃]
     exact φ.app_add (gen h₁ e₁) (gen h₂ e₂) (gen h₃ e₃)
   refine ⟨⟨Q, (isIsogeny_iff _).mpr ⟨ht, hresp⟩⟩, Isogeny.ext' ?_⟩
   exact (Isogeny.comp_val _ _).trans hQ
@@ -98,8 +144,8 @@ theorem exists_eq_comp_frobeniusIsogeny (φ : Isogeny E E')
     rw [← hψ, Isogeny.degree_comp, degree_frobeniusIsogeny]
   exact ⟨ψ, hψ.symm, hd, by rw [hd, Nat.mul_div_cancel _ hp.out.pos]⟩
 
-omit [E.IsElliptic] [CharP F p] [PerfectRing F p] hp in
 
+omit [E.IsElliptic] [CharP F p] [PerfectRing F p] hp in
 theorem Isogeny.comap_bijective_of_degree_eq_one {E₁ E₂ : WeierstrassCurve F} [E₁.IsElliptic]
     [E₂.IsElliptic] (ψ : Isogeny E₁ E₂) (h : ψ.degree = 1) : Function.Bijective ψ.comap := by
   refine ⟨ψ.comap.toRingHom.injective, fun z => ?_⟩

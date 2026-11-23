@@ -1,7 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.EllFamNontrivial
-import Development.AbelianVarietyTheory.Definitions.Divisors.FstTszeSec
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsCechPrimitiveBoxSegment
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.EllFamNontrivial
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsCechPrimitiveBoxSegment
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -56,6 +103,7 @@ private theorem exists_global_cechPrimitive_of_zero_section_lemma
       ext j
       · simp [Prod.fst_sum]
       · simp [Prod.snd_sum, Finset.sum_apply, Pi.single_apply]
+
     rw [hv, map_sum]
     refine Finset.sum_congr rfl fun a _ => ?_
     rw [map_smul, smul_eq_mul, (hG q hq).2.2.2.2.2.2.2.2.1 k a y hy hyB]
@@ -159,11 +207,11 @@ private theorem hol_sub_fn {E : Type} [NormedAddCommGroup E] [NormedSpace ℂ E]
   rw [← _root_.GlobalTheory.AnPer.Hol.ev_apply p hp, map_sub,
     _root_.GlobalTheory.AnPer.Hol.ev_apply, _root_.GlobalTheory.AnPer.Hol.ev_apply]
 
+
 set_option autoImplicit false in
 open CategoryTheory TopologicalSpace in
 variable {I : Type} [Fintype I] {g : ℕ} {Λ : Type} [AddCommGroup Λ]
   {F : _root_.GlobalTheory.AnPer.Fam I g Λ} in
-
 theorem _root_.GlobalTheory.AnPer.Charts.exists_primitive_of_rich {I : Type} [Fintype I] {g : ℕ} {Λ : Type}
     [AddCommGroup Λ] {F : _root_.GlobalTheory.AnPer.Fam I g Λ}
     (K : _root_.GlobalTheory.AnPer.Charts F) (hR : K.Rich)
@@ -172,16 +220,16 @@ theorem _root_.GlobalTheory.AnPer.Charts.exists_primitive_of_rich {I : Type} [Fi
     (ω : ∀ k, Fin g → _root_.GlobalTheory.AnPer.Hol (K.W k))
     (hcoc : ∀ k k' k'' (e : K.le 0 k' k)
       (e' : K.le 0 k'' k') (e'' : K.le 0 k'' k),
-      a k k'' e'' = _root_.GlobalTheory.AnPer.Charts.sh e' (a k k' e) + a k' k'' e')
+      a k k'' e'' = K.sh e' (a k k' e) + a k' k'' e')
     (hcl : ∀ k i j, _root_.GlobalTheory.AnPer.dw i (ω k j) =
       _root_.GlobalTheory.AnPer.dw j (ω k i))
     (hd : ∀ k k' (e : K.le 0 k' k) i,
-      ω k' i - _root_.GlobalTheory.AnPer.Charts.sh e (ω k i) =
+      ω k' i - K.sh e (ω k i) =
         _root_.GlobalTheory.AnPer.dw i (a k k' e)) :
     ∃ G : ∀ k, _root_.GlobalTheory.AnPer.Hol (K.W k),
       (∀ k i, _root_.GlobalTheory.AnPer.dw i (G k) = ω k i) ∧
       ∀ k k' (e : K.le 0 k' k),
-        a k k' e = G k' - _root_.GlobalTheory.AnPer.Charts.sh e (G k) := by
+        a k k' e = G k' - K.sh e (G k) := by
   classical
   obtain ⟨hcov, hmeet⟩ := hR
   obtain ⟨k₀, hk₀⟩ := hB
@@ -193,7 +241,7 @@ theorem _root_.GlobalTheory.AnPer.Charts.exists_primitive_of_rich {I : Type} [Fi
     intro k k' k'' e e'
     simpa using K.le_trans e e'
   have hsh : ∀ {k k' : K.K} (e : K.le 0 k' k) (f : _root_.GlobalTheory.AnPer.Hol (K.W k)),
-      ∀ p ∈ K.W k', (_root_.GlobalTheory.AnPer.Charts.sh e f).fn p = f.fn p := by
+      ∀ p ∈ K.W k', (K.sh e f).fn p = f.fn p := by
     intro k k' e f p hp
     rw [_root_.GlobalTheory.AnPer.Charts.fn_sh e f hp, _root_.GlobalTheory.AnPer.Fam.shift_zero]
   have hdw : ∀ {k : K.K} (i : Fin g) (f : _root_.GlobalTheory.AnPer.Hol (K.W k)), ∀ p ∈ K.W k,

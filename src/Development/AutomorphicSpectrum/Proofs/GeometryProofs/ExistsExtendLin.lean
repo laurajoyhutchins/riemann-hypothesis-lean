@@ -1,5 +1,53 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.LeadMinor
+module
+
+public import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.IsCompactUnitaryPointsAtPlaceFstMemCompact
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GlobalTheory.CompanionTheory.Ar.Flat.HTL
 
@@ -52,7 +100,7 @@ theorem exists_extend_lin {A K V W : Type} [CommRing A] [IsDomain A] [Field K] [
       have h1 : x ∈ M := Submodule.span_le.2 hbM hx
       have h2 : y ∈ M := Submodule.span_le.2 hbM hy
       have : (⟨x + y, h⟩ : M) = ⟨x, h1⟩ + ⟨y, h2⟩ := rfl
-      rw [map_add, ihx h1, ihy h2, this, map_add]
+      rw [map_add (f := _), ihx h1, ihy h2, this, map_add (f := _)]
     | smul a x hx ih =>
       intro h
       have h1 : x ∈ M := Submodule.span_le.2 hbM hx
@@ -122,15 +170,33 @@ theorem exists_vec [IsDomain A] [IsFractionRing A K] (hc : ∀ x, c (c x) = x)
     (σ : E →+* K) (g : Module.Dual A (D.omHT σ)) :
     ∃ e ∈ GlobalTheory.CompanionTheory.Ar.HT.eigSp ρ (σ.comp c.toRingHom), ∀ z : D.omHT σ,
       (z : Module.Dual K Li) e = algebraMap A K (g z) := by
-  haveI : Module.Finite K (Module.Dual K Li) := by
+  let U : Submodule K (Module.Dual K Li) := Submodule.span K (D.om : Set _)
+  haveI : Module.Finite K U := by
     obtain ⟨S, hS⟩ := D.om_lat.fg
-    refine ⟨⟨S, ?_⟩⟩
-    rw [← D.om_lat.span_eq_top, ← hS, Submodule.span_span_of_tower]
-  haveI : Module.Finite K Li := (Module.finite_dual_iff K).1 inferInstance
+    have : U = Submodule.span K (S : Set _) := by
+      dsimp [U]
+      rw [← hS, Submodule.span_span_of_tower]
+    rw [this]
+    exact Module.Finite.span_of_finite K S.finite_toSet
+  let T := U.map (eigProj D.ρΩ σ)
+  haveI : Module.Finite K T := Module.Finite.iff_fg.mpr (Submodule.FG.map (eigProj D.ρΩ σ) (Module.Finite.iff_fg.mp (show Module.Finite K U from inferInstance)))
   obtain ⟨G, hG⟩ := exists_extend_lin (K := K) (D.omHT σ) ((Algebra.linearMap A K) ∘ₗ g)
-  let v : Li := (Module.evalEquiv K Li).symm G
-  have hv : ∀ w : Module.Dual K Li, w v = G w := fun w => by
-    simpa [v] using Module.apply_evalEquiv_symm_apply w G
+  let B : Li →ₗ[K] Module.Dual K T := T.subtype.dualMap.comp (Module.Dual.eval K Li)
+  have hB : Function.Injective B.flip := by
+    intro x y h
+    apply Subtype.ext
+    ext v
+    exact LinearMap.congr_fun h v
+  obtain ⟨v, hv⟩ := (LinearMap.flip_injective_iff₂.mp hB) (G.comp T.subtype)
+  have hv' : ∀ w ∈ T, w v = G w := by
+    intro w hw
+    exact LinearMap.congr_fun hv ⟨w, hw⟩
+  have hom : D.om' ≤ D.om := by
+    rw [HTChart.om', sup_le_iff]
+    constructor
+    · exact Submodule.span_le.mpr (Set.range_subset_iff.mpr D.h_mem)
+    · rintro _ ⟨x, hx, rfl⟩
+      exact D.om.smul_mem _ hx
   refine ⟨eigProj (ρ.comp (RingOfIntegers.mapRingEquiv c : 𝓞 E →+* 𝓞 E)) σ v, ?_, ?_⟩
   · have h := LatBasic.eigProj_mem (ρ.comp (RingOfIntegers.mapRingEquiv c : 𝓞 E →+* 𝓞 E)) σ v
     rw [LatBasic.mem_eigSp] at h ⊢
@@ -155,7 +221,10 @@ theorem exists_vec [IsDomain A] [IsFractionRing A K] (hc : ∀ x, c (c x) = x)
     rw [← hz', eigProj_apply D ρ hc hact σ he w]
     have h2 : w (eigProj (ρ.comp (RingOfIntegers.mapRingEquiv c : 𝓞 E →+* 𝓞 E)) σ v) = (eigProj D.ρΩ σ w) v := by
       rw [eigProj_dual D ρ hact, LinearMap.comp_apply]
-    rw [h2, hz', hv, hG z]
+    have hzT : (z : Module.Dual K Li) ∈ T := by
+      rw [← hz']
+      exact ⟨w, Submodule.subset_span (hom hw), rfl⟩
+    rw [h2, hz', hv' _ hzT, hG z]
     rfl
 
 end Chart

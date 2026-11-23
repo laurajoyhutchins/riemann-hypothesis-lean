@@ -1,8 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.EqOfPowEqOneOfNormSubLt
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsFrobeniusSemisimplification
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsNilpotentZpowSubOne
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.SpanMkQOneTmul
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.EqOfPowEqOneOfNormSubLt
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.MonodromyZeroOfWeilDeligneRepClassIff
+public import Formalism.SharpRestriction.LevelLetterCocycles.DataN
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.SpanMkQOneTmul
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.FreeModule.IdealQuotient
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RootsOfUnity.AlgebraicallyClosed
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -76,6 +123,7 @@ theorem finiteDimensional_letter {ι : Type} [Fintype ι] (b : ι → D)
   rw [← span_letterMk, Submodule.span_le, Set.Finite.coe_toFinset]
   rintro _ ⟨x, rfl⟩
   obtain ⟨c, rfl⟩ := hb x
+
   rw [letterMk, tmul_sum, map_sum]
   refine Submodule.sum_mem _ fun i _ => ?_
   have := letterMk_mul m F τ (c i) (b i)
@@ -109,8 +157,8 @@ def Induces : Prop := ∀ x, x ∈ A ↔ ‖Bw.j x‖ ≤ 1
 
 variable {Bw}
 
-omit [NumberField E] in
 
+omit [NumberField E] in
 theorem Induces.valuation_lt_one_iff (hj : Induces Bw) (x : Ω) : A.valuation x < 1 ↔ ‖Bw.j x‖ < 1 := by
   rw [valuation_lt_one_iff', hj, hj, map_inv₀, norm_inv]
   rcases eq_or_ne x 0 with rfl | hx
@@ -135,8 +183,8 @@ theorem weilToGK_j (σ : ↥(Weil h)) (x : Ω) :
 
 variable {Bw h} [IsAlgClosure E Ω]
 
-variable (l) in
 
+variable (l) in
 def alpha (σ : ↥(Weil h)) : ℤ := resDeg l w * deg σ
 
 theorem frobUr_pow_root (n : ℕ) (c : ↥(MaximalUnramifiedExtension l)) (m : ℕ) (h0 : 0 < m) (hm : ¬ l ∣ m) (hc : c ^ m = 1) :
@@ -186,8 +234,8 @@ theorem commute_actD_phiU (g : ↥(GK K)) (n : ℤ) :
     Commute (actD P ρ g) ((phiU P ρ ^ n : (End LL ↥(Dpst P ρ))ˣ) : End LL ↥(Dpst P ρ)) :=
   Commute.units_zpow_right (u := phiU P ρ) (phiD_actD P ρ g).symm n
 
-omit [FiniteDimensional ↥(MaximalUnramifiedExtension l) (DpstUr P ρ)] in
 
+omit [FiniteDimensional ↥(MaximalUnramifiedExtension l) (DpstUr P ρ)] in
 theorem phiD_pow_mulD (n : ℕ) (c : ↥(MaximalUnramifiedExtension l)) :
     phiD P ρ ^ n * mulD P ρ c = mulD P ρ ((frobUr l ^ n) c) * phiD P ρ ^ n := by
   induction n generalizing c with

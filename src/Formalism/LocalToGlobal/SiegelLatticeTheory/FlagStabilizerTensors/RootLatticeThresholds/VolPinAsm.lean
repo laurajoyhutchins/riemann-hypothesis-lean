@@ -1,11 +1,57 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.VolPin
-import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RootLatticeThresholds.CovolIdx
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.StabilizerIndexVolumes.DiagMulOfBt
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.StabilizerIndexVolumes.VolumeIndexFiniteNonzero
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.StabilizerIndexVolumes.VolumeIndexAStable
-import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.VolPinG
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.FormTransp
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.StabilizerIndexVolumes.VolumeIndexFiniteNonzero
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.VolPinG
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.StabilizerIndexVolumes.StClosed
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.StabilizerIndexVolumes.DiagMulOfBt
+import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.TermDefPf
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.FormTransp
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RootLatticeThresholds.CovolIdx
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -33,7 +79,7 @@ def phiV (X : HidaSetting D) (v : InfinitePlace X.B.I.F) : D.host.E →+* ℂ :=
   (X.B.I.φ v).comp (X.ιE.symm : D.host.E →+* X.B.I.E)
 
 def DictProps (t : TT Y u u') (w : Point D.host.E (D.R.rS + 1))
-    (F' : LFlag (VS D) D.R.rS ((Tu D u' : ℕ) : D.host.E)) (L : Formalism.L2.SG.PairVal.MatR D)
+    (F' : LFlag (D.sp.Y 0) D.R.rS (((D.mem u').A.T : ℕ) : D.host.E)) (L : Formalism.L2.SG.PairVal.MatR D)
     (γw s c : X.B.I.Ginf) (Φ : StG w →* X.B.I.Ginf) : Prop :=
   Function.Injective Φ ∧ (∀ β, c⁻¹ * Φ β * c ∈ Formalism.L2.SG.TermOp.Vanish.Rset t) ∧
   (∀ y, (∃ β : StG w, (β : Formalism.L2.SG.PairVal.GLR D) ∈
@@ -49,28 +95,15 @@ def DictProps (t : TT Y u u') (w : Point D.host.E (D.R.rS + 1))
 
 def DictC : Prop :=
   ∀ (D : D7) (X : HidaSetting D) (Y : Full X) (u u' : D.what₂.Word) (t : TT Y u u'), t.relevant → t.G ≠ 0 →
-    ∀ w, t.toTerm.atPt w → ∀ (F' : LFlag (VS D) D.R.rS ((Tu D u' : ℕ) : D.host.E)) (L U : Formalism.L2.SG.PairVal.MatR D),
+    ∀ w, t.toTerm.atPt w → ∀ (F' : LFlag (D.sp.Y 0) D.R.rS (((D.mem u').A.T : ℕ) : D.host.E)) (L U : Formalism.L2.SG.PairVal.MatR D),
       Formalism.L2.SG.PairVal.NormRep t.toTerm w F' L U → ∀ (γw s s' : X.B.I.Ginf),
       Formalism.L2.SG.RealObj.IsPtRep X u u' w γw → s ∈ X.SinfU u → s' ∈ X.SinfU u' → t.pt.1 = s * γw * s'⁻¹ →
       ∃ (c : X.B.I.Ginf) (Φ : StG w →* X.B.I.Ginf), DictProps t w F' L γw s c Φ
 
-def CovolOneC : Prop :=
-  ∀ (D : D7) (X : HidaSetting D) (Y : Full X) (u u' : D.what₂.Word) (t : TT Y u u'), t.relevant → t.G ≠ 0 →
-    ∀ w, t.toTerm.atPt w → ∀ (F' : LFlag (VS D) D.R.rS ((Tu D u' : ℕ) : D.host.E)) (L U : Formalism.L2.SG.PairVal.MatR D),
-      Formalism.L2.SG.PairVal.NormRep t.toTerm w F' L U → ∀ (γw s s' : X.B.I.Ginf) (μw : Measure X.B.I.Ginf),
-      Formalism.L2.SG.RealObj.IsPtRep X u u' w γw → s ∈ X.SinfU u → s' ∈ X.SinfU u' → t.pt.1 = s * γw * s'⁻¹ →
-      IsHaarOnSet X.B.I (Formalism.L2.SG.RealObj.StInf X u u' γw) μw →
-      μw.map (Formalism.L2.SG.RealObj.stCoord X u' w γw) = Formalism.L2.SG.RealObj.muStab X w →
-      ∀ (c : X.B.I.Ginf) (Φ : StG w →* X.B.I.Ginf), DictProps t w F' L γw s c Φ →
-      ∃ KA : Set X.B.I.Ginf, MeasurableSet KA ∧
-        (∀ y, c⁻¹ * y * c ∈ Formalism.L2.SG.TermOp.Vanish.Rset t → ∃! x, x ∈
-          ((Formalism.L2.SG.PairVal.stabInt D u u' Y.δ Y.M w).subgroupOf (StG w)).map Φ ∧ x * y ∈ KA) ∧
-        ((μw.map (fun y => s * y * s⁻¹)).map (fun y => c * y * c⁻¹)) KA = 1
-
 def CovolOne3C : Prop :=
   ∀ (D : D7) (X : HidaSetting D) (Y : Full X) (u u' : D.what₂.Word), (∀ i, 3 ≤ D.host.g i) → PrimeHyp D u (Tu D u') →
     ∀ (t : TT Y u u'), t.relevant → t.G ≠ 0 →
-    ∀ w, t.toTerm.atPt w → ∀ (F' : LFlag (VS D) D.R.rS ((Tu D u' : ℕ) : D.host.E)) (L U : Formalism.L2.SG.PairVal.MatR D),
+    ∀ w, t.toTerm.atPt w → ∀ (F' : LFlag (D.sp.Y 0) D.R.rS (((D.mem u').A.T : ℕ) : D.host.E)) (L U : Formalism.L2.SG.PairVal.MatR D),
       Formalism.L2.SG.PairVal.NormRep t.toTerm w F' L U → ∀ (γw s s' : X.B.I.Ginf) (μw : Measure X.B.I.Ginf),
       Formalism.L2.SG.RealObj.IsPtRep X u u' w γw → s ∈ X.SinfU u → s' ∈ X.SinfU u' → t.pt.1 = s * γw * s'⁻¹ →
       IsHaarOnSet X.B.I (Formalism.L2.SG.RealObj.StInf X u u' γw) μw →
@@ -146,10 +179,10 @@ theorem rset_mul (t : TT Y u u') {a b : X.B.I.Ginf} (ha : a ∈ Formalism.L2.SG.
   exact Formalism.L2.SG.Pf.FormTranspose.ninf_mul (X := X) u' ha2 hb2
 
 theorem gval_of_normRep (t : TT Y u u') (w : Point D.host.E (D.R.rS + 1))
-    (F' : LFlag (VS D) D.R.rS ((Tu D u' : ℕ) : D.host.E)) (L U : Formalism.L2.SG.PairVal.MatR D)
+    (F' : LFlag (D.sp.Y 0) D.R.rS (((D.mem u').A.T : ℕ) : D.host.E)) (L U : Formalism.L2.SG.PairVal.MatR D)
     (hN : Formalism.L2.SG.PairVal.NormRep t.toTerm w F' L U) (hG : t.G ≠ 0) : Gval (lf D (X.Fu u)) F' ≠ 0 := by
   obtain ⟨⟨h, hmk⟩, -⟩ := hN
-  have hGF := PI.TermAttrConst.UnitaryGroupMassFormula.termGFun_holds D u u' (X.Fu u) t.toTerm.lam ((Y.rowsOK u).1 t.lam t.mem)
+  have hGF := Formalism.L2.SG.Pf.g_value_function t.toTerm.lam (lf D (X.Fu u)) (Formalism.L2.SG.TermDef.PD D t.toTerm.lam (lf D (X.Fu u)) u')
   have e : t.G = Gval (lf D (X.Fu u)) F' := by
     show Formalism.L2.SG.TermDef.Gt _ _ _ t.toTerm.cls = _
     rw [← hmk]
@@ -169,7 +202,7 @@ private theorem relIndex_map_of_injective' {G G' : Type*} [Group G] [Group G'] (
   | exact Subgroup.relindex_map_map_of_injective f hf
 
 private theorem H_affine_combination_eq_of_quadratic_relation (t : TT Y u u') (w : Point D.host.E (D.R.rS + 1))
-    (F' : LFlag (VS D) D.R.rS ((Tu D u' : ℕ) : D.host.E)) (L : Formalism.L2.SG.PairVal.MatR D)
+    (F' : LFlag (D.sp.Y 0) D.R.rS (((D.mem u').A.T : ℕ) : D.host.E)) (L : Formalism.L2.SG.PairVal.MatR D)
     (γw s c : X.B.I.Ginf) (Φ : StG w →* X.B.I.Ginf) (hDict : DictProps t w F' L γw s c Φ)
     (μR : Measure X.B.I.Ginf) (hH : IsHaarOnSet X.B.I (Formalism.L2.SG.TermOp.Vanish.Rset t) μR)
     (KA : Set X.B.I.Ginf) (hKA : MeasurableSet KA)
@@ -256,38 +289,9 @@ private theorem H_affine_combination_eq_of_quadratic_relation (t : TT Y u u') (w
   rw [eq_div_iff (by exact_mod_cast hf2)]
   exact h2.symm
 
-theorem volPinGC_of (hD : DictC) (hC : CovolOneC)
-    (hBin : ∀ (D : D7) (X : HidaSetting D) (Y : Full X) (u u' : D.what₂.Word), PrimeHyp D u (Tu D u') →
-      ∀ (t : TT Y u u') (w : Point D.host.E (D.R.rS + 1)) (F' : LFlag (VS D) D.R.rS ((Tu D u' : ℕ) : D.host.E))
-        (L U : Formalism.L2.SG.PairVal.MatR D), t.relevant → t.toTerm.generic →
-        Formalism.L2.SG.PairVal.NormRep t.toTerm w F' L U → Gval (lf D (X.Fu u)) F' ≠ 0 →
-        (Formalism.L2.SG.PairVal.stabAut D u u' (X.Fu u) (Y.what₂ u) t.toTerm F' L : Set (Formalism.L2.SG.PairVal.GLR D)) ⊆
-          Formalism.L2.SG.Pf.StabilizerIndexVolumes.StSet (ptMat w))
-    (hFin : ∀ (D : D7) (X : HidaSetting D) (Y : Full X) (u u' : D.what₂.Word), PrimeHyp D u (Tu D u') →
-      Formalism.L2.SG.Pf.StabilizerIndexVolumes.VolumeIndexFiniteNonzero D u u' (X.Fu u) (Y.what₂ u) Y.δ Y.M) :
-    Formalism.L2.SG.VolPin.VolPinGC := by
-  intro D X Y u u' hP t hrel hgen hG w hw μR hpin K hK hKu F' L U hN
-  obtain ⟨γw, s, s', μw, hpt, hs, hs', hdec, hμw, hmap, rfl⟩ := hpin
-  obtain ⟨c, Φ, hDict⟩ := hD D X Y u u' t hrel hG w hw F' L U hN γw s s' hpt hs hs' hdec
-  obtain ⟨KA, hKA, hKAu, hKA1⟩ :=
-    hC D X Y u u' t hrel hG w hw F' L U hN γw s s' μw hpt hs hs' hdec hμw hmap c Φ hDict
-  have hGv := gval_of_normRep t w F' L U hN hG
-  have hAut : Formalism.L2.SG.PairVal.stabAut D u u' (X.Fu u) (Y.what₂ u) t.toTerm F' L ≤ StG w :=
-    fun a ha => hBin D X Y u u' hP t w F' L U hrel hgen hN hGv ha
-  have hInt : Formalism.L2.SG.PairVal.stabInt D u u' Y.δ Y.M w ≤ StG w := by
-    unfold Formalism.L2.SG.PairVal.stabInt
-    refine (Subgroup.closure_le _).mpr ?_
-    intro a ha
-    obtain ⟨h1, b, hb, hwb, -⟩ := ha
-    show a ∈ Formalism.L2.SG.Pf.StabilizerIndexVolumes.StSet (ptMat w)
-    exact ⟨h1, b, hb, hwb⟩
-  obtain ⟨hf1, hf2⟩ := hFin D X Y u u' hP Y.agree t.toTerm w F' L U hrel hgen hN hGv
-  exact H_affine_combination_eq_of_quadratic_relation t w F' L γw s c Φ hDict _ (pinned_haar t w γw s s' μw hs hs' hdec hμw) KA hKA hKAu hKA1
-    K hK hKu hAut hInt hf1 hf2
-
 theorem volume_generic_odd_of (hD : DictC) (hC : CovolOne3C)
     (hBin : ∀ (D : D7) (X : HidaSetting D) (Y : Full X) (u u' : D.what₂.Word), PrimeHyp D u (Tu D u') →
-      ∀ (t : TT Y u u') (w : Point D.host.E (D.R.rS + 1)) (F' : LFlag (VS D) D.R.rS ((Tu D u' : ℕ) : D.host.E))
+      ∀ (t : TT Y u u') (w : Point D.host.E (D.R.rS + 1)) (F' : LFlag (D.sp.Y 0) D.R.rS (((D.mem u').A.T : ℕ) : D.host.E))
         (L U : Formalism.L2.SG.PairVal.MatR D), t.relevant → t.toTerm.generic →
         Formalism.L2.SG.PairVal.NormRep t.toTerm w F' L U → Gval (lf D (X.Fu u)) F' ≠ 0 →
         (Formalism.L2.SG.PairVal.stabAut D u u' (X.Fu u) (Y.what₂ u) t.toTerm F' L : Set (Formalism.L2.SG.PairVal.GLR D)) ⊆

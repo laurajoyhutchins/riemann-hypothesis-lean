@@ -1,6 +1,50 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RootLatticeThresholds.NormalizingConstantEq
-import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.InHHNeat
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.InHHNeat
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.ParametersTermRelations
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedVolumeStatements.LevelSubgroupProperties
+public import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.CdHaarScale
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 open scoped Classical InnerProductSpace ComplexConjugate
@@ -22,7 +66,7 @@ theorem sharp_bij_of_neat (u : D.what₂.Word) (hN : Formalism.L2.SG.PoincareInH
     fun ρ => DoubleCoset.mk (iotaF X u).range (Ku X u Y.hK) ((Y.cs u).h ρ)
   have hcls : Function.Bijective cls := by
     refine ⟨fun ρ ρ' h => ?_, fun c => ?_⟩
-    · obtain ⟨a, ⟨γ, rfl⟩, κ, hκ, hab⟩ := (DoubleCoset.eq _ _ _ _).1 h
+    · obtain ⟨a, ⟨γ, rfl⟩, κ, hκ, hab⟩ := (@DoubleCoset.eq _ _ _ _ _ _).1 h
       obtain ⟨ρ0, _, huniq⟩ := Y.colReps u ((Y.cs u).h ρ')
       have h1 := huniq ρ ⟨γ, ⟨κ, hκ⟩, hab⟩
       have h2 := huniq ρ' ⟨1, 1, by simp⟩
@@ -75,17 +119,17 @@ theorem finX_of_neat (hN : ∀ u, Formalism.L2.SG.PoincareInHH.Cut.NeatKu X u Y.
       rowOf Y.TR (Y.cs u) (Y.cs u') s₁ = rowOf Y.TR (Y.cs u) (Y.cs u') s₂ →
       rowOf Y.TR (Y.cs u) (Y.cs u') s₁' = rowOf Y.TR (Y.cs u) (Y.cs u') s₂' →
       s0T s₁ s₂ = s0T s₁' s₂' ∧ (liftScalar s₁ s₂ ↔ liftScalar s₁' s₂')) (hG : ∀ u u' (t : RT Y u u'), t.G ∈ D.host.F)
-    (hvol : VolPosC) : FinX Y where
-  shInj u := (sharp_bij_of_neat Y u (hN u)).1
-  shSurj u := (sharp_bij_of_neat Y u (hN u)).2
-  inHH := hin
-  puLin u := Formalism.L2.SG.PoincareInHH.Cut.puLinear_holds X u Y.hK (Y.Dt u)
-  finHH := hfin
-  fibFin := hfib
-  pairIndep := hpi
-  Greal := hG
-  cdEx n ε := cd_haar_scaling D.cd n ε
-  volPos u := hvol D X Y u (Formalism.L2.SG.Closed.level_subgroup_properties X)
+    (hvol : VolPosC) : FinX Y :=
+  { shInj := fun u => (sharp_bij_of_neat Y u (hN u)).1
+    shSurj := fun u => (sharp_bij_of_neat Y u (hN u)).2
+    inHH := hin
+    puLin := fun u => Formalism.L2.SG.PoincareInHH.Cut.puLinear_holds X u Y.hK (Y.Dt u)
+    finHH := hfin
+    fibFin := hfib
+    pairIndep := hpi
+    Greal := hG
+    cdEx := fun n ε => cd_haar_scaling D.cd n ε
+    volPos := fun u => hvol D X Y u (Formalism.L2.SG.Closed.level_subgroup_properties X) }
 
 end FinXN
 

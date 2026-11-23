@@ -1,6 +1,45 @@
-import Mathlib
-import Formalism.LocalToGlobal.KernelLattices.KernelLocalFactors.ThDistC
-import Formalism.ThetaSupremumBounds.StatementE
+module
+
+public import Formalism.LocalToGlobal.KernelLattices.ThDistC
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain MvPolynomial
 
@@ -13,9 +52,6 @@ open Formalism.BasicNotions Formalism.L2.Ker Formalism.L2.DIV Formalism.L2.Col
 section Alg
 
 variable {K : Type} [Field K] {ι : Type} [Fintype ι] {a b : ℕ}
-
-def jetCoef (m : DVar ι a b →₀ ℕ) : MvPolynomial ((ι × Fin b × Fin b) ⊕ DVar ι a b) K →ₗ[K] Pol K ι b :=
-  jetLin (fun m' => if m' = m then (1 : K) else 0)
 
 def dPart (s : ((ι × Fin b × Fin b) ⊕ DVar ι a b) →₀ ℕ) : DVar ι a b →₀ ℕ :=
   s.comapDomain Sum.inr Sum.inr_injective.injOn
@@ -39,7 +75,7 @@ theorem map_jetLin {L : Type} [Field L] (σ : K →+* L) (J : (DVar ι a b →�
   refine MvPolynomial.induction_on' Q (fun s r => ?_) (fun p q hp hq => ?_)
   · rw [MvPolynomial.map_monomial, jetLin_monomial', jetLin_monomial', MvPolynomial.smul_monomial,
       MvPolynomial.smul_monomial, MvPolynomial.map_monomial, smul_eq_mul, smul_eq_mul, map_mul]
-  · rw [map_add, map_add, map_add, map_add, hp, hq]
+  · rw [map_add (f := _), map_add (f := _), map_add (f := _), map_add (f := _), hp, hq]
 
 theorem map_frDet {L : Type} [Field L] (σ : K →+* L) (τ : ι) :
     MvPolynomial.map σ (frDet K a τ) = frDet L a τ := by
@@ -89,21 +125,6 @@ variable {X : Fields} (A : Amb X) {a b : ℕ} (Sall SB : Finset (HeightOneSpectr
   (lam : X.Tau → DomWeight a) (lam' : X.Tau → DomWeight b) (n : X.Tau → ℕ)
   (N : Submodule (𝓞 X.E) (Sp X.E a)) (fr : Frs X.E a SB) (N' : Submodule (𝓞 X.E) (Sp X.E b)) (fr' : Frs X.E b SB)
   (c : ℕ) (x : HomE X.E a b)
-
-def unitSc : ℂ := ((Real.sqrt (Real.pi * A.sc) : ℝ) : ℂ)
-
-def thUnit : VCx X.Tau a b → ℂ := fun u => A.thInd Sall N N' c x ((unitSc A)⁻¹ • u)
-
-def lamUnit (τ : X.Tau) : ℂ := A.cD τ * unitSc A
-
-def cUnit (m : DVar X.Tau a b →₀ ℕ) : ℂ := derivAt0 (thUnit A Sall N N' c x) m / (Formalism.DimensionVariation.mfact (⇑m) : ℂ)
-
-def kapBase : ℂ :=
-  A.σ₀ (muInvDet sel SB mU mI N fr * (muInvDet sel SB mU mI N' fr')⁻¹) * (A.chiF a b N N')⁻¹
-
-def rcBase (m : DVar X.Tau a b →₀ ℕ) : Pol ℂ X.Tau a →ₗ[ℂ] Pol ℂ X.Tau b :=
-  kapBase A SB sel mU mI N fr N' fr' •
-    (jetCoef m ∘ₗ (subD ℂ X.Tau a b).toLinearMap ∘ₗ LinearMap.mulRight ℂ (∏ τ, frDet ℂ a τ ^ n τ))
 
 end Base
 

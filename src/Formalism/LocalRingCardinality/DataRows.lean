@@ -1,6 +1,47 @@
-import Mathlib
-import Formalism.LocalRingCardinality.Params
-import Formalism.CoboundaryTransfers.Statement
+module
+
+public import Formalism.LocalRingCardinality.Params
+public import Mathlib.Analysis.InnerProductSpace.Adjoint
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace Formalism.BasicNotions.Rows
 
@@ -206,13 +247,7 @@ noncomputable def Zj (μ : D.Tup) (j : ℕ) : Submodule ℂ (D.Mt μ j) := Linea
 noncomputable def TjSet (μ : D.Tup) (j : ℕ) : Set (D.Mt μ j) :=
   (fun x => D.eMt μ j ((D.Zj μ j).starProjection x)) '' (D.MtLat μ j).carrier
 
-def nRows (π : D.FT) : ℕ := Fintype.card {σ : Fin D.Drows // D.ft σ = π}
-
 def nRows0 (π : D.FT) : ℕ := Fintype.card {σ : Fin D.D0 // D.ft0 σ = π}
-
-def EEpart (π : D.FT) : Submodule ℂ D.EE := Submodule.span ℂ (D.onb '' {σ | D.ft σ = π})
-
-def IsotypicPart (π : D.FT) : Submodule ℂ D.EE0 := Submodule.span ℂ (D.onb0 '' {σ | D.ft0 σ = π})
 
 def zeC (u : D.Word) (μ : D.Tup) : ℂ := D.embLL (D.ze u μ : D.LL)
 
@@ -230,13 +265,6 @@ def LamPDef {R : Ranks} (D : Data R) : Prop :=
   ∀ μ j, 1 ≤ j → j ≤ R.m → ∀ σ, ∀ x ∈ D.isot j σ, D.thetaP μ j (D.thetaT μ j x) = ((D.lamP μ j σ : ℝ) : ℂ) • x
 
 def DelpNonneg {R : Ranks} (D : Data R) : Prop := 0 ≤ D.delp
-
-def AIntegral {R : Ranks} (D : Data R) : Prop :=
-  ∀ μ x, x ∈ (D.Mtilde μ).carrier → ((D.restRowsFiniteGroupCard : ℂ) • D.eOp μ x) ∈ (D.Mtilde μ).carrier
-
-def ZeUnit {R : Ranks} (D : Data R) : Prop :=
-  ∀ u w, D.places.val w (D.ze u (D.muAt w) : D.LL) = 0 ∧
-    D.places.val (D.places.conj w) (D.ze u (D.muAt w) : D.LL) = 0
 
 def IsotInternal {R : Ranks} (D : Data R) : Prop :=
   ∀ j, 1 ≤ j → j ≤ R.m → DirectSum.IsInternal (D.isot j)

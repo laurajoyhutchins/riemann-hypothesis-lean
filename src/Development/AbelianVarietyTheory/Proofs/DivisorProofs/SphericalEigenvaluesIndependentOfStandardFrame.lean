@@ -1,18 +1,53 @@
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.NormalFam
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisGeometry₂.HoweUnram
-import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.IsStepWeil
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.ExistsNormLeHeightPow
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FinRepApply
-import Development.AbelianVarietyTheory.Definitions.Divisors.InstCMHostS
-import Formalism.LocalToGlobal.IndefiniteReal.PartsRow
-import Formalism.LocalToGlobal.IndefiniteReal.BaseLiftsPackageOfPrimitiveLinks
-import Formalism.LocalToGlobal.Divisibility.TrivialExtensionSideWellFormed
+module
+
+public import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.NormalFam
+public import Development.AbelianVarietyTheory.Definitions.Divisors.InstCMHostS
+public import Formalism.LocalToGlobal.IndefiniteReal.ConjSubConjSub
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HeckeCompatFiniteIsometry
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsometryMatchingLatticesMatchesSphericalOps
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PlaceIdempotentSmulMemCompletedSelfDualLatticeStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.StandardFramesMatchCompletedLatticesAtPrimeStatement
 import Development.AbelianVarietyTheory.Proofs.SatakeParameters.SphericalLabelOperatorsOnHyperspecialFixedVector
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsometryMatchingLatticesMatchesSphericalOps
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.SupportedSubgroupSplitCommutePrimeIdempotents
 import Formalism.LocalToGlobal.GlobalTheory.GL5.FamilyMassVolumeIdentityOfClassDecomp
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.StandardFramesMatchCompletedLatticesAtPrimeStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PlaceIdempotentSmulMemCompletedSelfDualLatticeStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.MainNotions.S MeasureTheory IsDedekindDomain NumberField Matrix
 open Formalism.L2.Theta Formalism.L2.DIV Formalism.L2.Indef Formalism.DivisionValues Polynomial
 open Formalism.IndefR Formalism.IndefR.Links Formalism.IndefR.Lev Formalism.IndefR.Mult Formalism.IndefR.Datum Formalism.IndefR.Cx
@@ -97,7 +132,7 @@ variable {V : HSp D} {n : ℕ}
 theorem pre_psi (Q : principalLevelFrame.RowPsi V n) (κ : Formalism.AUTREP.GAf D.host.E n) : principalLevelFrame.pre Q (Q.ψ κ) = κ := by
   have h : ∃ x, Q.ψ x = Q.ψ κ := ⟨κ, rfl⟩
   unfold principalLevelFrame.pre
-  rw [dif_pos h]
+  rw [dite_eq_left h]
   exact Q.inj h.choose_spec
 
 theorem psi_pre (Q : principalLevelFrame.RowPsi V n) {γ : GA D V} (hγ : γ ∈ GfC V) : Q.ψ (principalLevelFrame.pre Q γ) = γ := by
@@ -106,7 +141,7 @@ theorem psi_pre (Q : principalLevelFrame.RowPsi V n) {γ : GA D V} (hγ : γ ∈
 
 theorem pre_of_not_mem (Q : principalLevelFrame.RowPsi V n) {γ : GA D V} (hγ : γ ∉ GfC V) : principalLevelFrame.pre Q γ = 1 := by
   unfold principalLevelFrame.pre
-  rw [dif_neg]
+  rw [dite_eq_right]
   rintro ⟨x, rfl⟩
   exact hγ (Q.into x)
 
@@ -154,8 +189,8 @@ theorem loc_iff (hQ : StdPsi hF Q) (hQ' : StdPsi hF Q') (f : Formalism.L2.Theta.
     Q.ψ κ ∈ {k | k ∈ KsphC V ∅ ∧ SuppF V f k} ↔ Q'.ψ κ ∈ {k | k ∈ KsphC V' ∅ ∧ SuppF V' f k} :=
   and_congr (ksph_iff hQ hQ' κ) (suppF_iff hQ hQ' f κ)
 
-open Classical in
 
+open Classical in
 theorem sphOp_image (hQ : StdPsi hF Q) (hQ' : StdPsi hF Q') {Pr : Pl D.host.E} {d : List ℤ} {B : Finset (GA D V)}
     (hB : SphOp V Pr d B) : SphOp V' Pr d (B.image fun γ => Q'.ψ (principalLevelFrame.pre Q γ)) := by
   obtain ⟨e, f, ϖ, α, -, hpi, hϖ1, hϖ2, hd, -, -, hsα, hdiv, hsR, hcos⟩ := hB

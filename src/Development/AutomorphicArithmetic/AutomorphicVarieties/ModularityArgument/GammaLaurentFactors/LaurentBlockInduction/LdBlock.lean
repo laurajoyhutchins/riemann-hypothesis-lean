@@ -1,4 +1,63 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.GammaLaurentFactors.LaurentBlockInduction.LdDefs
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.GammaLaurentFactors.LaurentBlockInduction.LdDefs
+import Development.AbelianVarietyTheory.Definitions.Divisors.LineOppositeParabolicUnitaryLeviSectionEq
+import Development.AbelianVarietyTheory.Definitions.Divisors.T2SpaceGeneralLinearGroup
+import Formalism.DoubleCosetMeasures.Statement
+import GroundTheory.AutomorphicForms.GL2.ExistsEqPowMulOfValuationLe
+public import GroundTheory.AutomorphicForms.GL2.GJFEBlock
+public import GroundTheory.AutomorphicForms.GL2.GJLocalFECoeff
+public import GroundTheory.AutomorphicForms.GL2.GJLocalFEGamma
+import GroundTheory.AutomorphicForms.GL2.GJZetaCore
+import GroundTheory.AutomorphicForms.SmoothRepContragredient
+import GroundTheory.AutomorphicForms.SmoothRepSchur
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -151,11 +210,42 @@ theorem ldBlock_of (hL : LdLaurent) (hM : LdMean) (hT : LdTate) : LdBlock := by
     rw [hef, fixedContragredientEquiv_apply, restrictFixed_apply] at h
     rw [hef, h]
     exact hφ
-  have hcc := isCentralCoeff_coeff hσ.1 hα0 hα hsupp v₀ hℓ₀
+  have hcc : IsCentralCoeff m α (fun g => ℓ₀ (σ (g, 1) v₀)) := by
+    refine ⟨?_, hα0, ?_, hsupp v₀ ℓ₀ hℓ₀⟩
+    · set K : Subgroup (GL (Fin m) F) := (stabilizerOf σ v₀).comap (MonoidHom.inl _ _)
+      have hKo : IsOpen (K : Set (GL (Fin m) F)) :=
+        (hσ.1 v₀).preimage (continuous_id.prodMk continuous_const)
+      refine (isLocallyConstant_of_mul_right hKo fun g k hk => ?_).continuous
+      have hk' : σ (k, 1) v₀ = v₀ := mem_stabilizerOf.1 hk
+      show ℓ₀ (σ (g * k, 1) v₀) = ℓ₀ (σ (g, 1) v₀)
+      rw [show ((g * k, (1 : H)) : GL (Fin m) F × H) = (g, 1) * (k, 1) by simp,
+        map_mul, Module.End.mul_apply, hk']
+    · intro g
+      rw [show ((centralUnif F m * g, (1 : H)) : GL (Fin m) F × H) =
+        (centralUnif F m, 1) * (g, 1) by simp, map_mul, Module.End.mul_apply,
+        hα, map_smul, smul_eq_mul]
   set t : ℝ := Real.logb (LocalField.residueCard F) ‖α‖ / m
   have hR : ∀ s : ℂ, t < s.re → ‖α * qs F s ^ m‖ < 1 := fun s hs => norm_mul_qs_pow_lt_one hα0 hs
-  have hLft : ∀ s : ℂ, s.re < t + m → ‖α⁻¹ * qs F ((m : ℂ) - s) ^ m‖ < 1 := fun s hs =>
-    norm_inv_mul_qs_sub_lt_one hα0 (lt_norm_mul_qs_pow hα0 hs)
+  have hLft : ∀ s : ℂ, s.re < t + m → ‖α⁻¹ * qs F ((m : ℂ) - s) ^ m‖ < 1 := fun s hs => by
+    have hs' := lt_norm_mul_qs_pow hα0 hs
+    have hq : (1 : ℝ) < LocalField.residueCard F := by exact_mod_cast LocalField.one_lt_residueCard
+    have hq0 : (0 : ℝ) < LocalField.residueCard F := by linarith
+    have hqs : ‖qs F ((m : ℂ) - s)‖ = ((LocalField.residueCard F : ℝ) ^ (-(m : ℝ))) / ‖qs F s‖ := by
+      rw [norm_qs, norm_qs, Complex.sub_re, Complex.natCast_re, neg_sub, Real.rpow_sub hq0,
+        Real.rpow_neg hq0.le, Real.rpow_neg hq0.le]
+      field_simp
+    have hpos : 0 < ‖α * qs F s ^ m‖ :=
+      norm_pos_iff.2 (mul_ne_zero hα0 (pow_ne_zero _ (qs_ne_zero s)))
+    rw [norm_mul, norm_inv, norm_pow, hqs, div_pow, ← Real.rpow_natCast, ← Real.rpow_mul hq0.le]
+    rw [norm_mul, norm_pow] at hpos hs'
+    have hlhs : ((LocalField.residueCard F : ℝ) ^ m) ^ (-(m : ℤ)) =
+        (LocalField.residueCard F : ℝ) ^ (-(m : ℝ) * m) := by
+      rw [← Real.rpow_natCast, ← Real.rpow_intCast, ← Real.rpow_mul hq0.le]
+      push_cast
+      ring_nf
+    rw [hlhs] at hs'
+    rw [inv_mul_eq_div, div_div, mul_comm (‖qs F s‖ ^ m), div_lt_one hpos]
+    linarith
   split_ifs with hu
   · obtain ⟨rfl, hu⟩ := hu
     obtain ⟨Φ, hΦ, r, hr, hZ⟩ := hT F μ

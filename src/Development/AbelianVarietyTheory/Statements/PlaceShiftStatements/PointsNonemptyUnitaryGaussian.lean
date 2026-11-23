@@ -1,8 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.Uniformised
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.PointsNonemptyUnitaryRankOne
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+public import Mathlib.CategoryTheory.Monoidal.Cartesian.Over
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsDimEqOne
 import Development.AbelianVarietyTheory.Definitions.Divisors.HasDivPlace
-import Development.AbelianVarietyTheory.Definitions.Divisors.PointsNonemptyUnitaryRankOne
-import Development.AbelianVarietyTheory.Statements.PlaceShiftStatements.PrimeToPOne
+import Development.AbelianVarietyTheory.Definitions.Divisors.NotCompactOfMEqOne
+import Development.AbelianVarietyTheory.Definitions.Divisors.RedSurjective
+import Development.AbelianVarietyTheory.Definitions.Divisors.ToSpanSingletonConstGenInjective
+import Mathlib.Topology.Sheaves.Presheaf
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.CocycleRightZeroThd
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.CubicalStructures.CubeSymmetricSwapFirst
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SymplecticGenerators.StTransl
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -19,8 +65,6 @@ namespace GlobalTheory.LKCx
 
 variable {p : ℕ} [Fact p.Prime]
 
-def KpOne (G : HTGroup p) : Subgroup (Gr G 1) := (Kp0 G).map (inclG G 1)
-
 def Form.toAf {G : HTGroup p} (P : Form G) : grp G P.β →* G.GAf :=
   toAfF G P.β P.trivAf.choose P.trivAf.choose_spec.choose P.trivAf.choose_spec.choose_spec
 
@@ -34,39 +78,5 @@ abbrev Form.Stab {G : HTGroup p} (v : InfinitePlace G.F) (P : Form G) (Kf : Subg
 
 abbrev AllPts (G : HTGroup p) (v : InfinitePlace G.F) (Kf : Subgroup G.GAf) (K' : Subgroup (Gr G 1)) : Type :=
   Σ q : FCls G, Form.Pts v (Quot.out q) Kf K'
-
-def CxPtsM {D : Datum p} {R : Type} [CommRing R] {b : Base D R} {N : ℕ} (M : Model b N) (σ : R →+* ℂ) : Type :=
-  {y : Sp ℂ ⟶ M.X // y ≫ M.s = spMap σ}
-
-def QIsog {D : Datum p} {G : HTGroup p} (L : Link D G) {R : Type} [CommRing R] {b : Base D R} {k : Type} [Field k]
-    {β : R →+* k} {N : ℕ} (o : Obj b N (spMap β)) : Type :=
-  {π : End0 (av o) // PrimeToP o π ∧ ∃ g, IsGamma L o π g}
-
-def FixP {G : HTGroup p} (v : InfinitePlace G.F) (P : Form G) (K' : Subgroup (Gr G 1)) (a : Dat G v P.β) : Type :=
-  {y : grp G P.β // FixL G v P.β y a.2.1 ∧ a.1.2⁻¹ * toP1 G P.β y * a.1.2 ∈ K'}
-
-def CxUnif : Prop :=
-  ∀ (p : ℕ) [Fact p.Prime] (D : Datum p) (G : HTGroup p) (L : Link D G), D.IsSimple →
-    ∀ (R : Type) [CommRing R] (b : Base D R) (σ : R →+* ℂ) (ρ : D.O →+* Matrix (Fin D.g) (Fin D.g) ℂ),
-    b.Matches σ → b.IsType σ ρ → ∀ N : ℕ, 3 ≤ N → N.Coprime p → ∀ (M : Model b N) (v : InfinitePlace G.F),
-    sigPosH (G.gram_herm v) = 1 →
-    ∃ Φ : CxPtsM M σ ≃ AllPts G v (L.KN N) (KpOne G),
-      ∀ (y : CxPtsM M σ) (o : Obj b N (spMap σ)), Classifies M y.1 o →
-        ∀ (q : FCls G) (a : Dat G v (Quot.out q).β),
-          Φ y = (⟨q, Quot.mk _ a⟩ : AllPts G v (L.KN N) (KpOne G)) →
-          ∃ E : QIsog L o ≃ FixP v (Quot.out q) (KpOne G) a,
-            (∀ π : QIsog L o, IsGamma L o π.1 (a.1.1⁻¹ * (Quot.out q).toAf (E π).1 * a.1.1)) ∧
-            Nat.card {π : QIsog L o // ∃ k ∈ L.KN N, IsGamma L o π.1 k} =
-              Nat.card (Form.Stab v (Quot.out q) (L.KN N) (KpOne G) a)
-
-def FixP.one {G : HTGroup p} (v : InfinitePlace G.F) (P : Form G) (K' : Subgroup (Gr G 1)) (a : Dat G v P.β) :
-    FixP v P K' a :=
-  ⟨1, fixL_one G v P.β _, by simpa using K'.one_mem⟩
-
-example {G : HTGroup p} (P : Form G) (h : G.GAf) : h⁻¹ * P.toAf 1 * h = 1 := by simp
-
-example {G : HTGroup p} (v : InfinitePlace G.F) (P : Form G) (Kf : Subgroup G.GAf) (K' : Subgroup (Gr G 1))
-    (a : Dat G v P.β) : Nonempty (Form.Stab v P Kf K' a) :=
-  ⟨Stab.one G v P.β _ _ _ Kf K' a⟩
 
 end GlobalTheory.LKCx

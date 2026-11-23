@@ -1,6 +1,45 @@
-import Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow
-import Formalism.SharpRestriction.ParConsts
-import Formalism.SharpRestriction.GrowthBounds.ObjPol
+module
+
+public import Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow
+public import Formalism.SharpRestriction.GrowthBounds.ObjPol
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -17,8 +56,8 @@ def rhoN (n : ℕ) : Fin n → ℕ := fun j => n - 1 - j
 def Interlace {n : ℕ} (lam mu : Fin n → ℕ) : Prop :=
   (∀ j, lam j ≤ mu j) ∧ ∀ i j : Fin n, i.val + 1 = j.val → mu j ≤ lam i
 
-open Classical in
 
+open Classical in
 def adm1 (_D : Formalism.BasicNotions.D7) : Prop :=
   ∀ (n : ℕ) (lam : Fin n → ℕ), Antitone lam → ∀ b : ℕ,
     alt n (lam + rhoN n) * hsymm (Fin n) ℤ b =
@@ -146,8 +185,8 @@ def ValuationLemmaField (D : Formalism.BasicNotions.D7) : Prop := ValuationsAddi
 def detA {R : Type} [CommRing R] {ι : Type} {r : ℕ} (A : Fin r → ι) : MvPolynomial (ι × Fin r) R :=
   (Matrix.of fun i j : Fin r => (X (A i, j) : MvPolynomial (ι × Fin r) R)).det
 
-open Classical in
 
+open Classical in
 def degOther {ι : Type} [Fintype ι] {r : ℕ} (LL : Letters ι) (S : Set ι) (A : Fin r → ι) (d : ι → ℕ) : ℕ :=
   ∑ l, if l ∈ S ∧ LL.vec l = true ∧ l ∉ Set.range A then d l else 0
 
@@ -223,13 +262,13 @@ def UnitProductSecondLemma (D : Formalism.BasicNotions.D7) : Prop := FactorialUn
 
 def UnitProductLemmas (D : Formalism.BasicNotions.D7) : Prop := UnitFunctionExpansion D ∧ UnitProductSecondLemma D
 
-open Classical in
 
+open Classical in
 def vecDeg {ι : Type} {n : ℕ} (LL : Letters ι) (S : Set ι) (al : ι × Fin n →₀ ℕ) : ℕ :=
   ∑ v ∈ al.support, if v.1 ∈ S ∧ LL.vec v.1 = true then al v else 0
 
-open Classical in
 
+open Classical in
 def covDeg {ι : Type} {n : ℕ} (LL : Letters ι) (S : Set ι) (al : ι × Fin n →₀ ℕ) : ℕ :=
   ∑ v ∈ al.support, if v.1 ∈ S ∧ LL.vec v.1 = false then al v else 0
 
@@ -249,8 +288,8 @@ def DerivativeDigitExpansion (_D : Formalism.BasicNotions.D7) : Prop :=
       ∀ e' : σ → ℕ, (p : ℤ) ^ c ∣
         ((∏ k, (((rho k + p ^ t * e' k).choose (M k) : ℕ) : ℤ)) - ∑ l ∈ T, γ l * ∏ k, (((e' k).choose (l k) : ℕ) : ℤ))
 
-open Classical in
 
+open Classical in
 def TrueDerivativeDigitClass (_D : Formalism.BasicNotions.D7) : Prop :=
   ∀ (R : Type) [CommRing R] (σ : Type) (P : σ → ℕ), (∀ k, 1 ≤ P k) → ∀ (rho : σ → ℕ) (k : σ)
     (F : MvPolynomial σ R), F ∈ DigitClassL R P rho →
@@ -263,11 +302,5 @@ def DerivativeLemmaField (D : Formalism.BasicNotions.D7) : Prop := DerivativeLem
 def Conclusion1 (D : Formalism.BasicNotions.D7) : Prop := ProjectionTheorems D ∧ ValuationLemmaField D ∧ ConclusionE D ∧ UnitProductLemmas D ∧ DerivativeLemmaField D
 
 def IntegralityFromMetric (D : Formalism.BasicNotions.D7) : Prop := admitted D → Conclusion1 D
-
-def AdmF {eps : ℝ} (Fm : Formalism.MainNotions.FamP eps) : Prop := ∀ (x : ℝ) (i : Fm.Ix x), admitted (Fm.D x i)
-
-def Conclusion1Family {eps : ℝ} (Fm : Formalism.MainNotions.FamP eps) : Prop := ∃ x0 : ℝ, ∀ x : ℝ, x0 ≤ x → ∀ i : Fm.Ix x, Conclusion1 (Fm.D x i)
-
-def FamilyGlobalDerivation {eps : ℝ} (Fm : Formalism.MainNotions.FamP eps) : Prop := AdmF Fm → Conclusion1Family Fm
 
 end Formalism.MainNotions.CovariantDegrees

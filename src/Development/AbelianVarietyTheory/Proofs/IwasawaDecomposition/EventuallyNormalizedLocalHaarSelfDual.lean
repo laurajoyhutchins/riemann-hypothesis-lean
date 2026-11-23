@@ -1,8 +1,61 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.T2SpaceNumberFieldInfiniteAdeles
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IntegralPointsFinitePlaceTensorProperties
+module
+
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.T2SpaceNumberFieldInfiniteAdeles
+public import Mathlib.RingTheory.Henselian
+public import Mathlib.RingTheory.RegularLocalRing.Defs
+public import Mathlib.RingTheory.SimpleRing.Principal
+import Aesop.Main
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsUniqueSelfDualMeasuresFinitePlaceStatement
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IntegralPointsFinitePlaceTensorProperties
 import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LocalComponentsNontrivialAdelicCharacterStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsUniqueSelfDualMeasuresFinitePlaceStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -145,6 +198,7 @@ theorem trace_mul_eq (R : Type) [CommRing R] [Algebra F R] (e : E) (y : R ⊗[F]
       ∑ k, (Algebra.TensorProduct.basis R b).repr y k *
         algebraMap F R (Algebra.trace F E (e * b k)) := by
   conv_lhs => rw [GlobalTheory.GaugeEx.IntBasis.eq_sum b R y]
+
   rw [Finset.mul_sum, map_sum]
   refine Finset.sum_congr rfl fun k _ => ?_
   have h1 : inclR R e * ((Algebra.TensorProduct.basis R b).repr y k ⊗ₜ[F] b k) =
@@ -169,7 +223,8 @@ def intGrp (v : HeightOneSpectrum (𝓞 F)) : AddSubgroup (Fv F v ⊗[F] E) wher
   zero_mem' := by intro k; simp
   add_mem' := by
     intro x y hx hy k
-    rw [map_add]; exact add_mem (hx k) (hy k)
+    rw [map_add (f := _), Finsupp.add_apply]
+    exact add_mem (hx k) (hy k)
   neg_mem' := by
     intro x hx k
     rw [map_neg]; exact neg_mem (hx k)
@@ -191,7 +246,7 @@ variable (σ : E →ₐ[F] E) {M : ℕ} (J : Matrix (Fin M) (Fin M) E)
 omit [NumberField F] [NumberField E] in
 theorem BR_add (R : Type) [CommRing R] [Algebra F R] {n : ℕ} (X X' Y : Fin n → Fin M → R ⊗[F] E) :
     BR R σ J (X + X') Y = BR R σ J X Y + BR R σ J X' Y := by
-  simp only [BR, hR, Formalism.UG.hform, Pi.add_apply, map_add, add_mul, Finset.sum_add_distrib]
+  simp only [BR, hR, Formalism.UG.hform, Pi.add_apply, map_add (f := _), add_mul, Finset.sum_add_distrib]
 
 omit [NumberField F] [NumberField E] in
 theorem BR_zero (R : Type) [CommRing R] [Algebra F R] {n : ℕ} (X : Fin n → Fin M → R ⊗[F] E) :
@@ -204,7 +259,7 @@ theorem sigR_smul (R : Type) [CommRing R] [Algebra F R] (t : R) (y : R ⊗[F] E)
   induction y using TensorProduct.induction_on with
   | zero => simp
   | tmul a e => simp [sigR, TensorProduct.smul_tmul']
-  | add y₁ y₂ h₁ h₂ => rw [smul_add, map_add, map_add, h₁, h₂, smul_add]
+  | add y₁ y₂ h₁ h₂ => rw [smul_add, map_add (f := _), map_add (f := _), h₁, h₂, smul_add]
 
 omit [NumberField F] [NumberField E] in
 theorem BR_smul (R : Type) [CommRing R] [Algebra F R] {n : ℕ} (t : R)
@@ -237,6 +292,7 @@ theorem BR_test (hJ : J.det ≠ 0) (j : Fin M) (k : Fin d) : ∃ x : Fin M → E
   have hrow : ∀ j' : Fin M, (∑ i, inclR R (b.traceDual k * J⁻¹ j i) * inclR R (J i j') * Y 0 j') =
       inclR R (if j = j' then b.traceDual k else 0) * Y 0 j' := by
     intro j'
+
     rw [← key j', map_sum, Finset.sum_mul]
     refine Finset.sum_congr rfl fun i _ => ?_
     simp only [map_mul]

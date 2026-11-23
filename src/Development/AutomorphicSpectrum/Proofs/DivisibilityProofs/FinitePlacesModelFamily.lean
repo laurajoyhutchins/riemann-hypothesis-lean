@@ -1,13 +1,59 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.DivisibilityTowers.LocalAtPlaces
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.StatementsFlagIndependence
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.OfSteps
-import Development.AutomorphicSpectrum.Proofs.DivisibilityProofs.DivCycleMapLocalisation
+module
+
+public import Development.AutomorphicSpectrum.Definitions.DivisibilityTowers.LaurentCechNerveLevelSpecTensorPower
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ArithmeticHilbertSamuelLowerBound
+public import Development.AutomorphicSpectrum.Proofs.DivisibilityProofs.DivCycleMapLocalisation
+public import Development.AutomorphicSpectrum.Proofs.DivisibilityProofs.LocalizationModelOverPlaceStatement
+public import Development.AutomorphicSpectrum.Proofs.DivisibilityProofs.PointIdealComapPrimeLiftStatement
+public import Development.AutomorphicSpectrum.Proofs.DivisibilityProofs.ResidueModelAtPrimeStatement
+public import Development.AutomorphicSpectrum.Proofs.DivisibilityProofs.VerticalNumberLocalCycleStatement
 import Development.AutomorphicSpectrum.Proofs.DivisibilityProofs.VerticalNumberZeroOfHorizontalStatement
-import Development.AutomorphicSpectrum.Proofs.DivisibilityProofs.VerticalNumberLocalCycleStatement
-import Development.AutomorphicSpectrum.Proofs.DivisibilityProofs.PointIdealComapPrimeLiftStatement
-import Development.AutomorphicSpectrum.Proofs.DivisibilityProofs.LocalizationModelOverPlaceStatement
-import Development.AutomorphicSpectrum.Proofs.DivisibilityProofs.ResidueModelAtPrimeStatement
+import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.OfSteps
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Development.AutomorphicSpectrum.Definitions.DivisibilityTowers.LocalAtPlaces
+
+@[expose] public section
+
 open MvPolynomial GroundTheory.Heights₂.Heights.NumbersDVR GlobalTheory.CompanionTheory.Ar.Num GlobalTheory.CompanionTheory.Ar.Top GroundTheory.Heights₂.Heights.ModelLeaves
 open ReciprocityTheory.ChartRestriction.G.Geo (HermLine IsSmoothHerm IsArithVar IsHorizontal mcPts mCoordIdeal IsIntersectionFamily IsIntersectionSystem IntersectionSystem ptsIntegral geoNum charOf recR arInt ChartBundle chartRing)
 set_option maxSynthPendingDepth 1
@@ -75,11 +121,11 @@ include m
 theorem eq_of_comap_eq {W₁ W₂ : Ideal (MRing ι O)}
     (h : W₁.comap (MvPolynomial.map (algebraMap A O)) = W₂.comap (MvPolynomial.map (algebraMap A O))) :
     W₁ = W₂ := by
-  haveI : IsLocalization (m.primeCompl.map (C (σ := (Σ k, ι k)) (R := A))) (MRing ι O) :=
+  haveI : IsLocalization (m.primeCompl.map (C (σ := (Σ k, ι k)) (R := A))) (ReciprocityTheory.ChartRestriction.G.Geo.MRingOver O ι) :=
     MvPolynomial.isLocalization m.primeCompl O
   have e : ∀ W : Ideal (MRing ι O), (W.comap (algebraMap (MRing ι A) (MRing ι O))).map
       (algebraMap (MRing ι A) (MRing ι O)) = W :=
-    IsLocalization.map_comap (m.primeCompl.map (C (σ := (Σ k, ι k)) (R := A))) _
+    IsLocalization.map_under (m.primeCompl.map (C (σ := (Σ k, ι k)) (R := A))) _
   have h' : W₁.comap (algebraMap (MRing ι A) (MRing ι O)) =
       W₂.comap (algebraMap (MRing ι A) (MRing ι O)) := h
   rw [← e W₁, ← e W₂, h']
@@ -96,7 +142,7 @@ theorem exists_prime_of_comap_C {W : Ideal (MRing ι A)} (hW : W.IsPrime)
     exact hs (by rw [← hm]; exact hsW)
   exact ⟨W.map (algebraMap (MRing ι A) (MRing ι O)),
     IsLocalization.isPrime_of_isPrime_disjoint _ _ _ hW hdisj,
-    IsLocalization.comap_map_of_isPrime_disjoint _ _ hW hdisj⟩
+    IsLocalization.under_map_of_isPrime_disjoint _ _ hW hdisj⟩
 
 theorem comap_C_comap_eq [IsLocalRing O] {W : Ideal (MRing ι O)} (hW : W.IsPrime)
     (h : (IsLocalRing.maximalIdeal O).map (C : O →+* MRing ι O) ≤ W) :
@@ -109,7 +155,7 @@ theorem comap_C_comap_eq [IsLocalRing O] {W : Ideal (MRing ι O)} (hW : W.IsPrim
     ext a
     simp [Ideal.mem_comap]
   rw [h2, h1]
-  exact IsLocalization.AtPrime.comap_maximalIdeal O m
+  exact IsLocalization.AtPrime.under_maximalIdeal O m
 
 end Loc
 
@@ -159,7 +205,7 @@ theorem GlobalTheory.CompanionTheory.Ar.Num.cycList_zp_eq_sum_places : ∀ (K : 
   have hpm : ∀ l, ((p : ℕ) : A) ∈ m l := fun l => (hm (m l) inferInstance).2 ⟨l, rfl⟩
   have hpmax : ∀ l, ((p : ℕ) : O l) ∈ IsLocalRing.maximalIdeal (O l) := fun l => by
     have e : (IsLocalRing.maximalIdeal (O l)).comap (algebraMap A (O l)) = m l :=
-      IsLocalization.AtPrime.comap_maximalIdeal (O l) (m l)
+      IsLocalization.AtPrime.under_maximalIdeal (O l) (m l)
     have h : ((p : ℕ) : A) ∈ (IsLocalRing.maximalIdeal (O l)).comap (algebraMap A (O l)) := by
       rw [e]
       exact hpm l

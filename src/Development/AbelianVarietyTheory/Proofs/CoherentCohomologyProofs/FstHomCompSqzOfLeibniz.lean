@@ -1,4 +1,51 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.TrivSqZeroExt.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GlobalTheory.SquareZeroLeibnizPoint
 
@@ -7,44 +54,6 @@ open TrivSqZeroExt
 section PointsOfDual
 
 variable {O C : Type*} [CommRing O] [CommRing C] {ι : Type*} [Fintype ι]
-
-def sqzPoint (φ : O →+* C) (n : ι → C) (hn : ∀ a b, n a * n b = 0) :
-    TrivSqZeroExt O (ι → O) →+* C where
-  toFun x := φ x.fst + ∑ i, φ (x.snd i) * n i
-  map_one' := by simp
-  map_zero' := by simp
-  map_add' x y := by
-    simp only [fst_add, snd_add, Pi.add_apply, map_add, add_mul, Finset.sum_add_distrib]
-    ring
-  map_mul' x y := by
-    have hcross : (∑ i, φ (x.snd i) * n i) * (∑ j, φ (y.snd j) * n j) = 0 := by
-      rw [Finset.sum_mul_sum]
-      refine Finset.sum_eq_zero fun i _ => Finset.sum_eq_zero fun j _ => ?_
-      calc φ (x.snd i) * n i * (φ (y.snd j) * n j)
-          = φ (x.snd i) * φ (y.snd j) * (n i * n j) := by ring
-        _ = 0 := by rw [hn, mul_zero]
-    have hs : ∀ i, (x * y).snd i = x.fst * y.snd i + x.snd i * y.fst := fun i => by
-      rw [snd_mul]; rfl
-    have h1 : ∑ i, φ ((x * y).snd i) * n i
-        = φ x.fst * ∑ i, φ (y.snd i) * n i + φ y.fst * ∑ i, φ (x.snd i) * n i := by
-      rw [Finset.mul_sum, Finset.mul_sum, ← Finset.sum_add_distrib]
-      exact Finset.sum_congr rfl fun i _ => by rw [hs, map_add, map_mul, map_mul]; ring
-    rw [h1, fst_mul, map_mul]
-    linear_combination (-1 : C) * hcross
-
-theorem sqzPoint_apply (φ : O →+* C) (n : ι → C) (hn : ∀ a b, n a * n b = 0)
-    (x : TrivSqZeroExt O (ι → O)) :
-    sqzPoint φ n hn x = φ x.fst + ∑ i, φ (x.snd i) * n i := rfl
-
-@[simp] theorem sqzPoint_inl (φ : O →+* C) (n : ι → C) (hn : ∀ a b, n a * n b = 0) (a : O) :
-    sqzPoint φ n hn (inl a) = φ a := by
-  rw [sqzPoint_apply]
-  simp
-
-@[simp] theorem sqzPoint_inr (φ : O →+* C) (n : ι → C) (hn : ∀ a b, n a * n b = 0) (v : ι → O) :
-    sqzPoint φ n hn (inr v) = ∑ i, φ (v i) * n i := by
-  rw [sqzPoint_apply]
-  simp
 
 end PointsOfDual
 
@@ -69,14 +78,6 @@ def sqzOfLeibniz (ε : A →+* O) (d : A →+ M)
     change d (f * f') = ε f • d f' + MulOpposite.op (ε f') • d f
     rw [op_smul_eq_smul]
     exact hd f f')
-
-@[simp] theorem sqzOfLeibniz_fst (ε : A →+* O) (d : A →+ M)
-    (hd : ∀ f f', d (f * f') = ε f • d f' + ε f' • d f) (f : A) :
-    (sqzOfLeibniz ε d hd f).fst = ε f := rfl
-
-@[simp] theorem sqzOfLeibniz_snd (ε : A →+* O) (d : A →+ M)
-    (hd : ∀ f f', d (f * f') = ε f • d f' + ε f' • d f) (f : A) :
-    (sqzOfLeibniz ε d hd f).snd = d f := rfl
 
 end Leibniz
 

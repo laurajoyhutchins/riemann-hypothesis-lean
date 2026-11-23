@@ -1,6 +1,49 @@
-import GroundTheory.AutomorphicForms.AutomorphicFormSpaces.Height
-import GroundTheory.AutomorphicForms.ReductionMahler
-import Formalism.LocalToGlobal.UnitaryNorms.CharTransport
+module
+
+public import GroundTheory.AutomorphicForms.AutomorphicFormSpaces.Height
+public import Formalism.LocalToGlobal.UnitaryNorms.CharTransport
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain GroundTheory.Automorphic GroundTheory.Automorphic.Reduction Formalism.L2.Host
 
@@ -32,18 +75,14 @@ private theorem finAt_adMap {K : Type} [Field K] [NumberField K] {n : ℕ} (σ :
 
 private theorem infDense {K : Type} [Field K] (u : InfinitePlace K) :
     DenseRange (algebraMap K u.Completion) := by
-  have h1 : DenseRange (fun x : WithAbs u.1 => (x : UniformSpace.Completion (WithAbs u.1))) :=
-    UniformSpace.Completion.denseRange_coe
-  have h2 : DenseRange (InfinitePlace.Completion.ofCompletion : _ → u.Completion) :=
-    (InfinitePlace.Completion.equiv u).symm.surjective.denseRange
-  have h3 := h2.comp h1 (InfinitePlace.Completion.continuous_ofCompletion u)
-  refine h3.mono ?_
+  refine (AbsoluteValue.Completion.denseRange_coe u.1).mono ?_
   rintro _ ⟨x, rfl⟩
-  exact ⟨x.ofAbs, rfl⟩
+  exact ⟨x.ofAbs, by rw [InfinitePlace.Completion.algebraMap_apply]⟩
 
 private theorem norm_algebraMap_inf {K : Type} [Field K] (u : InfinitePlace K) (x : K) :
-    ‖algebraMap K u.Completion x‖ = u x :=
-  InfinitePlace.Completion.norm_coe u (WithAbs.toAbs u.1 x)
+    ‖algebraMap K u.Completion x‖ = u x := by
+  rw [InfinitePlace.Completion.algebraMap_apply]
+  exact InfinitePlace.Completion.norm_coe u (WithAbs.toAbs u.1 x)
 
 private theorem norm_infEquiv {K : Type} [Field K] [NumberField K] (σ : K ≃+* K) (u : InfinitePlace K)
     (y : (u.comap σ.toRingHom).Completion) : ‖CT.infEquiv σ u y‖ = ‖y‖ := by

@@ -1,4 +1,54 @@
-import Mathlib
+module
+
+public import Mathlib.FieldTheory.Galois.Abelian
+public import Mathlib.Topology.Algebra.Group.TopologicalAbelianization
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+public import Mathlib.FieldTheory.Galois.Profinite
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GroundTheory.LocalField
 
@@ -67,7 +117,7 @@ theorem commutator_le_ker_of_comm {G M : Type*} [Group G] [Group M] [IsMulCommut
 
 theorem le_maximalAbelianExtension (L : IntermediateField F Ω) [IsAbelianGalois F L] :
     L ≤ maximalAbelianExtension F Ω := by
-  have : T2Space (L ≃ₐ[F] L) := krullTopology_t2
+  have : T1Space (L ≃ₐ[F] L) := @T2Space.t1Space _ _ krullTopology_t2
   rw [maximalAbelianExtension, le_iff_le, ← L.restrictNormalHom_ker]
   refine Subgroup.topologicalClosure_minimal _ (commutator_le_ker_of_comm _) ?_
   exact isClosed_singleton.preimage (InfiniteGalois.restrictNormalHom_continuous L)
@@ -152,16 +202,6 @@ theorem exists_finite_abelian_mem {y : Ω} (hy : y ∈ maximalAbelianExtension F
       · exact (mem_fixedField_iff _ y).1 hy g (Subgroup.le_topologicalClosure _ hg)
     exact hle hg
 
-theorem maximalAbelianExtension_eq_iSup :
-    maximalAbelianExtension F Ω =
-      ⨆ (L : IntermediateField F Ω) (_ : FiniteDimensional F L) (_ : IsAbelianGalois F L), L := by
-  refine le_antisymm (fun y hy => ?_) (iSup_le fun L => iSup_le fun _ => iSup_le fun _ =>
-    le_maximalAbelianExtension L)
-  obtain ⟨L, hL1, hL2, hyL⟩ := exists_finite_abelian_mem hy
-  have hle : L ≤ ⨆ (L : IntermediateField F Ω) (_ : FiniteDimensional F L) (_ : IsAbelianGalois F L), L :=
-    le_iSup_of_le L (le_iSup_of_le hL1 (le_iSup_of_le hL2 le_rfl))
-  exact hle hyL
-
 theorem ext_restrictAb {σ τ : maximalAbelianExtension F Ω ≃ₐ[F] maximalAbelianExtension F Ω}
     (h : ∀ (L : IntermediateField F Ω) [FiniteDimensional F L] [IsAbelianGalois F L],
       restrictAb L (le_maximalAbelianExtension L) σ = restrictAb L (le_maximalAbelianExtension L) τ) :
@@ -184,17 +224,11 @@ theorem restrictAb_surjective (E : IntermediateField F Ω) [Normal F E]
   exact ⟨_, restrictAb_topologicalAbelianizationEquiv E h τ⟩
 
 variable (F Ω) in
-
 def finiteAbelianExtensions : Set (IntermediateField F Ω) :=
   {L | FiniteDimensional F L ∧ IsAbelianGalois F L}
 
 omit [IsGalois F Ω] in
-theorem mem_finiteAbelianExtensions {L : IntermediateField F Ω} :
-    L ∈ finiteAbelianExtensions F Ω ↔ FiniteDimensional F L ∧ IsAbelianGalois F L :=
-  Iff.rfl
-
 variable (F Ω) in
-
 noncomputable def restrictAbPi (σ : maximalAbelianExtension F Ω ≃ₐ[F] maximalAbelianExtension F Ω)
     (L : finiteAbelianExtensions F Ω) : (L : IntermediateField F Ω) ≃ₐ[F] (L : IntermediateField F Ω) :=
   have := L.2.2
@@ -251,10 +285,6 @@ theorem isAbelianGalois_of_le_maximalAbelianExtension (E : IntermediateField F �
   obtain ⟨σ', rfl⟩ := restrictAb_surjective E h σ
   obtain ⟨τ', rfl⟩ := restrictAb_surjective E h τ
   rw [← map_mul, ← map_mul, mul_comm' σ' τ']
-
-theorem isAbelianGalois_iff_le_maximalAbelianExtension (E : IntermediateField F Ω) [Normal F E] :
-    IsAbelianGalois F E ↔ E ≤ maximalAbelianExtension F Ω :=
-  ⟨fun _ => le_maximalAbelianExtension E, isAbelianGalois_of_le_maximalAbelianExtension E⟩
 
 end Commutative
 

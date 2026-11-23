@@ -1,4 +1,46 @@
-import Formalism.HermitianCurvature.ThetaExistenceInductiveFromPieces
+module
+
+public import Formalism.HermitianCurvature.ThetaExistenceInductiveFromPieces
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Formalism.FourierDecayAlt.A5 Formalism.FourierDecayAlt.A6 Formalism.DoubleCosetMeasures Matrix Filter Topology
 
@@ -297,34 +339,6 @@ theorem rootsSeparated : Formalism.FourierDecayAlt.A6.RootsSeparated := by
       have h' : z' * z⁻¹ = 1 := Units.ext (by rw [h, Units.val_one])
       exact (mul_inv_eq_one.1 h').symm
     · rw [← mul_pow, sub_mul, one_mul, ← Units.val_mul, inv_mul_cancel_right]
-
-theorem blockParametrisation : Formalism.FourierDecayAlt.A6.Param := by
-  intro K _ m t c u' a b hu w hw
-  have hdet : IsUnit ((t : K) • u').det := by
-    rw [Matrix.det_smul, isUpUni_det _ hu, mul_one]; exact (t.isUnit.pow _)
-  constructor
-  · rw [fromBlocks_multiply, fromBlocks_multiply]
-    have h1 : a * w * ((t : K) • u') * ((t : K) • u')⁻¹ * ((t : K) • b) = a * w * ((t : K) • b) := by
-      rw [Matrix.mul_assoc (a * w), Matrix.mul_nonsing_inv _ hdet, Matrix.mul_one]
-    rw [h1]
-    congr 1 <;> simp [Matrix.mul_assoc, add_comm]
-  · intro i hi
-    have hi0 : ∀ j : Fin m, j ≠ i → u' j i = 0 := by
-      intro j hj
-      apply hu.1
-      have : i.val < j.val := by
-        have : j.val ≠ i.val := fun h => hj (Fin.ext h)
-        omega
-      exact this
-    rw [Matrix.mul_apply, Finset.sum_eq_single i]
-    · rw [Matrix.smul_apply, hu.2 i, Matrix.mul_apply, Finset.sum_eq_single (Fin.rev i)]
-      · subst hw; simp [mul_comm]
-      · intro k _ hk; subst hw
-        have : i ≠ Fin.rev k := fun h => hk (by rw [h, Fin.rev_rev])
-        simp [this]
-      · simp
-    · intro j _ hj; rw [Matrix.smul_apply, hi0 j hj]; simp
-    · simp
 
 theorem smallModules : Formalism.FourierDecayAlt.A6.SmallModules := by
   intro K _ _ _ R ψ hD hn V hV

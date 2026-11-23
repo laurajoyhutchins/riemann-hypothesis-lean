@@ -1,7 +1,49 @@
-import Development.WeilBound.ThetaLifts.FrameEstimates.TowerRallisLemma
-import Development.AutomorphicSpectrum.Proofs.TwistedProofs.ExtensionEmbeddingEvInfRealAd
-import Development.AutomorphicSpectrum.Proofs.TwistedProofs.EqZeroOfPiInf
-import Development.AutomorphicSpectrum.Proofs.TwistedProofs.ExistsAdelePiInf
+module
+
+public import Development.WeilBound.ThetaLifts.FrameEstimates.TowerRallisLemma
+public import Development.AutomorphicSpectrum.Proofs.TwistedProofs.EqZeroOfPiInf
+public import Development.AutomorphicSpectrum.Proofs.TwistedProofs.ExistsAdelePiInf
+public import Development.AutomorphicSpectrum.Proofs.TwistedProofs.ExtensionEmbeddingEvInfRealAd
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.MatrixExponential
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.Divisors.MatchingOfParts
+
+@[expose] public section
 
 noncomputable section
 
@@ -56,7 +98,7 @@ theorem piInf_cA (h : IsCMExt F E σ) {w : InfinitePlace F} (τ : EmbOver E w) (
     piInf τ (cA σ z) = star (piInf τ z) := by
   induction z using TensorProduct.induction_on with
   | zero => simp only [map_zero, star_zero]
-  | add x y hx hy => simp only [map_add, hx, hy, star_add]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy, star_add]
   | tmul a x =>
     change piInf τ (a ⊗ₜ[F] σ x) = _
     rw [piInf_tmul, piInf_tmul, h.2.2.2, star_mul', show star (InfinitePlace.Completion.extensionEmbedding w (a.1 w)) = _ from
@@ -92,12 +134,13 @@ theorem exists_section (h : IsCMExt F E σ) (τ : ∀ w : InfinitePlace F, EmbOv
   · rw [Finset.smul_sum]
     refine Finset.sum_eq_zero fun w _ => ?_
     rw [smul_add, smul_comm c, smul_comm c, hx w c hc, hy w c hc, smul_zero, smul_zero, add_zero]
+
   · rw [map_sum, Finset.sum_eq_single w]
-    · rw [map_add, GlobalTheory.CompanionTheory.RealAdeleComponent.piInf_realAd_smul, GlobalTheory.CompanionTheory.RealAdeleComponent.piInf_realAd_smul, hx', hy',
-        Pi.single_eq_same, Pi.single_eq_same, mul_one, Complex.re_add_im]
+    · rw [map_add (f := _), GlobalTheory.CompanionTheory.RealAdeleComponent.piInf_realAd_smul, GlobalTheory.CompanionTheory.RealAdeleComponent.piInf_realAd_smul, hx', hy',
+      Pi.single_eq_same, Pi.single_eq_same, mul_one, Complex.re_add_im]
     · intro v _ hv
-      rw [map_add, GlobalTheory.CompanionTheory.RealAdeleComponent.piInf_realAd_smul, GlobalTheory.CompanionTheory.RealAdeleComponent.piInf_realAd_smul, hx', hy',
-        Pi.single_eq_of_ne hv.symm, Pi.single_eq_of_ne hv.symm, mul_zero, mul_zero, add_zero]
+      rw [map_add (f := _), GlobalTheory.CompanionTheory.RealAdeleComponent.piInf_realAd_smul, GlobalTheory.CompanionTheory.RealAdeleComponent.piInf_realAd_smul, hx', hy',
+      Pi.single_eq_of_ne hv.symm, Pi.single_eq_of_ne hv.symm, mul_zero, mul_zero, add_zero]
     · simp
 
 variable {d : ℕ}
@@ -133,7 +176,7 @@ theorem exists_matSection (h : IsCMExt F E σ) (τ : ∀ w : InfinitePlace F, Em
     have e := congrFun (congrFun (Matrix.map_one (n := Fin d) (piInf (τ w)) (map_zero _) (map_one _)) i) j
     rw [Matrix.map_apply] at e
     simp only [Matrix.map_apply, Matrix.of_apply]
-    rw [map_add, hp, e, add_sub_cancel]
+    rw [map_add (f := _), hp, e, add_sub_cancel]
 
 end ExponentialLineExistence
 

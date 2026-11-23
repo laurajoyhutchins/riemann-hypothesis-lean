@@ -1,12 +1,53 @@
-import Mathlib
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ClozelCohomology.ContinuousEntryPairings.LocFixed
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.TrivialOnInertiaOfUnr
+import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.MkMemAdmissibleAtIffCocycle
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CharpolyScaledInverse
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CoeDualRep
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.UnderEqIffConjPl
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.BcDefs
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.IsAlgChar
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PartsConj
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.ContinuousConjFin
 import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.GuDefs
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.BcPolar
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PartsConj
-import Development.AutomorphicArithmetic.AutomorphicVarieties.BuildingsResidueChars.SatakeParametersComplexConjugate
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CharpolyScaledInverse
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CoeDualRep
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ConjOpInvolutive
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Neutral.B1 Formalism.L2.Host Formalism.ConjugateSelfDual ReciprocityTheory.Gal Formalism.MainNotions.N Polynomial GlobalTheory.CuspRep GlobalTheory.HeckeGal
 open GlobalTheory.GalOfCusp UpperTheory.V UpperTheory.V.Af UpperTheory.V.Af.Bc UpperTheory.V.Af.Gu UpperTheory.V.Published GlobalTheory.MonoConj
@@ -211,43 +252,3 @@ private theorem frob_twDual {F Ω : Type} [Field F] [NumberField F] [Field Ω] [
   rw [Units.val_inv_eq_inv_val]
   have := a.ne_zero
   field_simp
-
-private theorem polOfFrob_of_iso :
-    IsoOfFrob → PolOfFrob := by
-  intro H E Ω _ _ _ _ _ _ l _ ι n r hr hs hF c hc
-  have hL := isLift_conj hc
-  have h0 : Ideal.span {((l : ℕ) : 𝓞 E)} ≠ 0 := by
-    rw [Ne, Ideal.zero_eq_bot, Ideal.span_singleton_eq_bot]
-    exact_mod_cast (Fact.out : l.Prime).ne_zero
-  have hl : ∀ᶠ v : HeightOneSpectrum (𝓞 E) in Filter.cofinite, ((l : ℕ) : 𝓞 E) ∉ v.asIdeal :=
-    (Ideal.finite_factors h0).subset fun v hv => Ideal.dvd_span_singleton.mpr (not_not.1 hv)
-  have hsurj : Function.Surjective (conjGal hL) := fun g =>
-    ⟨conjGal hL.symm g, AlgEquiv.ext fun x => by simp [UpperTheory.V.conjGal_apply]⟩
-  have hχ : Continuous (cycBar E Ω l ^ (1 - (n : ℤ)) : G E Ω →* (Qbar l)ˣ) :=
-    (cont_cycBar E Ω l).zpow (1 - (n : ℤ))
-  obtain ⟨P, hP⟩ := H E Ω l ι n (r.comp (conjGal hL)) (tw (dualRep r) (cycBar E Ω l ^ (1 - (n : ℤ))))
-    (hr.comp (continuous_conjGal hL)) (cont_twDual r _ hr hχ) (ss_comp r _ hsurj hs)
-    (ss_tw _ _ (ss_dual _ _ _ r hs)) (by
-      filter_upwards [hF, hl] with w ⟨B, hB, hB'⟩ hw
-      exact ⟨_, frob_conj hL hB', frob_twDual hw hB⟩)
-  refine ⟨P, fun s s' hs' => ?_⟩
-  have e : s' = conjGal hL s := AlgEquiv.ext fun x => DFunLike.congr_fun hs' x
-  have h1 := congrArg (fun g : GL (Fin n) (Qbar l) => ((g * P : GL (Fin n) (Qbar l)) : Matrix (Fin n) (Fin n) (Qbar l))) (hP s)
-  simp only [inv_mul_cancel_right, Units.val_mul, tw_val, coe_dualRep, MonoidHom.comp_apply] at h1
-  rw [e, Matrix.mul_assoc, ← h1, Matrix.smul_mul, Matrix.mul_smul, ← Matrix.mul_assoc, ← Matrix.transpose_mul,
-    ← Units.val_mul, ← map_mul, inv_mul_cancel, map_one, Units.val_one, Matrix.transpose_one, Matrix.one_mul]
-
-theorem GlobalTheory.ConjAut.isPairing_of_isAutCsd : GlobalTheory.ConjAut.Tools → ∀ (K Ω : Type) [Field K] [NumberField K] [IsCMField K] [Field Ω]
-    [Algebra K Ω] [IsAlgClosure K Ω] (l : ℕ) [Fact l.Prime] (ι : Qbar l ≃+* ℂ) (n : ℕ), 1 ≤ n →
-    ∀ r : G K Ω →* GL (Fin n) (Qbar l), Continuous r → IsAutCsd ι r → ∀ c : G (maximalRealSubfield K) Ω, IsConjEl c →
-      ∃ P, IsPairing c r (cycBar K Ω l ^ (1 - (n : ℤ))) P := by
-  intro h K Ω _ _ _ _ _ _ l _ ι n _ r hr hA c hc
-  obtain ⟨π, _, hd, hss, hev⟩ := hA
-  have hcsd : π.IsCsd := GlobalTheory.CsdBack.isCsd_of_paired h.litN.aut.fin K n π (h.litN.aut.gk K n π) hd
-  refine polOfFrob_of_iso h.iso K Ω l ι n r hr hss ?_ c hc
-  filter_upwards [hev, (conjSrc_injective (IsCMField.complexConj K).toRingEquiv).tendsto_cofinite.eventually hev]
-    with w ⟨B, hB, hF⟩ ⟨B', hB', hF'⟩
-  refine ⟨B', ?_, hF'⟩
-  have e := CG.HasSat.unique hB ((UpperTheory.satake_parameters_complex_conjugate K w).1 n π hcsd B' hB')
-  rw [← e]
-  exact hF

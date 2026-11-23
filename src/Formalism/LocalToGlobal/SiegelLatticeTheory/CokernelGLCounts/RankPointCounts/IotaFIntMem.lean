@@ -1,5 +1,57 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.WithZeroLeOneEqExp
+module
+
+public import Formalism.SharpRestriction.CuspSpanNormBounds.PsiEDef
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.WithZeroLeOneEqExp
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -59,7 +111,7 @@ theorem clear_F (p : HeightOneSpectrum (𝓞 F)) (l : (A p).Fp) :
     exact absurd h4 (not_le.2 hπv)
   have hW : IsOpen ((fun z => (z * l - 1) * c⁻¹) ⁻¹'
       ((ValuativeRel.valuation (A p).Fp).integer : Set (A p).Fp)) :=
-    Valuation.isOpen_integer.preimage (((continuous_mul_right l).sub continuous_const).mul continuous_const)
+    Valuation.isOpen_integer.preimage (((continuous_mul_const l).sub continuous_const).mul continuous_const)
   have hne : ((fun z => (z * l - 1) * c⁻¹) ⁻¹'
       ((ValuativeRel.valuation (A p).Fp).integer : Set (A p).Fp)).Nonempty := by
     refine ⟨l⁻¹, ?_⟩
@@ -167,17 +219,6 @@ theorem clear_one (p : HeightOneSpectrum (𝓞 F)) (z : (A p).Ep) :
       ring
     rw [e]
     exact Subring.mul_mem _ (ιF_mem_O_of_mem_integers A p _ h2) h1
-
-theorem clear (S : Finset (HeightOneSpectrum (𝓞 F))) {ι : Type} [Fintype ι] (z : ∀ p, ι → (A p).Ep) :
-    ∃ c : 𝓞 F, c ≠ 0 ∧ ∀ p ∈ S, ∀ k,
-      algebraMap (A p).Fp (A p).Ep ((A p).ιF (algebraMap (𝓞 F) F c)) * z p k ∈ (A p).O := by
-  classical
-  choose t ht0 ht using fun q : S × ι => clear_one A q.1.1 (z q.1 q.2)
-  refine ⟨∏ q, t q, Finset.prod_ne_zero_iff.2 (fun q _ => ht0 q), fun p hp k => ?_⟩
-  rw [← Finset.mul_prod_erase Finset.univ t (Finset.mem_univ (⟨⟨p, hp⟩, k⟩ : S × ι))]
-  simp only [map_mul]
-  rw [mul_comm (algebraMap (A p).Fp (A p).Ep ((A p).ιF (algebraMap (𝓞 F) F (t ⟨⟨p, hp⟩, k⟩)))), mul_assoc]
-  exact Subring.mul_mem _ (algebraMap_ιF_mem_O A p _) (ht ⟨⟨p, hp⟩, k⟩)
 
 end Clear
 

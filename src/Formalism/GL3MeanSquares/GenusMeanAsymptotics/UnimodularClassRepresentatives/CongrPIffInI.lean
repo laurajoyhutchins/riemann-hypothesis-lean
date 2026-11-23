@@ -1,5 +1,54 @@
-import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.InLZeroIff
-import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.ExistsLocalData
+module
+
+public import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.InLZeroIff
+public import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.LocalDensitySixth
+import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.MemSmulOfMemSmulLocF
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField Module
 
@@ -12,22 +61,19 @@ open LocalSpans idealPowerSpanBounds localizedQuotients WCA
 variable {K F : Type} [Field K] [NumberField K] [StarRing K] [Field F] [NumberField F] [Algebra F K]
 variable {V : Type} [AddCommGroup V] [Module K V] [Module (𝓞 K) V] [IsScalarTower (𝓞 K) K V]
 
-local notation "ι" => algebraMap (𝓞 F) (𝓞 K)
-local notation "κ" => algebraMap (𝓞 K) K
-
 variable {𝔭 : Ideal (𝓞 F)} {A : Submodule (𝓞 K) V}
 
-theorem κι (t : 𝓞 F) : κ (ι t) = algebraMap F K (t : F) := rfl
+local notation "ι" => algebraMap (𝓞 F) (𝓞 K)
+local notation "κ" => algebraMap (𝓞 K) K
 
 theorem congrP_iff_inI {k : ℕ} {a b : K} : CongrP 𝔭 k a b ↔ InI 𝔭 k (a - b) := Iff.rfl
 
 theorem inI_int (h𝔭 : 𝔭.IsMaximal) {k : ℕ} {z : 𝓞 K} : InI 𝔭 k (κ z) ↔ z ∈ extP K 𝔭 ^ k := by
-  have := integralBasisSpans.congrP_int h𝔭 k z 0
-  rw [congrP_iff_inI, map_zero, sub_zero, Ideal.Quotient.eq, sub_zero] at this
-  exact this
+  simpa only [congrP_iff_inI, map_zero, sub_zero, Ideal.Quotient.eq_zero_iff_mem] using
+    integralBasisSpans.congrP_int h𝔭 k z 0
 
-theorem inI_ι (h𝔭 : 𝔭.IsMaximal) {k : ℕ} {n : 𝓞 F} : InI 𝔭 k (κ (ι n)) ↔ n ∈ 𝔭 ^ k := by
-  rw [inI_int h𝔭, mem_pow_iff]
+theorem inI_ι (h𝔭 : 𝔭.IsMaximal) {k : ℕ} {n : 𝓞 F} : InI 𝔭 k (κ (ι n)) ↔ n ∈ 𝔭 ^ k :=
+  (inI_int (z := ι n) h𝔭).trans (mem_pow_iff (K := K) 𝔭 k n)
 
 theorem InI.of_mul (hp : 𝔭.IsPrime) {k : ℕ} {t : 𝓞 F} (ht : t ∉ 𝔭) {a : K}
     (h : InI 𝔭 k (κ (ι t) * a)) : InI 𝔭 k a := by
@@ -67,39 +113,5 @@ theorem InI.divK (h𝔭 : 𝔭.IsMaximal) (hF : IsFixF K F) {D : K} (hD : star D
     field_simp
   rw [this]
   exact h2
-
-theorem inI_of_trace (hK : Formalism.HermitianLatticesTheory.IsCMUnram K) (hF : IsFixF K F) (h𝔭 : 𝔭.IsMaximal) {k : ℕ} {z : K}
-    (h : ∀ c : 𝓞 K, InI 𝔭 k (κ c * z + star (κ c * z))) : InI 𝔭 k z := by
-  have hp := h𝔭.isPrime
-  obtain ⟨θ, hθ⟩ := exists_theta hK hF h𝔭
-  set δ := θ - conjO K θ with hδ
-  have h1 : InI 𝔭 k (κ δ * z) := by
-    have e : κ δ * z = (κ θ * z + star (κ θ * z)) - κ (conjO K θ) * (κ 1 * z + star (κ 1 * z)) := by
-      have : κ (conjO K θ) = star (κ θ) := rfl
-      rw [hδ, map_sub, this, map_one, one_mul, star_mul']
-      ring
-    rw [e]
-    have h2 := InI.mul hp (InI.int hp (conjO K θ)) (h 1)
-    rw [zero_add] at h2
-    exact (h θ).sub hp h2
-  obtain ⟨ν, hν⟩ := (conjO_eq_iff_mem_range hF (δ * conjO K δ)).1 (by
-    rw [map_mul, conjO_conjO, mul_comm])
-  have hνp : ν ∉ 𝔭 := by
-    intro hm
-    have h3 : δ * conjO K δ ∈ extP K 𝔭 ^ 1 := by rw [← hν]; exact ι_mem_pow (by simpa using hm)
-    have h4 : conjO K δ ∈ extP K 𝔭 ^ 1 := mem_of_unit_mul_mem hθ h3
-    have h5 : δ ∈ extP K 𝔭 ^ 1 := by
-      have := conjO_mem_pow hF 𝔭 1 _ h4
-      rwa [conjO_conjO] at this
-    have h6 : (1 : 𝓞 K) ∈ extP K 𝔭 ^ 1 := mem_of_unit_mul_mem hθ (by rwa [mul_one])
-    have h7 := (mem_pow_iff (K := K) 𝔭 1 1).1 (by rwa [map_one])
-    rw [pow_one] at h7
-    exact h𝔭.ne_top ((Ideal.eq_top_iff_one _).2 h7)
-  apply InI.of_mul hp hνp
-  have h8 := InI.mul hp (InI.int hp (conjO K δ)) h1
-  rw [zero_add] at h8
-  have : κ (ι ν) * z = κ (conjO K δ) * (κ δ * z) := by rw [hν, map_mul]; ring
-  rw [this]
-  exact h8
 
 end Formalism.HermitianLattices.Ext.L3.Cell

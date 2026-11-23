@@ -1,6 +1,55 @@
-import Formalism.CharacterColumnKernels.StatBlockRhoCount
-import Formalism.CharacterColumnKernels.IdempotentNormalForms.LengthEqKerAddRange
+module
+
+public import Formalism.CharacterColumnKernels.StatBlockRhoCount
+public import Formalism.CharacterColumnKernels.IdempotentNormalForms.LengthEqKerAddRange
 import Formalism.CharacterColumnKernels.IdempotentNormalForms.LengthKerOfDetEqZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Finset
 
@@ -184,21 +233,5 @@ theorem blockRhoAbs : StatBlockRhoAbs := by
       _ = s + ∑ w ∈ what₂, lenRow w := by
           rw [Finset.sum_ite_mem, Finset.union_inter_cancel_left]
   exact le_trans hchain (IdempotentNormalFormsRhoFacts.final_arith _ _ _ _ _ _ _ _ _ hker hmid hSel)
-
-theorem kerCount : StatKerCount := by
-  intro O _ _ _ Hk _ _ ι cols ℓ δ e' j d _ Xw _ _ h0 hX f hf
-  classical
-  refine (Module.length_le_of_injective f hf).trans ?_
-  rw [Module.length_pi_of_fintype,
-    Finset.sum_coe_sort cols (fun w => Module.length O (ColData O ℓ δ (e' w) (j w) (Xw w) d))]
-  refine (Finset.sum_le_sum fun w _ =>
-    KernelLengthBounds.length_colData_le ℓ δ (e' w) (j w) (Xw w) d (h0 w) (hX w)).trans (le_of_eq ?_)
-  simp only [Finset.sum_add_distrib, Finset.sum_const, nsmul_eq_mul, mul_assoc]
-
-theorem blockRhoCount : StatBlockRhoCount := by
-  intro O _ _ _ G _ d _ ρM H _ _ Ψ δ hδ ι _ what₂ cols D F lenRow Q s ℓ e' j h0
-  intro eO vδ N hrow hcol hQ hs Xw _ _ hX f hf
-  exact blockRhoAbs O G d ρM H Ψ δ hδ ι what₂ cols D F lenRow Q s ℓ e' j h0 hrow hcol hQ hs
-    (kerCount O (LinearMap.ker Ψ) ι cols ℓ δ e' j d Xw h0 hX f hf)
 
 end Formalism.NG

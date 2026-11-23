@@ -1,6 +1,54 @@
-import Development.WeilBound.ThetaLifts.Reductions.WeilPairs.AutDef
-import Development.WeilBound.ThetaLifts.Reductions.WeilPairs.AutGenA
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.InfiniteNormOne
+module
+
+public import Development.WeilBound.ThetaLifts.Reductions.WeilPairs.AutDef
+public import Development.AbelianVarietyTheory.Definitions.AdelicHermitianForms.IsHermForm
+import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.RealSymplecticFormAlternatingInvariantDefinite
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.UnitaryMatrixEqProdQuasiReflections
+import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.UnitaryQuasiReflectionLaws
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.InfiniteNormOne
+public import Development.WeilBound.ThetaLifts.Reductions.WeilPairs.AutGenA
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -127,18 +175,17 @@ theorem cart_blk (C : Ctx σ B JS JT ξ₀ θ ι) {sS : InfinitePlace F → Matr
     {sT : InfinitePlace F → Matrix (Fin nT) (Fin nT) ℂ}
     (hS : ∀ w, Formalism.IndefR.Datum.IsCartanInv (JS.map (tauB B w)) (sS w))
     (hT : ∀ w, Formalism.IndefR.Datum.IsCartanInv (((2 * (tauB B w ξ₀).im : ℝ) : ℂ) • JT.map (tauB B w)) (sT w)) :
-    CartF σ JS JT ξ₀ B θ (GlobalTheory.RealWeil.blk sT sS) where
-  sq := by
-    rw [GlobalTheory.RealWeil.blk_mul]
+    CartF σ JS JT ξ₀ B θ (GlobalTheory.RealWeil.blk sT sS) := by
+  refine ⟨?_, ?_, ?_⟩
+  · rw [GlobalTheory.RealWeil.blk_mul]
     simp only [fun w => (hS w).1, fun w => (hT w).1]
     exact GlobalTheory.RealWeil.blk_one
-  pos := by
-    unfold HMF
+  · unfold HMF
     rw [GlobalTheory.RealWeil.blk_mul]
     refine GlobalTheory.RealWeil.blk_posDef (fun w => (hT w).2.2) fun w => ?_
     rw [← GlobalTheory.RealSymplForm.cartan_inv_mul (hS w)]
     exact (hS w).2.2.inv
-  cen := fun k t hk => by
+  · intro k t hk
     rw [mMF_apply]
     refine GenA.blk_comm (fun w => ?_) (fun w => ?_)
     · rw [compAt_rat C hk]

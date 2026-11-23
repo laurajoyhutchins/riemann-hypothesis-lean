@@ -1,5 +1,51 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.KHCombContractSt
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.KHCombContractSt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.Kleiman
@@ -207,15 +253,15 @@ section Complex
 
 variable {S : Type} [CommRing S]
 
-open Classical in
 
+open Classical in
 def ext (J : ∀ k, Finset (ι k)) (n : ℕ) (φ : CombC S J n) (T : ∀ k, Finset (ι k)) : S :=
   if h : ((∀ l, (T l).Nonempty) ∧ ∑ l, ((T l).card - 1) = n) ∧ ∀ l, J l ⊆ T l then φ ⟨⟨T, h.1⟩, h.2⟩ else 0
 
 theorem ext_of_empty (J : ∀ k, Finset (ι k)) (n : ℕ) (φ : CombC S J n) (T : ∀ k, Finset (ι k))
     (hT : ∃ l, T l = ∅) : ext J n φ T = 0 := by
   obtain ⟨l, hl⟩ := hT
-  rw [ext, dif_neg]
+  rw [ext, dite_eq_right]
   intro h
   have := h.1.1 l
   rw [hl] at this
@@ -223,7 +269,7 @@ theorem ext_of_empty (J : ∀ k, Finset (ι k)) (n : ℕ) (φ : CombC S J n) (T 
 
 theorem ext_cell (J : ∀ k, Finset (ι k)) (n : ℕ) (φ : CombC S J n) (I : CombCell ι J n) :
     ext J n φ I.1.1 = φ I := by
-  rw [ext, dif_pos ⟨I.1.2, I.2⟩]
+  rw [ext, dite_eq_left ⟨I.1.2, I.2⟩]
   rfl
 
 theorem ext_zero (J : ∀ k, Finset (ι k)) (n : ℕ) : ext J n (0 : CombC S J n) = 0 := by
@@ -239,8 +285,8 @@ theorem combD_apply (J : ∀ k, Finset (ι k)) (n : ℕ) (φ : CombC S J n) (I :
   by_cases h : ((∀ l', (Function.update I.1.1 l ((I.1.1 l).erase i) l').Nonempty) ∧
       ∑ l', ((Function.update I.1.1 l ((I.1.1 l).erase i) l').card - 1) = n) ∧
       ∀ l', J l' ⊆ Function.update I.1.1 l ((I.1.1 l).erase i) l'
-  · rw [dif_pos h, ext, dif_pos h]; rfl
-  · rw [dif_neg h, ext, dif_neg h]; simp
+  · rw [dite_eq_left h, ext, dite_eq_left h]; rfl
+  · rw [dite_eq_right h, ext, dite_eq_right h]; simp
 
 theorem cond_ins (J : ∀ k, Finset (ι k)) (d : ℕ) (k : K) (i₀ : ι k) (T : ∀ k, Finset (ι k)) (h0 : i₀ ∉ T k)
     (h : ((∀ l, (T l).Nonempty) ∧ ∑ l, ((T l).card - 1) = d) ∧ ∀ l, J l ⊆ T l) :
@@ -290,18 +336,18 @@ theorem ext_hh (J : ∀ k, Finset (ι k)) (k : K) (i₀ : ι k) (hJ0 : i₀ ∉ 
     (T : ∀ k, Finset (ι k)) (hk : (T k).Nonempty) :
     ext J m (hh J k i₀ m φ) T = tH k i₀ (ext J (m + 1) φ) T := by
   by_cases hc : ((∀ l, (T l).Nonempty) ∧ ∑ l, ((T l).card - 1) = m) ∧ ∀ l, J l ⊆ T l
-  · rw [ext, dif_pos hc]; rfl
-  · rw [ext, dif_neg hc, tH]
+  · rw [ext, dite_eq_left hc]; rfl
+  · rw [ext, dite_eq_right hc, tH]
     split_ifs with h0
     · rfl
-    · rw [ext, dif_neg (fun h => hc (cond_of_ins J m k i₀ hJ0 T h0 hk h)), smul_zero]
+    · rw [ext, dite_eq_right (fun h => hc (cond_of_ins J m k i₀ hJ0 T h0 hk h)), smul_zero]
 
 theorem hh_combD (J : ∀ k, Finset (ι k)) (k : K) (i₀ : ι k) (m : ℕ) (φ : CombC S J m) (I : CombCell ι J m) :
     hh J k i₀ m (combD S J m φ) I = tH k i₀ (tD (ext J m φ)) I.1.1 := by
   rw [hh, tH, tH]
   split_ifs with h0
   · rfl
-  · rw [ext, dif_pos (cond_ins J m k i₀ I.1.1 h0 ⟨I.1.2, I.2⟩)]
+  · rw [ext, dite_eq_left (cond_ins J m k i₀ I.1.1 h0 ⟨I.1.2, I.2⟩)]
     congr 1
     exact combD_apply J m φ _
 
@@ -383,7 +429,7 @@ theorem corr_single (J : ∀ k, Finset (ι k)) (k : K) (i₀ : ι k) (d : ℕ) (
       rw [Finset.card_empty, pow_zero, one_mul, ← mul_pow]
       norm_num
     rw [hrem, corr, if_pos (Function.update_self _ _ _), tH, if_neg (by simp), hins, smul_smul, hs, one_smul, ext,
-      dif_pos ⟨(repl J k i₀ d I hJk h1).1.2, (repl J k i₀ d I hJk h1).2⟩]
+      dite_eq_left ⟨(repl J k i₀ d I hJk h1).1.2, (repl J k i₀ d I hJk h1).2⟩]
     rfl
   · rintro ⟨l, j⟩ hp hne
     have hj : j ∈ I.1.1 l := (Finset.mem_sigma.mp hp).2
@@ -418,7 +464,7 @@ theorem corr_zero (J : ∀ k, Finset (ι k)) (k : K) (i₀ : ι k) (hJ0 : i₀ �
     have := (I.1.2.1 l).card_pos
     omega
   have hJne : ¬ J l = ∅ := fun e => h ⟨e, h1⟩
-  rw [tH, if_neg (by rw [hT]; exact Finset.notMem_empty _), ext, dif_neg]
+  rw [tH, if_neg (by rw [hT]; exact Finset.notMem_empty _), ext, dite_eq_right]
   · simp
   rintro ⟨-, hJ⟩
   have hsub := hJ l

@@ -1,4 +1,43 @@
-import Development.WeilBound.RepresentationTheoryGL.RegularisedSiegelWeil.SingularNullSets.LJPosA
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.RegularisedSiegelWeil.SingularNullSets.WeakApproximationFinitePlace
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -27,16 +66,6 @@ def PlaceEx : Prop := ∀ (D : D7) (ψ : AddChar (AF D.host.F) ℂ), IsCharAF D.
       (P.π (u⁻¹ : (Fv D.host.F v ⊗[D.host.F] D.host.E)ˣ)).1 ∈ v.adicCompletionIntegers D.host.F → (P.π u).2 = 1 →
       χ (ideleAt D.host.F D.host.E v u) = 1) ∧
     ∀ u : (Fv D.host.F v ⊗[D.host.F] D.host.E)ˣ, (P.π u).1 = (P.π u).2 → χ (ideleAt D.host.F D.host.E v u) = 1
-
-def LocGrp : Prop := ∀ (D : D7) (v : Pl D) (P : SplitPkg D v) (n : ℕ),
-  ∃ Φ : GLoc D.sp.cm.sig (Jst D n) v ≃* GL (Fin (n + n)) (Fv D.host.F v),
-    Continuous Φ ∧ Continuous Φ.symm ∧
-    (∀ g, (Φ g).1 = (matHom (Fv D.host.F v) D.sp.cm.sig (Jst D n) g).1.map (fun y => (P.π y).1)) ∧
-    (∀ g, g ∈ stabLoc D.sp.cm.sig (Jst D n) (stdLattice D.host.E (n + n)) v ↔ Φ g ∈ KL D.host.F v n) ∧
-    ∀ g, IsUpper (Φ g).1 → emb D.sp.cm.sig (Jst D n) v g ∈ GlobalTheory.StdUnn.P D n ∧
-      ∃ a : GL (Fin n) (AE D), blkA (mat (emb D.sp.cm.sig (Jst D n) v g)) = a.1 ∧
-        ∃ u : (Fv D.host.F v ⊗[D.host.F] D.host.E)ˣ, Matrix.GeneralLinearGroup.det a = ideleAt D.host.F D.host.E v u ∧
-          P.π u = ((blkA (Φ g).1).det, ((blkD (Φ g).1).det)⁻¹)
 
 end PositivityTheory.Rg.Rsw.L.LJPos
 

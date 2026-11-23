@@ -1,5 +1,57 @@
-import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.HermitianForms.UnitaryLattices.IsotropicAtoms.FinSumFinEquivSymmDite
-import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.HermitianForms.UnitaryLattices.IsotropicAtoms.ChartRestriction
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.HermitianForms.AvgData
+public import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.HermitianForms.UnitaryLattices.IsotropicAtoms.ChartRestriction
+public import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.HermitianForms.UnitaryLattices.IsotropicAtoms.FinSumFinEquivSymmDite
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -28,8 +80,8 @@ def stabSub (v : V) : AddSubgroup (Fin (m + 1) → k) where
     conv_lhs => rw [← ha]
     rw [← Module.End.mul_apply, ← map_mul, ← colEl_add, neg_add_cancel, colEl_zero, map_one, Module.End.one_apply]
 
-variable (k) in
 
+variable (k) in
 def charSub {n : ℕ} (ψ : AddChar k Circle) (ξ : Fin n → k) : AddSubgroup (Fin n → k) where
   carrier := {x | ψ (ξ ⬝ᵥ x) = 1}
   add_mem' {a b} ha hb := by
@@ -40,8 +92,8 @@ def charSub {n : ℕ} (ψ : AddChar k Circle) (ξ : Fin n → k) : AddSubgroup (
     simp only [Set.mem_ofPred_eq] at *
     rw [dotProduct_neg, AddChar.map_neg_eq_inv, ha, inv_one]
 
-variable (k) in
 
+variable (k) in
 def annSub {n : ℕ} (ψ : AddChar k Circle) (A : AddSubgroup (Fin n → k)) : AddSubgroup (Fin n → k) where
   carrier := {ξ | ∀ a ∈ A, ψ (ξ ⬝ᵥ a) = 1}
   add_mem' {a b} ha hb := by
@@ -107,7 +159,7 @@ theorem avg_eq {ξ : Fin (m + 1) → k} {A : AddSubgroup (Fin (m + 1) → k)} {v
     avg ψ h π ξ A v = ((p.2.card : ℂ)⁻¹) •
       ∑ t ∈ p.2, (starRingEnd ℂ ((ψ (ξ ⬝ᵥ t) : Circle) : ℂ)) • π (colEl k m N h t) v := by
   have hd : ∃ p, AvgData ψ h π ξ A v p := ⟨p, hp⟩
-  rw [avg, dif_pos hd]
+  rw [avg, dite_eq_left hd]
   obtain ⟨hq1, hq2, hq3, hq4, hq5, hq6⟩ := hd.choose_spec
   obtain ⟨hp1, hp2, hp3, hp4, hp5, hp6⟩ := hp
   have key := card_smul_sum_eq hq1 hp1 hq5 hq6 hp5 hp6
@@ -148,9 +200,9 @@ theorem avg_add (hψ : Continuous ψ) (hπ : IsSmooth π) (ξ : Fin (m + 1) → 
     (hA : IsLat A) (v w : V) : avg ψ h π ξ A (v + w) = avg ψ h π ξ A v + avg ψ h π ξ A w := by
   obtain ⟨p, hp, hpw⟩ := exists_avgData₂ h π ψ hψ hπ ξ hA v w
   have hpvw : AvgData ψ h π ξ A (v + w) p :=
-    avgData_of_fix h π ψ hp (fun a ha => by rw [map_add, hp.2.2.1 a ha, hpw.2.2.1 a ha])
+    avgData_of_fix h π ψ hp (fun a ha => by rw [map_add (f := _), hp.2.2.1 a ha, hpw.2.2.1 a ha])
   rw [avg_eq h π ψ hpvw, avg_eq h π ψ hp, avg_eq h π ψ hpw, ← smul_add, ← Finset.sum_add_distrib]
-  simp only [map_add, smul_add]
+  simp only [map_add (f := _), smul_add]
 
 theorem avg_smul (hψ : Continuous ψ) (hπ : IsSmooth π) (ξ : Fin (m + 1) → k) {A : AddSubgroup (Fin (m + 1) → k)}
     (hA : IsLat A) (c : ℂ) (v : V) : avg ψ h π ξ A (c • v) = c • avg ψ h π ξ A v := by
@@ -167,6 +219,7 @@ theorem colEl_comm_avg' (hψ : Continuous ψ) (hπ : IsSmooth π) (ξ : Fin (m +
     {A : AddSubgroup (Fin (m + 1) → k)} (hA : IsLat A) (a : Fin (m + 1) → k) (v : V) :
     π (colEl k m N h a) (avg ψ h π ξ A v) = avg ψ h π ξ A (π (colEl k m N h a) v) := by
   obtain ⟨p, hp, hpw⟩ := exists_avgData₂ h π ψ hψ hπ ξ hA v (π (colEl k m N h a) v)
+
   rw [avg_eq h π ψ hp, avg_eq h π ψ hpw, map_smul, map_sum]
   congr 1
   refine Finset.sum_congr rfl fun t _ => ?_
@@ -191,11 +244,6 @@ theorem avg_colEl (hψ : Continuous ψ) (hπ : IsSmooth π) (ξ : Fin (m + 1) �
     congr 2
     ring
   rw [avg_eq h π ψ hpw, avg_eq h π ψ hp, Finset.sum_congr rfl (fun t _ => e t), ← Finset.smul_sum, hs, smul_comm]
-
-theorem colEl_avg (hψ : Continuous ψ) (hπ : IsSmooth π) (ξ : Fin (m + 1) → k) {A : AddSubgroup (Fin (m + 1) → k)}
-    (hA : IsLat A) {a : Fin (m + 1) → k} (ha : a ∈ A) (v : V) :
-    π (colEl k m N h a) (avg ψ h π ξ A v) = ((ψ (ξ ⬝ᵥ a) : Circle) : ℂ) • avg ψ h π ξ A v := by
-  rw [colEl_comm_avg' h π ψ hψ hπ ξ hA a v, avg_colEl h π ψ hψ hπ ξ hA ha v]
 
 open Classical in
 theorem char_sum {ξ η : Fin (m + 1) → k} {A : AddSubgroup (Fin (m + 1) → k)} {v : V}
@@ -234,20 +282,6 @@ theorem char_sum {ξ η : Fin (m + 1) → k} {A : AddSubgroup (Fin (m + 1) → k
         exact (div_eq_one.mp H2).symm
     rw [hz, mul_zero]
 
-open Classical in
-
-theorem avg_eigen (hψ : Continuous ψ) (hπ : IsSmooth π) (ξ η : Fin (m + 1) → k) {A : AddSubgroup (Fin (m + 1) → k)}
-    (hA : IsLat A) (v : V) (hv : ∀ a ∈ A, π (colEl k m N h a) v = ((ψ (η ⬝ᵥ a) : Circle) : ℂ) • v) :
-    avg ψ h π ξ A v = if ∀ a ∈ A, ψ (ξ ⬝ᵥ a) = ψ (η ⬝ᵥ a) then v else 0 := by
-  obtain ⟨p, hp, hpU⟩ := exists_avgData h π ψ hψ hπ ξ hA v (charSub k ψ η) (isOpen_charSub ψ hψ η)
-  have hs := char_sum h π ψ hp (fun a ha => hpU ha)
-  rw [avg_eq h π ψ hp]
-  have e : ∀ t ∈ p.2, (starRingEnd ℂ ((ψ (ξ ⬝ᵥ t) : Circle) : ℂ)) • π (colEl k m N h t) v =
-      ((starRingEnd ℂ ((ψ (ξ ⬝ᵥ t) : Circle) : ℂ)) * ((ψ (η ⬝ᵥ t) : Circle) : ℂ)) • v := by
-    intro t ht
-    rw [hv t (hp.2.2.2.2.1 t ht), smul_smul]
-  rw [Finset.sum_congr rfl e, ← Finset.sum_smul, smul_smul, hs]
-  split_ifs <;> simp
 
 theorem avg_zero' (hψ : Continuous ψ) (hπ : IsSmooth π) (ξ : Fin (m + 1) → k) {A : AddSubgroup (Fin (m + 1) → k)}
     (hA : IsLat A) : avg ψ h π ξ A 0 = 0 := by
@@ -263,8 +297,8 @@ theorem avg_sum' (hψ : Continuous ψ) (hπ : IsSmooth π) (ξ : Fin (m + 1) →
   · intro i s hi ih
     rw [Finset.sum_insert hi, Finset.sum_insert hi, avg_add h π ψ hψ hπ ξ hA, ih]
 
-open Classical in
 
+open Classical in
 theorem avg_avg (hψ : Continuous ψ) (hπ : IsSmooth π) (ξ η : Fin (m + 1) → k) {A A' : AddSubgroup (Fin (m + 1) → k)}
     (hA : IsLat A) (hA' : IsLat A') (hAA' : A ≤ A') (v : V) :
     avg ψ h π η A' (avg ψ h π ξ A v) = if ∀ a ∈ A, ψ (η ⬝ᵥ a) = ψ (ξ ⬝ᵥ a) then avg ψ h π η A' v else 0 := by
@@ -299,8 +333,9 @@ theorem form_avg (hψ : Continuous ψ) (hπ : IsSmooth π) (B : V →ₗ[ℂ] V 
   rw [Finset.card_image_of_injective _ neg_injective, Finset.sum_image (fun x _ y _ hxy => neg_injective hxy)] at key
   have hc : (p.2.card : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (transversal_nonempty hp6).card_pos.ne'
   have key' := smul_right_injective ℂ hc key
+
   simp only [map_smul, map_smulₛₗ, map_sum, LinearMap.smul_apply, LinearMap.sum_apply,
-    smul_eq_mul, map_inv₀, map_natCast, starRingEnd_self_apply]
+  smul_eq_mul, map_inv₀, map_natCast, starRingEnd_self_apply]
   congr 1
   refine (Finset.sum_congr rfl fun t _ => ?_).trans key'.symm
   show _ = ((ψ (ξ ⬝ᵥ (-t)) : Circle) : ℂ) * B v (π (colEl k m N h (-t)) w)
@@ -371,8 +406,9 @@ theorem avg_conj (hψ : Continuous ψ) (hπ : IsSmooth π) (g : GL (Fin (m + 1))
           (a - (g : Matrix (Fin (m + 1)) (Fin (m + 1)) k) *ᵥ s') ∈ p.1 at ht'
         rw [Matrix.mulVec_sub, hgg'] at ht'
         rw [hu s' ⟨hs'', ht'⟩]
+
   rw [avg_eq h π ψ hq, avg_eq h π ψ hp, Finset.card_image_of_injective _ hinj,
-    Finset.sum_image (fun x _ y _ hxy => hinj hxy), map_smul, map_sum]
+  Finset.sum_image (fun x _ y _ hxy => hinj hxy), map_smul, map_sum]
   congr 1
   refine Finset.sum_congr rfl fun s _ => ?_
   rw [map_smul, hcomm, Matrix.dotProduct_mulVec]
@@ -397,7 +433,7 @@ theorem avg_zero_char (ξ0 : Fin (m + 1) → k) (hξ0 : ξ0 = 0) (A : AddSubgrou
     rw [avg_eq h π ψ hp, avg_eq h π 1 ((hiff p).mp hp)]
     simp only [zero_dotProduct, AddChar.map_zero_eq_one]
   · have hd' : ¬ ∃ p, AvgData 1 h π 0 A v p := fun ⟨p, hp⟩ => hd ⟨p, (hiff p).mpr hp⟩
-    rw [avg, avg, dif_neg hd, dif_neg hd']
+    rw [avg, avg, dite_eq_right hd, dite_eq_right hd']
 
 theorem avg_congr_char (hψ : Continuous ψ) (hπ : IsSmooth π) {ξ ξ' : Fin (m + 1) → k} {A : AddSubgroup (Fin (m + 1) → k)}
     (hA : IsLat A) (hξ : ∀ a ∈ A, ψ (ξ ⬝ᵥ a) = ψ (ξ' ⬝ᵥ a)) (v : V) :

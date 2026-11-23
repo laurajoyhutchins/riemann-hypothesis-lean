@@ -1,6 +1,57 @@
-import Mathlib
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.QuotientVanishing.QuotIntegralZero
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LintegralTsumEnormNeTop
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.TwistedFactors.IntegralUnitBaseChange.InvTransposeGLInvTransposeGL
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.MeasureTheory.Group.FundamentalDomain
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LintegralTsumEnormNeTop
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -257,7 +308,8 @@ theorem unfold_abs [TopologicalSpace G] [IsTopologicalGroup G] [T2Space G] [Seco
       simp only
       rw [twConj_out ι θ θR hθ, ← map_repR ι q, ← map_inv, hχi]
     simp_rw [e1]
-    exact ENNReal.tsum_comp_le_tsum_of_injective (orbPt_injective (hH c)) _
+    exact ENNReal.tsum_comp_le_tsum_of_injective (orbPt_injective (hH c))
+      (fun d => ‖χ x * φ (twConj θ x (ι d))‖ₑ)
   have hterm : ∀ c, (quotIntegral μ (H c) Measure.count fun x => χ x * φ (twConj θ x (ι (rep c)))) =
       ∫ x in Fd, ∑' q : ι.range ⧸ (H c).subgroupOf ι.range,
         χ ((q.out : G)⁻¹ * x) * φ (twConj θ ((q.out : G)⁻¹ * x) (ι (rep c))) ∂μ := fun c => by
@@ -284,7 +336,7 @@ theorem unfold_abs [TopologicalSpace G] [IsTopologicalGroup G] [T2Space G] [Seco
       χ ((q.out : G)⁻¹ * x) * φ (twConj θ ((q.out : G)⁻¹ * x) (ι (rep c))) := fun x =>
     kernel_decomp hι hθ hcls hH hχi x (hsing x) T (hT x)
   simp_rw [hdec]
-  rw [integral_finset_sum]
+  rw [integral_finsetSum]
   · exact Finset.sum_congr rfl fun c _ => (hterm c).symm
   · intro c _
     haveI := hdisc c

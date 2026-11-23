@@ -1,12 +1,67 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.WeilGramSignature
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.SupportedSubgroupSplitCommutePrimeIdempotents
+public import Formalism.LocalToGlobal.ProjectiveLattices.ThClass
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EtaAtOfIsEtaConj
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsHeckeCharacterOfUnitaryTensorIdeles
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsNumeratorIdealOfAntiInvariantDivisorStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IdelicCharacterEqProdUnramifiedValueZpowStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MemSpanDetSetIffAdelicLatticeValuationStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.OscillatorModelValuesThird
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PlaceIdempotentComponentsConjValuationStatement
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.AbsNormSqOfMulConjEqDifferentIdeal
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsBaseChangeFiniteAdeleRingEquiv
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsFinitePlaceIdempotentBaseChangeAdeles
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.HeckeCharEqProdLocalComponentsApproximating
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Development.AbelianVarietyTheory.Definitions.Divisors.IsUnitaryOnTheta
+import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.DatEqZero
+import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IsStabForm
+public import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IsSystem
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FrAtEmb
-import Development.AbelianVarietyTheory.Definitions.Divisors.MarkAd
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsSmoothVector
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.OmegaFormPeriodRelation
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.EtaCharacterUnramified
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.OscillatorModelValuesThird
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EtaAtOfIsEtaConj
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.AbsNormSqOfMulConjEqDifferentIdeal
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ReadingsExistRow
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FibExtMarked
+
+@[expose] public section
 
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.L2.Theta Formalism.L2.DIV Formalism.IndefR Formalism.IndefR.Datum Formalism.IndefR.Links Formalism.IndefR.Mult Formalism.IndefR.FWT Formalism.L2.Pj
 open MeasureTheory IsDedekindDomain NumberField Matrix
@@ -180,7 +235,7 @@ theorem coefficientField_reading_at_embedding_prod {LL : Type} [Field LL] (f : L
   rw [map_mul, map_zpow₀, map_pow, map_natCast, hy Q hQ, hn, Complex.ofReal_inv,
     pow_factor hs (Circle.coe_ne_zero _) _ _ hm, Complex.ofReal_pow]
 
-set_option maxHeartbeats 1600000 in
+
 
 theorem exists_ideal_conj (V : HSp D) (hg : V.gram = 1) (hL : Bridge.hLat V 1 = Formalism.L2.Pj.stdLat D.host.E V.rank) (h : GA D V)
     (e : AE D) (P : Finset (HeightOneSpectrum (𝓞 D.host.E))) (y : (AE D)ˣ) (he : Formalism.IndefR.Datum.IsIdemSum e P)
@@ -206,12 +261,15 @@ theorem exists_ideal_conj (V : HSp D) (hg : V.gram = 1) (hL : Bridge.hLat V 1 = 
   simp only [← hev] at hid hcj
   obtain ⟨⟨es, hes, hsum⟩, horth⟩ := he
   have e0 : infPart D e = 0 := by
+
     rw [hsum, map_sum]
     exact Finset.sum_eq_zero fun Q hQ => (hid _ _ (hes Q hQ)).1
   have e1 : ∀ Q ∈ P, ev Q e = 1 := fun Q hQ => by
+
     rw [hsum, map_sum, Finset.sum_eq_single Q (fun Q' h' hne => (hid _ _ (hes Q' h')).2.2 Q hne.symm)
-      (fun h' => absurd hQ h'), (hid _ _ (hes Q hQ)).2.1]
+    (fun h' => absurd hQ h'), (hid _ _ (hes Q hQ)).2.1]
   have e2 : ∀ Q, Q ∉ P → ev Q e = 0 := fun Q hQ => by
+
     rw [hsum, map_sum]
     exact Finset.sum_eq_zero fun Q' h' => (hid _ _ (hes Q' h')).2.2 Q fun hh => hQ (hh ▸ h')
   have hP : ∀ Q ∈ P, GlobalTheory.IdemSupport.cP Q ∉ P := fun Q hQ hQ' => by
@@ -226,7 +284,7 @@ theorem exists_ideal_conj (V : HSp D) (hg : V.gram = 1) (hL : Bridge.hLat V 1 = 
     refine GlobalTheory.ClassScalarValue.det_supp (ev Q) hs ?_
     have a := hcj e (GlobalTheory.IdemSupport.cP Q)
     rw [e2 _ hQ', map_zero, GlobalTheory.ClassScalarValue.cP_cP, map_eq_zero] at a
-    rw [map_add, e2 Q hQ, a, add_zero]
+    rw [map_add (f := _), e2 Q hQ, a, add_zero]
   have d2 : ∀ Q, Valued.v (ev Q d) * Valued.v (ev (GlobalTheory.IdemSupport.cP Q) d) = 1 := fun Q => by
     rw [← hcj, ← map_mul, ← map_mul, hd, GlobalTheory.ClassScalarValue.det_unitary V hg h, map_one, map_one]
   have d3 : ∀ Q, Valued.v (ev Q d) ≠ 0 := fun Q => left_ne_zero_of_mul_eq_one (d2 Q)
@@ -250,12 +308,12 @@ theorem exists_ideal_conj (V : HSp D) (hg : V.gram = 1) (hL : Bridge.hLat V 1 = 
   obtain ⟨cc, c0, c1, c2, c3, c4⟩ := GlobalTheory.T.exists_numeratorIdeal_of_antiInvariant_divisor D.host.E (GlobalTheory.IdemSupport.cO D) GlobalTheory.IdemSupport.cP GlobalTheory.IdemSupport.cO_cO GlobalTheory.IdemSupport.mem_cP δ hfin δ1
   have hy' : (y : AE D) = e * d + (1 - e) := hd ▸ hy
   have y0 : infPart D (y : AE D) = 1 := by
-    rw [hy', RingHom.map_add, RingHom.map_mul, RingHom.map_sub, e0, RingHom.map_one, zero_mul, zero_add, sub_zero]
+    rw [hy', RingHom.map_add (f := _), RingHom.map_mul, RingHom.map_sub, e0, RingHom.map_one, zero_mul, zero_add, sub_zero]
   have y1 : ∀ Q ∈ P, Valued.v (ι (finPart D (y : AE D)) Q) = WithZero.exp (-δ Q) := fun Q hQ => by
-    rw [← hev, ← hδ, hy', RingHom.map_add, RingHom.map_mul, RingHom.map_sub, e1 Q hQ, RingHom.map_one, one_mul, sub_self,
+    rw [← hev, ← hδ, hy', RingHom.map_add (f := _), RingHom.map_mul, RingHom.map_sub, e1 Q hQ, RingHom.map_one, one_mul, sub_self,
       add_zero]
   have y2 : ∀ Q, Q ∉ P → ι (finPart D (y : AE D)) Q = 1 := fun Q hQ => by
-    rw [← hev, hy', RingHom.map_add, RingHom.map_mul, RingHom.map_sub, e2 Q hQ, RingHom.map_one, zero_mul, zero_add,
+    rw [← hev, hy', RingHom.map_add (f := _), RingHom.map_mul, RingHom.map_sub, e2 Q hQ, RingHom.map_one, zero_mul, zero_add,
       sub_zero]
   refine ⟨cc, c0, c1, c3 _ fun Q hQ hm => ?_, c4 _ fun x => ?_, ?_, ?_, y0⟩
   · exact hQ (δ0 Q (fun h' => hb Q h' hm) fun h' => hb _ h' ((hbc Q).2 hm))

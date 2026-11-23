@@ -1,11 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.IsIwVecTrivial
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisGeometry₂.DepthZeroJacquetInjective
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.HasFiniteLengthOfIsIrreducible
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.IsCuspidalIffCompositions
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.EventuallyInv
+module
+
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.EventuallyInv
+import Development.AbelianVarietyTheory.Definitions.Divisors.T2SpaceGeneralLinearGroup
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsEquivProdIrrTw
 import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IsIrreducibleIffOfLinearEquiv
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsEquivProdIrrTw
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.ExistsReadingLaws
+import Development.AbelianVarietyTheory.Proofs.SatakeParameters.IsIwVecTrivial
+
+@[expose] public section
 
 noncomputable section
 
@@ -31,12 +71,12 @@ theorem val_dg {n : ℕ} (p : parab k (points (Fin n))) (i : Fin n) :
   rw [Matrix.GeneralLinearGroup.val_det_apply, Matrix.det_unique]
   rfl
 
-variable (k) in
 
+variable (k) in
 def twoBlockParabolicFirstBlock (r t : ℕ) : parab k (two (eSt r t)) →* GL (Fin r) k := (MonoidHom.fst _ _).comp (Stages.pr _)
 
-variable (k) in
 
+variable (k) in
 def midPar (r t : ℕ) : Subgroup (GL (Fin (r + t)) k) :=
   ((parab k (points (Fin r))).comap (twoBlockParabolicFirstBlock k r t)).map (parab k (two (eSt r t))).subtype
 
@@ -237,16 +277,14 @@ theorem stage_two (ψ₁ : Fin r → kˣ →* ℂˣ) (ψ₂ : Fin t → kˣ →*
       simp only [Units.val_one, one_smul, Module.End.one_apply])
     (rho1 ψ₁ ψ₂) (TensorProduct.comm _ _ _) (fun q y => by
       induction y with
-      | zero => simp only [map_zero]
-      | add x y hx hy => simp only [map_add, hx, hy]
+      | add x y hx hy => simp only [LinearEquiv.map_add, LinearMap.map_add, hx, hy]
       | tmul a f =>
         show TensorProduct.comm ℂ _ _ ((sB ψ₁ (fstB q) a) ⊗ₜ (Stages.tauSnd (eSt r t) (prinSeries ψ₂) (incl q) f)) = _
         rw [TensorProduct.comm_tmul, TensorProduct.comm_tmul, TensorProduct.map_tmul, Stages.tauSnd_apply]
         exact TensorProduct.smul_tmul _ _ _)
     (sB (Fin.append ψ₁ ψ₂)) (TensorProduct.lid ℂ ℂ) (fun q h z => by
       induction z with
-      | zero => simp only [map_zero]
-      | add x y hx hy => simp only [map_add, hx, hy]
+      | add x y hx hy => simp only [LinearEquiv.map_add, LinearMap.map_add, hx, hy]
       | tmul a b =>
         rw [TensorProduct.lid_tmul, TensorProduct.map_tmul, TensorProduct.lid_tmul]
         show sB (Fin.append ψ₁ ψ₂) ⟨q, h⟩ (a • b) =

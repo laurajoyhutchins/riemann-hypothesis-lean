@@ -1,13 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.HasDefect
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.HasDefect
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.DivCalc
+import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.InvariantFunctionsDescend
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AbelianPartConst
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.SmoothRayQuotient
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsGlobalLocDerOfIsCob
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.LogDerivativePrincipalPolarisationIndependent
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
 import Development.AbelianVarietyTheory.Definitions.Divisors.RigidForFan
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.ToroidalCompactificationBis
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsConnK
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AbelianPartConst
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsRaynaudTorusWeightFunctionInvariantField
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TorusInvariantLiftAddInvariantCombination
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.LogDerivativePrincipalPolarisationIndependent
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.DivCalc
+
+@[expose] public section
+
 open CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj AlgebraicGeometry NumberField IsLocalRing
 open scoped CategoryTheory.Obj Matrix TensorProduct
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Out ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor Formalism.L2.Pj
@@ -142,8 +183,9 @@ theorem isField_dE (hdd : ∀ a, IsField ⊤ (dd a)) (i : h.J) : IsField (h.W i)
       rw [(hdd a).2.1 W le_top]; ring
     simp only [dE, h₀.2.1 W hW, e]
     ring
-  · simp only [dE, h₀.2.2 W W' hWW hW, fun a => (hdd a).2.2 W W' hWW le_top, map_add, map_sum, map_mul,
-      GlobalTheory.KS.GlueDer.res_const]
+
+  · simp only [dE, h₀.2.2 W W' hWW hW, fun a => (hdd a).2.2 W W' hWW le_top, map_add (f := _), map_sum, map_mul,
+    GlobalTheory.KS.GlueDer.res_const]
 
 theorem map_op (e : ℕ) (hν : ν * e = 1) (i : h.J) (O : G.left.Opens) (hO : O ≤ h.W i) {A : Type} [CommRing A]
     (π : Γ(G.left, O) →+* A) (hΘ : ∀ a b, π (constFn G.hom O (h.Θ a b)) = 0) (f : Γ(G.left, O)) :
@@ -155,8 +197,9 @@ theorem map_op (e : ℕ) (hν : ν * e = 1) (i : h.J) (O : G.left.Opens) (hO : O
       rw [← map_natCast (G.hom.appLE ⊤ O (fun _ _ => trivial)).hom,
         ← map_natCast (Scheme.ΓSpecIso (CommRingCat.of R)).inv.hom, ← map_mul, ← map_mul, hν, map_one, map_one]
     simpa using congrArg π this
-  simp only [op, dE, pE, GlobalTheory.KS.GlueDer.rsT_eq hO, map_add, map_sub, map_mul, map_sum, hΘ, zero_mul,
-    Finset.sum_const_zero, sub_zero, map_ofNat, map_natCast, map_pow, GlobalTheory.KS.GlueDer.res_const]
+
+  simp only [op, dE, pE, GlobalTheory.KS.GlueDer.rsT_eq hO, map_add (f := _), map_sub, map_mul, map_sum, hΘ, zero_mul,
+  Finset.sum_const_zero, sub_zero, map_ofNat, map_natCast, map_pow, GlobalTheory.KS.GlueDer.res_const]
   linear_combination (-2 * ∑ a, π (constFn G.hom O (h.u a)) * π (dd a O f) -
     2 * (e : A) * π (resG G.left hO (h.p' i)) * π f) * h1
 
@@ -208,8 +251,8 @@ def IsDesc : Prop :=
   ∀ (Z : Scheme.{0}) (a : Z ⟶ Y.H.left) (b : Z ⟶ A₀.left), a ≫ Y.q.left = b ≫ m₀ → ∀ (z : Z) (i : h.J),
     (b ≫ m₀) z ∈ V i → gs b z (m₀ ⁻¹ᵁ V i) (pb i) = gs a z (h.W i) (pE h ν i)
 
-variable (Q) in
 
+variable (Q) in
 def Commutes : Prop :=
   ∀ (α : Q.X) (j : Fin 4) (T : A₀.left ⟶ A₀.left), T ≫ m₀ = m₀ ≫ Q.famφB α j → T ≫ A₀.hom = A₀.hom →
     ∀ (W : Q.P.A.left.Opens) (f : Γ(Q.P.A.left, W)) (Z : Scheme.{0}) (b : Z ⟶ A₀.left) (z : Z),
@@ -271,7 +314,7 @@ theorem IsFibre.dE_agree [CharZero K] {Z : Scheme.{0}} {a : Z ⟶ Y.H.left} {b :
   have := AbConst.lift_agree h hF.field i i' U hU (gsH a z U hz)
     (by simpa only [map_ofNat] using (two_ne_zero (α := K)).isUnit.map (cstH (b ≫ A₀.hom) z))
     (fun a' b' => by rw [← gs_eq_gsH, hF.gs_const w z U hz, hF.symb, cst_eq_cstH, map_zero]) f
-  simp only [gs_eq_gsH a z U hz, dE, map_add, this]
+  simp only [gs_eq_gsH a z U hz, dE, map_add (f := _), this]
 
 theorem IsFibre.T_zero {α : Q.X} {T : A₀.left ⟶ A₀.left} (h₁ : T ≫ m₀ = m₀ ≫ Q.famφB α 0) (h₂ : T ≫ A₀.hom = A₀.hom) :
     T = 𝟙 _ :=

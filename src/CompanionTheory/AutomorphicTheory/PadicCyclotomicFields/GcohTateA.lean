@@ -1,4 +1,51 @@
-import CompanionTheory.AutomorphicTheory.PadicCyclotomicFields.GcohDefs
+module
+
+public import GroundTheory.ProfiniteCohomology.PoincareDuality.NsmulEqZeroOfNonemptyAddEquiv
+public import GroundTheory.ProfiniteCohomology.PoincareDuality.Torsion
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.Module.ZMod
+import ReciprocityTheory.GaloisValuations.GlobalA
+
+@[expose] public section
 
 open CategoryTheory MonoidalCategory GroundTheory.ProfCoh ReciprocityTheory.Gal ValuativeRel
 
@@ -76,11 +123,22 @@ theorem exists_dualEquiv (hb : Function.Bijective b.flip) :
       change eD (b.flip y (eA.symm a)) = χ a
       rw [hy]
       simp
+  let E : (A.V →+ D.V) ≃+ (A →ₗ[ULift.{0} ℤ] D) :=
+    { toFun := fun f =>
+        { toFun := f
+          map_add' := f.map_add
+          map_smul' := by
+            rintro ⟨r⟩ x
+            have hr : (r : ULift.{0} ℤ) = ⟨r⟩ := (ULift.up_intCast r).symm
+            simp only [RingHom.id_apply, ← hr, Int.cast_smul_eq_zsmul, map_zsmul] }
+      invFun := LinearMap.toAddMonoidHom
+      left_inv := fun _ => rfl
+      right_inv := fun f => LinearMap.ext fun _ => rfl
+      map_add' := fun _ _ => rfl }
   let eB : M' ≃+ (A →ₗ[ULift.{0} ℤ] D) :=
-    (AddEquiv.ofBijective F hF).trans (uliftIntLinearEquivAddHom A D).symm
+    (AddEquiv.ofBijective F hF).trans E
   have h2 : ∀ x y, eB y (eA x) = eD (b x y) := fun x y => by
-    change (uliftIntLinearEquivAddHom A D).symm (F y) (eA x) = _
-    rw [uliftIntLinearEquivAddHom_symm_apply]
+    change F y (eA x) = eD (b x y)
     simp [F]
   refine ⟨eB, fun g y => LinearMap.ext fun a => ?_, h2⟩
   obtain ⟨x, rfl⟩ := eA.surjective a

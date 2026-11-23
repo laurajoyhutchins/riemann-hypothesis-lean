@@ -1,8 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.InfUniv
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AbelianSchemeUnobstructedSquareZeroAffineStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AbelianSchemeFirstDeRhamStructureStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IsKSValueOneOfRetraction
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AbelianSchemeFirstDeRhamStructureStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AbelianSchemeUnobstructedSquareZeroAffineStatement
 import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ConnectedSpaceSpecOfIsLocalRing
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsDefiniteDatumGoodObj
+import Development.AbelianVarietyTheory.Definitions.Divisors.InfUniv
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor
 open GlobalTheory.UPel GlobalTheory.UPel.Sm GlobalTheory.Cris GlobalTheory.DeRham
@@ -63,7 +108,16 @@ theorem crys_free_and_red : ∀ (F : Type) [Field F] [NumberField F] (Λ : Type)
   haveI := Module.finitePresentation_of_projective Λ (prim (divided₂ hI) (spMap π) A₀)
   haveI : Module.Free Λ (prim (divided₂ hI) (spMap π) A₀) := Module.free_of_flat_of_isLocalRing
   have m : GrpMor (divided₂ hI) (spMap π) A₀ (dp0 k) (𝟙 _) A₀ (algebraMap Λ k) (𝟙 _) (Over.Hom.left (𝟙 A₀)) :=
-    GrpMor.of_hom (isDPMorphism_red π hI) (Category.id_comp _).symm (𝟙 A₀)
+    ⟨isDPMorphism_red π hI, by simp, by simp, by
+      intro T x y x₀ y₀ hx hy
+      have ex : x₀.left = x.left := by simpa using hx
+      have ey : y₀.left = y.left := by simpa using hy
+      have eqx : x₀ = x := Over.OverMorphism.ext ex
+      have eqy : y₀ = y := Over.OverMorphism.ext ey
+      subst x₀
+      subst y₀
+      simp only [Over.id_left, Category.comp_id]
+      rfl⟩
   have hm : m.IsBC := by
     have hb := (HBC Λ A g hA hg k A₀ i h).1
     let E := LinearEquiv.baseChange Λ k _ _ e
@@ -78,7 +132,7 @@ theorem crys_free_and_red : ∀ (F : Type) [Field F] [NumberField F] (Λ : Type)
         congr 1
         exact GrpMor.pull_pull (liftMor (divided₂ hI) h) m (GlobalTheory.Published.AbelianDeRham.bcMor (R' := k) h)
           (fun _ ↦ rfl) (by simp) c
-      | add x y hx hy => rw [map_add, hx, hy, map_add]
+      | add x y hx hy => rw [map_add (f := _), hx, hy, map_add (f := _)]
     have : liftSemi m.pull = liftSemi (GlobalTheory.Published.AbelianDeRham.bcMor (R' := k) h).pull ∘ₗ
         E.symm.toLinearMap := by
       rw [← key, LinearMap.comp_assoc, ← LinearEquiv.coe_trans, LinearEquiv.symm_trans_self]; rfl
@@ -105,11 +159,11 @@ theorem crys_free_and_red : ∀ (F : Type) [Field F] [NumberField F] (Λ : Type)
       rw [e1, e2, hm.bcMap.map_smulₛₗ, hact]
       rfl
     | add r s hr hs =>
-      rw [add_smul, hm.bcMap.map_add, hr, hs, map_add, add_smul]
+      rw [add_smul, map_add (f := hm.bcMap), hr, hs, map_add (f := _), add_smul]
   · intro h'
     let l : prim (divided₂ hI) (spMap π) A₀ →ₗ[Λ] k :=
       { toFun c := h' (m.pull c)
-        map_add' c d := by rw [map_add, map_add]
+        map_add' c d := by rw [map_add (f := _), map_add (f := _)]
         map_smul' r c := by
           rw [map_smulₛₗ, map_smul, smul_eq_mul, RingHom.id_apply, Algebra.smul_def] }
     obtain ⟨hh, hhl⟩ := Module.projective_lifting_property (Algebra.linearMap Λ k) l hπ

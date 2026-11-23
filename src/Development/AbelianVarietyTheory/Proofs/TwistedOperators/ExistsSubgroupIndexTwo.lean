@@ -1,11 +1,54 @@
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.QuadraticClassFieldTheory
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IsSquareMulInfinite
-import Development.AbelianVarietyTheory.Proofs.HeightProofs.QuadraticExtNormFormOverAlgebra
-import Development.AbelianVarietyTheory.Definitions.AdelicHermitianForms.MemPowSub
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ExistsIsKum
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.CyclicKummerNormFixedHilbert90
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.HerbrandPrimeOrder
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.PIdxUnitsFiniteExtensionAdicCompletion
+module
+
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IsSquareMulInfinite
+public import Development.AbelianVarietyTheory.Definitions.AdelicHermitianForms.MemPowSub
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.CyclicKummerNormFixedHilbert90
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ExistsIsKum
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.HerbrandPrimeOrder
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.PIdxUnitsFiniteExtensionAdicCompletion
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain GlobalTheory.CNorm GlobalTheory.QuadSymbol.NormIndex
 
@@ -30,7 +73,7 @@ theorem exists_mul_conj_iff {B E : Type} [Field B] [CharZero B] [Field E] [Algeb
   · rintro ⟨y, hy⟩
 
     obtain ⟨a, ha⟩ := hfix ((y + σ y) / 2) (by
-      rw [map_div₀, map_add, hinv, map_ofNat, add_comm])
+      rw [map_div₀, map_add (f := _), hinv, map_ofNat, add_comm])
     obtain ⟨b, hb⟩ := hfix ((y - σ y) / (2 * θ)) (by
       rw [map_div₀, map_sub, hinv, map_mul, hconj, map_ofNat, mul_neg, div_neg, ← neg_div, neg_sub])
     have hy' : y = algebraMap B E a + algebraMap B E b * θ := by
@@ -38,7 +81,7 @@ theorem exists_mul_conj_iff {B E : Type} [Field B] [CharZero B] [Field E] [Algeb
       field_simp
       ring
     have hσy : σ y = algebraMap B E a - algebraMap B E b * θ := by
-      rw [hy', map_add, map_mul, AlgEquiv.commutes, AlgEquiv.commutes, hconj]
+      rw [hy', map_add (f := _), map_mul, AlgEquiv.commutes, AlgEquiv.commutes, hconj]
       ring
     refine ⟨a, b, (algebraMap B E).injective ?_⟩
     rw [← hy, hσy, hy']
@@ -47,7 +90,7 @@ theorem exists_mul_conj_iff {B E : Type} [Field B] [CharZero B] [Field E] [Algeb
     ring
   · rintro ⟨a, b, rfl⟩
     refine ⟨algebraMap B E a + algebraMap B E b * θ, ?_⟩
-    rw [map_add, map_mul, AlgEquiv.commutes, AlgEquiv.commutes, hconj]
+    rw [map_add (f := _), map_mul, AlgEquiv.commutes, AlgEquiv.commutes, hconj]
     simp only [map_sub, map_mul, map_pow]
     rw [← hpow]
     ring

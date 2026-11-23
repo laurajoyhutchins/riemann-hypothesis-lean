@@ -1,16 +1,59 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.MetricPeriods.Pull1
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.TsgPolyVolPolyCoeffEven
-import GroundTheory.HeightsAndTheta.Heights.Intersections.StatementsFibreLocal
-import Development.AutomorphicSpectrum.Statements.MetricStatements.AgreementIffGuarded
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.SymExp
+module
+
+public import Development.AutomorphicSpectrum.Definitions.MetricPeriods.Pull1
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.SymExp
+import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.FrameDefinitions.PermFinTwoUniv
+public import Mathlib.Algebra.MvPolynomial.Funext
+
+@[expose] public section
 
 open MvPolynomial MeasureTheory Filter Topology ReciprocityTheory.AnForm ReciprocityTheory.AnForm.M ReciprocityTheory.AnForm.P ReciprocityTheory.ChartRestriction.G.Geo ReciprocityTheory.ChartRestriction.G.AI ReciprocityTheory.ChartRestriction.G.AI.I1 ReciprocityTheory.ChartRestriction.G.AI.I2 ReciprocityTheory.ChartRestriction.G.AI.I4 GlobalTheory.CompanionTheory.Ar.PB GroundTheory.Heights₂.Heights GroundTheory.Heights₂.Heights.LowerBoundFree
 
 namespace PositivityTheory.Xgp.thma_alg
 
 noncomputable def pml {σ : Type} [Fintype σ] (n : ℕ) (a : (Fin n → σ) → ℝ) :
-    MultilinearMap ℝ (fun _ : Fin n => σ → ℝ) ℝ :=
+    (Fin n → σ → ℝ) →ₘₗ[ℝ] ℝ :=
   ∑ w : Fin n → σ, a w • (MultilinearMap.mkPiAlgebra ℝ (Fin n) ℝ).compLinearMap
     (fun r => LinearMap.proj (w r))
 
@@ -55,7 +98,7 @@ theorem eval_linePoly {σ : Type} (c : σ → ℝ) (e : σ → ℤ) (Q : MvPolyn
   unfold linePoly
   induction Q using MvPolynomial.induction_on with
   | C a => simp
-  | add p q hp hq => simp only [map_add, Polynomial.eval_add, hp, hq]
+  | add p q hp hq => simp only [map_add (f := _), Polynomial.eval_add, hp, hq]
   | mul_X p i hp =>
     simp only [map_mul, Polynomial.eval_mul, hp, aeval_X, MvPolynomial.eval_X, Polynomial.eval_sub,
       Polynomial.eval_C, Polynomial.eval_X]
@@ -74,8 +117,8 @@ theorem linePoly_formPoly {σ : Type} [Fintype σ] (D : ℕ) (b : (Fin D → σ)
   rw [show -u / 2 = 1 / 2 * -u by ring, mul_pow]
   ring
 
-open Classical in
 
+open Classical in
 noncomputable def mixPoly {σ : Type} [Fintype σ] (n : ℕ) (a : (Fin n → σ) → ℝ) (k : ℕ) (e : σ → ℝ) (a₀ : σ) :
     MvPolynomial σ ℝ :=
   ∑ w : Fin n → σ, (∏ r : Fin n, if (r : ℕ) < k then C (e (w r)) else if w r = a₀ then 0 else X (w r)) * C (a w)
@@ -84,6 +127,7 @@ open Classical in
 theorem eval_mixPoly {σ : Type} [Fintype σ] (n : ℕ) (a : (Fin n → σ) → ℝ) (k : ℕ) (e : σ → ℝ) (a₀ : σ)
     (c : σ → ℝ) :
     MvPolynomial.eval c (mixPoly n a k e a₀) = polar n a (mix k e fun x => if x = a₀ then 0 else c x) := by
+
   simp only [mixPoly, polar, mix, map_sum, map_mul, map_prod, MvPolynomial.eval_C]
   refine Finset.sum_congr rfl fun w _ => ?_
   congr 1
@@ -168,9 +212,9 @@ theorem PositivityTheory.Xgp.t_thma_alg : ∀ (σ : Type) [Fintype σ] (D : ℕ)
       else 0 := by
     intro n
     rw [PositivityTheory.Xgp.thma_alg.linePoly_formPoly D b hb c ε]
-    simp only [volPoly, Polynomial.finset_sum_coeff, hx, Polynomial.coeff_C_mul, Polynomial.coeff_X_pow]
+    simp only [volPoly, Polynomial.finsetSum_coeff, hx, Polynomial.coeff_C_mul, Polynomial.coeff_X_pow]
     simp [Finset.mem_range]
-  rw [tsgPoly, Polynomial.eval_finset_sum]
+  rw [tsgPoly, Polynomial.eval_finsetSum]
   set Pl := linePoly c ε (formPoly D b) with hPl
   have key : ∀ f : ℕ → ℝ, (∀ n, Pl.coeff n = 0 → f n = 0) →
       ∑ n ∈ Finset.range (Pl.natDegree + 1), f n = ∑ n ∈ Finset.range (D + 1), f n := by

@@ -1,7 +1,59 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.IsSubquotientDetRepParInd
-import Development.AbelianVarietyTheory.Definitions.Divisors.T2SpaceGeneralLinearGroup
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.TwistedKernelFixed
+module
+
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.IsSubquotientDetRepParInd
+public import Development.AbelianVarietyTheory.Definitions.Divisors.T2SpaceGeneralLinearGroup
+import Development.AbelianVarietyTheory.Definitions.Foundations.SecondCountableAndT2LocalField
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.TwistedKernelFixed
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Algebra.Group.Units
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -49,6 +101,7 @@ theorem exists_orbit (hπ : IsSmooth π) {H : Subgroup G} (hH : IsCompact (H : S
     continuous_subtype_val).range_finite
   have hS : ∀ u, u ∈ hf.toFinset ↔ ∃ h ∈ H, π h v = u := fun u => by simp
   refine ⟨hf.toFinset, hS, mem_fixed.2 fun g hg => ?_⟩
+
   rw [map_sum]
   have key : ∀ g ∈ H, ∀ u ∈ hf.toFinset, π g u ∈ hf.toFinset := fun g hg u hu => by
     obtain ⟨h, hh, rfl⟩ := (hS u).1 hu
@@ -58,8 +111,8 @@ theorem exists_orbit (hπ : IsSmooth π) {H : Subgroup G} (hH : IsCompact (H : S
   · rw [← Module.End.mul_apply, ← map_mul]; simp
   · rw [← Module.End.mul_apply, ← map_mul]; simp
 
-variable (π) in
 
+variable (π) in
 def Inj (I J : Subgroup G) : Prop := ∀ v ∈ fixed π I, v ∈ twKer π J 1 → v = 0
 
 theorem Inj.trans (hπ : IsSmooth π) {I J K : Subgroup G} (hJ : IsCompact (J : Set G))
@@ -268,8 +321,8 @@ open Matrix
 variable {k : Type} [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k]
   {n : Type} [Fintype n] [DecidableEq n]
 
-variable (k) in
 
+variable (k) in
 def grp {f : n → n → ℤ} (hf : Conc f) : Subgroup (GL n k) where
   carrier := {g | (∀ i j, Deep (f i j) (g.val i j)) ∧ ∀ i j, Deep (f i j) ((g⁻¹).val i j)}
   one_mem' := by
@@ -281,7 +334,7 @@ def grp {f : n → n → ℤ} (hf : Conc f) : Subgroup (GL n k) where
   mul_mem' := by
     have : ∀ A B : Matrix n n k, (∀ i j, Deep (f i j) (A i j)) → (∀ i j, Deep (f i j) (B i j)) →
         ∀ i j, Deep (f i j) ((A * B) i j) := fun A B hA hB i j => by
-      rw [mul_apply]
+      rw [Matrix.mul_apply]
       exact Deep.sum fun l _ => ((hA i l).mul (hB l j)).mono (hf.2 i j l)
     intro a b ha hb
     refine ⟨this _ _ ha.1 hb.1, ?_⟩
@@ -329,7 +382,7 @@ theorem diag_unit {f : n → n → ℤ} (hf : Chamber f) {p : GL n k} {i : n}
     ¬ Deep 1 (p.val i i) := by
   intro h
   have h3 : Deep 1 ((p.val * (p⁻¹).val) i i) := by
-    rw [mul_apply]
+    rw [Matrix.mul_apply]
     refine Deep.sum fun l _ => ?_
     by_cases c : l = i
     · subst c
@@ -355,7 +408,7 @@ theorem mem_of_entry (hg : Conc g) (hf : Chamber f) (hij : i ≠ j)
   rw [c.1, c.2]
   obtain ⟨hu0, hu⟩ := deep_inv (diag_unit hf (h1 i) fun l => h2 l i (by grind))
   have h3 : (p.val * (p⁻¹).val) i j = 0 := by simp [one_apply_ne hij]
-  rw [mul_apply, ← Finset.add_sum_erase _ _ (Finset.mem_univ i), add_eq_zero_iff_eq_neg] at h3
+  rw [Matrix.mul_apply, ← Finset.add_sum_erase _ _ (Finset.mem_univ i), add_eq_zero_iff_eq_neg] at h3
   have h4 : Deep (f i j) (p.val i i * (p⁻¹).val i j) := by
     rw [h3]
     exact (Deep.sum fun l hl => ((h1 i l).mul (h2 l j (by grind))).mono (hf.1.2 i j l)).neg

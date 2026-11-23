@@ -1,5 +1,49 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.StatementsLines
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.KernelsLattice
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -20,61 +64,8 @@ theorem genIndex_map_of_injective {G G' : Type*} [AddCommGroup G] [AddCommGroup 
   rw [AddSubgroup.relIndex_map_map_of_injective _ _ hf,
     AddSubgroup.relIndex_map_map_of_injective _ _ hf]
 
-theorem single_injective (x : Fin n) :
-    Function.Injective (AddMonoidHom.single (fun _ : Fin n => K) x) := by
-  intro s t h
-  simpa using congrFun h x
-
-theorem inter_line (a : Fin n → FractionalIdeal (𝓞 K)⁰ K) (x : Fin n) :
-    (idealLattice a ⊓ (Submodule.span K
-        (Set.range fun _ : Fin 1 => (Pi.single x 1 : Fin n → K))).restrictScalars (𝓞 K)).toAddSubgroup =
-      ((a x : Submodule (𝓞 K) K).toAddSubgroup).map (AddMonoidHom.single (fun _ : Fin n => K) x) := by
-  ext v
-  simp only [Submodule.mem_toAddSubgroup, Submodule.mem_inf, Submodule.restrictScalars_mem,
-    Set.range_const, Submodule.mem_span_singleton, AddSubgroup.mem_map, AddMonoidHom.single_apply]
-  constructor
-  · rintro ⟨hv, t, rfl⟩
-    refine ⟨t, ?_, ?_⟩
-    · have h := (Submodule.mem_pi.mp hv) x (Set.mem_univ _)
-      simpa using h
-    · rw [← Pi.single_smul', smul_eq_mul, mul_one]
-  · rintro ⟨t, ht, rfl⟩
-    refine ⟨?_, t, ?_⟩
-    · rw [idealLattice, Submodule.mem_pi]
-      intro y _
-      by_cases hy : y = x
-      · subst hy
-        simpa using ht
-      · simp only [Pi.single_apply, hy, if_false]
-        exact zero_mem _
-    · rw [← Pi.single_smul', smul_eq_mul, mul_one]
-
-theorem span_line (x : Fin n) :
-    (Submodule.span (𝓞 K) (Set.range fun _ : Fin 1 => (Pi.single x 1 : Fin n → K))).toAddSubgroup =
-      ((1 : Submodule (𝓞 K) K).toAddSubgroup).map (AddMonoidHom.single (fun _ : Fin n => K) x) := by
-  ext v
-  simp only [Submodule.mem_toAddSubgroup, Set.range_const, Submodule.mem_span_singleton,
-    AddSubgroup.mem_map, Submodule.mem_one, AddMonoidHom.single_apply]
-  constructor
-  · rintro ⟨y, rfl⟩
-    exact ⟨algebraMap (𝓞 K) K y, ⟨y, rfl⟩, by rw [← Pi.single_smul', Algebra.smul_def, mul_one]⟩
-  · rintro ⟨t, ⟨y, rfl⟩, rfl⟩
-    exact ⟨y, by rw [← Pi.single_smul', Algebra.smul_def, mul_one]⟩
-
-theorem gram_line (d : (K →+* ℂ) → Fin n → ℝ) (σ : K →+* ℂ) (x : Fin n) :
-    (gramAt (diagMetric d σ) σ (fun _ : Fin 1 => (Pi.single x 1 : Fin n → K))).det.re = d σ x := by
-  rw [Matrix.det_unique]
-  simp [gramAt, diagMetric, embVec, dotProduct, Matrix.mulVec_diagonal, Pi.single_apply]
-
 end KLinesLineDegree
 
-open KLinesLineDegree in
-
-theorem LinesLineDegree.proof : LinesLineDegree.Statement := by
-  intro K _ _ n a d x
-  unfold subDegree idealIndex
-  rw [inter_line, span_line, genIndex_map_of_injective _ (single_injective x)]
-  simp only [gram_line]
 
 end
 

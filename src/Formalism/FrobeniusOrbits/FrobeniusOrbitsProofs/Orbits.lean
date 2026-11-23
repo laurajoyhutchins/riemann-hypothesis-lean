@@ -1,7 +1,60 @@
-import Mathlib
-import Formalism.FrobeniusOrbits.HostOrbitsPlaces
-import Formalism.FrobeniusOrbits.FrobeniusOrbitsProofs.CoprimeTwoPow
-import Formalism.FrobeniusOrbits.FrobeniusOrbitsProofs.Galois
+module
+
+public import Formalism.FrobeniusOrbits.HostOrbitsPlaces
+public import Formalism.FrobeniusOrbits.FrobeniusOrbitsProofs.Galois
+import Mathlib.Algebra.AffineMonoid.UniqueSums
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Matrix.FiniteDimensional
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Polynomial
 
@@ -10,16 +63,6 @@ noncomputable section
 namespace Formalism.FrobeniusOrbits
 
 namespace Orbits
-
-lemma orderOf_conjugation_eq_two : orderOf c0 = 2 := by
-  unfold c0
-  apply orderOf_eq_prime
-  · ext <;> simp
-  · intro h
-    have := congrArg Prod.fst h
-    simp at this
-
-lemma chD_apply (e : ℕ) (g : GG e) : chD e g = g.1.2 := rfl
 
 lemma prim_bound {E K : Type*} [Field E] [Field K] [Algebra ℚ E] [Algebra ℚ K] [Algebra E K]
     [IsScalarTower ℚ E K] [FiniteDimensional ℚ E] [FiniteDimensional E K] (g : ℕ) (hg : g.Prime)
@@ -40,7 +83,7 @@ lemma prim_bound {E K : Type*} [Field E] [Field K] [Algebra ℚ E] [Algebra ℚ 
     rw [IntermediateField.adjoin.finrank hint, ← minpoly.eq_of_irreducible_of_monic
       (cyclotomic.irreducible_rat hg.pos) hroot (cyclotomic.monic g ℚ),
       natDegree_cyclotomic, Nat.totient_prime hg]
-  rw [← h1, ← Module.finrank_mul_finrank ℚ (IntermediateField.adjoin ℚ {μ}) K]
+  rw [← h1, ← (letI : Module.Free (IntermediateField.adjoin ℚ {μ}) K := Module.Free.of_divisionRing _ _; Module.finrank_mul_finrank ℚ (IntermediateField.adjoin ℚ {μ}) K)]
   exact Nat.le_mul_of_pos_right _ Module.finrank_pos
 
 lemma dim_bound {E : Type*} [Field E] [Algebra ℚ E] [FiniteDimensional ℚ E]
@@ -94,35 +137,6 @@ end Orbits
 
 open Orbits
 
-theorem hostOrbits : HostOrbits := by
-  unfold HostOrbits
-  intro e φ hφ
-  have hb : φ.1.2 = -1 := by rcases hφ with h | h <;> simp [h, c0]
-  refine ⟨fun τ hτ i => ?_, fun h0 hne => ?_⟩
-  · have hτ2 : τ.1.2 = 1 := by simpa [Psi, chD] using hτ
-    have hm : (φ ^ i * τ).1.2 = (-1) ^ i := by simp [hb, hτ2]
-    have : φ ^ i * τ ∈ Psi e ↔ (φ ^ i * τ).1.2 = 1 := by simp [Psi, chD]
-    rw [this, hm]
-    exact neg_one_pow_eq_one_iff_even (by decide)
-  ·
-    have hpow : ∀ x : HGrp e, x ^ (2 ^ (e + 1)) = 1 := by
-      intro x
-      obtain ⟨u, rfl⟩ := QuotientGroup.mk_surjective x
-      have hc : Fintype.card (ZMod (2 ^ (e + 2)))ˣ = 2 ^ (e + 1) := by
-        rw [ZMod.card_units_eq_totient, Nat.totient_prime_pow_succ Nat.prime_two]
-        simp
-      rw [← QuotientGroup.mk_pow, ← hc, pow_card_eq_one, QuotientGroup.mk_one]
-    obtain ⟨j, -, hj⟩ := (Nat.dvd_prime_pow Nat.prime_two).mp (orderOf_dvd_of_pow_eq_one (hpow φ.2))
-    have hj0 : j ≠ 0 := by
-      rintro rfl
-      exact hne (orderOf_eq_one_iff.mp (by simpa using hj))
-    have hev : Even (orderOf φ.2) := by
-      rw [hj]
-      exact (Nat.even_pow.mpr ⟨even_two, hj0⟩)
-    refine ⟨hev, ?_⟩
-    rw [Prod.orderOf, h0, orderOf_conjugation_eq_two]
-    exact Nat.lcm_eq_right (even_iff_two_dvd.mp hev)
-
 theorem hostOrbitsPlaces : HostOrbitsPlaces := by
   unfold HostOrbitsPlaces
   intro e φ hφ τ hτ i
@@ -172,8 +186,5 @@ theorem hostFiniteOrder : HostFiniteOrder := by
   intro e q d hqd L _ _ ζ a b h k g hg M hM hne
   have := dim_bound k g hg M hM hne
   rwa [Galois.finrank_cmField hqd h] at this
-
-theorem hostOrbitsFin : HostOrbits ∧ HostOrbitsPlaces ∧ HostOrbitCount ∧ HostFiniteOrder :=
-  ⟨hostOrbits, hostOrbitsPlaces, hostOrbitCount, hostFiniteOrder⟩
 
 end Formalism.FrobeniusOrbits

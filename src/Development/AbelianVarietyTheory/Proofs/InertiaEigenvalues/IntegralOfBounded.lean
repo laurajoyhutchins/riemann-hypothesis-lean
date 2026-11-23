@@ -1,8 +1,69 @@
-import Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow
-import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
-import Formalism.SharpRestriction.LevelLetterCocycles.LocalSituation
-import Formalism.SharpRestriction.LevelLetterCocycles.LocCoh
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.FiniteAlgebraLocalCompletion
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.LocCoh
+public import Mathlib.NumberTheory.Padics.PadicIntegers
+public import Mathlib.RingTheory.IntegralClosure.IsIntegral.Defs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.Padics.LocalField
+import Mathlib.NumberTheory.Padics.ProperSpace
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Analysis.Normed.MulAction
+public import Mathlib.Analysis.SpecificLimits.Basic
+public import Mathlib.Analysis.SpecificLimits.Normed
+public import Mathlib.NumberTheory.Padics.RingHoms
+public import Mathlib.RingTheory.Filtration
+public import Mathlib.RingTheory.IntegralClosure.Algebra.Basic
+public import Mathlib.RingTheory.IntegralClosure.IntegrallyClosed
+public import Mathlib.Topology.Algebra.OpenSubgroup
+
+@[expose] public section
 
 open Topology Filter
 
@@ -156,7 +217,7 @@ lemma bounded [IsDomain O] [IsDiscreteValuationRing O] [IsModuleTopology ℚ_[l]
     show (l : LL) ^ i * algebraMap O LL ((l : O) ^ (j - i) * p) = (l : LL) ^ j * algebraMap O LL p
     rw [map_mul, map_pow, map_natCast, ← mul_assoc, ← pow_add, Nat.add_sub_cancel' hij]
   obtain ⟨J, hJ⟩ := hK.elim_directed_family_closed (fun j => powImage l LL O j)
-    (fun j => isClosed_powImage ho j) hempty hanti.directed_ge
+    (fun j => isClosed_powImage ho j) (Set.disjoint_iff_inter_eq_empty.mpr hempty) hanti.directed_ge
   refine ⟨J, ?_⟩
   rintro x ⟨p, rfl⟩
   by_cases hx1 : ‖e (algebraMap O LL p)‖ ≤ 1
@@ -201,9 +262,7 @@ lemma bounded [IsDomain O] [IsDiscreteValuationRing O] [IsModuleTopology ℚ_[l]
         nlinarith
     have hyJ : (l : LL) ^ j * algebraMap O LL p ∈ powImage l LL O J :=
       hanti hJj (show _ ∈ powImage l LL O j from ⟨_, ⟨p, rfl⟩, rfl⟩)
-    have hmem : (l : LL) ^ j * algebraMap O LL p ∈ K ∩ powImage l LL O J := ⟨hyK, hyJ⟩
-    rw [hJ] at hmem
-    exact hmem
+    exact Set.disjoint_left.mp hJ hyK hyJ
 
 lemma integral_of_bounded [IsModuleTopology ℚ_[l] LL] [IsTopologicalRing LL]
     (ho : IsOpen (Set.range (algebraMap O LL)))
@@ -227,6 +286,7 @@ lemma integral_of_bounded [IsModuleTopology ℚ_[l] LL] [IsTopologicalRing LL]
     let z : Fin d → ℤ_[l] := fun i => ⟨(l : ℚ_[l]) ^ n * e y i, hcoord i⟩
     have hy' : y = ∑ i, z i • v i := by
       apply e.injective
+
       simp only [hsmul, v, map_sum, map_smul, LinearEquiv.apply_symm_apply]
       ext j
       simp [z, Finset.sum_apply, Pi.single_apply, smul_smul]

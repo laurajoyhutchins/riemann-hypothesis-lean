@@ -1,7 +1,45 @@
-import Formalism.LocalToGlobal.IndefiniteReal.RealSeparation.ExistsLeftInvOfIndep
-import Formalism.LocalToGlobal.GlobalTheory.VolumeCarry.VolumeTheoremTwoOfRationalFrames
-import Formalism.LocalToGlobal.IndefiniteReal.LevelTypeEquivalence.GEqBase
-import Formalism.LocalToGlobal.IndefiniteReal.LevelTypeEquivalence.GrowthMod
+module
+
+public import Formalism.LocalToGlobal.GlobalTheory.VolumeCarry.VolumeTheoremTwoOfRationalFrames
+public import Formalism.LocalToGlobal.BesselHermitianTheta.TiedWeil
+public import Formalism.LocalToGlobal.IndefiniteReal.LevelTypeEquivalence.AtTauExUniqueHolds
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -10,7 +48,7 @@ open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.Glob
 
 namespace Formalism.IndefR.Mi
 
-set_option synthInstance.maxHeartbeats 400000
+
 
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
 
@@ -22,15 +60,6 @@ theorem frameMat_eq_global : frameMat T A ι = Formalism.L2.GlobalTheoryTheory.V
 
 def embP' (A T : HSp D) (ι : A.V →ₗ[D.host.E] T.V) : Matrix (Fin A.rank) (Fin T.rank) D.host.E :=
   A.gram⁻¹ * Formalism.UG.cT (D.sp.cm.sig : D.host.E →+* D.host.E) (frameMat T A ι) * T.gram
-
-theorem embP'_mul (hι : HSpace.IsIsomEmb A T ι) : embP' A T ι * frameMat T A ι = 1 := by
-  have hG := Formalism.L2.GlobalTheoryTheory.VolumeCarry.gram_frameMat D T A ι hι
-  rw [← frameMat_eq_global] at hG
-  unfold embP'
-  rw [show A.gram⁻¹ * Formalism.UG.cT (D.sp.cm.sig : D.host.E →+* D.host.E) (frameMat T A ι) * T.gram * frameMat T A ι =
-      A.gram⁻¹ * (Formalism.UG.cT (D.sp.cm.sig : D.host.E →+* D.host.E) (frameMat T A ι) * T.gram * frameMat T A ι) by
-      simp only [Matrix.mul_assoc], ← hG]
-  exact Matrix.nonsing_inv_mul _ (isUnit_iff_ne_zero.mpr (Formalism.IndefR.Eqv.gram_det_ne' D A))
 
 theorem perp_of_embP' (hι : HSpace.IsIsomEmb A T ι) :
     Formalism.UG.cT (D.sp.cm.sig : D.host.E →+* D.host.E) (frameMat T A ι) * T.gram * (1 - frameMat T A ι * embP' A T ι) = 0 := by
@@ -45,7 +74,7 @@ theorem perp_of_embP' (hι : HSpace.IsIsomEmb A T ι) :
         rw [hu, Matrix.one_mul]
     _ = _ := by rw [hG]; simp only [Matrix.mul_assoc]
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem mt_of_embRel (hι : HSpace.IsIsomEmb A T ι) {g : GA D T} {h : GA D A} (hr : EmbRel T A ι g h) :
     mt T g = (frameMat T A ι).map (incA D) * mt A h * (embP' A T ι).map (incA D) +

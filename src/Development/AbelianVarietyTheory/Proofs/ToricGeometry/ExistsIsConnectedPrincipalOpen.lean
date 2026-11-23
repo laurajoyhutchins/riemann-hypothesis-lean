@@ -1,7 +1,59 @@
-import Mathlib
-import ReciprocityTheory.ThetaQuasiPeriods.ThetaQuasiPeriodStatement
-import ReciprocityTheory.ThetaQuasiPeriods.Transl
-import ReciprocityTheory.ThetaQuasiPeriods.Change
+module
+
+public import Mathlib.Algebra.Polynomial.Derivative
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.RingTheory.FiniteType
+public import Mathlib.RingTheory.KrullDimension.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.MvPolynomial.IrreducibleQuadratic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import Mathlib.Topology.Algebra.MvPolynomial
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RingTheory.Algebraic.Basic
+public import Mathlib.RingTheory.Algebraic.Integral
+import ReciprocityTheory.ThetaQuasiPeriods.PeriodLattice
+
+@[expose] public section
 
 open ReciprocityTheory.PTheta Complex Matrix Filter Topology
 open scoped BigOperators Real
@@ -27,7 +79,7 @@ theorem evalPair_eq {d : ℕ} (z : (Fin d → ℂ) × ℂ) (r : Polynomial (MvPo
 theorem continuous_evalPair {d : ℕ} (r : Polynomial (MvPolynomial (Fin d) ℂ)) :
     Continuous fun z : (Fin d → ℂ) × ℂ => evalPair z r := by
   induction r using Polynomial.induction_on' with
-  | add p q hp hq => simp only [map_add]; exact hp.add hq
+  | add p q hp hq => simp only [map_add (f := _)]; exact hp.add hq
   | monomial n s =>
     simp only [← Polynomial.C_mul_X_pow_eq_monomial, map_mul, map_pow, evalPair_C, evalPair_X]
     exact ((MvPolynomial.continuous_eval s).comp continuous_fst).mul (continuous_snd.pow n)
@@ -56,12 +108,12 @@ theorem points_eq_image_hypersurface {A : Type} [CommRing A] [Algebra ℂ A] {d 
       | C c =>
         have : (MvPolynomial.C c : MvPolynomial (Fin d) ℂ) = algebraMap ℂ _ c := rfl
         rw [MvPolynomial.eval_C, this, AlgHom.commutes, AlgHom.commutes]; rfl
-      | add s t hs ht => simp only [map_add, hs, ht]
+      | add s t hs ht => simp only [map_add (f := _), hs, ht]
       | mul_X s i hs => simp only [map_mul, hs, MvPolynomial.eval_X, z]
     have h2 : ∀ s, φ (E s) = evalPair z s := by
       intro s
       induction s using Polynomial.induction_on' with
-      | add s t hs ht => simp only [map_add, hs, ht]
+      | add s t hs ht => simp only [map_add (f := _), hs, ht]
       | monomial n s =>
         have hX : E Polynomial.X = a := by simp [hE]
         rw [← Polynomial.C_mul_X_pow_eq_monomial, map_mul, map_mul, map_mul, map_pow, map_pow,
@@ -102,8 +154,8 @@ theorem points_eq_image_hypersurface {A : Type} [CommRing A] [Algebra ℂ A] {d 
           exact this
         map_add' := by
           intro b c
-          have := key (r (b + c)) (r b + r c) (by simp only [map_add, hEr]; ring)
-          rw [this, map_add, add_div]
+          have := key (r (b + c)) (r b + r c) (by simp only [map_add (f := _), hEr]; ring)
+          rw [this, map_add (f := _), add_div]
         commutes' := by
           intro c
           have := hj (algebraMap ℂ _ c)
@@ -137,7 +189,7 @@ theorem exists_isConnected_principalOpen :
       obtain ⟨u, v, huv⟩ := Ideal.mem_span_pair.1 hspan
       have h := congrArg (evalPair (x, y)) huv
       rw [Polynomial.derivative_map] at hd
-      simp only [map_add, map_mul, evalPair_C] at h
+      simp only [map_add (f := _), map_mul, evalPair_C] at h
       rw [evalPair_eq _ p, evalPair_eq _ p.derivative, hy, hd, mul_zero, mul_zero, add_zero] at h
       rw [map_mul, ← h, zero_mul] at hx
       exact hx rfl

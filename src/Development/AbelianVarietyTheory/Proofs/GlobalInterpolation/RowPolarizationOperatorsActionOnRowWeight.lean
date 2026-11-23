@@ -1,5 +1,53 @@
-import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.GoodTopBot
-import Development.AbelianVarietyTheory.PublishedTheorems.GlobalTheta.WeylDualWeylLatticesAgreeOfLowestAlcove
+module
+
+public import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.GoodTopBot
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
+
+@[expose] public section
+
 open MvPolynomial Formalism.GradedWeylDivisibility Formalism.BasicNotions GlobalTheory.Alc
 
 namespace GlobalTheory.Alc
@@ -41,6 +89,7 @@ theorem rowE_diag_monomial {R : Type} [CommRing R] {r n : ℕ} (a : Fin r) (μ :
     · simp [h]
     · rw [add_comm, tsub_add_cancel_of_le (Finsupp.single_le_iff.mpr (Nat.one_le_iff_ne_zero.mpr h))]
   simp_rw [hterm]
+
   rw [← map_sum, ← Finset.mul_sum, smul_monomial, smul_eq_mul, mul_comm]
   congr 2
   rw [← hd, weight_rowW_eq_sum]
@@ -71,8 +120,8 @@ theorem rowE_monomial_weight {R : Type} [CommRing R] {r n : ℕ} (a b : Fin r) (
   · refine isWeightedHomogeneous_monomial _ _ _ ?_
     have hle : Finsupp.single (b, s) 1 ≤ d := Finsupp.single_le_iff.mpr (Nat.one_le_iff_ne_zero.mpr h)
     have hsplit : Finsupp.weight (rowW r n) (d - Finsupp.single (b, s) 1) + Pi.single b 1 = μ := by
-      rw [← weight_rowW_single (b, s), ← map_add, tsub_add_cancel_of_le hle, hd]
-    rw [map_add, weight_rowW_single]
+      rw [← weight_rowW_single (b, s), ← map_add (f := _), tsub_add_cancel_of_le hle, hd]
+    rw [map_add (f := _), weight_rowW_single]
     apply add_right_cancel (b := Pi.single b 1)
     rw [hμ, ← hsplit]
     simp only
@@ -88,11 +137,14 @@ theorem rowE_rowWeight : ∀ (R : Type) [CommRing R] (r n : ℕ) (μ : Fin r →
   refine ⟨fun a => ?_, fun a b _ => ⟨fun hb => ?_, fun μ' hμ => ?_⟩⟩
   · conv_lhs => rw [f.as_sum]
     conv_rhs => rw [f.as_sum]
+
     rw [map_sum, Finset.smul_sum]
     exact Finset.sum_congr rfl fun d hd => rowE_diag_monomial a μ d _ (hmon d hd)
-  · rw [f.as_sum, map_sum]
+  · set_option synthInstance.maxHeartbeats 100000 in
+      rw [f.as_sum, map_sum]
     exact Finset.sum_eq_zero fun d hd => rowE_monomial_eq_zero a b μ d _ (hmon d hd) hb
-  · rw [f.as_sum, map_sum]
+  · set_option synthInstance.maxHeartbeats 100000 in
+      rw [f.as_sum, map_sum]
     exact IsWeightedHomogeneous.sum _ _ _ fun d hd => rowE_monomial_weight a b μ μ' d _ (hmon d hd) hμ
 
 end GlobalTheory.Alc

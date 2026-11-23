@@ -1,6 +1,63 @@
-import Formalism.FlagUnipotentLattices.StabiliserComplementDecomposition
-import Formalism.FlagUnipotentLattices.AlgebraicIdentityHigherDegree
-import Formalism.FormalDegreeBessel.FinalG
+module
+
+public import Formalism.FlagUnipotentLattices.StabiliserComplementDecomposition
+public import Formalism.FlagUnipotentLattices.MinkowskiFactorialBounds.IntegrableOnIoiTruncatedPowerMoment
+public import Mathlib.CategoryTheory.Category.Basic
+public import Formalism.FormalDegreeBessel.FormalDegreeRatio.GBasic
+public import Formalism.FormalDegreeBessel.FormalDegreeRatio.GNonneg
+public import Formalism.FormalDegreeBessel.FormalDegreeRatio.GroupFactorizationHolds
+public import Formalism.FormalDegreeBessel.FormalDegreeRatio.ReverseCauchySchwarzHolds
+public import Formalism.FormalDegreeBessel.FormalDegreeRatio.UnitaryWeylNormalHolds
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Finset Matrix
 open scoped ComplexConjugate TensorProduct
@@ -19,6 +76,7 @@ theorem orthogonality_relation : DualVectorOrthogonal := by
   intro V _ _ h r y f' b
   have h1 : h (formalDeterminantVector h y f') (f' b) =
       ((Matrix.of fun a b => h (y a) (f' b)).adjugate * (Matrix.of fun a b => h (y a) (f' b))) (Fin.last r) b := by
+
     simp [formalDeterminantVector, Matrix.mul_apply, map_sum]
   rw [h1, Matrix.adjugate_mul]
   by_cases hb : b = Fin.last r
@@ -157,10 +215,6 @@ theorem majorant_parameter_choice_holds : SkewVectorChoice := by
   refine ⟨e', _, he1, he3, p1, fun b hb => p2 _ ⟨b, hb, rfl⟩, ?_⟩
   rw [p3, hu3]
 
-noncomputable def tensorBasisCoordinates {W V : Type} [AddCommGroup W] [Module ℂ W] [AddCommGroup V] [Module ℂ V] {n : ℕ}
-    (xi : Module.Basis (Fin n) ℂ V) : (W ⊗[ℂ] V) →ₗ[ℂ] (Fin n → W) :=
-  (TensorProduct.piScalarRight ℂ ℂ W (Fin n)).toLinearMap ∘ₗ LinearMap.lTensor W xi.equivFun.toLinearMap
-
 theorem matrix_adjoint_action_holds : RankTwoSkewConjugation := by
   intro n H hH g hg e v
   obtain ⟨hgu, hgi⟩ := (unitary_group_holds n H hH).2.2 g hg
@@ -184,10 +238,12 @@ lemma s1c2_hL_apply {ι : Type*} [Fintype ι] (H : Matrix ι ι ℂ) (x y : ι �
 
 lemma s1c2_herm_sum_left {ι σ : Type*} [Fintype ι] (H : Matrix ι ι ℂ) (s : Finset σ) (c : σ → ℂ) (a : σ → ι → ℂ)
     (y : ι → ℂ) : herm H (∑ i ∈ s, c i • a i) y = ∑ i ∈ s, c i * herm H (a i) y := by
+
   simp only [← s1c2_hL_apply, map_sum, LinearMap.sum_apply, map_smul, LinearMap.smul_apply, smul_eq_mul]
 
 lemma s1c2_herm_sum_right {ι σ : Type*} [Fintype ι] (H : Matrix ι ι ℂ) (s : Finset σ) (c : σ → ℂ) (a : σ → ι → ℂ)
     (x : ι → ℂ) : herm H x (∑ i ∈ s, c i • a i) = ∑ i ∈ s, star (c i) * herm H x (a i) := by
+
   simp only [← s1c2_hL_apply, map_sum, map_smulₛₗ, smul_eq_mul]; rfl
 
 lemma s1c2_herm_sub_left {ι : Type*} [Fintype ι] (H : Matrix ι ι ℂ) (u v w : ι → ℂ) :
@@ -212,9 +268,6 @@ lemma s1c2_UH_of_isom {ι : Type*} [Fintype ι] [DecidableEq ι] (H p : Matrix �
 
 section ext
 variable {ι σ : Type*} [Fintype ι] [DecidableEq ι] [Fintype σ] [DecidableEq σ]
-
-noncomputable def gramCoordinateMap (H : Matrix ι ι ℂ) (v : σ → ι → ℂ) : (ι → ℂ) →ₗ[ℂ] (σ → ℂ) :=
-  ((Matrix.of fun i j => herm H (v j) (v i))⁻¹).mulVecLin ∘ₗ LinearMap.pi fun j => (hermitianSesquilinearForm H).flip (v j)
 
 end ext
 
@@ -403,13 +456,13 @@ theorem omega_decomposition : OrthogonalComplementDecomposition := by
     simp only [Pi.add_apply, Finset.sum_apply, Pi.smul_apply, smul_eq_mul]
     by_cases hi : i.val < r
     · rw [hW i (Or.inl hi), add_zero, Finset.sum_eq_single ⟨i.val, by omega⟩]
-      · rw [fvec_apply_lt z' hz' _ i hi, if_pos rfl, mul_one, dif_pos hi]; rfl
+      · rw [fvec_apply_lt z' hz' _ i hi, if_pos rfl, mul_one, dite_eq_left hi]; rfl
       · intro c _ hc
         rw [fvec_apply_lt z' hz' _ i hi, if_neg (fun h => hc (Fin.ext h)), mul_zero]
       · intro h; exact absurd (Finset.mem_univ _) h
     · push Not at hi
       rw [Finset.sum_eq_single (Fin.last r)]
-      · rw [fvec_apply_ge z' _ i hi, if_pos (by simp), dif_neg (by simp)]
+      · rw [fvec_apply_ge z' _ i hi, if_pos (by simp), dite_eq_right (by simp)]
         by_cases hk : i.val ≤ r + k
         · simp only [N3om]
           rw [if_pos ⟨hi, hk⟩]; ring

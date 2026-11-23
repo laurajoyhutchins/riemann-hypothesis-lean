@@ -1,6 +1,58 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.HilbertNinetyQuotientHomEqIff
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.IntegralFiniteAdeleCompactClosedMultiples
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.HilbertNinetyQuotientHomEqIff
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.IntegralFiniteAdeleCompactClosedMultiples
+import Mathlib.Algebra.Module.Torsion.Prod
+public import Mathlib.Algebra.Module.ZLattice.Summable
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -20,10 +72,10 @@ private lemma natCast_mul_mem_adicCompletionIntegers (N : ℕ) {b : FiniteAdeleR
   rw [← nsmul_eq_mul]
   exact nsmul_mem hb N
 
+
 open NumberField IsDedekindDomain in
 open scoped Classical in
 variable (F : Type) [Field F] [NumberField F] in
-
 theorem _root_.GlobalTheory.WeilM.exists_nat_mul_integral_of_isCompact {κ : Type} [Fintype κ]
     {K : Set (κ → FiniteAdeleRing (𝓞 F) F)}
     (hK : IsCompact K) : ∃ N : ℕ, 0 < N ∧ ∀ x ∈ K, ∀ i v,
@@ -132,10 +184,10 @@ private lemma mem_integers_of_forall_integral_finiteAdele (x : F)
   rw [HeightOneSpectrum.mem_adicCompletionIntegers] at hv
   simpa [HeightOneSpectrum.valuedAdicCompletion_eq_valuation] using hv
 
+
 open NumberField IsDedekindDomain in
 open scoped Classical in
 variable (F : Type) [Field F] [NumberField F] in
-
 theorem _root_.GlobalTheory.WeilM.summable_pureA {κ : Type} [Fintype κ]
     (f : SchwartzMap (κ → mixedEmbedding.mixedSpace F) ℂ)
     {g : (κ → FiniteAdeleRing (𝓞 F) F) → ℂ}
@@ -175,10 +227,10 @@ theorem _root_.GlobalTheory.WeilM.summable_pureA {κ : Type} [Fintype κ]
     rw [Set.indicator_of_mem hmem, mul_comm B]
     exact mul_le_mul_of_nonneg_left (hB _) (norm_nonneg _)
 
+
 open NumberField IsDedekindDomain in
 open scoped Classical in
 variable (F : Type) [Field F] [NumberField F] in
-
 theorem _root_.GlobalTheory.WeilM.summable_of_mem_schA {κ : Type} [Fintype κ]
     {Φ : (κ → AdeleRing (𝓞 F) F) → ℂ} (hΦ : Φ ∈ _root_.GlobalTheory.WeilM.schA F κ) :
     Summable fun ξ : κ → F => Φ (fun i => algebraMap F (AdeleRing (𝓞 F) F) (ξ i)) := by
@@ -191,10 +243,10 @@ theorem _root_.GlobalTheory.WeilM.summable_of_mem_schA {κ : Type} [Fintype κ]
   | add x y _ _ hx hy => simpa only [Pi.add_apply] using hx.add hy
   | smul a x _ hx => simpa only [Pi.smul_apply, smul_eq_mul] using hx.mul_left a
 
+
 open NumberField IsDedekindDomain in
 open scoped Classical in
 variable (F : Type) [Field F] [NumberField F] in
-
 theorem _root_.GlobalTheory.WeilM.summable_norm_of_mem_schA {κ : Type} [Fintype κ]
     {Φ : (κ → AdeleRing (𝓞 F) F) → ℂ} (hΦ : Φ ∈ _root_.GlobalTheory.WeilM.schA F κ) :
     Summable fun ξ : κ → F => ‖Φ (fun i => algebraMap F (AdeleRing (𝓞 F) F) (ξ i))‖ :=
@@ -239,10 +291,10 @@ def thetaLin (κ : Type) [Fintype κ] : schA F κ →ₗ[ℂ] ℂ where
 
 @[simp] theorem thetaLin_apply {κ : Type} [Fintype κ] (Φ : schA F κ) : thetaLin F κ Φ = thetaSum F Φ.1 := rfl
 
+
 open NumberField IsDedekindDomain in
 open scoped Classical in
 variable (F : Type) [Field F] [NumberField F] in
-
 theorem _root_.GlobalTheory.WeilM.thetaSum_summable_linear (κ : Type) [Fintype κ] :
     (∀ Φ ∈ _root_.GlobalTheory.WeilM.schA F κ,
       Summable fun ξ : κ → F => Φ (fun i => algebraMap F (AdeleRing (𝓞 F) F) (ξ i))) ∧

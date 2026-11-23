@@ -1,4 +1,50 @@
-import Development.WeilBound.RepresentationTheoryGL.RegularisedSiegelWeil.SingularNullSets.LThProdA
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FockTranslateSchwartzMajorant
+public import Development.WeilBound.RepresentationTheoryGL.RegularisedSiegelWeil.SingularNullSets.WeakApproximationFinitePlace
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.HeckeCharacterEtaCondition
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ProductMeasureStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ProductThetaOfSchwartzTensor
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SchwartzTensorDensity
+public import Development.WeilBound.RepresentationTheoryGL.RegularisedSiegelWeil.SingularNullSets.LThProdA
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -27,8 +73,11 @@ theorem succ (hW : L.WMaj) {p : ℕ} {ψ : AddChar (AF D.host.F) ℂ} (hψ : IsC
     (hθ : IsInfFam θ) : ∀ (k : ℕ) (b₀ : HermE D (k + 1)), IsDiagInv b₀ → ∀ χ : (AE D)ˣ →* Circle, IsHeckeChar D χ →
     ResEta D χ (k + 1) → ∀ (μ : Measure (Mx D (k + 1) p)) (𝓕 : Set (Mx D (k + 1) p)), IsCovolOne (ratMx D (k + 1) p) μ 𝓕 →
     ∀ η : Fin (k + 1) → Mx D 1 p → ℂ, (∀ i, η i ∈ schwartzA θ 1 p) →
-    ∃ Ω, IsTh ψ χ θ b₀ μ Ω ∧ ∀ y, Ω 1 y = ∏ i, η i (y.submatrix (fun _ => i) id)
-  | 0, b₀, hb, χ, hχ, hr, μ, 𝓕, hμ, η, hη => by
+    ∃ Ω, IsTh ψ χ θ b₀ μ Ω ∧ ∀ y, Ω 1 y = ∏ i, η i (y.submatrix (fun _ => i) id) := by
+  intro k
+  induction k with
+  | zero =>
+    intro b₀ hb χ hχ hr μ 𝓕 hμ η hη
     obtain ⟨Ω, hT, h1⟩ := oneTh hW μ 𝓕 hμ hψ b₀ hb.2 hχ hr hθ (η 0) (hη 0)
     refine ⟨Ω, hT, fun y => ?_⟩
     rw [Fin.prod_univ_one, h1]
@@ -36,11 +85,12 @@ theorem succ (hW : L.WMaj) {p : ℕ} {ψ : AddChar (AF D.host.F) ℂ} (hψ : IsC
     funext a j
     rw [Fin.fin_one_eq_zero a]
     rfl
-  | k + 1, b₀, hb, χ, hχ, hr, μ, 𝓕, hμ, η, hη => by
+  | succ k ih =>
+    intro b₀ hb χ hχ hr μ 𝓕 hμ η hη
     obtain ⟨ε, hε, hεr⟩ := GlobalTheory.CompanionTheory.HeckeEtaExist.heckeEta D 1
     obtain ⟨μr, 𝓕r, hμr⟩ := GlobalTheory.MixModel.exists_isCovolOne D (k + 1) p
     obtain ⟨μs, 𝓕s, hμs⟩ := GlobalTheory.MixModel.exists_isCovolOne D 1 p
-    obtain ⟨Ωr, hTr, hr1⟩ := succ hW hψ hθ k (topH b₀) (topH_diag hb) (χ * ε⁻¹) (hecke_mul_inv hχ hε)
+    obtain ⟨Ωr, hTr, hr1⟩ := ih (topH b₀) (topH_diag hb) (χ * ε⁻¹) (hecke_mul_inv hχ hε)
       (resEta_mul_inv hr (by simpa using hεr)) μr 𝓕r hμr (fun i => η (Fin.castSucc i)) fun i => hη _
     obtain ⟨Ωs, hTs, hs1⟩ := oneTh hW μs 𝓕s hμs hψ (botH b₀) (botH_det hb) hε (by simpa using hεr) hθ
       (η (Fin.last (k + 1))) (hη _)

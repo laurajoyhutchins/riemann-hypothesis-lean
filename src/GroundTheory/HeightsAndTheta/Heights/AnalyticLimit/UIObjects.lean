@@ -1,5 +1,48 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.AnalyticLimit.Objects
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.AnalyticLimit.Objects
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.AnalyticLimit
@@ -134,114 +177,6 @@ section Inhabitant
 
 open ReciprocityTheory.AnForm.M (p1 fsPot projectiveLinePairSection projLine_isSmoothPotential projLine_isPlurisubharmonic projLine_isHolomorphicSection projLine_isSimpleNormalCrossing ptAtlas)
 open OnePoint
-
-theorem analyticOnNhd_fin_zero {E : Type*} [NormedAddCommGroup E] [NormedSpace ℂ E]
-    (f : (Fin 0 → ℂ) → E) (s : Set (Fin 0 → ℂ)) : AnalyticOnNhd ℂ f s := by
-  intro z _
-  have h : f = fun _ => f z := funext fun w => congrArg f (Subsingleton.elim w z)
-  rw [h]
-  exact analyticAt_const
-
-theorem isAnalyticSubset_empty {e : ℕ} {X : Type*} [TopologicalSpace X] (A : FinHolAtlas e X) :
-    A.IsAnalyticSubset ∅ := by
-  intro x
-  refine ⟨Set.univ, isOpen_univ, Set.mem_univ _, 1, fun _ _ => 1,
-    fun _ _ => analyticOnNhd_const, ?_⟩
-  ext y
-  simp
-
-theorem mInt_zero_fun {e : ℕ} {X : Type*} [TopologicalSpace X] (A : FinHolAtlas e X)
-    (Φ : Fin e → LocPot X) : mInt A Φ (fun _ => 0) = 0 := by
-  unfold mInt
-  split_ifs
-  · simp [integralWith]
-  · rfl
-
-theorem mIntegrable_zero_fun {e : ℕ} {X : Type*} [TopologicalSpace X] (A : FinHolAtlas e X)
-    (Φ : Fin e → LocPot X) : MIntegrable A Φ (fun _ => 0) := by
-  intro j K _ _
-  simp only [zero_mul]
-  exact integrableOn_zero
-
-theorem tailLogBound_of_small {e : ℕ} {X : Type*} [TopologicalSpace X] (A : FinHolAtlas e X)
-    (Yo : Set X) (r : X → ℝ) (hr : ∀ x, r x < Real.exp 1) (T : Fin e → LocPot X) :
-    TailLogBound A Yo r T 0 := by
-  intro R₀ hR₀
-  have h : ((tail Yo r R₀).indicator fun x => Real.log (r x)) = fun _ => 0 := by
-    funext x
-    have hx : x ∉ tail Yo r R₀ := fun hx => lt_irrefl _ ((hR₀.trans hx.2).trans_lt (hr x))
-    simp [hx]
-  rw [h, mInt_zero_fun]
-  exact ⟨mIntegrable_zero_fun A T, by simp⟩
-
-theorem one_lt_exp_one : (1 : ℝ) < Real.exp 1 := by
-  have := Real.add_one_lt_exp (x := 1) one_ne_zero
-  linarith
-
-theorem inf_comp (k : Fin 1) : (![{∞}] : Fin 1 → Set (OnePoint ℂ)) k = {∞} := by
-  fin_cases k
-  rfl
-
-abbrev infUnique (k : Fin 1) : Unique ((![{∞}] : Fin 1 → Set (OnePoint ℂ)) k) where
-  default := ⟨∞, by rw [inf_comp]; exact Set.mem_singleton _⟩
-  uniq y := by
-    obtain rfl : k = 0 := Subsingleton.elim _ _
-    exact Subtype.ext y.2
-
-theorem projectiveLine_smoothPotForm :
-    IsSmoothPotForm p1 Set.univ (fun _ => (1 : ℝ)) projectiveLineKaehler 0 fsPot (fun _ => 0) := by
-  refine ⟨⟨projLine_isSmoothPotential, fun _ _ _ _ _ => le_rfl, ?_, fun _ => contDiffOn_const,
-    fun _ _ => le_rfl, fun _ _ => by simp, ?_, Or.inl fun _ => contDiffOn_const⟩,
-    fun _ => contDiffOn_const⟩
-  · intro x k y hy w
-    have := projLine_isPlurisubharmonic x k y ⟨hy.1, hy.2.1.2⟩ w
-    show -1 * levi (fsPot.φ x ∘ (p1.chart k).symm) y w ≤
-      1 * levi (fsPot.φ x ∘ (p1.chart k).symm) y w
-    linarith
-  · intro x k y hy w
-    have h : (potForm fsPot fun _ => (0 : ℝ)).φ x = fsPot.φ x := funext fun z => add_zero _
-    rw [h]
-    exact projLine_isPlurisubharmonic x k y ⟨hy.1, hy.2.2.1⟩ w
-
-def projectiveLineUniformIntegrabilityData : UIData 0 (OnePoint ℂ) where
-  A := p1
-  Om := projectiveLineKaehler
-  L := fsPot
-  s := projectiveLinePairSection
-  nc := 1
-  mult := ![1]
-  comp := ![{∞}]
-  B k := @ptAtlas _ _ (infUnique k)
-  L_pot := projLine_isSmoothPotential
-  s_sec := projLine_isHolomorphicSection
-  s_snc := projLine_isSimpleNormalCrossing
-  B_holo _ := ⟨continuous_subtype_val, fun _ _ => analyticOnNhd_fin_zero _ _⟩
-  Yo := Set.univ
-  Yo_open := isOpen_univ
-  bd_analytic := by rw [Set.compl_univ]; exact isAnalyticSubset_empty p1
-  bd_interior := by simp
-  bdComp_analytic _ := by rw [Set.preimage_univ, Set.compl_univ]; exact isAnalyticSubset_empty _
-  bdComp_interior _ := by simp
-  r _ := 1
-  th _ := fsPot
-  u _ _ _ := 0
-  lim _ _ := 0
-  C := 0
-  C₁ := 0
-  ell₀ := 1
-  CE := 0
-  form _ _ _ _ := projectiveLine_smoothPotForm
-  lim_le _ _ _ _ _ _ := le_rfl
-  near _ t ht _ _ _ _ := by
-    show (0 : ℝ) ≤ 0 + t ^ (1 / 3 : ℝ) + errE 0 t
-    rw [errE_zero]
-    have := Real.rpow_nonneg ht.le (1 / 3 : ℝ)
-    linarith
-  mono _ _ t₀ _ _ _ _ := by
-    show (0 : ℝ) ≤ 0 + 0 * errE 0 t₀
-    simp
-  tail _ _ _ _ _ := tailLogBound_of_small p1 _ _ (fun _ => one_lt_exp_one) _
-  tailComp _ _ _ _ _ _ := tailLogBound_of_small _ _ _ (fun _ => one_lt_exp_one) _
 
 end Inhabitant
 

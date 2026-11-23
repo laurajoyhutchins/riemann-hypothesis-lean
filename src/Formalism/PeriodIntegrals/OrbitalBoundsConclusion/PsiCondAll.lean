@@ -1,7 +1,50 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.TypedLoc
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicClassFiniteness.DictRing
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.EmbeddingTraceSumAlt.NormUnitsOfCalculation
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.TypedLoc
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.EmbeddingTraceSumAlt.NormUnitsOfCalculation
+public import Mathlib.Algebra.AffineMonoid.Basic
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicClassFiniteness.DictRing
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -102,7 +145,7 @@ theorem tT_at (t : I.E ⊗[I.F] Af I.F) (w : HeightOneSpectrum (𝓞 I.F)) :
     rw [PI.ScPsiExists.UnitaryGroupMassFormula.tT_tmul, hp, Formalism.L2.SG.Pf.TypedLoc.trV_tmul, Formalism.UG.P.afsplit_mul_apply,
       FiniteAdeleRing.algebraMap_apply, tlin_eq, Algebra.smul_def]
     rfl
-  | add x y hx hy => rw [map_add, map_add, map_add, Formalism.UG.P.afsplit_add_apply, hx, hy]
+  | add x y hx hy => rw [map_add (f := _), map_add (f := _), map_add (f := _), Formalism.UG.P.afsplit_add_apply, hx, hy]
 
 theorem tT_ew (ew : I.E ⊗[I.F] Af I.F) (v : HeightOneSpectrum (𝓞 I.F))
     (htr : Formalism.L2.SG.Pf.TypedLoc.trV I v (Formalism.UG.prV (E := I.E) v ew) = 1) (o : v.adicCompletion I.F) :
@@ -133,7 +176,7 @@ theorem trace_of_psi (x : I.E) (h : Formalism.L2.SG.HidaSetting.psiEinf I x = 1)
   have h2 : ∀ v : InfinitePlace I.F,
       I.φ v x + star (I.φ v x) = v.embedding (PI.ScPsiExists.UnitaryGroupMassFormula.tau I.cm.fixed x) := by
     intro v
-    rw [← I.φ_over, PI.ScPsiExists.UnitaryGroupMassFormula.tau_apply, map_add, I.cm.cmUnram.2.1 (I.φ v) x]
+    rw [← I.φ_over, PI.ScPsiExists.UnitaryGroupMassFormula.tau_apply, map_add (f := _), I.cm.cmUnram.2.1 (I.φ v) x]
     rfl
   have h3 : ((PI.ScPsiExists.UnitaryGroupMassFormula.sHom I x : ℝ) : ℂ) =
       algebraMap ℚ ℂ (Algebra.trace ℚ I.F (PI.ScPsiExists.UnitaryGroupMassFormula.tau I.cm.fixed x)) := by
@@ -234,8 +277,8 @@ end Inst
 
 end PsiCondAllPf
 
-open NumberField IsDedekindDomain IsDedekindDomain.HeightOneSpectrum in
 
+open NumberField IsDedekindDomain IsDedekindDomain.HeightOneSpectrum in
 theorem psi_conductor_all_places : Formalism.L2.SG.Pf.PsiCondAll := by
   intro D X v hv
   have hv' : ((D.host.g 0 : ℕ) : 𝓞 X.B.I.F) * ((D.host.g 1 : ℕ) : 𝓞 X.B.I.F) ∈ v.asIdeal := by

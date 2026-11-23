@@ -1,7 +1,62 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.StatementsChowFormBirationalAlgClosed
-import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.RenameProdMapMul
-import GroundTheory.HeightsAndTheta.Heights.ChowForms.Assembly
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.StatementsChowFormBirationalAlgClosed
+public import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.RenameProdMapMul
+public import GroundTheory.HeightsAndTheta.Heights.ChowForms.Assembly
+import GroundTheory.HeightsAndTheta.Heights.ChowForms.PChowFormBirational
+import Mathlib.Algebra.AffineMonoid.UniqueSums
+import Mathlib.Algebra.MvPolynomial.NoZeroDivisors
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -57,8 +112,8 @@ theorem IsChowForm.exists_pderiv_ne_zero {F : Type} [Field F] [IsAlgClosed F] {p
     by_cases h0 : s v = 0
     · simp [h0]
     have hle : Finsupp.single v 1 ≤ s := Finsupp.single_le_iff.2 (by omega)
-    have h1 := congrArg (coeff (s - Finsupp.single v 1)) (hall v)
-    rw [coeff_pderiv, coeff_zero, tsub_add_cancel_of_le hle] at h1
+    have h1 := congrArg (AddMonoidAlgebra.coeff · (s - Finsupp.single v 1)) (hall v)
+    rw [coeff_pderiv, AddMonoidAlgebra.coeff_zero, tsub_add_cancel_of_le hle] at h1
     have h2 := (mul_eq_zero.1 h1).resolve_left (mem_support_iff.1 hs)
     rw [Finsupp.tsub_apply, Finsupp.single_eq_same] at h2
     have h3 : ((s v : ℕ) : F) = 0 := by
@@ -70,7 +125,7 @@ theorem IsChowForm.exists_pderiv_ne_zero {F : Type} [Field F] [IsAlgClosed F] {p
   obtain ⟨h, hgh⟩ : ∃ h : MvPolynomial (Fin (k + 1) × Fin n) F, h ^ p = g := by
     have hroot : ∀ a : F, ∃ b : F, b ^ p = a := fun a => IsAlgClosed.exists_pow_nat_eq a hp.out.pos
     choose r hr using hroot
-    refine ⟨∑ s ∈ g.support, monomial (Finsupp.mapRange (· / p) (Nat.zero_div p) s) (r (coeff s g)), ?_⟩
+    refine ⟨∑ s ∈ g.support, monomial (Finsupp.mapRange (· / p) (Nat.zero_div p) s) (r (AddMonoidAlgebra.coeff g s)), ?_⟩
     rw [sum_pow_char]
     conv_rhs => rw [as_sum g]
     refine Finset.sum_congr rfl fun s hs => ?_
@@ -141,10 +196,11 @@ theorem ChowFormBirationalAlgClosed.proof : ChowFormBirationalAlgClosed.Statemen
       · simp
     rw [hsum, hmem]
     exact not_dvd_pderiv_of_pderiv_ne_zero hg.1 hl
-  · simp only [map_sum, map_mul, aeval_C, MvPolynomial.algebraMap_apply, hρ]
-    simp only [Finset.sum_mul, Finset.mul_sum]
-    refine Finset.sum_congr rfl fun l' _ => ?_
-    ring
+  set_option synthInstance.maxHeartbeats 100000 in
+    · simp only [map_sum, map_mul, aeval_C, MvPolynomial.algebraMap_apply, hρ]
+      simp only [Finset.sum_mul, Finset.mul_sum]
+      refine Finset.sum_congr rfl fun l' _ => ?_
+      ring
 
 end
 

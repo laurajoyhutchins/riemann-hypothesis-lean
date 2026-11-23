@@ -1,7 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.IsWeilDatumConjNegHermitianSpaces
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.ConjWeilDatumViaAdjointExchangedPair
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.IntegrandSZero
+module
+
+public import Development.AbelianVarietyTheory.Definitions.LatticeFrames.IntegrandSZero
+public import Development.AbelianVarietyTheory.Definitions.Foundations.EisValueAtIffEisPoleLE
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.ConjWeilDatumViaAdjointExchangedPair
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.IsWeilDatumConjNegHermitianSpaces
+import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.ThetaHeisenbergConjugationNegHermitianSpace
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LintegralNormSqEqToL2
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+public import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.ConjugateAdjointDagger
+
+@[expose] public section
+
 open scoped ComplexConjugate Matrix NNReal
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.L2.Theta Formalism.L2.Pj Formalism.IndefR.Datum MeasureTheory IsDedekindDomain NumberField
 open GlobalTheory.AutomorphicL2Unitary GlobalTheory.Cusp GlobalTheory.AdelicU GlobalTheory.Doubling GlobalTheory.Cont
@@ -75,7 +120,7 @@ noncomputable def reflEnd (X : Type) [AddGroup X] : Module.End ℂ (X → ℂ) �
     { toFun := fun f x => L (fun y => f (-y)) (-x)
       map_add' := fun f f' => by
         have : (fun y => (f + f') (-y)) = (fun y => f (-y)) + fun y => f' (-y) := rfl
-        rw [this, map_add]; rfl
+        rw [this, map_add (f := _)]; rfl
       map_smul' := fun c f => by
         have : (fun y => (c • f) (-y)) = c • fun y => f (-y) := rfl
         rw [this, map_smul]; rfl }
@@ -133,7 +178,7 @@ theorem weil_refl {ψ : AddChar (AF D.host.F) ℂ} {S T : HSp D} {χS χT : (AE 
     refine ⟨r, hr, fun ℓ hℓ f hf => ?_⟩
     let ℓ' : (WO S T → ℂ) →ₗ[ℂ] ℂ :=
       { toFun := fun F => ℓ fun z => F (-z)
-        map_add' := fun a b => by rw [← map_add]; rfl
+        map_add' := fun a b => by rw [← map_add (f := _)]; rfl
         map_smul' := fun c a => by rw [← map_smul]; rfl }
     have h1 : ℓ (fun z => om (g, h) (fun y => f (-y)) (-z)) =
         (r : ℂ) * (splitFacO χS χT x y : ℂ) * ℓ (fun z => f (- -z)) :=
@@ -165,7 +210,7 @@ theorem detA_val (V : HSp D) (g : GA D V) : ((detA V g : (AE D)ˣ) : AE D) = (Fo
 
 theorem conj_detAt {e : AE D} {V : HSp D} {g : GA D V} {x : (AE D)ˣ} (hx : IsDetAt e V g x) :
     cA D (x : AE D) = cA D e * cA D (Formalism.L2.Theta.mt V g).det + (1 - cA D e) := by
-  rw [hx, map_add, map_mul, map_sub, map_one]
+  rw [hx, map_add (f := _), map_mul, map_sub, map_one]
 
 theorem conj_idem {e : AE D} (he : IsSplitIdem D e) : cA D e * cA D e = cA D e := by rw [← map_mul, he.1]
 

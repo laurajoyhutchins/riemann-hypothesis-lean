@@ -1,4 +1,46 @@
-import Formalism.LocalToGlobal.NumberFieldFamilies.IsLocalizedOfSpan
+module
+
+public import Formalism.LocalToGlobal.NumberFieldFamilies.NPartCNd
+public import Formalism.LocalToGlobal.NumberFieldFamilies.IsLocalizedOfSpan
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -8,19 +50,12 @@ namespace Formalism.L2.Fam.NPC.LatticeFinitenessFree
 
 open Formalism.L2.Fam.NPC
 
-set_option synthInstance.maxHeartbeats 400000
+
 
 variable {R : Ranks} {H : Host R} {what₂ : Rows.Data R} (B : LocBase0 H what₂)
 
 def latJ (j : ℕ) (w : what₂.places.Pl) : Set (what₂.MtL (what₂.muTw w) j) :=
   {x | what₂.jMt (what₂.muTw w) j x ∈ (what₂.MtLat (what₂.muTw w) j).gen}
-
-def HeckeCommL : Prop := ∀ j w, 1 ≤ j → j ≤ R.m → ∀ v k v' k', GenAt0 H (what₂.places.resChar w) (B.Qw w) v k →
-  GenAt0 H (what₂.places.resChar w) (B.Qw w) v' k' → Commute (B.hL j w v k) (B.hL j w v' k')
-
-def HeckeInt : Prop := ∀ j w, 1 ≤ j → j ≤ R.m → ∀ v k, GenAt0 H (what₂.places.resChar w) (B.Qw w) v k → ∀ x ∈ latJ j w,
-  ∃ (F : Finset (what₂.MtL (what₂.muTw w) j)) (c : what₂.MtL (what₂.muTw w) j → what₂.LL), (↑F ⊆ latJ j w) ∧
-    (∀ y ∈ F, 0 ≤ what₂.places.val w (c y)) ∧ B.hL j w v k x = ∑ y ∈ F, c y • y
 
 variable {B}
 
@@ -35,7 +70,5 @@ theorem span_latJ (j : ℕ) (w : what₂.places.Pl) : Submodule.span what₂.LL 
 theorem span_iV (j : ℕ) (w : what₂.places.Pl) :
     Submodule.span (FractionRing (B.Oc j w)) (B.iV j w '' latJ j w) = ⊤ :=
   span_image_top (B.ec j w) (B.iV j w) (Module.Free.chooseBasis what₂.LL _) (B.iV_basis j w _).2 _ (span_latJ j w)
-
-def latN (j : ℕ) (w : what₂.places.Pl) : Submodule (B.Oc j w) (B.V j w) := Submodule.span (B.Oc j w) (B.iV j w '' latJ j w)
 
 end Formalism.L2.Fam.NPC.LatticeFinitenessFree

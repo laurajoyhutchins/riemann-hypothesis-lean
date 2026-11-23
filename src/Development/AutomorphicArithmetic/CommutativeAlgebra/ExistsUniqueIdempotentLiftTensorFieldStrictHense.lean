@@ -1,5 +1,57 @@
-import Development.AbelianVarietyTheory.Definitions.Divisors.DivisorSupportCondition
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.FiniteMaximalSpectrumOfFiniteOfIsLocalRing
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.GalMapMul
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.FiniteMaximalSpectrumOfFiniteOfIsLocalRing
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 open CategoryTheory Limits AlgebraicGeometry Opposite GlobalTheory.EtC
 open scoped TensorProduct
@@ -8,7 +60,7 @@ private lemma algebraMap_eq_zero_of_mem (O K : Type) [CommRing O] [IsLocalRing O
     [Algebra O K] [Algebra.IsIntegral O K] {a : O} (ha : a ∈ IsLocalRing.maximalIdeal O) :
     algebraMap O K a = 0 := by
   have hm : Ideal.comap (algebraMap O K) ⊥ = IsLocalRing.maximalIdeal O :=
-    IsLocalRing.eq_maximalIdeal (Ideal.isMaximal_comap_of_isIntegral_of_isMaximal ⊥)
+    IsLocalRing.eq_maximalIdeal (Ideal.isMaximal_under_of_isIntegral_of_isMaximal (R := O) (⊥ : Ideal K))
   have h : a ∈ Ideal.comap (algebraMap O K) ⊥ := hm ▸ ha
   simpa using h
 
@@ -31,7 +83,11 @@ private theorem mem_maximal_of_includeLeft_eq_zero (O R K : Type) [CommRing O] [
   haveI : Algebra.IsIntegral (IsLocalRing.ResidueField O) K :=
     Algebra.IsIntegral.tower_top O
   haveI : Algebra.IsAlgebraic (IsLocalRing.ResidueField O) K := inferInstance
-  let g : K →ₐ[IsLocalRing.ResidueField O] AlgebraicClosure (R ⧸ M) := IsAlgClosed.lift
+  let g : K →ₐ[IsLocalRing.ResidueField O] AlgebraicClosure (R ⧸ M) := (by
+    refine @_root_.IsAlgClosed.lift _ _ _ _ _ _ _ _ _ _ _ ?_ ?_ ?_
+    solve_by_elim* (maxDepth := 2) only [*,
+      @_root_.DivisionSemiring.to_moduleIsTorsionFree,
+      @_root_.Algebra.IsIntegral.isAlgebraic, @_root_.inferInstance])
   let fR : R →+* AlgebraicClosure (R ⧸ M) :=
     (algebraMap (R ⧸ M) (AlgebraicClosure (R ⧸ M))).comp (Ideal.Quotient.mk M)
   have hc : ∀ o : O, g (algebraMap O K o) = fR (algebraMap O R o) := by
@@ -84,7 +140,7 @@ private theorem exists_includeLeft_eq_pow_expChar_pow (O R K : Type) [CommRing O
     obtain ⟨n1, r1, h1⟩ := ha
     obtain ⟨n2, r2, h2⟩ := hb
     refine ⟨n1 + n2, r1 ^ q ^ n2 + r2 ^ q ^ n1, ?_⟩
-    rw [map_add, map_pow, map_pow, h1, h2, ← pow_mul, ← pow_mul, ← pow_add, ← pow_add,
+    rw [map_add (f := _), map_pow, map_pow, h1, h2, ← pow_mul, ← pow_mul, ← pow_add, ← pow_add,
       add_comm n2 n1, add_pow_expChar_pow]
 
 theorem UpperTheory.existsUnique_idempotent_lift_tensor_field_strictHenselian :
@@ -134,7 +190,7 @@ theorem UpperTheory.existsUnique_idempotent_lift_tensor_field_strictHenselian :
     have hz2 : z * z = z := hz
     have he2 : e' * e' = e' := he'
     have hf0 : (Algebra.TensorProduct.includeLeftRingHom : R →+* R ⊗[O] K) (y + z - 2 * y * z) = 0 := by
-      rw [map_sub, map_add, map_mul, map_mul, hyc, hzc, map_ofNat]
+      rw [map_sub, map_add (f := _), map_mul, map_mul, hyc, hzc, map_ofNat]
       linear_combination (-2 : R ⊗[O] K) * he2
     have hfj : ∀ Q : Ideal R, Q.IsMaximal → y + z - 2 * y * z ∈ Q := hjac _ hf0
     have hmem : y + z - 2 * y * z ∈ Ideal.jacobson (⊥ : Ideal R) :=

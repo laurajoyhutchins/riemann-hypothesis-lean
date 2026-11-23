@@ -1,10 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.ModuliSpaces.IsInvDer
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsDualFamilyModSubspace
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ThetaUnifAV
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.UniformisationConclusion
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsHolPeriods
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.UnifUniqSt
+module
+
+public import Development.AbelianVarietyTheory.Definitions.ModuliSpaces.IsInvDer
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsDualFamilyModSubspace
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor
@@ -39,9 +82,9 @@ theorem pushout_functional {K : Type} [Field K] {A B C : CommRingCat.{0}} (f : C
     exact this
   refine ⟨fun α β hα hβ => ?_, fun G hG w => ?_⟩
   · let α' : A →ₗ[K] K :=
-      { toFun := α, map_add' := α.map_add, map_smul' := fun c a => by rw [Algebra.smul_def]; exact hα c a }
+      { toFun := α, map_add' := map_add α, map_smul' := fun c a => by rw [Algebra.smul_def]; exact hα c a }
     let β' : B →ₗ[K] K :=
-      { toFun := β, map_add' := β.map_add, map_smul' := fun c b => by rw [Algebra.smul_def]; exact hβ c b }
+      { toFun := β, map_add' := map_add β, map_smul' := fun c b => by rw [Algebra.smul_def]; exact hβ c b }
     refine ⟨((LinearMap.mul' K K).comp (TensorProduct.map α' β')).toAddMonoidHom.comp φ.hom.toAddMonoidHom,
       fun a b => ?_⟩
     show LinearMap.mul' K K (TensorProduct.map α' β' (φ.hom (i.hom a * j.hom b))) = α a * β b
@@ -73,17 +116,17 @@ theorem pushout_functional {K : Type} [Field K] {A B C : CommRingCat.{0}} (f : C
     | tmul a b =>
       rw [Algebra.TensorProduct.productMap_apply_tmul]
       exact hG a b
-    | add x y hx hy => rw [map_add, map_add, hx, hy, add_zero]
+    | add x y hx hy => rw [map_add (f := _), map_add (f := _), hx, hy, add_zero]
 
 theorem pbT_of_le {Z Y : Scheme.{0}} (f : Z ⟶ Y) {O₀ : Y.Opens} (s : Γ(Y, O₀)) {O : Z.Opens}
     (h : O ≤ f ⁻¹ᵁ O₀) : pbT f s O = (f.appLE O₀ O h).hom s := by
   unfold pbT
-  rw [dif_pos h]
+  rw [dite_eq_left h]
 
 theorem rsT_of_le {Y : Scheme.{0}} {O₀ : Y.Opens} (s : Γ(Y, O₀)) {O : Y.Opens}
     (h : O ≤ O₀) : rsT s O = resG Y h s := by
   unfold rsT
-  rw [dif_pos h]
+  rw [dite_eq_left h]
 
 theorem res_pbT {Z Y : Scheme.{0}} (f : Z ⟶ Y) {O₀ O₁ : Y.Opens} (s : Γ(Y, O₀)) {O O' : Z.Opens}
     (h : O ≤ f ⁻¹ᵁ O₀) (h' : O' ≤ O) (h₁ : O₁ ≤ O₀) (h₂ : O' ≤ f ⁻¹ᵁ O₁) :
@@ -150,6 +193,7 @@ theorem functional_eq_sum {K : Type} [Field K] {Y : Scheme.{0}} {I : Type} [Fint
     conv_lhs => rw [← Finset.univ_sum_single (c i)]
     exact map_sum (AddMonoidHom.single _ i) _ _
   conv_lhs => rw [hc]
+
   simp only [map_sum]
 
 theorem functional_cob {K : Type} [Field K] {Y : Scheme.{0}} {I : Type} [Fintype I] [DecidableEq I]
@@ -328,6 +372,7 @@ theorem pair_symm {K : Type} [Field K] {Y Z : Scheme.{0}} {q : Y ⟶ Sp K} {p₁
       α (Pi.single i (Pi.single i' (φ a i i'))) * β (Pi.single j (Pi.single j' (θ a j j')))) =
       F i i' j j' (rsT (u i i' j') _ - rsT (u i i' j) _ + (rsT (u' i' j j') _ - rsT (u' i j j') _)) := by
     intro i i' j j'
+
     rw [← hu, map_sum]
     refine Finset.sum_congr rfl fun a _ => ?_
     rw [map_sub, hF, hF]
@@ -366,7 +411,7 @@ theorem pair_symm {K : Type} [Field K] {Y Z : Scheme.{0}} {q : Y ⟶ Sp K} {p₁
       (F i i' j j' (rsT (u i i' j') _) - F i i' j j' (rsT (u i i' j) _)) +
         (F i i' j j' (rsT (u' i' j j') _) - F i i' j j' (rsT (u' i j j') _)) := by
     intro i i' j j'
-    rw [map_add, map_sub, map_sub]
+    rw [map_add (f := _), map_sub, map_sub]
   rw [← sub_eq_zero, ← Finset.sum_sub_distrib]
   have e1 : ∀ a, α (θ a) * β (φ a) - α (φ a) * β (θ a) = ∑ i, ∑ i', ∑ j, ∑ j',
       (α (Pi.single i (Pi.single i' (θ a i i'))) * β (Pi.single j (Pi.single j' (φ a j j'))) -

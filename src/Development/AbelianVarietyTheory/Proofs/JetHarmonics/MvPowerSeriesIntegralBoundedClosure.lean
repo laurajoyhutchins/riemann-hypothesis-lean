@@ -1,5 +1,50 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Jets.PowerSeriesHasSumAt
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Jets.PowerSeriesHasSumAt
+public import Mathlib.Topology.MetricSpace.Ultra.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Analysis.Normed.Group.Ultra
+
+@[expose] public section
 
 noncomputable section
 
@@ -17,14 +62,8 @@ theorem Le.nonneg {c : ℝ} {S : MvPowerSeries σ K} (h : Le c S) : 0 ≤ c :=
 
 theorem Le.add {c d : ℝ} {S T : MvPowerSeries σ K} (h : Le c S) (h' : Le d T) :
     Le (max c d) (S + T) := fun ν => by
-  rw [map_add]
+  rw [map_add (f := _)]
   exact (IsUltrametricDist.norm_add_le_max _ _).trans (max_le_max (h ν) (h' ν))
-
-theorem Le.sub {c d : ℝ} {S T : MvPowerSeries σ K} (h : Le c S) (h' : Le d T) :
-    Le (max c d) (S - T) := fun ν => by
-  rw [map_sub, sub_eq_add_neg]
-  refine (IsUltrametricDist.norm_add_le_max _ _).trans (max_le_max (h ν) ?_)
-  rw [norm_neg]; exact h' ν
 
 theorem Le.mul {c d : ℝ} {S T : MvPowerSeries σ K} (h : Le c S) (h' : Le d T) :
     Le (c * d) (S * T) := fun ν => by
@@ -41,35 +80,10 @@ theorem le_C (a : K) : Le ‖a‖ (MvPowerSeries.C a : MvPowerSeries σ K) := fu
   rw [MvPowerSeries.coeff_C]
   split_ifs <;> simp
 
-theorem intg_add {S T : MvPowerSeries σ K} (h : Intg S) (h' : Intg T) : Intg (S + T) := by
-  have := Le.add (c := 1) (d := 1) h h'
-  rwa [max_self] at this
-
-theorem intg_sub {S T : MvPowerSeries σ K} (h : Intg S) (h' : Intg T) : Intg (S - T) := by
-  have := Le.sub (c := 1) (d := 1) h h'
-  rwa [max_self] at this
-
 theorem intg_mul {S T : MvPowerSeries σ K} (h : Intg S) (h' : Intg T) : Intg (S * T) := by
   have := Le.mul (c := 1) (d := 1) h h'
   rwa [one_mul] at this
 
-theorem bdd_add {S T : MvPowerSeries σ K} (h : Bdd S) (h' : Bdd T) : Bdd (S + T) := by
-  obtain ⟨c, h⟩ := h
-  obtain ⟨d, h'⟩ := h'
-  exact ⟨_, Le.add h h'⟩
-
-theorem bdd_sub {S T : MvPowerSeries σ K} (h : Bdd S) (h' : Bdd T) : Bdd (S - T) := by
-  obtain ⟨c, h⟩ := h
-  obtain ⟨d, h'⟩ := h'
-  exact ⟨_, Le.sub h h'⟩
-
-theorem bdd_mul {S T : MvPowerSeries σ K} (h : Bdd S) (h' : Bdd T) : Bdd (S * T) := by
-  obtain ⟨c, h⟩ := h
-  obtain ⟨d, h'⟩ := h'
-  exact ⟨_, Le.mul h h'⟩
-
-omit [IsUltrametricDist K] in
-theorem bdd_C (a : K) : Bdd (MvPowerSeries.C a : MvPowerSeries σ K) := ⟨_, le_C a⟩
 
 omit [IsUltrametricDist K] in
 theorem intg_C {a : K} (ha : ‖a‖ ≤ 1) : Intg (MvPowerSeries.C a : MvPowerSeries σ K) :=
@@ -90,19 +104,10 @@ theorem intg_prod {ι : Type} (t : Finset ι) (f : ι → MvPowerSeries σ K)
     (h : ∀ i ∈ t, Intg (f i)) : Intg (∏ i ∈ t, f i) :=
   Finset.prod_induction f Intg (fun _ _ => intg_mul) intg_one h
 
-theorem bdd_prod {ι : Type} (t : Finset ι) (f : ι → MvPowerSeries σ K)
-    (h : ∀ i ∈ t, Bdd (f i)) : Bdd (∏ i ∈ t, f i) :=
-  Finset.prod_induction f Bdd (fun _ _ => bdd_mul) (bdd_of_intg intg_one) h
-
 theorem intg_pow {S : MvPowerSeries σ K} (h : Intg S) (n : ℕ) : Intg (S ^ n) := by
   induction n with
   | zero => rw [pow_zero]; exact intg_one
   | succ n ih => rw [pow_succ]; exact intg_mul ih h
-
-theorem bdd_pow {S : MvPowerSeries σ K} (h : Bdd S) (n : ℕ) : Bdd (S ^ n) := by
-  induction n with
-  | zero => rw [pow_zero]; exact bdd_of_intg intg_one
-  | succ n ih => rw [pow_succ]; exact bdd_mul ih h
 
 omit [IsUltrametricDist K] in
 theorem small_X (i : σ) : Small (MvPowerSeries.X i : MvPowerSeries σ K) := by
@@ -128,14 +133,6 @@ theorem Le.subst {ρ : Type} [Fintype ρ] {a : ρ → MvPowerSeries σ K} {S : M
   have h1 : Intg (d.prod fun s e => a s ^ e) :=
     intg_prod _ _ fun i _ => intg_pow (ha i) _
   exact (mul_le_mul (hS d) (h1 ν) (norm_nonneg _) hS.nonneg).trans (mul_one c).le
-
-theorem bdd_eval₂ {k ι : Type} [CommRing k] (φ : k →+* K) (a : ι → MvPowerSeries σ K)
-    (A : MvPolynomial ι k) (ha : ∀ j, Bdd (a j)) :
-    Bdd (MvPolynomial.eval₂ ((MvPowerSeries.C : K →+* MvPowerSeries σ K).comp φ) a A) := by
-  induction A using MvPolynomial.induction_on with
-  | C r => rw [MvPolynomial.eval₂_C]; exact bdd_C _
-  | add p q hp hq => rw [MvPolynomial.eval₂_add]; exact bdd_add hp hq
-  | mul_X p n hp => rw [MvPolynomial.eval₂_mul, MvPolynomial.eval₂_X]; exact bdd_mul hp (ha n)
 
 variable {K : Type} [NormedField K] [IsUltrametricDist K] {σ : Type} in
 omit [IsUltrametricDist K] in
@@ -215,7 +212,7 @@ variable {K : Type} [NormedField K] [IsUltrametricDist K] {σ : Type} in
 private lemma le_add' {c : ℝ} {S T : MvPowerSeries σ K}
     (hS : _root_.GlobalTheory.BddAlg.Le c S) (hT : _root_.GlobalTheory.BddAlg.Le c T) :
     _root_.GlobalTheory.BddAlg.Le c (S + T) := fun ν => by
-  rw [map_add]
+  rw [map_add (f := _)]
   exact (IsUltrametricDist.norm_add_le_max _ _).trans (max_le (hS ν) (hT ν))
 
 variable {K : Type} [NormedField K] [IsUltrametricDist K] {σ : Type} in
@@ -287,6 +284,7 @@ variable {K : Type} [NormedField K] [IsUltrametricDist K] {σ : Type} in
 private lemma le_finset_sum {ι : Type*} {c : ℝ} (hc : 0 ≤ c) (t : Finset ι)
     (f : ι → MvPowerSeries σ K) (h : ∀ i ∈ t, _root_.GlobalTheory.BddAlg.Le c (f i)) :
     _root_.GlobalTheory.BddAlg.Le c (∑ i ∈ t, f i) := fun ν => by
+
   rw [map_sum]
   exact IsUltrametricDist.norm_sum_le_of_forall_le_of_nonneg hc fun i hi => h i hi ν
 
@@ -296,8 +294,8 @@ private lemma le_zero_series {c : ℝ} (hc : 0 ≤ c) :
     _root_.GlobalTheory.BddAlg.Le c (0 : MvPowerSeries σ K) :=
   fun ν => by simp [hc]
 
-variable {K : Type} [NormedField K] [IsUltrametricDist K] {σ : Type} in
 
+variable {K : Type} [NormedField K] [IsUltrametricDist K] {σ : Type} in
 theorem _root_.GlobalTheory.BddAlg.bdd_alg : ∀ (K : Type) [NormedField K] [IsUltrametricDist K] (σ : Type), (∀ S T : MvPowerSeries σ K, _root_.GlobalTheory.ConvSer.Intg S → _root_.GlobalTheory.ConvSer.Intg T → _root_.GlobalTheory.ConvSer.Intg (S + T) ∧ _root_.GlobalTheory.ConvSer.Intg (S - T) ∧ _root_.GlobalTheory.ConvSer.Intg (S * T)) ∧ (∀ S T : MvPowerSeries σ K, _root_.GlobalTheory.ConvSer.Bdd S → _root_.GlobalTheory.ConvSer.Bdd T → _root_.GlobalTheory.ConvSer.Bdd (S + T) ∧ _root_.GlobalTheory.ConvSer.Bdd (S - T) ∧ _root_.GlobalTheory.ConvSer.Bdd (S * T)) ∧ (∀ (S : MvPowerSeries σ K) (n : ℕ), (_root_.GlobalTheory.ConvSer.Intg S → _root_.GlobalTheory.ConvSer.Intg (S ^ n)) ∧ (_root_.GlobalTheory.ConvSer.Bdd S → _root_.GlobalTheory.ConvSer.Bdd (S ^ n)) ∧ (_root_.GlobalTheory.ConvSer.Intg S → _root_.GlobalTheory.ConvSer.Bdd S)) ∧ (∀ a : K, _root_.GlobalTheory.ConvSer.Bdd (MvPowerSeries.C a : MvPowerSeries σ K) ∧ (‖a‖ ≤ 1 → _root_.GlobalTheory.ConvSer.Intg (MvPowerSeries.C a : MvPowerSeries σ K)) ∧ (‖a‖ < 1 → _root_.GlobalTheory.ConvSer.Small (MvPowerSeries.C a : MvPowerSeries σ K))) ∧ (∀ i : σ, _root_.GlobalTheory.ConvSer.Small (MvPowerSeries.X i : MvPowerSeries σ K)) ∧ (∀ (ι : Type) (t : Finset ι) (f : ι → MvPowerSeries σ K), ((∀ i ∈ t, _root_.GlobalTheory.ConvSer.Intg (f i)) → _root_.GlobalTheory.ConvSer.Intg (∏ i ∈ t, f i) ∧ _root_.GlobalTheory.ConvSer.Intg (∑ i ∈ t, f i)) ∧ ((∀ i ∈ t, _root_.GlobalTheory.ConvSer.Bdd (f i)) → _root_.GlobalTheory.ConvSer.Bdd (∏ i ∈ t, f i) ∧ _root_.GlobalTheory.ConvSer.Bdd (∑ i ∈ t, f i))) ∧ (∀ (ρ : Type) [Fintype ρ] (a : ρ → MvPowerSeries σ K) (S : MvPowerSeries ρ K), (∀ j, _root_.GlobalTheory.ConvSer.Intg (a j)) → (∀ j, MvPowerSeries.constantCoeff (a j) = 0) → (_root_.GlobalTheory.ConvSer.Intg S → _root_.GlobalTheory.ConvSer.Intg (MvPowerSeries.subst a S)) ∧ (_root_.GlobalTheory.ConvSer.Bdd S → _root_.GlobalTheory.ConvSer.Bdd (MvPowerSeries.subst a S))) ∧ (∀ (a : MvPowerSeries σ K) (f : PowerSeries K), _root_.GlobalTheory.ConvSer.Intg a → MvPowerSeries.constantCoeff a = 0 → (_root_.GlobalTheory.ConvSer.Intg f → _root_.GlobalTheory.ConvSer.Intg (f.subst a)) ∧ (_root_.GlobalTheory.ConvSer.Bdd f → _root_.GlobalTheory.ConvSer.Bdd (f.subst a))) ∧ (∀ (k ι : Type) [CommRing k] (φ : k →+* K) (a : ι → MvPowerSeries σ K) (A : MvPolynomial ι k), (∀ j, _root_.GlobalTheory.ConvSer.Bdd (a j)) → _root_.GlobalTheory.ConvSer.Bdd (MvPolynomial.eval₂ ((MvPowerSeries.C : K →+* MvPowerSeries σ K).comp φ) a A)) ∧ (∀ f : PowerSeries K, (_root_.GlobalTheory.ConvSer.Intg f ↔ ∀ n, ‖PowerSeries.coeff n f‖ ≤ 1) ∧ (_root_.GlobalTheory.ConvSer.Bdd f ↔ ∃ C : ℝ, ∀ n, ‖PowerSeries.coeff n f‖ ≤ C)) := by
   intro K _ _ σ
   have hsubst : ∀ (ρ : Type) [Fintype ρ] (a : ρ → MvPowerSeries σ K) (S : MvPowerSeries ρ K),

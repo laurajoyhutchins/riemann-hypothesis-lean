@@ -1,6 +1,58 @@
-import Development.AutomorphicArithmetic.Foundations.Convolution.BlockHeckeSlices.SliceShift
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ContinuousOfIsOpenStab
+module
+
+public import Development.AutomorphicArithmetic.Foundations.Convolution.BlockHeckeSlices.SliceShift
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ContinuousOfIsOpenStab
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.SiegelHeights.InfEmbGrpEq
+import GroundTheory.AutomorphicForms.CuspidalDiscreteness.CuspFormsHeight
 import GroundTheory.AutomorphicForms.CuspidalDiscreteness.CuspFormsSiegel
+import GroundTheory.AutomorphicForms.CuspidalDiscreteness.DecayUniform
+import GroundTheory.AutomorphicForms.CuspidalDiscreteness.SiegelCount
+import GroundTheory.AutomorphicForms.CuspidalDiscreteness.SiegelFinite
+import GroundTheory.GlobalFields.Adele.Topology
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.Countable
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Dynamics.Ergodic.Action.Regular
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -181,7 +233,7 @@ private theorem root_le {φ : AdelicGLn.AdelicGL K n → ℂ} (hφ : Good φ)
   refine (hC x Y hYY hYT).trans ?_
   have hprod : ∏ i, ‖Y i‖ ≤ (C₁' * gain) ^ k := by
     rw [← Fin.prod_const]
-    exact Finset.prod_le_prod (fun i _ => norm_nonneg _) fun i _ => hYn i
+    exact Finset.prod_le_prod₀ (fun i _ => norm_nonneg _) fun i _ => hYn i
   have hh := pow_nonneg (height_pos x).le N
   calc C * (∏ i, ‖Y i‖) * height x ^ N ≤ max C 0 * (∏ i, ‖Y i‖) * height x ^ N :=
         mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_right (le_max_left _ _)
@@ -197,7 +249,7 @@ private theorem siegel_le {φ : AdelicGLn.AdelicGL K n → ℂ}
     ∃ C : ℝ, ∀ b ∈ ω, ∀ (ρ : Fin n → ℝ) (hρ : ∀ i, 0 < ρ i),
       (∀ i j : Fin n, (j : ℕ) = i + 1 → t * ρ j ≤ ρ i) →
       ∀ kk ∈ (Reduction.maxCompact : Subgroup (AdelicGLn.AdelicGL K n)),
-      ∀ x : AdelicGLn.AdelicGL K n, x ∈ Reduction.normOneGL K n →
+      ∀ x : AdelicGLn.AdelicGL K n, x ∈ Reduction.normOneGL (K := K) (n := n) →
       x = b * Reduction.diagUnits n (fun i => Reduction.posIdele (K := K) (ρ i) (hρ i)) * kk →
       ‖φ x‖ ≤ C * (height x ^ N')⁻¹ := by
   obtain ⟨N₀, C₀, hC₀⟩ := hφ.mod
@@ -315,7 +367,7 @@ private theorem siegel_le {φ : AdelicGLn.AdelicGL K n → ℂ}
 end
 
 open GlobalTheory.CuspRep UpperTheory.V.Cm in
-private theorem good_of {E : Type} [Field E] [NumberField E] [IsTotallyComplex E] {n : ℕ} {φ : Sm E n} (h : Umg φ)
+private theorem good_of {E : Type} [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] {n : ℕ} {φ : Sm E n} (h : Umg φ)
     (hc : Cusp φ.1) : Good φ.1 := by
   let S : Subgroup (GL (Fin n) (Af E)) :=
     { carrier := {k | GlobalTheory.CuspRep.finRep E n k φ = φ}
@@ -339,19 +391,19 @@ private theorem good_of {E : Type} [Field E] [NumberField E] [IsTotallyComplex E
 end UpperTheory.ConvolutionTheory.BW
 
 theorem UpperTheory.ConvolutionTheory.BW.rapidDecay :
-    ∀ (E : Type) [Field E] [NumberField E] [IsTotallyComplex E], UpperTheory.ConvolutionTheory.BW.RapidDecay E := by
+    ∀ (E : Type) [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E], UpperTheory.ConvolutionTheory.BW.RapidDecay E := by
   intro E _ _ _ n φ hU hc N
   have h0 := good_of hU hc
   obtain ⟨ω, hω, hωB, t, ht, hsieg⟩ := Reduction.exists_siegelSet (K := E) n
   obtain ⟨C, hC⟩ := siegel_le h0 hω hωB ht N
   refine ⟨C, fun g => ?_⟩
   obtain ⟨γ, b, hb, _, ⟨ρ, hρ, hs, rfl⟩, kk, hkk, hxe⟩ := hsieg g.1
-  have hγ1 : AdelicGLn.diagonal E n γ ∈ Reduction.normOneGL E n := Reduction.rationalGL_le_normOneGL ⟨γ, rfl⟩
+  have hγ1 : AdelicGLn.diagonal E n γ ∈ Reduction.normOneGL (K := E) (n := n) := Reduction.rationalGL_le_normOneGL ⟨γ, rfl⟩
   have h := hC b hb ρ hρ hs kk hkk _ (mul_mem hγ1 g.2) hxe
   rw [h0.left γ g.1] at h
   have hp := height_pos (AdelicGLn.diagonal E n γ * g.1)
   have hq : PositivityTheory.Rg.Tf.Core.qht g ≤ height (AdelicGLn.diagonal E n γ * g.1) :=
-    ciInf_le (f := fun γ : PositivityTheory.Rg.Tf.Core.Gam E n => height (((γ : Reduction.normOneGL E n) * g : Reduction.normOneGL E n) : AdelicGLn.AdelicGL E n))
+    ciInf_le (f := fun γ : PositivityTheory.Rg.Tf.Core.Gam E n => height (((γ : Reduction.normOneGL (K := E) (n := n)) * g : Reduction.normOneGL (K := E) (n := n)) : AdelicGLn.AdelicGL E n))
       ⟨0, by rintro _ ⟨γ, rfl⟩; exact (height_pos _).le⟩ ⟨⟨_, hγ1⟩, ⟨γ, rfl⟩⟩
   have hq0 : 0 ≤ PositivityTheory.Rg.Tf.Core.qht g := le_ciInf fun _ => (height_pos _).le
   rw [le_mul_inv_iff₀ (pow_pos hp N)] at h

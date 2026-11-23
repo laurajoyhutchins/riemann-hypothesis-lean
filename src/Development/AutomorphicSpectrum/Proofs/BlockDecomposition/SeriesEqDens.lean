@@ -1,17 +1,61 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.AutomorphicKernels.UnitarySchrodingerModel.LocalDefs
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ResAlgSplitTwo
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ResAlgSplitTwo
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CardRangeMulQuotientBoundedLevelStatement
 import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FixedNondeg
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.GaussSumHermitianNormLevelOneStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.GaussSumHermitianNormLevelShiftStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.HermitianMatrixDiagonalizableStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.MatrixGaussSumCongrInvarianceStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.MatrixGaussSumDiagonalFactorStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.MultiplicityReductionDiagonalProdStatement
 import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.UnramifiedQuotientCardStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.HermitianMatrixDiagonalizableStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.GaussSumHermitianNormLevelShiftStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.GaussSumHermitianNormLevelOneStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CardRangeMulQuotientBoundedLevelStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.MatrixGaussSumDiagonalFactorStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.MatrixGaussSumCongrInvarianceStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.MultiplicityReductionDiagonalProdStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.HermitianCharacterOrthogonalityStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.HermitianRepCountFourierExpansionStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 open PositivityTheory.PfSWUS.Loc GlobalTheory.CompanionTheory.UnrDens GlobalTheory.CompanionTheory.SiegLoc Filter Topology
@@ -89,21 +133,6 @@ theorem gauss_full {R : Type} [CommRing R] {σ : R →+* R} {ϖ : R} {q : ℕ} {
     rw [← pow_mul, ← pow_mul, mul_comm]
   simp only [hx]
   rw [Finset.prod_pow_eq_pow_sum]
-
-theorem seriesEqDens : SeriesEqDens := by
-  intro R _ σ ϖ q ε hR ψ hψ m n _ S T hS hT α hα
-  have hfin : ∀ k, Finite (R ⧸ lev ϖ k) := fun k => Nat.finite_of_card_ne_zero (by
-    rw [GlobalTheory.T.unramified_quotient_card R σ ϖ q ε hR k]
-    have := hR.one_lt
-    exact pow_ne_zero _ (by omega))
-  letI : ∀ k, Fintype (R ⧸ lev ϖ k) := fun k => Fintype.ofFinite _
-  have hε : (ε : ℂ) ^ 2 = 1 := by
-    rcases hR.eps with ⟨rfl, -⟩ | ⟨rfl, -⟩ <;> simp
-  have : siegAt ϖ σ ψ q ε m T = fun k => ((densAt σ ϖ S T k : ℝ) : ℂ) := funext fun k =>
-    GlobalTheory.T.hermitian_rep_count_fourier_expansion R σ ϖ q ε hR ψ hψ m n k S T hS.1 hT.1 (GlobalTheory.T.hermitian_character_orthogonality R σ ϖ q ε hR ψ hψ n k)
-      (fun B hB => gauss_full hR hψ hε k S hS B hB)
-  rw [this]
-  exact (Complex.continuous_ofReal.tendsto α).comp hα
 
 end GlobalTheory.CompanionTheory.SiegLoc
 end

@@ -1,6 +1,51 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.LocalClassFormation.InvariantSplit
-import GroundTheory.Brauer.BaseChangeRestriction
+module
+
+public import GroundTheory.ProfiniteCohomology.LocalClassFormation.InvariantSplit
+public import GroundTheory.ProfiniteCohomology.CohomologyFunctoriality
+public import GroundTheory.ProfiniteCohomology.LocalClassFormation.UnramifiedRes
+import GroundTheory.LocalFields.MaximalUnramified
+import GroundTheory.LocalFields.UnitsPowers
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
@@ -21,12 +66,6 @@ noncomputable def unitsResHomU :
     (MonoidHom.toAdditive (Units.map ((algebraMap L L' : L →+* L') : L →* L'))), fun σ => by
       ext x
       exact algebraMap_galRestrict_apply K K' L L' σ _⟩
-
-@[simp]
-theorem unitsResHomU_hom_apply (x : Additive Lˣ) :
-    ((Additive.toMul (α := L'ˣ) ((unitsResHomU K K' L L').hom x) : L'ˣ) : L') =
-      algebraMap L L' ((Additive.toMul (α := Lˣ) x : Lˣ) : L) :=
-  rfl
 
 noncomputable abbrev unitsResH2Lift :
     groupCohomology (galUnits K L) 2 ⟶ groupCohomology (galUnits K' L') 2 :=
@@ -73,8 +112,10 @@ theorem continuous_restrictScalarsHom_of_tower :
     have hx' : x = ∑ i, (b.repr ⟨x, hx⟩ i) • (b i : Ω) := by
       calc x = S.val (∑ i, b.repr ⟨x, hx⟩ i • b i) := by rw [b.sum_repr]; rfl
         _ = ∑ i, (b.repr ⟨x, hx⟩ i) • (b i : Ω) := by
+
           rw [map_sum]
           exact Finset.sum_congr rfl fun i _ => map_smul S.val _ _
+
     rw [hx', map_sum]
     refine Finset.sum_congr rfl fun i _ => ?_
     rw [map_smul, hT]
@@ -86,10 +127,6 @@ def galUnitsResScalars :
     fun σ => by
       ext x
       rfl⟩
-
-@[simp]
-theorem galUnitsResScalars_hom_apply (x : Additive Ωˣ) : (galUnitsResScalars F F' Ω).hom x = x :=
-  rfl
 
 variable [IsGalois F Ω] [IsGalois F' Ω]
 
@@ -112,9 +149,9 @@ variable (F F' Ω : Type) [Field F] [ValuativeRel F] [TopologicalSpace F] [IsNon
   [ValuativeRel Ω] [TopologicalSpace Ω] [IsValuativeTopology Ω] [ValuativeExtension F Ω]
   [ValuativeExtension F' Ω]
 
+
 omit [ValuativeRel F'] [TopologicalSpace F'] [IsNonarchimedeanLocalField F'] [ValuativeExtension F F']
   [FiniteDimensional F F'] [ValuativeExtension F' Ω] in
-
 theorem unitsInflationCochains_comp_cochainsMapAlong (E : IntermediateField F Ω)
     (E' : IntermediateField F' Ω) [FiniteDimensional F E] [Normal F E] [IsUnramified F E]
     [FiniteDimensional F' E'] [Normal F' E'] [Algebra E E'] [IsScalarTower F E E']
@@ -153,9 +190,9 @@ theorem unitsInflationCochains_comp_cochainsMapAlong (E : IntermediateField F Ω
   apply Units.ext
   exact (hι _).symm
 
+
 omit [ValuativeRel F'] [TopologicalSpace F'] [IsNonarchimedeanLocalField F'] [ValuativeExtension F F']
   [FiniteDimensional F F'] [ValuativeExtension F' Ω] in
-
 theorem brauerRes_brauerInflation (E : IntermediateField F Ω)
     (E' : IntermediateField F' Ω) [FiniteDimensional F E] [Normal F E] [IsUnramified F E]
     [FiniteDimensional F' E'] [Normal F' E'] [Algebra E E'] [IsScalarTower F E E']
@@ -167,9 +204,9 @@ theorem brauerRes_brauerInflation (E : IntermediateField F Ω)
   simp only [HomologicalComplex.homologyMap_comp] at h
   exact congrArg (fun φ => φ.hom y) h
 
+
 omit [ValuativeRel Ω] [TopologicalSpace Ω] [IsValuativeTopology Ω] [ValuativeExtension F Ω]
   [ValuativeExtension F' Ω] in
-
 theorem unramifiedLevel_le_unramifiedLevel (n : ℕ+) :
     unramifiedLevel F Ω n ≤ (unramifiedLevel F' Ω n).restrictScalars F := by
   rw [unramifiedLevel_eq, adjoin_simple_le_iff, mem_restrictScalars]
@@ -209,7 +246,7 @@ theorem brauerInv_brauerRes (x : galoisBrauerGroup F Ω) :
         IsScalarTower.algebraMap_apply F F' Ω a]
       rfl
   have : ValuativeExtension (unramifiedLevel F Ω n) (unramifiedLevel F' Ω n) :=
-    ⟨fun a b => by
+    ⟨fun {a b} => by
       rw [← IntermediateField.coe_vle_coe_iff (L := Ω) a b,
         ← IntermediateField.coe_vle_coe_iff (L := Ω)]
       rfl⟩

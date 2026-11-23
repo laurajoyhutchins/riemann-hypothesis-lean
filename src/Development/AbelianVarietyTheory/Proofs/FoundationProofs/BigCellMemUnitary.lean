@@ -1,5 +1,49 @@
-import Mathlib
-import Formalism.FormalDegreeBessel.StatementBF
+module
+
+public import Formalism.FormalDegreeBessel.StatementBF
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Matrix Formalism.QuantumDeterminants
 
@@ -44,7 +88,7 @@ theorem col_e (k r : ℕ) (c : Fin r → ℂ) (μ : Matrix (Fin (k + 1)) (Fin (k
     bigCell k r c μ i (eI k r b) = if i.val = 2 * r + k - b.val then c b else 0 := by
   have hb : (eI k r b).val < r := b.isLt
   unfold bigCell
-  rw [dif_pos hb]
+  rw [dite_eq_left hb]
   exact if_congr Fin.ext_iff rfl rfl
 
 theorem col_w (k r : ℕ) (c : Fin r → ℂ) (μ : Matrix (Fin (k + 1)) (Fin (k + 1)) ℂ)
@@ -54,7 +98,7 @@ theorem col_w (k r : ℕ) (c : Fin r → ℂ) (μ : Matrix (Fin (k + 1)) (Fin (k
   have hb := b.isLt
   have hv : (wI k r b).val = r + b.val := rfl
   unfold bigCell
-  rw [dif_neg (by omega), dif_pos (by omega)]
+  rw [dif_neg (by omega), dite_eq_left (by omega)]
   split_ifs
   · congr 1
     apply Fin.ext
@@ -94,7 +138,7 @@ theorem bigCell_submatrix (k r : ℕ) (c : Fin r → ℂ) (μ : Matrix (Fin (k +
   · exact dif_neg (by show ¬ (_ ∧ 2 * r + k - a.val ≤ _); omega)
   · exact if_neg (by show ¬ r + a.val = _; omega)
   · exact if_neg (by show ¬ r + a.val = _; omega)
-  · rw [dif_pos (by show r ≤ r + a.val ∧ r + a.val ≤ _; omega)]
+  · rw [dite_eq_left (by show r ≤ r + a.val ∧ r + a.val ≤ _; omega)]
     congr 1
     apply Fin.ext
     show r + a.val - r = a.val
@@ -102,16 +146,18 @@ theorem bigCell_submatrix (k r : ℕ) (c : Fin r → ℂ) (μ : Matrix (Fin (k +
 
 end BigCellUnitary
 
-open BigCellUnitary in
 
+open BigCellUnitary in
 theorem bigCell_mem_unitary : Formalism.QuantumDeterminants.BigCellMem := by
   intro k r c μ hc hμ
-  have key : ((bigCell k r c μ)ᴴ * Hpk k r * bigCell k r c μ).submatrix (posEquiv k r) (posEquiv k r) =
-      (Hpk k r).submatrix (posEquiv k r) (posEquiv k r) := by
-    rw [← submatrix_mul_equiv _ _ _ (posEquiv k r), ← submatrix_mul_equiv _ _ _ (posEquiv k r),
+  change (bigCell k r c μ)ᴴ * Hpk k r * bigCell k r c μ = Hpk k r
+  let e := BigCellUnitary.posEquiv k r
+  have key : ((bigCell k r c μ)ᴴ * Hpk k r * bigCell k r c μ).submatrix e e =
+      (Hpk k r).submatrix e e := by
+    rw [← submatrix_mul_equiv _ _ _ e, ← submatrix_mul_equiv _ _ _ e,
       ← conjTranspose_submatrix]
-    have hp : ⇑(posEquiv k r) = pos k r := rfl
-    rw [hp, gram_submatrix, bigCell_submatrix]
+    have hp : ⇑e = BigCellUnitary.pos k r := rfl
+    rw [hp, BigCellUnitary.gram_submatrix, BigCellUnitary.bigCell_submatrix]
     have h1 : diagonal (fun a => star (c a)) * diagonal (fun a => (star (c a))⁻¹) =
         (1 : Matrix (Fin r) (Fin r) ℂ) := by
       rw [diagonal_mul_diagonal, ← diagonal_one]
@@ -128,8 +174,8 @@ theorem bigCell_mem_unitary : Formalism.QuantumDeterminants.BigCellMem := by
     rw [show star c = fun a => star (c a) from rfl,
       show star (fun a => (star (c a))⁻¹) = fun a => star (star (c a))⁻¹ from rfl, h1, h2]
   ext i j
-  obtain ⟨i, rfl⟩ := (posEquiv k r).surjective i
-  obtain ⟨j, rfl⟩ := (posEquiv k r).surjective j
+  obtain ⟨i, rfl⟩ := e.surjective i
+  obtain ⟨j, rfl⟩ := e.surjective j
   exact congrFun (congrFun key i) j
 
 end GlobalTheory

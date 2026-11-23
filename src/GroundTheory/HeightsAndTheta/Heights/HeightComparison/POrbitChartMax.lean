@@ -1,8 +1,59 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HeightComparison.HeightOrbitChartMax
-import GroundTheory.HeightsAndTheta.Heights.HeightComparison.PSubringPrimeMaximal
-import GroundTheory.HeightsAndTheta.Heights.HeightComparison.POrbitCurve
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PMinimalPrimeMultiHomog
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HeightComparison.HeightOrbitChartMax
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PMinimalPrimeMultiHomog
+public import GroundTheory.HeightsAndTheta.Heights.HeightComparison.POrbitCurve
+public import GroundTheory.HeightsAndTheta.Heights.HeightComparison.PSubringPrimeMaximal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Sub.Prod
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.IsMultiHomogIdealSpanSingleton
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -25,6 +76,7 @@ theorem aeval_mul_of_homog {R : Type*} [CommRing R] [Algebra ℤ R] (t : ι → 
   classical
   conv_lhs => rw [G.as_sum]
   conv_rhs => rw [G.as_sum]
+
   rw [map_sum, map_sum, Finset.sum_mul]
   refine Finset.sum_congr rfl fun m hm ↦ ?_
   have hmb : ∀ k, ∑ i, m ⟨k, i⟩ = b k := fun k ↦ by
@@ -45,7 +97,7 @@ def homDeg (F : MvPolynomial (Coord n) ℤ) : ι → ℕ :=
 
 def homogenize (c : (k : ι) → Fin (n k + 1)) (F : MvPolynomial (Coord n) ℤ) :
     MvPolynomial (Coord n) ℤ :=
-  ∑ m ∈ F.support, monomial m (coeff m F) *
+  ∑ m ∈ F.support, monomial m (AddMonoidAlgebra.coeff F m) *
     chartMonomial c (homDeg F - Finsupp.weight (coordDeg n) m)
 
 theorem isWeightedHomogeneous_homogenize (c : (k : ι) → Fin (n k + 1))
@@ -54,7 +106,7 @@ theorem isWeightedHomogeneous_homogenize (c : (k : ι) → Fin (n k + 1))
   refine IsWeightedHomogeneous.sum _ _ _ fun m hm ↦ ?_
   have hle : Finsupp.weight (coordDeg n) m ≤ homDeg F := fun k ↦
     Finset.le_sup (f := fun m ↦ Finsupp.weight (coordDeg n) m k) hm
-  have h := (isWeightedHomogeneous_monomial (coordDeg n) m (coeff m F) rfl).mul
+  have h := (isWeightedHomogeneous_monomial (coordDeg n) m (AddMonoidAlgebra.coeff F m) rfl).mul
     (isWeightedHomogeneous_chartMonomial c (homDeg F - Finsupp.weight (coordDeg n) m))
   rwa [add_tsub_cancel_of_le hle] at h
 
@@ -62,8 +114,9 @@ theorem map_homogenize {R : Type*} [CommRing R] (c : (k : ι) → Fin (n k + 1))
     (φ : MvPolynomial (Coord n) ℤ →+* R) (hφ : ∀ k, φ (X ⟨k, c k⟩) = 1)
     (F : MvPolynomial (Coord n) ℤ) : φ (homogenize c F) = φ F := by
   conv_rhs => rw [F.as_sum]
+
   simp only [homogenize, map_sum, map_mul, chartMonomial, map_prod, map_pow, hφ, one_pow,
-    Finset.prod_const_one, mul_one]
+  Finset.prod_const_one, mul_one]
 
 theorem aeval_dehomCoords {Ω : Type*} [Field Ω] [Algebra ℤ Ω] (z : Coord n → Ω) (c : (k : ι) → Fin (n k + 1))
     (hz : ∀ k, z ⟨k, c k⟩ ≠ 0) (F : MvPolynomial (Coord n) ℤ) :
@@ -74,8 +127,8 @@ theorem aeval_dehomCoords {Ω : Type*} [Field Ω] [Algebra ℤ Ω] (z : Coord n 
     simp [dehomCoords, inv_mul_cancel₀ (hz k)]) F]
   exact aeval_mul_of_homog (fun k ↦ (z ⟨k, c k⟩)⁻¹) z (isWeightedHomogeneous_homogenize c F)
 
-omit [DecidableEq ι] in
 
+omit [DecidableEq ι] in
 theorem prod_inv_pow_ne_zero {Ω : Type*} [Field Ω] (z : Coord n → Ω) (c : (k : ι) → Fin (n k + 1))
     (hz : ∀ k, z ⟨k, c k⟩ ≠ 0) (D : ι → ℕ) : ∏ k, (z ⟨k, c k⟩)⁻¹ ^ D k ≠ 0 :=
   Finset.prod_ne_zero_iff.mpr fun k _ ↦ pow_ne_zero _ (inv_ne_zero (hz k))
@@ -105,14 +158,14 @@ theorem aeval_dehomCoords_of_homog {Ω : Type*} [Field Ω] [Algebra ℤ Ω] (z :
     aeval (dehomCoords z c) G = aeval z G * ∏ k, (z ⟨k, c k⟩)⁻¹ ^ b k :=
   aeval_mul_of_homog (fun k ↦ (z ⟨k, c k⟩)⁻¹) z hG
 
-omit [Fintype ι] [DecidableEq ι] in
 
+omit [Fintype ι] [DecidableEq ι] in
 theorem val_comp_chartEval (x : Cone n (AlgebraicClosure ℚ)) (c : (k : ι) → Fin (n k + 1)) :
     (chartRing x c).val.comp (chartEval x c) = aeval (chartRatio x c) :=
   MvPolynomial.algHom_ext fun _ ↦ by simp [chartEval]
 
-omit [Fintype ι] [DecidableEq ι] in
 
+omit [Fintype ι] [DecidableEq ι] in
 theorem chartEval_surjective (x : Cone n (AlgebraicClosure ℚ)) (c : (k : ι) → Fin (n k + 1)) :
     Function.Surjective (chartEval x c) := by
   rintro ⟨u, hu⟩
@@ -121,28 +174,28 @@ theorem chartEval_surjective (x : Cone n (AlgebraicClosure ℚ)) (c : (k : ι) �
   obtain ⟨F, hF⟩ := hu'
   exact ⟨F, Subtype.ext ((DFunLike.congr_fun (val_comp_chartEval x c) F).trans hF)⟩
 
-omit [Fintype ι] [DecidableEq ι] in
 
+omit [Fintype ι] [DecidableEq ι] in
 theorem coe_chartEval (x : Cone n (AlgebraicClosure ℚ)) (c : (k : ι) → Fin (n k + 1))
     (F : MvPolynomial (Coord n) ℤ) :
     (((chartEval x c F : ratioField x) : AlgebraicClosure ℚ)) =
       aeval (dehomCoords (flatCone x) c) F := by
   induction F using MvPolynomial.induction_on with
   | C a => simp
-  | add p q hp hq => rw [map_add, Subalgebra.coe_add, IntermediateField.coe_add, hp, hq, map_add]
+  | add p q hp hq => rw [map_add (f := _), Subalgebra.coe_add, IntermediateField.coe_add, hp, hq, map_add (f := _)]
   | mul_X p q hp =>
     rw [map_mul, Subalgebra.coe_mul, IntermediateField.coe_mul, hp, map_mul]
     simp [chartEval, chartRatio, dehomCoords, flatCone, div_eq_inv_mul]
 
-omit [Fintype ι] [DecidableEq ι] in
 
+omit [Fintype ι] [DecidableEq ι] in
 theorem chartEval_eq_zero_iff (x : Cone n (AlgebraicClosure ℚ)) (c : (k : ι) → Fin (n k + 1))
     (F : MvPolynomial (Coord n) ℤ) :
     chartEval x c F = 0 ↔ aeval (dehomCoords (flatCone x) c) F = 0 := by
   rw [← coe_chartEval, ZeroMemClass.coe_eq_zero, ZeroMemClass.coe_eq_zero]
 
-omit [Fintype ι] [DecidableEq ι] in
 
+omit [Fintype ι] [DecidableEq ι] in
 theorem chartEval_X_chart (x : Cone n (AlgebraicClosure ℚ)) (c : (k : ι) → Fin (n k + 1))
     (hxc : ∀ k, flatCone x ⟨k, c k⟩ ≠ 0) (k : ι) : chartEval x c (X ⟨k, c k⟩) = 1 := by
   apply Subtype.ext
@@ -154,13 +207,13 @@ section Generic
 
 variable (V : Ideal (MvPolynomial (Coord n) ℤ)) [V.IsPrime]
 
-omit [Fintype ι] [DecidableEq ι] in
 
+omit [Fintype ι] [DecidableEq ι] in
 def genPt : Coord n → FractionRing (MvPolynomial (Coord n) ℤ ⧸ V) :=
   fun p ↦ algebraMap _ _ (Ideal.Quotient.mk V (X p))
 
-omit [Fintype ι] [DecidableEq ι] [V.IsPrime] in
 
+omit [Fintype ι] [DecidableEq ι] [V.IsPrime] in
 theorem aeval_genPt (F : MvPolynomial (Coord n) ℤ) :
     aeval (genPt V) F = algebraMap _ (FractionRing (MvPolynomial (Coord n) ℤ ⧸ V))
       (Ideal.Quotient.mk V F) := by
@@ -173,14 +226,14 @@ theorem aeval_genPt (F : MvPolynomial (Coord n) ℤ) :
       (fun p ↦ by simp [genPt])
   exact DFunLike.congr_fun h F
 
-omit [Fintype ι] [DecidableEq ι] [V.IsPrime] in
 
+omit [Fintype ι] [DecidableEq ι] [V.IsPrime] in
 theorem aeval_genPt_eq_zero_iff (F : MvPolynomial (Coord n) ℤ) : aeval (genPt V) F = 0 ↔ F ∈ V := by
   rw [aeval_genPt, map_eq_zero_iff _ (IsFractionRing.injective _ _),
     Ideal.Quotient.eq_zero_iff_mem]
 
-omit [Fintype ι] [DecidableEq ι] [V.IsPrime] in
 
+omit [Fintype ι] [DecidableEq ι] [V.IsPrime] in
 theorem genPt_ne_zero {p : Coord n} (hp : (X p : MvPolynomial (Coord n) ℤ) ∉ V) : genPt V p ≠ 0 := by
   have h := (aeval_genPt_eq_zero_iff V (X p)).not.mpr hp
   rwa [aeval_X] at h
@@ -200,7 +253,7 @@ theorem proof : Statement := by
     have hJ : NumbersDVR.IsMultiHomogIdeal (ι := blockIdx n) (orbitIdeal x ⊔ Ideal.span {s}) := by
       intro f hf b
       obtain ⟨p, hp, t, ht, rfl⟩ := Submodule.mem_sup.mp hf
-      rw [map_add]
+      rw [map_add (f := _)]
       exact Submodule.add_mem_sup (OrbitCurve.weightedHomogeneousComponent_mem_orbitIdeal x hp b)
         (NumbersDVR.isMultiHomogIdeal_span_singleton (e := a) hsa' t ht b)
     exact NumbersDVR.MinimalPrimeMultiHomog.proof ℤ ι (blockIdx n) _ V hJ hVmin
@@ -215,8 +268,9 @@ theorem proof : Statement := by
   have hVzero : ∀ f ∈ V, aeval (dehomCoords (genPt V) c) f = 0 := by
     intro f hf
     classical
+
     rw [← sum_weightedHomogeneousComponent (w := coordDeg n) f,
-      finsum_eq_sum _ (weightedHomogeneousComponent_finsupp f), map_sum]
+    finsum_eq_sum _ (weightedHomogeneousComponent_finsupp f), map_sum]
     refine Finset.sum_eq_zero fun b _ ↦ ?_
     exact (aeval_dehomCoords_of_homog (genPt V) c
       (weightedHomogeneousComponent_isWeightedHomogeneous b f)).trans

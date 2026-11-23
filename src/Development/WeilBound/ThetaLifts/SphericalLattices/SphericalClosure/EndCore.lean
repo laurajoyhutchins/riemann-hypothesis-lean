@@ -1,65 +1,173 @@
-import Development.WeilBound.ThetaLifts.EigenvalueEndgame.CuspidalAverages.VacIntZ
-import Development.WeilBound.ThetaLifts.Reductions.WeightConstants.ConstOfGood
-import Development.WeilBound.CoreStatements.AbelianHeightsDuality.UnitaryDensity.EqTopOfLines
-import Development.WeilBound.ThetaLifts.LatticeBasics.NearUnits
-import Development.WeilBound.ThetaLifts.LatticeBasics.FrameConj
-import Development.WeilBound.CoreStatements.GaussianSeminormBounds.RealSeminormFiltration.TraceBlocks
-import Development.WeilBound.ThetaLifts.LatticeBasics.LocUnrSplit
-import Development.WeilBound.ThetaLifts.LatticeBasics.BadFactor
-import Development.WeilBound.ThetaLifts.LatticeBasics.PresDOf
-import Development.WeilBound.ThetaLifts.LeviDeterminants.ThetaBasic
-import Development.WeilBound.ThetaLifts.EigenvalueEndgame.UnipotentGroups.PerpZeroOf
-import Development.WeilBound.ThetaLifts.CartanFactorisation.ArchimedeanEvaluationVector
-import Development.WeilBound.ThetaLifts.FrameEstimates.CuspRapid
-import Development.WeilBound.ThetaLifts.EigenvalueEndgame.UnipotentGroups.TendstoIndMul
-import Development.WeilBound.ThetaLifts.CartanFactorisation.Cartan
-import Development.WeilBound.ThetaLifts.EigenvalueEndgame.UnipotentGroups.SigReOf
-import Development.WeilBound.ThetaLifts.TowerModels.TowerCodimensionTwo
-import Development.WeilBound.ThetaLifts.LeviDeterminants.EvZero
-import Development.WeilBound.ThetaLifts.LeviDeterminants.MixedModels.MixWClosed
-import Development.WeilBound.ThetaLifts.LeviDeterminants.MixedModels.MixXClosed
-import Development.WeilBound.ThetaLifts.WeilDomination.DomWeilOf
-import Development.WeilBound.ThetaLifts.SmallCones.ThetaExp
-import Development.WeilBound.ThetaLifts.SmallCones.SoZeroAOf
-import Development.WeilBound.ThetaLifts.EigenvalueEndgame.EigenKilling.SmallAnyOf
-import Development.WeilBound.ThetaLifts.EigenvalueEndgame.EigenKilling.EigenKillSet
-import Development.WeilBound.ThetaLifts.EigenvalueEndgame.EigenKilling.SubMemKer
-import Development.WeilBound.CoreStatements.GaussianSeminormBounds.RealSeminormFiltration.KRealAsm
-import Development.WeilBound.CoreStatements.CompactAveragingSplitting.EigenvectorLifting.SplitTop
-import Development.WeilBound.CoreStatements.LocalThetaKernels.EvlMain
-import Development.WeilBound.CoreStatements.CompactAveragingSplitting.EigenvectorLifting.SiegelTransport
-import Development.WeilBound.CoreStatements.CompactAveragingSplitting.EigenvectorLifting.LinearAct
-import Development.WeilBound.CoreStatements.CompactAveragingSplitting.EigenvectorLifting.HypothesesAtTriple
-import Development.WeilBound.CoreStatements.LocalThetaKernels.Locpair
-import Development.WeilBound.ThetaLifts.LocalTheory.StandardValuations.VacuumImageIntertwiner
-import Development.WeilBound.CoreStatements.LocallyConstantCoinvariants.KCoinvOfDict
-import Development.WeilBound.ThetaLifts.WeilDomination.MatchEx
-import Development.WeilBound.ThetaLifts.EigenvalueEndgame.EigenKilling.AlphaZeroOf
-import Development.WeilBound.ThetaLifts.LatticeBasics.PolDense
-import Development.WeilBound.ThetaLifts.EigenvalueEndgame.EigenKilling.RealVanishOf
-import Development.WeilBound.ThetaLifts.LocalTheory.ArchimedeanBumps.ArchHeisOf
-import Development.WeilBound.ThetaLifts.LocalTheory.ArchimedeanBumps.SlicePol
-import Development.WeilBound.ThetaLifts.LocalTheory.ConeShifts.ConeFacOf
-import Development.WeilBound.ThetaLifts.EigenvalueEndgame.SignatureSplitting.TwoStepOf
-import Development.WeilBound.ThetaLifts.EigenvalueEndgame.CuspidalAverages.LocalFieldT2Space
-import Development.WeilBound.ThetaLifts.EigenvalueEndgame.CuspidalAverages.PlaContinuous
-import Development.WeilBound.ThetaLifts.EigenvalueEndgame.CuspidalAverages.ActsOfReads
-import Development.WeilBound.ThetaLifts.EigenvalueEndgame.CuspidalAverages.ColOpSingle
-import Development.WeilBound.ThetaLifts.EigenvalueEndgame.CuspidalAverages.CuspOfLineOfKeys
-import Development.WeilBound.ThetaLifts.LatticeBasics.LocDist
-import Development.WeilBound.ThetaLifts.EigenvalueEndgame.OrthogonalDecomposition.SigThConstFin
-import Development.WeilBound.ThetaLifts.LatticeBasics.FinLevel
-import Development.WeilBound.ThetaLifts.LatticeBasics.CartanBound2
-import Development.WeilBound.ThetaLifts.LatticeBasics.SiegelWeilAnisoOf
-import Development.WeilBound.ThetaLifts.LatticeBasics.EisCont
-import Development.WeilBound.ThetaLifts.LatticeBasics.HgtIntOf
-import Development.WeilBound.ThetaLifts.LatticeBasics.OffOpen
-import Development.WeilBound.ThetaLifts.LatticeBasics.HeightGLLe
-import Development.WeilBound.ThetaLifts.LatticeBasics.OrthAn
-import Development.WeilBound.ThetaLifts.LatticeBasics.NormZeta
-import Development.WeilBound.ThetaLifts.LatticeBasics.LocUnrInert
-import Development.WeilBound.ThetaLifts.LatticeBasics.EulerHalf
-import Development.WeilBound.ThetaLifts.LatticeBasics.BotAsm
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsFockMap
+public import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.IsSmoothModerateOfIsAutFunSm
+public import Development.WeilBound.CoreStatements.CompactAveragingSplitting.EigenvectorLifting.FinSplit
+public import Development.WeilBound.CoreStatements.LocallyConstantCoinvariants.RightOnto
+public import Development.WeilBound.ThetaLifts.CartanFactorisation.CartanConj
+public import Development.WeilBound.ThetaLifts.LatticeBasics.HypothesesS
+public import Development.WeilBound.ThetaLifts.TowerModels.PlaneHerm
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.HeckeLEntireAndNonzeroAtOneHolds
+public import Development.WeilBound.CoreStatements.AbelianHeightsDuality.UnitaryDensity.EqTopOfLines
+public import Development.WeilBound.CoreStatements.GaussianSeminormBounds.RealSeminormFiltration.EvIHalfTrace
+public import Development.WeilBound.CoreStatements.GaussianSeminormBounds.RealSeminormFiltration.KRealAsm
+import Development.WeilBound.CoreStatements.GaussianSeminormBounds.RealSeminormFiltration.RLActs
+import Development.WeilBound.CoreStatements.GaussianSeminormBounds.RealSeminormFiltration.RLFrame
+public import Development.WeilBound.CoreStatements.GaussianSeminormBounds.RealSeminormFiltration.RLLieH
+import Development.WeilBound.CoreStatements.GaussianSeminormBounds.RealSeminormFiltration.RLLines
+public import Development.WeilBound.CoreStatements.LocallyConstantCoinvariants.PfDictSec
+public import Development.WeilBound.ThetaLifts.CartanFactorisation.ArchimedeanEvaluationVector
+public import Development.WeilBound.ThetaLifts.CartanFactorisation.Cartan
+public import Development.WeilBound.ThetaLifts.CartanFactorisation.TensOfEval
+public import Development.WeilBound.ThetaLifts.CartanFactorisation.Unimod
+public import Development.WeilBound.ThetaLifts.EigenvalueEndgame.CuspidalAverages.ActsOfReads
+public import Development.WeilBound.ThetaLifts.EigenvalueEndgame.CuspidalAverages.ColOpSingle
+public import Development.WeilBound.ThetaLifts.EigenvalueEndgame.CuspidalAverages.CuspOfLineOfKeys
+public import Development.WeilBound.ThetaLifts.EigenvalueEndgame.CuspidalAverages.LocalFieldT2Space
+public import Development.WeilBound.ThetaLifts.EigenvalueEndgame.CuspidalAverages.PlaContinuous
+public import Development.WeilBound.ThetaLifts.EigenvalueEndgame.CuspidalAverages.VacIntZ
+public import Development.WeilBound.ThetaLifts.EigenvalueEndgame.EigenKilling.AlphaZeroOf
+public import Development.WeilBound.ThetaLifts.EigenvalueEndgame.EigenKilling.EigenKillSet
+import Development.WeilBound.ThetaLifts.EigenvalueEndgame.EigenKilling.PolRange
+public import Development.WeilBound.ThetaLifts.EigenvalueEndgame.EigenKilling.RealVanishOf
+public import Development.WeilBound.ThetaLifts.EigenvalueEndgame.EigenKilling.SmallAnyOf
+public import Development.WeilBound.ThetaLifts.EigenvalueEndgame.EigenKilling.SubMemKer
+public import Development.WeilBound.ThetaLifts.EigenvalueEndgame.OrthogonalDecomposition.SigThConstFin
+public import Development.WeilBound.ThetaLifts.EigenvalueEndgame.SignatureSplitting.SigSplitOf
+public import Development.WeilBound.ThetaLifts.EigenvalueEndgame.SignatureSplitting.TwoStepOf
+import Development.WeilBound.ThetaLifts.EigenvalueEndgame.TowerCodimensionTwo
+import Development.WeilBound.ThetaLifts.EigenvalueEndgame.UnipotentGroups.ContinuousExpG
+import Development.WeilBound.ThetaLifts.EigenvalueEndgame.UnipotentGroups.ExistsAbsGt
+import Development.WeilBound.ThetaLifts.EigenvalueEndgame.UnipotentGroups.IsFrPlane
+public import Development.WeilBound.ThetaLifts.EigenvalueEndgame.UnipotentGroups.PerpZeroOf
+public import Development.WeilBound.ThetaLifts.EigenvalueEndgame.UnipotentGroups.SigReOf
+public import Development.WeilBound.ThetaLifts.EigenvalueEndgame.UnipotentGroups.TendstoIndMul
+public import Development.WeilBound.ThetaLifts.FrameEstimates.BlockForm
+public import Development.WeilBound.ThetaLifts.FrameEstimates.CuspRapid
+import Development.WeilBound.ThetaLifts.FrameEstimates.FundamentalDomainFiniteVolume
+import Development.WeilBound.ThetaLifts.FrameEstimates.GrpTop
+import Development.WeilBound.ThetaLifts.FrameEstimates.IInvOfParts
+import Development.WeilBound.ThetaLifts.FrameEstimates.InitialPairs.TriplePairHolds
+import Development.WeilBound.ThetaLifts.FrameEstimates.IsCompactIntV
+import Development.WeilBound.ThetaLifts.FrameEstimates.LatCpt
+import Development.WeilBound.ThetaLifts.FrameEstimates.SiegelAll
+import Development.WeilBound.ThetaLifts.FrameEstimates.WeilConv
+public import Development.WeilBound.ThetaLifts.LatticeBasics.BadFactor
+public import Development.WeilBound.ThetaLifts.LatticeBasics.BotAsm
+public import Development.WeilBound.ThetaLifts.LatticeBasics.BoxSec
+public import Development.WeilBound.ThetaLifts.LatticeBasics.CartanBound2
+public import Development.WeilBound.ThetaLifts.LatticeBasics.ConvOfCpt
+public import Development.WeilBound.ThetaLifts.LatticeBasics.EisCont
+public import Development.WeilBound.ThetaLifts.LatticeBasics.EulerHalf
+public import Development.WeilBound.ThetaLifts.LatticeBasics.ExistsIsGauss
+public import Development.WeilBound.ThetaLifts.LatticeBasics.FinLevel
+public import Development.WeilBound.ThetaLifts.LatticeBasics.FrameConj
+import Development.WeilBound.ThetaLifts.LatticeBasics.GoodNe
+public import Development.WeilBound.ThetaLifts.LatticeBasics.HeightGLLe
+public import Development.WeilBound.ThetaLifts.LatticeBasics.HgtIntOf
+import Development.WeilBound.ThetaLifts.LatticeBasics.LeviEx
+public import Development.WeilBound.ThetaLifts.LatticeBasics.LocDist
+public import Development.WeilBound.ThetaLifts.LatticeBasics.LocMeas
+public import Development.WeilBound.ThetaLifts.LatticeBasics.LocUnrInert
+public import Development.WeilBound.ThetaLifts.LatticeBasics.LocUnrSplit
+public import Development.WeilBound.ThetaLifts.LatticeBasics.NearUnits
+import Development.WeilBound.ThetaLifts.LatticeBasics.NonZero
+public import Development.WeilBound.ThetaLifts.LatticeBasics.NormZeta
+public import Development.WeilBound.ThetaLifts.LatticeBasics.OffOpen
+public import Development.WeilBound.ThetaLifts.LatticeBasics.OrthAn
+public import Development.WeilBound.ThetaLifts.LatticeBasics.PolDense
+public import Development.WeilBound.ThetaLifts.LatticeBasics.PresDOf
+public import Development.WeilBound.ThetaLifts.LatticeBasics.RatEquiv
+import Development.WeilBound.ThetaLifts.LatticeBasics.RealInv
+import Development.WeilBound.ThetaLifts.LatticeBasics.SWFull
+public import Development.WeilBound.ThetaLifts.LatticeBasics.SiegelWeilAnisoOf
+public import Development.WeilBound.ThetaLifts.LeviDeterminants.ActsEx
+public import Development.WeilBound.ThetaLifts.LeviDeterminants.EvAdel
+public import Development.WeilBound.ThetaLifts.LeviDeterminants.EvZero
+import Development.WeilBound.ThetaLifts.LeviDeterminants.MixedModels.AdelicEstimatesHolds
+import Development.WeilBound.ThetaLifts.LeviDeterminants.MixedModels.MCPure
+public import Development.WeilBound.ThetaLifts.LeviDeterminants.MixedModels.MixWClosed
+public import Development.WeilBound.ThetaLifts.LeviDeterminants.MixedModels.MixXClosed
+public import Development.WeilBound.ThetaLifts.LeviDeterminants.ThetaBasic
+public import Development.WeilBound.ThetaLifts.LocalTheory.ArchimedeanBumps.ArchHeisOf
+public import Development.WeilBound.ThetaLifts.LocalTheory.ArchimedeanBumps.SlicePol
+import Development.WeilBound.ThetaLifts.LocalTheory.ArchimedeanBumps.TracePiReal
+public import Development.WeilBound.ThetaLifts.LocalTheory.ConeShifts.ConeFacOf
+public import Development.WeilBound.ThetaLifts.LocalTheory.StandardValuations.VacuumImageIntertwiner
+public import Development.WeilBound.ThetaLifts.Reductions.WeightConstants.ConstOfGood
+public import Development.WeilBound.ThetaLifts.SmallCones.ConeAB
+public import Development.WeilBound.ThetaLifts.SmallCones.GenAnisoOf
+public import Development.WeilBound.ThetaLifts.SmallCones.GenSmallOf
+public import Development.WeilBound.ThetaLifts.SmallCones.IntegrableProdOfBound
+public import Development.WeilBound.ThetaLifts.SmallCones.IwaExOf
+public import Development.WeilBound.ThetaLifts.SmallCones.KFinDataOf
+public import Development.WeilBound.ThetaLifts.SmallCones.Leaves
+public import Development.WeilBound.ThetaLifts.SmallCones.LineInt
+public import Development.WeilBound.ThetaLifts.SmallCones.MixABOf
+public import Development.WeilBound.ThetaLifts.SmallCones.NormLeSum
+public import Development.WeilBound.ThetaLifts.SmallCones.SchInt
+public import Development.WeilBound.ThetaLifts.SmallCones.SliceSummable
+public import Development.WeilBound.ThetaLifts.SmallCones.SoStab
+public import Development.WeilBound.ThetaLifts.SmallCones.SoZeroAOf
+public import Development.WeilBound.ThetaLifts.SmallCones.SplitLatMap
+public import Development.WeilBound.ThetaLifts.SmallCones.StabDec
+public import Development.WeilBound.ThetaLifts.SmallCones.TateAbs
+public import Development.WeilBound.ThetaLifts.SmallCones.ThetaExp
+import Development.WeilBound.ThetaLifts.SmallCones.TwoExp
+import Development.WeilBound.ThetaLifts.SmallCones.Unfold
+import Development.WeilBound.ThetaLifts.SmallCones.UnipEx
+import Development.WeilBound.ThetaLifts.SmallCones.WittOf
+public import Development.WeilBound.ThetaLifts.TowerModels.LeviEx
+public import Development.WeilBound.ThetaLifts.TowerModels.ModelEx
+public import Development.WeilBound.ThetaLifts.TowerModels.PlaneSkew
+public import Development.WeilBound.ThetaLifts.TowerModels.StabEx
+public import Development.WeilBound.ThetaLifts.TowerModels.TowerCodimensionTwo
+public import Development.WeilBound.ThetaLifts.TowerModels.TowerCodimensionTwoOf
+public import Development.WeilBound.ThetaLifts.WeilDomination.DomWeilOf
+public import Development.WeilBound.ThetaLifts.WeilDomination.MatchEx
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Development.WeilBound.CoreStatements.LocallyConstantCoinvariants.LmOfLinBar
+public import Development.WeilBound.ThetaLifts.CTKernel
+public import Development.WeilBound.ThetaLifts.ConeHypotheses.PolDense
+public import Development.WeilBound.ThetaLifts.EigenvalueEndgame.OrthogonalDecomposition.SigThConst
+public import Development.WeilBound.ThetaLifts.EigenvalueEndgame.SignatureSplitting.SigSplit
+public import Development.WeilBound.ThetaLifts.LatticeBasics.LocUnr
+
+@[expose] public section
 
 theorem PositivityTheory.Sph.Tr.endAB_sph
     (hSiegelSet : GlobalTheory.Published.SiegelSetUnitary)

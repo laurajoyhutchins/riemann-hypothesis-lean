@@ -1,4 +1,48 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.EntryMem
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.EntryMem
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Formalism.ConjugateSelfDual ReciprocityTheory.Gal IsLocalRing UpperTheory.V UpperTheory.V.Base UpperTheory.V.Alg UpperTheory.V.HV UpperTheory.V.GradeZeroInterpolatingElement
 
 section SlopeTestRemainingChoices
@@ -16,7 +60,7 @@ private theorem wcomp_mul_homog (O : Type) [CommRing O] {σ X : Type} [AddCommGr
     have hp' := Finset.HasAntidiagonal.mem_antidiagonal.1 hp
     by_cases h2 : Finsupp.weight wt p.2 = w
     · rw [coeff_wcomp, if_pos]
-      rw [← h, ← hp', map_add, h2, add_sub_cancel_right]
+      rw [← h, ← hp', map_add (f := _), h2, add_sub_cancel_right]
     · rw [he _ h2, mul_zero, mul_zero]
   · symm
     refine Finset.sum_eq_zero fun p hp => ?_
@@ -25,7 +69,7 @@ private theorem wcomp_mul_homog (O : Type) [CommRing O] {σ X : Type} [AddCommGr
     · rw [coeff_wcomp, if_neg, zero_mul]
       intro h1
       apply h
-      rw [← hp', map_add, h1, h2, sub_add_cancel]
+      rw [← hp', map_add (f := _), h1, h2, sub_add_cancel]
     · rw [he _ h2, mul_zero]
 
 private theorem span_coeffs {O R X κ N : Type} [CommRing O] [CommRing R] [Algebra O R] [AddCommGroup X]
@@ -45,15 +89,16 @@ private theorem span_coeffs {O R X κ N : Type} [CommRing O] [CommRing R] [Algeb
         fun n hn => hf n (by simpa using hn)⟩
     · exact ⟨0, map_zero _, ∅, by simp, fun n _ => map_zero _⟩
     · rintro a b ⟨f, hf, s, ht, hs⟩ ⟨f', hf', s', ht', hs'⟩
-      refine ⟨f + f', by rw [map_add, hf, hf'], s ∪ s', fun j hj => ?_, fun n hn => ?_⟩
+      refine ⟨f + f', by rw [map_add (f := _), hf, hf'], s ∪ s', fun j hj => ?_, fun n hn => ?_⟩
       · rcases Finset.mem_union.1 hj with h | h
         · exact ht j h
         · exact ht' j h
       · rw [Finset.mem_union, not_or] at hn
-        rw [map_add, hs n hn.1, hs' n hn.2, add_zero]
+        rw [map_add (f := _), hs n hn.1, hs' n hn.2, add_zero]
   obtain ⟨f, hf, s, ht, hs⟩ := hl
   have hsum : f = ∑ j ∈ s, wcomp O W.wt j f := by
     ext n
+
     rw [map_sum]
     simp only [coeff_wcomp]
     rw [Finset.sum_ite_eq]
@@ -63,11 +108,13 @@ private theorem span_coeffs {O R X κ N : Type} [CommRing O] [CommRing R] [Algeb
   obtain ⟨a, ha⟩ := Ideal.mem_span_range_iff_exists_fun.1 hx
   choose G hG using fun i => W.surj (a i)
   have h1 : f - ∑ i, G i * e i ∈ RingHom.ker W.π := by
+
     rw [RingHom.mem_ker, map_sub, hf, ← ha, map_sum]
     simp [hG, heg]
   have key : ∀ j, W.π (wcomp O W.wt j f) = ∑ i, W.π (wcomp O W.wt (j - c i) (G i)) * g i := by
     intro j
     have h2 := W.homog _ h1 j
+
     rw [RingHom.mem_ker, map_sub, map_sub, sub_eq_zero, map_sum, map_sum] at h2
     rw [h2]
     refine Finset.sum_congr rfl fun i _ => ?_
@@ -78,6 +125,7 @@ private theorem span_coeffs {O R X κ N : Type} [CommRing O] [CommRing R] [Algeb
     exact hB n i ⟨_, wcomp_mem O W.wt _ _, rfl⟩
   · rw [← hf]
     conv_lhs => rw [hsum]
+
     rw [map_sum]
     simp only [key, Finset.sum_mul]
     exact Finset.sum_comm
@@ -103,7 +151,7 @@ theorem UpperTheory.V.GradeZeroInterpolatingElement.kerA :
       f f.2 h0
     have hf' : f = ∑ i, (⟨a i, ha i⟩ : M.A) * Sum.elim (Sum.elim M.eqns.F M.eqns.E) M.eqns.Z i := by
       apply Subtype.ext
-      rw [hfa, AddSubmonoidClass.coe_finset_sum]
+      rw [hfa, AddSubmonoidClass.coe_finsetSum]
       refine Finset.sum_congr rfl ?_
       rintro ((i | i) | i) - <;> rfl
     rw [hf']

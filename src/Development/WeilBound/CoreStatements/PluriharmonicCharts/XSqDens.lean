@@ -1,9 +1,54 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.MetricPeriods.Pull1
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.TsgPolyVolPolyCoeffEven
-import GroundTheory.HeightsAndTheta.Heights.Intersections.StatementsFibreLocal
-import Development.AutomorphicSpectrum.Statements.MetricStatements.AgreementIffGuarded
-import ReciprocityTheory.AnalyticForms.PlurisubharmonicFunctions.CovLog
+module
+
+public import Development.AutomorphicSpectrum.Definitions.MetricPeriods.Pull1
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.AnalyticForms.PlurisubharmonicFunctions.CovLog
+import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.FrameDefinitions.PermFinTwoUniv
+
+@[expose] public section
+
 open MvPolynomial MeasureTheory Filter Topology ReciprocityTheory.AnForm ReciprocityTheory.AnForm.M ReciprocityTheory.AnForm.P ReciprocityTheory.ChartRestriction.G.Geo ReciprocityTheory.ChartRestriction.G.AI ReciprocityTheory.ChartRestriction.G.AI.I1 ReciprocityTheory.ChartRestriction.G.AI.I2 ReciprocityTheory.ChartRestriction.G.AI.I4 GlobalTheory.CompanionTheory.Ar.PB GroundTheory.Heights₂.Heights GroundTheory.Heights₂.Heights.LowerBoundFree
 
 namespace PositivityTheory.Xgp.sq_dens
@@ -123,7 +168,7 @@ theorem lin_analyticAt {D D' : ℕ} (τ : Fin D' → Fin D) (z : Fin D → ℂ) 
   exact ContinuousLinearMap.analyticAt _ _
 
 theorem lin_contDiff {D D' : ℕ} (τ : Fin D' → Fin D) : ContDiff ℝ 2 (lin τ) :=
-  contDiff_pi.2 fun j => contDiff_apply ℝ ℂ (τ j)
+  contDiff_pi.2 fun j => contDiff_apply ℝ (fun _ => ℂ) (τ j)
 
 theorem herm2_line_expand (G : Matrix (Fin 2) (Fin 2) ℂ) (b : ℂ) :
     herm2 G ![1, b] ![1, b] = G 0 0 + G 0 1 * b + (starRingEnd ℂ) b * G 1 0 + (starRingEnd ℂ) b * G 1 1 * b := by
@@ -170,7 +215,7 @@ theorem α_cd (n : ℕ) (a : σ) {y : Fin d → ℂ} (hy : y ∈ Q.U n) : ContDi
 theorem xi_cd {D : ℕ} (n : ℕ) (τ : Fin d → Fin D) (j : Fin D) {z : Fin D → ℂ} (hz : lin τ z ∈ Q.U n) :
     ContDiffAt ℝ 2 (fun z' => xiPot (Q.G n (lin τ z')) (z' j)) z :=
   contDiffAt_xiPot (fun p q => (G_cd Q n p q hz).comp z (lin_contDiff τ).contDiffAt)
-    (contDiff_apply ℝ ℂ j).contDiffAt (Q.G_pos n _ hz)
+    (contDiff_apply ℝ (fun _ => ℂ) j).contDiffAt (Q.G_pos n _ hz)
 
 theorem sumα_cd {D : ℕ} (n : ℕ) (c : σ → ℝ) (τ : Fin d → Fin D) {z : Fin D → ℂ} (hz : lin τ z ∈ Q.U n) :
     ContDiffAt ℝ 2 (fun z' => ∑ a, c a * Q.α n a (lin τ z')) z :=

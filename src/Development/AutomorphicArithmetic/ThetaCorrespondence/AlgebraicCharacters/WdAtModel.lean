@@ -1,11 +1,57 @@
-import Development.AutomorphicArithmetic.ThetaCorrespondence.AlgebraicCharacters.EmbOrbit
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.WeilDeligneParamAboveLIndependentLocalEmbedding
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.WdParameterMonodromyZeroIffPotentiallyCrystallin
+module
+
+public import Development.AutomorphicArithmetic.ThetaCorrespondence.AlgebraicCharacters.EmbOrbit
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.WdPstCycRepNeTrivWD
+import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.MkMemAdmissibleAtIffCocycle
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.WeilGroupRestriction
 import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FiniteDimensionalAdjoinRange
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.WeilGroupRestriction
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisGeometry₂.ConclusionFinite
-import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.CrystallineBaseChange.PotRes
-open private ex_bridge from Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.CrystallineBaseChange.PotRes
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FinrankLetterHomComp
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LocalIndepBridge
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.WdParameterMonodromyZeroIffPotentiallyCrystallin
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsRecLawsSuppUnitSurj
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.IsPotentiallySemistableCoefficientFieldEnlarge
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.WeilDeligneParamAboveLIndependentLocalEmbedding
+public import Development.AbelianVarietyTheory.PublishedTheorems.GaloisGeometry₂.ConclusionFinite
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.CharpolyEqOfIsNilpotentSub
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.CharpolyWeilDelignePotSemistableEnlargeCoefficie
+import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.TripleAtt
+
+@[expose] public section
+
 open UpperTheory.Lit.CharWD GlobalTheory.Published
 
 section SlopeTestRemainingChoices
@@ -47,7 +93,7 @@ private theorem alpha_res {F F' Ω : Type} [Field F] [NumberField F] [Field F'] 
   push_cast
   ring
 
-set_option maxHeartbeats 1000000 in
+
 private theorem eig_res {F F' Ω : Type} [Field F] [NumberField F] [Field F'] [NumberField F'] [Field Ω]
     [Algebra F Ω] [Algebra F' Ω] [IsAlgClosure F Ω] [IsAlgClosure F' Ω]
     {l : ℕ} [Fact l.Prime] (P : LocPrime l) (ι : Om l ≃+* ℂ)
@@ -97,11 +143,34 @@ end SlopeTestRemainingChoices
 
 open NumberField IsDedekindDomain Formalism.ConjugateSelfDual ReciprocityTheory.Gal Formalism.BasicNotions Formalism.BasicNotions.Loc Formalism.MainNotions.N GlobalTheory.WeilDeligne GlobalTheory.Pst
   GlobalTheory.WeilRestrict GlobalTheory.TripleGal UpperTheory.V in
-set_option maxHeartbeats 1000000 in
+
 theorem UpperTheory.Lit.CharWD.chRes :
     ChRes := by
   intro F F' Ω _ _ _ _ _ _ _ _ _ _ _ l _ A w w' ι h h' O _ _ _ Bw hj
-  obtain ⟨L', Bw', hBj⟩ := ex_bridge (E := F') (A := A) Bw.j hj
+  have hBridge : ∃ (L : FinExt l) (B : LocBridge l F' Ω (Dec (F := F') A) ↥(OL L)),
+      B.j = Bw.j := by
+    let K : FinExt l :=
+      ⟨IntermediateField.adjoin ℚ_[l] (Set.range fun x : F' => Bw.j (algebraMap F' Ω x)),
+        GlobalTheory.PlaceBridge.finiteDimensional_adjoin_range (Bw.j.comp (algebraMap F' Ω))⟩
+    have : FiniteDimensional ℚ_[l] ↥K.1 := K.2
+    let L : FinExt l := ⟨IntermediateField.normalClosure ℚ_[l] K.1 (PadicAlgCl l), inferInstance⟩
+    obtain ⟨e, he, he', hec⟩ := GlobalTheory.PlaceBridge.exists_mulEquiv (E := F') hj K rfl
+    exact ⟨L,
+      { Kw := K
+        j := Bw.j
+        j_E := fun x => IntermediateField.subset_adjoin _ _ ⟨x, rfl⟩
+        j_dense := GlobalTheory.PlaceBridge.adjoin_range_subset_closure (Bw.j.comp (algebraMap F' Ω))
+        e := e
+        e_cont := he
+        e_symm_cont := he'
+        e_comm := hec
+        LL := L
+        LL_split := fun τ x => AlgHom.fieldRange_le_normalClosure τ ⟨x, rfl⟩
+        eO := RingEquiv.refl _
+        eO_alg := fun _ => rfl
+        eO_cont := continuous_id
+        eO_symm_cont := continuous_id }, rfl⟩
+  obtain ⟨L', Bw', hBj⟩ := hBridge
   have hj' : Induces Bw' := fun x => by rw [hBj]; exact hj x
   refine ⟨↥(OL L'), inferInstance, inferInstance, inferInstance, Bw', hj', fun κ κ' _ hκ ξ hξ => ?_⟩
   obtain ⟨⟨L₀, r₀, hm₀, hV₀⟩, hs, hξ⟩ := hξ

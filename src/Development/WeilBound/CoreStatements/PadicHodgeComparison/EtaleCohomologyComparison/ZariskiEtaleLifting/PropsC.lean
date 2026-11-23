@@ -1,23 +1,62 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.ZariskiEtaleLifting.CompatH
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.ZariskiEtaleLifting.IsFirstChernClassOfLineBundle
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.CechPairings.Imports
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SquarePull
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.TwAcrFromBase
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.PullFrob
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.UnitsPullbackEmptyProductOne
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.QuotientMapFactor
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.PullCup
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.MapHClsEq
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.OmMorImg
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SmulFil
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ReductionCommutesGaloisAction
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.PhiBaseLe
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.RedHcPullHc
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.RedHcCup
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.RedHcOneH
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.RedCmp
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.PullTransport
+module
+
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.ZariskiEtaleLifting.IsFirstChernClassOfLineBundle
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.ZariskiEtaleLifting.SchFnPtTw
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.MapHClsEq
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.OmMorImg
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.PhiBaseLe
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.PullCup
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.PullFrob
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.PullTransport
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.QuotientMapFactor
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.RedCmp
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.RedHcCup
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.RedHcOneH
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.RedHcPullHc
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ReductionCommutesGaloisAction
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SmulFil
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SquarePull
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.TwAcrFromBase
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.UnitsPullbackEmptyProductOne
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option backward.isDefEq.respectTransparency false
 open CategoryTheory AlgebraicGeometry DividedPowers GroundTheory.PAdicHodge GlobalTheory.LogCris CrystallineSemistableComparison CrystallineSemistableComparison.PAlg CrystallineSemistableComparison.B

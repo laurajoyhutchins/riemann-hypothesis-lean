@@ -1,5 +1,43 @@
-import Formalism.LocalToGlobal.IndefiniteReal.LevelTypeEquivalence.ThetaSquareIntegrable
-import Formalism.LocalToGlobal.IndefiniteReal.PHeisFC
+module
+
+public import Formalism.LocalToGlobal.IndefiniteReal.LocalNewformFunction
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -68,19 +106,6 @@ section Unit
 
 variable {ψ : AddChar (AF D.host.F) ℂ} {S T : HSp D} {χS χT : (AE D)ˣ →* Circle}
   {om : GA D S × GA D T →* Module.End ℂ (WO S T → ℂ)}
-
-theorem norm_weilRepresentation_thetaFunction_preserved (hω : IsWeilDatumO ψ S T χS χT om) {μ : Measure (WO S T)} {𝓕 : Set (WO S T)}
-    (hμ : μ.IsAddHaarMeasure) (h𝓕 : IsAddFundamentalDomain (ratL T S) 𝓕 μ) (p : GA D S × GA D T)
-    {f : WO S T → ℂ} (hf : IsThetaFunO ψ S T f) : nrm2 μ 𝓕 (om p f) = nrm2 μ 𝓕 f := by
-  unfold nrm2
-  have hu := hω.om_unit μ 𝓕 hμ h𝓕 p f hf
-  simp_rw [← ofReal_norm_eq_enorm, ← ENNReal.ofReal_pow (norm_nonneg _)] at hu
-  have c1 : Continuous fun w => ‖om p f w‖ ^ 2 := (hω.om_pres p f hf).cont.norm.pow 2
-  have c2 : Continuous fun w => ‖f w‖ ^ 2 := hf.cont.norm.pow 2
-  rw [integral_eq_lintegral_of_nonneg_ae (f := fun w => ‖om p f w‖ ^ 2)
-      (Filter.Eventually.of_forall fun _ => by positivity) c1.aestronglyMeasurable,
-    integral_eq_lintegral_of_nonneg_ae (f := fun w => ‖f w‖ ^ 2)
-      (Filter.Eventually.of_forall fun _ => by positivity) c2.aestronglyMeasurable, hu]
 
 end Unit
 

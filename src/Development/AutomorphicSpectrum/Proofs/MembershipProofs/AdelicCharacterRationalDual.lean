@@ -1,12 +1,63 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.MembershipProofs.AdelicCharacterRationalDualImports
-import Development.AutomorphicSpectrum.Proofs.MembershipProofs.ThetaSumAdmissibility
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.IsOpenNsmulAdelicCompletionOfVectorSet
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.FiniteAdeleStrongApproximationModNat
+module
+
+public import Development.AutomorphicSpectrum.Proofs.MembershipProofs.AdelicCharacterRationalDualImports
+public import GroundTheory.AutomorphicForms.GL2.GJMatrixFinite
+public import Development.AbelianVarietyTheory.Definitions.Divisors.HilbertNinetyQuotientHomEqIff
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.FiniteAdeleStrongApproximationModNat
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.IsOpenNsmulAdelicCompletionOfVectorSet
+public import Development.AutomorphicSpectrum.Proofs.MembershipProofs.DenseHasCompactSupport
+public import Development.AutomorphicSpectrum.Proofs.MembershipProofs.ThetaDistributionHeisenbergInvariant
+public import Development.AutomorphicSpectrum.Proofs.MembershipProofs.ThetaSumAdmissibility
 import GroundTheory.GlobalFields.TateThesis.AdelicCharDual
-import GroundTheory.AutomorphicForms.GL2.GJMatrixFinite
-import Development.AutomorphicSpectrum.Proofs.MembershipProofs.ThetaDistributionHeisenbergInvariant
-import Development.AutomorphicSpectrum.Proofs.MembershipProofs.DenseHasCompactSupport
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -39,7 +90,7 @@ theorem comb_of_basis : ∀ (V : Type) [NormedAddCommGroup V] [NormedSpace ℝ V
     refine h2 (fun i => m (e i)) (P f) (P g) fun x => ?_
     rw [hP, hP, h]
     congr 1
-    rw [map_add, hsum]
+    rw [map_add (f := _), hsum]
     simp
   obtain ⟨a, ha⟩ := GlobalTheory.CompanionTheory.DiracComb.eq_mul_comb _ (T.comp P) hA hC
   refine ⟨a, fun f => ?_⟩
@@ -325,7 +376,7 @@ theorem pureA_add_rat {κ : Type} (f : (κ → mixedEmbedding.mixedSpace F) → 
   unfold pureA
   congr 2
   funext i
-  rw [Pi.add_apply, Pi.add_apply, InfiniteAdeleRing.mixedEmbedding_eq_algebraMap_comp, ← map_add]
+  rw [Pi.add_apply, Pi.add_apply, InfiniteAdeleRing.mixedEmbedding_eq_algebraMap_comp, ← map_add (f := _)]
   rfl
 
 theorem pureA_mem {κ : Type} [Fintype κ] (f : SchwartzMap (κ → mixedEmbedding.mixedSpace F) ℂ)
@@ -372,8 +423,9 @@ theorem level_zero (hψ : Continuous ψ) (h1 : ψ ≠ 1) (hn : ∀ x, ‖ψ x‖
       Nat.cast_smul_eq_nsmul]
   have hsum : ∀ m : Module.Free.ChooseBasisIndex ℤ (𝓞 F) → ℤ,
       ∑ j, (m j : ℝ) • b j = N • mixedEmbedding F ((∑ j, m j • ω j : 𝓞 F) : F) := fun m => by
+
     rw [show ((∑ j, m j • ω j : 𝓞 F) : F) = algebraMap (𝓞 F) F (∑ j, m j • ω j) from rfl, map_sum, map_sum,
-      Finset.smul_sum]
+    Finset.smul_sum]
     refine Finset.sum_congr rfl fun j _ => ?_
     rw [hb, map_zsmul, map_zsmul, Int.cast_smul_eq_zsmul, smul_comm]
   let B := Pi.basis fun _ : κ => b
@@ -463,7 +515,7 @@ theorem level_span
   | add g g' _ _ h h' =>
     have e : pureA F f (g + g') = pureA F f g + pureA F f g' := by funext x; simp [pureA, mul_add]
     rw [e]
-    exact ⟨add_mem h.1 h'.1, by rw [map_add, thetaAdd F h.1 h'.1, h.2, h'.2, mul_add]⟩
+    exact ⟨add_mem h.1 h'.1, by rw [map_add (f := _), thetaAdd F h.1 h'.1, h.2, h'.2, mul_add]⟩
   | smul a g _ h =>
     have e : pureA F f (a • g) = a • pureA F f g := by funext x; simp [pureA, mul_left_comm]
     rw [e]
@@ -508,7 +560,7 @@ theorem theta_unique : ∀ (F : Type) [Field F] [NumberField F] [LocallyCompactS
       obtain ⟨M, hM, h⟩ := h
       obtain ⟨M', hM', h'⟩ := h'
       refine ⟨M * M', Nat.mul_pos hM hM', fun N hN hd => ?_⟩
-      rw [map_add, thetaAdd F hΦ hΨ, h N hN ((dvd_mul_right _ _).trans hd),
+      rw [map_add (f := _), thetaAdd F hΦ hΨ, h N hN ((dvd_mul_right _ _).trans hd),
         h' N hN ((dvd_mul_left _ _).trans hd), mul_add]
     | smul a Φ _ h =>
       obtain ⟨M, hM, h⟩ := h

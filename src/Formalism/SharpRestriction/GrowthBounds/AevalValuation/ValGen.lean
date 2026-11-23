@@ -1,6 +1,51 @@
-import Formalism.SharpRestriction.GrowthBounds.AevalValuation.PlDefs
-import Formalism.SharpRestriction.GrowthBounds.TwistedSubstitution.TwistedMonomialFiltration.TwistSubXMemSupported
-import Formalism.SharpRestriction.GrowthBounds.PolynomialLevels.LowestWeightNonposOffSet
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.AevalValuation.PlDefs
+public import Formalism.SharpRestriction.GrowthBounds.DiagonalSupport.MembDefs
+public import Formalism.SharpRestriction.GrowthBounds.TwistedSubstitution.TwistedMonomialFiltration.TMemLaurentFiltration
+public import Formalism.SharpRestriction.GrowthBounds.ValuationLowestDegreeMapFractionField
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.SharpRestriction.GrowthBounds.DiagonalSupport.TwiceValuationFactorialProduct
+import Formalism.SharpRestriction.GrowthBounds.PolynomialLevels.TlNonempty
+
+@[expose] public section
 
 noncomputable section
 
@@ -13,7 +58,7 @@ open Formalism.MainNotions.G Formalism.MainNotions.Proposition5Numerics Formalis
 private theorem le_valS_iff_forall_coeff_ne_zero {R : Type} [CommRing R] {ι : Type} {n : ℕ} [NeZero n] (LL : Letters ι)
     (S : Set ι) (G : MvPolynomial (ι × Fin n) R) (a : WithTop ℤ) :
     a ≤ valS LL S G ↔ ∀ (m : ι × Fin n →₀ ℕ) (k : ℤ),
-      (coeff m (twistSub LL S (lastIdx n) G)).coeff k ≠ 0 → a ≤ (k : WithTop ℤ) := by
+      (AddMonoidAlgebra.coeff (twistSub LL S (lastIdx n) G) m).coeff k ≠ 0 → a ≤ (k : WithTop ℤ) := by
   rw [valS, Finset.le_inf_iff]
   constructor
   · intro h m k hk
@@ -47,6 +92,7 @@ private theorem ringHom_eq_of_mem_supported_of_eqOn {σ R T : Type} [CommRing R]
 private theorem homComp_eq_polComp {R ι : Type} [CommRing R] {n : ℕ} (d : ι → ℕ)
     (F : MvPolynomial (ι × Fin n) R) : homComp d F = Joints.StandardMonomialSpace.polComp R n d F := by
   conv_rhs => rw [F.as_sum]
+
   rw [map_sum]
   simp only [Joints.StandardMonomialSpace.polComp, Joints.StandardMonomialSpace.suppProj_monomial, Set.mem_setOf_eq]
   rw [homComp, Finset.sum_filter]
@@ -57,7 +103,8 @@ theorem valS_sum_ge {R : Type} [CommRing R] {ι : Type} {n : ℕ} [NeZero n] (LL
   rw [le_valS_iff_forall_coeff_ne_zero]
   intro m k hk
   have hs : Joints.StandardMonomialSpace.SuppIn {k : ℤ | a ≤ (k : WithTop ℤ)}
-      (coeff m (twistSub LL S (lastIdx n) (∑ i ∈ s, f i))) := by
+      (AddMonoidAlgebra.coeff (twistSub LL S (lastIdx n) (∑ i ∈ s, f i)) m) := by
+
     rw [map_sum, coeff_sum]
     apply Joints.StandardMonomialSpace.SuppIn.sum
     intro i hi k' hk'
@@ -123,11 +170,13 @@ theorem twist_aeval (LL : Letters ι) (LL' : Letters κ) (S L : Set ι) (S' : Se
       rw [hg]
       simp only [twistSub, eval₂Hom_X', if_pos hS, if_pos hf, hvec]
       split_ifs
-      · simp only [map_sum, map_mul, thetaG, eval₂Hom_C, eval₂Hom_X']
+      · set_option synthInstance.maxHeartbeats 100000 in
+          simp only [thetaG, map_sum, map_mul, eval₂Hom_C, eval₂Hom_X']
         apply Finset.sum_congr rfl
         intro b _
         rw [(h1 (v.1, b) hv hS).1, map_X]
-      · simp only [map_sum, map_mul, thetaG, eval₂Hom_C, eval₂Hom_X']
+      · set_option synthInstance.maxHeartbeats 100000 in
+          simp only [thetaG, map_sum, map_mul, eval₂Hom_C, eval₂Hom_X']
         apply Finset.sum_congr rfl
         intro b _
         rw [(h1 (v.1, b) hv hS).1, map_X]

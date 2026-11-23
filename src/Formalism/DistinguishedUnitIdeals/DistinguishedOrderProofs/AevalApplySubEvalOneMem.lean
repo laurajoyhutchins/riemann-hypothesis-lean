@@ -1,5 +1,47 @@
-import Mathlib
-import Formalism.DistinguishedUnitIdeals.CoprimeProd
+module
+
+public import Formalism.DistinguishedUnitIdeals.Statement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -26,7 +68,7 @@ theorem aeval_apply_sub_eval_one_mem {R M : Type} [CommRing R] [AddCommGroup M] 
   | add p q hp hq =>
     have e : Polynomial.aeval γ (p + q) w - (p + q).eval 1 • w =
         (Polynomial.aeval γ p w - p.eval 1 • w) + (Polynomial.aeval γ q w - q.eval 1 • w) := by
-      rw [map_add, LinearMap.add_apply, Polynomial.eval_add, add_smul]; abel
+      rw [map_add (f := _), LinearMap.add_apply, Polynomial.eval_add, add_smul]; abel
     rw [e]
     exact U.add_mem hp hq
   | monomial n a =>
@@ -43,22 +85,5 @@ theorem aeval_apply_sub_eval_one_mem {R M : Type} [CommRing R] [AddCommGroup M] 
 theorem aeval_sub_eval_one_smul_mem : KillerShift := by
   intro R M _ _ _ γ U hU P w hw
   exact aeval_apply_sub_eval_one_mem γ U hU w hw P
-
-theorem exists_fixed_add_of_sub_mem : InvConst := by
-  intro k V _ _ _ γ U hU Q₀ hQ hkill w hw
-  have hm := aeval_apply_sub_eval_one_mem γ U hU w hw Q₀
-  set c := Q₀.eval 1 with hc
-  set x := Polynomial.aeval γ Q₀ w with hx
-  refine ⟨c⁻¹ • x, w - c⁻¹ • x, ?_, ?_, by abel⟩
-  · have h := hkill w
-    rw [map_mul, map_sub, Polynomial.aeval_X, map_one] at h
-    change (γ - 1) x = 0 at h
-    rw [LinearMap.sub_apply] at h
-    change γ x - x = 0 at h
-    rw [map_smul, sub_eq_zero.mp h]
-  · have e : w - c⁻¹ • x = (-c⁻¹) • (x - c • w) := by
-      rw [smul_sub, smul_smul, neg_mul, inv_mul_cancel₀ hQ, neg_smul, neg_smul, one_smul]; abel
-    rw [e]
-    exact U.smul_mem _ hm
 
 end Formalism.ExponentWindows

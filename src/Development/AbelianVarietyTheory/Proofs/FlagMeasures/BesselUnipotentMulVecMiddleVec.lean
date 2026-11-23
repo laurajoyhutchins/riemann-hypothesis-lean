@@ -1,6 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.BlockAnti
-import Formalism.FormalDegreeBessel.FinalG
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.UpperOff
+public import Formalism.FormalDegreeBessel.FinalG
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -26,6 +71,7 @@ theorem gramProj_comb {n r : ℕ} (P : Submodule ℂ (EuclideanSpace ℂ (Fin n)
   have hlin : (fun a => P.starProjection (WithLp.toLp 2 (∑ b, U b a • v b))) =
       fun a => ∑ b, U b a • P.starProjection (WithLp.toLp 2 (v b)) := by
     funext a
+
     simp [map_sum, map_smul]
   rw [hlin, gram_sum_smul_eq_conjTranspose_mul_gram_mul, Matrix.det_mul, Matrix.det_mul, Matrix.det_conjTranspose, hU]
   simp
@@ -331,7 +377,8 @@ theorem Yv_K (z z' : Fin (2 * r + k + 1) → ℂ) (γ x : Mat k r) {κ : Mat k r
   rw [gramProj_unitary (Ppos k r z z' γ x) (Ppos k r z z' γ (x * κ)) _ κ hκ hQ]
   congr 1
   funext a
-  simp only [Matrix.mul_inv_rev, hinv, Matrix.mulVec_mulVec, ← Matrix.mul_assoc, hu', Matrix.one_mul]
+  simp only [Matrix.mul_inv_rev, ← Matrix.mulVec_mulVec, hinv]
+  rw [Matrix.mulVec_mulVec, hu', Matrix.one_mulVec]
 
 private theorem inv_mul_mul_eq_of_eq_conj {k r : ℕ} {m γ ρ : Mat k r} (um : IsUnit m.det) (uγ : IsUnit γ.det)
     (hm : m = γ * ρ * γ⁻¹) : m⁻¹ * γ * ρ = γ := by

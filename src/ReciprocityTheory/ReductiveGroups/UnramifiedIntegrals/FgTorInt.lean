@@ -1,8 +1,58 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.FgIsoU
-import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.FgGauss
-import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.FgMulN
+module
+
+public import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.LatModel
+public import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.MulStableIntegral
+public import Formalism.LocalToGlobal.TorsionIntegrality.WeierstrassTwoTorsion.TwoTorsionU
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.CoeffOneSubstOfConstantCoeffEqZero
+public import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.FgBasic
+public import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.FgGauss
+public import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.FgIsoU
+public import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.FgMulN
 import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.NormNatCastClOfNotDvd
+import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.ShortWIntModel
+public import Formalism.FormalGroupLog.Statement
+public import Formalism.LocalToGlobal.TorsionIntegrality.WeierstrassTwoTorsion.CompInv
+public import Formalism.LocalToGlobal.TorsionIntegrality.WeierstrassTwoTorsion.StatementK
+
+@[expose] public section
 
 noncomputable section
 
@@ -16,9 +66,12 @@ theorem le_one_of_prod_max_le_one {α : Type} (S : Finset α) (f : α → ℝ)
   classical
   rw [← Finset.mul_prod_erase S _ hQ] at h
   have h1 : (1 : ℝ) ≤ ∏ P ∈ S.erase Q, max 1 (f P) :=
-    Finset.one_le_prod fun P _ => le_max_left _ _
-  have h2 : max 1 (f Q) ≤ max 1 (f Q) * ∏ P ∈ S.erase Q, max 1 (f P) :=
-    le_mul_of_one_le_right (le_trans zero_le_one (le_max_left _ _)) h1
+    Finset.one_le_prod₀ fun P _ => le_max_left _ _
+  have h2 : max 1 (f Q) ≤ max 1 (f Q) * ∏ P ∈ S.erase Q, max 1 (f P) := by
+    calc
+      max 1 (f Q) = max 1 (f Q) * 1 := (mul_one _).symm
+      _ ≤ max 1 (f Q) * ∏ P ∈ S.erase Q, max 1 (f P) :=
+        mul_le_mul_of_nonneg_left h1 (le_trans zero_le_one (le_max_left _ _))
   exact (le_max_right _ _).trans (h2.trans h)
 
 theorem tor_integral (l : ℕ) [Fact l.Prime] (hl : l ≠ 2) (L : PeriodPair) (ι : ℂ ≃+* ℂ_[l])

@@ -1,8 +1,12 @@
-import ReciprocityTheory.DualLattices.ColengthCotangentBoundStatementOfClaim
-import ReciprocityTheory.DualLattices.PrimeHopfOrderOfAddEquiv
-import ReciprocityTheory.DualLattices.MemDualLat
-import ReciprocityTheory.DualLattices.ImportsBis
-import ReciprocityTheory.DualLattices.SqIdeal
+module
+
+public import ReciprocityTheory.DualLattices.ColengthCotangentBoundStatementOfClaim
+public import ReciprocityTheory.DualLattices.PrimeHopfOrderOfAddEquiv
+public import ReciprocityTheory.DualLattices.MemDualLat
+public import ReciprocityTheory.DualLattices.ImportsBis
+public import ReciprocityTheory.DualLattices.SqIdeal
+
+@[expose] public section
 
 noncomputable section
 
@@ -227,6 +231,7 @@ theorem claim_all (p : ℕ) [hp : Fact p.Prime] (C : Type) [Field C] [IsAlgClose
     obtain ⟨r, hr⟩ := hg2 b hb
     refine ⟨r, ?_⟩
     have h1 := pullQ_sq K AA AQ hAQ hr
+
     simpa [map_sub, map_sum, map_smul] using h1
   have hsup : ∀ z ∈ (augIdeal (AA.carrier.comap (pullQ (R := R) K))).map (pullQ (R := R) K) ⊔
         augIdeal AA.carrier * augIdeal AA.carrier,
@@ -301,6 +306,7 @@ theorem claim_all (p : ℕ) [hp : Fact p.Prime] (C : Type) [Field C] [IsAlgClose
       simp only [Fin.snoc_castSucc, Fin.snoc_last, Fin.castSucc_lt_castSucc_iff, hnl, if_false,
         zero_smul, add_zero]
       have h1 := pullQ_sq K AA AQ hAQ ha
+
       simpa [map_sub, map_sum, map_smul, apply_ite (pullQ (R := R) K), map_zero] using h1
   · intro c hc
     obtain ⟨cB, hcB⟩ := hasColen_of_lat v AQ.lat

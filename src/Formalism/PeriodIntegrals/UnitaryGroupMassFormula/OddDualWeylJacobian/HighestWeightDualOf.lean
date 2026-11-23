@@ -1,6 +1,56 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.OddDualWeylJacobian.JacRev
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.OddDualWeylJacobian.MnrUpdateEqZero
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.OddDualWeylJacobian.JacRev
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.OddDualWeylJacobian.MnrUpdateEqZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open MvPolynomial Matrix
 
@@ -14,12 +64,12 @@ lemma nuNext_castSucc {m : ℕ} (ν : Fin (m + 1) → ℕ) (t : Fin m) : nuNext 
   have ht := t.isLt
   have h : (t.castSucc : Fin (m + 1)).val + 1 < m + 1 := by rw [Fin.val_castSucc]; omega
   unfold PI.OddDualWeyl.nuNext
-  rw [dif_pos h]
+  rw [dite_eq_left h]
   congr 1
 
 lemma nuNext_last {m : ℕ} (ν : Fin (m + 1) → ℕ) : nuNext ν (Fin.last m) = 0 := by
   unfold PI.OddDualWeyl.nuNext
-  rw [dif_neg (by simp)]
+  rw [dite_eq_right (by simp)]
 
 lemma nuStar_apply {m : ℕ} (lam : Fin (m + 1) → ℤ) (t : Fin (m + 1)) :
     nuOf (lamStar lam) t = (lam 0 - lam t.rev).toNat := by
@@ -110,12 +160,12 @@ lemma sum_expo {m : ℕ} (lam : Fin (m + 1) → ℤ) (hlam : Antitone lam) :
   have hG : ∀ t : Fin m, G t.val = PI.OddDualWeyl.nuOf lam t.castSucc := fun t => by
     have := t.isLt
     show (if h : t.val < m + 1 then _ else _) = _
-    rw [dif_pos (by omega)]
+    rw [dite_eq_left (by omega)]
     rfl
   have hG1 : ∀ t : Fin m, G (t.val + 1) = PI.OddDualWeyl.nuOf lam t.succ := fun t => by
     have := t.isLt
     show (if h : t.val + 1 < m + 1 then _ else _) = _
-    rw [dif_pos (by omega)]
+    rw [dite_eq_left (by omega)]
     rfl
   have hG0 : G 0 = PI.OddDualWeyl.nuOf lam 0 := by simp [G]
   have key : ((∑ t : Fin m, (m - 1 - t.val) * (PI.OddDualWeyl.nuOf lam t.castSucc - PI.OddDualWeyl.nuOf lam t.succ) : ℕ) : ℤ) =

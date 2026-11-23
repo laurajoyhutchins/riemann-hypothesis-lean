@@ -1,17 +1,67 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.MemLevEigenIffTransl
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MulEqOneOfCovolumeIdentity
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GeoLevelActionIffGeoAct
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LevelGroupLiftExists
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsLatticeBasisHermitianSpaceStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CompletedLatticeStabilizerIffBasisIntegralStatement
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ParahoricLevelLiftsExist
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.PrincipalLevelEqHalfMarkingStabilizer
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.MemLevEigenIffTransl
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GeoLevelActionIffGeoAct
+public import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.LevelLiftConditions
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.LevelHyperspecialTrivialCharacterSplitsOffPlaces
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.SupportedSubgroupSplitCommutePrimeIdempotents
+public import Development.AbelianVarietyTheory.Counterexamples.HeightSurvey.StarPurelyImaginaryEqNeg
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CompletedLatticeStabilizerIffBasisIntegralStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsLatticeAutomorphismModHalfLevelStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsLatticeBasisHermitianSpaceStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LevelGroupLiftExists
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MulEqOneOfCovolumeIdentity
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsAdelicUnitarySplitPlaceComponent
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ParahoricLevelLiftsExist
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.AdelicUnitaryExistsWithPrescribedParts
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsAdeleRingTensorEquivInfiniteProdFinite
 import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsLevelSubgroup
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.PrincipalLevelEqHalfMarkingStabilizer
+import Formalism.LocalToGlobal.Columns.StdLatUnimodular
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.UniformLevelMultiplicity
+
+@[expose] public section
 
 set_option autoImplicit false
-set_option synthInstance.maxHeartbeats 400000
-set_option maxHeartbeats 800000
+
+
 
 noncomputable section
 
@@ -98,11 +148,13 @@ theorem exists_idem_finset {Φ : AE D →+* FiniteAdeleRing (𝓞 D.host.E) D.ho
     | empty => rw [Finset.sum_empty, Finset.sum_empty, ev_zero]
     | cons a s ha ih => rw [Finset.sum_cons, Finset.sum_cons, ev_add, ih]
   refine ⟨∑ P ∈ T, δ P, ?_, fun Q hQ => ?_, fun Q hQ => ?_, fun Q hQ => ?_⟩
+
   · rw [map_sum]
     exact Finset.sum_eq_zero fun P _ => (hδ P).1
   · rw [ev, Finset.sum_eq_single_of_mem Q hQ fun P _ h => (hδ P).2.2 Q h.symm, (hδ Q).2.1]
   · rw [ev]
     exact Finset.sum_eq_zero fun P hP => (hδ P).2.2 Q fun h => hQ (h ▸ hP)
+
   · rw [map_sum, ev]
     exact Finset.sum_eq_zero fun P hP => (delta_conj hΦ (hδ P)).2.2 Q fun h => hT P hP (h ▸ hQ)
 
@@ -198,13 +250,13 @@ theorem exists_stab_lift (l : Level H) {V : HSp D} {β : GL (Fin V.rank) (EAf D)
   have hsf := supp_fin V (f := e + cA D e) hs
   rw [← hp] at hκ
   have hf : finSw D (e + cA D e) = p + Formalism.UG.sigR D.sp.cm.sig (Formalism.L2.Herm.Af D.host.F) p := by
-    rw [RingHom.map_add, finSw_cA, hp]
+    rw [RingHom.map_add (f := _), finSw_cA, hp]
   have hSt : finE V κ ∈ St β :=
     mem_St_of_part D.sp.cm.sig V.gram _ β hB.1 (hatL_selfDual hB) p u hpp (sigR_int p.2) Y hu' (finE V κ)
       (finE_mem_UA V κ) _ hf hsf hκ
   have hSt' : GlobalTheory.IndefiniteRowSideFullHecke.LatticeBasisLifts.finR V rfl κ ∈ St β := by rw [GlobalTheory.GeoLevel.finR_rfl]; exact hSt
   refine ⟨κ, mem_GfC_of_suppF V (f := e + cA D e) ?_ hs, hSt', ?_⟩
-  · rw [map_add, (parts_cA e).1, hinf, map_zero, add_zero]
+  · rw [map_add (f := _), (parts_cA e).1, hinf, map_zero, add_zero]
   · have h1 := (Formalism.L2.DIV.frGL_pullFr β ⟨_, hSt'⟩).trans (GlobalTheory.GeoLevel.finR_rfl V κ)
     rw [← h1] at hκ
     rw [map_eq_of_smul_eq _ β _ p hres _ Y hκ, hY]
@@ -222,8 +274,8 @@ theorem exists_isLevLift (l : Level H) (V : HSp D) (ι : Dw.La →ₗ[𝓞 D.hos
   rw [h3, ← hf, LinearEquiv.trans_apply, φ.symm_apply_apply]
   rfl
 
-open GlobalTheory.UnifEvery in
 
+open GlobalTheory.UnifEvery in
 theorem exists_isReduction : ∀ (D : D7) (H : ReciprocityTheory.ChartRestriction.G.Geo.Tor.Host D.host.E) (Dw : Datum H) (l : Level H) (V : Formalism.BasicNotions.TH.HSp D) (ι : Dw.La →ₗ[𝓞 D.host.E] (Fin (@HSpace.rank D.host.E _ _ D.host.cmStar V) → D.host.E)), LatEmb V ι → ∃ red : GlobalTheory.IndefiniteRowSideFullHecke.LiftedCharacterResidue.stabLat V →* GlobalTheory.IndefiniteRowSideFullHecke.LevelStructureAutomorphisms.LevelAut Dw l, GlobalTheory.LevDesc.IsReduction V ι red := by
   intro D H Dw l V ι hι
   have hs : ∀ k : GlobalTheory.IndefiniteRowSideFullHecke.LiftedCharacterResidue.stabLat V, (k : GA D V) ∈ GlobalTheory.IndefiniteRowSideFullHecke.EmbeddingLevelSets.levSet V 1 := fun k =>

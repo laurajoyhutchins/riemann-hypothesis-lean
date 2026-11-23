@@ -1,8 +1,47 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.IsThetaFam
-import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.HasConductorMulShift
-import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.UnramifiedCharacter
-import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.DualLiftInvariance
+module
+
+public import Development.AbelianVarietyTheory.Definitions.LatticeFrames.IsThetaFam
+public import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.UnramifiedCharacter
+public import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.DualLiftInvariance
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -107,7 +146,7 @@ structure AdaptFB (ψ : AddChar (AF D.host.F) ℂ) {σ : ℕ} (J : JacLev D (σ 
 def SplitCore {ρ : ℕ} (B : BesLev D ρ) (L₀ : Lat B.V₀) (v : Pl D) : Prop :=
   ∃ (LA : Lat B.A) (LL : Lat B.L), IsSelfDualC B.A LA ∧ IsSelfDualC B.L LL ∧ OrthAt B.o L₀ LA LL v
 
-def UInv (W : HSp D) {ρ : ℕ} (x y : Mx D W.rank ρ) : Prop := ∀ u : UX D ρ, pairS W (x ⬝ u.1.1) y = pairS W x y
+def UInv (W : HSp D) {ρ : ℕ} (x y : Mx D W.rank ρ) : Prop := ∀ u : UX D ρ, pairS W (x * u.1.1) y = pairS W x y
 
 structure HeisLaws (ψ : AddChar (AF D.host.F) ℂ) {V V₀ W W₀ : HSp D} {ρ σ : ℕ} (dV : HypDec V V₀ ρ) (dW : HypDec W W₀ σ)
     (x : Mx D W.rank ρ) (y : Mx D V₀.rank σ) (P : Pl D → Prop) (𝔉 : (WO V W → ℂ) → (WO V₀ W₀ → ℂ)) : Prop where
@@ -177,10 +216,10 @@ def Frame.IsLat (β : Frame p S n) (L : Lat S) (Λ : Submodule 𝒪[k] (n → k)
   ∀ x : n → k, x ∈ Λ ↔ (fun i => p.sec ((β.b *ᵥ x) i)) ∈ latV S L (· = p.v)
 
 def rd (α : Frame p S n') (β : Frame p T n) (t : WO S T) : Matrix n n' k :=
-  β.b' ⬝ Matrix.map t p.pr ⬝ α.b
+  β.b' * Matrix.map t p.pr * α.b
+
 
 open Classical in
-
 def extFun (α : Frame p S n') (β : Frame p T n) (Ψ : Matrix n n' k → ℂ) (t : WO S T) : ℂ :=
   if IsHalf p.e t then Ψ (rd α β t) else 0
 
@@ -211,12 +250,12 @@ def tensCol (Ψ : Matrix n n' k → ℂ) (a : (n → k) → ℂ) (x : Matrix n (
 def tensRow (Ψ : Matrix n n' k → ℂ) (b : (n' → k) → ℂ) (x : Matrix (n ⊕ Fin 1) n' k) : ℂ :=
   Ψ (x.submatrix Sum.inl id) * b (x (Sum.inr 0))
 
-open Classical in
 
+open Classical in
 def vecInd (Λ : Submodule 𝒪[k] (n → k)) (y : n → k) : ℂ := if y ∈ Λ then 1 else 0
 
-open Classical in
 
+open Classical in
 def dualInd (Λ : Submodule 𝒪[k] (n → k)) (η : n → k) : ℂ := if GlobalTheory.IndefiniteRowSideFullHecke.AppendedVectorData.InDual Λ η then 1 else 0
 
 def charInd (χ : AddChar 𝓀[k] ℂ) (Q : Pair k n) (y : n → k) : ℂ := χ (-Q.ev y) * vecInd Q.lat y

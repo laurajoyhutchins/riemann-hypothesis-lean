@@ -1,7 +1,44 @@
-import Mathlib
-import Formalism.LocalRingCardinality.DataLevel
-import Formalism.LocalRingCardinality.DataLevelD
-import Formalism.SharpRestriction.GlobalSchurBounds.GeneralLinearActions.GapAtLeast
+module
+
+public import Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -14,30 +51,6 @@ def SplitsCompletely (E : Type) [Field E] [NumberField E] (p : ℕ) : Prop :=
 
 theorem splitsCompletely_g (D : D7) (i : Fin 2) : SplitsCompletely D.host.E (D.host.g i) :=
   ⟨D.host.g_prime i, D.nd.g_split i⟩
-
-def ColClassSet (D : D7) (L : LevelData D) (u : D.what₂.Word) : Type :=
-  letI := D.host.cmStar
-  ClassSet
-    ((ratPts D.sp.cm.sig D.sp.gram0 (FiniteAdeleRing (𝓞 D.host.F) D.host.F)).subgroupOf
-      (UPts D.sp.cm.sig D.sp.gram0 (FiniteAdeleRing (𝓞 D.host.F) D.host.F)))
-    ((L u).U.subgroupOf (UPts D.sp.cm.sig D.sp.gram0 (FiniteAdeleRing (𝓞 D.host.F) D.host.F)))
-
-theorem card_colClassSet (D : D7) (L : LevelData D) (u : D.what₂.Word) :
-    Nat.card (ColClassSet D L u) = Nat.card ((D.mem u).C.cls 0) := by
-  letI := D.host.cmStar
-  exact (Nat.card_eq_of_bijective _ (L u).y_bij).symm
-
-def ClassCount (D : D7) (L : LevelData D) (u : D.what₂.Word) : Prop :=
-  (Nat.card (ColClassSet D L u) : ℝ) =
-    Formalism.MainNotions.StandardLattice.massI D D.R.k * Formalism.MainNotions.StandardLattice.idxPi D (D.host.g 0) (D.host.g 1) *
-      ((((D.mem u).A.T : ℕ) : ℝ) ^ D.R.k - 1) ^ D.R.f
-
-def ColumnClassNumber : Prop :=
-  ∀ (D : D7) (L : LevelData D) (u : D.what₂.Word),
-    (∀ i : Fin 2, 2 * D.R.f * D.R.k + 1 < D.host.g i) →
-    (∀ i : Fin 2, SplitsCompletely D.host.E (D.host.g i)) →
-    SplitsCompletely D.host.E (D.mem u).A.T →
-    ClassCount D L u
 
 end GlobalTheory.IndefiniteRowSideFullHecke.SplitColumnClasses
 

@@ -1,33 +1,87 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FullRankSB
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.BernsteinUnitaryProductIrreducible
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ThetaIntegralIntegrable
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.NormalizedAbsCharacterization
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FullRankSB
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ThetaIntegralIntegrable
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.NormalizedAbsCharacterization
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Algebra.Group.Matrix
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MeasureTheory Matrix Topology
 
 namespace GlobalTheory.RankFibre
 
 theorem X0_mul_X0_transpose (k : Type) [Field k] (a b : ℕ) :
-    GlobalTheory.SplitFlip.X0 k (finSumFinEquiv (m := a) (n := b)) * (GlobalTheory.SplitFlip.X0 k (finSumFinEquiv (m := a) (n := b)))ᵀ = 1 := by
+    GlobalTheory.SplitFlip.X0 (k := k) (finSumFinEquiv (m := a) (n := b)) *
+      (GlobalTheory.SplitFlip.X0 (k := k) (finSumFinEquiv (m := a) (n := b)))ᵀ = 1 := by
   ext i j
   rw [GlobalTheory.SplitFlip.frameMatrixFirstColumnBlock_mul_apply]
   simp [GlobalTheory.SplitFlip.X0, Matrix.one_apply, eq_comm]
 
 theorem isUnit_of_rank_mul_X0 {k : Type} [Field k] {a b : ℕ} (A : Matrix (Fin a) (Fin a) k)
-    (h : (A * GlobalTheory.SplitFlip.X0 k (finSumFinEquiv (m := a) (n := b))).rank = a) : IsUnit A := by
+    (h : (A * GlobalTheory.SplitFlip.X0 (k := k) (finSumFinEquiv (m := a) (n := b))).rank = a) : IsUnit A := by
   have h1 : A.rank = Fintype.card (Fin a) := by
     refine le_antisymm (by simpa using A.rank_le_width) ?_
-    simpa [h] using Matrix.rank_mul_le_left A (GlobalTheory.SplitFlip.X0 k (finSumFinEquiv (m := a) (n := b)))
+    simpa [h] using Matrix.rank_mul_le_left A (GlobalTheory.SplitFlip.X0 (k := k) (finSumFinEquiv (m := a) (n := b)))
   have hli : LinearIndependent k A.row := by
     rw [rank_eq_finrank_span_row] at h1
     rw [linearIndependent_iff_card_eq_finrank_span, eq_comm]; exact h1
-  exact Matrix.linearIndependent_rows_iff_isUnit.1 hli
+  exact Matrix.linearIndependent_row_iff_isUnit.1 hli
 
-theorem integrable_fibre_integrand : ∀ (k : Type) [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] [MeasurableSpace k] [BorelSpace k] (a b : ℕ) (ν : kˣ →* ℂˣ), GlobalTheory.SmGL.IsSmoothChar ν → ∀ Φ ∈ GlobalTheory.RankFibre.fullRankSB k a (a + b), MeasureTheory.Integrable (fun g : GL (Fin a) k => Φ (g.val * GlobalTheory.SplitFlip.X0 k finSumFinEquiv) * (ν (GlobalTheory.SplitFlip.gdet g) : ℂ) * GlobalTheory.SplitFlip.apow (GlobalTheory.SplitFlip.gdet g) (((a + b : ℕ) : ℂ) / 2)) (GlobalTheory.SplitFlip.haarVol (GlobalTheory.SplitWeil.KO k (Fin a))) := by
+theorem integrable_fibre_integrand : ∀ (k : Type) [Field k] [ValuativeRel k] [TopologicalSpace k]
+    [IsNonarchimedeanLocalField k] [MeasurableSpace k] [BorelSpace k] (a b : ℕ) (ν : kˣ →* ℂˣ),
+    GlobalTheory.SmGL.IsSmoothChar ν → ∀ Φ ∈ GlobalTheory.RankFibre.fullRankSB (k := k) a (a + b),
+    MeasureTheory.Integrable (fun g : GL (Fin a) k =>
+      Φ (g.val * GlobalTheory.SplitFlip.X0 (k := k) finSumFinEquiv) *
+        (ν (GlobalTheory.SplitFlip.gdet g) : ℂ) *
+        GlobalTheory.SplitFlip.apow (GlobalTheory.SplitFlip.gdet g) (((a + b : ℕ) : ℂ) / 2))
+      (GlobalTheory.SplitFlip.haarVol (GlobalTheory.SplitWeil.KO k (Fin a))) := by
   intro k _ _ _ _ _ _ a b ν hν Φ hΦ
   obtain ⟨⟨hl, hK⟩, hrk⟩ := hΦ
-  set X0 := GlobalTheory.SplitFlip.X0 k (finSumFinEquiv (m := a) (n := b)) with hX0
+  set X0 := GlobalTheory.SplitFlip.X0 (k := k) (finSumFinEquiv (m := a) (n := b)) with hX0
   have hc1 : IsLocallyConstant fun g : GL (Fin a) k => Φ (g.val * X0) :=
     hl.comp_continuous (Units.continuous_val.matrix_mul continuous_const)
   have hc2 := GlobalTheory.GodementJacquet.isLocallyConstant_char_det (k := k) (n := Fin a) hν

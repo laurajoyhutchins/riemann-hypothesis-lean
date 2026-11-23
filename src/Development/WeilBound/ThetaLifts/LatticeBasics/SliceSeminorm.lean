@@ -1,8 +1,55 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ProductFunctionOnSumCoordsMemAdelicSchwartzSpace
+public import GroundTheory.AutomorphicForms.GL2.GJMatrixAdelic
+public import Formalism.SharpRestriction.GlobalSchurBounds.GeneralLinearActions.GenusMassVolumes
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.IntegralFiniteAdeleCompactClosedMultiples
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsNatMulIntegralOfIsCompact
+import Mathlib.Algebra.Module.ZLattice.Summable
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.WeilTensorModels
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsNatMulIntegralOfIsCompact
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ProductFunctionOnSumCoordsMemAdelicSchwartzSpace
-import GroundTheory.AutomorphicForms.GL2.GJMatrixAdelic
+
+@[expose] public section
 
 noncomputable section
 
@@ -16,8 +63,8 @@ section Real
 
 variable {V : Type} [NormedAddCommGroup V] [NormedSpace ℝ V] {κ : Type} [Fintype κ]
 
-variable (V κ) in
 
+variable (V κ) in
 def dgL : (κ → V) →L[ℝ] (κ ⊕ κ → V) := GlobalTheory.SchwartzBox.restr V (Sum.elim id id)
 
 theorem dg_add (x u : κ → V) : dgL V κ u + Sum.elim x 0 = Sum.elim (u + x) u := by
@@ -132,7 +179,7 @@ theorem summable_decay (f : (κ → mixedEmbedding.mixedSpace F) → ℂ) (hf : 
 
 open GroundTheory.Automorphic.GJMatrix GroundTheory.Global
 
-theorem sch_eq : schA F κ = schwartzBruhatPi F κ := rfl
+theorem sch_eq : schA F κ = schwartzBruhatPi (K := F) (ι := κ) := rfl
 
 def sl (a : κ → AF F) (Φ : (κ ⊕ κ → AF F) → ℂ) (u : κ → AF F) : ℂ := Φ (Sum.elim (u + a) u)
 
@@ -161,7 +208,7 @@ theorem coset_split (J) (b : κ ⊕ κ → Af F) (a : κ → Af F) :
 abbrev rt (ξ : κ → F) : κ → AF F := fun i => algebraMap F (AF F) (ξ i)
 
 theorem sl_coset (f : 𝓢(κ ⊕ κ → mixedEmbedding.mixedSpace F, ℂ)) (J) (b : κ ⊕ κ → Af F) :
-    (∀ a, sl a (schwartzBruhatTensorPi f (finiteTensor fun i => cosetIndicator J (b i))) ∈ schwartzBruhatPi F κ) ∧
+    (∀ a, sl a (schwartzBruhatTensorPi f (finiteTensor fun i => cosetIndicator J (b i))) ∈ schwartzBruhatPi (K := F) (ι := κ)) ∧
     Summable fun ξ : κ ⊕ κ → F => adelicFourierPi F
       (sl (rt (ξ ∘ .inl)) (schwartzBruhatTensorPi f (finiteTensor fun i => cosetIndicator J (b i)))) (rt (ξ ∘ .inr)) := by
   have m : ∀ c : κ → Af F, finiteTensor (fun i => cosetIndicator J (c i)) ∈ finiteSchwartzBruhatPi F := fun c =>
@@ -174,7 +221,7 @@ theorem sl_coset (f : 𝓢(κ ⊕ κ → mixedEmbedding.mixedSpace F, ℂ)) (J) 
   · rw [sl_tensor, coset_split, adelicFourierPi_schwartzBruhatTensorPi, finiteFourierPi_smul]
     rfl
 
-theorem sl_mem {Φ : (κ ⊕ κ → AF F) → ℂ} (h : Φ ∈ schA F (κ ⊕ κ)) : (∀ a, sl a Φ ∈ schwartzBruhatPi F κ) ∧
+theorem sl_mem {Φ : (κ ⊕ κ → AF F) → ℂ} (h : Φ ∈ schA F (κ ⊕ κ)) : (∀ a, sl a Φ ∈ schwartzBruhatPi (K := F) (ι := κ)) ∧
     Summable fun ξ : κ ⊕ κ → F => adelicFourierPi F (sl (rt (ξ ∘ .inl)) Φ) (rt (ξ ∘ .inr)) := by
   rw [sch_eq, schwartzBruhatPi_eq_cosetSpanPi] at h
   induction h using Submodule.span_induction with

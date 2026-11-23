@@ -1,6 +1,56 @@
-import Mathlib
-import Development.AbelianVarietyTheory.BlockTheory.CMModuli.ProjectiveSpaceOverSpec
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsLocalUnramifiedOfIsIndEtale
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.CMModuli.ProjectiveSpaceOverSpec
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsLocalUnramifiedOfIsIndEtale
+public import Mathlib.Algebra.Category.Ring.FinitePresentation
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.MvPolynomial.IrreducibleQuadratic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RingTheory.Unramified.LocalRing
+
+@[expose] public section
 
 open CategoryTheory Limits IsLocalRing
 
@@ -40,6 +90,7 @@ theorem flat_of_isIndEtale {A S : Type} [CommRing A] [CommRing S] [Algebra A S]
       intro a ha
       obtain ⟨b, rfl⟩ := Ideal.mem_span_singleton'.mp ha
       have : MvPolynomial.aeval x p = 0 := by
+
         simp only [p, map_sum, map_smul, MvPolynomial.aeval_X, hfx]
       rw [map_mul, this, mul_zero])
   obtain ⟨W, _, _, _, u, v, huv⟩ := exists_etale_factor h g
@@ -51,9 +102,11 @@ theorem flat_of_isIndEtale {A S : Type} [CommRing A] [CommRing S] [Algebra A S]
     have h0 : Ideal.Quotient.mkₐ A I p = 0 :=
       Ideal.Quotient.eq_zero_iff_mem.mpr (Ideal.mem_span_singleton_self p)
     have : u (Ideal.Quotient.mkₐ A I p) = 0 := by rw [h0, map_zero]
+
     simpa only [p, map_sum, map_smul] using this
   obtain ⟨k, a, y, hy, ha⟩ := Module.Flat.isTrivialRelation_of_sum_smul_eq_zero (R := A) (M := W) hrel
   refine ⟨k, a, fun j => v (y j), fun i => ?_, ha⟩
+
   rw [← hw, hy, map_sum]
   simp only [map_smul]
 
@@ -77,7 +130,7 @@ theorem flat_map_maximalIdeal_isSeparable (A S : Type) [CommRing A] [IsLocalRing
     Module.Flat A S ∧ (maximalIdeal A).map (algebraMap A S) = maximalIdeal S ∧
       Algebra.IsSeparable (ResidueField A) (ResidueField S) := by
   refine ⟨flat_of_isIndEtale h, le_antisymm ?_ fun s hs => ?_, ⟨fun r => ?_⟩⟩
-  · exact ((local_hom_TFAE (algebraMap A S)).out 0 2 rfl rfl).mp inferInstance
+  · exact ((local_hom_tfae (algebraMap A S)).out 1 3 rfl rfl).mp inferInstance
   · obtain ⟨L, _, _, _, _, _, _, φ, hφ, x, rfl⟩ := exists_local_unramified h s
     have hx : x ∈ maximalIdeal L := fun hx => hs (hx.map φ)
     rw [← Algebra.FormallyUnramified.map_maximalIdeal (R := A)] at hx

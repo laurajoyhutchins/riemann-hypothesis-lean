@@ -1,5 +1,56 @@
-import Mathlib
-import GroundTheory.ArithmeticGeometry.SchemeCohomology.ProjectiveCohomology.Generation
+module
+
+public import GroundTheory.ArithmeticGeometry.SchemeCohomology.ProjectiveCohomology.QcohLocal
+public import Mathlib.AlgebraicGeometry.Morphisms.ClosedImmersion
+public import Mathlib.Tactic.ENatToNat
+public import GroundTheory.ArithmeticGeometry.SchemeCohomology.ProjectiveCohomology.Generation
+public import GroundTheory.ArithmeticGeometry.SchemeCohomology.ProjectiveCohomology.ModulesAbExact
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Morphisms.Finite
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.Sites.EpiMono
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Arith.SchemeCoh
@@ -18,11 +69,6 @@ lemma app_resO (i : X ⟶ Y) {U V : Y.Opens} (h : V ≤ U) (r : Γ(Y, U)) :
   exact congrArg (fun φ => φ.hom r) this
 
 variable (i : X ⟶ Y)
-
-lemma resF_pushforward (F : X.Modules) {U V : Y.Opens} (h : V ≤ U)
-    (m : Γ((Scheme.Modules.pushforward i).obj F, U)) :
-    resF ((Scheme.Modules.pushforward i).obj F) h m =
-      resF F ((Opens.map i.base).monotone h) m := rfl
 
 lemma smul_pushforward (F : X.Modules) {U : Y.Opens} (r : Γ(Y, U))
     (m : Γ((Scheme.Modules.pushforward i).obj F, U)) :
@@ -150,6 +196,7 @@ theorem span_eq_top_of_generatingSections (G : Y.Modules) [G.IsQuasicoherent]
       rw [h1]
       change (π.val.app (op (Y.basicOpen f))) (∑ k, (SheafOfModules.ιFree k).val.app
         (op (Y.basicOpen f)) (c k)) = _
+
       rw [map_sum]
       refine Finset.sum_congr rfl fun k _ => ?_
       rw [freeHomEquiv_symm_app_ιFree, sections_val_eq_resF]
@@ -169,8 +216,9 @@ theorem span_eq_top_of_generatingSections (G : Y.Modules) [G.IsQuasicoherent]
       rw [mul_assoc, ← pow_add, Nat.add_sub_cancel' (hna k), mul_comm]
     let δ : Γ(G, V) := f ^ a • g - ∑ k, b' k • resF G (le_top : V ≤ ⊤) (x k)
     have hδ : resF G hDV δ = 0 := by
+
       simp only [δ, map_sub, map_sum, resF_smul, resF_resF, hg, Finset.smul_sum, smul_smul,
-        map_pow, hb']
+      map_pow, hb']
       rw [sub_self]
     obtain ⟨e, he⟩ := qcoh_exists_pow_smul_eq_zero G hV f δ hδ
     refine ⟨f, hyf, e + a, ?_⟩

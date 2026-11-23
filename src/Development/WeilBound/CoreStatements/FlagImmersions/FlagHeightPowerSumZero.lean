@@ -1,4 +1,51 @@
-import Development.WeilBound.CoreStatements.FlagImmersions.ExistsWord
+module
+
+public import Development.AutomorphicSpectrum.Definitions.DivisibilityTowers.HasBaseDegreeSetting
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterNamed
+public import Development.WeilBound.CoreStatements.FlagImmersions.ExistsWord
+import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.PHFlProdLinear
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MvPolynomial ReciprocityTheory.ChartRestriction.G.Geo Filter Topology GlobalTheory.CompanionTheory.Ar GlobalTheory.CompanionTheory.Ar.Top
 
@@ -52,7 +99,9 @@ theorem flag_height_power_sum_zero : ∀ II : IntersectionSystem, IsFullIntersec
       refine Fin.lastCases ?_ (fun k => ?_) k
       · simp [u, GroundTheory.Heights₂.Heights.LowerBoundFree.xLine]
       · simp [u, GroundTheory.Heights₂.Heights.LowerBoundFree.xLine]
+
     rw [Finset.sum_congr rfl (fun i _ => h1 i), ← map_sum, HH.sum_xDeg (N := N) τ, map_zero]
+
   rw [MvPolynomial.as_sum Q, Finset.mul_sum, map_sum]
   apply Finset.sum_eq_zero
   intro m hm
@@ -61,9 +110,9 @@ theorem flag_height_power_sum_zero : ∀ II : IntersectionSystem, IsFullIntersec
     rw [Finsupp.degree_eq_weight_one]
     exact this
   obtain ⟨w, hw⟩ := HH.exists_word (dimFl Ψ N) m hdeg
-  have hprod : pk τ 1 * monomial m (coeff m Q) =
+  have hprod : pk τ 1 * monomial m (AddMonoidAlgebra.coeff Q m) =
       ∑ i : Fin N, monomial (∑ k : Fin (dimFl Ψ N + 1),
-        Finsupp.single (Fin.snoc (α := fun _ => Ψ × Fin N) w (τ, i) k) 1) (coeff m Q) := by
+        Finsupp.single (Fin.snoc (α := fun _ => Ψ × Fin N) w (τ, i) k) 1) (AddMonoidAlgebra.coeff Q m) := by
     unfold pk
     rw [Finset.sum_mul]
     apply Finset.sum_congr rfl
@@ -71,9 +120,10 @@ theorem flag_height_power_sum_zero : ∀ II : IntersectionSystem, IsFullIntersec
     rw [pow_one, X, monomial_mul, one_mul, Fin.sum_univ_castSucc]
     simp only [Fin.snoc_castSucc, Fin.snoc_last]
     rw [← hw, add_comm (Finsupp.single (τ, i) 1)]
+
   rw [hprod, map_sum,
-    Finset.sum_congr rfl (fun i _ => HH.hhFl_word II hII.1 hP
-      (Fin.snoc (α := fun _ => Ψ × Fin N) w (τ, i)) (coeff m Q)),
-    ← Finset.mul_sum, ← Finset.mul_sum, key w, mul_zero, mul_zero]
+  Finset.sum_congr rfl (fun i _ => HH.hhFl_word II hII.1 hP
+    (Fin.snoc (α := fun _ => Ψ × Fin N) w (τ, i)) (AddMonoidAlgebra.coeff Q m)),
+  ← Finset.mul_sum, ← Finset.mul_sum, key w, mul_zero, mul_zero]
 
 end RootFieldNumerics

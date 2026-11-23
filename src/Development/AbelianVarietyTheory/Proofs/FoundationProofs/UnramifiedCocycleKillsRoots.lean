@@ -1,7 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Foundations.FinalTheorems
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.MemIneSmulIff
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.NormSmulLeSelf
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.FinalTheorems
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.ResMapBijective
+public import Mathlib.RingTheory.AdicCompletion.Noetherian
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.HermitianCodeWordWeilElementMemQuadraticField
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.NormSmulLeSelf
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.MemIneSmulIff
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.FreeModule.IdealQuotient
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.MetricSpace.Ultra.TotallySeparated
+import ReciprocityTheory.GaloisValuations.ArithOfA
+import ReciprocityTheory.GaloisValuations.GlobalA
+
+@[expose] public section
 
 noncomputable section
 
@@ -62,8 +110,14 @@ theorem killsMu_ine {Ω C : Type} [Field Ω] [Algebra ℚ Ω] [Monoid C] {w q : 
     {χ : G ℚ Ω →* C} (hχ : KillsMu (normV w) χ) {B : ValuationSubring Ω} (hB : IsPlaceOver B q)
     {s : G ℚ Ω} (hs : s ∈ Ine (F := ℚ) B) : χ s = 1 := by
   have hp := prime_normV w
+  have hw : ((normV w : ℕ) : 𝓞 ℚ) ∈ w.asIdeal := by
+    have hn : normV w = Ideal.absNorm w.asIdeal := by
+      rw [Ideal.absNorm_apply, Submodule.cardQuot_apply]
+      rfl
+    rw [hn]
+    exact Ideal.absNorm_mem w.asIdeal
   have hpq : ((normV w : ℕ) : 𝓞 ℚ) ∉ q.asIdeal := fun h =>
-    hqw (GlobalTheory.PlaceConjQ.eq_of_prime_mem hp h (Ideal.absNorm_mem w.asIdeal))
+    hqw (GlobalTheory.PlaceConjQ.eq_of_prime_mem hp h hw)
   have hN : ¬ B.valuation ((normV w : ℕ) : Ω) < 1 := by
     have := not_valuation_lt_one_of_isPlaceOver hpq hB 1
     simpa using this
@@ -161,7 +215,7 @@ theorem main : ∀ (l : ℕ) [Fact l.Prime] (Ω : Type) [Field Ω] [Algebra ℚ 
           exact this.symm⟩
     have hMc : Continuous fun s => mat W s := Units.continuous_val.comp hWc
     have c1 : Continuous fun s => ∑ x, v x • Y s x :=
-      continuous_finset_sum _ fun x _ =>
+      continuous_finsetSum _ fun x _ =>
         Continuous.smul (f := fun _ => v x) (g := fun s => Y s x) continuous_const ((continuous_apply x).comp hYc)
     have c2 : Continuous fun s => v (ψ s).toAdd • (mat W s *ᵥ b) :=
       (hlc.comp fun m => v m.toAdd).continuous.smul (hMc.matrix_mulVec continuous_const)

@@ -1,6 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.NormOneFiniteAdeleDetClassOfIsDetLift
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LevOkTwists
+module
+
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.NormOneFiniteAdeleDetClassOfIsDetLift
+public import Formalism.LocalToGlobal.Columns.Adelic
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.DetMulConjDet
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ValDetSubOneLt
+public import Formalism.LocalToGlobal.Columns.RecLevelTop
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Algebra.Group.Units
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.NeutralLocalFields.LocalFieldComparison.HCFFromRecipA
+
+@[expose] public section
 
 noncomputable section
 
@@ -29,7 +77,7 @@ theorem lift_mem_KDq (hl : LevOk H SG SQ) (x : Formalism.L2.Herm.unitaryOneFinit
       algebraMap H.E _ (algebraMap (𝓞 H.E) H.E c) := fun w => adAt_inclE H.F w _
   have hsv : ∀ w : HeightOneSpectrum (𝓞 H.E), Valued.v (adAt H.F w s) ≤ 1 := (mem_rInt_iff H.F H.E s).1 hs
   have hle : ∀ w : HeightOneSpectrum (𝓞 H.E), Valued.v (adAt H.F w d) ≤ 1 := fun w => by
-    rw [hd, map_add, map_one, map_mul, hci]
+    rw [hd, map_add (f := _), map_one, map_mul, hci]
     refine Valuation.map_add_le _ (by rw [map_one]) ?_
     rw [map_mul, valued_algebraMap]
     exact mul_le_one' (HeightOneSpectrum.valuation_le_one _ _) (hsv w)
@@ -50,7 +98,7 @@ theorem lift_mem_KDq (hl : LevOk H SG SQ) (x : Formalism.L2.Herm.unitaryOneFinit
       exact DetSpec.val_compAt_ne _ _
     rw [hcomp P, mul_div_cancel_right₀ _ h0]
     show Valued.v (adAt H.F P d - 1) < 1
-    rw [hd, map_add, map_one, add_sub_cancel_left, map_mul, hci, map_mul,
+    rw [hd, map_add (f := _), map_one, add_sub_cancel_left, map_mul, hci, map_mul,
       valued_algebraMap]
     have hlt : P.valuation H.E (algebraMap (𝓞 H.E) H.E c) < 1 :=
       (HeightOneSpectrum.valuation_lt_one_iff_mem P c).2 (hc P hP)
@@ -66,8 +114,8 @@ theorem isOpen_ker_u1Dt : ∀ (R : Ranks) (H : Formalism.BasicNotions.Host R) (S
   let W : Set (GL (Fin 1) (AfE H.F H.E)) :=
     {u | c * ((u : Matrix (Fin 1) (Fin 1) (AfE H.F H.E)) 0 0 - 1) ∈ Formalism.L2.Herm.intAf H.F H.E}
   have hWo : IsOpen W := by
-    refine rlt_isOpen_intAf.preimage ?_
-    exact continuous_const.mul ((Units.continuous_val.matrix_elem 0 0).sub continuous_const)
+    exact rlt_isOpen_intAf.preimage
+      (continuous_const.mul ((Units.continuous_val.matrix_elem 0 0).sub continuous_const))
   have hW1 : (1 : GL (Fin 1) (AfE H.F H.E)) ∈ W := by
     show c * (((1 : GL (Fin 1) (AfE H.F H.E)) : Matrix (Fin 1) (Fin 1) (AfE H.F H.E)) 0 0 - 1) ∈ Formalism.L2.Herm.intAf H.F H.E
     simp
@@ -78,8 +126,10 @@ theorem isOpen_ker_u1Dt : ∀ (R : Ranks) (H : Formalism.BasicNotions.Host R) (S
     refine (QuotientGroup.eq_one_iff b).2 (lift_mem_KDq hl x b hb a ha _ hx ?_)
     rw [← mul_assoc, hca, one_mul]
     ring
-  have hnh : (((u1Dt H SQ).ker : Subgroup _) : Set (Formalism.L2.Herm.unitaryOneFiniteAdeles (host_cmData R H))) ∈ 𝓝 (1 : Formalism.L2.Herm.unitaryOneFiniteAdeles (host_cmData R H)) :=
-    Filter.mem_of_superset ((hWo.preimage continuous_subtype_val).mem_nhds hW1) fun x hx => hsub x hx
+  have hnh : (((u1Dt H SQ).ker : Subgroup _) : Set (Formalism.L2.Herm.unitaryOneFiniteAdeles (host_cmData R H))) ∈ 𝓝 (1 : Formalism.L2.Herm.unitaryOneFiniteAdeles (host_cmData R H)) := by
+    have hpre : (fun x : Formalism.L2.Herm.unitaryOneFiniteAdeles (host_cmData R H) => x.1) ⁻¹' W ∈ 𝓝 (1 : Formalism.L2.Herm.unitaryOneFiniteAdeles (host_cmData R H)) :=
+      (hWo.preimage continuous_subtype_val).mem_nhds hW1
+    exact Filter.mem_of_superset hpre fun x hx => hsub x hx
   exact Subgroup.isOpen_of_mem_nhds _ hnh
 
 end GlobalTheory.Mem.Col2.FullDt

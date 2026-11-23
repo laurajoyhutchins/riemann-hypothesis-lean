@@ -1,6 +1,45 @@
-import Mathlib
-import Formalism.SharpRestriction.Divisibility.ModuliIntegralCharts
-import Formalism.SharpRestriction.Divisibility.AbelianOpenPart.AbelianAt
+module
+
+public import Formalism.SharpRestriction.Divisibility.ModuliIntegralCharts
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Mathlib.Topology.Sheaves.Presheaf
+
+@[expose] public section
 
 noncomputable section
 
@@ -45,47 +84,5 @@ def intO (C : Type) [NormedField C] [IsUltrametricDist C] : Subring C where
   neg_mem' := by
     intro a ha
     simpa using ha
-
-def genPt (R : Type) [CommRing R] [IsDomain R] : Spec (CommRingCat.of R) :=
-  (⟨⊥, Ideal.isPrime_bot⟩ : PrimeSpectrum R)
-
-structure ModelO (O : Type) [CommRing O] where
-  Z : Scheme.{0}
-  str : Z ⟶ Spec (CommRingCat.of O)
-  proper : IsProper str
-  flat : Flat str
-  normal : ∀ x : Z, IsDomain (Z.presheaf.stalk x) ∧ IsIntegrallyClosed (Z.presheaf.stalk x)
-  G : GrpSch Z
-  U : Z.Opens
-  U_iff : ∀ x : Z, x ∈ U ↔ (CharZero (Z.residueField x) ∧ AbelianAt G x)
-  U_dense : Dense (U : Set Z)
-
-theorem ModelO.ab_open {O : Type} [CommRing O] (M : ModelO O) : ∀ x ∈ M.U, AbelianAt M.G x :=
-  fun x hx => ((M.U_iff x).1 hx).2
-
-def ModelO.toG {O : Type} [CommRing O] [IsLocalRing O] (M : ModelO O) : ModelG O := ⟨M.Z, M.str, M.G⟩
-
-structure PtOver {O : Type} [CommRing O] (M : ModelO O) (C : Type) [NormedField C] [IsUltrametricDist C] where
-  alg : O →+* intO C
-  x : Spec (CommRingCat.of (intO C)) ⟶ M.Z
-  comm : x ≫ M.str = Spec.map (CommRingCat.ofHom alg)
-  gen_open : x (genPt (intO C)) ∈ M.U
-
-def PtM (p : ℕ) {O : Type} [CommRing O] (M : ModelO O) : Type :=
-  Σ c : SCF p, PtOver M c.S
-
-def PtM.fld {p : ℕ} {O : Type} [CommRing O] {M : ModelO O} (y : PtM p M) : Formalism.MainNotions.ModuliIntegralCharts.CF p := y.1.toCF
-
-abbrev ChartM {O : Type} [CommRing O] (M : ModelO O) (OK : Type) [CommRing OK] : Type :=
-  Spec (CommRingCat.of (PowerSeries OK)) ⟶ M.Z
-
-def ChartM.IsOpenPart {O : Type} [CommRing O] {M : ModelO O} {OK : Type} [CommRing OK] [IsLocalRing OK]
-    (χ : ChartM M OK) : Prop :=
-  ∀ q : PrimeSpectrum (PowerSeries OK), PowerSeries.X ∉ q.asIdeal →
-    (∃ a ∈ IsLocalRing.maximalIdeal OK, PowerSeries.C a ∉ q.asIdeal) → χ q ∈ M.U
-
-def ChartM.AbExact {O : Type} [CommRing O] {M : ModelO O} {OK : Type} [CommRing OK]
-    (χ : ChartM M OK) : Prop :=
-  ∀ q : PrimeSpectrum (PowerSeries OK), AbelianAt (bchG χ M.G) q ↔ (PowerSeries.X ∉ q.asIdeal)
 
 end Formalism.MainNotions.DIV.Cons

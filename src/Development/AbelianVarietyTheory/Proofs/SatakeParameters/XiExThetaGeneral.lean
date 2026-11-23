@@ -1,11 +1,56 @@
-import Mathlib
-import Formalism.LocalToGlobal.PairingIndexBounds.OrthogonalChartLevels.FdOfCharts
-import Formalism.LocalToGlobal.GroupLattices.PendingLemmas.InvarianceRepresentativesLaw
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.NatCastMemOfPlace
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.KernelThetaRelationOfIndicatorRelationSplitStatement
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.HomLatticeVolumeCompletionSplitPlaceStatement
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsAddMonoidHomOfLinearRelations
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.CoefInTranslate
+module
+
+public import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.NatCastMemOfPlace
+public import Formalism.LocalToGlobal.GroupLattices.PendingLemmas.ConditionIffAdditiveMaps
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IsTraceCompatibleTorusEmbeddingStandardTorus
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.CoefInTranslate
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsAddMonoidHomOfLinearRelations
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.HomLatticeVolumeCompletionSplitPlaceStatement
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.KernelThetaRelationOfIndicatorRelationSplitStatement
+import Formalism.SharpRestriction.AdmissibleParameterJoins.GandSp
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 open Formalism.BasicNotions NumberField IsDedekindDomain Formalism.MainNotions Formalism.MainNotions.G Formalism.MainNotions.FormalGroupSystem Formalism.L2.G.Pend Formalism.L2.Ker Formalism.L2.PairingIndexBounds.F GlobalTheory.TwU TensorProduct
@@ -19,13 +64,16 @@ theorem resV_linSub_sum {σ κ ι R : Type} [Fintype σ] [Field R] (f : κ → �
     ∑ i ∈ s, d i • resV f (linSub B (G i)) = resV f (linSub B (∑ i ∈ s, d i • G i)) := by
   have hs : MvPowerSeries.HasSubst (S := R) (fun x : σ => ∑ y, MvPowerSeries.C (B x y) * MvPowerSeries.X y) := by
     refine ⟨fun x => ?_, fun d => Set.toFinite _⟩
+
     simp [map_sum]
   have h1 : linSub B (∑ i ∈ s, d i • G i) = ∑ i ∈ s, d i • linSub B (G i) := by
+
     simp only [linSub, ← MvPowerSeries.substAlgHom_apply hs, map_sum, map_smul]
   rw [h1]
   ext n
   show MvPowerSeries.coeff n (∑ i ∈ s, d i • resV f (linSub B (G i))) =
     MvPowerSeries.coeff (n.mapDomain f) (∑ i ∈ s, d i • linSub B (G i))
+
   rw [map_sum, map_sum]
   refine Finset.sum_congr rfl fun i _ => ?_
   rw [MvPowerSeries.coeff_smul, MvPowerSeries.coeff_smul]
@@ -35,6 +83,7 @@ theorem resV_linSub_zero {σ κ R : Type} [Fintype σ] [Field R] (f : κ → σ)
     resV f (linSub B 0) = 0 := by
   have hs : MvPowerSeries.HasSubst (S := R) (fun x : σ => ∑ y, MvPowerSeries.C (B x y) * MvPowerSeries.X y) := by
     refine ⟨fun x => ?_, fun d => Set.toFinite _⟩
+
     simp [map_sum]
   simp only [linSub, ← MvPowerSeries.substAlgHom_apply hs, map_zero]
   rfl
@@ -254,6 +303,7 @@ theorem xiEx_theta_general : letI := fun D : D7 => D.host.cmStar; ∀ (D : D7) (
         MvPowerSeries.coeff α (serP lam θ) = TaylorLogMetric.lamC lam (TaylorLogMetric.taylor D θ α) := fun α θ => rfl
     have hG0 : ∑ i ∈ s, ((cq i : ℂ_[p]) * (E.iK (kk i.1.1 i.1.2))⁻¹) • G i = 0 := by
       ext α
+
       rw [map_sum, map_zero]
       have e1 : ∀ i ∈ s, MvPowerSeries.coeff α (((cq i : ℂ_[p]) * (E.iK (kk i.1.1 i.1.2))⁻¹) • G i) =
           Q₀ * (p : ℂ_[p]) ^ (hh * volE X v j La₀.2 La₀'.2) * TaylorLogMetric.lamC lam (((cq i * r i : ℚ) : ℂ) *

@@ -1,7 +1,56 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.UnitLemmaGroup
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.LinearDescent
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.FourierMatch
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.FourierMatch
+public import Mathlib.LinearAlgebra.Charpoly.Basic
+public import Mathlib.LinearAlgebra.FreeModule.PID
+public import Mathlib.RingTheory.Flat.TorsionFree
+public import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.Charpoly.ToMatrix
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Matrix Module
 
@@ -20,11 +69,13 @@ def mapGl (φ : k →+* k') (Y : Gl r k) : Gl r k' :=
 theorem map_mulVec' (φ : k →+* k') (A : Matrix (Fin r) (Fin r) k) (v : Fin r → k) :
     (fun i => φ ((A *ᵥ v) i)) = A.map φ *ᵥ fun i => φ (v i) := by
   funext i
+
   simp [Matrix.mulVec, dotProduct, map_sum, map_mul]
 
 theorem map_vecMul' (φ : k →+* k') (A : Matrix (Fin r) (Fin r) k) (v : Fin r → k) :
     (fun i => φ ((v ᵥ* A) i)) = (fun i => φ (v i)) ᵥ* A.map φ := by
   funext i
+
   simp [Matrix.vecMul, dotProduct, map_sum, map_mul]
 
 theorem map_pow' (φ : k →+* k') (A : Matrix (Fin r) (Fin r) k) (i : ℕ) :
@@ -46,6 +97,7 @@ theorem mapGl_act (φ : k →+* k') (γ : GL (Fin r) k) (Y : Gl r k) :
 theorem mom_mapGl (φ : k →+* k') (Y : Gl r k) (i : ℕ) : mom (mapGl φ Y) i = φ (mom Y i) := by
   simp only [mom, mapGl]
   rw [← map_pow', ← map_mulVec']
+
   simp [dotProduct, map_sum, map_mul]
 
 theorem inv_mapGl (φ : k →+* k') (Y : Gl r k) : inv (mapGl φ Y) = (inv Y).map φ := by
@@ -137,6 +189,7 @@ theorem Yb_tw (e : Basis (Fin n) E V) (T : V →ₗ[E] V) (v : V) (l : V →ₗ[
       toMatrix_tw_left, toMatrix_tw_right]
   · exact tw_repr e γ v
   · funext j
+
     simp [tw_apply, map_sum, Matrix.vecMul, dotProduct, mul_comm]
 
 theorem vecMul_pow_Yb (e : Basis (Fin n) E V) (T : V →ₗ[E] V) (l : V →ₗ[E] E) (i : ℕ) (j : Fin n) :
@@ -144,6 +197,7 @@ theorem vecMul_pow_Yb (e : Basis (Fin n) E V) (T : V →ₗ[E] V) (l : V →ₗ[
   rw [LinearMap.toMatrix_pow]
   simp only [Matrix.vecMul, dotProduct, LinearMap.toMatrix_apply]
   conv_rhs => rw [← e.sum_repr ((T ^ i) (e j))]
+
   rw [map_sum]
   refine Finset.sum_congr rfl fun k _ => ?_
   rw [map_smul, smul_eq_mul, mul_comm]
@@ -160,6 +214,7 @@ theorem mom_Yb (e : Basis (Fin n) E V) (T : V →ₗ[E] V) (v : V) (l : V →ₗ
   rw [LinearMap.toMatrix_pow, LinearMap.toMatrix_mulVec_repr]
   conv_rhs => rw [← e.sum_repr ((T ^ i) v)]
   simp only [dotProduct]
+
   rw [map_sum]
   refine Finset.sum_congr rfl fun k _ => ?_
   rw [map_smul, smul_eq_mul, mul_comm]
@@ -203,7 +258,7 @@ theorem mem_lat (e : Basis (Fin n) E V) (y : V) :
     | zero => intro i; exact ⟨0, by simp⟩
     | add x z _ _ hx hz =>
       intro i
-      rw [map_add, Finsupp.add_apply]
+      rw [map_add (f := _), Finsupp.add_apply]
       exact Subring.add_mem _ (hx i) (hz i)
     | smul a x _ hx =>
       intro i
@@ -242,6 +297,7 @@ theorem lat_fun_iff (e : Basis (Fin n) E V) (l : V →ₗ[E] E) :
     exact h _ (by unfold lat; exact Submodule.subset_span ⟨j, rfl⟩)
   · intro h y hy
     rw [mem_lat] at hy
+
     rw [← e.sum_repr y, map_sum]
     refine Subring.sum_mem _ fun i _ => ?_
     rw [map_smul, smul_eq_mul]

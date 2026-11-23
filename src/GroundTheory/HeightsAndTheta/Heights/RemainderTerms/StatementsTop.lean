@@ -1,5 +1,48 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.RemainderTerms.Statements
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.RemainderTerms.Statements
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -31,14 +74,14 @@ def OtherFactorFormula.Statement : Prop :=
                 (numStandardTable (rectangle r a) : ℚ) ^ (f - 2) *
                 symmetricGroupCharacter (rectangle r a)
                   ((k - 1) :: List.replicate (r * a - (k - 1)) 1) *
-                coeff (Finsupp.single (⟨k - 1, by omega⟩ : Fin (r + a)) 1) S
+                AddMonoidAlgebra.coeff S (Finsupp.single (⟨k - 1, by omega⟩ : Fin (r + a)) 1)
 
 def SchurSignCoefficient.Statement : Prop :=
   ∀ (N r k : ℕ) (hk1 : 1 ≤ k) (hkN : k ≤ N) (nu : Fin r → ℕ) (s : ℚ), (s = 1 ∨ s = -1) →
     Antitone nu → ∑ i, nu i = k →
     ∃ S : MvPolynomial (Fin N) ℚ,
       powerSumHom N S = aeval (fun i : Fin N => C s * X i) (schur (Fin N) nu) ∧
-      coeff (Finsupp.single (⟨k - 1, by omega⟩ : Fin N) 1) S =
+      AddMonoidAlgebra.coeff S (Finsupp.single (⟨k - 1, by omega⟩ : Fin N) 1) =
         s ^ k * if ∀ i : Fin r, (i : ℕ) ≠ 0 → nu i ≤ 1 then
           (-1 : ℚ) ^ ((Finset.univ.filter fun i : Fin r => (i : ℕ) ≠ 0 ∧ nu i = 1).card) / k
         else 0
@@ -54,20 +97,6 @@ def HookSumBound.Statement : Prop :=
     (∀ nu ∈ partitionsOf r k, |b nu| ≤ numStandardTable (fun i => a + nu i)) →
     ∑ nu ∈ (partitionsOf r k).filter (fun nu => ∀ i : Fin r, (i : ℕ) ≠ 0 → nu i ≤ 1), |b nu| ≤
       (Nat.choose (r * a + k) k : ℚ) * 2 ^ (k - 1) * numStandardTable (rectangle r a)
-
-def ShiftSumRule.Statement : Prop :=
-  ∀ r a : ℕ, 1 ≤ r → 1 ≤ a → ∀ Q : ℕ → Fin 1 → RootRing 1 (r + a),
-    IsPowerSumDecomposition 1 (r + a) (restPolynomial 1 r a .last) Q →
-      (a : ℚ) * flagIntegral 1 (r + a) (Q 1 0) =
-        ∑ k ∈ Finset.Icc 2 (r + a),
-          restTerm 1 (r + a) Q k 0 (smallPowerSum 1 r a .last (k - 1) 0)
-
-def LinearTermValue.Statement : Prop :=
-  ∀ r a : ℕ, 1 ≤ r → 1 ≤ a → ∀ Q : ℕ → Fin 1 → RootRing 1 (r + a),
-    IsPowerSumDecomposition 1 (r + a) (restPolynomial 1 r a .last) Q →
-      flagIntegral 1 (r + a) (Q 1 0) * numStandardTable (rectangle r a) =
-        fibreDegree 1 r a .last *
-          numStandardTable (fun i : Fin r => a + if (i : ℕ) = 0 then 1 else 0)
 
 end
 

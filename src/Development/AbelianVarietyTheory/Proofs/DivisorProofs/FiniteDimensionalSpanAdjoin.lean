@@ -1,4 +1,61 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.Polynomial.AlgebraMap
+public import Mathlib.Basic.Complex.Basic
+public import Mathlib.LinearAlgebra.FiniteDimensional.Defs
+public import Mathlib.Order.CompletePartialOrder
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Finiteness.Lattice
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Algebra.Polynomial.BigOperators
+public import Mathlib.Algebra.Polynomial.Div
+public import Mathlib.Algebra.Polynomial.Roots
+public import Mathlib.LinearAlgebra.Dual.Lemmas
+
+@[expose] public section
+
 open NumberField
 
 noncomputable section
@@ -11,7 +68,7 @@ variable {V : Type} [AddCommGroup V] [Module ℂ V]
 
 theorem commute_aeval_left {x y : Module.End ℂ V} (h : Commute x y) (p : ℂ[X]) : Commute (aeval x p) y := by
   induction p using Polynomial.induction_on' with
-  | add p q hp hq => rw [map_add]; exact hp.add_left hq
+  | add p q hp hq => rw [map_add (f := _)]; exact hp.add_left hq
   | monomial n a => rw [aeval_monomial]; exact (Algebra.commute_algebraMap_left a y).mul_left (h.pow_left n)
 
 theorem coeff_mem_span_fin {M : Type} [AddCommGroup M] [Module ℂ M] {n : ℕ} {a : ℕ → M} {p : ℂ → M}
@@ -22,8 +79,9 @@ theorem coeff_mem_span_fin {M : Type} [AddCommGroup M] [Module ℂ M] {n : ℕ} 
   set Q : ℂ[X] := ∑ j ∈ Finset.range (n + 1), monomial j (φ (a j)) with hQdef
   have hev : ∀ u, Q.eval u = φ (p u) := by
     intro u
+
     rw [hp, map_sum]
-    simp only [Q, eval_finset_sum, eval_monomial]
+    simp only [Q, Polynomial.eval_finsetSum, eval_monomial]
     exact Finset.sum_congr rfl fun j _ => by rw [map_smul, smul_eq_mul, mul_comm]
   have hdeg : Q.natDegree ≤ n := by
     apply natDegree_sum_le_of_forall_le
@@ -36,8 +94,12 @@ theorem coeff_mem_span_fin {M : Type} [AddCommGroup M] [Module ℂ M] {n : ℕ} 
       rw [hev]
       exact (Submodule.mem_dualAnnihilator φ).1 hφ _ (Submodule.subset_span ⟨j, rfl⟩)
     · simpa using Nat.lt_succ_of_le hdeg
-  have := congrArg (fun P : Polynomial ℂ => P.coeff i) h0
-  simpa [Q, Polynomial.finset_sum_coeff, Polynomial.coeff_monomial, hi, Nat.lt_succ_iff.1 hi] using this
+  have hcoeff : Q.coeff i = 0 := by rw [h0, Polynomial.coeff_zero]
+  rw [hQdef, Polynomial.finsetSum_coeff,
+    Finset.sum_eq_single_of_mem i (Finset.mem_range.2 hi), Polynomial.coeff_monomial_same] at hcoeff
+  · exact hcoeff
+  · intro j _ hji
+    exact Polynomial.coeff_monomial_of_ne _ hji.symm
 
 def stabAlg (N : Submodule ℂ V) : Subalgebra ℂ (Module.End ℂ V) where
   carrier := {T | ∀ v ∈ N, T v ∈ N}
@@ -64,10 +126,10 @@ theorem aeval_mem_ext (T : Module.End ℂ V) {Q : ℂ[X]} (hQ : Q ≠ 0) {N : Su
   have hdeg : Q'.natDegree = Q.natDegree := by
     rw [hQ', natDegree_mul_C (inv_ne_zero (leadingCoeff_ne_zero.2 hQ))]
   have hQ'v : aeval T Q' v = 0 := by
-    rw [hQ', mul_comm, map_mul, Module.End.mul_apply, hN v hv, map_zero]
+    rw [hQ', mul_comm, map_mul, mul_apply_eq_comp, hN v hv, map_zero]
   have hsplit : p = p %ₘ Q' + (p /ₘ Q') * Q' := by
     rw [mul_comm]; exact (modByMonic_add_div p Q').symm
-  rw [hsplit, map_add, LinearMap.add_apply, map_mul, Module.End.mul_apply, hQ'v, map_zero, add_zero]
+  rw [hsplit, map_add (f := _), LinearMap.add_apply, map_mul, mul_apply_eq_comp, hQ'v, map_zero, add_zero]
   have hlt : (p %ₘ Q').natDegree < Q.natDegree + 1 := by
     have := natDegree_modByMonic_le p hm
     omega
@@ -86,7 +148,7 @@ theorem ext_stable (T : Module.End ℂ V) {Q : ℂ[X]} (hQ : Q ≠ 0) {N : Submo
     rw [Submodule.mem_comap]
     change T ((T ^ (k : ℕ)) x) ∈ ext T Q.natDegree N
     have := aeval_mem_ext T hQ hN (X ^ ((k : ℕ) + 1)) hx
-    rwa [map_pow, aeval_X, pow_succ', Module.End.mul_apply] at this
+    rwa [map_pow, aeval_X, pow_succ', mul_apply_eq_comp] at this
   exact fun v hv => this hv
 
 theorem ext_stable_comm (T S : Module.End ℂ V) (d : ℕ) (hST : Commute S T) {N : Submodule ℂ V}
@@ -99,7 +161,7 @@ theorem ext_stable_comm (T S : Module.End ℂ V) (d : ℕ) (hST : Commute S T) {
     rw [Submodule.mem_comap]
     change S ((T ^ (k : ℕ)) x) ∈ ext T d N
     have h := congrArg (fun F : Module.End ℂ V => F x) (hST.pow_right (k : ℕ)).eq
-    simp only [Module.End.mul_apply] at h
+    simp only [mul_apply_eq_comp] at h
     rw [h]
     exact pow_mem_ext T (Nat.lt_succ_iff.1 k.2) (hS x hx)
   exact fun v hv => this hv
@@ -113,27 +175,31 @@ theorem ext_kill (T R : Module.End ℂ V) (d : ℕ) (hRT : Commute R T) {N : Sub
     obtain ⟨x, hx, rfl⟩ := Submodule.mem_map.1 hy
     rw [LinearMap.mem_ker]
     have h := congrArg (fun F : Module.End ℂ V => F x) (hRT.pow_right (k : ℕ)).eq
-    simp only [Module.End.mul_apply] at h
+    simp only [mul_apply_eq_comp] at h
     rw [h, hN x hx, map_zero]
   exact fun v hv => this hv
 
 theorem exists_stable (a : ℕ → Module.End ℂ V) (Q : ℕ → ℂ[X]) (hc : ∀ i j, Commute (a i) (a j))
     (hQ : ∀ j, Q j ≠ 0) (w : V) (hw : ∀ j, aeval (a j) (Q j) w = 0) : ∀ m : ℕ, ∃ N : Submodule ℂ V,
-      FiniteDimensional ℂ N ∧ w ∈ N ∧ (∀ j < m, ∀ v ∈ N, a j v ∈ N) ∧ (∀ j, ∀ v ∈ N, aeval (a j) (Q j) v = 0)
-  | 0 => ⟨Submodule.span ℂ {w}, inferInstance, Submodule.mem_span_singleton_self w, by simp, fun j v hv => by
+      FiniteDimensional ℂ N ∧ w ∈ N ∧ (∀ j < m, ∀ v ∈ N, a j v ∈ N) ∧ (∀ j, ∀ v ∈ N, aeval (a j) (Q j) v = 0) := by
+  intro m
+  induction m with
+  | zero =>
+    exact ⟨Submodule.span ℂ {w}, inferInstance, Submodule.mem_span_singleton_self w, by simp, fun j v hv => by
       obtain ⟨r, rfl⟩ := Submodule.mem_span_singleton.1 hv
       rw [map_smul, hw, smul_zero]⟩
-  | m + 1 => by
-      obtain ⟨N, hf, hwN, hst, hk⟩ := exists_stable a Q hc hQ w hw m
-      haveI := hf
-      refine ⟨ext (a m) (Q m).natDegree N, ?_, le_ext _ _ _ hwN, ?_, ?_⟩
-      · unfold ext; infer_instance
-      · intro j hj
-        rcases Nat.lt_succ_iff_lt_or_eq.1 hj with h | h
-        · exact ext_stable_comm (a m) (a j) _ (hc j m) (hst j h)
-        · subst h; exact ext_stable (a j) (hQ j) (hk j)
-      · intro j
-        exact ext_kill (a m) _ _ (commute_aeval_left (hc j m) _) (hk j)
+  | succ m ih =>
+    obtain ⟨N, hf, hwN, hst, hk⟩ := ih
+    refine ⟨ext (a m) (Q m).natDegree N, ?_, le_ext _ _ _ hwN, ?_, ?_⟩
+    · unfold ext
+      infer_instance
+    · intro j hj
+      rcases Nat.lt_succ_iff_lt_or_eq.1 hj with h | h
+      · exact ext_stable_comm (a m) (a j) _ (hc j m) (hst j h)
+      · subst j
+        exact ext_stable (a m) (hQ m) (hk m)
+    · intro j
+      exact ext_kill (a m) _ _ (commute_aeval_left (hc j m) _) (hk j)
 
 theorem finiteDimensional_span_adjoin : ∀ (V : Type) [AddCommGroup V] [Module ℂ V] (n : ℕ) (c : ℕ → Module.End ℂ V)
     (g : ℂ → Module.End ℂ V), (∀ u, g u = ∑ i ∈ Finset.range (n + 1), u ^ i • c i) → (∀ u u', Commute (g u) (g u')) →
@@ -142,7 +208,6 @@ theorem finiteDimensional_span_adjoin : ∀ (V : Type) [AddCommGroup V] [Module 
   intro V _ _ n c g hg hc w P hP hw
   obtain ⟨N, hf, hwN, hst, -⟩ := exists_stable (fun j : ℕ => g (j : ℂ)) (fun j => P (j : ℂ))
     (fun i j => hc _ _) (fun j => hP _) w (fun j => hw _) (n + 1)
-  haveI := hf
   have hgS : ∀ u, g u ∈ stabAlg N := by
     intro u
     have hspan : Submodule.span ℂ (Set.range fun j : Fin (n + 1) => g ((j : ℕ) : ℂ)) ≤

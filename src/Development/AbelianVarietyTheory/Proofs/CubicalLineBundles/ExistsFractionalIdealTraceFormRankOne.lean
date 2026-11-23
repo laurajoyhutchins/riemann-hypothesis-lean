@@ -1,11 +1,57 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.CMLattices.ExistsIsThetaDegOfIsLocalModel
-import Development.AbelianVarietyTheory.Definitions.ArchimedeanThetaValues.IsCoprimeTwoSubRtTwoAddRt
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsHermCoordOfDatum
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.FinrankEqOfInjectiveOfSpan
-import Development.AbelianVarietyTheory.Proofs.HermitianTraceForms.TraceFormDualOneTraceFormDual
-import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.OneMulConjFracOneEqInvDifferent
-import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.NatCardAlgHomEqFinrankOfIsReducedOfIsFractionRin
+module
+
+public import Development.AbelianVarietyTheory.Definitions.CMLattices.IsDiffOf
+public import Development.AbelianVarietyTheory.Definitions.ArchimedeanThetaValues.IsCoprimeTwoSubRtTwoAddRt
+public import Development.AbelianVarietyTheory.Definitions.ArchimedeanThetaValues.OneAddZeta21PowSevenAddPowFourteenEqZero
+public import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.NatCardAlgHomEqFinrankOfIsReducedOfIsFractionRin
+public import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.OneMulConjFracOneEqInvDifferent
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsHermCoordOfDatum
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.FinrankEqOfInjectiveOfSpan
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField IsDedekindDomain
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.GeometryOfNumbersTheory
@@ -20,6 +66,7 @@ variable {E : Type} [Field E] [NumberField E]
 theorem trace_eq_sum {Ω : Type} [Field Ω] [CharZero Ω] [Fintype (E →+* Ω)]
     (h : Nat.card (E →+* Ω) = Module.finrank ℚ E) (x : E) :
     ((Algebra.trace ℚ E x : ℚ) : Ω) = ∑ τ : E →+* Ω, τ x := by
+  classical
   rw [← eq_ratCast (algebraMap ℚ Ω)]
   exact algebraMap_trace_eq_sum_algHom_of_card (Nat.card_eq_fintype_card.symm.trans h)
     (P := fun τ : E →+* Ω => τ.toRatAlgHom) (fun τ τ' e => RingHom.ext fun y => AlgHom.congr_fun e y) x
@@ -68,7 +115,7 @@ theorem re_pos_of_trace_pos {β : E} (hβ : IsCMField.complexConj E β = β) (h�
     · exact le_rfl)
   have h3 : Filter.Tendsto (fun n => ∑ σ, g σ n) Filter.atTop
       (nhds (∑ σ : E →+* ℂ, if InfinitePlace.mk σ = InfinitePlace.mk τ then (τ β).re else 0)) := by
-    refine tendsto_finset_sum _ fun σ _ => ?_
+    refine tendsto_finsetSum _ fun σ _ => ?_
     simp only [g]
     split_ifs with hσ
     · exact tendsto_const_nhds
@@ -227,12 +274,12 @@ theorem exists_ideal_traceForm_of_rank_one : ∀ (E : Type) [Field E] [NumberFie
       field_simp
       rw [coe_rt_eq]
       ring
-    rw [h3, map_add, map_smul (Algebra.trace ℚ E), map_smul (Algebra.trace ℚ E), ← h2, smul_zero, zero_add,
+    rw [h3, map_add (f := _), map_smul (Algebra.trace ℚ E), map_smul (Algebra.trace ℚ E), ← h2, smul_zero, zero_add,
       smul_eq_mul] at h1
     exact (mul_pos_iff_of_pos_left (by positivity)).1 h1
   · rw [← relTrace_eq H hΩ, ← hE, ← hE', hh]
     push_cast
-    simp only [map_add, map_mul, map_sub, map_intCast]
+    simp only [map_add (f := _), map_mul, map_sub, map_intCast]
     ring
   · have h1 := log_absNorm_of_selfDual h𝔞 (mul_ne_zero (div_ne_zero hε0 hrt) hdet) fun v => by
       have h2 := hdual fun _ => v

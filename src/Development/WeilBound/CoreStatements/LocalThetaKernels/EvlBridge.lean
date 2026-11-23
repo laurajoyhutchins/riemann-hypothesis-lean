@@ -1,13 +1,57 @@
-import Development.WeilBound.CoreStatements.CompactAveragingSplitting.EigenvectorLifting.InertDef
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.StandardAddCharSymplecticLocalLatticeEqOne
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.StandardAdelicCharacterNontrivialAtPlaces
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HermitianTensorSkewHermitianLatticeOpenCompact
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsStdCharNegOneOfStandardTraceAdelicAddChar
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AdelicHeisenbergActsByLocalSchrodinger
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsLocallyConstantFinprodSchwartzBruhatFiniteAdel
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HasCompactSupportFinprodSchwartzBruhatFiniteAdel
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsFactorPureTensorComponentAtPlace
-import Development.AutomorphicSpectrum.Proofs.MembershipProofs.LagrangianStabilizerCharacterTrivial
+module
+
+public import Development.WeilBound.CoreStatements.CompactAveragingSplitting.EigenvectorLifting.InertDef
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ContinuousAtPlace
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LatAtVAtStable
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AdelicHeisenbergActsByLocalSchrodinger
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EventuallyIntegralPointsIndicatorIsVacuum
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsFactorPureTensorComponentAtPlace
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HasCompactSupportFinprodSchwartzBruhatFiniteAdel
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HermitianTensorSkewHermitianLatticeOpenCompact
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsLocallyConstantFinprodSchwartzBruhatFiniteAdel
+public import Development.AutomorphicSpectrum.Proofs.MembershipProofs.LagrangianStabilizerCharacterTrivial
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Calculus.BumpFunction.FiniteDimension
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.WeilBound.CoreStatements.CompactAveragingSplitting.EigenvectorLifting.FinSplit
+
+@[expose] public section
 
 noncomputable section
 
@@ -70,7 +114,7 @@ theorem acts_unique {κ : Type} [Fintype κ] {v : Pl F} {T : ((κ → AF F) → 
   funext t
   have h' := congrFun h fun i => liftV v (t i)
   have e : r (fun i => liftV v (t i)) = 1 := by
-    rw [← h0, ← hr.1 0 _ (GlobalTheory.VacAny.at_pi fun i => at_liftV v (t i)), zero_add]
+    rw [← h0, ← hr.1 0 _ (fun u hu => funext fun i => at_liftV v (t i) u hu), zero_add]
   simpa only [tens, evFin_liftV, e, mul_one] using h'
 
 section Co
@@ -86,6 +130,7 @@ theorem acts_iff (ψ : AddChar (AF F) ℂ) {u : V} (hu : At (evFin F v) u) {φ �
 theorem ev_form (u u' : V) : evFin F v (Bf u u') =
     (locCo co v u).1 ⬝ᵥ (locCo co v u').2 - (locCo co v u').1 ⬝ᵥ (locCo co v u).2 := by
   rw [co.form]
+
   simp only [dotProduct, map_sub, map_sum, map_mul]
   rfl
 
@@ -120,15 +165,15 @@ theorem symp_lag {Cy : Matrix (Fin d) (Fin m) (AE F E)} (h : IsLagAt σ W v Cy) 
     symp (R := AF F) (cA σ) ξ (incM F X.J) (incM F W.J) (z * Cyᵀ) (z' * Cyᵀ) = 0 := by
   rw [symp, GlobalTheory.CompanionTheory.SplitUnique.hTens_eq_zero (cA σ) _ h.iso, mul_zero, map_zero]
 
-variable (v) in
 
+variable (v) in
 def lagr (Cy : Matrix (Fin d) (Fin m) (AE F E)) :
     Submodule (Fv F v) ((Fin n × Fin d → Fv F v) × (Fin n × Fin d → Fv F v)) where
   carrier := {w | ∃ z : Matrix (Fin n) (Fin m) (AE F E), locCo M.co v (z * Cyᵀ) = w}
   zero_mem' := ⟨0, by rw [Matrix.zero_mul, map_zero]⟩
   add_mem' := by
     rintro _ _ ⟨z, rfl⟩ ⟨z', rfl⟩
-    exact ⟨z + z', by rw [Matrix.add_mul, map_add]⟩
+    exact ⟨z + z', by rw [Matrix.add_mul, map_add (f := _)]⟩
   smul_mem' := by
     rintro a _ ⟨z, rfl⟩
     exact ⟨liftV v a • z, by rw [Matrix.smul_mul, GlobalTheory.LatOpenCpt.locCo_smul, evFin_liftV]⟩
@@ -192,7 +237,7 @@ theorem lat_split {Cy Cx : Matrix (Fin d) (Fin m) (AE F E)}
     obtain ⟨z₁, z₁', h₁, rfl⟩ := ha
     exact ⟨-z₁, -z₁', by rw [Matrix.neg_mul]; exact neg_mem h₁, by simp only [Matrix.neg_mul]; abel⟩
 
-theorem space_split (hX : X.L.IsLattice E) (hW : W.L.IsLattice E) {Cy Cx : Matrix (Fin d) (Fin m) (AE F E)}
+theorem space_split (hX : X.L.IsFullLattice E) (hW : W.L.IsFullLattice E) {Cy Cx : Matrix (Fin d) (Fin m) (AE F E)}
     (h : ∀ y ∈ latW W v, ∃ s t : Fin m → AE F E, Cy *ᵥ s ∈ latW W v ∧ Cx *ᵥ t ∈ latW W v ∧ y = Cy *ᵥ s + Cx *ᵥ t)
     (u : Matrix (Fin n) (Fin d) (AE F E)) :
     ∃ z z' : Matrix (Fin n) (Fin m) (AE F E), liftV v 1 • u = z * Cyᵀ + z' * Cxᵀ := by

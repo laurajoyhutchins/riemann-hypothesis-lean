@@ -1,6 +1,51 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.PublishedTheorems.PoitouTateDuality.CupCompareDegreeOneOne
-import Development.WeilBound.CoreStatements.EulerCharacteristicCounts.GcohCmp
+module
+
+public import GroundTheory.ProfiniteCohomology.CupProducts.Pairing
+public import ReciprocityTheory.Hypotheses.GalCohDefs
+public import Development.WeilBound.CoreStatements.EulerCharacteristicCounts.GcohCmp
+public import GroundTheory.ProfiniteCohomology.CupProducts.Graded
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+
+@[expose] public section
 
 noncomputable section
 
@@ -19,89 +64,6 @@ theorem cupPairing_swap_degree_one {Γ : Type} [Group Γ] [TopologicalSpace Γ] 
   rw [h1, neg_one_smul, map_neg, neg_neg]
 
 attribute [local instance 2000] Rep.hV2
-
-theorem cup_degree_one_compatible {Lv Hv : Type} [Group Lv] [TopologicalSpace Lv] [IsTopologicalGroup Lv]
-    [Group Hv] [TopologicalSpace Hv] [IsTopologicalGroup Hv] (ev : Hv ≃* Lv)
-    (hevc : Continuous ev.toMonoidHom) {R : Type} [CommRing R] {M M' P : Type}
-    [AddCommGroup M] [Module R M] [TopologicalSpace M] [DiscreteTopology M]
-    [AddCommGroup M'] [Module R M'] [TopologicalSpace M'] [DiscreteTopology M']
-    [AddCommGroup P] [Module R P] [TopologicalSpace P] [DiscreteTopology P]
-    (rho : Representation R Lv M) (rho' : Representation R Lv M') (rhoP : Representation R Lv P)
-    (b : M →ₗ[R] M' →ₗ[R] P) (hb : Continuous fun p : M × M' => b p.1 p.2)
-    (hbe : ∀ g x y, b (rho g x) (rho' g y) = rhoP g (b x y)) (hc : ContAction rho')
-    (A B C : Rep.{0} (ULift.{0} ℤ) Hv) [IsDiscreteRep A] [IsDiscreteRep B] [IsDiscreteRep C]
-    (eA : M ≃+ A.V) (eB : M' ≃+ B.V) (eC : P ≃+ C.V)
-    (heA : ∀ σ m, eA (rho (ev σ) m) = A.ρ σ (eA m))
-    (heB : ∀ σ m, eB (rho' (ev σ) m) = B.ρ σ (eB m))
-    (μ : A ⊗ B ⟶ C) (hbμ : ∀ x y, eC (b x y) = μ.hom (eA x ⊗ₜ[ULift.{0} ℤ] eB y))
-    (E : H1 rho ≃+ cohomology A 1)
-    (hE : ∀ (z : ↥(Z1 rho)) (x : cocycles A 1),
-      (∀ s, cochainOf A (cocycleι A 1 x) s = eA (z.1 (ev (s 0)))) →
-        E (Submodule.Quotient.mk z) = cohomologyπ A 1 x)
-    (E' : H1 rho' ≃+ cohomology B 1)
-    (hE' : ∀ (z : ↥(Z1 rho')) (x : cocycles B 1),
-      (∀ s, cochainOf B (cocycleι B 1 x) s = eB (z.1 (ev (s 0)))) →
-        E' (Submodule.Quotient.mk z) = cohomologyπ B 1 x)
-    (z : ↥(Z1 rho)) (z' : ↥(Z1 rho')) :
-    ∃ y : cocycles C 2,
-      (∀ s, cochainOf C (cocycleι C 2 y) s =
-        eC ((cupCocycleZ1Z1 rho rho' rhoP b hb hbe hc z z').1 (ev (s 0), ev (s 1)))) ∧
-      cupPairing μ (rfl : 1 + 1 = 2) (E (Submodule.Quotient.mk z)) (E' (Submodule.Quotient.mk z')) =
-        cohomologyπ C 2 y := by
-  obtain ⟨e1, he1a, -⟩ := PositivityTheory.LocalTateOrthogonality.Gcoh.gc1 Hv R M (rho.comp ev.toMonoidHom) A eA heA
-  obtain ⟨x, hx⟩ := he1a (restrictCocycles1 rho ev.toMonoidHom hevc z)
-  obtain ⟨e1', he1b, -⟩ := PositivityTheory.LocalTateOrthogonality.Gcoh.gc1 Hv R M' (rho'.comp ev.toMonoidHom) B eB heB
-  obtain ⟨x', hx'⟩ := he1b (restrictCocycles1 rho' ev.toMonoidHom hevc z')
-  have hEa : E (Submodule.Quotient.mk z) = cohomologyπ A 1 x := hE z x (fun s => hx s)
-  have hEb : E' (Submodule.Quotient.mk z') = cohomologyπ B 1 x' := hE' z' x' (fun s => hx' s)
-  obtain ⟨y, hy, hπ⟩ := cup_compare_degree_one_one (rho.comp ev.toMonoidHom) (rho'.comp ev.toMonoidHom)
-    (rhoP.comp ev.toMonoidHom) b hb (fun g x y => hbe (ev g) x y) (show ContAction (rho'.comp ev.toMonoidHom) from hc.comp ((hevc.comp continuous_fst).prodMk continuous_snd)) A B C eA eB eC heB μ
-    hbμ (restrictCocycles1 rho ev.toMonoidHom hevc z) (restrictCocycles1 rho' ev.toMonoidHom hevc z') x x' hx hx'
-  refine ⟨y, fun s => ?_, ?_⟩
-  · rw [hy s]
-    rfl
-  · rw [hEa, hEb, hπ]
-
-theorem restriction_square_degree_one {Lv Hv : Type} [Group Lv] [TopologicalSpace Lv] [IsTopologicalGroup Lv]
-    [Group Hv] [TopologicalSpace Hv] [IsTopologicalGroup Hv] [CompactSpace Hv]
-    [TotallyDisconnectedSpace Hv] (ev : Hv ≃* Lv)
-    (hevc : Continuous ev.toMonoidHom) {R : Type} [CommRing R] {M M' P : Type}
-    [AddCommGroup M] [Module R M] [TopologicalSpace M] [DiscreteTopology M]
-    [AddCommGroup M'] [Module R M'] [TopologicalSpace M'] [DiscreteTopology M']
-    [AddCommGroup P] [Module R P] [TopologicalSpace P] [DiscreteTopology P]
-    (rho : Representation R Lv M) (rho' : Representation R Lv M') (rhoP : Representation R Lv P)
-    (b : M →ₗ[R] M' →ₗ[R] P) (hb : Continuous fun p : M × M' => b p.1 p.2)
-    (hbe : ∀ g x y, b (rho g x) (rho' g y) = rhoP g (b x y)) (hc : ContAction rho')
-    (A B C : Rep.{0} (ULift.{0} ℤ) Hv) [IsDiscreteRep A] [IsDiscreteRep B] [IsDiscreteRep C]
-    (eA : M ≃+ A.V) (eB : M' ≃+ B.V) (eC : P ≃+ C.V)
-    (heA : ∀ σ m, eA (rho (ev σ) m) = A.ρ σ (eA m))
-    (heB : ∀ σ m, eB (rho' (ev σ) m) = B.ρ σ (eB m))
-    (μ' : B ⊗ A ⟶ C) (hbμ : ∀ x y, eC (b x y) = μ'.hom (eB y ⊗ₜ[ULift.{0} ℤ] eA x))
-    (E : H1 rho ≃+ cohomology A 1)
-    (hE : ∀ (z : ↥(Z1 rho)) (x : cocycles A 1),
-      (∀ s, cochainOf A (cocycleι A 1 x) s = eA (z.1 (ev (s 0)))) →
-        E (Submodule.Quotient.mk z) = cohomologyπ A 1 x)
-    (E' : H1 rho' ≃+ cohomology B 1)
-    (hE' : ∀ (z : ↥(Z1 rho')) (x : cocycles B 1),
-      (∀ s, cochainOf B (cocycleι B 1 x) s = eB (z.1 (ev (s 0)))) →
-        E' (Submodule.Quotient.mk z) = cohomologyπ B 1 x)
-    {Q : Type} [AddCommGroup Q] (I : H2 rhoP →+ Q) (J : cohomology C 2 →+ Q)
-    (hIJ : ∀ (c : ↥(Z2 rhoP)) (x : cocycles C 2),
-      (∀ s, cochainOf C (cocycleι C 2 x) s = eC (c.1 (ev (s 0), ev (s 1)))) →
-        I (Submodule.Quotient.mk c) = - J (cohomologyπ C 2 x))
-    (a : H1 rho') (b' : H1 rho) :
-    I (cupProductH1H1 rho rho' rhoP b hb hbe hc b' a) = J (cupPairing μ' (rfl : 1 + 1 = 2) (E' a) (E b')) := by
-  obtain ⟨za, rfl⟩ := Submodule.Quotient.mk_surjective _ a
-  obtain ⟨zb, rfl⟩ := Submodule.Quotient.mk_surjective _ b'
-  have hbμ' : ∀ x y, eC (b x y) = ((β_ A B).hom ≫ μ').hom (eA x ⊗ₜ[ULift.{0} ℤ] eB y) := by
-    intro x y
-    rw [hbμ]
-    rfl
-  obtain ⟨y, hy, hπ⟩ := cup_degree_one_compatible ev hevc rho rho' rhoP b hb hbe hc A B C eA eB eC heA heB
-    ((β_ A B).hom ≫ μ') hbμ' E hE E' hE' zb za
-  have hcup : cupProductH1H1 rho rho' rhoP b hb hbe hc (Submodule.Quotient.mk zb) (Submodule.Quotient.mk za) =
-      Submodule.Quotient.mk (cupCocycleZ1Z1 rho rho' rhoP b hb hbe hc zb za) := rfl
-  rw [hcup, hIJ _ y hy, cupPairing_swap_degree_one μ', hπ, map_neg]
 
 theorem transfer_cup_degree_one_one {Lv Hv : Type} [Group Lv] [TopologicalSpace Lv] [IsTopologicalGroup Lv]
     [Group Hv] [TopologicalSpace Hv] [IsTopologicalGroup Hv] (ev : Hv ≃* Lv)

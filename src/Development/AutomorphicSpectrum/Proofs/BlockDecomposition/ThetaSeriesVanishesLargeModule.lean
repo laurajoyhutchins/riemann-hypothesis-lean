@@ -1,6 +1,45 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ThPr
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.PureAdelicFunctionFormula
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.SiegelWeilProof.BaseOneSide.PsiSide
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.PureAdelicFunctionFormula
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ThPr
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open HeckeCharacterZeroLocus.SiegelWeilU GlobalTheory.CompanionTheory.SW NumberField IsDedekindDomain MeasureTheory Topology Filter GroundTheory.Global PositivityTheory.Rg.Base1 GlobalTheory.CompanionTheory.BasePsi
 open scoped ENNReal NNReal Classical
@@ -12,7 +51,7 @@ namespace GlobalTheory.CompanionTheory.BasePsi
 theorem exists_bound_inf {F : Type} [Field F] [NumberField F] (C : Set (Ainf F)) (hC : IsCompact C) :
     ∃ B : ℝ, 0 ≤ B ∧ ∀ y ∈ C, ∏ w : InfinitePlace F, ‖y w‖ ^ w.mult ≤ B := by
   have hc : Continuous fun y : Ainf F => ∏ w : InfinitePlace F, ‖y w‖ ^ w.mult :=
-    continuous_finset_prod _ fun w _ => ((continuous_apply w).norm).pow _
+    continuous_finsetProd _ fun w _ => ((continuous_apply w).norm).pow _
   obtain ⟨B, hB⟩ := (hC.image hc).bddAbove
   exact ⟨max B 0, le_max_right _ _, fun y hy => (hB ⟨y, hy, rfl⟩).trans (le_max_left _ _)⟩
 
@@ -36,7 +75,7 @@ theorem md_le_of_bounds {F : Type} [Field F] [NumberField F] (S : Finset (Height
   have hfp : ∏ᶠ v : HeightOneSpectrum (𝓞 F), ‖(b : AF F).2 v‖ ≤ ∏ v ∈ S, c v := by
     rw [finprod_eq_prod_of_mulSupport_subset _ hsub]
     calc ∏ v ∈ T, ‖(b : AF F).2 v‖ ≤ ∏ v ∈ T, (if v ∈ S then c v else 1) := by
-          refine Finset.prod_le_prod (fun _ _ => norm_nonneg _) fun v _ => ?_
+          refine Finset.prod_le_prod₀ (fun _ _ => norm_nonneg _) fun v _ => ?_
           by_cases hv : v ∈ S
           · simpa [hv] using hS v hv
           · simpa [hv] using (Valued.toNormedField.norm_le_one_iff).2
@@ -65,7 +104,7 @@ theorem th_pure_vanish : ∀ (F : Type) [Field F] [NumberField F] (S : Finset (H
   by_contra hne
   obtain ⟨t, ht⟩ : ∃ t : Fˣ, PositivityTheory.Rg.Base1.pure S G g (fun v => rv v 0) (pr t * a) ≠ 0 := by
     by_contra hall
-    push_neg at hall
+    push Not at hall
     exact hne (by simp [th, hall])
   rw [pure_rv_zero_apply] at ht
   split_ifs at ht with hint

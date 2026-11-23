@@ -1,4 +1,53 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.Group.Idempotent
+public import Mathlib.RingTheory.Artinian.Defs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RingTheory.Artinian.Module
+
+@[expose] public section
+
 open Matrix Polynomial
 
 namespace GlobalTheory
@@ -58,10 +107,10 @@ theorem reducedArtinian_involution_split :
   have hσeε : σ e * ε = 0 := by linear_combination (-σ e) * hεf + ε * hσef
   have hmem : Ideal.span {1 - (e + ε) - σ (e + ε)} ∈ S :=
     ⟨e + ε, by linear_combination he + hε + 2 * heε,
-      by rw [map_add]; linear_combination heσ + heσε + hσeε + hεσ, rfl⟩
+      by rw [map_add (f := _)]; linear_combination heσ + heσε + hσeε + hεσ, rfl⟩
   apply hmin _ hmem
   have hff : f * (1 - (e + ε) - σ (e + ε)) = 1 - (e + ε) - σ (e + ε) := by
-    rw [map_add]; linear_combination hf - hεf - hσεf
+    rw [map_add (f := _)]; linear_combination hf - hεf - hσεf
   refine lt_of_le_of_ne ?_ ?_
   · rw [Ideal.span_singleton_le_span_singleton]
     exact ⟨_, hff.symm⟩
@@ -71,7 +120,7 @@ theorem reducedArtinian_involution_split :
     obtain ⟨c, hc⟩ := Ideal.mem_span_singleton'.mp this
     apply hεne
     have hεg : ε * (1 - (e + ε) - σ (e + ε)) = 0 := by
-      rw [map_add]; linear_combination -heε - hσeε - hε - hεσ
+      rw [map_add (f := _)]; linear_combination -heε - hσeε - hε - hεσ
     linear_combination -hεf - ε * hc + c * hεg
 
 end GlobalTheory

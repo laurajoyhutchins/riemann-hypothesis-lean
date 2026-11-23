@@ -1,7 +1,44 @@
-import Formalism.SharpRestriction.GrowthBounds.AevalValuation.RestSpec
-import Formalism.SharpRestriction.GrowthBounds.DiagonalSupport.MemSupportSumMonomial
-import Formalism.SharpRestriction.GrowthBounds.PlaneCoefficients.DigOKAddInl
-import Formalism.SharpRestriction.GrowthBounds.PlaneCoefficients.TensZeroRight
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.PlaneCoefficients.DigOKAddInl
+public import Formalism.SharpRestriction.GrowthBounds.PlaneCoefficients.PlaneCoeffOneTTens
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -14,11 +51,6 @@ open Formalism.MainNotions.G Formalism.GradedWeylDivisibility Formalism.MainNoti
 def filtQ {Kf : Type} [Field Kf] {ι : Type} {n : ℕ} (Q : (ι → ℕ) → Prop) (F : MvPolynomial (ι × Fin n) Kf) :
     MvPolynomial (ι × Fin n) Kf :=
   ∑ mo ∈ F.support.filter (fun mo => Q (fun i => multideg mo i)), monomial mo (F.coeff mo)
-
-def VecOnly : Prop :=
-  ∀ (Kf : Type) [Field Kf] (ι : Type) (n : ℕ) [NeZero n] (LL : Letters ι) (S : Set ι)
-    (F : MvPolynomial (ι × Fin n) Kf), F ∈ supported Kf {v : ι × Fin n | v.1 ∈ S → LL.vec v.1 = true} →
-    (0 : WithTop ℤ) ≤ valS LL S F
 
 def ValFilt : Prop :=
   ∀ (Kf : Type) [Field Kf] (ι : Type) (n : ℕ) [NeZero n] (LL : Letters ι) (S : Set ι)
@@ -35,12 +67,6 @@ def ValAeval : Prop :=
 section Alg
 
 variable {p : ℕ} {O : Type} [CommRing O] [IsDomain O] [IsDiscreteValuationRing O] {r J : ℕ}
-
-def phL {nL : ZMod J → ℕ} : ML J nL r → TL J nL r
-  | ML.ll j l => ⟨j, Sum.inl l⟩
-  | ML.lab j m => ⟨j, Sum.inr m⟩
-  | ML.wc j m => ⟨j, Sum.inr m⟩
-  | ML.tp j m _ => ⟨j, Sum.inr m⟩
 
 def IsLW {nL : ZMod J → ℕ} : ML J nL r → Prop
   | ML.ll _ _ => True

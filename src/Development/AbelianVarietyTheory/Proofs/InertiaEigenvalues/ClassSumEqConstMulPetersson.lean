@@ -1,15 +1,58 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.IsWildInertiaCyclotomicElement
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.GaloisSideTwistedSelmerAuxiliaryPrimes
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.SemisimpleOfInjective
-import Formalism.LocalToGlobal.NormalizedHeckeFactors.CoverStd
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.RelIndexNeZeroOfCover
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.LocalisationCoefficientExtensionIsWildInertiaCyc
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.FiniteRationalConjMemBoundedCompact
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.FiniteIndexConj
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ClassSumSmallerLevel
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.MaxCompactUnitaryConjRelIndexEqStatement
+module
+
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.RelIndexNeZeroOfCover
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.LocalisationCoefficientExtensionIsWildInertiaCyc
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ClassSumSmallerLevel
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.FiniteIndexConj
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.FiniteRationalConjMemBoundedCompact
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.MaxCompactUnitaryConjRelIndexEqStatement
 import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FiniteDoubleCosetsDefiniteUnitaryMaximalLevel
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.RowsExhaust
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.MainNotions Formalism.MainNotions.N Formalism.ConjugateSelfDual ReciprocityTheory.Gal ReciprocityTheory.Aut Formalism.AUTREP Formalism.L2 NumberField IsDedekindDomain Polynomial GlobalTheory.EtaJoin GlobalTheory.CoefDuty
 
 noncomputable section
@@ -40,14 +83,13 @@ theorem exists_reps_cong {N : ℕ} (hN : 0 < N) : ∃ T, IsClassReps (congSub L 
   obtain ⟨f, hf, hfu⟩ := hF u hu
   exact ⟨t * f, Finset.mem_image₂_of_mem ht hf, γ, f⁻¹ * u, hfu, by group⟩
 
-variable (L n) in
-open Classical in
 
+open Classical in
 def reps (N : ℕ) : Finset (GAf L n) :=
   if h : ∃ T, IsClassReps (congSub L n N) T then h.choose else ∅
 
-theorem reps_spec {N : ℕ} (hN : 0 < N) : IsClassReps (congSub L n N) (reps L n N) := by
-  rw [reps, dif_pos (exists_reps_cong hN)]
+theorem reps_spec {N : ℕ} (hN : 0 < N) : IsClassReps (congSub L n N) (reps (L := L) (n := n) N) := by
+  rw [reps, dite_eq_left (exists_reps_cong hN)]
   exact (exists_reps_cong hN).choose_spec
 
 def InvAt {W : Type} (N : ℕ) (f : GAf L n → W) : Prop := ∀ κ, NG.Cong L n N κ → ∀ g, f (g * κ) = f g
@@ -67,7 +109,7 @@ theorem InvAt.smul {W : Type} [AddCommGroup W] [Module ℂ W] {N : ℕ} {f : GAf
 variable (a : NG.AlgWt L n) (β : a.W →ₗ⋆[ℂ] a.W →ₗ[ℂ] ℂ)
 
 def petN (N : ℕ) (f f' : GAf L n → a.W) : ℂ :=
-  ((congSub L n N).relIndex (Umax L n) : ℂ)⁻¹ * classSum a β (congSub L n N) (reps L n N) f f'
+  ((congSub L n N).relIndex (Umax L n) : ℂ)⁻¹ * classSum a β (congSub L n N) (reps (L := L) (n := n) N) f f'
 
 theorem refine_eq (hβ : IsInvForm a β) {J J' : Subgroup (GAf L n)} {T T' : Finset (GAf L n)} (hJ : IsBounded J)
     (hle : J' ≤ J) (hne : J'.relIndex J ≠ 0) (hT : IsClassReps J T) (hT' : IsClassReps J' T')
@@ -103,14 +145,14 @@ namespace GlobalTheory.ClassPet
 
 variable {L : Type} [Field L] [NumberField L] [IsCMField L] {n : ℕ}
 
-open Classical in
 
+open Classical in
 def lev {W : Type} (f : GAf L n → W) : ℕ := if h : ∃ N, 0 < N ∧ InvAt N f then h.choose else 1
 
 theorem lev_spec {W : Type} [AddCommGroup W] [Module ℂ W] {ρ : Representation ℂ (GQ L n) W} {f : GAf L n → W}
     (hf : f ∈ NG.AFall L n ρ) : 0 < lev f ∧ InvAt (lev f) f := by
   have h : ∃ N, 0 < N ∧ InvAt N f := hf.2
-  rw [lev, dif_pos h]
+  rw [lev, dite_eq_left h]
   exact h.choose_spec
 
 variable (a : NG.AlgWt L n) (β : a.W →ₗ⋆[ℂ] a.W →ₗ[ℂ] ℂ)
@@ -143,8 +185,8 @@ theorem petN_smul_right (N : ℕ) (c : ℂ) (f f' : GAf L n → a.W) :
     petN a β N f (c • f') = c * petN a β N f f' := by
   simp only [petN, classSum_smul_right]; ring
 
-variable (L n) in
 
+variable (L n) in
 def projAF {W : Type} [AddCommGroup W] [Module ℂ W] (ρ : Representation ℂ (GQ L n) W) :
     (GAf L n → W) →ₗ[ℂ] (GAf L n → W) :=
   (NG.AFall L n ρ).subtype ∘ₗ
@@ -172,7 +214,7 @@ theorem petFun_add_left (hβ : IsInvForm a β) (x₁ x₂ y : GAf L n → a.W) :
   have j2 := (i2.mul_left (lev (projAF L n a.ρ x₁))).mul_right (lev (projAF L n a.ρ y))
   have j3 := i3.mul_left (lev (projAF L n a.ρ x₁) * lev (projAF L n a.ρ x₂))
   unfold petFun
-  rw [map_add, petersson_level_eq_of_invariant_forms a β hβ (Submodule.add_mem _ (projAF_mem _ _) (projAF_mem _ _)) (projAF_mem _ _) hN (j1.add j2) j3,
+  rw [map_add (f := _), petersson_level_eq_of_invariant_forms a β hβ (Submodule.add_mem _ (projAF_mem _ _) (projAF_mem _ _)) (projAF_mem _ _) hN (j1.add j2) j3,
     petersson_level_eq_of_invariant_forms a β hβ (projAF_mem _ _) (projAF_mem _ _) hN j1 j3, petersson_level_eq_of_invariant_forms a β hβ (projAF_mem _ _) (projAF_mem _ _) hN j2 j3,
     petN_add_left]
 
@@ -187,7 +229,7 @@ theorem petFun_add_right (hβ : IsInvForm a β) (x y₁ y₂ : GAf L n → a.W) 
   have j2 := (i2.mul_left (lev (projAF L n a.ρ x))).mul_right (lev (projAF L n a.ρ y₂))
   have j3 := i3.mul_left (lev (projAF L n a.ρ x) * lev (projAF L n a.ρ y₁))
   unfold petFun
-  rw [map_add, petersson_level_eq_of_invariant_forms a β hβ (projAF_mem _ _) (Submodule.add_mem _ (projAF_mem _ _) (projAF_mem _ _)) hN j1 (j2.add j3),
+  rw [map_add (f := _), petersson_level_eq_of_invariant_forms a β hβ (projAF_mem _ _) (Submodule.add_mem _ (projAF_mem _ _) (projAF_mem _ _)) hN j1 (j2.add j3),
     petersson_level_eq_of_invariant_forms a β hβ (projAF_mem _ _) (projAF_mem _ _) hN j1 j2, petersson_level_eq_of_invariant_forms a β hβ (projAF_mem _ _) (projAF_mem _ _) hN j1 j3,
     petN_add_right]
 

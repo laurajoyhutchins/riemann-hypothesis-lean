@@ -1,12 +1,56 @@
-import Development.AutomorphicArithmetic.Foundations.Convolution.OrbitNormCounting.NormCount
-import Development.AutomorphicArithmetic.Foundations.Convolution.OrbitNormCounting.IntUniq
-import Development.AutomorphicArithmetic.Foundations.Convolution.OrbitNormCounting.CptInt
-import Development.AutomorphicArithmetic.Foundations.Convolution.OrbitNormCounting.OrbUnit
-import Development.AutomorphicArithmetic.Foundations.Convolution.OrbitNormCounting.OrbZero
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TwistedOrbitalIntegralTwistedConjInvariant
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TwistedOrbitalIntegralProductGroup
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.KappaConstantMulOfCoprimeEllipticPolynomials
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LocalTwistContinuousInvolutionIntegralProperties
+module
+
+public import Development.AutomorphicArithmetic.Foundations.Convolution.OrbitNormCounting.NormCount
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.KappaConstantMulOfCoprimeEllipticPolynomials
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LocalTwistContinuousInvolutionIntegralProperties
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TwistedOrbitalIntegralProductGroup
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TwistedOrbitalIntegralTwistedConjInvariant
+public import Development.AutomorphicArithmetic.Foundations.Convolution.OrbitNormCounting.CptInt
+public import Development.AutomorphicArithmetic.Foundations.Convolution.OrbitNormCounting.IntUniq
+public import Development.AutomorphicArithmetic.Foundations.Convolution.OrbitNormCounting.OrbUnit
+public import Development.AutomorphicArithmetic.Foundations.Convolution.OrbitNormCounting.OrbZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.MetricSpace.Ultra.TotallySeparated
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Matrix Polynomial Filter
 open GlobalTheory.CuspRep GlobalTheory.PRep Formalism.UG Formalism.BasicNotions GlobalTheory.UnitaryBC GlobalTheory.BCT
@@ -62,10 +106,10 @@ private theorem lpol_locEl (hU : Unr E) (n : ℕ) (w : Pl E) (δ : GL (Fin n) E)
   ThBasic.charpoly_nrmL hU n w δ
 
 private theorem unit_uniq (hU : Unr E) (n : ℕ) (w : Pl E) (δ : GL (Fin n) E)
-    (i : ∀ y ∈ GlobalTheory.LFun.KGL w n, lpol w y = atPl w (gpol δ) →
-      ∃ k ∈ GlobalTheory.LFun.KGL w n, y = k⁻¹ * locEl n w δ * thL n w k)
-    (y : GLw n w) (hy : y ∈ GlobalTheory.LFun.KGL w n) (h : Tw (thL n w) (locEl n w δ) y) :
-    ∃ k ∈ GlobalTheory.LFun.KGL w n, y = k⁻¹ * locEl n w δ * thL n w k :=
+    (i : ∀ y ∈ GlobalTheory.LFun.KGL w (n := n), lpol w y = atPl w (gpol δ) →
+      ∃ k ∈ GlobalTheory.LFun.KGL w (n := n), y = k⁻¹ * locEl n w δ * thL n w k)
+    (y : GLw n w) (hy : y ∈ GlobalTheory.LFun.KGL w (n := n)) (h : Tw (thL n w) (locEl n w δ) y) :
+    ∃ k ∈ GlobalTheory.LFun.KGL w (n := n), y = k⁻¹ * locEl n w δ * thL n w k :=
   i y hy ((lpol_tw hU n w h).trans (lpol_locEl hU n w δ))
 
 theorem _root_.UpperTheory.ConvolutionTheory.G3.unitAe : UnitAe := by
@@ -74,8 +118,8 @@ theorem _root_.UpperTheory.ConvolutionTheory.G3.unitAe : UnitAe := by
     with w i₁ i₂ c₁ c₂ y₁ y₂ l₁ l₂
   have hK₁ := ThBasic.thL_mem_KGL hU a w
   have hK₂ := ThBasic.thL_mem_KGL hU b w
-  have hK : ∀ k ∈ (GlobalTheory.LFun.KGL w a).prod (GlobalTheory.LFun.KGL w b),
-      (thL a w).prodMap (thL b w) k ∈ (GlobalTheory.LFun.KGL w a).prod (GlobalTheory.LFun.KGL w b) :=
+  have hK : ∀ k ∈ (GlobalTheory.LFun.KGL w (n := a)).prod (GlobalTheory.LFun.KGL w (n := b)),
+      (thL a w).prodMap (thL b w) k ∈ (GlobalTheory.LFun.KGL w (n := a)).prod (GlobalTheory.LFun.KGL w (n := b)) :=
     fun k hk => Subgroup.mem_prod.2 ⟨hK₁ _ (Subgroup.mem_prod.1 hk).1, hK₂ _ (Subgroup.mem_prod.1 hk).2⟩
   by_cases ht : Tw (thL a w) (locEl a w δ₁) y₁ ∧ Tw (thL b w) (locEl b w δ₂) y₂
   · rw [if_pos ht]

@@ -1,4 +1,54 @@
-import Development.AutomorphicArithmetic.Foundations.Convolution.TwistedLocalOrbits.HoweSpace
+module
+
+public import Development.AutomorphicArithmetic.Foundations.Convolution.TwistedLocalOrbits.HoweSpace
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.IwahoriDoubleCosets
+public import Mathlib.FieldTheory.Finite.GaloisField
+public import Mathlib.RingTheory.Trace.Basic
+
+@[expose] public section
 
 open GlobalTheory.PRep GlobalTheory.SmGL GlobalTheory.SplitWeil ValuativeRel Matrix GlobalTheory.IndefiniteRowSideFullHecke.IwahoriDoubleCosets UpperTheory.ConvolutionTheory.Loc
 
@@ -84,6 +134,7 @@ private theorem unramified_norm_trace_surjective {E : Type} [Field E] [Valuative
   · obtain ⟨x, rfl⟩ := IsLocalRing.residue_surjective z
     refine ⟨x, x.2, ?_⟩
     simp only [hτi] at hz
+
     rw [← map_sum, ← map_one (IsLocalRing.residue 𝒪[E]), key] at hz
     simpa only [AddSubmonoidClass.coe_finsetSum, hsi, OneMemClass.coe_one] using hz
 
@@ -133,6 +184,7 @@ theorem UpperTheory.ConvolutionTheory.Loc.unitNorm :
     have e1 := Finset.sum_range_succ (fun i => σ^[i] x) q
     rw [Finset.sum_range_succ', h.ord] at e1
     simp only [Function.iterate_succ_apply', Function.iterate_zero_apply] at e1
+
     rw [map_sum]
     exact add_right_cancel e1
   have near : ∀ x y : E, valuation E y = 1 → valuation E (x - y) < 1 → valuation E x = 1 := by
@@ -201,7 +253,7 @@ theorem UpperTheory.ConvolutionTheory.Loc.unitNorm :
   have hle : valuation E (N - u) ≤ valuation E (∏ i ∈ Finset.range q, σ^[i] (w * (1 + d * b)) - u) := hmin hw'
   have e1 : ∀ i : ℕ, σ^[i] (w * (1 + d * b)) = σ^[i] w * (1 + d * σ^[i] b) := by
     intro i
-    rw [hit, map_mul, map_add, map_one, map_mul, ← hit, ← hit, ← hit, hfix i d hdσ]
+    rw [hit, map_mul, map_add (f := _), map_one, map_mul, ← hit, ← hit, ← hit, hfix i d hdσ]
   simp only [e1] at hle
   rw [Finset.prod_mul_distrib, he, hTb, ← hN, ← hdv] at hle
   have e2 : N * (1 + d * 1 + d ^ 2 * c) - u = N * (d * (d * c)) := by

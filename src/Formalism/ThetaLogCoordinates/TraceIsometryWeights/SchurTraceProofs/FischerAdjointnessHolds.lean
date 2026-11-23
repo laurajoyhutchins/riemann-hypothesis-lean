@@ -1,4 +1,59 @@
-import Formalism.ThetaLogCoordinates.TraceIsometryWeights.StatementD
+module
+
+public import Formalism.ThetaLogCoordinates.TraceIsometryWeights.StatementD
+public import Formalism.ThetaLogCoordinates.TraceIsometryWeights.StatementC
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 namespace Formalism.InvariantFactorPaths.PW
 
@@ -25,14 +80,14 @@ theorem fock_add_right' (F G G' : MvPolynomial σ ℚ_[p]) : fock p F (G + G') =
   unfold fock
   rw [← Finset.sum_add_distrib]
   refine Finset.sum_congr rfl fun m _ => ?_
-  rw [coeff_add]
+  rw [MvPolynomial.coeff_add]
   ring
 
 theorem fock_smul_right' (c : ℚ_[p]) (F G : MvPolynomial σ ℚ_[p]) : fock p F (c • G) = c * fock p F G := by
   unfold fock
   rw [Finset.mul_sum]
   refine Finset.sum_congr rfl fun m _ => ?_
-  rw [coeff_smul, smul_eq_mul]
+  rw [MvPolynomial.coeff_smul, smul_eq_mul]
   ring
 
 theorem fock_add_left' (F F' G : MvPolynomial σ ℚ_[p]) : fock p (F + F') G = fock p F G + fock p F' G := by
@@ -117,7 +172,7 @@ theorem fock_nondeg (F : MvPolynomial σ ℚ_[p]) (h : ∀ G, fock p F G = 0) : 
   ext m
   have h1 := h (monomial m 1)
   rw [fock_monomial_right, mul_one] at h1
-  rw [coeff_zero]
+  change F.coeff m = 0
   exact (mul_eq_zero.1 h1).resolve_right (facProd_ne_zero m)
 
 theorem fock_disjoint (F G : MvPolynomial σ ℚ_[p]) (h : ∀ m ∈ F.support, m ∉ G.support) : fock p F G = 0 := by
@@ -133,6 +188,7 @@ theorem intPol_iff_norm (x : MvPolynomial σ ℚ_[p]) : x ∈ IntPol p σ ↔ �
     exact PadicInt.norm_le_one _
   · intro h
     refine ⟨∑ m ∈ x.support, monomial m (⟨x.coeff m, h m⟩ : ℤ_[p]), ?_⟩
+
     simp only [AlgHom.toLinearMap_apply, map_sum, mapAlgHom_apply, map_monomial]
     conv_rhs => rw [x.as_sum]
     refine Finset.sum_congr rfl fun m _ => ?_
@@ -179,6 +235,7 @@ theorem divPow_mul (D : A →ₗ[K] A) (hD : ∀ a b, D (a * b) = a * D b + b * 
     have hk : ((k + 1 : ℕ) : K) ≠ 0 := by exact_mod_cast Nat.succ_ne_zero k
     have hL : dd (k + 1) (f * g) = ((k + 1 : ℕ) : K)⁻¹ • D (dd k (f * g)) := by
       rw [hD1, smul_smul, inv_mul_cancel₀ hk, one_smul]
+
     rw [hL, ih, map_sum]
     simp only [hD, hD1, mul_smul_comm, Finset.sum_add_distrib]
     rw [inv_smul_eq_iff₀ hk]
@@ -288,7 +345,7 @@ theorem divided_integral_holds : DivInt := by
     exact LinearMap.mem_range.2 ⟨u' * w', by rw [← hu', ← hw']; simp⟩
   have hadd : ∀ u w, Pr u → Pr w → Pr (u + w) := by
     intro u w hu hw k
-    rw [map_add, smul_add]
+    rw [map_add (f := _), smul_add]
     exact Submodule.add_mem _ (hu k) (hw k)
   have hall : ∀ y : MvPolynomial (Fin N × Fin r) ℤ_[p],
       Pr (MvPolynomial.map (algebraMap ℤ_[p] ℚ_[p]) y) := by
@@ -298,7 +355,7 @@ theorem divided_integral_holds : DivInt := by
       rw [map_C]
       exact fun k => divPow_C_int LL j c d a k
     next u w hu hw =>
-      rw [map_add]
+      rw [map_add (f := _)]
       exact hadd _ _ hu hw
     next u v hu =>
       rw [map_mul, map_X]

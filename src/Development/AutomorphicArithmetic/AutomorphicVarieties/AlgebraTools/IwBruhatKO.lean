@@ -1,4 +1,60 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.HeckePairTop
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.HeckePairTop
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.IsSubquotientDetRepParInd
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.GroupTheory.DoubleCoset
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open ValuativeRel Matrix GlobalTheory.SmGL GlobalTheory.SplitWeil UpperTheory.V.Hi UpperTheory.V.AlgebraTools
 
 namespace UpperTheory.V.AlgebraTools.BruhatKO
@@ -9,11 +65,11 @@ variable {n : ℕ} {k : Type} [Field k]
 
 private lemma mul_pm_apply (M : Matrix (Fin n) (Fin n) k) (σ : Equiv.Perm (Fin n)) (r c : Fin n) :
     (M * (pm k n σ : Matrix (Fin n) (Fin n) k)) r c = M r (σ c) := by
-  simp [mul_apply, pm_apply]
+  simp [Matrix.mul_apply, pm_apply]
 
 private lemma pm_mul_apply (M : Matrix (Fin n) (Fin n) k) (σ : Equiv.Perm (Fin n)) (r c : Fin n) :
     ((pm k n σ : Matrix (Fin n) (Fin n) k) * M) r c = M (σ⁻¹ r) c := by
-  rw [mul_apply, Fintype.sum_eq_single (σ⁻¹ r)]
+  rw [Matrix.mul_apply, Fintype.sum_eq_single (σ⁻¹ r)]
   · simp [pm_apply]
   · intro a ha
     rw [pm_apply, if_neg, zero_mul]
@@ -99,7 +155,7 @@ private lemma rowsReduced_step (h : GL (Fin n) k) (t : ℕ) (ht : t < n)
     intro a c hca
     replace hca : c < a := hca
     simp only [E₂, Matrix.add_apply, one_apply, vecMulVec_apply, Pi.single_apply]
-    rw [if_neg (ne_of_lt hca).symm]
+    rw [Matrix.one_apply_ne (ne_of_lt hca).symm]
     by_cases haj : a = j
     · subst haj
       simp [v, not_lt.mpr hca.le]
@@ -136,7 +192,7 @@ private lemma rowsReduced_step (h : GL (Fin n) k) (t : ℕ) (ht : t < n)
     intro a c hca
     replace hca : c < a := hca
     simp only [E₁, Matrix.add_apply, one_apply, vecMulVec_apply, Pi.single_apply]
-    rw [if_neg (ne_of_lt hca).symm]
+    rw [Matrix.one_apply_ne (ne_of_lt hca).symm]
     by_cases hci : c = i₀
     · subst hci
       simp [u, not_lt.mpr hca.le]

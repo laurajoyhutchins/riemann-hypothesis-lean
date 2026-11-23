@@ -1,7 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.EqOfFiniteOfClosedFibres
-import Development.AbelianVarietyTheory.Proofs.ToricGeometry.IsUnitOfLagrangian
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ThetaUnifAV
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ThetaUnifAV
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.DifferentiableOnQuotientOfDifferentiableOnSlice
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.EqOfFiniteOfClosedFibres
+public import Development.AbelianVarietyTheory.Proofs.ToricGeometry.IsUnitOfLagrangian
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 open Filter Set
 open scoped Topology
@@ -43,9 +85,9 @@ private theorem eq_of_continuousAt_mul_eq_eventually {E : Type} [TopologicalSpac
   refine (hnz.and_eventually (e₁.and e₂)).mono fun y hy ↦ ?_
   exact mul_right_cancel₀ hy.1 (hy.2.1.trans hy.2.2.symm)
 
+
 open Filter Set in
 open scoped Topology in
-
 theorem _root_.GlobalTheory.ThetaValueCont.continuousAt_constant {V V' K ι : Type} [NormedAddCommGroup V] [NormedSpace ℂ V] [FiniteDimensional ℂ V]
     [NormedAddCommGroup V'] [NormedSpace ℂ V'] [FiniteDimensional ℂ V'] {B : Set V} {b₀ : V}
     {W : ι → Set (V × V')} {f : ι → V × V' → ℂ} {θ : K → V × V' → ℂ} {C : Set K} (hC : C.Finite) {κ : V → K}
@@ -146,7 +188,8 @@ theorem _root_.GlobalTheory.ThetaValueCont.continuousAt_constant {V V' K ι : Ty
         have h := hFse w.1 hBw w.2 hw.1
         rw [hκw] at h
         exact h)
-      (fun b z hz ↦ ((hFsd b (hNsub b hz.2).2).mono fun z' hz' ↦ hz'.1) z hz)
+      (fun b z hz ↦
+        ((hFsd b (hNsub b hz.2).2).mono (s := {z' | (b, z') ∈ Wst}) fun _ hz' ↦ hz'.1) z hz)
       (fun w hw ↦ hnz _ hκ₀ w.1 (hNsub w.1 hw.2).2 w.2)
   have hmem : (b₀, (0 : V')) ∈ Wst := ⟨hj, hb₀N⟩
   have hpair : Continuous fun b : V ↦ (b, (0 : V')) := continuous_id.prodMk continuous_const
@@ -170,10 +213,11 @@ theorem _root_.GlobalTheory.ThetaValueCont.continuousAt_constant {V V' K ι : Ty
   show Fs b 0 / r j b = c b
   rw [heq, h0 rfl, mul_div_cancel_right₀ _ hrb]
 
+open scoped Matrix in
+
 open Filter Set in
 open scoped Topology in
 open Complex Matrix in
-
 theorem _root_.GlobalTheory.ThetaValueCont.exists_coordinates_of_relations {g : ℕ} {Hm : Matrix (Fin g) (Fin g) ℂ} (hH : Hm.IsHermitian)
     (hpos : ∀ z : Fin g → ℂ, z ≠ 0 → 0 < (z ⬝ᵥ Hm.mulVec (star z)).re) (e f : Fin g → Fin g → ℂ)
     (hee : ∀ i j, (_root_.ReciprocityTheory.ChartRestriction.G.Geo.Tor.hermForm Hm (e i) (e j)).im = 0) (hff : ∀ i j, (_root_.ReciprocityTheory.ChartRestriction.G.Geo.Tor.hermForm Hm (f i) (f j)).im = 0)
@@ -229,8 +273,8 @@ theorem _root_.GlobalTheory.ThetaValueCont.exists_coordinates_of_relations {g : 
   obtain ⟨hsymm, hpd, hYI⟩ := _root_.GlobalTheory.SiegelNormalForm.siegel_of_relations Y hYpos τ
     (fun i j ↦ by rw [hYre, hYC, hPe, hPτ]; exact hef i j)
     (fun i j ↦ by rw [hYre, hYC, hPτ, hPτ]; exact hff i j)
-  letI : Invertible P := P.invertibleOfIsUnitDet hdet
-  refine ⟨Matrix.toLinearEquiv' P this, τ, hsymm, hpd, fun k ↦ ⟨?_, ?_⟩, fun z w ↦ ?_⟩
+  let hPinv : Invertible P := P.invertibleOfIsUnitDet hdet
+  refine ⟨Matrix.toLinearEquiv' P hPinv, τ, hsymm, hpd, fun k ↦ ⟨?_, ?_⟩, fun z w ↦ ?_⟩
   · change P *ᵥ Pi.single k 1 = e k
     exact hPe k
   · change P *ᵥ (τ *ᵥ Pi.single k 1) = f k

@@ -1,5 +1,59 @@
-import Formalism.ThetaLogCoordinates.FockResolutionOnto.StatementC
-import Formalism.ThetaLogCoordinates.FockResolutionOnto.FockMonomialProofs.FirstWeightLeOfSupport
+module
+
+public import Formalism.ThetaLogCoordinates.FockResolutionOnto.StatementC
+public import Formalism.MahlerMeasure.MahlerMeasureProofs.RemoveS
+public import Formalism.ThetaLogCoordinates.FockResolutionOnto.FockMonomialProofs.InitPartZeroXMul
+import Formalism.MahlerMeasure.MahlerMeasureProofs.MeanGam
+public import Formalism.ThetaLogCoordinates.FockResolutionOnto.FockMonomialProofs.FirstWeightLeOfSupport
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Formalism.PolynomialDimension.MultinomialDepth.PartnerM
+
+@[expose] public section
 
 namespace Formalism.InvariantFactorPaths.L4
 
@@ -64,12 +118,13 @@ theorem resL_pderiv (v u : σ) (huv : u ≠ v) (e : ℕ) (g : MvPolynomial σ �
     rw [hmv]
     split_ifs <;> simp [MvPolynomial.pderiv_monomial]
   | add f g hf hg =>
-    simp only [map_add, hf, hg]
+    simp only [map_add (f := _), hf, hg]
 
 theorem resL_glAct {N r : ℕ} (LL : Letters N) (j : ℕ) (c d : Fin r) (v : Fin N × Fin r) (e : ℕ)
     (h : ∀ i : Fin N, (i : ℕ) < j → (i, c) ≠ v ∧ (i, d) ≠ v) (x : MvPolynomial (Fin N × Fin r) ℚ_[p]) :
     resL p v e (glAct p LL j c d x) = glAct p LL j c d (resL p v e x) := by
   classical
+
   rw [glAct, LinearMap.sum_apply, LinearMap.sum_apply, map_sum]
   refine Finset.sum_congr rfl fun i _ => ?_
   by_cases hij : (i : ℕ) < j
@@ -144,6 +199,7 @@ theorem pderiv_keep_wt [NeZero r] (LL : Letters (K + 1)) (hv : LL.vec (Fin.last 
         restrictSupport ℚ_[p] {m : Fin (K + 1) × Fin r →₀ ℕ | ((wt LL (K + 1) 0 m : ℤ) : WithTop ℤ) ≤ Mt} := by
   intro x hx
   rw [MvPolynomial.mem_restrictSupport_iff] at hx
+
   rw [x.as_sum, map_sum]
   refine Submodule.sum_mem _ fun m hm => ?_
   rw [MvPolynomial.pderiv_monomial, MvPolynomial.mem_restrictSupport_iff]
@@ -170,6 +226,7 @@ private theorem pderiv_last_glAct_comm (LL : Letters (K + 1)) (a b c : Fin r)
     (x : MvPolynomial (Fin (K + 1) × Fin r) ℚ_[p]) :
     pderiv (Fin.last K, c) (glAct p LL K a b x) = glAct p LL K a b (pderiv (Fin.last K, c) x) := by
   classical
+
   rw [glAct, LinearMap.sum_apply, LinearMap.sum_apply, map_sum]
   refine Finset.sum_congr rfl fun i _ => ?_
   by_cases hij : (i : ℕ) < K
@@ -190,7 +247,7 @@ theorem pderiv_glAct (LL : Letters (K + 1)) (hv : LL.vec (Fin.last K) = true) (a
     pderiv (Fin.last K, c) (glAct p LL (K + 1) a b x) =
       glAct p LL (K + 1) a b (pderiv (Fin.last K, c) x) + (if a = c then pderiv (Fin.last K, b) x else 0) := by
   classical
-  rw [glAct_succ LL hv, glAct_succ LL hv, map_add, pderiv_last_glAct_comm, Derivation.leibniz,
+  rw [glAct_succ LL hv, glAct_succ LL hv, map_add (f := _), pderiv_last_glAct_comm, Derivation.leibniz,
     MvPolynomial.pderiv_X, smul_eq_mul, smul_eq_mul,
     Formalism.GM.ProjS.pderiv_comm (Fin.last K, c) (Fin.last K, b) x]
   by_cases hac : a = c
@@ -236,7 +293,7 @@ theorem ycond_pderiv [NeZero r] (LL : Letters (K + 1)) (hv : LL.vec (Fin.last K)
       rw [map_zero]
       exact Submodule.zero_mem _
     | add y1 y2 _ _ h1 h2 =>
-      rw [map_add]
+      rw [map_add (f := _)]
       exact Submodule.add_mem _ h1 h2
     | smul t y _ h =>
       rw [map_smul]
@@ -250,6 +307,7 @@ noncomputable def FreeLast (p : ℕ) [Fact p.Prime] (K r : ℕ) :
 theorem pderiv_freeLast (x : MvPolynomial (Fin (K + 1) × Fin r) ℚ_[p]) (hx : x ∈ FreeLast p K r) (d : Fin r) :
     pderiv (Fin.last K, d) x = 0 := by
   rw [FreeLast, MvPolynomial.mem_restrictSupport_iff] at hx
+
   rw [x.as_sum, map_sum]
   apply Finset.sum_eq_zero
   intro m hm
@@ -261,6 +319,7 @@ private theorem pderiv_mem_freeLast (v : Fin (K + 1) × Fin r) :
     ∀ y ∈ FreeLast p K r, pderiv v y ∈ FreeLast p K r := by
   intro y hy
   rw [FreeLast, MvPolynomial.mem_restrictSupport_iff] at hy
+
   rw [y.as_sum, map_sum]
   refine Submodule.sum_mem _ fun m hm => ?_
   rw [MvPolynomial.pderiv_monomial, FreeLast, MvPolynomial.mem_restrictSupport_iff]
@@ -376,6 +435,7 @@ private theorem pderiv_last_eulL_eq (c : Fin r) (g : MvPolynomial (Fin (K + 1) �
       pderiv (Fin.last K, c) g +
         Formalism.GM.ProjS.eulL (fun d : Fin r => (Fin.last K, d)) (pderiv (Fin.last K, c) g) := by
   classical
+
   rw [Formalism.GM.ProjS.eulL_apply, Formalism.GM.ProjS.eulL_apply, map_sum]
   simp only [Derivation.leibniz, MvPolynomial.pderiv_X, smul_eq_mul, Finset.sum_add_distrib]
   refine (add_comm _ _).trans ?_
@@ -402,7 +462,7 @@ theorem mem_cond_of_euler_eigen [NeZero r] (LL : Letters (K + 1)) (hv : LL.vec (
     rw [FreeLast, SetLike.mem_coe, MvPolynomial.mem_restrictSupport_iff]
     intro m hm c
     rw [Finset.mem_coe, MvPolynomial.mem_support_iff] at hm
-    have hc := congrArg (MvPolynomial.coeff m) he
+    have hc := congrArg (AddMonoidAlgebra.coeff · m) he
     rw [Formalism.GM.ProjS.coeff_eulL, Nat.cast_zero, zero_smul, MvPolynomial.coeff_zero] at hc
     have hs : (∑ d : Fin r, (m (Fin.last K, d) : ℚ_[p])) = 0 := (mul_eq_zero.1 hc).resolve_left hm
     have hs' : ∑ d : Fin r, m (Fin.last K, d) = 0 := by exact_mod_cast hs

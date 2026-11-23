@@ -1,5 +1,57 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.MapRepApply
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.ResMapBijective
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.MapRepApply
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.ResMapBijective
+public import Mathlib.LinearAlgebra.Matrix.IsDiag
+public import Mathlib.RingTheory.FiniteType
+public import Mathlib.Topology.Algebra.Group.Subgroup
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -106,7 +158,6 @@ structure Res (P : PD Φ.ι Γ R) : Prop where
   shape : (Supp nP P.r ∧ ∀ v, SuppM qQ (P.n v)) ∨ Supp nM P.r
 
 variable {Φ} in
-
 def InV (P : PD Φ.ι Γ R) : Prop := Supp vV P.r ∧ ∀ v, SuppM qQ (P.n v) ∧ P.n v 2 0 ≠ 0
 
 def Good (P : PD Φ.ι Γ R) : Prop :=
@@ -255,7 +306,7 @@ structure Fr.Std {O Γ : Type} [CommRing O] [Group Γ] [TopologicalSpace Γ] [Is
   phi : ∀ H : Subgroup Γ, IsOpen (H : Set Γ) → Subgroup.normalClosure Φ.N ≤ H → Finite {φ : H →* Multiplicative (ZMod l) //
     IsOpen (φ.ker : Set H) ∧ ∀ g : H, (g : Γ) ∈ (Subgroup.normalClosure Φ.N).topologicalClosure → φ g = 1}
   closed : ∀ v, IsClosed (Φ.Gv v : Set Γ)
-  phiv : ∀ v, PhiCond (Φ.Gv v) l
+  phiv : ∀ v, PhiCond (Γ := Φ.Gv v) l
   mu : ∀ v, ∀ s ∈ Φ.Mu v, s ∈ Φ.Gv v ∧ ∀ i, residue Λ (a (Φ.χ i s)) = 1
 
 def redIdeal {Γ R : Type} [Group Γ] [CommRing R] (S : Finset (ℤ × ℤ)) (r : Γ →* M4 R) : Ideal R :=

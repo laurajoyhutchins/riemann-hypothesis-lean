@@ -1,4 +1,49 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.Polynomial.Basic
+public import Mathlib.Analysis.SpecialFunctions.Log.Basic
+public import Mathlib.NumberTheory.Padics.PadicVal.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -7,40 +52,6 @@ open Finset Polynomial
 namespace Formalism.CohomologicalDescent
 
 open Classical
-
-def maxVal (l n : ℕ) : ℕ := (Finset.range (n + 1)).sup fun i => (Nat.choose n i).factorization l
-
-def diagBinom (R : Type) [CommRing R] (n : ℕ) : (Fin (n + 1) → R) →ₗ[R] (Fin (n + 1) → R) :=
-  LinearMap.pi fun i => ((n.choose i : ℕ) : R) • LinearMap.proj i
-
-def BinomialDiagonalCokernel : Prop :=
-  ∀ (R : Type) [CommRing R] (l n : ℕ), l.Prime → (∀ m : ℕ, ¬ l ∣ m → IsUnit (m : R)) →
-    ∀ y : Fin (n + 1) → R, (l : R) ^ maxVal l n • y ∈ LinearMap.range (diagBinom R n)
-
-def CompTwo : Prop :=
-  ∀ (R : Type) [CommRing R] (A B C : Type) [AddCommGroup A] [Module R A] [AddCommGroup B]
-    [Module R B] [AddCommGroup C] [Module R C] (f : A →ₗ[R] B) (g : B →ₗ[R] C) (l : R) (a b : ℕ),
-    (∀ y : B, l ^ a • y ∈ LinearMap.range f) → (∀ z : C, l ^ b • z ∈ LinearMap.range g) →
-    ∀ z : C, l ^ (a + b) • z ∈ LinearMap.range (g ∘ₗ f)
-
-def ValuationProdBound : Prop :=
-  ∀ (l H : ℕ) (s : Finset ℕ), l.Prime → (∀ x ∈ s, 0 < x ∧ x ≤ H) →
-    (padicValNat l (∏ x ∈ s, x) : ℝ) ≤ (H : ℝ) / ((l : ℝ) - 1)
-
-def ValuationProdBoundInt : Prop :=
-  ∀ (l H : ℕ) (s : Finset ℤ), l.Prime → H < l ^ 2 → (∀ x ∈ s, x ≠ 0 ∧ |x| ≤ (H : ℤ)) →
-    (padicValInt l (∏ x ∈ s, x) : ℝ) ≤ (H : ℝ) / ((l : ℝ) - 1) + 6
-
-def ContentColumn : Prop :=
-  ∀ (r p : ℕ) (lam tau : ℕ → ℕ), Antitone lam → Antitone tau → (∀ a, lam a ≤ tau a) →
-    (∀ col : ℕ, ((Finset.range r).filter (fun a => lam a ≤ col ∧ col < tau a)).card ≤ p) →
-    ∀ c : ℤ, ((Finset.range r).filter
-      (fun a => (lam a : ℤ) ≤ (a : ℤ) + c ∧ (a : ℤ) + c < (tau a : ℤ))).card ≤ p
-
-def ContentsBelow : Prop :=
-  ∀ (r w : ℕ) (lam tau : ℕ → ℕ), Antitone lam → Antitone tau → (∀ a, lam a ≤ tau a) →
-    lam 0 ≤ w → 0 < r → (∀ a < r, ¬ (lam a ≤ a + w ∧ a + w < tau a)) →
-    ∀ a < r, ∀ col : ℕ, lam a ≤ col → col < tau a → (col : ℤ) - (a : ℤ) < (w : ℤ)
 
 def vl (l : ℕ) (n : ℤ) : ℕ := padicValInt l n
 
@@ -63,11 +74,6 @@ def labelSumBound (l k t h : ℕ) (i : ℝ) (xm xp mB : ℤ) : ℝ :=
 def LabelSum : Prop :=
   ∀ (l k t h : ℕ) (i : ℝ) (xm xp mB : ℤ), l.Prime → 0 ≤ i → 0 ≤ mB → mB < xm → xm ≤ xp →
     xp ≤ (h : ℤ) → h < l ^ 2 → l ≤ 2 * h →
-    labelLHS l k t i xm xp mB ≤ labelSumBound l k t h i xm xp mB
-
-def LabelSumNeedsLe : Prop :=
-  ∀ (l k t h : ℕ) (i : ℝ) (xm xp mB : ℤ), l.Prime → 0 ≤ i → 0 ≤ mB → mB < xm → xm ≤ xp →
-    xp ≤ (h : ℤ) → h < l ^ 2 →
     labelLHS l k t i xm xp mB ≤ labelSumBound l k t h i xm xp mB
 
 def Linkage : Prop :=
@@ -99,39 +105,11 @@ def WEArith : Prop :=
     ∑ a ∈ Finset.univ.filter (fun a : Fin (k + j + t + q) => (a : ℕ) < k + j), (U a - U' a) ≤
       (q : ℤ) * h + ((l : ℤ) * mwp + mw) * ((t : ℤ) + 2 * κ)
 
-def Telescope : Prop :=
-  ∀ (T : Type) [CommRing T] (P : Type) [AddCommGroup P] [Module T P] (f : ℕ)
-    (F : ℕ → Submodule T P) (l : T) (c : ℕ → ℕ),
-    (∀ τ < f, ∀ x ∈ F (τ + 1), l ^ c τ • x ∈ F τ) →
-    ∀ x ∈ F f, l ^ (∑ τ ∈ Finset.range f, c τ) • x ∈ F 0
-
-def ExpIndex : Prop :=
-  ∀ (R : Type) [CommRing R] (L : Type) [AddCommGroup L] [Module R L] [Module.Free R L]
-    [Module.Finite R L] (L' : Submodule R L) (l : R) (J : ℕ),
-    Finite (R ⧸ Ideal.span {l ^ J}) → (∀ x : L, l ^ J • x ∈ L') →
-    Nat.card (L ⧸ L') ≤ Nat.card (R ⧸ Ideal.span {l ^ J}) ^ Module.finrank R L
-
-def ExpIndexSub : Prop :=
-  ∀ (R : Type) [CommRing R] [IsDomain R] [IsPrincipalIdealRing R] (L : Type) [AddCommGroup L]
-    [Module R L] [Module.Free R L] [Module.Finite R L] (L' Z : Submodule R L) (l : R) (J : ℕ),
-    Finite (R ⧸ Ideal.span {l ^ J}) → (∀ x : L, l ^ J • x ∈ L') →
-    Nat.card (Z ⧸ L'.comap Z.subtype) ≤ Nat.card (R ⧸ Ideal.span {l ^ J}) ^ Module.finrank R Z
-
 def GatedSum : Prop :=
   ∀ (D h : ℕ) (L A k : ℝ) (P : Finset ℕ), 1 ≤ D → D ≤ h → 0 ≤ A → 0 ≤ k → (h : ℝ) < L ^ 2 →
     1 ≤ L → (∀ l ∈ P, l.Prime ∧ L < (l : ℝ)) →
     ∑ l ∈ P, (if ((d0 l D : ℕ) : ℤ) < (D : ℤ) then min k (A / (d0 l D : ℝ)) else 0) *
         Real.log (l : ℝ) ≤
       A * (1 + Real.log (h : ℝ)) * Real.log (h : ℝ)
-
-def SharperSize : Prop :=
-  ∀ (k m h : ℕ), 1 ≤ m → m ≤ k → 1 ≤ h →
-    ∑ d ∈ Finset.Icc 1 h, min (k : ℝ) (((m : ℝ) * h) / d) ≤
-      ((m : ℝ) * h) * (1 + Real.log ((k : ℝ) / m))
-
-def SharperSizeNeedsMleK : Prop :=
-  ∀ (k m h : ℕ), 1 ≤ m → 1 ≤ k → 1 ≤ h →
-    ∑ d ∈ Finset.Icc 1 h, min (k : ℝ) (((m : ℝ) * h) / d) ≤
-      ((m : ℝ) * h) * (1 + Real.log ((k : ℝ) / m))
 
 end Formalism.CohomologicalDescent

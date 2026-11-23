@@ -1,33 +1,90 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.IsMultiProjPrimeBaseComap
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.KerAevalRatiosLe
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.MIdealOverOneBlockEq
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.MemChartRingBlockVecIff
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.BlockDegLeTotalDegree
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.ImportsBisAlt
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.ImportsBis
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.ProdNotMemPrimeOfForall
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.ImportsBisTer
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.Fintype
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.ImportsBisTail
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.ImportsExtraAlt
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.ImportsExtraExtra
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.ImportsExtraMore
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.ImportsFurtherBis
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.ImportsFurtherMore
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.ImportsFurtherTail
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.ImportsFurtherTer
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.ImportsLastExtra
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.ImportsRestRest
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.ImportsRestTer
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.ImportsTailRest
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.ImportsTerTail
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.OneMemSecOverZero
+public import Development.WeilBound.CoreStatements.HodgeTatePoints.A12
+public import Development.WeilBound.CoreStatements.HodgeTatePoints.ExistsAmpleBaseLocalizationEq
+import Development.WeilBound.CoreStatements.HodgeTatePoints.Imports
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.BlockDegLeTotalDegree
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.ChartRingOverOneBlockComp
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.ImportsBis
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.ImportsBisAlt
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.ImportsBisTer
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.ImportsExtra
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.ImportsFurther
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.ImportsLast
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.ImportsRest
 import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.ImportsTail
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.SpanSecsMemLocInSelf
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.MConeMapOverOfIsMultiHomog
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.RatioMonHomog
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.ResidOfMem
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.MIdealOverOneHeightslock
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.ImportsRest
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.ImportsFurther
-import GroundTheory.HeightsAndTheta.Heights.SemipositiveHeights.KleimanNefBCut
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.ImportsLast
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.TwistModNatMul
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.OfPowRealises
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.TwistSubEqChartSecOver
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.IsMultiProjPrimeBaseComap
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.KerAevalRatiosLe
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.MConeMapOverOfIsMultiHomog
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.MIdealOverOneBlockEq
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.MIdealOverOneHeightslock
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.MemChartOfMemSecOver
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.MemChartRingBlockVecIff
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.OfPowRealises
 import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.PChartSecGen
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.MemChartOfMemSecOver
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.ImportsExtra
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.TwistMulTwistTwistSys
-import Development.WeilBound.CoreStatements.HodgeTatePoints.ExistsAmpleBaseLocalizationEq
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.ChartRingOverOneBlockComp
-import Development.WeilBound.CoreStatements.HodgeTatePoints.A12
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.ProdNotMemPrimeOfForall
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.RatioMonHomog
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.ResidOfMem
+import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.SpanSecsMemLocInSelf
+import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.TwistModNatMul
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.TwistMulTwistTwistSys
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.TwistSubEqChartSecOver
+public import GroundTheory.HeightsAndTheta.Heights.SemipositiveHeights.KleimanNefBCut
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace PositivityTheory.HtPt.Ktw
 

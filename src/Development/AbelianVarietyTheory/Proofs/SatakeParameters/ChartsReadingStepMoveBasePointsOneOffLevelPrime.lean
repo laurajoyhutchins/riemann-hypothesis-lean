@@ -1,15 +1,56 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.ReadsMove
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.AdmissibleBasePointUnitaryNormalisesLevelStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.InclMulInvMul
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.TrueColumnSpacesStandardInFrameCoords
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ChartLevelTwistTrivialLocalMove
+module
+
+public import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.ReadsMove
+import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.MemStabGLAdeleIff
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.AdmissibleBasePointUnitaryNormalisesLevelStatement
 import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.BaseFieldsDefiniteLaws
-import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.AfsplitC
-import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.Afsplit
-import Formalism.LocalToGlobal.Columns.RecLevel
-import Formalism.LocalToGlobal.Columns.RecLevelLocP
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ChartLevelTwistTrivialLocalMove
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.InclMulInvMul
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.TrueColumnSpacesStandardInFrameCoords
 import Formalism.LocalToGlobal.Columns.RecLevelStep
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 noncomputable section
 
@@ -174,29 +215,23 @@ theorem reads_move {B : Base} {X : PreX B.toPre} (I : TC B X) {u : B.Word} {a : 
     (hT : ∀ β (P : (B.primes X).vT u) (r j : Fin (B.R.N i)), r.1 + 1 = B.R.N i →
       HasRes P.1 (adAt B.host.F P.1 ((((k' β)⁻¹ * k β)⁻¹ : GA B (B.R.N i)).1 r j))
         (if j = r then Ideal.Quotient.mk P.1.asIdeal (B.fields.conjO (X.piT u)) else 0)) :
-    I.Reads u a i chOf Lb U' chi' (fun c => y c * k' (chOf c)) st (fun β => (k' β)⁻¹ * k β) where
-  key := R.key
-  onto := R.onto
-  lb := R.lb
-  k_std := hstd
-  k_off := fun β v hv _ _ => hoff β v hv
-  k_T := hT
-  pt := fun c => by
+    I.Reads u a i chOf Lb U' chi' (fun c => y c * k' (chOf c)) st (fun β => (k' β)⁻¹ * k β) := by
+  refine ⟨R.key, R.onto, R.lb, hstd, fun β v hv _ _ => hoff β v hv, hT, ?_, ?_, ?_, R.stab⟩
+  · intro c
     have e : y c * k' (chOf c) * ((k' (chOf c))⁻¹ * k (chOf c)) = y c * k (chOf c) := by group
     rw [e]
     exact R.pt c
-  lev := fun c x q hq => by
+  · intro c x q hq
     have e : y c * k' (chOf c) * x * ((k' (chOf c))⁻¹ * k (chOf c)) = y c * (k' (chOf c) * x * (k' (chOf c))⁻¹) * k (chOf c) := by
       group
     rw [e] at hq
     exact (hU (chOf c) x).trans (R.lev c _ q hq)
-  chr := fun c x κ hκ hq => by
+  · intro c x κ hκ hq
     have e : y c * k' (chOf c) * x.1 * ((k' (chOf c))⁻¹ * k (chOf c)) =
         y c * (k' (chOf c) * x.1 * (k' (chOf c))⁻¹) * k (chOf c) := by group
     rw [e] at hq
     rw [hchi]
     exact R.chr c _ κ hκ hq
-  stab := R.stab
 
 end GlobalTheory.TwU.AtTrue
 
@@ -211,7 +246,7 @@ open NumberField IsDedekindDomain Formalism.BasicNotions Formalism.MainNotions F
 
 attribute [local instance] GlobalTheory.Mem.Col2.starE Formalism.BasicNotions.Host.cmStar
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem readsMove_holds : ReadsMove := by
   intro B X I hI hP l Z u a i hi bad Ch chOf K hK
@@ -220,7 +255,13 @@ theorem readsMove_holds : ReadsMove := by
   have hX := GlobalTheory.Mem.FieldsLaws.fields_ok B
   haveI : NeZero (B.R.N i) := ⟨(B.R.N_pos i).ne'⟩
   have hgr : gramN (I.rec7 l Z) i hi = 1 := ((GlobalTheory.Mem.Col2.TC.spaces_in_coordinates I hI hP l Z).2.2.2 i hi).1
-  have hB := basePi_of_ok hX hPr u
+  have hB : BasePi ((B.primes X).vT u) (X.piT u) := by
+    refine ⟨fun r => ?_, hPr.piT_cop u⟩
+    constructor
+    · intro hr
+      exact piT_dvd_of_mem hX hPr u r fun P => hr P.1 P.2
+    · rintro ⟨q, rfl⟩ P hP
+      exact Ideal.mul_mem_right _ _ ((rls_vT_iff hX hPr u P).1 hP)
   have hLb : ∀ β, (K β).lev.Lb = baseLb B.fields.E (B.R.N i) ((B.primes X).vT u) := fun β => by
     ext x
     exact (R.lb β x).trans (GlobalTheory.Mem.Col2.Reside.mem_baseLb hPr u _ x).symm
@@ -236,7 +277,7 @@ theorem readsMove_holds : ReadsMove := by
     have e : ((diaT (Pr := B.primes X) u P : (𝓞 B.fields.E ⧸ P.1.asIdeal)ˣ) : 𝓞 B.fields.E ⧸ P.1.asIdeal) =
         Ideal.Quotient.mk P.1.asIdeal (B.fields.conjO (X.piT u)) := by
       unfold diaT
-      rw [dif_pos hu]
+      rw [dite_eq_left hu]
       rfl
     rw [e]
     exact R.k_T β P r j hr

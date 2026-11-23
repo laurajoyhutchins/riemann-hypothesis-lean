@@ -1,5 +1,46 @@
-import Development.WeilBound.ThetaLifts.SphericalLattices.FunDefs
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.FinPartIdemMulMemIff
+module
+
+public import Development.WeilBound.ThetaLifts.SphericalLattices.FunDefs
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsUniqueIsConjAt
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.FinPartIdemMulMemIff
+public import Development.WeilBound.CoreStatements.LocalThetaKernels.IwasAd
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -17,7 +58,7 @@ theorem unitLiftSt : UnitLiftSt := by
     exact e
   have key : ∀ a b : Ev E v, (1 + sgE E v a) * (1 + sgE E v b) = 1 + sgE E v ((1 + a) * (1 + b) - 1) := fun a b => by
     have e : (1 + a) * (1 + b) - 1 = a + b + a * b := by ring
-    rw [e, map_add, map_add, ← hab]
+    rw [e, map_add (f := _), map_add (f := _), ← hab]
     ring
   refine ⟨⟨1 + sgE E v ((y : Ev E v) - 1), 1 + sgE E v (((y⁻¹ : (Ev E v)ˣ) : Ev E v) - 1), ?_, ?_⟩, ?_, ?_⟩
   · rw [key, show (1 : Ev E v) + ((y : Ev E v) - 1) = y by ring, show (1 : Ev E v) + (((y⁻¹ : (Ev E v)ˣ) : Ev E v) - 1) = _ by ring,
@@ -28,7 +69,7 @@ theorem unitLiftSt : UnitLiftSt := by
     rw [add_sub_cancel_left]
     exact at_sgE _
   · change compFin F E v (1 + sgE E v _) = _
-    rw [map_add, map_one, comp_sgE]
+    rw [map_add (f := _), map_one, comp_sgE]
     ring
 
 theorem pInvSt : PInvSt := by

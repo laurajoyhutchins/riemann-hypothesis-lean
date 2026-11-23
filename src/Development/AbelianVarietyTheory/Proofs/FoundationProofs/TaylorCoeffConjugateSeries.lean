@@ -1,7 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Foundations.NormSumPairRankZeroOfCurveCoordNorm
-import Formalism.PairingDivisors.StatementH
-import Development.AbelianVarietyTheory.Definitions.ThetaValues.MemAnalyticAtZeroOfEventuallyDifferentiableAt
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.NormSumPairRankZeroOfCurveCoordNorm
+public import Development.AbelianVarietyTheory.Definitions.ThetaValues.MemAnalyticAtZeroOfEventuallyDifferentiableAt
+public import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.DifferentiableOnOfTendstoLocallyUniformlyOn
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Filter Topology
 
@@ -57,7 +104,7 @@ theorem hasSum_fderiv_series {f : (σ → ℂ) → ℂ} {c : (σ →₀ ℕ) →
       simp only [Pi.add_apply, Pi.smul_apply]
       fun_prop) Metric.isOpen_ball (fun α t ht => by
       rw [norm_mul, norm_prod]
-      refine mul_le_mul_of_nonneg_left (Finset.prod_le_prod (fun _ _ => norm_nonneg _) fun j _ => ?_)
+      refine mul_le_mul_of_nonneg_left (Finset.prod_le_prod₀ (fun _ _ => norm_nonneg _) fun j _ => ?_)
         (norm_nonneg _)
       rw [norm_pow]
       exact pow_le_pow_left₀ (norm_nonneg _) ((norm_le_pi_norm _ j).trans (hn t ht).le) _)
@@ -120,14 +167,14 @@ theorem coeff_taylor_of_hasSum (n : ℕ) :
       rw [Finsupp.single_le_iff]; omega
     obtain ⟨m', rfl⟩ := exists_add_of_le hle
     have h1 := ih (analyticAt_fderiv_apply hf (Pi.single i 1)) (hasSum_fderiv_series hf h i) m' (by
-      rw [map_add, Finsupp.degree_single] at hm; omega)
+      rw [map_add (f := _), Finsupp.degree_single] at hm; omega)
     rw [taylor_fderiv hf, MvPowerSeries.coeff_pderiv] at h1
     have h4 : ((m' i : ℂ) + 1) ≠ 0 := by exact_mod_cast Nat.succ_ne_zero (m' i)
     rw [add_comm]
     exact mul_right_cancel₀ h4 h1
 
-omit [DecidableEq σ] in
 
+omit [DecidableEq σ] in
 theorem eventually_summable_of_ne_zero {c : (σ →₀ ℕ) → ℂ}
     (hf : Continuous fun z : σ → ℂ => ∑' α : σ →₀ ℕ, c α * ∏ j, z j ^ α j)
     (h0 : (fun z : σ → ℂ => ∑' α : σ →₀ ℕ, c α * ∏ j, z j ^ α j) ≠ 0) :
@@ -146,7 +193,7 @@ theorem eventually_summable_of_ne_zero {c : (σ →₀ ℕ) → ℂ}
   filter_upwards [hev] with z hz
   refine Summable.of_norm_bounded hs.norm fun α => ?_
   rw [norm_mul, norm_mul, norm_prod, norm_prod]
-  refine mul_le_mul_of_nonneg_left (Finset.prod_le_prod (fun _ _ => norm_nonneg _) fun j _ => ?_)
+  refine mul_le_mul_of_nonneg_left (Finset.prod_le_prod₀ (fun _ _ => norm_nonneg _) fun j _ => ?_)
     (norm_nonneg _)
   rw [norm_pow, norm_pow]
   exact pow_le_pow_left₀ (norm_nonneg _) (hz j).le _
@@ -193,7 +240,7 @@ theorem taylor_tsum (D : D7) {N N' : ℕ} (c : Mono D N N' → ℂ)
   exact hz.hasSum
 
 theorem coeff_minorPol_int (D : D7) {N N' : ℕ} {n : D.what₂.Tau → ℕ} (T : Tup D N N' n)
-    (α : Mono D N N') : ∃ k : ℤ, MvPolynomial.coeff α (minorPol D T) = k := by
+    (α : Mono D N N') : ∃ k : ℤ, AddMonoidAlgebra.coeff (minorPol D T) α = k := by
   have h : minorPol D T = MvPolynomial.map (Int.castRingHom ℂ)
       (∏ τ, ∏ j, (Matrix.of fun i i' : Fin N =>
         (MvPolynomial.X (τ, (T τ j).1 i, i') : MvPolynomial (GL3Theta.Idx D N N') ℤ)).det) := by
@@ -217,6 +264,7 @@ theorem taylor_fnConj : ∀ (D : D7) (N N' : ℕ) (M : IntermediateField ℚ ℂ
     simp [GL3Theta.applyAt0, x, hk, Finsupp.prod]
   rw [hx, hcj]
   refine ⟨x.2, ?_⟩
+
   simp only [GL3Theta.applyAt0, x, hk, h1, map_sum, map_mul, map_intCast, map_natCast]
   refine Finset.sum_congr rfl fun α _ => ?_
   rw [← hcj]

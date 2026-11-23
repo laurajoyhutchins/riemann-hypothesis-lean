@@ -1,4 +1,56 @@
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CasimirReductionTheory.OneParameterDerivatives.AdmissibleCasimirScalars.CompactDerivativesBounded
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CasimirReductionTheory.OneParameterDerivatives.AdmissibleCasimirScalars.CompactDerivativesBounded
+public import Formalism.RealPlaceAnalysis.RealPlaceTaylor.CompactHaarRightInvariantInst
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.InnerProductSpace.Calculus
+public import Mathlib.Analysis.InnerProductSpace.Spectrum
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.Normed.Algebra.MatrixExponential
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MeasureTheory Matrix Filter Topology
 open scoped InnerProductSpace
@@ -167,8 +219,8 @@ theorem U_cont (v : H) : Continuous fun t : ℝ => σ (NormedSpace.exp ((t : ℂ
     exact Units.continuous_val.comp (continuous_subtype_val.comp hE)
   exact (hσ.2.2 v).comp_continuous hc (fun t => U_mem σ hσ p hp t)
 
-include hσ hp in
 
+include hσ hp in
 theorem skew_of_der {u w u' w' : H}
     (hu : HasDerivAt (fun t : ℝ => σ (NormedSpace.exp ((t : ℂ) • gen ε p)) u) u' 0)
     (hw : HasDerivAt (fun t : ℝ => σ (NormedSpace.exp ((t : ℂ) • gen ε p)) w) w' 0) :
@@ -181,8 +233,8 @@ theorem skew_of_der {u w u' w' : H}
   have h3 := h1.unique h2
   simpa only [U_zero σ hσ p hp] using h3
 
-omit hσ p hp in
 
+omit hσ p hp in
 def Ev (X : Matrix (Fin n) (Fin n) ℂ) (μ : ℝ) : Submodule ℂ H where
   carrier := {u | HasDerivAt (fun t : ℝ => σ (NormedSpace.exp ((t : ℂ) • X)) u) (((μ : ℂ) * Complex.I) • u) 0}
   zero_mem' := by
@@ -190,7 +242,7 @@ def Ev (X : Matrix (Fin n) (Fin n) ℂ) (μ : ℝ) : Submodule ℂ H where
     exact hasDerivAt_const _ _
   add_mem' := by
     intro a b ha hb
-    simp only [Set.mem_ofPred_eq, map_add, smul_add] at *
+    simp only [Set.mem_ofPred_eq, map_add (f := _), smul_add] at *
     exact ha.add hb
   smul_mem' := by
     intro c a ha
@@ -214,14 +266,15 @@ theorem Ev_orth {μ ν : ℝ} (hne : μ ≠ ν) {u w : H} (hu : u ∈ Ev σ (gen
     linarith
   exact (mul_eq_zero.mp h).resolve_left hne'
 
-include hσ hp in
 
+include hσ hp in
 theorem bound_on_sup (Λ : Finset ℝ) (v : H) (hv : v ∈ ⨆ μ ∈ Λ, Ev σ (gen ε p) μ) :
     ‖dS σ (gen ε p) v‖ ≤ (∑ μ ∈ Λ, |μ|) * ‖v‖ := by
   obtain ⟨c, hc⟩ := (Submodule.mem_iSup_finset_iff_exists_sum _ v).mp hv
   have hder : HasDerivAt (fun t : ℝ => σ (NormedSpace.exp ((t : ℂ) • gen ε p)) v)
       (∑ μ ∈ Λ, ((μ : ℂ) * Complex.I) • (c μ : H)) 0 := by
     rw [← hc]
+
     simp only [map_sum]
     exact HasDerivAt.fun_sum fun μ _ => (c μ).2
   have hpy : ‖v‖ ^ 2 = ∑ μ ∈ Λ, ‖(c μ : H)‖ ^ 2 := by
@@ -243,8 +296,8 @@ theorem bound_on_sup (Λ : Finset ℝ) (v : H) (hv : v ∈ ⨆ μ ∈ Λ, Ev σ 
     _ ≤ ∑ μ ∈ Λ, |μ| * ‖v‖ := Finset.sum_le_sum fun μ hμ => mul_le_mul_of_nonneg_left (hle μ hμ) (abs_nonneg μ)
     _ = (∑ μ ∈ Λ, |μ|) * ‖v‖ := (Finset.sum_mul _ _ _).symm
 
-include hσ hp in
 
+include hσ hp in
 theorem isoK_le (S : Submodule ℂ H) (hfd : FiniteDimensional ℂ S) (hst : IsKStableOn ε σ S) :
     ∃ Λ : Finset ℝ, isoK ε σ S ≤ ⨆ μ ∈ Λ, Ev σ (gen ε p) μ := by
   haveI := hfd
@@ -322,6 +375,7 @@ theorem isoK_le (S : Submodule ℂ H) (hfd : FiniteDimensional ℂ S) (hst : IsK
     rw [hbA i, map_smul] at h4
     exact h4
   rintro _ ⟨v, rfl⟩
+
   rw [← (hB.eigenvectorBasis rfl).sum_repr v, map_sum]
   refine Submodule.sum_mem _ fun i _ => ?_
   rw [map_smul]

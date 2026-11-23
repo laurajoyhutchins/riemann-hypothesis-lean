@@ -1,7 +1,47 @@
-import Formalism.SharpRestriction.LevelLetterCocycles.DeltaInvariantUniformizer
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.DeltaInvariantUniformizer
+import Formalism.SharpRestriction.LevelLetterCocycles.FrobeniusPowUniformizerFactorisation
 import Formalism.SharpRestriction.LevelLetterCocycles.MapCompZero
-import Formalism.SharpRestriction.LevelLetterCocycles.FontExAll
-import Formalism.SharpRestriction.LevelLetterCocycles.DvrLatticeRank.PhibOLComplete
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -45,12 +85,13 @@ theorem frobenius_span_decomposition (W : LocWach PD LL O v n) [IsAdicComplete (
     obtain ⟨s, hs, rfl⟩ := hx
     obtain ⟨s', hs', rfl⟩ := hy
     exact ⟨fun k => s k + s' k, fun k => S.add_mem (hs k) (hs' k),
-      by simp only [map_add, smul_add, Finset.sum_add_distrib]⟩
+      by simp only [map_add (f := _), smul_add, Finset.sum_add_distrib]⟩
   | smul a x _ hx =>
     obtain ⟨s, hs, rfl⟩ := hx
     choose t ht he using fun k : Fin PD.p =>
       kl2_dec_lemma W T S (a * (letπ : LetA O n) ^ (k : ℕ)) (s k) (hs k)
     refine ⟨fun j => ∑ k, t k j, fun j => S.sum_mem fun k _ => ht k j, ?_⟩
+
     simp only [Finset.smul_sum, ← mul_smul, he, map_sum]
     rw [Finset.sum_comm]
 
@@ -64,6 +105,7 @@ theorem frobenius_span_exact_lift (W : LocWach PD LL O v n) [IsAdicComplete (Ide
   obtain ⟨s, hs, rfl⟩ := frobenius_span_decomposition W Tp (W.Nl Tp i) z hz
   have hπs : ∀ k, W.map π (s k) = 0 := by
     refine Formalism.MainNotions.LiftingTheory.phii_DD W T'' c'' (fun k => W.map π (s k)) ?_
+
     rw [← h0, map_sum]
     refine Finset.sum_congr rfl fun k _ => ?_
     rw [Formalism.MainNotions.LiftingTheory.wmap_map_smul, W.map_φ]
@@ -83,7 +125,8 @@ theorem frobenius_span_exact_lift (W : LocWach PD LL O v n) [IsAdicComplete (Ide
   · refine Submodule.sum_mem _ fun k _ => Submodule.smul_mem _ _ ?_
     unfold Formalism.MainNotions.DeltaInvariantLattices.φspan
     exact Submodule.subset_span ⟨y k, hyNl k, rfl⟩
-  · rw [map_sum]
+  · set_option synthInstance.maxHeartbeats 100000 in
+      rw [map_sum]
     refine Finset.sum_congr rfl fun k _ => ?_
     rw [Formalism.MainNotions.LiftingTheory.wmap_map_smul, W.map_φ, hy k]
 

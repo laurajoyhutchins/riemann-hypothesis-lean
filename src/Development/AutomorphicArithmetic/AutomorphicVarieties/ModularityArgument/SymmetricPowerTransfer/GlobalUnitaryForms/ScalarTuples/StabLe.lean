@@ -1,6 +1,59 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.GlobalUnitaryForms.HodgeTateFromSandwich
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.TraceFormulaEigenvalues.FormsFin
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.IsIntConj
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.GlobalUnitaryForms.HodgeTateFromSandwich
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.IsIntConj
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -45,7 +98,7 @@ private theorem isInt_inter {L R : Type} [CommRing L] [Algebra O L] [CommRing R]
       simp [Algebra.smul_def]
     | add p q hp hq =>
       intro c
-      simp only [map_add, Matrix.add_mulVec, hp, hq, add_mul, hadd]
+      simp only [map_add (f := _), Matrix.add_mulVec, hp, hq, add_mul, hadd]
     | monomial n r ih =>
       intro c
       have e1 : aeval M (C r * X ^ (n + 1)) = aeval M (C r * X ^ n) * M := by
@@ -99,7 +152,7 @@ private theorem jA_det (γ : DX Δ) (h : HasTr γ τ) (x : Etau K τ) :
   have ht' : mt γ 0 0 + mt γ 1 1 = algebraMap K _ τ := by rw [← h.2, Matrix.trace_fin_two]
   obtain ⟨e0, e1, e2, e3⟩ := jA_entries (Δ := Δ) (mt γ) x.re x.im
   rw [jA_apply, Matrix.det_fin_two, e0, e1, e2, e3, QuadraticAlgebra.norm_def]
-  simp only [map_add, map_sub, map_mul, map_neg, map_one]
+  simp only [map_add (f := _), map_sub, map_mul, map_neg, map_one]
   linear_combination (algebraMap K (Lsq K Δ) x.re * algebraMap K (Lsq K Δ) x.im) * ht' +
     (algebraMap K (Lsq K Δ) x.im) ^ 2 * hd'
 
@@ -107,7 +160,7 @@ private theorem jA_inj (γ : DX Δ) (h : HasTr γ τ) (hr : τ ^ 2 - 4 ≠ 0) : 
   have hd' : mt γ 0 0 * mt γ 1 1 - mt γ 0 1 * mt γ 1 0 = 1 := by rw [← Matrix.det_fin_two]; exact h.1
   have ht' : mt γ 0 0 + mt γ 1 1 = algebraMap K _ τ := by rw [← h.2, Matrix.trace_fin_two]
   have inj : Function.Injective (algebraMap K (Lsq K Δ)) := (algebraMap K (Lsq K Δ)).injective
-  rw [injective_iff_map_eq_zero]
+  set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
   intro x hx
   rw [jA_apply] at hx
   obtain ⟨e0, e1, e2, e3⟩ := jA_entries (Δ := Δ) (mt γ) x.re x.im
@@ -288,7 +341,7 @@ private theorem int_U (O : Type) [CommRing O] [Algebra O K] {c : K} {d m : EL Δ
     · exact inj (h5.trans (map_zero _).symm)
     · exact inj (h6.trans (map_zero _).symm)
   · intro a b
-    rw [← map_add]
+    rw [← map_add (f := _)]
     simp [ofE_add]
   · intro r z
     rw [← map_smul, ofE_smul]

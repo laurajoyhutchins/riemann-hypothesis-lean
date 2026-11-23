@@ -1,19 +1,62 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsGoodRowHeckeOfOcc
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.SplitPlaceHeckeOperatorScalarOnSpherical
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.IsotypicRowLocalSplitExists
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.FiniteTypeSpannedBySplitPlaceLocalComponent
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.TameBlockTypeAtSplitPlace
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LocalReciprocityUnramifiedSpherical
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FixedVectorsNeBotOfMemSumIntertwiningRanges
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IsParamFunVIffIsSysParamDOfLevel
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.HasSatakeGLOfHasSatakeParametersPrincipalSeries
+module
+
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.SplitPlaceHeckeOperatorScalarOnSpherical
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.RingSpecNormalisedCharacterEq
+public import Development.AbelianVarietyTheory.Definitions.Divisors.InstCMHostS
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IsEigenSysOfHeckeLin
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HeckeEqSmulOfIsot
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SphericalHeckeScalarOnSphericalVectors
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsIsSplitChartOne
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.SplitPlaceDoubleCosetOperatorsCommuteSphericalStatement
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.UnitaryFiniteAdelesSplitPlaceDecompositionStatement
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FixedVectorsNeBotOfMemSumIntertwiningRanges
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LocalReciprocityUnramifiedSpherical
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.FiniteTypeSpannedBySplitPlaceLocalComponent
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.IsotypicRowLocalSplitExists
 import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsFixedIff
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EOpEqAsAlgebraHom
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.NoFormsOff
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.UnivChar
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.RootsOfUnityRingLeWittIntegers
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LowSetFinite
+import Formalism.LocalRingCardinality.SpanPowerMembership.LocAtA
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 noncomputable section
 
@@ -128,6 +171,7 @@ theorem irr_of_scalar (ρ : G →* Module.End ℂ M) (S : Submodule ℂ M) (hS :
       · exact absurd ((W'.smul_mem_iff h).1 (hc ▸ havW _ (hw u hu))) hx'
     apply hx'
     have h1 : GlobalTheory.IsotSph.avg H ρK x = x := GlobalTheory.IsotSph.avg_of_fixed H ρK fun k => hxK k k.2
+
     rw [← h1, ← e, map_sum]
     refine W'.sum_mem fun u hu => ?_
     rw [map_smul, eb u hu, ← GlobalTheory.IsotSph.avg_map H ρK ρK (ρ (b u)) fun k y => ?_, hz u hu, map_zero, smul_zero]
@@ -149,6 +193,7 @@ theorem descent {K H H' ι : Type} [Field K] [AddCommGroup H] [Module ℂ H] [Ad
   classical
   have hj : ∀ x, j x = ∑ k, σ (x k) • j (Pi.basisFun K (Fin n) k) := fun x => by
     conv_lhs => rw [← (Pi.basisFun K (Fin n)).sum_repr x]
+
     simp [map_sum, map_smulₛₗ]
   have htop : ⊤ ≤ Submodule.span ℂ (Set.range fun k => j (Pi.basisFun K (Fin n) k)) := by
     rw [← hsp, Submodule.span_le]
@@ -175,11 +220,14 @@ theorem descent {K H H' ι : Type} [Field K] [AddCommGroup H] [Module ℂ H] [Ad
     apply he
     rw [map_zero, ← hTz a]
     conv_rhs => rw [← b.sum_repr z]
+
     simp only [map_sum, map_smul, hT, hb]
   funext l
   have h2 := congrArg (fun y => φ (b.repr y l)) h1
+
   simp only [map_sum, map_smul, Finsupp.finsetSum_apply, Finsupp.smul_apply, hrep, map_zero, Finsupp.zero_apply] at h2
   conv_lhs => rw [← (Pi.basisFun K (Fin n)).sum_repr fun k => φ (b.repr z k)]
+
   simp only [map_sum, map_smul, Finset.sum_apply, Pi.smul_apply, Pi.basisFun_repr]
   rw [Pi.zero_apply, ← h2]
   refine Finset.sum_congr rfl fun k _ => ?_
@@ -193,8 +241,8 @@ section Normaliser
 open NumberField IsDedekindDomain Formalism.UG GlobalTheory.LFun
 
 theorem conj_eq_of_normalises {E : Type} [Field E] [NumberField E] (w : HeightOneSpectrum (𝓞 E)) {n : ℕ}
-    (a : GL (Fin n) (w.adicCompletion E)) (ha : ∀ g ∈ KGL w n, a⁻¹ * g * a ∈ KGL w n) :
-    ∃ k ∈ KGL w n, ∀ g, a⁻¹ * g * a = k⁻¹ * g * k := by
+    (a : GL (Fin n) (w.adicCompletion E)) (ha : ∀ g ∈ KGL w (n := n), a⁻¹ * g * a ∈ KGL w (n := n)) :
+    ∃ k ∈ KGL w (n := n), ∀ g, a⁻¹ * g * a = k⁻¹ * g * k := by
   classical
   have hm := @GlobalTheory.HeckeScalarSph.mem_GLint_iff n _ _ (Ov E w)
   by_cases hn : ∀ i j : Fin n, i = j
@@ -213,7 +261,7 @@ theorem conj_eq_of_normalises {E : Type} [Field E] [NumberField E] (w : HeightOn
       rw [Matrix.one_apply]; split_ifs; exacts [one_mem _, zero_mem _]
     have hs : ∀ p q, Matrix.single i j (1 : w.adicCompletion E) p q ∈ Ov E w := fun p q => by
       rw [Matrix.single_apply]; split_ifs; exacts [one_mem _, zero_mem _]
-    have hg : g ∈ KGL w n := hm.2 ⟨fun p q => add_mem (h1 p q) (hs p q), fun p q => sub_mem (h1 p q) (hs p q)⟩
+    have hg : g ∈ KGL w (n := n) := hm.2 ⟨fun p q => add_mem (h1 p q) (hs p q), fun p q => sub_mem (h1 p q) (hs p q)⟩
     have h3 := sub_mem ((hm.1 (ha g hg)).1 p q) (h1 p q)
     have e : (a⁻¹ * g * a).1 = 1 + (a⁻¹).1 * Matrix.single i j 1 * a.1 := by
       rw [Units.val_mul, Units.val_mul]
@@ -302,11 +350,13 @@ theorem exists_scalar (π : NG.FinTyp L n) (s : SplitPlace L) : ∃ R : GAf L n 
     · intro x hx
       rw [hT]
       refine ⟨π.S.sum_mem fun γ _ => π.stable γ x hx.1, fun κ hκ => ?_⟩
+
       rw [map_sum]
       have := hRα.sum_eq hRα hκ (fun g => rtHom L n ℂ g x)
         (fun y l hl => by rw [map_mul, Module.End.mul_apply, hx.2 l hl])
       simpa only [map_mul, Module.End.mul_apply] using this
     · intro b hb x _
+
       rw [hT, hT, map_sum]
       refine Finset.sum_congr rfl fun γ hγ => ?_
       rw [← Module.End.mul_apply, ← map_mul, ← Module.End.mul_apply, ← map_mul, (hcomm γ b (hRtriv γ hγ) hb).eq]
@@ -351,7 +401,7 @@ theorem eq_complMap (s : SplitPlace L) (i : s.v.adicCompletion (maximalRealSubfi
 theorem map_loc_mem_iff (s : SplitPlace L) (i : s.v.adicCompletion (maximalRealSubfield L) ≃+* s.w.adicCompletion L)
     (hi : Continuous i) (hic : ∀ x : L, i (s.i x) = algebraMap L (s.w.adicCompletion L) x) {x : GAf L n}
     (hx : TrivOutside {s.v} x) :
-    Matrix.GeneralLinearGroup.map i.toRingHom (s.loc n x) ∈ GlobalTheory.LFun.KGL s.w n ↔ x ∈ Umax L n := by
+    Matrix.GeneralLinearGroup.map i.toRingHom (s.loc n x) ∈ GlobalTheory.LFun.KGL s.w (n := n) ↔ x ∈ Umax L n := by
   refine ⟨fun h => ?_, fun h => ?_⟩
   · have key : ∀ y, i y ∈ Formalism.UG.Ov L s.w → Valued.v y ≤ 1 := fun y hy =>
       (GlobalTheory.CuspRep.ParLaws.valuation_le_one_iff s.v y).1 (GlobalTheory.SphLoc.le_one_of_map i.toRingHom hi
@@ -401,8 +451,8 @@ theorem isSpherical_of_isLocS (π : NG.FinTyp L n) (s : SplitPlace L)
   exact hfix _ ⟨(map_loc_mem_iff s i hi hic (hlift _).1).1
     (by rw [hloc]; exact (GlobalTheory.SmGL.SphCompletion.KO_completion s.w n).le hk), (hlift _).1⟩
 
-open GlobalTheory.StdFrame Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes in
 
+open GlobalTheory.StdFrame Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes in
 theorem compAt_cast {F₁ : Subfield L} (h : F₁ = maximalRealSubfield L) (s : SplitPlace L)
     (i : s.v.adicCompletion (maximalRealSubfield L) ≃+* s.w.adicCompletion L)
     (hi : Continuous i) (hic : ∀ x : L, i (s.i x) = algebraMap L (s.w.adicCompletion L) x) (y : AL L) :
@@ -410,7 +460,7 @@ theorem compAt_cast {F₁ : Subfield L} (h : F₁ = maximalRealSubfield L) (s : 
   subst h
   induction y using TensorProduct.induction_on with
   | zero => simp
-  | add a b ha hb => rw [map_add, map_add, ha, hb, map_add, map_add]
+  | add a b ha hb => rw [map_add (f := _), map_add (f := _), ha, hb, map_add (f := _), map_add (f := _)]
   | tmul x a =>
     have e : s.proj (x ⊗ₜ[maximalRealSubfield L] a) = s.i x * a s.v := by
       simp only [SplitPlace.proj, AlgHom.toRingHom_eq_coe, RingHom.coe_coe, Algebra.TensorProduct.lift_tmul]
@@ -421,8 +471,8 @@ theorem compAt_cast {F₁ : Subfield L} (h : F₁ = maximalRealSubfield L) (s : 
     rw [e, map_mul, hic, eq_complMap s i hi hic, e2, mul_comm]
     rfl
 
-open GlobalTheory.StdFrame Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes in
 
+open GlobalTheory.StdFrame Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes in
 theorem triv_cast {F₁ : Subfield L} (h : F₁ = maximalRealSubfield L) (s : SplitPlace L) (x : GAf L n) :
     TrivOutside {s.v} x ↔ ∀ u, u ≠ s.w.under (𝓞 F₁) → ((x.1.1.map (tensCastR h).symm).map
       (Algebra.TensorProduct.map (Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes.evalV F₁ u) (AlgHom.id F₁ L))) = 1 := by
@@ -431,12 +481,12 @@ theorem triv_cast {F₁ : Subfield L} (h : F₁ = maximalRealSubfield L) (s : Sp
   refine forall_congr' fun u => imp_congr (by simp) ?_
   let c := (Algebra.TensorProduct.comm (maximalRealSubfield L) L (u.adicCompletion (maximalRealSubfield L))).toRingEquiv
   have e : ∀ y : AL L, Algebra.TensorProduct.map (Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes.evalV (maximalRealSubfield L) u) (AlgHom.id _ L)
-      ((tensCastR rfl).symm y) = c (compAt L u y) := fun y => by
+      ((tensCastR (F1 := maximalRealSubfield L) (E := L) rfl).symm y) = c (compAt L u y) := fun y => by
     induction y using TensorProduct.induction_on with
     | zero => simp
-    | add a b ha hb => simp only [map_add, ha, hb]
+    | add a b ha hb => simp only [map_add (f := _), ha, hb]
     | tmul x a => rfl
-  have e' : (x.1.1.map (tensCastR rfl).symm).map (Algebra.TensorProduct.map
+  have e' : (x.1.1.map (tensCastR (F1 := maximalRealSubfield L) (E := L) rfl).symm).map (Algebra.TensorProduct.map
       (Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes.evalV (maximalRealSubfield L) u) (AlgHom.id _ L)) = (x.1.1.map (compAt L u)).map c :=
     Matrix.ext fun a b => e _
   rw [e']

@@ -1,5 +1,50 @@
-import Formalism.SharpRestriction.CuspSpanNormBounds.UnimodularSchurMeasures.RegularRepAlgebraicMeasurableContinuous
-import Formalism.SharpRestriction.CuspSpanNormBounds.UnimodularSchurMeasures.RrdStronglyMeasurable
+module
+
+public import Formalism.SharpRestriction.CuspSpanNormBounds.UnimodularSchurMeasures.CovolumeIndependentOfFundamentalDomain
+public import Formalism.SharpRestriction.CuspSpanNormBounds.UnimodularSchurMeasures.RightRegularIsometricMultiplicative
+public import Formalism.SharpRestriction.CuspSpanNormBounds.UnimodularSchurMeasures.UnimodF
+public import Formalism.SharpRestriction.CuspSpanNormBounds.UnimodularSchurMeasures.RrdStronglyMeasurable
+import Formalism.SharpRestriction.CuspSpanNormBounds.UnimodularSchurMeasures.RrsSecondCountableAbs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Algebra.Group.Units
+import Mathlib.Topology.Sheaves.Init
+import Formalism.SharpRestriction.CuspSpanNormBounds.PlaceDegreeData
+
+@[expose] public section
 
 noncomputable section
 
@@ -19,32 +64,9 @@ theorem adelic_regular_rep_unitary_continuous (X : CData) (hd : RegData X) (hu :
   have : (X.I.muA X.μf).IsOpenPosMeasure := rr_muA_openPos X
   have hne : X.I.muA X.μf ≠ 0 := fun h0 =>
     isOpen_univ.measure_ne_zero (X.I.muA X.μf) (univ_nonempty (α := X.I.GA))
-      (by rw [h0, Measure.coe_zero, Pi.zero_apply])
+      (by rw [h0, FunLike.coe_zero, Pi.zero_apply])
   obtain ⟨h1, h2, h3⟩ := rightRegular_isometric_multiplicative X hd hu
   exact ⟨h1, h2, h3, fun F => rr_cont_of_meas' (μ := X.I.muA X.μf) hne h1 h2 h3 (regular_rep_coeff_measurable X hd hu) F⟩
-
-theorem unitary_rep_of_finite_adelic_unimodular (X : CData) {n₀ : ℕ} {A : ℝ} (hX : X.HypB n₀ A) (hu : UnimodF X) (h1 : X.e 1 ≠ 0) : RepA X :=
-  adelic_regular_rep_unitary_continuous X (RegData_of_HypB X hX) (UnimodA_of_UnimodF X hu) (LocFinF_of_e X hX h1)
-
-theorem unitary_rep_unimodular_of_finite_volume (X : CData) {n₀ : ℕ} {A : ℝ} (hX : X.HypB n₀ A) (hV : X.FinVol) (h1 : X.e 1 ≠ 0) :
-    RepA X ∧ UnimodF X :=
-  have hd := RegData_of_HypB X hX
-  have ha := adelic_unimodular_of_finite_covolume X hd hV
-  ⟨adelic_regular_rep_unitary_continuous X hd ha (LocFinF_of_e X hX h1), UnimodF_of_UnimodA X ha⟩
-
-theorem projection_count_cusp_of_unimodular {n₀ : ℕ} {A C : ℝ}
-    (hred : ∀ X : CData, X.HypB n₀ A → X.GapAboveThreeHalvesPower → X.GapAboveSquareRootThreshold C → RepA X → UnimodF X → X.ProjStep ∧ X.CountedStep ∧ X.CuspStep)
-    (hu : ∀ X : CData, X.HypB n₀ A → UnimodF X) : StepsB n₀ A C := by
-  intro X hX t1 t2
-  by_cases h1 : X.e 1 = 0
-  · exact projection_count_cusp_of_trivial_idempotent X hX h1
-  · exact hred X hX t1 t2 (unitary_rep_of_finite_adelic_unimodular X hX (hu X hX) h1) (hu X hX)
-
-theorem projection_count_cusp_of_finite_volume {n₀ : ℕ} {A C : ℝ}
-    (hred : ∀ X : CData, X.HypB n₀ A → X.GapAboveThreeHalvesPower → X.GapAboveSquareRootThreshold C → RepA X → UnimodF X → X.ProjStep ∧ X.CountedStep ∧ X.CuspStep)
-    (hV : ∀ X : CData, X.HypB n₀ A → X.FinVol) : StepsB n₀ A C :=
-  projection_count_cusp_of_unimodular hred fun X hX =>
-    UnimodF_of_UnimodA X (adelic_unimodular_of_finite_covolume X (RegData_of_HypB X hX) (hV X hX))
 
 end Formalism.MainNotions.LeviCoordinates
 

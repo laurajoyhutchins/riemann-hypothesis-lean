@@ -1,8 +1,49 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.PublishedTheorems.PoincareDeRhamDuality.DeRhamPerfectPairing.H1OnPointsEqZeroOfIsIso
-import Development.AutomorphicSpectrum.Proofs.DivisibilityProofs.RestrictTrivEqZero
+module
+
+public import Development.WeilBound.CoreStatements.PublishedTheorems.PoincareDeRhamDuality.DeRhamPerfectPairing.H1OnPointsEqZeroOfIsIso
+public import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.CrystallinePull2SumCup
 import Development.AbelianVarietyTheory.Proofs.ModuliProofs.IsAbelianSchemeOfIsGrpPullback
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.SabPull
+public import Development.AutomorphicSpectrum.Proofs.DivisibilityProofs.RestrictTrivEqZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -26,26 +67,10 @@ theorem key₁ {B B' : Type} [CommRing B] [CommRing B'] {n : ℕ} (ρ : B →+* 
     linear_combination gm' k * h2 k + ρ (aφ k) * h3 k
   have hs := Finset.sum_congr rfl (fun k (_ : k ∈ Finset.univ) => e k)
   simp only [Finset.sum_add_distrib] at hs
-  rw [map_add, map_sum]
+
+  rw [map_add (f := _), map_sum]
   simp only [map_mul]
   linear_combination hs - h1
-
-theorem key₂ {B B' : Type} [CommRing B] [CommRing B'] {n : ℕ} (ρ : B →+* B') (fθ : B) (fc f₂ f₁ fθ' : B')
-    (aθ gm₀ : Fin n → B) (b₂ a₁ bθ' a₂ aθ' gm₂ gm₁ t : Fin n → B')
-    (h1 : ρ fθ - fc + f₂ = ∑ k, ρ (aθ k) * b₂ k) (h2 : f₁ - fc + fθ' = ∑ k, a₁ k * bθ' k)
-    (h3 : ∀ k, ρ (aθ k) + a₂ k = a₁ k + aθ' k) (h4 : ∀ k, gm₂ k = ρ (gm₀ k) + b₂ k)
-    (h5 : ∀ k, t k + gm₂ k = gm₁ k + bθ' k) :
-    (fθ' + ∑ k, aθ' k * gm₂ k) - ρ (fθ + ∑ k, aθ k * gm₀ k) =
-      (f₂ + ∑ k, a₂ k * gm₂ k) - (f₁ + ∑ k, a₁ k * gm₁ k) + ∑ k, t k * a₁ k := by
-  have e : ∀ k, aθ' k * gm₂ k - ρ (aθ k) * ρ (gm₀ k) - a₂ k * gm₂ k + a₁ k * gm₁ k - t k * a₁ k
-      = ρ (aθ k) * b₂ k - a₁ k * bθ' k := by
-    intro k
-    linear_combination (-gm₂ k) * h3 k + ρ (aθ k) * h4 k - a₁ k * h5 k
-  have hs := Finset.sum_congr rfl (fun k (_ : k ∈ Finset.univ) => e k)
-  simp only [Finset.sum_sub_distrib, Finset.sum_add_distrib] at hs
-  rw [map_add, map_sum]
-  simp only [map_mul]
-  linear_combination hs + h2 - h1
 
 theorem exists_factor' {R M N : Type*} [CommRing R] [AddCommGroup M] [Module R M] [AddCommGroup N]
     [Module R N] (f : M →ₗ[R] N) (hf : Function.Surjective f) (x : M →ₗ[R] R)
@@ -107,6 +132,7 @@ theorem exists_bounds
   have hpull : ∀ k, pullP hp (H1.mk _ (β k)) = H1.mk (FP sW) ((pushC hp).pullbackOneCocycle (β k)) :=
     fun k => CoefMap.pullCohomologyOne_class _ _
   simp only [hpull, cup_mk] at h
+
   rw [← map_sum] at h
   obtain ⟨f, hf⟩ := H2.mk_eq_zero.mp h
   refine ⟨f, fun S S' S'' φ ψ χ e => ?_⟩
@@ -150,7 +176,8 @@ theorem hZ_rel (H : Bounds hp α β f) {T' : Pt sY} (τ : T ⟶ T') {X'' : Schem
   have e2 : ∀ z, pullP hw (H1.mk (FP sW) z) = H1.mk (FP s') ((pushC hw).pullbackOneCocycle z) :=
     fun z => CoefMap.pullCohomologyOne_class _ _
   simp only [e1, e2]
-  simp only [← LinearMap.map_smul, ← map_sum, ← map_sub, ← map_add]
+
+  simp only [← LinearMap.map_smul, ← map_sum, ← map_sub, ← map_add (f := _)]
   rw [H1.mk_eq_zero]
   let u : ∀ S : Pt s'', pushPt hw (pushPt hj S) ⟶ pushPt hw' S := fun S =>
     { ρ := { RingHom.id S.B with commutes' := fun r => congrArg (algebraMap T'.B S.B) (τ.ρ.commutes r) }
@@ -173,7 +200,8 @@ theorem hZ_rel (H : Bounds hp α β f) {T' : Pt sY} (τ : T ⟶ T') {X'' : Schem
     rw [Algebra.smul_def]
     rfl
   rw [hR]
-  rw [map_add, map_sum]
+
+  rw [map_add (f := _), map_sum]
   simp only [map_mul]
   have B1 : mp (FP s'') φ (v1 f (u S)) - v1 f (u S ≫ pushHom hw' φ) + v1 f (pushHom hw' φ)
       = ∑ k, mp (FP s'') φ (v1 (α k).1 (u S)) * v1 (β k).1 (pushHom hp (pushHom hw' φ)) :=
@@ -270,7 +298,7 @@ theorem exists_fun (hF : AbelianDeRham.Free) (hB : AbelianDeRham.BaseChange) (hA
       rw [hl, Submodule.coe_smul, map_smul, ← hpt]
       exact Submodule.smul_mem _ _ (Submodule.subset_span ⟨c, rfl⟩)
     | add a b ha hb =>
-      rw [map_add, Submodule.coe_add, map_add]
+      rw [map_add (f := _), Submodule.coe_add, map_add (f := _)]
       exact Submodule.add_mem _ ha hb
 
 end Fun
@@ -294,15 +322,13 @@ theorem exists_grpPullback {S S' : Scheme.{0}} (G : Over S) [GrpObj G] (f : S' �
       Limits.pullback.fst _ f = (lift x₀ y₀).left := by
     apply Limits.pullback.hom_ext
     · simp
-      erw [Limits.pullback.lift_fst_assoc, Limits.pullback.lift_fst]
       exact hx.symm
     · simp
-      erw [Limits.pullback.lift_snd_assoc, Limits.pullback.lift_snd]
       exact hy.symm
   rw [← key]
   simp only [Category.assoc]
 
-set_option maxHeartbeats 1000000 in
+
 theorem orth_of_surj (hF : AbelianDeRham.Free) (hB : AbelianDeRham.BaseChange) {R : Type} [CommRing R] {A B : Over (Sp R)} [GrpObj A] [GrpObj B] {g : ℕ} (hA : IsAbelianScheme A) (hg : SmoothOfRelativeDimension g A.hom) (hS : ∀ (C : Type) [CommRing C] [Algebra R C] (A' : Over (Sp C)) [GrpObj A'] (φ : A'.left ⟶ A.left), IsGrpPullback A' A (spMap (algebraMap R C)) φ → Function.Surjective (toP (A'.hom ≫ 𝟙 _))) {P : LB (A ⊗ B).left} (hP : P.IsLB) {φ : HdR A →ₗ[R] HdR B →ₗ[R] R} (hφ : IsCorrForm (dp0 R) (𝟙 _) A B P φ) : ∀ x ∈ Fil A, ∀ y ∈ Fil B, φ x y = 0 := by
   intro x hx y hy
   obtain ⟨n, a, b, hCh, hform⟩ := hφ
@@ -314,6 +340,7 @@ theorem orth_of_surj (hF : AbelianDeRham.Free) (hB : AbelianDeRham.BaseChange) {
     rw [← Category.assoc, Over.w]
     simp [spMap]
   have h0 := pull2_chern_class_eq_zero hP hCh
+
   rw [map_sum] at h0
   simp only [CoefMap.pullCohomologyTwo_cup] at h0
   have eA : ∀ k, (toPC _).pull1 (pullOver (dp0 R) (𝟙 (Sp R)) (fst A B) (a k).1) = pullP hq (toP _ (a k).1) :=
@@ -388,7 +415,7 @@ theorem orth_of_surj (hF : AbelianDeRham.Free) (hB : AbelianDeRham.BaseChange) {
         exact (τ.ρ.commutes _).symm
       · simp
       · intro u v _ _ hu hv
-        simp only [map_add, hu, hv]
+        simp only [map_add (f := _), hu, hv]
       · intro c u _ hu
         simp only [map_smulₛₗ, smul_eq_mul, map_mul, hu]
         rfl
@@ -397,7 +424,8 @@ theorem orth_of_surj (hF : AbelianDeRham.Free) (hB : AbelianDeRham.BaseChange) {
       rw [hα k, pullP_pullP hq (hw T) (hφ' T) (fun r => rfl) (hwf T),
         pullP_pullP (hφ' T) hj (hφ' T') (fun r => τ.ρ.commutes r) hjf, hXc]
     have h1 := congrArg (X T') hrel
-    simp only [map_add, map_sub, map_sum, map_smul, smul_eq_mul, hii, map_zero] at h1
+
+    simp only [map_add (f := _), map_sub, map_sum, map_smul, smul_eq_mul, hii, map_zero] at h1
     simp only [hi] at h1
     exact h1
   have hcob : ∃ g : C0 (FP (B.hom ≫ 𝟙 (Sp R))), d0 _ g = ↑(∑ k, x (a k) • β k) := by
@@ -412,12 +440,14 @@ theorem orth_of_surj (hF : AbelianDeRham.Free) (hB : AbelianDeRham.BaseChange) {
     linear_combination -key T T' τ
   have hmk : H1.mk _ (∑ k, x (a k) • β k) = 0 := H1.mk_eq_zero.mpr hcob
   have hc : toP (B.hom ≫ 𝟙 (Sp R)) (∑ k, x (a k) • (b k).1) = 0 := by
+
     simpa only [map_sum, map_smul, hβ] using hmk
   have hF1 := (toP_eq_zero_iff _).mp hc
   have hcF : (∑ k, x (a k) • b k) ∈ PrimitiveSubmodule B := by
     show (primDR B).subtype (∑ k, x (a k) • b k) ∈ F1 _
     simpa using hF1
   have hy0 := (Submodule.mem_dualAnnihilator _).mp hy _ hcF
+
   simpa [map_sum, map_smul] using hy0
 
 end CrystallinePoints.Pd

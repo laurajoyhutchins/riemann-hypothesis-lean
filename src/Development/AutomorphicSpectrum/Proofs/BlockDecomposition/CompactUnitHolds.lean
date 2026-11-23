@@ -1,14 +1,58 @@
-import Mathlib
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.SatakeExponents.UniformizerValuations.SetupEig
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsIsoDefiniteUnitaryAdelicUnitaryGroup
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IntegralAdaptedTriangularBounded
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsCompactImageEqUniv
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ProductOfLocalLevelsUnitaryIsOpenIsCompactIsLeve
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PlaceConjugationPropertiesCmField
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FixedPlaceUnitaryLocalPointsEquivLocalUnitaryGro
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.SplitPlaceUnitaryLocalPointsEquivGL
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.SatakeExponents.UniformizerValuations.SetupEig
+public import Development.AbelianVarietyTheory.Definitions.Foundations.AestronglyMeasurableQuotMeasureIffLift
+public import Development.AbelianVarietyTheory.Definitions.Foundations.InnerEqZeroOfNotUEquiv
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsIsoDefiniteUnitaryAdelicUnitaryGroup
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IntegralAdaptedTriangularBounded
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PlaceConjugationPropertiesCmField
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ProductOfLocalLevelsUnitaryIsOpenIsCompactIsLeve
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsCompactImageEqUniv
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FixedPlaceUnitaryLocalPointsEquivLocalUnitaryGro
 import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.DiscreteTopologyRationalPointsHermitianSpace
-import Development.AbelianVarietyTheory.Definitions.Foundations.InnerEqZeroOfNotUEquiv
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.LcscAdelicUnitaryGroup
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Dynamics.Ergodic.Action.Regular
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import Development.AbelianVarietyTheory.Definitions.Foundations.HermitianSpaceBaseLatticeEqFrameLattice
+
+@[expose] public section
 
 noncomputable section
 
@@ -45,7 +89,7 @@ theorem isMulRightInvariant_of_cover (hc : ∃ C : Set G, IsCompact C ∧ ∀ g,
     exact ⟨_, hx, (mk_eq_iff.2 ⟨⟨γ, hγ⟩, rfl⟩).symm⟩
   have e := Measure.isMulLeftInvariant_eq_smul (μ.map (· * g)) μ
   have h' : IsFundamentalDomain Γ ((· * g) ⁻¹' stdDom Γ) μ :=
-    h.preimage_of_equiv ⟨measurable_mul_const g, e ▸ Measure.smul_absolutelyContinuous⟩ Function.bijective_id
+    h.preimage_of_equiv ⟨(measurable_mul_const g).aemeasurable, e ▸ Measure.smul_absolutelyContinuous⟩ Function.bijective_id
       fun γ x => mul_assoc _ _ _
   have h1 := h'.measure_eq h
   rw [← Measure.map_apply (measurable_mul_const g) (measurableSet_stdDom _), e, Measure.smul_apply, ENNReal.smul_def,
@@ -68,7 +112,7 @@ theorem isUnitarisable_of_embedding (hc : ∃ C : Set G, IsCompact C ∧ ∀ g, 
         apply Lp.ext
         filter_upwards [(hm (v + w)).coeFn_toL2, (hm v).coeFn_toL2, (hm w).coeFn_toL2,
           Lp.coeFn_add (hm v).toL2 (hm w).toL2] with q h1 h2 h3 h4
-        rw [h1, h4, Pi.add_apply, h2, h3, map_add]
+        rw [h1, h4, Pi.add_apply, h2, h3, map_add (f := _)]
         rfl
       map_smul' := fun c v => by
         apply Lp.ext
@@ -106,8 +150,8 @@ section Concrete
 
 variable {E : Type} [Field E] [NumberField E] [IsCMField E]
 
-local notation "F₀" => maximalRealSubfield E
-local notation "σ₀" => (IsCMField.complexConj E : E →ₐ[maximalRealSubfield E] E)
+local notation3 "F₀" => maximalRealSubfield E
+local notation3 "σ₀" => (IsCMField.complexConj E).toAlgHom
 
 open Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes
 
@@ -126,6 +170,7 @@ theorem hform_one_ne_zero {n : ℕ} (x : Fin n → E) (hx : x ≠ 0) :
       ∑ i, IsCMField.complexConj E (x i) * x i := by
     simp [Formalism.UG.hform, Matrix.one_apply]
   have h1 := congrArg τ (e.symm.trans h)
+
   rw [map_sum, map_zero] at h1
   have h2 : ∑ i, ((Complex.normSq (τ (x i)) : ℝ) : ℂ) = 0 := by
     rw [← h1]

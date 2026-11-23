@@ -1,13 +1,57 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.GlueApplyOfNotInFibre
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsGenericFlag
-import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.LatNormGrLatNeZeroOfSpan
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsCompletedStrictHens
-import Development.WeilBound.CoreStatements.HodgeTatePoints.MbLCentre
-import Development.WeilBound.CoreStatements.HodgeTatePoints.McCramer
-import Development.WeilBound.CoreStatements.HodgeTatePoints.MbLPulllocCentre
-import Development.WeilBound.CoreStatements.HodgeTatePoints.MaBase
-import Development.WeilBound.CoreStatements.HodgeTatePoints.MaSerre
+module
+
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.GlueApplyOfNotInFibre
+public import Mathlib.LinearAlgebra.Determinant
+public import Development.WeilBound.CoreStatements.HodgeTatePoints.MaBase
+public import Development.WeilBound.CoreStatements.HodgeTatePoints.MaSerre
+public import Development.WeilBound.CoreStatements.HodgeTatePoints.MbLCentre
+public import Development.WeilBound.CoreStatements.HodgeTatePoints.MbLPulllocCentre
+public import Development.WeilBound.CoreStatements.HodgeTatePoints.McCramer
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory GlobalTheory.CompanionTheory.Ar NumberField
 
 noncomputable section
@@ -104,7 +148,7 @@ theorem span_image_span (i : Ω →+* Ω') (j : E →+ F) (hj : ∀ (a : Ω) (e 
     | mem y hy => exact Submodule.subset_span ⟨y, hy, rfl⟩
     | zero => simp
     | add y y' _ _ hy hy' =>
-      rw [map_add]
+      rw [map_add (f := _)]
       exact Submodule.add_mem _ hy hy'
     | smul a y _ hy =>
       have e1 : j (a • y) = (⟨i a, hA a a.2⟩ : A) • j y := by
@@ -130,6 +174,7 @@ theorem ext_basis (i : Ω →+* Ω') (j : E →+ F) (hj : IsExtOver i j) (V : Su
   have hJsum : ∀ v : V, J v = ∑ k, i (b₀.repr v k) • J (b₀ k) := by
     intro v
     conv_lhs => rw [← b₀.sum_repr v]
+
     rw [map_sum]
     simp only [hJs]
   have hJli : LinearIndependent Ω' (J ∘ b₀) := by
@@ -302,7 +347,7 @@ theorem plucker_block (o : Type) [CommRing o] (Ω : Type) [Field Ω] [Algebra o 
 
 end PositivityTheory.HtPt.Mb.LFlatten.Flatten
 
-open AlgebraicGeometry CategoryTheory GlobalTheory.CompanionTheory.Ar NumberField in
 
+open AlgebraicGeometry CategoryTheory GlobalTheory.CompanionTheory.Ar NumberField in
 theorem PositivityTheory.HtPt.Mb.flatten : ∀ (o : Type) [CommRing o] (Ω : Type) [Field Ω] [Algebra o Ω] (κ : Type) [Finite κ] (x : κ → Ω) (M : PModel o x) (E : Type) [AddCommGroup E] [Module Ω E] (L : Lat M.ξ E) (V : Submodule Ω E) [FiniteDimensional Ω V], L.IsCohOn Set.univ → (∀ p, Submodule.span Ω (L p : Set E) = V) → ∃ (κ' : Type) (_ : Finite κ') (w : κ' → Ω), (∃ l, w l ≠ 0) ∧ (∀ p : Cpt M.ξ, (∃ (r : ℕ) (b : Fin r → E), L.IsFrameAt b p) → ∃ l, InChart M.ξ w l p) ∧ ∀ (X' : Scheme.{0}) (Ω' : Type) [Field Ω'] (ξ' : Spec (CommRingCat.of Ω') ⟶ X') (i : Ω →+* Ω') (F : Type) [AddCommGroup F] [Module Ω' F] (j : E →+ F), IsExtOver i j → (L.pullLoc ξ' i j).IsVBOn {p' | p' ∈ ctrSet o x i ξ' ∧ ∃ l, InChart ξ' (fun l => i (w l)) l p'} (Module.finrank Ω V) (Submodule.span Ω' (j '' (V : Set E))) :=
   @PositivityTheory.HtPt.Mb.LFlatten.Flatten.plucker_block

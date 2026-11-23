@@ -1,4 +1,48 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.CocycleRightZeroThd
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.CocycleRightZeroThd
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -41,42 +85,5 @@ lemma ev_C {m n : ℕ} (a : Fin m → Pt R n d) (r : R) : ev a (C r : PS R m d) 
   all_goals first
     | rfl
     | simp [MvPowerSeries.algebraMap_apply]
-
-def addLaw (R : Type) [CommRing R] (d : ℕ) : FGLaw R d where
-  F := fun i => X ((0 : Fin 2), i) + X ((1 : Fin 2), i)
-  const := fun i => by simp
-  unit := fun i => by
-    have h : ∀ (j : Fin 2) (l : Fin d), constantCoeff ((![0, pt R d 0] : Fin 2 → Pt R 1 d) j l) = 0 := by
-      intro j l; fin_cases j <;> simp [pt]
-    rw [ev_add _ h, ev_X _ h, ev_X _ h]
-    simp [pt]
-  comm := fun i => by
-    have h : ∀ (j : Fin 2) (l : Fin d),
-        constantCoeff ((![pt R d 1, pt R d 0] : Fin 2 → Pt R 2 d) j l) = 0 := by
-      intro j l; fin_cases j <;> simp [pt]
-    rw [ev_add _ h, ev_X _ h, ev_X _ h]
-    simp [pt, add_comm]
-  assoc := fun i => by
-    have h2 : ∀ (j : Fin 2) (l : Fin d),
-        constantCoeff ((![pt R d 0, pt R d 1] : Fin 2 → Pt R 3 d) j l) = 0 := by
-      intro j l; fin_cases j <;> simp [pt]
-    have h2' : ∀ (j : Fin 2) (l : Fin d),
-        constantCoeff ((![pt R d 1, pt R d 2] : Fin 2 → Pt R 3 d) j l) = 0 := by
-      intro j l; fin_cases j <;> simp [pt]
-    have e1 : (fun l => ev ![pt R d 0, pt R d 1] (X ((0 : Fin 2), l) + X ((1 : Fin 2), l)) :
-        Pt R 3 d) = fun l => X ((0 : Fin 3), l) + X ((1 : Fin 3), l) := by
-      funext l; rw [ev_add _ h2, ev_X _ h2, ev_X _ h2]; simp [pt]
-    have e2 : (fun l => ev ![pt R d 1, pt R d 2] (X ((0 : Fin 2), l) + X ((1 : Fin 2), l)) :
-        Pt R 3 d) = fun l => X ((1 : Fin 3), l) + X ((2 : Fin 3), l) := by
-      funext l; rw [ev_add _ h2', ev_X _ h2', ev_X _ h2']; simp [pt]
-    rw [e1, e2]
-    have h3 : ∀ (j : Fin 2) (l : Fin d), constantCoeff ((![fun l => X ((0 : Fin 3), l) +
-        X ((1 : Fin 3), l), pt R d 2] : Fin 2 → Pt R 3 d) j l) = 0 := by
-      intro j l; fin_cases j <;> simp [pt]
-    have h3' : ∀ (j : Fin 2) (l : Fin d), constantCoeff ((![pt R d 0, fun l => X ((1 : Fin 3), l) +
-        X ((2 : Fin 3), l)] : Fin 2 → Pt R 3 d) j l) = 0 := by
-      intro j l; fin_cases j <;> simp [pt]
-    rw [ev_add _ h3, ev_X _ h3, ev_X _ h3, ev_add _ h3', ev_X _ h3', ev_X _ h3']
-    simp [pt, add_assoc]
 
 end ReciprocityTheory.ChartRestriction.G.Geo.Tor.Germ

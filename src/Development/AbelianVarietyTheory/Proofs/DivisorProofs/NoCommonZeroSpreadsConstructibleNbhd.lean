@@ -1,4 +1,64 @@
-import Mathlib
+module
+
+public import Mathlib.FieldTheory.IsAlgClosed.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+public import Mathlib.RingTheory.Nullstellensatz
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Algebra.MvPolynomial.CommRing
+import Mathlib.CategoryTheory.Monoidal.Cartesian.Basic
+import Mathlib.CategoryTheory.Monoidal.Category
+import Mathlib.CategoryTheory.Monoidal.Mon
+import Mathlib.Topology.Sheaves.Presheaf
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj TopologicalSpace TensorProduct
 open scoped CategoryTheory.Obj
 
@@ -82,6 +142,7 @@ theorem no_common_zero_spreads : ∀ (A : Type) [CommRing A] (τ J : Type) [Fini
     · simp
   have hPmul : ∀ h j, P (h * G j) = P h * G j := by
     intro h j; ext n
+
     rw [hPc, MvPolynomial.coeff_mul, MvPolynomial.coeff_mul, map_sum]
     refine (map_sum K.subtype _ _).trans (Finset.sum_congr rfl fun x _ => ?_)
     show ((g _ : K) : Ω) = _
@@ -92,6 +153,7 @@ theorem no_common_zero_spreads : ∀ (A : Type) [CommRing A] (τ J : Type) [Fini
   have hsum : ∑ j ∈ c.support, P (c j) * G j = 1 := by
     simp only [Finsupp.sum, smul_eq_mul] at hc
     have := congrArg PA hc
+
     rw [map_sum] at this
     simp only [PA, AddMonoidHom.mk'_apply] at this
     rw [← hP1]
@@ -125,12 +187,13 @@ theorem no_common_zero_spreads : ∀ (A : Type) [CommRing A] (τ J : Type) [Fini
   let E : MvPolynomial τ A := MvPolynomial.C b - ∑ j ∈ c.support, q j * F j
   have hE : MvPolynomial.map φ E = 0 := by
     have hG : ∀ j, MvPolynomial.map φ (F j) = G j := fun j => rfl
+
     simp only [E, map_sub, map_sum, map_mul, MvPolynomial.map_C, hq, hG, _root_.mul_assoc]
     rw [← Finset.mul_sum, hsum, _root_.mul_one, sub_self]
   refine ⟨b, E.coeffs, hb, ?_, ?_⟩
   · intro y hy
     obtain ⟨n, -, rfl⟩ := MvPolynomial.mem_coeffs_iff.1 hy
-    have := congrArg (MvPolynomial.coeff n) hE
+    have := congrArg (AddMonoidAlgebra.coeff · n) hE
     rwa [MvPolynomial.coeff_map, MvPolynomial.coeff_zero] at this
   · intro k _ ψ hψb hψI ⟨z, hz⟩
     have h0 : MvPolynomial.map ψ E = 0 := by
@@ -139,6 +202,7 @@ theorem no_common_zero_spreads : ∀ (A : Type) [CommRing A] (τ J : Type) [Fini
       by_cases hn : n ∈ E.support
       · exact hψI _ (MvPolynomial.mem_coeffs_iff.2 ⟨n, hn, rfl⟩)
       · rw [MvPolynomial.notMem_support_iff.1 hn, map_zero]
+        rfl
     have h2 : MvPolynomial.eval₂ ψ z E = 0 := by
       rw [MvPolynomial.eval₂_eq_eval_map, h0, map_zero]
     have h3 : MvPolynomial.eval₂ ψ z E = ψ b := by

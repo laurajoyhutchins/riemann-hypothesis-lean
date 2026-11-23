@@ -1,6 +1,48 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.UnipotentBlockMatrices.UnipotentBlockPairs
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.UnipotentBlockMatrices.ClosedKernelMinors.TypeFin
-import GroundTheory.AutomorphicForms.CuspidalDiscreteness.SummandsContRep
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.TwistedFactors.TruncatedCuspIrreducibility.AdelDefs
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.UnipotentBlockMatrices.ClosedKernelMinors.TypeFin
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MeasureTheory NumberField Set Filter Topology
 open GroundTheory.Automorphic GroundTheory.Automorphic.Reduction GroundTheory.Automorphic.RightCosetSpace
@@ -73,9 +115,16 @@ theorem UpperTheory.V.Z.InvariantSubmoduleMonicPolynomial.KX.fixRep :
       ∀ (y : L2 μ) (Φ : G1 K n → ℂ), Continuous Φ → Reps μ (Rop μ a y) Φ → D.Fix Φ := by
   intro K _ _ n μ _ D a hH y Φ hΦ hrep g
   haveI := D.prob
-  have hc := isContRep_rconv μ a y
+  have hc : Continuous (rconv (Gam K n) μ a y) := continuous_rconv (Gam K n) μ a y
+  have hae : (fun z => (Rop μ a y) (mk (Gam K n) z)) =ᵐ[μ]
+      rconv (Gam K n) μ a y := by
+    have := isFiniteMeasure_quotientMeasure (K := K) (n := n) μ
+    filter_upwards [QuasiMeasurePreserving.ae_eq_comp (quasiMeasurePreserving_mk (Gam K n) μ)
+      (integrated_ae_eq_rconvQ (Gam K n) μ a y)] with z hz
+    simpa only [Function.comp_apply, rconvQ_mk, Rop] using hz
   have hEq : Φ = rconv (Gam K n) μ a y := by
-    refine (hΦ.ae_eq_iff_eq μ hc.1).1 ?_
-    exact Filter.EventuallyEq.trans (Filter.EventuallyEq.symm hrep) hc.2.2
+    refine (hΦ.ae_eq_iff_eq μ hc).1 ?_
+    exact Filter.EventuallyEq.trans (Filter.EventuallyEq.symm hrep) hae
   rw [hEq]
+  set_option synthInstance.maxHeartbeats 200000 in
   exact rconv_fix (Gam K n) μ D.ν (typeFin D).1 D.supp D.cont a (fun g => (hH g).1) y g

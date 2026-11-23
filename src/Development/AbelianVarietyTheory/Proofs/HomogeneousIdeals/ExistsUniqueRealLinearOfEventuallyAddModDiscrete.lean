@@ -1,5 +1,57 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.TendstoUniformlyOnDoublingLogOfContraction
+module
+
+public import Mathlib.Analysis.Calculus.FDeriv.Defs
+public import Mathlib.LinearAlgebra.FiniteDimensional.Defs
+public import Mathlib.Topology.Algebra.Module.ContinuousLinearMap.RestrictScalars
+public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.TendstoUniformlyOnDoublingLogOfContraction
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.Module.ZLattice.Basic
+
+@[expose] public section
 
 open Filter Topology Set
 
@@ -249,56 +301,7 @@ section Kernel
 
 variable {M N : Type*} [AddCommGroup M] [AddCommGroup N] {Λ : Submodule ℤ M} {Λ' : Submodule ℤ N}
 
-def latticeQuotMap (Λ : Submodule ℤ M) (Λ' : Submodule ℤ N) (h : M →+ N)
-    (hΛ : ∀ x ∈ Λ, h x ∈ Λ') : M ⧸ Λ →+ N ⧸ Λ' :=
-  (Λ.mapQ Λ' h.toIntLinearMap hΛ).toAddMonoidHom
-
-@[simp]
-theorem latticeQuotMap_mk (h : M →+ N) (hΛ : ∀ x ∈ Λ, h x ∈ Λ') (x : M) :
-    latticeQuotMap Λ Λ' h hΛ (Submodule.Quotient.mk x) = Submodule.Quotient.mk (h x) := rfl
-
 variable {φ : M ⧸ Λ →+ N ⧸ Λ'} {h : M →+ N}
-
-theorem map_mem_of_quotient_lift
-    (hφ : ∀ x, φ (Submodule.Quotient.mk x) = Submodule.Quotient.mk (h x)) {x : M} (hx : x ∈ Λ) :
-    h x ∈ Λ' := by
-  rw [← Submodule.Quotient.mk_eq_zero, ← hφ, (Submodule.Quotient.mk_eq_zero Λ).2 hx, map_zero]
-
-theorem mk_mem_ker_iff_of_quotient_lift
-    (hφ : ∀ x, φ (Submodule.Quotient.mk x) = Submodule.Quotient.mk (h x)) (x : M) :
-    Submodule.Quotient.mk x ∈ φ.ker ↔ h x ∈ Λ' := by
-  rw [AddMonoidHom.mem_ker, hφ, Submodule.Quotient.mk_eq_zero]
-
-noncomputable def comapQuotEquivKer
-    (hφ : ∀ x, φ (Submodule.Quotient.mk x) = Submodule.Quotient.mk (h x)) :
-    (Λ'.toAddSubgroup.comap h) ⧸ Λ.toAddSubgroup.addSubgroupOf (Λ'.toAddSubgroup.comap h) ≃+
-      φ.ker :=
-  QuotientAddGroup.liftEquiv _
-    (φ := (Λ.mkQ.toAddMonoidHom.comp (Λ'.toAddSubgroup.comap h).subtype).codRestrict φ.ker
-      fun x ↦ (mk_mem_ker_iff_of_quotient_lift hφ x).2 x.2)
-    (by
-      rintro ⟨y, hy⟩
-      obtain ⟨x, rfl⟩ := Submodule.Quotient.mk_surjective Λ y
-      exact ⟨⟨x, (mk_mem_ker_iff_of_quotient_lift hφ x).1 hy⟩, rfl⟩)
-    (by
-      ext x
-      rw [AddMonoidHom.mem_ker, Subtype.ext_iff, AddSubgroup.mem_addSubgroupOf]
-      exact (Submodule.Quotient.mk_eq_zero Λ).symm)
-
-@[simp]
-theorem comapQuotEquivKer_mk
-    (hφ : ∀ x, φ (Submodule.Quotient.mk x) = Submodule.Quotient.mk (h x))
-    (x : Λ'.toAddSubgroup.comap h) :
-    (comapQuotEquivKer hφ (QuotientAddGroup.mk x) : M ⧸ Λ) = Submodule.Quotient.mk (x : M) := rfl
-
-def quotientLiftRestrict
-    (hφ : ∀ x, φ (Submodule.Quotient.mk x) = Submodule.Quotient.mk (h x)) : Λ →ₗ[ℤ] Λ' :=
-  h.toIntLinearMap.restrict fun _ hx ↦ map_mem_of_quotient_lift hφ hx
-
-@[simp]
-theorem coe_quotientLiftRestrict
-    (hφ : ∀ x, φ (Submodule.Quotient.mk x) = Submodule.Quotient.mk (h x)) (x : Λ) :
-    (quotientLiftRestrict hφ x : N) = h x := rfl
 
 end Kernel
 
@@ -306,46 +309,6 @@ section Torsion
 
 variable (K : Type*) [DivisionRing K] [CharZero K] {M : Type*} [AddCommGroup M] [Module K M]
   (Λ : Submodule ℤ M) (n : ℕ) [NeZero n]
-
-omit [NeZero n] in
-theorem natCast_zsmul_eq_smul (x : M) : (n : ℤ) • x = (n : K) • x := by
-  rw [natCast_zsmul, Nat.cast_smul_eq_nsmul]
-
-noncomputable def latticeToTorsion : Λ →ₗ[ℤ] Submodule.torsionBy ℤ (M ⧸ Λ) (n : ℤ) :=
-  LinearMap.codRestrict _
-    (Λ.mkQ ∘ₗ (DistribSMul.toAddMonoidHom M (n : K)⁻¹).toIntLinearMap ∘ₗ Λ.subtype) fun x ↦ by
-      change (n : ℤ) • Λ.mkQ ((n : K)⁻¹ • (x : M)) = 0
-      rw [← map_zsmul, natCast_zsmul_eq_smul K, smul_inv_smul₀ (NeZero.ne (n : K))]
-      exact (Submodule.Quotient.mk_eq_zero Λ).2 x.2
-
-noncomputable def modNEquivTorsion :
-    ModN Λ n ≃ₗ[ℤ] Submodule.torsionBy ℤ (M ⧸ Λ) (n : ℤ) :=
-  (Submodule.quotEquivOfEq _ _ (by
-    ext x
-    rw [LinearMap.mem_ker, Subtype.ext_iff]
-    change _ ↔ (Submodule.Quotient.mk ((n : K)⁻¹ • (x : M)) : M ⧸ Λ) = 0
-    rw [Submodule.Quotient.mk_eq_zero]
-    constructor
-    · rintro ⟨y, rfl⟩
-      change (n : K)⁻¹ • (n : ℤ) • (y : M) ∈ Λ
-      rw [natCast_zsmul_eq_smul K, inv_smul_smul₀ (NeZero.ne (n : K))]
-      exact y.2
-    · intro hx
-      refine ⟨⟨_, hx⟩, Subtype.ext ?_⟩
-      change (n : ℤ) • (n : K)⁻¹ • (x : M) = x
-      rw [natCast_zsmul_eq_smul K, smul_inv_smul₀ (NeZero.ne (n : K))])).trans
-    ((latticeToTorsion K Λ n).quotKerEquivOfSurjective (by
-      rintro ⟨y, hy⟩
-      obtain ⟨x, rfl⟩ := Submodule.Quotient.mk_surjective Λ y
-      have hx : (n : ℤ) • x ∈ Λ := (Submodule.Quotient.mk_eq_zero Λ).1 hy
-      refine ⟨⟨_, hx⟩, Subtype.ext ?_⟩
-      change (Submodule.Quotient.mk ((n : K)⁻¹ • (n : ℤ) • x) : M ⧸ Λ) = Submodule.Quotient.mk x
-      rw [natCast_zsmul_eq_smul K, inv_smul_smul₀ (NeZero.ne (n : K))]))
-
-@[simp]
-theorem coe_modNEquivTorsion_mk (x : Λ) :
-    (modNEquivTorsion K Λ n (Submodule.Quotient.mk x) : M ⧸ Λ) =
-      Submodule.Quotient.mk ((n : K)⁻¹ • (x : M)) := rfl
 
 end Torsion
 

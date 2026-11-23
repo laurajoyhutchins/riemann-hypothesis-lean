@@ -1,5 +1,50 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.TensorOperator.Development
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.TensorOperator.Development
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MvPolynomial
 
@@ -27,7 +72,7 @@ theorem fockR_add_left (f₁ f₂ g : MvPolynomial σ R) : fockR (f₁ + f₂) g
     fockR_eq_sum f₁ g _ Finset.subset_union_left, fockR_eq_sum f₂ g _ Finset.subset_union_right,
     ← Finset.sum_add_distrib]
   refine Finset.sum_congr rfl fun m _ => ?_
-  rw [coeff_add]
+  rw [MvPolynomial.coeff_add]
   ring
 
 theorem fockR_smul_left (a : R) (f g : MvPolynomial σ R) : fockR (a • f) g = a * fockR f g := by
@@ -35,21 +80,21 @@ theorem fockR_smul_left (a : R) (f g : MvPolynomial σ R) : fockR (a • f) g = 
   unfold fockR
   rw [Finset.mul_sum]
   refine Finset.sum_congr rfl fun m _ => ?_
-  rw [coeff_smul, smul_eq_mul]
+  rw [MvPolynomial.coeff_smul, smul_eq_mul]
   ring
 
 theorem fockR_add_right (f g₁ g₂ : MvPolynomial σ R) : fockR f (g₁ + g₂) = fockR f g₁ + fockR f g₂ := by
   unfold fockR
   rw [← Finset.sum_add_distrib]
   refine Finset.sum_congr rfl fun m _ => ?_
-  rw [coeff_add]
+  rw [MvPolynomial.coeff_add]
   ring
 
 theorem fockR_smul_right (a : R) (f g : MvPolynomial σ R) : fockR f (a • g) = a * fockR f g := by
   unfold fockR
   rw [Finset.mul_sum]
   refine Finset.sum_congr rfl fun m _ => ?_
-  rw [coeff_smul, smul_eq_mul]
+  rw [MvPolynomial.coeff_smul, smul_eq_mul]
   ring
 
 def fockB (σ R : Type*) [CommRing R] : MvPolynomial σ R →ₗ[R] MvPolynomial σ R →ₗ[R] R :=
@@ -78,19 +123,13 @@ theorem opWord_add (l : List (Fin n' × (Fin k × Fin k))) (f g : MvPolynomial (
     opWord l (f + g) = opWord l f + opWord l g := by
   induction l with
   | nil => rfl
-  | cons y l ih => rw [opWord_cons, opWord_cons, opWord_cons, ih, map_add, mul_add]
+  | cons y l ih => rw [opWord_cons, opWord_cons, opWord_cons, ih, map_add (f := _), mul_add]
 
 theorem opWord_smul (l : List (Fin n' × (Fin k × Fin k))) (a : K) (f : MvPolynomial (Fin n' × Fin k) K) :
     opWord l (a • f) = a • opWord l f := by
   induction l with
   | nil => rfl
   | cons y l ih => rw [opWord_cons, opWord_cons, ih, Derivation.map_smul, mul_smul_comm]
-
-def opWordL (l : List (Fin n' × (Fin k × Fin k))) :
-    MvPolynomial (Fin n' × Fin k) K →ₗ[K] MvPolynomial (Fin n' × Fin k) K where
-  toFun := opWord l
-  map_add' := opWord_add l
-  map_smul' a f := opWord_smul l a f
 
 theorem combo_add_fun (f : List (Fin n' × (Fin k × Fin k)) →₀ K) (G₁ G₂ : MvPolynomial (Fin n' × Fin k) K) :
     combo f (G₁ + G₂) = combo f G₁ + combo f G₂ := by
@@ -136,6 +175,7 @@ theorem bilin_ext_restrict {K : Type} [CommRing K] {σ : Type*} (T : Set (σ →
   intro G hG H hH
   rw [MvPolynomial.mem_restrictSupport_iff] at hG hH
   rw [G.as_sum, H.as_sum]
+
   simp only [map_sum, LinearMap.sum_apply]
   refine Finset.sum_congr rfl fun μ hμ => Finset.sum_congr rfl fun ν hν => ?_
   rw [e μ, e ν]

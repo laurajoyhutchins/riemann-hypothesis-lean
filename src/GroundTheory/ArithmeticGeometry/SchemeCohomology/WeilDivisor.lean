@@ -1,4 +1,53 @@
-import Mathlib
+module
+
+public import Mathlib.AlgebraicGeometry.FunctionField
+public import Mathlib.AlgebraicGeometry.Noetherian
+public import Mathlib.RingTheory.DedekindDomain.AdicValuation.Valuation
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+public import Mathlib.RingTheory.KrullDimension.Field
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Arith.SchemeCoh
@@ -80,9 +129,6 @@ lemma ord_mul (x : PrimeDivisor X) {f g : X.functionField} (hf : f ≠ 0) (hg : 
   simp only [ord, map_mul]
   rw [WithZero.log_mul ((Valuation.ne_zero_iff _).mpr hf) ((Valuation.ne_zero_iff _).mpr hg)]
   ring
-
-lemma ord_one (x : PrimeDivisor X) : x.ord 1 = 0 := by
-  simp [ord]
 
 end PrimeDivisor
 
@@ -186,34 +232,7 @@ section Divisor
 
 variable [IsIntegral X] [IsNoetherian X] [IsNormalScheme X]
 
-noncomputable def divisorOf (f : (X.functionField)ˣ) : WeilDivisor X :=
-  Finsupp.ofSupportFinite (fun x => x.ord (f : X.functionField))
-    (PrimeDivisor.finite_ord_ne_zero f.ne_zero)
 
-lemma divisorOf_apply (f : (X.functionField)ˣ) (x : PrimeDivisor X) :
-    divisorOf f x = x.ord (f : X.functionField) := rfl
-
-noncomputable def principalDivisor : Additive (X.functionField)ˣ →+ WeilDivisor X where
-  toFun f := divisorOf f.toMul
-  map_zero' := by
-    ext x
-    simp [divisorOf_apply, PrimeDivisor.ord_one]
-  map_add' f g := by
-    ext x
-    simp only [divisorOf_apply, toMul_add, Units.val_mul, Finsupp.coe_add, Pi.add_apply]
-    exact x.ord_mul f.toMul.ne_zero g.toMul.ne_zero
-
-lemma principalDivisor_apply (f : (X.functionField)ˣ) (x : PrimeDivisor X) :
-    principalDivisor (Additive.ofMul f) x = x.ord (f : X.functionField) := rfl
-
-variable (X) in
-
-noncomputable def principalDivisors : AddSubgroup (WeilDivisor X) :=
-  (principalDivisor (X := X)).range
-
-variable (X) in
-
-abbrev ClassGroup : Type u := WeilDivisor X ⧸ principalDivisors X
 
 end Divisor
 

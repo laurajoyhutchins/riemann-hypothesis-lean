@@ -1,6 +1,59 @@
-import Mathlib
-import Formalism.LocalToGlobal.TorsionIntegrality.FrobeniusFibreCurves.FinalD
-import Formalism.LocalToGlobal.TorsionIntegrality.FrobeniusFibreCurves.StatementE
+module
+
+public import Formalism.LocalToGlobal.TorsionIntegrality.FrobeniusFibreCurves.StatementE
+public import Formalism.FormalGroupLog.FormalGroupLogProofs.ConstantCoeffSubstOfZero
+public import Formalism.LocalToGlobal.TorsionIntegrality.FrobeniusFibreCurves.FinalA
+public import Formalism.LocalToGlobal.TorsionIntegrality.FrobeniusFibreCurves.LogarithmicSubstitution.ConstantCoeffSeriesAtVariable
+public import Formalism.LocalToGlobal.TorsionIntegrality.FrobeniusFibreCurves.LogarithmicSubstitution.InVarAddInVarNeZero
+import Formalism.LocalToGlobal.TorsionIntegrality.FrobeniusFibreCurves.LogarithmicSubstitution.WeierstrassReducedEquations
+public import Formalism.LocalToGlobal.TorsionIntegrality.FrobeniusFibreCurves.LogarithmicSubstitution.WeierstrassSeriesIntegral
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -36,7 +89,7 @@ theorem subst_wOf_mul (e1 : K) (P : PowerSeries K) {l : PowerSeries K}
   have hs : HasSubst l := HasSubst.of_constantCoeff_zero' hl
   have := congrArg (subst l) (wOf_mul e1 P)
   rw [← coe_substAlgHom hs] at this
-  simp only [map_sub, map_mul, map_add, map_one, map_pow] at this
+  simp only [map_sub, map_mul, map_add (f := _), map_one, map_pow] at this
   rw [coe_substAlgHom hs, subst_X hs, subst_C] at this
   exact this
 
@@ -47,7 +100,7 @@ theorem subst_dz_wOf (e1 : K) (P : PowerSeries K) {l : PowerSeries K}
   have hs : HasSubst l := HasSubst.of_constantCoeff_zero' hl
   have := congrArg (subst l) (dz_wOf e1 P)
   rw [← coe_substAlgHom hs] at this
-  simp only [map_sub, map_mul, map_add, map_one, map_pow, map_neg, map_ofNat] at this
+  simp only [map_sub, map_mul, map_add (f := _), map_one, map_pow, map_neg, map_ofNat] at this
   rw [coe_substAlgHom hs, subst_X hs, subst_C] at this
   exact this
 
@@ -57,7 +110,7 @@ theorem wl_mul_g {c0 xT : K} {P l ep : PowerSeries K} (hl : constantCoeff l = 0)
   apply mul_right_cancel₀ (pow_ne_zero 2 hl0)
   unfold gT
   have hw' := subst_wOf_mul (xT + c0) P hl
-  rw [map_add] at hw'
+  rw [map_add (f := _)] at hw'
   linear_combination X ^ 2 * hw' - subst l (wOf (xT + c0) P) * hcv
 
 theorem constantCoeff_gT {ep : PowerSeries K} (xT : K) (hep : constantCoeff ep = 1) :
@@ -84,8 +137,8 @@ theorem wprime_core {c0 a1 a3 xT yT : K} {P l ep : PowerSeries K} (hl : constant
   have hg0 : gT ep xT ≠ 0 :=
     ne_zero_of_constantCoeff (by rw [constantCoeff_gT xT hep]; exact one_ne_zero)
   have hT' : 2 * (C yT : PowerSeries K) + C a1 * C xT + C a3 = 0 := by
-    simp only [← map_ofNat (C (R := K)), ← map_mul, ← map_add]; rw [hT, map_zero]
-  rw [map_add] at hZ
+    simp only [← map_ofNat (C (R := K)), ← map_mul, ← map_add (f := _)]; rw [hT, map_zero]
+  rw [map_add (f := _)] at hZ
   generalize subst l (dz (wOf (xT + c0) P)) = W' at hZ ⊢
   generalize subst l (wOf (xT + c0) P) = W at hWg ⊢
   generalize subst l (dz P) = B at hZ h3
@@ -149,7 +202,7 @@ theorem hsL {l : PowerSeries K} (hl : PowerSeries.constantCoeff l = 0) :
 
 theorem X_ne {ι : Type} (j : ι) : (MvPowerSeries.X j : MvPowerSeries ι K) ≠ 0 := by
   intro h
-  have h2 := congrArg (MvPowerSeries.pderiv K j) h
+  have h2 := congrArg (MvPowerSeries.pderiv (R := K) j) h
   rw [MvPowerSeries.pderiv_X_self, map_zero] at h2
   exact one_ne_zero h2
 
@@ -189,7 +242,7 @@ theorem wadd_law {kap : K} {w l : PowerSeries K} {F : MvPowerSeries (Fin 2) K}
   have hb := hsL hl
   have e := congrArg (MvPowerSeries.subst ![at1 (0 : Fin 2) l, at1 1 l]) h
   rw [← MvPowerSeries.coe_substAlgHom hb] at e
-  simp only [map_sub, map_mul, map_one, map_pow, map_add, map_ofNat] at e
+  simp only [map_sub, map_mul, map_one, map_pow, map_add (f := _), map_ofNat] at e
   rw [MvPowerSeries.coe_substAlgHom hb, MvPowerSeries.subst_C] at e
   simp only [subst_log_at_variable _ _ hl, sub_atS _ hl hF hFl] at e
   exact e
@@ -233,7 +286,5 @@ theorem GCob_of (hW : WAdd) (hP : WPrimeU) : GCob := by
     (subst_wg (MvPowerSeries.constantCoeff_X (0 : Fin 2)) hg)
     (subst_wg (MvPowerSeries.constantCoeff_X (1 : Fin 2)) hg) (subst_wg hL.1 hg)
     (X_ne 0) (X_ne 1)
-
-theorem GCob_of' (hW : WAdd) : GCob := GCob_of hW weierstrass_derivative_unit_holds
 
 end Formalism.L2.Th1.B.GCob

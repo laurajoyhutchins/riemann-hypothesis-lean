@@ -1,5 +1,48 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.NcRealXCC
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.NcRealXCC
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.NcRealXLeb
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.Countable
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -26,7 +69,7 @@ def Φc (x : ∀ p : CBlk r, CSpc ι k p) (i : ι × LsNc5.CIdx r k) : ℝ :=
   | (v, Sum.inr (Sum.inr (Sum.inr a))) => (x (Sum.inr (Sum.inr a)) : ι → ℝ) v
 
 theorem measurable_Φc : Measurable (Φc (ι := ι) (r := r) (k := k)) := by
-  refine measurable_pi_lambda _ fun i => ?_
+  refine Measurable.of_eval fun i => ?_
   rcases i with ⟨v, ((⟨p, t⟩ | ⟨b, t⟩) | (⟨b, j, t⟩ | (⟨p, t⟩ | a)))⟩
   · exact (reim_cont t).measurable.comp ((measurable_pi_apply v).comp
       (measurable_pi_apply (Sum.inl (Sum.inl p) : CBlk r)))
@@ -83,18 +126,18 @@ theorem measurable_Ψc : Measurable (Ψc (ι := ι) (r := r) (k := k)) := by
   have hC : ∀ f g : (ι × LsNc5.CIdx r k → ℝ) → ℝ, Measurable f → Measurable g →
       Measurable fun y => (⟨f y, g y⟩ : ℂ) := fun f g hf hg =>
     Complex.measurableEquivRealProd.symm.measurable.comp (hf.prodMk hg)
-  refine measurable_pi_lambda _ fun p => ?_
+  refine Measurable.of_eval fun p => ?_
   rcases p with ((p | b) | (p | a))
-  · exact measurable_pi_lambda _ fun v => hC _ _ (measurable_pi_apply _) (measurable_pi_apply _)
-  · refine measurable_pi_lambda _ fun v => measurable_pi_lambda _ fun j => ?_
+  · exact Measurable.of_eval fun v => hC _ _ (measurable_pi_apply _) (measurable_pi_apply _)
+  · refine Measurable.of_eval fun v => Measurable.of_eval fun j => ?_
     show Measurable fun y : ι × LsNc5.CIdx r k → ℝ => (if h : j.val < k then (⟨y (v, Sum.inr (Sum.inl (b, ⟨j.val, h⟩, false))),
         y (v, Sum.inr (Sum.inl (b, ⟨j.val, h⟩, true)))⟩ : ℂ)
       else (⟨y (v, Sum.inl (Sum.inr (b, false))), y (v, Sum.inl (Sum.inr (b, true)))⟩ : ℂ))
     split_ifs with h
     · exact hC _ _ (measurable_pi_apply _) (measurable_pi_apply _)
     · exact hC _ _ (measurable_pi_apply _) (measurable_pi_apply _)
-  · exact measurable_pi_lambda _ fun v => hC _ _ (measurable_pi_apply _) (measurable_pi_apply _)
-  · exact measurable_pi_lambda _ fun v => measurable_pi_apply _
+  · exact Measurable.of_eval fun v => hC _ _ (measurable_pi_apply _) (measurable_pi_apply _)
+  · exact Measurable.of_eval fun v => measurable_pi_apply _
 
 end Phi
 

@@ -1,4 +1,57 @@
-import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.UnitaryDensityFieldBis
+module
+
+public import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.UnitaryDensityField
+public import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.LocalDensityEleventh
+public import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.LocalDensitySixth
+import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.StarAlgebraMap
+public import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.UnitaryDensityFieldBis
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField Module
 
@@ -23,7 +76,7 @@ private theorem exists_mem_ideal_form_eq_of_mem_ideal_smul {h : V →ₗ⋆[K] V
     rw [Submodule.coe_smul, ← algebraMap_smul K r (m : V), map_smul, smul_eq_mul, map_mul, ho]
   · obtain ⟨u, hu, hu'⟩ := hx
     obtain ⟨v, hv, hv'⟩ := hy
-    exact ⟨u + v, Ideal.add_mem _ hu hv, by rw [Submodule.coe_add, map_add, hu', hv', map_add]⟩
+    exact ⟨u + v, Ideal.add_mem _ hu hv, by rw [Submodule.coe_add, map_add (f := _), hu', hv', map_add (f := _)]⟩
 
 private theorem exists_mem_extP_pow_form_eq_of_mem_extP_pow_smul (hF : IsFixF K F) {h : V →ₗ⋆[K] V →ₗ[K] K} {L : Submodule (𝓞 K) V}
     (hLi : Formalism.HermitianLatticesTheory.IsIntegralLat h L) (𝔭 : Ideal (𝓞 F)) (k : ℕ) (w x : ↥L)
@@ -38,51 +91,7 @@ private theorem exists_mem_extP_pow_form_eq_of_mem_extP_pow_smul (hF : IsFixF K 
   · obtain ⟨u, hu, hu'⟩ := hx
     obtain ⟨v, hv, hv'⟩ := hy
     exact ⟨u + v, Ideal.add_mem _ hu hv, by
-      rw [Submodule.coe_add, map_add, LinearMap.add_apply, hu', hv', map_add]⟩
-
-theorem nk_iff (hF : IsFixF K F) {h : V →ₗ⋆[K] V →ₗ[K] K} (hs : h.IsSymm) {L : Submodule (𝓞 K) V}
-    (hLi : Formalism.HermitianLatticesTheory.IsIntegralLat h L) {𝔭 : Ideal (𝓞 F)} (h𝔭 : 𝔭.IsMaximal) (k : ℕ) (n : 𝓞 F)
-    (y₀ : ↥L) (n₀ : 𝓞 F) (h₀ : h (y₀ : V) (y₀ : V) = algebraMap F K (n₀ : F)) :
-    (∃ y : ↥L, (Submodule.Quotient.mk y : ↥L ⧸ ((extP K 𝔭) ^ k • ⊤ : Submodule (𝓞 K) ↥L)) =
-        Submodule.Quotient.mk y₀ ∧ CongrP 𝔭 k (h (y : V) (y : V)) (algebraMap F K (n : F))) ↔
-      n₀ - n ∈ 𝔭 ^ k := by
-  have hint : ∀ y : ↥L, ∃ o : 𝓞 K, h (y : V) (y : V) = algebraMap (𝓞 K) K o := fun y =>
-    let ⟨o, ho⟩ := Submodule.mem_one.mp (hLi (y : V) y.2 (y : V) y.2)
-    ⟨o, ho.symm⟩
-  have hn : ∀ m : 𝓞 F, algebraMap F K (m : F) = algebraMap (𝓞 K) K (ι m) := fun m => rfl
-  obtain ⟨o₀, ho₀⟩ := hint y₀
-  have ho₀' : o₀ = ι n₀ := IsFractionRing.injective (𝓞 K) K (by rw [← ho₀, h₀, hn])
-  have hcong : ∀ y : ↥L, (Submodule.Quotient.mk y : ↥L ⧸ ((extP K 𝔭) ^ k • ⊤ : Submodule (𝓞 K) ↥L)) =
-      Submodule.Quotient.mk y₀ → ∀ o : 𝓞 K, h (y : V) (y : V) = algebraMap (𝓞 K) K o →
-      Ideal.Quotient.mk (extP K 𝔭 ^ k) o = Ideal.Quotient.mk (extP K 𝔭 ^ k) o₀ := by
-    intro y hy o ho
-    rw [Submodule.Quotient.eq] at hy
-    obtain ⟨u1, hu1, he1⟩ := exists_mem_ideal_form_eq_of_mem_ideal_smul hLi (extP K 𝔭 ^ k) y₀ (y - y₀) hy
-    obtain ⟨u2, hu2, he2⟩ := exists_mem_extP_pow_form_eq_of_mem_extP_pow_smul hF hLi 𝔭 k y₀ (y - y₀) hy
-    obtain ⟨u3, hu3, he3⟩ := exists_mem_ideal_form_eq_of_mem_ideal_smul hLi (extP K 𝔭 ^ k) (y - y₀) (y - y₀) hy
-    have hyx : y = y₀ + (y - y₀) := by abel
-    have hsum : o = o₀ + u1 + u2 + u3 := by
-      apply IsFractionRing.injective (𝓞 K) K
-      rw [← ho, hyx]
-      simp only [Submodule.coe_add, map_add, LinearMap.add_apply]
-      rw [he1, he2, he3, ← ho₀]
-      ring
-    rw [Ideal.Quotient.eq, hsum, show o₀ + u1 + u2 + u3 - o₀ = u1 + u2 + u3 by ring]
-    exact Ideal.add_mem _ (Ideal.add_mem _ hu1 hu2) hu3
-  have key : ∀ o : 𝓞 K, Ideal.Quotient.mk (extP K 𝔭 ^ k) o = Ideal.Quotient.mk (extP K 𝔭 ^ k) o₀ →
-      (CongrP 𝔭 k (algebraMap (𝓞 K) K o) (algebraMap F K (n : F)) ↔ n₀ - n ∈ 𝔭 ^ k) := by
-    intro o hoo
-    rw [hn, integralBasisSpans.congrP_int h𝔭, hoo, ho₀', Ideal.Quotient.eq, ← map_sub,
-      ← MeanB.comap_extP_pow (K := K) 𝔭 k, Ideal.mem_comap]
-  constructor
-  · rintro ⟨y, hy, hc⟩
-    obtain ⟨o, ho⟩ := hint y
-    rw [ho] at hc
-    exact (key o (hcong y hy o ho)).mp hc
-  · intro hmem
-    refine ⟨y₀, rfl, ?_⟩
-    rw [ho₀]
-    exact (key o₀ rfl).mpr hmem
+      rw [Submodule.coe_add, map_add (f := _), LinearMap.add_apply, hu', hv', map_add (f := _)]⟩
 
 section Frame
 
@@ -101,6 +110,7 @@ variable {z g}
 theorem form_right (hzo : ∀ i j, i ≠ j → h (z i : V) (z j : V) = 0)
     (hzg : ∀ i, h (z i : V) (z i : V) = algebraMap (𝓞 K) K (g i)) (j : Fin m) (c : Fin m → 𝓞 K) :
     h (z j : V) (lin z c : V) = algebraMap (𝓞 K) K (c j * g j) := by
+
   rw [coe_lin, map_sum, Finset.sum_eq_single j]
   · rw [← algebraMap_smul K (c j) (z j : V), map_smul, hzg, smul_eq_mul, map_mul]
   · intro i _ hij
@@ -111,6 +121,7 @@ theorem form_lin (hzo : ∀ i j, i ≠ j → h (z i : V) (z j : V) = 0)
     (hzg : ∀ i, h (z i : V) (z i : V) = algebraMap (𝓞 K) K (g i)) (c : Fin m → 𝓞 K) :
     h (lin z c : V) (lin z c : V) = algebraMap (𝓞 K) K (∑ i, conjO K (c i) * c i * g i) := by
   nth_rewrite 1 [coe_lin]
+
   rw [map_sum, LinearMap.sum_apply, map_sum]
   refine Finset.sum_congr rfl fun i _ => ?_
   rw [← algebraMap_smul K (c i) (z i : V), LinearMap.map_smulₛₗ, LinearMap.smul_apply,
@@ -135,7 +146,7 @@ theorem mk_lin_eq_iff (hLi : Formalism.HermitianLatticesTheory.IsIntegralLat h L
         rw [Submodule.coe_smul, ← algebraMap_smul K r (m : V), map_smul, smul_eq_mul, map_mul, ho]
       · obtain ⟨u, hu, hu'⟩ := hx
         obtain ⟨w, hw, hw'⟩ := hy
-        exact ⟨u + w, Ideal.add_mem _ hu hw, by rw [Submodule.coe_add, map_add, hu', hw', map_add]⟩
+        exact ⟨u + w, Ideal.add_mem _ hu hw, by rw [Submodule.coe_add, map_add (f := _), hu', hw', map_add (f := _)]⟩
     obtain ⟨y, hy, hyeq⟩ := key _ hmem
     rw [form_right hzo hzg] at hyeq
     have h1 : (a - b) i * g i ∈ extP K 𝔭 ^ k := by
@@ -167,7 +178,7 @@ private theorem quotient_norm_congr_of_quotient_eq (hF : IsFixF K F) {h : V →�
   have hsum : o = o₀ + u1 + u2 + u3 := by
     apply IsFractionRing.injective (𝓞 K) K
     rw [← ho, hyx]
-    simp only [Submodule.coe_add, map_add, LinearMap.add_apply]
+    simp only [Submodule.coe_add, map_add (f := _), LinearMap.add_apply]
     rw [he1, he2, he3, ← ho₀]
     ring
   rw [Ideal.Quotient.eq, hsum, show o₀ + u1 + u2 + u3 - o₀ = u1 + u2 + u3 by ring]
@@ -175,7 +186,7 @@ private theorem quotient_norm_congr_of_quotient_eq (hF : IsFixF K F) {h : V →�
 
 theorem nkCount_eq_cnt (hK : Formalism.HermitianLatticesTheory.IsCMUnram K) (hF : IsFixF K F)
     {h : V →ₗ⋆[K] V →ₗ[K] K} (hs : h.IsSymm) (hd : IsTotPosDef h) {L : Submodule (𝓞 K) V}
-    (hL : Submodule.IsLattice K L) (hLi : Formalism.HermitianLatticesTheory.IsIntegralLat h L) {𝔭 : Ideal (𝓞 F)}
+    (hL : Submodule.IsFullLattice K L) (hLi : Formalism.HermitianLatticesTheory.IsIntegralLat h L) {𝔭 : Ideal (𝓞 F)}
     (h𝔭 : 𝔭.IsMaximal) (hv : vd h L 𝔭 = 0) {k : ℕ} (hk : 1 ≤ k) (n : 𝓞 F) :
     nkCount h L 𝔭 k n = cnt hF 𝔭 k (finrank K V) (ι n) := by
   obtain ⟨z, g, hzo, hzg, hg1⟩ := exists_frame hK hF hs hd hL hLi h𝔭 hv hk
@@ -207,6 +218,7 @@ theorem nkCount_eq_cnt (hK : Formalism.HermitianLatticesTheory.IsCMUnram K) (hF 
   have hsum : ∀ x, Ideal.Quotient.mk (extP K 𝔭 ^ k) (∑ i, conjO K (lift x i) * lift x i * g i) =
       ∑ i, sg hF 𝔭 k (x i) * x i := by
     intro x
+
     rw [map_sum]
     refine Finset.sum_congr rfl fun i _ => ?_
     have hg : Ideal.Quotient.mk (extP K 𝔭 ^ k) (g i) = 1 := by

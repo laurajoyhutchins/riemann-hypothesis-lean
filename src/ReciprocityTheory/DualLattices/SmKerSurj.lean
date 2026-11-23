@@ -1,4 +1,50 @@
-import ReciprocityTheory.DualLattices.NilSurjOfSqZero
+module
+
+public import ReciprocityTheory.DualLattices.NilSurjOfSqZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.DualLattices.IsFibreSq
+
+@[expose] public section
 
 noncomputable section
 
@@ -52,7 +98,7 @@ lemma ell_add (r r' : (R : Type u)) :
     ell π ξ hsurj (r + r') = ell π ξ hsurj r + ell π ξ hsurj r' := by
   obtain ⟨a, rfl⟩ := hsurj r
   obtain ⟨a', rfl⟩ := hsurj r'
-  rw [← map_add, ell_spec hsurj hker hsq, ell_spec hsurj hker hsq, ell_spec hsurj hker hsq, add_mul]
+  rw [← map_add (f := _), ell_spec hsurj hker hsq, ell_spec hsurj hker hsq, ell_spec hsurj hker hsq, add_mul]
 
 include hker hsq in
 lemma ell_mul (a : (R' : Type u)) (r : (R : Type u)) :
@@ -109,14 +155,14 @@ def sm : LHom (FP π Dp.π) R' :=
   ⟨smAlg π Dp ξ hsurj hker hsq, ⟨fun x hx => fp_isUnit π Dp.π x (π.2.map_nonunit _ (by
     convert hx.map π.1 using 1
     show _ = π.1 (x.1.1 + ell π ξ hsurj (Dp.κ x.1.2))
-    rw [map_add, ell_π hsurj hker, add_zero]; rfl))⟩⟩
+    rw [map_add (f := _), ell_π hsurj hker, add_zero]; rfl))⟩⟩
 
 lemma π_comp_sm : π.comp (sm π Dp ξ hsurj hker hsq) = π.comp (FP.p₁ π Dp.π) := by
   apply Subtype.ext
   apply AlgHom.ext
   intro x
   show π.1 (x.1.1 + ell π ξ hsurj (Dp.κ x.1.2)) = π.1 x.1.1
-  rw [map_add, ell_π hsurj hker, add_zero]
+  rw [map_add (f := _), ell_π hsurj hker, add_zero]
 
 end
 
@@ -176,7 +222,7 @@ lemma sm_ker : ∀ a ∈ (FP.p₁ π Dp.π).ker, (sm π Dp ξ hsurj hker hsq).1.
   intro a ha
   have ha0 : a.1.1 = 0 := ha
   show π.1 (a.1.1 + ell π ξ hsurj (Dp.κ a.1.2)) = 0
-  rw [map_add, ell_π hsurj hker, ha0, map_zero, add_zero]
+  rw [map_add (f := _), ell_π hsurj hker, ha0, map_zero, add_zero]
 
 lemma sm_ker_surj :
     Function.Surjective ((sm π Dp ξ hsurj hker hsq).1.toLinearMap.restrict

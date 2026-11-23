@@ -1,4 +1,50 @@
-import Mathlib
+module
+
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.Analysis.InnerProductSpace.Basic
+public import Mathlib.MeasureTheory.Group.FundamentalDomain
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MeasureTheory
 
@@ -8,8 +54,8 @@ variable {H : Type} [Group H] [TopologicalSpace H] [IsTopologicalGroup H] [Measu
   [BorelSpace H] (μ : Measure H) [μ.IsMulLeftInvariant] [μ.IsMulRightInvariant]
   (Γ : Subgroup H) [Countable Γ] (𝓕 : Set H)
 
-omit [μ.IsMulLeftInvariant] [Countable Γ] in
 
+omit [μ.IsMulLeftInvariant] [Countable Γ] in
 theorem isFundamentalDomain_mul_right (h𝓕 : IsFundamentalDomain Γ 𝓕 μ) (y : H) :
     IsFundamentalDomain Γ ((fun h => h * y) ⁻¹' 𝓕) μ :=
   h𝓕.preimage_of_equiv (measurePreserving_mul_right μ y).quasiMeasurePreserving
@@ -42,8 +88,8 @@ theorem integrableOn_mul_right (h𝓕 : IsFundamentalDomain Γ 𝓕 μ) (u : H �
   exact ((isFundamentalDomain_mul_right μ Γ 𝓕 h𝓕 y⁻¹).integrableOn_iff h𝓕
     (fun g h => hu g g.2 h)).2 hi
 
-omit [Group H] [IsTopologicalGroup H] [μ.IsMulLeftInvariant] [μ.IsMulRightInvariant] in
 
+omit [Group H] [IsTopologicalGroup H] [μ.IsMulLeftInvariant] [μ.IsMulRightInvariant] in
 theorem integrableOn_star_mul (F F' : H → ℂ) (hF : Continuous F) (hF' : Continuous F')
     (h1 : IntegrableOn (fun h => star (F h) * F h) 𝓕 μ)
     (h2 : IntegrableOn (fun h => star (F' h) * F' h) 𝓕 μ) :
@@ -55,8 +101,8 @@ theorem integrableOn_star_mul (F F' : H → ℂ) (hF : Continuous F) (hF' : Cont
 
 end GlobalTheory.DoubleCosetAdjoint
 
-open GlobalTheory.DoubleCosetAdjoint in
 
+open GlobalTheory.DoubleCosetAdjoint in
 theorem GlobalTheory.doubleCosetSum_adjoint : ∀ {H : Type} [Group H] [TopologicalSpace H] [IsTopologicalGroup H] [MeasurableSpace H] [BorelSpace H] (μ : Measure H) [μ.IsMulLeftInvariant] [μ.IsMulRightInvariant] (Γ K : Subgroup H) [Countable Γ] (𝓕 : Set H) (x : H) (A A' : Finset H) (F F' : H → ℂ), IsFundamentalDomain Γ 𝓕 μ → (∀ a ∈ A, ∃ k₁ ∈ K, ∃ k₂ ∈ K, a = k₁ * x * k₂) → (∀ a ∈ A', ∃ k₁ ∈ K, ∃ k₂ ∈ K, a = k₁ * x⁻¹ * k₂) → A.card = A'.card → Continuous F → Continuous F' → (∀ γ ∈ Γ, ∀ h, F (γ * h) = F h) → (∀ γ ∈ Γ, ∀ h, F' (γ * h) = F' h) → (∀ k ∈ K, ∀ h, F (h * k) = F h) → (∀ k ∈ K, ∀ h, F' (h * k) = F' h) → IntegrableOn (fun h => star (F h) * F h) 𝓕 μ → IntegrableOn (fun h => star (F' h) * F' h) 𝓕 μ → ∫ h in 𝓕, star (∑ a ∈ A, F (h * a)) * F' h ∂μ = ∫ h in 𝓕, star (F h) * ∑ a ∈ A', F' (h * a) ∂μ := by
   intro H _ _ _ _ _ μ _ _ Γ K _ 𝓕 x A A' F F' h𝓕 hA hA' hc cF cF' lF lF' rF rF' iF iF'
   set u : H → ℂ := fun h => star (F (h * x)) * F' h with hu
@@ -65,7 +111,7 @@ theorem GlobalTheory.doubleCosetSum_adjoint : ∀ {H : Type} [Group H] [Topologi
     simp only [hu, mul_assoc, lF γ hγ, lF' γ hγ]
   have iu : IntegrableOn u 𝓕 μ := by
     refine integrableOn_star_mul μ 𝓕 (fun h => F (h * x)) F'
-      (cF.comp (continuous_mul_right x)) cF' ?_ iF'
+      (cF.comp (continuous_mul_const x)) cF' ?_ iF'
     exact integrableOn_mul_right μ Γ 𝓕 h𝓕 (fun h => star (F h) * F h)
       (fun γ hγ h => by simp only [lF γ hγ]) x iF
   have eA : ∀ a ∈ A, ∃ y, ∀ h, star (F (h * a)) * F' h = u (h * y) := by
@@ -81,7 +127,7 @@ theorem GlobalTheory.doubleCosetSum_adjoint : ∀ {H : Type} [Group H] [Topologi
   have key : ∀ (B : Finset H) (t : H → H → ℂ), (∀ a ∈ B, ∃ y, ∀ h, t a h = u (h * y)) →
       ∫ h in 𝓕, ∑ a ∈ B, t a h ∂μ = B.card • ∫ h in 𝓕, u h ∂μ := by
     intro B t ht
-    rw [integral_finset_sum, ← Finset.sum_const]
+    rw [MeasureTheory.integral_finsetSum, ← Finset.sum_const]
     · refine Finset.sum_congr rfl fun a ha => ?_
       obtain ⟨y, hy⟩ := ht a ha
       simp only [hy]

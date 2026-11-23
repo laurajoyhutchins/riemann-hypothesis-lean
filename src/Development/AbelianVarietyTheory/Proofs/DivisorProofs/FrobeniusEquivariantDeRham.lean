@@ -1,8 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FrobPullHomExtAffine
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsDeRhamSheafIffAlt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Definitions.Divisors.IsEquivariantToBidual
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsDeRhamSheaf
+import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.IsAdditiveOfUniversal
+
+@[expose] public section
+
 open CategoryTheory AlgebraicGeometry Limits MonoidalCategory CartesianMonoidalCategory
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor
-open GlobalTheory GlobalTheory.VB GlobalTheory.LieVB GlobalTheory.DeRham GlobalTheory.DeRhamSheaf GlobalTheory.AbDual GlobalTheory.Cris GlobalTheory.AbDatum
+open GlobalTheory GlobalTheory.VB GlobalTheory.LieVB GlobalTheory.DeRham GlobalTheory.DeRhamSheaf GlobalTheory.AbDual GlobalTheory.Cris
 open scoped CategoryTheory.Obj
 attribute [local instance] Over.cartesianMonoidalCategory
 
@@ -21,21 +64,5 @@ theorem frobDR_primPull (p : ℕ) [Fact p.Prime] {R : Type} [CommRing R] (hR : (
   exact (GrpMor.pull_pull (homMor (dp0 R) (𝟙 _) f) (frobMor p R hR A (cast_left p R hR A)) k (fun _ ↦ rfl)
     (GlobalTheory.VB.frob_naturality p _ f.left _) c).trans
     (GrpMor.pull_pull (frobMor p R hR B (cast_left p R hR B)) (homMor (dp0 R) (𝟙 _) f) k (fun _ ↦ rfl) rfl c).symm
-
-theorem linFrob_isEquivariant : ∀ (O : Type) [CommRing O] (T : Scheme.{0}) (A : Over T) [GrpObj A] (i : OAct O A) (H : T.Modules)
-    (e : ∀ (V : T.Opens) (hV : IsAffineOpen V), Γ(H, V) ≃ₗ[Γ(T, V)] primDR (onAff A hV))
-    (p : ℕ) [Fact p.Prime] (h0 : (p : Γ(T, ⊤)) = 0) (ρ : O →+* End H) (Ψ : (frobPull p h0).obj H ⟶ H),
-    IsDRAct e i ρ → IsLinFrob e p h0 Ψ → IsEquivariant (pullAct ρ (frob T p h0)) ρ Ψ := by
-  intro O _ T A _ i H e p _ h0 ρ Ψ hρ hΨ x
-  refine frobPull_hom_ext_affine p h0 fun V hV s ↦ (e V hV).injective ?_
-  have e1 : (VB.act (pullAct ρ (frob T p h0)) x ≫ Ψ).app V (QCoh.pullbackSections (frob T p h0) H (le_refl V) s) =
-      Ψ.app V (QCoh.pullbackSections (frob T p h0) H (le_refl V) ((VB.act ρ x).app V s)) :=
-    congrArg (Ψ.app V) (QCoh.pullback_map_app_pullbackSections (frob T p h0) (VB.act ρ x) (le_refl V) s)
-  have e2 : (Ψ ≫ VB.act ρ x).app V (QCoh.pullbackSections (frob T p h0) H (le_refl V) s) =
-      (VB.act ρ x).app V (Ψ.app V (QCoh.pullbackSections (frob T p h0) H (le_refl V) s)) := rfl
-  refine (congrArg (e V hV) e1).trans (Eq.trans ?_ (congrArg (e V hV) e2).symm)
-  rw [hΨ V hV, hρ x V hV, hρ x V hV, hΨ V hV]
-  haveI := i.hom x
-  exact frobDR_primPull p _ (A := onAff A hV) (B := onAff A hV) ((Over.pullback hV.fromSpec).map (i.act x)) _
 
 end GlobalTheory.AbDatum

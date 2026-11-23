@@ -1,6 +1,53 @@
-import Mathlib
-import GroundTheory.ArithmeticGeometry.SchemeCohomology.SheafHOver
-import GroundTheory.ArithmeticGeometry.SchemeCohomology.CechSeparated
+module
+
+public import GroundTheory.ArithmeticGeometry.SchemeCohomology.SheafHOver
+public import GroundTheory.ArithmeticGeometry.SchemeCohomology.CechSeparated
+public import Mathlib.CategoryTheory.Preadditive.Injective.Preserves
+public import Mathlib.Algebra.Homology.DerivedCategory.Ext.MapBijective
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.Abelian.GrothendieckCategory.EnoughInjectives
+import Mathlib.CategoryTheory.Sites.LocalSite
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Arith.SchemeCoh
@@ -36,12 +83,20 @@ def constantSheafCongrIso :
 
 variable [HasExt.{w'} (Sheaf J AddCommGrpCat.{v})] [HasExt.{w'} (Sheaf K AddCommGrpCat.{v})]
 
-instance sheafCongrAb_functor_additive : (sheafCongrAb J K e).functor.Additive :=
-  Functor.additive_of_preserves_binary_products _
+instance sheafCongrAb_functor_additive : (sheafCongrAb J K e).functor.Additive := by
+  letI : (sheafCongrAb J K e).functor.IsLeftAdjoint :=
+    (sheafCongrAb J K e).toAdjunction.isLeftAdjoint
+  letI : (sheafCongrAb J K e).functor.PreservesZeroMorphisms :=
+    Functor.preservesZeroMorphisms_of_isLeftAdjoint _
+  exact Functor.additive_of_preserves_binary_products _
 
 instance sheafCongrAb_functor_preservesInjectiveObjects :
-    (sheafCongrAb J K e).functor.PreservesInjectiveObjects :=
-  Functor.preservesInjectiveObjects_of_adjunction_of_preservesMonomorphisms
+    (sheafCongrAb J K e).functor.PreservesInjectiveObjects := by
+  letI : PreservesLimitsOfShape WalkingCospan (sheafCongrAb J K e).symm.functor :=
+    (sheafCongrAb J K e).toAdjunction.rightAdjoint_preservesLimits.preservesLimitsOfShape
+  letI : (sheafCongrAb J K e).symm.functor.PreservesMonomorphisms :=
+    CategoryTheory.preservesMonomorphisms_of_preservesLimitsOfShape _
+  exact Functor.preservesInjectiveObjects_of_adjunction_of_preservesMonomorphisms
     (sheafCongrAb J K e).symm.toAdjunction
 
 def sheafHCongr [EnoughInjectives (Sheaf J AddCommGrpCat.{v})] (G : Sheaf J AddCommGrpCat.{v})
@@ -62,16 +117,7 @@ instance isDenseSubsite_overEquivalence_inverse :
       ((Opens.grothendieckTopology X.toTopCat).over U) :=
   U.instIsDenseSubsiteSubtypeMemOverGrothendieckTopologyOverInverseOverEquivalence
 
-lemma overEquivalence_inverse_left (W : U.toScheme.Opens) :
-    (U.overEquivalence.inverse.obj W).left = U.ι ''ᵁ W := by
-  ext x
-  constructor
-  · rintro ⟨y, hy, rfl⟩
-    exact ⟨y, hy, rfl⟩
-  · rintro ⟨y, hy, rfl⟩
-    exact ⟨y, hy, rfl⟩
 
-set_option maxHeartbeats 4000000 in
 
 def restrictAbIso (F : X.Modules) :
     (sheafCongrAb ((Opens.grothendieckTopology X.toTopCat).over U)

@@ -1,7 +1,48 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.CrystallinePeriodRings.ExistsMapEqOfPowMul
-import Development.WeilBound.CoreStatements.CrystallinePeriodRings.PhiGalCris
-import GroundTheory.PAdicHodge.GalSmulAlgebraMapPadicPlus
+module
+
+public import Development.WeilBound.CoreStatements.CrystallinePeriodRings.ExistsMapEqOfPowMul
+public import GroundTheory.PAdicHodge.BCrisRegular
+public import GroundTheory.PAdicHodge.GalSmulAlgebraMapPadicPlus
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -41,9 +82,6 @@ section Restrict
 
 variable {p : ℕ} [Fact p.Prime] {K L : IntermediateField ℚ_[p] (PadicAlgCl p)}
 
-local notation "𝔹" => BDeRhamPlus (normInteger ℂ_[p]) p
-local notation "𝔹dR" => BDeRham (normInteger ℂ_[p]) p
-
 theorem inv_galCp_congr (σ : Gal(PadicAlgCl p/K)) (τ : Gal(PadicAlgCl p/L)) (h : ∀ x, σ x = τ x) :
     (galCp σ : ℂ_[p] →+* ℂ_[p]) = (galCp τ : ℂ_[p] →+* ℂ_[p]) :=
   RingHom.ext (congrFun (eq_galCp_of_continuous τ (galCp σ) (continuous_galCp σ)
@@ -65,7 +103,8 @@ theorem inv_galQuot_congr (σ : Gal(PadicAlgCl p/K)) (τ : Gal(PadicAlgCl p/L)) 
     simp only [RingHom.comp_apply, galQuot_mk, inv_galAway_congr σ τ h])
 
 theorem inv_galBdRHom_congr (σ : Gal(PadicAlgCl p/K)) (τ : Gal(PadicAlgCl p/L))
-    (h : ∀ x, σ x = τ x) (x : 𝔹) : galBdRHom σ x = galBdRHom τ x :=
+    (h : ∀ x, σ x = τ x) (x : BDeRhamPlus (normInteger ℂ_[p]) p) :
+    galBdRHom σ x = galBdRHom τ x :=
   IsPerfectoidField.evalB_ext fun n => by
     rw [evalB_galBdRHom, evalB_galBdRHom, inv_galQuot_congr σ τ h]
 
@@ -104,8 +143,8 @@ theorem inv_cD_galCris (g : GQ l) (x : ACris.ACris ℂ_[l] l) :
 theorem inv_ιCD_σB (g : GQ l) (b : Per6.Bcris l) : ιCD l (Per6.σB g b) = Per6.σD g (ιCD l b) :=
   inv_equivariant (ιCD_fac l) (cB_isFrac l) (σB_comp g) (Per6.σD g) (inv_cD_galCris g) b
 
-variable (l) in
 
+variable (l) in
 def invPlusD : ACris.BCrisPlus ℂ_[l] l →+* Per6.BdR l :=
   (algebraMap (Per6.BdRp l) (Per6.BdR l)).comp (ACris.iotaPlus ℂ_[l] l)
 
@@ -118,7 +157,7 @@ theorem inv_exists_plus (b : Per6.Bcris l) : ∃ (n : ℕ) (y : ACris.BCrisPlus 
   obtain ⟨m, n, y, h⟩ := bcris_surj b
   exact ⟨n, inv_away_range (invPlusD l) (cD l) invPlusD_algebraMap (inv_map_frac (ιCD_fac l) h)⟩
 
-set_option maxHeartbeats 1600000 in
+
 theorem inv_exists_iotaB {ε : PreTilt (normInteger ℂ_[l]) l} (hε : PreTilt.untilt ε = 1)
     (hζ : PreTilt.untilt ((_root_.frobeniusEquiv (PreTilt (normInteger ℂ_[l]) l) l).symm ε) ≠ 1)
     {n : ℕ} {y : ACris.BCrisPlus ℂ_[l] l} {z : Per6.BdR l}
@@ -127,7 +166,7 @@ theorem inv_exists_iotaB {ε : PreTilt (normInteger ℂ_[l]) l} (hε : PreTilt.u
   inv_away_range (ACris.iotaB hε hζ) (invPlusD l) (ACris.iotaB_algebraMap hε hζ)
     (h.trans (congrArg (· ^ n * z) (invPlusD_algebraMap (ACris.periodT hε)).symm))
 
-set_option maxHeartbeats 1600000 in
+
 theorem inv_mem_Kur {b : Per6.Bcris l} {c : Om l} (h : oD l c = ιCD l b) : c ∈ MaximalUnramifiedExtension l := by
   obtain ⟨n, y, hy⟩ := inv_exists_plus b
   rw [← h] at hy

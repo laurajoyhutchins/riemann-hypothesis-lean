@@ -1,13 +1,67 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.NormPhiHatIndPhi
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ThetaRulesExistAndCusp
-import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.ThetaGeneratorPointwiseBoundOrthonormalFrame
-import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.IntegralityBoundOfFamilyContainingScaledThetaRul
-import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.ExistsBlockProductMemIntegralHarmonic
-import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.SumLeFinsumOfSurjectsOntoFinset
-import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.ExistsIsNabUncond
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.UnifOfSpaceEq
+public import Development.AbelianVarietyTheory.Definitions.Foundations.IsProbabilityMeasureMuPart
+public import Development.AbelianVarietyTheory.Definitions.ThetaValues.IsBlockProd
+public import Development.AbelianVarietyTheory.Definitions.TorusSections.IsTorusOf
+public import Formalism.LocalToGlobal.ProjectiveLattices.ThGerm
+public import Formalism.SharpRestriction.CuspSpanNormBounds.BesselShellMomentBounds
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.CardLatticeQuotientHalfLevel
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.ExistsBlockProductMemIntegralHarmonic
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.ExistsOrthoFrame
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.NegLogSqrtLeOfJbound
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.SumLeFinsumOfSurjectsOntoFinset
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.ThetaGeneratorPointwiseBoundOrthonormalFrame
+import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.ThetaRuleExistsAndEval
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.UnitaryDatumNumbersForSupBounds
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FirstMinAtHalfMax
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.NormPhiHatIndPhi
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SumWeightSpreadLeExponentNormAdd
+import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.ChartIndependenceUnconditional
+public import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.ExistsIsNabUncond
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsTotallyComplexExt
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.ThInCuspCusp
+public import Formalism.LocalToGlobal.ProjectiveLattices.ContDiffAtOfDiff
+import Formalism.LocalToGlobal.ProjectiveLattices.FreeBridge
 import Formalism.LocalToGlobal.ProjectiveLattices.HostSize
-import Formalism.LocalToGlobal.ProjectiveLattices.ContDiffAtOfDiff
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.ArakelovInstances.FirstMinimumInvariantContinuousPos
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.MinimumGrowthBounds
+
+@[expose] public section
 
 open NumberField Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions Formalism.L2.Theta Formalism.L2.Pj ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.FD GlobalTheory.AllWt GlobalTheory.LevGeo GlobalTheory.RawThetaSup GlobalTheory.BlockTh
 
@@ -21,7 +75,7 @@ variable {D : D7} {j : ℕ} {H : ReciprocityTheory.ChartRestriction.G.Geo.Tor.Ho
   {Xo : Moduli Dw l} {c : Coeff l} {U : ∀ σ : c.F →+* ℂ, Unf Xo c σ D.R.r}
   {dict : ∀ σ : c.F →+* ℂ, GA D (D.sp.W j) → Σ k, Frame ((U σ).X k).Ψ D.R.r}
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem theta_sup_le (hLw : Laws D j Xo c U dict) {σ : c.F →+* ℂ} (hσ : GoodEmb c σ) {a : (D.host.E →+* ℂ) × ℕ → ℕ} {n : ℕ}
     (hDom : Dom a n) [StarRing (𝓞 D.host.E)] {nab : NabV Xo c} (hnab : IsNab Xo c nab) {xx : Fin n → Dw.La}
@@ -129,7 +183,7 @@ theorem exists_large {ι : Type} [Fintype ι] [Nonempty ι] (u : ι → ℝ) (hu
   rw [neg_add, Real.exp_add, Real.exp_neg ((d + N) * _), h4, mul_inv_le_iff₀' (by positivity)]
   exact h3.trans h2
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem theta_lower (hLw : Laws D j Xo c U dict) {σ : c.F →+* ℂ} (hσ : GoodEmb c σ) {a : (D.host.E →+* ℂ) × ℕ → ℕ} {n : ℕ}
     (hDom : Dom a n) [StarRing (𝓞 D.host.E)] {nab : NabV Xo c} (hnab : IsNab Xo c nab) (α : 𝓞 D.host.E)
@@ -246,7 +300,7 @@ theorem loss_le {b φ d N lM z : ℝ} (hb : 1000 ≤ b) (hφ : b ^ 14 ≤ φ) (h
   have h8 : 0 ≤ b ^ 6 := by positivity
   nlinarith
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem core_ratio (hLw : Laws D j Xo c U dict) (α : 𝓞 D.host.E) (hα : α * H.bar α = (l.M : 𝓞 D.host.E))
     (hMb : l.Mb = Ideal.span {H.bar α}) {a : (D.host.E →+* ℂ) × ℕ → ℕ} {n : ℕ} (hDom : Dom a n) (hLP : LastPos Dw a)

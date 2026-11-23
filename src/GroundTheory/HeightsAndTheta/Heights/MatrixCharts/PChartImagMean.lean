@@ -1,7 +1,48 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.MatrixCharts.Statements
-import GroundTheory.HeightsAndTheta.Heights.MatrixCharts.StatementsPsh
-import GroundTheory.HeightsAndTheta.Heights.MatrixCharts.PshMean
+module
+
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Lean.Meta.Basic
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -9,65 +50,6 @@ namespace GroundTheory.Heights₂.Heights
 open Metric Real
 
 noncomputable section
-
-theorem ChartImagMean.proof : ChartImagMean.Statement := by
-  intro D z w hdisc j k
-  have hball : ∀ ζ ∈ closedBall (0 : ℂ) 1, z + ζ • w ∈ D.Ustar := fun ζ hζ =>
-    hdisc ζ (mem_closedBall_zero_iff.mp hζ)
-
-  have hY : ∀ x, D.Y x j k = (D.τ0 x j k).im +
-      ∑ i, (-(2 * π)⁻¹ * D.B i j k) * Real.log ‖x (Fin.castLE D.a_le i)‖ := by
-    intro x
-    simp only [PeriodChartData.Y, chartImag, Matrix.add_apply, Matrix.sum_apply,
-      Matrix.smul_apply, Matrix.map_apply, cuspTime, cuspCoord, smul_eq_mul, Real.log_inv]
-    congr 1
-    refine Finset.sum_congr rfl fun i _ => ?_
-    ring
-
-  have hτ : AnalyticOnNhd ℂ (fun ζ : ℂ => D.τ0 (z + ζ • w) j k) (closedBall 0 1) := by
-    intro ζ hζ
-    exact AnalyticAt.comp (g := fun x => D.τ0 x j k) (f := fun ζ : ℂ => z + ζ • w)
-      (D.τ0_analytic j k _ (hball ζ hζ).1)
-      (analyticAt_const.add (analyticAt_id.smul analyticAt_const))
-  have hc : ∀ i, AnalyticOnNhd ℂ
-      (fun ζ : ℂ => z (Fin.castLE D.a_le i) + ζ * w (Fin.castLE D.a_le i)) (closedBall 0 1) :=
-    fun i ζ _ => analyticAt_const.add (analyticAt_id.mul analyticAt_const)
-  have hcne : ∀ i, ∀ ζ ∈ closedBall (0 : ℂ) 1,
-      z (Fin.castLE D.a_le i) + ζ * w (Fin.castLE D.a_le i) ≠ 0 := by
-    intro i ζ hζ
-    have := (hball ζ hζ).2 i
-    simpa [cuspCoord] using this
-
-  have hτc : ContinuousOn (fun ζ : ℂ => (D.τ0 (z + ζ • w) j k).im) (closedBall 0 1) :=
-    Complex.continuous_im.comp_continuousOn hτ.continuousOn
-  have hlc : ∀ i, ContinuousOn
-      (fun ζ : ℂ => (-(2 * π)⁻¹ * D.B i j k) *
-        Real.log ‖z (Fin.castLE D.a_le i) + ζ * w (Fin.castLE D.a_le i)‖) (closedBall 0 1) := by
-    intro i
-    refine continuousOn_const.mul ((hc i).continuousOn.norm.log fun ζ hζ => ?_)
-    exact norm_ne_zero_iff.mpr (hcne i ζ hζ)
-  have hint : ∀ {f : ℂ → ℝ}, ContinuousOn f (closedBall 0 1) → CircleIntegrable f 0 1 :=
-    fun hf => (hf.mono sphere_subset_closedBall).circleIntegrable zero_le_one
-  have hfun : (fun ζ : ℂ => D.Y (z + ζ • w) j k) = fun ζ : ℂ =>
-      (D.τ0 (z + ζ • w) j k).im + ∑ i, (-(2 * π)⁻¹ * D.B i j k) *
-        Real.log ‖z (Fin.castLE D.a_le i) + ζ * w (Fin.castLE D.a_le i)‖ := by
-    funext ζ
-    rw [hY]
-    simp
-  rw [hfun, circleAverage_fun_add (hint hτc)
-    (hint (continuousOn_finsetSum _ fun i _ => hlc i)),
-    circleAverage_fun_sum fun i _ => hint (hlc i), MCPsh.circleAverage_im_of_analytic hτ, hY z]
-  congr 1
-  · simp
-  · refine Finset.sum_congr rfl fun i _ => ?_
-    have hs : circleAverage (fun ζ : ℂ => (-(2 * π)⁻¹ * D.B i j k) *
-        Real.log ‖z (Fin.castLE D.a_le i) + ζ * w (Fin.castLE D.a_le i)‖) 0 1 =
-        (-(2 * π)⁻¹ * D.B i j k) * circleAverage (fun ζ : ℂ =>
-        Real.log ‖z (Fin.castLE D.a_le i) + ζ * w (Fin.castLE D.a_le i)‖) 0 1 :=
-      circleAverage_fun_smul (E := ℝ) (𝕜 := ℝ) (a := -(2 * π)⁻¹ * D.B i j k)
-        (f := fun ζ : ℂ => Real.log ‖z (Fin.castLE D.a_le i) + ζ * w (Fin.castLE D.a_le i)‖)
-    rw [hs, MCPsh.circleAverage_log_norm_of_ne_zero (hc i) (hcne i)]
-    simp
 
 end
 

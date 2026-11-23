@@ -1,13 +1,60 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.LieInj
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.ScholzeWeinsteinB
-import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.EpsilonPairingZeta
-import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.HodgeTateKernel
-import Development.AbelianVarietyTheory.Definitions.Divisors.TorsionTowersOfDivisibleGroup
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsLatBasisHtLatIffSpanEq
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SandwichKernelRangeExact
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.EpsilonPairingZeta
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ConvEqOneOfForallPairing
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PadicRingHomEqCanonical
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PadicRingHomEqCanonical
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SandwichKernelRangeExact
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.Dimension.Torsion.Finite
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.SandwichMaps
+import Development.AbelianVarietyTheory.Definitions.Divisors.AevalEqZeroOfMemConeIdeal
+import Development.AbelianVarietyTheory.Definitions.Divisors.LogAbsVpOfNormalised
+
+@[expose] public section
+
 open GlobalTheory GlobalTheory.Sandwich GlobalTheory.IndefiniteRowSideFullHecke.SandwichMaps GlobalTheory.DetInv GlobalTheory.HTLat GlobalTheory.CompHt GlobalTheory.PDivGroup Matrix TensorProduct NumberField CategoryTheory
 
 namespace GlobalTheory.DetInv.HTKer
@@ -119,8 +166,8 @@ theorem pairingO_smul {G : PDivGroup p O} {h : ℕ} (e : G.Tate ≃ₗ[ℤ_[p]] 
     (χ : G.dual.Tate) : IndefiniteRowSideFullHecke.EpsilonPairingZeta.pairingO hε e (c • y) χ = c * IndefiniteRowSideFullHecke.EpsilonPairingZeta.pairingO hε e y χ := by
   simp [IndefiniteRowSideFullHecke.EpsilonPairingZeta.pairingO, Finset.mul_sum, mul_assoc]
 
-omit [Algebra ℤ_[p] O] in
 
+omit [Algebra ℤ_[p] O] in
 theorem pairingO_inj {G : PDivGroup p O} (hG : Function.Surjective (G.pairing O).flip) {h : ℕ}
     (e : G.Tate ≃ₗ[ℤ_[p]] (Fin h → ℤ_[p])) (y z : Fin h → O)
     (H : ∀ χ, IndefiniteRowSideFullHecke.EpsilonPairingZeta.pairingO hε e y χ = IndefiniteRowSideFullHecke.EpsilonPairingZeta.pairingO hε e z χ) : y = z := by
@@ -144,11 +191,13 @@ variable {u₁ u₂ : Oˣ} {G : PDivGroup p O} {h : ℕ} {D : Datum ε h ℤ_[p]
 theorem al_coordO (R : IndefiniteRowSideFullHecke.EpsilonPairingZeta.Realizes hε u₁ u₂ G G.padicAction D e fil lie) (x : O ⊗[ℤ_[p]] G.Tate) :
     D.al (coordO e x) = (u₁ : O) • (fil (G.hodgeTateLinear x) : Fin h → O) := by
   induction x using TensorProduct.induction_on with
-  | zero => simp
+  | zero =>
+    rw [(coordO e).map_zero, D.al.map_zero, G.hodgeTateLinear.map_zero, fil.map_zero]
+    simp
   | tmul c t =>
     rw [coordO_tmul, map_smul, R.al_eq, hodgeTateLinear_tmul, hodgeTate_eq_omegaMap, map_smul,
       Submodule.coe_smul, smul_comm]
-  | add x y hx hy => simp only [map_add, hx, hy, Submodule.coe_add, smul_add]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy, Submodule.coe_add, smul_add]
 
 theorem ht_eq_zero_iff (R : IndefiniteRowSideFullHecke.EpsilonPairingZeta.Realizes hε u₁ u₂ G G.padicAction D e fil lie) (x : O ⊗[ℤ_[p]] G.Tate) :
     G.hodgeTateLinear x = 0 ↔ D.al (coordO e x) = 0 := by
@@ -229,7 +278,7 @@ theorem ker_hodgeTateLinear : ∀ (p : ℕ) [Fact p.Prime] (C : Type) [Field C] 
       rw [coordO_tmul, pairingO_smul, IndefiniteRowSideFullHecke.EpsilonPairingZeta.pairingO_toO, ← padicToO_unique p O (algebraMap ℤ_[p] O)]
       simp only [LinearMap.baseChange_tmul, LinearMap.flip_apply, rid_tmul, hBe, Algebra.smul_def, map_mul, W]
       ring
-    | add x y hx hy => simp only [map_add, hx, hy, pairingO_add, mul_add]
+    | add x y hx hy => simp only [map_add (f := _), hx, hy, pairingO_add, mul_add]
   have hb : ∀ (m : Fin G.height → O) χ, IndefiniteRowSideFullHecke.EpsilonPairingZeta.pairingO hε e (D.bb m) χ =
       u₂ * lie (D.Fil.mkQ m) (dlog (G := G) χ) := by
     intro m χ

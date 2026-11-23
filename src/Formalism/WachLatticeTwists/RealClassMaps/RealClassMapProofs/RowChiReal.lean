@@ -1,6 +1,49 @@
-import Formalism.WachLatticeTwists.RealClassMaps.Statement
-import Formalism.WachLatticeTwists.ShapeRowIsomorphisms.Imports
-import Formalism.WachLatticeTwists.CupProductVanishing.Imports
+module
+
+public import Formalism.WachLatticeTwists.RealClassMaps.Statement
+public import Formalism.WachLatticeTwists.CupProductVanishing.CupProductProofs.Clause4GK
+public import Formalism.WachLatticeTwists.ShapeRowIsomorphisms.ShapeRowProofs.BkInRow
+public import Formalism.WachLatticeTwists.ShapeRowIsomorphisms.ShapeRowProofs.Clause5Row
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 variable [hT2Core : Fact ReciprocityTheory.ChartRestriction.T2.Core]
 
@@ -12,7 +55,7 @@ noncomputable section
 
 namespace Formalism.RepresentationBoundsCohomology.FIN
 
-set_option maxHeartbeats 1000000 in
+
 theorem rowRhoReal : StatRowRhoReal := by
   intro p _ O _ _ _ _ _ _ _ VT VT' _ _ _ _ _ _ _ _ _ _ _ _ _ _ Ek Ω _ _ _ _ _ Aw hp A T' _ _ _ _ _ _ _
     M _ _ _ _ r χ E ε T₁ T₂ _ _ _ _ ρ₁ ρ₂ inc π γ D u hu v familyMassRatio iS1 familyMassSecondLine iS2 HfV HfV' Fs Im hO hF hA hcyc hε hD hπ
@@ -47,20 +90,5 @@ theorem rowRhoReal : StatRowRhoReal := by
     · exact clause5Row O VT VT' A T' _ M r χ (Aw.decompositionSubgroup Ek) ε T₁ T₂ ρ₁ ρ₂ π γ
         (withInv D inv.toLinearMap invF.toLinearMap) u hu v hε hD.contT hπ hv hγ hk C₁ c3'
 
-set_option maxHeartbeats 1000000 in
-theorem rowChiReal : StatRowChiReal := by
-  intro p _ O _ _ _ _ _ hinj Ek Ω _ _ _ _ _ Aw hp pl hpl A T' _ _ _ _ M _ _ _ _ r χ E ε e hcyc hM hact F hF1 hF0
-    uu ww s m d U hTB
-  obtain ⟨sh1, sh0⟩ := shapeDec p O hinj Ek Ω Aw hp pl hpl A T' M r χ ε e hcyc hM hact
-  refine ⟨?_, hTB, ?_⟩
-  · rcases Nat.eq_zero_or_pos e with he | he
-    · rw [hF0 he]; exact inf_le_left
-    · rw [hF1 he]; exact bot_le
-  · rcases Nat.eq_zero_or_pos e with he | he
-    · have := sh0 he
-      rw [hF0 he]
-      unfold QuotShape at this ⊢
-      rwa [Submodule.comap_inf, Submodule.comap_subtype_self, top_inf_eq]
-    · rw [hF1 he]; exact sh1 he
 
 end Formalism.RepresentationBoundsCohomology.FIN

@@ -1,5 +1,54 @@
-import Formalism.HermitianCurvature.CompositeFormulaOfDensities
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.HsInnerAddSmulRight
+module
+
+public import Formalism.HermitianCurvature.CompositeFormulaOfDensities
+public import Mathlib.CategoryTheory.Category.Basic
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.HsInnerAddSmulRight
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.Countable
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MeasureTheory
 open scoped ComplexConjugate
@@ -84,7 +133,7 @@ theorem coordinate_extension_glue (i : Fin (r + 1)) (c : Fin r → ℂ) (a : Cf 
   simp [glue, coordinateExtension]
 
 theorem coordinate_extension_measurable (i : Fin (r + 1)) (c : Fin r → ℂ) : Measurable (coordinateExtension i c) := by
-  refine measurable_pi_lambda _ fun j => ?_
+  refine Measurable.of_eval fun j => ?_
   by_cases h : i.val ≤ j.1.val
   · simp only [coordinateExtension, glue, dif_pos h]; exact measurable_pi_apply _
   · simp only [coordinateExtension, glue, dif_neg h]; exact measurable_const
@@ -116,8 +165,6 @@ theorem integral_top_level_point {β E : Type} [MeasurableSpace β] [NormedAddCo
 
 theorem glue_last_level (c : Fin r → ℂ) (a : Cf r (Fin.last r)) : glue (Fin.last r) c a = c := by
   funext j; have := j.isLt; simp only [glue, Fin.val_last]; rw [dif_neg (by omega)]
-
-theorem weight_last_level (a : Cf r (Fin.last r)) : (∏ l, ‖a l‖ ^ (-2 : ℤ)) = 1 := Finset.prod_of_isEmpty _
 
 end Top
 

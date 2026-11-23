@@ -1,5 +1,50 @@
-import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.HeightLattices.IsModuleTopologyTens
-import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.HeightLattices.FinAlg
+module
+
+public import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.WhitGenOf
+public import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.WhittakerCovolume.InFrameForm
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.MulVecCEApply
+public import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.HeightLattices.FinAlg
+public import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.HeightLattices.IsModuleTopologyTens
+import GroundTheory.GlobalFields.LocalFieldAtPlace
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -74,7 +119,7 @@ theorem ev_OE (x : AF F ⊗[F] E) : ∀ᶠ v : HeightOneSpectrum (𝓞 F) in cof
     exact OE_mul v (AddSubgroup.subset_closure ⟨evFin F v a, ha, 1, by simp⟩) he
   | add x y hx hy =>
     filter_upwards [hx, hy] with v h1 h2
-    rw [map_add]
+    rw [map_add (f := _)]
     exact add_mem h1 h2
 
 theorem ev_OE_latO {k : ℕ} (bs : Module.Basis (Fin k) F E) : ∀ᶠ v : HeightOneSpectrum (𝓞 F) in cofinite,
@@ -95,8 +140,12 @@ theorem ev_OE_latO {k : ℕ} (bs : Module.Basis (Fin k) F E) : ∀ᶠ v : Height
     have hz' : z ∈ (OE E v : Set (v.adicCompletion F ⊗[F] E)) := hz
     rw [OE_eq_image] at hz'
     obtain ⟨c, hc, rfl⟩ := hz'
-    rw [map_sum, Finsupp.coe_finset_sum, Finset.sum_apply]
+
+    rw [map_sum]
+    change (Finsupp.applyAddHom j) (∑ i, B.repr (c i ⊗ₜ[F] ((RingOfIntegers.basis E) i : E))) ∈ _
+    rw [map_sum]
     refine sum_mem fun i _ => ?_
+    change B.repr (c i ⊗ₜ[F] ((RingOfIntegers.basis E) i : E)) j ∈ _
     rw [Algebra.TensorProduct.basis_repr_tmul, Finsupp.smul_apply, Finsupp.mapRange_apply, smul_eq_mul]
     exact mul_mem (hc i trivial) (h2 i j)
   · intro hz

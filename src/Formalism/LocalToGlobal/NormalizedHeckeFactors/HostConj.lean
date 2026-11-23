@@ -1,4 +1,44 @@
-import Formalism.LocalToGlobal.NormalizedHeckeFactors.CoverMain
+module
+
+public import CompanionTheory.AutomorphicTheory.HeckeStandardModules.HeckeStdStatement
+public import Formalism.LocalToGlobal.NormalizedHeckeFactors.CoverF
+public import Formalism.LocalToGlobal.NormalizedHeckeFactors.CoverMain
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Formalism.BasicNotions Formalism.FrobeniusOrbits NumberField
 
@@ -26,24 +66,5 @@ theorem locs_cover_twists_of_hecke {eps : ℝ} (Fm : Formalism.MainNotions.FamP 
   refine linkEtaTw_main Fm h ⟨x0, fun x hx' i => ?_⟩
   obtain ⟨M, T, HT⟩ := hx x hx' i
   exact ⟨M, T, HT, hostConj_eq_complexConj (Fm.D x i)⟩
-
-theorem link_eta_of_hecke_standard {eps : ℝ} (Fm : Formalism.MainNotions.FamP eps) (h : ReciprocityTheory.ChartRestriction.L3H.HeckeStdStatement)
-    (hfam : ∃ x0 : ℝ, ∀ x ≥ x0, ∀ i : Fm.Ix x, ∃ (M : MtFam (Fm.D x i)) (_ : NormalizedLocalCompatibility (Fm.D x i) M),
-      HeckeTied (Fm.D x i) M) :
-    Formalism.MainNotions.LinkEta Fm :=
-  (linkEta_iff_tw Fm).2 (locs_cover_twists_of_hecke Fm h hfam)
-
-theorem etaN_eq_etaJ_of_muAt_ne {D : D7} {M : MtFam D} (T : NormalizedLocalCompatibility D M)
-    (h : ReciprocityTheory.ChartRestriction.L3H.HeckeStdStatement) (HT : HeckeTied D M) {j : ℕ}
-    {w : D.what₂.places.Pl} (h1 : 1 ≤ j) (h2 : j ≤ D.R.m) (hw : D.what₂.muAt w ≠ D.what₂.mu0) :
-    etaN T j w = D.what₂.etaJ j w :=
-  etaN_eq_etaJ_main T h HT (hostConj_eq_complexConj D) h1 h2 hw
-
-example (D : D7) (z : D.host.E) :
-    letI : IsCMField D.host.E := hostCM D.host
-    D.host.conj z = IsCMField.complexConj D.host.E z :=
-  hostConj_eq_complexConj D z
-
-example (K : Type) [Field K] [NumberField K] (i₁ i₂ : IsCMField K) : i₁ = i₂ := rfl
 
 end Formalism.L2

@@ -1,12 +1,59 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.BcDefs
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.AdTransfer
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.RTwist
-import GroundTheory.GlobalFields.NormResidueSymbol.FunctorialFinite
-import CompanionTheory.AutomorphicTheory.UnitriangularMeasure.AdeleCoordinateMeasure.EllipticTorusNorm
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.BcDefs
+public import CompanionTheory.AutomorphicTheory.UnitriangularMeasure.AdeleCoordinateMeasure.EllipticTorusNorm
+public import GroundTheory.GlobalFields.NormResidueSymbol.FunctorialFinite
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Neutral.B1 Formalism.L2.Host Formalism.ConjugateSelfDual ReciprocityTheory.Gal Formalism.MainNotions.N Polynomial GlobalTheory.CuspRep GlobalTheory.HeckeGal GlobalTheory.GalOfCusp UpperTheory.V UpperTheory.V.Af UpperTheory.V.Af.Bc UpperTheory.V.Published
 
 private theorem adeleMap_eq (K L : Type) [Field K] [NumberField K] [Field L] [NumberField L] [Algebra K L] :
-    GlobalTheory.IndefiniteRowSideFullHecke.UnitaryHeckeCharacterIdele.adeleMap K L = GroundTheory.Global.AdeleBaseChange.adeleMap K L := rfl
+    GlobalTheory.IndefiniteRowSideFullHecke.UnitaryHeckeCharacterIdele.adeleMap K L = GroundTheory.Global.AdeleBaseChange.adeleMap K L := by
+  ext a : 1
+  apply Prod.ext
+  · funext w
+    open scoped NumberField.LiesOver in
+    change AbsoluteValue.Completion.map _ _ _ = algebraMap _ _ _
+    rw [AbsoluteValue.Completion.algebraMap_eq_of_liesOver]
+  · apply FiniteAdeleRing.ext
+    intro w
+    change GlobalTheory.IndefiniteRowSideFullHecke.UnitaryHeckeCharacterIdele.finiteCompletionMap K L w _ =
+      GroundTheory.Global.SemiLocal.completionMap _ w _
+    rfl
 
 open scoped GroundTheory.Global.AdeleBaseChange in
 private theorem ideleNorm_eq (E : Type) [Field E] [NumberField E] [IsCMField E] (x : (AdeleRing (𝓞 E) E)ˣ) :
@@ -23,7 +70,7 @@ private theorem ideleNorm_eq (E : Type) [Field E] [NumberField E] [IsCMField E] 
     | tmul a l =>
       rw [GlobalTheory.UnitaryHeckeBaseChange.toAdele_tmul, GroundTheory.Global.AdeleBaseChange.adeleTensorAlgEquivLeft_tmul,
         adeleMap_eq, mul_comm]
-    | add a b ha hb => rw [map_add, map_add, ha, hb]
+    | add a b ha hb => rw [map_add (f := _), map_add (f := _), ha, hb]
   change adeleNorm E (x : AdeleRing (𝓞 E) E) = _
   rw [GroundTheory.Global.coe_ideleNorm, ← hz, h]
   have h3 : GlobalTheory.UnitaryHeckeBaseChange.adeleEquiv (isCMExt_real E) z = _ := h2 z
@@ -34,7 +81,8 @@ private theorem val_of_norm {K L : Type} [Field K] [NumberField K] [Field L] [Nu
     (v : HeightOneSpectrum (𝓞 K)) (w : HeightOneSpectrum (𝓞 L)) (y : (v.adicCompletion K)ˣ) (x : (w.adicCompletion L)ˣ)
     (h : ‖(y : v.adicCompletion K)‖ = ‖(x : w.adicCompletion L)‖) (f : ℕ) (hf : normV w = normV v ^ f) :
     Valued.v (y : v.adicCompletion K) = Valued.v (x : w.adicCompletion L) ^ f := by
-  have hf' : Ideal.absNorm w.asIdeal = Ideal.absNorm v.asIdeal ^ f := hf
+  have hf' : Ideal.absNorm w.asIdeal = Ideal.absNorm v.asIdeal ^ f := by
+    simpa only [normV, Ideal.absNorm_apply, Submodule.cardQuot_apply] using hf
   have hy : Valued.v (y : v.adicCompletion K) ≠ 0 := (Valuation.ne_zero_iff _).2 y.ne_zero
   have hx : Valued.v (x : w.adicCompletion L) ≠ 0 := (Valuation.ne_zero_iff _).2 x.ne_zero
   rw [FinitePlace.norm_def, FinitePlace.norm_def] at h
@@ -44,7 +92,7 @@ private theorem val_of_norm {K L : Type} [Field K] [NumberField K] [Field L] [Nu
   have h2 := zpow_right_injective₀ (zero_lt_one.trans h1) h1.ne' h
   rw [← WithZero.coe_unzero hy, ← WithZero.coe_unzero hx, ← WithZero.coe_pow]
   refine congrArg _ (Multiplicative.toAdd.injective ?_)
-  rw [h2, toAdd_pow, nsmul_eq_mul]
+  rw [toAdd_pow, WithZero.toAdd_unzero_eq_log, WithZero.toAdd_unzero_eq_log, nsmul_eq_mul, h2]
 
 theorem UpperTheory.ideleNorm_local_compatibility :
     UpperTheory.V.Af.Bc.NormLoc := by

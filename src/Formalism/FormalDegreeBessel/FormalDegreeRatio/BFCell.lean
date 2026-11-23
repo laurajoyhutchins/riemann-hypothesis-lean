@@ -1,6 +1,56 @@
-import Formalism.FormalDegreeBessel.StatementBF
-import Formalism.FormalDegreeBessel.FormalDegreeRatio.GBasic
-import Formalism.FormalDegreeBessel.FormalDegreeRatio.GroupFactorizationHolds
+module
+
+public import Formalism.FormalDegreeBessel.StatementBF
+public import Formalism.FormalDegreeBessel.FormalDegreeRatio.GBasic
+public import Formalism.FormalDegreeBessel.FormalDegreeRatio.GroupFactorizationHolds
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Matrix
 
@@ -16,7 +66,7 @@ variable {k r : ℕ}
 
 lemma hpk_mul_apply' (A : Matrix (Fin (2 * r + k + 1)) (Fin (2 * r + k + 1)) ℂ)
     (p j : Fin (2 * r + k + 1)) : (Hpk k r * A) p j = sgn k r p * A (sig k r p) j := by
-  rw [mul_apply, Finset.sum_eq_single (sig k r p)]
+  rw [Matrix.mul_apply, Finset.sum_eq_single (sig k r p)]
   · rw [Hpk_eq, if_pos rfl]
   · intro q _ hq; rw [Hpk_eq, if_neg hq, zero_mul]
   · intro h; exact absurd (Finset.mem_univ _) h
@@ -38,14 +88,14 @@ lemma col_lo (i j : Fin (2 * r + k + 1)) (a : Fin r) (hj : j.val = a.val) :
   have hj' : j.val < r := by omega
   have ha : (⟨j.val, hj'⟩ : Fin r) = a := Fin.ext hj
   unfold bigCell
-  rw [dif_pos hj', ha]
+  rw [dite_eq_left hj', ha]
   simp only [esI, Fin.ext_iff]
 
 lemma col_hi (i j : Fin (2 * r + k + 1)) (a : Fin r) (hj : j.val = 2 * r + k - a.val) :
     bigCell k r c μ i j = if i.val = a.val then (star (c a))⁻¹ else 0 := by
   have ha := a.isLt
   unfold bigCell
-  rw [dif_neg (by omega), dif_neg (by omega)]
+  rw [dite_eq_right (by omega), dite_eq_right (by omega)]
   have e : (⟨2 * r + k - j.val, by omega⟩ : Fin r) = a := Fin.ext (by simp only; omega)
   rw [e]
   have e2 : (i.val = 2 * r + k - j.val) ↔ i.val = a.val := by omega
@@ -55,7 +105,7 @@ lemma col_mid (i j : Fin (2 * r + k + 1)) (h1 : r ≤ j.val) (h2 : j.val ≤ r +
     bigCell k r c μ i j = if hi : r ≤ i.val ∧ i.val ≤ r + k then
       μ ⟨i.val - r, by omega⟩ ⟨j.val - r, by omega⟩ else 0 := by
   unfold bigCell
-  rw [dif_neg (by omega), dif_pos h2]
+  rw [dite_eq_right (by omega), dite_eq_left h2]
 
 lemma row_lo (p j : Fin (2 * r + k + 1)) (a : Fin r) (hp : p.val = a.val) :
     bigCell k r c μ p j = if j.val = 2 * r + k - a.val then (star (c a))⁻¹ else 0 := by
@@ -64,7 +114,7 @@ lemma row_lo (p j : Fin (2 * r + k + 1)) (a : Fin r) (hp : p.val = a.val) :
   by_cases h1 : j.val < r
   · rw [col_lo c μ p j ⟨j.val, h1⟩ rfl, if_neg (by simp only; omega), if_neg (by omega)]
   · by_cases h2 : j.val ≤ r + k
-    · rw [col_mid c μ p j (by omega) h2, dif_neg (by omega), if_neg (by omega)]
+    · rw [col_mid c μ p j (by omega) h2, dite_eq_right (by omega), if_neg (by omega)]
     · rw [col_hi c μ p j ⟨2 * r + k - j.val, by omega⟩ (by simp only; omega)]
       by_cases h3 : j.val = 2 * r + k - a.val
       · have e : (⟨2 * r + k - j.val, by omega⟩ : Fin r) = a := Fin.ext (by simp only; omega)
@@ -82,7 +132,7 @@ lemma row_hi (p j : Fin (2 * r + k + 1)) (a : Fin r) (hp : p.val = 2 * r + k - a
       rw [if_pos (by simp only; omega), if_pos h3, e]
     · rw [if_neg (by simp only; omega), if_neg h3]
   · by_cases h2 : j.val ≤ r + k
-    · rw [col_mid c μ p j (by omega) h2, dif_neg (by omega), if_neg (by omega)]
+    · rw [col_mid c μ p j (by omega) h2, dite_eq_right (by omega), if_neg (by omega)]
     · rw [col_hi c μ p j ⟨2 * r + k - j.val, by omega⟩ (by simp only; omega),
         if_neg (by simp only; omega), if_neg (by omega)]
 
@@ -98,7 +148,7 @@ lemma mid_mid (p q : Fin (k + 1)) : bigCell k r c μ (wI k r p) (wI k r q) = μ 
   have hp := p.isLt
   have hq := q.isLt
   rw [col_mid c μ _ _ (by simp [wI]) (by simp only [wI]; omega),
-    dif_pos ⟨by simp [wI], by simp only [wI]; omega⟩]
+    dite_eq_left ⟨by simp [wI], by simp only [wI]; omega⟩]
   congr 1 <;> apply Fin.ext <;> simp [wI]
 
 lemma sum_mid (f : Fin (2 * r + k + 1) → ℂ)
@@ -125,7 +175,7 @@ theorem big_cell_mem_holds : BigCellMem := by
   intro k r c μ hc hμ
   show (bigCell k r c μ)ᴴ * Hpk k r * bigCell k r c μ = Hpk k r
   ext i j
-  rw [Matrix.mul_assoc, mul_apply]
+  rw [Matrix.mul_assoc, Matrix.mul_apply]
   simp only [conjTranspose_apply, hpk_mul_apply']
   have hi := i.isLt
   have hj := j.isLt
@@ -156,7 +206,7 @@ theorem big_cell_mem_holds : BigCellMem := by
       rw [sum_mid]
       swap
       · intro p hp
-        rw [col_mid c μ _ _ (by omega) h2, dif_neg (by omega), star_zero, zero_mul]
+        rw [col_mid c μ _ _ (by omega) h2, dite_eq_right (by omega), star_zero, zero_mul]
       have hsig : ∀ q : Fin (k + 1), sig k r (wI k r q) = wI k r q := fun q =>
         sig_mid _ _ _ (by simp [wI]) (by simp only [wI]; omega)
       simp only [hsig]
@@ -168,7 +218,7 @@ theorem big_cell_mem_holds : BigCellMem := by
         rw [hj1]
         simp only [mid_mid]
         have key := congrFun (congrFun hμ q0) q1
-        rw [Matrix.mul_assoc, mul_apply] at key
+        rw [Matrix.mul_assoc, Matrix.mul_apply] at key
         simp only [Hb, diagonal_mul, conjTranspose_apply] at key
         have hsg : ∀ q : Fin (k + 1), sgn k r (wI k r q) = (if q = Fin.last k then -1 else 1) := by
           intro q
@@ -243,7 +293,7 @@ theorem big_cell_coordinate_holds : BigCellZhat := by
   have hb := b.isLt
   by_cases hb1 : b.val < r
   · set bb : Fin r := ⟨b.val, hb1⟩
-    have hf : fvec k r z' b = bvec (eI k r bb) := by unfold fvec; rw [dif_pos hb1]
+    have hf : fvec k r z' b = bvec (eI k r bb) := by unfold fvec; rw [dite_eq_left hb1]
     rw [hf]
     have hw : ∀ p, (Hpk k r *ᵥ (bigCell k r c μ *ᵥ bvec (eI k r bb))) p =
         if p = eI k r bb then c bb else 0 := by
@@ -264,16 +314,16 @@ theorem big_cell_coordinate_holds : BigCellZhat := by
     rw [Pi.star_apply, fvec_apply_lt z hz a (eI k r bb) (by show b.val < r; exact hb1)]
     by_cases hab : a = b
     · subst hab
-      rw [if_pos rfl, if_pos (by simp [eI, bb]), dif_pos hb1]
+      rw [if_pos rfl, if_pos (by simp [eI, bb]), dite_eq_left hb1]
       simp only [star_one, one_mul]
       rfl
     · rw [if_neg hab, if_neg (by simp only [eI, bb]; intro h; exact hab (Fin.ext h)), star_zero, zero_mul]
   · have hbr : b.val = r := by omega
-    have hf : fvec k r z' b = z' := by unfold fvec; rw [dif_neg hb1]
+    have hf : fvec k r z' b = z' := by unfold fvec; rw [dite_eq_right hb1]
     rw [hf]
     by_cases ha1 : a.val < r
     · set aa : Fin r := ⟨a.val, ha1⟩
-      have hfa : fvec k r z a = bvec (eI k r aa) := by unfold fvec; rw [dif_pos ha1]
+      have hfa : fvec k r z a = bvec (eI k r aa) := by unfold fvec; rw [dite_eq_left ha1]
       rw [hfa, if_neg (by intro h; rw [h] at ha1; exact hb1 ha1)]
       rw [herm, star_bvec_dot, hpk_mulVec_apply, sgn_of_ne _ (by simp only [eI, aa]; omega), one_mul, mulVec, dotProduct]
       apply Finset.sum_eq_zero
@@ -286,8 +336,8 @@ theorem big_cell_coordinate_holds : BigCellZhat := by
       · rw [if_neg hq, zero_mul]
     · have hab : a = b := Fin.ext (by omega)
       subst hab
-      have hfa : fvec k r z a = z := by unfold fvec; rw [dif_neg ha1]
-      rw [hfa, if_pos rfl, dif_neg ha1]
+      have hfa : fvec k r z a = z := by unfold fvec; rw [dite_eq_right ha1]
+      rw [hfa, if_pos rfl, dite_eq_right ha1]
 
 open GBasic BruhatBigCell in
 theorem big_cell_minors_holds : BigCellMinors := by
@@ -297,7 +347,7 @@ theorem big_cell_minors_holds : BigCellMinors := by
     herm (Hpk k r) (bigCell k r c μ *ᵥ z') z with hd
   have hD := dmin_diag z z' (bigCell k r c μ) d hZ
   have hlo : ∀ (x : Fin (r + 1)) (hx : x.val < r), d x = c ⟨x.val, hx⟩ := by
-    intro x hx; simp only [hd]; rw [dif_pos hx]
+    intro x hx; simp only [hd]; rw [dite_eq_left hx]
   have part1 : ∀ l : Fin (r + 1), Dmin k r z z' (bigCell k r c μ) ⟨l.val, by omega⟩ =
       ∏ a : Fin r with a.val < l.val, c a := by
     intro l
@@ -341,7 +391,7 @@ theorem big_cell_minors_holds : BigCellMinors := by
       intro i; rw [hlo _ (by simp)]; rfl
     have e3 : d (Fin.castLE (le_refl (r + 1)) (Fin.last r)) =
         herm (Hpk k r) (bigCell k r c μ *ᵥ z') z := by
-      simp only [hd]; rw [dif_neg (by simp)]
+      simp only [hd]; rw [dite_eq_right (by simp)]
     simp only [e1, e2, e3]
     have hP : (∏ i : Fin r, c i) ≠ 0 := Finset.prod_ne_zero_iff.2 (fun b _ => hc b)
     rw [mul_comm, mul_div_assoc, div_self hP, mul_one]

@@ -1,10 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.WithISelf
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.IsNormPull
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.WithISelf
+public import Development.AbelianVarietyTheory.Definitions.Degenerations.AdmissibleBaseOfCompleteDvr
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.IsNormPull
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsPushEquiv
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.WeilIsGrpPullbackOfCommute
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.TorsionIsoOfLinearUniformisationTripleStatement
 import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.UniformisationTorsionMapsCompatibleInLevelStatement
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.TorsionIsoOfLinearUniformisationTripleStatement
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.WeilIsGrpPullbackOfCommute
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsPushEquiv
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 open CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj AlgebraicGeometry NumberField
 open scoped CategoryTheory.Obj BigOperators
@@ -86,33 +130,33 @@ theorem exists_fullI_of_tateIsoQ : GlobalTheory.UT.LL → AllD fun {E} _ _ _ {H}
   refine ⟨{ ζ := I'.ζ, ζ_prim := I'.ζ_prim, ζ_pow := I'.ζ_pow, ev := ev, add := ?_, lin := ?_, ker := ?_, onto := ?_, tower := ?_, isom := ?_ }, rfl, ?_⟩
   · intro n a b
     by_cases hn : 0 < n
-    · rw [hev, hev, hev, dif_pos hn, dif_pos hn, dif_pos hn, gAdd, map_mul]
-    · rw [hev, hev, hev, dif_neg hn, dif_neg hn, dif_neg hn]
+    · rw [hev, hev, hev, dite_eq_left hn, dite_eq_left hn, dite_eq_left hn, gAdd, map_mul]
+    · rw [hev, hev, hev, dite_eq_right hn, dite_eq_right hn, dite_eq_right hn]
       exact o.I.add n a b
   · intro n c a
     by_cases hn : 0 < n
-    · rw [hev, hev, dif_pos hn, dif_pos hn, gLin, hComm]
-    · rw [hev, hev, dif_neg hn, dif_neg hn]
+    · rw [hev, hev, dite_eq_left hn, dite_eq_left hn, gLin, hComm]
+    · rw [hev, hev, dite_eq_right hn, dite_eq_right hn]
       exact o.I.lin n c a
   · intro n hn a
-    rw [hev, dif_pos hn, map_eq_one_iff _ e.symm.injective, ← gZero n hn, gEq]
+    rw [hev, dite_eq_left hn, map_eq_one_iff _ e.symm.injective, ← gZero n hn, gEq]
     simp only [zero_add]
   · intro n hn x
     constructor
     · intro hx
       obtain ⟨a, ha⟩ := gOnto n hn (e x) (by rw [← map_pow, hx, map_one])
-      exact ⟨a, by rw [hev, dif_pos hn, ha, e.symm_apply_apply]⟩
+      exact ⟨a, by rw [hev, dite_eq_left hn, ha, e.symm_apply_apply]⟩
     · rintro ⟨a, rfl⟩
-      rw [hev, dif_pos hn, ← map_pow, gPow, map_one]
+      rw [hev, dite_eq_left hn, ← map_pow, gPow, map_one]
   · intro n m hn hm a
-    rw [hev, hev, dif_pos (Nat.mul_pos hn hm), dif_pos hn, ← map_pow, gTower n m hn hm]
+    rw [hev, hev, dite_eq_left (Nat.mul_pos hn hm), dite_eq_left hn, ← map_pow, gTower n m hn hm]
   · intro n hn a b
-    rw [hev, hev, dif_pos hn, dif_pos hn]
+    rw [hev, hev, dite_eq_left hn, dite_eq_left hn]
     exact weilIs_push M.P.A.isLB o.P.isLB M.cart M.lb (baseOver (Sp C)) (jFK (R := M.W) C)
       (by simp) n _ _ _ _ _ (hL _).symm (hL _).symm (gWeil n hn a b)
   · intro j hj x
     refine ⟨f j hj (I'.ev j x), ?_, gA j hj x⟩
     change _ = (ev j x).left ≫ M.φ
-    rw [hev, dif_pos hj, hL]
+    rw [hev, dite_eq_left hj, hL]
 
 end GlobalTheory.Relabel

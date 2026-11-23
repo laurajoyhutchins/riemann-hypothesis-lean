@@ -1,10 +1,58 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.ExistenceOfLattices.Hat1
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsNatMulMem
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsNsmulIntegersMem
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ImportsBis
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ImportsTer
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.NsmulIntegralMemNhdsZero
+module
+
+public import Development.AbelianVarietyTheory.Definitions.ExistenceOfLattices.Hat1
+public import Mathlib.Topology.Algebra.Module.ModuleTopology
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsNatMulMem
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ImportsBis
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ImportsTer
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.NsmulIntegralMemNhdsZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open NumberField IsDedekindDomain GlobalTheory.AdLat
 open scoped TensorProduct Topology Matrix
 
@@ -45,8 +93,8 @@ theorem nsmul_integral_mem_nhds (M : ℕ) (hM : 0 < M) :
 
 variable {E : Type} [Field E] [NumberField E] [Algebra F E] {n : ℕ}
 
-omit [Algebra F E] in
 
+omit [Algebra F E] in
 theorem exists_denom (L : Submodule (𝓞 E) (Fin n → E))
     (hsp : Submodule.span E (L : Set (Fin n → E)) = ⊤) (x : Fin n → E) :
     ∃ d : ℕ, 0 < d ∧ d • x ∈ L := by
@@ -111,7 +159,7 @@ theorem isOpen_nsmul_hat : ∀ (F E : Type) [Field F] [NumberField F] [Field E] 
   · let w := RingOfIntegers.basis E
     let φ : (Module.Free.ChooseBasisIndex ℤ (𝓞 E) → FiniteAdeleRing (𝓞 F) F) → RA F E :=
       fun c => ∑ k, c k • ((1 : FiniteAdeleRing (𝓞 F) F) ⊗ₜ[F] algebraMap (𝓞 E) E (w k))
-    have hφ : Continuous φ := continuous_finset_sum _ fun k _ => by fun_prop
+    have hφ : Continuous φ := continuous_finsetSum _ fun k _ => by fun_prop
     have h0 : φ 0 = 0 := by simp [φ]
     have h1 : φ ⁻¹' W ∈ 𝓝 0 := hφ.continuousAt.preimage_mem_nhds (h0 ▸ hW)
     rw [nhds_pi, Filter.mem_pi] at h1
@@ -123,6 +171,7 @@ theorem isOpen_nsmul_hat : ∀ (F E : Type) [Field F] [NumberField F] [Field E] 
       | mem x hx =>
         obtain ⟨a, ha, _, ⟨x, rfl⟩, rfl⟩ := hx
         refine ⟨fun k => w.repr x k • a, fun k v => zsmul_mem (ha v) _, ?_⟩
+
         conv_rhs => rw [← w.sum_repr x, map_sum, TensorProduct.tmul_sum]
         refine Finset.sum_congr rfl fun k _ => ?_
         rw [TensorProduct.smul_tmul', smul_eq_mul, mul_one, map_zsmul, TensorProduct.tmul_smul,

@@ -1,8 +1,57 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsHolPeriods
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.Signature
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsIsSymplecticBasisToMatrixOffDiagDvd
-import Development.AbelianVarietyTheory.Definitions.ArchimedeanThetaValues.IsCoprimeTwoSubRtTwoAddRt
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.Clauses
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsIsSymplecticBasisToMatrixOffDiagDvd
+import Mathlib.Algebra.AffineMonoid.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+public import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.DualRestrictSurjectiveOfIsTorsionFreeQuotient
+
+@[expose] public section
 
 open NumberField Matrix
 open scoped nonZeroDivisors
@@ -10,9 +59,9 @@ open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.G
 
 namespace GlobalTheory
 
+
 open NumberField Matrix in
 open scoped nonZeroDivisors in
-
 theorem _root_.GlobalTheory.finrank_int_eq_mul_of_finite {O M : Type*} [CommRing O] [IsDomain O] [CharZero O]
     [Module.Free ℤ O] [Module.Finite ℤ O] [AddCommGroup M] [Module O M] [Module.Finite O M] :
     Module.finrank ℤ M = Module.finrank ℤ O * Module.finrank O M := by
@@ -66,10 +115,10 @@ theorem _root_.GlobalTheory.finrank_int_eq_mul_of_finite {O M : Type*} [CommRing
 
 variable {E : Type} [Field E] [NumberField E] [IsCMField E]
 
+
 open NumberField Matrix in
 open scoped nonZeroDivisors in
 variable {E : Type} [Field E] [NumberField E] [IsCMField E] in
-
 theorem _root_.GlobalTheory.datum_free_int {H : _root_.ReciprocityTheory.ChartRestriction.G.Geo.Tor.Host E} (D : _root_.ReciprocityTheory.ChartRestriction.G.Geo.Tor.Datum H) : Module.Free ℤ D.La := by
   haveI := D.fin
   haveI := D.proj
@@ -78,10 +127,10 @@ theorem _root_.GlobalTheory.datum_free_int {H : _root_.ReciprocityTheory.ChartRe
   haveI : Module.IsTorsionFree ℤ D.La := Module.IsTorsionFree.trans (𝓞 E)
   exact Module.free_of_finite_type_torsion_free'
 
+
 open NumberField Matrix in
 open scoped nonZeroDivisors in
 variable {E : Type} [Field E] [NumberField E] [IsCMField E] in
-
 theorem _root_.GlobalTheory.datum_finrank_int {H : _root_.ReciprocityTheory.ChartRestriction.G.Geo.Tor.Host E} (D : _root_.ReciprocityTheory.ChartRestriction.G.Geo.Tor.Datum H) :
     Module.finrank ℤ D.La = 2 * (Module.finrank ℚ E / 2 * (D.p + D.q)) := by
   haveI := D.fin
@@ -142,17 +191,17 @@ open scoped nonZeroDivisors in
 variable {E : Type} [Field E] [NumberField E] [IsCMField E] in
 private lemma host_bar_w0 (H : _root_.ReciprocityTheory.ChartRestriction.G.Geo.Tor.Host E) : H.bar H.w0 = 1 - H.w0 := by
   have h := congrArg H.bar H.two_weight_eq_one_add_root
-  rw [map_mul, map_add, map_one, host_bar_rt_eq_neg, map_ofNat] at h
+  rw [map_mul, map_add (f := _), map_one, host_bar_rt_eq_neg, map_ofNat] at h
   have h2 : (2 : 𝓞 E) * (H.bar H.w0 - (1 - H.w0)) = 0 := by
     linear_combination h + H.two_weight_eq_one_add_root
   rcases mul_eq_zero.mp h2 with h3 | h3
   · exact absurd h3 two_ne_zero
   · exact sub_eq_zero.mp h3
 
+
 open NumberField Matrix in
 open scoped nonZeroDivisors in
 variable {E : Type} [Field E] [NumberField E] [IsCMField E] in
-
 theorem _root_.GlobalTheory.exists_symplectic_basis_adapted_mod_eight :
     ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (H : _root_.ReciprocityTheory.ChartRestriction.G.Geo.Tor.Host E) (D : _root_.ReciprocityTheory.ChartRestriction.G.Geo.Tor.Datum H) (g : ℕ),
       g = Module.finrank ℚ E / 2 * (D.p + D.q) → ∃ (bas : (Fin g ⊕ Fin g → ℤ) ≃ₗ[ℤ] D.La),
@@ -220,7 +269,7 @@ theorem _root_.GlobalTheory.exists_symplectic_basis_adapted_mod_eight :
         _ = (8 : 𝓞 E) • ((2 * m ^ 4) • y - (1 - w) ^ 4 • b) := by
             simp only [smul_sub, mul_smul]
     have hx : D.EF x y = D.EF (w ^ 4 • x) y - 8 * D.EF a y := by
-      rw [ha, map_add, LinearMap.add_apply, hE8]; ring
+      rw [ha, map_add (f := _), LinearMap.add_apply, hE8]; ring
     rw [hx, D.adj, hbar4, hy, hE8']
     exact (dvd_mul_right _ _).sub (dvd_mul_right _ _)
   have hQiso : ∀ x ∈ Q, ∀ y ∈ Q, (8 : ℤ) ∣ D.EF x y := by
@@ -235,7 +284,7 @@ theorem _root_.GlobalTheory.exists_symplectic_basis_adapted_mod_eight :
             rw [ha, mul_smul, smul_sub]; abel
     have hxy : D.EF x y = 8 * D.EF (a - (m ^ 2 - m) • x) y + D.EF ((1 - w) ^ 4 • x) y := by
       conv_lhs => rw [hx]
-      rw [map_add, LinearMap.add_apply, hE8]
+      rw [map_add (f := _), LinearMap.add_apply, hE8]
     rw [hxy, D.adj, hbar4', hb, hE8']
     exact (dvd_mul_right _ _).add (dvd_mul_right _ _)
   have hsup : P ⊔ Q = ⊤ := by

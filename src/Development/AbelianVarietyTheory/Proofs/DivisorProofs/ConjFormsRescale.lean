@@ -1,5 +1,64 @@
-import Mathlib
+module
+
+public import Formalism.QuotientMetricDivisors.RatHermLcvTwist
+public import Mathlib.Analysis.CStarAlgebra.Module.Constructions
+public import Formalism.LocalRingCardinality.DataHost
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.WeilGramSignature
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ReadingsExistRow
+import Formalism.LocalRingCardinality.DataTheta
+import Formalism.LocalToGlobal.BesselHermitianTheta.NoncompactGapAtLeastRange
+import Formalism.LocalToGlobal.Divisibility.CoefMod
+import Formalism.LocalToGlobal.IndefiniteReal.ExistsChosenExtremalVector
+import Formalism.LocalToGlobal.IndefiniteReal.IndefiniteWeightData
+import Formalism.LocalToGlobal.IndefiniteReal.LinksDefs
+import Formalism.LocalToGlobal.ProjectiveLattices.ErealAddIInf
+import Formalism.SharpRestriction.CuspSpanNormBounds.Point
+import Formalism.SharpRestriction.GlobalSchurBounds.GeneralLinearActions.GapAtLeast
+import Formalism.SharpRestriction.GlobalSchurBounds.GeneralLinearActions.GenusMassVolumes
+
+@[expose] public section
 
 open Formalism.BasicNotions Formalism.MainNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice MeasureTheory IsDedekindDomain NumberField
 open Formalism.L2.Theta Formalism.L2.DIV Formalism.L2.Pj Formalism.IndefR Formalism.IndefR.Links Formalism.IndefR.Mult Formalism.IndefR.Datum Formalism.IndefR.FWT
@@ -42,7 +101,7 @@ theorem rescale_mem {ι κ : Type} [Finite κ] (K0 : Subfield K) (bS : Module.Ba
     obtain ⟨i, rfl⟩ := hx
     exact Submodule.subset_span ⟨i, by simp⟩
   | zero => simp
-  | add x y _ _ hx hy => rw [map_add, map_add]; exact add_mem hx hy
+  | add x y _ _ hx hy => rw [map_add (f := _), map_add (f := _)]; exact add_mem hx hy
   | smul r x _ hx =>
     rw [Subfield.smul_def, map_smul, map_smul]
     exact Submodule.smul_mem _ r hx
@@ -59,11 +118,11 @@ theorem rescale_pair [StarRing K] {κ : Type} (b : κ → V) (σ : K →+* ℂ) 
       obtain ⟨a', rfl⟩ := hy
       exact hp a a'
     | zero => simp
-    | add x y _ _ hx hy => rw [map_add, inner_add_right, hx, hy, map_add, map_add]
+    | add x y _ _ hx hy => rw [map_add (f := _), inner_add_right, hx, hy, map_add (f := _), map_add (f := _)]
     | smul r x _ hx =>
       rw [Subfield.smul_def, LinearMap.map_smulₛₗ, inner_smul_right, hx, map_smul, smul_eq_mul, map_mul]
   | zero => simp
-  | add x y _ _ hx hy => rw [map_add, inner_add_left, hx, hy, map_add, LinearMap.add_apply, map_add]
+  | add x y _ _ hx hy => rw [map_add (f := _), inner_add_left, hx, hy, map_add (f := _), LinearMap.add_apply, map_add (f := _)]
   | smul r x _ hx =>
     rw [Subfield.smul_def, LinearMap.map_smulₛₗ, inner_smul_left, hx, LinearMap.map_smulₛₗ, LinearMap.smul_apply,
       smul_eq_mul, map_mul, ← r.2 σ]
@@ -73,6 +132,7 @@ theorem rescale_inj {κ : Type} [Finite κ] (b : Module.Basis κ K V) (σ : K �
     (h : LinearIndependent ℂ fun a => c (b a)) : Function.Injective c := by
   haveI := Fintype.ofFinite κ
   refine (injective_iff_map_eq_zero c).2 fun x hx => ?_
+
   rw [← b.sum_repr x, map_sum] at hx
   simp only [LinearMap.map_smulₛₗ] at hx
   have := Fintype.linearIndependent_iff.1 h _ hx
@@ -86,8 +146,10 @@ theorem rescale_span_top {κ : Type} [Finite κ] (b : Module.Basis κ K V) (σ :
   rintro _ ⟨a, rfl⟩
   have : b a = ∑ k, b.repr (φ.symm (b a)) k • φ (b k) := by
     conv_lhs => rw [← φ.apply_symm_apply (b a), ← b.sum_repr (φ.symm (b a))]
+
     simp only [map_sum, map_smul]
   change c (b a) ∈ Submodule.span ℂ _
+
   rw [this, map_sum]
   refine Submodule.sum_mem _ fun k _ => ?_
   rw [LinearMap.map_smulₛₗ]

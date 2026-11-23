@@ -1,9 +1,45 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.TraceFormula.GlobalTraceComparison.AutomorphicRepresentations.EvalBasis
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.ThetaCellCovers.KernelDiagonalIntegrableHolds
-import Development.DiscreteGroups.PiInvariants.CompactSupportTwists.PiInvTop
-import Development.DiscreteGroups.PiInvariants.CompactSupportTwists.PiVecExHolds
-import Development.DiscreteGroups.PiInvariants.CompactSupportTwists.PiSeenA
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.OnlyStableSubspaces
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.TraceFormula.GlobalTraceComparison.AutomorphicRepresentations.EvalBasis
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.OnlyStableSubspaces
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.ThetaCellCovers.AdmissibleLeHolds
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.ThetaCellCovers.KernelRowsColumnsSquareIntegrable
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 open UpperTheory.V.Z.Tf.GlobalTraceComparison.Pi DiscreteGroups.T1.G
 
@@ -75,18 +111,18 @@ theorem UpperTheory.V.Z.Tf.GlobalTraceComparison.Pi.weak_pf :
       rw [hv]
       simp only [g]
       ring
-    rw [integral_congr_ae h, integral_finset_sum _ fun l _ => (F j l).2.1.const_mul _]
+    rw [integral_congr_ae h, integral_finsetSum _ fun l _ => (F j l).2.1.const_mul _]
     exact Finset.sum_congr rfl fun l _ => integral_const_mul _ _
   have hint : Integrable (fun y => ∑ j, ∑ l, c l *
       ((∫ z, g j z * kerH (s.Φ₂ j l) z y ∂s.D.ν) * (v : H E n 0 → ℂ) y)) s.D.ν :=
-    integrable_finset_sum _ fun j _ => integrable_finset_sum _ fun l _ => (F j l).1.const_mul _
+    integrable_finsetSum _ fun j _ => integrable_finsetSum _ fun l _ => (F j l).1.const_mul _
   refine ⟨?_, ?_⟩
   · simpa only [hrep] using hint
   · simp only [hrep]
     change _ = inner ℂ u (s.T₂ (vecM v c))
-    rw [hR, integral_finset_sum _ fun j _ => integrable_finset_sum _ fun l _ => (F j l).1.const_mul _]
+    rw [hR, integral_finsetSum _ fun j _ => integrable_finsetSum _ fun l _ => (F j l).1.const_mul _]
     refine Finset.sum_congr rfl fun j _ => ?_
-    rw [integral_finset_sum _ fun l _ => (F j l).1.const_mul _]
+    rw [integral_finsetSum _ fun l _ => (F j l).1.const_mul _]
     refine Finset.sum_congr rfl fun l _ => ?_
     rw [integral_const_mul, (F j l).2.2]
 

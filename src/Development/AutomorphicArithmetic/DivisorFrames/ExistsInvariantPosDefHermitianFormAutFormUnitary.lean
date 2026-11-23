@@ -1,7 +1,57 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.BaseChangeDefiniteUnitary
+public import Formalism.LocalToGlobal.BesselHermitianTheta.IsAutFunDef
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsHeckeHermitianPairing
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsRepsOfOpenCompact
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.AdelicUnitaryTopology
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.AdelicUnitaryUnimodularExistsFundamentalDomain
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.RePosOfIsMultIP
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.DefiniteUnitaryCocompact
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.FundamentalDomainSetIntegralMulRight
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsSystemOf
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsStableComplBot
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsHeckeHermitianPairing
+
+@[expose] public section
+
 open NumberField IsDedekindDomain TensorProduct
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.L2.Theta Formalism.IndefR GlobalTheory.UnitaryBC GlobalTheory.FrameAut Formalism.CohomologicalDescent.DepthNonnegative
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
@@ -11,7 +61,7 @@ theorem UpperTheory.exists_invariant_posDef_hermitian_form_autForm_unitary :
     ∀ (D : D7) [IsCMField D.host.E] (V : HSp D), V.SigOK → V.IsPosDef → ∀ (j : UA D.host.E V.rank ≃ₜ* GA D V),
         (∀ x, x ∈ ratU D.host.E V.rank ↔ j x ∈ GQ V) →
         ∃ B : (UA D.host.E V.rank → ℂ) →ₗ⋆[ℂ] (UA D.host.E V.rank → ℂ) →ₗ[ℂ] ℂ, (∀ φ, IsAutFormU φ → φ ≠ 0 → 0 < (B φ φ).re) ∧
-          ∀ k ∈ finU D.host.E V.rank, ∀ φ ψ, IsAutFormU φ → IsAutFormU ψ →
+          ∀ k ∈ finU (E := D.host.E) (n := V.rank), ∀ φ ψ, IsAutFormU φ → IsAutFormU ψ →
             B (RU D.host.E V.rank k φ) (RU D.host.E V.rank k ψ) = B φ ψ := by
   intro D _ V hs hp j hj
   classical
@@ -51,30 +101,30 @@ theorem UpperTheory.exists_invariant_posDef_hermitian_form_autForm_unitary :
   let B : (UA D.host.E V.rank → ℂ) →ₗ⋆[ℂ] (UA D.host.E V.rank → ℂ) →ₗ[ℂ] ℂ :=
     LinearMap.mk₂'ₛₗ (starRingEnd ℂ) (RingHom.id ℂ) F
     (fun x x' y => by
-      simp only [F, map_add, Submodule.coe_add]
+      simp only [F, map_add (f := _), Submodule.coe_add]
       rw [← integral_add (hI _ (hPN x) _ (hPN y)) (hI _ (hPN x') _ (hPN y))]
       congr 1
       funext g
-      simp only [Pi.add_apply, star_add, add_mul])
+      simp only [Pi.add_apply, star_add, add_mul, mul_add])
     (fun c x y => by
       simp only [F, map_smul, Submodule.coe_smul]
       rw [smul_eq_mul, ← integral_const_mul]
       congr 1
       funext g
-      simp only [Pi.smul_apply, smul_eq_mul, star_mul', starRingEnd_apply]
+      simp only [Pi.smul_apply, smul_eq_mul, star_mul, RingHom.id_apply, starRingEnd_apply]
       ring)
     (fun x y y' => by
-      simp only [F, map_add, Submodule.coe_add]
+      simp only [F, map_add (f := _), Submodule.coe_add]
       rw [← integral_add (hI _ (hPN x) _ (hPN y)) (hI _ (hPN x) _ (hPN y'))]
       congr 1
       funext g
-      simp only [Pi.add_apply, mul_add])
+      simp only [Pi.add_apply, star_add, add_mul, mul_add])
     (fun c x y => by
       simp only [F, map_smul, Submodule.coe_smul]
       rw [smul_eq_mul, ← integral_const_mul]
       congr 1
       funext g
-      simp only [Pi.smul_apply, smul_eq_mul, RingHom.id_apply]
+      simp only [Pi.smul_apply, smul_eq_mul, star_mul, RingHom.id_apply, starRingEnd_apply]
       ring)
   have hB : ∀ x ∈ N, ∀ y ∈ N, B x y = ∫ g in 𝓕, star (x (j.symm g)) * y (j.symm g) ∂μ := by
     intro x hx y hy

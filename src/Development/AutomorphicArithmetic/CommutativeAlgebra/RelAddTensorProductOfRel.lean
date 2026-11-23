@@ -1,4 +1,50 @@
-import Development.AutomorphicArithmetic.CommutativeAlgebra.ExistsEtaleTrivializationOfTwoInvertibleModuleTo
+module
+
+public import Development.AutomorphicArithmetic.CommutativeAlgebra.PicData
+public import Development.AutomorphicArithmetic.CommutativeAlgebra.ExistsEtaleTrivializationOfTwoInvertibleModuleTo
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open CategoryTheory TensorProduct UpperTheory.PicD
 
@@ -19,11 +65,11 @@ private theorem cotangentAtUnit_tangentBijection {A C M M' : Type} [CommRing A] 
     intro x
     induction x using TensorProduct.induction_on with
     | zero => simp
-    | add x y hx hy => rw [map_add, map_add, hx, hy]
+    | add x y hx hy => rw [map_add (f := _), map_add (f := _), hx, hy]
     | tmul c y =>
       induction y using TensorProduct.induction_on with
       | zero => simp
-      | add y1 y2 h1 h2 => rw [TensorProduct.tmul_add, map_add, map_add, h1, h2]
+      | add y1 y2 h1 h2 => rw [TensorProduct.tmul_add, map_add (f := _), map_add (f := _), h1, h2]
       | tmul m m' =>
         simp [F, e, e', LinearMap.liftBaseChange_tmul, smul_eq_mul, mul_assoc]
   have : ⇑(LinearMap.liftBaseChange C
@@ -41,13 +87,13 @@ theorem UpperTheory.rel_add_tensorProduct_of_rel :
   refine ⟨C, i1, i2, hff, het, w + w', g * g',
     (Algebra.TensorProduct.lmul' A (S := C)).toLinearMap ∘ₗ TensorProduct.map t t', ?_⟩
   refine ⟨?_, ?_, ?_, cotangentAtUnit_tangentBijection t t' T.bij T'.bij⟩
-  · rw [map_add, map_add, T.dw, T'.dw]
-  · rw [P.un_mul, T.hg, T'.hg, map_add, map_add]
+  · rw [map_add (f := _), map_add (f := _), T.dw, T'.dw]
+  · rw [P.un_mul, T.hg, T'.hg, map_add (f := _), map_add (f := _)]
     abel
   · intro x
     induction x using TensorProduct.induction_on with
     | zero => simp
-    | add x y hx hy => rw [map_add, add_smul, hx, hy, TensorProduct.tmul_add]
+    | add x y hx hy => rw [map_add (f := _), add_smul, hx, hy, TensorProduct.tmul_add]
     | tmul m m' =>
       have h1 := T.ht m
       have h2 := T'.ht m'

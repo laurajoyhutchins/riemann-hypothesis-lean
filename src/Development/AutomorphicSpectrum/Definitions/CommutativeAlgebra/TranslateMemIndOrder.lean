@@ -1,4 +1,48 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.Module.Projective
+public import Mathlib.RingTheory.Ideal.Cotangent
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GlobalTheory.CompanionTheory.Ar.BT
 
@@ -35,8 +79,9 @@ def augIdeal (A : Subalgebra R (T → R)) : Ideal A := RingHom.ker (evalAt A 1)
 
 abbrev omega (A : Subalgebra R (T → R)) : Type := (augIdeal A).Cotangent
 
-open Classical in
 
+open scoped Classical in
+open Classical in
 noncomputable def dlogChar (A : Subalgebra R (T → R)) (χ : T →* Rˣ) : omega A :=
   if h : (fun t => ((χ t : Rˣ) : R)) ∈ A then
     (augIdeal A).toCotangent ⟨⟨_, h⟩ - 1, by simp [augIdeal, evalAt, RingHom.mem_ker]⟩
@@ -44,8 +89,8 @@ noncomputable def dlogChar (A : Subalgebra R (T → R)) (χ : T →* Rˣ) : omeg
 
 namespace OrderApi
 
-omit [CommGroup T] in
 
+omit [CommGroup T] in
 theorem mul_mem_prodSpan {A : Subalgebra R (T → R)} {a b : T → R} (ha : a ∈ A) (hb : b ∈ A) :
     (fun z : T × T => a z.1 * b z.2) ∈ prodSpan A :=
   Submodule.subset_span ⟨a, ha, b, hb, rfl⟩
@@ -53,8 +98,8 @@ theorem mul_mem_prodSpan {A : Subalgebra R (T → R)} {a b : T → R} (ha : a �
 theorem mem_indOrder (ι : H →* T) (A : Subalgebra R (H → R)) (f : T → R) :
     f ∈ indOrder ι A ↔ ∀ t, (fun h => f (t * ι h)) ∈ A := Iff.rfl
 
-omit [CommGroup T] in
 
+omit [CommGroup T] in
 theorem comp_mem_extOrder {R' : Type} [CommRing R'] (φ : R →+* R') {A : Subalgebra R (T → R)} {f : T → R}
     (hf : f ∈ A) : (fun t => φ (f t)) ∈ extOrder φ A :=
   Algebra.subset_adjoin ⟨f, hf, rfl⟩
@@ -64,32 +109,11 @@ theorem mem_augIdeal (A : Subalgebra R (T → R)) (f : A) : f ∈ augIdeal A ↔
 theorem dlogChar_of_mem (A : Subalgebra R (T → R)) (χ : T →* Rˣ) (h : (fun t => ((χ t : Rˣ) : R)) ∈ A) :
     dlogChar A χ =
       (augIdeal A).toCotangent ⟨⟨_, h⟩ - 1, by simp [augIdeal, evalAt, RingHom.mem_ker]⟩ := by
-  rw [dlogChar, dif_pos h]
+  rw [dlogChar, dite_eq_left h]
 
 end OrderApi
 
 namespace OrderEx
-
-def muTwoOrder : Subalgebra ℤ (ℤˣ → ℤ) where
-  carrier := {f | (2 : ℤ) ∣ f 1 - f (-1)}
-  mul_mem' {f g} hf hg := by
-    have : (f * g) 1 - (f * g) (-1) = f 1 * (g 1 - g (-1)) + (f 1 - f (-1)) * g (-1) := by
-      simp only [Pi.mul_apply]; ring
-    change (2 : ℤ) ∣ _
-    rw [this]
-    exact dvd_add (Dvd.dvd.mul_left hg _) (Dvd.dvd.mul_right hf _)
-  add_mem' {f g} hf hg := by
-    have : (f + g) 1 - (f + g) (-1) = (f 1 - f (-1)) + (g 1 - g (-1)) := by
-      simp only [Pi.add_apply]; ring
-    change (2 : ℤ) ∣ _
-    rw [this]
-    exact dvd_add hf hg
-  algebraMap_mem' r := by
-    change (2 : ℤ) ∣ _
-    simp
-
-example {S : Type} [CommRing S] {G : Type} [CommGroup G] (B : Subalgebra S (G → S)) : Module S (omega B) :=
-  inferInstance
 
 end OrderEx
 

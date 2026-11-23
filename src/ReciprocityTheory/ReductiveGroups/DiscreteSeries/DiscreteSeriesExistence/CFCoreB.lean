@@ -1,4 +1,49 @@
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.BochnerInequality.CasValK
+module
+
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.BochnerInequality.CasValK
+public import Mathlib.Analysis.InnerProductSpace.ProdL2
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -15,10 +60,11 @@ variable {M M' : Type*} [AddCommGroup M] [Module ℂ M] [AddCommGroup M'] [Modul
 
 theorem layer_map_le (f : M →ₗ[ℂ] M') (hf : ∀ a b x, f (E a b x) = E' a b (f x)) {V : Submodule ℂ M}
     {V' : Submodule ℂ M'} (hV : ∀ x ∈ V, f x ∈ V') :
-    ∀ k, ∀ x ∈ layer ε E V k, f x ∈ layer ε E' V' k
-  | 0 => hV
-  | k + 1 => by
-    have ih := layer_map_le f hf hV k
+    ∀ k, ∀ x ∈ layer ε E V k, f x ∈ layer ε E' V' k := by
+  intro k
+  induction k with
+  | zero => exact hV
+  | succ k ih =>
     have hle : layer ε E V (k + 1) ≤ (layer ε E' V' (k + 1)).comap f := by
       show layer ε E V k ⊔ _ ≤ _
       refine sup_le (fun x hx => ?_) (iSup_le fun a => iSup_le fun b => iSup_le fun hab => ?_)
@@ -37,7 +83,8 @@ theorem khw_map (f : M →ₗ[ℂ] M') (hf : ∀ a b x, f (E a b x) = E' a b (f 
 
 theorem casimir_map (f : M →ₗ[ℂ] M') (hf : ∀ a b x, f (E a b x) = E' a b (f x)) (x : M) :
     f (casimir E x) = casimir E' (f x) := by
-  simp [casimir, LinearMap.sum_apply, Module.End.mul_apply, map_sum, hf]
+  set_option synthInstance.maxHeartbeats 100000 in
+    simp [casimir, LinearMap.sum_apply, map_sum, hf]
 
 end Intertwine
 
@@ -54,9 +101,6 @@ def prFst : WithLp 2 (M₁ × M₂) →ₗ[ℂ] M₁ := LinearMap.fst ℂ M₁ M
 
 def prSnd : WithLp 2 (M₁ × M₂) →ₗ[ℂ] M₂ := LinearMap.snd ℂ M₁ M₂ ∘ₗ (WithLp.linearEquiv 2 ℂ (M₁ × M₂)).toLinearMap
 
-@[simp] theorem prFst_apply (x : WithLp 2 (M₁ × M₂)) : prFst x = (WithLp.ofLp x).1 := rfl
-@[simp] theorem prSnd_apply (x : WithLp 2 (M₁ × M₂)) : prSnd x = (WithLp.ofLp x).2 := rfl
-
 theorem prod_ext {x y : WithLp 2 (M₁ × M₂)} (h₁ : prFst x = prFst y) (h₂ : prSnd x = prSnd y) : x = y :=
   WithLp.ofLp_injective 2 (Prod.ext h₁ h₂)
 
@@ -69,17 +113,17 @@ theorem isGlRep_prod (hE₁ : IsGlRep E₁) (hE₂ : IsGlRep E₂) : IsGlRep (pr
   intro a b c d
   refine LinearMap.ext fun x => prod_ext ?_ ?_
   · have h := congrArg (fun X : Module.End ℂ M₁ => X (prFst x)) (hE₁ a b c d)
-    simp only [LinearMap.sub_apply, Module.End.mul_apply] at h
+    simp only [LinearMap.sub_apply, mul_apply_eq_comp] at h
     change prFst _ = prFst _
-    simp only [LinearMap.sub_apply, Module.End.mul_apply, map_sub, prFst_prodE]
+    simp only [LinearMap.sub_apply, mul_apply_eq_comp, map_sub, prFst_prodE]
     rw [h]
-    split_ifs <;> simp <;> rfl
+    split_ifs <;> (try simp) <;> rfl
   · have h := congrArg (fun X : Module.End ℂ M₂ => X (prSnd x)) (hE₂ a b c d)
-    simp only [LinearMap.sub_apply, Module.End.mul_apply] at h
+    simp only [LinearMap.sub_apply, mul_apply_eq_comp] at h
     change prSnd _ = prSnd _
-    simp only [LinearMap.sub_apply, Module.End.mul_apply, map_sub, prSnd_prodE]
+    simp only [LinearMap.sub_apply, mul_apply_eq_comp, map_sub, prSnd_prodE]
     rw [h]
-    split_ifs <;> simp <;> rfl
+    split_ifs <;> (try simp) <;> rfl
 
 end Prod
 

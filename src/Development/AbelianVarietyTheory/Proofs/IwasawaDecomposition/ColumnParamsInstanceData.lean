@@ -1,14 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.HarishChandraFinite
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.HasDRepIffHasDerivAt
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.HarishChandraModulesOn
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.AdmissibleDiscreteSeriesOfHasParam
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.ExistsNormLeHeightPow
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.TwArgs
-import Formalism.LocalToGlobal.IndefiniteReal.NonzeroIndexPlaceIndepConstants
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ReFaceZeroPartConventionsChosenAgainStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.DivisionCompatibleAtReadIdentificationsStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.GeoHalfUpd
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.HarishChandraFinite
+public import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.HasDRepIffHasDerivAt
+public import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.HarishChandraModulesOn
+public import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.AdmissibleDiscreteSeriesOfHasParam
+public import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.ExistsNormLeHeightPow
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.TwArgs
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.GeoHalfUpd
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.DivisionCompatibleAtReadIdentificationsStatement
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ReFaceZeroPartConventionsChosenAgainStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.PlaceModelImp
+
+@[expose] public section
 
 open Formalism.BasicNotions Formalism.MainNotions NumberField IsDedekindDomain
 open Formalism.L2 Formalism.L2.DIV Formalism.L2.Indef Formalism.L2.Rows Formalism.IndefR Formalism.IndefR.Links Formalism.IndefR.Cx Formalism.IndefR.Lev
@@ -39,7 +74,7 @@ variable {R F} {X0 : BaseLevelRowSide D} {Y : Read (A3 := A3) R.toRealDat F.lv2 
   {Zsc₀ Zsc : DefSub A3.fam3.amb3 → IndefScale A3.fam3.base3}
   {Y' : Read (A3 := A3) (newR R lam err).toRealDat (reFace F Dc Sp Zsc).lv2 X0}
 
-set_option maxHeartbeats 4000000 in
+
 
 def newC (C₀ : ReadC R (reFace F Dc Sp₀ Zsc₀) X0 Y) (ht : Y'.tup = Y.tup) (hj : HEq Y'.jA Y.jA) :
     ReadC (newR R lam err) (reFace F Dc Sp Zsc) X0 Y' where
@@ -56,9 +91,9 @@ def newC (C₀ : ReadC R (reFace F Dc Sp₀ Zsc₀) X0 Y) (ht : Y'.tup = Y.tup) 
         D.what₂.embLL ((Dc (zsOf R F)).Pt (C₀.wU u) t x f) =
           D.what₂.perCol u (tup t) (D.jN u (C₀.eNu u x)) (jA t ((rV0 D A3.A F.P1 F.ψ1 t).mulVec f)))
       (b := Y.jA) (b' := (by with_unfolding_all exact (Y'.jA :))) ht ((by with_unfolding_all exact (hj :))) ((by with_unfolding_all exact (C₀.pt :)))
-    kexactB h
+    with_unfolding_all exact (h :)
 
-set_option maxHeartbeats 4000000 in
+
 
 theorem rationalFormsComparison_baseLevel_indep_scalars {a0 : AmbForm D X0.s} (h : ∃ J, AmbTie D A3.A X0.s a0 F.P0 F.ψ0 Y.tup Y.jA0 J) (ht : Y'.tup = Y.tup)
     (hj : HEq Y'.jA0 Y.jA0) :
@@ -68,19 +103,21 @@ theorem rationalFormsComparison_baseLevel_indep_scalars {a0 : AmbForm D X0.s} (h
     (fun tup jA => ∃ J, AmbTie D A3.A X0.s a0 F.P0 F.ψ0 tup jA J) (b := Y.jA0) (b' := (by with_unfolding_all exact (Y'.jA0 :))) ht ((by with_unfolding_all exact (hj :))) h
   exact (by with_unfolding_all exact (h' :))
 
-set_option maxHeartbeats 4000000 in
+
 
 theorem mj_new {Z : ReadL R F X0 Y} {Z' : ReadL (newR R lam err) (reFace F Dc Sp Zsc) X0 Y'} {Xd : DivX D} (h : MjAre Z Xd)
     (hj : HEq Z'.jW Z.jW) : MjAre Z' Xd := by
-  obtain ⟨J, hJ⟩ := h
-  have e : Z'.jW = (by with_unfolding_all exact (Z.jW :)) := eq_of_heq ((by with_unfolding_all exact (hj :)))
-  refine ⟨⟨(by with_unfolding_all exact (J.eW :))⟩, ?_, (by with_unfolding_all exact (hJ.hlat :))⟩
-  rewrite [e]
-  exact (by with_unfolding_all exact (hJ.j_eq :))
+  set_option backward.isDefEq.lazyWhnfCore false in
+  set_option backward.isDefEq.lazyProjDelta false in
+    obtain ⟨J, hJ⟩ := h
+    have e : Z'.jW = (by with_unfolding_all exact (Z.jW :)) := eq_of_heq ((by with_unfolding_all exact (hj :)))
+    refine ⟨⟨(by with_unfolding_all exact (J.eW :))⟩, ?_, (by with_unfolding_all exact (hJ.hlat :))⟩
+    rewrite [e]
+    exact (by with_unfolding_all exact (hJ.j_eq :))
 
 end Field
 
-set_option maxHeartbeats 4000000 in
+
 
 def newGeo {C : Formalism.L2.Pj.CoreJ D} [Algebra C.Q.c.F D.what₂.LL] {R : RealDat3 D A3 C.Q.c.F} (lam : type_of% R.lam3)
     (err : type_of% R.err0) (g : GlobalTheory.RealGeo.GeoHalf C R.toRealDat fun _ => 1) :
@@ -89,12 +126,14 @@ def newGeo {C : Formalism.L2.Pj.CoreJ D} [Algebra C.Q.c.F D.what₂.LL] {R : Rea
     fun i => GlobalTheory.RealGeo.Upd.updO C R.toRealDat R.kap R.lam err (g.O i),
     fun i => GlobalTheory.RealGeo.Upd.omPins_upE R.kap R.lam err g.O i (g.pins i), g.rhoGeo, g.equivAll, g.cTie, g.phase⟩
 
-set_option maxHeartbeats 4000000 in
+
 
 theorem inGeo_new {C : Formalism.L2.Pj.CoreJ D} [Algebra C.Q.c.F D.what₂.LL] {R : RealDat3 D A3 C.Q.c.F} (lam : type_of% R.lam3)
     (err : type_of% R.err0) {g : GlobalTheory.RealGeo.GeoHalf C R.toRealDat fun _ => 1} (h : GlobalTheory.RealGeo.InGeo g) :
-    GlobalTheory.RealGeo.InGeo (newGeo lam err g) :=
-  ⟨h.jEvExists, h.jEvBar, h.evInj, h.jUnif, h.geoAct, h.latFull, h.dimMatch⟩
+    GlobalTheory.RealGeo.InGeo (newGeo lam err g) := by
+  set_option backward.isDefEq.lazyWhnfCore false in
+  set_option backward.isDefEq.lazyProjDelta false in
+    exact ⟨h.jEvExists, h.jEvBar, h.evInj, h.jUnif, h.geoAct, h.latFull, h.dimMatch⟩
 
 section Tw
 
@@ -106,7 +145,7 @@ variable {L : SizeData₂ D} {hT : GatTies D} {Gi : Formalism.MainNotions.G.Inst
   {Zsc₀ Zsc : DefSub A3.fam3.amb3 → IndefScale A3.fam3.base3}
   {Y' : Read (A3 := A3) (newR R lam err).toRealDat (reFace F Dc Sp Zsc).lv2 ex.p0}
 
-set_option maxHeartbeats 4000000 in
+
 
 def newTw (hC : GlobalTheory.Published.DiscreteSeriesCover ∧ GlobalTheory.Published.HarishChandraModules ∧ GlobalTheory.Published.CasselmanWallach ∧
       GlobalTheory.Published.HarishChandraFinite ∧ GlobalTheory.Published.CuspRapidDecay)
@@ -132,13 +171,41 @@ def newTw (hC : GlobalTheory.Published.DiscreteSeriesCover ∧ GlobalTheory.Publ
   Y := Y'
   Z := Z'
   C := newC lam err C₀ ht hj
-  sEE := kc% sEE
+  sEE := (by with_unfolding_all exact (sEE :))
   div := (GlobalTheory.T.divisionCompatible_at_readIdentifications hC D G Pl0 I0 T A3 C.Q.c.F (newR R lam err) (reFace F Dc Sp Zsc) cG ex.p0 Y' Z' (newC lam err C₀ ht hj)
-    (kc% sEE) Yd (mj_new lam err hM hW).choose hP hH (fun _ _ => (by with_unfolding_all exact (hG :)))).1
+    (by with_unfolding_all exact (sEE :)) Yd (mj_new lam err hM hW).choose hP hH (fun _ _ => (by with_unfolding_all exact (hG :)))).1
   JA := (rationalFormsComparison_baseLevel_indep_scalars lam err hA ht hj0).choose
   amb0 := (rationalFormsComparison_baseLevel_indep_scalars lam err hA ht hj0).choose_spec
   JM := (mj_new lam err hM hW).choose
   mjH := (mj_new lam err hM hW).choose_spec
+
+-- Check the dependent column projections before specializing the ambient data to a row.
+
+private theorem newTw_preserves_columns
+    (hC : GlobalTheory.Published.DiscreteSeriesCover ∧ GlobalTheory.Published.HarishChandraModules ∧
+      GlobalTheory.Published.CasselmanWallach ∧ GlobalTheory.Published.HarishChandraFinite ∧
+      GlobalTheory.Published.CuspRapidDecay)
+    (g : GlobalTheory.RealGeo.GeoHalf C R.toRealDat fun _ => 1)
+    (Z' : ReadL (newR R lam err) (reFace F Dc Sp Zsc) ex.p0 Y')
+    (C₀ : ReadC R (reFace F Dc Sp₀ Zsc₀) ex.p0 Y)
+    (sEE : (R.toCx3 F).EE →ₗ⋆[ℂ] (Sp (zsOf R F)).HH)
+    (hP : Pins (newR R lam err) (reFace F Dc Sp Zsc) cG)
+    (hH : Holds (newR R lam err) (reFace F Dc Sp Zsc))
+    (hE : ErrEq (newR R lam err) (reFace F Dc Sp Zsc))
+    (hG : GrpTie D A3.A F.P0 F.ψ0 F.P1 F.ψ1 (R.eG.trans cG))
+    (hA : ∃ J, AmbTie D A3.A ex.p0.s ex.amb0 F.P0 F.ψ0 Y.tup Y.jA0 J)
+    (hM : MjAre Z Yd) (ht : Y'.tup = Y.tup) (hj : HEq Y'.jA Y.jA)
+    (hj0 : HEq Y'.jA0 Y.jA0) (hW : HEq Z'.jW Z.jW) (hg : GlobalTheory.RealGeo.InGeo g) :
+    let x := newTw (R := R) (F := F) (cG := cG) (Y := Y) (Z := Z) (Dc := Dc)
+      (Sp₀ := Sp₀) (Sp := Sp) (Zsc₀ := Zsc₀) (Zsc := Zsc) (Y' := Y')
+      lam err hC g Z' C₀ sEE hP hH hE hG hA hM ht hj hj0 hW
+    HEq x.sEE sEE ∧ HEq x.C.wU C₀.wU ∧ HEq x.C.eNu C₀.eNu ∧ GlobalTheory.RealGeo.InGeo x.geo := by
+  have hCols := And.intro (HEq.refl sEE)
+    (And.intro (HEq.refl C₀.wU) (And.intro (HEq.refl C₀.eNu) (inGeo_new lam err hg)))
+  -- Check the dependent projections together with the kernel's conversion checker.
+  run_tac
+    Lean.Elab.Tactic.closeMainGoalUsing `exact fun _ _ =>
+      Lean.Elab.Tactic.elabTerm (Lean.mkIdent `hCols) none
 
 end Tw
 
@@ -148,14 +215,14 @@ namespace GlobalTheory.Mem.R3
 
 open TwistedScalarIndependence
 
-set_option maxHeartbeats 8000000 in
+
 
 theorem twArgs_exists : (GlobalTheory.Published.DiscreteSeriesCover ∧ GlobalTheory.Published.HarishChandraModules ∧ GlobalTheory.Published.CasselmanWallach ∧ GlobalTheory.Published.HarishChandraFinite ∧ GlobalTheory.Published.CuspRapidDecay) → ∀ (K : Ctx) (B : Base) (f : Fr B.toPre) (T : TwDat B) (w : ColW B f T) (Z : w.Lt) (Wt : Set B.places.Pl) (L : SizeData₂ (w.st Z).toD7) (hT : GatTies (w.st Z).toD7) (Gi : Formalism.MainNotions.G.Inst (w.st Z).toD7 L) (Gl : Formalism.MainNotions.G.LatInst (w.st Z).toD7) (Kc : Formalism.MainNotions.G.Consts) (Yd : DivX (w.st Z).toD7) (cX : ExtraC) (ex : Extra (w.st Z).toD7 L hT Gi Gl Kc Yd cX) (t : RowsT K w Z Wt ex.p0), AmbAre t.r.Z ex.amb ex.amb0 → MjAre t.r.Z Yd → GrpTie (w.st Z).toD7 (famT t).A t.r.z.F.P0 t.r.z.F.ψ0 t.r.z.F.P1 t.r.z.F.ψ1 (t.r.z.R.eG.trans t.r.z.cG) → (∀ p, t.r.z.R.EEp3 p ≠ ⊥ → ∀ i, t.r.z.R.Wp3 i p ≠ ⊥ ∧ ∀ v, v ≠ (famT t).A.v0 → t.r.z.R.PartAt t.r.z.F i p v) → ∀ Dc Sp₀ Zsc₀ (C₀ : ReadC t.r.z.R (reFace t.r.z.F Dc Sp₀ Zsc₀) ex.p0 ((t.r.Y))) (Sp : ∀ Zs, SPer (Dc Zs)) Zsc (sEE : (t.r.z.R.toCx3 t.r.z.F).EE →ₗ⋆[ℂ] (Sp (zsOf t.r.z.R t.r.z.F)).HH), ∃ a : TwArgs ex t, a.Dc = Dc ∧ HEq a.Sp Sp ∧ a.Zsc = Zsc ∧ HEq a.x.sEE sEE ∧ HEq a.x.C.wU C₀.wU ∧ HEq a.x.C.eNu C₀.eNu ∧ GlobalTheory.RealGeo.InGeo a.x.geo := by
   intro hC K B f T w Z Wt L hT Gi Gl Kc Yd cX ex t hA hM hG hp Dc Sp₀ Zsc₀ C₀ Sp Zsc sEE
   obtain ⟨kap, lam, err, hP, hH, hE, rfl, hl, Y', Z', h1, h2, h3, h4, h5, h6, h7, h8, h9, h10, h11, h12, h13⟩ :=
     GlobalTheory.T.reFace_zero_part_conventions_chosen_again (w.st Z).toD7 _ _ _ _ (famT t) _ t.r.z.R t.r.z.F t.r.z.cG ex.p0 t.r.Y t.r.Z Dc Sp Zsc t.r.z.pins t.r.intersectionNumber_baseChange hp
   let x : TwIn ex := newTw (R := t.r.z.R) (F := t.r.z.F) (cG := t.r.z.cG) (Y := t.r.Y) (Z := t.r.Z) (Dc := Dc) (Sp₀ := Sp₀) (Sp := Sp)
-    (Zsc₀ := Zsc₀) (Zsc := Zsc) (Y' := Y') lam err hC t.r.z.geo Z' ((by with_unfolding_all exact (C₀ :))) sEE hP hH hE hG hA.2 hM h1 h3 h4 h13
+    (Zsc₀ := Zsc₀) (Zsc := Zsc) (Y' := Y') lam err hC t.r.z.geo Z' C₀ sEE hP hH hE hG hA.2 hM h1 h3 h4 h13
   let a : TwArgs ex t :=
     { Dc := Dc, Sp := Sp, Zsc := Zsc, lam := lam, err := err, lam_eq := hl, x := x
       pack := rfl
@@ -176,11 +243,12 @@ theorem twArgs_exists : (GlobalTheory.Published.DiscreteSeriesCover ∧ GlobalTh
       eW := (by with_unfolding_all exact (h11 :))
       jW := (by with_unfolding_all exact (h13 :))
       eRR := (by with_unfolding_all exact (h12 :)) }
-  refine ⟨a, rfl, HEq.rfl, rfl, ?_, ?_, ?_, ?_⟩
-  · kexactB HEq.refl sEE
-  · kexactB HEq.refl C₀.wU
-  · kexactB HEq.refl C₀.eNu
-  · exact (by with_unfolding_all exact (inGeo_new lam err t.inGeo :))
+  have hCols := newTw_preserves_columns (R := t.r.z.R) (F := t.r.z.F) (cG := t.r.z.cG)
+    (Y := t.r.Y) (Z := t.r.Z) (Dc := Dc) (Sp₀ := Sp₀) (Sp := Sp) (Zsc₀ := Zsc₀)
+    (Zsc := Zsc) (Y' := Y') lam err hC t.r.z.geo Z' C₀ sEE hP hH hE hG hA.2 hM h1 h3 h4 h13 t.inGeo
+  refine ⟨a, rfl, HEq.rfl, rfl, ?_⟩
+  change HEq x.sEE sEE ∧ HEq x.C.wU C₀.wU ∧ HEq x.C.eNu C₀.eNu ∧ GlobalTheory.RealGeo.InGeo x.geo
+  exact hCols
 
 end GlobalTheory.Mem.R3
 

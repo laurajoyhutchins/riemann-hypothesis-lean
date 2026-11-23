@@ -1,10 +1,73 @@
-import Mathlib
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.InfinitesimalCharacterLimits.InfinitesimalCharacterGlue
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.T2SpaceAdelicGeneralLinearGroupNumberField
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ContinuousOfIsOpenStab
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SelfMemSpanK
+module
+
+public import Mathlib.Analysis.CStarAlgebra.Module.Constructions
+public import Mathlib.MeasureTheory.Integral.Bochner.Basic
+public import Mathlib.RepresentationTheory.Basic
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Matrix.FiniteDimensional
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.Foundations.AestronglyMeasurableQuotMeasureIffLift
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SquareIntegrableSmoothSubmoduleGL
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.AdmissibleDiscreteSpaces
+import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.BaseChangeDefiniteUnitary
+import Development.AutomorphicArithmetic.IntegralCasts.IsOpenStabOfMemNhds
+import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.InfinitesimalCharacterLimits.AllLeaves
+import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.SliceTensors.IsSliceMap
+public import Mathlib.Analysis.InnerProductSpace.Orthogonal
+public import Mathlib.Analysis.InnerProductSpace.Projection.Basic
+public import Mathlib.MeasureTheory.Function.LocallyIntegrable
+public import Mathlib.MeasureTheory.Group.Integral
+public import Mathlib.MeasureTheory.Integral.Bochner.ContinuousLinearMap
+
+@[expose] public section
 
 open scoped Classical InnerProductSpace ComplexConjugate
 open NumberField IsDedekindDomain Matrix MeasureTheory Filter Topology
@@ -71,7 +134,7 @@ lemma exists_repr_point (ν : Measure K) [ν.IsHaarMeasure]
       add_mem' := by
         rintro T T' ⟨τ, hτ⟩ ⟨τ', hτ'⟩
         refine ⟨τ + τ', fun σ => ?_⟩
-        rw [map_add, hτ, hτ', ← integral_add]
+        rw [map_add (f := _), hτ, hτ', ← integral_add]
         · simp [add_mul]
         · exact integrable_of_cont ν ((Complex.continuous_conj.comp (hb τ)).mul (hb σ))
         · exact integrable_of_cont ν ((Complex.continuous_conj.comp (hb τ')).mul (hb σ))
@@ -131,10 +194,11 @@ lemma end_coeff_continuous {M : Type} [AddCommGroup M] [Module ℂ M]
           simp only [c, LinearMap.comp_apply, LinearEquiv.coe_coe]
           rw [← h1]
       _ = _ := by
+
           rw [h2, map_sum]
           simp [LinearMap.single_apply]
   simp only [key]
-  refine continuous_finset_sum _ fun i _ => ?_
+  refine continuous_finsetSum _ fun i _ => ?_
   obtain ⟨ℓ', hℓ'⟩ := LinearMap.exists_extend (c ∘ₗ LinearMap.single ℂ (fun _ : Fin (Module.finrank ℂ A) => (A : Type)) i)
   have : ∀ k, (c ∘ₗ LinearMap.single ℂ (fun _ : Fin (Module.finrank ℂ A) => (A : Type)) i) (r k (b i)) = ℓ' (r k (b i) : M) := by
     intro k
@@ -215,7 +279,7 @@ theorem representing_vector : ∀ {K M H X : Type} [Group K] [TopologicalSpace K
       intro φ
       let σ : (A →ₗ[ℂ] A) →ₗ[ℂ] ℂ :=
         { toFun := fun ψ => τ (ψ ∘ₗ φ)
-          map_add' := fun ψ ψ' => by rw [LinearMap.add_comp, map_add]
+          map_add' := fun ψ ψ' => by rw [LinearMap.add_comp, map_add (f := _)]
           map_smul' := fun c ψ => by rw [LinearMap.smul_comp, map_smul]; rfl }
       exact hinv σ
     let η : (A →ₗ[ℂ] A) →ₗ[ℂ] ℂ :=

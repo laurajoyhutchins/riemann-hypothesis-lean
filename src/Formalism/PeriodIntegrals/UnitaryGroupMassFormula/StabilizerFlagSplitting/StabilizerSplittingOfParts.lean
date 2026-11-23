@@ -1,4 +1,56 @@
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerFlagSplitting.MulVecColOfMul
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerFlagSplitting.MulVecColOfMul
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerFlagSplitting.SubFlag
+import Formalism.FormalDegreeBessel.FinalG
+import Formalism.FormalDegreeBessel.FormalDegreeRatio.GBasic
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerFlagSplitting.UnitR
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.CStarAlgebra.CStarMatrix
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Matrix Formalism.QuantumDeterminants Formalism.FourierDecayAlt Formalism.FourierDecayAlt.C2
 
@@ -70,7 +122,7 @@ theorem stabilizer_splitting_of_parts (hFS : FixSub) (hSF : SubFlag) (hUN : Unip
     intro g hg
     refine Proj.exists_C Y (g * Y) (fun j => ?_)
     have e : (fun i => (g * Y) i j) = g *ᵥ gramVec k r z z' γ j := by
-      ext i; simp [hY, Ym, mul_apply, mulVec, dotProduct]
+      ext i; simp [hY, Ym, Matrix.mul_apply, mulVec, dotProduct]
     rw [e]; exact Hcol g hg j
   have HM : ∀ g ∈ Hst k r z z' γ, (1 - P) * g * P = 0 := fun g hg => by
     obtain ⟨C, hC⟩ := HC g hg; exact Proj.presM _ Y hG g C hC
@@ -83,7 +135,7 @@ theorem stabilizer_splitting_of_parts (hFS : FixSub) (hSF : SubFlag) (hUN : Unip
   have Q_U : ∀ j, (fun i => (1 - P) i j) ∈ Uperp k r z z' γ := by
     intro j; rw [mem_U_iff]; ext l
     have := congrFun (congrFun hLQ l) j
-    simpa [mulVec, dotProduct, mul_apply] using this
+    simpa [mulVec, dotProduct, Matrix.mul_apply] using this
   have fixU : ∀ g : B.Mat k r, (∀ v ∈ Uperp k r z z' γ, g *ᵥ v = v) → g * (1 - P) = 1 - P :=
     fun g hg => mul_eq_of_cols k r g (1 - P) (fun j => hg _ (Q_U j))
   have fixM : ∀ g : B.Mat k r, g * Y = Y → g * P = P := by
@@ -122,9 +174,9 @@ theorem stabilizer_splitting_of_parts (hFS : FixSub) (hSF : SubFlag) (hUN : Unip
       ext i j
       rcases j with a | b
       · have := congrFun (n1 a) i
-        simpa [hY, Ym, mul_apply, mulVec, dotProduct, gramVec] using this
+        simpa [hY, Ym, Matrix.mul_apply, mulVec, dotProduct, gramVec] using this
       · have := congrFun (n2 b) i
-        simpa [hY, Ym, mul_apply, mulVec, dotProduct, gramVec] using this
+        simpa [hY, Ym, Matrix.mul_apply, mulVec, dotProduct, gramVec] using this
     have hP0 : (g - 1) ^ (r + 1) * P = 0 := by
       simp only [hP, Pm, Proj.prj, ← Matrix.mul_assoc]
       rw [← hY, hY0]; simp
@@ -159,7 +211,20 @@ theorem stabilizer_splitting_of_parts (hFS : FixSub) (hSF : SubFlag) (hUN : Unip
       have e : s - 1 = γ⁻¹ * (g - 1) * γ := by
         calc s - 1 = γ⁻¹ * g * γ - γ⁻¹ * γ := by rw [hγ1, ← hsg]
           _ = γ⁻¹ * (g - 1) * γ := by noncomm_ring
-      rw [e, conj_pow (g - 1) γ γ⁻¹ hγ1 hγ2, hn]; simp
+      rw [e]
+      have hp : ∀ n : ℕ, (γ⁻¹ * (g - 1) * γ) ^ n = γ⁻¹ * (g - 1) ^ n * γ := by
+        intro n
+        induction n with
+        | zero => simp [hγ1]
+        | succ n ih =>
+          rw [pow_succ, ih, pow_succ]
+          calc
+            γ⁻¹ * (g - 1) ^ n * γ * (γ⁻¹ * (g - 1) * γ) =
+                γ⁻¹ * ((g - 1) ^ n * (γ * γ⁻¹)) * (g - 1) * γ := by noncomm_ring
+            _ = γ⁻¹ * ((g - 1) ^ n * (g - 1)) * γ := by rw [hγ2]; noncomm_ring
+            _ = γ⁻¹ * (g - 1) ^ (n + 1) * γ := by rw [pow_succ]
+      rw [hp (r + 2), hn]
+      simp
     · rintro ⟨hgN, n, hnN, hgn⟩
       refine ⟨⟨NS z g hgN, n, NS z' n hnN, hgn⟩, fun v hv => ?_⟩
       have hL : ∀ j, herm (Hpk k r) v (gramVec k r z z' γ j) = 0 := fun j => by

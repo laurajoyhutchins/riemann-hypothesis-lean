@@ -1,10 +1,52 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.CubeVal
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.UnifUniqSt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.IsNsmul
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.QkToAkU
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.FamMod
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.PhiGenPf
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.FamMod
+public import Mathlib.RingTheory.WittVector.IsPoly
+public import Mathlib.Tactic.ReduceModChar
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ValCalc
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits MonoidalCategory CartesianMonoidalCategory MonObj AlgebraicGeometry
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Out ReciprocityTheory.ChartRestriction.G.Geo.Tor
@@ -56,51 +98,23 @@ instance : Module F (SecMod p N) where
 
 @[simp] theorem coord_zero (j : N.ι) : (0 : SecMod p N).sec.f j = 0 := rfl
 
-@[simp] theorem coord_add (s t : SecMod p N) (j : N.ι) :
-    (s + t).sec.f j = s.sec.f j + t.sec.f j := rfl
-
-@[simp] theorem coord_neg (s : SecMod p N) (j : N.ι) : (-s).sec.f j = - s.sec.f j := rfl
-
 @[simp] theorem coord_smul (c : F) (s : SecMod p N) (j : N.ι) :
     (c • s).sec.f j = resTop (N.U j) (scal p c) * s.sec.f j := rfl
 
-@[simp] theorem coord_sub (s t : SecMod p N) (j : N.ι) :
-    (s - t).sec.f j = s.sec.f j - t.sec.f j := by
-  rw [sub_eq_add_neg, coord_add, coord_neg, ← sub_eq_add_neg]
-
-theorem coord_sum {I : Type*} (S : Finset I) (s : I → SecMod p N) (j : N.ι) :
-    (∑ i ∈ S, s i).sec.f j = ∑ i ∈ S, (s i).sec.f j := by
-  classical
-  induction S using Finset.induction_on with
-  | empty => simp only [Finset.sum_empty, coord_zero]
-  | insert a S ha ih => rw [Finset.sum_insert ha, Finset.sum_insert ha, coord_add, ih]
-
 @[simp] theorem coord_mk (s : LB.Sec N) (j : N.ι) : (mk p s).sec.f j = s.f j := rfl
 
-@[ext] theorem ext_coord {s t : SecMod p N} (h : ∀ j, s.sec.f j = t.sec.f j) : s = t := by
-  exact DVR.SecOps.sec_ext (s := s.sec) (t := t.sec) h
 
 theorem eq_zero_iff_coord (s : SecMod p N) : s = 0 ↔ ∀ j, s.sec.f j = 0 := by
   constructor
   · rintro rfl j
     exact coord_zero j
   · intro h
-    exact ext_coord fun j => (h j).trans (coord_zero j).symm
+    exact DVR.SecOps.sec_ext fun j => (h j).trans (coord_zero j).symm
 
 section Val
 variable {X Z : Scheme.{0}} {L : LB X} {K : Type} [Fintype K] {φ : K → (Y ⟶ X)} {ε : K → ℤ}
   {z : Z} {J : (Z ⟶ X) → L.ι} (hJ : Good L z J) (r : Z ⟶ Y)
 include hJ
-
-theorem value_zero : sval (0 : SecMod p (LB.LinComb L φ ε)).sec r z J = 0 := by
-  refine (congrArg (gs r z (LB.wchart L φ fun k => J (r ≫ φ k)))
-    (coord_zero (p := p) (N := LB.LinComb L φ ε) (fun k => J (r ≫ φ k)))).trans ?_
-  exact (gs_eq r z _ (hJ.mem φ r) 0).trans (by rw [map_zero, map_zero])
-
-theorem value_add (s t : SecMod p (LB.LinComb L φ ε)) :
-    sval (s + t).sec r z J = sval s.sec r z J + sval t.sec r z J := by
-  exact (congrArg (gs r z (LB.wchart L φ fun k => J (r ≫ φ k))) (coord_add s t _)).trans
-    (gs_add _ _ _ (hJ.mem φ r) _ _)
 
 theorem value_smul (c : F) (s : SecMod p (LB.LinComb L φ ε)) :
     sval (c • s).sec r z J = gs r z ⊤ (scal p c) * sval s.sec r z J := by
@@ -108,12 +122,6 @@ theorem value_smul (c : F) (s : SecMod p (LB.LinComb L φ ε)) :
   exact (gs_mul r z _ (hJ.mem φ r) _ _).trans
     (congrArg (· * _) (gs_res r z le_top (hJ.mem φ r) _))
 
-theorem value_sum {I : Type*} (S : Finset I) (s : I → SecMod p (LB.LinComb L φ ε)) :
-    sval (∑ i ∈ S, s i).sec r z J = ∑ i ∈ S, sval (s i).sec r z J := by
-  classical
-  induction S using Finset.induction_on with
-  | empty => rw [Finset.sum_empty, Finset.sum_empty]; exact value_zero hJ r
-  | insert a S ha ih => rw [Finset.sum_insert ha, Finset.sum_insert ha, value_add hJ r, ih]
 end Val
 
 def oneSec (F : Type) [CommRing F] :
@@ -141,13 +149,6 @@ theorem smul_oneSec_eq_zero_iff (F : Type) [CommRing F] (c : F) : c • oneSec F
   · rintro rfl
     exact zero_smul F _
 
-example : Nontrivial (SecMod (𝟙 (Spec (CommRingCat.of ℚ)))
-    (⟨PUnit, fun _ => ⊤, fun _ _ => 1⟩ : LB (Spec (CommRingCat.of ℚ)))) :=
-  ⟨⟨_, _, oneSec_ne_zero ℚ⟩⟩
-example : (2 : ℤ) • oneSec ℚ = (2 : ℚ) • oneSec ℚ := by
-  rw [two_smul, two_smul]
-example : oneSec ℚ + oneSec ℚ ≠ 0 := by
-  rw [← two_smul ℚ, Ne, smul_oneSec_eq_zero_iff]; norm_num
 end SecMod
 end GlobalTheory.UU
 end

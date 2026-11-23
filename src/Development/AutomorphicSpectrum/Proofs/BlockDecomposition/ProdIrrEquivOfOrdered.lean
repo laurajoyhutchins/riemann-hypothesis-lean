@@ -1,9 +1,47 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.NonemptyEquivMultiProdOne
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.MultiProdCompCongr
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.ZelevinskyJacquet.LSegJacquet
 import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.ZelevinskyJacquet.ZelevinskyCosocles.LUnlinkedComm
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.IrreducibleAdmissibleGL
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ContragredientProductIrreducibleStatement
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ParabolicProductEquivProductOfPartition
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsListPairwiseNotRel
+
+@[expose] public section
 
 open GlobalTheory.PRep GlobalTheory.SplitWeil GlobalTheory.SmGL GlobalTheory.LocGL GlobalTheory.JHMult Zc Zc.Cos GlobalTheory.SplitRead GlobalTheory.ProdReorder
 
@@ -13,28 +51,10 @@ namespace GlobalTheory.CompanionTheory.SegReorder
 
 variable {k : Type} [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k]
 
-def PairComm (x y : IrrGL k) : Prop :=
-  ∀ (N : ℕ) (h₁ : x.1 + y.1 = N) (h₂ : y.1 + x.1 = N),
-    Nonempty ((ind₂ (stdSum h₁) (extTensor x.rep y.rep)).Equiv (ind₂ (stdSum h₂) (extTensor y.rep x.rep)))
-
-theorem famCongr {u : ℕ} {f g : Fin u → IrrGL k} (hfg : ∀ i, f i = g i) {T : ℕ}
+theorem famCongr {u : ℕ} {f g : Fin u → IrrGL (k := k)} (hfg : ∀ i, f i = g i) {T : ℕ}
     (e : (Σ i, Fin (f i).1) ≃ Fin T) (e' : (Σ i, Fin (g i).1) ≃ Fin T) :
     Nonempty ((multiProd e fun i => (f i).rep).Equiv (multiProd e' fun i => (g i).rep)) := by
   obtain rfl : f = g := funext hfg
   exact multiProd_placing e e' _
-
-def MFClaim (k : Type) [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] (s : ℕ) : Prop :=
-  ∀ (y : Fin (s + 1) → IrrGL k) (a : Fin (s + 1)), (∀ i, i < a → PairComm (y i) (y a)) →
-    ∀ {T N : ℕ} (e : (Σ i, Fin (y i).1) ≃ Fin N) (h : (y a).1 + T = N)
-      (e' : (Σ j : Fin s, Fin (y (a.succAbove j)).1) ≃ Fin T),
-    Nonempty ((multiProd e fun i => (y i).rep).Equiv (ind₂ (stdSum h)
-      (extTensor (y a).rep (multiProd e' fun j => (y (a.succAbove j)).rep))))
-
-def RGClaim (k : Type) [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] (n : ℕ) : Prop :=
-  ∀ (Γ : Fin n → Segment k) (y : Fin n → IrrGL k) (g : Fin n → Fin n), Function.Injective g →
-    (∀ i j, i < j → ¬ (Γ i).Precedes (Γ j)) → (∀ i j, i < j → ¬ (Γ (g i)).Precedes (Γ (g j))) →
-    (∀ i, IsLSeg (Γ i) (y i).rep) → ∀ (z : Fin n → IrrGL k), (∀ i, z i = y (g i)) →
-    ∀ {N : ℕ} (e : (Σ i, Fin (y i).1) ≃ Fin N) (e' : (Σ i, Fin (z i).1) ≃ Fin N),
-    Nonempty ((multiProd e fun i => (y i).rep).Equiv (multiProd e' fun i => (z i).rep))
 
 end GlobalTheory.CompanionTheory.SegReorder

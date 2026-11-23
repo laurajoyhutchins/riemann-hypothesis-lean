@@ -1,5 +1,52 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PlaceDivisors.StChartFH
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.UniversalCharts.UnivChartLoc
+module
+
+public import Mathlib.RingTheory.AdicCompletion.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+public import Mathlib.CategoryTheory.Monoidal.Cartesian.Over
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Mathlib.RingTheory.MvPowerSeries.Basic
+import Mathlib.Topology.Sheaves.Presheaf
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.CocycleRightZeroThd
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PlaceDivisors.StChartF
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -13,48 +60,6 @@ namespace ReciprocityTheory.ChartRestriction.G.Pdiv.ChPt
 
 attribute [local instance] Over.cartesianMonoidalCategory
 
-example : @JetR = @ReciprocityTheory.ChartRestriction.G.Chart.JetR := rfl
-example : @zR = @ReciprocityTheory.ChartRestriction.G.Chart.zR := rfl
-
-def NilSt : Prop :=
-  ∀ (p : ℕ), p ≠ 0 → ∀ (C : Type) [Field C] [CharZero C] (v : Valuation C NNReal) (O : Type) [CommRing O]
-    [Algebra O C], v.Integers O → ∀ [IsLocalRing O], ¬ IsUnit (p : O) →
-    ∀ c ∈ maximalIdeal O, ∀ n : ℕ, ∃ N : ℕ, c ^ N ∈ Ideal.span {(p : O) ^ n}
-
-def JetSt : Prop :=
-  ∀ (T B : Type) [CommRing T] [CommRing B] [Algebra T B] (κ : Type) [Finite κ] (b : κ → B),
-    (∀ j, IsNilpotent (b j)) → ∃ k₀ : ℕ, ∀ k ≥ k₀,
-      ∃! ψ : JetR T κ k →ₐ[T] B, ∀ j, ψ (zR k j) = b j
-
-def EvalSt : Prop :=
-  ∀ (T O : Type) [CommRing T] [CommRing O] [Algebra T O] (I : Ideal O) (m d k : ℕ)
-    (χ : JetR T (Fin m × Fin d) k →ₐ[T] O ⧸ I) (c : Fin m → Fin d → O),
-    (∀ q, χ (zR k q) = Ideal.Quotient.mk I (c q.1 q.2)) → ∀ f : PS T m d,
-      χ (psJet k f) = Ideal.Quotient.mk I (MvPolynomial.eval (fun q : Fin m × Fin d => c q.1 q.2)
-        (MvPowerSeries.trunc O (Finsupp.equivFunOnFinite.symm fun _ => k + 1) (MvPowerSeries.map (algebraMap T O) f)))
-
-def InChartSt : Prop :=
-  ∀ (T : Type) [CommRing T] [IsLocalRing T] (G : Over (Sp T)) [GrpObj G] [IsCommMonObj G]
-    (d : ℕ) (F : FGLaw T d) (x : ∀ m : ℕ, algOver T (JetR T (Fin 1 × Fin d) m) ⟶ G), IsChartJ G F x →
-    ∀ Cc : ReciprocityTheory.ChartRestriction.G.Chart.Chart G,
-    ∃ φ : ∀ k : ℕ, Γ(G.left, Cc.U) →ₐ[T] JetR T (Fin 1 × Fin d) k,
-      (∀ k, x k = ReciprocityTheory.ChartRestriction.G.Chart.pt Cc (φ k)) ∧
-      (∀ k, (ReciprocityTheory.ChartRestriction.G.Chart.jetTruncR T (Fin 1 × Fin d) k).comp (φ (k + 1)) = φ k) ∧
-      ∀ k, (ReciprocityTheory.ChartRestriction.G.Chart.jetAug T (Fin 1 × Fin d) k).comp (φ k) = ReciprocityTheory.ChartRestriction.G.Chart.eps Cc
-
-def SurjSt : Prop :=
-  ∀ (T : Type) [CommRing T] [IsLocalRing T] (G : Over (Sp T)) [GrpObj G] [IsCommMonObj G], Smooth G.hom →
-    ∀ (d : ℕ) (F : FGLaw T d) (x : ∀ m : ℕ, algOver T (JetR T (Fin 1 × Fin d) m) ⟶ G), IsChartJ G F x →
-    ∀ (Cc : ReciprocityTheory.ChartRestriction.G.Chart.Chart G) (k : ℕ) (φ : Γ(G.left, Cc.U) →ₐ[T] JetR T (Fin 1 × Fin d) k),
-      x k = ReciprocityTheory.ChartRestriction.G.Chart.pt Cc φ → Function.Surjective φ
-
-def LocSt : Prop :=
-  ∀ (T O : Type) [CommRing T] [IsLocalRing T] [CommRing O] [IsLocalRing O] [Algebra T O]
-    (G : Over (Sp T)) [GrpObj G] (Cc : ReciprocityTheory.ChartRestriction.G.Chart.Chart G) (p : O), p ∈ maximalIdeal O →
-    ∀ (Q : algOver T O ⟶ G) (h : Γ(G.left, Cc.U) →ₐ[T] O ⧸ Ideal.span {p}),
-      algOverHom (Ideal.Quotient.mkₐ T (Ideal.span {p})) ≫ Q = ReciprocityTheory.ChartRestriction.G.Chart.pt Cc h →
-      ∃ h' : Γ(G.left, Cc.U) →ₐ[T] O, Q = ReciprocityTheory.ChartRestriction.G.Chart.pt Cc h'
-
 def SepSt : Prop :=
   ∀ (T A O : Type) [CommRing T] [CommRing A] [Algebra T A] [CommRing O] [Algebra T O] (p : O),
     IsHausdorff (Ideal.span {p}) O → ∀ h h' : A →ₐ[T] O,
@@ -65,13 +70,5 @@ def AlgLimSt : Prop :=
     IsAdicComplete (Ideal.span {p}) O → ∀ a : ∀ n : ℕ, A →ₐ[T] O ⧸ Ideal.span {p ^ n},
       (∀ (n : ℕ) (z : A) (y : O), Ideal.Quotient.mk _ y = a (n + 1) z → Ideal.Quotient.mk _ y = a n z) →
       ∃ h : A →ₐ[T] O, ∀ n, (Ideal.Quotient.mkₐ T (Ideal.span {p ^ n})).comp h = a n
-
-def LawSt : Prop :=
-  ∀ (T : Type) [CommRing T] (G : Over (Sp T)) [GrpObj G] [IsCommMonObj G]
-    (d : ℕ) (F : FGLaw T d) (x : ∀ m : ℕ, algOver T (JetR T (Fin 1 × Fin d) m) ⟶ G), IsChartJ G F x →
-    ∀ (B : Type) [CommRing B] [Algebra T B] (k : ℕ) (χ : JetR T (Fin 2 × Fin d) k →ₐ[T] B),
-      algOverHom (χ.comp (substJ k F.F F.const)) ≫ x k =
-        (algOverHom (χ.comp (jetPt (d := d) (0 : Fin 2) k)) ≫ x k) *
-          (algOverHom (χ.comp (jetPt (d := d) (1 : Fin 2) k)) ≫ x k)
 
 end ReciprocityTheory.ChartRestriction.G.Pdiv.ChPt

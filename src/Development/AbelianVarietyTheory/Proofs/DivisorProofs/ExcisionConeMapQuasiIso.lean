@@ -1,10 +1,56 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.DivisorSupportCondition
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsExcisionNbhdSelf
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AwayMapCompAlgebraMap
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ShortExactMappingConeResolutionHomotopyEquiv
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsNaturalHomotopyEquivChainsConstantPresheaf
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FreeEtaleSheafExcisionShortExactStatement
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsExcisionNbhdSelf
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AwayMapCompAlgebraMap
+public import Mathlib.Algebra.Homology.HomotopyCategory.ShortExact
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsNaturalHomotopyEquivChainsConstantPresheaf
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FreeEtaleSheafExcisionShortExactStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ShortExactMappingConeResolutionHomotopyEquiv
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+public import Mathlib.CategoryTheory.Abelian.Refinements
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+
+@[expose] public section
+
 open CategoryTheory Limits AlgebraicGeometry Opposite CochainComplex GlobalTheory.EtC
 
 noncomputable section
@@ -96,7 +142,7 @@ theorem mono_free_away (R : Type) [CommRing R] (A : Type) [CommRing A] (f : A) :
         (mono_iff_injective _).1 inferInstance
       rw [ModuleCat.mono_iff_injective]
       change Function.Injective (Finsupp.mapDomain _)
-      exact Finsupp.mapDomain_injective (fun x y hxy => ULift.ext _ _ (hinj (congrArg ULift.down hxy)))
+      exact Finsupp.mapDomain_injective (fun x y hxy => ULift.ext (hinj (congrArg ULift.down hxy)))
     exact NatTrans.mono_of_mono_app _
   change Mono ((presheafToSheaf _ _).map ((freeP R).map _))
   infer_instance
@@ -121,25 +167,49 @@ theorem quasiIso_map_of_corners {C : Type*} [Category C] [Abelian C] {K₁ K₂ 
     rw [key]; infer_instance
   exact quasiIso_of_comp_left (mappingCone.map φ' ψ' e₁ e₂ h₁₂) _
 
+private theorem biprod_lift_neg_desc_eq_zero {C : Type*} [Category C] [Abelian C]
+    {X₁ X₂ X₃ X₄ : C} {u' : X₁ ⟶ X₂} {u : X₃ ⟶ X₄} {a : X₁ ⟶ X₃} {b : X₂ ⟶ X₄}
+    (comm : u' ≫ b = a ≫ u) : biprod.lift a (-u') ≫ biprod.desc u b = 0 := by
+  rw [biprod.lift_desc, Preadditive.neg_comp, ← comm, add_neg_cancel]
+
+private theorem cone_qis_of_natural_homotopyEquiv {P C : Type*} [Category P] [Category C] [Abelian C]
+    (F : P ⥤ C) (G : P ⥤ CochainComplex C ℤ) {X₁ X₂ X₃ X₄ : P}
+    (u' : X₁ ⟶ X₂) (u : X₃ ⟶ X₄) (a : X₁ ⟶ X₃) (b : X₂ ⟶ X₄)
+    (sq : CommSq u' a b u) [Mono (F.map u)]
+    (hS : ∀ w : biprod.lift (F.map a) (-F.map u') ≫ biprod.desc (F.map u) (F.map b) = 0,
+      (ShortComplex.mk _ _ w).ShortExact)
+    (e : ∀ X, HomotopyEquiv ((singleFunctor C 0).obj (F.obj X)) (G.obj X))
+    (he : ∀ {X Y : P} (g : X ⟶ Y),
+      (e X).hom ≫ G.map g = (singleFunctor C 0).map (F.map g) ≫ (e Y).hom) :
+    QuasiIso (mappingCone.map (G.map u') (G.map u) (G.map a) (G.map b) (G.map_commSq sq).w) := by
+  let S := F ⋙ singleFunctor C 0
+  have commS := (S.map_commSq sq).w
+  have commF := (F.map_commSq sq).w
+  have w := biprod_lift_neg_desc_eq_zero commF
+  have : QuasiIso (mappingCone.map (S.map u') (S.map u) (S.map a) (S.map b) commS) :=
+    cone_single_qis (F.map u') (F.map u) (F.map a) (F.map b) commF w (hS w)
+  exact quasiIso_map_of_corners (S.map u') (S.map u) (S.map a) (S.map b) commS
+    (G.map u') (G.map u) (G.map a) (G.map b) (G.map_commSq sq).w
+    (e X₁).hom (e X₂).hom (e X₃).hom (e X₄).hom
+    (e X₁).quasiIso_hom (e X₂).quasiIso_hom (e X₃).quasiIso_hom (e X₄).quasiIso_hom
+    (he u').symm (he u).symm (he a).symm (he b).symm
+
 theorem _root_.GlobalTheory.EtC.excisionConeMap_quasiIso : ∀ (R : Type) [CommRing R] (A A' : Type) [CommRing A] [CommRing A'] [Algebra A A'] (f : A), IsExcisionNbhd A A' f → QuasiIso (excisionConeMap R A A' f) := by
   intro R _ A A' _ _ _ f h
   obtain ⟨e, -, he⟩ := chains_disc_homotopyEquiv R
-  haveI : Algebra.Etale A A' := h.1
-  have comm : (free R).map (yoneda.map (Spec.map (CommRingCat.ofHom (algebraMap A' (Localization.Away (algebraMap A A' f)))))) ≫
-      (free R).map (yoneda.map (Spec.map (CommRingCat.ofHom (algebraMap A A')))) =
-      (free R).map (yoneda.map (Spec.map (CommRingCat.ofHom (Localization.awayMap (algebraMap A A') f)))) ≫
-      (free R).map (yoneda.map (Spec.map (CommRingCat.ofHom (algebraMap A (Localization.Away f))))) := by
-    simp only [← Functor.map_comp, ← Spec.map_comp, ← CommRingCat.ofHom_comp, awayMap_comp_algebraMap]
-  have w : biprod.lift ((free R).map (yoneda.map (Spec.map (CommRingCat.ofHom (Localization.awayMap (algebraMap A A') f)))))
-      (-(free R).map (yoneda.map (Spec.map (CommRingCat.ofHom (algebraMap A' (Localization.Away (algebraMap A A' f))))))) ≫
-      biprod.desc ((free R).map (yoneda.map (Spec.map (CommRingCat.ofHom (algebraMap A (Localization.Away f))))))
-        ((free R).map (yoneda.map (Spec.map (CommRingCat.ofHom (algebraMap A A'))))) = 0 := by
-    rw [biprod.lift_desc, Preadditive.neg_comp, ← comm, add_neg_cancel]
-  have hS := GlobalTheory.T.freeEtaleSheaf_excision_shortExact R A A' f ⟨h.2.1, h.2.2⟩ w
-  haveI := mono_free_away R A f
-  haveI := cone_single_qis _ _ _ _ comm w hS
-  exact quasiIso_map_of_corners _ _ _ _ _ _ _ _ _ _ _ _ _ _ (e _).quasiIso_hom (e _).quasiIso_hom
-    (e _).quasiIso_hom (e _).quasiIso_hom (he _).symm (he _).symm (he _).symm (he _).symm
+  have : Algebra.Etale A A' := h.1
+  let u' := (CommRingCat.ofHom (algebraMap A' (Localization.Away (algebraMap A A' f)))).op
+  let u := (CommRingCat.ofHom (algebraMap A (Localization.Away f))).op
+  let a := (CommRingCat.ofHom (Localization.awayMap (algebraMap A A') f)).op
+  let b := (CommRingCat.ofHom (algebraMap A A')).op
+  have sq : CommSq u' a b u := ⟨
+    congrArg (fun g => (CommRingCat.ofHom g).op) (awayMap_comp_algebraMap (algebraMap A A') f).symm⟩
+  let Y : CommRingCat.{0}ᵒᵖ ⥤ PSh := Scheme.Spec ⋙ yoneda
+  let F := Y ⋙ free R
+  have hS := GlobalTheory.T.freeEtaleSheaf_excision_shortExact R A A' f ⟨h.2.1, h.2.2⟩
+  have : Mono (F.map u) := mono_free_away R A f
+  exact cone_qis_of_natural_homotopyEquiv F (Y ⋙ disc ⋙ chains R) u' u a b sq
+    hS (fun X => e (Y.obj X)) (fun g => he (Y.map g))
 
 end GlobalTheory.EtC.ExcisionQis
 

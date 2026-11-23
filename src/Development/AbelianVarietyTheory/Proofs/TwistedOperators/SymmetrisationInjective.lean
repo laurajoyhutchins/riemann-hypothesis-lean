@@ -1,12 +1,52 @@
-import Mathlib
-import Formalism.SharpRestriction.Divisibility.SchurIrreducible
-import Formalism.LocalToGlobal.BesselHermitianTheta.DefsReal
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.SymbolCongr
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.DegreeSingleAdd
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ProdXEqMonomial
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.UgMemSpanListProd
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ProdPLinIsHomogeneous
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.SymmetrisationEquivariant
+module
+
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.SymbolCongr
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.DegreeSingleAdd
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ProdPLinIsHomogeneous
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ProdXEqMonomial
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.SymmetrisationEquivariant
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.UgMemSpanListProd
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Formalism.BasicNotions.TH Formalism.MainNotions.SchurIrreducible MvPolynomial TensorProduct
 
@@ -223,12 +263,13 @@ theorem symmetrisation_injective (act : Mat p q →ₗ[ℂ] Module.End ℂ V) (h
       φ ∘ₗ (indRel act).mkQ ∘ₗ (TensorProduct.mk ℂ (Ug p q) V).flip v ∘ₗ symU p q -
         (TensorProduct.mk ℂ (MvPolynomial (PIx p q) ℂ) V).flip v
     have hM : ∀ Q, M Q = φ ((indRel act).mkQ (symU p q Q ⊗ₜ[ℂ] v)) - Q ⊗ₜ[ℂ] v := fun Q => rfl
+
     rw [← hM, P.as_sum, map_sum]
     refine Submodule.sum_mem _ fun α hα => ?_
     have hdeg : α.degree = k := by
       rw [Finsupp.degree_eq_weight_one]
       exact hP (mem_support_iff.mp hα)
-    have hmon : monomial α (coeff α P) = coeff α P • monomial α (1 : ℂ) := by
+    have hmon : monomial α (AddMonoidAlgebra.coeff P α) = AddMonoidAlgebra.coeff P α • monomial α (1 : ℂ) := by
       rw [smul_monomial, smul_eq_mul, mul_one]
     rw [hmon, map_smul]
     refine Submodule.smul_mem _ _ ?_
@@ -253,7 +294,7 @@ theorem symmetrisation_injective (act : Mat p q →ₗ[ℂ] Module.End ℂ V) (h
       exact hsym P.1 P.2 v
     | add w w' hw hw' =>
       have h5 := Submodule.add_mem _ hw hw'
-      simp only [map_add]
+      simp only [map_add (f := _)]
       rw [add_sub_add_comm]
       exact h5
   have hz0 : z ∈ degLt ℂ (PIx p q) V k := by

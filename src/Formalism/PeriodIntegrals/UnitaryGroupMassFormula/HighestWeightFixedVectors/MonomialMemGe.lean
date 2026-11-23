@@ -1,4 +1,55 @@
-import Mathlib
+module
+
+public import Mathlib.RingTheory.MvPolynomial.IrreducibleQuadratic
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.LinearAlgebra.Dual.Lemmas
+
+@[expose] public section
 
 noncomputable section
 
@@ -9,24 +60,25 @@ namespace PI.HwFix.UnitaryGroupMassFormula
 variable {σ : Type*} {K : Type*} [Field K]
 
 def Ge (w : σ → ℕ) (d : ℕ) : Submodule K (MvPolynomial σ K) where
-  carrier := {F | ∀ m, Finsupp.weight w m < d → coeff m F = 0}
+  carrier := {F | ∀ m, Finsupp.weight w m < d → AddMonoidAlgebra.coeff F m = 0}
   add_mem' := by
     intro F G hF hG
     rw [Set.mem_setOf_eq] at hF hG ⊢
     intro m hm
-    rw [coeff_add, hF m hm, hG m hm, add_zero]
+    rw [MvPolynomial.coeff_add, hF m hm, hG m hm, add_zero]
   zero_mem' := by
     rw [Set.mem_setOf_eq]
     intro m _
-    rw [coeff_zero]
+    rw [AddMonoidAlgebra.coeff_zero]
+    rfl
   smul_mem' := by
     intro c F hF
     rw [Set.mem_setOf_eq] at hF ⊢
     intro m hm
-    rw [coeff_smul, hF m hm, smul_zero]
+    rw [MvPolynomial.coeff_smul, hF m hm, smul_zero]
 
 theorem mem_Ge {w : σ → ℕ} {d : ℕ} {F : MvPolynomial σ K} :
-    F ∈ Ge w d ↔ ∀ m, Finsupp.weight w m < d → coeff m F = 0 := Iff.rfl
+    F ∈ Ge w d ↔ ∀ m, Finsupp.weight w m < d → AddMonoidAlgebra.coeff F m = 0 := Iff.rfl
 
 theorem Ge_mono {w : σ → ℕ} {d e : ℕ} (h : d ≤ e) {F : MvPolynomial σ K} (hF : F ∈ Ge w e) : F ∈ Ge w d :=
   mem_Ge.2 fun m hm => mem_Ge.1 hF m (lt_of_lt_of_le hm h)
@@ -39,7 +91,7 @@ theorem Ge_mul {w : σ → ℕ} {a b : ℕ} {F G : MvPolynomial σ K} (hF : F �
   rw [coeff_mul]
   refine Finset.sum_eq_zero fun p hp => ?_
   replace hp := Finset.HasAntidiagonal.mem_antidiagonal.mp hp
-  have h : Finsupp.weight w p.1 + Finsupp.weight w p.2 = Finsupp.weight w m := by rw [← map_add, hp]
+  have h : Finsupp.weight w p.1 + Finsupp.weight w p.2 = Finsupp.weight w m := by rw [← map_add (f := _), hp]
   by_cases h1 : Finsupp.weight w p.1 < a
   · rw [hF _ h1, zero_mul]
   · rw [hG _ (by omega), mul_zero]
@@ -99,12 +151,12 @@ theorem monomial_step (w : σ → ℕ) (φ : MvPolynomial σ K →ₐ[K] MvPolyn
 theorem uni_step (w : σ → ℕ) (φ : MvPolynomial σ K →ₐ[K] MvPolynomial σ K)
     (hφ : ∀ v, φ (X v) - X v ∈ Ge w (w v + 1)) (d : ℕ) (F : MvPolynomial σ K) (hF : F ∈ Ge w d) :
     φ F - F ∈ Ge w (d + 1) := by
-  have key : ∀ m ∈ F.support, φ (monomial m (coeff m F)) - monomial m (coeff m F) ∈ Ge w (d + 1) := by
+  have key : ∀ m ∈ F.support, φ (monomial m (AddMonoidAlgebra.coeff F m)) - monomial m (AddMonoidAlgebra.coeff F m) ∈ Ge w (d + 1) := by
     intro m hm
     have hd : d ≤ Finsupp.weight w m := by
       by_contra h
       exact (mem_support_iff.mp hm) (mem_Ge.1 hF m (by omega))
-    have e : monomial m (coeff m F) = coeff m F • monomial m (1 : K) := by
+    have e : monomial m (AddMonoidAlgebra.coeff F m) = AddMonoidAlgebra.coeff F m • monomial m (1 : K) := by
       rw [smul_monomial, smul_eq_mul, mul_one]
     rw [e, map_smul, ← smul_sub]
     exact Submodule.smul_mem _ _ (Ge_mono (by omega) (monomial_step w φ hφ m))
@@ -123,16 +175,17 @@ theorem coeffs_mem [Infinite K] {V : Type*} [AddCommGroup V] [Module K V] (S : S
     simp only [Set.mem_compl_iff, Set.mem_singleton_iff] at hs
     have h1 : S.mkQ (∑ k ∈ Finset.range N, s ^ k • f k) = 0 := (Submodule.Quotient.mk_eq_zero S).2 (h s hs)
     have h2 := congrArg ψ h1
+
     rw [map_sum, map_sum, map_zero] at h2
     simp only [map_smul, Submodule.mkQ_apply, smul_eq_mul] at h2
     show Polynomial.IsRoot p s
     rw [Polynomial.IsRoot.def]
-    simp only [p, Polynomial.eval_finset_sum, Polynomial.eval_mul, Polynomial.eval_C, Polynomial.eval_pow,
+    simp only [p, Polynomial.eval_finsetSum, Polynomial.eval_mul, Polynomial.eval_C, Polynomial.eval_pow,
       Polynomial.eval_X]
     rw [← h2]
     refine Finset.sum_congr rfl fun j _ => ?_
     rw [mul_comm]
-  have h3 := congrArg (fun q => Polynomial.coeff q k) hp
+  have h3 := congrArg (fun q => _root_.AddMonoidAlgebra.coeff (M := ℕ) q k) hp
   simp only [p, Polynomial.finsetSum_coeff, Polynomial.coeff_C_mul, Polynomial.coeff_X_pow, mul_ite, mul_one,
     mul_zero, Polynomial.coeff_zero] at h3
   rw [Finset.sum_ite_eq] at h3
@@ -156,9 +209,10 @@ theorem sc_monomial (w : σ → ℕ) (c : K) (m : σ →₀ ℕ) (a : K) :
   ring
 
 theorem coeff_sc (w : σ → ℕ) (c : K) (F : MvPolynomial σ K) (m : σ →₀ ℕ) :
-    coeff m (sc w c F) = c ^ Finsupp.weight w m * coeff m F := by
+    AddMonoidAlgebra.coeff (sc w c F) m = c ^ Finsupp.weight w m * AddMonoidAlgebra.coeff F m := by
   classical
   conv_lhs => rw [F.as_sum]
+
   rw [map_sum, coeff_sum]
   simp only [sc_monomial, coeff_monomial]
   rw [Finset.sum_ite_eq']
@@ -172,7 +226,7 @@ theorem sc_eq_sum (w : σ → ℕ) (c : K) (F : MvPolynomial σ K) (N : ℕ)
   classical
   ext m
   rw [coeff_sc, coeff_sum]
-  simp only [coeff_smul, coeff_weightedHomogeneousComponent, smul_eq_mul, mul_ite, mul_zero]
+  simp only [MvPolynomial.coeff_smul, coeff_weightedHomogeneousComponent, smul_eq_mul, mul_ite, mul_zero]
   rw [Finset.sum_ite_eq]
   split_ifs with h
   · rfl

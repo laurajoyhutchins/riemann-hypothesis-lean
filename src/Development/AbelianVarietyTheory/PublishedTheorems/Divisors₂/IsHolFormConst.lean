@@ -1,7 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsKSValueOneOfRetraction
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.Clauses
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.EigLatBasis
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.Clauses
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.EigLatBasis
+public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.HomLieEquivScalarTmul
+public import Mathlib.LinearAlgebra.ExteriorAlgebra.OfAlternating
+public import Mathlib.NumberTheory.NumberField.Discriminant.Defs
+public import Mathlib.RingTheory.DedekindDomain.Different
+public import Mathlib.RingTheory.PicardGroup
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -28,8 +72,8 @@ def IsTotPos (x : F) : Prop := ∀ τ : F →+* ℝ, 0 < τ x
 
 def HasGen {X : Scheme.{0}} (L : LB X) : Prop := ∃ t : L.Gen, t.IsGen
 
-variable (F) in
 
+variable (F) in
 structure Obj (𝔠 : FracId F) (S : Scheme.{0}) where
 
   A : Over S
@@ -114,8 +158,6 @@ end Obj
 
 abbrev ObjClass (𝔠 : FracId F) : Type 1 := ∀ (R : Type) [CommRing R], Obj F 𝔠 (Sp R) → Prop
 
-def trivialObjectCondition (𝔠 : FracId F) : ObjClass 𝔠 := fun _ _ _ ↦ True
-
 def rapObj (𝔠 : FracId F) : ObjClass 𝔠 := fun _ _ X ↦ X.IsRapoport
 
 @[ext] structure Rule {𝔠 : FracId F} (Q : ObjClass 𝔠) (R₀ : Type) [CommRing R₀] (k : ℕ) where
@@ -132,41 +174,10 @@ namespace Rule
 
 variable {𝔠 : FracId F} {Q Q' : ObjClass 𝔠} {R₀ R₁ : Type} [CommRing R₀] [CommRing R₁] {k l : ℕ}
 
-def const (Q : ObjClass 𝔠) (r : R₀) : Rule Q R₀ 0 where
-  val R _ _ _ _ _ := algebraMap R₀ R r
-  homog := by intros; simp
-  baseChange := by intros; simp
-
-def mul (r : Rule Q R₀ k) (s : Rule Q R₀ l) : Rule Q R₀ (k + l) where
-  val R _ _ X hX δ := r.val R X hX δ * s.val R X hX δ
-  homog R _ _ X hX δ δ' c h := by
-    rw [← r.homog R X hX δ δ' c h, ← s.homog R X hX δ δ' c h]; ring
-  baseChange R R' _ _ _ _ σ X hX X' hX' φ δ δ' h h' := by
-    rw [map_mul, r.baseChange R R' σ X hX X' hX' φ δ δ' h h', s.baseChange R R' σ X hX X' hX' φ δ δ' h h']
-
-def restrict (r : Rule Q R₀ k) (h : ∀ (R : Type) [CommRing R] (X : Obj F 𝔠 (Sp R)), Q' R X → Q R X) :
-    Rule Q' R₀ k where
-  val R _ _ X hX δ := r.val R X (h R X hX) δ
-  homog R _ _ X hX := r.homog R X (h R X hX)
-  baseChange R R' _ _ _ _ σ X hX X' hX' := r.baseChange R R' σ X (h R X hX) X' (h R' X' hX')
-
-def extend (r : Rule Q R₀ k) (R₁ : Type) [CommRing R₁] [Algebra R₀ R₁] : Rule Q R₁ k where
-  val R _ _ X hX δ :=
-    letI : Algebra R₀ R := ((algebraMap R₁ R).comp (algebraMap R₀ R₁)).toAlgebra
-    r.val R X hX δ
-  homog R _ _ X hX δ δ' c h :=
-    letI : Algebra R₀ R := ((algebraMap R₁ R).comp (algebraMap R₀ R₁)).toAlgebra
-    r.homog R X hX δ δ' c h
-  baseChange R R' _ _ _ _ σ X hX X' hX' φ δ δ' h h' :=
-    letI : Algebra R₀ R := ((algebraMap R₁ R).comp (algebraMap R₀ R₁)).toAlgebra
-    letI : Algebra R₀ R' := ((algebraMap R₁ R').comp (algebraMap R₀ R₁)).toAlgebra
-    r.baseChange R R' { (σ : R →+* R') with commutes' := fun x ↦ σ.commutes (algebraMap R₀ R₁ x) }
-      X hX X' hX' φ δ δ' h h'
-
 end Rule
 
-variable (F) in
 
+variable (F) in
 def halfSpace : Set ((F →+* ℝ) → ℂ) := {z | ∀ τ, 0 < (z τ).im}
 
 def dualLat (𝔞 : FracId F) : FractionalIdeal (𝓞 F)⁰ F :=
@@ -186,9 +197,6 @@ def qPower (ξ : F) (z : (F →+* ℝ) → ℂ) : ℂ :=
 
 def HasFourier (𝔞 𝔟 : FracId F) (g : ((F →+* ℝ) → ℂ) → ℂ) (a : (𝔞 * 𝔟).elt → ℂ) : Prop :=
   ∀ z ∈ halfSpace F, HasSum (fun ξ : (𝔞 * 𝔟).elt ↦ a ξ * qPower (ξ : F) z) (g z)
-
-theorem isHolForm_const (𝔞 𝔟 : FracId F) (x : ℂ) : IsHolForm 𝔞 𝔟 0 (fun _ ↦ x) :=
-  ⟨differentiableOn_const x, fun _ _ _ _ _ _ _ ↦ by simp⟩
 
 def IsTorusPoint (e : Fin (Module.finrank ℚ F) ≃ (F →+* ℝ)) (𝔞 𝔟 : FracId F) (z : (F →+* ℝ) → ℂ)
     (X : Obj F (𝔞 * 𝔟⁻¹) (Sp ℂ)) (δ : X.DetOmega) : Prop :=

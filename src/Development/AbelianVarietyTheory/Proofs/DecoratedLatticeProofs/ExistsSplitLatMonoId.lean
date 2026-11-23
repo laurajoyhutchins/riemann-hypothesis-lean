@@ -1,8 +1,47 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.WittDecompositionCoreProjMulCoreEqOne
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.LineLatAt
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.LevAtZ
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IsSelfDualCHyperbolicExtensionLatticeConjStable
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.WittDecompositionCoreProjMulCoreEqOne
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IsSelfDualCHyperbolicExtensionLatticeConjStable
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -113,30 +152,8 @@ theorem isLattice_splitL (h𝔟 : ∀ i, 𝔟 i ≠ 0) (hL₀ : Submodule.IsLatt
       (Submodule.mem_sup_right ?_)
     · exact sum_mem fun i _ => Submodule.mem_iSup_of_mem i ⟨_, h1 i, rfl⟩
     · exact sum_mem fun i _ => Submodule.mem_iSup_of_mem i ⟨_, hγ i (h3 i), rfl⟩
-  · rw [eq_top_iff]
-    intro y _
-    rw [decomp d y]
-    refine add_mem (add_mem ?_ ?_) ?_
-    · rw [← Finset.univ_sum_single (d.qX *ᵥ y), Matrix.mulVec_sum]
-      refine sum_mem fun i _ => ?_
-      obtain ⟨β, hβ, hβ0⟩ := exists_ne_zero (h𝔟 i)
-      rw [mulVec_single_smul d.e i hβ0]
-      exact Submodule.smul_mem _ _ (Submodule.subset_span
-        (e_mem (single_mem_of_mem (I := fun j => (𝔟 j : Submodule (𝓞 D.host.E) D.host.E)) i hβ)))
-    · have hx : d.q0 *ᵥ y ∈ Submodule.span D.host.E (L₀ : Set (Fin S₀.rank → D.host.E)) := by
-        rw [hL₀.span_eq_top]; trivial
-      generalize d.q0 *ᵥ y = x₀ at hx ⊢
-      induction hx using Submodule.span_induction with
-      | mem x hx => exact Submodule.subset_span (i₀_mem hx)
-      | zero => rw [Matrix.mulVec_zero]; exact zero_mem _
-      | add x x' _ _ hx hx' => rw [Matrix.mulVec_add]; exact add_mem hx hx'
-      | smul a x _ hx => rw [Matrix.mulVec_smul]; exact Submodule.smul_mem _ a hx
-    · rw [← Finset.univ_sum_single (d.qY *ᵥ y), Matrix.mulVec_sum]
-      refine sum_mem fun i _ => ?_
-      obtain ⟨c, hc, hc0⟩ := exists_ne_zero_dualC (𝔟 i)
-      rw [mulVec_single_smul d.e' i hc0]
-      exact Submodule.smul_mem _ _ (Submodule.subset_span (e'_mem (single_mem_of_mem (I := fun j => dualC (𝔟 j)) i hc)))
-
+  · intro s hs hli
+    exact (LinearIndependent.iff_fractionRing _ _).mp hli
 theorem isSelfDualC_splitL (h𝔟 : ∀ i, 𝔟 i ≠ 0) (hL₀ : IsSelfDualC S₀ L₀) : IsSelfDualC S (splitL d L₀ 𝔟) := by
   have hR : ∀ z : D.host.E, (∃ b : 𝓞 D.host.E, (b : D.host.E) = z) ↔ z ∈ (algebraMap (𝓞 D.host.E) D.host.E).range :=
     fun z => Iff.rfl

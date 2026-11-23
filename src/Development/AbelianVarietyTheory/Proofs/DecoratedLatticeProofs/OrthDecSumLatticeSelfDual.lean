@@ -1,12 +1,48 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.SumMatApply
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.Foundations.EventuallyEqOfIsPreconnected
+import Development.AbelianVarietyTheory.Definitions.LatticeFrames.IntegrandSZero
 import Development.AbelianVarietyTheory.Definitions.LatticeFrames.PrinInf
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.IsThetaFam
-import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.SkewGramHalfModule
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.ExistsNormLeHeightPow
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.PairwiseDisjointCell
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.HeckeLPartialContinuationHolds
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.SumMatApply
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.IsSelfDualCLatFrame
+import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.RegularisedSiegelWeilFirstTerm
+
+@[expose] public section
+
 open scoped ComplexConjugate Matrix NNReal
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.L2.Theta Formalism.L2.Pj Formalism.IndefR.Datum MeasureTheory IsDedekindDomain NumberField
 open GlobalTheory.AutomorphicL2Unitary GlobalTheory.Cusp GlobalTheory.AdelicU GlobalTheory.Doubling GlobalTheory.Cont GlobalTheory.MixModel
@@ -64,25 +100,7 @@ theorem iB_mem_sumLatO {B W H : HSp D} (o : OrthDec B W H) (LW : Lat W) {LH : La
 theorem isLattice_sumLatO {B W H : HSp D} (o : OrthDec B W H) (LW : Lat W) (LH : Lat H)
     (hW : Submodule.IsLattice D.host.E LW) (hH : Submodule.IsLattice D.host.E LH) :
     Submodule.IsLattice D.host.E (sumLatO o LW LH) := by
-  refine ⟨(hW.fg.map _).sup (hH.fg.map _), eq_top_iff.2 fun y _ => ?_⟩
-  have hA : ∀ z ∈ Submodule.span D.host.E (LW : Set (Fin W.rank → D.host.E)),
-      o.iA *ᵥ z ∈ Submodule.span D.host.E (sumLatO o LW LH : Set (Fin B.rank → D.host.E)) := by
-    intro z hz
-    induction hz using Submodule.span_induction with
-    | mem x hx => exact Submodule.subset_span (iA_mem_sumLatO o LH hx)
-    | zero => rw [Matrix.mulVec_zero]; exact zero_mem _
-    | add x z _ _ hx hz => rw [Matrix.mulVec_add]; exact add_mem hx hz
-    | smul a x _ hx => rw [Matrix.mulVec_smul]; exact Submodule.smul_mem _ a hx
-  have hB : ∀ z ∈ Submodule.span D.host.E (LH : Set (Fin H.rank → D.host.E)),
-      o.iB *ᵥ z ∈ Submodule.span D.host.E (sumLatO o LW LH : Set (Fin B.rank → D.host.E)) := by
-    intro z hz
-    induction hz using Submodule.span_induction with
-    | mem x hx => exact Submodule.subset_span (iB_mem_sumLatO o LW hx)
-    | zero => rw [Matrix.mulVec_zero]; exact zero_mem _
-    | add x z _ _ hx hz => rw [Matrix.mulVec_add]; exact add_mem hx hz
-    | smul a x _ hx => rw [Matrix.mulVec_smul]; exact Submodule.smul_mem _ a hx
-  rw [← split_vec o y]
-  exact add_mem (hA _ (hW.span_eq_top ▸ Submodule.mem_top)) (hB _ (hH.span_eq_top ▸ Submodule.mem_top))
+  exact Submodule.IsLattice.of_fg D.host.E ((hW.fg.map _).sup (hH.fg.map _))
 
 theorem selfDual_sumLatO : ∀ (D : D7) (B W H : HSp D) (o : OrthDec B W H) (LW : Lat W) (LH : Lat H),
     IsSelfDualC W LW → IsSelfDualC H LH → IsSelfDualC B (sumLatO o LW LH) := by

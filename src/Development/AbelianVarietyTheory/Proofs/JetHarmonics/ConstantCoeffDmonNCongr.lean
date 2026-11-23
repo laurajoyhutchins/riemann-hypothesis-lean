@@ -1,7 +1,45 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Jets.JetsOnCopiesCompatibleFrames
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.UnifUniqSt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.TwistBCPf
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Jets.JetsOnCopiesCompatibleFrames
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -25,7 +63,7 @@ theorem coeff_mul_congr (N : ℕ) (f g E : PS k n d)
   rw [coeff_mul, coeff_mul]
   refine Finset.sum_congr rfl fun p hp => ?_
   have hp' : p.1 + p.2 = a := Finset.HasAntidiagonal.mem_antidiagonal.1 hp
-  have hd : p.1.degree + p.2.degree = a.degree := by rw [← hp', map_add]
+  have hd : p.1.degree + p.2.degree = a.degree := by rw [← hp', map_add (f := _)]
   rw [h p.1 (by omega)]
 
 theorem coeff_DofN_congr (F : Fin d → PS k 2 d) (b : Fin n) (v : Fin d → k) (N : ℕ) (f g : PS k n d)
@@ -34,14 +72,15 @@ theorem coeff_DofN_congr (F : Fin d → PS k 2 d) (b : Fin n) (v : Fin d → k) 
     coeff mo (DofN F b v f) = coeff mo (DofN F b v g) := by
   classical
   unfold DofN
+
   rw [map_sum, map_sum]
   refine Finset.sum_congr rfl fun j _ => ?_
   rw [coeff_mul, coeff_mul]
   refine Finset.sum_congr rfl fun p hp => ?_
   have hp' : p.1 + p.2 = mo := Finset.HasAntidiagonal.mem_antidiagonal.1 hp
-  have hd : p.1.degree + p.2.degree = mo.degree := by rw [← hp', map_add]
+  have hd : p.1.degree + p.2.degree = mo.degree := by rw [← hp', map_add (f := _)]
   rw [coeff_pderiv, coeff_pderiv, h]
-  rw [map_add, Finsupp.degree_single]
+  rw [map_add (f := _), Finsupp.degree_single]
   omega
 
 theorem coeff_iterate_DofN_congr (F : Fin d → PS k 2 d) (b : Fin n) (v : Fin d → k) (r : ℕ) :
@@ -86,7 +125,7 @@ theorem isLinearMap_DofN (F : Fin d → PS k 2 d) (b : Fin n) (v : Fin d → k) 
   constructor
   · intro f g
     unfold DofN
-    simp only [map_add, mul_add, Finset.sum_add_distrib]
+    simp only [map_add (f := _), mul_add, Finset.sum_add_distrib]
   · intro c f
     unfold DofN
     simp only [Derivation.map_smul, mul_smul_comm, Finset.smul_sum]
@@ -98,7 +137,7 @@ theorem isLinearMap_iterate {M : Type} [AddCommGroup M] [Module k M] (φ : M →
   | succ r ih =>
     constructor
     · intro f g
-      simp only [Function.iterate_succ_apply, hφ.map_add, ih.map_add]
+      simp only [Function.iterate_succ_apply, hφ.map_add (f := _), ih.map_add (f := _)]
     · intro c f
       simp only [Function.iterate_succ_apply, hφ.map_smul, ih.map_smul]
 
@@ -112,7 +151,7 @@ theorem isLinearMap_DmonN (F : Fin d → PS k 2 d) {Ix : Type} [Fintype Ix] (cp 
     constructor
     · intro f g
       simp only [List.foldr_cons]
-      rw [ih.map_add, hl.map_add]
+      rw [ih.map_add (f := _), hl.map_add (f := _)]
     · intro c f
       simp only [List.foldr_cons]
       rw [ih.map_smul, hl.map_smul]
@@ -121,6 +160,7 @@ theorem constantCoeff_DpolyN_eq (F : Fin d → PS k 2 d) {Ix : Type} [Fintype Ix
     (P : MvPolynomial Ix k) (f : PS k n d) (S : Finset (Ix →₀ ℕ)) (hS : P.support ⊆ S) :
     constantCoeff (DpolyN F cp u P f) = ∑ m ∈ S, P.coeff m * constantCoeff (DmonN F cp u m f) := by
   unfold DpolyN
+
   rw [map_sum]
   simp only [map_mul, constantCoeff_C]
   refine Finset.sum_subset hS fun m _ hm => ?_
@@ -148,6 +188,7 @@ theorem nabJet : NabJetSt := by
     rw [Finset.sum_comm]
     refine Finset.sum_congr rfl fun m _ => ?_
     have hl := NabJet.isLinearMap_DmonN (B.FK k) cp u m
+
     rw [Finset.sum_mul, ← IsLinearMap.mk'_apply hl, map_sum, map_sum, Finset.mul_sum]
     refine Finset.sum_congr rfl fun j _ => ?_
     rw [smul_mul_assoc, map_smul, IsLinearMap.mk'_apply, smul_eq_C_mul, map_mul, constantCoeff_C]

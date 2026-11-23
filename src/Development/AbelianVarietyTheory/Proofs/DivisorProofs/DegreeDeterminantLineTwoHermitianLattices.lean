@@ -1,8 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FrameCoord
-import Formalism.LocalRingCardinality.CoeNeZeroOfNotMem
-import Formalism.QuotientMetricDivisors.HermitianTwistDivisors.LcvBasis
-import Formalism.MirabolicMackeyTheory.MirabolicMackeyProofs.IdxRules
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FrameCoord
+public import Formalism.LocalRingCardinality.CoeNeZeroOfNotMem
+public import Development.AbelianVarietyTheory.Definitions.Foundations.ExistsFlatSecRankZero
+public import Formalism.MirabolicMackeyTheory.MirabolicMackeyProofs.IdxRules
+public import Formalism.QuotientMetricDivisors.HermitianTwistDivisors.LcvBasis
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+public import ReciprocityTheory.GeometryOfNumbers.LatticeCovolumes.ArakelovDegreeEqDegreeOfFamily
+import Development.AbelianVarietyTheory.Definitions.Divisors.AevalEqZeroOfMemConeIdeal
+import Development.AbelianVarietyTheory.Definitions.Divisors.HtValOnSubset
+
+@[expose] public section
 
 noncomputable section
 
@@ -189,8 +232,9 @@ theorem det_gram_smul (h : ReciprocityTheory.GeometryOfNumbersTheory.HermFam K (
 
 theorem det_gram_re_pos (h : ReciprocityTheory.GeometryOfNumbersTheory.HermFam K (Fin n → K)) (σ : K →+* ℂ) {m : ℕ}
     {u : Fin m → Fin n → K} (hu : LinearIndependent K u) : 0 < (h.gram σ u).det.re := by
-  have := (h.posDef σ m u hu).det_pos
-  exact (Complex.pos_iff.1 this).1
+  open scoped ComplexOrder in
+    have := (h.posDef σ m u hu).det_pos
+    exact (Complex.pos_iff.1 this).1
 
 theorem lineDeg_frame (h : ReciprocityTheory.GeometryOfNumbersTheory.HermFam K (Fin n → K)) {L : Submodule (𝓞 K) (Fin n → K)} (hL : L.FG)
     {m : ℕ} {u : Fin m → Fin n → K} (hu : LinearIndependent K u)

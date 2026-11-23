@@ -1,12 +1,56 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.TorusSections.ExistsSecTie
-import Development.AbelianVarietyTheory.Definitions.TorusSections.IsTorusOf
-import Formalism.LocalToGlobal.ProjectiveLattices.DataAtPointN3
-import Formalism.LocalToGlobal.ProjectiveLattices.LiesOverBaseChange
-import Formalism.SharpRestriction.Divisibility.GeneratorPowers.ETPoint
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.ExistsRosatiGen
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.ExistsRosatiGen
+public import Formalism.LocalToGlobal.ProjectiveLattices.BetaAtSymm
+public import Formalism.SharpRestriction.Divisibility.ModuliIntegralCharts
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.UniformisationConclusion
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsGoodIntegral
 import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.PsiCoordExistsUniqueUpToUnitLocal
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsGoodIntegral
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.LBLocalC
+import Development.AbelianVarietyTheory.Definitions.ThetaValues.IsNullVal
+import Development.AbelianVarietyTheory.Definitions.TorusSections.ExistsSecTie
+import Formalism.SharpRestriction.Divisibility.AbelianOpenPart.AbelianAt
+public import Formalism.SharpRestriction.Divisibility.AbelianOpenPart.IsOpenPart
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField IsLocalRing IsDedekindDomain
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Out ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.DVR Formalism.L2.Pj GlobalTheory.EtaForm GlobalTheory.EtaVal
@@ -91,9 +135,9 @@ theorem main : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (H : Geo.T
     linarith
   let β : P.D.toPre.X →ₗ[ℤ] P.D.toPre.X →ₗ[ℤ] ℝ :=
     LinearMap.mk₂ ℤ (fun a b => (QForm.bHom hϖ P.D hQ' a b : ℝ))
-      (fun a a' b => by simp only [map_add, AddMonoidHom.add_apply, Int.cast_add])
+      (fun a a' b => by simp only [map_add (f := _), AddMonoidHom.add_apply, Int.cast_add])
       (fun c a b => by simp only [map_zsmul, AddMonoidHom.smul_apply, smul_eq_mul, Int.cast_mul, zsmul_eq_mul, Int.cast_id])
-      (fun a b b' => by simp only [map_add, Int.cast_add])
+      (fun a b b' => by simp only [map_add (f := _), Int.cast_add])
       (fun c a b => by simp only [map_zsmul, smul_eq_mul, Int.cast_mul, zsmul_eq_mul, Int.cast_id])
   have hβ : ∀ a b, β a b = (QForm.bOf P.D.toPre Q a b : ℝ) := fun _ _ => rfl
   refine ⟨Q, ⟨β, fun a b => ?_, fun c c' hc a b => ?_⟩, hQ', h0, hβ, fun a => ?_, fun C _ f p _ hf a b => ?_⟩

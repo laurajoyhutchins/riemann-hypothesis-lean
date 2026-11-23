@@ -1,11 +1,49 @@
-import Mathlib
-import PositivityTheory.AutomorphicForms.PublishedInputs.CuspidalContinuity.ArchimedeanCuspidal.StripEstimates.FaceMapCompSuccAboveCastSucc
-import GroundTheory.GlobalFields.AnalyticClassNumber.DirichletHeckeCorrespondence
-import GroundTheory.GlobalFields.TateThesis.RootNumberLocalPlace
-import GroundTheory.GlobalFields.TateThesis.NonvanishingPrimes
-import GroundTheory.GlobalFields.KummerTheory.LocalIndexAtPlace
+module
 
-open Ad3 Ad3.S
+public import PositivityTheory.AutomorphicForms.PublishedInputs.CuspidalContinuity.ArchimedeanCuspidal.AdFormOf
+public import GroundTheory.GlobalFields.AnalyticClassNumber.DirichletHeckeLocal
+public import GroundTheory.GlobalFields.TateThesis.RootNumberLocalPlace
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
+open Ad3 (Pl Qv pOf)
 open NumberField IsDedekindDomain GroundTheory.Global GroundTheory.LocalField
 open GroundTheory.Automorphic.GodementSection (localChar coe_localChar)
 open GroundTheory.Global.RationalSymbol (prime)
@@ -35,54 +73,5 @@ theorem ord_uniformizer_eq_one (v : Pl) :
     h2.symm.trans h1
   have h4 := WithZero.exp_injective h3
   omega
-
-theorem coe_localChar_unifUnit {N : ℕ} [NeZero N] (χ : DirichletCharacter ℂ N) (v : Pl)
-    (hv : ¬ prime v ∣ N) :
-    χ (prime v : ZMod N) = (localChar (DirichletHecke.heckeCharacter χ) v (unifUnit (Qv v)) : ℂ) := by
-  obtain ⟨a, ha⟩ : ∃ a : (IsDedekindDomain.HeightOneSpectrum.adicCompletion ℚ v)ˣ,
-      a = unifUnit (Qv v) * (DirichletHecke.uniformizer v)⁻¹ := ⟨_, rfl⟩
-  have h1 := ord_units_mul (K := Qv v) (unifUnit (Qv v)) (DirichletHecke.uniformizer v)⁻¹
-  have h2 := ord_units_inv (K := Qv v) (DirichletHecke.uniformizer v)
-  have h3 := ord_unifUnit (K := Qv v)
-  have h4 := ord_uniformizer_eq_one v
-  have hord : ord ((unifUnit (Qv v) * (DirichletHecke.uniformizer v)⁻¹ : (Qv v)ˣ) : Qv v) = 0 := by
-    rw [h1, h2, h3, h4]; norm_num
-  have hval : Valued.v ((a : IsDedekindDomain.HeightOneSpectrum.adicCompletion ℚ v)) = 1 := by
-    rw [ha]
-    exact (GroundTheory.Global.valued_eq_one_iff_ord (Units.ne_zero _)).2 hord
-  have hmem : a ∈ (Submonoid.ofClass
-      (IsDedekindDomain.HeightOneSpectrum.adicCompletionIntegers ℚ v)).units := by
-    simp only [Submonoid.mem_units_iff, Units.val_inv_eq_inv_val]
-    constructor
-    · change ((a : IsDedekindDomain.HeightOneSpectrum.adicCompletion ℚ v)) ∈
-        IsDedekindDomain.HeightOneSpectrum.adicCompletionIntegers ℚ v
-      rw [IsDedekindDomain.HeightOneSpectrum.mem_adicCompletionIntegers]
-      exact hval.le
-    · change ((a : IsDedekindDomain.HeightOneSpectrum.adicCompletion ℚ v))⁻¹ ∈
-        IsDedekindDomain.HeightOneSpectrum.adicCompletionIntegers ℚ v
-      rw [IsDedekindDomain.HeightOneSpectrum.mem_adicCompletionIntegers, map_inv₀, hval, inv_one]
-  have hnorm := DirichletHecke.norm_padicRingEquiv_eq_one hmem
-  have htriv := DirichletHecke.heckeCharacter_finiteEmbedding_of_not_dvd χ hv hnorm
-  have hunif := DirichletHecke.coe_heckeCharacter_uniformizer χ hv
-  have hπ : (unifUnit (Qv v) : (IsDedekindDomain.HeightOneSpectrum.adicCompletion ℚ v)ˣ) =
-      a * DirichletHecke.uniformizer v := by
-    rw [ha]; simp
-  have key : ((localChar (DirichletHecke.heckeCharacter χ) v (unifUnit (Qv v)) : ℂˣ) : ℂ) =
-      ((DirichletHecke.heckeCharacter χ (IdeleClassGroup.mk ℚ
-        (IdeleGroup.finiteEmbedding v (a * DirichletHecke.uniformizer v))) : Circle) : ℂ) := by
-    rw [← hπ]; rfl
-  rw [key, map_mul, map_mul, map_mul, Circle.coe_mul, htriv, hunif]
-  simp
-
-theorem e1 : E1 := by
-  unfold E1
-  intro c hc M₀ hM₀
-  obtain ⟨N, hN, χ, -, hχ⟩ := DirichletHecke.exists_heckeCharacter_eq hc
-  haveI : NeZero (N * M₀) := ⟨Nat.mul_ne_zero (NeZero.ne N) (Nat.pos_iff_ne_zero.mp hM₀)⟩
-  refine ⟨N * M₀, inferInstance, DirichletCharacter.changeLevel (dvd_mul_right N M₀) χ,
-    dvd_mul_left M₀ N, ?_⟩
-  intro v hv
-  rw [pOf_eq_prime] at hv ⊢
-  rw [coe_localChar_unifUnit _ v hv, DirichletHecke.heckeCharacter_changeLevel, hχ]
 
 end GlobalTheory.CompanionTheory.HalfIntegral

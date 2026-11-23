@@ -1,5 +1,57 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.HtDefs
-import ReciprocityTheory.SemistableReduction.AlgAll
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.TheoremA
+public import ReciprocityTheory.SemistableReduction.ComapInclusionIsLocalHom
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RingTheory.DedekindDomain.AdicValuation.Valuation
+
+@[expose] public section
 
 namespace ReciprocityTheory.ChartRestriction.G.T0
 
@@ -120,7 +172,8 @@ theorem val_eval_eq_zero {Ω U σ : Type} [Field Ω] [Field U] [Algebra Ω U]
     first
       | (refine ⟨∑ β ∈ P.support, MvPolynomial.monomial β
             (⟨P.coeff β, hc β⟩ : (vRing w).comap (algebraMap Ω U)), ?_⟩
-         rw [map_sum]
+         set_option synthInstance.maxHeartbeats 100000 in
+           rw [map_sum]
          simp only [MvPolynomial.map_monomial]
          conv_rhs => rw [P.as_sum]
          rfl)
@@ -151,12 +204,12 @@ theorem val_eval_eq_zero {Ω U σ : Type} [Field Ω] [Field U] [Algebra Ω U]
     rfl
   have hα : P₀.coeff α = 1 := by
     apply Subtype.ext
-    have h3 := congrArg (MvPolynomial.coeff α) hP₀
+    have h3 := congrArg (AddMonoidAlgebra.coeff · α) hP₀
     rw [MvPolynomial.coeff_map, h1] at h3
     exact h3
   have hne0 : MvPolynomial.map (residue ((vRing w).comap (algebraMap Ω U))) P₀ ≠ 0 := by
     intro h0
-    have h4 := congrArg (MvPolynomial.coeff α) h0
+    have h4 := congrArg (AddMonoidAlgebra.coeff · α) h0
     rw [MvPolynomial.coeff_map, MvPolynomial.coeff_zero, hα, map_one] at h4
     exact one_ne_zero h4
   have hne : residue (vRing w) (MvPolynomial.eval₂
@@ -318,7 +371,8 @@ theorem indep_u {K Ω U τ : Type} [Field K] [NumberField K] [Field Ω] [Field U
     push Not at hall
     apply hne
     ext α
-    rw [MvPolynomial.coeff_map, MvPolynomial.coeff_zero, RingHom.comp_apply, residue_eq_zero_iff]
+    rw [MvPolynomial.coeff_map, AddMonoidAlgebra.coeff_zero, Finsupp.zero_apply, RingHom.comp_apply,
+      residue_eq_zero_iff]
     exact (mem_max_iff ν _).mpr ((hpos _).mpr (hall α))
   have hw0 : ¬ 0 < w (MvPolynomial.eval₂ ((algebraMap Ω U).comp
       ((algebraMap K Ω).comp (algebraMap (𝓞 K) K))) (fun j => (u j : U)) P') := by

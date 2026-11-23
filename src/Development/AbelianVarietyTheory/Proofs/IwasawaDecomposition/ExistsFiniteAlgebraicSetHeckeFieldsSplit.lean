@@ -1,9 +1,57 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.FieldValuesMemFixedField
-import Formalism.LocalToGlobal.Columns.PathCountSymmetricHolds
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.SameCfgRefl
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.RowsLiftsHeckeOperatorsCommute
-import Formalism.LocalToGlobal.Columns.ColumnsProofs.HeckeFieldSplit
+module
+
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.SameCfgRefl
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.FixedCoefficientFieldInComplex
+public import Formalism.LocalToGlobal.Columns.ColumnsProofs.HFSSplit
+public import Formalism.LocalToGlobal.Columns.HeckeInert
+public import Formalism.LocalToGlobal.Divisibility.DivisionHeightBoundColumns
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.RowsLiftsHeckeOperatorsCommute
+public import Formalism.LocalToGlobal.Columns.ColumnsProofs.HeckeFieldSplit
+import Formalism.LocalToGlobal.Columns.GSetLemmas
+import Formalism.LocalToGlobal.Columns.RowFormsLemmas
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.StableIffCarrierEq
+public import Formalism.LocalToGlobal.Columns.ColumnsProofs.HFSData
+import Formalism.LocalToGlobal.HilbertRowConditions.CenterIdempotentAction
+import Formalism.LocalToGlobal.IndefiniteReal.LinksDefs
+import Formalism.LocalToGlobal.IndefiniteReal.RecTie
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.MainNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.MainNotions.S MeasureTheory IsDedekindDomain NumberField Matrix Formalism.L2.Theta Formalism.L2.DIV Formalism.L2.Indef Formalism.IndefR Formalism.IndefR.Links Formalism.IndefR.Mult Formalism.IndefR.Datum Formalism.IndefR.Cx
 open scoped TensorProduct InnerProductSpace
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
@@ -17,11 +65,11 @@ theorem chiC_apply {B : Base} {px : PreX B.toPre} (I : Col2.ColIn B px) (j : Fin
     (w : {w // w ∈ (B.primes px).vGs}) (y : 𝓞 B.host.E) (hu : IsUnit (Ideal.Quotient.mk w.1.asIdeal y)) :
     chiC I j w.1 y = B.embLL ((I.Ch.chi j w hu.unit : B.LLˣ) : B.LL) := by
   unfold chiC
-  rw [dif_pos w.2, dif_pos hu]
+  rw [dite_eq_left w.2, dite_eq_left hu]
 
 theorem qC_xi {B : Base} {px : PreX B.toPre} {I : Col2.ColIn B px} (hI : I.Ok) (a : I.ι) : qC I (I.xi a) = I.Q a := by
   unfold qC
-  rw [dif_pos ⟨a, rfl⟩]
+  rw [dite_eq_left ⟨a, rfl⟩]
   congr 1
   exact hI.xi_inj (Exists.choose_spec (⟨a, rfl⟩ : ∃ a', I.xi a' = I.xi a))
 
@@ -37,7 +85,7 @@ theorem mtTyQ_congr {X : Fields} (R : Ranks) {ξ ξ' : Chr X.F X.E X.K} (h : ξ 
   subst h
   rfl
 
-set_option maxHeartbeats 6000000 in
+
 theorem core (B0 : Base) (px0 : PreX B0.toPre) (I0 : Col2.ColIn B0 px0) (B : Base) (px : PreX B.toPre)
     (I : Col2.ColIn B px) (hX0 : B0.fields.Ok) (hI0 : I0.Ok) (hI : I.Ok) (hcfg : SameCfg B px I B0 px0 I0)
     (ι : B0.LL →+* B.LL) (hι : B.embLL.comp ι = B0.embLL) (a : I.ι) :
@@ -202,6 +250,7 @@ theorem transp : ∀ (B0 : Base) (px0 : PreX B0.toPre) (I0 : Col2.ColIn B0 px0),
       have hb : ∀ i, B0.embLL (bas i) ∈ B.LLC := fun i =>
         hs _ (Finset.mem_union_left _ (Finset.mem_image_of_mem _ (Finset.mem_univ i)))
       have hx : B0.embLL x ∈ B.LLC := by
+
         rw [← bas.sum_repr x, map_sum]
         refine sum_mem fun i _ => ?_
         rw [map_rat_smul]
@@ -213,7 +262,7 @@ theorem transp : ∀ (B0 : Base) (px0 : PreX B0.toPre) (I0 : Col2.ColIn B0 px0),
         map_one' := B.embLL.injective (by rw [hf, map_one, map_one])
         map_mul' := fun x y => B.embLL.injective (by rw [hf, map_mul, map_mul, hf, hf])
         map_zero' := B.embLL.injective (by rw [hf, map_zero, map_zero])
-        map_add' := fun x y => B.embLL.injective (by rw [hf, map_add, map_add, hf, hf]) }
+        map_add' := fun x y => B.embLL.injective (by rw [hf, map_add (f := _), map_add (f := _), hf, hf]) }
     have hι : B.embLL.comp ι = B0.embLL := RingHom.ext hf
     have hsp : ∀ p : B0.LL[X], (∀ z ∈ rts p, z ∈ s) → (p.map ι).Splits := fun p hp =>
       splits_of_roots_mem B0.embLL B.embLL ι hι p fun z hz => hs z (hp z (Multiset.mem_toFinset.2 hz))

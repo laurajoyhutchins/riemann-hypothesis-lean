@@ -1,26 +1,69 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.MetricPeriods.Pull1
-import Development.AutomorphicSpectrum.Definitions.MetricPeriods.IsPeriodOn
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.UpVApply
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.FlagModelBaseProjectionPoints
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.LogResolutionFromOrbitCharts
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.HoloMapOfLocalProductCharts
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.MinorIJLowerUniSwapStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.PMatStepColsEntryStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.ExistsLowerUniBlockDiagFactorizationStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.BlockMapFrameRestrictionStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.BlockMapFrameRestrictionRegularStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.FrameDataLocalResolutionOpenStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.FrameDataLocalResolutionRegularStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.CardPIdxEqChooseStatement
+module
+
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.IsBaseChart
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.BlockMapFrameRestrictionStatement
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.CardPIdxEqChooseStatement
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.ChartImmersion
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.FrameDataLocalDegreeBoundStatement
 import Development.AutomorphicSpectrum.Proofs.MetricProofs.FrameDataLocalDegreeEstimateStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.FrameDataLocalDegreeBoundStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.FrameDataLocalNormComparisonStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.PRhoContinuousStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.UpVSmul
 import Development.AutomorphicSpectrum.Proofs.MetricProofs.FrameDataLocalIntegrabilityStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.MinorMulSelf
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.ChartImmersion
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.FrameDataLocalNormComparisonStatement
+import Development.AutomorphicSpectrum.Proofs.MetricProofs.FrameDataLocalResolutionOpenStatement
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.FrameDataLocalResolutionRegularStatement
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.HoloMapOfLocalProductCharts
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.LogResolutionFromOrbitCharts
+import Development.AutomorphicSpectrum.Proofs.MetricProofs.LogResolutionFunctorialHolomorphic
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.MinorMulSelf
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.PRhoContinuousStatement
+import Development.AutomorphicSpectrum.Proofs.MetricProofs.SncResolutionCompactEmbedded
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.UpVSmul
+import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PCoordConeArithVar
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterBridgeB
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterMinor
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.FiniteMinimalPrimes
+
+@[expose] public section
+
 open MvPolynomial MeasureTheory Filter Topology Matrix ReciprocityTheory.AnForm ReciprocityTheory.AnForm.M ReciprocityTheory.AnForm.P ReciprocityTheory.ChartRestriction.G.Geo ReciprocityTheory.ChartRestriction.G.AI.I1 ReciprocityTheory.ChartRestriction.G.AI.I2 ReciprocityTheory.ChartRestriction.G.AI.I4 GlobalTheory.CompanionTheory.Ar.PB GroundTheory.Heights₂.Heights GroundTheory.Heights₂.Heights.LowerBoundFree
 open scoped ComplexOrder Classical
 open GlobalTheory.CompanionTheory.Ar.PB.WSq GlobalTheory.CompanionTheory.Ar.PB.WMan
@@ -174,7 +217,7 @@ theorem main : ∀ (K : Type) [Fintype K] (ι : K → Type) [∀ k, Fintype (ι 
     have hc'κ : ∀ k', c' (κ k') = c k' := fun k' => by
       have hk : ∃ k'', κ k'' = κ k' := ⟨k', rfl⟩
       simp only [c']
-      rw [dif_pos hk, hb.1 hk.choose_spec]
+      rw [dite_eq_left hk, hb.1 hk.choose_spec]
     have hyP : IsMultiHomogIdeal (mCoordIdeal y) := GroundTheory.Heights₂.Heights.CoordinateConeArithVar.isMultiHomogIdeal _
     refine ⟨fun p => c' p.1 * z₀ p, mcPts_smul hyP c' hc'0 hz₀, ?_, ?_⟩
     · funext q

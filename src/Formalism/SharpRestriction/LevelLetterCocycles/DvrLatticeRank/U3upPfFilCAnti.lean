@@ -1,9 +1,49 @@
-import Formalism.SharpRestriction.LevelLetterCocycles.UpPositionHypothesis
-import Formalism.SharpRestriction.LevelLetterCocycles.DeltaInvariantUniformizer
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.DownSlotProposition
+public import Formalism.SharpRestriction.LevelLetterCocycles.SplitROfSteps
+public import Formalism.SharpRestriction.LevelLetterCocycles.DvrLatticeRank.FrobPiNPf
 import Formalism.SharpRestriction.LevelLetterCocycles.MapCompZero
-import Formalism.SharpRestriction.LevelLetterCocycles.DvrLatticeRank.NinLamPf
-import Formalism.SharpRestriction.LevelLetterCocycles.DvrLatticeRank.GamPiPf
-import Formalism.SharpRestriction.LevelLetterCocycles.DvrLatticeRank.FrobPiNPf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.Interval.Finset.Box
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -31,7 +71,7 @@ theorem u3upPf_FilC_anti (T : LocLat G Qp LL O) (τ : K →ₐ[Qp] LL) {a a' : �
     induction z using TensorProduct.induction_on with
     | zero => rw [map_zero]; exact Submodule.zero_mem _
     | tmul u w => exact ⟨u ⊗ₜ ⟨(w : BdR), PD.Fil_anti k w.2⟩, rfl⟩
-    | add z z' hz hz' => rw [map_add]; exact Submodule.add_mem _ hz hz'
+    | add z z' hz hz' => rw [map_add (f := _)]; exact Submodule.add_mem _ hz hz'
   have hA : Antitone fun k => FildR PD T.ρ τ k := antitone_int_of_succ_le hs
   unfold Formalism.MainNotions.DeltaInvariantLattices.FilC
   exact sup_le_sup_right (hA h) _
@@ -160,11 +200,6 @@ theorem u3upPf_ofR (D : D7) (HW : HWOf D.loc) (hMF : modelFR D HW) (hW : wKillR 
   have hxN := u3upPf_memNL _ T₂ _ π' _ h' S up b c (fun ζ τ hpt => u3upPf_pt_over D HW hG c ζ τ hpt)
     hall f hf x hx hFil
   exact u3upPf_lift _ F _ π' _ h' _ _ c α β hMF2 hM hW' hNL1 hG1 hG2 _ h1 hxN y hy hα
-
-theorem u3upPf_step (hMF : ModelFStep) (hW : WStep) : UpSlotHypothesis := by
-  intro D HW F Cm CA CB CK hA
-  exact u3upPf_ofR D HW (hMF D HW F Cm CA CB CK hA) (hW D HW F Cm CA CB CK hA)
-    (ninlam_pf D HW F Cm CA CB CK hA) (gamPiCondition D HW F Cm CA CB CK hA)
 
 end Formalism.MainNotions.N.Ln34
 

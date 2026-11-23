@@ -1,5 +1,47 @@
-import Mathlib
-import Formalism.LocalToGlobal.IndefiniteReal.CutTuples2
+module
+
+public import Formalism.LocalToGlobal.IndefiniteReal.CutTuples2
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Module
 open scoped InnerProductSpace
@@ -43,13 +85,13 @@ variable {Bs : DefBase K} {A : DefAmb Bs} (X : CxData A)
 theorem jR_opR (hR : X.KFormR) (t : Bs.Tup) (i : A.OpR t) (x : A.FR t) :
     X.jR t (A.opR t i x) = X.opC t i (X.jR t x) := by
   unfold opC
-  rw [dif_pos (hR t)]
+  rw [dite_eq_left (hR t)]
   exact semilin_comp_eq_constr _ (X.jR t) (hR t).1 (hR t).2.ge (A.opR t i) x
 
 theorem jL_opL (hL : X.KFormL) (j : Bs.J) (t : Bs.Tup) (i : A.OpL j t) (x : A.FL j t) :
     X.jL j t (A.opL j t i x) = X.opLC j t i (X.jL j t x) := by
   unfold opLC
-  rw [dif_pos (hL j t)]
+  rw [dite_eq_left (hL j t)]
   exact semilin_comp_eq_constr _ (X.jL j t) (hL j t).1 (hL j t).2.ge (A.opL j t i) x
 
 theorem cutStable : X.CutStable := by

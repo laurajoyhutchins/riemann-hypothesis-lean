@@ -1,9 +1,57 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.ChartGen
-import Development.AbelianVarietyTheory.PublishedTheorems.DiscreteSeriesUnitary₂.MaxMass
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsShortVectorIntegralHermitianLatticeRankOneStatement
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.EncardShortVectorsLeStatement
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ImportsRest
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.ChartGen
+public import Formalism.HermitianLattices.StatementMass
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.EncardShortVectorsLeStatement
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsShortVectorIntegralHermitianLatticeRankOneStatement
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ImportsRest
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField Matrix GlobalTheory.Mass Formalism.HermitianLatticesTheory
 open scoped ENNReal Classical
@@ -14,29 +62,31 @@ section
 variable {K V : Type} [Field K] [NumberField K] [AddCommGroup V] [Module K V]
   [Module (𝓞 K) V] [IsScalarTower (𝓞 K) K V]
 
-theorem exists_smul_mem (L : Submodule (𝓞 K) V) (hL : Submodule.IsLattice K L) (x : V) :
-    ∃ r : 𝓞 K, r ≠ 0 ∧ r • x ∈ L := by
-  first
-  | exact @_root_.GlobalTheory.SmulMemSpan.exists_smul_mem
-  | exact _root_.GlobalTheory.SmulMemSpan.exists_smul_mem
-  | (apply _root_.GlobalTheory.SmulMemSpan.exists_smul_mem <;> assumption)
-  | (intros; apply _root_.GlobalTheory.SmulMemSpan.exists_smul_mem <;> assumption)
-  | (intros; apply @_root_.GlobalTheory.SmulMemSpan.exists_smul_mem <;> first | assumption | infer_instance)
-  | (intros; exact _root_.GlobalTheory.SmulMemSpan.exists_smul_mem ..)
+theorem exists_smul_mem (L : Submodule (𝓞 K) V) (hL : Submodule.IsFullLattice K L) (x : V) :
+    ∃ r : 𝓞 K, r ≠ 0 ∧ r • x ∈ L :=
+  _root_.GlobalTheory.SmulMemSpan.exists_smul_mem L hL x
 
 theorem latIn_isLattice (L : Submodule (𝓞 K) V) (hL : Submodule.IsLattice K L) (U : Submodule K V) :
     Submodule.IsLattice K (latIn U L) := by
   refine ⟨?_, ?_⟩
   · refine Submodule.fg_of_fg_map_injective (U.subtype.restrictScalars (𝓞 K)) U.injective_subtype ?_
     exact Submodule.FG.of_le hL.fg (Submodule.map_comap_le _ _)
-  · rw [eq_top_iff]
-    intro u _
-    obtain ⟨r, hr, hu⟩ := exists_smul_mem L hL (u : V)
-    have h1 : algebraMap (𝓞 K) K r ≠ 0 := by simpa using hr
-    have h2 : r • u ∈ Submodule.span K (latIn U L : Set U) := Submodule.subset_span hu
-    rw [← algebraMap_smul K r] at h2
-    exact (Submodule.smul_mem_iff _ h1).1 h2
-
+  · intro s hs hli
+    exact (LinearIndependent.iff_fractionRing _ _).mp hli
+theorem latIn_isFullLattice (L : Submodule (𝓞 K) V) (hL : Submodule.IsFullLattice K L)
+    (U : Submodule K V) : Submodule.IsFullLattice K (latIn U L) := by
+  let _ := latIn_isLattice L hL.toIsLattice U
+  refine ⟨?_⟩
+  apply eq_top_iff.mpr
+  intro x _
+  obtain ⟨r, hr, hx⟩ := exists_smul_mem L hL (x : V)
+  have hrK : algebraMap (𝓞 K) K r ≠ 0 := by simpa using hr
+  have hx' : r • x ∈ latIn U L := hx
+  have hmem : r • x ∈ Submodule.span K (latIn U L : Set U) := Submodule.subset_span hx'
+  have hmem' := (Submodule.span K (latIn U L : Set U)).smul_mem
+    (algebraMap (𝓞 K) K r)⁻¹ hmem
+  rw [← algebraMap_smul K r x, smul_smul, inv_mul_cancel₀ hrK, one_smul] at hmem'
+  exact hmem'
 end
 
 theorem one_le_rd (K : Type) [Field K] [NumberField K] : 1 ≤ 2 * vInv K := by
@@ -78,7 +128,7 @@ theorem main : ∀ (K V : Type) [Field K] [NumberField K] [StarRing K] [AddCommG
       rintro U ⟨hU, hd⟩
       obtain ⟨x, hx, hx0, hxB⟩ := GlobalTheory.T.exists_short_vector_integralHermitianLattice_rank_one K U (hRes h U) hK ⟨fun x y => hs.eq x y⟩
         (fun τ x hx => hp τ x (by simpa using hx)) hU (latIn U L)
-        ⟨latIn_isLattice L hL.1 U, fun x hx y hy => hL.2 x hx y hy⟩
+        ⟨latIn_isFullLattice L hL.1 U, fun x hx y hy => hL.2 x hx y hy⟩
       rw [hd] at hxB
       refine ⟨x, ⟨hx, hxB⟩, ?_⟩
       refine Submodule.eq_of_le_of_finrank_eq ((Submodule.span_singleton_le_iff_mem _ _).2 x.2) ?_

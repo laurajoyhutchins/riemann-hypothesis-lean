@@ -1,4 +1,42 @@
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsUnifAt
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IsUnifAt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -14,7 +52,7 @@ def phase (e : InfinitePlace E → ℤ) (R : E) (v : InfinitePlace E) : ℂ :=
   (v.embedding R / (‖v.embedding R‖ : ℂ)) ^ e v * ‖v.embedding R‖
 
 def unit2 (a b : ℕ) (w : Pl E) : GLw a w × GLw b w → ℂ :=
-  (((GlobalTheory.LFun.KGL w a).prod (GlobalTheory.LFun.KGL w b) : Subgroup (GLw a w × GLw b w)) : Set (GLw a w × GLw b w)).indicator 1
+  (((GlobalTheory.LFun.KGL w (n := a)).prod (GlobalTheory.LFun.KGL w (n := b)) : Subgroup (GLw a w × GLw b w)) : Set (GLw a w × GLw b w)).indicator 1
 
 def muAt (μ : HChar E) (w : Pl E) (x : E) : ℂ :=
   if h : algebraMap E (w.adicCompletion E) x ≠ 0 then (μ.loc w (Units.mk0 _ h) : ℂ) else 0
@@ -53,15 +91,6 @@ def DeltaProd : Prop := ∀ (E : Type) [Field E] [NumberField E] [IsCMField E], 
   ∀ (a b : ℕ) (P₁ P₂ : E[X]), P₁ ∈ Ell E a → P₂ ∈ Ell E b → IsCoprime P₁ P₂ →
     (Function.mulSupport fun w : Pl E => delta w (μ.loc w) (atPl w P₁) (atPl w P₂)).Finite ∧
       (∏ᶠ w ∈ S, delta w (μ.loc w) (atPl w P₁) (atPl w P₂)) * ∏ v, phase e (resultant P₁ P₂) v = 1
-
-def StOne : Prop := ∀ (E : Type) [Field E] [NumberField E] [IsCMField E], Unr E → ∀ (n : ℕ) (w : Pl E) (Q : (w.adicCompletionIntegers E)[X]), Q.Monic → Q.natDegree = n →
-  Q.Separable → IsUnit (Q.coeff 0) → (2 : 𝓞 E) ∉ w.asIdeal →
-  (IsSplitAt w ∨ ∃ δ : GLw n w, (nrmL n w δ).val.charpoly = Q.map (algebraMap _ (w.adicCompletion E))) →
-    stTw n w (Q.map (algebraMap _ (w.adicCompletion E))) ((GlobalTheory.LFun.KGL w n : Set (GLw n w)).indicator 1) = 1
-
-def StTens : Prop := ∀ (E : Type) [Field E] [NumberField E] [IsCMField E], Unr E → ∀ (a b : ℕ) (w : Pl E) (Q₁ Q₂ : (w.adicCompletion E)[X]), Q₁.Separable → Q₂.Separable →
-  stTw2 a b w Q₁ Q₂ (unit2 a b w) =
-    stTw a w Q₁ ((GlobalTheory.LFun.KGL w a : Set (GLw a w)).indicator 1) * stTw b w Q₂ ((GlobalTheory.LFun.KGL w b : Set (GLw b w)).indicator 1)
 
 def StAA : Prop := ∀ (E : Type) [Field E] [NumberField E] [IsCMField E], Unr E → ∀ (a b : ℕ) (P₁ P₂ : E[X]), P₁ ∈ Ell E a → P₂ ∈ Ell E b →
   ∀ᶠ w : Pl E in cofinite, stTw2 a b w (atPl w P₁) (atPl w P₂) (unit2 a b w) = 1

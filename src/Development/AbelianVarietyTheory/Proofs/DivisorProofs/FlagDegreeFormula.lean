@@ -1,8 +1,56 @@
-import Mathlib
-import Formalism.DegreeFormula.PointDegree.PowSum
-import Formalism.DegreeFormula.PointDegree.PermExpInj
-import Development.AbelianVarietyTheory.Definitions.Foundations.CurveCl
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FlagDegreeVandermonde
+module
+
+public import Formalism.DegreeFormula.FlagDegFormula
+public import Formalism.DegreeFormula.PointDegree.PowSum
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+public import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Data.Nat.Factorial.SuperFactorial
+public import Mathlib.LinearAlgebra.Matrix.Determinant.Basic
+public import Mathlib.LinearAlgebra.Vandermonde
+
+@[expose] public section
 
 open MvPolynomial Finset Formalism.DegreeFormula
 
@@ -11,7 +59,7 @@ namespace GlobalTheory.FlagPoly
 open MvPolynomial Finset in
 private theorem coeff_linearForm_pow_eq_factorial_mul_prod {σ : Type} [Fintype σ] [DecidableEq σ] (c : σ → ℝ) (n : ℕ)
     (d : σ →₀ ℕ) (hd : d.degree = n) :
-    coeff d ((∑ x, C (c x) * X x) ^ n) =
+    AddMonoidAlgebra.coeff ((∑ x, C (c x) * X x) ^ n) d =
       (n.factorial : ℝ) * ∏ x, (c x ^ d x / ((d x).factorial : ℝ)) := by
   rw [Finset.sum_pow_eq_sum_piAntidiag, coeff_sum]
   simp_rw [mul_pow, Finset.prod_mul_distrib, ← map_pow, ← map_prod,
@@ -84,8 +132,8 @@ private theorem sum_sign_prod_pow_div_factorial_eq_prod {N : ℕ} (v : Fin N →
   ext k
   simp
 
-open MvPolynomial Finset in
 
+open MvPolynomial Finset in
 theorem _root_.GlobalTheory.FlagPoly.flagDegFormula : _root_.Formalism.DegreeFormula.FlagDegFormula := by
   unfold _root_.Formalism.DegreeFormula.FlagDegFormula
   intro ι _ _ N lam

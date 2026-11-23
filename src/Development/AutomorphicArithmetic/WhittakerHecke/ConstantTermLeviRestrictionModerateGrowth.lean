@@ -1,7 +1,52 @@
-import Development.AutomorphicArithmetic.Foundations.Convolution.BlockHeckeSlices.CapRDefs
-import Development.AutomorphicArithmetic.Foundations.Convolution.BlockHeckeSlices.ContinuousLev
-import Development.AutomorphicArithmetic.Foundations.Convolution.BlockHeckeSlices.CuspidalNormBounds.GoodSmul
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TransposeMulIncl
+module
+
+public import Development.AutomorphicArithmetic.Foundations.Convolution.BlockHeckeSlices.Summand
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TransposeMulIncl
+public import Development.AutomorphicArithmetic.Foundations.Convolution.BlockHeckeSlices.ContinuousLev
+public import Development.AutomorphicArithmetic.Foundations.Convolution.BlockHeckeSlices.CuspidalNormBounds.GoodSmul
+import GroundTheory.AutomorphicForms.CuspidalDiscreteness.CuspFormsHeight
+import GroundTheory.GlobalFields.Adele.Topology
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open MeasureTheory NumberField GlobalTheory.CuspRep GlobalTheory.CompanionTheory.CTFin
 open GroundTheory.Automorphic GroundTheory.Automorphic.Reduction GroundTheory.Automorphic.RightCosetSpace UpperTheory.ConvolutionTheory.BW
 
@@ -65,7 +110,7 @@ private theorem emb_eq {R : Type} [CommRing R] (g : GL (Fin r) R) : embGL (Fin.c
       simp [Matrix.one_apply, this]
     | right j => simp [Matrix.one_apply]
 
-variable [IsTotallyComplex E]
+variable [_root_.NumberField.IsTotallyComplex E]
 
 private theorem uc_slice (f : Fin r ↪ Fin (r + s)) (g : GA E (r + s)) (u : UC E r) :
     ∃ u' : UC E (r + s), ∀ F, uC E r u (GlobalTheory.GLSlice.slice f g F) = GlobalTheory.GLSlice.slice f g (uC E (r + s) u' F) := by
@@ -80,7 +125,7 @@ private theorem uc_slice (f : Fin r ↪ Fin (r + s)) (g : GA E (r + s)) (u : UC 
   | add x y _ _ hx hy =>
     obtain ⟨a, ha⟩ := hx
     obtain ⟨b, hb⟩ := hy
-    exact ⟨a + b, fun F => by rw [map_add, map_add, LinearMap.add_apply, LinearMap.add_apply, map_add, ha, hb]⟩
+    exact ⟨a + b, fun F => by rw [map_add (f := _), map_add (f := _), LinearMap.add_apply, LinearMap.add_apply, map_add (f := _), ha, hb]⟩
   | mul x y _ _ hx hy =>
     obtain ⟨a, ha⟩ := hx
     obtain ⟨b, hb⟩ := hy
@@ -100,7 +145,7 @@ private def stab {n : ℕ} (ψ : Sm E n) : Subgroup (GL (Fin n) (Af E)) where
 end
 
 theorem UpperTheory.constantTerm_leviRestriction_moderateGrowth :
-    ∀ (E : Type) [Field E] [NumberField E] [IsTotallyComplex E] (r s : ℕ) (φ : Sm E (r + s)) (Φ : Sm E r) (x : GA E r) (m : GA E s), 0 < r → Umg φ →
+    ∀ (E : Type) [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] (r s : ℕ) (φ : Sm E (r + s)) (Φ : Sm E r) (x : GA E r) (m : GA E s), 0 < r → Umg φ →
           (∀ γ : GL (Fin r) E, x * ratGL E r γ = ratGL E r γ * x) →
           (∀ g, Φ.1 g = AutomorphicForm.constantTerm r φ.1 (lev (Ad E) r s (x * g, m))) → Umg Φ := by
   intro E _ _ _ r s φ Φ x m _ hφ hx hΦ

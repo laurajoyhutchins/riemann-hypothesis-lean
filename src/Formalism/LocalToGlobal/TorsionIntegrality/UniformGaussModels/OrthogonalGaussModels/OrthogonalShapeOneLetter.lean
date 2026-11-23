@@ -1,10 +1,51 @@
-import Formalism.LocalToGlobal.TorsionIntegrality.UniformGaussModels.OrthShapeOne
-import Formalism.LocalToGlobal.TorsionIntegrality.TorsionTranslationPowers.FacShapeZero
-import Formalism.LocalToGlobal.TorsionIntegrality.TorsionTranslationPowers.NonsingularJetNorms.Joints
-import Formalism.LocalToGlobal.TorsionIntegrality.TorsionTranslationPowers.NonsingularJetNorms.CmIntegralityOfTorsionPoints
-import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.KummerThetaLogarithms.SecondLevelOfNormHolds
-import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.KummerThetaLogarithms.ComplexMultiplicationFieldData
-import Formalism.LocalToGlobal.TorsionIntegrality.FrobeniusFibreCurves.LogarithmicSubstitution.BaseChangeCompatible
+module
+
+public import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.StatementE
+public import Formalism.LocalToGlobal.TorsionIntegrality.TorsionTranslationPowers.IsTransSys
+public import Formalism.LocalToGlobal.TorsionIntegrality.UniformGaussModels.IsHypPair
+public import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.KummerThetaLogarithms.ComplexMultiplicationFieldData
+public import Formalism.LocalToGlobal.TorsionIntegrality.TorsionTranslationPowers.NonsingularJetNorms.CmIntegralityOfTorsionPoints
+public import Formalism.LocalToGlobal.TorsionIntegrality.TorsionTranslationPowers.NonsingularJetNorms.Joints
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 open scoped BigOperators
@@ -43,63 +84,5 @@ theorem cc_ph (l : ℕ) [Fact l.Prime] (hl : 2 ≤ l) (g2 g3 s2 ε : MaximalUnra
 end ConjugatePartitionShape
 
 open ConjugatePartitionShape
-
-theorem orthogonal_shape_one_letter : OrthShapeOne := by
-  intro l _ hl L ι g2 g3 ε s2 h2 h3 hs2 hg2 hg3 hD hε hθ n _ ω₀ hω hω2 κ _ r s N hr hN hlN hs
-  choose V hV hVe using fun k i =>
-    factors l hl L ι g2 g3 ε s2 h2 h3 hs2 hg2 hg3 hD hε hθ ω₀ hω hω2 N hN hlN (s k i) (hs k i)
-  obtain ⟨e, hI⟩ := Formalism.L2.Th1.E.prodInt ℂ_[l] κ n
-    (PowerSeries.map (MaximalUnramifiedExtension l).subtype (phFF l g2 g3 s2 ε)) r V (cc_ph l (by omega) g2 g3 s2 ε) hr hV
-  refine ⟨_, hI, ?_⟩
-  simp only [hVe] at e
-  exact e
-
-theorem OrthShape_of (hC : CalcC) : OrthShape := by
-  intro l _ hl L ι g2 g3 ε s2 h2 h3 hs2 hg2 hg3 hD hε hθ σ hU F hF hN N0 N1 ιr _ _ n _ f f' hff
-    ω₀ hω hω2 κ _ r s N hr hN0 hlN hs
-  have hl2 : 2 ≤ l := by omega
-  choose V hV hVe using fun k i =>
-    factors l hl L ι g2 g3 ε s2 h2 h3 hs2 hg2 hg3 hD hε hθ ω₀ hω hω2 N hN0 hlN (s k i) (hs k i)
-  obtain ⟨hFr, hF1, hall, hbin⟩ := hC l hl g2 g3 ε s2 hg2 hg3 hε hθ σ hU F hF hN
-  obtain ⟨hf, hf', hG1, hG2, hG3⟩ := hff
-  have hσ : ∀ a : MaximalUnramifiedExtension l, ‖a‖ ≤ 1 → ‖σ a‖ ≤ 1 := (frobSq (MaximalUnramifiedExtension l) l σ hU).2
-  let _ : StarRing (BrC.Osub σ) := BrC.starO hσ
-  have gram : ∀ (a b : ιr × Fin N0 × Fin N1 → n → MaximalUnramifiedExtension l)
-      (ha : ∀ e i, ‖a e i‖ ≤ 1 ∧ σ (σ (a e i)) = a e i) (hb : ∀ e i, ‖b e i‖ ≤ 1 ∧ σ (σ (b e i)) = b e i)
-      (e e' : ιr × Fin N0 × Fin N1) (c : BrC.Osub σ), ∑ i, σ (a e i) * b e' i = c.1 →
-      ∑ i, star (⟨a e i, BrC.mem_Osub.2 (ha e i)⟩ : BrC.Osub σ) *
-        (⟨b e' i, BrC.mem_Osub.2 (hb e' i)⟩ : BrC.Osub σ) = c := by
-    intro a b ha hb e e' c h
-    apply Subtype.ext
-    rw [← h, AddSubmonoidClass.coe_finsetSum]
-    rfl
-  obtain ⟨U0, Φ, hU0, hΦ0, hΦ, hE⟩ := Formalism.L2.Th1.E.intHyp ℂ_[l] (unitBall ℂ_[l]) (fun _ => Iff.rfl)
-    (lgF ℂ_[l] l) (expF ℂ_[l] l) (PowerSeries.map (MaximalUnramifiedExtension l).subtype (phFF l g2 g3 s2 ε)) hFr
-    (BrC.Osub σ) ((MaximalUnramifiedExtension l).subtype.comp (BrC.Osub σ).subtype)
-    (fun α => (hall α.1 α.2.1 α.2.2).1)
-    (fun z hz => hbin z.1 z.2.1 (congrArg Subtype.val hz))
-    hF1
-    (fun α => (hall α.1 α.2.1 α.2.2).2.1)
-    (fun α => (hall α.1 α.2.1 α.2.2).2.2)
-    n (ιr × Fin N0 × Fin N1)
-    (fun e i => ⟨f e i, BrC.mem_Osub.2 (hf e i)⟩) (fun e i => ⟨f' e i, BrC.mem_Osub.2 (hf' e i)⟩)
-    (fun e e' => gram f f hf hf e e' 0 (hG1 e e'))
-    (fun e e' => gram f' f' hf' hf' e e' 0 (hG2 e e'))
-    (fun e e' => gram f f' hf hf' e e' _ (by
-      rw [hG3 e e']
-      split_ifs <;> rfl))
-    κ r V hr hV
-  refine ⟨U0, Φ, hU0, hΦ0, ?_, ?_⟩
-  · have hF0 : MvPowerSeries.constantCoeff (MvPowerSeries.map (MaximalUnramifiedExtension l).subtype F) = 0 := by
-      rw [← MvPowerSeries.coeff_zero_eq_constantCoeff_apply, MvPowerSeries.coeff_map,
-        MvPowerSeries.coeff_zero_eq_constantCoeff_apply, hF.1, map_zero]
-    have hcob : cob (MvPowerSeries.map (MaximalUnramifiedExtension l).subtype F) (lgF ℂ_[l] l) = 0 := by
-      rw [← Formalism.L2.Th1.E.Joints.map_lgF' (MaximalUnramifiedExtension l).subtype l, ← Formalism.L2.Th1.E.mapCob _ _ _ _ _ hF.1,
-        hF.2.2, map_zero]
-    rw [Formalism.L2.Th1.E.mapCob _ _ _ _ _ hF.1,
-      Formalism.L2.Th1.E.sumEBridge ℂ_[l] (lgF ℂ_[l] l) (expF ℂ_[l] l) (BrC.logPair hl2) _ hF0 hcob]
-    exact hΦ
-  · simp only [hVe] at hE
-    exact hE
 
 end Formalism.L2.Th1.Top

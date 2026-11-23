@@ -1,7 +1,44 @@
-import Formalism.LocalToGlobal.ProjectiveLattices.RecPJThAllNeBot
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.SupBoundPageRows
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.ModelLat
-import Formalism.SharpRestriction.GenusPolyhedralBounds.RelativeIndexClassSets.AdmissibleModuleIffLatticeQuotients
+module
+
+public import Formalism.LocalToGlobal.ProjectiveLattices.RecPJThAllNeBot
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.SupBoundPageRows
+public import Formalism.SharpRestriction.GenusPolyhedralBounds.RelativeIndexClassSets.AdmissibleModuleIffLatticeQuotients
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -34,15 +71,5 @@ def ThetaWeightBounds : Prop :=
       D.R.r ≤ w2.n ∧ LastPos (T.Q.Dw j) (wtA w2) ∧ DF w2 + 2 ≤ qq D) ∧
     (j < D.R.m → ∀ w1 : WeightFamilies.Wt D j, IsDoubledWeightWithShift wL w1 nW →
       D.R.r ≤ w1.n ∧ LastPos (T.Q.Dw j) (wtA w1) ∧ DF w1 + 2 ≤ qq D)
-
-def SupGenSt : Prop :=
-  ∀ (D : D7) (T : Top D) (_h : LawsP T), GamAt T → ∀ (large₂ : SizeData₂ D) (j : ℕ) (_hj : InR D j) (w : WeightFamilies.Wt D j),
-    SupBoundPageRows D large₂ w → 2 ≤ large₂.sc.L → D.R.r ≤ w.n → LastPos (T.Q.Dw j) (wtA w) →
-    ∀ (x : Fin w.n → (T.Q.Dw j).La) (P : MvPolynomial (LtN (T.Q.Dw j) w.n) T.Q.c.F), P ∈ harmA T.Q.c (wtA w) w.n →
-    ∀ f : T.R j, IsThRule (T.Q.Xo j) T.Q.c (T.nab j) x P f →
-    ∀ σ : T.Q.c.F →+* ℂ, GoodEmb T.Q.c σ →
-      Real.log (∑ m ∈ P.support, ‖σ (P.coeff m)‖) ≤ 140 * D.R.r * large₂.sc.L * absA w + 4 * D.R.f * D.R.r * w.n * large₂.sc.L →
-      Real.log (T.Ns j w σ f) ≤
-        (140 * D.R.r + 4) * large₂.sc.L * absA w + 67 * D.R.f * D.R.r * w.n * large₂.sc.L
 
 end ReciprocityTheory.ChartRestriction.G.PullbackSections

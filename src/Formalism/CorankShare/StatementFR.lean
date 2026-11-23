@@ -1,4 +1,50 @@
-import Mathlib
+module
+
+public import Mathlib.Analysis.InnerProductSpace.Adjoint
+public import Mathlib.LinearAlgebra.Trace
+public import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -21,43 +67,11 @@ def frQ {ι : Type*} [Fintype ι] {V : ι → Type*} [∀ i, NormedAddCommGroup 
     (c : ι → ℝ) (B : ∀ i, V i →ₗ[ℂ] H) : H →ₗ[ℂ] H :=
   ∑ i, (c i : ℂ) • (B i ∘ₗ LinearMap.adjoint (B i))
 
-def CorankShare : Prop :=
-  ∀ (R : ℕ) (x : Fin R → ℝ) (s u τ : ℝ), 0 < u → 0 ≤ τ →
-    (R : ℝ) * s ≤ ∑ j, x j → (∀ j, x j ≤ s + u) →
-    ((univ.filter (fun j => x j < s - τ)).card : ℝ) ≤ R * (u / (u + τ))
-
-def FrameLA : Prop :=
-  ∀ (ι : Type) [Fintype ι] (V : ι → Type) [∀ i, NormedAddCommGroup (V i)]
-    [∀ i, InnerProductSpace ℂ (V i)] [∀ i, FiniteDimensional ℂ (V i)]
-    (H : Type) [NormedAddCommGroup H] [InnerProductSpace ℂ H] [FiniteDimensional ℂ H]
-    (B : ∀ i, V i →ₗ[ℂ] H) (c : ι → ℝ) (Nτ : ∀ i, Submodule ℂ (V i)) (e η ε : ℝ),
-    (∀ i, 0 < c i) →
-    0 < ∑ i, finrank ℂ (V i) →
-
-    (∑ i, hs2 (frK (c i) (B i) - LinearMap.id)) ≤ e * ∑ i, (finrank ℂ (V i) : ℝ) →
-    0 ≤ e → e ≤ 1 / 4 →
-
-    (LinearMap.trace ℂ H (frQ c B ∘ₗ frQ c B)).re
-      ≤ (1 + η) * (LinearMap.trace ℂ H (frQ c B)).re ^ 2 / (finrank ℂ H : ℝ) →
-
-    (∑ i, ((finrank ℂ (V i) : ℝ) - finrank ℂ (Nτ i))) ≤ ε * ∑ i, (finrank ℂ (V i) : ℝ) →
-    (finrank ℂ (⨆ i, (Nτ i).map (B i))ᗮ : ℝ)
-      ≤ (2 * η + 4 * ε + 4 * Real.sqrt e) * (finrank ℂ H : ℝ)
-
 def LayerCake : Prop :=
   ∀ (D : ℕ) (x : Fin D → ℝ) (a HH : ℝ) (w : ℝ → ℝ), 0 < D → 0 ≤ HH →
     (∀ j, a - HH ≤ x j) →
     IntervalIntegrable (fun τ => min 1 (w τ)) MeasureTheory.volume 0 HH →
     (∀ τ ∈ Set.Icc (0 : ℝ) HH, ((univ.filter (fun j => x j < a - τ)).card : ℝ) ≤ w τ * D) →
     a - (∫ τ in (0 : ℝ)..HH, min 1 (w τ)) ≤ (∑ j, x j) / D
-
-def FrameLast : Prop :=
-  ∀ (D : ℕ) (x : Fin D → ℝ) (s h L u HH η e : ℝ), 0 < D → 0 ≤ L → 0 < u → 0 ≤ HH →
-    0 ≤ η → 0 ≤ e →
-    (∀ j, s - h - HH ≤ x j) →
-    (∀ τ ∈ Set.Icc (0 : ℝ) HH, ((univ.filter (fun j => x j < s - τ - h - L)).card : ℝ)
-        ≤ (2 * η + 4 * (u / (u + τ)) + 4 * Real.sqrt e) * D) →
-    s - h - L - u * (1 + 8 * Real.log (1 + HH / u)) - (4 * η + 8 * Real.sqrt e) * HH
-      ≤ (∑ j, x j) / D
 
 end Formalism.CorankShareLayerCake.FR

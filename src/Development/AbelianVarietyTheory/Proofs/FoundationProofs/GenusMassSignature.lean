@@ -1,13 +1,56 @@
-import Mathlib
-import Formalism.LocalToGlobal.GlobalTheory.GL5.Statement
-import Development.AbelianVarietyTheory.BlockTheory.TorsionBlocks.SelfDualLatticeMass
-import Development.AbelianVarietyTheory.BlockTheory.GlobalSignature.MassFormulaPositivity
+module
+
+public import Formalism.LocalRingCardinality.DataSpaces
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.Matrix.Order
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Analysis.Matrix.Hermitian
+
+@[expose] public section
 
 noncomputable section
 
 namespace GlobalTheory.Proof.GenusMassSignature
 
-open NumberField Formalism.BasicNotions GlobalTheory.IndefiniteRowSideFullHecke.SelfDualLatticeMass Matrix
+open NumberField Formalism.BasicNotions Matrix
 open scoped ComplexOrder MatrixOrder
 
 theorem denseRange_of_not_isReal {K : Type} [Field K] (σ : K →+* ℂ)
@@ -67,9 +110,10 @@ theorem emb_form (hst : ∀ (φ : E →+* ℂ) (a : E), φ (star a) = starRingEn
         (W.gram.map τ).mulVec (fun i => τ (W.frame.repr x i)) := by
   unfold HSpace.hD
   conv_lhs => rw [← W.frame.sum_repr x]
+
   simp only [map_sum, LinearMap.sum_apply, LinearMap.map_smulₛₗ, LinearMap.smul_apply,
-    smul_eq_mul, map_mul, RingHom.id_apply, starRingEnd_apply, hst, dotProduct, Matrix.mulVec,
-    Matrix.map_apply, HSpace.gram, Pi.star_apply, Finset.mul_sum]
+  smul_eq_mul, map_mul, RingHom.id_apply, starRingEnd_apply, hst, dotProduct, Matrix.mulVec,
+  Matrix.map_apply, HSpace.gram, Pi.star_apply, Finset.mul_sum]
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
   ring
@@ -137,8 +181,6 @@ theorem pos_iff_posDef (htc : IsTotallyComplex E)
       simpa using congrFun h i
     rw [emb_form hst]
     exact h.re_dotProduct_pos hv
-
-def withPosSig (W : HSpace E) : HSpace E := { W with sig := fun _ => (W.rank, 0) }
 
 end Field
 

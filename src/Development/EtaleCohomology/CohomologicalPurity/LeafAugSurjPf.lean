@@ -1,4 +1,52 @@
-import Development.EtaleCohomology.CohomologicalPurity.LeafAugLocalPf
+module
+
+public import Development.EtaleCohomology.CohomologicalPurity.LeafAugLocalPf
+public import Mathlib.Order.CompletePartialOrder
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 open CategoryTheory Limits AlgebraicGeometry Opposite GlobalTheory.EtC
@@ -20,12 +68,14 @@ theorem altSum (m : ℕ) : ∑ i : Fin (m + 2), (-1 : ℤ) ^ (i : ℕ) = if Even
 
 theorem dL {R : Type} [CommRing R] (Y : PSh) (m : ℕ) (T : Scheme.{0}ᵒᵖ) (z : ((((chainsP R).obj (disc.obj Y)).X (m + 1)).obj T)) :
     ((((chainsP R).obj (disc.obj Y)).d (m + 1) m).app T).hom z = (∑ i : Fin (m + 2), (-1 : ℤ) ^ (i : ℕ)) • z := by
+  change (((freeP R).obj Y).obj T) at z
   have e : ∀ i : Fin (m + 2), SimplicialObject.δ (disc.obj Y) i = 𝟙 _ := fun _ => rfl
   simp [chainsP, e]
   erw [LinearMap.sum_apply, Finset.sum_smul]
   refine Finset.sum_congr rfl fun i _ => ?_
-  erw [NatTrans.app_zsmul]
-  rfl
+  simp
+  simpa only [Int.cast_pow, Int.cast_neg, Int.cast_one] using
+    (Module.End.intCast_apply (R := ULift.{1} R) ((-1 : ℤ) ^ (i : ℕ)) z)
 
 section
 variable {R : Type} [CommRing R]
@@ -54,7 +104,7 @@ def imSv {K L : PCx R} (φ : K ⟶ L) (n : ℕ) {T : Scheme.{0}} (y : (L.X n).ob
 theorem imSv_add {K L : PCx R} (φ : K ⟶ L) (n : ℕ) {T : Scheme.{0}} (y z : (L.X n).obj (op T)) :
     imSv φ n y ⊓ imSv φ n z ≤ imSv φ n (y + z) := by
   rintro U f ⟨⟨a, ha⟩, ⟨b, hb⟩⟩
-  exact ⟨a + b, by rw [map_add, map_add, ha, hb]⟩
+  exact ⟨a + b, by rw [map_add (f := _), map_add (f := _), ha, hb]⟩
 
 theorem imSv_smul {K L : PCx R} (φ : K ⟶ L) (n : ℕ) {T : Scheme.{0}} (y : (L.X n).obj (op T)) (r : ULift.{1} R) :
     imSv φ n y ≤ imSv φ n (r • y) := by
@@ -94,7 +144,7 @@ theorem gen_mem (hcov : ∀ x : X, ∃ j, x ∈ Set.range (c j)) [∀ j, IsOpenI
   let σ : Fin (0 + 1) ⥤ J := (Functor.const _).obj (j t)
   refine ⟨ModuleCat.freeMk (ULift.up ((inj (D ⋙ yoneda) (op (SimplexCategory.mk 0)) σ).app (op (V t).toScheme) a)), ?_⟩
   erw [ModuleCat.free_map_apply, ModuleCat.free_map_apply]
-  refine congrArg ModuleCat.freeMk (ULift.ext _ _ ?_)
+  refine congrArg ModuleCat.freeMk (ULift.ext ?_)
   show (a ≫ D.map (𝟙 (j t))) ≫ c (j t) = (V t).ι ≫ g
   rw [D.map_id, Category.comp_id]
   exact IsOpenImmersion.lift_fac _ _ _

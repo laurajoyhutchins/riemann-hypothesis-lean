@@ -1,10 +1,53 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.HasArcDataIff
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ToStkAInjective
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ToStkAInjective
+public import Development.AbelianVarietyTheory.Definitions.ArchimedeanThetaValues.IsFShiftZeroIff
+public import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.LinearIndependentOfIsExtension
+public import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.GermEqZeroOfThickenings
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.AppCompatGeneric
 import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.SecBaseChangeAnySt
-import Development.AbelianVarietyTheory.Definitions.ArchimedeanThetaValues.IsFShiftZeroIff
-import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.GermEqZeroOfThickenings
-import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.LinearIndependentOfIsExtension
+
+@[expose] public section
 
 noncomputable section
 namespace GlobalTheory.ArcPts.Transfer
@@ -85,6 +128,18 @@ theorem isUnit_wv {j : L.ι} {k : L'.ι} (hj : F (x (cpt R)) ∈ L.U j) (hk : x 
 theorem wv_left (hw : w.IsGen) (hL' : L'.IsLB) {j j' : L.ι} {k : L'.ι} (hj : F (x (cpt R)) ∈ L.U j)
     (hj' : F (x (cpt R)) ∈ L.U j') (hk : x (cpt R) ∈ L'.U k) :
     wv w x j k = valR (x ≫ F) (L.U j ⊓ L.U j') (L.g j j').val * wv w x j' k := by
+  have toStkA_valR {A : Type} [CommRing A] {T : Scheme.{0}} (f : Sp A ⟶ T) (U : T.Opens)
+      (z : Sp A) (ht : ⊤ ≤ f ⁻¹ᵁ U) (a : Γ(T, U)ˣ) :
+      toStkA z (valR f U a.val) = (gm f z U a).val := by
+    have hz : f z ∈ U := ht (show z ∈ (⊤ : (Sp A).Opens) from trivial)
+    have e1 : ∀ c, (Scheme.ΓSpecIso (CommRingCat.of A)).inv.hom ((Scheme.ΓSpecIso (CommRingCat.of A)).hom.hom c) = c :=
+      fun c => congrArg (fun g => CommRingCat.Hom.hom g c) (Iso.hom_inv_id (Scheme.ΓSpecIso (CommRingCat.of A)))
+    rw [valR, dif_pos ht, gm, dif_pos hz]
+    show ((Sp A).presheaf.germ ⊤ z trivial).hom ((Scheme.ΓSpecIso (CommRingCat.of A)).inv.hom
+        ((Scheme.ΓSpecIso (CommRingCat.of A)).hom.hom ((f.appLE U ⊤ ht).hom a.val))) =
+      ((Sp A).presheaf.germ (f ⁻¹ᵁ U) z hz).hom ((f.app U).hom a.val)
+    rw [e1]
+    exact TopCat.Presheaf.germ_res_apply (Sp A).presheaf (homOfLE ht) z trivial ((f.app U).hom a.val)
   apply toStkA_injective
   rw [map_mul, toStkA_wv hj hk, toStkA_wv hj' hk,
     toStkA_valR (x ≫ F) (L.U j ⊓ L.U j') _ ((top_le_iff_cpt _ _).2 ⟨hj, hj'⟩),
@@ -93,6 +148,18 @@ theorem wv_left (hw : w.IsGen) (hL' : L'.IsLB) {j j' : L.ι} {k : L'.ι} (hj : F
 theorem wv_right (hw : w.IsGen) (hL : L.IsLB) {j : L.ι} {k k' : L'.ι} (hj : F (x (cpt R)) ∈ L.U j)
     (hk : x (cpt R) ∈ L'.U k) (hk' : x (cpt R) ∈ L'.U k') :
     wv w x j k * valR x (L'.U k ⊓ L'.U k') (L'.g k k').val = wv w x j k' := by
+  have toStkA_valR {A : Type} [CommRing A] {T : Scheme.{0}} (f : Sp A ⟶ T) (U : T.Opens)
+      (z : Sp A) (ht : ⊤ ≤ f ⁻¹ᵁ U) (a : Γ(T, U)ˣ) :
+      toStkA z (valR f U a.val) = (gm f z U a).val := by
+    have hz : f z ∈ U := ht (show z ∈ (⊤ : (Sp A).Opens) from trivial)
+    have e1 : ∀ c, (Scheme.ΓSpecIso (CommRingCat.of A)).inv.hom ((Scheme.ΓSpecIso (CommRingCat.of A)).hom.hom c) = c :=
+      fun c => congrArg (fun g => CommRingCat.Hom.hom g c) (Iso.hom_inv_id (Scheme.ΓSpecIso (CommRingCat.of A)))
+    rw [valR, dif_pos ht, gm, dif_pos hz]
+    show ((Sp A).presheaf.germ ⊤ z trivial).hom ((Scheme.ΓSpecIso (CommRingCat.of A)).inv.hom
+        ((Scheme.ΓSpecIso (CommRingCat.of A)).hom.hom ((f.appLE U ⊤ ht).hom a.val))) =
+      ((Sp A).presheaf.germ (f ⁻¹ᵁ U) z hz).hom ((f.app U).hom a.val)
+    rw [e1]
+    exact TopCat.Presheaf.germ_res_apply (Sp A).presheaf (homOfLE ht) z trivial ((f.app U).hom a.val)
   apply toStkA_injective
   rw [map_mul, toStkA_wv hj hk, toStkA_wv hj hk',
     toStkA_valR x (L'.U k ⊓ L'.U k') _ ((top_le_iff_cpt _ _).2 ⟨hk, hk'⟩),

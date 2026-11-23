@@ -1,5 +1,60 @@
-import Mathlib
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.IsPrecompleteFiniteModule
+module
+
+public import Mathlib.RingTheory.DiscreteValuationRing.Basic
+public import Mathlib.RingTheory.Henselian
+public import Mathlib.RingTheory.IntegralClosure.IsIntegralClosure.Basic
+public import Mathlib.RingTheory.SimpleRing.Principal
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.IsPrecompleteFiniteModule
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.AdicCompletion.Noetherian
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RingTheory.Artinian.Ring
+public import Mathlib.RingTheory.DedekindDomain.Basic
+public import Mathlib.RingTheory.DiscreteValuationRing.TFAE
+public import Mathlib.RingTheory.Idempotents
+
+@[expose] public section
 
 noncomputable section
 
@@ -22,7 +77,7 @@ theorem map_maximalIdeal_le_maximal {R : Type*} [CommRing R] [IsLocalRing R] (S 
     [Algebra R S] [Module.Finite R S] (n : Ideal S) (hn : n.IsMaximal) :
     (maximalIdeal R).map (algebraMap R S) ≤ n := by
   rw [Ideal.map_le_iff_le_comap]
-  have : (n.comap (algebraMap R S)).IsMaximal := Ideal.isMaximal_comap_of_isIntegral_of_isMaximal n
+  have : (n.comap (algebraMap R S)).IsMaximal := Ideal.isMaximal_under_of_isIntegral_of_isMaximal n
   exact (IsLocalRing.eq_maximalIdeal this).ge
 
 theorem finite_maximal_ideals_of_finite {R : Type*} [CommRing R] [IsLocalRing R] (S : Type*) [CommRing S]
@@ -107,7 +162,7 @@ theorem exists_idempotent_henselian {S : Type*} [CommRing S] (J : Ideal S) [Hens
       linear_combination (-(e - e0)) * hu2
     rw [this]
     exact (isUnit_iff_exists_inv.2 ⟨-(2 * e - 1), by linear_combination hu2⟩).mul
-      (Ideal.mem_jacobson_bot.1 (HenselianRing.jac hee) _)
+      (Ring.mem_jacobson_iff.1 (HenselianRing.jac hee) _)
   have hdW : e - e0 ∈ Ideal.span {x * x - x} := by
     obtain ⟨v, hv⟩ := hdu.exists_left_inv
     have hdd : (e - e0) * (e - e0 - (2 * e - 1)) = e0 * e0 - e0 := by
@@ -229,7 +284,7 @@ theorem cl_dvr [IsAdicComplete (maximalIdeal R) R] :
   have hnf : ¬ IsField (integralClosure R L) := fun h =>
     (isField_iff_maximalIdeal_eq.not.mpr IsDiscreteValuationRing.not_a_field')
       (isField_of_isIntegral_of_isField (cl_inj R L) h)
-  exact ((IsDiscreteValuationRing.TFAE (integralClosure R L) hnf).out 0 2).mpr hD
+  exact ((IsDiscreteValuationRing.TFAE (integralClosure R L) hnf).out 1 3).mpr hD
 
 end
 

@@ -1,4 +1,56 @@
-import Mathlib
+module
+
+public import Mathlib.RingTheory.TensorProduct.Free
+public import Mathlib.RingTheory.TensorProduct.Maps
+public import Mathlib.Tactic.Continuity
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Lean.Elab.MutualDef
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 open Matrix TensorProduct
@@ -39,6 +91,7 @@ def lmat (a : R ⊗[K] A) : Matrix κ κ R := fun k => coords b R (a * baseBasis
 
 theorem coords_mul (z x : R ⊗[K] A) : coords b R (z * x) = coords b R z ᵥ* rmat b R x := by
   conv_lhs => rw [eq_sum_coords b R z]
+
   rw [Finset.sum_mul, map_sum]
   funext l
   simp only [smul_mul_assoc, map_smul, Finset.sum_apply, Pi.smul_apply, smul_eq_mul, vecMul,
@@ -46,6 +99,7 @@ theorem coords_mul (z x : R ⊗[K] A) : coords b R (z * x) = coords b R z ᵥ* r
 
 theorem coords_mul_left (a z : R ⊗[K] A) : coords b R (a * z) = coords b R z ᵥ* lmat b R a := by
   conv_lhs => rw [eq_sum_coords b R z]
+
   rw [Finset.mul_sum, map_sum]
   funext l
   simp only [mul_smul_comm, map_smul, Finset.sum_apply, Pi.smul_apply, smul_eq_mul, vecMul,
@@ -97,6 +151,7 @@ theorem exists_rmat_eq (g : Matrix κ κ R)
     rw [hφ, coords_mul_left, coords_mul_left, hφ, vecMul_vecMul, vecMul_vecMul, hg]
   have ha : ∀ a z, φ (a * z) = a * φ z := by
     intro a z
+
     rw [eq_sum_coords b R a, Finset.sum_mul, Finset.sum_mul, map_sum]
     refine Finset.sum_congr rfl fun j _ => ?_
     rw [smul_mul_assoc, smul_mul_assoc, map_smul, hj]
@@ -123,6 +178,7 @@ theorem coords_baseMap (f : R →ₐ[K] R') (z : R ⊗[K] A) :
     simp only [baseBasis_apply, baseMap, TensorProduct.smul_tmul', smul_eq_mul, mul_one,
       Algebra.TensorProduct.map_tmul, AlgHom.coe_id, id_eq]
   conv_lhs => rw [eq_sum_coords b R z]
+
   rw [map_sum, Finset.sum_congr rfl fun k _ => h k, map_sum]
   funext l
   rw [Finset.sum_apply]
@@ -167,8 +223,9 @@ def coordsVec (x : ι → R ⊗[K] E) : ι × κ → R := fun p => coords b R (x
 theorem coordsVec_vecMul (x : ι → R ⊗[K] E) (M : Matrix ι ι (R ⊗[K] E)) :
     coordsVec b R (x ᵥ* M) = coordsVec b R x ᵥ* blockHom b R M := by
   funext ⟨j, l⟩
+
   simp only [coordsVec, vecMul, dotProduct, map_sum, Finset.sum_apply, coords_mul,
-    Fintype.sum_prod_type, blockHom_apply]
+  Fintype.sum_prod_type, blockHom_apply]
 
 theorem exists_blockHom_eq (g : Matrix (ι × κ) (ι × κ) R)
     (hg : ∀ j, blockHom b R (Matrix.scalar ι (baseBasis b R j)) * g =

@@ -1,7 +1,57 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.StPtsPosDensIntegrable
-import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.PtsSumMeasurableA
-import GroundTheory.HeightsAndTheta.Heights.Intersections.NoCommonComponentCoordinatesPlane
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.NoCommonComponentCoordinatesPlane
+public import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.StPtsPosPartProjIndep
+public import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.StokesObjects
+public import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.PtsSumMeasurableA
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterFib
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterSheet
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -140,7 +190,7 @@ theorem aestronglyMeasurable {P : Ideal (MRing ι)} {e : ℕ}
     intro m
     have : S m = B m ∩ ⋂ m' ∈ Finset.range m, (B m' ∩ {y | σ m' y = σ m y})ᶜ := by
       ext y
-      simp [hSdef]
+      simp [hSdef, imp_iff_not_or]
     rw [this]
     exact (hBo m).measurableSet.inter (Finset.measurableSet_biInter _ fun m' _ =>
       ((hBo m').measurableSet.inter (measurableSet_eq_fun (hσm m') (hσm m))).compl)
@@ -161,7 +211,7 @@ theorem aestronglyMeasurable {P : Ideal (MRing ι)} {e : ℕ}
     simp only
     rw [Set.indicator_of_mem hm, hdens m y hm.1]
     unfold sheetDensity
-    rw [dif_pos hex]
+    rw [dite_eq_left hex]
     rw [hy _ _ _ hex.choose_spec hsh]
   have hmemF : ∀ m, y ∈ S m → σ m y ∈ (hfin y).toFinset := by
     intro m hm
@@ -204,7 +254,7 @@ theorem aestronglyMeasurable {P : Ideal (MRing ι)} {e : ℕ}
       · rfl
     · have h0 : sheetDensity P Ψ (pot L) g y w = 0 := by
         unfold sheetDensity
-        rw [dif_neg hex]
+        rw [dite_eq_right hex]
       refine Eventually.of_forall fun N => ?_
       rw [h0, max_self]
       refine (Finset.sum_eq_zero fun m _ => ?_).symm

@@ -1,7 +1,63 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.DivisibilityTowers.LocalAtPlaces
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.StatementsFlagIndependence
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PEventualValueFacts
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.Objects
+public import Mathlib.LinearAlgebra.FiniteDimensional.Defs
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PEventualValueFacts
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AutomorphicSpectrum.Definitions.DivisibilityTowers.BundleChernComparison
+import Development.AutomorphicSpectrum.Definitions.DivisibilityTowers.CompactGapsGE
+public import Mathlib.Order.Filter.AtTopBot.Group
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ArithmeticHilbertSamuelLowerBound
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.Bundle
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.IsSemipositiveOn
+
+@[expose] public section
 
 open MvPolynomial GroundTheory.Heights₂.Heights.NumbersDVR GlobalTheory.CompanionTheory.Ar.Num GlobalTheory.CompanionTheory.Ar.Top GroundTheory.Heights₂.Heights.ModelLeaves
 open ReciprocityTheory.ChartRestriction.G.Geo (HermLine IsSmoothHerm IsArithVar IsHorizontal mcPts mCoordIdeal IsIntersectionFamily IsIntersectionSystem IntersectionSystem ptsIntegral geoNum charOf recR arInt ChartBundle chartRing)
@@ -38,7 +94,7 @@ theorem eventualValue_mul {c : ℤ} (hc : c ≠ 0) {f g : (K → ℤ) → ℤ}
       refine hg ⟨v / c, ?_⟩
       filter_upwards [h, hv] with m h1 h2
       rw [← h2, h1, Int.mul_ediv_cancel_left _ hc]
-    rw [eventualValue, eventualValue, dif_neg hg, dif_neg hf, mul_zero]
+    rw [eventualValue, eventualValue, dite_eq_right hg, dite_eq_right hf, mul_zero]
 
 end Eventual
 
@@ -57,6 +113,7 @@ theorem chart_pow {R : Type} [CommRing R] (c : ∀ k, ι k) (n : ℕ) :
 theorem weight_ex (c : ∀ k, ι k) (n : ℕ) :
     Finsupp.weight (blockWeight ι) (ex c n) = fun _ => n := by
   funext k
+
   rw [ex, map_sum, Finset.sum_apply]
   simp only [Finsupp.weight_apply, Finsupp.sum_single_index, zero_smul, blockWeight, Pi.smul_apply,
     Pi.single_apply, smul_eq_mul]
@@ -147,9 +204,11 @@ theorem exists_uniform [∀ k, Fintype (ι k)] [FiniteDimensional F F']
       Ideal.sum_mem _ fun i _ => V'.mul_mem_left _ (hV i)
     have h2 : (C a : MRing ι F') = ∑ i, C (algebraMap F F' (b.repr a i)) * C (b i) := by
       conv_lhs => rw [← b.sum_repr a]
+
       simp only [map_sum, Algebra.smul_def, map_mul]
     convert h1 using 1
     rw [h2]
+
     simp only [map_sum, map_mul, map_C, mul_sub, Finset.sum_sub_distrib, Finset.sum_mul, mul_assoc]
 
 theorem lift_form [∀ k, Fintype (ι k)] {n : ℕ} (h : ∀ c a, Good (F := F) V' n c a) {m : K → ℕ}
@@ -161,24 +220,24 @@ theorem lift_form [∀ k, Fintype (ι k)] {n : ℕ} (h : ∀ c a, Good (F := F) 
   · rintro q₁ q₂ ⟨p₁, h₁, k₁⟩ ⟨p₂, h₂, k₂⟩
     refine ⟨p₁ + p₂, IsWeightedHomogeneous.add h₁ h₂, ?_⟩
     convert V'.add_mem k₁ k₂ using 1
-    rw [map_add]
+    rw [map_add (f := _)]
     ring
   · exact ⟨0, isWeightedHomogeneous_zero _ _ _, by simp⟩
   · intro d hd
     have hw : Finsupp.weight (blockWeight ι) d = m := hq (mem_support_iff.1 hd)
     obtain ⟨c, hc⟩ := exists_chart (n := n) (d := d) (by rw [hw]; exact hm)
     obtain ⟨d', hd'⟩ := exists_add_of_le (ex_le hc)
-    obtain ⟨G, hG, hV⟩ := h c (coeff d q)
+    obtain ⟨G, hG, hV⟩ := h c (AddMonoidAlgebra.coeff q d)
     refine ⟨G * monomial d' 1, ?_, ?_⟩
     · have h1 := IsWeightedHomogeneous.mul hG
         (isWeightedHomogeneous_monomial (R := F) (blockWeight ι) d' 1 rfl)
       have h2 : (fun _ => n) + Finsupp.weight (blockWeight ι) d' = m := by
-        rw [← hw, hd', map_add, weight_ex]
+        rw [← hw, hd', map_add (f := _), weight_ex]
       rw [h2] at h1
       exact h1
     · have h1 := V'.mul_mem_right (monomial d' 1) hV
-      have h2 : (monomial d (coeff d q) : MRing ι F') =
-          C (coeff d q) * (∏ k, X ⟨k, c k⟩) ^ n * monomial d' 1 := by
+      have h2 : (monomial d (AddMonoidAlgebra.coeff q d) : MRing ι F') =
+          C (AddMonoidAlgebra.coeff q d) * (∏ k, X ⟨k, c k⟩) ^ n * monomial d' 1 := by
         rw [chart_pow, mul_assoc, monomial_mul, ← hd', C_mul_monomial]
         simp
       rw [h2, map_mul, map_monomial, (algebraMap F F').map_one, ← sub_mul]
@@ -222,20 +281,3 @@ theorem finrank_piece {m : K → ℕ}
 end Fields
 
 end BaseChangeColon.PlField
-
-theorem BaseChangeColon.intNumL_comap_base_extension : ∀ (K : Type) [Fintype K] [DecidableEq K] (ι : K → Type) [∀ k, Fintype (ι k)] (F F' : Type) [Field F] [Field F'] [Algebra F F'] [FiniteDimensional F F'] (V' : Ideal (MRing ι F')), IsMultiHomogIdeal V' → (∀ (c : ∀ k, ι k) (a : F'), ∃ (n : ℕ) (G : MRing ι F), IsMultiHomog G (fun _ => n) ∧ C a * (∏ k, X ⟨k, c k⟩) ^ n - MvPolynomial.map (algebraMap F F') G ∈ V') → ∀ l : List (K → ℤ), intNumL F (V'.comap (MvPolynomial.map (algebraMap F F'))) l = (Module.finrank F F' : ℤ) * intNumL F' V' l := by
-  intro K _ _ ι _ F F' _ _ _ _ V' _ h l
-  obtain ⟨n, hn⟩ := BaseChangeColon.PlField.exists_uniform (F := F) (V' := V') h
-  have hc : (Module.finrank F F' : ℤ) ≠ 0 := by
-    exact_mod_cast (Module.finrank_pos (R := F) (M := F')).ne'
-  refine BaseChangeColon.PlField.eventualValue_mul hc (BaseChangeColon.PlField.foldr_eventually _ _ ?_)
-  filter_upwards [Filter.eventually_ge_atTop fun k => ((n * Fintype.card (ι k) + 1 : ℕ) : ℤ)] with m hm
-  have h0 : ∀ k, 0 ≤ m k := fun k => le_trans (Int.natCast_nonneg _) (hm k)
-  have h1 : ∀ k, n * Fintype.card (ι k) < (m k).toNat := fun k => by
-    have h2 : ((n * Fintype.card (ι k) + 1 : ℕ) : ℤ) ≤ m k := hm k
-    generalize n * Fintype.card (ι k) = t at h2 ⊢
-    omega
-  rw [hilbFn, hilbFn, if_pos h0, if_pos h0,
-    BaseChangeColon.PlField.finrank_piece fun q hq => BaseChangeColon.PlField.lift_form hn h1 hq]
-  push_cast
-  rfl

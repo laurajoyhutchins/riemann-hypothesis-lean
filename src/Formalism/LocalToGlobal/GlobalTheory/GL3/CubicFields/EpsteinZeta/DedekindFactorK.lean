@@ -1,5 +1,44 @@
-import Mathlib
-import Formalism.LocalToGlobal.GlobalTheory.GL3.CubicFields.DedekindFactorization.OmegaPoly
+module
+
+public import Mathlib.NumberTheory.Harmonic.EulerMascheroni
+public import Mathlib.NumberTheory.ModularForms.DedekindEta
+public import Mathlib.NumberTheory.NumberField.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -32,24 +71,5 @@ def KroneckerLimit : Prop :=
 def latI {K : Type} [Field K] [NumberField K] (φ : K →+* ℂ) (𝔞 : Ideal (𝓞 K)) (δ : ℂ) :
     AddSubgroup ℂ :=
   AddSubgroup.closure {w | ∃ c ∈ 𝔞, w = δ * φ (c : K)}
-
-def logDerivLOne (d : ℕ) [Fact d.Prime] : ℝ :=
-  haveI : NeZero d := ⟨(Fact.out : d.Prime).ne_zero⟩
-  (deriv (DirichletCharacter.LFunction (chiD d)) 1 /
-    DirichletCharacter.LFunction (chiD d) 1).re
-
-def DedekindFactorK (K : Type) [Field K] [NumberField K] (d : ℕ) [Fact d.Prime] : Prop :=
-  ∀ s : ℂ, 1 < s.re →
-    NumberField.dedekindZeta K s =
-      riemannZeta s * (haveI : NeZero d := ⟨(Fact.out : d.Prime).ne_zero⟩
-        DirichletCharacter.LFunction ((quadraticChar (ZMod d)).ringHomComp (Int.castRingHom ℂ)) s)
-
-def epst (Λ : AddSubgroup ℂ) (s : ℝ) : ℝ :=
-  ∑' w : {w : ℂ // w ∈ Λ ∧ w ≠ 0}, ‖(w : ℂ)‖ ^ (-(2 * s))
-
-def yEta4 (z : ℂ) : ℝ := z.im * ‖ModularForm.eta z‖ ^ 4
-
-def clsI {K : Type} [Field K] [NumberField K] (J : Ideal (𝓞 K)) : ClassGroup (𝓞 K) :=
-  if h : J ∈ nonZeroDivisors (Ideal (𝓞 K)) then ClassGroup.mk0 ⟨J, h⟩ else 1
 
 end Formalism.L2.GlobalTheoryTheory.IntegralLatticeDensity.B5

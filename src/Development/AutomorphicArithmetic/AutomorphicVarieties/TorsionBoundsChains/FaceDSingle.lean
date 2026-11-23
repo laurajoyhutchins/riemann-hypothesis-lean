@@ -1,4 +1,52 @@
-import Mathlib
+module
+
+public import Mathlib.GroupTheory.Torsion
+public import Mathlib.RepresentationTheory.Coinduced
+public import Mathlib.RepresentationTheory.Homological.GroupHomology.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open CategoryTheory
 
@@ -73,39 +121,14 @@ noncomputable def faceCx (G : Type) [Group G] (X : ℕ → Type) [∀ p, MulActi
   d_equiv p g f := by
     induction f using Finsupp.induction_linear with
     | zero => simp
-    | add a b ha hb => simp only [map_add, ha, hb]
+    | add a b ha hb => simp only [map_add (f := _), ha, hb]
     | single x c => simp only [perm_single, faceD_single, map_sum, map_smul, h]
   ε_equiv g f := by
     induction f using Finsupp.induction_linear with
     | zero => simp
-    | add a b ha hb => simp only [map_add, ha, hb]
+    | add a b ha hb => simp only [map_add (f := _), ha, hb]
     | single x c => simp
 
-def Chain (P : Type) [Preorder P] (p : ℕ) : Type := {f : Fin (p + 1) → P // StrictMono f}
-
-def Chain.face (P : Type) [Preorder P] (p : ℕ) (i : Fin (p + 2)) (c : Chain P (p + 1)) :
-    Chain P p :=
-  ⟨fun j => c.1 (i.succAbove j), c.2.comp (Fin.strictMono_succAbove i)⟩
-
-instance Chain.mulAction (G P : Type) [Group G] [Preorder P] [MulAction G P]
-    [CovariantClass G P (· • ·) (· < ·)] (p : ℕ) : MulAction G (Chain P p) where
-  smul g c := ⟨fun j => g • c.1 j, fun _ _ hab =>
-    CovariantClass.elim (μ := fun (g : G) (x : P) => g • x) (r := (· < ·)) g (c.2 hab)⟩
-  one_smul c := Subtype.ext (funext fun j => one_smul G (c.1 j))
-  mul_smul g h c := Subtype.ext (funext fun j => mul_smul g h (c.1 j))
-
-theorem Chain.smul_val {G P : Type} [Group G] [Preorder P] [MulAction G P]
-    [CovariantClass G P (· • ·) (· < ·)] {p : ℕ} (g : G) (c : Chain P p) (j : Fin (p + 1)) :
-    (g • c).1 j = g • c.1 j := rfl
-
-theorem Chain.face_smul {G P : Type} [Group G] [Preorder P] [MulAction G P]
-    [CovariantClass G P (· • ·) (· < ·)] (p : ℕ) (i : Fin (p + 2)) (g : G)
-    (c : Chain P (p + 1)) : Chain.face P p i (g • c) = g • Chain.face P p i c := rfl
-
-def OrdExactTo (P : Type) [Preorder P] (m : ℕ) : Prop := FaceExactTo (Chain P) (Chain.face P) m
-
 def bound (m A s b : ℕ) : ℕ := b ^ A * s ^ (m * A * s ^ m)
-
-instance : Inhabited (Chain Unit 0) := ⟨⟨fun _ => (), fun a b h => absurd h (by omega)⟩⟩
 
 end UpperTheory.V.KH

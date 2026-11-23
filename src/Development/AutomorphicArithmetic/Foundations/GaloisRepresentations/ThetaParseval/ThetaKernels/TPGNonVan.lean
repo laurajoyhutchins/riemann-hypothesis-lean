@@ -1,15 +1,59 @@
-import Development.AutomorphicArithmetic.AdelicQuotients.MatrixCoefficientBoundedByValueAtOne
-import Development.AutomorphicArithmetic.AdelicQuotients.UnitaryAdelicMemOfLocalGroupsNearOne
-import Development.AutomorphicArithmetic.AdelicQuotients.UnitaryLocalGroupLeOffPlacesEmpty
-import Development.AutomorphicArithmetic.AdelicQuotients.HaarMeasureTripleProductDecomposition
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ThetaParseval.HalfIndexLattices.SplitStab
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ThetaParseval.HalfIndexLattices.IsLatRepL
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ThetaParseval.ThetaKernels.GalTPDefs
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ThetaParseval.ThetaKernels.ThetaBasicK
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ThetaParseval.ThetaKernels.ExistsFinitePlacesIntegralMemNhdsOne
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ThetaParseval.ThetaKernels.ExistsFiniteUnramifiedOutsideOfIsHecke
+module
 
-set_option synthInstance.maxHeartbeats 200000
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ThetaParseval.ThetaKernels.GalTPDefs
+import Development.AbelianVarietyTheory.Definitions.Foundations.MeasurePreservingRmulQuotMeas
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsTopologicalRingAdeleE
+public import Development.AutomorphicArithmetic.AdelicQuotients.HaarMeasureTripleProductDecomposition
+public import Development.AutomorphicArithmetic.AdelicQuotients.MatrixCoefficientBoundedByValueAtOne
+public import Development.AutomorphicArithmetic.AdelicQuotients.UnitaryAdelicMemOfLocalGroupsNearOne
+public import Development.AutomorphicArithmetic.AdelicQuotients.UnitaryLocalGroupLeOffPlacesEmpty
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ThetaParseval.ThetaKernels.ExistsFinitePlacesIntegralMemNhdsOne
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ThetaParseval.ThetaKernels.ExistsFiniteUnramifiedOutsideOfIsHecke
+public import Development.WeilBound.ThetaLifts.LatticeBasics.BadFactor
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
+
 
 section
 noncomputable section
@@ -22,7 +66,7 @@ private theorem nv_sf_pk {G : Type} [Group G] [TopologicalSpace G] [IsTopologica
     [SecondCountableTopology G] [MeasurableSpace G] [BorelSpace G] (μ : Measure G) [μ.IsHaarMeasure] : SFinite μ := inferInstance
 end UpperTheory.TP
 open UpperTheory.TP
-set_option maxHeartbeats 2000000 in
+
 theorem _root_.UpperTheory.TP.nonVan_k :
     _root_.UpperTheory.TP.Tools_k → _root_.UpperTheory.TP.Rallis_k → _root_.UpperTheory.TP.Decomp_k → _root_.UpperTheory.TP.BumpAny_k → _root_.UpperTheory.TP.Datum_k → _root_.UpperTheory.TP.Tail_k → UpperTheory.TP.AbsNe → _root_.UpperTheory.TP.SchurStep_k → _root_.UpperTheory.TP.NonVan_k := by
   intro T hR hD hBu hDa hTl hAb hSc E _ _ _ B n d X W M χX χW om hP hn e e' he he' hd K a ε hK ha hε t₀ ht hlt U hU f₀ hf₀ hf0 φ hφ0 hS
@@ -41,15 +85,15 @@ theorem _root_.UpperTheory.TP.nonVan_k :
   obtain ⟨r, r0, r1, r2⟩ := UpperTheory.matrix_coefficient_bounded_by_value_at_one (M := M) hC hP.good.haar hP.good.dom hfn hφ'0
   obtain ⟨O, oO, eO⟩ := isOpen_induced_iff.1 hA.level
   have one_O : (1 : GlobalTheory.UnitaryBC.UA E n) ∈ O := by
-    have : (1 : GlobalTheory.UnitaryBC.finU E n) ∈ Subtype.val ⁻¹' O := by
+    have : (1 : GlobalTheory.UnitaryBC.finU (E := E) (n := n)) ∈ Subtype.val ⁻¹' O := by
       rw [eO]; show GlobalTheory.UnitaryBC.RU E n 1 φ = φ; rw [map_one]; rfl
     exact this
   set N : Set (UA (cj E) X.J) := e.symm ⁻¹' O with hN
   have oN : IsOpen N := oO.preimage e.symm.continuous
   have one_N : (1 : UA (cj E) X.J) ∈ N := by simpa [hN] using one_O
   have hfix : ∀ g ∈ gOff (cj E) X ∅, g ∈ N → ∀ y, φ' (y * g) = φ' y := fun g hg hgN y => by
-    have k1 : e.symm g ∈ GlobalTheory.UnitaryBC.finU E n := (he.fin _).1 (by simpa using hg)
-    have k2 : (⟨e.symm g, k1⟩ : GlobalTheory.UnitaryBC.finU E n) ∈ {k : GlobalTheory.UnitaryBC.finU E n | GlobalTheory.UnitaryBC.RU E n k φ = φ} := by
+    have k1 : e.symm g ∈ GlobalTheory.UnitaryBC.finU (E := E) (n := n) := (he.fin _).1 (by simpa using hg)
+    have k2 : (⟨e.symm g, k1⟩ : GlobalTheory.UnitaryBC.finU (E := E) (n := n)) ∈ {k : GlobalTheory.UnitaryBC.finU (E := E) (n := n) | GlobalTheory.UnitaryBC.RU E n k φ = φ} := by
       rw [← eO]; exact hgN
     have : φ (e.symm y * e.symm g) = φ (e.symm y) := congrFun k2 (e.symm y)
     simpa [hφ'] using this

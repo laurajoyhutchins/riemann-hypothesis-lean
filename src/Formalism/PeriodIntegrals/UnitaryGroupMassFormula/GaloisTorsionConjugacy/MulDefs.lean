@@ -1,5 +1,50 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.GaloisTorsionConjugacy.StAddRight
+module
+
+public import Mathlib.Basic.Complex.Basic
+public import Mathlib.FieldTheory.IntermediateField.Basic
+public import Mathlib.RingTheory.Algebraic.Defs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.SemiChar
+
+@[expose] public section
 
 noncomputable section
 
@@ -7,51 +52,9 @@ namespace PI.GalTorsConj.W
 
 open Formalism.L2.Th1.F
 
-def TorsField : Prop :=
-  ∀ (L : PeriodPair) (M : IntermediateField ℚ ℂ), L.g₂ ∈ M → L.g₃ ∈ M →
-    ∃ M₁ : IntermediateField ℚ ℂ, M ≤ M₁ ∧ (∀ x ∈ M₁, IsAlgebraic M x) ∧
-      ∀ (n : ℕ) (t : ℂ), 0 < n → (n : ℂ) * t ∈ L.lattice → t ∉ L.lattice →
-        L.weierstrassP t ∈ M₁ ∧ L.derivWeierstrassP t ∈ M₁
-
 def ExtRho : Prop :=
   ∀ (M M₁ : IntermediateField ℚ ℂ) (h : M ≤ M₁), (∀ x ∈ M₁, IsAlgebraic M x) →
     ∀ ρ : M →ₐ[ℚ] ℂ, ∃ ρ₁ : M₁ →ₐ[ℚ] ℂ, ∀ x : M, ρ₁ (IntermediateField.inclusion h x) = ρ x
-
-def Descent : Prop :=
-  ∀ (M M₁ : IntermediateField ℚ ℂ) (h : M ≤ M₁), (∀ x ∈ M₁, IsAlgebraic M x) →
-    ∀ x : M₁, (∀ σ : M₁ →ₐ[ℚ] ℂ, (∀ y : M, σ (IntermediateField.inclusion h y) = (y : ℂ)) →
-      σ x = (x : ℂ)) → (x : ℂ) ∈ M
-
-def veluF (L : PeriodPair) (S : Finset ℂ) (z : ℂ) : ℂ :=
-  L.weierstrassP z + ∑ P ∈ S, (L.weierstrassP (z + P) - L.weierstrassP P)
-
-def veluD (L : PeriodPair) (S : Finset ℂ) (z : ℂ) : ℂ :=
-  L.derivWeierstrassP z + ∑ P ∈ S, L.derivWeierstrassP (z + P)
-
-def veluU (L : PeriodPair) (S : Finset ℂ) : Set ℂ :=
-  {z | z ∉ L.lattice ∧ ∀ P ∈ S, z + P ∉ L.lattice}
-
-def IsogD : Prop :=
-  ∀ (L : PeriodPair) (c : ℂ) (S : Finset ℂ), c ≠ 0 → MulStable L c → IsKerReps L c S →
-    ∀ z, c * z ∉ L.lattice → c ^ 3 * L.derivWeierstrassP (c * z) = veluD L S z
-
-def TorsDense : Prop :=
-  ∀ L : PeriodPair, Dense {t : ℂ | ∃ n : ℕ, 0 < n ∧ (n : ℂ) * t ∈ L.lattice}
-
-def IsogODE : Prop :=
-  ∀ (L : PeriodPair) (c : ℂ) (S : Finset ℂ), c ≠ 0 → (∀ P ∈ S, P ∉ L.lattice) →
-    (∀ P ∈ S, ∀ Q ∈ S, P - Q ∈ L.lattice → P = Q) →
-    (∀ z ∈ veluU L S, veluD L S z ^ 2 =
-      4 * veluF L S z ^ 3 - c ^ 4 * L.g₂ * veluF L S z - c ^ 6 * L.g₃) →
-    MulStable L c ∧ (∀ P ∈ S, c * P ∈ L.lattice) ∧
-      ∀ z ∈ veluU L S, c * z ∉ L.lattice ∧ c ^ 2 * L.weierstrassP (c * z) = veluF L S z ∧
-        c ^ 3 * L.derivWeierstrassP (c * z) = veluD L S z
-
-def MulSt : Prop :=
-  ∀ (L L' : PeriodPair) (M : IntermediateField ℚ ℂ) (ρ : M →ₐ[ℚ] ℂ) (hg2 : L.g₂ ∈ M)
-    (hg3 : L.g₃ ∈ M), L'.g₂ = ρ ⟨_, hg2⟩ → L'.g₃ = ρ ⟨_, hg3⟩ →
-    ∀ c : ℂ, MulStable L c → ∀ hc : c ∈ M, ρ ⟨c, hc⟩ = c →
-      ∀ t t', St L L' M ρ t t' → St L L' M ρ (c * t) (c * t')
 
 end PI.GalTorsConj.W
 

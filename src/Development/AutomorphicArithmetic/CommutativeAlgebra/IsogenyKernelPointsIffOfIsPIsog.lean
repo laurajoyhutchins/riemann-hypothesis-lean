@@ -1,19 +1,65 @@
-import Development.AutomorphicArithmetic.SpecialMaps.QuotObjDefs
-import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsDimEqOne
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HomTorsionFree
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BirigidifiedPullbackMulPairIsoTensorPowSq
+public import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsTjCorrDiagModel
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AbelianSchemeFieldSmoothOfRelativeDimensionExistStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AbelianSchemeTorsionPointLocallyConstantGeomPoinStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AbelianVarietyExistsDualPairStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AbelianVarietyIntCastSmulIsogenyDegreeStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AdjointCancelNonzeroMultiple
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AdjointUniqueAdditiveScalar
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BiadditiveClassEqPoincarePullbackUniqueHomStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsAdjointUpToIntegerStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsFactorThroughIsogenyOfKillsKernelStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsInvExp
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HarrisTaylorExistsTypeTjPIsogeny
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HomTorsionFree
 import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ConnectedSpaceSpecOfIsLocalRing
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BirigidifiedPullbackMulPairIsoTensorPowSq
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsFactorThroughIsogenyOfKillsKernelStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AbelianVarietyIntCastSmulIsogenyDegreeStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AbelianSchemeFieldSmoothOfRelativeDimensionExistStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AbelianVarietyExistsDualPairStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BiadditiveClassEqPoincarePullbackUniqueHomStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsAdjointUpToIntegerStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AdjointUniqueAdditiveScalar
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AdjointCancelNonzeroMultiple
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsInvExp
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HarrisTaylorExistsTypeTjPIsogeny
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AbelianSchemeTorsionPointLocallyConstantGeomPoinStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AbelianVarietyTheory.Definitions.Divisors.CompEqOneIffPush
+public import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsDimEqOne
+import Development.AutomorphicArithmetic.SpecialMaps.QuotObjDefs
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor GlobalTheory.UPel.HT GlobalTheory.UPel.HT.Hecke GlobalTheory.UPel.HT.ES GlobalTheory.IwLevel UpperTheory.QO
@@ -38,7 +84,9 @@ private theorem hom_cancel :
   have key : GlobalTheory.AV.AbVar.Hom.hom ((n : ℤ) • (F - G)) = 1 := by
     rw [GlobalTheory.AV.AbVar.zsmul_hom, hFG, zpow_natCast, div_pow, hfg, div_self']
   have h0 : (n : ℤ) • (F - G) = 0 :=
-    GlobalTheory.AV.AbVar.hom_ext (by rw [key, GlobalTheory.AV.AbVar.zero_hom])
+    by
+      apply Subtype.ext
+      exact key.trans (GlobalTheory.AV.AbVar.zero_hom A' B').symm
   have h1 := GlobalTheory.AV.AbVar.hom_torsionFree Ω A' B' n (F - G) (by exact_mod_cast hn.ne') h0
   have h2 : F = G := sub_eq_zero.mp h1
   exact congrArg GlobalTheory.AV.AbVar.Hom.hom h2
@@ -453,7 +501,7 @@ private theorem exists_ab (D : Datum p) (r : ℤ) (hr : (p : ℤ) ∣ r ^ 2 - D.
       exact sub_mem (hUJE ha) hβ
     have m3 : a - D.bar β ∈ Ideal.span {(p : 𝓞 D.F) ^ E} := by
       apply hUJ
-      rw [← Ideal.inf_eq_mul_of_isCoprime hcopE]
+      rw [Ideal.mul_eq_inf_of_isCoprime hcopE]
       exact ⟨m1, m2⟩
     obtain ⟨t, ht⟩ := Ideal.mem_span_singleton'.mp m3
     exact ⟨t, by rw [ht]; ring⟩
@@ -566,10 +614,10 @@ private theorem half {E : ℕ} {r : ℤ} (o₁ o₂ o' : Obj b N σ) (ψ₁ : o�
   haveI : IsMonHom (o₁.act.act (algebraMap (𝓞 D.F) D.O t)) := o₁.act.hom _
   have hsplit : ψ₁ ≫ φ₂ = (o₁.act.act (algebraMap (𝓞 D.F) D.O a) ≫ ψ₁ ≫ φ₂) *
       (o₁.act.act (algebraMap (𝓞 D.F) D.O β) ≫ ψ₁ ≫ φ₂) := by
-    rw [← MonObj.mul_comp, ← o₁.act.add, ← map_add, hab, map_one, o₁.act.one, Category.id_comp]
+    rw [← MonObj.mul_comp, ← o₁.act.add, ← map_add (f := _), hab, map_one, o₁.act.one, Category.id_comp]
   have ha : o₁.act.act (algebraMap (𝓞 D.F) D.O a) ≫ ψ₁ ≫ φ₂ =
       M * (o₁.act.act (algebraMap (𝓞 D.F) D.O t) ≫ ψ₁ ≫ φ₂) ^ (p ^ E) := by
-    rw [ht, map_add, o₁.act.add, MonObj.mul_comp, map_mul, map_pow, map_natCast, ← Nat.cast_pow,
+    rw [ht, map_add (f := _), o₁.act.add, MonObj.mul_comp, map_mul, map_pow, map_natCast, ← Nat.cast_pow,
       o₁.act.mul, act_nat, idPow_comp, MonObj.pow_comp, ← hbβ, ← hMdef]
   refine ⟨ν ^ u' * M ^ w * (o₁.act.act (algebraMap (𝓞 D.F) D.O t) ≫ ψ₁ ≫ φ₂) * κ, ?_, ?_⟩
   · have hX : IsMonHom (o₁.act.act (algebraMap (𝓞 D.F) D.O t) ≫ ψ₁ ≫ φ₂) := inferInstance

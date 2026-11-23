@@ -1,9 +1,56 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.HilbertNinetyQuotientHomEqIff
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EqZeroOfOrthogonalTranslatesProj
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.HilbertNinetyQuotientHomEqIff
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsOscillatorActionUnitaryGroupHermitian
+public import Mathlib.Analysis.CStarAlgebra.Module.Constructions
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EqZeroOfOrthogonalTranslatesProj
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsOscillatorActionOfGaussianPairings
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GaussianPairingUnitaryGroupTwoThree
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsOscillatorActionUnitaryGroupHermitian
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open GlobalTheory.WeilM Matrix MeasureTheory Complex GlobalTheory.RealWeil GlobalTheory.RealWeil.UnitaryOsc
 open scoped InnerProductSpace
@@ -27,20 +74,6 @@ def smSub (ρ : V → H →L[ℂ] H) : Submodule ℂ H where
   smul_mem' := fun a _ hf => Osc.sm_smul a hf
 
 end Abstract
-
-theorem detPlus_eq_det_toBlocks₁₁ {m n : Type} [Fintype m] [DecidableEq m] [Fintype n] [DecidableEq n] (g : Matrix (m ⊕ n) (m ⊕ n) ℂ) :
-    dP (fromBlocks 1 0 0 (-1)) g = g.toBlocks₁₁.det := by
-  have : (1 / 2 : ℂ) • ((1 + (fromBlocks 1 0 0 (-1) : Matrix (m ⊕ n) (m ⊕ n) ℂ)) * g) +
-      (1 / 2 : ℂ) • (1 - (fromBlocks 1 0 0 (-1) : Matrix (m ⊕ n) (m ⊕ n) ℂ)) =
-      fromBlocks g.toBlocks₁₁ g.toBlocks₁₂ 0 1 := by
-    conv_lhs => rw [← fromBlocks_toBlocks g, ← fromBlocks_one, sub_eq_add_neg, fromBlocks_neg, fromBlocks_add,
-      fromBlocks_add, fromBlocks_multiply, fromBlocks_smul, fromBlocks_smul, fromBlocks_add]
-    congr 1
-    · rw [add_zero, Matrix.zero_mul, add_zero, add_mul, one_mul]; module
-    · rw [add_zero, Matrix.zero_mul, add_zero, Matrix.add_mul, Matrix.one_mul]; module
-    · simp
-    · simp only [add_zero, Matrix.zero_mul, add_neg_cancel, neg_neg, smul_zero, zero_add]; module
-  rw [dP, this, det_fromBlocks_zero₂₁, det_one, mul_one]
 
 open Matrix MeasureTheory Complex in
 open scoped InnerProductSpace in
@@ -114,9 +147,9 @@ private theorem dP_sign_fromBlocks_diagonal_eq_det (p q : ℕ) (A : Matrix (Fin 
     congr 1 <;> ext i j <;> simp [Matrix.one_apply, Matrix.add_mul] <;> (try split_ifs) <;> ring
   rw [this, det_fromBlocks_zero₂₁, det_one, mul_one]
 
+
 open Matrix MeasureTheory Complex in
 open scoped InnerProductSpace in
-
 theorem _root_.GlobalTheory.FockRep.exists_unitary_osc : ∀ (p q : ℕ) (H : Type) [NormedAddCommGroup H] [InnerProductSpace ℂ H] [CompleteSpace H] (ρ : (Fin p ⊕ Fin q → ℂ) → (H ≃ₗᵢ[ℂ] H)), (∀ v, Continuous fun z => ρ z v) → (∀ z w v, ρ z (ρ w v) = Complex.exp (Real.pi * Complex.I * ((∑ i, z (Sum.inl i) * star (w (Sum.inl i))) - ∑ j, z (Sum.inr j) * star (w (Sum.inr j))).im) • ρ (z + w) v) → ∃ ω : _root_.GlobalTheory.WeilM.UG (Complex.conjAe : ℂ →ₐ[ℝ] ℂ) (Matrix.fromBlocks (1 : Matrix (Fin p) (Fin p) ℂ) 0 0 (-1 : Matrix (Fin q) (Fin q) ℂ)) →* (H ≃ₗᵢ[ℂ] H), (∀ v, Continuous fun g => ω g v) ∧ (∀ g z v, ω g (ρ z v) = ρ ((g.1 : Matrix (Fin p ⊕ Fin q) (Fin p ⊕ Fin q) ℂ) *ᵥ z) (ω g v)) ∧ (∀ A : H →L[ℂ] H, (∀ z v, A (ρ z v) = ρ z (A v)) → ∀ g v, A (ω g v) = ω g (A v)) ∧ ∀ g, (g.1 : Matrix (Fin p ⊕ Fin q) (Fin p ⊕ Fin q) ℂ).toBlocks₁₂ = 0 → (g.1 : Matrix (Fin p ⊕ Fin q) (Fin p ⊕ Fin q) ℂ).toBlocks₂₁ = 0 → ∀ v, (∀ z, ⟪v, ρ z v⟫_ℂ = Complex.exp (-(Real.pi / 2) * ∑ a, ((‖z a‖ ^ 2 : ℝ) : ℂ)) * ⟪v, v⟫_ℂ) → ω g v = (g.1 : Matrix (Fin p ⊕ Fin q) (Fin p ⊕ Fin q) ℂ).toBlocks₁₁.det • v := by
   intro p q H _ _ _ ρ hρc hρm
   let S : Matrix (Fin p ⊕ Fin q) (Fin p ⊕ Fin q) ℂ :=
@@ -164,7 +197,7 @@ theorem _root_.GlobalTheory.FockRep.exists_unitary_osc : ∀ (p q : ℕ) (H : Ty
     refine ⟨fun f => ?_, fun u v f => ?_, fun u f => (ρ _).norm_map f,
       fun f => (hρc f).comp (_root_.GlobalTheory.RealWeil.UnitaryOsc.crd (Fin p ⊕ Fin q)).continuous⟩
     · rw [hρE_apply, map_zero]; exact h0 f
-    · rw [hρE_apply, hρE_apply, hρE_apply, _root_.GlobalTheory.RealWeil.UnitaryOsc.omJ_cplx, hform, map_add]
+    · rw [hρE_apply, hρE_apply, hρE_apply, _root_.GlobalTheory.RealWeil.UnitaryOsc.omJ_cplx, hform, map_add (f := _)]
       exact hρm _ _ f
   let k : ↥G →* (EuclideanSpace ℂ (Fin p ⊕ Fin q) →L[ℝ] EuclideanSpace ℂ (Fin p ⊕ Fin q)) :=
     { toFun := fun g => _root_.GlobalTheory.RealWeil.UnitaryOsc.kL (m g)

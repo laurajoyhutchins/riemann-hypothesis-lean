@@ -1,9 +1,59 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.TwoChartAtlas.TwoChartSt
-import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.HermFormPullEqOfLbIsoPow
-import Development.AbelianVarietyTheory.Proofs.ToricGeometry.TopLePreimageOfValAtNeZero
-import Development.AbelianVarietyTheory.Proofs.ToricGeometry.HolFamilyOfIsPullback
-import Development.AbelianVarietyTheory.Proofs.ToricGeometry.AppellHumbertDataOfIsoCube
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ThetaUnifAV
+public import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.AppellHumbertTrivialOfNowhereVanishing
+public import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.HermFormPullEqOfLbIsoPow
+public import Development.AbelianVarietyTheory.Proofs.ToricGeometry.AppellHumbertDataOfIsoCube
+public import Development.AbelianVarietyTheory.Proofs.ToricGeometry.TopLePreimageOfValAtNeZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Development.AbelianVarietyTheory.Definitions.TwoChartAtlas.TwoChartSt
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj Complex Filter Topology
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor
@@ -184,9 +234,9 @@ theorem gen_linComb_in_frame (hL : L.IsLB) {Hm : Matrix (Fin g) (Fin g) ℂ} {χ
     exact mul_ne_zero (val_unit_ne_zero _ hv hj _) (inv_ne_zero (hF0 j z hj))
   obtain ⟨h1, h2⟩ := form_eq_zero_and_const (S := {l | ∀ w, p (w + l) = p w}) hS ψ hψ hψ0
     (fun z w => ∑ k, (ε k : ℂ) * hermForm Hm (lam k z) (lam k w))
-    (continuous_finset_sum _ fun k _ => continuous_const.mul
+    (continuous_finsetSum _ fun k _ => continuous_const.mul
       ((continuous_hermForm_self Hm).comp (hld k).continuous))
-    (fun z z' w => by simp only [map_add, hermForm_add_left, mul_add, Finset.sum_add_distrib])
+    (fun z z' w => by simp only [map_add (f := _), hermForm_add_left, mul_add, Finset.sum_add_distrib])
     (fun c z w => by
       simp only [map_smul, hermForm_smul_left, Finset.mul_sum]
       exact Finset.sum_congr rfl fun k _ => by ring)
@@ -211,7 +261,7 @@ theorem gen_linComb_in_frame (hL : L.IsLB) {Hm : Matrix (Fin g) (Fin g) ℂ} {χ
         rw [Finset.mul_sum, Finset.mul_sum, ← Finset.sum_add_distrib, Complex.exp_sum,
           ← Finset.prod_mul_distrib, ← Finset.prod_mul_distrib]
         refine Finset.prod_congr rfl fun k _ => ?_
-        rw [hu.2.2.2 ⟨lam k l, hΛ k⟩ (j k) (lam k z) ((hD j z).1 hj k), map_add, mul_zpow, mul_zpow,
+        rw [hu.2.2.2 ⟨lam k l, hΛ k⟩ (j k) (lam k z) ((hD j z).1 hj k), map_add (f := _), mul_zpow, mul_zpow,
           ← Complex.exp_int_mul]
         congr 3
         simp only [hermForm]
@@ -245,42 +295,11 @@ theorem val_eq_one_of_corr {X Y Z : Scheme.{0}} (L : LB X) {K : Type} [Fintype K
   refine ((val_res x hv _ h1 _).trans (val_pullU x hv h _ _)).symm.trans (e'.trans ?_)
   exact valAt'_one x h2
 
-def psumLin (g : ℕ) (I : ULift.{0} (Finset (Fin 3))) : (Fin 3 → Fin g → ℂ) →ₗ[ℂ] (Fin g → ℂ) :=
-  ∑ a ∈ I.down, LinearMap.proj a
-
 theorem prod_zpow_eq_zpow_sum {K : Type} (s : Finset K) {a : ℂ} (ha : a ≠ 0) (ε : K → ℤ) :
     ∏ k ∈ s, a ^ ε k = a ^ ∑ k ∈ s, ε k := by
   classical
   induction s using Finset.induction_on with
   | empty => simp
   | insert b s hb ih => rw [Finset.prod_insert hb, Finset.sum_insert hb, zpow_add₀ ha, ih]
-
-def pt2 (x : (Fin g → ℂ) × (Fin g → ℂ)) : Sp ℂ ⟶ (A ⊗ A).left := (lift (u.ex x.1) (u.ex x.2)).left
-
-def rosatiLin (F G : (Fin g → ℂ) →ₗ[ℂ] (Fin g → ℂ)) :
-    Fin 6 → ((Fin g → ℂ) × (Fin g → ℂ)) →ₗ[ℂ] (Fin g → ℂ) :=
-  ![F ∘ₗ LinearMap.fst ℂ _ _ + LinearMap.snd ℂ _ _, F ∘ₗ LinearMap.fst ℂ _ _, LinearMap.snd ℂ _ _,
-    LinearMap.fst ℂ _ _ + G ∘ₗ LinearMap.snd ℂ _ _, LinearMap.fst ℂ _ _, G ∘ₗ LinearMap.snd ℂ _ _]
-
-def primLin (W : (Fin g → ℂ) →ₗ[ℂ] (Fin g → ℂ)) : Fin 5 → (Fin g → ℂ) →ₗ[ℂ] (Fin g → ℂ) :=
-  ![LinearMap.id, LinearMap.id + W, LinearMap.id, W, 0]
-
-theorem primLin_apply (W : (Fin g → ℂ) →ₗ[ℂ] (Fin g → ℂ)) (k : Fin 5) (x : Fin g → ℂ) :
-    primLin W k x = ![x, x + W x, x, W x, 0] k := by
-  fin_cases k <;> rfl
-
-theorem ex_comp_primφ {w : A ⟶ A} {W : (Fin g → ℂ) →ₗ[ℂ] (Fin g → ℂ)} (hW : ∀ z, u.ex (W z) = u.ex z ≫ w)
-    (k : Fin 5) (z : Fin g → ℂ) : (u.ex z).left ≫ primφ w k = (u.ex (primLin W k z)).left := by
-  have key : ∀ (q : A ⟶ A) y, u.ex z ≫ q = u.ex y → (u.ex z).left ≫ q.left = (u.ex y).left :=
-    fun q w e => congrArg (·.left) e
-  rw [primLin_apply]
-  fin_cases k
-  · exact Category.comp_id _
-  · refine key (𝟙 A * w) (z + W z) ?_
-    simp [MonObj.comp_mul, u.ex_add, hW]
-  · exact Category.comp_id _
-  · exact key w (W z) (hW z).symm
-  · refine key 1 0 ?_
-    simp [ex_zero u]
 
 end GlobalTheory.FrameUnits

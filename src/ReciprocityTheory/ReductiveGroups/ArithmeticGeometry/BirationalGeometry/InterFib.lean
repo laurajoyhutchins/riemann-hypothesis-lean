@@ -1,5 +1,53 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterFibA
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterFibB
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterFibB
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterSt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.Nullstellensatz
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterFibA
+
+@[expose] public section
 
 noncomputable section
 
@@ -11,7 +59,6 @@ variable {K : Type*} [Fintype K] [DecidableEq K] {ι : K → Type*} [∀ k, Fint
   [∀ k, DecidableEq (ι k)]
 
 variable (ι) in
-
 def segMono (i : (k : K) → ι k) : MvPolynomial (Σ k, ι k) ℂ := ∏ k, X ⟨k, i k⟩
 
 theorem eval_segMono (i : (k : K) → ι k) (z : (Σ k, ι k) → ℂ) : eval z (segMono ι i) = segre z i := by
@@ -19,7 +66,8 @@ theorem eval_segMono (i : (k : K) → ι k) (z : (Σ k, ι k) → ℂ) : eval z 
 
 theorem segMono_homog (i : (k : K) → ι k) :
     IsWeightedHomogeneous (blkW ι) (segMono ι i) (fun _ => 1) := by
-  have := IsWeightedHomogeneous.prod (w := blkW ι) Finset.univ (fun k => (X ⟨k, i k⟩ : MvPolynomial (Σ k, ι k) ℂ))
+  have := IsWeightedHomogeneous.prod (w := blkW ι) Finset.univ
+    (fun k => (X ⟨k, i k⟩ : MvPolynomial (Σ k, ι k) ℂ))
     (fun k => blkW ι ⟨k, i k⟩) (fun k _ => isWeightedHomogeneous_X ℂ _ _)
   unfold segMono
   convert this using 1
@@ -37,8 +85,10 @@ theorem eval_psiPoly (Ψ : (((k : K) → ι k) → ℂ) →ₗ[ℂ] (Fin (e + 1)
   have hs : segre z = ∑ i, segre z i • (fun i' => if i = i' then (1 : ℂ) else 0) := by
     funext i'
     simp [Finset.sum_apply]
+
   simp only [psiPoly, map_sum, map_mul, eval_C, eval_segMono]
   conv_rhs => rw [hs]
+
   rw [map_sum, Finset.sum_apply]
   refine Finset.sum_congr rfl (fun i _ => ?_)
   rw [map_smul, Pi.smul_apply, smul_eq_mul, mul_comm]
@@ -53,7 +103,6 @@ theorem psiPoly_homog (Ψ : (((k : K) → ι k) → ℂ) →ₗ[ℂ] (Fin (e + 1
   exact (mem_weightedHomogeneousSubmodule _ _ _ _).mp hmem
 
 variable (ι) in
-
 def idealC (P : Ideal (MRing ι)) : Ideal (MvPolynomial (Σ k, ι k) ℂ) :=
   Ideal.map (map (Int.castRingHom ℂ)) P
 
@@ -134,10 +183,12 @@ theorem segre_rel {P : Ideal (MRing ι)} (hP : IsMultiHomogIdeal P)
     rw [hD]
     exact comp_mul_homog (psiPoly_homog Ψ j) (c j) _
   have heq := congrArg (weightedHomogeneousComponent (blkW ι) (fun _ : K => n + 1)) hga
-  rw [hseg, map_add, ← hc, map_sum] at heq
+
+  rw [hseg, map_add (f := _), ← hc, map_sum] at heq
   simp only [hterm] at heq
   have hev := congrArg (eval z) heq
-  rw [map_add, map_sum, eval_idealC hz hgc, zero_add, map_pow, eval_segMono] at hev
+
+  rw [map_add (f := _), map_sum, eval_idealC hz hgc, zero_add, map_pow, eval_segMono] at hev
   rw [← hev]
   refine Finset.sum_congr rfl (fun j _ => ?_)
   rw [map_mul, hG2, eval_psiPoly, mul_comm]

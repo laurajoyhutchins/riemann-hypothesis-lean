@@ -1,13 +1,61 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.GlobalProofs.IsCovolOne
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.ExistsUnitScalingSelfdualAdelicMeasures
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.SelfdualMeasureTwistBySymmetricAuto
+module
+
+public import GroundTheory.AutomorphicForms.GL2.GJMatrixAdelic
+public import Formalism.SharpRestriction.GlobalSchurBounds.GeneralLinearActions.GenusMassVolumes
+public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.ExistsUnipotentInvariantCompactlySupportedWeight
 import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.SelfdualMeasureTransportEquiv
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.ExistsTraceFormGramMatrixInBasis
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.ExistsUnipotentInvariantCompactlySupportedWeight
-import Development.AutomorphicSpectrum.Proofs.NonGaloisProofs.ExistsEqAdelicCharMul
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TamePartRight
-import GroundTheory.AutomorphicForms.GL2.GJMatrixAdelic
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TamePartRight
+public import Development.AutomorphicSpectrum.Proofs.NonGaloisProofs.ExistsEqAdelicCharMul
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicLocalCompactness.AdeleLC
+import GroundTheory.AutomorphicForms.ReductionMeasure
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Calculus.BumpFunction.FiniteDimension
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Compactness.Paracompact
+import Mathlib.Topology.Separation.Connected
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.PublishedTheorems.GlobalTheta.IsSchwartzBruhatOfProd
+import Development.AutomorphicSpectrum.Proofs.GlobalProofs.IsCovolOne
+
+@[expose] public section
 
 noncomputable section
 
@@ -154,7 +202,7 @@ variable {K : Type} [Field K] [NumberField K] {ι : Type} [Fintype ι]
 
 theorem exists_bump (z : ι → AdeleRing (𝓞 K) K) (U : Set (ι → AdeleRing (𝓞 K) K)) (hU : U ∈ 𝓝 z) :
     ∃ r : (ι → AdeleRing (𝓞 K) K) → ℝ, Continuous r ∧ (∀ x, 0 ≤ r x) ∧ 0 < r z ∧
-      (∀ x, r x ≠ 0 → x ∈ U) ∧ (fun x => (r x : ℂ)) ∈ schwartzBruhatPi K ι := by
+      (∀ x, r x ≠ 0 → x ∈ U) ∧ (fun x => (r x : ℂ)) ∈ schwartzBruhatPi (K := K) (ι := ι) := by
   classical
   let inv : (ι → mixedSpace K) × (ι → FiniteAdeleRing (𝓞 K) K) → (ι → AdeleRing (𝓞 K) K) :=
     fun p i => ((homeomorphMixedSpace K).symm (p.1 i), p.2 i)
@@ -179,7 +227,7 @@ theorem exists_bump (z : ι → AdeleRing (𝓞 K) K) (U : Set (ι → AdeleRing
     GlobalTheory.TamePartR.totallyDisconnected_finiteAdele K
   obtain ⟨Kc, hKn, hKs, hKc⟩ := local_compact_nhds hB
   obtain ⟨C, hCo, hv, hCs⟩ :=
-    (loc_compact_Haus_tot_disc_of_zero_dim (H := ι → FiniteAdeleRing (𝓞 K) K)).mem_nhds_iff.1 hKn
+    (loc_compact_Haus_tot_disc_of_zero_dim (X := ι → FiniteAdeleRing (𝓞 K) K)).mem_nhds_iff.1 hKn
   have hCo' : IsClopen C := hCo
   have hCc : IsCompact C := hKc.of_isClosed_subset hCo'.1 hCs
   have hlc : ∀ {Y : Type} [Zero Y] (c : Y), IsLocallyConstant (C.indicator fun _ => c) := by
@@ -226,7 +274,7 @@ theorem exists_bump (z : ι → AdeleRing (𝓞 K) K) (U : Set (ι → AdeleRing
 theorem selfDual_std : Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes.SelfDual (adeleMeasurePi K (ι := ι))
     (fun x y => ((adelicChar K (∑ i, x i * y i) : Circle) : ℂ)) := by
   refine selfDual_of_rich inferInstance _ ?_ (fun _ _ => Circle.norm_coe _) ?_
-    (schwartzBruhatPi K ι : Set _) ?_ exists_bump
+    (schwartzBruhatPi (K := K) (ι := ι) : Set _) ?_ exists_bump
   · exact continuous_subtype_val.comp ((continuous_adelicChar (K := K)).comp
       (continuous_finsetSum _ fun i _ =>
         ((continuous_apply i).comp continuous_fst).mul ((continuous_apply i).comp continuous_snd)))

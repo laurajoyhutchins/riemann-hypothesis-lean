@@ -1,6 +1,61 @@
-import Mathlib
-import GroundTheory.LocalFields.Interface
-import GroundTheory.LocalFields.UnitsBasic
+module
+
+public import Mathlib.FieldTheory.Galois.Basic
+public import Mathlib.NumberTheory.LocalField.Basic
+public import Mathlib.RingTheory.RegularLocalRing.Defs
+public import Mathlib.RingTheory.SimpleRing.Principal
+public import GroundTheory.LocalFields.Interface
+public import GroundTheory.LocalFields.UnitsBasic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+public import Mathlib.FieldTheory.Galois.NormalBasis
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Baire.LocallyCompactRegular
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -64,8 +119,8 @@ theorem smul_sum_mem_normalLattice_add_iff (hπ : π ≠ 0)
     rw [pow_add, mul_smul]
     simp_rw [smul_sum, ← mul_smul, hd]
 
-omit [FiniteDimensional K L] in
 
+omit [FiniteDimensional K L] in
 theorem normalLattice_antitone : Antitone (normalLattice π θ) := by
   refine antitone_nat_of_succ_le fun s => Submodule.span_le.mpr ?_
   rintro _ ⟨σ, rfl⟩
@@ -82,6 +137,7 @@ theorem algEquiv_smul_sum (τ : Gal(L/K)) (s : ℕ) (c : Gal(L/K) → 𝒪[K]) :
     τ (π ^ s • ∑ σ, c σ • σ θ) = π ^ s • ∑ σ, c (τ⁻¹ * σ) • σ θ := by
   have h : ∀ (a : 𝒪[K]) (y : L), τ (a • y) = a • τ y := fun a y => by
     rw [integer_smul_eq, integer_smul_eq, map_mul, AlgEquiv.commutes]
+
   rw [h, map_sum]
   congr 1
   simp_rw [h, ← AlgEquiv.mul_apply]
@@ -102,8 +158,8 @@ variable [TopologicalSpace K] [IsNonarchimedeanLocalField K] [ValuativeRel L]
 
 variable (π : 𝒪[K]) (θ : L)
 
-omit [TopologicalSpace K] [IsNonarchimedeanLocalField K] in
 
+omit [TopologicalSpace K] [IsNonarchimedeanLocalField K] in
 theorem mem_integer_of_mem_normalLattice (hθO : ∀ σ : Gal(L/K), σ θ ∈ 𝒪[L]) {s : ℕ} {x : L}
     (hx : x ∈ normalLattice π θ s) : x ∈ 𝒪[L] := by
   obtain ⟨c, rfl⟩ := (mem_normalLattice_iff π θ).mp hx
@@ -112,8 +168,8 @@ theorem mem_integer_of_mem_normalLattice (hθO : ∀ σ : Gal(L/K), σ θ ∈ �
   rw [integer_smul_eq]
   exact mul_mem ((algebraMap_mem_integer_iff K L _).mpr (c σ).2) (hθO σ)
 
-omit [ValuativeRel L] [ValuativeExtension K L] [FiniteDimensional K L] in
 
+omit [ValuativeRel L] [ValuativeExtension K L] [FiniteDimensional K L] in
 theorem exists_pow_mul_mem_integer_of_lt_one {F : Type*} [Field F] [ValuativeRel F]
     [TopologicalSpace F] [IsNonarchimedeanLocalField F] {t : F}
     (ht : valuation F t < 1) (a : F) : ∃ n, ∀ m ≥ n, t ^ m * a ∈ 𝒪[F] := by
@@ -134,8 +190,8 @@ theorem exists_pow_mul_mem_integer_of_lt_one {F : Type*} [Field F] [ValuativeRel
   rw [pow_add, mul_comm (t ^ n), mul_assoc]
   exact mul_mem (pow_mem ht1 d) hn
 
-omit [ValuativeRel L] [ValuativeExtension K L] [FiniteDimensional K L] in
 
+omit [ValuativeRel L] [ValuativeExtension K L] [FiniteDimensional K L] in
 theorem exists_pow_mul_mem_integer (hπ : Irreducible π) (a : K) :
     ∃ n, ∀ m ≥ n, (π : K) ^ m * a ∈ 𝒪[K] :=
   exists_pow_mul_mem_integer_of_lt_one
@@ -143,8 +199,8 @@ theorem exists_pow_mul_mem_integer (hπ : Irreducible π) (a : K) :
 
 variable [IsGalois K L]
 
-omit [ValuativeRel L] [ValuativeExtension K L] in
 
+omit [ValuativeRel L] [ValuativeExtension K L] in
 theorem exists_pow_smul_mem_normalLattice (hπ : Irreducible π)
     (hθ : LinearIndependent K fun σ : Gal(L/K) => σ θ) (y : L) :
     ∃ n, ∀ m ≥ n, π ^ m • y ∈ normalLattice π θ 0 := by
@@ -161,8 +217,8 @@ theorem exists_pow_smul_mem_normalLattice (hπ : Irreducible π)
   rw [hb, integer_smul_eq, integer_smul_eq, Algebra.smul_def, ← mul_assoc, ← map_mul]
   simp
 
-omit [ValuativeRel L] [ValuativeExtension K L] in
 
+omit [ValuativeRel L] [ValuativeExtension K L] in
 theorem exists_pow_smul_mul_mem_normalLattice (hπ : Irreducible π)
     (hθ : LinearIndependent K fun σ : Gal(L/K) => σ θ) :
     ∃ r, ∀ σ τ : Gal(L/K), π ^ r • (σ θ * τ θ) ∈ normalLattice π θ 0 := by
@@ -212,21 +268,21 @@ section Complete
 
 variable [TopologicalSpace K] [IsNonarchimedeanLocalField K]
 
-omit [FiniteDimensional K L] in
 
+omit [FiniteDimensional K L] in
 private theorem isAdicComplete_maximalIdeal : IsAdicComplete 𝓂[K] 𝒪[K] := by
   let := IsTopologicalAddGroup.rightUniformSpace K
   have := isUniformAddGroup_of_addCommGroup (G := K)
   infer_instance
 
-omit [FiniteDimensional K L] in
 
+omit [FiniteDimensional K L] in
 theorem smodEq_iff_pow_dvd {π : 𝒪[K]} (hπ : Irreducible π) {n : ℕ} {x y : 𝒪[K]} :
     x ≡ y [SMOD (𝓂[K] ^ n • ⊤ : Submodule 𝒪[K] 𝒪[K])] ↔ π ^ n ∣ x - y := by
   rw [SModEq.sub_mem, smul_eq_mul, Ideal.mul_top, mem_maximalIdeal_pow_iff hπ]
 
-omit [FiniteDimensional K L] in
 
+omit [FiniteDimensional K L] in
 theorem exists_limit_of_pow_dvd {π : 𝒪[K]} (hπ : Irreducible π) (c : ℕ → 𝒪[K])
     (hc : ∀ N, ∃ M, ∀ m ≥ M, ∀ n ≥ M, π ^ N ∣ c n - c m) :
     ∃ a, ∀ N, ∃ M, ∀ n ≥ M, π ^ N ∣ c n - a := by
@@ -245,8 +301,8 @@ theorem exists_limit_of_pow_dvd {π : 𝒪[K]} (hπ : Irreducible π) (c : ℕ �
   have := dvd_add h1 h2
   rwa [sub_add_sub_cancel] at this
 
-omit [FiniteDimensional K L] in
 
+omit [FiniteDimensional K L] in
 theorem eq_zero_of_forall_pow_dvd {π : 𝒪[K]} (hπ : Irreducible π) {x : 𝒪[K]}
     (h : ∀ N, π ^ N ∣ x) : x = 0 :=
   IsHausdorff.haus (isAdicComplete_maximalIdeal (K := K)).toIsHausdorff x fun N => by
@@ -362,8 +418,8 @@ section Existence
 variable [TopologicalSpace K] [IsNonarchimedeanLocalField K] [ValuativeRel L]
   [TopologicalSpace L] [IsNonarchimedeanLocalField L] [ValuativeExtension K L]
 
-omit [FiniteDimensional K L] [TopologicalSpace L] [IsNonarchimedeanLocalField L] in
 
+omit [FiniteDimensional K L] [TopologicalSpace L] [IsNonarchimedeanLocalField L] in
 theorem valuation_algebraMap_lt_one {π : 𝒪[K]} (hπ : Irreducible π) :
     valuation L (algebraMap K L (π : K)) < 1 :=
   (Valuation.HasExtension.val_map_lt_one_iff (valuation K) (valuation L) _).mpr

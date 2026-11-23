@@ -1,16 +1,76 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Statements.PlaceShiftStatements.NormSmall
-import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.WeilTensorModels
-import Development.AbelianVarietyTheory.Definitions.Divisors.DiscreteSeriesHermitianUnique
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsFinPt
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ComplTupBijective
-import Development.AbelianVarietyTheory.Statements.HeckeThetaIntegrals.ThetaIntegralsAgree
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.HoweDualityReal
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ProdMinorsMemInv
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EvalBasePtTopMinors
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ColSubEqDetCharSmulOfMemInv
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BigMatConjTransposeMul
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FockDetCharInvariantsLeSpanProdMaximalMinors
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EvalBasePtTopMinors
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BigMatConjTransposeMul
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ColSubEqDetCharSmulOfMemInv
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FockDetCharInvariantsLeSpanProdMaximalMinors
+import Formalism.LocalRingCardinality.DataHost
+import Formalism.LocalToGlobal.Columns.PolyFn
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.UnitCharTriangle
+import Development.AbelianVarietyTheory.Definitions.Divisors.CmHostImaginaryGeneratorNeZero
+import Development.AbelianVarietyTheory.Definitions.Divisors.FinitePrimesUnder
+import Development.AbelianVarietyTheory.Definitions.Divisors.FlatTensorVacuum
+public import Development.AbelianVarietyTheory.Definitions.Foundations.NormSumPairRankZeroOfCurveCoordNorm
+import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.ExistsMatchOver
+import Formalism.LocalRingCardinality.DataTheta
+import Formalism.LocalToGlobal.IndefiniteForms.IndefiniteTree.RealCubicMeans.LeafBounds.IntegralLeaf.LeafINTFree
+import Formalism.LocalToGlobal.IndefiniteReal.IndefiniteWeightData
+import Formalism.LocalToGlobal.IndefiniteReal.LinksDefs
+import Formalism.LocalToGlobal.IndefiniteReal.LocalNewformFunction
+import Formalism.SharpRestriction.GlobalSchurBounds.GeneralLinearActions.GapAtLeast
+import Formalism.SharpRestriction.GlobalSchurBounds.GeneralLinearActions.GenusMassVolumes
+
+@[expose] public section
 
 noncomputable section
 open MvPolynomial
@@ -30,7 +90,7 @@ theorem exists_unitary_eval_ne {a d : ℕ} (h : a ≤ d) (P : Pol ι d a) (hP : 
     intro Q w
     induction Q using MvPolynomial.induction_on with
     | C c => simp
-    | add p q hp hq => simp only [map_add, hp, hq]
+    | add p q hp hq => simp only [map_add (f := _), hp, hq]
     | mul_X p y hp => simp only [map_mul, hp, aeval_X, eval_X]
   have hF0 : aeval f P = 0 := by
     refine Formalism.L2.Col.eq_zero_of_forall_unitary (ι := ι) (n := d) (fun _ => 1) (fun _ => by simp) _ fun u hu => ?_
@@ -90,10 +150,9 @@ theorem lowScal_mem_unitary {d a : ℕ} {t : ℂ} (ht : ‖t‖ = 1) : lowScal d
     ← Matrix.diagonal_one]
   congr 1
   funext i
-  simp only [Pi.mul_apply, Pi.star_apply]
   by_cases hi : (i : ℕ) < a
   · simp [hi]
-  · simp only [hi, if_false, RCLike.star_def]
+  · simp only [Pi.star_apply, hi, if_false, RCLike.star_def]
     rw [Complex.conj_mul', ht]; simp
 
 theorem rowSub_lowScal_zero_mem {a d : ℕ} (S : Submodule ℂ (Pol ι d a))
@@ -108,9 +167,11 @@ theorem rowSub_lowScal_zero_mem {a d : ℕ} (S : Submodule ℂ (Pol ι d a))
       ∑ k ∈ Finset.range M, (M : ℂ)⁻¹ • rowSub (fun _ => lowScal d a (ω ^ k)) P := by
     conv_lhs => rw [as_sum P]
     conv_rhs => rw [as_sum P]
+
     simp only [map_sum, rowSub_lowScal_monomial, Finset.smul_sum]
     rw [Finset.sum_comm]
     refine Finset.sum_congr rfl fun s hs => ?_
+
     rw [Finset.sum_congr rfl (fun x _ => by rw [smul_monomial]), ← map_sum]
     congr 1
     have hb : lowDeg s < M := lt_of_le_of_lt (lowDeg_le s) (by have := le_totalDegree hs; omega)
@@ -179,6 +240,7 @@ theorem exists_fockS_orth {σ : Type} (V N : Submodule ℂ (MvPolynomial σ ℂ)
     rw [Submodule.coe_sum] at this
     simp only [Submodule.coe_smul] at this
     exact this.symm
+
   rw [hPe, ← Formalism.L2.DIV.fockL_apply, map_sum, LinearMap.sum_apply]
   refine Finset.sum_eq_zero fun i _ => ?_
   rw [LinearMap.map_smulₛₗ, LinearMap.smul_apply, Formalism.L2.DIV.fockL_apply, hQi i, smul_zero]
@@ -230,7 +292,7 @@ theorem inv_irreducible : ∀ {ι : Type} [Fintype ι] (a d : ℕ) (n : ι → �
   let M : Submodule ℂ (GlobalTheory.MinorFrame.Pol ι d a) :=
     { carrier := {R | R ∈ GlobalTheory.MinorFrame.inv a d n ∧ ∀ P ∈ N, Formalism.L2.DIV.fockS P R = 0}
       add_mem' := fun {R R'} hR hR' => ⟨(GlobalTheory.MinorFrame.inv a d n).add_mem hR.1 hR'.1, fun P hP => by
-        rw [← Formalism.L2.DIV.fockL_apply, map_add, Formalism.L2.DIV.fockL_apply, Formalism.L2.DIV.fockL_apply, hR.2 P hP, hR'.2 P hP,
+        rw [← Formalism.L2.DIV.fockL_apply, map_add (f := _), Formalism.L2.DIV.fockL_apply, Formalism.L2.DIV.fockL_apply, hR.2 P hP, hR'.2 P hP,
           add_zero]⟩
       zero_mem' := ⟨(GlobalTheory.MinorFrame.inv a d n).zero_mem, fun P _ => by
         rw [← Formalism.L2.DIV.fockL_apply, map_zero]⟩

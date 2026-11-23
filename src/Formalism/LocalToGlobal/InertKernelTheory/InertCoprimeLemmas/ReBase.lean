@@ -1,7 +1,54 @@
-import Formalism.LocalToGlobal.InertKernelTheory.StatementReBase
-import Formalism.LocalToGlobal.InertKernelTheory.InertCoprimeLemmas.HalfTorsionNotMemCmLattice
-import Formalism.LocalToGlobal.InertKernelTheory.InertCoprimeLemmas.KappaSelfDualFourthPowerLattice
-import Formalism.LocalToGlobal.KernelLattices.KernelLocalFactors.SelfDualLatticeNorms.IsTorsionPointStandardCM
+module
+
+public import Formalism.LocalToGlobal.InertKernelTheory.StatementReBase
+public import Formalism.LocalToGlobal.InertKernelTheory.StatementCurve
+public import Formalism.LocalToGlobal.TorsionIntegrality.UniformGaussModels.UniformGaussModelConditionEquivalent
+public import Formalism.LocalToGlobal.InertKernelTheory.InertCoprimeLemmas.HalfTorsionNotMemCmLattice
+import Formalism.LocalToGlobal.KernelLattices.KernelLocalFactors.BaseEx
+public import Formalism.LocalToGlobal.KernelLattices.KernelLocalFactors.SelfDualLatticeNorms.HalfPeriodStandardCM
+public import Formalism.LocalToGlobal.KernelLattices.KernelLocalFactors.SelfDualLatticeNorms.IsTorsionPointStandardCM
+import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.MulStableIntegral
+import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.QuasiPeriodConstUnique
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 open scoped BigOperators
@@ -104,22 +151,6 @@ theorem stdData_congr {L L' : PeriodPair} (h : L.lattice = L'.lattice) {ω₀ ω
   · rw [hS]; exact S.selfDual
   · rw [hL]; exact S.idx₁
   · rw [hL]; exact S.idx₂
-
-theorem k1ThetaAllBases : FirstKernelThetaAllBases := by
-  intro D cc δ B hcc hδ l _ h5 hj ι
-  obtain ⟨a₀, g, b₀, c₀, ha, hd, hl, B', hcm, -, hIs, hlat, -, -, -, hω, -, hth⟩ := theta_change_of_base D cc δ B hcc
-  have h : B.L.lattice = B'.L.lattice := hlat.symm
-  have hω' : (B.ω₀ - B'.ω₀) / 2 ∈ B'.L.lattice := h ▸ hω
-  obtain ⟨G, hS, hidx, hK⟩ := Kap.K1_theta_inert_prime D cc δ B' hcc hδ a₀ b₀ c₀ ha hd _ hl hcm hIs l h5 hj ι
-  refine ⟨G, ?_, ?_, ?_⟩
-  · have hS' := hS
-    rw [← KS.hOne_congr h, ← KS.stdH_congr h] at hS'
-    exact stdData_congr h hω' (Base.half_not_mem B) hS'
-  · rw [stdLat_congr h]; exact hidx
-  · intro g2 g3 ε s2 hN hg2 hg3 hD hε hth' t N hN0 hlN hNt σ γ B'' hF
-    have := hK g2 g3 ε s2 ((isLTNorm_congr h l ι g2 g3 s2 ε).1 hN) hg2 hg3 hD hε hth' t N hN0 hlN hNt σ γ B'' hF
-    rw [← KS.hOne_congr h, hth] at this
-    exact this
 
 end ReBase
 

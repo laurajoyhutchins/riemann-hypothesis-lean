@@ -1,7 +1,48 @@
-import Mathlib
-import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.IteratedLiftChains
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.DualLatticeDifferentIndex
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.StdCharFinitePartRationalEqExpTrace
+module
+
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.DualLatticeDifferentIndex
+public import Mathlib.Algebra.AffineMonoid.Basic
+import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.AddCharTrivialIntegralFiniteAdeleMul
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Formalism.LocalToGlobal.BesselHermitianTheta.NoncompactGapAtLeastRange
+
+@[expose] public section
 
 noncomputable section
 
@@ -113,31 +154,6 @@ theorem not_mem_sq_of_ext {E : Type} [Field E] [NumberField E] [Algebra F E] {p 
   rw [Ideal.map_pow, map_natCast] at h1
   have h2 : (p : 𝓞 E) ∈ Q ^ 2 := Ideal.pow_right_mono hle 2 h1
   exact h ⟨Q, hQ.isPrime, hb⟩ (Ideal.pow_le_self two_ne_zero h2) h2
-
-theorem psiUnramAt_of_splitsCompletely : ∀ (D : D7) (p : ℕ) (ψ : AddChar (AF D.host.F) ℂ),
-    GlobalTheory.IndefiniteRowSideFullHecke.IteratedLiftChains.SplitsCompletely D p → IsStdChar D ψ (-1) →
-    ∀ v : HeightOneSpectrum (𝓞 D.host.F), (p : 𝓞 D.host.F) ∈ v.asIdeal → GlobalTheory.IndefiniteRowSideFullHecke.IteratedLiftChains.PsiUnramAt ψ v := by
-  intro D p ψ hp hψ v hv α hα
-  have hc := count_codiff_eq_zero v
-    (not_dvd_different hp.1 v hv (not_mem_sq_of_ext (fun w hw => (hp.2 w hw).2) v))
-  have h := mem_adelicIdeal_codiff_iff hψ.1.1 (GlobalTheory.StdRat.stdChar_fin_rat D ψ hψ) α
-  have h' : (∀ β ∈ Formalism.MainNotions.StandardLattice.intAf D.host.F, ψ (pairA D.host.F 0 (α * β)) = 1) ↔
-      α ∈ adelicIdeal (codiff D.host.F) := by
-    rw [h]
-    exact forall_congr' fun β => by rw [mul_comm]; rfl
-  rw [h', mem_adelicIdeal_iff codiff_ne_zero, HeightOneSpectrum.mem_adicCompletionIntegers]
-  constructor
-  · intro H
-    have := H v
-    rwa [hc, neg_zero, exp_zero] at this
-  · intro H w
-    by_cases hw : w = v
-    · subst hw
-      rw [hc, neg_zero, exp_zero]
-      exact H
-    · have h0 : α w = 0 := hα w hw
-      rw [h0, map_zero]
-      exact zero_le
 
 end GlobalTheory.SplitUnram
 

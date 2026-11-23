@@ -1,5 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.QuasicoherentCohomology.IsIsoTermComparisonRestrictScalars
+module
+
+public import Development.AbelianVarietyTheory.Definitions.QuasicoherentCohomology.IsIsoTermComparisonRestrictScalars
+public import Mathlib.LinearAlgebra.CliffordAlgebra.Conjugation
+public import Mathlib.LinearAlgebra.ExteriorAlgebra.Basic
+public import Mathlib.RingTheory.Kaehler.Basic
+public import Mathlib.Tactic.Continuity
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -17,16 +63,16 @@ def delta (c : Finset ι → E) : Finset ι → E :=
 def Dtot (d : E →+ E) (c : Finset ι → E) : Finset ι → E :=
   fun t => delta c t + (-1 : ℤ) ^ t.card • d (c t)
 
-omit [LinearOrder ι] in
 
+omit [LinearOrder ι] in
 def InCech (N : Finset ι → AddSubgroup E) (m : ℕ) (c : Finset ι → E) : Prop :=
   c ∅ = 0 ∧ (∀ s, c s ∈ N s) ∧ ∀ s, s.card ≠ m → c s = 0
 
 def CechZero (N : Finset ι → AddSubgroup E) (b : ℕ) : Prop :=
   ∀ c, InCech N (b + 1) c → delta c = 0 → ∃ y, InCech N b y ∧ delta y = c
 
-omit [LinearOrder ι] in
 
+omit [LinearOrder ι] in
 def InTot (T : ℕ → Finset ι → AddSubgroup E) (m : ℕ) (c : Finset ι → E) : Prop :=
   c ∅ = 0 ∧ (∀ q s, q + s.card = m → c s ∈ T q s) ∧ ∀ s, m < s.card → c s = 0
 
@@ -61,8 +107,8 @@ def forms (B : Set K) (L : Set V) (q : ℕ) : AddSubgroup (ExteriorAlgebra K V) 
 
 variable {ι : Type} [LinearOrder ι]
 
-omit [LinearOrder ι] in
 
+omit [LinearOrder ι] in
 structure IsDatum (p : ℕ) (d : ExteriorAlgebra K V →+ ExteriorAlgebra K V) (f : ι → V →+ V)
     (h : ι → ι → V →+ K) : Prop where
   f_smul : ∀ i (c : K) v, f i (c • v) = c ^ p • f i v
@@ -79,8 +125,8 @@ def Lop (f : ι → V →+ V) (h : ι → ι → V →+ K) (v : V) (y : Finset �
         h (t.min' ht) ((t.erase (t.min' ht)).min' h2) v • y (t.erase (t.min' ht)) else 0)
   else 0
 
-omit [LinearOrder ι] in
 
+omit [LinearOrder ι] in
 def oneC : Finset ι → ExteriorAlgebra K V := fun t => if t.card = 1 then 1 else 0
 
 def prodL (f : ι → V →+ V) (h : ι → ι → V →+ K) (vs : List V) : Finset ι → ExteriorAlgebra K V :=

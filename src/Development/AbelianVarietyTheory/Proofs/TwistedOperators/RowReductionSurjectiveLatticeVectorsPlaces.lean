@@ -1,13 +1,58 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.LamHomApply
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.CompletedTensorLatticeStrongApproxOpenCompact
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.TensorLatticeSelfDualSemicharacterIndex
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.SmulMemLatO
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.MemRangeOfOneTmulMem
+module
+
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.LamHomApply
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ThPDatumEq
+public import Formalism.LocalToGlobal.IndefiniteReal.SubgroupCharExtensionOneApply
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.MemRangeOfOneTmulMem
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.SmulMemLatO
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.EqZeroOrEqOfPlaceIdem
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsNonvanishingFiniteDatumDefiniteLift
 import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsNsmulIntMemLatO
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsNonvanishingFiniteDatumDefiniteLift
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.GramMapMulInv
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.CompletedTensorLatticeStrongApproxOpenCompact
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.TensorLatticeSelfDualSemicharacterIndex
 import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsEqMulOfResSNeOne
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.EqZeroOrEqOfPlaceIdem
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.RevPosRevPos
+import Formalism.LocalToGlobal.IndefiniteReal.ExistsChosenExtremalVector
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.L2.Theta Formalism.IndefR Formalism.IndefR.Datum Formalism.IndefR.Links Formalism.IndefR.Mult Formalism.IndefR.FWT Formalism.L2.Pj
 open MeasureTheory IsDedekindDomain NumberField Matrix Complex
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.FD GlobalTheory GlobalTheory.ThFr GlobalTheory.Ker GlobalTheory.AdSpan
@@ -17,8 +62,8 @@ attribute [local instance] Formalism.BasicNotions.Host.cmStar
 
 noncomputable section
 
-set_option synthInstance.maxHeartbeats 400000
-set_option maxHeartbeats 800000
+
+
 
 namespace GlobalTheory.RowOnto
 
@@ -96,7 +141,7 @@ theorem redM_sub (PP : Formalism.L2.DIV.Pl D.host.E) {b c : ℕ} {N M : Matrix (
       Formalism.L2.DIV.resS D.host.F PP ⟨(N - M) i j, h⟩ else 0) =
     (if h : N i j ∈ Formalism.L2.Herm.intAf D.host.F D.host.E then Formalism.L2.DIV.resS D.host.F PP ⟨N i j, h⟩ else 0) -
     (if h : M i j ∈ Formalism.L2.Herm.intAf D.host.F D.host.E then Formalism.L2.DIV.resS D.host.F PP ⟨M i j, h⟩ else 0)
-  rw [dif_pos h1, dif_pos (hN i j), dif_pos (hM i j), ← (Formalism.L2.DIV.resS D.host.F PP).map_sub]
+  rw [dite_eq_left h1, dite_eq_left (hN i j), dite_eq_left (hM i j), ← (Formalism.L2.DIV.resS D.host.F PP).map_sub]
   rfl
 
 theorem redM_congr (PP : Formalism.L2.DIV.Pl D.host.E) {b c b' c' : ℕ} (N : Matrix (Fin b) (Fin c) (EAf D))
@@ -151,7 +196,7 @@ open GlobalTheory.LiftLevel GlobalTheory.LiftDat
 
 variable {D : D7}
 
-set_option maxHeartbeats 3000000 in
+
 
 theorem exists_row {S T : HSp D} (Pg Q : Finset (Formalism.L2.DIV.Pl D.host.E)) (e : AE D) (he : IsIdemSum e (Pg ∪ Q))
     (i0 : Fin S.rank) (t : ∀ PP : Formalism.L2.DIV.Pl D.host.E, Fin T.rank → Formalism.L2.DIV.kP PP) :
@@ -201,10 +246,11 @@ theorem exists_row {S T : HSp D} (Pg Q : Finset (Formalism.L2.DIV.Pl D.host.E)) 
     intro PP hPP j
     show (if h : R i0 j ∈ Formalism.L2.Herm.intAf D.host.F D.host.E then
       Formalism.L2.DIV.resS D.host.F PP ⟨R i0 j, h⟩ else 0) = _
-    rw [dif_pos (hRint i0 j)]
+    rw [dite_eq_left (hRint i0 j)]
     have hr : (⟨R i0 j, hRint i0 j⟩ : Formalism.L2.Herm.intAf D.host.F D.host.E) = r0 i0 j := rfl
     rw [hr]
     simp only [r0, if_pos rfl]
+
     rw [map_mul, hres PP hPP, one_mul, map_sum]
     simp_rw [map_mul, Formalism.L2.DIV.resS_oToS]
     rw [Finset.sum_eq_single ⟨PP, hPP⟩]
@@ -214,7 +260,7 @@ theorem exists_row {S T : HSp D} (Pg Q : Finset (Formalism.L2.DIV.Pl D.host.E)) 
     · intro h; exact absurd (Finset.mem_attach _ _) h
   exact ⟨R, hRint, hRe, hRred⟩
 
-set_option maxHeartbeats 3000000 in
+
 
 theorem rowReduction_surjective_over_adelicFrames {S T : HSp D} (C : Ctx S T) (βS : GL (Fin S.rank) (EAf D)) (βT : GL (Fin T.rank) (EAf D))
     (Pg Q : Finset (Formalism.L2.DIV.Pl D.host.E)) (e : AE D) (he : IsIdemSum e (Pg ∪ Q)) (a b : AE D) (hb : a * b = e)

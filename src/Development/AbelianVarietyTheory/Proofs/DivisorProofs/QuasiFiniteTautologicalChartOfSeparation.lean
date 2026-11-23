@@ -1,17 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.GalRigidOfSurjective
-import Development.AbelianVarietyTheory.Definitions.Divisors.MinSt5OfMinSt4
-import Development.AbelianVarietyTheory.Definitions.Divisors.FromBase
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsProperToroidalModelStructureMap
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsGensOfDataFrom
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsNoetherianRingCompletedStalkSiegelFibrePower
-import Development.AbelianVarietyTheory.Definitions.Divisors.PerFactor
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsMumfordFamOfSubsingleton
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.GalRigidOfSurjective
+public import Development.AbelianVarietyTheory.Definitions.Divisors.MinSt5OfMinSt4
+public import Development.AbelianVarietyTheory.Definitions.Divisors.FromBase
+public import Mathlib.AlgebraicGeometry.Morphisms.QuasiFinite
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsGensOfDataFrom
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FiniteTypeCycAway
 import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.FormallyUnramifiedOfTangentMapInjective
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ResidueFieldMapFiniteOfQuasiFinite
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FiniteTypeCycAway
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ResidueFieldMapFiniteOfQuasiFinite
 import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.IsSemiAbelianOfGenericAbelianOfClosedIsGt
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.FiniteResidueFieldOfIsClosedOfLocallyOfFiniteTyp
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.OneArc
+
+@[expose] public section
 
 noncomputable section
 
@@ -63,7 +99,7 @@ theorem eq_zero_of_inv_mem [IsLocalRing V] (ev : V →+* K) {r : V} (hr : r ∈ 
   by_contra h0
   obtain ⟨r', hr'⟩ := h
   have h₁ : 1 - r * r' ∈ RingHom.ker ev := by
-    rw [RingHom.mem_ker, map_sub, map_mul, map_one, hr', mul_inv_cancel₀ h0, sub_self]
+    rw [RingHom.mem_ker, RingHom.map_sub, map_mul, map_one, hr', mul_inv_cancel₀ h0, sub_self]
   have h₂ := le_maximalIdeal (RingHom.ker_ne_top ev) h₁
   have h₃ := add_mem h₂ (Ideal.mul_mem_right r' _ hr)
   rw [sub_add_cancel] at h₃
@@ -176,29 +212,14 @@ theorem exists_essFiniteType_stalk (y : (LowChart.powA F r).left) :
     Algebra.EssFiniteType.of_isLocalization (R := o) ((Spec.structureSheaf o).presheaf.stalk p) p.asIdeal.primeCompl
   exact ⟨_, RingHom.EssFiniteType.comp (e0 (LowChart.toO F r y)) (LocallyOfFiniteType.stalkMap (LowChart.toO F r) y)⟩
 
-theorem c₀_smul_single [IsNoetherianRing o] (y : (LowChart.powA F r).left) (k : ℕ) (i : Fin r) :
-    (LowChart.c₀ F y ((k : ℤ) • Pi.single i 1)).left ≫ Pdiv.PullbackComparison.pφ (LowChart.toPow F y ≫ (LowChart.powA F r).hom) F.univ.A =
-      LowChart.toPow F y ≫ (LowChart.coord F i).left ≫ (𝟙 F.univ.A ^ k).left := by
-  classical
-  have e : LowChart.c₀ F y ((k : ℤ) • Pi.single i 1) = LowChart.pt F y i ^ k := by
-    show ∏ j, LowChart.pt F y j ^ (((k : ℤ) • Pi.single i 1 : Fin r → ℤ) j) = _
-    rw [Finset.prod_eq_single i (fun j _ hj => by simp [Pi.single_eq_of_ne hj]) (by simp)]
-    simp
-  have pb := Pdiv.PullbackComparison.isGrpPullback (LowChart.toPow F y ≫ (LowChart.powA F r).hom) F.univ.A
-  have e₁ := map_pow (pushHom pb (𝟙_ _)) (LowChart.pt F y i) k
-  have e₂ : pushHom pb (𝟙_ _) (LowChart.pt F y i) ^ k = pushHom pb (𝟙_ _) (LowChart.pt F y i) ≫ (𝟙 F.univ.A ^ k) := by
-    rw [MonObj.comp_pow, Category.comp_id]
-  rw [e, ← Category.assoc, ← LowChart.pt_left]
-  exact congrArg (fun q => q.left) (e₁.trans e₂)
-
 end Pow
 
 section Core
 
 variable {O W V : Type} [CommRing O] [CommRing W] [CommRing V] [IsLocalRing O] [IsLocalRing W] [IsLocalRing V]
 
-omit [IsLocalRing W] in
 
+omit [IsLocalRing W] in
 theorem essFiniteType_residue (ib : W →+* V) {σ : Type} [Finite σ] (s : σ → V)
     (h : ∀ x : V, ∃ a ∈ Subring.closure (Set.range ib ∪ Set.range s), ∃ b ∈ Subring.closure (Set.range ib ∪ Set.range s),
       IsUnit b ∧ x * b - a ∈ maximalIdeal V) : ((residue V).comp ib).EssFiniteType := by

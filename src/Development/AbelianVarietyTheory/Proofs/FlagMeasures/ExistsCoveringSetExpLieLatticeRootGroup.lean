@@ -1,5 +1,57 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.OfRoots
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.OfRoots
+import Mathlib.Algebra.Order.Archimedean.Real.Hom
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.Countable
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Dynamics.Ergodic.Action.Regular
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.MeasureTheory.Group.GeometryOfNumbers
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Presheaf
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open NumberField Module Matrix Formalism.MainNotions.S GlobalTheory.LoopV
 open scoped ENNReal Classical
 open MeasureTheory Set
@@ -9,8 +61,8 @@ namespace GlobalTheory.LoopV.Cover
 section Analysis
 variable {E : Type} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
 
-omit [FiniteDimensional ℝ E] in
 
+omit [FiniteDimensional ℝ E] in
 theorem near_of_finset (Λ : Submodule ℤ E) (s : Finset E) (hs : ∀ x ∈ s, x ∈ Λ) (w : E)
     (hw : w ∈ Submodule.span ℝ (s : Set E)) : ∃ l ∈ Λ, ‖w - l‖ ≤ ∑ x ∈ s, ‖x‖ := by
   obtain ⟨f, -, rfl⟩ := Submodule.mem_span_finset.1 hw
@@ -93,7 +145,7 @@ theorem exists_transversal [MeasurableSpace E] [BorelSpace E] (D : Submodule ℤ
     exact ⟨x + y, D.add_mem hx hy, by rwa [← add_assoc]⟩
   refine ⟨⋃ n, B n \ ⋃ m < n, G m, ?_, ?_, ?_, ?_⟩
   · exact MeasurableSet.iUnion fun n => (hB n).measurableSet.diff
-      (isOpen_biUnion fun m _ => hG m).measurableSet
+      (isOpen_iUnion fun m => isOpen_iUnion fun _ : m < n => hG m).measurableSet
   · intro c hc w hw
     simp only [mem_iUnion, mem_sdiff, not_exists] at hc ⊢
     obtain ⟨n, h1, h2⟩ := hc

@@ -1,4 +1,56 @@
-import Development.WeilBound.ThetaLifts.LocalTheory.ConeShifts.ContinuousFc
+module
+
+public import Development.WeilBound.ThetaLifts.LocalTheory.ConeShifts.ContinuousFc
+import Aesop.Main
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.NormCmExtensionSplitPlaceEqZpow
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.OrdLEqNegLog
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsUniqueIsConjAt
+import Development.WeilBound.ThetaLifts.LocalTheory.ConeShifts.FubTate
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AbelianVarietyTheory.Definitions.Divisors.MatchingOfParts
+
+@[expose] public section
 
 noncomputable section
 
@@ -68,8 +120,8 @@ theorem nu_ew {ν : Chr F E} {w} (hν : UnrAt ν w) {l} (h : l ∈ part PI ⊤ (
   rw [e]
   exact Circle.coe_eq_one.1 (congrArg Units.val this)
 
-variable (F) in
 
+variable (F) in
 def pw (w : HeightOneSpectrum (𝓞 E)) : (AE F E)ˣ := locIdele F w (Formalism.L2.Host.atFin w (Formalism.L2.Host.unif w))
 
 theorem vw_pw (w : HeightOneSpectrum (𝓞 E)) : vw w (pw F w) = WithZero.exp (-1 : ℤ) := by
@@ -154,7 +206,8 @@ theorem locW {B : Base F E} (hB : B.IsGood σ) {ν : Chr F E} {z : ℕ} (hz : 1 
 
 theorem inf_sum (W : Finset (HeightOneSpectrum (𝓞 E))) {c : AE F E} (h0 : infTens F E c = 0) :
     infTens F E (∑ w ∈ W, ew F w + c) = 0 := by
-  rw [map_add, h0, add_zero, map_sum, Finset.sum_eq_zero fun w _ => inf_ew w]
+
+  rw [map_add (f := _), h0, add_zero, map_sum, Finset.sum_eq_zero fun w _ => inf_ew w]
 
 open Classical in
 theorem prodW {B : Base F E} (hB : B.IsGood σ) {ν : Chr F E} {z : ℕ} (hz : 1 ≤ z) (W : Finset (HeightOneSpectrum (𝓞 E)))
@@ -200,8 +253,8 @@ theorem prodW {B : Base F E} (hB : B.IsGood σ) {ν : Chr F E} {z : ℕ} (hz : 1
   rw [e]
   exact ⟨p1, p2.trans (by simp)⟩
 
-open Classical in
 
+open Classical in
 def ab (T : Finset (Pl F)) : Finset (HeightOneSpectrum (𝓞 E)) := T.biUnion (Formalism.L2.Host.aboveF (L := E) F)
 
 theorem mem_ab {T : Finset (Pl F)} {w : HeightOneSpectrum (𝓞 E)} : w ∈ ab T ↔ w.under (𝓞 F) ∈ T := by
@@ -211,7 +264,8 @@ open Classical in
 theorem rest_split {T T' : Finset (Pl F)} (h : T ⊆ T') :
     (io (rest T) : AE F E) = ∑ w ∈ ab (T' \ T), ew F w + io (rest T') := by
   refine ae_ext (by rw [inf_io (rest_fst _), inf_sum _ (inf_io (rest_fst _))]) fun u => ?_
-  rw [map_add, map_sum, cw_rest, cw_rest]
+
+  rw [map_add (f := _), map_sum, cw_rest, cw_rest]
   simp only [cw_ew, Finset.sum_ite_eq, mem_ab, Finset.mem_sdiff]
   by_cases h1 : u.under (𝓞 F) ∈ T
   · simp [h1, h h1]
@@ -241,7 +295,7 @@ theorem nu_rest {ν : Chr F E} (hc : Continuous ν) {T : Finset (Pl F)} (hν : U
   obtain ⟨T₀, hT₀⟩ := exists_subset_nhds_of_isCompact'
     (V := fun A : Finset (Pl F) => ((part PI ⊤ (io (rest A)) : Subgroup (AE F E)ˣ) : Set (AE F E)ˣ) ∩ UI F E)
     (fun A A' => ⟨A ∪ A', mono Finset.subset_union_left, mono Finset.subset_union_right⟩) (fun A => cpt_I (hi A) (h0 A))
-    (fun A => (cpt_I (hi A) (h0 A)).isClosed) (U := {x | ‖(ν x : ℂ) - 1‖ < 1}) fun x hx => by
+    (fun A => (cpt_I (hi A) (h0 A)).isClosed) (U := {x | ‖(ν x : ℂ) - 1‖ < 1}) <| mem_nhdsSet_iff_forall.mpr fun x hx => by
       have hx' := Set.mem_iInter.1 hx
       obtain rfl : x = 1 := Units.ext (ae_ext (by rw [((mem_part_iff (hi ∅) (h0 ∅) x).1 (hx' ∅).1).1, Units.val_one, map_one])
         fun w => by

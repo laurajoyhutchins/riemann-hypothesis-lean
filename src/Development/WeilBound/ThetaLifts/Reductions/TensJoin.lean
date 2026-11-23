@@ -1,4 +1,56 @@
-import Development.WeilBound.ThetaLifts.CartanFactorisation.TensMax
+module
+
+public import Mathlib.Algebra.Algebra.Subalgebra.Lattice
+public import Mathlib.Basic.Complex.Basic
+public import Mathlib.LinearAlgebra.Dimension.Basic
+public import Mathlib.LinearAlgebra.PiTensorProduct.Basic
+public import Development.WeilBound.ThetaLifts.CartanFactorisation.TensMax
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.CoassocSimps
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -104,7 +156,7 @@ theorem tens_join {A : ι → Type} (act : ∀ i, A i → Module.End ℂ (V i)) 
         obtain ⟨s, s1, s2⟩ := ha
         obtain ⟨t, t1, t2⟩ := hb
         refine ⟨fun i => s i ++ t i, fun i y hy => (List.mem_append.1 hy).elim (s1 i y) (t1 i y), fun u hu => ?_⟩
-        rw [map_add]
+        rw [map_add (f := _)]
         exact Q.add_mem (s2 u fun i y hy => hu i y (List.mem_append_left _ hy))
           (t2 u fun i y hy => hu i y (List.mem_append_right _ hy))
       | smul c a _ ha =>
@@ -117,7 +169,7 @@ theorem tens_join {A : ι → Type} (act : ∀ i, A i → Module.End ℂ (V i)) 
     | smul_tprod c f =>
       choose u u1 u2 u3 using fun i => h4 i (t i) (t1 i) (f i)
       have a1 : map u (tprod ℂ v) ∈ Q := by
-        rw [← e, map_add]
+        rw [← e, map_add (f := _)]
         exact Q.add_mem (map_st act Q q2 u u1 p hp) (t2 u u3)
       have a2 : map u (tprod ℂ v) - tprod ℂ f ∈ Q := ker_le Z Q q1 (by
         rw [LinearMap.mem_ker, map_sub, map_tprod, map_tprod, map_tprod, sub_eq_zero]
@@ -131,7 +183,7 @@ theorem tens_join {A : ι → Type} (act : ∀ i, A i → Module.End ℂ (V i)) 
       Q ≤ R ∨ Q = ⊤ := fun Q q1 q2 =>
     (tens_max act K hr h1 h2 h3 R hR (Q ⊔ R) le_sup_right (fun i a x hx => by
       obtain ⟨p, hp, y, hy, rfl⟩ := Submodule.mem_sup.1 hx
-      rw [map_add]
+      rw [map_add (f := _)]
       exact Submodule.add_mem_sup (q2 i a p hp) (Rst i a hy))).imp (le_sup_left.trans ·) (nak Q q1 q2)
   rcases le P hZ hP with a | a
   · rcases le P' hZ' hP' with b | b

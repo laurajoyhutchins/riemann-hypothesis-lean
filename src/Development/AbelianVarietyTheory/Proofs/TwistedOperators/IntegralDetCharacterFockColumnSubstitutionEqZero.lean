@@ -1,5 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ProdMinorsMemInv
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ProdMinorsMemInv
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.RingTheory.RootsOfUnity.Complex
+
+@[expose] public section
+
 open Classical MeasureTheory
 
 noncomputable section
@@ -55,8 +105,9 @@ theorem colSub_mul {d a : ℕ} (A B : ι → Matrix (Fin a) (Fin a) ℂ) (P : Po
   have : (colSub (fun τ => A τ * B τ) : Pol ι d a →ₐ[ℂ] Pol ι d a) = (colSub A).comp (colSub B) := by
     apply MvPolynomial.algHom_ext
     intro y
+
     simp only [AlgHom.comp_apply, colSub, aeval_X, map_sum, map_mul, algHom_C, algebraMap_eq, Matrix.mul_apply,
-      Finset.mul_sum, map_sum, Finset.sum_mul]
+    Finset.mul_sum, map_sum, Finset.sum_mul]
     rw [Finset.sum_comm]
     refine Finset.sum_congr rfl fun _ _ => Finset.sum_congr rfl fun _ _ => ?_
     ring
@@ -67,6 +118,7 @@ theorem sum_scalAt_eq_zero {d a : ℕ} (τ₀ : ι) (N : ℕ) (hN : 0 < N) (P : 
     ∑ k ∈ Finset.range (N + P.totalDegree + 1), (ω ^ k) ^ N • colSub (scalAt τ₀ (ω ^ k)) P = 0 := by
   generalize hM : N + P.totalDegree + 1 = M at hω ⊢
   conv_lhs => rw [as_sum P]
+
   simp only [map_sum, colSub_scalAt_monomial, Finset.smul_sum]
   rw [Finset.sum_comm]
   refine Finset.sum_eq_zero fun t ht => ?_
@@ -80,13 +132,14 @@ theorem sum_scalAt_eq_zero {d a : ℕ} (τ₀ : ι) (N : ℕ) (hN : 0 < N) (P : 
       omega
     rw [geom_sum_eq hne, ← pow_mul, mul_comm, pow_mul, hω.pow_eq_one, one_pow, sub_self, zero_div]
   have : ∀ k ∈ Finset.range M,
-      (ω ^ k) ^ N • (monomial t (coeff t P * (ω ^ k) ^ degAt τ₀ t) : Pol ι d a) =
-        monomial t (coeff t P * (ω ^ (N + degAt τ₀ t)) ^ k) := by
+      (ω ^ k) ^ N • (monomial t (AddMonoidAlgebra.coeff P t * (ω ^ k) ^ degAt τ₀ t) : Pol ι d a) =
+        monomial t (AddMonoidAlgebra.coeff P t * (ω ^ (N + degAt τ₀ t)) ^ k) := by
     intro k _
     rw [smul_monomial, smul_eq_mul]
     congr 1
     rw [← pow_mul, ← pow_mul, ← pow_mul, show (N + degAt τ₀ t) * k = k * N + k * degAt τ₀ t by ring, pow_add]
     ring
+
   rw [Finset.sum_congr rfl this, ← map_sum, ← Finset.mul_sum, hsum, mul_zero, map_zero]
 
 end GlobalTheory.MinorFrame
@@ -106,13 +159,14 @@ theorem prod_det_scalAt_zpow {ι : Type} [Fintype ι] {a : ℕ} (τ₀ : ι) (ζ
 theorem integral_detZpow_colSub_eq_zero :
     ∀ {ι : Type} [Fintype ι] (a d : ℕ) (m : ι → ℤ) (τ₀ : ι), 0 < a → 0 < m τ₀ → ∀ {K : Type} [Group K]
       [MeasurableSpace K] (ν : Measure K), IsProbabilityMeasure ν → ν.IsMulLeftInvariant →
+    (∀ u : K, AEMeasurable (fun x => u * x) ν) →
     ∀ (ρ : K →* (ι → Matrix.unitaryGroup (Fin a) ℂ)),
       (∀ τ i j, Measurable fun g => (ρ g τ : Matrix (Fin a) (Fin a) ℂ) i j) →
       Function.Surjective ρ →
     ∀ (Λ : GlobalTheory.MinorFrame.Pol ι d a →ₗ[ℂ] ℂ) (P : GlobalTheory.MinorFrame.Pol ι d a),
       ∫ g, (∏ τ, (ρ g τ : Matrix (Fin a) (Fin a) ℂ).det ^ (m τ)) *
         Λ (GlobalTheory.MinorFrame.colSub (fun τ => (ρ g τ : Matrix (Fin a) (Fin a) ℂ)) P) ∂ν = 0 := by
-  intro ι _ a d m τ₀ ha hm K _ _ ν hν hinv ρ _ hρ Λ P
+  intro ι _ a d m τ₀ ha hm K _ _ ν hν hinv hmeas ρ _ hρ Λ P
   set B : K → ι → Matrix (Fin a) (Fin a) ℂ := fun g τ => (ρ g τ : Matrix (Fin a) (Fin a) ℂ) with hB_def
   set c : K → ℂ := fun g => ∏ τ, (B g τ).det ^ (m τ) with hc_def
   set f : K → ℂ := fun g => c g * Λ (colSub (B g) P) with hf_def
@@ -124,10 +178,7 @@ theorem integral_detZpow_colSub_eq_zero :
   have hinvar : ∀ u : K, Integrable (fun x => f (u * x)) ν ∧ ∫ x, f (u * x) ∂ν = ∫ x, f x ∂ν := by
     intro u
     have hmap : Measure.map (fun x => u * x) ν = ν := map_mul_left_eq_self ν u
-    have hae : AEMeasurable (fun x => u * x) ν := by
-      by_contra h
-      rw [Measure.map_of_not_aemeasurable h] at hmap
-      exact (IsProbabilityMeasure.ne_zero ν) hmap.symm
+    have hae : AEMeasurable (fun x => u * x) ν := hmeas u
     refine ⟨?_, ?_⟩
     · have : Integrable f (Measure.map (fun x => u * x) ν) := by rw [hmap]; exact hint
       exact this.comp_aemeasurable hae
@@ -172,16 +223,18 @@ theorem integral_detZpow_colSub_eq_zero :
     ring
   have hsum0 : ∀ g, ∑ k ∈ Finset.range M, f (u k * g) = 0 := by
     intro g
+
     simp only [hpt, ← Finset.mul_sum, ← map_sum]
     have : ∑ k ∈ Finset.range M, (ω ^ k) ^ N • colSub (B g) (colSub (scalAt τ₀ (ω ^ k)) P) =
         colSub (B g) (∑ k ∈ Finset.range M, (ω ^ k) ^ N • colSub (scalAt τ₀ (ω ^ k)) P) := by
+
       rw [map_sum]; simp only [map_smul]
     rw [this, sum_scalAt_eq_zero τ₀ N hN P hω, map_zero, map_zero, mul_zero]
   have hkey : (M : ℂ) * ∫ x, f x ∂ν = 0 := by
     calc (M : ℂ) * ∫ x, f x ∂ν = ∑ k ∈ Finset.range M, ∫ x, f (u k * x) ∂ν := by
           rw [Finset.sum_congr rfl fun k _ => (hinvar (u k)).2, Finset.sum_const, Finset.card_range, nsmul_eq_mul]
       _ = ∫ x, ∑ k ∈ Finset.range M, f (u k * x) ∂ν :=
-          (integral_finset_sum _ fun k _ => (hinvar (u k)).1).symm
+          (MeasureTheory.integral_finsetSum _ fun k _ => (hinvar (u k)).1).symm
       _ = 0 := by simp [hsum0]
   exact (mul_eq_zero.1 hkey).resolve_left (by exact_mod_cast hM0)
 

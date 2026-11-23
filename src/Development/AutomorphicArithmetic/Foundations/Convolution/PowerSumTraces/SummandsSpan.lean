@@ -1,4 +1,47 @@
-import Development.AutomorphicArithmetic.Foundations.Convolution.PowerSumTraces.CuspidalMultiplicityOneTotallyComplex
+module
+
+public import Development.AutomorphicArithmetic.Foundations.Convolution.PowerSumTraces.CuspidalMultiplicityOneTotallyComplex
+public import GroundTheory.AutomorphicForms.CuspidalDiscreteness
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MeasureTheory NumberField GroundTheory.Automorphic GroundTheory.Automorphic.Reduction GroundTheory.Automorphic.RightCosetSpace
 open GroundTheory.Automorphic.AutomorphicForm GroundTheory.Automorphic.CuspidalSpectrum UpperTheory.ConvolutionTheory.C
@@ -57,20 +100,21 @@ private theorem closure_iSup_summands (hWc : IsClosed (W : Set H))
     fun V => isSummandOf_map π W hWi hWc V.1 (hinv V) (hirr V)
   apply le_antisymm
   · exact Submodule.topologicalClosure_minimal _ (iSup_le fun V => V.2.le) hWc
-  · set S : Submodule ℂ H := ⨆ V : {V // IsSummandOf π W V}, V.1 with hS
+  · set S : Submodule ℂ H := ⨆ V : {V // IsSummandOf π W V}, V.1
     have hcl : IsClosed ((S.topologicalClosure.comap W.subtype : Submodule ℂ W) : Set W) :=
       S.isClosed_topologicalClosure.preimage continuous_subtype_val
-    have hle : (⨆ V : s, LinearMap.range ((V : Submodule ℂ W).subtypeₗᵢ).toLinearMap) ≤
+    have hle : (⨆ V : s, (V : Submodule ℂ W)) ≤
         S.topologicalClosure.comap W.subtype := by
-      refine iSup_le fun V => ?_
-      rintro _ ⟨w, rfl⟩
+      refine iSup_le fun V w hw => ?_
       exact S.le_topologicalClosure
-        (le_iSup (fun V : {V // IsSummandOf π W V} => V.1) ⟨_, hmain V⟩ ⟨w.1, w.2, rfl⟩)
+        (le_iSup (fun V : {V // IsSummandOf π W V} => V.1) ⟨_, hmain V⟩ ⟨w, hw, rfl⟩)
+    have hspan : (⨆ V : s, (V : Submodule ℂ W)).topologicalClosure = ⊤ := by
+      simpa only [Submodule.subtypeₗᵢ_toLinearMap, Submodule.range_subtype] using
+        hH.OrthogonalFamily.range_linearIsometry.symm.trans
+          (LinearMap.range_eq_top.2 hH.surjective_isometry)
     have htop : (⊤ : Submodule ℂ W) ≤ S.topologicalClosure.comap W.subtype := by
-      have h := Submodule.topologicalClosure_minimal _ hle hcl
-      rw [← hH.OrthogonalFamily.range_linearIsometry,
-        LinearMap.range_eq_top.2 hH.surjective_isometry] at h
-      exact h
+      rw [← hspan]
+      exact Submodule.topologicalClosure_minimal _ hle hcl
     intro x hx
     exact htop (Submodule.mem_top : (⟨x, hx⟩ : W) ∈ ⊤)
 
@@ -81,5 +125,5 @@ theorem UpperTheory.ConvolutionTheory.C.summandsSpan :
   intro K _ _ n μ _
   obtain ⟨s, hc, hinv, hH, hirr⟩ := exists_isHilbertSum_isIrreducible_cuspidal μ
   haveI := hc
-  exact closure_iSup_summands (rightRegularRep (rationalGLOne K n) μ) (cuspidalL2 μ)
+  exact closure_iSup_summands (rightRegularRep (rationalGLOne (K := K) (n := n)) μ) (cuspidalL2 μ)
     (isInvariant_cuspidalL2 μ) (isClosed_cuspidalL2 μ) s hinv hH hirr

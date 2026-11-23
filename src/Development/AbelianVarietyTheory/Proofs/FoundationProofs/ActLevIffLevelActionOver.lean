@@ -1,12 +1,50 @@
-import Mathlib
-import Formalism.LocalToGlobal.ProjectiveLattices.ThClassPins
-import Formalism.LocalToGlobal.ProjectiveLattices.LiftLaSpec
-import Development.AbelianVarietyTheory.BlockTheory.TorsionBlocks.LevelCarrying
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.LevelActionOverlapLeSourceChart
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.FramedPointBaseChangeUniqueReflIff
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsSabCancel
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.IsReducedIsNormalSchemeIsLocallyNoetherianOfSmoo
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.CompEqIdOfTwists
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.TorsionBlocks.LevelCarrying
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.CompEqIdOfTwists
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.FramedPointBaseChangeUniqueReflIff
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.GroupTheory.FiniteAbelian.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import Development.AbelianVarietyTheory.Definitions.ExistenceOfLattices.MarkSpec
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -37,10 +75,6 @@ instance finite_levelMod : Finite (LevelMod Dw l) := by
 instance finite_levelAut : Finite (LevelAut Dw l) :=
   Finite.of_injective (fun g : LevelAut Dw l => (g : LevelMod Dw l → LevelMod Dw l)) DFunLike.coe_injective
 
-def Lifts (p : (Dw.La →ₗ[𝓞 E] Dw.La) × (Dw.La →ₗ[𝓞 E] Dw.La)) (g : LevelAut Dw l) : Prop :=
-  (∀ a, (Submodule.Quotient.mk (p.1 a) : LevelMod Dw l) = g (Submodule.Quotient.mk a)) ∧
-    ∀ a, Dw.ModN l.A (p.2 a - a)
-
 theorem frMap_id_iff {S : Type} [CommRing S] [Algebra c.F S] (y y' : FrPt Xo c S) :
     FrMap (AlgHom.id c.F S) y y' ↔ y = y' := by
   obtain ⟨hu, hr, -⟩ := GlobalTheory.Frames.frMap_unique_refl_iff E H Dw l Xo c S S (AlgHom.id c.F S) y
@@ -50,35 +84,15 @@ section Laws
 
 variable {G : Type} [Group G] (R : RelFam Xo c G)
 
-abbrev reord {S : Type} [CommRing S] [Algebra c.F S] (g : G) (y y' : FrPt Xo c S) : Prop := R g S y y'
-
-theorem mul_iff : ActMul (K := c.F) (fun S _ _ => FrPt Xo c S) (reord R) ↔ Multiplicative' R := Iff.rfl
-
 variable {R}
 
 end Laws
-
-def redMod (f : Dw.La →ₗ[𝓞 E] Dw.La) : LevelMod Dw l →ₗ[𝓞 E] LevelMod Dw l :=
-  Submodule.mapQ _ _ f fun x hx => by
-    refine Submodule.smul_induction_on hx (fun r hr y _ => ?_) fun y z hy hz => Submodule.add_mem _ hy hz
-    rw [Submodule.mem_comap, map_smul]
-    exact Submodule.smul_mem_smul hr Submodule.mem_top
 
 end General
 
 section Record
 
 variable {D : D7} {H : ReciprocityTheory.ChartRestriction.G.Geo.Tor.Host D.host.E} {Dw : Datum H} {l : Level H} (Xo : Moduli Dw l) (c : Coeff l)
-
-def ActLevAll : Prop :=
-  ∀ (G : Type) [Group G] (lev : G → (Dw.La →ₗ[𝓞 D.host.E] Dw.La) × (Dw.La →ₗ[𝓞 D.host.E] Dw.La))
-    (e : G →* LevelAut Dw l), (∀ g, Lifts (lev g) (e g)) → ActLev (Xo := Xo) c lev
-
-def ActLevMul : Prop :=
-  ∀ (G : Type) [Group G] (lev : G → Dw.La →ₗ[𝓞 D.host.E] Dw.La),
-    (∀ a, lev 1 a - a ∈ l.Mb • (⊤ : Submodule (𝓞 D.host.E) Dw.La)) →
-    (∀ g h a, lev (g * h) a - lev g (lev h a) ∈ l.Mb • (⊤ : Submodule (𝓞 D.host.E) Dw.La)) →
-    ActLev (Xo := Xo) c (fun g => (lev g, LinearMap.id))
 
 end Record
 

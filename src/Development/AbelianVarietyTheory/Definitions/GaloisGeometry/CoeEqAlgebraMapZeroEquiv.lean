@@ -1,7 +1,46 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.QuasicoherentCohomology.HdimEqZeroOfSubsingleton
-import Development.AbelianVarietyTheory.Definitions.Divisors.ComparisonMemCechHodgeFiltration
-import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.HigherDirectImagesVanishOfIsAffineHom
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.ComparisonMemCechHodgeFiltration
+public import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.HigherDirectImagesVanishOfIsAffineHom
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -60,8 +99,8 @@ section Pull
 
 variable {X' : Scheme.{0}} {s : X ⟶ Sp k} {s' : X' ⟶ Sp k} {f : X' ⟶ X}
 
-variable (s s' f) in
 
+variable (s s' f) in
 def appSec (U : X.Opens) : Sec s U →+* Sec s' (f ⁻¹ᵁ U) := (f.app U).hom
 
 omit [CommRing k] in
@@ -117,8 +156,8 @@ section Pull3
 
 variable {X' : Scheme.{0}} {s : X ⟶ Sp k} {s' : X' ⟶ Sp k} {f : X' ⟶ X}
 
-variable (s) in
 
+variable (s) in
 def toOmega (j : ℕ) : formsPre s j ⟶
     (SheafOfModules.forget _ ⋙ PresheafOfModules.restrictScalars (𝟙 X.ringCatSheaf.obj)).obj
       (Omega s j) :=
@@ -228,16 +267,5 @@ def hodgeZeroZeroEquiv : letI := algΓ s; hodgeH s 0 0 ≃ₗ[k] Γ(X, ⊤) :=
   (cohOn.mapIso k ⊤ 0 (omegaZeroIso s)).trans ((coh.zeroUnitEquiv X).restrictScalars k)
 
 end Zero2
-
-example (s : X ⟶ Sp k) : Module k (hodgeH s 2 1) := inferInstance
-
-example : Nontrivial (hodgeH (𝟙 (Sp ℤ)) 0 0) :=
-  letI : Nontrivial Γ(Sp ℤ, ⊤) :=
-    (Scheme.ΓSpecIso (CommRingCat.of ℤ)).commRingCatIsoToRingEquiv.toEquiv.nontrivial
-  (hodgeZeroZeroEquiv (𝟙 (Sp ℤ))).toEquiv.nontrivial
-
-example {X' : Scheme.{0}} (s : X ⟶ Sp k) (f : X' ⟶ X) (r : k) (x : hodgeH s 1 1) :
-    hodgePull (s' := f ≫ s) rfl 1 1 (r • x) = r • hodgePull (s' := f ≫ s) rfl 1 1 x :=
-  map_smul _ r x
 
 end GlobalTheory.HodgeCoh

@@ -1,5 +1,51 @@
-import Mathlib
-import Development.ResolutionOfSingularities.EmbeddedResolution.EtaleCoordinates.EtaleCoordinates
+module
+
+public import Development.ResolutionOfSingularities.EmbeddedResolution.EtaleCoordinates.EtaleCoordinates
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.MvPolynomial.IrreducibleQuadratic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 namespace FunctorialResolution.EmbeddedResolution
 namespace EtaleCoordinates
 
@@ -59,7 +105,7 @@ private theorem iterToSumHom_sumEvalIter (p : MvPolynomial (ι ⊕ κ) k) :
     iterToSumRingHom k ι κ (sumEvalIter k ι κ p) = p := by
   induction p using MvPolynomial.induction_on
   next a => rw [sumEvalIter_C, iterToSumHom_C_C]
-  next q r hq hr => simp only [map_add, hq, hr]
+  next q r hq hr => simp only [map_add (f := _), hq, hr]
   next q v hq =>
     rcases v with i | j
     · simp only [map_mul, hq, sumEvalIter_X_inl, iterToSumHom_C_X]
@@ -69,14 +115,14 @@ private theorem sumEvalIter_iterToSumHom_C (r : MvPolynomial ι k) :
     sumEvalIter k ι κ (iterToSumRingHom k ι κ (C r)) = C r := by
   induction r using MvPolynomial.induction_on
   next a => rw [iterToSumHom_C_C, sumEvalIter_C]
-  next p q hp hq => simp only [map_add, hp, hq]
+  next p q hp hq => simp only [map_add (f := _), hp, hq]
   next p i hp => simp only [map_mul, hp, iterToSumHom_C_X, sumEvalIter_X_inl]
 
 private theorem sumEvalIter_iterToSumHom (q : MvPolynomial κ (MvPolynomial ι k)) :
     sumEvalIter k ι κ (iterToSumRingHom k ι κ q) = q := by
   induction q using MvPolynomial.induction_on
   next r => exact sumEvalIter_iterToSumHom_C k ι κ r
-  next p p' hp hp' => simp only [map_add, hp, hp']
+  next p p' hp hp' => simp only [map_add (f := _), hp, hp']
   next p j hp => simp only [map_mul, hp, iterToSumHom_X, sumEvalIter_X_inr]
 
 private theorem bijective_sumEvalIter :
@@ -170,19 +216,6 @@ theorem algebraMap_eq_sumEval (p : MvPolynomial (ι ⊕ κ) k) :
     algebraMap (MvPolynomial (ι ⊕ κ) k) (MvPolynomial κ S) (X (Sum.inl i))
       = C (coord k ι S i) := by
   simp [algebraMap_eq_sumEval, sumEval]
-
-@[simp] theorem algebraMap_X_inr (j : κ) :
-    algebraMap (MvPolynomial (ι ⊕ κ) k) (MvPolynomial κ S) (X (Sum.inr j))
-      = (X j : MvPolynomial κ S) := by
-  simp [algebraMap_eq_sumEval, sumEval]
-
-@[simp] theorem coord_inl (i : ι) :
-    coord k (ι ⊕ κ) (MvPolynomial κ S) (Sum.inl i) = C (coord k ι S i) :=
-  (coord_def k (ι ⊕ κ) (MvPolynomial κ S) (Sum.inl i)).trans (algebraMap_X_inl k ι κ S i)
-
-@[simp] theorem coord_inr (j : κ) :
-    coord k (ι ⊕ κ) (MvPolynomial κ S) (Sum.inr j) = (X j : MvPolynomial κ S) :=
-  (coord_def k (ι ⊕ κ) (MvPolynomial κ S) (Sum.inr j)).trans (algebraMap_X_inr k ι κ S j)
 
 private theorem algebraMap_eq_sumEvalIter (p : MvPolynomial (ι ⊕ κ) k) :
     algebraMap (MvPolynomial (ι ⊕ κ) k) (MvPolynomial κ (MvPolynomial ι k)) p

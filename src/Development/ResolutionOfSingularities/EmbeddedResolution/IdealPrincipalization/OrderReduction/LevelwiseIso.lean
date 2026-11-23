@@ -1,15 +1,48 @@
-import Mathlib
+module
+
+public import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.OrderReduction.TunedMarkedBlowupSeq
 import Development.ResolutionOfSingularities.EmbeddedResolution.IteratedBlowups.StrictTransform
-import Development.ResolutionOfSingularities.Foundations.Blowup.StrictTransform
-import Development.ResolutionOfSingularities.EmbeddedResolution.ResolutionDescent.PullbackBlowupSequenceComposition
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.OrderReductionProperties
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MarkedOrderReduction.AppendIsomorphism
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.OrderReduction.TunedMarkedBlowupSeq
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.OrderReduction.StrictPullbackBlowupSeq
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MarkedBlowupSequence.BlowupSequenceData
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MarkedBlowupSequence.MarkedSequenceOfBlowups
-import Development.ResolutionOfSingularities.Foundations.BlowupUniversalProperty
-import Development.ResolutionOfSingularities.EmbeddedResolution.ResolutionOfSingularities
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 universe u
 
 open CategoryTheory AlgebraicGeometry
@@ -34,28 +67,6 @@ theorem BlowupSequenceData.iteratedStrictTransform_top {X : Scheme.{u}} (d : Blo
       simp
   | succ i ih =>
       rw [BlowupSequenceData.iteratedStrictTransform_succ, ih, strictTransform_top_eq_top]
-
-structure BlowupSequenceData.LevelwiseIso {X : Scheme.{u}} (s₁ s₂ : BlowupSequenceData X) where
-  iso : ∀ i : ℕ, i ≤ s₁.length → (s₁.obj i ≅ s₂.obj i)
-  length_eq : s₁.length = s₂.length
-  zero_compat : (iso 0 (Nat.zero_le _)).hom ≫ s₂.isoZero.hom = s₁.isoZero.hom
-  map_compat : ∀ (i : ℕ) (hi : i < s₁.length),
-    (iso (i + 1) hi).hom ≫ s₂.map i = s₁.map i ≫ (iso i hi.le).hom
-  center_compat : ∀ (i : ℕ) (hi : i < s₁.length),
-    (s₂.center i).comap (iso i hi.le).hom = s₁.center i
-
-structure BlowupSequenceData.LevelwiseIsoOver {Y₁ Y₂ : Scheme.{u}} (φ : Y₁ ≅ Y₂)
-    (t₁ : BlowupSequenceData Y₁) (t₂ : BlowupSequenceData Y₂) where
-  iso : ∀ i : ℕ, i ≤ t₁.length → (t₁.obj i ≅ t₂.obj i)
-  length_eq : t₁.length = t₂.length
-  zero_compat : (iso 0 (Nat.zero_le _)).hom ≫ t₂.isoZero.hom = t₁.isoZero.hom ≫ φ.hom
-  map_compat : ∀ (i : ℕ) (hi : i < t₁.length),
-    (iso (i + 1) hi).hom ≫ t₂.map i = t₁.map i ≫ (iso i hi.le).hom
-  center_compat : ∀ (i : ℕ) (hi : i < t₁.length),
-    (t₂.center i).comap (iso i hi.le).hom = t₁.center i
-
-private theorem nontrivialPart_nil {X : Scheme.{u}} :
-    MarkedIdealWithBoundary.nontrivialPart ([] : List X.IdealSheafData) = [] := rfl
 
 end FunctorialResolution.EmbeddedResolution
 

@@ -1,12 +1,56 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterPC
-import ReciprocityTheory.AnalyticForms.RegularLocalRings.MemConePtsIffChartIdeal
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterMinorA
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterPC
+public import ReciprocityTheory.AnalyticForms.RegularLocalRings.MemConePtsIffChartIdeal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
 namespace ReciprocityTheory.ChartRestriction.G.Geo
 
-open MvPolynomial MultiHomogZ
+open MvPolynomial
 open scoped Pointwise
 
 variable {K : Type} [Fintype K] {ι : K → Type} [∀ k, Fintype (ι k)]
@@ -59,10 +103,10 @@ private theorem isMultiHomog_zsmul (c : ℤ) {f : MRing ι} {a : K → ℕ} (h :
 
 private theorem isMultiHomog_pderiv_and_one_le_of_pderiv_ne_zero [DecidableEq K] (v : Σ k, ι k) {p : MRing ι} {d : K → ℕ}
     (h : IsMultiHomog p d) :
-    IsMultiHomog (pderiv v p) (fun k => d k - if k = v.1 then 1 else 0) ∧
-      (pderiv v p ≠ 0 → 1 ≤ d v.1) := by
+    IsMultiHomog (MvPolynomial.pderiv v p) (fun k => d k - if k = v.1 then 1 else 0) ∧
+      (MvPolynomial.pderiv v p ≠ 0 → 1 ≤ d v.1) := by
   classical
-  have key : ∀ m, m ∈ (pderiv v p).support → ∀ k, ∑ i, m ⟨k, i⟩ + (if k = v.1 then 1 else 0) = d k := by
+  have key : ∀ m, m ∈ (MvPolynomial.pderiv v p).support → ∀ k, ∑ i, m ⟨k, i⟩ + (if k = v.1 then 1 else 0) = d k := by
     intro m hm k
     rw [MvPolynomial.mem_support_iff, MvPolynomial.coeff_pderiv] at hm
     have hm' : m + Finsupp.single v 1 ∈ p.support := by
@@ -88,7 +132,7 @@ private theorem isMultiHomog_pderiv_and_one_le_of_pderiv_ne_zero [DecidableEq K]
 
 theorem isMultiHomog_det_pderiv {s c : ℕ} (G : Fin s → MRing ι) (hG : ∀ i, ∃ a, IsMultiHomog (G i) a)
     (a : Fin c → Fin s) (b : Fin c → Σ k, ι k) :
-    ∃ d, IsMultiHomog (Matrix.det (Matrix.of fun i j => pderiv (b j) (G (a i)))) d := by
+    ∃ d, IsMultiHomog (Matrix.det (Matrix.of fun i j => MvPolynomial.pderiv (b j) (G (a i)))) d := by
   classical
   choose d hd using hG
   refine ⟨fun k => (∑ i, d (a i) k) - ∑ j, (if k = (b j).1 then 1 else 0), ?_⟩
@@ -97,7 +141,7 @@ theorem isMultiHomog_det_pderiv {s c : ℕ} (G : Fin s → MRing ι) (hG : ∀ i
   rw [Units.smul_def]
   refine isMultiHomog_zsmul _ ?_
   simp only [Matrix.of_apply]
-  by_cases h0 : ∃ i, pderiv (b i) (G (a (σ i))) = 0
+  by_cases h0 : ∃ i, MvPolynomial.pderiv (b i) (G (a (σ i))) = 0
   · obtain ⟨i, hi⟩ := h0
     rw [Finset.prod_eq_zero (Finset.mem_univ i) hi]
     intro m hm
@@ -110,7 +154,7 @@ theorem isMultiHomog_det_pderiv {s c : ℕ} (G : Fin s → MRing ι) (hG : ∀ i
       · subst hk
         exact (isMultiHomog_pderiv_and_one_le_of_pderiv_ne_zero (b i) (hd (a (σ i)))).2 (h0 i)
       · exact Nat.zero_le _
-    have hp := isMultiHomog_finset_prod' Finset.univ (fun i => pderiv (b i) (G (a (σ i))))
+    have hp := isMultiHomog_finset_prod' Finset.univ (fun i => MvPolynomial.pderiv (b i) (G (a (σ i))))
       (fun i k => d (a (σ i)) k - if k = (b i).1 then 1 else 0)
       (fun i _ => (isMultiHomog_pderiv_and_one_le_of_pderiv_ne_zero (b i) (hd (a (σ i)))).1)
     convert hp using 1

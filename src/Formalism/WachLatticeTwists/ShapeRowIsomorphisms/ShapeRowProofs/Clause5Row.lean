@@ -1,6 +1,46 @@
-import Formalism.WachLatticeTwists.ShapeRowIsomorphisms.StatClause5Row
-import ReciprocityTheory.ReductiveGroups.TraceFormulas.ImportsAlt
-import ReciprocityTheory.ReductiveGroups.TraceFormulas.LatReal
+module
+
+public import Formalism.WachLatticeTwists.ShapeRowIsomorphisms.StatClause5Row
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 variable [hT2Core : Fact ReciprocityTheory.ChartRestriction.T2.Core]
 
@@ -11,7 +51,7 @@ noncomputable section
 
 namespace Formalism.RepresentationBoundsCohomology.LocallyConstantCohomology
 
-set_option maxHeartbeats 1000000 in
+
 theorem kRow_rel {O Γ VT VT' : Type} [CommRing O] [IsDomain O] [IsDiscreteValuationRing O]
     [TopologicalSpace O] [TopologicalSpace (FractionRing O)]
     [IsTopologicalAddGroup (FractionRing O)] [ContinuousSMul O (FractionRing O)]
@@ -26,7 +66,7 @@ theorem kRow_rel {O Γ VT VT' : Type} [CommRing O] [IsDomain O] [IsDiscreteValua
     rw [LinearEquiv.symm_apply_eq, hu, LinearEquiv.apply_symm_apply]
   let b' : coZ1s ρM := ⟨fun g => u.symm (x.1 g), fun g h => by
     show u.symm (x.1 (g * h)) = u.symm (x.1 g) + ρM g (u.symm (x.1 h))
-    rw [((mem_Z1_iff_cocycle _ _).1 x.2).2 g h, map_add, hsym]⟩
+    rw [((mem_Z1_iff_cocycle _ _).1 x.2).2 g h, map_add (f := _), hsym]⟩
   have hk0 : kRow D ρM u hu (Submodule.Quotient.mk x) = Submodule.mkQ _ b' := rfl
   have hy' : Submodule.mkQ _ b' = Submodule.mkQ _ b := hk0.symm.trans hy
   rw [Submodule.mkQ_apply, Submodule.mkQ_apply, Submodule.Quotient.eq, Submodule.mem_comap,
@@ -39,7 +79,7 @@ theorem kRow_rel {O Γ VT VT' : Type} [CommRing O] [IsDomain O] [IsDiscreteValua
   have h3 : (b : Γ → M) g = u.symm (x.1 g) - (ρM g m - m) := by rw [h2]; abel
   rw [h3, map_sub, map_sub, LinearEquiv.apply_symm_apply, hu]
 
-set_option maxHeartbeats 1000000 in
+
 theorem clause5Gen {O Γ VT VT' : Type} [CommRing O] [IsDomain O] [IsDiscreteValuationRing O]
     [TopologicalSpace O] [TopologicalSpace (FractionRing O)]
     [IsTopologicalAddGroup (FractionRing O)] [ContinuousSMul O (FractionRing O)]
@@ -65,7 +105,7 @@ theorem clause5Gen {O Γ VT VT' : Type} [CommRing O] [IsDomain O] [IsDiscreteVal
       have : (fun g => u ((b : Γ → M) g)) = fun g => x.1 g - (D.ρA g m' - m') := funext hbg
       rw [this]
       exact hxc.sub (hc2.sub continuous_const)
-    · rw [b.2 g h, map_add, hu]
+    · rw [b.2 g h, map_add (f := _), hu]
   have hxx : (Submodule.Quotient.mk x : ReciprocityTheory.Gal.H1 D.ρA) = Submodule.Quotient.mk ⟨_, hx'⟩ := by
     refine (Submodule.Quotient.eq _).2 ((mem_coboundaries1 _ _).2 ⟨m', fun g => ?_⟩)
     change x.1 g - u ((b : Γ → M) g) = _
@@ -83,7 +123,7 @@ theorem clause5Row : StatClause5Row := by
   have ht : (fun g => v (π (a g))) ∈ Z1 D.ρTl' := by
     refine (mem_Z1_iff_cocycle _ _).2 ⟨hC a hCa, fun g h => ?_⟩
     have e1 : a (g * h) = a g + ρ₁ (g : G) (a h) := ha g h
-    rw [e1, map_add, map_add, hπ, hv]
+    rw [e1, map_add (f := _), map_add (f := _), hπ, hv]
   have e2 : clsRow D v (fun g => π (a g)) = Submodule.Quotient.mk ⟨_, ht⟩ := by
     unfold clsRow
     exact dif_pos ht

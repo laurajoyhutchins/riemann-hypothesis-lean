@@ -1,5 +1,47 @@
-import Mathlib
-import Development.EtaleCohomology.EtaleSheaves.LeafGhostRelCut
+module
+
+public import Development.EtaleCohomology.EtaleSheaves.LeafGhostRelCut
+import Mathlib.Algebra.Category.ModuleCat.FilteredColimits
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 open CategoryTheory Limits AlgebraicGeometry Opposite GlobalTheory.EtC
@@ -14,10 +56,6 @@ abbrev SShv (B : Scheme.{0}) (q : ℕ) : Type 2 := Sheaf (EtTop B) (ModuleCat.{1
 instance (B : Scheme.{0}) (q : ℕ) : HasSheafify (EtTop B) (ModuleCat.{1} (ULift.{1} (ZMod q))) := by
   have : EssentiallySmall.{1} B.Etale := inferInstance
   infer_instance
-
-instance (B : Scheme.{0}) (q : ℕ) : IsGrothendieckAbelian.{1} (SShv B q) := by
-  have : EssentiallySmall.{1} B.Etale := inferInstance
-  exact Sheaf.isGrothendieckAbelian_of_essentiallySmall _ _
 
 noncomputable instance (B : Scheme.{0}) (q : ℕ) : HasDerivedCategory.{2} (SShv B q) := HasDerivedCategory.standard _
 
@@ -89,8 +127,8 @@ def RepB {B W : Scheme.{0}} (ι : W ⟶ B) (L : DerivedCategory (SShv B q)) (e :
     e U' n (rpl q i (prB ι U) (prB ι U') (resBW ι a) a.left (pullback.lift_fst _ _ _).symm n c) =
       (OU B q).map a ≫ e U n c
 
-open CategoryTheory.Limits in
 
+open CategoryTheory.Limits in
 def LeafCons : Prop := ∀ (q : ℕ) [NeZero q] (i : ℤ) {B W Y0 Y1 Y2 : Scheme.{0}} (ι : W ⟶ B) [IsClosedImmersion ι]
   (p : Y0 ⟶ B) (g1 : Y1 ⟶ Y0) (g2 : Y2 ⟶ Y1),
   ∃ (K0 K1 K2 L : DerivedCategory (SShv B q)) (f : K0 ⟶ K1) (g : K1 ⟶ K2) (ℓ : L ⟶ K2)

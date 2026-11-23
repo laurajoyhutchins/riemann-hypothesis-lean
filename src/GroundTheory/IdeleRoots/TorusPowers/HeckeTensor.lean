@@ -1,8 +1,54 @@
-import Mathlib
-import Formalism.UnipotentAdelicQuotients.ThmBInHecke
-import GroundTheory.GlobalFields.IdeleGroups.IdeleNorms.BaseChange
-import GroundTheory.GlobalFields.Adele.Approximation
-import GroundTheory.GlobalFields.Adele.BaseChange.FiniteTensor
+module
+
+public import Formalism.UnipotentAdelicQuotients.ThmBInHecke
+public import GroundTheory.GlobalFields.IdeleGroups.IdeleNorms.BaseChange
+public import GroundTheory.GlobalFields.Adele.Approximation
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -16,8 +62,8 @@ namespace ThmBHecke
 
 variable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E]
 
-variable (F E) in
 
+variable (F E) in
 def adeleEquiv : AE F E ≃ₐ[AF F] 𝔸[E] := adeleTensorAlgEquivLeft F E
 
 theorem adeleEquiv_tmul (a : AF F) (x : E) :
@@ -43,8 +89,8 @@ theorem continuous_adeleEquiv_symm : Continuous (adeleEquiv F E).symm := by
   have := IsModuleTopology.toContinuousAdd (AF F) (AE F E)
   exact IsModuleTopology.continuous_of_linearMap (adeleEquiv F E).symm.toLinearMap
 
-variable (F E) in
 
+variable (F E) in
 def ideleEquiv : (AE F E)ˣ ≃* IdeleGroup E :=
   Units.mapEquiv (adeleEquiv F E).toRingEquiv.toMulEquiv
 
@@ -52,17 +98,12 @@ def ideleEquiv : (AE F E)ˣ ≃* IdeleGroup E :=
 theorem coe_ideleEquiv (x : (AE F E)ˣ) : ((ideleEquiv F E x : IdeleGroup E) : 𝔸[E]) = adeleEquiv F E x :=
   rfl
 
-@[simp]
-theorem coe_ideleEquiv_symm (x : IdeleGroup E) :
-    (((ideleEquiv F E).symm x : (AE F E)ˣ) : AE F E) = (adeleEquiv F E).symm x :=
-  rfl
-
 theorem continuous_ideleEquiv_symm : Continuous (ideleEquiv F E).symm :=
   Units.continuous_iff.2 ⟨continuous_adeleEquiv_symm.comp Units.continuous_val,
     continuous_adeleEquiv_symm.comp Units.continuous_coe_inv⟩
 
-variable (F E) in
 
+variable (F E) in
 def finEquiv : Af F ⊗[F] E ≃+* FiniteAdeleRing (𝓞 E) E :=
   (Algebra.TensorProduct.comm F (Af F) E).toRingEquiv.trans (finiteTensorEquiv F E).toRingEquiv
 
@@ -86,13 +127,14 @@ theorem adeleEquiv_snd (z : AE F E) : (adeleEquiv F E z).2 = finEquiv F E (finPa
     rw [finEquiv_tmul]
     rfl
   | add y z hy hz =>
-    rw [map_add, map_add, map_add, ← hy, ← hz]
+    rw [map_add (f := _), map_add (f := _), map_add (f := _), ← hy, ← hz]
     rfl
 
 theorem finEquiv_symm_eq_sum {ι : Type*} [Fintype ι] [DecidableEq ι] (b : Module.Basis ι F E)
     (t : FiniteAdeleRing (𝓞 E) E) :
     (finEquiv F E).symm t = ∑ i, finiteCoord b i t ⊗ₜ b i := by
   change (Algebra.TensorProduct.comm F (Af F) E).symm ((finiteTensorEquiv F E).symm t) = _
+
   rw [finiteTensorEquiv_symm_apply b, map_sum]
   rfl
 
@@ -114,7 +156,7 @@ theorem finEquiv_mem_of_mem_intAE {y : Af F ⊗[F] E} (hy : y ∈ intAE F E) :
     exact Subring.mul_mem _ (algebraMap_mem_integralFiniteAdeles x)
       (finiteAdeleMap_mem_integralFiniteAdeles ha)
   | zero => rw [map_zero]; exact Subring.zero_mem _
-  | add _ _ _ _ h1 h2 => rw [map_add]; exact Subring.add_mem _ h1 h2
+  | add _ _ _ _ h1 h2 => rw [map_add (f := _)]; exact Subring.add_mem _ h1 h2
   | neg _ _ h => rw [map_neg]; exact Subring.neg_mem _ h
 
 theorem exists_basis_isIntegral :
@@ -181,7 +223,7 @@ theorem mem_intAE_of_mem_integralFiniteAdeles {t : FiniteAdeleRing (𝓞 E) E}
       exact algebraMap_mem_integralFiniteAdeles (D : 𝓞 E)
     exact h1 w
   obtain ⟨z, hz⟩ := hDk
-  rw [htk, map_add]
+  rw [htk, map_add (f := _)]
   refine AddSubgroup.add_mem _ ?_ (hcoord s hk)
   have h1 : (finEquiv F E).symm (algebraMap E (FiniteAdeleRing (𝓞 E) E) ((D : E) * k)) =
       (1 : Af F) ⊗ₜ[F] ((z : 𝓞 E) : E) := by

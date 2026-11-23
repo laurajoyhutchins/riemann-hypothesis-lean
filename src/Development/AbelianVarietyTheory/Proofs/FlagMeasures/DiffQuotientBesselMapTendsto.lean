@@ -1,9 +1,59 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.MatrixOfBesselTwoSidedAction
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.SmoothVectorsDenseInvariantStatement
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.EquivariantSubspace
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdjointInverseTranslate.AnaHpartUnique
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.MatrixOfBesselTwoSidedAction
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdjointInverseTranslate.AnaHpartUnique
+public import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.SmoothVectorsDenseInvariantStatement
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.EquivariantSubspace
 import Formalism.FormalDegreeBessel.FormalDegreeRatio.GBasic
+import Formalism.RealPlaceAnalysis.RealPlaceTaylor.CartanInvolutionConjTransposeMul
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.InnerProductSpace.Calculus
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.Normed.Algebra.MatrixExponential
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -88,7 +138,7 @@ theorem sm_add {σ : Mat k r → (H →L[ℂ] H)} {v w : H} (hv : IsSmoothVec σ
   show SmoothOnH _ (fun g => σ g (v + w))
   convert h using 1
   funext g
-  simp
+  exact (σ g).map_add v w
 
 theorem sm_smul {σ : Mat k r → (H →L[ℂ] H)} (a : ℂ) {v : H} (hv : IsSmoothVec σ v) :
     IsSmoothVec σ (a • v) := by
@@ -96,7 +146,7 @@ theorem sm_smul {σ : Mat k r → (H →L[ℂ] H)} (a : ℂ) {v : H} (hv : IsSmo
   show SmoothOnH _ (fun g => σ g (a • v))
   convert h using 1
   funext g
-  simp
+  exact (σ g).map_smul a v
 
 theorem sm_sub {σ : Mat k r → (H →L[ℂ] H)} {v w : H} (hv : IsSmoothVec σ v) (hw : IsSmoothVec σ w) :
     IsSmoothVec σ (v - w) := by
@@ -108,7 +158,7 @@ theorem sm_zero (σ : Mat k r → (H →L[ℂ] H)) : IsSmoothVec σ (0 : H) := b
   show SmoothOnH _ (fun g => σ g 0)
   convert h using 1
   funext g
-  simp
+  exact (σ g).map_zero
 
 theorem hasDerivAt_dsig {σ : Mat k r → (H →L[ℂ] H)} {v : H} {X : Mat k r} (hv : IsSmoothVec σ v)
     (hX : InLieHpk k r X) :
@@ -131,15 +181,15 @@ theorem sm_dsig {σ : Mat k r → (H →L[ℂ] H)} (hσ : IsURepOn (GG k r) σ) 
     {Y : Mat k r} (hY : InLieHpk k r Y) : IsSmoothVec σ (dsig σ Y v) := by
   exact (((GlobalTheory.T.smooth_vectors_dense_invariant k r σ v hσ).2.2.2.1 v hv).2 Y hY).1
 
-omit [CompleteSpace H] in
 
+omit [CompleteSpace H] in
 theorem inner_map {σ : Mat k r → (H →L[ℂ] H)} (hσ : IsURepOn (GG k r) σ) {g : Mat k r} (hg : g ∈ GG k r) (v w : H) :
     ⟪σ g v, σ g w⟫_ℂ = ⟪v, w⟫_ℂ := by
   let L : H →ₗᵢ[ℂ] H := { toLinearMap := (σ g).toLinearMap, norm_map' := hσ.2.1 g hg }
   exact L.inner_map_map v w
 
-omit [CompleteSpace H] in
 
+omit [CompleteSpace H] in
 theorem dsig_skew {σ : Mat k r → (H →L[ℂ] H)} (hσ : IsURepOn (GG k r) σ) {v w : H} {X : Mat k r}
     (hv : IsSmoothVec σ v) (hw : IsSmoothVec σ w) (hX : InLieHpk k r X) :
     ⟪dsig σ X v, w⟫_ℂ = -⟪v, dsig σ X w⟫_ℂ := by
@@ -362,8 +412,8 @@ end Main
 
 end GlobalTheory.DiffQuot
 
-open GlobalTheory.DiffQuot in
 
+open GlobalTheory.DiffQuot in
 theorem GlobalTheory.diffQuot_bessel : ∀ (k r : ℕ) {H : Type} [NormedAddCommGroup H] [InnerProductSpace ℂ H] [CompleteSpace H] {Wp : Type} [NormedAddCommGroup Wp] [InnerProductSpace ℂ Wp] [FiniteDimensional ℂ Wp] [CompleteSpace Wp] (σ : Mat k r → (H →L[ℂ] H)) (z : Fin (2 * r + k + 1) → ℂ) (ψ : Mat k r → ℂ) (π : Mat k r → (Wp →L[ℂ] Wp)) (l : H → Wp) (x : H) (X : Mat k r), IsURepOn (GG k r) σ → IsBesselMapSm z ψ σ π l → IsSmoothVec σ x → InLieHpk k r X → Filter.Tendsto (fun t : ℝ => l ((t : ℂ)⁻¹ • (σ (NormedSpace.exp ((t : ℂ) • X)) x - x))) (nhdsWithin 0 {0}ᶜ) (nhds (l (dsig σ X x))) ∧ ContinuousOn (fun g => l (σ g x)) (GG k r) ∧ ∀ t : ℝ, NormedSpace.exp ((t : ℂ) • X) ∈ GG k r ∧ σ (NormedSpace.exp ((t : ℂ) • X)) x - x = ∫ u in (0 : ℝ)..t, σ (NormedSpace.exp ((u : ℂ) • X)) (dsig σ X x) := by
   intro k r H _ _ _ Wp _ _ _ _ σ z ψ π l x X hσ hl hx hX
   have hd := sm_dsig hσ hx hX

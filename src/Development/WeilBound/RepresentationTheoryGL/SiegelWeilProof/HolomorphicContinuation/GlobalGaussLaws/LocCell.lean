@@ -1,12 +1,60 @@
-import Development.WeilBound.RepresentationTheoryGL.SiegelWeilProof.HolomorphicContinuation.GlobalGaussLaws.GaussLaw
-import Development.WeilBound.RepresentationTheoryGL.SiegelWeilProof.HolomorphicContinuation.GlobalGaussLaws.LocInstSt
-import Development.WeilBound.RepresentationTheoryGL.SiegelWeilProof.HolomorphicContinuation.GlobalGaussLaws.LocCellSt
-import Development.WeilBound.RepresentationTheoryGL.SiegelWeilProof.HolomorphicContinuation.GlobalGaussLaws.LocCellA
-import Development.WeilBound.RepresentationTheoryGL.SiegelWeilProof.HolomorphicContinuation.GlobalGaussLaws.LocCellT
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ThetaIntegralContinuous
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.FockPolynomialSchwartzKilledByLongAnnihilation
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LintegralNormSqEqToL2
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.ExistsGaussIndicator
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.SiegelWeilProof.HolomorphicContinuation.GlobalGaussLaws.GaussLaw
+public import Development.WeilBound.RepresentationTheoryGL.SiegelWeilProof.HolomorphicContinuation.GlobalGaussLaws.LocInstSt
+public import Development.WeilBound.RepresentationTheoryGL.SiegelWeilProof.HolomorphicContinuation.GlobalGaussLaws.LocCellSt
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.EqZeroOfLintegralEqZero
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.MemSchwartzAOfIsSchwartzBruhat
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LintegralNormSqEqToL2
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SchwartzBoundFiniteInfinite
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ThetaIntegralContinuous
+public import Development.WeilBound.RepresentationTheoryGL.SiegelWeilProof.HolomorphicContinuation.GlobalGaussLaws.LocCellA
+public import Development.WeilBound.RepresentationTheoryGL.SiegelWeilProof.HolomorphicContinuation.GlobalGaussLaws.LocCellT
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import Mathlib.Topology.Algebra.MvPolynomial
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -77,7 +125,8 @@ theorem exists_sec (θ : InfFam D) (hθ : IsInfFam θ) (τ : D.what₂.Tau) (m n
     intro τ' u
     rw [e]
     simp only [S]
-    simp_rw [map_sum, map_add]
+
+    simp_rw [map_sum, map_add (f := _)]
     simp_rw [← e, (hL _).2.2]
     split_ifs with h
     · ext a' i'
@@ -90,16 +139,17 @@ theorem exists_sec (θ : InfFam D) (hθ : IsInfFam θ) (τ : D.what₂.Tau) (m n
     intro u
     rw [ef]
     simp only [S]
-    simp_rw [map_sum, map_add]
+
+    simp_rw [map_sum, map_add (f := _)]
     simp_rw [← ef, (hL _).2.1]
     simp
   refine ⟨S, fun x u => ?_, fun x u τ' h => ?_, fun x u => ?_⟩
   · funext a i
     simp only [piT, Pi.add_apply]
-    rw [e, map_add, ← e, ← e, hc, if_pos rfl]
+    rw [e, map_add (f := _), ← e, ← e, hc, if_pos rfl]
     rfl
-  · rw [e, map_add, ← e, ← e, hc, if_neg h, add_zero]
-  · rw [ef, map_add, ← ef, ← ef, hf, add_zero]
+  · rw [e, map_add (f := _), ← e, ← e, hc, if_neg h, add_zero]
+  · rw [ef, map_add (f := _), ← ef, ← ef, hf, add_zero]
 
 theorem cov {m n : ℕ} (fr : Matrix (Fin m) (Fin m) ℂ) (hfr : IsUnit fr.det) :
     ∃ c' : ℝ, 0 < c' ∧ ∀ f : (Fin m → Fin n → ℂ) → ℂ,
@@ -229,8 +279,8 @@ end PositivityTheory.Rg.Sw.Glob.LocCell
 
 namespace PositivityTheory.Rg.Sw.Glob
 
-open LocCell in
 
+open LocCell in
 theorem lIcell_of (hAw : AwayAct) (hDA : DecompAway) (hU : UnipTau) (hAI : AwayIn) (hSF : SchFP) (hLN : LNe)
     (hLc : LIcont) (hLl : LIlaw) (hLv : LIvac) : LIcell := by
   intro D n V ψ χ θ μ ω H l s ν τ ε fr ι hC hTM L hL
@@ -249,7 +299,7 @@ theorem lIcell_of (hAw : AwayAct) (hDA : DecompAway) (hU : UnipTau) (hAI : AwayI
       ⟨tens θ τ fr (fP (cLoc l τ) P) Ψ0, hΨ0.2 _ (hSF _ _ _ hcpos P)⟩ := by
     intro P
     unfold phiS
-    rw [dif_pos (hΨ0.2 _ (hSF _ _ _ hcpos P))]
+    rw [dite_eq_left (hΨ0.2 _ (hSF _ _ _ hcpos P))]
 
   let aF : PX V.rank n → Matrix (Fin n) (Fin n) ℂ → (Fin V.rank → Fin n → ℂ) → ℂ := fun P b u =>
     Complex.exp (Complex.I * tLoc l τ * (b * gramX ε (fr⁻¹ * Matrix.of u)).trace) *

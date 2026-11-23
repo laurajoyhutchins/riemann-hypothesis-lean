@@ -1,8 +1,60 @@
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.GelfandTsetlinLowering.LiftDefs
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.GelfandTsetlinLowering.LiftDefs
+public import Formalism.GradedWeylDivisibility.StatementE
+public import Formalism.PeriodIntegrals.HwIrred
 import Formalism.GradedWeylDivisibility.DualWeylDominanceOf
-import Formalism.GradedWeylDivisibility.FockSpaceTableaux.LEhwLemmas
-import Formalism.GradedWeylDivisibility.FockSpaceTableaux.LRowdivLemmas
-import Formalism.GradedWeylDivisibility.FockSpaceTableaux.FockQRowDivAdj
+public import Formalism.GradedWeylDivisibility.FockSpaceTableaux.FockQRowDivAdj
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Formalism.LocalRingCardinality.Params
+
+@[expose] public section
 
 noncomputable section
 
@@ -74,7 +126,8 @@ theorem rowDiv_diag {r n : ℕ} (a : Fin r) (k : ℕ) (f : MvPolynomial (Fin r �
   classical
   unfold rowDiv
   conv_lhs => rw [f.as_sum]
-  rw [map_sum, Polynomial.finset_sum_coeff]
+
+  rw [map_sum, Polynomial.finsetSum_coeff]
   conv_rhs => rw [f.as_sum, Finset.smul_sum]
   refine Finset.sum_congr rfl fun m hm => ?_
   rw [rowGen_diag_monomial, Polynomial.coeff_C_mul, Polynomial.coeff_one_add_X_pow]
@@ -168,11 +221,12 @@ private theorem isWeightedHomogeneous_coeff_rowGen {r n : ℕ} (a b c : Fin r) (
     IsWeightedHomogeneous (rw1 c) ((rowGen ℂ a b g).coeff j)
       (H + j * ((if a = c then 1 else 0) - (if b = c then 1 else 0))) := by
   classical
-  rw [g.as_sum, map_sum, Polynomial.finset_sum_coeff, ← mem_weightedHomogeneousSubmodule]
+
+  rw [g.as_sum, map_sum, Polynomial.finsetSum_coeff, ← mem_weightedHomogeneousSubmodule]
   refine Submodule.sum_mem _ fun m hm => ?_
   rw [mem_weightedHomogeneousSubmodule]
   have hw := hg (mem_support_iff.mp hm)
-  have hC : rowGen ℂ a b (C (coeff m g) : MvPolynomial (Fin r × Fin n) ℂ) = Polynomial.C (C (coeff m g)) := by
+  have hC : rowGen ℂ a b (C (AddMonoidAlgebra.coeff g m) : MvPolynomial (Fin r × Fin n) ℂ) = Polynomial.C (C (AddMonoidAlgebra.coeff g m)) := by
     unfold rowGen
     rw [aeval_C, Polynomial.algebraMap_apply, MvPolynomial.algebraMap_eq]
   rw [monomial_eq, map_mul, Finsupp.prod, map_prod]
@@ -312,13 +366,13 @@ theorem fockDetect_of (h3 : PI.HwIrred) (hD : EqvDiv) : FockDetect := by
       zero_mem' := by simp [fockF]
       add_mem' := by
         intro a b ha hb
-        simp only [Set.mem_ofPred_eq, map_add] at *
+        simp only [Set.mem_ofPred_eq, map_add (f := _)] at *
         unfold fockF at *
         rw [← zero_add (0 : ℂ)]
         nth_rewrite 1 [← ha]
         rw [← hb, ← Finset.sum_add_distrib]
         refine Finset.sum_congr rfl fun m _ => ?_
-        simp only [coeff_add, star_add]
+        simp only [MvPolynomial.coeff_add, star_add]
         ring
       smul_mem' := by
         intro c a ha
@@ -330,7 +384,7 @@ theorem fockDetect_of (h3 : PI.HwIrred) (hD : EqvDiv) : FockDetect := by
               ((∏ k ∈ m.support, (m k).factorial : ℕ) : ℂ) := by
           rw [Finset.mul_sum]
           refine Finset.sum_congr rfl fun m _ => ?_
-          simp only [coeff_smul, smul_eq_mul, star_mul']
+          simp only [MvPolynomial.coeff_smul, smul_eq_mul, star_mul']
           ring
         rw [this, ha, mul_zero] }
   have hSP : Submodule.span ℂ S ≤ P := by

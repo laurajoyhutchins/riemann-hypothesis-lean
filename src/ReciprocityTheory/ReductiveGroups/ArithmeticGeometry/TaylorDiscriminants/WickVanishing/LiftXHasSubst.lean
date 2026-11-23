@@ -1,5 +1,54 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.GermSC
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.DiscriminantEstimates.DiscriminantTheorems.WickFormula
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.GermSC
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.DiscriminantEstimates.WickFormula
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Bool
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -25,13 +74,13 @@ theorem liftX_mul (f g : PS k 1 d) : liftX k (f * g) = liftX k f * liftX k g := 
 theorem Dof_add (F : Fin d → PS k 2 d) (u u' : Fin d → k) (f : PS k 1 d) :
     Dof F (u + u') f = Dof F u f + Dof F u' f := by
   unfold Dof
-  simp only [Pi.add_apply, map_add, add_mul, Finset.sum_add_distrib]
+  simp only [Pi.add_apply, map_add (f := _), add_mul, Finset.sum_add_distrib]
 
 theorem nabla_add (B : FB R d O) (h : PS k 2 d) (m : ℕ) (u u' φ φ' : Fin d → k) (G : AA k d) :
     nabla k B h m (u + u') (φ + φ') G = nabla k B h m u φ G + nabla k B h m u' φ' G := by
   first
   | (unfold nabla Dx
-     simp only [Pi.add_apply, Prod.fst_add, Prod.snd_add, map_add, add_mul, mul_add, Finset.sum_add_distrib, Dof_add,
+     simp only [Pi.add_apply, Prod.fst_add, Prod.snd_add, map_add (f := _), add_mul, mul_add, Finset.sum_add_distrib, Dof_add,
        liftX_add, smul_add, add_smul]
      ring)
   | (unfold nabla
@@ -41,12 +90,11 @@ theorem nabla_add (B : FB R d O) (h : PS k 2 d) (m : ℕ) (u u' φ φ' : Fin d �
 def nablaL (B : FB R d O) (h : PS k 2 d) (m : ℕ) (u φ : Fin d → k) : Module.End k (AA k d) where
   toFun := nabla k B h m u φ
   map_add' G G' := by
-    unfold nabla Dx
-    simp only [map_add, mul_add, Finset.sum_add_distrib]
+    simp only [nabla, Dx, Derivation.map_add, mul_add, Finset.sum_add_distrib]
     ring
   map_smul' c G := by
-    unfold nabla Dx
-    simp only [Derivation.map_smul, mul_smul_comm, RingHom.id_apply, smul_add, smul_sub, Finset.smul_sum]
+    simp only [nabla, Dx, Derivation.map_smul, mul_smul_comm, RingHom.id_apply, smul_add,
+      smul_sub, Finset.smul_sum]
 
 @[simp] theorem nablaL_apply (B : FB R d O) (h : PS k 2 d) (m : ℕ) (u φ : Fin d → k) (G : AA k d) :
     nablaL B h m u φ G = nabla k B h m u φ G := rfl

@@ -1,5 +1,48 @@
-import Mathlib
-import ReciprocityTheory.AnalyticForms.MaIntEmpty
+module
+
+public import ReciprocityTheory.AnalyticForms.MaIntEmpty
+public import Mathlib.Analysis.InnerProductSpace.Laplacian
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace ReciprocityTheory.AnForm.A
 
@@ -13,26 +56,6 @@ def ddcDens (u : ℂ → ℝ) (z : ℂ) : ℝ :=
 
 def ddcCoordDens {n : ℕ} (j : Fin n) (u : (Fin n → ℂ) → ℝ) (z : Fin n → ℂ) : ℝ :=
   (2 / Real.pi) * ReciprocityTheory.AnForm.levi u z (Pi.single j 1)
-
-def LeviOneEqLaplacianStatement : Prop :=
-  ∀ (u : ℂ → ℝ) (z : ℂ),
-    ReciprocityTheory.AnForm.levi (fun w : Fin 1 → ℂ => u (w 0)) (fun _ => z) (Pi.single 0 1) =
-      Δ u z / 4
-
-def GreenOriginStatement : Prop :=
-  ∀ u : ℂ → ℝ, ContDiff ℝ 2 u → HasCompactSupport u →
-    Integrable (fun z : ℂ => Real.log ‖z‖ * Δ u z) ∧
-      ∫ z : ℂ, Real.log ‖z‖ * Δ u z = 2 * Real.pi * u 0
-
-def GreenDdcOriginStatement : Prop :=
-  ∀ u : ℂ → ℝ, ContDiff ℝ 2 u → HasCompactSupport u →
-    Integrable (fun z : ℂ => Real.log ‖z‖ * ddcDens u z) ∧
-      ∫ z : ℂ, Real.log ‖z‖ * ddcDens u z = u 0
-
-def GreenPointStatement : Prop :=
-  ∀ (u : ℂ → ℝ) (a : ℂ), ContDiff ℝ 2 u → HasCompactSupport u →
-    Integrable (fun z : ℂ => Real.log ‖z - a‖ * Δ u z) ∧
-      ∫ z : ℂ, Real.log ‖z - a‖ * Δ u z = 2 * Real.pi * u a
 
 def GreenParamFiberStatement : Prop :=
   ∀ (E : Type) [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
@@ -55,32 +78,11 @@ def GreenCoordStatement : Prop :=
       ∫ z : Fin (D + 1) → ℂ, Real.log ‖z j‖ * ddcCoordDens j u z =
         ∫ w : Fin D → ℂ, u (Fin.insertNth j 0 w)
 
-def GreenCoordFiberStatement : Prop :=
-  ∀ (D : ℕ) (j : Fin (D + 1)) (u : (Fin (D + 1) → ℂ) → ℝ), ContDiff ℝ 2 u → HasCompactSupport u →
-    ∀ w : Fin D → ℂ,
-    Integrable (fun ζ : ℂ => Real.log ‖ζ‖ * ddcCoordDens j u (Fin.insertNth j ζ w)) ∧
-      ∫ ζ : ℂ, Real.log ‖ζ‖ * ddcCoordDens j u (Fin.insertNth j ζ w) = u (Fin.insertNth j 0 w)
-
-def GreenCoordZeroStatement : Prop :=
-  ∀ (D : ℕ) (u : (Fin (D + 1) → ℂ) → ℝ), ContDiff ℝ 2 u → HasCompactSupport u →
-    Integrable (fun z : Fin (D + 1) → ℂ => Real.log ‖z 0‖ * ddcCoordDens 0 u z) ∧
-      ∫ z : Fin (D + 1) → ℂ, Real.log ‖z 0‖ * ddcCoordDens 0 u z =
-        ∫ w : Fin D → ℂ, u (Fin.cons 0 w)
-
-def GreenMaDensStatement : Prop :=
-  ∀ u : (Fin 1 → ℂ) → ℝ, ContDiff ℝ 2 u → HasCompactSupport u →
-    Integrable (fun z : Fin 1 → ℂ => Real.log ‖z 0‖ * ReciprocityTheory.AnForm.maDens ![u] z) ∧
-      ∫ z : Fin 1 → ℂ, Real.log ‖z 0‖ * ReciprocityTheory.AnForm.maDens ![u] z = u 0
-
 def GreenMixedStatement : Prop :=
   ∀ (D : ℕ) (j a b : Fin (D + 1)) (u : (Fin (D + 1) → ℂ) → ℝ), ContDiff ℝ 2 u → HasCompactSupport u →
     (a, b) ≠ (j, j) →
     Integrable (fun z : Fin (D + 1) → ℂ => (Real.log ‖z j‖ : ℂ) * ReciprocityTheory.AnForm.hessC u z a b) ∧
       ∫ z : Fin (D + 1) → ℂ, (Real.log ‖z j‖ : ℂ) * ReciprocityTheory.AnForm.hessC u z a b = 0
-
-theorem hyp_inhabited_bump : ∃ u : ℂ → ℝ, ContDiff ℝ 2 u ∧ HasCompactSupport u ∧ u 0 = 1 := by
-  let b : ContDiffBump (0 : ℂ) := ⟨1, 2, one_pos, one_lt_two⟩
-  exact ⟨b, b.contDiff, b.hasCompactSupport, b.one_of_mem_closedBall (by simpa using b.rIn_pos.le)⟩
 
 end
 

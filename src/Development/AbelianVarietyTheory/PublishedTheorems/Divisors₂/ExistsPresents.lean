@@ -1,26 +1,59 @@
-import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.ChernDegreeComplex
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.ChernDegreePoint
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IntegrableOnSourceIffOfDensity
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsIsClosedImmersionGenericPoint
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.MemRiemannRochSpaceIffRegularAtEverywhere
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IntegrableOnSourceIffOfDensity
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import ReciprocityTheory.AnalyticForms.PotentialTheory.IntegrableOnTargetOfTsupport
+public import Development.AbelianVarietyTheory.Definitions.Divisors.AnalyticOnNhdFinChartIff
+
+@[expose] public section
 
 noncomputable section
 
 open CategoryTheory AlgebraicGeometry TopologicalSpace
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor
-open GlobalTheory.Cartier GlobalTheory.ProjVar GlobalTheory.CxPts GlobalTheory.Published.ArDegreeModel
+open GlobalTheory.Cartier GlobalTheory.ProjVar GlobalTheory.CxPts
 
 namespace GlobalTheory.Published.ChernDegreeComplexModel
 
 variable (Y : Var ℂ)
-
-theorem exists_presents {L : LB Y.X} (φ : Weight Y.str (RingHom.id ℂ) L) :
-    ∃ (Δ : Y.Dv) (r : L.ι → Y.Fnˣ), Presents Δ L r := by
-  obtain ⟨i₀, h₀⟩ := exists_chart φ.isLB (genericPoint Y.X)
-  exact ⟨ofLB φ.isLB i₀ h₀, frameRat L i₀ h₀, presents_ofLB φ.isLB i₀ h₀⟩
-
-theorem hyp_proj (n : ℕ) : ∃ r, Presents (projHyp ℂ n) (proj ℂ n).O1 r ∧
-    (fs (proj ℂ n) (RingHom.id ℂ)).IsCInf ∧ (proj ℂ n).inter (fun _ => projHyp ℂ n) = 1 :=
-  ⟨_, (proj ℂ n).presents_hyp (proj_gen_mem ℂ n 0), isCInf_fs (proj ℂ n) (RingHom.id ℂ), inter_projHyp ℂ n⟩
 
 theorem integrable {L : LB Y.X} (φ : Weight Y.str (RingHom.id ℂ) L) (h : φ.IsCInf) :
     φ.ChernIntegrableOn Y.dim Set.univ (fun _ => 1) := by
@@ -30,30 +63,5 @@ theorem integrable {L : LB Y.X} (φ : Weight Y.str (RingHom.id ℂ) L) (h : φ.I
   have hm := ReciprocityTheory.AnForm.M.mIntegrableCont R.finAtlas (fun _ => φ.locPot)
     (fun _ => Weight.isPotential_locPot hs) (fun _ => 1) continuous_const
   exact ((Weight.chernInt_eq_mInt R h measurable_const).1).2 hm
-
-theorem mass_fs_nonneg : 0 ≤ (fs Y (RingHom.id ℂ)).chernInt Y.dim Set.univ (fun _ => 1) := by
-  have hneg : (fs Y (RingHom.id ℂ)).chernPart Y.dim (-1) = 0 :=
-    Weight.chernPart_neg_eq_zero (isCInf_fs Y (RingHom.id ℂ)) (Weight.semiPosReg_fsBasis _ _ _ _ _)
-  unfold Weight.chernInt
-  rw [hneg]
-  rw [MeasureTheory.Measure.restrict_zero, MeasureTheory.integral_zero_measure, sub_zero]
-  exact MeasureTheory.integral_nonneg fun _ => zero_le_one
-
-theorem point (Δ : (proj ℂ 0).Dv) (L : LB (proj ℂ 0).X) (φ : Weight (proj ℂ 0).str (RingHom.id ℂ) L)
-    (h : φ.IsCInf) : φ.chernInt 0 Set.univ (fun _ => 1) = ((proj ℂ 0).inter (fun _ => Δ) : ℝ) :=
-  (chernDegree_point (RingHom.id ℂ) Δ L φ h).2
-
-theorem mass_proj (H : ChernDegreeComplex) (n : ℕ) :
-    (fs (proj ℂ n) (RingHom.id ℂ)).chernInt n Set.univ (fun _ => 1) = 1 := by
-  obtain ⟨r, hr, hfs, hint⟩ := hyp_proj n
-  have key := (H (proj ℂ n) (projHyp ℂ n) (proj ℂ n).O1 r hr _ hfs).2
-  rw [hint, proj_dim] at key
-  exact_mod_cast key
-
-theorem mass_indep (H : ChernDegreeComplex) {L : LB Y.X} (φ ψ : Weight Y.str (RingHom.id ℂ) L)
-    (h : φ.IsCInf) (h' : ψ.IsCInf) :
-    φ.chernInt Y.dim Set.univ (fun _ => 1) = ψ.chernInt Y.dim Set.univ (fun _ => 1) := by
-  obtain ⟨Δ, r, hp⟩ := exists_presents Y φ
-  exact (H Y Δ L r hp φ h).2.trans (H Y Δ L r hp ψ h').2.symm
 
 end GlobalTheory.Published.ChernDegreeComplexModel

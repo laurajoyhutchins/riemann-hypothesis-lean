@@ -1,14 +1,66 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.TranslateMemIndOrder
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.ExistsUnitFormLocalizationEtaleNbhd
-import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.Models
-import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.DualOrder
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.BaseChangePointsCompatStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.MemBtOrderIffBtSetStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.RegularFunctionIffSectionStatement
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.ExtensionOrderEqSpanStatement
+module
+
+public import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.TranslateMemIndOrder
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.ExistsUnitFormLocalizationEtaleNbhd
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.ExtensionOrderEqSpanStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.BaseChangePointsCompatStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.MemBtOrderIffBtSet
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.RegularFunctionIffSectionStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import Mathlib.RingTheory.Flat.TorsionFree
+
+@[expose] public section
+
 open CategoryTheory Limits AlgebraicGeometry MonoidalCategory CartesianMonoidalCategory MonObj TensorProduct
-open GlobalTheory.CompanionTheory.Ar.BT GroundTheory.PAdicHodge
+open GlobalTheory.CompanionTheory.Ar.BT
 
 noncomputable section
 
@@ -51,7 +103,7 @@ def kapL (κ : FractionRing R →+* FractionRing R')
 lemma inj_one (κ : FractionRing R →+* FractionRing R')
     (hκ : κ.comp (algebraMap R _) = (algebraMap R' _).comp (algebraMap R R')) :
     Function.Injective ((kapL κ hκ).liftBaseChange R') := by
-  rw [injective_iff_map_eq_zero]
+  set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
   intro u hu
   obtain ⟨r, d, hd, rfl⟩ := tensor_frac_form u
   rw [LinearMap.liftBaseChange_tmul] at hu
@@ -68,7 +120,7 @@ lemma inj_one (κ : FractionRing R →+* FractionRing R')
 lemma inj_pi {T : Type} [Fintype T] [DecidableEq T] (κ : FractionRing R →+* FractionRing R')
     (hκ : κ.comp (algebraMap R _) = (algebraMap R' _).comp (algebraMap R R')) :
     Function.Injective (((kapL κ hκ).compLeft T).liftBaseChange R') := by
-  rw [injective_iff_map_eq_zero]
+  set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
   intro y hy
   have key : ∀ (y : R' ⊗[R] (T → FractionRing R)) (h : T),
       (kapL κ hκ).liftBaseChange R' (TensorProduct.piRight R R' R' (fun _ : T => FractionRing R) y h) =
@@ -77,7 +129,7 @@ lemma inj_pi {T : Type} [Fintype T] [DecidableEq T] (κ : FractionRing R →+* F
     induction y using TensorProduct.induction_on with
     | zero => simp
     | tmul r f => simp [TensorProduct.piRight_apply, LinearMap.liftBaseChange_tmul]
-    | add a b ha hb => simp only [map_add, Pi.add_apply, ha, hb]
+    | add a b ha hb => simp only [map_add (f := _), Pi.add_apply, ha, hb]
   apply (TensorProduct.piRight R R' R' (fun _ : T => FractionRing R)).injective
   rw [map_zero]
   funext h
@@ -94,7 +146,7 @@ lemma tensor_pi_ext {T Q : Type} [Fintype T] [DecidableEq T] [AddCommGroup Q] [M
     induction y using TensorProduct.induction_on with
     | zero => simp
     | tmul r f => simp [TensorProduct.piRight_apply]
-    | add a b ha hb => simp only [map_add, Pi.add_apply, ha, hb]
+    | add a b ha hb => simp only [map_add (f := _), Pi.add_apply, ha, hb]
   apply (TensorProduct.piRight R R' R' (fun _ : T => Q)).injective
   rw [map_zero]
   funext t
@@ -135,8 +187,9 @@ theorem alg_core {T : Type} [CommGroup T] [Finite T] [Module.Flat R R']
       fun h => algebraMap R' (FractionRing R') (g (t * h)) := by
     intro t
     funext h
+
     simp only [z, map_sum, LinearMap.lTensor_tmul, cW, LinearMap.liftBaseChange_tmul, Finset.sum_apply,
-      Pi.smul_apply]
+    Pi.smul_apply]
     rw [Finset.sum_eq_single (t * h)]
     · have := congr($hκ 1)
       simp [LinearMap.compLeft_apply, ha, kapL, Algebra.smul_def]
@@ -152,7 +205,7 @@ theorem alg_core {T : Type} [CommGroup T] [Finite T] [Module.Flat R R']
       induction y using TensorProduct.induction_on with
       | zero => simp
       | tmul r n => simp [cN, cW, LinearMap.liftBaseChange_tmul]
-      | add p q hp hq => simp only [map_add, hp, hq]
+      | add p q hp hq => simp only [map_add (f := _), hp, hq]
     have hle : Submodule.span R' {w : T → FractionRing R' | ∃ n ∈ N, w = fun h => κ (n h)} ≤
         LinearMap.range cN := by
       rw [Submodule.span_le]
@@ -177,6 +230,7 @@ theorem alg_core {T : Type} [CommGroup T] [Finite T] [Module.Flat R R']
   let e := ((Algebra.linearMap R R').compLeft T).liftBaseChange R'
   have hez : e z = g := by
     funext h
+
     simp only [z, e, map_sum, LinearMap.liftBaseChange_tmul, Finset.sum_apply, Pi.smul_apply]
     rw [Finset.sum_eq_single h]
     · simp [LinearMap.compLeft_apply]
@@ -192,7 +246,7 @@ theorem alg_core {T : Type} [CommGroup T] [Finite T] [Module.Flat R R']
       simp only [LinearMap.lTensor_tmul, e, LinearMap.liftBaseChange_tmul]
       exact Submodule.smul_mem _ _ (Submodule.subset_span ⟨m, m.2, rfl⟩)
     | add p q hp hq =>
-      rw [map_add, map_add]
+      rw [map_add (f := _), map_add (f := _)]
       exact Submodule.add_mem _ hp hq
   rw [← hez, ← hy]
   exact hall y
@@ -272,7 +326,9 @@ def secFn (Γ : QFGroup R T) : Submodule R (T → FractionRing R) where
 
 lemma mem_btOrder_iff [Finite T] (Γ : QFGroup R T) (f : T → R) :
     f ∈ Γ.btOrder ⊤ ↔ ∀ t, (fun h => algebraMap R (FractionRing R) (f (t * h))) ∈ secFn Γ := by
-  rw [GlobalTheory.T.mem_btOrder_iff_btSet R T Γ ⊤ f]
+  have hmem : f ∈ Γ.btOrder ⊤ ↔ f ∈ Γ.btSet ⊤ :=
+    mem_btOrder_iff_mem_btSet R T Γ ⊤ f
+  rw [hmem]
   refine forall_congr' fun t => ?_
   have := GlobalTheory.T.regular_function_iff_section R T Γ ⊤ (fun h => algebraMap R (FractionRing R) (f (t * h)))
   exact this
@@ -289,7 +345,6 @@ lemma pushout_induction {A B C D : CommRingCat.{0}} {a : A ⟶ B} {c : A ⟶ C} 
   haveI : IsScalarTower A C D := .of_algebraMap_eq fun r => congr($(h.w).hom r)
   have hpo : Algebra.IsPushout A C B D := CommRingCat.isPushout_iff_isPushout.mp h.flip
   induction x using hpo.out.inductionOn with
-  | zero => exact h0
   | tmul y => exact h1 y
   | smul s n hn => exact h2 s n hn
   | add x y hx hy => exact h3 x y hx hy
@@ -342,7 +397,7 @@ theorem val_mem_span [Finite T] [Module.Flat R R'] (Γ : QFGroup R T) (Γ' : QFG
     exact Submodule.add_mem _ hp hq
 
 lemma flat_inj [Module.Flat R R'] : Function.Injective (algebraMap R R') := by
-  rw [injective_iff_map_eq_zero]
+  set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
   intro r hr
   by_contra hr0
   have hreg : IsSMulRegular R' r :=

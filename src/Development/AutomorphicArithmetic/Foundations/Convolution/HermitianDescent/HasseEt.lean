@@ -1,7 +1,62 @@
-import Development.AutomorphicArithmetic.Foundations.Convolution.HermitianDescent.NormAlmostAll
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ExistsIsRealEmbeddingEqHom
+module
+
+public import Development.AutomorphicArithmetic.Foundations.Convolution.HermitianDescent.NormAlmostAll
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ExistsIsRealEmbeddingEqHom
 import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ExistsRingHomAdicCompletionUnder
-import Development.AutomorphicArithmetic.Splittings.ExistsCyclicGaloisTensorAlgEquivPi
+import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.HasseNormPrincipleOfIsCyclicStatement
+import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.IsNormFromBaseChangeBaseChangeProperties
+public import Development.AutomorphicArithmetic.Splittings.ExistsCyclicGaloisTensorAlgEquivPi
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+public import Mathlib.RingTheory.TensorProduct.Pi
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Development.AbelianVarietyTheory.Definitions.AdelicHermitianForms.MemPowSub
+
+@[expose] public section
 
 open Matrix Polynomial NumberField IsDedekindDomain
 open scoped TensorProduct
@@ -83,9 +138,9 @@ private theorem field_case (F E K A : Type) [Field F] [NumberField F] [Field E] 
       ((algebraMap K ℝ).comp (algebraMap F K))
     refine local_step F E K L I A v.Completion ℝ e π
       (InfinitePlace.Completion.extensionEmbeddingOfIsReal hv) (fun b => ?_) x (hi v)
-    have := InfinitePlace.Completion.extensionEmbeddingOfIsReal_coe hv ((WithAbs.equiv v.1).symm b)
-    rw [hσ] at this
-    exact this
+    simp only [AbsoluteValue.Completion.algebraMap_def v.1, WithAbs.algebraMap_right_apply,
+      Algebra.algebraMap_self_apply, InfinitePlace.Completion.extensionEmbeddingOfIsReal_coe,
+      WithAbs.equiv_apply, WithAbs.ofAbs_toAbs, hσ, RingHom.comp_apply]
 
 end UpperTheory.ConvolutionTheory.D
 
@@ -119,6 +174,7 @@ theorem UpperTheory.ConvolutionTheory.D.hasseEt : UpperTheory.ConvolutionTheory.
   have h1 : Algebra.TensorProduct.map (Ideal.Quotient.mkₐ F m.asIdeal) (AlgHom.id F E)
       (∑ j, c j ⊗ₜ[F] b j) = y m := by
     conv_rhs => rw [← (Algebra.TensorProduct.basis _ b).sum_repr (y m)]
+
     rw [map_sum]
     refine Finset.sum_congr rfl fun j _ => ?_
     rw [Algebra.TensorProduct.map_tmul, Algebra.TensorProduct.basis_apply, ← hc m j,

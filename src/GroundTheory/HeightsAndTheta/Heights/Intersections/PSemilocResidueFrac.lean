@@ -1,9 +1,57 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.Intersections.StSemilocResidueFrac
-import GroundTheory.HeightsAndTheta.Heights.Intersections.StatementsSemilocFinite
-import GroundTheory.HeightsAndTheta.Heights.Intersections.StatementsSemilocMaxIdeals
-import GroundTheory.HeightsAndTheta.Heights.Intersections.NotIsUnitOfNumMem
-import GroundTheory.HeightsAndTheta.Heights.Intersections.PSemilocRankFrac
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.StSemilocResidueFrac
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.StatementsSemilocFinite
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.NotIsUnitOfNumMem
+import GroundTheory.HeightsAndTheta.Heights.Intersections.AvoidRing
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.PSemilocRankFrac
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import GroundTheory.HeightsAndTheta.Heights.Intersections.IsSmoothHermFubiniStudyO1
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -106,7 +154,7 @@ theorem aeval_memI {F : Type} [Field F] [Algebra F Ω] (L : IntermediateField F 
     rw [aeval_C, algebraMap_int_eq, eq_intCast]
     exact intCast_mem _ a
   | add f g hf hg =>
-    rw [map_add]
+    rw [map_add (f := _)]
     exact add_mem hf hg
   | mul_X f p hf =>
     rw [map_mul, aeval_X]
@@ -202,8 +250,8 @@ end Field
 
 end SemilocResidueFrac
 
-open SemilocResidueFrac SemilocRankFrac regularityLocalResidue_holds in
 
+open SemilocResidueFrac SemilocRankFrac regularityLocalResidue_holds in
 theorem SemilocResidueFrac.proof (hFin : SemilocFinite.Statement) (hMax : SemilocMaxIdeals.Statement) :
     SemilocResidueFrac.Statement := by
   intro K _ ι _ K' _ ι' _ κ v P' n s α W hv hP' hQ hs hsQ hW W' hW' _ G' i' hi' F _ _ hF
@@ -277,8 +325,8 @@ theorem SemilocResidueFrac.proof (hFin : SemilocFinite.Statement) (hMax : Semilo
   have hinvB : ∀ b, ρB b ≠ 0 → ∃ c, ρB c * ρB b = 1 := fun b hb => by
     obtain ⟨c, i, hi, e⟩ := h𝔪.exists_inv fun h => hb ((hkerB b).2 h)
     refine ⟨c, ?_⟩
-    have h := congrArg ρB e
-    rwa [map_add, map_mul, (hkerB i).2 hi, add_zero, map_one] at h
+    have h := congrArg (fun x => ρB x) e
+    rwa [ρB.map_add, ρB.map_mul, (hkerB i).2 hi, add_zero, ρB.map_one] at h
   have hinvA : ∀ a : locRing (imageZ v P') W, ρB (algebraMap _ (semiLocRing P' (fibreOver v P' W)) a) ≠ 0 →
       ∃ c, ρB (algebraMap _ (semiLocRing P' (fibreOver v P' W)) c) * ρB (algebraMap _ _ a) = 1 :=
     fun a ha => by

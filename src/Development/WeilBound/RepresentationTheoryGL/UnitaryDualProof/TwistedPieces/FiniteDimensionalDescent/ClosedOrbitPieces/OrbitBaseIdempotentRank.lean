@@ -1,4 +1,61 @@
-import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.TwistedPieces.FiniteDimensionalDescent.ClosedOrbitPieces.IsPretransitiveActO
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.TwistedPieces.FiniteDimensionalDescent.ClosedOrbitPieces.IsPretransitiveActO
+public import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.TwistedPieces.FiniteDimensionalDescent.ClosedOrbitPieces.PieceTop
+import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.CompactOrbits.Descent.SliceVanishing.T2SpaceCentralizerGroup
+public import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.TwistedPieces.FiniteDimensionalDescent.ClosedOrbitPieces.IsClosedRank
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -6,7 +63,8 @@ open Matrix Polynomial
 
 namespace PositivityTheory.RgUd.TP.Desc.Piece.TrI
 
-open PositivityTheory.RgUd.T PositivityTheory.RgUd.T.Desc.SLF PositivityTheory.RgUd.TP.Desc.Piece.Tr PositivityTheory.RgUd.TP.Desc.Piece.PTop
+open PositivityTheory.RgUd.T PositivityTheory.RgUd.T.Desc.SLF PositivityTheory.RgUd.TP.Desc.Piece
+  PositivityTheory.RgUd.TP.Desc.Piece.Tr PositivityTheory.RgUd.TP.Desc.Piece.PTop
 
 variable {k : Type} [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] {N : ℕ}
 
@@ -36,7 +94,7 @@ theorem cj_pow (g : GL (Fin N) k) (x : Matrix (Fin N) (Fin N) k) (n : ℕ) : cj 
 theorem rank_cj (g : GL (Fin N) k) (e : Matrix (Fin N) (Fin N) k) : (cj g e).rank = e.rank := rank_conj g e
 
 theorem eq_zero_of_rank {A : Matrix (Fin N) (Fin N) k} (h : A.rank = 0) : A = 0 := by
-  rw [Matrix.rank, Submodule.finrank_eq_zero, LinearMap.range_eq_bot] at h
+  rw [← Matrix.finrank_range_mulVecLin, Submodule.finrank_eq_zero, LinearMap.range_eq_bot] at h
   ext i j
   have := congrArg (fun f => f (Pi.single j 1) i) h
   simpa [Matrix.mulVecLin_apply, Matrix.mulVec_single] using this
@@ -53,7 +111,7 @@ theorem lin_cj {a0 : ℕ} (c : Fin a0 → k) (w : Fin a0 → Matrix (Fin N) (Fin
 
 theorem continuous_lin {a0 : ℕ} (c : Fin a0 → k) : Continuous (lin (N := N) c) := by
   unfold lin
-  exact continuous_finset_sum _ fun i _ => by fun_prop
+  exact continuous_finsetSum _ fun i _ => by fun_prop
 
 theorem pe_cj {d : ℕ} (c : Fin d → Matrix (Fin N) (Fin N) k) (x : Matrix (Fin N) (Fin N) k) (g : GL (Fin N) k) :
     pe (fun l => cj g (c l)) (cj g x) = cj g (pe c x) := by
@@ -62,7 +120,7 @@ theorem pe_cj {d : ℕ} (c : Fin d → Matrix (Fin N) (Fin N) k) (x : Matrix (Fi
 theorem continuous_re {d r : ℕ} (γ : Fin d → Fin r → k) (s : Fin r → Matrix (Fin N) (Fin N) k) :
     Continuous (re γ s) := by
   unfold re
-  exact continuous_finset_sum _ fun l _ => continuous_finset_sum _ fun j _ => by fun_prop
+  exact continuous_finsetSum _ fun l _ => continuous_finsetSum _ fun j _ => by fun_prop
 
 variable {Z : Subalgebra k (Matrix (Fin N) (Fin N) k)} {χ : k[X]} {q : ℕ} (D : SData Z χ q)
 
@@ -114,17 +172,17 @@ theorem et_cj (w : Fin D.a0 → Matrix (Fin N) (Fin N) k) (x : Matrix (Fin N) (F
 theorem continuous_sw (j : Fin D.r) :
     Continuous fun p : (Fin D.a0 → Matrix (Fin N) (Fin N) k) × Matrix (Fin N) (Fin N) k => sw D p.1 p.2 j := by
   unfold sw pe
-  exact continuous_finset_sum _ fun l _ => ((continuous_lin _).comp continuous_fst).mul ((continuous_pow _).comp continuous_snd)
+  exact continuous_finsetSum _ fun l _ => ((continuous_lin _).comp continuous_fst).mul ((continuous_pow _).comp continuous_snd)
 
 theorem continuous_ew :
     Continuous fun p : (Fin D.a0 → Matrix (Fin N) (Fin N) k) × Matrix (Fin N) (Fin N) k => ew D p.1 p.2 := by
   unfold ew pe
-  exact continuous_finset_sum _ fun l _ => ((continuous_lin _).comp continuous_fst).mul ((continuous_pow _).comp continuous_snd)
+  exact continuous_finsetSum _ fun l _ => ((continuous_lin _).comp continuous_fst).mul ((continuous_pow _).comp continuous_snd)
 
 theorem continuous_et (t : Fin D.m) :
     Continuous fun p : (Fin D.a0 → Matrix (Fin N) (Fin N) k) × Matrix (Fin N) (Fin N) k => et D p.1 p.2 t := by
   unfold et
-  exact continuous_finset_sum _ fun j _ => (continuous_sw D j).const_smul (D.κ t j)
+  exact continuous_finsetSum _ fun j _ => (continuous_sw D j).const_smul (D.κ t j)
 
 def Ys (τ : Fin D.m → ℕ) : Set ((Fin D.a0 → Matrix (Fin N) (Fin N) k) × Sp k N) :=
   {p | ∃ g : GL (Fin N) k, (∀ i, p.1 i = cj g (D.z i)) ∧ cj g⁻¹ p.2.1 ∈ piece D τ}

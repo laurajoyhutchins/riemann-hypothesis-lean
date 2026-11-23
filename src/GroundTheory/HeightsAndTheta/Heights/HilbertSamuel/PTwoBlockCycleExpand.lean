@@ -1,15 +1,66 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsTwoBlockCycleExpand
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PCoordArithOfFnField
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PTwoBlockFnField
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PMixedNumberPolynomial
-import GroundTheory.HeightsAndTheta.Heights.HeightComparison.GeoNum
-import GroundTheory.HeightsAndTheta.Heights.Intersections.PGeoNumCut
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterDivSupp
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterRed
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.MultihomogeneousIdeals.CycDim
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsTwoBlockCycleExpand
+public import GroundTheory.HeightsAndTheta.Heights.HeightComparison.GeoNum
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PCoordArithOfFnField
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PMixedNumberPolynomial
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PTwoBlockFnField
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsArith
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.PGeoNumCut
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
 import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.StepTStA
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.StepTStB
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.StepTStB
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.MultihomogeneousIdeals.CycDim
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterDivSupp
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterRed
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.HilbertSamuel
@@ -42,7 +93,7 @@ theorem exists_perm_mem_iff {D : ℕ} (s : Finset (Fin D)) :
       Equiv.sumCongr_apply, Sum.map_inr, Equiv.sumCompl_apply_inr]
     exact iff_of_false (Fintype.equivOfCardEq h2 ⟨j, hj⟩).2 hj
 
-theorem expand {D : ℕ} (M : MultilinearMap ℤ (fun _ : Fin D => Fin 2 → ℤ) ℤ)
+theorem expand {D : ℕ} (M : (Fin D → Fin 2 → ℤ) →ₘₗ[ℤ] ℤ)
     (hsym : ∀ (v : Fin D → Fin 2 → ℤ) (σ : Equiv.Perm (Fin D)), M (v ∘ σ) = M v) (a b : ℤ) :
     M (fun _ => ![a, b]) =
       ∑ i ∈ Finset.range (D + 1), (D.choose i : ℤ) * a ^ i * b ^ (D - i) * M (twoBlockDegList D i) := by
@@ -63,7 +114,8 @@ theorem expand {D : ℕ} (M : MultilinearMap ℤ (fun _ : Fin D => Fin 2 → ℤ
       · simp [Finset.piecewise, hj, twoBlockDegList, (hσ j).mpr hj]
       · have : ¬ (σ j : ℕ) < t.card := fun h => hj ((hσ j).mp h)
         simp [Finset.piecewise, hj, twoBlockDegList, this]
-    rw [hpw, M.map_smul_univ, hsym, Finset.prod_ite, Finset.prod_const, Finset.prod_const, smul_eq_mul]
+    rw [hpw, M.map_smul_univ, hsym]
+    simp only [RingHom.id_apply, Finset.prod_ite, Finset.prod_const, smul_eq_mul]
     congr 2
     · congr 1
       simp
@@ -108,7 +160,7 @@ theorem geoNum_update_eq_last {K : Type} [Fintype K] {ι : K → Type} [∀ k, F
 
 def geoNumMulti {K : Type} [Fintype K] {ι : K → Type} [∀ k, Fintype (ι k)] (W : Ideal (MRing ι)) (D : ℕ)
     (hsym : ∀ (v : Fin D → K → ℤ) (σ : Equiv.Perm (Fin D)), geoNum D W (v ∘ σ) = geoNum D W v) :
-    MultilinearMap ℤ (fun _ : Fin D => K → ℤ) ℤ where
+    (Fin D → K → ℤ) →ₘₗ[ℤ] ℤ where
   toFun := geoNum D W
   map_update_add' := by
     intro inst v j x y
@@ -197,8 +249,8 @@ theorem isMultiHomog_twoBlockNum (l : Ix κ → ℤ) :
 
 end TwoBlockCycleExpand
 
-open TwoBlockCycleExpand in
 
+open TwoBlockCycleExpand in
 theorem TwoBlockCycleExpand.proof : TwoBlockCycleExpand.Statement := by
   classical
   have hA := CoordArithOfFnField.proof

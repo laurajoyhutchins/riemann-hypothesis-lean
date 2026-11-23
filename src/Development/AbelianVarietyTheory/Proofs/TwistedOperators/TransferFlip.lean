@@ -1,14 +1,43 @@
-import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.TwistPlacesOffPrimeQZero
-import Formalism.LocalToGlobal.IndefiniteReal.HeckeNonvanishing.Imports
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsCosetSameLocalCosetSetsOtherBaseLatticeStatement
-import Development.AbelianVarietyTheory.Definitions.Divisors.DiscreteSeriesHermitianUnique
-import Development.AbelianVarietyTheory.Statements.PlaceShiftStatements.NormSmall
-import Development.AbelianVarietyTheory.Statements.PlaceShiftStatements.DictAt
-import Development.AbelianVarietyTheory.Statements.HeckeThetaIntegrals.ThetaIntegralsAgree
-import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.WeilTensorModels
-import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.CuspAlongSmoothRows
-import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.ToricSymbols
-import Development.AbelianVarietyTheory.Definitions.Foundations.NormSumPairRankZeroOfCurveCoordNorm
+module
+
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.TwistPlacesOffPrimeQZero
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsCosetSameLocalCosetSetsOtherBaseLatticeStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.L2.Theta Formalism.IndefR Formalism.IndefR.Datum Formalism.IndefR.Links Formalism.L2.DIV
 open IsDedekindDomain NumberField GlobalTheory.ChiGrid GlobalTheory.FunObj GlobalTheory.RowTest GlobalTheory.RowClaim
 open Formalism.L2.Host (HChar)
@@ -24,8 +53,6 @@ open GlobalTheory.FunObj Matrix GlobalTheory.SplitFlip GlobalTheory.SplitWeil Gl
 open scoped TensorProduct nonZeroDivisors Pointwise
 
 attribute [local instance] GlobalTheory.LocalData.complRel GlobalTheory.LocalData.isLocalField GlobalTheory.FunObj.borelKw GlobalTheory.FunObj.borelSpaceKw
-
-local macro:max "kc% " e:term:max : term => `((by kexactB $e))
 
 def SameD : Prop := ∀ {D : D7} {T T' : Type} {L : LevCh D T} {L' : LevCh D T'} {sc : Consts} (G : GridData L sc) (G' : GridData L' sc)
     (B : FunObj.Frames G) (B' : FunObj.Frames G') (ι : T' → T),
@@ -89,7 +116,7 @@ theorem stage_heq {k : Type} [Field k] [ValuativeRel k] [TopologicalSpace k] [Is
 
 abbrev gOf {D : D7} {T : Type} {L : LevCh D T} {sc : Consts} {G : GridData L sc} (_ : Frames G) : GridData L sc := G
 
-set_option maxHeartbeats 1000000 in
+
 theorem sameD_of_cosZero (hz : CosZero) : SameD := by
   intro D T T' L L' sc G G' B B' ι hY hY' hC hPg hxi hQ hv0 hw hchi hVs hβ Φ'
   have hm : 0 < D.R.m := by have := D.R.two_le_m; omega
@@ -151,11 +178,6 @@ theorem flips_tensor_heq {k : Type} [Field k] [ValuativeRel k] [TopologicalSpace
   cases hS
   rfl
 
-theorem tflip_eq {D : D7} {T : Type} {L : LevCh D T} {sc : Consts} {G : GridData L sc} (W : G.Weil) (B : FunObj.Frames G)
-    (t : T) (Φ : G.Datum) (w : Pl D.host.E) : FunObj.Tflip W B t Φ w =
-      ((FunObj.givenStage t w B Φ).flips .one (FunObj.psiAt W w) (FunObj.unifAt w) (FunObj.depthAt G w)
-        (FunObj.flipOrder D.R.m)).tensor := rfl
-
 theorem lsp_eq {D : D7} {x : LSp D} {s : HSp D} {l : Submodule (𝓞 D.host.E) (Fin s.rank → D.host.E)} (hs : s = x.sp)
     (hl : HEq l x.lat) : (⟨s, l⟩ : LSp D) = x := by
   cases x
@@ -167,7 +189,7 @@ abbrev dOf {D : D7} {T : Type} {L : LevCh D T} {sc : Consts} (_ : GridData L sc)
 
 abbrev lOf {D : D7} {T : Type} {L : LevCh D T} {sc : Consts} (_ : GridData L sc) : LevCh D T := L
 
-set_option maxHeartbeats 4000000 in
+
 theorem trFlip_of_same (hsame : SameD) : TrFlip := by
   intro X X' T T' L L' sc G G' W W' S S' μ₀ μ₀' ι hA Φ'
   obtain ⟨hl, hg, hw, hs⟩ := hA

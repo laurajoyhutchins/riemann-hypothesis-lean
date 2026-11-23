@@ -1,5 +1,48 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Foundations.LocallyConstantTwoCochain
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.NotCoboundaryConstantOne
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -8,34 +51,14 @@ namespace GlobalTheory.K5
 variable {p : ℕ} [Fact p.Prime] {Ω : Type*} [Field Ω] [Algebra (O0 p) Ω]
 
 def IntegralLocallyConstCochainModPow (k : ℕ) (H : Subgroup (Gal p Ω)) (w : Gal p Ω → Ω) : Prop :=
-  (∀ g ∈ H, IsInt p (w g)) ∧ ∀ g ∈ H, ∃ S : Finset Ω, ∀ h ∈ H, (∀ x ∈ S, h x = g x) → Cong p k (w h) (w g)
-
-def LocallyConstantTwoCochainOn (k : ℕ) (H : Subgroup (Gal p Ω)) (ξ : Gal p Ω → Gal p Ω → Ω) : Prop :=
-  (∀ g ∈ H, ∀ h ∈ H, IsInt p (ξ g h)) ∧ ∀ g ∈ H, ∀ h ∈ H, ∃ S : Finset Ω, ∀ g' ∈ H, ∀ h' ∈ H,
-    (∀ x ∈ S, g' x = g x ∧ h' x = h x) → Cong p k (ξ g' h') (ξ g h)
+  (∀ g ∈ H, IsInt (p := p) (w g)) ∧
+    ∀ g ∈ H, ∃ S : Finset Ω, ∀ h ∈ H,
+      (∀ x ∈ S, h x = g x) → Cong (p := p) k (w h) (w g)
 
 def IsTwistedOneCocycle (j k : ℕ) (H : Subgroup (Gal p Ω)) (χ : Gal p Ω → ZMod (p ^ k)) (c : Gal p Ω → Ω) : Prop :=
-  ∀ g ∈ H, ∀ h ∈ H, Cong p k (c (g * h)) (c g + ((χ g).val : Ω) ^ j * g (c h))
+  ∀ g ∈ H, ∀ h ∈ H, Cong (p := p) k (c (g * h)) (c g + ((χ g).val : Ω) ^ j * g (c h))
 
 def IsTwistedOneCoboundary (j k : ℕ) (H : Subgroup (Gal p Ω)) (χ : Gal p Ω → ZMod (p ^ k)) (c : Gal p Ω → Ω) : Prop :=
-  ∃ x : Ω, IsInt p x ∧ ∀ g ∈ H, Cong p k (c g) (((χ g).val : Ω) ^ j * g x - x)
-
-def IsTwistedTwoCocycle' (j k : ℕ) (H : Subgroup (Gal p Ω)) (χ : Gal p Ω → ZMod (p ^ k)) (ξ : Gal p Ω → Gal p Ω → Ω) : Prop :=
-  ∀ g ∈ H, ∀ h ∈ H, ∀ t ∈ H,
-    Cong p k (((χ g).val : Ω) ^ j * g (ξ h t) + ξ g (h * t)) (ξ (g * h) t + ξ g h)
-
-def IsTwistedTwoCoboundary' (j k : ℕ) (H : Subgroup (Gal p Ω)) (χ : Gal p Ω → ZMod (p ^ k)) (ξ : Gal p Ω → Gal p Ω → Ω) : Prop :=
-  ∃ w : Gal p Ω → Ω, IntegralLocallyConstCochainModPow k H w ∧ ∀ g ∈ H, ∀ h ∈ H,
-    Cong p k (ξ g h) (((χ g).val : Ω) ^ j * g (w h) - w (g * h) + w g)
-
-variable (p) in
-
-def plogQ (m k a : ℕ) : ZMod (p ^ k) :=
-  ∑ i ∈ Finset.Icc 1 (2 * k + 2), (-1 : ZMod (p ^ k)) ^ (i + 1) *
-    (p : ZMod (p ^ k)) ^ (m * (i - 1) - padicValNat p i) *
-    ((i / p ^ padicValNat p i : ℕ) : ZMod (p ^ k))⁻¹ * (a : ZMod (p ^ k)) ^ i
-
-def IsLam (T : Tower p Ω) (m k : ℕ) (H : Subgroup (Gal p Ω)) (lam : Gal p Ω → ZMod (p ^ k)) : Prop :=
-  1 ≤ m ∧ ∃ a : Gal p Ω → ZMod (p ^ k), IsKum T k H (T.ζ (m + k)) a ∧ ∀ g ∈ H, lam g = plogQ p m k (a g).val
+  ∃ x : Ω, IsInt (p := p) x ∧ ∀ g ∈ H, Cong (p := p) k (c g) (((χ g).val : Ω) ^ j * g x - x)
 
 end GlobalTheory.K5

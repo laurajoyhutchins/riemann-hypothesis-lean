@@ -1,4 +1,51 @@
-import Formalism.SharpRestriction.GrowthBounds.SegmentDegree.NonemptyDvrSettingOfStandard
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.SegmentDegree.NonemptyDvrSettingOfStandard
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -35,7 +82,7 @@ theorem supp_prod_bound {ι : Type*} (w : (σ →₀ ℕ) →+ ℕ) (s : Finset 
     have hmem' : m1 + m2 = m := Finset.HasAntidiagonal.mem_antidiagonal.mp hmem
     have h1 : m1 ∈ (f a).support := MvPolynomial.mem_support_iff.mpr (left_ne_zero_of_mul hne)
     have h2 : m2 ∈ (∏ j ∈ s, f j).support := MvPolynomial.mem_support_iff.mpr (right_ne_zero_of_mul hne)
-    rw [Finset.sum_insert ha, ← hmem', map_add, Nat.cast_add]
+    rw [Finset.sum_insert ha, ← hmem', map_add (f := _), Nat.cast_add]
     exact add_le_add (h a (Finset.mem_insert_self a s) m1 h1)
       (ih (fun j hj => h j (Finset.mem_insert_of_mem hj)) m2 h2)
 
@@ -57,6 +104,7 @@ theorem supp_aeval_pow (g : σ → τ) (e : σ → ℕ) (x : MvPolynomial σ R) 
   by_contra hne
   push_neg at hne
   apply MvPolynomial.mem_support_iff.mp hm'
+
   rw [x.as_sum, map_sum, MvPolynomial.coeff_sum]
   refine Finset.sum_eq_zero fun m hm => ?_
   rw [aeval_pow_monomial, MvPolynomial.coeff_monomial, if_neg (fun h => hne m hm h.symm)]
@@ -201,8 +249,8 @@ theorem strictMono_int_exists (e : ℤ → ℤ) (he : StrictMono e) (x : ℤ) : 
   have := hmin (j - 1) h
   omega
 
-open Classical in
 
+open Classical in
 def nonW (F : Frames n' r) (j : ℤ) : Finset ℤ := (F.letters j).filter fun x => ¬ F.IsW j x
 
 open Classical in
@@ -345,6 +393,7 @@ theorem vs_img_le (he : Even n') {F : Frames n' r} {L₁ N₁ : ℕ} (hV : F.Val
     vsDeg (imgMon (fun v : ℤ × Fin (r + K) => (posOf n' v.1, v.2)) (fun v => p ^ F.dist j v.1) m) ≤
       ∑ x ∈ nonW F j, p ^ F.dist j x * ordDeg m x := by
   classical
+
   rw [vsDeg_eq, imgMon, Finsupp.sum, map_sum]
   simp only [Finsupp.linearCombination_single, smul_eq_mul]
   calc ∑ v ∈ m.support, p ^ F.dist j v.1 * m v * wtVS (posOf n' v.1, v.2)
@@ -459,7 +508,7 @@ theorem seg_bound (O : Type) [CommRing O] (hX : X.Hyp p K) (j : ℤ) {x : SegRin
     hres0 (Finset.mem_coe.mpr hmm)
   have hsupp' := MvPolynomial.mem_supported.mp hsupp
   have hm : ∀ v ∈ mm.support, v ∈ okVars X.F K j := fun v hv =>
-    hsupp' (Finset.mem_coe.mpr ((MvPolynomial.mem_vars v).mpr ⟨mm, hmm, hv⟩))
+    hsupp' (Finset.mem_coe.mpr ((MvPolynomial.mem_vars_iff_mem_support v).mpr ⟨mm, hmm, hv⟩))
   have hmain := vs_img_le hX.even hV p j mm hm
   have hmain' := (Nat.cast_le (α := ℝ)).mpr hmain
   have hp : 0 < p := hX.prime.pos
@@ -538,7 +587,7 @@ theorem gen_bound (O : Type) [CommRing O] (hX : X.Hyp p K) (hC : 0 ≤ X.CLa) {P
     exact MvPolynomial.mem_support_iff.mpr hcoef
   have hadd : vsDeg mm = vsDeg (mm - l) + vsDeg l := by
     conv_lhs => rw [← tsub_add_cancel_of_le hle]
-    rw [vsDeg_eq, vsDeg_eq, vsDeg_eq, map_add]
+    rw [vsDeg_eq, vsDeg_eq, vsDeg_eq, map_add (f := _)]
   unfold RRdeg Dat.d at hdeg
   rw [MvPolynomial.mem_restrictSupport_iff] at hdeg
   have hrow := hdeg (Finset.mem_coe.mpr hmm)

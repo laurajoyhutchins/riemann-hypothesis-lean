@@ -1,22 +1,71 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeGroups.BaseRepGL3NormalisedOfPsiEqOne
-import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeGroups.ConjugateStarMatrix
-import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeGroups.ZetaReducibleRepEqSubInvAndIsUnit
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.TransposeInverseTheta
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.AntidiagonalTranspose
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeGroups.BaseRepGL3NormalisedOfPsiEqOne
+public import Mathlib.RingTheory.LocalRing.ResidueField.Defs
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeGroups.ConjugateStarMatrix
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeGroups.ZetaReducibleRepEqSubInvAndIsUnit
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.AntidiagonalTranspose
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.TransposeInverseTheta
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Matrix UpperTheory.V.U3
 
 private theorem conj_left {G R : Type} [Group G] [CommRing R] {m : ℕ} (h : GL (Fin m) R)
-    (r : G →* GG m R) (g : G) :
+    (r : G →* GG (m := m) (R := R)) (g : G) :
     (conjBy h r g).left = h * (r g).left * sgnAct m R (r g).right h⁻¹ :=
   _root_.UpperTheory.Reformulated.B.TransposeInverseTheta.conj_left h r g
 
 private theorem conj_right {G R : Type} [Group G] [CommRing R] {m : ℕ} (h : GL (Fin m) R)
-    (r : G →* GG m R) (g : G) : (conjBy h r g).right = (r g).right :=
+    (r : G →* GG (m := m) (R := R)) (g : G) : (conjBy h r g).right = (r g).right :=
   _root_.UpperTheory.Reformulated.B.AntidiagonalTranspose.conj_right h r g
 
 private theorem conj_mat {G R : Type} [Group G] [CommRing R] {m : ℕ} (h : GL (Fin m) R)
-    (r : G →* GG m R) (g : G) (hg : (r g).right = 1) :
+    (r : G →* GG (m := m) (R := R)) (g : G) (hg : (r g).right = 1) :
     (conjBy h r g).mat * (h : Matrix (Fin m) (Fin m) R) = (h : Matrix (Fin m) (Fin m) R) * (r g).mat := by
   unfold GG.mat
   rw [conj_left, hg, sgnAct_one, ← Units.val_mul, inv_mul_cancel_right, Units.val_mul]
@@ -31,12 +80,12 @@ private theorem unit_of_sub_mem {R : Type} [CommRing R] [IsLocalRing R] {a b : R
 
 theorem UpperTheory.V.U3.normalised_unique :
     ∀ {G R : Type} [Group G] [CommRing R] [IsLocalRing R]
-      (η : G →* ℤˣ) (Ψ : G →* (IsLocalRing.ResidueField R)ˣ) (c g₁ : G) (r : G →* GG 3 R) (h : GL (Fin 3) R), IsUnit (2 : R) → Marks η Ψ c g₁ →
+      (η : G →* ℤˣ) (Ψ : G →* (IsLocalRing.ResidueField R)ˣ) (c g₁ : G) (r : G →* GG (m := 3) (R := R)) (h : GL (Fin 3) R), IsUnit (2 : R) → Marks η Ψ c g₁ →
       (GG.map (IsLocalRing.residue R)).comp r = r0 η Ψ → CongOne (IsLocalRing.maximalIdeal R) h →
       Normalised c g₁ r → Normalised c g₁ (conjBy h r) → ∃ t : Rˣ, (t : R) - 1 ∈ IsLocalRing.maximalIdeal R ∧ h = tor R t := by
   intro G R _ _ _ η Ψ c g₁ r h h2 hM hred hc hN hN'
   have hright : ∀ g, (r g).right = η g := fun g => by
-    have := congrArg (fun f : G →* GG 3 _ => (f g).right) hred
+    have := congrArg (fun f : G →* GG (m := 3) (R := IsLocalRing.ResidueField R) => (f g).right) hred
     simpa using this
   have hrc : (r c).right = -1 := (hright c).trans hM.ηc
   have hrg : (r g₁).right = 1 := (hright g₁).trans hM.ηg

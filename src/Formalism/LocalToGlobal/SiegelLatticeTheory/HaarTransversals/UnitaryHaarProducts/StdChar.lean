@@ -1,7 +1,54 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.MeasCore
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.EmbeddingTraceSumAlt.NormUnitsOfCalculation
-import Formalism.LocalToGlobal.SiegelLatticeTheory.FundamentalEquivalence.FundamentalContinuity.AdelicIsomorphismStatement
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.MeasCore
+public import Mathlib.Analysis.SpecialFunctions.Complex.Circle
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -17,7 +64,7 @@ def psiA (x : Ainf F) : ℂ :=
 
 theorem psiA_add (x y : Ainf F) : psiA F (x + y) = psiA F x * psiA F y := by
   have h : ∀ w : InfinitePlace F, (x + y) w = x w + y w := fun w => rfl
-  simp only [psiA, h, map_add, Complex.add_re, Finset.sum_add_distrib]
+  simp only [psiA, h, map_add (f := _), Complex.add_re, Finset.sum_add_distrib]
   rw [← Complex.exp_add]
   congr 1
   push_cast
@@ -43,14 +90,14 @@ theorem continuous_psiA : Continuous (psiA F) := by
       | exact UniformSpace.Completion.continuous_extension
   have hs : Continuous (fun x : Ainf F =>
       (∑ w : InfinitePlace F, (InfinitePlace.Completion.extensionEmbedding w (x w)).re : ℝ)) :=
-    continuous_finset_sum _ (fun w _ => Complex.continuous_re.comp ((hc w).comp (hp w)))
+    continuous_finsetSum _ (fun w _ => Complex.continuous_re.comp ((hc w).comp (hp w)))
   unfold psiA
   exact Complex.continuous_exp.comp (continuous_const.mul (Complex.continuous_ofReal.comp hs))
 
 def trR : F →+ ℝ :=
   AddMonoidHom.mk' (fun a => ∑ w : InfinitePlace F, (w.embedding a).re) (by
     intro a b
-    simp only [map_add, Complex.add_re, Finset.sum_add_distrib])
+    simp only [map_add (f := _), Complex.add_re, Finset.sum_add_distrib])
 
 theorem trR_int [IsTotallyReal F] (d : 𝓞 F) : ∃ n : ℤ, trR F (algebraMap (𝓞 F) F d) = n := by
   have hsurj : Function.Surjective (InfinitePlace.mk : (F →+* ℂ) → InfinitePlace F) :=
@@ -140,7 +187,7 @@ def psiFin (z : Af F) : ℂ := ((AddCircle.toCircle (-((exists_psiF F).choose z)
 
 theorem psiFin_add (z w : Af F) : psiFin F (z + w) = psiFin F z * psiFin F w := by
   unfold psiFin
-  rw [map_add, neg_add, AddCircle.toCircle_add]
+  rw [map_add (f := _), neg_add, AddCircle.toCircle_add]
   first | rfl | simp
 
 theorem psiFin_int (z : Af F) (hz : z ∈ Formalism.UG.intAd F) : psiFin F z = 1 := by

@@ -1,6 +1,54 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.RealObj
-import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.WittExtensionTheorem
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.HidaSetting
+public import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.WittExtensionTheorem
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -53,10 +101,12 @@ theorem formB_apply (x y : Fin n → ℂ) : formB ε x y = hJ ε x y := rfl
 
 theorem hJ_sum_right {ι : Type*} (s : Finset ι) (x : Fin n → ℂ) (y : ι → Fin n → ℂ) :
     hJ ε x (∑ i ∈ s, y i) = ∑ i ∈ s, hJ ε x (y i) := by
+
   simp only [← formB_apply, map_sum]
 
 theorem hJ_sum_left {ι : Type*} (s : Finset ι) (x : ι → Fin n → ℂ) (y : Fin n → ℂ) :
     hJ ε (∑ i ∈ s, x i) y = ∑ i ∈ s, hJ ε (x i) y := by
+
   simp only [← formB_apply, map_sum, LinearMap.sum_apply]
 
 theorem hJ_mulVec (A : Matrix (Fin n) (Fin n) ℂ) (x y : Fin n → ℂ) :
@@ -109,7 +159,8 @@ theorem expand_of_dual {ι : Type*} [Fintype ι] [DecidableEq ι] (φ d : ι →
     (hcard : Fintype.card ι = n) (hd : ∀ j i, hJ ε (d j) (φ i) = if j = i then 1 else 0)
     (v : Fin n → ℂ) : v = ∑ i, hJ ε (d i) v • φ i := by
   have hli : LinearIndependent ℂ d := li_of_pair ε d φ 1 (by simp) (fun j i => by
-    rw [← hJ_conj, hd, one_apply]
+    rw [← hJ_conj, hd]
+    change star (if i = j then (1 : ℂ) else 0) = if j = i then 1 else 0
     by_cases hij : i = j
     · subst hij; simp
     · simp [hij, Ne.symm hij])
@@ -152,6 +203,7 @@ theorem wittFam {ι : Type*} [Fintype ι] (s t : ι → Fin n → ℂ) (hs : Lin
   have hfsum : ∀ x : U, f x = ∑ i, bs.repr x i • t i := by
     intro x
     have := congrArg f (bs.sum_repr x)
+
     rw [map_sum] at this
     simp only [map_smul, hf] at this
     exact this.symm

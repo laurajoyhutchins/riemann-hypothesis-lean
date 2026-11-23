@@ -1,9 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LiftsInvOne
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.TrueColumnSpacesStandardInFrameCoords
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.IntegralAtOfComponentZeroUnderPrime
-import Formalism.LocalToGlobal.Columns.RecLevelTop
-import Formalism.LocalToGlobal.Columns.RecLevelLocP
+module
+
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LiftsInvOne
+public import Formalism.LocalToGlobal.Columns.RecLevelTop
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.TrueColumnSpacesStandardInFrameCoords
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.IntegralAtOfComponentZeroUnderPrime
+public import Formalism.LocalToGlobal.Columns.RecLevelLocP
+import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.CsScale
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Formalism.BasicNotions Formalism.MainNotions Formalism.L2.Col Formalism.L2.DIV Formalism.L2.Ker Formalism.UG Formalism.L2.Forms GlobalTheory.Mem GlobalTheory.Mem.Chr GlobalTheory.Mem.Col2 GlobalTheory.Mem.Col2.TC GlobalTheory.Mem.Col2.AdT Matrix
 attribute [local instance] GlobalTheory.Mem.Col2.starE Formalism.BasicNotions.Host.cmStar
 
@@ -74,7 +117,7 @@ section Gen
 variable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E]
 
 local notation "𝔸" => FiniteAdeleRing (𝓞 F) F
-local notation "𝒜" => E ⊗[F] FiniteAdeleRing (𝓞 F) F
+local notation "𝒜" => E ⊗[F] 𝔸
 
 theorem inv_eq_cT (σ : E →ₐ[F] E) {n : ℕ} {u : GL (Fin n) 𝒜} (hu : u ∈ UPts σ (1 : Matrix (Fin n) (Fin n) E) 𝔸) :
     ((u⁻¹ : GL (Fin n) 𝒜) : Matrix (Fin n) (Fin n) 𝒜) =
@@ -152,7 +195,7 @@ def cp (ι : 𝒜 ≃+* FiniteAdeleRing (𝓞 E) E) (Q : HeightOneSpectrum (𝓞
   map_one' := by rw [map_one]; rfl
   map_mul' x y := by rw [map_mul]; rfl
   map_zero' := by rw [map_zero]; rfl
-  map_add' x y := by rw [map_add]; rfl
+  map_add' x y := by rw [map_add (f := _)]; rfl
 
 theorem val_cp_mul {ι : 𝒜 ≃+* FiniteAdeleRing (𝓞 E) E} (hι : GlobalTheory.TwU.IsAdIso ι) (Q : HeightOneSpectrum (𝓞 E)) (c : E) (x : 𝒜) :
     Valued.v (ι (iA F E c⁻¹ * x) Q) ≤ 1 ↔ Valued.v (cp ι Q x) * (Q.valuation E c)⁻¹ ≤ 1 := by
@@ -215,7 +258,7 @@ theorem exists_depth (hc : CMData F E) {n : ℕ} (U : Subgroup (GL (Fin n) 𝒜)
       have hprod : (1 + ((z : Matrix (Fin n) (Fin n) 𝒜) - 1)) * (1 + cT (sigR hc.sig 𝔸) ((z : Matrix (Fin n) (Fin n) 𝒜) - 1)) = 1 := by
         rw [← inv_eq_cT hc.sig hz, add_sub_cancel, Units.mul_inv]
       have hprod' := congrArg (cp ι (conjPrime₂ P)).mapMatrix hprod
-      rw [map_mul, map_add, map_add, map_one] at hprod'
+      rw [map_mul, map_add (f := _), map_add (f := _), map_one] at hprod'
       refine val_inv_le Valued.v _ _ hprod' _ ?_ (fun i j => ?_) a b
       · rw [map_pow]; exact pow_lt_one₀ zero_le hP' (by omega)
       · have h1 := intAtA_sig hc P (hcg j i)

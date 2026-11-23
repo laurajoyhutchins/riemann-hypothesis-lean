@@ -1,7 +1,67 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StTransverseSliceGeneral
-import GroundTheory.HeightsAndTheta.Heights.Intersections.JacMinorC
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.ExistsExpansion
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StTransverseSliceGeneral
+public import Mathlib.Algebra.MvPolynomial.PDeriv
+public import Mathlib.RingTheory.MvPolynomial.IrreducibleQuadratic
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.ExistsExpansion
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.JacMinorC
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Matrix.FiniteDimensional
+public import Mathlib.LinearAlgebra.Matrix.Rank
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Analysis.Normed.Module.FiniteDimension
+public import Mathlib.LinearAlgebra.Dimension.OrzechProperty
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -42,6 +102,7 @@ theorem mem_sq_of_gradAt_eq_zero (q : Fin n → ℂ) (p : MvPolynomial (Fin n) �
   obtain ⟨c, hc⟩ := exists_expansion q p
   rw [hp, map_zero, zero_add] at hc
   have hgrad : gradAt q p = ∑ i, eval q (c i) • (Pi.single i 1 : Fin n → ℂ) := by
+
     rw [hc, map_sum]
     refine Finset.sum_congr rfl fun i _ => ?_
     rw [gradAt_mul_of_eval_eq_zero q _ _ (by simp), gradAt_X_sub_C]
@@ -61,7 +122,7 @@ theorem exists_mul_mem_of_le_sup_sq (q : Fin n → ℂ) (I : Ideal (MvPolynomial
     rw [Submodule.map_le_iff_le_comap]
     intro x hx
     obtain ⟨i, hi, y, hy, rfl⟩ := Submodule.mem_sup.1 (h hx)
-    rw [Submodule.mem_comap, map_add, Submodule.mkQ_apply,
+    rw [Submodule.mem_comap, map_add (f := _), Submodule.mkQ_apply,
       (Submodule.Quotient.mk_eq_zero I).2 hi, zero_add, ← Submodule.map_smul'']
     rw [sq, ← Ideal.smul_eq_mul] at hy
     exact Submodule.mem_map_of_mem hy
@@ -90,9 +151,10 @@ theorem gradSpace_sliceIdeal (W : Ideal (MvPolynomial (Fin n) ℂ)) (L : Matrix 
   refine le_antisymm ?_ (sup_le ?_ ?_)
   · rintro _ ⟨x, hx, rfl⟩
     obtain ⟨w, hw, y, hy, rfl⟩ := Submodule.mem_sup.1 hx
-    rw [map_add]
+    rw [map_add (f := _)]
     refine Submodule.add_mem_sup ⟨w, hw, rfl⟩ ?_
     obtain ⟨c, rfl⟩ := Ideal.mem_span_range_iff_exists_fun.1 hy
+
     rw [map_sum]
     refine Submodule.sum_mem _ fun i _ => ?_
     rw [gradAt_mul_of_eval_eq_zero q _ _ (by rw [map_sub, eval_linPoly, eval_C, sub_self]),
@@ -190,7 +252,7 @@ theorem isOpen_dense_sup_span_rows (V : Submodule ℂ (Fin n → ℂ)) (hV : n �
       map_add' := fun L L' => by
         ext k i
         show Ψ (L i + L' i) k = Ψ (L i) k + Ψ (L' i) k
-        rw [map_add]
+        rw [map_add (f := _)]
         rfl
       map_smul' := fun c L => by
         ext k i

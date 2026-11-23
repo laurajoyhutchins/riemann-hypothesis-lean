@@ -1,54 +1,71 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.Regularisation.PMaxOscillation
-import GroundTheory.HeightsAndTheta.Heights.Regularisation.PMollifierLowerBound
-import GroundTheory.HeightsAndTheta.Heights.Regularisation.PChartComparison
-import GroundTheory.HeightsAndTheta.Heights.Regularisation.PCutoffs
-import GroundTheory.HeightsAndTheta.Heights.Regularisation.PGlueRegularised
-import GroundTheory.HeightsAndTheta.Heights.Regularisation.ChartFun
-import GroundTheory.HeightsAndTheta.Heights.Regularisation.IsCompactImageClosureMid
-import GroundTheory.HeightsAndTheta.Heights.Regularisation.PExpExtension
-import GroundTheory.HeightsAndTheta.Heights.Regularisation.PosSemidefOfIntQuadNonneg
-import GroundTheory.HeightsAndTheta.Heights.Regularisation.PKernelPositive
-import GroundTheory.HeightsAndTheta.Heights.Regularisation.PImTauBounds
-import GroundTheory.HeightsAndTheta.Heights.Regularisation.PHodgeDerivative
-import GroundTheory.HeightsAndTheta.Heights.MatrixCharts.PAnalyticDerivBound
-import GroundTheory.HeightsAndTheta.Heights.MatrixCharts.PInvEntryBound
-import GroundTheory.HeightsAndTheta.Heights.MatrixCharts.PInvEntryDeriv
-import GroundTheory.HeightsAndTheta.Heights.MatrixCharts.PMatrixDetDeriv
-import GroundTheory.HeightsAndTheta.Heights.MatrixCharts.PGramEntryDeriv
-import GroundTheory.HeightsAndTheta.Heights.MatrixCharts.PLogDetGramDeriv
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.Regularisation.StLogCoverDescent
+public import GroundTheory.HeightsAndTheta.Heights.Regularisation.StPuncturedExpOrder
+public import GroundTheory.HeightsAndTheta.Heights.Regularisation.StRiemannSlices
+public import GroundTheory.HeightsAndTheta.Heights.MatrixCharts.PAnalyticDerivBound
+public import GroundTheory.HeightsAndTheta.Heights.MatrixCharts.PGramEntryDeriv
+public import GroundTheory.HeightsAndTheta.Heights.MatrixCharts.PInvEntryBound
+public import GroundTheory.HeightsAndTheta.Heights.MatrixCharts.PInvEntryDeriv
+public import GroundTheory.HeightsAndTheta.Heights.MatrixCharts.PLogDetGramDeriv
+public import GroundTheory.HeightsAndTheta.Heights.MatrixCharts.PMatrixDetDeriv
+public import GroundTheory.HeightsAndTheta.Heights.Regularisation.PExpExtension
+public import GroundTheory.HeightsAndTheta.Heights.Regularisation.PGlueRegularised
+public import GroundTheory.HeightsAndTheta.Heights.Regularisation.PHodgeDerivative
+public import GroundTheory.HeightsAndTheta.Heights.Regularisation.PImTauBounds
+public import GroundTheory.HeightsAndTheta.Heights.Regularisation.PKernelPositive
+public import GroundTheory.HeightsAndTheta.Heights.Regularisation.PosSemidefOfIntQuadNonneg
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.Regular
-
-theorem PolyMaxOscillation.full : PolyMaxOscillation.Statement :=
-  PolyMaxOscillation.proof_closed
-
-theorem MollifiedLowerBound.full : MollifiedLowerBound.Statement :=
-  MollifiedLowerBound.closed
-
-theorem CutoffsExist.full : CutoffsExist.Statement :=
-  CutoffsExist.proof
 
 theorem GlueRegularised.full : GlueRegularised.Statement :=
   GlueRegularised.proof
 
 theorem KernelPositive.full : KernelPositive.Statement :=
   kernelPositive_statement
-
-theorem ChartComparison.cond (hLow : PolyMaxLowerBound.Statement) (hTP : TruncPsh.Statement)
-    (hTT : TruncTransfer.Statement) : ChartComparison.Statement :=
-  ChartComparison.proof MollifiedLowerBound.full PolyMaxOscillation.full hLow hTP hTT
-
-theorem LogLogRegularisation.cond (hLow : PolyMaxLowerBound.Statement) (hTP : TruncPsh.Statement)
-    (hTT : TruncTransfer.Statement) (hMNS : MollifiedNearSmooth.Statement)
-    (hCMB : ChartMollifiedBounds.Statement) : LogLogRegularisation.Statement :=
-  LogLogRegularisation.proof GlueRegularised.full (ChartComparison.cond hLow hTP hTT) hMNS
-    CutoffsExist.full hCMB
-
-theorem BoundedRegularisation.cond (hBC : BoundedChartComparison.Statement)
-    (hBG : BoundedGlue.Statement) : BoundedRegularisation.Statement :=
-  BoundedRegularisation.proof hBC hBG CutoffsExist.full ReciprocityTheory.AnForm.A.mollify_thm
 
 theorem Tau0Holomorphic.cond (hE : RiemannExtensionSlices.Statement)
     (hO : PuncturedExpOrder.Statement) (hD : LogCoverDescent.Statement) :

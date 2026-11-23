@@ -1,5 +1,52 @@
-import Mathlib
-import GroundTheory.GlobalFields.SemilocalAlgebras.Finite
+module
+
+public import GroundTheory.GlobalFields.SemilocalAlgebras.Finite
+public import Mathlib.NumberTheory.NumberField.Completion.FinitePlace
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+public import Mathlib.NumberTheory.RamificationInertia.Galois
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.MetricSpace.Ultra.TotallySeparated
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GroundTheory.Global
 
@@ -85,16 +132,16 @@ theorem norm_algebraMap_smul (σ : L ≃ₐ[K] L) (w : HeightOneSpectrum (𝓞 L
 
 variable [NumberField K] (v : HeightOneSpectrum (𝓞 K))
 
-instance : MulAction (L ≃ₐ[K] L) (PlacesOver L v) where
+instance : MulAction (L ≃ₐ[K] L) (PlacesOver (L := L) v) where
   smul σ w := ⟨σ • w.1, show (σ • w.1.asIdeal).LiesOver v.asIdeal from inferInstance⟩
   one_smul w := Subtype.ext (one_smul _ w.1)
   mul_smul σ τ w := Subtype.ext (mul_smul σ τ w.1)
 
 omit [NumberField K] [NumberField L] in
-@[simp] theorem coe_smul_placesOver (σ : L ≃ₐ[K] L) (w : PlacesOver L v) :
+@[simp] theorem coe_smul_placesOver (σ : L ≃ₐ[K] L) (w : PlacesOver (L := L) v) :
     (σ • w).1 = σ • w.1 := rfl
 
-instance [IsGalois K L] : MulAction.IsPretransitive (L ≃ₐ[K] L) (PlacesOver L v) where
+instance [IsGalois K L] : MulAction.IsPretransitive (L ≃ₐ[K] L) (PlacesOver (L := L) v) where
   exists_smul_eq w₁ w₂ := by
     obtain ⟨σ, hσ⟩ := Ideal.exists_smul_eq_of_isGaloisGroup v.asIdeal w₁.1.asIdeal w₂.1.asIdeal
       (L ≃ₐ[K] L)
@@ -198,18 +245,6 @@ theorem continuous_galEquiv (σ : L ≃ₐ[K] L) (w w' : HeightOneSpectrum (𝓞
     Continuous (galEquiv v σ w w' h) :=
   continuous_galHom σ w w' h
 
-theorem continuous_galEquiv_symm (σ : L ≃ₐ[K] L) (w w' : HeightOneSpectrum (𝓞 L))
-    [w.asIdeal.LiesOver v.asIdeal] [w'.asIdeal.LiesOver v.asIdeal] (h : w' = σ • w) :
-    Continuous (galEquiv v σ w w' h).symm :=
-  continuous_galHom σ⁻¹ w' w (by rw [h, inv_smul_smul])
-
-def galContinuousEquiv (σ : L ≃ₐ[K] L) (w w' : HeightOneSpectrum (𝓞 L))
-    [w.asIdeal.LiesOver v.asIdeal] [w'.asIdeal.LiesOver v.asIdeal] (h : w' = σ • w) :
-    ContinuousAlgEquiv (v.adicCompletion K) (w.adicCompletion L) (w'.adicCompletion L) where
-  toAlgEquiv := galEquiv v σ w w' h
-  continuous_toFun := continuous_galEquiv v σ w w' h
-  continuous_invFun := continuous_galEquiv_symm v σ w w' h
-
 end Completion
 
 section Product
@@ -217,7 +252,8 @@ section Product
 variable [NumberField K] (v : HeightOneSpectrum (𝓞 K))
 
 omit [NumberField K] [NumberField L] in
-theorem eq_smul_inv_smul (σ : L ≃ₐ[K] L) (u : PlacesOver L v) : u.1 = σ • (σ⁻¹ • u).1 := by
+theorem eq_smul_inv_smul (σ : L ≃ₐ[K] L) (u : PlacesOver (L := L) v) :
+    u.1 = σ • (σ⁻¹ • u).1 := by
   rw [← coe_smul_placesOver, smul_inv_smul]
 
 def piGal (σ : L ≃ₐ[K] L) : CompletionsOver L v →ₐ[v.adicCompletion K] CompletionsOver L v :=
@@ -225,7 +261,7 @@ def piGal (σ : L ≃ₐ[K] L) : CompletionsOver L v →ₐ[v.adicCompletion K] 
     (galEquiv v σ (σ⁻¹ • u).1 u.1 (eq_smul_inv_smul v σ u)).toAlgHom.comp
       (Pi.evalAlgHom _ _ (σ⁻¹ • u))
 
-theorem piGal_apply (σ : L ≃ₐ[K] L) (y : CompletionsOver L v) (u : PlacesOver L v) :
+theorem piGal_apply (σ : L ≃ₐ[K] L) (y : CompletionsOver L v) (u : PlacesOver (L := L) v) :
     piGal v σ y u = galEquiv v σ (σ⁻¹ • u).1 u.1 (eq_smul_inv_smul v σ u) (y (σ⁻¹ • u)) := rfl
 
 theorem tensorEquiv_map_gal (σ : L ≃ₐ[K] L) (x : v.adicCompletion K ⊗[K] L) :

@@ -1,6 +1,50 @@
-import Mathlib
-import Development.AutomorphicArithmetic.IntegralCasts.Imports
-import Development.AbelianVarietyTheory.Definitions.Foundations.SmoothPartStable
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.SmoothPartStable
+public import Development.AutomorphicArithmetic.IntegralCasts.IsOpenStabOfMemNhds
+public import Mathlib.RepresentationTheory.Irreducible
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -31,9 +75,9 @@ theorem isIrreducible_iff {V : Type} [AddCommGroup V] [Module ℂ V] (ρ : Repre
 
 variable [TopologicalSpace G]
 
-variable (G) in
 
-structure SmIrr where
+variable (G) in
+structure SmIrr (G : Type) [Group G] [TopologicalSpace G] where
 
   V : Type
   [acg : AddCommGroup V]
@@ -45,25 +89,25 @@ structure SmIrr where
 
 attribute [instance] SmIrr.acg SmIrr.mod
 
-variable (G) in
 
+variable (G) in
 instance SmIrr.setoid : Setoid (SmIrr G) where
   r σ σ' := Nonempty (σ.ρ.Equiv σ'.ρ)
   iseqv := ⟨fun σ => ⟨.refl σ.ρ⟩, fun ⟨e⟩ => ⟨e.symm⟩, fun ⟨e⟩ ⟨e'⟩ => ⟨e.trans e'⟩⟩
 
-variable (G) in
-
-def Irr : Type 1 := Quotient (SmIrr.setoid G)
 
 variable (G) in
+def Irr (G : Type) [Group G] [TopologicalSpace G] : Type 1 := Quotient (@SmIrr.setoid G _ _)
 
+
+variable (G) in
 def SmIrr.triv : SmIrr G where
   V := ℂ
   ρ := Representation.trivial ℂ G ℂ
   smooth v := by simp
   irred := (isIrreducible_iff _).2 ⟨inferInstance, fun W _ => eq_bot_or_eq_top W⟩
 
-instance : Inhabited (Irr G) := ⟨Quotient.mk _ (SmIrr.triv G)⟩
+instance : Inhabited (Irr G) := ⟨Quotient.mk (@SmIrr.setoid G _ _) (SmIrr.triv G)⟩
 
 variable [IsTopologicalGroup G]
 
@@ -81,22 +125,13 @@ def SmIrr.twist (σ : SmIrr G) (χ : G →* ℂˣ) (hχ : IsOpen {g | χ g = 1})
     exact (W.smul_mem_iff (Units.ne_zero (χ g))).1 (hW g v hv)
 
 def Irr.twist (σ : Irr G) (χ : G →* ℂˣ) (hχ : IsOpen {g | χ g = 1}) : Irr G :=
-  Quotient.map (sa := SmIrr.setoid G) (sb := SmIrr.setoid G) (fun σ : SmIrr G => σ.twist χ hχ) (fun σ σ' ⟨e⟩ => ⟨.mk e.toLinearEquiv fun g => by
+  Quotient.map (sa := @SmIrr.setoid G _ _) (sb := @SmIrr.setoid G _ _) (fun σ : SmIrr G => σ.twist χ hχ) (fun σ σ' ⟨e⟩ => ⟨.mk e.toLinearEquiv fun g => by
     ext v
     change e (((χ g : ℂˣ) : ℂ) • σ.ρ g v) = ((χ g : ℂˣ) : ℂ) • σ'.ρ g (e v)
     rw [map_smul]
     exact congrArg _ (LinearMap.congr_fun (e.isIntertwining' g) v)⟩) σ
 
-def Irr.ofChar (χ : G →* ℂˣ) (hχ : IsOpen {g | χ g = 1}) : Irr G := Quotient.mk _ ((SmIrr.triv G).twist χ hχ)
-
-theorem Irr.ofChar_inj {χ χ' : G →* ℂˣ} {hχ : IsOpen {g | χ g = 1}} {hχ' : IsOpen {g | χ' g = 1}}
-    (h : Irr.ofChar χ hχ = Irr.ofChar χ' hχ') : χ = χ' := by
-  obtain ⟨e⟩ : Nonempty ((twRep (Representation.trivial ℂ G ℂ) χ).Equiv (twRep (Representation.trivial ℂ G ℂ) χ')) :=
-    Quotient.exact h
-  ext g
-  have h1 : e (((χ g : ℂˣ) : ℂ) • (1 : ℂ)) = ((χ' g : ℂˣ) : ℂ) • e (1 : ℂ) :=
-    LinearMap.congr_fun (e.isIntertwining' g) (1 : ℂ)
-  rw [map_smul] at h1
-  exact smul_left_injective ℂ ((map_ne_zero_iff e e.injective).2 (one_ne_zero (α := ℂ))) h1
+def Irr.ofChar (χ : G →* ℂˣ) (hχ : IsOpen {g | χ g = 1}) : Irr G :=
+  Quotient.mk (@SmIrr.setoid G _ _) ((SmIrr.triv G).twist χ hχ)
 
 end GlobalTheory.CuspRep

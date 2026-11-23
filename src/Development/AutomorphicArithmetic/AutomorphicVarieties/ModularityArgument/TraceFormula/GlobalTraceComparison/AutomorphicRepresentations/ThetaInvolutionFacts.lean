@@ -1,6 +1,47 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.TraceFormula.GlobalTraceComparison.AutomorphicRepresentations.SlotBasic
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.TraceFormula.GlobalTraceComparison.TraceAsymptotics.FinprodSplitAlt
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.ListEig
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.TraceFormula.GlobalTraceComparison.AutomorphicRepresentations.SlotBasic
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.TraceFormula.GlobalTraceComparison.TraceAsymptotics.SplitLineAlt
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.ListEig
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -53,11 +94,11 @@ private theorem slot_pair_functions_eq {Z T : Finset (Pl E)} {w : Pl E} (hw : w 
 
 private theorem two_off {Z T : Finset (Pl E)} {w : Pl E} (hw : w ∉ Z) (hT : w ∉ T) (φ₁ φ₂ : ∀ w : Pl E, LF n 0 w)
     (e₁ e₂ : Pl E → Ex (Fin (n + 1) × Fin (0 + 1))) (b : Bool) :
-    two (intersection_update_fsHerm_neg_one Z T φ₁ e₁) (intersection_update_fsHerm_neg_one Z T φ₂ e₂) w b = (KGL w n : Set (GLw n w)).indicator 1 := by
+    two (intersection_update_fsHerm_neg_one Z T φ₁ e₁) (intersection_update_fsHerm_neg_one Z T φ₂ e₂) w b = (KGL w (n := n) : Set (GLw n w)).indicator 1 := by
   have key : ∀ g : GLw n w, (K2 n 0 w : Set (GLw n w × GLw 0 w)).indicator (1 : GLw n w × GLw 0 w → ℂ) (g, 1) =
-      (KGL w n : Set (GLw n w)).indicator 1 g := by
+      (KGL w (n := n) : Set (GLw n w)).indicator 1 g := by
     intro g
-    by_cases hg : g ∈ KGL w n
+    by_cases hg : g ∈ KGL w (n := n)
     · rw [Set.indicator_of_mem, Set.indicator_of_mem] <;> simp [hg, K2, Subgroup.mem_prod]
     · rw [Set.indicator_of_notMem, Set.indicator_of_notMem] <;> simp [hg, K2, Subgroup.mem_prod]
   cases b <;> funext g <;> simpa [two, intersection_update_fsHerm_neg_one, hw, hT] using key g
@@ -161,7 +202,7 @@ theorem tTr_pf :
     rw [(hG i.1).2.2.2 hwZ] at hfx
     obtain ⟨ho, ho'⟩ := off_of hPl hS hZ hs.1 hwZ
     obtain ⟨w, b⟩ := i
-    have hN : N w = KGL w n := (hG w).2.2.2 hwZ
+    have hN : N w = KGL w (n := n) := (hG w).2.2.2 hwZ
     have hxV := y.le x.2
     cases b
     · have hv := (hSat E n π w (B w) x.1 hxV hx0).1 (hB w ho) hfx

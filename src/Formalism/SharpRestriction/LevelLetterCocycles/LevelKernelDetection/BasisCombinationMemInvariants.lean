@@ -1,5 +1,47 @@
-import Formalism.SharpRestriction.LevelLetterCocycles.LevelKernelDetection.IdempotentMemInvariants
-import Formalism.SharpRestriction.LevelLetterCocycles.LevelKernelDetection.ExistsBasisOfSurjective
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.LevelKernelDetection.IdempotentMemInvariants
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+public import Mathlib.RingTheory.TensorProduct.IsBaseChangeFree
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Formalism.DistinguishedUnitIdeals.ExistsConstOfInvariantMod
+
+@[expose] public section
 
 noncomputable section
 
@@ -51,6 +93,7 @@ theorem basis_repr_gamma (x : W.DD T) (δ : W.Gam) (hδ : δ ∈ W.DelF) (j : Fi
     B.repr (W.γD T δ x) j = W.γE δ (B.repr x j) := by
   have h1 : W.γD T δ x = ∑ j, W.γE δ (B.repr x j) • B j := by
     conv_lhs => rw [← B.sum_repr x]
+
     rw [map_sum]
     simp only [W.γD_smul, hB _ δ hδ]
   rw [h1, Module.Basis.repr_sum_self]
@@ -63,23 +106,24 @@ theorem basis_repr_idempotent_smul (x : W.DD T) (i : ZMod n) (j : Fin r) :
     simp only [smul_assoc]
   rw [h1, Module.Basis.repr_sum_self]
 
-include hB in
 
+include hB in
 theorem basis_repr_mem_letter (i : ZMod n) (x : W.DD T) (hx : x ∈ DDl W T i) (j : Fin r) :
     B.repr x j ∈ EEl W i := by
   refine ⟨?_, fun δ hδ => ?_⟩
   · rw [← basis_repr_idempotent_smul, hx.1]
   · rw [← basis_repr_gamma B hB x δ hδ, hx.2 δ hδ]
 
-include hB in
 
+include hB in
 theorem basis_combination_mem_invariants (i : ZMod n) (d : Fin r → W.EE) (hd : ∀ j, d j ∈ EEl W i) :
     ∑ j, d j • B j ∈ DDl W T i := by
   refine ⟨?_, fun δ hδ => ?_⟩
   · rw [Finset.smul_sum]
     refine Finset.sum_congr rfl fun j _ => ?_
     rw [← smul_assoc, (hd j).1]
-  · rw [map_sum]
+  · set_option synthInstance.maxHeartbeats 100000 in
+      rw [map_sum]
     refine Finset.sum_congr rfl fun j _ => ?_
     rw [W.γD_smul, hB j δ hδ, (hd j).2 δ hδ]
 
@@ -107,11 +151,12 @@ theorem letterRing_mul_idempotent (i : ZMod n) (r : k17R W i) : letterRingVal W 
 theorem letterRing_sum_mul {i : ZMod n} {ι : Type} [Fintype ι] (a : ι → k17R W i)
     (C : ι → Fin r → k17R W i) (l : Fin r) :
     ∑ t, letterRingVal W i (a t) * letterRingVal W i (C t l) = letterRingVal W i ((∑ t, a t • C t) l) := by
+
   rw [Finset.sum_apply, map_sum]
   simp only [Pi.smul_apply, smul_eq_mul, letterRing_val_mul]
 
-include hB in
 
+include hB in
 theorem letter_invariants_basis (i : ZMod n) {ι : Type} [Fintype ι]
     (C : Module.Basis ι (k17R W i) (Fin r → k17R W i)) :
     LBasis W T i (fun t => ∑ l, letterRingVal W i (C t l) • B l) := by

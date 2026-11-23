@@ -1,6 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.WeilTensorModels
-import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.DualRestrictSurjectiveOfIsTorsionFreeQuotient
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.WeilTensorModels
+public import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.DualRestrictSurjectiveOfIsTorsionFreeQuotient
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Matrix.FiniteDimensional
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -18,11 +65,11 @@ def sympBil {R S : Type} [CommRing R] [CommRing S] [Algebra R S] (c : S →ₐ[R
     (JB : Matrix β β S) : LinearMap.BilinForm R (Matrix α β S) :=
   LinearMap.mk₂ R (symp c ξ JA JB)
     (fun x x' y => by
-      simp only [symp, hTens, Matrix.add_apply, add_mul, Finset.sum_add_distrib, mul_add, map_add])
+      simp only [symp, hTens, Matrix.add_apply, add_mul, Finset.sum_add_distrib, mul_add, map_add (f := _)])
     (fun a x y => by
       simp only [symp, hTens, Matrix.smul_apply, smul_mul_assoc, ← Finset.smul_sum, mul_smul_comm, map_smul])
     (fun x y y' => by
-      simp only [symp, hTens, Matrix.add_apply, add_mul, Finset.sum_add_distrib, mul_add, map_add])
+      simp only [symp, hTens, Matrix.add_apply, add_mul, Finset.sum_add_distrib, mul_add, map_add (f := _)])
     (fun a x y => by
       simp only [symp, hTens, Matrix.smul_apply, smul_mul_assoc, ← Finset.smul_sum, mul_smul_comm, map_smul])
 
@@ -46,9 +93,10 @@ theorem exists_darboux_of_basis {R W κ : Type} [CommRing R] [Invertible (2 : R)
   show B w w' = (fun k => b.repr w (.inl k)) ⬝ᵥ (fun k => b.repr w' (.inr k)) -
     (fun k => b.repr w' (.inl k)) ⬝ᵥ (fun k => b.repr w (.inr k))
   conv_lhs => rw [← b.sum_repr w, ← b.sum_repr w']
-  simp only [map_sum, map_smul, LinearMap.sum_apply, LinearMap.smul_apply, Fintype.sum_sum_type, map_add,
-    LinearMap.add_apply, h11, h22, e12, e21, smul_eq_mul, mul_zero, Finset.sum_const_zero, zero_add, add_zero,
-    mul_ite, Finset.sum_ite_eq', Finset.mem_univ, if_true, dotProduct, mul_one, mul_neg, Finset.sum_neg_distrib]
+
+  simp only [map_sum, map_smul, LinearMap.sum_apply, LinearMap.smul_apply, Fintype.sum_sum_type, map_add (f := _),
+  LinearMap.add_apply, h11, h22, e12, e21, smul_eq_mul, mul_zero, Finset.sum_const_zero, zero_add, add_zero,
+  mul_ite, Finset.sum_ite_eq', Finset.mem_univ, if_true, dotProduct, mul_one, mul_neg, Finset.sum_neg_distrib]
   rw [sub_eq_add_neg, add_comm]
   congr 1
   exact Finset.sum_congr rfl fun i _ => mul_comm _ _
@@ -68,6 +116,7 @@ theorem isAlt_sympBil [CharZero F] (σ : E →ₐ[F] E) (hσ : ∀ x, σ (σ x) 
   intro x
   show Algebra.trace F E (-1 * hTens σ JA JB x x) = 0
   have h : σ (hTens σ JA JB x x) = -hTens σ JA JB x x := by
+
     simp only [hTens, map_sum, map_mul, hσ, hA, hB]
     simp only [← Finset.sum_neg_distrib]
     rw [sum_four_swap]
@@ -83,7 +132,7 @@ theorem isAlt_sympBil [CharZero F] (σ : E →ₐ[F] E) (hσ : ∀ x, σ (σ x) 
 theorem bijective_sympBil [CharZero F] (σ : E →ₐ[F] E) (hσ : ∀ x, σ (σ x) = x) {JA : Matrix α α E}
     {JB : Matrix β β E} (hA : JA.det ≠ 0) (hB : JB.det ≠ 0) : Function.Bijective (sympBil σ (-1) JA JB) := by
   have hi : Function.Injective (sympBil σ (-1) JA JB) := by
-    rw [injective_iff_map_eq_zero]
+    set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
     intro x hx
     have h1 : JAᵀ * x * JB = 0 := by
       ext k l
@@ -135,6 +184,7 @@ theorem symp_map (σ : E →ₐ[F] E) (JA : Matrix α α E) (JB : Matrix β β E
   have hc : ∀ e : E, Algebra.TensorProduct.map (AlgHom.id R R) σ (Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes.inclR (F := F) R e) =
       Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes.inclR (F := F) R (σ e) := fun e => rfl
   rw [symp, symp, ← ht]
+
   simp only [hTens, Matrix.map_apply, hc, map_mul, map_sum, map_neg, map_one]
 
 theorem exists_darboux [CharZero F] [Invertible (2 : R)] (h2 : finrank F E = 2) (σ : E →ₐ[F] E)
@@ -194,8 +244,8 @@ open GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels (Base Spc Model Ha
 
 attribute [local instance] GlobalTheory.LocalData.complRel GlobalTheory.LocalData.isLocalField
 
-open GlobalTheory in
 
+open GlobalTheory in
 theorem Tw.RatDarboux.exists_rational_darboux : ∀ {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] (σ : E →ₐ[F] E) (B : Base F E)
     {n d : ℕ} (X : Spc F E n) (Y : Spc F E d) (r s r' s' : ℕ), B.IsGood σ → X.IsHerm σ B r s → Y.IsSkew σ B r' s' →
     ∃ co : GlobalTheory.WeilM.Darboux (GlobalTheory.WeilM.symp (R := AF F) (GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.cA σ) (-1) (GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.incM F X.J) (GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.incM F Y.J)) (Fin n × Fin d),

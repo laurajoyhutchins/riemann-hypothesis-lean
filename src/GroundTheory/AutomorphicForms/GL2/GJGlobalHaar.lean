@@ -1,7 +1,55 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.GL2.GJGlobalDefs
-import GroundTheory.GlobalFields.TateThesis.IdeleMeasureNormOne
+module
+
+public import GroundTheory.AutomorphicForms.ReductionMeasure
+public import GroundTheory.AutomorphicForms.ReductionSplitting
+public import GroundTheory.AutomorphicForms.CuspidalDiscreteness.Unimodular
 import GroundTheory.AutomorphicForms.RealIwasawaIntegration
+import GroundTheory.AutomorphicForms.Reduction
+import GroundTheory.GlobalFields.Adele.Topology
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MeasureTheory NumberField Set
 open scoped NumberField.AdeleRing ENNReal NNReal
@@ -19,21 +67,21 @@ set_option linter.unusedSectionVars false
 variable {K : Type*} [Field K] [NumberField K] {n : ℕ}
 
 def splitEquiv (hn : 0 < n) :
-    normOneGL K n × {r : ℝ // 0 < r} ≃ᵐ AdelicGLn.AdelicGL K n :=
+    normOneGL (K := K) (n := n) × {r : ℝ // 0 < r} ≃ᵐ AdelicGLn.AdelicGL K n :=
   (glNormOneSplitting (K := K) hn).symm.toHomeomorph.toMeasurableEquiv
 
-@[simp] theorem splitEquiv_apply (hn : 0 < n) (p : normOneGL K n × {r : ℝ // 0 < r}) :
+@[simp] theorem splitEquiv_apply (hn : 0 < n) (p : normOneGL (K := K) (n := n) × {r : ℝ // 0 < r}) :
     splitEquiv (K := K) hn p = (p.1 : AdelicGLn.AdelicGL K n) * centralSection K n p.2 :=
   rfl
 
-theorem splitEquiv_mul (hn : 0 < n) (p q : normOneGL K n × {r : ℝ // 0 < r}) :
+theorem splitEquiv_mul (hn : 0 < n) (p q : normOneGL (K := K) (n := n) × {r : ℝ // 0 < r}) :
     splitEquiv (K := K) hn (p * q) = splitEquiv hn p * splitEquiv hn q :=
   map_mul (glNormOneSplitting (K := K) hn).symm p q
 
-def splitHaar (hn : 0 < n) (μ : Measure (normOneGL K n)) : Measure (AdelicGLn.AdelicGL K n) :=
+def splitHaar (hn : 0 < n) (μ : Measure (normOneGL (K := K) (n := n))) : Measure (AdelicGLn.AdelicGL K n) :=
   Measure.map (splitEquiv (K := K) hn) (μ.prod posRealMeasure)
 
-variable (hn : 0 < n) (μ : Measure (normOneGL K n)) [μ.IsHaarMeasure]
+variable (hn : 0 < n) (μ : Measure (normOneGL (K := K) (n := n))) [μ.IsHaarMeasure]
 
 instance isHaarMeasure_splitHaar : (splitHaar (K := K) hn μ).IsHaarMeasure :=
   ContinuousMulEquiv.isHaarMeasure_map (μ.prod posRealMeasure) (glNormOneSplitting (K := K) hn).symm
@@ -46,7 +94,7 @@ theorem integral_splitHaar {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E
 
 theorem integrable_splitHaar_iff {E : Type*} [NormedAddCommGroup E] (H : AdelicGLn.AdelicGL K n → E) :
     Integrable H (splitHaar hn μ) ↔
-      Integrable (fun p : normOneGL K n × {r : ℝ // 0 < r} =>
+      Integrable (fun p : normOneGL (K := K) (n := n) × {r : ℝ // 0 < r} =>
         H ((p.1 : AdelicGLn.AdelicGL K n) * centralSection K n p.2)) (μ.prod posRealMeasure) :=
   integrable_map_equiv (splitEquiv (K := K) hn) H
 
@@ -59,30 +107,33 @@ theorem centralHaarConst_pos : 0 < centralHaarConst hn μ ν :=
   Measure.haarScalarFactor_pos_of_isHaarMeasure _ _
 
 theorem eq_centralHaarConst_smul : ν = centralHaarConst hn μ ν • splitHaar (K := K) hn μ :=
-  Measure.isMulLeftInvariant_eq_smul ν _
+  by
+    set_option synthInstance.maxHeartbeats 200000 in
+      exact Measure.isMulLeftInvariant_eq_smul ν _
 
 theorem integral_eq_centralHaarConst_smul {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
     {H : AdelicGLn.AdelicGL K n → E} (hH : Integrable H ν) :
     ∫ g, H g ∂ν = (centralHaarConst hn μ ν : ℝ) •
       ∫ s, ∫ y, H (centralSection K n s * (y : AdelicGLn.AdelicGL K n)) ∂μ ∂posRealMeasure := by
-  have hH' : Integrable H (splitHaar hn μ) := by
+  set_option synthInstance.maxHeartbeats 200000 in
+    have hH' : Integrable H (splitHaar hn μ) := by
+      have h := eq_centralHaarConst_smul hn μ ν
+      rw [h] at hH
+      exact (integrable_smul_measure (by simpa using (centralHaarConst_pos hn μ ν).ne')
+        ENNReal.coe_ne_top).1 hH
     have h := eq_centralHaarConst_smul hn μ ν
-    rw [h] at hH
-    exact (integrable_smul_measure (by simpa using (centralHaarConst_pos hn μ ν).ne')
-      ENNReal.coe_ne_top).1 hH
-  have h := eq_centralHaarConst_smul hn μ ν
-  calc ∫ g, H g ∂ν = ∫ g, H g ∂(centralHaarConst hn μ ν • splitHaar hn μ) := by
-        conv_lhs => rw [h]
-    _ = _ := ?_
-  rw [integral_smul_nnreal_measure, integral_splitHaar]
-  rw [integrable_splitHaar_iff] at hH'
-  rw [integral_prod_symm _ hH']
-  simp only [centralSection_mul_comm]
-  rfl
+    calc ∫ g, H g ∂ν = ∫ g, H g ∂(centralHaarConst hn μ ν • splitHaar hn μ) := by
+          conv_lhs => rw [h]
+      _ = _ := ?_
+    rw [integral_smul_nnreal_measure, integral_splitHaar]
+    rw [integrable_splitHaar_iff] at hH'
+    rw [integral_prod_symm _ hH']
+    simp only [centralSection_mul_comm]
+    rfl
 
 theorem integrable_iff_prod (hn : 0 < n) {E : Type*} [NormedAddCommGroup E]
     (H : AdelicGLn.AdelicGL K n → E) :
-    Integrable H ν ↔ Integrable (fun p : normOneGL K n × {r : ℝ // 0 < r} =>
+    Integrable H ν ↔ Integrable (fun p : normOneGL (K := K) (n := n) × {r : ℝ // 0 < r} =>
       H (centralSection K n p.2 * (p.1 : AdelicGLn.AdelicGL K n))) (μ.prod posRealMeasure) := by
   have hc : (centralHaarConst hn μ ν : ℝ≥0∞) ≠ 0 := by
     simpa using (centralHaarConst_pos hn μ ν).ne'
@@ -107,7 +158,8 @@ instance isMulRightInvariant_splitHaar : (splitHaar (K := K) hn μ).IsMulRightIn
     map_mul_right_eq_self]
 
 theorem isMulRightInvariant_haar (hn : 0 < n) : ν.IsMulRightInvariant := by
-  set μ₀ : Measure (normOneGL K n) := Measure.haar
+
+  set μ₀ : Measure (normOneGL (K := K) (n := n)) := Measure.haar
   have h := eq_centralHaarConst_smul hn μ₀ ν
   have : ((centralHaarConst hn μ₀ ν) • splitHaar (K := K) hn μ₀).IsMulRightInvariant :=
     inferInstance
@@ -116,7 +168,8 @@ theorem isMulRightInvariant_haar (hn : 0 < n) : ν.IsMulRightInvariant := by
 
 theorem isInvInvariant_haar (hn : 0 < n) : ν.IsInvInvariant := by
   have := isMulRightInvariant_haar ν hn
-  exact isInvInvariant_of_isMulRightInvariant ν
+  set_option synthInstance.maxHeartbeats 200000 in
+    exact isInvInvariant_of_isMulRightInvariant ν
 
 theorem integral_comp_inv (hn : 0 < n) {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
     (H : AdelicGLn.AdelicGL K n → E) : ∫ g, H g⁻¹ ∂ν = ∫ g, H g ∂ν := by

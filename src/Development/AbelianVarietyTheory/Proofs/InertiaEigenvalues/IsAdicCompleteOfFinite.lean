@@ -1,4 +1,55 @@
-import Mathlib
+module
+
+public import Mathlib.RingTheory.AdicCompletion.Basic
+public import Mathlib.RingTheory.LocalRing.MaximalIdeal.Defs
+public import Mathlib.RingTheory.Noetherian.Defs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.AdicCompletion.AsTensorProduct
+import Mathlib.RingTheory.AdicCompletion.Noetherian
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RingTheory.Ideal.GoingUp
+
+@[expose] public section
 
 open IsLocalRing TensorProduct
 
@@ -19,7 +70,7 @@ theorem isPrecomplete_of_finite {R M : Type} [CommRing R] (I : Ideal R) [IsPreco
   | add x y hx hy =>
     obtain ⟨a, ha⟩ := hx
     obtain ⟨b, hb⟩ := hy
-    exact ⟨a + b, by rw [map_add, map_add, ha, hb]⟩
+    exact ⟨a + b, by rw [map_add (f := _), map_add (f := _), ha, hb]⟩
 
 theorem isPrecomplete_of_pow_le {S : Type} [CommRing S] {I J : Ideal S} (hIJ : I ≤ J) {k : ℕ}
     (hk : J ^ k ≤ I) [h : IsPrecomplete I S] : IsPrecomplete J S := by
@@ -43,7 +94,7 @@ theorem isAdicComplete_of_finite (R S : Type) [CommRing R] [IsLocalRing R] [IsNo
   haveI : IsNoetherianRing S := IsNoetherianRing.of_finite R S
   haveI : Algebra.IsIntegral R S := Algebra.IsIntegral.of_finite R S
   have hcomap : (maximalIdeal S).comap (algebraMap R S) = maximalIdeal R :=
-    eq_maximalIdeal (Ideal.isMaximal_comap_of_isIntegral_of_isMaximal (maximalIdeal S))
+    eq_maximalIdeal (Ideal.isMaximal_comap_of_isIntegral_of_isMaximal (algebraMap _ _) (RingHom.Finite.to_isIntegral (RingHom.finite_algebraMap.mpr inferInstance)) (maximalIdeal S))
   have hle : (maximalIdeal R).map (algebraMap R S) ≤ maximalIdeal S :=
     Ideal.map_le_iff_le_comap.mpr hcomap.ge
   have hrad : maximalIdeal S ≤ ((maximalIdeal R).map (algebraMap R S)).radical := by
@@ -54,7 +105,8 @@ theorem isAdicComplete_of_finite (R S : Type) [CommRing R] [IsLocalRing R] [IsNo
     have h2 : P.comap (algebraMap R S) = maximalIdeal R :=
       ((maximalIdeal.isMaximal R).eq_of_le (Ideal.comap_ne_top _ hprime.ne_top) h1).symm
     have h3 : P.IsMaximal :=
-      Ideal.isMaximal_of_isIntegral_of_isMaximal_comap (R := R) P
+      Ideal.isMaximal_of_isIntegral_of_isMaximal_comap (algebraMap R S)
+        (RingHom.Finite.to_isIntegral (RingHom.finite_algebraMap.mpr inferInstance)) P
         (h2 ▸ maximalIdeal.isMaximal R)
     exact (eq_maximalIdeal h3).ge
   obtain ⟨k, hk⟩ := Ideal.exists_pow_le_of_le_radical_of_fg hrad (IsNoetherian.noetherian _)

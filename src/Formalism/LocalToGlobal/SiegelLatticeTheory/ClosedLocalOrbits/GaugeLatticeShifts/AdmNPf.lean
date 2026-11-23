@@ -1,5 +1,49 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.HermitianModuleBetaCongruence
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.HermitianModuleBetaCongruence
+import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.DualCoords
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -26,7 +70,7 @@ theorem InAt_add {a b : VA X.B.I} (ha : InAt X.B.I X.B.g X.B.g a) (hb : InAt X.B
     InAt X.B.I X.B.g X.B.g (a + b) := by
   obtain ⟨c, hc, hca⟩ := ha
   obtain ⟨d, hd, hdb⟩ := hb
-  refine ⟨c * d, Nat.Coprime.mul hc hd, ?_⟩
+  refine ⟨c * d, Nat.Coprime.mul_left hc hd, ?_⟩
   have e : ((c * d : ℕ) : X.B.I.E ⊗[X.B.I.F] Af X.B.I.F) • (a + b) =
       ((d : ℕ) : X.B.I.E ⊗[X.B.I.F] Af X.B.I.F) • (((c : ℕ) : X.B.I.E ⊗[X.B.I.F] Af X.B.I.F) • a) +
         ((c : ℕ) : X.B.I.E ⊗[X.B.I.F] Af X.B.I.F) • (((d : ℕ) : X.B.I.E ⊗[X.B.I.F] Af X.B.I.F) • b) := by
@@ -75,6 +119,7 @@ theorem crd_smul' (a : D.host.E) (v : (VS D).V) : X.crd (a • v) = X.ιE.symm a
 
 theorem crd_sum' {ι : Type} (t : Finset ι) (f : ι → (VS D).V) : X.crd (∑ i ∈ t, f i) = ∑ i ∈ t, X.crd (f i) := by
   funext i
+
   simp [Formalism.L2.SG.HidaSetting.HidaSetting.crd, crdOf, map_sum, Finset.sum_apply]
 
 theorem incl_sub' (x y : Fin X.B.I.n → X.B.I.E) : incl X.B.I (x - y) = incl X.B.I x - incl X.B.I y := by
@@ -89,6 +134,7 @@ theorem incl_smul' (c : X.B.I.E) (x : Fin X.B.I.n → X.B.I.E) :
 theorem incl_sum' {ι : Type} (t : Finset ι) (x : ι → Fin X.B.I.n → X.B.I.E) :
     incl X.B.I (∑ j ∈ t, x j) = ∑ j ∈ t, incl X.B.I (x j) := by
   funext i
+
   simp [incl, map_sum, Finset.sum_apply]
 
 theorem ratLink_incl {x : X.B.I.GA} {γ : (VS D).V ≃ₗ[D.host.E] (VS D).V} (h : RatLink X x γ) (y : (VS D).V) :
@@ -120,9 +166,9 @@ def ModGAt : Prop :=
     ∀ v, ModG (VS D) Λ (gS D) v → InAt X.B.I X.B.g X.B.g (X.B.I.fmat g1⁻¹ *ᵥ incl X.B.I (X.crd v))
 
 theorem frame_mapLF {γ : (VS D).V ≃ₗ[D.host.E] (VS D).V} (hγ : γ ∈ Formalism.HermitianLatticesTheory.isom (VS D).hT) {T : D.host.E}
-    (F : LFlag (VS D) D.R.rS T) (c : Fin (D.R.rS + 1)) : frame (mapLF γ F) c = γ (frame F c) := by
+    (F : LFlag (D.sp.Y 0) D.R.rS T) (c : Fin (D.R.rS + 1)) : frame (mapLF γ F) c = γ (frame F c) := by
   unfold frame mapLF
-  rw [dif_pos hγ]
+  rw [dite_eq_left hγ]
   show (mapFlag γ hγ F.fl).fvec c = γ (F.fl.fvec c)
   simp only [FlagG.fvec, mapFlag]
   induction c using Fin.lastCases with
@@ -171,8 +217,7 @@ theorem adm_norm_of_fixed_frames (hTF : FrameTie X u u' F0 F0') (hK : TermK F0 F
       simp only [hY', Matrix.mulVec_mulVec, hκ', ← fmat_mul]
       congr 2
       group
-    rw [e] at h1
-    exact h1
+    exact (congrArg (InAt X.B.I X.B.g X.B.g) e).mp h1
 
   have fixE : ∀ (w : D.what₂.Word) (h : Formalism.L2.SG.PoincareInHH.PoincareSetting.Hfin X w) (a : Fin D.R.rS),
       X.B.I.fmat ((h : X.B.I.Gf) * X.xu w)⁻¹ *ᵥ incl X.B.I (X.crd (X.eX a)) = incl X.B.I (X.crd (X.eX a)) :=

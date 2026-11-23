@@ -1,6 +1,53 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.ArithDegree
-import GroundTheory.HeightsAndTheta.Heights.HeightsOfSets.Slopes
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.ArithDegree
+public import GroundTheory.HeightsAndTheta.Heights.HeightsOfSets.Slopes
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.Matrix.PosDef
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GroundTheory.Heights₂.Heights
 
@@ -47,19 +94,19 @@ theorem mem_span_fibreVec {ι : Type*} [Fintype ι] {s : ι → E} (hs : LinearI
       rw [fibreVec, ← map_smul, smul_tmul', complex_smul_def, mul_one, AlgEquiv.apply_symm_apply]
     rw [this]
     exact W.smul_mem _ (key e)
-  | add x y hx hy => rw [map_add]; exact W.add_mem hx hy
+  | add x y hx hy => rw [map_add (f := _)]; exact W.add_mem hx hy
 
 end Span
 
-omit [NumberField K] in
 
+omit [NumberField K] in
 theorem lTensor_complex_smul (σ : K →+* ℂ) {M N : Type*} [AddCommGroup M] [Module (𝓞 K) M]
     [AddCommGroup N] [Module (𝓞 K) N] (f : M →ₗ[𝓞 K] N) (c : ℂ) (x : Fibre σ M) :
     f.lTensor (ComplexAt σ) (c • x) = c • f.lTensor (ComplexAt σ) x := by
   induction x using TensorProduct.induction_on with
   | zero => simp only [smul_zero, map_zero]
   | tmul z m => rw [smul_tmul', LinearMap.lTensor_tmul, LinearMap.lTensor_tmul, smul_tmul']
-  | add x y hx hy => rw [smul_add, map_add, map_add, hx, hy, smul_add]
+  | add x y hx hy => rw [smul_add, map_add (f := _), map_add (f := _), hx, hy, smul_add]
 
 section GramBlock
 
@@ -77,9 +124,9 @@ theorem det_gram_sumElim {m n : Type*} [Fintype m] [Fintype n] [DecidableEq m] [
   have h1 : Sum.elim a q = fun k ↦ ∑ l, T l k • Sum.elim a b l := by
     funext k
     rcases k with i | j
-    · simp [T, Fintype.sum_sum_type, one_apply, ite_smul]
+    · simp [T, Fintype.sum_sum_type, Matrix.one_apply, ite_smul]
     · simp only [T, Fintype.sum_sum_type, Sum.elim_inr, Sum.elim_inl, fromBlocks_apply₁₂,
-        fromBlocks_apply₂₂, one_apply, ite_smul, one_smul, zero_smul, Finset.sum_ite_eq',
+        fromBlocks_apply₂₂, Matrix.one_apply, ite_smul, one_smul, zero_smul, Finset.sum_ite_eq',
         Finset.mem_univ, if_true, hq j]
       simp only [Matrix.neg_apply, neg_smul, Finset.sum_neg_distrib, sub_eq_add_neg]
       exact add_comm _ _
@@ -106,8 +153,8 @@ variable {E' E E'' : HermitianBundle K} (X : HermitianExtension E' E E'')
 
 theorem proj_incl (y : E'.carrier) : X.proj (X.incl y) = 0 := X.exact.apply_apply_eq_zero y
 
-include X in
 
+include X in
 theorem finrank_eq : Module.finrank (𝓞 K) E.carrier =
     Module.finrank (𝓞 K) E'.carrier + Module.finrank (𝓞 K) E''.carrier := by
   have h1 := rank_quotient_add_rank_of_isDomain (LinearMap.range X.incl)
@@ -134,11 +181,13 @@ theorem linearIndependent_sumElim {s' : m → E'.carrier} {s'' : n → E''.carri
   simp only [Sum.elim_inl, Sum.elim_inr] at hg
   have h2 : ∑ j, g (Sum.inr j) • s'' j = 0 := by
     have := congrArg X.proj hg
-    simpa [map_add, map_sum, map_smul, proj_incl, hu] using this
+
+    simpa [map_add (f := _), map_sum, map_smul, proj_incl, hu] using this
   have hr := hs'' _ h2
   have h1 : ∑ i, g (Sum.inl i) • s' i = 0 := by
     apply X.incl_injective
     simp only [hr, zero_smul, Finset.sum_const_zero, add_zero] at hg
+
     rw [map_sum, map_zero]
     simpa [map_smul] using hg
   have hl := hs' _ h1
@@ -168,10 +217,12 @@ theorem card_quotient_sumElim {s' : m → E'.carrier} {s'' : n → E''.carrier}
         simp only [w, Sum.elim_inl, Sum.elim_inr] at hg
         have h2 : ∑ j, g (Sum.inr j) • s'' j = 0 := by
           have := congrArg X.proj hg
-          simpa [map_add, map_sum, map_smul, proj_incl, hu] using this
+
+          simpa [map_add (f := _), map_sum, map_smul, proj_incl, hu] using this
         have hr := (Fintype.linearIndependent_iff.mp hs'') _ h2
         simp only [hr, zero_smul, Finset.sum_const_zero, add_zero] at hg
         have : X.incl (∑ i, g (Sum.inl i) • s' i) = X.incl x := by
+
           rw [← hg, map_sum]
           simp [map_smul]
         rw [← X.incl_injective this]
@@ -194,6 +245,7 @@ theorem card_quotient_sumElim {s' : m → E'.carrier} {s'' : n → E''.carrier}
           Submodule.mkQ_apply, Submodule.Quotient.mk_eq_zero] at hx
         obtain ⟨b, hb⟩ := (Submodule.mem_span_range_iff_exists_fun (𝓞 K)).mp hx
         have hy : x - ∑ j, b j • u j ∈ LinearMap.range X.incl := by
+
           rw [← X.exact.linearMap_ker_eq, LinearMap.mem_ker, map_sub, map_sum]
           simp only [map_smul, hu, hb, sub_self]
         have hN : ∑ j, b j • u j ∈ N :=
@@ -269,6 +321,7 @@ theorem gramDet_sumElim (σ : K →+* ℂ) {s' : m → E'.carrier} {s'' : n → 
     fun j w ↦ Submodule.inner_right_of_mem_orthogonal (hLW w) (hqW j)
   have hP : ∀ j, P (q j) = fibreVec E''.metric σ (s'' j) := by
     intro j
+
     rw [hq j, map_sub, map_sum]
     have h0 : ∀ i, P (a i) = 0 := fun i ↦ by
       change X.proj.lTensor (ComplexAt σ) ((1 : ComplexAt σ) ⊗ₜ X.incl (s' i)) = 0
@@ -285,8 +338,8 @@ theorem gramDet_sumElim (σ : K →+* ℂ) {s' : m → E'.carrier} {s'' : n → 
   rw [hfam, det_gram_sumElim a b q _ hq horth, hga, hgq, Complex.mul_re, det_gram_im,
     det_gram_im, mul_zero, sub_zero]
 
-include X in
 
+include X in
 theorem arithDegree_eq_add : E.arithDegree = E'.arithDegree + E''.arithDegree := by
   obtain ⟨s', hs'⟩ := exists_linearIndependent_fin (K := K) (E := E'.carrier)
   obtain ⟨s'', hs''⟩ := exists_linearIndependent_fin (K := K) (E := E''.carrier)
@@ -316,10 +369,6 @@ end HermitianExtension
 
 theorem HermitianBundle.arithDegree_integers : (HermitianBundle.integers K).arithDegree = 0 :=
   GroundTheory.Heights₂.Heights.arithDegree_integers
-
-theorem HermitianBundle.arithDegree_standard_two : (HermitianBundle.standard K 2).arithDegree = 0 := by
-  rw [(HermitianExtension.standardSplit K).arithDegree_eq_add,
-    HermitianBundle.arithDegree_integers, add_zero]
 
 end
 

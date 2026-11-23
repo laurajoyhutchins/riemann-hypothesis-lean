@@ -1,29 +1,56 @@
-import Mathlib
+module
+
+public import Mathlib.AlgebraicGeometry.IdealSheaf.Functorial
+public import Mathlib.Combinatorics.Quiver.ReflQuiver
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Morphisms.Immersion
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+
+@[expose] public section
+
 universe u v
 
 open CategoryTheory CategoryTheory.Limits AlgebraicGeometry TopologicalSpace Opposite
 
 namespace FunctorialResolution.Blowup
-
-private theorem small_directedAffineCover_I₀ (X : Scheme.{u}) :
-    Small.{u} X.directedAffineCover.I₀ :=
-  small_self _
-
-instance instSmallDirectedAffineCoverI₀ (X : Scheme.{u}) :
-    Small.{u} X.directedAffineCover.I₀ :=
-  small_directedAffineCover_I₀ X
-
-private theorem isThin_directedAffineCover_I₀ (X : Scheme.{u}) :
-    Quiver.IsThin X.directedAffineCover.I₀ := by
-  intro a b
-  refine ⟨fun f g => ?_⟩
-  obtain ⟨⟨hf⟩⟩ := f
-  obtain ⟨⟨hg⟩⟩ := g
-  rfl
-
-instance instIsThinDirectedAffineCoverI₀ (X : Scheme.{u}) :
-    Quiver.IsThin X.directedAffineCover.I₀ :=
-  isThin_directedAffineCover_I₀ X
 
 theorem noetherianSpace_toScheme (X : Scheme.{u}) [NoetherianSpace ↥X] (U : X.Opens) :
     NoetherianSpace ↥(U.toScheme) := by

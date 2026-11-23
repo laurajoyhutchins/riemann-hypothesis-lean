@@ -1,7 +1,47 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.MemSmulLk
-import Formalism.LocalToGlobal.UnitaryNorms.UnramT
-import Formalism.LocalToGlobal.Columns.DecoFin
+module
+
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.MemSmulLk
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.StdLvPr
+import Formalism.LocalRingCardinality.RankBoundMonotoneInDimension
+public import Formalism.LocalToGlobal.UnitaryNorms.UnramT
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Formalism.BasicNotions Formalism.MainNotions Formalism.L2.Col Formalism.L2.DIV Formalism.L2.Ker Formalism.UG Formalism.L2.Forms GlobalTheory.Mem GlobalTheory.Mem.Chr GlobalTheory.Mem.Col2 GlobalTheory.Mem.Col2.TC GlobalTheory.Mem.Col2.HAt Matrix
 attribute [local instance] GlobalTheory.Mem.Col2.starE Formalism.BasicNotions.Host.cmStar
@@ -30,9 +70,9 @@ theorem pos_iff_mem_Pv (A : AtTTied u) (v : (D.mem u).A.vT) (ν : AddValuation D
   have hpb : A.res v (cO A.piU) ≠ 0 := A.res_conj v (cO A.piU) rfl
   have hπb : ν ((cO A.piU : 𝓞 D.host.E) : D.host.E) = 0 := by
     obtain ⟨zF, hzF⟩ := exists_intF_of_conj_eq (D := D) (A.piU + cO A.piU) (by
-      push_cast; simp only [hcO, map_add, hinv]; ring)
+      push_cast; simp only [hcO, map_add (f := _), hinv]; ring)
     have hnot : zF ∉ (A.eV v).1.asIdeal := by
-      rw [A.res_v, hzF, map_add, A.res_pi, zero_add]; exact hpb
+      rw [A.res_v, hzF, map_add (f := _), A.res_pi, zero_add]; exact hpb
     rw [hTau, hzF] at hnot
     refine le_antisymm (not_lt.mp fun h => hnot ?_) (Formalism.L2.Host.addVal_nonneg ν _)
     push_cast
@@ -41,9 +81,9 @@ theorem pos_iff_mem_Pv (A : AtTTied u) (v : (D.mem u).A.vT) (ν : AddValuation D
     intro y hy
     have hy' : A.res v y = 0 := hy
     obtain ⟨zF, hzF⟩ := exists_intF_of_conj_eq (D := D) (y * cO A.piU + cO y * A.piU) (by
-      push_cast; simp only [hcO, map_add, map_mul, hinv]; ring)
+      push_cast; simp only [hcO, map_add (f := _), map_mul, hinv]; ring)
     have hin : zF ∈ (A.eV v).1.asIdeal := by
-      rw [A.res_v, hzF, map_add, map_mul, map_mul, hy', A.res_pi]; simp
+      rw [A.res_v, hzF, map_add (f := _), map_mul, map_mul, hy', A.res_pi]; simp
     rw [hTau, hzF] at hin
     push_cast at hin
     have h2 : 0 < ν (((cO y : 𝓞 D.host.E) : D.host.E) * A.piU) := by

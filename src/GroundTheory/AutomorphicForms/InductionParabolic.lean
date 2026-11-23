@@ -1,7 +1,52 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.Induction
-import GroundTheory.AutomorphicForms.InductionJacquet
-import GroundTheory.AutomorphicForms.InductionParabolicLocal
+module
+
+public import GroundTheory.AutomorphicForms.Induction
+public import GroundTheory.AutomorphicForms.InductionJacquet
+public import GroundTheory.AutomorphicForms.InductionParabolicLocal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -77,7 +122,6 @@ section ParabolicInduction
 variable {W : Type*} [AddCommGroup W] [Module ℂ W]
 
 variable (F n β) in
-
 def inflateTwist (σ : Representation ℂ (levi F n β) W) : Representation ℂ (blockUpper F n β) W :=
   twist (sqrtModular F n β) (σ.comp (leviProj F n β))
 
@@ -86,12 +130,10 @@ theorem inflateTwist_apply (σ : Representation ℂ (levi F n β) W) (p : blockU
     inflateTwist F n β σ p w = sqrtModular F n β p • σ (leviProj F n β p) w := rfl
 
 variable (F n β) in
-
 abbrev parabolicIndSpace (σ : Representation ℂ (levi F n β) W) : Submodule ℂ (GL (Fin n) F → W) :=
   indSpace (blockUpper F n β) (inflateTwist F n β σ)
 
 variable (F n β) in
-
 abbrev parabolicInd (σ : Representation ℂ (levi F n β) W) :
     Representation ℂ (GL (Fin n) F) (parabolicIndSpace F n β σ) :=
   indRep (blockUpper F n β) (inflateTwist F n β σ)
@@ -114,7 +156,6 @@ section Jacquet
 variable {V : Type*} [AddCommGroup V] [Module ℂ V] (π : Representation ℂ (GL (Fin n) F) V)
 
 variable (F n β) in
-
 abbrev JacquetModule : Type _ :=
   Representation.Coinvariants (π.comp (unipotentRadical F n β).subtype)
 
@@ -125,7 +166,6 @@ theorem levi_conj_mem (m : levi F n β) :
   fun _ hu => conj_mem_unipotentRadical (levi_le_blockUpper m.2) hu
 
 variable (F n β) in
-
 def jacquetAction : Representation ℂ (levi F n β) (JacquetModule F n β π) where
   toFun m := coinvariantsTranslate π _ (m : GL (Fin n) F) (levi_conj_mem m)
   map_one' := Representation.Coinvariants.hom_ext (LinearMap.ext fun v => by simp)
@@ -139,7 +179,6 @@ theorem jacquetAction_mk (m : levi F n β) (v : V) :
       Representation.Coinvariants.mk _ (π m v) := rfl
 
 variable (F n β) in
-
 def jacquetRep : Representation ℂ (levi F n β) (JacquetModule F n β π) :=
   twist ((invSqrtModular F n β).comp leviIncl) (jacquetAction F n β π)
 
@@ -176,14 +215,12 @@ variable {π} {V' : Type*} [AddCommGroup V'] [Module ℂ V'] {π' : Representati
   {V'' : Type*} [AddCommGroup V''] [Module ℂ V''] {π'' : Representation ℂ (GL (Fin n) F) V''}
 
 variable (F n β) in
-
 def restrictN (f : Representation.IntertwiningMap π π') :
     Representation.IntertwiningMap (π.comp (unipotentRadical F n β).subtype)
       (π'.comp (unipotentRadical F n β).subtype) :=
   ⟨f.toLinearMap, fun u => f.isIntertwining' u⟩
 
 variable (F n β) in
-
 def jacquetMap (f : Representation.IntertwiningMap π π') :
     Representation.IntertwiningMap (jacquetRep F n β π) (jacquetRep F n β π') :=
   ⟨Representation.Coinvariants.map _ _ (restrictN F n β f), fun m =>
@@ -214,7 +251,6 @@ theorem leviIncl_coe (m : levi F n β) :
     ((leviIncl m : blockUpper F n β) : GL (Fin n) F) = m := rfl
 
 variable (F n β π) in
-
 def jacquetAdjunction :
     Representation.IntertwiningMap (π.comp (blockUpper F n β).subtype) (inflateTwist F n β σ) ≃ₗ[ℂ]
       Representation.IntertwiningMap (jacquetRep F n β π) σ where
@@ -254,7 +290,6 @@ def jacquetAdjunction :
     (LinearMap.ext fun v => rfl))
 
 variable (F n β) in
-
 def frobeniusParabolic (hπ : IsSmooth π) :
     Representation.IntertwiningMap π (parabolicInd F n β σ) ≃ₗ[ℂ]
       Representation.IntertwiningMap (jacquetRep F n β π) σ :=
@@ -269,7 +304,6 @@ theorem rankTorus_commute (e : ℕ) {y : GL (Fin n) F}
   · rw [mem_levi.1 hy i j h, mul_zero, zero_mul]
 
 variable (F n β π) in
-
 def jacquetFixedMap (K : Subgroup (GL (Fin n) F)) :
     fixedVectors π K →ₗ[ℂ] fixedVectors (jacquetAction F n β π) (K.subgroupOf (levi F n β)) :=
   ((Representation.Coinvariants.mk _).comp (fixedVectors π K).subtype).codRestrict _

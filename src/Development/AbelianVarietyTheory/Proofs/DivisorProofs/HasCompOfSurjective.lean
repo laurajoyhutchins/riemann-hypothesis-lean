@@ -1,6 +1,64 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.TensorProductTheorem.TwoFactorUnique
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.IsIrreducibleIff
+module
+
+public import GroundTheory.AutomorphicForms.TensorProductTheorem.TwoFactorUnique
+public import Development.AbelianVarietyTheory.Definitions.Foundations.SmoothPartStable
+public import Mathlib.RepresentationTheory.Irreducible
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.IsIrreducibleIff
+public import GroundTheory.AutomorphicForms.TensorProductTheorem.OuterTensor
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Eigenspace.Triangularizable
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Coalgebra.CoassocSimps
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.RingTheory.Flat.Basic
+
+@[expose] public section
 
 noncomputable section
 
@@ -70,7 +128,7 @@ theorem contractLeft_map {W' M' : Type} [AddCommGroup W'] [Module ℂ W'] [AddCo
   induction t using TensorProduct.induction_on with
   | zero => simp
   | tmul x y => simp [contractLeft_tmul]
-  | add x y hx hy => simp only [map_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
 
 theorem contractRight_map {W' M' : Type} [AddCommGroup W'] [Module ℂ W'] [AddCommGroup M'] [Module ℂ M']
     (l : Dual ℂ M') (A : W →ₗ[ℂ] W') (B : M →ₗ[ℂ] M') (t : W ⊗[ℂ] M) :
@@ -78,14 +136,14 @@ theorem contractRight_map {W' M' : Type} [AddCommGroup W'] [Module ℂ W'] [AddC
   induction t using TensorProduct.induction_on with
   | zero => simp
   | tmul x y => simp [contractRight_tmul]
-  | add x y hx hy => simp only [map_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
 
 theorem map_smulRight (l : Dual ℂ W) (y : W) (t : W ⊗[ℂ] M) :
     TensorProduct.map (l.smulRight y) LinearMap.id t = y ⊗ₜ contractLeft l t := by
   induction t using TensorProduct.induction_on with
   | zero => simp
   | tmul x m => simp [contractLeft_tmul, TensorProduct.smul_tmul]
-  | add x y hx hy => simp only [map_add, hx, hy, TensorProduct.tmul_add]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy, TensorProduct.tmul_add]
 
 theorem exists_split {ρ : Representation ℂ Γ V} (hρ : ρ.IsIrreducible) {σ : Representation ℂ Γ W}
     (hσ : σ.IsIrreducible) (hs : ∀ T : End ℂ W, (∀ g, T * σ g = σ g * T) → ∃ c : ℂ, T = c • 1) {e : Γ →* Γ}
@@ -104,7 +162,7 @@ theorem exists_split {ρ : Representation ℂ Γ V} (hρ : ρ.IsIrreducible) {σ
       rw [TensorProduct.map_tmul, hev, hev]
       change ρ ((e g)⁻¹ * g) (u.1 (σ g x)) = _
       rw [u.2 g x, rep_mul, (hc g g).eq, mul_inv_cancel_left]
-    | add x y hx hy => simp only [map_add, hx, hy]
+    | add x y hx hy => simp only [map_add (f := _), hx, hy]
   have hsurj : Function.Surjective ev := by
     rcases ((GlobalTheory.CuspRep.isIrreducible_iff ρ).1 hρ).2 (LinearMap.range ev) (by
       rintro g _ ⟨t, rfl⟩
@@ -130,6 +188,7 @@ theorem exists_split {ρ : Representation ℂ Γ V} (hρ : ρ.IsIrreducible) {σ
       | smul c a ha => simp [ha]
     have h1 : ev (TensorProduct.map (l.smulRight y) LinearMap.id (∑ i ∈ s, i.1 ⊗ₜ[ℂ] i.2)) =
         Representation.asAlgebraHom (ρ.comp e) r (ev (∑ i ∈ s, i.1 ⊗ₜ[ℂ] i.2)) := by
+
       simp only [map_sum]
       refine Finset.sum_congr rfl fun i hi => ?_
       rw [TensorProduct.map_tmul, hev, hev, ← key, hr _ (Finset.mem_image_of_mem _ hi)]
@@ -233,7 +292,7 @@ theorem finrank_fixed_split {ρ : Representation ℂ Γ V} {σ : Representation 
       induction t using TensorProduct.induction_on with
       | zero => simp
       | tmul x y => simp [j, mem_fix.1 x.2 g hg, mem_fix.1 y.2 g hg]
-      | add x y hx hy => simp only [map_add, hx, hy]
+      | add x y hx hy => simp only [map_add (f := _), hx, hy]
   rw [hr, LinearEquiv.finrank_map_eq, LinearMap.finrank_range_of_inj hj, Module.finrank_tensorProduct]
 
 def HasComp (ρ : Representation ℂ Γ V) (e : Γ →* Γ) (L : Subgroup Γ) (d : ℕ) : Prop :=

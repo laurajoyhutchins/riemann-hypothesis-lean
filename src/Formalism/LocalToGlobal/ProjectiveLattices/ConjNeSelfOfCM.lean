@@ -1,7 +1,54 @@
-import Formalism.LocalToGlobal.ProjectiveLattices.CrudeOrd
-import Formalism.LocalToGlobal.ProjectiveLattices.CrudeDiv
-import Formalism.LocalToGlobal.ProjectiveLattices.CrudeMin
-import Formalism.LocalToGlobal.ProjectiveLattices.CrudeVal
+module
+
+public import Formalism.LocalToGlobal.ProjectiveLattices.CrudeMin
+public import Formalism.LocalToGlobal.ProjectiveLattices.CrudeBase
+public import Formalism.LocalToGlobal.ProjectiveLattices.PlaceBelow
+public import Formalism.LocalToGlobal.ProjectiveLattices.CrudeDiv
+public import Formalism.LocalToGlobal.ProjectiveLattices.CrudeOrd
+public import Formalism.LocalToGlobal.ProjectiveLattices.CrudeVal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -20,8 +67,8 @@ def SatDir (T : CDVR) {d : ℕ} (uvec : Lt1 Dw → Fin d → T.Fr) : Prop :=
   ∀ τ : E →+* ℂ, ∃ W : Fin (Dw.mult τ) → Fin d → T.V,
     ∀ i i' : Fin (Dw.mult τ), ∑ j, uvec ⟨τ, i'⟩ j * algebraMap T.V T.Fr (W i j) = if i' = i then 1 else 0
 
-variable (Dw) in
 
+variable (Dw) in
 def DomW (a : (E →+* ℂ) × ℕ → ℕ) : Prop := Crude.Dom Dw.mult (fun τ i => a (τ, i))
 
 def crudeBd {K : Type} [Field K] [NumberField K] (la : HeightOneSpectrum (𝓞 K)) (D : ℕ) : ℝ :=
@@ -44,22 +91,22 @@ theorem Crude.le_degree {σ : Type} (α : σ →₀ ℕ) (s : σ) : α s ≤ α.
     rw [h0]
     exact Nat.zero_le _
 
+
 omit [IsCMField E] [StarRing (𝓞 E)] in
 variable (Dw) in
-
 def colP {n : ℕ} (hn : Fintype.card (Lt1 Dw) ≤ n) : Lt1 Dw → Fin n :=
   fun p => Fin.castLE hn (Fintype.equivFin (Lt1 Dw) p)
 
+
 open Classical in
 variable (Dw) in
-
 def P1 (T : CDVR) (a : (E →+* ℂ) × ℕ → ℕ) {n : ℕ} (hn : Fintype.card (Lt1 Dw) ≤ n) :
     MvPolynomial (LtN Dw n) T.Fr :=
   MvPolynomial.map (Int.castRingHom T.Fr) (Crude.Pmin Dw.mult n (colP Dw hn) (fun τ i => a (τ, i)))
 
+
 open Classical in
 variable (Dw) in
-
 def fact1 (a : (E →+* ℂ) × ℕ → ℕ) {n : ℕ} (hn : Fintype.card (Lt1 Dw) ≤ n) : ℕ :=
   (Crude.diagExp Dw.mult n (colP Dw hn) (fun τ i => a (τ, i))).prod fun _ t => t.factorial
 

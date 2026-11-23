@@ -1,7 +1,49 @@
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.ThetaNormCommutation.FactorFields.TensorCompl
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PlaceConjugationPropertiesCmField
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsIsSplitChartOne
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsIsSplitChartOfBasis
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.ThetaNormCommutation.FactorFields.TensorCompl
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PlaceConjugationPropertiesCmField
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsIsSplitChartOfBasis
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsIsSplitChartOne
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.MetricSpace.Ultra.TotallySeparated
+public import Development.AbelianVarietyTheory.Definitions.Foundations.NotIsSplitOfIsInertAt
+
+@[expose] public section
 
 noncomputable section
 
@@ -20,7 +62,7 @@ theorem decomp (E : Type) [Field E] [NumberField E] [IsCMField E] (s : E) (hs : 
     (hcs : IsCMField.complexConj E s = -s) (x : E) :
     ∃ p q : maximalRealSubfield E, x = algebraMap _ E p + s * algebraMap _ E q := by
   obtain ⟨p, hp⟩ := exists_real E ((x + IsCMField.complexConj E x) / 2) (by
-    rw [map_div₀, map_add, IsCMField.complexConj_apply_apply, map_ofNat]; ring)
+    rw [map_div₀, map_add (f := _), IsCMField.complexConj_apply_apply, map_ofNat]; ring)
   obtain ⟨q, hq⟩ := exists_real E ((x - IsCMField.complexConj E x) / (2 * s)) (by
     rw [map_div₀, map_sub, map_mul, IsCMField.complexConj_apply_apply, map_ofNat, hcs]
     field_simp; ring)
@@ -48,12 +90,12 @@ theorem inertBase_pf (h1 : TensorCompl) : InertBase := by
     | tmul a x =>
       obtain ⟨p, q, hx⟩ := InertBaseP.decomp E s hs hcs x
       refine ⟨a * algebraMap _ _ p, a * algebraMap _ _ q, ?_⟩
-      simp only [GlobalTheory.LFun.toCompl_tmul, hx, map_mul, map_add, GlobalTheory.LFun.complMap_algebraMap]
+      simp only [GlobalTheory.LFun.toCompl_tmul, hx, map_mul, map_add (f := _), GlobalTheory.LFun.complMap_algebraMap]
       ring
     | add t1 t2 e1 e2 =>
       obtain ⟨a1, b1, f1⟩ := e1
       obtain ⟨a2, b2, f2⟩ := e2
-      exact ⟨a1 + a2, b1 + b2, by rw [map_add, f1, f2, map_add, map_add]; ring⟩
+      exact ⟨a1 + a2, b1 + b2, by rw [map_add (f := _), f1, f2, map_add (f := _), map_add (f := _)]; ring⟩
 
 end PositivityTheory.Rg.BcB.G3
 

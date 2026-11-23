@@ -1,12 +1,65 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.SectionCountDropFiltSt
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.SectionCountDropFiltKernelSt
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.SectionCountDropFiltStepSt
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.SectionCountDropFiltFiniteSt
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.PPrimeFiltrationExists
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.PSubvarDrop
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.QuotGraded
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.TwistAlg
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.SectionCountDropFiltSt
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.SectionCountDropFiltKernelSt
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.SectionCountDropFiltStepSt
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.SectionCountDropFiltFiniteSt
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.PPrimeFiltrationExists
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.PSubvarDrop
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.QuotGraded
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.TwistAlg
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.KrullDimension.NonZeroDivisors
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.Kleiman
@@ -26,6 +79,7 @@ variable {S : Type u} [CommRing S] {N : ℕ}
 theorem homogeneousComponent_mul_mem_span {g : Poly S N} {e : ℕ} (hg : g.IsHomogeneous e)
     (r : Poly S N) (d : ℕ) : homogeneousComponent d (r * g) ∈ Ideal.span {g} := by
   classical
+
   rw [← sum_homogeneousComponent r, Finset.sum_mul, map_sum]
   refine Ideal.sum_mem _ fun m _ => ?_
   rw [homogeneousComponent_of_mem
@@ -46,11 +100,12 @@ theorem hom_span {T : Set (Poly S N)} (hT : ∀ g ∈ T, ∃ e, g.IsHomogeneous 
     · exact Ideal.subset_span hg
     · exact zero_mem _
   | zero => intro d; simp
-  | add a b _ _ ha hb => intro d; rw [map_add]; exact add_mem (ha d) (hb d)
+  | add a b _ _ ha hb => intro d; rw [map_add (f := _)]; exact add_mem (ha d) (hb d)
   | smul r a _ ha =>
     intro d
     classical
     change homogeneousComponent d (r * a) ∈ _
+
     rw [← sum_homogeneousComponent a, Finset.mul_sum, map_sum]
     refine Ideal.sum_mem _ fun m _ => ?_
     exact (Ideal.span_singleton_le_iff_mem _).mpr (ha m)
@@ -61,7 +116,7 @@ theorem hom_sup {I I' : Ideal (Poly S N)} (h : ∀ f ∈ I, ∀ d : ℕ, homogen
     ∀ f ∈ I ⊔ I', ∀ d : ℕ, homogeneousComponent d f ∈ I ⊔ I' := by
   intro f hf d
   obtain ⟨a, ha, a', ha', rfl⟩ := Submodule.mem_sup.mp hf
-  rw [map_add]
+  rw [map_add (f := _)]
   exact add_mem (Ideal.mem_sup_left (h a ha d)) (Ideal.mem_sup_right (h' a' ha' d))
 
 end Ideals
@@ -164,8 +219,8 @@ theorem finrank_le_of_step {K V W : Type*} [Field K] [AddCommGroup V] [Module K 
 
 end SectionCount.Drop.Filt
 
-open SectionCount.Drop.Filt in
 
+open SectionCount.Drop.Filt in
 theorem SectionCount.Drop.Filt.proof (hK : SectionCount.Drop.Filt.Kernel.Statement.{u, w})
     (hS : SectionCount.Drop.Filt.Step.Statement.{u, w})
     (hF : SectionCount.Drop.Filt.Finite.Statement.{u, w}) :
@@ -240,7 +295,7 @@ theorem SectionCount.Drop.Filt.proof (hK : SectionCount.Drop.Filt.Kernel.Stateme
     · intro hf
       obtain ⟨a, ha, y, hy, rfl⟩ := Submodule.mem_sup.mp hf
       obtain ⟨c, rfl⟩ := Ideal.mem_span_singleton'.mp hy
-      rw [map_add, hmkQ]
+      rw [map_add (f := _), hmkQ]
       exact Submodule.add_mem_sup ha (Submodule.smul_mem _ _ (Submodule.mem_span_singleton_self _))
   have hJkp : ∀ (l : Fin Fl.n) (f : Poly k N), f ∈ Fl.prime l ↔ f * g l ∈ Jk l.castSucc := by
     intro l f
@@ -335,7 +390,7 @@ theorem SectionCount.Drop.Filt.proof (hK : SectionCount.Drop.Filt.Kernel.Stateme
     fun a => ⟨heSv _ (hemb a), heS _ (hemb a), hann _⟩, fun qq => ?_, fun n i => ?_⟩
   ·
     by_cases h : qq ∈ J.minimalPrimes ∧ IsSubvar x qq d
-    · rw [dif_pos h, hc1 qq]
+    · rw [dite_eq_left h, hc1 qq]
       have hset : kept.filter (fun l => eS l = d ∧ Fl.prime l = qq) =
           Finset.univ.filter (fun l => Fl.prime l = qq) := by
         ext l
@@ -350,7 +405,7 @@ theorem SectionCount.Drop.Filt.proof (hK : SectionCount.Drop.Filt.Kernel.Stateme
       have hq := hcount Fl qq h.1
       unfold cutMult
       rw [← hq, ENat.toNat_natCast]
-    · rw [dif_neg h, hc1 qq, Nat.cast_eq_zero, Finset.card_eq_zero, Finset.filter_eq_empty_iff]
+    · rw [dite_eq_right h, hc1 qq, Nat.cast_eq_zero, Finset.card_eq_zero, Finset.filter_eq_empty_iff]
       rintro l hl ⟨hed, hpq⟩
       have hrel := (Finset.mem_filter.mp hl).2
       have hsub : IsSubvar x qq d := hpq ▸ hed ▸ heSv l hrel
@@ -416,7 +471,7 @@ theorem SectionCount.Drop.Filt.proof (hK : SectionCount.Drop.Filt.Kernel.Stateme
       | succ r ih =>
         intro hr
         have hr' : r < Fl.n := by omega
-        rw [Finset.sum_range_succ, dif_pos hr']
+        rw [Finset.sum_range_succ, dite_eq_left hr']
         have h1 := hstep ⟨r, hr'⟩
         have h2 := ih (by omega)
         rw [Fin.succ_mk, Fin.castSucc_mk] at h1
@@ -426,7 +481,7 @@ theorem SectionCount.Drop.Filt.proof (hK : SectionCount.Drop.Filt.Kernel.Stateme
     have htop := htel Fl.n le_rfl
     rw [show (⟨Fl.n, by omega⟩ : Fin (Fl.n + 1)) = Fin.last Fl.n from rfl, hlast,
       Finset.sum_range] at htop
-    simp only [Fin.is_lt, dif_pos, Fin.eta] at htop
+    simp only [Fin.is_lt, dite_eq_left, Fin.eta] at htop
 
     have hker := hK k Ω N x j b Fs hxj
     let mulβ : (Fs.twist (twistSys k x (-(b : ℤ)))).secs →ₗ[k] Fs.secs :=

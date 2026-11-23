@@ -1,16 +1,59 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.RowsMeanC
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.RowsMeanC
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.BesselModelHyperbolicBasisScaledStatement
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.BesselModelLinearMapMatrixExistsStatement
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.DualVectorsNormalFormMemSecondFlagStatement
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsBlockAntidiagonalScaledPairingMatrixStatement
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsIsometryHermFrameUnipotentStatement
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.RealMatrixMemBesselUnipotentOfFrameStatement
 import Development.AbelianVarietyTheory.Proofs.FlagMeasures.RealPointGramMinorsAgreeProof
-import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RootLatticeThresholds.Choice
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.HermitianFramesPairingStabilizerBlockDiagonal
 import Development.AbelianVarietyTheory.Proofs.FlagMeasures.SameBlockAppend
-import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.LoopTerm
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsIsometryHermFrameUnipotentStatement
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.RealMatrixMemBesselUnipotentOfFrameStatement
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.BesselModelLinearMapMatrixExistsStatement
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.BesselModelHyperbolicBasisScaledStatement
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.DualVectorsNormalFormMemSecondFlagStatement
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsBlockAntidiagonalScaledPairingMatrixStatement
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.LoopTerm
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RootLatticeThresholds.Choice
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 open scoped Classical
@@ -160,7 +203,7 @@ namespace GlobalTheory.TypeAsm
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
 open FramePf
 
-set_option maxHeartbeats 4000000 in
+
 
 theorem frameC_holds : FrameC := by
   intro D large₂ X Y u C hStd t N hAd
@@ -256,7 +299,7 @@ theorem frameC_holds : FrameC := by
     induction hy using Submodule.span_induction with
     | mem x hx => exact hS x hx
     | zero => simp
-    | add x y _ _ hx hy => rw [LinearMap.map_add, LinearMap.add_apply, hx, hy, add_zero]
+    | add x y _ _ hx hy => rw [LinearMap.map_add (f := _), LinearMap.add_apply, hx, hy, add_zero]
     | smul c x _ hx => rw [hBl, hx, mul_zero]
   have hset : ∀ a : Fin D.R.rS, {b : Fin D.R.rS | b < a} = {b | b.val < a.castSucc.val} := fun a => rfl
   have hsetU : {b : Fin D.R.rS | b.val < (Fin.last D.R.rS).val} = Set.univ := by
@@ -436,7 +479,7 @@ theorem frameC_holds : FrameC := by
   have hzT := Formalism.L2.SG.Pf.zTr C u τ
   refine ⟨?_, hzT.1, hzT.1, ?_, ⟨(embS D τ N.c)⁻¹, ?_⟩, fun a => ⟨hA1 a, hA2 a⟩, fun b hb => hA3 b hb, hZ1, hZ2⟩
   · rw [hfun]
-    refine ⟨fun x y => by beta_reduce; rw [map_add, GramPf.phiV_add],
+    refine ⟨fun x y => by beta_reduce; rw [map_add (f := _), GramPf.phiV_add],
       fun c x => by beta_reduce; rw [map_smul, GramPf.phiV_smul],
       fun x y => by beta_reduce; rw [GramPf.phiV_herm, hm2I], ?_⟩
     rw [show (Set.range fun y => phiV C τ (m2 y)) = Set.range (phiV C τ) from
@@ -469,7 +512,7 @@ theorem frameC_holds : FrameC := by
     rw [hE, Matrix.mulVec_smul, Matrix.mulVec_mulVec, hGl, Matrix.one_mulVec, hΦ]
     refine Submodule.smul_mem _ _ ?_
     exact span_map_mem (embS D τ) (fun y => phiV C τ (m2 y))
-      (fun x y => by beta_reduce; rw [map_add, GramPf.phiV_add])
+      (fun x y => by beta_reduce; rw [map_add (f := _), GramPf.phiV_add])
       (fun c x => by beta_reduce; rw [map_smul, GramPf.phiV_smul]) (fN '' {b | b.val < N.j}) _
       (by rintro _ ⟨b, hb, rfl⟩; beta_reduce; rw [hm2f']; exact hXst b hb) _ (hfN5 a ha)
   · have hE : Formalism.QuantumDeterminants.bvec (Formalism.QuantumDeterminants.eI D.R.k D.R.rS a) = ((((2 * D.host.v) ^ (D.R.rS - a.val) : ℝ) : ℂ))⁻¹ •
@@ -478,7 +521,7 @@ theorem frameC_holds : FrameC := by
     rw [hE, Matrix.mulVec_smul, hgΦ]
     refine Submodule.smul_mem _ _ ?_
     exact span_map_mem (embS D τ) (fun y => phiV C τ (mA (t.lin.symm y)))
-      (fun x y => by beta_reduce; rw [map_add, map_add, GramPf.phiV_add])
+      (fun x y => by beta_reduce; rw [map_add (f := _), map_add (f := _), GramPf.phiV_add])
       (fun c x => by beta_reduce; rw [map_smul, map_smul, GramPf.phiV_smul]) (fM '' {b | b.val < N.j}) _
       (by rintro _ ⟨b, hb, rfl⟩; beta_reduce; rw [hmAf']; exact hXst b hb) _ (hfM5 a ha)
   · refine hcancel _ _ (hρa a) ?_

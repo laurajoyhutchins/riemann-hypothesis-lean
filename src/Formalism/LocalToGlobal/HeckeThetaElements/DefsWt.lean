@@ -1,4 +1,46 @@
-import Formalism.LocalToGlobal.HeckeThetaElements.IsHeckeElt
+module
+
+public import Formalism.LocalToGlobal.HeckeThetaElements.IsHeckeElt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -25,12 +67,12 @@ def wtOf (D : D7) (V : HSp D) (τ : D.what₂.Tau) : Fin (V.sig (tauE D τ)).1 �
 private theorem lamAt_eq_v_of_lt {R : Ranks} (h : HCParam R) {n : ℕ} (hn : n < R.k - 1) :
     lamAt h n = h.v ⟨n, hn⟩ := by
   unfold lamAt
-  rw [dif_pos hn]
+  rw [dite_eq_left hn]
 
 private theorem lamAt_eq_neg_b_of_not_lt {R : Ranks} (h : HCParam R) {n : ℕ} (hn : ¬ n < R.k - 1)
     (hm : n - (R.k - 1) < R.m) : lamAt h n = -h.b ⟨n - (R.k - 1), hm⟩ := by
   unfold lamAt
-  rw [dif_neg hn, dif_pos hm]
+  rw [dite_eq_right hn, dite_eq_left hm]
 
 theorem lamAt_int {R : Ranks} (h : HCParam R) (n : ℕ) : ∃ z : ℤ, lamAt h n = z := by
   by_cases hn : n < R.k - 1
@@ -42,7 +84,7 @@ theorem lamAt_int {R : Ranks} (h : HCParam R) (n : ℕ) : ∃ z : ℤ, lamAt h n
       exact ⟨-z, by rw [hz, Int.cast_neg]⟩
     · refine ⟨0, ?_⟩
       unfold lamAt
-      rw [dif_neg hn, dif_neg hm, Int.cast_zero]
+      rw [dite_eq_right hn, dite_eq_right hm, Int.cast_zero]
 
 private theorem b_congr {R : Ranks} (h : HCParam R) {i j : ℕ} (hi : i < R.m) (hj : j < R.m) (e : i = j) :
     h.b ⟨i, hi⟩ = h.b ⟨j, hj⟩ := by

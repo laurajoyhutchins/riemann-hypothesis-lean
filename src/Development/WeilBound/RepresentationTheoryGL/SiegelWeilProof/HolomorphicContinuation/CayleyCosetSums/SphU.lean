@@ -1,4 +1,60 @@
-import Development.WeilBound.RepresentationTheoryGL.SiegelWeilProof.HolomorphicContinuation.CayleyCosetSums.CanonicalPsiNeZeroOfPathBasis
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.SiegelWeilProof.HolomorphicContinuation.CayleyCosetSums.FdProps
+public import Development.WeilBound.RepresentationTheoryGL.SiegelWeilProof.HolomorphicContinuation.AnalyticDeterminants.IteratedFDerivMulConstOf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Matrix.FiniteDimensional
+import Mathlib.LinearAlgebra.Multilinear.FiniteDimensional
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Development.WeilBound.RepresentationTheoryGL.SiegelWeilProof.HolomorphicContinuation.AnalyticDeterminants.ContinuousOnIteratedFDerivTranslate
+public import Mathlib.Analysis.Calculus.ParametricIntegral
+
+@[expose] public section
 
 noncomputable section
 
@@ -174,7 +230,7 @@ private theorem exists_ne_zero_smul_mem_of_mem_span' {E : Type} [NormedAddCommGr
     rw [iteratedFDeriv_comp_clm_mul_const F U hU hF (L p.1) (c p.1) N p.2 (hp.2 p.1)]
     simp
   have hdG : ∀ k, ContDiffOn ℂ ∞ (fun y => F (L k y) * c k) {y | ∀ k, L k y ∈ U} :=
-    fun k => (hF.comp (L k).contDiff.contDiffOn (fun y (hy : ∀ k, L k y ∈ U) => hy k)).mul contDiffOn_const
+    fun k => (hF.comp (L k).contDiff.contDiffOn (show Set.MapsTo (L k) {y | ∀ k, L k y ∈ U} U from fun y hy => hy k)).mul contDiffOn_const
   obtain ⟨key, hcd⟩ := matrix_mul_comm_of_mul_eq_smul_one_of_ne_zero μ {y | ∀ k, L k y ∈ U} (fun k y => F (L k y) * c k) hW hG hdG
   refine ⟨hW, hcd, fun N y hy => key N y hy, fun N y hy => ?_⟩
   haveI := finiteDimensional_continuousMultilinearMap (E := E) N
@@ -207,20 +263,20 @@ theorem sphU : SphU := by
             (fun i => LB g (single ((Fintype.equivFin ιB).symm i) (τ ((Fintype.equivFin ιB).symm i)) 1))) := by
     intro k
     have hFk : ContDiffOn ℂ ∞ (fun y => F (ι k * y)) {y : M2 n | ∀ k, ι k * y ∈ U} :=
-      (hF'.comp (Lc (ι k)).contDiff.contDiffOn (fun y (hy : ∀ k, ι k * y ∈ U) => by rw [hLapp]; exact hy k)).congr
+      (hF'.comp (Lc (ι k)).contDiff.contDiffOn (show Set.MapsTo (Lc (ι k)) {y : M2 n | ∀ k, ι k * y ∈ U} U from fun y hy => by rw [hLapp]; exact hy k)).congr
         (fun y _ => by rw [Function.comp_apply, hLapp])
     have h1 := detD_detD_mul_const (fun y => F (ι k * y)) _ hWo hFk g hgW (LA g) (LB g) (c k)
     have h2 := detD_detD_comp (fun y => F (ι k * y) * c k) _ hWo (hFk.mul contDiffOn_const) g hgW (LA g) (LB g)
     beta_reduce at h1 h2
     rw [← h1, h2]
   simp only [hR]
-  rw [integral_finset_sum _ (fun σ _ => ?_)]
+  rw [integral_finsetSum _ (fun σ _ => ?_)]
   · refine Finset.sum_congr rfl fun σ _ => ?_
-    rw [integral_finset_sum _ (fun τ _ => ?_)]
+    rw [integral_finsetSum _ (fun τ _ => ?_)]
     · refine Finset.sum_congr rfl fun τ _ => ?_
       rw [integral_const_mul]
     · exact ((ContinuousMultilinearMap.apply ℂ _ ℂ _).integrable_comp (hint _ g hgW)).const_mul _
-  · exact integrable_finset_sum _ fun τ _ =>
+  · exact integrable_finsetSum _ fun τ _ =>
       ((ContinuousMultilinearMap.apply ℂ _ ℂ _).integrable_comp (hint _ g hgW)).const_mul _
 
 end PositivityTheory.Rg.Sw.HSt

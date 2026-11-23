@@ -1,6 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.CoordPair
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.OneVectorCcOfSiegelWeil
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.CoordPair
+public import Development.AbelianVarietyTheory.Definitions.LatticeFrames.HermCoord
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.OneVectorCcOfSiegelWeil
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.T2SpaceNumberFieldInfiniteAdeles
+
+@[expose] public section
 
 open NumberField IsDedekindDomain MeasureTheory Topology Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes GlobalTheory.GaugeEx
 open scoped TensorProduct NNReal ENNReal
@@ -38,44 +81,13 @@ section Main
 variable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] {σ : E →ₐ[F] E}
   (R : Type) [CommRing R] [Algebra F R]
 
-def invMat (σ : E →ₐ[F] E) {n : ℕ} (x : (Fin n → R) × ({p : Fin n × Fin n // p.1 < p.2} → R ⊗[F] E)) :
-    Matrix (Fin n) (Fin n) (R ⊗[F] E) :=
-  fun a b => if h : a < b then x.2 ⟨(a, b), h⟩ else if h' : b < a then sigR R σ (x.2 ⟨(b, a), h'⟩)
-    else algebraMap R (R ⊗[F] E) (x.1 a)
-
-theorem invMat_mem (h : IsCMExt F E σ) {n : ℕ} (x : (Fin n → R) × ({p : Fin n × Fin n // p.1 < p.2} → R ⊗[F] E)) :
-    invMat R σ x ∈ HermR R σ n := by
-  intro a b
-  rcases lt_trichotomy a b with hab | hab | hab
-  · simp [invMat, hab, not_lt.2 hab.le, sigR_sigR R h]
-  · subst hab; simp only [invMat, lt_self_iff_false, ↓reduceDIte]; exact sigR_algebraMap R _
-  · simp [invMat, hab, not_lt.2 hab.le]
-
-def coordEquiv (h : IsCMExt F E σ) (n : ℕ) :
-    HermR R σ n ≃+ ((Fin n → R) × ({p : Fin n × Fin n // p.1 < p.2} → R ⊗[F] E)) where
-  toFun := hermCoord R σ
-  invFun x := ⟨invMat R σ x, invMat_mem R h x⟩
-  left_inv S := by
-    apply Subtype.ext
-    funext a b
-    rcases lt_trichotomy a b with hab | hab | hab
-    · simp [invMat, hab, hermCoord]
-    · subst hab; simpa [invMat, hermCoord] using fixed_eq R h (S.2 a a)
-    · simpa [invMat, hab, not_lt.2 hab.le, hermCoord] using S.2 a b
-  right_inv x := by
-    refine Prod.ext (funext fun a => ?_) (funext fun p => ?_)
-    · simpa [hermCoord, invMat] using half_trace R h (x.1 a)
-    · simp [hermCoord, invMat, p.2]
-  map_add' S T := by
-    refine Prod.ext (funext fun a => ?_) (funext fun p => rfl)
-    simp [hermCoord, mul_add]
-
 theorem pair_eq (h : IsCMExt F E σ) {n : ℕ} (S T : HermR R σ n) :
     pairHerm R σ n S T = coordPair R σ n (hermCoord R σ S) (hermCoord R σ T) := by
   unfold pairHerm coordPair
   rw [sum_sum_split (fun a b => (S : Matrix (Fin n) (Fin n) (R ⊗[F] E)) a b * (T : Matrix (Fin n) (Fin n) _) b a)]
   beta_reduce
-  rw [map_add, map_sum, map_sum, mul_add, Finset.mul_sum, Finset.mul_sum]
+
+  rw [map_add (f := _), map_sum, map_sum, mul_add, Finset.mul_sum, Finset.mul_sum]
   congr 1
   · refine Finset.sum_congr rfl fun a _ => ?_
     have := half_trace R h (algebraMap F R (1 / 2) * Algebra.trace R (R ⊗[F] E) (S.1 a a) *

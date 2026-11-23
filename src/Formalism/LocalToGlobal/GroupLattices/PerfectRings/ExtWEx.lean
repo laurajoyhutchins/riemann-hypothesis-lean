@@ -1,4 +1,57 @@
-import Formalism.LocalToGlobal.GroupLattices.PerfectRings.CharZeroWittQuadratic
+module
+
+public import Formalism.LocalToGlobal.GroupLattices.PerfectRings.CharZeroWittQuadratic
+import Mathlib.Algebra.AffineMonoid.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+public import Mathlib.RingTheory.IntegralClosure.IntegralRestrict
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.NumberTheory.NumberField.Norm
+
+@[expose] public section
 
 noncomputable section
 
@@ -68,7 +121,11 @@ theorem exists_emb (w : HeightOneSpectrum (𝓞 LL)) (hw : (p : 𝓞 LL) ∈ w.a
     charZero_of_injective_algebraMap (algebraMap (KO p n) (Om p n)).injective
   by_contra hno
   push_neg at hno
-  let τ0 : LL →ₐ[ℚ] Om p n := IsAlgClosed.lift
+  let τ0 : LL →ₐ[ℚ] Om p n := (by
+    refine @_root_.IsAlgClosed.lift _ _ _ _ _ _ _ _ _ _ _ ?_ ?_ ?_
+    solve_by_elim* (maxDepth := 2) only [*,
+      @_root_.DivisionSemiring.to_moduleIsTorsionFree,
+      @_root_.Algebra.IsIntegral.isAlgebraic, @_root_.inferInstance])
 
   have hav : ¬ ((w.asIdeal : Set (𝓞 LL)) ⊆ ⋃ σ ∈ ((Finset.univ : Finset (LL →ₐ[ℚ] Om p n)) :
       Set (LL →ₐ[ℚ] Om p n)), ((placeIdeal σ.toRingHom : Ideal (𝓞 LL)) : Set (𝓞 LL))) := by
@@ -132,14 +189,6 @@ theorem exists_emb (w : HeightOneSpectrum (𝓞 LL)) (hw : (p : 𝓞 LL) ∈ w.a
   rw [key]
   have hmI : IsIntegral (OO p n) ((m : ℤ) : Om p n) := (integralClosure (OO p n) (Om p n)).intCast_mem m
   exact hmI.mul (hN_eq ▸ hint)
-
-theorem exists_ringAt (w : HeightOneSpectrum (𝓞 LL)) (hw : (p : 𝓞 LL) ∈ w.asIdeal) :
-    ∃ τ : LL →+* Om p n, ∀ x : LL,
-      w.valuation LL x ≤ 1 ↔ embL τ x ∈ Set.range (algebraMap (Ot τ) (Lt τ)) := by
-  obtain ⟨τ, hτ⟩ := exists_emb (p := p) (n := n) w hw
-  refine ⟨τ, fun x => ?_⟩
-  have := induces (τ := τ) x
-  rwa [hτ] at this
 
 def tauAt (p : ℕ) [Fact p.Prime] (n : ℕ) (w : HeightOneSpectrum (𝓞 LL)) (hw : (p : 𝓞 LL) ∈ w.asIdeal) :
     LL →+* Om p n := (exists_emb (p := p) (n := n) w hw).choose

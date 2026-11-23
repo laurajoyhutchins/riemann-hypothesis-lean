@@ -1,15 +1,59 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutHB2
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.AdjointCornerScaledSingleComm
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.SliceContOn
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.KloostermanDensityOfParts
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutHB2
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.AdjointCornerScaledSingleComm
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutHLNf
 import Formalism.HermitianCurvature.HermitianCurvatureProofs.EmbeddedGroupMeasurePreserving
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.PBGLet
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutHLNf
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.SymmetricScalarBlockMatrixMul
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.SlicesFiniteRegularityBuilt
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.UwClosedSubgroup
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.LeftFubiniNormalizedTower
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.EmbeddingMapApplyFirstBlock
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.KloostermanDensityOfParts
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.LeftFubiniNormalizedTower
 import Formalism.HermitianCurvature.HermitianCurvatureProofs.LevelsOfBuiltSetting
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.SliceContOn
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.SlicesFiniteRegularityBuilt
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.SymmetricScalarBlockMatrixMul
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.UpperMinorOfLevelPoint
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.UwClosedSubgroup
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Matrix
 open scoped ContDiff ComplexConjugate
@@ -42,7 +86,7 @@ theorem cd_lowW_entry {p : ℕ} (σ : Equiv.Perm (Fin p)) (a b : Fin p) :
   simp only [Matrix.add_apply, Matrix.of_apply]
   refine contDiff_const.add ?_
   split_ifs
-  · exact contDiff_apply ℝ ℂ _
+  · exact contDiff_apply ℝ (fun _ => ℂ) _
   · exact contDiff_const
 
 theorem cd_zxH_entry (h : C.LPt) (j : ℕ) (hs : D.ptSize h = j) (a b : Fin j) :
@@ -217,8 +261,8 @@ theorem leading_block_of_base_point {k r j : ℕ} (hj : j + 1 ≤ r) (Z : Matrix
   have key : ∀ q : Fin (2 * (j + 1 + (r - (j + 1))) + k + 1), q.val = 2 * (j + (r - j)) + k - a.val →
       q = U.eB k (j + 1) (r - (j + 1)) (Sum.inr ⟨j - a.val, by omega⟩) := by
     intro q hq; ext; rw [Ux3.block_index_last_val]; simp only [Fin.val_mk]; omega
-  rw [key (Fin.cast _ _) (by simp), LeftFubiniLemmas.embedding_map_apply_last_block, dif_pos (by simp only [Fin.val_cast]; omega), zfull_apply,
-    dif_pos (by simp only [Fin.val_rev, Fin.val_cast, Fin.val_mk]; omega)]
+  rw [key (Fin.cast _ _) (by simp), LeftFubiniLemmas.embedding_map_apply_last_block, dite_eq_left (by simp only [Fin.val_cast]; omega), zfull_apply,
+    dite_eq_left (by simp only [Fin.val_rev, Fin.val_cast, Fin.val_mk]; omega)]
   congr 1 <;> ext <;> simp only [Fin.val_rev, Fin.val_cast, Fin.val_mk] <;> omega
 
 end head

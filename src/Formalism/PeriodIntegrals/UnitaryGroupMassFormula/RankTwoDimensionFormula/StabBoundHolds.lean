@@ -1,7 +1,48 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.RankTwoDimensionFormula.DimFormCOfThree
-import Formalism.LocalRingCardinality.SpanPowerMembership.ExampleLayerExistsGenerators
-import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.InclusionInjective
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.RankTwoDimensionFormula.DimFormCOfSteps
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.RankTwoDimensionFormula.DimFormCOfThree
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -35,6 +76,7 @@ theorem crd_gOf (M : GL (Fin X.B.I.n) X.B.I.E) (y : (VS D).V) :
   funext i
   simp only [Formalism.L2.SG.HidaSetting.HidaSetting.crd, crdOf]
   rw [hr]
+
   simp [Matrix.mulVec, dotProduct, hmat, map_sum, crdOf]
 
 theorem crd_injective : Function.Injective X.crd := by
@@ -76,15 +118,17 @@ theorem gOf_isom (M : GL (Fin X.B.I.n) X.B.I.E) (hM : M ∈ Formalism.UG.UJ (sta
   have key : ∀ i j, (VS D).hT (gOf X M (X.bas i)) (gOf X M (X.bas j)) = (VS D).hT (X.bas i) (X.bas j) := by
     intro i j
     rw [hg, hg, ← X.J_eq, ← congrFun (congrFun hU i) j]
+
     simp only [map_sum, LinearMap.map_smulₛₗ₂, LinearMap.sum_apply, LinearMap.map_smul, smul_eq_mul, ← X.J_eq,
-      hmat, Matrix.map_apply, RingEquiv.toRingHom_eq_coe, RingHom.coe_coe, starRingEnd_apply, star_host,
-      Formalism.UG.cT, Matrix.mul_apply, Matrix.transpose_apply, map_mul, Finset.sum_mul]
+    hmat, Matrix.map_apply, RingEquiv.toRingHom_eq_coe, RingHom.coe_coe, starRingEnd_apply, star_host,
+    Formalism.UG.cT, Matrix.mul_apply, Matrix.transpose_apply, map_mul, Finset.sum_mul]
     refine Finset.sum_congr rfl fun k _ => Finset.sum_congr rfl fun l _ => ?_
     ring
   intro x y
   rw [← X.bas.sum_repr x, ← X.bas.sum_repr y]
+
   simp only [map_sum, LinearEquiv.map_smul, LinearMap.map_smulₛₗ₂, LinearMap.sum_apply, LinearMap.map_smul,
-    smul_eq_mul, key]
+  smul_eq_mul, key]
 
 def matOf (η : X.B.I.Gf) : GL (Fin X.B.I.n) X.B.I.E :=
   if h : ∃ M : GL (Fin X.B.I.n) X.B.I.E, M ∈ Formalism.UG.UJ (starRingEnd X.B.I.E) X.B.I.J ∧
@@ -225,6 +269,7 @@ theorem eq_of_ind (u : D.what₂.Word) (g1 g2 : (VS D).V ≃ₗ[D.host.E] (VS D)
     have hc : ∀ b, c b = 0 := by
       intro b
       have := hb b
+
       simpa [map_sum, hfe] using this
     simp [hc]
   have hperp : ∀ x ∈ perpS (VS D) (X.Fu u).X, g1 x = g2 x := by
@@ -242,12 +287,14 @@ theorem eq_of_ind (u : D.what₂.Word) (g1 g2 : (VS D).V ≃ₗ[D.host.E] (VS D)
     unfold FlagG.X at hx
     rw [X.Fu_e, Submodule.mem_span_range_iff_exists_fun] at hx
     obtain ⟨c, rfl⟩ := hx
+
     simp [map_sum, X.ef]
   apply LinearEquiv.ext
   intro v
   have hsplit : v = (v - ∑ a, (VS D).hT (X.eX a) v • X.fY a) + ∑ a, (VS D).hT (X.eX a) v • X.fY a := by abel
-  rw [hsplit, map_add, map_add, hperp _ (hv' v)]
+  rw [hsplit, map_add (f := _), map_add (f := _), hperp _ (hv' v)]
   congr 1
+
   simp [map_sum, hf1, hf2]
 
 end PI.UnitaryDimensionFormula.StabB

@@ -1,7 +1,68 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterDivSuppAC
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterGoodA
-import ReciprocityTheory.CommutativeAlgebra.CohenMacaulay.IsCMOfIsRegularLocalRing
-import ReciprocityTheory.CommutativeAlgebra.SaturatedChains.RingKrullDimLocalizationQuotientEqHeight
+module
+
+public import Mathlib.RingTheory.Ideal.Height
+public import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.Ideal.KrullsHeightTheorem
+public import Mathlib.RingTheory.KrullDimension.Polynomial
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Polynomial
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.CommutativeAlgebra.CohenMacaulay.IsCMOfIsRegularLocalRing
+public import ReciprocityTheory.CommutativeAlgebra.CohenMacaulay.LocDim
+public import ReciprocityTheory.CommutativeAlgebra.SaturatedChains.RingKrullDimLocalizationQuotientEqHeight
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterDivSuppAA
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterDivSuppAC
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterGoodA
+public import Mathlib.Algebra.Algebra.ZMod
+public import Mathlib.RingTheory.KrullDimension.PID
+public import ReciprocityTheory.CommutativeAlgebra.ChainConnInDim
+
+@[expose] public section
 
 noncomputable section
 
@@ -43,14 +104,8 @@ theorem height_eq_ringKrullDim_of_forall {B : Type*} [CommRing B]
     haveI := hN.isPrime
     have h1 : Order.height p ≤ Order.height (⟨N, hN.isPrime⟩ : PrimeSpectrum B) :=
       Order.height_mono (show p ≤ ⟨N, hN.isPrime⟩ from hpN)
-    have h2 : N.height = Order.height (⟨N, hN.isPrime⟩ : PrimeSpectrum B) := by
-      have hmem : N ∈ N.minimalPrimes := by
-        rw [Ideal.minimalPrimes_eq_subsingleton_self]; exact Set.mem_singleton N
-      unfold Ideal.height
-      apply le_antisymm
-      · exact iInf₂_le N hmem
-      · exact le_iInf₂ fun J hJ =>
-          Order.height_mono (show (⟨N, hN.isPrime⟩ : PrimeSpectrum B) ≤ ⟨J, hJ.1.1⟩ from hJ.1.2)
+    have h2 : N.height = Order.height (⟨N, hN.isPrime⟩ : PrimeSpectrum B) :=
+      PrimeSpectrum.height_eq_orderHeight (⟨N, hN.isPrime⟩ : PrimeSpectrum B)
     rw [hB M N hM hN, h2]
     exact_mod_cast h1
 
@@ -64,9 +119,9 @@ theorem finiteRingKrullDim_mvPolynomialInt_quot {σ : Type*} [Finite σ]
   refine ne_top_of_le_ne_top ?_ (ringKrullDim_quotient_le P)
   rw [MvPolynomial.ringKrullDim_of_isNoetherianRing,
     IsPrincipalIdealRing.ringKrullDim_eq_one ℤ Int.not_isField]
-  rw [← Nat.cast_one, ← Nat.cast_add]
-  rw [← WithBot.coe_natCast]
-  exact ne_of_lt (WithBot.coe_lt_coe.mpr (ENat.natCast_lt_top _))
+  change ((1 : ℕ∞) : WithBot ℕ∞) + (ENat.card σ : WithBot ℕ∞) ≠ ⊤
+  rw [← WithBot.coe_add]
+  exact ne_of_lt (WithBot.coe_lt_coe.mpr (ENat.add_lt_top.2 ⟨by simp, ENat.card_lt_top_of_finite⟩))
 
 theorem finiteRingKrullDim_quot {B : Type*} [CommRing B] [FiniteRingKrullDim B] (q : Ideal B)
     [q.IsPrime] : FiniteRingKrullDim (B ⧸ q) := by
@@ -79,13 +134,7 @@ theorem finiteRingKrullDim_quot {B : Type*} [CommRing B] [FiniteRingKrullDim B] 
 
 private theorem ideal_height_eq_order_height_primeSpectrum {R : Type*} [CommRing R] (N : Ideal R) [hN : N.IsPrime] :
     N.height = Order.height (⟨N, hN⟩ : PrimeSpectrum R) := by
-  have hmem : N ∈ N.minimalPrimes := by
-    rw [Ideal.minimalPrimes_eq_subsingleton_self]; exact Set.mem_singleton N
-  unfold Ideal.height
-  apply le_antisymm
-  · exact iInf₂_le N hmem
-  · exact le_iInf₂ fun J hJ =>
-      Order.height_mono (show (⟨N, hN⟩ : PrimeSpectrum R) ≤ ⟨J, hJ.1.1⟩ from hJ.1.2)
+  exact PrimeSpectrum.height_eq_orderHeight (⟨N, hN⟩ : PrimeSpectrum R)
 
 theorem height_int_of_isMaximal (M : Ideal ℤ) (hM : M.IsMaximal) : M.height = 1 := by
   haveI := hM.isPrime
@@ -111,7 +160,7 @@ theorem height_int_of_isMaximal (M : Ideal ℤ) (hM : M.IsMaximal) : M.height = 
     exact bot_le
   have hx : ¬ IsMin (⟨M, hM.isPrime⟩ : PrimeSpectrum ℤ) := by
     intro h
-    have hlt : (⟨⊥, Ideal.bot_prime⟩ : PrimeSpectrum ℤ) < ⟨M, hM.isPrime⟩ :=
+    have hlt : (⟨⊥, Ideal.isPrime_bot⟩ : PrimeSpectrum ℤ) < ⟨M, hM.isPrime⟩ :=
       show (⊥ : Ideal ℤ) < M from bot_lt_iff_ne_bot.mpr hMbot
     exact lt_irrefl _ (lt_of_lt_of_le hlt (h (le_of_lt hlt)))
   apply le_antisymm

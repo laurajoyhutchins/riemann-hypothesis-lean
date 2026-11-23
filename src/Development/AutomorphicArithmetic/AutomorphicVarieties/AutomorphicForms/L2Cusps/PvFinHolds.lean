@@ -1,5 +1,45 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.L2Cusps.AbsCompactAlt
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.L2Cusps.HomFin
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.L2Cusps.AbsCompactAlt
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.L2Cusps.HomFin
+import GroundTheory.AutomorphicForms.CuspidalDiscreteness.SummandsAreCuspForms
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField MeasureTheory
 open GroundTheory.Automorphic GroundTheory.Automorphic.AutomorphicForm GroundTheory.Automorphic.CuspidalSpectrum
@@ -53,14 +93,16 @@ theorem UpperTheory.V.KernelIndexFullLattice.pvFin_holds :
     induction hx using Submodule.span_induction with
     | mem x hx =>
       obtain ⟨k, rfl⟩ := hx
+      simp only [archRepT_apply]
       have hcomm : retractOne (finEmb K n u) * archP K n k = archP K n k * retractOne (finEmb K n u) := by
-        rw [← retract_infEmb, ← retractOne_mul, ← retractOne_mul, infEmb_mul_finEmb_comm]
+        rw [← retract_infEmb (k : archGroup K n), ← retractOne_mul, ← retractOne_mul,
+          infEmb_mul_finEmb_comm (k : archGroup K n) u]
       have h1 := (cuspRepT μ₁).map_mul_apply (retractOne (finEmb K n u)) (archP K n k) v
       have h2 := (cuspRepT μ₁).map_mul_apply (archP K n k) (retractOne (finEmb K n u)) v
       rw [hv u hu, ← hcomm, h1] at h2
       exact h2
     | zero => exact map_zero _
-    | add x y _ _ hx hy => rw [map_add, hx, hy]
+    | add x y _ _ hx hy => rw [map_add (f := _), hx, hy]
     | smul c x _ hx => rw [map_smul, hx]
   obtain ⟨φ, hφ, e⟩ := hP x
   refine ⟨⟨φ, hφ⟩, fun u hu => hj ?_, e⟩

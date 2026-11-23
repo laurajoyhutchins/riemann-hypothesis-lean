@@ -1,4 +1,51 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.LiteratureResults.KTheoryStability.ReductionBoundsTorsion.ArithmeticGapBounds.AEConst
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.LiteratureResults.KTheoryStability.ReductionBoundsTorsion.ArithmeticGapBounds.AEConst
+public import Mathlib.MeasureTheory.Function.L2Space
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -54,8 +101,8 @@ theorem memLp_lift {u : S → ℝ} (h : Good j B μ DB u) : MemLp (lift j B u) 2
   have : (lift j B u ∘ pr j B) = u := funext fun x => lift_pr hi x
   rw [this]; exact hmem
 
-variable (j B μ DB) in
 
+variable (j B μ DB) in
 def cls (u : S → ℝ) : HL j B μ DB := by
   classical exact if h : Good j B μ DB u then (memLp_lift h).toLp (lift j B u) else 0
 
@@ -74,13 +121,13 @@ theorem good_sub {u v : S → ℝ} (hu : Good j B μ DB u) (hv : Good j B μ DB 
 theorem cls_sub {u v : S → ℝ} (hu : Good j B μ DB u) (hv : Good j B μ DB v) :
     cls j B μ DB (fun x => u x - v x) = cls j B μ DB u - cls j B μ DB v := by
   unfold cls
-  rw [dif_pos (good_sub hu hv), dif_pos hu, dif_pos hv]
+  rw [dite_eq_left (good_sub hu hv), dite_eq_left hu, dite_eq_left hv]
   exact MemLp.toLp_sub (memLp_lift hu) (memLp_lift hv)
 
 theorem cls_inner {u v : S → ℝ} (hu : Good j B μ DB u) (hv : Good j B μ DB v) :
     ⟪cls j B μ DB u, cls j B μ DB v⟫_ℝ = ∫ x in DB, u x * v x ∂μ := by
   unfold cls
-  rw [dif_pos hu, dif_pos hv, L2.inner_def]
+  rw [dite_eq_left hu, dite_eq_left hv, L2.inner_def]
   have h1 := (memLp_lift hu).coeFn_toLp
   have h2 := (memLp_lift hv).coeFn_toLp
   have hcongr : (fun q => ⟪((memLp_lift hu).toLp (lift j B u) : Qt j B → ℝ) q,
@@ -121,14 +168,14 @@ theorem cls_surj (f : HL j B μ DB) : ∃ u, Good j B μ DB u ∧ cls j B μ DB 
     show g (Quotient.mk _ q.out) = g q
     rw [Quotient.out_eq]
   unfold cls
-  rw [dif_pos hgood]
+  rw [dite_eq_left hgood]
   apply Lp.ext
   filter_upwards [(memLp_lift hgood).coeFn_toLp, hfg] with q h1 h2
   rw [h1, hl, h2]
 
 theorem cls_eq_iff {u v : S → ℝ} (hu : Good j B μ DB u) (hv : Good j B μ DB v) :
     cls j B μ DB u = cls j B μ DB v ↔ u =ᵐ[μ.restrict DB] v := by
-  unfold cls; rw [dif_pos hu, dif_pos hv, MemLp.toLp_eq_toLp_iff]
+  unfold cls; rw [dite_eq_left hu, dite_eq_left hv, MemLp.toLp_eq_toLp_iff]
   unfold nu Filter.EventuallyEq
   rw [ae_map_iff measurable_pr.aemeasurable
     (measurableSet_eq_fun (measurable_lift hu.1 hu.2.1) (measurable_lift hv.1 hv.2.1))]

@@ -1,7 +1,45 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.CharAbove
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.DenseRangeUnits
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HeckeCharacterUnramifiedAeAndExistsLevel
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.CharAbove
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.TripleAtt
+
+@[expose] public section
 
 noncomputable section
 
@@ -31,23 +69,6 @@ theorem heckeLAdicCharacterAbove_iff : HeckeLAdicCharacterAbove ↔
 end GlobalTheory.Published
 
 namespace GlobalTheory.HeckeGal
-
-theorem IsLAdicOf.eq_of_isGlobalArtin {E Ω : Type} [Field E] [NumberField E] [Field Ω] [Algebra E Ω]
-    [IsAlgClosure E Ω] {l : ℕ} [Fact l.Prime] {art art' : Ideles E →* Gab E Ω} (ha : IsGlobalArtin art)
-    (ha' : IsGlobalArtin art') {ι : Qbar l ≃+* ℂ} {χ : HChar E} {n : (E →+* ℂ) → ℤ} {μ μ' : G E Ω →* (Qbar l)ˣ}
-    (hμ : Continuous μ) (hμ' : Continuous μ') (h : IsLAdicOf art ι χ n μ) (h' : IsLAdicOf art' ι χ n μ') :
-    μ = μ' := by
-  have h0 : Ideal.span {((l : ℕ) : 𝓞 E)} ≠ 0 := by
-    rw [Ne, Ideal.zero_eq_bot, Ideal.span_singleton_eq_bot]
-    exact_mod_cast (Fact.out : l.Prime).ne_zero
-  have hl : ∀ᶠ v : HeightOneSpectrum (𝓞 E) in Filter.cofinite, ((l : ℕ) : 𝓞 E) ∉ v.asIdeal :=
-    (Ideal.finite_factors h0).subset fun v hv => Ideal.dvd_span_singleton.mpr (not_not.1 hv)
-  have hs := Filter.eventually_cofinite.1 (hl.and (GlobalTheory.Mem.UnrAe.unr_ae_and_level E χ).1)
-  refine mul_inv_eq_one.1 (GlobalTheory.FrobDense.eq_one_of_frob E Ω art ha _ (μ * μ'⁻¹) (hμ.mul hμ'.inv) hs.toFinset
-    fun v hv A hA σ hσ => ?_)
-  rw [Set.Finite.mem_toFinset, Set.mem_ofPred_eq, not_not] at hv
-  rw [MonoidHom.mul_apply, MonoidHom.inv_apply, mul_inv_eq_one]
-  exact Units.ext ((h.frob_unr ha (Or.inl hv.1) hv.2 hA hσ).trans (h'.frob_unr ha' (Or.inl hv.1) hv.2 hA hσ).symm)
 
 end GlobalTheory.HeckeGal
 

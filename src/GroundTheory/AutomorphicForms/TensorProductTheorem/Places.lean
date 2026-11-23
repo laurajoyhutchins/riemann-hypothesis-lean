@@ -1,7 +1,55 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.TensorProductTheorem.MatrixCoeff
-import GroundTheory.AutomorphicForms.TensorProductTheorem.Irreducible
-import GroundTheory.AutomorphicForms.TensorProductTheorem.LocalComponent
+module
+
+public import GroundTheory.AutomorphicForms.TensorProductTheorem.Smooth
+public import GroundTheory.AutomorphicForms.TensorProductTheorem.Window
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -19,9 +67,9 @@ section Group
 
 variable [DecidableEq ι]
 
-variable (K) in
 
-def singleHom (v : ι) : G v →* Πʳ w, [G w, K w] where
+variable (K) in
+def singleHom (K : ∀ w, Subgroup (G w)) (v : ι) : G v →* Πʳ w, [G w, K w] where
   toFun := RestrictedProduct.mulSingle K v
   map_one' := RestrictedProduct.mulSingle_one K v
   map_mul' x y := RestrictedProduct.mulSingle_mul K v x y
@@ -93,24 +141,24 @@ section Window
 
 variable [DecidableEq ι]
 
-omit hK'c hK'o hK'e in
 
+omit hK'c hK'o hK'e in
 theorem apply_eq_apply_single (v : ι) {u : V}
     (hu : ∀ h ∈ boxSubgroup K K', h v = 1 → ρ h u = u) {h : Πʳ w, [G w, K w]}
     (hh : h ∈ boxSubgroup K K') : ρ h u = ρ (singleHom K v (h v)) u := by
   conv_lhs => rw [← single_mul_eraseAt v h]
   rw [map_mul, Module.End.mul_apply, hu _ (eraseAt_mem_boxSubgroup v hh) (eraseAt_apply_self v h)]
 
-omit hK'c hK'o hK'e in
 
+omit hK'c hK'o hK'e in
 theorem apply_single_fixed (v : ι) (x : G v) {m : V} (hm : m ∈ fixedVectors ρ (boxSubgroup K K'))
     {h : Πʳ w, [G w, K w]} (hh : h ∈ boxSubgroup K K') (hv : h v = 1) :
     ρ h (ρ (singleHom K v x) m) = ρ (singleHom K v x) m := by
   rw [← Module.End.mul_apply, ← map_mul, ← commute_singleHom x hv, map_mul, Module.End.mul_apply,
     hm h hh]
 
-include hK'c hK'o hK'e in
 
+include hK'c hK'o hK'e in
 theorem heckeOp_single_mul (v : ι) (x : G v) {b : Πʳ w, [G w, K w]} (hb : b v = 1) :
     heckeOp hρ (isCompact_boxSubgroup_of_eq hK'c hK'e) (isOpen_boxSubgroup hK'o hK'e)
         (singleHom K v x * b) =

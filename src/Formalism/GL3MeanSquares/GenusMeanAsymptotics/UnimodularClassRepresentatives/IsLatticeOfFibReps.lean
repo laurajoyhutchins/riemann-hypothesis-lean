@@ -1,5 +1,64 @@
-import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.IsIntegralLatOfForall
-import Formalism.HermitianLattices.HermitianLatticesProofs.MassBasic
+module
+
+public import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.IsIntegralLatOfForall
+import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.AlgebraMapConjO
+import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.AlgebraMapIntCastSmul
+import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.CardFibGEqProd
+import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.ExistsLatticeOfFibLocNeZeroGood
+import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.ExistsSqAbsNormOfInert
+import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.ExistsVecOfHermRep
+import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.IsIntegralAtLocF
+import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.LamGEqOneOfOrtho
+import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.NkCountLocF
+public import Formalism.HermitianLattices.HermitianLatticesProofs.MassBasic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField Module Formalism.HermitianLattices.Ext.L3.SplitA
 
@@ -49,7 +108,7 @@ theorem psiP_eq (S : VecSplit h h') (L : Submodule (𝓞 K) V) (𝔭 : Ideal (�
     (hex : ∃ s, IsLocReps S L 𝔭 s) :
     psiP S L 𝔭 = ∑ T ∈ hex.choose, (fibLoc S L 𝔭 T : ℝ) * lamP h' T 𝔭 := by
   unfold psiP
-  rw [dif_pos hex]
+  rw [dite_eq_left hex]
 
 theorem psiP_eq_zero (S : VecSplit h h') (L : Submodule (𝓞 K) V) (𝔭 : Ideal (𝓞 F))
     (H : ∀ T, fibLoc S L 𝔭 T = 0) : psiP S L 𝔭 = 0 := by
@@ -60,17 +119,19 @@ theorem psiP_eq_zero (S : VecSplit h h') (L : Submodule (𝓞 K) V) (𝔭 : Idea
 
 theorem card_fibG_eq_zero (hK : Formalism.HermitianLatticesTheory.IsCMUnram K) (hF : IsFixF K F) (hs : h.IsSymm)
     (hd : IsTotPosDef h) (S : VecSplit h h') {L : Submodule (𝓞 K) V}
-    (hL : Submodule.IsLattice K L) (hLi : Formalism.HermitianLatticesTheory.IsIntegralLat h L) {Λ' : Submodule (𝓞 K) V'}
-    (hΛ' : Submodule.IsLattice K Λ') (𝔭 : {𝔭 : Ideal (𝓞 F) // 𝔭.IsMaximal})
+    (hL : Submodule.IsFullLattice K L) (hLi : Formalism.HermitianLatticesTheory.IsIntegralLat h L) {Λ' : Submodule (𝓞 K) V'}
+    (hΛ' : Submodule.IsFullLattice K Λ') (𝔭 : {𝔭 : Ideal (𝓞 F) // 𝔭.IsMaximal})
     (H : fibLoc S L 𝔭.1 Λ' = 0) : (Nat.card (fibG S L Λ') : ℝ) = 0 := by
-  rw [card_fibG_eq_prod hK hF hs hd S hL hLi hΛ']
+  letI := hL
+  letI := hΛ'
+  rw [card_fibG_eq_prod (L := L) (Λ' := Λ') hK hF hs hd S inferInstance hLi inferInstance]
   exact tprod_of_exists_eq_zero ⟨𝔭, by rw [H]; simp⟩
 
-theorem isLattice_of_fibReps (S : VecSplit h h') {L : Submodule (𝓞 K) V}
+theorem isFullLattice_of_fibReps (S : VecSplit h h') {L : Submodule (𝓞 K) V}
     {s' : Finset (Submodule (𝓞 K) V')} (hs' : IsFibReps S L s') {Λ' : Submodule (𝓞 K) V'}
-    (hΛ' : Λ' ∈ s') : Submodule.IsLattice K Λ' := by
+    (hΛ' : Λ' ∈ s') : Submodule.IsFullLattice K Λ' := by
   obtain ⟨Λ, hΛ, -, rfl⟩ := hs'.1 Λ' hΛ'
-  exact StabilizerLattices.isLattice_cut S hΛ.1
+  exact StabilizerLattices.isFullLattice_cut S hΛ.1
 
 theorem exists_norm_eq (hF : IsFixF K F) (hs : h.IsSymm) (S : VecSplit h h')
     {L : Submodule (𝓞 K) V} (hLi : Formalism.HermitianLatticesTheory.IsIntegralLat h L)
@@ -95,11 +156,11 @@ theorem exists_norm_eq (hF : IsFixF K F) (hs : h.IsSymm) (S : VecSplit h h')
   obtain ⟨t, ht⟩ := (conjO_eq_iff_mem_range hF y).mp hc
   exact ⟨t, by rw [← hy, ← ht]; rfl⟩
 
-open Classical in
 
+open Classical in
 theorem sum_genus (hK : Formalism.HermitianLatticesTheory.IsCMUnram K) (hF : IsFixF K F) (hs : h.IsSymm)
     (hd : IsTotPosDef h) (S : VecSplit h h') {L : Submodule (𝓞 K) V}
-    (hL : Submodule.IsLattice K L) (hLi : Formalism.HermitianLatticesTheory.IsIntegralLat h L) {c : ℝ}
+    (hL : Submodule.IsFullLattice K L) (hLi : Formalism.HermitianLatticesTheory.IsIntegralLat h L) {c : ℝ}
     (hc : MassConst K F (finrank K V - 1) c)
     {s' : Finset (Submodule (𝓞 K) V')} (hs' : IsFibReps S L s')
     {A : Submodule (𝓞 K) V'} (hA : Submodule.IsLattice K A) (hAi : Formalism.HermitianLatticesTheory.IsIntegralLat h' A)
@@ -111,22 +172,25 @@ theorem sum_genus (hK : Formalism.HermitianLatticesTheory.IsCMUnram K) (hF : IsF
       c * ∏ 𝔭 ∈ Z, ((fibLoc S L 𝔭.1 (locF 𝔭.1 M) : ℝ) * lamP h' (locF 𝔭.1 M) 𝔭.1) := by
   have hs2 := S.isSymm hs
   have hd2 := S.isTotPosDef hd
-  have hMi := hM.integral hF hL hLi
+  letI := hL
+  have hMi := hM.integral hF hL.toIsLattice hLi
+  have hMfull := hM.isFullLattice hL
   have hmass : Formalism.HermitianLatticesTheory.mass h' M = ∑ Λ' ∈ s'.filter (fun Λ' => Formalism.HermitianLatticesTheory.SameGenus h' M Λ'),
       ((Nat.card (Formalism.ThetaLiftIndependence.autL h' Λ') : ℕ) : ℝ)⁻¹ :=
-    (Formalism.HermitianLatticesTheory.massBasic K V' h' hs2 (StabilizerLattices.trace_pos hd2) M hM.1).2.1 _
-      (isClassReps_filter hK hF hs hd S hL hLi hs' hM)
+    (Formalism.HermitianLatticesTheory.massBasic K V' h' hs2 (StabilizerLattices.trace_pos hd2) M hMfull).2.1 _
+      (isClassReps_filter (L := L) hK hF hs hd S inferInstance hLi hs' hM)
   have hfr : finrank K V' = finrank K V - 1 := by
     have := S.finrank_add_one
     omega
-  have hmc := hc V' h' M hs2 hd2 hfr hM.1 hMi
+  have hmc := hc V' h' M hs2 hd2 hfr hMfull hMi
   have e1 : ∀ Λ' ∈ s'.filter (fun Λ' => Formalism.HermitianLatticesTheory.SameGenus h' M Λ'),
       (Nat.card (fibG S L Λ') : ℝ) / (Nat.card (Formalism.ThetaLiftIndependence.autL h' Λ') : ℝ) =
         (∏ 𝔭 ∈ Z, (fibLoc S L 𝔭.1 (locF 𝔭.1 M) : ℝ)) *
           ((Nat.card (Formalism.ThetaLiftIndependence.autL h' Λ') : ℕ) : ℝ)⁻¹ := by
     intro Λ' hΛ'
     rw [Finset.mem_filter] at hΛ'
-    rw [card_fibG_eq_prod (F := F) hK hF hs hd S hL hLi (isLattice_of_fibReps S hs' hΛ'.1),
+    letI := isFullLattice_of_fibReps S hs' hΛ'.1
+    rw [card_fibG_eq_prod (F := F) (L := L) (Λ' := Λ') hK hF hs hd S inferInstance hLi inferInstance,
       div_eq_mul_inv]
     congr 1
     have e2 : ∀ 𝔭 : {𝔭 : Ideal (𝓞 F) // 𝔭.IsMaximal},
@@ -145,8 +209,10 @@ theorem sum_genus (hK : Formalism.HermitianLatticesTheory.IsCMUnram K) (hF : IsF
     simp only [e4]
     apply tprod_eq_prod
     intro 𝔭 h𝔭
-    rw [hMA 𝔭 h𝔭, localFactor_localField hK hF hs2 hd2 hA hAi 𝔭.2]
-    exact localMassFactor_of_valuation_eq_zero hK hF hs2 hd2 hA hAi 𝔭.2 (hZ2 𝔭 h𝔭)
+    rw [← e4 𝔭]
+    apply localMassFactor_of_valuation_eq_zero hK hF hs2 hd2 hMfull hMi 𝔭.2
+    rw [← vd_locF hK hF hs2 hd2 hM.1 hMi 𝔭.2, hMA 𝔭 h𝔭,
+      vd_locF hK hF hs2 hd2 hA hAi 𝔭.2, hZ2 𝔭 h𝔭]
   rw [e3]
   ring
 

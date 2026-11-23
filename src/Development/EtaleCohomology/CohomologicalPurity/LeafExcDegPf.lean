@@ -1,4 +1,49 @@
-import Development.EtaleCohomology.CohomologicalPurity.LeafExcFormalPf
+module
+
+public import Development.EtaleCohomology.CohomologicalPurity.LeafExcFormalPf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.Limits.Types.Pushouts
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+
+@[expose] public section
 
 noncomputable section
 open CategoryTheory Limits AlgebraicGeometry Opposite GlobalTheory.EtC CochainComplex.HomComplex
@@ -9,7 +54,7 @@ section Gen
 variable {C : Type*} [Category C] [Abelian C]
 
 theorem cokPO_iso {A B Q : C} (f : A ⟶ B) (l r : B ⟶ Q) (h : IsPushout f f l r) :
-    IsIso (cokernel.map f r f l h.w) := by
+    IsIso (cokernel.map f r f l h.w.symm) := by
   refine ⟨⟨cokernel.desc r (h.desc (cokernel.π f) 0 (by simp)) (by simp), ?_, ?_⟩⟩
   · ext; simp
   · ext
@@ -20,26 +65,28 @@ theorem cokPO_iso {A B Q : C} (f : A ⟶ B) (l r : B ⟶ Q) (h : IsPushout f f l
 
 theorem cokMap_comp {A B A' B' A'' B'' : C} (f : A ⟶ B) (f' : A' ⟶ B') (f'' : A'' ⟶ B'')
     (a : A ⟶ A') (b : B ⟶ B') (w : f ≫ b = a ≫ f') (a' : A' ⟶ A'') (b' : B' ⟶ B'') (w' : f' ≫ b' = a' ≫ f'') :
-    cokernel.map f f' a b w ≫ cokernel.map f' f'' a' b' w' =
-      cokernel.map f f'' (a ≫ a') (b ≫ b') (by rw [← Category.assoc, w, Category.assoc, w', Category.assoc]) := by
+    cokernel.map f f' a b w.symm ≫ cokernel.map f' f'' a' b' w'.symm =
+      cokernel.map f f'' (a ≫ a') (b ≫ b') (by rw [Category.assoc, ← w', ← Category.assoc, ← w, Category.assoc]) := by
   ext; simp
 
 theorem cokPO_transfer {A' B' Q' A B Q : C} (f' : A' ⟶ B') (l' r' : B' ⟶ Q') (h' : IsPushout f' f' l' r')
     (f : A ⟶ B) (l r : B ⟶ Q) (h : IsPushout f f l r) (a : A' ⟶ A) (b : B' ⟶ B) (m : Q' ⟶ Q)
     (w : f' ≫ b = a ≫ f) (wl : l' ≫ m = b ≫ l) (wr : r' ≫ m = b ≫ r)
-    (hi : IsIso (cokernel.map f' f a b w)) : IsIso (cokernel.map r' r b m wr) := by
+    (hi : IsIso (cokernel.map f' f a b w.symm)) : IsIso (cokernel.map r' r b m wr.symm) := by
   have := cokPO_iso f' l' r' h'
   have := cokPO_iso f l r h
-  have e : cokernel.map f' r' f' l' h'.w ≫ cokernel.map r' r b m wr =
-      cokernel.map f' f a b w ≫ cokernel.map f r f l h.w := by
-    rw [cokMap_comp, cokMap_comp]; ext; simp [wl]
-  have : cokernel.map r' r b m wr = inv (cokernel.map f' r' f' l' h'.w) ≫
-      (cokernel.map f' f a b w ≫ cokernel.map f r f l h.w) := by rw [← e]; simp
+  have e : cokernel.map f' r' f' l' h'.w.symm ≫ cokernel.map r' r b m wr.symm =
+      cokernel.map f' f a b w.symm ≫ cokernel.map f r f l h.w.symm := by
+    ext
+    simp [Category.assoc, wl]
+    simpa only [Category.assoc] using congrArg (fun k => k ≫ cokernel.π r) wl
+  have : cokernel.map r' r b m wr.symm = inv (cokernel.map f' r' f' l' h'.w.symm) ≫
+      (cokernel.map f' f a b w.symm ≫ cokernel.map f r f l h.w.symm) := by rw [← e]; simp
   rw [this]; infer_instance
 
 theorem cokIso_comp {A B A' B' : C} (f : A ⟶ B) (f' : A' ⟶ B') (a : A ⟶ A') (b : B ⟶ B') (w : f ≫ b = a ≫ f')
-    [IsIso a] [IsIso b] : IsIso (cokernel.map f f' a b w) :=
-  ⟨⟨cokernel.map f' f (inv a) (inv b) (by rw [IsIso.eq_inv_comp, ← Category.assoc, ← w]; simp),
+    [IsIso a] [IsIso b] : IsIso (cokernel.map f f' a b w.symm) :=
+  ⟨⟨cokernel.map f' f (inv a) (inv b) (by apply Eq.symm; rw [IsIso.eq_inv_comp, ← Category.assoc, ← w]; simp),
     by ext; simp, by ext; simp⟩⟩
 
 end Gen
@@ -80,10 +127,10 @@ section Gen2
 theorem cokF {C D : Type*} [Category C] [Abelian C] [Category D] [Abelian D] (F : C ⥤ D)
     [F.PreservesZeroMorphisms] [PreservesColimitsOfShape WalkingParallelPair F] {A B A' B' : C}
     (f : A ⟶ B) (f' : A' ⟶ B') (a : A ⟶ A') (b : B ⟶ B') (w : f ≫ b = a ≫ f')
-    (hi : IsIso (cokernel.map (F.map f) (F.map f') (F.map a) (F.map b) (by rw [← F.map_comp, w, F.map_comp]))) :
-    IsIso (F.map (cokernel.map f f' a b w)) := by
-  have e : F.map (cokernel.map f f' a b w) = inv (cokernelComparison f F) ≫
-      (cokernel.map (F.map f) (F.map f') (F.map a) (F.map b) (by rw [← F.map_comp, w, F.map_comp]) ≫
+    (hi : IsIso (cokernel.map (F.map f) (F.map f') (F.map a) (F.map b) (by rw [← F.map_comp, ← w, F.map_comp]))) :
+    IsIso (F.map (cokernel.map f f' a b w.symm)) := by
+  have e : F.map (cokernel.map f f' a b w.symm) = inv (cokernelComparison f F) ≫
+      (cokernel.map (F.map f) (F.map f') (F.map a) (F.map b) (by rw [← F.map_comp, ← w, F.map_comp]) ≫
         cokernelComparison f' F) := by
     rw [IsIso.eq_inv_comp]; ext; simp [← Functor.map_comp]
   rw [e]; infer_instance
@@ -95,10 +142,10 @@ theorem cokNat {C E : Type*} [Category C] [Abelian C] [Category E] (Φ Ψ : E �
   have h1 := cokIso_comp (Φ.map g') (Ψ.map g') (α.hom.app X') (α.hom.app Y') (α.hom.naturality g')
   have h2 := cokIso_comp (Φ.map g) (Ψ.map g) (α.hom.app X) (α.hom.app Y) (α.hom.naturality g)
   have e : cokernel.map (Φ.map g') (Φ.map g) (Φ.map a) (Φ.map b) (by simp only [← Functor.map_comp, w]) =
-      (cokernel.map (Φ.map g') (Ψ.map g') (α.hom.app X') (α.hom.app Y') (α.hom.naturality g') ≫
+      (cokernel.map (Φ.map g') (Ψ.map g') (α.hom.app X') (α.hom.app Y') (α.hom.naturality g').symm ≫
         cokernel.map (Ψ.map g') (Ψ.map g) (Ψ.map a) (Ψ.map b) (by simp only [← Functor.map_comp, w])) ≫
-      inv (cokernel.map (Φ.map g) (Ψ.map g) (α.hom.app X) (α.hom.app Y) (α.hom.naturality g)) := by
-    rw [IsIso.eq_comp_inv, cokMap_comp, cokMap_comp]; ext; simp
+      inv (cokernel.map (Φ.map g) (Ψ.map g) (α.hom.app X) (α.hom.app Y) (α.hom.naturality g).symm) := by
+    rw [IsIso.eq_comp_inv]; ext; simp [Category.assoc, ← Functor.map_comp]
   rw [e]; infer_instance
 
 end Gen2
@@ -107,7 +154,7 @@ section Main
 variable (R : Type) [CommRing R]
 
 theorem dbl.inl_map' {P' P : Arrow Spc} (φ : P' ⟶ P) : dbl.inl P' ≫ dbl.map φ = φ.right ≫ dbl.inl P :=
-  pushout.inl_desc _ _ _
+  pushout.inl_desc (f := P'.hom) (g := P'.hom) _ _ _
 
 theorem hPO (P : Arrow Spc) (p : SimplexCategoryᵒᵖ) :
     IsPushout ((free R).map (P.hom.app p)) ((free R).map (P.hom.app p)) ((free R).map ((dbl.inl P).app p))
@@ -129,7 +176,7 @@ theorem LeafExcDeg_of : LeafExcDeg := by
     by_cases hj : ∃ p : ℕ, j = -(p : ℤ)
     · obtain ⟨p, rfl⟩ := hj
       show IsIso ((HomologicalComplex.eval _ _ _).map (cokC q φ))
-      refine cokF (HomologicalComplex.eval _ _ (-(p : ℤ))) _ _ _ _ _ ?_
+      refine cokF (HomologicalComplex.eval _ _ (-(p : ℤ))) _ _ _ _ (chainsInrSq q φ) ?_
       refine cokNat (chains (ZMod q) ⋙ HomologicalComplex.eval _ _ (-(p : ℤ))) _ (chIso (ZMod q) p)
         (dbl.inr P') (dbl.inr P) φ.right (dbl.map φ) (dbl.inr_map φ) ?_
       exact cokPO_transfer _ _ _ (hPO (ZMod q) P' _) _ _ _ (hPO (ZMod q) P _) _ _ _ (freeSq _ φ _)

@@ -1,6 +1,48 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.NodeYPredEqChainVertexAtRowZeroLast
+public import Formalism.SharpRestriction.LevelLetterCocycles.BlochKatoPhases
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.Divisors.EntireEqOfHalfPlane
 import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.IsAuxiliaryHeckeCharacter
-import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.NodeYPredEqChainVertexAtRowZeroLast
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.PlacesBelowSplitCoprimeConductorOfAdmissible
+
+@[expose] public section
 
 open NumberField IsDedekindDomain ReciprocityTheory.Gal Formalism.ConjugateSelfDual Formalism.BasicNotions Formalism.MainNotions Formalism.FrobeniusOrbits Formalism.L2.Host GlobalTheory.CMVal GlobalTheory.ToricDenom GlobalTheory.LamTie
 
@@ -39,25 +81,5 @@ theorem nFun_eq_bigN (D : D7) : BlochKatoReduction.Gen.NFun D.R = GlobalTheory.G
   have h : Odd (D.R.r + 6) := by
     rw [Nat.odd_iff]; unfold Ranks.r; omega
   simp only [BlochKatoReduction.Gen.NFun, BlochKatoReduction.Gen.sFun, if_pos h, GlobalTheory.Grid.bigN, GlobalTheory.Grid.sLen]
-
-theorem nFun_add_one_lt_eExp_add_cen (D : D7) (j a : Fin D.R.m) (g : D.R.Psi) :
-    (BlochKatoReduction.Gen.NFun D.R : ℚ) + 1 < eExp D j g + (GlobalTheory.Grid.cen D (D.eTau.symm g) (a.1 + 1) : ℚ) := by
-  have h1 := e_add_v_two_pos (D.hc (D.eTau.symm g)) (GlobalTheory.Grid.sLen D) (GlobalTheory.Grid.gap D) 0 j
-  have h2 := Int.lt_floor_add_one ((GlobalTheory.Grid.gridOf D (GlobalTheory.Grid.gap D) 0 (D.eTau.symm g)).mid (a.1 + 1))
-  have h3 := (GlobalTheory.Grid.gridOf D (GlobalTheory.Grid.gap D) 0 (D.eTau.symm g)).mid_eq (i := a.1 + 1) (by omega)
-  have h4 : (GlobalTheory.Grid.gridOf D (GlobalTheory.Grid.gap D) 0 (D.eTau.symm g)).a (a.1 + 1) =
-      ((GlobalTheory.Grid.gridOf D (GlobalTheory.Grid.gap D) 0 (D.eTau.symm g)).v 2 : ℚ) + 1 / 2 +
-        ((D.R.m : ℚ) + 1 - ((a.1 + 1 : ℕ) : ℚ)) * (GlobalTheory.Grid.gap D : ℚ) := rfl
-  have h5 : ((GlobalTheory.Grid.gridOf D (GlobalTheory.Grid.gap D) 0 (D.eTau.symm g)).ga : ℚ) = GlobalTheory.Grid.gap D := rfl
-  have h6 := (GlobalTheory.Grid.isLeast_gap D).1.2.1
-  have h7 : GlobalTheory.Grid.bigN D ≤ GlobalTheory.Grid.bigN D ^ 3 := Nat.le_self_pow (by norm_num) _
-  have h8 : ((GlobalTheory.Grid.bigN D + 2 : ℕ) : ℚ) ≤ GlobalTheory.Grid.gap D := by exact_mod_cast (by omega)
-  have h9 : ((a.1 + 1 : ℕ) : ℚ) ≤ D.R.m := by exact_mod_cast a.2
-  have h10 : (0 : ℚ) ≤ GlobalTheory.Grid.gap D := by positivity
-  have h11 : (GlobalTheory.Grid.gap D : ℚ) ≤ ((D.R.m : ℚ) + 1 - ((a.1 + 1 : ℕ) : ℚ)) * (GlobalTheory.Grid.gap D : ℚ) := by nlinarith
-  rw [nFun_eq_bigN]
-  unfold eExp GlobalTheory.Grid.cen
-  push_cast at h8
-  linarith
 
 end GlobalTheory.LamTie

@@ -1,4 +1,62 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.SendsToAlgMulAlg
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.HermitianSquareIntegrableAll
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.LevTransportHer
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.RadialTransformSquareIntegrable
+import Formalism.FormalDegreeBessel.FormalDegreeRatio.BFCell
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.DerivativeRulesA1
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.FsvMulFsvNeg
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.HasFDerivAtFsvOther
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.LevelFormSesquilinearFiniteClass
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.LevelSquareIntegrableOfTransport
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.LevelZeroFormIntegrableCompact
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.SendsToAlgMulAlg
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.SfiniteOfIsHaarOn
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.ThmPActualCptOfStepForm
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.WCellMemOmPlus
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MeasureTheory
 open scoped Matrix
@@ -89,8 +147,8 @@ section Gd
 variable {Wp Wq : Type} [NormedAddCommGroup Wp] [InnerProductSpace ℂ Wp] [NormedAddCommGroup Wq]
   [InnerProductSpace ℂ Wq] [FiniteDimensional ℂ Wp] [FiniteDimensional ℂ Wq]
 
-variable (S : Type) [Fintype S] [DecidableEq S] in
 
+variable (S : Type) [Fintype S] [DecidableEq S] in
 def gd0 (P : M.Par) (z z' : Fin (2 * P.r + P.k + 1) → ℂ) (π : Mx P.k P.r → (Wp →L[ℂ] Wp))
     (π' : Mx P.k P.r → (Wq →L[ℂ] Wq)) (μ : Measure (Mt P.k P.r)) [SFinite μ]
     (hμ : B.IsHaarOn (Glev P.k P.r (Fin.last P.r)) μ) (L : R.LevelData (Pr (RadSp P.k P.r z z' π π')) P.r)
@@ -102,7 +160,7 @@ def gd0 (P : M.Par) (z z' : Fin (2 * P.r + P.k + 1) → ℂ) (π : Mx P.k P.r �
   add_mem' := by
     rintro u v ⟨hu, Iu⟩ ⟨hv, Iv⟩
     exact ⟨(squareIntegrableSmoothSubmoduleGL P.k P.r z z' π π' μ hμ).add_mem hu hv, fun w hw a b => by
-      rw [map_add]; exact (squareIntegrableSmoothSubmoduleGL P.k P.r z z' π π' μ hμ).add_mem (Iu w hw a b) (Iv w hw a b)⟩
+      rw [map_add (f := _)]; exact (squareIntegrableSmoothSubmoduleGL P.k P.r z z' π π' μ hμ).add_mem (Iu w hw a b) (Iv w hw a b)⟩
   smul_mem' := by
     rintro c u ⟨hu, Iu⟩
     exact ⟨(squareIntegrableSmoothSubmoduleGL P.k P.r z z' π π' μ hμ).smul_mem c hu, fun w hw a b => by

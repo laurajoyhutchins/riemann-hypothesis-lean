@@ -1,4 +1,49 @@
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.ArchimedeanOrbitMeasures.CayleyInverseMeasurable
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.ArchimedeanOrbitMeasures.CayDensExCayS
+public import Mathlib.MeasureTheory.Measure.WithDensity
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.ArchimedeanOrbitMeasures.BaseLatticeIsUnimodular
+
+@[expose] public section
 
 noncomputable section
 
@@ -18,8 +63,8 @@ def rhoH (X : lieU P Q) : ℝ≥0∞ :=
   ENNReal.ofReal (‖((1 + 1) - ((X : lieU P Q) : Matrix (Fin P ⊕ Fin Q) (Fin P ⊕ Fin Q) ℂ)).det‖⁻¹ ^
     (2 * (P + Q)))
 
-open Classical in
 
+open Classical in
 def cayF (X : lieU P Q) : UpqT P Q :=
   if h : ∃ g : UpqT P Q, UpqT.mat g *
       ((1 + 1) - ((X : lieU P Q) : Matrix (Fin P ⊕ Fin Q) (Fin P ⊕ Fin Q) ℂ)) =
@@ -44,14 +89,5 @@ def LocalHaarUnique : Prop :=
       β ((fun g => h * g) '' S) = β S) →
     (∀ K, IsCompact K → K ⊆ W → β K ≠ ⊤) → β W ≠ 0 →
     ∃ t : ℝ≥0∞, t ≠ 0 ∧ t ≠ ⊤ ∧ ∃ W' ∈ 𝓝 (1 : G), W' ⊆ W ∧ β.restrict W' = t • m.restrict W'
-
-def ExpCay : Prop :=
-  ∀ (P Q : ℕ) (m : Measure (UpqT P Q)) (lam : Measure (lieU P Q)), lam.IsAddHaarMeasure →
-  ∀ D : Set (lieU P Q), D ∈ 𝓝 (0 : lieU P Q) → MeasurableSet D →
-  ∀ f : lieU P Q → ℝ≥0∞, Measurable f → ContinuousAt f 0 → f 0 ≠ ⊤ →
-    (m.restrict (cayS D)).map (cayInv P Q) = (lam.restrict D).withDensity f →
-    Tendsto (fun r : ℝ => m {g | ∃ X ∈ ballU P Q r, UpqT.mat g =
-      NormedSpace.exp (X : Matrix (Fin P ⊕ Fin Q) (Fin P ⊕ Fin Q) ℂ)} /
-      lam (ballU P Q r)) (𝓝[>] 0) (𝓝 (f 0))
 
 end HcInf

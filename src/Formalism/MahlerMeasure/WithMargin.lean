@@ -1,5 +1,48 @@
-import Formalism.MahlerMeasure.StatementTM
-import Formalism.MahlerMeasure.TieVars
+module
+
+public import Formalism.MahlerMeasure.TieVars
+public import Formalism.MahlerMeasure.GoodCount
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace Formalism.GM.M
 
@@ -20,11 +63,11 @@ def finPos (N : ℕ) (k : ℕ) : Fin (N + 1) := ⟨min k N, Nat.lt_succ_of_le (m
 
 def BlockData.lettersAt (D : BlockData N) (j : Fin D.T.t → ℕ) (jp : ℕ) : Letters N where
   vec := D.LL.vec
-  deg := fun a => D.LL.deg a - (∑ i, if (a : ℕ) = D.T.pos i ∨ (a : ℕ) = D.T.pos i + 1 then j i else 0) -
-    (if a = D.uPos then jp else 0)
-
-def BlockData.withMargin (D : BlockData N) (cap : Fin D.T.q → WithTop ℤ) (m : ℕ) : BlockData N :=
-  { D with T := { D.T with thr := fun k => (cap k).map (fun x => x - (m : ℤ)) } }
+  deg := fun a =>
+    -- Unfold the sum over `Fin D.T.t` to avoid a missing compiler specialization.
+    let tieDeg := (List.finRange D.T.t).map fun i =>
+      if (a : ℕ) = D.T.pos i ∨ (a : ℕ) = D.T.pos i + 1 then j i else 0
+    D.LL.deg a - tieDeg.sum - (if a = D.uPos then jp else 0)
 
 def chainEmb (N r t : ℕ) : Fin N × Fin r → BVar N r t := fun x => Sum.inl (Fin.castSucc x.1, x.2)
 

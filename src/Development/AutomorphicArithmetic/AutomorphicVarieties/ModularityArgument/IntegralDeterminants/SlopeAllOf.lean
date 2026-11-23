@@ -1,13 +1,58 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.IntegralDeterminants.PlaceConjAlt
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.IntegralDeterminants.ProdNorm
-import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.IntCrit
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AutomorphicFormsFiniteGL
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GelfandKazhdanDualOfTwoHyps
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.JacquetShalikaRigidityHolds
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.InfiniteQuadraticCMGoodBaseChangeSplitStatement
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.PolarizedPairBaseChangePolarizedSameWeightStatement
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ExistsPlaceCompletionIsoImports
-import Development.WeilBound.CoreStatements.PublishedTheorems.JacquetShalikaBound.JacquetShalikaBound
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.IntegralDeterminants.PlaceConjAlt
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.PredMemGamRanks
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AutomorphicFormsFiniteGL
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GelfandKazhdanDualOfTwoHyps
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.JacquetShalikaRigidityHolds
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.InfiniteQuadraticCMGoodBaseChangeSplitStatement
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.PolarizedPairBaseChangePolarizedSameWeightStatement
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.IntCrit
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.IntegralDeterminants.ProdNorm
+public import Development.WeilBound.CoreStatements.PublishedTheorems.JacquetShalikaBound.JacquetShalikaBound
+import GroundTheory.GlobalFields.CompletionAtPlace.Integers
+import GroundTheory.GlobalFields.SemilocalAlgebras.LocalDegree
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import PositivityTheory.AutomorphicForms.PublishedInputs.RealGaloisRepresentations.IwahoriSphericalTransfer.ExistsPlaceCompletionIso
+import PositivityTheory.AutomorphicForms.PublishedInputs.RealGaloisRepresentations.IwahoriSphericalTransfer.RamificationIdxEqOneAndInertiaDegEqOne
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.Langlands
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Matrix Neutral.B1 Formalism.L2.Host Formalism.ConjugateSelfDual Formalism.BasicNotions Formalism.MainNotions.N GlobalTheory.CuspRep GlobalTheory.UnitaryBC GlobalTheory.GalOfCusp UpperTheory.V.Af
 open scoped Classical
@@ -53,36 +98,6 @@ private theorem le_one_of_map {A C : Type} [Field A] [Field C] [Valued A ℤᵐ�
   rw [map_inv₀, map_inv₀] at h2
   have h3 : Valued.v (i x) ≠ 0 := by simpa using h0
   exact absurd h2 (not_lt.2 ((one_le_inv₀ (zero_lt_iff.2 h3)).2 h))
-
-private theorem lt_one_of_map {A C : Type} [Field A] [Field C] [Valued A ℤᵐ⁰] [Valued C ℤᵐ⁰] (i : A ≃+* C)
-    (hi : Continuous i) {p : A} (hp0 : p ≠ 0) (hp : Valued.v p < 1) {x : A} (h : Valued.v (i x) < 1) :
-    Valued.v x < 1 := by
-  have hx := le_one_of_map i hi h.le
-  refine lt_of_le_of_ne hx fun e => ?_
-  have hip : Valued.v (i p) ≠ 0 := by simpa using hp0
-  obtain ⟨k, hk⟩ := exists_pow_lt₀ h (Units.mk0 _ hip)
-  have h1 : Valued.v (i (x ^ k / p)) ≤ 1 := by
-    rw [map_div₀, map_div₀, map_pow, map_pow]
-    exact div_le_one_of_le₀ hk.le zero_le'
-  have h2 := le_one_of_map i hi h1
-  rw [map_div₀, map_pow, e, one_pow] at h2
-  have h3 : Valued.v p ≠ 0 := by simpa using hp0
-  rw [one_div] at h2
-  exact absurd hp (not_lt.2 ((inv_le_one₀ (zero_lt_iff.2 h3)).1 h2))
-
-private theorem map_le_one {A C : Type} [Field A] [Field C] [Valued A ℤᵐ⁰] [Valued C ℤᵐ⁰] (i : A ≃+* C)
-    (hi : Continuous i) {p : A} (hp0 : p ≠ 0) (hp : Valued.v p < 1) {x : A} (h : Valued.v x ≤ 1) :
-    Valued.v (i x) ≤ 1 := by
-  by_contra hc
-  have hc' := not_le.1 hc
-  have h0 : x ≠ 0 := fun e => by simp [e] at hc'
-  have h1 : Valued.v (i x⁻¹) < 1 := by
-    rw [map_inv₀, map_inv₀]
-    exact inv_lt_one_of_one_lt₀ hc'
-  have h2 := lt_one_of_map i hi hp0 hp h1
-  rw [map_inv₀] at h2
-  have h3 : Valued.v x ≠ 0 := by simpa using h0
-  exact absurd h (not_le.2 ((inv_lt_one₀ (zero_lt_iff.2 h3)).1 h2))
 
 private theorem normV_eq_of_iso {F K : Type} [Field F] [NumberField F] [Field K] [NumberField K] [Algebra F K]
     (v : HeightOneSpectrum (𝓞 F)) (w : HeightOneSpectrum (𝓞 K)) [hl : w.asIdeal.LiesOver v.asIdeal]

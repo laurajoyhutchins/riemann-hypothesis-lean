@@ -1,8 +1,57 @@
-import Mathlib
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.LocalMaximality.ResidueOfTraceIsFiberSum
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.KahlerFormsOverSubalgebraClosurePropertiesStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsLaurentConstantTermFormFunctionFieldStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsTopDegreeCoefficientFormAndEqOnTopFormsStatement
+module
+
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.LocalMaximality.ResidueOfTraceIsFiberSum
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsLaurentConstantTermFormFunctionFieldStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsTopDegreeCoefficientFormAndEqOnTopFormsStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.KahlerFormsOverSubalgebraClosurePropertiesStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open KaehlerDifferential GlobalTheory.CechDR GlobalTheory.PD GlobalTheory.WH GlobalTheory.W1 GlobalTheory.W1.Lef UpperTheory.Gal.productCup_of_system
 open scoped TensorProduct
 
@@ -128,6 +177,7 @@ private lemma alt_trace' (hTL : TrLin) {M : Type} [AddCommGroup M] [Module ℂ M
       | H α =>
         have e : ∑ k, φ' k (Submodule.Quotient.mk α) • v k =
             ((C.B q).submoduleOf (C.Z q)).mkQ (∑ k : {k // p k = q}, φ k.1 α.1 • (⟨f k.1, hfq k⟩ : C.Z q)) := by
+
           rw [map_sum]
           refine Finset.sum_congr rfl fun k _ => ?_
           rw [map_smul]
@@ -209,6 +259,7 @@ private lemma mapC_Z' {ι : Type} [LinearOrder ι] (B : Finset ι → Subalgebra
     have := congrFun hD' t
     simp only [GlobalTheory.DI.delta, Pi.zero_apply] at this ⊢
     have h2 := congrArg (mapL K L) this
+
     simpa only [map_sum, map_zsmul, map_zero, mapL_apply] using h2
 
 end Forms
@@ -307,6 +358,7 @@ theorem UpperTheory.Gal.productCup_of_system.fieldLe_of :
     have hP : (fun s => gY j2 ((top (resK inlE c) - ∑ k, join (TensorProduct.mk ℂ _ _) (e k) (f k)) s)) =
         (fun s => gY j2 (top c s)) - ∑ k, join μ (aa k) (fun J => bt k (uni ∅ J)) := by
       funext s
+
       rw [htop, Pi.sub_apply, Pi.sub_apply, Finset.sum_apply, Finset.sum_apply, map_sub, map_sum]
       congr 1
       exact Finset.sum_congr rfl fun k _ => congrFun (hgj k) s
@@ -324,6 +376,7 @@ theorem UpperTheory.Gal.productCup_of_system.fieldLe_of :
   have hterm : ∀ k, trF ℂ τ ρ (trDR ℂ K K' (cupE μ (aa k) (bb k) Finset.univ)) =
       pr K τ ρ (e k) (trC (k := ℂ) (K := K) (L := K') (bb k)) := by
     intro k
+
     simp only [cupE, map_sum, cupPair, LinearMap.sum_apply]
     refine Finset.sum_congr rfl fun j _ => ?_
     simp only [μ, aa, LinearMap.mul_apply', hT1]
@@ -331,6 +384,7 @@ theorem UpperTheory.Gal.productCup_of_system.fieldLe_of :
   rw [alt_trace' hTL (omCx (rB ℂ K (xv x)) a) u d M p f (fun k => trC (k := ℂ) (K := K) (L := K') (bb k))
     (fun k => pr K τ ρ (e k)) (fun k => (hpef k).1) (fun k => (hpef k).2.2) hbtC
     (fun k y hy => hPrB F K d x hcZ τ hτ ρ hρ a (p k) ha (hpef k).1 (e k) (hpef k).2.1 y hy) hid hbtu, ← hΛv]
+
   simp only [Λ, Finset.sum_apply, Pi.smul_apply, map_sum, map_zsmul, hterm]
   refine Finset.sum_congr rfl fun k _ => ?_
   simp

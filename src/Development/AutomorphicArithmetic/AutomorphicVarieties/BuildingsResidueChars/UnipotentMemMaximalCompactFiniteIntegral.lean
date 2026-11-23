@@ -1,5 +1,47 @@
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.IwahoriHeckeInjectivity.HeckeInj
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
 import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.IntegralCompression.LAbove
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.UnipotentBlockMatrices.ClosedKernelMinors.BlkInvVal
+import GroundTheory.AutomorphicForms.ArchimedeanWhittaker.ComplexWhittaker.ExpEqOfHasDerivAt
+
+@[expose] public section
 
 open MeasureTheory NumberField Filter Topology Matrix
 open GroundTheory.Automorphic GroundTheory.Automorphic.Reduction GroundTheory.Automorphic.RightCosetSpace GroundTheory.Automorphic.AutomorphicForm
@@ -56,11 +98,11 @@ theorem UpperTheory.unipotent_mem_maximalCompact_finite_integral :
         Matrix (Fin (2 + 2)) (Fin (2 + 2)) w.Completion) p.1.1 p.1.1 = 1 := by
       have hp := p.2.1
       change (((nn X : G1 K (2 + 2)) : AdelicGLn.AdelicGL K (2 + 2)) p.1.1 p.1.1).1 w = 1
-      rw [hent, unipMatrix, Matrix.add_apply, blockEntry_apply, dif_neg (by omega)]
+      rw [hent, unipMatrix, Matrix.add_apply, blockEntry_apply, dite_eq_right (by omega)]
       simp
     have h0 := off_diag_zero _ (hinf w) hii hne
     change (((nn X : G1 K (2 + 2)) : AdelicGLn.AdelicGL K (2 + 2)) p.1.1 p.1.2).1 w = 0 at h0
-    rw [hent, unipMatrix, Matrix.add_apply, blockEntry_apply, dif_pos p.2, Matrix.one_apply_ne hne, zero_add] at h0
+    rw [hent, unipMatrix, Matrix.add_apply, blockEntry_apply, dite_eq_left p.2, Matrix.one_apply_ne hne, zero_add] at h0
     exact h0
   set g : AdelicGLn.AdelicGL K (2 + 2) := ((nn X : G1 K (2 + 2)) : AdelicGLn.AdelicGL K (2 + 2)) with hg
   have h1 : (AdelicGLn.prodEquiv K (2 + 2) g).1 = 1 := by
@@ -70,7 +112,7 @@ theorem UpperTheory.unipotent_mem_maximalCompact_finite_integral :
     rw [hent, unipMatrix, Matrix.add_apply, blockEntry_apply]
     by_cases hab : a = b
     · subst hab
-      rw [dif_neg (by omega), Matrix.one_apply_eq, Matrix.one_apply_eq, add_zero]
+      rw [dite_eq_right (by omega), Matrix.one_apply_eq, Matrix.one_apply_eq, add_zero]
       rfl
     · rw [Matrix.one_apply_ne hab, Matrix.one_apply_ne hab]
       split_ifs with h
@@ -83,10 +125,10 @@ theorem UpperTheory.unipotent_mem_maximalCompact_finite_integral :
     have := infEmb_mul_finEmb g
     rwa [h1, map_one, map_one, one_mul] at this
   refine ⟨⟨_, hint⟩, ?_⟩
-  have hmem : finEmb K (2 + 2) (AdelicGLn.prodEquiv K (2 + 2) g).2 ∈ normOneGL K (2 + 2) := by
+  have hmem : finEmb K (2 + 2) (AdelicGLn.prodEquiv K (2 + 2) g).2 ∈ normOneGL (K := K) (n := (2 + 2)) := by
     rw [hgf]
     exact (nn X).2
   apply Subtype.ext
-  change g = ((MultiplicityOne.finProj K (2 + 2) (AdelicGLn.prodEquiv K (2 + 2) g).2 : normOneGL K (2 + 2)) : AdelicGLn.AdelicGL K (2 + 2))
+  change g = ((MultiplicityOne.finProj K (2 + 2) (AdelicGLn.prodEquiv K (2 + 2) g).2 : normOneGL (K := K) (n := (2 + 2))) : AdelicGLn.AdelicGL K (2 + 2))
   rw [MultiplicityOne.finProj_of_mem hmem]
   exact hgf.symm

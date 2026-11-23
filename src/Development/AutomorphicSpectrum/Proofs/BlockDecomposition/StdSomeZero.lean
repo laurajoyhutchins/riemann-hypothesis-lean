@@ -1,14 +1,57 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.PeriodBaseChange.OB
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.PolynomialSiteTraces.AdmissibleMap
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ToH0BijectiveOfInitial
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ChartIsGood
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ChartBcOfNe
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SmorFrFrame
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FlatOfEtalePoly
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.DividedPowerEnvelopeUniversal
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.DividedPowerEnvelopeExpansion
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.TruncatedEnvelopeFiltrationQuotient
+module
+
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.PeriodBaseChange.OB
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.PolynomialSiteTraces.AdmissibleMap
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.CapOComp
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ChartBcOfNe
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ChartIsGood
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.DividedPowerEnvelopeExpansion
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.DividedPowerEnvelopeUniversal
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FlatOfEtalePoly
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ToH0BijectiveOfInitial
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.TruncatedEnvelopeFiltrationQuotient
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.CoassocSimps
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 set_option backward.isDefEq.respectTransparency false
 set_option autoImplicit false
 open CategoryTheory AlgebraicGeometry TensorProduct GlobalTheory.LogCris DividedPowers CrystallineSemistableComparison CrystallineSemistableComparison.Pb
@@ -162,13 +205,11 @@ theorem crit_none (hp : p ≠ 0) (𝒱 : Set X.Opens) (r : ℤ) :
     exact Ideal.zero_mem _
 
 theorem ladder (hp : p ≠ 0) (𝒱 : Set X.Opens) :
-    (polyS (γ := γ) (q := q) (κ := κ) hp 𝒱).Ladder (fun r => stdI _ (some r) 0) (fun _ => stdI _ none 0) 0 where
-  le r' T := by
-    change (stdI _ none 0).S T ≤ (stdI _ (some r') 0).S T
-    rw [std_none_bot]
-    exact bot_le
-  ca _ h := crit_some hp 𝒱 0 h
-  cb r' _ := crit_none hp 𝒱 r'
+    (polyS (γ := γ) (q := q) (κ := κ) hp 𝒱).Ladder (fun r => stdI _ (some r) 0) (fun _ => stdI _ none 0) 0 := by
+  refine ⟨?_, fun _ h => crit_some hp 𝒱 0 h, fun r' _ => crit_none hp 𝒱 r'⟩
+  intro r' T
+  rw [std_none_bot]
+  exact bot_le
 
 end Crit
 
@@ -224,7 +265,12 @@ theorem local_bc : ∀ {O R R' : Type} [CommRing O] [CommRing R] [CommRing R'] [
     exact hW
   have hD : St (γ := γ) (p := p) (q := q) (κ := κ) ⊤ {V} c₀.D := ⟨trivial, V, rfl, c₀.inV⟩
   have hD' : St (γ := γ') (p := p) (q := q) (κ := κ') ⊤ {V} c'.D := ⟨trivial, V, rfl, c'.inV⟩
-  have hFr := GlobalTheory.CompanionTheory.ChartFrames.smor_Fr_frame m c₀ c' g₀ g' _ _ h hV hD hV' hD' e he
+  have hFr : SMor.Fr (m.smor _ _ h) (c₀.frame g₀ _ hV hD) (c'.frame g' _ hV' hD')
+      (ObjectProperty.homMk e) := by
+    intro i T s s'
+    change (s'.hom.φ (e.φ (c₀.t i)) - s.hom.φ (e.φ (c₀.t i)) : T.obj.B) =
+      s'.hom.φ (c'.t i) - s.hom.φ (c'.t i)
+    rw [he]
   letI := c₀.D.i.toAlgebra
   exact GlobalTheory.CompanionTheory.LocBC.local_base_change (m.smor _ _ h) (polyS hp {V}) (polyS hp {V})
     (c₀.frame g₀ _ hV hD) (c'.frame g' _ hV' hD') (ObjectProperty.homMk e) hFr (fun _ => Function.injective_id) (ι := Unit) (fun _ => R')

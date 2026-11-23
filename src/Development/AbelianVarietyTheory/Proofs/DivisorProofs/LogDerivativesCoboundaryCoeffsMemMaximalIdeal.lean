@@ -1,12 +1,58 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.HasDefect
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.HasDefect
+public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.ExistsChartOfMemRedKer
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.LawsChart
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsUnitCharts
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SurjectiveSpMapFst
+public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.AwayToAwayRightEqOfComp
+public import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.CommGroupCoboundaryRelationIdentity
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.AmplePt
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.LieBridgeG
+import Std.Tactic.BVDecide.Normalize.Prop
 import Development.AbelianVarietyTheory.Definitions.Divisors.HasRigidChart
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.ToroidalCompactificationBis
-import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.AwayToAwayRightEqOfComp
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsUnitCharts
-import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.CommGroupCoboundaryRelationIdentity
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SurjectiveSpMapFst
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.LieBridgeG
+import Development.AbelianVarietyTheory.Definitions.Divisors.IsProperToroidalModelStructureMap
+import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.TopLeAlgOverHom
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PlaceDivisors.StChartF
+
+@[expose] public section
 
 open CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj AlgebraicGeometry NumberField IsLocalRing
 open scoped CategoryTheory.Obj Matrix TensorProduct
@@ -45,7 +91,8 @@ theorem exists_isLieBasis (v : Module.Basis (Fin n) R (TanM (𝟙 (Sp R)) G)) :
   have h := isGrpPullback_self G
   choose u e using fun i => PullbackSections.push_surj h (tv (v i))
   have ts : ∀ f : Fin n → TanM (𝟙 (Sp R)) G, tv (∑ i, f i) = ∏ i, tv (f i) := fun f => by
-    simp only [tv, toMul_sum, Subgroup.val_finset_prod]
+    simp only [tv, toMul_sum]
+    exact map_prod (Subgroup.subtype _) _ _
   have key : ∀ a p m, pushHom h (epsR R) p = tv m → (IsLieComb a u p ↔ m = ∑ k, a k • v k) := fun a p m hp => by
     rw [PullbackSections.isLieComb_iff h, hp]
     simp only [e]
@@ -133,8 +180,8 @@ theorem valR_prod {v : Fin n → TanM (𝟙 (Sp R)) G} {u : Fin n → (epsR R �
 
 end Group
 
-open GlobalTheory.TangentCob ReciprocityTheory.ChartRestriction.G.Geo.Tor.Germ ReciprocityTheory.ChartRestriction.G.Pdiv.ChartF GlobalTheory.CubeFib GlobalTheory.AddCurve in
 
+open GlobalTheory.TangentCob ReciprocityTheory.ChartRestriction.G.Geo.Tor.Germ ReciprocityTheory.ChartRestriction.G.Pdiv.ChartF GlobalTheory.AddCurve in
 theorem eq_one_of_coboundary {k : Type} [CommRing k] {B : Over (Sp k)} [GrpObj B] {L : LB B.left}
     (hL : L.IsLB) (hK : KTriv B L) {D : Type} [CommRing D] [Algebra k D] (e : D) (he : e * e = 0)
     (x0 : algOver k D ⟶ B) (H : ∀ j, Γ(B.left, L.U j))
@@ -183,7 +230,7 @@ theorem eq_one_of_coboundary {k : Type} [CommRing k] {B : Over (Sp k)} [GrpObj B
     gen_chartPull (ReciprocityTheory.ChartRestriction.G.Geo.Tor.chartPullPull (translDiff B L x0) _ _ rfl) c hc⟩
 
 theorem pbT_id {X : Scheme.{0}} (O : X.Opens) (s : Γ(X, O)) : pbT (𝟙 X) s O = s := by
-  rw [pbT, dif_pos (show O ≤ (𝟙 X : X ⟶ X) ⁻¹ᵁ O from le_rfl)]
+  rw [pbT, dite_eq_left (show O ≤ (𝟙 X : X ⟶ X) ⁻¹ᵁ O from le_rfl)]
   exact (congrArg (fun φ => φ.hom s) (Scheme.Hom.appLE_eq_app (𝟙 X) (U := O))).trans rfl
 
 theorem mem_maximalIdeal_of_isCob : ∀ (A : Type) [CommRing A] [IsLocalRing A] [IsNoetherianRing A] (B : Over (Sp A)) [GrpObj B] [IsCommMonObj B] (g : ℕ) (L : LB B.left), IsAbelianScheme B → SmoothOfRelativeDimension g B.hom → L.IsLB → RelAmple B L → KTriv B L → (∀ i, IsAffineOpen (L.U i)) → Finite L.ι → ∀ (v : Fin g → TanM (𝟙 (Sp A)) B) (dd : Fin g → Fld B.left), (∀ a, IsInv B (v a) (dd a)) → (∀ w : TanM (𝟙 (Sp A)) B, ∃! cf : Fin g → A, w = ∑ a, cf a • v a) → ∀ (c : Fin g → A) (N : ℕ) (t : Fin N → A) (z : Fin N → C1 L.U), (∀ k, t k ∈ maximalIdeal A) → IsCob L.U (fun i j => ∑ a, constFn B.hom _ (c a) * dlg B (𝟙 _) L (dd a) i j (L.U i ⊓ L.U j) - ∑ k, constFn B.hom _ (t k) * z k i j) → ∀ a, c a ∈ maximalIdeal A := by
@@ -222,11 +269,12 @@ theorem mem_maximalIdeal_of_isCob : ∀ (A : Type) [CommRing A] [IsLocalRing A] 
         (valR_eq (R := S) _ _ hU _).symm.trans (GlobalTheory.InvFieldRing.valR_constFn _ _ _ hy _ hU a)
       have e₁ := congrArg (valHom (R := S) y.left _ hU) (hb j j')
       have r₁ : valHom (R := S) y.left _ hU (rsT (b j) _) = valHom (R := S) y.left _ hj (b j) := by
-        rw [rsT, dif_pos inf_le_left, ← valR_eq, ← valR_eq]
+        rw [rsT, dite_eq_left inf_le_left, ← valR_eq, ← valR_eq]
         exact valR_res _ _ hU _
       have r₂ : valHom (R := S) y.left _ hU (rsT (b j') _) = valHom (R := S) y.left _ hj' (b j') := by
-        rw [rsT, dif_pos inf_le_right, ← valR_eq, ← valR_eq]
+        rw [rsT, dite_eq_left inf_le_right, ← valR_eq, ← valR_eq]
         exact valR_res _ _ hU _
+
       simp only [dlg, pbT_id, map_sub, map_sum, map_mul, hc, r₁, r₂] at e₁
       have e₂ : valHom (R := S) y.left _ hU (L.g j j').val * valHom (R := S) y.left _ hU (L.g j j')⁻¹.val = 1 := by
         rw [← map_mul, Units.mul_inv, map_one]

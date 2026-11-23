@@ -1,7 +1,60 @@
-import Mathlib
-import Formalism.SatakeDualWeyl.Statement
-import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.RationalPointsLeHolds
-import Formalism.LocalToGlobal.SiegelLatticeTheory.SiegelMassRatios.ClassAct
+module
+
+public import Formalism.SatakeDualWeyl.Statement
+public import Mathlib.Analysis.CStarAlgebra.Module.Constructions
+public import Mathlib.Analysis.InnerProductSpace.Dual
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Matrix.FiniteDimensional
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -76,14 +129,6 @@ def ColsDim : Prop :=
     FiniteDimensional k (Cols k ιi ιf K ψ π) ∧
       finrank k (Cols k ιi ιf K ψ π) = finrank k V * Nat.card (Classes ιf K)
 
-def SharpDim : Prop :=
-  ∀ (Γ Gi Gf : Type) [Group Γ] [Group Gi] [Group Gf] (k : Type) [Field k] (V : Type)
-    [AddCommGroup V] [Module k V] (ιi : Γ →* Gi) (ιf : Γ →* Gf) (K K0 : Subgroup Gf)
-    (ψ : K →* kˣ) (π : Representation k Gi V),
-    K ≤ K0 → StabTriv ιf K0 → Finite (Classes ιf K) → FiniteDimensional k V →
-    FiniteDimensional k (Sharp k ιi ιf K π ψ) ∧
-      finrank k (Sharp k ιi ιf K π ψ) = finrank k V * Nat.card (Classes ιf K)
-
 def SharpBij : Prop :=
   ∀ (Γ Gi Gf : Type) [Group Γ] [Group Gi] [Group Gf] (V : Type) [NormedAddCommGroup V]
     [InnerProductSpace ℂ V] [FiniteDimensional ℂ V] (ιi : Γ →* Gi) (ιf : Γ →* Gf)
@@ -122,24 +167,8 @@ def ratHom (σ : E →ₐ[F] E) (J : Matrix n n E) (R : Type) [CommRing R] [Alge
   ((bc (inclE (F := F) R)).comp (UJ (σ : E →+* E) J).subtype).codRestrict _
     (fun g => bc_mem_UPts σ J R g)
 
-abbrev Ginf (σ : E →ₐ[F] E) (J : Matrix n n E) := UPts σ J (InfiniteAdeleRing F)
-
-abbrev Gfin (σ : E →ₐ[F] E) (J : Matrix n n E) := UPts σ J (FiniteAdeleRing (𝓞 F) F)
-
 end Unitary
 
-open NumberField in
-
-def ColsDimU : Prop :=
-  ∀ (F E : Type) [Field F] [NumberField F] [Field E] [Algebra F E] (n : Type) [Fintype n]
-    [DecidableEq n] (σ : E →ₐ[F] E) (J : Matrix n n E) (K K0 : Subgroup (Gfin σ J))
-    (ψ : K →* ℂˣ) (V : Type) [AddCommGroup V] [Module ℂ V] (π : Representation ℂ (Ginf σ J) V),
-    K ≤ K0 → StabTriv (ratHom σ J (FiniteAdeleRing (𝓞 F) F)) K0 →
-    Finite (Classes (ratHom σ J (FiniteAdeleRing (𝓞 F) F)) K) → FiniteDimensional ℂ V →
-    FiniteDimensional ℂ (Cols ℂ (ratHom σ J (InfiniteAdeleRing F))
-        (ratHom σ J (FiniteAdeleRing (𝓞 F) F)) K ψ π) ∧
-      finrank ℂ (Cols ℂ (ratHom σ J (InfiniteAdeleRing F)) (ratHom σ J (FiniteAdeleRing (𝓞 F) F))
-          K ψ π) = finrank ℂ V * Nat.card (Classes (ratHom σ J (FiniteAdeleRing (𝓞 F) F)) K)
 
 section Proofs
 
@@ -151,13 +180,9 @@ theorem mem_Equi {k : Type} [Field k] {W : Type} [AddCommGroup W] [Module k W]
 
 theorem stabTriv_mono {K K0 : Subgroup Gf} (h : K ≤ K0) (hs : StabTriv ιf K0) : StabTriv ιf K := fun x γ hx => hs x γ (h hx)
 
-theorem equi_subtype {k : Type} [Field k] {W : Type} [AddCommGroup W] [Module k W]
-    (Γ' : Subgroup Gf) (ρ : Representation k Γ' W) (χ : K →* kˣ) :
-    Equi k Γ'.subtype K ρ χ = Formalism.L2.SG.ClassAct.AMFChi k Γ' K ρ χ := rfl
-
 theorem exists_dec (s : Classes ιf K → Gf) (hs : ∀ c, DoubleCoset.mk ιf.range K (s c) = c)
     (g : Gf) : ∃ p : Γ × K, g = ιf p.1 * s (DoubleCoset.mk ιf.range K g) * (p.2 : Gf) := by
-  obtain ⟨h, hh, κ, hκ, e⟩ := (DoubleCoset.eq _ _ _ _).1 (hs (DoubleCoset.mk ιf.range K g))
+  obtain ⟨h, hh, κ, hκ, e⟩ := (@DoubleCoset.eq _ _ _ _ _ _).1 (hs (DoubleCoset.mk ιf.range K g))
   obtain ⟨γ, rfl⟩ := MonoidHom.mem_range.1 hh
   exact ⟨(γ, ⟨κ, hκ⟩), e⟩
 
@@ -188,7 +213,7 @@ theorem extF_eq (hst : StabTriv ιf K) (s : Classes ιf K → Gf)
     (e : g = ιf γ * s c * κ) : extF ιf K s hs ρ χ w g = ((χ κ : kˣ) : k) • ρ γ (w c) := by
   have hc : DoubleCoset.mk ιf.range K g = c := by
     rw [e]
-    exact ((DoubleCoset.eq _ _ _ _).2 ⟨(ιf γ)⁻¹, ιf.range.inv_mem (MonoidHom.mem_range.2 ⟨γ, rfl⟩),
+    exact ((@DoubleCoset.eq _ _ _ _ _ _).2 ⟨(ιf γ)⁻¹, ιf.range.inv_mem (MonoidHom.mem_range.2 ⟨γ, rfl⟩),
       ((κ : K) : Gf)⁻¹, K.inv_mem κ.2, by group⟩).trans (hs c)
   have spec := Classical.choose_spec (exists_dec ιf K s hs g)
   unfold extF
@@ -414,13 +439,5 @@ theorem columns_dimension : ColsDim := by
   haveI := h1
   refine ⟨LinearEquiv.finiteDimensional e.symm, ?_⟩
   rw [e.finrank_eq, h2, Subspace.dual_finrank_eq]
-
-theorem sharp_dimension : SharpDim := by
-  intro Γ Gi Gf _ _ _ k _ V _ _ ιi ιf K K0 ψ π hK hst hfin hV
-  exact equi_dim ιf K (stabTriv_mono ιf hK hst) (π.comp ιi) ψ⁻¹
-
-theorem columns_dimension_unitary : ColsDimU := by
-  intro F E _ _ _ _ n _ _ σ J K K0 ψ V _ _ π hK hst hfin hV
-  exact columns_dimension _ _ _ ℂ V _ _ K K0 ψ π hK hst hfin hV
 
 end Formalism.L2.SG.ColsDim

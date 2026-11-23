@@ -1,6 +1,55 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.FiniteCovolume.SecondCountableTopologyArchUnitary
-import GroundTheory.HeightsAndTheta.Heights.FiniteCovolume.StBoundedInverseCompact
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.FiniteCovolume.StBoundedInverseCompact
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.Matrix.PosDef
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+public import Mathlib.Topology.Algebra.Group.Units
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GroundTheory.Heights₂.Heights.FiniteCovolume
 
@@ -51,22 +100,22 @@ theorem posDef_exists_lower {P : Matrix ι ι ℂ} (hP : P.PosDef) :
       simp
     · exact absurd ⟨_, hunit y hy⟩ hne
 
-omit [Fintype ι] in
 
+omit [Fintype ι] in
 theorem norm_mul_apply_le {m κ : Type*} [Fintype κ] (A : Matrix m κ ℂ) (B : Matrix κ ι ℂ)
     (i : m) (j : ι) : ‖(A * B) i j‖ ≤ ∑ k, ‖A i k‖ * ‖B k j‖ := by
-  rw [mul_apply]
+  rw [Matrix.mul_apply]
   refine (norm_sum_le _ _).trans (le_of_eq ?_)
   simp
 
 end SlopeTestRemainingChoices
 
 variable {F E : Type*} [Field F] [Field E] [NumberField F] [NumberField E] [Algebra F E]
-  [Algebra.IsQuadraticExtension F E] [IsTotallyReal F] [IsTotallyComplex E]
+  [Algebra.IsQuadraticExtension F E] [IsTotallyReal F] [_root_.NumberField.IsTotallyComplex E]
 variable {W : Type*} [AddCommGroup W] [Module E W] {ι : Type*} [Fintype ι] [DecidableEq ι]
 
-omit [IsTotallyComplex E] [Fintype ι] in
 
+omit [_root_.NumberField.IsTotallyComplex E] [Fintype ι] in
 theorem exists_rightInv (v : Basis ι E W) {n : ℕ} {e : Fin n → W}
     (he : Submodule.span E (Set.range e) = ⊤) :
     ∃ c : ι → Fin n → E, ∀ w : InfinitePlace E,
@@ -77,10 +126,12 @@ theorem exists_rightInv (v : Basis ι E W) {n : ℕ} {e : Fin n → W}
   refine ⟨c, fun w => ?_⟩
   ext k i
   have h1 : ∑ a, v.repr (e a) k * c i a = v.repr (v i) k := by
+
     rw [← hc i, map_sum, Finsupp.finsetSum_apply]
     refine Finset.sum_congr rfl fun a _ => ?_
     rw [map_smul, Finsupp.smul_apply, smul_eq_mul, mul_comm]
-  simp only [mul_apply, of_apply, vecAt, ← map_mul, ← map_sum, h1, Basis.repr_self, one_apply]
+
+  simp only [Matrix.mul_apply, of_apply, vecAt, ← map_mul, ← map_sum, h1, Basis.repr_self, one_apply]
   by_cases hki : k = i
   · subst hki
     simp
@@ -91,11 +142,11 @@ end BoundedInverseCompact
 open BoundedInverseCompact
 
 variable {F E : Type*} [Field F] [Field E] [NumberField F] [NumberField E] [Algebra F E]
-  [Algebra.IsQuadraticExtension F E] [IsTotallyReal F] [IsTotallyComplex E]
+  [Algebra.IsQuadraticExtension F E] [IsTotallyReal F] [_root_.NumberField.IsTotallyComplex E]
 variable {W : Type*} [AddCommGroup W] [Module E W] {ι : Type*} [Fintype ι] [DecidableEq ι]
 
-omit [NumberField F] [IsTotallyReal F] [IsTotallyComplex E] in
 
+omit [NumberField F] [IsTotallyReal F] [_root_.NumberField.IsTotallyComplex E] in
 theorem BoundedInverseCompact.proof (h : HermitianForm F E W) (v : Basis ι E W) :
     BoundedInverseCompact.Statement h v := by
   intro M n e he C
@@ -164,7 +215,7 @@ theorem BoundedInverseCompact.proof (h : HermitianForm F E W) (v : Basis ι E W)
 
   have hGiU : ∀ j a, (Gi * U w) j a = invApply g (vecAt v (e a)) w j := by
     intro j a
-    simp [Gi, U, invApply, mul_apply, mulVec, dotProduct]
+    simp [Gi, U, invApply, Matrix.mul_apply, mulVec, dotProduct]
   have hGi_eq : Gi = Gi * U w * R w := by
     rw [Matrix.mul_assoc, hc w, Matrix.mul_one]
   have hGi_le : ∀ j i, ‖Gi j i‖ ≤ r1 w j i := by

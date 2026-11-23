@@ -1,4 +1,54 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.LinkedUnramifiedChains.CmpPrime
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.LinkedUnramifiedChains.CmpPrime
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Artinian.Instances
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.LocalProperties.Reduced
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Polynomial
 
@@ -31,7 +81,24 @@ private theorem cmpPrime_core {Λ B : Type} [CommRing Λ] [IsDomain Λ] [CommRin
       (∏ j ∈ Finset.univ.erase i, g j).map (algebraMap Λ (FractionRing Λ)) := by
     rw [Polynomial.map_prod]
     intro h
-    obtain ⟨j, hj, hdvd⟩ := (Prime.dvd_finset_prod_iff gprime _).1 h
+    have exists_dvd : ∀ (S : Finset (Fin s)),
+        (g i).map (algebraMap Λ (FractionRing Λ)) ∣
+          ∏ j ∈ S, (g j).map (algebraMap Λ (FractionRing Λ)) →
+        ∃ j ∈ S, (g i).map (algebraMap Λ (FractionRing Λ)) ∣
+          (g j).map (algebraMap Λ (FractionRing Λ)) := by
+      intro S
+      induction S using Finset.induction_on with
+      | empty =>
+        simp only [Finset.prod_empty, Finset.notMem_empty, false_and, exists_false]
+        exact fun hd => gprime.not_isUnit (isUnit_iff_dvd_one.mpr hd)
+      | @insert a S ha ih =>
+        simp only [Finset.prod_insert ha, Finset.mem_insert]
+        intro hd
+        rcases gprime.dvd_or_dvd hd with hd | hd
+        · exact ⟨a, Or.inl rfl, hd⟩
+        · obtain ⟨j, hj, hdj⟩ := ih hd
+          exact ⟨j, Or.inr hj, hdj⟩
+    obtain ⟨j, hj, hdvd⟩ := exists_dvd _ h
     have hji : j ≠ i := Finset.ne_of_mem_erase hj
     have hassoc := (irr i).associated_of_dvd (irr j) hdvd
     have heq := Polynomial.eq_of_monic_of_associated (mapMonic i) (mapMonic j) hassoc

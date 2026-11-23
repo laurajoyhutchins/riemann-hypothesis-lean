@@ -1,8 +1,44 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.OffQOfSizeRows
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.KerBF
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.QuasiOfFam
-import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.ConjugateAdjointDagger
+module
+
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.OffQOfSizeRows
+public import Development.AbelianVarietyTheory.Definitions.LatticeFrames.KerBF
+public import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.ConjugateAdjointDagger
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -107,12 +143,6 @@ def Irr (D : D7) : Prop :=
   ∀ (ψ : AddChar (AF D.host.F) ℂ), IsStdChar D ψ (-1) → ∀ (S T : HSp D) (Γ : AddSubgroup (WO S T)) (ℓ : (WO S T → ℂ) → ℂ),
     Tame ψ S T ℓ → ∀ f₀, VacG ψ S T Γ f₀ → f₀ ≠ 0 → (∀ w ∈ Ann ψ S T Γ, ℓ (heisO ψ S T w f₀) = 0) → ∀ f, VacG ψ S T Γ f → ℓ f = 0
 
-def HtCmp (D : D7) : Prop :=
-  (∀ (S S₀ : HSp D) (ρ : ℕ) (d : HypDec S S₀ ρ), ∃ (C : ℝ) (a : ℕ), ∀ n ∈ flagN d, ∀ h,
-    quotHeight S₀ h ≤ C * quotHeight S (n * d.emb0 h) ^ a ∧ quotHeight S (n * d.emb0 h) ≤ C * quotHeight S₀ h ^ a) ∧
-  ∀ (S A B : HSp D) (o : OrthDec S A B), ∃ (C : ℝ) (a : ℕ), ∀ h,
-    quotHeight A h ≤ C * quotHeight S (o.emb (h, 1)) ^ a ∧ quotHeight S (o.emb (h, 1)) ≤ C * quotHeight A h ^ a
-
 def VanBF (D : D7) : Prop :=
   ∀ (ψ : AddChar (AF D.host.F) ℂ) (ρ : ℕ) (B : BesL D ρ) (J : JacL D ρ) (s : StBF ψ B J) 𝒮 Γ₀ K,
     Loc B.d J.d s (xZero J.d) (yZero B.V₀ ρ (vecB B.o B.ζ)) 𝒮 Γ₀ K → ∀ (φ : GA D B.A → ℂ) (G : GA D J.W → ℂ),
@@ -170,18 +200,18 @@ abbrev omRow (W : G.Weil) (i : ℕ) : Om (G.V (.grid (i + 1) 0)) (G.V (.grid i 0
 
 abbrev omCore (W : G.Weil) (i : ℕ) : Om (G.V (.core (i + 1))) (G.V (.core i)) := cjOm (W.om (.core i))
 
-variable (G) in
 
+variable (G) in
 abbrev latRow (i : ℕ) : AddSubgroup (WO (G.V (.grid (i + 1) 0)) (G.V (.grid i 0))) := depLat G (.chi i 0)
 
-variable (G) in
 
+variable (G) in
 abbrev latCore (i : ℕ) : AddSubgroup (WO (G.V (.core (i + 1))) (G.V (.core i))) := depLat G (.core i)
+
 
 set_option genSizeOfSpec false in
 set_option genInjectivity false in
 variable (G) in
-
 structure Frames where
   Lz : HSp D
   rk : Lz.rank = 1
@@ -230,17 +260,6 @@ def TowerEx : Prop := All fun {_} _ _ _ {G} W M => ∀ v : CoreVol G, ∃ F : Fr
 
 def FockTot : Prop := All fun {D} _ _ _ {G} W _ => ∀ (i : Fin D.R.m) (ℓ : (WO (G.V (.grid (i.1 + 1) 0)) (G.V (.grid i.1 0)) → ℂ) → ℂ),
   Tame W.ψ _ _ ℓ → (∀ κ P, ℓ (star (W.fock (.chi i.1 0) (W.cosVec i.1 κ) P)) = 0) → ∀ f, VacG W.ψ _ _ (latRow G i.1) f → ℓ f = 0
-
-example : TowerEx ↔ ∀ D : D7, Nat.Coprime D.host.pde (D.host.QS * D.host.q) ∧ Nat.Coprime D.host.pde' (D.host.QS * D.host.q) → ∀ (T : Type) (L : LevCh D T) (μ0 : T), L.Is μ0 →
-    ∀ (sc : Consts) (G : GridData L sc) (W : G.Weil) (M : GlobalTheory.FunObj.Vol G), M.IsRow →
-      ∀ v : CoreVol G, ∃ F : Frames G, F.Ends v W M ∧ ∃ ΓL, F.Good v W ΓL := Iff.rfl
-
-example {ρ : ℕ} (B : BesLev D ρ) (J : JacLev D ρ) (s : StepBF ψ B J) :
-    flBF (B := ⟨_, _, _, _, B.d, B.o, B.ζ, B.line, B.vA, B.vN⟩) (J := ⟨_, _, J.d, J.v0, J.vN⟩) s = flatBF s := rfl
-
-example (S T : HSp D) : Tame ψ S T fun _ => 0 :=
-  ⟨fun _ _ _ _ => by simp, fun _ _ _ => by simp, fun _ _ => continuous_const, fun _ _ => ⟨0, fun _ => by simp⟩,
-    fun _ _ _ _ _ _ _ => by simp⟩
 
 end GlobalTheory.Asc
 

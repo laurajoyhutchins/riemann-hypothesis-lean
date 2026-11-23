@@ -1,8 +1,57 @@
-import Mathlib
-import GroundTheory.GlobalFields.SplittingFromInequality.Galois
-import GroundTheory.GlobalFields.SemilocalAlgebras.Galois
-import GroundTheory.GlobalFields.CompletionAtPlace.Inertia
-import GroundTheory.LocalFields.UnramifiedGalois
+module
+
+public import GroundTheory.GlobalFields.SemilocalAlgebras.Galois
+public import GroundTheory.GlobalFields.FirstInequalityStatement
+public import GroundTheory.GlobalFields.KummerTheory.Splitting
+public import Mathlib.FieldTheory.Galois.IsGaloisGroup
+public import Mathlib.RingTheory.Frobenius
+public import GroundTheory.GlobalFields.CompletionAtPlace.Inertia
+import GroundTheory.GlobalFields.CompletionAtPlace.Integers
+public import GroundTheory.GlobalFields.SplittingFromInequality.Galois
+public import GroundTheory.LocalFields.UnramifiedGalois
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import GroundTheory.GlobalFields.CompletionAtPlace.Galois
+
+@[expose] public section
 
 namespace GroundTheory.Global
 
@@ -16,8 +65,8 @@ section FixedField
 variable {K L : Type*} [Field K] [NumberField K] [Field L] [NumberField L] [Algebra K L]
   [IsGalois K L]
 
-omit [NumberField K] [NumberField L] [IsGalois K L] in
 
+omit [NumberField K] [NumberField L] [IsGalois K L] in
 theorem card_stabilizer_fixedField_eq (H : Subgroup Gal(L/K)) (w : HeightOneSpectrum (𝓞 L))
     (hD : MulAction.stabilizer Gal(L/K) w.asIdeal ≤ H) [FiniteDimensional K L] :
     Nat.card (MulAction.stabilizer Gal(L/fixedField H) w.asIdeal) =
@@ -64,8 +113,8 @@ theorem splitsCompletely_fixedField_of_stabilizer_le (H : Subgroup Gal(L/K))
   have : w.1.asIdeal.LiesOver v.asIdeal := Ideal.LiesOver.trans w.1.asIdeal w'.asIdeal v.asIdeal
   exact ramificationIdx_eq_one_and_inertiaDeg_eq_one_of_stabilizer_le H v w' w.1 (hD w.1 this)
 
-omit [NumberField K] [NumberField L] [IsGalois K L] in
 
+omit [NumberField K] [NumberField L] [IsGalois K L] in
 theorem below_smul (σ : Gal(L/K)) (w : HeightOneSpectrum (𝓞 L)) : below K (σ • w) = below K w :=
   (below_eq_iff (σ • w) (below K w)).2 (by rw [smul_asIdeal]; infer_instance)
 
@@ -111,15 +160,15 @@ section Frobenius
 variable {K L : Type*} [Field K] [NumberField K] [Field L] [NumberField L] [Algebra K L]
   [IsGalois K L]
 
-open AdicLiesOver in
 
+open AdicLiesOver in
 theorem stabilizer_eq_zpowers_arithFrobAt (v : HeightOneSpectrum (𝓞 K))
     (w : HeightOneSpectrum (𝓞 L)) [w.asIdeal.LiesOver v.asIdeal]
     (he : w.asIdeal.ramificationIdx (𝓞 K) = 1) :
     MulAction.stabilizer Gal(L/K) w.asIdeal =
       Subgroup.zpowers (arithFrobAt (𝓞 K) Gal(L/K) w.asIdeal) := by
-  have h : GroundTheory.LocalField.ramificationIndex (v.adicCompletion K) (w.adicCompletion L) = 1 := by
-    rw [GroundTheory.LocalField.ramificationIndex, ramificationIdx_integer v w, he]
+  have h : (_root_.Ideal.ramificationIdx (_root_.IsLocalRing.maximalIdeal (_root_.Valuation.integer (_root_.ValuativeRel.valuation (w.adicCompletion L)))) (_root_.Valuation.integer (_root_.ValuativeRel.valuation (v.adicCompletion K)))) = 1 := by
+    rw [ramificationIdx_integer v w, he]
   have hfr : decompositionToLocal v w (arithFrobAtDecomposition w) =
       GroundTheory.LocalField.frobenius _ _ h :=
     (eq_decompositionToLocal_arithFrobAt v w he _

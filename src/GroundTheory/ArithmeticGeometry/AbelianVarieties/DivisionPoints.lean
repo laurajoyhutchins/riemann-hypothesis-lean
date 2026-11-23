@@ -1,5 +1,57 @@
-import Mathlib
-import GroundTheory.ArithmeticGeometry.AbelianVarieties.NormEDS
+module
+
+public import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic
+public import GroundTheory.ArithmeticGeometry.AbelianVarieties.NormEDS
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 namespace GroundTheory.Arith.Abelian
 
@@ -94,8 +146,8 @@ theorem normEDS_eq_zero_iff_of_three {b d : R} (hb : b ≠ 0) (hd : d ≠ 0) (n 
   · exact nat k
   · rw [normEDS_neg, neg_eq_zero, nat k, dvd_neg]
 
-omit [IsDomain R] in
 
+omit [IsDomain R] in
 theorem normEDS_zero_left_of_even (c d : R) {n : ℤ} (hn : Even n) : normEDS 0 c d n = 0 := by
   simp [normEDS, hn]
 
@@ -333,9 +385,9 @@ private theorem good_two : Good W h₀ 2 := by
     mul_one, eq_sub_iff_add_eq, ← eq_sub_iff_add_eq', div_eq_iff (pow_ne_zero 2 hb)]
   linear_combination this
 
+
 omit [DecidableEq F] in
 include h₀ in
-
 private theorem ne_zero_of_Psi3_eq_zero (hc : W.Ψ₃.eval x₀ = 0) :
     2 * y₀ + W.a₁ * x₀ + W.a₃ ≠ 0 ∧ W.preΨ₄.eval x₀ ≠ 0 := by
   have hb : 2 * y₀ + W.a₁ * x₀ + W.a₃ ≠ 0 := by
@@ -541,9 +593,9 @@ private theorem good (n : ℤ) : Good W h₀ n := by
   · refine ⟨iff_of_true (zero_zsmul _) (psiAt_zero ..), fun h => absurd (psiAt_zero ..) h⟩
   · exact good_nat W h₀ n.toNat n hn (by omega)
 
+
 omit [DecidableEq F] in
 include h₀ in
-
 theorem psiAt_eq_zero_iff (n : ℤ) : psiAt W x₀ y₀ n = 0 ↔ (W.ΨSq n).eval x₀ = 0 := by
   rw [← psiAt_sq W h₀.1, pow_eq_zero_iff two_ne_zero]
 

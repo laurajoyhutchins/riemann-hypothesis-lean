@@ -1,7 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.Uniformised
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DiagFormTwoSmulAndKerStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.Uniformised
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DiagFormTwoSmulAndKerStatement
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.WeilPairingComplexValueUniqueStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor GlobalTheory.PELU
 open scoped Matrix
@@ -45,7 +90,7 @@ theorem unifCls_unit_iff (hker : ∀ z, e z = 1 ↔ z ∈ P.range) (hinj : Funct
 
 theorem unifCls_mul (hadd : ∀ z w, e (z + w) = e z * e w) (n : ℕ) (v v' : L) :
     e ((n : ℂ)⁻¹ • P (v + v')) = e ((n : ℂ)⁻¹ • P v) * e ((n : ℂ)⁻¹ • P v') := by
-  rw [map_add, smul_add, hadd]
+  rw [map_add (f := _), smul_add, hadd]
 
 theorem unifCls_eq_iff (hadd : ∀ z w, e (z + w) = e z * e w) (hker : ∀ z, e z = 1 ↔ z ∈ P.range)
     (hinj : Function.Injective P) {n : ℕ} (hn : 0 < n) (v v' : L) :
@@ -102,7 +147,7 @@ theorem unifCls_lift {Λ : Type} [AddCommGroup Λ] [Module.Free ℤ Λ] (hadd : 
       map_zero' := by simp [unifCls_exp_zero e hadd],
       map_add' := fun x y => by
         show Additive.ofMul (e _) = Additive.ofMul (e _) + Additive.ofMul (e _)
-        rw [map_add, map_add, smul_add, hadd]; rfl }
+        rw [map_add (f := _), map_add (f := _), smul_add, hadd]; rfl }
   have hψχ : ψ.toIntLinearMap = χ.toIntLinearMap := b.ext fun i => by
     simp [ψ, χ, hv, Module.Basis.constr_basis]
   intro a
@@ -156,6 +201,7 @@ theorem unifCls_bilin {L : Type} [AddCommGroup L] [Module.Free ℤ L] [Module.Fi
     Matrix.of fun i j => E (b i) (b j)
   have hsum : ∀ (c : Module.Free.ChooseBasisIndex ℤ L → ℤ) j, E (b.equivFun.symm c) (b j) = (c ᵥ* M) j := by
     intro c j
+
     simp [Module.Basis.equivFun_symm_apply, map_sum, Matrix.vecMul, dotProduct, M]
   have hdet : M.det ≠ 0 := by
     intro h0

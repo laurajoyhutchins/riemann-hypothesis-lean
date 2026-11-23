@@ -1,6 +1,61 @@
-import Formalism.SharpRestriction.GrowthBounds.BinomialPolynomialIdentities.DualWeightVectorApplyEqZeroOfNeNeg
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.BinomialPolynomialIdentities.ContragredientIrreducibleGeneratedByHighestWeigh
+public import Formalism.SharpRestriction.GrowthBounds.BinomialPolynomialIdentities.DualWeightVectorApplyEqZeroOfNeNeg
+import Formalism.SharpRestriction.GrowthBounds.RootWeights.IntegralEnvelopingPreservesSubmodule
+import Formalism.SharpRestriction.GrowthBounds.RootWeights.IrreducibleStableContainsEqTop
+public import Formalism.SharpRestriction.GrowthBounds.RootWeights.WeightConditionFromIntegralForm
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Matrix.FiniteDimensional
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
 import Formalism.SharpRestriction.GrowthBounds.ProjectionOfIsotypicDecomposition
-import Formalism.SharpRestriction.GrowthBounds.RootWeights.WeightConditionFromIntegralForm
+
+@[expose] public section
 
 noncomputable section
 
@@ -127,7 +182,7 @@ theorem highestWeightSpace_eq_span_highestWeightVector [CharZero (KK O)] {E : GL
       exact Submodule.subset_span ⟨u * w, L.mul_mem hu hw, rfl⟩
     | zero => simp
     | add y z _ _ hy hz =>
-      rw [map_add]
+      rw [map_add (f := _)]
       exact U.add_mem hy hz
     | smul c y _ hy =>
       rw [map_smul]
@@ -170,7 +225,7 @@ theorem highestWeightSpace_eq_span_highestWeightVector [CharZero (KK O)] {E : GL
       exact key u hu c d
     | zero => simp
     | add y z _ _ hy hz =>
-      rw [map_add]
+      rw [map_add (f := _)]
       exact U.add_mem hy hz
     | smul t y _ hy =>
       rw [map_smul]
@@ -272,7 +327,7 @@ theorem contragredient_span_highestWeight_eq_top (D : Formalism.BasicNotions.D7)
       exact Submodule.subset_span ⟨dualOps E a b * u,
         Submonoid.mul_mem _ (Submonoid.subset_closure ⟨(a, b), rfl⟩) hu, rfl⟩
     | zero => rw [map_zero]; exact Submodule.zero_mem _
-    | add x y _ _ hx hy => rw [map_add]; exact Submodule.add_mem _ hx hy
+    | add x y _ _ hx hy => rw [map_add (f := _)]; exact Submodule.add_mem _ hx hy
     | smul c x _ hx => rw [map_smul]; exact Submodule.smul_mem _ _ hx
   have hv'G : v' ∈ G' := Submodule.subset_span ⟨1, Submonoid.one_mem _, rfl⟩
   set Z : Submodule (KK O) V := G'.dualCoannihilator with hZ
@@ -283,7 +338,7 @@ theorem contragredient_span_highestWeight_eq_top (D : Formalism.BasicNotions.D7)
     have := hx _ (hG'st a b φ hφ)
     rw [dualOperators_apply, neg_eq_zero] at this
     exact this
-  obtain ⟨Z', hc, hZ'st⟩ := weight_condition_from_integral_form D (KK O) V n E hI.1 Z hZst
+  obtain ⟨Z', hc, hZ'st⟩ := cr_compl E hI.1.1 hI.1.2.2 Z hZst
   have hvtop : v ∈ Z ⊔ Z' := hc.sup_eq_top ▸ Submodule.mem_top
   obtain ⟨z, hz, z', hz', hsum⟩ := Submodule.mem_sup.1 hvtop
   have hzw : z ∈ weightSp E mu := by
@@ -294,7 +349,7 @@ theorem contragredient_span_highestWeight_eq_top (D : Formalism.BasicNotions.D7)
       Submodule.sub_mem _ (hZ'st a a z' hz') (Submodule.smul_mem _ _ hz')
     have h3 : (E a a z - (mu a : KK O) • z) + (E a a z' - (mu a : KK O) • z') = 0 := by
       have := mem_weightSpace_iff_diag_scalar.1 hI.2.2.1.2.1 a
-      rw [← hsum, map_add, smul_add] at this
+      rw [← hsum, map_add (f := _), smul_add] at this
       rw [← sub_eq_zero] at this
       rw [← this]
       abel

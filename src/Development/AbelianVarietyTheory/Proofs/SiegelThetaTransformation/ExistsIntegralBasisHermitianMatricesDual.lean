@@ -1,6 +1,56 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IsHeatZero
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SquareIntegrability.GCauchyStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.FirstCoordinateAdmissible
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open Matrix Complex NumberField GlobalTheory.SW Filter Topology
 open ReciprocityTheory.ChartRestriction.G.FD (cc herm)
 open scoped ComplexConjugate ComplexOrder Real Classical
@@ -89,6 +139,7 @@ def HermSub (E : Type) [Field E] [NumberField E] [IsCMField E] (N : ℕ) :
     rw [cc_smul, h1]
 
 theorem cc_trace {N : ℕ} (X : Matrix (Fin N) (Fin N) E) : cc X.trace = (ccT X).trace := by
+
   simp only [Matrix.trace, diag_apply, ccT, transpose_apply, map_apply, cc, map_sum]
 
 theorem cc_trace_mul {N : ℕ} (X Y : HermSub E N) : cc (X.1 * Y.1).trace = (X.1 * Y.1).trace := by
@@ -115,9 +166,12 @@ theorem form_self {Ψ : Finset (E →+* ℂ)} (hΨ : IsType Ψ) {N : ℕ} (X : H
   have hX : ccT X.1 = X.1 := X.2
   have h2 : ∀ τ : Ψ, τ.1 (X.1 * X.1).trace =
       ((∑ a, ∑ b, normSq (τ.1 (X.1 a b)) : ℝ) : ℂ) := fun τ => by
-    simp only [Matrix.trace, diag_apply, mul_apply, map_sum, map_mul]
+
+    simp only [Matrix.trace, diag_apply, map_sum]
     push_cast
-    refine Finset.sum_congr rfl fun a _ => Finset.sum_congr rfl fun b _ => ?_
+    refine Finset.sum_congr rfl fun a _ => ?_
+    simp only [Matrix.mul_apply, map_sum, map_mul]
+    refine Finset.sum_congr rfl fun b _ => ?_
     have h3 : cc (X.1 a b) = X.1 b a := congrFun (congrFun hX b) a
     rw [← h3, Base.map_cc, Complex.mul_conj]
   simp only [h2] at h1
@@ -142,8 +196,8 @@ theorem form_nondeg {Ψ : Finset (E →+* ℂ)} (hΨ : IsType Ψ) (N : ℕ) :
     (form E N).Nondegenerate :=
   ⟨fun X hX => form_self hΨ X (hX X), fun X hX => form_self hΨ X (hX X)⟩
 
-omit [IsCMField E] in
 
+omit [IsCMField E] in
 theorem exists_den {ι : Type} [Fintype ι] {N : ℕ} (X : ι → Matrix (Fin N) (Fin N) E) :
     ∃ c : ℕ, 0 < c ∧ ∀ i, IntM ((c : E) • X i) := by
   have h : ∀ p : ι × Fin N × Fin N, ∃ d : ℕ, 0 < d ∧ IsIntegral ℤ ((d : E) * X p.1 p.2.1 p.2.2) := by
@@ -177,7 +231,8 @@ theorem functional_eq_zero {Ψ : Finset (E →+* ℂ)} (hΨ : IsType Ψ) {N : �
             apply_ite cc, cc_cc, cc_zero, and_comm]
           rw [add_comm]
         rw [← h ⟨_, hm⟩]
-        simp only [← smul_eq_mul, ← map_smul, ← map_add, ← map_sum]
+
+        simp only [← smul_eq_mul, ← map_smul, ← map_add (f := _), ← map_sum]
         congr 1
         funext σ
         rw [Finset.sum_apply, Finset.sum_eq_single σ]
@@ -198,6 +253,7 @@ theorem functional_eq_zero {Ψ : Finset (E →+* ℂ)} (hΨ : IsType Ψ) {N : �
       exact Matrix.matrix_eq_sum_single Z
     · simp [Finset.sum_apply, Pi.single_eq_of_ne hσ]
   rw [hZ]
+
   simp only [map_sum, map_smul, key, smul_zero, Finset.sum_const_zero]
   simp
 
@@ -227,8 +283,9 @@ theorem exists_basis : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (�
     split_ifs <;> simp
   · have hrep : ∀ (X : HermSub E N) j, b.repr X j = form E N (t j) X := fun X j => by
       conv_rhs => rw [← b.sum_repr X]
+
       simp only [map_sum, map_smul, ht, smul_eq_mul, mul_ite, mul_one, mul_zero,
-        Finset.sum_ite_eq, Finset.mem_univ, if_true]
+      Finset.sum_ite_eq, Finset.mem_univ, if_true]
     funext τ
     ext k l
     let L : CM Ψ N N →ₗ[ℂ] ℂ :=

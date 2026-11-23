@@ -1,5 +1,46 @@
-import Development.AutomorphicArithmetic.Foundations.Convolution.RealGroupAnalysis.SpecialLinearCosets.GoodU
-import Development.AutomorphicArithmetic.Foundations.Convolution.RealGroupAnalysis.SpecialLinearCosets.FockGen
+module
+
+public import Development.AutomorphicArithmetic.Foundations.Convolution.RealGroupAnalysis.SpecialLinearCosets.GoodU
+import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.MkMemAdmissibleAtIffCocycle
+public import Development.AutomorphicArithmetic.Foundations.Convolution.RealGroupAnalysis.SpecialLinearCosets.FockGen
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicLocalCompactness.AdeleLC
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 open NumberField IsDedekindDomain MeasureTheory Matrix Topology Filter
 open Neutral.B1 Formalism.L2.Host Formalism.ConjugateSelfDual GlobalTheory.CuspRep GlobalTheory.GalOfCusp UpperTheory.V UpperTheory.V.Af UpperTheory.V.Published GroundTheory.Global GroundTheory.Automorphic.GJMatrix
@@ -211,7 +252,7 @@ private theorem poly_away {p : V4 F → ℂ} (hp : p ∈ polyFn (F := F)) (X : V
     simp only [Pi.mul_apply, hf, hg]
 
 private theorem gauss_away (δ : F) (X : V4 F) : gauss δ (away v X) = gauss δ X := by
-  simp only [gauss, map_add, map_sub, map_mul, map_pow, pInf_away]
+  simp only [gauss, map_add (f := _), map_sub, map_mul, map_pow, pInf_away]
 
 private theorem ten_eq (θ : Kv v) (δ : F) (p : V4 F → ℂ) (hp : p ∈ polyFn (F := F))
     (g : (Fin 4 → Af F) → ℂ) (b : M2 v → ℂ) (X : V4 F) :
@@ -242,7 +283,7 @@ theorem UpperTheory.ConvolutionTheory.R2.I.tenSpan :
   intro F _ _ _ v δ θ hδ hθ φ hφ
   set T := Submodule.span ℂ {φ : S4 F | ∃ u b, GoodU v δ θ u ∧ b ∈ SB (M2 v) ∧ φ.1 = ten v θ u b} with hT
   have key : ∀ p ∈ polyFn (F := F), ∀ g ∈ finiteSchwartzBruhatPi F (ι := Fin 4),
-      (fun X => p X * gauss δ X * g (finPartPi X)) ∈ T.map (schwartzBruhatPi F (Fin 4)).subtype := by
+      (fun X => p X * gauss δ X * g (finPartPi X)) ∈ T.map (schwartzBruhatPi (K := F) (ι := Fin 4)).subtype := by
     intro p hp g hg
     rw [finiteSchwartzBruhatPi_eq_span] at hg
     induction hg using Submodule.span_induction with
@@ -277,7 +318,7 @@ theorem UpperTheory.ConvolutionTheory.R2.I.tenSpan :
       rw [this]
       exact Submodule.smul_mem _ _ hx
   have hle : Submodule.span ℂ {φ : V4 F → ℂ | ∃ p ∈ polyFn (F := F), ∃ g ∈ finiteSchwartzBruhatPi F (ι := Fin 4),
-      φ = fun v => p v * gauss δ v * g (finPartPi v)} ≤ T.map (schwartzBruhatPi F (Fin 4)).subtype :=
+      φ = fun v => p v * gauss δ v * g (finPartPi v)} ≤ T.map (schwartzBruhatPi (K := F) (ι := Fin 4)).subtype :=
     Submodule.span_le.2 (by
       rintro _ ⟨p, hp, g, hg, rfl⟩
       exact key p hp g hg)

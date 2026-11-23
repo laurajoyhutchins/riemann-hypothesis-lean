@@ -1,5 +1,47 @@
-import Formalism.SharpRestriction.GenusPolyhedralBounds.RelativeIndexClassSets.IntegralFormsEqSpan
+module
+
+public import Formalism.SharpRestriction.GenusPolyhedralBounds.RelativeIndexClassSets.SectionMonomialGenerators
 import Formalism.LogFactorialIndices.SignedSubspaceIndex.IdxBase
+public import Formalism.SharpRestriction.GenusPolyhedralBounds.RelativeIndexClassSets.LengthLeOfSemilinear
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -200,7 +242,7 @@ theorem loc_span (s : Set X.Forms) :
       exact Submodule.subset_span ⟨x, hx, rfl⟩
     · simp
     · intro x y _ _ hx hy
-      rw [map_add]
+      rw [map_add (f := _)]
       exact Submodule.add_mem _ hx hy
     · intro a x _ hx
       rw [bc_smul_int]
@@ -317,7 +359,7 @@ def toWl : B.Mlat j ka →ₛₗ[algebraMap (𝓞 B.KO) (X.Ol la)] ↥(T0.MW X k
   map_add' F G := by
     apply Subtype.ext; apply Subtype.ext
     show X.bc la (X.inc ka ((F + G : B.Mlat j ka) : B.Cusp j ka)) = X.bc la (X.inc ka F) + X.bc la (X.inc ka G)
-    rw [Submodule.coe_add, map_add, map_add]
+    rw [Submodule.coe_add, map_add (f := _), map_add (f := _)]
   map_smul' a F := by
     apply Subtype.ext; apply Subtype.ext
     show X.bc la (X.inc ka ((a • F : B.Mlat j ka) : B.Cusp j ka)) =
@@ -385,10 +427,14 @@ theorem quot_len_ne_top (la : HeightOneSpectrum (𝓞 B.KO)) (ka : WeightFamilie
   obtain ⟨d, hd, h⟩ := Formalism.LatticeIndexTer.LatticeIndexLength.exists_smul_le (K := B.KO) (B.Mlat j ka)
     (Submodule.span (𝓞 B.KO) (Set.range fun i => ((th i : B.Mlat j ka) : B.Cusp j ka)) ⊔
       (WeightFamilies.MggK B CRm T c j ka).restrictScalars (𝓞 B.KO)) hM.1 (by
-    rw [eq_top_iff, ← hsp]
-    refine sup_le (Submodule.span_le.2 ?_) fun x hx => Submodule.subset_span (Submodule.mem_sup_right hx)
-    rintro _ ⟨i, rfl⟩
-    exact Submodule.subset_span (Submodule.mem_sup_left (Submodule.subset_span ⟨i, rfl⟩)))
+    apply top_unique
+    rw [← hsp]
+    apply sup_le
+    · apply Submodule.span_le.mpr
+      rintro _ ⟨i, rfl⟩
+      exact Submodule.subset_span (Submodule.mem_sup_left (Submodule.subset_span ⟨i, rfl⟩))
+    · intro x hx
+      exact Submodule.subset_span (Submodule.mem_sup_right hx))
   unfold WeightFamilies.lenAt
   refine length_localized_ne_top la d hd ?_
   intro x

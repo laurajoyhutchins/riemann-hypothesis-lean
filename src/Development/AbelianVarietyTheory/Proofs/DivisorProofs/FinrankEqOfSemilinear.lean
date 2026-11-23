@@ -1,13 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsArchOne
-import Development.AbelianVarietyTheory.PublishedTheorems.PublishedFoundations.GreenSeriesSt
-import Formalism.LocalToGlobal.GlobalTheory.IrreducibleOfCountSizes
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TwoLevelFlagDomainCuspFormRanksShiftedWeightsStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TwoLevelFlagDomainEigenspaceShareStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DefiniteCuspFormsFiniteRegularRepresentationStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsWhittakerCharacterPairStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ShareSizeBoundsAlongFamilyStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FinrankIInfKerEqOfIsBaseChangeFamilyStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsArchOne
+public import Development.AbelianVarietyTheory.Definitions.Divisors.BadElt
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DefiniteCuspFormsFiniteRegularRepresentationStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FinrankIInfKerEqOfIsBaseChangeFamilyStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TwoLevelFlagDomainCuspFormRanksShiftedWeightsStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TwoLevelFlagDomainEigenspaceShareStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TensorProduct.IsBaseChangeFree
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -34,6 +70,7 @@ theorem finrank_eig_eq {LL G W : Type} [Field LL] [Group G] [AddCommGroup W] [Mo
     intro v
     conv_lhs => rw [show v = ∑ k, v k • Pi.single k (1 : LL) by
       ext j; simp [Finset.sum_apply, Pi.single_apply]]
+
     rw [map_sum]
     refine Finset.sum_congr rfl fun k _ => ?_
     rw [map_smulₛₗ]
@@ -78,6 +115,7 @@ theorem top_le_span_single {LL W : Type} [Field LL] [AddCommGroup W] [Module ℂ
   rintro _ ⟨v, rfl⟩
   have hv : v = ∑ k, v k • Pi.single k (1 : LL) := by
     ext j; simp [Finset.sum_apply, Pi.single_apply]
+
   rw [hv, map_sum]
   exact Submodule.sum_mem _ fun k _ => by
     rw [map_smulₛₗ]; exact Submodule.smul_mem _ _ (Submodule.subset_span ⟨k, rfl⟩)
@@ -163,18 +201,5 @@ namespace GlobalTheory.ShareOn
 open NumberField IsDedekindDomain
 open Formalism.BasicNotions Formalism.MainNotions Formalism.L2.Pj Formalism.L2.DIV Formalism.L2.Indef Formalism.L2.Indef.Tree Formalism.IndefR Formalism.IndefR.Links Formalism.IndefR.Cx Formalism.IndefR.FWT
 open GlobalTheory.BigTop GlobalTheory.BigOn GlobalTheory.OntoChain GlobalTheory.RealIndexBound GlobalTheory.OnTies Formalism.MainNotions.ArithmeticCylinders
-
-theorem shareWSt_of_modelSt : ModelSt → ShareWSt := by
-  intro hM
-  unfold ModelSt AtRuns AtPts at hM
-  unfold ShareWSt AtRuns AtPts
-  refine (hM.and GlobalTheory.T.shareSize_bounds_along_family).imp ?_
-  intro eps Fm CH _ h
-  obtain ⟨⟨x1, h1⟩, ⟨x2, h2⟩⟩ := h
-  refine ⟨max x1 x2, fun x hx hle ι p hp hmore r hr hown i => ?_⟩
-  have hm := h1 x hx ((le_max_left _ _).trans hle) ι p hp hmore r hr hown i
-  have hn := h2 x hx ((le_max_right _ _).trans hle) ι
-  exact shareW_of_modelAt p i _ _ (by positivity) hm (by obtain ⟨_, _, -, -, h⟩ := GlobalTheory.T.exists_whittaker_character_pair _ _ _ _ _ _ _ _ _ _ p hp; exact h)
-    (fun p0 h0 => (hn p0 h0).1) (hn 0 (Nat.zero_le _)).2
 
 end GlobalTheory.ShareOn

@@ -1,5 +1,51 @@
-import Formalism.LocalToGlobal.PairingIndexBounds.RowActionCoefficients.UnitColsZero
-import Formalism.LocalToGlobal.PairingIndexBounds.RowActionCoefficients.AdmissibleInterpolation.EvalIdFrameRowAct
+module
+
+public import Formalism.LocalToGlobal.PairingIndexBounds.RowActionCoefficients.UnitColsZero
+public import Formalism.GradedWeylDivisibility.DualWeylDominanceOf
+import Formalism.GradedWeylDivisibility.FockSpaceTableaux.LSatLemmas
+public import Formalism.LocalToGlobal.PairingIndexBounds.RowActionCoefficients.AdmissibleInterpolation.EvalIdFrameRowAct
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MvPolynomial
 
@@ -17,17 +63,6 @@ theorem minor_zero (A : Type) [CommRing A] (r n s : ℕ) (hs : s ≤ n) (I : Fin
   obtain ⟨a, b, hab, hne⟩ := hI
   unfold initMinor
   exact Matrix.det_zero_of_row_eq hne (by funext q; simp only [Matrix.of_apply, hab])
-
-theorem unit_cols_det_zero (A : Type) [CommRing A] (n l : ℕ) (I : Fin (n - l) → Fin n)
-    (hI : ¬ Function.Injective I) (z : Fin n → ℕ → A) : (catM l (unitM A I) z).det = 0 := by
-  simp only [Function.Injective, not_forall] at hI
-  obtain ⟨a, b, hab, hne⟩ := hI
-  have hne' : Fin.castLE (Nat.sub_le n l) a ≠ Fin.castLE (Nat.sub_le n l) b := by
-    intro h
-    apply hne
-    exact Fin.ext (by simpa using congrArg Fin.val h)
-  refine Matrix.det_zero_of_column_eq hne' fun k => ?_
-  simp only [catM, if_true, unitM, Fin.val_castLE, a.isLt, b.isLt, dite_true, Fin.eta, hab]
 
 open Classical in
 theorem unit_cols (n l : ℕ) (hl : l ≤ n) (I : Fin (n - l) → Fin n) (hI : Function.Injective I) :
@@ -147,9 +182,6 @@ open UnitColumnMinors
 
 theorem minor_zero_holds : MinorZero := fun A _ r n s hs I hI => minor_zero A r n s hs I hI
 
-theorem unit_columns_det_zero : UnitColsZero := fun n l _ I hI A _ =>
-  ⟨fun z => unit_cols_det_zero A n l I hI z, minor_zero A n n (n - l) (Nat.sub_le n l) I hI⟩
-
 theorem unit_columns_holds : UnitCols := fun n l hl I hI => unit_cols n l hl I hI
 
 theorem highest_vector_full_holds : HvFull := fun A _ n μ hμ c e hc he hl hn x y => hv_full A n μ hμ c e hc he hl hn x y
@@ -171,7 +203,7 @@ theorem highest_vector_mem_odd : HvMemO := by
     ext a t
     have := t.isLt
     simp only [Matrix.of_apply, xg, Matrix.mvPolynomialX_apply, dif_pos (show n - 1 - t.val < n by omega)]
-    congr 2
+    apply congrArg (fun p : Fin n × Fin n => (X p : MvPolynomial (Fin n × Fin n) K).coeff _)
     refine Prod.ext rfl (Fin.ext ?_)
     show n - 1 - (n - 1 - t.val) = t.val
     omega

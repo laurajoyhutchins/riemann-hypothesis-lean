@@ -1,5 +1,46 @@
-import Formalism.LocalToGlobal.IndefiniteReal.LinksExist
-import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.IdemOrth
+module
+
+public import Formalism.LocalToGlobal.IndefiniteReal.DatumVec
+public import Formalism.LocalToGlobal.IndefiniteReal.LinksDefs
+public import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.IdemOrth
+import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.IdemSum
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -11,8 +52,8 @@ attribute [local instance] Formalism.BasicNotions.Host.cmStar
 
 variable {D : D7}
 
-open Classical in
 
+open Classical in
 theorem idemSum_of_noConj (S : Finset (Formalism.L2.DIV.Pl D.host.E))
     (hnc : ∀ P ∈ S, ∀ P' ∈ S, ¬ Lev.IsConjPl (D := D) P P') :
     ∃ e : AE D, Formalism.IndefR.Datum.IsIdemSum e S := by
@@ -24,6 +65,7 @@ theorem idemSum_of_noConj (S : Finset (Formalism.L2.DIV.Pl D.host.E))
     simp only [es, dif_pos h]
     exact (idem_exists_at PP h).choose_spec.1
   refine ⟨∑ PP ∈ S, es PP, ⟨es, hes, rfl⟩, ?_⟩
+
   rw [map_sum, Finset.sum_mul_sum]
   apply Finset.sum_eq_zero
   intro PP hPP
@@ -37,9 +79,6 @@ theorem g_mem_of_div (C : Formalism.L2.Host.CharFrame D) {k : Fin 2} {PP : Forma
   rw [← h] at h1
   have h2 : ((D.host.g k : ℕ) : 𝓞 D.host.K) ∈ PP.asIdeal.comap (algebraMap (𝓞 D.host.K) (𝓞 D.host.E)) := h1
   simpa [Ideal.mem_comap] using h2
-
-def PbNotConj (C : Formalism.L2.Host.CharFrame D) : Prop :=
-  ∀ (k : Fin 2) (PP PP' : Formalism.L2.DIV.Pl D.host.E), C.P.Div k PP → C.P.Div k PP' → ¬ Lev.IsConjPl (D := D) PP PP'
 
 section Links
 

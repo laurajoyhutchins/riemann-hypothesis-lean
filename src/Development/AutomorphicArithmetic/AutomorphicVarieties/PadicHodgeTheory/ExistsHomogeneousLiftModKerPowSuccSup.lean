@@ -1,4 +1,51 @@
+module
+
+public import Mathlib.RingTheory.MvPolynomial.Homogeneous
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.MvPolynomial.IrreducibleQuadratic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Topology.Sheaves.Init
 import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.ResMapBijective
+
+@[expose] public section
 
 open IsLocalRing UpperTheory.V.Alg
 
@@ -39,6 +86,7 @@ theorem UpperTheory.exists_homogeneous_lift_mod_ker_pow_succ_sup :
         obtain ⟨e2, o, he2, hs2⟩ := hyp c hxc
         have haL : MvPolynomial.aeval t (∑ i, MvPolynomial.C (o i) * MvPolynomial.X i)
             = ∑ i, o i • t i := by
+
           simp [map_sum, Algebra.smul_def]
         have hLK : MvPolynomial.aeval t (∑ i, MvPolynomial.C (o i) * MvPolynomial.X i)
             ∈ RingHom.ker x := by
@@ -71,13 +119,13 @@ theorem UpperTheory.exists_homogeneous_lift_mod_ker_pow_succ_sup :
       · rintro a1 a2 ⟨e1, h1, he1, hh1, hm1, hs1⟩ ⟨e2, h2, he2, hh2, hm2, hs2⟩
         refine ⟨e1 * e2, MvPolynomial.C e2 * h1 + MvPolynomial.C e1 * h2, mul_ne_zero he1 he2,
           (hh1.C_mul _).add (hh2.C_mul _), ?_, ?_⟩
-        · rw [map_add, map_mul, map_mul, MvPolynomial.aeval_C, MvPolynomial.aeval_C]
+        · rw [map_add (f := _), map_mul, map_mul, MvPolynomial.aeval_C, MvPolynomial.aeval_C]
           exact Ideal.add_mem _ (Ideal.mul_mem_left _ _ hm1) (Ideal.mul_mem_left _ _ hm2)
         · have eq : (e1 * e2) • (a1 + a2) - MvPolynomial.aeval t
                 (MvPolynomial.C e2 * h1 + MvPolynomial.C e1 * h2)
               = e2 • (e1 • a1 - MvPolynomial.aeval t h1)
                 + e1 • (e2 • a2 - MvPolynomial.aeval t h2) := by
-            simp only [map_add, map_mul, MvPolynomial.aeval_C, Algebra.smul_def]
+            simp only [map_add (f := _), map_mul, MvPolynomial.aeval_C, Algebra.smul_def]
             ring
           rw [eq]
           refine Submodule.add_mem _ ?_ ?_

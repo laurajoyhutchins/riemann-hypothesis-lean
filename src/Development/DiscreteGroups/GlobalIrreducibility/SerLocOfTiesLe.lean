@@ -1,7 +1,47 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.HasLabelOfIsCuspOf
-import Development.DiscreteGroups.GlobalIrreducibility.IneEqOfHasGreenLe
-import Development.DiscreteGroups.GlobalIrreducibility.LocTypeOfSerParamLe
+module
+
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.HasLabelOfIsCuspOf
+public import Development.DiscreteGroups.GlobalIrreducibility.IneEqOfHasGreenLe
+public import Development.DiscreteGroups.GlobalIrreducibility.LocTypeOfSerParamLe
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.InjPrimeTo
+
+@[expose] public section
 
 noncomputable section
 
@@ -21,20 +61,6 @@ theorem labParamLe_of (D : D7) (L : ∀ k, LabelDatum (D.host.g k)) (rc : Corr D
     LabParamLe D.R.nV D L rc := fun k v n hn π hπ f hf =>
   ine_eq_of_has_green_le D.R.nV (OfLabel.ofLabel (L k) (five_le D k) hG) (L k) _ _ _ (h1 k v) (h2 k) hG (h3 k v)
     (labelsCusp _ _ _) ⟨n, π⟩ hn hπ.1 hπ.2 f hf
-
-theorem serLocLe_of (D : D7) (L : ∀ k, LabelDatum (D.host.g k)) (rc : Corr D) (hG : Green)
-    (hL : LabTie D L) (hU : IneUnr D) (hC : LocComp D rc) (hP : LabParamLe D.R.nV D L rc) : SerLoc D :=
-  have hS : ∀ k, (OfLabel.ofLabel (L k) (five_le D k) hG).IsOf (L k) := fun _ _ _ => rfl
-  GlobalTheory.SerLocal.serLoc D _ (hL.sysTie hS) hU (locType_of_tiesLe hL hS hC hP)
-
-theorem serLoc_of_tiesLe (D : D7) (L : ∀ k, LabelDatum (D.host.g k)) (rc : Corr D) (hG : Green)
-    (hL : LabTie D L) (hU : IneUnr D) (hC : LocComp D rc)
-    (h1 : ∀ k v, TameGen.SupportCompat (fun a => D.naut.inePol a (D.ntypes.tg k v))
-      (fun π : GLRep _ => rc k v π.1 π.2))
-    (h2 : ∀ k, TameGen.DepthZeroCuspidal (D.host.g k))
-    (h3 : ∀ k v, TameParamLe D.R.nV (L k) (fun a => D.naut.inePol a (D.ntypes.tg k v))
-      (fun π : GLRep _ => rc k v π.1 π.2)) : SerLoc D :=
-  serLocLe_of D L rc hG hL hU hC (labParamLe_of D L rc hG h1 h2 h3)
 
 end DiscreteGroups.sglob.DzType.Rt
 

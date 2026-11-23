@@ -1,7 +1,45 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsIntegerAddStarEqOneOfIsCMUnram
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.HalfData
-import Development.AbelianVarietyTheory.PublishedTheorems.SiegelWeil₂.SiegelWeilUnitaryConvergent
+module
+
+public import Development.AbelianVarietyTheory.Definitions.LatticeFrames.HalfData
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsIntegerAddStarEqOneOfIsCMUnram
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open scoped Matrix NNReal ComplexConjugate TensorProduct ContDiff
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.L2.Theta Formalism.L2.Pj Formalism.IndefR.Datum MeasureTheory IsDedekindDomain NumberField
 open GlobalTheory.AutomorphicL2Unitary GlobalTheory.AdelicU GlobalTheory.Doubling GlobalTheory.Cont GlobalTheory.MixModel GlobalTheory.Core.Rk.SWLaw GlobalTheory.Core.Rk.SW GlobalTheory.StdUnn
@@ -22,7 +60,7 @@ theorem compFin_half (v : HeightOneSpectrum (𝓞 F)) (x c : E) :
     change evalV F v (1 : Af F) = 1; exact map_one _
   have h0 : evFin F v (pairA F 1 0) = 0 := by
     change evalV F v (0 : Af F) = 0; exact map_zero _
-  rw [compFin, AlgHom.toRingHom_eq_coe, RingHom.coe_coe, map_add, Algebra.TensorProduct.map_tmul,
+  rw [compFin, AlgHom.toRingHom_eq_coe, RingHom.coe_coe, map_add (f := _), Algebra.TensorProduct.map_tmul,
     Algebra.TensorProduct.map_tmul, AlgHom.id_apply, AlgHom.id_apply, h1, h0, TensorProduct.zero_tmul, add_zero]
 
 theorem compInf_half (w : InfinitePlace F) (x : E) :
@@ -31,7 +69,7 @@ theorem compInf_half (w : InfinitePlace F) (x : E) :
     change GlobalTheory.AutFunCompare.evW w (0 : Ainf F) = 0; exact map_zero _
   have h0 : evInf F w (pairA F 1 0) = 1 := by
     change GlobalTheory.AutFunCompare.evW w (1 : Ainf F) = 1; exact map_one _
-  rw [compInf, AlgHom.toRingHom_eq_coe, RingHom.coe_coe, two_mul, map_add, map_add, Algebra.TensorProduct.map_tmul,
+  rw [compInf, AlgHom.toRingHom_eq_coe, RingHom.coe_coe, two_mul, map_add (f := _), map_add (f := _), Algebra.TensorProduct.map_tmul,
     Algebra.TensorProduct.map_tmul, AlgHom.id_apply, AlgHom.id_apply, h1, h0, TensorProduct.zero_tmul, zero_add,
     ← TensorProduct.tmul_add, add_halves, ← Algebra.TensorProduct.one_def]
 
@@ -39,7 +77,7 @@ theorem sigR_half (σ : E →ₐ[F] E) (x : E) :
     sigR (AF F) σ (pairA F 0 1 ⊗ₜ[F] x + pairA F 1 0 ⊗ₜ[F] (1 / 2 : E)) =
       pairA F 0 1 ⊗ₜ[F] σ x + pairA F 1 0 ⊗ₜ[F] (1 / 2 : E) := by
   have h2 : σ (1 / 2 : E) = 1 / 2 := by rw [map_div₀, map_one, map_ofNat]
-  rw [sigR, AlgHom.toRingHom_eq_coe, RingHom.coe_coe, map_add, Algebra.TensorProduct.map_tmul,
+  rw [sigR, AlgHom.toRingHom_eq_coe, RingHom.coe_coe, map_add (f := _), Algebra.TensorProduct.map_tmul,
     Algebra.TensorProduct.map_tmul, AlgHom.id_apply, AlgHom.id_apply, h2]
 
 theorem half_add (x y : E) (h : x + y = 1) :

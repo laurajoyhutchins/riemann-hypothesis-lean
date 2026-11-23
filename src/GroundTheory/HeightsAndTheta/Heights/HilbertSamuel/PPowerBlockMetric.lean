@@ -1,5 +1,59 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsSectionNormSqExtension
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsSectionNormSqExtension
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsPowerBlockMetric
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.InnerProductSpace.Calculus
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.HilbertSamuel
@@ -130,6 +184,7 @@ theorem mConeMap_homog (y : (Σ k, ι k) → Ω) {g : MRing ι} {d : K → ℕ} 
   classical
   conv_lhs => rw [g.as_sum]
   conv_rhs => rw [g.as_sum]
+
   rw [map_sum, map_sum, map_sum, Finset.sum_mul]
   refine Finset.sum_congr rfl fun m hm => ?_
   have hdeg := hg m hm
@@ -180,7 +235,7 @@ theorem exists_form_of_mem_chartRingZ (y : (Σ k, ι k) → Ω) (c : ∀ k, ι k
       homog_add (homog_mul h₁ (homog_chartMon c δ₂)) ?_, ?_⟩
     · rw [add_comm δ₁]
       exact homog_mul h₂ (homog_chartMon c δ₁)
-    · rw [map_add, map_mul, map_mul, v₁, v₂, aeval_chartMon, aeval_chartMon, hpow]
+    · rw [map_add (f := _), map_mul, map_mul, v₁, v₂, aeval_chartMon, aeval_chartMon, hpow]
       ring
   | mul x z _ _ hx hz =>
     obtain ⟨δ₁, e₁, h₁, v₁⟩ := hx
@@ -278,7 +333,7 @@ theorem val_spec {y : (Σ k, ι k) → Ω} {A : HermLine ι} {n : ℕ} {s : Ω} 
     eval z (map (Int.castRingHom ℂ) g) =
       val y A n s z * eval z (map (Int.castRingHom ℂ) h) * (A.h z : ℂ) ^ n := by
   have H := (exists_rep_at hs hz).choose_spec
-  rw [val, dif_pos ⟨hs, hz⟩]
+  rw [val, dite_eq_left ⟨hs, hz⟩]
   have hc := cross hr H.1 hz
   have h1 := H.2
   have h2 := metric_ne (A := A) hz n
@@ -339,8 +394,9 @@ theorem exists_val_ne {y : (Σ k, ι k) → Ω} {A : HermLine ι} {m N : ℕ} {v
           rw [Finset.prod_mul_distrib]
           ring
   have hΦy : aeval y Φ = 0 := by
+
     rw [hΦ, map_sub, map_sum, aeval_chartMon, Finset.sum_congr rfl fun j _ => hterm j, ← Finset.sum_mul, hsum',
-      one_mul, sub_self]
+    one_mul, sub_self]
   have hΦz := vanish hx hΦh hΦy
   have hgz : ∀ j, eval x (map (Int.castRingHom ℂ) (g j)) = 0 := fun j => by
     have hrep : IsRep y A.a m (v j) (g j) (chartMon c (Nj j)) :=
@@ -349,8 +405,9 @@ theorem exists_val_ne {y : (Σ k, ι k) → Ω} {A : HermLine ι} {m N : ℕ} {v
         linarith, by rw [hgv j, aeval_chartMon]⟩
     rw [val_spec (hv j) hx hrep, hall j]
     ring
+
   simp only [hΦ, map_sub, map_sum, map_mul, hgz, mul_zero, zero_mul, Finset.sum_const_zero, sub_zero,
-    eval_chartMon] at hΦz
+  eval_chartMon] at hΦz
   exact (Finset.prod_ne_zero_iff.mpr fun k _ => pow_ne_zero _ (hc k)) hΦz
 
 def oldIdx (N : ℕ) (p : Σ k, ι k) : Σ k, addIdx ι N k := ⟨some p.1, p.2⟩
@@ -482,10 +539,10 @@ theorem newSq_pos {N : ℕ} {z : (Σ k, addIdx ι N k) → ℂ} (hz : ∀ k, ∃
 
 theorem contDiff_newSq {N : ℕ} {n : WithTop ℕ∞} : ContDiff ℝ n (addedBlockNormSq (ι := ι) (N := N)) := by
   unfold addedBlockNormSq
-  exact ContDiff.sum fun j _ => (contDiff_norm_sq ℝ).comp (contDiff_apply ℝ ℂ (⟨none, j⟩ : Σ k, addIdx ι N k))
+  exact ContDiff.sum fun j _ => (contDiff_norm_sq ℝ).comp (contDiff_apply ℝ (fun _ => ℂ) (⟨none, j⟩ : Σ k, addIdx ι N k))
 
 theorem contDiff_oldPart {N : ℕ} {n : WithTop ℕ∞} : ContDiff ℝ n (basePart₂ (ι := ι) (N := N)) :=
-  contDiff_pi.mpr fun p => contDiff_apply ℝ ℂ (⟨some p.1, p.2⟩ : Σ k, addIdx ι N k)
+  contDiff_pi.mpr fun p => contDiff_apply ℝ (fun _ => ℂ) (⟨some p.1, p.2⟩ : Σ k, addIdx ι N k)
 
 variable [DecidableEq K]
 
@@ -532,8 +589,8 @@ theorem conj_graphLine {S : ((Σ k, ι k) → ℂ) → ℝ}
 
 end PowerBlockMetric
 
-open PowerBlockMetric in
 
+open PowerBlockMetric in
 theorem PowerBlockMetric.proof (hExt : SectionNormSqExtension.Statement) : PowerBlockMetric.Statement := by
   intro K _ _ ι _ Ω _ y A P0 m N v hP0 hsemi hconj hv hgen
   obtain ⟨S, hSs, hSp, hSt, hSc, hSv, hSl⟩ := hExt K ι Ω y A m N v hsemi.1 hconj hv hgen

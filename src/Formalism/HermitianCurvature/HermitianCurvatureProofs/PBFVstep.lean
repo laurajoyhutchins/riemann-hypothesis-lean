@@ -1,12 +1,60 @@
-import Formalism.HermitianCurvature.RealInputsClosedAdmissibleSettings
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.LiftMemMatrixAlgebra
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.FsvMulFsvNeg
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.TopTwistDensOfZeta
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.TopTwistDensOfWaveQQ
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.InsCombineMk
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.NormalFormOrderZeroOfParts
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.DiagScalarCommuteTransposedRMatrix
+module
+
+public import Formalism.HermitianCurvature.CompositeFormulaLevelZero
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.DiagScalarCommuteTransposedRMatrix
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.FsvMulFsvNeg
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.InsCombineMk
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.LiftMemMatrixAlgebra
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.NormalFormOrderZeroOfParts
 import Formalism.HermitianCurvature.HermitianCurvatureProofs.PositionInsertionDiagonalCompat
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.TopTwistDensOfWaveQQ
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.TopTwistDensOfZeta
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.BlockTwist
+
+@[expose] public section
 
 open Matrix MeasureTheory
 open scoped ComplexConjugate
@@ -167,14 +215,14 @@ theorem topDens_wave_right (hD : IsData P z z' π π' X μ L st l0) (w : List (L
   have hW'W : Wv' * Wv = 1 := by
     apply LinearMap.ext; intro Φ; apply Subtype.ext; funext c g
     simp only [Module.End.mul_apply, Module.End.one_apply, hW1, hW2, smul_smul, fsv_neg_mul_fsv, one_smul]
-  have f_fi : mkP Wv Wv' * mkP Wv' Wv = 1 := pr_ext (by simpa using hWW') (by simpa using hWW')
-  have fi_f : mkP Wv' Wv * mkP Wv Wv' = 1 := pr_ext (by simpa using hW'W) (by simpa using hW'W)
+  have f_fi : mkP Wv Wv' * mkP Wv' Wv = 1 := pr_ext hWW' hWW'
+  have fi_f : mkP Wv' Wv * mkP Wv Wv' = 1 := pr_ext hW'W hW'W
   have hfn : ∀ g ∈ Fr.zfns L, Commute (mkP Wv Wv') g := by
     obtain ⟨-, -, -, -, -, -, hz, hzi, hzb, hzbi, hG, hGi, -⟩ := hAL
     have key : ∀ j j' : Fin 6, Commute (mkP Wv Wv') (mkP (X.fn j) (X.fn j')) := by
       intro j j'
       show _ * _ = _ * _
-      exact pr_ext (by simpa using mulOp_comm_fn X Wv _ hW j) (by simpa using (mulOp_comm_fn X Wv' _ hW' j').symm)
+      exact pr_ext (mulOp_comm_fn X Wv _ hW j) (mulOp_comm_fn X Wv' _ hW' j').symm
     intro g hg
     simp only [Fr.zfns, Set.mem_insert_iff, Set.mem_singleton_iff] at hg
     rcases hg with rfl | rfl | rfl | rfl | rfl | rfl
@@ -226,7 +274,8 @@ theorem topDens_wave_right (hD : IsData P z z' π π' X μ L st l0) (w : List (L
   unfold topDens
   rw [Finset.mul_sum]
   refine Finset.sum_congr rfl fun e _ => ?_
-  rw [← act_mul, hFV, act_mul (io (mkP Wv Wv')) (Fr.ofWord L st w).F y, act_io, mkPair_fst', hW1, hsInner_smul_right]
+  rw [← act_mul, hFV, act_mul (io (mkP Wv Wv')) (Fr.ofWord L st w).F y, act_io,
+    show (mkP Wv Wv').1 = Wv from rfl, hW1, hsInner_smul_right]
 
 theorem rr_wave_B (hD : IsData P z z' π π' X μ L st l0) (hOn : ThmPOn (S := S) P z z' π π' μ L st K l0)
     (w : List (Letter ℂ S)) (hw : WordOK P z z' π π' st l0 w) (hr : P.r = 0) (s : ℂ)

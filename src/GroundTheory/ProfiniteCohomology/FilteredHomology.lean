@@ -1,4 +1,52 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.Category.ModuleCat.Abelian
+public import Mathlib.Algebra.Homology.ShortComplex.HomologicalComplex
+public import Mathlib.Combinatorics.Quiver.ReflQuiver
+public import Mathlib.Algebra.Homology.ShortComplex.ModuleCat
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
@@ -70,8 +118,7 @@ theorem iCycles_cyclesMap_apply (φ : K ⟶ L) (i : ι) (z : K.cycles i) :
 
 theorem homologyMap_homologyπ_apply (φ : K ⟶ L) (i : ι) (z : K.cycles i) :
     (HomologicalComplex.homologyMap φ i).hom ((K.homologyπ i).hom z) =
-      (L.homologyπ i).hom ((HomologicalComplex.cyclesMap φ i).hom z) :=
-by
+      (L.homologyπ i).hom ((HomologicalComplex.cyclesMap φ i).hom z) := by
   rw [← LinearMap.comp_apply, ← ModuleCat.hom_comp, HomologicalComplex.homologyπ_naturality]
   rfl
 
@@ -88,8 +135,8 @@ theorem cocone_w_apply {j j' : J} (f : j ⟶ j') (i : ι) (y : (F.obj j).X i) :
     ((t.ι.app j').f i).hom (((F.map f).f i).hom y) = ((t.ι.app j).f i).hom y :=
   congrArg (fun φ : F.obj j ⟶ t.pt => (φ.f i).hom y) (t.w f)
 
-omit [IsFiltered J] in
 
+omit [IsFiltered J] in
 theorem exists_homologyMap_eq_of_cocone (i : ι)
     (hsurj : ∀ x : t.pt.X i, ∃ (j : J) (y : (F.obj j).X i), ((t.ι.app j).f i).hom y = x)
     (hinj : ∀ (j : J) (y : (F.obj j).X (c.next i)), ((t.ι.app j).f (c.next i)).hom y = 0 →
@@ -141,28 +188,6 @@ theorem exists_homologyMap_map_eq_zero_of_cocone (i : ι)
   simp only [ModuleCat.hom_comp, LinearMap.comp_apply]
   rw [← hom_f_d_apply]
   exact hg.symm
-
-noncomputable def isColimitHomologyMapCocone (i : ι)
-    (hsurj : ∀ (n : ι) (x : t.pt.X n),
-      ∃ (j : J) (y : (F.obj j).X n), ((t.ι.app j).f n).hom y = x)
-    (hinj : ∀ (n : ι) (j : J) (y : (F.obj j).X n), ((t.ι.app j).f n).hom y = 0 →
-      ∃ (j' : J) (f : j ⟶ j'), ((F.map f).f n).hom y = 0) :
-    IsColimit ((HomologicalComplex.homologyFunctor (ModuleCat.{u} R) c i).mapCocone t) :=
-  isColimitOfReflects (forget (ModuleCat.{u} R)) <|
-    Types.FilteredColimit.isColimitOf' _ _
-      (fun z => by
-        obtain ⟨j, y, hy⟩ := exists_homologyMap_eq_of_cocone t i (hsurj i) (hinj (c.next i)) z
-        exact ⟨j, y, hy.symm⟩)
-      (fun j (x y : (F.obj j).homology i) hxy => by
-        have hxy' : (HomologicalComplex.homologyMap (t.ι.app j) i).hom x =
-            (HomologicalComplex.homologyMap (t.ι.app j) i).hom y := hxy
-        obtain ⟨j', f, h⟩ := exists_homologyMap_map_eq_zero_of_cocone t i (hsurj (c.prev i))
-          (hinj i) j (x - y) (by rw [map_sub, hxy', sub_self])
-        have h' : (HomologicalComplex.homologyMap (F.map f) i).hom x =
-            (HomologicalComplex.homologyMap (F.map f) i).hom y := by
-          rw [← sub_eq_zero, ← map_sub]
-          exact h
-        exact ⟨j', f, h'⟩)
 
 end Filtered
 

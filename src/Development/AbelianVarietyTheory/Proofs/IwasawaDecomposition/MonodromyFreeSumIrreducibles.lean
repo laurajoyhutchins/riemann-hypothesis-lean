@@ -1,11 +1,59 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.RestrictHomApply
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.LocalLanglandsGL
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsStableIsCompl
+module
+
+public import Mathlib.Basic.Complex.Basic
+public import Mathlib.RepresentationTheory.Irreducible
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.CoassocSimps
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.ExistsNotCongPow
+public import Formalism.ConjugateSelfDual.Statement
+import ReciprocityTheory.GaloisValuations.GlobalA
+import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.HasExponentZeroIff
+
+@[expose] public section
 
 noncomputable section
 
-open NumberField IsDedekindDomain Formalism.ConjugateSelfDual ReciprocityTheory.Gal GlobalTheory.WeilDeligne GlobalTheory.WeilDeligne.PrimDecomp
+open NumberField IsDedekindDomain Formalism.ConjugateSelfDual ReciprocityTheory.Gal GlobalTheory.WeilDeligne
   GlobalTheory.LocLanglands Module
 
 namespace GlobalTheory.WeilDeligne.IrrDecomp
@@ -41,60 +89,5 @@ theorem isIrreducible_of_equiv {G V V' : Type} [Monoid G] [AddCommGroup V] [Modu
 
 variable {E Ω : Type} [Field E] [NumberField E] [Field Ω] [Algebra E Ω] [IsAlgClosure E Ω]
   {A : ValuationSubring Ω} {w : HeightOneSpectrum (𝓞 E)} {h : IsPlaceOver A w}
-
-theorem exists_irr_list (n : ℕ) : ∀ (V : Type) [AddCommGroup V] [Module ℂ V]
-    [FiniteDimensional ℂ V] (a : WDRep h V), finrank ℂ V = n → a.N = 0 →
-    ∃ L : List (WD h), (∀ z ∈ L, IsIrrWD z) ∧ WD.mk a = sumList L := by
-  classical
-  induction n using Nat.strong_induction_on with
-  | _ n ih =>
-  intro V _ _ _ a hn hN
-  rcases Nat.eq_zero_or_pos n with rfl | hpos
-  · refine ⟨[], by simp, ?_⟩
-    show WD.mk a = WD.mk (WDRep.diag h (ι := Fin 0) fun i => i.elim0)
-    exact WD.sound ⟨LinearEquiv.ofFinrankEq _ _ (by simp [hn]), fun _ _ => Subsingleton.elim _ _,
-      fun _ => Subsingleton.elim _ _⟩
-  · haveI : Nontrivial V := Module.nontrivial_of_finrank_pos (hn ▸ hpos)
-    have hP : ∃ d, ∃ Q : Submodule ℂ V, (∀ σ, ∀ v ∈ Q, a.ρ σ v ∈ Q) ∧ Q ≠ ⊥ ∧ finrank ℂ Q = d :=
-      ⟨_, ⊤, fun _ _ _ => trivial, top_ne_bot, rfl⟩
-    obtain ⟨Q, hQs, hQ0, hQd⟩ := Nat.find_spec hP
-    have hmin : ∀ Q' : Submodule ℂ V, (∀ σ, ∀ v ∈ Q', a.ρ σ v ∈ Q') → Q' ≠ ⊥ →
-        finrank ℂ Q ≤ finrank ℂ Q' := fun Q' hs hne => hQd ▸ Nat.find_min' hP ⟨Q', hs, hne, rfl⟩
-    have hirr : (restrictρ a Q hQs).ρ.IsIrreducible := by
-      haveI : Nontrivial Q := Submodule.nontrivial_iff_ne_bot.mpr hQ0
-      refine { exists_pair_ne := ⟨⊥, ⊤, fun hbt => ?_⟩, eq_bot_or_eq_top := fun U => ?_ }
-      · exact bot_ne_top (α := Submodule ℂ Q) (congrArg Subrepresentation.toSubmodule hbt)
-      · by_cases hU : U.toSubmodule = ⊥
-        · exact Or.inl (Subrepresentation.toSubmodule_injective hU)
-        · refine Or.inr (Subrepresentation.toSubmodule_injective ?_)
-          show U.toSubmodule = ⊤
-          have hs : ∀ σ, ∀ v ∈ U.toSubmodule.map Q.subtype, a.ρ σ v ∈ U.toSubmodule.map Q.subtype := by
-            rintro σ _ ⟨u, hu, rfl⟩
-            exact ⟨_, U.apply_mem_toSubmodule σ hu, rfl⟩
-          have hr : finrank ℂ (U.toSubmodule.map Q.subtype) = finrank ℂ U.toSubmodule :=
-            Submodule.finrank_map_subtype_eq Q U.toSubmodule
-          have hpos' : 0 < finrank ℂ U.toSubmodule :=
-            Nat.pos_of_ne_zero fun h0 => hU (Submodule.finrank_eq_zero.mp h0)
-          have hne : U.toSubmodule.map Q.subtype ≠ ⊥ := fun h0 => by
-            rw [h0, finrank_bot] at hr; omega
-          have h1 := hmin _ hs hne
-          have h2 := Submodule.finrank_le U.toSubmodule
-          exact Submodule.eq_top_of_finrank_eq (by omega)
-    obtain ⟨T, hQT, hTs⟩ := GlobalTheory.WeilDeligne.PrimDecomp.exists_stable_isCompl E Ω A w h V a Q hQs
-    have hiso : ((restrictρ a Q hQs).sum (restrictρ a T hTs)).Iso a := by
-      refine ⟨Submodule.prodEquivOfIsCompl Q T hQT, fun σ v => ?_, fun v => ?_⟩
-      · simp [map_add]
-      · simp [hN]
-    have hdim := Submodule.finrank_add_eq_of_isCompl hQT
-    have hQpos : 0 < finrank ℂ Q := Nat.pos_of_ne_zero fun h0 => hQ0 (Submodule.finrank_eq_zero.mp h0)
-    obtain ⟨L, hL, hT⟩ := ih (finrank ℂ T) (by omega) T (restrictρ a T hTs) rfl rfl
-    refine ⟨WD.mk (restrictρ a Q hQs) :: L, ?_, ?_⟩
-    · refine List.forall_mem_cons.mpr ⟨?_, hL⟩
-      obtain ⟨e, he, -⟩ := WD.iso_std (restrictρ a Q hQs)
-      exact ⟨_, (WD.std (restrictρ a Q hQs)).2, (WD.sound (WD.iso_std _)).symm,
-        isIrreducible_of_equiv e he hirr⟩
-    · rw [show sumList (WD.mk (restrictρ a Q hQs) :: L) =
-        WD.lpSum (WD.mk (restrictρ a Q hQs)) (sumList L) from rfl, ← hT, WD.lpSum_mk]
-      exact (WD.sound hiso).symm
 
 end GlobalTheory.WeilDeligne.IrrDecomp

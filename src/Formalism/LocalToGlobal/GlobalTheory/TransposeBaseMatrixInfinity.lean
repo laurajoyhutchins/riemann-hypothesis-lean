@@ -1,5 +1,55 @@
-import Formalism.LocalToGlobal.GlobalTheory.NatInvMemIntW
-import Formalism.LocalToGlobal.GroupLattices.ComparisonMaps.ExistsPrimeToLe
+module
+
+public import Formalism.LocalToGlobal.GlobalTheory.ColValOfTiedSOfFin
+import Formalism.LocalRingCardinality.SpanPowerMembership.ExampleLayerExistsGenerators
+import Formalism.LocalToGlobal.Columns.PolyFn
+public import Formalism.LocalToGlobal.GlobalTheory.ColMemOfIsLocBasis
+import Formalism.LocalToGlobal.GlobalTheory.GL6.LatticeInclusionFamilyOf
+public import Formalism.LocalToGlobal.GlobalTheory.GL6.PBwLocBases
+import Formalism.LocalToGlobal.GlobalTheory.GL6.PBwLocGen
+import Formalism.LocalToGlobal.GlobalTheory.MemIffOfLocBasisG
+public import Formalism.LocalToGlobal.GlobalTheory.NatInvMemIntW
+import Formalism.LocalToGlobal.GlobalTheory.NfAllSmulSelfRe
+public import Formalism.LocalToGlobal.GroupLattices.ComparisonMaps.ExistsPrimeToLe
+import Formalism.SharpRestriction.GlobalSchurBounds.GlobalRankLatticeProofs.UnitTraceSumBounds.RankConditionsOfLayerTwo
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -52,8 +102,9 @@ theorem transpose_base_matrix_infinity (Y : GL (Fin (D.R.N 0)) D.host.E) (τ : D
         Matrix (Fin (D.R.N 0)) (Fin (D.R.N 0)) D.host.E) τ := by
   rw [B0inv_coe]
   ext i j
+
   simp only [Matrix.transpose_apply, Matrix.map_apply, Formalism.L2.Forms.atInf, Formalism.UG.cT, Matrix.mul_apply, map_sum, map_mul,
-    AlgHom.coe_toRingHom]
+  AlgHom.coe_toRingHom]
   refine Finset.sum_congr rfl fun k _ => ?_
   rw [embLL_rhoC, embLL_rhoC, gramN_sig j k, embT_sigD, embT_sigD, starRingEnd_self_apply, mul_comm]
 
@@ -163,10 +214,15 @@ theorem finCo_of (T : ∀ u : D.what₂.Word, Formalism.L2.Forms.Forms0 D u) (u 
   have : Fact (D.what₂.places.resChar w).Prime := ⟨D.what₂.places.resChar_prime w⟩
   have hex : ∀ c : (D.mem u).C.cls 0, ∃ Y : GL (Fin (D.R.N 0)) D.host.E,
       Formalism.L2.Forms.IsLocBasis (D.what₂.places.resChar w)
-        (Formalism.L2.Forms.clsCrd D u 0 (Nat.zero_le _) c : Set (Fin (D.R.N 0) → D.host.E)) Y := fun c =>
-    Formalism.L2.GlobalTheoryTheory.LocalLatticeBases.LocB.exists_isLocBasis (l := D.what₂.places.resChar w) (K := D.host.E) _
-      (Formalism.L2.GlobalTheoryTheory.LocalLatticeBases.bwB_clsCrd_lat D u 0 (Nat.zero_le _) c).fg
-      (Formalism.L2.GlobalTheoryTheory.LocalLatticeBases.bwB_clsCrd_lat D u 0 (Nat.zero_le _) c).span_eq_top
+        (Formalism.L2.Forms.clsCrd D u 0 (Nat.zero_le _) c : Set (Fin (D.R.N 0) → D.host.E)) Y := by
+    intro c
+    refine Formalism.L2.GlobalTheoryTheory.LocalLatticeBases.LocB.exists_isLocBasis
+      (l := D.what₂.places.resChar w) (K := D.host.E) _
+      (Formalism.L2.GlobalTheoryTheory.LocalLatticeBases.bwB_clsCrd_lat D u 0 (Nat.zero_le _) c).fg ?_
+    have hLat := D.clsLat_lat u 0 c
+    unfold Formalism.L2.Forms.clsCrd
+    rw [Submodule.map_coe, LinearMap.coe_restrictScalars, Submodule.span_image, hLat.span_eq_top,
+      Submodule.map_top, LinearEquiv.range]
   choose Y hY using hex
   refine ⟨fun c τ => Mb B c τ * (Y c : Matrix (Fin (D.R.N 0)) (Fin (D.R.N 0)) D.host.E).map (B.rho τ),
     fun c τ => locBasis_gamma B hB w c τ (Y c) (hY c), fun x => ?_⟩

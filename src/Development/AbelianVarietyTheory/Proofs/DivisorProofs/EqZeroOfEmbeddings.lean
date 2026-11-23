@@ -1,5 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.SubsetSpanBy
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.SubsetSpanBy
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open IsLocalRing
 
@@ -39,7 +87,7 @@ theorem exists_functional {T M Ω : Type} [CommRing T] [IsLocalRing T] [AddCommG
     push Not at hcon
     exact hq ((Module.forall_dual_apply_eq_zero_iff (ResidueField T) _).mp hcon)
   refine ⟨LinearMap.mk (AddHom.mk (fun m => algebraMap (ResidueField T) Ω (f (Submodule.Quotient.mk m)))
-    (fun a b => by simp only [Submodule.Quotient.mk_add, map_add])) (fun a m => ?_), ?_⟩
+    (fun a b => by simp only [Submodule.Quotient.mk_add, map_add (f := _)])) (fun a m => ?_), ?_⟩
   · have hs : (Submodule.Quotient.mk (a • m) : M ⧸ N) = residue T a • Submodule.Quotient.mk m := rfl
     simp only [RingHom.id_apply]
     rw [hs, map_smul, smul_eq_mul, map_mul, Algebra.smul_def, IsScalarTower.algebraMap_apply T (ResidueField T) Ω a]
@@ -75,7 +123,11 @@ theorem compat {c₀ : O →+* F} {θ : F →+* F₁} (hc : θ.comp c₀ = (alge
     (h1 : lam ⟨1, W.one_mem⟩ ≠ 0) (o : O) :
     algebraMap (ResidueField O) Ω (residue O o) = algebraMap T Ω (algebraMap O T o) := by
   classical
-  let s : ResidueField T →ₐ[ResidueField O] Ω := IsAlgClosed.lift
+  let s : ResidueField T →ₐ[ResidueField O] Ω := (by
+    refine @_root_.IsAlgClosed.lift _ _ _ _ _ _ _ _ _ _ _ ?_ ?_ ?_
+    solve_by_elim* (maxDepth := 2) only [*,
+      @_root_.DivisionSemiring.to_moduleIsTorsionFree,
+      @_root_.Algebra.IsIntegral.isAlgebraic, @_root_.inferInstance])
   have hco : ∀ x, θ (c₀ x) = algebraMap T F₁ (algebraMap O T x) := fun x => RingHom.congr_fun hc x
   have hmem : ∀ x, θ (c₀ x) ∈ Subalgebra.toSubmodule W := fun x => by
     rw [Subalgebra.mem_toSubmodule, hco]
@@ -130,6 +182,7 @@ theorem comp_div {c₀ : O →+* F} {θ : F →+* F₁} (hc : θ.comp c₀ = (al
     simp only [cc, Finset.mul_sum]
     rw [Finset.sum_comm]
     refine Finset.sum_congr rfl fun i _ => ?_
+
     conv_rhs => rw [← b.sum_repr (residue T (r i)), map_sum, Finset.sum_mul]
     refine Finset.sum_congr rfl fun t' _ => ?_
     rw [map_smul, ← ho, Algebra.smul_def]
@@ -137,6 +190,7 @@ theorem comp_div {c₀ : O →+* F} {θ : F →+* F₁} (hc : θ.comp c₀ = (al
   have he : (⟨_, hsum⟩ : Subalgebra.toSubmodule W) = ∑ i, algebraMap O T (o t i) • ⟨θ (w i), hw i⟩ := by
     ext
     simp [Algebra.smul_def]
+
   rw [he, map_sum]
   have hct : cc t = 0 := by rw [hcc]; rfl
   rw [← hct]
@@ -162,6 +216,7 @@ theorem div_span (hinj : Function.Injective (algebraMap T F₁)) {c₀ : O →+*
   have hdiff : ∀ i, ∃ r' : T, r i = ∑ t, algebraMap O T (o t i) * β t + algebraMap O T π * r' := by
     intro i
     have hm : r i - ∑ t, algebraMap O T (o t i) * β t ∈ maximalIdeal T := by
+
       rw [← IsLocalRing.residue_eq_zero_iff, map_sub, map_sum]
       simp only [map_mul, ← IsLocalRing.ResidueField.algebraMap_residue, ho, hβ]
       conv_lhs => enter [1]; rw [← b.sum_repr (residue T (r i))]
@@ -175,6 +230,7 @@ theorem div_span (hinj : Function.Injective (algebraMap T F₁)) {c₀ : O →+*
     intro t
     have hne : θ (c₀ π) ≠ 0 := by rw [hco]; exact hϖ
     have hval : θ ((∑ i, c₀ (o t i) * w i) * (c₀ π)⁻¹) = y' t := by
+
       rw [map_mul, map_inv₀, map_sum]
       simp only [map_mul, hco]
       rw [hyeq t, mul_comm, ← mul_assoc, inv_mul_cancel₀ hϖ, one_mul]
@@ -182,7 +238,8 @@ theorem div_span (hinj : Function.Injective (algebraMap T F₁)) {c₀ : O →+*
   have hyeq' : y = ∑ t, algebraMap T F₁ (β t) * y' t + ∑ i, algebraMap T F₁ (r' i) * θ (w i) := by
     apply mul_left_cancel₀ hϖ
     rw [← hr]
-    simp only [hr', map_add, map_sum, map_mul, add_mul, Finset.sum_add_distrib, Finset.sum_mul, mul_add, Finset.mul_sum]
+
+    simp only [hr', map_add (f := _), map_sum, map_mul, add_mul, Finset.sum_add_distrib, Finset.sum_mul, mul_add, Finset.mul_sum]
     congr 1
     · rw [Finset.sum_comm]
       refine Finset.sum_congr rfl fun t _ => ?_

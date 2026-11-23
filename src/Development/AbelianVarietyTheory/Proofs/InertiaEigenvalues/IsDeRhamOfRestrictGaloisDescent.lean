@@ -1,9 +1,58 @@
-import Mathlib
-import Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow
-import Formalism.SharpRestriction.LevelLetterCocycles.LocalSituation
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
+public import Formalism.SharpRestriction.LevelLetterCocycles.LocCoh
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.DeRhamJumpDescent
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Definitions.Foundations.HTBasis
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.ExpStar
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.DeRhamJumpDescent
+import Formalism.SharpRestriction.LevelLetterCocycles.LocalSituation
+
+@[expose] public section
+
 open Formalism.WeaklyAdmissibleFiltrations Formalism.BasicNotions Formalism.BasicNotions.Loc Formalism.MainNotions.N Formalism.MainNotions.LocalSituation GlobalTheory.Cyc
 open scoped TensorProduct
 
@@ -56,10 +105,11 @@ theorem finrank_fixed {R G M K L : Type} [Field R] [Group G] [AddCommGroup M] [M
   have hΦ : ∀ x, Φ₀ x = ∑ i, m (b i) (x i) := fun x => by
     simp [Φ₀]
   have hinj : Function.Injective Φ₀ := by
-    rw [injective_iff_map_eq_zero]
+    set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
     intro x hx
     have h3 : ∀ σ : L ≃ₐ[K] L, ∑ i, m (σ (b i)) (x i) = 0 := fun σ => by
       have := congrArg (A (s σ)) hx
+
       rw [hΦ, map_sum, map_zero] at this
       rw [← this]
       refine Finset.sum_congr rfl fun i _ => ?_
@@ -68,8 +118,10 @@ theorem finrank_fixed {R G M K L : Type} [Field R] [Group G] [AddCommGroup M] [M
     apply Subtype.ext
     have h4 : ∑ σ : L ≃ₐ[K] L, m (σ (μ j)) (∑ i, m (σ (b i)) (x i)) = 0 := by
       simp only [h3, map_zero, Finset.sum_const_zero]
+
     simp only [map_sum, ← Module.End.mul_apply, ← map_mul m] at h4
     rw [Finset.sum_comm] at h4
+
     simp only [← LinearMap.sum_apply, ← map_sum m, h1] at h4
     rw [Finset.sum_eq_single j (fun i _ hi => by simp [Ne.symm hi]) (by simp)] at h4
     simpa using h4
@@ -80,7 +132,8 @@ theorem finrank_fixed {R G M K L : Type} [Field R] [Group G] [AddCommGroup M] [M
       exact D'.sum_mem fun i _ => hm _ _ (hDD (x i).2)
     · intro x hx
       refine ⟨fun i => ⟨∑ σ, A (s σ) (m (μ i) x), (hD _).2 fun g => ?_⟩, ?_⟩
-      · rw [map_sum, ← Equiv.sum_comp (Equiv.mulLeft (ε g))
+      · set_option synthInstance.maxHeartbeats 100000 in
+          rw [map_sum, ← Equiv.sum_comp (Equiv.mulLeft (ε g))
           (fun σ => A (s σ) (m (μ i) x))]
         refine Finset.sum_congr rfl fun σ _ => ?_
         rw [← Module.End.mul_apply, ← map_mul]
@@ -88,8 +141,10 @@ theorem finrank_fixed {R G M K L : Type} [Field R] [Group G] [AddCommGroup M] [M
       · rw [hΦ]
         have hmm : ∀ a a' y, m a (m a' y) = m (a * a') y := fun a a' y => by
           rw [map_mul, Module.End.mul_apply]
+
         simp only [hε, hs', map_sum, hmm]
         rw [Finset.sum_comm]
+
         simp only [← LinearMap.sum_apply, ← map_sum m, h2]
         rw [Finset.sum_eq_single 1 (fun i _ hi => by simp [Ne.symm hi]) (by simp)]
         simpa using (hD' x).1 hx _ (hs' 1)
@@ -102,8 +157,8 @@ theorem finrank_fixed {R G M K L : Type} [Field R] [Group G] [AddCommGroup M] [M
       (LinearMap.proj (R := R) (φ := fun _ : L ≃ₐ[K] L => D) (1 : L ≃ₐ[K] L))
       (fun y => ⟨fun _ => y, rfl⟩))
 
-open GlobalTheory.JumpDescent TensorProduct in
 
+open GlobalTheory.JumpDescent TensorProduct in
 theorem isDR_of_restrict : ∀ (l : ℕ) [Fact l.Prime] (P : LocPrime l) (K K' LL : FinExt l)
     (hle : GK K' ≤ GK K), K.1 ≤ K'.1 → (∀ g ∈ GK K, ∀ x ∈ K'.1, g x ∈ K'.1) →
     ∀ (V : Type) [AddCommGroup V] [Module ↥LL.1 V] [Module ℚ_[l] V]
@@ -145,7 +200,7 @@ theorem isDR_of_restrict : ∀ (l : ℕ) [Fact l.Prime] (P : LocPrime l) (K K' L
       induction x using TensorProduct.induction_on with
       | zero => simp only [map_zero]
       | tmul v b => simp [mulOm_tmul, actVdR_tmul, P.actQdR_Om]
-      | add y z hy hz => simp only [map_add, hy, hz])
+      | add y z hy hz => simp only [map_add (f := _), hy, hz])
     (DdR (P.PD K) ρ) (DdR (P.PD K') (ρ.comp (Subgroup.inclusion hle)))
     (fun x => mem_DdR P K ρ x)
     (fun x => by

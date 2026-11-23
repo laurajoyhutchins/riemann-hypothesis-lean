@@ -1,9 +1,61 @@
-import Mathlib
-import GroundTheory.GlobalFields.LocalFieldAtPlace
-import GroundTheory.GlobalFields.TateThesis.IdeleMeasure
-import GroundTheory.LocalFields.LocalFourier
+module
+
+public import GroundTheory.GlobalFields.LocalFieldAtPlace
+public import GroundTheory.GlobalFields.TateThesis.IdeleMeasure
+public import GroundTheory.LocalFields.LocalFourier
+public import GroundTheory.GlobalFields.IdeleGroups.Restricted
+import GroundTheory.GlobalFields.LocalAtPlace
+import GroundTheory.LocalFields.ExistsUnitFiltrationUnitsLeRangeNormUnits
 import GroundTheory.LocalFields.LocalFourierMult
-import GroundTheory.LocalFields.LocalFourierHaar
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.MeasureTheory.Integral.Pi
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain MeasureTheory Filter Topology GroundTheory.Global GroundTheory.LocalField
 open scoped NumberField.AdeleRing ENNReal NNReal Pointwise
@@ -23,16 +75,8 @@ instance borelSpace_adicCompletion (v : HeightOneSpectrum (𝓞 K)) :
 def finUnitAt (v : HeightOneSpectrum (𝓞 K)) : (FiniteAdeleRing (𝓞 K) K)ˣ →* (v.adicCompletion K)ˣ :=
   Units.map (RestrictedProduct.evalMonoidHom (fun w : HeightOneSpectrum (𝓞 K) ↦ w.adicCompletion K) v)
 
-@[simp]
-theorem coe_finUnitAt (v : HeightOneSpectrum (𝓞 K)) (b : (FiniteAdeleRing (𝓞 K) K)ˣ) :
-    ((finUnitAt v b : (v.adicCompletion K)ˣ) : v.adicCompletion K) = (b : FiniteAdeleRing (𝓞 K) K) v :=
-  rfl
-
 theorem continuous_finUnitAt (v : HeightOneSpectrum (𝓞 K)) : Continuous (finUnitAt (K := K) v) :=
   Units.continuous_map (RestrictedProduct.continuous_eval v)
-
-theorem measurable_finUnitAt (v : HeightOneSpectrum (𝓞 K)) : Measurable (finUnitAt (K := K) v) :=
-  (continuous_finUnitAt v).measurable
 
 abbrev intUnitsAt (v : HeightOneSpectrum (𝓞 K)) : Subgroup (v.adicCompletion K)ˣ :=
   (Submonoid.ofClass (v.adicCompletionIntegers K)).units
@@ -80,9 +124,6 @@ theorem multHaar_intUnitsAt :
 
 theorem isOpen_intUnitsAt : IsOpen (intUnitsAt v : Set (v.adicCompletion K)ˣ) :=
   IdeleGroup.isOpen_units_adicCompletionIntegers K v
-
-theorem measurableSet_intUnitsAt : MeasurableSet (intUnitsAt v : Set (v.adicCompletion K)ˣ) :=
-  (isOpen_intUnitsAt v).measurableSet
 
 theorem finUnitAt_mem_intUnitsAt_iff (b : (FiniteAdeleRing (𝓞 K) K)ˣ) :
     finUnitAt v b ∈ intUnitsAt v ↔ (b : FiniteAdeleRing (𝓞 K) K) v ∈ v.adicCompletionIntegers K ∧
@@ -215,6 +256,9 @@ theorem awayImageS_eq_smul {g : (FiniteAdeleRing (𝓞 K) K)ˣ → ℝ≥0∞}
     awayImageS S g = awayImageS S g (intUnitsAtS S) • multHaarS S := by
   have := isMulLeftInvariant_awayImageS hinv
   have := isFiniteMeasureOnCompacts_awayImageS hinv hc
+  haveI : (multHaarS S).IsHaarMeasure := by
+    unfold multHaarS
+    infer_instance
   have h := Measure.isMulLeftInvariant_eq_smul (awayImageS S g) (multHaarS S)
   set c := Measure.haarScalarFactor (awayImageS S g) (multHaarS S)
   have hU : awayImageS S g (intUnitsAtS S) = (c : ℝ≥0∞) := by

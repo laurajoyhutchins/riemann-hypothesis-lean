@@ -1,6 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.MumfordProportionality
-import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.SigmaSplitSymmInl
+module
+
+public import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.SigmaSplitSymmInl
+public import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.InterPolyProdSum
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.MvPolynomial.Symmetric.FundamentalTheorem
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.FnAlgClosedOfFixedPoints
+import Development.AbelianVarietyTheory.Definitions.Divisors.IsProperToroidalModelStructureMap
+import Formalism.LocalToGlobal.ProjectiveLattices.ErealAddIInf
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory MvPolynomial NumberField ReciprocityTheory.ChartRestriction.G.Geo.Tor Formalism.L2.Pj GlobalTheory.Toroidal GlobalTheory.ShFam GlobalTheory.ProjVar GlobalTheory.FlagBundle GlobalTheory.GoodMetric
 
 set_option autoImplicit false
@@ -47,7 +92,7 @@ theorem splitEquiv_symm_C (c : MvPolynomial (Root (fun τ : {τ // τ ≠ τ₀}
     simp only [rename_C]
     change _ = splitEquiv R τ₀ (algebraMap R _ r)
     rw [AlgEquiv.commutes]; rfl
-  | add p q hp hq => simp [map_add, ← hp, ← hq]
+  | add p q hp hq => simp [map_add (f := _), ← hp, ← hq]
   | mul_X p y hp =>
     simp only [map_mul, rename_X]
     rw [← hp, splitEquiv_X_ne R τ₀ y.1.2]
@@ -55,7 +100,8 @@ theorem splitEquiv_symm_C (c : MvPolynomial (Root (fun τ : {τ // τ ≠ τ₀}
 theorem splitEquiv_symm_esymm (j : ℕ) :
     (splitEquiv R τ₀).symm (esymm (Fin (m τ₀)) (MvPolynomial (Root (fun τ : {τ // τ ≠ τ₀} => m τ.1)) R) j) =
       chernRootsOver R m (X (τ₀, j)) := by
-  simp [chernRootsOver, esymm, map_sum, map_prod, splitEquiv_symm_X]
+  set_option synthInstance.maxHeartbeats 100000 in
+    simp [chernRootsOver, esymm, map_sum, map_prod, splitEquiv_symm_X]
 
 theorem splitEquiv_rename_update (σ : Equiv.Perm (Fin (m τ₀))) (S : MvPolynomial (Root m) R) :
     splitEquiv R τ₀ (rename (Equiv.sigmaCongrRight
@@ -88,7 +134,7 @@ theorem rename_chernRootsOver (T : MvPolynomial ({τ // τ ≠ τ₀} × ℕ) R)
       chernRootsOver R m (rename (Prod.map Subtype.val id) T) := by
   induction T using MvPolynomial.induction_on with
   | C r => simp [chernRootsOver]
-  | add p q hp hq => simp only [map_add, hp, hq]
+  | add p q hp hq => simp only [map_add (f := _), hp, hq]
   | mul_X p x hp =>
     simp only [map_mul, hp]
     congr 1
@@ -121,7 +167,7 @@ theorem mem_range_chernRootsOver (n : ℕ) : ∀ (ι : Type) [Fintype ι] [Decid
     obtain ⟨T, hT⟩ := esymmAlgHom_fin_surjective R' (m := m τ₀) (n := m τ₀) le_rfl ⟨_, hsym⟩
     have hT' : aeval f T = splitEquiv R τ₀ S := by
       rw [← esymmAlgHom_apply, hT]
-    have hcoef : ∀ d, coeff d T ∈ (chernRootsOver R (fun τ : {τ // τ ≠ τ₀} => m τ.1)).range := by
+    have hcoef : ∀ d, AddMonoidAlgebra.coeff T d ∈ (chernRootsOver R (fun τ : {τ // τ ≠ τ₀} => m τ.1)).range := by
       intro d
       apply ih _ hc' R
       intro w'
@@ -135,7 +181,7 @@ theorem mem_range_chernRootsOver (n : ℕ) : ∀ (ι : Type) [Fintype ι] [Decid
         congr 1
         funext i
         exact (map_esymm _ _ _ _).symm
-      have := congrArg (coeff d) hinv
+      have := congrArg (AddMonoidAlgebra.coeff · d) hinv
       rwa [coeff_map] at this
     let k : MvPolynomial (Fin (m τ₀)) R' →+* MvPolynomial (Root m) R :=
       (splitEquiv R τ₀).symm.toRingEquiv.toRingHom

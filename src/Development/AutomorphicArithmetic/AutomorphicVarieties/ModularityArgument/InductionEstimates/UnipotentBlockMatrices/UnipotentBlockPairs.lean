@@ -1,7 +1,48 @@
-import Development.WeilBound.RepresentationTheoryGL.TwistedFactors.TruncatedCuspIrreducibility.IsOrthogonalProjectionTwoLines
-import Development.AutomorphicArithmetic.Foundations.Convolution.PowerSumTraces.CuspidalMultiplicityOneTotallyComplex
-import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.GalTwistEx
-import GroundTheory.AutomorphicForms.HaarSK
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.TwistedFactors.TruncatedCuspIrreducibility.IsOrthogonalProjectionTwoLines
+public import Development.AutomorphicArithmetic.Foundations.Convolution.PowerSumTraces.CuspidalMultiplicityOneTotallyComplex
+public import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.GalTwistEx
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -33,13 +74,14 @@ def wGL (R : Type) [CommRing R] : GL (Fin (2 + 2)) R where
 def w0 (K : Type) [Field K] [NumberField K] : G1 K (2 + 2) := retractOne (wGL 𝔸[K])
 
 def KG (K : Type) [Field K] [NumberField K] (n : ℕ) : Subgroup (G1 K n) :=
-  (maxCompact : Subgroup (AdelicGLn.AdelicGL K n)).comap (normOneGL K n).subtype
+  (maxCompact : Subgroup (AdelicGLn.AdelicGL K n)).comap (normOneGL (K := K) (n := n)).subtype
 
 def PK (K : Type) [Field K] [NumberField K] : Subgroup (G1 K (2 + 2)) := (ParΓ K 2 2).map (Gam K (2 + 2)).subtype
 
 abbrev Cos (K : Type) [Field K] [NumberField K] : Type := Quotient (QuotientGroup.rightRel (ParΓ K 2 2))
 
-abbrev nn (X : UPos (2 + 2) 2 → 𝔸[K]) : G1 K (2 + 2) := unipOne K (2 + 2) 2 X
+abbrev nn (X : UPos (2 + 2) 2 → 𝔸[K]) : G1 K (2 + 2) :=
+  unipOne (K := K) (n := 2 + 2) 2 X
 
 abbrev HH (g : G1 K (2 + 2)) : ℝ := HP 2 2 g
 
@@ -55,8 +97,10 @@ structure PFun (F : G1 K (2 + 2) → ℂ) : Prop where
   bdd : ∃ C : ℝ, ∀ g, ‖F g‖ ≤ C
   unip : ∀ X g, F (nn X * g) = F g
   rat : ∀ γ ∈ PK K, ∀ g, F (γ * g) = F g
-  cusp₁ : ∀ g, ∫ Y in unipFundamentalDomain K 2 1, F (lv (unipOne K 2 1 Y) 1 0 * g) ∂unipMeasure K 2 1 = 0
-  cusp₂ : ∀ g, ∫ Y in unipFundamentalDomain K 2 1, F (lv 1 (unipOne K 2 1 Y) 0 * g) ∂unipMeasure K 2 1 = 0
+  cusp₁ : ∀ g, ∫ Y in unipFundamentalDomain K 2 1,
+    F (lv (unipOne (K := K) (n := 2) 1 Y) 1 0 * g) ∂unipMeasure K 2 1 = 0
+  cusp₂ : ∀ g, ∫ Y in unipFundamentalDomain K 2 1,
+    F (lv 1 (unipOne (K := K) (n := 2) 1 Y) 0 * g) ∂unipMeasure K 2 1 = 0
 
 def InBand (F : G1 K (2 + 2) → ℂ) : Prop := ∃ R : ℝ, ∀ g, F g ≠ 0 → |HH g| ≤ R
 
@@ -68,7 +112,8 @@ structure Rd {μ₂ : Measure (G1 K 2)} (τ : Submodule ℂ (L2 μ₂)) (φ : G1
   cont : Continuous φ
   rep : ∃ v ∈ τ, Reps μ₂ v φ
   rat : ∀ γ ∈ Gam K 2, ∀ m, φ (γ * m) = φ m
-  cusp : ∀ m, ∫ Y in unipFundamentalDomain K 2 1, φ (unipOne K 2 1 Y * m) ∂unipMeasure K 2 1 = 0
+  cusp : ∀ m, ∫ Y in unipFundamentalDomain K 2 1,
+    φ (unipOne (K := K) (n := 2) 1 Y * m) ∂unipMeasure K 2 1 = 0
   decay : ∀ N : ℕ, ∃ C : ℝ, ∀ m, ‖φ m‖ * qht m ^ N ≤ C
 
 abbrev fd {n : ℕ} (μ : Measure (G1 K n)) : Measure (G1 K n) := μ.restrict (fundamentalDomain (Gam K n))
@@ -110,8 +155,9 @@ def tChi (μ : Measure (G1 K (2 + 2))) (a : CC K (2 + 2)) (χ : ℝ → ℂ) (f 
   ∫ g, a g * χ (HH (x * g) - HH x) * Complex.exp (2 * ((HH (x * g) - HH x : ℝ) : ℂ)) * f (x * g) ∂μ
 
 def Dies (F : G1 K (2 + 2) → ℂ) (r : ℕ) (γ : G1 K (2 + 2)) (X₀ : UPos (2 + 2) r → K) : Prop :=
-  ∀ x, ∫ y in GroundTheory.Global.fundamentalSet K, F (γ * unipOne K (2 + 2) r (fun p => y * algebraMap K 𝔸[K] (X₀ p)) * x)
-    ∂GroundTheory.Global.adeleMeasure K = 0
+  ∀ x, ∫ y in GroundTheory.Global.fundamentalSet K,
+    F (γ * unipOne (K := K) (n := 2 + 2) r (fun p => y * algebraMap K 𝔸[K] (X₀ p)) * x)
+      ∂GroundTheory.Global.adeleMeasure K = 0
 
 section Steps
 
@@ -131,12 +177,12 @@ end Steps
 def ForAllC (p : ∀ (K : Type) [Field K] [NumberField K] (μ : Measure (G1 K (2 + 2))) [μ.IsHaarMeasure] (μ₂ : Measure (G1 K 2))
     [μ₂.IsHaarMeasure] (τ₁ τ₂ : Submodule ℂ (L2 μ₂)) (D : TypeDat K (2 + 2)) (d d' : ℕ), Line μ τ₁ τ₂ D d → Line μ τ₂ τ₁ D d' → Prop) :
     Prop :=
-  ∀ (K : Type) [Field K] [NumberField K] [IsTotallyComplex K] (μ : Measure (G1 K (2 + 2))) [μ.IsHaarMeasure] (μ₂ : Measure (G1 K 2))
+  ∀ (K : Type) [Field K] [NumberField K] [_root_.NumberField.IsTotallyComplex K] (μ : Measure (G1 K (2 + 2))) [μ.IsHaarMeasure] (μ₂ : Measure (G1 K 2))
     [μ₂.IsHaarMeasure] (τ₁ τ₂ : Submodule ℂ (L2 μ₂)), Pair μ₂ τ₁ τ₂ → ∀ (D : TypeDat K (2 + 2)) (d d' : ℕ)
     (A : Line μ τ₁ τ₂ D d) (A' : Line μ τ₂ τ₁ D d'), p K μ μ₂ τ₁ τ₂ D d d' A A'
 
 def LineExC : Prop :=
-  ∀ (K : Type) [Field K] [NumberField K] [IsTotallyComplex K] (μ : Measure (G1 K (2 + 2))) [μ.IsHaarMeasure]
+  ∀ (K : Type) [Field K] [NumberField K] [_root_.NumberField.IsTotallyComplex K] (μ : Measure (G1 K (2 + 2))) [μ.IsHaarMeasure]
     (μ₂ : Measure (G1 K 2)) [μ₂.IsHaarMeasure] (τ₁ τ₂ : Submodule ℂ (L2 μ₂)), Pair μ₂ τ₁ τ₂ → ∀ D : TypeDat K (2 + 2),
     ∃ d, Nonempty (Line μ τ₁ τ₂ D d)
 
@@ -157,8 +203,5 @@ def UnitB : Prop := ForAllC fun _ _ _ μ _ _ _ _ _ _ _ _ A A' => UnitAt μ A A'
 
 def ProjExC : Prop := ForAllC fun _ _ _ μ _ _ _ _ _ _ _ _ A A' =>
   (∃ P, IsOrthogonalProjectionTwoLines A.J A'.J P) ∧ ∀ T : ℝ, 0 ≤ T → ∃ Λ, IsTrunc A.J A'.J T Λ
-
-def FamilyOf2 : Prop := ForAllC fun _ _ _ μ _ _ _ _ _ _ d _ A A' =>
-  TruncCpt μ A A' → ∀ P, IsOrthogonalProjectionTwoLines A.J A'.J P → ∃ N, Family μ A A' 0 P N d
 
 end UpperTheory.V.Z.InvariantSubmoduleMonicPolynomial

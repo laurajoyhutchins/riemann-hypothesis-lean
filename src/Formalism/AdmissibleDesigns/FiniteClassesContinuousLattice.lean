@@ -1,5 +1,52 @@
-import Formalism.AdmissibleDesigns.NonemptyPl
-import Formalism.WeaklyAdmissibleFiltrations.CrystallineStableLifts.Galois
+module
+
+public import Formalism.AdmissibleDesigns.NonemptyPl
+public import Formalism.CharacterColumnKernels.IdempotentNormalForms.GlobalConcreteOf
+public import Formalism.WachLatticeTwists.RealClassMaps.RealClassMapTheorem
+public import Formalism.WachLatticeTwists.RealClassMaps.StatClassMapReal
+public import Formalism.WachLatticeTwists.SplitLocalLifts.Statement
+public import Formalism.WeaklyAdmissibleFiltrations.CrystallineStableLifts.Galois
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 variable [hT2Core : Fact ReciprocityTheory.ChartRestriction.T2.Core]
 
@@ -205,9 +252,6 @@ theorem locRep_mkK (ρM : Representation O Γ M) (g : Γ) (m : M) :
 def finLoc (ρM : Representation O Γ M) : Submodule O (Γ → M) :=
   finPre e PD ι (locRep ρM) mkK
 
-def finiteClassesModelLattice (ρM : Representation O Γ M) : Submodule O (Formalism.NG.H1z ρM) :=
-  finiteClassesModel e PD ι (locRep ρM) ρM mkK
-
 def finiteClassesContinuousLattice [TopologicalSpace Γ] [TopologicalSpace M] [IsTopologicalAddGroup M] [ContinuousConstSMul O M]
     (ρM : Representation O Γ M) : Submodule O (ReciprocityTheory.Gal.H1 ρM) :=
   finiteClassesContinuous e PD ι (locRep ρM) ρM mkK
@@ -278,19 +322,19 @@ theorem fZ_pos (hn : K.plOf i dc n ∈ placesOver D.host.E (D.nd.l i)) :
     fZ i dc n ρ = finZ (eK (D.nbr i _ hn)) (Br.PD D.loc D.nbr i _ hn) ρ (Br.iota D.nbr i _ hn) :=
   dif_pos hn
 
-variable (n) in
 
+variable (n) in
 def fPre (φ : M →ₗ[D.nd.O i] V) : Submodule (D.nd.O i) (↥(Γn i dc n) → M) :=
   ((fZ i dc n ρ).restrictScalars (D.nd.O i)).comap (LinearMap.compLeft φ _)
 
-variable (n) in
 
+variable (n) in
 def finiteClassesCocyclesMap (ρM : Representation (D.nd.O i) ↥(Γn i dc n) M) (φ : M →ₗ[D.nd.O i] V) :
     Submodule (D.nd.O i) (Formalism.NG.H1z ρM) :=
   ((fPre i dc n ρ φ).comap (Formalism.NG.coZ1s ρM).subtype).map (Submodule.mkQ _)
 
-variable (n) in
 
+variable (n) in
 def finiteClassesContinuousMap [TopologicalSpace M] [IsTopologicalAddGroup M] [ContinuousConstSMul (D.nd.O i) M]
     (ρM : Representation (D.nd.O i) ↥(Γn i dc n) M) (φ : M →ₗ[D.nd.O i] V) :
     Submodule (D.nd.O i) (ReciprocityTheory.Gal.H1 ρM) :=
@@ -507,7 +551,7 @@ theorem fZ_map (ρ : Representation (D.nd.O i) ↥(Γn i dc n) V) (ρ' : Represe
     rw [fZ_pos i dc ρ' hn]
     exact finZ_map _ _ ρ ρ' _ f hf c hc
   · unfold fZ
-    rw [dif_neg hn]
+    rw [dite_eq_right hn]
     trivial
 
 theorem fLoc_map (ρM : Representation (D.nd.O i) ↥(Γn i dc n) M) (ρ : Representation (D.nd.O i) ↥(Γn i dc n) V)
@@ -519,7 +563,7 @@ theorem fLoc_map (ρM : Representation (D.nd.O i) ↥(Γn i dc n) M) (ρ : Repre
     rw [fZ_pos i dc ρ hn]
     exact finLoc_map _ _ _ ρ ρM f hf c hc
   · unfold fZ
-    rw [dif_neg hn]
+    rw [dite_eq_right hn]
     trivial
 
 def OrbC (ρ : Representation (D.nd.O i) ↥(Γn i dc n) V) : Prop :=
@@ -532,7 +576,7 @@ theorem cob_mem_fZ (ρ : Representation (D.nd.O i) ↥(Γn i dc n) V) (h : OrbC 
   · rw [fZ_pos i dc ρ hn]
     exact coboundaryMap_mem_finiteCocycles (PD := Br.PD D.loc D.nbr i _ hn) (h hn) v
   · unfold fZ
-    rw [dif_neg hn]
+    rw [dite_eq_right hn]
     trivial
 
 end Prf

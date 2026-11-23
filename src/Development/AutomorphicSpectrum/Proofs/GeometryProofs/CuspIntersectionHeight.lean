@@ -1,25 +1,63 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.PotentialsBoundedRegSettingEqReference
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.GlobalSectionsRankAlgClosed
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.BdryChart
-import ReciprocityTheory.AnalyticForms.PlurisubharmonicFunctions.IsPshLocallyIntegrableStatement
-import Development.AutomorphicSpectrum.Statements.GeometryStatements.FlatDegree
-import Development.AutomorphicSpectrum.Statements.GeometryStatements.NineGeoU
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LocRatio
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.IsValues
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.IntersectionSystemWeightRightStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.IntersectionDatumDegreeSumStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.CompactDatumIntersectionStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ValAtIffValueAtStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ValAtComplexEmbedding
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LocalRatioProductFormula
+module
+
+public import Development.AutomorphicSpectrum.Statements.GeometryStatements.NineGeoU
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.AbelianPartIntegralLatticeStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.AbelianPartIntegralPointAltBis
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.AbelianPartLatticeEigenCompatStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.CompactDatumIntersectionStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ComponentDataAbelianPartBoundStatement
 import Development.AutomorphicSpectrum.Proofs.GeometryProofs.CoordValuationBoundLocal
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.AbelianPartIntegralPointAltBis
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.AbelianPartIntegralLatticeStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ComponentDataAbelianPartBoundStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.AbelianPartLatticeEigenCompatStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.TensorLatticeCoordDegreeStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.GluedLatticeFromLocalMatricesStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.GluedLatticeFromLocalMatricesStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.IntersectionDatumDegreeSumStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.IntersectionSystemWeightRightStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LocalRatioProductFormula
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.TensorLatticeCoordDegreeStatement
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ValAtComplexEmbedding
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ValAtIffValueAtStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LocRatio
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField Matrix Filter Topology
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Geo ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.Semi
@@ -100,8 +138,8 @@ theorem datum (hG : Top.Given) (E : Type) [Field E] [NumberField E] [IsCMField E
 
   have hex : ∃ v, IsValueAt Dc.y d.u (fun p => e₀ (w p)) v := by
     by_contra hn
-    exact hu0 (by rw [GroundTheory.Heights₂.Heights.LowerBoundFree.valAt, dif_neg hn])
-  have hu1 : valAt Dc.y d.u (fun p => e₀ (w p)) = hex.choose := by rw [GroundTheory.Heights₂.Heights.LowerBoundFree.valAt, dif_pos hex]
+    exact hu0 (by rw [GroundTheory.Heights₂.Heights.LowerBoundFree.valAt, dite_eq_right hn])
+  have hu1 : valAt Dc.y d.u (fun p => e₀ (w p)) = hex.choose := by rw [GroundTheory.Heights₂.Heights.LowerBoundFree.valAt, dite_eq_left hex]
   obtain ⟨uL, huL, hue⟩ := val_descend _ _ _ ((tv e₀ _ _).2 hex.choose_spec)
   have huL0 : uL ≠ 0 := fun h0 => hu0 (by rw [hu1, ← hue, h0, map_zero])
   refine ⟨d.c, d.f, d.b, d.u, uL, s, fun k h0 => ?_, d.adapted, d.unit, d.eq, huL0, huL, fun e => ⟨fun k h0 => ?_, ?_⟩, fun e => ?_,
@@ -112,7 +150,7 @@ theorem datum (hG : Top.Given) (E : Type) [Field E] [NumberField E] [IsCMField E
   · exact ⟨e fL, (tv e _ _).1 (valAt_of_field_map _ zL _ e rfl hfL), by simpa using hfL0⟩
   · have h1 : ValAt Or.𝔐.ξ (spMap e ≫ zL) d.u (e uL) := valAt_of_field_map _ zL _ e rfl huL
     have hex' : ∃ v, IsValueAt Dc.y d.u (fun p => e (w p)) v := ⟨_, (tv e _ _).1 h1⟩
-    rw [GroundTheory.Heights₂.Heights.LowerBoundFree.valAt, dif_pos hex']
+    rw [GroundTheory.Heights₂.Heights.LowerBoundFree.valAt, dite_eq_left hex']
     exact CxVal.unique ((tv e _ _).2 hex'.choose_spec) h1
   · have hq : (⟨centre (spMap e₀ ≫ zL), Or.𝔐.all _⟩ : Cpt Or.𝔐.ξ) = ⟨centre zL, Or.𝔐.all _⟩ :=
       Subtype.ext (centre_field_map zL e₀)

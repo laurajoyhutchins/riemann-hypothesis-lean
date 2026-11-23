@@ -1,5 +1,61 @@
-import Mathlib
-import Formalism.SharpRestriction.CuspSpanNormBounds.CayleyDegreeNondegeneracy.ShortVectorEveryPlace
+module
+
+public import Formalism.SharpRestriction.CuspSpanNormBounds.CayleyDegreeNondegeneracy.ShortVectorEveryPlace
+public import Mathlib.RingTheory.FractionalIdeal.Norm
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+public import Mathlib.NumberTheory.NumberField.Discriminant.Basic
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Analysis.Real.Pi.Bounds
+public import Mathlib.NumberTheory.NumberField.CanonicalEmbedding.Basic
+public import Mathlib.NumberTheory.NumberField.CanonicalEmbedding.ConvexBody
+
+@[expose] public section
 
 noncomputable section
 
@@ -8,7 +64,7 @@ namespace Formalism.MainNotions.BridgeLemma₂
 open NumberField NumberField.mixedEmbedding Formalism.HermitianLatticesTheory
 open scoped nonZeroDivisors NNReal ENNReal
 
-theorem rootDiscr_pow_eq_sqrt_discr (K : Type) [Field K] [NumberField K] [IsTotallyComplex K] :
+theorem rootDiscr_pow_eq_sqrt_discr (K : Type) [Field K] [NumberField K] [_root_.NumberField.IsTotallyComplex K] :
     rootDiscriminant K ^ InfinitePlace.nrComplexPlaces K = Real.sqrt |(discr K : ℝ)| := by
   have h1 := InfinitePlace.card_add_two_mul_card_eq_rank K
   rw [IsTotallyComplex.nrRealPlaces_eq_zero K, zero_add] at h1
@@ -23,11 +79,9 @@ theorem rootDiscr_pow_eq_sqrt_discr (K : Type) [Field K] [NumberField K] [IsTota
   congr 1
   field_simp
 
-theorem rootDiscr_nonneg (K : Type) [Field K] [NumberField K] : 0 ≤ rootDiscriminant K := Real.rpow_nonneg (abs_nonneg _) _
 
 open scoped Classical in
-
-theorem exists_small_mem_fractional_ideal (K : Type) [Field K] [NumberField K] [IsTotallyComplex K]
+theorem exists_small_mem_fractional_ideal (K : Type) [Field K] [NumberField K] [_root_.NumberField.IsTotallyComplex K]
     (I : (FractionalIdeal (𝓞 K)⁰ K)ˣ) (hI : FractionalIdeal.absNorm (I : FractionalIdeal (𝓞 K)⁰ K) ≤ 1) :
     ∃ a ∈ (I : FractionalIdeal (𝓞 K)⁰ K), a ≠ 0 ∧ ∀ w : InfinitePlace K, (w a) ^ 2 ≤ rootDiscriminant K := by
   have h1 := InfinitePlace.card_add_two_mul_card_eq_rank K
@@ -101,6 +155,7 @@ theorem eq_sum_coords_orthonormal_pair (hspan : Submodule.span K (Set.range e) =
   obtain ⟨c, hc⟩ := (Submodule.mem_span_range_iff_exists_fun K).1 hv
   have hcoef : ∀ j, h (e j) v = c j := by
     intro j
+
     rw [← hc, map_sum]
     simp [map_smul, ho]
   rw [hcoef 0, hcoef 1]
@@ -111,7 +166,7 @@ theorem inner_eq_coords_orthonormal_pair (hspan : Submodule.span K (Set.range e)
     (ho : ∀ i j, h (e i) (e j) = if i = j then 1 else 0) (u v : V) :
     h u v = star (h (e 0) u) * h (e 0) v + star (h (e 1) u) * h (e 1) v := by
   conv_lhs => rw [eq_sum_coords_orthonormal_pair h e hspan ho u, eq_sum_coords_orthonormal_pair h e hspan ho v]
-  simp only [map_add, LinearMap.add_apply, LinearMap.map_smulₛₗ₂, map_smul, smul_eq_mul, ho, starRingEnd_apply]
+  simp only [map_add (f := _), LinearMap.add_apply, LinearMap.map_smulₛₗ₂, map_smul, smul_eq_mul, ho, starRingEnd_apply]
   simp
   ring
 
@@ -119,7 +174,7 @@ def orthCompanion (x : V) : V := -(star (h (e 1) x)) • e 0 + star (h (e 0) x) 
 
 theorem orthCompanion_inner_apply (x v : V) :
     h (orthCompanion h e x) v = -(h (e 1) x) * h (e 0) v + h (e 0) x * h (e 1) v := by
-  simp only [orthCompanion, map_add, LinearMap.add_apply, LinearMap.map_smulₛₗ₂, smul_eq_mul, starRingEnd_apply,
+  simp only [orthCompanion, map_add (f := _), LinearMap.add_apply, LinearMap.map_smulₛₗ₂, smul_eq_mul, starRingEnd_apply,
     star_neg, star_star]
 
 theorem coords_orthCompanion (ho : ∀ i j, h (e i) (e j) = if i = j then 1 else 0) (x : V) :
@@ -157,7 +212,7 @@ theorem inner_self_ne_zero_of_orthonormal (hcm : ∀ (φ : K →+* ℂ) (a : K),
   have hpar := inner_eq_coords_orthonormal_pair h e hspan ho x x
   rw [h0] at hpar
   have h1 := congrArg φ hpar
-  simp only [map_zero, map_add, map_mul, hcm] at h1
+  simp only [map_zero, map_add (f := _), map_mul, hcm] at h1
   have e0 : ((Complex.normSq (φ (h (e 0) x)) + Complex.normSq (φ (h (e 1) x)) : ℝ) : ℂ) = 0 := by
     push_cast
     rw [Complex.normSq_eq_conj_mul_self, Complex.normSq_eq_conj_mul_self]
@@ -191,7 +246,7 @@ theorem inner_orthCompanion_symm {K : Type} [Field K] [NumberField K] [StarRing 
 theorem exists_orthogonal_second_vector (K : Type) [Field K] [NumberField K] [StarRing K] (hK : Formalism.HermitianLatticesTheory.IsCMUnram K)
     (V : Type) [AddCommGroup V] [Module K V] [Module (𝓞 K) V] [IsScalarTower (𝓞 K) K V]
     (h : V →ₗ⋆[K] V →ₗ[K] K) (L : Submodule (𝓞 K) V) (hL : Formalism.HermitianLatticesTheory.IsOrthoLattice h L 2)
-    (M : Submodule (𝓞 K) V) (hlat : Submodule.IsLattice K M) (hint : Formalism.HermitianLatticesTheory.IsIntegralLat h M)
+    (M : Submodule (𝓞 K) V) (hlat : Submodule.IsFullLattice K M) (hint : Formalism.HermitianLatticesTheory.IsIntegralLat h M)
     (huni : Formalism.HermitianLatticesTheory.dual h M = M) (x : V) (hx : x ∈ M) (hx0 : x ≠ 0) :
     ∃ y ∈ M, y ≠ 0 ∧ h x y = 0 ∧ ∀ φ : K →+* ℂ, ‖φ (h y y)‖ ≤ ‖φ (h x x)‖ * rootDiscriminant K := by
   obtain ⟨e, -, hspan, -, ho⟩ := hL

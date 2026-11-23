@@ -1,5 +1,56 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.SplitDoublingNBlock
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.SplitDoublingNBlock
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+public import Mathlib.Data.Matrix.PEquiv
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Basic.PEquiv
+
+@[expose] public section
 
 noncomputable section
 
@@ -26,6 +77,7 @@ theorem proj_mem (τ : Representation ℂ G V) (A : Subgroup G) [Fintype A] (χ 
     (hχ : ∀ x ∈ A, ∀ y ∈ A, χ (x * y) = χ x * χ y) (v : V) : proj τ A χ v ∈ eig τ A χ := by
   rw [mem_eig_iff]
   intro g hg
+
   rw [proj_apply, map_sum, Finset.smul_sum]
   refine Fintype.sum_equiv (Equiv.mulLeft (⟨g, hg⟩ : A)) _ _ fun a => ?_
   have h : χ (a : G)⁻¹ = χ g * χ (g * a)⁻¹ := by
@@ -64,7 +116,7 @@ theorem finrank_eig_le [FiniteDimensional ℂ V] (τ : Representation ℂ G V) (
   let f : eig τ A χ →ₗ[ℂ] eig τ B χ :=
     ((proj τ B χ).comp (eig τ A χ).subtype).codRestrict _ fun v => proj_mem τ B χ hB v
   refine LinearMap.finrank_le_finrank_of_injective (f := f) ?_
-  rw [injective_iff_map_eq_zero]
+  set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
   rintro ⟨v, hv⟩ h0
   have h0' : proj τ B χ v = 0 := congrArg Subtype.val h0
   have hv' := (mem_eig_iff τ A χ v).1 hv
@@ -84,8 +136,9 @@ theorem finrank_eig_le [FiniteDimensional ℂ V] (τ : Representation ℂ G V) (
       rw [e2, map_smul, ← sub_eq_zero, ← sub_smul, smul_eq_zero, sub_eq_zero] at e1
       rw [e1.resolve_left hne, smul_zero, zero_smul]
   have h2 := congrArg (proj τ A χ) h0'
+
   rw [proj_apply τ B, map_sum, map_zero, Finset.sum_congr rfl fun b _ => key b, ← Finset.sum_smul,
-    smul_eq_zero] at h2
+  smul_eq_zero] at h2
   refine Subtype.ext (h2.resolve_left ?_)
   rw [Finset.sum_ite, Finset.sum_const_zero, add_zero, Finset.sum_const, nsmul_eq_mul]
   refine mul_ne_zero ?_ (Nat.cast_ne_zero.2 Fintype.card_ne_zero)

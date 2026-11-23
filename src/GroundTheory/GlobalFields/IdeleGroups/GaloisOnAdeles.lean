@@ -1,5 +1,52 @@
-import Mathlib
-import GroundTheory.GlobalFields.IdeleGroups.IdeleNorms.InfiniteAdeleRingMapInfiniteAdeleRingMap
+module
+
+public import GroundTheory.GlobalFields.IdeleGroups.IdeleNorms.BaseChange
+public import GroundTheory.GlobalFields.IdeleGroups.IdeleNorms.InfiniteAdeleRingMapInfiniteAdeleRingMap
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GroundTheory.Global
 
@@ -22,7 +69,7 @@ theorem adeleRingHom_ext {R : Type*} [Semiring R] {f g : 𝔸[L] →+* R}
   induction t using TensorProduct.induction_on with
   | zero => simp
   | tmul l a => rw [adeleTensorEquiv_tmul, map_mul, map_mul, hL, hK]
-  | add s t hs ht => rw [map_add, map_add, map_add, hs, ht]
+  | add s t hs ht => rw [map_add (f := _), map_add (f := _), map_add (f := _), hs, ht]
 
 theorem adeleTensorEquiv_symm_algebraMap (l : L) :
     (adeleTensorEquiv K L).symm (algebraMap L 𝔸[L] l) = l ⊗ₜ 1 := by
@@ -101,19 +148,6 @@ theorem continuous_adeleRingEquiv (τ : L ≃+* L') : Continuous (adeleRingEquiv
           RingHom.id_apply] }
   exact IsModuleTopology.continuous_of_linearMap f
 
-def adeleHomeomorph (τ : L ≃+* L') : 𝔸[L] ≃ₜ 𝔸[L'] where
-  toEquiv := (adeleRingEquiv τ).toEquiv
-  continuous_toFun := continuous_adeleRingEquiv τ
-  continuous_invFun := by
-    change Continuous (adeleRingEquiv τ).symm
-    rw [← adeleRingEquiv_symm]
-    exact continuous_adeleRingEquiv τ.symm
-
-@[simp]
-theorem adeleHomeomorph_apply (τ : L ≃+* L') (x : 𝔸[L]) :
-    adeleHomeomorph τ x = adeleRingEquiv τ x :=
-  rfl
-
 end Transport
 
 section Relative
@@ -134,15 +168,10 @@ theorem adeleRingEquiv_adeleMap (τ : L ≃ₐ[K] L') (a : 𝔸[K]) :
         RingEquiv.coe_toRingHom, adeleMap_adeleMap, adeleRingEquiv_adeleMap_rat]
   exact congrArg (fun f : 𝔸[K] →+* 𝔸[L'] ↦ f a) h
 
-variable (K) in
 
+variable (K) in
 def adeleAlgEquiv (τ : L ≃ₐ[K] L') : 𝔸[L] ≃ₐ[𝔸[K]] 𝔸[L'] :=
   AlgEquiv.ofRingEquiv (f := adeleRingEquiv (τ : L ≃+* L')) fun a ↦ adeleRingEquiv_adeleMap τ a
-
-@[simp]
-theorem adeleAlgEquiv_apply (τ : L ≃ₐ[K] L') (x : 𝔸[L]) :
-    adeleAlgEquiv K τ x = adeleRingEquiv (τ : L ≃+* L') x :=
-  rfl
 
 theorem norm_adeleRingEquiv (τ : L ≃ₐ[K] L') (x : 𝔸[L]) :
     Algebra.norm 𝔸[K] (adeleRingEquiv (τ : L ≃+* L') x) = Algebra.norm 𝔸[K] x :=
@@ -235,20 +264,9 @@ variable {K L L' : Type*} [Field K] [NumberField K] [Field L] [NumberField L] [F
   [NumberField L'] [Algebra K L] [Algebra K L']
 
 @[simp]
-theorem ideleEquiv_ideleEmbedding (τ : L ≃ₐ[K] L') (x : IdeleGroup K) :
-    ideleEquiv (τ : L ≃+* L') (ideleEmbedding K L x) = ideleEmbedding K L' x :=
-  Units.ext (adeleRingEquiv_adeleMap τ (x : 𝔸[K]))
-
-@[simp]
 theorem ideleNorm_ideleEquiv (τ : L ≃ₐ[K] L') (x : IdeleGroup L) :
     ideleNorm K L' (ideleEquiv (τ : L ≃+* L') x) = ideleNorm K L x :=
   Units.ext (norm_adeleRingEquiv τ (x : 𝔸[L]))
-
-@[simp]
-theorem ideleClassEquiv_ideleClassMap (τ : L ≃ₐ[K] L') (c : IdeleClassGroup K) :
-    ideleClassEquiv (τ : L ≃+* L') (ideleClassMap K L c) = ideleClassMap K L' c := by
-  obtain ⟨x, rfl⟩ := IdeleClassGroup.mk_surjective K c
-  rw [ideleClassMap_mk, ideleClassEquiv_mk, ideleEquiv_ideleEmbedding, ideleClassMap_mk]
 
 @[simp]
 theorem ideleClassNorm_ideleClassEquiv (τ : L ≃ₐ[K] L') (c : IdeleClassGroup L) :

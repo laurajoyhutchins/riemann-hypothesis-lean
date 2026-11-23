@@ -1,8 +1,48 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.IntegralCompression.LAbove
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.IntegralCompression.ContinuousEntryCharacters.CoLaws
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.IntegralCompression.LAbove
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.IntegralCompression.ContinuousEntryCharacters.CoLaws
 import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.IntegralCompression.ContinuousEntryCharacters.LongWeylSwapsBlockDiagonal
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.IntegralCompression.ContinuousEntryCharacters.RepsRight
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.UnipotentBlockMatrices.ClosedKernelMinors.UnipBlocks
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.IntegralCompression.ContinuousEntryCharacters.RepsRight
+import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.UnipotentBlockMatrices.ClosedKernelMinors.BlkInvVal
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.UnipotentBlockMatrices.ClosedKernelMinors.UnipBlocks
+import GroundTheory.AutomorphicForms.RealIwasawaIntegration
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 open MeasureTheory NumberField Filter Topology Matrix
 open GroundTheory.Automorphic GroundTheory.Automorphic.Reduction GroundTheory.Automorphic.RightCosetSpace GroundTheory.Automorphic.AutomorphicForm
@@ -43,7 +83,7 @@ private theorem un_cont {K : Type} [Field K] [NumberField K] {ι : Type} [Fintyp
   exact continuous_archP.comp (continuous_subtype_val.comp ((C.Φ 2).symm.continuous.comp h))
 
 theorem UpperTheory.V.Z.InvariantSubmoduleMonicPolynomial.EA.lineInj :
-    ∀ (K : Type) [Field K] [NumberField K] [IsTotallyComplex K] (ι : Type) [Fintype ι] (C : Co K ι) (μ₂ : Measure (G1 K 2)) [μ₂.IsHaarMeasure] (τ₁ τ₂ : Submodule ℂ (L2 μ₂)), Pair μ₂ τ₁ τ₂ →
+    ∀ (K : Type) [Field K] [NumberField K] [_root_.NumberField.IsTotallyComplex K] (ι : Type) [Fintype ι] (C : Co K ι) (μ₂ : Measure (G1 K 2)) [μ₂.IsHaarMeasure] (τ₁ τ₂ : Submodule ℂ (L2 μ₂)), Pair μ₂ τ₁ τ₂ →
       ∀ (μ : Measure U4) (e : ι → U4 → ℂ) n q n' q' (x : ι → U4), Haar4 μ → ExtP μ e n q n' q' x →
       (∀ i, C.MinAt μ₂ τ₁ i (n i) (q i)) → (∀ i, C.MinAt μ₂ τ₂ i (n' i) (q' i)) → ∀ f, IsSec τ₁ τ₂ f → FixA (C.κ₄ μ) (C.e e) f →
         (∀ (h : FA K (2 + 2)) m₁ m₂, f (lv m₁ m₂ 0 * arc1 ((C.Φ (2 + 2)).symm x) * fin1 h) = 0) → f = 0 := by
@@ -56,7 +96,9 @@ theorem UpperTheory.V.Z.InvariantSubmoduleMonicPolynomial.EA.lineInj :
     intro k; simp only [Co.e, ContinuousMulEquiv.apply_symm_apply]
   have ha : ∀ a b : ι → U4, arc1 ((C.Φ (2 + 2)).symm (a * b)) =
       arc1 ((C.Φ (2 + 2)).symm a) * arc1 ((C.Φ (2 + 2)).symm b) := by
-    intro a b; simp [arc1, map_mul]
+    intro a b
+    set_option synthInstance.maxHeartbeats 200000 in
+      simp [arc1, map_mul]
   have h1 : (arc1 ((C.Φ 2).symm (1 : ι → U2)) : G1 K 2) = 1 := by simp [arc1, map_one]
   have hun : ∀ i (a b : U2), C.un i (a * b) = C.un i a * C.un i b := by
     intro i a b; simp [Co.un, arc1, Pi.mulSingle_mul, map_mul]
@@ -89,7 +131,7 @@ theorem UpperTheory.V.Z.InvariantSubmoduleMonicPolynomial.EA.lineInj :
     have hs : ∀ a b : G1 K 2, f (lv a b 0 * y) = ∑ j, φ j a * ψ j b := fun a b =>
       p₃ a b _ (by rw [Subgroup.coe_mul, lv_zero])
     simp only [hs, Finset.mul_sum]
-    rw [integral_finset_sum]
+    rw [integral_finsetSum]
     · refine Finset.sum_eq_zero fun j _ => ?_
       obtain ⟨v, hv, hr⟩ := (p₁ j).2
       have h0 := (ptPi K ι C μ₂ v (φ j) (p₁ j).1 hr).1 i n₀ q₀ ((hmin i).2 n₀ q₀ hA v hv) M
@@ -107,7 +149,7 @@ theorem UpperTheory.V.Z.InvariantSubmoduleMonicPolynomial.EA.lineInj :
     have hs : ∀ a b : G1 K 2, f (lv a b 0 * y) = ∑ j, φ j a * ψ j b := fun a b =>
       p₃ a b _ (by rw [Subgroup.coe_mul, lv_zero])
     simp only [hs, Finset.mul_sum]
-    rw [integral_finset_sum]
+    rw [integral_finsetSum]
     · refine Finset.sum_eq_zero fun j _ => ?_
       obtain ⟨v, hv, hr⟩ := (p₂ j).2
       have h0 := (ptPi K ι C μ₂ v (ψ j) (p₂ j).1 hr).1 i n₀ q₀ ((hmin' i).2 n₀ q₀ hA v hv) M

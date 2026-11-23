@@ -1,4 +1,47 @@
-import Formalism.LocalToGlobal.NumberFieldFamilies.NPartCBase
+module
+
+public import Formalism.LocalToGlobal.NumberFieldFamilies.NPartCBase
+public import Formalism.LocalRingCardinality.SpanPowerMembership.ExampleLayerExistsGenerators
+public import Formalism.LocalToGlobal.GaloisLevelStructure.DefsAut
+public import Formalism.LocalToGlobal.NumberFieldFamilies.NPartCNd
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -31,8 +74,8 @@ def HeckeLift0 (M : MtFam0 H what₂) (Qw : what₂.places.Pl → Finset (Height
 
 variable (M : MtFam0 H what₂) (Qw : what₂.places.Pl → Finset (HeightOneSpectrum (𝓞 H.E))) (hR : HeckeLift0 M Qw)
 
-open Classical in
 
+open Classical in
 def hLC (j : ℕ) (w : what₂.places.Pl) (v : HeightOneSpectrum (𝓞 H.E)) (k : ℕ) :
     Module.End what₂.LL (what₂.MtL (what₂.muTw w) j) :=
   if h : (1 ≤ j ∧ j ≤ R.m) ∧ GenAt0 H (what₂.places.resChar w) (Qw w) v k then (hR j w v k h.1.1 h.1.2 h.2).choose else 0
@@ -45,7 +88,7 @@ theorem hLC_spec (j : ℕ) (w : what₂.places.Pl) (v : HeightOneSpectrum (𝓞 
       NG.tN (M (what₂.muTw w) j h1 h2).J s ϖ k ((M (what₂.muTw w) j h1 h2).real (what₂.jMt (what₂.muTw w) j x)) := by
   have h : (1 ≤ j ∧ j ≤ R.m) ∧ GenAt0 H (what₂.places.resChar w) (Qw w) v k := ⟨⟨h1, h2⟩, hg⟩
   unfold hLC
-  rw [dif_pos h]
+  rw [dite_eq_left h]
   exact (hR j w v k h.1.1 h.1.2 h.2).choose_spec s ϖ hc hu x
 
 variable (X : CoefIn what₂)
@@ -75,9 +118,5 @@ def baseC (hS : SplitK M Qw hR X) : LocBase0 H what₂ where
   hK := hKC M Qw hR X
   hK_def := hKC_def M Qw hR X
   split := hS
-
-theorem baseC_Oc (hS : SplitK M Qw hR X) : (baseC M Qw hR X hS).Oc = OcC X := rfl
-theorem baseC_hL (hS : SplitK M Qw hR X) : (baseC M Qw hR X hS).hL = hLC M Qw hR := rfl
-theorem baseC_iV (hS : SplitK M Qw hR X) : (baseC M Qw hR X hS).iV = iVC X := rfl
 
 end Formalism.L2.Fam.NPC.BaseC

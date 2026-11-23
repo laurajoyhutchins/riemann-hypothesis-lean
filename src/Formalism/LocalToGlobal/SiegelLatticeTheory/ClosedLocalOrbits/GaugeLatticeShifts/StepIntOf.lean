@@ -1,6 +1,48 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.InfCut
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.TermOp
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Algebra.Group.Units
+import Mathlib.Topology.Sheaves.Init
 import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.WuDecayPf
+import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.WuDecay
+
+@[expose] public section
 
 noncomputable section
 
@@ -16,56 +58,12 @@ section Defs
 
 variable {D : D7} (X : HidaSetting D)
 
-def CoefDec (a : ℝ) : Prop :=
-  ∃ K : ℝ, 0 ≤ K ∧ ∀ v (g : Formalism.REAL.UJ (X.B.I.ε v)), ‖coefV X v g‖ ≤ K * opn (uMat g) ^ (-a)
-
-def MDec (a : ℝ) : Prop :=
-  ∃ K : ℝ≥0∞, K ≠ ⊤ ∧ ∀ g : X.B.I.Ginf, ‖mX X g‖ₑ ≤ K * ENNReal.ofReal (normInf X g ^ (-a))
-
-def GrowthG (A : ℝ) : Prop :=
-  ∫⁻ x, ENNReal.ofReal (normInf X x ^ (-A)) ∂(Formalism.L2.SG.ProjRows.muInf X.B.I) < ⊤
-
-def GrowthS (u : D.what₂.Word) (B : ℝ) : Prop :=
-  ∫⁻ s, ENNReal.ofReal (normInf X s ^ (-B)) ∂(muS X u) < ⊤
-
-def PropP (u u' : D.what₂.Word) (γ : X.B.I.Ginf) (M : ℝ) : Prop :=
-  ∃ CP : ℝ, 1 ≤ CP ∧ ∀ s ∈ X.SinfU u, ∀ s' ∈ X.SinfU u',
-    max (normInf X s) (normInf X s') ≤ CP * normInf X (s * γ * s'⁻¹) ^ M
-
-def LaFin (u u' : D.what₂.Word) (γ : X.B.I.Ginf) (b : ℝ) : Prop :=
-  ∫⁻ s, ∫⁻ s', ENNReal.ofReal (normInf X (s * γ * s'⁻¹) ^ (-b)) ∂(muS X u') ∂(muS X u) < ⊤
-
-def NormInv : Prop := ∀ g : X.B.I.Ginf, normInf X g⁻¹ = normInf X g
-
-def RealInputs : Prop :=
-  ∃ a b M : ℝ, 0 ≤ b ∧ b ≤ a ∧ 0 < M ∧ CoefDec X a ∧ GrowthG X (a - b) ∧
-    (∀ u, GrowthS X u (b / (2 * M))) ∧
-    ∀ (u u' : D.what₂.Word) (sc : ℝ), ∀ c ∈ Formalism.L2.SG.RealObj.Good X u u', ∀ γ,
-      Formalism.L2.SG.RealObj.HasDiag X u u' sc c γ → PropP X u u' γ M
-
 end Defs
 
 def StIntOfLint : Prop :=
   ∀ (D : D7) (X : HidaSetting D) (u u' : D.what₂.Word) (γ : X.B.I.Ginf),
     ∫⁻ x, ‖X.Wu u x‖ₑ * ‖X.Wu u' (γ⁻¹ * x)‖ₑ ∂(Formalism.L2.SG.ProjRows.muInf X.B.I) < ⊤ →
       Formalism.L2.SG.TermOp.OOInt (Formalism.L2.SG.ProjRows.muInf X.B.I) Set.univ (X.Wu u) (X.Wu u') γ
-
-def StMDec : Prop := ∀ (D : D7) (X : HidaSetting D) (a : ℝ), CoefDec X a → MDec X a
-
-def StLa : Prop :=
-  ∀ (D : D7) (X : HidaSetting D) (u u' : D.what₂.Word) (γ : X.B.I.Ginf) (M b : ℝ), 0 < M → 0 ≤ b →
-    (∀ g, 1 ≤ normInf X g) → PropP X u u' γ M → GrowthS X u (b / (2 * M)) → GrowthS X u' (b / (2 * M)) →
-      LaFin X u u' γ b
-
-def StTheta : Prop :=
-  ∀ (D : D7) (X : HidaSetting D) (u u' : D.what₂.Word) (γ : X.B.I.Ginf) (a b : ℝ),
-    (∀ g, 1 ≤ normInf X g) → NormInv X → 0 ≤ b → b ≤ a → WuDom X u → WuDom X u' → MDec X a →
-      GrowthG X (a - b) → LaFin X u u' γ b →
-        ∫⁻ x, ‖X.Wu u x‖ₑ * ‖X.Wu u' (γ⁻¹ * x)‖ₑ ∂(Formalism.L2.SG.ProjRows.muInf X.B.I) < ⊤
-
-def StNormOne : Prop := ∀ (D : D7) (X : HidaSetting D), 0 < X.B.I.n → ∀ g, 1 ≤ normInf X g
-
-def StNormInv : Prop := ∀ (D : D7) (X : HidaSetting D), NormInv X
 
 end Formalism.L2.SG.RealObj.StepIntOf
 

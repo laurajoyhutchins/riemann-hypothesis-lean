@@ -1,4 +1,72 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.BigOperators.Group.Finset.Defs
+public import Mathlib.Algebra.Group.Hom.End
+public import Mathlib.Data.Finset.Card
+public import Mathlib.Data.Nat.Choose.Basic
+public import Mathlib.Data.Nat.Prime.Defs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+public import Mathlib.Data.Nat.Choose.Dvd
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.Eigenspace.Zero
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.BigOperators.Group.Finset.Basic
+public import Mathlib.Algebra.BigOperators.Ring.Finset
+public import Mathlib.Algebra.Group.Action.Defs
+public import Mathlib.Algebra.Group.Subgroup.Defs
+public import Mathlib.Algebra.GroupWithZero.Action.Defs
+public import Mathlib.Algebra.Module.Defs
+public import Mathlib.Algebra.Module.LinearMap.Defs
+public import Mathlib.Algebra.Module.LinearMap.End
+public import Mathlib.Algebra.Module.ZMod
+public import Mathlib.Algebra.Polynomial.AlgebraMap
+public import Mathlib.Algebra.Ring.GeomSum
+public import Mathlib.FieldTheory.Finiteness
+public import Mathlib.LinearAlgebra.Charpoly.Basic
+
+@[expose] public section
 
 namespace GlobalTheory
 namespace FiniteOrderUnipotent
@@ -125,7 +193,7 @@ theorem prime_order {g : ℕ} (hg : g.Prime) (hprim : ∀ x : A, ∃ j : ℕ, g 
     { toFun := fun y => (N ^ k) (d y)
       map_zero' := hk _ (hd 0)
       map_add' := fun a b => by
-        rw [← map_add, ← sub_eq_zero, ← map_sub]
+        rw [← map_add (f := _), ← sub_eq_zero, ← map_sub]
         apply hk
         rw [smul_sub, smul_add, hd, hd, hd, sub_self] }
   have hMy : ∀ y, M y = (N ^ k) (d y) := fun y => rfl
@@ -153,7 +221,7 @@ theorem prime_order {g : ℕ} (hg : g.Prime) (hprim : ∀ x : A, ∃ j : ℕ, g 
   rw [hpow, end_mul_apply, end_mul_apply, end_mul_apply, ← hMy, ← hMN, sq, end_mul_apply,
     ← end_mul_apply N V, hNV.eq, end_mul_apply] at h0
   have hx : 1 • (N y) = N ((-(V + N ^ e * M)) (N y)) := by
-    rw [one_smul, end_neg_apply, map_neg, end_add_apply, end_mul_apply, map_add, eq_neg_iff_add_eq_zero]
+    rw [one_smul, end_neg_apply, map_neg, end_add_apply, end_mul_apply, map_add (f := _), eq_neg_iff_add_eq_zero]
     rw [← end_mul_apply N (N ^ e), ← pow_succ', pow_succ, end_mul_apply]
     exact h0
   exact inj_core hprim N _ hcZ k 1 (Nat.coprime_one_left _) hk _ hx
@@ -221,8 +289,8 @@ theorem kill_geom {g r : ℕ} (C : AddMonoid.End A) (s : ℕ)
 
 end FiniteOrderUnipotent
 
-open FiniteOrderUnipotent in
 
+open FiniteOrderUnipotent in
 theorem finite_order_unipotent_eq_id : ∀ (A : Type) [AddCommGroup A] (β : A →+ A) (n g r m : ℕ),
     0 < n → (∀ x : A, β^[n] x = x) → g.Prime → r + 2 ≤ g → (∀ x : A, ∃ y : A, g • y = x) →
     (∀ x : A, ∃ j : ℕ, g ^ j • x = 0) →

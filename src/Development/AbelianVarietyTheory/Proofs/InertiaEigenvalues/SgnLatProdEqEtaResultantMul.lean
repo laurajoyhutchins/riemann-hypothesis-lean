@@ -1,10 +1,62 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.UnitLemmaGroup
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.LinearDescent
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.LinearDescent
+public import Mathlib.Algebra.Module.Lattice.Full
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CharpolyDvdPowOfAevalEqZero
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CharpolyLeftMulBasis
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.SgnLatSpanBasis
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Charpoly.ToMatrix
+public import Mathlib.LinearAlgebra.Dimension.OrzechProperty
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.DltEqZero
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CharpolyLeftMulBasis
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.SgnLatSpanBasis
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CharpolyDvdPowOfAevalEqZero
+
+@[expose] public section
 
 open GlobalTheory.UnitLemma GlobalTheory.UnitLemma.Desc Polynomial Filter Topology
 
@@ -35,15 +87,14 @@ theorem eta_of_sq_one (K : UQ) {ε : K.E} (h : ε * ε = 1) (a : K.E) : K.eta (�
 theorem exists_basis_lat (K : UQ) {V : Type} [AddCommGroup V] [Module K.E V] [Module K.O V]
     [IsScalarTower K.O K.E V] [Module.Finite K.E V] (L : Submodule K.O V) (hfg : L.FG) (hsp : Submodule.span K.E (L : Set V) = ⊤) :
     ∃ e : Module.Basis (Fin (Module.finrank K.E V)) K.E V, Submodule.span K.O (Set.range e) = L := by
-  haveI : Submodule.IsLattice K.E L := ⟨hfg, hsp⟩
-  let b := Module.Free.chooseBasis K.O L
-  let e' := b.extendOfIsLattice K.E
-  have hc : Fintype.card (Module.Free.ChooseBasisIndex K.O L) = Module.finrank K.E V :=
-    (Module.finrank_eq_card_basis e').symm
-  refine ⟨e'.reindex (Fintype.equivFinOfCardEq hc), ?_⟩
-  rw [Module.Basis.range_reindex]
-  have : Set.range e' = L.subtype '' Set.range b := by
-    ext x; simp [e', Set.range_comp]
+  have : Submodule.IsLattice K.E L := Submodule.IsLattice.of_fg K.E hfg
+  have : Submodule.IsFullLattice K.E L := ⟨hsp⟩
+  have : Module.Finite K.O L := Submodule.IsLattice.finite K.E L
+  have : Module.Free K.O L := Submodule.IsLattice.free K.E L
+  let b := Module.finBasisOfFinrankEq K.O L (Submodule.IsFullLattice.finrank_eq K.E L)
+  refine ⟨b.extendOfIsFullLattice K.E, ?_⟩
+  have : Set.range (b.extendOfIsFullLattice K.E) = L.subtype '' Set.range b := by
+    ext x; simp
   rw [this, Submodule.span_image, b.span_eq, Submodule.map_top, Submodule.range_subtype]
 
 theorem exists_smul_mem (K : UQ) {V : Type} [AddCommGroup V] [Module K.E V] [Module K.O V]
@@ -77,6 +128,7 @@ theorem det_trace_ne_zero {K : UQ} (B : InvAlg K) (hsep : B.P.Separable)
     intro l
     have := congrFun hvm l
     simp only [Matrix.vecMul, dotProduct, Matrix.of_apply, Pi.zero_apply] at this
+
     rw [← this, hq, map_sum, Finset.sum_mul, map_sum]
     refine Finset.sum_congr rfl fun k _ => ?_
     have ha : aeval B.g (C (c k) * X ^ (k : ℕ)) = c k • B.g ^ (k : ℕ) := by
@@ -85,6 +137,7 @@ theorem det_trace_ne_zero {K : UQ} (B : InvAlg K) (hsep : B.P.Separable)
   have hz' : aeval B.g q = 0 := by
     apply GlobalTheory.UnitLemma.Centraliser.eq_zero_of_trace_mul B hsep
     intro y
+
     rw [← e.sum_repr y, Finset.mul_sum, map_sum]
     refine Finset.sum_eq_zero fun l _ => ?_
     rw [mul_smul_comm, map_smul, hz l, smul_zero]
@@ -98,7 +151,7 @@ theorem det_trace_ne_zero {K : UQ} (B : InvAlg K) (hsep : B.P.Separable)
   apply hc
   funext k
   have := congrArg (fun p : K.E[X] => p.coeff k) hq0
-  simp only [hq, finset_sum_coeff, coeff_C_mul_X_pow, coeff_zero] at this
+  simp only [hq, Polynomial.finsetSum_coeff, coeff_C_mul_X_pow, coeff_zero] at this
   rw [Finset.sum_eq_single k (fun b _ hb => if_neg (fun h => hb (Fin.ext h.symm))) (by simp)] at this
   simpa using this
 
@@ -107,6 +160,7 @@ theorem trace_mat_toMatrix {E A : Type} [Field E] [CommRing A] [Algebra E A] {ι
     (Matrix.of fun k l => Algebra.trace E A (x k * f l)) =
       (Matrix.of fun k i => Algebra.trace E A (x k * b i)) * b.toMatrix f := by
   ext k l
+
   rw [Matrix.of_apply, Matrix.mul_apply, ← b.sum_toMatrix_smul_self f l, Finset.mul_sum, map_sum]
   refine Finset.sum_congr rfl fun i _ => ?_
   rw [mul_smul_comm, map_smul, smul_eq_mul, Matrix.of_apply, mul_comm]

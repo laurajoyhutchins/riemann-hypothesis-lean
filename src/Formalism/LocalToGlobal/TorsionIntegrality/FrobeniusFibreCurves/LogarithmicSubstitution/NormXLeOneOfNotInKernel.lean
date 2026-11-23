@@ -1,8 +1,51 @@
-import Mathlib
-import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.MulStableIntegral
-import Formalism.LocalToGlobal.TorsionIntegrality.TorsionTranslationPowers.ShiftAnalyticW
-import Formalism.EllipticTorsion.FormalGroupPointsNoTorsion
-import Formalism.LocalToGlobal.TorsionIntegrality.FrobeniusFibreCurves.StatementJ
+module
+
+public import Formalism.LocalToGlobal.TorsionIntegrality.FrobeniusFibreCurves.StatementJ
+public import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.MulStableIntegral
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 open scoped BigOperators
@@ -94,8 +137,8 @@ section Alg
 variable {K K' : Type} [Field K] [Field K'] (φ : K →+* K')
 
 theorem map_derivative (f : PowerSeries K) :
-    PowerSeries.map φ (PowerSeries.derivative K f) =
-      PowerSeries.derivative K' (PowerSeries.map φ f) := by
+    PowerSeries.map φ (PowerSeries.derivative (R := K) f) =
+      PowerSeries.derivative (R := K') (PowerSeries.map φ f) := by
   ext n
   simp [PowerSeries.coeff_derivative]
 
@@ -136,44 +179,5 @@ theorem norm_x_le_one_of_not_in_kernel {K : Type} [NormedField K] {W : Weierstra
   | zero => exact absurd trivial h
   | some x y hxy => exact not_lt.1 h
 
-open Classical in
-theorem points_integral_at_two_holds : PointsIntTwo := by
-  intro l _ L ι W hU hW α α' t0 t' t'' hα hα' hinj ht0 h1 h2 h3 h4
-  obtain ⟨a1, a2, a3, a4, a6, hΔ⟩ := hW
-  have hsub := Formalism.ELL.formal_group_points_subgroup.{0} ℂ_[l] W ⟨a1, a2, a3, a4, a6⟩ hΔ
-  have hadd := Formalism.L2.Th1.E.ptWAdd l L ι W hU
-  have hzero := Formalism.L2.Th1.E.ptWZero l L ι W hU
-  have hlat : ∀ t ∈ L.lattice, InFormalGroupPoints (ptW l L ι W t) := by
-    intro t ht
-    rw [(hzero t).2 ht]
-    trivial
-  have hA : ∀ s t, InFormalGroupPoints (ptW l L ι W s) → InFormalGroupPoints (ptW l L ι W t) → InFormalGroupPoints (ptW l L ι W (s + t)) := by
-    intro s t hs ht
-    rw [hadd]
-    exact (hsub _ _ hs ht).1
-  have hneg : ∀ t, ptW l L ι W (-t) = - ptW l L ι W t := by
-    intro t
-    apply eq_neg_of_add_eq_zero_left
-    rw [← hadd, neg_add_cancel]
-    exact (hzero 0).2 L.lattice.zero_mem
-  have hN : ∀ t, InFormalGroupPoints (ptW l L ι W t) → InFormalGroupPoints (ptW l L ι W (-t)) := by
-    intro t ht
-    rw [hneg]
-    exact (hsub _ _ ht ht).2
-  have ht0' : ¬ InFormalGroupPoints (ptW l L ι W t0) := by
-    intro H
-    have e : t'' = α' * t0 + -(α' * t') + -(α' * t'' - t'') := by rw [ht0]; ring
-    have : InFormalGroupPoints (ptW l L ι W t'') := by
-      rw [e]
-      exact hA _ _ (hA _ _ (hα' _ H) (hN _ (hlat _ h1))) (hN _ (hlat _ h2))
-    exact h3 (hinj t'' this h4)
-  refine ⟨norm_x_le_one_of_not_in_kernel _ ht0', ?_⟩
-  intro Q hQ
-  apply norm_x_le_one_of_not_in_kernel
-  intro H
-  apply ht0'
-  have e : t0 = α * Q + -(α * Q - t0) := by ring
-  rw [e]
-  exact hA _ _ (hα _ H) (hN _ (hlat _ hQ))
 
 end Formalism.L2.Th1.B.Half

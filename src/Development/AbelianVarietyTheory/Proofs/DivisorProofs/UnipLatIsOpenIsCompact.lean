@@ -1,7 +1,59 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.LineOppositeParabolicUnitaryLeviSectionEq
-import Formalism.SatakeDualWeyl.StatementE
+module
+
+public import Formalism.SatakeDualWeyl.StatementF
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import Mathlib.Topology.Algebra.Valued.LocallyCompact
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.Divisors.EqOfHasValueAtInfinite
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MemGUIffAdjJ
+public import Mathlib.RingTheory.Valuation.Discrete.RankOne
+
+@[expose] public section
+
 open GlobalTheory.LGrp GlobalTheory.BorelUMod Formalism.UG
 
 namespace GlobalTheory.BorelUMod
@@ -45,20 +97,5 @@ theorem isCompact_vball [CompleteSpace L] {ϖ : L} {σ : L →+* L} {q : ℕ} (h
         refine ne_of_eq_of_ne hcard (pow_ne_zero _ (by omega)))⟩
   rw [ball_eq_image hϖ]
   exact (isCompact_iff_compactSpace.2 hp).image (continuous_const.mul continuous_id)
-
-theorem continuous_adjJ {σ : L →+* L} (hσ : Continuous σ) (n : ℕ) :
-    Continuous (adjJ σ : Matrix (Fin n) (Fin n) L → Matrix (Fin n) (Fin n) L) :=
-  continuous_matrix fun i j => hσ.comp (continuous_id.matrix_elem j.rev i.rev)
-
-theorem isInducing_GU_val {σ : L →+* L} (hσ : Continuous σ) (n : ℕ) :
-    Topology.IsInducing fun g : GU σ n => (g.1.val : Matrix (Fin n) (Fin n) L) := by
-  have h1 : Topology.IsInducing fun g : GU σ n => Units.embedProduct _ g.1 :=
-    Units.isEmbedding_embedProduct.isInducing.comp Topology.IsInducing.subtypeVal
-  refine Topology.IsInducing.of_comp (g := fun A : Matrix (Fin n) (Fin n) L => (A, MulOpposite.op (adjJ σ A)))
-    (Units.continuous_val.comp continuous_subtype_val)
-    (continuous_id.prodMk (MulOpposite.continuous_op.comp (continuous_adjJ hσ n))) ?_
-  convert h1 using 1
-  funext g
-  simp only [Function.comp_apply, Units.embedProduct_apply, (mem_GU_iff_adjJ σ _).1 g.2]
 
 end GlobalTheory.BorelUMod

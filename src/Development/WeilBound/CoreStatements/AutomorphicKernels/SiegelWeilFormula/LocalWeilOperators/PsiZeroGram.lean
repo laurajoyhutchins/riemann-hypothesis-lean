@@ -1,6 +1,50 @@
-import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.LocalWeilOperators.IsLocOpOfOk
-import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.FockSpaces.ContinuousLoc
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SchwartzFourierTransformMatrixStatement
+module
+
+public import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.AuxiliaryPrimeFunction
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SchwartzFourierTransformMatrixStatement
+public import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.CayleyTransform.CompFinFinOne
+public import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.FockSpaces.ContinuousLoc
+import Development.WeilBound.ThetaLifts.TowerModels.LeviAd
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -56,12 +100,6 @@ theorem insL_supp (v : Fin d.m → Fin d.n → ℂ) : Supp w (insL R w v) := by
   · ext i j
     simp only [insL, Matrix.smul_apply, Matrix.map_apply, insW_fin, Matrix.zero_apply]
 
-theorem loc_insL (v : Fin d.m → Fin d.n → ℂ) : R.loc w (insL R w v) = v := by
-  unfold RD.loc
-  rw [cw_insL, ← Matrix.mul_assoc, Units.inv_mul, Matrix.one_mul]
-  ext i j
-  simp
-
 theorem insL_add (v v' : Fin d.m → Fin d.n → ℂ) : insL R w (v + v') = insL R w v + insL R w v' := by
   have e : (R.fr w).1 * (Matrix.of (v + v')).map star =
       (R.fr w).1 * (Matrix.of v).map star + (R.fr w).1 * (Matrix.of v').map star := by
@@ -112,7 +150,7 @@ theorem psi_add_right (ε : ℤˣ) (X Z Z' : Mx F E d.m d.n) :
   have e : d.gram X (Z + Z') = d.gram X Z + d.gram X Z' := by
     unfold SD.gram
     rw [Matrix.map_add _ (map_add _), Matrix.mul_add]
-  rw [e, SD.tt, SD.tt, SD.tt, Matrix.trace_add, map_add, mul_add, AddChar.map_add_eq_mul]
+  rw [e, SD.tt, SD.tt, SD.tt, Matrix.trace_add, map_add (f := _), mul_add, AddChar.map_add_eq_mul]
 
 theorem psi_add_left (ε : ℤˣ) (X X' Z : Mx F E d.m d.n) :
     d.B.ψ (((ε : ℤ) : AF F) * d.tt (d.gram (X + X') Z)) =
@@ -120,7 +158,7 @@ theorem psi_add_left (ε : ℤˣ) (X X' Z : Mx F E d.m d.n) :
   have e : d.gram (X + X') Z = d.gram X Z + d.gram X' Z := by
     unfold SD.gram
     rw [Matrix.transpose_add, Matrix.add_mul, Matrix.add_mul]
-  rw [e, SD.tt, SD.tt, SD.tt, Matrix.trace_add, map_add, mul_add, AddChar.map_add_eq_mul]
+  rw [e, SD.tt, SD.tt, SD.tt, Matrix.trace_add, map_add (f := _), mul_add, AddChar.map_add_eq_mul]
 
 theorem cw_gram (w : InfinitePlace F) (X Z : Mx F E d.m d.n) :
     d.cw w (d.gram X Z) = (d.cw w X)ᵀ * d.A.J.map (d.B.emb w).1 * (d.cw w Z).map star := by
@@ -182,7 +220,8 @@ theorem psi_at_w (d : SD σ) (w : InfinitePlace F) (ε : ℤˣ) (M : Mx F E d.n 
     rw [map_zsmul, zsmul_eq_mul]
     rfl
   have ptr : ∀ u, piInf (d.B.emb u) M.trace = (d.cw u M).trace := fun u => by
-    simp [Matrix.trace, SD.cw, map_sum]
+    set_option synthInstance.maxHeartbeats 100000 in
+      simp [Matrix.trace, SD.cw, map_sum]
   rw [hz, Place.psi_trace_at d.std d.cm d.B.emb w _ ?_ ?_, map_zsmul, ptr, zsmul_eq_mul]
   · rw [smul_comm, ← Matrix.trace_smul, hM2, Matrix.trace_zero, smul_zero]
   · intro u hu

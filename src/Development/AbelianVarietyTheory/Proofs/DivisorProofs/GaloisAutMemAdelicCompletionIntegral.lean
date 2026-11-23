@@ -1,7 +1,59 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Statements.PlaceShiftStatements.DefiniteBound
-import Development.AbelianVarietyTheory.Definitions.ExistenceOfLattices.SmulBasisMemHatIff
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ZeroMemLatOf
+module
+
+public import Development.AbelianVarietyTheory.Statements.PlaceShiftStatements.DefiniteBound
+public import Mathlib.RingTheory.SimpleRing.Principal
+public import Development.AbelianVarietyTheory.Definitions.ExistenceOfLattices.SmulBasisMemHatIff
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Matrix GlobalTheory.AdLat GlobalTheory.UCls ReciprocityTheory.ChartRestriction.G.FD
 open scoped TensorProduct nonZeroDivisors
@@ -19,15 +71,14 @@ theorem exists_sub_notMem {A B : Type} [CommRing A] [CommRing B] [IsDomain B] [A
   let φ : B ⊗[A] B →ₐ[A] B := Algebra.TensorProduct.productMap (AlgHom.id A B) σ
   have h1 : ∀ z, Algebra.TensorProduct.lmul' A (S := B) z - φ z ∈ P := by
     intro z
-    induction z using TensorProduct.induction_on with
-    | zero => simp
+    induction z using TensorProduct.inductionOn with
     | tmul x y =>
       have := P.mul_mem_left x (hcon y)
       simpa [φ, mul_sub] using this
     | add x y hx hy =>
       have := P.add_mem hx hy
       convert this using 1
-      simp only [map_add]; ring
+      simp only [map_add (f := _)]; ring
   have h2 : φ (Algebra.FormallyUnramified.elem A B) = 0 := by
     have h := congrArg φ (Algebra.FormallyUnramified.one_tmul_mul_elem (R := A) s)
     simp only [map_mul, φ, Algebra.TensorProduct.productMap_apply_tmul, AlgHom.id_apply, map_one,
@@ -48,7 +99,7 @@ theorem herm_add_left (G : Matrix (Fin r) (Fin r) E) (x x' y : Fin r → E) :
 
 theorem herm_add_right (G : Matrix (Fin r) (Fin r) E) (x y y' : Fin r → E) :
     herm G x (y + y') = herm G x y + herm G x y' := by
-  simp only [herm, cc, Pi.add_apply, map_add, mul_add, Finset.sum_add_distrib]
+  simp only [herm, cc, Pi.add_apply, map_add (f := _), mul_add, Finset.sum_add_distrib]
 
 theorem herm_smul_left (G : Matrix (Fin r) (Fin r) E) (t : E) (x y : Fin r → E) :
     herm G (t • x) y = t * herm G x y := by
@@ -57,6 +108,7 @@ theorem herm_smul_left (G : Matrix (Fin r) (Fin r) E) (t : E) (x y : Fin r → E
 theorem herm_symm (G : Matrix (Fin r) (Fin r) E) (hG : ∀ a b, cc (G a b) = G b a) (x y : Fin r → E) :
     IsCMField.complexConj E (herm G x y) = herm G y x := by
   simp only [cc] at hG
+
   simp only [herm, cc, map_sum, map_mul, IsCMField.complexConj_apply_apply, hG]
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun a _ => Finset.sum_congr rfl fun b _ => by ring
@@ -87,7 +139,7 @@ theorem exists_herm_notMem (hr : 1 ≤ r) {G : Matrix (Fin r) (Fin r) E} {Λ : S
       subst hp
       simpa using isIntegral_zero)
     have h2 : IsIntegral ℤ (algebraMap ℚ E (2 : ℚ)⁻¹) := by simpa using this
-    rw [isIntegral_algebraMap_iff (algebraMap ℚ E).injective] at h2
+    rw [isIntegral_algebraMap_iff ] at h2
     obtain ⟨n, hn⟩ := IsIntegrallyClosed.isIntegral_iff.1 h2
     have h3 : (2 * n : ℤ) = 1 := by
       have : ((2 * n : ℤ) : ℚ) = (1 : ℤ) := by
@@ -132,7 +184,7 @@ theorem span_norm_eq_top (hE : Unr E) (hr : 1 ≤ r) {G : Matrix (Fin r) (Fin r)
     intro x hx
     have hfix := (IsCMField.complexConj_eq_self_iff E _).1 (herm_symm G h.1 x x)
     have hi : IsIntegral ℤ (⟨herm G x x, hfix⟩ : maximalRealSubfield E) :=
-      (isIntegral_algebraMap_iff (algebraMap (maximalRealSubfield E) E).injective).1 (hint x hx x hx)
+      (isIntegral_algebraMap_iff ).1 (hint x hx x hx)
     have h1 : (⟨_, hi⟩ : 𝓞 (maximalRealSubfield E)) ∈ m := hIm (Ideal.subset_span ⟨x, hx, rfl⟩)
     rw [← hPm] at h1
     exact h1
@@ -167,7 +219,7 @@ theorem hermA_add_left (c : E ≃ₐ[F] E) (G : Matrix (Fin n) (Fin n) E) (x x' 
 
 theorem hermA_add_right (c : E ≃ₐ[F] E) (G : Matrix (Fin n) (Fin n) E) (x y y' : Fin n → RA F E) :
     hermA c G x (y + y') = hermA c G x y + hermA c G x y' := by
-  simp only [hermA, Pi.add_apply, map_add, mul_add, Finset.sum_add_distrib]
+  simp only [hermA, Pi.add_apply, map_add (f := _), mul_add, Finset.sum_add_distrib]
 
 theorem hermA_tmul (c : E ≃ₐ[F] E) (G : Matrix (Fin n) (Fin n) E) (s t : FiniteAdeleRing (𝓞 F) F)
     (x y : Fin n → E) : hermA c G (fun i => s ⊗ₜ x i) (fun i => t ⊗ₜ y i)
@@ -344,6 +396,7 @@ theorem exists_idem_adele {T : Type} [Fintype T] [DecidableEq T] (N : T → 𝓞
     · rfl
     · exact map_zero _
   · have hsum' := congrArg incl hsum
+
     rw [map_mul, map_sum, map_one] at hsum'
     simp only [map_mul, incl_algebraMap] at hsum'
     exact hsum'

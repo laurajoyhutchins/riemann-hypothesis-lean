@@ -1,11 +1,44 @@
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsProjOverWeierstrass
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.MumfordConstruction
-import Development.AbelianVarietyTheory.Definitions.Degenerations.AdmissibleBaseOfCompleteDvr
-import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.PullQkSurjective
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsCdvrExtensionQkPointsRational
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.PsiGenOnInteriorOfPsiUnitOn
-import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.RelationsAreFunctions
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsToricRankOne
 import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExistsCompleteDvrFiniteSubalgebra
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj IsLocalRing NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Out ReciprocityTheory.ChartRestriction.G.Geo.Tor
 open scoped CategoryTheory.Obj
@@ -47,7 +80,7 @@ theorem exists_finite_trait_extension : ∀ (R W R₁ : Type) [CommRing R] [IsDo
     induction hx using Submodule.span_induction with
     | mem y hy => exact hmem _ (Finset.mem_image_of_mem _ hy) (hint y)
     | zero => simp
-    | add y z _ _ hy hz => rw [map_add]; exact W₁.add_mem hy hz
+    | add y z _ _ hy hz => rw [map_add (f := _)]; exact W₁.add_mem hy hz
     | smul a y _ hy =>
       rw [Algebra.smul_def, map_mul]
       refine W₁.mul_mem ?_ hy
@@ -64,14 +97,14 @@ theorem exists_finite_trait_extension : ∀ (R W R₁ : Type) [CommRing R] [IsDo
     have : f₀ a = f₀ b := congrArg Subtype.val h
     exact IsFractionRing.injective R₁ (FractionRing R₁) (e.injective this)
   have hφ₁l : IsLocalHom φ₁ := by
-    have h1 : (maximalIdeal W₁).comap iw = maximalIdeal W := ((local_hom_TFAE iw).out 0 4).mp hloc
-    have h2 : (maximalIdeal W).comap φ = maximalIdeal R := ((local_hom_TFAE φ).out 0 4).mp hφl
+    have h1 : (maximalIdeal W₁).comap iw = maximalIdeal W := ((local_hom_tfae iw).out 1 5).mp hloc
+    have h2 : (maximalIdeal W).comap φ = maximalIdeal R := ((local_hom_tfae φ).out 1 5).mp hφl
     have hP : ((maximalIdeal W₁).comap φ₁).comap ρ = maximalIdeal R := by
       rw [Ideal.comap_comap, hcomp, ← Ideal.comap_comap, h1, h2]
     have hmax : ((maximalIdeal W₁).comap φ₁).IsMaximal :=
       Ideal.isMaximal_of_isIntegral_of_isMaximal_comap' ρ (RingHom.Finite.to_isIntegral hρf) _
         (by rw [hP]; infer_instance)
-    exact ((local_hom_TFAE φ₁).out 0 4).mpr (IsLocalRing.eq_maximalIdeal hmax)
+    exact ((local_hom_tfae φ₁).out 1 5).mpr (IsLocalRing.eq_maximalIdeal hmax)
   haveI : Algebra.IsAlgebraic W₁ Ω := Algebra.IsAlgebraic.extendScalars hiwinj
   haveI : Module.IsTorsionFree W₁ Ω :=
     Module.isTorsionFree_iff_algebraMap_injective.mpr Subtype.val_injective
@@ -79,7 +112,11 @@ theorem exists_finite_trait_extension : ∀ (R W R₁ : Type) [CommRing R] [IsDo
     Module.isTorsionFree_iff_algebraMap_injective.mpr (by
       rw [IsScalarTower.algebraMap_eq W₁ (FractionRing W₁) (AlgebraicClosure (FractionRing W₁))]
       exact (algebraMap (FractionRing W₁) _).injective.comp (IsFractionRing.injective W₁ (FractionRing W₁)))
-  let σ' : Ω →ₐ[W₁] AlgebraicClosure (FractionRing W₁) := IsAlgClosed.lift
+  let σ' : Ω →ₐ[W₁] AlgebraicClosure (FractionRing W₁) := (by
+    refine @_root_.IsAlgClosed.lift _ _ _ _ _ _ _ _ _ _ _ ?_ ?_ ?_
+    solve_by_elim* (maxDepth := 2) only [*,
+      @_root_.DivisionSemiring.to_moduleIsTorsionFree,
+      @_root_.Algebra.IsIntegral.isAlgebraic, @_root_.inferInstance])
   have hσ : ∀ x : W₁, σ' (x : Ω) = algebraMap (FractionRing W₁) (AlgebraicClosure (FractionRing W₁))
       (algebraMap W₁ (FractionRing W₁) x) := fun x => by
     rw [← IsScalarTower.algebraMap_apply]; exact σ'.commutes x

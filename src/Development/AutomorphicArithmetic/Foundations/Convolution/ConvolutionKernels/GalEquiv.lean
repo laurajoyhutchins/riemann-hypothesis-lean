@@ -1,7 +1,49 @@
-import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.AdBasic
-import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.AdNormOne
-import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.AutOrder
-import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.GalTwistEx
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.TwistedFactors.CuspDecayHeights.HeightLe
+public import Formalism.LocalToGlobal.UnitaryNorms.CharTransport
+public import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.AdBasic
+public import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.AdNormOne
+public import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.AutOrder
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import GroundTheory.AutomorphicForms.CuspidalProjection.Global
+
+@[expose] public section
 
 open MeasureTheory NumberField GroundTheory.Automorphic GroundTheory.Automorphic.CuspidalSpectrum GroundTheory.Automorphic.RightCosetSpace
 open GroundTheory.Automorphic.CuspidalProjection PositivityTheory.Rg.Tf.Core UpperTheory.ConvolutionTheory.K
@@ -38,8 +80,11 @@ private theorem resMap_refl (K : Type) [Field K] [NumberField K] (n : ℕ) (g : 
 
 private theorem resMap_cont (K : Type) [Field K] [NumberField K] (n : ℕ) (σ : K ≃+* K) :
     Continuous (resMap K n σ) := by
-  refine Continuous.subtype_mk (Continuous.comp ?_ continuous_subtype_val) _
-  exact Continuous.units_map _ (continuous_id.matrix_map (Formalism.L2.Host.CT.continuous_adMap σ))
+  apply Continuous.subtype_mk _ _
+  exact (show Continuous (Matrix.GeneralLinearGroup.map (Formalism.L2.Host.CT.adMap σ) :
+      AdelicGLn.AdelicGL K n → AdelicGLn.AdelicGL K n) from
+    (continuous_id.matrix_map (Formalism.L2.Host.CT.continuous_adMap σ)).units_map _).comp
+      continuous_subtype_val
 
 private theorem resMap_iter (K : Type) [Field K] [NumberField K] (n : ℕ) (σ : K ≃+* K) (m : ℕ) (g : G1 K n) :
     (resMap K n σ)^[m] g = resMap K n (σ ^ m) g := by

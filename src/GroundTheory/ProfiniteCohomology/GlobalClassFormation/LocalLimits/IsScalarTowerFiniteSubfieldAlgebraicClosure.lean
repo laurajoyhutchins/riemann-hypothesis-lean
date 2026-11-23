@@ -1,9 +1,57 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.GlobalClassFormation.IdeleLimits.NormalFixingSubgroupGaloisClosure
-import GroundTheory.ProfiniteCohomology.RestrictedRamification.LocalMaps
-import GroundTheory.GlobalFields.SemilocalAlgebras.Galois
-import GroundTheory.GlobalFields.IdeleGroups.LocalHerbrand
-import GroundTheory.ProfiniteCohomology.GaloisModules.Discrete
+module
+
+public import GroundTheory.ProfiniteCohomology.GlobalClassFormation.IdeleLimits.NormalFixingSubgroupGaloisClosure
+public import GroundTheory.ProfiniteCohomology.RestrictedRamification.LocalMaps
+public import GroundTheory.GlobalFields.IdeleGroups.LocalHerbrand
+public import GroundTheory.ProfiniteCohomology.GaloisModules.Discrete
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
@@ -29,6 +77,7 @@ theorem exists_unique_map_single_one_eq_one (φ : (∀ i, A i) →+* R) :
     rw [IsIdempotentElem, ← map_mul, ← Pi.single_mul, one_mul]
   have hsum : ∑ i, φ (Pi.single i 1) = 1 := by
     have h1 : ∑ i, Pi.single i (1 : A i) = (1 : ∀ i, A i) := Finset.univ_sum_single 1
+
     rw [← map_sum, h1, map_one]
   obtain ⟨i, -, hi⟩ : ∃ i ∈ Finset.univ, φ (Pi.single i 1) ≠ 0 := by
     by_contra h
@@ -47,8 +96,8 @@ theorem exists_unique_map_single_one_eq_one (φ : (∀ i, A i) →+* R) :
   rw [map_mul, map_zero, hj, (hidem i).resolve_left hi, one_mul] at this
   exact one_ne_zero this
 
-omit [Fintype ι] [IsDomain R] in
 
+omit [Fintype ι] [IsDomain R] in
 theorem map_eq_map_single_of_map_single_one {φ : (∀ i, A i) →+* R} {i : ι}
     (hi : φ (Pi.single i 1) = 1) (y : ∀ i, A i) : φ y = φ (Pi.single i (y i)) := by
   have h : Pi.single i (1 : A i) * y = Pi.single i (y i) := by
@@ -127,8 +176,8 @@ theorem pi_single_algebraMap_eq {w : PlacesOver F.1 v} [DecidableEq (PlacesOver 
     simp
   · simp [hu]
 
-open Classical in
 
+open Classical in
 def completionEmbedding :
     (placeOfEmbedding ι F).1.adicCompletion F.1 →ₐ[v.adicCompletion K.1]
       AlgebraicClosure (v.adicCompletion K.1) where
@@ -136,7 +185,7 @@ def completionEmbedding :
   map_one' := tensorLift_single_placeOfEmbedding ι F
   map_mul' x y := by rw [Pi.single_mul, map_mul]
   map_zero' := by rw [Pi.single_zero, map_zero]
-  map_add' x y := by rw [Pi.single_add, map_add]
+  map_add' x y := by rw [Pi.single_add, map_add (f := _)]
   commutes' a := by
     rw [pi_single_algebraMap_eq, map_mul, AlgHom.commutes, tensorLift_single_placeOfEmbedding,
       mul_one]
@@ -225,8 +274,7 @@ def localDecompHom :
     Gal(AlgebraicClosure (v.adicCompletion K.1)/v.adicCompletion K.1) →*
       MulAction.stabilizer Gal(F.1/K.1) (placeOfEmbedding ι F).1.asIdeal :=
   (decompHom (v.adicCompletion K.1) (embedLevel ι F)).codRestrict _ fun σ ↦
-    MulAction.mem_stabilizer_iff.2
-      (congrArg (fun u : PlacesOver F.1 v ↦ u.1.asIdeal) (decompHom_smul_placeOfEmbedding ι F σ))
+    congrArg (fun u : PlacesOver F.1 v ↦ u.1.asIdeal) (decompHom_smul_placeOfEmbedding ι F σ)
 
 theorem coe_localDecompHom
     (σ : Gal(AlgebraicClosure (v.adicCompletion K.1)/v.adicCompletion K.1)) :

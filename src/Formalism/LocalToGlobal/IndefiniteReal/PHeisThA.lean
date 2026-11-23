@@ -1,4 +1,45 @@
-import Formalism.LocalToGlobal.IndefiniteReal.PHeisThP
+module
+
+public import Formalism.LocalToGlobal.IndefiniteReal.PHeisFC
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -25,7 +66,7 @@ theorem repr_snd (z : AF F ⊗[F] E) (k : Fin (Module.finrank F E)) :
       Algebra.TensorProduct.basis_repr_tmul]
     simp [sndA]
     rfl
-  | add x y hx hy => simp only [map_add, Finsupp.add_apply, hx, hy, Pi.add_apply]; rfl
+  | add x y hx hy => simp only [map_add (f := _), Finsupp.add_apply, hx, hy, Pi.add_apply]; rfl
 
 theorem repr_fst (z : AF F ⊗[F] E) (k : Fin (Module.finrank F E)) :
     (Algebra.TensorProduct.basis (Ainf F) (Module.finBasis F E)).repr
@@ -38,7 +79,7 @@ theorem repr_fst (z : AF F ⊗[F] E) (k : Fin (Module.finrank F E)) :
       Algebra.TensorProduct.basis_repr_tmul]
     simp [fstA]
     rfl
-  | add x y hx hy => simp only [map_add, Finsupp.add_apply, hx, hy, Pi.add_apply]; rfl
+  | add x y hx hy => simp only [map_add (f := _), Finsupp.add_apply, hx, hy, Pi.add_apply]; rfl
 
 theorem trace_tmul (e : E) :
     Algebra.trace (AF F) (AF F ⊗[F] E) ((1 : AF F) ⊗ₜ[F] e) = algebraMap F (AF F) (Algebra.trace F E e) := by
@@ -49,7 +90,7 @@ theorem trace_tmul (e : E) :
     induction z using TensorProduct.induction_on with
     | zero => simp
     | tmul a m => simp [LinearMap.baseChange_tmul, Algebra.TensorProduct.tmul_mul_tmul]
-    | add x y hx hy => rw [map_add, map_add, hx, hy]
+    | add x y hx hy => rw [map_add (f := _), map_add (f := _), hx, hy]
   rw [Algebra.trace_apply, h, LinearMap.trace_baseChange]
   rfl
 
@@ -68,68 +109,6 @@ theorem cA_algebraMap (c : AF D.host.F) :
 
 theorem cA_smul (c : AF D.host.F) (z : AE D) : cA D (c • z) = c • cA D z := by
   rw [Algebra.smul_def, map_mul, cA_algebraMap, ← Algebra.smul_def]
-
-theorem cA_incA (e : D.host.E) : cA D (incA D e) = incA D (D.sp.cm.sig e) := by
-  show (Algebra.TensorProduct.map (AlgHom.id D.host.F (AF D.host.F)) D.sp.cm.sig) ((1 : AF D.host.F) ⊗ₜ[D.host.F] e) =
-    (1 : AF D.host.F) ⊗ₜ[D.host.F] D.sp.cm.sig e
-  rw [Algebra.TensorProduct.map_tmul]
-  rfl
-
-theorem hHom_add_right (V W : HSp D) (x y y' : WA V W) :
-    hHom V W x (y + y') = hHom V W x y + hHom V W x y' := by
-  unfold hHom
-  split_ifs <;> simp only [Matrix.add_apply, mul_add, Finset.sum_add_distrib]
-
-theorem hHom_smul_right (V W : HSp D) (c : AF D.host.F) (x y : WA V W) :
-    hHom V W x (c • y) = c • hHom V W x y := by
-  unfold hHom
-  split_ifs <;> simp only [Matrix.smul_apply, mul_smul_comm, Finset.smul_sum]
-
-theorem hHom_add_left (V W : HSp D) (x x' y : WA V W) :
-    hHom V W (x + x') y = hHom V W x y + hHom V W x' y := by
-  unfold hHom
-  split_ifs <;> simp only [Matrix.add_apply, map_add, add_mul, Finset.sum_add_distrib]
-
-theorem hHom_smul_left (V W : HSp D) (c : AF D.host.F) (x y : WA V W) :
-    hHom V W (c • x) y = c • hHom V W x y := by
-  unfold hHom
-  split_ifs <;> simp only [Matrix.smul_apply, cA_smul, smul_mul_assoc, Finset.smul_sum]
-
-theorem symplH_add_left (V W : HSp D) (x x' y : WA V W) :
-    symplH V W (x + x') y = symplH V W x y + symplH V W x' y := by
-  simp only [symplH, Formalism.L2.Theta.sympl, hHom_add_right, mul_add, map_add]
-
-theorem symplH_smul_left (V W : HSp D) (c : AF D.host.F) (x y : WA V W) :
-    symplH V W (c • x) y = c * symplH V W x y := by
-  simp only [symplH, Formalism.L2.Theta.sympl, hHom_smul_right, mul_smul_comm, map_smul, smul_eq_mul]
-  ring
-
-theorem symplH_add_right (V W : HSp D) (x y y' : WA V W) :
-    symplH V W x (y + y') = symplH V W x y + symplH V W x y' := by
-  simp only [symplH, Formalism.L2.Theta.sympl, hHom_add_left, mul_add, map_add]
-
-theorem symplH_smul_right (V W : HSp D) (c : AF D.host.F) (x y : WA V W) :
-    symplH V W x (c • y) = c * symplH V W x y := by
-  simp only [symplH, Formalism.L2.Theta.sympl, hHom_smul_left, mul_smul_comm, map_smul, smul_eq_mul]
-  ring
-
-def symplB (V W : HSp D) : WA V W →ₗ[AF D.host.F] WA V W →ₗ[AF D.host.F] AF D.host.F :=
-  LinearMap.mk₂ (AF D.host.F) (symplH V W) (symplH_add_left V W)
-    (fun c x y => by rw [symplH_smul_left, smul_eq_mul]) (symplH_add_right V W)
-    (fun c x y => by rw [symplH_smul_right, smul_eq_mul])
-
-def eV (V W : HSp D) (a : Ix V W) : WA V W :=
-  Matrix.single a.1 a.2.1 (incA D (Module.finBasis D.host.F D.host.E a.2.2))
-
-theorem sum_eV (V W : HSp D) (x : WA V W) : ∑ a, Co V W x a • eV V W a = x := by
-  ext i j
-  simp only [Matrix.sum_apply, Matrix.smul_apply, eV, Matrix.single_apply, Fintype.sum_prod_type, Co, Phi, smul_ite,
-    smul_zero, ite_and]
-  simp only [Finset.sum_ite_irrel, Finset.sum_const_zero, Finset.sum_ite_eq', Finset.mem_univ, if_true]
-  conv_rhs => rw [← (bA D.host.F D.host.E).sum_repr (x i j)]
-  refine Finset.sum_congr rfl fun k _ => ?_
-  rw [Algebra.TensorProduct.basis_apply]
-  rfl
 
 end Sympl
 

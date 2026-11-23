@@ -1,8 +1,56 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.MultOfNotMem
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HodgeMetricUniformisationSmoothOnInterior
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.EqOfConjEqOne
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsFramedChartExponentialToroidalModel
+module
+
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.MultOfNotMem
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.ToroidalCompactificationData
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsIsLieBase
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.EqOfConjEqOne
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsFramedChartExponentialToroidalModel
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FrameCoefficientEqOmegaRatio
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FrameCoefficientEqWeightRatio
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HodgeMetricUniformisationSmoothOnInterior
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.PtEqOfPtOfFrameEq
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.UnfoldedFramesParabolicRelation
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.RelabelEmbeddingsGoodBijectiveConjCompat
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.KaUnfoldPfB
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.OrthoStatementPf
+import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.InterPolyProdSum
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -23,7 +71,8 @@ variable {E : Type} [Field E] [NumberField E] [IsCMField E] {H : ReciprocityTheo
 
 theorem gram_orth {U : Formalism.L2.PjFree.Unf Xo c σ (Dw.p + Dw.q)} (hσ : Formalism.L2.PjFree.GoodEmb c σ)
     (hU : Formalism.L2.PjFree.IsUnf U) (k : U.Comp) (x : (U.X k).dom) (hx : IsOrth (U.X k) x.1) (τ : E →+* ℂ) :
-    (hodgeMet Z U).gram (cxPt Z (U.un k x)) (cxFrame Z (U.un k x)) τ = ((2 * Real.pi : ℝ) : ℂ) • 1 := by
+    (hodgeMet Z U).gram (cxPt Z (U.un k x)) (cxFrame Z (U.un k x)) τ =
+      ((2 * Real.pi : ℝ) : ℂ) • (1 : Matrix (Fin (Dw.mult τ)) (Fin (Dw.mult τ)) ℂ) := by
   classical
   by_cases h0 : Dw.mult τ = 0
   · ext a
@@ -86,7 +135,7 @@ variable {V : Type} [NormedAddCommGroup V] [NormedSpace ℂ V] {x₀ : V}
 theorem an_mul {m n p : Type} [Fintype n] {A : V → Matrix m n ℂ} {B : V → Matrix n p ℂ}
     (hA : ∀ i j, AnalyticAt ℂ (fun x => A x i j) x₀) (hB : ∀ i j, AnalyticAt ℂ (fun x => B x i j) x₀)
     (i : m) (j : p) : AnalyticAt ℂ (fun x => (A x * B x) i j) x₀ := by
-  simp only [mul_apply]
+  simp only [Matrix.mul_apply]
   exact Finset.analyticAt_fun_sum _ fun k _ => (hA i k).mul (hB k j)
 
 end Analytic
@@ -150,12 +199,12 @@ theorem gram_conj {m : ℕ} {Ω Ω₁ Q : Matrix (Fin m) (Fin m) ℂ} (hΩ₁ : 
 
 theorem hP_transpose {p q : ℕ} (z : Matrix (Fin p) (Fin q) ℂ) : (hP z)ᵀ = 1 - z.map (starRingEnd ℂ) * zᵀ := by
   ext a b
-  simp [hP, mul_apply, mul_comm, one_apply, eq_comm]
+  simp [hP, Matrix.mul_apply, mul_comm, Matrix.one_apply, eq_comm]
 
 theorem cast_cols_map {p q q' : ℕ} (z : Matrix (Fin p) (Fin q) ℂ) (e : Fin q' ≃ Fin q) :
     (z.submatrix id e).map (starRingEnd ℂ) * (z.submatrix id e)ᵀ = z.map (starRingEnd ℂ) * zᵀ := by
   ext a b
-  simp only [mul_apply, map_apply, transpose_apply, submatrix_apply, id]
+  simp only [Matrix.mul_apply, map_apply, transpose_apply, submatrix_apply, id]
   exact Fintype.sum_equiv e _ _ fun _ => rfl
 
 theorem cast_cols_herm {p q q' : ℕ} (z : Matrix (Fin p) (Fin q) ℂ) (e : Fin q' ≃ Fin q) :

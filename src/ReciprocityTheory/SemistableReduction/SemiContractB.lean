@@ -1,5 +1,49 @@
-import ReciprocityTheory.SemistableReduction.LatSemiSt
-import ReciprocityTheory.SemistableReduction.SemiContractA
+module
+
+public import ReciprocityTheory.SemistableReduction.LatSemiSt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.Matrix.PosDef
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.Star.UnitaryStarAlgAut
+
+@[expose] public section
 
 namespace ReciprocityTheory.MultiplicativeHeights
 
@@ -32,6 +76,7 @@ theorem sc_col_mul {K : Type} [Field K] [NumberField K] {r : ℕ} {ι : Type} [F
     (σ : K →+* ℂ) (N : Matrix (Fin r) (Fin r) K) (c : ι → Fin r → K) :
     embCols σ (fun j => N *ᵥ c j) = N.map σ * embCols σ c := by
   ext a j
+
   simp [embCols, Matrix.mul_apply, Matrix.mulVec, dotProduct, map_sum, map_mul]
 
 theorem sc_col_inj {K : Type} [Field K] [NumberField K] {r : ℕ} {ι : Type} [Fintype ι]
@@ -84,8 +129,8 @@ theorem sc_gram_lt {K : Type} [Field K] [NumberField K] {r k m : ℕ} (hm : 0 < 
       rw [hDhdef, Matrix.diagonal_conjTranspose, Matrix.diagonal_mul_diagonal]
       congr 1
       funext i
-      simp only [Pi.star_apply, Function.comp_apply]
-      rw [Complex.star_def, Complex.conj_ofReal, ← Complex.ofReal_mul, Real.mul_self_sqrt (hP.eigenvalues_pos i).le]
+      simp only [Pi.star_apply, Complex.star_def, Complex.conj_ofReal, ← Complex.ofReal_mul,
+        Real.mul_self_sqrt (hP.eigenvalues_pos i).le, Function.comp_apply]
       rfl
     set T := U * Dh with hTdef
     have hTT : T * Tᴴ = P := by
@@ -142,7 +187,7 @@ theorem sc_gram_lt {K : Type} [Field K] [NumberField K] {r k m : ℕ} (hm : 0 < 
         _ = _ := by rw [hdV, mul_one, Complex.ofReal_prod]
     have hμ : ∀ i, 0 < hFh.eigenvalues i := hF.eigenvalues_pos
     have hprod : 1 < ∏ i, (1 + hFh.eigenvalues i) := by
-      have h := Finset.prod_lt_prod_of_nonempty (s := Finset.univ) (f := fun _ => (1 : ℝ))
+      have h := Finset.prod_lt_prod_of_nonempty₀ (s := Finset.univ) (f := fun _ => (1 : ℝ))
         (g := fun i => 1 + hFh.eigenvalues i) (fun i _ => one_pos) (fun i _ => by linarith [hμ i])
         ⟨⟨0, hm⟩, Finset.mem_univ _⟩
       simpa using h

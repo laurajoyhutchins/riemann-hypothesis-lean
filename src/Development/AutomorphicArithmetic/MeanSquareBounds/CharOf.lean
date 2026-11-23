@@ -1,8 +1,55 @@
-import Development.AutomorphicArithmetic.MeanSquareBounds.PrimeSetTwoBounds
-import Development.AutomorphicArithmetic.MeanSquareBounds.StagePow
-import Development.AutomorphicArithmetic.MeanSquareBounds.ExistsCoprimePrimePairSetSecondEqPPset
-import Development.AutomorphicArithmetic.MeanSquareBounds.LogOddM
+module
+
+public import Development.AutomorphicArithmetic.MeanSquareBounds.PrimeSetTwoBounds
+public import Development.AutomorphicArithmetic.MeanSquareBounds.ExistsCoprimePrimePairSetSecondEqPPset
+public import Development.AutomorphicArithmetic.MeanSquareBounds.LogOddM
+public import Development.AutomorphicArithmetic.MeanSquareBounds.StagePow
 import Development.AutomorphicArithmetic.MeanSquareBounds.TwistPrim
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.MulChar.Duality
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Finset Formalism.HermitianLattices.ZeroFreeRegionGL2 Formalism.HermitianLattices.Ext.LogarithmicIntegralBounds
 
@@ -139,14 +186,14 @@ theorem stage2 :
       have hl2' : 0 < Real.log 2 := Real.log_pos (by norm_num)
       have hm : Real.log ((16 * oddM z q : ℕ) : ℝ) ≤ 4 * z := by
         rw [h16, h4] at hlm
-        nlinarith [mul_lt_mul_of_pos_right hl2 hzpos]
-      nlinarith [mul_le_mul_of_nonneg_left hm (sq_nonneg (Real.log Y))]
+        linarith [mul_lt_mul_of_pos_right hl2 hzpos]
+      linarith [mul_le_mul_of_nonneg_left hm (sq_nonneg (Real.log Y))]
     · rw [Real.log_exp, show 6 * ε / 5 / 6 = ε / 5 by ring]
-      nlinarith [hz]
+      linarith [hz]
     · rw [Real.log_exp, show 6 * ε / 5 / 5 = ε / 5 + ε / 25 by ring, Real.rpow_add hYpos]
       have h := mul_le_mul_of_nonneg_right hK2 (by positivity : (0:ℝ) ≤ z * Real.log Y ^ 2)
       rw [← hz]
-      nlinarith
+      linarith
   have hzle : z ≤ Y ^ (6 * ε / 5 / 5) := by
     rw [hz]
     exact Real.rpow_le_rpow_of_exponent_le hY1 (by linarith)
@@ -166,7 +213,7 @@ theorem stage2 :
         rw [(Nat.prime_dvd_prime_iff_eq hp hqp).mp h]
         exact hqK
       · left
-        obtain ⟨r, hr, hpr⟩ := (Prime.dvd_finset_prod_iff hp.prime _).mp h
+        obtain ⟨r, hr, hpr⟩ := (Prime.dvd_finsetProd_iff hp.prime _).mp h
         simp only [Finset.mem_filter, Finset.mem_Icc] at hr
         have hpr' := (Nat.prime_dvd_prime_iff_eq hp hr.2).mp hpr
         subst hpr'

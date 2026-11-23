@@ -1,7 +1,55 @@
-import Formalism.LocalToGlobal.TorsionIntegrality.RamifiedCurveKernels.StatementS
-import Formalism.LocalToGlobal.TorsionIntegrality.RamifiedCurveKernels.PairedSquareJets.Hurwitz
-import Formalism.LocalToGlobal.TorsionIntegrality.RamifiedCurveKernels.PairedSquareJets.HurwitzB
-import Formalism.LocalToGlobal.TorsionIntegrality.SecondCoefficientNorms.FirstLevelFromUniversalLaw
+module
+
+public import Formalism.LocalToGlobal.TorsionIntegrality.RamifiedCurveKernels.StatementS
+public import Formalism.LocalToGlobal.TorsionIntegrality.RamifiedCurveKernels.PairedSquareJets.Hurwitz
+public import Formalism.LocalToGlobal.TorsionIntegrality.RamifiedCurveKernels.PairedSquareJets.HurwitzB
+import Formalism.LocalToGlobal.TorsionIntegrality.SecondCoefficientNorms.BinomialSeriesCoefficients.CoeffPowEqZeroOfCc
+import Formalism.LocalToGlobal.TorsionIntegrality.SecondCoefficientNorms.BinomialSeriesCoefficients.IntPSDerivativeOfLG
+import Formalism.LocalToGlobal.TorsionIntegrality.SecondCoefficientNorms.PhNormFromDatum
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 open scoped BigOperators
@@ -43,6 +91,7 @@ theorem mvSubst_subst {σ τ : Type} {a : σ → MvPowerSeries τ K} (ha : MvPow
 theorem cc_linForm {m : Type} [Fintype m] (v : m → K) :
     MvPowerSeries.constantCoeff (∑ x, MvPowerSeries.C (v x) * MvPowerSeries.X x :
       MvPowerSeries m K) = 0 := by
+
   rw [map_sum]
   exact Finset.sum_eq_zero fun x _ => by rw [map_mul, MvPowerSeries.constantCoeff_X, mul_zero]
 
@@ -71,6 +120,7 @@ theorem linSub_sqSum {n m : Type} [Fintype n] [Fintype m] (A : n → m → K) (c
     linSub A (sqSum c) =
       ∑ i, MvPowerSeries.C (c i) * (∑ x, MvPowerSeries.C (A i x) * MvPowerSeries.X x) ^ 2 := by
   unfold sqSum
+
   rw [← linSubHom_apply, map_sum]
   refine Finset.sum_congr rfl fun i _ => ?_
   rw [map_mul, map_pow, linSubHom_apply, linSubHom_apply, linSub_C, linSub_X]
@@ -78,6 +128,7 @@ theorem linSub_sqSum {n m : Type} [Fintype n] [Fintype m] (A : n → m → K) (c
 theorem cc_sqSum {n : Type} [Fintype n] (c : n → K) :
     MvPowerSeries.constantCoeff (sqSum c) = 0 := by
   unfold sqSum
+
   rw [map_sum]
   exact Finset.sum_eq_zero fun x _ => by
     rw [map_mul, map_pow, MvPowerSeries.constantCoeff_X, zero_pow two_ne_zero, mul_zero]
@@ -121,6 +172,7 @@ theorem toZ_phSum {n : Type} [Fintype n] {linv : PowerSeries K}
     (h0 : PowerSeries.constantCoeff linv = 0) (c : n → K) (ph : PowerSeries K) :
     toZ linv (phSum c ph) = phSum c (PowerSeries.subst linv ph) := by
   unfold phSum
+
   rw [← toZHom_apply h0, map_sum]
   refine Finset.sum_congr rfl fun i _ => ?_
   rw [map_smul, toZHom_apply, toZ_subst_X h0]
@@ -128,6 +180,7 @@ theorem toZ_phSum {n : Type} [Fintype n] {linv : PowerSeries K}
 theorem cc_phSum {n : Type} [Fintype n] (c : n → K) {ph : PowerSeries K}
     (h0 : PowerSeries.constantCoeff ph = 0) : MvPowerSeries.constantCoeff (phSum c ph) = 0 := by
   unfold phSum
+
   rw [map_sum]
   refine Finset.sum_eq_zero fun i _ => ?_
   rw [MvPowerSeries.smul_eq_C_mul, map_mul,
@@ -218,7 +271,7 @@ theorem jetsIn_phSum {K : Type} [Field K] [CharZero K] {R : Subring K} {n : Type
     (jetsIn_subst_one hf (MvPowerSeries.constantCoeff_X i) (jetsIn_X i))
 
 theorem jetsIn_toZ {K : Type} [Field K] [CharZero K] {R : Subring K} {l linv : PowerSeries K}
-    (h : IsLogPair l linv) (hl : IsOneUnit R (PowerSeries.derivative K l)) {n : Type} [Fintype n]
+    (h : IsLogPair l linv) (hl : IsOneUnit R (PowerSeries.derivative (R := K) l)) {n : Type} [Fintype n]
     {G : MvPowerSeries n K} (hG : IntMv R G) : JetsIn R (toZ linv G) :=
   IntMvZ_of (JetsSubst_of jets_ring_holds jets_div_pow_holds) integral_jets_holds jets_subst_one_holds
     jets_ring_holds K R l linv h hl n G hG

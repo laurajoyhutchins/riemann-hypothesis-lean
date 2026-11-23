@@ -1,6 +1,54 @@
-import Mathlib
-import GroundTheory.PAdicHodge.ACrisBdRGalois
-import GroundTheory.PAdicHodge.BdRTGalois
+module
+
+public import GroundTheory.PAdicHodge.BdRAlg
+public import GroundTheory.PAdicHodge.InstMulSemiringActionGalPlus
+public import GroundTheory.PAdicHodge.TateCpTwist
+public import GroundTheory.PAdicHodge.ACrisBdRGalois
+import GroundTheory.PAdicHodge.ACrisBdRInj
+public import GroundTheory.PAdicHodge.BdRTGalois
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import GroundTheory.PAdicHodge.ACrisBdR
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -23,31 +71,6 @@ theorem awaySMulHom_algebraMap (σ : G) (x : R) :
       algebraMap R (Localization.Away t) (σ • x) :=
   IsLocalization.lift_eq _ x
 
-theorem awaySMulHom_one : awaySMulHom t h (1 : G) = RingHom.id _ := by
-  apply IsLocalization.ringHom_ext (Submonoid.powers t)
-  refine RingHom.ext fun x => ?_
-  rw [RingHom.comp_apply, awaySMulHom_algebraMap, one_smul, RingHom.comp_apply, RingHom.id_apply]
-
-theorem awaySMulHom_mul (σ τ : G) :
-    awaySMulHom t h (σ * τ) = (awaySMulHom t h σ).comp (awaySMulHom t h τ) := by
-  apply IsLocalization.ringHom_ext (Submonoid.powers t)
-  refine RingHom.ext fun x => ?_
-  rw [RingHom.comp_apply, awaySMulHom_algebraMap, mul_smul, RingHom.comp_apply, RingHom.comp_apply,
-    awaySMulHom_algebraMap, awaySMulHom_algebraMap]
-
-def awayMulSemiringAction : MulSemiringAction G (Localization.Away t) where
-  smul σ x := awaySMulHom t h σ x
-  one_smul x := by
-    change awaySMulHom t h 1 x = x
-    rw [awaySMulHom_one, RingHom.id_apply]
-  mul_smul σ τ x := by
-    change awaySMulHom t h (σ * τ) x = awaySMulHom t h σ (awaySMulHom t h τ x)
-    rw [awaySMulHom_mul, RingHom.comp_apply]
-  smul_zero σ := map_zero (awaySMulHom t h σ)
-  smul_add σ := map_add (awaySMulHom t h σ)
-  smul_one σ := map_one (awaySMulHom t h σ)
-  smul_mul σ := map_mul (awaySMulHom t h σ)
-
 theorem awaySMulHom_comm (f : Localization.Away t →+* Localization.Away t) (F : R →+* R)
     (hf : ∀ x, f (algebraMap R (Localization.Away t) x) = algebraMap R (Localization.Away t) (F x))
     (hF : ∀ (σ : G) x, F (σ • x) = σ • F x) (σ : G) (x : Localization.Away t) :
@@ -65,8 +88,6 @@ namespace ACris
 
 variable {p : ℕ} [hp : Fact p.Prime] {K : IntermediateField ℚ_[p] (PadicAlgCl p)}
 
-local notation "𝒪♭" => PreTilt (normInteger ℂ_[p]) p
-
 def chiCris (σ : Gal(PadicAlgCl p/K)) : ACris ℂ_[p] p :=
   algebraMap (AInf ℂ_[p] p) (ACris ℂ_[p] p)
     (IsPerfectoidField.padicIntToWitt p (cycloChar K σ : ℤ_[p]))
@@ -74,11 +95,17 @@ def chiCris (σ : Gal(PadicAlgCl p/K)) : ACris ℂ_[p] p :=
 theorem isUnit_chiCris (σ : Gal(PadicAlgCl p/K)) : IsUnit (chiCris σ) :=
   ((cycloChar K σ).isUnit.map (IsPerfectoidField.padicIntToWitt p)).map _
 
-theorem gal_smul_periodT (σ : Gal(PadicAlgCl p/K)) {ε : 𝒪♭} (hε : PreTilt.untilt ε = 1) :
+theorem gal_smul_periodT (σ : Gal(PadicAlgCl p/K)) {ε : PreTilt (normInteger ℂ_[p]) p}
+    (hε : PreTilt.untilt ε = 1) :
     σ • periodT hε = chiCris σ * periodT hε := by
   apply iota_injective (K := ℂ_[p]) (p := p)
-  rw [iota_gal_smul, iota_periodT, map_mul, iota_periodT, chiCris, iota_padicInt,
-    gal_smul_fontaineT]
+  calc
+    iota ℂ_[p] p (σ • periodT hε) = σ • fontaineT ε hε := by
+      rw [iota_gal_smul σ, iota_periodT hε]
+    _ = algebraMap ℚ_[p] _ ((cycloChar K σ : ℤ_[p]) : ℚ_[p]) * fontaineT ε hε :=
+      gal_smul_fontaineT σ hε
+    _ = iota ℂ_[p] p (chiCris σ * periodT hε) := by
+      rw [map_mul, chiCris, iota_padicInt, iota_periodT hε]
 
 variable {ε : PreTilt (normInteger ℂ_[p]) p} (hε : PreTilt.untilt ε = 1)
 
@@ -100,29 +127,35 @@ theorem isUnit_gal_smul_periodT (σ : Gal(PadicAlgCl p/K)) :
 def galB (σ : Gal(PadicAlgCl p/K)) : BCris hε →+* BCris hε :=
   awaySMulHom _ (isUnit_gal_smul_periodT hε) σ
 
-def galBAction : MulSemiringAction Gal(PadicAlgCl p/K) (BCris hε) :=
-  awayMulSemiringAction (isUnit_gal_smul_periodT hε)
-
-theorem galBAction_smul (σ : Gal(PadicAlgCl p/K)) (x : BCris hε) :
-    (galBAction hε).smul σ x = galB hε σ x :=
-  rfl
-
-theorem galB_one : galB hε (1 : Gal(PadicAlgCl p/K)) = RingHom.id (BCris hε) :=
-  awaySMulHom_one _
-
-theorem galB_mul (σ τ : Gal(PadicAlgCl p/K)) :
-    galB hε (σ * τ) = (galB hε σ).comp (galB hε τ) :=
-  awaySMulHom_mul _ σ τ
-
 theorem galB_algebraMap (σ : Gal(PadicAlgCl p/K)) (x : BCrisPlus ℂ_[p] p) :
     galB hε σ (algebraMap (BCrisPlus ℂ_[p] p) (BCris hε) x) =
-      algebraMap (BCrisPlus ℂ_[p] p) (BCris hε) (σ • x) :=
-  awaySMulHom_algebraMap (isUnit_gal_smul_periodT hε) σ x
+      algebraMap (BCrisPlus ℂ_[p] p) (BCris hε) (σ • x) := by
+  -- Infer the localization arguments from the unfolded action.
+  delta galB
+  apply @awaySMulHom_algebraMap
 
 theorem phiB_galB (σ : Gal(PadicAlgCl p/K)) (x : BCris hε) :
-    phiB hε (galB hε σ x) = galB hε σ (phiB hε x) :=
-  awaySMulHom_comm (isUnit_gal_smul_periodT hε) (phiB hε) (phiPlus ℂ_[p] p)
-    (phiB_algebraMap hε) phiPlus_gal_smul σ x
+    phiB hε (galB hε σ x) = galB hε σ (phiB hε x) := by
+  let t := algebraMap (ACris ℂ_[p] p) (BCrisPlus ℂ_[p] p) (periodT (K := ℂ_[p]) (p := p) hε)
+  let φ := phiB (K := ℂ_[p]) (p := p) hε
+  let g := galB hε σ
+  have e : φ.comp g = g.comp φ := by
+    apply IsLocalization.ringHom_ext (Submonoid.powers t)
+    refine RingHom.ext fun y => ?_
+    change φ (g (algebraMap (BCrisPlus ℂ_[p] p) (BCris hε) y)) =
+      g (φ (algebraMap (BCrisPlus ℂ_[p] p) (BCris hε) y))
+    calc
+      _ = φ (algebraMap (BCrisPlus ℂ_[p] p) (BCris hε) (σ • y)) :=
+        congrArg (fun z : BCris hε => φ z) (galB_algebraMap hε σ y)
+      _ = algebraMap (BCrisPlus ℂ_[p] p) (BCris hε) (phiPlus ℂ_[p] p (σ • y)) :=
+        phiB_algebraMap (K := ℂ_[p]) (p := p) hε (σ • y)
+      _ = algebraMap (BCrisPlus ℂ_[p] p) (BCris hε) (σ • phiPlus ℂ_[p] p y) :=
+        congrArg (algebraMap (BCrisPlus ℂ_[p] p) (BCris hε)) (phiPlus_gal_smul σ y)
+      _ = g (algebraMap (BCrisPlus ℂ_[p] p) (BCris hε) (phiPlus ℂ_[p] p y)) :=
+        (galB_algebraMap hε σ (phiPlus ℂ_[p] p y)).symm
+      _ = _ := congrArg (fun z : BCris hε => g z)
+        (phiB_algebraMap (K := ℂ_[p]) (p := p) hε y).symm
+  exact congrArg (fun F : BCris hε →+* BCris hε => F x) e
 
 end ACris
 

@@ -1,7 +1,57 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.MonodromyZeroOfWeilDeligneRepClassIff
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.Mono0OfLpDimEqOne
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsAevalEqSmulOnEigenspace
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.MonodromyZeroOfWeilDeligneRepClassIff
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsAevalEqSmulOnEigenspace
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.Mono0OfLpDimEqOne
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Charpoly.ToMatrix
+import Mathlib.LinearAlgebra.Eigenspace.Semisimple
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -39,22 +89,22 @@ theorem WDRep.charpoly_eq_mul_of_isCompl {V : Type} [AddCommGroup V] [Module ℂ
 
 theorem finite_range_of_frob_pow_eq_one {V : Type} [AddCommGroup V] [Module ℂ V]
     (ρ : Representation ℂ (Weil h) V) (hρ : IsSmooth ρ) {m : ℕ} (hm : 0 < m)
-    (h1 : ρ (frob h) ^ m = 1) : (Set.range ρ).Finite := by
-  refine (Set.Finite.image2 (· * ·) (Set.finite_range fun j : Fin m => ρ (frob h) ^ (j : ℕ))
+    (h1 : ρ (frob (h := h)) ^ m = 1) : (Set.range ρ).Finite := by
+  refine (Set.Finite.image2 (· * ·) (Set.finite_range fun j : Fin m => ρ (frob (h := h)) ^ (j : ℕ))
     hρ.finite_range).subset ?_
   rintro _ ⟨σ, rfl⟩
   obtain ⟨τ, hτ⟩ := exists_eq_zpow_mul (h := h) deg_frob σ
-  have hker : frob h ^ m ∈ ρ.ker := by rw [MonoidHom.mem_ker, map_pow, h1]
+  have hker : frob (h := h) ^ m ∈ ρ.ker := by rw [MonoidHom.mem_ker, map_pow, h1]
   set k := deg σ
-  have hk : frob h ^ k = frob h ^ ((k % m).toNat) * (frob h ^ m) ^ (k / m) := by
-    rw [← zpow_natCast (frob h) m, ← zpow_mul, ← zpow_natCast (frob h) ((k % m).toNat),
+  have hk : frob (h := h) ^ k = frob (h := h) ^ ((k % m).toNat) * (frob (h := h) ^ m) ^ (k / m) := by
+    rw [← zpow_natCast (frob (h := h)) m, ← zpow_mul, ← zpow_natCast (frob (h := h)) ((k % m).toNat),
       ← zpow_add, Int.toNat_of_nonneg (Int.emod_nonneg _ (by exact_mod_cast hm.ne')),
       add_comm, Int.mul_ediv_add_emod]
   have hlt : (k % m).toNat < m := by
     have := Int.emod_lt_of_pos k (by exact_mod_cast hm : (0 : ℤ) < m)
     omega
-  refine ⟨ρ (frob h) ^ ((k % m).toNat), ⟨⟨_, hlt⟩, rfl⟩, ρ (ineIncl h τ), ⟨τ, rfl⟩, ?_⟩
-  have h2 : ρ ((frob h ^ m) ^ (k / m)) = 1 := (ρ.ker.zpow_mem hker _)
+  refine ⟨ρ (frob (h := h)) ^ ((k % m).toNat), ⟨⟨_, hlt⟩, rfl⟩, ρ (ineIncl h τ), ⟨τ, rfl⟩, ?_⟩
+  have h2 : ρ ((frob (h := h) ^ m) ^ (k / m)) = 1 := (ρ.ker.zpow_mem hker _)
   show _ = ρ σ
   rw [hτ, hk, map_mul, map_mul, h2, mul_one, map_pow]
 
@@ -71,15 +121,15 @@ theorem exists_of_lpSum_twist_finite (S : WD h → Prop)
   intro V _ _ _ hd ρ hρ hs
   let a0 : WDRep h V := ⟨ρ, 0, hρ, hs, IsNilpotent.zero, by simp⟩
   obtain ⟨m, hm, hcomm⟩ := exists_pow_frob_commute ρ hρ
-  have hsm : ρ (frob h) ^ m = ρ (frob h ^ m) := (map_pow _ _ _).symm
-  by_cases hsc : ∃ c : ℂ, c ≠ 0 ∧ ρ (frob h) ^ m = c • (1 : Module.End ℂ V)
+  have hsm : ρ (frob (h := h)) ^ m = ρ (frob (h := h) ^ m) := (map_pow _ _ _).symm
+  by_cases hsc : ∃ c : ℂ, c ≠ 0 ∧ ρ (frob (h := h)) ^ m = c • (1 : Module.End ℂ V)
   · obtain ⟨c, hc0, hsc⟩ := hsc
     obtain ⟨c', hc'⟩ := IsAlgClosed.exists_pow_nat_eq c hm
     have hc'0 : c' ≠ 0 := by rintro rfl; exact hc0 (by rw [← hc', zero_pow hm.ne'])
     set u : ℂˣ := Units.mk0 c' hc'0
     let b : WDRep h V := a0.twist (unrChar h u⁻¹) (isSmooth_unrChar h _)
-    have hb1 : b.ρ (frob h) ^ m = 1 := by
-      show ((((unrChar h u⁻¹) (frob h) : ℂˣ) : ℂ) • ρ (frob h)) ^ m = 1
+    have hb1 : b.ρ (frob (h := h)) ^ m = 1 := by
+      show ((((unrChar h u⁻¹) (frob (h := h)) : ℂˣ) : ℂ) • ρ (frob (h := h))) ^ m = 1
       rw [_root_.smul_pow, hsc, smul_smul, unrChar_apply, deg_frob, zpow_one, ← Units.val_pow_eq_pow_val,
         inv_pow]
       have : u ^ m = Units.mk0 c hc0 := Units.ext (by simp [u, hc'])
@@ -98,7 +148,7 @@ theorem exists_of_lpSum_twist_finite (S : WD h → Prop)
       by_contra hn
       rw [not_nontrivial_iff_subsingleton] at hn
       exact hsc ⟨1, one_ne_zero, LinearMap.ext fun v => Subsingleton.elim _ _⟩
-    set s := ρ (frob h) ^ m with hs_def
+    set s := ρ (frob (h := h)) ^ m with hs_def
     have hss : End.IsSemisimple s := by rw [hsm]; exact hs _
     obtain ⟨c, hc⟩ := Module.End.exists_eigenvalue s
     have hinv : ∀ σ α, ∀ v ∈ End.eigenspace s α, ρ σ v ∈ End.eigenspace s α := by
@@ -126,8 +176,8 @@ theorem exists_of_lpSum_twist_finite (S : WD h → Prop)
       apply hv0
       have h1 := Module.End.mem_eigenspace_iff.mp hv
       rw [zero_smul] at h1
-      have h1' : ρ (frob h ^ m) v = 0 := by rw [← hsm]; exact h1
-      have := congrArg (ρ (frob h ^ m)⁻¹) h1'
+      have h1' : ρ (frob (h := h) ^ m) v = 0 := by rw [← hsm]; exact h1
+      have := congrArg (ρ (frob (h := h) ^ m)⁻¹) h1'
       rwa [← Module.End.mul_apply, ← map_mul, inv_mul_cancel, map_one, Module.End.one_apply,
         map_zero] at this
     have hUb : U ≠ ⊥ := hc

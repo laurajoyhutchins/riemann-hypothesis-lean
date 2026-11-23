@@ -1,4 +1,51 @@
-import Development.WeilBound.CoreStatements.PublishedTheorems.JacquetShalikaRigidity.ColumnConjugationMeasure
+module
+
+public import Development.WeilBound.CoreStatements.PublishedTheorems.JacquetShalikaRigidity.ColumnConjugationMeasure
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.Countable
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Compactness.Paracompact
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -93,10 +140,10 @@ theorem blk_mul_val (j : ℕ) (hj : j < k) (x : UnipotentBlockColumnIndex k j j 
     | simp [Matrix.one_apply]
   · rw [Finset.sum_eq_single ⟨j, hj⟩]
     · by_cases h : (i : ℕ) < j
-      · rw [dif_pos (show (i : ℕ) < j ∧ ((⟨j, hj⟩ : Fin k) : ℕ) = j from ⟨h, rfl⟩), dif_pos h]
-      · rw [dif_neg (fun h' : (i : ℕ) < j ∧ ((⟨j, hj⟩ : Fin k) : ℕ) = j => h h'.1), dif_neg h]
+      · rw [dite_eq_left (show (i : ℕ) < j ∧ ((⟨j, hj⟩ : Fin k) : ℕ) = j from ⟨h, rfl⟩), dite_eq_left h]
+      · rw [dite_eq_right (fun h' : (i : ℕ) < j ∧ ((⟨j, hj⟩ : Fin k) : ℕ) = j => h h'.1), dite_eq_right h]
     · intro m _ hm
-      rw [dif_neg, zero_mul]
+      rw [dite_eq_right, zero_mul]
       rintro ⟨_, h2⟩
       exact hm (Fin.ext h2)
     · intro h
@@ -121,20 +168,20 @@ theorem blk_succ {j : ℕ} {g : GA E k} (hg : GlobalTheory j g) : GlobalTheory (
 
 theorem blk_blkU_succ {j : ℕ} (x : UnipotentBlockColumnIndex k j j → Ad E) : GlobalTheory (j + 1) (blkU x : GA E k) := by
   intro i c h
-  rw [blk_val, dif_neg, add_zero]
+  rw [blk_val, dite_eq_right, add_zero]
   rintro ⟨h1, h2⟩
   omega
 
 theorem UU_blk {j : ℕ} (x : UnipotentBlockColumnIndex k j j → Ad E) : UU j (blkU x : GA E k) := by
   refine ⟨fun i c hci => ?_, fun i => ?_, fun i c hc => ?_⟩
   · have hci' : (c : ℕ) < i := hci
-    rw [blk_val, dif_neg, add_zero, Matrix.one_apply_ne (hci.ne')]
+    rw [blk_val, dite_eq_right, add_zero, Matrix.one_apply_ne (hci.ne')]
     rintro ⟨h1, h2⟩
     omega
-  · rw [blk_val, dif_neg, add_zero, Matrix.one_apply_eq]
+  · rw [blk_val, dite_eq_right, add_zero, Matrix.one_apply_eq]
     rintro ⟨h1, h2⟩
     omega
-  · rw [blk_val, dif_neg, add_zero]
+  · rw [blk_val, dite_eq_right, add_zero]
     rintro ⟨h1, h2⟩
     omega
 
@@ -169,11 +216,11 @@ theorem UU_blk_mul {j : ℕ} (hj : j < k) (x : UnipotentBlockColumnIndex k j j �
     rw [blk_mul_val j hj, h1 i c hci]
     by_cases h : (i : ℕ) < j
     · rw [h1 ⟨j, hj⟩ c (show (c : ℕ) < j by omega), mul_zero, add_zero]
-    · rw [dif_neg h, zero_mul, add_zero]
+    · rw [dite_eq_right h, zero_mul, add_zero]
   · rw [blk_mul_val j hj, h2 i]
     by_cases h : (i : ℕ) < j
     · rw [h1 ⟨j, hj⟩ i (show (i : ℕ) < j from h), mul_zero, add_zero]
-    · rw [dif_neg h, zero_mul, add_zero]
+    · rw [dite_eq_right h, zero_mul, add_zero]
   · have hc' : (c : ℕ) < j := hc
     rw [blk_mul_val j hj, h3 i c (by omega), h1 ⟨j, hj⟩ c (show (c : ℕ) < j from hc'), mul_zero,
       add_zero]
@@ -187,11 +234,11 @@ theorem UU_col {j : ℕ} (hj : j < k) (u : GA E k) (hu : UU j u) : UU (j + 1) (b
     rw [blk_mul_val j hj, h1 i c hci]
     by_cases h : (i : ℕ) < j
     · rw [h1 ⟨j, hj⟩ c (show (c : ℕ) < j by omega), mul_zero, add_zero]
-    · rw [dif_neg h, zero_mul, add_zero]
+    · rw [dite_eq_right h, zero_mul, add_zero]
   · rw [blk_mul_val j hj, h2 i]
     by_cases h : (i : ℕ) < j
     · rw [h1 ⟨j, hj⟩ i (show (i : ℕ) < j from h), mul_zero, add_zero]
-    · rw [dif_neg h, zero_mul, add_zero]
+    · rw [dite_eq_right h, zero_mul, add_zero]
   · have hc' : (c : ℕ) < j + 1 := hc
     rw [blk_mul_val j hj]
     rcases Nat.lt_or_ge (c : ℕ) j with hcj | hcj
@@ -200,12 +247,12 @@ theorem UU_col {j : ℕ} (hj : j < k) (u : GA E k) (hu : UU j u) : UU (j + 1) (b
       subst hcj'
       by_cases h : (i : ℕ) < j
       · have hne : i ≠ ⟨j, hj⟩ := fun e => by subst e; exact lt_irrefl j h
-        rw [dif_pos h, h2 ⟨j, hj⟩, mul_one, Matrix.one_apply_ne hne]
+        rw [dite_eq_left h, h2 ⟨j, hj⟩, mul_one, Matrix.one_apply_ne hne]
         show u.val i ⟨j, hj⟩ + -u.val i ⟨j, hj⟩ = 0
         first
         | exact add_neg_cancel _
         | simp
-      · rw [dif_neg h, zero_mul, add_zero]
+      · rw [dite_eq_right h, zero_mul, add_zero]
         rcases Nat.lt_or_ge j (i : ℕ) with hij | hij
         · have hne : i ≠ ⟨j, hj⟩ := fun e => by subst e; exact lt_irrefl j hij
           rw [h1 i ⟨j, hj⟩ (show j < (i : ℕ) from hij), Matrix.one_apply_ne hne]

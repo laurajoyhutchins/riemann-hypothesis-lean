@@ -1,5 +1,50 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ConjSingleApply
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ConjSingleApply
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.DifferentiableAtOfSmooth
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -34,8 +79,8 @@ theorem fderiv_post {E F : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [No
   have e : (fun y => L (h y)) = (L.restrictScalars ℝ) ∘ h := rfl
   rw [e, this]; rfl
 
-variable (n V) in
 
+variable (n V) in
 def Sm : Submodule ℂ (Mat n → V) where
   carrier := {f | ContDiffOn ℝ ∞ f (GLs n) ∧ ∀ g, g ∉ GLs n → f g = 0}
   add_mem' := fun {a b} ha hb => ⟨ha.1.add hb.1, fun g hg => by simp [ha.2 g hg, hb.2 g hg]⟩
@@ -74,8 +119,8 @@ def Dm (X : Mat n) : Module.End ℂ (Sm n V) where
 theorem Dm_apply (X : Mat n) (h : Sm n V) {g : Mat n} (hg : g ∈ GLs n) : (Dm X h).1 g = Rd X h.1 g :=
   Dmf_apply X h hg
 
-variable (n V) in
 
+variable (n V) in
 def DA : Mat n →+ Module.End ℂ (Sm n V) where
   toFun := Dm
   map_zero' := by

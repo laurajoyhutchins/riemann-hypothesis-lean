@@ -1,9 +1,62 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Statements.GeometryStatements.IsPolLatticePlane
-import Development.WeilBound.CoreStatements.HodgeTatePoints.GeCanon
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.BtOrderValueEval
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.SemiabelianAdicTorsionOneStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExistsUniqueTangentDualNumber
+module
+
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.NonemptyLinearEquivOfPiFinPowFinite
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.DerRingInjective
+public import Mathlib.Tactic.ENatToNat
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.AbelianSchemeQuotients.IsAbelianScheme
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.BtOrderValueEval
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.DualLatticePointUniversalStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExistsUniqueBtOrderEmbeddingStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExistsUniqueTangentDualNumber
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LieModelFiniteBaseChangeStatement
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.SectionEqZeroOfValuesStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.SemiabelianAdicTorsionOneStatement
+public import Development.WeilBound.CoreStatements.HodgeTatePoints.GeCanon
+public import Development.WeilBound.CoreStatements.HodgeTatePoints.GeEmbSub
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.GroupTheory.FiniteAbelian.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -418,10 +471,10 @@ theorem der_all {R : Type} [CommRing R] [IsDomain R] {T : Type} [CommGroup T] [F
       Der Γ N i M (f + g) (w + w') ∧ Der Γ N i M (f * g) (f 1 • w' + g 1 • w)) ∧
     (∀ r : R, Der Γ N i M (fun _ => r) 0) ∧
     ∀ f : augIdeal (Γ.btOrder ⊤), Der Γ N i M f.1.1 0 → (f : Γ.btOrder ⊤) ∈ augIdeal (Γ.btOrder ⊤) ^ 2 := by
-  have hex : ∀ e : L, ∃ v, IsTanPt Γ N i M e v := fun e =>
-    (TanLift.tangent_mod_torsion R T Γ S G x N i ht L M e).exists
-  have hu : ∀ (e : L) (v v'), IsTanPt Γ N i M e v → IsTanPt Γ N i M e v' → v = v' := fun e _ _ h h' =>
-    (TanLift.tangent_mod_torsion R T Γ S G x N i ht L M e).unique h h'
+  have hex : ∀ e : L, ∃ v, IsTanPt Γ N i M e v := fun e => by
+    simpa only [IsTanPt] using (TanLift.tangent_mod_torsion R T Γ S G x N i ht L M e).exists
+  have hu : ∀ (e : L) (v v'), IsTanPt Γ N i M e v → IsTanPt Γ N i M e v' → v = v' := fun e _ _ h h' => by
+    exact (TanLift.tangent_mod_torsion R T Γ S G x N i ht L M e).unique (by simpa only [IsTanPt] using h) (by simpa only [IsTanPt] using h')
   obtain ⟨θ, hsurj, -, hpin⟩ := omega_open Γ ht M hj U hU
   have hsec : ∀ f : Γ.btOrder ⊤, ∃ s, Γ.HasValues s (f : T → R) := fun f =>
     ⟨j.appTop.hom ((Scheme.ΓSpecIso (CommRingCat.of (Γ.btOrder ⊤))).inv.hom f), fun t =>
@@ -492,6 +545,6 @@ theorem der_main : ∀ (p : ℕ) [Fact p.Prime] (C : Type) [Field C] [IsAlgClose
   obtain ⟨U, H, hfin, -⟩ := GlobalTheory.T.semiabelian_adic_torsion_one p C v O hv hp hO S G hG y La X
   obtain ⟨j, hj, -⟩ := GlobalTheory.T.existsUnique_btOrder_embedding O _ (X.Γ n)
   haveI := (EmbSub.openImmersion_translatesCover O _ (X.Γ n) (U n) (hfin n) j hj).1
-  exact der_all (X.Γ n) (X.tors n) M hj (U n) (hfin n).one
+  simpa only [TorsTower.IsDer, Der] using der_all (X.Γ n) (X.tors n) M hj (U n) (hfin n).one
 
 end PositivityTheory.HtPt.Ge.TwDer

@@ -1,6 +1,57 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CapRWordsOfParts
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CapRWordsOfParts
 import Formalism.HermitianCurvature.HermitianCurvatureProofs.ActualAdjointnessFromHermitian
 import Formalism.HermitianCurvature.HermitianCurvatureProofs.RegularisedPairingViaPhase
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.BitVec
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Algebra.MvPolynomial.Funext
+
+@[expose] public section
 
 open Formalism.REAL Formalism.QuantumDeterminants Formalism.FourierDecayAlt NumberField Matrix
 open scoped ContDiff
@@ -36,7 +87,7 @@ theorem sum_toList_map {ι M : Type*} [AddCommMonoid M] (s : Finset ι) (F : ι 
   exact Finset.sum_map_toList s F
 
 theorem coeff_listSum {σ' : Type*} {α : Type*} (m : σ' →₀ ℕ) (l : List α) (F : α → MvPolynomial σ' ℂ) :
-    MvPolynomial.coeff m ((l.map F).sum) = (l.map fun a => MvPolynomial.coeff m (F a)).sum := by
+    AddMonoidAlgebra.coeff ((l.map F).sum) m = (l.map fun a => AddMonoidAlgebra.coeff (F a) m).sum := by
   induction l with
   | nil => simp
   | cons a l ih => simp [MvPolynomial.coeff_add, ih]
@@ -127,7 +178,7 @@ def termP (tm : Polynomial ℂ × List (B.Mat k r)) (τ : B.Mat k r → ℂ) (t 
     (Finsupp.single (0 : Fin 2) d + Finsupp.single (1 : Fin 2) tm.2.length) (tm.1.coeff d * (tm.2.map τ).prod)
 
 theorem coeff_termPolynomial (tm : Polynomial ℂ × List (B.Mat k r)) (τ : B.Mat k r → ℂ) (hj : j ≤ t) :
-    MvPolynomial.coeff (Finsupp.single (0 : Fin 2) (t - j) + Finsupp.single (1 : Fin 2) j) (termP tm τ t) =
+    AddMonoidAlgebra.coeff (termP tm τ t) (Finsupp.single (0 : Fin 2) (t - j) + Finsupp.single (1 : Fin 2) j) =
       if tm.2.length = j then tm.1.coeff (t - j) * (tm.2.map τ).prod else 0 := by
   unfold termP
   rw [MvPolynomial.coeff_sum]
@@ -143,6 +194,7 @@ theorem eval_termPolynomial (tm : Polynomial ℂ × List (B.Mat k r)) (τ : B.Ma
     (x : Fin 2 → ℂ) :
     MvPolynomial.eval x (termP tm τ t) = tm.1.eval (x 0) * x 1 ^ tm.2.length * (tm.2.map τ).prod := by
   unfold termP
+
   rw [map_sum, Polynomial.eval_eq_sum_range' (show tm.1.natDegree < t + 1 by omega), Finset.sum_mul, Finset.sum_mul]
   refine Finset.sum_congr rfl fun d _ => ?_
   rw [MvPolynomial.eval_monomial, Finsupp.prod_add_index' (by simp) (by intros; rw [pow_add]),
@@ -166,6 +218,7 @@ theorem core_symb (hD : FExpDeg) (hS : FExpSymb) (hDet : DetShiftCoeff) (hlen : 
   have hPD : P = D := by
     apply MvPolynomial.funext
     intro x
+
     rw [hP, hDdef, map_sum, map_sum]
     refine Finset.sum_congr rfl fun σ _ => ?_
     rw [map_mul, map_mul, eval_listSum]
@@ -278,8 +331,8 @@ theorem mem_Lw {t N : ℕ} {G : Equiv.Perm (Fin t) → List (GenW k r)} {Ys : Fi
 
 end CapWP
 
-open CapWP in
 
+open CapWP in
 theorem capelli_words_holds : CapWordsOfParts := by
   intro _ hR hCV hD hS hDet hI k r j hj1 hjn
   have hmd := mdim0 k r
@@ -306,8 +359,8 @@ theorem capelli_words_holds : CapWordsOfParts := by
       (fun σ => capGens_deg _ σ) (by omega) (by omega) hYs (fun X => Matrix.trace (Ξ * X))
       (fun a b => Matrix.trace (Ξ * zgCV k r a b)) (fun σ u s => capGens_symb _ Ξ σ u s), cv_charpoly, hmd]
 
-open CapWP in
 
+open CapWP in
 theorem right_capelli_words_holds : CapRWordsOfParts := by
   intro _ hR hCR hD hS hDet hI k r z' Bs _ j hj1 hjk
   obtain ⟨Ys, lam, hYs⟩ := hI k (k - j) (by omega)
@@ -333,8 +386,8 @@ theorem right_capelli_words_holds : CapRWordsOfParts := by
       (fun σ => capGens_deg _ σ) (by omega) le_rfl hYs (fun X => Matrix.trace (Ξ * X))
       (fun a b => Matrix.trace (Ξ * zgB Bs a b)) (fun σ u s => capGens_symb _ Ξ σ u s)
 
-open CapWP in
 
+open CapWP in
 theorem left_capelli_words_holds : CapLWordsOfParts := by
   intro _ hL hCL hD hS hDet hI k r z Bs _ j hj1 hjk
   obtain ⟨Ys, lam, hYs⟩ := hI k (k - j) (by omega)

@@ -1,6 +1,49 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.TraceFormula.GlobalTraceComparison.OrbitalCosetFiniteness.CvGelfandAlt
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RegularTwistedOrbitLocalFinitenessStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LocalTwistContinuousInvolutionIntegralPropertiesStatement
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.TraceFormula.GlobalTraceComparison.OrbitalCosetFiniteness.CvGelfandAlt
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LocalTwistContinuousInvolutionIntegralPropertiesStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RegularTwistedOrbitLocalFinitenessStatement
+import GroundTheory.GlobalFields.LocalFieldAtPlace
+import GroundTheory.LocalFields.PadicLogSeries
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 noncomputable section
 
@@ -15,8 +58,8 @@ private lemma out_orbit {G : Type} [Group G] (θ : G →* G) (K : Subgroup G) (h
     ∃ k ∈ K, ∃ k' ∈ K,
       (Quotient.out (DoubleCoset.mk (twCent θ δ) K x))⁻¹ * δ * θ (Quotient.out (DoubleCoset.mk (twCent θ δ) K x)) =
         k * (x⁻¹ * δ * θ x) * k' := by
-  obtain ⟨h, hh, k, hk, e⟩ := (DoubleCoset.eq (twCent θ δ) K _ _).1
-    (DoubleCoset.out_eq' (twCent θ δ) K (DoubleCoset.mk (twCent θ δ) K x))
+  obtain ⟨h, hh, k, hk, e⟩ := (@DoubleCoset.eq _ _ (twCent θ δ) K _ _).1
+    (DoubleCoset.out_eq' (DoubleCoset.mk (twCent θ δ) K x))
   generalize Quotient.out (DoubleCoset.mk (twCent θ δ) K x) = o at e
   have hc : h * δ = δ * θ h := hh
   refine ⟨k, hk, (θ k)⁻¹, K.inv_mem (hθ k hk), ?_⟩
@@ -39,13 +82,13 @@ private theorem orbFin_prod {G H : Type} [Group G] [Group H] [TopologicalSpace G
   have hφ : Function.Injective φ := by
     intro q q' e
     obtain ⟨e1, e2⟩ := Prod.mk.inj e
-    obtain ⟨a, ha, k, hk, f1⟩ := (DoubleCoset.eq _ _ _ _).1 e1
-    obtain ⟨b, hb, l, hl, f2⟩ := (DoubleCoset.eq _ _ _ _).1 e2
+    obtain ⟨a, ha, k, hk, f1⟩ := (@DoubleCoset.eq _ _ _ _ _ _).1 e1
+    obtain ⟨b, hb, l, hl, f2⟩ := (@DoubleCoset.eq _ _ _ _ _ _).1 e2
     have hab : (a, b) ∈ twCent (θ.prodMap θ') (δ, δ') :=
       Prod.ext (show a * δ = δ * θ a from ha) (show b * δ' = δ' * θ' b from hb)
     have key : DoubleCoset.mk (twCent (θ.prodMap θ') (δ, δ')) (K.prod K') (Quotient.out q) =
         DoubleCoset.mk (twCent (θ.prodMap θ') (δ, δ')) (K.prod K') (Quotient.out q') :=
-      (DoubleCoset.eq _ _ _ _).2 ⟨(a, b), hab, (k, l), ⟨hk, hl⟩, Prod.ext f1 f2⟩
+      (@DoubleCoset.eq _ _ _ _ _ _).2 ⟨(a, b), hab, (k, l), ⟨hk, hl⟩, Prod.ext f1 f2⟩
     rwa [DoubleCoset.out_eq', DoubleCoset.out_eq'] at key
   refine (Set.Finite.preimage hφ.injOn ((h1 _ c1).prod (h2 _ c2))).subset ?_
   intro q hq

@@ -1,11 +1,71 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.BlockAnti
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.UpperOff
+public import Formalism.PeriodIntegrals.QuotInv
+public import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ClosedSubgroupBesselUnitaryHaarUniqueStatement
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.DensityInChartStatement
+import Development.AbelianVarietyTheory.Proofs.FlagMeasures.FlagUnipotentLebesgueMeasureIsHaarOn
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.FlagUnipotentLebesgueMeasureIsHaarOnStatement
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.HaarLieIsHaarOnUnipotentRadicalStatement
+import Development.AbelianVarietyTheory.Proofs.FlagMeasures.IsotropicLeviEmbeddingHomomorphismProperties
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.PowApplyEqZeroOfStrictUpper
 import Development.AbelianVarietyTheory.Proofs.FlagMeasures.UnipotentLeviRadicalCoordsHomeomorph
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.HaarLieIsHaarOnUnipotentRadicalStatement
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ClosedSubgroupBesselUnitaryHaarUniqueStatement
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.DensityInChartStatement
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.FlagUnipotentLebesgueMeasureIsHaarOnStatement
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.PowApplyEqZeroOfStrictUpper
+import Formalism.FormalDegreeBessel.FinalG
+import Mathlib.Algebra.Order.Archimedean.Real.Hom
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Ring.IsFormallyReal
+public import Mathlib.Analysis.Calculus.Deriv.Star
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.Normed.Algebra.MatrixExponential
+public import Mathlib.Analysis.SpecialFunctions.Gaussian.FourierTransform
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.Countable
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.MeasureTheory.Integral.Pi
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -117,14 +177,19 @@ theorem exp_inj_upper {m : ℕ} {X Y : Matrix (Fin m) (Fin m) ℂ} (hX : ∀ i j
       (P Z).eval (t : ℂ) = (NormedSpace.exp Z ^ t) i j := by
     intro Z hZ t
     rw [← Matrix.exp_nsmul, exp_upper (X := t • Z) (fun i j h => by simp [hZ i j h]), Matrix.sum_apply,
-      Polynomial.eval_finset_sum]
+      Polynomial.eval_finsetSum]
     refine Finset.sum_congr rfl fun n _ => ?_
     rw [← Nat.cast_smul_eq_nsmul ℂ, smul_pow]
     simp only [Polynomial.eval_monomial, Matrix.smul_apply, smul_eq_mul]
     ring
   have hc : ∀ Z : Matrix (Fin m) (Fin m) ℂ, (P Z).coeff 1 = Z i j := by
     intro Z
-    simp [P, Polynomial.coeff_monomial]
+    simp only [P, Polynomial.finsetSum_coeff, Polynomial.coeff_monomial_apply]
+    rw [Finset.sum_eq_single 1]
+    · simp
+    · intro n hn hne
+      simp [hne]
+    · simp
   have : P X = P Y := by
     refine Polynomial.eq_of_infinite_eval_eq _ _ (Set.infinite_of_injective_forall_mem
       (f := fun t : ℕ => (t : ℂ)) Nat.cast_injective fun t => ?_)
@@ -553,7 +618,7 @@ theorem haarLie_eq_lebN : ∀ k r : ℕ,
   obtain ⟨c, -, -, hc⟩ := GlobalTheory.T.closedSubgroupBesselUnitary_haar_unique k r (Nset k r) _ _
     ⟨fun _ h => h.1, closed_N, (nSubgroup k r).1, (nSubgroup k r).2.1, (nSubgroup k r).2.2⟩ (GlobalTheory.T.flagUnipotentLebesgueMeasure_isHaarOn k r) hH
   have hT := GlobalTheory.T.tendsto_measure_image_ball_div_volume _ (Nset k r) _ 1 matGroup_N hH dens_one (EE k r) Phi (LL k r) Phi_zero
-    (Eventually.of_forall Phi_mem) fun i j => ⟨_, (smooth_Phi i j).contDiffAt.hasStrictFDerivAt (by simp),
+    (Eventually.of_forall Phi_mem) fun i j => ⟨_, (smooth_Phi i j).contDiffAt.hasStrictFDerivAt_fderiv (by simp),
       fun v => by rw [LL_val, unrealify_rl]; rfl⟩
   have hi : Function.Injective fun q : EE k r => (Matrix.of.symm (Phi q) : Mt k r) := fun q q' h =>
     (coord_homeo k r).1.injOn trivial trivial h

@@ -1,4 +1,51 @@
-import Formalism.HermitianCurvature.BigCellVanishingOfCommute
+module
+
+public import Formalism.HermitianCurvature.BigCellVanishingOfCommute
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.MvPolynomial.CommRing
+
+@[expose] public section
 
 open Formalism.FourierDecayAlt Formalism.QuantumDeterminants MvPolynomial
 
@@ -92,38 +139,6 @@ end Formalism.FourierDecayAlt.P.PartialDerivativeAlgebra
 namespace Formalism.FourierDecayAlt.P
 
 open PartialDerivativeAlgebra
-
-theorem homogeneity_natural_degree : C6.SSNatHomog := by
-  intro m m' E _ _ OO h1 h2 w w' Gv T T' th hGv hT hT' _ _
-  simp only [C6.unitOf]
-  rw [h1, h2, smul_smul, smul_smul]
-  congr 1
-  have hc : 0 < Real.sqrt (T * T') := Real.sqrt_pos.mpr (mul_pos hT hT')
-  have hab : Real.sqrt (T / Gv) * Real.sqrt (T' / Gv) = Real.sqrt (T * T') / Gv := by
-    rw [← Real.sqrt_mul (div_nonneg hT.le hGv.le),
-      show T / Gv * (T' / Gv) = (T * T') / (Gv * Gv) by ring,
-      Real.sqrt_div' _ (mul_self_nonneg Gv), Real.sqrt_mul_self hGv.le]
-  have hab' : ((Real.sqrt (T / Gv) : ℝ) : ℂ) * ((Real.sqrt (T' / Gv) : ℝ) : ℂ)
-      = ((Real.sqrt (T * T') : ℝ) : ℂ) / (Gv : ℂ) := by
-    rw [← Complex.ofReal_mul, hab, Complex.ofReal_div]
-  have hc' : ((Real.sqrt (T * T') : ℝ) : ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr hc.ne'
-  have hG' : (Gv : ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr hGv.ne'
-  rw [mul_assoc, hab']
-  field_simp
-
-theorem polynomial_root_facts : C6.RootFacts := by
-  intro s D' hs hD
-  have hs0 : s ≠ 0 := by omega
-  have hprim := Complex.isPrimitiveRoot_exp s hs0
-  have hnd : (Polynomial.nthRoots s D').Nodup := hprim.nthRoots_nodup hD
-  refine ⟨?_, ?_⟩
-  · unfold G.rootSet
-    rw [Multiset.toFinset_card_of_nodup hnd, hprim.card_nthRoots D']
-    rw [if_pos (IsAlgClosed.exists_pow_nat_eq D' (by omega))]
-  · intro z hz
-    unfold G.rootSet at hz
-    rw [Multiset.mem_toFinset, Polynomial.mem_nthRoots (by omega)] at hz
-    rw [← hz, norm_pow, one_div, Real.pow_rpow_inv_natCast (norm_nonneg z) hs0]
 
 theorem gram_function_last_minor : C6.GfDlast := by
   intro k r z z' hz hz' g ε hε

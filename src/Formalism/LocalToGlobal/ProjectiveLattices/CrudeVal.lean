@@ -1,4 +1,53 @@
-import Formalism.LocalToGlobal.ProjectiveLattices.PlaceBelow
+module
+
+public import Formalism.LocalToGlobal.ProjectiveLattices.PlaceBelow
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+public import Mathlib.Data.Nat.Prime.Factorial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.FreeModule.IdealQuotient
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -89,13 +138,14 @@ lemma crv_vLa_natCast {N : ℕ} (hN : N ≠ 0) :
     vLa la ((N : ℕ) : K) = (padicValNat (resCharOf la) N * ramOverZ la : ℕ) := by
   have hp := resCharOf_prime la
   haveI : Fact (resCharOf la).Prime := ⟨hp⟩
-  obtain ⟨n', hn'⟩ : resCharOf la ^ padicValNat (resCharOf la) N ∣ N := pow_padicValNat_dvd
+  obtain ⟨n', hn'⟩ : resCharOf la ^ padicValNat (resCharOf la) N ∣ N := (_root_.Dvd.intro_left _ (_root_.Nat.divMaxPow_mul_pow_padicValNat _ _))
   have hndvd : ¬ resCharOf la ∣ n' := by
     rintro ⟨b, rfl⟩
     have hd : resCharOf la ^ (padicValNat (resCharOf la) N + 1) ∣
         resCharOf la ^ padicValNat (resCharOf la) N * (resCharOf la * b) := ⟨b, by ring⟩
     rw [← hn'] at hd
-    exact pow_succ_padicValNat_not_dvd (p := resCharOf la) hN hd
+    exact pow_succ_padicValNat_not_dvd (p := resCharOf la) hN (by
+      simpa only [Nat.padicValNat_def] using hd)
   have hn0 : n' ≠ 0 := by
     rintro rfl
     exact hN (by simpa using hn')
@@ -129,10 +179,10 @@ lemma crv_padic_prod {σ : Type} (p : ℕ) [Fact p.Prime] (α : σ →₀ ℕ) :
   classical
   simp only [Finsupp.prod]
   refine Finset.induction_on α.support ?_ ?_
-  · simp
+  · simp [Nat.padicValNat_def]
   · intro a u ha ih
     rw [Finset.prod_insert ha, Finset.sum_insert ha,
-      padicValNat.mul (Nat.factorial_ne_zero _)
+      (show ∀ {p a b : ℕ} [_root_.Fact (_root_.Nat.Prime p)], a ≠ 0 → b ≠ 0 → _root_.padicValNat p (a * b) = _root_.padicValNat p a + _root_.padicValNat p b from by simpa only [← _root_.Nat.padicValNat_def] using @_root_.Nat.multiplicity_mul) (Nat.factorial_ne_zero _)
         (Finset.prod_ne_zero_iff.mpr fun _ _ => Nat.factorial_ne_zero _), ih]
 
 lemma crv_legendre {σ : Type} (p : ℕ) [Fact p.Prime] (α : σ →₀ ℕ) :
@@ -140,8 +190,11 @@ lemma crv_legendre {σ : Type} (p : ℕ) [Fact p.Prime] (α : σ →₀ ℕ) :
   rw [crv_padic_prod, Finset.mul_sum]
   unfold Finsupp.degree
   exact Finset.sum_le_sum fun s _ => by
-    rw [sub_one_mul_padicValNat_factorial]
-    exact Nat.sub_le _ _
+    rw [Nat.padicValNat_def]
+    calc
+      (p - 1) * multiplicity p (α s).factorial = (α s) - (p.digits (α s)).sum :=
+        (Fact.out : p.Prime).sub_one_mul_multiplicity_factorial
+      _ ≤ α s := Nat.sub_le _ _
 
 theorem nval_factProd_le (ho : OverLa la V ι e) {σ : Type} (α : σ →₀ ℕ) :
     nval V e (((α.prod fun _ t => t.factorial : ℕ) : K')) ≤
@@ -174,9 +227,11 @@ theorem nval_factProd_le_zero (ho : OverLa la V ι e) {σ : Type} (α : σ →�
     exact Finset.prod_ne_zero_iff.mpr fun _ _ => Nat.factorial_ne_zero _
   have hv : padicValNat (resCharOf la) (α.prod fun _ t => t.factorial) = 0 := by
     rw [crv_padic_prod]
-    refine Finset.sum_eq_zero fun s _ => padicValNat.eq_zero_of_not_dvd ?_
-    rw [hp.dvd_factorial]
-    exact not_le.mpr (hα s)
+    refine Finset.sum_eq_zero fun s _ => by
+      rw [Nat.padicValNat_def]
+      apply multiplicity_eq_zero_of_not_dvd
+      rw [hp.dvd_factorial]
+      exact not_le.mpr (hα s)
   rw [crv_nval_natCast la ho hne, hv]
   simp
 

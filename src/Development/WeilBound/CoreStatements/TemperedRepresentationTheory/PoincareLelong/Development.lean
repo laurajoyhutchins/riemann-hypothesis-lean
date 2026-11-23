@@ -1,37 +1,82 @@
-import Mathlib
-import Development.AutomorphicSpectrum.PublishedTheorems.Metrics₂.PoincareLelong
-import Development.AutomorphicSpectrum.PublishedTheorems.Metrics₂.PoincareLelongInv
+module
+
+public import Development.AutomorphicSpectrum.PublishedTheorems.Metrics₂.PoincareLelong
+public import Development.AutomorphicSpectrum.PublishedTheorems.Metrics₂.PoincareLelongInv
+public import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.StChartDivisor
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StDivisorGeneralPointBranches
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StLelongLimit
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StLelongLimitAtBranches
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StRegMassNearSmall
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.StPtsAbsIntegrable
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.StPtsAbsMeasurable
+public import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.StLelongPolyLimit
+public import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.StSegreChartIntegral
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.Assembly
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.PLelongLimit
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.PLelongLimitGoodPoints
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.PLelongLimitOnZero
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.PLelongMassNearSmall
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.PTubeDeepAreaCount
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.PTubeDeepMass
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.PTubeDeepRankOne
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.PTubeEuclMass
+public import GroundTheory.HeightsAndTheta.Heights.ElementarySymmetric.PVarIntGraphX
 import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.AssemblyBase
-import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.PoincareLelongAlt
-import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.PotFinCons
-import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.LogRegLineTensor
-import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.PLelongSectionLimit
-import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.PLelongChartLimit
-import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.PtsIntegrable
-import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.Stokes
-import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.PPtsBilinear
-import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.PSegreChart
+public import GroundTheory.HeightsAndTheta.Heights.LocalFiniteness.CentredDiscCoverCurveHolds
+public import GroundTheory.HeightsAndTheta.Heights.LocalFiniteness.IsolatedPointsCount
+public import GroundTheory.HeightsAndTheta.Heights.LocalFiniteness.UniformIntegrabilityProportionalityHolds
+public import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.LogRegLineTensor
 import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.PChartSectionNotMem
-import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.PLelongWeightLimit
+public import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.PLelongChartLimit
+public import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.PLelongSectionLimit
+public import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.PLelongWeightLimit
 import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.PLocalMultComap
-import GroundTheory.HeightsAndTheta.Heights.ElementarySymmetric.PVarIntGraphX
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.PStokesOnVariety
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.PCutOffLimit
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.PCutOff
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.PCutOffTube
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.PTubeEuclMass
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.PTubeDeepMass
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.PTubeDeepRankOne
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.PTubeDeepAreaCount
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.PLelongLimit
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.PLelongLimitOnZero
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.PLelongLimitGoodPoints
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.PLelongMassNearSmall
-import GroundTheory.HeightsAndTheta.Heights.LocalFiniteness.CentredDiscCoverCurveHolds
-import GroundTheory.HeightsAndTheta.Heights.LocalFiniteness.UniformIntegrabilityProportionalityHolds
-import GroundTheory.HeightsAndTheta.Heights.LocalFiniteness.IsolatedPointsCount
-import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.StChartDivisor
-import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.PSegreChartIntegral
+public import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.PPtsBilinear
+public import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.PSegreChart
+public import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.PoincareLelongAlt
+public import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.PotFinCons
+import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.PtsIntegrable
+public import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.Stokes
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.LelongChartLimit
+
+@[expose] public section
 
 namespace PositivityTheory.Tls2.Pl
 

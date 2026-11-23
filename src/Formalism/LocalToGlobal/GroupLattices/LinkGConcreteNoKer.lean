@@ -1,6 +1,46 @@
-import Formalism.LocalToGlobal.GroupLattices.StdSubAtOfRing
-import Formalism.LocalToGlobal.GroupLattices.AdmissibleFamilyNoKernel
-import Formalism.LocalToGlobal.GroupLattices.TrivialTransfer.GramTotallyDefinite
+module
+
+public import Formalism.LocalToGlobal.GroupLattices.StdSubAtOfRing
+public import Formalism.LocalToGlobal.GroupLattices.AdmissibleFamilyNoKernel
+public import Formalism.LocalToGlobal.GroupLattices.ComparisonMaps.NpDescFOfValRatF
+public import Formalism.LocalToGlobal.GroupLattices.TrivialTransfer.GramTotallyDefinite
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -31,19 +71,6 @@ theorem npDescF_of_tied {eps : ℝ} (Fm : FamP eps) (h : GroupCompatibilityFamil
   exact ⟨x0, fun x hx i hx1 => by
     obtain ⟨G⟩ := h0 x hx i hx1
     exact Cmp.CmpTied.valRat G.cmp⟩
-
-theorem linkG_concrete (𝒞 : FamClass) (h : Loc)
-    (hT : Closed 𝒞 fun Fm _ => GroupCompatibilityFamily Fm)
-    (hsys : Closed 𝒞 fun Fm _ => Ev Fm fun x i => LocalDataSystem (Fm.Gx x i) (Fm.Gy x i) (Formalism.MainNotions.AuxBlock8.lowU (Fm.D x i)))
-    (hsysS : Closed 𝒞 fun Fm _ => Ev Fm fun x i => LocalDataSystem (Fm.Gx x i) (Fm.Gy x i) (Formalism.MainNotions.G.lowFE (Fm.L x i)))
-    (h2 : Closed 𝒞 fun Fm _ => Adm2F Fm) :
-    Closed 𝒞 fun Fm _ => LinkG Fm := by
-  refine link_of_numbers_proved 𝒞 h ?_ h2 (hT.imp fun Fm _ _ ht => npDescF_of_tied Fm ht)
-  exact ((hT.and hsys).and hsysS).imp fun Fm _ _ hh =>
-    { gatE := gatEF_of_tied Fm hh.1.1
-      stdSub := stdSubF_of_tied Fm hh.1.1
-      localSystemLowTerm := hh.1.2
-      localSystemSizeLowTerm := hh.2 }
 
 theorem linkG_concrete_noKer (𝒞 : FamClass) (h : Loc)
     (hT : Closed 𝒞 fun Fm _ => GroupCompatibilityFamily Fm) (h2 : Closed 𝒞 fun Fm _ => Adm2F Fm) :

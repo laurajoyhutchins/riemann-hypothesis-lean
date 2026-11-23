@@ -1,6 +1,56 @@
-import Mathlib
-import Development.AbelianVarietyTheory.BlockTheory.NonGaloisCusps.OnePlusPowerAssembly
-import Development.AbelianVarietyTheory.BlockTheory.NonGaloisCusps.KernelCharacterDelta
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.NonGaloisCusps.OnePlusPowerAssembly
+public import Development.AbelianVarietyTheory.BlockTheory.NonGaloisCusps.KernelCharacterDelta
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 namespace GlobalTheory.PsiLemmaCompare
@@ -168,8 +218,9 @@ theorem assemble_bijective : Function.Bijective (OnePlusPowerCharacters.assemble
      Matrix.mulVec_surjective_iff_isUnit.2 ((Matrix.isUnit_iff_isUnit_det T).2 (hdet ▸ isUnit_one))⟩
   have e : OnePlusPowerCharacters.assemble k l = assembleX k l ∘ T.mulVec := by
     funext y
+
     simp only [Function.comp, OnePlusPowerCharacters.assemble, assembleX, Matrix.mulVec, dotProduct, map_sum, map_mul, T,
-      Matrix.of_apply, map_natCast, Finset.mul_sum]
+    Matrix.of_apply, map_natCast, Finset.mul_sum]
     rw [Finset.sum_comm]
     refine Finset.sum_congr rfl fun j _ => ?_
     simp only [← mul_assoc]
@@ -300,8 +351,8 @@ theorem isCyclotomic_iff (R : RingPG k l) (ι : k⸨X⸩ →ₐ[k] k⸨X⸩) :
       exact ⟨fun h => ⟨⟨b, rfl⟩, h⟩, fun h => h.2⟩
     · rw [hγ, hab, gam_coe]
 
-omit hl [CharP k l] in
 
+omit hl [CharP k l] in
 theorem psiRing_iff (R : RingPG k l) (ψ : k⸨X⸩ →ₗ[k] k⸨X⸩) :
     OnePlusPowerCharacters.PsiRing R ψ ↔ FrobeniusBinomialReduction.PsiRing R ψ := by
   have e : {x : k⸨X⸩ | ∃ b : k⟦X⟧, x = (b : k⸨X⸩)} = Set.range (fun b : k⟦X⟧ => (b : k⸨X⸩)) := by
@@ -339,7 +390,7 @@ theorem image_sh_pull (ψ : k⸨X⸩ →ₗ[k] k⸨X⸩) (f Ψ : V →ₗ[k] V) 
         rw [← coe_smul, ← mul_smul, h1, ← hc, coe_smul]
         exact M₀.smul_mem c hm
       | zero => intro b; simp
-      | add x y _ _ hx hy => intro b; rw [smul_add, smul_add, map_add]; exact M₀.add_mem (hx b) (hy b)
+      | add x y _ _ hx hy => intro b; rw [smul_add, smul_add, map_add (f := _)]; exact M₀.add_mem (hx b) (hy b)
       | smul c x _ hx => intro b; rw [← mul_smul b]; exact hx _
     simpa using key 1
   · intro hm
@@ -360,15 +411,5 @@ theorem psiMod_iff {l : ℕ} (R : RingPG k l) (ψ : k⸨X⸩ →ₗ[k] k⸨X⸩)
     ⟨fun a h1 h2 => image_sh_pull ψ f Ψ a (hψ.2.2.2 a h1 h2) h.1 M₀, h.2.2 M₀ hM⟩⟩⟩
 
 end Mod
-
-def LemmaPsiEtale : Prop :=
-  ∀ (l : ℕ) [Fact l.Prime] (k : Type) [Field k] [CharP k l], 5 ≤ l →
-  ∀ (R : RingPG k l) (ι : k⸨X⸩ →ₐ[k] k⸨X⸩), OnePlusPowerCharacters.IsCyclotomic R ι →
-    Function.Bijective (OnePlusPowerCharacters.assemble k l) ∧
-    ∃ ψ : k⸨X⸩ →ₗ[k] k⸨X⸩, OnePlusPowerCharacters.IsPsi l ι ψ ∧ OnePlusPowerCharacters.PsiRing R ψ ∧
-      ∀ (n : ℕ) [NeZero n] (V : Type) [AddCommGroup V] [Module k⸨X⸩ V] [Module k⟦X⟧ V] [Module k V]
-        [IsScalarTower k⟦X⟧ k⸨X⸩ V] [IsScalarTower k k⸨X⸩ V] [IsScalarTower k k⟦X⟧ V]
-        [FiniteDimensional k⸨X⸩ V] (D : ModPG R n V) (i : ZMod n),
-        ∃ Ψ : V →ₗ[k] V, OnePlusPowerCharacters.PsiMod l ψ (D.φ i) (D.γ (i - 1)) (D.γ i) Ψ
 
 end GlobalTheory.PsiLemmaCompare

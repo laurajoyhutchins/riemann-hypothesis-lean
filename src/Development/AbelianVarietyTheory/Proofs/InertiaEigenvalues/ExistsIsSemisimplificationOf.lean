@@ -1,6 +1,47 @@
-import Mathlib
-import Formalism.SharpRestriction.LevelLetterCocycles.QuotientHomNonvanishingBound
-import Development.AbelianVarietyTheory.BlockTheory.NonGaloisCusps.SemisimplificationConstituents
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.NonGaloisCusps.SemisimplificationConstituents
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Formalism.BasicNotions Formalism.MainNotions Formalism.MainNotions.N
 
@@ -55,7 +96,7 @@ private theorem stable_sup' (f : Representation k Γ V) (A B : Submodule k V) (h
     (hB : Stable f B) : Stable f (A ⊔ B) := by
   intro g x hx
   obtain ⟨a, ha, b, hb, rfl⟩ := Submodule.mem_sup.mp hx
-  rw [map_add]
+  rw [map_add (f := _)]
   exact Submodule.add_mem_sup (hA g a ha) (hB g b hb)
 
 theorem partial_step (ρ : Representation k Γ V) (U U' : Submodule k V) (hU : Stable ρ U)
@@ -79,7 +120,7 @@ theorem partial_step (ρ : Representation k Γ V) (U U' : Submodule k V) (hU : S
     have e1 : p (v - p v) = 0 := by rw [map_sub, hpp, sub_self]
     have e2 : p (s g (p v)) = s g (p v) := hpU _ (hsU' g _ (hp v))
     have e3 : s' g v = s g (p v) + (ρ g (v - p v) - p (ρ g (v - p v))) := by rw [hs', glue_apply]
-    rw [hB g _ e1, e3, map_add, e2]
+    rw [hB g _ e1, e3, map_add (f := _), e2]
     generalize ρ g (v - p v) = x
     rw [map_sub, hpp, sub_self, add_zero, add_sub_cancel_left]
   set Wm : Submodule k V := U ⊓ LinearMap.ker p with hWm
@@ -114,7 +155,7 @@ theorem partial_step (ρ : Representation k Γ V) (U U' : Submodule k V) (hU : S
       obtain ⟨a, ha, b, hb, rfl⟩ := Submodule.mem_sup.mp hx
       have hbk : p b = 0 := (hX hb).2
       have hρb : ρ g b = p (ρ g b) + s' g b := by rw [hB g b hbk]; abel
-      rw [map_add, hρb, ← add_assoc]
+      rw [map_add (f := _), hρb, ← add_assoc]
       exact Submodule.add_mem_sup (add_mem (hU' g a ha) (hp _)) (hXs g b hb)
     rcases hmax (U' ⊔ X) hρX le_sup_left (sup_le hle (hX.trans inf_le_left)) with h1 | h1
     · left

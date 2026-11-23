@@ -1,7 +1,54 @@
-import Mathlib
-import GroundTheory.LocalFields.IntermediateField
-import GroundTheory.LocalFields.Integers
-import GroundTheory.LocalFields.LowerIndex
+module
+
+public import GroundTheory.LocalFields.LowerIndex
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RingTheory.Valuation.Discrete.IsDiscreteValuationRing
+
+@[expose] public section
 
 namespace UpperTheory.Reformulated.B.RamificationLowerIndex
 
@@ -53,7 +100,7 @@ private lemma exists_generator {R S : Type*} [CommRing R] [CommRing S] [Algebra 
   have hϖ0 : ϖ ≠ 0 := hϖ.ne_zero
   have hex : ∃ x : S, residue S x = g ∧ ¬ ϖ ^ 2 ∣ x ^ q - x := by
     by_cases h : ϖ ^ 2 ∣ x₀ ^ q - x₀
-    · refine ⟨x₀ + ϖ, by rw [map_add, hx₀, (hres ϖ).2 dvd_rfl, add_zero], fun h' => ?_⟩
+    · refine ⟨x₀ + ϖ, by rw [map_add (f := _), hx₀, (hres ϖ).2 dvd_rfl, add_zero], fun h' => ?_⟩
       obtain ⟨k, hk⟩ := (X ^ q : S[X]).binomExpansion x₀ ϖ
       simp only [eval_pow, eval_X, derivative_X_pow, eval_mul, eval_C] at hk
       obtain ⟨c, hc⟩ := hqd
@@ -158,7 +205,7 @@ theorem UpperTheory.Reformulated.B.RamificationLowerIndex.ramificationIndex_mul_
       [inst_3 : IsNonarchimedeanLocalField K] [inst_4 : Field L] [inst_5 : ValuativeRel L] [inst_6 : TopologicalSpace L]
       [inst_7 : IsNonarchimedeanLocalField L] [inst_8 : Algebra K L] [inst_9 : ValuativeExtension K L]
       [inst_10 : FiniteDimensional K L] (M : IntermediateField K L) [IsGalois K L] [inst_12 : Normal K ↥M] (σ : Gal(L/K)),
-      (↑(GroundTheory.LocalField.ramificationIndex (↥M) L) : ℕ∞) *
+      (↑((_root_.Ideal.ramificationIdx (_root_.IsLocalRing.maximalIdeal (_root_.Valuation.integer (_root_.ValuativeRel.valuation L))) (_root_.Valuation.integer (_root_.ValuativeRel.valuation (↥M))))) : ℕ∞) *
           GroundTheory.LocalField.lowerIndex K (↥M) ((AlgEquiv.restrictNormalHom ↥M : Gal(L/K) → Gal(↥M/K)) σ) =
         ∑ τ : Gal(L/↥M), GroundTheory.LocalField.lowerIndex K L (σ * AlgEquiv.restrictScalars K τ) := by
   intro K L _ _ _ _ _ _ _ _ _ _ _ M _ _ σ
@@ -215,7 +262,8 @@ theorem UpperTheory.Reformulated.B.RamificationLowerIndex.ramificationIndex_mul_
       have h1 : valuation L (algebraMap M L m) ≤ 1 := by rw [hm]; exact (f.coeff i).2
       exact (Valuation.HasExtension.val_map_le_one_iff (valuation M) (valuation L) m).1 h1
     have hy : f.coeff i = algebraMap 𝒪[M] 𝒪[L] ⟨m, hm1⟩ := Subtype.ext hm.symm
-    rw [hy, RingHom.coe_coe, hcomm, ← map_sub]
+    set_option synthInstance.maxHeartbeats 200000 in
+      rw [hy, RingHom.coe_coe, hcomm, ← map_sub (algebraMap 𝒪[M] 𝒪[L])]
     apply _root_.map_dvd
     rw [← addVal_le_iff_dvd, ← hy₁]
     exact lowerIndex_le _ _

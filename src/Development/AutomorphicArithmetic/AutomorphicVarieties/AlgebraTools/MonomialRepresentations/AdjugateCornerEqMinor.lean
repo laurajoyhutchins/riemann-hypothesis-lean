@@ -1,4 +1,57 @@
-import Mathlib
+module
+
+public import Mathlib.FieldTheory.RatFunc.AsPolynomial
+public import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+public import Mathlib.FieldTheory.RatFunc.Valuation
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Polynomial Matrix
 
@@ -129,7 +182,7 @@ private theorem separable_quartic_of_dsc_ne_zero {F : Type} [Field F] (b c d e :
   have hm : algebraMap F (AlgebraicClosure F) (dsc b c d e) = dsc (algebraMap F (AlgebraicClosure F) b)
       (algebraMap F (AlgebraicClosure F) c) (algebraMap F (AlgebraicClosure F) d)
       (algebraMap F (AlgebraicClosure F) e) := by
-    simp only [dsc, map_sub, map_add, map_mul, map_pow, map_ofNat]
+    simp only [dsc, map_sub, map_add (f := _), map_mul, map_pow, map_ofNat]
   rw [hm]
   simp [hf, IsRoot] at h0 h1
   have hd : algebraMap F (AlgebraicClosure F) d = -(4 * r ^ 3 + 3 * (algebraMap F (AlgebraicClosure F) b) * r ^ 2
@@ -208,7 +261,7 @@ theorem UpperTheory.V.AlgebraTools.disc4 :
     ring
   have hm3 : ∀ i j k, m3 A i j k = φ (m3 x i j k) * RatFunc.X ^ (w i + w j + w k) := by
     intro i j k
-    simp only [m3, hA, map_sub, map_add, map_mul, zpow_add₀ hX0]
+    simp only [m3, hA, map_sub, map_add (f := _), map_mul, zpow_add₀ hX0]
     ring
   have hdm : (x.map φ).det = φ x.det := by
     rw [RingHom.map_det]

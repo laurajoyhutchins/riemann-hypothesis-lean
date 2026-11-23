@@ -1,5 +1,45 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Foundations.GLintEqKOAndPrincEqKOne
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.NonemptyAlgHomOfNotIsField
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.IsIntOv
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -31,16 +71,15 @@ theorem atPlace_mul_right (a : Fv F v) (y : AF F) : atPlace v a * y = atPlace v 
 
 theorem evFin_atPlace (a : Fv F v) : evFin F v (atPlace v a) = a := evalV_singleFin_self v a
 
-variable (E) in
 
+variable (E) in
 def tensAt : Fv F v ⊗[F] E →ₗ[F] AF F ⊗[F] E := TensorProduct.map (atPlace v) LinearMap.id
 
 theorem tensAt_tmul (a : Fv F v) (x : E) : tensAt E v (a ⊗ₜ[F] x) = atPlace v a ⊗ₜ[F] x := rfl
 
 theorem compFin_tensAt (y : Fv F v ⊗[F] E) : compFin F E v (tensAt E v y) = y := by
-  induction y using TensorProduct.induction_on with
-  | zero => simp
-  | add x y hx hy => simp only [map_add, hx, hy]
+  induction y using TensorProduct.inductionOn with
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
   | tmul a x => exact congrArg (· ⊗ₜ[F] x) (evFin_atPlace v a)
 
 theorem tensAt_eq_zero {y : Fv F v ⊗[F] E} : tensAt E v y = 0 ↔ y = 0 :=
@@ -48,13 +87,11 @@ theorem tensAt_eq_zero {y : Fv F v ⊗[F] E} : tensAt E v y = 0 ↔ y = 0 :=
 
 theorem tensAt_mul_right (y : Fv F v ⊗[F] E) (z : AF F ⊗[F] E) :
     tensAt E v y * z = tensAt E v (y * compFin F E v z) := by
-  induction y using TensorProduct.induction_on with
-  | zero => simp
-  | add x y hx hy => simp only [map_add, add_mul, hx, hy]
+  induction y using TensorProduct.inductionOn with
+  | add x y hx hy => simp only [map_add (f := _), add_mul, hx, hy]
   | tmul a x =>
-    induction z using TensorProduct.induction_on with
-    | zero => simp
-    | add x y hx hy => simp only [map_add, mul_add, hx, hy]
+    induction z using TensorProduct.inductionOn with
+    | add x y hx hy => simp only [map_add (f := _), mul_add, hx, hy]
     | tmul b x' =>
       change _ = tensAt E v (a ⊗ₜ[F] x * evFin F v b ⊗ₜ[F] x')
       rw [tensAt_tmul, Algebra.TensorProduct.tmul_mul_tmul, Algebra.TensorProduct.tmul_mul_tmul, tensAt_tmul,
@@ -62,17 +99,15 @@ theorem tensAt_mul_right (y : Fv F v ⊗[F] E) (z : AF F ⊗[F] E) :
 
 theorem sigR_tensAt (σ : E →ₐ[F] E) (y : Fv F v ⊗[F] E) :
     sigR (AF F) σ (tensAt E v y) = tensAt E v (sigR _ σ y) := by
-  induction y using TensorProduct.induction_on with
-  | zero => simp
-  | add x y hx hy => simp only [map_add, hx, hy]
+  induction y using TensorProduct.inductionOn with
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
   | tmul a x => rfl
 
 theorem map_evalV_map_sndA (z : AF F ⊗[F] E) :
     Algebra.TensorProduct.map (evalV F v) (AlgHom.id F E) (Algebra.TensorProduct.map (sndA F) (AlgHom.id F E) z) =
       compFin F E v z := by
-  induction z using TensorProduct.induction_on with
-  | zero => simp only [map_zero]
-  | add x y hx hy => simp only [map_add, hx, hy]
+  induction z using TensorProduct.inductionOn with
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
   | tmul a x => rfl
 
 theorem map_evalV_mem {z : Af F ⊗[F] E}
@@ -97,7 +132,7 @@ theorem map_sndA_tensAt_mem {y : Fv F v ⊗[F] E} (h : y ∈ intLoc F E v) :
     · subst e; rw [evalV_singleFin_self]; exact ha
     · rw [evalV_singleFin_ne e]; exact zero_mem _
   · rw [map_zero, map_zero]; exact zero_mem _
-  · rw [map_add, map_add]; exact add_mem hy hz
+  · rw [map_add (f := _), map_add (f := _)]; exact add_mem hy hz
   · rw [map_neg, map_neg]; exact neg_mem hy
 
 end General
@@ -129,7 +164,7 @@ theorem isSplitIdem_idem (τ : D.host.E →ₐ[D.host.F] Fv D.host.F v) : IsSpli
     ?_⟩
   · rw [idem_mul, compFin_idem, splitIdem_mul_self]; rfl
   · rw [idem_mul, cA_idem, compFin_tensAt, mul_sub, mul_one, splitIdem_mul_self, sub_self, LinearMap.map_zero]
-  · rw [cA_idem, idem, ← LinearMap.map_add, add_sub_cancel]; rfl
+  · rw [cA_idem, idem, ← LinearMap.map_add (f := _), add_sub_cancel]; rfl
 
 theorem finPart_idem_mul_mem_iff (τ : D.host.E →ₐ[D.host.F] Fv D.host.F v) (a : AE D) :
     finPart D (idem τ * a) ∈ intAE D ↔

@@ -1,6 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.Edge1
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.GermCompatId
+module
+
+public import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.Edge1
+public import Mathlib.Order.CompletePartialOrder
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -142,14 +189,14 @@ def sysP (a : ℕ) : Sys d (F ⊗[ℂ] K) (F ⊗[ℂ] DR ℂ K) where
   R I J := (Algebra.TensorProduct.map (rA ℂ (xv x) I).val (rB ℂ K (xv x) J).val).range
   M I J := Submodule.map₂ (TensorProduct.mk ℂ _ _) (omA ℂ (xv x) I) (omB ℂ K (rB ℂ K (xv x) J) a)
 
-variable (F) in
 
+variable (F) in
 def muP (τ : DR ℂ K →ₗ[K] K) : DR ℂ K ⊗[ℂ] DR ℂ K →ₗ[ℂ] DR ℂ K →ₗ[ℂ] F ⊗[ℂ] DR ℂ K :=
   LinearMap.flip (LinearMap.rTensorHom (DR ℂ K) ∘ₗ (LinearMap.mul ℂ (DR ℂ K)).flip.compr₂
     ((Algebra.trace F K).restrictScalars ℂ ∘ₗ τ.restrictScalars ℂ))
 
-variable (F) in
 
+variable (F) in
 def mulP : F ⊗[ℂ] DR ℂ K →ₗ[ℂ] DR ℂ K :=
   TensorProduct.lift ((Algebra.lsmul ℂ ℂ (DR ℂ K)).toLinearMap ∘ₗ (Algebra.linearMap F K).restrictScalars ℂ)
 
@@ -168,10 +215,6 @@ def sysY (j2 : K →ₐ[ℂ] K') (a : ℕ) : Sys d K' (DR ℂ K') where
   Y i := Units.map ((j2.toRingHom.comp (algebraMap F K) : F →+* K') : F →* K') (x i)
   R := RY (xv x) j2
   M I J := omB ℂ K' (RY (xv x) j2 I J) a
-
-def RF (j2 : K →ₐ[ℂ] K') (s : Finset (Two d)) : Subalgebra ℂ K' :=
-  if (rgt s).Nonempty then (if (lft s).Nonempty then RY (xv x) j2 (lft s) (rgt s) else R2 (xv x) j2 (rgt s))
-  else rB ℂ K' (xv x) (lft s)
 
 def gS (j2 : K →ₐ[ℂ] K') : K ⊗[ℂ] K →ₐ[ℂ] K' := Algebra.TensorProduct.productMap (IsScalarTower.toAlgHom ℂ K K') j2
 
@@ -194,16 +237,14 @@ def loc (B : Subalgebra ℂ L) (e : B →ₐ[ℂ] ℂ) : Subalgebra ℂ L where
     rwa [show (b' : L) * (b * v) + b * (b' * v') = ((b * b' : B) : L) * (v + v') by push_cast; ring] at this
   algebraMap_mem' c := ⟨1, by simp, by simpa using B.algebraMap_mem c⟩
 
-def van (B : Subalgebra ℂ L) (e : B →ₐ[ℂ] ℂ) : Set L := {v | Val B e v 0}
-
 variable {F : Type} [Field F] [Algebra ℂ F] [Algebra F L] {d : ℕ} (x : Fin (d + 1) → Fˣ)
 
-variable (L) in
 
+variable (L) in
 def tt (j : Fin d) : L := algebraMap F L ((x j.succ : F) / x 0)
 
-variable (L) in
 
+variable (L) in
 def dtS (S : Finset (Fin d)) : DR ℂ L :=
   ExteriorAlgebra.ιMulti L S.card fun a => D ℂ L (tt L x (S.orderEmbOfFin rfl a))
 

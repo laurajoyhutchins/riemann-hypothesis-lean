@@ -1,11 +1,63 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.KerDatTuple
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.NormalFam
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsDeltaDelAtOwnAt
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.WeilActionLiftPairStepVectorInvLevelChar
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.LevelCharactersRamificationLevelPlaces
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.KerDatTuple
+public import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.NormalFam
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.KernelSpanOverClasses
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsDetInt
+import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.GoodIdempotentBadPlaces
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.UnderEqOrSmulUnderEq
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.DetTwoDiagBlocksPropertiesStatement
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.HeckeCharTrivialOnIdempotentIntegralUnitsStatement
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IsSelfDualCoordLatticeOfSelfDualFrameStatement
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IsUnramifiedEtaTildeOfOddExponentSumStatement
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.LevelCharactersRamificationLevelPlaces
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.TameAtOfUnrAt
 import Development.AbelianVarietyTheory.Proofs.TwistedOperators.TameHeckeCharSplitSupportedEqProdResidueStatement
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.HeckeCharTrivialOnIdempotentIntegralUnitsStatement
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.WeilActionLiftPairStepVectorInvLevelChar
+import Formalism.LocalToGlobal.Columns.AdelicLemmas
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Development.AbelianVarietyTheory.Definitions.Divisors.RealisedChainTorusEq
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -24,19 +76,19 @@ variable {D : D7}
 
 theorem ramif_ker {T0 : Type} {L : LevCh D T0} {μ0 : T0} (hL : L.Is μ0) {ξ : Formalism.L2.Host.HChar D.host.E}
     {Q : Finset (Pl D.host.E)} (hpl : IsTwistPlaces D.host.g Q)
-    (hram : ∀ PP, ¬ ξ.UnrAt PP ↔ PP ∈ Q ∨ ∃ PP' ∈ Q, IsConjPl PP' PP) (j : Fin D.R.m) :
+    (hram : ∀ PP, ¬ ξ.UnrAt PP ↔ PP ∈ Q ∨ ∃ PP' ∈ Q, Lev.IsConjPl PP' PP) (j : Fin D.R.m) :
     Disjoint L.Pg Q ∧ (∀ PP ∈ Q, (L.C.mu0 j).UnrAt PP) ∧ (∀ PP ∈ L.Pg, ξ.UnrAt PP) ∧
-      ∀ PP', PP' ∉ L.Pg → (∀ PP ∈ L.Pg, ¬ IsConjPl PP PP') → (L.C.mu0 j).UnrAt PP' := by
+      ∀ PP', PP' ∉ L.Pg → (∀ PP ∈ L.Pg, ¬ Lev.IsConjPl PP PP') → (L.C.mu0 j).UnrAt PP' := by
   classical
   have hoff : ∀ (k : Fin 2) (PP : Pl D.host.E), ((D.host.g k : ℕ) : 𝓞 D.host.E) ∈ PP.asIdeal →
-      PP ∉ Q ∧ ¬ ∃ PP' ∈ Q, IsConjPl PP' PP := by
+      PP ∉ Q ∧ ¬ ∃ PP' ∈ Q, Lev.IsConjPl PP' PP := by
     intro k PP hk
     refine ⟨fun hQ => ?_, fun ⟨PP', hQ, hc⟩ => ?_⟩
     · obtain ⟨q, hq, hm, hne⟩ := GlobalTheory.LevelRamif.exists_prime_mem hpl hQ
       exact GlobalTheory.LevelRamif.not_two_primes PP hq (D.host.g_prime k) (hne k) hm hk
     · obtain ⟨q, hq, hm, hne⟩ := GlobalTheory.LevelRamif.exists_prime_mem hpl hQ
       exact GlobalTheory.LevelRamif.not_two_primes PP hq (D.host.g_prime k) (hne k) (GlobalTheory.LevelRamif.natCast_mem_conj hc hm) hk
-  have hPg : ∀ PP ∈ L.Pg, PP ∉ Q ∧ ¬ ∃ PP' ∈ Q, IsConjPl PP' PP := by
+  have hPg : ∀ PP ∈ L.Pg, PP ∉ Q ∧ ¬ ∃ PP' ∈ Q, Lev.IsConjPl PP' PP := by
     intro PP h
     obtain ⟨k, hk⟩ := (hL.Pg PP).1 h
     exact hoff k PP (GlobalTheory.LevelRamif.typePrime_mem hk)
@@ -54,7 +106,7 @@ theorem ramif_ker {T0 : Type} {L : LevCh D T0} {μ0 : T0} (hL : L.Is μ0) {ξ : 
 
 theorem unrOff_ker {T0 : Type} {L : LevCh D T0} {μ0 : T0} (hL : L.Is μ0) {ξ : Formalism.L2.Host.HChar D.host.E}
     {χ : (AE D)ˣ →* Circle} {Q : Finset (Pl D.host.E)} (hchr : ChrEq χ ξ) (hpl : IsTwistPlaces D.host.g Q)
-    (hram : ∀ PP, ¬ ξ.UnrAt PP ↔ PP ∈ Q ∨ ∃ PP' ∈ Q, IsConjPl PP' PP) (j : Fin D.R.m)
+    (hram : ∀ PP, ¬ ξ.UnrAt PP ↔ PP ∈ Q ∨ ∃ PP' ∈ Q, Lev.IsConjPl PP' PP) (j : Fin D.R.m)
     {P : Finset (Pl D.host.E)} {e : AE D} (hP : ∀ PP, PP ∈ P ↔ PP ∈ L.Pg ∨ PP ∈ Q) (he : IsIdemSum e P) :
     GlobalTheory.VecInv.UnrOff (e + cA D e) (L.mu0 ((j : ℕ) + 1) * χ) ∧ GlobalTheory.VecInv.UnrOff (e + cA D e) L.eta := by
   obtain ⟨-, -, -, h4⟩ := ramif_ker hL hpl hram j
@@ -69,7 +121,7 @@ theorem unrOff_ker {T0 : Type} {L : LevCh D T0} {μ0 : T0} (hL : L.Is μ0) {ξ :
 theorem val_ker {T0 : Type} {L : LevCh D T0} {μ0 : T0} (hL : L.Is μ0) {ξ : Formalism.L2.Host.HChar D.host.E}
     {χ : (AE D)ˣ →* Circle} {ξR : ∀ PP : Pl D.host.E, (kP PP)ˣ →* ℂˣ} {Q : Finset (Pl D.host.E)} (hchr : ChrEq χ ξ)
     (htame : ∀ v, ξ.TameAt v) (hres : ∀ PP ∈ Q, IsRes ξ PP (ξR PP)) (hpl : IsTwistPlaces D.host.g Q)
-    (hram : ∀ PP, ¬ ξ.UnrAt PP ↔ PP ∈ Q ∨ ∃ PP' ∈ Q, IsConjPl PP' PP) (j : Fin D.R.m)
+    (hram : ∀ PP, ¬ ξ.UnrAt PP ↔ PP ∈ Q ∨ ∃ PP' ∈ Q, Lev.IsConjPl PP' PP) (j : Fin D.R.m)
     {P : Finset (Pl D.host.E)} {e : AE D} (hP : ∀ PP, PP ∈ P ↔ PP ∈ L.Pg ∨ PP ∈ Q) (he : IsIdemSum e P)
     (x : (AE D)ˣ) (a : AE D) (a' : Formalism.L2.Herm.intAf D.host.F D.host.E) (u : ∀ PP : Pl D.host.E, (kP PP)ˣ)
     (hx : (x : AE D) = e * a + (1 - e)) (ha : (a' : Lev.EAf D) = toEAf D a)

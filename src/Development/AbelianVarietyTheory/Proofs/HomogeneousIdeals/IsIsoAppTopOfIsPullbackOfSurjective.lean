@@ -1,4 +1,67 @@
-import Mathlib
+module
+
+public import Mathlib.AlgebraicGeometry.Geometrically.Integral
+public import Mathlib.AlgebraicGeometry.Morphisms.Proper
+public import Mathlib.Combinatorics.Quiver.ReflQuiver
+public import Mathlib.FieldTheory.IsAlgClosed.Basic
+public import Mathlib.RingTheory.IntegralClosure.IntegrallyClosed
+public import Mathlib.Tactic.ENatToNat
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+public import Mathlib.AlgebraicGeometry.AffineTransitionLimit
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+public import Mathlib.AlgebraicGeometry.Morphisms.Descent
+import Mathlib.AlgebraicGeometry.Morphisms.WeaklyEtale
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.Finset.Functor
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+public import Mathlib.RingTheory.Flat.FaithfullyFlat.Descent
+public import Mathlib.RingTheory.Ideal.AssociatedPrime.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.AlgebraicGeometry.Morphisms.Etale
+
+@[expose] public section
 
 open CategoryTheory Limits AlgebraicGeometry TensorProduct Opposite
 
@@ -27,7 +90,7 @@ theorem mem_map_of_tmul_eq_zero {R A M : Type*} [CommRing R] [CommRing A] [Algeb
       simp only [LinearMap.lTensor_tmul, Submodule.subtype_apply, TensorProduct.rid_tmul,
         Algebra.smul_def]
       exact Ideal.mul_mem_right _ _ (Ideal.mem_map_of_mem _ (hJ _ (LinearMap.mem_ker.mp r.2)))
-    | add a b ha hb => simpa only [map_add] using Ideal.add_mem _ ha hb
+    | add a b ha hb => simpa only [map_add (f := _)] using Ideal.add_mem _ ha hb
   simpa [hy] using key y
 
 theorem mem_map_of_mul_mem_map {R A : Type*} [CommRing R] [CommRing A] (φ : R →+* A)
@@ -142,7 +205,7 @@ theorem eq_zero_of_forall_affineOpens (x : Γ(X, ⊤))
 
 theorem injective_appTop_of_isPullback (H : IsPullback g q p f) [IsAffine S] [IsAffine T] [Flat p]
     (hf : Function.Injective f.appTop) : Function.Injective g.appTop := by
-  rw [injective_iff_map_eq_zero]
+  set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
   intro x hx
   refine eq_zero_of_forall_affineOpens x fun U ↦ ?_
   have := mem_map_ker_of_app_eq_zero H U.2 (X.presheaf.map (homOfLE (le_top : U.1 ≤ ⊤)).op x) (by
@@ -395,7 +458,7 @@ theorem isIso_appTop_of_section_of_fiber (p : X ⟶ S) [IsAffine S] [IsLocallyNo
   have h1 : p.appTop ≫ e.appTop = 𝟙 _ := by
     rw [← Scheme.Hom.comp_appTop, he, Scheme.Hom.id_appTop]
   have h2 : Function.Injective e.appTop := by
-    rw [injective_iff_map_eq_zero]
+    set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
     intro x hx
     refine eq_zero_of_forall_affineOpens x fun U ↦ ?_
     have := mem_map_of_compatible hq he ⊥
@@ -515,13 +578,6 @@ theorem isIso_appTop_of_isAffine (p : X ⟶ S) [IsAffine S] [IsLocallyNoetherian
   have := isIso_appTop_of_section (pullback.snd p (i ≫ p)) (e := pullback.lift i (𝟙 T) (by simp))
     (pullback.lift_snd _ _ _)
   exact isIso_appTop_of_isPullback_of_surjective (.of_hasPullback p (i ≫ p))
-
-theorem isIso_app (p : X ⟶ S) [IsLocallyNoetherian S] [Flat p]
-    [UniversallyClosed p] [LocallyOfFiniteType p] [GeometricallyIntegral p] (U : S.Opens) :
-    IsIso (p.app U) :=
-  isIso_app_of_forall_affineOpens p (fun V ↦
-    have : IsAffine V.1 := V.2
-    isIso_appTop_of_isAffine (p ∣_ V.1)) U
 
 end Main
 

@@ -1,4 +1,54 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.EqLagIff
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.EqLagIff
+public import Mathlib.CategoryTheory.Category.Basic
+public import Mathlib.RingTheory.Idempotents
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.Polynomial.Div
+public import Mathlib.Algebra.Polynomial.RingDivision
+
+@[expose] public section
 
 open Polynomial Matrix IsLocalRing TensorProduct UpperTheory.V.AlgebraTools
 
@@ -35,7 +85,7 @@ theorem UpperTheory.V.AlgebraTools.lag_coi :
       rw [mul_comm, ← hg]
       ring
     conv_lhs => rw [hq']
-    rw [map_add, map_mul, add_mul, mul_assoc, hroot, mul_zero, zero_add, aeval_C, Algebra.smul_def]
+    rw [map_add (f := _), map_mul, add_mul, mul_assoc, hroot, mul_zero, zero_add, aeval_C, Algebra.smul_def]
   have hP : ∀ i, P * lag a P i = a i • lag a P i := by
     intro i
     have := hq X i
@@ -45,7 +95,7 @@ theorem UpperTheory.V.AlgebraTools.lag_coi :
     rw [hL]
     generalize L i = f
     induction f using Polynomial.induction_on' with
-    | add p q hp hq => rw [map_add]; exact hp.add_right hq
+    | add p q hp hq => rw [map_add (f := _)]; exact hp.add_right hq
     | monomial n c =>
       rw [aeval_monomial]
       exact Commute.mul_right (show Commute y (algebraMap R E c) from (Algebra.commutes c y).symm)
@@ -56,10 +106,11 @@ theorem UpperTheory.V.AlgebraTools.lag_coi :
       · intro i _ j _ hij
         exact isCoprime_X_sub_C_of_isUnit_sub (ha i j hij)
       · intro k _
-        rw [dvd_iff_isRoot, IsRoot, eval_sub, eval_one, eval_finset_sum]
+        rw [dvd_iff_isRoot, IsRoot, eval_sub, eval_one, eval_finsetSum]
         simp only [hLe, Finset.sum_ite_eq', Finset.mem_univ, if_true, sub_self]
     obtain ⟨g, hg⟩ := h1
     have h2 := congrArg (aeval P) hg
+
     rw [map_mul, hm, zero_mul, map_sub, map_one, map_sum, sub_eq_zero] at h2
     simp only [hL]
     exact h2.symm

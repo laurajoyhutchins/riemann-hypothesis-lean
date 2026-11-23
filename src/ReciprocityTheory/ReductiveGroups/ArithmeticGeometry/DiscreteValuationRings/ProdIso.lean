@@ -1,5 +1,54 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.AppCompatGeneric
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.CubicalStructures.CubicalPullBaseChangeSt
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.CubicalStructures.CubicalPullBaseChangeSt
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.LBTransport
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.AppCompatGeneric
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -279,7 +328,7 @@ lemma inf_le_iSup_inf_cover (hB : B.IsLB) (a a' : A.ι) : A.U a ⊓ A.U a' ≤ �
   calc A.U a ⊓ A.U a' = (A.U a ⊓ A.U a') ⊓ ⨆ b, B.U b := by rw [hB.cover, inf_top_eq]
     _ ≤ ⨆ b, (A.U a ⊓ A.U a') ⊓ B.U b := (inf_iSup_eq _ _).le
 
-set_option maxHeartbeats 1000000 in
+
 private lemma res_trans_eq_inv_mul_of_res_eq_one_left {T : Scheme.{0}} {O P Q R S' W : T.Opens}
     (hP : O ≤ P) (hQ : O ≤ Q) (hR : O ≤ R) (hS : O ≤ S') (hW : W ≤ O)
     (s : Γ(T, P)ˣ) (m : Γ(T, Q)ˣ) (l : Γ(T, R)ˣ) (s' : Γ(T, S')ˣ)
@@ -366,7 +415,7 @@ def boxSecF (σ : Fin j → LB.Sec (LB.LinComb L (K := Fin 1) (fun _ => 𝟙 X) 
     Γ(X', LB.wchart (LB.LinComb L pr (fun _ => 1)) (fun _ : Fin 1 => 𝟙 X') jN) :=
   ∏ i, rs (box_le_pr L pr jN i) (((pr i).app _).hom ((σ i).f (fun _ => jN 0 i)))
 
-set_option maxHeartbeats 1000000 in
+
 private lemma res_pullU_res_pullU_id {T S : Scheme.{0}} (h : S ⟶ T) {O Q : T.Opens} {W : S.Opens}
     (e : O ≤ (𝟙 T) ⁻¹ᵁ Q) (hW : W ≤ h ⁻¹ᵁ O) (c : W ≤ h ⁻¹ᵁ Q) (z : Γ(T, Q)ˣ) :
     res hW (pullU h O (res e (pullU (𝟙 T) Q z))) = res c (pullU h Q z) := by
@@ -413,7 +462,7 @@ lemma box_g_res (jN jN' : Fin 1 → (Fin j → L.ι)) {V : X'.Opens}
   refine (congrArg (· ^ k) (res_linComb_g_eq_prod_tr_zpow L pr (fun _ => 1) (jN 0) (jN' 0) c0)).trans ?_
   simp only [zpow_one, Finset.prod_zpow]
 
-set_option maxHeartbeats 1000000 in
+
 lemma g_pull_one {Z : Scheme.{0}} (h : Z ⟶ X) (a b : Fin 1 → L.ι) {W : Z.Opens}
     (hW : W ≤ h ⁻¹ᵁ (LB.wchart L (fun _ : Fin 1 => 𝟙 X) a ⊓ LB.wchart L (fun _ : Fin 1 => 𝟙 X) b)) :
     res hW (pullU h _ ((LB.LinComb L (K := Fin 1) (fun _ => 𝟙 X) (fun _ => k)).g a b)) =
@@ -429,7 +478,7 @@ lemma g_pull_one {Z : Scheme.{0}} (h : Z ⟶ X) (a b : Fin 1 → L.ι) {W : Z.Op
   congr 1
   exact (res_pullU_res_pullU_id h _ hW c _).trans e3.symm
 
-set_option maxHeartbeats 1000000 in
+
 lemma boxSecF_compat (σ : Fin j → LB.Sec (LB.LinComb L (K := Fin 1) (fun _ => 𝟙 X) (fun _ => k)))
     (jN jN' : Fin 1 → (Fin j → L.ι)) :
     rs (inf_le_left : LB.wchart (LB.LinComb L pr (fun _ => 1)) (fun _ : Fin 1 => 𝟙 X') jN ⊓

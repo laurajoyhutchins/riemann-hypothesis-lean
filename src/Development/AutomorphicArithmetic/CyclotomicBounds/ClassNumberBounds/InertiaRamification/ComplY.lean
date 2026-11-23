@@ -1,8 +1,72 @@
-import Development.AutomorphicArithmetic.CyclotomicBounds.ClassNumberBounds.InertiaRamification.ComplDefY
-import Development.AutomorphicArithmetic.CyclotomicBounds.ClassNumberBounds.InertiaRamification.LocDiffY
-import Development.AutomorphicArithmetic.CyclotomicBounds.ClassNumberBounds.InertiaRamification.FieldDisc
-import Development.AutomorphicArithmetic.CyclotomicBounds.ClassNumberBounds.InertiaRamification.EmbDefY
-import Development.AutomorphicArithmetic.CyclotomicBounds.ClassNumberBounds.HeckeCharacterChoice.SplitDef
+module
+
+public import Development.AutomorphicArithmetic.CyclotomicBounds.ClassNumberBounds.InertiaRamification.FieldDefs
+public import Development.AutomorphicArithmetic.CyclotomicBounds.ClassNumberBounds.InertiaRamification.EmbDefY
+public import Mathlib.NumberTheory.Padics.PadicIntegers
+public import Mathlib.RingTheory.DedekindDomain.AdicValuation.Completion
+public import Mathlib.RingTheory.RamificationInertia.Inertia
+public import Mathlib.RingTheory.RamificationInertia.Ramification
+public import Development.AutomorphicArithmetic.CyclotomicBounds.ClassNumberBounds.InertiaRamification.ComplDefY
+public import Development.AutomorphicArithmetic.CyclotomicBounds.ClassNumberBounds.InertiaRamification.LocDiffY
+import Mathlib.Algebra.AffineMonoid.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.Padics.RingHoms
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+public import Mathlib.RingTheory.AdicCompletion.Functoriality
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Ideal.Int
+import Mathlib.RingTheory.Radical.NatInt
+public import Mathlib.RingTheory.RamificationInertia.Basic
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 namespace KStar.Ram
 
@@ -158,6 +222,7 @@ private theorem cy_fin [Algebra ℤ_[l] (w.adicCompletionIntegers E)] :
     have hx : φ (fun i => ((b.repr x i : ℤ) : ℤ_[l])) =
         algebraMap (𝓞 E) (w.adicCompletionIntegers E) x := by
       conv_rhs => rw [← b.sum_repr x]
+
       simp [φ, Fintype.linearCombination_apply, map_sum, Int.cast_smul_eq_zsmul]
     simp only [LinearMap.coe_comp, Function.comp_apply, Submodule.mkQ_apply, hx]
     rw [Submodule.Quotient.eq, Submodule.ideal_span_singleton_smul,
@@ -234,8 +299,8 @@ theorem finrank_complIntegers [Algebra ℤ_[l] (w.adicCompletionIntegers E)] :
         rintro ⟨q, hq1, hq2⟩
         apply Subtype.ext
         have : q.IsMaximal := by
-          apply Ideal.isMaximal_of_isIntegral_of_isMaximal_comap (R := ℤ_[l])
-          rw [← Ideal.under_def, ← hq2.over]
+          apply Ideal.isMaximal_of_isIntegral_of_isMaximal_under (R := ℤ_[l])
+          rw [← hq2.over]
           exact hmax
         exact IsLocalRing.eq_maximalIdeal this }
   haveI : Fintype ((Ideal.span {(l : ℤ_[l])}).primesOver (w.adicCompletionIntegers E)) :=
@@ -267,7 +332,7 @@ private theorem ramificationIdx_mul_inertiaDeg_eq_one_of_splitsIn (hs : SplitsIn
     intro q
     haveI : q.1.IsPrime := q.2.1
     exact Nat.one_le_iff_ne_zero.2
-      (Nat.mul_ne_zero (Ideal.ramificationIdx_pos q.1 ℤ).ne' (Ideal.inertiaDeg_pos q.1 ℤ).ne')
+      (Nat.mul_ne_zero (Ideal.ramificationIdx_pos (R := ℤ) q.1).ne' (Ideal.inertiaDeg_pos q.1 ℤ).ne')
   let q0 : (Ideal.span {(l : ℤ)}).primesOver (𝓞 E) := ⟨w.asIdeal, w.isPrime, inferInstance⟩
   by_contra hne
   have hlt : ∑ _q : (Ideal.span {(l : ℤ)}).primesOver (𝓞 E), (1 : ℕ) <
@@ -300,7 +365,7 @@ theorem finrank_compl [Algebra ℚ_[l] (w.adicCompletion E)]
     IsFractionRing.finrank_eq ℤ_[l] ℚ_[l] (w.adicCompletionIntegers E) (w.adicCompletion E)
   have hpos : 0 < Module.finrank ℚ_[l] (w.adicCompletion E) := by
     rw [hK, hrank]
-    exact Nat.mul_pos (Ideal.ramificationIdx_pos w.asIdeal ℤ) (Ideal.inertiaDeg_pos w.asIdeal ℤ)
+    exact Nat.mul_pos (Ideal.ramificationIdx_pos (R := ℤ) w.asIdeal) (Ideal.inertiaDeg_pos w.asIdeal ℤ)
   haveI : Module.Finite ℚ_[l] (w.adicCompletion E) := Module.finite_of_finrank_pos hpos
   refine ⟨inferInstance, hK.trans hrank, fun hs => ?_⟩
   have h1 : Module.finrank ℚ_[l] (w.adicCompletion E) = 1 := by

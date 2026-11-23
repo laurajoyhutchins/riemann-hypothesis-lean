@@ -1,10 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.NontrivialIsomClassInt
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsIsLBGenTrivOfRatios
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.GenericTrivialisationSectionAndPullback
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.IsClosedImmersionOfCoordinateDivisibility
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.HomExtOfIsOpenImmersion
-import Development.WeilBound.CoreStatements.HomogeneousNonvanishing.VuSelfA
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.IsHomOpenPart
+public import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.EqOfIsometricTrivShift
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsIsLBGenTrivOfRatios
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.GenericTrivialisationSectionAndPullback
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.IsClosedImmersionOfCoordinateDivisibility
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -36,7 +78,7 @@ theorem surj_desc (M : RatModel o Ω) (q : Sp Ω ⟶ M.Z) (hq : q = M.pt) :
     Scheme.germ_stalkClosedPointTo, ← hf]
   have htop : ⊤ ≤ M.pt ⁻¹ᵁ U := (Scheme.preimage_eq_top_of_closedPoint_mem M.pt hc).ge
   unfold valF
-  rw [dif_pos htop]
+  rw [dite_eq_left htop]
   simp only [Scheme.Hom.appLE, Iso.trans_hom, Functor.mapIso_hom, CommRingCat.comp_apply]
   rfl
 
@@ -96,7 +138,7 @@ private theorem valF_pt_mul' (M : RatModel o Ω) {V : M.Z.Opens} (hV : (V : Set 
     rw [hw]
     exact hgen
   unfold valF
-  rw [dif_pos htop, dif_pos htop, dif_pos htop]
+  rw [dite_eq_left htop, dite_eq_left htop, dite_eq_left htop]
   simp only [map_mul]
 
 private theorem valF_pt_one' (M : RatModel o Ω) {V : M.Z.Opens} (hV : (V : Set M.Z).Nonempty) :
@@ -111,7 +153,7 @@ private theorem valF_pt_one' (M : RatModel o Ω) {V : M.Z.Opens} (hV : (V : Set 
     rw [hw]
     exact hgen
   unfold valF
-  rw [dif_pos htop]
+  rw [dite_eq_left htop]
   simp only [map_one]
 
 private theorem exists_unit_valF_pt_eq_of_mem_O (M : RatModel o Ω) {V : M.Z.Opens} (hV : (V : Set M.Z).Nonempty)
@@ -263,7 +305,7 @@ private theorem valF_mul_var (M : RatModel o Ω) {V : M.Z.Opens} (hV : (V : Set 
     rw [hw]
     exact hgen
   unfold valF
-  rw [dif_pos htop, dif_pos htop, dif_pos htop]
+  rw [dite_eq_left htop, dite_eq_left htop, dite_eq_left htop]
   simp only [map_mul]
 
 private theorem valF_one_var (M : RatModel o Ω) {V : M.Z.Opens} (hV : (V : Set M.Z).Nonempty) :
@@ -278,7 +320,7 @@ private theorem valF_one_var (M : RatModel o Ω) {V : M.Z.Opens} (hV : (V : Set 
     rw [hw]
     exact hgen
   unfold valF
-  rw [dif_pos htop]
+  rw [dite_eq_left htop]
   simp only [map_one]
 
 theorem exists_unit {M : RatModel o Ω} {H : LB M.Z} {e : H.ι → Ω} (he : M.GenTriv H e) {m : ℕ}

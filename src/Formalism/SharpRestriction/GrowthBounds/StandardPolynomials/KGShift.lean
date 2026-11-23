@@ -1,6 +1,46 @@
-import Formalism.SharpRestriction.GrowthBounds.FrobeniusPaths.CanonicalTranslateJetIdentity
-import Formalism.SharpRestriction.GrowthBounds.FrobeniusPaths.EqEmptyIffSplit
-import Mathlib
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.FrobeniusPaths.EqEmptyIffSplit
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -40,7 +80,7 @@ theorem HomG.mul {φ : (σ →₀ ℕ) →+ ℕ} {d d' : ℕ} {P Q : MvPolynomia
   classical
   intro m hm
   obtain ⟨a, ha, b, hb, rfl⟩ := Finset.mem_add.mp (MvPolynomial.support_mul P Q hm)
-  rw [map_add, hP a ha, hQ b hb]
+  rw [map_add (f := _), hP a ha, hQ b hb]
 
 theorem HomG.one (φ : (σ →₀ ℕ) →+ ℕ) : HomG φ 0 (1 : MvPolynomial σ R) := by
   intro m hm
@@ -54,15 +94,6 @@ theorem HomG.sign {φ : (σ →₀ ℕ) →+ ℕ} {d : ℕ} {P : MvPolynomial σ
   apply hP m
   rw [hc, MvPolynomial.mem_support_iff, MvPolynomial.coeff_C_mul] at hm
   exact MvPolynomial.mem_support_iff.mpr (right_ne_zero_of_mul hm)
-
-theorem HomG.prod {φ : (σ →₀ ℕ) →+ ℕ} {κ : Type} (s : Finset κ) (d : κ → ℕ) (P : κ → MvPolynomial σ R)
-    (h : ∀ a ∈ s, HomG φ (d a) (P a)) : HomG φ (∑ a ∈ s, d a) (∏ a ∈ s, P a) := by
-  classical
-  revert h
-  refine Finset.induction_on s (fun _ => by simpa using HomG.one (σ := σ) (R := R) φ) ?_
-  intro a s ha ih h
-  rw [Finset.prod_insert ha, Finset.sum_insert ha]
-  exact HomG.mul (h a (Finset.mem_insert_self a s)) (ih fun b hb => h b (Finset.mem_insert_of_mem hb))
 
 theorem KG_hom {n : ℕ} (φ : (σ →₀ ℕ) →+ ℕ) (c : ℤ) (hs : ℕ → ℕ) (x : ℕ → Fin n → MvPolynomial σ R) (ω : ℕ → ℕ)
     (hx : ∀ j b, HomG φ (ω j) (x j b)) :

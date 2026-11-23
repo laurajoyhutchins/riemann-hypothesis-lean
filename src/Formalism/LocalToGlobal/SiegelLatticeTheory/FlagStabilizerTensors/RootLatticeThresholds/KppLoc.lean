@@ -1,7 +1,50 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RootLatticeThresholds.KppFrameW
-import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RootLatticeThresholds.KppIdx
-import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RootLatticeThresholds.AllRowsRhoX
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RootLatticeThresholds.KppFrameW
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RootLatticeThresholds.KppIdx
+import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RootLatticeThresholds.RedBasicsPf
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicClassFiniteness.DictLat
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -38,10 +81,6 @@ theorem mL_le (hg : (g : 𝓞 I.E) ∈ w.asIdeal) : mL I g ≤ Lq I w := by
 theorem hhat_neg_left (u v : Fin I.n → I.E ⊗[I.F] Af I.F) : hhat I (-u) v = -hhat I u v := by
   have := hhat_sub_left I 0 u v
   rwa [zero_sub, DictLat.hhat_zero_left, zero_sub] at this
-
-theorem hhat_neg_right (u v : Fin I.n → I.E ⊗[I.F] Af I.F) : hhat I u (-v) = -hhat I u v := by
-  have := hhat_sub_right I u 0 v
-  rwa [zero_sub, DictLat.hhat_zero_right, zero_sub] at this
 
 theorem pair_right (hg : (g : 𝓞 I.E) ∈ w.asIdeal) {u : Fin I.n → I.E ⊗[I.F] Af I.F} (hu : u ∈ I.Lf)
     {S : Set (VA I)} (hS : ∀ s ∈ S, hhat I u s ∈ Wq I w) {v : VA I} (hv : InMod I g S v) : hhat I u v ∈ Wq I w := by
@@ -167,48 +206,46 @@ def frd (ob : Bool) (j : Fin D.R.r) : VA X.B.I :=
 
 def rv {n : ℕ} (a : Fin n) : Fin n := ⟨n - 1 - a.1, by omega⟩
 
-@[simp] theorem rv_val {n : ℕ} (a : Fin n) : (rv a).1 = n - 1 - a.1 := rfl
-
-theorem rv_rv {n : ℕ} (a : Fin n) : rv (rv a) = a := Fin.ext (by simp <;> omega)
+theorem rv_rv {n : ℕ} (a : Fin n) : rv (rv a) = a := Fin.ext (by simp only [rv]; omega)
 
 theorem frame_isotropic (ob : Bool) (a : Fin D.R.rS) : fr X ob (xI (hrD D) a) = X.e0 a := by
-  unfold fr; rw [dif_pos (show (xI (hrD D) a).1 < D.R.rS from a.2)]; rfl
+  unfold fr; rw [dite_eq_left (show (xI (hrD D) a).1 < D.R.rS from a.2)]; rfl
 
 theorem fr_w (ob : Bool) (i : Fin D.R.k) : fr X ob (wI (hrD D) i) = if ob then X.bw i else X.bwd (rv i) := by
   unfold fr
-  rw [dif_neg (show ¬ (wI (hrD D) i).1 < D.R.rS by simp), dif_pos (show (wI (hrD D) i).1 < D.R.rS + D.R.k by simp)]
-  congr 1 <;> congr 1 <;> ext <;> simp
+  rw [dite_eq_right (show ¬ (wI (hrD D) i).1 < D.R.rS by simp [wI, rv]), dite_eq_left (show (wI (hrD D) i).1 < D.R.rS + D.R.k by simp [wI, rv])]
+  congr 1 <;> congr 1 <;> ext <;> simp [wI, rv]
 
 theorem frame_anisotropic (ob : Bool) : fr X ob (zI (hrD D)) = X.z0 := by
   unfold fr
-  rw [dif_neg (show ¬ (zI (hrD D)).1 < D.R.rS by simp <;> omega),
-    dif_neg (show ¬ (zI (hrD D)).1 < D.R.rS + D.R.k by simp), if_pos (by simp)]
+  rw [dite_eq_right (show ¬ (zI (hrD D)).1 < D.R.rS by simp [zI] <;> omega),
+    dite_eq_right (show ¬ (zI (hrD D)).1 < D.R.rS + D.R.k by simp [zI]), if_pos (by simp [zI])]
 
 theorem fr_y (ob : Bool) (a : Fin D.R.rS) : fr X ob (yI (hrD D) a) = X.f0 (rv a) := by
   unfold fr
-  rw [dif_neg (show ¬ (yI (hrD D) a).1 < D.R.rS by simp <;> omega),
-    dif_neg (show ¬ (yI (hrD D) a).1 < D.R.rS + D.R.k by simp <;> omega), if_neg (by simp <;> omega),
-    dif_pos (show (yI (hrD D) a).1 - (D.R.rS + D.R.k + 1) < D.R.rS by simp)]
-  congr 1; ext; simp
+  rw [dite_eq_right (show ¬ (yI (hrD D) a).1 < D.R.rS by simp [yI, rv] <;> omega),
+    dite_eq_right (show ¬ (yI (hrD D) a).1 < D.R.rS + D.R.k by simp [yI, rv] <;> omega), if_neg (by simp [yI, rv] <;> omega),
+    dite_eq_left (show (yI (hrD D) a).1 - (D.R.rS + D.R.k + 1) < D.R.rS by simp [yI, rv])]
+  congr 1; ext; simp [yI, rv]
 
 theorem dual_frame_isotropic (ob : Bool) (a : Fin D.R.rS) : frd X ob (xI (hrD D) a) = X.f0 a := by
-  unfold frd; rw [dif_pos (show (xI (hrD D) a).1 < D.R.rS from a.2)]; rfl
+  unfold frd; rw [dite_eq_left (show (xI (hrD D) a).1 < D.R.rS from a.2)]; rfl
 
 theorem frd_w (ob : Bool) (i : Fin D.R.k) : frd X ob (wI (hrD D) i) = if ob then X.bwd i else X.bw (rv i) := by
   unfold frd
-  rw [dif_neg (show ¬ (wI (hrD D) i).1 < D.R.rS by simp), dif_pos (show (wI (hrD D) i).1 < D.R.rS + D.R.k by simp)]
-  congr 1 <;> congr 1 <;> ext <;> simp
+  rw [dite_eq_right (show ¬ (wI (hrD D) i).1 < D.R.rS by simp [wI, rv]), dite_eq_left (show (wI (hrD D) i).1 < D.R.rS + D.R.k by simp [wI, rv])]
+  congr 1 <;> congr 1 <;> ext <;> simp [wI, rv]
 
 theorem dual_frame_anisotropic (ob : Bool) : frd X ob (zI (hrD D)) = -X.z0 := by
   unfold frd
-  rw [dif_neg (show ¬ (zI (hrD D)).1 < D.R.rS by simp <;> omega),
-    dif_neg (show ¬ (zI (hrD D)).1 < D.R.rS + D.R.k by simp), if_pos (by simp)]
+  rw [dite_eq_right (show ¬ (zI (hrD D)).1 < D.R.rS by simp [zI] <;> omega),
+    dite_eq_right (show ¬ (zI (hrD D)).1 < D.R.rS + D.R.k by simp [zI]), if_pos (by simp [zI])]
 
 theorem frd_y (ob : Bool) (a : Fin D.R.rS) : frd X ob (yI (hrD D) a) = X.e0 (rv a) := by
   unfold frd
-  rw [dif_neg (show ¬ (yI (hrD D) a).1 < D.R.rS by simp <;> omega),
-    dif_neg (show ¬ (yI (hrD D) a).1 < D.R.rS + D.R.k by simp <;> omega), if_neg (by simp <;> omega),
-    dif_pos (show (yI (hrD D) a).1 - (D.R.rS + D.R.k + 1) < D.R.rS by simp)]
-  congr 1; ext; simp
+  rw [dite_eq_right (show ¬ (yI (hrD D) a).1 < D.R.rS by simp [yI, rv] <;> omega),
+    dite_eq_right (show ¬ (yI (hrD D) a).1 < D.R.rS + D.R.k by simp [yI, rv] <;> omega), if_neg (by simp [yI, rv] <;> omega),
+    dite_eq_left (show (yI (hrD D) a).1 - (D.R.rS + D.R.k + 1) < D.R.rS by simp [yI, rv])]
+  congr 1; ext; simp [yI, rv]
 
 end Formalism.L2.SG.Pf.KppLoc

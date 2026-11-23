@@ -1,12 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.InfUniv
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AbelianSchemeFirstDeRhamStructureStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BaseChangeTensorModuleCompat
-import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.SpanSingletonEqTopIffIsUnitOfIsBaseChange
-import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.IsAbelianSchemeAndExtendOfGenericHoms
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.SABBaseChangeSt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.SabPull
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BcObjIsAbelianScheme
+public import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.SpanSingletonEqTopIffIsUnitOfIsBaseChange
+public import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.IsAbelianSchemeAndExtendOfGenericHoms
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AbelianSchemeFirstDeRhamStructureStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicTopology.FundamentalGroupoid.SimplyConnected
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Matrix.FiniteDimensional
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
 import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ThetaCore
+import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsDefiniteDatumGoodObj
+import Development.AbelianVarietyTheory.Definitions.Divisors.InfUniv
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor
@@ -22,7 +64,7 @@ namespace GlobalTheory.HdRDescent
 
 universe u v
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem baseChange_equiv :
     ∀ (K L O : Type) [Field K] [Field L] [Algebra K L] [CommRing O] (M : Type u) [AddCommGroup M]
@@ -71,7 +113,7 @@ theorem baseChange_equiv :
     | zero => simp
     | tmul r' o =>
       rw [hv, hu, map_one, _root_.one_mul]
-    | add x y hx hy => rw [map_add, map_add, hx, hy]
+    | add x y hx hy => rw [map_add (f := _), map_add (f := _), hx, hy]
   have hvu : ∀ x, v (u x) = x := by
     intro x
     induction x using TensorProduct.induction_on with
@@ -82,8 +124,8 @@ theorem baseChange_equiv :
       | tmul r o =>
         rw [hu, ← Algebra.smul_def, hv, ← TensorProduct.smul_tmul, TensorProduct.smul_tmul', smul_eq_mul,
           _root_.mul_one]
-      | add a b ha hb => rw [add_tmul, map_add, map_add, ha, hb]
-    | add x y hx hy => rw [map_add, map_add, hx, hy]
+      | add a b ha hb => rw [add_tmul, map_add (f := _), map_add (f := _), ha, hb]
+    | add x y hx hy => rw [map_add (f := _), map_add (f := _), hx, hy]
   have hubij : Function.Bijective u :=
     ⟨fun a b hab => by rw [← hvu a, ← hvu b, hab], fun y => ⟨v y, huv y⟩⟩
   have hFF : Module.FaithfullyFlat (R ⊗[ℤ] O) (R' ⊗[ℤ] O) :=
@@ -97,7 +139,7 @@ theorem baseChange_equiv :
     | tmul r o =>
       rw [hf, TensorProduct.Algebra.smul_def, TensorProduct.Algebra.smul_def, ← he,
         TensorProduct.tmul_smul, ← algebraMap_smul R', map_smul]
-    | add a b ha hb => rw [add_smul, tmul_add, map_add, ha, hb, map_add, add_smul]
+    | add a b ha hb => rw [add_smul, tmul_add, map_add (f := _), ha, hb, map_add (f := _), add_smul]
   let j : M →ₗ[R ⊗[ℤ] O] N :=
     { toFun := fun m => e (1 ⊗ₜ m)
       map_add' := fun x y => by simp [tmul_add]
@@ -125,7 +167,7 @@ theorem baseChange_equiv :
       change (r' ⊗ₜ[ℤ] (1 : O)) • e (1 ⊗ₜ m) = _
       rw [TensorProduct.Algebra.smul_def, one_smul, ← map_smul, TensorProduct.smul_tmul',
         smul_eq_mul, _root_.mul_one]
-    | add x y hx hy => rw [map_add, map_add, hx, hy, map_add]
+    | add x y hx hy => rw [map_add (f := _), map_add (f := _), hx, hy, map_add (f := _)]
   have h2 : ∀ z, ψ (e.symm (Φ z)) = z := by
     intro z
     induction z using TensorProduct.induction_on with
@@ -148,8 +190,8 @@ theorem baseChange_equiv :
         congr 1
         change f (1 ⊗ₜ o) * _ = _
         rw [hf, map_one, Algebra.TensorProduct.tmul_mul_tmul, _root_.one_mul, _root_.mul_one]
-      | add x y hx hy => rw [add_tmul, map_add, map_add, map_add, hx, hy]
-    | add x y hx hy => rw [map_add, map_add, map_add, hx, hy]
+      | add x y hx hy => rw [add_tmul, map_add (f := _), map_add (f := _), map_add (f := _), hx, hy]
+    | add x y hx hy => rw [map_add (f := _), map_add (f := _), map_add (f := _), hx, hy]
   have hinj : Function.Injective Φ := fun a b hab => by rw [← h2 a, ← h2 b, hab]
   have hsurj : Function.Surjective Φ := fun n =>
     ⟨ψ (e.symm n), by rw [h1, LinearEquiv.apply_symm_apply]⟩
@@ -183,7 +225,7 @@ theorem tensorModule_eq (a : OAct O A) :
     rfl
   | add x y hx hy =>
     change actAlg (dp0 R) (𝟙 _) a (x + y) h = (x + y) • h
-    rw [add_smul, map_add, LinearMap.add_apply]
+    rw [add_smul, map_add (f := _), LinearMap.add_apply]
     exact congrArg₂ (· + ·) hx hy
 
 end Module

@@ -1,15 +1,62 @@
-import Development.WeilBound.RepresentationTheoryGL.GenericUnitaryGL.ComplementarySeries.Complementary
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IsSmoothIterPhi
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.DualClassInvolutive
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.DualClassTwistNeg
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.JacquetMultiplicityOfEquiv
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LanglandsSocleOfOrderFree
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LocalLanglandsOfIrreducibleAdmissibleStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsIrrRepInjectiveStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.PairingTwistedDeterminantSubquotientStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.NontrivialTwJacquetOfSurjective
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.HasFiniteLengthOfIsIrreducible
-import CompanionTheory.AutomorphicTheory.HeckeStandardModules.EqZeroOfCompAt
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.GenericUnitaryGL.ComplementarySeries.Complementary
+public import Development.WeilBound.RepresentationTheoryGL.GenericUnitaryGL.SegmentDerivatives.CuspPairSubGeneric
+public import Development.WeilBound.RepresentationTheoryGL.GenericUnitaryGL.SegmentDerivatives.DerivJac
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.NontrivialTwJacquetOfSurjective
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.SmoothContragredientIrreducibleAndReflexive
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.UnitarisableOfSquareIntegrable
+public import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.HasFiniteLengthOfIsIrreducible
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.DualClassInvolutive
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.DualClassTwistNeg
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsIrrRepInjectiveStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IsSmoothIterPhi
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.JacquetMultiplicityOfEquiv
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LanglandsSocleOfOrderFree
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LocalLanglandsOfIrreducibleAdmissibleStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.PairingTwistedDeterminantSubquotientStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.MirabolicDerivatives.SegmentCuspLines.ProdIrrFiniteLength
+
+@[expose] public section
 
 noncomputable section
 
@@ -46,13 +93,13 @@ theorem continuous_inv_addChar (ψ : AddChar k Circle) (hc : Continuous ψ) : Co
   rw [this]
   exact hc.comp continuous_neg
 
-theorem dualCl_fst (x : IrrGL k) : (dualCl x).1 = x.1 := by
+theorem dualCl_fst (x : IrrGL (k := k)) : (dualCl x).1 = x.1 := by
   unfold dualCl
   split <;> rfl
 
 end NuP
 
-set_option maxHeartbeats 4000000 in
+
 open NuP in
 theorem nuPair_of (k : Type) [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k]
     (h1 : GlobalTheory.BZSeg.DerivJac k) (h2 : GlobalTheory.BZSeg.JmTheta k) (h3 : DerFin k) : GlobalTheory.BZSeg.NuPair k := by
@@ -110,9 +157,9 @@ theorem nuPair_of (k : Type) [Field k] [ValuativeRel k] [TopologicalSpace k] [Is
       (ω.comp (Zc.Cos.thetaW k (n + 1 + j + 1))) := by
     rw [GlobalTheory.CompanionTheory.JacquetCongr.jm_congr_of_equiv _ hd2 _ _ E]
     exact hj2
-  set α : IrrGL k := (IrrGL.of S.ρ S.smooth S.irr).nu (-(((j : ℂ) + 1) / 2)) with hα
-  set Q' : IrrGL k := (IrrGL.of Q.ρ Q.smooth Q.irr).nu (-(((j : ℂ) + 1) / 2)) with hQ'
-  have hsum2 : ∀ (x y : IrrGL k), ∑ a, (![x, y] a).1 = x.1 + y.1 := fun x y => by
+  set α : IrrGL (k := k) := (IrrGL.of S.ρ S.smooth S.irr).nu (-(((j : ℂ) + 1) / 2)) with hα
+  set Q' : IrrGL (k := k) := (IrrGL.of Q.ρ Q.smooth Q.irr).nu (-(((j : ℂ) + 1) / 2)) with hQ'
+  have hsum2 : ∀ (x y : IrrGL (k := k)), ∑ a, (![x, y] a).1 = x.1 + y.1 := fun x y => by
     simp [Fin.sum_univ_two]
   have hd3 : ∑ i, (![dualCl β'', dualCl Q'] i).1 = n + 1 + j + 1 := by
     rw [hsum2, dualCl_fst, dualCl_fst]
@@ -125,7 +172,7 @@ theorem nuPair_of (k : Type) [Field k] [ValuativeRel k] [TopologicalSpace k] [Is
     rw [hQ', hQcl, hα, IrrGL.nu_nu, IrrGL.nu_nu, GlobalTheory.CompanionTheory.ZcDual.dualCl_nu hA, GlobalTheory.CompanionTheory.Zcore.dualCl_dualCl hA]
     congr 1
     ring
-  have key : ∀ u : IrrGL k, u = α.nu 1 → ∀ hdu : ∑ i, (![dualCl β'', u] i).1 = n + 1 + j + 1,
+  have key : ∀ u : IrrGL (k := k), u = α.nu 1 → ∀ hdu : ∑ i, (![dualCl β'', u] i).1 = n + 1 + j + 1,
       1 ≤ jm ![dualCl β'', u] hdu ω → ∃ hd' : ∑ a, (![dualCl β'', α.nu 1] a).1 = n + 1 + j + 1,
         1 ≤ jm ![dualCl β'', α.nu 1] hd' ω := by
     rintro u rfl hdu h

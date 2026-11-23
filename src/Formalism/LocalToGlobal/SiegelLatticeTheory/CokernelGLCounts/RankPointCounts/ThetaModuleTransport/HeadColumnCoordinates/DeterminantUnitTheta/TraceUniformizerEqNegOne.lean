@@ -1,5 +1,50 @@
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.ThetaModuleTransport.HeadColumnCoordinates.DeterminantUnitTheta.CoordGHolds
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.ThetaModuleTransport.HeadColumnCoordinates.SharpSpanCounting.ModularBoundZeroHolds
+module
+
+public import Formalism.SharpRestriction.CuspSpanNormBounds.FractionFieldToGenericStalkAlgebraMapEq
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.ThetaModuleTransport.HeadColumnCoordinates.DeterminantUnitTheta.CompOfMemR
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.LsDatumA
+
+@[expose] public section
 
 noncomputable section
 
@@ -45,7 +90,7 @@ def trO (hs : M.split = some g) : M.R →+ 𝒪[F] where
   map_zero' := by apply Subtype.ext; simp
   map_add' x y := by
     apply Subtype.ext
-    simp only [Subring.coe_add, map_add, Prod.fst_add, Prod.snd_add]
+    simp only [Subring.coe_add, map_add (f := _), Prod.fst_add, Prod.snd_add]
     push_cast
     ring
 
@@ -76,7 +121,7 @@ theorem R_decomp (hs : M.split = some g) (s : M.R) :
   refine ⟨⟨(g.e s).1, h1⟩, -c, ?_⟩
   apply Subtype.ext
   apply g.e.injective
-  rw [AddMemClass.coe_add, MulMemClass.coe_mul, map_add, map_mul, e_dgR, e_dgR, embedding_uniformizer]
+  rw [AddMemClass.coe_add, MulMemClass.coe_mul, map_add (f := _), map_mul, e_dgR, e_dgR, embedding_uniformizer]
   ext
   · simp
   · simp only [Prod.snd_add, Prod.snd_mul]
@@ -95,7 +140,7 @@ def llMap (Z : M.Mat (r + 1)) (TT : M.R) : (Fin (r + 1) → M.R) →+ (Fin (r + 
   toFun m := Z.Z.mulVec m - (TT * dgR hs (trO hs (m (Fin.last r)))) • eV r
   map_zero' := by simp
   map_add' x y := by
-    simp only [Matrix.mulVec_add, Pi.add_apply, map_add, mul_add, add_smul]
+    simp only [Matrix.mulVec_add, Pi.add_apply, map_add (f := _), mul_add, add_smul]
     abel
 
 def LL (Z : M.Mat (r + 1)) (TT : M.R) : AddSubgroup (Fin (r + 1) → M.R) := (llMap hs Z TT).range

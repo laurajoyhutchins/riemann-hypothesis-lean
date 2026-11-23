@@ -1,7 +1,58 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.WeightedLimitGauge.VolumeLieE
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.WeightedLimitGauge.HaarUniq
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.HasDensityAtIdentityUnitaryGroupProbability
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.WeightedLimitGauge.HaarUniq
+public import Formalism.PeriodIntegrals.QuotInv
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.HasDensityAtIdentityUnitaryGroupProbability
+import Development.AbelianVarietyTheory.Proofs.JetHarmonics.MatGroupHaarUniqueFiniteCompactOpenPos
+import Mathlib.Algebra.Order.Archimedean.Real.Hom
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Matrix.FiniteDimensional
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -197,10 +248,13 @@ theorem row_nonW {g : Mat k r} (hg : g ∈ SW k r) (i j : Fin (2 * r + k + 1)) (
 
 theorem isMatGroup_SW : PI.IsMatGroup (SW k r) := by
   refine ⟨?_, ?_, ?_, ?_⟩
-  · refine IsClosed.inter ?_ (IsClosed.inter ?_ ?_)
-    · exact isClosed_eq ((continuous_id.matrix_conjTranspose.matrix_mul continuous_const).matrix_mul continuous_id)
+  · have hU : IsClosed {g : Mat k r | gᴴ * Hpk k r * g = Hpk k r} := by
+      exact isClosed_eq ((continuous_id.matrix_conjTranspose.matrix_mul continuous_const).matrix_mul continuous_id)
         continuous_const
-    · have e : {g : Mat k r | ∀ a : Fin r, g *ᵥ bvec (eI k r a) = bvec (eI k r a) ∧
+    have h1 : IsClosed {g : Mat k r | ∀ a : Fin r,
+        g *ᵥ bvec (eI k r a) = bvec (eI k r a) ∧
+        g *ᵥ bvec (esI k r a) = bvec (esI k r a)} := by
+      have e : {g : Mat k r | ∀ a : Fin r, g *ᵥ bvec (eI k r a) = bvec (eI k r a) ∧
           g *ᵥ bvec (esI k r a) = bvec (esI k r a)} = ⋂ a : Fin r, ({g : Mat k r | g *ᵥ bvec (eI k r a) =
           bvec (eI k r a)} ∩ {g | g *ᵥ bvec (esI k r a) = bvec (esI k r a)}) := by ext g; simp
       show IsClosed {g : Mat k r | ∀ a : Fin r, g *ᵥ bvec (eI k r a) = bvec (eI k r a) ∧
@@ -209,7 +263,9 @@ theorem isMatGroup_SW : PI.IsMatGroup (SW k r) := by
       exact isClosed_iInter fun a => IsClosed.inter
         (isClosed_eq (continuous_id.matrix_mulVec continuous_const) continuous_const)
         (isClosed_eq (continuous_id.matrix_mulVec continuous_const) continuous_const)
-    · exact isClosed_eq (continuous_id.matrix_mulVec continuous_const) continuous_const
+    have h2 : IsClosed {g : Mat k r | g *ᵥ wLast k r = wLast k r} :=
+      isClosed_eq (continuous_id.matrix_mulVec continuous_const) continuous_const
+    exact hU.inter (h1.inter h2)
   · exact ⟨HU.uh_one, fun a => ⟨Matrix.one_mulVec _, Matrix.one_mulVec _⟩, Matrix.one_mulVec _⟩
   · intro a ha b hb
     refine ⟨HU.uh_mul ha.1 hb.1, fun c => ⟨?_, ?_⟩, ?_⟩
@@ -643,7 +699,7 @@ theorem gaugeVolUk : W.GaugeVolUk := by
         funext x
         show s * iota (r := r) (Matrix.of x) = iota (r := r) (blk s * Matrix.of x)
         rw [iota_mul, ← eq_iota_blk (out_SW hs)]
-      rw [hν0def, Measure.map_smul, Measure.map_map (GlobalTheory.MatHaar.lmulQ_cont s).measurable iM_memb.measurable, hcomp,
+      rw [hν0def, Measure.map_smul _ (GlobalTheory.MatHaar.lmulQ_cont s).measurable.aemeasurable, Measure.map_map (GlobalTheory.MatHaar.lmulQ_cont s).measurable iM_memb.measurable, hcomp,
         ← Measure.map_map iM_memb.measurable (GlobalTheory.MatHaar.lmulQ_cont (blk s)).measurable, hμ₀.2.2.2 _ hb]
   have hr0 : Tendsto (fun ρ : ℝ => (ν0 (expBall (k := k) (r := r) (SW k r) ρ)).toReal / sVol k r (SW k r) ρ)
       (𝓝[>] 0) (𝓝 1) := by

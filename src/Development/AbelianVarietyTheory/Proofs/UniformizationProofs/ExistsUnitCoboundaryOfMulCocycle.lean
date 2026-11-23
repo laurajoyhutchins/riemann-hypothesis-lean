@@ -1,5 +1,57 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IsUnitAddMonoidAlgebraIffOfTwoUniqueSums
+module
+
+public import Mathlib.Algebra.MonoidAlgebra.Basic
+public import Mathlib.RingTheory.Ideal.Maps
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.RingTheory.Ideal.BigOperators
+public import Mathlib.RingTheory.Nilpotent.Basic
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -23,7 +75,7 @@ theorem finsupp_homotopy {X : Type*} [Zero X] {N : Type*} [AddCommGroup N] (f : 
   induction f using Finsupp.induction_linear with
   | zero => simp
   | add f g hf hg =>
-    simp only [map_add, Finsupp.mapDomain_add, Finsupp.add_apply, Finsupp.sub_apply] at hf hg ⊢
+    simp only [map_add (f := _), Finsupp.mapDomain_add, Finsupp.add_apply, Finsupp.sub_apply] at hf hg ⊢
     rw [← sub_eq_zero] at hf hg ⊢
     rw [← add_zero (0 : N)]
     nth_rewrite 1 [← hf]
@@ -96,7 +148,7 @@ theorem exists_unit_of_faces {R₁ R₂ R₃ : Type*} [CommRing R₁] [CommRing 
     obtain ⟨φ, rfl⟩ : ∃ φ, f = 1 + φ := ⟨f - 1, by ring⟩
     rw [add_sub_cancel_left] at hf
     have hc' := hc
-    simp only [map_add, map_one] at hc'
+    simp only [map_add (f := _), map_one] at hc'
     obtain ⟨ψ, hψ, e⟩ := H K (K ^ 2) φ hf (by
       have : d₀ φ - d₁ φ + d₂ φ - d₃ φ = d₁ φ * d₃ φ - d₂ φ * d₀ φ := by
         linear_combination -hc'
@@ -119,7 +171,7 @@ theorem exists_unit_of_faces {R₁ R₂ R₃ : Type*} [CommRing R₁] [CommRing 
           have k₀ := k e₀
           have k₂ := k e₂
           rw [hu] at k₀ k₂ ⊢
-          simp only [map_add, map_one] at k₀ k₂ ⊢
+          simp only [map_add (f := _), map_one] at k₀ k₂ ⊢
           linear_combination ((1 + e₀ ψ) * e₀ v) * k₂ + k₀
         rw [this]
         exact Ideal.mul_mem_right _ _ (sub_mem (add_mem e
@@ -170,7 +222,7 @@ theorem exists_unit_coboundary_of_mul_cocycle (B : Type) [CommRing B] (I : Ideal
     intro a a' b b' h w
     induction w using AddMonoidAlgebra.induction_linear with
     | zero => simp
-    | add x y hx hy => simp only [map_add, hx, hy]
+    | add x y hx hy => simp only [map_add (f := _), hx, hy]
     | single x r => simp [h]
   obtain ⟨g, hg, hg'⟩ := exists_unit_of_faces (B := B)
     (mapDomainAlgHom B B (AddMonoidHom.inr X X))

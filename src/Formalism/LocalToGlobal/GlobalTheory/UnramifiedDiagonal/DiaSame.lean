@@ -1,6 +1,48 @@
-import Formalism.SharpRestriction.GlobalSchurBounds.LemmaBSecondBranchOfLength
-import Formalism.LocalToGlobal.GlobalTheory.GL6.DiagonalSlopes.NaturalTranslateAdelicFunction
-import Formalism.LocalToGlobal.GroupLattices.Joint0
+module
+
+public import Formalism.LocalToGlobal.GlobalTheory.GL6.DiagonalSlopes.NaturalTranslateAdelicFunction
+import Formalism.LocalToGlobal.GlobalTheory.GL6.DiagonalSlopes.PSplitT
+import Formalism.LocalToGlobal.GlobalTheory.GL6.RndLinkAdmTOf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -57,7 +99,7 @@ def DnDiaSame0F (T : Forms0 D u) : Prop :=
       (∀ x, IsDnMvF T v c x.1 (Mv x)) ∧ (∀ x, IsDnMvF T v _ x.1 (Mv2 x)) ∧
       ∀ x, (Mv2 (σ x)).1⁻¹ * κd.1 * (δ.1⁻¹ * (Mv x).1 * δ.1) ∈ T.cls0.lev.U
 
-set_option maxHeartbeats 4000000 in
+
 
 theorem diaU_same (T : Forms0 D u) (hM : UpDiaSame0F T) (v : (D.mem u).A.vT)
     (a : ((D.mem u).A.Fv v)ˣ) (φ : Fn D u 0) (hφ : φ ∈ (D.fm u).Fi 0) :
@@ -77,7 +119,7 @@ theorem diaU_same (T : Forms0 D u) (hM : UpDiaSame0F T) (v : (D.mem u).A.vT)
     exact T.val0.dilT v a k hk c1 δ hδ g hgA
   funext c
   have hcl := T.val0.dil v a k hk c δ hδ
-  obtain ⟨hh, hhH, κ0, hκK, e⟩ := (DoubleCoset.eq _ _ _ _).1 hcl
+  obtain ⟨hh, hhH, κ0, hκK, e⟩ := (@DoubleCoset.eq _ _ _ _ _ _).1 hcl
   have hκ : κ0.1 ∈ T.cls0.lev.U := hκK
   obtain ⟨γd, hγd, hge⟩ := Subgroup.mem_map.1 (Subgroup.mem_subgroupOf.1 hhH)
   have hx : (T.cls0.y c * δ).1 =
@@ -128,7 +170,7 @@ theorem diaU_same (T : Forms0 D u) (hM : UpDiaSame0F T) (v : (D.mem u).A.vT)
   rw [S0.adelic_value_translate T.cls0.lev (embT D) (fun τ x => S0.embedding_conj_compat D τ x) hgA γd hγd _ _
     m hx2, hχ]
 
-set_option maxHeartbeats 4000000 in
+
 
 theorem diaD_same (T : Forms0 D u) (hM : DnDiaSame0F T) (v : (D.mem u).A.vT)
     (a : ((D.mem u).A.Fv v)ˣ) (φ : Fn D u 0) (hφ : φ ∈ (D.fm u).Fi 0) :
@@ -148,7 +190,7 @@ theorem diaD_same (T : Forms0 D u) (hM : DnDiaSame0F T) (v : (D.mem u).A.vT)
     exact T.val0.dilT v a k hk c1 δ hδ g hgA
   funext c
   have hcl := T.val0.dil v a k hk c δ hδ
-  obtain ⟨hh, hhH, κ0, hκK, e⟩ := (DoubleCoset.eq _ _ _ _).1 hcl
+  obtain ⟨hh, hhH, κ0, hκK, e⟩ := (@DoubleCoset.eq _ _ _ _ _ _).1 hcl
   have hκ : κ0.1 ∈ T.cls0.lev.U := hκK
   obtain ⟨γd, hγd, hge⟩ := Subgroup.mem_map.1 (Subgroup.mem_subgroupOf.1 hhH)
   have hx : (T.cls0.y c * δ).1 =

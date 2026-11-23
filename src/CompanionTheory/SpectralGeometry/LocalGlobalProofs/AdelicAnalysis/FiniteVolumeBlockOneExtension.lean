@@ -1,17 +1,70 @@
-import Mathlib
-import CompanionTheory.SpectralGeometry.CountingDefinitions.AdelicEulerProducts.HypJ
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.TensorLocallyCompactRing
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.AdelesLocallyCompactSecondCountable
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.ArithmeticUnitaryGroupDiscrete
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.BlockOneRightInjective
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.AdelicUnitaryGroupLocallyCompactStatement
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.WittExtensionGlobalStatement
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.InvariantMeasureCompactCoverBoundStatement
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.FundamentalDomainOfSubgroupFromCosetRepsStatement
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.HaarFundamentalDomainExistsUnitaryStatement
+module
+
+public import CompanionTheory.SpectralGeometry.CountingDefinitions.AdelicEulerProducts.HypJ
+public import Formalism.UnipotentAdelicQuotients.SiegelWeilUnitaryConvergent
+public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.AdelesLocallyCompactSecondCountable
+public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.AdelicUnitaryGroupLocallyCompactStatement
+public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.ArithmeticUnitaryGroupDiscrete
+public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.BlockOneRightInjective
+public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.FundamentalDomainOfSubgroupFromCosetRepsStatement
+public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.GramOrbitCompactRepresentativeStatement
+public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.HaarFundamentalDomainExistsUnitaryStatement
+public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.HyperbolicAndBlockOneNondegenerateStatement
+public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.InvariantMeasureCompactCoverBoundStatement
 import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.RationalGramAdelicCompactFiniteStatement
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.GramOrbitCompactRepresentativeStatement
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.HyperbolicAndBlockOneNondegenerateStatement
+import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.TensorLocallyCompactRing
+public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.WittExtensionGlobalStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open HeckeCharacterZeroLocus.SiegelWeilU GlobalTheory.CompanionTheory.SW NumberField IsDedekindDomain MeasureTheory Topology
 open scoped TensorProduct ENNReal NNReal Matrix
@@ -101,6 +154,7 @@ theorem act_rat (γ : HA R σ J) (g : GL (Fin M) E) (hγ : HA.mat R σ J γ = bc
   simp only [actW, actTup, ratTup, hγ]
   show ∑ j, inclR (F := F) R ((g : Matrix (Fin M) (Fin M) E) i j) * inclR (F := F) R (X a j) =
     inclR (F := F) R (∑ j, (g : Matrix (Fin M) (Fin M) E) i j * X a j)
+
   simp [map_sum]
 
 end Rat
@@ -216,13 +270,13 @@ theorem count_lt_top : ∀ (F E : Type) [Field F] [NumberField F] [Field E] [Num
       rw [mul_inv_rev, hmul, (hstab _).1 hp']
     simp only [f, this]
   obtain ⟨C₀, hC₀, hC₀p⟩ := GlobalTheory.T.gram_orbit_compact_representative F E σ hσ (M + 1) _ hJb 1 e0E hdet Ω hΩ
-  have hsupp : ∀ x, f x ≠ 0 → ∃ p ∈ ι.range, ∃ c ∈ C₀⁻¹, x = p * c := by
+  have hsupp : ∀ x, f x ≠ 0 → ∃ p ∈ ι.range, ∃ c ∈ (fun c => c⁻¹) '' C₀, x = p * c := by
     intro x hx
     have hxΩ : actW (AF F) σ (blockOne (algebraMap F E t) J) x⁻¹ e0 ∈ Ω := by
       by_contra hn
       exact hx (Set.indicator_of_notMem hn _)
     obtain ⟨c, hc, hce⟩ := hC₀p _ hxΩ (by rw [hgram]; exact hgr2 1 e0E)
-    refine ⟨x * c, (hstab _).2 ?_, c⁻¹, Set.inv_mem_inv.2 hc, by group⟩
+    refine ⟨x * c, (hstab _).2 ?_, c⁻¹, ⟨c, hc, rfl⟩, by group⟩
     rw [hmul]
     show actW (AF F) σ (blockOne (algebraMap F E t) J) x (actW (AF F) σ (blockOne (algebraMap F E t) J) c (ratTup (AF F) e0E)) = e0
     rw [hce, ← hmul, mul_inv_cancel]
@@ -273,7 +327,7 @@ theorem count_lt_top : ∀ (F E : Type) [Field F] [NumberField F] [Field E] [Num
     (fun u => by
       obtain ⟨γ, h1, h2⟩ := hcov₁ u
       exact ⟨γ, (hmemΓ₁ γ).2 h1, h2⟩)
-    Q r hr hQ f hfm hf1 hinv C₀⁻¹ hC₀.inv hsupp
+    Q r hr hQ f hfm hf1 hinv ((fun c => c⁻¹) '' C₀) (hC₀.image continuous_inv) hsupp
   have hrew : ∀ (h : HA (AF F) σ (blockOne (algebraMap F E t) J)) (q : Q), f (r q * h) =
       Set.indicator Ω (fun _ => (1 : ℝ≥0∞))
         (actW (AF F) σ (blockOne (algebraMap F E t) J) h⁻¹ (ratTup (AF F) q.1)) := by

@@ -1,5 +1,47 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Statements.GeometryStatements.IsPolLatticePlane
+module
+
+public import Development.AutomorphicSpectrum.Statements.GeometryStatements.IsPolLatticePlane
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -23,7 +65,7 @@ theorem inj_mod_of_surj_mod {M : Type} [AddCommGroup M] [Module.Finite ℤ M] (f
     obtain ⟨z, b, rfl⟩ := hs a
     refine ⟨K.mkQ z, ?_⟩
     show K.mkQ (f z) = _
-    rw [map_add, show K.mkQ (q • b) = 0 from (Submodule.Quotient.mk_eq_zero K).2 ((hK _).2 ⟨b, rfl⟩), add_zero]
+    rw [map_add (f := _), show K.mkQ (q • b) = 0 from (Submodule.Quotient.mk_eq_zero K).2 ((hK _).2 ⟨b, rfl⟩), add_zero]
   have hi := OrzechProperty.injective_of_surjective_endomorphism g hg
   have h0 : g (K.mkQ z) = g 0 := by
     rw [map_zero]
@@ -37,7 +79,7 @@ theorem surj_mod_pow {M L : Type} [AddCommGroup M] [AddCommGroup L] (σ : M →+
   | succ n ih =>
     obtain ⟨z, b, rfl⟩ := ih
     obtain ⟨z', b', rfl⟩ := h b
-    exact ⟨z + (p ^ n) • z', b', by rw [map_add, map_nsmul, smul_add, pow_succ, mul_smul, add_assoc]⟩
+    exact ⟨z + (p ^ n) • z', b', by rw [map_add (f := _), map_nsmul, smul_add, pow_succ, mul_smul, add_assoc]⟩
 
 theorem perfect_mod {M L : Type} [AddCommGroup M] [AddCommGroup L] [Module.Free ℤ L] (σ : M →ₗ[ℤ] L) (q : ℕ)
     (EF : L →ₗ[ℤ] L →ₗ[ℤ] ℤ) (hE : Function.Bijective EF) (hs : ∀ a, ∃ z b, a = σ z + q • b)
@@ -67,7 +109,7 @@ theorem perfect_mod {M L : Type} [AddCommGroup M] [AddCommGroup L] [Module.Free 
       rw [map_sub, sub_eq_iff_eq_add']
       exact hst (σ z))
     have h1 : φ z = φ (s (σ z)) := by
-      rw [sub_eq_iff_eq_add.1 hz', map_add, map_nsmul]
+      rw [sub_eq_iff_eq_add.1 hz', map_add (f := _), map_nsmul]
       simp [← sub_eq_iff_eq_add.1 hz']
     have h2 : σ (zz a₀) = a₀ - q • cc a₀ := eq_sub_iff_add_eq.2 (hzc a₀).symm
     rw [h1, ← hψ, ← ha₀, h2]
@@ -76,7 +118,7 @@ theorem perfect_mod {M L : Type} [AddCommGroup M] [AddCommGroup L] [Module.Free 
     have hd : ∀ a, (q : ℤ) ∣ EF (σ y) a := by
       intro a
       obtain ⟨z, b, rfl⟩ := hs a
-      rw [map_add, map_nsmul, nsmul_eq_mul]
+      rw [map_add (f := _), map_nsmul, nsmul_eq_mul]
       exact dvd_add ((ZMod.intCast_zmod_eq_zero_iff_dvd _ _).1 (hy z)) (dvd_mul_right _ _)
     choose d hd using hd
     let ψ : L →ₗ[ℤ] ℤ := B.constr ℤ fun i => d (B i)
@@ -142,7 +184,7 @@ theorem exists_levPairing {E : Type} [Field E] [NumberField E] (c : E ≃+* E) (
     obtain ⟨z, b, rfl⟩ := hs a
     refine ⟨Multiplicative.ofAdd z, ?_⟩
     have h0 : K.mkQ ((p ^ n) • b) = 0 := (hone _).2 ⟨b, rfl⟩
-    rw [map_add, h0, add_zero] at ha
+    rw [map_add (f := _), h0, add_zero] at ha
     exact ha
   · rw [hπ, hone]
     exact ⟨fun ⟨b, hb⟩ => hk y b hb, fun ⟨y', hy'⟩ => ⟨σ y', by rw [hy', map_nsmul]⟩⟩

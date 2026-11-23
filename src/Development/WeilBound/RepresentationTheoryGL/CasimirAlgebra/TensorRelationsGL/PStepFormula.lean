@@ -1,4 +1,53 @@
-import Development.WeilBound.RepresentationTheoryGL.CasimirAlgebra.TensorRelationsGL.PStepFormulaA
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.CasimirAlgebra.TensorRelationsGL.QdetFacts
+public import Development.WeilBound.RepresentationTheoryGL.CasimirAlgebra.TensorRelationsGL.PStepFormulaA
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Development.WeilBound.RepresentationTheoryGL.CasimirAlgebra.TensorRelationsGL.LiftCommEAt
+
+@[expose] public section
 
 noncomputable section
 
@@ -29,7 +78,7 @@ theorem one (hT : TensorGl) (hJ : JMComm) (hQ : PiQdet) (hC : Curry) (E : Fin n 
     rw [lift_PiJ]
     unfold PiJ
     rw [List.ofFn_add, List.prod_append, map_mul, map_list_prod, map_list_prod, List.map_ofFn, List.map_ofFn]
-    simp only [Function.comp_def, map_add, AlgEquiv.commutes]
+    simp only [Function.comp_def, map_add (f := _), AlgEquiv.commutes]
     congr 2
     · congr 1; funext i; congr 1; exact conj_eq e fun x => LinearMap.congr_fun (h3 i) x
     · congr 1; funext j; congr 1; exact conj_eq e fun x => LinearMap.congr_fun (h4 j) x
@@ -48,16 +97,18 @@ theorem one (hT : TensorGl) (hJ : JMComm) (hQ : PiQdet) (hC : Curry) (E : Fin n 
     unfold PiJ
     rw [map_list_prod, map_list_prod, List.map_ofFn, List.map_ofFn, List.ofFn_congr (Nat.add_comm 1 n),
       List.ofFn_succ', List.concat_eq_append, List.prod_append, List.prod_singleton]
-    simp only [Function.comp_apply, map_add, AlgEquiv.commutes]
+    simp only [Function.comp_apply, map_add (f := _), AlgEquiv.commutes]
     congr 1
     · congr 1; congr 1; funext j; congr 1
       have hk : (Fin.cast (Nat.add_comm 1 n).symm j.castSucc : Fin (1 + n)) = ⟨j, by omega⟩ := Fin.ext (by simp)
-      rw [hΨ, conj_xJ hT E hE, hk, rot_nat, map_add, hOr, xJ, sum_lt_cast _ (by simp), map_sum]
+
+      rw [hΨ, conj_xJ hT E hE, hk, rot_nat, map_add (f := _), hOr, xJ, sum_lt_cast _ (by simp), map_sum]
       congr 1
       refine Finset.sum_congr (Finset.filter_congr fun i _ => Iff.rfl) fun i _ => ?_
       rw [rot_nat, hsw]
-    · rw [hΨ, conj_xJ hT E hE, rot_last _ (by simp), map_add, hOl, sum_lt_cast _ (by simp), hQdef, map_sum, map_sum,
-        add_assoc]
+    · set_option synthInstance.maxHeartbeats 100000 in
+        rw [hΨ, conj_xJ hT E hE, rot_last _ (by simp), map_add (f := _), hOl, sum_lt_cast _ (by simp), hQdef, map_sum, map_sum,
+          add_assoc]
       congr 2
       refine Finset.sum_congr (Finset.filter_true_of_mem fun i _ => by simp) fun i _ => ?_
       rw [rot_nat]
@@ -82,7 +133,7 @@ theorem one (hT : TensorGl) (hJ : JMComm) (hQ : PiQdet) (hC : Curry) (E : Fin n 
     simp only [alt, Finset.sum_mul, Finset.mul_sum, smul_mul_assoc, mul_smul_comm, (lift_comm_pm B _).eq]
   have hl : (lift (algebraMap ℂ _ (u + 1) + Om E 0) : Module.End ℂ (TV n (TV n M (Fin 1)) (Fin n))) =
       algebraMap ℂ _ u + lift (Om E 0) + 1 := by
-    rw [← liftA_apply, map_add, AlgHom.commutes, liftA_apply, map_add, map_one]; abel
+    rw [← liftA_apply, map_add (f := _), AlgHom.commutes, liftA_apply, map_add (f := _), map_one]; abel
   rw [PiJ_one E (u + 1)]
   apply ext_of_alt (n := n)
   calc lift (PiJ 1 E u * qdet (tE Finset.univ E) u) * alt Finset.univ
@@ -119,7 +170,7 @@ theorem stepFormula_of : TensorGl → JMComm → PiQdet → Curry → StepFormul
       rw [lift_PiJ]
       unfold PiJ
       rw [List.ofFn_add, List.prod_append, map_mul, map_list_prod, map_list_prod, List.map_ofFn, List.map_ofFn]
-      simp only [Function.comp_def, map_add, AlgEquiv.commutes]
+      simp only [Function.comp_def, map_add (f := _), AlgEquiv.commutes]
       congr 2
       · congr 1; funext i; congr 1; exact conj_eq e fun x => LinearMap.congr_fun (h3 i) x
       · congr 1; funext j; congr 1; exact conj_eq e fun x => LinearMap.congr_fun (h4 j) x

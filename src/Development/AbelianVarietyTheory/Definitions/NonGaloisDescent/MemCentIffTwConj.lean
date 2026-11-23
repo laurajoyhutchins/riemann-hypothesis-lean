@@ -1,5 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.TwConj
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.TwConj
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Matrix
 
@@ -81,52 +127,10 @@ theorem theta_theta {g : Matrix (Fin n) (Fin n) R} (hg : IsUnit g) : theta (thet
       = (Phi n R * Phi n R) * g * ((Phi n R)ᵀ * (Phi n R)ᵀ) := by simp only [Matrix.mul_assoc]
     _ = g := by rw [h3, h4]; simp [smul_smul, hs]
 
-theorem nrm_twConj {x δ : Matrix (Fin n) (Fin n) R} (hx : IsUnit x) :
-    nrm (twConj x δ) = x⁻¹ * nrm δ * x := by
-  have hx' : IsUnit x⁻¹ := by rwa [Matrix.isUnit_nonsing_inv_iff]
-  simp only [nrm, twConj, theta_mul, theta_theta hx, Matrix.mul_assoc]
-  rw [← Matrix.mul_assoc (theta x), theta_mul_theta_inv hx, Matrix.one_mul]
-
 theorem adj_eq {δ g : Matrix (Fin n) (Fin n) R} (hδ : IsUnit δ) (hg : IsUnit g) :
     adj δ g = (δ * theta g * δ⁻¹)⁻¹ := by
   rw [Matrix.mul_inv_rev, Matrix.mul_inv_rev, theta_inv_eq hg,
     Matrix.nonsing_inv_nonsing_inv _ ((Matrix.isUnit_iff_isUnit_det δ).mp hδ), adj]
   simp only [Matrix.mul_assoc]
-
-theorem mem_cent_iff_twConj {δ g : Matrix (Fin n) (Fin n) R} (hg : IsUnit g) :
-    g ∈ cent δ ↔ twConj g δ = δ := by
-  have hd := (Matrix.isUnit_iff_isUnit_det g).mp hg
-  simp only [cent, Set.mem_setOf_eq, hg, true_and, twConj, Matrix.mul_assoc]
-  constructor
-  · intro h
-    rw [← h, Matrix.nonsing_inv_mul_cancel_left _ _ hd]
-  · intro h
-    conv_lhs => rw [← h]
-    rw [Matrix.mul_nonsing_inv_cancel_left _ _ hd]
-
-theorem Phi_two : Phi 2 ℂ = !![0, 1; -1, 0] := by
-  ext i j; fin_cases i <;> fin_cases j <;> simp [Phi]
-
-theorem inv_diag : (!![2, 0; 0, 1] : Matrix (Fin 2) (Fin 2) ℂ)⁻¹ = !![1/2, 0; 0, 1] := by
-  apply Matrix.inv_eq_right_inv
-  ext i j; fin_cases i <;> fin_cases j <;> simp [Matrix.mul_apply, Fin.sum_univ_two]
-
-theorem nrm_diag : nrm (!![2, 0; 0, 1] : Matrix (Fin 2) (Fin 2) ℂ) = Matrix.diagonal ![2, 1/2] := by
-  rw [nrm, theta, inv_diag, Phi_two]
-  ext i j; fin_cases i <;> fin_cases j <;>
-    simp [Matrix.mul_apply, Fin.sum_univ_two, Matrix.conjTranspose_apply, Matrix.vecMul, dotProduct, map_ofNat]
-
-theorem reg_diag : Reg (!![2, 0; 0, 1] : Matrix (Fin 2) (Fin 2) ℂ) := by
-  refine ⟨?_, ?_⟩
-  · rw [Matrix.isUnit_iff_isUnit_det]; simp [Matrix.det_fin_two]
-  · rw [nrm_diag, Matrix.charpoly_diagonal, Polynomial.separable_prod_X_sub_C_iff]
-    intro i j h
-    fin_cases i <;> fin_cases j <;> simp_all <;> norm_num at h
-
-theorem not_reg_one : ¬ Reg (1 : Matrix (Fin 2) (Fin 2) ℂ) := by
-  rintro ⟨-, h⟩
-  rw [nrm, theta_one, Matrix.mul_one, ← Matrix.diagonal_one, Matrix.charpoly_diagonal,
-    Polynomial.separable_prod_X_sub_C_iff] at h
-  exact absurd (@h 0 1 rfl) (by decide)
 
 end GlobalTheory.Tw.Model

@@ -1,8 +1,57 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.EqZeroOfForallPowDvd
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SandwichKernelRangeExact
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsPowEqOfIntegers
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.GhostFrobenius
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ConvEqOneOfForallPairing
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsPowEqOfIntegers
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SandwichKernelRangeExact
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+public import Mathlib.RingTheory.Valuation.Integral
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.SandwichMaps
+import Development.AbelianVarietyTheory.Definitions.Divisors.EqZeroOfForallPowDvd
+import Development.AbelianVarietyTheory.Definitions.Divisors.FormalCoboundarySmul
+
+@[expose] public section
 
 set_option autoImplicit false
 noncomputable section
@@ -65,6 +114,7 @@ theorem eq_sum_epsPairing_smul {ε : PreTilt O p} (hε : IsPrimitiveSystem ε) (
   classical
   apply (G.pairing_flip_bijective C).1
   refine tb.ext fun m => ?_
+
   rw [LinearMap.flip_apply, LinearMap.flip_apply, map_sum]
   have hlin : ∀ (t : G.Tate) (c : ℤ_[p]) (ψ : G.dual.Tate),
       epsPairing hε G t (c • ψ) = c * epsPairing hε G t ψ := by
@@ -109,8 +159,9 @@ theorem hasDatum_of_matrices : ∀ (p : ℕ) [Fact p.Prime] (C : Type) [Field C]
       fun m' => algebraMap O C (D.bb z m') := by
     intro z
     funext m'
+
     simp [GlobalTheory.IndefiniteRowSideFullHecke.SandwichMaps.bC, GlobalTheory.IndefiniteRowSideFullHecke.SandwichMaps.redC, Datum.bb, Matrix.toLin'_apply, Matrix.mulVec,
-      dotProduct, map_sum, map_mul]
+    dotProduct, map_sum, map_mul]
   have halC : ∀ (y : Fin G.height → C) a, GlobalTheory.IndefiniteRowSideFullHecke.SandwichMaps.alC C D y (σ a) =
       ∑ m, algebraMap O C (WittVector.fontaineTheta O p (Fa a m)) * y m := by
     intro y a
@@ -213,6 +264,7 @@ theorem hasDatum_of_matrices : ∀ (p : ℕ) [Fact p.Prime] (C : Type) [Field C]
       ∑ m, lb j (hodgeTate G (tb m)) * padicToO p O (tb.repr t m) := by
     intro j t
     conv_lhs => rw [← tb.sum_repr t]
+
     rw [map_sum (hodgeTate G), map_sum (lb j)]
     refine Finset.sum_congr rfl fun m _ => ?_
     rw [hodgeTate_smul (padicToO p O), map_smul, smul_eq_mul, mul_comm]
@@ -237,12 +289,14 @@ theorem hasDatum_of_matrices : ∀ (p : ℕ) [Fact p.Prime] (C : Type) [Field C]
     rw [hbq]
     have hbbx : ∀ m', D.bb m m' = lie (D.Fil.mkQ m) (dlog G (χ m')) := by
       intro m'
+
       rw [hbb, hdlog, map_sum]
       refine Finset.sum_congr rfl fun i _ => ?_
       rw [map_smul, hlie, smul_eq_mul]
     rw [pairingO]
     simp only [hbbx, he]
     conv_rhs => rw [hχexp χ0]
+
     rw [map_sum (dlog G), map_sum]
     refine Finset.sum_congr rfl fun m' _ => ?_
     rw [dlog_smul (padicToO p O), map_smul, smul_eq_mul, mul_comm]

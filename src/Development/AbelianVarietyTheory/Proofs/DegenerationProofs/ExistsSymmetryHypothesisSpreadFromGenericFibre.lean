@@ -1,10 +1,55 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.SecBaseChangeAnySt
-import Development.AbelianVarietyTheory.Definitions.Degenerations.RigGen
-import Development.AbelianVarietyTheory.Definitions.AbelianSchemeLaws.FirstCohomologyVanishesSpecOfIsLocalRing
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsProjectiveModel
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.LineBundleSymmetryHypothesisBaseChange
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Degenerations.RigGen
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.SabComp
+public import Development.AbelianVarietyTheory.Definitions.ThetaMetrics.MemNonzeroLocusIffPowFn
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsProjectiveModel
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.LineBundleSymmetryHypothesisBaseChange
 import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.IsSchemeTheoreticallyDominantSpecOfInjective
+import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.LbIsoLinComb
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.BCTools
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.LBLocal
+
+@[expose] public section
 
 open CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj AlgebraicGeometry
 open scoped CategoryTheory.Obj
@@ -47,8 +92,8 @@ theorem lbIso_cube (h : IsGrpPullback A G j a) {L : LB G.left} {LA : LB A.left} 
     (hb : LBIso LA (L.pull a)) {T : Over S} {T' : Over U} {n : ℕ} (x : Fin n → (T ⟶ G)) (x' : Fin n → (T' ⟶ A))
     (V : Over.mk (T'.hom ≫ j) ⟶ T) (hx : ∀ i, pushPt h.1.w (x' i) = V ≫ x i) :
     LBIso (cubeLB A x' LA) ((cubeLB G x L).pull V.left) :=
-  LBIso.trans (DVR.linComb_isLB _ hLA _ _) (DVR.linComb_isLB _ (pull_isLB hL a) _ _)
-    (pull_isLB (DVR.linComb_isLB _ hL _ _) _) (GlobalTheory.PowPrimitive.lbIso_linComb hb _ _)
+  LBIso.trans (DVR.linComb_isLB _ hLA _ _) (DVR.linComb_isLB _ (LB.isLB_pull hL a) _ _)
+    (LB.isLB_pull (DVR.linComb_isLB _ hL _ _) _) (GlobalTheory.PowPrimitive.lbIso_linComb hb _ _)
     (LBIso.chartPull (chartPullLinComb L a _ _ _ V.left fun I => psum_push h _ _ V hx I.down)
       (Geo.Tor.chartPullPull _ V.left V.left rfl) (lbIso_refl (DVR.linComb_isLB _ hL _ _)))
 
@@ -101,10 +146,10 @@ theorem exists_forall_hypS : ∀ (R K : Type) [CommRing R] [IsDomain R] [IsNoeth
     change IsProper (pullback.fst G.hom G.hom ≫ G.hom)
     infer_instance
   obtain ⟨a₁, ha₁, H₁⟩ := GenSpread.exists_lbIso G.hom h.1 hL (cl _)
-    (hb.symm.trans (pull_isLB hL _) hL₀ (pull_isLB (cl _) _) (hp.trans hL₀ (cl₀ _) (pull_isLB (cl _) _) c₁))
+    (hb.symm.trans (LB.isLB_pull hL _) hL₀ (LB.isLB_pull (cl _) _) (hp.trans hL₀ (cl₀ _) (LB.isLB_pull (cl _) _) c₁))
   obtain ⟨a₂, ha₂, H₂⟩ := GenSpread.exists_lbIso (G ⊗ G).hom (isPullback_square h) (cl _) (cl _)
-    (c₂.symm.trans (pull_isLB (cl _) _) (cl₀ _) (pull_isLB (cl _) _)
-      (ha.trans (cl₀ _) (cl₀ _) (pull_isLB (cl _) _) c₃))
+    (c₂.symm.trans (LB.isLB_pull (cl _) _) (cl₀ _) (LB.isLB_pull (cl _) _)
+      (ha.trans (cl₀ _) (cl₀ _) (LB.isLB_pull (cl _) _) c₃))
   refine ⟨a₁ * a₂, mul_ne_zero ha₁ ha₂, fun R' _ g hg G' _ _ π L' h' hL' hb' => ?_⟩
   rw [map_mul, IsUnit.mul_iff] at hg
   obtain ⟨w', hw', pa⟩ := SymBaseChange.exists_endo h' w
@@ -119,10 +164,10 @@ theorem exists_forall_hypS : ∀ (R K : Type) [CommRing R] [IsDomain R] [IsNoeth
     have d := pd (𝟙 G')
     rw [Category.id_comp] at c d
     rw [b, c, d, ← MonObj.comp_mul, hsum, Category.comp_id]
-  · exact hb'.trans hL' (pull_isLB hL _) (cl' _)
-      ((H₁ R' g hg.1 _ π G'.hom h'.1.w).trans (pull_isLB hL _) (pull_isLB (cl _) _) (cl' _) d₁.symm)
-  · exact d₂.trans (cl' _) (pull_isLB (cl _) _) (cl' _)
-      ((H₂ R' g hg.2 _ _ (G' ⊗ G').hom (isPullback_square h').w).trans (pull_isLB (cl _) _) (pull_isLB (cl _) _)
+  · exact hb'.trans hL' (LB.isLB_pull hL _) (cl' _)
+      ((H₁ R' g hg.1 _ π G'.hom h'.1.w).trans (LB.isLB_pull hL _) (LB.isLB_pull (cl _) _) (cl' _) d₁.symm)
+  · exact d₂.trans (cl' _) (LB.isLB_pull (cl _) _) (cl' _)
+      ((H₂ R' g hg.2 _ _ (G' ⊗ G').hom (isPullback_square h').w).trans (LB.isLB_pull (cl _) _) (LB.isLB_pull (cl _) _)
         (cl' _) d₃.symm)
 
 end GlobalTheory.SymSpread

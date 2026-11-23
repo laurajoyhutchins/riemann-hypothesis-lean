@@ -1,6 +1,60 @@
-import Mathlib
-import Formalism.GL3MeanSquares.PrimeCountAsymptoticInProgressions
-import Formalism.LandauZeroFreeBounds.SiegelWalfiszAPOfSiegelLower
+module
+
+public import Formalism.GL3MeanSquares.PrimeCountAsymptoticInProgressions
+public import Formalism.LandauZeroFreeBounds.SiegelWalfiszAPOfSiegelLower
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.MeasureTheory.Function.Floor
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LSeries.Nonvanishing
+public import Mathlib.NumberTheory.LSeries.SumCoeff
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Formalism.LandauZeroFreeBounds.SiegelWalfiszAP
+public import Mathlib.NumberTheory.AbelSummation
+
+@[expose] public section
 
 open Finset Filter Topology ArithmeticFunction MeasureTheory
 
@@ -69,12 +123,6 @@ private lemma rem_measurable (a : ℕ → ℂ) (m : ℂ) : Measurable (rem a m) 
 private lemma F_measurable (a : ℕ → ℂ) (m : ℂ) (s : ℂ) :
     Measurable (fun t : ℝ => rem a m t * (t : ℂ) ^ s) := by
   exact (rem_measurable a m).mul (Complex.measurable_ofReal.pow_const s)
-
-private lemma cpow_contOn (s : ℂ) : ContinuousOn (fun t : ℝ => (t : ℂ) ^ s) (Set.Ici 1) := by
-  intro t ht
-  have ht' : (0 : ℝ) < t := lt_of_lt_of_le one_pos ht
-  exact (Complex.continuous_ofReal.continuousAt.cpow continuousAt_const
-    (Complex.ofReal_mem_slitPlane.2 ht')).continuousWithinAt
 
 private lemma core_bigO {a : ℕ → ℂ} {m : ℂ} (h : RemBound a m) :
     (fun t : ℝ => rem a m t * (t : ℂ) ^ (-(((1 : ℝ) : ℂ) + 1))) =O[atTop] dom := by
@@ -364,8 +412,8 @@ private theorem logDerivSeries_main : Formalism.HermitianLattices.GL2a2.LogDeriv
   have hf_int : LocallyIntegrableOn (deriv (fun t : ℝ => ((t⁻¹ : ℝ) : ℂ))) (Set.Ici 1) := by
     have hc : ContinuousOn (fun t : ℝ => ((-(t ^ 2)⁻¹ : ℝ) : ℂ)) (Set.Ici 1) := by
       apply Complex.continuous_ofReal.comp_continuousOn
-      apply ContinuousOn.neg
-      apply ContinuousOn.inv₀ (by fun_prop)
+      apply ContinuousOn.fun_neg
+      apply ContinuousOn.fun_inv₀ (by fun_prop)
       intro t ht
       exact pow_ne_zero 2 (show (0 : ℝ) < t from lt_of_lt_of_le one_pos ht).ne'
     exact (hc.congr (fun t ht => hdf t (show (0 : ℝ) < t from lt_of_lt_of_le one_pos ht).ne')).locallyIntegrableOn

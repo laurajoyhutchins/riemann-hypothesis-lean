@@ -1,5 +1,44 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.HeightProofs.StdCharIffInt
+module
+
+public import Formalism.LocalToGlobal.BesselHermitianTheta.DefsReal
+import Development.AbelianVarietyTheory.Proofs.HeightProofs.EmbeddingXiZeroNeZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -14,43 +53,11 @@ variable {D : D7}
 section Gen
 variable {R : Type} [CommRing R] {a b : ℕ}
 
-def thenTr (φ : Matrix (Fin a) (Fin b) R ≃ₗ[R] Matrix (Fin a) (Fin b) R) :
-    Matrix (Fin a) (Fin b) R ≃ₗ[R] Matrix (Fin b) (Fin a) R :=
-  φ.trans (Matrix.transposeLinearEquiv _ _ R R)
-
-theorem leftMul_apply (J Ji : Matrix (Fin a) (Fin a) R) (h1 : Ji * J = 1) (x : Matrix (Fin a) (Fin b) R) :
-    leftMul J Ji h1 x = Jiᵀ * x := rfl
-
 end Gen
 
 open GlobalTheory.IndefiniteRowSideFullHecke
 
 instance topRing (D : D7) : IsTopologicalRing (AE D) := IsModuleTopology.isTopologicalRing (AF D.host.F) _
-
-theorem gramInv_mul (A : HSp D) : HeisenbergWeilMatrices.gramInvA A * HeisenbergWeilMatrices.gramA A = 1 := by
-  unfold HeisenbergWeilMatrices.gramInvA HeisenbergWeilMatrices.gramA
-  rw [← Matrix.map_mul, Matrix.nonsing_inv_mul _ (isUnit_iff_ne_zero.2 (gram_det_ne A))]
-  exact Matrix.map_one _ (incA D).map_zero (incA D).map_one
-
-def coordUp (A B : HSp D) : HeisenbergWeilMatrices.WA A B ≃ₗ[AE D] WA A B :=
-  leftMul (HeisenbergWeilMatrices.gramA A) (HeisenbergWeilMatrices.gramInvA A) (gramInv_mul A)
-
-def coordDn (V W : HSp D) : HeisenbergWeilMatrices.WA W V ≃ₗ[AE D] WA V W :=
-  thenTr (coordUp W V)
-
-theorem coordUp_eq (A B : HSp D) (x : HeisenbergWeilMatrices.WA A B) : coordUp A B x = HMul.hMul (HeisenbergWeilMatrices.gramInvA A)ᵀ x :=
-  leftMul_apply _ _ (gramInv_mul A) x
-
-theorem cont_up (A B : HSp D) : Continuous (coordUp A B) ∧ Continuous (coordUp A B).symm :=
-  gen_cont _ _ (gramInv_mul A)
-
-structure IsCoord {V W A B : HSp D} (φ : HeisenbergWeilMatrices.WA A B ≃ₗ[AE D] WA V W) : Prop where
-  cont : Continuous φ
-  cont_symm : Continuous φ.symm
-  herm : ∀ x y, hHom V W (φ y) (φ x) = HeisenbergWeilMatrices.herm x y
-  rat : ∀ x, φ x ∈ ratL V W ↔ x ∈ HeisenbergWeilMatrices.WQ A B
-  inf : ∀ x, (φ x).map (infPart D) = 0 ↔ x.map (infPart D) = 0
-  fin : ∀ x, (φ x).map (finPart D) = 0 ↔ x.map (finPart D) = 0
 
 end GlobalTheory.DualPairCompare
 

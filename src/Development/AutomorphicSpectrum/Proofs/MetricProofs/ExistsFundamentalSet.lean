@@ -1,10 +1,63 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.MetricPeriods.GroupDict
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsSheetCover
-import GroundTheory.HeightsAndTheta.Heights.FiniteCovolume.StatementsProved
-import GroundTheory.HeightsAndTheta.Heights.CountingLowerBound.Assembly
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.ExhaustStatementPfA
-import GroundTheory.HeightsAndTheta.Heights.FiniteCovolume.PMahlerCompactness
+module
+
+public import Development.AutomorphicSpectrum.Definitions.MetricPeriods.GroupDict
+public import GroundTheory.HeightsAndTheta.Heights.FiniteCovolume.PMahlerCompactness
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+public import Mathlib.Analysis.Real.Pi.Bounds
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+public import Mathlib.Data.Matrix.ColumnRowPartitioned
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.MeasureTheory.Constructions.Polish.EmbeddingReal
+public import Mathlib.MeasureTheory.Function.Floor
+public import Mathlib.MeasureTheory.Function.SpecialFunctions.Arctan
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Separation.CompletelyRegular
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.ExhaustStatementPfA
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsCompletedStrictHens
+
+@[expose] public section
 
 noncomputable section
 
@@ -76,7 +129,7 @@ theorem RiemLat.normSq_nonneg (R : RiemLat E g Λ) (x : Λ) : 0 ≤ R.normSq x :
 
 theorem RiemLat.form_antisymm (R : RiemLat E g Λ) (x y : Λ) : R.form y x = - R.form x y := by
   have h := R.alt (x + y)
-  simp only [map_add, LinearMap.add_apply, R.alt] at h
+  simp only [map_add (f := _), LinearMap.add_apply, R.alt] at h
   linarith
 
 theorem RiemLat.form_sq_le (R : RiemLat E g Λ) (x y : Λ) :
@@ -149,7 +202,8 @@ theorem RiemLat.left_inv_gram (R : RiemLat E g Λ) {ι : Type} [Fintype ι] [Dec
   ext i j
   have h1 : R.form (y i) (b j) = ∑ k, b.repr (y i) k * R.form (b k) (b j) := by
     have e : R.form (∑ k, b.repr (y i) k • b k) (b j) = ∑ k, b.repr (y i) k * R.form (b k) (b j) := by
-      simp only [map_sum, LinearMap.sum_apply, map_smul, LinearMap.smul_apply, smul_eq_mul]
+      set_option synthInstance.maxHeartbeats 100000 in
+        simp only [map_sum, LinearMap.sum_apply, map_smul, LinearMap.smul_apply, smul_eq_mul]
     rwa [b.sum_repr] at e
   have h2 : R.form (y i) (b j) = if i = j then 1 else 0 := by
     rw [hy i]
@@ -304,7 +358,11 @@ theorem RiemLat.EqvBy.trans {R R' R'' : RiemLat E g Λ} {γ γ' : Λ ≃ₗ[𝓞
 
 end Main
 
-theorem exists_isFundSet : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (Ψ : Type) [Fintype Ψ] (j j' n g : ℕ) (Λ : Type) [AddCommGroup Λ] [Module (𝓞 E) Λ] (F : UnivFam E Ψ j j' n g Λ) (Δ : GroupDict F) (Γ : Subgroup (Λ ≃ₗ[𝓞 E] Λ)), F.IsArith Γ → ∃ FF, F.IsFundSet Γ FF := by
+theorem exists_isFundSet : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E]
+    (Ψ : Type) [Fintype Ψ] (j j' n g : ℕ) (Λ : Type) [AddCommGroup Λ] [Module (𝓞 E) Λ]
+    (F : UnivFam (E := E) Ψ j j' n g Λ)
+    (Δ : _root_.GlobalTheory.CompanionTheory.Ar.Cusp.GroupDict F)
+    (Γ : Subgroup (Λ ≃ₗ[𝓞 E] Λ)), F.IsArith Γ → ∃ FF, F.IsFundSet Γ FF := by
   intro E _ _ _ Ψ _ j j' n g Λ _ _ F Δ Γ hΓ
   classical
   have hXo : IsOpen (ballDom F.q) := isOpen_ballDom F.q
@@ -314,7 +372,7 @@ theorem exists_isFundSet : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E
   let b := Module.Free.chooseBasis ℤ Λ
   let u : (Fin n → ℂ) → ℝ := fun t => ∑ i, (F.R t).normSq (b i)
   have huc : ContinuousOn u (ballDom F.q) :=
-    continuousOn_finset_sum _ fun i _ => continuousOn_normSq F.hol (b i)
+    continuousOn_finsetSum _ fun i _ => continuousOn_normSq F.hol (b i)
   haveI : Countable Λ := b.repr.toEquiv.injective.countable
   have hext : ∀ γ γ' : Λ ≃ₗ[𝓞 E] Λ, (∀ i, γ (b i) = γ' (b i)) → γ = γ' := by
     intro γ γ' h

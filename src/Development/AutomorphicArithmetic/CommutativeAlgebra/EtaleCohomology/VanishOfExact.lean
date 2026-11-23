@@ -1,4 +1,52 @@
-import Development.AutomorphicArithmetic.CommutativeAlgebra.EtaleCohomology.TPullTMap
+module
+
+public import Development.AutomorphicArithmetic.CommutativeAlgebra.EtaleCohomology.TPullTMap
+public import Mathlib.GroupTheory.FreeAbelianGroup
+import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.CechPairings.MapHComp
+import Mathlib.Algebra.Category.Grp.Abelian
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.Abelian.FunctorCategory
+import Mathlib.CategoryTheory.Monoidal.Mon
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 set_option backward.isDefEq.respectTransparency false
 
@@ -11,22 +59,22 @@ namespace UpperTheory.Ru.crystallineComparison.Th
 
 variable {C : Type 1} [Category.{0} C]
 
-theorem fa_ext {X : Type 1} {A : AddCommGrpCat.{1}} {f g : AddCommGrpCat.of (FreeAbelianGroup X) ⟶ A}
-    (h : ∀ x, f.hom (FreeAbelianGroup.of x) = g.hom (FreeAbelianGroup.of x)) : f = g := by
+theorem fa_ext {X : Type 1} {A : AddCommGrpCat.{1}} {f g : AddCommGrpCat.of (FreeAddCommGroup X) ⟶ A}
+    (h : ∀ x, f.hom (FreeAddCommGroup.of x) = g.hom (FreeAddCommGroup.of x)) : f = g := by
   refine AddCommGrpCat.hom_ext (AddMonoidHom.ext fun x => ?_)
-  induction x using FreeAbelianGroup.induction_on with
+  induction x using FreeAddCommGroup.induction_on with
   | zero => simp
   | of x => exact h x
   | neg x ih => simpa using congrArg Neg.neg (h x)
-  | add x y hx hy => simp only [map_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
 
 variable (P : C ⥤ Type)
 
 abbrev Gen (k : ℕ) (B : C) : Type 1 := Σ s : ComposableArrows P.Elements k, ((s.obj (Fin.last k)).1 ⟶ B)
 
 def L (k : ℕ) : Coef C where
-  obj B := AddCommGrpCat.of (FreeAbelianGroup (Gen P k B))
-  map φ := AddCommGrpCat.ofHom (FreeAbelianGroup.map fun g => ⟨g.1, g.2 ≫ φ⟩)
+  obj B := AddCommGrpCat.of (FreeAddCommGroup (Gen P k B))
+  map φ := AddCommGrpCat.ofHom (FreeAddCommGroup.map fun g => ⟨g.1, g.2 ≫ φ⟩)
   map_id B := fa_ext fun x => by simp
   map_comp φ ψ := fa_ext fun x => by simp
 
@@ -34,32 +82,32 @@ def gFace {k : ℕ} {B : C} (i : Fin (k + 2)) (g : Gen P (k + 1) B) : Gen P k B 
   ⟨face i g.1, (toLast i g.1).1 ≫ g.2⟩
 
 def dL (k : ℕ) : L P (k + 1) ⟶ L P k where
-  app B := AddCommGrpCat.ofHom (FreeAbelianGroup.lift fun g => ∑ i : Fin (k + 2), (-1 : ℤ) ^ (i : ℕ) • FreeAbelianGroup.of (gFace P i g))
+  app B := AddCommGrpCat.ofHom (FreeAddCommGroup.lift fun g => ∑ i : Fin (k + 2), (-1 : ℤ) ^ (i : ℕ) • FreeAddCommGroup.of (gFace P i g))
   naturality B B' φ := fa_ext fun g => by
     simp [L, gFace]
 
 variable {P}
 
 def tOf {K : Coef C} {k : ℕ} (f : Cn (elF P (zm K)) k) : L P k ⟶ K where
-  app B := AddCommGrpCat.ofHom (FreeAbelianGroup.lift fun g => (K.map g.2).hom (f g.1))
+  app B := AddCommGrpCat.ofHom (FreeAddCommGroup.lift fun g => (K.map g.2).hom (f g.1))
   naturality B B' φ := fa_ext fun g => by
     simp [L]
 
 def cOf {K : Coef C} {k : ℕ} (u : L P k ⟶ K) : Cn (elF P (zm K)) k :=
-  fun s => (u.app (s.obj (Fin.last k)).1).hom (FreeAbelianGroup.of ⟨s, 𝟙 _⟩)
+  fun s => (u.app (s.obj (Fin.last k)).1).hom (FreeAddCommGroup.of ⟨s, 𝟙 _⟩)
 
 theorem L_map_of {B B' : C} (φ : B ⟶ B') {k : ℕ} (g : Gen P k B) :
-    ((L P k).map φ).hom (FreeAbelianGroup.of g) = FreeAbelianGroup.of (⟨g.1, g.2 ≫ φ⟩ : Gen P k B') :=
-  FreeAbelianGroup.map_of_apply _
+    ((L P k).map φ).hom (FreeAddCommGroup.of g) = FreeAddCommGroup.of (⟨g.1, g.2 ≫ φ⟩ : Gen P k B') :=
+  FreeAddCommGroup.map_of_apply _
 
 theorem dL_of {k : ℕ} {B : C} (g : Gen P (k + 1) B) :
-    ((dL P k).app B).hom (FreeAbelianGroup.of g) =
-      ∑ i : Fin (k + 2), (-1 : ℤ) ^ (i : ℕ) • (FreeAbelianGroup.of (gFace P i g) : (L P k).obj B) :=
-  FreeAbelianGroup.lift_apply_of _ _
+    ((dL P k).app B).hom (FreeAddCommGroup.of g) =
+      ∑ i : Fin (k + 2), (-1 : ℤ) ^ (i : ℕ) • (FreeAddCommGroup.of (gFace P i g) : (L P k).obj B) :=
+  FreeAddCommGroup.lift_apply_of _ _
 
 theorem tOf_of {K : Coef C} {k : ℕ} (f : Cn (elF P (zm K)) k) {B : C} (g : Gen P k B) :
-    ((tOf f).app B).hom (FreeAbelianGroup.of g) = (K.map g.2).hom (f g.1) :=
-  FreeAbelianGroup.lift_apply_of _ _
+    ((tOf f).app B).hom (FreeAddCommGroup.of g) = (K.map g.2).hom (f g.1) :=
+  FreeAddCommGroup.lift_apply_of _ _
 
 theorem cOf_tOf {K : Coef C} {k : ℕ} (f : Cn (elF P (zm K)) k) : cOf (tOf f) = f := by
   funext s
@@ -68,11 +116,11 @@ theorem cOf_tOf {K : Coef C} {k : ℕ} (f : Cn (elF P (zm K)) k) : cOf (tOf f) =
   rfl
 
 theorem u_of {K : Coef C} {k : ℕ} (u : L P k ⟶ K) {B : C} (g : Gen P k B) :
-    (u.app B).hom (FreeAbelianGroup.of g) = (K.map g.2).hom (cOf u g.1) := by
+    (u.app B).hom (FreeAddCommGroup.of g) = (K.map g.2).hom (cOf u g.1) := by
   obtain ⟨s, a⟩ := g
-  have h2 : ((L P k).map a).hom (FreeAbelianGroup.of (⟨s, 𝟙 _⟩ : Gen P k _)) = FreeAbelianGroup.of (⟨s, a⟩ : Gen P k B) := by
+  have h2 : ((L P k).map a).hom (FreeAddCommGroup.of (⟨s, 𝟙 _⟩ : Gen P k _)) = FreeAddCommGroup.of (⟨s, a⟩ : Gen P k B) := by
     rw [L_map_of]; simp
-  have h3 := congrArg (fun f => f.hom (FreeAbelianGroup.of (⟨s, 𝟙 _⟩ : Gen P k _))) (u.naturality a)
+  have h3 := congrArg (fun f => f.hom (FreeAddCommGroup.of (⟨s, 𝟙 _⟩ : Gen P k _))) (u.naturality a)
   refine Eq.trans ?_ h3
   exact (congrArg (u.app B).hom h2).symm
 
@@ -86,7 +134,8 @@ theorem d_apply' {K : Coef C} {k : ℕ} (f : Cn (elF P (zm K)) k) (s : Composabl
 theorem d_cOf {K : Coef C} {k : ℕ} (u : L P k ⟶ K) : d (elF P (zm K)) k (cOf u) = cOf (dL P k ≫ u) := by
   funext s
   rw [d_apply']
-  change _ = (u.app _).hom (((dL P k).app _).hom (FreeAbelianGroup.of (⟨s, 𝟙 _⟩ : Gen P (k + 1) _)))
+  change _ = (u.app _).hom (((dL P k).app _).hom (FreeAddCommGroup.of (⟨s, 𝟙 _⟩ : Gen P (k + 1) _)))
+
   rw [dL_of, map_sum]
   refine Finset.sum_congr rfl fun i _ => ?_
   rw [map_zsmul, u_of]
@@ -95,7 +144,8 @@ theorem d_cOf {K : Coef C} {k : ℕ} (u : L P k ⟶ K) : d (elF P (zm K)) k (cOf
 theorem tOf_d {K : Coef C} {k : ℕ} (f : Cn (elF P (zm K)) k) : tOf (d (elF P (zm K)) k f) = dL P k ≫ tOf f := by
   ext B : 2
   refine fa_ext fun g => (tOf_of _ g).trans ?_
-  change _ = ((tOf f).app B).hom (((dL P k).app B).hom (FreeAbelianGroup.of g))
+  change _ = ((tOf f).app B).hom (((dL P k).app B).hom (FreeAddCommGroup.of g))
+
   rw [d_apply', dL_of, map_sum, map_sum]
   refine Finset.sum_congr rfl fun i _ => ?_
   rw [map_zsmul, map_zsmul, tOf_of]

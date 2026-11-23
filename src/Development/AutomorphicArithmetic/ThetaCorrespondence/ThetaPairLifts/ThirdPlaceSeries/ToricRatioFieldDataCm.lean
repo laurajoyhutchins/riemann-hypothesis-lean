@@ -1,8 +1,60 @@
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ToricRatioFieldDataCm
-import Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.CohomologicalCsdTempered
-import Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.Realised
+module
 
-set_option synthInstance.maxHeartbeats 200000
+public import Development.AbelianVarietyTheory.Definitions.Divisors.TieTest
+public import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.ToricSymbols
+public import Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.Realised
+public import CompanionTheory.AutomorphicTheory.PlaceSeparation.IsOpenQuotientMapArt0
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IsValCharTwist
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsAutCentre
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FinPartEqOneOfLevel
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.NuHTwisted
+public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.ExistsRingEquivOfIsTranscendenceBasis
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsCMValueHeckeCharacterAuxiliarySetOfEmpty
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ValApplySubLtOne
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.InertialOrderFifteenCharAuxiliaryPrimeSpec
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsIntegralHalf
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.NormalFormToricRatio
+import Formalism.LocalRingCardinality.ConjSqrtMinusD
+import Formalism.SharpRestriction.Divisibility.JetPolynomialLogs.AnnihilatorMulRelativeDifferent
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.Valuation.LocalSubring
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
+
 
 section
 open Formalism.BasicNotions Formalism.MainNotions GlobalTheory.BigTop GlobalTheory.BigTop.Fun GlobalTheory.SqTop NumberField IsDedekindDomain
@@ -160,7 +212,7 @@ private theorem almostIn_pz (h : GridFit p G) (i j : Fin D.R.m) (l : ℕ) :
 private theorem isSet_pz (h : GridFit p G) {w : D.what₂.places.Pl} (hw : TwistedAt D w) :
     IsFinSetSplitPlacesCoprimeConductor (GlobalTheory.FunObj.SqNum.condF G.pl) (belowSet (ex.nch.Q w)) := by
   refine (placesBelow_splitCoprimeConductor_of_admissible (h.cond w hw) fun P hP => (h.list _ (h.setting.inW1 hw)).1 P ?_).1
-  obtain ⟨v, hv, hd⟩ := (Prime.dvd_finset_prod_iff (below P).prime _).1 hP
+  obtain ⟨v, hv, hd⟩ := (below P).prime.exists_mem_finset_dvd hP
   have e : below P = v := HeightOneSpectrum.ext
     ((v.isMaximal.eq_of_le (below P).isPrime.ne_top (Ideal.le_of_dvd ((below P).prime.dvd_of_dvd_pow hd))).symm)
   subst e

@@ -1,5 +1,49 @@
-import Formalism.LocalToGlobal.IndefiniteReal.IsThPKernelSigBase
-import Formalism.LocalRingCardinality.RankBoundMonotoneInDimension
+module
+
+public import Formalism.LocalToGlobal.IndefiniteReal.IsThPKernelSigBase
+public import Formalism.LocalRingCardinality.RankBoundMonotoneInDimension
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -34,41 +78,8 @@ theorem ArchLab.emb_eq (A : ArchLab D) (τ : D.what₂.Tau) :
 
 theorem emb_injective : Function.Injective (D.host.emb) := (factEmb D.R D.host).1.1
 
-theorem tau_nonempty : Nonempty D.what₂.Tau := by
-  have h : 0 < Fintype.card D.what₂.Tau := by
-    rw [D.what₂.card_Tau]
-    unfold Ranks.f Ranks.n
-    positivity
-  exact Fintype.card_pos_iff.mp h
-
 theorem snd_side (b : Bool) : ((if b then 1 else D.R.cc : D.R.GG)).1.2 = if b then 1 else -1 := by
   cases b <;> rfl
-
-theorem labUnique : LabUnique D := by
-  intro σ A A' h h'
-  have key : ∀ τ, (D.eTau (A.perm τ)).1 * (if A.side then 1 else D.R.cc) =
-      (D.eTau (A'.perm τ)).1 * (if A'.side then 1 else D.R.cc) := by
-    intro τ
-    apply emb_injective
-    rw [← ArchLab.emb_eq, ← ArchLab.emb_eq, ← h τ, ← h' τ]
-  obtain ⟨τ0⟩ := tau_nonempty (D := D)
-  have hs : A.side = A'.side := by
-    have e1 := congrArg (fun g : D.R.GG => g.1.2) (key τ0)
-    simp only [Prod.fst_mul, Prod.snd_mul] at e1
-    rw [(Formalism.HC.Frame.mem_Psi_iff _).1 (D.eTau (A.perm τ0)).2, (Formalism.HC.Frame.mem_Psi_iff _).1 (D.eTau (A'.perm τ0)).2, one_mul, one_mul,
-      snd_side, snd_side] at e1
-    cases hA : A.side <;> cases hA' : A'.side <;> rw [hA, hA'] at e1 <;> first | rfl | exact absurd e1 (by decide)
-  have hp : ∀ τ, A.perm τ = A'.perm τ := by
-    intro τ
-    have e1 := key τ
-    rw [hs] at e1
-    exact D.eTau.injective (Subtype.ext (mul_right_cancel e1))
-  rcases A with ⟨p, s⟩
-  rcases A' with ⟨p', s'⟩
-  simp only at hs hp
-  subst hs
-  congr
-  exact Equiv.ext hp
 
 theorem labExists : LabExists D := by
   intro σ
@@ -113,14 +124,6 @@ theorem labExists : LabExists D := by
     rw [hlab τ, ArchLab.emb_eq]
     simp only [Equiv.ofBijective_apply, f, Equiv.apply_symm_apply, Bool.false_eq_true, if_false]
     rw [mul_assoc (γ * (D.eTau τ).1), cc_mul_cc, mul_one]
-
-theorem isLabOf_labOf (σ : D.what₂.LL →+* ℂ) : IsLabOf σ (labOf σ) := labOf_spec (labExists σ)
-
-theorem labOf_embLL : labOf (D := D) D.what₂.embLL = baseLab D := labOf_base labUnique
-
-theorem labOf_conj (σ : D.what₂.LL →+* ℂ) :
-    labOf ((starRingEnd ℂ).comp σ) = (labOf (D := D) σ).flip :=
-  labUnique _ _ _ (isLabOf_labOf _) (isLabOf_conj (isLabOf_labOf σ))
 
 end Formalism.IndefR.Conj
 

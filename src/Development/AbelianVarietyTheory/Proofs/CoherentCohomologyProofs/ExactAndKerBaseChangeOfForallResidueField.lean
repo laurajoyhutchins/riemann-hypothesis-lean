@@ -1,5 +1,62 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.ExistsFiniteProjectiveComplexQuasiIso
+module
+
+public import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.ExistsFiniteProjectiveComplexQuasiIso
+public import Mathlib.RingTheory.Flat.FaithfullyFlat.Basic
+public import Mathlib.RingTheory.LocalRing.ResidueField.Ideal
+import Mathlib.Algebra.Homology.ShortComplex.ModuleCat
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RingTheory.LocalProperties.Projective
+public import Mathlib.RingTheory.LocalRing.Module
+
+@[expose] public section
 
 open TensorProduct Function
 
@@ -85,7 +142,7 @@ theorem split_injective_of_forall_lTensor_residueField_injective [Module.Finite 
       (LinearMap.lTensor_surjective _ (Submodule.mkQ_surjective _))
       (lTensor_exact _ l.exact_map_mkQ_range (Submodule.mkQ_surjective _)) (hloc m)
     infer_instance
-  have := (Exact.split_tfae l.exact_map_mkQ_range hinj (Submodule.mkQ_surjective _)).out 0 1
+  have := (Exact.split_tfae l.exact_map_mkQ_range hinj (Submodule.mkQ_surjective _)).out 1 2
   rw [← this]
   exact Module.projective_lifting_property _ _ (Submodule.mkQ_surjective _)
 
@@ -93,7 +150,7 @@ theorem lTensor_liftQ_injective_of_exact (N : Type*) [AddCommGroup N] [Module R 
     {f : A →ₗ[R] B} {g : B →ₗ[R] C} (hfg : LinearMap.range f ≤ LinearMap.ker g)
     (h : Exact (f.lTensor N) (g.lTensor N)) :
     Injective (((LinearMap.range f).liftQ g hfg).lTensor N) := by
-  rw [injective_iff_map_eq_zero]
+  set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
   intro x hx
   obtain ⟨y, rfl⟩ := LinearMap.lTensor_surjective N (Submodule.mkQ_surjective _) x
   rw [← LinearMap.comp_apply, ← LinearMap.lTensor_comp, Submodule.liftQ_mkQ] at hx
@@ -158,41 +215,7 @@ section ShortComplex
 
 variable [HasZeroMorphisms C] [HasZeroMorphisms D] (F : C ⥤ D) [F.PreservesZeroMorphisms]
 
-noncomputable def shortCyclesComparison (S : ShortComplex C) [S.HasHomology]
-    [(S.map F).HasHomology] : F.obj S.cycles ⟶ (S.map F).cycles :=
-  (S.map F).liftCycles (F.map S.iCycles) (by
-    rw [ShortComplex.map_g, ← F.map_comp, S.iCycles_g, F.map_zero])
-
-@[reassoc (attr := simp)]
-theorem shortCyclesComparison_iCycles (S : ShortComplex C) [S.HasHomology]
-    [(S.map F).HasHomology] :
-    shortCyclesComparison F S ≫ (S.map F).iCycles = F.map S.iCycles :=
-  ShortComplex.liftCycles_i _ _ _
-
-@[reassoc (attr := simp)]
-theorem map_toCycles_shortCyclesComparison (S : ShortComplex C) [S.HasHomology]
-    [(S.map F).HasHomology] :
-    F.map S.toCycles ≫ shortCyclesComparison F S = (S.map F).toCycles := by
-  rw [← cancel_mono (S.map F).iCycles, assoc, shortCyclesComparison_iCycles, ← F.map_comp,
-    S.toCycles_i, (S.map F).toCycles_i, ShortComplex.map_f]
-
 variable [PreservesColimitsOfShape WalkingParallelPair F]
-
-noncomputable def shortHomologyComparison (S : ShortComplex C) [S.HasHomology]
-    [(S.map F).HasHomology] : F.obj S.homology ⟶ (S.map F).homology :=
-  (CokernelCofork.mapIsColimit _ S.homologyIsCokernel F).desc
-    (CokernelCofork.ofπ (shortCyclesComparison F S ≫ (S.map F).homologyπ) (by
-      rw [map_toCycles_shortCyclesComparison_assoc, ShortComplex.toCycles_comp_homologyπ]))
-
-@[reassoc (attr := simp)]
-theorem map_homologyπ_shortHomologyComparison (S : ShortComplex C) [S.HasHomology]
-    [(S.map F).HasHomology] :
-    F.map S.homologyπ ≫ shortHomologyComparison F S =
-      shortCyclesComparison F S ≫ (S.map F).homologyπ :=
-  Cofork.IsColimit.π_desc (CokernelCofork.mapIsColimit _ S.homologyIsCokernel F)
-
-theorem epi_map_homologyπ (S : ShortComplex C) [S.HasHomology] : Epi (F.map S.homologyπ) :=
-  epi_of_isColimit_cofork (CokernelCofork.mapIsColimit _ S.homologyIsCokernel F)
 
 end ShortComplex
 
@@ -201,27 +224,7 @@ section Complex
 variable [HasZeroMorphisms C] [HasZeroMorphisms D] [CategoryWithHomology C]
   [CategoryWithHomology D] (F : C ⥤ D) [F.PreservesZeroMorphisms] {ι : Type*} {c : ComplexShape ι}
 
-noncomputable def cyclesComparison (K : HomologicalComplex C c) (p : ι) :
-    F.obj (K.cycles p) ⟶ ((F.mapHomologicalComplex c).obj K).cycles p :=
-  shortCyclesComparison F (K.sc p)
-
-@[reassoc (attr := simp)]
-theorem cyclesComparison_iCycles (K : HomologicalComplex C c) (p : ι) :
-    cyclesComparison F K p ≫ ((F.mapHomologicalComplex c).obj K).iCycles p =
-      F.map (K.iCycles p) :=
-  shortCyclesComparison_iCycles F (K.sc p)
-
 variable [PreservesColimitsOfShape WalkingParallelPair F]
-
-noncomputable def homologyComparison (K : HomologicalComplex C c) (p : ι) :
-    F.obj (K.homology p) ⟶ ((F.mapHomologicalComplex c).obj K).homology p :=
-  shortHomologyComparison F (K.sc p)
-
-@[reassoc (attr := simp)]
-theorem map_homologyπ_homologyComparison (K : HomologicalComplex C c) (p : ι) :
-    F.map (K.homologyπ p) ≫ homologyComparison F K p =
-      cyclesComparison F K p ≫ ((F.mapHomologicalComplex c).obj K).homologyπ p :=
-  map_homologyπ_shortHomologyComparison F (K.sc p)
 
 end Complex
 
@@ -268,33 +271,6 @@ universe u
 
 variable {R : Type u} [CommRing R] (S : Type u) [CommRing S] [Algebra R S]
   {ι : Type*} {c : ComplexShape ι}
-
-set_option backward.isDefEq.respectTransparency false in
-
-noncomputable def tensorEquivExtendScalars (M : ModuleCat.{u} R) :
-    S ⊗[R] M ≃ₗ[S] (ModuleCat.extendScalars.{u, u, u} (algebraMap R S)).obj M :=
-  let e : S ≃ₗ[R] (ModuleCat.restrictScalars (algebraMap R S)).obj (ModuleCat.of S S) :=
-    { toFun := fun s => s
-      invFun := fun s => s
-      map_add' := fun _ _ => rfl
-      map_smul' := fun r s => Algebra.smul_def r s
-      left_inv := fun _ => rfl
-      right_inv := fun _ => rfl }
-  { (TensorProduct.congr e (LinearEquiv.refl R M)).toAddEquiv with
-    map_smul' := fun s x => by
-      change TensorProduct.congr e (LinearEquiv.refl R M) (s • x) =
-        s • TensorProduct.congr e (LinearEquiv.refl R M) x
-      induction x with
-      | zero => simp
-      | tmul a m => rfl
-      | add x y hx hy => rw [smul_add, map_add, map_add, hx, hy, smul_add] }
-
-noncomputable def homologyBaseChange (K : HomologicalComplex (ModuleCat.{u} R) c) (p : ι) :
-    S ⊗[R] (K.homology p : ModuleCat R) →ₗ[S]
-      ((((ModuleCat.extendScalars.{u, u, u} (algebraMap R S)).mapHomologicalComplex c).obj
-        K).homology p : ModuleCat S) :=
-  (homologyComparison (ModuleCat.extendScalars.{u, u, u} (algebraMap R S)) K p).hom ∘ₗ
-    (tensorEquivExtendScalars S (K.homology p)).toLinearMap
 
 end Explicit
 

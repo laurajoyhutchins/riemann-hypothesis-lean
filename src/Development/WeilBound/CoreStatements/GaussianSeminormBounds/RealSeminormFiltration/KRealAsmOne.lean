@@ -1,6 +1,51 @@
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsFockMap
+public import Formalism.LocalToGlobal.ThetaOperatorCommutation.RealTh
+public import ReciprocityTheory.ThetaSummability.RealCoinvariants.Numbers
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FockOperatorsLieRepresentationCommute
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FockPolynomialsLocallyFiniteRationalWeights
+public import Development.WeilBound.CoreStatements.GaussianSeminormBounds.RealSeminormFiltration.CoreLM
+public import Development.WeilBound.CoreStatements.GaussianSeminormBounds.RealSeminormFiltration.Tensor
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.MvPolynomial
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsNontrivialLiftModule
-import Development.WeilBound.CoreStatements.GaussianSeminormBounds.RealSeminormFiltration.CoreLM
-import Development.WeilBound.CoreStatements.GaussianSeminormBounds.RealSeminormFiltration.Tensor
+
+@[expose] public section
 
 noncomputable section
 
@@ -31,7 +76,7 @@ def actL : Mat R S →ₗ[ℂ] Module.End ℂ V where
   map_add' Y Z := by
     refine LinearMap.ext fun v => ?_
     obtain ⟨f, rfl⟩ := hp v
-    simp only [LinearMap.add_apply, h, map_add]
+    simp only [LinearMap.add_apply, h, map_add (f := _)]
   map_smul' c Y := by
     refine LinearMap.ext fun v => ?_
     obtain ⟨f, rfl⟩ := hp v
@@ -70,7 +115,7 @@ def gkImage : GKMod R S where
       exact Submodule.mem_iSup_of_mem _ (actL_wt p hp act h μ g hg)
     · simp
     · intro g g' hg hg'
-      rw [map_add]
+      rw [map_add (f := _)]
       exact Submodule.add_mem _ hg hg'
 
 end Image
@@ -126,7 +171,7 @@ theorem onePlaceD (D : RealData) (h : D.Hyp) :
     refine (h2 W _).symm.trans ?_
     have e : PositivityTheory.KReal.opV' D W (thMkC _ _ _ _ _ f) =
         thMkC _ _ _ _ _ (FockH1Action.fockAct2 _ _ _ _ W f) + ((D.κ : ℂ) / 2 * W.trace) • thMkC _ _ _ _ _ f := rfl
-    rw [e, map_add, map_smul]
+    rw [e, map_add (f := _), map_smul]
     rfl
   have hI : Formalism.MainNotions.SchurIrreducible.IrrGK (gkImage p hp act ha) := ⟨hn, hirr⟩
   refine ⟨gkImage p hp act ha, p, p', ⟨hp, fun X f => ?_, fun Y f => ?_⟩, ⟨hp', fun X f => ?_, fun Y f => ?_⟩, hI,

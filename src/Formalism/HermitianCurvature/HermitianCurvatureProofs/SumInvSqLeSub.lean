@@ -1,4 +1,57 @@
-import Formalism.HermitianCurvature.StatementSz
+module
+
+public import Formalism.HermitianCurvature.StatementSz
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+public import Mathlib.Analysis.Complex.ExponentialBounds
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Algebra.BigOperators.Field
+
+@[expose] public section
 
 namespace Formalism.FourierDecayAlt.P.Sz4
 
@@ -227,9 +280,9 @@ lemma rde_bound (J : ℕ) (hJ : 1 ≤ J) (de : ℕ → ℝ) (h01 : ∀ i, de i =
           exact Finset.prod_congr rfl fun i _ => Real.exp_sum _ _
       _ ≤ Rde J de := by
           unfold Rde
-          refine Finset.prod_le_prod (fun i _ => Finset.prod_nonneg fun j _ => (Real.exp_pos _).le)
+          refine Finset.prod_le_prod₀ (fun i _ => Finset.prod_nonneg fun j _ => (Real.exp_pos _).le)
             fun i _ => ?_
-          refine Finset.prod_le_prod (fun j _ => (Real.exp_pos _).le) fun j hj => ?_
+          refine Finset.prod_le_prod₀ (fun j _ => (Real.exp_pos _).le) fun j hj => ?_
           exact one_add_ge _ (pair_small de h01 i j (mem_Ioc.mp hj).1)
   · calc Rde J de ≤ ∏ i ∈ Icc 1 J, ∏ j ∈ Ioc i J, Real.exp
             ((de j - de i) / (4 * ((j : ℝ) - (i : ℝ)))) := by
@@ -238,9 +291,9 @@ lemma rde_bound (J : ℕ) (hJ : 1 ≤ J) (de : ℕ → ℝ) (h01 : ∀ i, de i =
             intro i j hj
             have := abs_le.mp (pair_small de h01 i j (mem_Ioc.mp hj).1)
             linarith [this.1]
-          refine Finset.prod_le_prod (fun i _ => Finset.prod_nonneg fun j hj => hnn i j hj)
+          refine Finset.prod_le_prod₀ (fun i _ => Finset.prod_nonneg fun j hj => hnn i j hj)
             fun i _ => ?_
-          refine Finset.prod_le_prod (fun j hj => hnn i j hj) fun j hj => ?_
+          refine Finset.prod_le_prod₀ (fun j hj => hnn i j hj) fun j hj => ?_
           rw [add_comm]; exact Real.add_one_le_exp _
       _ = Real.exp (∑ i ∈ Icc 1 J, ∑ j ∈ Ioc i J, (de j - de i) / (4 * ((j : ℝ) - (i : ℝ)))) := by
           rw [Real.exp_sum]
@@ -440,20 +493,11 @@ lemma prod_ratio_le (s : Finset ℕ) (f g : ℕ → ℝ) (ε : ℝ) (hg : ∀ i 
     (hf : ∀ i ∈ s, 0 < f i) (h : ∀ i ∈ s, f i ≤ (1 + ε) * g i) :
     ∏ i ∈ s, f i / g i ≤ Real.exp ((s.card : ℝ) * ε) := by
   calc ∏ i ∈ s, f i / g i ≤ ∏ _i ∈ s, Real.exp ε := by
-        refine Finset.prod_le_prod (fun i hi => (div_pos (hf i hi) (hg i hi)).le) fun i hi => ?_
+        refine Finset.prod_le_prod₀ (fun i hi => (div_pos (hf i hi) (hg i hi)).le) fun i hi => ?_
         rw [div_le_iff₀ (hg i hi)]
         refine (h i hi).trans (mul_le_mul_of_nonneg_right ?_ (hg i hi).le)
         rw [add_comm]; exact Real.add_one_le_exp ε
     _ = Real.exp ((s.card : ℝ) * ε) := by rw [Finset.prod_const, Real.exp_nat_mul]
-
-lemma prod_ratio_ge (s : Finset ℕ) (f g : ℕ → ℝ) (B : ℝ) (hg : ∀ i ∈ s, 0 < g i)
-    (hf : ∀ i ∈ s, 0 < f i) (h : ∏ i ∈ s, g i / f i ≤ Real.exp B) :
-    Real.exp (-B) ≤ ∏ i ∈ s, f i / g i := by
-  have e : ∏ i ∈ s, f i / g i = (∏ i ∈ s, g i / f i)⁻¹ := by
-    rw [← Finset.prod_inv_distrib]
-    exact Finset.prod_congr rfl fun i _ => (inv_div _ _).symm
-  rw [e, Real.exp_neg]
-  exact inv_anti₀ (Finset.prod_pos fun i hi => div_pos (hg i hi) (hf i hi)) h
 
 lemma u_mid (c : Cfg) (de : ℕ → ℝ) (hw : IsWord c.k de) (i : ℕ) (hi : i ∈ Icc 2 (c.k - 1)) :
     c.u de i = c.v (i - 1) - 1 / 2 - de (i - 1) * c.Del := by
@@ -562,30 +606,16 @@ theorem edgeFactors : Formalism.FourierDecayAlt.Sz.EdgeFactors := by
   · calc (c.a - c.v 1) ^ (c.k - 1) = ∏ _i ∈ Icc 2 c.k, (c.a - c.v 1) := by
           rw [Finset.prod_const, hcard]
       _ ≤ _ := by
-          refine Finset.prod_le_prod (fun _ _ => hpos) fun i hi => ?_
+          refine Finset.prod_le_prod₀ (fun _ _ => hpos) fun i hi => ?_
           rw [mem_Icc] at hi
           exact (edge_factor c de hc hw i hi.1 hi.2 (Or.inr ht)).1
   · calc _ ≤ ∏ _i ∈ Icc 2 c.k, (2 * (c.a - c.v 1)) := by
-          refine Finset.prod_le_prod (fun i hi => ?_) fun i hi => ?_
+          refine Finset.prod_le_prod₀ (fun i hi => ?_) fun i hi => ?_
           · rw [mem_Icc] at hi
             exact hpos.trans (edge_factor c de hc hw i hi.1 hi.2 (Or.inr ht)).1
           · rw [mem_Icc] at hi
             exact (edge_factor c de hc hw i hi.1 hi.2 (Or.inr ht)).2
       _ = _ := by rw [Finset.prod_const, hcard]
-
-theorem edgeRatios : Formalism.FourierDecayAlt.Sz.EdgeRatios := by
-  intro c de de' hc _ hw hw'
-  have hkD := kDel_pos c hc
-  refine ⟨⟨?_, edge_ratio_le c de de' hc hw hw'⟩, fun ht => ⟨?_, top_ratio_le c de de' hc ht hw hw'⟩⟩
-  · refine prod_ratio_ge _ (fun i => c.a - c.u de i) (fun i => c.a - c.u de' i) _
-      (fun i hi => ?_) (fun i hi => ?_) (edge_ratio_le c de' de hc hw' hw)
-    · have := a_sub_u_pos c de' hc hw' i hi; linarith
-    · have := a_sub_u_pos c de hc hw i hi; linarith
-  · have hb := bp_pos c hc ht
-    refine prod_ratio_ge _ (fun i => c.u de i + c.bp) (fun i => c.u de' i + c.bp) _
-      (fun i hi => ?_) (fun i hi => ?_) (top_ratio_le c de' de hc ht hw' hw)
-    · have := u_mid_nonneg c de' hc hw' i hi; linarith
-    · have := u_mid_nonneg c de hc hw i hi; linarith
 
 end Formalism.FourierDecayAlt.P
 

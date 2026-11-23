@@ -1,4 +1,50 @@
-import Formalism.ThetaLogCoordinates.BihomogeneousPairs.LetterChainEmbeddings.ChainEmbInj
+module
+
+public import Formalism.ThetaLogCoordinates.BihomogeneousPairs.LetterChainEmbeddings.ChainEmbInj
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace Formalism.InvariantFactorPaths.KP.LL
 
@@ -78,14 +124,14 @@ theorem biHom_tie (hB : D.BlockOK) (j : Fin D.T.t → ℕ) (jp : ℕ) (i : Fin D
   · simp only [Finsupp.add_apply]
     rw [Finset.sum_add_distrib]
     have e1 : ∀ c, Finsupp.mapDomain (chainEmb N r D.T.t) m1 (wv D i c) = m1 (D.letterAt (D.T.pos i), c) := fun c => by
-      rw [wv_chain (hB := hB), Finsupp.mapDomain_apply (chainEmb_inj (D := D))]
+      rw [wv_chain (hB := hB), Finsupp.mapDomain_apply_of_injective (chainEmb_inj (D := D))]
     have e2 : ∀ c, m2 (wv D i c) = 0 := fun c => hxi.1 _ (fun d => wv_ne_xi hB i c d)
     simp only [e1, e2, Finset.sum_const_zero, add_zero]
     exact hdeg _
   · simp only [Finsupp.add_apply]
     rw [Finset.sum_add_distrib]
     have e1 : ∀ c, Finsupp.mapDomain (chainEmb N r D.T.t) m1 (ev D i c) = m1 (D.letterAt (D.T.pos i + 1), c) := fun c => by
-      rw [ev_chain (hB := hB), Finsupp.mapDomain_apply (chainEmb_inj (D := D))]
+      rw [ev_chain (hB := hB), Finsupp.mapDomain_apply_of_injective (chainEmb_inj (D := D))]
     have e2 : ∀ c, m2 (ev D i c) = 0 := fun c => hxi.1 _ (fun d => ev_ne_xi hB i c d)
     simp only [e1, e2, Finset.sum_const_zero, add_zero]
     exact hdeg _
@@ -105,7 +151,7 @@ theorem biHom_plus (j : Fin D.T.t → ℕ) (jp : ℕ) :
     rw [Finset.sum_add_distrib]
     have e1 : ∀ c, Finsupp.mapDomain (chainEmb N r D.T.t) m1 (wU D c) = m1 (D.uPos, c) := fun c => by
       show Finsupp.mapDomain (chainEmb N r D.T.t) m1 (chainEmb N r D.T.t (D.uPos, c)) = _
-      rw [Finsupp.mapDomain_apply (chainEmb_inj (D := D))]
+      rw [Finsupp.mapDomain_apply_of_injective (chainEmb_inj (D := D))]
     have e2 : ∀ c, m2 (wU D c) = 0 := fun c => hxi.1 _ (fun d => wU_ne_xi c d)
     simp only [e1, e2, Finset.sum_const_zero, add_zero]
     exact hdeg _

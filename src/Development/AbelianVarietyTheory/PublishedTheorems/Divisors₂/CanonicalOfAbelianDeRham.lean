@@ -1,6 +1,46 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsKSValueOneOfRetraction
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.CrysToDRBijective
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.CrysToDRBijective
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -119,7 +159,7 @@ theorem LiftHom.exists_iso_iff (H : LiftHom κ π) (h : IsGrpPullback A₀ A (sp
 
 theorem crysRedMor (κ : DividedPowers I) (hI : RingHom.ker π = I) (A₀ : Over (Sp R₀)) [GrpObj A₀] :
     GrpMor κ (spMap π) A₀ (dp0 R₀) (𝟙 _) A₀ π (𝟙 _) (Over.Hom.left (𝟙 A₀)) := by
-  refine GrpMor.of_hom ?_ (Category.id_comp _).symm (𝟙 A₀)
+  apply GrpMor.of_hom _ (Category.id_comp _).symm (𝟙 A₀)
   have z : ∀ a ∈ I, π a = 0 := fun a ha ↦ RingHom.mem_ker.1 (hI ▸ ha)
   refine (isDPMorphism_iff _ _ _).2 ⟨Ideal.map_le_iff_le_comap.2 fun a ha ↦ z a ha, fun n hn a ha ↦ ?_⟩
   rw [z a ha, z _ (κ.dpow_mem hn ha), dpow_eval_zero _ hn]
@@ -153,7 +193,7 @@ theorem canonical_of_abelianDeRham (P : AbelianDeRham) (hκ : IsNilDP κ)
     · exact (Submodule.mem_dualAnnihilator _).2 fun c hc ↦ by
         rw [LinearMap.comp_apply, (Submodule.projection_apply_eq_zero_iff hN).2 hc, map_zero]
     · ext c
-      rw [LinearMap.add_apply, LinearMap.comp_apply, LinearMap.comp_apply, ← map_add, add_comm,
+      rw [LinearMap.add_apply, LinearMap.comp_apply, LinearMap.comp_apply, ← map_add (f := _), add_comm,
         Submodule.projection_add_projection_eq_self hN]
   · intro hy
     let l : primDR A →ₗ[R] R₀ :=
@@ -166,7 +206,7 @@ theorem canonical_of_abelianDeRham (P : AbelianDeRham) (hκ : IsNilDP κ)
     have z : l (Submodule.projection _ _ hN c) = 0 := (Submodule.mem_dualAnnihilator _).1 hy _
       (hF ▸ Submodule.subset_span ⟨_, Submodule.projection_apply_mem hN c, rfl⟩)
     change l c = π (x _)
-    conv_lhs => rw [← Submodule.projection_add_projection_eq_self hN c, map_add, z, zero_add, ← hx]
+    conv_lhs => rw [← Submodule.projection_add_projection_eq_self hN c, map_add (f := _), z, zero_add, ← hx]
     rfl
   · rintro ⟨x, hx, e⟩
     rw [Fil, hF, Submodule.mem_dualAnnihilator]
@@ -174,11 +214,6 @@ theorem canonical_of_abelianDeRham (P : AbelianDeRham) (hκ : IsNilDP κ)
     refine (Submodule.span_le (p := LinearMap.ker y)).2 (fun c hc ↦ ?_) hc
     obtain ⟨c, hc, rfl⟩ := hc
     exact (e c).trans (by rw [(Submodule.mem_dualAnnihilator _).1 hx c hc, map_zero])
-
-theorem at_dualNumber (H : GrothendieckMessing) {p : ℕ} (hp : p.Prime) (hR : IsNilpotent (p : R)) :
-    At (epsDP R) (TrivSqZeroExt.fstHom R R R).toRingHom :=
-  H p hp _ (by simpa using hR.map (algebraMap R (DualNumber R))) _ _ (isDPNilpotent_squareZero _) R _
-    (fun r ↦ ⟨TrivSqZeroExt.inl r, rfl⟩) rfl
 
 end GrothendieckMessing
 

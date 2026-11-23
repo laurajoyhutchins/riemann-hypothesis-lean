@@ -1,5 +1,48 @@
-import Formalism.LocalToGlobal.PairingIndexBounds.RowActionCoefficients.NumericalIdentityScalar
-import Formalism.LocalToGlobal.PairingIndexBounds.RowActionCoefficients.AdmissibleInterpolation.WeylComplementDetCoeffSpan
+module
+
+public import Formalism.LocalToGlobal.PairingIndexBounds.RowActionCoefficients.AdmissibleInterpolation.FinalTheorems
+public import Formalism.LocalToGlobal.PairingIndexBounds.RowActionCoefficients.XFacts
+public import Formalism.LocalToGlobal.PairingIndexBounds.RowActionCoefficients.AdmissibleInterpolation.WeylComplementDetCoeffSpan
+public import Formalism.LocalToGlobal.PairingIndexBounds.RowActionCoefficients.AdmissibleInterpolation.YVMapRowAct
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MvPolynomial
 
@@ -60,11 +103,11 @@ theorem HgX_map (O K : Type) [CommRing O] [CommRing K] (f : O →+* K) (j : ℕ)
 
 theorem hQX (hS : XShape) (j : ℕ) (b : BX X) :
     (weyl X.G.O (NJ X j) (NJ X j) le_rfl (nuM X j b)).map (toK X.G.O X.G.Kf) ≤
-      Submodule.span X.G.O (Set.range fun m => coeff m (HgX X X.G.Kf j b)) := by
+      Submodule.span X.G.O (Set.range fun m => AddMonoidAlgebra.coeff (HgX X X.G.Kf j b) m) := by
   obtain ⟨h1, -, hanti, hle, -, -, -, -, -, -⟩ := hS p X j b
   rw [h1]
   have key : weyl X.G.O (NJ X j) (NJ X j) le_rfl (nuS X j b) ≤
-      Submodule.span X.G.O (Set.range fun m => coeff m (HgX X X.G.O j b)) := by
+      Submodule.span X.G.O (Set.range fun m => AddMonoidAlgebra.coeff (HgX X X.G.O j b) m) := by
     by_cases ho : IsOddPos b.2
     · have hn : nuS X j b = fun t => cX X j b - muX X j (NJ X j) b t.rev := if_pos ho
       unfold HgX
@@ -83,7 +126,7 @@ theorem hQX (hS : XShape) (j : ℕ) (b : BX X) :
   refine Submodule.span_mono ?_
   rintro _ ⟨m, rfl⟩
   refine ⟨m, ?_⟩
-  show _ = map (algebraMap X.G.O X.G.Kf) (coeff m (HgX X X.G.O j b))
+  show _ = map (algebraMap X.G.O X.G.Kf) (AddMonoidAlgebra.coeff (HgX X X.G.O j b) m)
   rw [← HgX_map X X.G.O X.G.Kf (algebraMap X.G.O X.G.Kf) j b]
   exact coeff_map _ _ _
 

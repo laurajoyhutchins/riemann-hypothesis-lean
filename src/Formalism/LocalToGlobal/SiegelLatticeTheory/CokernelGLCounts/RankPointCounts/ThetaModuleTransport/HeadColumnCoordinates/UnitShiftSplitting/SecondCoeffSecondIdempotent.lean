@@ -1,4 +1,48 @@
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.ThetaModuleTransport.HeadColumnCoordinates.UnitShiftSplitting.FormSplitP
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.ThetaModuleTransport.HeadColumnCoordinates.UnitShiftSplitting.FormSplitP
+import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.ThetaModuleTransport.HeadColumnCoordinates.DeterminantUnitTheta.CompOfMemR
+import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.ThetaModuleTransport.HeadColumnCoordinates.UnitShiftSplitting.ExistsUnitShift
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.LsDatumA
+
+@[expose] public section
 
 noncomputable section
 
@@ -25,7 +69,7 @@ def blk1 (h1 : ∀ x, (Θ (x, 0)).2 = 0) (h1' : ∀ z, (Θ.symm (z, 0)).2 = 0) :
     rw [e1] at this
     simp only [this]
   map_add' x y := by
-    rw [show ((x + y, 0) : A × B) = (x, 0) + (y, 0) by simp, map_add]
+    rw [show ((x + y, 0) : A × B) = (x, 0) + (y, 0) by simp, map_add (f := _)]
     rfl
 
 def blk2 (h2 : ∀ y, (Θ (0, y)).1 = 0) (h2' : ∀ z, (Θ.symm (0, z)).1 = 0) : B ≃+ D where
@@ -42,7 +86,7 @@ def blk2 (h2 : ∀ y, (Θ (0, y)).1 = 0) (h2' : ∀ z, (Θ.symm (0, z)).1 = 0) :
     rw [e1] at this
     simp only [this]
   map_add' x y := by
-    rw [show ((0, x + y) : A × B) = (0, x) + (0, y) by simp, map_add]
+    rw [show ((0, x + y) : A × B) = (0, x) + (0, y) by simp, map_add (f := _)]
     rfl
 
 theorem blk_eq (h1 : ∀ x, (Θ (x, 0)).2 = 0) (h1' : ∀ z, (Θ.symm (z, 0)).2 = 0)
@@ -50,7 +94,7 @@ theorem blk_eq (h1 : ∀ x, (Θ (x, 0)).2 = 0) (h1' : ∀ z, (Θ.symm (z, 0)).2 
     Θ p = (blk1 Θ h1 h1' p.1, blk2 Θ h2 h2' p.2) := by
   have e : p = (p.1, 0) + (0, p.2) := by simp
   conv_lhs => rw [e]
-  rw [map_add]
+  rw [map_add (f := _)]
   ext
   · simp [blk1, h2]
   · simp [blk2, h1]
@@ -94,7 +138,7 @@ theorem splitH_smul (h : GHyp M g T T' TT Zh Z Zσ) (a : M.L.O) (v : DG g Zh T T
       (QuotientAddGroup.mk (dgR hs (c2 g a) • w) : DD1 hs Zσ TT)) := by
   have hv' : v = (splitH hs h).symm ((QuotientAddGroup.mk l : DD1 hs Z TT),
       (QuotientAddGroup.mk w : DD1 hs Zσ TT)) := by rw [← hv, AddEquiv.symm_apply_apply]
-  rw [hv', splitH_symm_mk, ← Submodule.Quotient.mk_smul, splitH_mk, firstComponent_smul, secondComponent_smul, map_add, map_add,
+  rw [hv', splitH_symm_mk, ← Submodule.Quotient.mk_smul, splitH_mk, firstComponent_smul, secondComponent_smul, map_add (f := _), map_add (f := _),
     firstComponent_iotaOne, firstComponent_iotaTwo, secondComponent_iotaOne, secondComponent_iotaTwo, add_zero, zero_add]
 
 theorem splitH_split (h : GHyp M g T T' TT Zh Z Zσ) (v : DG g Zh T T') :

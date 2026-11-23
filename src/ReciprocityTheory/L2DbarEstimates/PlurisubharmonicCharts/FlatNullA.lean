@@ -1,6 +1,61 @@
-import ReciprocityTheory.L2DbarEstimates.PlurisubharmonicCharts.ContinuousOnSec
-import ReciprocityTheory.L2DbarEstimates.WeakHolomorphy.ImportsAlt
-import ReciprocityTheory.L2DbarEstimates.ChartDerivatives.HoloSmooth
+module
+
+public import ReciprocityTheory.L2DbarEstimates.PlurisubharmonicCharts.FamilyLeCoords
+public import Mathlib.Algebra.MvPolynomial.Funext
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+public import Mathlib.Analysis.Calculus.ContDiff.WithLp
+public import Mathlib.Analysis.Calculus.InverseFunctionTheorem.FDeriv
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.L2DbarEstimates.ChartDerivatives.HoloSmooth
+public import ReciprocityTheory.L2DbarEstimates.WeakHolomorphy.ImportsAlt
+public import Mathlib.Analysis.Calculus.ContDiff.RCLike
+public import Mathlib.Analysis.Calculus.FDeriv.Pow
+
+@[expose] public section
 
 namespace ReciprocityTheory.L2DbarEstimates.Y
 
@@ -16,7 +71,7 @@ section Hom
 variable {n : ℕ} (De : MvPolynomial (Fin n) ℂ)
 
 def fnHom (a : ℂ) (b : Fin n → ℂ) : ℂ :=
-  ∑ m ∈ De.support, MvPolynomial.coeff m De *
+  ∑ m ∈ De.support, AddMonoidAlgebra.coeff De m *
     (a ^ (De.totalDegree + 1 - ∑ k, m k) * ∏ k, b k ^ m k)
 
 theorem fn_sum_le_totalDegree {m : Fin n →₀ ℕ} (hm : m ∈ De.support) :
@@ -68,15 +123,15 @@ theorem fn_diffOn_hom {E : Type*} [NormedAddCommGroup E] [NormedSpace ℂ E] {S 
     (hb : ∀ k, DifferentiableOn ℂ (b k) S) :
     DifferentiableOn ℂ (fun x => fnHom De (a x) (fun k => b k x)) S := by
   unfold fnHom
-  have hterm : ∀ m ∈ De.support, DifferentiableOn ℂ (fun x => MvPolynomial.coeff m De *
+  have hterm : ∀ m ∈ De.support, DifferentiableOn ℂ (fun x => AddMonoidAlgebra.coeff De m *
       (a x ^ (De.totalDegree + 1 - ∑ k, m k) * ∏ k, (fun k => b k x) k ^ m k)) S := fun m _ =>
     ((ha.pow _).mul (fn_diffOn_prod Finset.univ (fun k x => b k x ^ m k) (fun k => (hb k).pow _))).const_mul _
   first
     | exact DifferentiableOn.fun_sum hterm
     | exact DifferentiableOn.sum hterm
-    | (have e : (fun x => ∑ m ∈ De.support, MvPolynomial.coeff m De *
+    | (have e : (fun x => ∑ m ∈ De.support, AddMonoidAlgebra.coeff De m *
           (a x ^ (De.totalDegree + 1 - ∑ k, m k) * ∏ k, (fun k => b k x) k ^ m k)) =
-          ∑ m ∈ De.support, fun x => MvPolynomial.coeff m De *
+          ∑ m ∈ De.support, fun x => AddMonoidAlgebra.coeff De m *
           (a x ^ (De.totalDegree + 1 - ∑ k, m k) * ∏ k, (fun k => b k x) k ^ m k) := by
          ext x; simp [Finset.sum_apply]
        rw [e]
@@ -92,7 +147,7 @@ theorem fn_eq_zero_of_eval {v0 : V n}
       simp only [MvPolynomial.eval_C]
       exact differentiable_const a
     next p q hp hq =>
-      simp only [map_add]
+      simp only [map_add (f := _)]
       exact hp.add hq
     next p i hp =>
       simp only [map_mul, MvPolynomial.eval_X]
@@ -209,11 +264,8 @@ theorem fn_not_ev (hD : A.D0 L w w0 s) (hF : A.Flat w0 s De) {P : Y} (hP : P ∈
       simpa only [div_eq_mul_inv] using h3
     exact contDiffOn_of_differentiableOn n _ U hUo hk
   have hcda : ContDiffAt ℂ ∞ (A.zLoc w0 s i) c := hcd.contDiffAt (hUo.mem_nhds hcU)
-  have hstr : HasStrictFDerivAt (A.zLoc w0 s i) (fderiv ℂ (A.zLoc w0 s i) c) c := by
-    first
-    | exact hcda.hasStrictFDerivAt (by simp)
-    | exact hcda.hasStrictFDerivAt (by norm_num)
-    | exact hcda.hasStrictFDerivAt (by exact_mod_cast le_top)
+  have hstr : HasStrictFDerivAt (A.zLoc w0 s i) (fderiv ℂ (A.zLoc w0 s i) c) c :=
+    hcda.hasStrictFDerivAt_fderiv (by simp)
   have hdet : LinearMap.det (fderiv ℂ (A.zLoc w0 s i) c : V n →ₗ[ℂ] V n) ≠ 0 := hD.coord P hP
   let e : V n ≃L[ℂ] V n :=
     (LinearMap.equivOfDetNeZero (fderiv ℂ (A.zLoc w0 s i) c : V n →ₗ[ℂ] V n) hdet).toContinuousLinearEquiv
@@ -248,7 +300,7 @@ theorem fn_dense (hD : A.D0 L w w0 s) (hF : A.Flat w0 s De) : Dense (A.Mset w0 s
           Metric.ball (A.chart (A.pick y) y) r) :=
         (A.chart _).continuousOn.isOpen_inter_preimage (A.chart _).open_source Metric.isOpen_ball
       have hyN : y ∈ (A.chart (A.pick y)).source ∩ A.chart (A.pick y) ⁻¹'
-          Metric.ball (A.chart (A.pick y) y) r := ⟨hys, Metric.mem_ball_self hr⟩
+          Metric.ball (A.chart (A.pick y) y) r := ⟨hys, Set.mem_preimage.mpr (Metric.mem_ball_self hr)⟩
       obtain ⟨y', hy'N, hy'W⟩ := mem_closure_iff.1 hy _ hNo hyN
       have hv'B := hy'N.2
       have hev : fnG A w0 s De (A.pick y) =ᶠ[𝓝 (A.chart (A.pick y) y')] 0 := by

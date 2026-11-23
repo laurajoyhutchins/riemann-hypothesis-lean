@@ -1,8 +1,49 @@
-import Formalism.LocalToGlobal.TorsionIntegrality.WeierstrassTwoTorsion.StatementN
-import Formalism.LocalToGlobal.TorsionIntegrality.WeierstrassTwoTorsion.StatementO
-import Formalism.LocalToGlobal.TorsionIntegrality.WeierstrassTwoTorsion.StatementJ
-import Formalism.LocalToGlobal.TorsionIntegrality.WeierstrassTwoTorsion.StatementK
-import Formalism.LocalToGlobal.TorsionIntegrality.SecondCoefficientNorms.JetExpShape
+module
+
+public import Formalism.LocalToGlobal.TorsionIntegrality.WeierstrassTwoTorsion.StatementO
+public import Formalism.LocalToGlobal.TorsionIntegrality.WeierstrassTwoTorsion.StatementJ
+public import Formalism.LocalToGlobal.TorsionIntegrality.WeierstrassTwoTorsion.StatementC
+public import Formalism.LocalToGlobal.TorsionIntegrality.WeierstrassTwoTorsion.StatementG
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open PowerSeries
 
@@ -11,14 +52,6 @@ universe u v
 noncomputable section
 
 namespace Formalism.L2.Th1.A
-
-def FglDiff : Prop :=
-  ∀ (R : Type u) [CommRing R] (W : WeierstrassCurve R),
-    ∃ n₁ n₂ : MvPowerSeries (Fin 2) R, MvPowerSeries.constantCoeff n₁ = 1 ∧
-      MvPowerSeries.constantCoeff n₂ = 1 ∧
-      MvPowerSeries.subst (![U₁, (iSer W).subst (U₂ : MvPowerSeries (Fin 2) R)] :
-        Fin 2 → MvPowerSeries (Fin 2) R) (fgl W) = (U₁ - U₂) * n₁ ∧
-      fgl W = (U₂ - (iSer W).subst (U₁ : MvPowerSeries (Fin 2) R)) * n₂
 
 def CubeMem : Prop :=
   ∀ (R : Type u) [CommRing R] (W : WeierstrassCurve R) (S : Subring R),
@@ -57,27 +90,10 @@ def BridgeTwoMore : Prop :=
     (IntModel W → ‖xT‖ ≤ 1 → ‖yT‖ ≤ 1 ∧ ‖W.b₂ / 12 - (xT + W.b₂ / 12)‖ ≤ 1 ∧
       ‖3 * (xT + W.b₂ / 12) ^ 2 - g₂ W / 4‖ ≤ 1)
 
-def ShortModel : Prop :=
-  ∀ (K : Type) [NormedField K] [IsUltrametricDist K] [CharZero K] (g2 g3 : K),
-    ‖g2‖ ≤ 1 → ‖g3‖ ≤ 1 → ‖(2 : K)‖ = 1 → IntModel (shortW g2 g3)
-
-def ShortNeg : Prop :=
-  ∀ (K : Type) [Field K] [CharZero K] (g2 g3 : K),
-    iSer (shortW g2 g3) = -X ∧ (∀ n, Even n → coeff n (expSer (shortW g2 g3)) = 0) ∧
-    (∀ n, Even n → coeff n (logSer (shortW g2 g3)) = 0)
-
 def FlowUniqueZ : Prop :=
   ∀ (K : Type u) [Field K] [CharZero K] (W : WeierstrassCurve K) (x y x' y' : K⟦X⟧),
-    IsFlow (curveS W) (derivative K) x y → IsFlow (curveS W) (derivative K) x' y' →
+    IsFlow (curveS W) (derivative (R := K)) x y →
+    IsFlow (curveS W) (derivative (R := K)) x' y' →
     constantCoeff x = constantCoeff x' → constantCoeff y = constantCoeff y' → x = x' ∧ y = y'
-
-def DinvEq : Prop :=
-  ∀ (K : Type) [Field K] [CharZero K] (W : WeierstrassCurve K) (f : K⟦X⟧),
-    Formalism.L2.Th1.B.Dinv (logSer W) f = D W f ∧ Formalism.L2.Th1.C.Dinv (logSer W) f = D W f
-
-def ChainLog : Prop :=
-  ∀ (K : Type u) [Field K] [CharZero K] (W : WeierstrassCurve K),
-    (∀ g : K⟦X⟧, D W (g.subst (logSer W)) = (derivative K g).subst (logSer W)) ∧
-    ∀ n : ℤ, zSer W n = (expSer W).subst (C (n : K) * logSer W)
 
 end Formalism.L2.Th1.A

@@ -1,9 +1,56 @@
-import Mathlib
-import Formalism.SatakeDualWeyl.KpqSubgroupCompact
-import Formalism.SatakeDualWeyl.StatementG
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.InvMemDoubleCosetAndComm
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.FiniteResidueFieldAdicCompletionIntegers
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsNormEqXModMonicOfAdicCompleteInvolutionStatement
+module
+
+public import Formalism.SatakeDualWeyl.StatementE
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.FiniteResidueFieldAdicCompletionIntegers
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsNormEqXModMonicOfAdicCompleteInvolutionStatement
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.InvMemDoubleCosetAndComm
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open IsDedekindDomain NumberField Formalism.UG GlobalTheory.SelfDualGenus
 open scoped TensorProduct Matrix
@@ -15,43 +62,6 @@ namespace GlobalTheory.UnitaryDoubleCoset
 section Abstract
 
 variable {O L : Type} [CommRing O] [CommRing L] {n : Type} [Fintype n] [DecidableEq n]
-
-theorem cT_pow (c : O →+* O) {B : Matrix n n O} (hB : cT c B = B) (m : ℕ) : cT c (B ^ m) = B ^ m := by
-  induction m with
-  | zero => simp [cT_one]
-  | succ m ih => rw [pow_succ, cT_mul, ih, hB, ← pow_succ', pow_succ]
-
-theorem cT_aeval (c : O →+* O) {B : Matrix n n O} (hB : cT c B = B) (p : Polynomial O) :
-    cT c (Polynomial.aeval B p) = Polynomial.aeval B (p.map c) := by
-  induction p using Polynomial.induction_on' with
-  | add p q hp hq =>
-    rw [Polynomial.map_add, map_add, map_add, ← hp, ← hq]
-    ext i j; simp [cT]
-  | monomial m a =>
-    rw [Polynomial.map_monomial, Polynomial.aeval_monomial, Polynomial.aeval_monomial,
-      ← Algebra.smul_def, ← Algebra.smul_def]
-    conv_rhs => rw [← cT_pow c hB m]
-    ext i j; simp [cT]
-
-theorem aeval_intertwine (ι : O →+* L) {B B' : Matrix n n O} {g : Matrix n n L}
-    (h : B.map ι * g = g * B'.map ι) (p : Polynomial O) :
-    (Polynomial.aeval B p).map ι * g = g * (Polynomial.aeval B' p).map ι := by
-  have hp : ∀ m : ℕ, (B ^ m).map ι * g = g * (B' ^ m).map ι := by
-    intro m
-    induction m with
-    | zero => simp
-    | succ m ih =>
-      rw [pow_succ, pow_succ, Matrix.map_mul, Matrix.map_mul, Matrix.mul_assoc, h, ← Matrix.mul_assoc, ih,
-        Matrix.mul_assoc]
-  induction p using Polynomial.induction_on' with
-  | add p q hp hq =>
-    rw [map_add, map_add, Matrix.map_add _ (map_add ι), Matrix.map_add _ (map_add ι), Matrix.add_mul,
-      Matrix.mul_add, hp, hq]
-  | monomial m a =>
-    have e : ∀ M : Matrix n n O, (a • M).map ι = ι a • M.map ι := fun M => by
-      ext i j; simp
-    rw [Polynomial.aeval_monomial, Polynomial.aeval_monomial, ← Algebra.smul_def, ← Algebra.smul_def, e, e,
-      Matrix.smul_mul, Matrix.mul_smul, hp]
 
 open IsDedekindDomain NumberField in
 open scoped TensorProduct Matrix in
@@ -84,8 +94,8 @@ private theorem cT_aeval_eq_aeval_cT_map (c : O →+* O) (B : Matrix n n O) (q :
     · subst hij; simp [_root_.Formalism.UG.cT, Polynomial.aeval_C, Matrix.algebraMap_matrix_apply]
     · simp [_root_.Formalism.UG.cT, Polynomial.aeval_C, Matrix.algebraMap_matrix_apply, hij, Ne.symm hij]
   | add p q hp hq =>
-    simp only [map_add, Polynomial.map_add, ← hp, ← hq]
-    simp [_root_.Formalism.UG.cT, Matrix.map_add, Matrix.transpose_add]
+    simp only [map_add (f := _), Polynomial.map_add (f := _), ← hp, ← hq]
+    simp [_root_.Formalism.UG.cT, Matrix.map_add (f := _), Matrix.transpose_add]
   | monomial m a hm =>
     rw [pow_succ, ← mul_assoc, mul_comm _ Polynomial.X, Polynomial.map_mul,
       map_mul (Polynomial.aeval B) Polynomial.X, map_mul (Polynomial.aeval (_root_.Formalism.UG.cT c B)), ← hm,
@@ -96,10 +106,10 @@ private theorem cT_aeval_eq_aeval_cT_map (c : O →+* O) (B : Matrix n n O) (q :
       simpa only [map_mul, Polynomial.aeval_X] using this
     simp only [_root_.Formalism.UG.cT, ← Matrix.transpose_mul, ← Matrix.map_mul, hcomm]
 
+
 open IsDedekindDomain NumberField in
 open scoped TensorProduct Matrix in
 variable {O L : Type} [CommRing O] [CommRing L] {n : Type} [Fintype n] [DecidableEq n] in
-
 theorem _root_.GlobalTheory.UnitaryDoubleCoset.exists_poly_norm {c : O →+* O} (hc : ∀ x, c (c x) = x)
     (hN : ∀ f : Polynomial O, f.Monic → f.map c = f → IsUnit (f.coeff 0) →
       ∃ p : Polynomial O, f ∣ p * p.map c - Polynomial.X)
@@ -222,7 +232,7 @@ theorem _root_.GlobalTheory.UnitaryDoubleCoset.exists_unitary_factors (ι : O �
       ext i j
       simp [Matrix.diagonal_mul, Matrix.mul_diagonal, mul_comm]
     | add p q hp hq =>
-      rw [map_add, map_add, Matrix.map_add _ (map_add ι), Matrix.map_add _ (map_add ι), add_mul,
+      rw [map_add (f := _), map_add (f := _), Matrix.map_add _ (map_add ι), Matrix.map_add _ (map_add ι), add_mul,
         mul_add, hp, hq]
     | monomial m a hm =>
       rw [pow_succ, ← mul_assoc, map_mul (Polynomial.aeval H) _ Polynomial.X,

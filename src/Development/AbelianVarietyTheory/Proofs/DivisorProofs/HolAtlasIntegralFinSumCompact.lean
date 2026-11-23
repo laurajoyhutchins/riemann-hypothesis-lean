@@ -1,6 +1,45 @@
-import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.IsTypeIsRealConst
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IntegralSubOfIsFormStatement
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.IsTypeIsRealConst
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IntegralSubOfIsForm
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -13,37 +52,6 @@ open scoped ComplexOrder
 namespace GlobalTheory.CxForm.IntegralSum
 
 variable {M : Type} [TopologicalSpace M] {n : ℕ} (A : HolAtlas M n)
-
-theorem loc_finset_sum {κ : Type} (s : Finset κ) (α : κ → A.Fld) (i : A.ι) (v : ReciprocityTheory.L2DbarEstimates.V n) :
-    A.loc (∑ j ∈ s, α j) i v = ∑ j ∈ s, A.loc (α j) i v := by
-  unfold HolAtlas.loc
-  split_ifs
-  · exact Finset.sum_apply _ _ _
-  · exact Finset.sum_const_zero.symm
-
-theorem isForm_finset_sum {κ : Type} (s : Finset κ) (α : κ → A.Fld) (h : ∀ j ∈ s, A.IsForm (α j)) :
-    A.IsForm (∑ j ∈ s, α j) := by
-  refine ⟨fun i S => ?_, fun x x' e => ?_⟩
-  · simp only [loc_finset_sum, map_sum, Finsupp.finsetSum_apply]
-    exact ContDiffOn.sum fun j hj => (h j hj).smooth i S
-  · rw [Finset.sum_apply, Finset.sum_apply, map_sum]
-    exact Finset.sum_congr rfl fun j hj => (h j hj).compat x x' e
-
-theorem integral_finset_sum [CompactSpace M] [T2Space M] [SecondCountableTopology M] [MeasurableSpace M] [BorelSpace M]
-    {κ : Type} (s : Finset κ) (α : κ → A.Fld) (h : ∀ j ∈ s, A.IsForm (α j)) :
-    A.integral (∑ j ∈ s, α j) = ∑ j ∈ s, A.integral (α j) := by
-  classical
-  induction s using Finset.induction_on with
-  | empty =>
-    have h0 := isForm_finset_sum A ∅ α h
-    have := GlobalTheory.T.integral_sub_of_isForm' A _ _ h0 h0
-    rw [sub_self, sub_self] at this
-    simpa using this
-  | insert a s ha ih =>
-    have := GlobalTheory.T.integral_sub_of_isForm' A _ _ (isForm_finset_sum A _ α h) (h a (Finset.mem_insert_self a s))
-    rw [Finset.sum_insert ha, add_sub_cancel_left, ih fun j hj => h j (Finset.mem_insert_of_mem hj)] at this
-    rw [Finset.sum_insert ha, Finset.sum_insert ha]
-    linarith
 
 set_option autoImplicit false in
 open Set Matrix MeasureTheory in
@@ -146,8 +154,8 @@ private theorem isForm_and_integral_finset_sum {ι : Type} (s : Finset ι)
     refine ⟨isForm_add' A hA hs.1, ?_⟩
     rw [integral_add_of_isForm A hA hs.1, hs.2]
 
-set_option autoImplicit false in
 
+set_option autoImplicit false in
 theorem _root_.GlobalTheory.CxForm.IntegralSum.integral_sum : ∀ {M : Type} [TopologicalSpace M] [CompactSpace M]
     [T2Space M] [SecondCountableTopology M] [MeasurableSpace M] [BorelSpace M] {n : ℕ}
     (A : _root_.GlobalTheory.CxForm.HolAtlas M n) {N : ℕ} (α : Fin N → A.Fld),

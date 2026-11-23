@@ -1,6 +1,50 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.WittOnFalse
-import Development.AbelianVarietyTheory.Definitions.Divisors.FormalCoboundarySmul
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.FormalCoboundarySmul
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open CategoryTheory TensorProduct MvPowerSeries GlobalTheory GlobalTheory.PDiv GlobalTheory.PDivGroup GlobalTheory.Katz
 
 set_option autoImplicit false
@@ -22,7 +66,7 @@ theorem hom_mul {σ : Type} {m n : ℕ} {g h : MvPowerSeries σ R}
   rw [Finset.HasAntidiagonal.mem_antidiagonal] at hp
   by_cases h1 : p.1.degree = m
   · have h2 : p.2.degree ≠ n := by
-      intro h2; apply he; rw [← hp, map_add, h1, h2]
+      intro h2; apply he; rw [← hp, map_add (f := _), h1, h2]
     rw [hh _ h2, mul_zero]
   · rw [hg _ h1, zero_mul]
 
@@ -73,7 +117,7 @@ theorem hom_add {σ : Type} {n : ℕ} {g h : MvPowerSeries σ R}
     (hg : ∀ e : σ →₀ ℕ, e.degree ≠ n → coeff e g = 0)
     (hh : ∀ e : σ →₀ ℕ, e.degree ≠ n → coeff e h = 0) :
     ∀ e : σ →₀ ℕ, e.degree ≠ n → coeff e (g + h) = 0 := by
-  intro e he; rw [map_add, hg e he, hh e he, add_zero]
+  intro e he; rw [map_add (f := _), hg e he, hh e he, add_zero]
 
 theorem hom_sub {σ : Type} {n : ℕ} {g h : MvPowerSeries σ R}
     (hg : ∀ e : σ →₀ ℕ, e.degree ≠ n → coeff e g = 0)
@@ -159,7 +203,7 @@ variable {R : Type} [CommRing R]
 
 theorem mdl_inl {d : ℕ} (β : Fin d →₀ ℕ) (k : Fin d) :
     (β.mapDomain Sum.inl : Fin d ⊕ Fin d →₀ ℕ) (Sum.inl k) = β k :=
-  Finsupp.mapDomain_apply Sum.inl_injective β k
+  Finsupp.mapDomain_apply_of_injective Sum.inl_injective β k
 
 theorem mdl_inr {d : ℕ} (β : Fin d →₀ ℕ) (k : Fin d) :
     (β.mapDomain Sum.inl : Fin d ⊕ Fin d →₀ ℕ) (Sum.inr k) = 0 :=
@@ -286,7 +330,7 @@ theorem coeff_prod_addLaw (d n : ℕ) : ∀ α : Fin d →₀ ℕ, α.degree = n
       simp only [Finsupp.coe_add, Finsupp.coe_tsub, Pi.add_apply, Pi.sub_apply, Finsupp.single_apply]
       split_ifs with h1 <;> (try subst h1) <;> omega⟩
     have ha : a.degree = n := by
-      rw [map_add, Finsupp.degree_single] at hα; omega
+      rw [map_add (f := _), Finsupp.degree_single] at hα; omega
     have hP : ((a + Finsupp.single j 1).prod fun s m => addLaw R d s ^ m) =
         (a.prod fun s m => addLaw R d s ^ m) * monomial (Finsupp.single (Sum.inl j) 1) 1 +
         (a.prod fun s m => addLaw R d s ^ m) * monomial (Finsupp.single (Sum.inr j) 1) 1 := by
@@ -295,14 +339,14 @@ theorem coeff_prod_addLaw (d n : ℕ) : ∀ α : Fin d →₀ ℕ, α.degree = n
       rfl
     rw [hP]
     refine ⟨?_, fun i => ?_⟩
-    · rw [map_add, coeff_mul_monomial, coeff_mul_monomial, if_neg (c := Finsupp.single (Sum.inr j) 1 ≤ _), add_zero]
+    · rw [map_add (f := _), coeff_mul_monomial, coeff_mul_monomial, if_neg (c := Finsupp.single (Sum.inr j) 1 ≤ _), add_zero]
       swap
       · rw [Finsupp.single_le_iff, mdl_inr]; omega
       by_cases hb : 1 ≤ β j
       · rw [if_pos (by rw [Finsupp.single_le_iff, mdl_inl]; exact hb), subA, (ih a ha _).1, mul_one]
         simp only [eqA a β j hb]
       · rw [if_neg (by rw [Finsupp.single_le_iff, mdl_inl]; exact hb), if_neg (neA a β j (by omega))]
-    · rw [map_add, coeff_mul_monomial, coeff_mul_monomial]
+    · rw [map_add (f := _), coeff_mul_monomial, coeff_mul_monomial]
       by_cases hji : j = i
       · subst hji
         rw [if_pos (c := Finsupp.single (Sum.inr j) 1 ≤ _) (by simp [Finsupp.single_le_iff]),
@@ -358,7 +402,7 @@ theorem coeff_cob1_additive_law_mixed (d : ℕ) (f : MvPowerSeries (Fin d) R) (�
     rw [if_neg, smul_zero]
     intro h
     have := DFunLike.congr_fun h (Sum.inr i)
-    simp [mdl_inr, Finsupp.mapDomain_apply Sum.inl_injective] at this
+    simp [mdl_inr, Finsupp.mapDomain_apply_of_injective Sum.inl_injective] at this
   have h2 : (∑ᶠ δ : Fin d →₀ ℕ, coeff δ f • (if β.mapDomain Sum.inl + Finsupp.single (Sum.inr i) 1 =
       δ.mapDomain Sum.inr then (1 : R) else 0)) = 0 := by
     refine finsum_eq_zero_of_forall_eq_zero fun δ => ?_

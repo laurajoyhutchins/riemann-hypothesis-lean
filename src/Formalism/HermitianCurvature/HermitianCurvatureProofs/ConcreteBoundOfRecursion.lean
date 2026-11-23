@@ -1,10 +1,50 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.FirstNormRealNonneg
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.RecursionWithDensities
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.PoissonSummationDecay
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.LevelSizesJointMean
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.DualCovolumeChangeOfVariables
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.PoissonJointFirstReduction
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.LocalConditionsAndQuotientSplitting
+module
+
+public import Formalism.HermitianCurvature.StatementC
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.DualCovolumeChangeOfVariables
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.FirstNormRealNonneg
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.LevelSizesJointMean
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.LevelZeroEstimateProduct
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.LocalConditionsAndQuotientSplitting
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace Formalism.FourierDecayAlt.P
 
@@ -24,33 +64,6 @@ theorem real_inputs_concrete_holds : C.RealInputsConcrete :=
     lattice_facts_general gram_positive_semidefinite words_pos_of_parts wave_estimate_of_integral
     poisson_input_of_parts lift_estimate_of_base block_estimate_of_base level_zero_estimate_product
     cutoff_of_parts
-
-theorem concrete_bound_of_recursion : C.TheoremAConcreteOfParts := by
-  intro hTA hPT hPJ hPSJ hRI C₁ C₄ hC₁ hC₄
-  obtain ⟨C, C', hCC⟩ := hTA C₁ C₄ hC₁ hC₄
-  refine ⟨C, C', ?_⟩
-  intro E _ _ _ Wp Wq _ _ _ _ _ S jv cE Kr hK0 Th e Θ H _ _ _ Vt c hf hg1 hg2 hΘ hC'Θ hsmall hSz hP hG hI hP1
-    hP23 hT hLE _ hPG hKr hA2 hEB hDom hLS hA4 R
-  obtain ⟨hGram, hWP, hWave, hPI, hLift, hBlock, hE, hCut⟩ :=
-    hRI E Wp Wq S jv H Vt C₄ hg1 hg2 hP hG hI hP1 hP23 hT hLE hPG Kr hK0 Th e
-  obtain ⟨V, _, _, _, _, _, ι, _, π, Λ, hD, hZ, emb, dmap, hbij, hFr, hWF⟩ := hPI
-  have hPS : (S.mkData Kr hK0 Th e).PoissonStep :=
-    @hPSJ hPT hPJ E S.W _ (S.mkData Kr hK0 Th e) V _ _ _ _ _ ι _ π hbij Λ hD hZ emb dmap hFr hWF
-  have hr : (S.G.r : ℝ) * (C / Θ) ^ S.f ≤ 1 := by
-    rcases le_or_gt 0 ((C / Θ) ^ S.f) with hx | hx
-    · nlinarith
-    · have : (S.G.r : ℝ) * (C / Θ) ^ S.f ≤ 0 := mul_nonpos_of_nonneg_of_nonpos (Nat.cast_nonneg _) hx.le
-      linarith
-  have hK : 4 ≤ (S.mkData Kr hK0 Th e).K := by
-    show 4 ≤ Kst
-    unfold Kst
-    norm_num
-  exact hCC E S.W (S.mkData Kr hK0 Th e) Θ (∏ v, jv v) H Vt c hK hf hΘ hC'Θ hr hSz hGram hKr hWP hA2 hEB hDom
-    hWave hPS hLift hBlock hLS hE hCut hA4 R
-
-theorem concrete_bound_holds : C.TheoremAConcrete :=
-  concrete_bound_of_recursion theorem_a_after poisson_summation_level_statement poisson_joint
-    poisson_level_joint real_inputs_concrete_holds
 
 end
 

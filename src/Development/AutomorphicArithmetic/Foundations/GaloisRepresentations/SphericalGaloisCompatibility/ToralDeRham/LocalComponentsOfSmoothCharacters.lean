@@ -1,18 +1,62 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.CyclicStrongAtCusp
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsSubquotientProdIrrUc
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsEquivProdIrrTw
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.LanglandsQuotientOfSpehTypeProductIsL
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.SupercuspidalSupportTwistNuCharacters
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsGenericOfIsLocComp
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsUnitarisableOfIsLocCompCusp
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsIsUnitaryTwistAbsPow
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsPolarizedTwistAbsPow
+module
+
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.SphericalGaloisCompatibility.Chl
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BzfinHolds
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GeometricLemmaFiltrationHolds
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HeckeCharCMEtaLocalEqNegOnePowValInert
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsSubquotSmIndCongr
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsSubquotientProdIrrUc
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsUnitarisableOfIsLocCompCusp
 import Development.AbelianVarietyTheory.Proofs.FoundationProofs.HasSatakeGLOfIsSatVecGL
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsSubquotSmIndCongr
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HeckeCharCMEtaLocalEqNegOnePowValInert
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.IsUnitaryOfCharIff
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.SphericalGaloisCompatibility.Chl
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsEquivProdIrrTw
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsIsUnitaryTwistAbsPow
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsGenericOfIsLocComp
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.LanglandsQuotientOfSpehTypeProductIsL
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.NontrivialTwJacquetOfSurjective
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsPolarizedTwistAbsPow
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.SupercuspidalSupportTwistNuCharacters
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.GeometricLemmaOfFiltration
+import Development.AutomorphicSpectrum.Proofs.GlobalProofs.HasSupportOfIsSubquotientProdIrr
+import GroundTheory.LocalFields.PadicLogSeries
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.RestrictsSelf
+
+@[expose] public section
 
 namespace GalTw
 open NumberField IsDedekindDomain Neutral.B1 Formalism.L2.Host Formalism.ConjugateSelfDual ReciprocityTheory.Gal Formalism.BasicNotions Formalism.BasicNotions.Loc Formalism.MainNotions.N Polynomial
@@ -29,7 +73,7 @@ section Local
 variable {k : Type} [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k]
 
 theorem exists_equiv_of_eq {N h : ℕ} {V : Type} [AddCommGroup V] [Module ℂ V]
-    {ρ : Representation ℂ (GL (Fin N) k) V} {x y : Fin h → IrrGL k} {hd : ∑ a, (x a).1 = N}
+    {ρ : Representation ℂ (GL (Fin N) k) V} {x y : Fin h → IrrGL (k := k)} {hd : ∑ a, (x a).1 = N}
     (φ : Nonempty (ρ.Equiv (prodIrr x hd))) (e : x = y) :
     ∃ hd' : ∑ a, (y a).1 = N, Nonempty (ρ.Equiv (prodIrr y hd')) := by
   subst e
@@ -91,7 +135,7 @@ theorem equiv_prodIrr_chars (hGU : GlobalTheory.Published.GenericUnitaryDualGL) 
   rw [ms_eq_singleton (hlen i), hτ i]
 
 theorem equiv_prodIrr_untwist {N h : ℕ} {V : Type} [AddCommGroup V] [Module ℂ V]
-    (ρ : Representation ℂ (GL (Fin N) k) V) (χ : kˣ →* ℂˣ) (hχ : IsSmoothChar χ) (x : Fin h → IrrGL k)
+    (ρ : Representation ℂ (GL (Fin N) k) V) (χ : kˣ →* ℂˣ) (hχ : IsSmoothChar χ) (x : Fin h → IrrGL (k := k))
     (hd : ∑ a, (x a).1 = N) (φ : Nonempty ((twist ρ (detChar (Fin N) χ)).Equiv (prodIrr x hd))) :
     Nonempty (ρ.Equiv (prodIrr (fun a => (x a).tw χ⁻¹ hχ.inv) hd)) := by
   obtain ⟨φ⟩ := φ
@@ -104,14 +148,15 @@ theorem equiv_prodIrr_untwist {N h : ℕ} {V : Type} [AddCommGroup V] [Module �
   rw [← e]
   exact (twistEquiv φ _).trans (prodIrrTwistEquiv x hd χ⁻¹ hχ.inv)
 
-open scoped Classical in
 
-noncomputable def valAt (ϖ : kˣ) (y : IrrGL k) : ℂˣ :=
-  if h : ∃ (μ : kˣ →* ℂˣ) (hμ : IsSmoothChar μ), y = IrrGL.ofChar μ hμ then h.choose ϖ else 1
+open scoped Classical in
+noncomputable def valAt (ϖ : kˣ) (y : IrrGL (k := k)) : ℂˣ := by
+  classical
+  exact if h : ∃ (μ : kˣ →* ℂˣ) (hμ : IsSmoothChar μ), y = IrrGL.ofChar μ hμ then h.choose ϖ else 1
 
 theorem valAt_ofChar (ϖ : kˣ) (μ : kˣ →* ℂˣ) (hμ : IsSmoothChar μ) : valAt ϖ (IrrGL.ofChar μ hμ) = μ ϖ := by
   have h : ∃ (μ' : kˣ →* ℂˣ) (hμ' : IsSmoothChar μ'), IrrGL.ofChar μ hμ = IrrGL.ofChar μ' hμ' := ⟨μ, hμ, rfl⟩
-  rw [valAt, dif_pos h]
+  rw [valAt, dite_eq_left h]
   obtain ⟨hμ', e⟩ := h.choose_spec
   exact (congrArg (fun f : kˣ →* ℂˣ => f ϖ) (IrrGL.ofChar_inj.1 e)).symm
 
@@ -138,7 +183,7 @@ theorem hasSatGL_of_equiv_prodIrr {n h : ℕ} (σ : SmIrr (GL (Fin n) (w.adicCom
     refine (Submodule.ne_bot_iff _).2 ⟨ψ.symm v, GlobalTheory.LGrp.mem_fixed.2 fun g hg => ?_, fun e => hv0 ?_⟩
     · exact (ψ.symm.toIntertwiningMap.isIntertwining _ _ g v).symm.trans
         (congrArg ψ.symm (GlobalTheory.LGrp.mem_fixed.1 hv g hg))
-    · exact ψ.symm.toLinearEquiv.injective (e.trans (map_zero _).symm)
+    · exact ψ.symm.toLinearEquiv.injective (e.trans ψ.symm.toLinearEquiv.map_zero.symm)
   have hS : HasSatake σ.ρ (fun i => ζ i ϖ) := ⟨σ.irred, hsph,
     (IsSubquotient.of_injective ψ.toIntertwiningMap ψ.toLinearEquiv.injective).trans
       (GlobalTheory.GenSph.isSubquotient_prodIrr_uc (fun i => ζ i ϖ) hd')⟩
@@ -149,7 +194,7 @@ end Sph
 
 section Glob
 
-variable {E : Type} [Field E] [NumberField E] [IsTotallyComplex E]
+variable {E : Type} [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E]
 
 theorem exists_isUnitarisable_twist {a : ℕ} (ha : 1 ≤ a) (π : CuspSub E a) (w : HeightOneSpectrum (𝓞 E))
     (σ : SmIrr (GL (Fin a) (w.adicCompletion E))) (hσ : π.IsLocComp w σ) :
@@ -217,8 +262,5 @@ open NumberField IsDedekindDomain Neutral.B1 Formalism.L2.Host Formalism.Conjuga
 open GlobalTheory.CuspRep GlobalTheory.WeilDeligne GlobalTheory.Pst GlobalTheory.LocLanglands GlobalTheory.HeckeGal GlobalTheory.LocGL GlobalTheory.GalOfCusp GlobalTheory.GLq
 open GlobalTheory.PRep GlobalTheory.SmGL GlobalTheory.SplitWeil GlobalTheory.GalCut GlobalTheory.RoadU GlobalTheory.AboveL
 attribute [local instance] GlobalTheory.LocalData.complRel GlobalTheory.LocalData.isLocalField
-set_option maxHeartbeats 1000000 in
-theorem GlobalTheory.T.local_components_of_smooth_characters : UpperTheory.Gal.ToralGalois.Inq → ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (n : ℕ), 1 ≤ n → ∀ (π : CuspSub E n) (w : HeightOneSpectrum (𝓞 E)), ∀ σ : SmIrr (GL (Fin n) (w.adicCompletion E)), π.IsLocComp w σ → ∀ (ξ : Fin n → ((w.adicCompletion E)ˣ →* ℂˣ)) (hξ : ∀ j, IsSmoothChar (ξ j)), HasSupport σ.ρ (chars ξ hξ) → Unlinked (chars ξ hξ) → (∀ j (x : (w.adicCompletion E)ˣ), Valued.v (x : w.adicCompletion E) = 1 → ξ j x = 1) → ∀ ϖ : (w.adicCompletion E)ˣ, Valued.v (ϖ : w.adicCompletion E) = WithZero.exp (-1 : ℤ) → (CG.mk π).HasSat w (Finset.univ.val.map fun j => ξ j ϖ) := by
-  first | (exact @GlobalTheory.SphUnr.hasSat_of_unlinked_unr) | (exact GlobalTheory.SphUnr.hasSat_of_unlinked_unr) | (intros; apply GlobalTheory.SphUnr.hasSat_of_unlinked_unr  <;> assumption)
 
 end

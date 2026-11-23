@@ -1,4 +1,54 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.FrobeniusSmoothVectors.PresDefs
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.FrobeniusSmoothVectors.PresDefs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RingTheory.Filtration
+
+@[expose] public section
 
 open IsLocalRing Matrix UpperTheory.V.Alg UpperTheory.V.U3 UpperTheory.V.Fr
 
@@ -65,15 +115,9 @@ private theorem lc_ker [IsNoetherianRing A] {I K : Ideal A} (hs : I * K = ⊥) {
 
 private theorem map_sgn (f : A →+* C) (s : ℤˣ) (g : GL (Fin n) A) :
     GeneralLinearGroup.map f (sgnAct n A s g) = sgnAct n C s (GeneralLinearGroup.map f g) := by
-  by_cases hs : s = 1
-  · subst hs
-    simp
-  · have hA : sgnAct n A s = thetaAut n A := by
-      simp [sgnAct, hs]
-    have hC : sgnAct n C s = thetaAut n C := by
-      simp [sgnAct, hs]
-    rw [hA, hC]
-    exact map_theta f g
+  rcases Int.units_eq_one_or s with rfl | rfl
+  · simp
+  · simpa using map_theta f g
 
 private theorem lc_hom {G H : Type} [Group G] [TopologicalSpace G] [IsTopologicalGroup G] [Group H]
     (φ : G →* H) (h : IsOpen (φ.ker : Set G)) : IsLocallyConstant φ := by
@@ -81,7 +125,7 @@ private theorem lc_hom {G H : Type} [Group G] [TopologicalSpace G] [IsTopologica
   intro x
   have h1 : ∀ᶠ z in nhds (1 : G), z ∈ (φ.ker : Set G) := h.mem_nhds (one_mem _)
   have hc : Filter.Tendsto (fun y => x⁻¹ * y) (nhds x) (nhds 1) := by
-    have := (continuous_mul_left x⁻¹).tendsto x
+    have := (continuous_const_mul x⁻¹).tendsto x
     rwa [inv_mul_cancel] at this
   filter_upwards [hc.eventually h1] with y hy
   rw [SetLike.mem_coe, MonoidHom.mem_ker, map_mul, map_inv, inv_mul_eq_one] at hy
@@ -120,7 +164,7 @@ theorem UpperTheory.V.Fr.pr_omk :
         have e4 := hdel.comp_continuous (continuous_fst (X := F.Γ) (Y := F.Γ))
         have := IsLocallyConstant.comp₂
           (IsLocallyConstant.comp₂ e1 (IsLocallyConstant.comp₂ e4 e2
-            fun s g => sgnAct n (C' ⧸ maximalIdeal C' ^ N) s g) (· * ·)) e3 (fun a b => a * b⁻¹)
+            fun s g => sgnAct n _ s g) (· * ·)) e3 (fun a b => a * b⁻¹)
         convert this using 1
         funext x
         simp [Function.comp, map_sgn])

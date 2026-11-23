@@ -1,5 +1,53 @@
-import Mathlib
-import Formalism.PeriodIntegrals.PhNormLimit
+module
+
+public import Formalism.PeriodIntegrals.PhNormLimit
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Algebra.Nonarchimedean.Completion
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 private theorem coeff_pow_eq_zero_of_lt_of_constantCoeff_eq_zero {K : Type*} [CommRing K] (a : MvPowerSeries Unit K)
     (ha : MvPowerSeries.constantCoeff a = 0) :
@@ -51,7 +99,7 @@ private theorem continuous_coeff_pow_of_continuous_coeff {K Y : Type*} [NormedFi
   | succ n ih =>
     intro e
     simp only [pow_succ, MvPowerSeries.coeff_mul]
-    exact continuous_finset_sum _ fun x _ => (ih x.1).mul (hF x.2)
+    exact continuous_finsetSum _ fun x _ => (ih x.1).mul (hF x.2)
 
 private theorem continuous_coeff_subst_of_continuous_coeff {K Y : Type*} [NormedField K] [TopologicalSpace Y]
     (f : PowerSeries K) (a : Y → MvPowerSeries Unit K)
@@ -64,7 +112,7 @@ private theorem continuous_coeff_subst_of_continuous_coeff {K Y : Type*} [Normed
         PowerSeries.coeff d f • MvPowerSeries.coeff e (a y ^ d) :=
     funext fun y => coeff_subst_eq_sum_range_coeff_mul_coeff_pow f (a y) (ha y) e
   rw [h]
-  exact continuous_finset_sum _ fun d _ =>
+  exact continuous_finsetSum _ fun d _ =>
     Continuous.smul (f := fun _ => PowerSeries.coeff d f) continuous_const (continuous_coeff_pow_of_continuous_coeff a hc d e)
 
 private theorem forall_mem_closure_of_isClosed_setOf {Y : Type*} [TopologicalSpace Y] (T : Set Y) (P : Y → Prop)
@@ -85,7 +133,7 @@ private theorem isClosed_setOf_coeff_exp_norm_le_one {K Y : Type*} [NormedField 
     simp only [Set.setOf_forall]
     refine isClosed_iInter fun n => isClosed_le ?_ continuous_const
     simp only [hG]
-    exact (continuous_finset_sum _ fun k _ => (continuous_coeff_pow_of_continuous_coeff F hF k n).div_const _).norm
+    exact (continuous_finsetSum _ fun k _ => (continuous_coeff_pow_of_continuous_coeff F hF k n).div_const _).norm
   simpa only [Set.setOf_and] using h1.inter h2
 
 private theorem continuous_coeff_subst_subst_C_mul_subst {K Y : Type*} [NormedField K] [TopologicalSpace Y]

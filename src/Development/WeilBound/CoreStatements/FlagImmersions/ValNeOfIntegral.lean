@@ -1,11 +1,61 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.ArchBetween
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.IsSmoothHermTrivLine
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ValuationCoordsComplexPoint
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LogResolutionPotentialPullback
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LogResolutionReindexed
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.ExistsHermLineOfLocalSmooth
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.FubiniStudyMetricSmooth
+module
+
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.IsSmoothHermTrivLine
+public import Development.AutomorphicSpectrum.Definitions.MetricPeriods.HasMultiplier
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LogResolutionPotentialPullback
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LogResolutionReindexed
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ValuationCoordsComplexPoint
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.ExistsHermLineOfLocalSmooth
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.FubiniStudyMetricSmooth
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Analytic.Polynomial
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.InnerProductSpace.Calculus
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterBridgeB
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -78,9 +128,9 @@ theorem rho_eq {y : (Σ k, ι k) → Ω} {a : K → ℤ} {ks : K} {d d' : ι ks 
     simp only [Pi.add_apply]
     omega)
   have h4 := aeval_eq_zero_of (mem_ptsOver hz) h3 (by
-    simp only [map_add, map_neg, map_mul, aeval_X, e, e']
+    simp only [map_add (f := _), map_neg, map_mul, aeval_X, e, e']
     ring)
-  simp only [map_add, map_neg, map_mul, aeval_X] at h4
+  simp only [map_add (f := _), map_neg, map_mul, aeval_X] at h4
   unfold rho
   rw [div_eq_div_iff n.2.1 n'.2.1]
   linear_combination h4
@@ -119,7 +169,7 @@ theorem NZ_smul {y : (Σ k, ι k) → Ω} {a : K → ℤ} {ks : K} {d : ι ks ×
       ring
     · simp [hk]
       ring
-  simp only [e4, Finset.sum_sub_distrib, Finset.sum_add_distrib, Finset.sum_ite_eq', Finset.mem_univ, if_true]
+  simp only [e4, Finset.sum_sub_distrib, Finset.sum_add_distrib, Finset.sum_ite_eq', Finset.mem_univ, ite_true]
 
 theorem exists_flat (y : (Σ k, ι k) → Ω) (hP : IsMultiHomogIdeal (mCoordIdeal y)) (a : K → ℤ) (ks : K)
     (hcov : ∀ z ∈ mcPts (mCoordIdeal y), ∃ d, Rep y a ks d ∧ NZ d z) :
@@ -134,7 +184,7 @@ theorem exists_flat (y : (Σ k, ι k) → Ω) (hP : IsMultiHomogIdeal (mCoordIde
   have hψ : ∀ z ∈ mcPts (mCoordIdeal y), ∀ d, Rep y a ks d → NZ d z → ψ z = Real.log ‖rho d z‖ := by
     intro z hz d h1 h2
     have h : ∃ d, Rep y a ks d ∧ NZ d z := ⟨d, h1, h2⟩
-    simp only [ψ, dif_pos h]
+    simp only [ψ, dite_eq_left h]
     rw [rho_eq h.choose_spec.1 h1 hz h.choose_spec.2 h2]
   obtain ⟨B, hBa, hBs, hB⟩ := GlobalTheory.CompanionTheory.Ar.PB.exists_hermLine_of_local_smooth K ι (mCoordIdeal y)
     (fun z => ψ z - Real.log (F.h z)) hP (by
@@ -148,9 +198,9 @@ theorem exists_flat (y : (Σ k, ι k) → Ω) (hP : IsMultiHomogIdeal (mCoordIde
       intro z hz
       obtain ⟨d, h1, h2⟩ := hcov z hz
       have ho : IsOpen {z : (Σ k, ι k) → ℂ | ∀ k, ∃ i, z ⟨k, i⟩ ≠ 0} := by
-        rw [Set.setOf_forall]
+        rw [Set.ofPred_forall]
         refine isOpen_iInter_of_finite fun k => ?_
-        rw [Set.setOf_exists]
+        rw [Set.ofPred_exists]
         exact isOpen_iUnion fun i => isOpen_ne_fun (continuous_apply _) continuous_const
       refine ⟨{z | NZ d z} ∩ {z | ∀ k, ∃ i, z ⟨k, i⟩ ≠ 0}, fun z => Real.log ‖rho d z‖ - Real.log (F.h z),
         (isOpen_NZ d).inter ho, ⟨h2, hz.1⟩, ?_, ?_⟩
@@ -228,7 +278,7 @@ theorem exists_line {K₀ K : Type} [Fintype K₀] [Fintype K] [DecidableEq K] {
   have hren : ∀ f : MRing ι₀, aeval y (rename v f) = i (aeval y₀ f) := fun f => by
     induction f using MvPolynomial.induction_on with
     | C a => simp
-    | add p q hp hq => simp only [map_add, hp, hq]
+    | add p q hp hq => simp only [map_add (f := _), hp, hq]
     | mul_X p n hp => simp only [map_mul, hp, rename_X, aeval_X, hy]
   have hle : mCoordIdeal y₀ ≤ imageZ v (mCoordIdeal y) := by
     intro f hf
@@ -238,7 +288,7 @@ theorem exists_line {K₀ K : Type} [Fintype K₀] [Fintype K] [DecidableEq K] {
       intro f
       induction f using MvPolynomial.induction_on with
       | C a => simp [mConeMap, Φ]
-      | add p q hp hq => simp only [map_add, hp, hq]
+      | add p q hp hq => simp only [map_add (f := _), hp, hq]
       | mul_X p n hp =>
         simp only [map_mul, hp, rename_X]
         congr 1

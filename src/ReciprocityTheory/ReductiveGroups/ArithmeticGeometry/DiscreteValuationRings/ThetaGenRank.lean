@@ -1,7 +1,60 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.ThetaGenGeneric
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.HasGen
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.LBLocalC
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.GlobalSectionsRankAlgClosed
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.GlobalSectionsRankAlgClosed
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.LBTransport
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.ThetaGenFlat
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.DegExp
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.AlgebraicGeometry.Morphisms.SchemeTheoreticallyDominant
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.LBLocalC
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.ThetaGenGeneric
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.ThetaGenLevel
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.ThetaGenThick
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.AppCompatGeneric
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -211,12 +264,25 @@ section Rank
 
 variable {R : Type} [CommRing R] [IsDomain R] [IsLocalRing R] [IsNoetherianRing R] {I : Ideal R} (D : DegData R I)
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem secB_rank_one (hLaws : Laws) (t s' : D.toPre.SecB 1 0) :
     ∃ c₀ c' : R, (∀ j, toW D.toPre.P.A.hom _ c₀ * s'.f j = toW D.toPre.P.A.hom _ c' * t.f j) ∧
       (c₀ = 0 → ∀ j, t.f j = 0) := by
   classical
+  let pullSection {X Y Z : Scheme.{0}} (L : LB X) {K : Type} [Fintype K]
+      (φ : K → (Y ⟶ X)) (ε : K → ℤ) (s : LB.Sec (LB.LinComb L φ ε))
+      (f : Z ⟶ Y) (φ' : K → (Z ⟶ X)) (hφ : ∀ k, φ' k = f ≫ φ k) :
+      LB.Sec (LB.LinComb L φ' ε) := by
+    obtain rfl : φ' = fun k => f ≫ φ k := funext hφ
+    exact pullSec L φ ε s f
+  have pullSection_f {X Y Z : Scheme.{0}} (L : LB X) {K : Type} [Fintype K]
+      (φ : K → (Y ⟶ X)) (ε : K → ℤ) (s : LB.Sec (LB.LinComb L φ ε))
+      (f : Z ⟶ Y) (φ' : K → (Z ⟶ X)) (hφ : ∀ k, φ' k = f ≫ φ k) (j : K → L.ι) :
+      (pullSection L φ ε s f φ' hφ).f j =
+        (Z.presheaf.map (homOfLE (wchart_le_preimage L f φ φ' hφ j)).op).hom ((f.app _).hom (s.f j)) := by
+    obtain rfl : φ' = fun k => f ≫ φ k := funext hφ
+    rfl
   have hL := D.toPre.P.isLB
   obtain ⟨V, hpV, b, hb⟩ := hLaws.secBaseChange (Spec (CommRingCat.of R)) D.toPre.P 1 le_rfl
     (IsLocalRing.closedPoint R)
@@ -232,10 +298,10 @@ theorem secB_rank_one (hLaws : Laws) (t s' : D.toPre.SecB 1 0) :
     show t0 ≫ V.ι ≫ 𝟙 _ = 𝟙 _
     rw [Category.comp_id, ht0]
   let b' : Fin (1 ^ D.toPre.P.g) → LB.Sec (LPow D.toPre.P.A D.toPre.P.L ((1 : ℕ) : ℤ) T) := fun i =>
-    pullSec' D.toPre.P.L _ _ (b i) (homAt t0 ▷ D.toPre.P.A).left (fun _ => (snd T D.toPre.P.A).left)
+    pullSection D.toPre.P.L _ _ (b i) (homAt t0 ▷ D.toPre.P.A).left (fun _ => (snd T D.toPre.P.A).left)
       (fun _ => by rw [← Over.comp_left, whiskerRight_snd])
   have hpull : ∀ i, IsPullSec D.toPre.P.A D.toPre.P.L ((1 : ℕ) : ℤ) (homAt t0 ▷ D.toPre.P.A)
-      (whiskerRight_snd (homAt t0) D.toPre.P.A) (b i) (b' i) := fun i j => pullSec'_f _ _ _ _ _ _ _ j
+      (whiskerRight_snd (homAt t0) D.toPre.P.A) (b i) (b' i) := fun i j => pullSection_f _ _ _ _ _ _ _ j
   obtain ⟨-, hspan⟩ := hb R t0 b' hpull
   have hsub : Subsingleton (Fin (1 ^ D.toPre.P.g)) := by rw [one_pow]; infer_instance
   have i0 : Fin (1 ^ D.toPre.P.g) := ⟨0, by rw [one_pow]; exact Nat.one_pos⟩
@@ -259,12 +325,12 @@ theorem secB_rank_one (hLaws : Laws) (t s' : D.toPre.SecB 1 0) :
     infer_instance
   let pl : LB.Sec (LB.LinComb D.toPre.P.L (fun _ : Fin 1 => 𝟙 D.toPre.P.A.left) (fun _ => ((1 : ℕ) : ℤ))) →
       LB.Sec (LPow D.toPre.P.A D.toPre.P.L ((1 : ℕ) : ℤ) T) := fun u =>
-    pullSec' D.toPre.P.L _ _ u π₂ (fun _ => π₂) (fun _ => (Category.comp_id _).symm)
+    pullSection D.toPre.P.L _ _ u π₂ (fun _ => π₂) (fun _ => (Category.comp_id _).symm)
   obtain ⟨c0, hc0⟩ := mem (pl ut)
   obtain ⟨c1, hc1⟩ := mem (pl us)
   have hrel : c0 • (SecM.ofSec D.toPre.P.A (pl us) : SecM D.toPre.P.A D.toPre.P.L ((1 : ℕ) : ℤ) T) =
       c1 • SecM.ofSec D.toPre.P.A (pl ut) := by
-    rw [hc0, hc1, smul_smul, smul_smul, mul_comm]
+    simp only [hc0, hc1, smul_smul, mul_comm c0 c1]
   have hfstp : (fst T D.toPre.P.A).left = π₂ ≫ D.toPre.P.A.hom := by
     have h1 : (fst T D.toPre.P.A).left ≫ T.hom = (T ⊗ D.toPre.P.A).hom := Over.w _
     have h2 : π₂ ≫ D.toPre.P.A.hom = (T ⊗ D.toPre.P.A).hom := Over.w _
@@ -274,8 +340,9 @@ theorem secB_rank_one (hLaws : Laws) (t s' : D.toPre.SecB 1 0) :
       ((Scheme.ΓSpecIso (CommRingCat.of R)).hom.hom c) = c :=
     fun c => by rw [← CommRingCat.comp_apply, Iso.hom_inv_id]; rfl
   have hlift : ∀ (W : (T ⊗ D.toPre.P.A).left.Opens) (c : Γ(T.left, ⊤)), liftHom D.toPre.P.A W c =
-      toW ((fst T D.toPre.P.A).left) W ((Scheme.ΓSpecIso (CommRingCat.of R)).hom.hom c) := by
+      toW (π₂ ≫ D.toPre.P.A.hom) W ((Scheme.ΓSpecIso (CommRingCat.of R)).hom.hom c) := by
     intro W c
+    rw [← toW_congr hfstp W]
     simp only [liftHom, toW, RingHom.comp_apply]
     rw [eR']
     rfl
@@ -289,8 +356,9 @@ theorem secB_rank_one (hLaws : Laws) (t s' : D.toPre.SecB 1 0) :
     have hj := congrArg (fun z => z.1 j) h
     change liftHom _ _ c * (pl u₁).f j = liftHom _ _ c' * (pl u₂).f j at hj
     rw [hlift, hlift] at hj
-    simp only [pl] at hj
-    rw [pullSec'_f, pullSec'_f, toW_congr hfstp, toW_congr hfstp] at hj
+    have h₁ := pullSection_f D.toPre.P.L _ _ u₁ π₂ (fun _ => π₂) (fun _ => (Category.comp_id _).symm) j
+    have h₂ := pullSection_f D.toPre.P.L _ _ u₂ π₂ (fun _ => π₂) (fun _ => (Category.comp_id _).symm) j
+    simp only [LPow, pl, h₁, h₂] at hj
     apply Scheme.Hom.app_injective π₂
     apply map_inj_of_le_ge (wchart_le_preimage D.toPre.P.L π₂ (fun _ => 𝟙 _) (fun _ => π₂)
       (fun _ => (Category.comp_id _).symm) j) (fun x hx => Set.mem_iInter.2 fun k => Set.mem_iInter.1 hx k)

@@ -1,8 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.TateUnramifiedOfTorsionUnramified
-import Development.AbelianVarietyTheory.Definitions.Degenerations.OfDerivationFnOn
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.IsProjectiveOverRingByChartsAbelianVariety
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.NormChart
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.NormChart
+public import Development.AbelianVarietyTheory.Definitions.ThetaMetrics.IsRegularFnIffOfIsAffineOpen
+public import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.ExistsUniqueLbIsoPullEqOfCoheightLeOne
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsSecImageNonzeroLocus
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.IsProjectiveOverRingByChartsAbelianVariety
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.BCTools
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.ProdIso
+
+@[expose] public section
+
 open CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj AlgebraicGeometry
 open scoped CategoryTheory.Obj CategoryTheory.MonObj Pointwise
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor
@@ -85,7 +132,7 @@ theorem normChart_baseChange : ∀ (K Ω : Type) [Field K] [Field Ω] [Algebra K
     IsAbelianScheme A → ∀ N₀ : LB A.left, N₀.IsLB → NormChart A N₀ →
       NormChart ((Over.pullback (spMap (algebraMap K Ω))).obj A)
         (N₀.pull (pullback.fst A.hom (spMap (algebraMap K Ω)))) := by
-  intro K Ω _ _ _ A _ _ N₀ _ ⟨W, V, π, a, U, N, n, hπ, ha, hW, hWt, hU, hUne, hN, H, hloc⟩
+  intro K Ω _ _ _ A _ _ N₀ hN₀ ⟨W, V, π, a, U, N, n, hπ, ha, hW, hWt, hU, hUne, hN, H, hloc⟩
   have hf := surjective_spMap K Ω
   set f := spMap (algebraMap K Ω)
   have hsurj : ∀ X : Over (Sp K), Function.Surjective (bcProj f X) := fun X =>
@@ -98,9 +145,9 @@ theorem normChart_baseChange : ∀ (K Ω : Type) [Field K] [Field Ω] [Algebra K
     rw [bcProd_fst, bcProd_fst]
     exact (isPullback_whiskerRight _ _).paste_horiz (isPullback_bcProj f π)
   refine ⟨(Over.pullback f).obj W, (Over.pullback f).obj V, (Over.pullback f).map π, (Over.pullback f).map a,
-    bcProj f A ⁻¹ᵁ U, N.pull (bcProd f V A), GlobalTheory.secPull n (bcProd f V A),
+    bcProj f A ⁻¹ᵁ U, N.pull (bcProd f V A), GlobalTheory.Cartier.secPull n (bcProd f V A),
     MorphismProperty.of_isPullback (isPullback_bcProj f π) hπ,
-    MorphismProperty.of_isPullback (isPullback_bcProj f a) ha, ?_, ?_, ?_, ?_, pull_isLB hN _, ?_, ?_⟩
+    MorphismProperty.of_isPullback (isPullback_bcProj f a) ha, ?_, ?_, ?_, ?_, LB.isLB_pull hN _, ?_, ?_⟩
   · obtain ⟨w⟩ := hW
     obtain ⟨w', -⟩ := hsurj W w
     exact ⟨w'⟩
@@ -111,13 +158,18 @@ theorem normChart_baseChange : ∀ (K Ω : Type) [Field K] [Field Ω] [Algebra K
   · obtain ⟨u, hu⟩ := hUne
     obtain ⟨u', rfl⟩ := hsurj A u
     exact ⟨u', hu⟩
-  · have e : (snd ((Over.pullback f).obj V) ((Over.pullback f).obj A)).left ≫ bcProj f A =
-        bcProd f V A ≫ (snd V A).left := (bcProd_snd f V A).symm
-    exact LBIso.chartPull (GlobalTheory.chartPullPull N (bcProd f V A))
-      (chartPullLinComb N₀ (bcProj f A) (fun _ : PUnit => _) (fun _ => (snd V A).left) (fun _ => 1) _
-        fun _ => e) H
+  · let r := bcProd f V A
+    let b := (snd V A).left
+    let d := bcProj f A
+    let c := (snd ((Over.pullback f).obj V) ((Over.pullback f).obj A)).left
+    change LBIso (N.pull r) ((N₀.pull d).pull c)
+    refine LBIso.trans (LB.isLB_pull hN r) (LB.isLB_pull (LB.isLB_pull hN₀ b) r)
+      (LB.isLB_pull (LB.isLB_pull hN₀ d) c) ?_ ?_
+    · obtain ⟨w, hw⟩ := H
+      exact ⟨GlobalTheory.lbIsoPull w r, ReciprocityTheory.ChartRestriction.G.DVR.linCombIso_isGen w hw _ _⟩
+    · exact GlobalTheory.FiniteAmple.lbIso_pull_pull b hN₀ (bcProd_snd f V A)
   · intro x'
-    rw [GlobalTheory.nonzeroLocus_secPull]
+    rw [GlobalTheory.Cartier.nonzeroLocus_secPull]
     change bcProd f V A x' ∈ Out.nonzeroLocus n ↔ _
     rw [hloc]
     constructor

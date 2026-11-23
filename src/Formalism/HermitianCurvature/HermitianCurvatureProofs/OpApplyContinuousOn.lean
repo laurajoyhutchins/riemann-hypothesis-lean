@@ -1,6 +1,71 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.OpApplyZeroNear
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.IntegrableUnipotentNormRpowNeg
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.LevelFormSesquilinearFiniteClass
+public import Formalism.HermitianCurvature.RealInputsClosedAdmissibleSettings
+import Formalism.FormalDegreeBessel.FormalDegreeRatio.UnitaryWeylNormalHolds
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.CompactGroupHaarExists
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.ComponentFamilySettingOfSetting
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutoffIteratedFDerivBounded
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.DilationUnipotentWeylMeasure
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.HomogeneityNaturalDegree
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.IntegrableUnipotentNormRpowNeg
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.JfBetaAdjCOfLemmaBNorm
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.MajorantEstimate
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.NormDiagonalEntryDilationGeneratorLeOne
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.OpApplyZeroNear
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.PolynomialMapProper
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.RegularisedPairingViaPhase
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.SlicesFiniteRegularityBuilt
 import Formalism.HermitianCurvature.HermitianCurvatureProofs.TheoremPIntegralOfPlaces
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Matrix MeasureTheory Filter Topology
 open scoped ContDiff ComplexConjugate ENNReal
@@ -108,10 +173,11 @@ theorem orbJ_dom : ∃ c₃ : ℝ, ∀ (k r : ℕ) (Wp Wq : Type) [NormedAddComm
   set μR := D.muR Bs γ w with hμR
   set cR : ℝ := ∫ x, B.gN (Matrix.of x) ^ (-M) ∂μR with hcRdef
   have hone : Matrix.of (Matrix.of.symm (1 : B.Mat k r)) ∈ B.GV k r := by
-    simpa using (P.unitary_group_closed k r).one_mem
+    rw [Equiv.apply_symm_apply]
+    exact (P.unitary_group_closed k r).one_mem
   have hcR : 0 < cR := by
     have := Dx3.om_pos hR hM0 hI hone
-    simpa [Dx3.Om] using this
+    simpa only [Dx3.Om, Equiv.apply_symm_apply, mul_one, hcRdef] using this
   obtain ⟨KW, hKW1, hKW⟩ := Dx3.UW_bound Bs.z Bs.z_mem Bs.T_pos
   obtain ⟨KW', hKW1', hKW'⟩ := Dx3.UW_bound Bs.z' Bs.z'_mem Bs.T'_pos
   set K1 := KW * KW' with hK1
@@ -674,7 +740,7 @@ theorem vecV_cut_op : ∃ c₃ : ℝ, ∀ (k r : ℕ) (Wp Wq : Type) [NormedAddC
     apply opApply_continuousOn
     intro T hT
     have h1 : ContinuousOn T.coef (B.GPos Bs) :=
-      (ckOn_continuousOn' (fun g hg => hg.1) (hIn.1 T hT).1).mono
+      (ckOn_continuousOn' (UU := C6.domL Bs ∅) (fun g hg => hg.1) (hIn.1 T hT).1).mono
         (fun g hg => ⟨hg.1, hg.2, fun l hl => by simp at hl⟩)
     have h2 : ContinuousOn (B.Rw T.word G) (B.GPos Bs) :=
       (P.B5.ckOn_continuousOn (P.JFxG.ckOn_Rw_top hG T.word T.word_lie)).mono hGPG
@@ -849,9 +915,9 @@ theorem formLimit_top (Cb : ℝ) : ∃ Cc : ℝ, ∀ (Wp Wq : Type) [NormedAddCo
       exact hc₂ P0.k P0.r Wp Wq p.T.base p.ν' p.m₀ q _ cut nf fib o κ Dop (ε * δ)
         (A - 2 * ((P0.r : ℝ) + 1) * o) bF hfib hIn (mul_pos hε hδ) hFv hFck hbF hcut'
         (hmono c₂ (le_max_right _ _) _ (by linarith [hthr]))
-    apply tendsto_finset_sum
+    apply tendsto_finsetSum
     intro e _
-    apply tendsto_finset_sum
+    apply tendsto_finsetSum
     intro ρ _
     apply Tendsto.const_mul
     have hcomp : ∀ q, Tendsto (fun n => (p.TP.E ρ).comp

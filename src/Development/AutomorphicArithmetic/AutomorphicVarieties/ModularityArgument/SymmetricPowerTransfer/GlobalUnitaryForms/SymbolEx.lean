@@ -1,4 +1,47 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.GlobalUnitaryForms.LevelTwoFiniteIndex
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.GlobalUnitaryForms.LevelTwoFiniteIndex
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -17,9 +60,11 @@ def Cu (O : Type) [CommRing O] [Algebra O K] (τ : K) : Subgroup (Etau K τ)ˣ :
 
 def scalE (τ : K) : Subgroup (Etau K τ)ˣ := (Units.map (algebraMap K (Etau K τ) : K →* Etau K τ)).range
 
-open Classical in
 
-def toUnit {R : Type} [Monoid R] (x : R) : Rˣ := if h : IsUnit x then h.unit else 1
+open Classical in
+def toUnit {R : Type} [Monoid R] (x : R) : Rˣ := by
+  classical
+  exact if h : IsUnit x then h.unit else 1
 
 variable {F : Type} [Field F] [NumberField F]
 
@@ -27,10 +72,12 @@ abbrev TA (τ : F) : Type := RP (fun v : Pl F => (Etau (Kv v) (cv v τ))ˣ) fun 
 
 def IsDiagT (τ : F) (φ : (Etau F τ)ˣ →* TA τ) : Prop := ∀ z v, ((φ z).1 v : Etau (Kv v) (cv v τ)) = emap (cv v) τ z
 
-open Classical in
 
-def ms (τ : F) : ℂ :=
-  if h : ∃ φ, IsDiagT τ φ then mass h.choose (scalE τ) ((rpg _ _).box fun v => Cint (Ov v) (cv v τ)) else 0
+open Classical in
+def ms (τ : F) : ℂ := by
+  classical
+  exact if h : ∃ φ, IsDiagT τ φ then
+    mass h.choose (scalE τ) ((rpg _ _).box fun v => Cint (Ov v) (cv v τ)) else 0
 
 variable {Δ : F} (D : Dat Δ)
 
@@ -83,28 +130,10 @@ def SideG : Prop :=
     ∀ (V : Type) [AddCommGroup V] [Module ℂ V] [FiniteDimensional ℂ V] (ch : F → ℂ) (B : Base (U3 Δ) (GA Δ) V) (s : B.Tw),
     D.IsBG ch B s → ∀ t, D.Cone t → LinearMap.trace ℂ B.Forms (s.R (D.FG t)) = c * (D.sumS ch t + e * D.sumK ch t)
 
-def SideS : Prop :=
-  ∀ (F : Type) [Field F] [NumberField F] (Δ : F) (D : Dat Δ), D.Ok → ∃ (n : ℕ) (x : Fin (n + 1) → DA Δ) (c : ℝ), x 0 = 1 ∧
-    (∀ i, D.Off (x i)) ∧ 0 < c ∧
-    ∀ (V : Type) [AddCommGroup V] [Module ℂ V] [FiniteDimensional ℂ V] (ch : F → ℂ) (B : Fin (n + 1) → Base (SU Δ) (SA Δ) V),
-    (∀ i, D.IsBS ch (x i) (B i)) → ∀ t, D.Cone t →
-    ∑ i, LinearMap.trace ℂ (B i).Forms ((Base.Tw.one (B i)).R (D.FSx t (x i))) = c * D.sumS ch t
-
 def SideK : Prop :=
   ∀ (F : Type) [Field F] [NumberField F] (Δ : F) (D : Dat Δ), D.Ok → ∃ c : ℝ, 0 < c ∧
     ∀ (V : Type) [AddCommGroup V] [Module ℂ V] [FiniteDimensional ℂ V] (ch : F → ℂ) (B : Base (DX Δ) (DA Δ) V),
     D.IsBK ch B → ∀ t, D.Cone t → LinearMap.trace ℂ B.Forms ((Base.Tw.one B).R (D.FK t)) = c * D.sumK ch t
-
-def TFId : Prop :=
-  ∀ (F : Type) [Field F] [NumberField F] (Δ : F) (D : Dat Δ), D.Ok → ∃ (n : ℕ) (x : Fin (n + 1) → DA Δ) (a b : ℝ), x 0 = 1 ∧
-    (∀ i, D.Off (x i)) ∧ 0 < a ∧
-    ∀ (VG VS VK : Type) [AddCommGroup VG] [Module ℂ VG] [FiniteDimensional ℂ VG] [AddCommGroup VS] [Module ℂ VS]
-      [FiniteDimensional ℂ VS] [AddCommGroup VK] [Module ℂ VK] [FiniteDimensional ℂ VK] (ch : F → ℂ)
-      (BG : Base (U3 Δ) (GA Δ) VG) (s : BG.Tw) (BS : Fin (n + 1) → Base (SU Δ) (SA Δ) VS) (BK : Base (DX Δ) (DA Δ) VK),
-    D.IsBG ch BG s → (∀ i, D.IsBS ch (x i) (BS i)) → D.IsBK ch BK → ∀ t, D.Cone t →
-    LinearMap.trace ℂ BG.Forms (s.R (D.FG t)) =
-      a * ∑ i, LinearMap.trace ℂ (BS i).Forms ((Base.Tw.one (BS i)).R (D.FSx t (x i))) +
-      b * LinearMap.trace ℂ BK.Forms ((Base.Tw.one BK).R (D.FK t))
 
 def Recip : Prop :=
   ∀ (F : Type) [Field F] [NumberField F] (d x : F), d ≠ 0 → x ≠ 0 →

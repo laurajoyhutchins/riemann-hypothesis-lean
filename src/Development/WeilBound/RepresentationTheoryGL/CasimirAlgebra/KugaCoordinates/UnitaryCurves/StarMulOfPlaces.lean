@@ -1,8 +1,56 @@
-import Development.WeilBound.RepresentationTheoryGL.CasimirAlgebra.KugaCoordinates.CompactUnitaryGroups.IsCompactUnitaryGroup
-import Development.WeilBound.RepresentationTheoryGL.CasimirAlgebra.KugaCoordinates.UnitaryCurves.ExistsUnitaryCurve
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.InfinitesimalCharacterQuantumDet
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.CommuteCapOfCommuteEop
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.CapCommuteRtInfGL
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.CasimirAlgebra.TensorRelationsGL.ClozelCohomologicalOf
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.InfinitesimalCharacterQuantumDet
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.CapCommuteRtInfGL
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.CommuteCapOfCommuteEop
+public import Development.WeilBound.RepresentationTheoryGL.CasimirAlgebra.KugaCoordinates.CompactUnitaryGroups.IsCompactUnitaryGroup
+public import Development.WeilBound.RepresentationTheoryGL.CasimirAlgebra.KugaCoordinates.UnitaryCurves.ExistsUnitaryCurve
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+public import Mathlib.Analysis.Calculus.Deriv.Prod
+public import Mathlib.Analysis.Calculus.Deriv.Star
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -11,7 +59,7 @@ open scoped Classical
 
 namespace PositivityTheory.Rg.Cz.GK
 
-variable {E : Type} [Field E] [NumberField E] [IsTotallyComplex E] {a : ℕ}
+variable {E : Type} [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] {a : ℕ}
 
 theorem exists_eval {π : CuspSub E a} (S : Submodule ℂ π.V) [FiniteDimensional ℂ S] (lam : π.V →ₗ[ℂ] ℂ) :
     ∃ (s : Finset (GA E a)) (c : GA E a → ℂ), ∀ v ∈ S, lam v = ∑ g ∈ s, c g * v.1.1 g := by
@@ -30,8 +78,8 @@ theorem continuous_eval (y : Sm E a) (g : GA E a) :
   rw [h1]
   exact (y.2 g).continuousOn.comp_continuous continuous_subtype_val fun k => val_mem_invSet (Unitary.toUnits k)
 
-omit [NumberField E] [IsTotallyComplex E] in
 
+omit [NumberField E] [_root_.NumberField.IsTotallyComplex E] in
 theorem star_mul_of_places (D : InfinitePlace E → Matrix (Fin a) (Fin a) ℂ) (h : ∀ w, star (D w) * D w = 1) :
     star (Matrix.of fun i j w => D w i j : Matrix (Fin a) (Fin a) (Cinf E)) * Matrix.of (fun i j w => D w i j) = 1 := by
   ext i j w
@@ -42,8 +90,8 @@ theorem star_mul_of_places (D : InfinitePlace E → Matrix (Fin a) (Fin a) ℂ) 
   rw [this, Matrix.one_apply, Matrix.one_apply]
   split_ifs <;> rfl
 
-omit [NumberField E] [IsTotallyComplex E] in
 
+omit [NumberField E] [_root_.NumberField.IsTotallyComplex E] in
 theorem atEmb_apply (τ : E →+* ℂ) (z : ℂ) (w : InfinitePlace E) :
     atEmb τ z w = if w = InfinitePlace.mk τ then
       (if (InfinitePlace.mk τ).embedding = τ then z else starRingEnd ℂ z) else 0 := by
@@ -128,13 +176,14 @@ theorem lieOp_atEmb (π : CuspSub E a) (τ : E →+* ℂ) (X : Matrix (Fin a) (F
   have key : ∀ (z : ℂ) (i j : Fin a), lieS E a i j (atEmb τ z) =
       z • Eop τ i j + star z • Eop (barE E τ) i j := by
     intro z i j
-    rw [atEmb_eq τ z, map_add, map_smul, map_smul, lieS_atEmb_one, lieS_atEmb_I]
+    rw [atEmb_eq τ z, map_add (f := _), map_smul, map_smul, lieS_atEmb_one, lieS_atEmb_I]
     conv_rhs => rw [← Complex.re_add_im z]
-    simp only [Complex.star_def, map_add, map_mul, Complex.conj_ofReal, Complex.conj_I]
+    simp only [Complex.star_def, map_add (f := _), map_mul, Complex.conj_ofReal, Complex.conj_I]
     rw [← Complex.coe_smul, ← Complex.coe_smul]
     match_scalars <;> ring
   refine LinearMap.ext fun φ => Subtype.ext ?_
   have hX : lie E a (fun i j => atEmb τ (X i j)) = ∑ i, ∑ j, lieS E a i j (atEmb τ (X i j)) := by
+
     simp only [lieS_apply, ← map_sum]
     exact congrArg _ (Matrix.matrix_eq_sum_single (Matrix.of fun i j => atEmb τ (X i j)))
   change lie E a (fun i j => atEmb τ (X i j)) φ.1 = _

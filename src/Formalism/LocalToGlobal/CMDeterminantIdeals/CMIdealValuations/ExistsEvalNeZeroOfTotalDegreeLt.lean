@@ -1,4 +1,58 @@
-import Formalism.LocalToGlobal.CMDeterminantIdeals.StatementG
+module
+
+public import Formalism.LocalToGlobal.CMDeterminantIdeals.StatementG
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+public import Mathlib.Combinatorics.Nullstellensatz
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.MvPolynomial.IrreducibleQuadratic
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -40,7 +94,7 @@ end SlopeTestRemainingChoices
 section Subst
 
 theorem coeff_aeval_scale {K σ : Type} [Field K] [Fintype σ] (c : σ → K) (F : MvPolynomial σ K) (μ : σ →₀ ℕ) :
-    coeff μ (aeval (fun w => C (c w) * X w) F) = coeff μ F * ∏ w, c w ^ μ w := by
+    AddMonoidAlgebra.coeff (aeval (fun w => C (c w) * X w) F) μ = AddMonoidAlgebra.coeff F μ * ∏ w, c w ^ μ w := by
   classical
   induction F using MvPolynomial.induction_on' with
   | monomial s a =>
@@ -54,7 +108,7 @@ theorem coeff_aeval_scale {K σ : Type} [Field K] [Fintype σ] (c : σ → K) (F
     split_ifs with h
     · subst h; ring
     · simp
-  | add p q hp hq => simp only [map_add, coeff_add, hp, hq, add_mul]
+  | add p q hp hq => simp only [map_add (f := _), AddMonoidAlgebra.coeff_add, Finsupp.add_apply, hp, hq, add_mul]
 
 theorem substGauss : SubstGauss := by
   intro R K _ _ _ B _ m P U c hP hcU μ
@@ -70,6 +124,7 @@ theorem substGauss : SubstGauss := by
     rw [map_bind₁, hP0, substFr, aeval_bind₁]
     change bind₁ _ P = bind₁ _ P
     refine congrArg (fun g => bind₁ g P) (funext fun v => ?_)
+
     simp only [g0, map_sum, map_mul, aeval_C, aeval_X, map_C, map_X, algebraMap_eq]
     refine Finset.sum_congr rfl fun j _ => ?_
     rw [(hcU v.1 j v.2.2).choose_spec, C_mul]
@@ -90,10 +145,10 @@ theorem coeffIntegralOfUnitEval : LemmaGCore := by
   have hϖ0 : ϖ ≠ 0 := hϖ.ne_zero
   have hinj : Function.Injective (algebraMap R K) := IsFractionRing.injective R K
 
-  obtain ⟨b, hb⟩ := IsLocalization.exist_integer_multiples (nonZeroDivisors R) P.support (fun μ => coeff μ P)
+  obtain ⟨b, hb⟩ := IsLocalization.exist_integer_multiples (nonZeroDivisors R) P.support (fun μ => AddMonoidAlgebra.coeff P μ)
   have hb0 : (b : R) ≠ 0 := nonZeroDivisors.coe_ne_zero b
   obtain ⟨n, u, hbu⟩ := IsDiscreteValuationRing.eq_unit_mul_pow_irreducible hb0 hϖ
-  have hex : ∃ e : ℕ, ∀ μ, algebraMap R K (ϖ ^ e) * coeff μ P ∈ Set.range (algebraMap R K) := by
+  have hex : ∃ e : ℕ, ∀ μ, algebraMap R K (ϖ ^ e) * AddMonoidAlgebra.coeff P μ ∈ Set.range (algebraMap R K) := by
     refine ⟨n, fun μ => ?_⟩
     by_cases hμ : μ ∈ P.support
     · obtain ⟨r, hr⟩ := hb μ hμ
@@ -103,12 +158,12 @@ theorem coeffIntegralOfUnitEval : LemmaGCore := by
     · rw [notMem_support_iff.mp hμ, mul_zero]
       exact ⟨0, map_zero _⟩
   set e := Nat.find hex with he_def
-  have he : ∀ μ, algebraMap R K (ϖ ^ e) * coeff μ P ∈ Set.range (algebraMap R K) := Nat.find_spec hex
+  have he : ∀ μ, algebraMap R K (ϖ ^ e) * AddMonoidAlgebra.coeff P μ ∈ Set.range (algebraMap R K) := Nat.find_spec hex
   have he0 : e ≠ 0 := by
     intro h0
     apply hμ0
     simpa [h0] using he μ0
-  have hmin : ¬ ∀ μ, algebraMap R K (ϖ ^ (e - 1)) * coeff μ P ∈ Set.range (algebraMap R K) :=
+  have hmin : ¬ ∀ μ, algebraMap R K (ϖ ^ (e - 1)) * AddMonoidAlgebra.coeff P μ ∈ Set.range (algebraMap R K) :=
     Nat.find_min hex (by omega)
   push Not at hmin
   obtain ⟨μ1, hμ1⟩ := hmin
@@ -119,12 +174,12 @@ theorem coeffIntegralOfUnitEval : LemmaGCore := by
     obtain ⟨ν, -, rfl⟩ := mem_coeffs_iff.mp ha
     rw [coeff_C_mul]
     exact he ν
-  have hQc : ∀ μ, algebraMap R K (coeff μ Q) = algebraMap R K (ϖ ^ e) * coeff μ P := by
+  have hQc : ∀ μ, algebraMap R K (AddMonoidAlgebra.coeff Q μ) = algebraMap R K (ϖ ^ e) * AddMonoidAlgebra.coeff P μ := by
     intro μ
     rw [← coeff_map, hQ, coeff_C_mul]
-  have hu1 : IsUnit (coeff μ1 Q) := by
+  have hu1 : IsUnit (AddMonoidAlgebra.coeff Q μ1) := by
     by_contra hnu
-    have hmem : coeff μ1 Q ∈ maximalIdeal R := (IsLocalRing.mem_maximalIdeal _).mpr hnu
+    have hmem : AddMonoidAlgebra.coeff Q μ1 ∈ maximalIdeal R := (IsLocalRing.mem_maximalIdeal _).mpr hnu
     rw [hϖ.maximalIdeal_eq, Ideal.mem_span_singleton'] at hmem
     obtain ⟨t, ht⟩ := hmem
     apply hμ1
@@ -147,8 +202,8 @@ theorem coeffIntegralOfUnitEval : LemmaGCore := by
     simp [RingHom.mapMatrix_apply]
   have hQb0 : Qb ≠ 0 := by
     intro h0
-    have := congrArg (coeff μ1) h0
-    rw [hQb, coeff_map, coeff_zero] at this
+    have := congrArg (AddMonoidAlgebra.coeff · μ1) h0
+    simp only [hQb, coeff_map, AddMonoidAlgebra.coeff_zero] at this
     exact (residue_ne_zero_iff_isUnit _).mpr hu1 this
   have hDt0 : Dt ≠ 0 := by
     intro h0
@@ -169,7 +224,7 @@ theorem coeffIntegralOfUnitEval : LemmaGCore := by
         intro hP0
         apply hμ
         rw [hQb, coeff_map]
-        have : coeff μ Q = 0 := hinj (by rw [hQc, hP0, mul_zero, map_zero])
+        have : AddMonoidAlgebra.coeff Q μ = 0 := hinj (by rw [hQc, hP0, mul_zero, map_zero])
         rw [this, map_zero]
       unfold totalDegree
       exact Finset.sup_mono hsub
@@ -220,7 +275,7 @@ theorem LemmaG_of : BigResExt → LemmaG := by
     (hW W (FractionRing W) f hcW hfinW hloc hf) μ
   rw [coeff_map] at hcoef
   obtain ⟨w, hw⟩ := hcoef
-  set x := coeff μ P
+  set x := AddMonoidAlgebra.coeff P μ
   by_cases hx0 : x = 0
   · exact ⟨0, by rw [hx0, map_zero]⟩
   rcases ValuationRing.isInteger_or_isInteger V x with ⟨r, hr⟩ | ⟨y, hy⟩

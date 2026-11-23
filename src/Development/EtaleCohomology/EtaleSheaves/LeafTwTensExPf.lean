@@ -1,4 +1,47 @@
-import Development.EtaleCohomology.EtaleSheaves.LeafTwPairExistsPf
+module
+
+public import Development.EtaleCohomology.EtaleSheaves.LeafTwPairExistsPf
+import Mathlib.Algebra.Category.ModuleCat.FilteredColimits
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 open CategoryTheory Limits AlgebraicGeometry Opposite CochainComplex GlobalTheory.EtC
@@ -98,7 +141,7 @@ theorem dT_dT (U : Scheme.{0}) (w : ℤ) : dT I J U (w + 1) ∘ₗ dT I J U w = 
   apply DirectSum.linearMap_ext; rintro ⟨⟨s, t⟩, h⟩
   apply TensorProduct.ext'; intro a b
   simp only [LinearMap.comp_apply, LinearMap.zero_apply]
-  rw [dT_tmul, map_add, map_zsmul]
+  rw [dT_tmul, map_add (f := _), map_zsmul]
   rw [dT_tmul (s := s + 1) (t := t) (w := w + 1)]
   rw [dT_tmul (s := s) (t := t + 1) (w := w + 1)]
   rw [dd0 (K := I), dd0 (K := J)]
@@ -151,7 +194,7 @@ def tau : Pair I J (TC I J) where
     exact tres_tmul I J g w ⟨(s, t), h⟩ a b
   leibniz U s t w h a b := by
     simp only [LinearMap.compr₂_apply, TensorProduct.mk_apply, LinearMap.comp_apply]
-    rw [un_d, dT_tmul, map_add, map_zsmul, Units.smul_def]
+    rw [un_d, dT_tmul, map_add (f := _), map_zsmul, Units.smul_def]
 
 theorem tau_lift (U : Scheme.{0}) (w : ℤ) : (tau I J).lift U w = un I J U w := by
   apply DirectSum.linearMap_ext; rintro ⟨⟨s, t⟩, h⟩

@@ -1,4 +1,53 @@
-import Formalism.SharpRestriction.GrowthBounds.DualFockLinear.IsMultiHom
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.DualFockLinear.IsMultiHom
+public import Formalism.PeriodIntegrals.AdmissibleModel.WeylDim
+public import Formalism.SharpRestriction.GrowthBounds.ScaleEdges.RemainingWeightVectorCount
+public import Formalism.SharpRestriction.GrowthBounds.ScaleEdges.SymbolRealisableBound
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Finset
 
@@ -221,19 +270,6 @@ theorem nuOf_cast {m : ℕ} (lam : Fin (m + 1) → ℤ) (h : Antitone lam) (t : 
   rw [Int.toNat_of_nonneg (by linarith)]
   ring
 
-theorem Xs_finite (m : ℕ) (top vec : Bool) (ν : Fin (m + 1) → ℕ) : (Xs m top vec ν).Finite := by
-  have hb : ∀ g : TX m top vec ν, ∀ a t, g.1 a t < ν t + 1 := fun g a t => by
-    have h1 : g.1 a t ≤ ∑ b, g.1 b t :=
-      Finset.single_le_sum (f := fun b => g.1 b t) (fun _ _ => Nat.zero_le _) (Finset.mem_univ a)
-    rw [g.2.1.2 t] at h1
-    omega
-  have : Finite (TX m top vec ν) :=
-    Finite.of_injective (fun g : TX m top vec ν => fun a t => (⟨g.1 a t, hb g a t⟩ : Fin (ν t + 1)))
-      (fun g g' h => Subtype.ext (funext fun a => funext fun t => by
-        have h2 := congrFun (congrFun h a) t
-        simpa using h2))
-  exact Set.finite_coe_iff.mp (Finite.of_equiv _ (xsEquiv m top vec ν).symm)
-
 private lemma weylDim_add_const' (n : ℕ) (μ : Fin n → ℤ) (c : ℤ) :
     Formalism.CountingSumsFrames.weylDim n (fun t => μ t + c) = Formalism.CountingSumsFrames.weylDim n μ := by
   unfold Formalism.CountingSumsFrames.weylDim
@@ -316,8 +352,8 @@ theorem cntTop : CntTop := by
     rw [hf, dGT_weylDim _ _ hanti]
     exact weylDim_const_sub_rev m (fun i => lo i.succ) (lo 0)
 
-open Formalism.MainNotions.Pf14 (restW dT flW flatDeg vecE remainingWeightVectorCount) in
 
+open Formalism.MainNotions.Pf14 (restW dT flW flatDeg vecE remainingWeightVectorCount) in
 theorem card_all {n' m : ℕ} (hm : 2 ≤ m) (TT : Finset (Fin n')) (lam0 : Fin n' → Fin (m + 1) → ℤ)
     (hdom : IsDominant lam0) :
     ((Nat.card (∀ s : Fin n', ↥(Xs m (decide (s ∈ TT)) (vecE n' s) (nuOf (lamAt (restW TT lam0) s)))) : ℕ) : ℚ) =

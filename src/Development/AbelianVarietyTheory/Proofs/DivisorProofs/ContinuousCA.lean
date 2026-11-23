@@ -1,6 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.CTSmallCone
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.WeilTensorModels
 import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.LcscAdelicUnitaryGroup
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.Divisors.MatchingOfParts
+import Development.AbelianVarietyTheory.Definitions.Foundations.IsIwasawaOfIsCompact
+public import Development.AbelianVarietyTheory.Definitions.Foundations.T2SpaceTensorProductFiniteExtension
+
+@[expose] public section
 
 open scoped TensorProduct NNReal Matrix
 open NumberField IsDedekindDomain MeasureTheory Filter Topology Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes
@@ -13,37 +56,18 @@ namespace GlobalTheory.LeviModulus
 
 variable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E]
 
-def hmat (σ : E →ₐ[F] E) {n : ℕ} (J : Matrix (Fin n) (Fin n) E) (x u : Fin n → AE F E) (c : AE F E) :
-    Matrix (Fin n) (Fin n) (AE F E) :=
-  1 + Matrix.vecMulVec (u + c • x) (incM F J *ᵥ fun i => cA σ (x i)) -
-    Matrix.vecMulVec x (incM F J *ᵥ fun i => cA σ (u i))
-
 variable (σ : E →ₐ[F] E)
-
-def imA : AddSubgroup (AE F E) where
-  carrier := {z | cA σ z = -z}
-  zero_mem' := by simp
-  add_mem' := by
-    intro a b ha hb
-    simp only [Set.mem_setOf_eq, map_add] at *
-    rw [ha, hb, neg_add]
-  neg_mem' := by
-    intro a ha
-    simp only [Set.mem_setOf_eq, map_neg] at *
-    rw [ha]
 
 theorem cA_cA (hσ : ∀ a, σ (σ a) = a) (z : AE F E) : cA σ (cA σ z) = z := by
   induction z using TensorProduct.induction_on with
   | zero => simp
-  | add x y hx hy => simp only [map_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
   | tmul a x =>
     show Algebra.TensorProduct.map _ _ (Algebra.TensorProduct.map _ _ (a ⊗ₜ[F] x)) = a ⊗ₜ[F] x
     simp [hσ]
 
-theorem mem_imA {z : AE F E} : z ∈ imA σ ↔ cA σ z = -z := Iff.rfl
 
 variable (F E) in
-
 theorem topAE : IsTopologicalRing (AE F E) ∧ LocallyCompactSpace (AE F E) ∧ SecondCountableTopology (AE F E) ∧
     T2Space (AE F E) := by
   haveI : Module.Finite F E := Module.Finite.of_restrictScalars_finite ℚ F E
@@ -59,11 +83,6 @@ theorem continuous_cA : Continuous (cA σ) := by
   haveI : IsModuleTopology (AF F) (AE F E) := ⟨rfl⟩
   haveI := (topAE F E).1
   exact IsModuleTopology.continuous_of_linearMap (cA σ).toLinearMap
-
-theorem isClosed_imA : IsClosed (imA σ : Set (AE F E)) := by
-  obtain ⟨h1, -, -, h4⟩ := topAE F E
-  haveI := h1
-  exact isClosed_eq (continuous_cA σ) continuous_neg
 
 theorem topUA {n : ℕ} (J : Matrix (Fin n) (Fin n) E) :
     IsTopologicalGroup (UA σ J) ∧ LocallyCompactSpace (UA σ J) ∧ SecondCountableTopology (UA σ J) ∧
@@ -88,20 +107,6 @@ theorem topUA {n : ℕ} (J : Matrix (Fin n) (Fin n) E) :
   exact ⟨inferInstance, hc.isClosedEmbedding_subtypeVal.locallyCompactSpace,
     hc.isClosedEmbedding_subtypeVal.isEmbedding.secondCountableTopology,
     inferInstanceAs (T2Space (UG (cA σ) (incM F J)))⟩
-
-def conjOn {G : Type} [Group G] [TopologicalSpace G] [ContinuousMul G] (N : Subgroup G) (g : G)
-    (h₁ : ∀ u ∈ N, g * u * g⁻¹ ∈ N) (h₂ : ∀ u ∈ N, g⁻¹ * u * g ∈ N) : N ≃ₜ* N where
-  toFun u := ⟨g * u * g⁻¹, h₁ u u.2⟩
-  invFun u := ⟨g⁻¹ * u * g, h₂ u u.2⟩
-  left_inv u := Subtype.ext (by simp [mul_assoc])
-  right_inv u := Subtype.ext (by simp [mul_assoc])
-  map_mul' u v := Subtype.ext (by simp [mul_assoc])
-  continuous_toFun := by fun_prop
-  continuous_invFun := by fun_prop
-
-theorem conjOn_apply {G : Type} [Group G] [TopologicalSpace G] [ContinuousMul G] (N : Subgroup G) (g : G)
-    (h₁ : ∀ u ∈ N, g * u * g⁻¹ ∈ N) (h₂ : ∀ u ∈ N, g⁻¹ * u * g ∈ N) (u : N) :
-    ((conjOn N g h₁ h₂ u : N) : G) = g * u * g⁻¹ := rfl
 
 end GlobalTheory.LeviModulus
 

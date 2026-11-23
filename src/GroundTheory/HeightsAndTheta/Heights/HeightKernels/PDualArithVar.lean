@@ -1,5 +1,54 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.StatementsLineDegreeDual
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.StatementsLineDegreeDual
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.StatementsGrassHeight
+public import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -25,9 +74,8 @@ theorem algebraicIndependent_gen (m : ℕ) :
 theorem evalForm_ne_zero {m : ℕ} {φ : Fin m → K} (hφ : φ ≠ 0) : evalForm m φ ≠ 0 := by
   intro h0
   apply hφ
-  funext j
-  exact Fintype.linearIndependent_iff.mp (algebraicIndependent_gen m).linearIndependent φ
-    (by rw [← Fintype.linearCombination_apply]; exact h0) j
+  apply (algebraicIndependent_gen m).linearIndependent.fintypeLinearCombination_injective
+  simpa only [evalForm, map_zero] using h0
 
 theorem mem_of_gen_mem {m : ℕ} (E : IntermediateField K (ProjField K m))
     (h : ∀ j, algebraMap (MvPolynomial (Fin m) K) (ProjField K m) (X j) ∈ E) (z : ProjField K m) :
@@ -74,7 +122,7 @@ theorem span_dualLattice (F : HermLattice K i) :
     | add x y _ _ hx hy =>
       obtain ⟨a, ha⟩ := hx
       obtain ⟨c, hc⟩ := hy
-      exact ⟨a + c, by rw [dotProduct_add, map_add, ha, hc]⟩
+      exact ⟨a + c, by rw [dotProduct_add, map_add (f := _), ha, hc]⟩
     | smul r x _ hx =>
       obtain ⟨a, ha⟩ := hx
       refine ⟨r * a, ?_⟩
@@ -97,6 +145,7 @@ theorem span_basis [Fintype T] (b : Module.Basis T ℤ (dualLattice F)) :
 
 theorem dualLatticeCoord_eq (b : Module.Basis T ℤ (dualLattice F)) (t : T) :
     dualLatticeCoord b ⟨(), t⟩ = evalForm i (b t : Fin i → K) := by
+
   rw [dualLatticeCoord, evalForm, Fintype.linearCombination_apply, map_sum]
   refine Finset.sum_congr rfl fun j _ => ?_
   rw [map_mul, Algebra.smul_def, IsScalarTower.algebraMap_apply K (MvPolynomial (Fin i) K),
@@ -104,8 +153,8 @@ theorem dualLatticeCoord_eq (b : Module.Basis T ℤ (dualLattice F)) (t : T) :
 
 end DualArithmeticVariety
 
-open DualArithmeticVariety in
 
+open DualArithmeticVariety in
 theorem DualArithVar.proof (h : CoordConeArithVar.Statement) : DualArithVar.Statement := by
   intro K _ _ i F T _ _ b hi
   obtain ⟨n, rfl⟩ : ∃ n, i = n + 1 := ⟨i - 1, by omega⟩
@@ -164,8 +213,9 @@ theorem DualArithVar.proof (h : CoordConeArithVar.Statement) : DualArithVar.Stat
     | add x y _ _ hx hy => rw [add_div]; exact hx.add hy
     | smul c x _ hx =>
       rw [Algebra.smul_def, mul_div_assoc]
-      exact ((Algebra.IsIntegral.isIntegral (R := ℚ) c).map
-        (IsScalarTower.toAlgHom ℚ K (ProjField K (n + 1)))).tower_top.mul hx
+      set_option synthInstance.maxHeartbeats 200000 in
+        exact ((Algebra.IsIntegral.isIntegral (R := ℚ) c).map
+          (IsScalarTower.toAlgHom ℚ K (ProjField K (n + 1)))).tower_top.mul hx
   refine h Unit (dualBlocks T) (ProjField K (n + 1)) (dualLatticeCoord b) (fun _ => u 0) n s ⟨()⟩
     (fun _ => by rw [hy]; exact hw0) hs (fun l => IntermediateField.subset_adjoin _ _ ⟨⟨(), u l.succ⟩, ?_⟩) ?_
   · show dualLatticeCoord b ⟨(), u l.succ⟩ / dualLatticeCoord b ⟨(), u 0⟩ = w l.succ / w 0

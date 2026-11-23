@@ -1,6 +1,49 @@
-import Mathlib
-import Formalism.SharpRestriction.GlobalSchurBounds.SlopeMaxOpenOfHookTwoLeV
-import Formalism.LocalToGlobal.GlobalTheory.GL4.PTenFrames
+module
+
+public import Formalism.LocalToGlobal.GlobalTheory.GL4.PTenFrames
+public import Formalism.LocalToGlobal.Divisibility.CoefMod
+public import Formalism.SharpRestriction.GlobalSchurBounds.FlipTwoThree
+import Formalism.LocalRingCardinality.Lemmas
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.CoassocSimps
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Module NumberField IsDedekindDomain MvPolynomial
 open scoped Matrix
@@ -99,11 +142,6 @@ theorem map_ten {n : ℕ} (f : D.what₂.Tau → MvPolynomial (Fin n × Fin n) �
       MvPolynomial.map (Int.castRingHom D.what₂.LL) (Formalism.MainNotions.flipTwoThree.ten f) := by
   simp only [Formalism.MainNotions.flipTwoThree.ten, map_prod, MvPolynomial.map_rename]
 
-theorem intCast_mem_intW (w : D.what₂.places.Pl) (z : ℤ) : (z : D.what₂.LL) ∈ intW D.what₂.places w := by
-  first
-    | exact Subring.intCast_mem _ z
-    | exact intCast_mem _ z
-
 theorem mem_intSpanAt_iff {n : ℕ} (w : D.what₂.places.Pl) (lam : D.what₂.Tau → DomWeight n) (Z : ZBasis lam)
     (y : MvPolynomial (D.what₂.Tau × Fin n × Fin n) D.what₂.LL) :
     y ∈ IntSpanAt D w lam ↔ y ∈ Submodule.span (intW D.what₂.places w)
@@ -123,7 +161,7 @@ theorem mem_intSpanAt_iff {n : ℕ} (w : D.what₂.places.Pl) (lam : D.what₂.T
         induction h1 using Submodule.span_induction with
         | mem q hq => obtain ⟨i, rfl⟩ := hq; exact Submodule.subset_span ⟨i, rfl⟩
         | zero => rw [map_zero]; exact Submodule.zero_mem _
-        | add p q _ _ hp hq => rw [map_add]; exact Submodule.add_mem _ hp hq
+        | add p q _ _ hp hq => rw [map_add (f := _)]; exact Submodule.add_mem _ hp hq
         | smul z q _ hq =>
           rw [zsmul_eq_mul, map_mul, map_intCast, ← zsmul_eq_mul]
           exact zsmul_mem hq z
@@ -158,7 +196,7 @@ theorem mem_intSpanAt_iff {n : ℕ} (w : D.what₂.places.Pl) (lam : D.what₂.T
         refine AddSubgroup.subset_closure ⟨1, f, one_mem _, hf, ?_⟩
         rw [one_smul, map_ten]
       | zero => rw [map_zero]; exact zero_mem _
-      | add p q _ _ hp hq => rw [map_add]; exact add_mem hp hq
+      | add p q _ _ hp hq => rw [map_add (f := _)]; exact add_mem hp hq
       | smul z q _ hq =>
         rw [zsmul_eq_mul, map_mul, map_intCast, ← zsmul_eq_mul]
         exact zsmul_mem hq z

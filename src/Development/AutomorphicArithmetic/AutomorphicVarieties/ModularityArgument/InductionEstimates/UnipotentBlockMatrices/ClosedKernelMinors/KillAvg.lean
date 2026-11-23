@@ -1,8 +1,53 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.UnipotentBlockMatrices.UnipotentBlockPairs
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.UnipotentBlockMatrices.ClosedKernelMinors.ThBasic
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.UnipotentBlockMatrices.UnipotentBlockPairs
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.UnipotentBlockMatrices.ClosedKernelMinors.LocFin
 import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.UnipotentBlockMatrices.ClosedKernelMinors.PkLaws
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.UnipotentBlockMatrices.ClosedKernelMinors.LocFin
 import GroundTheory.AutomorphicForms.CuspidalDiscreteness.TorusDifference
+import GroundTheory.GlobalFields.Adele.Topology
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.Countable
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MeasureTheory NumberField Set Filter Topology
 open GroundTheory.Automorphic GroundTheory.Automorphic.Reduction GroundTheory.Automorphic.RightCosetSpace
@@ -112,28 +157,29 @@ private theorem act_val {K : Type} [Field K] [NumberField K] (F : G1 K (2 + 2) �
 
 theorem UpperTheory.V.Z.InvariantSubmoduleMonicPolynomial.killAvg :
     ∀ {K : Type} [Field K] [NumberField K] (F : G1 K (2 + 2) → ℂ), Continuous F → (∀ γ ∈ PK K, ∀ g, F (γ * g) = F g) → InBand F → ∀ (r : ℕ) (S : Set (Cos K)),
-      (∀ (γ γ' : Gam K (2 + 2)) (ξ : unipLattice K (2 + 2) r), (γ' : G1 K (2 + 2)) = γ * unipOne K (2 + 2) r ξ.1 →
+      (∀ (γ γ' : Gam K (2 + 2)) (ξ : unipLattice K (2 + 2) r), (γ' : G1 K (2 + 2)) = γ * unipOne (K := K) (n := 2 + 2) r ξ.1 →
         (Quotient.mk _ γ : Cos K) ∈ S → (Quotient.mk _ γ' : Cos K) ∈ S) →
       (∀ q ∈ S, ∃ X₀, Dies F r (q.out : G1 K (2 + 2)) X₀) → ∀ g,
-        ∫ X in unipFundamentalDomain K (2 + 2) r, ∑ᶠ q ∈ S, F ((q.out : G1 K (2 + 2)) * (unipOne K (2 + 2) r X * g)) ∂unipMeasure K (2 + 2) r = 0 := by
+        ∫ X in unipFundamentalDomain K (2 + 2) r, ∑ᶠ q ∈ S, F ((q.out : G1 K (2 + 2)) * (unipOne (K := K) (n := 2 + 2) r X * g)) ∂unipMeasure K (2 + 2) r = 0 := by
   intro K _ _ F hFc hF hband r S hS hD g
   classical
   obtain ⟨R, hR⟩ := hband
-  let u : unipLattice K (2 + 2) r → Gam K (2 + 2) := fun ξ => ⟨unipOne K (2 + 2) r ξ.1, unipOne_mem_rationalGLOne r ξ⟩
+  let u : unipLattice K (2 + 2) r → Gam K (2 + 2) := fun ξ => ⟨unipOne (K := K) (n := 2 + 2) r ξ.1, unipOne_mem_rationalGLOne r ξ⟩
   have hu : ∀ ξ, u ξ * u (-ξ) = 1 := fun ξ => Subtype.ext (by
-    show unipOne K (2 + 2) r ξ.1 * unipOne K (2 + 2) r (-ξ.1) = 1
+    show unipOne (K := K) (n := 2 + 2) r ξ.1 * unipOne (K := K) (n := 2 + 2) r (-ξ.1) = 1
     rw [← unipOne_add, add_neg_cancel, unipOne_zero])
   have hu' : ∀ ξ, u (-ξ) * u ξ = 1 := fun ξ => by simpa using hu (-ξ)
   have hSa : ∀ ξ q, q ∈ S → act (u ξ) q ∈ S := fun ξ q hq =>
     hS q.out (q.out * u ξ) ξ rfl (by rwa [Quotient.out_eq])
   have hDa : ∀ ξ (q : Cos K) a, Dies F r (q.out : G1 K (2 + 2)) a → Dies F r ((act (u ξ) q).out : G1 K (2 + 2)) a := by
-    intro ξ q a h x
-    rw [← h (unipOne K (2 + 2) r ξ.1 * x)]
-    congr 1
-    funext y
+    intro ξ q a h
+    unfold Dies at h ⊢
+    intro x
+    rw [← h (unipOne (K := K) (n := 2 + 2) r ξ.1 * x)]
+    refine setIntegral_congr_fun (GroundTheory.Global.measurableSet_fundamentalSet K) fun y _ => ?_
     rw [mul_assoc, act_val F hF, mul_assoc]
-    congr 2
-    show unipOne K (2 + 2) r ξ.1 * _ = _
+    refine congrArg (fun z : G1 K (2 + 2) => F ((q.out : G1 K (2 + 2)) * z)) ?_
+    show unipOne (K := K) (n := 2 + 2) r ξ.1 * _ = _
     rw [← mul_assoc, ← mul_assoc, ← unipOne_add, ← unipOne_add, add_comm ξ.1]
   let c : Cos K → UPos (2 + 2) r → K := fun q => Classical.epsilon fun a => Dies F r (q.out : G1 K (2 + 2)) a
   have hc : ∀ ξ q, c (act (u ξ) q) = c q := by
@@ -141,11 +187,11 @@ theorem UpperTheory.V.Z.InvariantSubmoduleMonicPolynomial.killAvg :
     refine congrArg Classical.epsilon (funext fun a => propext ⟨fun h => ?_, hDa ξ q a⟩)
     have := hDa (-ξ) _ a h
     rwa [act_act _ _ (hu ξ)] at this
-  have hcont : Continuous fun X => unipOne K (2 + 2) r X * g := (continuous_unipOne r).mul continuous_const
-  have hf : ∀ q : Cos K, Continuous fun X => F ((q.out : G1 K (2 + 2)) * (unipOne K (2 + 2) r X * g)) :=
+  have hcont : Continuous fun X => unipOne (K := K) (n := 2 + 2) r X * g := (continuous_unipOne r).mul continuous_const
+  have hf : ∀ q : Cos K, Continuous fun X => F ((q.out : G1 K (2 + 2)) * (unipOne (K := K) (n := 2 + 2) r X * g)) :=
     fun q => hFc.comp (continuous_const.mul hcont)
   have hfin : ∀ C, IsCompact C →
-      {q : Cos K | ∃ X ∈ C, F ((q.out : G1 K (2 + 2)) * (unipOne K (2 + 2) r X * g)) ≠ 0}.Finite := by
+      {q : Cos K | ∃ X ∈ C, F ((q.out : G1 K (2 + 2)) * (unipOne (K := K) (n := 2 + 2) r X * g)) ≠ 0}.Finite := by
     intro C hC
     refine (locFin _ (-R) (hC.image hcont)).subset ?_
     rintro q ⟨X, hX, h⟩
@@ -161,7 +207,7 @@ theorem UpperTheory.V.Z.InvariantSubmoduleMonicPolynomial.killAvg :
   · rw [act_val F hF, unipOne_add, mul_assoc]
   · rintro q ⟨hq, rfl⟩ X
     have h : Dies F r (q.out : G1 K (2 + 2)) (c q) := Classical.epsilon_spec (hD q hq)
-    rw [← h (unipOne K (2 + 2) r X * g)]
-    congr 1
-    funext y
+    unfold Dies at h
+    rw [← h (unipOne (K := K) (n := 2 + 2) r X * g)]
+    refine setIntegral_congr_fun (GroundTheory.Global.measurableSet_fundamentalSet K) fun y _ => ?_
     rw [add_comm X, unipOne_add, mul_assoc, mul_assoc]

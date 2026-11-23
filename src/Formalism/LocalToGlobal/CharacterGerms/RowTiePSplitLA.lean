@@ -1,4 +1,58 @@
-import Formalism.LocalToGlobal.CharacterGerms.RowTiePSplitDef
+module
+
+public import Formalism.LocalToGlobal.CharacterGerms.RowTiePSplitDef
+public import Mathlib.LinearAlgebra.Lagrange
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 namespace Formalism.L2.FormalSeriesBounds
 
@@ -43,7 +97,7 @@ theorem exists_sep {O : Type} [CommRing O] {ι : Type} [Fintype ι] (em : ι →
       obtain ⟨t, ht⟩ := hfin.infinite_compl.nonempty
       refine ⟨x + (t : O) * z, fun q hq h => ht (Set.mem_biUnion (Finset.mem_coe.2 hq) ?_)⟩
       simp only [Set.mem_ofPred_eq]
-      simp only [map_add, map_mul, map_natCast] at h
+      simp only [map_add (f := _), map_mul, map_natCast] at h
       linear_combination h
   obtain ⟨x0, hx0⟩ := key (Finset.univ.filter fun q : ι × ι => q.1 ≠ q.2)
     (fun q hq => (Finset.mem_filter.1 hq).2)
@@ -69,7 +123,7 @@ theorem commute_aeval {A B : Matrix (Fin n) (Fin n) K} (h : Commute A B) (f : K[
     rw [aeval_C]
     exact (Algebra.commutes a A).symm
   | add p q hp hq =>
-    rw [map_add]
+    rw [map_add (f := _)]
     exact hp.add_right hq
   | monomial k a ih =>
     rw [pow_succ, ← mul_assoc, map_mul, aeval_X]
@@ -94,7 +148,7 @@ theorem aeval_shift (N B : Matrix (Fin n) (Fin n) K) (hNB : Commute N B) (lam : 
     aeval (N + B) f *ᵥ w = aeval (algebraMap K (Matrix (Fin n) (Fin n) K) lam + B) f *ᵥ w := by
   induction f using Polynomial.induction_on with
   | C a => simp
-  | add p q hp hq => rw [map_add, map_add, Matrix.add_mulVec, Matrix.add_mulVec, hp, hq]
+  | add p q hp hq => rw [map_add (f := _), map_add (f := _), Matrix.add_mulVec, Matrix.add_mulVec, hp, hq]
   | monomial k a _ =>
     rw [map_mul, map_mul, aeval_C, aeval_C, map_pow, map_pow, aeval_X, aeval_X, alg_mulVec, alg_mulVec,
       pow_shift N B hNB lam w hw (k + 1)]
@@ -124,8 +178,9 @@ theorem coeff_extract [CharZero K] {ι : Type} [Fintype ι] [DecidableEq ι] (B 
     have hroot : ∀ t : ℕ, q.eval (t : K) = 0 := by
       intro t
       have h1 := congrFun (h t) i
+
       rw [← hev t, eval_eq_sum_range' (n := R.natDegree + 2) (by omega), map_sum, Matrix.sum_mulVec,
-        Finset.sum_apply, Pi.zero_apply] at h1
+      Finset.sum_apply, Pi.zero_apply] at h1
       rw [hq, eval_finsetSum]
       refine Eq.trans (Finset.sum_congr rfl fun k _ => ?_) h1
       rw [eval_monomial, ← map_pow, map_mul, aeval_C, ← Algebra.commutes, alg_mulVec, Pi.smul_apply, smul_eq_mul,
@@ -135,8 +190,8 @@ theorem coeff_extract [CharZero K] {ι : Type} [Fintype ι] [DecidableEq ι] (B 
       refine Set.Infinite.mono ?_ (Set.infinite_range_of_injective (Nat.cast_injective (R := K)))
       rintro _ ⟨t, rfl⟩
       exact hroot t
-    have hc1 := congrArg (fun p => Polynomial.coeff p 1) hq0
-    simp only [hq, finsetSum_coeff, coeff_monomial, Finset.sum_ite_eq', Finset.mem_range, coeff_zero] at hc1
+    have hc1 := congrArg (fun p : K[X] => p.coeff 1) hq0
+    simp only [hq, finsetSum_coeff, coeff_monomial_apply, Finset.sum_ite_eq', Finset.mem_range, coeff_zero] at hc1
     rw [if_pos (by omega)] at hc1
     exact hc1
   have hR1 : R.coeff 1 = (X - Polynomial.C (μ c)) * Polynomial.C (∏ c' ∈ Finset.univ.erase c, a c') := by
@@ -170,15 +225,18 @@ theorem split_holds : SplitSt := by
     by_contra hne
     exact hx0 c c' hne h
   refine ⟨fun c => P *ᵥ (aeval (M x0) (Lagrange.basis Finset.univ (fun c => em c x0) c) *ᵥ v), ?_, ?_⟩
+
   · rw [← Matrix.mulVec_sum, ← Matrix.sum_mulVec, ← map_sum, Lagrange.sum_basis hinjl Finset.univ_nonempty, map_one,
-      Matrix.one_mulVec]
+    Matrix.one_mulVec]
   intro c x
   set u := aeval (M x0) (Lagrange.basis Finset.univ (fun c => em c x0) c) *ᵥ v with hu
   have hP0 : Commute P (M x0) := hPM x0
 
   have hXL : (X - Polynomial.C (em c x0)) * Lagrange.basis Finset.univ (fun c => em c x0) c =
       Polynomial.C (Lagrange.nodalWeight Finset.univ (fun c => em c x0) c) * ∏ c', (X - Polynomial.C (em c' x0)) :=
-    X_sub_mul_basis (Finset.mem_univ c)
+    by
+      simpa only [Lagrange.nodal_eq] using
+        (X_sub_mul_basis (v := fun c' => em c' x0) (Finset.mem_univ c))
   have hE0 : (M x0 - algebraMap K _ (em c x0)) *
       (P * aeval (M x0) (Lagrange.basis Finset.univ (fun c => em c x0) c)) = 0 := by
     have e1 : M x0 - algebraMap K (Matrix (Fin n) (Fin n) K) (em c x0) = aeval (M x0) (X - Polynomial.C (em c x0)) := by
@@ -199,16 +257,16 @@ theorem split_holds : SplitSt := by
     rw [← map_mul, ← map_mul, mul_comm]
   have h1 := congrArg (fun A => A *ᵥ u) (hann (x0 + (t : O) * x))
   simp only [Matrix.zero_mulVec] at h1
-  rw [← Matrix.mulVec_mulVec, map_add, map_mul, map_natCast, aeval_shift _ _ hcx (em c x0) _ hw0] at h1
+  rw [← Matrix.mulVec_mulVec, map_add (f := _), map_mul, map_natCast, aeval_shift _ _ hcx (em c x0) _ hw0] at h1
   have e2 : algebraMap K (Matrix (Fin n) (Fin n) K) (em c x0) + (t : Matrix (Fin n) (Fin n) K) * M x =
       aeval (M x) (Polynomial.C (em c x0) + Polynomial.C (t : K) * X) := by
-    rw [map_add, map_mul, aeval_C, aeval_C, aeval_X, map_natCast]
+    rw [map_add (f := _), map_mul, aeval_C, aeval_C, aeval_X, map_natCast]
   rw [e2, ← aeval_comp, prod_comp] at h1
   refine Eq.trans ?_ h1
   congr 2
   refine Finset.prod_congr rfl fun c' _ => ?_
   rw [sub_comp, X_comp, C_comp]
-  simp only [map_add, map_mul, map_natCast, map_sub]
+  simp only [map_add (f := _), map_mul, map_natCast, map_sub]
   ring
 
 end RowTiePSplit

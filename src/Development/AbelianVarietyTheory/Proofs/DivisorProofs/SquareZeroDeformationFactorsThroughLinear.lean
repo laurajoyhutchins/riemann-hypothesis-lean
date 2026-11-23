@@ -1,4 +1,62 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.DualNumber
+public import Mathlib.RingTheory.Kaehler.Basic
+public import Mathlib.RingTheory.Smooth.StandardSmooth
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+public import Mathlib.RingTheory.Smooth.StandardSmoothCotangent
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.LinearAlgebra.FiniteDimensional.Lemmas
+
+@[expose] public section
 
 namespace GlobalTheory
 
@@ -24,10 +82,6 @@ def derOf (h : B →+* DualNumber K) (hfst : ∀ b, (h b).fst = algebraMap B K b
         RingHom.id_apply]
       ring)
 
-@[simp] lemma derOf_apply (h : B →+* DualNumber K) (hfst : ∀ b, (h b).fst = algebraMap B K b)
-    (hc : ∀ a : R₀, (h (algebraMap R₀ B a)).snd = 0) (b : B) :
-    derOf h hfst hc b = (h b).snd := rfl
-
 lemma derOf_injective (h h' : B →+* DualNumber K) (hfst : ∀ b, (h b).fst = algebraMap B K b)
     (hc : ∀ a : R₀, (h (algebraMap R₀ B a)).snd = 0)
     (hfst' : ∀ b, (h' b).fst = algebraMap B K b)
@@ -36,7 +90,7 @@ lemma derOf_injective (h h' : B →+* DualNumber K) (hfst : ∀ b, (h b).fst = a
   ext b
   · rw [hfst, hfst']
   · have := congrArg (fun D : Derivation R₀ B K => D b) e
-    simpa using this
+    simpa [derOf] using this
 
 lemma derivation_eq_of_basis {ι : Type} (e : Module.Basis ι B Ω[B⁄R₀]) (D D' : Derivation R₀ B K)
     (h : ∀ j, D.liftKaehlerDifferential (e j) = D'.liftKaehlerDifferential (e j)) : D = D' := by
@@ -102,7 +156,7 @@ theorem exists_linearCombination_eq :
   let D : (ι → K) → Derivation R₀ B K := fun M => derOf (hM M) (hMfst M) (hMc M)
   have hD : ∀ M x, D M x = ∑ i, M i * D (Pi.single i 1) x := by
     intro M x
-    simp [D, hM, Fintype.linearCombination_apply, Pi.single_apply, mul_comm]
+    simp [D, derOf, hM, Fintype.linearCombination_apply, Pi.single_apply, mul_comm]
   let w : ι → (Fin n → K) := fun i j => (D (Pi.single i 1)).liftKaehlerDifferential (e j)
   let L := Fintype.linearCombination K w
   have hL : ∀ M, L M = fun j => (D M).liftKaehlerDifferential (e j) := by

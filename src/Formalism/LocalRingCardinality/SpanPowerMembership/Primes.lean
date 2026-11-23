@@ -1,5 +1,53 @@
-import Mathlib
-import Formalism.CyclotomicNorms.StatementI
+module
+
+public import Formalism.CyclotomicNorms.StatementI
+public import Mathlib.Order.CompletePartialOrder
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+public import Mathlib.NumberTheory.LucasPrimality
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 namespace Formalism.BasicNotions.Examples₂
 
@@ -539,7 +587,7 @@ theorem exc_dvd {g d l : ℕ} (hg : 1 ≤ g) (h1 : 1 ≤ d) (h9 : d ≤ 9) (h : 
     rw [h0, mul_zero, pow_zero] at this
     have := Nat.one_le_pow d g hg
     omega
-  refine ((dvd_pow_self l hv).trans pow_padicValNat_dvd).trans (List.dvd_prod ?_)
+  refine ((dvd_pow_self l hv).trans (_root_.Dvd.intro_left _ (_root_.Nat.divMaxPow_mul_pow_padicValNat _ _))).trans (List.dvd_prod ?_)
   exact List.mem_map.mpr ⟨d - 1, List.mem_range.mpr (by omega), by rw [Nat.sub_add_cancel h1]⟩
 
 theorem not_exc {g d l k : ℕ} (h1 : ¬ l ^ (k + 1) ∣ g ^ d - 1) (h2 : l ^ (4 * k) ≤ g ^ d) :
@@ -547,7 +595,7 @@ theorem not_exc {g d l k : ℕ} (h1 : ¬ l ^ (k + 1) ∣ g ^ d - 1) (h2 : l ^ (4
   rintro ⟨hl, h⟩
   have hv : padicValNat l (g ^ d - 1) ≤ k := by
     by_contra hc
-    exact h1 ((pow_dvd_pow l (by omega)).trans pow_padicValNat_dvd)
+    exact h1 ((pow_dvd_pow l (by omega)).trans (_root_.Dvd.intro_left _ (_root_.Nat.divMaxPow_mul_pow_padicValNat _ _)))
   have := Nat.pow_le_pow_right hl.pos (Nat.mul_le_mul_left 4 hv)
   omega
 

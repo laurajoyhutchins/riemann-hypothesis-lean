@@ -1,4 +1,56 @@
-import Formalism.SharpRestriction.CuspSpanNormBounds.BcWeightEqZeroOf
+module
+
+public import Mathlib.Basic.ENNReal.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.FormalDegreeBessel.StatementWR
+import Formalism.SharpRestriction.CuspSpanNormBounds.LeadMinorK
+import Formalism.SharpRestriction.CuspSpanNormBounds.OnePlaceEstimates
+import Formalism.SharpRestriction.CuspSpanNormBounds.Point
+public import Mathlib.Basic.ENNReal.Real
+
+@[expose] public section
 
 open MeasureTheory Matrix Finset
 
@@ -9,69 +61,6 @@ namespace Formalism.MainNotions.FrameBoundFromBesselTorus
 open Formalism.QuantumDeterminants Formalism.MainNotions.S Formalism.MainNotions.S.ThB Formalism.BasicNotions Formalism.MainNotions.OnePlaceEstimates
 
 variable {r : ℕ} {κ τ : ℝ}
-
-theorem frame_factor_ge (hκ : 0 < κ) (hτ : 0 < τ) (A A₁ : (Fin r → ℂ) × ℂ → ENNReal) (K F : ℝ) (hK : 0 < K)
-    (hF : 0 ≤ F)
-    (h1 : ∀ p, A₁ (sBig r κ τ p) ≤ ENNReal.ofReal (K * F) * A p)
-    (h2 : ∀ p, ENNReal.ofReal K * A p ≤ ENNReal.ofReal F * A₁ (sBig r κ τ p))
-    (hint : ∫⁻ p, A₁ p = ENNReal.ofReal K * ∫⁻ p, A p) (h0 : ∫⁻ p, A p ≠ 0) (htop : ∫⁻ p, A p ≠ ⊤) :
-    jacBig r κ τ ≤ F ∧ 1 ≤ jacBig r κ τ * F := by
-  have hJ := jacBig_pos (r := r) hκ hτ
-  have hS := lintegral_sBig (r := r) hκ hτ A₁
-  set I := ∫⁻ p, A p
-  set I₁ := ∫⁻ p, A₁ (sBig r κ τ p)
-  have e : ENNReal.ofReal (jacBig r κ τ) * I₁ = ENNReal.ofReal K * I := by rw [← hS, hint]
-  have a1 : I₁ ≤ ENNReal.ofReal (K * F) * I := by
-    calc I₁ ≤ ∫⁻ p, ENNReal.ofReal (K * F) * A p := lintegral_mono h1
-      _ = ENNReal.ofReal (K * F) * I := lintegral_const_mul' _ _ ENNReal.ofReal_ne_top
-  have a2 : ENNReal.ofReal K * I ≤ ENNReal.ofReal F * I₁ := by
-    calc ENNReal.ofReal K * I = ∫⁻ p, ENNReal.ofReal K * A p := (lintegral_const_mul' _ _ ENNReal.ofReal_ne_top).symm
-      _ ≤ ∫⁻ p, ENNReal.ofReal F * A₁ (sBig r κ τ p) := lintegral_mono h2
-      _ = ENNReal.ofReal F * I₁ := lintegral_const_mul' _ _ ENNReal.ofReal_ne_top
-  constructor
-  ·
-    have b : ENNReal.ofReal (jacBig r κ τ * K) * I ≤ ENNReal.ofReal (F * K) * I := by
-      calc ENNReal.ofReal (jacBig r κ τ * K) * I = ENNReal.ofReal (jacBig r κ τ) * (ENNReal.ofReal K * I) := by
-            rw [ENNReal.ofReal_mul hJ.le, mul_assoc]
-        _ ≤ ENNReal.ofReal (jacBig r κ τ) * (ENNReal.ofReal F * I₁) := by gcongr
-        _ = ENNReal.ofReal F * (ENNReal.ofReal K * I) := by rw [mul_left_comm, e]
-        _ = ENNReal.ofReal (F * K) * I := by rw [ENNReal.ofReal_mul hF, mul_assoc]
-    have c := (ENNReal.mul_le_mul_iff_left h0 htop).mp b
-    rw [ENNReal.ofReal_le_ofReal_iff (mul_nonneg hF hK.le)] at c
-    nlinarith
-  · have b : ENNReal.ofReal K * I ≤ ENNReal.ofReal (jacBig r κ τ * K * F) * I := by
-      calc ENNReal.ofReal K * I = ENNReal.ofReal (jacBig r κ τ) * I₁ := e.symm
-        _ ≤ ENNReal.ofReal (jacBig r κ τ) * (ENNReal.ofReal (K * F) * I) := by gcongr
-        _ = ENNReal.ofReal (jacBig r κ τ * K * F) * I := by
-            rw [← mul_assoc, ← ENNReal.ofReal_mul hJ.le, mul_assoc (jacBig r κ τ)]
-    have c := (ENNReal.mul_le_mul_iff_left h0 htop).mp b
-    rw [ENNReal.ofReal_le_ofReal_iff (by positivity)] at c
-    nlinarith
-
-theorem jacBig_one (τ : ℝ) : jacBig r 1 τ = τ ^ (4 * (r + 1)) := by
-  unfold jacBig tF
-  simp only [one_pow, mul_one, Finset.prod_const, Finset.card_univ, Fintype.card_fin]
-  rw [← pow_mul, ← pow_add]; ring_nf
-
-theorem cf_ge_two (hτ : 1 < τ) (Cf : ℝ) (A A₁ : (Fin r → ℂ) × ℂ → ENNReal) (K : ℝ) (hK : 0 < K)
-    (h1 : ∀ p, A₁ (sBig r 1 τ p) ≤
-      ENNReal.ofReal (K * (max τ τ⁻¹ ^ (Cf * ((2 * r + 2 : ℕ) : ℝ)))) * A p)
-    (h2 : ∀ p, ENNReal.ofReal K * A p ≤
-      ENNReal.ofReal (max τ τ⁻¹ ^ (Cf * ((2 * r + 2 : ℕ) : ℝ))) * A₁ (sBig r 1 τ p))
-    (hint : ∫⁻ p, A₁ p = ENNReal.ofReal K * ∫⁻ p, A p) (h0 : ∫⁻ p, A p ≠ 0) (htop : ∫⁻ p, A p ≠ ⊤) :
-    2 ≤ Cf := by
-  have hτ0 : 0 < τ := by linarith
-  have hmax : max τ τ⁻¹ = τ := max_eq_left (by
-    have : τ⁻¹ < 1 := inv_lt_one_of_one_lt₀ hτ
-    linarith)
-  rw [hmax] at h1 h2
-  have hF : 0 ≤ τ ^ (Cf * ((2 * r + 2 : ℕ) : ℝ)) := Real.rpow_nonneg hτ0.le _
-  have := (frame_factor_ge one_pos hτ0 A A₁ K _ hK hF h1 h2 hint h0 htop).1
-  rw [jacBig_one, ← Real.rpow_natCast] at this
-  have h := (Real.rpow_le_rpow_left_iff hτ).mp this
-  push_cast at h
-  have hr : (0 : ℝ) < 2 * r + 2 := by positivity
-  nlinarith
 
 theorem frames_ineqs {pw pw₁ s K ρ F : ℝ} (X : ENNReal) (hs : 0 ≤ s) (hK : 0 ≤ K) (hρ : 0 < ρ)
     (h1 : ρ ≤ F) (h2 : ρ⁻¹ ≤ F) (he : pw₁ * s = K * ρ * pw) :

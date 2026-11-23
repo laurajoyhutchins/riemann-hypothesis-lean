@@ -1,7 +1,60 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.ArchimedeanOrbitMeasures.SumLPresHolds
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.ArchimedeanOrbitMeasures.PsiInv
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.ArchimedeanOrbitMeasures.CayDensExHaar
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.ArchimedeanOrbitMeasures.SumLPresHolds
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.ArchimedeanOrbitMeasures.CayDensExCayH
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.ArchimedeanOrbitMeasures.CayDensExTop
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.ArchimedeanOrbitMeasures.CayDensExHaar
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.ArchimedeanOrbitMeasures.CayDensExOm
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.ArchimedeanOrbitMeasures.CayleyInverseMeasurable
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.ArchimedeanOrbitMeasures.ContinuousAdelicGL2Det
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.ArchimedeanOrbitMeasures.PsiInv
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.ArchimedeanOrbitMeasures.PsiSmoothHolds
+import Mathlib.Algebra.Order.Archimedean.Real.Hom
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Matrix.FiniteDimensional
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Algebra.Group.Units
+import Mathlib.Topology.Sheaves.Init
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.ArchimedeanOrbitMeasures.CayDensExCayK
+
+@[expose] public section
 
 noncomputable section
 
@@ -63,7 +116,7 @@ theorem rA_mem_iff (M : Matrix (Fin n) (Fin n) ℂ) :
 theorem rA_skew_iff (M : Matrix (Fin n) (Fin n) ℂ) :
     (rA ε M)ᴴ * HcS.UG.Jpq (pP ε) (pQ ε) + HcS.UG.Jpq (pP ε) (pQ ε) * rA ε M = 0 ↔
       Mᴴ * Formalism.REAL.Jm ε + Formalism.REAL.Jm ε * M = 0 := by
-  rw [rA_conj, ← rA_Jm, ← map_mul, ← map_mul, ← map_add, ← map_zero (rA ε), (rA ε).injective.eq_iff]
+  rw [rA_conj, ← rA_Jm, ← map_mul, ← map_mul, ← map_add (f := _), ← map_zero (rA ε), (rA ε).injective.eq_iff]
 
 theorem continuous_rA : Continuous (rA ε) := by
   exact LinearMap.continuous_of_finiteDimensional (rA ε).toLinearMap
@@ -147,7 +200,7 @@ def psiL : gLie ε →ₗ[ℝ] HcS.BasicNotions.lieU (pP ε) (pQ ε) where
   map_add' x y := by
     apply Subtype.ext
     show rA ε (unrLin n ((x + y : gLie ε) : EuclideanSpace ℝ _)) = rA ε (unrLin n x) + rA ε (unrLin n y)
-    rw [Submodule.coe_add, map_add, map_add]
+    rw [Submodule.coe_add, map_add (f := _), map_add (f := _)]
   map_smul' c x := by
     apply Subtype.ext
     ext i j
@@ -194,7 +247,7 @@ theorem rel_iff (g : Formalism.REAL.UJ ε) (x : gLie ε) :
         2 + unrealify (x : EuclideanSpace ℝ (Fin n × Fin n × Bool)) := by
   have e1 : HcS.BasicNotions.UpqT.mat (phiC ε g) = rA ε (((g : (Matrix (Fin n) (Fin n) ℂ)ˣ)) : Matrix (Fin n) (Fin n) ℂ) :=
     phiF_mat ε g
-  rw [e1, psiC_val, one_add_one_eq_two, ← map_ofNat (rA ε) 2, ← map_sub, ← map_mul, ← map_add,
+  rw [e1, psiC_val, one_add_one_eq_two, ← map_ofNat (rA ε) 2, ← map_sub, ← map_mul, ← map_add (f := _),
     (rA ε).injective.eq_iff]
 
 theorem isUnit_of_mem_cayley_domain (x : gLie ε) (hx : psiC ε x ∈ HcInf.D0 (pP ε) (pQ ε)) :
@@ -216,7 +269,7 @@ theorem cayR_eq (x : EuclideanSpace ℝ (Fin n × Fin n × Bool)) (g : Formalism
       Formalism.REAL.inUJ ε ((2 + unrealify x) * (2 - unrealify x)⁻¹) := by
     rw [h]; exact ⟨(g : (Matrix (Fin n) (Fin n) ℂ)ˣ).isUnit, g.2⟩
   unfold cayR
-  rw [dif_pos hc]
+  rw [dite_eq_left hc]
   apply Subtype.ext; apply Units.ext
   rw [IsUnit.unit_spec]; exact h
 
@@ -229,8 +282,8 @@ end Perm
 
 end CDX
 
-open CDX in
 
+open CDX in
 theorem cayDensEx_holds : CayDensEx := by
   intro n ε
   classical
@@ -239,10 +292,11 @@ theorem cayDensEx_holds : CayDensEx := by
   set φM := φ.toHomeomorph.toMeasurableEquiv with hφM
   set ψM := ψ.toHomeomorph.toMeasurableEquiv with hψM
   set m : Measure (HcS.BasicNotions.UpqT (pP ε) (pQ ε)) := (Formalism.REAL.muG ε).map φM with hm
-  haveI : m.IsHaarMeasure := ContinuousMulEquiv.isHaarMeasure_map (Formalism.REAL.muG ε) φ
+  have hmHaar : m.IsHaarMeasure := ContinuousMulEquiv.isHaarMeasure_map (Formalism.REAL.muG ε) φ
   set lam : Measure (HcS.BasicNotions.lieU (pP ε) (pQ ε)) := (volume : Measure (gLie ε)).map ψM with hlam
-  haveI : lam.IsAddHaarMeasure := ψ.isAddHaarMeasure_map volume
-  obtain ⟨D, hD, hDm, f, hfm, hfc, -, hfT, hmap⟩ := HcHDC.cayDensU (pP ε) (pQ ε) m lam
+  have hlamHaar : lam.IsAddHaarMeasure := ψ.isAddHaarMeasure_map volume
+  have hDensity := @HcHDC.cayDensU (pP ε) (pQ ε) m hmHaar lam hlamHaar
+  obtain ⟨D, hD, -, f, hfm, hfc, -, hfT, hmap⟩ := hDensity
   have hψ0 : ψ 0 = 0 := map_zero ψ
   have hψc : ContinuousAt ψ 0 := ψ.continuous.continuousAt
   have hN1 : ψ ⁻¹' D ∈ 𝓝 (0 : gLie ε) := hψc.preimage_mem_nhds (by rw [hψ0]; exact hD)

@@ -1,6 +1,55 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.ImportsTerBis
-import GroundTheory.HeightsAndTheta.Heights.IntegralModels.ChartGlueSat
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.ImportsTerBis
+public import GroundTheory.HeightsAndTheta.Heights.IntegralModels.ChartGlueSat
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.NumbersDVR
@@ -18,8 +67,9 @@ variable {Ω : Type*} [Field Ω] {E : Type*} [AddCommGroup E] [Module Ω E] {N :
 theorem repr_sum_smul {τ : Type*} [Fintype τ] (w : Module.Basis (Fin N) Ω E) (a : τ → Ω) (bb : τ → E)
     (j : Fin N) :
     w.repr (∑ q, a q • bb q) j = ∑ q, a q * w.repr (bb q) j := by
+
   simp only [map_sum, map_smul, Finsupp.coe_finsetSum, Finset.sum_apply, Finsupp.smul_apply,
-    smul_eq_mul]
+  smul_eq_mul]
 
 theorem coeff_eq_zero_of_tri (w : Module.Basis (Fin N) Ω E) (bb : Fin N → E)
     (hup : ∀ q j : Fin N, q < j → w.repr (bb q) j = 0) (hd : ∀ q, w.repr (bb q) q ≠ 0)
@@ -82,16 +132,16 @@ variable {o : Type u} [CommRing o] {Ω : Type v} [Field Ω] [Algebra o Ω] {K : 
   [AddCommGroup E] [Module Ω E] {B : ChartBundle o (segreVec y) N E}
   {w : Module.Basis (Fin N) Ω E} {b : Fin N → K → ℤ}
 
-omit [∀ k, Fintype (ι k)] in
 
+omit [∀ k, Fintype (ι k)] in
 theorem mon_ne_zero {c : ∀ k, ι k} (hc : segreVec y c ≠ 0) (a : K → ℤ) :
     IndefiniteRowSideFullHecke.NumbersDVR.Bundles.chartMon y c a ≠ 0 := by
   have hy : ∀ k, y ⟨k, c k⟩ ≠ 0 := fun k =>
     (Finset.prod_ne_zero_iff.mp hc) k (Finset.mem_univ _)
   exact Finset.prod_ne_zero_iff.mpr fun k _ => zpow_ne_zero _ (hy k)
 
-omit [∀ k, Fintype (ι k)] in
 
+omit [∀ k, Fintype (ι k)] in
 theorem forward (h : IsFlagFrame y B w b) :
     IndefiniteRowSideFullHecke.NumbersDVR.Bundles.IsGradedFrame o y B
       (fun i => Submodule.span Ω (w '' {j | (j : ℕ) < i})) b w := by
@@ -173,8 +223,8 @@ theorem forward (h : IsFlagFrame y B w b) :
       apply hj
       rw [hdiag, Finsupp.single_eq_same, mul_one, sub_self]
 
-omit [∀ k, Fintype (ι k)] in
 
+omit [∀ k, Fintype (ι k)] in
 theorem backward (h : IndefiniteRowSideFullHecke.NumbersDVR.Bundles.IsGradedFrame o y B
       (fun i => Submodule.span Ω (w '' {j | (j : ℕ) < i})) b w) :
     IsFlagFrame y B w b := by

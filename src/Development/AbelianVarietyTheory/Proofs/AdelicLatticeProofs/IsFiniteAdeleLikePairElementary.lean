@@ -1,30 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AdelicHermitianForms.AdelicPair
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AdelicHermitianForms.AdelicPair
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open Matrix GlobalTheory.ClassFin
 open scoped Kronecker ComplexOrder TensorProduct
 
 namespace GlobalTheory.ClassFin
-
-theorem AdelicPair.exists_mul_mem {R : Type} [CommRing R] [Algebra ℚ R] {R₀ : Subring R}
-    (h : AdelicPair R R₀) (r : R) : ∃ M : ℕ, 0 < M ∧ (M : R) * r ∈ R₀ := by
-  obtain ⟨q, a, ha, e⟩ := h.approx 1 one_pos r
-  refine ⟨q.den, q.den_pos, ?_⟩
-  have h1 : (q.den : R) * algebraMap ℚ R q = (q.num : R) := by
-    rw [← map_natCast (algebraMap ℚ R), ← map_mul, ← map_intCast (algebraMap ℚ R)]
-    congr 1
-    exact Rat.den_mul_eq_num q
-  rw [e, mul_add, h1]
-  exact R₀.add_mem (intCast_mem R₀ _)
-    (R₀.mul_mem (natCast_mem R₀ _) (R₀.mul_mem (natCast_mem R₀ _) ha))
-
-theorem AdelicPair.exists_mul_mem_family {R : Type} [CommRing R] [Algebra ℚ R] {R₀ : Subring R}
-    (h : AdelicPair R R₀) (κ : Type) [Fintype κ] (r : κ → R) :
-    ∃ M : ℕ, 0 < M ∧ ∀ k, (M : R) * r k ∈ R₀ := by
-  classical
-  choose m hm hmem using fun k => h.exists_mul_mem (r k)
-  refine ⟨∏ k, m k, Finset.prod_pos fun k _ => hm k, fun k => ?_⟩
-  rw [← Finset.prod_erase_mul Finset.univ m (Finset.mem_univ k), Nat.cast_mul, mul_assoc]
-  exact R₀.mul_mem (natCast_mem R₀ _) (hmem k)
 
 open Matrix in
 open scoped Kronecker ComplexOrder TensorProduct in
@@ -38,9 +61,9 @@ private lemma exists_pos_nat_clearing_rat_denominators {κ : Type} [Fintype κ] 
   calc ((q k).den : ℚ) * m * q k = m * (q k * (q k).den) := by ring
     _ = m * (q k).num := by rw [Rat.mul_den_eq_num]
 
+
 open Matrix in
 open scoped Kronecker ComplexOrder TensorProduct in
-
 theorem _root_.GlobalTheory.ClassFin.adelicPair_elementary : ∀ (R : Type) [CommRing R] [Algebra ℚ R] (R₀ : Subring R), _root_.GlobalTheory.ClassFin.AdelicPair R R₀ → (∀ M : ℕ, 0 < M → ∀ r ∈ R₀, ∃ z : ℤ, ∃ a ∈ R₀, r = (z : R) + (M : R) * a) ∧ (∀ (κ : Type) [Fintype κ] (r : κ → R), ∃ M : ℕ, 0 < M ∧ ∀ k, (M : R) * r k ∈ R₀) ∧ Function.Injective (algebraMap ℚ R) := by
   intro R _ _ R₀ hR
   refine ⟨fun M hM r hr => ?_, fun κ _ r => ?_, ?_⟩

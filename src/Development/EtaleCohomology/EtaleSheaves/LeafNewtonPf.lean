@@ -1,4 +1,50 @@
-import Development.EtaleCohomology.EtaleSheaves.InstCommRingR
+module
+
+public import Development.EtaleCohomology.EtaleSheaves.InstCommRingR
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 open PowerSeries
@@ -6,22 +52,22 @@ open PowerSeries
 namespace LateralTheory.E.LeafNewtonPf
 
 def nser {A : Type 1} [CommRing A] (c : ℕ → A) : PowerSeries A :=
-  -(X * derivative A (mk c)) * (mk c).invOfUnit 1
+  -(X * PowerSeries.derivative (mk c)) * (mk c).invOfUnit 1
 
 lemma uniq {A : Type 1} [CommRing A] {f g s : PowerSeries A} (hf : constantCoeff f = 1) (h : s * f = g) :
     g * f.invOfUnit 1 = s := by
   rw [← h, mul_assoc, mul_invOfUnit f 1 (by simp [hf]), mul_one]
 
 lemma nser_eq {A : Type 1} [CommRing A] (c : ℕ → A) {s : PowerSeries A} (h0 : constantCoeff (mk c) = 1)
-    (h : s * mk c = -(X * derivative A (mk c))) : nser c = s := uniq h0 h
+    (h : s * mk c = -(X * PowerSeries.derivative (mk c))) : nser c = s := uniq h0 h
 
 lemma nser_spec {A : Type 1} [CommRing A] (c : ℕ → A) (h0 : c 0 = 1) :
-    nser c * mk c = -(X * derivative A (mk c)) := by
+    nser c * mk c = -(X * PowerSeries.derivative (mk c)) := by
   unfold nser
   rw [mul_assoc, invOfUnit_mul (mk c) 1 (by simp [h0]), mul_one]
 
 lemma map_deriv {A B : Type 1} [CommRing A] [CommRing B] (φ : A →+* B) (f : PowerSeries A) :
-    map φ (derivative A f) = derivative B (map φ f) := by
+    map φ (PowerSeries.derivative f) = PowerSeries.derivative (map φ f) := by
   ext n
   simp [coeff_derivative, coeff_map, map_mul, map_natCast]
 
@@ -48,7 +94,7 @@ lemma part2 {A : Type 1} [CommRing A] (c d e : ℕ → A) (hc : c 0 = 1) (hd : d
     have h2 := nser_spec d hd
     linear_combination (mk d) * h1 + (mk c) * h2
   show coeff k (nser e) = coeff k (nser c) + coeff k (nser d)
-  rw [key, map_add]
+  rw [key, map_add (f := _)]
 
 lemma geom {A : Type 1} [CommRing A] (x : A) : mk (fun k => x ^ k) * (1 - C x * X) = 1 := by
   ext n

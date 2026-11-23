@@ -1,11 +1,62 @@
-import Mathlib
-import Development.AbelianVarietyTheory.BlockTheory.NonGaloisCusps.BlockComplementLattice
-import Development.AbelianVarietyTheory.BlockTheory.TorsionBlocks.CongruenceMaxGalois
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.GaloisSideTwistedSelmerAuxiliaryPrimes
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.CompletelySplitPrimeHostPlaceProperties
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsEigenvectorOfTraceEqAddCharacter
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsMatrixOfSaturated
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsPowLeSpan
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.NonGaloisCusps.BlockComplementLattice
+public import Development.AbelianVarietyTheory.BlockTheory.TorsionBlocks.CongruenceMaxGalois
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.GaloisSideTwistedSelmerAuxiliaryPrimes
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsEigenvectorOfTraceEqAddCharacter
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsMatrixOfSaturated
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsPowLeSpan
+public import Formalism.LocalRingCardinality.ConjSqrtMinusD
+import Mathlib.Algebra.AffineMonoid.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.FreeModule.IdealQuotient
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.MetricSpace.Ultra.TotallySeparated
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.RingTheory.DedekindDomain.Factorization
+
+@[expose] public section
 
 noncomputable section
 
@@ -138,7 +189,7 @@ theorem exists_eigenvectors {L : Type} [Field L] [CharZero L] (φ : K →+* L) {
     obtain ⟨v, hv, hve⟩ := ih (fun c => χ c.succ) C C'.toRepresentation
       (semisimple_of_injective hρ C.subtype C.injective_subtype fun g x => rfl) fun g => by
         have h1 := h g
-        rw [trace_eq_add (ρ g) hv₀ (he g) (hC g) hc, map_add, Fin.sum_univ_succ] at h1
+        rw [trace_eq_add (ρ g) hv₀ (he g) (hC g) hc, map_add (f := _), Fin.sum_univ_succ] at h1
         change φ (LinearMap.trace K C ((ρ g).restrict (hC g))) = _
         linear_combination h1
     refine ⟨Fin.cons v₀ fun c => (v c : V), ?_, fun c g => ?_⟩
@@ -177,6 +228,7 @@ theorem exists_complement {L : Type} [Field L] [CharZero L] (φ : FractionRing O
   have hj : Function.Injective j := hv.fintypeLinearCombination_injective
   have hje : ∀ g y, fracRep r g (j y) = j (charSum χ t g y) := by
     intro g y
+
     simp only [j, Fintype.linearCombination_apply, map_sum, map_smul, he, smul_smul]
     refine Finset.sum_congr rfl fun c _ => ?_
     rw [mul_comm]
@@ -197,7 +249,7 @@ theorem exists_complement {L : Type} [Field L] [CharZero L] (φ : FractionRing O
     · rw [← LinearMap.range_eq_top, LinearMap.range_coprod, hkW, hcW.symm.sup_eq_top]
   have hee : ∀ g x, k.coprod j (blockRep ρ χ t g x) = fracRep r g (k.coprod j x) := by
     intro g x
-    rw [LinearMap.coprod_apply, LinearMap.coprod_apply, map_add, hke, hje]
+    rw [LinearMap.coprod_apply, LinearMap.coprod_apply, map_add (f := _), hke, hje]
     rfl
   refine ⟨ρ, ⟨(LinearEquiv.ofBijective _ hb).symm, fun g x => ?_⟩,
     semisimple_of_injective hs' _ hb.1 hee, hρ⟩
@@ -325,7 +377,7 @@ theorem HasTrace.list_sum {α : Type} (l : List α) (F : α → PlE H → ℂ) (
     obtain ⟨T, h1, h2, h3⟩ := h a List.mem_cons_self
     obtain ⟨T', h1', h2', h3'⟩ := ih fun b hb => h b (List.mem_cons_of_mem _ hb)
     refine ⟨_, h1.add h1', h2.add h2', (h3.and h3').mono fun w σ e => ?_⟩
-    rw [map_add, e.1, e.2]
+    rw [map_add (f := _), e.1, e.2]
     simp
 
 theorem HasTrace.twist {F c : PlE H → ℂ} (h : HasTrace A i F) (ψ : G H.E N.Om →* Qbar (N.l i))
@@ -337,8 +389,8 @@ theorem HasTrace.twist {F c : PlE H → ℂ} (h : HasTrace A i F) (ψ : G H.E N.
   change A.iotaQC i (T σ * ψ σ ^ k) = F w * c w ^ k
   rw [← e.1, ← e.2, map_mul, map_zpow₀]
 
-variable (N i) in
 
+variable (N i) in
 def epsBar : G H.E N.Om →* Qbar (N.l i) :=
   (((algebraMap ℚ_[N.l i] (Qbar (N.l i))).comp PadicInt.Coe.ringHom).toMonoidHom.comp
     (Units.coeHom _)).comp (cycZ H.E N.Om (N.l i))
@@ -356,8 +408,8 @@ theorem ae_epsBar : AE N fun w σ => A.iotaQC i (epsBar N i σ) = ((normV w : �
     ((cycZ H.E N.Om (N.l i) σ : ℤ_[N.l i]ˣ) : ℤ_[N.l i])) = _
   rw [this, map_natCast, map_natCast]
 
-variable (A i) in
 
+variable (A i) in
 def chiBar (c : ℕ) : G H.E N.Om →* Qbar (N.l i) :=
   ((iotaOQ N A i).toMonoidHom.comp (Units.coeHom _)).comp (N.chi i c)
 
@@ -380,12 +432,12 @@ theorem chiBar_succ (c : ℕ) (hc : c < R.t) (σ : G H.E N.Om) :
   congr 2
   exact A.iotaQ_alg i _
 
-variable (A) in
 
+variable (A) in
 def sumEig {a : ℕ} (π : A.CG a) (w : PlE H) : ℂ := (A.frobEig (A.locG π w)).sum
 
-variable (A i) in
 
+variable (A i) in
 abbrev muEta : A.CG 1 := A.tw (A.muC i) A.etaTinv
 
 variable (A i) in
@@ -408,8 +460,8 @@ theorem sumEig_tw {a : ℕ} (π : A.CG a) (χ : A.CG 1) :
   rw [hc, Multiset.mem_singleton] at h0
   exact ⟨Ne.symm h0, rfl⟩
 
-variable (A) in
 
+variable (A) in
 def sumPart (p : Part A.CG) (w : PlE H) : ℂ :=
   ((List.range p.d).map fun k : ℕ => sumEig A p.π w *
     ((normV w : ℕ) : ℂ) ^ (((((p.d : ℝ) - 1) / 2 - k : ℝ)) : ℂ)).sum
@@ -558,8 +610,9 @@ theorem complement_at (hC : GlobalTheory.TwSys.Cheb) (D : D7) (hG : GaloisRepsCu
     have h6 := D.naut.pt_loc i P π hP w (h4 hw)
     rw [← hr3 w (h4 hw) B σ hB hσ, ← hB4 w hw] at h6
     refine (map_trace_eq_sum _ _ _ h6).trans ?_
-    rw [D.naut.frobEig_tw _ _ h5.1, Multiset.sum_map_mul_right, Multiset.map_id', h5.2, map_add,
-      h1 hw B σ hB hσ, map_sum, List.sum_map_mul_right]
+
+    rw [D.naut.frobEig_tw _ _ h5.1, Multiset.sum_map_mul_right, Multiset.map_id', h5.2, map_add (f := _),
+    h1 hw B σ hB hσ, map_sum, List.sum_map_mul_right]
     have h7 : ∑ c : Fin D.R.t, D.naut.iotaQC i (chiBar D.naut i (c.1 + 1) σ) =
         sumPart D.naut ⟨1, muEta D.naut i, D.R.t⟩ w *
           ((normV w : ℕ) : ℂ) ^ ((((1 - (D.R.nV : ℝ)) / 2 : ℝ)) : ℂ) := by
@@ -577,15 +630,6 @@ theorem complement_at (hC : GlobalTheory.TwSys.Cheb) (D : D7) (hG : GaloisRepsCu
   obtain ⟨ρ, h1, h2, h3⟩ := exists_complement (a := D.R.r) (t := D.R.t) (D.naut.iotaQ i) rfl r₀ (D.nd.chi i)
     hr1 hr2 hT1 fun g => congrFun key g
   exact ⟨ρ, h1, h2, h3⟩
-
-theorem complementF (hC : GlobalTheory.TwSys.Cheb) {eps : ℝ} (Fm : FamP eps)
-    (hG : ∀ x : ℝ, Fm.x1 < x → ∀ k : Fm.Ix x, GaloisRepsCusp (Fm.D x k)) : ComplementF Fm :=
-  fun x hx k => complement_at hC _ (hG x hx k)
-
-theorem complementClosed (hC : GlobalTheory.TwSys.Cheb) (𝒞 : FamClass)
-    (hG : Closed 𝒞 fun Fm _ => ∀ x : ℝ, Fm.x1 < x → ∀ k : Fm.Ix x, GaloisRepsCusp (Fm.D x k)) :
-    ComplementClosed 𝒞 :=
-  Closed.imp hG fun Fm _ _ h => complementF hC Fm h
 
 end Main
 

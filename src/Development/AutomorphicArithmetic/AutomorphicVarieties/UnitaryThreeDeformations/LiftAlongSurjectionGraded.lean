@@ -1,8 +1,57 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeDeformations.IsCharZeroPt
-import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeDeformations.CondConj
-import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeGroups.NormEx
-import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeGroups.NormUniq
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.MapTor
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeDeformations.IsCharZeroPt
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeDeformations.CondConj
+import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeGroups.ConjTor
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeGroups.NormEx
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeGroups.NormUniq
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.MapTor
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Matrix IsLocalRing ReciprocityTheory.Gal UpperTheory.V.U3 UpperTheory.V.Alg UpperTheory.V.UnitaryThreeInertia
 
@@ -11,7 +60,7 @@ private theorem map_tor {A B : Type} [CommRing A] [CommRing B] (f : A →+* B) (
   _root_.UpperTheory.Reformulated.B.H71.map_tor f t
 
 private theorem map_conjBy {A B D : Type} [CommRing A] [CommRing B] [Group D] (f : A →+* B) (h : GL (Fin 3) A)
-    (r : D →* GG 3 A) :
+    (r : D →* GG (m := 3) (R := A)) :
     (GG.map f).comp (conjBy h r) = conjBy (GeneralLinearGroup.map f h) ((GG.map f).comp r) := by
   have e : GG.map f (GG.ofGL h) = GG.ofGL (GeneralLinearGroup.map f h) := by
     unfold GG.map
@@ -19,17 +68,20 @@ private theorem map_conjBy {A B D : Type} [CommRing A] [CommRing B] [Group D] (f
   refine MonoidHom.ext fun g => ?_
   simp only [conjBy, MonoidHom.comp_apply, MulEquiv.coe_toMonoidHom, MulAut.conj_apply, map_mul, map_inv, e]
 
-private theorem conj_conj {A D : Type} [CommRing A] [Group D] (h h' : GL (Fin 3) A) (r : D →* GG 3 A) :
+private theorem conj_conj {A D : Type} [CommRing A] [Group D] (h h' : GL (Fin 3) A)
+    (r : D →* GG (m := 3) (R := A)) :
     conjBy (h * h') r = conjBy h (conjBy h' r) := by
   ext1 g
   simp only [conjBy, MonoidHom.comp_apply, MulEquiv.coe_toMonoidHom, MulAut.conj_apply, map_mul,
     _root_.mul_inv_rev, mul_assoc, MulAut.mul_apply]
 
-private theorem conj_one {A D : Type} [CommRing A] [Group D] (r : D →* GG 3 A) : conjBy 1 r = r := by
+private theorem conj_one {A D : Type} [CommRing A] [Group D]
+    (r : D →* GG (m := 3) (R := A)) : conjBy 1 r = r := by
   ext1 g
   simp [conjBy]
 
-private theorem conj_mat {A D : Type} [CommRing A] [Group D] (h : GL (Fin 3) A) (r : D →* GG 3 A) (g : D) :
+private theorem conj_mat {A D : Type} [CommRing A] [Group D] (h : GL (Fin 3) A)
+    (r : D →* GG (m := 3) (R := A)) (g : D) :
     (conjBy h r g).mat = (h : Matrix _ _ A) * (r g).mat *
       ((sgnAct 3 A (r g).right h⁻¹ : GL (Fin 3) A) : Matrix _ _ A) := by
   have : (conjBy h r g).left = h * (r g).left * sgnAct 3 A (r g).right h⁻¹ := by
@@ -38,7 +90,8 @@ private theorem conj_mat {A D : Type} [CommRing A] [Group D] (h : GL (Fin 3) A) 
 
 private theorem setup {O : Type} [CommRing O] [IsLocalRing O] {G Γ ι : Type} [Group G] [TopologicalSpace G]
     [IsTopologicalGroup G] [Group Γ] [TopologicalSpace Γ] (F : Frame O G Γ ι) (hF : F.Ok) (g₁ : Γ)
-    (hg : F.Marked g₁) {R : Type} [CommRing R] [Algebra O R] [IsLocalRing R] (r : Γ →* GG 3 R)
+    (hg : F.Marked g₁) {R : Type} [CommRing R] [Algebra O R] [IsLocalRing R]
+    (r : Γ →* GG (m := 3) (R := R))
     (hr : Red F.η F.Ψ r) :
     ∃ Ψ : Γ →* (ResidueField R)ˣ, IsUnit (2 : R) ∧ Marks F.η Ψ F.c g₁ ∧
       (GG.map (residue R)).comp r = r0 F.η Ψ := by
@@ -52,8 +105,13 @@ private theorem setup {O : Type} [CommRing O] [IsLocalRing O] {G Γ ι : Type} [
     exact Ideal.Quotient.eq.2 (hr.red g a b)
 
 theorem UpperTheory.lift_along_surjection_graded :
-    ∀ {O : Type} [CommRing O] [IsLocalRing O] {G Γ ι : Type} [Group G] [TopologicalSpace G] [IsTopologicalGroup G] [Group Γ] [TopologicalSpace Γ] (F : Frame O G Γ ι), F.Ok → ∀ g₁, F.Marked g₁ → ∀ {R R' : Type} [CommRing R] [Algebra O R] [IsCO O R] [CommRing R'] [Algebra O R'] [IsCO O R'] (q : R →ₐ[O] R'), Function.Surjective q → ∀ (r : Γ →* GG 3 R) (r' : Γ →* GG 3 R'), F.Cond r → IsLocallyConstant (mats r) → push q r = r' → F.CondN g₁ r' →
-     ∃ r₂ : Γ →* GG 3 R, F.IsPt g₁ r₂ ∧ push q r₂ = r' := by
+    ∀ {O : Type} [CommRing O] [IsLocalRing O] {G Γ ι : Type} [Group G] [TopologicalSpace G]
+      [IsTopologicalGroup G] [Group Γ] [TopologicalSpace Γ] (F : Frame O G Γ ι),
+      F.Ok → ∀ g₁, F.Marked g₁ → ∀ {R R' : Type} [CommRing R] [Algebra O R] [IsCO O R]
+        [CommRing R'] [Algebra O R'] [IsCO O R'] (q : R →ₐ[O] R'), Function.Surjective q →
+      ∀ (r : Γ →* GG (m := 3) (R := R)) (r' : Γ →* GG (m := 3) (R := R')),
+        F.Cond r → IsLocallyConstant (mats r) → push q r = r' → F.CondN g₁ r' →
+        ∃ r₂ : Γ →* GG (m := 3) (R := R), F.IsPt g₁ r₂ ∧ push q r₂ = r' := by
   intro O _ _ G Γ ι _ _ _ _ _ F hF g₁ hg R R' _ _ _ _ _ _ q hq r r' hr hlc hp hr'
   haveI : IsAdicComplete (maximalIdeal R) R := IsCO.complete (O := O)
   have hm : ∀ x : R, q x ∈ maximalIdeal R' ↔ x ∈ maximalIdeal R := fun x => by

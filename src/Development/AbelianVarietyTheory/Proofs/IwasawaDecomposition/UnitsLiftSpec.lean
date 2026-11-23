@@ -1,11 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.RingSpecNormalisedCharacterEq
-import Formalism.LocalToGlobal.NormalizedHeckeFactors.CoverStd
-import Formalism.LocalToGlobal.NumberFieldFamilies.NPartCNdTie
-import Formalism.LocalToGlobal.NumberFieldFamilies.NPartCNdStd
-import Formalism.LocalToGlobal.NumberFieldFamilies.NPartCNdProj
-import Formalism.LocalToGlobal.NumberFieldFamilies.HeckeLift0
+module
+
+public import Formalism.LocalToGlobal.NumberFieldFamilies.NPartCNdStd
+public import Formalism.LocalToGlobal.NumberFieldFamilies.HeckeLift0
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.LocAutHodgeTateWeightsLevelZeroDef
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.WdOfMono0L
+public import Formalism.LocalToGlobal.NormalizedHeckeFactors.HeckeStdTwOfStd
+public import Formalism.LocalToGlobal.ProjectiveLattices.HalfOneAddSqrtNegIsIntegral
+public import Formalism.SharpRestriction.LevelLetterCocycles.BlochKatoPhases
 import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsTameGenAt
+public import Formalism.LocalToGlobal.NumberFieldFamilies.NPartCNdProj
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Formalism.LocalToGlobal.IndefiniteReal.DoubleCosetOperators.Objects
+import Formalism.LocalToGlobal.NormalizedHeckeFactors.TypesDefs
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.MainNotions Formalism.MainNotions.N Formalism.ConjugateSelfDual ReciprocityTheory.Gal ReciprocityTheory.Aut Formalism.AUTREP Formalism.L2 Formalism.L2.Host Formalism.L2.NT Formalism.IndefR.NX GlobalTheory.HeightCounting NumberField IsDedekindDomain Polynomial
 open Formalism.L2.Fam.NPC Formalism.L2.Fam.NPC.BaseC
 
@@ -13,17 +57,14 @@ noncomputable section
 
 namespace GlobalTheory.HeckeLocN
 
-set_option maxHeartbeats 2000000
-set_option synthInstance.maxHeartbeats 400000
+
+
 
 variable {D : D7}
 
 def mt0 (M : MtFam D) : MtFam0 D.host D.what₂ := fun μ j h1 h2 =>
   { wt := (M μ j h1 h2).wt, J := (M μ j h1 h2).J, χ := (M μ j h1 h2).χ, J_open := (M μ j h1 h2).J_open,
     real := (M μ j h1 h2).real, real_inj := (M μ j h1 h2).real_inj, real_range := (M μ j h1 h2).real_range }
-
-theorem genAt_iff (l : ℕ) (Q : Finset (PlE D.host)) (v : PlE D.host) (k : ℕ) :
-    GenAt D l Q v k ↔ GenAt0 D.host l Q v k := Iff.rfl
 
 def plEmb (pl : PlSide D) : PlEmb D.what₂ where
   emb w := (pl.ι w).symm.toRingHom.comp D.what₂.embLL
@@ -126,7 +167,7 @@ theorem gamN_tg (D : D7) (hD : PlGwDisj D) (k : Fin 2) (v : D.nd.PlG k) : gamN D
   classical
   have h : ∃ kv : (Σ k, D.nd.PlG k), D.naut.plGw kv.1 kv.2 = D.naut.plGw k v := ⟨⟨k, v⟩, rfl⟩
   unfold gamN
-  rw [dif_pos h]
+  rw [dite_eq_left h]
   have key : ∀ kv : (Σ k, D.nd.PlG k), D.naut.plGw kv.1 kv.2 = D.naut.plGw k v → kv = ⟨k, v⟩ := by
     rintro ⟨k', v'⟩ e
     obtain rfl := hD k' k v' v e
@@ -138,7 +179,7 @@ section Build
 
 variable (B0 : LocBase0 D.host D.what₂) (C : NChoice D)
 
-set_option synthInstance.maxHeartbeats 400000 in
+
 
 def mkX (hs : HeckeStd0 B0) (hd : FinDimV B0) (hL : MtLoc B0 (partCompl_of hs hd))
     (hMF : ∀ i, Module.Free (OOf B0 i) (MtSub B0 (partCompl_of hs hd) i))
@@ -230,7 +271,7 @@ variable (B0 : LocBase0 D.host D.what₂) (C : NChoice D) (hs : HeckeStd0 B0) (h
   (hRam : ∀ i, ∀ v ∈ B0.Qw (wOf B0 i), ∃ g ∈ Ine (F := D.host.E) (D.nd.plOm.1 v), chi1N B0 C tw ps i g ≠ 1)
   (hI : OsInt B0) (hBF : ∀ i, Module.Free (OOf B0 i) (BjC B0 hI i))
 
-set_option synthInstance.maxHeartbeats 400000 in
+
 
 def mkT
     (hTwE : ∀ (a : LocT B0) (x : D.LL0) (y : D.ntw.O0 (C.twI (wOf B0 a))),
@@ -280,15 +321,6 @@ theorem unitsLift_spec {Γ O : Type} [Group Γ] [CommRing O] [IsDomain O] (f : �
 
 def iqC (X : CoefIn D.what₂) (j : ℕ) (w : D.what₂.places.Pl) : FractionRing (OcC X j w) →+* Qbar (D.what₂.places.resChar w) :=
   (X.Kx j w).1.val.toRingHom.comp (FractionRing.algEquiv ↥(Loc.OL (X.Kx j w)) ↥(X.Kx j w).1).toRingEquiv.toRingHom
-
-def BigOk (pl : PlSide D) (X : CoefIn D.what₂) (big : D.what₂.places.Pl → Finset ℂ) : Prop :=
-  ∀ j w, ∀ z ∈ big w, ∃ x, pl.ι w (iqC X j w x) = z
-
-def TwEmb (C : NChoice D) (X : CoefIn D.what₂) (twC : ∀ j w, D.ntw.O0 (C.twI w) →+* OcC X j w) : Prop :=
-  ∀ j w, TwistedAt D w → ∀ (x : D.LL0) (y : D.ntw.O0 (C.twI w)),
-    algebraMap (D.ntw.O0 (C.twI w)) (FractionRing (D.ntw.O0 (C.twI w))) y =
-      (if C.sd w then D.ntw.emb0 (C.twI w) else D.ntw.emb0b (C.twI w)) x →
-    ecC X j w (x : D.what₂.LL) = algebraMap (OcC X j w) (FractionRing (OcC X j w)) (twC j w y)
 
 def TwAlgAt (C : NChoice D) (X : CoefIn D.what₂) (j : ℕ) (w : D.what₂.places.Pl) (f : D.ntw.O0 (C.twI w) →+* OcC X j w) : Prop :=
   haveI : Fact (D.ntw.l (C.twI w)).Prime := D.ntw.lPrime (C.twI w)

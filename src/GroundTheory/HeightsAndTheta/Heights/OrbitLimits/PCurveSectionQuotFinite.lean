@@ -1,13 +1,61 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.StatementsCurveVertIndexSteps
-import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.CurveCountObjects
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.StatementsCurveVertIndexSteps
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PCoordConeArithVar
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PCurveCharts
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.AssemblyBase
 import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PLiftBirationalAmple
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PSectionLatticeFinite
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.AssemblyBase
 import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PSectionBounded
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PCoordConeArithVar
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PCurveCharts
-import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.PFnFieldTrdeg
+import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PSectionLatticeFinite
+public import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.PFnFieldTrdeg
+public import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.CurveCountObjects
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.GroupTheory.FiniteAbelian.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.Targets
@@ -20,8 +68,8 @@ namespace CurveSectionQuotientFinite
 
 variable {K : Type} [Fintype K] {ι : K → Type} [∀ k, Fintype (ι k)] {Ω : Type} [Field Ω]
 
-omit [Fintype K] [∀ k, Fintype (ι k)] in
 
+omit [Fintype K] [∀ k, Fintype (ι k)] in
 theorem charZero (y : (Σ k, ι k) → Ω) (hP : IsHorizontal (mCoordIdeal y)) : CharZero Ω := by
   refine charZero_of_inj_zero fun n hn => ?_
   have h : ((n : ℤ) : ℤ) ∈ (mCoordIdeal y).comap (C : ℤ →+* MRing ι) := by
@@ -40,8 +88,8 @@ theorem aeval_ne_zero (y : (Σ k, ι k) → Ω) {s : MRing ι} {d : K → ℕ} (
   erw [HilbertSamuel.SectionBounded.mConeMap_homog y hs]
   rw [h0, map_zero, zero_mul]
 
-omit [Fintype K] [∀ k, Fintype (ι k)] in
 
+omit [Fintype K] [∀ k, Fintype (ι k)] in
 theorem mem_ratioField [CharZero Ω] (y : (Σ k, ι k) → Ω) (c : ∀ k, ι k) {b : Ω}
     (hb : b ∈ chartRingZ y c) : b ∈ ratioField y c := by
   induction hb using Algebra.adjoin_induction with
@@ -68,8 +116,8 @@ theorem exists_nat_mul_mem_chartRingZ [CharZero Ω] (y : (Σ k, ι k) → Ω) (h
     exact hq
   exact CurveAffineCharts.exists_nat_mul_mem_adjoin hq'
 
-omit [∀ k, Fintype (ι k)] in
 
+omit [∀ k, Fintype (ι k)] in
 theorem div_mem_ratioField [CharZero Ω] (y : (Σ k, ι k) → Ω) (a : K → ℤ) (c : ∀ k, ι k)
     (hc : ∀ k, y ⟨k, c k⟩ ≠ 0) {m x : Ω} (hm : m ∈ chartLat y a 1) (hx : x ∈ chartLat y a 1) :
     m / x ∈ ratioField y c := by
@@ -122,8 +170,8 @@ theorem finite_curveSectionMod (y : (Σ k, ι k) → Ω) (hP : IsArithVar (mCoor
 
 end CurveSectionQuotientFinite
 
-open CurveSectionQuotientFinite in
 
+open CurveSectionQuotientFinite in
 theorem CurveSectionQuotFinite.proof : CurveSectionQuotFinite.Statement := by
   intro K _ ι _ Ω _ y s d hP hs hsP
   have hxM : aeval y s ∈ chartLat y (fun k => (d k : ℤ)) 1 := HilbertSamuel.LiftBirationalAmple.chartLat_form hs

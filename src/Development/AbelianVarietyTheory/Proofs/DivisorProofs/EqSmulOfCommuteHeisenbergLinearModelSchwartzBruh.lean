@@ -1,10 +1,60 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.HilbertNinetyQuotientHomEqIff
-import Development.AbelianVarietyTheory.Definitions.Divisors.RankEqCardIffExistsFrameMatrixFirstColumnBlock
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AddCharNegEqOne
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsOpenSubgroupPeriodicStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsFinsetEqSumAddCosetIndicatorStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CharacterTrivialMatrixLatticeOpenCompactBasisStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.HilbertNinetyQuotientHomEqIff
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AddCharNegEqOne
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CharacterTrivialMatrixLatticeOpenCompactBasisStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsFinsetEqSumAddCosetIndicatorStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsOpenSubgroupPeriodicStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MeasureTheory Matrix Filter Topology
 
@@ -42,7 +92,7 @@ theorem cind_mem {X : Type} [AddCommGroup X] [TopologicalSpace X] [IsTopological
       · rintro ⟨W, hW, rfl⟩
         show W + y - y ∈ L
         rwa [add_sub_cancel_right]
-    refine IsCompact.of_isClosed_subset (himg ▸ hc.image (continuous_add_right y)) (isClosed_tsupport _)
+    refine IsCompact.of_isClosed_subset (himg ▸ hc.image (continuous_add_const y)) (isClosed_tsupport _)
       (closure_minimal ?_ hKc)
     intro Z hZ
     by_contra h
@@ -56,8 +106,8 @@ theorem addChar_ne_zero {A : Type} [AddGroup A] (ψ : AddChar A ℂ) (a : A) : �
 
 end GlobalTheory.LinSchur
 
-open GlobalTheory.LinSchur in
 
+open GlobalTheory.LinSchur in
 theorem GlobalTheory.LinSchur.eq_smul_of_commute : ∀ {k : Type} [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] {n d : ℕ} {Xt : Type} [AddCommGroup Xt] [Module ℂ Xt] (V : Submodule ℂ Xt)
     (ψ0 : AddChar k ℂ), Continuous ψ0 → ψ0 ≠ 1 →
     ∀ (ι₁ : Xt →ₗ[ℂ] (Matrix (Fin n) (Fin d) k → ℂ)) (ι₂ : Xt → Matrix (Fin n) (Fin d) k → ℂ),
@@ -106,7 +156,7 @@ theorem GlobalTheory.LinSchur.eq_smul_of_commute : ∀ {k : Type} [Field k] [Val
       funext Z
       simp only [cind, Pi.smul_apply, smul_eq_mul]
       split_ifs with hZ
-      · rw [mul_one, mul_one, show l Z = l (Z - y) + l y by rw [← map_add, sub_add_cancel],
+      · rw [mul_one, mul_one, show l Z = l (Z - y) + l y by rw [← map_add (f := _), sub_add_cancel],
           AddChar.map_add_eq_mul, hl1 _ hZ, one_mul]
       · simp
     have e2 : Mu l x = ψ0 (l y) • x := inj _ m1 _ (V.smul_mem _ hx) e1
@@ -114,7 +164,7 @@ theorem GlobalTheory.LinSchur.eq_smul_of_commute : ∀ {k : Type} [Field k] [Val
     rw [e2, hsmul x hx] at e3
     simp only [Pi.smul_apply, smul_eq_mul] at e3
     have hYy : ψ0 (l Y) = ψ0 (l (Y - y)) * ψ0 (l y) := by
-      rw [← AddChar.map_add_eq_mul, ← map_add, sub_add_cancel]
+      rw [← AddChar.map_add_eq_mul, ← map_add (f := _), sub_add_cancel]
     rw [hYy] at e3
     have e4 : ψ0 (l y) * (1 - ψ0 (l (Y - y))) * ι₂ x Y = 0 := by linear_combination e3
     rcases mul_eq_zero.mp e4 with h | h
@@ -158,6 +208,7 @@ theorem GlobalTheory.LinSchur.eq_smul_of_commute : ∀ {k : Type} [Field k] [Val
     obtain ⟨F, hF⟩ := GlobalTheory.T.exists_finset_eq_sum_addCosetIndicator _ (hLoc s hs).1 (ι₁ x) (maps x hx) hper
     have hxeq : x = ∑ y ∈ F, ι₁ x y • xs s y :=
       inj _ hx _ (V.sum_mem fun y _ => V.smul_mem _ (hxsV s hs y)) (by
+
         rw [map_sum]
         simp only [map_smul, hxs1 s hs]
         exact hF)

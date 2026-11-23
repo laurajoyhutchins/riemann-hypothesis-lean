@@ -1,14 +1,56 @@
-import Formalism.SharpRestriction.CuspSpanNormBounds.BruhatCellsKronecker.OwnEvIntro
-import Formalism.SharpRestriction.CuspSpanNormBounds.BruhatCellsKronecker.NcardPrimesOverOfSplitsCompl
-import Formalism.SharpRestriction.CuspSpanNormBounds.LocalBesselAndTopKernel
-import Formalism.SharpRestriction.CuspSpanNormBounds.AuxiliaryNormPrimes
-import Formalism.SharpRestriction.CuspSpanNormBounds.NonGenericAndKTwoTheorems
-import Formalism.LocalRingCardinality.RankBoundMonotoneInDimension
-import Formalism.HermitianLattices.FinalMass
-import Formalism.GL3MeanSquares.GlobalBoundRefinementResults
+module
+
+public import Formalism.SharpRestriction.CuspSpanNormBounds.LocalBesselAndTopKernel
+public import Formalism.HermitianCurvature.StatementSz
+public import Formalism.HermitianLattices.HermitianLatticesProofs.MassTelescope
+public import Formalism.GL3MeanSquares.HookFormulaTorsion.GlobalBoundRefinements
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CorollaryAOfPropositionA
 import Formalism.HermitianCurvature.HermitianCurvatureProofs.MassRatioFormula
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CorollaryAOfPropositionA
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CriticalThresholdLowerBound
+public import Formalism.LocalRingCardinality.RankBoundMonotoneInDimension
+public import Formalism.SharpRestriction.CuspSpanNormBounds.BruhatCellsKronecker.NcardPrimesOverOfSplitsCompl
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -112,15 +154,14 @@ theorem sza_vand_pos (D : D7) (u : D.what₂.Word) (τ : D.what₂.Tau) : 0 < va
   have hab : a < b := (Finset.mem_filter.mp hb).2
   exact sub_pos.mpr (sza_u_anti D u τ hab)
 
-theorem szaData_ok (D : D7) (u : D.what₂.Word) : (szaData D u).Ok where
-  hk := by have := D.R.m_add_three_le_k; show 1 ≤ D.R.k; omega
-  hv := sza_v_pos D
-  hdF := by show (2 * D.host.v) ^ D.R.f = (2 * D.host.v) ^ (szaData D u).f; rw [szaData_f]
-  hg1 := (D.host.g_prime 0).two_le
-  hg2 := (D.host.g_prime 1).two_le
-  hT := (D.mem u).A.T_prime.two_le
-  hvol := szaMass_pos D _
-  hVu := sza_vand_pos D u
+theorem szaData_ok (D : D7) (u : D.what₂.Word) : (szaData D u).Ok := by
+  refine ⟨?_, sza_v_pos D, ?_, (D.host.g_prime 0).two_le, (D.host.g_prime 1).two_le,
+    (D.mem u).A.T_prime.two_le, szaMass_pos D _, sza_vand_pos D u⟩
+  · have := D.R.m_add_three_le_k
+    show 1 ≤ D.R.k
+    omega
+  · show (2 * D.host.v) ^ D.R.f = (2 * D.host.v) ^ (szaData D u).f
+    rw [szaData_f]
 
 theorem szaData_LBound (D : D7) (u : D.what₂.Word) : (szaData D u).LBound := by
   intro M hk _
@@ -403,8 +444,10 @@ theorem level_ratio_bound (D : D7) (C0 C1 : ℝ) (hD : StandingNumericalData D C
     have h2 := D.R.two_le_m
     omega
   have hf1 : 1 ≤ D.R.f := by
-    have : 0 < D.R.n := by unfold Ranks.n; positivity
-    unfold Ranks.f; omega
+    have hm := D.R.two_le_m
+    have hmf := D.R.m_le_f
+    unfold Ranks.f Ranks.n
+    omega
   obtain ⟨_, _, _, _, _, _, _, _, _, hwin, _⟩ := hD
   set x : ℝ := (D.R.f : ℝ) * (2 : ℝ) ^ ((3 : ℝ) - D.R.k) with hx
   set A : D.what₂.Word → ℝ := fun w => ∏ τ, (Tcrit D w τ / Tr D w) ^ D.R.k with hA
@@ -476,7 +519,7 @@ theorem level_ratio_bound (D : D7) (C0 C1 : ℝ) (hD : StandingNumericalData D C
       rw [← mul_pow]
       exact pow_le_pow_left₀ (sza_tcrit_pos D u τ).le this _
     calc P u ≤ ∏ τ, (C1 ^ D.R.k * Tcrit D u' τ ^ D.R.k) :=
-          Finset.prod_le_prod (fun τ _ => (pow_pos (sza_tcrit_pos D u τ) _).le) (fun τ _ => h1 τ)
+          Finset.prod_le_prod₀ (fun τ _ => (pow_pos (sza_tcrit_pos D u τ) _).le) (fun τ _ => h1 τ)
       _ = C1 ^ (D.R.k * D.R.f) * P u' := by
           rw [Finset.prod_mul_distrib, Finset.prod_const, Finset.card_univ, sza_card_Tau, ← pow_mul]
 

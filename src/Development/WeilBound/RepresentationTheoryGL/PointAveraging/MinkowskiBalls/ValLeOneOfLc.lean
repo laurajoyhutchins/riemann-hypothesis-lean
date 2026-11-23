@@ -1,6 +1,61 @@
-import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.GermIntegrals.StepSt
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.HermitianFormNormSqLeReMulReStatement
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.PadicIsNonarchimedeanLocalField
+module
+
+public import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.GermIntegrals.StepSt
+public import Development.AbelianVarietyTheory.Definitions.Foundations.SecondCountableAndT2LocalField
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.PadicIsNonarchimedeanLocalField
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.HermitianFormNormSqLeReMulReStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.CStarAlgebra.CStarMatrix
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.IsParahoricVec
+
+@[expose] public section
 
 open MeasureTheory PositivityTheory.Tls2.Ming3 GlobalTheory.PRep GlobalTheory.SmGL GlobalTheory.SplitWeil GlobalTheory.ThetaGL ValuativeRel
 
@@ -111,7 +166,7 @@ theorem exists_strictHenselian_absolutely_closed_local_ring (hjn : j ≤ n) (hjr
   have heq : Submodule.span k (Set.range v) = LinearMap.range x.mulVecLin := by
     apply Submodule.eq_of_le_of_finrank_le hsub
     rw [finrank_span_eq_card hli, Fintype.card_fin]
-    exact hrk
+    simpa only [Matrix.finrank_range_mulVecLin] using hrk
   have hmem : ∀ l : Fin r, (fun i => x i l) ∈ Submodule.span k (Set.range v) := by
     intro l
     rw [heq]
@@ -361,6 +416,7 @@ theorem avg_zero {G : Type} [Group G] {V : Type} [AddCommGroup V] [Module ℂ V]
     exact (pow_le_pow_iff_left₀ (norm_nonneg _) hR.le two_ne_zero).1 h'
   have hexp : Bf v v = ∑ i, s⁻¹ * Bf (σ (g i) v) v := by
     have : Bf v v = Bf (∑ i, s⁻¹ • σ (g i) v) v := by rw [← hv]
+
     rw [this, map_sum, LinearMap.sum_apply]
     simp only [map_smul, LinearMap.smul_apply, smul_eq_mul]
   have hle : (Bf v v).re ≤ (Fintype.card ι : ℝ) * ‖s‖⁻¹ * (Bf v v).re :=
@@ -445,8 +501,9 @@ theorem core : BallSt → RkSt → CoreSt := by
   have hBΦ : ∀ w, B Φ w = ∑ ρ, s⁻¹ • σ (g ρ) (B Φ w) := by
     intro w
     have h1 := congrArg (fun f => f w) hΨ
+
     simp only [map_sub, map_sum, map_smul, LinearMap.sub_apply, LinearMap.sum_apply, LinearMap.smul_apply,
-      LinearMap.zero_apply] at h1
+    LinearMap.zero_apply] at h1
     have h2 : ∀ ρ, B (Φρ ρ) w = σ (g ρ) (B Φ w) := by
       intro ρ
       have := hE (g ρ) 1 Φ (Φρ ρ) rfl w

@@ -1,7 +1,58 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.ChowForms.StatementsDehomogOrd
-import GroundTheory.HeightsAndTheta.Heights.ChowForms.PChartLocalOrder
-import GroundTheory.HeightsAndTheta.Heights.ChowForms.PChartLocDomain
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.ChowForms.StatementsDehomogOrd
+public import GroundTheory.HeightsAndTheta.Heights.ChowForms.Statements
+public import Mathlib.Order.CompletePartialOrder
+public import GroundTheory.HeightsAndTheta.Heights.ChowForms.PChartLocDomain
+public import GroundTheory.HeightsAndTheta.Heights.ChowForms.PChartLocalOrder
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -76,6 +127,7 @@ theorem aeval_smul_hom {B : Type*} [CommSemiring B] [Algebra F B] (π : MvPolyno
   have key : aeval (fun m => c * π (X m)) g = c ^ d * aeval (fun m => π (X m)) g := by
     conv_lhs => rw [g.as_sum]
     conv_rhs => rw [g.as_sum]
+
     rw [map_sum, map_sum, Finset.mul_sum]
     refine Finset.sum_congr rfl fun s hs => ?_
     have hd := hg (mem_support_iff.mp hs)
@@ -86,14 +138,14 @@ theorem aeval_smul_hom {B : Type*} [CommSemiring B] [Algebra F B] (π : MvPolyno
     ring
   rw [key]
   congr 1
-  rw [← comp_aeval_apply]
-  simp
+  exact (DFunLike.congr_fun (MvPolynomial.aeval_unique π) g).symm
 
 theorem map_eq_zero_of_components {B G : Type*} [CommRing B] [FunLike G (MvPolynomial (Fin n) F) B]
     [RingHomClass G (MvPolynomial (Fin n) F) B] (f : G)
     {K : Ideal (MvPolynomial (Fin n) F)}
     (hf : ∀ g ∈ K, ∀ k, f (homogeneousComponent k g) = 0) {g : MvPolynomial (Fin n) F} (hg : g ∈ K) :
     f g = 0 := by
+
   rw [← sum_homogeneousComponent g, map_sum]
   exact Finset.sum_eq_zero fun k _ => hf g hg k
 
@@ -272,8 +324,8 @@ def locEquiv (hI : IsHomogIdeal I) :
 
 end DehomogOrd
 
-open DehomogOrd in
 
+open DehomogOrd in
 theorem DehomogOrd.proof (h₁ : OrdPolynomialLocalization.Statement) : DehomogOrd.Statement := by
   intro F _ n I W t hI hW hIW htW hP hPQ g d hg
   set P := W.map (Ideal.Quotient.mk I) with hPdef
@@ -299,6 +351,7 @@ theorem DehomogOrd.proof (h₁ : OrdPolynomialLocalization.Statement) : DehomogO
     intro r hr
     obtain ⟨a, rfl⟩ := Ideal.Quotient.mk_surjective r
     have ha : a ∈ W := (hmemP a).mp hr
+
     rw [toPolyR_mk, ← sum_homogeneousComponent a, map_sum]
     refine Ideal.sum_mem _ fun k _ => ?_
     rw [toPoly_hom I t (homogeneousComponent_isHomogeneous k a)]
@@ -308,8 +361,9 @@ theorem DehomogOrd.proof (h₁ : OrdPolynomialLocalization.Statement) : DehomogO
         (P.map (algebraMap _ (Localization.Away (linClass I t)))) := by
       rw [hPQdef, Ideal.map_le_iff_le_comap, Ideal.comap_comap]
       intro w hw
+
       rw [Ideal.mem_comap, RingHom.comp_apply, RingHom.comp_apply, fromPoly_C_mk, ← sum_homogeneousComponent w,
-        map_sum]
+      map_sum]
       refine Ideal.sum_mem _ fun k _ => ?_
       rw [fromChart_hom I t (homogeneousComponent_isHomogeneous k w)]
       exact Ideal.mul_mem_left _ _ (Ideal.mem_map_of_mem _ ((hmemP _).mpr (hW w hw k)))

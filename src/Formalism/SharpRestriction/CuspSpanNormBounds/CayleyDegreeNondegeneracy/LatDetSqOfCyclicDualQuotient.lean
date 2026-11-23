@@ -1,5 +1,47 @@
-import Formalism.SharpRestriction.CuspSpanNormBounds.CayleyDegreeNondegeneracy.ForPrimeFlagLattice
-import Formalism.SharpRestriction.CuspSpanNormBounds.LatticeGluingRadicals
+module
+
+public import Formalism.SharpRestriction.CuspSpanNormBounds.IsPrimitiveSub
+public import Formalism.SharpRestriction.CuspSpanNormBounds.BruhatCellsKronecker.NcardPrimesOverOfSplitsCompl
+public import Formalism.SharpRestriction.CuspSpanNormBounds.LatticeGluingRadicals
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Formalism.SharpRestriction.CuspSpanNormBounds.BruhatCellsKronecker.OwnEvIntro
+
+@[expose] public section
 
 noncomputable section
 
@@ -140,7 +182,23 @@ theorem latDet_sq_of_cyclic_dual_quotient (M : Submodule (𝓞 E) S.V) (hl : Sub
     latDetH S.hT M = Real.sqrt ((T : ℝ) ^ finrank ℚ E) := by
   have hA : Formalism.HermitianLatticesTheory.dual S.hT M ⊓ Submodule.restrictScalars (𝓞 E) (Submodule.span E (M : Set S.V)) =
       Formalism.HermitianLatticesTheory.dual S.hT M := by
-    rw [hl.span_eq_top, Submodule.restrictScalars_top, inf_top_eq]
+    apply inf_eq_left.mpr
+    intro w hw'
+    change w ∈ Submodule.span E (M : Set S.V)
+    have hw₁ : w₁ ∈ Submodule.span E (M : Set S.V) := by
+      have hm : ((T : ℕ) : 𝓞 E) • w₁ ∈ M := (hker _).2 (dvd_refl _)
+      have hs : ((T : ℕ) : E) • w₁ ∈ Submodule.span E (M : Set S.V) := by
+        have hm' : ((T : ℕ) : 𝓞 E) • w₁ ∈ Submodule.span E (M : Set S.V) := Submodule.subset_span hm
+        simpa only [Nat.cast_smul_eq_nsmul] using hm'
+      have hn : ((T : ℕ) : E) ≠ 0 := Nat.cast_ne_zero.mpr hT.ne_zero
+      simpa only [inv_smul_smul₀ hn] using
+        (Submodule.span E (M : Set S.V)).smul_mem (((T : ℕ) : E)⁻¹) hs
+    obtain ⟨a, ha⟩ := hgen w hw'
+    have ha' : w + a • w₁ ∈ Submodule.span E (M : Set S.V) := Submodule.subset_span ha
+    have hs : a • w₁ ∈ Submodule.span E (M : Set S.V) := by
+      simpa only [IsScalarTower.algebraMap_smul] using
+        (Submodule.span E (M : Set S.V)).smul_mem (algebraMap (𝓞 E) E a) hw₁
+    simpa only [add_sub_cancel_right] using (Submodule.span E (M : Set S.V)).sub_mem ha' hs
   have hφ : ∀ a : 𝓞 E, LinearMap.toSpanSingleton (𝓞 E) _
       (Submodule.Quotient.mk (p := M.comap (Formalism.HermitianLatticesTheory.dual S.hT M).subtype) ⟨w₁, hw⟩) a =
       Submodule.Quotient.mk ⟨a • w₁, (Formalism.HermitianLatticesTheory.dual S.hT M).smul_mem a hw⟩ := by

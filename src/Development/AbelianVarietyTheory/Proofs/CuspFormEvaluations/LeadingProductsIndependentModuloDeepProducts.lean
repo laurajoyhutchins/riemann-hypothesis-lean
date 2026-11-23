@@ -1,16 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.ThetaValues.Generic
-import Development.AbelianVarietyTheory.Definitions.ThetaValues.GamAt
-import Formalism.SharpRestriction.GenusPolyhedralBounds.RelativeIndexClassSets.TheoremZeroOfReducedInputs
-import Formalism.SharpRestriction.GenusPolyhedralBounds.RelativeIndexClassSets.LiftIndexPowFourLeDegree
-import Formalism.SharpRestriction.GenusPolyhedralBounds.RelativeIndexClassSets.AdmissibleModuleIffLatticeQuotients
-import Formalism.LocalToGlobal.ProjectiveLattices.ArchimedeanQuadraticData.MaximalCuspKernels.KerExistsStatement
-import Formalism.SharpRestriction.Divisibility.GeneratorPowers.ThExprUniqOfChartIndep2
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.SupBoundPageRows
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.LocalUnfoldBStatementHolds
-import Development.AbelianVarietyTheory.Proofs.TorusHaarMeasure.LeadMCoeffEqZero
-import Development.AbelianVarietyTheory.Proofs.TorusHaarMeasure.SumMultiLtSucc
-import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.MemSpanCuspReadingsIffComponents
+module
+
+public import Development.AbelianVarietyTheory.Definitions.ThetaValues.Generic
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.MemSpanCuspReadingsIffComponents
+public import Development.AbelianVarietyTheory.Proofs.TorusHaarMeasure.LeadMCoeffEqZero
+public import Development.AbelianVarietyTheory.Proofs.TorusHaarMeasure.SumMultiLtSucc
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.DivStatementPfLC
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.InterpStatementPfH
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.InterpStatementPfK
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.FourierCoefficientDomain
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Formalism.BasicNotions Formalism.MainNotions Formalism.MainNotions.WeightAlgebra Formalism.MainNotions.Gaps Formalism.MainNotions.Gaps.EtaleWeightGaps Formalism.L2.Pj ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.FD ReciprocityTheory.ChartRestriction.G.AR.Inst ReciprocityTheory.ChartRestriction.G.AR.Up GlobalTheory.RunIn GlobalTheory.Shares
 
@@ -47,13 +85,14 @@ private theorem coeff_lemma_3 {D : ℕ} (M : Finset (Fin D → ℕ)) (A : (Fin D
   have hp : p = 0 := by
     apply MvPolynomial.funext
     intro y
+
     simp only [p, map_sum, MvPolynomial.eval_monomial, map_zero]
     rw [← h y]
     refine Finset.sum_congr rfl fun α _ => ?_
     rw [Finsupp.prod_fintype _ _ (fun i => pow_zero _)]
     simp
   intro α hα
-  have h1 := congrArg (MvPolynomial.coeff (Finsupp.equivFunOnFinite.symm α)) hp
+  have h1 := congrArg (AddMonoidAlgebra.coeff · (Finsupp.equivFunOnFinite.symm α)) hp
   simp only [p, MvPolynomial.coeff_sum, MvPolynomial.coeff_monomial, MvPolynomial.coeff_zero] at h1
   rw [Finset.sum_eq_single α] at h1
   · simpa using h1
@@ -211,7 +250,8 @@ theorem main : ∀ (D : D7) (T : Top D) (h : LawsP T) (j : ℕ) (hj : InR D j) (
       e.symm ⟨k, ⟨cpt ((T.U j T.σ₀).X k) ((Fl.Fl k).xs i) z, hz⟩⟩ else xs q
   let U : Set (V (nd ((T.U j T.σ₀).X k))) :=
     cpt ((T.U j T.σ₀).X k) ((Fl.Fl k).xs i) ⁻¹' ((T.U j T.σ₀).X k).dom
-  have hU : IsOpen U := (FourierCoefficientDomain.isOpen_dom _).preimage (IW.cpt_diff _ _).continuous
+  have hU : IsOpen U := (FourierCoefficientDomain.isOpen_dom _).preimage
+    (IW.cpt_diff ((T.U j T.σ₀).X k) ((Fl.Fl k).xs i)).continuous
   have h0U : (0 : V (nd ((T.U j T.σ₀).X k))) ∈ U := by
     simp only [U, Set.mem_preimage, IW.cpt_zero]
     exact hx0

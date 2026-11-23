@@ -1,4 +1,44 @@
-import Formalism.LocalToGlobal.CharacterGerms.RowTieVal
+module
+
+public import Formalism.LocalToGlobal.CharacterGerms.RowTieVal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -16,36 +56,11 @@ section Defs
 
 variable (Y : FBChart C V O dd) (p : ∀ o, PairData Y d (I o))
 
-def expAll (x : Fin dd) : MvPowerSeries (WVO I) C :=
-  MvPowerSeries.subst (fun i : Fin dd => ∑ w : WVO I, (p w.1).u w.2.1 w.2.2 i •
-    (MvPowerSeries.X w : MvPowerSeries (WVO I) C)) (un1 (Y.ex x))
-
-def pull1 (F : PS C 1 dd) : MvPowerSeries (WVO I) C :=
-  MvPowerSeries.subst (fun q : Fin 1 × Fin dd => expAll Y p q.2) F
-
 def rowOf {n : ℕ} (b : Fin n) (F : MvPowerSeries (WVO I) C) : MvPowerSeries (Fin n × WVO I) C :=
   MvPowerSeries.subst (fun w : WVO I => (MvPowerSeries.X (b, w) : MvPowerSeries (Fin n × WVO I) C)) F
 
-def pullN {n : ℕ} (F : PS C n dd) : MvPowerSeries (Fin n × WVO I) C :=
-  MvPowerSeries.subst (fun q : Fin n × Fin dd => rowOf q.1 (expAll Y p q.2)) F
-
 def toAllS (o : Orb) (F : MvPowerSeries (WV (I o)) C) : MvPowerSeries (WVO I) C :=
   MvPowerSeries.subst (fun w : WV (I o) => (MvPowerSeries.X (⟨o, w⟩ : WVO I) : MvPowerSeries (WVO I) C)) F
-
-def LogCoordSt : Prop :=
-  ∀ (n : ℕ) (ι : Type) [Fintype ι] (cp : ι → Fin n) (uv : ι → Fin dd → C) (P : MvPolynomial ι C)
-    (Q : MvPolynomial (Fin n × WVO I) C), IsImgO (fun o => Y.raw (p o)) cp uv P Q →
-    ∀ F : PS C n dd, MvPowerSeries.constantCoeff (DpolyN (Y.B.FK C) cp uv P F) = jetAt0 Q (pullN Y p F)
-
-def UnitSt : Prop :=
-  PairsSep Y p → ∃ U : PS C 1 dd, IntS V U ∧ V.v (MvPowerSeries.constantCoeff U) = 0 ∧
-    pull1 Y p (FB.expS C ((Y.k : C) • Y.B.hL C Y.h Y.w0)) =
-      pull1 Y p U * ∏ o, toAllS o (mvExp (Y.raw (p o)).hRow)
-
-def GermLiftSt (H : ∀ o, (Y.raw (p o)).Hyps V) : Prop :=
-  PairsSep Y p → ∀ (o : Orb) (S : ∀ g, Sys (((Y.raw (p o)).rowData (H o)).G g))
-    (t : ∀ g, I o g → MvPowerSeries (I o g) C), (∀ g, (S g).IsT (t g)) →
-    ∀ F ∈ IntGerm V t, ∃ G : PS C 1 dd, IntS V G ∧ pull1 Y p G = toAllS o F
 
 end Defs
 
@@ -55,11 +70,5 @@ def LeafSt : Prop :=
     (kind : Fin n → Option (Fin 2 × ZMod d × ZMod d)), RowsOK (X.rowData H).G (X.rowData H).Alt Po kind →
     ∀ gr : Fin n → MvPowerSeries (WV I) C,
       jetAt0 Po (∏ ρ, (rowCopy ρ (gr ρ) * mvExp (rowCopy ρ X.hRow))) = ValOf (X.rowData H).hL Po kind gr
-
-def ValEqPFromCutsSt : Prop :=
-  ∀ (C : Type) [Field C] [CharZero C] (V : VF C) (O : Type) [CommRing O] [StarRing O] (dd : ℕ) (d : ℕ) [NeZero d]
-    (Orb : Type) [Fintype Orb] (I : Orb → Fin 2 → Type) [∀ o g, Fintype (I o g)]
-    (Y : FBChart C V O dd) (p : ∀ o, PairData Y d (I o)) (H : ∀ o, (Y.raw (p o)).Hyps V) (Ls : LetSys C dd) (n : ℕ),
-    LogCoordSt Y p → UnitSt Y p → GermLiftSt Y p H → LeafSt → ValEqPSt Y p H Ls n
 
 end Formalism.L2.FormalSeriesBounds

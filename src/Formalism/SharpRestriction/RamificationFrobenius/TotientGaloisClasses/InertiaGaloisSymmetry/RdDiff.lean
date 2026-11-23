@@ -1,4 +1,66 @@
-import Mathlib
+module
+
+public import Mathlib.LinearAlgebra.Lagrange
+public import Mathlib.NumberTheory.ArithmeticFunction.VonMangoldt
+public import Mathlib.NumberTheory.Cyclotomic.Basic
+public import Mathlib.NumberTheory.NumberField.Discriminant.Defs
+public import Mathlib.RingTheory.DedekindDomain.Different
+public import Mathlib.RingTheory.Ideal.Norm.AbsNorm
+import Mathlib.Algebra.AffineMonoid.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+public import Mathlib.NumberTheory.NumberField.Cyclotomic.Basic
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.NumberTheory.Cyclotomic.PrimitiveRoots
+
+@[expose] public section
 
 open NumberField IntermediateField Polynomial ArithmeticFunction
 
@@ -57,14 +119,6 @@ private theorem log_abs_norm_sub_one_mul_totient_eq {m : ℕ} (hm : 1 < m) {L : 
   rw [habs, Real.log_pow, log_abs_eval_one_cyclotomic_eq_vonMangoldt hm, ← Module.finrank_mul_finrank ℚ ℚ⟮η - 1⟯ L, hdeg]
   push_cast; ring
 
-theorem log_norm_cyc {m : ℕ} (hm : 1 < m) {F : Type*} [Field F] [NumberField F] [IsCyclotomicExtension {m} ℚ F]
-    {η : F} (hη : IsPrimitiveRoot η m) : Real.log |((Algebra.norm ℚ (η - 1) : ℚ) : ℝ)| = vonMangoldt m := by
-  haveI : NeZero m := ⟨by omega⟩
-  have h := log_abs_norm_sub_one_mul_totient_eq hm hη
-  rw [IsCyclotomicExtension.finrank F (cyclotomic.irreducible_rat (by omega : 0 < m))] at h
-  have ht : (0 : ℝ) < m.totient := by exact_mod_cast Nat.totient_pos.2 (by omega)
-  exact mul_right_cancel₀ ht.ne' (h.trans (mul_comm _ _))
-
 private theorem absNorm_map_algebraMap_eq_pow_finrank {L E : Type*} [Field L] [NumberField L] [Field E] [NumberField E]
     [Algebra E L] (I : Ideal (𝓞 E)) :
     Ideal.absNorm (I.map (algebraMap (𝓞 E) (𝓞 L))) = Ideal.absNorm I ^ Module.finrank E L := by
@@ -72,16 +126,11 @@ private theorem absNorm_map_algebraMap_eq_pow_finrank {L E : Type*} [Field L] [N
     exact (IsFractionRing.finrank_eq (𝓞 E) E (𝓞 L) L).symm
   rw [Ideal.absNorm_algebraMap (𝓞 E) (𝓞 L) I, hr]
 
-theorem log_norm_root {m : ℕ} (hm : 1 < m) {L : Type*} [Field L] [NumberField L] {η : L}
-    (hη : IsPrimitiveRoot η m) :
-    Real.log |((Algebra.norm ℚ (η - 1) : ℚ) : ℝ)| * (m.totient : ℝ) = (Module.finrank ℚ L : ℝ) * vonMangoldt m := by
-  exact log_abs_norm_sub_one_mul_totient_eq hm hη
-
 variable {N : ℕ} [NeZero N] {L : Type*} [Field L] [NumberField L] [IsCyclotomicExtension {N} ℚ L] {ζ : L}
   (hζ : IsPrimitiveRoot ζ N) (E : Type*) [Field E] [NumberField E] [Algebra E L]
 include hζ
 
-set_option maxHeartbeats 800000 in
+
 
 theorem adjoin_top : Algebra.adjoin E {ζ} = ⊤ := by
   have h1 : Algebra.adjoin ℚ ({ζ} : Set L) = ⊤ := IsCyclotomicExtension.adjoin_primitive_root_eq_top hζ
@@ -287,14 +336,17 @@ theorem log_norm_weight (u : ZMod N) (hu : u ≠ 1) :
   rw [mul_div_assoc', eq_div_iff ht.ne']
   exact key
 
-open Classical in
 
+local instance (p : Prop) : Decidable p := Classical.propDecidable p
+
+open Classical in
 theorem log_rd (U : Subgroup (ZMod N)ˣ)
     (hU : ∀ (σ : L ≃ₐ[ℚ] L) (u : (ZMod N)ˣ), σ ζ = ζ ^ (u : ZMod N).val →
       ((∀ x : E, σ (algebraMap E L x) = algebraMap E L x) ↔ u ∈ U)) :
     Real.log |(discr E : ℝ)| / Module.finrank ℚ E =
       ∑ u ∈ (Finset.univ : Finset (ZMod N)ˣ).filter (fun u => u ∉ U),
         vonMangoldt (addOrderOf ((u : ZMod N) - 1)) / ((addOrderOf ((u : ZMod N) - 1)).totient : ℝ) := by
+  classical
   haveI : FiniteDimensional E L := Module.Finite.of_restrictScalars_finite ℚ E L
   haveI : IsGalois ℚ L := IsCyclotomicExtension.isGalois {N} ℚ L
   have hφ : Module.finrank ℚ L = N.totient :=

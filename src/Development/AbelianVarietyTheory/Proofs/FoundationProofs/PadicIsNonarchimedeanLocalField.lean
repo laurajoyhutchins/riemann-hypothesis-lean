@@ -1,5 +1,68 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Foundations.MatrixMeasurableSpace
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.MatrixMeasurableSpace
+public import Mathlib.NumberTheory.Padics.ValuativeRel
+public import Mathlib.RingTheory.RegularLocalRing.Defs
+public import Mathlib.RingTheory.SimpleRing.Principal
+import Aesop.Main
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+public import Mathlib.Analysis.SpecialFunctions.Complex.CircleAddChar
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.Padics.LocalField
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Compactness.Paracompact
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Algebra.Module.CharacterModule
+public import Mathlib.Analysis.SpecialFunctions.Complex.Circle
+
+@[expose] public section
 
 open MeasureTheory ValuativeRel Matrix
 open scoped NNReal ENNReal Pointwise Topology
@@ -154,7 +217,7 @@ theorem nabs_uniformiser {ϖ : 𝒪[k]} (hϖ : Irreducible ϖ) {x : kˣ} (hx : (
   have hS : ∀ (r : 𝓀[k]) (y : 𝒪[k]), (y : k) ∈ S r ↔ IsLocalRing.residue _ y = r := by
     intro r y
     have := mem_cball_uniformiser hϖ hx (-(l r) + y)
-    rw [← IsLocalRing.residue_eq_zero_iff, map_add, map_neg, hl, neg_add_eq_zero, eq_comm] at this
+    rw [← IsLocalRing.residue_eq_zero_iff, map_add (f := _), map_neg, hl, neg_add_eq_zero, eq_comm] at this
     simpa [S] using this
   have hsub : ∀ r, S r ⊆ (𝒪[k] : Set k) := by
     intro r z hz
@@ -233,8 +296,8 @@ theorem ratCircle_eq_zero {x : AddCircle (1 : ℚ)} (h : ratCircle x = 0) : x = 
   rw [zsmul_eq_mul, mul_one] at hn ⊢
   exact_mod_cast hn
 
-variable (k) in
 
+variable (k) in
 theorem exists_hasConductor_one : ∃ ψ : AddChar k Circle, HasConductor ψ 1 := by
   obtain ⟨ϖ, hϖ⟩ := IsDiscreteValuationRing.exists_irreducible 𝒪[k]
   have h0 : (ϖ : k) ≠ 0 := by simpa using hϖ.ne_zero
@@ -428,8 +491,8 @@ theorem fourier_inversion (h : HasConductor ψ c) {f : k → ℂ} (hf : f ∈ SB
     rw [← nabs_mul, mul_comm, inv_mul_cancel_right]
   rw [h4]; ring
 
-omit [ν.IsAddHaarMeasure] in
 
+omit [ν.IsAddHaarMeasure] in
 theorem isSelfDual_of_isUnitVol (h : HasConductor ψ 1) (hν : IsUnitVol ν) : IsSelfDual ψ ν := by
   haveI := hν.1
   refine ⟨hν.1, fun f hf => ?_⟩

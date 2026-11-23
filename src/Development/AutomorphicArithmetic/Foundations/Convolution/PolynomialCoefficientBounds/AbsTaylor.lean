@@ -1,8 +1,48 @@
-import Mathlib
-import Development.AutomorphicArithmetic.Foundations.Convolution.BlockHeckeSlices.SliceShift
-import Development.AutomorphicArithmetic.Foundations.Convolution.PolynomialCoefficientBounds.Reduce
-import Development.AutomorphicArithmetic.Foundations.Convolution.PolynomialCoefficientBounds.Taylor
-import Development.AutomorphicArithmetic.Foundations.Convolution.PolynomialCoefficientBounds.AbsGrow
+module
+
+public import Development.AutomorphicArithmetic.Foundations.Convolution.BlockHeckeSlices.SliceShift
+public import Development.AutomorphicArithmetic.Foundations.Convolution.PolynomialCoefficientBounds.AbsGrow
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Calculus.Taylor
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open PositivityTheory.Rg.Fx UpperTheory.ConvolutionTheory.BW
 
@@ -48,7 +88,7 @@ private theorem taylor_seq (g : ℕ → ℝ → ℂ) (hg : ∀ k s, HasDerivAt (
       M * A * (A ^ m / (Nat.factorial m : ℝ)) := by
     intro m
     have h1 := taylor_mean_remainder_bound (f := g 0) (a := 0) (b := 1) (x := 1) (n := m)
-      (C := M * A ^ (m + 1)) zero_le_one
+      (C := M * A ^ (m + 1))
       (by exact_mod_cast (hgs (m + 1)).contDiffOn) (by simp) (by
         intro y hy
         rw [iteratedDerivWithin_eq_iteratedDeriv (uniqueDiffOn_Icc zero_lt_one)
@@ -174,7 +214,7 @@ theorem UpperTheory.ConvolutionTheory.FX.abs_taylor :
     | empty => intro ψ y; simpa using hasDerivAt_const (0 : ℝ) (c ψ y)
     | insert j S hj ih =>
       intro ψ y
-      rw [Finset.sum_insert hj, Finset.sum_insert hj, add_smul, map_add, Pi.add_apply]
+      rw [Finset.sum_insert hj, Finset.sum_insert hj, add_smul, map_add (f := _), Pi.add_apply]
       exact line_add (c ψ) _ _ _ _ _ _ (hone j ψ) (ih ψ) (hone j _) (ih _) (hb _) (hb _) y
   set T : A := ∑ j, (v j : ℂ) • I j with hT
   have hv : ∀ (ψ : V) (y : Fin r → ℝ), HasDerivAt (fun s : ℝ => c ψ (y + s • v)) (c (T • ψ) y) 0 := by
@@ -205,13 +245,14 @@ theorem UpperTheory.ConvolutionTheory.FX.abs_taylor :
         congr 1
         simp only [ha, hσ, Algebra.smul_def]
         ring
+
       rw [e, Finset.sum_smul, map_sum, Finset.sum_apply, pow_succ, ← mul_assoc, hM, Finset.mul_sum]
       refine (norm_sum_le _ _).trans (Finset.sum_le_sum fun j _ => ?_)
       rw [smul_assoc, c.map_smul, Pi.smul_apply, norm_smul, sub_smul, map_sub, smul_assoc, c.map_smul, Pi.sub_apply,
         Pi.smul_apply, Complex.norm_real, Real.norm_eq_abs, ← hM]
       have i1 := ih (α + Finsupp.single (τ0, σ j) 1)
       have i2 := mul_le_mul_of_nonneg_left (ih α) (norm_nonneg (Λ (τ0, σ j)))
-      rw [map_add, Finsupp.degree_single, pow_succ] at i1
+      rw [map_add (f := _), Finsupp.degree_single, pow_succ] at i1
       rw [← norm_smul] at i2
       have i3 := mul_le_mul_of_nonneg_left ((norm_sub_le _ _).trans (add_le_add i1 i2)) (abs_nonneg (v j))
       refine i3.trans (le_of_eq ?_)

@@ -1,6 +1,50 @@
-import Mathlib
-import Formalism.LocalToGlobal.KernelLattices.MuProd
-import Formalism.LocalToGlobal.Columns.RecLevelHost
+module
+
+public import Formalism.LocalToGlobal.KernelLattices.MuProd
+public import Formalism.LocalToGlobal.Columns.RecLevelHost
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain
 
@@ -17,11 +61,6 @@ variable {E : Type} [Field E] [NumberField E]
 theorem ab_one_val {P : HeightOneSpectrum (𝓞 E)} {a : E} (h : OneAt P a) : P.valuation E a = 1 := by
   have := Valuation.map_one_add_of_lt (v := P.valuation E) h
   rwa [add_sub_cancel] at this
-
-theorem ab_one_one (P : HeightOneSpectrum (𝓞 E)) : OneAt P (1 : E) := by
-  unfold OneAt
-  rw [sub_self, map_zero]
-  exact zero_lt_one
 
 theorem ab_one_mul {P : HeightOneSpectrum (𝓞 E)} {a b : E} (ha : OneAt P a) (hb : OneAt P b) : OneAt P (a * b) := by
   unfold OneAt
@@ -210,7 +249,7 @@ theorem ab_norm_int (hX : X.Ok) (a : 𝓞 X.E) : ∃ k : 𝓞 X.F, algebraMap (�
     have h2 : IsIntegral ℤ (algebraMap X.F X.E k) := by
       rw [hk]
       exact RingOfIntegers.isIntegral_coe _
-    exact (isIntegral_algebraMap_iff (algebraMap X.F X.E).injective).1 h2
+    exact (isIntegral_algebraMap_iff ).1 h2
   refine ⟨⟨k, hint⟩, ?_⟩
   apply RingOfIntegers.ext
   exact hk

@@ -1,7 +1,47 @@
-import Mathlib
-import Development.AbelianVarietyTheory.BlockTheory.NonGaloisCusps.ResidualConstruction
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.MemSpanRingCornerIdealModuleIff
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CoeffDetGenericSumMemOfCharpolyCoeffMem
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.NonGaloisCusps.ResidualConstruction
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CoeffDetGenericSumMemOfCharpolyCoeffMem
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.MemSpanRingCornerIdealModuleIff
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Formalism.BasicNotions Formalism.MainNotions Formalism.MainNotions.N GlobalTheory.IndefiniteRowSideFullHecke.CongruenceModuleMatrices GlobalTheory.SpanRing
 
@@ -33,15 +73,16 @@ theorem charpoly_coeff_mem_of_charPolyIn {Γ X O : Type} [Group Γ] [CommRing O]
 
 private theorem coeff_det_generic_sum_eval {X O : Type} [CommRing O] {n m : ℕ}
     (a : Fin m → X → Matrix (Fin n) (Fin n) O) (x : X) (d : Fin m →₀ ℕ) :
-    MvPolynomial.coeff d (Matrix.det (∑ k,
-      (MvPolynomial.X k : MvPolynomial (Fin m) O) • (a k x).map MvPolynomial.C)) =
-    (MvPolynomial.coeff d (Matrix.det (∑ k, (MvPolynomial.X k : MvPolynomial (Fin m) (X → O)) •
-      Matrix.of (fun i j => MvPolynomial.C (fun y => a k y i j)))) : X → O) x := by
+    AddMonoidAlgebra.coeff (Matrix.det (∑ k,
+      (MvPolynomial.X k : MvPolynomial (Fin m) O) • (a k x).map MvPolynomial.C)) d =
+    (AddMonoidAlgebra.coeff (Matrix.det (∑ k, (MvPolynomial.X k : MvPolynomial (Fin m) (X → O)) •
+      Matrix.of (fun i j => MvPolynomial.C (fun y => a k y i j)))) d : X → O) x := by
   set φ : MvPolynomial (Fin m) (X → O) →+* MvPolynomial (Fin m) O :=
     MvPolynomial.map (Pi.evalRingHom (fun _ => O) x) with hφ
   have h1 : φ.mapMatrix (∑ k, (MvPolynomial.X k : MvPolynomial (Fin m) (X → O)) •
       Matrix.of (fun i j => MvPolynomial.C (fun y => a k y i j))) =
       ∑ k, (MvPolynomial.X k : MvPolynomial (Fin m) O) • (a k x).map MvPolynomial.C := by
+
     rw [map_sum]
     refine Finset.sum_congr rfl fun k _ => ?_
     refine Matrix.ext fun i j => ?_
@@ -53,17 +94,17 @@ theorem coeff_det_generic_sum_mem_of_inRing :
     ∀ {Γ X O : Type} [Group Γ] [CommRing O] {n : ℕ} (T : Subalgebra O (X → O))
       (rep : X → (Γ →* GL (Fin n) O)), CharPolyIn T rep →
       ∀ (m : ℕ) (a : Fin m → X → Matrix (Fin n) (Fin n) O), (∀ k, InRing T rep (a k)) →
-      ∀ d : Fin m →₀ ℕ, (fun x => MvPolynomial.coeff d (Matrix.det (∑ k,
-        (MvPolynomial.X k : MvPolynomial (Fin m) O) • (a k x).map MvPolynomial.C))) ∈ T := by
+      ∀ d : Fin m →₀ ℕ, (fun x => AddMonoidAlgebra.coeff (Matrix.det (∑ k,
+        (MvPolynomial.X k : MvPolynomial (Fin m) O) • (a k x).map MvPolynomial.C)) d) ∈ T := by
   intro Γ X O _ _ n T rep hT m a ha d
   classical
 
   let T' : Subring (MvPolynomial (Fin m) (X → O)) := (MvPolynomial.map T.val.toRingHom).range
-  have hmemT : ∀ p ∈ T', ∀ e, MvPolynomial.coeff e p ∈ T := by
+  have hmemT : ∀ p ∈ T', ∀ e, AddMonoidAlgebra.coeff p e ∈ T := by
     intro p hp e
     obtain ⟨q, rfl⟩ := RingHom.mem_range.1 hp
     rw [MvPolynomial.coeff_map]
-    exact (MvPolynomial.coeff e q).2
+    exact (AddMonoidAlgebra.coeff q e).2
   have hC : ∀ f ∈ T, (MvPolynomial.C f : MvPolynomial (Fin m) (X → O)) ∈ T' := fun f hf =>
     RingHom.mem_range.2 ⟨MvPolynomial.C ⟨f, hf⟩, by simp⟩
   have hX : ∀ k, (MvPolynomial.X k : MvPolynomial (Fin m) (X → O)) ∈ T' := fun k =>
@@ -75,6 +116,7 @@ theorem coeff_det_generic_sum_mem_of_inRing :
     rintro _ ⟨g, rfl⟩ _ ⟨h, rfl⟩
     refine ⟨g * h, ?_⟩
     refine Matrix.ext fun i j => ?_
+
     simp only [M, Matrix.mul_apply, Matrix.of_apply, ← map_mul, ← map_sum]
     congr 1
     funext y
@@ -93,7 +135,7 @@ theorem coeff_det_generic_sum_mem_of_inRing :
           mat (rep y) h := by
         refine Matrix.ext fun i j => ?_
         rfl
-      have e' := congrArg (fun p => Polynomial.coeff p j)
+      have e' := congrArg (fun p => _root_.AddMonoidAlgebra.coeff (M := ℕ) p j)
         (Matrix.charpoly_map (Matrix.of fun i j => fun y => mat (rep y) h i j) (Pi.evalRingHom (fun _ => O) y))
       rw [hm] at e'
       simp only [Polynomial.coeff_map] at e'
@@ -130,7 +172,7 @@ theorem coeff_det_generic_sum_mem_of_inRing :
           Matrix.of (fun i j => MvPolynomial.C (fun y => b y i j)) +
             Matrix.of (fun i j => MvPolynomial.C (fun y => c y i j)) := by
         refine Matrix.ext fun i j => ?_
-        simp only [Matrix.of_apply, Matrix.add_apply, ← map_add]
+        simp only [Matrix.of_apply, Matrix.add_apply, ← map_add (f := _)]
         rfl
       rw [e]
       exact Submodule.add_mem _ hb hc
@@ -160,10 +202,10 @@ theorem coeff_det_generic_sum_mem_of_inRing :
     rw [← hfg]
     rfl
   rw [hsum] at hdet
-  have key : (fun x => MvPolynomial.coeff d (Matrix.det (∑ k,
-      (MvPolynomial.X k : MvPolynomial (Fin m) O) • (a k x).map MvPolynomial.C))) =
-      MvPolynomial.coeff d (Matrix.det (∑ k, (MvPolynomial.X k : MvPolynomial (Fin m) (X → O)) •
-        Matrix.of (fun i j => MvPolynomial.C (fun y => a k y i j)))) :=
+  have key : (fun x => AddMonoidAlgebra.coeff (Matrix.det (∑ k,
+      (MvPolynomial.X k : MvPolynomial (Fin m) O) • (a k x).map MvPolynomial.C)) d) =
+      AddMonoidAlgebra.coeff (Matrix.det (∑ k, (MvPolynomial.X k : MvPolynomial (Fin m) (X → O)) •
+        Matrix.of (fun i j => MvPolynomial.C (fun y => a k y i j)))) d :=
     funext fun x => coeff_det_generic_sum_eval a x d
   rw [key]
   exact hmemT _ hdet d

@@ -1,5 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ValHalfInf
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.MemSiegelOfIffRightAct
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import Mathlib.Topology.Algebra.Group.Units
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -173,7 +219,8 @@ theorem blocks_mem {R : Subring A} {a b c d : Matrix n n A} (ha : ∀ i k, a i k
   obtain ⟨x | x, rfl⟩ := e.surjective x <;> obtain ⟨y | y, rfl⟩ := e.surjective y <;> simp [*]
 
 theorem one_mem_entries (R : Subring A) (i k : n) : (1 : Matrix n n A) i k ∈ R := by
-  rw [one_apply]; split_ifs; exacts [one_mem _, zero_mem _]
+  change (if i = k then (1 : A) else 0) ∈ R
+  split_ifs <;> simp
 
 theorem uni_rat (S : Matrix n n E) : uni e (S.map j) ∈ (bc j).range :=
   (mem_rat j).2 (blocks_mem e (one_mem_entries _) (fun _ _ => ⟨_, rfl⟩) (fun _ _ => zero_mem _) (one_mem_entries _))
@@ -301,7 +348,7 @@ theorem core (j : E →+* A) (e : n ⊕ n ≃ ι) {σ : A →+* A} (hσc : Conti
       obtain ⟨y, hy⟩ := (mem_rat j).1 (hLj q) (e (.inr i)) x
       have h3 : j y = s.1 ^ m * (w₁ q).1 (e (.inr i)) x := by
         rw [hy, h1, Units.val_mul, Units.val_mul, val_uni, val_blkGL, blkMat, submatrix_mul_equiv, fromBlocks_multiply,
-          mul_apply, ← e.sum_comp]
+          Matrix.mul_apply, ← e.sum_comp]
         simp [dg, diagonal_apply, hm]
       rw [← hy, hm₀ m (by omega) _ (hw₂ q _ _) y h3, map_zero]
     have := (isUnit_iff_isUnit_det _).1 (L q * cayley e * (p q * k q)).isUnit

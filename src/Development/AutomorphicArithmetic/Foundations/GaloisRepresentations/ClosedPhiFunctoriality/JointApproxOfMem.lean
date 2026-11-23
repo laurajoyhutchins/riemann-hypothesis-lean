@@ -1,10 +1,45 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.PolyApproxZeroPadic
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.IsStratHom
+public import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.GaloisRepOfPolarizedCuspidal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
 import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.TrivIsCr
-import Development.AbelianVarietyTheory.Statements.EllipticCurveLevels.ClosedAtLConclusionOfMem
-import Formalism.SharpRestriction.LevelLetterCocycles.LocCoh
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.TwistStep
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.AcrisTorsionFreeComplete
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.DeRhamPotSemistable
+
+@[expose] public section
 
 noncomputable section
 
@@ -44,13 +79,6 @@ def ClosedPhi : Prop :=
           IsJumpsAt P Bw (ρ.comp (Dec (F := E) A).subtype) τ (J τ)) →
       wdTr P ι Bw h hj (r.comp (Dec (F := E) A).subtype) g = θ
 
-def PolyOfTr : Prop :=
-  ∀ (E Ω : Type) [Field E] [NumberField E] [Field Ω] [Algebra E Ω] [IsAlgClosure E Ω]
-    (w : HeightOneSpectrum (𝓞 E)) (A : ValuationSubring Ω) (h : IsPlaceOver A w) (a : ℕ) (X Y : WD h), X.unr → Y.unr →
-    X.lpDim = a → Y.lpDim = a → ∀ F : ↥(Weil h), deg F = -1 →
-    (∀ j : ℕ, 1 ≤ j → j ≤ a → (X.charPol (F ^ j)).nextCoeff = (Y.charPol (F ^ j)).nextCoeff) →
-    ∀ g : ↥(Weil h), X.charPol g = Y.charPol g
-
 abbrev iA (l : ℕ) [Fact l.Prime] : Ainf l →+* Per.Acris l := algebraMap (Ainf l) (Per.Acris l)
 
 abbrev iB (l : ℕ) [Fact l.Prime] : Per.Acris l →+* Per.Bcris l := algebraMap (Per.Acris l) (Per.Bcris l)
@@ -76,9 +104,6 @@ structure IsSecQ (bk : BK K) (N k : ℕ) {d : ℕ} (A : Matrix (Fin d) (Fin d) b
 structure IsPerU {d : ℕ} (ρ : ↥(GK K) →* GL (Fin d) ℤ_[l]) (U : Matrix (Fin d) (Fin d) (Per.Bcris l)) : Prop where
   unit : IsUnit U
   inv : ∀ g : ↥(GK K), (ρ g).val.map (Per.zB l) * U.map (Per.σB (g : GQ l)) = U
-
-def IsOp {d : ℕ} (ρ : ↥(GK K) →* GL (Fin d) ℤ_[l]) (n : ℕ) (s : Per.Bcris l) (V : Matrix (Fin d) (Fin d) (Per.Bcris l)) : Prop :=
-  ∃ U, IsPerU ρ U ∧ V * U = s • U.map ⇑(Per.φB l ^ n)
 
 def FixUr (K : FinExt l) (n : ℕ) : Prop := ∀ c : ↥(MaximalUnramifiedExtension l), (c : Om l) ∈ K.1 → (frobUr l ^ n) c = c
 

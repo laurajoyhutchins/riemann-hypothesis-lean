@@ -1,6 +1,49 @@
-import Mathlib
-import Formalism.SharpRestriction.CuspSpanNormBounds.BlockEnds
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.CountingFormula.CTEqConjTranspose
+module
+
+public import Formalism.LocalRingCardinality.DataSpaces
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.CountingFormula.CTEqConjTranspose
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Matrix NumberField Module Formalism.BasicNotions
 
@@ -15,8 +58,9 @@ def ctau (S : HSpace E) (τ : E →+* ℂ) (x : S.V) : Fin S.rank → ℂ := fun
 theorem hT_coord (S : HSpace E) (x y : S.V) :
     S.hT x y = ∑ i, ∑ j, star (S.frame.repr x i) * (S.gram i j * S.frame.repr y j) := by
   conv_lhs => rw [← S.frame.sum_repr x, ← S.frame.sum_repr y]
+
   simp only [map_sum, LinearMap.sum_apply, LinearMap.map_smulₛₗ, LinearMap.smul_apply, smul_eq_mul,
-    Finset.mul_sum, starRingEnd_apply]
+  Finset.mul_sum, starRingEnd_apply]
   conv_lhs => rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
   simp only [HSpace.gram, RingHom.id_apply]
@@ -25,19 +69,9 @@ theorem hT_coord (S : HSpace E) (x y : S.V) :
 theorem tau_hT (S : HSpace E) (τ : E →+* ℂ) (hτ : ∀ a, τ (star a) = starRingEnd ℂ (τ a)) (x y : S.V) :
     τ (S.hT x y) = star (ctau S τ x) ⬝ᵥ ((S.gram.map τ) *ᵥ ctau S τ y) := by
   rw [hT_coord]
-  simp only [dotProduct, mulVec, ctau, map_sum, map_mul, hτ, Pi.star_apply, Matrix.map_apply,
-    Finset.mul_sum, Complex.star_def]
 
-theorem hT_span_zero (S : HSpace E) {ι : Type} (f : ι → S.V) (y : S.V) (h : ∀ i, S.hT (f i) y = 0) :
-    ∀ x ∈ Submodule.span E (Set.range f), S.hT x y = 0 := by
-  intro x hx
-  induction hx using Submodule.span_induction with
-  | mem z hz =>
-    obtain ⟨i, rfl⟩ := hz
-    exact h i
-  | zero => simp
-  | add a b _ _ ha hb => simp [ha, hb]
-  | smul c a _ ha => simp [ha]
+  simp only [dotProduct, mulVec, ctau, map_sum, map_mul, hτ, Pi.star_apply, Matrix.map_apply,
+  Finset.mul_sum, Complex.star_def]
 
 theorem card_le_of_nonpos (S : HSpace E) (τ : E →+* ℂ) (hτ : ∀ a, τ (star a) = starRingEnd ℂ (τ a))
     (hsig : Formalism.UG.HasSignature (S.gram.map τ) (S.sig τ).1 (S.sig τ).2)
@@ -69,45 +103,5 @@ theorem card_le_of_nonpos (S : HSpace E) (τ : E →+* ℂ) (hτ : ∀ a, τ (st
       ring
     rw [key]
     exact mul_nonpos_of_nonneg_of_nonpos (by positivity) (hnp a)
-
-theorem finrank_perp_add (S : HSpace E) {r : ℕ} (e : Fin r → S.V) (he : LinearIndependent E e) :
-    finrank E (Formalism.MainNotions.S.perpS S (Submodule.span E (Set.range e))) + r = S.rank := by
-  let ψ : S.V →ₗ[E] (Fin r → E) := LinearMap.pi (fun i => S.hT (e i))
-  have hker : LinearMap.ker ψ = Formalism.MainNotions.S.perpS S (Submodule.span E (Set.range e)) := by
-    ext y
-    simp only [LinearMap.mem_ker]
-    constructor
-    · intro hy x hx
-      refine hT_span_zero S e y (fun i => ?_) x hx
-      have := congrFun hy i
-      simpa [ψ] using this
-    · intro hy
-      funext i
-      simpa [ψ] using hy (e i) (Submodule.subset_span ⟨i, rfl⟩)
-  have hsurj : LinearMap.range ψ = ⊤ := by
-    rw [LinearMap.range_eq_top, ← LinearMap.dualMap_injective_iff]
-    rw [← LinearMap.ker_eq_bot, LinearMap.ker_eq_bot']
-    intro φ hφ
-    let c : Fin r → E := fun i => φ (fun j => if i = j then 1 else 0)
-    have hφy : ∀ y, φ (ψ y) = S.hT (∑ i, star (c i) • e i) y := by
-      intro y
-      rw [LinearMap.pi_apply_eq_sum_univ φ (ψ y)]
-      simp [ψ, map_sum, LinearMap.sum_apply, c, mul_comm, starRingEnd_apply, star_star]
-    have hzero : ∑ i, star (c i) • e i = 0 := by
-      apply S.nondeg.1
-      intro y
-      rw [← hφy]
-      have := LinearMap.congr_fun hφ y
-      simpa [LinearMap.dualMap_apply] using this
-    have hc : ∀ i, c i = 0 := by
-      intro i
-      have := Fintype.linearIndependent_iff.1 he (fun i => star (c i)) hzero i
-      simpa using this
-    refine LinearMap.ext fun x => ?_
-    rw [LinearMap.pi_apply_eq_sum_univ φ x]
-    simp [show ∀ i, φ (fun j => if i = j then 1 else 0) = 0 from hc]
-  have h := LinearMap.finrank_range_add_finrank_ker ψ
-  rw [hsurj, hker, finrank_top, Module.finrank_fin_fun, S.rank_eq] at h
-  omega
 
 end PI.UnitaryGroupMassFormula.CntFormula.WbDefH

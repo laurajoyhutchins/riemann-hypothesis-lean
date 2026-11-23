@@ -1,8 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.EndOmega
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.SubstCongrModPrimeOfIntegralDerivativeStatement
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.PowPrimePowSubFrobeniusTwistNormLeStatement
-import Formalism.LocalToGlobal.TorsionIntegrality.SecondCoefficientNorms.BinomialSeriesCoefficients.Points
+module
+
+public import Development.AbelianVarietyTheory.Definitions.LatticeFrames.EndOmega
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.PowPrimePowSubFrobeniusTwistNormLeStatement
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.SubstCongrModPrimeOfIntegralDerivativeStatement
+public import Formalism.LocalToGlobal.TorsionIntegrality.SecondCoefficientNorms.BinomialSeriesCoefficients.DegreeLeOfMemAntidiagonal
+public import Formalism.LocalToGlobal.TorsionIntegrality.SecondCoefficientNorms.BinomialSeriesCoefficients.Points
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.PowerSeries.Expand
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open PowerSeries GlobalTheory.Honda
 
@@ -48,12 +91,12 @@ theorem twistLog_additive_mod : ∀ (K : Type) [NormedField K] [IsUltrametricDis
     · have := congrArg (MvPowerSeries.map (σ ^ i)) hef
       rw [PowerSeries.map_subst (PowerSeries.HasSubst.of_constantCoeff_zero' h0'), hXm] at this
       exact this
-  have hd' : CoefLe 1 (d⁄dX K g) := by
+  have hd' : CoefLe 1 (d⁄dX g) := by
     intro k
     rw [PowerSeries.coeff_derivative, hg, PowerSeries.coeff_map]
     have hk : (σ ^ i) ((PowerSeries.coeff (k + 1)) f) * ((k : K) + 1)
         = (σ ^ i) ((PowerSeries.coeff (k + 1)) f * ((k : K) + 1)) := by
-      rw [map_mul, map_add, map_one, map_natCast]
+      rw [map_mul, map_add (f := _), map_one, map_natCast]
     rw [hk, hτ, ← PowerSeries.coeff_derivative]
     exact hd k
   set X0 : MvPowerSeries (Fin 2) K := MvPowerSeries.X 0 with hX0
@@ -90,16 +133,16 @@ theorem twistLog_additive_mod : ∀ (K : Type) [NormedField K] [IsUltrametricDis
     rw [PowerSeries.subst_comp_subst_apply (PowerSeries.HasSubst.X_pow hn) has,
       PowerSeries.subst_pow has, PowerSeries.subst_X has]
   have hs0 : MvPowerSeries.constantCoeff (PowerSeries.subst X0 g + PowerSeries.subst X1 g) = 0 := by
-    rw [map_add, PowerSeries.constantCoeff_subst_eq_zero hX00 _ hg0,
+    rw [map_add (f := _), PowerSeries.constantCoeff_subst_eq_zero hX00 _ hg0,
       PowerSeries.constantCoeff_subst_eq_zero hX10 _ hg0, add_zero]
   have hs0f : MvPowerSeries.constantCoeff (PowerSeries.subst X0 f + PowerSeries.subst X1 f) = 0 := by
-    rw [map_add, PowerSeries.constantCoeff_subst_eq_zero hX00 _ h0,
+    rw [map_add (f := _), PowerSeries.constantCoeff_subst_eq_zero hX00 _ h0,
       PowerSeries.constantCoeff_subst_eq_zero hX10 _ h0, add_zero]
   have hmapF : MvPowerSeries.map (σ ^ i) F
       = PowerSeries.subst (PowerSeries.subst X0 g + PowerSeries.subst X1 g) e' := by
     rw [hF]
     unfold fadd
-    rw [PowerSeries.map_subst (PowerSeries.HasSubst.of_constantCoeff_zero hs0f), map_add,
+    rw [PowerSeries.map_subst (PowerSeries.HasSubst.of_constantCoeff_zero hs0f), map_add (f := _),
       PowerSeries.map_subst (PowerSeries.HasSubst.X 0), PowerSeries.map_subst (PowerSeries.HasSubst.X 1),
       hX0, hX1, MvPowerSeries.map_X, MvPowerSeries.map_X]
   have hBf : B = fadd g e' (X0 ^ l ^ i) (X1 ^ l ^ i) := by

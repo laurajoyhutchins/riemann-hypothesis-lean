@@ -1,4 +1,46 @@
-import Formalism.SharpRestriction.GrowthBounds.SegmentDegree.DiscriminantNeZeroOfResidueNeZero
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.SegmentDegree.DiscriminantNeZeroOfResidueNeZero
+public import Formalism.SharpRestriction.GrowthBounds.ValuationLowestDegreeMapFractionField
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -41,7 +83,7 @@ theorem plEmb_Pol {R : Type} [CommRing R] (r K : ℕ) {d : ℤ → ℕ} {A : MvP
   unfold multideg
   rw [Fin.sum_univ_add]
   have z1 : ∀ c : Fin r, Finsupp.mapDomain (fun v : ℤ × Fin r => (v.1, Fin.castAdd K v.2)) u (i, Fin.castAdd K c)
-      = u (i, c) := fun c => Finsupp.mapDomain_apply hf u (i, c)
+      = u (i, c) := fun c => Finsupp.mapDomain_apply_of_injective hf u (i, c)
   have z2 : ∀ c : Fin K, Finsupp.mapDomain (fun v : ℤ × Fin r => (v.1, Fin.castAdd K v.2)) u (i, Fin.natAdd r c)
       = 0 := by
     intro c
@@ -69,7 +111,7 @@ theorem nmEmb_Pol {R : Type} [CommRing R] (r K : ℕ) {d : ℤ → ℕ} {A : MvP
   unfold multideg
   rw [Fin.sum_univ_add]
   have z1 : ∀ c : Fin K, Finsupp.mapDomain (fun v : ℤ × Fin K => (v.1, Fin.natAdd r v.2)) u (i, Fin.natAdd r c)
-      = u (i, c) := fun c => Finsupp.mapDomain_apply hf u (i, c)
+      = u (i, c) := fun c => Finsupp.mapDomain_apply_of_injective hf u (i, c)
   have z2 : ∀ c : Fin r, Finsupp.mapDomain (fun v : ℤ × Fin K => (v.1, Fin.natAdd r v.2)) u (i, Fin.castAdd K c)
       = 0 := by
     intro c
@@ -106,9 +148,12 @@ theorem XX'_polComp (O : Type) [CommRing O] (r K : ℕ) [NeZero r] [NeZero K] {n
       have hsum : plEmb O r K A * nmEmb O r K G = ∑ d' ∈ T', ∑ d'' ∈ T'',
           plEmb O r K (polComp O r d' A) * nmEmb O r K (polComp O K d'' G) := by
         conv_lhs => rw [hT', hT'']
+
         rw [map_sum, map_sum, Finset.sum_mul_sum]
+
       rw [hsum, map_sum]
       refine Submodule.sum_mem _ fun d' _ => ?_
+
       rw [map_sum]
       refine Submodule.sum_mem _ fun d'' _ => ?_
       have hP : plEmb O r K (polComp O r d' A) * nmEmb O r K (polComp O K d'' G) ∈ Pol O (r + K) (d' + d'') :=
@@ -124,7 +169,7 @@ theorem XX'_polComp (O : Type) [CommRing O] (r K : ℕ) [NeZero r] [NeZero K] {n
       · rw [polComp_of_ne O _ _ _ _ hP hd]
         exact Submodule.zero_mem _
     | zero => rw [map_zero]; exact Submodule.zero_mem _
-    | add y z _ _ hy hz => rw [map_add]; exact Submodule.add_mem _ hy hz
+    | add y z _ _ hy hz => rw [map_add (f := _)]; exact Submodule.add_mem _ hy hz
     | smul c y _ hy => rw [map_smul]; exact Submodule.smul_mem _ c hy
   · rw [mem_restrictSupport_iff] at hx2 ⊢
     intro mm hmm
@@ -133,7 +178,7 @@ theorem XX'_polComp (O : Type) [CommRing O] (r K : ℕ) [NeZero r] [NeZero K] {n
 theorem zSeg_add {n' r : ℕ} [NeZero n'] (X : Dat n' r) (p K : ℕ) (O : Type) [CommRing O] (j : ℤ)
     (y1 y2 : SegRing O r K) (e : ℤ × Fin (r + K) →₀ ℕ) :
     X.zSeg p K O j (y1 + y2) e = X.zSeg p K O j y1 e + X.zSeg p K O j y2 e := by
-  unfold Dat.zSeg; rw [map_add]; ring
+  unfold Dat.zSeg; rw [map_add (f := _)]; ring
 
 theorem zSeg_smul {n' r : ℕ} [NeZero n'] (X : Dat n' r) (p K : ℕ) (O : Type) [CommRing O] (j : ℤ) (c : O)
     (y : SegRing O r K) (e : ℤ × Fin (r + K) →₀ ℕ) :
@@ -161,7 +206,7 @@ theorem segment_reduction_of_column_words (D : Formalism.BasicNotions.D7) (hB12 
     | add y z _ _ hy hz =>
       obtain ⟨x1, hx1, e1⟩ := hy
       obtain ⟨x2, hx2, e2⟩ := hz
-      exact ⟨x1 + x2, Submodule.add_mem _ hx1 hx2, by rw [zSeg_add, map_add, map_add, e1, e2]⟩
+      exact ⟨x1 + x2, Submodule.add_mem _ hx1 hx2, by rw [zSeg_add, map_add (f := _), map_add (f := _), e1, e2]⟩
     | smul c y _ hy =>
       obtain ⟨x1, hx1, e1⟩ := hy
       refine ⟨c • x1, Submodule.smul_mem _ c hx1, ?_⟩

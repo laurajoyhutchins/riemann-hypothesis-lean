@@ -1,13 +1,61 @@
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.StdBases
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.BeData
-import Formalism.LocalRingCardinality.CoeNeZeroOfNotMem
-import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.StatementB
-import Formalism.LocalToGlobal.InertKernelTheory.InertCoprimeLemmas.HurwitzSubstituteTwoSeries
+module
+
+public import Formalism.LocalToGlobal.InertKernelTheory.InertCoprimeLemmas.HurwitzSubstituteTwoSeries
+public import Formalism.LocalToGlobal.TorsionIntegrality.CMGoodModels.Statement
+public import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.TrDual
+public import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.KummerThetaLogarithms.ExistsUnitFactorizationBounded
+public import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.KummerThetaLogarithms.ExponentialSpecification
+public import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.KummerThetaLogarithms.SubstFirstCoboundaryThree
+public import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.KummerThetaLogarithms.SubstZeroOfConstantCoeff
+import Formalism.LocalToGlobal.TorsionIntegrality.SecondCoefficientNorms.BinomialSeriesCoefficients.CoeffPowEqZeroOfCc
 import Formalism.LocalToGlobal.TorsionIntegrality.SecondCoefficientNorms.BinomialSeriesCoefficients.DegreeLeOfMemAntidiagonal
-import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.KummerThetaLogarithms.SubstFirstCoboundaryThree
-import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.KummerThetaLogarithms.ExponentialSpecification
-import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.KummerThetaLogarithms.ExistsUnitFactorizationBounded
-import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.KummerThetaLogarithms.SubstZeroOfConstantCoeff
+import Formalism.ThetaLogCoordinates.UniformThetaSubstitution.FrobeniusLiftNorms.CoeffSubstLgFOfDegreeOne
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.StdBases
+public import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.StatementB
+import Formalism.SharpRestriction.GlobalSchurBounds.GeneralLinearActions.IsDiscriminantTwelfthRootOfIdealLattice
+
+@[expose] public section
+
 open NumberField Formalism.BasicNotions Formalism.MainNotions Formalism.MainNotions.G Formalism.MainNotions.TaylorLogMetric GlobalTheory.KerStd Classical
 open Formalism.L2.Th1.CM (MaximalUnramifiedExtension)
 open Formalism.L2.Th1.D (F1 F2 OwOK TrDual addC thetaInZ sumE)
@@ -51,7 +99,7 @@ variable {K : Type} [NormedField K] [IsUltrametricDist K] [CharZero K]
 theorem norm_natCast_le (n : ℕ) : ‖(n : K)‖ ≤ 1 := IsUltrametricDist.norm_natCast_le_one K n
 
 theorem lgF_deriv_int (l : ℕ) (hl : 2 ≤ l) (n : ℕ) :
-    PowerSeries.coeff n (PowerSeries.derivative K (lgF K l)) ∈ ball K := by
+    PowerSeries.coeff n (PowerSeries.derivative (lgF K l)) ∈ ball K := by
   rw [PowerSeries.coeff_derivative]
   unfold lgF
   rw [PowerSeries.coeff_mk, Finset.sum_mul]
@@ -100,7 +148,7 @@ theorem hur_of_simeq0 {τ : Type} [Fintype τ] [DecidableEq τ] (l : ℕ) (hl : 
   have h1 : constantCoeff (Formalism.L2.Th1.C.mvExp g) = 1 := Formalism.L2.Th1.C.constantCoeff_mvExp hg0
   have hEi : Hur (ball K) (Formalism.L2.Th1.C.mvExp g)⁻¹ := hur_inv _ hS h1
   refine hur_of_pderiv _ (by rw [hg0]; exact (ball K).zero_mem) fun i => ?_
-  have e : pderiv K i g = pderiv K i (Formalism.L2.Th1.C.mvExp g) * (Formalism.L2.Th1.C.mvExp g)⁻¹ := by
+  have e : pderiv i g = pderiv i (Formalism.L2.Th1.C.mvExp g) * (Formalism.L2.Th1.C.mvExp g)⁻¹ := by
     rw [Formalism.L2.Th1.C.pderiv_mvExp hg0, mul_assoc,
       MvPowerSeries.mul_inv_cancel _ (by rw [h1]; exact one_ne_zero), mul_one]
   rw [e]
@@ -180,26 +228,26 @@ variable {K : Type} [Field K]
 theorem constantCoeff_X_fin_three (i : Fin 3) : constantCoeff (X i : MvPowerSeries (Fin 3) K) = 0 := constantCoeff_X i
 
 theorem dd_first (B : MvPowerSeries (Fin 2) K) :
-    pderiv K 0 (pderiv K 1 (subst ![(X 0 + X 1 : MvPowerSeries (Fin 3) K), X 2] B -
+    pderiv 0 (pderiv 1 (subst ![(X 0 + X 1 : MvPowerSeries (Fin 3) K), X 2] B -
       subst ![(X 0 : MvPowerSeries (Fin 3) K), X 2] B - subst ![(X 1 : MvPowerSeries (Fin 3) K), X 2] B)) =
-      subst ![(X 0 + X 1 : MvPowerSeries (Fin 3) K), X 2] (pderiv K 0 (pderiv K 0 B)) := by
+      subst ![(X 0 + X 1 : MvPowerSeries (Fin 3) K), X 2] (pderiv 0 (pderiv 0 B)) := by
   have h01 : constantCoeff (X 0 + X 1 : MvPowerSeries (Fin 3) K) = 0 := by simp
   simp only [map_sub]
   rw [pd2 _ h01 (constantCoeff_X_fin_three 2), pd2 _ (constantCoeff_X_fin_three 0) (constantCoeff_X_fin_three 2), pd2 _ (constantCoeff_X_fin_three 1) (constantCoeff_X_fin_three 2)]
-  simp only [map_add, pderiv_X_self, pderiv_X_of_ne (show (0 : Fin 3) ≠ 1 by decide),
+  simp only [map_add (f := _), pderiv_X_self, pderiv_X_of_ne (show (0 : Fin 3) ≠ 1 by decide),
     pderiv_X_of_ne (show (2 : Fin 3) ≠ 1 by decide), mul_zero, add_zero, mul_one, zero_add, sub_zero]
   rw [pd2 _ h01 (constantCoeff_X_fin_three 2), pd2 _ (constantCoeff_X_fin_three 1) (constantCoeff_X_fin_three 2)]
   simp [pderiv_X_self, pderiv_X_of_ne (show (1 : Fin 3) ≠ 0 by decide),
     pderiv_X_of_ne (show (2 : Fin 3) ≠ 0 by decide)]
 
 theorem dd_second (B : MvPowerSeries (Fin 2) K) :
-    pderiv K 0 (pderiv K 1 (subst ![(X 2 : MvPowerSeries (Fin 3) K), X 0 + X 1] B -
+    pderiv 0 (pderiv 1 (subst ![(X 2 : MvPowerSeries (Fin 3) K), X 0 + X 1] B -
       subst ![(X 2 : MvPowerSeries (Fin 3) K), X 0] B - subst ![(X 2 : MvPowerSeries (Fin 3) K), X 1] B)) =
-      subst ![(X 2 : MvPowerSeries (Fin 3) K), X 0 + X 1] (pderiv K 1 (pderiv K 1 B)) := by
+      subst ![(X 2 : MvPowerSeries (Fin 3) K), X 0 + X 1] (pderiv 1 (pderiv 1 B)) := by
   have h01 : constantCoeff (X 0 + X 1 : MvPowerSeries (Fin 3) K) = 0 := by simp
   simp only [map_sub]
   rw [pd2 _ (constantCoeff_X_fin_three 2) h01, pd2 _ (constantCoeff_X_fin_three 2) (constantCoeff_X_fin_three 0), pd2 _ (constantCoeff_X_fin_three 2) (constantCoeff_X_fin_three 1)]
-  simp only [map_add, pderiv_X_self, pderiv_X_of_ne (show (0 : Fin 3) ≠ 1 by decide),
+  simp only [map_add (f := _), pderiv_X_self, pderiv_X_of_ne (show (0 : Fin 3) ≠ 1 by decide),
     pderiv_X_of_ne (show (2 : Fin 3) ≠ 1 by decide), mul_zero, add_zero, mul_one, zero_add, sub_zero]
   rw [pd2 _ (constantCoeff_X_fin_three 2) h01, pd2 _ (constantCoeff_X_fin_three 2) (constantCoeff_X_fin_three 1)]
   simp [pderiv_X_self, pderiv_X_of_ne (show (1 : Fin 3) ≠ 0 by decide),
@@ -223,32 +271,32 @@ theorem restr' (g : MvPowerSeries (Fin 2) K) (u w : MvPowerSeries (Fin 3) K)
   rfl
 
 theorem conj_dd' (be : MvPowerSeries (Fin 2) K) (a' b' : K) :
-    constantCoeff (pderiv K 0 (pderiv K 1 (subst ![C a' * X 0, X 1] be - subst ![X 0, C b' * X 1] be :
+    constantCoeff (pderiv 0 (pderiv 1 (subst ![C a' * X 0, X 1] be - subst ![X 0, C b' * X 1] be :
       MvPowerSeries (Fin 2) K))) =
-      constantCoeff (pderiv K 0 (pderiv K 1 be)) * (a' - b') := by
+      constantCoeff (pderiv 0 (pderiv 1 be)) * (a' - b') := by
   have hu : constantCoeff (C a' * X 0 : MvPowerSeries (Fin 2) K) = 0 := by simp
   have hw : constantCoeff (C b' * X 1 : MvPowerSeries (Fin 2) K) = 0 := by simp
   have hX0 : constantCoeff (X 0 : MvPowerSeries (Fin 2) K) = 0 := constantCoeff_X 0
   have hX1 : constantCoeff (X 1 : MvPowerSeries (Fin 2) K) = 0 := constantCoeff_X 1
-  have hu0 : pderiv K 0 (C a' * X 0 : MvPowerSeries (Fin 2) K) = C a' := by
+  have hu0 : pderiv 0 (C a' * X 0 : MvPowerSeries (Fin 2) K) = C a' := by
     rw [Derivation.leibniz]; simp
-  have hu1 : pderiv K 1 (C a' * X 0 : MvPowerSeries (Fin 2) K) = 0 := by
+  have hu1 : pderiv 1 (C a' * X 0 : MvPowerSeries (Fin 2) K) = 0 := by
     rw [Derivation.leibniz]; simp [pderiv_X_of_ne (show (0 : Fin 2) ≠ 1 by decide)]
-  have hw0 : pderiv K 0 (C b' * X 1 : MvPowerSeries (Fin 2) K) = 0 := by
+  have hw0 : pderiv 0 (C b' * X 1 : MvPowerSeries (Fin 2) K) = 0 := by
     rw [Derivation.leibniz]; simp [pderiv_X_of_ne (show (1 : Fin 2) ≠ 0 by decide)]
-  have hw1 : pderiv K 1 (C b' * X 1 : MvPowerSeries (Fin 2) K) = C b' := by
+  have hw1 : pderiv 1 (C b' * X 1 : MvPowerSeries (Fin 2) K) = C b' := by
     rw [Derivation.leibniz]; simp
-  have A1 : pderiv K 1 (subst ![C a' * X 0, X 1] be : MvPowerSeries (Fin 2) K) =
-      subst ![C a' * X 0, X 1] (pderiv K 1 be) := by
+  have A1 : pderiv 1 (subst ![C a' * X 0, X 1] be : MvPowerSeries (Fin 2) K) =
+      subst ![C a' * X 0, X 1] (pderiv 1 be) := by
     rw [pd2 _ hu hX1, hu1, pderiv_X_self]; ring
-  have A0 : pderiv K 0 (subst ![C a' * X 0, X 1] (pderiv K 1 be) : MvPowerSeries (Fin 2) K) =
-      subst ![C a' * X 0, X 1] (pderiv K 0 (pderiv K 1 be)) * C a' := by
+  have A0 : pderiv 0 (subst ![C a' * X 0, X 1] (pderiv 1 be) : MvPowerSeries (Fin 2) K) =
+      subst ![C a' * X 0, X 1] (pderiv 0 (pderiv 1 be)) * C a' := by
     rw [pd2 _ hu hX1, hu0, pderiv_X_of_ne (show (1 : Fin 2) ≠ 0 by decide)]; ring
-  have B1 : pderiv K 1 (subst ![X 0, C b' * X 1] be : MvPowerSeries (Fin 2) K) =
-      subst ![X 0, C b' * X 1] (pderiv K 1 be) * C b' := by
+  have B1 : pderiv 1 (subst ![X 0, C b' * X 1] be : MvPowerSeries (Fin 2) K) =
+      subst ![X 0, C b' * X 1] (pderiv 1 be) * C b' := by
     rw [pd2 _ hX0 hw, pderiv_X_of_ne (show (0 : Fin 2) ≠ 1 by decide), hw1]; ring
-  have B0 : pderiv K 0 (subst ![X 0, C b' * X 1] (pderiv K 1 be) * C b' : MvPowerSeries (Fin 2) K) =
-      subst ![X 0, C b' * X 1] (pderiv K 0 (pderiv K 1 be)) * C b' := by
+  have B0 : pderiv 0 (subst ![X 0, C b' * X 1] (pderiv 1 be) * C b' : MvPowerSeries (Fin 2) K) =
+      subst ![X 0, C b' * X 1] (pderiv 0 (pderiv 1 be)) * C b' := by
     rw [Derivation.leibniz, pd2 _ hX0 hw, pderiv_C, pderiv_X_self, hw0]; simp [mul_comm]
   rw [map_sub, map_sub, A1, A0, B1, B0, map_sub, map_mul, map_mul, cc_subst (cc2 hu hX1),
     cc_subst (cc2 hX0 hw), constantCoeff_C, constantCoeff_C]
@@ -342,7 +390,7 @@ theorem hur_addC (l : ℕ) (σ : K →+* K) (hU : Formalism.InvariantFactorPaths
     rw [subst_addC l hl (constantCoeff_X_fin_three 2) hX01, subst_addC l hl (constantCoeff_X_fin_three 2) (constantCoeff_X_fin_three 0),
       subst_addC l hl (constantCoeff_X_fin_three 2) (constantCoeff_X_fin_three 1)]
     exact H
-  have h00 : Hur (ball K) (pderiv K 0 (pderiv K 0 (addC l be0))) := by
+  have h00 : Hur (ball K) (pderiv 0 (pderiv 0 (addC l be0))) := by
     have H := hur_pderiv _ (hur_pderiv _ hD1 1) 0
     rw [dd_first] at H
     have hb0 : ∀ j, constantCoeff ((![X 0, 0, X 1] : Fin 3 → MvPowerSeries (Fin 2) K) j) = 0 := by
@@ -352,7 +400,7 @@ theorem hur_addC (l : ℕ) (σ : K →+* K) (hU : Formalism.InvariantFactorPaths
     have := hur_subst (ball K) hb0 (by intro j; fin_cases j <;> simp [hur_X, hur_zero]) H
     rwa [restr' _ _ _ _ (by simp) (by simp) hb0 (by rw [subst_add hb, subst_X hb, subst_X hb]; simp)
       (by rw [subst_X hb]; simp)] at this
-  have h11 : Hur (ball K) (pderiv K 1 (pderiv K 1 (addC l be0))) := by
+  have h11 : Hur (ball K) (pderiv 1 (pderiv 1 (addC l be0))) := by
     have H := hur_pderiv _ (hur_pderiv _ hD2 1) 0
     rw [dd_second] at H
     have hb0 : ∀ j, constantCoeff ((![X 1, 0, X 0] : Fin 3 → MvPowerSeries (Fin 2) K) j) = 0 := by
@@ -397,7 +445,7 @@ theorem hur_addC (l : ℕ) (σ : K →+* K) (hU : Formalism.InvariantFactorPaths
   have hlt1 : ‖(l : K)‖ < 1 := by
     rw [hU.2.2.1]; exact inv_lt_one_of_one_lt₀ (by exact_mod_cast hU.1.one_lt)
   have hsep : ‖ζ - σ ζ‖ = 1 := by rw [hσζ]; exact norm_root_sub_pow l hl hlt1 hζ
-  have h01 : constantCoeff (pderiv K 0 (pderiv K 1 (addC l be0))) ∈ ball K := by
+  have h01 : constantCoeff (pderiv 0 (pderiv 1 (addC l be0))) ∈ ball K := by
     have hc := hur_cc _ (hur_pderiv _ (hur_pderiv _ hD3 1) 0)
     rw [conj_dd', mem_ball, norm_mul, hsep, mul_one] at hc
     exact hc

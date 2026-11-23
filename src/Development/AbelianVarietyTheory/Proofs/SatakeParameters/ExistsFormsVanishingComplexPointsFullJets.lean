@@ -1,13 +1,62 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.FRatioSelf
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsAffCoverSpec
-import Development.AbelianVarietyTheory.Definitions.Divisors.ComparisonMemCechHodgeFiltration
-import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.RingKrullDimLeOfQuasiFinite
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsGenericForms
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsCotangentBasis
+module
+
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.FRatioSelf
+public import Development.AbelianVarietyTheory.Definitions.Divisors.ComparisonMemCechHodgeFiltration
+public import Development.AbelianVarietyTheory.Definitions.Divisors.DetJacMatCoordsEqTransitionJacobianDet
+public import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.RingKrullDimLeOfQuasiFinite
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.AlgebraMapBasicOpen
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsCotangentBasis
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsGenericForms
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsProjFormNonvanishingGenericPointComplexPoi
 import Development.AbelianVarietyTheory.Proofs.SatakeParameters.FRatioLinear
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.RatioSpanCotangentChangeDenominator
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsProjFormNonvanishingGenericPointComplexPoi
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.RatioSpanCotangentChangeDenominator
+import Mathlib.Algebra.Module.Submodule.Union
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+public import Mathlib.AlgebraicGeometry.AlgClosed.Basic
+import Mathlib.AlgebraicGeometry.QuasiAffine
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.AbProj
+import Development.AbelianVarietyTheory.Definitions.Divisors.CupPair
+
+@[expose] public section
+
 open CategoryTheory AlgebraicGeometry ReciprocityTheory.ChartRestriction.G.Geo.Tor GlobalTheory GlobalTheory.CechDR GlobalTheory.PD
 
 set_option autoImplicit false
@@ -214,7 +263,7 @@ theorem exists_lin_sep {X : Scheme.{0}} (p : X ⟶ Sp ℂ) {N : ℕ} (ι : X ⟶
       exact ((basicOpen_app_frac ι _ (hL l) hg le_rfl).le h).2 (hLx l)
     | algebraMap c => rw [he, sub_self]; exact I.zero_mem
     | add a b _ _ ha hb =>
-      rw [map_add, map_add]
+      rw [map_add (f := _), map_add (f := _)]
       convert I.add_mem ha hb using 1
       ring
     | mul a b _ _ ha hb =>
@@ -306,7 +355,7 @@ theorem exists_lin_mul {X : Scheme.{0}} (p : X ⟶ Sp ℂ) {N : ℕ} (ι : X ⟶
       Eq.trans (congrArg (ι.app _).hom (frac_mul_eq rfl).symm) (map_mul _ _ _)
     have e2 : rat p ι _ g₀ hl hg₀ = (e t)⁻¹ • rat p ι l₁ g₀ hl₁ hg₀ := fRatio_smul_n p ι hp _ hl₁ hl hg₀
     have h3 : 1 - algebraMap ℂ _ (e t)⁻¹ * t ∈ RingHom.ker e := by
-      rw [RingHom.mem_ker, map_sub, map_mul, he, map_one, inv_mul_cancel₀ ht, sub_self]
+      rw [RingHom.mem_ker, RingHom.map_sub, map_mul, he, map_one, inv_mul_cancel₀ ht, sub_self]
     have h4 : u' - v ∈ RingHom.ker e ^ 2 := by
       have h5 := Ideal.mul_mem_mul (RingHom.mem_ker.2 hs0) h3
       rw [← pow_two] at h5
@@ -357,13 +406,13 @@ theorem mem_vanS {k : ℕ} {f : MvPolynomial (Fin (N + 1)) ℂ} :
 def vanAt (k : ℕ) (x : X) : Submodule ℂ (vanS ι S k) :=
   ((ι.base x).asHomogeneousIdeal.toIdeal.restrictScalars ℂ).comap (vanS ι S k).subtype
 
-variable (p) in
 
+variable (p) in
 abbrev evS {U : X.Opens} {y : CxPts p (RingHom.id ℂ)} (hy : y ∈ CxPts.ptsIn p (RingHom.id ℂ) U) : Sec p U →+* ℂ :=
   CxPts.evHom hy
 
-variable (p) in
 
+variable (p) in
 def sqI {U : X.Opens} {y : CxPts p (RingHom.id ℂ)} (hy : y ∈ CxPts.ptsIn p (RingHom.id ℂ) U) : Submodule ℂ (Sec p U) :=
   ((RingHom.ker (evS p hy)) ^ 2).restrictScalars ℂ
 
@@ -408,6 +457,7 @@ theorem jet_range (hp : ι ≫ PSpace.str ℂ N = p) (d : ℕ) [SmoothOfRelative
         exact ((mem_vanS ι S).1 f.2).2 y hyS
       obtain ⟨b, hb⟩ := hgs _ hf0
       change (sqI p hy).mkQ _ ∈ _
+
       rw [(hq _ _).2 hb, map_sum]
       exact Submodule.sum_mem _ fun j _ => by
         rw [map_smul]
@@ -420,6 +470,7 @@ theorem jet_range (hp : ι ≫ PSpace.str ℂ N = p) (d : ℕ) [SmoothOfRelative
     intro b hb
     refine congrFun (hgi b ?_)
     have : (sqI p hy).mkQ (∑ j, b j • g j) = (sqI p hy).mkQ 0 := by
+
       rw [map_sum]
       simpa only [map_smul, map_zero] using hb
     have h2 := (hq _ _).1 this
@@ -565,7 +616,7 @@ theorem exists_jet_forms : ∀ (X : Scheme.{0}) [IsIntegral X] (p : X ⟶ Sp ℂ
         calc ((k + 1 : ℕ) : ℕ∞) = (k : ℕ∞) + 1 := by push_cast; ring
           _ ≤ Order.coheight t + 1 := by gcongr
           _ ≤ Order.coheight x := h2
-      · rw [Fin.comp_snoc, linearIndependent_fin_snoc]
+      · rw [Fin.comp_snoc, linearIndependent_finSnoc]
         exact ⟨hli y, hc' (some (Sum.inr y))⟩
   obtain ⟨c, hgen, hZ, hli⟩ := key d le_rfl
   let Z : Set X := ⋂ i, (↑(fOpen ι (c i).1) : Set X)ᶜ
@@ -622,6 +673,7 @@ theorem exists_jet_forms : ∀ (X : Scheme.{0}) [IsIntegral X] (p : X ⟶ Sp ℂ
       obtain ⟨b, hb⟩ := (Submodule.mem_span_range_iff_exists_fun ℂ).1 h1
       have h2 : u - ∑ j, b j • r j ∈ RingHom.ker (evS p hya) ^ 2 := by
         have e1 : (sqI p hya).mkQ (∑ j, b j • r j) = (sqI p hya).mkQ u := by
+
           rw [← hb, map_sum]
           simp only [map_smul]
           rfl

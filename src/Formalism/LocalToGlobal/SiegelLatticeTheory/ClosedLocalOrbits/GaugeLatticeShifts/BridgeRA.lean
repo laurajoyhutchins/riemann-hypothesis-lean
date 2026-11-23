@@ -1,5 +1,55 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.IotaDictAll
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.BridgeRat
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.IotaBridgeHalves
+import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.ChiNMul
+import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RootLatticeThresholds.LatDictK
+import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.HermitianETransportInvariant
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicClassFiniteness.DictAll
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicClassFiniteness.DictRing
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -32,19 +82,6 @@ theorem bezoutMo {v : VA X.B.I} (hv : v ∈ X.B.I.Lf) {N : ℕ} (hN : Nat.Coprim
     have : ((z : X.B.I.E ⊗[X.B.I.F] Af X.B.I.F)) • w = (⟨_, intCast_mem _ z⟩ : IntAf X.B.I.F X.B.I.E) • w := rfl
     rw [this]; exact Submodule.smul_mem _ _ hw
   exact add_mem (sm _ _ h) (sm _ _ (mL_Mo X.B.I (smul_mem_mL X.B.I hv)))
-
-theorem cE_mem (a : Fin D.R.rS) : ∃ c : ℕ, Nat.Coprime c X.B.g ∧
-    (c : X.B.I.E ⊗[X.B.I.F] Af X.B.I.F) • incl X.B.I (X.crd (X.eX a)) ∈ X.B.I.Lf := by
-  obtain ⟨c, hc, hcm⟩ := (X.basisApprox a).1
-  refine ⟨c, hc, ?_⟩
-  have hmL : mL X.B.I X.B.g ≤ X.B.I.Lf := (Mo_le_Lf X).trans' (mL_Mo X.B.I)
-  have e : (c : X.B.I.E ⊗[X.B.I.F] Af X.B.I.F) • incl X.B.I (X.crd (X.eX a)) =
-      (c : X.B.I.E ⊗[X.B.I.F] Af X.B.I.F) • X.e0 a - (c : X.B.I.E ⊗[X.B.I.F] Af X.B.I.F) • (X.e0 a - incl X.B.I (X.crd (X.eX a))) := by
-    rw [smul_sub]; abel
-  rw [e]
-  refine sub_mem ?_ (hmL hcm)
-  have : (c : X.B.I.E ⊗[X.B.I.F] Af X.B.I.F) • X.e0 a = (⟨_, natCast_mem _ c⟩ : IntAf X.B.I.F X.B.I.E) • X.e0 a := rfl
-  rw [this]; exact Submodule.smul_mem _ _ (X.vectorsInLattice.1 a).1
 
 theorem cF_mem (a : Fin D.R.rS) : ∃ c : ℕ, Nat.Coprime c X.B.g ∧
     (c : X.B.I.E ⊗[X.B.I.F] Af X.B.I.F) • incl X.B.I (X.crd (X.fY a)) ∈ X.B.I.Lf := by
@@ -149,6 +186,7 @@ theorem hat_NgX (A : X.B.I.Gf) {u : D.what₂.Word} {Λ : Submodule (𝓞 D.host
     obtain ⟨s, hs⟩ := (Submodule.mem_span_range_iff_exists_fun D.host.E).1 hspan
     have hcoef : ∀ b, (VS D).hT (X.fY b) q = s b := by
       intro b
+
       rw [← hs, map_sum]
       simp only [map_smul, smul_eq_mul, Formalism.L2.SG.Pf.hT_f_e X, mul_ite, mul_one, mul_zero, Finset.sum_ite_eq',
         Finset.mem_univ, if_true]
@@ -304,6 +342,7 @@ theorem iotaBridgeRAC_holds : IotaBridgeRAC := by
     rw [this]; exact Submodule.smul_mem _ _ hyL
   have hxo : ∀ a, (VS D).hT (X.eX a) x = 0 := by
     intro a
+
     rw [hx, map_sub, map_smul, map_sum]
     simp only [map_smul, smul_eq_mul, X.ef, mul_ite, mul_one, mul_zero, Finset.sum_ite_eq, Finset.mem_univ, if_true, hs]
     ring

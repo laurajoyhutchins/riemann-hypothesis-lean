@@ -1,13 +1,58 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.ChiLenPicPushforwardOfIsClosedImmersion
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.IsClosedImmersionBaseChange
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ScaleZeroComp
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.AbsLogGrNormSubLe
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsUnitSectionOfLocalValues
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsScfEmbeddingDvd
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsPointOfIntegralPoint
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.DividesOfNormBoundedPoints
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.ChiLenPicPushforwardOfIsClosedImmersion
+public import Development.AbelianVarietyTheory.Counterexamples.ModuliSurvey.DominatesLiftUnique
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.IsClosedImmersionBaseChange
 import Development.AbelianVarietyTheory.Proofs.FoundationProofs.RangeAlgebraMapEqIInfDiscreteValuationSubring
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.AbsLogGrNormSubLe
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.DividesOfNormBoundedPoints
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsPointOfIntegralPoint
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsScfEmbeddingDvd
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsUnitSectionOfLocalValues
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LatDRSubsetLatHT
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LocalSystemModelMap
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ScaleZeroComp
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Localization.Cardinality
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.AbProj
+import Std.Tactic.BVDecide.Normalize.Prop
+import Formalism.SharpRestriction.Divisibility.AbelianOpenPart.AbelianAt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -50,11 +95,11 @@ theorem valF_map {F F' : Type} [Field F] [Field F'] (f : F →+* F') {X : Scheme
 
 theorem valF_natCast {F : Type} [Field F] {X : Scheme.{0}} {w : Sp F ⟶ X} {U : X.Opens} (h : ⊤ ≤ w ⁻¹ᵁ U) (n : ℕ) :
     valF w U (n : Γ(X, U)) = n := by
-  rw [valF, dif_pos h, map_natCast, map_natCast]
+  rw [valF, dite_eq_left h, map_natCast, map_natCast]
 
 theorem valF_one {F : Type} [Field F] {X : Scheme.{0}} {w : Sp F ⟶ X} {U : X.Opens} (h : ⊤ ≤ w ⁻¹ᵁ U) :
     valF w U 1 = 1 := by
-  rw [valF, dif_pos h, map_one, map_one]
+  rw [valF, dite_eq_left h, map_one, map_one]
 
 theorem maximal_of_stalk {X : Scheme.{0}} {x : X} {K : Type} [Field K] {f : X.presheaf.stalk x →+* K}
     (hf : Function.Injective f) (y : X) (hy : y ⤳ (spMap f ≫ X.fromSpecStalk x) (closedPoint K)) :
@@ -196,14 +241,14 @@ theorem exists_extension {U : Z.X.Opens} (f : ∀ a, Γ(Z.X, (Z.U a).1 ⊓ U))
 
 variable {b b' : Bool} {st st' : ((E →+* ℂ) × ℕ) ⊕ ℕ} {x : Letter Dw}
 
-omit hp hW in
 
+omit hp hW in
 theorem val_ne_zero (M : LineModel Z b st x) {k : Type} [Field k] {w : Sp k ⟶ Z.X} {a : Fin Z.m} {i : Fin M.L.n}
     (ha : ⊤ ≤ w ⁻¹ᵁ (Z.U a).1) (hi : ⊤ ≤ w ⁻¹ᵁ M.L.U i) : valF w _ (M.r a i).val ≠ 0 :=
   left_ne_zero_of_mul_eq_one (valF_mul_inv (U := (Z.U a).1 ⊓ M.L.U i) (fun _ hq => ⟨ha hq, hi hq⟩) _)
 
-omit hp hW in
 
+omit hp hW in
 theorem cross_eq (hty : ∀ τ k, k ≤ Dw.mult τ → k ∈ Z.ty τ) (M : LineModel Z b st x) (M' : LineModel Z b' st' x)
     {k : Type} [Field k] {w : Sp k ⟶ Z.X} {a a' : Fin Z.m} {i : Fin M.L.n} {j : Fin M'.L.n}
     (ha : ⊤ ≤ w ⁻¹ᵁ (Z.U a).1) (ha' : ⊤ ≤ w ⁻¹ᵁ (Z.U a').1) (hi : ⊤ ≤ w ⁻¹ᵁ M.L.U i) (hj : ⊤ ≤ w ⁻¹ᵁ M'.L.U j) :
@@ -224,19 +269,19 @@ def IsQuot (M : LineModel Z b st x) (M' : LineModel Z b' st' x) (i : Fin M.L.n) 
   ∀ (k : Type) [Field k] (w : Sp k ⟶ Z.X) a, ⊤ ≤ w ⁻¹ᵁ (Z.U a).1 → ⊤ ≤ w ⁻¹ᵁ V →
     valF w V s * valF w _ (M.r a i).val = c * valF w _ (M'.r a j).val
 
-variable (Z b st b' st') in
 
+variable (Z b st b' st') in
 def Bdd : Prop := ∃ m : ℕ, ∀ (y : Z.Pt) a (φ : Γ(Z.X, (Z.U a).1) →+* ↥y.C.S), spMap φ ≫ Z.chart a = y.gen →
   |lnStep (Y Z.i).t (y.gen ≫ Z.π) ((Z.fr a).bc φ) p b st - lnStep (Y Z.i).t (y.gen ≫ Z.π) ((Z.fr a).bc φ) p b' st'| ≤
     m * Real.log p
 
-omit hp hW in
 
+omit hp hW in
 theorem Bdd.symm (h : Bdd Z b b' st st') : Bdd Z b' b st' st :=
   h.imp fun _ h y a φ e => (abs_sub_comm _ _).trans_le (h y a φ e)
 
-omit hW in
 
+omit hW in
 theorem bdd_step (st : ((E →+* ℂ) × ℕ) ⊕ ℕ) : Bdd Z false true st st := by
   have := Fact.mk hp
   have hp2 : (2 : ℝ) ≤ p := by exact_mod_cast hp.two_le
@@ -392,11 +437,6 @@ def IsGenId (M : LineModel Z b st x) (M' : LineModel Z b' st' x) (u : GenIso Z M
 variable (hp : p.Prime) (hW : (p : ℂ) ∈ W.nonunits) {M : LineModel Z b st x} {M' : LineModel Z b' st' x}
 
 include hp hW
-
-theorem IsGenId.unique {u u' : GenIso Z M.L M'.L} (h : IsGenId M M' u) (h' : IsGenId M M' u') : u = u' := by
-  refine NModel.GenIso.ext (funext₂ fun i j => Units.ext (GenId.ext_chart hp hW fun k _ w a ha hw => ?_))
-  exact mul_right_cancel₀ (GenId.val_ne_zero M ha fun q hq => (hw hq).2.1)
-    ((h k w a i j fun q hq => ⟨ha hq, (hw hq).2⟩).trans (h' k w a i j fun q hq => ⟨ha hq, (hw hq).2⟩).symm)
 
 theorem exists_isGenId (hty : ∀ τ k, k ≤ Dw.mult τ → k ∈ Z.ty τ) (hB : GenId.Bdd Z b b' st st')
     (M : LineModel Z b st x) (M' : LineModel Z b' st' x) : ∃ u, IsGenId M M' u := by

@@ -1,16 +1,54 @@
-import Mathlib
-import Formalism.LocalToGlobal.ProjectiveLattices.NormsFree
-import Formalism.LocalToGlobal.ProjectiveLattices.RegPFree
-import Formalism.LocalToGlobal.ProjectiveLattices.RegQFree
-import Formalism.LocalToGlobal.ProjectiveLattices.ThShort
-import Formalism.LocalToGlobal.ProjectiveLattices.LiftLaSpec
-import Formalism.LocalToGlobal.ProjectiveLattices.IsGenFrGenFr
-import Formalism.LocalToGlobal.ProjectiveLattices.ChartDirectionsIntegral
-import Formalism.LocalToGlobal.ProjectiveLattices.AllTest
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsHolPeriods
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.UniformisationConclusion
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.SecBaseChangeAnySt
-import Development.AbelianVarietyTheory.Counterexamples.LevelGroupExamples.ZeroNotAdmissibleOfRankPos
+module
+
+public import Formalism.LocalToGlobal.ProjectiveLattices.ThShort
+public import Development.AbelianVarietyTheory.Counterexamples.LevelGroupExamples.ZeroNotAdmissibleOfRankPos
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.FreeModule.IdealQuotient
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.Signature
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -18,8 +56,8 @@ noncomputable section
 
 namespace GlobalTheory.HalfPairing
 
-open scoped TensorProduct in
 
+open scoped TensorProduct in
 theorem nonempty_equiv_quot {R N : Type} [CommRing R] [IsDomain R] [AddCommGroup N] [Module R N]
     [Module.Finite R N] [Module.Projective R N] (I : Ideal R) [Finite (R ⧸ I)] (r : ℕ)
     (hr : Module.finrank R N = r) :
@@ -71,7 +109,8 @@ theorem exists_span {R Q : Type} [CommRing R] [AddCommGroup Q] [Module R Q] (I :
     (e : Q ≃ₗ[R] (Fin r → R ⧸ I)) : ∃ x : Fin r → Q, Submodule.span R (Set.range x) = ⊤ := by
   refine ⟨fun b => e.symm (Pi.single b 1), eq_top_iff.2 fun q _ => ?_⟩
   have h : q = ∑ b, e.symm (Pi.single b (e q b)) := by
-    rw [← map_sum, Finset.univ_sum_single, e.symm_apply_apply]
+    set_option synthInstance.maxHeartbeats 100000 in
+      rw [← map_sum, Finset.univ_sum_single, e.symm_apply_apply]
   rw [h]
   refine Submodule.sum_mem _ fun b _ => ?_
   obtain ⟨a, ha⟩ := Ideal.Quotient.mk_surjective (e q b)
@@ -135,7 +174,7 @@ theorem cHalf_spec (I : Ideal (𝓞 E)) (hI : I ⊔ I.map (H.bar : 𝓞 E →+* 
     have : mb - 1 = -m := by rw [← hsum]; ring
     rw [this]; exact neg_mem hm
   unfold cHalf
-  rw [dif_pos h]
+  rw [dite_eq_left h]
   exact h.choose_spec
 
 theorem bar_mem {I : Ideal (𝓞 E)} {a : 𝓞 E} (ha : a ∈ I.map (H.bar : 𝓞 E →+* 𝓞 E)) : H.bar a ∈ I := by
@@ -145,7 +184,7 @@ theorem bar_mem {I : Ideal (𝓞 E)} {a : 𝓞 E} (ha : a ∈ I.map (H.bar : �
 
 theorem ef_swap (x y : Dw.La) : Dw.EF y x = -Dw.EF x y := by
   have := Dw.alt (x + y)
-  simp only [map_add, LinearMap.add_apply, Dw.alt] at this
+  simp only [map_add (f := _), LinearMap.add_apply, Dw.alt] at this
   linarith
 
 theorem dvd_of_mem (N : ℕ) (x y : Dw.La) {a : 𝓞 E} (ha : a ∈ Ideal.span {(N : 𝓞 E)}) :
@@ -176,13 +215,13 @@ theorem exists_adjoint_halves (N : ℕ) (hN : N ≠ 0) (I : Ideal (𝓞 E))
     rw [hKI] at hy
     refine Submodule.smul_induction_on hy (fun a ha z _ => ?_) (fun u v hu hv => ?_)
     · rw [← mul_smul, mul_comm]; exact dvd_of_mem _ _ _ (hmul a ha)
-    · rw [smul_add, map_add]; exact dvd_add hu hv
+    · rw [smul_add, map_add (f := _)]; exact dvd_add hu hv
   have hleft : ∀ x ∈ KJ, ∀ y, (N : ℤ) ∣ Dw.EF x (c • y) := by
     intro x hx y
     rw [hKJ] at hx
     refine Submodule.smul_induction_on hx (fun a ha z _ => ?_) (fun u v hu hv => ?_)
     · rw [Dw.adj, ← mul_smul]; exact dvd_of_mem _ _ _ (hmul _ (bar_mem ha))
-    · rw [map_add, LinearMap.add_apply]; exact dvd_add hu hv
+    · rw [map_add (f := _), LinearMap.add_apply]; exact dvd_add hu hv
   let B : (Dw.La ⧸ KJ) → (Dw.La ⧸ KI) → ZMod N := fun p q => ((Dw.EF (qRep p) (c • qRep q) : ℤ) : ZMod N)
   have hB : ∀ u v, B (Submodule.Quotient.mk u) (Submodule.Quotient.mk v) = ((Dw.EF u (c • v) : ℤ) : ZMod N) := by
     intro u v
@@ -196,13 +235,13 @@ theorem exists_adjoint_halves (N : ℕ) (hN : N ≠ 0) (I : Ideal (𝓞 E))
     obtain ⟨u, rfl⟩ := Submodule.Quotient.mk_surjective _ u
     obtain ⟨v, rfl⟩ := Submodule.Quotient.mk_surjective _ v
     obtain ⟨w, rfl⟩ := Submodule.Quotient.mk_surjective _ w
-    rw [← Submodule.Quotient.mk_add, hB, hB, hB, smul_add, map_add, Int.cast_add]
+    rw [← Submodule.Quotient.mk_add, hB, hB, hB, smul_add, map_add (f := _), Int.cast_add]
   have haddl : ∀ u u' v, B (u + u') v = B u v + B u' v := by
     intro u v w
     obtain ⟨u, rfl⟩ := Submodule.Quotient.mk_surjective _ u
     obtain ⟨v, rfl⟩ := Submodule.Quotient.mk_surjective _ v
     obtain ⟨w, rfl⟩ := Submodule.Quotient.mk_surjective _ w
-    rw [← Submodule.Quotient.mk_add, hB, hB, hB, map_add, LinearMap.add_apply, Int.cast_add]
+    rw [← Submodule.Quotient.mk_add, hB, hB, hB, map_add (f := _), LinearMap.add_apply, Int.cast_add]
   have hbal : ∀ (a : 𝓞 E) u v, B u (a • v) = B (H.bar a • u) v := by
     intro a u v
     obtain ⟨u, rfl⟩ := Submodule.Quotient.mk_surjective _ u
@@ -235,7 +274,7 @@ theorem exists_adjoint_halves (N : ℕ) (hN : N ≠ 0) (I : Ideal (𝓞 E))
       exact Module.Projective.of_split (s.restrictScalars ℤ) (p.restrictScalars ℤ)
         (LinearMap.ext fun x => LinearMap.congr_fun hps x)
     let f : Dw.La →+ ZMod N := AddMonoidHom.mk' (fun u => B (g (Submodule.Quotient.mk u)) v) (fun u u' => by
-      simp only [Submodule.Quotient.mk_add, map_add, haddl])
+      simp only [Submodule.Quotient.mk_add, map_add (f := _), haddl])
     obtain ⟨F, hF⟩ := Module.projective_lifting_property (Int.castAddHom (ZMod N)).toIntLinearMap f.toIntLinearMap
       (ZMod.intCast_surjective)
     obtain ⟨w, hw⟩ := Dw.unimod.2 F

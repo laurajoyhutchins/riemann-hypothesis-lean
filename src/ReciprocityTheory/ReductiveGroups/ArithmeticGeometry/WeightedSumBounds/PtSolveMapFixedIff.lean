@@ -1,7 +1,57 @@
-import Mathlib
-import ReciprocityTheory.DualLattices.VEqZeroOfPowEqOne
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.WeightedSumBounds.PtOrderProdSub
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.WeightedSumBounds.PtCoeffSingleSubst
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.WeightedSumBounds.PtOrderProdSub
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.WeightedSumBounds.PtCoeffSingleSubst
+public import Mathlib.Data.Matrix.Mul
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace ReciprocityTheory.ChartRestriction.G.Sh
 
@@ -38,6 +88,7 @@ theorem pt_subst_lin_split {σ τ : Type*} [Fintype σ] {x : σ → MvPowerSerie
     (hx : HasSubst x) (Φ : MvPowerSeries σ C) (m : σ → C) :
     subst x Φ = ∑ a, m a • x a + subst x (Φ - ∑ a, m a • X a) := by
   have hs : subst x (∑ a, m a • X a : MvPowerSeries σ C) = ∑ a, m a • x a := by
+
     rw [← MvPowerSeries.coe_substAlgHom hx, map_sum]
     refine Finset.sum_congr rfl fun a _ => ?_
     rw [MvPowerSeries.coe_substAlgHom hx, MvPowerSeries.subst_smul hx, MvPowerSeries.subst_X hx]
@@ -49,6 +100,7 @@ theorem pt_low_of_lin {σ : Type*} [Fintype σ] {Φ : MvPowerSeries σ C}
     (hm : ∀ s, coeff (Finsupp.single s 1) Φ = m s) :
     ∀ α : σ →₀ ℕ, α.degree ≤ 1 → coeff α (Φ - ∑ a, m a • X a) = 0 := by
   intro α hα
+
   rw [map_sub, map_sum]
   simp only [map_smul, smul_eq_mul]
   rcases Nat.le_one_iff_eq_zero_or_eq_one.mp hα with h | h
@@ -71,7 +123,7 @@ theorem pt_low_of_lin {σ : Type*} [Fintype σ] {Φ : MvPowerSeries σ C}
       · simp [Finsupp.single_apply, Ne.symm hi]
     have hadd := add_tsub_cancel_of_le hle
     have hd := congrArg Finsupp.degree hadd
-    rw [map_add, Finsupp.degree_single, h] at hd
+    rw [map_add (f := _), Finsupp.degree_single, h] at hd
     have h0' : α - Finsupp.single s 1 = 0 := (Finsupp.degree_eq_zero_iff _).mp (by omega)
     rw [← hadd, h0', add_zero]
     simp [MvPowerSeries.coeff_X, hm, Finsupp.single_left_inj one_ne_zero]
@@ -128,6 +180,7 @@ theorem ptSolveMap_agree
     (hxy : PTAgree k x y) :
     PTAgree (k + 1) (ptSolveMap A K N f x) (ptSolveMap A K N f y) := by
   intro c e he
+
   simp only [ptSolveMap, map_sum, coeff_smul, map_sub]
   refine Finset.sum_congr rfl fun b _ => ?_
   rw [pt_subst_agree (hasSubst_of_constantCoeff_zero (hA0 x hx))
@@ -144,9 +197,10 @@ theorem ptSolveMap_good (hN : ∀ i j, N i j ∈ ptIntSub v) (hf : PTGood v f)
   have hs := hasSubst_of_constantCoeff_zero (hA0 x hx)
   refine ⟨?_, ?_⟩
   · rw [← coeff_zero_eq_constantCoeff_apply]
+
     simp only [ptSolveMap, map_sum, coeff_smul, map_sub, coeff_zero_eq_constantCoeff_apply,
-      (hf _).1, constantCoeff_subst_eq_zero hs (hA0 x hx) (hK0 _), sub_zero, mul_zero,
-      Finset.sum_const_zero]
+    (hf _).1, constantCoeff_subst_eq_zero hs (hA0 x hx) (hK0 _), sub_zero, mul_zero,
+    Finset.sum_const_zero]
   · exact Subring.sum_mem _ fun b _ => ptIntSer_smul (hN b c)
       (Subring.sub_mem _ (hf b).2 (ptIntSer_subst hs (hAi x hx) (hKi b)))
 

@@ -1,5 +1,49 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.CutIdentityRightSideCongrOfSubMem
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.CutIdentityRightSideCongrOfSubMem
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.NumbersDVR
@@ -18,7 +62,8 @@ def ResidualComparison.Statement : Prop :=
       (P : Ideal (MRing ι O)) (d : ℕ), IsModelOver P (d + 1) →
     ∀ (b : K → ℤ) (f g : MRing ι O), IsEffectiveVertical P ϖ b f g →
     ∀ (c : K → ℕ) (s : MRing ι O), IsMultiHomog s c → s ∉ P →
-    (∀ H, divCycle P s H ≠ 0 → (C ϖ : MRing ι O) ∉ H → IsVerticalDivisor H ϖ b f g) →
+    (∀ H, divCycle P s H ≠ 0 → (C ϖ : MRing ι O) ∉ H →
+      IsVerticalDivisor H ϖ b f g) →
     ∀ e : K → ℕ, (∀ k, (c k : ℤ) = b k + e k) →
     ∀ m : MRing ι O, IsMultiHomog m e → m ∉ P →
     (∀ H, divCycle P s H ≠ 0 → (C ϖ : MRing ι O) ∉ H → m ∉ H) →
@@ -38,7 +83,8 @@ def ExceptionalComparison.Statement : Prop :=
       (P : Ideal (MRing ι O)) (d : ℕ), IsModelOver P (d + 1) →
     ∀ (b : K → ℤ) (f g : MRing ι O), IsEffectiveVertical P ϖ b f g →
     ∀ (c : K → ℕ) (s : MRing ι O), IsMultiHomog s c → s ∉ P →
-    (∀ H, divCycle P s H ≠ 0 → (C ϖ : MRing ι O) ∉ H → IsVerticalDivisor H ϖ b f g) →
+    (∀ H, divCycle P s H ≠ 0 → (C ϖ : MRing ι O) ∉ H →
+      IsVerticalDivisor H ϖ b f g) →
     ∀ e : K → ℕ, (∀ k, (c k : ℤ) = b k + e k) →
     ∀ m : MRing ι O, IsMultiHomog m e → m ∉ P →
     (∀ H, divCycle P s H ≠ 0 → (C ϖ : MRing ι O) ∉ H → m ∉ H) →
@@ -79,15 +125,6 @@ variable {K : Type} {ι : K → Type} {J : Type} {O : Type*} [CommRing O] [IsDom
 
 theorem liftForm_const (a : O) : liftForm (J := J) (C a : MRing ι O) = C a :=
   (liftForm (J := J) (ι := ι) (R := O)).commutes a
-
-def constChart (ϖ : O) (n : J → ℕ) (j₀ : J) : MRing (extIdx ι J) O →ₐ[O] MRing (extIdx ι J) O :=
-  aeval fun v => match v with
-    | ⟨none, j⟩ => C (ϖ ^ (n j - n j₀)) * X (⟨none, j₀⟩ : Σ o, extIdx ι J o)
-    | ⟨some k, i⟩ => X ⟨some k, i⟩
-
-def constChartPrime (ϖ : O) (n : J → ℕ) (j₀ : J) : Ideal (MRing (extIdx ι J) O) :=
-  RingHom.ker ((MvPolynomial.map (Ideal.Quotient.mk (Ideal.span {ϖ}))).comp
-    (constChart ϖ n j₀).toRingHom)
 
 end Constants
 

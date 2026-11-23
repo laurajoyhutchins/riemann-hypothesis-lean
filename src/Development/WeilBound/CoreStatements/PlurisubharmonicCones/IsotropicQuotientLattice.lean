@@ -1,10 +1,52 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.MetricPeriods.IsEigFrames
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.BdryChart
-import ReciprocityTheory.AnalyticForms.PlurisubharmonicFunctions.IsPshLocallyIntegrableStatement
-import Development.WeilBound.CoreStatements.PlurisubharmonicCones.EmbEquivSymmApply
-import Development.WeilBound.CoreStatements.PlurisubharmonicCones.CommGroupMulMulEqMulInvMulMulMul
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.ImportsRestRest
+module
+
+public import Development.WeilBound.CoreStatements.PlurisubharmonicCones.EmbEquivSymmApply
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.ImportsRestRest
+public import Development.WeilBound.CoreStatements.PlurisubharmonicCones.CommGroupMulMulEqMulInvMulMulMul
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 open NumberField Matrix Filter Topology GlobalTheory.CompanionTheory.Ar GlobalTheory.CompanionTheory.Ar.Cusp GroundTheory.Heights₂.Heights.LowerBoundFree GroundTheory.Heights₂.Heights.Regular
 
@@ -67,7 +109,7 @@ theorem imB_iso (hI : IsIsoSub R.form I) {u u' : Fin g → ℂ} (hu : u ∈ Subm
 
 theorem im_part_zero (hI : IsIsoSub R.form I) {u u' : Fin g → ℂ} (hu : u ∈ Submodule.span ℝ (R.P '' I))
     (hu' : u' ∈ Submodule.span ℝ (R.P '' I)) (h : imB R u' (u + Complex.I • u') = 0) : u' = 0 := by
-  rw [map_add, imB_iso R hI hu' hu, zero_add, imB_apply, ip_smul_right, Complex.I_mul_im] at h
+  rw [map_add (f := _), imB_iso R hI hu' hu, zero_add, imB_apply, ip_smul_right, Complex.I_mul_im] at h
   exact eq_zero_of_re R h
 
 theorem span_split {T : Set (Fin g → ℂ)} {w : Fin g → ℂ} (hw : w ∈ Submodule.span ℂ T) :
@@ -109,6 +151,7 @@ theorem isotropic_quotient_lattice : ∀ (E : Type) [Field E] [NumberField E] [I
     refine le_antisymm (Submodule.span_le.2 ?_) (Submodule.span_mono ?_)
     · rintro _ ⟨x, hx, rfl⟩
       obtain ⟨c, rfl⟩ := hsp x hx
+
       rw [map_sum]
       refine Submodule.sum_mem _ fun b _ => ?_
       rw [map_zsmul]
@@ -169,7 +212,7 @@ theorem isotropic_quotient_lattice : ∀ (E : Type) [Field E] [NumberField E] [I
         rw [map_zero, LinearMap.zero_apply, map_zero]
       map_add' := fun a b => LinearMap.ext fun z => by
         show q (R.B (a + b) (j z)) = q (R.B a (j z)) + q (R.B b (j z))
-        rw [map_add, LinearMap.add_apply, map_add] }
+        rw [map_add (f := _), LinearMap.add_apply, map_add (f := _)] }
   let R' : RiemLat E g' Λ' :=
     { free := hfree
       fin := hfin

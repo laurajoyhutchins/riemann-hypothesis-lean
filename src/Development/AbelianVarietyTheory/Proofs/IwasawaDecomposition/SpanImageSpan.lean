@@ -1,5 +1,60 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.NatCastMemPrimeOf
+module
+
+public import Mathlib.NumberTheory.NumberField.Basic
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.NatCastMemPrimeOf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField
 
@@ -36,8 +91,7 @@ theorem span_image_span {n : ℕ} (S : Set (Fin n → K)) :
       rw [SetLike.mem_coe] at hy ⊢
       convert Submodule.smul_mem _ (RingOfIntegers.mapRingHom φ a) hy using 1
       funext k
-      simp only [Pi.smul_apply, Algebra.smul_def, map_mul]
-      rfl
+      simp [Pi.smul_apply, Algebra.smul_def, map_mul]
   · exact Submodule.span_mono (Set.image_mono Submodule.subset_span)
 
 theorem span_image_inf {n : ℕ} (X : Submodule (𝓞 K) (Fin n → K)) (V : Submodule K (Fin n → K)) :
@@ -81,6 +135,7 @@ theorem span_image_inf {n : ℕ} (X : Submodule (𝓞 K) (Fin n → K)) (V : Sub
           have h0 := (hℓV x).1 hx r
           rw [hℓ] at h0
           have := congrArg φ h0
+
           rw [map_sum, map_zero] at this
           rw [← this]
           refine Finset.sum_congr rfl fun k _ => ?_
@@ -124,8 +179,9 @@ theorem span_image_inf {n : ℕ} (X : Submodule (𝓞 K) (Fin n → K)) (V : Sub
     obtain ⟨N, a, yv, hr, ha⟩ := GlobalTheory.Proof.IdempotentLatticeSequence.flat_system (fun i r => b (i, r)) r0 (fun r => by
       apply RingOfIntegers.ext
       have h1 : ((∑ i, b (i, r) • r0 i : 𝓞 K') : K') = ∑ i, φ (b (i, r) : K) * (r0 i : K') := by
+
         rw [show ((∑ i, b (i, r) • r0 i : 𝓞 K') : K') = ∑ i, ((b (i, r) • r0 i : 𝓞 K') : K') from
-          map_sum (algebraMap (𝓞 K') K') _ _]
+        map_sum (algebraMap (𝓞 K') K') _ _]
         rfl
       rw [h1]
       simp only [hb', map_mul]
@@ -135,6 +191,7 @@ theorem span_image_inf {n : ℕ} (X : Submodule (𝓞 K) (Fin n → K)) (V : Sub
       change _ = (0 : K')
       rw [← mul_zero (φ ((d : 𝓞 K) : K)), ← h2, Finset.mul_sum]
       refine Finset.sum_congr rfl fun i _ => ?_
+
       rw [hℓ, map_sum]
       simp only [map_mul, Finset.mul_sum, Finset.sum_mul]
       exact Finset.sum_congr rfl fun k _ => by ring)
@@ -145,8 +202,10 @@ theorem span_image_inf {n : ℕ} (X : Submodule (𝓞 K) (Fin n → K)) (V : Sub
       rw [hℓV]
       intro r
       have h1 := congrArg (fun z : 𝓞 K => (z : K)) (ha l r)
+
       simp only [map_sum, map_mul, hb', map_zero] at h1
       apply mul_left_cancel₀ hd0
+
       rw [mul_zero, ← h1, map_sum, Finset.mul_sum]
       refine Finset.sum_congr rfl fun i _ => ?_
       rw [LinearMap.map_smul_of_tower, Algebra.smul_def]
@@ -154,12 +213,14 @@ theorem span_image_inf {n : ℕ} (X : Submodule (𝓞 K) (Fin n → K)) (V : Sub
     have hyu : y = ∑ l, yv l • Φ (u l) := by
       funext k
       rw [hy, Finset.sum_apply]
+
       simp only [Pi.smul_apply, hΦ, u, Finset.sum_apply, map_sum, Algebra.smul_def]
       have h2 : ∀ i, ((r0 i : 𝓞 K') : K') = ∑ l, φ (a i l : K) * (yv l : K') := by
         intro i
         rw [hr i]
+
         rw [show ((∑ l, a i l • yv l : 𝓞 K') : K') = ∑ l, ((a i l • yv l : 𝓞 K') : K') from
-          map_sum (algebraMap (𝓞 K') K') _ _]
+        map_sum (algebraMap (𝓞 K') K') _ _]
         rfl
       simp only [h2, Finset.sum_mul, Finset.mul_sum]
       rw [Finset.sum_comm]

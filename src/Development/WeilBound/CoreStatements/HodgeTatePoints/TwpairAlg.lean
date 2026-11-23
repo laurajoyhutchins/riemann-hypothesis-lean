@@ -1,6 +1,56 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Statements.GeometryStatements.IsPolLatticePlane
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.HopfOrderContainsCharacters
+module
+
+public import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.PairingExtends
+public import Mathlib.RingTheory.Henselian
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.HopfOrderContainsCharacters
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.GroupTheory.FiniteAbelian.Basic
+public import Mathlib.LinearAlgebra.Quotient.Bilinear
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open GlobalTheory.CompanionTheory.Ar.BT GlobalTheory.CompanionTheory.Ar.HT
 
@@ -25,8 +75,8 @@ theorem translate_mem {A : Subalgebra R (T → R)} (hA : IsHopfOrder A) {f : T �
     | smul r x _ hx => exact A.smul_mem hx r
   exact key _ (hA.comul f hf)
 
-omit [CommGroup T] in
 
+omit [CommGroup T] in
 theorem mul_mem_prodSpan {A : Subalgebra R (T → R)} {a b : T → R} (ha : a ∈ A) (hb : b ∈ A)
     {g : T × T → R} (hg : g ∈ prodSpan A) : (fun z => a z.1 * b z.2 * g z) ∈ prodSpan A := by
   induction hg using Submodule.span_induction with
@@ -53,13 +103,13 @@ theorem mul_mem_prodSpan {A : Subalgebra R (T → R)} {a b : T → R} (ha : a �
     simp only [Pi.smul_apply, smul_eq_mul]
     ring
 
-open Classical in
 
+open Classical in
 def extZero (H : Subgroup T) (t : T) (a : H → R) : T → R :=
   fun x => if h : t⁻¹ * x ∈ H then a ⟨_, h⟩ else 0
 
-open Classical in
 
+open Classical in
 def extZero₂ (H : Subgroup T) (t s : T) (g : H × H → R) : T × T → R :=
   fun z => if h : t⁻¹ * z.1 ∈ H ∧ s⁻¹ * z.2 ∈ H then g (⟨_, h.1⟩, ⟨_, h.2⟩) else 0
 
@@ -73,7 +123,7 @@ theorem extZero_mem {H : Subgroup T} {A : Subalgebra R (H → R)} (hA : IsHopfOr
     have h1 : t⁻¹ * (u * H.subtype h) ∈ H := by
       rw [← mul_assoc]; exact H.mul_mem hu h.2
     simp only [extZero]
-    rw [dif_pos h1]
+    rw [dite_eq_left h1]
     congr 1
     exact Subtype.ext (mul_assoc _ _ _).symm
   · have : (fun h : H => extZero H t a (u * H.subtype h)) = 0 := by
@@ -82,7 +132,7 @@ theorem extZero_mem {H : Subgroup T} {A : Subalgebra R (H → R)} (hA : IsHopfOr
         rw [← mul_assoc]
         exact fun h1 => hu ((H.mul_mem_cancel_right h.2).1 h1)
       simp only [extZero]
-      rw [dif_neg h1]
+      rw [dite_eq_right h1]
       rfl
     rw [this]
     exact A.zero_mem
@@ -111,8 +161,7 @@ theorem extZero₂_mem {H : Subgroup T} {A : Subalgebra R (H → R)} (hA : IsHop
     have := Submodule.smul_mem _ r hx
     convert this using 1
     funext z
-    simp only [extZero₂, Pi.smul_apply]
-    split_ifs <;> simp
+    simp [extZero₂] 
 
 theorem pair_ind : ∀ (R : Type) [CommRing R] [IsDomain R] [IsIntegrallyClosed R] (T : Type) [CommGroup T] [Finite T] (H : Subgroup T) (A : Subalgebra R (H → R)) (β : T →* T →* Rˣ), IsHopfOrder A → (fun z : H × H => ((β z.1 z.2 : Rˣ) : R)) ∈ prodSpan A → (fun z : T × T => ((β z.1 z.2 : Rˣ) : R)) ∈ prodSpan (indOrder H.subtype A) := by
   intro R _ _ _ T _ _ H A β hA hβ
@@ -125,7 +174,8 @@ theorem pair_ind : ∀ (R : Type) [CommRing R] [IsDomain R] [IsIntegrallyClosed 
     have := Submodule.smul_mem _ ((β t s : Rˣ) : R) (mul_mem_prodSpan ha hb hβ)
     convert this using 1
     funext w
-    simp
+    simp only [Pi.smul_apply, smul_eq_mul, MonoidHom.map_mul, MonoidHom.mul_apply,
+      MonoidHom.flip_apply, MonoidHom.comp_apply, Subgroup.coe_subtype, Units.val_mul]
     ring
   have key : ∀ (c : T ⧸ H) (x : T), c.out⁻¹ * x ∈ H ↔ c = (x : T ⧸ H) := by
     intro c x
@@ -135,11 +185,11 @@ theorem pair_ind : ∀ (R : Type) [CommRing R] [IsDomain R] [IsIntegrallyClosed 
     funext z
     rw [Finset.sum_apply, Finset.sum_eq_single ((z.1 : T ⧸ H), (z.2 : T ⧸ H))]
     · simp only [extZero₂]
-      rw [dif_pos ⟨(key _ _).2 rfl, (key _ _).2 rfl⟩]
+      rw [dite_eq_left ⟨(key _ _).2 rfl, (key _ _).2 rfl⟩]
       simp only [mul_inv_cancel_left]
     · intro c _ hc
       simp only [extZero₂]
-      rw [dif_neg]
+      rw [dite_eq_right]
       rintro ⟨a, b⟩
       exact hc (Prod.ext ((key _ _).1 a) ((key _ _).1 b))
     · simp

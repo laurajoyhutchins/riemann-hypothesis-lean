@@ -1,6 +1,49 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalJacobianType.ContinuousTrESymm
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.DiffProd
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.DiffProd
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalUnitaryOrbits.GenSmulMem
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -74,7 +117,6 @@ theorem one_mem : (1 : Fv F v ⊗[F] E) ∈ OEv (E := E) v := by
 theorem int_mem (r : 𝓞 F) : algebraMap F (Fv F v) (r : F) ∈ v.adicCompletionIntegers F := by
   have h := v.coe_mem_adicCompletionIntegers (K := F) r
   convert h using 1
-  exact (IsScalarTower.algebraMap_apply (𝓞 F) F (Fv F v) r).symm
 
 theorem inclR_alg (a : F) : inclR (F := F) (Fv F v) (algebraMap F E a) =
     algebraMap (Fv F v) (Fv F v ⊗[F] E) (algebraMap F (Fv F v) a) := by
@@ -87,39 +129,8 @@ theorem alg_mem {c : Fv F v} (hc : c ∈ v.adicCompletionIntegers F) :
   exact oev_smul' v hc (one_mem v)
 
 theorem mul_mem {x y : Fv F v ⊗[F] E} (hx : x ∈ OEv (E := E) v) (hy : y ∈ OEv (E := E) v) :
-    x * y ∈ OEv (E := E) v := by
-  have hx' : x ∈ Submodule.span (v.adicCompletionIntegers F)
-      ((fun x : 𝓞 E => inclR (F := F) (Fv F v) (x : E)) '' Set.univ) := hx
-  have hy' : y ∈ Submodule.span (v.adicCompletionIntegers F)
-      ((fun x : 𝓞 E => inclR (F := F) (Fv F v) (x : E)) '' Set.univ) := hy
-  show x * y ∈ Submodule.span (v.adicCompletionIntegers F)
-      ((fun x : 𝓞 E => inclR (F := F) (Fv F v) (x : E)) '' Set.univ)
-  clear hx hy
-  induction hx' using Submodule.span_induction with
-  | mem a ha =>
-    obtain ⟨a, -, rfl⟩ := ha
-    induction hy' using Submodule.span_induction with
-    | mem b hb =>
-      obtain ⟨b, -, rfl⟩ := hb
-      exact Submodule.subset_span ⟨a * b, Set.mem_univ _, by simp⟩
-    | zero =>
-      rw [mul_zero]
-      exact Submodule.zero_mem _
-    | add y z _ _ hy hz =>
-      rw [mul_add]
-      exact Submodule.add_mem _ hy hz
-    | smul c y _ hy =>
-      rw [mul_smul_comm]
-      exact Submodule.smul_mem _ c hy
-  | zero =>
-    rw [zero_mul]
-    exact Submodule.zero_mem _
-  | add x z _ _ hx hz =>
-    rw [add_mul]
-    exact Submodule.add_mem _ hx hz
-  | smul c x _ hx =>
-    rw [smul_mul_assoc]
-    exact Submodule.smul_mem _ c hx
+    x * y ∈ OEv (E := E) v :=
+  (PI.OmLocU.Orb.oSub (E := E) v).2 x hx y hy
 
 theorem trace_mem {x : Fv F v ⊗[F] E} (hx : x ∈ OEv (E := E) v) :
     Algebra.trace (Fv F v) (Fv F v ⊗[F] E) x ∈ v.adicCompletionIntegers F := by
@@ -151,7 +162,7 @@ theorem trace_mem {x : Fv F v ⊗[F] E} (hx : x ∈ OEv (E := E) v) :
     rw [map_zero]
     exact (v.adicCompletionIntegers F).zero_mem
   | add y z _ _ hy hz =>
-    rw [map_add]
+    rw [map_add (f := _)]
     exact add_mem hy hz
   | smul c y _ hy =>
     rw [show c • y = (c : Fv F v) • y from rfl, map_smul, smul_eq_mul]
@@ -174,7 +185,7 @@ theorem trace_v (σ : E →ₐ[F] E) (hinv : ∀ y, σ (σ y) = y) (hnt : ∃ x,
         ext k
         simp
       rw [h, LinearMap.trace_baseChange]
-    rw [ht, ← inclR_alg v, trace_eq_add σ hinv hnt hfin e, map_add]
+    rw [ht, ← inclR_alg v, trace_eq_add σ hinv hnt hfin e, map_add (f := _)]
     rfl
   have hL : (Algebra.linearMap (Fv F v) (Fv F v ⊗[F] E)) ∘ₗ
         (Algebra.trace (Fv F v) (Fv F v ⊗[F] E)) =
@@ -233,8 +244,8 @@ end Gen
 
 end TrW
 
-open TrW in
 
+open TrW in
 theorem annX_of {D : D7} (X : HidaSetting D) (ψ : AddChar (AF X.B.I.F) ℂ) (hC : Formalism.L2.SG.Pf.NcVal.CondAll) : AnnX X ψ := by
   intro hψ hs v y
   have hmax : v.asIdeal.IsMaximal := v.isMaximal

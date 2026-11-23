@@ -1,4 +1,58 @@
-import Mathlib
+module
+
+public import Mathlib.Analysis.Calculus.InverseFunctionTheorem.FDeriv
+public import Mathlib.Analysis.Normed.Algebra.Exponential
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Analysis.Calculus.FDeriv.Comp
+public import Mathlib.Analysis.Calculus.FDeriv.Linear
+public import Mathlib.Analysis.Calculus.FDeriv.Mul
+public import Mathlib.Analysis.SpecialFunctions.Exponential
+
+@[expose] public section
 
 noncomputable section
 
@@ -13,23 +67,23 @@ theorem hasStrictFDerivAt_exp_zero_alt : HasStrictFDerivAt (exp : 𝔸 → 𝔸)
   have h := hasStrictFDerivAt_exp_zero (𝕂 := ℝ) (𝔸 := 𝔸)
   exact h
 
-variable (𝔸) in
 
+variable (𝔸) in
 def logA : 𝔸 → 𝔸 := (hasStrictFDerivAt_exp_zero_alt (𝔸 := 𝔸)).localInverse _ _ _
 
-theorem logA_exp : ∀ᶠ X in 𝓝 (0 : 𝔸), logA 𝔸 (exp X) = X := hasStrictFDerivAt_exp_zero_alt.eventually_left_inverse
+theorem logA_exp : ∀ᶠ X in 𝓝 (0 : 𝔸), logA (𝔸 := 𝔸) (exp X) = X := hasStrictFDerivAt_exp_zero_alt.eventually_left_inverse
 
-theorem exp_logA : ∀ᶠ h in 𝓝 (1 : 𝔸), exp (logA 𝔸 h) = h := by
+theorem exp_logA : ∀ᶠ h in 𝓝 (1 : 𝔸), exp (logA (𝔸 := 𝔸) h) = h := by
   have h := (hasStrictFDerivAt_exp_zero_alt (𝔸 := 𝔸)).eventually_right_inverse
   rw [exp_zero] at h
   exact h
 
-theorem logA_one : logA 𝔸 (1 : 𝔸) = 0 := by
+theorem logA_one : logA (𝔸 := 𝔸) (1 : 𝔸) = 0 := by
   have h := (hasStrictFDerivAt_exp_zero_alt (𝔸 := 𝔸)).localInverse_apply_image
   rw [exp_zero] at h
   exact h
 
-theorem hasStrict_logA : HasStrictFDerivAt (logA 𝔸) (ContinuousLinearMap.id ℝ 𝔸) (1 : 𝔸) := by
+theorem hasStrict_logA : HasStrictFDerivAt (logA (𝔸 := 𝔸)) (ContinuousLinearMap.id ℝ 𝔸) (1 : 𝔸) := by
   have h := (hasStrictFDerivAt_exp_zero_alt (𝔸 := 𝔸)).to_localInverse
   rw [exp_zero] at h
   exact h
@@ -42,13 +96,9 @@ theorem exp_neg_mul (X : 𝔸) : exp (-X) * exp X = 1 := by
   letI : NormedAlgebra ℚ 𝔸 := NormedAlgebra.restrictScalars ℚ ℝ 𝔸
   rw [← exp_add_of_commute (Commute.neg_left (Commute.refl X)), neg_add_cancel, exp_zero]
 
-theorem exp_mul_neg (X : 𝔸) : exp X * exp (-X) = 1 := by
-  letI : NormedAlgebra ℚ 𝔸 := NormedAlgebra.restrictScalars ℚ ℝ 𝔸
-  rw [← exp_add_of_commute (Commute.neg_right (Commute.refl X)), add_neg_cancel, exp_zero]
+def F1 (p : 𝔸 × 𝔸) : 𝔸 := logA (𝔸 := 𝔸) (exp (-p.1) * exp (p.1 + p.2))
 
-def F1 (p : 𝔸 × 𝔸) : 𝔸 := logA 𝔸 (exp (-p.1) * exp (p.1 + p.2))
-
-def F2 (p : 𝔸 × 𝔸) : 𝔸 := logA 𝔸 (exp p.1 * exp p.2)
+def F2 (p : 𝔸 × 𝔸) : 𝔸 := logA (𝔸 := 𝔸) (exp p.1 * exp p.2)
 
 theorem hasStrict_exp_comp (L : 𝔸 × 𝔸 →L[ℝ] 𝔸) :
     HasStrictFDerivAt (fun p : 𝔸 × 𝔸 => exp (L p)) L (0 : 𝔸 × 𝔸) := by
@@ -60,10 +110,10 @@ theorem hasStrict_exp_comp (L : 𝔸 × 𝔸 →L[ℝ] 𝔸) :
   simpa using h
 
 theorem hasStrict_mul (L M : 𝔸 × 𝔸 →L[ℝ] 𝔸) :
-    HasStrictFDerivAt (fun p : 𝔸 × 𝔸 => logA 𝔸 (exp (L p) * exp (M p))) (L + M) (0 : 𝔸 × 𝔸) := by
+    HasStrictFDerivAt (fun p : 𝔸 × 𝔸 => logA (𝔸 := 𝔸) (exp (L p) * exp (M p))) (L + M) (0 : 𝔸 × 𝔸) := by
   have hprod := (hasStrict_exp_comp L).mul' (hasStrict_exp_comp M)
   simp only [map_zero, exp_zero, one_smul, MulOpposite.op_one] at hprod
-  have hlog : HasStrictFDerivAt (logA 𝔸) (ContinuousLinearMap.id ℝ 𝔸)
+  have hlog : HasStrictFDerivAt (logA (𝔸 := 𝔸)) (ContinuousLinearMap.id ℝ 𝔸)
       (((fun p : 𝔸 × 𝔸 => exp (L p)) * fun p : 𝔸 × 𝔸 => exp (M p)) 0) := by
     simp only [Pi.mul_apply, map_zero, exp_zero, mul_one]
     exact hasStrict_logA
@@ -75,7 +125,7 @@ theorem hasStrictFDerivAt_translateLog : HasStrictFDerivAt (F1 (𝔸 := 𝔸)) (
   have h := hasStrict_mul (𝔸 := 𝔸) (-ContinuousLinearMap.fst ℝ 𝔸 𝔸)
     (ContinuousLinearMap.fst ℝ 𝔸 𝔸 + ContinuousLinearMap.snd ℝ 𝔸 𝔸)
   rw [neg_add_cancel_left] at h
-  have hf : F1 (𝔸 := 𝔸) = fun p => logA 𝔸 (exp ((-ContinuousLinearMap.fst ℝ 𝔸 𝔸) p) *
+  have hf : F1 (𝔸 := 𝔸) = fun p => logA (𝔸 := 𝔸) (exp ((-ContinuousLinearMap.fst ℝ 𝔸 𝔸) p) *
       exp ((ContinuousLinearMap.fst ℝ 𝔸 𝔸 + ContinuousLinearMap.snd ℝ 𝔸 𝔸) p)) := by
     funext p
     simp [F1]
@@ -118,15 +168,15 @@ theorem distortion {ε : ℝ} (hε : 0 < ε) : ∃ δ > 0, ∀ X Y : 𝔸, ‖X�
   have hc2 : Continuous (fun p : 𝔸 × 𝔸 => exp p.1 * exp p.2) :=
     (exp_cont.comp continuous_fst).mul (exp_cont.comp continuous_snd)
   have e1 : ∀ᶠ p in 𝓝 (0 : 𝔸 × 𝔸),
-      exp (logA 𝔸 (exp (-p.1) * exp (p.1 + p.2))) = exp (-p.1) * exp (p.1 + p.2) := by
+      exp (logA (𝔸 := 𝔸) (exp (-p.1) * exp (p.1 + p.2))) = exp (-p.1) * exp (p.1 + p.2) := by
     have ht := hc1.tendsto 0
     simp only [Prod.fst_zero, Prod.snd_zero, neg_zero, add_zero, exp_zero, mul_one] at ht
     exact ht.eventually exp_logA
-  have e2 : ∀ᶠ p in 𝓝 (0 : 𝔸 × 𝔸), exp (logA 𝔸 (exp p.1 * exp p.2)) = exp p.1 * exp p.2 := by
+  have e2 : ∀ᶠ p in 𝓝 (0 : 𝔸 × 𝔸), exp (logA (𝔸 := 𝔸) (exp p.1 * exp p.2)) = exp p.1 * exp p.2 := by
     have ht := hc2.tendsto 0
     simp only [Prod.fst_zero, Prod.snd_zero, exp_zero, mul_one] at ht
     exact ht.eventually exp_logA
-  have e3 : ∀ᶠ p in 𝓝 (0 : 𝔸 × 𝔸), logA 𝔸 (exp p.1) = p.1 := by
+  have e3 : ∀ᶠ p in 𝓝 (0 : 𝔸 × 𝔸), logA (𝔸 := 𝔸) (exp p.1) = p.1 := by
     have ht := (continuous_fst (X := 𝔸) (Y := 𝔸)).tendsto 0
     simp only [Prod.fst_zero] at ht
     exact ht.eventually logA_exp

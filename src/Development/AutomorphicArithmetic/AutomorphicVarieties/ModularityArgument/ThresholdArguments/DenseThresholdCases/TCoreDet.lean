@@ -1,10 +1,61 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ThresholdArguments.DenseThresholdCases.DiscreteSeriesCoefficientsCuspidal
-import Development.AutomorphicArithmetic.AutomorphicVarieties.HeckeAlgebras.OrdinaryHeckeCharacters.CoreDet
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ThresholdArguments.DenseThresholdCases.LitAut
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ThresholdArguments.DenseThresholdCases.UnitaryPointProperties
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ThresholdArguments.DenseThresholdCases.TCoreSep
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ThresholdArguments.DenseThresholdCases.HeckeOperatorPreservesPart
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.CdNormLt
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ThresholdArguments.DenseThresholdCases.LitAut
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ThresholdArguments.DenseThresholdCases.UnitaryPointProperties
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.DeterminantRepresentations.GlueRep
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.DeterminantRepresentations.IsContIff
+import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.DeterminantRepresentations.MapApi
+import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.DeterminantRepresentations.RepApi
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.HeckeAlgebras.OrdinaryHeckeCharacters.HiAlgUnit
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.HeckeAlgebras.OrdinaryHeckeCharacters.SpecIntIff
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ThresholdArguments.DenseThresholdCases.HeckeOperatorPreservesPart
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ThresholdArguments.DenseThresholdCases.TCoreSep
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.CharExt
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.CdNormLt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.AdicCompletion.Topology
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.MetricSpace.Ultra.TotallySeparated
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 set_option maxHeartbeats 800000
 set_option synthInstance.maxHeartbeats 200000
@@ -54,7 +105,7 @@ private theorem cd_pow {l : ℕ} [Fact l.Prime] (c : Coef l) {R : Type} [CommRin
     { carrier := {a | ‖y a‖ ≤ max b 0}
       add_mem' := fun {p q} hp hq => by
         change ‖y (p + q)‖ ≤ _
-        rw [map_add]
+        rw [map_add (f := _)]
         exact (IsUltrametricDist.norm_add_le_max _ _).trans (max_le hp hq)
       zero_mem' := by simp
       smul_mem' := fun r p hp => by
@@ -162,8 +213,8 @@ private theorem cd_tel {M : Type} [CommGroup M] {n : ℕ} (U : Fin n → M) :
   simp [V]
 private theorem cd_fin {l : ℕ} [Fact l.Prime] (c : Coef l) : Finite (ResidueField c.O) := by
   have h : (maximalIdeal c.O).comap (algebraMap ℤ_[l] c.O) = maximalIdeal ℤ_[l] :=
-    eq_maximalIdeal (Ideal.isMaximal_comap_of_isIntegral_of_isMaximal _)
-  have : IsLocalHom (algebraMap ℤ_[l] c.O) := ((IsLocalRing.local_hom_TFAE _).out 4 0).1 h
+    eq_maximalIdeal (Ideal.isMaximal_under_of_isIntegral_of_isMaximal (R := ℤ_[l]) (maximalIdeal c.O))
+  have : IsLocalHom (algebraMap ℤ_[l] c.O) := ((IsLocalRing.local_hom_tfae _).out 5 1).1 h
   exact ResidueField.finite_of_finite (R := ℤ_[l]) inferInstance
 private theorem cd_eT {k : Type} [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] {n : ℕ}
     (i : Fin n) (c : ℕ) (y : Uo k) (hy : valuation k (((y : kˣ) : k) - 1) ≤ uniformizer k ^ ((c + 1 : ℕ) : ℤ)) :
@@ -229,7 +280,7 @@ private theorem cd_psi (hN : _root_.GlobalTheory.Mem.LiteralAutomorphy.Literatur
   obtain ⟨ψ, ⟨hψ, hψa⟩, -⟩ := Loc.charExt hN.aut.art (H.ovr v) (H.art v) (hH.art_spec v) T ξ hξ
   have hl : ((l : ℕ) : T) ∈ maximalIdeal T := by
     have h : (maximalIdeal c.O).comap (algebraMap ℤ_[l] c.O) = maximalIdeal ℤ_[l] :=
-      eq_maximalIdeal (Ideal.isMaximal_comap_of_isIntegral_of_isMaximal _)
+      eq_maximalIdeal (Ideal.isMaximal_under_of_isIntegral_of_isMaximal (R := ℤ_[l]) (maximalIdeal c.O))
     have h1 : (l : ℤ_[l]) ∈ maximalIdeal ℤ_[l] := by
       rw [PadicInt.maximalIdeal_eq_span_p]; exact Ideal.mem_span_singleton_self _
     rw [← h, Ideal.mem_comap] at h1
@@ -283,6 +334,7 @@ private theorem cd_pol {T : Type} [CommRing T] {l : ℕ} [Fact l.Prime] (ι : Qb
     (Hi.heckePol n q a).map x = p := by
   apply Polynomial.map_injective ι.toRingHom ι.injective
   rw [hp]
+
   simp only [Hi.heckePol, Polynomial.map_sum, Polynomial.map_mul, Polynomial.map_pow, map_C, map_X]
   refine Finset.sum_congr rfl fun j hj => ?_
   simp [← h j (Nat.lt_succ_iff.1 (Finset.mem_range.1 hj))]
@@ -314,8 +366,8 @@ theorem UpperTheory.V.Hi.coreDet_alt :
     refine ⟨Y.r, Y.cont, fun ⟨⟨w, B, σ⟩, hB, hσ⟩ => cd_pol ι _ n _ _ (Y.a w) (fun j hj => ?_) _ (Y.frob w B σ hB hσ)⟩
     change ι (x (H.genW θ a K w j)) = _
     rcases j with _ | j
-    · rw [HSet.genW, dif_neg (by omega), map_one, map_one, Y.a_zero]
-    · rw [HSet.genW, dif_pos ⟨j.succ_pos, hj⟩]
+    · rw [HSet.genW, dite_eq_right (by omega), map_one, map_one, Y.a_zero]
+    · rw [HSet.genW, dite_eq_left ⟨j.succ_pos, hj⟩]
       exact smul_left_injective ℂ hF ((hop (.inl (w, ⟨j, hj⟩))).symm.trans (Y.sph w (j + 1) F hFY.1))
   refine ⟨D, ψ, hD, hψ1, fun w B σ hB hσ => hDf ⟨(w, B, σ), hB, hσ⟩, hψ2, fun v j s g hg hs => ?_⟩
   rw [Finset.prod_congr rfl fun i _ => hψ3 v i s g hg hs, hu]

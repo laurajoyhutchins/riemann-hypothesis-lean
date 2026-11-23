@@ -1,5 +1,51 @@
-import Formalism.LocalToGlobal.GroupLattices.FockModels.ElementaryDivisorBasis
-import Formalism.SharpRestriction.GrowthBounds.ScaleEdges.ScaleNegMono
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.LatticeSystems
+import Formalism.GradedWeylDivisibility.FinalD
+public import Formalism.LocalToGlobal.GroupLattices.FockModels.ElementaryDivisorBasis
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MvPolynomial
 
@@ -62,7 +108,6 @@ theorem pos_basisO (O Kf : Type) [CommRing O] [IsDomain O] [Field Kf] [Algebra O
     rw [← hD, Submodule.map_span, ← Set.range_comp]
     congr 2
     funext i
-    simp only [Function.comp]
     have hprod : (∏ a, (if a.val < r then c⁻¹ else 1) ^ rowWt i.1 a)⁻¹ = c ^ (∑ a ∈ S, rowWt i.1 a) := by
       simp_rw [ite_pow, one_pow]
       rw [Finset.prod_ite, Finset.prod_const_one, mul_one, Finset.prod_pow_eq_pow_sum, inv_pow, inv_inv]
@@ -73,6 +118,7 @@ theorem pos_basisO (O Kf : Type) [CommRing O] [IsDomain O] [Field Kf] [Algebra O
     have hpw : (c⁻¹ ^ S.card) ^ (-ll) = c ^ ((S.card : ℤ) * ll) := by
       rw [inv_pow, inv_zpow', ← zpow_natCast, ← zpow_mul]
       ring_nf
+    simp only [Function.comp_apply]
     rw [hdet, ← hll, hprod]
     simp only [LinearMap.restrictScalars_apply, LinearMap.lsmul_apply, smul_smul]
     congr 1
@@ -145,9 +191,8 @@ theorem ten_basisO (O Kf : Type) [CommRing O] [IsDomain O] [Field Kf] [Algebra O
       rw [Hten, e1, ← hT]
       congr 2
       funext i
-      simp only [hP, MvPolynomial.smul_eq_C_mul, map_mul, blockEmb, MvPolynomial.rename_C,
-        Finset.prod_mul_distrib]
-      rw [← map_prod, lb_zpow_sum c hc]
+      simp only [map_smul]
+      rw [Finset.prod_smul, lb_zpow_sum c hc]
     rw [toV, hH, ← comap_span_coe (O := O) (Kf := Kf) (Vsp Kf lam0)
       (fun i => c ^ (∑ s, π s (i s)) • (Module.Basis.mk hyi hys.symm.le) i)]
     congr 3

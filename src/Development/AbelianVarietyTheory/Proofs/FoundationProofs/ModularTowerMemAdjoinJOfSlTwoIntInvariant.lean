@@ -1,7 +1,64 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Foundations.ApplyEqOfMemAdjoin
-import Development.AbelianVarietyTheory.Definitions.Foundations.IsTopWTopWOfExists
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.SlTwoInvariantHolomorphicMemAdjoinJInvariantStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.ExpUpper
+public import Mathlib.Analysis.Meromorphic.Order
+public import Mathlib.FieldTheory.IsAlgClosed.Basic
+public import Mathlib.RingTheory.Flat.FaithfullyFlat.Basic
+public import Mathlib.RingTheory.Flat.TorsionFree
+public import Mathlib.RingTheory.Henselian
+public import Mathlib.RingTheory.RegularLocalRing.Defs
+public import Mathlib.RingTheory.SimpleRing.Principal
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.SlTwoInvariantHolomorphicMemAdjoinJInvariantStatement
+import Mathlib.Algebra.AffineMonoid.UniqueSums
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.Convex
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.Meromorphic.NormalForm
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AbelianVarietyTheory.Definitions.Foundations.EeProd
+import Development.AbelianVarietyTheory.Definitions.Foundations.Integral
+
+@[expose] public section
 
 open scoped MatrixGroups
 open GlobalTheory.KZ GlobalTheory.Glue GlobalTheory.K5 GlobalTheory.KummerEisensteinGalois
@@ -116,7 +173,8 @@ theorem germ_differentiableOn (G : Mero) (a b : ℂ → ℂ) (ha : Differentiabl
       congr 1
       ext w
       simp [Finset.sum_apply]
-    rw [e1, map_add, map_pow, map_sum]
+
+    rw [e1, map_add (f := _), map_pow, map_sum]
     simp_rw [map_mul, map_pow]
     change (g : Mero) ^ n + ∑ i ∈ Finset.range n, (c i : Mero) * (g : Mero) ^ i = 0
     rw [← hG]
@@ -146,7 +204,7 @@ theorem holRep (X : Tower Ω ε) (hj : ∃ φ : ℂ → ℂ, DifferentiableOn �
   | add x y _ _ hx hy =>
     obtain ⟨φ, h1, h2⟩ := hx
     obtain ⟨ψ, h3, h4⟩ := hy
-    exact ⟨φ + ψ, h1.add h3, by rw [map_add, h2, h4, Filter.Germ.coe_add]⟩
+    exact ⟨φ + ψ, h1.add h3, by rw [map_add (f := _), h2, h4, Filter.Germ.coe_add]⟩
   | mul x y _ _ hx hy =>
     obtain ⟨φ, h1, h2⟩ := hx
     obtain ⟨ψ, h3, h4⟩ := hy
@@ -157,7 +215,7 @@ theorem sl_eq_of_mem (X : Tower Ω ε) {r : X.K} (hr : r ∈ Algebra.adjoin Ω {
   induction hr using Algebra.adjoin_induction with
   | mem x hx => rw [Set.mem_singleton_iff.1 hx]; exact X.j_inv γ
   | algebraMap c => exact (X.sl (ofSL γ)).commutes c
-  | add x y _ _ hx hy => rw [map_add, hx, hy]
+  | add x y _ _ hx hy => rw [map_add (f := _), hx, hy]
   | mul x y _ _ hx hy => rw [map_mul, hx, hy]
 
 theorem exists_denom (X : Tower Ω ε) {c : X.K} (hc : c ∈ IntermediateField.adjoin Ω {X.jK}) :

@@ -1,6 +1,48 @@
-import Mathlib
-import GroundTheory.GlobalFields.NormResidueSymbol.RangeIdeleNormLeKerIdeleSymbol
-import GroundTheory.GlobalFields.IdeleGroups.IdeleNorms.InfiniteAdeleRingMapInfiniteAdeleRingMap
+module
+
+public import GroundTheory.GlobalFields.NormResidueSymbol.RangeIdeleNormLeKerIdeleSymbol
+public import GroundTheory.GlobalFields.IdeleGroups.IdeleNorms.InfiniteAdeleRingMapInfiniteAdeleRingMap
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+
+@[expose] public section
 
 namespace GroundTheory.Global
 
@@ -16,8 +58,8 @@ section Finite
 
 variable (v : HeightOneSpectrum (𝓞 K))
 
-omit [NumberField K] [NumberField L] [NumberField M] in
 
+omit [NumberField K] [NumberField L] [NumberField M] in
 theorem liesOver_below_of_placesOver (u : PlacesOver M v) :
     (below L u.1).asIdeal.LiesOver v.asIdeal :=
   (below_eq_iff _ v).1 (by rw [below_below, (below_eq_iff u.1 v).2 inferInstance])
@@ -25,12 +67,9 @@ theorem liesOver_below_of_placesOver (u : PlacesOver M v) :
 def belowPlace (u : PlacesOver M v) : PlacesOver L v :=
   ⟨below L u.1, liesOver_below_of_placesOver L M v u⟩
 
-omit [NumberField K] [NumberField L] [NumberField M] in
-theorem belowPlace_val (u : PlacesOver M v) : (belowPlace L M v u).1 = below L u.1 :=
-  rfl
+
 
 omit [NumberField K] [NumberField L] [NumberField M] in
-
 instance liesOver_belowPlace (u : PlacesOver M v) :
     u.1.asIdeal.LiesOver (belowPlace L M v u).1.asIdeal :=
   liesOver_below (K := L) u.1
@@ -74,8 +113,8 @@ end Finite
 
 section Infinite
 
-omit [NumberField K] [NumberField L] in
 
+omit [NumberField K] [NumberField L] in
 theorem isConj_conjAt_of_isReal [IsGalois K L] {w : InfinitePlace L}
     (hv : (w.comap (algebraMap K L)).IsReal) : IsConj w.embedding (conjAt K w) := by
   by_cases hw : w.IsReal
@@ -83,8 +122,8 @@ theorem isConj_conjAt_of_isReal [IsGalois K L] {w : InfinitePlace L}
     exact isConj_one_iff.2 (isReal_iff.1 hw)
   · exact isConj_conjAt (isRamified_iff.2 ⟨not_isReal_iff_isComplex.1 hw, hv⟩)
 
-omit [NumberField K] [NumberField L] [NumberField M] in
 
+omit [NumberField K] [NumberField L] [NumberField M] in
 theorem restrictNormal_conjAt [IsGalois K L] [IsGalois K M] (w : InfinitePlace M)
     (hv : (w.comap (algebraMap K M)).IsReal) :
     (conjAt K w).restrictNormal L = conjAt K (w.comap (algebraMap L M)) := by

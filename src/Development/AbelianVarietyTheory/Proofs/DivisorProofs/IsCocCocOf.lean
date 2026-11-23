@@ -1,5 +1,44 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsDatNeZero
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsDatNeZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -21,12 +60,12 @@ abbrev smallAt (W : K → X.left.Opens) {D : Type} [CommRing D] [Algebra R D] (x
     SmallCat W := ⟨trivAt x, h⟩
 
 theorem Sm.map {W : K → X.left.Opens} {D D' : Type} [CommRing D] [Algebra R D] [CommRing D'] [Algebra R D']
-    (φ : D →ₐ[R] D') {x : Pt X D} (h : Sm W x) : Sm W (spOver φ ≫ x) := by
+    (φ : D →ₐ[R] D') {x : Pt X D} (h : Sm W x) : Sm W (D := D') (spOver φ ≫ x) := by
   obtain ⟨i, hi⟩ := h
   exact ⟨i, (trivMap φ x).le_preimage hi⟩
 
-open Classical in
 
+open Classical in
 def cocOf (W : K → X.left.Opens) (n : C1 ((IsSmall (dp0 R) (X.hom ≫ 𝟙 _) W).ι ⋙ O (dp0 R) (X.hom ≫ 𝟙 _))) :
     Fn1 X := fun _ _ _ _ _ _ φ x ↦
   if h : Sm W x then n (smallAt W x h) (smallAt W _ (h.map φ)) (ObjectProperty.homMk (trivMap φ x)) else 0
@@ -35,6 +74,16 @@ end GlobalTheory.PtExt
 
 namespace GlobalTheory.PtExt
 variable {R : Type} [CommRing R] {X : Over (Sp R)} {K : Type}
+
+private theorem thickHom_ext {T T' : Thick (dp0 R) (X.hom ≫ 𝟙 _)}
+    {f g : Thick.Hom T T'} (h : ∀ b, f.φ b = g.φ b) : f = g := by
+  rcases f with ⟨φ, φ₀, comm, dp, pt⟩
+  rcases g with ⟨ψ, ψ₀, comm', dp', pt'⟩
+  obtain rfl : φ = ψ := AlgHom.ext h
+  obtain rfl : φ₀ = ψ₀ := RingHom.ext fun c ↦ by
+    obtain ⟨b, rfl⟩ := T.surj c
+    rw [comm, comm']
+  rfl
 
 theorem isCoc_cocOf (W : K → X.left.Opens)
     (n : C1 ((IsSmall (dp0 R) (X.hom ≫ 𝟙 _) W).ι ⋙ O (dp0 R) (X.hom ≫ 𝟙 _)))
@@ -45,12 +94,12 @@ theorem isCoc_cocOf (W : K → X.left.Opens)
       (f : smallAt W x hx ⟶ smallAt W y h) (f' : smallAt W x hx ⟶ smallAt W y' h'),
       (∀ r, f.hom.φ r = f'.hom.φ r) → n _ _ f = n _ _ f' := by
     rintro y _ rfl h h' f f' hf
-    have : f = f' := ObjectProperty.hom_ext _ (Thick.hom_ext hf)
+    have : f = f' := ObjectProperty.hom_ext _ (thickHom_ext hf)
     subst this; rfl
   have key := hn (smallAt W x hx) (smallAt W _ (hx.map φ)) (smallAt W _ ((hx.map φ).map ψ))
     (ObjectProperty.homMk (trivMap φ x)) (ObjectProperty.homMk (trivMap ψ _)) rfl rfl rfl
   rw [d1_apply] at key
-  simp only [cocOf, dif_pos hx, dif_pos (hx.map φ), dif_pos (hx.map (ψ.comp φ))]
+  simp only [cocOf, dite_eq_left hx, dite_eq_left (hx.map φ)]
   have e := tr (spOver (ψ.comp φ) ≫ x) (spOver ψ ≫ spOver φ ≫ x)
     (by rw [← spOver_comp, Category.assoc]) (hx.map (ψ.comp φ)) ((hx.map φ).map ψ)
     (ObjectProperty.homMk (trivMap (ψ.comp φ) x))

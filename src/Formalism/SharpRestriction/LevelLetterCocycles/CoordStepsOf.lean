@@ -1,4 +1,46 @@
-import Formalism.SharpRestriction.LevelLetterCocycles.RealisedOfCoordArc
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.RealisedOfCoordArc
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.DistinguishedUnitIdeals.ExistsConstOfInvariantMod
+
+@[expose] public section
 
 noncomputable section
 
@@ -16,14 +58,14 @@ variable {G : Type} [Group G] [TopologicalSpace G] {Qp K₀ K : Type} [Field Qp]
     {v : AddValuation LL (WithTop ℚ)} {n : ℕ} [NeZero n] {W : LocWach PD LL O v n}
     [Fintype (K →ₐ[Qp] LL)]
 
-variable (W) in
 
+variable (W) in
 def EEl (i : ZMod n) : AddSubgroup W.EE where
   carrier := {ε | (letE i : LetA O n) • ε = ε ∧ ∀ δ ∈ W.DelF, W.γE δ ε = ε}
   zero_mem' := ⟨smul_zero _, fun δ _ => map_zero _⟩
   add_mem' := by
     rintro a b ⟨ha, ha'⟩ ⟨hb, hb'⟩
-    exact ⟨by rw [smul_add, ha, hb], fun δ hδ => by rw [map_add, ha' δ hδ, hb' δ hδ]⟩
+    exact ⟨by rw [smul_add, ha, hb], fun δ hδ => by rw [map_add (f := _), ha' δ hδ, hb' δ hδ]⟩
   neg_mem' := by
     rintro a ⟨ha, ha'⟩
     exact ⟨by rw [smul_neg, ha], fun δ hδ => by rw [map_neg, ha' δ hδ]⟩
@@ -31,8 +73,8 @@ def EEl (i : ZMod n) : AddSubgroup W.EE where
 def lc {T : LocLat G Qp LL O} {ι : Type} [Fintype ι] (b : ι → W.DD T) (c : ι → W.EE) : W.DD T :=
   ∑ j, c j • b j
 
-variable (W) in
 
+variable (W) in
 def LBasis (T : LocLat G Qp LL O) (i : ZMod n) {ι : Type} [Fintype ι] (b : ι → W.DD T) : Prop :=
   (∀ c : ι → W.EE, (∀ j, c j ∈ EEl W i) → lc b c ∈ DDl W T i) ∧
   (∀ c c' : ι → W.EE, (∀ j, c j ∈ EEl W i) → (∀ j, c' j ∈ EEl W i) → lc b c = lc b c' → c = c') ∧
@@ -55,16 +97,16 @@ attribute [instance] CoeffData.acg CoeffData.mod
 
 def CoeffStep (hR : Ring9 W) : Prop := Nonempty (CoeffData hR)
 
-variable (W) in
 
+variable (W) in
 def SplitStep : Prop :=
   ∀ (T₁ T₂ : LocLat G Qp LL O) (F : LatHom T₁.L T₂.L), CrysLat PD T₁ → CrysLat PD T₂ → F.Onto →
     ∃ r k : ℕ, ∀ i : ZMod n, ∃ (b₁ : Fin r ⊕ Fin k → W.DD T₁) (b₂ : Fin r → W.DD T₂),
       LBasis W T₁ i b₁ ∧ LBasis W T₂ i b₂ ∧ (∀ j, W.map F (b₁ (Sum.inl j)) = b₂ j) ∧
         ∀ j, W.map F (b₁ (Sum.inr j)) = 0
 
-variable (W) in
 
+variable (W) in
 def UnitStep (e : W.DD W.one) : Prop := ∀ i : ZMod n, LBasis W W.one i (fun _ : Unit => e)
 
 section Build
@@ -110,9 +152,6 @@ def coordOf : Coord W (baseIdOf hR) T where
     change lc (b i) (fun j => D.κ i ((a • c) j)) = (baseIdOf hR).d a • lc (b i) (fun j => D.κ i (c j))
     simp only [lc, Pi.smul_apply, D.semi, Finset.smul_sum, mul_smul, algebraMap_smul]
 
-theorem coordOf_t_apply_eq_sum_kappa_smul (i : ZMod n) (c : ι → D.M) :
-    (coordOf D b hb).t i c = ∑ j, D.κ i (c j) • b i j := rfl
-
 end Build
 
 theorem coordSteps_of (hR : Ring9 W) (e : W.DD W.one) (hK : CoeffStep hR) (hS : SplitStep W)
@@ -128,6 +167,7 @@ theorem coordSteps_of (hR : Ring9 W) (e : W.DD W.one) (hK : CoeffStep hR) (hS : 
       crys := hc₁.2.2.2
       crys' := hc₂.2.2.2 }, fun _ => D.m₁, fun i => ?_⟩
   · change ∑ j, D.κ i (c (Sum.inl j)) • b₂ i j = W.map F (∑ j, D.κ i (c j) • b₁ i j)
+
     rw [map_sum, Fintype.sum_sum_type]
     simp only [map_smul, hin, hout, smul_zero, Finset.sum_const_zero, add_zero]
   · change ∑ _u : Unit, D.κ i D.m₁ • e = (letE i : LetA O n) • e

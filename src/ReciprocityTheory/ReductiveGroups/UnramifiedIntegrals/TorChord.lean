@@ -1,6 +1,56 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.TorDefs
-import Formalism.EllipticTorsion.FormalGroupPointsNoTorsion
+module
+
+public import Formalism.EllipticTorsion.FormalGroupPointsParametrisation
+public import Formalism.EllipticTorsion.EllipticTorsionProofs.FormalGroupPointsHomDef
+public import Formalism.EllipticTorsion.FormalGroupPointsNoTorsion
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.Normed.Ring.Ultra
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Formalism.LocalToGlobal.TorsionIntegrality.CMGoodModels.Statement
+public import Formalism.LocalToGlobal.TorsionIntegrality.TorsionTranslationPowers.IsTransSys
+public import Formalism.LocalToGlobal.TorsionIntegrality.WeierstrassTwoTorsion.StatementK
+
+@[expose] public section
 
 noncomputable section
 open scoped Classical
@@ -76,12 +126,6 @@ theorem formalGroup_param_norm_lt_one (W : WeierstrassCurve C) (hW : IntegralMod
     have : 1 ≤ ‖-x / y‖ ^ 2 := one_le_pow₀ hcon
     nlinarith
 
-theorem formalGroup_param_sq_norm (W : WeierstrassCurve C) (hW : IntegralModel W) (P : W.toAffine.Point) (hP : InFormalGroupPoints P)
-    (h0 : P ≠ 0) : ‖uOf P‖ ^ 2 * ‖px W P‖ = 1 := by
-  rcases P with _ | @⟨x, y, h⟩
-  · exact absurd rfl h0
-  · exact chord_norm_u_sq W hW h.1 hP
-
 theorem chord_adjoin_le (W : WeierstrassCurve C) (hW : IntegralModel W) {c : C}
     (hc : c ∈ Algebra.adjoin ℤ ({W.a₁, W.a₂, W.a₃, W.a₄, W.a₆} : Set C)) : ‖c‖ ≤ 1 := by
   obtain ⟨h1, h2, h3, h4, h6⟩ := hW
@@ -148,9 +192,13 @@ theorem formalGroup_add_estimate [CompleteSpace C] (W : WeierstrassCurve C) (hW 
     (P Q : W.toAffine.Point) (hP : InFormalGroupPoints P) (hQ : InFormalGroupPoints Q) :
     ‖uOf (P + Q) - uOf P - uOf Q‖ ≤ (max ‖uOf P‖ ‖uOf Q‖) ^ 2 := by
   obtain ⟨w, hw, -⟩ := wSeriesUnique.{0} C W
-  obtain ⟨F, hFc, h00, h10, h01, hch⟩ := wChordSeries.{0} C W w hw
-  have hF : Formalism.G.IntegralMv F := fun d => chord_adjoin_le W hW (hFc d)
-  rw [formal_group_points_hom.{0} C W w F hW hw hF h00 hch P Q hP hQ]
-  exact chord_eval_est hF h00 h10 h01 (formalGroup_param_norm_lt_one W hW P hP) (formalGroup_param_norm_lt_one W hW Q hQ)
+  obtain ⟨F, hFc, hch⟩ := wFormalGroup.{0} C W w hw
+  have hF : Formalism.G.IntegralMv F.toPowerSeries := fun d => chord_adjoin_le W hW (hFc d)
+  have hadd : uOf (P + Q) = evalMv2 F.toPowerSeries (uOf P) (uOf Q) :=
+    FormalGroupPointsHom.e1hom_main wSubstUnique wChordSubst formal_group_points_param
+      hW hw F hF hch P Q hP hQ
+  rw [hadd]
+  exact chord_eval_est hF F.zero_constantCoeff F.lin_coeff_X F.lin_coeff_Y
+    (formalGroup_param_norm_lt_one W hW P hP) (formalGroup_param_norm_lt_one W hW Q hQ)
 
 end ReciprocityTheory.ChartRestriction.L1

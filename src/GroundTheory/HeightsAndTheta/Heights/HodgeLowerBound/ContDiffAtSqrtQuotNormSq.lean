@@ -1,7 +1,58 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.StatementsMuWeightChartSmooth
-import GroundTheory.HeightsAndTheta.Heights.ElementarySymmetric.PMuLineNormEq
-import GroundTheory.HeightsAndTheta.Heights.ElementarySymmetric.PMuFrameExists
+module
+
+public import Mathlib.Analysis.Calculus.ContDiff.Defs
+public import Mathlib.Analysis.InnerProductSpace.Basic
+public import Mathlib.LinearAlgebra.Matrix.Determinant.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Analysis.Calculus.ContDiff.Basic
+public import Mathlib.Analysis.Calculus.ContDiff.Comp
+public import Mathlib.Analysis.Calculus.ContDiff.Operations
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ArithmeticHilbertSamuelLowerBound
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.IsSemipositiveOn
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -16,13 +67,6 @@ namespace MuWeightChartSmooth
 section Calculus
 
 variable {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F] {n : WithTop ℕ∞} {x : F}
-
-theorem contDiffAt_eval {σ : Type*} {Φ : F → σ → ℂ} (hΦ : ∀ i, ContDiffAt ℝ n (fun w => Φ w i) x)
-    (P : MvPolynomial σ ℂ) : ContDiffAt ℝ n (fun w => eval (Φ w) P) x := by
-  induction P using MvPolynomial.induction_on with
-  | C a => simpa using contDiffAt_const
-  | add p q hp hq => simpa using hp.add hq
-  | mul_X p i hp => simpa using hp.mul (hΦ i)
 
 theorem contDiffAt_det {m : Type*} [Fintype m] [DecidableEq m] {M : F → Matrix m m ℂ}
     (hM : ∀ i j, ContDiffAt ℝ n (fun w => M w i j) x) : ContDiffAt ℝ n (fun w => (M w).det) x := by
@@ -55,35 +99,6 @@ variable {II : IntersectionSystem} {Ψ : Type} [Fintype Ψ] {K : Type} [Fintype 
   [∀ k, Fintype (ι k)] {Ω : Type} [Field Ω] [Algebra ℚ Ω] {E : Ψ → Type} [∀ τ, AddCommGroup (E τ)]
   [∀ τ, Module Ω (E τ)]
 
-omit [Algebra ℚ Ω] in
-
-theorem contDiffAt_valAt {y : (Σ k, ι k) → Ω} {m : ℕ} {γ : (Fin m → ℂ) → (Σ k, ι k) → ℂ}
-    {t : Fin m → ℂ} (hγ : ∀ p, ContDiffAt ℝ 2 (fun t' => γ t' p) t)
-    (hP : ∀ᶠ t' in 𝓝 t, γ t' ∈ mcPts (mCoordIdeal y)) {a : Ω} {v : ℂ}
-    (hv : IndefiniteRowSideFullHecke.LowerBoundFree.IsValueAt y a (γ t) v) :
-    ContDiffAt ℝ 2 (fun t' => valAt y a (γ t')) t ∧ valAt y a (γ t) = v ∧
-      ∀ᶠ t' in 𝓝 t, IsValueAt y a (γ t') (valAt y a (γ t')) := by
-  obtain ⟨d, g, h, hg, hh, hy, hyg, hz, hgv⟩ := hv
-  have hG := contDiffAt_eval hγ (map (Int.castRingHom ℂ) g)
-  have hH := contDiffAt_eval hγ (map (Int.castRingHom ℂ) h)
-  have hval : ∀ᶠ t' in 𝓝 t, IsValueAt y a (γ t') (eval (γ t') (map (Int.castRingHom ℂ) g) /
-      eval (γ t') (map (Int.castRingHom ℂ) h)) ∧ γ t' ∈ mcPts (mCoordIdeal y) := by
-    filter_upwards [hP, hH.continuousAt.eventually_ne hz] with t' h1 h2
-    exact ⟨⟨d, g, h, hg, hh, hy, hyg, h2, rfl⟩, h1⟩
-  have hev : ∀ᶠ t' in 𝓝 t, valAt y a (γ t') =
-      eval (γ t') (map (Int.castRingHom ℂ) g) * (eval (γ t') (map (Int.castRingHom ℂ) h))⁻¹ := by
-    filter_upwards [hval] with t' h1
-    rw [valAt_eq h1.2 h1.1, div_eq_mul_inv]
-  refine ⟨(hG.mul (hH.fun_inv hz)).congr_of_eventuallyEq hev, ?_, ?_⟩
-  · rw [hev.self_of_nhds, hgv, mul_inv_cancel_right₀ hz]
-  · filter_upwards [hval] with t' h1
-    rw [valAt_eq h1.2 h1.1]
-    exact h1.1
-
-def datumValue {D : ComponentData II Ψ K ι Ω E} (H : HodgeData D) (c : (k : K) → ι k)
-    (b : ∀ τ, Fin D.N → E τ) (u : Ω) (z : (Σ k, ι k) → ℂ) : ℝ :=
-  ‖valAt D.y u z‖ * (∏ k, ‖z ⟨k, c k⟩‖ ^ H.aMu k) *
-    ∏ τ, Real.sqrt (quotNormSq D.j_le_N (gramAt (D.h τ) (b τ) z))
 
 end Chart
 

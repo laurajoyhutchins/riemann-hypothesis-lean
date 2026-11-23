@@ -1,6 +1,52 @@
-import Mathlib
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.RealDescent.RealLeviDescent.InjectiveDecompositionAction
-import CompanionTheory.HarishChandraModules.LowKTypeMultiplicity.EigenspaceCyclicDensity.CreationOperators.WtProj
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.RealDescent.RealLeviDescent.InjectiveDecompositionAction
+public import CompanionTheory.HarishChandraModules.LowKTypeMultiplicity.EigenspaceCyclicDensity.CreationOperators.WtProj
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Finset
 
@@ -274,10 +320,10 @@ theorem kA_xL {E1 E2 : Fin n → Fin n → Module.End ℂ V} (hP : IsPairA E1 E2
     (LinearMap.congr_fun (hP.2.2 l.2.1.1 l.2.1.2 c c) x).symm
   simp only [xL, alL]
   cases hl : l.1
-  · simp only [kA, pA, Bool.false_eq_true, if_false, LinearMap.add_apply, map_add]
+  · simp only [kA, pA, Bool.false_eq_true, if_false, LinearMap.add_apply, map_add (f := _)]
     rw [g1, g2, c1, c2]
     module
-  · simp only [kA, pA, if_true, LinearMap.add_apply, LinearMap.sub_apply, map_add, map_sub]
+  · simp only [kA, pA, if_true, LinearMap.add_apply, LinearMap.sub_apply, map_add (f := _), map_sub]
     rw [g1, g2, c1, c2]
     module
 
@@ -293,7 +339,7 @@ theorem ftL_bdL {E1 E2 : Fin n → Fin n → Module.End ℂ V} (hP : IsPairA E1 
           liftL n (xL E1 E2 l) (FtL E1 E2 c y) + (alL l c : ℂ) • liftL n (xL E1 E2 l) y := by
         intro y
         funext A
-        simp only [FtL_apply, liftL_apply, Pi.add_apply, Pi.smul_apply, map_add, map_smul, kA_xL hP]
+        simp only [FtL_apply, liftL_apply, Pi.add_apply, Pi.smul_apply, map_add (f := _), map_smul, kA_xL hP]
         module
       simp only [Module.End.mul_apply]
       rw [e, FtL_ann, map_sub, map_smul, sub_add_cancel]
@@ -352,13 +398,13 @@ theorem kA_comm {E1 E2 : Fin n → Fin n → Module.End ℂ V} (hP : IsPairA E1 
       simpa [sub_eq_zero] using this
   have c1 : ∀ v, E1 c c (E2 d d v) = E2 d d (E1 c c v) := fun v => LinearMap.congr_fun (hP.2.2 c c d d) v
   have c2 : ∀ v, E1 d d (E2 c c v) = E2 c c (E1 d d v) := fun v => LinearMap.congr_fun (hP.2.2 d d c c) v
-  simp only [kA, LinearMap.add_apply, map_add, g hP.1, g hP.2.1, c1, c2]
+  simp only [kA, LinearMap.add_apply, map_add (f := _), g hP.1, g hP.2.1, c1, c2]
   abel
 
 theorem FtL_commute {E1 E2 : Fin n → Fin n → Module.End ℂ V} (hP : IsPairA E1 E2) (c d : Fin n) :
     Commute (FtL E1 E2 c) (FtL E1 E2 d) := by
   refine LinearMap.ext fun x => funext fun A => ?_
-  simp only [Module.End.mul_apply, FtL_apply, map_add, map_smul, kA_comm hP c d, smul_add, smul_smul,
+  simp only [Module.End.mul_apply, FtL_apply, map_add (f := _), map_smul, kA_comm hP c d, smul_add, smul_smul,
     mul_comm (wtL A c : ℂ)]
   abel
 
@@ -521,6 +567,7 @@ theorem injRL_of (hB : BdSqL) (hV : VanKL) : InjRL := by
           rw [h1] at h2
           simp at h2
         have e := congrFun hb A
+
         rw [Pi.single_eq_of_ne hAo, hsum, map_sum, Finset.sum_apply, Finset.sum_eq_single B] at e
         · apply hne
           by_contra h'
@@ -586,10 +633,12 @@ theorem injRL_of (hB : BdSqL) (hV : VanKL) : InjRL := by
           have h2 := (hrne B A hB').1
           have h3 := (hry B A hB')
           exact ⟨(h A h3.2).1, by rw [h3.1]; omega⟩
+
       · rw [map_sub, map_sum, hw c, smul_sub, Finset.smul_sum]
         congr 1
         refine Finset.sum_congr rfl fun B _ => ?_
         rw [← Module.End.mul_apply, (ftL_bdL hP _ c).eq, Module.End.mul_apply, t1 B c, map_smul]
+
       · rw [map_sub, map_sum, hb, Finset.sum_eq_zero, sub_zero]
         exact fun B _ => hsq _
   obtain ⟨y', y1, y2, y3⟩ := wtProjL hP (fun c x y => hA.unitK c c x y)

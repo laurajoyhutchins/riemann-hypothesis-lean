@@ -1,8 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.WittOnFalse
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FrobKerIdealLeAugIdeal
+public import Development.AbelianVarietyTheory.Definitions.Divisors.ToBaseChangePtsBijective
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsFrobGBaseChange
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
 import Development.AbelianVarietyTheory.Definitions.Divisors.FormalCoboundarySmul
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FrobKerIdealLeAugIdeal
-import Development.AbelianVarietyTheory.Definitions.Divisors.FibreRankCompOfSurjective
+import Mathlib.RingTheory.MvPowerSeries.Basic
+
+@[expose] public section
+
 open CategoryTheory TensorProduct MvPowerSeries GlobalTheory GlobalTheory.PDiv GlobalTheory.PDivGroup GlobalTheory.Katz
 
 set_option autoImplicit false
@@ -65,9 +110,8 @@ def iterFrobSemi : SemiBialgHom (algebraMap (IterFrobBase K p r) K) H H where
               rw [smul_pow]⟩ c := by
       intro c
       induction c with
-      | zero => exact map_zero _
       | add x y hx hy =>
-        rw [map_add, ← hx, ← hy]
+        rw [map_add (f := _), ← hx, ← hy]
         exact map_add _ (@id (H ⊗[K] H) x) (@id (H ⊗[K] H) y)
       | tmul x y =>
         change (x ⊗ₜ[K] y) ^ p ^ r = (x ^ p ^ r) ⊗ₜ[K] (y ^ p ^ r)
@@ -79,7 +123,7 @@ def iterFrobSemi : SemiBialgHom (algebraMap (IterFrobBase K p r) K) H H where
 def iterRelFrob : K ⊗[IterFrobBase K p r] H →ₐc[K] H := (iterFrobSemi p K H r).liftBC
 
 theorem iterRelFrob_tmul (c : K) (a : H) : iterRelFrob p K H r (c ⊗ₜ a) = c • a ^ p ^ r :=
-  SemiBialgHom.liftBC_tmul _ c a
+  SemiBialgHom.liftBC_tmul (iterFrobSemi p K H r) c a
 
 end GlobalTheory.PDiv
 
@@ -95,13 +139,11 @@ theorem finrank_le_frobKer_mul_span_pow (p : ℕ) [Fact p.Prime] (K H : Type) [F
   · have hle : frobKerIdeal (p ^ r) K H ≤ kerIdeal f := by
       refine Ideal.span_le.2 ?_
       rintro _ ⟨a, ha, rfl⟩
-      have ha' : counit (R := K) a = 0 := ha
+      have ha' : counit (R := IterFrobBase K p r) a = 0 := ha
       have hb : (1 : K) ⊗ₜ[IterFrobBase K p r] a ∈
           augIdeal K (K ⊗[IterFrobBase K p r] H) := by
         change counit (R := K) ((1 : K) ⊗ₜ[IterFrobBase K p r] a) = 0
-        rw [← toBaseChange_apply (IterFrobBase K p r) K H a, SemiBialgHom.counit_map]
-        have ha'' : counit (R := IterFrobBase K p r) a = 0 := ha'
-        rw [ha'', map_zero]
+        rw [TensorProduct.counit_tmul, ha', zero_smul]
       have e : f ((1 : K) ⊗ₜ a) = a ^ p ^ r := by
         rw [iterRelFrob_tmul, one_smul]
       show a ^ p ^ r ∈ _
@@ -113,9 +155,8 @@ theorem finrank_le_frobKer_mul_span_pow (p : ℕ) [Fact p.Prime] (K H : Type) [F
   · refine Submodule.finrank_mono ?_
     rintro _ ⟨x, rfl⟩
     induction x with
-    | zero => simp
     | add x y hx hy =>
-      rw [map_add]
+      rw [map_add (f := _)]
       exact Submodule.add_mem _ hx hy
     | tmul c a =>
       change f (c ⊗ₜ a) ∈ _

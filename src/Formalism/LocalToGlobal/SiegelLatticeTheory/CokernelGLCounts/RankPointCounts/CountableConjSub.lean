@@ -1,4 +1,55 @@
-import Mathlib
+module
+
+public import Mathlib.MeasureTheory.Group.FundamentalDomain
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Analysis.LocallyConvex.SeparatingDual
+public import Mathlib.MeasureTheory.Integral.Bochner.ContinuousLinearMap
+
+@[expose] public section
 
 noncomputable section
 
@@ -66,46 +117,6 @@ theorem SF_mul_right {S : Set G} {Ω : Set G} (h : SF S Ω) (y : G) : SF S {r | 
   · exact h.2.2 (x * y) hx s hs (by simpa [Set.mem_setOf_eq, mul_assoc] using hsx)
 
 variable (h : G)
-
-def conjSub (Γ : Subgroup G) : Subgroup G := Γ.map (MulAut.conj h⁻¹).toMonoidHom
-
-theorem mem_conjSub {Γ : Subgroup G} {s : G} : s ∈ conjSub h Γ ↔ h * s * h⁻¹ ∈ Γ := by
-  unfold conjSub
-  rw [Subgroup.mem_map]
-  constructor
-  · rintro ⟨g, hg, rfl⟩
-    simpa [mul_assoc] using hg
-  · intro hs
-    exact ⟨h * s * h⁻¹, hs, by simp [mul_assoc]⟩
-
-instance countable_conjSub (Γ : Subgroup G) [Countable Γ] : Countable (conjSub h Γ) := by
-  unfold conjSub
-  exact Countable.of_equiv _ (Γ.equivMapOfInjective _ (MulAut.conj h⁻¹).injective).toEquiv
-
-theorem SF_conj {Γ : Subgroup G} {Ω : Set G} (hΩ : SF (Γ : Set G) Ω) :
-    SF (conjSub h Γ : Set G) {r | h * r * h⁻¹ ∈ Ω} := by
-  refine ⟨hΩ.1.preimage ((measurable_const_mul h).mul_const h⁻¹), fun x => ?_, fun x hx t ht htx => ?_⟩
-  · obtain ⟨s, hs, hsx⟩ := hΩ.2.1 (h * x * h⁻¹)
-    refine ⟨h⁻¹ * s * h, ?_, ?_⟩
-    · show h⁻¹ * s * h ∈ conjSub h Γ
-      rw [mem_conjSub]
-      simpa [mul_assoc] using hs
-    · show h * (h⁻¹ * s * h * x) * h⁻¹ ∈ Ω
-      simpa [mul_assoc] using hsx
-  · have ht' : h * t * h⁻¹ ∈ Γ := (mem_conjSub h).1 ht
-    have h1 : (h * t * h⁻¹) * (h * x * h⁻¹) ∈ Ω := by simpa [mul_assoc] using htx
-    have h2 : h * t * h⁻¹ = 1 := hΩ.2.2 (h * x * h⁻¹) hx (h * t * h⁻¹) ht' h1
-    calc t = h⁻¹ * (h * t * h⁻¹) * h := by group
-      _ = 1 := by rw [h2]; group
-
-theorem SF_transl {Γ : Subgroup G} {Ω : Set G} (hΩ : SF (Γ : Set G) Ω) (y : G) :
-    SF (conjSub h Γ : Set G) {r | h * (r * y) ∈ Ω} := by
-  have H := SF_mul_right (SF_conj h hΩ) (y * h)
-  have hset : {r | h * (r * y) ∈ Ω} = {r | r * (y * h) ∈ {r | h * r * h⁻¹ ∈ Ω}} := by
-    ext r
-    simp [mul_assoc]
-  rw [hset]
-  exact H
 
 end SF
 

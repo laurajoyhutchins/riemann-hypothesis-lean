@@ -1,4 +1,60 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.MvPolynomial.Basic
+public import Mathlib.LinearAlgebra.Matrix.Determinant.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Algebra.MvPolynomial.Eval
+public import Mathlib.Algebra.Polynomial.Basic
+public import Mathlib.Algebra.Polynomial.Div
+public import Mathlib.LinearAlgebra.Matrix.Polynomial
+public import Mathlib.LinearAlgebra.Matrix.SchurComplement
+
+@[expose] public section
 
 open scoped BigOperators
 open Polynomial
@@ -60,24 +116,27 @@ def swapM {O X : Type} {n : ℕ} (a : X → Matrix (Fin n) (Fin n) O) :
 theorem det_sum_smul_mem {O X B : Type} [CommRing O] [CommRing B] (T : Subalgebra O (X → O))
     {n : ℕ} (ι : (X → O) →+* B) (S : Subring B) (hS : ∀ t ∈ T, ι t ∈ S) {m : ℕ}
     (a : Fin m → X → Matrix (Fin n) (Fin n) O)
-    (h : ∀ d : Fin m →₀ ℕ, (fun x => MvPolynomial.coeff d (Matrix.det
-      (∑ k, (MvPolynomial.X k : MvPolynomial (Fin m) O) • (a k x).map MvPolynomial.C))) ∈ T)
+    (h : ∀ d : Fin m →₀ ℕ, (fun x => AddMonoidAlgebra.coeff (Matrix.det
+      (∑ k, (MvPolynomial.X k : MvPolynomial (Fin m) O) • (a k x).map MvPolynomial.C)) d) ∈ T)
     (c : Fin m → B) (hc : ∀ k, c k ∈ S) :
     (∑ k, c k • (swapM (a k)).map ι).det ∈ S := by
   set D : MvPolynomial (Fin m) (X → O) := Matrix.det
     (∑ k, (MvPolynomial.X k : MvPolynomial (Fin m) (X → O)) • (swapM (a k)).map MvPolynomial.C)
     with hD
-  have hco : ∀ d, MvPolynomial.coeff d D ∈ T := by
+  have hco : ∀ d, AddMonoidAlgebra.coeff D d ∈ T := by
     intro d
     convert h d using 1
     funext x
-    have : MvPolynomial.coeff d D x =
-        MvPolynomial.coeff d (MvPolynomial.map (Pi.evalRingHom (fun _ : X => O) x) D) := by
+    have : AddMonoidAlgebra.coeff D d x =
+        AddMonoidAlgebra.coeff (MvPolynomial.map (Pi.evalRingHom (fun _ : X => O) x) D) d := by
       rw [MvPolynomial.coeff_map]; rfl
     rw [this, hD, RingHom.map_det]
-    congr 2
-    ext i j : 1
-    simp [swapM, Matrix.sum_apply]
+    have hm : (∑ k, (MvPolynomial.X k : MvPolynomial (Fin m) (X → O)) •
+        (swapM (a k)).map MvPolynomial.C).map (MvPolynomial.map (Pi.evalRingHom (fun _ : X => O) x)) =
+        ∑ k, (MvPolynomial.X k : MvPolynomial (Fin m) O) • (a k x).map (MvPolynomial.C (σ := Fin m)) := by
+      ext i j
+      simp [swapM, Matrix.sum_apply]
+    exact congrArg (fun M => AddMonoidAlgebra.coeff (Matrix.det M) d) hm
   have hev : (∑ k, c k • (swapM (a k)).map ι).det = MvPolynomial.eval₂Hom ι c D := by
     rw [hD, RingHom.map_det]
     congr 1
@@ -86,7 +145,7 @@ theorem det_sum_smul_mem {O X B : Type} [CommRing O] [CommRing B] (T : Subalgebr
   rw [hev, MvPolynomial.coe_eval₂Hom, MvPolynomial.eval₂_eq]
   exact S.sum_mem fun d _ => S.mul_mem (hS _ (hco d)) (S.prod_mem fun k _ => S.pow_mem (hc k) _)
 
-theorem main : ∀ {O X : Type} [CommRing O] (T : Subalgebra O (X → O)) (n : ℕ) (R : Subalgebra O (X → Matrix (Fin n) (Fin n) O)), (∀ (m : ℕ) (a : Fin m → X → Matrix (Fin n) (Fin n) O), (∀ k, a k ∈ R) → ∀ d : Fin m →₀ ℕ, (fun x => MvPolynomial.coeff d (Matrix.det (∑ k, (MvPolynomial.X k : MvPolynomial (Fin m) O) • (a k x).map MvPolynomial.C))) ∈ T) → ∀ (g : ℕ) (Θ : Fin g → Fin g → X → Matrix (Fin n) (Fin n) O), (∀ p q, Θ p q ∈ R) → (fun x => Matrix.det (Matrix.of fun (pa qb : Fin g × Fin n) => Θ pa.1 qb.1 x pa.2 qb.2)) ∈ T := by
+theorem main : ∀ {O X : Type} [CommRing O] (T : Subalgebra O (X → O)) (n : ℕ) (R : Subalgebra O (X → Matrix (Fin n) (Fin n) O)), (∀ (m : ℕ) (a : Fin m → X → Matrix (Fin n) (Fin n) O), (∀ k, a k ∈ R) → ∀ d : Fin m →₀ ℕ, (fun x => AddMonoidAlgebra.coeff (Matrix.det (∑ k, (MvPolynomial.X k : MvPolynomial (Fin m) O) • (a k x).map MvPolynomial.C)) d) ∈ T) → ∀ (g : ℕ) (Θ : Fin g → Fin g → X → Matrix (Fin n) (Fin n) O), (∀ p q, Θ p q ∈ R) → (fun x => Matrix.det (Matrix.of fun (pa qb : Fin g × Fin n) => Θ pa.1 qb.1 x pa.2 qb.2)) ∈ T := by
   intro O X _ T n R hR g Θ hΘ
   set N := Fintype.card (Fin g × Fin n) with hN
   let I : Ideal (X → O)[X] := Ideal.span {Polynomial.X ^ (N + 1)}
@@ -134,7 +193,7 @@ theorem main : ∀ {O X : Type} [CommRing O] (T : Subalgebra O (X → O)) (n : �
   set F : (X → O)[X] := Matrix.det ((Polynomial.X : (X → O)[X]) • M.map Polynomial.C +
     (1 : Matrix (Fin g × Fin n) (Fin g × Fin n) (X → O)).map Polynomial.C) with hF
   have hπ : (1 + π Polynomial.X • blk fun p q => (swapM (Θ p q)).map ι).det = π F := by
-    rw [hF, RingHom.map_det, Matrix.map_one _ (map_zero _) (map_one _), map_add, map_one, add_comm]
+    rw [hF, RingHom.map_det, Matrix.map_one _ (map_zero _) (map_one _), map_add (f := _), map_one, add_comm]
     congr 2
   rw [hπ] at key
   obtain ⟨t, ht⟩ := key

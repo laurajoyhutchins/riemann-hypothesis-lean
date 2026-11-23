@@ -1,7 +1,45 @@
-import Mathlib
-import Formalism.SharpRestriction.LevelLetterCocycles.QuotientHomNonvanishingBound
-import Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow
-import Formalism.SharpRestriction.ParamsHeightRankConstant
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.QuotientHomNonvanishingBound
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -122,16 +160,6 @@ def ConsExist : Prop :=
         (∀ x, S.X0 x = (X0 x).map (algebraMap A (N.O i))) ∧
         GoodCongruenceObjects N rep ρ π S)
 
-def TakenAfter (rep : N.X i → (GE N →* GL (Fin R.nV) (N.O i)))
-    (ρ : N.X i → (GE N →* GL (Fin R.r) (N.O i))) : Prop :=
-  ∃ (A : Type) (_ : CommRing A) (_ : IsDomain A) (_ : IsDiscreteValuationRing A) (_ : Algebra ℤ_[N.l i] A)
-    (_ : Module.Finite ℤ_[N.l i] A) (_ : Algebra A (N.O i)) (_ : IsScalarTower ℤ_[N.l i] A (N.O i))
-    (TA : Subalgebra A (N.X i → A)) (repA : N.X i → (GE N →* GL (Fin R.nV) A))
-    (ρA : N.X i → (GE N →* GL (Fin R.r) A)) (χA : ℕ → (GE N →* Aˣ)),
-    IsEnlargement N i rep ρ A TA repA ρA χA ∧ HidaSetting R.t TA (N.Z i) repA ρA χA ∧
-    ∀ π ∈ N.Z i, ∃ g0 L eB e1 X0, IsInertiaCyclotomicGeneratorElement N i g0 ∧ IsChoice R.t TA repA ρA χA π g0 L eB e1 X0 ∧
-      RootsIn R.t (N.O i) eB X0
-
 theorem isEnlargement_self (rep : N.X i → (GE N →* GL (Fin R.nV) (N.O i)))
     (ρ : N.X i → (GE N →* GL (Fin R.r) (N.O i))) :
     IsEnlargement N i rep ρ (N.O i) (N.T i) rep ρ (N.chi i) := by
@@ -146,18 +174,6 @@ theorem isEnlargement_self (rep : N.X i → (GE N →* GL (Fin R.nV) (N.O i)))
     rfl
 
 end Record
-
-example {A : Type} [CommRing A] {n : ℕ} (M : Matrix (Fin n) (Fin n) A) : blockPol 1 M = M.charpoly := by
-  unfold blockPol Matrix.charpoly Matrix.charmatrix
-  congr 1
-  ext a b
-  by_cases h : a = b <;> simp [h, Matrix.one_apply]
-
-def ConsExist_at (D : D7) : Prop := ∀ i : D.nd.Loc, ConsExist D.nd i
-
-def ConsExistF {eps : ℝ} (Fm : FamP eps) : Prop := ∀ (x : ℝ) (k : Fm.Ix x), ConsExist_at (Fm.D x k)
-
-def ConsExistClosed (𝒞 : FamClass) : Prop := Closed 𝒞 (fun Fm _ => ConsExistF Fm)
 
 end GlobalTheory.IndefiniteRowSideFullHecke.CongruenceModuleMatrices
 

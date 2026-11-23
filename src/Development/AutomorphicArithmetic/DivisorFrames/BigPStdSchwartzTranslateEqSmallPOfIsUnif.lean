@@ -1,7 +1,66 @@
-import Mathlib
+module
+
+public import Mathlib.Analysis.Matrix.MeasurableSpace
+public import Formalism.DoubleCosetMeasures.StatementZ
+public import Development.AbelianVarietyTheory.Definitions.Divisors.RankEqCardIffExistsFrameMatrixFirstColumnBlock
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsLocPart
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.StandardPairFrameBlocksDetAndNegTranspose
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsContinuousPadic
+public import Development.AutomorphicArithmetic.DivisorFrames.ShellSumEqConstOfTwistEqIndicatorDoubleCoset
+import Formalism.LocalRingCardinality.DataHost
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.WeilTensorModels
+import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.MatchingAdjoints
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.BlkGLMem
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IsReading
 import Development.AutomorphicArithmetic.LocalEmbeddings.FinMatchDefs
-import Development.AutomorphicArithmetic.DivisorFrames.ShellSumEqConstOfTwistEqIndicatorDoubleCoset
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.StandardPairFrameBlocksDetAndNegTranspose
+
+@[expose] public section
 
 namespace UpperTheory.StandardFormChange
 open GlobalTheory.SplitFlip GlobalTheory.SplitWeil GlobalTheory.StdPairLoc GlobalTheory.StdPairCone MeasureTheory
@@ -73,7 +132,7 @@ private theorem bigF_change (ν : kˣ →* ℂˣ) (ϖ : kˣ) (c a a' : ℕ) (hϖ
   by_cases h0 : (blk₁ (X * M)).det = 0
   · rw [hA0 _ h0, mul_zero]
     have h1 : ∀ y : GL (Fin a) k, stdA ν ϖ c a a' (g.1 * (y.1 * X) * M) = 0 := fun y => by
-      rw [has, stdA, dif_neg]
+      rw [has, stdA, dite_eq_right]
       rintro ⟨h, -⟩
       exact h (by rw [blk₁_mul, Matrix.det_mul, h0, mul_zero])
     simp [bigF, shellSum, shell, h1]
@@ -102,9 +161,9 @@ private theorem bigF_change (ν : kˣ →* ℂˣ) (ϖ : kˣ) (c a a' : ℕ) (hϖ
     · have h' : (blk₁ ((g * y).val * (X * M))).det ≠ 0 ∧ IsGLO (blk₁ ((g * y).val * (X * M))) ∧
           ∀ i j, blk₂ ((g * y).val * (X * M)) i j ∈ cball (ϖ ^ c) := by
         rw [blk₁_mul, blk₂_mul, ← hg]; exact h
-      rw [stdA, dif_pos h']
+      rw [stdA, dite_eq_left h']
       congr 3
-    · rw [stdA, dif_neg]
+    · rw [stdA, dite_eq_right]
       rwa [blk₁_mul, blk₂_mul, ← hg]
 
 private theorem smallF_change (ν : kˣ →* ℂˣ) (a' d : ℕ) (Ψ : Matrix (Fin a') (Fin d) k → ℂ) (l : ℂ) (g : GL (Fin a') k)
@@ -118,12 +177,11 @@ private theorem smallF_change (ν : kˣ →* ℂˣ) (a' d : ℕ) (Ψ : Matrix (F
   rw [← integral_mul_left_eq_self (fun y : GL (Fin a') k =>
     Ψ (y.val * (Y * M)) * (ν (gdet y) : ℂ) * apow (gdet y) ((Fintype.card (Fin d) : ℂ) / 2)) g, ← integral_const_mul]
   congr 1
-  funext y
-  simp only [Pi.smul_apply, smul_eq_mul, Units.val_mul, map_mul, apow_mul, Matrix.mul_assoc]
-  rw [mul_assoc l, mul_assoc l, mul_assoc l]
-  congr 1
-  rw [eq_inv_mul_iff_mul_eq₀ hne]
-  ring
+  funext a
+  simp only [Pi.smul_apply, smul_eq_mul, gdet_mul, map_mul, Units.val_mul, apow_mul,
+    Matrix.mul_assoc]
+  field_simp [apow_ne_zero]
+  <;> ring
 
 private theorem main (ϖ : kˣ) (hϖ : IsUnif ϖ) (α β ν : kˣ →* ℂˣ) (hν : ν = α / β) (c a a' : ℕ) (g : GL (Fin a) k)
     (g' : GL (Fin a') k) (κ : GL (Fin (a + a')) k) :

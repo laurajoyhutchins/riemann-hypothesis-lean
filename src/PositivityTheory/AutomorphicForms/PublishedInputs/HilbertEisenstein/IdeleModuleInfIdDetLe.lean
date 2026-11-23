@@ -1,8 +1,52 @@
-import PositivityTheory.AutomorphicForms.PublishedInputs.HilbertEisenstein.SSmooth
-import GroundTheory.GlobalFields.TateThesis.TateThetaDecay
-import GroundTheory.GlobalFields.TateThesis.AdelePoissonUniform
-import GroundTheory.IdeleRoots.ClassicalIdeles.FinOrdValGenProof
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsOpenIdeleSubgroupContainsCongruenceUnits
+module
+
+public import PositivityTheory.AutomorphicForms.PublishedInputs.HilbertEisenstein.SSmooth
+import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ExistsUniqueIdeleOfLinearEquivQuotientLocal
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsOpenIdeleSubgroupContainsCongruenceUnits
+import Formalism.SharpRestriction.GrowthBounds.MonomialOrderSegments.BrData
+public import GroundTheory.IdeleRoots.ClassicalIdeles.FinOrdValGenProof
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.ExistsUniqueHcharOfFiniteOrder
+import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.SelmerTransport.RestrictionMemInvariantH1
+import Development.AutomorphicArithmetic.AutomorphicVarieties.IdeleGenerators.ConstSmall
+import Development.AutomorphicArithmetic.AutomorphicVarieties.PublishedTheorems.GelfandKazhdanReal
+
+@[expose] public section
 
 noncomputable section
 
@@ -126,7 +170,7 @@ theorem ideleModule_infId_det_le (y : GL (Fin 2) (UpperTheory.V.TR.Rinf F)) :
   rw [ideleModule_infId]
   calc ∏ w, |((Matrix.GeneralLinearGroup.det y : (UpperTheory.V.TR.Rinf F)ˣ) : UpperTheory.V.TR.Rinf F) w|
       ≤ ∏ _w : InfinitePlace F, 2 * UpperTheory.V.TR.height y ^ 2 :=
-        Finset.prod_le_prod (fun _ _ => abs_nonneg _) fun w _ => abs_det_apply_le y w
+        Finset.prod_le_prod₀ (fun _ _ => abs_nonneg _) fun w _ => abs_det_apply_le y w
     _ = _ := by rw [Finset.prod_const, Finset.card_univ, mul_pow, ← pow_mul, mul_comm 2 (Fintype.card _)]
 
 theorem absD_mul_infGL_le (g : GA F 2) : ∃ (C : ℝ) (N : ℕ), ∀ y : GL (Fin 2) (UpperTheory.V.TR.Rinf F),
@@ -259,8 +303,8 @@ theorem norm_Eis_le (ω : HChar F) (Ψ : (Fin 2 → Ad F) → ℂ) (h : GA F 2) 
     ENNReal.toReal_ofReal hK] at h2
   linarith [h2]
 
-open Classical in
 
+open Classical in
 theorem norm_Phi_le (c : HeightOneSpectrum (𝓞 F) → ℕ) (v : Fin 2 → Ad F) :
     ‖Phi c v‖ ≤ ‖arch (UpperTheory.V.TR.pInf F (v 0)) (UpperTheory.V.TR.pInf F (v 1))‖ *
       (if boxP (fun w => (c w : ℤ) + dd w) v then 1 else 0) := by
@@ -288,8 +332,8 @@ theorem norm_Phi_le (c : HeightOneSpectrum (𝓞 F) → ℕ) (v : Fin 2 → Ad F
   · simp
   · simp
 
-open Classical in
 
+open Classical in
 theorem norm_PhiH_le (c : HeightOneSpectrum (𝓞 F) → ℕ) (v : Fin 2 → Ad F) :
     ‖PhiH c v‖ ≤ ‖arch (UpperTheory.V.TR.pInf F (v 0)) (UpperTheory.V.TR.pInf F (v 1))‖ *
       (if boxP (fun w => (c w : ℤ) + dd w) v then 1 else 0) := by

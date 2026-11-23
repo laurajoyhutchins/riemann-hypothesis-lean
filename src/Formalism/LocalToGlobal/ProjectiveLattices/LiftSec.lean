@@ -1,4 +1,43 @@
-import Formalism.LocalToGlobal.ProjectiveLattices.LiftCurveSt
+module
+
+public import Formalism.LocalToGlobal.ProjectiveLattices.LiftCurveSt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -13,14 +52,10 @@ variable {D : D7} {B : WeightFamilies.Prov D} {P : ModuliIntegralCharts.Prov D} 
 
 def hasseW (β : Idx D j N →₀ ℕ) (x : Lw X la w) : Lw X la w := hasse X la w β x
 
-theorem hasseW_apply (β : Idx D j N →₀ ℕ) (x : Lw X la w) : hasseW X la w β x = hasse X la w β x := rfl
-
 theorem hasseW_of_mul_eq (β : Idx D j N →₀ ℕ) {s x : Rp X la N} {y : Lw X la w}
     (h : algebraMap (Rp X la N) (Lw X la w) s * y = algebraMap (Rp X la N) (Lw X la w) x) :
     ∑ q ∈ antidiagonal β, algebraMap (Rp X la N) (Lw X la w) (hasseRp X la N q.1 s) * hasseW X la w q.2 y =
       algebraMap (Rp X la N) (Lw X la w) (hasseRp X la N β x) := hasse_of_mul_eq X la w β h
-
-theorem hasseW_zero (x : Lw X la w) : hasseW X la w 0 x = x := hasse_zero X la w x
 
 theorem hasse_frac_succ_mem {u : WeightFamilies.Wt D j} {m : ℕ} {g : Rp X la N} (hg : g ∈ Vw X la N (addL u wL (m + 1)))
     (β : Idx D j N →₀ ℕ) : hasseW X la w β (frac X la w (m + 1) g) ∈ Hfr X la w u := by
@@ -54,7 +89,7 @@ theorem hasse_frac_succ_mem {u : WeightFamilies.Wt D j} {m : ℕ} {g : Rp X la N
       apply ne_of_mem_erase hq'
       exact Prod.ext h (by rw [← h12, h, zero_add])
     have hlt : Finsupp.degree q.2 < n := by
-      rw [← hn, ← h12, map_add]
+      rw [← hn, ← h12, map_add (f := _)]
       have : Finsupp.degree q.1 ≠ 0 := fun h => hne ((Finsupp.degree_eq_zero_iff _).1 h)
       omega
     have h2 := ih _ hlt q.2 rfl
@@ -90,7 +125,7 @@ def Low (n : ℕ) (z : M.Λ) : Prop := ∀ β : Idx D j G.N →₀ ℕ, M.hd β 
 theorem low_zero_left (z : M.Λ) : M.Low 0 z := fun β => by simp
 
 theorem low_add {n : ℕ} {z z' : M.Λ} (hz : M.Low n z) (hz' : M.Low n z') : M.Low n (z + z') := fun β => by
-  rw [map_add]; exact Ideal.add_mem _ (hz β) (hz' β)
+  rw [map_add (f := _)]; exact Ideal.add_mem _ (hz β) (hz' β)
 
 theorem low_mul {n m : ℕ} {z z' : M.Λ} (hz : M.Low n z) (hz' : M.Low m z') : M.Low (n + m) (z * z') := fun β => by
   rw [M.hd_mul]
@@ -99,7 +134,7 @@ theorem low_mul {n m : ℕ} {z z' : M.Λ} (hz : M.Low n z) (hz' : M.Low m z') : 
   have h := Ideal.mul_mem_mul (hz q.1) (hz' q.2)
   rw [← pow_add] at h
   refine Ideal.pow_le_pow_right ?_ h
-  rw [← h12, map_add]
+  rw [← h12, map_add (f := _)]
   omega
 
 theorem low_gen (i : Fin (WeightFamilies.dimY D j)) :
@@ -140,7 +175,7 @@ theorem ev_I (ζ : PtsG G la) {z : M.Λ} (hz : z ∈ M.I) : M.ev ζ z = 0 := by
     rw [M.ev_ι]
     exact (hs ζ).lift_Jid (sfr_succ_mem_Jid (xplus X E hM) la G.w i)
   | zero => exact map_zero _
-  | add x y _ _ hx hy => rw [map_add, hx, hy, add_zero]
+  | add x y _ _ hx hy => rw [map_add (f := _), hx, hy, add_zero]
   | smul a x _ hx => rw [smul_eq_mul, map_mul, hx, mul_zero]
 
 theorem hd_mul_e' (β : Idx D j G.N →₀ ℕ) (r : M.Λ) : M.hd β (r * M.e') = M.hd β r * M.e' := by

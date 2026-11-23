@@ -1,6 +1,54 @@
-import Mathlib
-import Formalism.LocalToGlobal.TorsionIntegrality.FrobeniusFibreCurves.LogarithmicSubstitution.OneAddMulDerivLogSubst
-import Formalism.LocalToGlobal.TorsionIntegrality.FrobeniusFibreCurves.StatementC
+module
+
+public import Formalism.LocalToGlobal.TorsionIntegrality.FrobeniusFibreCurves.StatementC
+public import Formalism.LocalToGlobal.TorsionIntegrality.FrobeniusFibreCurves.LogarithmicSubstitution.OneAddMulDerivLogSubst
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -84,7 +132,7 @@ theorem cc_sigS (P : PowerSeries K) : PowerSeries.constantCoeff (sigS P) = 0 := 
 theorem map_sig1S (e1 kap : K) (w : PowerSeries K) :
     PowerSeries.map j (sigmaOneSeries e1 kap w) = sigmaOneSeries (j e1) (j kap) (PowerSeries.map j w) := by
   unfold Formalism.L2.Th1.B.sigmaOneSeries
-  rw [map_neg, map_prim, map_prim, map_add, map_mul, PowerSeries.map_C,
+  rw [map_neg, map_prim, map_prim, map_add (f := _), map_mul, PowerSeries.map_C,
     PowerSeries.map_C]
 
 theorem cc_sig1S (e1 kap : K) (w : PowerSeries K) :
@@ -118,7 +166,7 @@ theorem map_wOf (e1 : K) (P : PowerSeries K) :
     simp
   unfold Formalism.L2.Th1.B.wOf
   rw [map_mul, map_inv' j hc]
-  simp only [map_pow, map_sub, map_add, map_one, map_mul, PowerSeries.map_X, PowerSeries.map_C]
+  simp only [map_pow, map_sub, map_add (f := _), map_one, map_mul, PowerSeries.map_X, PowerSeries.map_C]
 
 theorem map_phO (s2 : K) (P : PowerSeries K) {l : PowerSeries K}
     (h0 : PowerSeries.constantCoeff l = 0) (h1 : PowerSeries.coeff 1 l = 1) :
@@ -126,7 +174,7 @@ theorem map_phO (s2 : K) (P : PowerSeries K) {l : PowerSeries K}
   have hd : PowerSeries.constantCoeff (Formalism.L2.Th1.B.lU l) = 1 := by
     rw [← PowerSeries.coeff_zero_eq_constantCoeff_apply, Formalism.L2.Th1.B.lU, PowerSeries.coeff_mk, zero_add, h1]
   unfold Formalism.L2.Th1.B.phO
-  rw [map_sub, map_add, map_neg, map_psubst' j h0, map_sigS, map_mul,
+  rw [map_sub, map_add (f := _), map_neg, map_psubst' j h0, map_sigS, map_mul,
     PowerSeries.map_C, map_div₀, map_ofNat, map_pow, map_fLog' j hd, map_lU]
 
 theorem map_phE (s2 e1 kap : K) (w : PowerSeries K) {l : PowerSeries K}
@@ -134,7 +182,7 @@ theorem map_phE (s2 e1 kap : K) (w : PowerSeries K) {l : PowerSeries K}
     PowerSeries.map j (phE s2 e1 kap w l) =
       phE (j s2) (j e1) (j kap) (PowerSeries.map j w) (PowerSeries.map j l) := by
   unfold Formalism.L2.Th1.B.phE
-  rw [map_add, map_neg, map_psubst' j h0, map_sig1S, map_mul,
+  rw [map_add (f := _), map_neg, map_psubst' j h0, map_sig1S, map_mul,
     PowerSeries.map_C, map_div₀, map_ofNat, map_pow]
 
 theorem map_inVar {ι : Type} (x : ι) (f : PowerSeries K) :

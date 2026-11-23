@@ -1,6 +1,45 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.EndValuedForm11Coeffs
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IntegralAntiholomorphicJacobianEqZeroPoincareGroStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.EndValuedForm11Coeffs
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IntegralAntiholomorphicJacobianEqZeroPoincareGroStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -29,19 +68,19 @@ theorem integral_mixTop_mdbar_eq_zero : ∀ {n : ℕ} {r : Type} [Fintype r] [De
   have hI2 : ∀ (p : Fin n → r) (π : Equiv.Perm (Fin n)),
       Integrable (fun v => ∑ u : Equiv.Perm (Fin n), ((Equiv.Perm.sign π : ℤ) : ℂ) * ((Equiv.Perm.sign u : ℤ) : ℂ) *
         (Matrix.of fun i b => mdbar (θ i (u i)) v (coordVec b) (p i) (p (π i))).det)
-        (volume.restrict (offHyp S U)) := fun p π => integrable_finset_sum _ fun u _ => hI p π u
+        (volume.restrict (offHyp S U)) := fun p π => integrable_finsetSum _ fun u _ => hI p π u
   have hI3 : ∀ (p : Fin n → r),
       Integrable (fun v => ∑ π : Equiv.Perm (Fin n), ∑ u : Equiv.Perm (Fin n),
         ((Equiv.Perm.sign π : ℤ) : ℂ) * ((Equiv.Perm.sign u : ℤ) : ℂ) *
         (Matrix.of fun i b => mdbar (θ i (u i)) v (coordVec b) (p i) (p (π i))).det)
-        (volume.restrict (offHyp S U)) := fun p => integrable_finset_sum _ fun π _ => hI2 p π
+        (volume.restrict (offHyp S U)) := fun p => integrable_finsetSum _ fun π _ => hI2 p π
   unfold mixTop
-  refine ⟨Integrable.const_mul (integrable_finset_sum _ fun p _ => hI3 p) _, ?_⟩
-  rw [integral_const_mul, integral_finset_sum _ fun p _ => hI3 p]
+  refine ⟨Integrable.const_mul (integrable_finsetSum _ fun p _ => hI3 p) _, ?_⟩
+  rw [integral_const_mul, integral_finsetSum _ fun p _ => hI3 p]
   refine mul_eq_zero_of_right _ (Finset.sum_eq_zero fun p _ => ?_)
-  rw [integral_finset_sum _ fun π _ => hI2 p π]
+  rw [integral_finsetSum _ fun π _ => hI2 p π]
   refine Finset.sum_eq_zero fun π _ => ?_
-  rw [integral_finset_sum _ fun u _ => hI p π u]
+  rw [integral_finsetSum _ fun u _ => hI p π u]
   refine Finset.sum_eq_zero fun u _ => ?_
   rw [integral_const_mul, (key p π u).2, mul_zero]
 

@@ -1,9 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.GeometricallyConnectedOfIsIsoRestrict
-import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsIsLocModelIsPrimeOf
-import Development.AbelianVarietyTheory.Definitions.Divisors.NotDominatesTopPlace
-import Development.AbelianVarietyTheory.Definitions.Divisors.DominatesIffIsLocalHom
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.NotDominatesTopPlace
 import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.IsDomainAndIsIntegrallyClosedAtPrimeOfSmoothOfCo
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 open CategoryTheory AlgebraicGeometry TopologicalSpace
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor
 open GlobalTheory GlobalTheory.Cartier GlobalTheory.TopForm GlobalTheory.Discrepancy GlobalTheory.FieldPair
@@ -13,8 +55,8 @@ namespace GlobalTheory.FieldPair
 
 open CategoryTheory AlgebraicGeometry TopologicalSpace in
 open scoped TensorProduct in
-set_option synthInstance.maxHeartbeats 400000 in
-set_option maxHeartbeats 1600000 in
+
+
 open MvPolynomial in
 private lemma ne_zero_of_eval₂Hom_formallyEtale {A T : Type} [CommRing A] [CommRing T] [Nontrivial T]
     {n : ℕ} (ι : A →+* T) (τ : Fin n → T) (h : (MvPolynomial.eval₂Hom ι τ).FormallyEtale) (i : Fin n) :
@@ -57,8 +99,8 @@ private lemma ne_zero_of_eval₂Hom_formallyEtale {A T : Type} [CommRing A] [Com
 
 open CategoryTheory AlgebraicGeometry TopologicalSpace in
 open scoped TensorProduct in
-set_option synthInstance.maxHeartbeats 400000 in
-set_option maxHeartbeats 1600000 in
+
+
 open MvPolynomial in
 private lemma formallyEtale_quotient_last {A T : Type} [CommRing A] [CommRing T] {n : ℕ}
     (ι : A →+* T) (τ : Fin (n + 1) → T) (h : (MvPolynomial.eval₂Hom ι τ).FormallyEtale) :
@@ -141,8 +183,8 @@ private lemma formallyEtale_quotient_last {A T : Type} [CommRing A] [CommRing T]
 
 open CategoryTheory AlgebraicGeometry TopologicalSpace in
 open scoped TensorProduct in
-set_option synthInstance.maxHeartbeats 400000 in
-set_option maxHeartbeats 1600000 in
+
+
 private lemma isDomain_of_formallyEtale_of_isLocalRing {A B : Type} [CommRing A] [IsDomain A]
     [IsIntegrallyClosed A] [IsNoetherianRing A] [CommRing B] [IsLocalRing B] [Algebra A B]
     [Algebra.EssFiniteType A B] [Algebra.FormallyEtale A B] : IsDomain B := by
@@ -175,7 +217,7 @@ private lemma isDomain_of_formallyEtale_of_isLocalRing {A B : Type} [CommRing A]
   let q' : Ideal (Localization.Away f) := q.map (algebraMap S _)
   haveI hq' : q'.IsPrime := IsLocalization.isPrime_of_isPrime_disjoint (Submonoid.powers f) _ q hq hdisj
   have hcomap : q'.comap (algebraMap S (Localization.Away f)) = q :=
-    IsLocalization.comap_map_of_isPrime_disjoint (Submonoid.powers f) _ hq hdisj
+    IsLocalization.under_map_of_isPrime_disjoint (Submonoid.powers f) _ hq hdisj
   obtain ⟨hdom, -⟩ := _root_.GlobalTheory.isDomain_and_isIntegrallyClosed_atPrime_of_etale A q' (Localization.AtPrime q')
   haveI : IsLocalization q.primeCompl (Localization.AtPrime q') := by
     have h1 : IsLocalization (q'.comap (algebraMap S (Localization.Away f))).primeCompl
@@ -188,10 +230,10 @@ private lemma isDomain_of_formallyEtale_of_isLocalRing {A B : Type} [CommRing A]
     (IsLocalization.algEquiv q.primeCompl (Localization.AtPrime q') B).toRingEquiv
   exact e'.symm.toMulEquiv.isDomain
 
+
 open CategoryTheory AlgebraicGeometry TopologicalSpace in
 open scoped TensorProduct in
-set_option synthInstance.maxHeartbeats 400000 in
-set_option maxHeartbeats 1600000 in
+
 
 theorem _root_.GlobalTheory.FieldPair.IsEtTower.exists_quotient_last :
     ∀ {K L : Type} [Field K] [Field L] (cK : ℂ →+* K) (cL : ℂ →+* L) (r : ℕ) (R : Subring K)

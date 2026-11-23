@@ -1,12 +1,60 @@
-import Mathlib
-import Development.AbelianVarietyTheory.BlockTheory.SiegelWeilLocal.OrbitStepSpace
-import Development.AbelianVarietyTheory.BlockTheory.SiegelWeilLocal.OrthonormalPlaceBasis
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsOrthonormalBasis
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsContinuousMultilinearMapOfInnerProd
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsNormSqTensUpdate
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.HasDerivAtOrbitTens
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.StepSpacePropsOfDiff
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.VPSubOfLocalBound
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.SiegelWeilLocal.OrbitStepSpace
+public import Development.AbelianVarietyTheory.BlockTheory.SiegelWeilLocal.OrthonormalPlaceBasis
+public import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsContinuousMultilinearMapOfInnerProd
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsNormSqTensUpdate
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsOrthonormalBasis
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.HasDerivAtOrbitTens
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.StepSpaceProps
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.StepSpacePropsOfDiff
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.VPSubOfLocalBound
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.PiTensorProduct.Finite
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.LinearAlgebra.PiTensorProduct.Basic
+
+@[expose] public section
 
 open Formalism.MainNotions.S NumberField Matrix GlobalTheory.IndefiniteRowSideFullHecke.OrthonormalPlaceBasis
 open GlobalTheory.IndefiniteRowSideFullHecke.OrbitDifferenceSpace (stepSpace IsDiffVec IsONFamily stepConst)
@@ -85,8 +133,8 @@ variable {B} (hU : ∀ v, IsURepOn (UJset (B.I.ε v)) (B.σ v))
 
 include hU hd
 
-open Classical in
 
+open Classical in
 theorem hasDerivAt_orbit_sum {P k : ℕ} (E : gInf B) (u : Fin k → ∀ v, B.H v)
     (hu : ∀ l v, u l v ∈ stepSpace (B.I.ε v) (B.lam v) (B.σ v) P) :
     HasDerivAt (orbit B E (∑ l, B.tens (u l)))
@@ -97,8 +145,8 @@ theorem hasDerivAt_orbit_sum {P k : ℕ} (E : gInf B) (u : Fin k → ∀ v, B.H 
   exact GlobalTheory.TensDer.hasDerivAt_orbit_tens B E (u l) _
     (fun v => (hd v P _ (hu l v) _ (E v).2).hasDerivAt) (fun v => (hU v).1.1)
 
-open Classical in
 
+open Classical in
 theorem dAct_atPlace_sum {P k : ℕ} (v : InfinitePlace B.I.F) (X : gLie (B.I.ε v))
     (u : Fin k → ∀ v, B.H v) (hu : ∀ l v, u l v ∈ stepSpace (B.I.ε v) (B.lam v) (B.σ v) P) :
     dAct B (atPlace B v X) (∑ l, B.tens (u l)) =

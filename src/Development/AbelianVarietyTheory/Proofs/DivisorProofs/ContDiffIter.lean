@@ -1,8 +1,58 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.TCoefMInMMul
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ScaledKoszulTestFamilyHasDerivAtScaleStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsSmoothEventuallyZeroCutoffIntervalIntegralDeriStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ConjugationDerivCutoffPolynomialMemUnitarySpanStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.TCoefMInMMul
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ConjugationDerivCutoffPolynomialMemUnitarySpanStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsSmoothEventuallyZeroCutoffIntervalIntegralDeriStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ScaledKoszulTestFamilyHasDerivAtScaleStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
+
+@[expose] public section
 
 open MvPolynomial GlobalTheory.PsCo.Pc1 GlobalTheory.PsCo.Pc1.A
 open scoped ContDiff
@@ -77,14 +127,14 @@ theorem stHomot : GlobalTheory.PsCo.Pc1.StHomot := by
       field_simp
     have hDc : Continuous D := by
       rw [hD]
-      refine continuous_finset_sum _ fun x _ => continuous_finset_sum _ fun j _ => ?_
+      refine continuous_finsetSum _ fun x _ => continuous_finsetSum _ fun j _ => ?_
       exact ((hc _).mul continuous_const).add ((hc _).mul continuous_const)
     have hftc := intervalIntegral.integral_eq_sub_of_hasDerivAt hder (hDc.intervalIntegrable _ _)
     have hint : ∫ s in (1:ℝ)..t, D s = ∑ x : Mode ε, ∑ j ∈ Finset.range (nMode ε + 1),
         adBas ε (Matrix.single x.1.2 x.1.1 1) (fun y => ∫ s in (1:ℝ)..t, scF G j s y) (q x j) g := by
-      rw [hD, intervalIntegral.integral_finset_sum]
+      rw [hD, intervalIntegral.integral_finsetSum]
       · refine Finset.sum_congr rfl fun x _ => ?_
-        rw [intervalIntegral.integral_finset_sum]
+        rw [intervalIntegral.integral_finsetSum]
         · refine Finset.sum_congr rfl fun j _ => ?_
           rw [intervalIntegral.integral_add (((hc _).mul_const _).intervalIntegrable _ _)
             (((hc _).mul_const _).intervalIntegrable _ _),
@@ -94,7 +144,7 @@ theorem stHomot : GlobalTheory.PsCo.Pc1.StHomot := by
         · intro j _
           exact (((hc _).mul continuous_const).add ((hc _).mul continuous_const)).intervalIntegrable _ _
       · intro x _
-        refine (continuous_finset_sum _ fun j _ => ?_).intervalIntegrable _ _
+        refine (continuous_finsetSum _ fun j _ => ?_).intervalIntegrable _ _
         exact ((hc _).mul continuous_const).add ((hc _).mul continuous_const)
     simp only [Pi.sub_apply, Pi.neg_apply, Finset.sum_apply]
     rw [← hint, hftc]

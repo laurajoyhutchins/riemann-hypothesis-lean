@@ -1,7 +1,48 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.HodgeTateResidues.ToYIsFirstChernIff
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.HodgeTateResidues.CompId
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.HodgeTateResidues.IsLiftOneSOfLevEqOne
+module
+
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.HodgeTateResidues.ToYIsFirstChernIff
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.HodgeTateResidues.CompId
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.HodgeTateResidues.IsLiftOneSOfLevEqOne
+import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.HodgeTateResidues.RedPullPd
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
@@ -40,17 +81,19 @@ include H in
 theorem half_galois_of_compatible (hg : ∀ (m : ℕ) (σ : K.fixingSubgroup), Nonempty (LHom (S m) (S m)
     (ACris.galCris (IntermediateField.fixingSubgroupEquiv K σ)) (galBase (IntermediateField.fixingSubgroupEquiv K σ))
     (period_ring_base.σC σ.1).toRingHom (qC l (period_ring_base.χ σ.1)))) :
-    Half2 (K := K) ht fun x => gam S (toY ht hs x) where
-  add hM _ _ x y hx hy a := H.add hM (cY ht hs hx) (cY ht hs hy) (cY ht hs (comp_add hx hy)) a
-  lin hM _ _ c x hx a φ := H.lin hM c (cY ht hs hx) (cY ht hs (comp_smul c hx)) a φ
-  lin' hM _ _ x hx a k φ := H.lin' hM (cY ht hs hx) a k φ
-  sh hM _ _ _ k h x hx a := H.sh hM k h (cY ht hs hx) (cY ht hs (comp_sh ht k h hx)) a
-  gal {M} hM r _ σ x hx a φ := H.gal hM (hg r σ).some (galY ht hs M σ) (galY_pt ht hs M σ) (cY ht hs hx) _
-    (cY ht hs (comp_gal σ hx)) (fun n => galBase_cris _ n) (toY_gal ht hs σ x) a φ
-  nat u hu hM hN _ _ x hx a φ := H.nat hM hN u hu (cY ht hs hx) _ (cY ht hs (comp_pull u hu hx)) (toY_pull ht hs u hu x) a φ
-  cup hM _ _ _ _ _ h x y hx hy _ _ b b' c φ := H.cup hM h (cY ht hs hx) (cY ht hs hy) (cY ht hs (comp_cup h hx hy)) b b' c φ
-  one {M} hM φ := H.one hM (cY ht hs (comp_one M)) φ
-  c1 hM D hD x c hx h1 h2 := H.c1' hM D hD _ c (cY ht hs hx) ((toY_isFirstChern_iff ht hs D x).2 h1) h2
+    Half2 (K := K) ht (fun x => gam S (toY ht hs x)) := by
+  exact {
+    add hM _ _ x y hx hy a := H.add hM (cY ht hs hx) (cY ht hs hy) (cY ht hs (comp_add hx hy)) a
+    lin hM _ _ c x hx a φ := H.lin hM c (cY ht hs hx) (cY ht hs (comp_smul c hx)) a φ
+    lin' hM _ _ x hx a k φ := H.lin' hM (cY ht hs hx) a k φ
+    sh hM _ _ _ k h x hx a := H.sh hM k h (cY ht hs hx) (cY ht hs (comp_sh ht k h hx)) a
+    gal {M} hM r _ σ x hx a φ := H.gal hM (hg r σ).some (galY ht hs M σ) (galY_pt ht hs M σ) (cY ht hs hx) _
+      (cY ht hs (comp_gal σ hx)) (fun n => galBase_cris _ n) (toY_gal ht hs σ x) a φ
+    nat u hu hM hN _ _ x hx a φ := H.nat hM hN u hu (cY ht hs hx) _ (cY ht hs (comp_pull u hu hx)) (toY_pull ht hs u hu x) a φ
+    cup hM _ _ _ _ _ h x y hx hy _ _ b b' c φ := H.cup hM h (cY ht hs hx) (cY ht hs hy) (cY ht hs (comp_cup h hx hy)) b b' c φ
+    one {M} hM φ := H.one hM (cY ht hs (comp_one M)) φ
+    c1 hM D hD x c hx h1 h2 := H.c1' hM D hD _ c (cY ht hs hx) ((toY_isFirstChern_iff ht hs D x).2 h1) h2
+  }
 
 variable (l K) in
 theorem half2Of : Half2Of l K := fun ht hs hL h1 h2 h3 h4 h5 h6 h7 _ =>

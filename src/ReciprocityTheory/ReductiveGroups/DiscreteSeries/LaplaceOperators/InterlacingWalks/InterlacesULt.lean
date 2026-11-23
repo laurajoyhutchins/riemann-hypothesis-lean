@@ -1,6 +1,49 @@
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.LaplaceOperators.InterlacingWalks.LowerStepStatement
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.LaplaceOperators.InterlacingWalks.AdjGap
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.LaplaceOperators.InterlacingWalks.Imports
+module
+
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.LaplaceOperators.InterlacingWalks.LowerStepStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace ReciprocityTheory.ChartRestriction.DS.Lap
 
@@ -112,7 +155,7 @@ theorem lowPt_lt {k r : ℕ} {u : Fin k → ℝ} {v : Fin (k - 1) → ℝ} {b : 
   show (if a.val = i then x else walkPar k r u v b (i + 1) a) = _
   rw [if_neg h1]
   show (if h : a.val < i + 1 ∧ a.val < k then u ⟨a.val, h.2⟩ - 1 / 2 else parLam k r v b a) = _
-  rw [dif_pos h2]
+  rw [dite_eq_left h2]
 
 theorem lowPt_gt {k r : ℕ} {u : Fin k → ℝ} {v : Fin (k - 1) → ℝ} {b : Fin (2 * r + 2) → ℝ}
     (i : ℕ) (x : ℝ) (a : Fin (2 * r + k + 1)) (ha : i < a.val) :
@@ -122,7 +165,7 @@ theorem lowPt_gt {k r : ℕ} {u : Fin k → ℝ} {v : Fin (k - 1) → ℝ} {b : 
   show (if a.val = i then x else walkPar k r u v b (i + 1) a) = _
   rw [if_neg h1]
   show (if h : a.val < i + 1 ∧ a.val < k then u ⟨a.val, h.2⟩ - 1 / 2 else parLam k r v b a) = _
-  rw [dif_neg h2]
+  rw [dite_eq_right h2]
 
 theorem walkPar_add {k r : ℕ} (u : Fin k → ℝ) (v : Fin (k - 1) → ℝ) (b : Fin (2 * r + 2) → ℝ)
     (i : ℕ) (hi : i < k) (hin : i < 2 * r + k + 1) (c : ℝ) :
@@ -135,7 +178,7 @@ theorem walkPar_add {k r : ℕ} (u : Fin k → ℝ) (v : Fin (k - 1) → ℝ) (b
     rw [lowPt_at, Pi.single_eq_same, mul_one]
     have h2 : i < i + 1 ∧ i < k := ⟨Nat.lt_succ_self i, hi⟩
     show (if h : i < i + 1 ∧ i < k then u ⟨i, h.2⟩ - 1 / 2 else parLam k r v b ⟨i, hin⟩) + c = _
-    rw [dif_pos h2]
+    rw [dite_eq_left h2]
   · have hne : a ≠ ⟨i, hin⟩ := fun h => ha (congrArg Fin.val h)
     rw [Pi.single_apply, if_neg hne, mul_zero, add_zero]
     show _ = (if a.val = i then _ else walkPar k r u v b (i + 1) a)
@@ -164,16 +207,16 @@ theorem lowPt_bot {k r : ℕ} (u : Fin k → ℝ) (v : Fin (k - 1) → ℝ) (b :
   · rw [lowPt_lt (u := u) (v := v) (b := b) i (parLam k r v b ⟨i, hin⟩) hi a h]
     have h2 : a.val < i ∧ a.val < k := ⟨h, by omega⟩
     show _ = (if h : a.val < i ∧ a.val < k then u ⟨a.val, h.2⟩ - 1 / 2 else parLam k r v b a)
-    rw [dif_pos h2]
+    rw [dite_eq_left h2]
   · obtain rfl : a = ⟨i, hin⟩ := Fin.ext h
     rw [lowPt_at]
     have h2 : ¬ (i < i ∧ i < k) := fun h' => lt_irrefl i h'.1
     show _ = (if h : i < i ∧ i < k then u ⟨i, h.2⟩ - 1 / 2 else parLam k r v b ⟨i, hin⟩)
-    rw [dif_neg h2]
+    rw [dite_eq_right h2]
   · rw [lowPt_gt (u := u) (v := v) (b := b) i (parLam k r v b ⟨i, hin⟩) a h]
     have h2 : ¬ (a.val < i ∧ a.val < k) := fun h' => absurd h'.1 (by omega)
     show _ = (if h : a.val < i ∧ a.val < k then u ⟨a.val, h.2⟩ - 1 / 2 else parLam k r v b a)
-    rw [dif_neg h2]
+    rw [dite_eq_right h2]
 
 private theorem gapAtLeast_of_adjacent_sign_change_ge {n : ℕ} (ε : Fin n → Bool) (L : Fin n → ℝ) (h : ℝ)
     (hL : StrictAnti L)

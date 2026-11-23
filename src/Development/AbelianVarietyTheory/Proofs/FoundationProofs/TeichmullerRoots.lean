@@ -1,6 +1,50 @@
-import Mathlib
-import Formalism.SharpRestriction.LevelLetterCocycles.ArithmeticCylinders
-import Development.AbelianVarietyTheory.BlockTheory.TorsionBlocks.FactorSeriesSupport
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.ArithmeticCylinders
+public import Development.AbelianVarietyTheory.BlockTheory.TorsionBlocks.FactorSeriesSupport
+import Mathlib.Algebra.AffineMonoid.UniqueSums
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+public import Mathlib.FieldTheory.PrimeField
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -13,20 +57,6 @@ open Formalism.BasicNotions Formalism.CyclotomicNorms GlobalTheory.IndefiniteRow
 section Roots
 
 variable {g : ℕ} [Fact g.Prime]
-
-theorem frob_comp : (frobenius (Fbar g) g).comp (algebraMap (ZMod g) (Fbar g)) = algebraMap (ZMod g) (Fbar g) :=
-  Subsingleton.elim _ _
-
-theorem rootsBar_frob (f : (ZMod g)[X]) : (rootsBar f).map (fun x => x ^ g) = rootsBar f := by
-  have h := Polynomial.roots_map_of_injective_of_card_eq_natDegree
-    (p := f.map (algebraMap (ZMod g) (Fbar g))) (f := frobenius (Fbar g) g) (RingHom.injective _)
-    IsAlgClosed.card_roots_eq_natDegree
-  rw [Polynomial.map_map, frob_comp] at h
-  exact h
-
-theorem card_rootsBar (f : (ZMod g)[X]) : (rootsBar f).card = f.natDegree := by
-  unfold rootsBar
-  rw [IsAlgClosed.card_roots_eq_natDegree, natDegree_map]
 
 theorem zero_mem_rootsBar {f : (ZMod g)[X]} (hf : f.Monic) : 0 ∈ rootsBar f ↔ f.coeff 0 = 0 := by
   unfold rootsBar
@@ -152,16 +182,6 @@ theorem teich_zpow (t : Fbar g →* ℂ) {x : Fbar g} (hx : x ≠ 0) (a : ℤ) :
 
 end Roots
 
-theorem exists_exponent (α : ℂ ≃+* ℂ) {M : ℕ} (hM : M ≠ 0) :
-    ∃ a : ℤ, ∀ ζ : ℂ, ζ ^ M = 1 → α ζ = ζ ^ a := by
-  haveI : NeZero M := ⟨hM⟩
-  have hp := Complex.isPrimitiveRoot_exp M hM
-  obtain ⟨a, -, ha⟩ := hp.eq_pow_of_pow_eq_one (ξ := α (Complex.exp (2 * Real.pi * Complex.I / M)))
-    (by rw [← map_pow, hp.pow_eq_one, map_one])
-  refine ⟨a, fun ζ hζ => ?_⟩
-  obtain ⟨i, -, rfl⟩ := hp.eq_pow_of_pow_eq_one hζ
-  rw [map_pow, ← ha, zpow_natCast, ← pow_mul, ← pow_mul, mul_comm a i]
-
 variable (D : D7)
 
 theorem labAct_eq (k : Fin 2) (α : ℂ ≃+* ℂ) (a : ℤ)
@@ -184,15 +204,6 @@ theorem labAct_eq (k : Fin 2) (α : ℂ ≃+* ℂ) (a : ℤ)
       (fun x => Function.invFun (D.ntypes.teichC k) (α (D.ntypes.teichC k x))))
     ⟨f', hm, hp.trans e.symm⟩
   exact IsPowLabel.unique (a := a) (f := f) (hs.2.trans e) hp hs.1 hm
-
-theorem atPlace_eq (k : Fin 2) (v : D.nd.PlG k) (f : (ZMod (D.host.g k))[X]) :
-    Formalism.MainNotions.ArithmeticCylinders.atPlace D k v (D.ntypes.eSer k f) = (serAt D k v f).1 := by
-  unfold Formalism.MainNotions.ArithmeticCylinders.atPlace serAt atFactor
-  change _ = MonoidAlgebra.ofCoeff (Finsupp.mapDomain _ _)
-  congr!
-  funext h
-  simp only [MonoidHom.mulSingle_apply, MonoidHom.coe_coe]
-  congr!
 
 end GlobalTheory.Compare.TeichmullerRoots
 

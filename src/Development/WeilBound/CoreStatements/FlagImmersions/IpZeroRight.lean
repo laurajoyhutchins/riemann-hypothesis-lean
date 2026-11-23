@@ -1,7 +1,53 @@
-import Development.WeilBound.CoreStatements.FlagImmersions.Transport
-import Development.WeilBound.CoreStatements.VolumeEquality.BaseUnifRiem
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.HermitianRestrictionOrthonormalCoordsStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.GenusEqCardMulSignatureStatement
+module
+
+public import Development.AutomorphicSpectrum.Definitions.MetricPeriods.IsEigFrames
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.HodgeIPIffHodgeFormConj
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.HermitianRestrictionOrthonormalCoordsStatement
+public import Development.WeilBound.CoreStatements.VolumeEquality.BaseUnifRiem
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 open NumberField Matrix GlobalTheory.CompanionTheory.Ar GlobalTheory.CompanionTheory.Ar.Cusp
 
@@ -51,6 +97,7 @@ theorem exists_onb (R : RiemLat E g Λ) (W : Submodule ℂ (Fin g → ℂ)) {m :
     simp [Pi.single_apply, eq_comm]
   · have h : (⟨z, hz⟩ : W) = ∑ i, c z i • e i := by
       apply hinj
+
       rw [map_sum]
       simp only [map_smul, he]
       ext k
@@ -73,6 +120,7 @@ theorem star_io (a : Λ) : star (io b a) = io b a := by
 
 theorem Pc_io (R : RiemLat E g Λ) (a : Λ) : Pc b R (io b a) = R.P a := by
   conv_rhs => rw [← b.sum_repr a]
+
   rw [Pc_apply, map_sum]
   refine Finset.sum_congr rfl fun k _ => ?_
   rw [map_zsmul, io, Int.cast_smul_eq_zsmul]
@@ -80,6 +128,7 @@ theorem Pc_io (R : RiemLat E g Λ) (a : Λ) : Pc b R (io b a) = R.P a := by
 def act (a : 𝓞 E) (ξ : Fin (2 * g) → ℂ) : Fin (2 * g) → ℂ := ∑ k, ξ k • io b (a • b k)
 
 theorem Pc_act (R : RiemLat E g Λ) (a : 𝓞 E) (ξ : Fin (2 * g) → ℂ) : Pc b R (act b a ξ) = R.B a (Pc b R ξ) := by
+
   rw [act, map_sum, Pc_apply b R ξ, map_sum]
   simp only [map_smul, Pc_io, R.act]
 
@@ -96,7 +145,7 @@ theorem exists_real (R : RiemLat E g Λ) (e : Fin g → ℂ) : ∃ ξ, star ξ =
   | add x y _ _ hx hy =>
     obtain ⟨ξ, h1, h2⟩ := hx
     obtain ⟨ξ', h1', h2'⟩ := hy
-    exact ⟨ξ + ξ', by rw [star_add, h1, h1'], by rw [map_add, h2, h2']⟩
+    exact ⟨ξ + ξ', by rw [star_add, h1, h1'], by rw [map_add (f := _), h2, h2']⟩
   | smul r x _ hx =>
     obtain ⟨ξ, h1, h2⟩ := hx
     exact ⟨(r : ℂ) • ξ, by rw [star_smul, h1]; simp, by rw [map_smul, h2]; rfl⟩
@@ -105,11 +154,11 @@ theorem exists_pair (R : RiemLat E g Λ) (e e' : Fin g → ℂ) : ∃ η, Pc b R
   obtain ⟨ξ, h1, h2⟩ := exists_real b R ((2⁻¹ : ℂ) • (e + e'))
   obtain ⟨ξ', h1', h2'⟩ := exists_real b R ((2⁻¹ * Complex.I : ℂ) • (e' - e))
   refine ⟨ξ + Complex.I • ξ', ?_, ?_⟩
-  · rw [map_add, map_smul, h2, h2', smul_smul]
+  · rw [map_add (f := _), map_smul, h2, h2', smul_smul]
     ext k
     simp only [Pi.add_apply, Pi.smul_apply, Pi.sub_apply, smul_eq_mul]
     linear_combination (2⁻¹ * (e' k - e k)) * Complex.I_mul_I
-  · rw [star_add, star_smul, h1, h1', map_add, map_smul, h2, h2', smul_smul]
+  · rw [star_add, star_smul, h1, h1', map_add (f := _), map_smul, h2, h2', smul_smul]
     ext k
     simp only [Pi.add_apply, Pi.smul_apply, Pi.sub_apply, smul_eq_mul, Complex.star_def, Complex.conj_I]
     linear_combination (-2⁻¹ * (e' k - e k)) * Complex.I_mul_I

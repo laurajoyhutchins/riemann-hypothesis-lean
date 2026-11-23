@@ -1,15 +1,60 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.FromBaseAlt
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.BoundaryFormNonlocalDvr
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.FromBaseAlt
+public import Development.AbelianVarietyTheory.Counterexamples.ModuliSurvey.PremisesOfProper
+import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ModuliModelUltrametricPoints
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsLocalHomCompleteDVRPrincipalMaximalIdealStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsLocalPushoutUnramifiedCharZeroStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ProdClassGroupMk0EqOfLinearEquivPiStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SteinitzPiIdealsLinearEquivOfClassGroupProdStatement
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.BoundaryFormBaseChangeDvr
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ConeAtOfToricChart
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsUnramifiedUniformisationPolarisedTripleStatement
 import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FinitelyManyIsoClassesProjectiveNumberField
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ConeAtOfToricChart
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.PolynomialSupportHolds
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.PolarizationTransferModels
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.PolynomialSupportHolds
 import Development.AbelianVarietyTheory.Proofs.ModuliProofs.LinearUniformisationTorsionIsomorphism
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsCommonSemiAbelianPullbackTwoUnitaryTraits
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ProdClassGroupMk0EqOfLinearEquivPiStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SteinitzPiIdealsLinearEquivOfClassGroupProdStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsLocalHomCompleteDVRPrincipalMaximalIdealStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsLocalPushoutUnramifiedCharZeroStatement
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.DegenerationDataCoordsNeZeroLatticesIsomorphic
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.LevelOfSplitAndLevelCoeffExist
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.MvPowerSeries.Equiv
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 open scoped nonZeroDivisors
@@ -76,7 +121,7 @@ section Ring
 theorem injective_of_ker_le_span {R W : Type} [CommRing R] [IsLocalRing R] [IsNoetherianRing R]
     [CommRing W] [IsDomain W] (φ : R →+* W) {t : R} (ht : t ∈ maximalIdeal R) (h0 : φ t ≠ 0)
     (h : ∀ r, r ∉ Ideal.span {t} → φ r ≠ 0) : Function.Injective φ := by
-  rw [injective_iff_map_eq_zero]
+  set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
   have key : ∀ n : ℕ, ∀ x, φ x = 0 → x ∈ Ideal.span {t} ^ n := by
     intro n
     induction n with
@@ -158,7 +203,7 @@ theorem side {A : Type} [CommRing A] [CharZero k] (θ : A →+* ChartRing k m e)
   have hc : (maximalIdeal V).comap f = (Ideal.span {t}).comap θ := by
     rw [← Ideal.comap_comap]
     congr 1
-    exact Localization.AtPrime.comap_maximalIdeal
+    exact Localization.AtPrime.under_maximalIdeal
   refine ⟨?_, hc, ?_, ?_, hm, hj, hunit⟩
   · exact RingHom.Flat.comp hθ (by rw [RingHom.flat_algebraMap_iff]; exact IsLocalization.flat _ (Ideal.span {t}).primeCompl)
   · rw [hc]
@@ -207,7 +252,7 @@ theorem exists_two_traits {A : Type} [CommRing A] [CharZero k] (θ : A →+* Cha
     rw [← hgm, hm, Ideal.map_span, Set.image_singleton]
   have hB' : maximalIdeal B = Ideal.span {ϖ'} := by
     rw [← hgm', hm', Ideal.map_span, Set.image_singleton]
-  have hl0 : IsLocalHom g0 := ((IsLocalRing.local_hom_TFAE g0).out 0 2).2 hgm.le
+  have hl0 : IsLocalHom g0 := ((IsLocalRing.local_hom_tfae g0).out 1 3).2 hgm.le
   have hreg : ϖ ∈ nonZeroDivisors B := by
     letI := g0.toAlgebra
     haveI : Module.Flat V B := hg0
@@ -300,7 +345,7 @@ theorem eq_of_diag {X : Type} [AddCommGroup X] {β β' : LinearMap.BilinForm ℤ
     (hγ : ∀ y z, β' y z = β' z y) (h : ∀ y, β y y = β' y y) : β = β' := by
   refine LinearMap.ext₂ fun y z => ?_
   have h1 := h (y + z)
-  simp only [map_add, LinearMap.add_apply] at h1
+  simp only [map_add (f := _), LinearMap.add_apply] at h1
   rw [h y, h z, hβ z y, hγ z y] at h1
   linarith
 

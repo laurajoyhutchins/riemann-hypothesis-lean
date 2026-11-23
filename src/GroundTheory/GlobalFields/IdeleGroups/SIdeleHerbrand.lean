@@ -1,6 +1,51 @@
-import Mathlib
-import GroundTheory.GlobalFields.IdeleGroups.SIdeleHerbrand.Places
-import GroundTheory.GlobalFields.SemilocalAlgebras.Finite
+module
+
+public import GroundTheory.GlobalFields.IdeleGroups.SIdeleHerbrand.Places
+public import GroundTheory.GlobalFields.IdeleGroups.SIdeleGroups.Galois
+public import GroundTheory.GlobalFields.IdeleGroups.SIdeleGroups.Decomposition
+import GroundTheory.GlobalFields.IdeleGroups.SIdeleHerbrand.Product
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GroundTheory.Global
 
@@ -16,8 +61,8 @@ namespace IdeleGroup
 
 variable {K L : Type*} [Field K] [NumberField K] [Field L] [NumberField L] [Algebra K L]
 
-open SemiLocal in
 
+open SemiLocal in
 theorem nonempty_placesOver_of_finite (v : HeightOneSpectrum (𝓞 K)) :
     Nonempty (PlacesOver L v) := by
   by_contra h
@@ -63,8 +108,8 @@ theorem cycHerbrand_integerUnitsOutside (S : Set (HeightOneSpectrum (𝓞 K)))
     Nat.card_eq_one_iff_unique.2 ⟨h1, ⟨0⟩⟩]
   norm_num
 
-open AdicLiesOver in
 
+open AdicLiesOver in
 theorem cycHerbrand_sIdeles (S : Set (HeightOneSpectrum (𝓞 K))) (hSf : S.Finite)
     (hS : ∀ v ∉ S, ∀ w : PlacesOver L v, w.1.asIdeal.ramificationIdx (𝓞 K) = 1)
     (σ : Gal(L/K)) (hσ : ∀ g, g ∈ Subgroup.zpowers σ)
@@ -100,7 +145,8 @@ theorem cycHerbrand_sIdeles (S : Set (HeightOneSpectrum (𝓞 K))) (hSf : S.Fini
   rw [key]
   refine mul_ne_zero (Finset.prod_ne_zero_iff.2 fun v _ ↦ ?_)
     (Finset.prod_ne_zero_iff.2 fun v _ ↦ ?_)
-  · exact Nat.cast_ne_zero.2 Module.finrank_pos.ne'
+  · exact Nat.cast_ne_zero.2 (GroundTheory.Global.InfinitePlace.finrank_completion_pos
+      (v := v) (wInf v).1).ne'
   · exact Nat.cast_ne_zero.2 Module.finrank_pos.ne'
 
 end IdeleGroup

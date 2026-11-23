@@ -1,5 +1,59 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.PartialDifferential.EllipticLocal
+module
+
+public import GroundTheory.AutomorphicForms.PartialDifferential.EllipticLocal
+import Aesop.Main
+import GroundTheory.AutomorphicForms.HilbertSchmidtKernel
+import GroundTheory.AutomorphicForms.PartialDifferential.SobolevMollifier
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.MetricSpace.Contracting
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 namespace GroundTheory.Automorphic.Sobolev
 
@@ -79,7 +133,7 @@ theorem IsEllipticAt.exists_regularity_radius {T : 𝓢'(E, ℂ) →L[ℂ] 𝓢'
   have hid : u + K u = Qop a w x₀ μ 1 ((prinOp a w + N) u) + Rop a w x₀ μ 1 u := by
     have h1 := congrArg (fun A : 𝓢'(E, ℂ) →L[ℂ] 𝓢'(E, ℂ) ↦ A u) (parametrix_comp_frozenOperator a w x₀ hμ0.le 1)
     simp only [ContinuousLinearMap.comp_apply, sub_apply, ContinuousLinearMap.id_apply] at h1
-    rw [hTu', map_add, h1]
+    rw [hTu', map_add (f := _), h1]
     simp only [K, ContinuousLinearMap.comp_apply]
     abel
   have hz : MemSobolev (s + 1) 2 (Qop a w x₀ μ 1 ((prinOp a w + N) u) + Rop a w x₀ μ 1 u) := by
@@ -191,9 +245,14 @@ theorem OpBound.sub {A B : 𝓢'(E, ℂ) →L[ℂ] 𝓢'(E, ℂ)} {s t C D : ℝ
 theorem lintegral_mul_le_eLpNorm_mul (f g : E → ℂ) (hf : AEMeasurable (fun x ↦ ‖f x‖ₑ) volume)
     (hg : AEMeasurable (fun x ↦ ‖g x‖ₑ) volume) :
     ∫⁻ x, ‖f x‖ₑ * ‖g x‖ₑ ≤ eLpNorm f 2 volume * eLpNorm g 2 volume := by
+  have norm_le (u : E → ℂ) : eLpNorm' u 2 volume ≤ eLpNorm u 2 volume := by
+    by_cases hu : AEStronglyMeasurable u volume
+    · simp [eLpNorm_eq_eLpNorm' two_ne_zero ENNReal.ofNat_ne_top hu]
+    · rw [eLpNorm_of_not_aestronglyMeasurable hu]
+      exact le_top
   have h := L2Kernel.lintegral_mul_sq_le (volume : Measure E) hf hg
   rw [← L2Kernel.eLpNorm_two_sq, ← L2Kernel.eLpNorm_two_sq, ← mul_pow] at h
-  exact (ENNReal.pow_le_pow_left_iff two_ne_zero).1 h
+  exact ((ENNReal.pow_le_pow_left_iff two_ne_zero).1 h).trans (mul_le_mul' (norm_le f) (norm_le g))
 
 theorem norm_ofSchwartz_smulLeft_fourierMultiplier_le (χ : 𝓢(E, ℂ)) {g : E → ℂ}
     (hg : g.HasTemperateGrowth) (t : ℝ) (hA : MemLp (weight t : E → ℂ) 2 volume)
@@ -240,10 +299,10 @@ theorem norm_ofSchwartz_smulLeft_fourierMultiplier_le (χ : 𝓢(E, ℂ)) {g : E
       _ ≤ ENNReal.ofReal (∫ x, ‖χ x‖) * (eLpNorm (fun ξ ↦ g ξ * weight (-t) ξ) 2 volume *
             eLpNorm (fun ξ ↦ weight t ξ * (𝓕 φ : 𝓢(E, ℂ)) ξ) 2 volume) := by
           gcongr
-          exact lintegral_mul_le_eLpNorm_mul _ _ hB.1.enorm
+          exact lintegral_mul_le_eLpNorm_mul _ _ hB.aestronglyMeasurable.enorm
             (measurable_weight_mul_fourier t φ).enorm.aemeasurable
       _ = Cst := by rw [← mul_assoc]
-  have hle := eLpNorm_mono_enorm hpt (p := 2) (μ := (volume : Measure E))
+  have hle := eLpNorm_mono_eNorm (measurable_weight_mul_fourier t _).aestronglyMeasurable hpt (p := 2) (μ := (volume : Measure E))
   rw [show (fun ξ ↦ (Cst.toReal : ℂ) * weight t ξ) = (Cst.toReal : ℂ) • (weight t : E → ℂ) from rfl,
     eLpNorm_const_smul, ← ofReal_norm, Complex.norm_real, Real.norm_of_nonneg ENNReal.toReal_nonneg,
     ENNReal.ofReal_toReal hCst] at hle

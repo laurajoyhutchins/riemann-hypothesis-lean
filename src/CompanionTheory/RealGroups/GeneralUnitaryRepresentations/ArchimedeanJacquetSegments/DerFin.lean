@@ -1,16 +1,58 @@
-import CompanionTheory.RealGroups.GeneralUnitaryRepresentations.ArchimedeanJacquetSegments.Complementary
-import Mathlib
-import CompanionTheory.AutomorphicTheory.TemperedLocalSpectra.ZelevinskyClassification.ZelevinskySegments.SegDefs
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LeviIrreducibleTensorDecomposition
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.StableLattices.DualClassInvolutiveImports
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IsSmoothIterPhi
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.HighestDerivativeOfProduct
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ParabolicProductHasFiniteLengthGL
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsIrreducibleSubquotientTwoBlockConstituents
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.InductionFiniteLength
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsCuspProdCharTransport
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.GlobalTheory.BernsteinZelevinskyFiniteness
-import CompanionTheory.RealGroups.GeneralUnitaryRepresentations.WhittakerModels.WhitCuspOfSegCuspGeneric
+module
+
+public import CompanionTheory.RealGroups.GeneralUnitaryRepresentations.ArchimedeanJacquetSegments.Complementary
+public import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.MirabolicDerivatives.TwistedKernels.TwKerLeComapOf
+public import CompanionTheory.RealGroups.GeneralUnitaryRepresentations.WhittakerModels.WhitCuspOfSegCuspGeneric
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.InductionFiniteLength
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsCuspProdCharTransport
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsIrreducibleSubquotientTwoBlockConstituents
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ParabolicProductHasFiniteLengthGL
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.HighestDerivativeOfProduct
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IsSmoothIterPhi
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LeviIrreducibleTensorDecomposition
+import Development.AutomorphicSpectrum.Proofs.GlobalProofs.BernsteinZelevinskyFiniteness
+import GroundTheory.LocalFields.PadicLogSeries
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IsIrreducibleIffOfLinearEquiv
+
+@[expose] public section
 
 noncomputable section
 
@@ -153,7 +195,7 @@ theorem base (hc : Continuous ψ) (h1 : ψ ≠ 1) (Y : Representation ℂ (GL (F
     | smul_tprod c f =>
       simp only [map_smul, piTensor_tprod, hP, TensorProduct.map_tmul, ← hl0, ← hl1]
       rfl
-    | add x y hx hy => rw [map_add, map_add, map_add, hx, hy, map_add]
+    | add x y hx hy => rw [map_add (f := _), map_add (f := _), map_add (f := _), hx, hy, map_add (f := _)]
   set K : Submodule ℂ B := twKer β (unipB k (Fin t)) (whitChar ψ t) with hK
 
   have hgen : ∀ (a : A) (b : B), b ∈ K → Ψ.symm (a ⊗ₜ b) ∈ twKer Y (rightUnip k n t) (rightWhit k ψ n t) := by
@@ -166,10 +208,10 @@ theorem base (hc : Continuous ψ) (h1 : ψ ≠ 1) (Y : Representation ℂ (GL (F
       refine Submodule.subset_span ⟨⟨_, hu⟩, Ψ.symm (a ⊗ₜ y), ?_⟩
       apply Ψ.injective
       rw [LinearEquiv.apply_symm_apply, map_sub, map_smul, hΨ, LinearEquiv.apply_symm_apply,
-        TensorProduct.map_tmul, TensorProduct.tmul_sub, TensorProduct.tmul_smul, map_one, Module.End.one_apply]
+        TensorProduct.map_tmul, TensorProduct.tmul_sub, TensorProduct.tmul_smul, map_one, one_apply_eq_self]
       rfl
     | zero => rw [TensorProduct.tmul_zero, map_zero]; exact Submodule.zero_mem _
-    | add x y _ _ hx hy => rw [TensorProduct.tmul_add, map_add]; exact Submodule.add_mem _ hx hy
+    | add x y _ _ hx hy => rw [TensorProduct.tmul_add, map_add (f := _)]; exact Submodule.add_mem _ hx hy
     | smul c x _ hx => rw [TensorProduct.tmul_smul, map_smul]; exact Submodule.smul_mem _ c hx
   have hrange : ∀ z ∈ LinearMap.range (K.subtype.lTensor A),
       Ψ.symm z ∈ twKer Y (rightUnip k n t) (rightWhit k ψ n t) := by
@@ -177,7 +219,7 @@ theorem base (hc : Continuous ψ) (h1 : ψ ≠ 1) (Y : Representation ℂ (GL (F
     induction z using TensorProduct.induction_on with
     | zero => rw [map_zero, map_zero]; exact Submodule.zero_mem _
     | tmul a b => rw [LinearMap.lTensor_tmul]; exact hgen a b b.2
-    | add x y hx hy => rw [map_add, map_add]; exact Submodule.add_mem _ hx hy
+    | add x y hx hy => rw [map_add (f := _), map_add (f := _)]; exact Submodule.add_mem _ hx hy
 
   have hrk : Module.rank ℂ (B ⧸ K) ≤ 1 :=
     CompanionTheory.rg.gu.whit.whitRankIrr k ψ hc h1 t B β (σ 1).rep.smooth (σ 1).rep.irr
@@ -242,14 +284,14 @@ theorem base (hc : Continuous ψ) (h1 : ψ ≠ 1) (Y : Representation ℂ (GL (F
       induction Ψ v using TensorProduct.induction_on with
       | zero => simp
       | tmul x y =>
-        rw [TensorProduct.map_tmul, he'_tmul, he'_tmul, map_one, Module.End.one_apply, smul_smul]
+        rw [TensorProduct.map_tmul, he'_tmul, he'_tmul, map_one, one_apply_eq_self, smul_smul]
         congr 1
         have hm : β u y - (whitChar ψ t ⟨u, hu2⟩ : ℂ) • y ∈ K := Submodule.subset_span ⟨⟨u, hu2⟩, y, rfl⟩
         have := hℓK _ hm
         rw [map_sub, map_smul, sub_eq_zero] at this
         rw [this, smul_eq_mul]
         rfl
-      | add x y hx hy => simp only [map_add, smul_add, hx, hy]
+      | add x y hx hy => simp only [map_add (f := _), smul_add, hx, hy]
 
     let F : TwJacquet Y (rightUnip k n t) (rightWhit k ψ n t) →ₗ[ℂ] A :=
       (twKer Y (rightUnip k n t) (rightWhit k ψ n t)).liftQ (e' ∘ₗ Ψ.toLinearMap) hker
@@ -273,8 +315,8 @@ theorem base (hc : Continuous ψ) (h1 : ψ ≠ 1) (Y : Representation ℂ (GL (F
         rw [hFmk, hFmk, hΨ]
         induction Ψ v using TensorProduct.induction_on with
         | zero => simp
-        | tmul x y => rw [TensorProduct.map_tmul, he'_tmul, he'_tmul, map_one, Module.End.one_apply, map_smul]
-        | add x y hx hy => simp only [map_add, hx, hy])⟩
+        | tmul x y => rw [TensorProduct.map_tmul, he'_tmul, he'_tmul, map_one, one_apply_eq_self, map_smul]
+        | add x y hx hy => simp only [map_add (f := _), hx, hy])⟩
     exact GlobalTheory.ProdLength.hasFiniteLength_of_injective Fi hFinj
       (GlobalTheory.SmGL.hasFiniteLength_of_isIrreducible (σ 0).rep.irr)
 

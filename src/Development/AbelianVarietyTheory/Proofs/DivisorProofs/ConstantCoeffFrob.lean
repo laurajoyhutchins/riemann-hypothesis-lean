@@ -1,5 +1,46 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.EqZeroOfForallPowDvd
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.EqZeroOfForallPowDvd
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -33,7 +74,7 @@ theorem in_add {N : Ideal B} {f g : MvPowerSeries σ Q} (hf : In N f) (hg : In N
     In N (f + g) := fun α => by
   obtain ⟨a, ha, ea⟩ := hf α
   obtain ⟨b, hb, eb⟩ := hg α
-  exact ⟨a + b, N.add_mem ha hb, by rw [map_add, ea, eb, map_add]⟩
+  exact ⟨a + b, N.add_mem ha hb, by rw [map_add (f := _), ea, eb, map_add (f := _)]⟩
 
 theorem in_neg {N : Ideal B} {f : MvPowerSeries σ Q} (hf : In N f) : In N (-f) := fun α => by
   obtain ⟨a, ha, ea⟩ := hf α
@@ -66,7 +107,7 @@ theorem hasSubst_X_pow : HasSubst (fun i : σ => (X i : MvPowerSeries σ Q) ^ p)
 
 theorem frob_add (f g : MvPowerSeries σ Q) : frob p s (f + g) = frob p s f + frob p s g := by
   unfold frob
-  rw [map_add, subst_add (hasSubst_X_pow p)]
+  rw [map_add (f := _), subst_add (hasSubst_X_pow p)]
 
 theorem frob_zero : frob p s (0 : MvPowerSeries σ Q) = 0 := by
   have h := frob_add p s (0 : MvPowerSeries σ Q) 0
@@ -152,13 +193,13 @@ theorem ql_add_smul (hμ : ∀ i, constantCoeff (μ i) = 0) {N : Ideal B}
     {f g : MvPowerSeries (Fin d) Q} (hf : QL μ N f) (hg : QL μ N g) (b : B) :
     QL μ N (f + algebraMap B Q b • g) := by
   refine ⟨?_, fun i => ?_, ?_⟩
-  · rw [← coeff_zero_eq_constantCoeff_apply, map_add, map_smul, coeff_zero_eq_constantCoeff_apply,
+  · rw [← coeff_zero_eq_constantCoeff_apply, map_add (f := _), map_smul, coeff_zero_eq_constantCoeff_apply,
       coeff_zero_eq_constantCoeff_apply, hf.1, hg.1, smul_zero, add_zero]
   · obtain ⟨a, ha, ea⟩ := hf.2.1 i
     obtain ⟨a', ha', ea'⟩ := hg.2.1 i
     refine ⟨a + b * a', N.add_mem ha (N.mul_mem_left b ha'), ?_⟩
     simp only [lin] at ea ea' ⊢
-    rw [map_add, map_smul, ea, ea', smul_eq_mul, map_add, map_mul]
+    rw [map_add (f := _), map_smul, ea, ea', smul_eq_mul, map_add (f := _), map_mul]
   · rw [formalCoboundary_add (constantCoeff_up hμ), formalCoboundary_smul (constantCoeff_up hμ)]
     exact in_add hf.2.2 (in_smul hg.2.2 b)
 

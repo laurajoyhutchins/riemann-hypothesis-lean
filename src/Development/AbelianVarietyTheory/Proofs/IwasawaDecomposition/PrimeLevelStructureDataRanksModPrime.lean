@@ -1,12 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.PredMemGamRanks
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.PredMemGamRanks
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.FreeModule.IdealQuotient
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+public import Mathlib.RingTheory.Spectrum.Prime.FreeLocus
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Formalism.BasicNotions Formalism.L2.Col Formalism.L2.DIV Formalism.L2.Forms GlobalTheory.Mem.Col2
 
 namespace GlobalTheory.Mem.Col2.LRank
 
-open scoped TensorProduct in
 
+open scoped TensorProduct in
 theorem natCard_quot {R N : Type} [CommRing R] [IsDomain R] [AddCommGroup N] [Module R N]
     [Module.Finite R N] [Module.Projective R N] (I : Ideal R) [Finite (R ⧸ I)] :
     Nat.card (N ⧸ (I • ⊤ : Submodule R N)) = Nat.card (R ⧸ I) ^ Module.finrank R N := by
@@ -46,26 +87,28 @@ theorem finrank_of_card {F V : Type} [Field F] [Finite F] [AddCommGroup V] [Modu
   rw [h] at h2
   exact (Nat.pow_right_injective h1 h2).symm
 
-set_option maxHeartbeats 800000 in
+
 
 theorem finrank_red {E : Type} [Field E] [NumberField E] {n : ℕ} (N : Submodule (𝓞 E) (Fin n → E))
-    (hN : Submodule.IsLattice E N) (P : HeightOneSpectrum (𝓞 E)) :
+    (hN : Submodule.IsFullLattice E N) (P : HeightOneSpectrum (𝓞 E)) :
     Module.finrank (Res P) (TDat.Red N P) = n := by
-  have : Module.Finite (𝓞 E) N := Module.Finite.iff_fg.2 (Submodule.IsLattice.fg (self := hN))
+  let : Submodule.IsFullLattice E N := hN
+  have : Module.Finite (𝓞 E) N := Submodule.IsLattice.finite E N
   have : Module.FinitePresentation (𝓞 E) N := Module.finitePresentation_of_finite _ _
   have : Module.Flat (𝓞 E) N := inferInstance
   have : Module.Projective (𝓞 E) N := Module.Flat.projective_of_finitePresentation
   have : Finite (𝓞 E ⧸ P.asIdeal) := Ideal.finiteQuotientOfFreeOfNeBot _ P.ne_bot
   have hr : Module.finrank (𝓞 E) N = n := by
-    simpa using finrank_of_span_top N hN.span_eq_top
+    exact (Submodule.IsFullLattice.finrank_eq E N).trans (Module.finrank_fin_fun E)
   have h := natCard_quot (R := 𝓞 E) (N := N) P.asIdeal
   rw [hr] at h
   exact finrank_of_card (F := Res P) h
 
-set_option maxHeartbeats 1600000 in
+
 
 theorem ranks : ∀ {E K : Type} [Field E] [NumberField E] [StarRing E] [Field K] {n : ℕ} {S : GStep E K n} {ST : Finset (HeightOneSpectrum (𝓞 E))} (A : TDat S ST) (T : ℕ), S.Ok → A.Ok T → (∀ P c, Module.finrank (Res P.1) (A.lv P c) = n) ∧ ∀ P c, Module.finrank (Res P.1) (A.lk P c) = n := by
   intro E K _ _ _ _ n S ST A T _ h
-  exact ⟨fun P c => finrank_red _ (h.N_lat _ _) P.1, fun P c => finrank_red _ (h.dnN_lat _ _ P) P.1⟩
+  exact ⟨fun P c => finrank_red _ (h.N_lat c.1 (S.rep c)) P.1,
+    fun P c => finrank_red _ (h.dnN_lat c.1 (S.rep c) P) P.1⟩
 
 end GlobalTheory.Mem.Col2.LRank

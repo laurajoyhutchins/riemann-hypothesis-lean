@@ -1,15 +1,69 @@
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ReadsHecke
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.SplitPlaceHeckeOperatorScalarOnSpherical
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsSplitPlaceParahoricSubgroupCharacter
-import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.Tjcosets
-import Formalism.LocalToGlobal.Columns.GenericUnipotentCharacter
+module
+
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ReadsHecke
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.SplitPlaceHeckeOperatorScalarOnSpherical
+import Development.AbelianVarietyTheory.Definitions.Foundations.ExistsAuxiliaryPlaceNotMemFinset
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RankLeAleph0SmoothIrreducibleUnitaryAdelic
+import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsAdelicUnitaryTrivialOutsideSplitPlaceLocEq
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.EtaJUntw
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.NStageTrivialCharacterCoeffEqAlt
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.NotBaseCondFalse
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.PositionOfIntro
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.RowsRestWordColumnUnitBaseTupleAlt
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.StableIffCarrierEq
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.StrictHenselianAcyclic
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsCharDescent
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsReadsAtOfCover
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FunKilled
+import Formalism.LocalToGlobal.IndefiniteReal.DoubleCosetOperators.GoodPartLeTypeSubspace
+import Formalism.LocalToGlobal.NormalizedHeckeFactors.TypesDefs
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.MainNotions Formalism.MainNotions.N Formalism.L2 Formalism.L2.Host Formalism.L2.NT Formalism.IndefR.NX Formalism.ConjugateSelfDual ReciprocityTheory.Gal ReciprocityTheory.Aut NumberField IsDedekindDomain GlobalTheory.Mem GlobalTheory.Mem.Col2 GlobalTheory.Mem.Top GlobalTheory.Mem.Top.GroupRetwisting GlobalTheory.Mem.Top.Bl GlobalTheory.Mem.R3 GlobalTheory.Mem.R3.Rw GlobalTheory.HeightCounting GlobalTheory.HeightCounting.Up
 open Formalism.AUTREP (GAf)
 open Neutral.B1 (Ideles)
 open GlobalTheory.HeckeGal (Gab IsGlobalArtin)
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
-set_option synthInstance.maxHeartbeats 400000
-set_option maxHeartbeats 1000000
+
+
 open GlobalTheory.LevCmp
 open GlobalTheory.TwistChoice (Reading ReadsAt)
 
@@ -19,7 +73,7 @@ namespace GlobalTheory.ParaOpp
 
 variable {L : Type} [Field L] [NumberField L] [IsCMField L]
 
-local notation3 "L⁺" => maximalRealSubfield L
+local notation3 "L⁺" => NumberField.maximalRealSubfield L
 
 theorem algHom_eq_or_conj {F : Type} [Field F] [Algebra L⁺ F] (φ ψ : L →ₐ[L⁺] F) :
     φ = ψ ∨ ∀ x, φ x = ψ (IsCMField.complexConj L x) := by
@@ -45,7 +99,7 @@ theorem algHom_eq_or_conj {F : Type} [Field F] [Algebra L⁺ F] (φ ψ : L →�
     rw [← map_mul, ← map_mul]
     exact fix _ (by rw [map_mul, hyc]; ring)
   have fp : ∀ x : L, IsCMField.complexConj L (x + IsCMField.complexConj L x) = x + IsCMField.complexConj L x := by
-    intro x; rw [map_add, cc, add_comm]
+    intro x; rw [map_add (f := _), cc, add_comm]
   have fq : ∀ x : L, IsCMField.complexConj L ((x - IsCMField.complexConj L x) * y⁻¹) =
       (x - IsCMField.complexConj L x) * y⁻¹ := by
     intro x; rw [map_mul, map_inv₀, hyc, map_sub, cc]; ring_nf
@@ -56,7 +110,7 @@ theorem algHom_eq_or_conj {F : Type} [Field F] [Algebra L⁺ F] (φ ψ : L →�
     calc 2 * χ x = χ (2 * x) := by rw [map_mul, two]
       _ = χ ((x + IsCMField.complexConj L x) + ((x - IsCMField.complexConj L x) * y⁻¹) * y) := by
           congr 1; field_simp; ring
-      _ = _ := by rw [map_add, map_mul]
+      _ = _ := by rw [map_add (f := _), map_mul]
   have decc : ∀ (χ : L →ₐ[L⁺] F) (x : L), 2 * χ (IsCMField.complexConj L x) = χ (x + IsCMField.complexConj L x) -
       χ ((x - IsCMField.complexConj L x) * y⁻¹) * χ y := by
     intro χ x
@@ -85,7 +139,7 @@ theorem proj_conj {v : HeightOneSpectrum (𝓞 L⁺)} (i j : L →ₐ[L⁺] v.ad
   | zero => simp
   | tmul a b =>
     simp [SplitPlace.proj, conjAL, Algebra.TensorProduct.map_tmul, hij]
-  | add a b ha hb => rw [map_add, map_add, map_add, ha, hb]
+  | add a b ha hb => rw [map_add (f := _), map_add (f := _), map_add (f := _), ha, hb]
 
 theorem loc_conj {v : HeightOneSpectrum (𝓞 L⁺)} (i j : L →ₐ[L⁺] v.adicCompletion L⁺)
     (hij : ∀ x, j x = i (IsCMField.complexConj L x)) {n : ℕ} (κ : GAf L n) (a b : Fin n) :

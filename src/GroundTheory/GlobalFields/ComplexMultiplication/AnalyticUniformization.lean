@@ -1,7 +1,52 @@
-import Mathlib
-import GroundTheory.GlobalFields.ComplexMultiplication.ClassGroupActionIso
-import GroundTheory.GlobalFields.ComplexMultiplication.JInvariantHomothety
-import GroundTheory.GlobalFields.ComplexMultiplication.EllipticConstant
+module
+
+public import GroundTheory.GlobalFields.ComplexMultiplication.EllipticConstant
+public import GroundTheory.ArithmeticGeometry.AbelianVarieties.KodairaNeron
+public import GroundTheory.GlobalFields.ComplexMultiplication.UniformizationGroup
+public import GroundTheory.GlobalFields.ComplexMultiplication.ClassGroupActionIso
+public import GroundTheory.GlobalFields.ComplexMultiplication.JInvariantHomothety
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 open Complex Filter Topology Set WeierstrassCurve GroundTheory.Arith.Abelian
@@ -44,16 +89,21 @@ theorem limPunctured_eq_zero_of_pos {f : ℂ → ℂ} {z : ℂ}
   exact tendsto_nhds_unique (tendsto_limPunctured hf ho.le) (tendsto_zero_of_meromorphicOrderAt_pos ho)
 
 theorem isAnalyticUniformization_toPointHom :
-    IsAnalyticUniformization L.lattice (toPointHom L) where
-  map_eq_zero_iff z := toPoint_eq_zero_iff
-  surjective := toPoint_surjective
-  analyticAt_affine z hz := by
+    IsAnalyticUniformization L.lattice (toPointHom L) := by
+  refine {
+    map_eq_zero_iff := fun z ↦ toPoint_eq_zero_iff
+    surjective := toPoint_surjective
+    analyticAt_affine := ?analyticAt_affine
+    analyticAt_infinity := ?analyticAt_infinity }
+  case analyticAt_affine =>
+    intro z hz
     have hz' : z ∉ L.lattice := fun h ↦ hz (toPoint_of_mem h)
     refine ⟨℘[L], fun w ↦ ℘'[L] w / 2, L.analyticOnNhd_weierstrassP z hz',
       (L.analyticOnNhd_derivWeierstrassP z hz').div_const, ?_⟩
     filter_upwards [L.isClosed_lattice.isOpen_compl.mem_nhds hz'] with w hw
     exact ⟨_, toPoint_of_notMem hw⟩
-  analyticAt_infinity z hz := by
+  case analyticAt_infinity =>
+    intro z hz
     have hzL : z ∈ L.lattice := toPoint_eq_zero_iff.1 hz
     set F : ℂ → ℂ := fun w ↦ ℘[L] w / (℘'[L] w / 2)
     set G : ℂ → ℂ := fun w ↦ 1 / (℘'[L] w / 2)
@@ -123,12 +173,18 @@ theorem exists_point_some_eq {W : WeierstrassCurve ℂ} {x y x' y' : ℂ} (h : W
 variable {Λ : Submodule ℤ ℂ} {E E' : WeierstrassCurve ℂ} {f : ℂ →+ E.toAffine.Point}
 
 theorem IsAnalyticUniformization.vcPoint (hf : IsAnalyticUniformization Λ f) (C : VariableChange ℂ)
-    (h : C • E = E') : IsAnalyticUniformization Λ ((vcPointEquiv C h).toAddMonoidHom.comp f) where
-  map_eq_zero_iff z := by
+    (h : C • E = E') : IsAnalyticUniformization Λ ((vcPointEquiv C h).toAddMonoidHom.comp f) := by
+  refine {
+    map_eq_zero_iff := ?map_eq_zero_iff
+    surjective := (vcPointEquiv C h).surjective.comp hf.surjective
+    analyticAt_affine := ?analyticAt_affine
+    analyticAt_infinity := ?analyticAt_infinity }
+  case map_eq_zero_iff =>
+    intro z
     rw [AddMonoidHom.comp_apply, AddEquiv.coe_toAddMonoidHom, vcPointEquiv_apply, vcPoint_eq_zero_iff,
       hf.map_eq_zero_iff]
-  surjective := (vcPointEquiv C h).surjective.comp hf.surjective
-  analyticAt_affine z hz := by
+  case analyticAt_affine =>
+    intro z hz
     have hz' : f z ≠ 0 := fun h0 ↦ hz (by
       rw [AddMonoidHom.comp_apply, h0, map_zero])
     obtain ⟨X, Y, hX, hY, hev⟩ := hf.analyticAt_affine z hz'
@@ -138,7 +194,8 @@ theorem IsAnalyticUniformization.vcPoint (hf : IsAnalyticUniformization Λ f) (C
     filter_upwards [hev] with w ⟨hw, e⟩
     rw [AddMonoidHom.comp_apply, AddEquiv.coe_toAddMonoidHom, vcPointEquiv_apply, e, vcPoint_some]
     exact ⟨_, rfl⟩
-  analyticAt_infinity z hz := by
+  case analyticAt_infinity =>
+    intro z hz
     have hz' : f z = 0 := by
       rw [AddMonoidHom.comp_apply, AddEquiv.coe_toAddMonoidHom, vcPointEquiv_apply,
         vcPoint_eq_zero_iff] at hz
@@ -181,20 +238,29 @@ end VariableChange
 theorem IsAnalyticUniformization.comp_mul {Λ Λ' : Submodule ℤ ℂ} {E : WeierstrassCurve ℂ}
     {f : ℂ →+ E.toAffine.Point} (hf : IsAnalyticUniformization Λ f) {c : ℂ} (hc : c ≠ 0)
     (hΛ : ∀ z, z ∈ Λ' ↔ c * z ∈ Λ) :
-    IsAnalyticUniformization Λ' (f.comp (AddMonoidHom.mulLeft c)) where
-  map_eq_zero_iff z := by
+    IsAnalyticUniformization Λ' (f.comp (AddMonoidHom.mulLeft c)) := by
+  refine {
+    map_eq_zero_iff := ?map_eq_zero_iff
+    surjective := ?surjective
+    analyticAt_affine := ?analyticAt_affine
+    analyticAt_infinity := ?analyticAt_infinity }
+  case map_eq_zero_iff =>
+    intro z
     rw [AddMonoidHom.comp_apply, AddMonoidHom.coe_mulLeft, hf.map_eq_zero_iff, hΛ]
-  surjective P := by
+  case surjective =>
+    intro P
     obtain ⟨y, rfl⟩ := hf.surjective P
     exact ⟨c⁻¹ * y, by rw [AddMonoidHom.comp_apply, AddMonoidHom.coe_mulLeft, mul_inv_cancel_left₀ hc]⟩
-  analyticAt_affine z hz := by
+  case analyticAt_affine =>
+    intro z hz
     obtain ⟨X, Y, hX, hY, hev⟩ := hf.analyticAt_affine (c * z) hz
     have ht : Tendsto (fun w ↦ c * w) (𝓝 z) (𝓝 (c * z)) := (continuous_const_mul c).tendsto z
     refine ⟨fun w ↦ X (c * w), fun w ↦ Y (c * w), hX.comp_of_eq (by fun_prop) rfl,
       hY.comp_of_eq (by fun_prop) rfl, ?_⟩
     filter_upwards [ht.eventually hev] with w hw
     exact hw
-  analyticAt_infinity z hz := by
+  case analyticAt_infinity =>
+    intro z hz
     obtain ⟨U, V, hU, hV, hev⟩ := hf.analyticAt_infinity (c * z) hz
     have ht : Tendsto (fun w ↦ c * w) (𝓝 z) (𝓝 (c * z)) := (continuous_const_mul c).tendsto z
     refine ⟨fun w ↦ U (c * w), fun w ↦ V (c * w), hU.comp_of_eq (by fun_prop) rfl,

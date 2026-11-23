@@ -1,10 +1,69 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.SecBaseChangeAnySt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FirstCohomology.SectionArithmetic
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.DivCalc
-import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.WeilIsAlternatingSkewNatural
-import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.HasEnoughRootsOfUnityGlobalSections
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.FiniteAbelianWeightDecomposition
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.SecBaseChangeAnySt
+public import Mathlib.RepresentationTheory.Basic
+public import Mathlib.RingTheory.RootsOfUnity.EnoughRootsOfUnity
+public import Mathlib.Tactic.ENatToNat
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ValCalc
+public import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.HasEnoughRootsOfUnityGlobalSections
+public import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.WeilIsAlternatingSkewNatural
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.FiniteAbelianWeightDecomposition
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.Finsupp.Pointwise
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.GroupTheory.FiniteAbelian.Duality
+import Mathlib.GroupTheory.Schreier
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.DivCalc
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.SabPull
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.LBPull
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FirstCohomology.SectionArithmetic
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FirstCohomology.ThetaMove
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -16,8 +75,8 @@ attribute [local instance] Over.cartesianMonoidalCategory
 
 namespace GlobalTheory.MulSplit
 
-open FiniteAbelianWeights in
 
+open FiniteAbelianWeights in
 theorem nonempty_equiv_pi_of_weights {R M N G : Type} [CommRing R] [IsDomain R] [AddCommGroup M] [Module R M]
     [AddCommGroup N] [Module R N] [CommGroup G] [Finite G] (n : ℕ) [NeZero n] [HasEnoughRootsOfUnity R n]
     (hn : IsUnit (n : R)) (hG : ∀ g : G, g ^ n = 1) (ρ : Representation R G M) (W : Submodule R M)
@@ -42,11 +101,12 @@ theorem nonempty_equiv_pi_of_weights {R M N G : Type} [CommRing R] [IsDomain R] 
   let F : ((G →* Rˣ) → N) →ₗ[R] M := ∑ χ, (f χ).comp (LinearMap.proj χ)
   have hF : ∀ x, F x = ∑ χ, f χ (x χ) := fun x => by simp [F, LinearMap.sum_apply]
   have hinj : Function.Injective F := by
-    rw [injective_iff_map_eq_zero]
+    set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
     intro x hx
     funext c
     apply hf c
     have := congrArg (avg ρ u c) hx
+
     rw [hF, map_sum, map_zero, Finset.sum_eq_single c, avg_of_weight ρ u hu c _ ((hr c _).1 ⟨_, rfl⟩).2] at this
     · simpa using this
     · exact fun d _ hd => avg_of_weight_ne ρ u c d hd _ ((hr d _).1 ⟨_, rfl⟩).2
@@ -91,8 +151,8 @@ theorem mul_vals (v w : Vals L p) (i : Idx L p) : (v * w) i = v i * w i := rfl
 
 variable {K K' : Type} [Fintype K] [Fintype K']
 
-variable (p) in
 
+variable (p) in
 def ev {φ : K → (Y ⟶ X)} {ε : K → ℤ} (s : LB.Sec (LB.LinComb L φ ε)) : Vals L p :=
   fun i => sval s i.1.2.2 i.1.1 i.1.2.1
 
@@ -102,6 +162,7 @@ theorem formEq_of_dv {φ : K → (Y ⟶ X)} {ε : K → ℤ} {φ' : K' → (Y �
     (h : dv φ ε = dv φ' ε') : FormEq φ ε φ' ε' := by
   intro U _ f
   have := congrArg (Finsupp.linearCombination ℤ (fun ψ => Additive.ofMul (f ψ))) h
+
   simp only [dv, map_sum, Finsupp.linearCombination_single] at this
   apply Additive.ofMul.injective
   simpa only [ofMul_prod, ofMul_zpow] using this
@@ -111,7 +172,7 @@ theorem dv_support (D : (Y ⟶ X) →₀ ℤ) : dv (fun k : D.support => k.1) (f
 
 theorem dv_comp {Y' : Scheme.{0}} (h : Y' ⟶ Y) (φ : K → (Y ⟶ X)) (ε : K → ℤ) :
     dv (fun k => h ≫ φ k) ε = (dv φ ε).mapDomain (h ≫ ·) := by
-  simp only [dv, Finsupp.mapDomain_finset_sum, Finsupp.mapDomain_single]
+  simp only [dv, Finsupp.mapDomain_finsetSum, Finsupp.mapDomain_single]
 
 theorem ev_add {φ : K → (Y ⟶ X)} {ε : K → ℤ} {s t u : LB.Sec (LB.LinComb L φ ε)}
     (h : ∀ j, u.f j = s.f j + t.f j) : ev p u = ev p s + ev p t :=
@@ -136,8 +197,8 @@ theorem ev_inj (hL : L.IsLB) {φ : K → (Y ⟶ X)} {ε : K → ℤ} {s t : LB.S
     (h : ev p s = ev p t) (j : K → L.ι) : s.f j = t.f j :=
   sec_ext_val hL (fun y J hJ => congrFun h ⟨(y, J, 𝟙 Y), hJ, Category.id_comp _⟩) j
 
-variable (L p) in
 
+variable (L p) in
 def Sg (D : (Y ⟶ X) →₀ ℤ) : Submodule Γ(B, ⊤) (Vals L p) where
   carrier := {v | ∃ s : LB.Sec (LB.LinComb L (fun k : D.support => k.1) (fun k => D k.1)), ev p s = v}
   add_mem' := by
@@ -166,8 +227,8 @@ theorem mul_mem_Sg (hL : L.IsLB) {D E F : (Y ⟶ X) →₀ ℤ} {v w : Vals L p}
   rw [← h]
   exact (Fintype.sum_sum_type _).trans (congrArg₂ (· + ·) (dv_support D) (dv_support E))
 
-variable (L) in
 
+variable (L) in
 def pl (h : Y ⟶ Y) (hh : h ≫ p = p) : Vals L p →ₐ[Γ(B, ⊤)] Vals L p where
   toFun v := fun i => v ⟨(i.1.1, i.1.2.1, i.1.2.2 ≫ h), i.2.1, by rw [Category.assoc, hh, i.2.2]⟩
   map_one' := rfl
@@ -349,10 +410,10 @@ theorem Descends.weight (hL : L.IsLB) {q : Y ⟶ Y} {τ : G → (Y ⟶ Y)} (H : 
     ∃ f : Sg L p D →ₗ[Γ(B, ⊤)] Vals L p, Function.Injective f ∧
       ∀ v, (∃ x, f x = v) ↔ v ∈ Sg L p F ∧ ∀ g, pl L (τ g) (hτ g) v = (χ g).val • v := by
   refine ⟨⟨⟨fun x => pl L q hq x.1 * u.val, fun x y => ?_⟩, fun c x => ?_⟩, ?_, fun v => ⟨?_, ?_⟩⟩
-  · rw [Submodule.coe_add, map_add, add_mul]
+  · rw [Submodule.coe_add, map_add (f := _), add_mul]
   · show pl L q hq (c • x.1) * u.val = c • (pl L q hq x.1 * u.val)
     rw [map_smul, smul_mul_assoc]
-  · rw [injective_iff_map_eq_zero]
+  · set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
     intro x hx
     exact Subtype.ext (H.injective hL hq x.2 (u.mul_left_eq_zero.1 hx))
   · rintro ⟨x, rfl⟩
@@ -483,8 +544,8 @@ end GlobalTheory.MulSplit
 
 namespace GlobalTheory
 
-open MulSplit in
 
+open MulSplit in
 theorem sections_mulPull_split :
     (∀ (S : Scheme.{0}) (P : PolAV S) (n : ℕ), ∃ α : LB.Gen (LB.LinComb P.L (K := Fin 2) ![𝟙 P.A.left, (mulA P.A n).left] ![(n : ℤ) ^ 2, -1]), α.IsGen) → (∀ (S : Scheme.{0}) [IsLocallyNoetherian S] (P : PolAV S) (n : ℕ), 1 ≤ n → IsFinite (mulA P.A n).left ∧ Flat (mulA P.A n).left ∧ Surjective (mulA P.A n).left ∧ (IsUnit (n : Γ(S, ⊤)) → Etale (mulA P.A n).left)) → (∀ (K : Type) [Field K] [IsAlgClosed K] (P : PolAV (Spec (CommRingCat.of K))) (n : ℕ), (n : K) ≠ 0 → ∀ (U : P.A.left.Opens) (f : Γ(P.A.left, (mulA P.A n).left ⁻¹ᵁ U)), (∀ y : 𝟙_ (Over (Spec (CommRingCat.of K))) ⟶ P.A, y ^ n = 1 → ∀ (e : (mulA P.A n).left ⁻¹ᵁ U ≤ ((toUnit P.A ≫ y) * 𝟙 P.A).left ⁻¹ᵁ ((mulA P.A n).left ⁻¹ᵁ U)), (((toUnit P.A ≫ y) * 𝟙 P.A).left.appLE _ _ e).hom f = f) → ∃! g : Γ(P.A.left, U), ((mulA P.A n).left.app U).hom g = f) → (∀ (K : Type) [Field K] [IsAlgClosed K] (P : PolAV (Spec (CommRingCat.of K))) (n : ℕ) (x : baseOver (Spec (CommRingCat.of K)) ⟶ P.A), x ^ n = 1 → ∃ (u : LB.Gen (LB.LinComb P.L (K := Fin 2) ![(mulT P.A (baseOver (Spec (CommRingCat.of K))) n ≫ translPt P.A x).left, (snd (baseOver (Spec (CommRingCat.of K))) P.A ^ n).left] ![1, -1])) (ε : ℤ), u.IsGen ∧ (ε = 1 ∨ ε = -1) ∧ ∀ (y : baseOver (Spec (CommRingCat.of K)) ⟶ P.A) (c : Γ((baseOver (Spec (CommRingCat.of K))).left, ⊤)ˣ), y ^ n = 1 → WeilIs P.A P.L n x y c → LB.Gen.Corr P.L _ _ _ _ (LB.pullGen P.L _ _ u (translT P.A y).left) (LB.mulGen P.L _ _ _ _ u (constGen P.A P.L (c ^ ε)))) → CharPairSt → WeilSt → (∀ (S : Scheme.{0}) (P : PolAV S) (k : ℕ) (T : Over S), (∀ x : T ⟶ P.A, x ^ k = 1 → WeilIs P.A P.L k x x 1) ∧ (∀ (x y : T ⟶ P.A) (c : Γ(T.left, ⊤)ˣ), WeilIs P.A P.L k x y c → WeilIs P.A P.L k y x c⁻¹) ∧ ∀ (T' : Over S) (h : T' ⟶ T) (x y : T ⟶ P.A) (c : Γ(T.left, ⊤)ˣ), WeilIs P.A P.L k x y c → WeilIs P.A P.L k (h ≫ x) (h ≫ y) (Units.map h.left.appTop.hom.toMonoidHom c)) → (∀ (S : Scheme.{0}) [IsLocallyNoetherian S] (P : PolAV S) (K : Type) [Field K] [IsAlgClosed K] (t : Spec (CommRingCat.of K) ⟶ S) (q : ℕ), 1 ≤ q → ∀ c : Over.mk t ⟶ P.A, ∃ d : Over.mk t ⟶ P.A, d ^ q = c ∧ ∃ w : LB.Gen (LB.LinComb P.L (K := Fin 3) ![(snd (Over.mk t) P.A).left, (translPt P.A c).left, (translPt P.A d).left] ![(q : ℤ) - 1, 1, -(q : ℤ)]), w.IsGen) → ∀ (K : Type) [Field K] [IsAlgClosed K] (P : PolAV (Spec (CommRingCat.of K))) (n j : ℕ), (n : K) ≠ 0 → 1 ≤ j → Nonempty (SecM P.A P.L ((n ^ 2 * j : ℕ) : ℤ) (baseOver (Spec (CommRingCat.of K))) ≃ₗ[Γ((baseOver (Spec (CommRingCat.of K))).left, ⊤)] ({x : baseOver (Spec (CommRingCat.of K)) ⟶ P.A // x ^ n = 1} → SecM P.A P.L (j : ℤ) (baseOver (Spec (CommRingCat.of K))))) := by
   intro hmul hfin hgal hchi hchar _ _ htw K _ _ P n j hn hj

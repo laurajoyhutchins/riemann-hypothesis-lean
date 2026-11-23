@@ -1,11 +1,58 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.IsCrisP
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.Acris0TorsionFree
+module
+
+public import Formalism.LocalRingCardinality.AdicCompletionLocal.InstIsAdicCompleteOCSpanSingletonSetCast
+public import Development.AbelianVarietyTheory.CrystallinePeriods.RingBasics
+public import Development.AbelianVarietyTheory.CrystallinePeriods.RingIface
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.UntiltNormUltrametricEqZeroStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.WittVectorGaussNormMulStatement
 import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.WittVectorGaussNormUltrametricStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.WittVectorGaussNormMulStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.UntiltNormUltrametricEqZeroStatement
-import Development.AbelianVarietyTheory.CrystallinePeriods.RingIface
-import Development.AbelianVarietyTheory.CrystallinePeriods.RingBasics
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.Acris0TorsionFree
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 namespace GlobalTheory.GaussExt
@@ -43,7 +90,7 @@ theorem exists_ext_loc {R S : Type} [CommRing R] [CommRing S] [Algebra R S] (M :
     rw [key x (a * d) (b * d) (by simp only [Submonoid.coe_mul, map_mul, ← hx]; ring),
       key y (c * b) (b * d) (by simp only [Submonoid.coe_mul, map_mul, ← hy]; ring),
       key (x + y) (a * d + c * b) (b * d)
-        (by simp only [Submonoid.coe_mul, map_mul, map_add, ← hx, ← hy]; ring),
+        (by simp only [Submonoid.coe_mul, map_mul, map_add (f := _), ← hx, ← hy]; ring),
       max_div_div_right (h0 _)]
     exact div_le_div_of_nonneg_right (hadd _ _) (h0 _)
   · obtain ⟨⟨a, b⟩, hx⟩ := IsLocalization.surj M x
@@ -121,7 +168,7 @@ theorem exists_ext_compl {A B : Type} [CommRing A] [CommRing B] (f : A →+* B) 
     refine le_of_tendsto_of_tendsto' (hN' (x + y) (fun k => s k + t k) fun k => ?_)
       ((hN' x s hx).max (hN' y t hy)) fun k => hadd _ _
     have := (hx k).add (hy k)
-    convert this using 1; rw [map_add]; ring
+    convert this using 1; rw [map_add (f := _)]; ring
   · obtain ⟨s, hx⟩ := hs x
     refine tendsto_nhds_unique (hN' (-x) (fun k => -s k) fun k => ?_) (by simpa only [hneg] using hN' x s hx)
     have := (hx k).neg_right
@@ -158,8 +205,9 @@ theorem pow_le_factorial {R : Type} [CommRing R] (p : ℕ) [Fact p.Prime] (N : R
     (Fact.out : p.Prime).ne_one
   have hen : e ≤ n := by
     have h2 : e ≤ padicValNat p n.factorial :=
-      (padicValNat_dvd_iff_le n.factorial_ne_zero).1 ⟨m, he⟩
-    have h3 := sub_one_mul_padicValNat_factorial (p := p) n
+      ((by simpa only [_root_.Nat.padicValNat_def] using @_root_.multiplicity_dvd_iff_le : ∀ {p : _root_.Nat} [hp : _root_.Fact (_root_.Nat.Prime p)] {a n : _root_.Nat} (ha : a ≠ 0), p ^ n ∣ a ↔ n ≤ _root_.padicValNat p a) n.factorial_ne_zero).1 ⟨m, he⟩
+    have h3 := Nat.Prime.sub_one_mul_multiplicity_factorial (n := n) (Fact.out : p.Prime)
+    rw [← Nat.padicValNat_def] at h3
     have h4 : 1 ≤ p - 1 := by have := (Fact.out : p.Prime).two_le; omega
     have h5 := Nat.mul_le_mul_right (padicValNat p n.factorial) h4
     omega

@@ -1,4 +1,49 @@
-import Development.EtaleCohomology.EtaleTrace.GenInPf
+module
+
+public import Development.EtaleCohomology.EtaleTrace.GenInPf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+
+@[expose] public section
 
 noncomputable section
 open CategoryTheory Limits AlgebraicGeometry MvPolynomial HomogeneousLocalization
@@ -8,22 +53,18 @@ namespace LateralTheory.EtaleTrace.Cov.GenInPf
 
 variable {k : Type} [Field k] {N : ℕ}
 
-def pg {X : Scheme.{0}} [IsIntegral X] (ι : X ⟶ PN k N) (U : (PN k N).Opens)
-    (hU : genericPoint X ∈ ι ⁻¹ᵁ U) : Γ(PN k N, U) →+* X.functionField :=
+def pg {X : Scheme.{0}} [IsIntegral X] (ι : X ⟶ PN (k := k) N) (U : (PN (k := k) N).Opens)
+    (hU : genericPoint X ∈ ι ⁻¹ᵁ U) : Γ(PN (k := k) N, U) →+* X.functionField :=
   (ι.app U ≫ X.presheaf.germ _ (genericPoint X) hU).hom
 
-theorem pg_apply {X : Scheme.{0}} [IsIntegral X] (ι : X ⟶ PN k N) (U : (PN k N).Opens)
-    (hU : genericPoint X ∈ ι ⁻¹ᵁ U) (s : Γ(PN k N, U)) :
-    pg ι U hU s = X.presheaf.germ _ (genericPoint X) hU (ι.app U s) := rfl
-
-theorem pg_res {X : Scheme.{0}} [IsIntegral X] (ι : X ⟶ PN k N) {U V : (PN k N).Opens} (hVU : V ≤ U)
-    (hV : genericPoint X ∈ ι ⁻¹ᵁ V) (hU : genericPoint X ∈ ι ⁻¹ᵁ U) (s : Γ(PN k N, U)) :
-    pg ι V hV ((PN k N).presheaf.map (homOfLE hVU).op s) = pg ι U hU s := by
-  show (((PN k N).presheaf.map (homOfLE hVU).op ≫ ι.app V) ≫ X.presheaf.germ _ _ hV).hom s = _
+theorem pg_res {X : Scheme.{0}} [IsIntegral X] (ι : X ⟶ PN (k := k) N) {U V : (PN (k := k) N).Opens} (hVU : V ≤ U)
+    (hV : genericPoint X ∈ ι ⁻¹ᵁ V) (hU : genericPoint X ∈ ι ⁻¹ᵁ U) (s : Γ(PN (k := k) N, U)) :
+    pg ι V hV ((PN (k := k) N).presheaf.map (homOfLE hVU).op s) = pg ι U hU s := by
+  show (((PN (k := k) N).presheaf.map (homOfLE hVU).op ≫ ι.app V) ≫ X.presheaf.germ _ _ hV).hom s = _
   rw [Scheme.Hom.naturality, Category.assoc, TopCat.Presheaf.germ_res]
   rfl
 
-theorem away_eq {X : Scheme.{0}} [IsIntegral X] (ι : X ⟶ PN k N) {n : ℕ}
+theorem away_eq {X : Scheme.{0}} [IsIntegral X] (ι : X ⟶ PN (k := k) N) {n : ℕ}
     (f : MvPolynomial (Fin (N + 1)) k) (hf : f ∈ A k N n) (h : genericPoint X ∈ ι ⁻¹ᵁ Proj.basicOpen (A k N) f)
     (m : ℕ) (g : MvPolynomial (Fin (N + 1)) k) (hg : g ∈ A k N (m • n)) :
     away ι f hf h m g hg = pg ι _ h (Proj.awayToSection _ f (Away.mk _ hf m g hg)) := rfl
@@ -52,7 +93,7 @@ theorem away_self_pow' (x : MvPolynomial (Fin (N + 1)) k) (hx : x ∈ A k N 1) {
     (h : x ^ n ∈ A k N (m • 1)) : Away.mk (A k N) hx m (x ^ n) h = 1 := by
   subst hmn; exact away_self_pow x hx m h
 
-theorem key {X : Scheme.{0}} [IsIntegral X] (ι : X ⟶ PN k N) (i : Fin (N + 1))
+theorem key {X : Scheme.{0}} [IsIntegral X] (ι : X ⟶ PN (k := k) N) (i : Fin (N + 1))
     (hi : genericPoint X ∈ ι ⁻¹ᵁ Proj.basicOpen (A k N) (MvPolynomial.X i)) {n : ℕ}
     (f : MvPolynomial (Fin (N + 1)) k) (hf : f ∈ A k N n) (hfη : genericPoint X ∈ ι ⁻¹ᵁ Proj.basicOpen (A k N) f)
     (m : ℕ) (g : MvPolynomial (Fin (N + 1)) k) (hg : g ∈ A k N (m • n))
@@ -83,13 +124,13 @@ theorem key {X : Scheme.{0}} [IsIntegral X] (ι : X ⟶ PN k N) (i : Fin (N + 1)
 
 theorem basicOpen_le (i : Fin (N + 1)) {n : ℕ} (hn : 0 < n) (f : MvPolynomial (Fin (N + 1)) k)
     (hf : f ∈ A k N n) (hf' : f ∈ A k N (n • 1)) :
-    (PN k N).basicOpen (Proj.awayToSection (A k N) (MvPolynomial.X i) (Away.mk _ (X_mem k N i) n f hf')) ≤
+    (PN (k := k) N).basicOpen (Proj.awayToSection (A k N) (MvPolynomial.X i) (Away.mk _ (X_mem k N i) n f hf')) ≤
       Proj.basicOpen (A k N) f := by
   intro y hy
-  have hyU : y ∈ Proj.basicOpen (A k N) (MvPolynomial.X i) := (PN k N).basicOpen_le _ hy
+  have hyU : y ∈ Proj.basicOpen (A k N) (MvPolynomial.X i) := (PN (k := k) N).basicOpen_le _ hy
   let y' : (Proj.basicOpen (A k N) (MvPolynomial.X i : MvPolynomial (Fin (N + 1)) k)).toScheme := ⟨y, hyU⟩
   have h1 : y' ∈ (Proj.basicOpen (A k N) (MvPolynomial.X i : MvPolynomial (Fin (N + 1)) k)).ι ⁻¹ᵁ
-      (PN k N).basicOpen (Proj.awayToSection (A k N) (MvPolynomial.X i) (Away.mk _ (X_mem k N i) n f hf')) := hy
+      (PN (k := k) N).basicOpen (Proj.awayToSection (A k N) (MvPolynomial.X i) (Away.mk _ (X_mem k N i) n f hf')) := hy
   rw [← Scheme.Opens.toSpecΓ_preimage_basicOpen, ← SpecMap_preimage_basicOpen] at h1
   have ht : Away.isLocalizationElem (X_mem k N i) hf = Away.mk _ (X_mem k N i) n f hf' := by
     apply val_injective; simp [Away.val_mk]

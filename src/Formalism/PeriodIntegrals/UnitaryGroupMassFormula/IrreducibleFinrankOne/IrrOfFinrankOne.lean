@@ -1,5 +1,56 @@
-import Mathlib
-import Formalism.PeriodIntegrals.XgCTieBr
+module
+
+public import Formalism.LocalToGlobal.NormalizedHeckeFactors.TypesDefs
+public import Formalism.LocalToGlobal.Divisibility.GoodPartHermitianSpec
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RepresentationTheory.Maschke
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open scoped ComplexOrder Matrix
 
@@ -34,6 +85,7 @@ theorem char_ofGL {k : Type} [Field k] {n : ℕ} (ρ : G →* GL (Fin n) k) (x :
 
 theorem trace_map {k k' : Type} [Field k] [Field k'] {n : ℕ} (f : k →+* k') (M : Matrix (Fin n) (Fin n) k) :
     Matrix.trace (M.map f) = f (Matrix.trace M) := by
+
   simp [Matrix.trace, map_sum]
 
 theorem star_trace_inv [Fintype G] {n : ℕ} (ρ : G →* GL (Fin n) ℂ) (g : G) :
@@ -121,7 +173,11 @@ theorem absIrr_isIrr [Fintype G] {K : Type} [Field K] [CharZero K] (σ : K →+*
   classical
   obtain ⟨n, ρ, hρ, hch⟩ := hχ
   letI : Algebra K ℂ := σ.toAlgebra
-  let τ : AlgebraicClosure K →ₐ[K] ℂ := IsAlgClosed.lift
+  let τ : AlgebraicClosure K →ₐ[K] ℂ := (by
+    refine @_root_.IsAlgClosed.lift _ _ _ _ _ _ _ _ _ _ _ ?_ ?_ ?_
+    solve_by_elim* (maxDepth := 2) only [*,
+      @_root_.DivisionSemiring.to_moduleIsTorsionFree,
+      @_root_.Algebra.IsIntegral.isAlgebraic, @_root_.inferInstance])
   have hτ : ∀ a : K, τ (algebraMap K _ a) = σ a := fun a => by rw [τ.commutes]; rfl
   haveI : CharZero (AlgebraicClosure K) := charZero_of_injective_algebraMap (algebraMap K _).injective
   let ρc : G →* GL (Fin n) ℂ := (Matrix.GeneralLinearGroup.map τ.toRingHom).comp (toGL ρ)
@@ -135,38 +191,16 @@ theorem absIrr_isIrr [Fintype G] {K : Type} [Field K] [CharZero K] (σ : K →+*
   have hstar : ∀ x, star (σ (χ x)) = σ (χ x⁻¹) := fun x => by rw [htr, htr, star_trace_inv]
   show ∑ x, σ (χ x) * star (σ (χ x)) = _
   simp_rw [hstar]
-  have horth := Formalism.L2.Col.gx_orth (G := G) (k := AlgebraicClosure K) ⟨n, ρ, hρ, rfl⟩ ⟨n, ρ, hρ, rfl⟩
-  rw [if_pos rfl] at horth
+  letI : ρ.IsIrreducible := hρ
+  letI : Invertible (Nat.card G : AlgebraicClosure K) :=
+    invertibleOfNonzero (by exact_mod_cast Nat.card_pos.ne')
+  have horth := Representation.char_orthonormal ρ ρ
+  rw [if_pos ⟨Representation.Equiv.refl ρ⟩] at horth
   have hne : (Nat.card G : AlgebraicClosure K) ≠ 0 := by exact_mod_cast Nat.card_pos.ne'
   rw [inv_mul_eq_one₀ hne] at horth
   have := congrArg τ horth
+
   simp only [map_sum, map_mul, map_natCast, hch, hτ] at this
   rw [← this, Nat.card_eq_fintype_card]
-
-theorem isIrr_absIrr [Fintype G] {K : Type} [Field K] (σ : K →+* ℂ) (hB : PI.XgNamed.BrauerSplit) (z : K)
-    (hz : IsPrimitiveRoot z (Fintype.card G)) {χc : G → ℂ} (hc : Formalism.L2.NT.IsIrrChar χc) :
-    ∃ χ : G → K, Formalism.L2.DIV.IsAbsIrrChar χ ∧ (fun x => σ (χ x)) = χc := by
-  classical
-  obtain ⟨⟨n, ρc, htr⟩, hip⟩ := hc
-  have hchar : ∀ x, (ofGL ρc).character x = χc x := fun x => by rw [char_ofGL, htr]
-  haveI : NeZero (Nat.card G : ℂ) := ⟨by exact_mod_cast Nat.card_pos.ne'⟩
-  haveI : Invertible (Nat.card G : ℂ) := invertibleOfNonzero (NeZero.ne _)
-  have hfr := Representation.card_inv_mul_sum_char_mul_char_eq_finrank (ofGL ρc) (ofGL ρc)
-  have hsum : ∑ g : G, (ofGL ρc).character g * (ofGL ρc).character g⁻¹ = (Nat.card G : ℂ) := by
-    simp_rw [hchar]
-    rw [Nat.card_eq_fintype_card, ← hip]
-    unfold Formalism.L2.NT.ipG
-    refine Finset.sum_congr rfl fun x _ => ?_
-    rw [htr x, htr x⁻¹, star_trace_inv]
-  rw [hsum, inv_mul_cancel₀ (NeZero.ne _)] at hfr
-  have h1 : Module.finrank ℂ (Representation.IntertwiningMap (ofGL ρc) (ofGL ρc)) = 1 := by
-    exact_mod_cast hfr.symm
-  have hirr := irr_of_finrank_one (ofGL ρc) h1
-  obtain ⟨m, τ, τb, hτb, hmat, hσ⟩ := hB G K σ z hz n (ofGL ρc) hirr
-  refine ⟨fun t => τ.character t, ⟨m, τb, hτb, fun t => ?_⟩, funext fun t => ?_⟩
-  · show _ = algebraMap K _ (τ.character t)
-    rw [char_eq_trace, hmat t, trace_map, char_eq_trace]
-  · show σ (τ.character t) = χc t
-    rw [hσ t, hchar]
 
 end PI.XgCTieBrWork.Chars

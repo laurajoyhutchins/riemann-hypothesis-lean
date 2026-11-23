@@ -1,7 +1,53 @@
-import Mathlib
-import ReciprocityTheory.ThetaQuasiPeriods.ThetaQuasiPeriodStatement
-import ReciprocityTheory.ThetaQuasiPeriods.Transl
-import Development.AbelianVarietyTheory.Definitions.ThetaMetrics.ExistsEventuallyNormRiemannThetaTermLe
+module
+
+public import ReciprocityTheory.ThetaQuasiPeriods.ThetaQuasiPeriodStatement
+public import Development.AbelianVarietyTheory.Definitions.ThetaMetrics.ExistsEventuallyNormRiemannThetaTermLe
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Complex Matrix ReciprocityTheory.PTheta
 
@@ -83,9 +129,9 @@ private lemma exists_uniform_im_quadForm_lower_bound_on_compact {K : Set ((ι �
           nlinarith [mul_nonneg hm.le (sq_nonneg ‖x‖)]
       _ ≤ Q := h4
 
+
 open Complex Matrix in
 variable {ι : Type*} [Fintype ι] in
-
 theorem _root_.GlobalTheory.thetaMTest_holds : _root_.ReciprocityTheory.PTheta.ThetaMTestStatement := by
   unfold _root_.ReciprocityTheory.PTheta.ThetaMTestStatement
   intro ι _ a K hK hKd
@@ -96,9 +142,9 @@ theorem _root_.GlobalTheory.thetaMTest_holds : _root_.ReciprocityTheory.PTheta.T
   exact _root_.GlobalTheory.norm_riemannThetaTerm_le a b (hcK p hp)
     (fun i => (_root_.GlobalTheory.abs_im_apply_le_norm p.1 i).trans (hS p hp)) l
 
+
 open Complex Matrix in
 variable {ι : Type*} [Fintype ι] in
-
 theorem _root_.GlobalTheory.thetaSummable_holds : _root_.ReciprocityTheory.PTheta.ThetaSummableStatement := by
   have hM := _root_.GlobalTheory.thetaMTest_holds
   unfold _root_.ReciprocityTheory.PTheta.ThetaMTestStatement at hM
@@ -111,9 +157,9 @@ theorem _root_.GlobalTheory.thetaSummable_holds : _root_.ReciprocityTheory.PThet
   exact Summable.of_nonneg_of_le (fun _ => norm_nonneg _)
     (fun l => hbound b _ (Set.mem_singleton _) l) hu
 
+
 open Complex Matrix in
 variable {ι : Type*} [Fintype ι] in
-
 theorem _root_.GlobalTheory.thetaMTest_and_thetaSummable : _root_.ReciprocityTheory.PTheta.ThetaMTestStatement ∧ _root_.ReciprocityTheory.PTheta.ThetaSummableStatement :=
   ⟨_root_.GlobalTheory.thetaMTest_holds, _root_.GlobalTheory.thetaSummable_holds⟩
 

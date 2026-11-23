@@ -1,9 +1,53 @@
-import Mathlib
+module
+
+public import Formalism.ConjugateSelfDual.Statement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.TripleAtt
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.InjPrimeTo
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.OffRange
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.GaloisSideTwistedSelmerAuxiliaryPrimes
-import Formalism.LocalRingCardinality.AdicCompletionLocal.LocTied
+public import Mathlib.RingTheory.Ideal.Norm.AbsNorm
+
+@[expose] public section
 
 open GlobalTheory.TripleGal Formalism Formalism.BasicNotions Formalism.BasicNotions.Loc Formalism.MainNotions Formalism.MainNotions.N Formalism.MainNotions.BlochKatoReduction Formalism.MainNotions.BlochKatoReduction.Gen Formalism.ConjugateSelfDual ReciprocityTheory.Gal NumberField IsDedekindDomain Polynomial
 
@@ -53,54 +97,5 @@ theorem one_lt_norm {E : Type} [Field E] [NumberField E] (v : HeightOneSpectrum 
     exact v.ne_bot
   have : 1 < normV v := by omega
   exact_mod_cast this
-
-theorem noInv_of_pure : ∀ (D : D7) (i : D.ntw.Tw) (s : D.ntw.Sig i) (ι : FractionRing (D.ntw.O0 i) →+* ℂ), Pure i s ι → ∀ v, v ∉ placesOver D.host.E (D.ntw.l i) → v ∉ Spl (X := D.ntw) i → NoInv i (Tmat i s) v ∧ NoInv i (Tdual i s) v := by
-  intro D i s ι hP v hv hs
-  have hq : (1 : ℝ) < ((normV v : ℕ) : ℝ) := one_lt_norm v
-  have ht : (5 : ℝ) ≤ (D.R.t : ℝ) := by
-    have := D.R.rank_add_five_le
-    exact_mod_cast (by omega : 5 ≤ D.R.t)
-  have hlt : ((normV v : ℕ) : ℝ) ^ ((1 - (D.R.t : ℝ)) / 2) < 1 :=
-    Real.rpow_lt_one_of_one_lt_of_neg hq (by linarith)
-  have hl : ((D.ntw.l i : ℕ) : 𝓞 D.host.E) ∉ v.asIdeal := by
-    intro h
-    apply hv
-    unfold placesOver
-    exact h
-  constructor
-  · intro A hA x hx
-    by_contra hx0
-    obtain ⟨σ, hσ⟩ := ReciprocityTheory.Gal.exists_isFrob (F := D.host.E) hA
-    have hdec : σ ∈ Dec (F := D.host.E) A := by
-      unfold Formalism.ConjugateSelfDual.IsFrob at hσ
-      exact hσ.1
-    have e := hx σ hdec
-    have hr := isRoot_of_eigen (algebraMap (D.ntw.O0 i) (FractionRing (D.ntw.O0 i))) ι (Tmat i s σ) 1 x hx0
-      (by rw [one_smul]; exact e)
-    have hn := hP v hv hs A hA σ hσ _ hr
-    rw [map_one, norm_one] at hn
-    linarith
-  · intro A hA x hx
-    by_contra hx0
-    obtain ⟨σ, hσ⟩ := ReciprocityTheory.Gal.exists_isFrob (F := D.host.E) hA
-    have hdec : σ ∈ Dec (F := D.host.E) A := by
-      unfold Formalism.ConjugateSelfDual.IsFrob at hσ
-      exact hσ.1
-    have e := hx σ hdec
-    have hu : IsUnit (Tmat i s σ).det := by
-      unfold Tmat
-      rw [Matrix.det_smul]
-      exact ((Units.isUnit _).pow _).mul ((Matrix.isUnit_iff_isUnit_det _).1 (Units.isUnit _))
-    have e2 := eigen_of_dual (algebraMap (D.ntw.O0 i) (FractionRing (D.ntw.O0 i))) (Tmat i s σ) hu
-      ((eps0 D.ntw i σ : (D.ntw.O0 i)ˣ) : D.ntw.O0 i) x (by unfold Tdual at e; exact e)
-    have hr := isRoot_of_eigen (algebraMap (D.ntw.O0 i) (FractionRing (D.ntw.O0 i))) ι (Tmat i s σ).transpose _ x hx0 e2
-    rw [Matrix.charpoly_transpose] at hr
-    have hn := hP v hv hs A hA σ hσ _ hr
-    have hc : ((eps0 D.ntw i σ : (D.ntw.O0 i)ˣ) : D.ntw.O0 i) = (normV v : ℕ) := by
-      unfold eps0
-      rw [MonoidHom.comp_apply, Units.coe_map]
-      exact (congrArg (algebraMap _ (D.ntw.O0 i)) (ReciprocityTheory.Gal.cycZ_of_isFrob hl hA hσ)).trans (map_natCast _ _)
-    rw [hc, map_natCast, map_natCast, Complex.norm_natCast] at hn
-    linarith
 
 end GlobalTheory.PurityInvariants

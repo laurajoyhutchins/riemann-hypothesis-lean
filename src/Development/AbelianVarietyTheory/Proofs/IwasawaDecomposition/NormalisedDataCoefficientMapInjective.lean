@@ -1,9 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsCastMap
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ModelSame
+module
+
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsCastMap
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ModelSame
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.AssembleLattice
+import Development.AbelianVarietyTheory.Definitions.ThetaValues.IoOverLeftUnique
+import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.TensorMapDescent
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsReferenceTupleThetaComparisonNormalisedDat
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.PlaceModelImp
+
+@[expose] public section
 
 set_option autoImplicit false
-set_option synthInstance.maxHeartbeats 200000
+
 
 noncomputable section
 
@@ -56,6 +98,7 @@ theorem inj_of_li {L K I W : Type} [Field L] [CharZero L] [Field K] [Fintype I] 
     (hli : LinearIndependent ℂ fun i => cL (bVV L lam i)) : Function.Injective cK := by
   have hL : ∀ u : VV L lam, cL u = 0 → u = 0 := fun u hu => by
     have e := (bVV L lam).sum_repr u
+
     rw [← e, map_sum] at hu
     simp only [LinearMap.map_smulₛₗ] at hu
     have := Fintype.linearIndependent_iff.1 hli _ hu
@@ -81,7 +124,7 @@ theorem normalisedData_coefficientMap_injective {D : D7} {G : Type} [Group G] [F
   obtain ⟨g, r, c0L, hT, hbc⟩ := hO.lift.c0
   exact inj_of_li (lamV D i) O.jL sj hbc (hT.mapL i).2.1
 
-set_option maxHeartbeats 4000000 in
+
 
 theorem omOver_of_isBCOf (X X' : Stages) (hP : X'.B.toPre = X.B.toPre)
     {G : Type} [Group G] [Fintype G] {Pl0 T0 Pl0' T0' : Type} {A : FamIn X.toD7.what₂.LL G Pl0 T0 X.toD7.R.m}

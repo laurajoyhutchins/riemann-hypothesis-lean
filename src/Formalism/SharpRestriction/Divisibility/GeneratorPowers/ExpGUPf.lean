@@ -1,5 +1,51 @@
-import Formalism.SharpRestriction.Divisibility.GeneratorPowers.UnitIdSt
-import Formalism.SharpRestriction.Divisibility.GeneratorPowers.FBIdAd
+module
+
+public import Formalism.SharpRestriction.Divisibility.GeneratorPowers.UnitIdSt
+public import Formalism.SharpRestriction.Divisibility.GeneratorPowers.FBIdAd
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.CalcExp
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.GaugeTrans
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.LogClosed
+
+@[expose] public section
 
 noncomputable section
 
@@ -33,13 +79,13 @@ theorem cocycle_first_face_exp (u v w : Q S d n) : E3 B.ph1 u v w = FB.expS S (E
   have e : B.ph1 = FB.expS S (E2 h (gen 0) (gen 2) + E2 h (gen 1) (gen 2) - E2 h (op (FQ B.G) (gen 0) (gen 1)) (gen 2)) := by
     simp only [formalSeriesValueAtTwoPoints_eq_ev, op_val]; exact (map_id_apply _).symm.trans (hg.ph1.trans (by rw [show B.FK S = B.G.F from funext fun _ => map_id_apply _]; rfl))
   rw [e, E3, sb_expS _ (by simp [const_coeff_pair_form_zero B hg])]
-  simp only [map_sub, map_add, formalPointSubstitutionSeries_valueAtTwoPoints, sq_op, sq_gen]; rfl
+  simp only [map_sub, map_add (f := _), formalPointSubstitutionSeries_valueAtTwoPoints, sq_op, sq_gen]; rfl
 
 theorem cocycle_second_face_exp (u v w : Q S d n) : E3 B.ph2 u v w = FB.expS S (E2 h u v + E2 h u w - E2 h u (op (FQ B.G) v w)) := by
   have e : B.ph2 = FB.expS S (E2 h (gen 0) (gen 1) + E2 h (gen 0) (gen 2) - E2 h (gen 0) (op (FQ B.G) (gen 1) (gen 2))) := by
     simp only [formalSeriesValueAtTwoPoints_eq_ev, op_val]; exact (map_id_apply _).symm.trans (hg.ph2.trans (by rw [show B.FK S = B.G.F from funext fun _ => map_id_apply _]; rfl))
   rw [e, E3, sb_expS _ (by simp [const_coeff_pair_form_zero B hg])]
-  simp only [map_sub, map_add, formalPointSubstitutionSeries_valueAtTwoPoints, sq_op, sq_gen]; rfl
+  simp only [map_sub, map_add (f := _), formalPointSubstitutionSeries_valueAtTwoPoints, sq_op, sq_gen]; rfl
 
 omit hg [Algebra ℚ S] in
 theorem actK_eq (a : 𝓞 E) : B.actK S a = B.A.act a := by

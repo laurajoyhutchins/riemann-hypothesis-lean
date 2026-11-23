@@ -1,4 +1,45 @@
-import Formalism.SharpRestriction.LevelLetterCocycles.InvariantLetterIdempotentOfFixed
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.LatticeBoundsOfThreeParts
+public import Formalism.SharpRestriction.LevelLetterCocycles.InvariantLetterIdempotentOfFixed
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -63,7 +104,7 @@ theorem cocycleXi_eq (hcoc : W.γ T yv - yv = W.φD T zv - zv) (c : ZMod n) :
       (W.γ T (t c) - t c) := by
   have hc := cocycle_relation_on_letter (W := W) (T := T) hcoc c
   unfold gammaDefectOfLiftCorrection liftCorrection gammaDefectOfLetterLift
-  simp only [map_add, map_sub, map_smul, gamma_letter_smul, gamma_frobenius_comm, hc]
+  simp only [map_add (f := _), map_sub, map_smul, gamma_letter_smul, gamma_frobenius_comm, hc]
   simp only [smul_add, smul_sub, smul_smul, ← pow_add, add_comm σ s₁]
   abel
 
@@ -78,14 +119,14 @@ theorem gamma_sub_cocycleW (hcoc : W.γ T yv - yv = W.φD T zv - zv) (c : ZMod n
   have hl' : W.φD T ((letE (c - 1) : LetA O n) • zv) = (letE c : LetA O n) • W.φD T zv := by
     rw [frobenius_letter_shift, sub_add_cancel]
   unfold frobeniusShiftDefectOfLiftCorrection gammaDefectOfLiftCorrection gammaDefectOfLetterLift
-  simp only [map_add, map_sub, map_smul, gamma_letter_smul, gamma_frobenius_comm, hc, hl, hl']
+  simp only [map_add (f := _), map_sub, map_smul, gamma_letter_smul, gamma_frobenius_comm, hc, hl, hl']
   simp only [smul_add, smul_sub, smul_smul, ← pow_add, add_comm σ s₁]
   abel
 
 theorem cocycleY_eq_frobenius_add (c : ZMod n) :
     frobeniusSquareDefectOfLiftCorrection W T s₁ σ yv ms t c = W.φD T (frobeniusShiftDefectOfLiftCorrection W T s₁ σ yv ms t c) + t c := by
   unfold frobeniusSquareDefectOfLiftCorrection frobeniusShiftDefectOfLiftCorrection liftCorrection
-  simp only [map_add, map_sub, map_smul, smul_add]
+  simp only [map_add (f := _), map_sub, map_smul, smul_add]
   abel
 
 theorem gamma_sub_cocycle_component (hcoc : W.γ T yv - yv = W.φD T zv - zv) (c : ZMod n) :
@@ -93,7 +134,7 @@ theorem gamma_sub_cocycle_component (hcoc : W.γ T yv - yv = W.φD T zv - zv) (c
       W.φD T (W.φD T (gammaDefectOfLiftCorrection W T s₁ σ yv zv ms t (c - 2))) - gammaDefectOfLiftCorrection W T s₁ σ yv zv ms t c := by
   rw [cocycleY_eq_frobenius_add, cocycleXi_eq ms t hcoc c]
   have h := congrArg (W.φD T) (gamma_sub_cocycleW (s₁ := s₁) (σ := σ) (ms := ms) (t := t) hcoc c)
-  simp only [map_add, map_sub, map_smul, gamma_frobenius_comm] at h ⊢
+  simp only [map_add (f := _), map_sub, map_smul, gamma_frobenius_comm] at h ⊢
   rw [show ∀ a b e : W.DD T, a - (b - e) = (a - b) + e from fun a b e => by abel, ← h]
   abel
 
@@ -129,8 +170,9 @@ theorem first_component_sum_eq [NeZero n] (hn : Even n) (d : ℕ) :
   simp only [Finset.sum_add_distrib, Finset.sum_sub_distrib]
   rw [h2, h3, key]
   unfold liftCorrectionSum
+
   rw [map_sum]
-  simp only [map_add, map_smul, Finset.sum_add_distrib]
+  simp only [map_add (f := _), map_smul, Finset.sum_add_distrib]
   abel
 
 theorem second_component_sum_eq [NeZero n] (hn : Even n) (d : ℕ) (hcoc : W.γ T yv - yv = W.φD T zv - zv) :
@@ -148,11 +190,12 @@ theorem second_component_sum_eq [NeZero n] (hn : Even n) (d : ℕ) (hcoc : W.γ 
     have := cocycle_relation_on_letter (W := W) (T := T) hcoc (c + 1)
     rwa [show c + 1 + 1 = c + 2 by ring] at this
   unfold gammaDefectOfLiftCorrection liftCorrectionSum
+
   rw [map_sum, ← Finset.sum_sub_distrib]
   conv_lhs => rw [hz]
   rw [Finset.smul_sum, ← Finset.sum_add_distrib]
   refine Finset.sum_congr rfl fun c _ => ?_
-  simp only [map_add, map_sub, map_smul, gamma_letter_smul, gamma_frobenius_comm, hc, smul_add, smul_sub]
+  simp only [map_add (f := _), map_sub, map_smul, gamma_letter_smul, gamma_frobenius_comm, hc, smul_add, smul_sub]
   abel
 
 end Core

@@ -1,4 +1,56 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.HtDefs
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.LaTIsPrime
+public import ReciprocityTheory.SemistableReduction.SphereLogIntegrableStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.MvPolynomial.IrreducibleQuadratic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RingTheory.Norm.Basic
+
+@[expose] public section
 
 namespace ReciprocityTheory.ChartRestriction.G.T0
 
@@ -77,6 +129,7 @@ theorem scale_multiHomogeneous (b : Fin (D + 1)) (u : Kˣ) (a : Fin (D + 1) → 
       exact absurd (Finset.mem_univ b) h
   conv_lhs => rw [F.as_sum]
   conv_rhs => rw [F.as_sum]
+
   rw [map_sum, Finset.mul_sum]
   refine Finset.sum_congr rfl fun s hs => ?_
   rw [scaleEquiv_monomial, hsum s, hF s hs b]
@@ -131,7 +184,8 @@ theorem scale_sImg_expr (b : Fin (D + 1)) (hb : b ≠ 0) (u : Ωˣ) (j₀ : Fin 
       have hb' : ¬ ((0 : Fin (D + 1)) = b) := fun h => hb h.symm
       rw [if_pos rfl, if_neg hb', one_mul, scaleEquiv_X]
       simp [InBlock]
-    · rw [if_neg h0, map_neg, map_sum, mul_neg, Finset.mul_sum]
+    · set_option synthInstance.maxHeartbeats 100000 in
+        rw [if_neg h0, map_neg, map_sum, mul_neg, Finset.mul_sum]
       congr 1
       refine Finset.sum_congr rfl fun k _ => ?_
       rw [map_mul, hX, scaleEquiv_C, mul_assoc]
@@ -199,7 +253,7 @@ theorem tauF_sHom (b : Fin (D + 1)) (hb : b ≠ 0) (u : Kˣ) (j₀ : Fin (N + 1)
     have e2 : sigP (K := K) (D := D) (N := N) b u (C a) = C a := scaleEquiv_C _ _ _
     rw [e2, e1, algebraMap_K_OmS, tauF_algebraMap', scaleEquiv_C]
   next p q hp hq =>
-    simp only [map_add, hp, hq]
+    simp only [map_add (f := _), hp, hq]
   next p v hp =>
     simp only [map_mul, hp]
     congr 1

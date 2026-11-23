@@ -1,7 +1,42 @@
-import Mathlib
-import Formalism.SharpRestriction.GlobalSchurBounds.TaylorLogMetric
-import Formalism.LocalToGlobal.GlobalTheory.GL3.Statement
-import Formalism.LocalToGlobal.GlobalTheory.GL3.CubicFields.EpsteinZeta.DedekindFactorK
+module
+
+public import Formalism.LocalToGlobal.GlobalTheory.GL3.Statement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -30,16 +65,6 @@ def CMConjSet (D : D7) : Prop :=
     ∀ 𝔟 : Ideal (𝓞 D.host.K), 𝔟 ≠ ⊥ →
       ((Finset.univ.filter fun ρ : M →ₐ[ℚ] ℂ => ρ ⟨jL (lamOf D cc 1), h⟩ = jL (lamOf D 𝔟 1)).card : ℝ) *
         (Fintype.card (ClassGroup (𝓞 D.host.K)) : ℝ) = (Module.finrank ℚ M : ℝ)
-
-def CMConjSetF : Prop :=
-  ∀ (K : Type) [Field K] [NumberField K] (d : ℕ) [Fact d.Prime], d % 4 = 3 →
-    ∀ x : K, x ^ 2 = -(d : K) → Module.finrank ℚ K = 2 → ∀ φ : K →+* ℂ,
-    ∀ cc : Ideal (𝓞 K), cc ≠ ⊥ → ∀ (M : IntermediateField ℚ ℂ) [NumberField M]
-    (h : jL (latI φ cc 1) ∈ M),
-    (∀ ρ : M →ₐ[ℚ] ℂ, ∃ 𝔟 : Ideal (𝓞 K), 𝔟 ≠ ⊥ ∧ ρ ⟨jL (latI φ cc 1), h⟩ = jL (latI φ 𝔟 1)) ∧
-    ∀ 𝔟 : Ideal (𝓞 K), 𝔟 ≠ ⊥ →
-      ((Finset.univ.filter fun ρ : M →ₐ[ℚ] ℂ => ρ ⟨jL (latI φ cc 1), h⟩ = jL (latI φ 𝔟 1)).card : ℝ) *
-        (Fintype.card (ClassGroup (𝓞 K)) : ℝ) = (Module.finrank ℚ M : ℝ)
 
 theorem uniqInv_of_lat (hL : LatOfDiscr) (hU : Uniformization) : UniqInv := by
   intro Λ Λ' hd h2 h3

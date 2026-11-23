@@ -1,4 +1,48 @@
-import Formalism.LocalToGlobal.GlobalTheory.PlacesP
+module
+
+public import Formalism.SharpRestriction.Divisibility.LocalQuadraticParts
+public import Formalism.SharpRestriction.GlobalSchurBounds.TopDensityNGeSixteen
+public import Formalism.LocalToGlobal.GlobalTheory.PlacesP
+import Formalism.SharpRestriction.GlobalSchurBounds.FrameCodeOfAdditive
+import Formalism.SharpRestriction.GlobalSchurBounds.GlobalRankLatticeProofs.SevenLogLeLOfPowerBound
+import Formalism.SharpRestriction.GrowthBounds.TopChoiceBounds
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Module NumberField IsDedekindDomain
 
@@ -7,18 +51,6 @@ noncomputable section
 namespace Formalism.L2.GlobalTheoryTheory.Places
 
 open Formalism.BasicNotions Formalism.MainNotions Formalism.MainNotions.GlobalTheoryTheory Formalism.HN Formalism.LFunctionChainParameters
-
-theorem level_prime_division_of_statements {eps : ℝ} (Fm : FamP eps) (crystallineComparison : ℝ) (h10 : product_first_zeroth_parts.ConclusionOnFamily Fm crystallineComparison) (tSet : SettingEventually Fm) (hTu : TuSize Fm) :
-    LocalQuadraticParts.LevelTFamily Fm := by
-  obtain ⟨x0, h0⟩ := h10
-  obtain ⟨x1, h1⟩ := tSet
-  refine J.family_levelPrime_summary_closed Fm crystallineComparison hTu (dlSize eps Fm) ⟨max (max x0 x1) (Fm.x1 + 1), fun x hx i => ?_⟩
-  have hx0 : x0 ≤ x := le_trans (le_trans (le_max_left _ _) (le_max_left _ _)) hx
-  have hx1 : x1 ≤ x := le_trans (le_trans (le_max_right _ _) (le_max_left _ _)) hx
-  have hx2 : Fm.x1 < x := by
-    have := le_trans (le_max_right _ _) hx
-    linarith
-  exact ⟨fun u => (h0 x hx0 i u (h1 x hx1 hx2 i u)).2.1, fun u => (h0 x hx0 i u (h1 x hx1 hx2 i u)).2.2.2.2.1⟩
 
 theorem placesF_min' {eps : ℝ} (Fm : FamP eps) (h26 : LocalQuadraticParts.LevelTFamily Fm) (hNC : Lnk.NuCommensF Fm) (hTu : TuSize Fm)
     (hRank : J.MuRank Fm) (lG : LinkG Fm) (lMu : LinkMu Fm) : Lnk.PlacesF Fm := by
@@ -118,9 +150,6 @@ theorem placesF_min' {eps : ℝ} (Fm : FamP eps) (h26 : LocalQuadraticParts.Leve
     have h1 : ¬ ((((Fm.D x i).what₂.places.resChar w : ℕ) : ℝ) ≤ (Fm.L x i).sc.X'' (Fm.D x i).R.n) :=
       fun h => hs (Fm.supp_sat x hx1 i w h)
     linarith [not_le.1 h1]
-
-theorem placesF_of_via_min : PlaceConditionsFamily := by
-  exact placesF_of
 
 end Formalism.L2.GlobalTheoryTheory.Places
 

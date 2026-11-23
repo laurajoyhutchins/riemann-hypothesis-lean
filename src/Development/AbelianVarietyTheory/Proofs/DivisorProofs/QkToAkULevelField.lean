@@ -1,10 +1,60 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SectionValueEqAdicSumAtImageOfZeroPair
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SumFConvOfCrossAny
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExhaustOfLabels
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.QkToAkUInvariantUnderFieldEmbedding
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.TxFrameTranslate
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.FiniteAlgebraLocalCompletion
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EqOneOfFiniteOrderAny
+import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.AbelianProjectiveBaseChange
+import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.NonemptyPerfectSectionsComplexOfNoetherianStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SumFConvOfCrossAny
+import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.GtActIffEqGtSmul
+import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.AdicSumSectionsOfFiniteSumsOnThickenings
+import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.CubNMul
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.QkToAkUInvariantUnderFieldEmbedding
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.UwRQeIsNsmul
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.FiniteAlgebraLocalCompletion
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.PrecompleteBases.PsbLb
+import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.DivMemOfForallPowSuccDivPowMem
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits MonoidalCategory CartesianMonoidalCategory MonObj AlgebraicGeometry IsLocalRing
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Out ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.DVR
@@ -119,8 +169,9 @@ theorem sumF_field : LL → FieldD fun {R} _ _ {I} D F _ _ => ∀ (K : Type) [Fi
     have e₁ := fun j => gs_loc₀ P (hv' j) _ p hp hJ'
     rw [gs_eq _ p _ hp] at e₀
     simp only [gs_eq _ p _ hp] at e₁
+
     rw [loc₀_sub_sum, gs_eq _ p _ hp, map_sub, map_sub, map_sum, map_sum, e₀, Finset.sum_congr rfl fun j _ => e₁ j,
-      ← Finset.mul_sum]
+    ← Finset.mul_sum]
     exact sub_eq_zero.2 (congrArg _ h₃)
 
 end
@@ -207,6 +258,7 @@ theorem prodConv_field : LL → FieldUF fun {R} _ _ {I} {D} {A} {G} _ _ U F _ _ 
   have hs : ∀ β, famProj D.toPre F k'' β (∑ p : Fin n × Fin n', (c p.1 * c' p.2) • famPull D.toPre (FractionRing R) F hG k'' (Φ p)) =
       ∑ p : Fin n × Fin n', (c p.1 * c' p.2 * (algebraMap (FractionRing R) F (algebraMap R (FractionRing R) (r p)))⁻¹) •
         termPull D.toPre (FractionRing R) F k'' β (genericTerm D k'' β ((y p).2 β)) := fun β => by
+
     rw [map_sum]
     refine Finset.sum_congr rfl fun p _ => ?_
     rw [d₂, map_smulₛₗ, map_smulₛₗ, smul_smul, inv_mul_cancel_right₀ (hr' p)]; rfl
@@ -238,13 +290,14 @@ theorem qkToAkU_level_field : LL → FieldUF fun {R} _ _ {I} {D} {A} {G} _ _ U F
   have hN1 : 1 ≤ N := hN ▸ Nat.mul_pos hk hn
   have hf : (algebraMap F (AlgebraicClosure F)).comp (algebraMap (FractionRing R) F) = algebraMap _ _ :=
     (IsScalarTower.algebraMap_eq _ _ _).symm
-  have hp := (TorusExt.qkExt_iff D.tau_bimult _ hf p _).2 rfl
-  have hq := (TorusExt.qkExt_iff D.tau_bimult _ hf q _).2 rfl
+  obtain ⟨p', hp⟩ := qkExtExists R D.toPre F (AlgebraicClosure F) (algebraMap F _) (fun r => DFunLike.congr_fun hf r) k p
+  obtain ⟨q', hq⟩ := qkExtExists R D.toPre F (AlgebraicClosure F) (algebraMap F _) (fun r => DFunLike.congr_fun hf r) N q
   refine (TorsionExt.qkToAkU_iff_of_algebra hL.1.globalFns hL.1.kerPow U hN1 hq x).2 ?_
   refine DvrAnyChar.qkToAkU_level_any hL R I hI D A G hG U _ k n N hk hn hN
-    (TorusExt.qkExt D.tau_bimult _ hf p) _ _ hy ?_
-    ((TorsionExt.qkToAkU_iff_of_algebra hL.1.globalFns hL.1.kerPow U hk hp x).1 hx)
-  exact congrArg (TorusExt.gtExt D.toPre _ hf) hg
+    p' q' _ ?_ ?_ ((TorsionExt.qkToAkU_iff_of_algebra hL.1.globalFns hL.1.kerPow U hk hp x).1 hx)
+  · rw [hq.1, hp.1, hy]
+  · exact ((TorusExt.eq_gtExt_iff _ hf _ _).2 hq.2).trans
+      (((TorusExt.eq_gtExt_iff _ hf _ _).2 hp.2).trans (congrArg (TorusExt.gtExt D.toPre _ hf) hg).symm).symm
 
 theorem exists_sumI_smul {R : Type} [CommRing R] {I : Ideal R} [IsAdicComplete I R] {E Ix : Type} [AddCommGroup E]
     [Module R E] {x : Ix → E} {s : E} (h : SumI I x s) (a : Ix → R) : ∃ s', SumI I (fun i => a i • x i) s' := by

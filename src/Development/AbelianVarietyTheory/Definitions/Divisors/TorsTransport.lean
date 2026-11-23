@@ -1,7 +1,48 @@
-import Mathlib
-import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.VpBounds
-import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.DefiningCoordinates
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TwistedTransport
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.VpBounds
+public import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.DefiningCoordinates
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TwistedTransport
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -36,8 +77,8 @@ def LatIntRam : Prop := AllLat fun E _ _ I _ d φ s z 𝔣 Λ l L => c_vp 𝔣 l
 def LatIntUnr : Prop := AllLat fun E _ _ I _ d φ s z 𝔣 Λ l L => c_vp 𝔣 l = 0 → ∀ (κ : I → ℕ) (S : ℂ → ℂ),
   IsLatSum φ (2 * s) κ L S → ValGe_vp l (betaBound_vp d s κ 𝔣 z l) (beta E d s κ Λ (S 0))
 
-open Classical in
 
+open Classical in
 def Expansion : Prop := AllLat fun _ _ _ I _ d φ s z 𝔣 Λ l L => c_vp 𝔣 l ≠ 0 →
   ∀ [Fact l.Prime] (lam : algebraicClosure ℚ ℂ →+* ℂ_[l]) (Ω : ℂ), Ω ^ 12 = latDisc Λ →
   ∃ a b : I → ℂ, (∀ i, a i ≠ 0 ∧ b i ≠ 0 ∧ Sz l lam (a0 𝔣 l) (a i / Ω) ∧
@@ -66,7 +107,7 @@ def IsLatDatum {E : Type} [Field E] [NumberField E] [Algebra K E] {I : Type} [Fi
 end Transport
 
 def PeriodEx : Prop :=
-  ∀ (K : Type) [Field K] [NumberField K] [IsTotallyComplex K] (ι : K →+* ℂ), Module.finrank ℚ K = 2 →
+  ∀ (K : Type) [Field K] [NumberField K] [_root_.NumberField.IsTotallyComplex K] (ι : K →+* ℂ), Module.finrank ℚ K = 2 →
     ∀ (Λ₀ : PeriodPair) (Ω₀ : ℂ), IsLatOf ι 1 Λ₀ → Ω₀ ≠ 0 →
     ∀ (Ω : Type) [Field Ω] [Algebra K Ω] [IsAlgClosure K Ω] (j : Ω →+* ℂ)
       (art : Ideles K →* Gab K Ω), j.comp (algebraMap K Ω) = ι → IsGlobalArtin art →
@@ -90,7 +131,5 @@ def LatConj : Prop :=
         IsLatSum φ (2 * s) κ (lattice (condQ 𝔣 Q) y) S →
         IsLatSum φ (2 * s) κ' (lattice (condQ 𝔣 Q) (y * (upIdele K E t)⁻¹)) S' →
         g (coordIn E d s κ Ω₀ (S 0)) = coordIn E d s κ Ω₁ ((((modF t : ℝ) : ℂ) ^ (∑ i, κ i))⁻¹ * S' 0)
-
-def LatClaims : Prop := LatIntRam ∧ LatIntUnr ∧ Expansion ∧ PeriodEx ∧ LatAlg ∧ LatConj
 
 end GlobalTheory.LatVal

@@ -1,10 +1,58 @@
-import Development.WeilBound.ThetaLifts.CartanFactorisation.ExistsGreatestProperInvariantSubmoduleOfSide
-import Development.WeilBound.ThetaLifts.CartanFactorisation.TensMax
-import Development.WeilBound.ThetaLifts.CartanFactorisation.UnitDef
-import Development.WeilBound.ThetaLifts.CartanFactorisation.PolCount
-import Development.WeilBound.ThetaLifts.ConeHypotheses.PureEqPureA
-import Development.WeilBound.CoreStatements.GaussianSeminormBounds.RealSeminormFiltration.RLLines
-import Development.WeilBound.CoreStatements.GaussianSeminormBounds.RealSeminormFiltration.RLParity
+module
+
+public import Development.WeilBound.ThetaLifts.CartanFactorisation.ExistsGreatestProperInvariantSubmoduleOfSide
+public import Development.WeilBound.ThetaLifts.CartanFactorisation.UnitDef
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsFockMap
+public import Mathlib.RingTheory.PiTensorProduct
+public import Development.WeilBound.CoreStatements.GaussianSeminormBounds.RealSeminormFiltration.RLActs
+public import Development.WeilBound.CoreStatements.GaussianSeminormBounds.RealSeminormFiltration.RLLines
+public import Development.WeilBound.CoreStatements.GaussianSeminormBounds.RealSeminormFiltration.RLParity
+public import Development.WeilBound.ThetaLifts.CartanFactorisation.PolCount
+public import Development.WeilBound.ThetaLifts.CartanFactorisation.TensMax
+public import Development.WeilBound.ThetaLifts.ConeHypotheses.PureEqPureA
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.Divisors.MatchingOfParts
+
+@[expose] public section
 
 noncomputable section
 
@@ -98,7 +146,7 @@ theorem sum_single {r s : ℕ} (act : Mat r s →ₗ[ℂ] Module.End ℂ V) (c :
       (c w' * (Function.update (fun _ => (0 : Mat r s)) w Z w').trace) • 1) = atL w (act Z) + (c w * Z.trace) • 1 := by
   unfold sumPl
   rw [Finset.sum_eq_single w]
-  · rw [← atL_eq, map_add, map_smul, atL_one, Function.update_self]
+  · rw [← atL_eq, map_add (f := _), map_smul, atL_one, Function.update_self]
   · intro w' _ h
     rw [← atL_eq]; simp [Function.update_of_ne h]
   · simp
@@ -112,7 +160,7 @@ theorem line_at {m P Q R S r s : ℕ} {κ : Type} [Fintype κ] (hcm : IsCMExt F 
     (hC : ∀ w, IsFrame (b • J.map (piInf (τ w))) (C w)) {o : UG (cA σ) J →* Module.End ℂ ((κ → AF F) → ℂ)}
     {Φ : Tens F P Q R S →ₗ[ℂ] SInf F κ} {act : Mat r s →ₗ[ℂ] Module.End ℂ (Formalism.BasicNotions.TH.Pol P Q R S)} {c : InfinitePlace F → ℂ}
     (h : ActsBy τ C o Φ act c) (w : InfinitePlace F) {Z : Mat r s} (hZ : Z ∈ upq r s) :
-    ∃ γ ∈ RLines σ J, ∀ T, ActsD (evI F) (fun t => o (γ (Multiplicative.ofAdd t))) (Φ T)
+    ∃ γ ∈ RLines (σ := σ) J, ∀ T, ActsD (evI F) (fun t => o (γ (Multiplicative.ofAdd t))) (Φ T)
       (Φ (atL w (act Z) T + (c w * Z.trace) • T)) := by
   obtain ⟨γ, hγ, hg⟩ := PositivityTheory.RL.lineEx F E σ (Fin m) r s τ J b C hcm hC (Function.update (fun _ => 0) w Z) fun w' => by
     by_cases e : w' = w
@@ -145,21 +193,21 @@ theorem radMax_pair {n d P Q R S : ℕ} {X : Spc F E n} {W : Spc F E d} {B : Bas
     have e : atL w (fockAct1 P Q R S (Z₁ + Complex.I • Z₂)) T + (c₁ w * (Z₁ + Complex.I • Z₂).trace) • T =
         (atL w (fockAct1 P Q R S Z₁) T + (c₁ w * Z₁.trace) • T) +
           Complex.I • (atL w (fockAct1 P Q R S Z₂) T + (c₁ w * Z₂.trace) • T) := by
-      simp only [map_add, map_smul, LinearMap.add_apply, LinearMap.smul_apply, Matrix.trace_add, Matrix.trace_smul, smul_eq_mul]
+      simp only [map_add (f := _), map_smul, LinearMap.add_apply, LinearMap.smul_apply, Matrix.trace_add, Matrix.trace_smul, smul_eq_mul]
       module
-    rw [e, map_add, LinearMap.map_smulₛₗ, LinearMap.add_apply, LinearMap.smul_apply, u Z₁ a1, u Z₂ a2, smul_zero, add_zero]
+    rw [e, map_add (f := _), LinearMap.map_smulₛₗ, LinearMap.add_apply, LinearMap.smul_apply, u Z₁ a1, u Z₂ a2, smul_zero, add_zero]
   have sB : ∀ w (Z : Mat R S) x y, β' (atL w (fockAct2 P Q R S Z) x) y =
       β' x (atL w (fockAct2 P Q R S (Jm R S * Zᴴ * Jm R S)) y) := fun w Z x y => by
     have u : ∀ Z ∈ upq R S, β' (atL w (fockAct2 P Q R S Z) x) y = -β' x (atL w (fockAct2 P Q R S Z) y) := fun Z hZ => by
       obtain ⟨γ, hγ, h⟩ := line_at hcm fr.2.2 h2 w hZ
       have := hW γ hγ (φ x) (φ _) (φ y) (φ _) (h x) (h y)
       rw [← hβ', ← hβ'] at this
-      simp only [map_add, LinearMap.add_apply, LinearMap.map_smulₛₗ, LinearMap.smul_apply, map_mul, hc₂, tr_upq hZ,
+      simp only [map_add (f := _), LinearMap.add_apply, LinearMap.map_smulₛₗ, LinearMap.smul_apply, map_mul, hc₂, tr_upq hZ,
         smul_eq_mul, RingHom.id_apply] at this
       linear_combination this
     obtain ⟨Z₁, a1, Z₂, a2, e1, e2⟩ := decomp Z
     rw [e2, e1]
-    simp only [map_add, map_neg, map_smul, LinearMap.add_apply, LinearMap.smul_apply, LinearMap.neg_apply, LinearMap.map_smulₛₗ,
+    simp only [map_add (f := _), map_neg, map_smul, LinearMap.add_apply, LinearMap.smul_apply, LinearMap.neg_apply, LinearMap.map_smulₛₗ,
       u Z₁ a1, u Z₂ a2, Complex.conj_I, smul_eq_mul, RingHom.id_apply]
     ring
   choose K k1 k2 k3 k4 using ho
@@ -198,7 +246,7 @@ theorem radMax_pair {n d P Q R S : ℕ} {X : Spc F E n} {W : Spc F E d} {B : Bas
         simpa using (N.comap φ).sub_mem this ((N.comap φ).smul_mem (c₂ w * Z.trace) hx)
       obtain ⟨Z₁, a1, Z₂, a2, rfl, -⟩ := decomp Z
       show atL w (fockAct2 P Q R S _) x ∈ _
-      simp only [map_add, map_smul, LinearMap.add_apply, LinearMap.smul_apply]
+      simp only [map_add (f := _), map_smul, LinearMap.add_apply, LinearMap.smul_apply]
       exact add_mem (u Z₁ a1) (Submodule.smul_mem _ _ (u Z₂ a2)))
   rcases key with e | e
   · refine Or.inl fun x hx => ?_

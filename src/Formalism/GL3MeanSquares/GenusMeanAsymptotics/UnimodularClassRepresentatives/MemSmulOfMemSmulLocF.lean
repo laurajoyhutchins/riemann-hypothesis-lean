@@ -1,5 +1,55 @@
-import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.ExistsBasisLocF
+module
+
+public import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.LocalDensityRatio
+public import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.ExistsBasisLocF
+public import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.ExistsMulSubOneMemPow
+public import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.StarAlgebraMap
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
 import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.ExtPPowLeSpanSup
+
+@[expose] public section
 
 open NumberField Module
 
@@ -18,8 +68,10 @@ theorem le_locF (𝔭 : Ideal (𝓞 F)) [𝔭.IsPrime] (L : Submodule (𝓞 K) V
   (mem_locF 𝔭 L x).2 ⟨1, fun h => (Ideal.ne_top_iff_one 𝔭).1 (Ideal.IsPrime.ne_top inferInstance) h,
     by simpa using hx⟩
 
-theorem ι_mem_pow {𝔭 : Ideal (𝓞 F)} {k : ℕ} {a : 𝓞 F} (ha : a ∈ 𝔭 ^ k) : ι a ∈ extP K 𝔭 ^ k :=
-  (mem_pow_iff 𝔭 k a).2 ha
+theorem ι_mem_pow {𝔭 : Ideal (𝓞 F)} {k : ℕ} {a : 𝓞 F} (ha : a ∈ 𝔭 ^ k) : ι a ∈ extP K 𝔭 ^ k := by
+  have ha' := Ideal.mem_map_of_mem ι ha
+  rw [extP, ← Ideal.map_pow]
+  exact ha'
 
 theorem exists_approx {𝔭 : Ideal (𝓞 F)} (h𝔭 : 𝔭.IsMaximal) (L : Submodule (𝓞 K) V) (k : ℕ) {w : V}
     (hw : w ∈ locF 𝔭 L) : ∃ c : 𝓞 F, c - 1 ∈ 𝔭 ^ k ∧ ι c • w ∈ L := by
@@ -112,7 +164,7 @@ theorem congrP_mul_left_of_sub_one_mem {𝔭 : Ideal (𝓞 F)} {k : ℕ} {c : �
   refine ⟨u, hu, ι c * z + ι (u * (c - 1) * n), ?_, ?_⟩
   · refine add_mem (Ideal.mul_mem_left _ _ hz) (ι_mem_pow ?_)
     exact Ideal.mul_mem_right _ _ (Ideal.mul_mem_left _ _ hc)
-  · rw [map_add, map_mul, e]
+  · rw [map_add (f := _), map_mul, e]
     simp only [MeanB.algebraMap_comp, map_mul, map_sub, map_one]
     ring
 
@@ -226,10 +278,16 @@ theorem vd_locF (hF : IsFixF K F) (h : V →ₗ⋆[K] V →ₗ[K] K) (L : Submod
         simp only [Matrix.of_apply, Matrix.smul_apply, smul_eq_mul]
         exact form_smul hF h t t _ _
       rw [this, Matrix.det_smul, Fintype.card_fin, map_mul, ez, map_pow, map_pow]
-    have h2 : (t * t) ^ finrank K V ∉ 𝔭 ^ (0 + 1) := by
-      rw [zero_add, pow_one]
+    have h2 : (t * t) ^ finrank K V ∉ 𝔭 := by
       intro hm
       exact (h𝔭.isPrime.mem_or_mem (h𝔭.isPrime.mem_of_pow_mem _ hm)).elim ht ht
-    exact mem_of_mul_mem h𝔭 h2 (by rw [zero_add]; exact hle h1)
+    obtain ⟨u, hu⟩ := MeanA.exists_mul_sub_one_mem_pow h𝔭 h2 e
+    have hmul : ι u * (ι ((t * t) ^ finrank K V) * z) ∈ extP K 𝔭 ^ e :=
+      Ideal.mul_mem_left _ _ (hle h1)
+    have hsub : ι (u * (t * t) ^ finrank K V - 1) * z ∈ extP K 𝔭 ^ e :=
+      Ideal.mul_mem_right _ _ (ι_mem_pow hu)
+    change z ∈ extP K 𝔭 ^ e
+    simpa only [map_sub, map_mul, map_one, sub_mul, one_mul, mul_assoc, sub_sub_cancel]
+      using sub_mem hmul hsub
 
 end Formalism.HermitianLattices.Ext.L3.localizedQuotients

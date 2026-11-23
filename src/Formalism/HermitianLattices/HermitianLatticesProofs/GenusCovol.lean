@@ -1,11 +1,64 @@
-import Mathlib
-import Formalism.HermitianLattices.DefsCS
-import Formalism.HermitianLattices.HermitianLatticesProofs.IsomAct
-import Formalism.HermitianLattices.HermitianLatticesProofs.LocBasic
-import Formalism.HermitianLattices.HermitianLatticesProofs.GenusBasic
+module
+
+public import Formalism.HermitianLattices.DefsCS
+public import Formalism.FockGram.FockGramProofs.CovolGram
+public import Formalism.HermitianLattices.HermitianLatticesProofs.GenusBasic
+public import Formalism.HermitianLattices.HermitianLatticesProofs.GenusCovolBound
 import Formalism.HermitianLattices.HermitianLatticesProofs.GenusScale
-import Formalism.HermitianLattices.HermitianLatticesProofs.GenusCovolBound
-import Formalism.FockGram.FockGramProofs.CovolGram
+import Formalism.HermitianLattices.HermitianLatticesProofs.IsomAct
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.InnerProductSpace.Dual
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Module NumberField
 
@@ -223,7 +276,7 @@ def genusCovol_tdual (h : V →ₗ⋆[K] V →ₗ[K] K) (L : Submodule (𝓞 K) 
     intro a b ha hb x hx
     obtain ⟨z1, h1⟩ := ha x hx
     obtain ⟨z2, h2⟩ := hb x hx
-    exact ⟨z1 + z2, by rw [map_add, map_add, h1, h2]; push_cast; ring⟩
+    exact ⟨z1 + z2, by rw [map_add (f := _), map_add (f := _), h1, h2]; push_cast; ring⟩
   zero_mem' := fun x _ => ⟨0, by simp⟩
   smul_mem' := by
     intro r y hy x hx
@@ -357,6 +410,7 @@ theorem genusCovol_dualBasis (h : V →ₗ⋆[K] V →ₗ[K] K) (N : ℕ)
   have hlin : ∀ x i, b x (y i) = ∑ j, Gi i j * b x (m j) := by
     intro x i
     simp only [hbdef, hy]
+
     rw [map_sum, map_sum]
     refine Finset.sum_congr rfl fun j _ => ?_
     rw [LinearMap.map_smul, smul_eq_mul, ← Algebra.smul_def, LinearMap.map_smul, smul_eq_mul]
@@ -470,7 +524,7 @@ theorem genusCovol_sq (h : V →ₗ⋆[K] V →ₗ[K] K)
   classical
   obtain ⟨bv, hE2, hprod⟩ := genusCovol_dualBasis h N ι hι A
   have hinj : Function.Injective ι := by
-    rw [injective_iff_map_eq_zero]
+    set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
     intro x hx
     by_contra hne
     have h1 := hpos x hne
@@ -562,24 +616,27 @@ end PartF
 theorem genusCovol : GenusCovol := by
   intro K V _ _ _ _ _ _ _ _ h hs hpos N ι hι L M hL hM _ _ _ _
   classical
-  have hMl : Submodule.IsLattice K M := hM.1
   obtain ⟨d, hd0, hd⟩ := genusScale K V h hs L hL
-  have hLgen : L ∈ genus h L := ⟨hL, fun p _ => ⟨1, (isom h).one_mem, genusBasic_gmap_one _⟩⟩
-  have hDmem : ∀ A ∈ genus h L, ∀ x ∈ A, d • x ∈ genusCovol_tdual h A := by
-    intro A hA x hx y hy
-    obtain ⟨r, hr⟩ := Submodule.mem_one.mp (hd A hA y hy x hx)
+  have hdM := hd M hM
+  have hdL := genusScale_transfer genusCovol_hinj star_algebraMap_ringOfIntegers_mem_range
+    h (d : K) M L (genusBasic_symm h L M hM.2) hdM
+  have hDmem (A : Submodule (𝓞 K) V)
+      (hA : ∀ x ∈ A, ∀ y ∈ A, (d : K) * h x y ∈ (1 : Submodule (𝓞 K) K)) :
+      ∀ x ∈ A, d • x ∈ genusCovol_tdual h A := by
+    intro x hx y hy
+    obtain ⟨r, hr⟩ := Submodule.mem_one.mp (hA y hy x hx)
     obtain ⟨z, hz⟩ := genusCovolBound_trace_int r
     refine ⟨z, ?_⟩
     rw [map_nsmul, nsmul_eq_mul, ← hz, hr]
-  obtain ⟨hL1, hL2, hLsq⟩ := genusCovol_sq h hpos N ι hι L d hd0 (hDmem L hLgen)
-  obtain ⟨hM1, hM2, hMsq⟩ := genusCovol_sq h hpos N ι hι M d hd0 (hDmem M hM)
+  obtain ⟨hL1, hL2, hLsq⟩ := genusCovol_sq h hpos N ι hι L d hd0 (hDmem L hdL)
+  obtain ⟨hM1, hM2, hMsq⟩ := genusCovol_sq h hpos N ι hι M d hd0 (hDmem M hdM)
   have hloc : ∀ (P : Ideal (𝓞 K)) [P.IsMaximal], ∃ g : V ≃ₗ[K] V,
       gmap g (locS P.primeCompl L) = locS P.primeCompl M ∧
       gmap g (locS P.primeCompl (genusCovol_tdual h L)) =
         locS P.primeCompl (genusCovol_tdual h M) := by
     intro P hP
     obtain ⟨g, hg, hgL⟩ := hM.2 P hP
-    exact ⟨g, genusCovol_local h L M hL.fg hMl.fg P g hg hgL⟩
+    exact ⟨g, genusCovol_local h L M hL.fg hM.1.toIsLattice.fg P g hg hgL⟩
   have hinf : ∀ (P : Ideal (𝓞 K)) [P.IsMaximal] (g : V ≃ₗ[K] V),
       gmap g (locS P.primeCompl L) = locS P.primeCompl M →
       gmap g (locS P.primeCompl (genusCovol_tdual h L)) =

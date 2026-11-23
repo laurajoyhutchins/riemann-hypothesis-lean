@@ -1,9 +1,52 @@
-import Mathlib
-import Development.AutomorphicArithmetic.Foundations.EtaleClopenDescent.EFam
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IsAffCoverSpec
+public import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.TcoMem
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BoundaryChartHodgeMatrix
+public import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.FormallyUnramifiedOfIsReduced
+public import Development.AutomorphicArithmetic.Foundations.EtaleClopenDescent.IsIntegralRBIff
 import Development.AutomorphicArithmetic.Foundations.EtaleClopenDescent.IsSeparatedOfProj
-import Development.AutomorphicArithmetic.Foundations.EtaleClopenDescent.IsIntegralRBIff
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BoundaryChartHodgeMatrix
-import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.FormallyUnramifiedOfIsReduced
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.CoeEqAlgebraMapZeroEquiv
+import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.Edge1
+
+@[expose] public section
+
 open CategoryTheory AlgebraicGeometry ReciprocityTheory.ChartRestriction.G.Geo.Tor GlobalTheory GlobalTheory.HodgeCoh GlobalTheory.CechDR GlobalTheory.PD KaehlerDifferential GlobalTheory.W1 GlobalTheory.WH
 
 private theorem red_of_fu {A B : Type} [CommRing A] [CommRing B] [Algebra ℂ A] [Algebra ℂ B] [Algebra A B]
@@ -38,7 +81,7 @@ private theorem fin_of_const {R E Q : Type} [CommRing R] [CommRing E] [Algebra R
       obtain ⟨i, rfl⟩ := hy
       exact Submodule.subset_span ⟨i, rfl⟩
     | zero => rw [map_zero]; exact Submodule.zero_mem _
-    | add a b _ _ iha ihb => rw [map_add]; exact Submodule.add_mem _ iha ihb
+    | add a b _ _ iha ihb => rw [map_add (f := _)]; exact Submodule.add_mem _ iha ihb
     | smul r y _ ih =>
       obtain ⟨c, hc'⟩ := hc r
       rw [hπ, hc', ← Algebra.smul_def]
@@ -69,15 +112,15 @@ private theorem rA_const {F Q : Type} [Field F] [Algebra ℂ F] [CommRing Q] [Al
   | add a b ha hb iha ihb =>
     obtain ⟨c₁, e₁⟩ := iha
     obtain ⟨c₂, e₂⟩ := ihb
-    exact ⟨c₁ + c₂, by rw [map_add, ← e₁, ← e₂]; exact map_add ψ ⟨a, ha⟩ ⟨b, hb⟩⟩
+    exact ⟨c₁ + c₂, by rw [map_add (f := _), ← e₁, ← e₂]; exact map_add ψ ⟨a, ha⟩ ⟨b, hb⟩⟩
   | mul a b ha hb iha ihb =>
     obtain ⟨c₁, e₁⟩ := iha
     obtain ⟨c₂, e₂⟩ := ihb
     exact ⟨c₁ * c₂, by rw [map_mul, ← e₁, ← e₂]; exact map_mul ψ ⟨a, ha⟩ ⟨b, hb⟩⟩
 
+
 set_option synthInstance.maxHeartbeats 400000 in
 set_option maxHeartbeats 1000000 in
-
 private theorem fin_quot {K F : Type} [Field K] [Field F] [Algebra ℂ K] [Algebra ℂ F] [Algebra F K]
     [IsScalarTower ℂ F K] {d : ℕ} (x : Fin (d + 1) → F) (hx : IsFinCover ℂ K x) :
     Module.Finite ℂ ((rB ℂ K x {0}) ⧸ (Ideal.span (Set.range fun j : Fin d => (⟨_, tco_mem ℂ K x j⟩ : rB ℂ K x {0})))) := by
@@ -135,8 +178,8 @@ private theorem map_upB_span_tco (K L : Type) {F : Type} [Field K] [Field L] [Fi
   funext j
   exact Subtype.ext (IsScalarTower.algebraMap_apply F K L _).symm
 
-set_option synthInstance.maxHeartbeats 400000 in
-set_option maxHeartbeats 1000000 in
+
+
 
 private theorem upB_fu {d : ℕ} {Z Y : Scheme.{0}} [IsIntegral Z] [IsIntegral Y] {s : Z ⟶ Sp ℂ} {s' : Y ⟶ Sp ℂ}
     [SmoothOfRelativeDimension d s] [SmoothOfRelativeDimension d s'] {c : Y ⟶ Z} (h : c ≫ s = s') [IsFinite c] [Etale c]

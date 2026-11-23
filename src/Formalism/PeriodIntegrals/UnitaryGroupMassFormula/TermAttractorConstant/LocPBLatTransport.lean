@@ -1,5 +1,47 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.TermAttractorConstant.LeadMinorEMulUpper
+module
+
+public import Formalism.SharpRestriction.CuspSpanNormBounds.IsPrimitiveSub
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.RelativeEquivalence.DCRelEquivAllHolds
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.TermAttractorConstant.LeadMinorEMulUpper
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -47,12 +89,6 @@ theorem locP_gmap (P : Ideal (𝓞 E)) [P.IsPrime] (n : S.V ≃ₗ[E] S.V) (M : 
     rw [mem_gmap_iff]
     have e : n.symm (s • v) = s • n.symm v := (fO n.symm).map_smul s v
     rwa [e]
-
-theorem gmap_injective (n : S.V ≃ₗ[E] S.V) {A B : Submodule (𝓞 E) S.V}
-    (h : Formalism.HermitianLatticesTheory.gmap n A = Formalism.HermitianLatticesTheory.gmap n B) : A = B := by
-  ext v
-  have := SetLike.ext_iff.1 h (n v)
-  simpa [mem_gmap_iff] using this
 
 theorem sup_span_swap {M : Submodule (𝓞 E) S.V} {a b : S.V} (h : a - b ∈ M) :
     M ⊔ Submodule.span (𝓞 E) {a} = M ⊔ Submodule.span (𝓞 E) {b} := by
@@ -179,15 +215,6 @@ theorem locP_BLat_transport {F : LFlag S r T} {F₁ F₂ : LFlag S r T'} {n m : 
     (P : Ideal (𝓞 E)) [P.IsPrime] :
     Formalism.HermitianLatticesTheory.localization₂ P (BLat Λ F F₂) = Formalism.HermitianLatticesTheory.gmap n (Formalism.HermitianLatticesTheory.localization₂ P (BLat Λ F F₁)) := by
   rw [BLat_transport hF h₁ hn hm hfr hzt, locP_gmap]
-
-theorem offg_transport {F : LFlag S r T} {F₁ F₂ : LFlag S r T'} {n m : S.V ≃ₗ[E] S.V}
-    (hF : IsLift Λ F) (h₁ : IsLift Λ F₁) (hn : n ∈ NLam Λ F) (hm : m ∈ NLam Λ F₁)
-    (hfr : ∀ a, frame F₂ a = n (m (frame F₁ a))) (hzt : F₂.zt = n (m F₁.zt))
-    (P : Ideal (𝓞 E)) [P.IsPrime] :
-    Formalism.HermitianLatticesTheory.localization₂ P (BLat Λ F F₂) = Formalism.HermitianLatticesTheory.localization₂ P (UU Λ F F₂) ↔
-      Formalism.HermitianLatticesTheory.localization₂ P (BLat Λ F F₁) = Formalism.HermitianLatticesTheory.localization₂ P (UU Λ F F₁) := by
-  rw [locP_BLat_transport hF h₁ hn hm hfr hzt, UU_transport hF h₁ hn hm hfr hzt, locP_gmap]
-  exact ⟨gmap_injective n, fun h => by rw [h]⟩
 
 end Gen
 

@@ -1,4 +1,50 @@
-import Mathlib
+module
+
+public import Mathlib.RingTheory.ClassGroup.Basic
+public import Mathlib.RingTheory.DedekindDomain.Ideal.Lemmas
+public import Mathlib.RingTheory.Valuation.RamificationGroup
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Pointwise
 open scoped nonZeroDivisors
@@ -8,36 +54,6 @@ namespace ReciprocityTheory.Neutral.Bridge.HCF
 section classGroup
 
 variable {R R' : Type*} [CommRing R] [IsDedekindDomain R] [CommRing R'] [IsDedekindDomain R']
-
-theorem map_mem_nzd (g : R ≃+* R') (I : (Ideal R)⁰) : (I : Ideal R).map g ∈ (Ideal R')⁰ := by
-  refine mem_nonZeroDivisors_of_ne_zero ?_
-  rw [Ne, Ideal.zero_eq_bot, Ideal.map_eq_bot_iff_of_injective g.injective, ← Ideal.zero_eq_bot]
-  exact nonZeroDivisors.coe_ne_zero I
-
-theorem classGroup_mulEquiv_mk0 (g : R ≃+* R') (I : (Ideal R)⁰) :
-    ClassGroup.mulEquiv g (ClassGroup.mk0 I) = ClassGroup.mk0 ⟨(I : Ideal R).map g, map_mem_nzd g I⟩ := by
-  apply (ClassGroup.equiv (FractionRing R')).injective
-  rw [ClassGroup.mulEquiv_apply, MulEquiv.apply_symm_apply, ClassGroup.equiv_mk0, ClassGroup.equiv_mk0]
-  simp only [QuotientGroup.mk'_apply]
-  erw [QuotientGroup.congr_mk]
-  congr 1
-  apply Units.ext
-  simp only [Units.coe_mapEquiv, RingEquiv.coe_toMulEquiv, FractionalIdeal.coe_mk0]
-  apply Subtype.ext
-  rw [FractionalIdeal.ringEquivOfRingEquiv_apply_val]
-  ext x
-  simp only [Submodule.mem_map, FractionalIdeal.val_eq_coe, FractionalIdeal.mem_coe, FractionalIdeal.mem_coeIdeal]
-  constructor
-  · rintro ⟨y, hy, rfl⟩
-    obtain ⟨z, hz, rfl⟩ := hy
-    refine ⟨g z, Ideal.mem_map_of_mem _ hz, ?_⟩
-    simp [IsFractionRing.semilinearEquivOfRingEquiv]
-  · rintro ⟨y, hy, rfl⟩
-    rw [Ideal.mem_map_of_equiv] at hy
-    obtain ⟨z, hz, rfl⟩ := hy
-    refine ⟨algebraMap R (FractionRing R) z, ?_, ?_⟩
-    · exact ⟨z, hz, rfl⟩
-    · simp [IsFractionRing.semilinearEquivOfRingEquiv]
 
 theorem classGroup_hom_ext {G : Type*} [Monoid G] (f₁ f₂ : ClassGroup R →* G)
     (h : ∀ v : HeightOneSpectrum R, f₁ (ClassGroup.mk0 ⟨v.asIdeal, mem_nonZeroDivisors_of_ne_zero v.ne_bot⟩) =

@@ -1,5 +1,55 @@
-import Formalism.SharpRestriction.GlobalTheoremInputs
-import Formalism.HarderNarasimhan.HarderNarasimhanProofs.DualPl
+module
+
+public import Formalism.SharpRestriction.GlobalTheoremInputs
+public import Formalism.HarderNarasimhan.HarderNarasimhanProofs.DegSupermodZ
+public import Formalism.HarderNarasimhan.HarderNarasimhanProofs.DiscreteSpanOfLinIndep
+public import Formalism.HarderNarasimhan.HarderNarasimhanProofs.DualPl
+import Formalism.HarderNarasimhan.HarderNarasimhanProofs.ShiftInvariance
+import Formalism.LatticeSlopes.ExistsSaturatedSlopeEqMuMax
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.Ideal.Int
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.NumberTheory.Primorial
+
+@[expose] public section
 
 open Module NumberField IsDedekindDomain Pointwise
 
@@ -331,7 +381,7 @@ theorem sum_log_primes_le (N : ℕ) :
     intro p hp
     exact Nat.cast_ne_zero.mpr (Finset.mem_filter.mp hp).2.ne_zero
   rw [← h1]
-  have h2 : ((primorial N : ℕ) : ℝ) ≤ (4 : ℝ) ^ N := by exact_mod_cast primorial_le_4_pow N
+  have h2 : ((primorial N : ℕ) : ℝ) ≤ (4 : ℝ) ^ N := by exact_mod_cast primorial_le_four_pow N
   have h3 : (0 : ℝ) < ((primorial N : ℕ) : ℝ) := by exact_mod_cast primorial_pos N
   calc Real.log ((primorial N : ℕ) : ℝ) ≤ Real.log ((4 : ℝ) ^ N) := Real.log_le_log h3 h2
     _ = N * Real.log 4 := by rw [Real.log_pow]
@@ -396,8 +446,8 @@ theorem mu_diff (D : D7) (L : SizeData₂ D) (hdef : DV.NprimeDef D L) (u : D.wh
   rw [Finset.sum_congr rfl this, ← Finset.sum_div, ← Finset.mul_sum]
   ring
 
-open Classical in
 
+open Classical in
 theorem round_le (D : D7) (L : SizeData₂ D) (hdef : DV.NprimeDef D L) (u : D.what₂.Word)
     (hX : ∀ v, IsUnit ((D.div.Nu u).X v).det)
     (hfg : (D.div.Nu u).L.FG) (hne : (D.div.Nu u).L ≠ ⊥) :
@@ -581,7 +631,7 @@ theorem log_T_le (hT : SizeTu L) (u : D.what₂.Word) :
     _ ≤ 2 * D.R.n * L.sc.x := mul_le_mul_of_nonneg_right hm hx.le
     _ ≤ 2 * L.sc.X'' D.R.n := by linarith
 
-set_option maxHeartbeats 800000 in
+
 
 theorem fN_le (hN : SizeN L) (hEta : SizeEta L) (hNodes : SizeNodes L) :
     (D.R.f : ℝ) * D.R.N D.R.m * Real.log ((D.R.f : ℝ) * D.R.N D.R.m) ≤ 10 * L.sc.X'' D.R.n ∧

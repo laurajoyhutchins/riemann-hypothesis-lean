@@ -1,4 +1,56 @@
-import Mathlib
+module
+
+public import Mathlib.RingTheory.DiscreteValuationRing.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.LinearAlgebra.FreeModule.PID
+
+@[expose] public section
 
 noncomputable section
 
@@ -61,14 +113,17 @@ theorem pb_abs {O K V : Type} [CommRing O] [IsDomain O] [IsDiscreteValuationRing
         rw [LinearMap.map_smul, LinearMap.map_smul, LinearMap.smul_apply, smul_eq_mul, smul_eq_mul]
         ring
       simp only [vec]
+
       rw [map_sum B0, LinearMap.sum_apply, Finset.mul_sum]
       refine Finset.sum_congr rfl fun k _ => ?_
+
       rw [map_sum (B0 (algebraMap O K (d k) • b k)), Finset.mul_sum]
       refine Finset.sum_congr rfl fun l _ => ?_
       rw [e1]
       ring
     have rhs : algebraMap O K (Matrix.vecMul d Mat ⬝ᵥ e) =
         ∑ k, ∑ l, algebraMap O K (d k) * algebraMap O K (e l) * (c * B0 (b k) (b l)) := by
+
       simp only [dotProduct, Matrix.vecMul, map_sum, map_mul, Finset.sum_mul, Mat]
       rw [Finset.sum_comm]
       refine Finset.sum_congr rfl fun k _ => Finset.sum_congr rfl fun l _ => ?_
@@ -118,6 +173,7 @@ theorem pb_abs {O K V : Type} [CommRing O] [IsDomain O] [IsDiscreteValuationRing
       simp only [Submodule.coe_smul] at this
       exact this.symm
     conv_lhs => rw [h2]
+
     rw [map_sum]
     refine Finset.sum_congr rfl fun i' _ => ?_
     rw [map_smul, S.snf, map_smul, Module.Basis.coord_apply, Module.Basis.repr_self, Finsupp.single_apply,
@@ -204,6 +260,7 @@ theorem pb_abs {O K V : Type} [CommRing O] [IsDomain O] [IsDiscreteValuationRing
       have e1 : c / algebraMap O K (S.a (g.symm i)) =
           c / algebraMap O K (S.a (g.symm i)) * algebraMap O K (S.bM i ⬝ᵥ dc i) := by
         rw [h1, map_one, mul_one]
+
       rw [e1, dotProduct, map_sum, map_sum, Finset.mul_sum]
       refine Finset.sum_congr rfl fun k _ => ?_
       rw [map_mul, map_mul, sub_eq_zero.1 (hlin k)]

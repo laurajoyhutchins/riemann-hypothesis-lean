@@ -1,4 +1,51 @@
-import Development.WeilBound.ThetaLifts.LocalTheory.ConeShifts.FubLoc
+module
+
+public import Development.WeilBound.ThetaLifts.LocalTheory.ConeShifts.FubLoc
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.LcscAdelicUnitaryGroup
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AbelianVarietyTheory.Definitions.Divisors.MatchingOfParts
+
+@[expose] public section
 
 noncomputable section
 
@@ -65,7 +112,7 @@ theorem lim_tw {ν : Chr F E} {z : ℕ} (hz : 2 ≤ z) (m : HeightOneSpectrum (�
       rw [Set.mulIndicator_of_mem (show w ∈ {w | w ∉ above E (S : Set (Pl F))} from h), locL, charFam_of_unrAt (hν w h)]
       simp [eulerFac, eulerPoly]
 
-set_option maxHeartbeats 600000 in
+
 open Classical in
 theorem tail {B : Base F E} (hB : B.IsGood σ) {z : ℕ} (hz : 2 ≤ z) (𝔞 : FractionalIdeal (𝓞 E)⁰ E) (T T₀ : Finset (Pl F))
     (hT : T ⊆ T₀) (hm : ∀ w : HeightOneSpectrum (𝓞 E), w.under (𝓞 F) ∉ T₀ → FractionalIdeal.count E w 𝔞 = 0)
@@ -183,9 +230,7 @@ theorem euler {ν : Chr F E} {z : ℕ} (hz : 2 ≤ z) (𝔞 : FractionalIdeal (�
     have := @hT (w.under (𝓞 F))
     tauto
 
-theorem wt_mul (ν : Chr F E) (z : ℕ) (a b : (AE F E)ˣ) : wt ν z (a * b) = wt ν z a * wt ν z b := map_mul (wtH ν z) a b
 
-set_option maxHeartbeats 1000000 in
 theorem ideleFub : IdeleFub := by
   classical
   intro F E _ _ _ _ _ σ B n X K m μ hB hm hμ 𝔞 z h𝔞 hz
@@ -196,7 +241,7 @@ theorem ideleFub : IdeleFub := by
   have di := idAt_eq (E := E) (evI F) real_idem fun _ => at_inf_iff
   have df := fun v => idAt_eq (E := E) (evFin F v) (idem_idem v) fun _ => at_fin_iff
   have e1 : (⊤ : Subgroup (AE F E)ˣ) = part PI ⊤ (io (realAd F 1) + io (rest ∅)) := by
-    rw [io, io, ← map_add, real_add_rest, map_one]
+    rw [io, io, ← map_add (f := _), real_add_rest, map_one]
     exact Subgroup.ext fun g => ⟨fun h => ⟨h, unitInvariant_one g⟩, fun h => h.1⟩
   have sp := sy.split hr (hi ∅) (io_orth (real_rest ∅))
   let et : (⊤ : Subgroup (AE F E)ˣ) ≃ₜ* (AE F E)ˣ :=
@@ -233,11 +278,12 @@ theorem ideleFub : IdeleFub := by
       κa * (idealVal ν 𝔞 : ℂ) * charL ν (S₀ : Set (Pl F)) (z : ℂ) :=
     euler hz 𝔞 fin hS hT hν hram _ hu2 _ t2
   have hsum : (io (rest ∅) : AE F E) = ∑ v ∈ T, io (idem F v) + io (rest T) := by
-    rw [sum_rest T, io, map_add, map_sum]; rfl
+
+    rw [sum_rest T, io, map_add (f := _), map_sum]; rfl
   obtain ⟨p1, p2⟩ := sy.prod (fun v => io (idem F v)) hv (fun _ _ h => io_orth (idem_orth h)) _ (hi T) γ hγ (β T) (hβ T) T
     (fun v h => io_orth (idem_rest h))
     (fun T' h => co_I (sy.good_sum _ hv (fun _ _ h => io_orth (idem_orth h)) _ (hi T) T' fun v h' => io_orth (idem_rest (h h')))
-      (by rw [map_add, inf_io (rest_fst T), add_zero, map_sum, Finset.sum_eq_zero fun v _ => inf_io rfl]))
+      (by rw [map_add (f := _), inf_io (rest_fst T), add_zero, map_sum, Finset.sum_eq_zero fun v _ => inf_io rfl]))
     _ hsum (β ∅) (hβ ∅) (fun v l => ext0 _ (g v) l * wt ν z l)
     (fun l => (if ∀ v ∉ T, InAt 𝔞 v (l : AE F E) then (1 : ℂ) else 0) * wt ν z l)
     (fun v h => (g3 v fun l => ext0 _ (g v) l * wt ν z l).1.2 (by simp only [extendByZeroOnSubset_apply_coe]; exact i2 v h)) t1

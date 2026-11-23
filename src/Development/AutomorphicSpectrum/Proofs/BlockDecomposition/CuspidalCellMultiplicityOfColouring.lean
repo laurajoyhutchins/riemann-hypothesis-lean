@@ -1,12 +1,55 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.ZelevinskyJacquet.ZelevinskyCosocles.LUnlinkedComm
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.IrreducibleAdmissibleGL
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ProductSingleNonzeroFactorEquivStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.JacquetMultiplicitySublistPaddingStatement
-import Development.AutomorphicSpectrum.Proofs.GlobalProofs.GeometricLemma
-import Development.AutomorphicSpectrum.Proofs.GlobalProofs.BernsteinZelevinskyFiniteness
-import Development.AutomorphicSpectrum.Proofs.GlobalProofs.IsSubquotientCompMulSingle
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.SubsingletonIrrClZero
+module
+
+public import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.ZelevinskyJacquet.ZelevinskyCosocles.LUnlinkedComm
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.JhMultSubAddQuot
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.PiExteriorTensorSmoothIrreducibleIsIrreducibleStatement
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.TensorProductDeterminesFactorClassesStatement
+public import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.SubsingletonIrrClZero
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.JacquetMultiplicitySublistPaddingStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ProductSingleNonzeroFactorEquivStatement
+public import Development.AutomorphicSpectrum.Proofs.GlobalProofs.BernsteinZelevinskyFiniteness
+public import Development.AutomorphicSpectrum.Proofs.GlobalProofs.GeometricLemma
+import GroundTheory.LocalFields.PadicLogSeries
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -16,8 +59,8 @@ namespace GlobalTheory.CompanionTheory.FineProdCell
 
 variable {k : Type} [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k]
 
-theorem exists_class_of_degree (n : ℕ) (t : IrrGL k) (h : t.1 = n) :
-    ∃ u : IrrCl (GL (Fin n) k), (⟨n, u⟩ : IrrGL k) = t := by
+theorem exists_class_of_degree (n : ℕ) (t : IrrGL (k := k)) (h : t.1 = n) :
+    ∃ u : IrrCl (GL (Fin n) k), (⟨n, u⟩ : IrrGL (k := k)) = t := by
   subst h
   exact ⟨t.2, rfl⟩
 
@@ -25,13 +68,13 @@ theorem subsingleton_irrCl_of_eq_zero (n : ℕ) (h : n = 0) : Subsingleton (IrrC
   subst h
   exact GlobalTheory.SmGL.SegModel.subsingleton_irrCl_zero
 
-theorem class_eq_of_sigma_eq (t : IrrGL k) (z : IrrCl (GL (Fin t.1) k))
-    (h : (⟨t.1, z⟩ : IrrGL k) = t) : z = t.2 :=
+theorem class_eq_of_sigma_eq (t : IrrGL (k := k)) (z : IrrCl (GL (Fin t.1) k))
+    (h : (⟨t.1, z⟩ : IrrGL (k := k)) = t) : z = t.2 :=
   eq_of_heq (Sigma.ext_iff.1 h).2
 
-set_option maxHeartbeats 1600000 in
 
-theorem jhMult_cell_colour : ∀ {k : Type} [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] {h : ℕ} (x : Fin h → IrrGL k) (W : List (IrrGL k)) (b : Fin h → Fin W.length → ℕ) (hrow : ∀ i, ∑ j, b i j = (x i).1) (hcol : ∀ j, ∑ i, b i j = (W.get j).1) (c : Fin W.length → Fin h), (∀ i j, b i j = if c j = i then (W.get j).1 else 0) → jhMult (piTensor fun j => (W.get j).rep) (cellFunctor (c := fun i j => Fin (b i j)) (fun i => stdBlocks (b i) (hrow i)) (fun j => stdBlocks (fun i => b i j) (hcol j)) (piTensor fun i => (x i).rep)) = ∏ i, jmL (sub W c i) (x i).rep := by
+
+theorem jhMult_cell_colour : ∀ {k : Type} [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] {h : ℕ} (x : Fin h → IrrGL (k := k)) (W : List (IrrGL (k := k))) (b : Fin h → Fin W.length → ℕ) (hrow : ∀ i, ∑ j, b i j = (x i).1) (hcol : ∀ j, ∑ i, b i j = (W.get j).1) (c : Fin W.length → Fin h), (∀ i j, b i j = if c j = i then (W.get j).1 else 0) → jhMult (piTensor fun j => (W.get j).rep) (cellFunctor (c := fun i j => Fin (b i j)) (fun i => stdBlocks (b i) (hrow i)) (fun j => stdBlocks (fun i => b i j) (hcol j)) (piTensor fun i => (x i).rep)) = ∏ i, jmL (sub W c i) (x i).rep := by
   intro k _ _ _ _ h x W b hrow hcol c hb
   have hBZ := GlobalTheory.CompanionTheory.Published.bernsteinZelevinskyFiniteness
   have hC : CellSemisimplification k := (GlobalTheory.CompanionTheory.GeoLink.geometricLemma k).2
@@ -47,14 +90,14 @@ theorem jhMult_cell_colour : ∀ {k : Type} [Field k] [ValuativeRel k] [Topologi
   have hzero : ∀ i j, c j ≠ i → b i j = 0 := fun i j hij => by rw [hb, if_neg hij]
 
   have hcolumn : ∀ (s : ∀ i j, IrrCl (GL (Fin (b i j)) k)) (j : Fin W.length),
-      ∃ z : IrrCl (GL (Fin (W.get j).1) k), (⟨_, z⟩ : IrrGL k) = ⟨b (c j) j, s (c j) j⟩ ∧
+      ∃ z : IrrCl (GL (Fin (W.get j).1) k), (⟨_, z⟩ : IrrGL (k := k)) = ⟨b (c j) j, s (c j) j⟩ ∧
         Nonempty ((multiProd (stdBlocks (fun i => b i j) (hcol j))
           fun i => (s i j).rep.ρ).Equiv z.rep.ρ) := fun s j =>
-    GlobalTheory.T.product_single_nonzero_factor_equiv (fun i => (⟨b i j, s i j⟩ : IrrGL k)) (hcol j) (c j)
+    GlobalTheory.T.product_single_nonzero_factor_equiv (fun i => (⟨b i j, s i j⟩ : IrrGL (k := k))) (hcol j) (c j)
       fun i hi => hzero i j (Ne.symm hi)
 
   have hex : ∀ i j, ∃ u : IrrCl (GL (Fin (b i j)) k),
-      c j = i → (⟨b i j, u⟩ : IrrGL k) = W.get j := by
+      c j = i → (⟨b i j, u⟩ : IrrGL (k := k)) = W.get j := by
     intro i j
     by_cases hij : c j = i
     · obtain ⟨u, hu⟩ := exists_class_of_degree (b i j) (W.get j) (by rw [hb, if_pos hij])
@@ -63,7 +106,7 @@ theorem jhMult_cell_colour : ∀ {k : Type} [Field k] [ValuativeRel k] [Topologi
   choose s₀ hs₀ using hex
   have hfirst : ∀ i, jhMult (piTensor fun j => (s₀ i j).rep.ρ)
       (jac (stdBlocks (b i) (hrow i)) (x i).rep) = jmL (sub W c i) (x i).rep := fun i =>
-    GlobalTheory.T.jacquet_multiplicity_sublist_padding W c i (fun j => (⟨b i j, s₀ i j⟩ : IrrGL k)) (fun j hj => hs₀ i j hj)
+    GlobalTheory.T.jacquet_multiplicity_sublist_padding W c i (fun j => (⟨b i j, s₀ i j⟩ : IrrGL (k := k))) (fun j hj => hs₀ i j hj)
       (fun j hj => hzero i j hj) (hrow i) (x i).rep
   rw [Finset.sum_eq_single s₀]
   · choose z hz e using hcolumn s₀
@@ -94,7 +137,7 @@ theorem jhMult_cell_colour : ∀ {k : Type} [Field k] [ValuativeRel k] [Topologi
     refine hs (funext fun i => funext fun j => ?_)
     by_cases hij : c j = i
     · subst hij
-      have h1 : (⟨b (c j) j, s (c j) j⟩ : IrrGL k) = ⟨b (c j) j, s₀ (c j) j⟩ := by
+      have h1 : (⟨b (c j) j, s (c j) j⟩ : IrrGL (k := k)) = ⟨b (c j) j, s₀ (c j) j⟩ := by
         rw [hs₀ (c j) j rfl, ← hz j, ← hcl j]
       exact eq_of_heq (Sigma.mk.inj_iff.1 h1).2
     · haveI := subsingleton_irrCl_of_eq_zero (k := k) (b i j) (hzero i j hij)

@@ -1,5 +1,58 @@
-import Mathlib
+module
+
+public import Formalism.UnipotentAdelicQuotients.SWXSDefs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
 import CompanionTheory.SpectralGeometry.CountingDefinitions.AdelicEulerProducts.IsEulerProd
+
+@[expose] public section
 
 open HeckeCharacterZeroLocus.SiegelWeilU GlobalTheory.CompanionTheory.SW NumberField IsDedekindDomain MeasureTheory Topology
 open scoped TensorProduct ENNReal NNReal Matrix
@@ -78,10 +131,12 @@ def lin {n : ℕ} (X : Fin n → V) (c : Fin n → E) : V := ∑ a, c a • X a
 
 theorem form_lin_left (B : V →ₛₗ[σ] V →ₗ[E] E) {n : ℕ} (X : Fin n → V) (c : Fin n → E) (z : V) :
     B (lin X c) z = ∑ a, σ (c a) * B (X a) z := by
+
   simp [lin, map_sum, LinearMap.sum_apply]
 
 theorem form_lin_right (B : V →ₛₗ[σ] V →ₗ[E] E) {n : ℕ} (X : Fin n → V) (c : Fin n → E) (z : V) :
     B z (lin X c) = ∑ a, c a * B z (X a) := by
+
   simp [lin, map_sum]
 
 theorem lin_single {n : ℕ} (X : Fin n → V) (a : Fin n) : lin X (Pi.single a (1 : E)) = X a := by
@@ -114,7 +169,7 @@ theorem exists_norm_ne_zero (B : V →ₛₗ[σ] V →ₗ[E] E) (hB : ∀ x y, �
   have hba : B (X b) (X a) = σ s := (hB _ _).symm
   have h := hc (Pi.single a (1 : E) + s⁻¹ • Pi.single b (1 : E))
   rw [lin_add, lin_smul, lin_single, lin_single] at h
-  simp only [map_add, map_smulₛₗ, LinearMap.add_apply, LinearMap.smul_apply, map_smul,
+  simp only [map_add (f := _), map_smulₛₗ, LinearMap.add_apply, LinearMap.smul_apply, map_smul,
     smul_eq_mul, hu, hv, hba, ← hsdef, map_inv₀, RingHom.id_apply] at h
   have hσs : σ s ≠ 0 := (map_ne_zero σ).2 hs
   simp only [mul_zero, add_zero, zero_add, inv_mul_cancel₀ hs, inv_mul_cancel₀ hσs] at h
@@ -229,7 +284,7 @@ theorem exists_isom_tuple (B : V →ₛₗ[σ] V →ₗ[E] E) (hσ : ∀ x, σ (
   have hXa : X a = X' a + (t a / q) • x := by simp [hX']
   have hYa : Y a = Y' a + (t a / q) • y := by simp [hY']
   have hf : γ₂ (Y' a) = Y' a := f2 _ (by rw [← e1 a, i1]; exact hx0 a) (hy0 a)
-  rw [LinearMap.comp_apply, hXa, map_add, map_smul, e1, map_add, map_smul, hf, e2, ← hYa]
+  rw [LinearMap.comp_apply, hXa, map_add (f := _), map_smul, e1, map_add (f := _), map_smul, hf, e2, ← hYa]
 
 end Induct
 
@@ -241,7 +296,7 @@ def formB (s : E →+* E) {M : ℕ} (J : Matrix (Fin M) (Fin M) E) :
     (Fin M → E) →ₛₗ[s] (Fin M → E) →ₗ[E] E :=
   LinearMap.mk₂'ₛₗ s (RingHom.id E) (fun x y => hform s J x y)
     (fun x x' y => by
-      simp only [hform, Pi.add_apply, map_add, add_mul, Finset.sum_add_distrib])
+      simp only [hform, Pi.add_apply, map_add (f := _), add_mul, Finset.sum_add_distrib])
     (fun c x y => by
       simp only [hform, Pi.smul_apply, smul_eq_mul, map_mul, Finset.mul_sum, mul_assoc])
     (fun x y y' => by
@@ -256,6 +311,7 @@ theorem formB_apply (s : E →+* E) {M : ℕ} (J : Matrix (Fin M) (Fin M) E) (x 
 theorem formB_conj (s : E →+* E) (hs : ∀ x, s (s x) = x) {M : ℕ} (J : Matrix (Fin M) (Fin M) E)
     (hJ : ∀ i j, s (J j i) = J i j) (x y : Fin M → E) :
     s (formB s J x y) = formB s J y x := by
+
   simp only [formB_apply, hform, map_sum, map_mul, hs, hJ]
   rw [Finset.sum_comm]
   exact Finset.sum_congr rfl fun _ _ => Finset.sum_congr rfl fun _ _ => by ring

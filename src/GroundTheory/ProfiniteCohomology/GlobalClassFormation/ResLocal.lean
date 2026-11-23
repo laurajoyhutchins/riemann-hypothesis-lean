@@ -1,5 +1,47 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.GlobalClassFormation.LocalRestriction
+module
+
+public import GroundTheory.ProfiniteCohomology.GlobalClassFormation.LocalRestriction
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
@@ -87,8 +129,10 @@ theorem continuous_fieldConjHom : Continuous (fieldConjHom Kv L e hL) := by
     have hx' : x = ∑ i, (b.repr ⟨x, hx⟩ i) • (b i : Ωv) := by
       calc x = M.val (∑ i, b.repr ⟨x, hx⟩ i • b i) := by rw [b.sum_repr]; rfl
         _ = ∑ i, (b.repr ⟨x, hx⟩ i) • (b i : Ωv) := by
+
           rw [map_sum]
           exact Finset.sum_congr rfl fun i _ => map_smul M.val _ _
+
     rw [hx', map_sum]
     refine Finset.sum_congr rfl fun i _ => ?_
     rw [map_smul, hT]
@@ -115,8 +159,8 @@ variable {K E : FiniteSubfield} [Fact (K ≤ E)]
   (hL : ∀ l ∈ L, ∃ y : Ew, e (algebraMap Ew Ωw y) = l)
   (ιK : ℚ̄ →ₐ[K.1] Ωv) (ιE : ℚ̄ →ₐ[E.1] Ωw) (hι : ∀ x, e (ιE x) = ιK x)
 
-include hι in
 
+include hι in
 theorem unitsLocalRes_unitsResField (n : ℕ) (x : cohomology (unitsLimitRep K) n) :
     (unitsLocalRes Ew ιE n).hom ((unitsResField K E n).hom x) =
       (cohomologyMapAlong (fieldConjHom Kv L e hL) (continuous_fieldConjHom Kv L e hL) (fieldConjUnitsMor Kv L e hL) n).hom
@@ -143,8 +187,8 @@ theorem unitsLocalRes_unitsResField (n : ℕ) (x : cohomology (unitsLimitRep K) 
       rw [← hι, RingEquiv.symm_apply_apply]
   exact (congrArg (fun φ => φ.hom x) h)
 
-include hL hι in
 
+include hL hι in
 theorem unitsLocalRes_unitsResField_eq_zero (n : ℕ) (x : cohomology (unitsLimitRep K) n)
     (hx : (unitsScalarsRes Kv Ωv L n).hom ((unitsLocalRes Kv ιK n).hom x) = 0) :
     (unitsLocalRes Ew ιE n).hom ((unitsResField K E n).hom x) = 0 := by

@@ -1,12 +1,60 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.RingSpecNormalisedCharacterEq
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.TypeOrthOfAvTied
+module
+
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.TypeOrthOfAvTied
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.IsWildInertiaCyclotomicElement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ClassSumEqConstMulPeterssonStatement
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.AlgWtExistsInvFormStatement
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FiniteDoubleCosetsDefiniteUnitaryMaximalLevelStatement
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.SmoothAdmissibleUnitaryMemSupIsotypicParts
+import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsFiniteClass
 import Development.AbelianVarietyTheory.Proofs.SatakeParameters.FiniteDimensionalForms
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.UnitaryCongruenceConjContainsCongruence
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.SmoothAdmissibleUnitaryMemSupIsotypicParts
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ClassSumEqConstMulPeterssonStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FiniteDoubleCosetsDefiniteUnitaryMaximalLevelStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.AlgWtExistsInvFormStatement
+import Formalism.LocalToGlobal.GaloisLevelStructure.Checks
+import Formalism.LocalToGlobal.IndefiniteReal.CongNatCastEqOneTmul
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.NStageTrivialCharacterCoeffEqAlt
+import Formalism.LocalToGlobal.IndefiniteReal.DoubleCosetOperators.Objects
+import Formalism.LocalToGlobal.NormalizedHeckeFactors.TypesDefs
+import Formalism.LocalToGlobal.UnitaryNorms.IsUnitaryNormOf
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.MainNotions Formalism.MainNotions.N Formalism.ConjugateSelfDual ReciprocityTheory.Gal ReciprocityTheory.Aut Formalism.AUTREP Formalism.L2 Formalism.L2.Host Formalism.L2.NT Formalism.IndefR.NX GlobalTheory.HeightCounting NumberField IsDedekindDomain Polynomial
 
 noncomputable section
@@ -105,7 +153,7 @@ theorem rt_mem_AFall {L : Type} [Field L] [NumberField L] [IsCMField L] {n : ℕ
     {ρ : Representation ℂ (GQ L n) W} (h : GAf L n) {f : GAf L n → W} (hf : f ∈ NG.AFall L n ρ) :
     NG.rt L n h f ∈ NG.AFall L n ρ := by
   obtain ⟨h1, N, hN, h2⟩ := hf
-  obtain ⟨N', hN', hc⟩ := GlobalTheory.CongConjugate.congConj L n h N hN
+  obtain ⟨N', hN', hc⟩ := Formalism.IndefR.principalLevelFrame.congConj_holds L n h N hN
   refine ⟨fun γ g => ?_, N', hN', fun κ hκ g => ?_⟩
   · show f ((γ : GAf L n) * g * h) = ρ γ (f (g * h))
     rw [mul_assoc]; exact h1 γ _
@@ -142,7 +190,7 @@ theorem mem_sSup_irrRep : ∀ (L : Type) [Field L] [NumberField L] [IsCMField L]
   let F : Submodule ℂ C :=
     { carrier := {v | ∀ k ∈ GlobalTheory.IsotOrth.congSub L n N, ρC k v = v}
       zero_mem' := fun k _ => map_zero _
-      add_mem' := fun ha hb k hk => by rw [map_add, ha k hk, hb k hk]
+      add_mem' := fun ha hb k hk => by rw [map_add (f := _), ha k hk, hb k hk]
       smul_mem' := fun c v hv k hk => by rw [map_smul, hv k hk] }
   haveI := hfin N hN
   let ι : F →ₗ[ℂ] ↥(Submodule.span ℂ {f | f ∈ NG.AFall L n a.ρ ∧ ∀ κ, NG.Cong L n N κ → ∀ g, f (g * κ) = f g}) :=
@@ -290,6 +338,7 @@ theorem typeSp_decomp : ∀ (L : Type) [Field L] [NumberField L] [IsCMField L] (
   have hy1 : ∀ i : P, ∀ w ∈ NG.isoTyp a.ρ (S i), B y w = 0 := by
     intro i w hw
     have e : B y w = B (x - p i) w - ∑ j ∈ Finset.univ.erase i, B (p j) w := by
+
       simp only [hy, map_sub, map_sum, LinearMap.sub_apply, LinearMap.sum_apply]
       rw [← Finset.add_sum_erase _ _ (Finset.mem_univ i)]
       ring

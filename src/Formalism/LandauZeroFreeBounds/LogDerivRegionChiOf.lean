@@ -1,6 +1,47 @@
-import Formalism.LandauZeroFreeBounds.SiegelWalfiszAP
-import Formalism.LandauZeroFreeBounds.NoZeroComplexOf
-import Formalism.ZeroFreeRegion.SmallHeightLogDeriv
+module
+
+public import Formalism.LandauZeroFreeBounds.SiegelWalfiszAP
+public import Formalism.LandauZeroFreeBounds.NoZeroComplexOf
+public import Formalism.ZeroFreeRegion.SmallHeightLogDeriv
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Complex Finset ArithmeticFunction
 
@@ -51,9 +92,6 @@ def ExcBound : Prop :=
   ∀ ε : ℝ, 0 < ε → ∃ c : ℝ, 0 < c ∧ ∀ (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q) (β : ℝ),
     χ ^ 2 = 1 → χ ≠ 1 → DirichletCharacter.LFunction χ (β : ℂ) = 0 → β ≤ 1 - c * (q : ℝ) ^ (-ε)
 
-def MertensUpper : Prop :=
-  ∀ z : ℝ, 2 ≤ z → ∏ p ∈ (range (⌊z⌋₊ + 1)).filter Nat.Prime, (1 - 1 / (p : ℝ)) ≤ 1 / Real.log z
-
 def LandauLocal3 : Prop :=
   ∀ (f : ℂ → ℂ) (z₀ : ℂ) (r M : ℝ), 0 < r → 1 ≤ M →
     DifferentiableOn ℂ f (Metric.closedBall z₀ r) → f z₀ ≠ 0 →
@@ -78,9 +116,5 @@ def PsiChiBoundOf : Prop := SmoothChi → Formalism.ZF.GzPNT → PsiChiBound
 def ExcBoundOf : Prop := SiegelLower → LDerivNearOne → ExcBound
 
 def SiegelWalfiszOf : Prop := PsiChiBound → ZFRDirichlet → ExcBound → SiegelWalfisz
-
-def SiegelWalfiszAPOf : Prop := SiegelWalfisz → SiegelWalfiszAP
-
-def PrimeShareSWOf : Prop := SiegelWalfiszAP → MertensUpper → PrimeShareSW
 
 end Formalism.ZeroFreeDirichlet

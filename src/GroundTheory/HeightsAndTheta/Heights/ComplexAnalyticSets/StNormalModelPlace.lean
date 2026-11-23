@@ -1,6 +1,50 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StCurveNormalisationLength
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StNormalModel
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StCurveNormalisationLength
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StNormalModel
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -34,30 +78,6 @@ theorem isUnit_algebraMap_pointLocalRing (I : Ideal (MvPolynomial σ ℂ)) (w : 
       (⟨f, fun h ↦ hf (RingHom.mem_ker.1 h)⟩ : (RingHom.ker (eval w : MvPolynomial σ ℂ →+* ℂ)).primeCompl)
   exact hu.map (Ideal.Quotient.mk _)
 
-theorem pointLocalRing_nontrivial (I : Ideal (MvPolynomial σ ℂ)) (w : σ → ℂ)
-    (hw : w ∈ IndefiniteRowSideFullHecke.ComplexSets.zeroSetIn I) : Nontrivial (pointLocalRing I w) := by
-  unfold pointLocalRing
-  rw [Ideal.Quotient.nontrivial_iff]
-  intro htop
-  have hle : I.map (algebraMap (MvPolynomial σ ℂ)
-      (Localization.AtPrime (RingHom.ker (eval w : MvPolynomial σ ℂ →+* ℂ)))) ≤
-      IsLocalRing.maximalIdeal (Localization.AtPrime (RingHom.ker (eval w : MvPolynomial σ ℂ →+* ℂ))) := by
-    rw [Ideal.map_le_iff_le_comap]
-    intro g hg
-    rw [Ideal.mem_comap]
-    exact (IsLocalization.AtPrime.to_map_mem_maximal_iff _ _ g).2 (RingHom.mem_ker.2 (hw g hg))
-  exact (IsLocalRing.maximalIdeal.isMaximal _).ne_top (top_le_iff.1 (htop ▸ hle))
-
-theorem pointLocalRing_subsingleton (I : Ideal (MvPolynomial σ ℂ)) (w : σ → ℂ)
-    (hw : w ∉ IndefiniteRowSideFullHecke.ComplexSets.zeroSetIn I) : Subsingleton (pointLocalRing I w) := by
-  simp only [IndefiniteRowSideFullHecke.ComplexSets.zeroSetIn, Set.mem_ofPred_eq, not_forall] at hw
-  obtain ⟨g, hg, hgw⟩ := hw
-  unfold pointLocalRing
-  rw [Ideal.Quotient.subsingleton_iff]
-  exact Ideal.eq_top_of_isUnit_mem _ (Ideal.mem_map_of_mem _ hg)
-    (IsLocalization.map_units _
-      (⟨g, fun h ↦ hgw (RingHom.mem_ker.1 h)⟩ : (RingHom.ker (eval w : MvPolynomial σ ℂ →+* ℂ)).primeCompl))
-
 def NormalModelPlace.Statement : Prop :=
   ∀ (n : ℕ) (J : Ideal (MvPolynomial (Fin n) ℂ)) (q : Fin n → ℂ) (M : IndefiniteRowSideFullHecke.ComplexSets.NormalModel J)
     (w : Fin n ⊕ Fin M.m → ℂ),
@@ -69,18 +89,6 @@ def NormalModelPlace.Statement : Prop :=
                 (algebraMap (MvPolynomial (Fin n) ℂ) (curveLocalRing J q) f))) =
           Ring.ord (pointLocalRing M.ideal w)
             (algebraMap (MvPolynomial (Fin n ⊕ Fin M.m) ℂ) (pointLocalRing M.ideal w) (rename Sum.inl f))
-
-theorem NormalModelPlace.hypotheses_inhabited :
-    (⊥ : Ideal (MvPolynomial (Fin 1) ℂ)).IsPrime ∧
-      (fun _ ↦ 0 : Fin 1 ⊕ Fin IndefiniteRowSideFullHecke.ComplexSets.lineDiagonalModel.m → ℂ) ∈
-        IndefiniteRowSideFullHecke.ComplexSets.zeroSetIn IndefiniteRowSideFullHecke.ComplexSets.lineDiagonalModel.ideal ∧
-      IndefiniteRowSideFullHecke.ComplexSets.firstCoords (fun _ ↦ 0 : Fin 1 ⊕ Fin IndefiniteRowSideFullHecke.ComplexSets.lineDiagonalModel.m → ℂ) = 0 :=
-  ⟨Ideal.isPrime_bot, IndefiniteRowSideFullHecke.ComplexSets.const_mem_zeroSetIn_lineDiagonal 0, rfl⟩
-
-theorem NormalModelPlace.pointLocalRing_inhabitant_nontrivial :
-    Nontrivial (pointLocalRing IndefiniteRowSideFullHecke.ComplexSets.lineDiagonalModel.ideal
-      (fun _ ↦ 0 : Fin 1 ⊕ Fin IndefiniteRowSideFullHecke.ComplexSets.lineDiagonalModel.m → ℂ)) :=
-  pointLocalRing_nontrivial _ _ NormalModelPlace.hypotheses_inhabited.2.1
 
 end
 

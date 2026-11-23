@@ -1,18 +1,62 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.UniformisationConclusion
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.HeckeKer
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.RigidSys
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.Splits
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.GtBaseChangeSt
-import Development.AbelianVarietyTheory.Definitions.ModuliSpaces.AuxiliaryInertOddPrime
-import Development.AbelianVarietyTheory.Statements.HeckeInFamilies.GenericMemChart
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.RangeAlgebraMapEqIInfDiscreteValuationSubring
+module
+
+public import Mathlib.RingTheory.DiscreteValuationRing.Basic
+public import Mathlib.RingTheory.Valuation.ValuationSubring
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsGrpPullback
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.AbelianSchemeQuotients.IsAbelianScheme
+public import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.IsAbelianSchemeAndExtendOfGenericHoms
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.GroupSchemeMorphismDescends
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.RangeAlgebraMapEqIInfDiscreteValuationSubring
 import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.IsSchemeTheoreticallyDominantSpecOfInjective
-import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.IsAbelianSchemeAndExtendOfGenericHoms
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.GroupSchemeMorphismDescends
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.IsMonHomIffOfIsGrpPullback
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.SmoothGrpSchemeDescendsToFgSubring
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.HomDescendsToFgIntermediateField
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.HomDescendsToFgIntermediateField
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.IsMonHomIffOfIsGrpPullback
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.SmoothGrpSchemeDescendsToFgSubring
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Morphisms.FlatDescent
+import Mathlib.AlgebraicGeometry.Morphisms.WeaklyEtale
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.AbProj
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.BCTools
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.OneArc
+import Development.AbelianVarietyTheory.Definitions.ModuliSpaces.AuxiliaryInertOddPrime
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor
@@ -217,7 +261,7 @@ namespace GlobalTheory
 
 open GoodVal
 
-set_option maxHeartbeats 800000 in
+
 
 theorem range_subset_abLocus_of_goodReduction : (∀ (T K : Type) [CommRing T] [IsDomain T] [IsDiscreteValuationRing T] [Field K] [Algebra T K] [IsFractionRing T K] (G G' : Over (Sp T)) [GrpObj G] [GrpObj G'], IsSemiAbelian G → IsSemiAbelian G' → ∀ f : (Over.pullback (spMap (algebraMap T K))).obj G ⟶ (Over.pullback (spMap (algebraMap T K))).obj G', IsMonHom f → ∃! F : G ⟶ G', IsMonHom F ∧ (Over.pullback (spMap (algebraMap T K))).map F = f) → ∀ (X : Scheme.{0}) (z : X ⟶ Sp ℤ) (G : Over X) [GrpObj G] (V C : Type) [CommRing V] [IsDomain V] [ValuationRing V] [Field C] [Algebra V C] [IsFractionRing V C] (y : Sp V ⟶ X) (𝒜 : Over (Sp V)) [GrpObj 𝒜] (A : Over (Sp C)) [GrpObj A] (φ₁ : A.left ⟶ 𝒜.left) (φ₂ : A.left ⟶ G.left), LocallyOfFiniteType z → IsSemiAbelian G → IsAbelianScheme 𝒜 → IsGrpPullback A 𝒜 (spMap (algebraMap V C)) φ₁ → IsGrpPullback A G (spMap (algebraMap V C) ≫ y) φ₂ → Set.range y ⊆ abLocus G := by
   intro hext X z G _ V C _ _ _ _ _ _ y 𝒜 _ A _ φ₁ φ₂ hz hG h𝒜 h₁ h₂
@@ -270,7 +314,46 @@ theorem range_subset_abLocus_of_goodReduction : (∀ (T K : Type) [CommRing T] [
     exact (algebraMap K L).injective.comp (IsFractionRing.injective R K)
   have hcl : spMap g (IsLocalRing.closedPoint T) = spMap R.subtype P := PrimeSpectrum.ext hgp
   obtain ⟨hB, hB'⟩ := isSemiAbelian_pullback_of_range_subset A₀ hφ.1 (spMap g) (range_subset_of_centre R hginj P hcl)
-  have hH := IsSemiAbelian.pullback (spMap g ≫ y₀) G hG
+  have hH : IsSemiAbelian ((Over.pullback (spMap g ≫ y₀)).obj G) := by
+    have := hG.comm
+    have := hG.smooth
+    have := hG.separated
+    have := hG.quasiCompact
+    have := hG.geomConnected
+    refine ⟨inferInstance, inferInstanceAs (Smooth (pullback.snd _ _)),
+      inferInstanceAs (IsSeparated (pullback.snd _ _)),
+      inferInstanceAs (QuasiCompact (pullback.snd _ _)),
+      inferInstanceAs (GeometricallyConnected (pullback.snd _ _)), ?_⟩
+    intro Ω _ _ q
+    obtain ⟨E⟩ := hG.fibres Ω (q ≫ spMap g ≫ y₀)
+    let em := (Functor.mapMonNatIso (Over.pullbackComp q (spMap g ≫ y₀)) ≪≫
+      Functor.mapMonCompIso).app (Mon.mk G)
+    let e : (Over.pullback (q ≫ (spMap g ≫ y₀))).obj G ≅
+        (Over.pullback q).obj ((Over.pullback (spMap g ≫ y₀)).obj G) := (Mon.forget _).mapIso em
+    haveI : IsMonHom e.hom := by
+      show IsMonHom em.hom.hom
+      infer_instance
+    letI := E.grpB
+    haveI := E.q_hom
+    haveI := E.i_hom
+    have : IsIso e.hom.left := Functor.map_isIso (Over.forget _) e.hom
+    exact ⟨{
+      X := E.X
+      addCommGroup := E.addCommGroup
+      free := E.free
+      finite := E.finite
+      B := E.B
+      grpB := E.grpB
+      isAbelian := E.isAbelian
+      q := e.inv ≫ E.q
+      q_hom := inferInstance
+      q_flat := by rw [Over.comp_left]; have := E.q_flat; infer_instance
+      q_surjective := by rw [Over.comp_left]; have := E.q_surjective; infer_instance
+      q_quasiCompact := by rw [Over.comp_left]; have := E.q_quasiCompact; infer_instance
+      i := E.i ≫ e.hom
+      i_hom := inferInstance
+      isKernel := by
+        refine IsPullback.of_iso E.isKernel (Iso.refl _) e (Iso.refl _) (Iso.refl _) ?_ ?_ ?_ ?_ <;> simp }⟩
   obtain ⟨a, ha⟩ := exists_iso_of_comp_eq A₀ hc'.symm
   obtain ⟨b, hb⟩ := exists_iso_of_comp_eq G (k := spMap g ≫ y₀) (l := spMap (algebraMap T L))
     (g := spMap (algebraMap R K) ≫ y₀) (j := spMap (algebraMap K L)) (by rw [← Category.assoc, hc', Category.assoc])

@@ -1,5 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.BlockTheory.GlobalSignature.StabiliserCardinality
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.GlobalSignature.StabiliserCardinality
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.BigOperators.Ring.Finset
+
+@[expose] public section
 
 namespace GlobalTheory.Proof.DoubleCosetCountGlobalInterpolation
 
@@ -14,10 +62,10 @@ theorem card_fiber_mul_card_stab {G : Type} [Group G] (Γ U K : Subgroup G) (hUK
         DoubleCoset.mk Γ K d.out = DoubleCoset.mk Γ K y},
       ∃ k : K, DoubleCoset.mk Γ U (y * k) = d.1 := by
     rintro ⟨d, hd⟩
-    obtain ⟨a, ha, k, hk, h⟩ := (DoubleCoset.eq Γ K _ _).1 hd.symm
+    obtain ⟨a, ha, k, hk, h⟩ := (@DoubleCoset.eq _ _ Γ K _ _).1 hd.symm
     refine ⟨⟨k, hk⟩, ?_⟩
-    refine Eq.trans ?_ (DoubleCoset.out_eq' Γ U d)
-    exact (DoubleCoset.eq Γ U _ _).2 ⟨a, ha, 1, U.one_mem, by rw [h]; group⟩
+    refine Eq.trans ?_ (DoubleCoset.out_eq' (H := Γ) (K := U) d)
+    exact (@DoubleCoset.eq _ _ Γ U _ _).2 ⟨a, ha, 1, U.one_mem, by rw [h]; group⟩
   choose κ hκ using hex
   rw [← Nat.card_prod, Subgroup.relIndex, Subgroup.index]
   refine Nat.card_congr (Equiv.ofBijective
@@ -32,7 +80,7 @@ theorem card_fiber_mul_card_stab {G : Type} [Group G] (Γ U K : Subgroup G) (hUK
     have hde : d = e := by
       apply Subtype.ext
       rw [← hκ d, ← hκ e]
-      exact (DoubleCoset.eq Γ U _ _).2 ⟨t⁻¹ * s, Γ.mul_mem (Γ.inv_mem ht') hs', _, h1, by group⟩
+      exact (@DoubleCoset.eq _ _ Γ U _ _).2 ⟨t⁻¹ * s, Γ.mul_mem (Γ.inv_mem ht') hs', _, h1, by group⟩
     subst hde
     have h2 : s⁻¹ * t ∈ stab Γ U (y * κ d) := by
       refine (mem_stab Γ U _ _).2 ⟨Γ.mul_mem (Γ.inv_mem hs') ht', ?_⟩
@@ -45,12 +93,12 @@ theorem card_fiber_mul_card_stab {G : Type} [Group G] (Γ U K : Subgroup G) (hUK
     induction q using QuotientGroup.induction_on with
     | H k =>
       have hd : DoubleCoset.mk Γ K (DoubleCoset.mk Γ U (y * k)).out = DoubleCoset.mk Γ K y := by
-        obtain ⟨a, ha, u, hu, h⟩ := (DoubleCoset.eq Γ U _ _).1
-          (DoubleCoset.out_eq' Γ U (DoubleCoset.mk Γ U (y * k))).symm
+        obtain ⟨a, ha, u, hu, h⟩ := (@DoubleCoset.eq _ _ Γ U _ _).1
+          (DoubleCoset.out_eq' (H := Γ) (K := U) (DoubleCoset.mk Γ U (y * k))).symm
         symm
-        exact (DoubleCoset.eq Γ K _ _).2
+        exact (@DoubleCoset.eq _ _ Γ K _ _).2
           ⟨a, ha, k * u, K.mul_mem k.2 (hUK hu), h.trans (by group)⟩
-      obtain ⟨a, ha, u, hu, h⟩ := (DoubleCoset.eq Γ U _ _).1 (hκ ⟨_, hd⟩)
+      obtain ⟨a, ha, u, hu, h⟩ := (@DoubleCoset.eq _ _ Γ U _ _).1 (hκ ⟨_, hd⟩)
       have hk : y⁻¹ * a * y = k * u⁻¹ * (κ ⟨_, hd⟩ : G)⁻¹ := by
         generalize (κ ⟨_, hd⟩ : G) = m at h ⊢
         rw [show (k : G) = y⁻¹ * (y * k) by group, h]

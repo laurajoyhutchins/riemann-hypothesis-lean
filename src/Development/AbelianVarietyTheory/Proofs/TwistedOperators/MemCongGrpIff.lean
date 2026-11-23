@@ -1,6 +1,44 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.IsAuxiliaryVectorWittDec
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.AdelicPointComponentsAtPlacesLatticesVacua
+module
+
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.IsAuxiliaryVectorWittDec
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.AdelicPointComponentsAtPlacesLatticesVacua
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.L2.Theta Formalism.IndefR Formalism.IndefR.Datum Formalism.IndefR.Links MeasureTheory IsDedekindDomain NumberField Matrix
 open GlobalTheory.MixModel GlobalTheory.MixPer GlobalTheory.Grow GlobalTheory.Unf GlobalTheory.ChiGrid GlobalTheory.FunObj GlobalTheory.SepRows GlobalTheory.Asc
 open scoped TensorProduct
@@ -77,8 +115,8 @@ theorem congGrp_inf {V : HSp D} {I J : Ideal (AE D)} {g : GA D V} (hI : g ∈ Gl
 
 theorem mul_sub_mem {I : Ideal (AE D)} {k m n : ℕ} {M : Matrix (Fin m) (Fin m) (AE D)}
     (hM : ∀ i j, M i j - (1 : Matrix (Fin m) (Fin m) (AE D)) i j ∈ I) (N : Matrix (Fin k) (Fin m) (AE D))
-    (Y : Matrix (Fin m) (Fin n) (AE D)) (i : Fin k) (j : Fin n) : (N ⬝ M ⬝ Y - N ⬝ Y) i j ∈ I := by
-  have e : N ⬝ M ⬝ Y - N ⬝ Y = N ⬝ (M - 1) ⬝ Y := by
+    (Y : Matrix (Fin m) (Fin n) (AE D)) (i : Fin k) (j : Fin n) : (N * M * Y - N * Y) i j ∈ I := by
+  have e : N * M * Y - N * Y = N * (M - 1) * Y := by
     rw [Matrix.mul_sub, Matrix.sub_mul, Matrix.mul_one]
   rw [e]
   simp only [Matrix.mul_apply]
@@ -88,26 +126,26 @@ theorem mul_sub_mem {I : Ideal (AE D)} {k m n : ℕ} {M : Matrix (Fin m) (Fin m)
 variable {W : HSp D} {ρ : ℕ}
 
 theorem off_left {P : GlobalTheory.FinPl.Pl D → Prop} {gv g' : GA D W} (hg' : g' ∈ GlobalTheory.FinPl.congGrp W (GlobalTheory.FinPl.idOff D P))
-    {X x a : Mx D W.rank ρ} (h : MxOff P (Formalism.L2.Theta.mt W (gv * g')⁻¹ ⬝ X - x - a)) :
-    MxOff P (Formalism.L2.Theta.mt W gv⁻¹ ⬝ X - x - a) := by
+    {X x a : Mx D W.rank ρ} (h : MxOff P (Formalism.L2.Theta.mt W (gv * g')⁻¹ * X - x - a)) :
+    MxOff P (Formalism.L2.Theta.mt W gv⁻¹ * X - x - a) := by
   intro i j
-  have h1 := mul_sub_mem (mem_congGrp_iff.1 (inv_mem hg')) (1 : Matrix (Fin W.rank) (Fin W.rank) (AE D)) (Formalism.L2.Theta.mt W gv⁻¹ ⬝ X) i j
+  have h1 := mul_sub_mem (mem_congGrp_iff.1 (inv_mem hg')) (1 : Matrix (Fin W.rank) (Fin W.rank) (AE D)) (Formalism.L2.Theta.mt W gv⁻¹ * X) i j
   simp only [Matrix.one_mul] at h1
-  have e : Formalism.L2.Theta.mt W gv⁻¹ ⬝ X - x - a =
-      (Formalism.L2.Theta.mt W (gv * g')⁻¹ ⬝ X - x - a) -
-        (Formalism.L2.Theta.mt W g'⁻¹ ⬝ (Formalism.L2.Theta.mt W gv⁻¹ ⬝ X) - Formalism.L2.Theta.mt W gv⁻¹ ⬝ X) := by
+  have e : Formalism.L2.Theta.mt W gv⁻¹ * X - x - a =
+      (Formalism.L2.Theta.mt W (gv * g')⁻¹ * X - x - a) -
+        (Formalism.L2.Theta.mt W g'⁻¹ * (Formalism.L2.Theta.mt W gv⁻¹ * X) - Formalism.L2.Theta.mt W gv⁻¹ * X) := by
     rw [_root_.mul_inv_rev, mt_mul, Matrix.mul_assoc]; abel
   rw [e, Matrix.sub_apply]
   exact Ideal.sub_mem _ (h i j) h1
 
 theorem off_right {P : GlobalTheory.FinPl.Pl D → Prop} {gv g' : GA D W} (hgv : gv ∈ GlobalTheory.FinPl.congGrp W (GlobalTheory.FinPl.idOff D P))
-    {X x a : Mx D W.rank ρ} (h : MxOff P (Formalism.L2.Theta.mt W (gv * g')⁻¹ ⬝ X - x - a)) :
-    MxOff P (Formalism.L2.Theta.mt W g'⁻¹ ⬝ X - x - a) := by
+    {X x a : Mx D W.rank ρ} (h : MxOff P (Formalism.L2.Theta.mt W (gv * g')⁻¹ * X - x - a)) :
+    MxOff P (Formalism.L2.Theta.mt W g'⁻¹ * X - x - a) := by
   intro i j
   have h1 := mul_sub_mem (mem_congGrp_iff.1 (inv_mem hgv)) (Formalism.L2.Theta.mt W g'⁻¹) X i j
-  have e : Formalism.L2.Theta.mt W g'⁻¹ ⬝ X - x - a =
-      (Formalism.L2.Theta.mt W (gv * g')⁻¹ ⬝ X - x - a) -
-        (Formalism.L2.Theta.mt W g'⁻¹ * Formalism.L2.Theta.mt W gv⁻¹ ⬝ X - Formalism.L2.Theta.mt W g'⁻¹ ⬝ X) := by
+  have e : Formalism.L2.Theta.mt W g'⁻¹ * X - x - a =
+      (Formalism.L2.Theta.mt W (gv * g')⁻¹ * X - x - a) -
+        (Formalism.L2.Theta.mt W g'⁻¹ * Formalism.L2.Theta.mt W gv⁻¹ * X - Formalism.L2.Theta.mt W g'⁻¹ * X) := by
     rw [_root_.mul_inv_rev, mt_mul]; abel
   rw [e, Matrix.sub_apply]
   exact Ideal.sub_mem _ (h i j) h1
@@ -124,10 +162,10 @@ variable {D : D7}
 theorem assemble (W : HSp D) {ρ : ℕ} (x : Mx D W.rank ρ) (A : AddSubgroup (Mx D W.rank ρ)) (K : Subgroup (GA D W))
     (t : Finset (GlobalTheory.FinPl.Pl D)) (ht : t.Nonempty)
     (loc : ∀ v ∈ t, ∀ g ∈ grpAt W (· = v),
-      (∃ u : UX D ρ, ∃ a ∈ A, MxOff (· = v) (Formalism.L2.Theta.mt W g⁻¹ ⬝ (x ⬝ u.1.1) - x - a)) →
+      (∃ u : UX D ρ, ∃ a ∈ A, MxOff (· = v) (Formalism.L2.Theta.mt W g⁻¹ * (x * u.1.1) - x - a)) →
         ∃ r ∈ Rgrp W x, r ∈ grpAt W (· = v) ∧ ∃ k ∈ K, k ∈ grpAt W (· = v) ∧ g = r * k) :
     ∀ g ∈ grpAt W (· ∈ t),
-      (∃ u : UX D ρ, ∃ a ∈ A, MxOff (· ∈ t) (Formalism.L2.Theta.mt W g⁻¹ ⬝ (x ⬝ u.1.1) - x - a)) →
+      (∃ u : UX D ρ, ∃ a ∈ A, MxOff (· ∈ t) (Formalism.L2.Theta.mt W g⁻¹ * (x * u.1.1) - x - a)) →
         ∃ r ∈ Rgrp W x, r ∈ grpAt W (· ∈ t) ∧ ∃ k ∈ K, k ∈ grpAt W (· ∈ t) ∧ g = r * k := by
   revert loc
   induction ht using Finset.Nonempty.cons_induction with
@@ -155,9 +193,9 @@ theorem assemble (W : HSp D) {ρ : ℕ} (x : Mx D W.rank ρ) (A : AddSubgroup (M
         rwa [inv_mul_cancel_left] at this
       exact congGrp_mono (idAt_inf_idOff fun w hw hnv => (Finset.mem_cons.1 hw).resolve_left hnv)
         (congGrp_inf h1 hg')
-    have hcv : MxOff (· = v) (Formalism.L2.Theta.mt W gv⁻¹ ⬝ (x ⬝ u.1.1) - x - a) :=
+    have hcv : MxOff (· = v) (Formalism.L2.Theta.mt W gv⁻¹ * (x * u.1.1) - x - a) :=
       off_left hg' (mxOff_mono (fun w hw => hw ▸ Finset.mem_cons_self v t) hc)
-    have hct : MxOff (· ∈ t) (Formalism.L2.Theta.mt W g'⁻¹ ⬝ (x ⬝ u.1.1) - x - a) :=
+    have hct : MxOff (· ∈ t) (Formalism.L2.Theta.mt W g'⁻¹ * (x * u.1.1) - x - a) :=
       off_right (hv_off hgv) (mxOff_mono (fun w hw => Finset.mem_cons.2 (Or.inr hw)) hc)
     obtain ⟨rv, hrv, hrv', kv, hkv, hkv', rfl⟩ := loc v (Finset.mem_cons_self v t) gv hgv ⟨u, a, ha, hcv⟩
     obtain ⟨r', hr', hr'', k', hk', hk'', rfl⟩ :=

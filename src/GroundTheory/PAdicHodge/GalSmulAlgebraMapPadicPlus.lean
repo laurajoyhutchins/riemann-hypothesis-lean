@@ -1,5 +1,51 @@
-import Mathlib
-import GroundTheory.PAdicHodge.FontaineLemmaInvariants
+module
+
+public import GroundTheory.PAdicHodge.BCrisRegular
+public import GroundTheory.PAdicHodge.FontaineLemmaInvariants
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -10,45 +56,17 @@ namespace ACris
 
 variable {p : ℕ} [hp : Fact p.Prime]
 
-local notation "𝔹" => BDeRhamPlus (normInteger ℂ_[p]) p
-local notation "𝔹dR" => BDeRham (normInteger ℂ_[p]) p
-
 variable {ε : PreTilt (normInteger ℂ_[p]) p} (hε : PreTilt.untilt ε = 1)
   (hζ : PreTilt.untilt ((_root_.frobeniusEquiv (PreTilt (normInteger ℂ_[p]) p) p).symm ε) ≠ 1)
 
 section Algebra
 
-theorem algebraMap_padic_bCris (q : ℚ_[p]) :
-    algebraMap ℚ_[p] (BCris hε) q =
-      algebraMap (BCrisPlus ℂ_[p] p) (BCris hε) (algebraMap ℚ_[p] (BCrisPlus ℂ_[p] p) q) :=
-  rfl
-
 variable {K : IntermediateField ℚ_[p] (PadicAlgCl p)}
 
-theorem gal_smul_algebraMap_padic_plus (σ : Gal(PadicAlgCl p/K)) (q : ℚ_[p]) :
-    σ • algebraMap ℚ_[p] (BCrisPlus ℂ_[p] p) q = algebraMap ℚ_[p] (BCrisPlus ℂ_[p] p) q :=
-  iotaPlus_injective (K := ℂ_[p]) (p := p) (by
-    rw [iotaPlus_gal_smul, iotaPlus_algebraMap_padic, gal_smul_algebraMap_bdR])
 
-set_option maxHeartbeats 1600000 in
 
-theorem galB_algebraMap_padic (σ : Gal(PadicAlgCl p/K)) (q : ℚ_[p]) :
-    galB hε σ (algebraMap ℚ_[p] (BCris hε) q) = algebraMap ℚ_[p] (BCris hε) q :=
-  (galB_algebraMap hε σ _).trans (congrArg (algebraMap (BCrisPlus ℂ_[p] p) (BCris hε))
-    (gal_smul_algebraMap_padic_plus σ q))
-
-set_option maxHeartbeats 1600000 in
-
-theorem smulCommClass_galBAction :
-    letI := galBAction (K := K) hε
-    SMulCommClass Gal(PadicAlgCl p/K) ℚ_[p] (BCris hε) :=
-  let _ := galBAction (K := K) hε
-  ⟨fun σ q x => (congrArg (galB hε σ) (Algebra.smul_def q x)).trans
-    ((map_mul (galB hε σ) _ _).trans ((congrArg (· * galB hε σ x) (galB_algebraMap_padic hε σ q)).trans
-      (Algebra.smul_def q (galB hε σ x)).symm))⟩
 
 include hζ in
-
 theorem isDomain_bCris : IsDomain (BCris hε) :=
   Function.Injective.isDomain (iotaB hε hζ) (iotaB_injective hε hζ)
 
@@ -59,31 +77,17 @@ section Invariants
 variable {K : IntermediateField ℚ_[p] (PadicAlgCl p)}
 
 theorem algClToBdRField_apply (k : PadicAlgCl p) :
-    algClToBdRField p k = algebraMap 𝔹 𝔹dR (algClToBdR p k) :=
+    algClToBdRField p k =
+      algebraMap (BDeRhamPlus (normInteger ℂ_[p]) p) (BDeRham (normInteger ℂ_[p]) p)
+        (algClToBdR p k) :=
   rfl
 
 theorem algClToBdRField_injective : Function.Injective (algClToBdRField p) :=
   (algClToBdRField p).injective
 
-include hζ in
-set_option maxHeartbeats 1600000 in
 
-theorem image_iotaB_fixedPoints [FiniteDimensional ℚ_[p] K] :
-    letI := galBAction (K := K) hε
-    iotaB hε hζ '' MulAction.fixedPoints Gal(PadicAlgCl p/K) (BCris hε) =
-      algClToBdRField p '' (maxUnramified p K : Set (PadicAlgCl p)) := by
-  let _ := galBAction (K := K) hε
-  ext b
-  constructor
-  · rintro ⟨x, hx, rfl⟩
-    obtain ⟨k, hk, hxk⟩ := bCris_fixed_mem_maxUnramified hε hζ x hx
-    exact ⟨k, hk, hxk.symm⟩
-  · rintro ⟨k, hk, rfl⟩
-    obtain ⟨x, hx, hxk⟩ := exists_bCris_fixed hε hζ hk
-    exact ⟨x, hx, hxk⟩
 
 include hζ in
-set_option maxHeartbeats 1600000 in
 
 theorem exists_iotaB_eq_iff {β : PadicAlgCl p} :
     (∃ x : BCris hε, iotaB hε hζ x = algClToBdRField p β) ↔ β ∈ unramifiedClosure p := by

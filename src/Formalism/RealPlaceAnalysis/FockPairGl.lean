@@ -1,4 +1,50 @@
-import Formalism.RealPlaceAnalysis.StatementA
+module
+
+public import Formalism.RealPlaceAnalysis.StatementA
+public import Mathlib.Algebra.MvPolynomial.PDeriv
+public import Mathlib.RingTheory.MvPolynomial.IrreducibleQuadratic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.Category.ModuleCat.Descent
+
+@[expose] public section
 
 open MvPolynomial
 
@@ -44,17 +90,5 @@ def FockPairGl : Prop :=
   ∀ (M n' : ℕ) (ε : Fin M → Bool) (ε' : Fin n' → Bool),
     GlRel (Eg ε ε') ∧ GlRel (Eg' ε ε') ∧
     ∀ (i j : Fin M) (a b : Fin n'), Eg ε ε' i j * Eg' ε ε' a b = Eg' ε ε' a b * Eg ε ε' i j
-
-def FockAdj : Prop :=
-  ∀ (M n' : ℕ) (ε : Fin M → Bool) (ε' : Fin n' → Bool) (f g : MvPolynomial (Fin M × Fin n') ℂ),
-    (∀ (i : Fin M) (a : Fin n'), fockF (bop ε ε' i a f) g =
-      (if sgnv ε ε' i a then 1 else -1) * fockF f (bpl ε ε' i a g)) ∧
-    (∀ i j : Fin M, fockF (Eg ε ε' i j f) g = (sgn ε i j : ℂ) * fockF f (Eg ε ε' j i g)) ∧
-    (∀ a b : Fin n', fockF (Eg' ε ε' a b f) g = (sgn ε' a b : ℂ) * fockF f (Eg' ε ε' b a g))
-
-def FockCas : Prop :=
-  ∀ (M n' : ℕ) (ε : Fin M → Bool) (ε' : Fin n' → Bool),
-    NN ε ε' = -∑ a, Eg' ε ε' a a ∧
-    Cas (Eg ε ε') - (M : ℂ) • NN ε ε' = Cas (Eg' ε ε') - (n' : ℂ) • NN ε ε'
 
 end Formalism.REAL

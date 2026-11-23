@@ -1,4 +1,47 @@
-import Mathlib
+module
+
+public import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Formula
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 universe u
 
@@ -32,11 +75,6 @@ def FlowOfUW : Prop :=
   ∀ (A : Type u) [CommRing A] (W : WeierstrassCurve A) (D : A → A) (u w v : A),
     IsDer D → IsFlowUW W D u w → v * w = 1 → IsFlow W D (u * v) (-v)
 
-def FlowUWOfFirst : Prop :=
-  ∀ (A : Type u) [CommRing A] (W : WeierstrassCurve A) (D : A → A) (u w : A),
-    IsDer D → ConstCurve D W → WEq W u w → D u = fwAt W u w →
-    (∀ a : A, fwAt W u w * a = 0 → a = 0) → IsFlowUW W D u w
-
 def FlowSq : Prop :=
   ∀ (A : Type u) [CommRing A] (W : WeierstrassCurve A) (D : A → A) (x y : A),
     IsDer D → ConstCurve D W → IsFlow W D x y →
@@ -50,11 +88,6 @@ def FlowWp : Prop :=
     D (x + c) = 2 * y + W.a₁ * x + W.a₃ ∧
     D (x + c) ^ 2 = 4 * (x + c) ^ 3 - g2 * (x + c) - g3 ∧
     2 * D (D (x + c)) = 12 * (x + c) ^ 2 - g2
-
-def FlowNeg : Prop :=
-  ∀ (A : Type u) [CommRing A] (W : WeierstrassCurve A) (D : A → A) (x y : A),
-    IsDer D → ConstCurve D W → IsFlow W D x y →
-    IsFlow W (fun a => -D a) x (W.toAffine.negY x y)
 
 def FlowTranslate : Prop :=
   ∀ (A : Type u) [CommRing A] (W : WeierstrassCurve A) (D : A → A) (x y xP yP t : A),

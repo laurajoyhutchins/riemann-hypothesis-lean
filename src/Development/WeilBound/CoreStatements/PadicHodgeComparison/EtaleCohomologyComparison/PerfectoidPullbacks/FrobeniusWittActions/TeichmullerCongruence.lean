@@ -1,7 +1,46 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.BocksteinBaseChange.IsUnitWitt
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.ZariskiEtaleLifting.MapAcrFromBase
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.ZariskiEtaleLifting.SchFnPtTw
+module
+
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.BocksteinBaseChange.IsUnitWitt
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.ZariskiEtaleLifting.SchFnPtTw
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option backward.isDefEq.respectTransparency false
 
@@ -112,31 +151,38 @@ def ptOut (n : ℕ) (hT : TeichmullerCongruence r N) : F.ptK (κm r n) ⟶ F.ptK
     rw [e]; exact z.2⟩
   naturality _ _ _ := rfl
 
-variable (r) in
 
+variable (r) in
 def mIn (M : Model l K) (n : ℕ) (hT : TeichmullerCongruence r N) :
     Mor (Lm r M n) (B.Lc (B.schFn M.p) (okToOC l K) true n) (RingHom.id _) :=
   B.crMor (F := B.schFn M.p) (F' := B.schFn M.p) (b := B.bs l true n) (b' := B.bs l true n) (ht := rfl) (ht' := rfl)
     (RingHom.id _) rfl (DPMorphism.id _).isDPMorphism (ptIn (B.schFn M.p) n hT) fun _ _ _ => rfl
 
-variable (r) in
 
+variable (r) in
 def mOut (M : Model l K) (n : ℕ) (hT : TeichmullerCongruence r N) :
     Mor (B.Lc (B.schFn M.p) (okToOC l K) true n) (Lm r M n) (phiP l n N) :=
   B.crMor (F := B.schFn M.p) (F' := B.schFn M.p) (b := B.bs l true n) (b' := B.bs l true n) (ht := rfl) (ht' := rfl)
     (phiP l n N) rfl (dp_phiP n N) (ptOut (B.schFn M.p) n hT) fun _ _ _ => rfl
 
+
 variable (l) in
+def phiA (N : ℕ) : Acris l →+* Acris l := ACris.phi (K := ℂ_[l]) (p := l) ^ N
 
-def phiA (N : ℕ) : Acris l →+* Acris l := ACris.phi ℂ_[l] l ^ N
-
-theorem phiA_succ (N : ℕ) (a : Acris l) : phiA l (N + 1) a = ACris.phi ℂ_[l] l (phiA l N a) := by
+theorem phiA_succ (N : ℕ) (a : Acris l) :
+    phiA l (N + 1) a = ACris.phi (K := ℂ_[l]) (p := l) (phiA l N a) := by
   rw [phiA, pow_succ']; rfl
 
 theorem phiP_cris (n N : ℕ) (a : Acris l) : phiP l n N ((base l).cris n a) = (base l).cris n (phiA l N a) := by
+  have hφ (x : Acris l) :
+      (base l).phi n ((base l).cris n x) =
+        (base l).cris n (ACris.phi (K := ℂ_[l]) (p := l) x) :=
+    (base l).pdOk_frob.acr_cris (base l).frob_comp_s (ACris.phiZero (K := ℂ_[l]) (p := l))
+      (fun y => RingHom.congr_fun (f := ACris.phiAway (K := ℂ_[l]) (p := l))
+        (awayW_ext fun x => by rw [ACris.phiAway_algebraMap, awayW_algebraMap, wmap_frobenius]) y.1) n x
   induction N with
   | zero => rfl
-  | succ N ih => rw [phiP_succ, ih, phiA_succ, (base l).phi_cris]
+  | succ N ih => rw [phiP_succ, ih, phiA_succ, hφ]
 
 end Mid
 

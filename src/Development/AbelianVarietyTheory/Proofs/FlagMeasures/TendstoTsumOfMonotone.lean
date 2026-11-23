@@ -1,7 +1,50 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.SiegelMeanCc
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsTruncatedGaussiansWithDensitiesStatement
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.MeasurableSetHasFlag
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.SiegelMeanCc
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsTruncatedGaussiansWithDensitiesStatement
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.MeasurableSetHasFlag
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MeasureTheory NumberField Matrix Finset Formalism.MainNotions.S GlobalTheory.Count GlobalTheory.FlagMeas GlobalTheory.GaussMean Filter Topology
 
@@ -29,7 +72,7 @@ theorem tendsto_lintegral_tsum {α ι : Type*} [MeasurableSpace α] [Countable �
     funext x
     exact (tsum_subtype {y | p y x} fun y => f k y x).trans (tsum_congr fun y => rfl)
   rw [e]
-  exact Measurable.ennreal_tsum fun y => (hf k y).indicator (hp y)
+  exact Measurable.tsum fun y => (hf k y).indicator (hp y)
 
 theorem measurable_coord (I : AutInst) (v : InfinitePlace I.F) (w : Fin I.n → ℂ) :
     Measurable fun x : I.GA => ((uMat (x.1 v))⁻¹ * (I.P v)⁻¹) *ᵥ w := by
@@ -60,12 +103,12 @@ theorem siegelMean_of_cc : SiegelMeanCc → SiegelMean := by
     (fun k y => ENNReal.measurable_ofReal.comp (Finset.measurable_prod _ fun v _ =>
       (h1 v k).1.continuous.measurable.comp (measurable_coord I v _)))
     (fun y x a b hab => ENNReal.ofReal_le_ofReal
-      (Finset.prod_le_prod (fun v _ => (h1 v a).2.2.1 _) fun v _ => (h2 v _).1 hab))
-    (fun y x => ENNReal.tendsto_ofReal (tendsto_finset_prod _ fun v _ => (h2 v _).2))
+      (Finset.prod_le_prod₀ (fun v _ => (h1 v a).2.2.1 _) fun v _ => (h2 v _).1 hab))
+    (fun y x => ENNReal.tendsto_ofReal (tendsto_finsetProd _ fun v _ => (h2 v _).2))
   have hR : Tendsto (fun k => I.muA μf fund * ENNReal.ofReal (meanConst I.E I.n * ∏ v, D v k (sgn ℝ s))) atTop
       (𝓝 (I.muA μf fund * ENNReal.ofReal (meanConst I.E I.n * ∏ v, gaussDens (I.ε v) (sgn ℝ s)))) :=
     ENNReal.Tendsto.const_mul
-      (ENNReal.tendsto_ofReal ((tendsto_finset_prod _ fun v _ => h3 v _ hs).const_mul _)) (Or.inr hfin.ne)
+      (ENNReal.tendsto_ofReal ((tendsto_finsetProd _ fun v _ => h3 v _ hs).const_mul _)) (Or.inr hfin.ne)
   exact tendsto_nhds_unique hL (hR.congr fun k => (hH (fun v => φ v k) (fun v => D v k) fun v => h1 v k).symm)
 
 end GlobalTheory.GaussMean.Limit

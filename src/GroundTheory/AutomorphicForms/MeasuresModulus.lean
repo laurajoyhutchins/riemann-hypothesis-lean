@@ -1,5 +1,61 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.GLnLocal
+module
+
+public import Mathlib.MeasureTheory.Measure.Haar.DistribChar
+public import Mathlib.NumberTheory.LocalField.Basic
+public import GroundTheory.AutomorphicForms.GLnLocal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Compactness.Paracompact
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 namespace GroundTheory.Automorphic
 
@@ -78,32 +134,32 @@ instance continuousConstSMul_linearEquiv :
     ContinuousConstSMul ((ι → F) ≃ₗ[F] (ι → F)) (ι → F) :=
   ⟨fun L => (L.toLinearMap).continuous_on_pi⟩
 
+
 variable (F ι) in
+noncomputable def box : Set (ι → F) := Set.univ.pi fun _ => (𝒪[F] : Set F)
 
-def box : Set (ι → F) := Set.univ.pi fun _ => (𝒪[F] : Set F)
-
-theorem mem_box {x : ι → F} : x ∈ box F ι ↔ ∀ i, x i ∈ 𝒪[F] := by
+theorem mem_box {x : ι → F} : x ∈ box (F := F) (ι := ι) ↔ ∀ i, x i ∈ 𝒪[F] := by
   simp [box]
 
-theorem isOpen_box : IsOpen (box F ι) :=
+theorem isOpen_box : IsOpen (box (F := F) (ι := ι)) :=
   isOpen_set_pi Set.finite_univ fun _ _ => Valuation.isOpen_integer
 
-theorem isCompact_box : IsCompact (box F ι) :=
+theorem isCompact_box : IsCompact (box (F := F) (ι := ι)) :=
   isCompact_univ_pi fun _ => isCompact_iff_compactSpace.mpr (inferInstanceAs (CompactSpace 𝒪[F]))
 
-theorem zero_mem_box : (0 : ι → F) ∈ box F ι := fun _ _ => (𝒪[F]).zero_mem
+theorem zero_mem_box : (0 : ι → F) ∈ box (F := F) (ι := ι) := fun _ _ => (𝒪[F]).zero_mem
 
 theorem distribHaarChar_eq_one_of_image_box {L : (ι → F) ≃ₗ[F] (ι → F)}
-    (h : L '' box F ι = box F ι) : distribHaarChar (ι → F) L = 1 := by
+    (h : L '' box (F := F) (ι := ι) = box (F := F) (ι := ι)) : distribHaarChar (ι → F) L = 1 := by
   borelize (ι → F)
   let μ : Measure (ι → F) := Measure.addHaar
-  refine distribHaarChar_eq_of_measure_smul_eq_mul (μ := μ) (s := box F ι)
+  refine distribHaarChar_eq_of_measure_smul_eq_mul (μ := μ) (s := box (F := F) (ι := ι))
     (isOpen_box.measure_ne_zero μ ⟨0, zero_mem_box⟩) isCompact_box.measure_lt_top.ne ?_
-  have : L • box F ι = L '' box F ι := rfl
+  have : L • box (F := F) (ι := ι) = L '' box (F := F) (ι := ι) := rfl
   rw [this, h, ENNReal.coe_one, one_mul]
 
 theorem distribHaarChar_eq_one_of_mapsTo_box {L : (ι → F) ≃ₗ[F] (ι → F)}
-    (h₁ : ∀ x ∈ box F ι, L x ∈ box F ι) (h₂ : ∀ x ∈ box F ι, L.symm x ∈ box F ι) :
+    (h₁ : ∀ x ∈ box (F := F) (ι := ι), L x ∈ box (F := F) (ι := ι)) (h₂ : ∀ x ∈ box (F := F) (ι := ι), L.symm x ∈ box (F := F) (ι := ι)) :
     distribHaarChar (ι → F) L = 1 := by
   refine distribHaarChar_eq_one_of_image_box (Set.Subset.antisymm ?_ fun x hx => ?_)
   · rintro _ ⟨x, hx, rfl⟩
@@ -113,14 +169,14 @@ theorem distribHaarChar_eq_one_of_mapsTo_box {L : (ι → F) ≃ₗ[F] (ι → F
 variable [DecidableEq ι]
 
 theorem mulVec_mem_box {A : Matrix ι ι F} (hA : ∀ i j, A i j ∈ 𝒪[F]) {x : ι → F}
-    (hx : x ∈ box F ι) : A.mulVec x ∈ box F ι :=
+    (hx : x ∈ box (F := F) (ι := ι)) : A.mulVec x ∈ box (F := F) (ι := ι) :=
   mem_box.2 fun i => Subring.sum_mem _ fun j _ => Subring.mul_mem _ (hA i j) (mem_box.1 hx j)
 
 noncomputable def modulus : F →*₀ ℝ≥0 where
   toFun x := by classical exact if h : x = 0 then 0 else distribHaarChar F (Units.mk0 x h)
   map_zero' := dif_pos rfl
   map_one' := by
-    rw [dif_neg one_ne_zero]
+    rw [dite_eq_right one_ne_zero]
     convert map_one (distribHaarChar F (G := Fˣ))
     ext
     rfl
@@ -129,13 +185,13 @@ noncomputable def modulus : F →*₀ ℝ≥0 where
     · simp [hx]
     by_cases hy : y = 0
     · simp [hy]
-    rw [dif_neg (mul_ne_zero hx hy), dif_neg hx, dif_neg hy, ← map_mul]
+    rw [dite_eq_right (mul_ne_zero hx hy), dite_eq_right hx, dite_eq_right hy, ← map_mul]
     congr 1
     ext
     rfl
 
 theorem modulus_units (u : Fˣ) : modulus (u : F) = distribHaarChar F u := by
-  rw [modulus, MonoidWithZeroHom.coe_mk, ZeroHom.coe_mk, dif_neg u.ne_zero]
+  rw [modulus, MonoidWithZeroHom.coe_mk, ZeroHom.coe_mk, dite_eq_right u.ne_zero]
   congr 1
   ext
   rfl
@@ -194,7 +250,8 @@ theorem distribHaarChar_glEquiv_diagonal {D : ι → F} (h : (Matrix.diagonal D)
   borelize F
   let ν : Measure F := Measure.addHaar
   let μ : Measure (ι → F) := Measure.pi fun _ => ν
-  have himage : glEquiv (Matrix.GeneralLinearGroup.mkOfDetNeZero _ h) • box F ι =
+  letI : Regular μ := Measure.Regular.of_sigmaCompactSpace_of_isLocallyFiniteMeasure μ
+  have himage : glEquiv (Matrix.GeneralLinearGroup.mkOfDetNeZero _ h) • box (F := F) (ι := ι) =
       Set.univ.pi fun i => u i • (𝒪[F] : Set F) := by
     ext x
     simp only [Set.mem_pi, Set.mem_univ, true_implies]
@@ -208,7 +265,7 @@ theorem distribHaarChar_glEquiv_diagonal {D : ι → F} (h : (Matrix.diagonal D)
       refine ⟨y, mem_box.2 hy, funext fun i => ?_⟩
       simpa [LinearEquiv.smul_def, glEquiv_apply, u, Matrix.GeneralLinearGroup.mkOfDetNeZero,
         Matrix.mulVec_diagonal, Units.smul_def] using hyx i
-  refine distribHaarChar_eq_of_measure_smul_eq_mul (μ := μ) (s := box F ι)
+  refine distribHaarChar_eq_of_measure_smul_eq_mul (μ := μ) (s := box (F := F) (ι := ι))
     (isOpen_box.measure_ne_zero μ ⟨0, zero_mem_box⟩) isCompact_box.measure_lt_top.ne ?_
   rw [himage, box, Measure.pi_pi, Measure.pi_pi, ENNReal.ofNNReal_finsetProd,
     ← Finset.prod_mul_distrib]

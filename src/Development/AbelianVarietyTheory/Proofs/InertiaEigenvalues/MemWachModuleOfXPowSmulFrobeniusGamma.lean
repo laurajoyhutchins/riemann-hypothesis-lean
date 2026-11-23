@@ -1,12 +1,55 @@
-import Mathlib
-import Formalism.SharpRestriction.LevelLetterCocycles.UsedLocalConclusion
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.NotFullBot
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.MemRangeOfFrob
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.EtaleComparisonOfWachBasis
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.WachInclusionXQFrobenius
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.MapConstantCoeffEqOne
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.NotFullBot
+public import Formalism.SharpRestriction.LevelLetterCocycles.DeltaInvariantLattices
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.MapConstantCoeffEqOne
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.NBasisLoc
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.WachInclusionXQFrobenius
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open Formalism.WeaklyAdmissibleFiltrations Formalism.BasicNotions Formalism.BasicNotions.Loc TensorProduct GlobalTheory.NL Formalism.MainNotions.DeltaInvariantLattices
-set_option maxHeartbeats 1000000
+
 
 namespace GlobalTheory.NL.ExtLattice
 
@@ -86,6 +129,7 @@ theorem mem_N_of_div {r : ℕ} (b : Fin r → W.DD T) (hbN : ∀ j, b j ∈ W.N 
     rw [Submodule.span_le]
     rintro _ ⟨x, hx, rfl⟩
     obtain ⟨u, rfl⟩ := hspan x hx
+
     rw [map_sum]
     refine Submodule.sum_mem _ fun i _ => ?_
     rw [φ_smul]
@@ -108,6 +152,7 @@ theorem mem_N_of_div {r : ℕ} (b : Fin r → W.DD T) (hbN : ∀ j, b j ∈ W.N 
       W.γA W.gam W.X ^ a * (c i + letπ * W.X ^ a * ω i) := by
     have h1 : W.X ^ a • W.γD T W.gam (W.X ^ a • m) =
         ∑ i, (W.X ^ a * ∑ k, Γc k i * W.γA W.gam (c k)) • b i := by
+
       rw [hc, map_sum]
       simp_rw [γ_smul, hΓeq]
       rw [sum_smul_sum W T b _ (fun i k => Γc k i), Finset.smul_sum]
@@ -130,6 +175,7 @@ theorem mem_N_of_div {r : ℕ} (b : Fin r → W.DD T) (hbN : ∀ j, b j ∈ W.N 
       W.Q ^ K * W.Q ^ a * W.Q ^ M * c i + W.Q ^ K * W.X ^ a * W.Q ^ a * υ i := by
     have h1 : W.Q ^ M • W.Q ^ K • W.φD T (W.X ^ a • m) =
         ∑ i, (W.Q ^ M * ∑ k, Φc k i * W.φA (c k)) • b i := by
+
       rw [hc, map_sum, Finset.smul_sum]
       simp_rw [φ_smul, hcomm (W.Q ^ K), hΦc]
       rw [sum_smul_sum W T b _ (fun i k => Φc k i), Finset.smul_sum]
@@ -222,7 +268,7 @@ end Generic
 
 section Concrete
 
-set_option maxHeartbeats 1600000 in
+
 
 theorem X_pow_dvd_entry_of_fintype (D : Formalism.BasicNotions.D7) (HW : HWOf D.loc) (l : ℕ) [Fact l.Prime] (K : FinExt l)
     (s : ℕ) (LL : FinExt l) (h : Good K s LL) {ι : Type} [Fintype ι] [DecidableEq ι] (a m m' : ℕ)
@@ -254,7 +300,7 @@ theorem X_pow_dvd_entry_of_fintype (D : Formalism.BasicNotions.D7) (HW : HWOf D.
   · rw [← map_mul, hP, map_smul, map_one]
   · rw [hmap, ← map_mul, hφ, map_smul, map_mul]
 
-set_option maxHeartbeats 1600000 in
+
 
 theorem mem_N : ∀ (D : Formalism.BasicNotions.D7) (HW : HWOf D.loc) (F : FonOf D.loc D.locA HW) (l : ℕ) [Fact l.Prime] (K : FinExt l) (s : ℕ) (LL : FinExt l) (h : Good K s LL), let W := (HW l).W K s LL h; ∀ T : Lt K LL, IsCrys ((D.loc l).PD K) T.ρ → ∀ (M a : ℕ) (m : W.DD T), W.φD T m - m ∈ invN W T (W.Q ^ M) → W.γ T m - m ∈ aN W T letπ → W.X ^ a • m ∈ W.N T → m ∈ W.N T := by
   intro D HW F l _ K s LL h W T hT M a m hφ hγ hX

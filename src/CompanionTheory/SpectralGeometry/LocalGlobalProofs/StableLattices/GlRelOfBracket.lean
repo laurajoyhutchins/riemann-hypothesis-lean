@@ -1,6 +1,57 @@
-import Mathlib
-import CompanionTheory.HarishChandraModules.LowKTypeMultiplicity.DiscreteSeriesCharacters.CapelliDeterminantBlockProduct
-import Formalism.RealPlaceAnalysis.ThirdArithmeticHolds
+module
+
+public import CompanionTheory.HarishChandraModules.LowKTypeMultiplicity.DiscreteSeriesCharacters.CapelliDeterminantBlockProduct
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.InnerProductSpace.Calculus
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+public import Mathlib.Analysis.Normed.Algebra.MatrixExponential
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Analysis.Calculus.Deriv.Add
+public import Mathlib.Analysis.Calculus.Deriv.Comp
+public import Mathlib.Analysis.Calculus.Deriv.Mul
+
+@[expose] public section
 
 open Matrix Finset
 open scoped InnerProductSpace
@@ -227,7 +278,7 @@ theorem bracket_ext {R : Type*} [Ring R] [Algebra ℂ R] (C : Matrix (Fin n) (Fi
   have h2 := h _ _ (inG_re Y) (inG_im Z)
   have h3 := h _ _ (inG_im Y) (inG_re Z)
   have h4 := h _ _ (inG_im Y) (inG_im Z)
-  simp only [map_sub, map_add, map_smul, add_mul, mul_add, smul_mul_assoc, mul_smul_comm] at *
+  simp only [map_sub, map_add (f := _), map_smul, add_mul, mul_add, smul_mul_assoc, mul_smul_comm] at *
   linear_combination (norm := module) h1 + Complex.I • h2 + Complex.I • h3 +
     Complex.I • Complex.I • h4
 
@@ -248,7 +299,7 @@ theorem adj_ext {V : Type*} [NormedAddCommGroup V] [InnerProductSpace ℂ V]
     (h : ∀ X, inG ε X → ∀ x y, ⟪C X x, y⟫_ℂ = -⟪x, C X y⟫_ℂ) (Y : Matrix (Fin n) (Fin n) ℂ) (x y : V) :
     ⟪C Y x, y⟫_ℂ = -⟪x, C (thetaJ ε Y) y⟫_ℂ := by
   rw [← re_add_im (ε := ε) Y, theta_pair (inG_re Y) (inG_im Y)]
-  simp only [map_add, map_sub, map_smul, LinearMap.add_apply, LinearMap.sub_apply, LinearMap.smul_apply,
+  simp only [map_add (f := _), map_sub, map_smul, LinearMap.add_apply, LinearMap.sub_apply, LinearMap.smul_apply,
     inner_add_left, inner_sub_right, inner_smul_left, inner_smul_right, h _ (inG_re Y), h _ (inG_im Y),
     Complex.conj_I]
   ring
@@ -304,7 +355,7 @@ theorem smMod (hL : CompanionTheory.D.DSIC.SmLin) (hB : CompanionTheory.D.DSIC.S
     { toFun := fun v => ⟨dsig σ X v, (hd X hX v v.2).1⟩
       map_add' := fun v w => Subtype.ext <| by
         have h1 := (hd X hX _ (v + w).2).2
-        simp only [Submodule.coe_add, map_add] at h1
+        simp only [Submodule.coe_add, map_add (f := _)] at h1
         exact h1.unique ((hd X hX v v.2).2.add (hd X hX w w.2).2)
       map_smul' := fun c v => Subtype.ext <| by
         have h1 := (hd X hX _ (c • v).2).2
@@ -344,8 +395,9 @@ theorem smMod (hL : CompanionTheory.D.DSIC.SmLin) (hB : CompanionTheory.D.DSIC.S
       exact matrix_eq_sum_single X
     have h2 : (C X v : H) = ∑ a, ∑ b, X a b • (C (single a b 1) v : H) := by
       conv_lhs => rw [h]
+
       simp only [map_sum, map_smul, LinearMap.sum_apply, LinearMap.smul_apply, Submodule.coe_sum,
-        Submodule.coe_smul]
+      Submodule.coe_smul]
     rw [← h2]
     exact hder X hX v
   · refine glRel_of_bracket C (bracket_ext (ε := ε) C fun X Y hX hY => ?_)
@@ -366,11 +418,12 @@ theorem smMod (hL : CompanionTheory.D.DSIC.SmLin) (hB : CompanionTheory.D.DSIC.S
     have h2 : ∀ Y, σ g (C Y v) = C (g * Y * g⁻¹) w := by
       intro Y
       rw [← re_add_im (ε := ε) Y]
-      simp only [Matrix.mul_add, Matrix.add_mul, Matrix.mul_smul, Matrix.smul_mul, map_add, map_smul,
+      simp only [Matrix.mul_add, Matrix.add_mul, Matrix.mul_smul, Matrix.smul_mul, map_add (f := _), map_smul,
         LinearMap.add_apply, LinearMap.smul_apply, Submodule.coe_add, Submodule.coe_smul,
         h1 _ (inG_re Y), h1 _ (inG_im Y)]
     rw [h2, conj_single]
+
     simp only [map_sum, map_smul, LinearMap.sum_apply, LinearMap.smul_apply, Submodule.coe_sum,
-      Submodule.coe_smul]
+    Submodule.coe_smul]
 
 end GlobalTheory.CompanionTheory.SmoothModule

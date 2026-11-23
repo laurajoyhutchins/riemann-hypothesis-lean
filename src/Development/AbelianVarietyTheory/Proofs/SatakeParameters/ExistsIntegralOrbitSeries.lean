@@ -1,10 +1,57 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.StdBases
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.BeData
-import Formalism.LocalRingCardinality.CoeNeZeroOfNotMem
-import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.StatementB
-import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.BiextensionHypothesesOfLevelOne
-import Formalism.SharpRestriction.Divisibility.JetPolynomialLogs.OneLetterJetKernel
+module
+
+public import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.BeData
+public import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.KummerThetaLogarithms.FirstMomentIdempotentLaw
+public import Formalism.GaussJetBounds.GaussJetProofs.Transfer
+public import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.BiextensionHypothesesOfLevelOne
+import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.KummerThetaLogarithms.BiextensionOfExpSpec
+public import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.KummerThetaLogarithms.BiextensionPointsOfExpSpec
+import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.KummerThetaLogarithms.SubstFirstCoboundaryThree
+public import Formalism.SharpRestriction.Divisibility.JetPolynomialLogs.OneLetterJetKernel
+import Formalism.ThetaLogCoordinates.UniformThetaSubstitution.FinalS
+import Formalism.ThetaLogCoordinates.UniformThetaSubstitution.FrobeniusLiftNorms.LogarithmEquivalence
+import Formalism.ThetaLogCoordinates.UniformThetaSubstitution.FrobeniusLiftNorms.TopsChoicePartB
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.SharpRestriction.GlobalSchurBounds.GeneralLinearActions.IsDiscriminantTwelfthRootOfIdealLattice
+
+@[expose] public section
 
 noncomputable section
 open scoped BigOperators
@@ -57,6 +104,7 @@ theorem xOfZ_eq (l : ℕ) (j : K0 →+* K) (σ : K0 →+* K0) (om oms : ι → K
 theorem cc_linP (j : K0 →+* K) (σ : K0 →+* K0) (om oms : ι → K0) (a : Fin N0) (b : Fin N1)
     (x : Bool × ι) : constantCoeff (linP (d := d) j σ om oms a b x) = 0 := by
   unfold linP
+
   rw [map_sum]
   refine Finset.sum_eq_zero fun s _ => ?_
   simp
@@ -83,6 +131,7 @@ theorem map_inVar {τ : Type} (j : K0 →+* K) (x : τ) (f : PowerSeries K0) :
 
 theorem map_zXY [Fintype ι] (l : ℕ) (j : K0 →+* K) (σ : K0 →+* K0) (om oms : ι → K0) (s : ZMod d) :
     map j (zXY l σ om oms s) = ∑ x : Bool × ι, C (j (mXY σ om oms s x)) * at1 x (lgF K l) := by
+
   rw [zXY_eq, map_sum]
   refine Finset.sum_congr rfl fun x _ => ?_
   rw [map_mul, map_C, map_inVar, BiextensionSums.map_lgF']
@@ -93,6 +142,7 @@ theorem map_letLog (l : ℕ) (j : K0 →+* K) (s : ZMod d) :
   rw [coeff_map]
   show j (letLog (K := K0) l s n) = letLog (K := K) l s n
   unfold letLog
+
   rw [map_sum]
   refine Finset.sum_congr rfl fun e _ => ?_
   split_ifs <;> simp
@@ -162,6 +212,7 @@ theorem subst_xOfZ_zXY [Fintype ι] [DecidableEq ι] {l : ℕ} (hl : 2 ≤ l) (h
         ∑ s' : ZMod d, C (j (pXY σ om oms x s')) * (X (s', a, b) : MvPowerSeries (ZV d N0 N1) K)) =
       ∑ s' : ZMod d, C (j (∑ x : Bool × ι, mXY σ om oms s x * pXY σ om oms x s')) *
         (X (s', a, b) : MvPowerSeries (ZV d N0 N1) K) := by
+
     simp only [Finset.mul_sum, map_sum, Finset.sum_mul]
     rw [Finset.sum_comm]
     refine Finset.sum_congr rfl fun y _ => Finset.sum_congr rfl fun s' _ => ?_
@@ -184,6 +235,7 @@ theorem sum_subst_rho_beXY [Fintype ι] (j : K0 →+* K) (be0 : MvPowerSeries (F
     intro ab
     have hρ := hasSubst_rho (K := K) (ι := ι) ab.1 ab.2
     unfold beXY
+
     rw [map_sum, subst_sum hρ]
     refine Finset.sum_congr rfl fun r _ => ?_
     rw [map_subst (hs2 (constantCoeff_X _) (constantCoeff_X _)),
@@ -284,6 +336,7 @@ theorem exists_cofactor (l d N0 N1 : ℕ) [NeZero d] (σ : K0 →+* K0) (j : K0 
     have h0 : constantCoeff (map j be0) = 0 := by
       rw [constantCoeff_map, ← coeff_zero_eq_constantCoeff_apply, hF1.1 0 (Or.inl rfl), map_zero]
     unfold sumE
+
     rw [map_sum]
     refine Finset.sum_eq_zero fun e _ => ?_
     exact constantCoeff_subst_eq_zero (hasSubst_of_constantCoeff_zero fun c => constantCoeff_X _)

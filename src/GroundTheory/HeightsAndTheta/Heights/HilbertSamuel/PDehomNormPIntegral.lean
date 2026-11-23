@@ -1,6 +1,60 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsDehomNormPIntegral
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PDehomCharpolyForms
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsDehomNormPIntegral
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PPullFormsGeneric
+public import Mathlib.NumberTheory.Padics.PadicNumbers
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PDehomCharpolyForms
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Charpoly.BaseChange
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.Polynomial.IsIntegral
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.Valuation.AlgebraInstances
+import Mathlib.RingTheory.Valuation.LocalSubring
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.HilbertSamuel
@@ -32,6 +86,7 @@ theorem mem_range_map_iff {τ : Type*} (V : Subring ℚ) (F : MvPolynomial τ �
     exact (F'.coeff ν).2
   · intro h
     refine ⟨∑ ν ∈ F.support, monomial ν ⟨F.coeff ν, h ν⟩, ?_⟩
+
     rw [map_sum]
     simp only [map_monomial]
     exact F.support_sum_monomial_coeff
@@ -89,15 +144,15 @@ theorem coeff_mem_of_dehom_coeff_mem {Ω : Type} [Field Ω] [CharZero Ω] {D : �
     split_ifs
     · exact (mem_range_map_iff V H).mp hHW ν
     · exact V.zero_mem
-  have h1 : coeff (μ + Finsupp.single j (N2 - N)) (X j ^ (N2 - N) * F) = coeff μ F := by
+  have h1 : AddMonoidAlgebra.coeff (X j ^ (N2 - N) * F) (μ + Finsupp.single j (N2 - N)) = AddMonoidAlgebra.coeff F μ := by
     rw [X_pow_eq_monomial, mul_comm, coeff_mul_monomial, mul_one]
   rw [← h1]
   exact (mem_range_map_iff V _).mp hKW _
 
 end DehomNormPIntegral
 
-open DehomCharpolyForms DehomNormPIntegral in
 
+open DehomCharpolyForms DehomNormPIntegral in
 theorem DehomNormPIntegral.proof : DehomNormPIntegral.Statement := by
   intro Ω _ _ D l P _ hP hgen p hp M hM j m u hu c hchom hcp μ
   classical
@@ -107,7 +162,7 @@ theorem DehomNormPIntegral.proof : DehomNormPIntegral.Statement := by
   set f := LinearMap.charpoly (Algebra.lmul P Ω u) with hf
 
   have h0 : algebraMap P Ω (f.coeff 0) = aeval (fun i => l i / l j) (c n) := by
-    have := congrArg (fun g => Polynomial.coeff g 0) hcp
+    have := congrArg (fun g => _root_.AddMonoidAlgebra.coeff (M := ℕ) g 0) hcp
     simp only [Polynomial.coeff_map, Polynomial.finsetSum_coeff, Polynomial.coeff_C_mul_X_pow] at this
     rw [this, Finset.sum_eq_single n]
     · simp

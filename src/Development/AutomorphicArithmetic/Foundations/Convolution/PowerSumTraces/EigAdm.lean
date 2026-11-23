@@ -1,9 +1,53 @@
-import Development.AutomorphicArithmetic.Foundations.Convolution.PowerSumTraces.OfinProd
-import Development.AutomorphicArithmetic.Foundations.Convolution.PowerSumTraces.OpBasics
-import Development.AutomorphicArithmetic.Foundations.Convolution.PowerSumTraces.FixLev
-import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.KernelTransforms.RrTens
-import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.KernelTransforms.CompatEx
-import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.KernelTransforms.PrjFix
+module
+
+public import Development.AutomorphicArithmetic.Foundations.Convolution.PowerSumTraces.OfinProd
+public import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.KernelTransforms.CompatEx
+public import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.KernelTransforms.PrjFix
+public import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.KernelTransforms.RrTens
+public import Development.AutomorphicArithmetic.Foundations.Convolution.PowerSumTraces.FixLev
+public import Development.AutomorphicArithmetic.Foundations.Convolution.PowerSumTraces.OpBasics
+import GroundTheory.AutomorphicForms.ReductionFinite
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MeasureTheory NumberField IsDedekindDomain Filter GroundTheory.Automorphic GroundTheory.Automorphic.Reduction GroundTheory.Automorphic.RightCosetSpace GroundTheory.Automorphic.AutomorphicForm
 open GroundTheory.Automorphic.CuspidalSpectrum GlobalTheory.IndefiniteRowSideFullHecke.IwahoriDoubleCosets GlobalTheory.PRep Formalism.BasicNotions GlobalTheory.CuspRep GlobalTheory.SmGL PositivityTheory.Rg.Tf.Core PositivityTheory.Rg.Tf.Geo UpperTheory.ConvolutionTheory UpperTheory.ConvolutionTheory.GM UpperTheory.ConvolutionTheory.C
@@ -19,8 +63,8 @@ private theorem comp_eq {K : Type} [Field K] [NumberField K] {n : ℕ} (v : Pl K
   show (AdelicGLn.finiteRestrictedEquiv K n (AdelicGLn.prodEquiv K n (finEmb K n y)).2) v = _
   rw [prodEquiv_finEmb]
 
-open scoped Classical in
 
+open scoped Classical in
 private theorem levOn_inter {K : Type} [Field K] [NumberField K] {n : ℕ} (P : Finset (Pl K))
     (U : ∀ v : Pl K, Subgroup (Gw n v)) :
     (levOn P (fun v => U v ⊓ GLnLocal.integralGL (v.adicCompletion K) n) :
@@ -53,7 +97,7 @@ private theorem levOn_inter {K : Type} [Field K] [NumberField K] {n : ℕ} (P : 
     · exact ⟨h2 v hv, h3⟩
     · exact h3
 
-private theorem fixL_anti {K : Type} [Field K] [NumberField K] {n : ℕ} (μ : Measure (normOneGL K n))
+private theorem fixL_anti {K : Type} [Field K] [NumberField K] {n : ℕ} (μ : Measure (normOneGL (K := K) (n := n)))
     [μ.IsHaarMeasure] (v : Pl K) {J J' : Subgroup (Gw n v)} (h : J' ≤ J) : fixL μ v J ≤ fixL μ v J' := by
   intro f hf
   simp only [fixL, fixF, Submodule.mem_iInf] at hf ⊢
@@ -70,7 +114,7 @@ private theorem fin_of_compact {H : Type*} [NormedAddCommGroup H] [InnerProductS
   show T (prj W f) = c • f
   rw [prj_self W h1, h2]
 
-set_option maxHeartbeats 2000000 in
+
 theorem UpperTheory.ConvolutionTheory.C.eigAdm :
     UpperTheory.ConvolutionTheory.C.EigAdm := by
   intro K _ _ n hn μ _ ν _ a x hx P U hU

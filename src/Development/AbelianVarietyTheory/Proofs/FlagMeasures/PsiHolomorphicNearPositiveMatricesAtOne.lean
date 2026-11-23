@@ -1,7 +1,56 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Statements.CuspFrameWeights.DiscreteSpectrumKFiniteDecomposition
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.InnerRepK
-import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.FderivIntegralApplyOfHolomorphicOfDominated
+module
+
+public import Development.AbelianVarietyTheory.Statements.CuspFrameWeights.DiscreteSpectrumKFiniteDecomposition
+public import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.FderivIntegralApplyOfHolomorphicOfDominated
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.InnerRepK
+import Formalism.RealPlaceAnalysis.RealPlaceTaylor.CompactHaarRightInvariantInst
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.CStarAlgebra.ContinuousLinearMap
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+set_option backward.isDefEq.respectTransparency false
+
+@[expose] public section
 
 open MeasureTheory Matrix Finset Formalism.MainNotions.S Formalism.REAL Formalism.QuantumDeterminants GlobalTheory.Count GlobalTheory.Dec GlobalTheory.Dec.FormF
 open scoped InnerProductSpace ComplexOrder
@@ -94,7 +143,7 @@ theorem IsTau.isURepOn {ε : Fin n → Bool} {abelian₂ : Fin n → ℝ} {W : T
     have heq : (fun g => τ g v) = fun g => ∑ i, ⟪bs i, τ g v⟫_ℂ • bs i := by
       funext g; exact (bs.sum_repr' (τ g v)).symm
     rw [heq]
-    exact continuousOn_finset_sum _ fun i _ => (hco (bs i)).smul continuousOn_const
+    exact continuousOn_finsetSum _ fun i _ => (hco (bs i)).smul continuousOn_const
 
 theorem psBasic : PsBasic := by
   intro n ε lam W _ _ τ w _hlam htau
@@ -108,7 +157,7 @@ theorem psBasic : PsBasic := by
   have hτc : Continuous (fun k : KG ε => τ (toMK k) w) :=
     (hrep.2.2 w).comp_continuous (toMK_cont ε) hK
   have hPc : Continuous (fun k : KG ε => (innerSL ℂ (τ (toMK k) w)).smulRight (τ (toMK k) w)) := by
-    have := (ContinuousLinearMap.smulRightL ℂ W W).continuous₂.comp₂ ((innerSL ℂ).continuous.comp hτc) hτc
+    have := (StrongDual.smulRightL ℂ W W).continuous₂.comp₂ ((innerSL ℂ).continuous.comp hτc) hτc
     exact this
   refine ⟨isOpen_kConjNonzeroMinorsSet ε, fun x hx => posDef_mem_kConjNonzeroMinorsSet ε hx, ?_, ?_⟩
   · have hU := isOpen_kConjNonzeroMinorsSet ε
@@ -126,7 +175,7 @@ theorem psBasic : PsBasic := by
           Phi lam ((toMK q.1)⁻¹ * Matrix.of q.2 * toMK q.1))
           (Set.univ ×ˢ {z : Fin n → Fin n → ℂ | Matrix.of z ∈ U1 ε}) := by
         unfold Phi
-        exact continuousOn_finset_prod _ fun i _ =>
+        exact continuousOn_finsetProd _ fun i _ =>
           (continuous_leadMinor_conj ε (i.val + 1) i.isLt).continuousOn.zpow₀ _
             fun q hq => Or.inl (hmem q.1 q.2 hq.2 i)
       have hB : ContinuousOn (fun q : KG ε × (Fin n → Fin n → ℂ) =>
@@ -180,7 +229,7 @@ theorem psBasic : PsBasic := by
         simp only [show ∀ a b : W, (innerSL ℂ a) b = ⟪a, b⟫_ℂ from fun _ _ => rfl, hbi, mul_one] at this
         exact this
       have e2 : ∑ i, ∫ k : KG ε, ⟪τ (toMK k) w, b i⟫_ℂ * ⟪b i, τ (toMK k) w⟫_ℂ ∂(muK ε) = 1 := by
-        rw [← integral_finset_sum _ fun i _ => hI (fun k : KG ε => ⟪τ (toMK k) w, b i⟫_ℂ * ⟪b i, τ (toMK k) w⟫_ℂ)
+        rw [← MeasureTheory.integral_finsetSum _ fun i _ => hI (fun k : KG ε => ⟪τ (toMK k) w, b i⟫_ℂ * ⟪b i, τ (toMK k) w⟫_ℂ)
           ((hτc.inner continuous_const).mul (continuous_const.inner hτc))]
         simp_rw [b.sum_inner_mul_inner]
         have hone : ∀ k : KG ε, ⟪τ (toMK k) w, τ (toMK k) w⟫_ℂ = 1 := fun k => by

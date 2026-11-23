@@ -1,13 +1,65 @@
-import Formalism.LocalToGlobal.GroupLattices.FockModels.TransposeWords.DualWeylIn
-import Formalism.ThetaLogCoordinates.SandwichModelDomains.FinalW
-import Formalism.GradedWeylDivisibility.FockSpaceTableaux.LClosedeqLemmas
-import Formalism.GradedWeylDivisibility.FockSpaceTableaux.ColSums
-import Formalism.LocalToGlobal.GroupLattices.FockModels.TransposeWords.TransposeWordsProofs.ProdBlockEmbMonomial
-import Formalism.LocalToGlobal.GroupLattices.FockModels.TransposeWords.TransposeWordsProofs.FockPairingDividedAdjoint
-import Formalism.LocalToGlobal.GroupLattices.FockModels.TransposeWords.TransposeWordsProofs.FockPairingRowAction
-import Formalism.LocalToGlobal.GroupLattices.FockModels.TransposeWords.TransposeWordsProofs.FockPairingHighestWeightProof
-import Formalism.LocalToGlobal.GroupLattices.FockModels.TransposeWords.TransposeWordsProofs.CwlApplyWordAppendSingle
-import Formalism.LocalToGlobal.GroupLattices.FockModels.TransposeWords.TransposeWordsProofs.LowerTriangularOverField
+module
+
+public import Formalism.LocalToGlobal.GroupLattices.FockModels.TransposeWords.DualWeylIn
+public import Formalism.LocalToGlobal.GroupLattices.FockModels.TransposeWords.FockPairingHighestWeight
+import Formalism.GradedWeylDivisibility.DualWeylDominanceOf
+public import Formalism.GradedWeylDivisibility.FockSpaceTableaux.ColSums
+public import Formalism.GradedWeylDivisibility.FockSpaceTableaux.LClosedeqLemmas
+public import Formalism.GradedWeylDivisibility.FockSpaceTableaux.LRowdivLemmas
+public import Formalism.LocalToGlobal.GroupLattices.FockModels.TransposeWords.TransposeWordsProofs.CwlApplyWordAppendSingle
+public import Formalism.LocalToGlobal.GroupLattices.FockModels.TransposeWords.TransposeWordsProofs.FockPairingDividedAdjoint
+public import Formalism.LocalToGlobal.GroupLattices.FockModels.TransposeWords.TransposeWordsProofs.FockPairingHighestWeightProof
+public import Formalism.LocalToGlobal.GroupLattices.FockModels.TransposeWords.TransposeWordsProofs.FockPairingRowAction
+public import Formalism.LocalToGlobal.GroupLattices.FockModels.TransposeWords.TransposeWordsProofs.LowerTriangularOverField
+public import Formalism.LocalToGlobal.GroupLattices.FockModels.TransposeWords.TransposeWordsProofs.ProdBlockEmbMonomial
+public import Formalism.ThetaLogCoordinates.SandwichModelDomains.FinalW
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MvPolynomial
 
@@ -89,8 +141,8 @@ lemma tsc_norm_ne (hN : HWNorm) (K : Type) [Field K] [CharZero K] {r n : ℕ} (h
 lemma tsc_coeff_pair (hA : FockRWordAdj) (hH : FockPairingHighestWeight) (hC : CoeffWord) {K : Type} [Field K] [CharZero K] {r n : ℕ}
     (hn : n ≤ r) (ν : Fin n → ℕ) (hν : Antitone ν) (Q : MvPolynomial (Fin r × Fin n) K) (hQ : Q ∈ dualWeyl K r n ν)
     (e : Fin r × Fin n →₀ ℕ) (he : LowerTri e) :
-    coeff e Q = 0 ∨ fockR (applyWord K (transposeWord (wordOf e)) (hw K hn ν)) Q =
-      coeff e Q * fockR (hw K hn ν) (hw K hn ν) := by
+    AddMonoidAlgebra.coeff Q e = 0 ∨ fockR (applyWord K (transposeWord (wordOf e)) (hw K hn ν)) Q =
+      AddMonoidAlgebra.coeff Q e * fockR (hw K hn ν) (hw K hn ν) := by
   by_cases hcol : ∀ s : Fin n, ∑ a : Fin r, e (a, s) = ν s
   · right
     have h1 : IsWeightedHomogeneous (colW r n) Q ν := (mem_weightedHomogeneousSubmodule K _ _ _).1 hQ.1
@@ -117,7 +169,7 @@ theorem weylPair_of (hB : FockRBilin) (hA : FockRWordAdj) (hH : FockPairingHighe
   | add x y _ _ hx hy =>
     obtain ⟨a, ha⟩ := hx
     obtain ⟨b, hb⟩ := hy
-    exact ⟨a + b, by rw [map_add, tsc_add_left hB, ha, hb, map_add, add_mul]⟩
+    exact ⟨a + b, by rw [map_add (f := _), tsc_add_left hB, ha, hb, map_add (f := _), add_mul]⟩
   | smul a x _ hx =>
     obtain ⟨z, hz⟩ := hx
     exact ⟨a * z, by rw [tsc_map_smul, tsc_smul_left hB, hz, map_mul, mul_assoc]⟩
@@ -169,7 +221,7 @@ lemma tsc_zero_weight {O : Type} [CommRing O] {r n : ℕ} (hn : n ≤ r) (ν : F
     unfold hw
     refine Finset.prod_eq_one fun s _ => ?_
     rw [h0 s, Nat.zero_sub, pow_zero]
-  have hPc : P = C (coeff 0 P) := by
+  have hPc : P = C (AddMonoidAlgebra.coeff P 0) := by
     ext m
     rw [coeff_C]
     split_ifs with hm
@@ -184,7 +236,7 @@ lemma tsc_zero_weight {O : Type} [CommRing O] {r n : ℕ} (hn : n ≤ r) (ν : F
       simpa using h2.symm
   have h1 : (1 : MvPolynomial (Fin r × Fin n) O) ∈ weyl O r n hn ν :=
     Submodule.subset_span ⟨[], hhw⟩
-  rw [hPc, ← mul_one (C (coeff 0 P)), ← smul_eq_C_mul]
+  rw [hPc, ← mul_one (C (AddMonoidAlgebra.coeff P 0)), ← smul_eq_C_mul]
   exact Submodule.smul_mem _ _ h1
 
 theorem formCoreG_of (hB : FockRBilin) (hR : FockRRowAct) (hN : HWNorm) (hW : WeylPair) (hD : DualWeylIn)

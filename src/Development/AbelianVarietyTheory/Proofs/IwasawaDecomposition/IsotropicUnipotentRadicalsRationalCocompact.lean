@@ -1,8 +1,55 @@
-import Mathlib
-import Formalism.LocalToGlobal.BesselHermitianTheta.AllTied
-import Formalism.LocalToGlobal.IndefiniteReal.DatumVec
+module
+
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.IsCuspFunIffConstTerm
+public import Formalism.LocalToGlobal.BesselHermitianTheta.TiedBessel
+import Development.AbelianVarietyTheory.Counterexamples.HeightSurvey.EmbRelExistsUnique
+import Development.AbelianVarietyTheory.Proofs.HeightProofs.TwoStepUnipotentCompactModSubring
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.LcscAdelicUnitaryGroup
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
 import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.AdelicDataRowMeasureScaleTrivialTuple
-import Development.AbelianVarietyTheory.Proofs.HeightProofs.IsCuspFunIffConstTerm
+
+@[expose] public section
 
 namespace GlobalTheory.Mem.UnipCocompact
 
@@ -26,7 +73,7 @@ theorem cay_unitary (hm : ∀ x y, st (x * y) = st y * st x) (hi : ∀ x, st (st
     have := congrArg st a2
     rwa [hm, map_sub, h1, hy, sub_neg_eq_add] at this
   have c1 : st ((1 + y) * G) * ((1 + y) * G) = 1 := by
-    rw [hm, map_add, h1, hy]
+    rw [hm, map_add (f := _), h1, hy]
     calc st G * (1 + -y) * ((1 + y) * G) = (st G * (1 + y)) * ((1 - y) * G) := by noncomm_ring
       _ = 1 := by rw [a1, b1, one_mul]
   have c2 : ((1 + y) * G) * ((1 - y) * st G) = 1 := by
@@ -63,7 +110,7 @@ theorem compact_mod_of_filtration [TopologicalSpace S] [IsTopologicalRing S] (S�
   have hhx : ∀ x, h * x + h * x = x := fun x => by rw [← add_mul, hh, one_mul]
   have hhN : ∀ i, ∀ x ∈ N i, h * x ∈ N i := fun i x hx => by
     have : h * x = p i (h * x) := by
-      conv_lhs => rw [← hpf i x hx, ← hhx x, map_add, mul_add, hhx]
+      conv_lhs => rw [← hpf i x hx, ← hhx x, map_add (f := _), mul_add, hhx]
     rw [this]; exact hpN _ _
   have hle0 : ∀ i, N i ≤ N 0 := fun i => by
     induction i with
@@ -304,6 +351,7 @@ theorem mem_raise_fam (hm : ∀ x y, st (x * y) = st y * st x) (hi : ∀ x, st (
       rw [mul_sub, mul_one, Finset.mul_sum, sub_eq_self]
       exact Finset.sum_eq_zero fun j _ => he.ortho (ha j)
     have l3 : ∀ b, (∀ j, some (.inr j) ≠ b) → (1 - st (∑ j, u j)) * fam st u b = fam st u b := fun b hb => by
+
       rw [sub_mul, one_mul, map_sum, Finset.sum_mul, sub_eq_self]
       exact Finset.sum_eq_zero fun j _ => he.ortho (hb j)
     have l : ∀ a b, (∀ j, a ≠ some (.inl j)) → (∀ j, some (.inr j) ≠ b) → fam st u a * x * fam st u b = 0 :=
@@ -537,7 +585,7 @@ theorem closure_radSet_cocompact {r : ℕ} (C : Matrix (Fin V.rank) (Fin r) E) (
     (Matrix.scalar _ (φ (1 / 2))) (Set.pi Set.univ fun _ => Set.pi Set.univ fun _ => K) hcont
     (adj_mul hc V) (adj_adj hc V) hst0
     ⟨Matrix.scalar _ (1 / 2), by ext i j; by_cases h : i = j <;> simp [h]⟩
-    (by rw [← map_add, ← map_add, add_halves, map_one, map_one])
+    (by rw [← map_add (f := _), ← map_add (f := _), add_halves, map_one, map_one])
     (fun x => (Matrix.scalar_commute _ (fun _ => Commute.all _ _) x).eq)
     (isCompact_univ_pi fun _ => isCompact_univ_pi fun _ => hK)
     (fun X => by

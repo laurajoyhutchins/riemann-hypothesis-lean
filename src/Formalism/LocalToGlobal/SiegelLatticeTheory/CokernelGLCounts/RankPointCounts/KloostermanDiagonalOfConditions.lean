@@ -1,13 +1,45 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.PairsDegCutCOfSteps
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.KppOffCOfSteps
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.SatGram
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.TypedLoc
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.SatGramLocPfB
-import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.ConcreteLevelAdelicSubset
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedVolumeStatements.GenericRatioOfBoundHolds
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.GrowthOfBasic
-import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.UnitaryDimensionFormula
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RowsConc
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.SatGram
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.KappaOffDiagonal
+
+@[expose] public section
 
 noncomputable section
 
@@ -17,20 +49,5 @@ namespace Formalism.L2.SG.KappaOffDiagonal
 
 theorem corankPosC_holds : Formalism.L2.SG.RowsConc.CorankPosC :=
   fun _ _ Y u u' _ => Formalism.L2.SG.Pf.SatGram.corankPos_tO Y u u'
-
-theorem pairsDegree_of_conditions (hFold : FoldOKC) (hOI : OOIntAllC) (hIV : IrrVecC) (hJP : JPosC) (hTy : TypeC) (hDl : DelC)
-    (hDim : DimFormC) : Formalism.L2.SG.RowsConc.PairsDegCutC :=
-  pairsDegCutC_of_steps hFold Formalism.L2.SG.Pf.fundExistsC_holds hOI hIV hJP hTy hDl hDim
-    Formalism.L2.SG.Pf.splitPrimeLoc_holds Formalism.L2.SG.Pf.SatGramLoc.reduction_structure_holds
-
-theorem kloostermanDiagonal_of_conditions (hFold : FoldOKC) (hOI : OOIntAllC) (hIV : IrrVecC) (hJP : JPosC) (hTy : TypeC) (hDl : DelC)
-    (hDim : DimFormC) (hN : Formalism.L2.SG.RowsConc.NormExpDegC) : Formalism.L2.SG.RowsConc.KppDiagC :=
-  Formalism.L2.SG.RowsConc.kppDiagC_of_cut Formalism.FourierDecayAlt.P.price_of_index Formalism.FourierDecayAlt.P.equal_index
-    Formalism.FourierDecayAlt.P.pair_split_alt Formalism.FourierDecayAlt.P.subfamilyAlt Formalism.L2.SG.Closed.TermsGGBound_holds corankPosC_holds hN
-    (pairsDegree_of_conditions hFold hOI hIV hJP hTy hDl hDim)
-
-theorem kloostermanDiagonal_of_typeCond (hFold : FoldOKC) (hOI : OOIntAllC) (hIV : IrrVecC) (hJP : JPosC) (hTy : TypeC) (hDl : DelC)
-    (hN : Formalism.L2.SG.RowsConc.NormExpDegC) : Formalism.L2.SG.RowsConc.KppDiagC :=
-  kloostermanDiagonal_of_conditions hFold hOI hIV hJP hTy hDl kappa_off_diagonal_dim_form_C hN
 
 end Formalism.L2.SG.KappaOffDiagonal

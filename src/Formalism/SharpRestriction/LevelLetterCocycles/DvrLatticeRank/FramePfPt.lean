@@ -1,4 +1,50 @@
-import Formalism.SharpRestriction.LevelLetterCocycles.DvrLatticeRank.FramePfLoc
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.DeltaInvariantLattices
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.PowerSeries.Inverse
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.SharpRestriction.LevelLetterCocycles.ElementDenominator
+import Formalism.SharpRestriction.LevelLetterCocycles.LocalTheoremOfGoodExtensions
+
+@[expose] public section
 
 noncomputable section
 
@@ -13,14 +59,14 @@ open PowerSeries
 variable {LL : Type} [Field LL]
 
 theorem framepf_exp_pow_sub_one (E : PowerSeries LL) (h0 : constantCoeff E = 1)
-    (hd : PowerSeries.derivative LL E = E) (p : ℕ) :
+    (hd : PowerSeries.derivative E = E) (p : ℕ) :
     ∃ w : PowerSeries LL, E ^ p - 1 = X * w ∧ constantCoeff w = (p : LL) := by
   have hX1 : X ∣ E - 1 := by
     rw [PowerSeries.X_dvd_iff]
     simp [h0]
   obtain ⟨w1, hw1⟩ := hX1
   have hc1 : constantCoeff w1 = 1 := by
-    have h2 : coeff 0 (PowerSeries.derivative LL E) = coeff 1 E := by
+    have h2 : coeff 0 (PowerSeries.derivative E) = coeff 1 E := by
       rw [PowerSeries.coeff_derivative]
       simp
     rw [hd] at h2
@@ -54,8 +100,8 @@ variable {G : Type} [Group G] [TopologicalSpace G] {Qp K₀ K : Type} [Field Qp]
     [CommRing O] [Algebra O LL] {v : AddValuation LL (WithTop ℚ)} {n : ℕ}
     (W : LocWach PD LL O v n)
 
-open PowerSeries in
 
+open PowerSeries in
 theorem framepf_lev_q_simple (c : ZMod n) (ζ : LL) (hζ : IsPrimitiveRoot ζ PD.p) :
     ∃ u : PowerSeries LL, W.lev c ζ W.q = X * u ∧ constantCoeff u ≠ 0 := by
   obtain ⟨E, hE0, hEd, hE⟩ := W.lev_π c ζ ⟨1, by simpa using hζ⟩
@@ -81,7 +127,7 @@ theorem framepf_lev_q_simple (c : ZMod n) (ζ : LL) (hζ : IsPrimitiveRoot ζ PD
     simp only [Pi.mul_apply, Pi.sub_apply, Pi.pow_apply, Pi.add_apply, Pi.one_apply]
     exact W.q₀_def
   have hfq : W.lev c ζ letπ * W.lev c ζ W.q = E ^ PD.p - 1 := by
-    rw [← map_mul, hq, map_sub, map_pow, map_add, map_one, hE, mul_pow, ← map_pow, hζp, map_one,
+    rw [← map_mul, hq, map_sub, map_pow, map_add (f := _), map_one, hE, mul_pow, ← map_pow, hζp, map_one,
       one_mul]
   set P := W.lev c ζ letπ with hPdef
   have hP : P = C ζ * E - 1 := eq_sub_of_add_eq' hE

@@ -1,11 +1,63 @@
-import Mathlib
-import Development.WeilBound.ThetaLifts.Reductions.WeilPairs.SplitPlaceSiegelLawDiagonalLagrangianCharacterIm
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SplitPlaceThetaFunctionVacuumConjugatePlace
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ContinuousPlaceAt
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsCompactShellNsmul
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RationalMatricesDiscreteCocompactAdelicMatrixSpa
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EqZeroOfTraceMul
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AdelicSymplecticTraceFormAlternatingSwap
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.WeilTensorModels
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsNsmulFix
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AdelicSymplecticTraceFormAlternatingSwap
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ContinuousPlaceAt
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EqZeroOfTraceMul
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsCompactShellNsmul
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsHalfAbstract
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RationalMatricesDiscreteCocompactAdelicMatrixSpa
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SplitPlaceThetaFunctionVacuumConjugatePlace
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ThetaFunctionHeisenbergInvariant
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.LcscAdelicUnitaryGroup
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Algebra.Group.OpenMapping
+public import Mathlib.Topology.Baire.LocallyCompactRegular
+import Mathlib.Topology.MetricSpace.Ultra.Pi
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open scoped TensorProduct Matrix
 open NumberField IsDedekindDomain Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes MeasureTheory
 open GlobalTheory.WeilM GlobalTheory.LFun GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels
@@ -80,7 +132,7 @@ theorem exists_detect {F E : Type} [Field F] [NumberField F] [Field E] [NumberFi
       rw [Finset.sum_eq_single d (fun d' _ hd => by simp [Matrix.single_apply, Ne.symm hd])
         (fun h => absurd (Finset.mem_univ d) h), Matrix.single_apply_same]
     have h2 : algebraMap F (AF F) (1 / 2) + algebraMap F (AF F) (1 / 2) = 1 := by
-      rw [← map_add, show (1 / 2 : F) + 1 / 2 = 1 by norm_num, map_one]
+      rw [← map_add (f := _), show (1 / 2 : F) + 1 / 2 = 1 by norm_num, map_one]
     unfold symplOHF
     rw [GlobalTheory.SymplSkew.symplOF_swap F E σ hσ nS nT JS JT hS hT ξ₀ hσξ (Matrix.single d a (e * z)) y, mul_neg,
       sub_neg_eq_add, ← add_mul, h2, one_mul, symplOF, hh, ← mul_assoc]
@@ -189,8 +241,8 @@ theorem isClosed_conjHalf (e : AEF F E) : IsClosed (conjHalf σ e nS nT : Set (W
   rw [hs]
   exact isClosed_eq hcs continuous_id
 
-variable (σ nS nT) in
 
+variable (σ nS nT) in
 def projH {e : AEF F E} (he : e * e = e) : WOF F E nS nT →+ conjHalf σ e nS nT where
   toFun y := ⟨cAF σ e • y, fun i j => by
     rw [Matrix.smul_apply, smul_eq_mul, ← mul_assoc, ← map_mul, he]⟩

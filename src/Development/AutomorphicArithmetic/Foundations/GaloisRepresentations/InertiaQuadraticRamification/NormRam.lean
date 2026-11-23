@@ -1,6 +1,54 @@
-import Mathlib
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.InertiaQuadraticRamification.InertiaGenAlt
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.QuadraticNormHeckeCharRamifiedBelowRamifiedPrime
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.BcDefs
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.InertiaQuadraticRamification.NumberField
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IsQuadCharOfOfIsNormChar
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.DenseRangeUnits
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsPadicAlgClRingEquivComplexCompEqOfCountabl
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.GlobalArtinReciprocityHolds
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HeckeCharacterUnramifiedAeAndExistsLevel
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsOpenKerOfInfConn
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.AdTransfer
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.BuildingsResidueChars.FrobeniusPowerCompatibility
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.MetricSpace.Ultra.TotallySeparated
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Formalism.L2.Host Formalism.ConjugateSelfDual ReciprocityTheory.Gal GlobalTheory.HeckeGal GlobalTheory.CuspRep UpperTheory.V.Published UpperTheory.V.Af.Bc
 open UpperTheory.Gal.UnramifiedFromSplittingCriterion
@@ -16,12 +64,12 @@ theorem UpperTheory.Gal.UnramifiedFromSplittingCriterion.normRam :
   have halg : IsAlgPos η 0 := isAlgPos_zero_of_orderDvd hp.pos hηp
   obtain ⟨r, hrc, hr⟩ := hart.exists_isLAdicOf (ι : Qbar 2 ≃+* ℂ) halg
   have hrI : ∀ s ∈ Ine A, r s = 1 := (hr.unr_iff hart (Or.inr rfl) hA).2 hunr
-  have hres : ∀ g : G M Ω, r (res K Ω M g) = 1 := by
+  have hres : ∀ g : G M Ω, r (UpperTheory.V.Af.Bc.res K Ω M g) = 1 := by
     haveI : IsAlgClosure M Ω := by
       haveI : Algebra.IsAlgebraic K Ω := IsAlgClosure.isAlgebraic
       exact ⟨IsAlgClosure.isAlgClosed K, Algebra.IsAlgebraic.tower_top (K := K) M⟩
     obtain ⟨artM, hartM⟩ := GlobalTheory.globalArtinReciprocity_holds M Ω
-    have hφc : Continuous (r.comp (res K Ω M)) :=
+    have hφc : Continuous (r.comp (UpperTheory.V.Af.Bc.res K Ω M)) :=
       hrc.comp (UpperTheory.V.Af.continuous_restrictScalarsHom K M Ω)
     have hbad : {w : HeightOneSpectrum (𝓞 M) | ¬ (η.UnrAt (HeightOneSpectrum.under (𝓞 K) w) ∧
         ∀ f : ℕ, normV w = normV (HeightOneSpectrum.under (𝓞 K) w) ^ f →
@@ -30,7 +78,7 @@ theorem UpperTheory.Gal.UnramifiedFromSplittingCriterion.normRam :
       have h2 : ∀ᶠ w in Filter.cofinite, η.UnrAt (HeightOneSpectrum.under (𝓞 K) w) :=
         h1.eventually (Filter.eventually_cofinite.2 (GlobalTheory.Mem.UnrAe.finite_ramified η))
       exact Filter.eventually_cofinite.1 (h2.and hηev)
-    have hone := GlobalTheory.FrobDense.eq_one_of_frob M Ω artM hartM (Qbar 2)ˣ (r.comp (res K Ω M)) hφc
+    have hone := GlobalTheory.FrobDense.eq_one_of_frob M Ω artM hartM (Qbar 2)ˣ (r.comp (UpperTheory.V.Af.Bc.res K Ω M)) hφc
       hbad.toFinset ?_
     · intro g
       exact DFunLike.congr_fun hone g
@@ -54,10 +102,10 @@ theorem UpperTheory.Gal.UnramifiedFromSplittingCriterion.normRam :
         rw [← Units.val_pow_eq_pow_val, hwn _ (GlobalTheory.QuadNormChar.normV_under w)]
         rfl
       rw [h7] at h6
-      have h8 : (((r.comp (res K Ω M)) σ⁻¹ : (Qbar 2)ˣ) : Qbar 2) = 1 := by
+      have h8 : (((r.comp (UpperTheory.V.Af.Bc.res K Ω M)) σ⁻¹ : (Qbar 2)ˣ) : Qbar 2) = 1 := by
         have h9 := congrArg ι.symm h6
         simpa using h9
-      have h10 : (r.comp (res K Ω M)) σ⁻¹ = 1 := Units.ext h8
+      have h10 : (r.comp (UpperTheory.V.Af.Bc.res K Ω M)) σ⁻¹ = 1 := Units.ext h8
       rw [map_inv, inv_eq_one] at h10
       exact h10
   have hr1 : ∀ g : G K Ω, r g = 1 := by
@@ -70,7 +118,7 @@ theorem UpperTheory.Gal.UnramifiedFromSplittingCriterion.normRam :
         have h2 : g.restrictNormal M = 1 := hg
         rw [h2] at h1
         simpa using h1.symm)
-      have hg' : res K Ω M g' = g := by
+      have hg' : UpperTheory.V.Af.Bc.res K Ω M g' = g := by
         ext x
         rfl
       rw [← hg']

@@ -1,4 +1,54 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.GaugeBilinearTermEqNegDoubleSum
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.GaugeBilinearTermEqNegDoubleSum
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -34,7 +84,7 @@ theorem eq_xz {n : Fin 2 × Fin d →₀ ℕ} {l m : Fin d} (h0 : n (0, l) ≠ 0
     intro a b
     first
       | exact map_add _ a b
-      | simp [Finsupp.degree_eq_weight_one, map_add]
+      | simp [Finsupp.degree_eq_weight_one, map_add (f := _)]
       | simp [Finsupp.degree, Finsupp.sum_add_index']
   have hsg : ∀ x : Fin 2 × Fin d, (single x 1).degree = 1 := by
     intro x
@@ -156,7 +206,7 @@ theorem degree_xz (j i : Fin d) : (single ((0 : Fin 2), j) 1 + single ((1 : Fin 
     intro a b
     first
       | exact map_add _ a b
-      | simp [Finsupp.degree_eq_weight_one, map_add]
+      | simp [Finsupp.degree_eq_weight_one, map_add (f := _)]
       | simp [Finsupp.degree, Finsupp.sum_add_index']
   have hsg : ∀ x : Fin 2 × Fin d, (single x 1).degree = 1 := by
     intro x
@@ -314,10 +364,12 @@ theorem gauge_stable : ReciprocityTheory.ChartRestriction.G.TB.HStableSt := by
   let u₂ : Fin d → R := fun i => ∑ j, coeff (single ((0 : Fin 1), j) 1) (B.A.act a i) * u j
   let φ₂ : Fin d → R := fun i => ∑ j, coeff (single ((0 : Fin 1), i) 1) (B.A.act (star a) j) * φ j + ∑ j, M i j * u j
   have hu₂ : (fun i => algebraMap R k (u₂ i)) = (dAct k B a).mulVec vu := funext fun i => by
-    simp only [u₂, map_sum, map_mul, Matrix.mulVec, dotProduct, hA, vu]
+    set_option synthInstance.maxHeartbeats 100000 in
+      simp only [u₂, map_sum, map_mul, Matrix.mulVec, dotProduct, hA, vu]
   have hφ₂ : (fun i => algebraMap R k (φ₂ i)) = (dAct k B (star a)).transpose.mulVec vφ +
       (S * dAct k B a - (dAct k B (star a)).transpose * S).mulVec vu := funext fun i => by
-    simp only [φ₂, map_add, map_sum, map_mul, Matrix.mulVec, dotProduct, hA, hM, Matrix.transpose_apply,
+    set_option synthInstance.maxHeartbeats 100000 in
+      simp only [φ₂, map_add (f := _), map_sum, map_mul, Matrix.mulVec, dotProduct, hA, hM, Matrix.transpose_apply,
       Pi.add_apply, vu, vφ]
   refine ⟨u₂, φ₂, Prod.ext ?_ ?_⟩
   · exact hu₂.symm

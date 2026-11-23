@@ -1,8 +1,50 @@
-import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.GaussManinPeriods
-import Development.AbelianVarietyTheory.Definitions.ThetaValues.MemAnalyticAtZeroOfEventuallyDifferentiableAt
-import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.ConstantCoeffDpolyOfAdditiveTaylorPts
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IteratedFDerivWordEqCoeff
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.GaussManinPeriods
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IteratedFDerivWordEqCoeff
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Development.AbelianVarietyTheory.Definitions.ThetaValues.MemAnalyticAtZeroOfEventuallyDifferentiableAt
+
+@[expose] public section
 
 open Filter Topology
 
@@ -23,7 +65,7 @@ theorem exists_prod_dvd_monomial (t : I → D) (k : ℕ) :
     have hle : Finsupp.single i 1 ≤ m := by
       rw [Finsupp.single_le_iff]; omega
     obtain ⟨m', rfl⟩ := exists_add_of_le hle
-    obtain ⟨s, hs⟩ := ih m' (by rw [map_add, Finsupp.degree_single] at hm; omega)
+    obtain ⟨s, hs⟩ := ih m' (by rw [map_add (f := _), Finsupp.degree_single] at hm; omega)
     refine ⟨Fin.cons i s, ?_⟩
     have h1 : ∏ j, t j ^ (Finsupp.single i 1 : I →₀ ℕ) j = t i := by
       rw [Finset.prod_eq_single i] <;> simp +contextual [Finsupp.single_apply, eq_comm]
@@ -45,13 +87,13 @@ theorem aeval_eq_zero_of_coeff_eq_zero {N : ℕ} {t : I → D}
   rw [ht, zero_dvd_iff] at hs
   rw [hs, mul_zero]
 
-omit [Algebra ℂ D] [CommRing D] in
 
+omit [Algebra ℂ D] [CommRing D] in
 theorem coeff_sum_monomial_finsuppAntidiag (N : ℕ) (F : MvPowerSeries I ℂ) (n : I →₀ ℕ)
     (hn : n.degree < N + 1) :
-    MvPolynomial.coeff n (∑ k ∈ Finset.range (N + 1),
+    AddMonoidAlgebra.coeff (∑ k ∈ Finset.range (N + 1),
       ∑ m ∈ Finset.finsuppAntidiag (Finset.univ : Finset I) k,
-        MvPolynomial.monomial m (MvPowerSeries.coeff m F)) = MvPowerSeries.coeff n F := by
+        MvPolynomial.monomial m (MvPowerSeries.coeff m F)) n = MvPowerSeries.coeff n F := by
   simp only [MvPolynomial.coeff_sum, MvPolynomial.coeff_monomial, Finset.sum_ite_eq',
     Finset.mem_finsuppAntidiag, Finset.subset_univ, and_true]
   rw [← Finsupp.degree_eq_sum, Finset.sum_ite_eq, if_pos (Finset.mem_range.2 hn)]
@@ -62,7 +104,8 @@ theorem aeval_sum_monomial_finsuppAntidiag (N : ℕ) (t : I → D) (F : MvPowerS
         MvPolynomial.monomial m (MvPowerSeries.coeff m F)) =
       ∑ k ∈ Finset.range (N + 1), ∑ m ∈ Finset.finsuppAntidiag (Finset.univ : Finset I) k,
         MvPowerSeries.coeff m F • ∏ i, t i ^ m i := by
-  simp only [map_sum, MvPolynomial.aeval_monomial, Algebra.smul_def,
+  set_option synthInstance.maxHeartbeats 100000 in
+    simp only [map_sum, MvPolynomial.aeval_monomial, Algebra.smul_def,
     Finsupp.prod_fintype _ _ (fun i => pow_zero (t i))]
 
 end
@@ -83,7 +126,7 @@ theorem taylor_mul_of_prod_eq_zero : ∀ {I : Type} [Fintype I] [DecidableEq I] 
     MvPowerSeries.coeff_mul, sub_eq_zero]
   refine Finset.sum_congr rfl fun p hp => ?_
   rw [Finset.HasAntidiagonal.mem_antidiagonal] at hp
-  rw [← hp, map_add] at hm
+  rw [← hp, map_add (f := _)] at hm
   rw [coeff_sum_monomial_finsuppAntidiag _ _ _ (by omega),
     coeff_sum_monomial_finsuppAntidiag _ _ _ (by omega)]
 

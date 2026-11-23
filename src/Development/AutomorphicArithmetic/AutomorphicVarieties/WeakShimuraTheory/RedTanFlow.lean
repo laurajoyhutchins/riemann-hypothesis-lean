@@ -1,4 +1,57 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.WeakShimuraTheory.RedTanDefs
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.WeakShimuraTheory.RedTanDefs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.AdicCompletion.Noetherian
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.LinearAlgebra.Dimension.RankNullity
+
+@[expose] public section
 
 open IsLocalRing Polynomial UpperTheory.V.Alg UpperTheory.V.GradeZeroInterpolatingElement UpperTheory.V.Ws
 
@@ -31,16 +84,17 @@ theorem rank_le_of_lowest : ∀ {k V : Type} [Field k] [AddCommGroup V] [Module 
     exact (Submodule.equivMapOfInjective _ (W ⊓ K p).subtype_injective _).rank_eq
   have main : ∀ p ≤ max hi lo, Module.rank k ↥(T ⊓ K p) ≤ Module.rank k ↥(U ⊓ K p) := by
     intro p hp
-    induction p, hp using Int.le_induction_down with
-    | base =>
+    induction p using Int.inductionOn' (b := max hi lo) with
+    | zero =>
       have : T ⊓ K (max hi lo) = ⊥ := by
         rw [eq_bot_iff]
         intro x hx
         exact hhi x fun q hq => (hK _ _).1 hx.2 q (lt_max_of_lt_left hq)
       rw [this]; simp
+    | succ n hn ih => omega
     | pred n hn ih =>
       rw [step T, step U, sub_add_cancel]
-      refine add_le_add (Submodule.rank_mono ?_) ih
+      refine add_le_add (Submodule.rank_mono ?_) (ih hn)
       rintro _ ⟨x, ⟨h1, h2⟩, rfl⟩
       refine ⟨π (n - 1) x, ⟨H _ x h1 ((hK _ _).1 h2), (hK _ _).2 fun q hq => ?_⟩, ?_⟩
       · rw [h, if_neg hq.ne]
@@ -77,7 +131,7 @@ theorem tan_lowest : ∀ {O Γ : Type} [CommRing O] [Group Γ] [TopologicalSpace
   refine ⟨a1.comp (cmp m p), fun g => csp (a2 g), fun g h => ?_, fun g h => ?_, fun i j h => cz (a5 h),
     fun g i j h1 h2 => ?_, fun v => ⟨csp (a7 v).1, fun i j h => ?_⟩, fun v s hs i j h => ?_⟩
   · simp only [Fr.cmpT_fst]
-    rw [a3, map_add, (c3 (hr g).1 (hr g⁻¹).1 (hX h)).2, ← (hr g).2, ← (hr g⁻¹).2]
+    rw [a3, map_add (f := _), (c3 (hr g).1 (hr g⁻¹).1 (hX h)).2, ← (hr g).2, ← (hr g⁻¹).2]
   · rw [Fr.cmpT_fst, a4 g h, map_zero]
   · have := cmp_mul (hX g) (hr g).1
     rw [add_zero, ← (hr g).2] at this
@@ -87,7 +141,7 @@ theorem tan_lowest : ∀ {O Γ : Type} [CommRing O] [Group Γ] [TopologicalSpace
     exact cz ((a7 v).2 i j h)
   · have h3 := c3 (hr s).1 (hr s⁻¹).1 (hY v)
     rw [← (hr s).2, ← (hr s⁻¹).2] at h3
-    rw [Fr.cmpT_snd, Fr.cmpT_fst, ← h3.2, ← map_add, ← map_sub, cn v (((hX s).add h3.1).sub (hY v))]
+    rw [Fr.cmpT_snd, Fr.cmpT_fst, ← h3.2, ← map_add (f := _), ← map_sub, cn v (((hX s).add h3.1).sub (hY v))]
     exact cz (a8 v s hs i j h)
 
 theorem tan_flow {O Γ : Type} [CommRing O] [Group Γ] [TopologicalSpace Γ] (Φ : Fr O Γ) {k : Type} [Field k]

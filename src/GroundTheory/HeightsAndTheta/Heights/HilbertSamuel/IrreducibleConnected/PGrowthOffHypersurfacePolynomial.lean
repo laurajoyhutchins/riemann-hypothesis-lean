@@ -1,8 +1,51 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.IrreducibleConnected.StGrowthOffHypersurfacePolynomial
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.IrreducibleConnected.StEntirePolynomialGrowth
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StRiemannExtensionAnalytic
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.PRiemannExtensionAnalytic
+module
+
+public import Mathlib.Algebra.MvPolynomial.Eval
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.Algebra.MvPolynomial.Funext
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.HilbertSamuel
@@ -30,46 +73,5 @@ theorem dense_eval_ne_zero {d : ℕ} {Q : MvPolynomial (Fin d) ℂ} (hQ : Q ≠ 
   intro V hV hne
   obtain ⟨t, htV, ht⟩ := exists_eval_ne_zero_of_isOpen hQ hV hne
   exact ⟨t, htV, ht⟩
-
-theorem GrowthOffHypersurfacePolynomial.proof (h : EntirePolynomialGrowth.Statement) :
-    GrowthOffHypersurfacePolynomial.Statement := by
-  intro d Q f C M hQ hf hb
-  have hg : Differentiable ℂ (fun y : Fin d → ℂ => eval y Q) := fun y =>
-    (AnalyticOnNhd.eval_mvPolynomial Q y (Set.mem_univ y)).differentiableAt
-  obtain ⟨F, hF, hFf⟩ := IndefiniteRowSideFullHecke.ComplexSets.RiemannExtensionAnalytic.proof d Set.univ
-    (fun y => eval y Q) f isOpen_univ hg.differentiableOn
-    (fun V hV _ hne => exists_eval_ne_zero_of_isOpen hQ hV hne)
-    (by simpa using hf)
-    (fun τ _ => by
-      refine ⟨Metric.ball τ 1, Metric.ball_mem_nhds τ one_pos, ?_⟩
-      refine isBounded_iff_forall_norm_le.2 ⟨|C| * (2 + ‖τ‖) ^ M, ?_⟩
-      rintro _ ⟨y, ⟨⟨hy, -⟩, hyQ⟩, rfl⟩
-      have hdist : ‖y‖ ≤ ‖τ‖ + 1 := by
-        have := norm_le_norm_add_norm_sub' y τ
-        rw [Metric.mem_ball, dist_eq_norm] at hy
-        linarith
-      calc ‖f y‖ ≤ C * (1 + ‖y‖) ^ M := hb y hyQ
-        _ ≤ |C| * (1 + ‖y‖) ^ M :=
-          mul_le_mul_of_nonneg_right (le_abs_self C) (pow_nonneg (by positivity) _)
-        _ ≤ |C| * (2 + ‖τ‖) ^ M :=
-          mul_le_mul_of_nonneg_left
-            (pow_le_pow_left₀ (by positivity) (by linarith) M) (abs_nonneg C))
-  have hFd : Differentiable ℂ F := differentiableOn_univ.1 hF
-  have hFc : Continuous F := hFd.continuous
-  have hclosed : IsClosed {y : Fin d → ℂ | ‖F y‖ ≤ C * (1 + ‖y‖) ^ M} :=
-    isClosed_le hFc.norm (continuous_const.mul ((continuous_const.add continuous_norm).pow M))
-  have hsub : {y : Fin d → ℂ | eval y Q ≠ 0} ⊆ {y | ‖F y‖ ≤ C * (1 + ‖y‖) ^ M} := by
-    intro y hy
-    have : F y = f y := hFf ⟨Set.mem_univ y, hy⟩
-    show ‖F y‖ ≤ C * (1 + ‖y‖) ^ M
-    rw [this]
-    exact hb y hy
-  have hall : ∀ y, ‖F y‖ ≤ C * (1 + ‖y‖) ^ M := by
-    intro y
-    have := closure_minimal hsub hclosed
-    rw [(dense_eval_ne_zero hQ).closure_eq] at this
-    exact this (Set.mem_univ y)
-  obtain ⟨p, hp⟩ := h d F C M hFd hall
-  exact ⟨p, fun y hy => (hFf ⟨Set.mem_univ y, hy⟩).symm.trans (hp y)⟩
 
 end GroundTheory.Heights₂.Heights.HilbertSamuel

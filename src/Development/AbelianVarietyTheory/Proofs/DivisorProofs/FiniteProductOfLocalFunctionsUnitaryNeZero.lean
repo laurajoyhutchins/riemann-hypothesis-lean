@@ -1,9 +1,48 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IsUnifAt
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FiniteAdelicUnitaryPointLocalComponentMemLocalUn
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HeckeOperatorTestFamilyPreservesLevelForms
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RelIndexProd
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SeparableCharpolyOfTestFunctionNeZeroRegularPlac
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FinPtHomApply
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HeckeOperatorTestFamilyPreservesLevelForms
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FiniteAdelicUnitaryPointLocalComponentMemLocalUn
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SeparableCharpolyOfTestFunctionNeZeroRegularPlac
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RelIndexProd
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Matrix Polynomial Filter GlobalTheory.CuspRep GlobalTheory.PRep Formalism.UG Formalism.BasicNotions GlobalTheory.UnitaryBC Formalism.L2.Host GlobalTheory.BCT GlobalTheory.BCT.TraceBlocks
 open scoped Classical TensorProduct
 attribute [local instance] GlobalTheory.LocalData.complRel GlobalTheory.LocalData.isLocalField
@@ -14,14 +53,14 @@ namespace GlobalTheory.BCT.HSupp
 
 variable {E : Type} [Field E] [NumberField E] [IsCMField E] {n : ℕ}
 
-theorem toSub_cLoc_val (hE : Unr E) (w : Pl E) (x : finU E n) :
+theorem toSub_cLoc_val (hE : Unr E) (w : Pl E) (x : finU (E := E) (n := n)) :
     ((toSub (UL n w) (cLoc w (x : UA E n)) : UL n w) : GLw n w) = cLoc w (x : UA E n) := by
   unfold toSub
-  rw [dif_pos (cLoc_mem_UL E hE n w x)]
+  rw [dite_eq_left (cLoc_mem_UL E hE n w x)]
 
 theorem factor_ne_zero (S : Set (Pl E)) (K' : ∀ w : Pl E, Subgroup (UL n w)) (hK : ∀ᶠ w in cofinite, K' w = KL n w)
     (f : ∀ w : Pl E, UL n w → ℂ) (hf : ∀ᶠ w in cofinite, f w = (KL n w : Set (UL n w)).indicator 1)
-    (x : finU E n) (hx : globFn S f x ≠ 0) :
+    (x : finU (E := E) (n := n)) (hx : globFn S f x ≠ 0) :
     ∀ w ∈ S, f w (toSub (UL n w) (cLoc w (x : UA E n))) ≠ 0 := by
   set g : Pl E → ℂ := fun w => f w (toSub (UL n w) (cLoc w (x : UA E n))) with hg
   have hB : {w | ¬ (f w = (KL n w : Set (UL n w)).indicator 1 ∧
@@ -46,17 +85,17 @@ theorem factor_ne_zero (S : Set (Pl E)) (K' : ∀ w : Pl E, Subgroup (UL n w)) (
 
 end GlobalTheory.BCT.HSupp
 
-open GlobalTheory.BCT.HSupp in
 
+open GlobalTheory.BCT.HSupp in
 theorem GlobalTheory.BCT.finite_globFn_ne_zero : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E], Unr E → ∀ (n : ℕ)
     (S : Set (Pl E)) (K' : ∀ w : Pl E, Subgroup (UL n w)),
     IsLevelFam (fun w : Pl E => MonoidHom.id (UL n w)) (KL n) K' → ∀ f : ∀ w : Pl E, UL n w → ℂ,
-    IsTest (KL n) K' f → {q : finU E n ⧸ globLev S K' | globFn S f q.out ≠ 0}.Finite := by
+    IsTest (KL n) K' f → {q : finU (E := E) (n := n) ⧸ globLev S K' | globFn S f q.out ≠ 0}.Finite := by
   intro E _ _ _ hE n S K' hK f hf
   set F : Set (Pl E) := {w | ¬ (K' w = KL n w ∧ f w = (KL n w : Set (UL n w)).indicator 1)} with hF
   have hFfin : F.Finite := Filter.eventually_cofinite.1 (hK.2.and hf.2)
   have key := factor_ne_zero S K' hK.2 f hf.2
-  have inK : ∀ x : finU E n, globFn S f x ≠ 0 → ∀ w ∈ S, w ∉ F →
+  have inK : ∀ x : finU (E := E) (n := n), globFn S f x ≠ 0 → ∀ w ∈ S, w ∉ F →
       toSub (UL n w) (cLoc w (x : UA E n)) ∈ K' w := by
     intro x hx w hwS hwF
     simp only [hF, Set.mem_setOf_eq, not_not] at hwF
@@ -66,7 +105,7 @@ theorem GlobalTheory.BCT.finite_globFn_ne_zero : ∀ (E : Type) [Field E] [Numbe
     by_contra hc
     exact h (Set.indicator_of_notMem hc _)
   haveI : Finite ↥(F ∩ S) := (hFfin.inter_of_left S).to_subtype
-  let Φ : finU E n ⧸ globLev S K' → ∀ w : ↥(F ∩ S), UL n w.1 ⧸ K' w.1 := fun q w =>
+  let Φ : finU (E := E) (n := n) ⧸ globLev S K' → ∀ w : ↥(F ∩ S), UL n w.1 ⧸ K' w.1 := fun q w =>
     (toSub (UL n w.1) (cLoc w.1 (q.out : UA E n)) : UL n w.1 ⧸ K' w.1)
   refine Set.Finite.of_injOn (f := Φ)
     (t := Set.pi Set.univ fun w : ↥(F ∩ S) => {c : UL n w.1 ⧸ K' w.1 | f w.1 c.out ≠ 0}) ?_ ?_

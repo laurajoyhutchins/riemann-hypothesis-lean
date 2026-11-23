@@ -1,7 +1,61 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.Intersections.StChartPrimElt
-import GroundTheory.HeightsAndTheta.Heights.Intersections.StLocAwaySpec
-import GroundTheory.HeightsAndTheta.Heights.Intersections.StChartSpecCount
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.StChartPrimElt
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.StLocAwaySpec
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.StChartSpecCount
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Algebra.MvPolynomial.CommRing
+public import Mathlib.Algebra.Polynomial.Lifts
+public import Mathlib.Algebra.Polynomial.Roots
+public import Mathlib.FieldTheory.IsAlgClosed.Basic
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -26,7 +80,7 @@ theorem exists_pow_mul_eq_map {R : Type*} [CommRing R] (E : R) {Q : Type*}
     obtain ⟨n, F', hF'⟩ := hF
     obtain ⟨k, G', hG'⟩ := hG
     refine ⟨n + k, MvPolynomial.C (E ^ k) * F' + MvPolynomial.C (E ^ n) * G', ?_⟩
-    simp only [map_add, map_mul, MvPolynomial.map_C, hF', hG', pow_add, map_pow]
+    simp only [map_add (f := _), map_mul, MvPolynomial.map_C, hF', hG', pow_add, map_pow]
     ring
   | mul_X F i hF =>
     obtain ⟨n, F', hF'⟩ := hF
@@ -59,12 +113,12 @@ theorem dvd_map_of_dvd_map {A Φ K : Type*} [CommRing A] [Field Φ] [CommRing K]
     exact RingHom.mem_ker.mp (hker (RingHom.mem_ker.mpr (by rw [← coeff_map, h0, coeff_zero])))
   refine ⟨(p /ₘ mA).map σ, ?_⟩
   conv_lhs => rw [← modByMonic_add_div p mA]
-  rw [Polynomial.map_add, Polynomial.map_mul, h1, zero_add]
+  rw [Polynomial.map_add (f := _), Polynomial.map_mul, h1, zero_add]
 
 end ChartSpecCount
 
-open ChartSpecCount in
 
+open ChartSpecCount in
 theorem ChartSpecCount.proof (hPE : ChartPrimElt.Statement) (hLA : LocAwaySpec.Statement) :
     ChartSpecCount.Statement := by
   classical

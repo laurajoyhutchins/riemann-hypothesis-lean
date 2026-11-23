@@ -1,5 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.AevalLogDefect
+module
+
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.AevalLogDefect
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.MvPolynomial.CommRing
+public import Mathlib.Data.Nat.Choose.Sum
+
+@[expose] public section
 
 open GlobalTheory.LogU MvPolynomial Finset
 
@@ -17,8 +67,8 @@ lemma single_add_single_eq_iff {i j i' j' : ℕ} :
   · rintro ⟨rfl, rfl⟩; rfl
 
 lemma coeff_monomial_two (i j p q : ℕ) (c : ℤ) :
-    coeff (Finsupp.single 0 i + Finsupp.single 1 j)
-        (monomial (Finsupp.single (0 : Fin 2) p + Finsupp.single 1 q) c) =
+    AddMonoidAlgebra.coeff (monomial (Finsupp.single (0 : Fin 2) p + Finsupp.single 1 q) c)
+        (Finsupp.single 0 i + Finsupp.single 1 j) =
       if p = i ∧ q = j then c else 0 := by
   rw [coeff_monomial]
   simp only [single_add_single_eq_iff]
@@ -59,12 +109,12 @@ lemma factorial_dvd_term (n K s a : ℕ) (hK1 : 1 ≤ K) (hKn : K ≤ n) (hs : s
 
 def Good (n : ℕ) (f : MvPolynomial (Fin 2) ℤ) : Prop :=
   ∀ i j : ℕ, n ≤ i + j → ((n.factorial * ((n - 1) / 2).factorial : ℕ) : ℤ) ∣
-    ((i.factorial * j.factorial : ℕ) : ℤ) * coeff (Finsupp.single 0 i + Finsupp.single 1 j) f
+    ((i.factorial * j.factorial : ℕ) : ℤ) * AddMonoidAlgebra.coeff f (Finsupp.single 0 i + Finsupp.single 1 j)
 
 lemma good_sub {n : ℕ} {f g : MvPolynomial (Fin 2) ℤ} (hf : Good n f) (hg : Good n g) :
     Good n (f - g) := by
   intro i j h
-  rw [coeff_sub, mul_sub]
+  rw [MvPolynomial.coeff_sub, mul_sub]
   exact dvd_sub (hf i j h) (hg i j h)
 
 lemma good_sum {n : ℕ} {ι : Type} (t : Finset ι) (f : ι → MvPolynomial (Fin 2) ℤ)
@@ -145,7 +195,7 @@ theorem good_logDefect (n : ℕ) : Good n (logDefect n) := by
 
 theorem logDefect_coeff_dvd : ∀ (n i j : ℕ), n ≤ i + j → ∃ d : ℤ,
     ((i.factorial * j.factorial : ℕ) : ℤ) *
-        MvPolynomial.coeff (Finsupp.single 0 i + Finsupp.single 1 j) (GlobalTheory.LogU.logDefect n) =
+        AddMonoidAlgebra.coeff (GlobalTheory.LogU.logDefect n) (Finsupp.single 0 i + Finsupp.single 1 j) =
       ((n.factorial * ((n - 1) / 2).factorial : ℕ) : ℤ) * d := by
   intro n i j h
   exact good_logDefect n i j h

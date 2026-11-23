@@ -1,6 +1,46 @@
-import Mathlib
-import Formalism.LocalToGlobal.TorsionIntegrality.WeierstrassTwoTorsion.StatementJ
-import Formalism.LocalToGlobal.TorsionIntegrality.FrobeniusFibreCurves.CurveHyp
+module
+
+public import Formalism.LocalToGlobal.TorsionIntegrality.WeierstrassTwoTorsion.StatementJ
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -53,30 +93,5 @@ def WeierstrassBiadditiveModEquiv : Prop :=
     IntModel W → ‖(2 : K)‖ = 1 →
     DivAB (beW W s2) ∧ swap2 (beW W s2) = beW W s2 ∧
       Simeq (d1 (fgl W) (beW W s2)) 0 ∧ Simeq (d1 (fgl W) (swap2 (beW W s2))) 0
-
-def CurveJets : Prop :=
-  ∀ (K : Type) [NormedField K] [IsUltrametricDist K] [CharZero K] (W : WeierstrassCurve K) (s2 : K),
-    IntModel W → ‖(2 : K)‖ = 1 →
-    ∀ n : ℕ, n = 1 ∨ 3 ≤ n →
-      ‖PowerSeries.constantCoeff ((Dinv (logSer W))^[n] (phW W s2))‖ ≤ 1
-
-def CurveTwo : Prop :=
-  ∀ (K : Type) [NormedField K] [IsUltrametricDist K] [CharZero K] (W : WeierstrassCurve K)
-    (s2 xT yT : K), IntModel W → W.toAffine.Equation xT yT → 2 * yT + W.a₁ * xT + W.a₃ = 0 →
-    ‖xT‖ ≤ 1 → ‖yT‖ ≤ 1 →
-    kapW W xT = 3 * xT ^ 2 + 2 * W.a₂ * xT + W.a₄ - W.a₁ * yT ∧
-    4 * e1W W xT ^ 3 - g₂ W * e1W W xT - g₃ W = 0 ∧
-    PowerSeries.subst (iSer W) (evenSigmaLogAtTwoTorsion W s2 xT) = evenSigmaLogAtTwoTorsion W s2 xT ∧
-    Simeq (par (fgl W) (iSer W) (evenSigmaLogAtTwoTorsion W s2 xT)) 0 ∧
-    Simeq (ι := Unit) (2 * evenSigmaLogAtTwoTorsion W s2 xT) (2 * phW W s2)
-
-def CurveTwoOdd : Prop :=
-  ∀ (K : Type) [NormedField K] [IsUltrametricDist K] [CharZero K] (W : WeierstrassCurve K)
-    (s2 xT yT : K), IntModel W → W.toAffine.Equation xT yT → 2 * yT + W.a₁ * xT + W.a₃ = 0 →
-    ‖xT‖ ≤ 1 → ‖yT‖ ≤ 1 → ‖(2 : K)‖ = 1 →
-    Simeq (ι := Unit) (evenSigmaLogAtTwoTorsion W s2 xT) (phW W s2) ∧
-    DivAB (cob (fgl W) (evenSigmaLogAtTwoTorsion W s2 xT)) ∧
-    Simeq (d1 (fgl W) (cob (fgl W) (evenSigmaLogAtTwoTorsion W s2 xT))) 0 ∧
-    Simeq (d1 (fgl W) (swap2 (cob (fgl W) (evenSigmaLogAtTwoTorsion W s2 xT)))) 0
 
 end Formalism.L2.Th1.B

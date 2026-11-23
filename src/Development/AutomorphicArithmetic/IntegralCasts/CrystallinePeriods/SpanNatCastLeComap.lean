@@ -1,4 +1,51 @@
-import Mathlib
+module
+
+public import Mathlib.RingTheory.Perfectoid.BDeRham
+public import Mathlib.RingTheory.WittVector.Compare
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -36,15 +83,7 @@ theorem evalₐ_adicMap (I : Ideal A) (J : Ideal B) (f : A →+* B) (h : I ≤ J
       Ideal.quotientMap (J ^ n) f (pow_le_comap_pow h n) (AdicCompletion.evalₐ I n x) := by
   unfold adicMap
   rw [AdicCompletion.evalₐ_liftRingHom]
-  · rfl
-  · intro m n hle
-    ext x
-    induction x using AdicCompletion.induction_on with
-    | h x =>
-      simp only [RingHom.comp_apply, RingHom.coe_coe, AdicCompletion.evalₐ_mk,
-        Ideal.quotientMap_mk, Ideal.Quotient.factorPow, Ideal.Quotient.factor_mk]
-      rw [← Ideal.quotientMap_mk (H := pow_le_comap_pow h m),
-        ← Ideal.quotientMap_mk (H := pow_le_comap_pow h m), AdicCompletion.Ideal.mk_eq_mk I hle]
+  rfl
 
 @[simp] theorem adicMap_algebraMap (I : Ideal A) (J : Ideal B) (f : A →+* B) (h : I ≤ J.comap f)
     (a : A) : adicMap I J f h (algebraMap A _ a) = algebraMap B _ (f a) := by
@@ -141,13 +180,11 @@ namespace Ainf
 abbrev teich : Tilt p R →* Ainf p R := WittVector.teichmuller p
 
 variable (R) in
-
 def frob : Ainf p R →+* Ainf p R := WittVector.frobenius
 
 def map (f : R →+* S) : Ainf p R →+* Ainf p S := WittVector.map (Tilt.map p f)
 
 variable (R) in
-
 def ofPadicInt : ℤ_[p] →+* Ainf p R :=
   (WittVector.map (ZMod.castHom (dvd_refl p) (Tilt p R))).comp (WittVector.equiv p).symm.toRingHom
 
@@ -174,8 +211,6 @@ theorem frob_eq_map : frob p R = WittVector.map (frobenius (Tilt p R) p) :=
 theorem map_frob (f : R →+* S) (x : Ainf p R) : map p f (frob p R x) = frob p S (map p f x) := by
   ext n; simp [map, frob_eq_map, frobenius_def]
 
-theorem frob_bijective : Function.Bijective (frob p R) := WittVector.frobenius_bijective p _
-
 @[simp] theorem map_algebraMap (f : R →+* S) (a : ℤ_[p]) :
     map p f (algebraMap ℤ_[p] _ a) = algebraMap ℤ_[p] _ a := by
   ext n
@@ -199,7 +234,6 @@ theorem p_dvd_frob_sub_pow (x : Ainf p R) : (p : Ainf p R) ∣ frob p R x - x ^ 
 variable [IsAdicComplete (span {(p : R)}) R] [IsAdicComplete (span {(p : S)}) S]
 
 variable (p R) in
-
 def theta : Ainf p R →+* R := WittVector.fontaineTheta R p
 
 @[simp] theorem theta_teich (x : Tilt p R) : theta p R (teich p x) = PreTilt.untilt x :=
@@ -242,7 +276,6 @@ theorem hom_ext {B : Type*} [CommRing B] {f g : AinfInv p R →+* B}
   IsLocalization.ringHom_ext (Submonoid.powers (p : Ainf p R)) (RingHom.ext h)
 
 variable (R) in
-
 def frob : AinfInv p R →+* AinfInv p R := extend p (Ainf.frob p R)
 
 def map (f : R →+* S) : AinfInv p R →+* AinfInv p S := extend p (Ainf.map p f)
@@ -300,7 +333,6 @@ theorem map_frob (f : R →+* S) (x : AinfInv p R) : map p f (frob p R x) = frob
 variable [IsAdicComplete (span {(p : R)}) R] [IsAdicComplete (span {(p : S)}) S]
 
 variable (p R) in
-
 def theta : AinfInv p R →+* Localization.Away (p : R) := fontaineThetaInvertP R p
 
 @[simp] theorem theta_algebraMap (x : Ainf p R) :

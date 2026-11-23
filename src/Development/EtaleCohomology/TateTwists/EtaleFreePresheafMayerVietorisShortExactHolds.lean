@@ -1,4 +1,52 @@
-import Development.EtaleCohomology.TateTwists.EtaleChainsMayerVietorisShortExactOfFree
+module
+
+public import Development.EtaleCohomology.TateTwists.EtaleChainsMayerVietorisShortExactOfFree
+public import Mathlib.Algebra.Category.ModuleCat.Biproducts
+public import Mathlib.CategoryTheory.Limits.Types.Pushouts
+public import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.Limits.FunctorCategory.BinaryBiproducts
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+
+@[expose] public section
 
 open CategoryTheory Limits AlgebraicGeometry Opposite GlobalTheory.EtC
 
@@ -62,7 +110,10 @@ noncomputable def mvIso {C D : Type*} [Category C] [Category D] [Preadditive C] 
   exact ShortComplex.isoMk (Iso.refl _) (G.mapBiprod A B) (Iso.refl _)
     (by show 𝟙 _ ≫ biprod.lift (G.map a) (-G.map b) = G.map (biprod.lift a (-b)) ≫ (G.mapBiprod A B).hom
         rw [biprod.map_lift_mapBiprod, Functor.map_neg, Category.id_comp])
-    (by dsimp; rw [← biprod.mapBiprod_inv_map_desc]; erw [Iso.hom_inv_id_assoc]; simp; exact (Category.comp_id _).symm)
+    (by
+      show (G.mapBiprod A B).hom ≫ biprod.desc (G.map c) (G.map d) =
+        G.map (biprod.desc c d) ≫ 𝟙 _
+      rw [Category.comp_id, biprod.mapBiprod_hom_desc])
 
 theorem mono_f_of_iso {C : Type*} [Category C] [HasZeroMorphisms C] {S T : ShortComplex C}
     (e : S ≅ T) [Mono S.f] : Mono T.f := by
@@ -121,10 +172,10 @@ theorem pointwise (R : Type) [CommRing R] {P Q E : PSh} (f : P ⟶ E) (g : Q ⟶
     (fun y : ULift.{1} ((pullback f g).obj X) => ULift.up ((pullback.snd f g).app X y.down))
     (fun y : ULift.{1} (P.obj X) => ULift.up (f.app X y.down))
     (fun y : ULift.{1} (Q.obj X) => ULift.up (g.app X y.down))
-    (fun x y h => ULift.ext _ _ (hf (congrArg ULift.down h)))
-    (fun x y h => ULift.ext _ _ (hg (congrArg ULift.down h)))
+    (fun x y h => ULift.ext (hf (congrArg ULift.down h)))
+    (fun x y h => ULift.ext (hg (congrArg ULift.down h)))
     (fun t => congrArg ULift.up (by simpa using ConcreteCategory.congr_hom hw t.down))
-    (fun t t' h => ULift.ext _ _ (hj _ _ ⟨congrArg ULift.down h.1, congrArg ULift.down h.2⟩))
+    (fun t t' h => ULift.ext (hj _ _ ⟨congrArg ULift.down h.1, congrArg ULift.down h.2⟩))
     (fun x y h => by
       obtain ⟨t, h1, h2⟩ := hs x.down y.down (congrArg ULift.down h)
       exact ⟨ULift.up t, congrArg ULift.up h1, congrArg ULift.up h2⟩)

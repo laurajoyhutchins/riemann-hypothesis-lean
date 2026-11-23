@@ -1,5 +1,57 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.ContragredientTranspose.GelfandKazhdan
+module
+
+public import GroundTheory.AutomorphicForms.ContragredientTranspose.GelfandKazhdan
+import GroundTheory.AutomorphicForms.GLnLocal
+import GroundTheory.AutomorphicForms.MeasuresModulus
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.MeasureTheory.Measure.Haar.Unique
+public import Mathlib
+
+@[expose] public section
 
 namespace GroundTheory.Variant₂.N1
 
@@ -57,23 +109,23 @@ lemma secondCountableTopology_GL : SecondCountableTopology (GL (Fin n) F) := by
     (MulOpposite.opHomeomorph (M := Matrix (Fin n) (Fin n) F)).symm.isEmbedding.isInducing.secondCountableTopology
   exact Units.isEmbedding_embedProduct.isInducing.secondCountableTopology
 
-open GroundTheory.Automorphic.ContragredientTranspose in
 
+open GroundTheory.Automorphic.ContragredientTranspose in
 lemma continuous_transposeGL {F : Type*} [Field F] [TopologicalSpace F] {n : ℕ} :
     Continuous (transposeGL : GL (Fin n) F → GL (Fin n) F) := by
   refine Units.continuous_iff.2 ⟨?_, ?_⟩
   · exact Units.continuous_val.matrix_transpose
   · exact Units.continuous_coe_inv.matrix_transpose
 
-open GroundTheory.Automorphic.ContragredientTranspose in
 
+open GroundTheory.Automorphic.ContragredientTranspose in
 noncomputable def thetaTContinuous : GL (Fin n) F ≃ₜ* GL (Fin n) F :=
   { (thetaT : GL (Fin n) F ≃* GL (Fin n) F) with
     continuous_toFun := continuous_transposeGL.inv
     continuous_invFun := continuous_transposeGL.inv }
 
-open GroundTheory.Automorphic.ContragredientTranspose in
 
+open GroundTheory.Automorphic.ContragredientTranspose in
 lemma thetaT_thetaT {F : Type*} [Field F] {n : ℕ} (g : GL (Fin n) F) :
     (thetaT : GL (Fin n) F ≃* GL (Fin n) F) (thetaT g) = g :=
   (thetaT : GL (Fin n) F ≃* GL (Fin n) F).symm_apply_apply g
@@ -84,8 +136,8 @@ end MapThetaTInvariant
 
 open MapThetaTInvariant
 
-open GroundTheory.Automorphic.ContragredientTranspose in
 
+open GroundTheory.Automorphic.ContragredientTranspose in
 theorem map_thetaT_eq_self {F : Type*} [Field F] [ValuativeRel F] [TopologicalSpace F]
     [IsNonarchimedeanLocalField F] {n : ℕ} [MeasurableSpace (GL (Fin n) F)]
     [BorelSpace (GL (Fin n) F)] (μ : Measure (GL (Fin n) F)) [μ.IsHaarMeasure] :
@@ -104,7 +156,7 @@ theorem map_thetaT_eq_self {F : Type*} [Field F] [ValuativeRel F] [TopologicalSp
     ext g : 1
     exact thetaT_thetaT g
   have hsq : (c * c) • μ = μ := by
-    conv_rhs => rw [← h2, hc, Measure.map_smul, hc, smul_smul]
+    conv_rhs => rw [← h2, hc, Measure.map_smul c hmeas.aemeasurable, hc, smul_smul]
 
   obtain ⟨K, hK, hK1⟩ := exists_compact_mem_nhds (1 : GL (Fin n) F)
   have hpos : 0 < μ K := Measure.measure_pos_of_mem_nhds μ hK1

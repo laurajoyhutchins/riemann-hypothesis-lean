@@ -1,5 +1,47 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsGrpPullback
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsCompletedStrictHens
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.AbelianSchemeQuotients.IsAbelianScheme
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 open CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj AlgebraicGeometry
 open scoped CategoryTheory.Obj
@@ -22,31 +64,6 @@ theorem finite (h : AbMulNSt) (hB : IsAbelianScheme B) (hg : SmoothOfRelativeDim
   rintro rfl
   exact hn Nat.cast_zero
 
-theorem dim_eq_zero (h : AbMulNSt) (hB : IsAbelianScheme B) (hg : SmoothOfRelativeDimension g B.hom)
-    (hn : (n : k) ≠ 0) (h2 : 2 ≤ n) (ht : ∀ x : 𝟙_ (Over (Sp k)) ⟶ B, x ^ n = 1 → x = 1) :
-    g = 0 := by
-  have : Unique {x : (𝟙_ (Over (Sp k)) ⟶ B) // x ^ n = 1} :=
-    ⟨⟨⟨1, one_pow n⟩⟩, fun x => Subtype.ext (ht x.1 x.2)⟩
-  have h1 := h k B g n hB hg hn
-  rw [Nat.card_unique] at h1
-  rcases Nat.pow_eq_one.1 h1.symm with h3 | h3 <;> omega
-
-omit [IsAlgClosed k] in
-
-theorem unit_case (n : ℕ) : IsAbelianScheme (𝟙_ (Over (Sp k))) ∧
-    SmoothOfRelativeDimension 0 (𝟙_ (Over (Sp k))).hom ∧
-    Nat.card {x : (𝟙_ (Over (Sp k)) ⟶ 𝟙_ (Over (Sp k))) // x ^ n = 1} = n ^ (2 * 0) := by
-  refine ⟨⟨inferInstance, ?_, ?_, ?_⟩, ?_, ?_⟩
-  · exact inferInstanceAs (Smooth (𝟙 (Sp k)))
-  · exact inferInstanceAs (IsProper (𝟙 (Sp k)))
-  · change GeometricallyConnected (𝟙 (Sp k))
-    refine ⟨fun K _ y Z fst snd H => ?_⟩
-    have : IsIso snd := H.isIso_snd_of_isIso
-    exact snd.homeomorph.symm.surjective.connectedSpace snd.homeomorph.symm.continuous
-  · exact inferInstanceAs (SmoothOfRelativeDimension 0 (𝟙 (Sp k)))
-  · have : Unique {x : (𝟙_ (Over (Sp k)) ⟶ 𝟙_ (Over (Sp k))) // x ^ n = 1} :=
-      ⟨⟨⟨1, one_pow n⟩⟩, fun x => Subtype.ext (toUnit_unique _ _)⟩
-    rw [Nat.card_unique, mul_zero, pow_zero]
 
 end AbMulNSt
 

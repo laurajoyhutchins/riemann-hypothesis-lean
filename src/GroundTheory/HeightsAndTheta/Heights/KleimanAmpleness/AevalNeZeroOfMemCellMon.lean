@@ -1,8 +1,58 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.ImportsSideBis
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.ImportsTerExtra
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.ImportsSideMore
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.ImportsSideAlt
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.ImportsSideBis
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.ImportsTerExtra
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.ImportsSideMore
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.ImportsSideAlt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.Kleiman.SectionsOverLocalization
@@ -47,8 +97,8 @@ theorem isMultiHomog_unique {t : MRingOver S ι} {a b : K → ℕ} (ha : IsMulti
   funext k
   rw [← ha m hm' k, hb m hm' k]
 
-omit [∀ k, Fintype (ι k)] in
 
+omit [∀ k, Fintype (ι k)] in
 theorem cellMon_split {B B' : ∀ k, Finset (ι k)} {p : Σ k, ι k}
     (hB : ∀ k (i : ι k), i ∈ B' k → (⟨k, i⟩ : Σ k, ι k) = p ∨ i ∈ B k) {t : MRingOver S ι}
     (ht : t ∈ cellMon S B') : ∃ s : ℕ, ∃ t' ∈ cellMon S B, t = X p ^ s * t' := by
@@ -82,8 +132,8 @@ theorem cellMon_isMultiHomog [DecidableEq K] {B : ∀ k, Finset (ι k)} {t : MRi
     obtain ⟨b, hb⟩ := hg
     exact ⟨a + b, isMultiHomog_mul' ha hb⟩
 
-omit [∀ k, Fintype (ι k)] in
 
+omit [∀ k, Fintype (ι k)] in
 theorem aeval_ne_zero_of_mem_cellMon {Ω : Type} [Field Ω] [Algebra S Ω] {y : (Σ k, ι k) → Ω}
     {B : ∀ k, Finset (ι k)} (hB : CellMeets y B) {t : MRingOver S ι} (ht : t ∈ cellMon S B) : aeval y t ≠ 0 := by
   unfold cellMon at ht
@@ -230,8 +280,8 @@ theorem cellSec_mono (y : (Σ k, ι k) → Ω) (γ : K → ℤ) {I I' : ∀ k, F
 
 variable [LinearOrder K] [∀ k, LinearOrder (ι k)]
 
-omit [∀ k, Fintype (ι k)] in
 
+omit [∀ k, Fintype (ι k)] in
 theorem mem_update_insert {I : ∀ k, Finset (ι k)} {k : K} {i : ι k} {k' : K} {i' : ι k'}
     (h : i' ∈ Function.update I k (insert i (I k)) k') : (⟨k', i'⟩ : Σ k, ι k) = ⟨k, i⟩ ∨ i' ∈ I k' := by
   by_cases hk : k' = k
@@ -243,8 +293,8 @@ theorem mem_update_insert {I : ∀ k, Finset (ι k)} {k : K} {i : ι k} {k' : K}
   · rw [Function.update_of_ne hk] at h
     exact Or.inr h
 
-omit [∀ k, Fintype (ι k)] in
 
+omit [∀ k, Fintype (ι k)] in
 theorem subset_update_insert (I : ∀ k, Finset (ι k)) (k : K) (i : ι k) (k' : K) :
     I k' ⊆ Function.update I k (insert i (I k)) k' := by
   by_cases hk : k' = k
@@ -253,8 +303,8 @@ theorem subset_update_insert (I : ∀ k, Finset (ι k)) (k : K) (i : ι k) (k' :
     exact Finset.subset_insert _ _
   · rw [Function.update_of_ne hk]
 
-omit [∀ k, Fintype (ι k)] in
 
+omit [∀ k, Fintype (ι k)] in
 theorem subset_baseCell (k₀ : K) {N : ℕ} (e : ι k₀ ≃ Fin (N + 1)) (J : Finset (Fin (N + 1)))
     (I : ∀ k, Finset (ι k)) (k : K) : I k ⊆ baseCell k₀ e J I k := by
   unfold baseCell
@@ -262,8 +312,8 @@ theorem subset_baseCell (k₀ : K) {N : ℕ} (e : ι k₀ ≃ Fin (N + 1)) (J : 
   · subst hk; rw [Function.update_self]; exact Finset.subset_union_left
   · rw [Function.update_of_ne hk]
 
-omit [∀ k, Fintype (ι k)] in
 
+omit [∀ k, Fintype (ι k)] in
 theorem baseCell_mono (k₀ : K) {N : ℕ} (e : ι k₀ ≃ Fin (N + 1)) (J : Finset (Fin (N + 1)))
     {I I' : ∀ k, Finset (ι k)} (hI : ∀ k, I k ⊆ I' k) (k : K) :
     baseCell k₀ e J I k ⊆ baseCell k₀ e J I' k := by
@@ -273,8 +323,8 @@ theorem baseCell_mono (k₀ : K) {N : ℕ} (e : ι k₀ ≃ Fin (N + 1)) (J : Fi
     exact Finset.union_subset_union (hI k) subset_rfl
   · rw [Function.update_of_ne hk, Function.update_of_ne hk]; exact hI k
 
-omit [∀ k, Fintype (ι k)] in
 
+omit [∀ k, Fintype (ι k)] in
 theorem cellMeets_baseCell (y : (Σ k, ι k) → Ω) (k₀ : K) {N : ℕ} (e : ι k₀ ≃ Fin (N + 1))
     (J : Kleiman.Chart (IndefiniteRowSideFullHecke.Kleiman2.blockVec y k₀ ∘ e.symm)) {I : ∀ k, Finset (ι k)} (hI : CellMeets y I) :
     CellMeets y (baseCell k₀ e J.1 I) := by
@@ -289,8 +339,8 @@ theorem cellMeets_baseCell (y : (Σ k, ι k) → Ω) (k₀ : K) {N : ℕ} (e : �
       exact (Kleiman.mem_support _).mp (J.2.2 hj)
   · rw [Function.update_of_ne hk] at hi; exact hI k i hi
 
-omit [∀ k, Fintype (ι k)] in
 
+omit [∀ k, Fintype (ι k)] in
 theorem mem_baseCell_update (k₀ : K) {N : ℕ} (e : ι k₀ ≃ Fin (N + 1)) (J : Finset (Fin (N + 1)))
     (I : ∀ k, Finset (ι k)) (k : K) (i : ι k) {k' : K} {i' : ι k'}
     (h : i' ∈ baseCell k₀ e J (Function.update I k (insert i (I k))) k') :
@@ -336,8 +386,8 @@ theorem coord_mem_secOver [DecidableEq K] (y : (Σ k, ι k) → Ω) (k : K) (i :
 
 variable [LinearOrder K] [∀ k, Fintype (ι k)] {y : (Σ k, ι k) → Ω} {k₀ : K} {N : ℕ} (e : ι k₀ ≃ Fin (N + 1))
 
-omit [LinearOrder K] in
 
+omit [LinearOrder K] in
 theorem chartSecOver_zero_subset [DecidableEq K] (hGen : ChartSecGen.Statement)
     (hM : IndefiniteRowSideFullHecke.Kleiman2.IsModelWithBase F y k₀) (J : Kleiman.Chart (IndefiniteRowSideFullHecke.Kleiman2.blockVec y k₀ ∘ e.symm)) {z : Ω}
     (hz : z ∈ chartSecOver F y k₀ e 0 J) : z ∈ Kleiman.chartRing F (IndefiniteRowSideFullHecke.Kleiman2.blockVec y k₀ ∘ e.symm) J := by
@@ -352,8 +402,8 @@ theorem chartSecOver_zero_subset [DecidableEq K] (hGen : ChartSecGen.Statement)
   rw [Subalgebra.smul_def, smul_eq_mul, mul_one]
   exact (c j).2
 
-omit [LinearOrder K] in
 
+omit [LinearOrder K] in
 theorem exists_sum_eq_one [DecidableEq K] (hGen : ChartSecGen.Statement) (hMul : ChartSecMul.Statement)
     (hM : IndefiniteRowSideFullHecke.Kleiman2.IsModelWithBase F y k₀) (J : Kleiman.Chart (IndefiniteRowSideFullHecke.Kleiman2.blockVec y k₀ ∘ e.symm)) (k : K) :
     ∃ w : ι k → Ω, (∀ i, w i ∈ chartSecOver F y k₀ e (-Pi.single k 1) J) ∧ ∑ i, w i * y ⟨k, i⟩ = 1 := by

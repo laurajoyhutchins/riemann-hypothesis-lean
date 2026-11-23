@@ -1,4 +1,49 @@
-import Formalism.SharpRestriction.GrowthBounds.FrobeniusPaths.SelfDualLatticesOneOrbit
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.FrobeniusPaths.ExteriorWedgeSqZero
+public import Formalism.SharpRestriction.GrowthBounds.FrobeniusPaths.NmHContrPos
+public import Formalism.SharpRestriction.GrowthBounds.FrobeniusPaths.SelfDualLatticesOneOrbit
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -106,23 +151,29 @@ lemma lift_substitution_letter (w : O) (LL : LiftLetters (Fin N)) (g g' : Matrix
       MvPolynomial.map (algebraMap O (KK O)) (zetaL p f w LL g g' i b) := by
   unfold letG zetaL
   by_cases hv : LL.vec i = true
-  · rw [if_pos hv, if_pos hv, map_sum]
+  · set_option synthInstance.maxHeartbeats 100000 in
+      rw [if_pos hv, if_pos hv, map_sum]
+
     simp only [map_mul, liftSubst_X_vec p f O w LL r g' hg' i _ hv, algHom_C, Matrix.vecMul, dotProduct, map_sum,
-      Matrix.map_apply, phiS, RingHom.comp_apply, map_C, yO, map_X]
+    Matrix.map_apply, phiS, RingHom.comp_apply, map_C, yO, map_X]
     have e : ∀ c : Fin (r + K), ∑ a, sigMat p f O g'⁻¹ (LL.pos i) c a * sigMat p f O g (LL.pos i) a b =
         algebraMap O (KK O) (psiO p f O (LL.pos i) ((g'⁻¹ * g) c b)) := by
       intro c; rw [← Matrix.mul_apply, ← sigMat_mul, sigMat_apply]
+
     simp only [← e, Finset.sum_mul, map_sum, Finset.mul_sum, C_mul]
     rw [Finset.sum_comm]
     exact Finset.sum_congr rfl fun c _ => Finset.sum_congr rfl fun a _ => by
       rw [MvPolynomial.algebraMap_eq]; ring
   · have hv' : LL.vec i = false := by simpa using hv
+
     rw [if_neg hv, if_neg hv, map_sum, sigMat_inv p f O g hg]
+
     simp only [map_mul, liftSubst_X_cov p f O w LL r g' i _ hv', algHom_C, Matrix.mulVec, dotProduct, map_sum,
-      Matrix.map_apply, phiS, RingHom.comp_apply, map_C, yO, map_X]
+    Matrix.map_apply, phiS, RingHom.comp_apply, map_C, yO, map_X]
     have e : ∀ c : Fin (r + K), ∑ a, sigMat p f O g⁻¹ (LL.pos i) b a * sigMat p f O g' (LL.pos i) a c =
         algebraMap O (KK O) (psiO p f O (LL.pos i) ((g⁻¹ * g') b c)) := by
       intro c; rw [← Matrix.mul_apply, ← sigMat_mul, sigMat_apply]
+
     simp only [← e, Finset.sum_mul, map_sum, Finset.mul_sum, C_mul]
     rw [Finset.sum_comm]
     exact Finset.sum_congr rfl fun c _ => Finset.sum_congr rfl fun a _ => by

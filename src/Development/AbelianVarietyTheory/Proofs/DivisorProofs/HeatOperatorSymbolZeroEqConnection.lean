@@ -1,12 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.HasDefect
-import Development.AbelianVarietyTheory.Definitions.Divisors.RigidForFan
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.ToroidalCompactificationBis
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsConnK
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ConnectionClosedFibreEqDerivationIdentificationStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HeatOperatorConnectionClosedFibreStatement
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.LogDerivativePrincipalPolarisationIndependent
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.HasDefect
+public import Development.AbelianVarietyTheory.Definitions.Divisors.RigidForFan
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ConnectionClosedFibreEqDerivationIdentificationStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HeatOperatorConnectionClosedFibreStatement
 import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ConstThickeningFieldStructure
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.LogDerivativePrincipalPolarisationIndependent
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 open CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj AlgebraicGeometry NumberField IsLocalRing
 open scoped CategoryTheory.Obj Matrix TensorProduct
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Out ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor Formalism.L2.Pj
@@ -51,7 +88,8 @@ theorem gs_intCast {Z Y : Scheme.{0}} (f : Z ⟶ Y) (z : Z) (O : Y.Opens) (hz : 
 
 theorem gs_sum {Z Y : Scheme.{0}} (f : Z ⟶ Y) (z : Z) (O : Y.Opens) (hz : f z ∈ O) {I : Type} (s : Finset I)
     (a : I → Γ(Y, O)) : gs f z O (∑ i ∈ s, a i) = ∑ i ∈ s, gs f z O (a i) := by
-  simp only [gs_eq f z O hz, map_sum]
+  set_option synthInstance.maxHeartbeats 100000 in
+    simp only [gs_eq f z O hz, map_sum]
 
 def cstD {k : Type} [Field k] {Z : Scheme.{0}} (p : Z ⟶ Sp (DualNumber k)) (z : Z) :
     DualNumber k →+* Z.presheaf.stalk z :=
@@ -113,8 +151,6 @@ theorem gm_pull_g {X X' Y : Scheme.{0}} {L : LB X} (F : X' ⟶ X) (f : Y ⟶ X')
   show gm f y _ (∏ _k : PUnit, (res _ (pullU F _ (L.g j j'))) ^ (1 : ℤ)) = _
   rw [Fintype.prod_unique, zpow_one]
   exact (gm_res f y _ hp _).trans (gm_pull f F y (L.U j ⊓ L.U j') ⟨hj, hj'⟩ _)
-
-example {X Y Z : Scheme.{0}} (f : Z ⟶ Y) (g : Y ⟶ X) (z : Z) : (f ≫ g) z = g (f z) := rfl
 
 end GlobalTheory.HeatUConn
 
@@ -292,7 +328,7 @@ theorem core {R : Type} [CommRing R] {k : Type} [Field k] [CharZero k] (A : Over
       ((trF fam es (x ≫ π₁) z (fun k => J ((x ≫ π₁) ≫ fam k)) t)⁻¹).val = 1 := Units.mul_inv _
   rw [gs_cstD, gs_cstD, sa, sb, sc, hA', hFz]
   simp only [hgw]
-  rw [prod3, htr1, htr2, Units.val_mul, Units.val_mul, hKprod, map_mul, map_add, map_one, hinr, hinr]
+  rw [prod3, htr1, htr2, Units.val_mul, Units.val_mul, hKprod, map_mul, map_add (f := _), map_one, hinr, hinr]
   simp only [map_neg]
   exact final_alg _ _ _ _ _ _ _ _ _ _ _ hU hH hEE
 

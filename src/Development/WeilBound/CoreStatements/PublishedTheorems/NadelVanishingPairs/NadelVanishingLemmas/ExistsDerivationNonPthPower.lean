@@ -1,5 +1,64 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.Field.Subfield.Defs
+public import Mathlib.Algebra.TrivSqZeroExt.Basic
+public import Mathlib.Order.CompletePartialOrder
+public import Mathlib.RingTheory.Derivation.Basic
+import Mathlib.Algebra.DualNumber
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Definitions.Divisors.IsEulerContraction
+import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.ExistsAddEquivOfSurjectiveOfKerIff
+public import Mathlib.Algebra.CharP.Frobenius
+public import Mathlib.Algebra.CharP.Reduced
+public import Mathlib.Algebra.Field.Subfield.Basic
+public import Mathlib.FieldTheory.KummerPolynomial
+
+@[expose] public section
 
 open GlobalTheory GlobalTheory.LogDR
 
@@ -104,7 +163,7 @@ private theorem exists_inclusion_mul_eq_mul_inclusion_of_normal (p : ℕ) [Fact 
     intro P
     induction P using Polynomial.induction_on with
     | C a => simp [φ, ev, hfst]
-    | add P Q hP hQ => simp only [map_add, fst_add, hP, hQ]
+    | add P Q hP hQ => simp only [map_add (f := _), fst_add, hP, hQ]
     | monomial n a _ =>
       simp [φ, ev, hfst, fst_pow]
   have hpow : (inl x + inr v : TrivSqZeroExt K K) ^ p = inl (x ^ p) := by
@@ -131,7 +190,7 @@ private theorem exists_inclusion_mul_eq_mul_inclusion_of_normal (p : ℕ) [Fact 
     by_contra h
     obtain ⟨a, b, hab⟩ := (hirr.coprime_iff_not_dvd).2 h
     have := congrArg ev hab
-    simp [map_add, map_mul, hevm, hP] at this
+    simp [map_add (f := _), map_mul, hevm, hP] at this
   refine ⟨φ.range, ?_, ?_, ?_, ?_⟩
   · rintro _ ⟨P, rfl⟩ h
     obtain ⟨Q, rfl⟩ := hdvd P (by rw [← hfstφ]; exact h)
@@ -143,7 +202,7 @@ private theorem exists_inclusion_mul_eq_mul_inclusion_of_normal (p : ℕ) [Fact 
     obtain ⟨a, b, hab⟩ := (hirr.coprime_iff_not_dvd).2 hnd
     refine ⟨φ b, ⟨b, rfl⟩, ?_⟩
     have := congrArg φ hab
-    rw [map_add, map_mul, map_mul, hφm, mul_zero, zero_add, map_one] at this
+    rw [map_add (f := _), map_mul, map_mul, hφm, mul_zero, zero_add, map_one] at this
     rw [mul_comm]; exact this
   · intro a
     exact ⟨Polynomial.C a, by simp [φ]⟩

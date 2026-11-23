@@ -1,8 +1,48 @@
-import Mathlib
-import Formalism.LocalToGlobal.IndefiniteReal.ConcretePkgSpec
-import Formalism.LocalRingCardinality.DataExtra
-import Formalism.LocalRingCardinality.DataTies
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsHolRepOfIsTau
+module
+
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsHolRepOfIsTau
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.BitVec
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.MainNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.MainNotions.S MeasureTheory IsDedekindDomain NumberField Matrix Formalism.L2.Theta Formalism.L2.DIV Formalism.L2.Indef Formalism.IndefR Formalism.IndefR.Links Formalism.IndefR.Mult Formalism.IndefR.Datum GlobalTheory.JointHarm
 open scoped TensorProduct InnerProductSpace Classical
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
@@ -139,7 +179,7 @@ theorem fsub_minorPlus (ε : D.what₂.Tau → Fin m → Bool) (k : D.what₂.Ta
   have hsn : s ≤ n := by omega
   have hv : ∀ α β : Fin s, (varF τ β α : PolF D m n) =
       MvPolynomial.X (τ, Fin.castLE hsm β, Fin.castLE hsn α) := fun α β => by
-    rw [varF, dif_pos ⟨by omega, by omega⟩]; rfl
+    rw [varF, dite_eq_left ⟨by omega, by omega⟩]; rfl
   have hui := inv_tri (u τ) hu.1 _ (lo_tri hu.2)
   have key := det_subst (R := PolF D m n) (fun a b => MvPolynomial.X (τ, a, b)) (k τ) (u τ)⁻¹
     (Fin.castLE hsm) (Fin.castLE hsn) (Fin.castLE_injective _) (Fin.castLE_injective _)
@@ -179,7 +219,7 @@ theorem fsub_minorMinus (ε : D.what₂.Tau → Fin m → Bool) (k : D.what₂.T
   let f : Fin s → Fin n := fun α => ⟨n - s + α, by omega⟩
   have hv : ∀ α β : Fin s, (varF τ (p + β) (n - s + α) : PolF D m n) =
       MvPolynomial.X (τ, e β, f α) := fun α β => by
-    rw [varF, dif_pos ⟨by omega, by omega⟩]
+    rw [varF, dite_eq_left ⟨by omega, by omega⟩]
   let w : Fin m → ℤ := fun a => if (a : ℕ) < p then ((a : ℕ) : ℤ) else 2 * m - ((a : ℕ) : ℤ)
   have hw : Function.Injective w := fun a b h => by
     simp only [w] at h

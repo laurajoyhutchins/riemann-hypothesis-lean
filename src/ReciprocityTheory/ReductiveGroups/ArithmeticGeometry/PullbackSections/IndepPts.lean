@@ -1,6 +1,55 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.JInjCore
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.DetAlg
-import Formalism.LocalToGlobal.ProjectiveLattices.AlgebraMapCAt
+module
+
+public import Formalism.LocalToGlobal.ProjectiveLattices.AlgebraMapCAt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.DetAlg
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.JInjCore
+public import Mathlib.Algebra.Module.Torsion.Field
+public import Mathlib.Analysis.Complex.Polynomial.Basic
+
+@[expose] public section
 
 namespace ReciprocityTheory.ChartRestriction.G.PullbackSections
 
@@ -16,7 +65,7 @@ theorem evalAt_eq_of (hWD : EvalWD pts mapR) (f : Rules pts) (hf : IsNatural pts
     (h : mapR φ y w) : evalAt pts mapR f w = φ (f p y) := by
   have hT : FromTest pts mapR w := ⟨p, φ, y, h⟩
   unfold evalAt
-  rw [dif_pos hT]
+  rw [dite_eq_left hT]
   exact hWD f hf S _ p _ φ _ y w hT.choose_spec.choose_spec.choose_spec h
 
 theorem indep_of_complex [Algebra K ℂ] (hWD : EvalWD pts mapR)
@@ -31,7 +80,11 @@ theorem indep_of_complex [Algebra K ℂ] (hWD : EvalWD pts mapR)
   haveI : Normal K F := IsAlgClosure.normal K F
   haveI : Algebra.IsSeparable K F := IsAlgClosure.separable K F
   haveI : IsGalois K F := ⟨⟩
-  let ι : F →ₐ[K] ℂ := IsAlgClosed.lift
+  let ι : F →ₐ[K] ℂ := (by
+    refine @_root_.IsAlgClosed.lift _ _ _ _ _ _ _ _ _ _ _ ?_ ?_ ?_
+    solve_by_elim* (maxDepth := 2) only [*,
+      @_root_.DivisionSemiring.to_moduleIsTorsionFree,
+      @_root_.Algebra.IsIntegral.isAlgebraic, @_root_.inferInstance])
   let Pt := Σ p : TRing K, pts p.R × (p.R →ₐ[K] F)
   let v : Rules pts →ₗ[K] (Pt → F) :=
     { toFun := fun f q => q.2.2 (f q.1 q.2.1)
@@ -58,7 +111,11 @@ theorem indep_of_complex [Algebra K ℂ] (hWD : EvalWD pts mapR)
     funext p y
     apply detAlg_holds K p.n p.I p.3 (f p y)
     intro L _ _ _ φ
-    let e : L →ₐ[K] F := IsAlgClosed.lift
+    let e : L →ₐ[K] F := (by
+      refine @_root_.IsAlgClosed.lift _ _ _ _ _ _ _ _ _ _ _ ?_ ?_ ?_
+      solve_by_elim* (maxDepth := 2) only [*,
+        @_root_.DivisionSemiring.to_moduleIsTorsionFree,
+        @_root_.Algebra.IsIntegral.isAlgebraic, @_root_.inferInstance])
     have h1 : e (φ (f p y)) = 0 := congrFun hf0 ⟨p, y, e.comp φ⟩
     exact e.toRingHom.injective (h1.trans (map_zero e).symm)
   have hli := indepDescent_holds K F ι.toRingHom (Rules pts) Pt v act hbij heq hinj n b hb

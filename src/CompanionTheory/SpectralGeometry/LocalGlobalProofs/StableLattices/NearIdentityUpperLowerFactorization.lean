@@ -1,6 +1,50 @@
-import Mathlib
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.StableLattices.EntryMulSubOne
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.FactorizationBis
+module
+
+public import Mathlib.Analysis.Normed.Field.Basic
+public import Mathlib.Data.Matrix.Mul
+public import Mathlib.Topology.MetricSpace.Ultra.Basic
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.FactorizationBis
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -10,27 +54,9 @@ namespace GlobalTheory.CompanionTheory.CartGL.IwahoriLU
 
 variable {L : Type} [NontriviallyNormedField L] [IsUltrametricDist L] {n : ℕ}
 
-def blk (P : Matrix (Fin n) (Fin n) L) (b c : Fin n → L) (d : L) :
-    Matrix (Fin (n + 1)) (Fin (n + 1)) L :=
-  fun i j => Fin.lastCases (motive := fun _ => L)
-    (Fin.lastCases (motive := fun _ => L) d c j)
-    (fun i' => Fin.lastCases (motive := fun _ => L) (b i') (P i') j) i
 
-omit [IsUltrametricDist L] in
-@[simp] theorem blk_cc (P : Matrix (Fin n) (Fin n) L) (b c : Fin n → L) (d : L) (i j : Fin n) :
-    blk P b c d i.castSucc j.castSucc = P i j := by simp [blk]
 
-omit [IsUltrametricDist L] in
-@[simp] theorem blk_cl (P : Matrix (Fin n) (Fin n) L) (b c : Fin n → L) (d : L) (i : Fin n) :
-    blk P b c d i.castSucc (Fin.last n) = b i := by simp [blk]
 
-omit [IsUltrametricDist L] in
-@[simp] theorem blk_lc (P : Matrix (Fin n) (Fin n) L) (b c : Fin n → L) (d : L) (j : Fin n) :
-    blk P b c d (Fin.last n) j.castSucc = c j := by simp [blk]
-
-omit [IsUltrametricDist L] in
-@[simp] theorem blk_ll (P : Matrix (Fin n) (Fin n) L) (b c : Fin n → L) (d : L) :
-    blk P b c d (Fin.last n) (Fin.last n) = d := by simp [blk]
 
 theorem factor (n : ℕ) (r : ℝ) (h0 : 0 ≤ r) (h1 : r < 1) :
     ∀ A : Matrix (Fin n) (Fin n) L, (∀ i j, ‖(A - 1) i j‖ ≤ r) →

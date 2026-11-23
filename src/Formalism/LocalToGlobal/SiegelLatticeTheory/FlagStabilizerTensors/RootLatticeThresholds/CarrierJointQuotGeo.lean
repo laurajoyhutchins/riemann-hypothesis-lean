@@ -1,6 +1,50 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RootLatticeThresholds.CarrierJointQuotMeas
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.QuotIndepPf
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RootLatticeThresholds.CarrierJointQuotMeas
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.QuotIndepPf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Algebra.Group.Units
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -236,7 +280,7 @@ theorem locUni_of (X : Formalism.L2.SG.HidaSetting.HidaSetting D) (u u' : D.what
       MeasurePreserving f (muStabV X w) (muStabV X w) := by
     intro f hf
     rw [heq]
-    exact ⟨hf.measurable, by rw [Measure.map_smul, hf.map_eq]⟩
+    exact ⟨hf.measurable, by rw [Measure.map_smul _ hf.measurable.aemeasurable, hf.map_eq]⟩
   obtain ⟨hσ, hne, hc, hleft, hinvν, hκm, b, hb, hbt, hb1⟩ :=
     chart_haar (StV X u u' (gamW X u u' w) v) (stCoordV X u' w (gamW X u u' w) v) φ (muStabV X w)
       (stCoordV_continuous X u' w _ v) hφ hφS hφκ hκφ h1 hmul hinv (fun s hs => hMP _ (hL s hs))
@@ -251,7 +295,7 @@ theorem globProd_of (X : Formalism.L2.SG.HidaSetting.HidaSetting D) (u u' : D.wh
   haveI : ∀ v, SigmaFinite (μRv v) := fun v => (hRv v).1.1
   let Φ : (InfinitePlace X.B.I.F → FreeE w → ℂ) → X.B.I.Ginf := fun c v => φ v (c v)
   have hΦm : Measurable Φ :=
-    measurable_pi_lambda _ fun v => (hφc v).measurable.comp (measurable_pi_apply v)
+    Measurable.of_eval fun v => (hφc v).measurable.comp (measurable_pi_apply v)
   have hsc := stCoord_measurable X u' w (gamW X u u' w)
   have hleft : ∀ y ∈ StInf X u u' (gamW X u u' w), Φ (stCoord X u' w (gamW X u u' w) y) = y := by
     intro y hy

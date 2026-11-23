@@ -1,6 +1,51 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.CupProducts.ExistsCocycleMapFEqD
-import GroundTheory.ProfiniteCohomology.CupProducts.Pairing
+module
+
+public import GroundTheory.ProfiniteCohomology.CupProducts.Pairing
+public import GroundTheory.ProfiniteCohomology.ContinuousCochains.LongExactSequence
+import GroundTheory.ProfiniteCohomology.CupProducts.Cocycles
+public import GroundTheory.ProfiniteCohomology.CupProducts.ExistsCocycleMapFEqD
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
@@ -16,9 +61,9 @@ variable {S T : ShortComplex (Rep.{u} k G)} [IsDiscreteRep S.X₁] [IsDiscreteRe
   {C : Rep.{u} k G} [IsDiscreteRep C]
   (μ₁ : S.X₁ ⊗ T.X₃ ⟶ C) (μ₂ : S.X₂ ⊗ T.X₂ ⟶ C) (μ₃ : S.X₃ ⊗ T.X₁ ⟶ C)
 
+
 omit [TopologicalSpace G] [IsTopologicalGroup G] [IsDiscreteRep S.X₁] [IsDiscreteRep S.X₂] [IsDiscreteRep S.X₃] [IsDiscreteRep T.X₁]
   [IsDiscreteRep T.X₂] [IsDiscreteRep T.X₃] [IsDiscreteRep C] in
-
 theorem cupCochain_pairing_left (h₁₂ : (S.f ⊗ₘ 𝟙 T.X₂) ≫ μ₂ = (𝟙 S.X₁ ⊗ₘ T.g) ≫ μ₁)
     {p q n : ℕ} (h : p + q = n) (a : (Fin p → G) → S.X₁) (b : (Fin q → G) → T.X₂)
     (σ : Fin n → G) :
@@ -29,9 +74,9 @@ theorem cupCochain_pairing_left (h₁₂ : (S.f ⊗ₘ 𝟙 T.X₂) ≫ μ₂ = 
   rw [tensorHom_cupCochain, tensorHom_cupCochain] at e
   exact e
 
+
 omit [TopologicalSpace G] [IsTopologicalGroup G] [IsDiscreteRep S.X₁] [IsDiscreteRep S.X₂] [IsDiscreteRep S.X₃] [IsDiscreteRep T.X₁]
   [IsDiscreteRep T.X₂] [IsDiscreteRep T.X₃] [IsDiscreteRep C] in
-
 theorem cupCochain_pairing_right (h₂₃ : (𝟙 S.X₂ ⊗ₘ T.f) ≫ μ₂ = (S.g ⊗ₘ 𝟙 T.X₁) ≫ μ₃)
     {p q n : ℕ} (h : p + q = n) (a : (Fin p → G) → S.X₂) (b : (Fin q → G) → T.X₁)
     (σ : Fin n → G) :
@@ -82,13 +127,13 @@ theorem cupPairing_δ_add_cupPairing_δ (h₁₂ : (S.f ⊗ₘ 𝟙 T.X₂) ≫ 
     have hcomm := ConcreteCategory.congr_hom ((cochainsMap μ₂).comm (p + q) (p + q + 1))
       (cupLocallyConstant rfl x₂ y₂)
     rw [ConcreteCategory.comp_apply, ConcreteCategory.comp_apply] at hcomm
-    rw [map_add, map_smul, cochainOf_add, cochainOf_smul, cochainOf_cocycleι_cyclesMap,
+    rw [map_add (f := _), map_smul, cochainOf_add, cochainOf_smul, cochainOf_cocycleι_cyclesMap,
       cochainOf_cocycleι_cyclesMap, cocycleι_cupCocycles, cocycleι_cupCocycles,
       cochainOf_cocycleι_toCycles, ← cochainOf_d, hcomm, cochainOf_cochainsMap_f, cochainOf_d]
     simp only [cochainOf_cupLocallyConstant]
     rw [d_cupCochain, ← hx₁', ← hy₁']
     funext σ
-    rw [Pi.add_apply, Pi.smul_apply, Pi.add_apply, Pi.smul_apply, map_add, map_smul,
+    rw [Pi.add_apply, Pi.smul_apply, Pi.add_apply, Pi.smul_apply, map_add (f := _), map_smul,
       cupCochain_pairing_left μ₁ μ₂ h₁₂, cupCochain_pairing_right μ₂ μ₃ h₂₃, hx₂', hy₂']
   rw [key, cohomologyπ_toCycles]
 

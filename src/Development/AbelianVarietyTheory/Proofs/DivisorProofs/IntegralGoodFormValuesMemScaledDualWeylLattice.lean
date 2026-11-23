@@ -1,18 +1,60 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Statements.PlaceShiftStatements.InfClassAt
-import Development.AbelianVarietyTheory.Statements.PlaceShiftStatements.DictAt
-import Development.AbelianVarietyTheory.Definitions.Divisors.DiscreteSeriesHermitianUnique
-import Development.AbelianVarietyTheory.Definitions.Foundations.NormSumPairRankZeroOfCurveCoordNorm
-import Development.AbelianVarietyTheory.Definitions.Divisors.FrameSignSimple
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FiniteInfinitePsiBounds
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AuxiliaryVectorDecompositionEqZero
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.RationalFormCoordinatesCoeffMemCoefficientField
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.BranchingPairingMemCoefficientField
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HcParameterEAddHalfShiftLeBSucc
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.LevelHyperspecialTrivialCharacterSplitsOffPlaces
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsSmulMemOfLeLocP
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.SplitOffBadOfSuppSplitOff
+module
+
+public import Development.AbelianVarietyTheory.Statements.PlaceShiftStatements.InfClassAt
+public import Development.AbelianVarietyTheory.Definitions.Divisors.FrameSignSimple
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AuxiliaryVectorDecompositionEqZero
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FiniteInfinitePsiBounds
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsSmulMemOfLeLocP
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.FinCongMemLevEnv
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IntValuationEqOfMem
 import Development.AbelianVarietyTheory.Proofs.FoundationProofs.LatticeExtensionAlongFieldEmbeddingDuals
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.LatticeHasBasisAtEveryFinitePlace
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.SplitOffBadOfSuppSplitOff
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HcParameterEAddHalfShiftLeBSucc
+import Development.AbelianVarietyTheory.Proofs.SatakeParameters.LevelHyperspecialTrivialCharacterSplitsOffPlaces
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.BranchingPairingMemCoefficientField
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.RationalFormCoordinatesCoeffMemCoefficientField
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.CompletedLatticeEqAdelicCompletionAndGram
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsLatticeRationalVectorsInAdelicTranslate
+import Formalism.LocalToGlobal.Columns.CoefColLemmas
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.L2.Theta Formalism.IndefR Formalism.IndefR.Datum Formalism.IndefR.Links Formalism.L2.DIV
 open IsDedekindDomain NumberField Matrix GlobalTheory.ChiGrid GlobalTheory.FunObj GlobalTheory.RowTest GlobalTheory.RowClaim GlobalTheory.TestLat GlobalTheory.SumSize
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
@@ -39,7 +81,7 @@ private theorem invTr_invTr (B : GL (Fin n) K) : inside₂ K n (inside₂ K n B)
   simp [inside₂]
 
 private theorem isBasisAt_of_dualFr (w : HeightOneSpectrum (𝓞 K)) {M : Submodule (𝓞 K) (Fin n → K)}
-    (hM : Submodule.IsLattice K M) {B : GL (Fin n) K} (hB : IsBasisAt w (dualFr M) B) : IsBasisAt w M (inside₂ K n B) := by
+    (hM : Submodule.IsFullLattice K M) {B : GL (Fin n) K} (hB : IsBasisAt w (dualFr M) B) : IsBasisAt w M (inside₂ K n B) := by
   obtain ⟨B₀, h₀⟩ := GlobalTheory.LatBasisAt.basisAtEx K n M hM w
   have h1 : IsBasisAt w (colLat (inside₂ K n B₀)) B :=
     Eq.trans (Eq.symm (GlobalTheory.DualWeylDual.isBasisAt_dualFr w hM.fg h₀)) hB
@@ -48,7 +90,7 @@ private theorem isBasisAt_of_dualFr (w : HeightOneSpectrum (𝓞 K)) {M : Submod
   exact Eq.trans h₀ h2
 
 private theorem funEquiv_nabK (lam : ι → DomWeight n) (M : ι → Submodule (𝓞 K) (Fin n → K))
-    (hM : ∀ τ, Submodule.IsLattice K (M τ)) (F : VV K lam) (hF : F ∈ nabK lam M) :
+    (hM : ∀ τ, Submodule.IsFullLattice K (M τ)) (F : VV K lam) (hF : F ∈ nabK lam M) :
     funEquiv lam F ∈ nabK (fun τ => (lam τ).dual) fun τ => dualFr (M τ) := by
   have hF' : F.1 ∈ transLat lam (nabStd K lam) M := hF
   show (funEquiv lam F).1 ∈ transLat _ (nabStd K _) _
@@ -72,6 +114,15 @@ end Lat
 section Ad
 
 variable {D : D7}
+
+private theorem hLat_full (V : HSp D) (g : Bridge.Gf V) :
+    Submodule.IsFullLattice D.host.E (Bridge.hLat V g) := by
+  obtain ⟨-, -, hfg, hsp, -⟩ := GlobalTheory.Member.latHat_eq_hat_and_gram D V
+  obtain ⟨Λ, hΛ, h1, h2, -⟩ := GlobalTheory.AdLat.exists_lattice_latOf
+    D.host.F D.host.E V.rank (GlobalTheory.Member.latC V) g.1 hfg hsp
+  rw [SetLike.coe_injective ((GlobalTheory.RepsCompare.coe_hLat V g).trans hΛ.symm)]
+  letI : Submodule.IsLattice D.host.E Λ := Submodule.IsLattice.of_fg D.host.E h1
+  exact ⟨h2⟩
 
 private theorem mem_hLat (V : HSp D) (g : Bridge.Gf V) (x : Fin V.rank → D.host.E) :
     x ∈ Bridge.hLat V g ↔ (g.1⁻¹).1 *ᵥ (fun i => (1 : Af D.host.F) ⊗ₜ[D.host.F] x i) ∈
@@ -200,13 +251,13 @@ private theorem inLat_value {V : HSp D} {β : GL (Fin V.rank) (Lev.EAf D)} {Λ :
   rw [mul_one] at e2
   refine e2 ▸ TestFunctionNorms.GlobalTheory.CompanionTheory.TestVal.nabAtr_map _ _ _ _ _ ?_
   exact funEquiv_nabK lam' _
-    (fun τ => GlobalTheory.TauLat.tauLatLattice _ _ _ _ (labLL D) τ _ (GlobalTheory.RepsCompare.isLattice_hLat _ _)) v hv
+    (fun τ => GlobalTheory.TauLat.tauLatLattice _ _ _ _ (labLL D) τ _ (hLat_full _ _)) v hv
 
 end Ad
 
 end GlobalTheory.FormFinVal
 
-set_option maxHeartbeats 1600000 in
+
 open GlobalTheory.FormFinVal in
 theorem _root_.GlobalTheory.T.integralGoodForm_values_mem_scaledDualWeylLattice : BigC fun {D} {_} _ _ {_} {_} {A} {_} _ _ _ {R} F ch _ _ => ∀ (t : _) (w : PlL D), ∀ x ∈ (A.fam.R t).Mt (A.fam.lvl F.P0 F.ψ0), ∀ y,
   InLat _ w 0 (latAt ch.S.toGridChoice (.grid 0 D.R.m) y) (rowVal ch.S.toGridChoice (ch.S.formC t (R.jX t (formOf F t x)) y)) := by

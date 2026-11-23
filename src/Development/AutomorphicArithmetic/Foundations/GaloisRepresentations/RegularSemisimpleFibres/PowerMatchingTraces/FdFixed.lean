@@ -1,17 +1,80 @@
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.RegularSemisimpleFibres.PowerMatchingTraces.MatchPowAlt
+module
+
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.RegularSemisimpleFibres.PowerMatchingTraces.MatchPowAlt
+import Development.AbelianVarietyTheory.Definitions.Divisors.T2SpaceGeneralLinearGroup
+public import Development.AutomorphicArithmetic.Foundations.Convolution.BlockEvaluation.Ci
+public import Development.AutomorphicArithmetic.Foundations.Convolution.CentreSplitting.LocIff
+public import Development.AutomorphicArithmetic.Foundations.Convolution.GeneralizedMeasures.Outright
+public import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.EigBasic
+public import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.TwistY
+public import Development.AutomorphicArithmetic.Foundations.Convolution.PowerSumTraces.ExistsPowerSums
+public import Development.AutomorphicArithmetic.Foundations.Convolution.PowerSumTraces.LocGalEx
+import Development.AutomorphicArithmetic.Foundations.Convolution.PowerSumTraces.OccursBasics
+public import Development.AutomorphicArithmetic.Foundations.Convolution.PowerSumTraces.OccursIff
+public import Development.AutomorphicArithmetic.Foundations.Convolution.PowerSumTraces.TermEV
+public import Development.AutomorphicArithmetic.Foundations.Convolution.TraceSplitting.CarryLift
+public import Development.AutomorphicArithmetic.Foundations.Convolution.TraceSplitting.CoreDescOf
+public import Development.AutomorphicArithmetic.Foundations.Convolution.TraceSplitting.CoreLift
+public import Development.AutomorphicArithmetic.Foundations.Convolution.TraceSplitting.FamParts
+import Development.AutomorphicArithmetic.Foundations.Convolution.TraceSplitting.GoodEx
+public import Development.AutomorphicArithmetic.Foundations.Convolution.TraceSplitting.LiftAll
+public import Development.AutomorphicArithmetic.Foundations.Convolution.TraceSplitting.LiftStep
+public import Development.AutomorphicArithmetic.Foundations.Convolution.TraceSplitting.OneTerm
+public import Development.AutomorphicArithmetic.Foundations.Convolution.TraceSplitting.PickInf
+public import Development.AutomorphicArithmetic.Foundations.Convolution.TraceSplitting.PickS
+import Development.AutomorphicArithmetic.Foundations.Convolution.TraceSplitting.Places
+public import Development.AutomorphicArithmetic.Foundations.Convolution.TraceSplitting.SideSum
+public import Development.AutomorphicArithmetic.Foundations.Convolution.TraceSplitting.TyEx
+import Development.AutomorphicArithmetic.Foundations.Convolution.TraceSplitting.UnitTrace
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.RegularSemisimpleFibres.PowerMatchingTraces.BaseTw
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.RegularSemisimpleFibres.PowerMatchingTraces.CmpIso
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.RegularSemisimpleFibres.PowerMatchingTraces.FibTrace
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.RegularSemisimpleFibres.PowerMatchingTraces.LevEx
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.RegularSemisimpleFibres.PowerMatchingTraces.MatchCutAlt
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.RegularSemisimpleFibres.PowerMatchingTraces.PowNe
 import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.RegularSemisimpleFibres.PowerMatchingTraces.TrBasic
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.RegularSemisimpleFibres.PowerMatchingTraces.TrEx
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.RegularSemisimpleFibres.PowerMatchingTraces.LevEx
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.RegularSemisimpleFibres.PowerMatchingTraces.CmpIso
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.RegularSemisimpleFibres.PowerMatchingTraces.MatchCutAlt
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.RegularSemisimpleFibres.PowerMatchingTraces.FibTrace
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.RegularSemisimpleFibres.PowerMatchingTraces.BaseTw
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.RegularSemisimpleFibres.PowerMatchingTraces.PowNe
-import Development.AutomorphicArithmetic.Foundations.Convolution.Cbcc
-import Development.AutomorphicArithmetic.Foundations.Convolution.GeneralizedMeasures.Outright
-import Development.AutomorphicArithmetic.Foundations.Convolution.PowerSumTraces.TermEV
-import Development.AutomorphicArithmetic.Foundations.Convolution.PowerSumTraces.LocGalEx
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.RegularSemisimpleFibres.PowerMatchingTraces.TrEx
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerOrbitVolume.DetAdmA
 import GroundTheory.AutomorphicForms.LocallyProfinite
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MeasureTheory NumberField IsDedekindDomain Filter
 open GroundTheory.Automorphic GroundTheory.Automorphic.Reduction GroundTheory.Automorphic.RightCosetSpace GroundTheory.Automorphic.AutomorphicForm
@@ -90,7 +153,7 @@ private theorem updLoc {F E : Type} [Field F] [NumberField F] [Field E] [NumberF
   · have h : y ≠ v := fun h => hy (h ▸ hv)
     simp only [Function.update_of_ne h]; exact L.off y hy hyq
 
-set_option maxHeartbeats 1600000 in
+
 theorem UpperTheory.Gal.InertialTypesAlt.G.core :
     UpperTheory.Gal.InertialTypesAlt.G.Core := by
   intro F E _ _ _ _ _ _ _ _ σ hσ hp n hn μE _ π P V hC hP hW v w hv iF bF iE bE mF mE hmF hmE τ τ' hτ hτ' s₀ I₀ hs₀ hI₀
@@ -100,7 +163,7 @@ theorem UpperTheory.Gal.InertialTypesAlt.G.core :
   haveI : ∀ x : Pl E, BorelSpace (Gw n x) := fun _ => ⟨rfl⟩
   letI : ∀ x : Pl F, MeasurableSpace (Gw n x) := fun _ => borel _
   haveI : ∀ x : Pl F, BorelSpace (Gw n x) := fun _ => ⟨rfl⟩
-  let μF : Measure (normOneGL F n) := Measure.haar
+  let μF : Measure (normOneGL (K := F) (n := n)) := Measure.haar
   have hV := hC.summand
   obtain ⟨-, hAtE, -, -, hnp, θ, hθ, hst⟩ := carryLift F E σ hσ hp n hn μE μF
   obtain ⟨Λ, t, hAt⟩ := hAtE V hV
@@ -193,10 +256,8 @@ theorem UpperTheory.Gal.InertialTypesAlt.G.core :
   let ψ : ∀ y : Pl F, Gw n (T.mk' y).1 → ℂ := fun y =>
     (T.J (T.mk' y).1 : Set (Gw n (T.mk' y).1)).indicator fun x => conj (T.χ (T.mk' y).1 x)
   have hψs : ∀ y, GM.Split E y → ψ y = (T.J (T.mk' y).1 : Set (Gw n (T.mk' y).1)).indicator 1 := fun y hy => by
-    simp only [ψ, T.triv y hy (T.mk' y)]
-    congr 1
-    funext x
-    simp
+    simp [ψ, T.triv y hy (T.mk' y)]
+    rfl
   have hunit := fun y (hy : GM.Split E y) =>
     unitTrace E n μE V hV (T.mk' y).1 (m _) (hm _) (X y).1 (T.J _) (hX y).1 (T.co _) (hfixS y hy _)
   have hbase := fun y (hyS : y ∈ T.S) (hy : ¬ GM.Split E y) =>

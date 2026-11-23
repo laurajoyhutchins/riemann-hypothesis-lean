@@ -1,5 +1,50 @@
-import Formalism.RealPlaceAnalysis.StatementE
-import Formalism.FormalDegreeBessel.StatementDS
+module
+
+public import Formalism.FormalDegreeBessel.StatementDS
+public import Mathlib.LinearAlgebra.Eigenspace.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -43,7 +88,7 @@ theorem glRel_tensE (X : GMod n) : GlRel (tensE X) := by
   refine LinearMap.ext fun u => funext fun i => ?_
   have e : ∀ (p : Prop) [Decidable p] (T : Module.End ℂ (Fin n → X.V)),
       (if p then T else 0) u i = if p then T u i else 0 := fun p _ T => by split_ifs <;> simp
-  simp only [LinearMap.sub_apply, Module.End.mul_apply, Pi.sub_apply, e, tensE_apply, map_add]
+  simp only [LinearMap.sub_apply, Module.End.mul_apply, Pi.sub_apply, e, tensE_apply, map_add (f := _)]
   rw [comm_apply X a b c d (u i)]
   by_cases h1 : i = a <;> by_cases h2 : i = c <;> by_cases h3 : b = c <;> by_cases h4 : d = a <;>
     simp_all <;> abel
@@ -59,7 +104,8 @@ theorem om_apply (X : GMod n) (u : Fin n → X.V) (b : Fin n) : om X u b = ∑ a
 
 theorem commute_om (X : GMod n) (c d : Fin n) : Commute (tensE X c d) (om X) := by
   refine LinearMap.ext fun u => funext fun b => ?_
-  simp only [Module.End.mul_apply, tensE_apply, om_apply, map_sum, map_add, sum_add_distrib]
+
+  simp only [Module.End.mul_apply, tensE_apply, om_apply, map_sum, map_add (f := _), sum_add_distrib]
   simp only [comm_apply X c d _ b, sum_sub_distrib, sum_add_distrib, apply_ite (X.E _ b), map_zero]
   by_cases h : b = c <;> simp [h]
 
@@ -104,8 +150,6 @@ def IsSimple (X : GMod n) : Prop :=
 def Iso (X X' : GMod n) : Prop := ∃ e : X.V ≃ₗ[ℂ] X'.V, ∀ a b x, e (X.E a b x) = X'.E a b (e x)
 
 def triv (n : ℕ) : GMod n := ⟨ℂ, 0, fun a b c d => by simp⟩
-
-theorem isSimple_triv : IsSimple (triv n) := ⟨inferInstanceAs (Nontrivial ℂ), fun S _ => eq_bot_or_eq_top (α := Submodule ℂ ℂ) S⟩
 
 def StepChar : Prop :=
   ∀ (n : ℕ) (X : GMod n) (χ : Fin n → ℂ) (s : Fin n), HasChar X χ → HasChar (step X (χ s)) (χ + Pi.single s 1)

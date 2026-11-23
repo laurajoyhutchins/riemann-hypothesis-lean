@@ -1,8 +1,61 @@
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.CommAlgFunctorCoboundaryZeroMemCocyclesOne
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+public import Mathlib.CategoryTheory.Monoidal.Cartesian.Over
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.AbelianSchemeLaws.FirstCohomologyVanishesSpecOfIsLocalRing
 import Development.AbelianVarietyTheory.Definitions.Divisors.AxesVanishingStructureSheafDegOne
-import Development.AbelianVarietyTheory.Definitions.AbelianSchemeLaws.IsScalarTowerOfAlgebraMapEq
-import Development.AbelianVarietyTheory.Definitions.Uniformization.PointEqOfSubsingleton
-import Development.AbelianVarietyTheory.Definitions.Uniformization.ExistsInKNeOne
-import Development.AbelianVarietyTheory.PublishedTheorems.RelativeAmpleness.RelAmpleAndKTrivIff
+import Development.AbelianVarietyTheory.Definitions.Divisors.OneFormMapEqKaehlerDifferentialMap
+public import Mathlib.LinearAlgebra.Basis.VectorSpace
+public import Mathlib.LinearAlgebra.TensorProduct.Basis
+import Mathlib.Topology.Sheaves.Presheaf
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsCompletedStrictHens
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.QuadTie
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.NonzeroLocus
+
+@[expose] public section
+
 open CategoryTheory CategoryTheory.Limits AlgebraicGeometry MonoidalCategory CartesianMonoidalCategory MonObj
 open scoped TensorProduct CategoryTheory.Obj
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Out ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.Semi GlobalTheory.AbLaw GlobalTheory.CatCoh GlobalTheory.CechDR GlobalTheory.AbCoh
@@ -25,7 +78,7 @@ theorem tensor_eq_zero_of_forall {K : Type} [Field K] {V W : Type} [AddCommGroup
     induction s using TensorProduct.induction_on with
     | zero => simp
     | tmul m n => simp [TensorProduct.equivFinsuppOfBasisRight_apply_tmul_apply]
-    | add u v hu hv => simp only [map_add, Finsupp.add_apply, hu, hv]
+    | add u v hu hv => simp only [map_add (f := _), Finsupp.add_apply, hu, hv]
   apply (TensorProduct.equivFinsuppOfBasisRight b).injective
   ext j
   rw [key, h, map_zero, Finsupp.zero_apply]
@@ -59,6 +112,7 @@ theorem contr_tmul (M : Type) [AddCommGroup M] [Module K M] (Λ : C1 G →ₗ[K]
   rw [contr_apply]
   simp only [LinearMap.lTensor_tmul, TensorProduct.rid_tmul, ← Finset.sum_smul]
   congr 1
+
   simp only [coef, LinearMap.comp_apply, ← map_sum]
   congr 1
   simp only [LinearMap.single_apply, Finset.univ_sum_single]
@@ -66,13 +120,14 @@ theorem contr_tmul (M : Type) [AddCommGroup M] [Module K M] (Λ : C1 G →ₗ[K]
 theorem contr_natural (M N : Type) [AddCommGroup M] [Module K M] [AddCommGroup N] [Module K N]
     (Λ : C1 G →ₗ[K] K) (h : M →ₗ[K] N) (c : ∀ (T T' : Q) (_ : T ⟶ T'), M ⊗[K] G.obj T') :
     contr G N Λ (fun T T' φ => LinearMap.rTensor (G.obj T') h (c T T' φ)) = h (contr G M Λ c) := by
+
   simp only [contr_apply, map_sum]
   refine Finset.sum_congr rfl fun T _ => Finset.sum_congr rfl fun T' _ =>
     Finset.sum_congr rfl fun φ _ => ?_
   induction c T T' φ using TensorProduct.induction_on with
   | zero => simp
   | tmul m n => simp
-  | add u v hu hv => simp only [map_add, hu, hv]
+  | add u v hu hv => simp only [map_add (f := _), hu, hv]
 
 theorem kunneth_contraction_d0_vanishes (M : Type) [AddCommGroup M] [Module K M] (Λ : C1 G →ₗ[K] K)
     (hΛ : ∀ g : C0 G, Λ (d0 G g) = 0) (w : ∀ T : Q, M ⊗[K] G.obj T) :
@@ -100,7 +155,7 @@ theorem kunneth_contraction_d0_vanishes (M : Type) [AddCommGroup M] [Module K M]
       have c := contr_tmul G M Λ z (-d0 G (Pi.single T₀ u : C0 G))
       simp only [Pi.neg_apply] at c
       rw [LinearMap.comp_apply, e, c, map_neg, hΛ, neg_zero, zero_smul, LinearMap.zero_apply]
-    | add u v hu hv => simp only [Pi.single_add, map_add, hu, hv]
+    | add u v hu hv => simp only [Pi.single_add, map_add (f := _), hu, hv]
   exact LinearMap.congr_fun hD w
 
 end Contr
@@ -116,12 +171,14 @@ theorem sum_tmul_eq_zero_of_cup : ∀ (K : Type) [Field K] (P Q : Type) [Categor
   haveI : ∀ T T' : Q, Fintype (T ⟶ T') := fun _ _ => Fintype.ofFinite _
   apply tensor_eq_zero_of_forall
   intro l
+
   simp only [map_sum, LinearMap.lTensor_tmul, TensorProduct.rid_tmul]
   obtain ⟨Λ, hΛ⟩ := LinearMap.exists_extend (l ∘ₗ H1.mk G)
   have hΛy : ∀ z : Z1 G, Λ z.1 = l (H1.mk G z) := fun z => LinearMap.congr_fun hΛ z
   have hΛd : ∀ g : C0 G, Λ (d0 G g) = 0 := fun g => by
     have e := hΛy ⟨d0 G g, commAlgFunctorCoboundaryZero_mem_cocyclesOne G g⟩
     rw [e, H1.mk_eq_zero.2 ⟨g, rfl⟩, map_zero]
+
   simp only [← hΛy, ← map_smul, ← map_sum]
   rw [H1.mk_eq_zero]
   let β : ∀ T : P × Q, F.obj T.1 ⊗[K] G.obj T.2 ≃ₐ[K] E.obj T :=
@@ -137,7 +194,7 @@ theorem sum_tmul_eq_zero_of_cup : ∀ (K : Type) [Field K] (P Q : Type) [Categor
     | tmul z u =>
       rw [LinearMap.rTensor_tmul, hβ, hβ, map_mul, ← h₁ (p, T) (p', T), ← h₂ (p, T) (p', T)]
       simp [mp_id]
-    | add u v hu hv => simp only [map_add, hu, hv]
+    | add u v hu hv => simp only [map_add (f := _), hu, hv]
   have natR : ∀ (p : P) (T T' : Q) (b : T ⟶ T') (t : F.obj p ⊗[K] G.obj T),
       β (p, T') (LinearMap.lTensor (F.obj p) (mp G b).toLinearMap t) =
         mp E ((𝟙 p, b) : (p, T) ⟶ (p, T')) (β (p, T) t) := by
@@ -147,7 +204,7 @@ theorem sum_tmul_eq_zero_of_cup : ∀ (K : Type) [Field K] (P Q : Type) [Categor
     | tmul z u =>
       rw [LinearMap.lTensor_tmul, hβ, hβ, map_mul, ← h₁ (p, T) (p, T'), ← h₂ (p, T) (p, T')]
       simp [mp_id]
-    | add u v hu hv => simp only [map_add, hu, hv]
+    | add u v hu hv => simp only [map_add (f := _), hu, hv]
   refine ⟨fun p => contr G (F.obj p) Λ
     (fun T T' φ => (β (p, T')).symm (f (p, T) (p, T') ((𝟙 p, φ) : (p, T) ⟶ (p, T')))), ?_⟩
   funext p p' a
@@ -169,6 +226,7 @@ theorem sum_tmul_eq_zero_of_cup : ∀ (K : Type) [Field K] (P Q : Type) [Categor
     simp only [prod_comp, Category.comp_id, Category.id_comp] at H1 H2
     simp only [Z1.id, map_zero, zero_mul, Finset.sum_const_zero] at H2
     simp only [← h₁, mp_id] at H1
+
     simp only [map_sub, map_sum, AlgEquiv.apply_symm_apply, natL, natR, hβ]
     linear_combination H1 - H2
   have nat := contr_natural G (F.obj p) (F.obj p') Λ (mp F a).toLinearMap
@@ -183,7 +241,8 @@ theorem sum_tmul_eq_zero_of_cup : ∀ (K : Type) [Field K] (P Q : Type) [Categor
     funext T T' b
     simp only [Pi.sub_apply, Finset.sum_apply]
     exact step T T' b
-  · rw [map_sub, kunneth_contraction_d0_vanishes _ _ _ hΛd, sub_zero, map_sum]
+  · set_option synthInstance.maxHeartbeats 100000 in
+      rw [map_sub, kunneth_contraction_d0_vanishes _ _ _ hΛd, sub_zero, map_sum]
     simp only [contr_tmul]
 
 end GlobalTheory.CatCoh.KunnethOne

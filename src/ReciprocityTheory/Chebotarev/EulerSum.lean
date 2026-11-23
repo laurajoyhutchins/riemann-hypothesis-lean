@@ -1,4 +1,51 @@
-import ReciprocityTheory.Chebotarev.NZIdeal
+module
+
+public import Mathlib.NumberTheory.NumberField.DedekindZeta
+public import Mathlib.Algebra.BigOperators.Ring.Nat
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open NumberField Filter Topology
 
@@ -81,65 +128,5 @@ theorem sum_le_idealZetaR (E : Type) [Field E] [NumberField E] {s : ℝ} (hs : 1
 theorem summable_absNorm_rpow_ideal (E : Type) [Field E] [NumberField E] {s : ℝ} (hs : 1 < s) :
     Summable (fun a : Ideal (𝓞 E) => ((Ideal.absNorm a : ℕ) : ℝ) ^ (-s)) :=
   summable_of_sum_le (c := idealZetaR E s) (fun _ ↦ by positivity) fun u ↦ sum_le_idealZetaR E hs u
-
-theorem hasSum_absNorm_rpow_ideal (E : Type) [Field E] [NumberField E] {s : ℝ} (hs : 1 < s) :
-    HasSum (fun a : Ideal (𝓞 E) => ((Ideal.absNorm a : ℕ) : ℝ) ^ (-s)) (idealZetaR E s) := by
-  have hsum := (summable_absNorm_rpow_ideal E hs).hasSum
-  have h1 := ((Equiv.sigmaFiberEquiv (Ideal.absNorm : Ideal (𝓞 E) → ℕ)).hasSum_iff).mpr hsum
-  have h2 := h1.sigma (g := fun n : ℕ =>
-      (Nat.card {I : Ideal (𝓞 E) // Ideal.absNorm I = n} : ℝ) * (n : ℝ) ^ (-s)) (fun n ↦ by
-    have : Finite {I : Ideal (𝓞 E) // Ideal.absNorm I = n} :=
-      (Ideal.finite_setOfPred_absNorm_eq (S := 𝓞 E) n).to_subtype
-    have hc : ∀ c : {I : Ideal (𝓞 E) // Ideal.absNorm I = n},
-        ((Ideal.absNorm (Equiv.sigmaFiberEquiv (Ideal.absNorm : Ideal (𝓞 E) → ℕ) ⟨n, c⟩) : ℕ) : ℝ)
-          ^ (-s) = (n : ℝ) ^ (-s) := fun c ↦ by
-      simp [Equiv.sigmaFiberEquiv, c.2]
-    simp only [Function.comp_apply, hc]
-    have h3 : HasSum (fun _ : {I : Ideal (𝓞 E) // Ideal.absNorm I = n} ↦ (n : ℝ) ^ (-s))
-        (∑' _ : {I : Ideal (𝓞 E) // Ideal.absNorm I = n}, (n : ℝ) ^ (-s)) :=
-      Summable.of_finite.hasSum
-    rw [tsum_const, nsmul_eq_mul] at h3
-    exact h3)
-  rw [idealZetaR, h2.tsum_eq]
-  exact hsum
-
-theorem summable_absNorm_rpow (E : Type) [Field E] [NumberField E] {s : ℝ} (hs : 1 < s) :
-    Summable (fun a : NZIdeal E => ((Ideal.absNorm a.1 : ℕ) : ℝ) ^ (-s)) :=
-  (summable_absNorm_rpow_ideal E hs).subtype _
-
-theorem dedekindZeta_eq_tsum (E : Type) [Field E] [NumberField E] {s : ℝ} (hs : 1 < s) :
-    dedekindZeta E s = ∑' a : NZIdeal E, ((Ideal.absNorm a.1 : ℕ) : ℂ) ^ (-(s : ℂ)) := by
-  have hsupp : Function.support (fun a : Ideal (𝓞 E) => ((Ideal.absNorm a : ℕ) : ℝ) ^ (-s)) ⊆
-      {a | a ≠ ⊥} := by
-    intro a ha hbot
-    apply ha
-    have hb : a = ⊥ := by simpa using hbot
-    simp [hb, Real.zero_rpow (neg_ne_zero.mpr (zero_lt_one.trans hs).ne')]
-  have h1 : ∑' a : NZIdeal E, ((Ideal.absNorm a.1 : ℕ) : ℝ) ^ (-s) = idealZetaR E s := by
-    rw [← (hasSum_absNorm_rpow_ideal E hs).tsum_eq]
-    exact tsum_subtype_eq_of_support_subset hsupp
-  rw [dedekindZeta_eq_idealZetaR E hs, ← h1, Complex.ofReal_tsum]
-  refine tsum_congr fun a ↦ ?_
-  rw [Complex.ofReal_cpow (Nat.cast_nonneg _), Complex.ofReal_neg, Complex.ofReal_natCast]
-
-theorem two_le_Nrm {E : Type} [Field E] [NumberField E] (q : Prm E) : 2 ≤ Nrm q := by
-  have h0 : Ideal.absNorm q.asIdeal ≠ 0 := by
-    rw [Ne, Ideal.absNorm_eq_zero_iff]
-    exact q.ne_bot
-  have h1 : Ideal.absNorm q.asIdeal ≠ 1 := by
-    rw [Ne, Ideal.absNorm_eq_one_iff]
-    exact q.isPrime.ne_top
-  unfold Nrm
-  omega
-
-theorem summable_prm_rpow (E : Type) [Field E] [NumberField E] {s : ℝ} (hs : 1 < s) :
-    Summable (fun q : Prm E => ((Nrm q : ℕ) : ℝ) ^ (-s)) := by
-  classical
-  refine summable_of_sum_le (c := idealZetaR E s) (fun _ ↦ by positivity) fun u ↦ ?_
-  unfold Nrm
-  rw [← Finset.sum_image (f := fun I : Ideal (𝓞 E) ↦ ((Ideal.absNorm I : ℕ) : ℝ) ^ (-s))
-    (g := IsDedekindDomain.HeightOneSpectrum.asIdeal)
-    (fun v _ w _ h ↦ IsDedekindDomain.HeightOneSpectrum.ext h)]
-  exact sum_le_idealZetaR E hs _
 
 end ReciprocityTheory.Cheb

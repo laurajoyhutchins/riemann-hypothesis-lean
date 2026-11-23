@@ -1,10 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ChartRestrEqGerm
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FrameEqUnitSmulDForm
-import ReciprocityTheory.AnalyticForms.RegularLocalRings.Monomial
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsComponentStalkDerivationOfFunctionFieldExtStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SpanLogDerGermsStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BoundaryComponentStalkRegularBoundaryIdealProdPaStatement
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AlgebraMapCompStalkAlg
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TopPairDForm
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BoundaryComponentStalkRegularBoundaryIdealProdPaStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ChartRestrEqGerm
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CotangentImagesLinearIndependent
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsComponentStalkDerivationOfFunctionFieldExtStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FrameEqUnitSmulDForm
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SpanLogDerGermsStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import ReciprocityTheory.AnalyticForms.RegularLocalRings.Monomial
+import ReciprocityTheory.AnalyticForms.RegularLocalRings.RegDom
+import Development.AbelianVarietyTheory.Definitions.Divisors.NormNegCmConstantEqAtAllEmbeddings
+
+@[expose] public section
+
 open CategoryTheory AlgebraicGeometry TopologicalSpace Limits NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor Formalism.L2.Pj Formalism.BasicNotions
 open ReciprocityTheory.ChartRestriction.G.Out (nonzeroLocus)
@@ -38,7 +81,7 @@ theorem isUnit_det_of_span_eq_top (k A : Type) [CommRing k] [CommRing A] [Algebr
     simp only [KaehlerDifferential.linearMapEquivDerivation_apply_apply, ← hg] at h1
     rw [Matrix.mul_apply, Matrix.one_apply]
     have h2 : (∑ j, a i j • δ j) (g l) = ∑ j, a i j * δ j (g l) := by
-      have := map_sum (Derivation.coeFnAddMonoidHom (R := k) (A := A) (M := A)) (fun j => a i j • δ j) Finset.univ
+      have := map_sum (FunLike.coeAddMonoidHom (Derivation k A A) A A) (fun j => a i j • δ j) Finset.univ
       have h3 := congrFun this (g l)
       rw [Finset.sum_apply] at h3
       exact h3
@@ -66,10 +109,12 @@ theorem det_mem_maximalIdeal (k A : Type) [CommRing k] [CommRing A] [IsLocalRing
   refine Matrix.exists_vecMul_eq_zero_iff.1 ⟨_, hne, ?_⟩
   funext j
   have h1 : δ j t = ∑ i, c i * δ j (g i) := by
+
     rw [← (δ j).liftKaehlerDifferential_comp_D t, hsum, map_sum]
     simp [hg]
   have h2 : residue A (δ j t) = 0 :=
     (residue_eq_zero_iff _).2 ((Ideal.span_singleton_le_iff_mem _).2 ht (hδ j))
+
   rw [h1, map_sum] at h2
   simpa [Matrix.vecMul, dotProduct] using h2
 

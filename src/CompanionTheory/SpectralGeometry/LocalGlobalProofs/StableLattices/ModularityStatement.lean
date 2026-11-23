@@ -1,5 +1,58 @@
-import Mathlib
-import CompanionTheory.RealGroups.UnitaryAdmissibility.ArchimedeanUnitaryDual.InhabitedFinite
+module
+
+public import CompanionTheory.RealGroups.UnitaryAdmissibility.ArchimedeanUnitaryDual.InhabitedFinite
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open CompanionTheory.Rg.Fl
 open scoped InnerProductSpace ComplexConjugate
@@ -149,7 +202,7 @@ theorem lam_single (g : G) (x : G ⧸ K) (c : ℂ) :
   simp [lam, Finsupp.lmapDomain_apply, Finsupp.mapDomain_single]
 
 theorem lam_apply_smul (g : G) (f : (G ⧸ K) →₀ ℂ) (x : G ⧸ K) : lam K g f (g • x) = f x :=
-  Finsupp.mapDomain_apply (MulAction.injective g) f x
+  Finsupp.mapDomain_apply_of_injective (MulAction.injective g) f x
 
 theorem comm_lam (h : Hk K) (g : G) (u : (G ⧸ K) →₀ ℂ) : h.1 (lam K g u) = lam K g (h.1 u) := by
   have := (Subalgebra.mem_centralizer_iff ℂ).1 h.2 (lam K g) ⟨g, rfl⟩
@@ -225,7 +278,7 @@ theorem inner_phi {N : ℕ} (Γ : Subgroup G) (φ : ((G ⧸ K) →₀ ℂ) →�
   induction f using Finsupp.induction_linear with
   | zero => simp
   | add a b ha hb =>
-    rw [map_add, inner_add_right, ha, hb, Finsupp.sum_add_index' (by simp) (by intros; ring)]
+    rw [map_add (f := _), inner_add_right, ha, hb, Finsupp.sum_add_index' (by simp) (by intros; ring)]
   | single z c =>
     have hs : Finsupp.single z c = c • Finsupp.single z (1 : ℂ) := by simp
     rw [Finsupp.sum_single_index (by simp), hs, map_smul, inner_smul_right, hφ]
@@ -263,7 +316,7 @@ theorem adj {N : ℕ} (Γ : Subgroup G) [∀ x : G ⧸ K, Finite (MulAction.stab
     ⟪φ u, φ (h.1 v)⟫_ℂ = ⟪φ ((starH hp h).1 u), φ v⟫_ℂ := by
   induction v using Finsupp.induction_linear with
   | zero => simp
-  | add a b ha hb => simp only [map_add, inner_add_right, ha, hb]
+  | add a b ha hb => simp only [map_add (f := _), inner_add_right, ha, hb]
   | single y c =>
     have hs : Finsupp.single y c = c • Finsupp.single y (1 : ℂ) := by simp
     rw [hs]
@@ -271,7 +324,7 @@ theorem adj {N : ℕ} (Γ : Subgroup G) [∀ x : G ⧸ K, Finite (MulAction.stab
     congr 1
     induction u using Finsupp.induction_linear with
     | zero => simp
-    | add a b ha hb => simp only [map_add, inner_add_left, ha, hb]
+    | add a b ha hb => simp only [map_add (f := _), inner_add_left, ha, hb]
     | single x d =>
       have hs' : Finsupp.single x d = d • Finsupp.single x (1 : ℂ) := by simp
       rw [hs']

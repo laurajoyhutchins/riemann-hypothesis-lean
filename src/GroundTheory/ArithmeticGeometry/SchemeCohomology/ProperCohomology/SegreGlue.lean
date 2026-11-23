@@ -1,5 +1,51 @@
-import Mathlib
-import GroundTheory.ArithmeticGeometry.SchemeCohomology.ProperCohomology.ProjSpaceHom
+module
+
+public import GroundTheory.ArithmeticGeometry.SchemeCohomology.ProperCohomology.ProjSpaceHom
+public import GroundTheory.ArithmeticGeometry.SchemeCohomology.ProjectiveCohomology.TwistingSheaf
+public import Mathlib.AlgebraicGeometry.Pullbacks
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Arith.SchemeCoh
@@ -27,15 +73,15 @@ abbrev segreOpen (i : Fin (n + 1)) (j : Fin (m + 1)) : (prodP A n m).Opens :=
   pullback.fst (toSpecBase A n) (toSpecBase A m) ⁻¹ᵁ Proj.basicOpen (grading A n) (X i) ⊓
     pullback.snd (toSpecBase A n) (toSpecBase A m) ⁻¹ᵁ Proj.basicOpen (grading A m) (X j)
 
-omit [CommRing A] in
 
+omit [CommRing A] in
 lemma top_le_preimage_ι_comp {Y Z : Scheme.{u}} (V : Y.Opens) (q : Y ⟶ Z) {U : Z.Opens}
     (h : V ≤ q ⁻¹ᵁ U) : ⊤ ≤ (V.ι ≫ q) ⁻¹ᵁ U := by
   intro x _
   exact h x.2
 
-omit [CommRing A] in
 
+omit [CommRing A] in
 lemma homOfLE_appTop_appLE {Y Z : Scheme.{u}} (q : Y ⟶ Z) {U : Z.Opens} {V W : Y.Opens}
     (hW : W ≤ V) (hV : V ≤ q ⁻¹ᵁ U) (s : Γ(Z, U)) :
     (Y.homOfLE hW).appTop ((V.ι ≫ q).appLE U ⊤ (top_le_preimage_ι_comp V q hV) s) =
@@ -76,6 +122,7 @@ lemma map_eq_pow_mul_of_isHomogeneous {σ R S : Type*} [CommRing R] [CommRing S]
     ψ p = c ^ m * φ p := by
   conv_lhs => rw [p.as_sum]
   conv_rhs => rw [p.as_sum]
+
   rw [map_sum, map_sum, Finset.mul_sum]
   refine Finset.sum_congr rfl fun d hd => ?_
   have hdeg : d.degree = m := by
@@ -192,8 +239,8 @@ lemma segreLocal_agree (i k : Fin (n + 1)) (j l : Fin (m + 1)) :
     rw [← e₁, ← e₂]
     ring
 
-variable (n m) in
 
+variable (n m) in
 lemma iSup_segreOpen : ⨆ c : Fin (n + 1) × Fin (m + 1), segreOpen A c.1 c.2 = ⊤ := by
   rw [eq_top_iff]
   intro x _
@@ -205,14 +252,14 @@ lemma iSup_segreOpen : ⨆ c : Fin (n + 1) × Fin (m + 1), segreOpen A c.1 c.2 =
       ⨆ j : Fin (m + 1), Proj.basicOpen (grading A m) (X j) by rw [iSup_basicOpen_X]; trivial)
   exact TopologicalSpace.Opens.mem_iSup.2 ⟨(i, j), ⟨hi, hj⟩⟩
 
-variable (n m) in
 
+variable (n m) in
 def segreCover : (prodP A n m).OpenCover :=
   (prodP A n m).openCoverOfIsOpenCover (fun c : Fin (n + 1) × Fin (m + 1) => segreOpen A c.1 c.2)
     (iSup_segreOpen A n m)
 
-variable (n m) in
 
+variable (n m) in
 def segre : prodP A n m ⟶ projectiveSpace A (n * m + n + m) :=
   (segreCover A n m).glueMorphisms (fun c => segreLocal A c.1 c.2) fun c d => by
     have H := isPullback_opens_inf (segreOpen A c.1 c.2) (segreOpen A d.1 d.2)
@@ -233,8 +280,8 @@ lemma fromOfGlobalSections_toSpecBase {N : ℕ} {O : Scheme.{u}}
   rw [toSpecBase, Proj.fromOfGlobalSections_toSpecZero_assoc, ← Spec.map_comp]
   rfl
 
-variable (n m) in
 
+variable (n m) in
 theorem segre_toSpecBase :
     segre A n m ≫ toSpecBase A (n * m + n + m) =
       pullback.fst (toSpecBase A n) (toSpecBase A m) ≫ toSpecBase A n := by

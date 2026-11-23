@@ -1,6 +1,51 @@
-import Mathlib
-import GroundTheory.GlobalFields.IdeleClassGroup.IdeleClassEquivIdeleClassMapOfComm
-import GroundTheory.ProfiniteCohomology.DiscreteModules.IsDiscreteRepIffForallExistsOpenNormalSubgroup
+module
+
+public import GroundTheory.GlobalFields.IdeleClassGroup.IdeleClassEquivIdeleClassMapOfComm
+public import GroundTheory.ProfiniteCohomology.DiscreteModules
+import GroundTheory.GlobalFields.IdeleGroups.IdeleNorms.InfiniteAdeleRingMapInfiniteAdeleRingMap
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
@@ -58,13 +103,15 @@ instance : CommGroup IdeleLimit :=
   inferInstanceAs (CommGroup (DirectLimit (fun F : FiniteSubfield ↦ IdeleGroup F.1)
     (fun _ _ h ↦ ideleMap h)))
 
-set_option maxHeartbeats 1000000 in
+
 
 def of (F : FiniteSubfield) : IdeleGroup F.1 →* IdeleLimit where
   toFun x := (⟦⟨F, x⟩⟧ : DirectLimit (fun F : FiniteSubfield ↦ IdeleGroup F.1)
     (fun _ _ h ↦ ideleMap h))
-  map_one' := (DirectLimit.one_def (f := fun _ _ h ↦ ideleMap h) F).symm
-  map_mul' x y := (DirectLimit.mul_def (f := fun _ _ h ↦ ideleMap h) F x y).symm
+  map_one' := (DirectLimit.one_def (G := fun F : FiniteSubfield ↦ IdeleGroup F.1)
+    (f := fun _ _ h ↦ ideleMap h) F).symm
+  map_mul' x y := (DirectLimit.mul_def (G := fun F : FiniteSubfield ↦ IdeleGroup F.1)
+    (f := fun _ _ h ↦ ideleMap h) F x y).symm
 
 @[simp]
 theorem of_ideleMap {F E : FiniteSubfield} (h : F ≤ E) (x : IdeleGroup F.1) :
@@ -86,10 +133,6 @@ theorem exists_of₂ (z w : IdeleLimit) : ∃ (F : FiniteSubfield) (x y : IdeleG
   obtain ⟨F, x, y, rfl, rfl⟩ := DirectLimit.exists_eq_mk₂ (f := fun _ _ h ↦ ideleMap h) z w
   exact ⟨F, x, y, rfl, rfl⟩
 
-theorem of_eq_of_iff {F E M : FiniteSubfield} (hF : F ≤ M) (hE : E ≤ M) (x : IdeleGroup F.1)
-    (y : IdeleGroup E.1) : of F x = of E y ↔ ideleMap hF x = ideleMap hE y := by
-  rw [← of_ideleMap hF x, ← of_ideleMap hE y, (of_injective M).eq_iff]
-
 section lift
 
 variable {A : Type*} [CommGroup A] (g : ∀ F : FiniteSubfield, IdeleGroup F.1 →* A)
@@ -108,18 +151,7 @@ def lift : IdeleLimit →* A where
     rw [← map_mul]
     exact map_mul (g F) x y
 
-@[simp]
-theorem lift_of (F : FiniteSubfield) (x : IdeleGroup F.1) : lift g compat (of F x) = g F x :=
-  rfl
-
 end lift
-
-@[ext]
-theorem hom_ext {A : Type*} [Monoid A] {φ ψ : IdeleLimit →* A}
-    (h : ∀ F : FiniteSubfield, φ.comp (of F) = ψ.comp (of F)) : φ = ψ := by
-  ext z
-  obtain ⟨F, x, rfl⟩ := exists_of z
-  exact DFunLike.congr_fun (h F) x
 
 theorem of_ideleEquiv_congr {F E E' : FiniteSubfield} (τ : F.1 ≃+* E.1) (τ' : F.1 ≃+* E'.1)
     (h : ∀ x : F.1, (τ x : ℚ̄) = τ' x) (x : IdeleGroup F.1) :
@@ -177,9 +209,6 @@ instance : MulDistribMulAction (ℚ̄ ≃ₐ[ℚ] ℚ̄) IdeleLimit where
   mul_smul := galoisHom_mul
   smul_one σ := map_one (galoisHom σ)
   smul_mul σ := map_mul (galoisHom σ)
-
-theorem smul_def (σ : ℚ̄ ≃ₐ[ℚ] ℚ̄) (z : IdeleLimit) : σ • z = galoisHom σ z :=
-  rfl
 
 theorem smul_of (σ : ℚ̄ ≃ₐ[ℚ] ℚ̄) (F : FiniteSubfield) (x : IdeleGroup F.1) :
     σ • of F x = of (map σ F) (ideleEquiv (mapEquiv σ F) x) :=

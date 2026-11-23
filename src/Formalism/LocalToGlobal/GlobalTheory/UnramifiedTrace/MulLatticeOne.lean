@@ -1,4 +1,56 @@
-import Formalism.LocalToGlobal.GlobalTheory.UnramifiedTrace.DUAllOfSameTe
+module
+
+public import Formalism.LocalToGlobal.GlobalTheory.UnramifiedDiagonal.HeckeRamifiedZeroOfMatchingsAndDu
+public import Formalism.LocalToGlobal.GlobalTheory.UnramifiedTrace.DUAllOfParts
+import Formalism.LocalToGlobal.GlobalTheory.GL6.BwAValIntegralNonneg
+public import Formalism.LocalToGlobal.GlobalTheory.UnramifiedTrace.DUAllOfSameTe
+import Formalism.LocalToGlobal.GlobalTheory.UnramifiedTrace.DUPt0FOfVals
+import Formalism.LocalToGlobal.GlobalTheory.UnramifiedTrace.NatSmulInv
+import Formalism.LocalToGlobal.GlobalTheory.UnramifiedTrace.TripMem
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.CrossDiagonalMatching.DnkLkLocP
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.CrossDiagonalMatching.DualSigmaApply
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -19,7 +71,7 @@ theorem mul_lattice_one {E : Type} [Field E] [NumberField E] {n : ℕ} (L : Subm
 
 variable {D : D7} {u : D.what₂.Word}
 
-set_option maxHeartbeats 4000000 in
+
 
 theorem pt_agree1 (T : Forms0 D u) (v : (D.mem u).A.vT) (c : (D.mem u).C.cls 0)
     (w1 : Fin (D.R.N 0) → D.host.E) (s1 : 𝓞 D.host.E)
@@ -43,12 +95,12 @@ theorem pt_agree1 (T : Forms0 D u) (v : (D.mem u).A.vT) (c : (D.mem u).C.cls 0)
     rw [smul_add, smul_comm s1 (((D.mem u).A.T : ℕ) : 𝓞 D.host.E), smul_comm s1 e]
   have hp : T.lv0.prk v c ⟨_, hY⟩ = T.atT.res v e • y := by
     have h := congrArg (T.lv0.prk v c) e0
-    rw [T.lv0.prk_smul, map_add, T.lv0.prk_smul, hTl0, zero_add, hy1, smul_comm] at h
+    rw [T.lv0.prk_smul, map_add (f := _), T.lv0.prk_smul, hTl0, zero_add, hy1, smul_comm] at h
     exact smul_right_injective _ (res_ne T hs1) h
   rw [hp, map_smul, map_smul, h1, h3]
 
-set_option maxHeartbeats 16000000 in
-set_option synthInstance.maxHeartbeats 400000 in
+
+
 
 theorem valSame_pt (T : Forms0 D u) : ValSame T := by
   intro v c G hG g η κ μ g' η' κ' μ' y hP hP'
@@ -68,8 +120,8 @@ theorem valSame_pt (T : Forms0 D u) : ValSame T := by
     (dn_fwd T hD z.1 z.2) (pt_agree1 T v c _ s1 hw1 hs1 y hy1 g g' hg1 hg3)
   exact val_of_mem T v (T.cls0.y c) (hcomp T η' κ' μ') (hcomp T η κ μ) H3.1 H1.1 hm G hG
 
-set_option maxHeartbeats 16000000 in
-set_option synthInstance.maxHeartbeats 400000 in
+
+
 
 theorem valTe_pt (T : Forms0 D u) : ValTe T := by
   intro v c G hG g η κ μ hP

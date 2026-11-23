@@ -1,6 +1,43 @@
-import Mathlib
-import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.WeilTensorModels
-import Development.AbelianVarietyTheory.Definitions.Foundations.SmoothPartStable
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.WeilTensorModels
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -24,15 +61,6 @@ def IsPairHom (om : G × H →* Module.End ℂ (Y → ℂ)) (π : Representation
 def IsBigTheta (om : G × H →* Module.End ℂ (Y → ℂ)) (π : Representation ℂ G V) (Θ : Representation ℂ H T)
     (p : SB Y →ₗ[ℂ] V ⊗[ℂ] T) : Prop :=
   IsPairHom om π Θ p ∧ Function.Surjective p ∧ ∀ φ, p φ = 0 ↔ ∀ f, IsLeftHom om π f → f φ = 0
-
-example : IsBigTheta (1 : G × H →* Module.End ℂ (Y → ℂ)) (Representation.trivial ℂ G ℂ) (Representation.trivial ℂ H (SB Y))
-    (TensorProduct.lid ℂ (SB Y)).symm.toLinearMap := by
-  have e : ∀ (x : G × H) (φ φ₁ : SB Y), (φ₁ : Y → ℂ) = (1 : G × H →* Module.End ℂ (Y → ℂ)) x φ → φ₁ = φ :=
-    fun _ _ _ h => Subtype.ext h
-  refine ⟨fun g h φ φ₁ hφ => by simp [e _ _ _ hφ], (TensorProduct.lid ℂ (SB Y)).symm.surjective, fun φ => ?_⟩
-  rw [LinearEquiv.coe_coe, LinearEquiv.map_eq_zero_iff]
-  exact ⟨fun h f _ => by rw [h, map_zero], fun h => (Module.forall_dual_apply_eq_zero_iff ℂ φ).1 fun f =>
-    h f fun g φ φ₁ hφ => by simp [e _ _ _ hφ]⟩
 
 def HoweDualityFor [TopologicalSpace G] [TopologicalSpace H] (om : G × H →* Module.End ℂ (Y → ℂ)) : Prop :=
   ∀ (V : Type) [AddCommGroup V] [Module ℂ V] (π : Representation ℂ G V), π.IsIrreducible → GlobalTheory.PRep.IsAdmissible π →
@@ -59,20 +87,9 @@ def HoweDualityUnitary : Prop :=
     HoweDualityFor om ∧ HoweDualityFor (om.comp (MulEquiv.prodComm (M := UG c JB) (N := UG c JA)).toMonoidHom)
 
 def ThetaSub {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] {σ : E →ₐ[F] E} {n d : ℕ}
-    {X : Spc F E n} {W : Spc F E d} (om : Rep σ X W) (v : Pl F) (N : Submodule ℂ ((Fin n × Fin d → Fv F v) → ℂ)) : Prop :=
+    {X : Spc F E n} {W : Spc F E d} (om : Rep σ X W) (v : Pl (F := F)) (N : Submodule ℂ ((Fin n × Fin d → Fv F v) → ℂ)) : Prop :=
   augAt om v ≤ N ∧ N ≤ SB _ ∧
     ∀ h ∈ UAt σ W (evFin F v), ∀ φ ∈ N, ∀ φ₁ ∈ SB _, Acts (evFin F v) (om (1, h)) φ φ₁ → φ₁ ∈ N
-
-def HoweDualityFinite : Prop :=
-  ∀ (F E : Type) [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] (σ : E →ₐ[F] E), IsCMExt F E σ →
-    ∀ (n d : ℕ) (X : Spc F E n) (W : Spc F E d) (M : Model σ X W) (ψ : AddChar (AF F) ℂ) (χX χW : Chr F E) (om : Rep σ X W),
-      IsStd ψ → (∀ i j, σ (X.J j i) = X.J i j) → X.J.det ≠ 0 → (∀ i j, σ (W.J j i) = -W.J i j) → W.J.det ≠ 0 →
-      ResEtaPow (Units.map (algebraMap F (AF F)).toMonoidHom).range χX n →
-      ResEtaPow (Units.map (algebraMap F (AF F)).toMonoidHom).range χW d → IsHecke F E χX → IsHecke F E χW →
-      M.IsWeil ψ χX χW om →
-      ∀ v : Pl F, IsEmpty (E →ₐ[F] Fv F v) →
-        (∃ L : ℕ, ∀ (m : ℕ) (N : Fin m → Submodule ℂ _), StrictMono N → (∀ i, ThetaSub om v (N i)) → m ≤ L) ∧
-        ∀ N N', ThetaSub om v N → ThetaSub om v N' → N ≠ SB _ → N' ≠ SB _ → N ⊔ N' ≠ SB _
 
 end GlobalTheory.Published
 

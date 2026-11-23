@@ -1,5 +1,63 @@
-import ReciprocityTheory.AnalyticForms.RegularLocalRings.JacChartA
-import ReciprocityTheory.CommutativeAlgebra.MaximalIdealSquares.RingKrullDimQuotientSpanSingletonAddOne
+module
+
+public import ReciprocityTheory.AnalyticForms.RegularLocalRings.JacChartA
+public import Mathlib.RingTheory.RegularLocalRing.Defs
+public import Mathlib.Algebra.Module.SpanRankOperations
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+public import Mathlib.RingTheory.Ideal.KrullsHeightTheorem
+public import Mathlib.RingTheory.KrullDimension.NonZeroDivisors
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.CommutativeAlgebra.MaximalIdealSquares.RingKrullDimQuotientSpanSingletonAddOne
+
+@[expose] public section
 
 namespace ReciprocityTheory.AnForm.R.JacobianCriterionAlt
 
@@ -41,12 +99,14 @@ theorem toCot_psi {a : MvPolynomial (Fin n) ℂ} (ha : a ∈ ptI p)
         ∑ i, psi p K (C (gradP p a i)) • (⟨psi p K (X i - C (p i)), lin_mem_max p K i⟩ :
           maximalIdeal (locR K p)) := by
       apply Subtype.ext
-      simp only [AddSubmonoidClass.coe_finset_sum, SetLike.val_smul, smul_eq_mul]
+      simp only [AddSubmonoidClass.coe_finsetSum, SetLike.val_smul, smul_eq_mul]
+
     rw [e2, map_sum]
     simp only [Phi, LinearMap.coe_mk, AddHom.coe_mk]
     refine Finset.sum_congr rfl fun i _ => ?_
     rw [map_smul, ← algebraMap_eq_psi, algebraMap_smul]
   rw [e, Ideal.toCotangent_eq]
+
   simpa [map_sub, map_sum, map_mul] using hsq
 
 theorem ker_Phi : LinearMap.ker (Phi p K) = jacS K p := by
@@ -131,7 +191,7 @@ theorem finrank_residueField : Module.finrank ℂ (ResidueField (locR K p)) = 1 
   obtain ⟨x, rfl⟩ := IsLocalRing.residue_surjective w
   refine ⟨evRing K hK x, ?_⟩
   rw [Algebra.smul_def, mul_one, IsScalarTower.algebraMap_apply ℂ (locR K p) (ResidueField (locR K p)),
-    IsLocalRing.ResidueField.algebraMap_eq, ← sub_eq_zero, ← map_sub, IsLocalRing.residue_eq_zero_iff,
+    IsLocalRing.ResidueField.algebraMap_eq, ← sub_eq_zero, ← (IsLocalRing.residue (locR K p)).map_sub, IsLocalRing.residue_eq_zero_iff,
     ← ker_evRing (K := K) (p := p) hK, RingHom.mem_ker, map_sub, algebraMap_eq_psi, evRing_psi, eval_C,
     sub_self]
 
@@ -142,7 +202,7 @@ theorem finrank_cot_eq :
   haveI : Module.Free ℂ (ResidueField (locR K p)) := Module.Free.of_divisionRing ℂ _
   haveI : Module.Free (ResidueField (locR K p)) (CotangentSpace (locR K p)) :=
     Module.Free.of_divisionRing (ResidueField (locR K p)) _
-  rw [← Module.finrank_mul_finrank ℂ (ResidueField (locR K p)) (CotangentSpace (locR K p)),
+  rw [← (letI : Module.Free (ResidueField (locR K p)) (CotangentSpace (locR K p)) := Module.Free.of_divisionRing _ _; Module.finrank_mul_finrank ℂ (ResidueField (locR K p)) (CotangentSpace (locR K p))),
     finrank_residueField, one_mul] at h
   exact h
 

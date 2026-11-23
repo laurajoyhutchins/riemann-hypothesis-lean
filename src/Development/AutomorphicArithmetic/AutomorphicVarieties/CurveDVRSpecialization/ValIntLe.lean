@@ -1,8 +1,46 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CurveDVRSpecialization.EveryPointSatisfiesFrameCondition
-import Development.AutomorphicArithmetic.AutomorphicVarieties.IdeleGenerators.ShapeFacts
-import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.SelmerTransport.Places
-import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.ClassFieldRamification.UnramIff
-import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.ClassFieldRamification.IneAbs
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CurveDVRSpecialization.EveryPointSatisfiesFrameCondition
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.IdeleGenerators.ShapeFacts
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.ClassFieldRamification.IneAbs
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.ClassFieldRamification.UnramIff
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.SelmerTransport.Places
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Formalism.ConjugateSelfDual ReciprocityTheory.Gal GlobalTheory.GalOfCusp UpperTheory.V UpperTheory.V.Base UpperTheory.V.Pr
 
@@ -17,20 +55,20 @@ private theorem val_dvd (A : ValuationSubring Ω) {a b : ℕ} (h : a ∣ b) (ha 
     A.valuation (b : Ω) < 1 := by
   obtain ⟨c, rfl⟩ := h
   rw [Nat.cast_mul, map_mul]
-  exact mul_lt_one_of_lt_of_le ha (by simpa using val_int_le A (c : ℤ))
+  exact mul_lt_one_of_lt_of_le ha (by simpa only [Int.cast_natCast] using val_int_le A (c : ℤ))
 
 private theorem val_prime (A : ValuationSubring Ω) (n : ℕ) (hn : n ≠ 0) (h : A.valuation (n : Ω) < 1) :
     ∃ p : ℕ, p.Prime ∧ p ∣ n ∧ A.valuation (p : Ω) < 1 := by
   induction n using Nat.recOnMul with
   | zero => exact absurd rfl hn
-  | one => simp at h
+  | one => simp only [Nat.cast_one, map_one, lt_self_iff_false] at h
   | prime p hp => exact ⟨p, hp, dvd_rfl, h⟩
   | mul a b iha ihb =>
     rw [Nat.cast_mul, map_mul] at h
     by_cases ha : A.valuation (a : Ω) < 1
     · obtain ⟨p, hp, hd, hv⟩ := iha (left_ne_zero_of_mul hn) ha
       exact ⟨p, hp, hd.mul_right _, hv⟩
-    · have h1 : A.valuation (a : Ω) = 1 := le_antisymm (by simpa using val_int_le A (a : ℤ)) (not_lt.1 ha)
+    · have h1 : A.valuation (a : Ω) = 1 := le_antisymm (by simpa only [Int.cast_natCast] using val_int_le A (a : ℤ)) (not_lt.1 ha)
       rw [h1, one_mul] at h
       obtain ⟨p, hp, hd, hv⟩ := ihb (right_ne_zero_of_mul hn) h
       exact ⟨p, hp, hd.mul_left _, hv⟩
@@ -87,7 +125,7 @@ private theorem discr_over (K : Type) [Field K] [NumberField K] [Algebra K Ω] [
   obtain ⟨B, hB⟩ : ∃ B : ValuationSubring Ω, IsPlaceOver B w := exists_isPlaceOver Ω w
   have hpB : B.valuation (p : Ω) < 1 := by
     have := (hB (p : 𝓞 K)).2 hw
-    simpa using this
+    simpa only [map_natCast] using this
   have hI : Ine (F := ℚ) B ≤ galOf ℚ K Ω := by
     by_contra hc
     exact val_cop B ((Nat.Prime.coprime_iff_not_dvd hp).2 hM) hpB (h B hc)

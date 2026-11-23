@@ -1,6 +1,47 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.VecPairApply
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.SemilinearCoefficientMapCocycles
+module
+
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.VecPairApply
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.SemilinearCoefficientMapCocycles
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.ContinuousCycMod
+import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.PoitouTateNineTermTransgressionZeroApply
+
+@[expose] public section
 
 noncomputable section
 
@@ -33,7 +74,7 @@ theorem tr_back (z : Z1 rho') :
   congrArg Submodule.Quotient.mk (Subtype.ext rfl)
 
 theorem tr_injective : Function.Injective (tr σ hs rho rho' he) := by
-  rw [injective_iff_map_eq_zero]
+  set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
   intro x hx
   induction x using Submodule.Quotient.induction_on with
   | H z =>
@@ -109,7 +150,7 @@ theorem trL_mem_bkOn (v : PlE D.host) (x : H1 ((repOn ρ κ Y).comp (DecV N v).s
       change ((z : ↥(DecV N v) → Fin r → Y) g a) = _
       rw [hz, algebraMap_smul φ hY]
     | zero => rw [map_zero]; exact Submodule.zero_mem _
-    | add x y _ _ hx hy => rw [map_add]; exact Submodule.add_mem _ hx hy
+    | add x y _ _ hx hy => rw [map_add (f := _)]; exact Submodule.add_mem _ hx hy
     | smul a x _ hx => rw [map_smulₛₗ]; exact Submodule.smul_mem _ _ hx
   · rw [Submodule.mem_bot] at hx ⊢
     rw [hx, map_zero]
@@ -119,7 +160,7 @@ theorem exists_mem_bkOn (v : PlE D.host) (x' : H1 ((repOn ρ κ' Y).comp (DecV N
   by_cases hv : v ∈ placesOver D.host.E (X.l i)
   · have H : ∀ a : Λ', ∃ w ∈ bkOn bkP i ρ κ Y v, trL i ρ φ κ κ' hκ hY v w = a • x' := by
       unfold bkOn at hx
-      rw [dif_pos hv] at hx
+      rw [dite_eq_left hv] at hx
       induction hx using Submodule.span_induction with
       | mem x hx =>
         intro a
@@ -128,7 +169,7 @@ theorem exists_mem_bkOn (v : PlE D.host) (x' : H1 ((repOn ρ κ' Y).comp (DecV N
           (fun g m => repOn_eq_repOn φ hY ρ κ κ' hκ g.1 m) (a • z)), ?_,
           tr_back _ _ _ _ _ _⟩
         unfold bkOn
-        rw [dif_pos hv]
+        rw [dite_eq_left hv]
         refine Submodule.subset_span ⟨back ((repOn ρ κ Y).comp (DecV N v).subtype) ((repOn ρ κ' Y).comp (DecV N v).subtype)
           (fun g m => repOn_eq_repOn φ hY ρ κ κ' hκ g.1 m) (a • z), c, y, a • b, hc, hy,
             fun g e => ?_, rfl⟩
@@ -139,14 +180,14 @@ theorem exists_mem_bkOn (v : PlE D.host) (x' : H1 ((repOn ρ κ' Y).comp (DecV N
         intro a
         obtain ⟨w, hw, e⟩ := hx a
         obtain ⟨w', hw', e'⟩ := hy a
-        exact ⟨w + w', Submodule.add_mem _ hw hw', by rw [map_add, e, e', smul_add]⟩
+        exact ⟨w + w', Submodule.add_mem _ hw hw', by rw [map_add (f := _), e, e', smul_add]⟩
       | smul c x _ hx =>
         intro a
         obtain ⟨w, hw, e⟩ := hx (a * c)
         exact ⟨w, hw, by rw [e, mul_smul]⟩
     simpa using H 1
   · unfold bkOn at hx
-    rw [dif_neg hv, Submodule.mem_bot] at hx
+    rw [dite_eq_right hv, Submodule.mem_bot] at hx
     exact ⟨0, Submodule.zero_mem _, by rw [map_zero, hx]⟩
 
 theorem trG_mem_selOn (Q : Finset (PlE D.host)) (x : H1 (repOn ρ κ Y)) (hx : x ∈ selOn bkP i ρ κ Y Q) :

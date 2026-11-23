@@ -1,5 +1,47 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.ExistsHasCls
+module
+
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.ExistsHasCls
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open MeasureTheory Set Filter Polynomial NumberField IsDedekindDomain
 open GlobalTheory.AdelicU GlobalTheory.Orb GlobalTheory.AutomorphicL2Unitary Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes
 open GlobalTheory.IndefiniteRowSideFullHecke.PlusPolynomialRoots GlobalTheory.TrEll
@@ -34,7 +76,7 @@ theorem comm_of_alpha (f : (k ⊗[F] Fld P) →ₗ[k ⊗[F] E] (k ⊗[F] Fld P))
         rw [mul_assoc, ha, hb, mul_assoc]
       add_mem' := fun {a b} ha hb y => by
         simp only [Set.mem_setOf_eq] at *
-        rw [add_mul, map_add, ha, hb, add_mul]
+        rw [add_mul, map_add (f := _), ha, hb, add_mul]
       algebraMap_mem' := fun a y => by
         rw [← Algebra.smul_def, map_smul, Algebra.smul_def] }
   have h1 : ∀ l : Fld P, (1 : k) ⊗ₜ[F] l ∈ S := by
@@ -78,7 +120,7 @@ theorem trBase_perfect [NumberField E] (w : k ⊗[F] Fld P) (hw : ∀ y, trBase 
     induction z using TensorProduct.induction_on with
     | zero => simp
     | add u v hu hv =>
-      simp only [add_mul, map_add, Finset.sum_add_distrib, hu, hv]
+      simp only [add_mul, map_add (f := _), Finset.sum_add_distrib, hu, hv]
     | tmul a l =>
       have hl : ∑ i, Algebra.trace E (Fld P) (l * b i) • d i = l := by
         conv_rhs => rw [← d.sum_repr l]
@@ -105,6 +147,7 @@ theorem hform_mulVec_of_unitary {A : Type} [CommRing A] (s : A →+* A) (G M : M
     Formalism.UG.hform s G (M *ᵥ a) (M *ᵥ b) = Formalism.UG.hform s G a b := by
   have e : (fun i => s ((M *ᵥ a) i)) = Matrix.vecMul (fun i => s (a i)) (Formalism.UG.cT s M) := by
     ext i
+
     simp [Formalism.UG.cT, Matrix.vecMul, Matrix.mulVec, dotProduct, map_sum, mul_comm]
   rw [hform_eq_vecMul, hform_eq_vecMul, e, Matrix.dotProduct_mulVec, Matrix.vecMul_vecMul, Matrix.vecMul_vecMul, ← Matrix.mul_assoc, h]
 

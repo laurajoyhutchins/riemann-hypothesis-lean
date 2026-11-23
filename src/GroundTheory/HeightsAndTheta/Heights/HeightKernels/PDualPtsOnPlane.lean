@@ -1,5 +1,53 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.DualProjApply
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.DualProjApply
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -31,8 +79,8 @@ theorem mulMat_sum (b : Module.Basis T ℤ (dualLattice F)) (α : 𝓞 K) (s : T
     zsmul_eq_mul, smul_eq_mul] at h2
   exact h2
 
-omit [Fintype T] in
 
+omit [Fintype T] in
 theorem recover_spec (b : Module.Basis T ℤ (dualLattice F))
     (hb : Function.Bijective (Matrix.mulVecLin (dualEmbMatrix b))) (Z : T → ℂ) (t : T) :
     Z t = ∑ p : (K →+* ℂ) × Fin i, p.1 ((b t : Fin i → K) p.2) * dualRecover b hb Z p := by
@@ -60,6 +108,7 @@ theorem mulMat_recover (b : Module.Basis T ℤ (dualLattice F))
     _ = _ := by
         refine Finset.sum_congr rfl fun p _ => ?_
         have h := congrArg p.1 (mulMat_sum b α s p.2)
+
         simp only [map_sum, map_mul, map_intCast] at h
         rw [h]
         ring
@@ -76,6 +125,7 @@ theorem quad_mem (b : Module.Basis T ℤ (dualLattice F)) (α : 𝓞 K) (s r : T
     rw [Finset.sum_comm]
     refine Finset.sum_congr rfl fun j _ => ?_
     have h := congrArg (C : K → MvPolynomial (Fin i) K) (mulMat_sum b α u j)
+
     simp only [map_sum, map_mul, map_intCast] at h
     rw [← mul_assoc, ← h, Finset.sum_mul]
     refine Finset.sum_congr rfl fun t _ => ?_
@@ -84,11 +134,13 @@ theorem quad_mem (b : Module.Basis T ℤ (dualLattice F)) (α : 𝓞 K) (s r : T
       algebraMap (MvPolynomial (Fin i) K) (ProjField K i) (C (α : K)) * dualLatticeCoord b ⟨(), u⟩ := by
     intro u
     have h := congrArg (algebraMap (MvPolynomial (Fin i) K) (ProjField K i)) (hlin u)
+
     simpa only [dualLatticeCoord, map_sum, map_mul, map_intCast] using h
   have hsum : ∀ u, mConeMap (dualLatticeCoord b) (∑ t, C (mulMat b α u t) * X ⟨(), t⟩) =
       MvPolynomial.C (algebraMap (MvPolynomial (Fin i) K) (ProjField K i) (C (α : K)) *
         dualLatticeCoord b ⟨(), u⟩) * MvPolynomial.X () := by
     intro u
+
     rw [← hS u, map_sum, map_sum, Finset.sum_mul]
     refine Finset.sum_congr rfl fun t _ => ?_
     simp only [mConeMap, aeval_X, map_mul, map_intCast, eq_intCast]
@@ -144,8 +196,8 @@ theorem agree (b : Module.Basis T ℤ (dualLattice F))
 
 end DualPointsOnPlane
 
-open DualPointsOnPlane in
 
+open DualPointsOnPlane in
 theorem DualPtsOnPlane.proof : DualPtsOnPlane.Statement := by
   intro K _ _ i F T _ _ b hb z hz
   obtain ⟨s0, hs0⟩ := hz.1 ()

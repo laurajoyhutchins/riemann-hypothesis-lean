@@ -1,5 +1,59 @@
-import ReciprocityTheory.L2DbarEstimates.SkodaWeights.SmoothRLog
-import ReciprocityTheory.L2DbarEstimates.SkodaWeights.WeightedIntegralEqLintegral
+module
+
+public import ReciprocityTheory.L2DbarEstimates.SkodaWeights.SkodaWeightStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.InnerProductSpace.Calculus
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.L2DbarEstimates.ChartDerivatives.ChartSymmEventuallyEq
+public import ReciprocityTheory.L2DbarEstimates.ChartDerivatives.IsLocalHomeomorphCompFst
+public import ReciprocityTheory.L2DbarEstimates.SkodaWeights.HlinVsqPos
+public import ReciprocityTheory.L2DbarEstimates.SkodaWeights.SmoothRLog
+public import ReciprocityTheory.L2DbarEstimates.SkodaWeights.WeightedIntegralEqLintegral
+import ReciprocityTheory.L2DbarEstimates.WeakHolomorphy.HoloContDiffAtComplex
+
+@[expose] public section
 
 namespace ReciprocityTheory.L2DbarEstimates.H
 
@@ -27,19 +81,10 @@ private theorem contDiffOn_vsq_gv_comp_chart_symm {M : Type*} [TopologicalSpace 
     h0.restrict_scalars ℝ
   exact (contDiff_norm_sq ℝ).comp_contDiffOn h1
 
-theorem near_smoothR_log {M : Type*} [TopologicalSpace M] [T2Space M] (n : ℕ) (z : M → V n)
-    (hz : IsLocalHomeomorph z) {p : ℕ} (g : Fin p → M → ℂ) (hg : ∀ l, Holo n z (g l))
-    (hN : ∀ x, gv g x ≠ 0) : SmoothR n z (fun x => Real.log (vsq (gv g x))) := by
-  intro e he
-  have h1 := contDiffOn_vsq_gv_comp_chart_symm n z g hg e he
-  have h2 : ContDiffOn ℝ ((⊤ : ℕ∞) : WithTop ℕ∞) (fun y => Real.log (vsq (gv g (e.symm y)))) e.target :=
-    h1.log fun y _ => (near_vsq_pos (gv g (e.symm y)) (hN (e.symm y))).ne'
-  exact Complex.ofRealCLM.contDiff.comp_contDiffOn h2
-
 theorem near_continuous_vsq {M : Type*} [TopologicalSpace M] {p : ℕ} (g : Fin p → M → ℂ)
     (hg : ∀ l, Continuous (g l)) : Continuous (fun x => vsq (gv g x)) := by
   unfold vsq gv
-  exact continuous_finset_sum _ fun i _ => ((hg i).norm).pow 2
+  exact continuous_finsetSum _ fun i _ => ((hg i).norm).pow 2
 
 theorem near_continuous_of_smoothR {M : Type*} [TopologicalSpace M] (n : ℕ) (z : M → V n)
     (hz : IsLocalHomeomorph z) (f : M → ℝ) (hf : SmoothR n z f) : Continuous f := by

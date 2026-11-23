@@ -1,5 +1,44 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.NonemptyInvFunEquiv
+module
+
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.NonemptyInvFunEquiv
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -37,11 +76,10 @@ theorem contracts_of_iso_directSum (H G I F V : Type) [Monoid H] [Monoid G] [Add
     fun f v => by simp [π]
   have hπJ : ∀ y w, π (J i₀ y w) = ε w • y := fun y w => by
     induction w with
-    | zero => simp
     | tmul x v => rw [hJ, hπ, DirectSum.component.lof_self, hP]
-    | add s t hs ht => simp only [map_add, hs, ht, add_smul]
+    | add s t hs ht => simp only [map_add (f := _), hs, ht, add_smul]
   have hπJ' : ∀ i, i ≠ i₀ → ∀ y x v, π (J i y (x ⊗ₜ v)) = 0 := fun i hi y x v => by
-    rw [hJ, hπ, DirectSum.component.of, dif_neg hi]; simp
+    rw [hJ, hπ, DirectSum.component.of, dite_eq_right hi]; simp
   refine ⟨π, fun y => ⟨J i₀ y z, by rw [hπJ, hz, one_smul]⟩, fun h g f v => ?_, fun l hl => ?_⟩
   · rw [hπ, hπ]
     have e : DirectSum.component ℂ I (fun i => A i ⊗[ℂ] B i) i₀ ((Representation.directSum fun i =>
@@ -50,16 +88,14 @@ theorem contracts_of_iso_directSum (H G I F V : Type) [Monoid H] [Monoid G] [Add
     rw [e]
     generalize DirectSum.component ℂ I (fun i => A i ⊗[ℂ] B i) i₀ f = t
     induction t with
-    | zero => simp
     | tmul x y => rw [TensorProduct.map_tmul, hP, hP, hεi, map_smul]
-    | add s t hs ht => simp only [map_add, TensorProduct.add_tmul, hs, ht]
+    | add s t hs ht => simp only [map_add (f := _), TensorProduct.add_tmul, hs, ht]
   · have hinv : ∀ i y, l ∘ₗ J i y ∈ invFun ((a i).tprod σ) := fun i y => mem_invFun.2 fun h w => by
       induction w with
-      | zero => simp
       | tmul x v =>
         have := hl h (DirectSum.lof ℂ I (fun i => A i ⊗[ℂ] B i) i (x ⊗ₜ y)) v
         simpa [hJ] using this
-      | add s t hs ht => simp only [map_add, hs, ht]
+      | add s t hs ht => simp only [map_add (f := _), hs, ht]
     let c : B i₀ →ₗ[ℂ] ℂ := l ∘ₗ LinearMap.rTensor V (DirectSum.lof ℂ I (fun i => A i ⊗[ℂ] B i) i₀) ∘ₗ
       (TensorProduct.rightComm ℂ (A i₀) (B i₀) V).symm.toLinearMap ∘ₗ TensorProduct.mk ℂ _ _ z
     have hc : ∀ y, c y = l (J i₀ y z) := fun y => by
@@ -67,9 +103,8 @@ theorem contracts_of_iso_directSum (H G I F V : Type) [Monoid H] [Monoid G] [Add
       congr 1
       generalize z = w
       induction w with
-      | zero => simp
       | tmul x v => simp [hJ]
-      | add s t hs ht => simp only [map_add, TensorProduct.add_tmul, hs, ht]
+      | add s t hs ht => simp only [map_add (f := _), TensorProduct.add_tmul, hs, ht]
     have key : ∀ i y x v, l (J i y (x ⊗ₜ v)) = c (π (J i y (x ⊗ₜ v))) := fun i y x v => by
       by_cases hi : i = i₀
       · subst hi

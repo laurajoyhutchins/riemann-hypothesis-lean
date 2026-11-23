@@ -1,7 +1,49 @@
-import Mathlib
-import GroundTheory.GlobalFields.LocalAtPlace
-import GroundTheory.GlobalFields.Adele.Approximation
-import GroundTheory.GlobalFields.Adele.Discrete
+module
+
+public import GroundTheory.GlobalFields.Adele.Approximation
+public import GroundTheory.GlobalFields.LocalAtPlace
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GroundTheory.Global
 
@@ -22,31 +64,5 @@ theorem isCompact_integralFiniteAdeles :
   have h := isCompact_range hcont
   rw [RestrictedProduct.range_structureMap] at h
   exact h
-
-abbrev AdeleQuotient : Type _ := 𝔸[K] ⧸ AdeleRing.principalSubgroup (𝓞 K) K
-
-instance : IsClosed (AdeleRing.principalSubgroup (𝓞 K) K : Set 𝔸[K]) :=
-  isClosed_principalSubgroup K
-
-instance compactSpace_adeleQuotient : CompactSpace (AdeleQuotient K) := by
-  obtain ⟨C, hC, hx⟩ := exists_isCompact_forall_exists_sub_mem K
-  have hD : IsCompact (C ×ˢ (integralFiniteAdeles (𝓞 K) K : Set (FiniteAdeleRing (𝓞 K) K)) :
-      Set 𝔸[K]) := hC.prod (isCompact_integralFiniteAdeles K)
-  refine ⟨?_⟩
-  convert hD.image (QuotientAddGroup.continuous_mk (N := AdeleRing.principalSubgroup (𝓞 K) K))
-  refine (Set.eq_univ_of_forall fun q => ?_).symm
-  induction q using QuotientAddGroup.induction_on with
-  | H x =>
-    obtain ⟨k, hk⟩ := hx x
-    refine ⟨x - algebraMap K 𝔸[K] k, hk, ?_⟩
-    rw [QuotientAddGroup.eq]
-    exact ⟨k, by simp⟩
-
-instance t2Space_adeleQuotient : T2Space (AdeleQuotient K) := inferInstance
-
-theorem compactSpace_and_t2Space_adeleQuotient :
-    CompactSpace (𝔸[K] ⧸ AdeleRing.principalSubgroup (𝓞 K) K) ∧
-      T2Space (𝔸[K] ⧸ AdeleRing.principalSubgroup (𝓞 K) K) :=
-  ⟨compactSpace_adeleQuotient K, t2Space_adeleQuotient K⟩
 
 end GroundTheory.Global

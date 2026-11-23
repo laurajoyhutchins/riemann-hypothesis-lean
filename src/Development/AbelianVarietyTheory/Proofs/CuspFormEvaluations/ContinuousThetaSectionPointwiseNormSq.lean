@@ -1,7 +1,55 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SquareIntegrability.GCauchyStatement
-import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.FockTranslationLaws
-import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.IntegrableOnFundamentalDomainOfContinuous
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SquareIntegrability.GCauchyStatement
+public import Mathlib.Topology.Separation.CompletelyRegular
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.FockTranslationLaws
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.IntegrableOnFundamentalDomainOfContinuous
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GlobalTheory
 
@@ -105,7 +153,7 @@ theorem pairing_density_add (Y : GT ι) {F : EuclideanSpace ℂ ι → ℂ} (hF 
   have hk : Y.ka x * (starRingEnd ℂ) (Y.ka x) = 1 := by
     rw [Complex.mul_conj, Complex.normSq_eq_norm_sq, Y.ka_abs x hx]; simp
   have e : ∀ z, v + x - z = (v - z) + x := fun z => by abel
-  simp only [hU, e, hF.2 x hx, map_mul, ← Complex.exp_conj, map_add, map_sub, map_div₀,
+  simp only [hU, e, hF.2 x hx, map_mul, ← Complex.exp_conj, map_add (f := _), map_sub, map_div₀,
     herm_conj, Complex.conj_ofReal, Nat.cast_one, one_mul, map_ofNat]
   have key : cexp (Real.pi * Hf (v + x) y - Real.pi * Hf y y / 2) *
       cexp (Real.pi * Hf (v - y) x + Real.pi * Hf x x / 2) *
@@ -221,8 +269,8 @@ theorem thetaSectionPointwiseNormSq_eq (Y : GT ι) (F : EuclideanSpace ℂ ι �
 
 end IsogenySum
 
-open IsogenySum FockTranslation in
 
+open IsogenySum FockTranslation in
 theorem isogeny_sum_mem_and_norm {ι : Type} [Fintype ι] (U : ℕ → EuclideanSpace ℂ ι → (EuclideanSpace ℂ ι → ℂ) → EuclideanSpace ℂ ι → ℂ)
     (hU : ∀ (q : ℕ) a F v, U q a F v = cexp (q * Real.pi * Hf v a - q * Real.pi * Hf a a / 2) * F (v - a))
     (Y Y' : GT ι) (hY : (∀ x ∈ lat Y.b, ∀ y ∈ lat Y.b, Y.ka (x + y) = Y.ka x * Y.ka y * cexp (Real.pi * I * (Hf x y).im))) (hY' : (∀ x ∈ lat Y'.b, ∀ y ∈ lat Y'.b, Y'.ka (x + y) = Y'.ka x * Y'.ka y * cexp (Real.pi * I * (Hf x y).im)))
@@ -280,6 +328,7 @@ theorem isogeny_sum_mem_and_norm {ι : Type} [Fintype ι] (U : ℕ → Euclidean
           (U 1 y F v * (starRingEnd ℂ) (U 1 y' F v) * cexp (-(Real.pi * Hf v v))) := by
       intro v
       rw [thetaSectionPointwiseNormSq_eq]
+
       simp only [Finset.sum_apply, Pi.smul_apply, smul_eq_mul, map_sum, map_mul]
       rw [Finset.sum_mul_sum]
       simp only [Finset.sum_mul]
@@ -290,10 +339,10 @@ theorem isogeny_sum_mem_and_norm {ι : Type} [Fintype ι] (U : ℕ → Euclidean
       integrableOn_fundamentalDomain_of_continuous volume b _
         (continuous_const.mul (pairing_density_continuous U hU hF.1 y y'))
     rw [integral_congr_ae (Filter.Eventually.of_forall hpt)]
-    rw [integral_finset_sum _ fun y _ => integrable_finset_sum _ fun y' _ => hint y y',
+    rw [MeasureTheory.integral_finsetSum _ fun y _ => MeasureTheory.integrable_finsetSum _ fun y' _ => hint y y',
       Complex.ofReal_sum]
     refine Finset.sum_congr rfl fun y hy => ?_
-    rw [integral_finset_sum _ fun y' _ => hint y y', Finset.sum_eq_single_of_mem y hy]
+    rw [MeasureTheory.integral_finsetSum _ fun y' _ => hint y y', Finset.sum_eq_single_of_mem y hy]
     · have hk : Y'.ka y * (starRingEnd ℂ) (Y'.ka y) = 1 := by
         rw [Complex.mul_conj, Complex.normSq_eq_norm_sq, Y'.ka_abs y (hR y hy)]; simp
       rw [hk, ← integral_complex_ofReal]

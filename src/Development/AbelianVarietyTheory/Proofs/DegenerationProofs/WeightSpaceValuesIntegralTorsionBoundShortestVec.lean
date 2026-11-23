@@ -1,26 +1,78 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.TWMain
-import Development.AbelianVarietyTheory.PublishedTheorems.SemistableReduction₂.SemistableReductionSt
-import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.LawsThirdToSixthOfLaws
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.TwistedPrincipalPolarisationSectionsBaseChange
-import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.ValuationThetaRatioEqBilinear
-import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.ExistsBasisOfCoord
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ValueAtOrigin
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExistsPrimGenerator
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ValueAtFormalTorsion
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.TestQuadraticFormEqPsiValuationMul
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsGlobalGenerators
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.NormVal
+public import Development.AbelianVarietyTheory.Definitions.Uniformization.AllDV
+public import Development.AbelianVarietyTheory.Statements.SemistableTorsion.UTorsSt
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.PeriodicValuation
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.VRatioGtStatement
+public import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.LawsThirdToSixthOfLaws
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.EigensectionSupport
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.EqZeroOfSumV
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsEquivYEqZero
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsExpandsFAndNuGeOfIsComb
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsGlobalGenerators
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsRatLog
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsTorusPoint
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.LinCombValueAct
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.NuGeTranslatePullSmul
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.TestQuadraticFormEqPsiValuationMul
 import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ThetaSysFFMemFinitePerpProj
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsTorusPoint
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsRatLog
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.UtestGeomNonempty
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsExpandsFAndNuGeOfIsComb
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.LinCombValueAct
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.NuGeTranslatePullSmul
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsEquivYEqZero
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.EigensectionSupport
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.EqZeroOfSumV
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.NormVal
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.UtestGeomNonempty
+import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.ExistsBasisOfCoord
+import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.ValuationThetaRatioEqBilinear
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExistsPrimGenerator
+import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.TwistedPrincipalPolarisationSectionsBaseChange
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ValueAtFormalTorsion
+import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ValueAtOrigin
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.TWMain
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open CategoryTheory CategoryTheory.Limits MonoidalCategory CartesianMonoidalCategory MonObj AlgebraicGeometry IsLocalRing
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Out ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.DVR
 open scoped CategoryTheory.Obj
@@ -47,7 +99,7 @@ theorem ρ_mul_proj {T : AddSubgroup S.Gam} (hT : S.IsoFree T) (c : T →+ ZMod 
   rw [Finset.mul_sum, Finset.smul_sum,
     ← Equiv.sum_comp (Equiv.addLeft a) fun t : T => S.ζN ^ (c a).val • chi S (c t) • S.ρ t]
   refine Finset.sum_congr rfl fun t _ => ?_
-  rw [Matrix.mul_smul, ρ_mul_ρ hT, Equiv.coe_addLeft, map_add, chi_add, smul_smul, ← _root_.mul_assoc, h1, _root_.one_mul]
+  rw [Matrix.mul_smul, ρ_mul_ρ hT, Equiv.coe_addLeft, map_add (f := _), chi_add, smul_smul, ← _root_.mul_assoc, h1, _root_.one_mul]
 
 end Alg
 
@@ -121,7 +173,7 @@ theorem exists_wt_ne (l : u.Lab) [ArithBase o Ω] (β : u.D.toPre.X) (hβ : ∀ 
   rw [(GlobalTheory.thetaSys_FF_mem_finite_perp_proj o Ω S).2.2.1, AddMonoidHom.mem_ker, map_nsmul, hx, ← QuotientAddGroup.mk_nsmul,
     QuotientAddGroup.eq_zero_iff] at hm
   obtain ⟨z, hz⟩ := hm
-  have : IsAddTorsionFree u.D.toPre.X := IsAddTorsionFree.of_isTorsionFree ℤ _
+  have : HasUniqueDiv u.D.toPre.X := HasUniqueDiv.of_isTorsionFree ℤ _
   refine hβ z (nsmul_right_injective (Nat.one_le_iff_ne_zero.1 S.r_pos) ?_)
   show S.r • β = S.r • S.N • z
   rw [← hz, smul_smul]; rfl
@@ -129,8 +181,8 @@ theorem exists_wt_ne (l : u.Lab) [ArithBase o Ω] (β : u.D.toPre.X) (hβ : ∀ 
 theorem prim_root [ArithBase o Ω] (y₀ : S.R →+* PadicAlgCl p) : IsPrimitiveRoot (y₀ (algebraMap o S.R S.ζN)) S.N := by
   have : IsDomain o := (ArithBase.inj (Ω := Ω)).isDomain _
   have : NeZero ((S.N : ℕ) : PadicAlgCl p) := ⟨Nat.cast_ne_zero.2 (N_pos S).ne'⟩
-  rw [← Polynomial.isRoot_cyclotomic_iff, ← Polynomial.map_cyclotomic _ (y₀.comp (algebraMap o S.R))]
-  exact ((isPrimitiveRoot_ζN S).isRoot_cyclotomic (N_pos S)).map
+  rw [← Polynomial.isRoot_cyclotomic_iff (R := PadicAlgCl p), ← Polynomial.map_cyclotomic _ (y₀.comp (algebraMap o S.R))]
+  exact Polynomial.IsRoot.map (y₀.comp (algebraMap o S.R)) ((isPrimitiveRoot_ζN S).isRoot_cyclotomic (N_pos S))
 
 theorem wt_sep (hLL : LL) (hU : UTorsSt) [ArithBase o Ω] (l : u.Lab) (Φ : u.Geom) (β : u.D.toPre.X) (hβ : ∀ z, β ≠ S.N • z) :
     ∃ (a : S.perp l.yy.ker) (q : QkPt u.D.toPre (PadicAlgCl p) S.N) (τ : Multiplicative u.D.toPre.X →* (PadicAlgCl p)ˣ),
@@ -154,8 +206,8 @@ variable (hLL : LL) (hT : TwistBCSpanStatement) (hVR : TWM.VRatioGtStatement) (h
   (hc : ∀ j, Φ.th.f j = liftFun u.A.A _ ((Scheme.ΓSpecIso (CommRingCat.of (PadicAlgCl p))).inv.hom c) * th₀.f j)
   (hint : ∀ a : o, ‖y₀ (algebraMap o S.R a)‖ ≤ 1)
 
-include hLL hT hVR hTW hUU hϖ hQ hv hnv hw₀ hexp hprim hc hint in
 
+include hLL hT hVR hTW hUU hϖ hQ hv hnv hw₀ hexp hprim hc hint in
 theorem norm_le_delta (hU : UTorsSt) : ‖c‖ ≤ S.delta y₀ := by
   have hN : 2 ≤ S.N := S.N_ge
   have hr : 1 ≤ S.r := S.r_pos
@@ -182,8 +234,8 @@ include hnv hint in
 theorem val_nonneg (a : o) : ((0 : ℚ) : WithTop ℚ) ≤ v (y₀ (algebraMap o S.R a)) :=
   (norm_le_of_val hnv).2 (by simpa using hint a)
 
-include hLL hT hVR hTW hUU hϖ hQ hv hnv hw₀ hexp hprim hc hint in
 
+include hLL hT hVR hTW hUU hϖ hQ hv hnv hw₀ hexp hprim hc hint in
 theorem nuGe_basis (r : ℚ) (hrc : (r : WithTop ℚ) ≤ v c) (j : S.J) (σ : Fam u.D.toPre (PadicAlgCl p) S.N)
     (hσ : u.U.ExpandsF (PadicAlgCl p) S.N w₀ (Φ.s j) σ) : NuGe u.D Q (PadicAlgCl p) v S.N σ r := by
   have hN : 2 ≤ S.N := S.N_ge
@@ -213,8 +265,8 @@ theorem nuGe_basis (r : ℚ) (hrc : (r : WithTop ℚ) ≤ v c) (j : S.J) (σ : F
       (Φ.s ρ.i₀) t _ (Φ.U a) σ' Φ.s_zero (pt_pow Φ a) (Φ.U_sym a) ((Φ.U_act a _ t).2 ht) hσ') σ hσ
   rwa [add_zero] at this
 
-include hLL in
 
+include hLL in
 theorem exists_qk_zero (hU : UTorsSt) (l : u.Lab) {h : S.Gam} (hh : h ∈ l.yy.ker) :
     ∃ ph : QkPt u.D.toPre (PadicAlgCl p) (S.r * S.N), ph.y = 0 ∧ QkToAkU u.U.toUnifPre (PadicAlgCl p) (S.r * S.N) ph (Φ.pt h) := by
   have hA : AdmBase u.V (maximalIdeal u.V) := ⟨inferInstance, inferInstance, inferInstance, u.complete⟩
@@ -225,8 +277,8 @@ theorem exists_qk_zero (hU : UTorsSt) (l : u.Lab) {h : S.Gam} (hh : h ∈ l.yy.k
   obtain ⟨p', hp', he⟩ := GlobalTheory.ZH.exists_equiv_y_eq_zero hLL u.V _ hA u.D (PadicAlgCl p) (S.r * S.N) pk z hz.symm
   exact ⟨p', hp', (hf.1 p' _).2 (hpk.symm.trans ((hf.2.2.1 pk p').2 he))⟩
 
-include hLL hw₀ in
 
+include hLL hw₀ in
 theorem support (hU : UTorsSt) [ArithBase o Ω] (l : u.Lab) (α : u.D.toPre.X) (i : S.J) (d : PadicAlgCl p)
     {t : SecA u.A (PadicAlgCl p) S.N} (ht : IsComb Φ.s (fun j => d * y₀ (algebraMap o S.R (S.proj _ (l.wt α) j i))) t)
     {σ : Fam u.D.toPre (PadicAlgCl p) S.N} (hσ : u.U.ExpandsF (PadicAlgCl p) S.N w₀ t σ) (β : u.D.toPre.X)
@@ -245,6 +297,7 @@ theorem support (hU : UTorsSt) [ArithBase o Ω] (l : u.Lab) (α : u.D.toPre.X) (
     (hact (Φ.U a) t' t'' (fun j => (Φ.U_act a j _).2 (ht' j)) ht'') (fun m => ?_) β (fun e => hne ?_) j
   · have e : ∀ n, ∑ j, b j * y₀ (algebraMap o S.R (S.ρ a n j)) = (τ (Multiplicative.ofAdd α)).val * b n := fun n => by
       have := congrArg (fun M => y₀ (algebraMap o S.R (M n i))) (ρ_mul_proj l.isoFree (l.wt α) a)
+
       simp only [Matrix.mul_apply, Matrix.smul_apply, smul_eq_mul, map_sum, map_mul] at this
       rw [hτw, hb]
       beta_reduce
@@ -256,6 +309,7 @@ theorem support (hU : UTorsSt) [ArithBase o Ω] (l : u.Lab) (α : u.D.toPre.X) (
     have e₂ : t''.f m = con u.A _ (τ (Multiplicative.ofAdd α)).val * t.f m := by
       rw [e₁, (isComb_iff _ _ _).1 ht m, Finset.mul_sum, Finset.sum_comm]
       refine Finset.sum_congr rfl fun n _ => ?_
+
       rw [← _root_.mul_assoc, ← map_mul, ← e, map_sum, Finset.sum_mul]
       exact Finset.sum_congr rfl fun j _ => by rw [map_mul, _root_.mul_assoc]
     exact e₂

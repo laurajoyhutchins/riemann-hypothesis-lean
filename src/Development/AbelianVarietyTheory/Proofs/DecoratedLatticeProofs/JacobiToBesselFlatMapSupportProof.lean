@@ -1,14 +1,58 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.ValueDoubleExact
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.BesselToJacobiFlatMapVacuumAtGoodPlace
+module
+
+public import Development.AbelianVarietyTheory.Definitions.LatticeFrames.ValueDoubleExact
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.HomLatticeCompletionSelfAnnihilatorAtPlaces
+import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.WittHyperbolicAnisotropicCommuteLevi
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.MemRangeOfOneTmulMem
+import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.OneEqSumPlaceIdempotentsOverTwoAddTwoMul
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.BesselToJacobiFlatMapVacuumAtGoodPlace
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.EventuallyIncAMulMemIntAt
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.HomLatticeIndicatorOnSplitHalfEqHalfIndicator
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.IwasawaDecompositionSelfDualWittSplitAtPlaceStatement
+import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.MemHomLatticeCompletionIffSupportedMaps
+import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.PlaceIdempotentActsOnSupportedAndOff
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.SelfDualLatticeStabilizersFixWeilVacuumOnPlaceSeStatement
 import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.SelfDualSplitComponentIsLatticeStabilizerEq
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.HomLatticeIndicatorOnSplitHalfEqHalfIndicator
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.HomLatticeCompletionSelfAnnihilatorAtPlaces
 import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.WittCoreEmbeddingPreservesSupportedUnitarySubgro
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.EventuallyIncAMulMemIntAt
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.MemRangeOfOneTmulMem
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.IwasawaDecompositionSelfDualWittSplitAtPlaceStatement
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.SelfDualLatticeStabilizersFixWeilVacuumOnPlaceSeStatement
+import Formalism.LocalToGlobal.BesselHermitianTheta.LemmasWeil
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 noncomputable section
 
@@ -117,7 +161,7 @@ theorem heisO_zero (ψ : AddChar (AF D.host.F) ℂ) (S T : HSp D) (f : WO S T �
   funext w
   rw [heisO, symplOH_zero_right, AddChar.map_zero_eq_one, one_mul, add_zero]
 
-set_option maxHeartbeats 800000 in
+
 
 theorem exists_parts {ψ : AddChar (AF D.host.F) ℂ} {S T : HSp D} {LS : Lat S} {LT : Lat T} (hS : IsSelfDualC S LS)
     (hT : IsSelfDualC T LT) {v : Pl D} (hv : Tame D v) {f : WO S T → ℂ} (hf : Vac ψ S T LS LT (· = v) f) :
@@ -204,7 +248,7 @@ theorem idAt_of_colMul {S S₀ : HSp D} {ρ : ℕ} (d : HypDec S S₀ ρ) {L : L
 theorem psi_parts (ψ : AddChar (AF D.host.F) ℂ) {a b : AE D} (hab : a + b = 1) {s : AE D} (ha : psiE ψ (a * s) = 1)
     (hb : psiE ψ (b * s) = 1) : psiE ψ s = 1 := by
   unfold psiE at *
-  rw [← one_mul s, ← hab, add_mul, map_add, AddChar.map_add_eq_mul, ha, hb, one_mul]
+  rw [← one_mul s, ← hab, add_mul, map_add (f := _), AddChar.map_add_eq_mul, ha, hb, one_mul]
 
 theorem hO_extX {V V₀ W : HSp D} {ρ : ℕ} (dV : HypDec V V₀ ρ) (x : Mx D W.rank ρ) (u : WO V W) :
     hO V W (dV.extX W x) u = pairS W x (u ⬝ dV.jY) := by
@@ -218,7 +262,7 @@ theorem smul_eq_self {α : Type} {F : α → ℂ} (hF : F ≠ 0) {c : ℂ} (h : 
   rw [Pi.smul_apply, smul_eq_mul] at this
   exact mul_right_cancel₀ hw (this.symm.trans (one_mul _).symm)
 
-set_option maxHeartbeats 1600000 in
+
 
 theorem dual_col {ψ : AddChar (AF D.host.F) ℂ} (hψ : IsStdChar D ψ (-1)) {V V₀ W : HSp D} {ρ : ℕ} (dV : HypDec V V₀ ρ)
     {LV : Lat V} {LV₀ : Lat V₀} {LW : Lat W} (hV : IsSelfDualC V LV) (hW : IsSelfDualC W LW) {v : Pl D}
@@ -287,7 +331,7 @@ theorem dual_col {ψ : AddChar (AF D.host.F) ℂ} (hψ : IsStdChar D ψ (-1)) {V
       rw [e1, symplO_eq, hO_extX, HypDec.extY_apply, Matrix.mul_assoc, dV.pY_jY, Matrix.mul_one, hpair] at h2
       rw [mul_left_comm]
       exact h2
-    exact psi_parts ψ (a := cA D a) (b := cA D b) (by rw [← RingHom.map_add, hab, RingHom.map_one])
+    exact psi_parts ψ (a := cA D a) (b := cA D b) (by rw [← RingHom.map_add (f := _), hab, RingHom.map_one])
       (key a (hfix _ hπ).1) (key b (hfix _ hπ).2)
   have h := LatMem.latO_maps hV hU hc
   have e : (SelfDualAt.cP (· = v) • dV.extX W (y ⬝ E)) *ᵥ colMul dV.jX i c = colMul y i c := by
@@ -372,7 +416,7 @@ theorem int_of_stable {S S₀ : HSp D} {ρ : ℕ} (d : HypDec S S₀ ρ) {L : La
   have e : c = c * eps v - eps v + 1 := by
     have := eps_mul hc1
     linear_combination -this
-  rw [e, RingHom.map_add, RingHom.map_sub]
+  rw [e, RingHom.map_add (f := _), RingHom.map_sub]
   exact add_mem (sub_mem h' (eps_int v)) (int_of_idem (one_mul 1))
 
 theorem stable_of_prim {ψ : AddChar (AF D.host.F) ℂ} {S S₀ : HSp D} {ρ : ℕ} (d : HypDec S S₀ ρ) {L : Lat S} {L₀ : Lat S₀}
@@ -471,7 +515,7 @@ theorem xLast_last {T T₀ : HSp D} {σ : ℕ} (d : HypDec T T₀ σ) (z : Fin T
     xLast d z k (Fin.last σ) = (d.j0 *ᵥ ratV z) k := by
   simp only [xLast, Matrix.of_apply, Fin.snoc_last]
 
-set_option maxHeartbeats 1600000 in
+
 
 theorem support_parts {ψ : AddChar (AF D.host.F) ℂ} {σ : ℕ} {J : JacLev D (σ + 1)} {B : BesLev D σ} (s : StepFB ψ J B)
     {LV : Lat J.W} {LV₀ : Lat J.W₀} {LW : Lat B.V} {LW₀ : Lat B.V₀} {v : Pl D} (hA : AdaptFB ψ J B LV LV₀ LW LW₀ v)
@@ -573,8 +617,8 @@ end GlobalTheory.FinPl.SuppShift
 
 namespace GlobalTheory.FinPl
 
-open SuppShift in
 
+open SuppShift in
 theorem supportShift : ∀ D : D7, GlobalTheory.FinPl.SupportShift D := by
   intro D ψ σ J B s LV LV₀ LW LW₀ v hA hU 𝔉 h𝔉 hsh f hf
   refine ⟨?_, fun h hh hne => ?_⟩

@@ -1,5 +1,43 @@
-import Mathlib
-import Formalism.LocalToGlobal.LatticeGeometry.GeoTiedP
+module
+
+public import Formalism.LocalToGlobal.LatticeGeometry.GeoTiedP
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -23,29 +61,7 @@ def graft (Xg X₀ : DivX D) (iM : ∀ j (c : Xg.Comp j), (X₀.MjH j).V →ₗ[
 
 def Keeps (X X₀ : DivX D) : Prop := ∃ Xg iM hiM, X = graft Xg X₀ iM hiM
 
-theorem Keeps.refl (X : DivX D) : Keeps X X := ⟨X, X.iMj, X.iMj_mem, rfl⟩
-
-theorem Keeps.trans {X Y Z : DivX D} (h : Keeps X Y) (h' : Keeps Y Z) : Keeps X Z := by
-  obtain ⟨Zg, i, hi, rfl⟩ := h'
-  obtain ⟨Yg, i', hi', rfl⟩ := h
-  exact ⟨Yg, i', hi', rfl⟩
-
-theorem Keeps.symm {X Y : DivX D} (h : Keeps X Y) : Keeps Y X := by
-  obtain ⟨Yg, i', hi', rfl⟩ := h
-  exact ⟨Y, Y.iMj, Y.iMj_mem, rfl⟩
-
-theorem Keeps.mjH {X X₀ : DivX D} (h : Keeps X X₀) : X.MjH = X₀.MjH ∧ HEq X.jM X₀.jM := by
-  obtain ⟨_, _, _, rfl⟩ := h; exact ⟨rfl, HEq.rfl⟩
-
-theorem Keeps.num {X X₀ : DivX D} (h : Keeps X X₀) :
-    X.kapR = X₀.kapR ∧ X.logLam = X₀.logLam ∧ X.Qp = X₀.Qp ∧ X.QPl = X₀.QPl ∧ HEq X.qv X₀.qv ∧ HEq X.nu X₀.nu ∧
-      HEq X.ZQ X₀.ZQ ∧ HEq X.quotientLocalValueFirst X₀.quotientLocalValueFirst ∧ HEq X.typeDim X₀.typeDim := by
-  obtain ⟨_, _, _, rfl⟩ := h; exact ⟨rfl, rfl, rfl, rfl, HEq.rfl, HEq.rfl, HEq.rfl, HEq.rfl, HEq.rfl⟩
-
 def GeoOver (Q : DivX D → Prop) (X₀ : DivX D) : Prop :=
   ∃ (X : DivX D) (inK : X.Lev → ℕ → Prop), Keeps X X₀ ∧ GeoTiedP X inK ∧ Q X
-
-theorem GeoOver.mono {Q Q' : DivX D → Prop} (h : ∀ X, Q X → Q' X) {X₀ : DivX D} (g : GeoOver Q X₀) : GeoOver Q' X₀ :=
-  let ⟨X, k, a, b, c⟩ := g; ⟨X, k, a, b, h X c⟩
 
 end GlobalTheory.GeoGraft

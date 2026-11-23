@@ -1,4 +1,50 @@
-import Development.AbelianVarietyTheory.Definitions.Divisors.HilbertNinetyQuotientHomEqIff
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.HilbertNinetyQuotientHomEqIff
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -90,16 +136,16 @@ theorem star_mem {X : Type} [TopologicalSpace X] {φ : X → ℂ} (h : φ ∈ SB
 
 def conjL {X : Type} (l : (X → ℂ) →ₗ[ℂ] ℂ) : (X → ℂ) →ₗ[ℂ] ℂ where
   toFun φ := star (l (star φ))
-  map_add' φ φ' := by rw [star_add, map_add, star_add]
+  map_add' φ φ' := by rw [star_add, map_add (f := _), star_add]
   map_smul' a φ := by rw [star_smul, map_smul, star_smul, star_star]; rfl
 
 def boxL {A : Type} (l : ((κ → A) → ℂ) →ₗ[ℂ] ℂ) (l' : ((κ' → A) → ℂ) →ₗ[ℂ] ℂ) : ((κ ⊕ κ' → A) → ℂ) →ₗ[ℂ] ℂ where
   toFun Φ := l' fun y => l fun x => Φ (Sum.elim x y)
   map_add' Φ Ψ := by
-    rw [← map_add]
+    rw [← map_add (f := _)]
     congr 1
     funext y
-    rw [Pi.add_apply, ← map_add]
+    rw [Pi.add_apply, ← map_add (f := _)]
     rfl
   map_smul' a Φ := by
     rw [RingHom.id_apply, ← map_smul]
@@ -128,12 +174,12 @@ theorem boxL_inv {A : Type} [CommRing A] [Invertible (2 : A)] [TopologicalSpace 
   rw [← h₂ _ (star_mem (partial_mem hΦ l))]
   congr 2
   funext y
-  simp only [Pi.star_apply, schr]
+  dsimp only [schr, Pi.star_apply]
   rw [← h₁ _ (slice_mem hΦ (y + w₂.1)), ← star_star (ψ (y ⬝ᵥ w₂.2 + _)), ← star_mul', conj_psi hψ,
     ← smul_eq_mul (ψ (-_)) (l _), ← map_smul]
   congr 2
   funext x
-  simp only [Pi.smul_apply, smul_eq_mul, schr]
+  dsimp only [schr, Pi.smul_apply, smul_eq_mul]
   rw [← mul_assoc, ← AddChar.map_add_eq_mul]
   congr 2
   · simp only [sumElim_dotProduct_sumElim, dotProduct_neg]

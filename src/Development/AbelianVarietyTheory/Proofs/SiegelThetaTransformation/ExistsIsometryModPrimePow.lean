@@ -1,7 +1,58 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IsBaseClassLevelAdapted
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.FiniteResidueFieldAdicCompletionIntegers
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.FiniteAdeleStrongApproximationModNat
+module
+
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.FiniteResidueFieldAdicCompletionIntegers
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.FiniteAdeleStrongApproximationModNat
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.LocalToGlobal.ProjectiveLattices.SubConstMemOrig
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.CocycleRightZeroThd
+
+@[expose] public section
 
 open NumberField ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.FD ReciprocityTheory.ChartRestriction.G.Geo.Tor Formalism.L2.Pj GlobalTheory
 open IsDedekindDomain GlobalTheory.SelfDualGenus
@@ -44,7 +95,7 @@ theorem exists_approx {L : Submodule (𝓞 E) (Fin r → E)} (hL : L.FG) {n : �
   haveI : Module.Finite (𝓞 E) L := Module.Finite.iff_fg.2 hL
   haveI : Module.Finite ℤ L := Module.Finite.trans (𝓞 E) L
   obtain ⟨m, t, ht⟩ := Module.Finite.exists_fin (R := ℤ) (M := L)
-  have h1 : ∀ v, z v ∈ Submodule.span (v.adicCompletionIntegers (maximalRealSubfield E)) (Set.range fun i => vec v (t i : Fin r → E)) := by
+  have h1 : ∀ v, z v ∈ Submodule.span (v.adicCompletionIntegers (maximalRealSubfield E)) (Set.range fun i : Fin m => vec (E := E) (r := r) v (t i : Fin r → E)) := by
     intro v
     refine (Submodule.span_le.2 ?_ : locLattice v L ≤ _) (hz v)
     rintro _ ⟨x, hx, rfl⟩
@@ -54,6 +105,7 @@ theorem exists_approx {L : Submodule (𝓞 E) (Fin r → E)} (hL : L.FG) {n : �
       have := congrArg Subtype.val hc
       simpa using this.symm
     change vec v x ∈ _
+
     rw [e, map_sum]
     refine Submodule.sum_mem _ fun i _ => ?_
     rw [map_zsmul]
@@ -65,6 +117,7 @@ theorem exists_approx {L : Submodule (𝓞 E) (Fin r → E)} (hL : L.FG) {n : �
   choose a ha using fun i => hs i v
   refine ⟨∑ i, a i • vec v (t i : Fin r → E),
     Submodule.sum_mem _ fun i _ => Submodule.smul_mem _ _ (vec_mem v (t i).2), ?_⟩
+
   rw [← hc v, map_sum, Finset.smul_sum, ← Finset.sum_add_distrib]
   refine Finset.sum_congr rfl fun i _ => ?_
   rw [ha i, vec_smul_real, add_smul, smul_assoc]
@@ -94,7 +147,7 @@ def rel (L L' : Submodule (𝓞 E) (Fin r → E)) (γ : ∀ v : HeightOneSpectru
     obtain ⟨w, hw, hp⟩ := hp v
     obtain ⟨w', hw', hq⟩ := hq v
     refine ⟨w + w', add_mem hw hw', ?_⟩
-    simp only [Prod.snd_add, Prod.fst_add, Submodule.coe_add, map_add, Matrix.mulVec_add, hp, hq, smul_add]
+    simp only [Prod.snd_add, Prod.fst_add, Submodule.coe_add, map_add (f := _), Matrix.mulVec_add, hp, hq, smul_add]
     abel
   smul_mem' := by
     intro c p hp v
@@ -142,7 +195,7 @@ theorem hermLoc_add_left (x x' y : Fin r → LocAlg v) :
 
 theorem hermLoc_add_right (x y y' : Fin r → LocAlg v) :
     hermLoc v G x (y + y') = hermLoc v G x y + hermLoc v G x y' := by
-  simp only [hermLoc, dotProduct, Pi.add_apply, map_add, mul_add, Finset.sum_add_distrib]
+  simp only [hermLoc, dotProduct, Pi.add_apply, map_add (f := _), mul_add, Finset.sum_add_distrib]
 
 theorem hermLoc_smul_left (c : v.adicCompletionIntegers (maximalRealSubfield E)) (x y : Fin r → LocAlg v) :
     hermLoc v G (c • x) y = c • hermLoc v G x y := by
@@ -250,8 +303,8 @@ theorem exists_isometry_mod {G G' : Matrix (Fin r) (Fin r) E} {L L' : Submodule 
       abel
     exact ⟨m, hm, congrFun e 0⟩
 
-omit [IsCMField E] in
 
+omit [IsCMField E] in
 theorem isLattice_ideal {I : FractionalIdeal (𝓞 E)⁰ E} (hI : I ≠ 0) :
     ReciprocityTheory.MultiplicativeHeights.IsLattice (Submodule.pi Set.univ fun _ : Fin 1 => (I : Submodule (𝓞 E) E)) := by
   refine ⟨Submodule.fg_pi fun _ => FractionalIdeal.fg_of_isNoetherianRing le_rfl I, ?_⟩

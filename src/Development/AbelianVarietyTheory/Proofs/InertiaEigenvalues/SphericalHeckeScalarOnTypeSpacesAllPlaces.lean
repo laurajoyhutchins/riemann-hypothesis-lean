@@ -1,12 +1,53 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.RowsExhaust
+public import Formalism.LocalToGlobal.ProjectiveLattices.HalfOneAddSqrtNegIsIntegral
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.SplitPlaceHeckeOperatorScalarOnSphericalStatement
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.FiniteCosetsHeckeSetAtSplitPlaceOutsideLevelStatement
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.SplitExEveryDatum
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
 import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.IsWildInertiaCyclotomicElement
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.GaloisSideTwistedSelmerAuxiliaryPrimes
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.SemisimpleOfInjective
-import Formalism.LocalToGlobal.NormalizedHeckeFactors.CoverStd
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.RowsExhaust
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.SplitExEveryDatum
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.FiniteCosetsHeckeSetAtSplitPlaceOutsideLevelStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.SplitPlaceHeckeOperatorScalarOnSphericalStatement
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.MainNotions Formalism.MainNotions.N Formalism.ConjugateSelfDual ReciprocityTheory.Gal ReciprocityTheory.Aut Formalism.AUTREP Formalism.L2 NumberField IsDedekindDomain Polynomial GlobalTheory.EtaJoin GlobalTheory.CoefDuty
 
 noncomputable section
@@ -52,7 +93,7 @@ theorem finsum_cosets_eq {G W : Type} [Group G] [AddCommGroup W] (J U : Subgroup
     by_contra hn
     apply hc
     simp only [φ]
-    rw [dif_neg]
+    rw [dite_eq_right]
     rintro ⟨x, hx, rfl⟩
     exact hn ⟨x, hx, rfl⟩
   have hψ : Function.support ψ ⊆ (fun x : G => (x : G ⧸ U)) '' Dset := by
@@ -60,7 +101,7 @@ theorem finsum_cosets_eq {G W : Type} [Group G] [AddCommGroup W] (J U : Subgroup
     by_contra hn
     apply hc
     simp only [ψ]
-    rw [dif_neg]
+    rw [dite_eq_right]
     rintro ⟨x, hx, rfl⟩
     exact hn ⟨x, hx, rfl⟩
   rw [← Set.indicator_eq_self.2 hφ, ← Set.indicator_eq_self.2 hψ, ← finsum_mem_def, ← finsum_mem_def]
@@ -102,8 +143,8 @@ section Hk
 
 variable {L : Type} [Field L] [NumberField L] [IsCMField L] {n : ℕ} {W : Type} [AddCommGroup W] [Module ℂ W]
 
-open Classical in
 
+open Classical in
 theorem heckeD_eq_sum (J : Subgroup (GAf L n)) (Dset : Set (GAf L n))
     (hfin : ((fun x : GAf L n => (x : GAf L n ⧸ J)) '' Dset).Finite) (f : GAf L n → W) :
     NG.heckeD J Dset f = ∑ c ∈ hfin.toFinset,
@@ -117,7 +158,7 @@ theorem heckeD_eq_sum (J : Subgroup (GAf L n)) (Dset : Set (GAf L n))
     by_contra hn
     apply hcc
     dsimp only
-    rw [dif_neg]
+    rw [dite_eq_right]
     rintro ⟨x, hx, rfl⟩
     exact hn ⟨x, hx, rfl⟩
   simp only [NG.heckeD]
@@ -186,11 +227,15 @@ theorem tN_iso {ρ : Representation ℂ (GQ L n) W} {S S' : Submodule ℂ (GAf L
     refine Finset.sum_congr rfl fun d _ => ?_
     split_ifs <;> rfl
   have hTσ : ((T σ : S') : GAf L n → W) = NG.heckeD (Umax L n) (tSet L n s ϖ k) f' := by
-    rw [heckeD_eq_sum _ _ hfin, map_sum, Submodule.coe_sum]
+    change ((T.toLinearMap σ : S') : GAf L n → W) = _
+    dsimp only [σ]
+    rw [heckeD_eq_sum _ _ hfin, map_sum T.toLinearMap, Submodule.coe_sum]
     refine Finset.sum_congr rfl fun d _ => ?_
     split_ifs
     · exact hrt _
-    · simp
+    · change ((T.toLinearMap 0 : S') : GAf L n → W) = 0
+      rw [map_zero]
+      rfl
   simp only [NG.tN] at hcf ⊢
   have key : ((s.q : ℂ) ^ (k * (n - 1)))⁻¹ • σ = c • f := Subtype.ext (by
     rw [Submodule.coe_smul, hσ, Submodule.coe_smul]; exact hcf)
@@ -246,7 +291,7 @@ theorem tN_finset_sum {ρ : Representation ℂ (GQ L n) W} {S : Submodule ℂ (G
       have hyfix : ∀ κ ∈ Umax L n, TrivOutside {s.v} κ → NG.rt L n κ y = y := by
         intro κ hκ hκt
         have e := hfix κ hκ hκt
-        rw [map_add] at e
+        rw [map_add (f := _)] at e
         have hd : NG.rt L n κ y - y ∈ a ⊓ ⨆ i ∈ t, i := by
           refine ⟨Submodule.sub_mem _ (haF.1.1.stable κ y hy) hy, ?_⟩
           have h4 : NG.rt L n κ y - y = z - NG.rt L n κ z := by
@@ -259,7 +304,7 @@ theorem tN_finset_sum {ρ : Representation ℂ (GQ L n) W} {S : Submodule ℂ (G
       have hzfix : ∀ κ ∈ Umax L n, TrivOutside {s.v} κ → NG.rt L n κ z = z := by
         intro κ hκ hκt
         have e := hfix κ hκ hκt
-        rw [map_add, hyfix κ hκ hκt] at e
+        rw [map_add (f := _), hyfix κ hκ hκt] at e
         exact add_left_cancel e
       have e1 := tN_iso hS.1 haF.2 s ϖ k hfin c hc y hy hyfix
       have e2 := ih htF z hz hzfix

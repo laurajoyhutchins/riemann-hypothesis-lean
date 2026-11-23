@@ -1,6 +1,60 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.HolomorphicFamilies.HolJetE
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsHolPeriods
-import Formalism.LocalToGlobal.ProjectiveLattices.ThGerm
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsHolPeriods
+public import Formalism.LocalToGlobal.ProjectiveLattices.ThGerm
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.HolomorphicFamilies.HolJetB
+import Formalism.SharpRestriction.Divisibility.GeneratorPowers.FBIdJet
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.HolomorphicFamilies.HolJetC
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.HolomorphicFamilies.HolJetD
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.HolomorphicFamilies.HolJetE
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.TaylorComp
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -39,6 +93,7 @@ theorem anLin_coe (A : (Fin g' → ℂ) →L[ℂ] (Fin g → ℂ)) (p : Fin 1 ×
 
 theorem anLin_cc (A : (Fin g' → ℂ) →L[ℂ] (Fin g → ℂ)) (p : Fin 1 × Fin g) :
     MvPowerSeries.constantCoeff ((anLin A p : MvPolynomial (Fin 1 × Fin g') ℂ) : MvPowerSeries (Fin 1 × Fin g') ℂ) = 0 := by
+
   rw [anLin_coe, map_sum]
   simp
 
@@ -53,12 +108,13 @@ theorem tay_comp_anLin {θ : (Fin g → ℂ) → ℂ} (hθ : ContDiffAt ℂ ω �
     rw [Fintype.sum_prod_type, Fin.sum_univ_one]
     exact sum_single_smul _
   have hLd : ∀ (p : Fin 1 × Fin g) (q : Fin 1 × Fin g'),
-      MvPowerSeries.pderiv ℂ q ((anLin A p : MvPolynomial (Fin 1 × Fin g') ℂ) : MvPowerSeries (Fin 1 × Fin g') ℂ) =
+      MvPowerSeries.pderiv (R := ℂ) q ((anLin A p : MvPolynomial (Fin 1 × Fin g') ℂ) : MvPowerSeries (Fin 1 × Fin g') ℂ) =
         MvPowerSeries.C (A (Pi.single q.2 1) p.2) := by
     intro p q
     obtain ⟨a, j⟩ := q
     have ha : a = 0 := Subsingleton.elim _ _
     subst ha
+
     rw [anLin_coe, map_sum, Finset.sum_eq_single j]
     · rw [Derivation.leibniz, MvPowerSeries.pderiv_C, smul_zero, add_zero, MvPowerSeries.pderiv_X, smul_eq_mul]
       simp
@@ -79,8 +135,8 @@ end Lin
 
 variable {Y : Scheme.{0}}
 
-set_option backward.isDefEq.respectTransparency false in
 
+set_option backward.isDefEq.respectTransparency false in
 theorem jetPt_precompD {g g' : ℕ} (e : (Fin g → ℂ) → (Sp ℂ ⟶ Y)) (e' : (Fin g' → ℂ) → (Sp ℂ ⟶ Y))
     (hol : IsHolFam e) (hol' : IsHolFam e') (h0 : e' 0 = e 0) (m : ℕ)
     (χ : Jet ℂ (Fin 1 × Fin g) m →+* Jet ℂ (Fin 1 × Fin g') m) [hχl : IsLocalHom χ]
@@ -132,7 +188,7 @@ theorem anJetMap_comp {K : Type} [Field K] {Ia Ib Ic : Type} {m : ℕ} (φ : Ia 
   congr 1
   induction p using MvPolynomial.induction_on with
   | C r => simp
-  | add p q hp hq => simp only [map_add, hp, hq]
+  | add p q hp hq => simp only [map_add (f := _), hp, hq]
   | mul_X p i hp => simp only [map_mul, hp, MvPolynomial.aeval_X, h i]
 
 section Two
@@ -171,7 +227,7 @@ theorem anRen_sum (m : ℕ) (a : Jet ℂ (Fin 1 × Fin g) m) :
       (MvPolynomial.X (anKap.symm q.2) : MvPolynomial (Fin 2 × Fin g) ℂ)) (anLin anSum p) =
       MvPolynomial.X ((0 : Fin 2), p.2) + MvPolynomial.X ((1 : Fin 2), p.2) := by
     intro p
-    simp only [anSum, anLin_add, anLin_anPr, map_add, MvPolynomial.aeval_X, Equiv.symm_apply_apply]
+    simp only [anSum, anLin_add, anLin_anPr, map_add (f := _), MvPolynomial.aeval_X, Equiv.symm_apply_apply]
   unfold anRen jetSubstP
   rw [anJetMap_comp _ _ _ _ _ (fun p => Ideal.add_mem _ (X_mem_orig _) (X_mem_orig _)) hs a]
   refine jetMap_congr _ _ _ _ (fun p => ?_) a

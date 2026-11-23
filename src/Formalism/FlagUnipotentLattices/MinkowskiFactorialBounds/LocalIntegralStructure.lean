@@ -1,7 +1,62 @@
-import Formalism.FlagUnipotentLattices.DetIndexProductHyperbolicInequality
-import Formalism.FlagUnipotentLattices.DetIndexProductPlacesInequalitySq
-import Formalism.HyperbolicPlaceProducts.SecondLevelArithmeticNorm
-import Formalism.HyperbolicPlaceProducts.ArithmeticCountRevised
+module
+
+public import Formalism.FlagUnipotentLattices.DetIndexProductHyperbolicInequality
+public import Formalism.FlagUnipotentLattices.DetIndexProductPlacesInequalitySq
+public import Formalism.HyperbolicPlaceProducts.SecondLevelArithmeticNorm
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Module NumberField Formalism.HermitianLatticeCounting.LocalIntegralStructure nonZeroDivisors
 set_option linter.all false
@@ -9,7 +64,6 @@ set_option linter.all false
 namespace Formalism.HermitianLatticeCounting.P
 
 theorem card_range_nsmul_mul_card_le : Formalism.HermitianLatticeCounting.LocalIntegralStructure.TorsionIndex := Formalism.SLP.Final.torsionIndex
-theorem unipotent_upper_entries : Formalism.HermitianLatticeCounting.LocalIntegralStructure.EntriesOfSignaturePreserving := Formalism.SLP.GlobalBoundRefinements.Final.local_integral_entries_of_signature_preserving
 
 theorem orthogonal_complement_formula : PerpCompl := by
   intro K U _ _ _ _ σ hσ B hR hL r A A' hU hA hA' hsup
@@ -31,6 +85,7 @@ theorem orthogonal_complement_formula : PerpCompl := by
           exact (map_eq_zero σ).mp h2
         have h3 : a = ∑ i, (bs.repr ⟨a, ha⟩ i) • (bs i : U) := by
           have h4 := congrArg (S.subtype) (bs.sum_repr ⟨a, ha⟩)
+
           rw [map_sum] at h4
           simpa only [map_smul, Submodule.subtype_apply] using h4.symm
         rw [h3]; simp [hi]
@@ -200,20 +255,6 @@ theorem gram_determinant_general : GramDetGen := by
     linear_combination ((-1 : R) ^ (r + 1)) * hx - x * hsq
   exact key _ h1
 
-theorem gram_determinant_formula : GramDet := by
-  intro r Z T T'
-  have h := gram_determinant_general ℂ r Z Z.conjTranspose (T : ℂ) (T' : ℂ)
-  rw [h, ← Matrix.conjTranspose_submatrix, Matrix.det_conjTranspose, Matrix.det_conjTranspose]
-  congr 1
-  have hs : ∀ z : ℂ, z * star z = ((‖z‖ ^ 2 : ℝ) : ℂ) := by
-    intro z
-    first
-      | exact Complex.mul_conj' z
-      | (rw [Complex.star_def, Complex.mul_conj']; push_cast; ring)
-      | (rw [Complex.star_def, Complex.mul_conj, Complex.normSq_eq_norm_sq])
-  rw [mul_assoc ((T : ℂ) * (T' : ℂ)), hs, hs]
-  push_cast <;> ring
-
 end Gram
 
 theorem gram_matrix_nondegenerate : GramNondeg := by
@@ -223,6 +264,7 @@ theorem gram_matrix_nondegenerate : GramNondeg := by
     have h1 : (Matrix.of fun i j => B (v i) (v j)).mulVec (fun i => σ (c i)) = 0 := by
       funext j
       have hj := hc j
+
       rw [map_sum] at hj
       simp only [LinearMap.map_smulₛₗ, smul_eq_mul] at hj
       simp only [Matrix.mulVec, dotProduct, Matrix.of_apply, Pi.zero_apply]
@@ -238,6 +280,7 @@ theorem gram_matrix_nondegenerate : GramNondeg := by
     have h1 : Matrix.vecMul c (Matrix.of fun i j => B (v i) (v j)) = 0 := by
       funext j
       have hj := hc j
+
       rw [map_sum, LinearMap.sum_apply] at hj
       simp only [LinearMap.map_smul, LinearMap.smul_apply, smul_eq_mul] at hj
       simp only [Matrix.vecMul, dotProduct, Matrix.of_apply, Pi.zero_apply]
@@ -260,44 +303,6 @@ theorem gram_matrix_nondegenerate : GramNondeg := by
     simp [hc]
 
 end GramAll
-
-theorem denominator_norm_fraction : DenomNormFrac := by
-  intro E _ _ α J hα hJ hint
-  have hle : FractionalIdeal.spanSingleton (𝓞 E)⁰ α * J ≤ 1 := by
-    rw [FractionalIdeal.mul_le]
-    intro i hi j hj
-    rw [FractionalIdeal.mem_spanSingleton] at hi
-    obtain ⟨z, rfl⟩ := hi
-    obtain ⟨w, hw⟩ := hint j hj
-    rw [FractionalIdeal.mem_one_iff]
-    refine ⟨z * w, ?_⟩
-    rw [map_mul, Algebra.smul_def, mul_assoc]
-    congr 1
-  obtain ⟨I, hI⟩ := FractionalIdeal.le_one_iff_exists_coeIdeal.1 hle
-  have hne : FractionalIdeal.spanSingleton (𝓞 E)⁰ α * J ≠ 0 :=
-    mul_ne_zero (FractionalIdeal.spanSingleton_ne_zero_iff.2 hα) hJ
-  have hI0 : I ≠ ⊥ := by
-    rintro rfl
-    apply hne
-    rw [← hI]
-    simp
-  have hn : FractionalIdeal.absNorm (FractionalIdeal.spanSingleton (𝓞 E)⁰ α) =
-      |Algebra.norm ℚ α| := by
-    first
-      | exact FractionalIdeal.absNorm_span_singleton (𝓞 E) α
-      | exact FractionalIdeal.absNorm_span_singleton α
-      | simp [FractionalIdeal.absNorm_span_singleton]
-  have hc : FractionalIdeal.absNorm ((I : FractionalIdeal (𝓞 E)⁰ E)) = (Ideal.absNorm I : ℚ) := by
-    first
-      | exact FractionalIdeal.coeIdeal_absNorm I
-      | simp [FractionalIdeal.coeIdeal_absNorm]
-      | simp
-  have key : |Algebra.norm ℚ α| * FractionalIdeal.absNorm J = (Ideal.absNorm I : ℚ) := by
-    rw [← hn, ← map_mul, ← hI, hc]
-  rw [key]
-  have h0 : Ideal.absNorm I ≠ 0 := by
-    rwa [Ne, Ideal.absNorm_eq_zero_iff]
-  exact_mod_cast Nat.one_le_iff_ne_zero.2 h0
 
 lemma pow_two_div_sq_identity (g : ℝ) (e f : ℕ) : ((2 / g) ^ (e * f)) ^ 2 = 4 ^ (e * f) / g ^ (2 * f * e) := by
   rw [← pow_mul, div_pow, show e * f * 2 = 2 * f * e by ring]

@@ -1,11 +1,60 @@
-import Mathlib
-import Formalism.SharpRestriction.CuspSpanNormBounds.FractionFieldToGenericStalkAlgebraMapEq
-import Development.AbelianVarietyTheory.Definitions.Foundations.IsHermND
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.ComplementReferenceCompactSubgroup
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.HermLat
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.ComplementReferenceCompactSubgroup
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.HermLat
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.BasisOfIsCompl
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsEqZpowMulUnit
 import Development.AbelianVarietyTheory.Proofs.FlagMeasures.IsPrincipalIdealRingOfHenselian
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsEqZpowMulUnit
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.BasisOfIsCompl
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.BitVec
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open ValuativeRel Formalism.MainNotions.S.Loc GlobalTheory.HL MeasureTheory
 open scoped Pointwise ENNReal Classical
@@ -289,9 +338,15 @@ theorem block_of : ∀ (bs : List (Eˣ × ℕ+)) (i : ℕ), i < (bs.map (fun b =
     ∃ (l' l : ℕ) (t : E), l' ≤ i ∧ i < l ∧ l ≤ (bs.map (fun b => (b.2 : ℕ))).sum ∧
       (∀ a b, l' ≤ a → a < l → l' ≤ b → b < l → sameBlock bs a b = true) ∧
       (∀ a b, l' ≤ a → a < l → ptEntryL bs a b = if a + b + 1 = l + l' then t else 0) ∧
-      (∀ a b, l ≤ a → b < l → ptEntryL bs a b = 0) ∧ (∀ a b, l' ≤ a → b < l' → ptEntryL bs a b = 0)
-  | [], i, h => by simp at h
-  | (t, s) :: bs, i, h => by
+      (∀ a b, l ≤ a → b < l → ptEntryL bs a b = 0) ∧ (∀ a b, l' ≤ a → b < l' → ptEntryL bs a b = 0) := by
+  intro bs
+  induction bs with
+  | nil =>
+    intro i h
+    simp at h
+  | cons head bs ih =>
+    rcases head with ⟨t, s⟩
+    intro i h
     simp only [List.map_cons, List.sum_cons] at h ⊢
     by_cases h1 : i < s
     · refine ⟨0, s, t, by omega, h1, by omega, ?_, ?_, ?_, ?_⟩
@@ -305,7 +360,7 @@ theorem block_of : ∀ (bs : List (Eˣ × ℕ+)) (i : ℕ), i < (bs.map (fun b =
         split_ifs <;> first | rfl | omega
       · intro a b ha hb
         omega
-    · obtain ⟨l', l, t', e1, e2, e3, e4, e5, e6, e7⟩ := block_of bs (i - s) (by omega)
+    · obtain ⟨l', l, t', e1, e2, e3, e4, e5, e6, e7⟩ := ih (i - s) (by omega)
       refine ⟨s + l', s + l, t', by omega, by omega, by omega, ?_, ?_, ?_, ?_⟩
       · intro a b ha' ha hb' hb
         have := e4 (a - s) (b - s) (by omega) (by omega) (by omega) (by omega)

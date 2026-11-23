@@ -1,4 +1,52 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.SelmerTransport.RestrictionMemInvariantH1
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.SelmerTransport.RestrictionMemInvariantH1
+public import Mathlib.LinearAlgebra.Eigenspace.Basic
+public import Mathlib.RingTheory.Length
+public import Mathlib.RingTheory.LocalRing.MaximalIdeal.Defs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import Mathlib.RingTheory.LocalRing.Length
+
+@[expose] public section
 
 open ReciprocityTheory.Gal UpperTheory.V.Base
 
@@ -21,6 +69,7 @@ variable {b} {J : N →+ N'} {C : ι → N' →+ N}
 private theorem Coords.comm (h : Coords b J C) (f : N → N) (f' : N' →ₗ[O] N') (hf : ∀ x, J (f x) = f' (J x))
     (i : ι) (y : N') : C i (f' y) = f (C i y) := by
   conv_lhs => rw [← h.sum y]
+
   simp only [map_sum, LinearMap.map_smul, ← hf, h.coord, Module.Basis.repr_self]
   rw [Finset.sum_eq_single i]
   · simp
@@ -57,23 +106,24 @@ private theorem Coords.length [IsLocalRing R] [IsLocalRing O] [IsLocalHom (algeb
       simp only [ψ, hφ, h.coord]
       simp only [← TensorProduct.smul_tmul, ← TensorProduct.sum_tmul, b.sum_repr]
     | add s t hs ht =>
-      simp only [ψ, map_add, TensorProduct.tmul_add, Finset.sum_add_distrib] at hs ht ⊢
+      simp only [ψ, map_add (f := _), TensorProduct.tmul_add, Finset.sum_add_distrib] at hs ht ⊢
       rw [hs, ht]
   have hφψ : ∀ y, φ (ψ y) = y := by
     intro y
+
     simp only [ψ, map_sum, hφ, h.sum]
   have hφs : ∀ (o : O) t, φ (o • t) = o • φ t := by
     intro o t
     induction t using TensorProduct.induction_on with
     | zero => simp
     | tmul o' x => rw [TensorProduct.smul_tmul', hφ, hφ, smul_eq_mul, mul_smul]
-    | add s t hs ht => rw [smul_add, map_add, map_add, hs, ht, smul_add]
+    | add s t hs ht => rw [smul_add, map_add (f := _), map_add (f := _), hs, ht, smul_add]
   let e : N' ≃ₗ[O] O ⊗[R] N :=
     { toFun := ψ
       invFun := φ
       left_inv := hφψ
       right_inv := hψφ
-      map_add' := fun y y' => by simp [ψ, map_add, TensorProduct.tmul_add, Finset.sum_add_distrib]
+      map_add' := fun y y' => by simp [ψ, map_add (f := _), TensorProduct.tmul_add, Finset.sum_add_distrib]
       map_smul' := fun o y => by
         show ψ (o • y) = o • ψ y
         conv_lhs => rw [← hφψ y, ← hφs, hψφ] }
@@ -93,7 +143,7 @@ variable {G : Type} [Group G] [TopologicalSpace G]
 
 private def zMap : Z1U ρ U →+ Z1U ρ' U where
   toFun f := ⟨u ∘ f.1, continuous_of_discreteTopology.comp f.2.1, fun g h => by
-    simp only [Function.comp_apply, f.2.2 g h, map_add]
+    simp only [Function.comp_apply, f.2.2 g h, map_add (f := _)]
     exact congrArg _ (hu _ _)⟩
   map_zero' := Subtype.ext (funext fun _ => map_zero u)
   map_add' f f' := Subtype.ext (funext fun g => map_add u _ _)
@@ -147,7 +197,7 @@ private theorem UpperTheory.V.Base.exists_coords_of_isBaseChange {R O ι M M' : 
       simp only [smul_comm (b _) (b.repr o _)]
       simp only [← smul_assoc, ← Finset.sum_smul, b.sum_repr]
     | add s t hs ht =>
-      simp only [map_add, smul_add, Finset.sum_add_distrib, hs, ht]
+      simp only [map_add (f := _), smul_add, Finset.sum_add_distrib, hs, ht]
   · intro i o x
     simp only [AddMonoidHom.comp_apply, LinearMap.toAddMonoidHom_coe, LinearEquiv.coe_coe]
     rw [← IsBaseChange.equiv_tmul hj, LinearEquiv.symm_apply_apply, hFt]
@@ -191,7 +241,7 @@ private theorem UpperTheory.V.Base.selBaseEig_lemma_3 {G : Type} [Group G] [Topo
     { toFun := fun f => ⟨fun g => C i (f.1 g), (continuous_of_discreteTopology (f := C i)).comp f.2.1,
         fun g g' => by
           show C i (f.1 (g * g')) = C i (f.1 g) + ρ g (C i (f.1 g'))
-          rw [f.2.2 g g', map_add]
+          rw [f.2.2 g g', map_add (f := _)]
           exact congrArg _ (hcomm i _ _)⟩
       map_zero' := Subtype.ext (funext fun _ => map_zero (C i))
       map_add' := fun f f' => Subtype.ext (funext fun g => map_add (C i) _ _) }
@@ -251,7 +301,7 @@ private theorem UpperTheory.V.Base.selBaseEig_lemma_5 {G : Type} [Group G] [Topo
   obtain ⟨z, rfl⟩ := Submodule.Quotient.mk_surjective _ x
   exact congrArg Submodule.Quotient.mk (Subtype.ext (funext fun w => (hu _ _).symm))
 
-set_option maxHeartbeats 800000 in
+
 open UpperTheory.V.Base.SelmerBaseEigenCoordinates in
 theorem UpperTheory.V.Base.selBaseEig :
     ∀ (R G M : Type) [CommRing R] [Group G] [TopologicalSpace G] [IsTopologicalGroup G] [AddCommGroup M] [Module R M]

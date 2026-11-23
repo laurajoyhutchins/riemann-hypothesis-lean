@@ -1,7 +1,47 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Statements.TowerExistence.GoodTowerExists
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.NumberField
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.PtsIntZero
+module
+
+public import Development.AutomorphicSpectrum.Definitions.DivisibilityTowers.GoodOrigin
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.NumberField
+public import Mathlib.NumberTheory.Harmonic.EulerMascheroni
+public import Mathlib.NumberTheory.NumberField.Discriminant.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -66,32 +106,6 @@ theorem const_le : Real.eulerMascheroniConstant + Real.log (2 * Real.pi) + 2 * R
     Real.log_pow, Real.log_pow] at h
   push_cast at h
   linarith
-
-theorem value_bound (p q : ℕ) (lK l L : ℝ) (h7 : Real.log 7 / 2 ≤ lK) (hl : lK ≤ l) :
-    |((p : ℝ) - q) / 2 * (Real.eulerMascheroniConstant + Real.log (2 * Real.pi) - l - L) + q * (2 * lK - l)| +
-      ((p + q : ℕ) : ℝ) * Real.log 2 ≤ ((p + q : ℕ) : ℝ) * (3 / 2 * l + |L| / 2) := by
-  have hc := const_le
-  have hγ := Real.one_half_lt_eulerMascheroniConstant
-  have h2 : 0 < Real.log 2 := Real.log_pos one_lt_two
-  have h4 : 2 * Real.log 2 ≤ Real.log (2 * Real.pi) := by
-    have : Real.log (2 ^ 2) ≤ Real.log (2 * Real.pi) :=
-      Real.log_le_log (by norm_num) (by linarith [Real.pi_gt_three])
-    rw [Real.log_pow] at this
-    exact_mod_cast this
-  have hL := le_abs_self L
-  have hL' := neg_abs_le L
-  have hp : (0 : ℝ) ≤ p := p.cast_nonneg
-  have hq : (0 : ℝ) ≤ q := q.cast_nonneg
-  set c := Real.eulerMascheroniConstant + Real.log (2 * Real.pi) with hcdef
-  set b := 3 / 2 * l + |L| / 2 - Real.log 2 with hb
-  have a1 : 0 ≤ b - (c - l - L) / 2 := by linarith
-  have a2 : 0 ≤ b + (c - l - L) / 2 := by linarith
-  have a3 : 0 ≤ b - (-(c - l - L) / 2 + 2 * lK - l) := by linarith
-  have a4 : 0 ≤ b + (-(c - l - L) / 2 + 2 * lK - l) := by linarith
-  have : |((p : ℝ) - q) / 2 * (c - l - L) + q * (2 * lK - l)| ≤ (p + q) * b :=
-    abs_le.2 ⟨by nlinarith [mul_nonneg hp a2, mul_nonneg hq a4], by nlinarith [mul_nonneg hp a1, mul_nonneg hq a3]⟩
-  push_cast
-  nlinarith
 
 end OnHodge
 

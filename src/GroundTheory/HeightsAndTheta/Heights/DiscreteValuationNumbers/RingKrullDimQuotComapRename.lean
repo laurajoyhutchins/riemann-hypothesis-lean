@@ -1,12 +1,57 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.IsVerticalDivOfIsVerticalDivisor
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.StatementsFlagBundle
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.StatementsHsymmShift
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.StatementsGenericPoint
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PNumericalSegre
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.IsFieldIntersectionExample
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.AssemblyBridgeFull
-import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.Assembly
+module
+
+public import Mathlib.Algebra.BigOperators.Group.Finset.Defs
+public import Mathlib.Data.Nat.Choose.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Lean.Elab.MutualDef
+public import Mathlib.Algebra.Algebra.Defs
+public import Mathlib.Algebra.BigOperators.Group.Finset.Basic
+public import Mathlib.Algebra.Field.Defs
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterDivSuppAA
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.NumbersDVR
@@ -29,33 +74,6 @@ theorem sum_choose_succ (n : ℕ) (U : ℕ → ℤ) :
   rw [Finset.sum_range_succ (fun k => (n.choose (k + 1) : ℤ) * U (k + 1)),
     Nat.choose_succ_self, Nat.cast_zero, zero_mul, add_zero]
   ring
-
-def extMap {K : Type*} {ι : K → Type} {τ τ' : Type} (g : τ' → τ) :
-    (Σ o, IndefiniteRowSideFullHecke.NumbersDVR.extIdx ι τ' o) → Σ o, IndefiniteRowSideFullHecke.NumbersDVR.extIdx ι τ o
-  | ⟨none, t⟩ => ⟨none, g t⟩
-  | ⟨some k, i⟩ => ⟨some k, i⟩
-
-def extEquiv {K : Type*} {ι : K → Type} {τ τ' : Type} (g : τ' ≃ τ) :
-    (Σ o, IndefiniteRowSideFullHecke.NumbersDVR.extIdx ι τ' o) ≃ Σ o, IndefiniteRowSideFullHecke.NumbersDVR.extIdx ι τ o where
-  toFun := extMap g
-  invFun := extMap g.symm
-  left_inv := by
-    rintro ⟨(_ | k), i⟩
-    · exact congrArg (fun t : τ' => (⟨none, t⟩ : Σ o, IndefiniteRowSideFullHecke.NumbersDVR.extIdx ι τ' o))
-        (g.symm_apply_apply i)
-    · rfl
-  right_inv := by
-    rintro ⟨(_ | k), i⟩
-    · exact congrArg (fun t : τ => (⟨none, t⟩ : Σ o, IndefiniteRowSideFullHecke.NumbersDVR.extIdx ι τ o))
-        (g.apply_symm_apply i)
-    · rfl
-
-def bundleEquiv {K : Type*} (ι : K → Type) (M : ℕ) :
-    (Σ o, bundleIdx ι M o) ≃ Σ o, IndefiniteRowSideFullHecke.NumbersDVR.extIdx ι (Fin M) o where
-  toFun := FlagTypings.bundleToExt ι M
-  invFun := FlagTypings.extToBundle ι M
-  left_inv := by rintro ⟨(_ | k), i⟩ <;> rfl
-  right_inv := by rintro ⟨(_ | k), i⟩ <;> rfl
 
 section ProjBundle
 

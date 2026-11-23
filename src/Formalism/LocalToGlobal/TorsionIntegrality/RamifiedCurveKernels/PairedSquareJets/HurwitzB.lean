@@ -1,5 +1,57 @@
-import Formalism.LocalToGlobal.TorsionIntegrality.RamifiedCurveKernels.StatementH
-import Formalism.LocalToGlobal.TorsionIntegrality.SecondCoefficientNorms.PhNormFromDatum
+module
+
+public import Formalism.LocalToGlobal.TorsionIntegrality.RamifiedCurveKernels.StatementH
+public import Mathlib.RingTheory.MvPowerSeries.Rename
+public import Formalism.LocalToGlobal.TorsionIntegrality.SecondCoefficientNorms.PhNormFromDatum
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 open scoped BigOperators
@@ -106,7 +158,7 @@ theorem rep_apply (B : Type) [Fintype B] {ι : Type} (m : B → ι →₀ ℕ) (
     rep B m (k, i) = m k i := by
   classical
   unfold rep
-  rw [Finsupp.finset_sum_apply, Finset.sum_eq_single k]
+  rw [Finsupp.finsetSum_apply, Finset.sum_eq_single k]
   · first
       | exact Finsupp.embDomain_apply_self (blockEmb B ι k) (m k) i
       | exact Finsupp.embDomain_apply_self (f := blockEmb B ι k) (v := m k) (a := i)
@@ -151,7 +203,7 @@ theorem coeff_prod_inBlock {K : Type} [Field K] {ι B : Type} [Fintype B]
     congr 1
     ext i
     have h1 := congrArg (fun x : B × ι →₀ ℕ => x (k, i)) hl.1
-    simp only [Finsupp.finset_sum_apply, rep_apply, hm] at h1
+    simp only [Finsupp.finsetSum_apply, rep_apply, hm] at h1
     rw [Finset.sum_eq_single k] at h1
     · rw [← h1]
       symm
@@ -171,7 +223,7 @@ theorem coeff_prod_inBlock {K : Type} [Field K] {ι B : Type} [Fintype B]
     rw [Finset.mem_finsuppAntidiag]
     refine ⟨?_, fun _ _ => Finset.mem_univ _⟩
     ext ⟨k, i⟩
-    rw [Finsupp.finset_sum_apply, rep_apply, Finset.sum_eq_single k]
+    rw [Finsupp.finsetSum_apply, rep_apply, Finset.sum_eq_single k]
     · show (Finsupp.embDomain (blockEmb B ι k) κ) (k, i) = κ i
       first
         | exact Finsupp.embDomain_apply_self (blockEmb B ι k) κ i
@@ -207,9 +259,9 @@ private theorem intPS_mul_paired_square_jets {K : Type} [Field K] {R : Subring K
   exact R.sum_mem fun p _ => R.mul_mem (hf p.1) (hg p.2)
 
 private theorem intPS_derivative' {K : Type} [Field K] {R : Subring K} {f : PowerSeries K}
-    (hf : Formalism.L2.Th1.C.IntPS R f) : Formalism.L2.Th1.C.IntPS R (PowerSeries.derivative K f) := by
+    (hf : Formalism.L2.Th1.C.IntPS R f) : Formalism.L2.Th1.C.IntPS R (PowerSeries.derivative (R := K) f) := by
   intro n
-  have h : PowerSeries.coeff n (PowerSeries.derivative K f) = PowerSeries.coeff (n + 1) f * (n + 1) := by
+  have h : PowerSeries.coeff n (PowerSeries.derivative (R := K) f) = PowerSeries.coeff (n + 1) f * (n + 1) := by
     first
       | exact PowerSeries.coeff_derivativeFun f n
       | (rw [PowerSeries.derivative_coe, PowerSeries.coeff_derivativeFun])

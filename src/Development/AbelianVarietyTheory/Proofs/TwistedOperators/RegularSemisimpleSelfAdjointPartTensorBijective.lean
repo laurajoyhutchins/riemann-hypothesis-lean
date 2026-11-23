@@ -1,6 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.CentralizerTensorForms
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.NotCompactOfIdempotent
+module
+
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.NotCompactOfIdempotent
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open GlobalTheory.RegSS GlobalTheory.IndefiniteRowSideFullHecke.CentralizerTensorForms
 open scoped TensorProduct
@@ -25,7 +68,6 @@ theorem productMap_bijective_of_involution {F E L : Type} [Field F] [CharZero F]
   · have hrep : ∀ x : P ⊗[F] E, ∃ a c : P, x = a ⊗ₜ[F] 1 + c ⊗ₜ[F] b 1 := by
       intro x
       induction x with
-      | zero => exact ⟨0, 0, by simp⟩
       | tmul p e =>
         refine ⟨b.repr e 0 • p, b.repr e 1 • p, ?_⟩
         conv_lhs => rw [← b.sum_repr e, Fin.sum_univ_two, h0]
@@ -34,12 +76,12 @@ theorem productMap_bijective_of_involution {F E L : Type} [Field F] [CharZero F]
         obtain ⟨a, c, rfl⟩ := hx
         obtain ⟨a', c', rfl⟩ := hy
         exact ⟨a + a', c + c', by rw [TensorProduct.add_tmul, TensorProduct.add_tmul]; abel⟩
-    rw [injective_iff_map_eq_zero]
+    set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
     intro x hx
     obtain ⟨a, c, rfl⟩ := hrep x
     rw [hval] at hx
     have hx' := congrArg τ hx
-    rw [map_add, map_mul, map_zero, (hP _).1 a.2, (hP _).1 c.2, h1] at hx'
+    rw [map_add (f := _), map_mul, map_zero, (hP _).1 a.2, (hP _).1 c.2, h1] at hx'
     have ha : (a : L) = 0 := by
       linear_combination (algebraMap F L 2⁻¹) * (hx + hx') - (a : L) * h2
     have hc : (c : L) = 0 := by
@@ -50,7 +92,7 @@ theorem productMap_bijective_of_involution {F E L : Type} [Field F] [CharZero F]
     refine ⟨(⟨algebraMap F L 2⁻¹ * (l + τ l), (hP _).2 ?_⟩ : P) ⊗ₜ[F] 1 +
       (⟨algebraMap F L 2⁻¹ * algebraMap F L d⁻¹ * f (b 1) * (l - τ l), (hP _).2 ?_⟩ : P) ⊗ₜ[F] b 1,
       ?_⟩
-    · rw [map_mul, map_add, hτ, AlgEquiv.commutes, add_comm]
+    · rw [map_mul, map_add (f := _), hτ, AlgEquiv.commutes, add_comm]
     · rw [map_mul, map_mul, map_mul, map_sub, hτ, AlgEquiv.commutes, AlgEquiv.commutes, h1]
       ring
     · rw [hval]

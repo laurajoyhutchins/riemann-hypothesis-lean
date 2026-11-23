@@ -1,4 +1,51 @@
+module
+
+public import Formalism.LocalToGlobal.IndefiniteReal.LinksDefs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.PiTensorProduct.Basis
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Definitions.LatticeFrames.ChainParSucc
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.MainNotions.S MeasureTheory IsDedekindDomain NumberField Matrix
 open Formalism.L2.Theta Formalism.L2.DIV Formalism.IndefR Formalism.IndefR.Links Formalism.IndefR.Mult Formalism.IndefR.Datum
 open scoped TensorProduct InnerProductSpace ComplexConjugate
@@ -46,7 +93,7 @@ theorem ellC_apply (a : ∀ i, E i) (w : ⨂[ℂ] i, E i) : ellC a w = conj (ell
 theorem ellC_tprod (a b : ∀ i, E i) : ellC a (PiTensorProduct.tprod ℂ b) = ∏ i, ⟪b i, a i⟫_ℂ := by
   rw [ellC_apply, ellA_tprod, map_prod]; simp
 
-def ellM : MultilinearMap ℂ E ((⨂[ℂ] i, E i) →ₗ⋆[ℂ] ℂ) where
+def ellM : (∀ i, E i) →ₘₗ[ℂ] ((⨂[ℂ] i, E i) →ₗ⋆[ℂ] ℂ) where
   toFun := ellC
   map_update_add' a i x y := by
     ext w; simp [ellC_apply, ellA_update_add]
@@ -67,8 +114,8 @@ theorem ipT_herm (w w' : ⨂[ℂ] i, E i) : ipT w w' = conj (ipT w' w) := by
       simp only [map_smul, map_smulₛₗ, LinearMap.smul_apply, ipT_tprod, smul_eq_mul, map_mul, map_prod, inner_conj_symm,
         RingHomCompTriple.comp_apply, RingHom.id_apply, Complex.conj_conj]
       ring
-    | add x y hx hy => rw [map_add, hx, hy, map_add, LinearMap.add_apply, map_add]
-  | add x y hx hy => simp [map_add, LinearMap.add_apply, hx, hy]
+    | add x y hx hy => rw [map_add (f := _), hx, hy, map_add (f := _), LinearMap.add_apply, map_add (f := _)]
+  | add x y hx hy => simp [map_add (f := _), LinearMap.add_apply, hx, hy]
 
 end GlobalTheory.PiTensorInner
 
@@ -86,8 +133,8 @@ theorem ipT_map {G : ι → Type*} [∀ i, NormedAddCommGroup (G i)] [∀ i, Inn
     induction y using PiTensorProduct.induction_on with
     | smul_tprod s b =>
       simp only [map_smul, map_smulₛₗ, LinearMap.smul_apply, PiTensorProduct.map_tprod, ipT_tprod, hf]
-    | add x y hx hy => simp only [map_add, hx, hy]
-  | add x y hx hy => simp only [map_add, LinearMap.add_apply, hx, hy]
+    | add x y hx hy => simp only [map_add (f := _), hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), LinearMap.add_apply, hx, hy]
 
 theorem ipT_pos_fd [∀ i, FiniteDimensional ℂ (E i)] (x : ⨂[ℂ] i, E i) (hx : x ≠ 0) : 0 < (ipT x x).re := by
   classical
@@ -103,6 +150,7 @@ theorem ipT_pos_fd [∀ i, FiniteDimensional ℂ (E i)] (x : ⨂[ℂ] i, E i) (h
   set c := B.repr x
   have hsum : ipT x x = ∑ p, c p * conj (c p) := by
     conv_lhs => rw [← B.sum_repr x]
+
     simp only [map_sum, map_smul, map_smulₛₗ, LinearMap.sum_apply, LinearMap.smul_apply, hB, smul_eq_mul]
     simp [Finset.mul_sum, c]
     exact Finset.sum_congr rfl (fun _ _ => mul_comm _ _)
@@ -136,7 +184,7 @@ theorem exists_fd (w : ⨂[ℂ] i, E i) : ∃ F : ∀ i, Submodule ℂ (E i), (�
     refine ⟨fun i => F₁ i ⊔ F₂ i, fun i => inferInstance,
       PiTensorProduct.map (fun i => Submodule.inclusion (le_sup_left : F₁ i ≤ F₁ i ⊔ F₂ i)) x₀ +
       PiTensorProduct.map (fun i => Submodule.inclusion (le_sup_right : F₂ i ≤ F₁ i ⊔ F₂ i)) y₀, ?_⟩
-    rw [map_add, ← LinearMap.comp_apply, ← LinearMap.comp_apply, ← PiTensorProduct.map_comp, ← PiTensorProduct.map_comp]
+    rw [map_add (f := _), ← LinearMap.comp_apply, ← LinearMap.comp_apply, ← PiTensorProduct.map_comp, ← PiTensorProduct.map_comp]
     rfl
 
 theorem ipT_pos (w : ⨂[ℂ] i, E i) (hw : w ≠ 0) : 0 < (ipT w w).re := by

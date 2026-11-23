@@ -1,26 +1,57 @@
-import CompanionTheory.AutomorphicTheory.NumberFieldModels.HsVecProjLe
-import CompanionTheory.AutomorphicTheory.NumberFieldModels.ModelPt
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutNFCoreN
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutNFHatProdKBStmt
+module
+
+public import Formalism.HermitianCurvature.StatementTBB
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutFpmDecay
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutLemB
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutNFTrNormKB
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.VectorVanishesBigCell
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutGaugeCut
+
+@[expose] public section
 
 open Formalism.QuantumDeterminants Formalism.FourierDecayAlt Formalism.FourierDecayAlt.P Formalism.FourierDecayAlt.P.CutBP Formalism.FourierDecayAlt.P.CutMP.Gauge
 
 namespace Formalism.MainStatements.NFTie
 
 noncomputable section
-
-def StepCpt : Prop :=
-  ∃ C₁ : ℝ, ∀ (Wp Wq : Type) [NormedAddCommGroup Wp] [InnerProductSpace ℂ Wp] [NormedAddCommGroup Wq]
-    [InnerProductSpace ℂ Wq] [FiniteDimensional ℂ Wp] [FiniteDimensional ℂ Wq] (P : M.Par) (p : KB.Pl P Wp Wq)
-    (w : List C.Letter), KB.CutWord P p.l0 w → ∀ (a : Wd.Ix (Fin w.length)) (N : ℕ), w.length ≤ N → ∀ s : ℕ,
-    ∃ (m : ℕ) (Th : Fin m → B.DiffOp P.k P.r Wp Wq) (K : ℝ), 0 ≤ K ∧ (∀ t, NFOpOK C₁ p N (Th t)) ∧
-      ∀ F : B.Mat P.k P.r → (Wq →L[ℂ] Wp), KB.CptCoef p.T.base F →
-      ∀ (ρ : M.Ty P) (c : Fin (P.r + 1) → ℂ), D.IsLocPt (TBB.bigPt P.r c) (P.r + 1) → 0 < TBB.Gp p (TBB.bigPt P.r c) →
-        Top.dH P p.l0 (TBB.TTp p) w (TBB.bigPt P.r c) a ρ ^ 2 *
-            ‖B.hsVec (p.V (p.Θ.Θ w a fun g => ((Gf P.k P.r p.T.base.z p.T.base.z' g ^ s : ℝ) : ℂ) • F g)
-              (TBB.bigPt P.r c))‖ ^ 2 ≤
-          K * TBB.Gp p (TBB.bigPt P.r c) ^ (2 * s) * TBB.Gp p (TBB.bigPt P.r c) ^ (-(w.length : ℤ)) *
-            ∑ t, ‖B.hsVec (p.V (B.opApply (Th t) F) (TBB.bigPt P.r c))‖ ^ 2
 
 section pt
 

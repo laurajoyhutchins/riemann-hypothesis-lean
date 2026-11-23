@@ -1,8 +1,53 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.CubeTheorem.LBSpreads
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsProjOverOfIsProjOverBase
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.CubeTheorem
-import Development.AbelianVarietyTheory.Proofs.ToricGeometry.TranslateTrivialEqOneOfFiniteTypePoints
+module
+
+public import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.CubeTheorem.LBSpreads
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.PullCub
+public import Development.AbelianVarietyTheory.Proofs.ToricGeometry.TranslateTrivialEqOneOfFiniteTypePoints
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.AffineTransitionLimit
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.Finset.Functor
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.SabPull
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -17,7 +62,7 @@ theorem isLB_of_germs {B : Scheme.{0}} {S : Type} (V : S → B.Opens) (t : ∀ k
     (hcov : ∀ y, ∃ k, y ∈ V k)
     (hcoc : ∀ k l m (y : B), y ∈ V k → y ∈ V l → y ∈ V m →
       gm (𝟙 B) y _ (t k l) * gm (𝟙 B) y _ (t l m) = gm (𝟙 B) y _ (t k m)) :
-    LB.IsLB (⟨S, V, t⟩ : LB B) where
+    LB.IsLB (⟨S, V, t⟩ : LB B) := {
   cover := by
     refine top_le_iff.1 fun y _ => ?_
     obtain ⟨k, hk⟩ := hcov y
@@ -32,7 +77,7 @@ theorem isLB_of_germs {B : Scheme.{0}} {S : Type} (V : S → B.Opens) (t : ∀ k
     have hk : y ∈ V k := hy.2
     have hi : y ∈ V i := hy.1.1
     rw [map_mul, gm_res _ y _ hy, gm_res _ y _ hy, gm_res _ y _ hy]
-    exact hcoc i j k y hi hj hk
+    exact hcoc i j k y hi hj hk }
 
 theorem exists_iso_pull {X B : Scheme.{0}} (ρ : X ⟶ B) (M : LB X) (hM : M.IsLB) (M₁ : LB B)
     (a : M₁.ι → M.ι) (hle : ∀ k, ρ ⁻¹ᵁ M₁.U k ≤ M.U (a k))
@@ -66,8 +111,8 @@ section Limit
 variable {I : Type} [Category.{0} I] [IsCofiltered I] (D : I ⥤ Scheme.{0}) (c : Cone D)
   (hc : IsLimit c) [∀ {i j} (f : i ⟶ j), IsAffineHom (D.map f)]
 
-include hc in
 
+include hc in
 theorem exists_finite_cover [∀ i, CompactSpace (D.obj i)] (M : LB c.pt) (hM : M.IsLB) :
     ∃ (j : I) (S : Type) (_ : Finite S) (W : S → (D.obj j).Opens) (a : S → M.ι),
       (∀ k, IsCompact (W k : Set (D.obj j))) ∧ (∀ y, ∃ k, y ∈ W k) ∧
@@ -106,8 +151,8 @@ theorem exists_finite_cover [∀ i, CompactSpace (D.obj i)] (M : LB c.pt) (hM : 
     rw [this, hpre k]
     exact hle k
 
-include hc in
 
+include hc in
 theorem exists_units_stage [∀ i, QuasiSeparatedSpace (D.obj i)] {j : I} {A : Type} [Finite A]
     (U : A → (D.obj j).Opens) (hU : ∀ p, IsCompact (U p : Set (D.obj j)))
     (s : ∀ p, Γ(c.pt, c.π.app j ⁻¹ᵁ U p)ˣ) :
@@ -147,8 +192,8 @@ theorem exists_units_stage [∀ i, QuasiSeparatedSpace (D.obj i)] {j : I} {A : T
   choose t ht using hnf
   exact ⟨n, f, t, ht⟩
 
-include hc in
 
+include hc in
 theorem exists_cocycle_stage {n : I} {S : Type} [Finite S] [∀ i, QuasiSeparatedSpace (D.obj i)]
     (V : S → (D.obj n).Opens) (hV : ∀ k, IsCompact (V k : Set (D.obj n)))
     (t : ∀ k l, Γ(D.obj n, V k ⊓ V l)ˣ)
@@ -200,8 +245,8 @@ theorem exists_cocycle_stage {n : I} {S : Type} [Finite S] [∀ i, QuasiSeparate
     (fun q n₁ n₂ g' g h => hmono q n₁ n₂ g' g h) hexist
   exact ⟨n', g, fun k l m y hk hl hm => hg (k, l, m) y hk hl hm⟩
 
-include hc in
 
+include hc in
 theorem exists_lb_stage [∀ i, CompactSpace (D.obj i)] [∀ i, QuasiSeparatedSpace (D.obj i)]
     (M : LB c.pt) (hM : M.IsLB) :
     ∃ (i : I) (M₁ : LB (D.obj i)), M₁.IsLB ∧ ∃ w : LB.Iso M (M₁.pull (c.π.app i)), w.IsGen := by

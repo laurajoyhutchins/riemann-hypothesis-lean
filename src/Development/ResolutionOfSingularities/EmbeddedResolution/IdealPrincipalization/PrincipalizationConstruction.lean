@@ -1,15 +1,48 @@
-import Mathlib
-import Development.ResolutionOfSingularities.EmbeddedResolution.IteratedBlowups.BlowupSequenceRelations
-import Development.ResolutionOfSingularities.EmbeddedResolution.EtaleCoordinates.ConstantCodimension
-import Development.ResolutionOfSingularities.EmbeddedResolution.EtaleCoordinates.StrictNormalCrossings
-import Development.ResolutionOfSingularities.EmbeddedResolution.DerivativeIdeal.IdealSheafOrder
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.OrderReductionProperties
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.DimensionRecursion
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.FunctorialPrincipalization
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MarkedBlowupSequence.IdealBlowupSequence
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MarkedBlowupSequence.MarkedSequenceOfBlowups
-import Development.ResolutionOfSingularities.Foundations.BlowupUniversalProperty
-import Development.ResolutionOfSingularities.EmbeddedResolution.ResolutionOfSingularities
+module
+
+public import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.DimensionRecursion
+public import Development.ResolutionOfSingularities.Foundations.Schemes.IdealSheafData
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 universe u
 
 open CategoryTheory AlgebraicGeometry
@@ -23,47 +56,10 @@ def markedTripleOrderOne (k : Type u) [Field k] (X : Scheme.{u})
     (E : List X.IdealSheafData) : MarkedIdealWithBoundary.{u} :=
   MarkedIdealWithBoundary.mk k X p I 1 E
 
-@[simp] theorem markedTripleOrderOne_baseField (k : Type u) [Field k] (X : Scheme.{u})
-    (p : X ⟶ Spec (CommRingCat.of k)) (I : X.IdealSheafData)
-    (E : List X.IdealSheafData) :
-    (markedTripleOrderOne k X p I E).base = k := rfl
-
-@[simp] theorem markedTripleOrderOne_scheme (k : Type u) [Field k] (X : Scheme.{u})
-    (p : X ⟶ Spec (CommRingCat.of k)) (I : X.IdealSheafData)
-    (E : List X.IdealSheafData) :
-    (markedTripleOrderOne k X p I E).scheme = X := rfl
-
-@[simp] theorem markedTripleOrderOne_structureMorphism (k : Type u) [Field k] (X : Scheme.{u})
-    (p : X ⟶ Spec (CommRingCat.of k)) (I : X.IdealSheafData)
-    (E : List X.IdealSheafData) :
-    (markedTripleOrderOne k X p I E).structMap = p := rfl
-
-@[simp] theorem markedTripleOrderOne_ideal (k : Type u) [Field k] (X : Scheme.{u})
-    (p : X ⟶ Spec (CommRingCat.of k)) (I : X.IdealSheafData)
-    (E : List X.IdealSheafData) :
-    (markedTripleOrderOne k X p I E).ideal = I := rfl
-
-@[simp] theorem markedTripleOrderOne_mult (k : Type u) [Field k] (X : Scheme.{u})
-    (p : X ⟶ Spec (CommRingCat.of k)) (I : X.IdealSheafData)
-    (E : List X.IdealSheafData) :
-    (markedTripleOrderOne k X p I E).mult = 1 := rfl
-
-@[simp] theorem markedTripleOrderOne_boundary (k : Type u) [Field k] (X : Scheme.{u})
-    (p : X ⟶ Spec (CommRingCat.of k)) (I : X.IdealSheafData)
-    (E : List X.IdealSheafData) :
-    (markedTripleOrderOne k X p I E).boundary = E := rfl
-
 @[simp] theorem markedTripleOrderOne_dim (k : Type u) [Field k] (X : Scheme.{u})
     (p : X ⟶ Spec (CommRingCat.of k)) (I : X.IdealSheafData)
     (E : List X.IdealSheafData) :
     (markedTripleOrderOne k X p I E).krullDimSucc = krullDimSucc X := rfl
-
-theorem markedTripleOrderOne_pullbackAlong (k : Type u) [Field k] (X : Scheme.{u})
-    (p : X ⟶ Spec (CommRingCat.of k)) (I : X.IdealSheafData)
-    (E : List X.IdealSheafData) (Y : Scheme.{u})
-    (q : Y ⟶ Spec (CommRingCat.of k)) (h : Y ⟶ X) :
-    (markedTripleOrderOne k X p I E).pullbackAlong Y q h
-      = markedTripleOrderOne k Y q (I.comap h) (E.map fun D => D.comap h) := rfl
 
 theorem markedTripleOrderOne_isAdmissible (k : Type u) [Field k] [CharZero k] (X : Scheme.{u})
     (p : X ⟶ Spec (CommRingCat.of k))
@@ -71,14 +67,15 @@ theorem markedTripleOrderOne_isAdmissible (k : Type u) [Field k] [CharZero k] (X
     [AlgebraicGeometry.QuasiCompact p]
     (I : X.IdealSheafData) (hI : NonzeroOnComponents I)
     (E : List X.IdealSheafData) (hE : InStrictNormalCrossingPosition p E) :
-    (markedTripleOrderOne k X p I E).IsAdmissible where
-  charZero := inferInstanceAs (CharZero k)
-  locallyOfFiniteType := inferInstanceAs (AlgebraicGeometry.LocallyOfFiniteType p)
-  nonzeroOnComponents := hI
-  one_le_mult := le_refl 1
-  quasiCompact := inferInstanceAs (AlgebraicGeometry.QuasiCompact p)
-  smooth := inferInstanceAs (AlgebraicGeometry.Smooth p)
-  snc := hE
+    (markedTripleOrderOne k X p I E).IsAdmissible := by
+  exact
+    { charZero := inferInstanceAs (CharZero k)
+      locallyOfFiniteType := inferInstanceAs (AlgebraicGeometry.LocallyOfFiniteType p)
+      nonzeroOnComponents := hI
+      one_le_mult := le_refl 1
+      quasiCompact := inferInstanceAs (AlgebraicGeometry.QuasiCompact p)
+      smooth := inferInstanceAs (AlgebraicGeometry.Smooth p)
+      snc := hE }
 
 def SmoothSubschemeIdealIsRadical : Prop :=
   ∀ (k : Type u) [Field k] (X : Scheme.{u}) (p : X ⟶ Spec (CommRingCat.of k))
@@ -92,12 +89,6 @@ def markedBlowupSeq (B : PrincipalizationRules.{u}) (k : Type u) [Field k] (X : 
     (p : X ⟶ Spec (CommRingCat.of k)) (I : X.IdealSheafData)
     (E : List X.IdealSheafData) : MarkedSequenceOfBlowups p I 1 E :=
   (B.outputLevelData (krullDimSucc X)).maxOrderRed (markedTripleOrderOne k X p I E)
-
-theorem sequence_eq_maxOrderReduction (B : PrincipalizationRules.{u}) (k : Type u) [Field k] (X : Scheme.{u})
-    (p : X ⟶ Spec (CommRingCat.of k)) (I : X.IdealSheafData)
-    (E : List X.IdealSheafData) :
-    B.markedBlowupSeq k X p I E
-      = (B.outputLevelData (krullDimSucc X)).maxOrderRed (markedTripleOrderOne k X p I E) := rfl
 
 end PrincipalizationRules
 
@@ -391,13 +382,14 @@ private theorem markedBlowupSeq_lastIdeal_eq_top (B : PrincipalizationRules.{u})
 
 theorem isFunctorialPrincipalization_principalization (B : PrincipalizationRules.{u}) (hB : B.ReducesInductivelyOnDimension)
     (hrad : SmoothSubschemeIdealIsRadical.{u}) (hemb : CommutesWithClosedImmersion.{u} B) :
-    IsFunctorialPrincipalization (B.principalization hrad) where
-  pushforward := by
+    IsFunctorialPrincipalization (B.principalization hrad) := by
+  constructor
+  case pushforward =>
     intro k _ _ S X pS p _ _ _ _ _ _ j _ hjp c hc hcc I hI hIX hES hEX
     rw [B.principalization_toSequenceOfBlowups hrad k S pS I hI [] hES,
       B.principalization_toSequenceOfBlowups hrad k X p (imageIdealSheaf j I) hIX [] hEX]
     exact hemb k S X pS p j hjp c hc hcc I hI hIX hES hEX
-  base_change := by
+  case base_change =>
     intro k _ _ X p _ _ _ I hI E hE K _ _ f _ _ _ hI' hE'
     rw [B.principalization_toSequenceOfBlowups hrad K
         (CategoryTheory.Limits.pullback p (specMapOfFieldHom k K f))
@@ -406,7 +398,7 @@ theorem isFunctorialPrincipalization_principalization (B : PrincipalizationRules
         (E.map fun D => D.comap (CategoryTheory.Limits.pullback.fst p (specMapOfFieldHom k K f))) hE',
       B.principalization_toSequenceOfBlowups hrad k X p I hI E hE]
     exact B.markedBlowupSeq_baseChange_isPullback hB k X p I hI E hE K f hI' hE'
-  base_change_strict := by
+  case base_change_strict =>
     intro k _ _ X p _ _ _ I hI E hE K _ _ f _ _ _ hI' hE'
     rw [B.principalization_toSequenceOfBlowups hrad K
         (CategoryTheory.Limits.pullback p (specMapOfFieldHom k K f))
@@ -415,17 +407,17 @@ theorem isFunctorialPrincipalization_principalization (B : PrincipalizationRules
         (E.map fun D => D.comap (CategoryTheory.Limits.pullback.fst p (specMapOfFieldHom k K f))) hE',
       B.principalization_toSequenceOfBlowups hrad k X p I hI E hE]
     exact B.markedBlowupSeq_baseChange_isStrictPullback hB k X p I hI E hE K f hI' hE'
-  lastIdeal_eq_top := by
+  case lastIdeal_eq_top =>
     intro k _ _ X p _ _ _ I hI E hE
     rw [B.principalization_lastIdeal hrad k X p I hI E hE]
     exact B.markedBlowupSeq_lastIdeal_eq_top hB k X p I hI E hE
-  smooth_pullback := by
+  case smooth_pullback =>
     intro k _ _ X p _ _ _ I hI E hE X' p' _ _ _ φ _ hφ hI' hE'
     rw [B.principalization_toSequenceOfBlowups hrad k X' p' (I.comap φ) hI'
         (E.map fun D => D.comap φ) hE',
       B.principalization_toSequenceOfBlowups hrad k X p I hI E hE]
     exact B.markedBlowupSeq_smoothPullback_isPullback hB k X p I hI E hE X' p' φ hφ hI' hE'
-  smooth_pullback_strict := by
+  case smooth_pullback_strict =>
     intro k _ _ X p _ _ _ I hI E hE X' p' _ _ _ φ _ _ hφ hI' hE'
     rw [B.principalization_toSequenceOfBlowups hrad k X' p' (I.comap φ) hI'
         (E.map fun D => D.comap φ) hE',

@@ -1,5 +1,58 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.DixmierMalliavinBasic
+module
+
+public import GroundTheory.AutomorphicForms.DixmierMalliavinBasic
+public import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+public import Mathlib.MeasureTheory.Integral.Bochner.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+public import Mathlib.Analysis.Calculus.FDeriv.OfCompLeft
+public import Mathlib.Analysis.Calculus.InverseFunctionTheorem.ContDiff
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Compactness.DeltaGeneratedSpace
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Analysis.Calculus.FDeriv.Mul
+public import Mathlib.Analysis.Calculus.ParametricIntegral
+
+@[expose] public section
 
 namespace GroundTheory.Automorphic
 
@@ -32,8 +85,8 @@ theorem contDiff_prodExpVal {d : ℕ} (X : Fin d → 𝔸) : ContDiff ℝ ∞ (p
     have e : prodExpVal X = fun t => exp (t 0 • X 0) *
         prodExpVal (fun i => X i.succ) (fun i => t i.succ) := funext (prodExpVal_succ X)
     rw [e]
-    exact ((contDiff_exp ℝ 𝔸).comp ((contDiff_apply ℝ ℝ 0).smul contDiff_const)).mul
-      ((ih _).comp (contDiff_pi.2 fun i => contDiff_apply ℝ ℝ i.succ))
+    exact ((contDiff_exp ℝ 𝔸).comp ((contDiff_apply ℝ (fun _ => ℝ) 0).smul contDiff_const)).mul
+      ((ih _).comp (contDiff_pi.2 fun i => contDiff_apply ℝ (fun _ => ℝ) i.succ))
 
 theorem hasFDerivAt_prodExpVal_zero {d : ℕ} (X : Fin d → 𝔸) :
     HasFDerivAt (prodExpVal X)
@@ -195,8 +248,8 @@ theorem isEmbedding_coe_coe :
     Topology.IsEmbedding (fun x : G => ((x : 𝔸ˣ) : 𝔸)) :=
   Units.isOpenEmbedding_val.isEmbedding.comp Topology.IsEmbedding.subtypeVal
 
-include h in
 
+include h in
 theorem secondCountableTopology : SecondCountableTopology G :=
   isEmbedding_coe_coe.secondCountableTopology
 
@@ -269,8 +322,8 @@ theorem contDiff_smul_of_tsupport {V F : Type*} [NormedAddCommGroup V] [NormedSp
       simp [hy]
     exact contDiffAt_const.congr_of_eventuallyEq this
 
-open MeasureTheory in
 
+open MeasureTheory in
 theorem contDiff_integral_comp_of_hasCompactSupport {X : Type*} [MeasurableSpace X]
     [TopologicalSpace X] [OpensMeasurableSpace X] [SecondCountableTopology X] (ν : Measure X)
     [IsFiniteMeasure ν] {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V] {u : X → V}

@@ -1,24 +1,67 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.PrimeIsMaximalOfIsFractionRing
-import Development.AutomorphicSpectrum.Statements.GeometryStatements.CurveSemiAbelianConjecture
-import Development.AutomorphicSpectrum.Statements.GeometryStatements.SeparableFormGroupElementFixesUniquePositiveLine
-import Development.AutomorphicSpectrum.Definitions.DivisibilityTowers.Proportional
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.LengthFormulaSumValuationsStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LocalRingEssFiniteTypeStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.GeometricNumberZeroFinrankStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExistsMultihomogPrimeOfPlaceStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.MultihomogPrimeMemDivisorSupportStatement
+module
+
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.PrimeIsMaximalOfIsFractionRing
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsFFCurve
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.LocalComponentsSurjective
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.LengthFormulaSumValuationsStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExistsMultihomogPrimeOfPlaceStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.GeometricNumberZeroFinrankStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LocalRingEssFiniteTypeStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.MultihomogPrimeMemDivisorSupportStatement
+import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PCoordConeArithVar
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.AssemblyBase
+import GroundTheory.HeightsAndTheta.Heights.Intersections.OneNotMemOfIsPrime
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterDivSupp
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.GermComp1ZeroPointLeft
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Geo ReciprocityTheory.ChartRestriction.G.Geo.Tor GlobalTheory.CompanionTheory.Ar GlobalTheory.CompanionTheory.Ar.Crv GlobalTheory.CompanionTheory.Ar.Conj
 
 noncomputable section
 namespace GlobalTheory.CompanionTheory.Ar.GeoDeg
 open MvPolynomial GroundTheory.FunctionField GroundTheory.Heights₂.Heights.Inter IsLocalRing
-
-local notation "T_eft" => GlobalTheory.T.local_ring_ess_finite_type
-local notation "T_geo" => GlobalTheory.T.geometric_number_zero_finrank
-local notation "T_ex1" => GlobalTheory.T.exists_multihomog_prime_of_place
-local notation "T_ex2" => GlobalTheory.T.multihomog_prime_mem_divisor_support
 
 section
 variable {B : Type} [Fintype B] {J : B → Type} [∀ k, Fintype (J k)]
@@ -39,7 +82,7 @@ theorem exists_centre (w : (Σ k, J k) → K) (hbir : Birational w) (hw : ∀ k,
     simp only [h, map_zero] at h1
     exact ((Valuation.ne_zero_iff _).2 h0) (le_zero_iff.1 h1)
   choose c' hc1 hc2 using hch
-  obtain ⟨W, hWp, hWh, hVW, hcW, hD, hiff⟩ := T_ex1 B J p K w v c' hc1 hc2
+  obtain ⟨W, hWp, hWh, hVW, hcW, hD, hiff⟩ := GlobalTheory.T.exists_multihomog_prime_of_place B J p K w v c' hc1 hc2
   have hx : (X ⟨k, c⟩ : MRing J) ∈ W := by
     rw [hiff (Pi.single k 1) _ (GroundTheory.Heights₂.Heights.Inter.regularityLocalFlat_holds.homog_X k c)]
     have hs : (Finset.univ.sup fun i => v.valuation (w ⟨k, i⟩)) = v.valuation (w ⟨k, c' k⟩) :=
@@ -47,7 +90,7 @@ theorem exists_centre (w : (Σ k, J k) → K) (hbir : Birational w) (hw : ∀ k,
         (Finset.le_sup (f := fun i => v.valuation (w ⟨k, i⟩)) (Finset.mem_univ _))
     rw [hs] at hlt
     simpa [Pi.single_apply, pow_ite, Finset.prod_ite_eq'] using hlt
-  exact ⟨W, ⟨T_ex2 B J p K w hbir W c' hWp hWh hVW hcW k c hc hx, fun k' => ⟨c' k', hcW k'⟩⟩, hD⟩
+  exact ⟨W, ⟨GlobalTheory.T.multihomog_prime_mem_divisor_support B J p K w hbir W c' hWp hWh hVW hcW k c hc hx, fun k' => ⟨c' k', hcW k'⟩⟩, hD⟩
 
 open GroundTheory.Heights₂.Heights.Inter.regularityLocalFlat_holds (homog_X fracHom fracHom_apply fracHom_eq_zero_iff isLocalRing mem_maximalIdeal_iff isUnit_iff)
 
@@ -76,7 +119,7 @@ theorem local_term (w : (Σ k, J k) → K) (hbir : Birational w) (k : B) (c : J 
       DFunLike.congr_fun (Subsingleton.elim (algebraMap (ZMod p) K)
         ((algebraMap (locRing (mCoordIdeal w) W) K).comp (algebraMap (ZMod p) (locRing (mCoordIdeal w) W)))) x
   haveI hE : Algebra.EssFiniteType (ZMod p) (locRing (mCoordIdeal w) W) :=
-    T_eft B J p K w W c' hV hWp hVW hc'
+    GlobalTheory.T.local_ring_ess_finite_type B J p K w W c' hV hWp hVW hc'
   haveI hN : IsNoetherianRing (locRing (mCoordIdeal w) W) := Algebra.EssFiniteType.isNoetherianRing (ZMod p) _
   have hs : IsMultiHomog (X ⟨k, c⟩ : MRing J) (Pi.single k 1) := homog_X k c
   have ht : IsMultiHomog (X ⟨k, c' k⟩ : MRing J) (Pi.single k 1) := homog_X k (c' k)
@@ -87,7 +130,7 @@ theorem local_term (w : (Σ k, J k) → K) (hbir : Birational w) (k : B) (c : J 
   have hy : (fracHom (mCoordIdeal w) (X ⟨k, c⟩) / fracHom (mCoordIdeal w) (X ⟨k, c' k⟩)) *
       fracHom (mCoordIdeal w) (X ⟨k, c' k⟩) = fracHom (mCoordIdeal w) (X ⟨k, c⟩) := div_mul_cancel₀ _ ht0
   obtain ⟨hym, hlen⟩ := GroundTheory.Heights₂.Heights.HilbertSamuel.Closed.Inter.regularityDehomogenization_holds B J (mCoordIdeal w) (X ⟨k, c⟩) (X ⟨k, c' k⟩)
-    (Pi.single k 1) W _ hproj hs hsV hWd ht (hc' k) hy
+    (Pi.single k 1) W (fracHom (mCoordIdeal w) (X ⟨k, c⟩) / fracHom (mCoordIdeal w) (X ⟨k, c' k⟩)) hproj hs hsV hWd ht (hc' k) hy
   set f : locRing (mCoordIdeal w) W := ⟨_, hym⟩ with hfdef
   have hf1 := hρ f _ _ _ hs ht (hc' k) hy
   have hne : w ⟨k, c' k⟩ ≠ 0 := fun h => hc' k (hVW ((X_mem_iff w k _).2 h))
@@ -112,7 +155,7 @@ theorem local_term (w : (Σ k, J k) → K) (hbir : Birational w) (k : B) (c : J 
     ext v
     exact hρ.dom_iff hV hWp hVW v
   rw [hset] at key
-  rw [hlen, locIdeal_eq_span hym, T_geo B J p K w hbir k c hc W hWd b]
+  rw [hlen, locIdeal_eq_span hym, GlobalTheory.T.geometric_number_zero_finrank B J p K w hbir k c hc W hWd b]
   have : (algebraMap (locRing (mCoordIdeal w) W) K f) = w ⟨k, c⟩ / w ⟨k, c' k⟩ := hf2
   rw [this] at key
   rw [← key]
@@ -256,7 +299,7 @@ theorem degree_of_local (local_term : ∀ (B : Type) [Fintype B] (J : B → Type
     obtain ⟨c, hc⟩ := hw k
     exact ⟨c, fun h => hc ((X_mem_iff w k c).1 h)⟩
   show geoNum (0 + 1) (mCoordIdeal w) (fun _ => a) = _
-  rw [geoNum, dif_pos hrel, coordDeg]
+  rw [geoNum, dite_eq_left hrel, coordDeg]
   refine Finset.sum_congr rfl fun k _ => ?_
   have hck : w ⟨k, (hrel k).choose⟩ ≠ 0 := fun h => (hrel k).choose_spec ((X_mem_iff w k _).2 h)
   rw [block_sum (local_term B J p K) (exists_centre B J p K) w hbir hw hfin hprod k _ hck, ← finsum_comp_equiv e]

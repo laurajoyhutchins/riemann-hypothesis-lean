@@ -1,7 +1,59 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.IntegrableOfDecay4
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.StandardPairingDecay
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.VectorVanishesBigCell
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.IntegrableOfDecay4
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.LevelFormSesquilinearFiniteClass
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.ActualAdjointnessFromHermitian
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.BigCellHermitian
 import Formalism.HermitianCurvature.HermitianCurvatureProofs.BigCellInversePair
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.ContinuousZetaL
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.OppositeWeylSubgroupClosed
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.RankOneEmbeddings
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.StandardPairingDecay
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.WCellMemOmPlus
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace Formalism.FourierDecayAlt.P.PBF
 
@@ -149,7 +201,7 @@ theorem const_one (Bs : B.RealPlaceData k r Wp Wq) (μ : Measure (Mt k r)) (C : 
   have h2 : μ.map (fun g : Mt k r => Q.zetaL k r Bs.z Bs.z' (Fin.last r) (Matrix.of g)) =
       ((C : ℝ≥0∞) * (Bs.μW Set.univ * Bs.μW' Set.univ)) •
         (volume : Measure ℂ).withDensity (rbW k (Tz k r Bs.z) (Tz k r Bs.z')) := by
-    rw [hmap, Measure.map_smul, rbP_map_zeta, smul_smul]
+    rw [hmap, Measure.map_smul _ (measurable_zetaM Bs).aemeasurable, rbP_map_zeta, smul_smul]
   rw [h1] at h2
   obtain ⟨hp, hf⟩ := weight_annulus k (T := Tz k r Bs.z) (T' := Tz k r Bs.z') (mul_pos Bs.T_pos Bs.T'_pos).le
   set A : Set ℂ := {ζ | Tz k r Bs.z * Tz k r Bs.z' < Complex.normSq ζ ∧
@@ -200,15 +252,23 @@ end formOne
 section exist
 
 theorem haar_smul {k r : ℕ} {U : Set (B.Mat k r)} {μ : Measure (Mt k r)} (h : B.IsHaarOn U μ) {c : ℝ≥0∞}
-    (hc0 : c ≠ 0) (hcT : c ≠ ∞) : B.IsHaarOn U (c • μ) where
-  conc := by rw [Measure.smul_apply, h.conc, smul_zero]
-  left a ha := by rw [Measure.map_smul, h.left a ha]
-  right a ha := by rw [Measure.map_smul, h.right a ha]
-  finite_compact K hK := by
+    (hc0 : c ≠ 0) (hcT : c ≠ ∞) : B.IsHaarOn U (c • μ) := by
+  refine ⟨?_, ?_, ?_, ?_, ?_⟩
+  · rw [Measure.smul_apply, h.conc, smul_zero]
+  · intro a ha
+    have hcont : Continuous (lmulM a : Mt k r → Mt k r) := by
+      unfold lmulM
+      exact continuous_const.matrix_mul (continuous_id (X := B.Mat k r))
+    rw [Measure.map_smul c hcont.measurable.aemeasurable, h.left a ha]
+  · intro a ha
+    have hcont : Continuous (B.rmulF a) := by
+      unfold B.rmulF
+      exact (continuous_id (X := B.Mat k r)).matrix_mul continuous_const
+    rw [Measure.map_smul c hcont.measurable.aemeasurable, h.right a ha]
+  · intro K hK
     rw [Measure.smul_apply, smul_eq_mul]
     exact ENNReal.mul_lt_top (lt_top_iff_ne_top.2 hcT) (h.finite_compact K hK)
-  ne_zero := by
-    intro h0
+  · intro h0
     apply h.ne_zero
     have := congrArg (fun ν : Measure (Mt k r) => c⁻¹ • ν) h0
     simpa [smul_smul, ENNReal.inv_mul_cancel hc0 hcT] using this
@@ -228,7 +288,7 @@ theorem zetaNormExists : Formalism.FourierDecayAlt.P.PBO.ZetaNormExists := by
     (ENNReal.mul_ne_top (measure_ne_top _ _) (measure_ne_top _ _))
   have hlaw : μb.map (fun g : Mt k r => Q.zetaL k r Bs.z Bs.z' (Fin.last r) (Matrix.of g)) =
       a • (volume : Measure ℂ).withDensity (rbW k (Tz k r Bs.z) (Tz k r Bs.z')) := by
-    rw [hmap, Measure.map_smul, rbP_map_zeta, smul_smul]
+    rw [hmap, Measure.map_smul _ (measurable_zetaM Bs).aemeasurable, rbP_map_zeta, smul_smul]
   refine ⟨a⁻¹ • μb, ?_, fun ψ hψ => ?_⟩
   · rw [Formalism.FourierDecayAlt.P.PBH.glev_last_eq]
     exact haar_smul hb (ENNReal.inv_ne_zero.2 haT) (ENNReal.inv_ne_top.2 ha0)

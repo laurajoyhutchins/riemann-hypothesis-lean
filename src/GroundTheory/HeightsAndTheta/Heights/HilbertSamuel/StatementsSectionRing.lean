@@ -1,5 +1,48 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsArith
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsArith
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.ArithModel
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.HilbertSamuel
@@ -39,24 +82,6 @@ theorem isBoundedH_one_of_isSmallH {K : Type} [Fintype K] {ι : K → Type} [∀
   intro dg dh g h' z hg hh hdeg he hz
   rw [one_mul]
   exact h dg dh g h' z hg hh hdeg he hz
-
-theorem SectionRingFinite.hyps_inhabited :
-    (∀ k, ∃ i, y ⟨k, i⟩ ≠ 0) ∧ (∀ j : Fin 2, y ⟨(), j⟩ ∈ chartLat (ι := GlobalTheory (Fin 2)) y fsLine1.a 1) ∧
-      KH.GeneratesOn (ι := GlobalTheory (Fin 2)) y fsLine1.a (fun j : Fin 2 => y ⟨(), j⟩) :=
-  ⟨IntegralClosureFinite.hyps_inhabited.2.1, coord_mem_chartLat, generatesOn_coords⟩
-
-theorem SectionBounded.hyps_inhabited :
-    (∀ j : Fin 2, y ⟨(), j⟩ ∈ chartLat (ι := GlobalTheory (Fin 2)) y fsLine1.a 1) ∧
-      KH.GeneratesOn (ι := GlobalTheory (Fin 2)) y fsLine1.a (fun j : Fin 2 => y ⟨(), j⟩) ∧
-      ∀ j : Fin 2, IsSmallH (mCoordIdeal (ι := GlobalTheory (Fin 2)) y) y fsLine1 1 (y ⟨(), j⟩) :=
-  ⟨coord_mem_chartLat, generatesOn_coords, isSmallH_coord⟩
-
-theorem SectionBoundedMul.hyps_inhabited :
-    y ⟨(), 0⟩ ∈ chartLat (ι := GlobalTheory (Fin 2)) y fsLine1.a 1 ∧ y ⟨(), 1⟩ ∈ chartLat (ι := GlobalTheory (Fin 2)) y fsLine1.a 1 ∧
-      IsBoundedH (mCoordIdeal (ι := GlobalTheory (Fin 2)) y) y fsLine1 1 1 (y ⟨(), 0⟩) ∧
-      IsBoundedH (mCoordIdeal (ι := GlobalTheory (Fin 2)) y) y fsLine1 1 1 (y ⟨(), 1⟩) :=
-  ⟨coord_mem_chartLat 0, coord_mem_chartLat 1, isBoundedH_one_of_isSmallH (isSmallH_coord 0),
-    isBoundedH_one_of_isSmallH (isSmallH_coord 1)⟩
 
 end Inhabitants
 

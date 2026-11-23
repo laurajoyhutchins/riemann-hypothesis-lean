@@ -1,10 +1,67 @@
-import Development.WeilBound.CoreStatements.FlagImmersions.SpecMapFactorisation
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.CptFlatInputsOfPropZ
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExistsFlatHermHodgeCptConst
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.PropZProvedStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HodgeTateFreeCmTypeWeightStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExistsSandwichOfHodgeTateFreeStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ComplexPointExistsUniqueEmbeddingStatement
+module
+
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.GenericCentreSpecializes
+public import Development.WeilBound.CoreStatements.FlagImmersions.FibSandwich
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.CmTypeExteriorLatticeComparisonStatement
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.CmTypeLatticeComparisonStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ComplexPointExistsUniqueEmbeddingStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.CoordOverIntOfFiniteOrder
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.CptFlatInputsOfPropZ
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.EigenLatticeVectorBundle
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExistsFlatHermHodgeCptConst
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExistsPlaceOfNotMemGenFibre
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExistsSandwichOfHodgeTateFreeStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExteriorCoeffBaseChangeCompatStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.FlagCmTypeLatticeComparisonStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.FlagWeightedDegreeSectionStatement
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.GenericPointNormalCoords
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HermitianNormSectionValueStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HodgeComponentMatchesModelComponentStatement
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HodgeCptFlagDegreeStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HodgeTateFreeCmTypeWeightStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.PointOverNumberFieldValueStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.PropZProvedStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.WedgeLineLatticeTrivialModStatement
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.WedgeLineLatticeVectorBundleStatement
+public import Development.AutomorphicSpectrum.Statements.GeometryStatements.CompactConjugacyDomainLocal
+public import Development.WeilBound.CoreStatements.FlagImmersions.SpecMapFactorisation
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -22,7 +79,7 @@ theorem tauIn_injective {l : Level H} (c : Coeff l) (τ : E →+* ℂ) : Functio
     simpa [tauIn] using this
   exact RingOfIntegers.ext (τ.injective h)
 
-set_option maxHeartbeats 1600000 in
+
 theorem core (hSm : SmoothLine) (hLc : LocalCmp) (hNu : Numerics) (hF : HT.FarguesHodgeTate) {l : Level H}
     {Xo : Moduli D l} {c : Coeff l} [NumberField c.F] {Y : Model Xo c (algebraMap (𝓞 c.F) c.F)} {U : Set (Xo.XF c)}
     (Z : CptOver Y U) (φ : FrameFn Xo c) (τ : CMType H) (N : LogNorms c.F) {S : Finset ℕ} {Ω : Type} [Field Ω]

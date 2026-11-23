@@ -1,4 +1,55 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.ConstantCoeffEv
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.ConstantCoeffEv
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.MvPolynomial.IrreducibleQuadratic
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -45,20 +96,52 @@ theorem formalGroupLaw_ev_x_zero (i : Fin d) : ev (n := 1) ![pt k d 0, 0] (G.F i
   rw [e]
   exact G.unit i
 
+open scoped MvPowerSeries.WithPiTopology
+
+local macro "prove_ev_chain_rule " k:ident a:ident ha:term:max f:term:max v:term:max : term =>
+  `(by
+    classical
+    let : UniformSpace $k := ⊥
+    let family := fun p : _ × _ => $a p.1 p.2
+    change pderiv $v (subst family $f) = ∑ p, subst family (pderiv p $f) * pderiv $v (family p)
+    have hsubst := continuous_subst (R := $k) (CZ.hasSubst (show CZ $a from $ha))
+    have hderiv {σ : Type} (i : σ) : Continuous (pderiv (R := $k) i) := by
+      apply continuous_pi
+      intro e
+      change Continuous (fun g => coeff e (pderiv i g))
+      simp only [coeff_pderiv]
+      exact (WithPiTopology.continuous_coeff $k _).mul continuous_const
+    refine congrFun (WithPiTopology.denseRange_toMvPowerSeries.equalizer
+      ((hderiv $v).comp hsubst) (continuous_finsetSum _ fun p _ =>
+        (hsubst.comp (hderiv p)).mul continuous_const) ?_) $f
+    funext q
+    change pderiv $v (subst family (q : MvPowerSeries _ $k)) =
+      ∑ p, subst family (pderiv p (q : MvPowerSeries _ $k)) * pderiv $v (family p)
+    simp only [pderiv_coe, subst_coe]
+    induction q using MvPolynomial.induction_on with
+    | C c => simp
+    | add q r hq hr => simp only [map_add, hq, hr, add_mul, Finset.sum_add_distrib]
+    | mul_X q p hq =>
+      rw [map_mul, MvPolynomial.aeval_X, Derivation.leibniz, hq, smul_eq_mul, smul_eq_mul,
+        Finset.mul_sum]
+      simp [Pi.single_apply, apply_ite (MvPolynomial.aeval family), add_mul,
+        Finset.sum_add_distrib, mul_assoc])
+
 theorem pderiv_ev_zero {m n : ℕ} {a : Fin m → Pt k n d} (ha : CZ a) (f : PS k m d) (v : Fin n × Fin d)
-    (h : ∀ j i, pderiv k v (a j i) = 0) : pderiv k v (ev a f) = 0 := by
-  rw [pderiv_ev ha]
+    (h : ∀ j i, pderiv (R := k) v (a j i) = 0) : pderiv (R := k) v (ev a f) = 0 := by
+  have hchain : pderiv v (ev a f) =
+      ∑ p : Fin m × Fin d, ev a (pderiv p f) * pderiv v (a p.1 p.2) :=
+    prove_ev_chain_rule k a ha f v
+  rw [hchain]
   exact Finset.sum_eq_zero (fun p _ => by rw [h p.1 p.2, mul_zero])
 
 theorem pderiv_pt {n : ℕ} (v : Fin n × Fin d) (j : Fin n) (i : Fin d) :
-    pderiv k v (pt k (n := n) d j i) = if (j, i) = v then 1 else 0 := by
-  first
-  | rw [pt_apply, MvPowerSeries.pderiv_X, Pi.single_apply]
-  | (rw [pt_apply, MvPowerSeries.pderiv_X]; simp [Pi.single_apply])
+    pderiv (R := k) v (pt k (n := n) d j i) = if (j, i) = v then 1 else 0 := by
+  rw [pt_apply, MvPowerSeries.pderiv_X, Pi.single_apply]
 
-def Jac : Fin d → Fin d → PS k 1 d := fun i b => ev (n := 1) ![pt k d 0, 0] (pderiv k ((1 : Fin 2), b) (G.F i))
+def Jac : Fin d → Fin d → PS k 1 d := fun i b => ev (n := 1) ![pt k d 0, 0] (pderiv (R := k) ((1 : Fin 2), b) (G.F i))
 
-def Ar : Fin d → Fin d → PS k 2 d := fun i b => pderiv k ((1 : Fin 2), b) (G.F i)
+def Ar : Fin d → Fin d → PS k 2 d := fun i b => pderiv (R := k) ((1 : Fin 2), b) (G.F i)
 
 section Fams
 
@@ -115,26 +198,36 @@ private theorem ev_zero_one_identity (g : PS k 2 d) :
   rw [e, ev_two_identity]
 
 private theorem pderiv_two_ev (b : Fin d) (g : PS k 2 d) :
-    pderiv k ((2 : Fin 3), b) (ev (n := 3) ![pt k d 1, pt k d 2] g) =
-      ev (n := 3) ![pt k d 1, pt k d 2] (pderiv k ((1 : Fin 2), b) g) := by
-  rw [pderiv_ev cz12, Fintype.sum_prod_type, Fin.sum_univ_two]
-  simp [pderiv_pt]
+    pderiv (R := k) ((2 : Fin 3), b) (ev (n := 3) ![pt k d 1, pt k d 2] g) =
+      ev (n := 3) ![pt k d 1, pt k d 2] (pderiv (R := k) ((1 : Fin 2), b) g) := by
+  let a : Fin 2 → Pt k 3 d := ![pt k d 1, pt k d 2]
+  have hchain : pderiv (2, b) (ev a g) =
+      ∑ p : Fin 2 × Fin d, ev a (pderiv p g) * pderiv (2, b) (a p.1 p.2) :=
+    prove_ev_chain_rule k a cz12 g (2, b)
+  change pderiv (2, b) (ev a g) = _
+  rw [hchain, Fintype.sum_prod_type, Fin.sum_univ_two]
+  simp [a, pderiv_pt]
 
 private theorem ev_jacobian_left (i b : Fin d) :
     ev (n := 2) (![pt k d 0, pt k d 1, 0] : Fin 3 → Pt k 2 d)
-      (pderiv k ((2 : Fin 3), b)
+      (pderiv (R := k) ((2 : Fin 3), b)
         (ev (n := 3) ![fun l => ev (n := 3) ![pt k d 0, pt k d 1] (G.F l), pt k d 2] (G.F i))) =
       ev (n := 2) ![G.F] (Jac G i b) := by
   have hA : CZ (![fun l => ev (n := 3) ![pt k d 0, pt k d 1] (G.F l), pt k d 2] : Fin 2 → Pt k 3 d) :=
     CZ.cons (fun l => constantCoeff_ev cz01 (cz_F G l)) (CZ.cons (cc_pt _) CZ.nil)
-  have h0 : ∀ l, pderiv k ((2 : Fin 3), b) (ev (n := 3) ![pt k d 0, pt k d 1] (G.F l)) = 0 := fun l =>
+  have h0 : ∀ l, pderiv (R := k) ((2 : Fin 3), b) (ev (n := 3) ![pt k d 0, pt k d 1] (G.F l)) = 0 := fun l =>
     pderiv_ev_zero cz01 _ _ (fun j i => by fin_cases j <;> simp [pderiv_pt])
-  have hs : pderiv k ((2 : Fin 3), b)
+  have hs : pderiv (R := k) ((2 : Fin 3), b)
       (ev (n := 3) ![fun l => ev (n := 3) ![pt k d 0, pt k d 1] (G.F l), pt k d 2] (G.F i)) =
       ev (n := 3) ![fun l => ev (n := 3) ![pt k d 0, pt k d 1] (G.F l), pt k d 2]
-        (pderiv k ((1 : Fin 2), b) (G.F i)) := by
-    rw [pderiv_ev hA, Fintype.sum_prod_type, Fin.sum_univ_two]
-    simp [h0, pderiv_pt]
+        (pderiv (R := k) ((1 : Fin 2), b) (G.F i)) := by
+    let a : Fin 2 → Pt k 3 d := ![fun l => ev ![pt k d 0, pt k d 1] (G.F l), pt k d 2]
+    have hchain : pderiv (2, b) (ev a (G.F i)) =
+        ∑ p : Fin 2 × Fin d, ev a (pderiv p (G.F i)) * pderiv (2, b) (a p.1 p.2) :=
+      prove_ev_chain_rule k a hA (G.F i) (2, b)
+    change pderiv (2, b) (ev a (G.F i)) = _
+    rw [hchain, Fintype.sum_prod_type, Fin.sum_univ_two]
+    simp [a, h0, pderiv_pt]
   have e1 : (fun j l => ev (n := 2) (![pt k d 0, pt k d 1, 0] : Fin 3 → Pt k 2 d)
       ((![fun l => ev (n := 3) ![pt k d 0, pt k d 1] (G.F l), pt k d 2] : Fin 2 → Pt k 3 d) j l)) =
       (![G.F, 0] : Fin 2 → Pt k 2 d) := by
@@ -154,18 +247,23 @@ private theorem ev_jacobian_left (i b : Fin d) :
 
 private theorem ev_jacobian_right (i b : Fin d) :
     ev (n := 2) (![pt k d 0, pt k d 1, 0] : Fin 3 → Pt k 2 d)
-      (pderiv k ((2 : Fin 3), b)
+      (pderiv (R := k) ((2 : Fin 3), b)
         (ev (n := 3) ![pt k d 0, fun l => ev (n := 3) ![pt k d 1, pt k d 2] (G.F l)] (G.F i))) =
       ∑ c, Ar G i c * ev (n := 2) ![pt k d 1] (Jac G c b) := by
   have hB : CZ (![pt k d 0, fun l => ev (n := 3) ![pt k d 1, pt k d 2] (G.F l)] : Fin 2 → Pt k 3 d) :=
     CZ.cons (cc_pt _) (CZ.cons (fun l => constantCoeff_ev cz12 (cz_F G l)) CZ.nil)
-  have hs : pderiv k ((2 : Fin 3), b)
+  have hs : pderiv (R := k) ((2 : Fin 3), b)
       (ev (n := 3) ![pt k d 0, fun l => ev (n := 3) ![pt k d 1, pt k d 2] (G.F l)] (G.F i)) =
       ∑ c, ev (n := 3) ![pt k d 0, fun l => ev (n := 3) ![pt k d 1, pt k d 2] (G.F l)]
-          (pderiv k ((1 : Fin 2), c) (G.F i)) *
-        ev (n := 3) ![pt k d 1, pt k d 2] (pderiv k ((1 : Fin 2), b) (G.F c)) := by
-    rw [pderiv_ev hB, Fintype.sum_prod_type, Fin.sum_univ_two]
-    simp [pderiv_pt, pderiv_two_ev]
+          (pderiv (R := k) ((1 : Fin 2), c) (G.F i)) *
+        ev (n := 3) ![pt k d 1, pt k d 2] (pderiv (R := k) ((1 : Fin 2), b) (G.F c)) := by
+    let a : Fin 2 → Pt k 3 d := ![pt k d 0, fun l => ev ![pt k d 1, pt k d 2] (G.F l)]
+    have hchain : pderiv (2, b) (ev a (G.F i)) =
+        ∑ p : Fin 2 × Fin d, ev a (pderiv p (G.F i)) * pderiv (2, b) (a p.1 p.2) :=
+      prove_ev_chain_rule k a hB (G.F i) (2, b)
+    change pderiv (2, b) (ev a (G.F i)) = _
+    rw [hchain, Fintype.sum_prod_type, Fin.sum_univ_two]
+    simp [a, pderiv_pt, pderiv_two_ev]
   have e1 : (fun j l => ev (n := 2) (![pt k d 0, pt k d 1, 0] : Fin 3 → Pt k 2 d)
       ((![pt k d 0, fun l => ev (n := 3) ![pt k d 1, pt k d 2] (G.F l)] : Fin 2 → Pt k 3 d) j l)) =
       (![pt k d 0, pt k d 1] : Fin 2 → Pt k 2 d) := by

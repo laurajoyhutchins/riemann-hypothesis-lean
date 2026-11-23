@@ -1,10 +1,50 @@
-import Mathlib
-import Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow
-import Formalism.LocalRingCardinality.AdicCompletionLocal.LocTied
-import Formalism.SharpRestriction.LevelLetterCocycles.LocalSituation
-import Formalism.SharpRestriction.LevelLetterCocycles.LocCoh
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.LocalSituation
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.DeRhamComparisonIsFiltered
 import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.DeRhamDieudonneSpansTensorDeRhamPeriods
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.DeRhamComparisonIsFiltered
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsInvFilD
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.NonemptyThetaDeRhamFilZeroConcretePeriod
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Formalism Formalism.BasicNotions Formalism.BasicNotions.Loc Formalism.WeaklyAdmissibleFiltrations Formalism.MainNotions.N TensorProduct Module
 open scoped Formalism.Per
@@ -65,6 +105,7 @@ theorem step_invariant
       graded_indep σ ρ F FM hρ hmul hsmul hFG hMG hinv hT k d hd hdk s hs c
         (fun i => σ g (b i) - b i) (fun i hi => (F _).sub_mem (hFG _ _ _ (hb i hi)) (hb i hi)) (by
           convert hsum g using 1
+
           simp only [map_sum, hρ, hd, sub_smul, Finset.sum_sub_distrib])
     have hκ : ∀ i, ∃ κ ∈ F 0, (∀ g, σ g κ = κ) ∧ (c - k i ≠ 0 → κ = 0) ∧
         (i ∈ s → b i - κ ∈ F (c - k i + 1)) := fun i => by
@@ -79,6 +120,7 @@ theorem step_invariant
         rwa [show 0 + k i = c by omega] at this
       · rw [h3 i hk, zero_smul]
         exact (FM _).zero_mem
+
     · simp only [map_sum, hρ, hd, h2]
     · rw [← Finset.sum_sub_distrib]
       refine (FM _).sum_mem fun i hi => ?_
@@ -101,7 +143,7 @@ theorem invariant_mod
     ∃ w ∈ FM a, (∀ g, ρ g w = w) ∧ z - w ∈ FM b := by
   have key : ∀ c, a ≤ c → c ≤ max a b → ∃ w ∈ FM a, (∀ g, ρ g w = w) ∧ z - w ∈ FM c := by
     intro c hc
-    induction c, hc using Int.le_induction with
+    induction c, hc using Int.leInduction with
     | base => exact fun _ => ⟨0, (FM _).zero_mem, fun g => map_zero _, by rwa [sub_zero]⟩
     | succ c hc ih =>
       intro hcb
@@ -115,7 +157,7 @@ theorem invariant_mod
         (fun g => by
           rw [← e, map_sub, hwg, sub_sub_sub_cancel_right]
           exact hMa hcb' (hg g))
-      refine ⟨w + w', (FM _).add_mem hw (hMa hc hw'), fun g => by rw [map_add, hwg, hwg'], ?_⟩
+      refine ⟨w + w', (FM _).add_mem hw (hMa hc hw'), fun g => by rw [map_add (f := _), hwg, hwg'], ?_⟩
       rwa [← e, sub_sub] at hzw'
   obtain ⟨w, hw, hwg, hzw⟩ := key (max a b) (le_max_left _ _) le_rfl
   exact ⟨w, hw, hwg, hMa (le_max_right _ _) hzw⟩
@@ -155,7 +197,7 @@ theorem tied_invariant_mod (l : ℕ) [Fact l.Prime] (P : LocPrime l) (AI : LocAi
     induction z using TensorProduct.induction_on with
     | zero => rw [map_zero]; exact S.zero_mem
     | tmul v x => exact hS v x x.2
-    | add x y hx hy => rw [map_add]; exact S.add_mem hx hy
+    | add x y hx hy => rw [map_add (f := _)]; exact S.add_mem hx hy
   have hFa : Antitone fun a => ((P.PD K).Fil a).toAddSubgroup :=
     antitone_int_of_succ_le fun a => (P.PD K).Fil_anti a
   have hMa : Antitone fun a => (FilV (P.PD K) (LL := LL) (V := V) a).toAddSubgroup :=
@@ -170,7 +212,7 @@ theorem tied_invariant_mod (l : ℕ) [Fact l.Prime] (P : LocPrime l) (AI : LocAi
       induction x using TensorProduct.induction_on with
       | zero => simp
       | tmul v x => simp [actVdR]
-      | add x y hx hy => simp only [map_add, hx, hy])
+      | add x y hx hy => simp only [map_add (f := _), hx, hy])
     (P.PD K).Fil_mul
     (fun a c x z hx hz => hind c
       ((FilV (P.PD K) (LL := LL) (V := V) (a + c)).toAddSubgroup.comap (φ x).toAddMonoidHom)

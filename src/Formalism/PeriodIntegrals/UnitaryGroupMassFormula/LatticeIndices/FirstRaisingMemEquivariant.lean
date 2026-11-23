@@ -1,5 +1,47 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LatticeIndices.LatFreeHolds
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LatticeIndices.LatBasisAllOf
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LatticeIndices.LatFreeHolds
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -64,9 +106,7 @@ theorem firstLattice_mem_local (h : UnitElt X p θ) (y : Fin X.B.I.n → FpX X p
     obtain ⟨l, hl, rfl⟩ := hy
     exact first_raising_mem_equivariant X p θ h l hl
   | zero =>
-    convert Submodule.zero_mem (latLoc (E := X.B.I.E) p.1 (X.B.I.L : Set (Fin X.B.I.n → X.B.I.E))) using 1
-    funext j
-    simp
+    convert Submodule.zero_mem (latLoc (E := X.B.I.E) p.1 (X.B.I.L : Set (Fin X.B.I.n → X.B.I.E))) using 1 <;> funext j <;> simp
   | add y y' _ _ hy hy' =>
     convert Submodule.add_mem _ hy hy' using 1
     funext j
@@ -75,8 +115,8 @@ theorem firstLattice_mem_local (h : UnitElt X p θ) (y : Fin X.B.I.n → FpX X p
   | smul c y _ hy =>
     convert Submodule.smul_mem _ c hy using 1
     funext j
-    simp only [Pi.smul_apply]
-    rw [osmul_eq X p, ← map_smul, Prod.smul_mk, smul_zero]
+    simp only [Pi.smul_apply, osmul_eq X p]
+    rw [← map_smul, Prod.smul_mk, smul_zero]
     rfl
 
 theorem secondLattice_mem_local (h : UnitElt X p θ) (z : Fin X.B.I.n → FpX X p) (hz : z ∈ Mlat2 X p θ) :
@@ -89,14 +129,12 @@ theorem secondLattice_mem_local (h : UnitElt X p θ) (z : Fin X.B.I.n → FpX X 
       Submodule.subset_span ⟨l, hl, rfl⟩
     convert Submodule.sub_mem _ h2 h1 using 1
     funext j
-    simp only [Pi.sub_apply, ratV]
     apply θ.injective
+    change θ (θ.symm (0, iota2 X p θ (l j))) = θ (inclR (FpX X p) (l j) - θ.symm (iota1 X p θ (l j), 0))
     rw [map_sub, AlgEquiv.apply_symm_apply, AlgEquiv.apply_symm_apply, th_incl]
     ext <;> simp
   | zero =>
-    convert Submodule.zero_mem (latLoc (E := X.B.I.E) p.1 (X.B.I.L : Set (Fin X.B.I.n → X.B.I.E))) using 1
-    funext j
-    simp
+    convert Submodule.zero_mem (latLoc (E := X.B.I.E) p.1 (X.B.I.L : Set (Fin X.B.I.n → X.B.I.E))) using 1 <;> funext j <;> simp
   | add y y' _ _ hy hy' =>
     convert Submodule.add_mem _ hy hy' using 1
     funext j
@@ -105,8 +143,8 @@ theorem secondLattice_mem_local (h : UnitElt X p θ) (z : Fin X.B.I.n → FpX X 
   | smul c y _ hy =>
     convert Submodule.smul_mem _ c hy using 1
     funext j
-    simp only [Pi.smul_apply]
-    rw [osmul_eq X p, ← map_smul, Prod.smul_mk, smul_zero]
+    simp only [Pi.smul_apply, osmul_eq X p]
+    rw [← map_smul, Prod.smul_mk, smul_zero]
     rfl
 
 theorem latSplit_of (h : UnitElt X p θ) : LatSplitP X p θ := by
@@ -122,7 +160,7 @@ theorem latSplit_of (h : UnitElt X p θ) : LatSplitP X p θ := by
       simp only [Pi.zero_apply, map_zero]
       exact ⟨Submodule.zero_mem _, Submodule.zero_mem _⟩
     | add x y _ _ hx hy =>
-      simp only [Pi.add_apply, map_add]
+      simp only [Pi.add_apply, map_add (f := _)]
       exact ⟨Submodule.add_mem _ hx.1 hy.1, Submodule.add_mem _ hx.2 hy.2⟩
     | smul c x _ hx =>
       simp only [Pi.smul_apply, osmul_eq X p, firstSplitCoord_smul, secondSplitCoord_smul]
@@ -131,7 +169,7 @@ theorem latSplit_of (h : UnitElt X p θ) : LatSplitP X p θ := by
     have hx : x = (fun j => θ.symm (th1 X p θ (x j), 0)) + (fun j => θ.symm (0, th2 X p θ (x j))) := by
       funext j
       simp only [Pi.add_apply]
-      rw [← map_add, Prod.mk_add_mk, add_zero, zero_add]
+      rw [← map_add (f := _), Prod.mk_add_mk, add_zero, zero_add]
       apply θ.injective
       rw [AlgEquiv.apply_symm_apply]
       rfl

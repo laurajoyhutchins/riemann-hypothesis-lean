@@ -1,7 +1,52 @@
-import Mathlib
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.MemTwKerIffAverage
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.Foundations.MatrixMeasurableSpace
 import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.PolyBall
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.MemTwKerIffAverage
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.FourierTransformInversionLocalFieldPi
+import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.MirabolicDerivatives.TwistedKernels.TwKerLeComapOf
+
+@[expose] public section
+
 open Matrix GlobalTheory.PRep GlobalTheory.BZMir GlobalTheory.SplitWeil GlobalTheory.CompanionTheory.MirFourier ValuativeRel
 open scoped Topology
 
@@ -18,18 +63,18 @@ theorem sum_twOrbit_eq_zero {G V : Type} [CommGroup G] [TopologicalSpace G] [IsT
     (hk : v ∈ twKer ρ L θ) [L₁.Normal] [Fintype (L ⧸ L₁)] :
     ∑ q : L ⧸ L₁, twOrbit ρ L θ v q.out = 0 := by
   classical
-  haveI : CompactSpace L := isCompact_iff_compactSpace.mp hL
+  have : CompactSpace L := isCompact_iff_compactSpace.mp hL
   have hle : L₁ ≤ θ.ker := fun x hx => hθ x hx
   have hopen : IsOpen (θ.ker : Set L) := Subgroup.isOpen_mono hle hL₁
   obtain ⟨M, hM, hsum⟩ := exists_sum_eq_zero hρ hL θ hopen hk
-  haveI : L₁.FiniteIndex := Subgroup.finiteIndex_of_finite_quotient
+  have : L₁.FiniteIndex := Subgroup.finiteIndex_of_finite_quotient
   set C : Subgroup L := (M ⊓ L₁).normalCore with hC
-  haveI : C.Normal := Subgroup.normalCore_normal _
-  haveI : C.FiniteIndex := inferInstance
-  haveI : Fintype (L ⧸ C) := Fintype.ofFinite _
+  have : C.Normal := Subgroup.normalCore_normal _
+  have : C.FiniteIndex := inferInstance
+  have : Fintype (L ⧸ C) := Fintype.ofFinite _
   have hCM : C ≤ M ⊓ L₁ := Subgroup.normalCore_le _
-  haveI : Finite (L₁ ⧸ C.subgroupOf L₁) := inferInstance
-  haveI : Fintype (L₁ ⧸ C.subgroupOf L₁) := Fintype.ofFinite _
+  have : Finite (L₁ ⧸ C.subgroupOf L₁) := inferInstance
+  have : Fintype (L₁ ⧸ C.subgroupOf L₁) := Fintype.ofFinite _
   have h0 := hsum C (hCM.trans inf_le_left)
   rw [sum_out_refine (hCM.trans inf_le_right) (twOrbit ρ L θ v)
     (fun x k hk => twOrbit_mul_right ρ L θ v x k ⟨hv k hk, hθ k hk⟩)] at h0
@@ -42,10 +87,10 @@ theorem eq_zero_of_twKer :
     ∀ {G V : Type} [CommGroup G] [TopologicalSpace G] [IsTopologicalGroup G] [AddCommGroup V] [Module ℂ V] (ρ : Representation ℂ G V), IsSmooth ρ → ∀ (L : Subgroup G), IsCompact (L : Set G) → ∀ (L₁ : Subgroup L), IsOpen (L₁ : Set L) → ∀ (v : V), (∀ x ∈ L₁, ρ (x : G) v = v) → ∀ {ι : Type} (R : Finset ι), R.Nonempty → ∀ (χ : ι → (L →* ℂˣ)), (∀ a ∈ R, ∀ x ∈ L₁, χ a x = 1) → (∀ a ∈ R, v ∈ twKer ρ L (χ a)) → (∀ x : L, x ∉ L₁ → ∑ a ∈ R, (((χ a x)⁻¹ : ℂˣ) : ℂ) = 0) → v = 0 := by
   intro G V _ _ _ _ _ ρ hρ L hL L₁ hL₁ v hv ι R hR χ hχ hker hsum
   classical
-  haveI : CompactSpace L := isCompact_iff_compactSpace.mp hL
-  haveI : Finite (L ⧸ L₁) := Subgroup.quotient_finite_of_isOpen _ hL₁
-  haveI : L₁.Normal := Subgroup.normal_of_comm L₁
-  haveI : Fintype (L ⧸ L₁) := Fintype.ofFinite _
+  have : CompactSpace L := isCompact_iff_compactSpace.mp hL
+  have : Finite (L ⧸ L₁) := Subgroup.quotient_finite_of_isOpen _ hL₁
+  have : L₁.Normal := inferInstance
+  have : Fintype (L ⧸ L₁) := Fintype.ofFinite _
   have key : ∀ a ∈ R, ∑ q : L ⧸ L₁, twOrbit ρ L (χ a) v q.out = 0 := fun a ha =>
     sum_twOrbit_eq_zero ρ hρ L hL L₁ hL₁ v hv (χ a) (hχ a ha) (hker a ha)
   have h0 : ∑ q : L ⧸ L₁, ∑ a ∈ R, twOrbit ρ L (χ a) v q.out = 0 := by

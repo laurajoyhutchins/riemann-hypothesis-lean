@@ -1,9 +1,47 @@
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.IsInfUnitary
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.DefsRep
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.CasimirCoefficients.IsClosedEmbeddingToM
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.CasimirCoefficients.PsiExistsStatement
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.CasimirCoefficients.IsClosedKset
-import Formalism.SharpRestriction.CuspSpanNormBounds.RelevantZeroGramTerms
+module
+
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.CasimirCoefficients.IsClosedKset
+public import Formalism.SharpRestriction.CuspSpanNormBounds.RelevantZeroGramTerms
+public import Mathlib.Analysis.Matrix.Spectrum
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -18,6 +56,10 @@ variable {n : ℕ}
 
 def dk (ε : Fin n → Bool) : Measure (KG ε) := (muK ε Set.univ)⁻¹ • muK ε
 
+/-- The compact Haar measure normalized by its total mass. Use this lemma to rewrite `dk`
+so separate import branches do not generate duplicate equation theorems. -/
+theorem dk_def (ε : Fin n → Bool) : dk ε = (muK ε Set.univ)⁻¹ • muK ε := rfl
+
 abbrev PCoord (ε : Fin n → Bool) : Type := {ab : Fin n × Fin n // ab.2 < ab.1 ∧ ε ab.1 ≠ ε ab.2}
 
 def pmat {ε : Fin n → Bool} (z : PCoord ε → ℂ) : Matrix (Fin n) (Fin n) ℂ := fun a b =>
@@ -30,10 +72,10 @@ theorem pmat_isHermitian {ε : Fin n → Bool} (z : PCoord ε → ℂ) : (pmat z
   simp only [pmat]
   by_cases h1 : b < a ∧ ε a ≠ ε b
   · have hn : ¬ (a < b ∧ ε b ≠ ε a) := fun h => absurd h.1 (not_lt.2 h1.1.le)
-    simp only [dif_neg hn, dif_pos h1, star_star]
+    simp only [dite_eq_right hn, dite_eq_left h1, star_star]
   · by_cases h2 : a < b ∧ ε b ≠ ε a
-    · simp only [dif_pos h2, dif_neg h1]
-    · simp only [dif_neg h1, dif_neg h2, star_zero]
+    · simp only [dite_eq_left h2, dite_eq_right h1]
+    · simp only [dite_eq_right h1, dite_eq_right h2, star_zero]
 
 def pev {ε : Fin n → Bool} (z : PCoord ε → ℂ) : Fin n → ℝ := (pmat_isHermitian z).eigenvalues
 
@@ -69,8 +111,6 @@ def PiW (ε : Fin n → Bool) (lam : Fin n → ℝ) : ℝ := ∏ ab : PCoord ε,
 def dimVlam (lam : Fin n → ℝ) : ℝ :=
   (∏ a : Fin n, ∏ b ∈ univ.filter (fun b : Fin n => a < b), |lam a - lam b|) /
     ∏ a : Fin n, ∏ b ∈ univ.filter (fun b : Fin n => a < b), (((b : ℕ) : ℝ) - ((a : ℕ) : ℝ))
-
-def lamAbs (lam : Fin n → ℝ) : ℝ := ⨆ a : Fin n, ⨆ b : Fin n, |lam a - lam b|
 
 def cPQ (ε : Fin n → Bool) : ℝ :=
   (∏ i ∈ range n, (i.factorial : ℝ)) /

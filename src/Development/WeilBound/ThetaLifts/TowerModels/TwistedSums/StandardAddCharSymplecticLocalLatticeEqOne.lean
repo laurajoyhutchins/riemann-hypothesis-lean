@@ -1,10 +1,48 @@
-import Mathlib
-import Formalism.SharpRestriction.GlobalSchurBounds.StandardLattice
-import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.WeilTensorModels
-import Development.WeilBound.ThetaLifts.TowerModels.TwistedSums.LatAtVAtStable
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.AddCharTrivialIntegralFiniteAdeleMul
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.ProductFormulaHaar.TrSumOf
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.TraceMixedEmbedding
+module
+
+public import Development.WeilBound.ThetaLifts.TowerModels.TwistedSums.LatAtVAtStable
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.AddCharTrivialIntegralFiniteAdeleMul
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.TraceMixedEmbedding
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice
 open IsDedekindDomain NumberField MeasureTheory Matrix
@@ -87,6 +125,7 @@ theorem symp_incM (σ : E →ₐ[F] E) {n d : ℕ} (JA : Matrix (Fin n) (Fin n) 
     rw [Algebra.trace_apply, Algebra.trace_apply, ← Algebra.baseChange_lmul, LinearMap.trace_baseChange]
   have hc : ∀ e : E, cA σ (inclR (F := F) (AF F) e) = inclR (F := F) (AF F) (σ e) := fun e => rfl
   rw [← hTens_vecMulVec, ← ht, GlobalTheory.WeilM.symp]
+
   simp only [GlobalTheory.WeilM.hTens, incM, Matrix.map_apply, hc, map_mul, map_sum]
 end Gen
 
@@ -112,7 +151,7 @@ theorem trace_int_of_lat (σ : E →ₐ[F] E) (B : Base F E) {n d r s r' s' : �
   obtain ⟨k, hk⟩ := IsIntegrallyClosed.isIntegral_iff.1 h
   exact ⟨k, by rw [← hk]; simp⟩
 
-theorem liftV_one_mul (v : GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.Pl F) (w : AF F) :
+theorem liftV_one_mul (v : GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.Pl (F := F)) (w : AF F) :
     Tw.LatVac.liftV v 1 * w = Tw.LatVac.liftV v (GlobalTheory.AdelicU.evFin F v w) := by
   refine Prod.ext ?_ ?_
   · change (0 : Ainf F) * w.1 = 0
@@ -126,14 +165,14 @@ theorem liftV_one_mul (v : GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorMod
       rw [GlobalTheory.AdelicU.evalV_singleFin_self, GlobalTheory.AdelicU.evalV_singleFin_self, one_mul]
     · rw [GlobalTheory.AdelicU.evalV_singleFin_ne hu, GlobalTheory.AdelicU.evalV_singleFin_ne hu, zero_mul]
 
-theorem eq_liftV_of_at {v : GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.Pl F} {a : AF F} (ha : At (GlobalTheory.AdelicU.evFin F v) a) :
+theorem eq_liftV_of_at {v : GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.Pl (F := F)} {a : AF F} (ha : At (GlobalTheory.AdelicU.evFin F v) a) :
     a = Tw.LatVac.liftV v 1 * a := by
   have h := ha (1 - Tw.LatVac.liftV v 1) (by rw [map_sub, map_one, Tw.LatVac.evFin_liftV, sub_self])
   rw [smul_eq_mul, sub_mul, one_mul, sub_eq_zero] at h
   exact h
 
 theorem psi_gen (σ : E →ₐ[F] E) (B : Base F E) {n d r s r' s' : ℕ} (X : Spc F E n) (Y : Spc F E d)
-    (hX : X.IsHerm σ B r s) (hY : Y.IsSkew σ B r' s') (hstd : IsStd B.ψ) (v : GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.Pl F) (θ : 𝓞 E) (b : AF F)
+    (hX : X.IsHerm σ B r s) (hY : Y.IsSkew σ B r' s') (hstd : IsStd B.ψ) (v : GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.Pl (F := F)) (θ : 𝓞 E) (b : AF F)
     (hb : GlobalTheory.AdelicU.evFin F v b ∈ v.adicCompletionIntegers F) {a a' : AF F}
     (ha : At (GlobalTheory.AdelicU.evFin F v) a) (hav : GlobalTheory.AdelicU.evFin F v a ∈ v.adicCompletionIntegers F)
     (hav' : GlobalTheory.AdelicU.evFin F v a' ∈ v.adicCompletionIntegers F)
@@ -180,14 +219,14 @@ theorem symp_add_left (σ : E →ₐ[F] E) {n d : ℕ} (ξ : AE F E) (JA : Matri
     GlobalTheory.WeilM.symp (R := AF F) (cA σ) ξ JA JB (x + x') y =
       GlobalTheory.WeilM.symp (R := AF F) (cA σ) ξ JA JB x y + GlobalTheory.WeilM.symp (R := AF F) (cA σ) ξ JA JB x' y := by
   unfold GlobalTheory.WeilM.symp GlobalTheory.WeilM.hTens
-  simp only [Matrix.add_apply, add_mul, Finset.sum_add_distrib, mul_add, map_add]
+  simp only [Matrix.add_apply, add_mul, Finset.sum_add_distrib, mul_add, map_add (f := _)]
 
 theorem symp_add_right (σ : E →ₐ[F] E) {n d : ℕ} (ξ : AE F E) (JA : Matrix (Fin n) (Fin n) (AE F E))
     (JB : Matrix (Fin d) (Fin d) (AE F E)) (x y y' : Matrix (Fin n) (Fin d) (AE F E)) :
     GlobalTheory.WeilM.symp (R := AF F) (cA σ) ξ JA JB x (y + y') =
       GlobalTheory.WeilM.symp (R := AF F) (cA σ) ξ JA JB x y + GlobalTheory.WeilM.symp (R := AF F) (cA σ) ξ JA JB x y' := by
   unfold GlobalTheory.WeilM.symp GlobalTheory.WeilM.hTens
-  simp only [Matrix.add_apply, map_add, mul_add, Finset.sum_add_distrib]
+  simp only [Matrix.add_apply, map_add (f := _), mul_add, Finset.sum_add_distrib]
 
 theorem symp_zero_left (σ : E →ₐ[F] E) {n d : ℕ} (ξ : AE F E) (JA : Matrix (Fin n) (Fin n) (AE F E))
     (JB : Matrix (Fin d) (Fin d) (AE F E)) (y : Matrix (Fin n) (Fin d) (AE F E)) :
@@ -224,7 +263,7 @@ theorem symp_neg_right (σ : E →ₐ[F] E) {n d : ℕ} (ξ : AE F E) (JA : Matr
 theorem psi_symp_latAtV : ∀ {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E]
     (σ : E →ₐ[F] E) (B : GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.Base F E) {n d : ℕ} (X : GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.Spc F E n)
     (Y : GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.Spc F E d) (r s r' s' : ℕ),
-    B.IsGood σ → X.IsHerm σ B r s → Y.IsSkew σ B r' s' → ∀ (v : GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.Pl F) (θ : 𝓞 E) (b : AF F),
+    B.IsGood σ → X.IsHerm σ B r s → Y.IsSkew σ B r' s' → ∀ (v : GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.Pl (F := F)) (θ : 𝓞 E) (b : AF F),
     GlobalTheory.AdelicU.evFin F v b ∈ v.adicCompletionIntegers F →
     ∀ γ ∈ GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.latAtV X Y v, ∀ γ' ∈ GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.latAtV X Y v,
       B.ψ (b * GlobalTheory.WeilM.symp (R := AF F) (GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.cA σ) (inclR (F := F) (AF F) (θ : E))

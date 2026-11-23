@@ -1,8 +1,55 @@
-import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.GenericIrreducibility.CentralProd2
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ProductTransposeInverseDualReverse
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.UnitarisableSegmentTwistPrecedesAddOneLe
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.IsComplementaryProductOfIsCuspidal
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.NontrivialTwJacquetOfSurjective
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.GenericIrreducibility.CentralProd2
+public import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.BernsteinExponentBounds.IsInvForm
+import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.EmbedsLevelZeroDepthZero
+import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.NotInSupportOfSubsingleton
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.AlgebraMapIntertwiningMapBijectiveOfIsSmooth
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.NontrivialTwJacquetOfSurjective
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.UnitarisableSegmentTwistPrecedesAddOneLe
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.NormalizedAbsCharacterization
+public import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.IsComplementaryProductOfIsCuspidal
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ProductTransposeInverseDualReverse
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.UnlinkedCommuteOfIrreducible
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -58,7 +105,7 @@ theorem asmZero (ω : kˣ →* ℂˣ) (m : ℕ) (hm : 0 < m) (s : ℝ)
   · exact (mul_eq_zero.1 h).resolve_left hm'
   · exact absurd h hL0
 
-theorem asmLower (hL : ExpLow k) (y z : IrrGL k) {N : ℕ} (hd2 : ∑ a, (![y, z] a).1 = N)
+theorem asmLower (hL : ExpLow k) (y z : IrrGL (k := k)) {N : ℕ} (hd2 : ∑ a, (![y, z] a).1 = N)
     (hG : IsGeneric (prodIrr ![y, z] hd2)) (hU : IsUnitarisable (prodIrr ![y, z] hd2)) (hy : 1 ≤ y.1)
     (ω : kˣ →* ℂˣ) (s : ℝ) (hm : 0 < z.1) (hω : HasCentralChar z.rep ω)
     (hn : ∀ w, ‖(ω w : ℂ)‖ = nabs k w ^ ((z.1 : ℝ) * s)) : -1 / 2 < s := by
@@ -84,7 +131,7 @@ theorem asmSmoothTheta {n : ℕ} {V : Type} [AddCommGroup V] [Module ℂ V] (ρ 
     (h : IsSmooth ρ) : IsSmooth (ρ.comp (Zc.Cos.thetaW k n)) :=
   GlobalTheory.SmGL.isSmooth_comp h _ (GlobalTheory.CompanionTheory.ThetaProd.continuous_thetaW n)
 
-theorem asmPair (z y : IrrGL k) {N : ℕ} (hd3 : ∑ a, (![z, y] a).1 = N) (hG : IsGeneric (prodIrr ![z, y] hd3))
+theorem asmPair (z y : IrrGL (k := k)) {N : ℕ} (hd3 : ∑ a, (![z, y] a).1 = N) (hG : IsGeneric (prodIrr ![z, y] hd3))
     (hU : IsUnitarisable (prodIrr ![z, y] hd3)) :
     IsGeneric (prod₂ z.rep y.rep) ∧ IsUnitarisable (prod₂ z.rep y.rep) := by
   have h : z.1 + y.1 = N := (Fin.sum_univ_two _).symm.trans hd3
@@ -94,7 +141,7 @@ theorem asmPair (z y : IrrGL k) {N : ℕ} (hd3 : ∑ a, (![z, y] a).1 = N) (hG :
   obtain ⟨E⟩ := E
   exact asmInd h (asmGeneric hG E.symm) (GlobalTheory.GenericUnitary.isUnitarisable_of_equiv E.symm hU)
 
-theorem asmUpper (hL : ExpLow k) (hT : ThetaProd k) (hF : ThetaFacts k) (z y : IrrGL k) {N : ℕ}
+theorem asmUpper (hL : ExpLow k) (hT : ThetaProd k) (hF : ThetaFacts k) (z y : IrrGL (k := k)) {N : ℕ}
     (hd3 : ∑ a, (![z, y] a).1 = N) (hG : IsGeneric (prodIrr ![z, y] hd3))
     (hU : IsUnitarisable (prodIrr ![z, y] hd3)) (hy : 1 ≤ y.1) (ω : kˣ →* ℂˣ) (s : ℝ) (hm : 0 < z.1)
     (hω : HasCentralChar z.rep ω) (hn : ∀ w, ‖(ω w : ℂ)‖ = nabs k w ^ ((z.1 : ℝ) * s)) : -1 / 2 < -s := by

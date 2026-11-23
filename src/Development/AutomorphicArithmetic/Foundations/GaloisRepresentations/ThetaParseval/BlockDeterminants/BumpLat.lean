@@ -1,6 +1,44 @@
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ThetaParseval.SchurStep
-import Development.WeilBound.CoreStatements.LocalThetaKernels.Locrep
-import Development.WeilBound.CoreStatements.LocalThetaKernels.IwasAd
+module
+
+public import Development.WeilBound.CoreStatements.LocalThetaKernels.IwasAd
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -12,15 +50,15 @@ namespace UpperTheory.TP.BA
 
 variable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] {n d : ℕ}
 
-abbrev sg (v : Pl F) (t : Fv F v) : AF F := PositivityTheory.ThKH.Iwas.sg v t
+abbrev sg (v : Pl (F := F)) (t : Fv F v) : AF F := PositivityTheory.ThKH.Iwas.sg v t
 
-abbrev eM (v : Pl F) (n : ℕ) : Matrix (Fin n) (Fin n) (AE F E) := sg v 1 • (1 : Matrix (Fin n) (Fin n) (AE F E))
+abbrev eM (v : Pl (F := F)) (n : ℕ) : Matrix (Fin n) (Fin n) (AE F E) := sg v 1 • (1 : Matrix (Fin n) (Fin n) (AE F E))
 
-def Oh (E : Type) [Field E] [NumberField E] [Algebra F E] (v : Pl F) : AddSubgroup (AE F E) :=
+def Oh (E : Type) [Field E] [NumberField E] [Algebra F E] (v : Pl (F := F)) : AddSubgroup (AE F E) :=
   AddSubgroup.closure {z | ∃ a : AF F, At (evFin F v) a ∧ evFin F v a ∈ v.adicCompletionIntegers F ∧
     ∃ o : 𝓞 E, z = a • inclR (F := F) (AF F) (o : E)}
 
-structure IsFr (X : Spc F E n) (v : Pl F) (b c : Matrix (Fin n) (Fin n) (AE F E)) : Prop where
+structure IsFr (X : Spc F E n) (v : Pl (F := F)) (b c : Matrix (Fin n) (Fin n) (AE F E)) : Prop where
   at_b : At (evFin F v) b
   at_c : At (evFin F v) c
   bc : b * c = eM v n
@@ -28,7 +66,7 @@ structure IsFr (X : Spc F E n) (v : Pl F) (b c : Matrix (Fin n) (Fin n) (AE F E)
   col : ∀ j, (fun i => b i j) ∈ PositivityTheory.ThK.latW X v
   coord : ∀ z ∈ PositivityTheory.ThK.latW X v, ∀ i, (c *ᵥ z) i ∈ Oh E v
 
-def abelian₂ (v : Pl F) (b c : Matrix (Fin n) (Fin n) (AE F E)) : AddSubgroup (Matrix (Fin n) (Fin n) (AE F E)) where
+def abelian₂ (v : Pl (F := F)) (b c : Matrix (Fin n) (Fin n) (AE F E)) : AddSubgroup (Matrix (Fin n) (Fin n) (AE F E)) where
   carrier := {a | At (evFin F v) a ∧ ∀ i j, (c * a * b) i j ∈ Oh E v}
   zero_mem' := ⟨fun u _ => smul_zero u, fun i j => by simp [zero_mem]⟩
   add_mem' := fun {a a'} h h' => ⟨fun u hu => by rw [smul_add, h.1 u hu, h'.1 u hu, add_zero], fun i j => by
@@ -38,13 +76,13 @@ def abelian₂ (v : Pl F) (b c : Matrix (Fin n) (Fin n) (AE F E)) : AddSubgroup 
 
 variable (σ : E →ₐ[F] E)
 
-structure IsIsoW (W : Spc F E d) (v : Pl F) (Y : Matrix (Fin n) (Fin d) (AE F E)) (R : Matrix (Fin d) (Fin n) (AE F E)) : Prop where
+structure IsIsoW (W : Spc F E d) (v : Pl (F := F)) (Y : Matrix (Fin n) (Fin d) (AE F E)) (R : Matrix (Fin d) (Fin n) (AE F E)) : Prop where
   what₂ : ∀ i, Y i ∈ PositivityTheory.ThK.latW W v
   right : Y * R = eM v n
   gram : Y * incM F W.J * (Y.map (cA σ))ᵀ = 0
   coord : ∀ z ∈ PositivityTheory.ThK.latW W v, ∀ j, (z ᵥ* R) j ∈ Oh E v
 
-structure LatData (X : Spc F E n) (W : Spc F E d) (v : Pl F) (Λ : AddSubgroup (Matrix (Fin n) (Fin n) (AE F E)))
+structure LatData (X : Spc F E n) (W : Spc F E d) (v : Pl (F := F)) (Λ : AddSubgroup (Matrix (Fin n) (Fin n) (AE F E)))
     (x₁ : Matrix (Fin n) (Fin d) (AE F E)) (r : Matrix (Fin d) (Fin n) (AE F E)) (ϖ : Fv F v) : Prop where
   at_mem : ∀ a ∈ Λ, At (evFin F v) a
   one_mem : eM v n ∈ Λ

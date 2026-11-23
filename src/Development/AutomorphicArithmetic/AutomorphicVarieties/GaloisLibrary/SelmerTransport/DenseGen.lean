@@ -1,4 +1,56 @@
+module
+
+public import Mathlib.NumberTheory.Padics.PadicIntegers
+public import ReciprocityTheory.GaloisValuations.SeparatedDvrSecondCohomologyMem
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.Padics.ProperSpace
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
 import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.SelmerTransport.RestrictionMemInvariantH1
+public import Mathlib.Analysis.SpecificLimits.Normed
+public import Mathlib.NumberTheory.Padics.RingHoms
+public import Mathlib.Topology.LocallyConstant.Basic
+
+@[expose] public section
 
 open ReciprocityTheory.Gal UpperTheory.V.Base
 
@@ -111,6 +163,7 @@ private theorem solveGen (l : ℕ) [Fact l.Prime] (R N : Type) [CommRing R] [Add
       ∑ t ∈ Finset.range (l ^ (max A k - k)), σ (γ ^ (t * l ^ k)) (a (l ^ k) - a 0) := by
     rw [← L2 _ hk, hK1, mul_comm (l ^ k)]
   have hfixQ : σ (γ ^ (l ^ (max A k))) (a (l ^ (max A k)) - a 0) = a (l ^ (max A k)) - a 0 := by
+
     rw [hdQ, map_sum]
     refine Finset.sum_congr rfl (fun t _ => ?_)
     rw [← Module.End.mul_apply, ← map_mul, mul_comm (γ ^ (l ^ (max A k))), map_mul,
@@ -157,7 +210,7 @@ private theorem solveGen (l : ℕ) [Fact l.Prime] (R N : Type) [CommRing R] [Add
   · intro x
     refine (denseGen l).induction_on
       (p := fun x => C (Multiplicative.ofAdd 1 * x) = σ (Multiplicative.ofAdd 1) (C x) - φ x) x ?_ ?_
-    · exact (clopenEq (hCc.comp (continuous_mul_left _))
+    · exact (clopenEq (hCc.comp (continuous_const_mul _))
         ((continuous_of_discreteTopology
           (f := fun pr : N × N => σ (Multiplicative.ofAdd 1) pr.1 - pr.2)).comp
           (hCc.prodMk hφ))).isClosed
@@ -194,7 +247,7 @@ theorem UpperTheory.V.Base.h2Zl :
   refine (denseGen l).induction_on (p := fun g => σ g (C h) - C (g * h) + C g = f.1 (g, h)) g ?_ ?_
   · exact (clopenEq
       (((hσ'.comp (continuous_id.prodMk continuous_const)).sub
-        (hC.comp (continuous_mul_right h))).add hC)
+        (hC.comp (continuous_mul_const h))).add hC)
       (hf.comp (continuous_id.prodMk continuous_const))).isClosed
   · intro n
     induction n with
@@ -204,7 +257,7 @@ theorem UpperTheory.V.Base.h2Zl :
     | succ n ih =>
       rw [pow_succ', mul_assoc, hCeq, hCeq, map_mul, Module.End.mul_apply]
       have hc := hcoc (Multiplicative.ofAdd 1) (Multiplicative.ofAdd 1 ^ n) h
-      rw [← ih, map_add, map_sub] at hc
+      rw [← ih, map_add (f := _), map_sub] at hc
       rw [← sub_eq_zero]
       convert hc using 1
       abel

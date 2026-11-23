@@ -1,8 +1,59 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsAlgHomOfIsBaseChange
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IsProperToroidalModelStructureMap
+public import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.DenseInterior
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.FlatBCSec
+import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.ExistsUniqueLbIsoPullEqOfCoheightLeOne
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CotangentImagesLinearIndependent
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsStandardBasisExtensionDetNeZero
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RegularSequenceExtendCoords
+public import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.ToroidalCompactificationBis
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TensorProduct.IsBaseChangeFree
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.IsLinearHomPull
 import Development.AbelianVarietyTheory.Definitions.Divisors.HasDefect
 import Development.AbelianVarietyTheory.Definitions.Divisors.HasRigidChart
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.ToroidalCompactificationBis
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RegularSequenceExtendCoords
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IsUnitMkOfFormallyUnramified
+public import Development.AbelianVarietyTheory.Definitions.ModuliSpaces.IsInvDer
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -27,7 +78,7 @@ theorem mem_of_mul_mem {R : Type} [CommRing R] [IsNoetherianRing R] (hQ : ∀ n 
     | succ n ih =>
       have := hI _ ih
       have hn : d ((n : R) + 1) = 0 := by simp
-      rw [map_add, d.leibniz, d.leibniz, ht, hn, ← hb, ← hb] at this
+      rw [map_add (f := _), d.leibniz, d.leibniz, ht, hn, ← hb, ← hb] at this
       convert this using 1
       simp only [smul_eq_mul]
       push_cast
@@ -124,6 +175,7 @@ theorem exists_basis_of_dual {K R : Type} [CommRing R] [IsNoetherianRing R] (hQ 
     have := map_sum (Derivation.coeFnAddMonoidHom (R := ℤ) (A := R) (M := R)) (fun k => g k • d k) Finset.univ
     have h3 := congrFun this (z l)
     rw [Finset.sum_apply] at h3
+    change (∑ k, g k • d k) (z l) = ∑ k, (g k • d k) (z l) at h3
     refine h3.trans ?_
     simp [hd]
   let v : Fin n → M := fun k => ⟨u k • d k, hv k⟩
@@ -204,7 +256,9 @@ theorem exists_basis_of_kaehler {K R : Type} [Field K] [CharZero K] [CommRing R]
       have := map_sum (Derivation.coeFnAddMonoidHom (R := ℤ) (A := R) (M := R)) (fun k => D (z k) • d k) Finset.univ
       have h3 := congrFun this r
       rw [Finset.sum_apply] at h3
+      change (∑ k, D (z k) • d k) r = ∑ k, (D (z k) • d k) r at h3
       refine Eq.trans ?_ h3.symm
+
       rw [← hD', ← D'.liftKaehlerDifferential_comp_D r, ← bΩ.sum_repr (KaehlerDifferential.D K R r), map_sum]
       refine Finset.sum_congr rfl fun k _ => ?_
       rw [map_smul, hb, D'.liftKaehlerDifferential_comp_D, hD']
@@ -225,8 +279,9 @@ theorem exists_basis_map {k A B : Type} [CommRing k] [CommRing A] [CommRing B] [
   let v : Fin n → Ω[B⁄k] := fun i => KaehlerDifferential.D k B (algebraMap A B (z i))
   have hv : ∀ i, v i = ∑ l, algebraMap A B (c i l) • hbc.basis b l := by
     intro i
+
     simp only [v, ← KaehlerDifferential.map_D k k A B, hc, map_sum, map_smul, IsBaseChange.basis_apply,
-      algebraMap_smul]
+    algebraMap_smul]
   have hm : (hbc.basis b).toMatrix v = (c.map (algebraMap A B)).transpose := by
     ext l i
     rw [Module.Basis.toMatrix_apply, hv, Module.Basis.repr_sum_self]
@@ -288,6 +343,7 @@ theorem exists_coords {k : Type} [Field k] [CharZero k] {X : Scheme.{0}} [IsLoca
       funext j
       rw [Function.comp_apply, Fintype.linearCombination_apply, ← hz₀ j]
       have e1 := congrArg (KaehlerDifferential.map k k Γ(X, U) (X.presheaf.stalk y)) (ha j)
+
       rw [map_sum] at e1
       change KaehlerDifferential.map k k Γ(X, U) (X.presheaf.stalk y)
         (KaehlerDifferential.D k Γ(X, U) (z₀ j)) = _ at e1

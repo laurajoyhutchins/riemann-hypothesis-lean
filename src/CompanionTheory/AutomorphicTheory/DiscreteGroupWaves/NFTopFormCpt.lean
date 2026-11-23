@@ -1,9 +1,64 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutFpmDecay
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.LimitOfModuleForms
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.StepFormCptAllOfStepFormAll
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.RadialExhaustion
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.HeadGermSmoothExtension
-import CompanionTheory.AutomorphicTheory.DiscreteGroupWaves.NFTopCpt
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutLimENF
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.GramLocSetCApp
+public import CompanionTheory.AutomorphicTheory.DiscreteGroupWaves.IntegralEqOfSqrtCauchy
+public import CompanionTheory.AutomorphicTheory.DiscreteGroupWaves.NFTopCpt
+import CompanionTheory.AutomorphicTheory.DiscreteGroupWaves.NFTopSq
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CccoefMono
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutDec
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutFpmDecay
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.HeadGermSmoothExtension
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.LimitOfModuleForms
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.PositiveDensityModerateGrowth
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.RadialExhaustion
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.TopFirstOfParts
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 namespace CompanionTheory.NFCpt
 
@@ -56,7 +111,7 @@ theorem residue_zero_bound : ∃ Cs : ℝ, 0 ≤ Cs ∧ ∀ (Wp Wq : Type) [Norm
   have e : p.RR (D.cutF p.T.base χ h ε) 0 w [] [] = D.formLev p.T (M.sgn P p.l0) ⟨0, by omega⟩ w
       (PBE.xs p.T χ ε 0 (Nat.zero_le _) w [] hc h) (PBE.xs p.T χ ε 0 (Nat.zero_le _) w [] hc h) := by
     unfold KB.Pl.RR D.RRplace
-    rw [dif_pos ⟨hloc, hloc⟩, dif_pos (Nat.zero_le _)]
+    rw [dite_eq_left ⟨hloc, hloc⟩, dite_eq_left (Nat.zero_le _)]
     rfl
   rw [e]
   exact hb.trans (le_of_eq (by ring))

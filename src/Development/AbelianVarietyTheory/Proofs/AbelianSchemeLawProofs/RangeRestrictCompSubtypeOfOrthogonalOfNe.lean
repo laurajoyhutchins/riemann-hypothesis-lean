@@ -1,5 +1,64 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.CubeTotalComplexAcyclicOfSlicesInductionOnCard
+module
+
+public import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.CubeTotalComplexAcyclicOfSlicesInductionOnCard
+public import Mathlib.LinearAlgebra.Dimension.Finrank
+import Mathlib.Algebra.Homology.ShortComplex.ModuleCat
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.LinearAlgebra.Basis.VectorSpace
+public import Mathlib.LinearAlgebra.Dimension.Constructions
+public import Mathlib.LinearAlgebra.Dimension.Finite
+
+@[expose] public section
 
 open CategoryTheory Limits HomologicalComplex TensorProduct
 
@@ -264,7 +323,7 @@ theorem Cube.exists_contraction (A : Cube.{v} ι K) : ∃ e h : Module.End K (�
   have hDε : D * degSign A = -(degSign A * D) := totalD_mul_degSign A
   have hP : ∀ q, degProj A q * (D * h + h * D) = (D * h + h * D) * degProj A q := fun q =>
     LinearMap.ext fun x => ext_restrictDeg fun p => by
-      simp only [Module.End.mul_apply, LinearMap.add_apply, map_add, restrictDeg_degProj, hD, hr,
+      simp only [Module.End.mul_apply, LinearMap.add_apply, map_add (f := _), restrictDeg_degProj, hD, hr,
         restrictDeg_totalD_succ]
       cases p with
       | zero => split_ifs <;> simp [restrictDeg_totalD_zero]
@@ -365,7 +424,8 @@ theorem exists_retraction_tensor_ranges {f : ℕ → Module.End K V} {g : ℕ �
     simp only [LinearMap.comp_apply, LinearMap.proj_apply, LinearMap.pi_apply]
     rw [TensorProduct.map_map]
     rfl
-  · rw [LinearMap.sum_apply, LinearMap.pi_apply, map_sum, Finset.sum_eq_single x]
+  · set_option synthInstance.maxHeartbeats 100000 in
+      rw [LinearMap.sum_apply, LinearMap.pi_apply, map_sum, Finset.sum_eq_single x]
     · simp only [LinearMap.comp_apply, LinearMap.proj_apply]
       rw [TensorProduct.map_map, rangeRestrict_comp_subtype_of_orthogonal hf,
         rangeRestrict_comp_subtype_of_orthogonal hg, TensorProduct.map_id, LinearMap.id_apply]
@@ -395,20 +455,16 @@ noncomputable def extTensor (A : Cube.{v} ι K) (B : Cube.{v} κ K) : Cube.{v} (
       induction x using TensorProduct.induction_on with
       | zero => simp
       | tmul a b => simp
-      | add x y hx hy => rw [map_add, hx, hy])
+      | add x y hx hy => rw [map_add (f := _), hx, hy])
     (fun _ _ x => by
       induction x using TensorProduct.induction_on with
       | zero => simp
       | tmul a b => simp
-      | add x y hx hy => rw [map_add, map_add, hx, hy, map_add])
+      | add x y hx hy => rw [map_add (f := _), map_add (f := _), hx, hy, map_add (f := _)])
 
 theorem extTensor_obj (A : Cube.{v} ι K) (B : Cube.{v} κ K) (w : Finset (ι ⊕ₗ κ)) :
     (extTensor A B).obj w =
       ModuleCat.of K (A.obj (part (inlEmb ι κ) w) ⊗[K] B.obj (part (inrEmb ι κ) w)) := rfl
-
-theorem res_extTensor (A : Cube.{v} ι K) (B : Cube.{v} κ K) {w w' : Finset (ι ⊕ₗ κ)}
-    (h : w ⊆ w') : res (extTensor A B) h =
-      TensorProduct.map (res A (monotone_part _ h)) (res B (monotone_part _ h)) := rfl
 
 theorem sum_parts {M : Type*} [AddCommMonoid M] (w : Finset (ι ⊕ₗ κ)) (F : ι ⊕ₗ κ → M) :
     ∑ j ∈ w, F j = ∑ i ∈ part (inlEmb ι κ) w, F (inlEmb ι κ i) +
@@ -441,8 +497,8 @@ theorem cubeSign_inrEmb (w : Finset (ι ⊕ₗ κ)) (k : κ) :
     ext; rw [mem_part, Finset.mem_filter]; simp
   rw [cubeSign, card_parts, h1, h2, cubeSign, pow_add]
 
-variable (ι κ) in
 
+variable (ι κ) in
 noncomputable def partsEquiv : Finset (ι ⊕ₗ κ) ≃ Σ _ : Finset ι, Finset κ where
   toFun w := ⟨part (inlEmb ι κ) w, part (inrEmb ι κ) w⟩
   invFun x := sumVertex x.1 x.2
@@ -470,10 +526,10 @@ theorem totalD_totalTensorEquiv (z : (∀ s, A.obj s) ⊗[K] (∀ t, B.obj t)) :
         Module.End K _) z) := by
   induction z using TensorProduct.induction_on with
   | zero => simp
-  | add x y hx hy => simp only [map_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
   | tmul x y =>
     funext w
-    rw [LinearMap.add_apply, map_add, Pi.add_apply, TensorProduct.map_tmul, TensorProduct.map_tmul,
+    rw [LinearMap.add_apply, map_add (f := _), Pi.add_apply, TensorProduct.map_tmul, TensorProduct.map_tmul,
       totalTensorEquiv_tmul, totalTensorEquiv_tmul, totalD_apply, totalD_apply, totalD_apply,
       sum_parts, sum_tmul, tmul_sum]
     refine congrArg₂ (· + ·) (Finset.sum_congr rfl fun i _ => ?_)
@@ -508,11 +564,12 @@ theorem degProj_totalTensorEquiv (n : ℕ) (z : (∀ s, A.obj s) ⊗[K] (∀ t, 
         Module.End K _) z) := by
   induction z using TensorProduct.induction_on with
   | zero => simp
-  | add x y hx hy => simp only [map_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
   | tmul x y =>
     funext w
+
     rw [LinearMap.sum_apply, map_sum, Finset.sum_apply, degProj_apply,
-      card_parts]
+    card_parts]
     have h : ∀ p : ℕ × ℕ, totalTensorEquiv A B
         (TensorProduct.map (degProj A p.1) (degProj B p.2) (x ⊗ₜ y)) w =
         if ((part (inlEmb ι κ) w).card, (part (inrEmb ι κ) w).card) = p then
@@ -536,7 +593,7 @@ variable {A B}
 
 noncomputable def extTensorMap {A' : Cube.{v} ι K} {B' : Cube.{v} κ K} (φ : A ⟶ A') (ψ : B ⟶ B') :
     extTensor A B ⟶ extTensor A' B' :=
-  homMk (A := extTensor A B) (B := extTensor A' B')
+  homMk (ι ⊕ₗ κ) K (A := extTensor A B) (B := extTensor A' B')
     (fun w => TensorProduct.map (φ.app (part (inlEmb ι κ) w)).hom (ψ.app (part (inrEmb ι κ) w)).hom)
     fun {w w'} h x => by
       have : TensorProduct.map (φ.app (part (inlEmb ι κ) w')).hom
@@ -601,7 +658,7 @@ theorem nonempty_trunc₂_iso_extTensor (C : Cube.{v} (ι ⊕ₗ κ) K)
         ((res_res C _ _ _).trans (res_res C _ _ _).symm)
     exact LinearMap.congr_fun this x
   let φ : supp (extTensor A B) _ hP ⟶ C :=
-    homMk (fun w => if hw : _ then ν w hw ∘ₗ (suppEquiv _ hP hw).toLinearMap else 0)
+    homMk (ι ⊕ₗ κ) K (fun w => if hw : _ then ν w hw ∘ₗ (suppEquiv _ hP hw).toLinearMap else 0)
       fun {w w'} h x => by
         by_cases hw : w ∈ partsIn (inlEmb ι κ) (inrEmb ι κ) {s | s.Nonempty} {t | t.Nonempty}
         · have hw' := isUpperSet_partsIn_nonempty _ _ h hw

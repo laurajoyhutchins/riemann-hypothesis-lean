@@ -1,13 +1,80 @@
-import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.SliceTensors.AscSeedOfLocSub
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.TraceFormula.GL1SpectralBounds.CuspOrTwoAlt
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.TraceFormula.GL1SpectralBounds.CuspOrTwoAlt
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ConstantTermUnipotentIntegralVariant
+public import Development.WeilBound.CoreStatements.PublishedTheorems.JacquetShalikaRigidity.JacquetShalikaRigidity
+public import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.ExponentialNegativity.CommonEigenvectors.KillPoly
+public import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.ExponentialNegativity.DiagonalInfinityValues.InfGLValDiag
+public import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.ExponentialNegativity.NormalisedExistence.ExistsNormed
+public import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.ExponentialNegativity.SqIntCritHolds
+public import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.ExponentialNegativity.TopGap
+public import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.ExponentialNegativity.TopNeg
+public import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.SliceTensors.AscSeedOfLocSub
+import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.SliceTensors.ContinuousAT
+import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.SliceTensors.InfInd2Holds
+import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.SliceTensors.IsOpenStabTw
+import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.SliceTensors.PAscAll
+import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.SliceTensors.PChord
+import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.SliceTensors.PExpFin
+import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.SliceTensors.PExpTw
+import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.SliceTensors.PIndMap
+import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.SliceTensors.PInfAsc
+import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.SliceTensors.PSatAsc
+import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.SliceTensors.PSatHerm
+import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.SliceTensors.PSlice
+import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.SliceTensors.PSliceTens
+import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.SliceTensors.PStages
+import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.SliceTensors.PStringStep
+import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.SliceTensors.PrHolds
+import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.SliceTensors.ProjOf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.FixedVectorVanishing.FixedEqZeroOfMemISup
+
+@[expose] public section
 
 open NumberField IsDedekindDomain MeasureTheory Polynomial Formalism.L2.Host
 open GlobalTheory.CuspRep GlobalTheory.UnitaryBC GlobalTheory.SmGL GlobalTheory.DiscSpec GlobalTheory.CompanionTheory.CTFin
 open PositivityTheory.Rg.Rs PositivityTheory.Rg.BcB PositivityTheory.Rg.BcB.F UpperTheory.V.Z.Tf.GOne
 
-open PositivityTheory.Rg.Rs.PExpFin in
 
-private theorem cusp_or_exp {E : Type} [Field E] [NumberField E] [IsTotallyComplex E] {N : ℕ}
+open PositivityTheory.Rg.Rs.PExpFin in
+private theorem cusp_or_exp {E : Type} [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] {N : ℕ}
     (V : Submodule ℂ (Sm E N)) (hV : IsDiscrete V) :
     (∃ P : CuspSub E N, P.V = V) ∨ ∃ r, 0 < r ∧ r < N ∧ (ExpV r V).Nonempty := by
   obtain ⟨-, -, -, hDct⟩ := dict_holds E N
@@ -44,14 +111,14 @@ private theorem cusp_or_exp {E : Type} [Field E] [NumberField E] [IsTotallyCompl
       simpa [PositivityTheory.Affgl.CT.ct] using this⟩
     exact ⟨⟨V, hcusp, hV.stable, hV.ne_bot, hV.irred⟩, rfl⟩
 
-private theorem pos_of_ascEmb {E : Type} [Field E] [NumberField E] [IsTotallyComplex E] {r a d : ℕ}
+private theorem pos_of_ascEmb {E : Type} [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] {r a d : ℕ}
     {V : Submodule ℂ (Sm E r)} {π : CuspSub E a} (hr : 0 < r) (h : AscEmb V π d) : 0 < a ∧ 0 < d := by
   obtain ⟨hs, -⟩ := h
   simp only [Finset.sum_const, Finset.card_univ, Fintype.card_fin, smul_eq_mul] at hs
   subst hs
   exact ⟨Nat.pos_of_mul_pos_left hr, Nat.pos_of_mul_pos_right hr⟩
 
-private theorem two_of_exp {E : Type} [Field E] [NumberField E] [IsTotallyComplex E] {N : ℕ}
+private theorem two_of_exp {E : Type} [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] {N : ℕ}
     (V : Submodule ℂ (Sm E N)) (hV : IsDiscrete V) (τ : E →+* ℂ) (hτ : RegInt V τ)
     (hne : ∃ r, 0 < r ∧ r < N ∧ (ExpV r V).Nonempty) :
     ∃ (a d : ℕ) (P : CuspSub E a), 1 ≤ a ∧ 2 ≤ d ∧ P.IsUnitary ∧ IsNormalised P ∧ AscEmb V P d := by

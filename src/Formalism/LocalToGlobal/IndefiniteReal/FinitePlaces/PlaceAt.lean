@@ -1,7 +1,53 @@
-import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.PlaceSum
-import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.FourUniq
-import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.HeisSt
-import Formalism.LocalToGlobal.IndefiniteReal.LevelTypeEquivalence.IpTheta
+module
+
+public import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.PlaceS
+public import Formalism.LocalToGlobal.BesselHermitianTheta.LemmasWeil
+public import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.FourUniq
+public import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.HeisSt
+public import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.PlaceInst
+public import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.PlaceSum
+public import Formalism.LocalToGlobal.IndefiniteReal.LevelTypeEquivalence.IpTheta
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.CharLem
+public import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.FourModel
+public import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.PlaceHeis
+
+@[expose] public section
 
 noncomputable section
 
@@ -45,8 +91,8 @@ theorem heisO_comm_of {u a : WO S T} (h : symplO S T u a = 0) (f : WO S T → �
   have := congrArg (fun Tm : Module.End ℂ (WO S T → ℂ) => Tm f) (heisL_comm ψ S T u a)
   simpa [Module.End.mul_apply, heisL_apply, h] using this
 
-open Classical in
 
+open Classical in
 theorem placeModel_core (hψ : IsStdChar D ψ (-1)) (e₁ : AE D) (he : e₁ * cA D e₁ = 0) (Λ : AddSubgroup (WO S T))
     (f₀ : WO S T → ℂ) (hf₀ : IsThetaFunO ψ S T f₀)
     (hLL : ∀ x ∈ Λ, IsHalf e₁ x → ∀ y ∈ Λ, IsHalf (cA D e₁) y → ψ (symplO S T x y) = 1)

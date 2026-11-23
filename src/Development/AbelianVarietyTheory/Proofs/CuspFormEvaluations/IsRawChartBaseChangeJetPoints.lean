@@ -1,10 +1,49 @@
-import Mathlib
-import Formalism.LocalToGlobal.ProjectiveLattices.ThShort
-import Formalism.SharpRestriction.Divisibility.GeneratorPowers.CIndBC
-import Formalism.SharpRestriction.Divisibility.GeneratorPowers.ThExprUniqOfChartIndep2
-import Formalism.SharpRestriction.Divisibility.GeneratorPowers.GermCut
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.SecBaseChangeAnySt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.JetSubstPCompJetBC
+module
+
+public import Formalism.SharpRestriction.Divisibility.GeneratorPowers.CIndBC
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.JetSubstPCompJetBC
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Out ReciprocityTheory.ChartRestriction.G.Geo.Tor Formalism.L2.Pj Formalism.MainNotions.ModuliIntegralCharts.H1
@@ -34,6 +73,7 @@ theorem psTrunc_map {S S' : Type} [CommRing S] [CommRing S'] (ψ : S →+* S') {
     (m : ℕ) (f : MvPowerSeries κ S) :
     psTrunc m (MvPowerSeries.map ψ f) = MvPolynomial.map ψ (psTrunc m f) := by
   unfold psTrunc
+
   rw [map_sum]
   refine Finset.sum_congr rfl fun e _ => ?_
   rw [MvPolynomial.map_monomial, MvPowerSeries.coeff_map]
@@ -81,8 +121,7 @@ variable {S S' : Type} [CommRing S] [CommRing S'] (ψ : S →+* S') (x0 : Sp S �
 def baseMap : overAt (spMap ψ ≫ x0) S' ⟶ overAt x0 S :=
   Over.homMk (spMap ψ) (by
     show spMap ψ ≫ spMap (algebraMap S S) ≫ x0 = spMap (algebraMap S' S') ≫ spMap ψ ≫ x0
-    rw [← Category.assoc, ← Category.assoc, spMap_spMap, spMap_spMap]
-    first | done | rfl)
+    rw [← Category.assoc, ← Category.assoc, spMap_spMap, spMap_spMap])
 
 def dualPtMap : overAt (spMap ψ ≫ x0) (DualNumber S') ⟶ overAt x0 (DualNumber S) :=
   Over.homMk (spMap (dualMap ψ)) (by
@@ -122,7 +161,22 @@ theorem sq_tan (d : ℕ) (ℓ : Fin 1 × Fin d) :
   apply Over.OverMorphism.ext
   show spMap _ ≫ spMap (jetBC ψ _ (0 + 1)) = spMap (dualMap ψ) ≫ spMap _
   rw [spMap_spMap, spMap_spMap]
-  exact congrArg spMap (jetTan_comp_jetBC ψ ℓ 0)
+  have evalTan (T : Type) [CommRing T] (P : MvPolynomial (Fin 1 × Fin d) T) :
+      (jetTan ℓ : Jet T (Fin 1 × Fin d) (0 + 1) →ₐ[T] DualNumber T)
+          (Ideal.Quotient.mk (orig T (Fin 1 × Fin d) ^ (0 + 1 + 1)) P) =
+        MvPolynomial.aeval (fun i => if i = ℓ then (DualNumber.eps : DualNumber T) else 0) P := rfl
+  have hcomp :
+      (jetTan ℓ : Jet S' (Fin 1 × Fin d) (0 + 1) →ₐ[S'] DualNumber S').toRingHom.comp
+          (jetBC ψ (Fin 1 × Fin d) (0 + 1)) =
+        (dualMap ψ).comp (jetTan ℓ : Jet S (Fin 1 × Fin d) (0 + 1) →ₐ[S] DualNumber S).toRingHom := by
+    refine Ideal.Quotient.ringHom_ext (MvPolynomial.ringHom_ext (fun r => ?_) (fun i => ?_))
+    · simp only [RingHom.comp_apply, AlgHom.toRingHom_eq_coe, RingHom.coe_coe, jetBC_mk, evalTan,
+        MvPolynomial.aeval_C, MvPolynomial.map_C]
+      ext <;> simp [dualMap, TrivSqZeroExt.algebraMap_eq_inl]
+    · simp only [RingHom.comp_apply, AlgHom.toRingHom_eq_coe, RingHom.coe_coe, jetBC_mk, evalTan,
+        MvPolynomial.aeval_X, MvPolynomial.map_X]
+      split_ifs <;> ext <;> simp [dualMap]
+  exact congrArg spMap hcomp
 
 theorem jetMap_congr_fun {R κ κ' : Type} [CommRing R] {m : ℕ} {f g : κ → MvPolynomial κ' R} (e : f = g)
     (hf : ∀ i, f i ∈ orig R κ') (hg : ∀ i, g i ∈ orig R κ') : jetMap (m := m) f hf = jetMap (m := m) g hg := by

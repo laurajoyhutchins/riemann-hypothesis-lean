@@ -1,7 +1,56 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StMinimalPrimePlace
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.CurveNormalisationFiniteLemmas
-import GroundTheory.HeightsAndTheta.Heights.ChowForms.PChartLocalOrder
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StMinimalPrimePlace
+public import GroundTheory.HeightsAndTheta.Heights.ChowForms.PChartLocalOrder
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.CurveNormalisationFiniteLemmas
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -106,7 +155,7 @@ theorem exists_fracMap_unit [IsNoetherianRing A] [IsReduced A] [IsDomain B] (π 
   · have h := congrArg (fracMap π hker)
       (IsLocalization.mk'_spec (FractionRing A) s (⟨s + t, hw⟩ : nonZeroDivisors A))
     rw [map_mul, IsLocalization.map_eq, IsLocalization.map_eq] at h
-    simp only [map_add, hπt, add_zero] at h
+    simp only [map_add (f := _), hπt, add_zero] at h
     have hne : algebraMap B (FractionRing B) (π s) ≠ 0 := fun h0 ↦ hπs (hinj (by rw [h0, map_zero]))
     exact mul_right_cancel₀ hne (h.trans (one_mul _).symm)
   · intro z hz
@@ -127,7 +176,7 @@ theorem exists_fracMap_unit [IsNoetherianRing A] [IsReduced A] [IsDomain B] (π 
     refine ⟨IsLocalization.mk' (FractionRing A) (a * s) (⟨c * s + t, hst c hcp⟩ : nonZeroDivisors A), ?_⟩
     rw [IsLocalization.map_mk', IsLocalization.mk'_eq_iff_eq]
     congr 1
-    simp only [map_mul, map_add, hπt, add_zero, hc]
+    simp only [map_mul, map_add (f := _), hπt, add_zero, hc]
     ring
 
 theorem isIntegral_mul_of_fracMap [IsDomain B] (π : A →+* B) (hπ : Function.Surjective π)
@@ -222,8 +271,8 @@ theorem exists_maximal_ord_eq [IsNoetherianRing A] [IsReduced A] [IsDomain B] (�
 
 end MinimalPrimePlace
 
-open MinimalPrimePlace in
 
+open MinimalPrimePlace in
 theorem MinimalPrimePlace.proof : MinimalPrimePlace.Statement := by
   intro n I J q hI hJ hJq P'
   have hle : I.map (algebraMap (MvPolynomial (Fin n) ℂ) (Localization.AtPrime (RingHom.ker (eval q)))) ≤

@@ -1,6 +1,50 @@
-import Mathlib
-import GroundTheory.TateCohomology.Induced
-import GroundTheory.TateCohomology.InducedNorm
+module
+
+public import GroundTheory.TateCohomology.Induced
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.Monoidal.Mon
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.CoassocSimps
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.GroupCoh
@@ -37,8 +81,8 @@ theorem toCoind_hom_apply (A : Rep.{u} k G) (a : A) (x : G) :
 theorem toCoind_injective (A : Rep.{u} k G) : Function.Injective (toCoind A).hom := by
   intro a b hab
   have h : ((toCoind A).hom a).1 1 = ((toCoind A).hom b).1 1 := by rw [hab]
-  rwa [toCoind_hom_apply, toCoind_hom_apply, map_one, Module.End.one_apply,
-    Module.End.one_apply] at h
+  rwa [toCoind_hom_apply, toCoind_hom_apply, map_one, one_apply_eq_self,
+    one_apply_eq_self] at h
 
 instance (A : Rep.{u} k G) : Mono (toCoind A) :=
   (Rep.mono_iff_injective _).2 (toCoind_injective A)
@@ -49,7 +93,7 @@ noncomputable def coindSES : Rep.{u} k G ⥤ ShortComplex (Rep.{u} k G) where
     { τ₁ := f
       τ₂ := (resFunctor (⊥ : Subgroup G).subtype ⋙ coindFunctor k (⊥ : Subgroup G).subtype).map f
       τ₃ := cokernel.map (toCoind A) (toCoind B) f _
-        ((resCoindAdjunction k (⊥ : Subgroup G).subtype).unit.naturality f).symm
+        ((resCoindAdjunction k (⊥ : Subgroup G).subtype).unit.naturality f)
       comm₁₂ := (resCoindAdjunction k (⊥ : Subgroup G).subtype).unit.naturality f
       comm₂₃ := by simp }
   map_id A := by
@@ -72,14 +116,11 @@ noncomputable def coindSES : Rep.{u} k G ⥤ ShortComplex (Rep.{u} k G) where
 @[simp] theorem coindSES_obj_X₂ (A : Rep.{u} k G) :
     (coindSES.obj A).X₂ = coind (⊥ : Subgroup G).subtype (res (⊥ : Subgroup G).subtype A) := rfl
 
-@[simp] theorem coindSES_obj_f (A : Rep.{u} k G) : (coindSES.obj A).f = toCoind A := rfl
-
-@[simp] theorem coindSES_map_τ₁ {A B : Rep.{u} k G} (f : A ⟶ B) : (coindSES.map f).τ₁ = f := rfl
-
-theorem coindSES_shortExact (A : Rep.{u} k G) : (coindSES.obj A).ShortExact where
-  exact := ShortComplex.exact_of_g_is_cokernel _ (cokernelIsCokernel (toCoind A))
-  mono_f := inferInstanceAs (Mono (toCoind A))
-  epi_g := coequalizer.π_epi
+theorem coindSES_shortExact (A : Rep.{u} k G) : (coindSES.obj A).ShortExact := by
+  change (ShortComplex.cokernelSequence (toCoind A)).ShortExact
+  refine ShortComplex.ShortExact.mk' (ShortComplex.cokernelSequence_exact _) ?_ inferInstance
+  change Mono (toCoind A)
+  infer_instance
 
 noncomputable abbrev coindShift (A : Rep.{u} k G) : Rep.{u} k G := (coindSES.obj A).X₃
 
@@ -144,14 +185,11 @@ noncomputable def indSES : Rep.{u} k G ⥤ ShortComplex (Rep.{u} k G) where
 
 @[simp] theorem indSES_obj_X₃ (A : Rep.{u} k G) : (indSES.obj A).X₃ = A := rfl
 
-@[simp] theorem indSES_obj_g (A : Rep.{u} k G) : (indSES.obj A).g = fromInd A := rfl
-
-@[simp] theorem indSES_map_τ₃ {A B : Rep.{u} k G} (f : A ⟶ B) : (indSES.map f).τ₃ = f := rfl
-
-theorem indSES_shortExact (A : Rep.{u} k G) : (indSES.obj A).ShortExact where
-  exact := ShortComplex.exact_of_f_is_kernel _ (kernelIsKernel (fromInd A))
-  mono_f := equalizer.ι_mono
-  epi_g := inferInstanceAs (Epi (fromInd A))
+theorem indSES_shortExact (A : Rep.{u} k G) : (indSES.obj A).ShortExact := by
+  change (ShortComplex.kernelSequence (fromInd A)).ShortExact
+  refine ShortComplex.ShortExact.mk' (ShortComplex.kernelSequence_exact _) inferInstance ?_
+  change Epi (fromInd A)
+  infer_instance
 
 noncomputable abbrev indShift (A : Rep.{u} k G) : Rep.{u} k G := (indSES.obj A).X₁
 
@@ -164,10 +202,6 @@ noncomputable def indShiftIso (A : Rep.{u} k G) (n : ℤ) :
     tateCohomology A n ≅ tateCohomology (indShift A) (n + 1) :=
   @asIso _ _ _ _ (TateCohomology.δ (indSES_shortExact A) n)
     (isIso_δ_of_tateAcyclic (indSES_shortExact A) (tateAcyclic_indSES_X₂ A) n)
-
-theorem isIso_δ_indSES (A : Rep.{u} k G) (n : ℤ) :
-    IsIso (TateCohomology.δ (indSES_shortExact A) n) :=
-  isIso_δ_of_tateAcyclic _ (tateAcyclic_indSES_X₂ A) n
 
 end Ind
 

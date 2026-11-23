@@ -1,8 +1,56 @@
-import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.SliceTensors.TwistedSlicesSquareIntegrable
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IteratedDerivSplitCentre
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisGeometry₂.NotIsTemperedGLDetRepTwo
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SatakeParametersOfTwist
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.T2SpaceAdelicGeneralLinearGroupNumberField
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.SubsingletonRankZero
+public import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.IsNormalisedOfIsDiscrete
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.T2SpaceAdelicGeneralLinearGroupNumberField
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IteratedDerivSplitCentre
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SatakeParametersOfTwist
+public import Development.AbelianVarietyTheory.PublishedTheorems.GaloisGeometry₂.NotIsTemperedGLDetRepTwo
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.NeutralLocalFields.LocalFieldComparison.HCFFromRecipA
+
+@[expose] public section
 
 noncomputable section
 
@@ -11,7 +59,7 @@ open GlobalTheory.CuspRep GlobalTheory.UnitaryBC GlobalTheory.DiscSpec
 
 namespace PositivityTheory.Rg.Rs.StrStepB
 
-variable {E : Type} [Field E] [NumberField E] [IsTotallyComplex E]
+variable {E : Type} [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E]
 
 theorem absC_unrAt (s : ℂ) (w : HeightOneSpectrum (𝓞 E)) : (GlobalTheory.CuspRep.Model.absC E s).UnrAt w := by
   intro x hx
@@ -76,10 +124,10 @@ theorem eq_zero_of_iso_twist {b : ℕ} (hb : 1 ≤ b) {ρ ρ' : CuspSub E b} (h 
   have h1 := hT (.lie (dC b)) φ
   have h2 : ρ.op (.lie (dC b)) φ = 0 := Subtype.ext (lie_dC_eq_zero h φ.2)
   have h3 : ρ'.op (.lie (dC b)) ψ = 0 := Subtype.ext (lie_dC_eq_zero h' ψ.2)
-  rw [h2, map_zero, ← hψ, CuspSub.op_toTwist, h3, opAdd_dC, smul_zero, zero_add] at h1
+  rw [h2, T.map_zero, ← hψ, CuspSub.op_toTwist, h3, opAdd_dC, smul_zero, zero_add] at h1
   have h4 : (c * (2 * b * Fintype.card (InfinitePlace E)) : ℂ) • ψ = 0 :=
-    (ρ'.toTwist _).injective (h1.symm.trans (map_zero _).symm)
-  have hψ0 : ψ ≠ 0 := fun e0 => hφ (T.injective (by rw [← hψ, e0, map_zero, map_zero]))
+    (ρ'.toTwist _).injective (h1.symm.trans (ρ'.toTwist _).map_zero.symm)
+  have hψ0 : ψ ≠ 0 := fun e0 => hφ (T.injective (by rw [← hψ, e0, (ρ'.toTwist _).map_zero, T.map_zero]))
   have hK : (2 * b * Fintype.card (InfinitePlace E) : ℂ) ≠ 0 := by
     have : 0 < Fintype.card (InfinitePlace E) := Fintype.card_pos
     have hb' : (b : ℂ) ≠ 0 := by exact_mod_cast (show b ≠ 0 by omega)

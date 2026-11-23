@@ -1,4 +1,58 @@
-import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.ExistsOrthTuple
+module
+
+public import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.ExistsOrthTuple
+public import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.ExistsPrimitiveNorm
+public import Mathlib.LinearAlgebra.FiniteDimensional.Defs
+public import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.LinearIndependentOfGramDetNeZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -41,14 +95,15 @@ theorem expand_orth [FiniteDimensional K V] {y : Fin (finrank K V) → V}
     rw [Fintype.linearIndependent_iff]
     intro g hg j
     have hj := congrArg (h (y j)) hg
+
     simp only [map_sum, map_smul, smul_eq_mul, map_zero] at hj
     rw [Finset.sum_eq_single j (fun i _ hij => by rw [horth j i (Ne.symm hij), mul_zero])
       (by simp)] at hj
     exact (mul_eq_zero.mp hj).resolve_right (hne j)
   by_cases h0 : finrank K V = 0
-  · haveI : Subsingleton V := Module.finrank_zero_iff.mp h0
+  · have : Subsingleton V := Module.finrank_zero_iff.mp h0
     exact Subsingleton.elim _ _
-  haveI : Nonempty (Fin (finrank K V)) := ⟨⟨0, Nat.pos_of_ne_zero h0⟩⟩
+  have : Nonempty (Fin (finrank K V)) := ⟨⟨0, Nat.pos_of_ne_zero h0⟩⟩
   set b := basisOfLinearIndependentOfCardEqFinrank hli (Fintype.card_fin _) with hb
   have hbi : ∀ i, b i = y i := fun i => by
     rw [hb, coe_basisOfLinearIndependentOfCardEqFinrank]
@@ -59,6 +114,7 @@ theorem expand_orth [FiniteDimensional K V] {y : Fin (finrank K V) → V}
     intro j
     rw [eq_mul_inv_iff_mul_eq₀ (hne j)]
     have hj := congrArg (h (y j)) hv
+
     simp only [map_sum, map_smul, smul_eq_mul] at hj
     rw [Finset.sum_eq_single j (fun i _ hij => by rw [horth j i (Ne.symm hij), mul_zero])
       (by simp)] at hj
@@ -138,8 +194,8 @@ theorem exists_isASD_of_tuple [FiniteDimensional K V] (hS : IsHermSemilocal S) (
       have h1 := hall (fun i => (if i = i₁ then l else 1) • y i) (by
         intro i
         by_cases hi : i = i₁
-        · simp only [hi, if_true]; exact hl
-        · simp only [hi, if_false, one_smul]; exact hyM i) (by
+        · simp only [hi, ite_true]; exact hl
+        · simp only [hi, ite_false, one_smul]; exact hyM i) (by
         intro i j hij
         simp only [map_smulₛₗ, LinearMap.smul_apply, horth i j hij, smul_zero])
       rw [gram_det_smul_orth horth] at h1

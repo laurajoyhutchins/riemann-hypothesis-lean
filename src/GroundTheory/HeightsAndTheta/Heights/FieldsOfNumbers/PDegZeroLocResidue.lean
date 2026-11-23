@@ -1,6 +1,52 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PDegZeroLocQuot
-import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.StatementsDegZeroLocResidue
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.StatementsDegZeroLocResidue
+public import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PDegZeroLocQuot
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.FieldNumbers
@@ -21,15 +67,14 @@ local notation "fr" Q:max h:max =>
   algebraMap (_ ⧸ Q) (FractionRing (_ ⧸ Q)) (Ideal.Quotient.mk Q h)
 
 omit [DecidableEq K] in
-
 theorem fr_ne_zero (Q : Ideal (MRing ι F)) [Q.IsPrime] {h : MRing ι F} (hh : h ∉ Q) :
     fr Q h ≠ 0 := by
   rwa [Ne, IsFractionRing.to_map_eq_zero_iff, Ideal.Quotient.eq_zero_iff_mem]
 
 variable {P W : Ideal (MRing ι F)} [P.IsPrime] [W.IsPrime]
 
-omit [DecidableEq K] in
 
+omit [DecidableEq K] in
 theorem residue_eq (hPW : P ≤ W) {f g f' g' : MRing ι F} (hg : g ∉ W) (hg' : g' ∉ W)
     (h : fr P f / fr P g = fr P f' / fr P g') : fr W f / fr W g = fr W f' / fr W g' := by
   rw [div_eq_div_iff (fr_ne_zero P fun h => hg (hPW h)) (fr_ne_zero P fun h => hg' (hPW h)),
@@ -37,19 +82,19 @@ theorem residue_eq (hPW : P ≤ W) {f g f' g' : MRing ι F} (hg : g ∉ W) (hg' 
   rw [div_eq_div_iff (fr_ne_zero W hg) (fr_ne_zero W hg'), ← map_mul, ← map_mul, ← map_mul,
     ← map_mul, Ideal.Quotient.eq.mpr (hPW (Ideal.Quotient.eq.mp (IsFractionRing.injective _ _ h)))]
 
+
 variable (P W) in
 open Classical in
-
 def res (x : FractionRing (MRing ι F ⧸ P)) : FractionRing (MRing ι F ⧸ W) :=
   if h : ∃ fg : MRing ι F × MRing ι F, fg.2 ∉ W ∧ x = fr P fg.1 / fr P fg.2 then
     fr W h.choose.1 / fr W h.choose.2 else 0
 
-omit [DecidableEq K] in
 
+omit [DecidableEq K] in
 theorem res_eq (hPW : P ≤ W) {x : FractionRing (MRing ι F ⧸ P)} {f g : MRing ι F} (hg : g ∉ W)
     (hx : x = fr P f / fr P g) : res P W x = fr W f / fr W g := by
   have h : ∃ fg : MRing ι F × MRing ι F, fg.2 ∉ W ∧ x = fr P fg.1 / fr P fg.2 := ⟨(f, g), hg, hx⟩
-  rw [res, dif_pos h]
+  rw [res, dite_eq_left h]
   exact residue_eq hPW h.choose_spec.1 hg (h.choose_spec.2.symm.trans hx)
 
 theorem exists_rep (x : degZeroLoc P {W}) : ∃ (b : K → ℕ) (f g : MRing ι F), IsMultiHomog f b ∧
@@ -79,9 +124,9 @@ def ρ (hPW : P ≤ W) : degZeroLoc P {W} →+* FractionRing (MRing ι F ⧸ W) 
     have hgg : g * g' ∉ W := fun h => (Ideal.IsPrime.mem_or_mem ‹_› h).elim hg hg'
     rw [res_eq hPW hg hx, res_eq hPW hg' hy, res_eq (f := f * g' + g * f') hPW hgg
       (by rw [Subalgebra.coe_add, hx, hy, div_add_div _ _ (fr_ne_zero P fun h => hg (hPW h))
-        (fr_ne_zero P fun h => hg' (hPW h))]; simp only [map_add, map_mul]),
+        (fr_ne_zero P fun h => hg' (hPW h))]; simp only [map_add (f := _), map_mul]),
       div_add_div _ _ (fr_ne_zero W hg) (fr_ne_zero W hg')]
-    simp only [map_add, map_mul]
+    simp only [map_add (f := _), map_mul]
 
 theorem ρ_apply (hPW : P ≤ W) (x : degZeroLoc P {W}) : ρ hPW x = res P W x := rfl
 

@@ -1,6 +1,47 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Foundations.HermitianSpaceBaseLatticeEqFrameLattice
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.CompletedLatticeStabilizerCompactOpen
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.HermitianSpaceBaseLatticeEqFrameLattice
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.CompletedLatticeStabilizerCompactOpen
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 namespace GlobalTheory.AdelicU
 
@@ -36,13 +77,13 @@ theorem image_ofFin_levelOffFin (S : Finset (HeightOneSpectrum (𝓞 F))) :
     obtain ⟨y, rfl⟩ := h
     exact ⟨y, hg, rfl⟩
 
-variable [Submodule.IsLattice E L]
+variable [Submodule.IsFullLattice E L]
 
 theorem isOpen_isCompact_levelOffFin_empty :
     IsOpen (levelOffFin σ J L ∅ : Set (GFin σ J)) ∧ IsCompact (levelOffFin σ J L ∅ : Set (GFin σ J)) := by
-  have hfg : L.FG := Submodule.IsLattice.fg (A := E)
+  have hfg : L.FG := Submodule.IsLattice.fg (A := E) L
   obtain ⟨K, hK, ho, hc⟩ := GlobalTheory.Mem.Vol.StabGroup.exists_compact_open_stab F E σ n J L hfg
-    Submodule.IsLattice.span_eq_top
+    Submodule.IsFullLattice.span_eq_top
   have e : levelOffFin σ J L ∅ = K := by
     ext g
     have h := mem_levelOpen_iff_latHat σ J hfg (ofFin σ J g)
@@ -93,13 +134,5 @@ theorem isCompact_levelOff (S : Finset (HeightOneSpectrum (𝓞 F))) :
   exact (isCompact_levelOffFin σ J L S).image (continuous_ofFin σ J)
 
 theorem isCompact_levelFin : IsCompact (levelFin σ J L : Set (GAd σ J)) := isCompact_levelOff σ J L ∅
-
-theorem levels_open_compact :
-    (∀ v, IsOpen (stabLoc σ J L v : Set (GLoc σ J v)) ∧ IsCompact (stabLoc σ J L v : Set (GLoc σ J v))) ∧
-    IsOpen (levelOpen σ J L : Set (GAd σ J)) ∧
-    (IsOpen (levelOffFin σ J L ∅ : Set (GFin σ J)) ∧ IsCompact (levelOffFin σ J L ∅ : Set (GFin σ J))) ∧
-    ∀ S, IsCompact (levelOff σ J L S : Set (GAd σ J)) :=
-  ⟨fun v => ⟨isOpen_stabLoc σ J L v, isCompact_stabLoc σ J L v⟩, isOpen_levelOpen σ J L,
-    isOpen_isCompact_levelOffFin_empty σ J L, isCompact_levelOff σ J L⟩
 
 end GlobalTheory.AdelicU

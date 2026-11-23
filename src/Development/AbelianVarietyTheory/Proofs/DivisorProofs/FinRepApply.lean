@@ -1,8 +1,46 @@
-import Mathlib
-import Formalism.LocalToGlobal.IndefiniteReal.ConcretePkgSpec
-import Formalism.LocalToGlobal.IndefiniteReal.CutTuples2
-import Formalism.LocalToGlobal.Divisibility.LiftLatLemmas
-import Development.AbelianVarietyTheory.Definitions.Foundations.SmoothPartStable
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.SmoothPartStable
+public import Formalism.LocalToGlobal.IndefiniteReal.LinksDefs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -64,8 +102,8 @@ def cuspMult (θ : D.what₂.Tau → (Ainf D.host.F ⊗[D.host.F] D.host.E →+*
     (M : DSModel V S) {W : Type} [AddCommGroup W] [Module ℂ W] (σ : Representation ℂ (GfC V) W) : Cardinal :=
   Module.rank ℂ (homInto σ (finRep M) (allMaps θ M))
 
-variable (D) in
 
+variable (D) in
 def CuspDecomp : Prop :=
   ∀ (θ : D.what₂.Tau → (Ainf D.host.F ⊗[D.host.F] D.host.E →+* ℂ)), IsInfFam θ →
     ∀ (V : HSp D) (S : D.what₂.Tau → SPar) (M : DSModel V S), IsDecomp (finRep M) (allMaps θ M)
@@ -79,12 +117,6 @@ structure IsFinIso (V V' : HSp D) (β : GL (Fin V.rank) (EAf D)) (β' : GL (Fin 
   frame : ∃ (h : V.rank = V'.rank) (u : GL (Fin V'.rank) (Formalism.L2.Herm.intAf D.host.F D.host.E)),
     HMul.hMul j β.val = (β' * intGL D.host.F D.host.E V'.rank u).val.submatrix id (Fin.cast h) ∧
       ∀ PP ∈ Pg, Formalism.UG.bc (resS D.host.F PP) u = 1
-
-theorem IsFinIso.refl (V : HSp D) (β : GL (Fin V.rank) (EAf D)) (Pg : Finset (Pl D.host.E)) :
-    IsFinIso V V β β Pg 1 (ContinuousMulEquiv.refl _) where
-  isom := by rw [Formalism.UG.cT_one, Matrix.one_mul, Matrix.mul_one]
-  conj g := by rw [Matrix.one_mul, Matrix.mul_one]; rfl
-  frame := ⟨rfl, 1, by rw [map_one, mul_one, Matrix.one_mul]; rfl, fun _ _ => map_one _⟩
 
 abbrev princDat (n r t : ℕ) (hr : r ≤ n) (Pg : Finset (Pl D.host.E)) (χ : ℕ → ∀ PP : Pl D.host.E, (kP PP)ˣ →* ℂˣ) :
     LevDat D.host.E ℂ n :=

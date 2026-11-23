@@ -1,25 +1,64 @@
-import Mathlib
-import Development.ResolutionOfSingularities.Foundations.Blowup.BlowupProperties
-import Development.ResolutionOfSingularities.EmbeddedResolution.IteratedBlowups.ClopenRestriction
-import Development.ResolutionOfSingularities.EmbeddedResolution.IteratedBlowups.BlowupSequenceRelations
-import Development.ResolutionOfSingularities.EmbeddedResolution.StrictTransformCharts.CoordinateBlowupChart
-import Development.ResolutionOfSingularities.EmbeddedResolution.StrictTransformCharts.StrictTransformSubscheme
-import Development.ResolutionOfSingularities.EmbeddedResolution.EtaleCoordinates.ChartRing
-import Development.ResolutionOfSingularities.EmbeddedResolution.EtaleCoordinates.CoordinateSubscheme
-import Development.ResolutionOfSingularities.EmbeddedResolution.EtaleCoordinates.EtaleCoordinates
-import Development.ResolutionOfSingularities.EmbeddedResolution.EtaleCoordinates.JacobianChartChange
-import Development.ResolutionOfSingularities.EmbeddedResolution.EtaleCoordinates.SmoothHypersurfaceLocalCoordinates
-import Development.ResolutionOfSingularities.EmbeddedResolution.EtaleCoordinates.DerivationLiftAndDeterminant
-import Development.ResolutionOfSingularities.EmbeddedResolution.EtaleCoordinates.StrictNormalCrossings
-import Development.ResolutionOfSingularities.EmbeddedResolution.EtaleCoordinates.StrictNormalCrossingsChartNormalization
-import Development.ResolutionOfSingularities.EmbeddedResolution.EtaleCoordinates.StrictNormalCrossingsAddHypersurface
+module
+
+public import Development.ResolutionOfSingularities.EmbeddedResolution.EtaleCoordinates.SmoothHypersurfaceLocalCoordinates
+public import Development.ResolutionOfSingularities.EmbeddedResolution.DerivativeIdeal.DerivativeIdealSheafSmoothPullback
+public import Development.ResolutionOfSingularities.EmbeddedResolution.EtaleCoordinates.CoordinateDivisorSmoothness
+public import Development.ResolutionOfSingularities.EmbeddedResolution.EtaleCoordinates.DerivationLiftAndDeterminant
+public import Development.ResolutionOfSingularities.EmbeddedResolution.EtaleCoordinates.JacobianChartChange
 import Development.ResolutionOfSingularities.EmbeddedResolution.EtaleCoordinates.SmoothCenterChart
-import Development.ResolutionOfSingularities.EmbeddedResolution.DerivativeIdeal.DerivativeIdealSheaf
-import Development.ResolutionOfSingularities.EmbeddedResolution.DerivativeIdeal.DerivativeIdealSheafSmoothPullback
+public import Development.ResolutionOfSingularities.EmbeddedResolution.EtaleCoordinates.StrictNormalCrossingsChartNormalization
+public import Development.ResolutionOfSingularities.EmbeddedResolution.StrictTransformCharts.StrictTransformSubscheme
 import Development.ResolutionOfSingularities.Foundations.Schemes.IdealSheafData
-import Development.ResolutionOfSingularities.Foundations.Schemes.SchemeMorphismProperties
-import Development.ResolutionOfSingularities.Foundations.BlowupUniversalProperty
-import Development.ResolutionOfSingularities.EmbeddedResolution.ResolutionOfSingularities
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 universe u
 
 open CategoryTheory Opposite AlgebraicGeometry TopologicalSpace
@@ -600,8 +639,8 @@ theorem hasLocalCoordsOnSmoothHypersurface_of_comap (p : P ⟶ Spec (CommRingCat
         = Ideal.span {(c.restrict hU'U).coord j} := by
       have h := (c.restrict hU'U).ideal_eq_span_coord hU'aff _ {j} (hNsome i hi j hij)
       simpa using h
-    have hmapeq : Ideal.span {(H.subschemeι.appLE U' (H.subschemeι ⁻¹ᵁ U') le_rfl).hom
-          ((c.restrict hU'U).coord j)}
+    have hmapeq : Ideal.span {((H.subschemeι.appLE U' (H.subschemeι ⁻¹ᵁ U') le_rfl).hom
+          ((c.restrict hU'U).coord j))}
         = Ideal.span {((c'.restrict hV₁V).restrict hW'V₁).coord b} := by
       rw [← hspanW, hcomapideal, hspanU, Ideal.map_span, Set.image_singleton]
     refine ⟨exists_unit_mul_coord_of_span_eq (H.subschemeι ≫ p) hW'aff
@@ -639,12 +678,12 @@ theorem hasLocalCoordsOnSmoothHypersurface_of_comap (p : P ⟶ Spec (CommRingCat
       ∀ b : Fin m, w (ULift.up ((ρ b : Fin n))) = wb b := by
     refine ⟨fun t => if h : t.down = j₀ then (c.restrict hU'U).coord j₀
       else wb (ρ.symm ⟨t.down, h⟩), ?_, ?_⟩
-    · exact dif_pos rfl
+    · exact dite_eq_left rfl
     · intro b
       have hne : ((ρ b : Fin n)) ≠ j₀ := (ρ b).2
       show (if h : ((ρ b : Fin n)) = j₀ then (c.restrict hU'U).coord j₀
         else wb (ρ.symm ⟨((ρ b : Fin n)), h⟩)) = wb b
-      rw [dif_neg hne]
+      rw [dite_eq_right hne]
       congr 1
       have hsub : (⟨((ρ b : Fin n)), hne⟩ : {j : Fin n // j ≠ j₀}) = ρ b := rfl
       rw [hsub, Equiv.symm_apply_apply]
@@ -747,11 +786,11 @@ theorem hasLocalCoordsOnSmoothHypersurface_of_comap (p : P ⟶ Spec (CommRingCat
       else ULift.up.{u} ((ρ (t.pred h) : Fin n)), ?_, ?_⟩
     · show (if h : (0 : Fin (m + 1)) = 0 then ULift.up.{u} j₀
         else ULift.up.{u} ((ρ ((0 : Fin (m + 1)).pred h) : Fin n))) = ULift.up j₀
-      exact dif_pos rfl
+      exact dite_eq_left rfl
     · intro b
       show (if h : b.succ = 0 then ULift.up.{u} j₀
         else ULift.up.{u} ((ρ (b.succ.pred h) : Fin n))) = ULift.up ((ρ b : Fin n))
-      rw [dif_neg (Fin.succ_ne_zero b), Fin.pred_succ]
+      rw [dite_eq_right (Fin.succ_ne_zero b), Fin.pred_succ]
   have hbij : Function.Bijective F := by
     refine (Fintype.bijective_iff_injective_and_card F).mpr ⟨?_, ?_⟩
     · intro t₁ t₂ ht

@@ -1,5 +1,67 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.DixmierMalliavinHaarCoord
+module
+
+public import GroundTheory.AutomorphicForms.DixmierMalliavinBasic
+public import Mathlib.MeasureTheory.Integral.Bochner.Basic
+public import Mathlib.MeasureTheory.Measure.Haar.OfBasis
+public import GroundTheory.AutomorphicForms.DixmierMalliavinHaarCoord
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Calculus.BumpFunction.FiniteDimension
+public import Mathlib.Analysis.Calculus.BumpFunction.Normed
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Algebra.Group.Units
+import Mathlib.Topology.Sheaves.Init
+import Mathlib.Topology.UniformSpace.Uniformizable
+public import Mathlib.Analysis.Calculus.BumpFunction.Basic
+public import Mathlib.MeasureTheory.Function.Jacobian
+public import Mathlib.MeasureTheory.Group.Integral
+public import Mathlib.MeasureTheory.Integral.Prod
+
+@[expose] public section
 
 namespace GroundTheory.Automorphic
 
@@ -24,8 +86,8 @@ theorem exists_haar_density_prodExp {d : ℕ} (b : Module.Basis (Fin d) ℝ 𝔤
         tsupport ψ₀ ⊆ h.prodExp (⇑b) '' ball 0 r →
         ∫ y, ψ₀ y ∂μ = ∫ z in ball (0 : Fin d → ℝ) r, ψ₀ (h.prodExp (⇑b) z) * (ρ z : ℂ) := by
   classical
-  have : SecondCountableTopology G := h.secondCountableTopology
-  have : LocallyCompactSpace G := h.locallyCompactSpace
+  have : SecondCountableTopology G := secondCountableTopology h
+  have : LocallyCompactSpace G := locallyCompactSpace h
   obtain ⟨S, T, Ψ, hSo, hTo, h0S, hST, hTS, hleft, hright, hΨ, hSN⟩ := h.exists_prodExp_coord b
   set p : (Fin d → ℝ) → 𝔸 := prodExpVal (fun i => (b i : 𝔸)) with hp_def
   set P : (Fin d → ℝ) → G := h.prodExp ⇑b with hP_def
@@ -348,7 +410,7 @@ theorem exists_haar_density_prodExp {d : ℕ} (b : Module.Basis (Fin d) ℝ 𝔤
             by_contra hne; exact hnot (hχ0 _ hne)
           show 0 = ψ₀ (P z) * (((θ z * χ (p z * a)) • (β (Λ (a, z)) * J (a, z)) : ℝ) : ℂ)
           rw [hχ]; simp
-      · rw [indicator_of_notMem hzb, indicator_of_notMem (fun h' => hzb h'.1)]
+      · rw [indicator_of_notMem hzb, indicator_of_notMem (fun (h' : z ∈ U) => hzb h'.1)]
     rw [← hL, hcov, hR]
   have hβint : 0 < ∫ s, β s := β.integral_pos
   refine ⟨r, fun z => D z / ∫ s, β s, c, Wc, hr, hDs.div_const _,

@@ -1,5 +1,56 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.T2SpaceNumberFieldInfiniteAdeles
+module
+
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.T2SpaceNumberFieldInfiniteAdeles
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Compactness.Paracompact
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -120,9 +171,11 @@ theorem smul_map_mulVec_pi [IsArtinianRing S] [IsReduced S] (ν : Measure S) [ν
       ext f
       simp only [Set.mem_preimage, Set.mem_univ_pi, mulVec_diagonal]
       exact forall_congr' fun i => (Set.mem_inv_smul_set_iff (a := (A i).unit)).symm
-    rw [this, Measure.pi_pi, hu', modu_coe, map_prod, ENNReal.coe_finset_prod, smul_eq_mul,
-      ← Finset.prod_mul_distrib]
+    rw [this, Measure.pi_pi, hu', modu_coe, map_prod, smul_eq_mul]
+    change ENNReal.ofNNRealHom (∏ i, distribHaarChar S (A i).unit) * _ = _
+    rw [map_prod, ← Finset.prod_mul_distrib]
     refine Finset.prod_congr rfl fun i _ => ?_
+    change ((distribHaarChar S (A i).unit : ℝ≥0) : ℝ≥0∞) * _ = _
     rw [distribHaarChar_mul, smul_inv_smul]
   · intro a b c hab
     rw [det_transvection_of_ne _ _ hab]
@@ -144,15 +197,16 @@ theorem smul_map_mulVec_pi [IsArtinianRing S] [IsReduced S] (ν : Measure S) [ν
     refine ⟨hA.mul hB, ?_⟩
     rw [modu_mul hA hB, ENNReal.coe_mul, mul_smul, e, ← Measure.map_map (hm _) (hm _),
       ← Measure.map_smul, IHB, IHA]
+    exact (hm A).aemeasurable
 
 end
 
 theorem tupMeas_eq_map {S : Type} [MeasurableSpace S] (lam : Measure S) [SigmaFinite lam] (n M : ℕ) :
     tupMeas lam n M = (Measure.pi fun _ : Fin n × Fin M => lam).map Function.curry := by
   have hu : Measurable (Function.uncurry : (Fin n → Fin M → S) → Fin n × Fin M → S) :=
-    measurable_pi_lambda _ fun p => (measurable_pi_apply p.2).comp (measurable_pi_apply p.1)
+    Measurable.of_eval fun p => (measurable_pi_apply p.2).comp (measurable_pi_apply p.1)
   have hc : Measurable (Function.curry : (Fin n × Fin M → S) → Fin n → Fin M → S) :=
-    measurable_pi_lambda _ fun a => measurable_pi_lambda _ fun i => measurable_pi_apply (a, i)
+    Measurable.of_eval fun a => Measurable.of_eval fun i => measurable_pi_apply (a, i)
   have : (Measure.pi fun _ : Fin n × Fin M => lam) = (tupMeas lam n M).map Function.uncurry := by
     refine Measure.pi_eq fun s hs => ?_
     rw [Measure.map_apply hu (MeasurableSet.univ_pi hs)]
@@ -168,7 +222,7 @@ theorem tupMeas_eq_map {S : Type} [MeasurableSpace S] (lam : Measure S) [SigmaFi
 theorem tupMeas_lrAct : ∀ (S : Type) [CommRing S] [TopologicalSpace S] [IsTopologicalRing S] [T2Space S] [LocallyCompactSpace S] [SecondCountableTopology S] [MeasurableSpace S] [BorelSpace S], IsArtinianRing S → IsReduced S → ∀ (lam : Measure S), lam.IsAddHaarMeasure → ∀ (n M : ℕ) (g : Matrix (Fin M) (Fin M) S) (γ : Matrix (Fin n) (Fin n) S), IsUnit g.det → IsUnit γ.det → tupMeas lam n M = (modu S g.det ^ n * modu S γ.det ^ M) • (tupMeas lam n M).map (lrAct g γ) := by
   intro S _ _ _ _ _ _ _ _ _ _ lam _ n M g γ hg hγ
   have hc : Measurable (Function.curry : (Fin n × Fin M → S) → Fin n → Fin M → S) :=
-    measurable_pi_lambda _ fun a => measurable_pi_lambda _ fun i => measurable_pi_apply (a, i)
+    Measurable.of_eval fun a => Measurable.of_eval fun i => measurable_pi_apply (a, i)
   have hl : Measurable (lrAct g γ) := by
     refine Continuous.measurable (continuous_pi fun a => continuous_const.matrix_mulVec ?_)
     fun_prop
@@ -183,7 +237,8 @@ theorem tupMeas_lrAct : ∀ (S : Type) [CommRing S] [TopologicalSpace S] [IsTopo
     exact Finset.sum_congr rfl fun _ _ => Finset.sum_congr rfl fun _ _ => by ring
   have hm : Measurable (γᵀ ⊗ₖ g).mulVec := (continuous_const.matrix_mulVec continuous_id).measurable
   rw [tupMeas_eq_map, Measure.map_map hl hc, hcomm, ← Measure.map_map hc hm, ← Measure.map_smul]
-  exact congrArg _ key.symm
+  · exact congrArg _ key.symm
+  · exact hc.aemeasurable
 
 end GlobalTheory.GaugeEx.ModDet
 

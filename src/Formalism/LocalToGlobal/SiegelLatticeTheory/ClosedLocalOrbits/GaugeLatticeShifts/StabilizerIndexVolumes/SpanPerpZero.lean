@@ -1,5 +1,49 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.StabilizerIndexVolumes.VolumeIndexBCongruence
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.StabilizerIndexVolumes.VolumeIndexBCongruence
+import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.StabilizerIndexVolumes.DiagMulOfBt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -119,6 +163,7 @@ theorem tw_inj (hT : T ≠ 0) (hL : IsUnit L.det) (hZ : IsUnit (Formalism.MainNo
       apply Matrix.eq_zero_of_mulVec_eq_zero hG.ne_zero
       ext l
       have hl : S.hT (gg F F' l) (∑ m, a m • gg F F' m) = 0 := by rw [ha, map_zero]
+
       simp only [map_sum, map_smul, smul_eq_mul] at hl
       simp only [Matrix.mulVec, dotProduct, gramOf, Pi.zero_apply]
       rw [← hl]
@@ -162,6 +207,7 @@ theorem span_perp_zero (hG : IsUnit (gramOf (gg F F')).det) (a : Fin (r + 1) ⊕
     apply Matrix.eq_zero_of_mulVec_eq_zero hG.ne_zero
     ext l
     have hl := h l
+
     simp only [map_sum, map_smul, smul_eq_mul] at hl
     simp only [Matrix.mulVec, dotProduct, gramOf, Pi.zero_apply]
     rw [← hl]
@@ -208,7 +254,7 @@ theorem tw_eq_of (hL : IsUnit L.det) (hZ : IsUnit (Formalism.MainNotions.S.Zhat 
     induction hy using Submodule.span_induction with
     | mem x hx => obtain ⟨m, rfl⟩ := hx; exact hg m
     | zero => simp
-    | add x y _ _ hx hy => rw [map_add, map_add, hx, hy]
+    | add x y _ _ hx hy => rw [map_add (f := _), map_add (f := _), hx, hy]
     | smul c x _ hx => rw [map_smul, map_smul, hx]
   have hτs : ∀ m, τ.symm (gg F F' m) ∈ Sg := fun m => sL_mem_span _ (Submodule.subset_span ⟨m, rfl⟩)
   have hss : ∀ m, s.symm (gg F F' m) ∈ Sg := by
@@ -225,6 +271,7 @@ theorem tw_eq_of (hL : IsUnit L.det) (hZ : IsUnit (Formalism.MainNotions.S.Zhat 
   have hqperp : ∀ l, S.hT (gg F F' l) q = 0 := by
     intro l
     have h1 := congrFun (gram_cOf (gg F F') hG x) l
+
     rw [hq, hp, map_sub, map_sum]
     simp only [map_smul, smul_eq_mul]
     rw [← h1]
@@ -246,7 +293,7 @@ theorem tw_eq_of (hL : IsUnit L.det) (hZ : IsUnit (Formalism.MainNotions.S.Zhat 
     rw [ha] at h0
     exact sub_eq_zero.1 h0
   have hx : x = p + q := by rw [hq]; abel
-  rw [hx, map_add, map_add, hspan p hpS, hsq, hτq]
+  rw [hx, map_add (f := _), map_add (f := _), hspan p hpS, hsq, hτq]
 
 end TwProps
 

@@ -1,4 +1,55 @@
-import Mathlib
+module
+
+public import Mathlib.NumberTheory.Padics.RingHoms
+public import Mathlib.RingTheory.RootsOfUnity.PrimitiveRoots
+public import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+public import Mathlib.NumberTheory.Multiplicity
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+public import Mathlib.RingTheory.ZMod.UnitsCyclic
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace LevelStatements.Ln03
 
@@ -35,11 +86,7 @@ theorem toZModPow_eq_one_iff (k : ℕ) (x : ℤ_[l]) (hx : x - 1 ≠ 0) :
   rw [h1, ← RingHom.mem_ker, PadicInt.ker_toZModPow, Ideal.mem_span_singleton,
     pow_dvd_iff_le_valuation _ hx]
 
-private theorem prime_natCast_padicInt : Prime (l : ℤ_[l]) := by
-  first
-  | exact PadicInt.prime_p
-  | exact UniqueFactorizationMonoid.irreducible_iff_prime.mp PadicInt.irreducible_p
-  | exact PadicInt.irreducible_p.prime
+private theorem prime_natCast_padicInt : Prime (l : ℤ_[l]) := PadicInt.prime_p
 
 theorem factV (hl2 : l ≠ 2) (u : ℤ_[l]) (hu : (u - 1).valuation = 1) (m : ℕ) (hm : m ≠ 0) :
     (u ^ m - 1).valuation = 1 + padicValNat l m := by
@@ -64,8 +111,10 @@ theorem factV (hl2 : l ≠ 2) (u : ℤ_[l]) (hu : (u - 1).valuation = 1) (m : �
     rintro rfl
     exact hm' (dvd_zero l)
   have hval : padicValNat l (l ^ e * m') = e := by
-    rw [padicValNat.mul (pow_ne_zero _ hl.ne_zero) hm'0, padicValNat.prime_pow,
-      padicValNat.eq_zero_of_not_dvd hm', add_zero]
+    rw [(show ∀ {p a b : ℕ} [_root_.Fact (_root_.Nat.Prime p)], a ≠ 0 → b ≠ 0 → _root_.padicValNat p (a * b) = _root_.padicValNat p a + _root_.padicValNat p b from by simpa only [← _root_.Nat.padicValNat_def] using @_root_.Nat.multiplicity_mul) (pow_ne_zero _ hl.ne_zero) hm'0, (show padicValNat l (l ^ e) = e from by
+        simpa only [← Nat.padicValNat_def] using (Nat.multiplicity_prime_pow e)),
+      (show padicValNat l m' = 0 from by
+        simpa only [← Nat.padicValNat_def] using (multiplicity_eq_zero_of_not_dvd hm')), add_zero]
   rw [hval]
   have hE1 : emultiplicity (l : ℤ_[l]) (u ^ (l ^ e) - 1) =
       emultiplicity (l : ℤ_[l]) (u - 1) + e := by
@@ -111,7 +160,8 @@ theorem orderOf_u (hl2 : l ≠ 2) (u : ℤ_[l]) (hu : (u - 1).valuation = 1) (s 
   have key : ∀ j : ℕ, (PadicInt.toZModPow (s + 1) u) ^ (l ^ j) = 1 ↔ s ≤ j := by
     intro j
     have hv := factV hl2 u hu (l ^ j) (pow_ne_zero _ hl.ne_zero)
-    rw [padicValNat.prime_pow] at hv
+    rw [(show padicValNat l (l ^ j) = j from by
+      simpa only [← Nat.padicValNat_def] using (Nat.multiplicity_prime_pow j))] at hv
     have hne : u ^ (l ^ j) - 1 ≠ 0 := by
       intro h
       rw [h, PadicInt.valuation_zero] at hv
@@ -142,15 +192,6 @@ theorem isPrimitiveRoot_pow_eq_pow_iff_zmod_eq {N : ℕ} [NeZero N] {ξ : LL} (h
     | (rw [ZMod.natCast_eq_natCast_iff]; rfl)
   rw [hz, hmod a, hmod b]
   exact ⟨fun h => hξ.pow_inj (Nat.mod_lt _ hN) (Nat.mod_lt _ hN) h, fun h => by rw [h]⟩
-
-theorem card_Rs {n : ℕ} {ζ : LL} (hζ : IsPrimitiveRoot ζ (l ^ n)) (s : ℕ) (hs : s < n) :
-    (primitiveRoots (l ^ (s + 1)) LL).card = (l - 1) * l ^ s := by
-  have hl := (Fact.out : l.Prime)
-  have hpos : 0 < l ^ n := pow_pos hl.pos n
-  have hprod : l ^ n = l ^ (n - (s + 1)) * l ^ (s + 1) := by
-    rw [← pow_add, Nat.sub_add_cancel (by omega)]
-  have h := hζ.pow hpos hprod
-  rw [h.card_primitiveRoots, Nat.totient_prime_pow_succ hl, mul_comm]
 
 private theorem mem_primitiveRoots_iff_isPrimitiveRoot {k : ℕ} (h0 : 0 < k) {ζ : LL} :
     ζ ∈ primitiveRoots k LL ↔ IsPrimitiveRoot ζ k := by

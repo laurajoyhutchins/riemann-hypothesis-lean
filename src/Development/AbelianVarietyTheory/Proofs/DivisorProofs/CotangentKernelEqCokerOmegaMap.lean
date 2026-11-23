@@ -1,9 +1,50 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.ToSpanSingletonConstGenInjective
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RigOfOmegaInjectiveOfEqZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
 import Development.AbelianVarietyTheory.Definitions.Divisors.RedSurjective
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.KerEqRangeOfRangeEqKer
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FrobKerIdealLeAugIdeal
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.OmegaLevelBijectiveOfPowEqZero
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DUnitMemRangeOfMemKerIdeal
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DUnitMemRangeOfMemKerIdeal
+
+@[expose] public section
+
 open CategoryTheory TensorProduct Coalgebra Bialgebra GlobalTheory GlobalTheory.PDiv GlobalTheory.PDivGroup GlobalTheory.Dieu
 
 noncomputable section
@@ -18,7 +59,7 @@ theorem cotMap_comp_eq_zero_of_kerIdeal_le {k A B C : Type} [Field k] [CommRing 
   obtain ⟨b, rfl⟩ := AugCot.d_surjective _ x
   rw [cotMap_d]
   have h' := (kerIdeal_le_ker_iff g (π : A →ₐ[k] C)).1 h b
-  change dUnit k ((π : A →ₐ[k] C) (g b)) = 0
+  change dUnit (R := k) ((π : A →ₐ[k] C) (g b)) = 0
   rw [h']
   exact AugCot.d_algebraMap _ _
 
@@ -43,11 +84,11 @@ theorem cot_kernel_eq_coker_omegaMap : ∀ (p : ℕ) [Fact p.Prime] (k : Type) [
           hw
         obtain ⟨x, hx⟩ := (AugCot.exact_kerMap_map (π : G.A 1 →ₐ[k] C)
           (BialgHomClass.counitAlgHom_comp π) hπ (w.1 1)).1 hw'
-        have hx2 : dUnit k (x : G.A 1) = w.1 1 := by
+        have hx2 : dUnit (R := k) (x : G.A 1) = w.1 1 := by
           rw [← hx]; exact (AugCot.kerMap_apply _ _ x).symm
         have hxm : (x : G.A 1) ∈ kerIdeal (q.app 1) ⊔ augIdeal k (G.A 1) ^ 2 := h1 x.2
         obtain ⟨y, hy, z, hz, hyz⟩ := Submodule.mem_sup.1 hxm
-        have hz0 : dUnit k z = 0 := by
+        have hz0 : dUnit (R := k) z = 0 := by
           have hzI : z ∈ augIdeal k (G.A 1) := Ideal.pow_le_self two_ne_zero hz
           have hεz : counitAlgHom k (G.A 1) z = 0 := hzI
           rw [dUnit, AugCot.d_eq_zero_iff, hεz, map_zero, sub_zero]
@@ -57,8 +98,8 @@ theorem cot_kernel_eq_coker_omegaMap : ∀ (p : ℕ) [Fact p.Prime] (k : Type) [
         refine ⟨v, (G.omegaLevel_one_bijective hp).1 ?_⟩
         change cotMap (q.app 1) (H.omegaLevel 1 v) = w.1 1
         rw [hu, ← hx2, ← hyz]
-        change dUnit k y = dUnit k (y + z)
-        rw [show dUnit k (y + z) = dUnit k y + dUnit k z from map_add _ y z, hz0, add_zero]
+        change dUnit (R := k) y = dUnit (R := k) (y + z)
+        rw [show dUnit (R := k) (y + z) = dUnit (R := k) y + dUnit (R := k) z from map_add _ y z, hz0, add_zero]
       · intro hw
         exact part1 h2 w hw
     rw [← hker]

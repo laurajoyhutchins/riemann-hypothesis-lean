@@ -1,7 +1,55 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StPrimitivePresentationCover
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StSeparateWeierstrassDivision
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.PevEqZeroOfPresentation
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StPrimitivePresentationCover
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StSeparateWeierstrassDivision
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.PevEqZeroOfPresentation
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.FieldTheory.IsAlgClosed.Basic
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.IndefiniteRowSideFullHecke.ComplexSets
@@ -55,6 +103,7 @@ theorem PrimitivePresentationCover.proof (hdiv : SeparateWeierstrassDivision.Sta
     C (δ' ^ (M - Mm m)) * ∑ j : Fin N, C (⟨a m j, ha m j⟩ : analyticSubring (A w)) * X ^ (j : ℕ)
   have hqp : ∀ m y t, pev y t (qp m) = δ y ^ (M - Mm m) * ∑ j : Fin N, a m j y * t ^ (j : ℕ) := by
     intro m y t
+
     simp [qp, δ', map_sum]
   have hQan : ∀ m, AnalyticAt ℂ (fun z => pev (A z) (ℓ z) (qp m)) w := fun m =>
     analyticAt_pev_comp w A ℓ (qp m)
@@ -75,6 +124,7 @@ theorem PrimitivePresentationCover.proof (hdiv : SeparateWeierstrassDivision.Sta
   have hpevH1 : ∀ m y t, pev y t (H1 m) = pev y t (qp m) ^ n m +
       ∑ j : Fin (n m), b m j y * δ y ^ (M * (n m - j)) * pev y t (qp m) ^ (j : ℕ) := by
     intro m y t
+
     simp [H1, δ', map_sum]
   have hE1 : ∀ m, ∀ᶠ y in 𝓝 (A w), ∀ t : ℂ, t ^ N + ∑ j, c j y * t ^ (j : ℕ) = 0 →
       pev y t (H1 m) = 0 := by
@@ -101,6 +151,7 @@ theorem PrimitivePresentationCover.proof (hdiv : SeparateWeierstrassDivision.Sta
   have hpevHlin : ∀ lam L y t, pev y t (Hlin lam L) =
       ∑ m, lam (ev m) * pev y t (qp m) - δ y ^ M * pev y t L := by
     intro lam L y t
+
     simp [Hlin, δ', map_sum]
   have hElin : ∀ (lam : (σ → ℂ) →L[ℂ] ℂ) (L : (analyticSubring (A w))[X]),
       (∀ z, pev (A z) (ℓ z) L = lam z) →
@@ -133,6 +184,7 @@ theorem PrimitivePresentationCover.proof (hdiv : SeparateWeierstrassDivision.Sta
   have hpevH4 : ∀ i y t, pev y t (H4 i) = ∑ α : (m : σ) → Fin (n m),
       r i α y * δ y ^ (M * (Ntot - ∑ m, (α m : ℕ))) * ∏ m, pev y t (qp m) ^ (α m : ℕ) := by
     intro i y t
+
     simp [H4, δ', map_sum, map_prod]
   have hrem : ∀ i (y : Fin d → ℂ) (e : ℂ) (x : σ → ℂ), ∑ α : (m : σ) → Fin (n m),
       r i α y * e ^ (M * (Ntot - ∑ m, (α m : ℕ))) * ∏ m, (e ^ M * x m) ^ (α m : ℕ) =

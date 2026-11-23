@@ -1,5 +1,44 @@
-import Formalism.LocalToGlobal.GroupLattices.ComparisonMaps.CmpLApply
-import Formalism.LocalToGlobal.GroupLattices.ComparisonMaps.TiedRec
+module
+
+public import Formalism.LocalToGlobal.GroupLattices.ComparisonMaps.CmpLApply
+public import Formalism.LocalToGlobal.GroupLattices.ComparisonMaps.TiedRec
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -15,7 +54,7 @@ variable {D : D7}
 def embFr (T : ∀ u : D.what₂.Word, Forms0 D u) (u : D.what₂.Word) :
     ((D.fm u).lat 0).V →ₛₗ[D.what₂.embLL] ((D.mem u).C.cls 0 → Fr D 0 (Nat.zero_le _) → ℂ) where
   toFun x := fun cl z => (D.fm u).emb 0 x cl (((T u).val0).eY.symm z)
-  map_add' x y := by funext cl z; rw [map_add]; rfl
+  map_add' x y := by funext cl z; rw [map_add (f := _)]; rfl
   map_smul' a x := by funext cl z; rw [LinearMap.map_smulₛₗ]; rfl
 
 structure CmpIn (D : D7) (X : Formalism.L2.Herm.Herm0 D) where

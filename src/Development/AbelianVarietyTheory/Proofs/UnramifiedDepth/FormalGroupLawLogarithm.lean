@@ -1,8 +1,51 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.WeightedSumBounds.WtSubOneLe
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.CocycleRightZeroThd
-import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.PderivSecondEvFirstPointEqZero
-import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.ExistsFormalBiextMap
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.CocycleRightZeroThd
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.MvPowerSeries.Rename
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.DualLattices.VEqZeroOfPowEqOne
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.ConnectionKillsSeries
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.WeightedSumBounds.PtOrderProdSub
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -72,45 +115,5 @@ theorem add_pt (G : FGLaw k d) : G.add (pt k (n := 2) d 0) (pt k d 1) = G.F := b
   unfold ev
   rw [e, subst_self]
   rfl
-
-theorem exists_logFGL :
-  (∀ (C : Type) [Field C] [CharZero C] (v : AddValuation C (WithTop ℝ)) (R : Type) [CommRing R] [Algebra R C], (∀ r : R, IsIntV v (algebraMap R C r)) →
-    ∀ (d : ℕ) (G : ReciprocityTheory.ChartRestriction.G.Geo.Tor.Germ.FGLaw R d), ∃ L : LogFGL v d, ∀ a,
-      L.F a = subst (fun q : Fin 2 × Fin d => (X (if q.1 = 0 then Sum.inl q.2 else Sum.inr q.2) : MvPowerSeries (Fin d ⊕ Fin d) C))
-        (MvPowerSeries.map (algebraMap R C) (G.F a))) := by
-  intro C _ _ v R _ _ hR d G
-  set G' : FGLaw C d := GlobalTheory.FBMap.mapLaw (algebraMap R C) G with hG'
-  obtain ⟨ℓ, h0, h1, hadd⟩ := GlobalTheory.FormalLog.logSt C d G'
-  rw [add_pt] at hadd
-  refine ⟨{ lg := fun a => subst (oneVar C d) (ℓ a)
-            lg_const := fun a => constantCoeff_subst_eq_zero hs_oneVar cc_oneVar (h0 a)
-            lg_lin := fun a b => ?_
-            F := fun a => subst (twoVars C d) (G'.F a)
-            F_int := fun a α => ?_
-            F_const := fun a => constantCoeff_subst_eq_zero hs_twoVars cc_twoVars (G'.const a)
-            lg_F := fun a => ?_ }, fun a => rfl⟩
-  · rw [coeff_single_oneVar]
-    have := congrFun (congrFun h1 a) b
-    rw [Matrix.one_apply] at this
-    exact this
-  · have e : subst (twoVars C d) (G'.F a) =
-        MvPowerSeries.map (algebraMap R C) (subst (twoVars R d) (G.F a)) := by
-      rw [MvPowerSeries.map_subst hs_twoVars]
-      congr 1
-      funext q
-      simp [twoVars]
-    rw [e, coeff_map]
-    exact hR _
-  · have hp : ∀ (j : Fin 2) i, constantCoeff (pt C (n := 2) d j i) = 0 := fun j i => by simp [pt]
-    have e0 : (fun b => (X (Sum.inl b) : MvPowerSeries (Fin d ⊕ Fin d) C)) =
-        fun i => subst (twoVars C d) (pt C (n := 2) d 0 i) := by
-      funext i; rw [pt, subst_X hs_twoVars]; simp [twoVars]
-    have e1 : (fun b => (X (Sum.inr b) : MvPowerSeries (Fin d ⊕ Fin d) C)) =
-        fun i => subst (twoVars C d) (pt C (n := 2) d 1 i) := by
-      funext i; rw [pt, subst_X hs_twoVars]; simp [twoVars]
-    rw [e0, e1, subst_oneVar _ cc_twoVars _ G'.const, subst_oneVar _ cc_twoVars _ (hp 0),
-      subst_oneVar _ cc_twoVars _ (hp 1), ← subst_add hs_twoVars]
-    congr 1
-    exact congrFun hadd a
 
 end GlobalTheory.LawLog

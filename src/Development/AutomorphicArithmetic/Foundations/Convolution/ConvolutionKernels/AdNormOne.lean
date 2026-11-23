@@ -1,25 +1,67 @@
-import GroundTheory.AutomorphicForms.AutomorphicFormSpaces.Height
-import GroundTheory.AutomorphicForms.ReductionMahler
-import Formalism.LocalToGlobal.UnitaryNorms.CharTransport
-import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.AdBasic
+module
+
+public import GroundTheory.AutomorphicForms.ReductionMahler
+public import Formalism.LocalToGlobal.UnitaryNorms.CharTransport
+public import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.AdBasic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain GroundTheory.Automorphic GroundTheory.Automorphic.Reduction Formalism.L2.Host
 open scoped NumberField.AdeleRing
 
 private theorem denseInf {K : Type} [Field K] (u : InfinitePlace K) :
     DenseRange (algebraMap K u.Completion) := by
-  have h1 : DenseRange (fun x : WithAbs u.1 => (x : UniformSpace.Completion (WithAbs u.1))) :=
-    UniformSpace.Completion.denseRange_coe
-  have h2 : DenseRange (InfinitePlace.Completion.ofCompletion : _ → u.Completion) :=
-    (InfinitePlace.Completion.equiv u).symm.surjective.denseRange
-  have h3 := h2.comp h1 (InfinitePlace.Completion.continuous_ofCompletion u)
-  refine h3.mono ?_
+  refine (AbsoluteValue.Completion.denseRange_coe u.1).mono ?_
   rintro _ ⟨x, rfl⟩
-  exact ⟨x.ofAbs, rfl⟩
+  refine ⟨x.ofAbs, ?_⟩
+  rw [AbsoluteValue.Completion.algebraMap_def, WithAbs.algebraMap_right_apply]
+  simp
 
 private theorem normAlg {K : Type} [Field K] [NumberField K] (w : InfinitePlace K) (x : K) :
-    ‖algebraMap K w.Completion x‖ = w x :=
-  InfinitePlace.Completion.norm_coe (K := K) (v := w) _
+    ‖algebraMap K w.Completion x‖ = w x := by
+  rw [AbsoluteValue.Completion.algebraMap_def, WithAbs.algebraMap_right_apply]
+  simpa using (InfinitePlace.Completion.norm_coe (v := w) (WithAbs.toAbs w.1 x))
 
 private theorem norm_infEquiv {K : Type} [Field K] [NumberField K] (j : K ≃+* K) (u : InfinitePlace K)
     (y : (u.comap j.toRingHom).Completion) : ‖CT.infEquiv j u y‖ = ‖y‖ := by
@@ -99,7 +141,7 @@ private theorem map_rational {K : Type} [Field K] [NumberField K] (n : ℕ) (σ 
 
 theorem UpperTheory.ConvolutionTheory.K.adNormOne :
     ∀ (K : Type) [Field K] [NumberField K] (n : ℕ) (σ : K ≃+* K) (g : AdelicGLn.AdelicGL K n),
-      ((Matrix.GeneralLinearGroup.map (CT.adMap σ) g : AdelicGLn.AdelicGL K n) ∈ normOneGL K n ↔ g ∈ normOneGL K n) ∧
+      ((Matrix.GeneralLinearGroup.map (CT.adMap σ) g : AdelicGLn.AdelicGL K n) ∈ normOneGL (K := K) (n := n) ↔ g ∈ normOneGL (K := K) (n := n)) ∧
       ((Matrix.GeneralLinearGroup.map (CT.adMap σ) g : AdelicGLn.AdelicGL K n) ∈ AdelicGLn.rationalGL K n ↔ g ∈ AdelicGLn.rationalGL K n) := by
   intro K _ _ n σ g
   refine ⟨?_, fun h => ?_, map_rational n σ g⟩

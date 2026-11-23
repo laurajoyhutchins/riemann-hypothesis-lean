@@ -1,5 +1,46 @@
-import Development.WeilBound.CoreStatements.PublishedTheorems.SmoothVectorEstimates.WhittakerVanishingImpliesZero
-import GroundTheory.GlobalFields.Adele.WeakApprox
+module
+
+public import Development.WeilBound.CoreStatements.PublishedTheorems.SmoothVectorEstimates.WhittakerVanishingImpliesZero
+public import GroundTheory.GlobalFields.Adele.WeakApprox
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -101,7 +142,7 @@ theorem denseRange_mapGL {K B : Type} [Field K] [CommRing B] [TopologicalSpace B
     rfl
   rw [e]; exact hQO
 
-variable {E : Type} [Field E] [NumberField E] [IsTotallyComplex E]
+variable {E : Type} [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E]
 
 abbrev BS (S : Finset (Pl E)) : Type := ((v : S) → v.1.adicCompletion E) × Cinf E
 
@@ -127,7 +168,7 @@ theorem denseRange_jS (S : Finset (Pl E)) : DenseRange (jS S) := by
   refine Prod.ext rfl (funext fun w => ?_)
   rfl
 
-omit [IsTotallyComplex E] in
+omit [_root_.NumberField.IsTotallyComplex E] in
 theorem goodInv_BS (S : Finset (Pl E)) : GoodInv (BS S) :=
   goodInv_prod (goodInv_pi fun _ => goodInv_field _) (goodInv_pi fun _ => goodInv_field ℂ)
 
@@ -151,52 +192,52 @@ theorem continuous_ρS (S : Finset (Pl E)) : Continuous (ρS S) := by
   change Continuous fun y : InfiniteAdeleRing E × Af E => (y.2 : Af E) v.1
   exact (RestrictedProduct.continuous_eval v.1).comp continuous_snd
 
-open Classical in
 
+open Classical in
 def fSr (S : Finset (Pl E)) (p : (v : S) → v.1.adicCompletion E) : (w : Pl E) → w.adicCompletion E :=
   fun w => if h : w ∈ S then p ⟨w, h⟩ else 0
 
-omit [IsTotallyComplex E] in
+omit [_root_.NumberField.IsTotallyComplex E] in
 theorem fSr_of_mem (S : Finset (Pl E)) (p : (v : S) → v.1.adicCompletion E) {w : Pl E} (h : w ∈ S) :
     fSr S p w = p ⟨w, h⟩ := by
   classical
-  unfold fSr; rw [dif_pos h]
+  unfold fSr; rw [dite_eq_left h]
 
-omit [IsTotallyComplex E] in
+omit [_root_.NumberField.IsTotallyComplex E] in
 theorem fSr_of_not_mem (S : Finset (Pl E)) (p : (v : S) → v.1.adicCompletion E) {w : Pl E} (h : w ∉ S) :
     fSr S p w = 0 := by
   classical
-  unfold fSr; rw [dif_neg h]
+  unfold fSr; rw [dite_eq_right h]
 
-omit [IsTotallyComplex E] in
+omit [_root_.NumberField.IsTotallyComplex E] in
 theorem fSr_mul (S : Finset (Pl E)) (p q : (v : S) → v.1.adicCompletion E) : fSr S (p * q) = fSr S p * fSr S q := by
   funext w
   by_cases h : w ∈ S
   · rw [Pi.mul_apply, fSr_of_mem S _ h, fSr_of_mem S _ h, fSr_of_mem S _ h]; rfl
   · rw [Pi.mul_apply, fSr_of_not_mem S _ h, fSr_of_not_mem S _ h, fSr_of_not_mem S _ h, zero_mul]
 
-omit [IsTotallyComplex E] in
+omit [_root_.NumberField.IsTotallyComplex E] in
 theorem fSr_add (S : Finset (Pl E)) (p q : (v : S) → v.1.adicCompletion E) : fSr S (p + q) = fSr S p + fSr S q := by
   funext w
   by_cases h : w ∈ S
   · rw [Pi.add_apply, fSr_of_mem S _ h, fSr_of_mem S _ h, fSr_of_mem S _ h]; rfl
   · rw [Pi.add_apply, fSr_of_not_mem S _ h, fSr_of_not_mem S _ h, fSr_of_not_mem S _ h, zero_add]
 
-omit [IsTotallyComplex E] in
+omit [_root_.NumberField.IsTotallyComplex E] in
 theorem fSr_zero (S : Finset (Pl E)) : fSr S 0 = 0 := by
   funext w
   by_cases h : w ∈ S
   · rw [fSr_of_mem S _ h]; rfl
   · rw [fSr_of_not_mem S _ h]; rfl
 
-omit [IsTotallyComplex E] in
+omit [_root_.NumberField.IsTotallyComplex E] in
 theorem fSr_int (S : Finset (Pl E)) (p : (v : S) → v.1.adicCompletion E) :
     ∀ v ∈ (↑S : Set (Pl E))ᶜ, fSr S p v ∈ (v.adicCompletionIntegers E : Set (v.adicCompletion E)) := by
   intro v hv
   rw [fSr_of_not_mem S p hv]
   exact zero_mem _
 
-omit [IsTotallyComplex E] in
+omit [_root_.NumberField.IsTotallyComplex E] in
 theorem continuous_fSr (S : Finset (Pl E)) : Continuous (fSr S) := by
   refine continuous_pi fun w => ?_
   by_cases h : w ∈ S
@@ -213,7 +254,7 @@ def fS (S : Finset (Pl E)) : ((v : S) → v.1.adicCompletion E) →ₙ+* Af E wh
   map_zero' := Subtype.ext (fSr_zero S)
   map_add' p q := Subtype.ext (fSr_add S p q)
 
-omit [IsTotallyComplex E] in
+omit [_root_.NumberField.IsTotallyComplex E] in
 theorem continuous_fS (S : Finset (Pl E)) : Continuous (fS S) := by
   let g : ((v : S) → v.1.adicCompletion E) →
       RestrictedProduct (fun v : Pl E => v.adicCompletion E) (fun v => (v.adicCompletionIntegers E : Set (v.adicCompletion E)))

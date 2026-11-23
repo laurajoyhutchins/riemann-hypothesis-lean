@@ -1,5 +1,52 @@
-import Mathlib
-import ReciprocityTheory.DualLattices.CyclicRecursionStatement
+module
+
+public import ReciprocityTheory.DualLattices.CyclicRecursionStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+public import Mathlib.RingTheory.WittVector.DiscreteValuationRing
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -213,7 +260,7 @@ theorem kerTheta : KerThetaStatement p O := by
     intro x
     obtain ⟨z, hz⟩ := witt_exists_eq_teichmuller_coeff_zero_add_p_mul x
     conv_lhs => rw [hz]
-    rw [map_add, map_mul, map_natCast, hθt, map_add, map_mul, hmkp, zero_mul, add_zero]
+    rw [map_add (f := _), map_mul, map_natCast, hθt, map_add (f := _), map_mul, hmkp, zero_mul, add_zero]
     exact mk_sh (x.coeff 0) 0
   have hfac : ∀ x : WittVector p (PreTilt O p),
       Ideal.Quotient.mk (span {(p : O)}) (fontaineTheta O p x) = 0 →
@@ -236,7 +283,7 @@ theorem kerTheta : KerThetaStatement p O := by
       have e : (p : WittVector p (PreTilt O p)) * (teichmuller p d + z) =
           x + ((p : WittVector p (PreTilt O p)) - teichmuller p pflat) * teichmuller p d := by
         rw [hdz]; ring
-      rw [← map_natCast (fontaineTheta O p) p, ← map_mul, e, map_add, map_mul, hx0, hξ, zero_mul,
+      rw [← map_natCast (fontaineTheta O p) p, ← map_mul, e, map_add (f := _), map_mul, hx0, hξ, zero_mul,
         add_zero]
   · have hu0 : PreTilt.untilt (0 : PreTilt O p) = 0 := by
       have e := map_mul PreTilt.untilt (0 : PreTilt O p) pflat

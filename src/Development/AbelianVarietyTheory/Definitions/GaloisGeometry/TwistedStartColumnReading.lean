@@ -1,9 +1,47 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.TrueWtAddSSNonneg
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.CardStabDvdAutU
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.NormMapOfFinOrder
-import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.IntegralGLSuccEmbeddingMemParahoricTimesPrincipa
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.PredMemGamRanks
+module
+
+public import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.CardStabDvdAutU
+public import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.IntegralGLSuccEmbeddingMemParahoricTimesPrincipa
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.PredMemGamRanks
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.SumFibreEqSumOrbits
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -94,12 +132,6 @@ theorem RhoUnit.norm_rhoPt' (h : RhoUnit Ch sel mu cst σ chi) {i : ℕ} (hi : i
     ‖rhoPt' Ch sel mu cst σ chi i p‖ = 1 := by
   rw [rhoPt', norm_mul, norm_inv, norm_zpow, muInvPt, h.1 i hi, h.2 _ _ ⟨p.deco.2.lat, p.deco.2.uni⟩, one_zpow, inv_one, one_mul]
 
-theorem rhoUnit_of {D : D7} {s : Seam D X} {χ : TaylorLogMetric.IdE D → ℂ} {L : ChIdx X Pr R (QE sel (mu : Chr X.F X.E X.K))} {G : ChGlob X R.m} {m2 : ℕ}
-    {e : Fin R.m → X.Tau → ℚ} {eta : Formalism.L2.Host.HChar X.E} (hX : X.Ok) (hPr : Pr.Ok) (hsel : IsSel X sel) (hS : ∀ i, Pr.g i ∈ S)
-    (ht : Ch.Tied s.σ₀ e G.mu0 eta) (hL : L.Ok Ch sel mu cst G m2) (hG : G.σ₀ = s.σ₀) (hs : s.Ok) (hχ : TaylorLogMetric.IsChi D χ) :
-    RhoUnit Ch sel mu cst s.σ₀ (chiLat s χ) :=
-  ⟨fun _ hi _ N fr => hG ▸ norm_muInvDet hX hPr hsel hS (hG ▸ ht) hL hi N fr, fun _ _ hN => norm_chiLat hX hs hχ hN⟩
-
 end Rho
 
 section Chain
@@ -117,10 +149,6 @@ def TwEquiv : Prop :=
     TopEquiv W Ch sel mu cst L (chTh W Ch sel mu cst A u m2) b hY P c
 
 variable {W Ch sel mu cst L A u m2 b hY P c}
-
-theorem TwEquiv.kerEquivC (h : TwEquiv W Ch sel mu cst L A u m2 b hY P c) (hX : X.Ok) (hPr : Pr.Ok) (hm : R.m = m2 + 2) (hc : cst.Ok)
-    (H : TilOk Pr sel mu u) : KerEquivC W Ch sel mu cst L A u m2 b hY P :=
-  ⟨h.1, h.2.1, h.2.2.cp2Equiv hX hPr hm hc H (tameFr_chTh W Ch sel mu cst A u m2)⟩
 
 def twistedKernelPointCoset (h : TwEquiv W Ch sel mu cst L A u m2 b hY P c) (al : L.β m2) :
     ClsKer ((chF W sel mu L u m2).mem al) (cplMem W sel mu cst L u m2 b hY).gsd :=
@@ -171,12 +199,6 @@ def twSrc (chi : ∀ n : ℕ, Submodule (𝓞 X.E) (Sp X.E n) → ℂ) (hX : X.O
   dvd i hi x := (card_stab_dvd_autU i x.1 _).trans
     (card_autU_dvd_DGam (posStar_of_ok hX) R (by omega) hi ⟨(twRep i x).deco.2.lat, (twRep i x).deco.2.uni⟩)
 
-def twSrcOf {D : D7} (s : Seam D X) {cc : Ideal (𝓞 D.host.K)} {δ : ℂ} (B : Base D cc δ) (χ : TaylorLogMetric.IdE D → ℂ) (cD : D.what₂.Tau → ℂ)
-    {G : ChGlob X R.m} {e : Fin R.m → X.Tau → ℚ} {eta : Formalism.L2.Host.HChar X.E} (hX : X.Ok) (hPr : Pr.Ok) (hsel : IsSel X sel)
-    (hS : ∀ i, Pr.g i ∈ S) (ht : Ch.Tied s.σ₀ e G.mu0 eta) (hL : L.Ok Ch sel mu cst G m2) (hG : G.σ₀ = s.σ₀) (hs : s.Ok)
-    (hχ : TaylorLogMetric.IsChi D χ) (hF : ∀ j, (chF W sel mu L u j).Ok) (hK : TwEquiv W Ch sel mu cst L (ambOf s B χ cD) u m2 b hY P c) : ChSrc X R :=
-  twSrc (chiLat s χ) hX hL.hm hF hK (rhoUnit_of hX hPr hsel hS ht hL hG hs hχ)
-
 section Laws
 
 variable {chi : ∀ n : ℕ, Submodule (𝓞 X.E) (Sp X.E n) → ℂ} {hX : X.Ok} {hm : R.m = m2 + 2} {hF : ∀ j, (chF W sel mu L u j).Ok}
@@ -184,11 +206,6 @@ variable {chi : ∀ n : ℕ, Submodule (𝓞 X.E) (Sp X.E n) → ℂ} {hX : X.Ok
 
 end Laws
 
-variable (b hY P c) in
-
-def twStart {G : ChGlob X R.m} (hL : L.Ok Ch sel mu cst G m2) :
-    MfV W Ch u →ₗ[X.K] (twFam W Ch sel mu cst L u m2 b hY P c 0).Forms :=
-  spIn m2 R.m _ _ 0 ∘ₗ startC hL u
 
 section Col
 
@@ -196,22 +213,6 @@ variable {chi : ∀ n : ℕ, Submodule (𝓞 X.E) (Sp X.E n) → ℂ} {hX : X.Ok
   {hK : TwEquiv W Ch sel mu cst L A u m2 b hY P c} {hρ : RhoUnit Ch sel mu cst A.σ₀ chi} {G : ChGlob X R.m}
 
 end Col
-
-example : Nonempty (twFam W Ch sel mu cst L u m2 b hY P c R.m).Cl :=
-  (inferInstance : Nonempty (TopPt R sel mu u)).elim fun p => ⟨⟨.top rfl, Quotient.mk _ p⟩⟩
-
-example : Nonempty (twFam W Ch sel mu cst L u m2 b hY P c (m2 + 1)).Cl :=
-  haveI : NeZero (R.N (m2 + 1)) := ⟨(R.N_pos _).ne'⟩
-  open Classical in ⟨⟨.cpl rfl, Quotient.mk _ ⟨(DecoF.base _ _ _ _ _, {z | z - 0 ∈ locLat (rowSG Pr sel mu) (stdLat X.E (R.N (m2 + 1)))
-    fun P => if P.1 ∈ Pr.vGs then 0 else (cst.M : ℤ)}), 0, zero_mem _, rfl⟩⟩⟩
-
-example (hm : R.m = m2 + 2) (i : ℕ) (hi : R.m < i) : IsEmpty (twFam W Ch sel mu cst L u m2 b hY P c i).Cl :=
-  ⟨fun x => (SpIdx.isEmpty_of_lt (by omega) hi).false x.1⟩
-
-example (σ : X.K →+* ℂ) (z : ℂ) (i : ℕ) (p : ChPt (R := R) sel mu u i) (p' : ChPt (R := R) sel mu u (i + 1))
-    (h : muInvPt Ch sel mu cst i p = 1) (h' : muInvPt Ch sel mu cst i p' = 1) :
-    rhoPt Ch sel mu cst σ (fun _ _ => z) i p = (z ^ (R.N (i + 1) / 2))⁻¹ ∧ rhoPt' Ch sel mu cst σ (fun _ _ => z) i p' = z ^ (R.N i / 2) := by
-  simp only [rhoPt, rhoPt', h, h', map_one, one_mul, inv_one, zpow_neg, zpow_natCast, and_self]
 
 end Chain
 

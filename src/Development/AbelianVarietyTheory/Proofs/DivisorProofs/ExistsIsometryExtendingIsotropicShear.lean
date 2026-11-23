@@ -1,6 +1,44 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EquivOfIsometryApply
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsModuliOfSignatureEq
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CmHostUnitAddConjEqOne
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EquivOfIsometryApply
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsModuliOfSignatureEq
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -20,12 +58,12 @@ theorem IsOpp.exists_isometry_extend {E : Type} [Field E] [NumberField E] [IsCMF
     rw [hz, add_sub_cancel_left]
     exact nsmul_mem he N
   choose c hc hu using fun a : D.La => h.2.2.1 (AddMonoidHom.mk' (fun z : Z => D.EF (t z - z) (a - q a))
-    fun z z' => by simp only [map_add, map_sub, Submodule.coe_add, LinearMap.add_apply, LinearMap.sub_apply]; abel)
+    fun z z' => by simp only [map_add (f := _), map_sub, Submodule.coe_add, LinearMap.add_apply, LinearMap.sub_apply]; abel)
   simp only [AddMonoidHom.mk'_apply] at hc hu
   let α : D.La →ₗ[𝓞 E] Z' :=
     { toFun := c
       map_add' := fun a a' => (hu _ _ fun z => by
-        simp only [Submodule.coe_add, map_add, hc, map_sub, LinearMap.sub_apply, map_add]
+        simp only [Submodule.coe_add, map_add (f := _), hc, map_sub, LinearMap.sub_apply, map_add (f := _)]
         abel).symm
       map_smul' := fun x a => (hu _ _ fun z => by
         have key : ∀ u w : D.La, D.EF u (x • w) = D.EF (H.bar x • u) w := fun u w => by rw [D.adj, bar_bar]
@@ -55,7 +93,7 @@ theorem IsOpp.exists_isometry_extend {E : Type} [Field E] [NumberField E] [IsCMF
       simp only [map_sub, LinearMap.sub_apply] at this h2 ⊢
       linear_combination -this - h2
     rw [hg, hg]
-    simp only [map_add, map_sub, LinearMap.add_apply, LinearMap.sub_apply] at f2 f3 f7 f8 ⊢
+    simp only [map_add (f := _), map_sub, LinearMap.add_apply, LinearMap.sub_apply] at f2 f3 f7 f8 ⊢
     linear_combination f1 - f2 - f3 + f4 - f5 - f7 - f8
   · obtain ⟨e, -, he⟩ := ht (q a)
     obtain ⟨e', he'⟩ := GlobalTheory.ModuliGenus.exists_eq_nsmul_of_dvd D hN (c a : D.La) fun b => by

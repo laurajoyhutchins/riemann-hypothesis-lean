@@ -1,7 +1,63 @@
-import Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.LocalTypeDictionary.DiscreteSpectrumResidualClassification
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IsOpenLevelGroupSubgroupOf
-import Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.LocalTypeDictionary.BernsteinUnitaryProductIrreducible
-import Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.LocalTypeDictionary.MovedVacuumIsVacuumIntegral
+module
+
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.SplitOff
+public import Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.LocalTypeDictionary.BernsteinUnitaryProductIrreducible
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.ExtendByZeroTrivialDecomposition
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsIsThetaAtOfVac
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsUnitVacuumStandardLatticesDefinitePair
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.KernelLatticesFormSelfDualTriples
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.SphericalPair
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsNeZeroOfIsVacO
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.AbsNormCoprimeOfSup
+import Development.AbelianVarietyTheory.Proofs.SatakeParameters.LevelHyperspecialTrivialCharacterSplitsOffPlaces
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsUnitScalarFourier
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.LatticeOrbitVectorsMovedPair
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.VacuumValueAlgebraicCongruence
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.LatHatOpenAndContinuous
+public import Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.LocalTypeDictionary.MovedVacuumIsVacuumIntegral
+import Formalism.LocalToGlobal.GlobalTheory.GL5.FamilyMassVolumeIdentityOfClassDecomp
+import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.IdemElt
+public import Formalism.LocalToGlobal.IndefiniteReal.LevelTypeEquivalence.KerDiag
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicLocalCompactness.T2SpaceTensorProductFiniteExtension
+import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.CsApprox
+import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.CsSpan
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.TwistPlacesOffPrimeQZero
+
+@[expose] public section
 
 section
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.L2.Theta Formalism.IndefR Formalism.IndefR.Datum Formalism.IndefR.Links Formalism.L2.DIV
@@ -63,10 +119,69 @@ private theorem exists_pow_mem_open_subgroup {G : Type} [Group G] [TopologicalSp
   obtain ⟨m, hm, -, h⟩ := Subgroup.exists_pow_mem_of_index_ne_zero
     (H := U.subgroupOf K) Subgroup.index_ne_zero_of_finite ⟨k, hk⟩
   exact ⟨m, hm, h⟩
-set_option synthInstance.maxHeartbeats 400000 in
-set_option maxHeartbeats 1000000 in
+private theorem selfDual_full {D : D7} (V : HSp D) (Λ : Submodule (𝓞 D.host.E) (Fin V.rank → D.host.E))
+    (hΛ : IsSelfDualC V Λ) : Submodule.IsFullLattice D.host.E Λ := by
+  haveI : Submodule.IsLattice D.host.E Λ := hΛ.1
+  refine ⟨?_⟩
+  obtain ⟨s, hs⟩ := hΛ.1.fg
+  apply eq_top_iff.mpr
+  intro y _
+  let f : (Fin V.rank → D.host.E) → D.host.E := fun x =>
+    ∑ i, ∑ j, star (x i) * V.gram i j * y j
+  obtain ⟨a, ha⟩ := IsLocalization.exist_integer_multiples (nonZeroDivisors (𝓞 D.host.E)) s f
+  have ha0 : (algebraMap (𝓞 D.host.E) D.host.E a) ≠ 0 := by
+    exact (FaithfulSMul.algebraMap_injective _ _).ne (mem_nonZeroDivisors_iff_ne_zero.mp a.2)
+  let P : Submodule (𝓞 D.host.E) (Fin V.rank → D.host.E) := {
+    carrier := {x | ∃ b : 𝓞 D.host.E, (b : D.host.E) = (algebraMap (𝓞 D.host.E) D.host.E a) * f x}
+    zero_mem' := by refine ⟨0, ?_⟩; simp [f]
+    add_mem' := by
+      rintro x z ⟨b, hb⟩ ⟨c, hc⟩
+      refine ⟨b + c, ?_⟩
+      change (b : D.host.E) + c = _
+      rw [hb, hc]
+      simp [f, map_add, add_mul, Finset.sum_add_distrib, mul_add]
+    smul_mem' := by
+      rintro c x ⟨b, hb⟩
+      refine ⟨RingOfIntegers.mapRingHom (starRingEnd D.host.E) c * b, ?_⟩
+      simp only [map_mul, hb, f, Pi.smul_apply, Algebra.smul_def, map_mul, RingOfIntegers.mapRingHom_apply, star_mul]
+      simp only [Finset.mul_sum]
+      apply Finset.sum_congr rfl
+      intro i _
+      apply Finset.sum_congr rfl
+      intro j _
+      change star (c : D.host.E) * _ = _
+      ring }
+  have hsP : (s : Set (Fin V.rank → D.host.E)) ⊆ P := by
+    intro x hx
+    obtain ⟨b, hb⟩ := ha x hx
+    exact ⟨b, by simpa [Algebra.smul_def] using hb⟩
+  have hy : (algebraMap (𝓞 D.host.E) D.host.E a) • y ∈ Λ := by
+    apply (hΛ.2 _).2
+    intro x hx
+    have hxP : x ∈ P := (hs ▸ Submodule.span_le.mpr hsP) hx
+    obtain ⟨b, hb⟩ := hxP
+    refine ⟨b, ?_⟩
+    rw [hb]
+    dsimp only [f, Pi.smul_apply]
+    simp only [smul_eq_mul, Finset.mul_sum]
+    apply Finset.sum_congr rfl
+    intro i _
+    apply Finset.sum_congr rfl
+    intro j _
+    ring
+  have hy' : (algebraMap (𝓞 D.host.E) D.host.E a) • y ∈ Submodule.span D.host.E (Λ : Set (Fin V.rank → D.host.E)) :=
+    Submodule.subset_span hy
+  have := (Submodule.span D.host.E (Λ : Set (Fin V.rank → D.host.E))).smul_mem
+    (algebraMap (𝓞 D.host.E) D.host.E a)⁻¹ hy' 
+  change (algebraMap (𝓞 D.host.E) D.host.E a)⁻¹ •
+    ((algebraMap (𝓞 D.host.E) D.host.E a) • y) ∈ _ at this
+  rw [← smul_assoc, smul_eq_mul, inv_mul_cancel₀ ha0, one_smul] at this
+  exact this
+
+
+
 private theorem exists_pow_mem_principal_level {D : D7} (V : HSp D) (Λ : Submodule (𝓞 D.host.E) (Fin V.rank → D.host.E))
-    (hΛ : Submodule.IsLattice D.host.E Λ) {k : GA D V} (hk : k ∈ GfC V)
+    (hΛ : Submodule.IsFullLattice D.host.E Λ) {k : GA D V} (hk : k ∈ GfC V)
     (hfix : Formalism.UG.CS.globLat (Formalism.IndefR.Lev.finE V k) Λ = Λ) {N : ℕ} (hN : 0 < N) :
     ∃ m : ℕ, 0 < m ∧ k ^ m ∈ GlobalTheory.Member.PrincLevel.levelGroup V N := by
   have := Formalism.L2.GlobalTheoryTheory.GenusMassVolumes.Unfold.topGroupHA D.sp.cm.sig V.gram
@@ -82,8 +197,8 @@ private theorem exists_pow_mem_principal_level {D : D7} (V : HSp D) (Λ : Submod
     exact hy
   exact exists_pow_mem_open_subgroup (GfC V) (Formalism.IndefR.Lev.levA V (Formalism.L2.DIV.St β)) _ inf_le_left
     (GlobalTheory.AscInh.stab_compact_open V β).1 (isOpen_principal_level_subgroup V hN) ⟨hk, hst⟩
-set_option synthInstance.maxHeartbeats 400000 in
-set_option maxHeartbeats 1000000 in
+
+
 private theorem exists_root_of_unity_factor {D : D7} {ψ : AddChar (AF D.host.F) ℂ} {θ : InfFam D} {S T : HSp D}
     {χS χT : (Formalism.L2.Theta.AE D)ˣ →* Circle}
     {om : GA D S × GA D T →* Module.End ℂ (WO S T → ℂ)} (hW : IsWeilDatumO ψ S T χS χT om)
@@ -97,11 +212,11 @@ private theorem exists_root_of_unity_factor {D : D7} {ψ : AddChar (AF D.host.F)
     (hf' : IsVacO ψ θ S T sS sT ΛS ΛT (om (k, k') f)) :
     ∃ (c : ℂ) (m : ℕ), 0 < m ∧ c ^ m = 1 ∧ om (k, k') f = c • f := by
   obtain ⟨c, hc⟩ := GlobalTheory.LevelVac.vac_eq_smul hS hT hΛS hΛT hf hf'
-  obtain ⟨α, hα⟩ := GlobalTheory.latticeFrame.exists_frame D.host.F D.host.E _ ΛS hΛS.1
-  obtain ⟨β, hβ⟩ := GlobalTheory.latticeFrame.exists_frame D.host.F D.host.E _ ΛT hΛT.1
+  obtain ⟨α, hα⟩ := GlobalTheory.latticeFrame.exists_frame D.host.F D.host.E _ ΛS (selfDual_full S ΛS hΛS)
+  obtain ⟨β, hβ⟩ := GlobalTheory.latticeFrame.exists_frame D.host.F D.host.E _ ΛT (selfDual_full T ΛT hΛT)
   obtain ⟨N, hN, hfix⟩ := GlobalTheory.LevelVac.exists_level_fix hW hS hT hΛS hΛT hα hβ hf
-  obtain ⟨a, ha, hka⟩ := exists_pow_mem_principal_level S ΛS hΛS.1 hk h1 hN
-  obtain ⟨b, hb, hkb⟩ := exists_pow_mem_principal_level T ΛT hΛT.1 hk' h2 hN
+  obtain ⟨a, ha, hka⟩ := exists_pow_mem_principal_level S ΛS (selfDual_full S ΛS hΛS) hk h1 hN
+  obtain ⟨b, hb, hkb⟩ := exists_pow_mem_principal_level T ΛT (selfDual_full T ΛT hΛT) hk' h2 hN
   have e1 : k ^ (a * b) ∈ GlobalTheory.Member.PrincLevel.levelGroup S N := by
     rw [pow_mul]; exact pow_mem hka b
   have e2 : k' ^ (a * b) ∈ GlobalTheory.Member.PrincLevel.levelGroup T N := by
@@ -131,8 +246,8 @@ private theorem inverse_image_standard_lattice {D : D7} {n : ℕ} (B : GL (Fin n
     refine ⟨fun j => algebraMap _ D.host.E (c j), fun i _ => Submodule.mem_one.2 ⟨c i, rfl⟩, funext fun a => ?_⟩
     simp only [Finset.sum_apply, Pi.smul_apply, Algebra.smul_def, Matrix.mulVec, dotProduct]
     exact Finset.sum_congr rfl fun j _ => mul_comm _ _
-set_option synthInstance.maxHeartbeats 400000 in
-set_option maxHeartbeats 1000000 in
+
+
 theorem movedVacuum_root_exists_algebraic (hP : _root_.GlobalTheory.FunPr.ThetaLocalInputs) (hI : ∀ D, GlobalTheory.NormSum.Inp D) {D : D7} {Γ : Type} [Group Γ] [Fintype Γ] {Pl0 T : Type}
     {A : FamIn D.what₂.LL Γ Pl0 T D.R.m} {Ks : Type} [Field Ks] [NumberField Ks] [Algebra Ks D.what₂.LL] {R : RealDat D A Ks}
     (ch : Choice R) (hch : ch.Is) (p : Pair T) (hp : DefPair D.R.m p) (x : FinPt ch.G p.small) (y : FinPt ch.G p.big)
@@ -178,8 +293,8 @@ theorem movedVacuum_root_exists_algebraic (hP : _root_.GlobalTheory.FunPr.ThetaL
 end GlobalTheory.MovedVacRoot
 end
 open GlobalTheory.MovedVacRoot in
-set_option synthInstance.maxHeartbeats 400000 in
-set_option maxHeartbeats 1000000 in
+
+
 theorem _root_.GlobalTheory.T.moved_vacuum_has_algebraic_root : _root_.GlobalTheory.FunPr.ThetaLocalInputs → (∀ D, GlobalTheory.NormSum.Inp D) → ∀ {D : D7} {Γ : Type} [Group Γ] [Fintype Γ] {Pl0 T : Type}
     {A : FamIn D.what₂.LL Γ Pl0 T D.R.m} {Ks : Type} [Field Ks] [NumberField Ks] [Algebra Ks D.what₂.LL] {R : RealDat D A Ks}
     (ch : Choice R), ch.Is → ∀ (p : Pair T), DefPair D.R.m p → ∀ (x : FinPt ch.G p.small) (y : FinPt ch.G p.big),
@@ -190,7 +305,7 @@ theorem _root_.GlobalTheory.T.moved_vacuum_has_algebraic_root : _root_.GlobalThe
   have h2 : (opp p c) ^ m = 1 := by rw [← map_pow, h1, map_one]
   have h3 := mem_algebraic_of_root_of_unity hm h2
   refine ⟨opp p c, ⟨h3, fun σ => norm_root_of_unity_eq_one σ hm h2 h3⟩, fun q _ lam => ?_, fun k => ?_⟩
-  · rw [lamC, dif_pos h3]
+  · rw [lamC, dite_eq_left h3]
     exact norm_root_of_unity_eq_one lam hm h2 h3
   · have hs : srcLat ch.S.toGridChoice p x y = stdL D _ := by
       cases p

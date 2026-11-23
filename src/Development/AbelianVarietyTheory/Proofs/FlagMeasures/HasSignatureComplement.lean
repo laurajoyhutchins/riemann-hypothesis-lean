@@ -1,18 +1,73 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.DefClassNum
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsFrameOfHasSignature
+import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.SignatureConjugationInvariant
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+public import Mathlib.Data.Matrix.ColumnRowPartitioned
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
 import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.IsLatMeasurableConst
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsFrameOfHasSignature
+
+@[expose] public section
 
 open MeasureTheory NumberField Matrix Finset Formalism.MainNotions.S GlobalTheory.Count GlobalTheory.FlagMeas GlobalTheory.FlagBase GlobalTheory.AutInhab
 
 namespace GlobalTheory.AdaptedExists
 
 theorem telescope : ∀ (a : ℕ) (j : Fin a → ℕ) (f : Fin (a + 1) → ℕ), (∀ i : Fin a, f i.succ = f i.castSucc + j i) →
-    f (Fin.last a) = f 0 + ∑ i, j i
-  | 0, _, _, _ => by simp
-  | a + 1, j, f, h => by
-    have := telescope a (fun i => j i.castSucc) (fun i => f i.castSucc) fun i => h i.castSucc
-    rw [Fin.sum_univ_castSucc, ← Fin.succ_last, h, this, add_assoc]
-    rfl
+    f (Fin.last a) = f 0 + ∑ i, j i := by
+  intro a
+  induction a with
+  | zero => simp
+  | succ a ih =>
+    intro j f h
+    have hs := ih (fun i => j i.castSucc) (fun i => f i.castSucc) (fun i => by
+      simpa only [Fin.castSucc_succ] using h i.castSucc)
+    change f (Fin.last a).castSucc = f 0 + ∑ i : Fin a, j i.castSucc at hs
+    rw [← Fin.succ_last, h, hs, Fin.sum_univ_castSucc, Nat.add_assoc]
 
 section
 
@@ -167,14 +222,16 @@ theorem rkK_add {A S : Submodule (𝓞 E) (Fin n → E)} (h : A ⊓ S = ⊥) :
   omega
 
 theorem exists_model {k : ℕ} (A : Submodule (𝓞 E) (Fin n → E)) (hA : A.FG) (hk : Formalism.HN.rkK A = k) :
-    ∃ (Λ : Submodule (𝓞 E) (Fin k → E)) (T : Matrix (Fin n) (Fin k) E), Submodule.IsLattice E Λ ∧
+    ∃ (Λ : Submodule (𝓞 E) (Fin k → E)) (T : Matrix (Fin n) (Fin k) E), Submodule.IsFullLattice E Λ ∧
       ∀ z, z ∈ A ↔ ∃ u ∈ Λ, z = T *ᵥ u := by
   obtain ⟨T, hT, hr⟩ := exists_matrix_range (k := Fin k) (Submodule.span E (A : Set (Fin n → E)))
     (hk.trans (Fintype.card_fin k).symm)
-  refine ⟨A.comap (T.mulVecLin.restrictScalars (𝓞 E)), T, ⟨?_, ?_⟩, fun z => ⟨fun hz => ?_, ?_⟩⟩
+  refine ⟨A.comap (T.mulVecLin.restrictScalars (𝓞 E)), T,
+    { toIsLattice := Submodule.IsLattice.of_fg E ?_, span_eq_top := ?_ }, fun z => ⟨fun hz => ?_, ?_⟩⟩
   · exact Submodule.fg_of_fg_map_injective (T.mulVecLin.restrictScalars (𝓞 E)) hT
       (hA.of_le (Submodule.map_comap_le _ _))
-  · refine eq_top_iff.2 fun u _ => ?_
+  · rw [Submodule.eq_top_iff']
+    intro u
     obtain ⟨c, hc, h⟩ := exists_smul_mem (L := A) (hr ▸ ⟨u, rfl⟩ : T.mulVecLin u ∈ _)
     have h1 : c • u ∈ A.comap (T.mulVecLin.restrictScalars (𝓞 E)) := by
       rw [Submodule.mem_comap, map_smul]; exact h
@@ -188,7 +245,7 @@ theorem exists_model {k : ℕ} (A : Submodule (𝓞 E) (Fin n → E)) (hA : A.FG
 
 end Blocks
 
-theorem exists_blocks : ∀ (E : Type) [Field E] [NumberField E] (n a : ℕ) (j : Fin a → ℕ) (S : Fin (a + 1) → Submodule (𝓞 E) (Fin n → E)) (A : Fin a → Submodule (𝓞 E) (Fin n → E)), S 0 = ⊥ → Monotone S → (S (Fin.last a)).FG → (∀ i : Fin a, Formalism.HN.rkK (S i.succ) = Formalism.HN.rkK (S i.castSucc) + j i) → (∀ i, A i ⊓ S i.castSucc = ⊥ ∧ A i ⊔ S i.castSucc = S i.succ) → ∃ (Λ : ∀ i, Submodule (𝓞 E) (Fin (j i) → E)) (T : ∀ i, Matrix (Fin n) (Fin (j i)) E), (∀ i, Submodule.IsLattice E (Λ i)) ∧ ∀ k z, z ∈ S k ↔ ∃ u : ∀ i, Fin (j i) → E, (∀ i, u i ∈ Λ i) ∧ (∀ i : Fin a, ¬ i.castSucc < k → u i = 0) ∧ z = ∑ i, T i *ᵥ u i := by
+theorem exists_blocks : ∀ (E : Type) [Field E] [NumberField E] (n a : ℕ) (j : Fin a → ℕ) (S : Fin (a + 1) → Submodule (𝓞 E) (Fin n → E)) (A : Fin a → Submodule (𝓞 E) (Fin n → E)), S 0 = ⊥ → Monotone S → (S (Fin.last a)).FG → (∀ i : Fin a, Formalism.HN.rkK (S i.succ) = Formalism.HN.rkK (S i.castSucc) + j i) → (∀ i, A i ⊓ S i.castSucc = ⊥ ∧ A i ⊔ S i.castSucc = S i.succ) → ∃ (Λ : ∀ i, Submodule (𝓞 E) (Fin (j i) → E)) (T : ∀ i, Matrix (Fin n) (Fin (j i)) E), (∀ i, Submodule.IsFullLattice E (Λ i)) ∧ ∀ k z, z ∈ S k ↔ ∃ u : ∀ i, Fin (j i) → E, (∀ i, u i ∈ Λ i) ∧ (∀ i : Fin a, ¬ i.castSucc < k → u i = 0) ∧ z = ∑ i, T i *ᵥ u i := by
   intro E _ _ n a j S A h0 hmono hfg hrk hA
   have hle : ∀ i, A i ≤ S i.succ := fun i => (hA i).2 ▸ le_sup_left
   choose Λ T hΛ hT using fun i => exists_model (k := j i) (A i)
@@ -277,7 +334,7 @@ theorem exists_witt : ∀ (E : Type) [Field E] [StarRing E] (n m : ℕ) (κ : Ty
   have hz : J *ᵥ (B *ᵥ v) = 0 := funext fun s => by simpa [Pi.star_single] using hall (Pi.single s 1)
   exact hv (hB ((Matrix.eq_zero_of_mulVec_eq_zero hd hz).trans (map_zero B.mulVecLin).symm))
 
-theorem exists_factor_lattice : ∀ (E E₀ : Type) [Field E] [NumberField E] [StarRing E] [Field E₀] [NumberField E₀] [StarRing E₀] (e : E₀ ≃+* E), (∀ y, e (star y) = star (e y)) → ∀ (n m : ℕ) (J : Matrix (Fin n) (Fin n) E) (B : Matrix (Fin n) (Fin m) E) (G : Matrix (Fin m) (Fin m) E₀) (Λ : Submodule (𝓞 E) (Fin n → E)), Jᴴ = J → Bᴴ * J * B = G.map e → G.det ≠ 0 → Submodule.IsLattice E Λ → (∀ x, x ∈ Λ ↔ ∀ y ∈ Λ, star y ⬝ᵥ (J *ᵥ x) ∈ (algebraMap (𝓞 E) E).range) → (∀ z ∈ Λ, ∃ y : Fin m → E, B *ᵥ y ∈ Λ ∧ (Bᴴ * J) *ᵥ (z - B *ᵥ y) = 0) → ∃ L : Submodule (𝓞 E₀) (Fin m → E₀), Submodule.IsLattice E₀ L ∧ (∀ y, y ∈ L ↔ (B *ᵥ fun l => e (y l)) ∈ Λ) ∧ ∀ x, x ∈ L ↔ ∀ y ∈ L, star y ⬝ᵥ (G *ᵥ x) ∈ (algebraMap (𝓞 E₀) E₀).range := by
+theorem exists_factor_lattice : ∀ (E E₀ : Type) [Field E] [NumberField E] [StarRing E] [Field E₀] [NumberField E₀] [StarRing E₀] (e : E₀ ≃+* E), (∀ y, e (star y) = star (e y)) → ∀ (n m : ℕ) (J : Matrix (Fin n) (Fin n) E) (B : Matrix (Fin n) (Fin m) E) (G : Matrix (Fin m) (Fin m) E₀) (Λ : Submodule (𝓞 E) (Fin n → E)), Jᴴ = J → Bᴴ * J * B = G.map e → G.det ≠ 0 → Submodule.IsFullLattice E Λ → (∀ x, x ∈ Λ ↔ ∀ y ∈ Λ, star y ⬝ᵥ (J *ᵥ x) ∈ (algebraMap (𝓞 E) E).range) → (∀ z ∈ Λ, ∃ y : Fin m → E, B *ᵥ y ∈ Λ ∧ (Bᴴ * J) *ᵥ (z - B *ᵥ y) = 0) → ∃ L : Submodule (𝓞 E₀) (Fin m → E₀), Submodule.IsFullLattice E₀ L ∧ (∀ y, y ∈ L ↔ (B *ᵥ fun l => e (y l)) ∈ Λ) ∧ ∀ x, x ∈ L ↔ ∀ y ∈ L, star y ⬝ᵥ (G *ᵥ x) ∈ (algebraMap (𝓞 E₀) E₀).range := by
   intro E E₀ _ _ _ _ _ _ e he n m J B G Λ hJ hG hd hΛ hdual hproj
   let f : (Fin m → E₀) →ₗ[ℤ] (Fin n → E) :=
     { toFun := fun y => B *ᵥ fun l => e (y l)
@@ -306,12 +363,14 @@ theorem exists_factor_lattice : ∀ (E E₀ : Type) [Field E] [NumberField E] [S
       smul_mem' := fun c y hy => by
         change f (c • y) ∈ Λ
         rw [hsm]; exact Λ.smul_mem _ hy }
-  refine ⟨L, ⟨?_, ?_⟩, fun y => Iff.rfl, fun x => ⟨fun hx y hy => ?_, fun hx => ?_⟩⟩
+  refine ⟨L, { toIsLattice := Submodule.IsLattice.of_fg E₀ ?_, span_eq_top := ?_ },
+    fun y => Iff.rfl, fun x => ⟨fun hx y hy => ?_, fun hx => ?_⟩⟩
   · have h1 : (Λ.restrictScalars ℤ).FG := hΛ.fg.restrictScalars
     refine Submodule.FG.of_restrictScalars ℤ (Submodule.fg_of_fg_map_injective f hf (h1.of_le ?_))
     rintro _ ⟨y, hy, rfl⟩
     exact hy
-  · refine eq_top_iff.2 fun y _ => ?_
+  · rw [Submodule.eq_top_iff']
+    intro y
     obtain ⟨c, hc, h⟩ := exists_smul_mem (L := Λ) (x := f y) (hΛ.span_eq_top ▸ Submodule.mem_top)
     obtain ⟨c, rfl⟩ := (RingOfIntegers.mapRingEquiv e).surjective c
     have hc' : (c : E₀) ≠ 0 := by simpa using hc

@@ -1,8 +1,51 @@
-import GroundTheory.AutomorphicForms.AutomorphicFormSpaces.Height
-import GroundTheory.AutomorphicForms.ReductionMahler
-import Formalism.LocalToGlobal.UnitaryNorms.CharTransport
+module
+
+public import Formalism.LocalToGlobal.UnitaryNorms.CharTransport
+public import GroundTheory.AutomorphicForms.StrongApproximationSLDense
 import GroundTheory.GlobalFields.Adele.Compact
-import GroundTheory.AutomorphicForms.StrongApproximationSLDense
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import GroundTheory.AutomorphicForms.ReductionBlock
+
+@[expose] public section
 
 open NumberField IsDedekindDomain GroundTheory.Automorphic GroundTheory.Automorphic.Reduction Formalism.L2.Host
 
@@ -80,7 +123,7 @@ private theorem map_idem (s : AdeleRing (𝓞 K) K →+* AdeleRing (𝓞 K) K) (
     inf_kill w (((Pi.evalRingHom (fun w : InfinitePlace K => w.Completion) w).comp (RingHom.fst _ _)).comp s)
       (((continuous_apply w).comp continuous_fst).comp hs)
   have e : zi 1 + zf 1 = (1 : AdeleRing (𝓞 K) K) := Prod.ext (add_zero _) (zero_add _)
-  have h3 : s (zi 1) + s (zf 1) = 1 := by rw [← map_add, e, map_one]
+  have h3 : s (zi 1) + s (zf 1) = 1 := by rw [← map_add (f := _), e, map_one]
   have h4 : (s (zi 1)).1 + (s (zf 1)).1 = 1 := congrArg Prod.fst h3
   have h5 : (s (zi 1)).2 + (s (zf 1)).2 = 1 := congrArg Prod.snd h3
   rw [h2, add_zero] at h4
@@ -107,7 +150,7 @@ private theorem ext_of_field (s t : AdeleRing (𝓞 K) K →+* AdeleRing (𝓞 K
       rw [e, map_mul, map_mul, h, (map_idem s hs).2, (map_idem t ht).2])
   refine RingHom.ext fun x => ?_
   have e : x = zi x.1 + zf x.2 := Prod.ext (add_zero _).symm (zero_add _).symm
-  rw [e, map_add, map_add]
+  rw [e, map_add (f := _), map_add (f := _)]
   exact congrArg₂ (· + ·) (congrFun hi x.1) (congrFun hf x.2)
 
 private theorem adMap_algebraMap (σ : K ≃+* K) (x : K) :

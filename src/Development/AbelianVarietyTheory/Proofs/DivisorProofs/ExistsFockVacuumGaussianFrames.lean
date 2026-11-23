@@ -1,10 +1,57 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsFockMap
-import Development.AbelianVarietyTheory.Definitions.Divisors.DiscreteSeriesHermitianUnique
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsUniqueArchimedeanMatrixAdeleExtensionOfComStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RealScalarArchimedeanAdeleSmulMatrixRealPlaceStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ArchimedeanTraceSymplecticFormOrthonormalFramesStatement
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.GaussianIsSchwartzFunction
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsFockMap
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.GaussianIsSchwartzFunction
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ArchimedeanTraceSymplecticFormOrthonormalFramesStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsUniqueArchimedeanMatrixAdeleExtensionOfComStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RealScalarArchimedeanAdeleSmulMatrixRealPlaceStatement
+public import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.MetaplecticRepresentation
+import Mathlib.Algebra.Order.Archimedean.Real.Hom
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open scoped TensorProduct Matrix Classical GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels
 open NumberField Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.BasicNotions.TH GlobalTheory.WeilM GlobalTheory.AdelicU GlobalTheory.FockAlg GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels GlobalTheory.RealLift
 
@@ -50,9 +97,9 @@ theorem exists_siegel {V C : Type} [AddCommGroup V] [Module ℝ V] [FiniteDimens
     simp only [he1, he2, map_zero, LinearMap.zero_apply] at h
     rw [hY]; linarith
   · have : e.symm (p c, 0) + e.symm (0, p (J c)) = c := by
-      rw [← map_add, LinearEquiv.symm_apply_eq]
+      rw [← map_add (f := _), LinearEquiv.symm_apply_eq]
       exact Prod.ext (add_zero _) (zero_add _)
-    rw [hX, hY, sub_neg_eq_add, ← map_add, ← map_add, this]
+    rw [hX, hY, sub_neg_eq_add, ← map_add (f := _), ← map_add (f := _), this]
 
 theorem exists_gaussian {V : Type} [NormedAddCommGroup V] [NormedSpace ℝ V] [FiniteDimensional ℝ V]
     (X Y : V →ₗ[ℝ] V →ₗ[ℝ] ℝ) (hX : ∀ x y, X x y = X y x) (hY : ∀ x y, Y x y = Y y x) (hp : ∀ x, x ≠ 0 → 0 < Y x x) :
@@ -127,9 +174,9 @@ theorem mul_infAd (u : AF F) (hu : evI F u = 0) (t : mixedEmbedding.mixedSpace F
 def trPair (F : Type) [Field F] [NumberField F] (κ : Type) [Fintype κ] :
     (κ → mixedEmbedding.mixedSpace F) →ₗ[ℝ] (κ → mixedEmbedding.mixedSpace F) →ₗ[ℝ] ℝ :=
   LinearMap.mk₂ ℝ (fun x y => Algebra.trace ℝ (mixedEmbedding.mixedSpace F) (∑ i, x i * y i))
-    (fun x x' y => by simp only [Pi.add_apply, add_mul, Finset.sum_add_distrib, map_add])
+    (fun x x' y => by simp only [Pi.add_apply, add_mul, Finset.sum_add_distrib, map_add (f := _)])
     (fun c x y => by simp only [Pi.smul_apply, smul_mul_assoc, ← Finset.smul_sum, map_smul])
-    (fun x y y' => by simp only [Pi.add_apply, mul_add, Finset.sum_add_distrib, map_add])
+    (fun x y y' => by simp only [Pi.add_apply, mul_add, Finset.sum_add_distrib, map_add (f := _)])
     (fun c x y => by simp only [Pi.smul_apply, mul_smul_comm, ← Finset.smul_sum, map_smul])
 
 theorem trPair_apply {κ : Type} [Fintype κ] (x y : κ → mixedEmbedding.mixedSpace F) :
@@ -228,7 +275,7 @@ theorem exists_vacuum : ∀ {F E : Type} [Field F] [NumberField F] [Field E] [Nu
     { toFun := fun c i => evI F ((d.e (U c)).1 i)
       map_add' := fun c c' => by
         funext i
-        rw [hadd, map_add]
+        rw [hadd, map_add (f := _)]
         exact map_add (evR F) _ _
       map_smul' := fun r c => by
         funext i
@@ -238,7 +285,7 @@ theorem exists_vacuum : ∀ {F E : Type} [Field F] [NumberField F] [Field E] [Nu
     { toFun := fun c i => evI F ((d.e (U c)).2 i)
       map_add' := fun c c' => by
         funext i
-        rw [hadd, map_add]
+        rw [hadd, map_add (f := _)]
         exact map_add (evR F) _ _
       map_smul' := fun r c => by
         funext i
@@ -248,6 +295,7 @@ theorem exists_vacuum : ∀ {F E : Type} [Field F] [NumberField F] [Field E] [Nu
       -2 * (∑ w, ∑ a, ∑ b, lineSign a b * c w a b * star (c' w a b)).im := fun c c' => by
     rw [← GlobalTheory.T.archimedeanTrace_symplecticForm_orthonormalFrames σ τ JA JB a₀ b₀ A C hCM hFr (U c) (U c') c c' (hU c).1 (hU c').1 (hU c).2 (hU c').2, d.form,
       trPair_apply, trPair_apply, ← map_sub, ← evR_apply]
+
     simp only [dotProduct, map_sub, map_sum, map_mul]
     rfl
   have hs : Function.Surjective (p.prod q) := by

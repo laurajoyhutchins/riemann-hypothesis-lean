@@ -1,4 +1,53 @@
-import Formalism.SharpRestriction.LevelLetterCocycles.SecOfPInt
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.ArcLiftingSetup
+public import Formalism.SharpRestriction.LevelLetterCocycles.RingConditionOfDeltaInvariants
+public import Formalism.SharpRestriction.LevelLetterCocycles.ArcCoordinatesOfMembership
+public import Formalism.SharpRestriction.LevelLetterCocycles.FilCrisTriv
+public import Formalism.SharpRestriction.LevelLetterCocycles.StrictSesLetter
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -108,6 +157,7 @@ theorem pull_vec [FiniteDimensional Qp LL] (hK : Function.Bijective (algebraMap 
   refine ⟨m, r, fun j => ?_, fun s hs hneg => ?_⟩
   · have h1 : crisMap B ι.f (dvO W T₂ e b r) = ∑ j, (∑ k, algebraMap O LL (r k) * algebraMap O LL (o k j)) •
         dv W Y e bY (Pi.single j 1) := by
+
       rw [dvO_sum, map_sum]
       simp only [map_smul, ho, Finset.smul_sum, smul_smul, Finset.sum_smul]
       exact Finset.sum_comm
@@ -117,6 +167,7 @@ theorem pull_vec [FiniteDimensional Qp LL] (hK : Function.Bijective (algebraMap 
       simp only [smul_smul]
     have := congrFun (coef_eq _ hindY _ _ (h1.symm.trans h2')) j
     apply hinj
+
     rw [map_sum, map_mul, map_pow, map_natCast]
     simpa only [map_mul] using this
   · rw [hdvr]
@@ -141,6 +192,7 @@ theorem o_inj [FiniteDimensional Qp LL] (hK : Function.Bijective (algebraMap K�
       exact Submodule.sum_mem _ fun k _ => Submodule.smul_mem _ _ (Submodule.subset_span ⟨k, rfl⟩)
     exact ((Strict.mem_DcrisL_iff PD _ ξ).1 this).1
   have h0 : crisMap B ι.f ξ = 0 := by
+
     rw [hξ, map_sum]
     simp only [map_smul, ho, Finset.smul_sum, smul_smul]
     rw [Finset.sum_comm]
@@ -149,8 +201,8 @@ theorem o_inj [FiniteDimensional Qp LL] (hK : Function.Bijective (algebraMap K�
   funext k
   exact Fintype.linearIndependent_iff.1 hind2 ρ (by rw [← hξ, hξ0]) k
 
-include W in
 
+include W in
 theorem right_inv (hV : ValRing (LL := LL) O v) (hinj : Function.Injective (algebraMap O LL)) {d dY : ℕ}
     (o : Fin d → Fin dY → O)
     (hinjo : ∀ ρ : Fin d → LL, (∀ j, ∑ k, ρ k * algebraMap O LL (o k j) = 0) → ρ = 0) :
@@ -172,6 +224,7 @@ theorem right_inv (hV : ValRing (LL := LL) O v) (hinj : Function.Injective (alge
       rw [hf, Finset.sum_apply]
       simp [Pi.single_apply]
     have h1 := congrArg (fun φ : (Fin d → LL) →ₗ[LL] (Fin d → LL) => φ (Pi.single k 1)) hg
+
     simp only [LinearMap.comp_apply, LinearMap.id_apply, hv, map_sum, map_smul] at h1
     have h2 := congrFun h1 m
     rw [Finset.sum_apply] at h2
@@ -182,6 +235,7 @@ theorem right_inv (hV : ValRing (LL := LL) O v) (hinj : Function.Injective (alge
     · simp [Ne.symm hkm, hkm]
   obtain ⟨q, D, hD⟩ := int_vec W hV fun x : Fin dY × Fin d => Dl x.1 x.2
   refine ⟨q, fun j m => D (j, m), fun k m => hinj ?_⟩
+
   rw [map_sum]
   simp only [map_mul, hD]
   have : ∑ j, algebraMap O LL (o k j) * ((PD.p : LL) ^ q * Dl j m) =

@@ -1,5 +1,60 @@
-import Formalism.HermitianCurvature.StatementG
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.RemainderNormLeStrictUpper
+module
+
+public import Formalism.HermitianCurvature.StatementG
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.RemainderNormLeStrictUpper
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+public import Mathlib.Analysis.Calculus.ContDiff.Bounds
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.InnerProductSpace.Calculus
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Mathlib.Topology.UniformSpace.Uniformizable
+
+@[expose] public section
 
 open Matrix
 
@@ -29,8 +84,8 @@ theorem cutM_nonneg {s : ℕ} (τ : ℝ) (Z : Mat s) : 0 ≤ cutM τ Z :=
   Finset.prod_nonneg fun _ _ => Finset.prod_nonneg fun _ _ => chi0_nonneg _
 
 theorem cutM_le_one {s : ℕ} (τ : ℝ) (Z : Mat s) : cutM τ Z ≤ 1 :=
-  Finset.prod_le_one (fun _ _ => Finset.prod_nonneg fun _ _ => chi0_nonneg _)
-    fun _ _ => Finset.prod_le_one (fun _ _ => chi0_nonneg _) fun _ _ => smooth_cutoff_le_one _
+  Finset.prod_le_one₀ (fun _ _ => Finset.prod_nonneg fun _ _ => chi0_nonneg _)
+    fun _ _ => Finset.prod_le_one₀ (fun _ _ => chi0_nonneg _) fun _ _ => smooth_cutoff_le_one _
 
 theorem cutM_eq_one {s : ℕ} {τ : ℝ} {Z : Mat s} (hτ : 0 < τ) (h : ‖Z‖ ≤ τ) : cutM τ Z = 1 := by
   refine Finset.prod_eq_one fun i _ => Finset.prod_eq_one fun j _ => extendedCharacter_one ?_
@@ -53,7 +108,7 @@ theorem cutM_eq_zero {s : ℕ} {τ : ℝ} {Z : Mat s} (hτ : 0 < τ) (h : 2 * τ
 theorem cutM_contDiff {s : ℕ} (τ : ℝ) {n : ℕ∞} : ContDiff ℝ n (cutM (s := s) τ) := by
   show ContDiff ℝ n (fun Z : Mat s => ∏ i, ∏ j, chi0 (‖Z i j‖ ^ 2 / τ ^ 2))
   refine contDiff_prod fun i _ => contDiff_prod fun j _ => contDiff_smooth_cutoff.comp ?_
-  exact ((contDiff_apply_apply ℝ ℂ i j).norm_sq ℝ).div_const _
+  exact ((contDiff_apply_apply (𝕜 := ℝ) (E := ℂ) i j).norm_sq ℝ).div_const _
 
 theorem cutM_scale {s : ℕ} {τ : ℝ} (hτ : 0 < τ) :
     cutM (s := s) τ = fun Z => cutM 1 (τ⁻¹ • Z) := by
@@ -94,7 +149,7 @@ theorem critCut_nonneg {n : ℕ} (δ : ℝ) (z : ℂ) (x : Fin n → ℂ) : 0 �
   Finset.prod_nonneg fun _ _ => chi0_nonneg _
 
 theorem critCut_le_one {n : ℕ} (δ : ℝ) (z : ℂ) (x : Fin n → ℂ) : critCut δ z x ≤ 1 :=
-  Finset.prod_le_one (fun _ _ => chi0_nonneg _) fun _ _ => smooth_cutoff_le_one _
+  Finset.prod_le_one₀ (fun _ _ => chi0_nonneg _) fun _ _ => smooth_cutoff_le_one _
 
 theorem critCut_eq_one {n : ℕ} {δ : ℝ} {z : ℂ} {x : Fin n → ℂ} (hδ : 0 < δ)
     (h : ‖x - fun _ => z‖ ≤ δ) : critCut δ z x = 1 := by
@@ -119,7 +174,7 @@ theorem critCut_eq_zero {n : ℕ} {δ : ℝ} {z : ℂ} {x : Fin n → ℂ} (hδ 
 theorem critCut_contDiff {d : ℕ} (δ : ℝ) (z : ℂ) {n : ℕ∞} : ContDiff ℝ n (critCut (n := d) δ z) := by
   show ContDiff ℝ n (fun x : Fin d → ℂ => ∏ k, chi0 (‖x k - z‖ ^ 2 / δ ^ 2))
   refine contDiff_prod fun k _ => contDiff_smooth_cutoff.comp ?_
-  exact (((contDiff_apply ℝ ℂ k).sub contDiff_const).norm_sq ℝ).div_const _
+  exact (((contDiff_apply ℝ (fun _ => ℂ) k).sub contDiff_const).norm_sq ℝ).div_const _
 
 theorem critCut_shift {d : ℕ} (δ : ℝ) (z : ℂ) :
     critCut (n := d) δ z = fun x => critCut δ 0 (x - fun _ => z) := by
@@ -439,7 +494,7 @@ theorem product_lower_bound : Formalism.FourierDecayAlt.G.ProdLower := by
         norm_prod]
       refine mul_le_mul_of_nonneg_left ?_ (norm_nonneg _)
       calc ∏ l ∈ Finset.univ.erase k, ‖xOf X B l‖ ≤ ∏ _l ∈ Finset.univ.erase k, L :=
-            Finset.prod_le_prod (fun _ _ => norm_nonneg _) fun l _ => norm_xOf_le hX' hB' l
+            Finset.prod_le_prod₀ (fun _ _ => norm_nonneg _) fun l _ => norm_xOf_le hX' hB' l
         _ = L ^ m := by
             rw [Finset.prod_const, Finset.card_erase_of_mem (Finset.mem_univ k), Finset.card_univ,
               Fintype.card_fin, Nat.add_sub_cancel]

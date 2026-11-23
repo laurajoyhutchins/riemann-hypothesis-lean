@@ -1,5 +1,47 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.GlobalClassFormation.CupLocal
+module
+
+public import GroundTheory.ProfiniteCohomology.GlobalClassFormation.CupLocal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
@@ -7,8 +49,6 @@ namespace GroundTheory.ProfCoh
 open CategoryTheory NumberField IntermediateField GroundTheory.Global FiniteSubfield IsDedekindDomain
 
 open scoped DirectSum
-
-local notation "ℚ̄" => AlgebraicClosure ℚ
 
 noncomputable section
 
@@ -46,15 +86,6 @@ theorem placeInv_brauerLocal_globalCupClass (χ : Additive K.1.fixingSubgroup �
   | .inl v => placeInv_brauerLocal_globalCupClass_inl ι v χ a _
       (exists_eq_one_iff_mem_range_norm v (algebraMap K.1 v.Completion (a : K.1))).choose_spec
 
-theorem finite_support_char_localSymbolAt (χ : Additive K.1.fixingSubgroup →ₜ+ QZ) (a : K.1ˣ) :
-    (Function.support fun v : Place K.1 => χ (Additive.ofMul (localSymbolAt ι v a))).Finite := by
-  classical
-  refine ((brauerLocal ι (globalCupClass χ a)).support.finite_toSet).subset fun v hv => ?_
-  rw [Function.mem_support, ← placeInv_brauerLocal_globalCupClass] at hv
-  rw [Finset.mem_coe, DFinsupp.mem_support_iff]
-  intro h
-  exact hv (by rw [h, map_zero])
-
 theorem brauerSumInv_globalCupClass (χ : Additive K.1.fixingSubgroup →ₜ+ QZ) (a : K.1ˣ) :
     brauerSumInv ι (globalCupClass χ a) = ∑ᶠ v : Place K.1, χ (Additive.ofMul (localSymbolAt ι v a)) := by
   classical
@@ -62,6 +93,7 @@ theorem brauerSumInv_globalCupClass (χ : Additive K.1.fixingSubgroup →ₜ+ QZ
   have hsum : brauerSumInv ι (globalCupClass χ a) = ∑ v ∈ x.support, placeInv v (x v) := by
     change sumPlaceInv K x = _
     conv_lhs => rw [← DFinsupp.sum_single (f := x)]
+
     rw [DFinsupp.sum, map_sum]
     refine Finset.sum_congr rfl fun v _ => ?_
     exact sumPlaceInv_of v (x v)

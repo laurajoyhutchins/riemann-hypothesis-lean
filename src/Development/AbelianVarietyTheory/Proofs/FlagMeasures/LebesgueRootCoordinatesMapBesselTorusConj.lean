@@ -1,6 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.Admissible
-import Formalism.HermitianCurvature.HeisenbergConjugationMeasurePreserving
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.Admissible
+public import Formalism.HermitianCurvature.WeylElementCommutesLevelOne
+public import Formalism.HermitianCurvature.HeisenbergConjugationMeasurePreserving
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Formalism.FourierDecayAlt GlobalTheory.ThA MeasureTheory Formalism.QuantumDeterminants Matrix
 open scoped InnerProductSpace
@@ -109,22 +154,18 @@ theorem contOn : ContinuousOn (aT k r) (Metric.sphere (0 : ℂ) 1) := by
 theorem circle_compact : IsCompact (aT k r '' Metric.sphere (0 : ℂ) 1) :=
   (isCompact_sphere _ _).image_of_continuousOn contOn
 
-theorem circle_subgroup : B2.IsClosedSubgroup (aT k r '' Metric.sphere (0 : ℂ) 1) where
-  one_mem := ⟨1, by simp, aT_one⟩
-  mul_mem := by
-    rintro _ ⟨a, ha, rfl⟩ _ ⟨b, hb, rfl⟩
+theorem circle_subgroup : B2.IsClosedSubgroup (aT k r '' Metric.sphere (0 : ℂ) 1) := by
+  refine ⟨⟨1, by simp, aT_one⟩, ?_, ?_, ?_, circle_compact.isClosed⟩
+  · rintro _ ⟨a, ha, rfl⟩ _ ⟨b, hb, rfl⟩
     refine ⟨a * b, ?_, (aT_mul a b).symm⟩
     simp only [mem_sphere_zero_iff_norm] at *
     rw [norm_mul, ha, hb, mul_one]
-  inv_mem := by
-    rintro _ ⟨a, ha, rfl⟩
+  · rintro _ ⟨a, ha, rfl⟩
     refine ⟨a⁻¹, ?_, (aT_inv (ne_zero_of_mem_unit_sphere ⟨a, ha⟩)).symm⟩
     simp only [mem_sphere_zero_iff_norm] at *
     rw [norm_inv, ha, inv_one]
-  unit := by
-    rintro _ ⟨a, ha, rfl⟩
+  · rintro _ ⟨a, ha, rfl⟩
     exact aT_unit (ne_zero_of_mem_unit_sphere ⟨a, ha⟩)
-  closed := circle_compact.isClosed
 
 theorem conj_cont (a : B.Mat k r) : Continuous (conjM a : Mt k r → Mt k r) :=
   (continuous_const.matrix_mul (continuous_id (X := B.Mat k r))).matrix_mul continuous_const

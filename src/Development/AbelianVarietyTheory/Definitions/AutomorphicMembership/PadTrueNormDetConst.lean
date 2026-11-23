@@ -1,8 +1,43 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.AmpleOnAbelianBase
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.DegFrame
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.AdmissibleRepresentationFactorisation
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.NormDetAtConstOfPlacewise
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.AdmissibleRepresentationFactorisation
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.NormDetAtConstOfPlacewise
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -23,41 +58,12 @@ def padTrue (L : LocSt D N j ng) (G : GlobSt fun p => (L.loc p).Mdl) : PadPkg D 
 
 variable (L : LocSt D N j ng) (G : GlobSt fun p => (L.loc p).Mdl)
 
-theorem padTrue_arDeg : (padTrue s Φ hm jC hj hA L G).arDeg = (arIn s Φ hm).arDeg := rfl
-
 section Prime
 
 open PadPkg (md)
 
 variable {p : ℕ} [Fact p.Prime] {la : PlL D p}
 
-def padTrue_mp (p : ℕ) [Fact p.Prime] (la : PlL D p) :
-    (padTrue s Φ hm jC hj hA L G).Mp p la ≃ AdmPl S κ jC hj p la :=
-  mpEquiv s L G (admissible_representation_factorisation S κ jC hj hA) (flatSt s Φ hm) (arIn s Φ hm) p la
-
-def padTrue_crv (z : (padTrue s Φ hm jC hj hA L G).Mp p la) :
-    (padTrue s Φ hm jC hj hA L G).CurveM p la z ≃ Crv (padTrue_mp s Φ hm jC hj hA L G p la z) where
-  toFun c := c.2
-  invFun c := ⟨Fact.out, c⟩
-  left_inv _ := rfl
-  right_inv _ := rfl
-
-example (z : (padTrue s Φ hm jC hj hA L G).Mp p la) :
-    (md (padTrue s Φ hm jC hj hA L G) p la z).Z.dim = Formalism.DegreeFormula.dimFl D.what₂.Tau N + 1 := rfl
-
 end Prime
-
-example (T : Finset ℕ) (R : ℝ) (x : DV.Rt D.what₂.Tau N) :
-    (padTrue s Φ hm jC hj hA L G).arDeg T R (MvPolynomial.X x ^ (Formalism.DegreeFormula.dimFl D.what₂.Tau N + 1)) =
-      ∑ k, polar (fun w => (adlOf (Φ.C k) (hm k) w).arTop) (Multiset.replicate (Formalism.DegreeFormula.dimFl D.what₂.Tau N + 1)
-        (rootSym S.Dw (ArIn.ind T) (some R) (DV.tauEmb D x.1) x.2)) := by
-  rw [padTrue_arDeg, ArIn.arDeg, LinearMap.sum_apply]
-  refine Finset.sum_congr rfl fun k _ => ?_
-  change numL _ _ (MvPolynomial.rename _ _) = _
-  rw [map_pow, MvPolynomial.rename_X, numL_X_pow]
-  rfl
-
-example (T : Finset ℕ) (R : ℝ) : (padTrue s Φ hm jC hj hA L G).arDeg T R 1 = 0 :=
-  (arIn s Φ hm).arDeg_homog T R 1 0 (Nat.succ_ne_zero _).symm (MvPolynomial.isHomogeneous_one _ _)
 
 end GlobalTheory.ShFam.Pad

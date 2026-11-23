@@ -1,8 +1,44 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsProdUnif
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.HypSEisensteinCurve
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.EndoLbIsoSymmetryHypothesisExtendNormalModel
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ClsLinCombSingle
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsProdUnif
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.EndoLbIsoSymmetryHypothesisExtendNormalModel
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj IsLocalRing
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Out ReciprocityTheory.ChartRestriction.G.Geo.Tor
 open GlobalTheory.Toroidal GlobalTheory.LocM GlobalTheory.PolFan GlobalTheory.ZM GlobalTheory.SiegelTor GlobalTheory.TorRef GlobalTheory.PolDeg GlobalTheory.Mum
@@ -34,14 +70,24 @@ theorem cubeCls_add {G : Over S} [GrpObj G] [IsCommMonObj G] {T : Over S} {n : �
     (a b : Pic G.left) :
     GlobalTheory.ZH.EndoExtend.cubeCls G x (a + b) = GlobalTheory.ZH.EndoExtend.cubeCls G x a + GlobalTheory.ZH.EndoExtend.cubeCls G x b := by
   unfold GlobalTheory.ZH.EndoExtend.cubeCls
-  simp only [map_add, smul_add, Finset.sum_add_distrib]
+  simp only [map_add (f := _), smul_add, Finset.sum_add_distrib]
 
 theorem cubeCls_one_left {G : Over S} [GrpObj G] [IsCommMonObj G] {T : Over S} (y : T ⟶ G) (c : Pic G.left) :
     GlobalTheory.ZH.EndoExtend.cubeCls G ![1, y] c = 0 := by
-  have h := GlobalTheory.ZH.CubeRootAut.cubeCls_pair (1 : T ⟶ G) y c
-  have e : GlobalTheory.ZH.EndoExtend.cubeCls G ![1, y] c = GlobalTheory.TripleProd.cubeCls ![1, y] c := rfl
-  rw [e, h, _root_.one_mul]
-  abel
+  classical
+  unfold GlobalTheory.ZH.EndoExtend.cubeCls
+  refine (Fintype.sum_equiv (Equiv.ulift : ULift.{0} (Finset (Fin 2)) ≃ Finset (Fin 2)) _
+    (fun I => ((-1 : ℤ) ^ (2 - I.card)) • pull (psum G ![1, y] I).left c) (fun _ => rfl)).trans ?_
+  have u : (Finset.univ : Finset (Finset (Fin 2))) = {∅, {0}, {1}, {0, 1}} := by decide
+  have p₀ : psum G ![1, y] ∅ = 1 := rfl
+  have p₁ : psum G ![1, y] {0} = 1 := _root_.mul_one 1
+  have p₂ : psum G ![1, y] {1} = y := _root_.mul_one y
+  have p₄ : psum G ![1, y] {0, 1} = 1 * y := congrArg (1 * ·) (_root_.mul_one y)
+  rw [u, Finset.sum_insert (by decide), Finset.sum_insert (by decide), Finset.sum_insert (by decide),
+    Finset.sum_singleton, p₀, p₁, p₂, p₄, _root_.one_mul]
+  have c₁ : ({0, 1} : Finset (Fin 2)).card = 2 := by decide
+  simp only [c₁, Finset.card_singleton, Finset.card_empty]
+  norm_num
 
 end GlobalTheory.MumProd.GAdjFst
 

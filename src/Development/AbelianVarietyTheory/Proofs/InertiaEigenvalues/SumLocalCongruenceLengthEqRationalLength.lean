@@ -1,19 +1,64 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.RowsExhaust
-import Formalism.LocalToGlobal.NormalizedHeckeFactors.CoverEta
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.NormalizedLengthLatticeQuotientBaseChangeEqStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.LatticeProjectionBaseChangeDvrCommStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.LatticeInfSubspaceBaseChangeDvrStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CongruenceLengthFinsetSupEqSumStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IntegralFormLatticeEqSumLocalisedLatticesStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.HeckeEigenspaceSumDisjointComplStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CoeffEmbeddingIntegersResCharUnitStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.FiniteLengthLatticeProjectionQuotientStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.GoodEigSumSupComplEigSumEqTopStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.RationalFormEqSumLocalisationProjectionsStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.FgInfSupOfIsComplStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.SpanImageSemilinearLatticeEqStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.DisjointFinsetSupOfSupIndepSupStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.RowsExhaust
+public import Formalism.LocalToGlobal.NormalizedHeckeFactors.CoverEta
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CoeffEmbeddingIntegersResCharUnitStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CongruenceLengthFinsetSupEqSumStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.DisjointFinsetSupOfSupIndepSupStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.FgInfSupOfIsComplStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.FiniteLengthLatticeProjectionQuotientStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.GoodEigSumSupComplEigSumEqTopStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.HeckeEigenspaceSumDisjointComplStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IntegralFormLatticeEqSumLocalisedLatticesStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.LatticeInfSubspaceBaseChangeDvrStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.LatticeProjectionBaseChangeDvrCommStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.NormalizedLengthLatticeQuotientBaseChangeEqStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.RationalFormEqSumLocalisationProjectionsStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.SpanImageSemilinearLatticeEqStatement
+public import Formalism.LocalToGlobal.NormalizedHeckeFactors.CoverLen
+import Formalism.LocalToGlobal.NormalizedHeckeFactors.CoverThm
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+public import Mathlib.Data.ENat.BigOperators
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Formalism.LocalToGlobal.Divisibility.ClassSum
+import Formalism.LocalToGlobal.IndefiniteForms.IndefSide
+
+@[expose] public section
 
 open Formalism.BasicNotions Formalism.ConjugateSelfDual ReciprocityTheory.Gal ReciprocityTheory.Aut Formalism.AUTREP Formalism.L2 Formalism.L2.DIV Formalism.L2.Indef NumberField IsDedekindDomain GlobalTheory.EtaJoin
 
@@ -148,6 +193,7 @@ theorem sum_etaLoc_eq_etaRat : ∀ (D : D7) (M : MtFam D) (T : NormalizedLocalCo
     have hli := (D.what₂.jMt_basis (D.what₂.muTw w) j b).1
     refine (injective_iff_map_eq_zero _).2 fun y hy => ?_
     have hsum := b.sum_repr y
+
     rw [← hsum, map_sum] at hy
     simp only [LinearMap.map_smulₛₗ] at hy
     have hz := Fintype.linearIndependent_iff.1 hli _ hy
@@ -238,7 +284,7 @@ theorem sum_etaLoc_eq_etaRat : ∀ (D : D7) (M : MtFam D) (T : NormalizedLocalCo
     have hm : b a ∈ U ⊔ U' := by rw [hUU]; exact Submodule.mem_top
     obtain ⟨u, hu, u', hu', e⟩ := Submodule.mem_sup.1 hm
     show T.B.iV j w (b a) ∈ G' ⊔ B'
-    rw [← e, map_add]
+    rw [← e, map_add (f := _)]
     exact Submodule.add_mem_sup (Submodule.subset_span ⟨u, hu, rfl⟩) (Submodule.subset_span ⟨u', hu', rfl⟩)
   have key : ∀ {a c d e : Submodule (FractionRing (T.B.Oc j w)) (T.B.V j w)},
       a ≤ c → d ≤ e → a ⊔ d = ⊤ → Disjoint c e → c = a := by
@@ -275,7 +321,7 @@ theorem sum_etaLoc_eq_etaRat : ∀ (D : D7) (M : MtFam D) (T : NormalizedLocalCo
     have hy : y ∈ D.nd.eigSum i.1 ↑(D.nd.Zgood i.1) ⊔ D.nd.eigSum i.1 (↑(D.nd.Zgood i.1))ᶜ := by
       rw [GlobalTheory.T.goodEigSum_sup_compl_eigSum_eq_top D i.1 (zrat_loc i.2 hZ) (hSP i.1 i.2)]; exact Submodule.mem_top
     obtain ⟨a, ha, c, hc', e⟩ := Submodule.mem_sup.1 hy
-    rw [← Submodule.restrictScalars_sup, Submodule.restrictScalars_mem, psiO_apply, ← e, map_add]
+    rw [← Submodule.restrictScalars_sup, Submodule.restrictScalars_mem, psiO_apply, ← e, map_add (f := _)]
     exact Submodule.add_mem_sup ((mem_gK T i _ _).2 ⟨a, ha, rfl⟩) ((mem_gK T i _ _).2 ⟨c, hc', rfl⟩)
   have hEL : F.sup (lO T) = latC T.B j w := by
     ext y
@@ -292,12 +338,12 @@ theorem sum_etaLoc_eq_etaRat : ∀ (D : D7) (M : MtFam D) (T : NormalizedLocalCo
       refine ⟨fun i => if h : i ∈ D.nd.locs j w then zf ⟨i, h⟩ else 0, fun i => ?_, ?_⟩
       · dsimp only
         by_cases h : i ∈ D.nd.locs j w
-        · rw [dif_pos h]; exact hzf ⟨i, h⟩
-        · rw [dif_neg h]; exact Submodule.zero_mem _
+        · rw [dite_eq_left h]; exact hzf ⟨i, h⟩
+        · rw [dite_eq_right h]; exact Submodule.zero_mem _
       · rw [← hμ]
         refine Finset.sum_congr rfl fun i _ => ?_
         dsimp only
-        rw [dif_pos i.2]
+        rw [dite_eq_left i.2]
         exact (hzf' i).symm
     · rintro ⟨z, hz, rfl⟩
       refine ⟨fun i => ⟨T.Psi j w i.1 i.2 (z i.1), ?_⟩, rfl⟩

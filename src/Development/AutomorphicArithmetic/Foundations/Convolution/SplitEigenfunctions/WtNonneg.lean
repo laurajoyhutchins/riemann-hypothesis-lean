@@ -1,9 +1,48 @@
-import Development.AutomorphicArithmetic.Foundations.Convolution.SplitEigenfunctions.ThetaLiftEqAnisotropicPart
-import Development.AutomorphicArithmetic.Foundations.Convolution.SplitEigenfunctions.HermitianMatrixBasisOne
-import Development.AutomorphicArithmetic.Foundations.Convolution.SplitEigenfunctions.AbLower
-import Development.AutomorphicArithmetic.Foundations.Convolution.RealGroupAnalysis.ThetaBounds.ContinuousScalarFour
+module
+
+public import Development.AutomorphicArithmetic.Foundations.Convolution.SplitEigenfunctions.ThetaLiftEqAnisotropicPart
+public import Development.AutomorphicArithmetic.Foundations.Convolution.RealGroupAnalysis.ThetaBounds.ContinuousScalarFour
 import Development.AutomorphicArithmetic.Foundations.Convolution.RealGroupAnalysis.ThetaBounds.Iwa
-import Development.AutomorphicArithmetic.Foundations.Convolution.RealGroupAnalysis.UnitaryActions.ContinuousQuaternaryQuadraticForm
+public import Development.AutomorphicArithmetic.Foundations.Convolution.RealGroupAnalysis.UnitaryActions.ContinuousQuaternaryQuadraticForm
+public import Development.AutomorphicArithmetic.Foundations.Convolution.SplitEigenfunctions.AbLower
+public import Development.AutomorphicArithmetic.Foundations.Convolution.SplitEigenfunctions.HermitianMatrixBasisOne
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 open NumberField IsDedekindDomain MeasureTheory Matrix Topology Filter
 open Neutral.B1 Formalism.L2.Host Formalism.ConjugateSelfDual GlobalTheory.CuspRep GlobalTheory.GalOfCusp UpperTheory.V UpperTheory.V.Af UpperTheory.V.Published GroundTheory.Global GroundTheory.Automorphic.GJMatrix
@@ -14,13 +53,13 @@ private theorem cD_one' {F : Type} [Field F] [NumberField F] (g : G1 F) : cD (1 
   ext i j
   fin_cases i <;> fin_cases j <;> simp [cD]
 
-private theorem norm_eta {E : Type} [Field E] [NumberField E] [IsTotallyComplex E] {D : Dat ℚ E} (W : Weil D)
+private theorem norm_eta {E : Type} [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] {D : Dat ℚ E} (W : Weil D)
     (a : (A ℚ)ˣ) : ‖((W.η.1 a : ℂˣ) : ℂ)‖ = 1 := by
   have h2 : ((W.η.1 a : ℂˣ) : ℂ) ^ 2 = 1 := by
     rw [← Units.val_pow_eq_pow_val, W.η_sq a, Units.val_one]
   exact (pow_eq_one_iff_of_nonneg (norm_nonneg _) two_ne_zero).mp (by rw [← norm_pow, h2, norm_one])
 
-private theorem om_norm {E : Type} [Field E] [NumberField E] [IsTotallyComplex E] {D : Dat ℚ E} (W : Weil D)
+private theorem om_norm {E : Type} [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] {D : Dat ℚ E} (W : Weil D)
     (ph : S4 ℚ) (b : A ℚ) (a : (A ℚ)ˣ) (k' : G1 ℚ) (x : GL (Fin 2) (A E)) (hx : nu ℚ x = 1) (v : V4 ℚ) :
     ‖(W.Om (nU b * mD a * k') (W.L x ph)).1 v‖ =
       ab a ^ 2 * ‖(W.Om k' ph).1 (fun i => (a : A ℚ) * D.act x⁻¹ v i)‖ := by
@@ -61,7 +100,7 @@ private theorem wt_nonneg'' (S : Set (Fin 4 → FiniteAdeleRing (𝓞 ℚ) ℚ))
   · positivity
   · exact le_rfl
 
-private theorem maj_core (hL : LatSum) (hDec : DecE) (E : Type) [Field E] [NumberField E] [IsTotallyComplex E]
+private theorem maj_core (hL : LatSum) (hDec : DecE) (E : Type) [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E]
     (D : Dat ℚ E) (W : Weil D) (P : CuspSub E 2) (hO : Orb1) (Ω : Set (GL (Fin 2) (A E))) (hΩ : IsCompact Ω)
     (hΩ1 : ∀ k ∈ Ω, nu ℚ k = 1) (c₀ : ℝ) (hc₀ : 0 < c₀)
     (hred : ∀ h : G1 E, ∃ (γ : Matrix.SpecialLinearGroup (Fin 2) E) (u : A E) (β : (A E)ˣ), ∃ k₁ ∈ Ω,

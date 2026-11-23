@@ -1,5 +1,50 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SquareIntegrability.GCauchyStatement
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SquareIntegrability.GCauchyStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Calculus.ContDiff.WithLp
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GlobalTheory
 
@@ -36,6 +81,7 @@ theorem herm_smul_right (c : ℂ) (u w : EuclideanSpace ℂ ι) :
   exact Finset.sum_congr rfl fun i _ => by ring
 
 theorem herm_conj (u w : EuclideanSpace ℂ ι) : (starRingEnd ℂ) (Hf u w) = Hf w u := by
+
   simp only [Hf, map_sum, map_mul, Complex.conj_conj]
   exact Finset.sum_congr rfl fun i _ => by ring
 
@@ -71,8 +117,8 @@ theorem herm_differentiable (a : EuclideanSpace ℂ ι) :
 
 end FockTranslation
 
-open FockTranslation in
 
+open FockTranslation in
 theorem fock_translation_laws {ι : Type} [Fintype ι] (U : ℕ → EuclideanSpace ℂ ι → (EuclideanSpace ℂ ι → ℂ) → EuclideanSpace ℂ ι → ℂ)
     (hU : ∀ (q : ℕ) a F v, U q a F v = cexp (q * Real.pi * Hf v a - q * Real.pi * Hf a a / 2) * F (v - a)) (q : ℕ) :
     (∀ a b F, U q a (U q b F) = cexp (-(q * Real.pi * I * (Hf a b).im)) • U q (a + b) F) ∧ (∀ F, U q 0 F = F) ∧
@@ -90,20 +136,22 @@ theorem fock_translation_laws {ι : Type} [Fintype ι] (U : ℕ → EuclideanSpa
     simp only [hU, Pi.smul_apply, smul_eq_mul]
     rw [← mul_assoc, ← mul_assoc, ← Complex.exp_add, ← Complex.exp_add, sub_sub]
     congr 2
-    simp only [herm_add_left, herm_add_right, herm_sub_left]
-    rw [herm_sub_swap a b]
+    simp only [FockTranslation.herm_add_left, FockTranslation.herm_add_right,
+      FockTranslation.herm_sub_left]
+    rw [FockTranslation.herm_sub_swap a b]
     ring
   have h2 : ∀ F, U q 0 F = F := by
     intro F
     funext v
-    simp [hU, herm_zero_right]
+    simp [hU, FockTranslation.herm_zero_right]
   have h6 : ∀ (Y : GT ι) F, F ∈ Y.Sec q ↔
       Differentiable ℂ F ∧ ∀ γ ∈ lat Y.b, Y.ka γ • U q γ F = F := by
     intro Y F
     have key : ∀ γ v, (Y.ka γ • U q γ F) (v + γ) =
         Y.ka γ * cexp (q * Real.pi * Hf v γ + q * Real.pi * Hf γ γ / 2) * F v := by
       intro γ v
-      simp only [hU, Pi.smul_apply, smul_eq_mul, add_sub_cancel_right, herm_add_left]
+      simp only [hU, Pi.smul_apply, smul_eq_mul, add_sub_cancel_right,
+        FockTranslation.herm_add_left]
       rw [← mul_assoc]
       congr 3
       ring
@@ -116,7 +164,7 @@ theorem fock_translation_laws {ι : Type} [Fintype ι] (U : ℕ → EuclideanSpa
   refine ⟨h1, h2, ?_, ?_, ?_, h6, ?_, ?_⟩
   · intro a F
     funext v
-    simp only [hU, herm_neg_left, herm_neg_right, neg_neg]
+    simp only [hU, FockTranslation.herm_neg_left, FockTranslation.herm_neg_right, neg_neg]
     congr 2
     abel
   · intro a F M
@@ -125,8 +173,8 @@ theorem fock_translation_laws {ι : Type} [Fintype ι] (U : ℕ → EuclideanSpa
     | succ M ih =>
       rw [Function.iterate_succ_apply', ih, h1]
       have : (Hf a ((M : ℂ) • a)).im = 0 := by
-        rw [herm_smul_right]
-        simp [herm_self_im]
+        rw [FockTranslation.herm_smul_right]
+        simp [FockTranslation.herm_self_im]
       rw [this]
       have e : a + (M : ℂ) • a = ((M + 1 : ℕ) : ℂ) • a := by
         push_cast
@@ -136,14 +184,14 @@ theorem fock_translation_laws {ι : Type} [Fintype ι] (U : ℕ → EuclideanSpa
     rw [hU, norm_mul, mul_pow, Complex.norm_exp, mul_comm (_ ^ 2) (‖F (v - a)‖ ^ 2), mul_assoc,
       ← Real.exp_nat_mul, ← Real.exp_add]
     congr 2
-    rw [← herm_self_re v, ← herm_self_re (v - a)]
+    rw [← FockTranslation.herm_self_re v, ← FockTranslation.herm_self_re (v - a)]
     have e : (q * Real.pi * Hf v a - q * Real.pi * Hf a a / 2 : ℂ) =
         ((q * Real.pi : ℝ) : ℂ) * Hf v a - ((q * Real.pi / 2 : ℝ) : ℂ) * Hf a a := by
       push_cast
       ring
     rw [e]
-    simp only [herm_sub_left, herm_sub_right, Complex.sub_re, Complex.re_ofReal_mul,
-      herm_re_swap v a]
+    simp only [FockTranslation.herm_sub_left, FockTranslation.herm_sub_right, Complex.sub_re,
+      Complex.re_ofReal_mul, FockTranslation.herm_re_swap v a]
     push_cast
     ring
   · intro Y a ha F hF
@@ -154,7 +202,7 @@ theorem fock_translation_laws {ι : Type} [Fintype ι] (U : ℕ → EuclideanSpa
           cexp (q * Real.pi * Hf v a - q * Real.pi * Hf a a / 2) * F (v - a) :=
         funext fun v => hU q a F v
       rw [e]
-      have := herm_differentiable a
+      have := FockTranslation.herm_differentiable a
       fun_prop
     · obtain ⟨k, hk⟩ := ha γ hγ
       have hk' : (q : ℂ) * ((Hf a γ).im : ℂ) = k := by exact_mod_cast hk
@@ -163,7 +211,7 @@ theorem fock_translation_laws {ι : Type} [Fintype ι] (U : ℕ → EuclideanSpa
         congr 1
         rw [Complex.exp_eq_exp_iff_exists_int]
         refine ⟨k, ?_⟩
-        rw [herm_im_swap a γ, ← hk']
+        rw [FockTranslation.herm_im_swap a γ, ← hk']
         push_cast
         ring
       rw [hc]

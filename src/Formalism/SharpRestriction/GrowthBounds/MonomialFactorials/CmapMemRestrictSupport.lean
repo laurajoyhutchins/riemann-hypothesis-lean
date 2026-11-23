@@ -1,5 +1,44 @@
-import Formalism.SharpRestriction.GrowthBounds.MonomialFactorials.RestDecompProved
-import Formalism.SharpRestriction.GrowthBounds.MonomialFactorials.StructureSheafH2BaseChange
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.MonomialFactorials.RestDecompProved
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -12,13 +51,13 @@ section CMap
 variable {K L σ : Type} [CommRing K] [CommRing L] (f : K →+ L)
 
 theorem cmap_add (y z : MvPolynomial σ K) : cmap f (y + z) = cmap f y + cmap f z := by
-  ext m; simp only [coeff_add, coeff_cmap, map_add]
+  ext m; simp only [MvPolynomial.coeff_add, coeff_cmap, map_add (f := _)]
 
 theorem cmap_zero : cmap f (0 : MvPolynomial σ K) = 0 := by
-  ext m; simp only [coeff_cmap, coeff_zero, map_zero]
+  ext m; simp only [coeff_cmap, AddMonoidAlgebra.coeff_zero, Finsupp.zero_apply, map_zero]
 
 theorem cmap_neg (y : MvPolynomial σ K) : cmap f (-y) = -cmap f y := by
-  ext m; simp only [coeff_cmap, coeff_neg, map_neg]
+  ext m; simp only [coeff_cmap, MvPolynomial.coeff_neg, map_neg]
 
 theorem cmap_monomial (n : σ →₀ ℕ) (c : K) : cmap f (monomial n c) = monomial n (f c) := by
   classical
@@ -47,7 +86,7 @@ theorem cmap_X_pderiv (v w : σ) (y : MvPolynomial σ K) :
     have e2 : ((n w : ℕ) : L) * f c = (n w) • f c := (nsmul_eq_mul _ _).symm
     rw [e1, e2, map_nsmul]
   | add p q hp hq =>
-    rw [map_add, mul_add, cmap_add, hp, hq, cmap_add, map_add, mul_add]
+    rw [map_add (f := _), mul_add, cmap_add, hp, hq, cmap_add, map_add (f := _), mul_add]
 
 end CMap
 
@@ -61,6 +100,7 @@ theorem cmap_glAct {N r : ℕ} (LL : ChainLetters N) (j : ℕ) (c d : Fin r) (y 
   unfold Formalism.MainNotions.G.glAct Formalism.GM.M.glAct
   rw [LinearMap.sum_apply, LinearMap.sum_apply]
   show cmapHom f _ = _
+
   rw [map_sum]
   refine Finset.sum_congr rfl fun i _ => ?_
   show cmap f _ = _
@@ -133,7 +173,7 @@ theorem cmap_ycond (ι : ℚ_[p] →+* KK O) (_hf : ∀ (a : ℚ_[p]) (x : KK O)
       rw [← cmap_glAct]
       exact Submodule.subset_span ⟨_, sk_ycond_stable LL j Mt c d z hz, rfl⟩
     | zero => rw [map_zero]; exact S'.zero_mem
-    | add x y _ _ hx hy => rw [map_add]; exact S'.add_mem hx hy
+    | add x y _ _ hx hy => rw [map_add (f := _)]; exact S'.add_mem hx hy
     | smul a x _ hx => rw [map_smul]; exact S'.smul_mem a hx
   have h3 : S' ≤ Formalism.GM.M.YCond p (r := r) (gmL LL) j Mt := by
     unfold Formalism.GM.M.YCond

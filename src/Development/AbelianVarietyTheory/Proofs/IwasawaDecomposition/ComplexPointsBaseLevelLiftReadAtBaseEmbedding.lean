@@ -1,16 +1,61 @@
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.IsBaseEnlargementFixedCoefFieldOfCoeffEnlargemen
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.CoefAEqOfHeq
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.Forms
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.AdmissibleDiscreteSeriesOfHasParam
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.HarishChandraModulesOn
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.HasDRepIffHasDerivAt
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.GreenCuspidalIff
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.ExistsIsBIffCoreB
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.WeilRepresentationUnitaryPair
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.DsExistsOfDiscreteSeriesExists
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.HarishChandraFinite
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.ExistsNormLeHeightPow
-import Formalism.LocalToGlobal.IndefiniteReal.LinksStage
+module
+
+public import Formalism.LocalToGlobal.IndefiniteReal.ZeroPartEigenvalueConvention
+public import Mathlib.RingTheory.Coalgebra.IsFrobenius
+public import Mathlib.RingTheory.Etale.Weakly
+public import Mathlib.RingTheory.HopfAlgebra.Basic
+public import Mathlib.RingTheory.TotallySplit
+public import Formalism.LocalToGlobal.IndefiniteReal.ConjSubConjSub
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.LinearIndependent.BaseChange
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.EtaJUntw
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.NotBaseCondFalse
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.PlaceModelImp
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.PositionOfIntro
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.RowsRestWordColumnUnitBaseTupleAlt
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.StableIffCarrierEq
+import Development.AbelianVarietyTheory.Definitions.Foundations.ValuedAlgebraMapEqOne
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FunKilled
+import Formalism.LocalToGlobal.HilbertRowConditions.CenterIdempotentAction
+import Formalism.LocalToGlobal.IndefiniteReal.RecTie
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.MainNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.MainNotions.S MeasureTheory IsDedekindDomain NumberField
 open Formalism.L2.Theta Formalism.L2.DIV Formalism.L2.Indef Formalism.L2.Rows Formalism.IndefR Formalism.IndefR.Links Formalism.IndefR.Lev Formalism.IndefR.Cx Formalism.IndefR.RecTie
 open scoped TensorProduct InnerProductSpace ComplexOrder
@@ -49,6 +94,7 @@ theorem exists_mat {K K' : Type} [Field K] [Field K'] (φ : K →+* K') {n n' : 
   have hΦsum : ∀ y : Fin (Module.finrank K V) → K, Φ (∑ i, y i • (b i : Fin n → K)) = ∑ i, φ (y i) • Φ (b i) := by
     intro y
     funext k
+
     simp [hΦ, Finset.sum_apply, map_sum]
   let c : Fin (Module.finrank K V) → Fin n → K' := fun i => Φ (b i)
   have hc_mem : ∀ i, c i ∈ V' := fun i => hV ▸ Submodule.subset_span ⟨b i, (b i).2, rfl⟩
@@ -84,6 +130,7 @@ theorem exists_mat {K K' : Type} [Field K] [Field K'] (φ : K →+* K') {n n' : 
   refine ⟨Matrix.of fun l i => b'.repr (bc i) l, ?_, ?_⟩
   · have hG : (Matrix.of fun l i => b'.repr (bc i) l).mulVec = fun y => b'.equivFun (bc.equivFun.symm y) := by
       funext y l
+
       simp [Matrix.mulVec, dotProduct, Module.Basis.equivFun_symm_apply, map_sum, mul_comm]
     rw [hG]
     exact b'.equivFun.bijective.comp bc.equivFun.symm.bijective
@@ -94,6 +141,7 @@ theorem exists_mat {K K' : Type} [Field K] [Field K'] (φ : K →+* K') {n n' : 
       have : ∑ l, ((Matrix.of fun l i => b'.repr (bc i) l).mulVec (fun i => φ (y i))) l • b' l = ∑ i, φ (y i) • bc i := by
         rw [← b'.sum_repr (∑ i, φ (y i) • bc i)]
         congr 1; funext l; congr 1
+
         simp [Matrix.mulVec, dotProduct, map_sum, mul_comm]
       have := congrArg Subtype.val this
       simpa [Submodule.coe_sum] using this
@@ -166,6 +214,7 @@ theorem complexPoints_baseLevelLift_readAtBaseEmbedding {D : D7} {G : Type} [Gro
     rfl
   have h1 : ∀ x : Tw s WS, @Tw.out s _ ((R.toCx3 F).eW false i x) = (((Real.sqrt (RealDat.nP F.lv2 false) : ℝ) : ℂ)) • ((Tw.out x : WS) : (R.HW i (sg0 D A3.A)).H) := fun x => rfl
   refine Eq.trans (h1 ((R.toCx3 F).wC false i A3.fam3.base3.v0 (cpt A3.fam3.base3.v0.embedding y))) ?_
+
   rw [h2, Submodule.coe_sum, Finset.smul_sum, map_sum]
   refine Finset.sum_congr rfl fun k _ => ?_
   rw [Submodule.coe_smul, map_smulₛₗ, smul_comm]

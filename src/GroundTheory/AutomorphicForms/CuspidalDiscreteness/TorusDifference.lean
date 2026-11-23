@@ -1,6 +1,59 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.AutomorphicFormSpaces
-import GroundTheory.AutomorphicForms.CuspidalDiscreteness.AltSum
+module
+
+public import GroundTheory.AutomorphicForms.CuspidalDiscreteness.AltSum
+public import GroundTheory.AutomorphicForms.AutomorphicFormSpaces.ConstantTerm
+import Aesop.Main
+public import GroundTheory.AutomorphicForms.AutomorphicFormSpaces
+import GroundTheory.AutomorphicForms.ReductionMeasure
+import GroundTheory.GlobalFields.Adele.Topology
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.Countable
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Dynamics.Ergodic.Action.Regular
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MeasureTheory Set Filter Topology Function
 open NumberField IsDedekindDomain
@@ -75,9 +128,8 @@ theorem norm_le_of_forall_altSum_le (hD : IsAddFundamentalDomain L D ν) (hD1 : 
       rw [integral_sub hi0' (integrableOn_const hfin.ne)]
       simp only [zero_add, hmean, setIntegral_const, measureReal_def, hD1, ENNReal.toReal_one,
         one_smul, zero_sub]
-    calc ‖h 0‖ = ‖∫ y in D, (h (0 + y) - h 0) ∂ν‖ := by rw [hkey, norm_neg]
-      _ ≤ B * ν.real D := norm_setIntegral_le_of_norm_le_const hfin hstep
-      _ = B := by simp [measureReal_def, hD1]
+    have hbound := norm_setIntegral_le_of_norm_le_const hfin hstep
+    simpa only [hkey, norm_neg, measureReal_def, hD1, ENNReal.toReal_one, mul_one] using hbound
 
 end Abstract
 
@@ -87,8 +139,8 @@ open AutomorphicForm
 
 variable {K : Type*} [Field K] [NumberField K] {n : ℕ}
 
-variable (K n) in
 
+variable (K n) in
 def scaledUnipFD (r M : ℕ) : Set (UPos n r → 𝔸[K]) :=
   {X | (fun p => algebraMap K 𝔸[K] ((M : K)⁻¹) * X p) ∈ unipFundamentalDomain K n r}
 
@@ -163,8 +215,8 @@ theorem exists_finite_eq_natCast_mul (hM : 0 < M) {X : UPos n r → 𝔸[K]}
   conv_lhs => rw [h1]
   rfl
 
-variable (K) in
 
+variable (K) in
 def scaledInfSet (M : ℕ) : Set (InfiniteAdeleRing K) :=
   (fun x => (M : InfiniteAdeleRing K) * x) '' closure (GroundTheory.Global.fundamentalSetInfinite K)
 

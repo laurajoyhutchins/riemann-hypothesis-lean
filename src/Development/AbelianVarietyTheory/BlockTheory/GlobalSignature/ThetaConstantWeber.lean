@@ -1,5 +1,44 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.ExistsVariableChangeEqLatticeCurve
+module
+
+public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.ExistsVariableChangeEqLatticeCurve
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Complex Polynomial
 open UpperHalfPlane hiding I
@@ -24,10 +63,10 @@ def wp (τ : ℍ) (z : ℂ) : ℂ := (periodPairOfTau τ).weierstrassP z
 
 def jLat (τ : ℍ) : ℂ := (latticeCurve (periodPairOfTau τ)).j
 
+
 open Complex Polynomial in
 open UpperHalfPlane hiding I in
 open scoped Real in
-
 theorem _root_.GlobalTheory.IndefiniteRowSideFullHecke.ThetaConstantWeber.disc_ne_zero (τ : ℍ) :
     (_root_.GlobalTheory.periodPairOfTau τ).g₂ ^ 3 - 27 * (_root_.GlobalTheory.periodPairOfTau τ).g₃ ^ 2
       ≠ 0 := by
@@ -46,10 +85,10 @@ theorem _root_.GlobalTheory.IndefiniteRowSideFullHecke.ThetaConstantWeber.jLat_e
     _root_.GlobalTheory.latticeCurve_Δ]
   ring
 
+
 open Complex Polynomial in
 open UpperHalfPlane hiding I in
 open scoped Real in
-
 theorem _root_.GlobalTheory.IndefiniteRowSideFullHecke.ThetaConstantWeber.halfPeriods_notMem (τ : ℍ) :
     (1 / 2 : ℂ) ∉ (_root_.GlobalTheory.periodPairOfTau τ).lattice ∧
       (τ : ℂ) / 2 ∉ (_root_.GlobalTheory.periodPairOfTau τ).lattice ∧
@@ -95,10 +134,10 @@ def WeberCubic (τ : ℍ) : Prop :=
 def ThetaWeberStatement : Prop :=
   ∀ τ : ℍ, HalfPeriodDiff τ ∧ JacobiProduct τ ∧ ThetaWeber τ ∧ WeberCubic τ
 
+
 open Complex Polynomial in
 open UpperHalfPlane hiding I in
 open scoped Real in
-
 theorem _root_.GlobalTheory.IndefiniteRowSideFullHecke.ThetaConstantWeber.ThetaWeber.pow_twelve {τ : ℍ}
     (h : _root_.GlobalTheory.IndefiniteRowSideFullHecke.ThetaConstantWeber.ThetaWeber τ) :
     (_root_.GlobalTheory.IndefiniteRowSideFullHecke.ThetaConstantWeber.thetaConst 0 0 τ / ModularForm.eta τ) ^ 12 = _root_.GlobalTheory.IndefiniteRowSideFullHecke.ThetaConstantWeber.weberF τ ^ 24 ∧
@@ -110,8 +149,5 @@ theorem _root_.GlobalTheory.IndefiniteRowSideFullHecke.ThetaConstantWeber.ThetaW
   · rw [h1, mul_div_cancel_left₀ _ hη, ← pow_mul]
   · rw [h2, mul_div_cancel_left₀ _ hη, ← pow_mul]
   · rw [h3, mul_div_cancel_left₀ _ hη, ← pow_mul]
-
-example (τ : ℍ) : thetaConst 0 0 τ = jacobiTheta τ := by
-  simp [thetaConst, jacobiTheta_eq_jacobiTheta₂]
 
 end GlobalTheory.IndefiniteRowSideFullHecke.ThetaConstantWeber

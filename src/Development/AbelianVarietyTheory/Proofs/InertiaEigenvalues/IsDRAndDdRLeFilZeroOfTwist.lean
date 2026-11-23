@@ -1,8 +1,56 @@
-import Mathlib
-import Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow
-import Formalism.SharpRestriction.LevelLetterCocycles.LocalSituation
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.LocCoh
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Definitions.Foundations.HTBasis
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.ExpStar
+import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
+import Formalism.SharpRestriction.LevelLetterCocycles.LocalSituation
+public import Mathlib.RingTheory.Flat.Basic
+
+@[expose] public section
+
 open Formalism.WeaklyAdmissibleFiltrations Formalism.BasicNotions Formalism.BasicNotions.Loc Formalism.MainNotions.N Formalism.MainNotions.LocalSituation GlobalTheory.Cyc TensorProduct
 
 namespace GlobalTheory
@@ -97,7 +145,7 @@ theorem drTwist_range (e : ℕ)
   · rintro _ ⟨x, rfl⟩
     induction x using TensorProduct.induction_on with
     | zero => rw [map_zero]; exact Submodule.zero_mem _
-    | add a b ha hb => rw [map_add]; exact Submodule.add_mem _ ha hb
+    | add a b ha hb => rw [map_add (f := _)]; exact Submodule.add_mem _ ha hb
     | tmul v k =>
       simp only [DdR, Submodule.mem_iInf, LinearMap.mem_ker, LinearMap.sub_apply,
         LinearMap.id_apply, AlgebraTensorModule.map_tmul, sub_eq_zero]
@@ -113,7 +161,7 @@ theorem drTwist_range (e : ℕ)
       intro g x i
       induction x using TensorProduct.induction_on with
       | zero => simp
-      | add a b ha hb => simp only [map_add, Finsupp.add_apply, ha, hb, smul_add]
+      | add a b ha hb => simp only [map_add (f := _), Finsupp.add_apply, ha, hb, smul_add]
       | tmul v y =>
         rw [drTwist_act_tmul PD ρ e h]
         simp only [E, TensorProduct.equivFinsuppOfBasisLeft_apply_tmul_apply]
@@ -140,7 +188,7 @@ theorem isDR_and_DdR_le_Fil_zero_of_twist : ∀ {G : Type} [Group G] [Topologica
     rintro _ ⟨x, rfl⟩
     induction x using TensorProduct.induction_on with
     | zero => rw [map_zero]; exact Submodule.zero_mem _
-    | add a b ha hb => rw [map_add]; exact Submodule.add_mem _ ha hb
+    | add a b ha hb => rw [map_add (f := _)]; exact Submodule.add_mem _ ha hb
     | tmul v k => exact ⟨v ⊗ₜ ⟨drTwistMap PD e k, drTwistMap_mem PD e k⟩, rfl⟩
 
 end GlobalTheory

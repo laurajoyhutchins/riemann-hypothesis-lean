@@ -1,6 +1,53 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.ChowForms.StatementsChartIncOrd
-import GroundTheory.HeightsAndTheta.Heights.ChowForms.PChartLocalOrder
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.ChowForms.StatementsChartIncOrd
+public import GroundTheory.HeightsAndTheta.Heights.ChowForms.PChartLocalOrder
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -44,15 +91,18 @@ theorem toInc_mk (x : MvPolynomial (Fin n) F) :
     toInc I t e (mkQ I t x) = chartX I t e x := rfl
 
 theorem sum_tQ : (∑ m, mkQ I t (C (t m) * X m)) = 1 := by
+
   rw [← map_sum, ← map_one (mkQ I t), Ideal.Quotient.eq]
   exact Ideal.mem_sup_right (Ideal.mem_span_singleton_self _)
 
 theorem sum_tS : (∑ m, chartX I t e (C (t m) * X m)) = 1 := by
   have := congrArg (toInc I t e) (sum_tQ I t)
-  simpa [map_sum, toInc_mk] using this
+  set_option synthInstance.maxHeartbeats 100000 in
+    simpa [map_sum, toInc_mk] using this
 
 theorem sum_uS (i : Fin e) :
     (∑ m, mkS I t e (X (Sum.inr (i, m)) * X (Sum.inl m))) = 0 := by
+
   rw [← map_sum]
   exact mkS_eq_zero I t e (Ideal.mem_sup_right (Ideal.subset_span ⟨i, rfl⟩))
 
@@ -101,8 +151,10 @@ theorem chartIncIdeal_le_ker : chartIncIdeal I t e ≤ RingHom.ker (back₀ I t 
     rintro _ ⟨i, rfl⟩
     rw [SetLike.mem_coe, RingHom.mem_ker]
     have h1 := congrArg (C : ChartQ I t →+* MvPolynomial (Fin e × Fin n) (ChartQ I t)) (sum_tQ I t)
-    simp only [map_sum, map_mul, map_one] at h1
-    simp only [map_sum, map_mul, back₀_inl, back₀_inr, genSubst]
+    set_option synthInstance.maxHeartbeats 100000 in
+      simp only [map_sum, map_mul, map_one] at h1
+    set_option synthInstance.maxHeartbeats 100000 in
+      simp only [map_sum, map_mul, back₀_inl, back₀_inr, genSubst]
     set S := ∑ l, X (i, l) * C (mkQ I t (X l))
     have : ∑ m, (X (i, m) - S * C (mkQ I t (C (t m)))) * C (mkQ I t (X m)) = S - S * 1 := by
       rw [← h1, Finset.mul_sum, ← Finset.sum_sub_distrib]
@@ -128,6 +180,7 @@ theorem sum_fwd (i : Fin e) :
       C (chartX I t e (X l))) = (X i : MvPolynomial (Fin e) (ChartInc I t e)) := by
   have hu := congrArg (C : ChartInc I t e →+* MvPolynomial (Fin e) (ChartInc I t e)) (sum_uS I t e i)
   have ht := congrArg (C : ChartInc I t e →+* MvPolynomial (Fin e) (ChartInc I t e)) (sum_tS I t e)
+
   simp only [map_sum, map_mul, map_one, map_zero] at hu ht
   have hX : ∀ l, chartX I t e (X l) = mkS I t e (X (Sum.inl l)) := fun l => by
     rw [chartX_apply, rename_X]
@@ -145,7 +198,8 @@ theorem fwd_back (s : ChartInc I t e) : fwd I t e (back I t e s) = C s := by
     · simp only [RingHom.comp_apply, back_mk, back₀_C, fwd_C, toInc_mk, chartX_apply, rename_C]
     · rcases v with m | ⟨i, m⟩
       · simp only [RingHom.comp_apply, back_mk, back₀_inl, fwd_C, toInc_mk, chartX_apply, rename_X]
-      · simp only [RingHom.comp_apply, back_mk, back₀_inr, genSubst, map_sub, map_mul, map_sum, fwd_X,
+      · set_option synthInstance.maxHeartbeats 100000 in
+        simp only [RingHom.comp_apply, back_mk, back₀_inr, genSubst, map_sub, map_mul, map_sum, fwd_X,
           fwd_C, toInc_mk]
         linear_combination (-(C (chartX I t e (C (t m))))) * sum_fwd I t e i
   obtain ⟨a, rfl⟩ := mkS_surjective I t e s
@@ -153,8 +207,10 @@ theorem fwd_back (s : ChartInc I t e) : fwd I t e (back I t e s) = C s := by
 
 theorem fwd_bwd : (fwd I t e).comp (bwd I t e) = RingHom.id _ := by
   refine MvPolynomial.ringHom_ext (fun s => ?_) (fun i => ?_)
-  · simp [bwd, fwd_back]
-  · simp only [bwd, RingHom.comp_apply, eval₂Hom_X', map_sum, map_mul, fwd_X, fwd_C, toInc_mk,
+  · set_option synthInstance.maxHeartbeats 100000 in
+    simp [bwd, fwd_back]
+  · set_option synthInstance.maxHeartbeats 100000 in
+    simp only [bwd, RingHom.comp_apply, eval₂Hom_X', map_sum, map_mul, fwd_X, fwd_C, toInc_mk,
       RingHom.id_apply]
     exact sum_fwd I t e i
 
@@ -162,7 +218,7 @@ theorem bwd_fwd : (bwd I t e).comp (fwd I t e) = RingHom.id _ := by
   refine MvPolynomial.ringHom_ext (fun q => ?_) (fun ij => ?_)
   · simp [fwd, bwd, back_toInc]
   · obtain ⟨i, m⟩ := ij
-    simp only [RingHom.comp_apply, fwd_X, map_add, map_mul, bwd, eval₂Hom_C, eval₂Hom_X',
+    simp only [RingHom.comp_apply, fwd_X, map_add (f := _), map_mul, bwd, eval₂Hom_C, eval₂Hom_X',
       RingHom.id_apply, chartX_apply, rename_C, back_mk, back₀_C, back₀_inr, genSubst]
     ring
 

@@ -1,8 +1,50 @@
-import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.EisensteinS2LimitFormula
-import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.AnalyticIdentityTheorems.WeierstrassNumeratorDenominator
-import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.AnalyticIdentityTheorems.TaylorWp
-import Formalism.LocalToGlobal.TorsionIntegrality.FrobeniusFibreCurves.LogarithmicSubstitution.OneAddMulDerivLogSubst
-import Formalism.LocalToGlobal.TorsionIntegrality.SecondCoefficientNorms.BinomialSeriesCoefficients.CoeffPowEqZeroOfCc
+module
+
+public import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.EisensteinS2LimitFormula
+public import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.AnalyticIdentityTheorems.WeierstrassNumeratorDenominator
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.MvPolynomial.IrreducibleQuadratic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 open scoped BigOperators
@@ -37,7 +79,7 @@ theorem IsU.add {a b : ∀ (K : Type) [Field K] [CharZero K], K → K → K} (ha
   obtain ⟨q, hq⟩ := hb
   exact ⟨p + q, fun K _ _ g2 g3 => by
     show a K g2 g3 + b K g2 g3 = _
-    rw [map_add, hp, hq]⟩
+    rw [map_add (f := _), hp, hq]⟩
 
 theorem IsU.mul {a b : ∀ (K : Type) [Field K] [CharZero K], K → K → K} (ha : IsU a) (hb : IsU b) :
     IsU (fun K [Field K] [CharZero K] g2 g3 => a K g2 g3 * b K g2 g3) := by
@@ -89,76 +131,8 @@ theorem isU_pOf (n : ℕ) : IsU (fun K [Field K] [CharZero K] g2 g3 => coeff n (
   · exact (isU_cW (n / 2 + 1)).congr fun K _ _ g2 g3 => by rw [POf.coeff_pOf, if_pos hn]
   · exact (isU_const 0).congr fun K _ _ g2 g3 => by rw [POf.coeff_pOf, if_neg hn]; simp
 
-theorem isU_prim (n : ℕ) :
-    IsU (fun K [Field K] [CharZero K] g2 g3 => coeff n (-B.prim (pOf g2 g3))) := by
-  by_cases hn : n = 0
-  · exact (isU_const 0).congr fun K _ _ g2 g3 => by
-      rw [map_neg, B.prim, coeff_mk, if_pos hn]; simp
-  · refine ((isU_pOf (n - 1)).mul (isU_const (-1 / (n : ℚ)))).congr fun K _ _ g2 g3 => ?_
-    rw [map_neg, B.prim, coeff_mk, if_neg hn]
-    push_cast
-    ring
-
 variable {K : Type} [Field K] [CharZero K]
 
-theorem coeff_exp_succ (P : PowerSeries K) (n : ℕ) :
-    coeff (n + 1) (B.fExp (B.sigS P) : PowerSeries K) =
-      ((1 / ((n : ℚ) + 1) : ℚ) : K) * ∑ ij ∈ Finset.HasAntidiagonal.antidiagonal n,
-        coeff ij.1 (-B.prim P) * coeff ij.2 (B.fExp (B.sigS P) : PowerSeries K) := by
-  have hS0 : constantCoeff (B.sigS P) = 0 := by
-    rw [B.sigS, map_neg, B.constantCoeff_prim, neg_zero]
-  have hSd : derivative K (B.sigS P) = -B.prim P := by
-    rw [B.sigS, map_neg]
-    exact congrArg Neg.neg (B.dz_prim _)
-  have h : derivative K (B.fExp (B.sigS P) : PowerSeries K) =
-      -B.prim P * (B.fExp (B.sigS P) : PowerSeries K) := by
-    rw [← hSd]
-    exact C.derivative_mvExp hS0
-  have hc := congrArg (coeff n) h
-  rw [coeff_derivative, coeff_mul] at hc
-  rw [← hc]
-  have hn : ((n : K) + 1) ≠ 0 := by exact_mod_cast Nat.succ_ne_zero n
-  push_cast
-  field_simp
-
-theorem coeff_exp_zero (P : PowerSeries K) :
-    coeff 0 (B.fExp (B.sigS P) : PowerSeries K) = 1 := by
-  have hS0 : constantCoeff (B.sigS P) = 0 := by
-    rw [B.sigS, map_neg, B.constantCoeff_prim, neg_zero]
-  rw [coeff_zero_eq_constantCoeff_apply]
-  exact C.constantCoeff_mvExp hS0
-
-theorem isU_exp (n : ℕ) : IsU (fun K [Field K] [CharZero K] g2 g3 =>
-    coeff n (B.fExp (B.sigS (pOf g2 g3)) : PowerSeries K)) := by
-  induction n using Nat.strong_induction_on with
-  | _ n ih =>
-    rcases n with _ | n
-    · exact (isU_const 1).congr fun K _ _ g2 g3 => by rw [coeff_exp_zero]; simp
-    · refine ((isU_const (1 / ((n : ℚ) + 1))).mul
-        (IsU.sum (Finset.HasAntidiagonal.antidiagonal n) (fun ij K [Field K] [CharZero K] g2 g3 =>
-          coeff ij.1 (-B.prim (pOf g2 g3)) *
-            coeff ij.2 (B.fExp (B.sigS (pOf g2 g3)) : PowerSeries K))
-          fun ij hij => (isU_prim ij.1).mul (ih ij.2 ?_))).congr
-        fun K _ _ g2 g3 => coeff_exp_succ _ n
-      have := Finset.HasAntidiagonal.mem_antidiagonal.mp hij
-      omega
-
-theorem isU_sigma (n : ℕ) : IsU (fun K [Field K] [CharZero K] g2 g3 =>
-    coeff n (B.sigma (pOf g2 g3))) := by
-  rcases n with _ | n
-  · exact (isU_const 0).congr fun K _ _ g2 g3 => by
-      rw [B.sigma, coeff_zero_X_mul]; simp
-  · exact (isU_exp n).congr fun K _ _ g2 g3 => by
-      rw [B.sigma, coeff_succ_X_mul]
-
 end Universal
-
-theorem sigmaUniversal_of (hu : IsWpUnique) (hp : POfIsWp) : SigmaUniversal := by
-  choose U hU using Universal.isU_sigma
-  refine ⟨U, fun K _ _ g2 g3 P hP n => ?_⟩
-  rw [hu K g2 g3 P (pOf g2 g3) hP (hp K g2 g3)]
-  exact hU n K g2 g3
-
-theorem sigma_universal : SigmaUniversal := sigmaUniversal_of weierstrass_series_unique weierstrass_p_of_series
 
 end Formalism.L2.Th1.F

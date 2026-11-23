@@ -1,6 +1,47 @@
-import Mathlib
-import Formalism.LocalToGlobal.HermitianColumns.InLocalDiscriminantKernel
-import Formalism.LocalRingCardinality.DataLevelD
+module
+
+public import Formalism.LocalToGlobal.HermitianColumns.InLocalDiscriminantKernel
+public import Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -49,28 +90,6 @@ def ColumnForm (D : D7) : Prop :=
 
 def MassAsCosetSum : Prop := GeneralForm ∧ ∀ D : D7, ColumnForm D
 
-def ClassDictionary : Prop :=
-  ∀ (F E : Type) [Field F] [NumberField F] [Field E] [NumberField E] [StarRing E] [Algebra F E]
-    (hc : CMData F E) (S : HSpace E), S.SigOK → S.IsPosDef →
-    ∀ N : Submodule (𝓞 E) S.V, Submodule.IsLattice E N → Formalism.HermitianLatticesTheory.IsUnimodular S.hT N →
-      (∀ y : UAf hc S, ∃! L : Submodule (𝓞 E) S.V, Submodule.IsLattice E L ∧
-        Carries (F := F) (y : GL (Fin S.rank) (E ⊗[F] Af F)) (crdLat S N) (crdLat S L)) ∧
-      (∀ L : Submodule (𝓞 E) S.V, Submodule.IsLattice E L →
-        ((L ∈ Formalism.HermitianLatticesTheory.genus S.hT N ↔ ∃ y : UAf hc S,
-          Carries (F := F) (y : GL (Fin S.rank) (E ⊗[F] Af F)) (crdLat S N) (crdLat S L)) ∧
-        (L ∈ Formalism.HermitianLatticesTheory.genus S.hT N ↔ Formalism.HermitianLatticesTheory.IsUnimodular S.hT L))) ∧
-      (∀ (y y' : UAf hc S) (L L' : Submodule (𝓞 E) S.V), Submodule.IsLattice E L →
-        Submodule.IsLattice E L' →
-        Carries (F := F) (y : GL (Fin S.rank) (E ⊗[F] Af F)) (crdLat S N) (crdLat S L) →
-        Carries (F := F) (y' : GL (Fin S.rank) (E ⊗[F] Af F)) (crdLat S N) (crdLat S L') →
-        ((DoubleCoset.mk (UFin hc S) (stabHat hc S N) y = DoubleCoset.mk (UFin hc S) (stabHat hc S N) y') ↔
-          ∃ g ∈ Formalism.HermitianLatticesTheory.isom S.hT, Formalism.HermitianLatticesTheory.gmap g L = L')) ∧
-      (∀ (y : UAf hc S) (L : Submodule (𝓞 E) S.V), Submodule.IsLattice E L →
-        Carries (F := F) (y : GL (Fin S.rank) (E ⊗[F] Af F)) (crdLat S N) (crdLat S L) →
-        ∀ γ : GL (Fin S.rank) E, γ ∈ UF hc S →
-          (bc (inclE (F := F) (Af F)) γ ∈ (cosetGrp (UFin hc S) (stabHat hc S N) y).map (UAf hc S).subtype ↔
-            γ ∈ stabGL (crdLat S L)))
-
 theorem mem_cosetGrp {G : Type} [Group G] (Γ K : Subgroup G) (y x : G) :
     x ∈ cosetGrp Γ K y ↔ x ∈ Γ ∧ y⁻¹ * x * y ∈ K := by
   simp only [cosetGrp, Subgroup.mem_inf, Subgroup.mem_map, MulEquiv.coe_toMonoidHom, MulAut.conj_apply]
@@ -84,22 +103,6 @@ theorem stabHat_eq {F E : Type} [Field F] [NumberField F] [Field E] [NumberField
     stabHat hc S N = (levelAfL hc.sig S.gram (crdLat S N)).subgroupOf (UAf hc S) := by
   ext x
   exact ⟨fun h => ⟨x.2, h⟩, fun h => h.2⟩
-
-theorem CosetSum.pos {G : Type} [Group G] {Γ K : Subgroup G} {m : ℝ} (h : CosetSum Γ K m) : 0 < m := by
-  obtain ⟨h1, h2, h3⟩ := h
-  letI : Fintype (ClassSet Γ K) := Fintype.ofFinite _
-  haveI : Nonempty (ClassSet Γ K) := ⟨DoubleCoset.mk Γ K 1⟩
-  have hb : Function.Bijective
-      (fun c : ClassSet Γ K => (DoubleCoset.mk Γ K (Quotient.out c) : ClassSet Γ K)) := by
-    have : (fun c : ClassSet Γ K => (DoubleCoset.mk Γ K (Quotient.out c) : ClassSet Γ K)) = id := by
-      funext c
-      exact Quotient.out_eq' c
-    rw [this]
-    exact Function.bijective_id
-  rw [← h3 _ _ hb]
-  refine Finset.sum_pos (fun c _ => ?_) Finset.univ_nonempty
-  haveI := h2 (Quotient.out c)
-  exact inv_pos.2 (Nat.cast_pos.2 Nat.card_pos)
 
 end GlobalTheory.IndefiniteRowSideFullHecke.CosetGroupMembership
 

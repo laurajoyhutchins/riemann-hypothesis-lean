@@ -1,4 +1,49 @@
-import Mathlib
+module
+
+public import Mathlib.LinearAlgebra.Determinant
+public import Mathlib.Tactic.Continuity
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Module Submodule Function
 
@@ -17,19 +62,10 @@ theorem det_smul_eq_sum_det_update (b : Basis ι R F) (v : ι → F) (x : F) :
   have h := Matrix.mulVec_cramer (b.toMatrix v) (b.equivFun x)
   rw [map_smul, Basis.det_apply, ← h]
   ext j
-  simp only [map_sum, map_smul, Finset.sum_apply, Pi.smul_apply, Basis.equivFun_apply,
-    smul_eq_mul, Matrix.mulVec, dotProduct, Matrix.cramer_apply, Basis.det_apply,
-    Basis.toMatrix_update, Basis.toMatrix_apply, mul_comm]
 
-theorem det_ne_zero_of_linearIndependent [IsDomain R] (b : Basis ι R F) {v : ι → F}
-    (hv : LinearIndependent R v) : b.det v ≠ 0 := by
-  intro h
-  rw [Basis.det_apply] at h
-  obtain ⟨c, hc, h0⟩ := Matrix.exists_mulVec_eq_zero_iff.2 h
-  refine hc (funext (Fintype.linearIndependent_iff.1 hv c ?_))
-  apply b.equivFun.injective
-  ext j
-  simpa [Matrix.mulVec, dotProduct, Basis.toMatrix_apply, mul_comm] using congrFun h0 j
+  simp only [map_sum, map_smul, Finset.sum_apply, Pi.smul_apply, Basis.equivFun_apply,
+  smul_eq_mul, Matrix.mulVec, dotProduct, Matrix.cramer_apply, Basis.det_apply,
+  Basis.toMatrix_update, Basis.toMatrix_apply, mul_comm]
 
 theorem mem_span_of_det_update_mem (b : Basis ι R F) {v : ι → F}
     (hv : b.det v ∈ nonZeroDivisors R) {x : F}
@@ -55,19 +91,6 @@ theorem span_range_comp_eq (b : Basis ι R F) (G : κ → F) {σ : ι → κ}
   refine mem_span_of_det_update_mem b hσ fun i => ?_
   rw [← comp_update]
   exact h _
-
-theorem exists_det_ne_zero [IsDomain R] (b : Basis ι R F) (G : κ → F)
-    (hr : Fintype.card ι ≤ finrank R (span R (Set.range G))) :
-    ∃ σ : ι → κ, b.det (G ∘ σ) ≠ 0 := by
-  by_contra! h
-  obtain ⟨w, hw⟩ := exists_linearIndependent_of_le_finrank hr
-  have hw' := (hw.comp _ (Fintype.equivFin ι).injective).map' _ (ker_subtype _)
-  refine det_ne_zero_of_linearIndependent b hw' ?_
-  have h0 : (b.det.compLinearMap (span R (Set.range G)).subtype).toMultilinearMap = 0 := by
-    refine MultilinearMap.ext_of_span_eq_top
-      (g := fun (_ : ι) (k : κ) => (⟨G k, subset_span ⟨k, rfl⟩⟩ : span R (Set.range G)))
-      (fun _ => span_range_subtype_eq_top_iff _ _ |>.2 rfl) fun σ => h σ
-  exact DFunLike.congr_fun h0 (w ∘ Fintype.equivFin ι)
 
 end Cramer
 

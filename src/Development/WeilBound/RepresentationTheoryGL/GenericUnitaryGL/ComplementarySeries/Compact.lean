@@ -1,6 +1,53 @@
-import Development.WeilBound.RepresentationTheoryGL.GenericUnitaryGL.ComplementarySeries.Complementary
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IsLocallyConstantModulus
-import Development.AbelianVarietyTheory.Definitions.Divisors.EqOfHasValueAtInfinite
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.GenericUnitaryGL.ComplementarySeries.Complementary
+public import Development.AbelianVarietyTheory.Definitions.Divisors.EqOfHasValueAtInfinite
+import Development.AbelianVarietyTheory.Definitions.Divisors.T2SpaceGeneralLinearGroup
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IsLocallyConstantModulus
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.CoassocSimps
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -68,8 +115,11 @@ theorem rc_of_KO (q : parab k (blk2 d)) (hq : (q : GL (Fin (d + d)) k) ∈ KO k 
 theorem exists_pw (x : GL (Fin (d + d)) k) :
     ∃ p : parab k (blk2 d), ∃ w ∈ KO k (Fin (d + d)), x = (p : GL (Fin (d + d)) k) * w := by
   obtain ⟨u, g, w, hw, rfl⟩ := GlobalTheory.SmGL.UnitInd.exists_iwasawa (blk2 d) x
+  have hg : leviEmb k (blk2 d) g ∈ parab k (blk2 d) :=
+    mem_parab_iff.2 fun _ _ i j hab => by
+      simp [leviEmb, Matrix.blockDiagonal'_apply', hab.ne']
   exact ⟨⟨(u : GL (Fin (d + d)) k) * leviEmb k (blk2 d) g,
-    mul_mem (unipRad_le_parab k (blk2 d) u.2) (leviEmb_mem_parab k (blk2 d) g)⟩, w, hw, rfl⟩
+    mul_mem (unipRad_le_parab k (blk2 d) u.2) hg⟩, w, hw, rfl⟩
 
 def hh (x : GL (Fin (d + d)) k) : ℝ := rc (leviProj k (blk2 d) (Classical.choose (exists_pw x)))
 

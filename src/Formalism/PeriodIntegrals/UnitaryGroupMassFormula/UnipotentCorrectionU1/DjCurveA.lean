@@ -1,6 +1,66 @@
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.UnipotentCorrectionU1.CoreStar
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.SumEqSumCompEmbedding
-import Lemmata.B110.ExistsMoved
+module
+
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.Analysis.Calculus.Deriv.Basic
+public import Mathlib.Analysis.Complex.Exponential
+public import Mathlib.Analysis.InnerProductSpace.Basic
+public import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+public import Mathlib.Analysis.Normed.Algebra.Exponential
+public import Mathlib.Topology.Instances.Matrix
+public import Lemmata.B110.ExistsMoved
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Matrix.Normed
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Analysis.Calculus.Deriv.Comp
+public import Mathlib.Analysis.Calculus.Deriv.Shift
+public import Mathlib.Analysis.Calculus.MeanValue
+public import Mathlib.Analysis.Complex.RealDeriv
+public import Mathlib.Analysis.SpecialFunctions.ExpDeriv
+public import Mathlib.Topology.Algebra.Module.FiniteDimension
+
+@[expose] public section
 
 open Matrix
 
@@ -55,26 +115,8 @@ theorem pres_exp {S : Set (Fin N)} {Y : Matrix (Fin N) (Fin N) ℂ} (hY : Pres S
     rw [this]; exact hasSum_zero
   exact h2.unique h3
 
-theorem sum_emb (e : Fin j ↪ Fin N) (f : Fin N → ℂ) (hf : ∀ c, c ∉ Set.range e → f c = 0) :
-    ∑ c, f c = ∑ a, f (e a) := by
-  first | exact GlobalTheory.EmbeddingSum.sum_eq_sum_comp_embedding .. | (apply GlobalTheory.EmbeddingSum.sum_eq_sum_comp_embedding <;> assumption) | (intros; apply GlobalTheory.EmbeddingSum.sum_eq_sum_comp_embedding <;> assumption) | (apply @GlobalTheory.EmbeddingSum.sum_eq_sum_comp_embedding <;> assumption) | (intros; apply @GlobalTheory.EmbeddingSum.sum_eq_sum_comp_embedding <;> assumption) | (apply @GlobalTheory.EmbeddingSum.sum_eq_sum_comp_embedding <;> first | assumption | infer_instance) | exact @GlobalTheory.EmbeddingSum.sum_eq_sum_comp_embedding N j e f hf | exact @GlobalTheory.EmbeddingSum.sum_eq_sum_comp_embedding N j e f | exact @GlobalTheory.EmbeddingSum.sum_eq_sum_comp_embedding N j e | exact @GlobalTheory.EmbeddingSum.sum_eq_sum_comp_embedding N j | exact @GlobalTheory.EmbeddingSum.sum_eq_sum_comp_embedding N
-
 def sub (e : Fin j ↪ Fin N) (E : Matrix (Fin N) (Fin N) ℂ) : Matrix (Fin j) (Fin j) ℂ :=
   Matrix.of fun a b => E (e a) (e b)
-
-theorem sub_right (e : Fin j ↪ Fin N) (row : Fin j → Fin N) (h E : Matrix (Fin N) (Fin N) ℂ)
-    (hE : Pres (Set.range e) E) :
-    (Matrix.of fun a b => (h * E) (row a) (e b)) = (Matrix.of fun a b => h (row a) (e b)) * sub e E := by
-  ext a b
-  rw [Matrix.of_apply, Matrix.mul_apply, Matrix.mul_apply]
-  exact sum_emb e _ fun c hc => by rw [hE c (e b) ⟨b, rfl⟩ hc, mul_zero]
-
-theorem sub_left (e : Fin j ↪ Fin N) (col : Fin j → Fin N) (h E : Matrix (Fin N) (Fin N) ℂ)
-    (hE : Pres (Set.range e)ᶜ E) :
-    (Matrix.of fun a b => (E * h) (e a) (col b)) = sub e E * (Matrix.of fun a b => h (e a) (col b)) := by
-  ext a b
-  rw [Matrix.of_apply, Matrix.mul_apply, Matrix.mul_apply]
-  exact sum_emb e _ fun c hc => by rw [hE (e a) c hc (fun h' => h' ⟨a, rfl⟩), zero_mul]
 
 end Gen
 

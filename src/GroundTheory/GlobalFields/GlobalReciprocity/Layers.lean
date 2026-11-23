@@ -1,14 +1,56 @@
-import Mathlib
-import GroundTheory.GlobalFields.GlobalReciprocity.InfKerDegreeLeOfLeSupZhatField
+module
+
+public import GroundTheory.GlobalFields.GlobalReciprocity.InfKerDegreeLeOfLeSupZhatField
+public import GroundTheory.GlobalFields.NormResidueSymbol.Cyclotomic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 namespace GroundTheory.Global
 
 open NumberField IntermediateField GroundTheory.LocalField.Abstract IdeleGroup
 open scoped GroundTheory.LocalField.Abstract
 
-local notation "ℚ̄" => AlgebraicClosure ℚ
-
 noncomputable section
+
+local notation "ℚ̄" => AlgebraicClosure ℚ
 
 namespace IdeleClassLimit
 
@@ -37,7 +79,7 @@ variable (K L : FiniteSubfield) [hKL : Fact (K ≤ L)]
 
 theorem abstractSymbol_eq_of_cycRestrict_eq (hL : L.1 ≤ K.1 ⊔ zhatField) (a : IdeleClassGroup K.1)
     (g : K.1.fixingSubgroup) (hg : cycRestrict (g : ℚ̄ ≃ₐ[ℚ] ℚ̄) = cycSymbol K a) :
-    abstractSymbol K L a = Abelianization.of (restrictHom g) := by
+    abstractSymbol K L a = Group.Abelianization.of (restrictHom g) := by
   set D := classFieldTheory.toClassFieldData
   have hLK : L.openSubgroup ≤ K.openSubgroup := openSubgroup_le hKL.out
   have hu : (K.openSubgroup : Subgroup (ℚ̄ ≃ₐ[ℚ] ℚ̄)) ⊓ D.deg.ker ≤ L.openSubgroup :=
@@ -75,35 +117,22 @@ theorem abstractSymbol_eq_of_cycRestrict_eq (hL : L.1 ≤ K.1 ⊔ zhatField) (a 
     simp only [nsmul_eq_mul, Nat.cast_mul]
     ring
   have e : (reciprocityEquiv K L).symm (normClass K L a) =
-      Abelianization.of (QuotientGroup.mk (s := (L.openSubgroup : Subgroup (ℚ̄ ≃ₐ[ℚ] ℚ̄)).subgroupOf
+      Group.Abelianization.of (QuotientGroup.mk (s := (L.openSubgroup : Subgroup (ℚ̄ ≃ₐ[ℚ] ℚ̄)).subgroupOf
         K.openSubgroup) g) := by
     refine hr.trans ?_
     rw [← map_pow, ← QuotientGroup.mk_pow]
     exact congrArg _ (QuotientGroup.eq.2 hmem)
-  rw [abstractSymbol_apply, e, Abelianization.map_of]
+  rw [abstractSymbol_apply, e, Group.Abelianization.map_of]
   rfl
 
 theorem abstractSymbol_mk_of_le_sup_zhatField [IsMulCommutative (L.1 ≃ₐ[K.1] L.1)]
     (hL : L.1 ≤ K.1 ⊔ zhatField) (x : IdeleGroup K.1) :
-    abstractSymbol K L (IdeleClassGroup.mk K.1 x) = Abelianization.of (ideleSymbol K.1 L.1 x) := by
+    abstractSymbol K L (IdeleClassGroup.mk K.1 x) =
+      Group.Abelianization.of (ideleSymbol K.1 L.1 x) := by
   obtain ⟨g, hgK, hg⟩ := exists_mem_fixingSubgroup_cycRestrict_eq K (IdeleClassGroup.mk K.1 x)
   rw [abstractSymbol_eq_of_cycRestrict_eq K L hL _ ⟨g, hgK⟩ hg,
     restrictHom_eq_ideleSymbol_of_le_sup K L (hL.trans (sup_le_sup_left zhatField_le_maxCyclotomic _))
       ⟨g, hgK⟩ x hg]
-
-theorem range_diagonal_le_ker_ideleSymbol_of_le_sup_zhatField [IsMulCommutative (L.1 ≃ₐ[K.1] L.1)]
-    (hL : L.1 ≤ K.1 ⊔ zhatField) : (diagonal K.1).range ≤ (ideleSymbol K.1 L.1).ker := by
-  rintro _ ⟨a, rfl⟩
-  exact ideleSymbol_diagonal_eq_one_of_le_sup K L
-    (hL.trans (sup_le_sup_left zhatField_le_maxCyclotomic _)) a
-
-theorem abstractSymbol_eq_ideleClassSymbol [IsMulCommutative (L.1 ≃ₐ[K.1] L.1)]
-    (hL : L.1 ≤ K.1 ⊔ zhatField) :
-    abstractSymbol K L = Abelianization.of.comp (ideleClassSymbol L.1
-      (range_diagonal_le_ker_ideleSymbol_of_le_sup_zhatField K L hL)) := by
-  refine MonoidHom.ext fun c ↦ ?_
-  obtain ⟨x, rfl⟩ := IdeleClassGroup.mk_surjective K.1 c
-  rw [MonoidHom.comp_apply, ideleClassSymbol_mk, abstractSymbol_mk_of_le_sup_zhatField K L hL]
 
 end IdeleClassLimit
 

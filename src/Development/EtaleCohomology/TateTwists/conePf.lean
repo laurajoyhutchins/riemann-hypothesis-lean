@@ -1,4 +1,47 @@
-import Development.EtaleCohomology.TateTwists.EtaleTensorPreservesQuasiIsoOfAcyclicAndCone
+module
+
+public import Development.EtaleCohomology.TateTwists.EtaleTensorPreservesQuasiIsoOfAcyclicAndCone
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 open CategoryTheory Limits AlgebraicGeometry Opposite CochainComplex CochainComplex.HomComplex GlobalTheory.EtC
 
@@ -95,7 +138,7 @@ theorem σ_leib {I I' J T T' : Cx R} (τ : Pair I J T) (τ' : Pair I' J T') (f :
     abel
   · rw [← sm_comp, mappingCone.d_snd_v u w (w + 1) rfl, sm_add, sm_comp, sm_comp, σ_fst, σ_snd, sm_madd, sm_msmul,
       σ_snd, σ_snd, ← sm_comp, mappingCone.d_snd_v f s (s + 1) rfl, sm_add, sm_comp, sm_comp, hc, τ'.leibniz]
-    simp only [map_add, LinearMap.add_apply, HomologicalComplex.id_f, sm_id]
+    simp only [map_add (f := _), LinearMap.add_apply, HomologicalComplex.id_f, sm_id]
     abel
 
 def σ {I I' J T T' : Cx R} (τ : Pair I J T) (τ' : Pair I' J T') (f : I ⟶ I') (u : T ⟶ T')
@@ -212,7 +255,7 @@ theorem decomp (U : Scheme.{0}) (w : ℤ) :
   obtain ⟨⟨p1, p2⟩, hp⟩ := p
   simp only [LinearMap.add_apply, LinearMap.comp_apply, P1, P2, Q1, Q2, DirectSum.toModule_lof, DirectSum.lmap_lof,
     TensorProduct.map_tmul, LinearMap.id_apply]
-  rw [shiftB (J := J) f U p1 p2 w hp _ (by omega), ← map_add]
+  rw [shiftB (J := J) f U p1 p2 w hp _ (by omega), ← map_add (f := _)]
   congr 1
   rw [← TensorProduct.add_tmul]
   congr 1
@@ -227,7 +270,7 @@ theorem isTensor (hc : τ.Compat τ' f (𝟙 J) u) (hτ : τ.IsTensor) (hτ' : �
     obtain ⟨x1, hx1⟩ := hP1 V g hg.1
     obtain ⟨x2, hx2⟩ := hP2 V g hg.2
     refine ⟨Q1 f V w x1 + Q2 f V w x2, ?_⟩
-    rw [map_add, ← LinearMap.comp_apply, etale_mapping_cone_pairing_lift_comp_inl_incl, ← LinearMap.comp_apply ((σ τ τ' f u hc).lift V w), etale_mapping_cone_pairing_lift_comp_inr_incl,
+    rw [map_add (f := _), ← LinearMap.comp_apply, etale_mapping_cone_pairing_lift_comp_inl_incl, ← LinearMap.comp_apply ((σ τ τ' f u hc).lift V w), etale_mapping_cone_pairing_lift_comp_inr_incl,
       LinearMap.comp_apply, LinearMap.comp_apply, hx1, hx2, sm_res, sm_res]
     exact congrArg (fun φ => Sec.map φ (Sec.res g y)) (mappingCone.id_X u w (w + 1) rfl)
   · intro U w x hx

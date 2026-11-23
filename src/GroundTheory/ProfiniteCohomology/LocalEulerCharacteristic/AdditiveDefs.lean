@@ -1,4 +1,50 @@
-import Mathlib
+module
+
+public import Mathlib.LinearAlgebra.FreeModule.ModN
+public import Mathlib.RepresentationTheory.Intertwining
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
@@ -29,16 +75,6 @@ instance additiveDistribMulAction {Γ M : Type*} [Monoid Γ] [Monoid M] [MulDist
   smul_zero γ := congrArg Additive.ofMul (smul_one γ)
   smul_add γ a b := congrArg Additive.ofMul (smul_mul' γ a.toMul b.toMul)
 
-@[simp]
-theorem toMul_smul_additive {Γ M : Type*} [Monoid Γ] [Monoid M] [MulDistribMulAction Γ M] (γ : Γ)
-    (a : Additive M) : (γ • a).toMul = γ • a.toMul :=
-  rfl
-
-@[simp]
-theorem smul_ofMul_additive {Γ M : Type*} [Monoid Γ] [Monoid M] [MulDistribMulAction Γ M] (γ : Γ)
-    (a : M) : γ • Additive.ofMul a = Additive.ofMul (γ • a) :=
-  rfl
-
 section Rep
 
 def piRep {k Γ X : Type*} [CommSemiring k] [Monoid Γ] [AddCommMonoid X] [Module k X] (ι : Type*)
@@ -60,11 +96,6 @@ def intRepToZMod (n : ℕ) {V : Type*} [AddCommGroup V] [Module (ZMod n) V]
   toFun γ := (ρ γ).toAddMonoidHom.toZModLinearMap n
   map_one' := by ext x; simp
   map_mul' γ δ := by ext x; simp
-
-@[simp]
-theorem intRepToZMod_apply (n : ℕ) {V : Type*} [AddCommGroup V] [Module (ZMod n) V]
-    (ρ : Representation ℤ Γ V) (γ : Γ) (x : V) : intRepToZMod n ρ γ x = ρ γ x :=
-  rfl
 
 variable (Γ) (A : Type*) [AddCommGroup A] [DistribMulAction Γ A] (n : ℕ)
 
@@ -91,11 +122,6 @@ def torsNRep : Representation (ZMod n) Γ (TorsN A n) :=
 @[simp]
 theorem modNRep_mk (γ : Γ) (x : A) :
     modNRep Γ A n γ (Submodule.Quotient.mk x) = Submodule.Quotient.mk (γ • x) :=
-  rfl
-
-@[simp]
-theorem coe_torsNRep_apply (γ : Γ) (x : TorsN A n) :
-    ((torsNRep Γ A n γ x : TorsN A n) : A) = γ • (x : A) :=
   rfl
 
 end Rep
@@ -129,11 +155,11 @@ noncomputable def g (A : Type u) [AddCommGroup A] [DistribMulAction Γ A] : ℤ 
 theorem g_eq (A : Type u) [AddCommGroup A] [DistribMulAction Γ A] [Finite (ModN A l)]
     [Finite (TorsN A l)] :
     d.g A = d.toFun (ModN A l) (modNRep Γ A l) - d.toFun (TorsN A l) (torsNRep Γ A l) := by
-  rw [g, dif_pos ⟨‹_›, ‹_›⟩]
+  rw [g, dite_eq_left ⟨‹_›, ‹_›⟩]
 
 theorem g_of_not_finite (A : Type u) [AddCommGroup A] [DistribMulAction Γ A]
     (h : ¬ (Finite (ModN A l) ∧ Finite (TorsN A l))) : d.g A = 0 := by
-  rw [g, dif_neg h]
+  rw [g, dite_eq_right h]
 
 noncomputable def one [NeZero l] : ℤ :=
   d.toFun (ULift.{u} (ZMod l)) (Representation.trivial (ZMod l) Γ (ULift.{u} (ZMod l)))

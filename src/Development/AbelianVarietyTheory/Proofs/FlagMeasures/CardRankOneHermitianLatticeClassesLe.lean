@@ -1,5 +1,62 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.IsGaugeAll
+module
+
+public import Formalism.HermitianLattices.StatementMass
+public import Mathlib.NumberTheory.NumberField.ClassNumber
+public import Mathlib.NumberTheory.NumberField.Units.DirichletTheorem
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.DefClassNum
+import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.LayerProd
+import Formalism.SharpRestriction.CuspSpanNormBounds.Point
+
+@[expose] public section
+
 open MeasureTheory NumberField Matrix Finset Formalism.MainNotions.S GlobalTheory.Count GlobalTheory.FlagMeas
 
 namespace GlobalTheory.RankOneClasses
@@ -9,21 +66,22 @@ open scoped nonZeroDivisors
 variable {E : Type} [Field E] [NumberField E] [StarRing E]
 
 omit [StarRing E] in
-theorem ne_bot_of_isLattice {L : Submodule (𝓞 E) E} (h : Submodule.IsLattice E L) : L ≠ ⊥ := by
+theorem ne_bot_of_isLattice {L : Submodule (𝓞 E) E} (h : Submodule.IsFullLattice E L) : L ≠ ⊥ := by
   intro hb
-  have := h.span_eq_top
+  let : Submodule.IsFullLattice E L := h
+  have : Submodule.span E (L : Set E) = ⊤ := Submodule.IsFullLattice.span_eq_top
   rw [hb] at this
   simp at this
 
-noncomputable def latUnit (L : Submodule (𝓞 E) E) (h : Submodule.IsLattice E L) :
+noncomputable def latUnit (L : Submodule (𝓞 E) E) (h : Submodule.IsFullLattice E L) :
     (FractionalIdeal (𝓞 E)⁰ E)ˣ :=
   Units.mk0 (⟨L, FractionalIdeal.isFractional_of_fg h.fg⟩ : FractionalIdeal (𝓞 E)⁰ E) (by
     intro h0
     exact ne_bot_of_isLattice h (FractionalIdeal.coeToSubmodule_eq_bot.mpr h0))
 
 omit [StarRing E] in
-theorem exists_scale {L M : Submodule (𝓞 E) E} (hL : Submodule.IsLattice E L)
-    (hM : Submodule.IsLattice E M)
+theorem exists_scale {L M : Submodule (𝓞 E) E} (hL : Submodule.IsFullLattice E L)
+    (hM : Submodule.IsFullLattice E M)
     (h : (QuotientGroup.mk (latUnit L hL) :
       (FractionalIdeal (𝓞 E)⁰ E)ˣ ⧸ (toPrincipalIdeal (𝓞 E) E).range) =
       QuotientGroup.mk (latUnit M hM)) :
@@ -48,7 +106,7 @@ theorem exists_scale {L M : Submodule (𝓞 E) E} (hL : Submodule.IsLattice E L)
 def idealOf (β : E) (L : Submodule (𝓞 E) E) : Submodule (𝓞 E) E :=
   Submodule.span (𝓞 E) {t | ∃ x ∈ L, ∃ y ∈ L, t = star x * β * y}
 
-theorem idealOf_fg (β : E) {L : Submodule (𝓞 E) E} (h : Submodule.IsLattice E L) :
+theorem idealOf_fg (β : E) {L : Submodule (𝓞 E) E} (h : Submodule.IsFullLattice E L) :
     (idealOf β L).FG := by
   obtain ⟨d, hd, hdL⟩ : IsFractional (𝓞 E)⁰ L := FractionalIdeal.isFractional_of_fg h.fg
   have hd0 : (d : E) ≠ 0 := by
@@ -71,7 +129,7 @@ theorem idealOf_fg (β : E) {L : Submodule (𝓞 E) E} (h : Submodule.IsLattice 
   exact Submodule.FG.of_le (Submodule.fg_span_singleton _) hle
 
 theorem idealOf_ne_bot {β : E} (hβ : β ≠ 0) {L : Submodule (𝓞 E) E}
-    (h : Submodule.IsLattice E L) : idealOf β L ≠ ⊥ := by
+    (h : Submodule.IsFullLattice E L) : idealOf β L ≠ ⊥ := by
   obtain ⟨x, hx, hx0⟩ := (Submodule.ne_bot_iff L).mp (ne_bot_of_isLattice h)
   refine (Submodule.ne_bot_iff _).mpr ⟨star x * β * x, Submodule.subset_span ⟨x, hx, x, hx, rfl⟩, ?_⟩
   simp [hx0, hβ]
@@ -91,7 +149,7 @@ theorem mul_mem_idealOf {β γ t a : E} {L M : Submodule (𝓞 E) E}
   | smul r x _ hx => rw [smul_comm]; exact Submodule.smul_mem _ r hx
 
 theorem exists_unit {β γ a : E} (hβ : β ≠ 0) (hγ : γ ≠ 0) {L M : Submodule (𝓞 E) E}
-    (hL : Submodule.IsLattice E L) (ha : a ≠ 0) (h : ∀ y, a * y ∈ M ↔ y ∈ L)
+    (hL : Submodule.IsFullLattice E L) (ha : a ≠ 0) (h : ∀ y, a * y ∈ M ↔ y ∈ L)
     (hN : idealOf β L = idealOf γ M) :
     ∃ u : (𝓞 E)ˣ, star a * γ * a * ((u : 𝓞 E) : E) = β := by
   have hs : star a ≠ 0 := by simpa using ha
@@ -139,7 +197,7 @@ theorem exists_sq_of_parity {u w : (𝓞 E)ˣ} (h : even_im_hermitian_sub u = ev
       Additive.ofMul (w : (𝓞 E)ˣ ⧸ Units.torsion E) +
         (2 : ℤ) • Additive.ofMul (v : (𝓞 E)ˣ ⧸ Units.torsion E) := by
     apply (Units.basisModTorsion E).equivFun.injective
-    rw [map_add, map_smul, hv', LinearEquiv.apply_symm_apply]
+    rw [map_add (f := _), map_smul, hv', LinearEquiv.apply_symm_apply]
     funext i
     simp only [Module.Basis.equivFun_apply, Pi.add_apply, Pi.smul_apply, smul_eq_mul]
     linear_combination hk i
@@ -159,12 +217,12 @@ theorem eq_of_norm_eq (φ : E →+* ℂ) (hφ : ∀ a, φ (star a) = starRingEnd
     Real.norm_of_nonneg pB.le] at h
   rw [← a1, ← b1, h]
 
-theorem card_classes_le : ∀ (E : Type) [Field E] [NumberField E] [StarRing E], Formalism.HermitianLatticesTheory.IsCMUnram E → ∀ N : Submodule (𝓞 E) E, ENat.card (Quot (fun X Y : {X : E × Submodule (𝓞 E) E // star X.1 = X.1 ∧ (∀ φ : E →+* ℂ, 0 < (φ X.1).re) ∧ Submodule.IsLattice E X.2 ∧ Submodule.span (𝓞 E) {t | ∃ x ∈ X.2, ∃ y ∈ X.2, t = star x * X.1 * y} = N} => ∃ c : E, c ≠ 0 ∧ star c * Y.1.1 * c = X.1.1 ∧ ∀ y, c * y ∈ Y.1.2 ↔ y ∈ X.1.2)) ≤ ((classNumber E * 2 ^ Formalism.HermitianLatticesTheory.fDeg E : ℕ) : ENat) := by
+theorem card_classes_le : ∀ (E : Type) [Field E] [NumberField E] [StarRing E], Formalism.HermitianLatticesTheory.IsCMUnram E → ∀ N : Submodule (𝓞 E) E, ENat.card (Quot (fun X Y : {X : E × Submodule (𝓞 E) E // star X.1 = X.1 ∧ (∀ φ : E →+* ℂ, 0 < (φ X.1).re) ∧ Submodule.IsFullLattice E X.2 ∧ Submodule.span (𝓞 E) {t | ∃ x ∈ X.2, ∃ y ∈ X.2, t = star x * X.1 * y} = N} => ∃ c : E, c ≠ 0 ∧ star c * Y.1.1 * c = X.1.1 ∧ ∀ y, c * y ∈ Y.1.2 ↔ y ∈ X.1.2)) ≤ ((classNumber E * 2 ^ Formalism.HermitianLatticesTheory.fDeg E : ℕ) : ENat) := by
   intro E _ _ _ hE N
   classical
   obtain ⟨φ⟩ : Nonempty (E →+* ℂ) := inferInstance
   have hφ := hE.2.1 φ
-  set S := {X : E × Submodule (𝓞 E) E // star X.1 = X.1 ∧ (∀ φ : E →+* ℂ, 0 < (φ X.1).re) ∧ Submodule.IsLattice E X.2 ∧ Submodule.span (𝓞 E) {t | ∃ x ∈ X.2, ∃ y ∈ X.2, t = star x * X.1 * y} = N} with hS
+  set S := {X : E × Submodule (𝓞 E) E // star X.1 = X.1 ∧ (∀ φ : E →+* ℂ, 0 < (φ X.1).re) ∧ Submodule.IsFullLattice E X.2 ∧ Submodule.span (𝓞 E) {t | ∃ x ∈ X.2, ∃ y ∈ X.2, t = star x * X.1 * y} = N} with hS
   have hne : ∀ X : S, X.1.1 ≠ 0 := by
     intro X h0
     have := X.2.2.1 φ

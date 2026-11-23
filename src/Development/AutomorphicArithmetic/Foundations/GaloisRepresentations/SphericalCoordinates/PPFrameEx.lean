@@ -1,7 +1,48 @@
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.SphericalCoordinates.PFrameEx
-import Development.AutomorphicArithmetic.PAdicLatticeApproximation.ExistsGlobalApproxOfLocalModPPowConj
-import Development.AutomorphicArithmetic.PAdicLatticeApproximation.ExistsBoundedDenominatorOfLocalIntegralityConj
-import Development.AutomorphicArithmetic.PAdicLatticeApproximation.ExistsFinsetSpanOfIntegralMultiples
+module
+
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.SphericalCoordinates.PFrameEx
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.SphericalCoordinates.LineBasis
+public import Development.AutomorphicArithmetic.PAdicLatticeApproximation.ExistsBoundedDenominatorOfLocalIntegralityConj
+public import Development.AutomorphicArithmetic.PAdicLatticeApproximation.ExistsFinsetSpanOfIntegralMultiples
+public import Development.AutomorphicArithmetic.PAdicLatticeApproximation.ExistsGlobalApproxOfLocalModPPowConj
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.SphericalCoordinates.PerCApply
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor GlobalTheory GlobalTheory.PELU GlobalTheory.UPel.HT GlobalTheory.UPel.HT.Gen
@@ -14,9 +55,8 @@ namespace UpperTheory.Gal.W2.HermitianFrame
 variable {F K : Type} [Field F] [Field K] {n : ℕ}
 
 private theorem map_mulVec' (τ : F →+* K) (M : Matrix (Fin n) (Fin n) F) (v : Fin n → F) :
-    (fun i => τ ((M *ᵥ v) i)) = M.map τ *ᵥ (fun i => τ (v i)) := by
-  funext i
-  simp [Matrix.mulVec, dotProduct, map_sum, map_mul]
+    (fun i => τ ((M *ᵥ v) i)) = M.map τ *ᵥ (fun i => τ (v i)) :=
+  funext (τ.map_mulVec M v)
 
 private theorem transpose_conj {R M S : Matrix (Fin n) (Fin n) K} (hS : S.det ≠ 0) (h : R * S = S * M) :
     Rᵀ * (S⁻¹)ᵀ = (S⁻¹)ᵀ * Mᵀ := by
@@ -32,7 +72,7 @@ private theorem pair_eval (τ : F →+* K) (j : F →+* F) (S B : Matrix (Fin n)
     (h : Bᵀ * S = Q.map τ) (y z : Fin n → F) :
     (B *ᵥ (fun i => τ (j (y i)))) ⬝ᵥ (S *ᵥ (fun i => τ (z i))) = τ ((fun i => j (y i)) ⬝ᵥ (Q *ᵥ z)) := by
   rw [← Matrix.vecMul_transpose, ← Matrix.dotProduct_mulVec, Matrix.mulVec_mulVec, h, ← map_mulVec']
-  simp [dotProduct, map_sum, map_mul]
+  exact (τ.map_dotProduct (fun i => j (y i)) (Q *ᵥ z)).symm
 
 private theorem conj_form (j : F →+* F) (hj : ∀ x, j (j x) = x) (Q : Matrix (Fin n) (Fin n) F) (hQ : (Q.map j)ᵀ = -Q)
     (y z : Fin n → F) :
@@ -40,6 +80,7 @@ private theorem conj_form (j : F →+* F) (hj : ∀ x, j (j x) = x) (Q : Matrix 
   have hQ' : ∀ i k, j (Q i k) = - Q k i := fun i k => by
     have := congrFun (congrFun hQ k) i
     simpa using this
+
   simp only [dotProduct, Matrix.mulVec, map_sum, map_mul, hj, hQ', Finset.mul_sum, ← Finset.sum_neg_distrib]
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun k _ => Finset.sum_congr rfl fun i _ => ?_
@@ -101,18 +142,17 @@ theorem UpperTheory.Gal.W2.pFrameEx_of :
           rw [← K1, hrinv]; simp only [Matrix.mul_one, Matrix.mul_assoc]
       _ = _ := by simp only [Matrix.mul_assoc]
   have hkp' : ∀ c v, kp (L.rep c v) = σ c *ᵥ kp v := hkp
+  let j : G.F →+* G.F := (IsCMField.complexConj G.F).toRingEquiv.toRingHom
   have hcm : ∀ w (M : Matrix (Fin G.n) (Fin G.n) G.F) (v : Fin G.n → G.F),
       (fun i => G.embW w (IsCMField.complexConj G.F ((M *ᵥ v) i)))
         = (M.map (IsCMField.complexConj G.F)).map (G.embW w) *ᵥ (fun i => G.embW w (IsCMField.complexConj G.F (v i))) := by
     intro w M v
-    funext i
-    simp [Matrix.mulVec, dotProduct, map_sum, map_mul]
+    rw [Matrix.map_map]
+    exact map_mulVec' ((G.embW w).comp j) M v
   have hc1 : ∀ (M : Matrix (Fin G.n) (Fin G.n) G.F) (v : Fin G.n → G.F),
       (fun i => IsCMField.complexConj G.F ((M *ᵥ v) i))
-        = M.map (IsCMField.complexConj G.F) *ᵥ (fun i => IsCMField.complexConj G.F (v i)) := by
-    intro M v
-    funext i
-    simp [Matrix.mulVec, dotProduct, map_sum, map_mul]
+        = M.map (IsCMField.complexConj G.F) *ᵥ (fun i => IsCMField.complexConj G.F (v i)) :=
+    map_mulVec' j
   have hdetS : ∀ w, ((S w)⁻¹).det ≠ 0 := by
     intro w
     have : ((S w)⁻¹).det * (S w).det = 1 := by
@@ -139,7 +179,6 @@ theorem UpperTheory.Gal.W2.pFrameEx_of :
         = (fun i => IsCMField.complexConj G.F (v i)) ⬝ᵥ ((A * σ ↑β⁻¹) *ᵥ z) := by
     intro v z
     rw [hc1, ← Matrix.vecMul_transpose, ← Matrix.dotProduct_mulVec, Matrix.mulVec_mulVec, ← hAsh, hβi]
-  let j : G.F →+* G.F := (IsCMField.complexConj G.F).toRingEquiv.toRingHom
   have hjj : ∀ x, j (j x) = x := fun x => by simp [j]
   have hjA : (A.map j)ᵀ = -A := hAc
   let T : VQ D →+ Loc G := AddMonoidHom.mk' (fun x w => S w *ᵥ (fun i => G.embW w (kp x i))) (by

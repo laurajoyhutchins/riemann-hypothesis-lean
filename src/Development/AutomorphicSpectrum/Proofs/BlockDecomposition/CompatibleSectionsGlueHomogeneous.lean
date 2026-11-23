@@ -1,7 +1,46 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.VanIdealHomog
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.ProjectiveCharts
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.Saturation
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.VanIdealHomog
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.ProjectiveCharts
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -11,27 +50,7 @@ namespace GlobalTheory.CompanionTheory.GE.SerreVan
 
 variable {B : Type} [CommRing B] {M : ℕ}
 
-attribute [local instance] MvPolynomial.gradedAlgebra in
 
-theorem comp_mul {a : MvPolynomial (Fin M) B} {e : ℕ} (ha : a.IsHomogeneous e) (d : ℕ)
-    (f : MvPolynomial (Fin M) B) :
-    homogeneousComponent (e + d) (a * f) = a * homogeneousComponent d f := by
-  have h := DirectSum.coe_decompose_mul_add_of_left_mem (homogeneousSubmodule (Fin M) B)
-    (i := e) (j := d) (a := a) (b := f) ha
-  rw [← decomposition.decompose'_apply, ← decomposition.decompose'_apply]
-  exact h
-
-attribute [local instance] MvPolynomial.gradedAlgebra in
-
-theorem comp_zero_X_mul (i : Fin M) (f : MvPolynomial (Fin M) B) :
-    homogeneousComponent 0 (X i * f) = 0 := by
-  have h := DirectSum.coe_decompose_mul_of_left_mem_of_not_le (homogeneousSubmodule (Fin M) B)
-    (i := 1) (n := 0) (a := X i) (b := f) (isHomogeneous_X B i) (by norm_num)
-  rw [← decomposition.decompose'_apply]
-  exact h
-
-noncomputable def sat {R : Type} [CommRing R] (Q : Ideal R) (x : R) : Ideal R :=
-  _root_.UpperTheory.Reformulated.B.IdealSaturationByElement.sat Q x
 
 def V0 (W : Finset (Fin M)) (P Q : Ideal (MvPolynomial (Fin M) B)) (n₀ : ℕ) : Prop :=
   ∀ n, n₀ ≤ n → ∀ f ∈ P, f.IsHomogeneous n → (∀ i ∈ W, ∃ m : ℕ, X i ^ m * f ∈ Q) → f ∈ Q

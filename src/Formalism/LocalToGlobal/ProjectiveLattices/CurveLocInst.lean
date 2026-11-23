@@ -1,6 +1,45 @@
-import Formalism.LocalToGlobal.ProjectiveLattices.CurveAsm
-import Formalism.LocalToGlobal.ProjectiveLattices.CurveLoc
-import Formalism.LocalToGlobal.ProjectiveLattices.CurveCountB
+module
+
+public import Formalism.LocalToGlobal.ProjectiveLattices.CurveAsm
+public import Formalism.LocalToGlobal.ProjectiveLattices.CurveLoc
+public import Formalism.LocalToGlobal.ProjectiveLattices.CurveOpen
+public import Formalism.LocalToGlobal.ProjectiveLattices.CurveCountB
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -58,34 +97,11 @@ theorem hone_of (hC : CompSplitSt h j hG) :
   exact CurveLoc.one_of_split (recPlus h j hj) la G.N G.w (fun Z => Om Z) (fun Z => formsEvR j hG hT Z)
     (fun Z k => split_of h j hj hG hT hC G Z k) Q hQ Z Z' hZ hZ'
 
-theorem hloc_of (hB : ∀ (ka wL wF : WeightFamilies.Wt D j) (G : GlobalFamilyData (recPlus h j hj) ka wL wF) (S : Scal (recB h.toLawsCore))
-      (g0 : (recB h.toLawsCore).Cusp j wF), CurveHyp h j hj hG ka wL wF G S g0 → BIRSt h j hj hG G)
-    (hQ : CountQAtSt h j hj hG hT) :
-    ∀ ka wL wF G S g0 la, CurveHyp h j hj hG ka wL wF G S g0 →
-      ∀ Z (r : RZs (recPlus h j hj) la G.N (Om Z) (formsEvR j hG hT Z) G.w),
-        ∃ a p : ↥(Frac0 (recPlus h j hj) la G.w),
-          (∀ Q : Ideal ↥(Frac0 (recPlus h j hj) la G.w), Q.IsPrime → Jid (recPlus h j hj) la G.w ≤ Q →
-            RingHom.ker (phiI h j hj hG hT la G Z) ≤ Q → p ∉ Q) ∧
-          phiI h j hj hG hT la G Z p * r = phiI h j hj hG hT la G Z a := by
-  intro ka wL wF G S g0 la hH Z r
-  exact CurveLoc.loc_of_bir (recPlus h j hj) la G.N G.w (formsEvR j hG hT Z)
-    (birAt_of h j hj hG hT G (hB ka wL wF G S g0 hH) Z) (hQ ka wL wF G S g0 la hH Z) r
-
 theorem countQAtSt_holds : CountQAtSt h j hj hG hT := by
   intro ka wL wF G S g0 la hH Z
   obtain ⟨k₀, hk₀, htr⟩ := hH.2.1.2 Z
   exact CurveLoc.countQAt_of (recPlus h j hj) la G.N G.w (formsEvR j hG hT Z)
     (fun i => evC hG Z ((G.w i : (recB h.toLawsCore).Cusp j wL) : T.R j))
     (fun i => formsEvR_inc h j hj hG hT Z wL (G.w i)) ⟨k₀, hk₀, le_of_eq htr⟩
-
-theorem hloc_of_bir (hB : ∀ (ka wL wF : WeightFamilies.Wt D j) (G : GlobalFamilyData (recPlus h j hj) ka wL wF) (S : Scal (recB h.toLawsCore))
-      (g0 : (recB h.toLawsCore).Cusp j wF), CurveHyp h j hj hG ka wL wF G S g0 → BIRSt h j hj hG G) :
-    ∀ ka wL wF G S g0 la, CurveHyp h j hj hG ka wL wF G S g0 →
-      ∀ Z (r : RZs (recPlus h j hj) la G.N (Om Z) (formsEvR j hG hT Z) G.w),
-        ∃ a p : ↥(Frac0 (recPlus h j hj) la G.w),
-          (∀ Q : Ideal ↥(Frac0 (recPlus h j hj) la G.w), Q.IsPrime → Jid (recPlus h j hj) la G.w ≤ Q →
-            RingHom.ker (phiI h j hj hG hT la G Z) ≤ Q → p ∉ Q) ∧
-          phiI h j hj hG hT la G Z p * r = phiI h j hj hG hT la G Z a :=
-  hloc_of h j hj hG hT hB (countQAtSt_holds h j hj hG hT)
 
 end Formalism.L2.Pj

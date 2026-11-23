@@ -1,6 +1,62 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IsHeatZero
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SquareIntegrability.GCauchyStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.FirstCoordinateAdmissible
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.Matrix.PosDef
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Algebra.Star.UnitaryStarAlgAut
+
+@[expose] public section
+
 open Matrix Complex NumberField GlobalTheory.SW Filter Topology
 open ReciprocityTheory.ChartRestriction.G.FD (cc herm)
 open scoped ComplexConjugate ComplexOrder Real Classical
@@ -8,14 +64,6 @@ open scoped ComplexConjugate ComplexOrder Real Classical
 namespace GlobalTheory.SW.TracePair
 
 variable {E : Type} [Field E] [NumberField E]
-
-theorem card_pos {Ψ : Finset (E →+* ℂ)} (hΨ : IsType Ψ) : 0 < Ψ.card := by
-  obtain ⟨σ⟩ : Nonempty (E →+* ℂ) := inferInstance
-  by_cases h : σ ∈ Ψ
-  · exact Finset.card_pos.2 ⟨σ, h⟩
-  · refine Finset.card_pos.2 ⟨ComplexEmbedding.conjugate σ, ?_⟩
-    by_contra h'
-    exact h ((hΨ σ).2 h')
 
 open Matrix NumberField in
 open scoped ComplexOrder in
@@ -109,7 +157,6 @@ private lemma exists_conjTranspose_mul_self_eq_of_posDef {N : ℕ} {Y : Matrix (
       rw [diagonal_mul_diagonal]
       congr 1
       funext i
-      simp only [Function.comp_apply]
       rw [← Complex.ofReal_mul, Real.mul_self_sqrt (hY.eigenvalues_pos i).le]
       rfl
     conv_rhs => rw [hY.isHermitian.spectral_theorem]
@@ -132,7 +179,7 @@ private lemma card_mul_prod_rpow_inv_card_le_sum {ι : Type*} [Fintype ι] [None
   have hn : (0 : ℝ) < Fintype.card ι := by exact_mod_cast Fintype.card_pos
   have h := Real.geom_mean_le_arith_mean_weighted Finset.univ (fun _ => 1 / (Fintype.card ι : ℝ)) x
     (fun _ _ => by positivity) (by simp [Finset.card_univ]) (fun i _ => hx i)
-  rw [Real.finset_prod_rpow _ _ (fun i _ => hx i), ← Finset.mul_sum] at h
+  rw [Real.finsetProd_rpow _ _ (fun i _ => hx i), ← Finset.mul_sum] at h
   calc (Fintype.card ι : ℝ) * (∏ i, x i) ^ (1 / (Fintype.card ι : ℝ))
       ≤ (Fintype.card ι : ℝ) * (1 / (Fintype.card ι : ℝ) * ∑ i, x i) := by gcongr
     _ = ∑ i, x i := by field_simp
@@ -173,10 +220,10 @@ private lemma card_mul_det_mul_det_rpow_le_trace_mul_of_posDef {N : ℕ} (hN : 0
   rw [htr, ← hre]
   exact card_mul_det_rpow_le_trace_of_posDef hN hP
 
+
 open Matrix Complex NumberField Filter Topology in
 open scoped ComplexConjugate ComplexOrder Real Classical in
 variable {E : Type} [Field E] [NumberField E] in
-
 theorem _root_.GlobalTheory.SW.TracePair.trace_ge :
     ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (Ψ : Finset (E →+* ℂ)),
       _root_.GlobalTheory.SW.IsType Ψ → ∀ N c : ℕ, 0 < N → 0 < c → ∃ k : ℝ, 0 < k ∧
@@ -228,7 +275,7 @@ theorem _root_.GlobalTheory.SW.TracePair.trace_ge :
     card_mul_det_mul_det_rpow_le_trace_mul_of_posDef hN (hA τ) (hY τ)
   have hamgm := card_mul_prod_rpow_inv_card_le_sum (fun τ : Ψ => (a τ * y τ) ^ (1 / (N : ℝ)))
     (fun τ => by have := ha τ; have := hy τ; positivity)
-  rw [Fintype.card_coe, Real.finset_prod_rpow _ _ (fun τ _ => (mul_pos (ha τ) (hy τ)).le),
+  rw [Fintype.card_coe, Real.finsetProd_rpow _ _ (fun τ _ => (mul_pos (ha τ) (hy τ)).le),
     ← Real.rpow_mul (Finset.prod_nonneg fun τ _ => (mul_pos (ha τ) (hy τ)).le),
     Finset.prod_mul_distrib, ← hD] at hamgm
   have he : 1 / (N : ℝ) * (1 / (Ψ.card : ℝ)) = 1 / ((Ψ.card * N : ℕ) : ℝ) := by

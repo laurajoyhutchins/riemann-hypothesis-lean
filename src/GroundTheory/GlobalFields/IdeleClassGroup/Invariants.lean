@@ -1,6 +1,50 @@
-import Mathlib
-import GroundTheory.GlobalFields.IdeleClassGroup.IdeleClassEquivIdeleClassMapOfComm
-import GroundTheory.GlobalFields.IdeleClassGroup.ConjugateNorm
+module
+
+public import GroundTheory.GlobalFields.IdeleClassGroup.IdeleClassEquivIdeleClassMapOfComm
+import GroundTheory.GlobalFields.CyclotomicCharacters.Character
+public import GroundTheory.GlobalFields.IdeleClassGroup.ConjugateNorm
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.FieldTheory.Galois.Infinite
+
+@[expose] public section
 
 namespace GroundTheory.Global
 
@@ -173,34 +217,6 @@ theorem norm_fixedEquiv {F E : FiniteSubfield} (h : F ≤ E) (c : IdeleClassGrou
   change _ = of F (GroundTheory.Global.ideleClassNorm F.1 E.1 c)
   rw [← of_ideleClassMap hFM]
   exact congrArg (of M) h2.symm
-
-instance normal_range_ideleClassNorm {F E : FiniteSubfield} (h : F ≤ E) :
-    (FiniteSubfield.ideleClassNorm h).range.Normal :=
-  ⟨fun n hn g ↦ by rwa [mul_comm g n, mul_inv_cancel_right]⟩
-
-def tateZeroEquiv {F E : FiniteSubfield} (h : F ≤ E) :
-    tateZero IdeleClassLimit F.1.fixingSubgroup E.1.fixingSubgroup ≃*
-      IdeleClassGroup F.1 ⧸ (FiniteSubfield.ideleClassNorm h).range :=
-  QuotientGroup.congr (norm IdeleClassLimit F.1.fixingSubgroup E.1.fixingSubgroup).range
-    (FiniteSubfield.ideleClassNorm h).range (fixedEquiv F).symm (by
-    ext c
-    simp only [Subgroup.mem_map, MonoidHom.mem_range]
-    constructor
-    · rintro ⟨_, ⟨a, rfl⟩, rfl⟩
-      obtain ⟨d, rfl⟩ := (fixedEquiv E).surjective a
-      refine ⟨d, ?_⟩
-      rw [norm_fixedEquiv h]
-      exact ((fixedEquiv F).symm_apply_apply _).symm
-    · rintro ⟨d, rfl⟩
-      refine ⟨_, ⟨fixedEquiv E d, rfl⟩, ?_⟩
-      rw [norm_fixedEquiv h]
-      exact (fixedEquiv F).symm_apply_apply _)
-
-theorem tateZeroEquiv_mk {F E : FiniteSubfield} (h : F ≤ E) (c : IdeleClassGroup F.1) :
-    tateZeroEquiv h (fixedEquiv F c : tateZero IdeleClassLimit F.1.fixingSubgroup
-      E.1.fixingSubgroup) = (c : IdeleClassGroup F.1 ⧸ (FiniteSubfield.ideleClassNorm h).range) := by
-  rw [tateZeroEquiv, QuotientGroup.congr_mk]
-  exact congrArg _ ((fixedEquiv F).symm_apply_apply c)
 
 end IdeleClassLimit
 

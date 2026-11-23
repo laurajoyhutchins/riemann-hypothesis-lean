@@ -1,15 +1,70 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.ExponentialFamilyPeriods
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsHodgeGram
-import Development.AbelianVarietyTheory.Definitions.Uniformization.PointEqOfSubsingleton
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExponentialSurjectiveSemiabelianStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExistsLinearLiftOfAdditiveFamily
-import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.ExistsIsClosedEmbeddingOfAffine
+module
+
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.ExponentialFamilyPeriods
+public import Development.AbelianVarietyTheory.Definitions.ThetaMetrics.MemRangeCompIffOfIsClosedImmersion
+public import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.ExistsSplitTorusPointsMulEquiv
+public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.HomBaseChangeBijectiveOfLeNilradical
+public import Development.AbelianVarietyTheory.Definitions.Uniformization.PointEqOfSubsingleton
+public import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.ExistsSymmetricVeryAmple
+public import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.ExistsIsClosedEmbeddingOfAffine
 import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.IsProjOverIffIsProperAndExistsIsAmpleLB
-import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.ExistsSymmetricVeryAmple
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.TorusExtensionPointsDivisible
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.IsHolToOfComponents
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.HolomorphicFamilies.HolPairA
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.TorusExtensionPointsDivisible
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.IsHolToOfComponents
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExistsLinearLiftOfAdditiveFamily
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExponentialSurjectiveSemiabelianStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import Mathlib.Topology.Algebra.Group.OpenMapping
+import Mathlib.Topology.Baire.LocallyCompactRegular
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.HolomorphicFamilies.HolPairA
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsHodgeGram
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor GlobalTheory.CompanionTheory.Ar GlobalTheory.CompanionTheory.Ar.Fl GlobalTheory.CompanionTheory.Ar.Flat Filter Topology Metric
@@ -63,7 +118,7 @@ theorem eq_top_of_compact_quotient (g : ℕ) (H : Type) [Group H] [TopologicalSp
     obtain ⟨w, hw, hwz⟩ := hcz
     have h1 : π w = π (lift c + z) := by rw [hwz, hadd, hlift]
     have h2 := heq _ _ h1
-    rw [map_add] at h2
+    rw [map_add (f := _)] at h2
     have h3 : ℓ z = ℓ w - ℓ (lift c) := by rw [h2]; ring
     have h4 : ‖ℓ w‖ ≤ ‖ℓ'‖ := by
       have := ℓ'.le_opNorm w
@@ -175,7 +230,7 @@ def famExpAtPoint {R : Type} [CommRing R] {G : Over (Sp R)} [GrpObj G] {g n : �
     have hφ : Continuous (fun p : (Fin 0 → ℂ) × (Fin N → ℂ) => (b, p.2)) := by fun_prop
     have hφ' : Continuous (fun p : (Fin 0 → ℂ) × (Fin g → ℂ) => (b, p.2)) := by fun_prop
     refine ⟨V, N, f, fun p => L (b, p.2), h1, ?_, ?_, ?_⟩
-    · exact AnalyticAt.comp' (f := fun p : (Fin 0 → ℂ) × (Fin N → ℂ) => (b, p.2)) h2
+    · exact AnalyticAt.comp (f := fun p : (Fin 0 → ℂ) × (Fin N → ℂ) => (b, p.2)) h2
         (analyticAt_const.prod analyticAt_snd)
     · exact (hφ'.tendsto (b₀, 0)).eventually h3
     · exact (hφ.tendsto (b₀, _)).eventually h4
@@ -298,7 +353,7 @@ theorem differentiable_torusExp_coord (α : torusRing ZU X) :
   induction α using AddMonoidAlgebra.induction_linear with
   | zero => simp
   | add f f' hf hf' =>
-    simp only [map_add]
+    simp only [map_add (f := _)]
     exact hf.add hf'
   | single χ r =>
     have e : (AddMonoidAlgebra.single χ r : AddMonoidAlgebra (ULift.{0} ℤ) X) =
@@ -366,7 +421,9 @@ theorem span_per_eq_top : ∀ (R : Type) [CommRing R] (G : Over (Sp R)) [GrpObj 
   obtain ⟨d, t, tadd, thol, tsurj, tper⟩ := exists_torusExp T.X
   have := (compact_alt_alt T.B T.isAbelian).1
   have := (compact_alt_alt T.B T.isAbelian).2
-  have := isTopologicalGroup_over (C := ℂ) T.B
+  have : IsTopologicalGroup (𝟙_ (Over (Sp ℂ)) ⟶ T.B) :=
+    { toContinuousMul := ⟨(continuous_over_comp (μ[T.B])).comp (tensorHomeomorph T.B T.B).symm.continuous⟩
+      toContinuousInv := ⟨continuous_over_comp (GrpObj.inv (X := T.B))⟩ }
   let x := spMap (ψ b)
   let u : (Fin d → ℂ) → (Over.mk x ⟶ G) := fun w => ofFibre G x (t w ≫ T.i)
   have uadd : ∀ z w, u (z + w) = u z * u w := fun z w => by
@@ -384,6 +441,7 @@ theorem span_per_eq_top : ∀ (R : Type) [CommRing R] (G : Over (Sp R)) [GrpObj 
       ext c
       have h2 : (2 * Real.pi * Complex.I : ℂ) ≠ 0 := Complex.two_pi_I_ne_zero
       simp [Finset.sum_apply, Pi.single_apply, h2]
+
     rw [e1, map_sum]
     exact Submodule.sum_mem _ fun a _ => by
       rw [map_smul]

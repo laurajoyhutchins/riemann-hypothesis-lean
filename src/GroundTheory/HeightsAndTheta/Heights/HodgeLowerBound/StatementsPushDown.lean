@@ -1,10 +1,48 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.StatementsHodgeFlag
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterNamed
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterRedF
-import GroundTheory.HeightsAndTheta.Heights.Intersections.Statements
-import GroundTheory.HeightsAndTheta.Heights.Intersections.StatementsPFStep
-import GroundTheory.HeightsAndTheta.Heights.Intersections.PPFHoriz
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.StatementsHodgeFlag
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterNamed
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -36,70 +74,6 @@ section Bot
 
 variable {K : Type} {ι : K → Type} {K' : Type} {ι' : K' → Type}
 
-abbrev botAlgBase (v : (Σ k, ι k) → (Σ k', ι' k')) : Algebra (MRing ι) (FractionRing (MRing ι')) :=
-  ((algebraMap (MRing ι') (FractionRing (MRing ι'))).comp (rename v : MRing ι →ₐ[ℤ] MRing ι').toRingHom).toAlgebra
-
-theorem botAlgBase_injective {v : (Σ k, ι k) → (Σ k', ι' k')} (hv : Function.Injective v) :
-    Function.Injective (@algebraMap (MRing ι) (FractionRing (MRing ι')) _ _ (botAlgBase v)) :=
-  (IsFractionRing.injective (MRing ι') (FractionRing (MRing ι'))).comp (rename_injective _ hv)
-
-abbrev botAlg (v : (Σ k, ι k) → (Σ k', ι' k')) (hv : Function.Injective v) :
-    Algebra (FractionRing (MRing ι)) (FractionRing (MRing ι')) :=
-  letI := botAlgBase v
-  haveI : FaithfulSMul (MRing ι) (FractionRing (MRing ι')) :=
-    (faithfulSMul_iff_algebraMap_injective _ _).mpr (botAlgBase_injective hv)
-  FractionRing.liftAlgebra _ _
-
-theorem botAlg_algebraMap {v : (Σ k, ι k) → (Σ k', ι' k')} (hv : Function.Injective v) (f : MRing ι) :
-    @algebraMap _ _ _ _ (botAlg v hv) (algebraMap (MRing ι) (FractionRing (MRing ι)) f) =
-      algebraMap (MRing ι') (FractionRing (MRing ι')) (rename v f) := by
-  let := botAlgBase v
-  have : FaithfulSMul (MRing ι) (FractionRing (MRing ι')) :=
-    (faithfulSMul_iff_algebraMap_injective _ _).mpr (botAlgBase_injective hv)
-  exact IsFractionRing.lift_algebraMap (botAlgBase_injective hv) f
-
-def genFibreBot (v : (Σ k, ι k) → (Σ k', ι' k')) (hv : Function.Injective v) :
-    GenFibre v (⊥ : Ideal (MRing ι')) where
-  Φ := FractionRing (MRing ι)
-  Φ' := FractionRing (MRing ι')
-  alg := botAlg v hv
-  x p := algebraMap (MRing ι) (FractionRing (MRing ι)) (X p)
-  x' q := algebraMap (MRing ι') (FractionRing (MRing ι')) (X q)
-  ker_x := by
-    rw [show imageZ v (⊥ : Ideal (MRing ι')) = ⊥ from Ideal.comap_bot_of_injective _ (rename_injective _ hv)]
-    ext f
-    rw [RingHom.mem_ker, Ideal.mem_bot]
-    convert map_eq_zero_iff (algebraMap (MRing ι) (FractionRing (MRing ι)))
-      (IsFractionRing.injective _ _) using 2
-    exact Inter.aeval_algebraMap_X_eq f
-  gen c := by
-    obtain ⟨a, b, hb, rfl⟩ := IsFractionRing.div_surjective (A := MRing ι) c
-    refine ⟨a, b, ?_, ?_⟩
-    · convert IsFractionRing.to_map_ne_zero_of_mem_nonZeroDivisors
-        (K := FractionRing (MRing ι)) hb using 2
-      exact Inter.aeval_algebraMap_X_eq b
-    · exact (congrArg₂ (· / ·) (Inter.aeval_algebraMap_X_eq a) (Inter.aeval_algebraMap_X_eq b)).symm
-  genericFibre_ker_target := by
-    ext f
-    rw [RingHom.mem_ker, Ideal.mem_bot]
-    convert map_eq_zero_iff (algebraMap (MRing ι') (FractionRing (MRing ι')))
-      (IsFractionRing.injective _ _) using 2
-    exact Inter.aeval_algebraMap_X_eq f
-  compat p := by
-    rw [botAlg_algebraMap, rename_X]
-
 end Bot
-
-def Line.projLineFlagGenericFibre :
-    GenFibre (Line.linePl Line.zeroSystem fun _ _ => le_rfl).xV
-      ((Line.linePl Line.zeroSystem fun _ _ => le_rfl).flagPrime (Line.lineAdapted Line.zeroSystem fun _ _ => le_rfl)) :=
-  Inter.PFHoriz.genFibreOf
-    (genFibreBot (Line.linePl Line.zeroSystem fun _ _ => le_rfl).xV
-      (Line.linePl Line.zeroSystem fun _ _ => le_rfl).isBlockMap_xV.2.1) _
-    (by
-      have h1 := (Line.linePl Line.zeroSystem fun _ _ => le_rfl).imageZ_xV_PY
-      have h2 : (Line.linePl Line.zeroSystem fun _ _ => le_rfl).PY = ⊥ := Line.PY_line _ _
-      rw [h2] at h1
-      rw [PlueckerData.imageZ_forget_flagPrime, h1])
 
 end GroundTheory.Heights₂.Heights.LowerBoundFree

@@ -1,17 +1,56 @@
-import Mathlib
-import Formalism.LocalToGlobal.BesselHermitianTheta.AllTied
-import Development.AbelianVarietyTheory.BlockTheory.HeightDefect.FinitePartTypes
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.DiscreteSeriesUpqExistsIffDsExists
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.DiscreteSeriesUpqUniqueOfClassification
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.HarishChandraModulesOn
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.HasDRepIffHasDerivAt
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HasTypeAllAddOfEquiv
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.OneAddHsConjLe
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ContinuousOnAtTau
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.CoefBoundOfCasselmanWallach
-import Development.AbelianVarietyTheory.Proofs.HeightProofs.FiniteDimensionalPolyV
-import Development.AbelianVarietyTheory.Proofs.HeightProofs.ContDiffMatrixRightInvariantDerivative
-import Development.AbelianVarietyTheory.Proofs.HeightProofs.CompactUnitaryCoordFunMulEqSum
+module
+
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.FiniteDimensionalPolyV
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.CompactUnitaryCoordFunMulEqSum
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.ContDiffMatrixRightInvariantDerivative
+import Formalism.RealPlaceAnalysis.RealPlaceTaylor.CompactHaarRightInvariantInst
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Calculus.Deriv.Star
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.MainNotions.S Formalism.L2.Theta Matrix
 open Formalism.REAL GlobalTheory.SmoothGlob GlobalTheory.TypeSum
 open scoped TensorProduct
@@ -134,9 +173,9 @@ theorem casInv_lap_symm {d : ℕ} {a b : KG ε → ℂ} (ha : a ∈ polyV ε d) 
     ∫ k, a k * (∑ j, rder ε [X j, X j] b) k ∂(muK ε) =
       ∫ k, (∑ j, rder ε [X j, X j] a) k * b k ∂(muK ε) := by
   simp only [Finset.sum_apply, Finset.mul_sum, Finset.sum_mul]
-  rw [integral_finset_sum _ (fun j _ => casInv_integrable (f := fun k => a k * rder ε [X j, X j] b k)
+  rw [integral_finsetSum _ (fun j _ => casInv_integrable (f := fun k => a k * rder ε [X j, X j] b k)
       ((continuous_of_mem ha).mul (continuous_of_mem (casInv_rder2_mem (hX j) hb)))),
-    integral_finset_sum _ (fun j _ => casInv_integrable (f := fun k => rder ε [X j, X j] a k * b k)
+    integral_finsetSum _ (fun j _ => casInv_integrable (f := fun k => rder ε [X j, X j] a k * b k)
       ((continuous_of_mem (casInv_rder2_mem (hX j) ha)).mul (continuous_of_mem hb)))]
   refine Finset.sum_congr rfl fun j _ => ?_
   rw [casInv_rder_pair, casInv_rder_pair]
@@ -157,7 +196,7 @@ theorem casInv_energy {d : ℕ} {p : KG ε → ℂ} (hp : p ∈ polyV ε d) :
     ∫ k, (∑ j, rder ε [X j, X j] p) k * star (p k) ∂(muK ε) =
       -(((∑ j, ∫ k, ‖rder ε [X j] p k‖ ^ 2 ∂(muK ε) : ℝ)) : ℂ) := by
   simp only [Finset.sum_apply, Finset.sum_mul]
-  rw [integral_finset_sum _ (fun j _ => casInv_integrable (f := fun k => rder ε [X j, X j] p k * star (p k))
+  rw [integral_finsetSum _ (fun j _ => casInv_integrable (f := fun k => rder ε [X j, X j] p k * star (p k))
       ((continuous_of_mem (casInv_rder2_mem (hX j) hp)).mul (continuous_star.comp (continuous_of_mem hp))))]
   push_cast
   rw [← Finset.sum_neg_distrib]

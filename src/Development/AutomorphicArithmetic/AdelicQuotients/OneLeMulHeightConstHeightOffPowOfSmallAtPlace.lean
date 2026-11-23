@@ -1,6 +1,49 @@
-import Development.WeilBound.RepresentationTheoryGL.TwistedFactors.SelmerRankBounds.EllipticityFromProductFormula
-import GroundTheory.GlobalFields.IdeleGroups.GaloisOnAdeles.Action
-import GroundTheory.GlobalFields.IdeleGroups.GaloisOnAdeles.Places
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.TwistedFactors.SelmerRankBounds.IsNormAlong
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Polynomial
 open GroundTheory.Automorphic GroundTheory.Automorphic.Reduction GroundTheory.Global GroundTheory.Global.SemiLocal GroundTheory.Global.AdeleBaseChange
 open PositivityTheory.Rg.Tf.Core PositivityTheory.Rg.Tf.Loc PositivityTheory.Rg.Tf.Geo
@@ -18,7 +61,7 @@ private theorem finprod_le_mul_finprod_pow {ι : Type*} {N b : ι → ℝ} (hN :
     finprod_eq_prod_of_mulSupport_subset b (s := s)
       (fun v hv => by simp only [hs, Finset.coe_union, Set.Finite.coe_toFinset]; exact Or.inl (Or.inr hv)),
     ← Finset.mul_prod_erase s N hi, ← Finset.mul_prod_erase s b hi, hi₀, one_mul, ← Finset.prod_pow]
-  exact mul_le_mul h0 (Finset.prod_le_prod (fun i _ => N0 i) fun i hi' => h i (Finset.ne_of_mem_erase hi'))
+  exact mul_le_mul h0 (Finset.prod_le_prod₀ (fun i _ => N0 i) fun i hi' => h i (Finset.ne_of_mem_erase hi'))
     (Finset.prod_nonneg fun i _ => N0 i) ((N0 _).trans h0)
 
 theorem UpperTheory.one_le_mul_heightConst_heightOff_pow_of_small_at_place :
@@ -32,7 +75,10 @@ theorem UpperTheory.one_le_mul_heightConst_heightOff_pow_of_small_at_place :
   classical
   have hprod : (∏ w : InfinitePlace E, ‖algebraMap E w.Completion a‖ ^ w.mult) *
       ∏ᶠ v : HeightOneSpectrum (𝓞 E), ‖algebraMap E (v.adicCompletion E) a‖ = 1 :=
-    prod_norm_mul_finprod_norm ha
+    by
+      simpa only [InfinitePlace.Completion.algebraMap_apply,
+        HeightOneSpectrum.algebraMap_adicCompletion, Function.comp_apply,
+        Algebra.algebraMap_self_apply] using prod_norm_mul_finprod_norm ha
   have hNfin : (Function.mulSupport fun v : HeightOneSpectrum (𝓞 E) =>
       ‖algebraMap E (v.adicCompletion E) a‖).Finite :=
     Filter.eventually_cofinite.1 (eventually_norm_eq_one ha)
@@ -63,7 +109,7 @@ theorem UpperTheory.one_le_mul_heightConst_heightOff_pow_of_small_at_place :
       refine Finset.prod_congr rfl fun w _ => ?_
       rw [← mul_pow, ← pow_mul, ← pow_mul, mul_comm n]
     rw [e]
-    exact Finset.prod_le_prod (fun _ _ => pow_nonneg (norm_nonneg _) _) fun w _ =>
+    exact Finset.prod_le_prod₀ (fun _ _ => pow_nonneg (norm_nonneg _) _) fun w _ =>
       pow_le_pow_left₀ (norm_nonneg _) (hinf w) _
   have hoff : heightOff q g = A * ∏ᶠ v, b v := by
     simp only [heightOff, hA, hb, finprod_eq_if]

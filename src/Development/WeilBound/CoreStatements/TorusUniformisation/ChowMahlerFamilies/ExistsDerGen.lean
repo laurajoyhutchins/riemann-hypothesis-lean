@@ -1,5 +1,47 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.TorusUniformisation.ChowMahlerFamilies.ValAtSpecMap
+module
+
+public import Development.WeilBound.CoreStatements.TorusUniformisation.ChowMahlerFamilies.ValAtSpecMap
+public import ReciprocityTheory.DualLattices.CotangentSurjective
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 open GlobalTheory.CompanionTheory.Ar GlobalTheory.CompanionTheory.Ar.BT
 
 noncomputable section
@@ -20,7 +62,7 @@ theorem exists_der_gen {R RC C N L U : Type} [CommRing R] [IsDomain R] [CommRing
   letI : Algebra R RC := σ.toAlgebra
   let k₀ : L →ₗ[R] ReciprocityTheory.PGsh.Up.LieDualModP p RC g :=
     { toFun := fun w => Submodule.Quotient.mk (io (j w))
-      map_add' := fun a b => by rw [map_add, map_add, Submodule.Quotient.mk_add]
+      map_add' := fun a b => by rw [map_add (f := _), map_add (f := _), Submodule.Quotient.mk_add]
       map_smul' := fun r a => by
         rw [map_smul, io.map_smulₛₗ, Submodule.Quotient.mk_smul]
         exact algebraMap_smul RC r _ }
@@ -37,7 +79,7 @@ theorem exists_der_gen {R RC C N L U : Type} [CommRing R] [IsDomain R] [CommRing
       (LinearEquiv.symm_apply_eq _).2 rfl
     simp only [d₀, LinearMap.comp_apply, LinearEquiv.coe_coe, this, Submodule.liftQ_apply]
   obtain ⟨Dv, hD1, hD2⟩ := exists_der_ext h1 h2 φ hφ hA (d₀ ∘ₗ cotMap A)
-    (fun a b => by simp only [LinearMap.comp_apply, cotMap_mul, map_add, map_smul]) M hM
+    (fun a b => by simp only [LinearMap.comp_apply, cotMap_mul, map_add (f := _), map_smul]) M hM
   refine ⟨Dv, hD1, fun a f w hf hw => ?_⟩
   rw [hD2 a f hf, LinearMap.comp_apply, hw, hd₀]
   rfl

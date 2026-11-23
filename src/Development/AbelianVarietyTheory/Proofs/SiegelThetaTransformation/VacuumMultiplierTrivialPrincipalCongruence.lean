@@ -1,17 +1,68 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IsStabForm
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.PeriodCoordinateThetaOfSignedHeisenbergVacuumStatement
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.WeilActionPreservesThetaAndInnerProduct
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IsSystem
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SymplecticGenerators.SymplecticCharacters.InversionStatement
+public import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.EqZeroOfSemicharacterMultiplier
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.DifferentiableOnDetHMat
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.AdmissibleIndicatorFunctions
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.LevelTestFunctionFiniteSumEquivariant
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.PeriodCoordinateThetaOfSignedHeisenbergVacuumStatement
+import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.PeriodsLactSymplectic
 import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.TensorLatticeVacuaExistUnique
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.LevelTestFunctionFiniteSumEquivariant
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.AdmissibleIndicatorFunctions
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsLatticeDatumOfSelfDualLattice
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.HostGeneratorPowFourTraceNormModEight
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.CmUnitPowFourIdempotentModEight
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ThetaSqTransformLevelEight
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.RatioSqEqDetJAut
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ChangeOfNormalisation
+import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.WeilActionPreservesThetaAndInnerProduct
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ChangeOfNormalisation
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.CmUnitPowFourIdempotentModEight
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsLatticeDatumOfSelfDualLattice
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.HostGeneratorPowFourTraceNormModEight
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.RatioSqEqDetJAut
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ThetaSqTransformLevelEight
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
 import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.RealPlaceEmbeddings
+public import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IsStabForm
+
+@[expose] public section
 
 namespace GlobalTheory.VacMult
 
@@ -125,7 +176,7 @@ theorem hostHalfRoot_add_conj_eq_one {E : Type} [Field E] [NumberField E] [IsCMF
     rw [this] at a
     nlinarith [mul_self_nonneg (τ H.rt).re]
   apply τ.injective
-  rw [map_add, cc, IsCMField.complexEmbedding_complexConj, map_one, Complex.add_conj]
+  rw [map_add (f := _), cc, IsCMField.complexEmbedding_complexConj, map_one, Complex.add_conj]
   have h6 := congrArg Complex.re h4
   simp only [add_re, one_re, h5, add_zero, mul_re, re_ofNat, im_ofNat, zero_mul, sub_zero] at h6
   exact_mod_cast h6
@@ -163,7 +214,7 @@ theorem wG_vac_eq : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (r : 
     choose f' hf' using fun a => (hmem _).1 (hgaL _ ((hmem _).2 ⟨a, rfl⟩))
     exact ⟨{ toFun := f
              invFun := f'
-             map_add' := fun a b => hψi (by rw [map_add, hf, hf, hf, map_add, mulVec_add])
+             map_add' := fun a b => hψi (by rw [map_add (f := _), hf, hf, hf, map_add (f := _), mulVec_add])
              map_smul' := fun c a => hψi (by
                rw [map_smul, hf, hf, map_smul, RingHom.id_apply, mulVec_smul])
              left_inv := fun a => hψi (by rw [hf', hf, hgi])
@@ -176,7 +227,7 @@ theorem wG_vac_eq : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (r : 
     obtain ⟨e, rfl⟩ := (hmem _).1 hu
     refine ⟨-e, hψi ?_⟩
     rw [hgam, hgi, ← hgam] at he
-    rw [map_add, map_nsmul, map_neg, he, smul_neg, add_neg_cancel_right]
+    rw [map_add (f := _), map_nsmul, map_neg, he, smul_neg, add_neg_cancel_right]
   let N : Matrix (Fin g ⊕ Fin g) (Fin g ⊕ Fin g) ℤ :=
     Matrix.of fun u v => bs.symm (gam (bs (Pi.single v 1))) u
   obtain ⟨h8, hdet⟩ := AdaptedDet.blocks_det_mod_eight E H D g M bs gam N hb8 hM hiso hfull
@@ -185,6 +236,7 @@ theorem wG_vac_eq : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (r : 
     have hm : m = ∑ j, m j • Pi.single j (1 : ℤ) := by
       funext j; simp [Pi.single_apply]
     conv_lhs => rw [hm]
+
     simp only [map_sum, map_zsmul]
   obtain ⟨c₁, c₂, C, hC, h₁, h₂, hth⟩ := GlobalTheory.T.periodCoordinateTheta_of_signedHeisenbergVacuum E r X g bas idx n hs hn _ hw hw' L hL v hv
     (fun j => ψ (bs (Pi.single j 1)))
@@ -200,7 +252,7 @@ theorem wG_vac_eq : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (r : 
   let P : Frame X.Ψ r → D.La →+ (Fin g → ℂ) := fun y =>
     { toFun := fun a => pv X idx y (ψ a)
       map_zero' := by rw [map_zero, pv, per_zero]; rfl
-      map_add' := fun a b => by rw [map_add, pv, per_add]; rfl }
+      map_add' := fun a b => by rw [map_add (f := _), pv, per_add]; rfl }
   have hnorm : ∀ y : Frame X.Ψ r,
       IsUnit (Matrix.of fun i k => pv X idx y (ψ (bs (Pi.single (Sum.inl k) 1))) i)⁻¹.det → ∀ k,
       (Matrix.of fun i k => pv X idx y (ψ (bs (Pi.single (Sum.inl k) 1))) i)⁻¹ *ᵥ

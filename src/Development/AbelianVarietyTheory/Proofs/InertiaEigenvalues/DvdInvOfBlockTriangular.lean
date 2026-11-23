@@ -1,6 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.UdlApply
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IwahoriFactorisation
+module
+
+public import Mathlib.LinearAlgebra.Matrix.GeneralLinearGroup.Defs
+public import Mathlib.RingTheory.LocalRing.Defs
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IwahoriFactorisation
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.UdlApply
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Polynomial
 
@@ -18,12 +66,6 @@ def UpperUnip (α : O) (u : Matrix (Fin n) (Fin n) O) : Prop :=
 
 def LowerUnip (β : O) (l : Matrix (Fin n) (Fin n) O) : Prop :=
   ∀ i j, (i < j → l i j = 0) ∧ (i = j → l i j = 1) ∧ (j < i → β ∣ l i j)
-
-theorem Shape.one (α β : O) : Shape α β (1 : Matrix (Fin n) (Fin n) O) := by
-  intro i j
-  refine ⟨fun h => ?_, fun h => ?_⟩
-  · rw [Matrix.one_apply_ne h.ne]; exact dvd_zero _
-  · rw [Matrix.one_apply_ne h.ne']; exact dvd_zero _
 
 theorem Shape.mul {α β : O} {x y : Matrix (Fin n) (Fin n) O} (hx : Shape α β x)
     (hy : Shape α β y) : Shape α β (x * y) := by
@@ -65,12 +107,6 @@ theorem Shape.inv {α β : O} {g : GL (Fin n) O} (hg : Shape α β (g : Matrix (
   · exact dvd_inv_of_blockTriangular (ι := (Fin n)ᵒᵈ) OrderDual.toDual α g
       (fun i j h => (hg i j).1 h) i j h
   · exact dvd_inv_of_blockTriangular id β g (fun i j h => (hg i j).2 h) i j h
-
-def shapeGroup (n : ℕ) (α β : O) : Subgroup (GL (Fin n) O) where
-  carrier := {g | Shape α β (g : Matrix (Fin n) (Fin n) O)}
-  one_mem' := Shape.one α β
-  mul_mem' hx hy := Shape.mul hx hy
-  inv_mem' hx := Shape.inv hx
 
 theorem UpperUnip.shape {α : O} (β : O) {u : Matrix (Fin n) (Fin n) O} (hu : UpperUnip α u) :
     Shape α β u := fun i j =>
@@ -243,13 +279,5 @@ theorem existsUnique_factor_opp [IsLocalRing O] {α β : O} (hβ : ¬ IsUnit β)
   simp [flip_flip]
 
 end General
-
-theorem not_isUnit_pow {O : Type} [CommRing O] {ϖ : O} (hϖ : Irreducible ϖ) {s : ℕ} (hs : 1 ≤ s) :
-    ¬ IsUnit (ϖ ^ s) := fun h =>
-  hϖ.not_isUnit ((isUnit_pow_iff (by omega)).1 h)
-
-theorem iwahori_factorisation : ∀ (O : Type) [CommRing O] [IsDomain O] [IsDiscreteValuationRing O] (ϖ : O), Irreducible ϖ → ∀ (n r s : ℕ), 1 ≤ s → ∀ g : GL (Fin n) O, (∀ i j, (i < j → ϖ ^ r ∣ (g : Matrix (Fin n) (Fin n) O) i j) ∧ (j < i → ϖ ^ s ∣ (g : Matrix (Fin n) (Fin n) O) i j)) → ∃! p : Matrix (Fin n) (Fin n) O × (Fin n → Oˣ) × Matrix (Fin n) (Fin n) O, (∀ i j, (j < i → p.1 i j = 0) ∧ (i = j → p.1 i j = 1) ∧ (i < j → ϖ ^ r ∣ p.1 i j)) ∧ (∀ i j, (i < j → p.2.2 i j = 0) ∧ (i = j → p.2.2 i j = 1) ∧ (j < i → ϖ ^ s ∣ p.2.2 i j)) ∧ (g : Matrix (Fin n) (Fin n) O) = p.1 * Matrix.diagonal (fun i => (p.2.1 i : O)) * p.2.2 := by
-  intro O _ _ _ ϖ hϖ n r s hs g hg
-  exact existsUnique_factor (not_isUnit_pow hϖ hs) g hg
 
 end GlobalTheory.IwahoriFactor

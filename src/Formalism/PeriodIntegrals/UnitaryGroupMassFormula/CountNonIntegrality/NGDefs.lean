@@ -1,5 +1,45 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.CountNonIntegrality.NotIntAllOfLoc
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.CntLocal
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.CountNonIntegrality.RingInverseMulEquiv
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -14,24 +54,6 @@ def FrIntG : Prop :=
   ∀ (D : Formalism.BasicNotions.D7) (δ : ∀ p : PlF D, (D.s.atP p).Fp) (M : ∀ p : PlF D, Loc.Model (D.s.atP p).Fp (D.s.atP p).Ep),
     (∀ p, Agree δ M p) → ∀ p (g : Loc.SplitG (M p).L), (M p).split = some g → ∀ a,
       (g.e (frFac δ p a)).1 ∈ 𝒪[(D.s.atP p).Fp]
-
-def CongG : Prop :=
-  ∀ (D : Formalism.BasicNotions.D7) (δ : ∀ p : PlF D, (D.s.atP p).Fp) (M : ∀ p : PlF D, Loc.Model (D.s.atP p).Fp (D.s.atP p).Ep),
-    (∀ p, Agree δ M p) → ∀ (u u' : D.what₂.Word),
-    (D.mem u).A.T ≡ (D.mem u').A.T [MOD (Lat.gS D) ^ 2] →
-    ∀ (F0 : FlagG (VS D) D.R.rS (Tn u)) (what₂ : Finset (Submodule (𝓞 D.host.E) (VS D).V)),
-      RowsOf u F0 what₂ → ∀ Λ ∈ what₂, ∀ (Z : MatZ D) (F' : LFlag (VS D) D.R.rS (Tn u')),
-        F' ∈ EZ (Tn u') F0 Λ Z → ∀ p (g : Loc.SplitG (M p).L), (M p).split = some g → ∀ a b,
-          (∃ s : 𝒪[(D.s.atP p).Fp], (g.e ((D.s.atP p).ιE (Z a b))).1 +
-            (if a = Fin.last D.R.rS ∧ b = Fin.last D.R.rS then (((D.mem u).A.T : ℕ) : (D.s.atP p).Fp) else 0) =
-              (g.q : (D.s.atP p).Fp) * s) ∧
-          (∃ s : 𝒪[(D.s.atP p).Fp], (g.e ((D.s.atP p).ιE (Z a b))).2 +
-            (if a = Fin.last D.R.rS ∧ b = Fin.last D.R.rS then (((D.mem u).A.T : ℕ) : (D.s.atP p).Fp) else 0) =
-              (g.q : (D.s.atP p).Fp) * s) ∧
-          (∃ s : 𝒪[(D.s.atP p).Fp], (g.e ((D.s.atP p).ιE (Z a b))).1 + (g.e ((D.s.atP p).ιE (Z b a))).2 +
-            (if a = Fin.last D.R.rS ∧ b = Fin.last D.R.rS then
-              (((D.mem u).A.T : ℕ) : (D.s.atP p).Fp) + (((D.mem u').A.T : ℕ) : (D.s.atP p).Fp) else 0) =
-              (g.q : (D.s.atP p).Fp) ^ 2 * s)
 
 theorem frFac_last (D : Formalism.BasicNotions.D7) (δ : ∀ p : PlF D, (D.s.atP p).Fp) (p : PlF D) :
     frFac δ p (Fin.last D.R.rS) = 1 := by
@@ -57,32 +79,5 @@ theorem zhatLoc_eq (D : Formalism.BasicNotions.D7) (δ : ∀ p : PlF D, (D.s.atP
   have h : (M p).L.cj = (D.s.atP p).cj := (hA p).2.2.1
   simp only [ZhatLoc, Matrix.of_apply]
   rw [h, cj_frFac]
-
-theorem normG_of (h1 : FrIntG) (h2 : CongG) : NormG := by
-  intro D δ M hA u u' hu F0 what₂ hrows Λ hΛ Z F' hF' p g hg a b
-  obtain ⟨c1, c2, c3⟩ := h2 D δ M hA u u' hu F0 what₂ hrows Λ hΛ Z F' hF' p g hg a b
-  have hfa := h1 D δ M hA p g hg a
-  have hfb := h1 D δ M hA p g hg b
-  have ea := frFac_coord D δ M hA p g a
-  have eb := frFac_coord D δ M hA p g b
-  unfold NormAt
-  rw [zhatLoc_eq D δ M hA p Z a b, zhatLoc_eq D δ M hA p Z b a]
-  by_cases hab : a = Fin.last D.R.rS ∧ b = Fin.last D.R.rS
-  · obtain ⟨rfl, rfl⟩ := hab
-    simp only [frFac_last, one_mul] at c1 c2 c3 ⊢
-    exact ⟨c1, c2, c3⟩
-  · simp only [map_mul, Prod.fst_mul, Prod.snd_mul, ea, eb]
-    simp only [if_neg hab, add_zero] at c1 c2 c3 ⊢
-    obtain ⟨s1, hs1⟩ := c1
-    obtain ⟨s2, hs2⟩ := c2
-    obtain ⟨s3, hs3⟩ := c3
-    refine ⟨⟨⟨_, mul_mem (mul_mem hfb hfa) s1.2⟩, ?_⟩, ⟨⟨_, mul_mem (mul_mem hfb hfa) s2.2⟩, ?_⟩,
-      ⟨⟨_, mul_mem (mul_mem hfb hfa) s3.2⟩, ?_⟩⟩
-    · show _ = (g.q : (D.s.atP p).Fp) * ((g.e (frFac δ p b)).1 * (g.e (frFac δ p a)).1 * (s1 : (D.s.atP p).Fp))
-      linear_combination ((g.e (frFac δ p b)).1 * (g.e (frFac δ p a)).1) * hs1
-    · show _ = (g.q : (D.s.atP p).Fp) * ((g.e (frFac δ p b)).1 * (g.e (frFac δ p a)).1 * (s2 : (D.s.atP p).Fp))
-      linear_combination ((g.e (frFac δ p b)).1 * (g.e (frFac δ p a)).1) * hs2
-    · show _ = (g.q : (D.s.atP p).Fp) ^ 2 * ((g.e (frFac δ p b)).1 * (g.e (frFac δ p a)).1 * (s3 : (D.s.atP p).Fp))
-      linear_combination ((g.e (frFac δ p b)).1 * (g.e (frFac δ p a)).1) * hs3
 
 end PI.CntNotIntW

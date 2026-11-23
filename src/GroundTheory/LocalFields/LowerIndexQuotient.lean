@@ -1,8 +1,51 @@
-import Mathlib
-import GroundTheory.LocalFields.LowerIndex
-import GroundTheory.LocalFields.IntermediateField
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.RamificationLowerIndex
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.CapelliComplements.GeneralBFactAlt
+module
+
+public import GroundTheory.LocalFields.LowerIndex
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.CapelliComplements.GeneralBFactAlt
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.RamificationLowerIndex
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -44,40 +87,16 @@ section
 
 variable (M : IntermediateField K L)
 
-theorem integerAlgEquiv_restrictScalars_algebraMap (τ : L ≃ₐ[M] L) (y : 𝒪[M]) :
-    integerAlgEquiv K L (τ.restrictScalars K) (algebraMap 𝒪[M] 𝒪[L] y) = algebraMap 𝒪[M] 𝒪[L] y := by
-  apply Subtype.ext
-  rw [coe_integerAlgEquiv_apply, coe_algebraMap_integer, AlgEquiv.restrictScalars_apply]
-  exact τ.commutes _
-
 variable [IsGalois K L]
 
 theorem ramificationIndex_mul_lowerIndex_restrictNormalHom [Normal K M] (σ : L ≃ₐ[K] L) :
-    (ramificationIndex M L : ℕ∞) * lowerIndex K M (AlgEquiv.restrictNormalHom M σ) =
+    ((_root_.Ideal.ramificationIdx (_root_.IsLocalRing.maximalIdeal (_root_.Valuation.integer (_root_.ValuativeRel.valuation L))) (_root_.Valuation.integer (_root_.ValuativeRel.valuation M))) : ℕ∞) * lowerIndex K M (AlgEquiv.restrictNormalHom M σ) =
       ∑ τ : L ≃ₐ[M] L, lowerIndex K L (σ * τ.restrictScalars K) :=
   by apply _root_.UpperTheory.Reformulated.B.RamificationLowerIndex.ramificationIndex_mul_lowerIndex_restrictNormalHom <;> assumption
 
-open Classical in
 
-theorem ramificationIndex_mul_lowerIndex_eq_sum_fiber [Normal K M] (s : M ≃ₐ[K] M) :
-    (ramificationIndex M L : ℕ∞) * lowerIndex K M s =
-      ∑ σ ∈ Finset.univ.filter (fun σ : L ≃ₐ[K] L ↦ AlgEquiv.restrictNormalHom M σ = s),
-        lowerIndex K L σ := by
-  obtain ⟨σ, rfl⟩ := AlgEquiv.restrictNormalHom_surjective (F := K) (K₁ := M) L s
-  rw [ramificationIndex_mul_lowerIndex_restrictNormalHom]
-  refine Finset.sum_bij (fun τ _ ↦ σ * τ.restrictScalars K) ?_ ?_ ?_ (fun _ _ ↦ rfl)
-  · intro τ _
-    rw [Finset.mem_filter, map_mul, restrictNormalHom_restrictScalars, mul_one]
-    exact ⟨Finset.mem_univ _, rfl⟩
-  · intro a _ b _ hab
-    exact AlgEquiv.restrictScalars_injective K (mul_left_cancel hab)
-  · intro ρ hρ
-    obtain ⟨τ, hτ⟩ := exists_eq_mul_restrictScalars_of_restrictNormalHom_eq M
-      (Finset.mem_filter.mp hρ).2
-    exact ⟨τ, Finset.mem_univ _, hτ⟩
 
 omit [IsGalois K L] in
-
 theorem exists_lowerIndex_mul_eq_min (σ : L ≃ₐ[K] L) :
     ∃ τ₀ : L ≃ₐ[M] L,
       (∀ τ : L ≃ₐ[M] L, lowerIndex K L (σ * τ.restrictScalars K) ≤
@@ -97,19 +116,6 @@ theorem exists_lowerIndex_mul_eq_min (σ : L ≃ₐ[K] L) :
       AlgEquiv.ext fun _ ↦ rfl
     have := hmax (τ₀ * τ) (Finset.mem_univ _)
     rwa [hm, ← mul_assoc] at this
-
-theorem exists_ramificationIndex_mul_lowerIndex_eq_sum_min [Normal K M] (σ : L ≃ₐ[K] L) :
-    ∃ σ₀ : L ≃ₐ[K] L, AlgEquiv.restrictNormalHom M σ₀ = AlgEquiv.restrictNormalHom M σ ∧
-      (∀ τ : L ≃ₐ[M] L, lowerIndex K L (σ * τ.restrictScalars K) ≤ lowerIndex K L σ₀) ∧
-      (ramificationIndex M L : ℕ∞) * lowerIndex K M (AlgEquiv.restrictNormalHom M σ) =
-        ∑ τ : L ≃ₐ[M] L, min (lowerIndex M L τ) (lowerIndex K L σ₀) := by
-  obtain ⟨τ₀, hmax, hmin⟩ := exists_lowerIndex_mul_eq_min M σ
-  have hres : AlgEquiv.restrictNormalHom M (σ * τ₀.restrictScalars K) =
-      AlgEquiv.restrictNormalHom M σ := by
-    rw [map_mul, restrictNormalHom_restrictScalars, mul_one]
-  refine ⟨σ * τ₀.restrictScalars K, hres, hmax, ?_⟩
-  rw [← hres, ramificationIndex_mul_lowerIndex_restrictNormalHom]
-  exact Finset.sum_congr rfl fun τ _ ↦ hmin τ
 
 end
 

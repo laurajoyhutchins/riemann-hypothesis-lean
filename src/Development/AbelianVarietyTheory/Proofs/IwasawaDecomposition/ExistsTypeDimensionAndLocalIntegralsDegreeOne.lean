@@ -1,14 +1,66 @@
-import Mathlib
-import Formalism.LocalToGlobal.Divisibility.QLocTied
+module
+
+public import Formalism.LocalToGlobal.Divisibility.QLocTied
+public import Development.AbelianVarietyTheory.Definitions.Foundations.MatrixMeasurableSpace
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsContinuousPadic
+public import Development.AbelianVarietyTheory.Definitions.Divisors.T2SpaceGeneralLinearGroup
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.BlockUpperTriangularGLMulDetInvStatement
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsAddHaarCompletionIntegralMatricesVolOne
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsIsNrm
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsIsUnrM
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsOpenIsCompactParahoricGLCompletionStatement
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ParahoricCharacterMulOfTameStatement
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ParahoricTypeRCMulInvMemStatement
+import Formalism.LocalRingCardinality.SpanPowerMembership.LocAtA
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Algebra.Group.Units
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
 import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.HostPins
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsIsUnrM
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsIsNrm
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsAddHaarCompletionIntegralMatricesVolOne
-import Development.AbelianVarietyTheory.Definitions.Divisors.T2SpaceGeneralLinearGroup
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsOpenIsCompactParahoricGLCompletionStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.BlockUpperTriangularGLMulDetInvStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ParahoricTypeRCMulInvMemStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ParahoricCharacterMulOfTameStatement
+
+@[expose] public section
+
 open MeasureTheory Matrix NumberField IsDedekindDomain Formalism.BasicNotions Formalism.DoubleCosetMeasures Formalism.L2.Host Formalism.L2.DIV Formalism.L2.DIV.QLoc GlobalTheory.Mem.HD
 
 noncomputable section
@@ -67,11 +119,11 @@ def levD (p : GL (Fin (r + c)) F) : GL (Fin c) F :=
 
 theorem levA_val {p : GL (Fin (r + c)) F} (hp : bDA (p : Matrix (Fin (r + c)) (Fin (r + c)) F) = 0) :
     (levA p : Matrix (Fin r) (Fin r) F) = bAA (p : Matrix (Fin (r + c)) (Fin (r + c)) F) := by
-  rw [levA, dif_pos (detA_ne hp)]; rfl
+  rw [levA, dite_eq_left (detA_ne hp)]; rfl
 
 theorem levD_val {p : GL (Fin (r + c)) F} (hp : bDA (p : Matrix (Fin (r + c)) (Fin (r + c)) F) = 0) :
     (levD p : Matrix (Fin c) (Fin c) F) = bDD (p : Matrix (Fin (r + c)) (Fin (r + c)) F) := by
-  rw [levD, dif_pos (detD_ne hp)]; rfl
+  rw [levD, dite_eq_left (detD_ne hp)]; rfl
 
 theorem lev_mul {p q : GL (Fin (r + c)) F} (hp : bDA (p : Matrix (Fin (r + c)) (Fin (r + c)) F) = 0)
     (hq : bDA (q : Matrix (Fin (r + c)) (Fin (r + c)) F) = 0) :
@@ -170,7 +222,7 @@ theorem fvec_eq {p k : GL (Fin (r + c)) F} (hp : bDA (p : Matrix (Fin (r + c)) (
     (hk : k ∈ parJ O ϖ r c) :
     fvec O ϖ nrm δ ρ v₀ (p * k) = (chiP nrm δ p * lamJ δ k) • ρ (levA p, levD p) v₀ := by
   have h : p * k ∈ PJset O ϖ r c := ⟨p, hp, k, hk, rfl⟩
-  rw [fvec, dif_pos h]
+  rw [fvec, dite_eq_left h]
   have h2 := h.choose_spec.2.choose_spec.1
   have h3 := h.choose_spec.2.choose_spec.2
   exact cons hgrp hlam hfix h.choose_spec.1 hp h2 hk h3.symm

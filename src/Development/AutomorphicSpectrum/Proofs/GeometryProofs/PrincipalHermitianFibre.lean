@@ -1,22 +1,56 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.SlopeBoundSt
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.ArchBetween
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.BdryChart
-import Development.AutomorphicSpectrum.Definitions.MetricPeriods.ClopenCondOnto
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.UniformisationConclusion
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.HeckeKer
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.BlowupProjections.BlowupProjStatement
-import Development.AbelianVarietyTheory.PublishedTheorems.SemiabelianTori.GeometricallyConnectedSplitTorusAff
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.BCRing
+module
+
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.SlopeBoundSt
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExistsLieModel
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HodgeHermitianFormExists
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HodgeInnerProductConjugateStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LieModelExistsUniqueSemilinear
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LieModelFiniteProjectiveStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LieModelIsBaseChangeStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
 import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.AmplePt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.SabComp
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.PullCub
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExistsLieModel
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LieModelExistsUniqueSemilinear
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LieModelFiniteProjectiveStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LieModelIsBaseChangeStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HodgeHermitianFormExists
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HodgeInnerProductConjugateStatement
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.BCRing
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField TensorProduct Filter Topology Matrix
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Geo ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.Semi GlobalTheory.CompanionTheory.Ar
@@ -70,11 +104,11 @@ theorem exists_metric [Module.Finite (𝓞 L) V] [Module.Projective (𝓞 L) V]
   change h _ (e _ _) (e _ _) = starRingEnd ℂ (h σ (e σ x) (e σ y))
   induction x using TensorProduct.induction_on with
   | zero => simp
-  | add a b ha hb => simp only [map_add, LinearMap.add_apply, ha, hb]
+  | add a b ha hb => simp only [map_add (f := _), LinearMap.add_apply, ha, hb]
   | tmul z a =>
     induction y using TensorProduct.induction_on with
     | zero => simp
-    | add c d hc' hd => simp only [map_add, ← hc', ← hd]
+    | add c d hc' hd => simp only [map_add (f := _), ← hc', ← hd]
     | tmul w b =>
       rw [tm σ z a, tm σ w b, conjMap_smul, conjMap_smul, cm, cm]
       simp only [map_smul, map_smulₛₗ, LinearMap.smul_apply, hc, smul_eq_mul, map_mul, Complex.conj_conj, RingHom.id_apply]
@@ -87,7 +121,7 @@ theorem exists_fibre_equiv {S : Scheme.{0}} (G : Over S) [GrpObj G] [Smooth G.ho
     (x : Sp (𝓞 L) ⟶ S) {V : Type} [AddCommGroup V] [Module (𝓞 L) V] (M : LieModel G x V) (σ : L →+* ℂ)
     {W : Type} [AddCommGroup W] [Module ℂ W] (Mσ : LieModel G (spMap (σ.comp (algebraMap (𝓞 L) L)) ≫ x) W)
     (j : V →ₛₗ[σ.comp (algebraMap (𝓞 L) L)] W)
-    (hj : ∀ a, M.Lifts (σ.comp (algebraMap (𝓞 L) L)) (𝟙 G.left) a (Mσ.pt (j a))) :
+    (hj : ∀ a, ((Mσ.pt (j a)).left ≫ (𝟙 G.left) = ReciprocityTheory.ChartRestriction.G.Geo.Tor.spMap (GlobalTheory.CompanionTheory.Ar.dualMap (σ.comp (algebraMap (𝓞 L) L))) ≫ (M.pt a).left)) :
     ∃ e : Fibre σ V ≃ₗ[ℂ] W, ∀ a, e ((1 : ComplexAt σ) ⊗ₜ a) = j a := by
   letI i₀ : Algebra (𝓞 L) ℂ := (σ.comp (algebraMap (𝓞 L) L)).toAlgebra
   letI i₂ : Module (𝓞 L) W := Module.compHom W (algebraMap (𝓞 L) ℂ)
@@ -114,7 +148,7 @@ theorem exists_fibre_equiv {S : Scheme.{0}} (G : Over S) [GrpObj G] [Smooth G.ho
     | tmul z a =>
       rw [TensorProduct.smul_tmul', he, he, complex_smul_def, map_mul, mul_smul]
       simp
-    | add a b ha hb' => rw [smul_add, map_add, map_add, ha, hb', smul_add]
+    | add a b ha hb' => rw [smul_add, map_add (f := _), map_add (f := _), ha, hb', smul_add]
   · exact (he 1 a).trans (by simp)
 
 theorem spectrumMap_comp {A B C : Type} [CommRing A] [CommRing B] [CommRing C] (f : A →+* B) (g : B →+* C) :
@@ -127,7 +161,7 @@ theorem dualMap_comp_alt {A B C : Type} [CommRing A] [CommRing B] [CommRing C] (
 
 theorem lifts_left {S : Scheme.{0}} {G : Over S} [GrpObj G] {R R' : Type} [CommRing R] [CommRing R'] {x : Sp R ⟶ S}
     {V : Type} [AddCommGroup V] [Module R V] (M : LieModel G x V) {c : R →+* R'} {x' : Sp R' ⟶ S} {a : V}
-    {v : epsAt x' ⟶ G} (h : M.Lifts c (𝟙 G.left) a v) : v.left = spMap (dualMap c) ≫ (M.pt a).left :=
+    {v : epsAt x' ⟶ G} (h : (v.left ≫ (𝟙 G.left) = ReciprocityTheory.ChartRestriction.G.Geo.Tor.spMap (GlobalTheory.CompanionTheory.Ar.dualMap c) ≫ (M.pt a).left)) : v.left = spMap (GlobalTheory.CompanionTheory.Ar.dualMap c) ≫ (M.pt a).left :=
   (Category.comp_id _).symm.trans h
 
 variable {E : Type} [Field E] [NumberField E] [IsCMField E] {H : Host E}
@@ -187,7 +221,7 @@ theorem exists_hermitianBundle : ∀ (E : Type) [Field E] [NumberField E] [IsCMF
     exact ((hI _ _ _ _).1 (hodgeInnerProduct_conj_of_eq t (hz σ) (hl σ x) (hl σ y) ((hI σ _ _ _).2 rfl))).symm
   refine ⟨{ carrier := V, metric := mt }, M, fun σ x x' v v' hv hv' => ?_⟩
   have key : ∀ (a : V) (u : epsAt (spMap (σ.comp (algebraMap (𝓞 L) L)) ≫ 𝟙 _) ⟶ t.G),
-      M.Lifts (σ.comp (algebraMap (𝓞 L) L)) (𝟙 t.G.left) a u → u = (Mσ σ).pt (j σ a) := fun a u ha => by
+      (u.left ≫ (𝟙 t.G.left) = ReciprocityTheory.ChartRestriction.G.Geo.Tor.spMap (GlobalTheory.CompanionTheory.Ar.dualMap (σ.comp (algebraMap (𝓞 L) L))) ≫ (M.pt a).left) → u = (Mσ σ).pt (j σ a) := fun a u ha => by
     exact Over.OverMorphism.ext ((lifts_left M ha).trans (lifts_left M (hj σ a)).symm)
   obtain rfl := key x v hv
   obtain rfl := key x' v' hv'

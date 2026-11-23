@@ -1,7 +1,55 @@
-import Formalism.SharpRestriction.LevelLetterCocycles.HermFlagUnipotentAnisotropicVectorSubMem
-import Formalism.SharpRestriction.LevelLetterCocycles.AnnihilatorLevelsUnramifiedStatement
-import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.ResiduePi0EqNegPrime
-import Formalism.SharpRestriction.LevelLetterCocycles.CompleteOfPow
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.HermFlagUnipotentAnisotropicVectorSubMem
+public import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.ResiduePi0EqNegPrime
+public import Mathlib.RingTheory.Binomial
+public import Formalism.SharpRestriction.LevelLetterCocycles.AnnihilatorLevelsUnramifiedStatement
+public import Formalism.SharpRestriction.LevelLetterCocycles.CompleteOfPow
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.Padics.MahlerBasis
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -18,8 +66,8 @@ variable {G : Type} [Group G] [TopologicalSpace G] {Qp K₀ K : Type} [Field Qp]
     {LL O : Type} [Field LL] [Algebra Qp LL] [TopologicalSpace LL] [CommRing O] [Algebra O LL]
     {v : AddValuation LL (WithTop ℚ)} {n : ℕ} (W : LocWach PD LL O v n)
 
-open PowerSeries in
 
+open PowerSeries in
 def ιS (hR : Formalism.MainNotions.UnusedSlot80.ToolsR.RingP W) : PowerSeries O →ₐ[O] PowerSeries O :=
   PowerSeries.substAlgHom (R := O) (PowerSeries.HasSubst.of_constantCoeff_zero'
     (Formalism.MainNotions.UnusedSlot80.ToolsR.π₀₁_cc hR))
@@ -63,7 +111,7 @@ theorem Gd01 : (Gd (O := O) PD.p 0 1) = PowerSeries.X + ((PD.p : ℕ) : PowerSer
 
 theorem ιS_qp (hR : Formalism.MainNotions.UnusedSlot80.ToolsR.RingP W) (i : ZMod n) :
     Formalism.MainNotions.LiftingTheory.qp W i = ιS W hR (PowerSeries.X + ((PD.p : ℕ) : PowerSeries O)) := by
-  rw [map_add, ιS_X, map_natCast]
+  rw [map_add (f := _), ιS_X, map_natCast]
   rfl
 
 theorem res_decomp [IsLocalRing O] [IsAdicComplete (IsLocalRing.maximalIdeal O) O]
@@ -81,7 +129,7 @@ theorem res_decomp [IsLocalRing O] [IsAdicComplete (IsLocalRing.maximalIdeal O) 
     simp
   have he : g = (fun i => PowerSeries.C ((R i).coeff 0)) + Formalism.MainNotions.LiftingTheory.qp W * fun i => ιS W hR (Q i) := by
     funext i
-    rw [Pi.add_apply, Pi.mul_apply, hF i, hQR i, Gd01, map_add, map_mul, ← ιS_qp, hRc i]
+    rw [Pi.add_apply, Pi.mul_apply, hF i, hQR i, Gd01, map_add (f := _), map_mul, ← ιS_qp, hRc i]
     rw [show ιS W hR (PowerSeries.C ((R i).coeff 0)) = PowerSeries.C ((R i).coeff 0) from
       (ιS W hR).commutes _]
     ring
@@ -205,14 +253,14 @@ theorem hγp_of [IsDomain O] [CharZero O] [IsLocalRing O] [IsAdicComplete (IsLoc
   set u : LetA O n := χ + p1 * W.φA rq
   have huA : u ∈ W.AΔ := W.AΔ.add_mem (W.AΔ.algebraMap_mem _) (W.AΔ.mul_mem hp1A (Formalism.MainNotions.LiftingTheory.lifta_φΔ W _ hrq))
   have hγp1 : W.γA W.gam p1 = u * p1 := by
-    rw [hp1, ← W.φA_γA, hγq, map_mul, map_add, map_mul]
+    rw [hp1, ← W.φA_γA, hγq, map_mul, map_add (f := _), map_mul]
     simp only [u, χ, AlgHom.commutes]
     rw [← hp1]
   obtain ⟨g', hg', hγg'⟩ := hγg_of W hR z hz hz1 p1 hp1A
   have hu1 : (u - 1) * p1 = W.π₀ * qp * g' := by rw [← hγg', hγp1]; ring
   obtain ⟨t, ht, hφπ⟩ := hLR.φπ
   have hp1e : p1 = ((PD.p : ℕ) : LetA O n) + W.π₀ * qp ^ (PD.p - 1) * t := by
-    rw [hp1, show qp = W.π₀ + ((PD.p : ℕ) : LetA O n) from rfl, map_add, hφπ, map_natCast]
+    rw [hp1, show qp = W.π₀ + ((PD.p : ℕ) : LetA O n) from rfl, map_add (f := _), hφπ, map_natCast]
     simp only [Formalism.MainNotions.LiftingTheory.qp]
     ring
   obtain ⟨o, a, ha, hua⟩ := res_decomp W hlm hR (W.AΔ.sub_mem huA W.AΔ.one_mem)
@@ -319,7 +367,7 @@ namespace Formalism.MainNotions.CrystallineLiftingInputs.truncatedSeriesData
 
 open Formalism.WeaklyAdmissibleFiltrations Formalism.BasicNotions Formalism.BasicNotions.Loc
 
-set_option maxHeartbeats 400000 in
+
 
 theorem gamma_lemma_of_crystalline (D : D7) (HW : HWOf D.loc) (F : FonOf D.loc D.locA HW) (h9 : Formalism.MainNotions.DeltaInvariantLattices.P9 D HW F) :
     ∀ (l : ℕ) [Fact l.Prime] (K LL : FinExt l) (hg : Good K 1 LL)

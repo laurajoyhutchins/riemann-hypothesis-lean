@@ -1,6 +1,48 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.PredMemGamRanks
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.PredMemGamRanks
 import Formalism.LocalToGlobal.Columns.PolyFnLemmas
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.LinearIndependent.BaseChange
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -43,11 +85,13 @@ theorem li_pi_of_basis [Finite C] [Fintype J] (e : Module.Basis J K V) (ev : V �
   funext i c
   have h4 : b i c = ∑ j, e.repr (b i c) j • e j := (e.sum_repr _).symm
   conv_lhs => rw [h4]
+
   simp only [map_sum, LinearMap.map_smulₛₗ]
   simp [T, r, LinearMap.sum_apply, RingHom.algebraMap_toAlgebra]
 
 theorem mem_span_basis_image [Fintype J] (e : Module.Basis J K V) (ev : V →ₛₗ[σ] W) (x : V) :
     ev x ∈ Submodule.span ℂ (Set.range fun j => ev (e j)) := by
+
   rw [← e.sum_repr x, map_sum]
   refine Submodule.sum_mem _ fun j _ => ?_
   rw [LinearMap.map_smulₛₗ]
@@ -55,6 +99,7 @@ theorem mem_span_basis_image [Fintype J] (e : Module.Basis J K V) (ev : V →ₛ
 
 theorem rho_sum_translates {G : Type} [Group G] [Fintype G] (ρ : G →* Module.End K V) (g : G) (x : V) :
     ρ g (∑ t, ρ t x) = ∑ t, ρ t x := by
+
   rw [map_sum]
   refine Fintype.sum_equiv (Equiv.mulLeft g) _ _ fun t => ?_
   simp [map_mul]
@@ -66,8 +111,8 @@ namespace GStep
 variable {E K ι : Type} [Field E] [NumberField E] [StarRing E] [Field K] [NumberField K] [StarRing K] [Fintype ι] {n : ℕ}
   (S : GStep E K n) (emb : ι → E →+* K) (σ : K →+* ℂ) (lam : ι → DomWeight n)
 
-omit [StarRing E] [StarRing K] in
 
+omit [StarRing E] [StarRing K] in
 theorem evV_rho_eq_tr (b : S.β) (g : S.G b) (F : VV K lam) :
     evV emb (1 : Matrix (Fin n) (Fin n) E) lam σ (S.rho emb lam b g F) =
       S.tr emb σ b g (evV emb (1 : Matrix (Fin n) (Fin n) E) lam σ F) := by
@@ -127,6 +172,7 @@ theorem lawBasis_of_ok (h : (S.fam emb lam).Ok) : S.LawBasis emb σ lam h := by
           show _ = evV emb (1 : Matrix (Fin n) (Fin n) E) lam σ ((Pi.single c (∑ t, ρc t F) : S.Cl → VV K lam) c')
           by_cases hc : c' = c
           · subst hc
+
             rw [Pi.single_eq_same, Pi.single_eq_same, map_sum]
             exact Finset.sum_congr rfl fun g _ => (S.evV_rho_eq_tr emb σ lam c'.1 g.1 F).symm
           · rw [Pi.single_eq_of_ne hc, Pi.single_eq_of_ne hc, map_zero]

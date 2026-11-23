@@ -1,4 +1,49 @@
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.IsInfUnitary
+module
+
+public import Mathlib.Algebra.Module.LinearMap.End
+public import Mathlib.Basic.Complex.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -10,20 +55,5 @@ variable {n : ℕ} {M : Type*} [AddCommGroup M] [Module ℂ M]
 
 def antiE (E : Fin n → Fin n → Module.End ℂ M) : Fin n → Fin n → Module.End ℂ M :=
   fun a b => -E (Fin.rev b) (Fin.rev a)
-
-theorem antiE_isGlRep {E : Fin n → Fin n → Module.End ℂ M} (hE : IsGlRep E) : IsGlRep (antiE E) := by
-  intro a b c d
-  have h := hE (Fin.rev d) (Fin.rev c) (Fin.rev b) (Fin.rev a)
-  simp only [Fin.rev_inj, show (c = b) ↔ (b = c) from eq_comm,
-    show (a = d) ↔ (d = a) from eq_comm] at h
-  simp only [antiE, neg_mul_neg]
-  rw [← neg_sub, h]
-  split_ifs <;> simp <;> abel
-
-theorem antiE_hw {E : Fin n → Fin n → Module.End ℂ M} {ν : Fin n → ℝ} {v : M} (hv : IsHWVec E ν v) :
-    IsHWVec (antiE E) (fun r => -ν (Fin.rev r)) v := by
-  refine ⟨fun a => ?_, fun a b hab => ?_⟩
-  · simp [antiE, hv.1 (Fin.rev a)]
-  · simp [antiE, hv.2 (Fin.rev b) (Fin.rev a) (Fin.rev_lt_rev.mpr hab)]
 
 end ReciprocityTheory.ChartRestriction.DS

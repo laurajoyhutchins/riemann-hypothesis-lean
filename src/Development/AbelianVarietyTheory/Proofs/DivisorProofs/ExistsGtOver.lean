@@ -1,8 +1,45 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsProjOverWeierstrass
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.MumfordConstruction
-import Development.AbelianVarietyTheory.Definitions.Degenerations.AdmissibleBaseOfCompleteDvr
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TensFacts
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TensFacts
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj IsLocalRing NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Out ReciprocityTheory.ChartRestriction.G.Geo.Tor
 open scoped CategoryTheory.Obj
@@ -118,13 +155,15 @@ theorem tor_rel (hT : TensFacts W φ e wv) (hdet : IsUnit (W + W.transpose).det)
   let E : N'.X ≃+ (Fin r → N.X) := AddEquiv.ofBijective (AddMonoidHom.mk' e fun a b => funext (hem a b)) heb
   let sH : Fin r → Multiplicative N.X →* Fˣ := fun k =>
     t'.comp (AddMonoidHom.toMultiplicative ((E.symm : (Fin r → N.X) →+ N'.X).comp (AddMonoidHom.single (fun _ : Fin r => N.X) k)))
-  let C := (W + W.transpose)⁻¹
+  let C : Fin r → Fin r → ℤ := ((W + W.transpose)⁻¹ : Matrix (Fin r) (Fin r) ℤ)
+  let M : Fin r → Fin r → ℤ := W
   refine ⟨fun j => ∏ k, sH k ^ C j k, fun j => ?_, fun χ' => ?_⟩
   · have h1 := hφm 1 1 j
     rw [_root_.mul_one] at h1
     exact mul_eq_left.1 h1.symm
   · have hχ : χ' = ∑ i, E.symm (Pi.single i (e χ' i)) := by
-      rw [← map_sum, Finset.univ_sum_single]; exact (E.symm_apply_apply χ').symm
+      set_option synthInstance.maxHeartbeats 100000 in
+        rw [← map_sum, Finset.univ_sum_single]; exact (E.symm_apply_apply χ').symm
     have ht : t' (Multiplicative.ofAdd χ') = ∏ i, sH i (Multiplicative.ofAdd (e χ' i)) := by
       conv_lhs => rw [hχ]
       rw [ofAdd_sum, map_prod]
@@ -133,7 +172,13 @@ theorem tor_rel (hT : TensFacts W φ e wv) (hdet : IsUnit (W + W.transpose).det)
     congr 2
     congr 1
     rw [ht]
-    simp only [MonoidHom.finset_prod_apply, MonoidHom.zpow_apply]
+    change (∏ i, sH i (Multiplicative.ofAdd (e χ' i))) =
+      ∏ i, ∏ j, ((∏ k, sH k ^ C j k) (Multiplicative.ofAdd (e χ' i)) *
+        (∏ k, sH k ^ C i k) (Multiplicative.ofAdd (e χ' j))) ^ M i j
+    have hp (f : Fin r → (Multiplicative N.X →* Fˣ)) (x : Multiplicative N.X) :
+        (∏ k, f k) x = ∏ k, f k x := by
+      exact map_prod (MonoidHom.eval x) _ _
+    simp only [hp, MonoidHom.zpow_apply]
     apply Additive.ofMul.injective
     simp only [ofMul_prod, ofMul_zpow, ofMul_mul]
     exact (sum_sym_inv W C hBC fun i k => Additive.ofMul (sH k (Multiplicative.ofAdd (e χ' i)))).symm

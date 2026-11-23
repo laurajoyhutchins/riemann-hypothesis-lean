@@ -1,11 +1,58 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.IsNormalFormStabilizerMeasure
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.CommonStabilizerSetEqRangeNormalFormStatement
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.StabilizerHaarUnimodularNormalStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.IsNormalFormStabilizerMeasure
+public import Formalism.PeriodIntegrals.QuotInv
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.CommonStabilizerSetEqRangeNormalFormStatement
 import Development.AbelianVarietyTheory.Proofs.FlagMeasures.IsotropicLeviEmbeddingHomomorphismProperties
 import Development.AbelianVarietyTheory.Proofs.FlagMeasures.IsotropicStabilizerRadicalStructure
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.MatGroupHaarUniqueFiniteCompactOpenPos
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.StabilizerHaarUnimodularNormalStatement
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.MatGroupHaarUniqueFiniteCompactOpenPos
 import Formalism.FormalDegreeBessel.FinalG
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open MeasureTheory Matrix Formalism.QuantumDeterminants Formalism.MainNotions.S GlobalTheory.SgInf GlobalTheory.Amp Filter Topology
 open scoped InnerProductSpace ENNReal
@@ -127,7 +174,9 @@ theorem le_of_tendsto_conj (ν : Measure (Mt k r)) (U : Set (Mt k r)) (hU : IsOp
     exact fun i hi => hx i (le_trans hab hi)
   have hVle : ∀ m, ν (V m) ≤ C := by
     intro m
-    calc ν (V m) ≤ ν (conjM (n m) ⁻¹' U) := measure_mono (Set.biInter_subset_of_mem (le_refl m))
+    calc ν (V m) ≤ ν (conjM (n m) ⁻¹' U) := measure_mono (by
+        intro x hx
+        exact Set.mem_iInter₂.mp hx m (le_refl m))
       _ = ν.map (conjM (n m)) U := (Measure.map_apply (hm m) hU.measurableSet).symm
       _ ≤ C := h m
   have hsub : U ⊆ ⋃ m, V m := by
@@ -657,11 +706,11 @@ private theorem map_conjM_conj_smul_eq_of_map_conjM_smul_eq {R : Set (Mat k r)} 
       = (((s • ν).map (conjM D⁻¹)).map (conjM n)).map (conjM D) := by
         rw [map_conj_conj, map_conj_conj]
     _ = ((c • (s • ν)).map (conjM n)).map (conjM D) := by
-        rw [Measure.map_smul s ν (conjM D⁻¹), hc, smul_comm s c ν]
+        rw [Measure.map_smul s (conj_cont _).measurable.aemeasurable, hc, smul_comm s c ν]
     _ = (c • (s' • ν)).map (conjM D) := by
-        rw [Measure.map_smul c (s • ν) (conjM n), h]
+        rw [Measure.map_smul c (conj_cont _).measurable.aemeasurable, h]
     _ = s' • (c • ν).map (conjM D) := by
-        rw [Measure.map_smul c (s' • ν), Measure.map_smul s' ν, Measure.map_smul c ν, smul_comm c s']
+        rw [Measure.map_smul c (conj_cont _).measurable.aemeasurable, Measure.map_smul s' (conj_cont _).measurable.aemeasurable, Measure.map_smul c (conj_cont _).measurable.aemeasurable, smul_comm c s']
     _ = s' • ν := by
         rw [← hc, hback]
 

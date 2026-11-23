@@ -1,7 +1,50 @@
-import Mathlib
-import Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.NotFullBot
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.FinrankDcrisLetterDeRhamComponentEqDim
+module
+
+public import Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.NotFullBot
+public import Mathlib.RingTheory.HahnSeries.PowerSeries
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.FinrankDcrisLetterDeRhamComponentEqDim
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.Interval.Finset.Box
+public import Mathlib.RingTheory.LaurentSeries
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Formalism.WeaklyAdmissibleFiltrations Formalism.BasicNotions Formalism.BasicNotions.Loc TensorProduct GlobalTheory.NL
 
@@ -109,12 +152,14 @@ theorem core {H A N : Type} [AddCommGroup H] [Module (PowerSeries L) H] [CommRin
   set u : Fin r → H := fun j => Ex (nb j) with hu
   have hsum : ∀ e : Fin r → PowerSeries L, c (∑ j, e j • u j) = ∑ j, conv (e j) (ex (nb j)) := by
     intro e
+
     rw [map_sum]
     exact Finset.sum_congr rfl fun j _ => by rw [hc, hEx]
   have hy : ∀ y, Ex y = ∑ j, lev (nb.repr y j) • u j := by
     intro y
     apply hinj
     rw [hsum, hEx]
+
     conv_lhs => rw [← nb.sum_repr y, map_sum]
     exact Finset.sum_congr rfl fun j _ => hsm _ _
   have h2 : ∀ f ∈ (latSpan ex : Submodule L (ℤ → M)), ∃ e : Fin r → PowerSeries L,
@@ -130,7 +175,7 @@ theorem core {H A N : Type} [AddCommGroup H] [Module (PowerSeries L) H] [CommRin
     | add f g _ _ hf hg =>
       obtain ⟨e, rfl⟩ := hf
       obtain ⟨e', rfl⟩ := hg
-      exact ⟨e + e', by simp only [Pi.add_apply, add_smul, Finset.sum_add_distrib, map_add]⟩
+      exact ⟨e + e', by simp only [Pi.add_apply, add_smul, Finset.sum_add_distrib, map_add (f := _)]⟩
     | smul s f _ hf =>
       obtain ⟨e, rfl⟩ := hf
       refine ⟨fun j => PowerSeries.C s * e j, ?_⟩
@@ -155,6 +200,7 @@ theorem core {H A N : Type} [AddCommGroup H] [Module (PowerSeries L) H] [CommRin
     intro g hg a
     ext n
     have h1 := congrFun (congrArg c hg) ((m : ℤ) + n)
+
     rw [map_sum, map_zero, Finset.sum_apply] at h1
     simp only [hc, ← hE, conv_single, Pi.zero_apply] at h1
     simpa using Fintype.linearIndependent_iff.1 hd' _ h1 a
@@ -262,6 +308,7 @@ theorem expansion_basis : ∀ (D : Formalism.BasicNotions.D7) (HW : HWOf D.loc) 
   refine ⟨hsm, fun r nb => ?_⟩
   haveI := LL.2
   haveI : IsFractionRing ↥(OL LL) ↥LL.1 := integralClosure.isFractionRing_of_finite_extension ℚ_[l] ↥LL.1
+  set_option synthInstance.maxHeartbeats 200000 in
   have hr : r ≤ Module.finrank ↥LL.1 ↥(Di (HW l) h T i) := by
     rw [card_eq_rank W T hT r nb,
       (GlobalTheory.Per.LetterDim.tied_letter_component_finrank l _ _ (D.locT l) K LL T.V T.ρ).1 (card_emb W) hT]

@@ -1,5 +1,67 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.XSmulMemWeightedHomogeneousSubmodule
+module
+
+public import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.XSmulMemWeightedHomogeneousSubmodule
+public import Mathlib.Data.Rat.Floor
+public import Mathlib.LinearAlgebra.Projectivization.Basic
+public import Mathlib.RingTheory.KrullDimension.Basic
+public import Mathlib.RingTheory.MvPolynomial.IrreducibleQuadratic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.RegularizedHypergeometric
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Order.Filter.AtTopBot.Archimedean
+public import Mathlib.RingTheory.Ideal.MinimalPrime.Noetherian
+public import Mathlib.Topology.Algebra.Order.Polynomial
+
+@[expose] public section
 
 open Polynomial Filter Module
 
@@ -27,7 +89,7 @@ theorem leadingCoeff_nonneg_of_eventually_eval_nat {P : ℚ[X]}
     rw [eq_C_of_degree_le_zero h0] at hn hneg
     simp only [eval_C, leadingCoeff_C] at hn hneg
     exact absurd hn (not_le.2 hneg)
-  · have := ((tendsto_atBot_of_leadingCoeff_nonpos P h0 hneg.le).comp
+  · have := ((tendsto_atBot_of_leadingCoeff_nonpos h0 hneg.le).comp
       (tendsto_natCast_atTop_atTop (R := ℚ))).eventually (eventually_lt_atBot 0)
     obtain ⟨n, h1, h2⟩ := (h.and this).exists
     exact absurd h1 (not_le.2 h2)
@@ -106,7 +168,8 @@ theorem weightedHomogeneousComponent_one_mem {I : Ideal (MvPolynomial ι k)}
     (hI : I.IsHomogeneous (homogeneousSubmodule ι k)) (n : ℤ) {p : MvPolynomial ι k}
     (hp : p ∈ I) : weightedHomogeneousComponent (fun _ : ι => (1 : ℤ)) n p ∈ I := by
   classical
-  rw [← sum_homogeneousComponent p, map_sum]
+  set_option synthInstance.maxHeartbeats 100000 in
+    rw [← sum_homogeneousComponent p, map_sum]
   refine I.sum_mem fun i _ => ?_
   have h1 : homogeneousComponent i p ∈ weightedHomogeneousSubmodule k (fun _ : ι => (1 : ℤ))
       (i : ℤ) := by
@@ -152,10 +215,11 @@ theorem exists_isHilbertPoly_quotPiece [Fintype ι] {I : Ideal (MvPolynomial ι 
     push_cast
     ring
 
-open Classical in
 
-noncomputable def idealHilbertPoly (I : Ideal (MvPolynomial ι k)) : ℚ[X] :=
-  if h : ∃ P, IsHilbertPoly (quotPiece I) P then h.choose else 0
+open Classical in
+noncomputable def idealHilbertPoly (I : Ideal (MvPolynomial ι k)) : ℚ[X] := by
+  classical
+  exact if h : ∃ P, IsHilbertPoly (quotPiece I) P then h.choose else 0
 
 theorem isHilbertPoly_idealHilbertPoly [Finite ι] {I : Ideal (MvPolynomial ι k)}
     (hI : I.IsHomogeneous (homogeneousSubmodule ι k)) :
@@ -163,14 +227,8 @@ theorem isHilbertPoly_idealHilbertPoly [Finite ι] {I : Ideal (MvPolynomial ι k
   cases nonempty_fintype ι
   have h : ∃ P, IsHilbertPoly (quotPiece I) P :=
     (exists_isHilbertPoly_quotPiece hI).imp fun _ h => h.1
-  rw [idealHilbertPoly, dif_pos h]
+  rw [idealHilbertPoly, dite_eq_left h]
   exact h.choose_spec
-
-theorem IsHilbertPoly.idealHilbertPoly_eq {I : Ideal (MvPolynomial ι k)} {P : ℚ[X]}
-    (hP : IsHilbertPoly (quotPiece I) P) : idealHilbertPoly I = P := by
-  have h : ∃ P, IsHilbertPoly (quotPiece I) P := ⟨P, hP⟩
-  rw [idealHilbertPoly, dif_pos h]
-  exact h.choose_spec.unique hP
 
 theorem eventually_finrank_quotPiece [Finite ι] {I : Ideal (MvPolynomial ι k)}
     (hI : I.IsHomogeneous (homogeneousSubmodule ι k)) :

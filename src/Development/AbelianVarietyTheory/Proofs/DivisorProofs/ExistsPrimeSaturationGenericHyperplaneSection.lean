@@ -1,5 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.ThetaMetrics.WeightedHomogeneousComponentMemElimIdeal
+module
+
+public import Development.AbelianVarietyTheory.Definitions.ThetaMetrics.WeightedHomogeneousComponentMemElimIdeal
+public import Mathlib.FieldTheory.IsAlgClosed.AlgebraicClosure
+public import Mathlib.Algebra.MvPolynomial.Funext
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MvPolynomial
 
@@ -13,7 +63,7 @@ theorem exists_mul_pow_mem_incidenceIdeal_of_generic {σ β K F : Type*} [Fintyp
     {h : MvPolynomial (β × σ) (MvPolynomial σ K)}
     (hf : map (aeval ξ : MvPolynomial σ K →ₐ[K] F).toRingHom h ∈
       Ideal.span (Set.range (linForm ξ : β → _))) (j : σ) :
-    ∃ m : ℕ, h * C (X j ^ m) ∈ incidenceIdeal β p := by
+    ∃ m : ℕ, h * C (X j ^ m) ∈ incidenceIdeal (β := β) p := by
   let φ : MvPolynomial σ K →+* F := (aeval ξ : MvPolynomial σ K →ₐ[K] F).toRingHom
   have hφ : (fun j => φ (X j)) = ξ := by ext j; simp [φ]
   by_cases hj : ξ j = 0
@@ -48,7 +98,7 @@ theorem eq_zero_of_mem_elimIdeal_of_forall_meets {K : Type} [Field K] {N : ℕ}
     {P : Ideal (MvPolynomial (Fin N) K)}
     (hP : ∀ u : Fin N → AlgebraicClosure K, ∃ y : Fin N → AlgebraicClosure K,
       y ≠ 0 ∧ (∀ g ∈ P, aeval y g = 0) ∧ ∑ j, u j * y j = 0)
-    {f : MvPolynomial (Unit × Fin N) K} (hf : f ∈ elimIdeal Unit P) : f = 0 := by
+    {f : MvPolynomial (Unit × Fin N) K} (hf : f ∈ elimIdeal (β := Unit) P) : f = 0 := by
   apply map_injective (algebraMap K (AlgebraicClosure K)) (algebraMap K _).injective
   rw [map_zero]
   apply MvPolynomial.funext
@@ -95,9 +145,9 @@ theorem exists_prime_saturation_generic_section (K L : Type) [Field K] [Field L]
     (rename (fun j => ((), j)) : _ →ₐ[K] _).toRingHom
   let θ : MvPolynomial (Fin N) K →+* Ω := π.comp ((map (algebraMap K F)).comp ρ)
   have hθ : Function.Injective θ := by
-    rw [injective_iff_map_eq_zero]
+    set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
     intro a ha
-    have h1 : ρ a ∈ elimIdeal Unit P :=
+    have h1 : ρ a ∈ elimIdeal (β := Unit) P :=
       (mem_elimIdeal_iff_of_generic hξ hne).2 ((hπ _).1 ha)
     have h2 := eq_zero_of_mem_elimIdeal_of_forall_meets hP h1
     apply rename_injective (fun j : Fin N => ((), j)) (fun _ _ h => (Prod.ext_iff.1 h).2)
@@ -120,8 +170,9 @@ theorem exists_prime_saturation_generic_section (K L : Type) [Field K] [Field L]
     · simp [ev, Ψ, φ, hθL, θ, ρ]
   have hcomp' (h) : ev (Ψ h) = π (map φ h) := DFunLike.congr_fun hcomp h
   have hΨC (a) : Ψ (C a) = map (algebraMap K L) a := by simp [Ψ]
-  have hΨL : Ψ (genericForm K (Fin N) ()) =
+  have hΨL : Ψ (genericForm (K := K) (σ := Fin N) ()) =
       ∑ j : Fin N, C (algebraMap (MvPolynomial (Fin N) K) L (X j)) * X j := by
+
     rw [genericForm_eq, map_sum]
     exact Finset.sum_congr rfl fun j _ => by simp [Ψ, mul_comm]
   have hΨc (c : MvPolynomial (Fin N) K) : Ψ (map C (ρ c)) = C (algebraMap _ L c) := by
@@ -144,7 +195,7 @@ theorem exists_prime_saturation_generic_section (K L : Type) [Field K] [Field L]
       obtain ⟨c, hc, h, hh⟩ := hf
       obtain ⟨d, hd, k, hk⟩ := hg
       refine ⟨c * d, mul_ne_zero hc hd, map C (ρ d) * h + map C (ρ c) * k, ?_⟩
-      rw [map_add, map_mul, map_mul, hΨc, hΨc, hh, hk, map_mul, map_mul]
+      rw [map_add (f := _), map_mul, map_mul, hΨc, hΨc, hh, hk, map_mul, map_mul]
       ring
     | mul_X f v hf =>
       obtain ⟨c, hc, h, hh⟩ := hf
@@ -166,7 +217,7 @@ theorem exists_prime_saturation_generic_section (K L : Type) [Field K] [Field L]
       rw [← hπ, ← hcomp', hh, map_mul, (RingHom.mem_ker.1 hg), mul_zero]
     obtain ⟨m, hm⟩ := exists_mul_pow_mem_incidenceIdeal_of_generic hξ h1 j
     refine ⟨m, ?_⟩
-    have hle : incidenceIdeal Unit P ≤ Ideal.comap Ψ
+    have hle : incidenceIdeal (β := Unit) P ≤ Ideal.comap Ψ
         (P.map (MvPolynomial.map (algebraMap K L) :
           MvPolynomial (Fin N) K →+* MvPolynomial (Fin N) L) ⊔
         Ideal.span {(∑ j : Fin N, C (algebraMap (MvPolynomial (Fin N) K) L (X j)) * X j :

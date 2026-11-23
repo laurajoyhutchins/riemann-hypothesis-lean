@@ -1,6 +1,55 @@
-import Mathlib
-import Formalism.LocalRingCardinality.DataCD
-import Formalism.SatakeDualWeyl.KpqSubgroupCompact
+module
+
+public import Formalism.LocalRingCardinality.DataCD
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+public import Mathlib.Analysis.Calculus.InverseFunctionTheorem.FDeriv
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Matrix.Normed
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+public import Mathlib.Analysis.Normed.Algebra.MatrixExponential
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open Formalism.BasicNotions MeasureTheory Filter Topology Matrix
 
 noncomputable section
@@ -24,21 +73,6 @@ theorem exists_chart : ∃ e : OpenPartialHomeomorph (Matrix n n ℂ) (Matrix n 
     hasStrictFDerivAt_exp_zero (𝕂 := ℂ) (𝔸 := Matrix n n ℂ)
   open scoped Matrix.Norms.Operator in
   exact ⟨h.toOpenPartialHomeomorph _, rfl, h.mem_toOpenPartialHomeomorph_source⟩
-
-theorem exists_ball_subset {W : Set (Matrix n n ℂ)} (hW : W ∈ 𝓝 (0 : Matrix n n ℂ)) :
-    ∃ δ : ℝ, 0 < δ ∧ ∀ Z : Matrix n n ℂ, ∑ i, ∑ j, ‖Z i j‖ < δ → Z ∈ W := by
-  open scoped Matrix.Norms.Elementwise in
-  obtain ⟨δ, hδ, h⟩ := Metric.mem_nhds_iff.1 hW
-  refine ⟨δ, hδ, fun Z hZ => h ?_⟩
-  open scoped Matrix.Norms.Elementwise in
-  rw [mem_ball_zero_iff, Matrix.norm_lt_iff hδ]
-  intro i j
-  refine lt_of_le_of_lt ?_ hZ
-  calc ‖Z i j‖ ≤ ∑ j, ‖Z i j‖ :=
-        Finset.single_le_sum (f := fun j => ‖Z i j‖) (fun _ _ => norm_nonneg _) (Finset.mem_univ j)
-    _ ≤ ∑ i, ∑ j, ‖Z i j‖ :=
-        Finset.single_le_sum (f := fun i => ∑ j, ‖Z i j‖)
-          (fun _ _ => Finset.sum_nonneg fun _ _ => norm_nonneg _) (Finset.mem_univ i)
 
 theorem exp_mul_exp_neg (X : Matrix n n ℂ) : NormedSpace.exp X * NormedSpace.exp (-X) = 1 := by
   rw [← Matrix.exp_add_of_commute X (-X) (Commute.refl X).neg_right, add_neg_cancel,
@@ -82,14 +116,5 @@ theorem mat_unitary {P Q : ℕ} (g : UpqT P Q) :
 
 theorem continuous_mat {P Q : ℕ} : Continuous (UpqT.mat : UpqT P Q → _) :=
   Units.continuous_val.comp continuous_subtype_val
-
-def expU (P Q : ℕ) (X : lieU P Q) : UpqT P Q :=
-  (⟨⟨NormedSpace.exp X.1, NormedSpace.exp (-X.1), exp_mul_exp_neg _, exp_neg_mul_exp _⟩,
-    exp_unitary (jpq_sq P Q) X.2⟩ : Formalism.UG.Upq P Q)
-
-theorem continuous_expU (P Q : ℕ) : Continuous (expU P Q) := by
-  refine Continuous.subtype_mk (Units.continuous_iff.2 ⟨?_, ?_⟩) _
-  · exact continuous_matExp.comp continuous_subtype_val
-  · exact continuous_matExp.comp continuous_subtype_val.neg
 
 end GlobalTheory.UpqExpChart

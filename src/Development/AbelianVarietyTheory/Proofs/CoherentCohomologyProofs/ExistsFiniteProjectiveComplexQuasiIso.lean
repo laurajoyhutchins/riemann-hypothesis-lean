@@ -1,4 +1,66 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.Category.ModuleCat.Abelian
+public import Mathlib.Algebra.Category.ModuleCat.ChangeOfRings
+public import Mathlib.Algebra.Category.ModuleCat.Monoidal.Basic
+public import Mathlib.Algebra.Homology.QuasiIso
+public import Mathlib.Combinatorics.Quiver.ReflQuiver
+public import Mathlib.RingTheory.Flat.Basic
+public import Mathlib.Algebra.Homology.ShortComplex.ModuleCat
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.TensorProduct.Prod
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+public import Mathlib.RingTheory.Flat.Equalizer
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.Module.FinitePresentation
+public import Mathlib.RingTheory.Flat.EquationalCriterion
+
+@[expose] public section
 
 open CategoryTheory TensorProduct
 
@@ -39,7 +101,7 @@ theorem flat_prod [Module.Flat R A] [Module.Flat R B] : Module.Flat R (A × B) :
     induction x using TensorProduct.induction_on with
     | zero => simp only [map_zero]; ext <;> simp
     | tmul m y => simp
-    | add x y hx hy => simp only [map_add, hx, hy]; ext <;> simp
+    | add x y hx hy => simp only [map_add (f := _), hx, hy]; ext <;> simp
   intro x y hxy
   apply (TensorProduct.prodRight R R I A B).injective
   apply h1.prodMap h2
@@ -98,10 +160,6 @@ structure ConeExact {K : ℕ → Type v} {C : ℕ → Type w} [∀ p, AddCommGro
   succ : ∀ (p : ℕ) (c : C (p + 1)) (k : K (p + 2)), dC (p + 1) c = φ (p + 2) k →
     dK (p + 2) k = 0 → ∃ (c' : C p) (k' : K (p + 1)),
       dC p c' + φ (p + 1) k' = c ∧ dK (p + 1) k' = k
-
-theorem coneExact_id {K : ℕ → Type v} [∀ p, AddCommGroup (K p)] (d : ∀ p, K p →+ K (p + 1)) :
-    ConeExact (fun p => d p) (fun p => d p) (fun _ x => x) :=
-  ⟨fun _ h _ => h, fun c _ h _ => ⟨c, rfl, h⟩, fun p c _ h _ => ⟨0, c, by simp, h⟩⟩
 
 section Cone
 
@@ -199,7 +257,7 @@ theorem ConeExact.lTensor [∀ p, Module.Flat R (K (p + 1))] [∀ p, Module.Flat
     induction x using TensorProduct.induction_on with
     | zero => simp only [map_zero]
     | tmul m y => simp
-    | add x y hx hy => simp only [map_add, hx, hy]
+    | add x y hx hy => simp only [map_add (f := _), hx, hy]
   have e1 : ∀ p x, coneD (fun p => (dK p).lTensor M) (fun p => (dC p).lTensor M)
       (fun p => (φ p).lTensor M) p (TensorProduct.prodRight R R M _ _ x) =
       TensorProduct.prodRight R R M _ _ ((coneD dK dC φ p).lTensor M x) := by
@@ -207,7 +265,7 @@ theorem ConeExact.lTensor [∀ p, Module.Flat R (K (p + 1))] [∀ p, Module.Flat
     induction x using TensorProduct.induction_on with
     | zero => simp only [map_zero]
     | tmul m y => simp [tmul_sub, tmul_neg]
-    | add x y hx hy => simp only [map_add, hx, hy]
+    | add x y hx hy => simp only [map_add (f := _), hx, hy]
   refine (coneExact_iff (fun p x => ?_) (fun p x => ?_) (fun p x => ?_)).2 ⟨?_, ?_, fun p => ?_⟩
   · rw [← LinearMap.comp_apply, ← LinearMap.lTensor_comp,
       show dK (p + 1) ∘ₗ dK p = 0 from LinearMap.ext (hK p)]
@@ -439,12 +497,12 @@ theorem quasiIso_iff_coneExact {K C : CochainComplex (ModuleCat.{v} R) ℕ} (φ 
     · obtain ⟨w, rfl⟩ := (h1 0).2 k c hk hc
       obtain ⟨x, hx, hx'⟩ := h0.1 (c - (φ.f 0).hom w)
         (by rw [map_sub, cochain_comm_apply, sub_eq_zero]; exact hc)
-      exact ⟨x + w, by rw [map_add, hx', sub_add_cancel], by rw [map_add, hx]; exact zero_add _⟩
+      exact ⟨x + w, by rw [map_add (f := _), hx', sub_add_cancel], by rw [map_add (f := _), hx]; exact zero_add _⟩
     · obtain ⟨w, rfl⟩ := (h1 (p + 1)).2 k c hk hc
       obtain ⟨x, z, hx, hx'⟩ := (h1 p).1 (c - (φ.f (p + 1)).hom w)
         (by rw [map_sub, cochain_comm_apply, sub_eq_zero]; exact hc)
-      exact ⟨z, x + w, by rw [map_add, ← add_assoc, hx', sub_add_cancel],
-        by rw [map_add, hx, zero_add]⟩
+      exact ⟨z, x + w, by rw [map_add (f := _), ← add_assoc, hx', sub_add_cancel],
+        by rw [map_add (f := _), hx, zero_add]⟩
   · rintro ⟨h0, h1, h2⟩ (_ | p)
     · refine (quasiIsoAt_zero_iff φ).2 ⟨fun y hy => ?_, fun x hx hx' => h0 x hx' hx⟩
       obtain ⟨x, hx, hx'⟩ := h1 y 0 (by rw [map_zero]; exact hy) (map_zero _)

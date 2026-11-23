@@ -1,5 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsStrictlySemistableIff
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IsStrictlySemistableIff
+public import Mathlib.AlgebraicGeometry.Morphisms.Smooth
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory
 
 namespace GlobalTheory.SmChart
@@ -8,9 +58,6 @@ open MvPolynomial
 
 noncomputable def subst {O : Type} [CommRing O] (ϖ : O) (n : ℕ) (i : Fin (n + 1)) : MvPolynomial (Fin n) O :=
   Fin.cases (C ϖ) (fun j => X j) i
-
-@[simp] theorem subst_zero {O : Type} [CommRing O] (ϖ : O) (n : ℕ) : subst ϖ n 0 = C ϖ := rfl
-@[simp] theorem subst_succ {O : Type} [CommRing O] (ϖ : O) (n : ℕ) (j : Fin n) : subst ϖ n j.succ = X j := rfl
 
 theorem prod_lt_one {O : Type} [CommRing O] (n : ℕ) :
     (∏ i ∈ Finset.univ.filter (fun i : Fin (n + 1) => (i : ℕ) < 1), (X i : MvPolynomial (Fin (n + 1)) O)) = X 0 := by
@@ -28,8 +75,7 @@ theorem subst_vanish {O : Type} [CommRing O] (ϖ : O) (n : ℕ) :
     ∀ a ∈ gen ϖ n, (aeval (subst ϖ n)).toRingHom a = 0 := by
   intro a ha
   obtain ⟨c, rfl⟩ := Ideal.mem_span_singleton'.mp ha
-  rw [map_mul, map_sub, AlgHom.toRingHom_eq_coe, AlgHom.coe_toRingHom, aeval_X, aeval_C, subst_zero,
-    algebraMap_eq, sub_self, mul_zero]
+  simp [subst, algebraMap_eq]
 
 noncomputable def quotMap {O : Type} [CommRing O] (ϖ : O) (n : ℕ) :
     (MvPolynomial (Fin (n + 1)) O ⧸ gen ϖ n) →+* MvPolynomial (Fin n) O :=
@@ -48,7 +94,7 @@ theorem quotMap_quotInv {O : Type} [CommRing O] (ϖ : O) (n : ℕ) :
   · intro c
     simp [quotInv, quotMap_mk]
   · intro i
-    simp [quotInv, quotMap_mk]
+    simp [quotInv, quotMap_mk, subst]
 
 theorem quotInv_quotMap {O : Type} [CommRing O] (ϖ : O) (n : ℕ) :
     (quotInv ϖ n).comp (quotMap ϖ n) = RingHom.id _ := by
@@ -58,11 +104,11 @@ theorem quotInv_quotMap {O : Type} [CommRing O] (ϖ : O) (n : ℕ) :
     simp [quotInv, quotMap_mk]
   · intro i
     refine Fin.cases ?_ (fun j => ?_) i
-    · simp only [RingHom.comp_apply, quotMap_mk, aeval_X, subst_zero, RingHom.id_apply]
+    · simp only [RingHom.comp_apply, quotMap_mk, aeval_X, subst, Fin.cases_zero, RingHom.id_apply]
       simp only [quotInv, RingHom.comp_apply, AlgHom.toRingHom_eq_coe, AlgHom.coe_toRingHom, rename_C]
       rw [Ideal.Quotient.eq]
       rw [← neg_sub]; exact neg_mem (Ideal.subset_span rfl)
-    · simp [quotInv, quotMap_mk]
+    · simp [quotInv, quotMap_mk, subst]
 
 theorem quotMap_bijective {O : Type} [CommRing O] (ϖ : O) (n : ℕ) : Function.Bijective (quotMap ϖ n) :=
   ⟨Function.LeftInverse.injective (g := quotInv ϖ n) (fun a => congr($(quotInv_quotMap ϖ n) a)),
@@ -76,8 +122,8 @@ theorem quotMap_algebraMap {O : Type} [CommRing O] (ϖ : O) (n : ℕ) :
 
 end GlobalTheory.SmChart
 
-open GlobalTheory.SmChart in
 
+open GlobalTheory.SmChart in
 theorem GlobalTheory.SSG.chartAt_of_smooth : ∀ (O : Type) [CommRing O] (ϖ : O) (X : Scheme.{0})
     (p : X ⟶ Spec (CommRingCat.of O)) (V : X.Opens) (x : X), x ∈ V → Smooth (V.ι ≫ p) →
     GlobalTheory.SSG.ChartAt ϖ p x := by

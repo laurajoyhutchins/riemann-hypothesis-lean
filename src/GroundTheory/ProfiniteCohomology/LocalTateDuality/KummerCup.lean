@@ -1,6 +1,55 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.LocalTateDuality.InjectiveCohomologyMapKummerSeqOpenFTwo
-import GroundTheory.ProfiniteCohomology.LocalTateDuality.Bockstein
+module
+
+public import GroundTheory.ProfiniteCohomology.LocalTateDuality.InjectiveCohomologyMapKummerSeqOpenFTwo
+public import GroundTheory.ProfiniteCohomology.LocalTateDuality.Bockstein
+public import GroundTheory.ProfiniteCohomology.CyclicCupProf
+public import GroundTheory.ProfiniteCohomology.PoincareDuality.NsmulEqZeroOfNonemptyAddEquiv
+import GroundTheory.ProfiniteCohomology.CyclicCupBrauer
+import GroundTheory.ProfiniteCohomology.GaloisCohomology.Kummer
+public import GroundTheory.ProfiniteCohomology.PoincareDuality.DeltaPairing
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -21,8 +70,8 @@ theorem nsmul_res_galRootsOfUnity_eq_zero (hn : (n : K) ≠ 0) (W : Subgroup Gal
     (d : Rep.res W.subtype (galRootsOfUnity.{0} K Ksep n)) : n • d = 0 :=
   nsmul_eq_zero_of_nonempty_addEquiv (nonempty_addEquiv_galRootsOfUnity (Ksep := Ksep) hn) d
 
-omit [IsSepClosure K Ksep] in
 
+omit [IsSepClosure K Ksep] in
 theorem bockSeq_kummerSeqOpen_compat₁₂ (W : Subgroup Gal(Ksep/K)) :
     ((bockSeq W n).f ⊗ₘ 𝟙 (kummerSeqOpen (K := K) (Ksep := Ksep) n W).X₂) ≫
         intMulPairing W (kummerSeqOpen (K := K) (Ksep := Ksep) n W).X₂ =
@@ -43,7 +92,7 @@ theorem bockSeq_kummerSeqOpen_compat₁₂ (W : Subgroup Gal(Ksep/K)) :
       simp
     rw [hnm, kummerSeqOpen_g_hom_apply, intMulPairing_tmul, intMulPairing_tmul, mul_zsmul',
       natCast_zsmul]
-  | add x y hx hy => simp only [map_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
 
 theorem bockSeq_kummerSeqOpen_compat₂₃ (hn : (n : K) ≠ 0) (W : Subgroup Gal(Ksep/K)) :
     (𝟙 (bockSeq W n).X₂ ⊗ₘ (kummerSeqOpen (K := K) (Ksep := Ksep) n W).f) ≫
@@ -65,7 +114,7 @@ theorem bockSeq_kummerSeqOpen_compat₂₃ (hn : (n : K) ≠ 0) (W : Subgroup Ga
     rw [zmodReduction_hom_apply, zmodMulPairing_tmul, intMulPairing_tmul,
       zsmul_eq_zsmul_of_intCast_eq (nsmul_res_galRootsOfUnity_eq_zero hn W)
         (ZMod.intCast_zmod_cast (m : ZMod n)) d, map_zsmul]
-  | add x y hx hy => simp only [map_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
 
 end Pairings
 
@@ -112,14 +161,9 @@ def unitsInvariantOpen (W : Subgroup Gal(Ksep/K)) (a : (fixedField W)ˣ) :
     (Representation.mem_invariants _ _).2 fun σ =>
       congrArg Additive.ofMul (Units.ext ((mem_fixedField_iff _ _).1 (a : fixedField W).2 σ σ.2))⟩
 
-omit [IsSepClosure K Ksep] in
-theorem coe_unitsInvariantOpen (W : Subgroup Gal(Ksep/K)) (a : (fixedField W)ˣ) :
-    ((unitsInvariantOpen W a : Rep.res W.subtype (galUnits.{0} K Ksep)) : Additive Ksepˣ) =
-      Additive.ofMul (Units.map (algebraMap (fixedField W) Ksep : fixedField W →* Ksep) a) :=
-  rfl
+
 
 omit [IsSepClosure K Ksep] in
-
 theorem exists_unitsInvariantOpen_eq (W : Subgroup Gal(Ksep/K))
     (v : (Rep.res W.subtype (galUnits.{0} K Ksep)).ρ.invariants) :
     ∃ a : (fixedField W)ˣ, unitsInvariantOpen W a = v := by
@@ -188,8 +232,8 @@ theorem exists_δ_unitsInvariantOpen_eq (hn : (n : K) ≠ 0) (U : OpenSubgroup G
   obtain ⟨a, rfl⟩ := exists_unitsInvariantOpen_eq (U : Subgroup Gal(Ksep/K)) v
   exact ⟨a, hv⟩
 
-variable (n) in
 
+variable (n) in
 def openChar (U : OpenSubgroup Gal(Ksep/K)) (z : cocycles (zmodRep.{0} (U : Subgroup Gal(Ksep/K)) n) 1) :
     Additive Gal(Ksep/fixedField (U : Subgroup Gal(Ksep/K))) →ₜ+ QZ where
   toFun σ := zmodToQZ n (zmodCocycleHom z (galFixedFieldEquivOpen U (Additive.toMul σ)))
@@ -200,7 +244,7 @@ def openChar (U : OpenSubgroup Gal(Ksep/K)) (z : cocycles (zmodRep.{0} (U : Subg
       simpa using h
     simp only [toMul_zero, map_one, h0, map_zero]
   map_add' σ τ := by
-    simp only [toMul_add, map_mul, zmodCocycleHom_mul, map_add]
+    simp only [toMul_add, map_mul, zmodCocycleHom_mul, map_add (f := _)]
   continuous_toFun :=
     (((isLocallyConstant_zmodCocycleHom z).comp_continuous
       ((continuous_galFixedFieldEquivOpen U).comp continuous_toMul)).comp (zmodToQZ n)).continuous
@@ -212,8 +256,8 @@ theorem openChar_apply (U : OpenSubgroup Gal(Ksep/K))
     openChar n U z σ = zmodToQZ n (zmodCocycleHom z (galFixedFieldEquivOpen U (Additive.toMul σ))) :=
   rfl
 
-omit [ValuativeRel K] [TopologicalSpace K] [IsNonarchimedeanLocalField K] in
 
+omit [ValuativeRel K] [TopologicalSpace K] [IsNonarchimedeanLocalField K] in
 theorem res_galUnits_ρ_galFixedFieldEquivOpen (U : OpenSubgroup Gal(Ksep/K))
     (σ : Gal(Ksep/fixedField (U : Subgroup Gal(Ksep/K)))) (x : Additive Ksepˣ) :
     (Rep.res (U : Subgroup Gal(Ksep/K)).subtype (galUnits.{0} K Ksep)).ρ (galFixedFieldEquivOpen U σ) x =
@@ -251,8 +295,8 @@ theorem cupPairing_δ_unitsInvariantOpen_eq_zero_iff (hn : (n : K) ≠ 0) (U : O
     (charAdd (openChar n U z)) (fun σ => rfl)]
   rfl
 
-omit [ValuativeRel K] [TopologicalSpace K] [IsNonarchimedeanLocalField K] in
 
+omit [ValuativeRel K] [TopologicalSpace K] [IsNonarchimedeanLocalField K] in
 theorem zmodCocycleHom_eq_zero_of_charKer_eq_top (hn : (n : K) ≠ 0) (U : OpenSubgroup Gal(Ksep/K))
     (z : cocycles (zmodRep.{0} (U : Subgroup Gal(Ksep/K)) n) 1)
     (h : charKer (charAdd (openChar n U z)) = ⊤) (g : (U : Subgroup Gal(Ksep/K))) :
@@ -263,8 +307,8 @@ theorem zmodCocycleHom_eq_zero_of_charKer_eq_top (hn : (n : K) ≠ 0) (U : OpenS
   rw [mem_charKer, charAdd_apply, openChar_apply, AddEquiv.map_eq_zero_iff] at hσ
   exact zmodToQZ_injective (hσ.trans (map_zero _).symm)
 
-omit [ValuativeRel K] [TopologicalSpace K] [IsNonarchimedeanLocalField K] in
 
+omit [ValuativeRel K] [TopologicalSpace K] [IsNonarchimedeanLocalField K] in
 theorem exists_cocycle_charKer_eq (hn : (n : K) ≠ 0) (U : OpenSubgroup Gal(Ksep/K))
     (ψ : Gal(Ksep/fixedField (U : Subgroup Gal(Ksep/K))) →* Multiplicative (ZMod n))
     (hψ : IsOpen (ψ.ker : Set Gal(Ksep/fixedField (U : Subgroup Gal(Ksep/K))))) :

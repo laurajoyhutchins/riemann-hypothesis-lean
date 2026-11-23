@@ -1,6 +1,59 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.StatementsValuativeCentre
-import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PMChartDehomog
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.StatementsValuativeCentre
+public import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PMChartDehomog
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.LocalProperties.Reduced
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.FieldNumbers
@@ -33,9 +86,10 @@ theorem blockSpecial_monomial (ρ : MRing ι F →+* κ) (d : (Σ k, ι k) →�
   rw [Finsupp.prod_mul, mul_assoc]
 
 theorem coeff_blockSpecial (ρ : MRing ι F →+* κ) (f : MRing ι F) (e : K →₀ ℕ) :
-    coeff e (blockSpecial ρ f) = ρ (weightedHomogeneousComponent (blockWeight ι) (⇑e) f) := by
+    AddMonoidAlgebra.coeff (blockSpecial ρ f) e = ρ (weightedHomogeneousComponent (blockWeight ι) (⇑e) f) := by
   classical
   conv_lhs => rw [f.as_sum]
+
   rw [weightedHomogeneousComponent_apply, map_sum, coeff_sum, map_sum, Finset.sum_filter]
   refine Finset.sum_congr rfl fun d _ => ?_
   rw [blockSpecial_monomial, coeff_C_mul, coeff_monomial]
@@ -43,8 +97,10 @@ theorem coeff_blockSpecial (ρ : MRing ι F →+* κ) (f : MRing ι F) (e : K �
       Finsupp.weight (blockWeight ι) d = ⇑e := by
     rw [Equiv.symm_apply_eq]; rfl
   by_cases h : Finsupp.weight (blockWeight ι) d = ⇑e
-  · rw [if_pos (hiff.mpr h), if_pos h, mul_one]
-  · rw [if_neg (fun h' => h (hiff.mp h')), if_neg h, mul_zero]
+  · simp [h]
+  · have hn : Finsupp.equivFunOnFinite.symm (Finsupp.weight (blockWeight ι) d) ≠ e :=
+      fun h' => h (hiff.mp h')
+    simp only [hn, h, ↓reduceIte, mul_zero]
 
 end Graded
 
@@ -99,11 +155,13 @@ theorem ValuativeCentre.proof : ValuativeCentre.Statement.{u} := by
     rw [RingHom.mem_ker]
     constructor
     · intro h b
-      have := congrArg (coeff (Finsupp.equivFunOnFinite.symm b)) h
-      rwa [coeff_blockSpecial, coeff_zero, Finsupp.coe_equivFunOnFinite_symm] at this
+      have := congrArg (AddMonoidAlgebra.coeff · (Finsupp.equivFunOnFinite.symm b)) h
+      change AddMonoidAlgebra.coeff (blockSpecial ρ f) (Finsupp.equivFunOnFinite.symm b) = 0 at this
+      simpa only [coeff_blockSpecial, Finsupp.coe_equivFunOnFinite_symm] using this
     · intro h
       ext e
-      rw [coeff_blockSpecial, coeff_zero, h]
+      change AddMonoidAlgebra.coeff (blockSpecial ρ f) e = 0
+      rw [coeff_blockSpecial, h]
   have hyform : ∀ f b, IsMultiHomog f b → (f ∈ RingHom.ker θ ↔ ρ f = 0) := by
     intro f b hf
     rw [hy]

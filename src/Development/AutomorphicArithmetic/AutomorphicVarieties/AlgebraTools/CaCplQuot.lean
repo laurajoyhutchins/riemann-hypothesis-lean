@@ -1,7 +1,55 @@
-import Mathlib
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.IsCplAtSelf
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.CaCplMap
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.CaCplFlat
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.IsCplAtSelf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.AdicCompletion.Noetherian
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RingTheory.LocalRing.RingHom.Basic
+public import Mathlib.RingTheory.Noetherian.Basic
+
+@[expose] public section
 
 open IsLocalRing UpperTheory.V.AlgebraTools
 
@@ -20,7 +68,8 @@ private theorem prec_of_surj {B C : Type} [CommRing B] [CommRing C] (g : B →+*
   let u : ℕ → B := fun n => b0 + ∑ i ∈ Finset.range n, d i
   have hu : ∀ n, g (u n) = f n := by
     intro n
-    simp only [u, map_add, map_sum, hgd, hb0, Finset.sum_range_sub]
+
+    simp only [u, map_add (f := _), map_sum, hgd, hb0, Finset.sum_range_sub]
     ring
   have hc : ∀ {m n}, m ≤ n → u m ≡ u n [SMOD (I ^ m • ⊤ : Submodule B B)] := by
     intro m n hmn
@@ -58,7 +107,7 @@ private theorem approx_map {R : Type} [CommRing R] {p : Ideal R} {B : Type} [Com
     have := Ideal.add_mem _ (Ideal.mul_mem_left _ (algebraMap R B t) hx)
       (Ideal.mul_mem_left _ (algebraMap R B s) hy)
     convert this using 1
-    simp only [map_add, map_mul]; ring
+    simp only [map_add (f := _), map_mul]; ring
   | smul b x _ hx =>
     obtain ⟨i, hi, s, hs, hx⟩ := hx
     obtain ⟨a, t, ht, hb⟩ := h.dense n b

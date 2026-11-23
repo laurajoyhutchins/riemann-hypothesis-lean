@@ -1,6 +1,55 @@
-import Mathlib
+module
+
+public import Formalism.SharpRestriction.CuspSpanNormBounds.RelevantZeroGramTerms
+public import Development.AbelianVarietyTheory.Counterexamples.HeightSurvey.ExistsGoodFamily
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.RhoCompactTwiceEqOfSignBlockOrdered
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.CStarAlgebra.Matrix
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Definitions.Foundations.CdScaleTieIff
-import Development.AbelianVarietyTheory.Proofs.HeightProofs.RhoCompactTwiceEqOfSignBlockOrdered
+
+@[expose] public section
 
 noncomputable section
 
@@ -59,7 +108,7 @@ theorem exists_type (T : Matrix (Fin N) (Fin N) ℂ → (E →L[ℂ] E))
   · right
     refine Submodule.eq_of_le_of_finrank_le hle' (hmin _ ⟨hle'.trans hle, hst', v₁, h₁, h0, fun θ hθ => ?_⟩)
     have h := hw θ hθ
-    rw [map_add, smul_add] at h
+    rw [map_add (f := _), smul_add] at h
     rw [← sub_eq_zero]
     refine (Submodule.disjoint_def.1 S'.orthogonal_disjoint) _
       (S'.sub_mem (hst' _ hθ _ h₁) (S'.smul_mem _ h₁)) ?_
@@ -380,7 +429,7 @@ theorem HasModel.exists_rep {Λ : Fin N → ℝ} (h : HasModel Λ) :
       exact (sq_eq_sq₀ (norm_nonneg _) (norm_nonneg _)).1 h'
     · refine (PiLp.continuous_toLp 2 fun _ : ι => ℂ).comp_continuousOn
         (f := fun g => ρ g *ᵥ x.ofLp) (continuousOn_pi.2 fun i => ?_)
-      exact continuousOn_finset_sum _ fun j _ => (h4 i j).mul continuousOn_const
+      exact continuousOn_finsetSum _ fun j _ => (h4 i j).mul continuousOn_const
   let v₀ : EuclideanSpace ℂ ι := WithLp.toLp 2 v
   let W : Submodule ℂ (EuclideanSpace ℂ ι) := Submodule.span ℂ (Set.range fun g => T g v₀)
   have hW : IsKStableOn (allPos N) T W := by
@@ -445,12 +494,5 @@ theorem exists_isHCTypeU (N : ℕ) (lam : Fin N → ℝ) (h : Formalism.QuantumD
   have := (hasModel_of_antitone _ hL).exists_rep
   rw [← e] at this
   exact this
-
-theorem exists_isDS_const : ∀ (N : ℕ) (b : Bool) (lam : Fin N → ℝ), Formalism.QuantumDeterminants.IsHCParam lam →
-    ∃ (H : Type) (_ : NormedAddCommGroup H) (_ : InnerProductSpace ℂ H)
-      (σ : Matrix (Fin N) (Fin N) ℂ → (H →L[ℂ] H)), IsDS (fun _ => b) lam σ := by
-  intro N b lam h
-  obtain ⟨H, _, _, σ, hσ⟩ := exists_isHCTypeU N lam h
-  exact ⟨H, _, _, σ, (GlobalTheory.RealPar.isDS_const_iff b lam σ).2 hσ⟩
 
 end GlobalTheory.CompactDS

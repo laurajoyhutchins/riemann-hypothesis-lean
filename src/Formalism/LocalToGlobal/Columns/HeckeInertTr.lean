@@ -1,6 +1,49 @@
-import Formalism.LocalToGlobal.Columns.HeckeInertLemmas
-import Formalism.LocalToGlobal.Columns.WmLemmas
-import Formalism.LocalToGlobal.Divisibility.LiftLatInst
+module
+
+public import Formalism.LocalToGlobal.Divisibility.LiftLatInst
+public import Formalism.LocalToGlobal.Columns.HeckeInert
+public import Formalism.LocalToGlobal.Columns.HeckeInertLemmas
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -13,7 +56,7 @@ section NbFunI
 variable {E : Type} [Field E] [NumberField E] [StarRing E] {n : ℕ} {ST SG : Finset (HeightOneSpectrum (𝓞 E))}
 variable (K V : Type) [Field K] [AddCommGroup V] [Module K V]
 
-def nbFunI (P : Ideal (𝓞 E)) (s : List ℕ) : (DecoSet E n ST SG → V) →ₗ[K] (DecoSet E n ST SG → V) where
+def nbFunI (P : Ideal (𝓞 E)) (s : List ℕ) : (DecoSet (E := E) (n := n) (ST := ST) (SG := SG) → V) →ₗ[K] (DecoSet (E := E) (n := n) (ST := ST) (SG := SG) → V) where
   toFun ψ d := ∑ d₁ ∈ d.inertNb P s, ψ d₁
   map_add' ψ ψ' := by
     funext d
@@ -28,27 +71,27 @@ section Tr
 
 variable {X : Fields} {n : ℕ} {ST SG : Finset (HeightOneSpectrum (𝓞 X.E))}
 
-theorem trF_nbFunI {V : Type} [AddCommGroup V] [Module X.K V] (a : GLG X.E n SG) (P : Ideal (𝓞 X.E)) (s : List ℕ)
-    (ψ : DecoSet X.E n ST SG → V) :
+theorem trF_nbFunI {V : Type} [AddCommGroup V] [Module X.K V] (a : GLG (E := X.E) (n := n) (SG := SG)) (P : Ideal (𝓞 X.E)) (s : List ℕ)
+    (ψ : DecoSet (E := X.E) (n := n) (ST := ST) (SG := SG) → V) :
     trF X n ST SG V a (nbFunI X.K V P s ψ) = nbFunI X.K V P s (trF X n ST SG V a ψ) := by
   funext d
   show ∑ d₁ ∈ (((1 : UF X.E n), a⁻¹) • d).inertNb P s, ψ d₁ =
     ∑ d₁ ∈ d.inertNb P s, ψ (((1 : UF X.E n), a⁻¹) • d₁)
   exact DecoSet.sum_inertNb_smul P s _ d ψ
 
-variable (C : CoefPk X n (DecoSet X.E n ST SG)) (Λ : LevFam X.E X.K n SG)
+variable (C : CoefPk X n (DecoSet (E := X.E) (n := n) (ST := ST) (SG := SG))) (Λ : LevFam X.E X.K n SG)
 
 theorem heckeFamI_formPts_apply (S0 : Set (HeightOneSpectrum (𝓞 X.E))) (y : LevOffI ST SG S0 × List ℕ)
     (φ : (formGSD C Λ).EqFun) :
-    ((heckeFamI (Formalism.L2.DIV.formPts C Λ) S0 y φ : (formGSD C Λ).EqFun) : DecoSet X.E n ST SG → C.V) =
-      nbFunI X.K C.V y.1.1.asIdeal y.2 (φ : DecoSet X.E n ST SG → C.V) := by
+    ((heckeFamI (Formalism.L2.DIV.formPts C Λ) S0 y φ : (formGSD C Λ).EqFun) : DecoSet (E := X.E) (n := n) (ST := ST) (SG := SG) → C.V) =
+      nbFunI X.K C.V y.1.1.asIdeal y.2 (φ : DecoSet (E := X.E) (n := n) (ST := ST) (SG := SG) → C.V) := by
   funext d
-  show ((heckeI (Formalism.L2.DIV.formPts C Λ) y.1.1.asIdeal y.2).op φ : DecoSet X.E n ST SG → C.V) d =
-    ∑ d₁ ∈ DecoSet.inertNb y.1.1.asIdeal y.2 d, (φ : DecoSet X.E n ST SG → C.V) d₁
+  show ((heckeI (Formalism.L2.DIV.formPts C Λ) y.1.1.asIdeal y.2).op φ : DecoSet (E := X.E) (n := n) (ST := ST) (SG := SG) → C.V) d =
+    ∑ d₁ ∈ DecoSet.inertNb y.1.1.asIdeal y.2 d, (φ : DecoSet (E := X.E) (n := n) (ST := ST) (SG := SG) → C.V) d₁
   rw [heckeI_op_apply]
   simp [DecoPts.nbI, Formalism.L2.DIV.formPts]
 
-theorem heckeFamI_comm_trRep {A : Type} [Group A] (ι : A →* GLG X.E n SG) (hι : ∀ a w, (Λ w).NormBy (ι a w))
+theorem heckeFamI_comm_trRep {A : Type} [Group A] (ι : A →* GLG (E := X.E) (n := n) (SG := SG)) (hι : ∀ a w, (Λ w).NormBy (ι a w))
     (S0 : Set (HeightOneSpectrum (𝓞 X.E))) (y : LevOffI ST SG S0 × List ℕ) (a : A) :
     Commute (trRep C Λ ι hι a) (heckeFamI (Formalism.L2.DIV.formPts C Λ) S0 y) := by
   show trRep C Λ ι hι a * heckeFamI (Formalism.L2.DIV.formPts C Λ) S0 y =
@@ -58,9 +101,9 @@ theorem heckeFamI_comm_trRep {A : Type} [Group A] (ι : A →* GLG X.E n SG) (h�
   apply Subtype.ext
   rw [Module.End.mul_apply, Module.End.mul_apply]
   show trF X n ST SG C.V (ι a)
-      ((heckeFamI (Formalism.L2.DIV.formPts C Λ) S0 y φ : (formGSD C Λ).EqFun) : DecoSet X.E n ST SG → C.V) =
+      ((heckeFamI (Formalism.L2.DIV.formPts C Λ) S0 y φ : (formGSD C Λ).EqFun) : DecoSet (E := X.E) (n := n) (ST := ST) (SG := SG) → C.V) =
     ((heckeFamI (Formalism.L2.DIV.formPts C Λ) S0 y (trRep C Λ ι hι a φ) : (formGSD C Λ).EqFun) :
-      DecoSet X.E n ST SG → C.V)
+      DecoSet (E := X.E) (n := n) (ST := ST) (SG := SG) → C.V)
   rw [heckeFamI_formPts_apply, heckeFamI_formPts_apply, trF_nbFunI]
   rfl
 

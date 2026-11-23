@@ -1,7 +1,59 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.RestrictedRamification.BaseChangeDefs
-import GroundTheory.ProfiniteCohomology.RestrictedRamification.BaseChangePlaces
-import GroundTheory.ProfiniteCohomology.MackeyFormula.CompactSupport
+module
+
+public import GroundTheory.ProfiniteCohomology.RestrictedRamification.BaseChangeDefs
+public import GroundTheory.ProfiniteCohomology.RestrictedRamification.BaseChangePlaces
+public import GroundTheory.ProfiniteCohomology.MackeyFormula.CompactSupport
+public import GroundTheory.ProfiniteCohomology.RestrictedRamification.LocalMaps
+import GroundTheory.GlobalFields.CompletionAtPlace.Integers
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+public import Mathlib.FieldTheory.Galois.Profinite
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
@@ -86,10 +138,6 @@ def fixingOfAlgHom : Subgroup Gal(AlgebraicClosure (v.adicCompletion F) / v.adic
     rw [AlgEquiv.aut_inv]
     exact σ.symm_apply_eq.2 (hσ l).symm
 
-omit [NumberField L] in
-theorem mem_fixingOfAlgHom_iff (σ : Gal(AlgebraicClosure (v.adicCompletion F) / v.adicCompletion F)) :
-    σ ∈ fixingOfAlgHom j ↔ ∀ l, σ (j l) = j l :=
-  Iff.rfl
 
 def fixingOfAlgHomToAut (σ : fixingOfAlgHom j) :
     Gal(AlgebraicClosure ((placeOfAlgHom j).1.adicCompletion L) / (placeOfAlgHom j).1.adicCompletion L) :=
@@ -129,12 +177,6 @@ def fixingOfAlgHomMulEquiv : fixingOfAlgHom j ≃*
       closureEquivOfAlgHom j (σ.1 ((closureEquivOfAlgHom j).symm (closureEquivOfAlgHom j
         (τ.1 ((closureEquivOfAlgHom j).symm z)))))
     simp
-
-theorem fixingOfAlgHomMulEquiv_apply (σ : fixingOfAlgHom j)
-    (z : AlgebraicClosure ((placeOfAlgHom j).1.adicCompletion L)) :
-    fixingOfAlgHomMulEquiv j σ z =
-      closureEquivOfAlgHom j (σ.1 ((closureEquivOfAlgHom j).symm z)) :=
-  rfl
 
 theorem continuous_coe_fixingOfAlgHomMulEquiv_symm :
     Continuous fun τ : Gal(AlgebraicClosure ((placeOfAlgHom j).1.adicCompletion L) /
@@ -179,11 +221,6 @@ def fixingOfAlgHomEquiv : fixingOfAlgHom j ≃ₜ*
   { fixingOfAlgHomMulEquiv j with
     continuous_toFun := e.symm.continuous
     continuous_invFun := hc }
-
-theorem fixingOfAlgHomEquiv_apply (σ : fixingOfAlgHom j)
-    (z : AlgebraicClosure ((placeOfAlgHom j).1.adicCompletion L)) :
-    fixingOfAlgHomEquiv j σ z = closureEquivOfAlgHom j (σ.1 ((closureEquivOfAlgHom j).symm z)) :=
-  rfl
 
 end Fixing
 
@@ -285,8 +322,8 @@ theorem gsLocalPlace_mul (v : S) (x : galUnramifiedOutside F Ω S) {u : galUnram
     AlgHom.ext fun l => gsLocalEmbedding_mul hL ιs v x hu h l
   rw [gsLocalPlace, e, placeOfAlgHom_comp]
 
-variable (S) in
 
+variable (S) in
 def mackeyPlace (p : MackeyIndex (gsOpenSubgroup S hL) (gsFinFamily S ιs)) :
     (placesOver S : Set (HeightOneSpectrum (𝓞 L))) :=
   ⟨(gsLocalPlace hL ιs p.1 p.2.out).1, p.1.1, p.1.2, (gsLocalPlace hL ιs p.1 p.2.out).2⟩
@@ -312,7 +349,7 @@ theorem mackeyPlace_injective : Function.Injective (mackeyPlace S hL ιs) := by
     rw [AlgEquiv.mul_apply, AlgEquiv.mul_apply, ← hinj, ← AlgEquiv.mul_apply, mul_inv_cancel,
       AlgEquiv.one_apply]
   have hd : d = d' := by
-    rw [← DoubleCoset.out_eq' _ _ d, ← DoubleCoset.out_eq' _ _ d', DoubleCoset.eq]
+    rw [← DoubleCoset.out_eq' d, ← DoubleCoset.out_eq' d', DoubleCoset.eq]
     refine ⟨_, hmem, gsFinFamily S ιs v g⁻¹, ⟨g⁻¹, rfl⟩, ?_⟩
     rw [map_inv]
     group
@@ -327,7 +364,7 @@ theorem mackeyPlace_surjective : Function.Surjective (mackeyPlace S hL ιs) := b
       (gsFinFamily S ιs v).toMonoidHom :=
     DoubleCoset.mk _ _ x
   refine ⟨⟨v, d⟩, ?_⟩
-  obtain ⟨a, b, ha, hb, hab⟩ := DoubleCoset.mk_out_eq_mul
+  obtain ⟨a, ha, b, hb, hab⟩ := DoubleCoset.mk_out_eq_mul
     (gsOpenSubgroup S hL : Subgroup (galUnramifiedOutside F Ω S)) (gsFinFamily S ιs v).toMonoidHom.range x
   obtain ⟨h, rfl⟩ := MonoidHom.mem_range.1 hb
   apply Subtype.ext
@@ -335,19 +372,15 @@ theorem mackeyPlace_surjective : Function.Surjective (mackeyPlace S hL ιs) := b
   have e1 : d.out = a * x * gsFinFamily S ιs v h := hab
   rw [e1, gsLocalPlace_mul hL ιs v x ha h, gsLocalPlace, hx, hj]
 
-variable (S) in
 
+variable (S) in
 def mackeyPlaceEquiv :
     MackeyIndex (gsOpenSubgroup S hL) (gsFinFamily S ιs) ≃ (placesOver S : Set (HeightOneSpectrum (𝓞 L))) :=
   Equiv.ofBijective (mackeyPlace S hL ιs) ⟨mackeyPlace_injective hL ιs, mackeyPlace_surjective hL ιs⟩
 
-theorem coe_mackeyPlaceEquiv (p : MackeyIndex (gsOpenSubgroup S hL) (gsFinFamily S ιs)) :
-    (mackeyPlaceEquiv S hL ιs p : HeightOneSpectrum (𝓞 L)) = (gsLocalPlace hL ιs p.1 p.2.out).1 :=
-  rfl
 
 omit [IsScalarTower F L Ω] in
 variable (S) in
-
 def gsAutLift (x : galUnramifiedOutside F Ω S) : Gal(Ω/F) :=
   (AlgEquiv.restrictNormalHom_surjective (K₁ := maxUnramifiedOutside F Ω S) Ω x).choose
 

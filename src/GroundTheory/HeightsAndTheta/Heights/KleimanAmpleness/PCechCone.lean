@@ -1,6 +1,47 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.Statements
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.StatementsSerrePoly
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.StatementsSerrePoly
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.Kleiman
@@ -55,7 +96,7 @@ def onSet {i : ℕ} (s : Cech.Cochain (fun _ : StdCell N => V) i) (A : Finset (F
 theorem onSet_idx {i : ℕ} (s : Cech.Cochain (fun _ : StdCell N => V) i)
     (I : Cech.Idx (Finset.univ : Finset (Fin (N + 1))) i) : onSet s I.1.1 = s I := by
   unfold onSet
-  rw [dif_pos I.2]
+  rw [dite_eq_left I.2]
 
 theorem d_eq {i : ℕ} (s : Cech.Cochain (fun _ : StdCell N => V) i)
     (K : Cech.Idx (Finset.univ : Finset (Fin (N + 1))) (i + 1)) :
@@ -102,8 +143,8 @@ theorem const {z : Cech.Cochain (fun _ : StdCell N => V) 0}
 
 end Cech.Cone
 
-open Cech.Cone in
 
+open Cech.Cone in
 theorem Cech.Cone.proof : Cech.Cone.Statement.{u, v} := by
   intro R _ V _ _ N J
   refine ⟨?_, ?_, fun z hz I K => const hz I K⟩
@@ -139,7 +180,7 @@ theorem Cech.Cone.proof : Cech.Cone.Statement.{u, v} := by
           Cech.Cochain (fun _ : StdCell N => V) i) (K.1.1.erase j) = coneY i₀ z (K.1.1.erase j) := by
         intro j hj
         unfold onSet
-        rw [dif_pos (by rw [Finset.card_erase_of_mem hj, hK]; rfl)]
+        rw [dite_eq_left (by rw [Finset.card_erase_of_mem hj, hK]; rfl)]
       rw [Finset.sum_congr rfl fun j hj => by rw [hY j hj]]
       generalize K.1.1 = Kf at hK ⊢
       by_cases h : i₀ ∈ Kf

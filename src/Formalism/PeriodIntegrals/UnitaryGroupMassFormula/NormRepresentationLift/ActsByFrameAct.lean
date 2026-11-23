@@ -1,7 +1,49 @@
-import Mathlib
-import Formalism.SharpRestriction.CuspSpanNormBounds.IsPrimitiveSub
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.NormRepresentationLift.TvMapApply
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.NormRepresentationLift.ExistsMulEqOneAddSmulOfRowsGe
+module
+
+public import Formalism.SharpRestriction.CuspSpanNormBounds.IsPrimitiveSub
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.NormRepresentationLift.TvMapApply
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.NormRepresentationLift.ExistsMulEqOneAddSmulOfRowsGe
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -16,12 +58,8 @@ variable {E : Type} [Field E] [NumberField E] [StarRing E] {S : HSpace E}
 theorem smul_coe (o : 𝓞 E) (w : S.V) : (o : E) • w = o • w := by
   exact IsScalarTower.algebraMap_smul E o w
 
-theorem herm_eq (x y : S.V) : S.hT y x = star (S.hT x y) := by
-  first
-    | exact (S.herm x y).symm
-    | exact (S.herm.eq x y).symm
-    | (rw [← S.herm x y]; rfl)
-    | (rw [← S.herm.eq x y]; rfl)
+theorem herm_eq (x y : S.V) : S.hT y x = star (S.hT x y) :=
+  (S.herm.eq x y).symm
 
 theorem tvMap_isom (e v : S.V) (l : E) (hee : S.hT e e = 0) (hev : S.hT e v = 0)
     (hl : l + star l = -S.hT v v) (x y : S.V) :
@@ -30,7 +68,7 @@ theorem tvMap_isom (e v : S.V) (l : E) (hee : S.hT e e = 0) (hev : S.hT e v = 0)
   have hxe : S.hT x e = star (S.hT e x) := herm_eq e x
   have hxv : S.hT x v = star (S.hT v x) := herm_eq v x
   rw [tvMap_apply, tvMap_apply]
-  simp only [map_add, map_sub, map_smul, map_smulₛₗ, LinearMap.add_apply, LinearMap.sub_apply,
+  simp only [map_add (f := _), map_sub, map_smul, map_smulₛₗ, LinearMap.add_apply, LinearMap.sub_apply,
     LinearMap.smul_apply, hee, hev, hve, hxe, hxv, smul_eq_mul, starRingEnd_apply, star_mul',
     mul_zero, zero_mul, add_zero, sub_zero, zero_add]
   linear_combination (star (S.hT e x) * S.hT e y) * hl
@@ -175,6 +213,7 @@ theorem actsBy_frameAct {n : ℕ} {φ : S.V ≃ₗ[E] S.V} {f : Fin n → S.V} {
       | push_cast
       | simp
   unfold ActsBy at h
+
   simp only [frameAct, map_sum, map_smul, h, Finset.smul_sum, smul_smul, hcoe, Finset.sum_smul]
   rw [Finset.sum_comm]
   exact Finset.sum_congr rfl fun c _ => Finset.sum_congr rfl fun a _ => by rw [mul_comm]

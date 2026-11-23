@@ -1,4 +1,53 @@
-import Development.WeilBound.RepresentationTheoryGL.CasimirAlgebra.TensorRelationsGL.LiftCommEAt
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.CasimirAlgebra.TensorRelationsGL.KTypeData
+public import Development.WeilBound.RepresentationTheoryGL.CasimirAlgebra.TensorRelationsGL.LiftCommEAt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -33,6 +82,7 @@ theorem sgn_sq {m : ℕ} (τ : Equiv.Perm (Fin m)) :
 theorem pm_alt_first {m k : ℕ} (τ : Equiv.Perm (Fin m)) (hτ : τ ∈ firstG m k) (ξ : TV n M (Fin m)) :
     pm τ (alt (firstG m k) ξ) = ((Equiv.Perm.sign τ : ℤ) : ℂ) • alt (firstG m k) ξ := by
   rw [mem_firstG] at hτ
+
   simp only [alt, LinearMap.sum_apply, LinearMap.smul_apply, map_sum, map_smul, Finset.smul_sum]
   refine Finset.sum_equiv (Equiv.mulLeft τ) ?_ ?_
   · intro σ
@@ -84,8 +134,15 @@ theorem contr (E₁ E₂ : Fin n → Fin n → Module.End ℂ M) {m : ℕ} (c : 
     simp only [Finset.mem_univ, if_true]
     congr 1
     funext x
-    simp only [Function.comp_apply, Function.update_apply, Equiv.swap_apply_def]
-    split_ifs <;> subst_vars <;> simp_all
+    by_cases hxp : x = p
+    · subst x
+      simp [hpj]
+    · by_cases hxj : x = j
+      · subst x
+        simp [hxp, hpj]
+      · simp only [Function.update_of_ne hxp, Function.update_of_ne hxj]
+        change I x = I (Equiv.swap j p x)
+        rw [Equiv.swap_apply_of_ne_of_ne hxj hxp]
   rw [h1, Finset.sum_congr rfl h2, hR] at key
   simp only [Pi.add_apply, Pi.smul_apply, Om_apply, Finset.sum_apply, pm_apply, Finset.filter_ne']
   rw [← key]
@@ -174,6 +231,7 @@ theorem outer {m k : ℕ} (hk : k < m) (X : Submodule ℂ (TV n M (Fin m))) (hP 
   have hπ2 : π * π = 1 := Equiv.swap_mul_self k' i
   have hcomm : ∀ η : TV n M (Fin m), alt (firstG m k) (pm π η) = pm π (alt (firstG m k) η) := by
     intro η
+
     simp only [alt, LinearMap.sum_apply, LinearMap.smul_apply, map_sum, map_smul]
     refine Finset.sum_congr rfl fun σ hσ => ?_
     rw [mem_firstG] at hσ
@@ -192,6 +250,7 @@ theorem outer {m k : ℕ} (hk : k < m) (X : Submodule ℂ (TV n M (Fin m))) (hP 
     refine Finset.sum_congr rfl fun j hj => ?_
     have hne : j ≠ k' := by
       intro h; rw [h] at hj; simp [k'] at hj
+
     rw [map_sum, ← Finset.sum_neg_distrib]
     refine Finset.sum_congr rfl fun σ _ => ?_
     rw [Equiv.Perm.sign_mul, Equiv.Perm.sign_swap hne, pm_mul, map_smul, Module.End.mul_apply]
@@ -200,6 +259,7 @@ theorem outer {m k : ℕ} (hk : k < m) (X : Submodule ℂ (TV n M (Fin m))) (hP 
   have hA := h0 (pm π ξ) (hP π ξ hξ)
   rw [hdec, hcomm, sub_eq_zero] at hA
   have h2 := congrArg (pm π) hA
+
   rw [← Module.End.mul_apply, ← pm_mul, hπ2, pm_one, Module.End.one_apply, map_sum] at h2
   conv_rhs => rw [h2]
   refine Finset.sum_congr rfl fun j hj => ?_
@@ -245,6 +305,7 @@ theorem om_alt {m : ℕ} (E : Fin n → Fin n → Module.End ℂ M) (hT : ∀ (�
       pm σ * Om E p = (Om E (σ p) * pm σ : Module.End ℂ (TV n M (Fin m)))) (k : ℕ) (ξ : TV n M (Fin m)) :
     alt (firstG m k) (∑ j ∈ Finset.univ.filter (fun j : Fin m => (j : ℕ) < k), Om E j ξ) =
       ∑ j ∈ Finset.univ.filter (fun j : Fin m => (j : ℕ) < k), Om E j (alt (firstG m k) ξ) := by
+
   simp only [alt, LinearMap.sum_apply, LinearMap.smul_apply, map_sum, map_smul]
   conv_lhs => rw [Finset.sum_comm]
   conv_rhs => rw [Finset.sum_comm]

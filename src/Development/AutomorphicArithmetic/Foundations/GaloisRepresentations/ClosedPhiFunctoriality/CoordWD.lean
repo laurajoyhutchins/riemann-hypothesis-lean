@@ -1,5 +1,44 @@
-import Mathlib
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ClosedPhiFunctoriality.IntBasisAlt
+module
+
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ClosedPhiFunctoriality.IntBasisAlt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Formalism Formalism.ConjugateSelfDual ReciprocityTheory.Gal Formalism.BasicNotions Formalism.BasicNotions.Loc Formalism.WeaklyAdmissibleFiltrations Formalism.MainNotions.N TensorProduct PowerSeries GlobalTheory.Prism GlobalTheory.BKReal GlobalTheory.Per GlobalTheory.BSP GlobalTheory.MemLoc GlobalTheory.Pst GlobalTheory.BKLim GlobalTheory.Cong GlobalTheory.WeilDeligne Matrix
 open scoped Formalism.Per NNReal
 open UpperTheory.Gal.ClosedPhiFromClosedTrace
@@ -14,7 +53,7 @@ private theorem letter_lift {LL U D : Type} [Field LL] [Field U] [AddCommGroup D
   letI : Module F M := Module.compHom M κ
   have hsm : ∀ (c : F) (y : M), c • y = κ c • y := fun _ _ => rfl
   let f₂ : F →+ D →+ M := AddMonoidHom.mk' (fun c =>
-      (DistribMulAction.toAddMonoidHom M (κ c)).comp f)
+      (DistribSMul.toAddMonoidHom M (κ c)).comp f)
     (fun c c' => by
       ext x
       simp [add_smul])
@@ -25,7 +64,7 @@ private theorem letter_lift {LL U D : Type} [Field LL] [Field U] [AddCommGroup D
   have hgs : ∀ (c : F) (y : F ⊗[LL] D), g (c • y) = κ c • g y := fun c y => by
     induction y using TensorProduct.induction_on with
     | zero => simp
-    | add x y hx hy => rw [smul_add, map_add, map_add, smul_add, hx, hy]
+    | add x y hx hy => rw [smul_add, map_add (f := _), map_add (f := _), smul_add, hx, hy]
     | tmul c' x => rw [TensorProduct.smul_tmul', hg, hg, smul_eq_mul, map_mul, mul_smul]
   let gL : F ⊗[LL] D →ₗ[F] M := { toFun := g, map_add' := g.map_add, map_smul' := hgs }
   have hk : letterKer m F τ ≤ LinearMap.ker gL := iSup_le fun u => by
@@ -34,7 +73,7 @@ private theorem letter_lift {LL U D : Type} [Field LL] [Field U] [AddCommGroup D
     change g _ = 0
     induction y using TensorProduct.induction_on with
     | zero => simp
-    | add x y hx hy => rw [map_add, map_add, hx, hy, add_zero]
+    | add x y hx hy => rw [map_add (f := _), map_add (f := _), hx, hy, add_zero]
     | tmul c x =>
       simp only [LinearMap.sub_apply, LinearMap.baseChange_tmul, LinearMap.smul_apply, LinearMap.id_apply,
         map_sub, hgs, hg, hU]
@@ -50,7 +89,7 @@ private theorem coord_smul {l : ℕ} [Fact l.Prime] {P : LocPrime l} {L : FinExt
     ψ₀ (c • y) = (((c : Om l) ⊗ₜ 1 : OB P)) • ψ₀ y := by
   induction y using TensorProduct.induction_on with
   | zero => simp
-  | add x y hx hy => rw [smul_add, map_add, map_add, smul_add, hx, hy]
+  | add x y hx hy => rw [smul_add, map_add (f := _), map_add (f := _), smul_add, hx, hy]
   | tmul v b =>
     funext i
     rw [TensorProduct.smul_tmul', h, Pi.smul_apply, Pi.smul_apply, h, smul_eq_mul, smul_eq_mul,
@@ -63,7 +102,7 @@ private theorem coord_mulV {l : ℕ} [Fact l.Prime] {P : LocPrime l} {L : FinExt
     ψ₀ (GlobalTheory.Pst.mulV P ↥L.1 (Fin a → ↥L.1) c y) = (((c : Om l) ⊗ₜ 1 : OB P)) • ψ₀ y := by
   induction y using TensorProduct.induction_on with
   | zero => simp
-  | add x y hx hy => rw [map_add, map_add, map_add, smul_add, hx, hy]
+  | add x y hx hy => rw [map_add (f := _), map_add (f := _), map_add (f := _), smul_add, hx, hy]
   | tmul v b =>
     funext i
     rw [GlobalTheory.Pst.mulV_tmul, h, Pi.smul_apply, h, smul_eq_mul,
@@ -83,7 +122,7 @@ variable {l : ℕ} [Fact l.Prime] {P : LocPrime l} {K L : FinExt l} {a : ℕ}
   (R : Representation ↥L.1 ↥(GK K) (Fin a → ↥L.1))
   (ψ₀ : (Fin a → ↥L.1) ⊗[ℚ_[l]] Bst P →+ (Fin a → OB P))
 
-set_option synthInstance.maxHeartbeats 400000 in
+
 
 private noncomputable def fD : ↥(GlobalTheory.Pst.Dpst P R) →+ (Fin a → OB P) :=
   { toFun := fun x => ψ₀ x.1, map_zero' := ψ₀.map_zero, map_add' := fun x y => ψ₀.map_add x.1 y.1 }
@@ -94,7 +133,7 @@ private theorem fD_smul (h : IsCoord P L ψ₀) (ι : Om l ≃+* ℂ) (r : ↥L.
   exact (coord_smul h r x.1).trans
     (congrArg (fun t : OB P => t • ψ₀ x.1) (kap_apply P ι (r : Om l)).symm)
 
-set_option synthInstance.maxHeartbeats 400000 in
+
 private theorem fD_mul (h : IsCoord P L ψ₀) (ι : Om l ≃+* ℂ) (u : ↥(MaximalUnramifiedExtension l)) (x : ↥(GlobalTheory.Pst.Dpst P R)) :
     fD R ψ₀ (GlobalTheory.Pst.mulD P R u x) = kap P ι (ι (u : Om l)) • fD R ψ₀ x := by
   exact (coord_mulV h u x.1).trans

@@ -1,5 +1,53 @@
-import Mathlib
-import Formalism.LocalToGlobal.Columns.ColumnsProofs.HFSLin
+module
+
+public import Formalism.LocalToGlobal.Columns.ColumnsProofs.HFSLin
+public import Formalism.LocalToGlobal.Columns.HeckeSp
+import Mathlib.Algebra.AffineMonoid.UniqueSums
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Matrix.FiniteDimensional
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Module NumberField IsDedekindDomain Polynomial
 
@@ -15,12 +63,6 @@ variable {K V I : Type} [Field K] [AddCommGroup V] [Module K V]
 
 def HeckePolyFor (op : I → Module.End K V) (p : K[X]) : Prop :=
   p ≠ 0 ∧ ∃ s : Finset I, (∀ x, ∃ c : I → K, op x = ∑ y ∈ s, c y • op y) ∧ ∀ y ∈ s, Polynomial.aeval (op y) p = 0
-
-theorem HeckePolyFor.of_dvd {op : I → Module.End K V} {p q : K[X]} (h : HeckePolyFor op p) (hq : q ≠ 0) (hpq : p ∣ q) :
-    HeckePolyFor op q := by
-  obtain ⟨s, hs, hz⟩ := h.2
-  obtain ⟨r, rfl⟩ := hpq
-  exact ⟨hq, s, hs, fun y hy => by rw [map_mul, hz y hy, zero_mul]⟩
 
 theorem hfs_exists_poly [FiniteDimensional K V] (op : I → Module.End K V) : ∃ p, HeckePolyFor op p := by
   classical
@@ -118,8 +160,8 @@ theorem Lifts.eq_zero (F : CoefFrame ι) {A' : Module.End L S'.EqFun} (hA : b.Li
     rw [hA φ]
     simp only [LinearMap.zero_apply, lift_zero]
 
-include b in
 
+include b in
 theorem finiteDimensional (F : CoefFrame ι) [FiniteDimensional K S.EqFun] : FiniteDimensional L S'.EqFun := by
   classical
   let B := Module.finBasis K S.EqFun

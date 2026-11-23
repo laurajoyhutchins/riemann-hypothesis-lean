@@ -1,5 +1,62 @@
-import Mathlib
+module
+
+public import Mathlib.NumberTheory.NumberField.Basic
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PlaceDivisors.StAvDefs
+import Mathlib.Algebra.AffineMonoid.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+public import Mathlib.RingTheory.Valuation.Integral
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
 import Development.AutomorphicArithmetic.CMTraceForms.Places
+import Formalism.LocalToGlobal.ProjectiveLattices.RowDeg
+public import Mathlib.Algebra.Algebra.Hom.Rat
+public import Mathlib.NumberTheory.NumberField.Norm
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.CocycleRightZeroThd
+
+@[expose] public section
 
 open NumberField TensorProduct
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.Pdiv.AvDefs Formalism.L2.Pj UpperTheory.Depth
@@ -44,6 +101,7 @@ private theorem exists_equiv (E : Type) [Field E] [NumberField E] (C : Type) [Fi
     have hg : Function.Injective g := by
       rw [RingHom.injective_iff_ker_eq_bot]
       apply Ideal.eq_bot_of_comap_eq_bot (R := ℤ)
+      change Ideal.comap (algebraMap ℤ (𝓞 E)) (RingHom.ker g) = ⊥
       rw [RingHom.comap_ker]
       have : g.comp (algebraMap ℤ (𝓞 E)) = Int.castRingHom C := RingHom.ext_int _ _
       rw [this]
@@ -68,8 +126,8 @@ private theorem trace_eq_sum (E : Type) [Field E] [NumberField E] (p : ℕ) [Fac
     have hadd : LinearMap.mulLeft ℤ_[p] (a + b) = LinearMap.mulLeft ℤ_[p] a + LinearMap.mulLeft ℤ_[p] b := by
       ext z
       simp [add_mul]
-    rw [hadd, map_add, map_add, map_add, ha, hb, ← Finset.sum_add_distrib]
-    simp [map_add]
+    rw [hadd, map_add (f := _), map_add (f := _), map_add (f := _), ha, hb, ← Finset.sum_add_distrib]
+    simp [map_add (f := _)]
   | tmul c y =>
     have h0 : (c ⊗ₜ[ℤ] y : ℤ_[p] ⊗[ℤ] 𝓞 E) = c • ((1 : ℤ_[p]) ⊗ₜ[ℤ] y) := by
       rw [TensorProduct.smul_tmul', smul_eq_mul, mul_one]
@@ -91,14 +149,14 @@ private theorem trace_eq_sum (E : Type) [Field E] [NumberField E] (p : ℕ) [Fac
 
 end UpperTheory.TraceSumEquivalence
 
-open UpperTheory.TraceSumEquivalence in
 
+open UpperTheory.TraceSumEquivalence in
 theorem UpperTheory.trace_form_decomposition_CMDatum :
     ∀ (E : Type) [Field E] [NumberField E] (p : ℕ) [Fact p.Prime] (C : Type) [Field C] [IsAlgClosed C] [CharZero C] (v : Valuation C NNReal) (O : Type) [CommRing O] [Algebra O C], v.Integers O → ∀ [Algebra ℤ_[p] O] (e : ℤ_[p] ⊗[ℤ] 𝓞 E), e * e = e →
       Nonempty (Fin (Module.finrank ℤ_[p] (LinearMap.range (LinearMap.mulLeft ℤ_[p] e))) ≃ Emb (O := O) e) ∧ Nat.card (𝓞 E →+* O) = Module.finrank ℚ E := by
   intro E _ _ p _ C _ _ _ v O _ _ hv _ e he
   classical
-  obtain ⟨Φ, hΦ⟩ := exists_equiv E C v O hv
+  obtain ⟨Φ, hΦ⟩ := UpperTheory.TraceSumEquivalence.exists_equiv E C v O hv
   have hcard : Nat.card (𝓞 E →+* O) = Module.finrank ℚ E := by
     rw [← Nat.card_congr Φ, Nat.card_eq_fintype_card, AlgHom.card]
   refine ⟨?_, hcard⟩
@@ -110,7 +168,7 @@ theorem UpperTheory.trace_form_decomposition_CMDatum :
     simp [f, ← mul_assoc, he]
   have htr : LinearMap.trace ℤ_[p] _ f = (Module.finrank ℤ_[p] (LinearMap.range f) : ℤ_[p]) :=
     ((LinearMap.isProj_range_iff_isIdempotentElem f).mpr hf).trace
-  have hsum := trace_eq_sum E p C O Φ hΦ e
+  have hsum := UpperTheory.TraceSumEquivalence.trace_eq_sum E p C O Φ hΦ e
   have hval : ∀ σ, algebraMap O C (tauExt (Φ σ) e) = if Φ σ ∈ Emb (O := O) e then 1 else 0 := by
     intro σ
     have hid : IsIdempotentElem (tauExt (Φ σ) e) := by

@@ -1,7 +1,53 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.SmoothRep
-import GroundTheory.AutomorphicForms.TensorProductTheorem.Operators
-import GroundTheory.AutomorphicForms.TensorProductTheorem.MatrixCoeff
+module
+
+public import GroundTheory.AutomorphicForms.SmoothRep
+public import GroundTheory.AutomorphicForms.TensorProductTheorem.Operators
+public import Mathlib.RepresentationTheory.Irreducible
+public import GroundTheory.AutomorphicForms.TensorProductTheorem.MatrixCoeff
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -82,9 +128,6 @@ theorem heckeOp_of_mem {g : G} (hg : g ∈ K) : heckeOp hρ hKc hKo g = 1 := by
   rw [heckeOp_apply, fixedProj_apply_act hρ hKc hKo hg, fixedProj_apply_of_mem hρ hKc hKo m.2,
     Module.End.one_apply]
 
-theorem heckeOp_one : heckeOp hρ hKc hKo 1 = 1 :=
-  heckeOp_of_mem hρ hKc hKo (one_mem K)
-
 theorem heckeOp_mul_apply {a b : G}
     (hab : ∀ h ∈ K, ∃ k ∈ K, k * a = a * k ∧ (k⁻¹ * h) * b = b * (k⁻¹ * h))
     (m : fixedVectors ρ K) :
@@ -111,7 +154,7 @@ theorem heckeOp_mul_apply {a b : G}
       rw [h1, map_sub, map_sub, ← Module.End.mul_apply, ← map_mul, ← hka, map_mul,
         Module.End.mul_apply, fixedProj_apply_act hρ hKc hKo hk, sub_self]
     | zero => simp
-    | add x y _ _ hx hy => rw [map_add, map_add, hx, hy, add_zero]
+    | add x y _ _ hx hy => rw [map_add (f := _), map_add (f := _), hx, hy, add_zero]
     | smul c x _ hx => rw [map_smul, map_smul, hx, smul_zero]
   have := hkill _ hspan
   rw [map_sub, map_sub, sub_eq_zero] at this
@@ -145,8 +188,8 @@ theorem isSimpleUnder_heckeOps [ρ.IsIrreducible] (hK : fixedVectors ρ K ≠ �
     Subtype.ext (fixedProj_apply_of_mem hρ hKc hKo m'.2)
   rwa [he] at this
 
-omit hρ hKc hKo in
 
+omit hρ hKc hKo in
 theorem isIrreducible_of_forall (hρ : IsSmooth ρ) [Nontrivial V]
     (h : ∀ x y : V, x ≠ 0 → ∃ (K : Subgroup G) (hKc : IsCompact (K : Set G))
       (hKo : IsOpen (K : Set G)), x ∈ fixedVectors ρ K ∧ y ∈ fixedVectors ρ K ∧
@@ -186,8 +229,8 @@ theorem isIrreducible_of_forall (hρ : IsSmooth ρ) [Nontrivial V]
       rw [h0]; trivial
     exact this
 
-omit hρ hKc hKo in
 
+omit hρ hKc hKo in
 theorem fixedProj_comp_eq {L : Type*} [Group L] [TopologicalSpace L] [IsTopologicalGroup L]
     [LocallyCompactSpace L] [T2Space L] [TotallyDisconnectedSpace L] (ι : L →* G)
     (hρ : IsSmooth ρ) (hρι : IsSmooth (ρ.comp ι)) (hKc : IsCompact (K : Set G))

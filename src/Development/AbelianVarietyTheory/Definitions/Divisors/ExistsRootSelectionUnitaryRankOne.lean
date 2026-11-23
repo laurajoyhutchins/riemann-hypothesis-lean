@@ -1,8 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsCyclotomicExtensionQI
-import Development.AbelianVarietyTheory.Definitions.Divisors.TwOrbMEqTwOrbUOfNormal
-import Development.AbelianVarietyTheory.Definitions.Divisors.PointSide
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.T2SpaceTensorRatFiniteAlgebraModuleTopology
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IsCyclotomicExtensionQI
+public import Development.AbelianVarietyTheory.Definitions.Divisors.TwOrbMEqTwOrbUOfNormal
+public import Development.AbelianVarietyTheory.Definitions.Divisors.PointSide
+public import Mathlib.GroupTheory.Commensurable
+import Mathlib.Algebra.Order.Archimedean.Real.Hom
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -91,15 +138,6 @@ def IsNrm (G : HTGroup p) (r : ℕ) (γ : Gp G) (δ z : Gr G r) : Prop :=
 
 def carry (G : HTGroup p) (r : ℕ) (z : Gr G r) : Gp G →* Gr G r :=
   (MulAut.conj z⁻¹).toMonoidHom.comp (inclG G r)
-
-def lorb (G : HTGroup p) (r : ℕ) (K : Subgroup (Gr G r)) (φ : Gr G r → ℂ) (γ : Gp G) : ℂ :=
-  if h : ∃ dz : Gr G r × Gr G r, IsNrm G r γ dz.1 dz.2 then
-    GlobalTheory.LKCount.orbC (sigG G r) K ((Subgroup.centralizer {γ} ⊓ Kp0 G).map (carry G r h.choose.2)) h.choose.1 φ
-  else 0
-
-def Match (G : HTGroup p) (r : ℕ) (K : Subgroup (Gr G r)) (φ : Gr G r → ℂ) (K' : Subgroup (Gr G 1))
-    (f : Gr G 1 → ℂ) : Prop :=
-  ∀ γ : Gp G, regular₂ G γ → lorb G r K φ γ = lorb G 1 K' f γ
 
 def IsTest {H : Type} [Group H] (θ : H →* H) (K₀ K : Subgroup H) (φ : H → ℂ) : Prop :=
   Subgroup.Commensurable K K₀ ∧ K.map θ ≤ K ∧ (∀ k ∈ K, ∀ g, φ (k⁻¹ * g * θ k) = φ g) ∧
@@ -204,24 +242,11 @@ def IsSel (G : HTGroup p) (sel : Polynomial G.F → ℂ) : Prop :=
   ∀ v : InfinitePlace G.F, sigPosH (G.gram_herm v) = 1 → ∀ P : Polynomial G.F, P.Monic → P.natDegree = G.n →
     P.eval₂ v.embedding (sel P) = 0
 
-def markedSum (G : HTGroup p) (wt sel : Polynomial G.F → ℂ) (Kf : Subgroup G.GAf) (f : G.GAf → ℂ) (r : ℕ)
-    (K : Subgroup (Gr G r)) (φ : Gr G r → ℂ) : ℂ :=
-  ∑ᶠ q : Cls G, if (Quot.out q).Mark (sel (Quot.out q).pol) then
-    wt (Quot.out q).pol * (Quot.out q).term Kf f r K φ else 0
-
 def fullSum (G : HTGroup p) (wt : Polynomial G.F → ℂ) (Kf : Subgroup G.GAf) (f : G.GAf → ℂ) (r : ℕ)
     (K : Subgroup (Gr G r)) (φ : Gr G r → ℂ) : ℂ :=
   ∑ᶠ q : Cls G, if ∃ μ, (Quot.out q).Mark μ then wt (Quot.out q).pol * (Quot.out q).term Kf f r K φ else 0
 
 def IsSimple (G : HTGroup p) : Prop := (∀ x : G.C, x ≠ 0 → IsUnit x) ∧ G.a = 1
-
-def Compare : Prop :=
-  ∀ (p : ℕ) [Fact p.Prime] (G : HTGroup p), IsSimple G → ∀ (wt sel : Polynomial G.F → ℂ), IsSel G sel →
-    ∀ (L : G.Level) (f : G.GAf → ℂ), IsTest (MonoidHom.id _) L.K.toSubgroup L.K.toSubgroup f →
-    ∀ (r : ℕ), 0 < r → ∀ (K : Subgroup (Gr G r)) (φ : Gr G r → ℂ) (K' : Subgroup (Gr G 1)) (f' : Gr G 1 → ℂ),
-      IsTest (sigG G r) (KHT p G.m G.n r G.Fw) K φ → IsTest (sigG G 1) (KHT p G.m G.n 1 G.Fw) K' f' →
-      Match G r K φ K' f' →
-      (G.n : ℂ) * markedSum G wt sel L.K.toSubgroup f r K φ = fullSum G wt L.K.toSubgroup f 1 K' f'
 
 end GlobalTheory.LKMid
 
@@ -295,9 +320,6 @@ theorem isTest_indicator {H : Type} [Group H] (θ : H →* H) (K : Subgroup H) (
       by_contra hn; exact hg (by simp [Set.indicator_apply, hn])
     exact ⟨1, Finset.mem_singleton_self _, 1, K.one_mem, g, hgK, by simp⟩
 
-theorem match_refl (G : HTGroup p) (K : Subgroup (Gr G 1)) (φ : Gr G 1 → ℂ) : Match G 1 K φ K φ :=
-  fun _ _ => rfl
-
 end Inhabitants
 
 namespace Example
@@ -325,11 +347,8 @@ def a21 : QIˣ := Units.mk0 (2 + gi) two_add_gi_ne_zero
 
 theorem norm_gaussian_element_eq_five : ((a21 : QI)) * IsCMField.complexConj QI a21 = algebraMap ℚ QI ((Units.mk0 (5 : ℚ) (by norm_num) : ℚˣ) : ℚ) := by
   show (2 + gi) * IsCMField.complexConj QI (2 + gi) = algebraMap ℚ QI 5
-  rw [map_add, conj_gi, map_ofNat, map_ofNat]
+  rw [map_add (f := _), conj_gi, map_ofNat, map_ofNat]
   linear_combination (-1 : QI) * zeta_sq
-
-def exPair : Pair (ex 1 one_ne_zero) :=
-  Pair.ofScalar (ex 1 one_ne_zero) rfl a21 (Units.mk0 5 (by norm_num)) norm_gaussian_element_eq_five
 
 theorem isSimple_unitaryRankOne : IsSimple (ex 1 one_ne_zero) := by
   refine ⟨fun x hx => ?_, a_ex_one⟩
@@ -342,35 +361,7 @@ theorem isSimple_unitaryRankOne : IsSimple (ex 1 one_ne_zero) := by
     rfl
   exact key x hx
 
-theorem exPair_mark : ∃ μ : ℂ, exPair.Mark μ := by
-  have ha : 0 < (ex 1 one_ne_zero).a := by rw [a_ex_one]; exact one_pos
-  obtain ⟨⟨v, hv⟩⟩ := Fintype.card_pos_iff.1 ha
-  refine ⟨v.embedding (show (ex 1 one_ne_zero).F from (2 + gi : QI)), v, hv, fun _ => 1, ?_, ?_⟩
-  · show (ex 1 one_ne_zero).psi v (algebraMap (ex 1 one_ne_zero).F (ex 1 one_ne_zero).C (show (ex 1 one_ne_zero).F from (2 + gi : QI))) *ᵥ (fun _ => (1 : ℂ)) =
-      v.embedding (show (ex 1 one_ne_zero).F from (2 + gi : QI)) • (fun _ => (1 : ℂ))
-    rw [(ex 1 one_ne_zero).psi_F v, Matrix.scalar_apply]
-    ext i
-    rw [Matrix.mulVec_diagonal, Pi.smul_apply, smul_eq_mul]
-  · show 0 < (star (fun _ => (1 : ℂ)) ⬝ᵥ (((ex 1 one_ne_zero).gram v *
-      (ex 1 one_ne_zero).psi v (((1 : (ex 1 one_ne_zero).Cˣ)⁻¹ : (ex 1 one_ne_zero).Cˣ) : (ex 1 one_ne_zero).C)) *ᵥ
-      (fun _ => (1 : ℂ)))).re
-    rw [inv_one, Units.val_one, map_one, Matrix.mul_one]
-    show 0 < (star (fun _ : Fin 1 => (1 : ℂ)) ⬝ᵥ (gramAt (Hc 1) (v.embedding : QI →+* ℂ) *ᵥ fun _ : Fin 1 => (1 : ℂ))).re
-    simp [gramAt, Hc, dotProduct, Matrix.mulVec]
-    have h1 : ((v.embedding : QI →+* ℂ) 1).re = 1 := by rw [map_one]; rfl
-    exact lt_of_lt_of_eq zero_lt_one h1.symm
-
 theorem exists_rootSelection_unitaryRankOne : ∃ sel, IsSel (ex 1 one_ne_zero) sel := exists_isSel_of_isSimple _ isSimple_unitaryRankOne
-
-theorem exists_cls_mark : ∃ q : Cls (ex 1 one_ne_zero), ∃ P : Pair (ex 1 one_ne_zero), Quot.mk _ P = q ∧ ∃ μ, P.Mark μ :=
-  ⟨Quot.mk _ exPair, exPair, rfl, exPair_mark⟩
-
-example : ((exPair.c : ℚˣ) : ℚ) = 5 := rfl
-
-example : exPair.pol = Polynomial.X - Polynomial.C (2 + gi) :=
-  Pair.ofScalar_pol (ex 1 one_ne_zero) rfl a21 _ norm_gaussian_element_eq_five
-
-example : Nonempty (ex 1 one_ne_zero).Level := GlobalTheory.LKTrip.LevelExists.level_exists 5 (ex 1 one_ne_zero)
 
 end Example
 

@@ -1,4 +1,55 @@
-import Mathlib
+module
+
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.Analysis.InnerProductSpace.Basic
+public import Mathlib.MeasureTheory.Integral.Bochner.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.MeasureTheory.Integral.Bochner.ContinuousLinearMap
+
+@[expose] public section
 
 open MeasureTheory
 
@@ -134,7 +185,7 @@ def Adj : Subalgebra ℂ (Module.End ℂ (X hI)) where
   mul_mem' := by
     rintro S T ⟨S', hS⟩ ⟨T', hT⟩
     refine ⟨T' * S', fun x y => ?_⟩
-    simp only [Module.End.mul_apply]
+    simp only [mul_apply_eq_comp]
     rw [hS, hT]
   add_mem' := by
     rintro S T ⟨S', hS⟩ ⟨T', hT⟩
@@ -202,12 +253,14 @@ instance instStarModule : StarModule ℂ (A hI) where
     show ip hI (c • (T : Module.End ℂ (X hI)) x) y = ip hI x (star c • ((star T : A hI) : Module.End ℂ (X hI)) y)
     rw [ip_smul_left, ip_smul_right, star_star, star_spec]
 
-open scoped Classical in
 
-def mk' (f : β → ℂ) : X hI := if hf : f ∈ 𝓕 then Submodule.Quotient.mk ⟨f, hf⟩ else 0
+open scoped Classical in
+def mk' (f : β → ℂ) : X hI := by
+  classical
+  exact if hf : f ∈ 𝓕 then Submodule.Quotient.mk ⟨f, hf⟩ else 0
 
 theorem mk'_of {f : β → ℂ} (hf : f ∈ 𝓕) : mk' hI f = Submodule.Quotient.mk ⟨f, hf⟩ := by
-  rw [mk', dif_pos hf]
+  rw [mk', dite_eq_left hf]
 
 theorem mk'_surj (x : X hI) : ∃ f ∈ 𝓕, mk' hI f = x := by
   obtain ⟨f, rfl⟩ := Submodule.Quotient.mk_surjective (N hI) x
@@ -273,13 +326,10 @@ structure AdjOp (Φ Φ' : (β → ℂ) → (β → ℂ)) : Prop where
 variable {G}
 
 theorem AdjOp.symm {Φ Φ' : (β → ℂ) → (β → ℂ)} (hΦ : AdjOp (μ := μ) (ι := ι) (𝓕 := 𝓕) G Φ Φ') :
-    AdjOp (μ := μ) (ι := ι) (𝓕 := 𝓕) G Φ' Φ where
-  mem := hΦ.mem'
-  mem' := hΦ.mem
-  lin := hΦ.lin'
-  lin' := hΦ.lin
-  adj f hf h hh := by
-    rw [pr_conj, ← hΦ.adj h hh f hf, ← pr_conj]
+    AdjOp (μ := μ) (ι := ι) (𝓕 := 𝓕) G Φ' Φ := by
+  refine ⟨hΦ.mem', hΦ.mem, hΦ.lin', hΦ.lin, ?_⟩
+  intro f hf h hh
+  rw [pr_conj, ← hΦ.adj h hh f hf, ← pr_conj]
 
 private theorem adjOp_map_add_smul {Φ Φ' : (β → ℂ) → (β → ℂ)}
     (hΦ : AdjOp (μ := μ) (ι := ι) (𝓕 := 𝓕) G Φ Φ') {f h : β → ℂ} (hf : f ∈ 𝓕) (hh : h ∈ 𝓕) (c : ℂ) :
@@ -418,8 +468,7 @@ theorem repOn_algebraMap (c : ℂ) : RepOn hI (algebraMap ℂ (A hI) c) (fun f =
   exact repOn_smul hI c (repOn_one hI)
 
 theorem repOn_intCast (n : ℤ) : RepOn hI ((n : A hI)) (fun f => (n : ℂ) • f) := by
-  rw [← map_intCast (algebraMap ℂ (A hI)) n]
-  exact repOn_algebraMap hI (n : ℂ)
+  simpa only [map_intCast] using repOn_algebraMap hI (n : ℂ)
 
 theorem repOn_sum {γ : Type*} (s : Finset γ) {T : γ → A hI} {Φ : γ → (β → ℂ) → β → ℂ}
     (h : ∀ c ∈ s, RepOn hI (T c) (Φ c)) : RepOn hI (∑ c ∈ s, T c) (fun f => ∑ c ∈ s, Φ c f) := by

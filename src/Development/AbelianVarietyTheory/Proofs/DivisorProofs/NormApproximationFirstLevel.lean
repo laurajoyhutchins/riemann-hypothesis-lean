@@ -1,10 +1,57 @@
-import Mathlib
-import Formalism.SatakeDualWeyl.StatementF
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.AevalRootEqZeroIff
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsUnitOneAddPiOMul
-import GroundTheory.LocalFields.FilteredSurj
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsMulInvolEqOfFixed
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsReducedAdjoinRootOfSeparable
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsUnitOneAddPiOMul
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsMulInvolEqOfFixed
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsReducedAdjoinRootOfSeparable
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open Polynomial Matrix Formalism.UG
 
 namespace GlobalTheory.NormEq
@@ -231,7 +278,7 @@ theorem exists_mul_conj_sub_mem_piPow_one : ∀ (L : Type) [Field L] [Valued L (
   haveI : I0.IsMaximal := span_piO_isMaximal h
   letI : Field (intL L ⧸ I0) := Ideal.Quotient.field I0
   haveI : Finite (intL L ⧸ I0) := finite_quot_span_piO h
-  let J := piPow h P 1
+  let J : Ideal (GlobalTheory.UTr.Alg P) := piPow h P 1
   have hJ : J = (Ideal.map (AdjoinRoot.of P.1) I0 : Ideal (GlobalTheory.UTr.Alg P)) := by
     change Ideal.span {algebraMap (intL L) (GlobalTheory.UTr.Alg P) (piO h) ^ 1} =
       Ideal.map (AdjoinRoot.of P.1) (Ideal.span {piO h})
@@ -254,20 +301,21 @@ theorem exists_mul_conj_sub_mem_piPow_one : ∀ (L : Type) [Field L] [Valued L (
 
   have hsig : ∀ b, sigO σ h.2.1 (sigO σ h.2.1 b) = b := fun b => Subtype.ext (h.1 b)
   have hsp : sigO σ h.2.1 (piO h) = piO h := Subtype.ext h.2.2.1
+  set_option backward.isDefEq.respectTransparency false in
   have hle : J ≤ J.comap (GlobalTheory.UTr.conj P) := Ideal.span_le.2 (Set.singleton_subset_iff.2 (by
-    change GlobalTheory.UTr.conj P _ ∈ J
-    rw [map_pow, GlobalTheory.UTr.conj_algebraMap, hsp]
-    exact Ideal.subset_span rfl))
+    change GlobalTheory.UTr.conj P ((algebraMap (intL L) (GlobalTheory.UTr.Alg P) (piO h)) ^ 1) ∈ J
+    simp only [pow_one, GlobalTheory.UTr.conj_algebraMap, hsp]
+    exact Ideal.subset_span (by simp only [Set.mem_singleton_iff, pow_one]; rfl)))
   let τ := Ideal.quotientMap J (GlobalTheory.UTr.conj P) hle
   have hτ' : ∀ y, τ (Ideal.Quotient.mk J y) = Ideal.Quotient.mk J (GlobalTheory.UTr.conj P y) :=
-    fun y => Ideal.quotientMap_mk
+    fun y => by simpa only [τ] using (Ideal.quotientMap_mk (H := hle) (x := y))
   have hτ : ∀ a, τ (τ a) = a := fun a => by
     obtain ⟨y, rfl⟩ := Ideal.Quotient.mk_surjective a
     rw [hτ', hτ', GlobalTheory.UTr.conj_conj P hsig]
 
   obtain ⟨x0, hx0, hv⟩ := h.2.2.2.2.1
   let d : intL L := sigO σ h.2.1 ⟨x0, hx0⟩ - ⟨x0, hx0⟩
-  have hd : IsUnit d := isUnit_of_v_eq_one d (by simpa [d] using hv)
+  have hd : IsUnit d := isUnit_of_v_eq_one d (by change Valued.v (σ x0 - x0) = 1; exact hv)
   let b : GlobalTheory.UTr.Alg P ⧸ J := Ideal.Quotient.mk J (algebraMap (intL L) _ ⟨x0, hx0⟩)
   have hb : IsUnit (τ b - b) := by
     have : τ b - b = Ideal.Quotient.mk J (algebraMap (intL L) (GlobalTheory.UTr.Alg P) d) := by
@@ -281,7 +329,9 @@ theorem exists_mul_conj_sub_mem_piPow_one : ∀ (L : Type) [Field L] [Valued L (
   obtain ⟨z, rfl⟩ := Ideal.Quotient.mk_surjective zb
   obtain ⟨wb, hw⟩ := hzb.exists_right_inv
   obtain ⟨w, rfl⟩ := Ideal.Quotient.mk_surjective wb
+  set_option backward.isDefEq.respectTransparency false in
   have hzw : IsUnit (z * w) := isUnit_of_sub_one_mem h P le_rfl (by
+    change z * w - 1 ∈ J
     rw [← Ideal.Quotient.eq_zero_iff_mem, map_sub, map_mul, hw, map_one, sub_self])
   have hz : IsUnit z := isUnit_of_mul_isUnit_left hzw
   refine ⟨hz.unit, ?_⟩

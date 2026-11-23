@@ -1,5 +1,58 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.FourierWhittaker.PartialCoeffDiagonalBlockGLEqVecCoeff
+module
+
+public import GroundTheory.AutomorphicForms.FourierWhittaker.PartialCoeffDiagonalBlockGLEqVecCoeff
+public import GroundTheory.AutomorphicForms.FourierWhittaker.AlgebraMapIntegerMemIntegralFiniteAdeles
+import GroundTheory.AutomorphicForms.ReductionMeasure
+import GroundTheory.GlobalFields.Adele.Topology
+import Mathlib.Algebra.Module.Torsion.Prod
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+
+@[expose] public section
 
 open NumberField NumberField.mixedEmbedding MeasureTheory Topology Set Filter IsDedekindDomain Matrix
 open scoped NumberField.AdeleRing
@@ -70,14 +123,13 @@ theorem archSlice_mul_finEmb {ϕ : AdelicGLn.AdelicGL K n → ℂ} {V : OpenSubg
   rw [mul_assoc, ← infEmb_mul_finEmb_comm, ← mul_assoc, hV _ v hv]
 
 theorem IsUSmooth.rDeriv_smooth {ϕ : AdelicGLn.AdelicGL K n → ℂ} (hϕ : IsUSmooth ϕ) (Y : archLie K n) :
-    IsUSmooth (rDeriv Y ϕ) where
-  arch := by
-    rw [rDeriv_eq_uActFun Y hϕ.arch]
+    IsUSmooth (rDeriv Y ϕ) := by
+  refine ⟨?_, ?_, ?_⟩
+  · rw [rDeriv_eq_uActFun Y hϕ.arch]
     exact uActFun_mem _ _
-  fin := by
-    obtain ⟨V, hV⟩ := hϕ.fin
+  · obtain ⟨V, hV⟩ := hϕ.fin
     exact ⟨V, fun g v hv => by simp only [rDeriv, archSlice_mul_finEmb hV g hv]⟩
-  left γ g := by
+  · intro γ g
     simp only [rDeriv]
     congr 1
     funext x
@@ -293,15 +345,15 @@ theorem infEmb_expG_dirMat (k : ℕ) (hk : k < n) (p : Fin k × BIdx K) (s : ℝ
       exact map_one _
     · rw [if_neg hab, if_neg hab, zero_add]
       by_cases hlt : a < b
-      · rw [dif_pos hlt]
+      · rw [dite_eq_left hlt]
         by_cases hbk : b.val = k
-        · rw [dif_pos hbk, ← GroundTheory.Global.homeomorphMixedSpace_apply, hv1]
+        · rw [dite_eq_left hbk, ← GroundTheory.Global.homeomorphMixedSpace_apply, hv1]
           by_cases ha : a.val = p.1.val
           · rw [if_pos (Fin.ext ha), if_pos ⟨ha, hbk⟩]
           · rw [if_neg (fun h => ha (by rw [← h])), if_neg (fun h => ha h.1), smul_zero]
-        · rw [dif_neg hbk, if_neg (fun h => hbk h.2), smul_zero]
+        · rw [dite_eq_right hbk, if_neg (fun h => hbk h.2), smul_zero]
           exact map_zero _
-      · rw [dif_neg hlt, if_neg (fun h => hlt (by rw [Fin.lt_def]; omega)), smul_zero]
+      · rw [dite_eq_right hlt, if_neg (fun h => hlt (by rw [Fin.lt_def]; omega)), smul_zero]
         exact map_zero _
   apply (AdelicGLn.prodEquiv K n).injective
   rw [prodEquiv_infEmb, ← hinf, ContinuousMulEquiv.symm_apply_apply, ← hfin]

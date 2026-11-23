@@ -1,5 +1,53 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.OddDualWeylJacobian.JacRev
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.OddDualWeylJacobian.JacRev
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.Interval.Finset.Box
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+
+@[expose] public section
 
 open MvPolynomial Matrix
 
@@ -101,12 +149,12 @@ theorem good_rowGen_X (a b : Fin k) (hδ : ∀ s, wt (a, s) = wt (b, s) + δ) (v
 theorem good_rowGen (a b : Fin k) (hδ : ∀ s, wt (a, s) = wt (b, s) + δ) {d : ℤ}
     {f : MvPolynomial (Fin k × Fin k) R} (hf : IsWeightedHomogeneous wt f d) :
     Good wt δ d (rowGen R a b f) := by
-  have key : ∀ m ∈ f.support, Good wt δ d (rowGen R a b (monomial m (coeff m f))) := by
+  have key : ∀ m ∈ f.support, Good wt δ d (rowGen R a b (monomial m (AddMonoidAlgebra.coeff f m))) := by
     intro m hm
     have hw : Finsupp.weight wt m = d := hf (mem_support_iff.mp hm)
     rw [monomial_eq, map_mul, Finsupp.prod, map_prod]
-    have h1 : Good wt δ 0 (rowGen R a b (C (coeff m f))) := by
-      have hC : rowGen R a b (C (coeff m f) : MvPolynomial (Fin k × Fin k) R) = Polynomial.C (C (coeff m f) : MvPolynomial (Fin k × Fin k) R) := by
+    have h1 : Good wt δ 0 (rowGen R a b (C (AddMonoidAlgebra.coeff f m))) := by
+      have hC : rowGen R a b (C (AddMonoidAlgebra.coeff f m) : MvPolynomial (Fin k × Fin k) R) = Polynomial.C (C (AddMonoidAlgebra.coeff f m) : MvPolynomial (Fin k × Fin k) R) := by
         simp [rowGen, Polynomial.algebraMap_apply]
       rw [hC]
       exact good_C (isWeightedHomogeneous_C wt _)
@@ -115,9 +163,10 @@ theorem good_rowGen (a b : Fin k) (hδ : ∀ s, wt (a, s) = wt (b, s) + δ) {d :
     refine good_congr ?_ (good_mul h1 h2)
     rw [← hw, Finsupp.weight_apply, Finsupp.sum]
     simp [nsmul_eq_mul]
+
   rw [f.as_sum, map_sum]
   intro i
-  rw [Polynomial.finset_sum_coeff, ← mem_weightedHomogeneousSubmodule]
+  rw [Polynomial.finsetSum_coeff, ← mem_weightedHomogeneousSubmodule]
   refine Submodule.sum_mem _ fun m hm => ?_
   rw [mem_weightedHomogeneousSubmodule]
   exact key m hm i
@@ -210,10 +259,11 @@ theorem rowGen_diag (a : Fin k) {d : ℕ} {f : MvPolynomial (Fin k × Fin k) R}
     rowGen R a a f = (1 + Polynomial.X) ^ d * Polynomial.C f := by
   conv_lhs => rw [f.as_sum]
   conv_rhs => rw [f.as_sum]
+
   rw [map_sum, map_sum, Finset.mul_sum]
   refine Finset.sum_congr rfl fun m hm => ?_
   have hw : Finsupp.weight (rowW a) m = d := hf (mem_support_iff.mp hm)
-  have hC : rowGen R a a (C (coeff m f) : MvPolynomial (Fin k × Fin k) R) = Polynomial.C (C (coeff m f) : MvPolynomial (Fin k × Fin k) R) := by
+  have hC : rowGen R a a (C (AddMonoidAlgebra.coeff f m) : MvPolynomial (Fin k × Fin k) R) = Polynomial.C (C (AddMonoidAlgebra.coeff f m) : MvPolynomial (Fin k × Fin k) R) := by
     simp [rowGen, Polynomial.algebraMap_apply]
   rw [monomial_eq, map_mul, Finsupp.prod, map_prod, map_mul, map_prod, hC]
   simp_rw [map_pow, rowGen_diag_X, mul_pow, Finset.prod_mul_distrib, ← pow_mul,

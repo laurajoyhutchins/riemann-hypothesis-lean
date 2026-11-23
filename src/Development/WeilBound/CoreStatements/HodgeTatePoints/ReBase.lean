@@ -1,12 +1,60 @@
-import Mathlib
-import ReciprocityTheory.DualLattices.CotangentSurjective
-import ReciprocityTheory.DualLattices.MemDualLat
-import ReciprocityTheory.DualLattices.IsUnitDetOfSpanEq
-import ReciprocityTheory.DualLattices.PowMemCarrier
-import ReciprocityTheory.DualLattices.HasLenCokerDet
+module
+
+public import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.IsTight
+public import Mathlib.FieldTheory.IsAlgClosed.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.DualLattices.HasLenCokerDet
+public import ReciprocityTheory.DualLattices.IsUnitDetOfSpanEq
+public import ReciprocityTheory.DualLattices.MemDualLat
 import ReciprocityTheory.DualLattices.MemOfSumSingleEqZero
-import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.IsTight
-import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.StepOrderRes
+public import ReciprocityTheory.DualLattices.PowMemCarrier
+import ReciprocityTheory.DualLattices.PrimeHopfOrderOfAddEquiv
+
+@[expose] public section
 
 noncomputable section
 
@@ -51,7 +99,7 @@ theorem ret_hopf : ∀ (p : ℕ) [Fact p.Prime] (C : Type) [Field C] [IsAlgClose
       refine ⟨hpull h hh.1, ?_⟩
       rintro x k ⟨k', hk', rfl⟩
       show h (π (x + ι k')) = h (π x)
-      rw [map_add, hπ]
+      rw [map_add (f := _), hπ]
       exact hh.2 _ _ hk'
     have h2 := hG h1
     let φ : (N → C) →ₐ[R] (N' → C) := AlgHom.pi (fun y => Pi.evalAlgHom R (fun _ : N => C) (ι y))
@@ -65,8 +113,8 @@ theorem ret_hopf : ∀ (p : ℕ) [Fact p.Prime] (C : Type) [Field C] [IsAlgClose
       refine Algebra.adjoin_mono ?_
       rintro _ ⟨g, ⟨⟨hg1, hg2⟩, hg3⟩, rfl⟩
       refine ⟨⟨⟨g, hg1, rfl⟩, fun y k hk => ?_⟩, fun x y => ?_⟩
-      · rw [hφ, hφ, map_add]; exact hg2 _ _ ⟨k, hk, rfl⟩
-      · rw [hφ, hφ, hφ, map_add]; exact hg3 _ _
+      · rw [hφ, hφ, map_add (f := _)]; exact hg2 _ _ ⟨k, hk, rfl⟩
+      · rw [hφ, hφ, hφ, map_add (f := _)]; exact hg3 _ _
     rw [← h3]
     exact h4 ⟨_, h2, rfl⟩
 
@@ -152,7 +200,7 @@ theorem mem_pFun {p : ℕ} {X : Type} {f : X → C} :
 theorem addFun_comp {p : ℕ} {X Y : Type} [AddCommGroup X] [AddCommGroup Y] (e : X →+ Y)
     {f : Y → C} (hf : f ∈ addFun (C := C) R p Y) : (fun x => f (e x)) ∈ addFun (C := C) R p X := by
   intro x y
-  simp only [map_add]
+  simp only [map_add (f := _)]
   exact hf _ _
 
 theorem linFun_comp {p : ℕ} {X Y : Type} [AddCommGroup X] [AddCommGroup Y] (e : X →+ Y)

@@ -1,5 +1,47 @@
-import Formalism.LocalToGlobal.Columns.TiedGlPl
-import Formalism.SharpRestriction.GenusPolyhedralBounds.RelativeIndexClassSets.LevGapLoc
+module
+
+public import Formalism.LocalRingCardinality.DataSpaces
+public import Formalism.LocalToGlobal.Columns.DecoFin
+public import Formalism.LocalToGlobal.Columns.RecLevelLocP
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Matrix
 open scoped TensorProduct
@@ -14,8 +56,8 @@ section Tr
 
 variable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [StarRing E] [Algebra F E] (hc : Formalism.BasicNotions.CMData F E)
 
-include hc in
 
+include hc in
 theorem gls_trace_mem (a : 𝓞 E) : ∃ b : 𝓞 F, algebraMap (𝓞 F) (𝓞 E) b = a + cO E a := by
   obtain ⟨b0, hb0⟩ := rll_norm_mem hc a
   obtain ⟨b1, hb1⟩ := rll_norm_mem hc (a + 1)
@@ -29,49 +71,6 @@ section Ex
 
 variable {X : Fields} {Pr : Primes X} (hc : Formalism.BasicNotions.CMData X.F X.E) (hPr : Pr.Ok)
 
-include hPr in
-
-theorem gls_exists (i : Fin 2) (v : HeightOneSpectrum (𝓞 X.F)) (h : (Pr.g i : 𝓞 X.F) ∈ v.asIdeal) :
-    Nonempty (Formalism.MainNotions.Gaps.LG.SplitAt hc.sig v (hc.sig (Pr.piG i : X.E))) := by
-  obtain ⟨t, ht⟩ := gls_trace_mem hc (Pr.piG i)
-  have hsig : ∀ x : X.E, hc.sig x = star x := fun _ => rfl
-  have hN : algebraMap X.F X.E ((Pr.g i : 𝓞 X.F) : X.F) = (Pr.piG i : X.E) * hc.sig (Pr.piG i : X.E) := by
-    have := congrArg (algebraMap (𝓞 X.E) X.E) (hPr.piG_norm i)
-    rw [map_mul, map_natCast] at this
-    have h0 : (((Pr.g i : ℕ) : 𝓞 X.F) : X.F) = ((Pr.g i : ℕ) : X.F) := map_natCast (algebraMap (𝓞 X.F) X.F) _
-    rw [h0, map_natCast]
-    exact this.symm
-  have ht' : algebraMap X.F X.E (t : X.F) = (Pr.piG i : X.E) + hc.sig (Pr.piG i : X.E) := by
-    have := congrArg (algebraMap (𝓞 X.E) X.E) ht
-    rw [map_add, ← IsScalarTower.algebraMap_apply, IsScalarTower.algebraMap_apply (𝓞 X.F) X.F X.E] at this
-    exact this
-  have htv : t ∉ v.asIdeal := by
-    intro htv
-    have hov := gwOf_over hc hPr i v h
-    have h1 : algebraMap (𝓞 X.F) (𝓞 X.E) t ∈ (gwOf hc hPr i v h).1.asIdeal := by
-      have : t ∈ (gwOf hc hPr i v h).1.asIdeal.comap (algebraMap (𝓞 X.F) (𝓞 X.E)) := hov ▸ htv
-      exact this
-    have h3 : X.conjO (Pr.piG i) ∈ (gwOf hc hPr i v h).1.asIdeal := decoFin_mem_of_mem_divs (gwOf_mem hc hPr i v h)
-    have h4 : Pr.piG i ∈ (gwOf hc hPr i v h).1.asIdeal := by
-      have h5 : Pr.piG i = algebraMap (𝓞 X.F) (𝓞 X.E) t - X.conjO (Pr.piG i) := by
-        rw [ht]
-        show Pr.piG i = Pr.piG i + cO X.E (Pr.piG i) - cO X.E (Pr.piG i)
-        ring
-      rw [h5]
-      exact Ideal.sub_mem _ h1 h3
-    obtain ⟨a, b, e⟩ := hPr.piG_cop i
-    apply one_notMem (gwOf hc hPr i v h).1
-    rw [← e]
-    exact Ideal.add_mem _ (Ideal.mul_mem_left _ _ h4) (Ideal.mul_mem_left _ _ h3)
-  obtain ⟨s⟩ := Formalism.MainNotions.Gaps.LG.sc_core hc.sig (fun x => by rw [hsig, hsig, star_star])
-    (fun x hx => (hc.fixed x).1 hx) hc.deg2 v (Pr.piG i) t (Pr.g i : 𝓞 X.F) ht' hN h htv
-  exact Formalism.MainNotions.Gaps.LG.sc_orient s (Pr.piG i) (Pr.g i : 𝓞 X.F) h hN.symm
-
-def gSplit : GSplit (Pr := Pr) hc where
-  sp i v h := (Classical.choice (gls_exists hc hPr i v h)).φ
-  sp_sig i v h := (Classical.choice (gls_exists hc hPr i v h)).sig
-  sp_alg i v h := (Classical.choice (gls_exists hc hPr i v h)).alg
-  sp_pi i v h := (Classical.choice (gls_exists hc hPr i v h)).ori
 
 end Ex
 

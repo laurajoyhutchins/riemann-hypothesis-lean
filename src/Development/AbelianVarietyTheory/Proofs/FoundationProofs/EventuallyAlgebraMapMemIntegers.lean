@@ -1,5 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Foundations.HermitianSpaceBaseLatticeEqFrameLattice
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.HermitianSpaceBaseLatticeEqFrameLattice
+import Development.AbelianVarietyTheory.Proofs.HeightProofs.MemAdelicLatticeIffLocalSelfDualCompletion
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -30,7 +76,9 @@ theorem eventually_map_evalV_mem_intLoc (z : Af F ⊗[F] E) :
       Algebra.TensorProduct.map (Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes.evalV F v) (AlgHom.id F E) z ∈ intLoc F E v := by
   induction z using TensorProduct.induction_on with
   | zero => exact Eventually.of_forall fun v => by rw [map_zero]; exact zero_mem _
-  | add y z hy hz => filter_upwards [hy, hz] with v h h' using by rw [map_add]; exact add_mem h h'
+  | add y z hy hz =>
+    filter_upwards [hy, hz] with v h h'
+    simpa only [map_add] using add_mem h h'
   | tmul a e =>
     filter_upwards [a.2, eventually_one_tmul_mem_intLoc (F := F) e] with v h h'
     have := mul_mem (tmul_mem_intLoc (a := Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes.evalV F v a) h (1 : 𝓞 E)) h'
@@ -51,9 +99,11 @@ theorem exists_map_evalV_eq (z : ∀ v : HeightOneSpectrum (𝓞 F), Fv F v ⊗[
       have e' : (x : E) = ∑ j, c.repr x j • (c j : E) := by
         conv_lhs => rw [← c.sum_repr x]
         simp
+
       simp only [e', map_sum, map_zsmul, Finsupp.coe_finsetSum, Finset.sum_apply, Finsupp.coe_smul, Pi.smul_apply]
+
     simp only [Algebra.TensorProduct.basis_repr_tmul, Finsupp.smul_apply, Finsupp.mapRange_apply, smul_eq_mul, e,
-      map_sum, map_zsmul]
+    map_sum, map_zsmul]
     exact mul_mem ha (sum_mem fun j _ => zsmul_mem (hv j) _)
   let A : Fin (Module.finrank F E) → Af F := fun k =>
     ⟨fun v => (Algebra.TensorProduct.basis (Fv F v) b).repr (z v) k, by
@@ -109,34 +159,36 @@ theorem eventually_latLoc_le {L L' : Submodule (𝓞 E) (Fin n → E)} (hL : L.F
   change _ = a ⊗ₜ[F] ((1 : 𝓞 E) : E) * (1 : Fv F v) ⊗ₜ[F] x i
   simp
 
+
 variable (F) in
-
-theorem eventually_latLoc_eq (L L' : Submodule (𝓞 E) (Fin n → E)) [hL : Submodule.IsLattice E L]
-    [hL' : Submodule.IsLattice E L'] :
+theorem eventually_latLoc_eq (L L' : Submodule (𝓞 E) (Fin n → E)) [hL : Submodule.IsFullLattice E L]
+    [hL' : Submodule.IsFullLattice E L'] :
     ∀ᶠ v : HeightOneSpectrum (𝓞 F) in cofinite, latLoc F L v = latLoc F L' v := by
-  filter_upwards [eventually_latLoc_le (F := F) hL.fg hL'.span_eq_top,
-    eventually_latLoc_le (F := F) hL'.fg hL.span_eq_top] with v h h' using le_antisymm h h'
+  filter_upwards [eventually_latLoc_le (F := F) (Submodule.IsLattice.fg E L) (Submodule.IsFullLattice.span_eq_top (A := E) (M := L')),
+    eventually_latLoc_le (F := F) (Submodule.IsLattice.fg E L') (Submodule.IsFullLattice.span_eq_top (A := E) (M := L))] with v h h' using le_antisymm h h'
 
-omit [NumberField E] in
 
-theorem isLattice_stdLattice : Submodule.IsLattice E (stdLattice E n) := by
-  refine ⟨Submodule.fg_pi fun _ => ?_, eq_top_iff.2 fun y _ => ?_⟩
-  · rw [LinearMap.range_eq_map]
-    exact Module.Finite.fg_top.map _
-  · rw [← Finset.univ_sum_single y]
-    refine sum_mem fun i _ => ?_
-    have h1 : (Pi.single i 1 : Fin n → E) ∈ stdLattice E n := fun j _ => ⟨Pi.single (M := fun _ => 𝓞 E) i 1 j, by
+theorem isLattice_stdLattice : Submodule.IsFullLattice E (stdLattice E n) := by
+  haveI : Submodule.IsLattice E (stdLattice E n) := Submodule.IsLattice.of_fg E (by
+    refine Submodule.fg_pi fun _ => ?_
+    rw [LinearMap.range_eq_map]
+    exact Module.Finite.fg_top.map _)
+  refine ⟨eq_top_iff.2 ?_⟩
+  intro y _
+  rw [← Finset.univ_sum_single y]
+  refine sum_mem fun i _ => ?_
+  have h1 : (Pi.single i 1 : Fin n → E) ∈ stdLattice E n := fun j _ => ⟨Pi.single (M := fun _ => 𝓞 E) i 1 j, by
       by_cases e : j = i
       · subst e; simp
       · simp [e]⟩
-    convert Submodule.smul_mem _ (y i) (Submodule.subset_span h1) using 1
-    rw [← Pi.single_smul, smul_eq_mul, mul_one]
+  convert Submodule.smul_mem _ (y i) (Submodule.subset_span h1) using 1
+  rw [← Pi.single_smul, smul_eq_mul, mul_one]
 
 variable (σ : E →ₐ[F] E) (J : Matrix (Fin n) (Fin n) E)
 
+
 omit [NumberField E] in
 variable {σ J} in
-
 theorem mem_stabLoc_stdLattice_iff {v : HeightOneSpectrum (𝓞 F)} {k : GLoc σ J v} :
     k ∈ stabLoc σ J (stdLattice E n) v ↔ (∀ i j, (matHom _ σ J k).1 i j ∈ intLoc F E v) ∧
       ∀ i j, (matHom _ σ J k⁻¹).1 i j ∈ intLoc F E v := by
@@ -154,13 +206,13 @@ theorem mem_stabLoc_stdLattice_iff {v : HeightOneSpectrum (𝓞 F)} {k : GLoc σ
   have := h2 _ h.2 _ hy
   rwa [Matrix.mulVec_mulVec, map_inv, Units.inv_mul, Matrix.one_mulVec] at this
 
-theorem eventually_stabLoc_eq (L L' : Submodule (𝓞 E) (Fin n → E)) [Submodule.IsLattice E L]
-    [Submodule.IsLattice E L'] :
+theorem eventually_stabLoc_eq (L L' : Submodule (𝓞 E) (Fin n → E)) [Submodule.IsFullLattice E L]
+    [Submodule.IsFullLattice E L'] :
     ∀ᶠ v : HeightOneSpectrum (𝓞 F) in cofinite, stabLoc σ J L v = stabLoc σ J L' v := by
   filter_upwards [eventually_latLoc_eq F L L'] with v h
   rw [stabLoc, stabLoc, h]
 
-variable (L : Submodule (𝓞 E) (Fin n → E)) [Submodule.IsLattice E L]
+variable (L : Submodule (𝓞 E) (Fin n → E)) [Submodule.IsFullLattice E L]
 
 theorem eventually_projFinLoc_mem_stabLoc (g : GFin σ J) :
     ∀ᶠ v in cofinite, projFinLoc σ J v g ∈ stabLoc σ J L v := by
@@ -196,7 +248,7 @@ theorem existsUnique_projFinLoc_eq (x : ∀ v, GLoc σ J v) (hx : ∀ᶠ v in co
     induction z using TensorProduct.induction_on with
     | zero => simp
     | tmul a e => simp [φ, Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes.sigR]
-    | add x y hx hy => simp only [map_add, hx, hy]
+    | add x y hx hy => simp only [map_add (f := _), hx, hy]
   have hJ : ∀ v, (JR (Af F) J).map (φ v) = JR (Fv F v) J := fun v => by ext r s; simp [φ, JR, inclR]
   let u : GL (Fin n) (Af F ⊗[F] E) := ⟨Matrix.of A, Matrix.of B,
     hext _ _ fun v => by
@@ -208,18 +260,6 @@ theorem existsUnique_projFinLoc_eq (x : ∀ v, GLoc σ J v) (hx : ∀ᶠ v in co
     rw [Matrix.map_mul, Matrix.map_mul, ← GlobalTheory.IndefiniteRowSideFullHecke.AdelicUnitaryGroups.cT_map _ _ _ (hσ v), hA', hJ]
     exact (x v).2
   exact ⟨⟨u, hu⟩, fun v => matHom_injective _ σ J (Units.ext (hA' v))⟩
-
-def restrictedEquiv : GFin σ J ≃* Πʳ v, [GLoc σ J v, stabLoc σ J L v] :=
-  MulEquiv.ofBijective (F := GFin σ J →* Πʳ v, [GLoc σ J v, stabLoc σ J L v])
-    { toFun := fun g => ⟨fun v => projFinLoc σ J v g, eventually_projFinLoc_mem_stabLoc σ J L g⟩
-      map_one' := Subtype.ext (funext fun v => map_one (projFinLoc σ J v))
-      map_mul' := fun g h => Subtype.ext (funext fun v => map_mul (projFinLoc σ J v) g h) }
-    ⟨fun _ _ e => GFin_ext σ J fun v => congrFun (congrArg Subtype.val e) v, fun x =>
-      let ⟨g, hg, _⟩ := existsUnique_projFinLoc_eq σ J L x.1 x.2
-      ⟨g, Subtype.ext (funext hg)⟩⟩
-
-@[simp] theorem restrictedEquiv_apply (g : GFin σ J) (v : HeightOneSpectrum (𝓞 F)) :
-    restrictedEquiv σ J L g v = projFinLoc σ J v g := rfl
 
 end GlobalTheory.AdelicU
 

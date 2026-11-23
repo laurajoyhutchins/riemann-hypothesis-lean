@@ -1,8 +1,57 @@
-import Mathlib
-import Formalism.LocalToGlobal.Columns.FiniteSumNonzeroLargeDepth
+module
+
+public import Formalism.LocalToGlobal.Columns.FiniteSumNonzeroLargeDepth
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.LambdaCharSymMulInvEqOne
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.MemZmuOfPowPred
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.IsRowFrame
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.LambdaCharSymMulInvEqOne
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.MemZmuOfPowPred
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Formalism.BasicNotions Formalism.HermitianLatticesTheory Formalism.L2.DIV Formalism.L2.Col GlobalTheory.TwU
 
@@ -159,8 +208,8 @@ theorem Pat.block (hA : Pat k rS r t a A) (hB : Pat k rS r t a B)
 
 variable {K : Type} [Field K]
 
-open Classical in
 
+open Classical in
 def ext0 (χ : κˣ →* Kˣ) (a : κ) : K := if h : IsUnit a then ((χ h.unit : Kˣ) : K) else 0
 
 theorem matrixExtendByZero_mul (χ : κˣ →* Kˣ) (a b : κ) : ext0 χ (a * b) = ext0 χ a * ext0 χ b := by
@@ -170,8 +219,8 @@ theorem matrixExtendByZero_mul (χ : κˣ →* Kˣ) (a b : κ) : ext0 χ (a * b)
     · rw [dif_pos ha, dif_pos hb, dif_pos (ha.mul hb), ← Units.val_mul, ← map_mul]
       congr 2
       exact Units.ext (by simp)
-    · rw [dif_neg hb, dif_neg fun h => hb (isUnit_of_mul_isUnit_right h), mul_zero]
-  · rw [dif_neg ha, dif_neg fun h => ha (isUnit_of_mul_isUnit_left h), zero_mul]
+    · rw [dite_eq_right hb, dite_eq_right fun h => hb (isUnit_of_mul_isUnit_right h), mul_zero]
+  · rw [dite_eq_right ha, dite_eq_right fun h => ha (isUnit_of_mul_isUnit_left h), zero_mul]
 
 theorem unitCharacterExtendByZero_ne_zero_of_isUnit (χ : κˣ →* Kˣ) {a : κ} (h : IsUnit a) : ext0 χ a ≠ 0 := by
   unfold ext0
@@ -232,12 +281,12 @@ theorem of_div {a : E} (h : IntAt P (a / (qOf P : E))) : IntAt P a ∧ redP P a 
     (Ideal.absNorm_mem P.asIdeal) ?_
   rwa [mul_comm, ← div_eq_mul_inv]
 
-variable (P) in
 
+variable (P) in
 def red (M : ℕ → ℕ → E) : ℕ → ℕ → 𝓞 E ⧸ P.asIdeal := fun p p' => redP P (M p p')
 
-variable (P) in
 
+variable (P) in
 def IntM (b a : ℕ) (M : ℕ → ℕ → E) : Prop := ∀ p p', p < b → p' < a → IntAt P (M p p')
 
 def IsMul (n : ℕ) (A B C : ℕ → ℕ → E) : Prop := ∀ p p', C p p' = ∑ l ∈ Finset.range n, A p l * B l p'
@@ -277,8 +326,8 @@ theorem redP_dB {s t : ℕ} (hA : IntM P b a A) (h1 : s + t ≤ b) (h2 : s + t �
 theorem reduction_leadingMinor {t : ℕ} (hA : IntM P b a A) (h1 : t ≤ b) (h2 : t ≤ a) : redP P (dT A t) = dT (red P A) t :=
   SymLevelInv.reduction_det P _ fun u u' => hA _ _ (by have := u.2; omega) (by have := u'.2; omega)
 
-variable (P) in
 
+variable (P) in
 def SuppQ (r b a : ℕ) (M : ℕ → ℕ → E) : Prop :=
   IntM P b a M ∧ ∀ p p', r ≤ p → p < b → p' < r → IntAt P (M p p' / (qOf P : E))
 
@@ -296,13 +345,13 @@ theorem SuppQ.det {r t : ℕ} (hA : SuppQ P r (r + t) (r + t) A) :
   rw [reduction_leadingMinor hA.1 le_rfl le_rfl]
   exact dT_split fun u l hu hl => (of_div (hA.2 _ _ (by omega) (by omega) hl)).2
 
-variable (P) in
 
+variable (P) in
 def SuppG (k rS r t b a : ℕ) (M : ℕ → ℕ → E) : Prop :=
   IntM P b a M ∧ (∀ p p', a ≤ p → p < b → p' < a → IntAt P (M p p' / (qOf P : E))) ∧ Pat k rS r t a (red P M)
 
-variable (P) in
 
+variable (P) in
 def LevG (k rS r t n : ℕ) (M : ℕ → ℕ → E) : Prop :=
   IntM P n n M ∧
     (∀ p', p' < r → redP P (M p' p') = 1 ∧ ∀ p, p < n → p ≠ p' → Zs k rS r p p' → redP P (M p p') = 0) ∧
@@ -430,6 +479,7 @@ theorem entB_comp {N'' N k₀ c'' n'' c' n' c n : ℕ} (hk : k₀ ≤ n') (ex'' 
     simp [Finset.sum_apply, eN, Fin.val_inj]
   have h3 : atN (x v) (fIdx k₀ c n p) =
       ∑ l : Fin (n' + c'), v (fPerm c' hk l) * atN (x (eN E (n' + c') (fPerm c' hk l).1)) (fIdx k₀ c n p) := by
+
     conv_lhs => rw [h2, map_sum]
     unfold atN
     split_ifs
@@ -463,16 +513,16 @@ theorem entB_det {k₀ c n : ℕ} (hk : k₀ ≤ n) (ex : ℕ → ℕ) (g : Sp E
     inv_mul_cancel₀ (Finset.prod_ne_zero_iff.2 fun i _ => zpow_ne_zero _ hq), one_mul,
     Matrix.det_submatrix_equiv_self, LinearMap.det_toMatrix', LinearEquiv.coe_det]
 
-variable (E) in
 
+variable (E) in
 def bv (q k₀ n c : ℕ) (ex : ℕ → ℕ) (s : ℕ) : Sp E (n + c) :=
   ((q : E) ^ scE n ex (fIdx k₀ c n s)) • eN E (n + c) (fIdx k₀ c n s)
 
 def co (q k₀ n c : ℕ) (ex : ℕ → ℕ) (v : Sp E (n + c)) (p : ℕ) : E :=
   ((q : E) ^ scE n ex (fIdx k₀ c n p))⁻¹ * atN v (fIdx k₀ c n p)
 
-variable (P) in
 
+variable (P) in
 def midL (k₀ n c : ℕ) (ex : ℕ → ℕ) (D : ℕ → Prop) [DecidablePred D] : Submodule (𝓞 E) (Sp E (n + c)) :=
   sclLat P (qOf P) (n + c) fun l => scE n ex l + if D (fPos k₀ c n l) then 1 else 0
 
@@ -655,8 +705,8 @@ theorem inv_comp {a b : ℕ} (g : Sp E b ≃ₗ[E] Sp E b) (x : HomE E a b) :
 variable (ψ : AddChar (𝓞 E ⧸ P.asIdeal) K) (χ : ℕ → (𝓞 E ⧸ P.asIdeal)ˣ →* Kˣ) (ξ : (𝓞 E ⧸ P.asIdeal)ˣ →* Kˣ)
   {k₀ k₁ rS r t i c' n' c n : ℕ}
 
-open Classical in
 
+open Classical in
 def PhiM (k₀ k₁ rS r t i c' n' c n : ℕ) : SF E K (n' + c') (n + c) := fun x =>
   if SuppG P k₁ rS r t (n + c) (r + i * t) (entB (qOf P) k₀ c' n' c n (fun i => i + 1) (fun i => i + 1) x) then
     valG ψ χ k₁ r t i (entB (qOf P) k₀ c' n' c n (fun i => i + 1) (fun i => i + 1) x) else 0

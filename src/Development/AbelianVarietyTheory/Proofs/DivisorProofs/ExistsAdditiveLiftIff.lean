@@ -1,11 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.ExistsCrystalPairing
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LiftLeftFst
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.BiadditiveOfTrivAxes
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.IsAbelianSchemeOfIsGrpPullback
-import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.AbelianSchemeLawsWithoutCohomology
-import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.IsProjOverIffIsProperAndExistsIsAmpleLB
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.SabPull
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.ExistsCrystalPairing
+public import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.GrothendieckDeformation
+public import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.AbelianSchemeLawsWithoutCohomology
+public import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.IsProjOverIffIsProperAndExistsIsAmpleLB
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LiftLeftFst
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.BiadditiveOfTrivAxes
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.IsAbelianSchemeOfIsGrpPullback
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.AbelianSchemeGerms
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -24,8 +64,8 @@ section General
 
 variable {S : Scheme.{0}} {A B D : Over S} [GrpObj A] [GrpObj B] [GrpObj D]
 
-omit [GrpObj A] in
 
+omit [GrpObj A] in
 theorem isAdditive_swap_iff {P : LB (A ⊗ B).left} (hP : P.IsLB) : IsAdditive (swap P) ↔
     ∀ (Y : Over S) (a : Y ⟶ A) (b b' : Y ⟶ B), evc hP a (b * b') = evc hP a b + evc hP a b' := by
   have hs : (swap P).IsLB := pull_isLB hP _
@@ -33,13 +73,13 @@ theorem isAdditive_swap_iff {P : LB (A ⊗ B).left} (hP : P.IsLB) : IsAdditive (
   simp only [evc_swap hP hs]
   exact ⟨fun h Y a b b' ↦ h Y b b' a, fun h Y b b' a ↦ h Y a b b'⟩
 
-omit [GrpObj B] in
 
+omit [GrpObj B] in
 theorem triv_left {P : LB (A ⊗ B).left} (hP : P.IsLB) (h : IsAdditive P) : Triv (ev P (1 : B ⟶ A) (𝟙 B)) :=
   (triv_ev_iff hP _ _).2 (h.evc_one hP _)
 
-omit [GrpObj A] in
 
+omit [GrpObj A] in
 theorem triv_right {P : LB (A ⊗ B).left} (hP : P.IsLB) (h : IsAdditive (swap P)) :
     Triv (ev P (𝟙 A) (1 : A ⟶ B)) := by
   have hs : (swap P).IsLB := pull_isLB hP _
@@ -54,8 +94,8 @@ theorem dual_ext {Q : LB (A ⊗ D).left} (h : IsDual A D Q) {T : Over S} {y y' :
   simp only [evc_ev h.isLB, lift_fst, lift_snd_assoc]
   exact (isAdditive_iff h.isLB).1 h.additive _ _ _ _
 
-omit [GrpObj A] [GrpObj B] [GrpObj D] in
 
+omit [GrpObj A] [GrpObj B] [GrpObj D] in
 theorem evc_of_cls {Q : LB (A ⊗ D).left} (hQ : Q.IsLB) {P : LB (A ⊗ B).left} (hP : P.IsLB) {x : B ⟶ D}
     (e : cls P hP = evc hQ (fst A B) (snd A B ≫ x)) {Y : Over S} (a : Y ⟶ A) (b : Y ⟶ B) :
     evc hP a b = evc hQ a (b ≫ x) := by
@@ -106,8 +146,8 @@ theorem additive_pull {S' : Scheme.{0}} {b : S' ⟶ S} {A' B' : Over S'} [GrpObj
       (pushP hg (s := Y.hom) rfl t * pushP hg (s := Y.hom) rfl t') rfl (mul_left_comp hg rfl rfl rfl), k, k]
     exact (isAdditive_swap_iff hP).1 a₂ _ _ _ _
 
-omit [GrpObj A] [GrpObj B] [GrpObj D] in
 
+omit [GrpObj A] [GrpObj B] [GrpObj D] in
 theorem pull_evc_eq {S' : Scheme.{0}} {A' B' D' : Over S'} {f : A'.left ⟶ A.left} {g : B'.left ⟶ B.left}
     {d : D'.left ⟶ D.left} {l : (A' ⊗ B').left ⟶ (A ⊗ B).left} {m : (A' ⊗ D').left ⟶ (A ⊗ D).left}
     (l₁ : l ≫ (fst A B).left = (fst A' B').left ≫ f) (l₂ : l ≫ (snd A B).left = (snd A' B').left ≫ g)

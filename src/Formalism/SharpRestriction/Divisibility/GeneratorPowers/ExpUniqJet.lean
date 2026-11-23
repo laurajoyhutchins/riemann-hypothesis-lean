@@ -1,5 +1,53 @@
-import Formalism.LocalToGlobal.ProjectiveLattices.ThGerm
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.UniversalCharts.SpanXLeKerAevalZero
+module
+
+public import Formalism.LocalToGlobal.ProjectiveLattices.SubConstMemOrig
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.MvPolynomial.IrreducibleQuadratic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -13,8 +61,8 @@ variable {R : Type} [CommRing R]
 
 abbrev zz {κ : Type} (m : ℕ) (j : κ) : Jet R κ m := Ideal.Quotient.mk _ (X j)
 
-variable (R) in
 
+variable (R) in
 def Ij (κ : Type) (m : ℕ) : Ideal (Jet R κ m) := Ideal.span (Set.range (zz (R := R) (κ := κ) m))
 
 theorem Ij_eq_map (κ : Type) (m : ℕ) :
@@ -73,7 +121,7 @@ theorem sub_aug_mem {κ : Type} {m : ℕ} (p : Jet R κ m) :
   next q r hq hr =>
     have h := Ideal.add_mem _ hq hr
     convert h using 1
-    simp only [map_add]
+    simp only [map_add (f := _)]
     abel
   next q j _ =>
     have hz : (Ideal.Quotient.mk (orig R κ ^ (m + 1)) (X j) : Jet R κ m) ∈ Ij R κ m :=
@@ -132,7 +180,7 @@ theorem sc_one_mem {κ : Type} (m : ℕ) (c : R) {b : Jet R κ m} (hb : b ∈ Ij
   | add x y _ _ hx hy =>
     have h := Ideal.add_mem _ hx hy
     convert h using 1
-    rw [map_add, smul_add]
+    rw [map_add (f := _), smul_add]
     abel
   | smul a x hx' hx =>
     have e1 : sc m c (a • x) - c • (a • x) =
@@ -174,7 +222,7 @@ theorem sc_pow_mem {κ : Type} (m : ℕ) (c : R) :
     · intro x y hx hy
       have h := Ideal.add_mem _ hx hy
       convert h using 1
-      rw [map_add, smul_add]
+      rw [map_add (f := _), smul_add]
       abel
 
 end Scale
@@ -208,7 +256,7 @@ theorem poly_sub_kill_mem (i : Fin 2) (P : MvPolynomial (Fin 2 × Fin n) R) :
   next a =>
     simp
   next p q hp hq =>
-    rw [map_add, add_sub_add_comm]
+    rw [map_add (f := _), add_sub_add_comm]
     exact Ideal.add_mem _ hp hq
   next p v hp =>
     rw [map_mul, aeval_X]
@@ -253,7 +301,7 @@ theorem mem_mul_of_kill (m : ℕ) (e : Jet R (Fin 2 × Fin n) m) (h0 : kill m 0 
     | add y z _ _ hy hz =>
       have h := Ideal.add_mem _ hy hz
       convert h using 1
-      rw [map_add]
+      rw [map_add (f := _)]
       abel
     | smul a y hy' hy =>
       have e1 : a • y - kill m 1 (a • y) = y * (a - kill m 1 a) + kill m 1 a * (y - kill m 1 y) := by

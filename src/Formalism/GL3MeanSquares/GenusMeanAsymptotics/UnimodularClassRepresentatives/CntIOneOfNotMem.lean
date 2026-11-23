@@ -1,4 +1,52 @@
-import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.UnitaryDensityField
+module
+
+public import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.UnitaryDensityField
+public import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.CardLiftMatrix
+import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.StarAlgebraMap
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField Module
 
@@ -27,18 +75,38 @@ theorem map_mem {𝔭 : Ideal (𝓞 F)} {ϖ : 𝓞 F} (h1 : ϖ ∈ 𝔭) : ι ϖ
 
 theorem mulW_injective {𝔭 : Ideal (𝓞 F)} (h𝔭 : 𝔭.IsMaximal) {ϖ : 𝓞 F} (h1 : ϖ ∈ 𝔭) (h2 : ϖ ∉ 𝔭 ^ 2)
     (j : ℕ) : Function.Injective (mulW (K := K) 𝔭 (map_mem h1) j) := by
-  rw [injective_iff_map_eq_zero]
+  set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
   intro a ha
   obtain ⟨z, rfl⟩ := Ideal.Quotient.mk_surjective a
   rw [mulW_mk, Ideal.Quotient.eq_zero_iff_mem] at ha
   rw [Ideal.Quotient.eq_zero_iff_mem]
-  exact idealPowerSpanBounds.mem_of_mul_mem h𝔭 (v := 1) (j := j + 1) h2 (by rwa [show 1 + (j + 1) = j + 2 by ring])
+  have hspan : extP K 𝔭 ≤ Ideal.span {ι ϖ} ⊔ extP K 𝔭 ^ (j + 2) := by
+    have h := idealPowerSpanBounds.pow_le_span_sup h𝔭.isPrime (idealPowerSpanBounds.ne_bot h𝔭)
+      (c := 1) h2 (j + 2)
+    simpa only [extP, Ideal.map_sup, Ideal.map_span, Set.image_singleton, Ideal.map_pow, pow_one]
+      using Ideal.map_mono (f := ι) h
+  have hle : extP K 𝔭 * Ideal.span {z} ≤ extP K 𝔭 ^ (j + 2) := by
+    refine (Ideal.mul_mono_left hspan).trans ?_
+    rw [Ideal.sup_mul, Ideal.span_singleton_mul_span_singleton]
+    exact sup_le (Ideal.dvd_iff_le.mp (Ideal.dvd_span_singleton.mpr ha)) Ideal.mul_le_left
+  have hdvd : extP K 𝔭 * extP K 𝔭 ^ (j + 1) ∣ extP K 𝔭 * Ideal.span {z} := by
+    rw [← pow_succ']
+    exact Ideal.dvd_iff_le.mpr hle
+  have hne : extP K 𝔭 ≠ 0 := by
+    rw [Ideal.zero_eq_bot]
+    exact idealPowerSpanBounds.map_ne_bot_of_isMaximal h𝔭
+  exact Ideal.dvd_span_singleton.mp ((mul_dvd_mul_iff_left hne).mp hdvd)
 
 theorem inQ_iff_range {𝔭 : Ideal (𝓞 F)} (h𝔭 : 𝔭.IsMaximal) {ϖ : 𝓞 F} (h1 : ϖ ∈ 𝔭) (h2 : ϖ ∉ 𝔭 ^ 2)
     (j : ℕ) (a : AQ K 𝔭 (j + 2)) : InQ 𝔭 (j + 2) a ↔ ∃ b, mulW (K := K) 𝔭 (map_mem h1) j b = a := by
   constructor
   · rintro ⟨z, hz, rfl⟩
-    have h3 := idealPowerSpanBounds.map_pow_le_span_sup (K := K) h𝔭 (c := 1) h2 (j + 2) (by rwa [pow_one])
+    have hspan : extP K 𝔭 ≤ Ideal.span {ι ϖ} ⊔ extP K 𝔭 ^ (j + 2) := by
+      have h := idealPowerSpanBounds.pow_le_span_sup h𝔭.isPrime (idealPowerSpanBounds.ne_bot h𝔭)
+        (c := 1) h2 (j + 2)
+      simpa only [extP, Ideal.map_sup, Ideal.map_span, Set.image_singleton, Ideal.map_pow, pow_one]
+        using Ideal.map_mono (f := ι) h
+    have h3 := hspan hz
     obtain ⟨u, hu, e, he, hue⟩ := Submodule.mem_sup.1 h3
     obtain ⟨r, rfl⟩ := Ideal.mem_span_singleton'.1 hu
     refine ⟨Ideal.Quotient.mk _ r, ?_⟩
@@ -60,22 +128,34 @@ theorem norm_iff (hF : IsFixF K F) {𝔭 : Ideal (𝓞 F)} (h𝔭 : 𝔭.IsMaxim
         Ideal.Quotient.mk _ n' := by
   choose z hz using fun i => Ideal.Quotient.mk_surjective (y i)
   obtain rfl : (fun i => Ideal.Quotient.mk _ (z i)) = y := funext hz
+
   simp only [mulW_mk, Ideal.Quotient.factor_mk, sg_mk, ← map_mul, ← map_sum]
   rw [Ideal.Quotient.eq, Ideal.Quotient.eq]
+  have hfix : conjO K (ι ϖ) = ι ϖ := by
+    apply RingOfIntegers.ext
+    change star (algebraMap (𝓞 K) K (ι ϖ)) = algebraMap (𝓞 K) K (ι ϖ)
+    rw [MeanB.algebraMap_comp]
+    exact (hF _).mpr ⟨_, rfl⟩
   have e1 : ∑ i, conjO K (ι ϖ * z i) * (ι ϖ * z i) = ι ϖ ^ 2 * ∑ i, conjO K (z i) * z i := by
     rw [Finset.mul_sum]
     refine Finset.sum_congr rfl fun i _ => ?_
-    rw [map_mul, idealPowerSpanBounds.conjO_map hF]
+    rw [map_mul, hfix]
     ring
   rw [e1]
-  have h3 : ϖ * ϖ ∉ 𝔭 ^ (1 + 1 + 1) := idealPowerSpanBounds.mul_notMem h𝔭.isPrime (idealPowerSpanBounds.ne_bot h𝔭) h2 h2
   constructor
   · intro h
+    have hcancel (k : ℕ) {a : 𝓞 K} (ha : ι ϖ * a ∈ extP K 𝔭 ^ (k + 1)) : a ∈ extP K 𝔭 ^ k := by
+      cases k with
+      | zero => simp [Ideal.one_eq_top]
+      | succ k =>
+        rw [← Ideal.Quotient.eq_zero_iff_mem]
+        apply mulW_injective h𝔭 h1 h2 k
+        rwa [map_zero, mulW_mk, Ideal.Quotient.eq_zero_iff_mem]
     have h4 := add_mem h hn
     have e2 : ι ϖ ^ 2 * ∑ i, conjO K (z i) * z i - n + (n - ι ϖ ^ 2 * n') =
-        ι (ϖ * ϖ) * (∑ i, conjO K (z i) * z i - n') := by rw [map_mul]; ring
+        ι ϖ * (ι ϖ * (∑ i, conjO K (z i) * z i - n')) := by ring
     rw [e2] at h4
-    exact idealPowerSpanBounds.mem_of_mul_mem h𝔭 (v := 2) (j := j) h3 (by rwa [show 2 + j = j + 2 by ring])
+    exact hcancel j (hcancel (j + 1) h4)
   · intro h
     have h4 : ι ϖ ^ 2 * (∑ i, conjO K (z i) * z i - n') ∈ extP K 𝔭 ^ (j + 2) := by
       rw [show j + 2 = 2 + j by ring, pow_add]
@@ -142,6 +222,7 @@ theorem cntI_eq_zero (hF : IsFixF K F) (𝔭 : Ideal (𝓞 F)) (j M : ℕ) {n : 
   rintro ⟨x, hx1, hx2⟩
   choose z hz hzx using hx1
   obtain rfl : (fun i => Ideal.Quotient.mk _ (z i)) = x := funext hzx
+
   simp only [sg_mk, ← map_mul, ← map_sum] at hx2
   rw [Ideal.Quotient.eq] at hx2
   have h1 : ∑ i, conjO K (z i) * z i - n ∈ extP K 𝔭 ^ 2 := Ideal.pow_le_pow_right (by omega) hx2
@@ -172,19 +253,5 @@ theorem cntI_one_of_mem (hF : IsFixF K F) (𝔭 : Ideal (𝓞 F)) (M : ℕ) {n :
     simp only [Pi.zero_apply, mul_zero, Finset.sum_const_zero]
     rw [Ideal.Quotient.eq_zero_iff_mem, pow_one]
     exact hn
-
-theorem cntI_one_of_notMem (hF : IsFixF K F) (𝔭 : Ideal (𝓞 F)) (M : ℕ) {n : 𝓞 K}
-    (hn : n ∉ extP K 𝔭) : cntI hF 𝔭 1 M n = 0 := by
-  unfold cntI
-  rw [Nat.card_eq_zero]
-  left
-  constructor
-  rintro ⟨x, hx1, hx2⟩
-  apply hn
-  have h0 : ∑ i, sg hF 𝔭 1 (x i) * x i = 0 :=
-    Finset.sum_eq_zero fun i _ => by rw [eq_zero_of_inQ_one (hx1 i), mul_zero]
-  rw [h0] at hx2
-  have := Ideal.Quotient.eq_zero_iff_mem.1 hx2.symm
-  rwa [pow_one] at this
 
 end Formalism.HermitianLattices.Ext.L3.unitaryAbsoluteValueBounds

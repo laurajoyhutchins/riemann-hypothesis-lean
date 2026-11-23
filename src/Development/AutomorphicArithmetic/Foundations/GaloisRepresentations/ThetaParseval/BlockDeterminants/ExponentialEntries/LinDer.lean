@@ -1,4 +1,52 @@
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsFockMap
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsFockMap
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Matrix.FiniteDimensional
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -39,6 +87,7 @@ theorem isExp_add_smul {V : Type} [AddCommGroup V] [Module ℂ V] {L U : Module.
     simp [mul_comm]
   rw [hval]
   convert key using 2 with n
+
   rw [hcomm.add_pow', LinearMap.sum_apply, map_sum, Finset.mul_sum]
   refine Finset.sum_congr rfl ?_
   rintro ⟨i, j⟩ hij
@@ -107,8 +156,9 @@ theorem der_pow_mul (D : Derivation ℂ (MvPolynomial σ ℂ) (MvPolynomial σ �
   induction n with
   | zero => simp
   | succ n ih =>
+
     rw [Finset.sum_antidiagonal_choose_succ_nsmul (fun i j => (L ^ i) P * (L ^ j) Q) n, pow_succ',
-      Module.End.mul_apply, ih, map_sum, ← Finset.sum_add_distrib]
+    Module.End.mul_apply, ih, map_sum, ← Finset.sum_add_distrib]
     refine Finset.sum_congr rfl ?_
     rintro ⟨i, j⟩ hij
     obtain rfl : i + j = n := by simpa using hij
@@ -126,6 +176,7 @@ theorem eval_series_mul (D : Derivation ℂ (MvPolynomial σ ℂ) (MvPolynomial 
   have key := hasSum_cauchy hP hQ
   rw [map_mul, map_mul]
   convert key using 2 with n
+
   rw [der_pow_mul, map_sum, Finset.mul_sum]
   refine Finset.sum_congr rfl ?_
   rintro ⟨i, j⟩ hij
@@ -157,6 +208,7 @@ theorem linDer_pow_X (T : Matrix σ σ ℂ) (n : ℕ) (i : σ) :
   induction n with
   | zero => simp [Matrix.one_apply, ite_smul]
   | succ n ih =>
+
     rw [pow_succ', Module.End.mul_apply, ih, map_sum, pow_succ']
     simp only [map_smul, Derivation.coeFn_coe, linDer_X, Finset.smul_sum, smul_smul, Matrix.mul_apply, Finset.sum_smul]
     rw [Finset.sum_comm]
@@ -189,7 +241,7 @@ theorem linDer_locFin (T : Matrix σ σ ℂ) :
     obtain ⟨N₂, f₂, m₂, s₂⟩ := hq
     refine ⟨N₁ ⊔ N₂, Submodule.finiteDimensional_sup _ _, Submodule.add_mem_sup m₁ m₂, fun y hy => ?_⟩
     obtain ⟨a, ha, b, hb, rfl⟩ := Submodule.mem_sup.1 hy
-    rw [map_add]
+    rw [map_add (f := _)]
     exact Submodule.add_mem_sup (s₁ a ha) (s₂ b hb)
   | mul_X p i hp =>
     obtain ⟨N, f, m, s⟩ := hp
@@ -204,7 +256,7 @@ theorem linDer_locFin (T : Matrix σ σ ℂ) :
       rw [mul_comm b]
       exact Submodule.add_mem _ (Submodule.mul_mem_mul ha (hst0 b hb)) (Submodule.mul_mem_mul (s a ha) hb)
     | add a _ b _ ha hb =>
-      rw [map_add]
+      rw [map_add (f := _)]
       exact Submodule.add_mem _ ha hb
 
 def evL (z : σ → ℂ) : MvPolynomial σ ℂ →ₗ[ℂ] ℂ where
@@ -234,7 +286,7 @@ theorem linDer_eval_series (T G : Matrix σ σ ℂ)
       obtain ⟨m, rfl⟩ := Nat.exists_eq_succ_of_ne_zero hn
       simp [pow_succ, Module.End.mul_apply, h0]
   | add p q hp hq =>
-    simpa [mul_add, map_add] using hp.add hq
+    simpa [mul_add, map_add (f := _)] using hp.add hq
   | mul_X p i hp =>
     refine eval_series_mul _ _ z hp ?_
     have hv : eval z (linSub G (X i)) = ∑ l, G l i * z l := by
@@ -246,6 +298,7 @@ theorem linDer_eval_series (T G : Matrix σ σ ℂ)
           MvPolynomial σ ℂ →ₗ[ℂ] MvPolynomial σ ℂ) ^ n) (X i))) =
         fun b : ℕ => ∑ l, (b.factorial : ℂ)⁻¹ * (T ^ b) l i * z l := by
       funext n
+
       rw [linDer_pow_X, map_sum, Finset.mul_sum]
       exact Finset.sum_congr rfl fun l _ => by simp [smul_eval, mul_assoc]
     rw [heq]
@@ -260,8 +313,8 @@ theorem linDer_isExp (T G : Matrix σ σ ℂ)
   · rintro _ ⟨z, rfl⟩ v
     exact linDer_eval_series T G hG z v
 
-open scoped Matrix.Norms.Operator in
 
+open scoped Matrix.Norms.Operator in
 theorem hasSum_exp_entry (Y : Matrix σ σ ℂ) (a b : σ) :
     HasSum (fun n : ℕ => (n.factorial : ℂ)⁻¹ * (Y ^ n) a b) (NormedSpace.exp Y a b) := by
   have key := NormedSpace.exp_series_hasSum_exp' (𝕂 := ℂ) Y
@@ -292,8 +345,8 @@ theorem linDer_kron_left_isExp (Y : Matrix α α ℂ) :
 
 end Kron
 
-open Formalism.BasicNotions.TH in
 
+open Formalism.BasicNotions.TH in
 theorem omAct_definite (n d : ℕ) (T : Matrix (Ln n 0 d 0) (Ln n 0 d 0) ℂ) :
     omAct n 0 d 0 T = ((linDer T : Derivation ℂ (Pol n 0 d 0) (Pol n 0 d 0)) : Pol n 0 d 0 →ₗ[ℂ] Pol n 0 d 0) +
       ((1 / 2 : ℂ) * T.trace) • 1 := by

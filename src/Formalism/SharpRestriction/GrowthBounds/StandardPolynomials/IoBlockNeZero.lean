@@ -1,7 +1,58 @@
-import Formalism.SharpRestriction.GrowthBounds.StandardPolynomials.RestRoom
-import Formalism.SharpRestriction.GrowthBounds.CoarseMultiplicity.SymbolFormOfOrthogonality
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.CoarseMultiplicity.BFDefs
+public import Formalism.SharpRestriction.GrowthBounds.CoarseMultiplicity.WeightWLet
+public import Formalism.SharpRestriction.GrowthBounds.StandardPolynomials.IdentityLiftWeightedHomog
+public import Formalism.SharpRestriction.GrowthBounds.StandardPolynomials.TCoreDef
+import Formalism.SharpRestriction.GrowthBounds.BinomialRatio.SegmentStatementHolds
+public import Formalism.SharpRestriction.GrowthBounds.CoarseMultiplicity.BFTrueDeg
 import Formalism.SharpRestriction.GrowthBounds.CoarseMultiplicity.IoBlockMonomial
-import Formalism.SharpRestriction.GrowthBounds.CoarseMultiplicity.BFTrueDeg
+import Formalism.SharpRestriction.GrowthBounds.CoarseMultiplicity.Lemma44IdentityOfRawTail
+public import Formalism.SharpRestriction.GrowthBounds.CoarseMultiplicity.LogLeOfLeSq
+public import Formalism.SharpRestriction.GrowthBounds.StandardPolynomials.NormalWeightCovectorZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -188,14 +239,15 @@ theorem ioBlock_coeff (hp : 0 < X.p) (j : Fin (numSeg X.TT)) (b : SegBlock (segS
     by_cases h : ν = μ
     · rw [if_pos h, if_pos (by rw [h])]
     · rw [if_neg h, if_neg fun e => h (ioExp_inj C0 CE1 CE2 X hp j b e)]
-  | add p q hp' hq' => rw [ioBlock_add, coeff_add, coeff_add, hp', hq']
+  | add p q hp' hq' => rw [ioBlock_add, MvPolynomial.coeff_add, MvPolynomial.coeff_add, hp', hq']
 
 theorem ioBlock_ne_zero (hp : 0 < X.p) (j : Fin (numSeg X.TT)) (b : SegBlock (segS X.TT j) X.m)
     {u : MvPolynomial (BV C0 CE1 CE2 X j) (KK O)} (hu : u ≠ 0) : ioBlock (KK O) X.p C0 CE1 CE2 X j b u ≠ 0 := by
   intro h
   apply hu
   ext μ
-  rw [← ioBlock_coeff hp j b u μ, h, coeff_zero, coeff_zero]
+  rw [← ioBlock_coeff hp j b u μ, h]
+  simp only [AddMonoidAlgebra.coeff_zero, Finsupp.zero_apply]
 
 theorem ioD_ne_zero (hp : 0 < X.p) {mu : ℝ} (β : GlobalTheory X) (j : Fin (numSeg X.TT))
     {u : MvPolynomial (BVar (2 * segS X.TT j + 1) X.m (BDk C0 CE1 CE2 mu X β j).T.t) (KK O)} (hu : u ≠ 0) :

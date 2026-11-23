@@ -1,5 +1,53 @@
-import Mathlib
-import ReciprocityTheory.GaloisValuations.ContinuousConstSMulQuotient
+module
+
+public import Mathlib.Topology.Algebra.OpenSubgroup
+public import ReciprocityTheory.GaloisValuations.SeparatedDvrSecondCohomologyMem
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import Mathlib.Topology.Algebra.ClopenNhdofOne
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open ReciprocityTheory.Gal
 
@@ -24,6 +72,7 @@ theorem two_variables [K.Normal] (hJK : ∀ j ∈ J, π j ∈ K)
   have hS : ∀ a b, ∑ i : K, ∑ j : K, F (a * i) (b * j) = 0 := by
     intro a b
     refine hinv _ fun g hg => ?_
+
     simp only [map_sum, ← heq]
     rw [← sum_shift K (fun x => ∑ j : K, F x (b * j)) a _ (hJK g hg)]
     exact Finset.sum_congr rfl fun i _ => sum_shift K (fun x => F _ x) b _ (hJK g hg)
@@ -44,6 +93,7 @@ theorem two_variables [K.Normal] (hJK : ∀ j ∈ J, π j ∈ K)
         simp only [Finset.sum_sub_distrib, Finset.sum_add_distrib, hS, zero_add, Finset.sum_const,
           Finset.card_univ, ← Finset.smul_sum]
   refine ⟨-(Fintype.card K • ∑ i : K, F 1 (1 * i)), fun g => ?_⟩
+
   rw [key, map_neg, map_nsmul, map_sum]
   simp only [← heq, mul_one, one_mul]
   abel
@@ -57,6 +107,7 @@ theorem three_variables [K.Normal] (hJK : ∀ j ∈ J, π j ∈ K)
   have hS : ∀ a b c, ∑ i : K, ∑ j : K, ∑ k : K, F (a * i) (b * j) (c * k) = 0 := by
     intro a b c
     refine hinv _ fun g hg => ?_
+
     simp only [map_sum, ← heq]
     rw [← sum_shift K (fun x => ∑ j : K, ∑ k : K, F x (b * j) (c * k)) a _ (hJK g hg)]
     refine Finset.sum_congr rfl fun i _ => ?_
@@ -88,6 +139,7 @@ theorem three_variables [K.Normal] (hJK : ∀ j ∈ J, π j ∈ K)
           Finset.card_univ, ← Finset.smul_sum, smul_sub]
   have hH : ∀ g a b, H (π g * a) (π g * b) = ρ g (H a b) := by
     intro g a b
+
     simp only [H, map_nsmul, map_sum, map_sub, ← heq, mul_assoc]
   refine ⟨H 1, fun g h => ?_⟩
   rw [key, ← hH, mul_one, map_mul]
@@ -175,7 +227,7 @@ theorem cohomology_vanishes : ∀ (Γ : Type) [Group Γ] [TopologicalSpace Γ] [
         have e := hfc (a⁻¹ * b) (b⁻¹ * c)
         have e' : a⁻¹ * b * (b⁻¹ * c) = a⁻¹ * c := by group
         simp only [hF']
-        rw [← e', e, map_add, ← Module.End.mul_apply, ← map_mul, mul_inv_cancel_left]
+        rw [← e', e, map_add (f := _), ← Module.End.mul_apply, ← map_mul, mul_inv_cancel_left]
         abel)
     obtain ⟨a, ha⟩ := exists_inverse l _ ((hcop U).pow_left 2) htor (fun q => F 1 q 1)
     refine (mem_coboundaries1 ρ _).2 ⟨a • m, fun g => ?_⟩
@@ -212,7 +264,7 @@ theorem cohomology_vanishes : ∀ (Γ : Type) [Group Γ] [TopologicalSpace Γ] [
         have e := congrArg (ρ a) (hfc (a⁻¹ * b) (b⁻¹ * c) (c⁻¹ * d))
         have e1 : a⁻¹ * b * (b⁻¹ * c) = a⁻¹ * c := by group
         have e2 : b⁻¹ * c * (c⁻¹ * d) = b⁻¹ * d := by group
-        rw [e1, e2, map_sub, map_add, map_sub, ← Module.End.mul_apply, ← map_mul,
+        rw [e1, e2, map_sub, map_add (f := _), map_sub, ← Module.End.mul_apply, ← map_mul,
           mul_inv_cancel_left, map_zero] at e
         simp only [hF]
         exact e)

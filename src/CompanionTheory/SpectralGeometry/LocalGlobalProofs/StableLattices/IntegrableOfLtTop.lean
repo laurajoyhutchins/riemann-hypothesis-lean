@@ -1,5 +1,61 @@
-import Mathlib
-import CompanionTheory.RealGroups.DiscreteSeries.DiscreteSeriesClassification.DiscreteSeriesExhaustion.MatrixCoefficientDecay.HilbertSchmidtDecay.HaarExists
+module
+
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.Analysis.Calculus.Deriv.Basic
+public import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+public import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.InnerProductSpace.Calculus
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Analysis.Calculus.Deriv.Mul
+public import Mathlib.Analysis.SpecialFunctions.ExpDeriv
+public import Mathlib.MeasureTheory.Integral.IntegralEqImproper
+
+@[expose] public section
 
 noncomputable section
 
@@ -131,7 +187,7 @@ lemma energy_ge (hae : z.re + R = a) (hu : Continuous u) (hg : Continuous g)
 lemma iint_le {f : ℝ → ℝ} (hf : IntegrableOn f (Ioi 0)) (h0 : ∀ t, 0 ≤ f t) {T : ℝ} (hT : 0 ≤ T) :
     ∫ t in (0 : ℝ)..T, f t ≤ ∫ t in Ioi (0 : ℝ), f t := by
   rw [intervalIntegral.integral_of_le hT]
-  exact setIntegral_mono_set hf (ae_of_all _ h0) Ioc_subset_Ioi_self.eventuallyLE
+  exact setIntegral_mono_set hf (ae_of_all _ h0) Ioc_subset_Ioi_self.eventuallySubset
 
 lemma iint_mono {f : ℝ → ℝ} (hf : Continuous f) (h0 : ∀ t, 0 ≤ f t) {S T : ℝ} (hS : 0 ≤ S)
     (hST : S ≤ T) : ∫ t in (0 : ℝ)..S, f t ≤ ∫ t in (0 : ℝ)..T, f t :=
@@ -372,8 +428,16 @@ lemma lint_unit {u : ℝ → ℂ} (hu : Continuous u) :
   refine lintegral_congr fun t => ?_
   rw [ENNReal.ofReal_pow (norm_nonneg _), ofReal_norm]
 
-theorem lineChain : CompanionTheory.RgExh.Dec.L.LineChain := by
-  intro m z R R' hRR hz
+theorem lineChain (m : ℕ) (z : Fin m → ℂ) (R R' : ℝ)
+    (hRR : R ≤ R') (hz : ∀ k, (z k).re ≠ -R) : ∃ C : ℝ, 0 < C ∧
+    ∀ F : Fin (m + 1) → ℝ → ℂ,
+      (∀ (k : Fin m) (t : ℝ), 0 ≤ t →
+        HasDerivAt (F k.succ) (z k * F k.succ t + F k.castSucc t) t) →
+      (∀ k, Continuous (F k)) →
+      (∀ k, ∫⁻ t in Ioi (0 : ℝ), ‖F k t‖ₑ ^ 2 * ENNReal.ofReal (Real.exp (2 * R' * t)) < ⊤) →
+      ∫⁻ t in Ioi (0 : ℝ), ‖F (Fin.last m) t‖ₑ ^ 2 * ENNReal.ofReal (Real.exp (2 * R * t)) ≤
+        ENNReal.ofReal C * (∑ k, ∫⁻ t in Ioc (0 : ℝ) 1, ‖F k t‖ₑ ^ 2 +
+          ∫⁻ t in Ioi (0 : ℝ), ‖F 0 t‖ₑ ^ 2 * ENNReal.ofReal (Real.exp (2 * R * t))) := by
   obtain ⟨C, hC, H⟩ := chain m z R (fun k h => hz k (by linarith))
   refine ⟨C, hC, fun F hd hc hfin => ?_⟩
   have hint : ∀ k, IntegrableOn (wt R (F k)) (Ioi 0) := by

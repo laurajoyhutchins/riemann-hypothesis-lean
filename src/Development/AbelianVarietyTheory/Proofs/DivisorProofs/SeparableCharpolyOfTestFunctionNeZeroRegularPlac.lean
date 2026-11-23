@@ -1,6 +1,44 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.KernSum
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LocalComponentDefiniteUnitaryFinitePartEqLocalPo
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IsUnifAt
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LocalComponentDefiniteUnitaryFinitePartEqLocalPo
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Matrix Polynomial Filter GlobalTheory.CuspRep GlobalTheory.PRep Formalism.UG Formalism.BasicNotions GlobalTheory.UnitaryBC Formalism.L2.Host GlobalTheory.BCT
 open scoped Classical TensorProduct
 attribute [local instance] GlobalTheory.LocalData.complRel GlobalTheory.LocalData.isLocalField
@@ -21,7 +59,7 @@ theorem mem_GLint_of_entries {L : Type} [Field L] {k : ℕ} (O : Subring L) (g :
   · simp only [Matrix.map_mul, Matrix.map_one _ (map_zero _) (map_one _)]
     exact g.inv_mul
 
-theorem eventually_toSub_mem (x : finU E n) :
+theorem eventually_toSub_mem (x : finU (E := E) (n := n)) :
     ∀ᶠ w in cofinite, toSub (UL n w) (cLoc w (x : UA E n)) ∈ KL n w := by
   have h : ∀ y : FiniteAdeleRing (𝓞 E) E, ∀ᶠ w in cofinite, pLoc E w y ∈ Formalism.UG.Ov E w := fun y => y.2
   have h1 : ∀ᶠ w in cofinite, ∀ i j, pLoc E w (pFin E (((x : UA E n) : GA E n).val i j)) ∈ Formalism.UG.Ov E w := by
@@ -29,7 +67,7 @@ theorem eventually_toSub_mem (x : finU E n) :
   have h2 : ∀ᶠ w in cofinite, ∀ i j, pLoc E w (pFin E ((((x : UA E n) : GA E n))⁻¹.val i j)) ∈ Formalism.UG.Ov E w := by
     simp only [Filter.eventually_all]; exact fun i j => h _
   filter_upwards [h1, h2] with w a b
-  have hK : cLoc w (x : UA E n) ∈ GlobalTheory.LFun.KGL w n := by
+  have hK : cLoc w (x : UA E n) ∈ GlobalTheory.LFun.KGL w (n := n) := by
     refine mem_GLint_of_entries _ _ (fun i j => a i j) (fun i j => ?_)
     rw [← map_inv]
     exact b i j
@@ -39,7 +77,7 @@ theorem eventually_toSub_mem (x : finU E n) :
   · exact one_mem _
 
 theorem cLoc_finPt_val (w : Pl E) (γ : UE E n) :
-    (cLoc w ((finPt γ : finU E n) : UA E n)).val = γ.1.val.map (algebraMap E (w.adicCompletion E)) := by
+    (cLoc w ((finPt γ : finU (E := E) (n := n)) : UA E n)).val = γ.1.val.map (algebraMap E (w.adicCompletion E)) := by
   rw [FinPtLoc.finPt_eq]
   refine Matrix.ext fun i j => ?_
   change pLoc E w (pFin E ((finGL E n (ratF E n γ.1)).val i j)) = algebraMap E _ (γ.1.val i j)
@@ -56,10 +94,10 @@ end GlobalTheory.BCT.RegVan
 
 theorem GlobalTheory.BCT.regvan : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (n : ℕ) (S : Set (Pl E))
     (K' : ∀ w : Pl E, Subgroup (UL n w)) (f : ∀ w : Pl E, UL n w → ℂ), IsTest (KL n) K' f → ∀ w ∈ S,
-    (∀ y, f w y ≠ 0 → y.1.val.charpoly.Separable) → ∀ (x : finU E n) (γ : UE E n),
+    (∀ y, f w y ≠ 0 → y.1.val.charpoly.Separable) → ∀ (x : finU (E := E) (n := n)) (γ : UE E n),
     globFn S f (x⁻¹ * finPt γ * x) ≠ 0 → γ.1.val.charpoly.Separable := by
   intro E _ _ _ n S K' f hT w hw hsep x γ hne
-  set y : finU E n := x⁻¹ * finPt γ * x with hy
+  set y : finU (E := E) (n := n) := x⁻¹ * finPt γ * x with hy
   set g : Pl E → ℂ := fun u => f u (toSub (UL n u) (cLoc u (y : UA E n))) with hg
   have hev : ∀ᶠ u in cofinite, g u = 1 := by
     filter_upwards [RegVan.eventually_toSub_mem y, hT.2] with u a b
@@ -79,7 +117,7 @@ theorem GlobalTheory.BCT.regvan : ∀ (E : Type) [Field E] [NumberField E] [IsCM
   · rw [show toSub (UL n w) (cLoc w (y : UA E n)) = ⟨_, hmem⟩ from dif_pos hmem] at hs
     change (cLoc w (y : UA E n)).val.charpoly.Separable at hs
     have hyv : (cLoc w (y : UA E n)).val = (cLoc w (x : UA E n))⁻¹.val *
-        (cLoc w ((finPt γ : finU E n) : UA E n)).val * (cLoc w (x : UA E n)).val := by
+        (cLoc w ((finPt γ : finU (E := E) (n := n)) : UA E n)).val * (cLoc w (x : UA E n)).val := by
       rw [hy]
       simp only [Subgroup.coe_mul, Subgroup.coe_inv, map_mul, map_inv, Units.val_mul]
     rw [hyv, Matrix.coe_units_inv, Matrix.charpoly_units_conj', RegVan.cLoc_finPt_val, Matrix.charpoly_map] at hs

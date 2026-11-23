@@ -1,6 +1,49 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LatAtVAtStable
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LocalAddCharComponentTrivialIntegersEventually
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ActFromBlocks
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LocalAddCharComponentTrivialIntegersEventually
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ContinuousAtPlace
+
+@[expose] public section
+
 open scoped Matrix GlobalTheory.VacAny
 open NumberField IsDedekindDomain MeasureTheory Filter Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes GlobalTheory.WeilM GlobalTheory.AdelicU GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels GlobalTheory.RatWeilOp
 
@@ -43,7 +86,6 @@ theorem exists_finset_trivial (ψ : AddChar (AF F) ℂ) (hψ : Continuous ψ) :
         simpa using intFin_nsmul (F := F) 0 0
       show LinearMap.inr F (Ainf F) (Af F) (intFin 0) = (0 : AF F)
       rw [h, map_zero]
-      rfl
     simp [this, AddChar.map_zero_eq_one]
   obtain ⟨I, u, hu, hsub⟩ := isOpen_pi_iff.1 hopen 0 h0
   refine ⟨I, fun y hy => GlobalTheory.eq_one_of_forall_norm_pow_sub_one_lt _ fun n => ?_⟩
@@ -54,7 +96,6 @@ theorem exists_finset_trivial (ψ : AddChar (AF F) ℂ) (hψ : Continuous ψ) :
   have e : (ι (n • y) : AF F) = n • (ι y : AF F) := by
     show LinearMap.inr F (Ainf F) (Af F) (intFin (n • y)) = _
     rw [intFin_nsmul, map_nsmul]
-    rfl
   have h := hsub hmem
   simp only [Set.mem_setOf_eq] at h
   rwa [e, AddChar.map_nsmul_eq_pow] at h
@@ -96,7 +137,7 @@ theorem psiAt_eq_one_of_integral {F : Type} [Field F] [NumberField F] (ψ : AddC
 
 theorem psi_prod : ∀ (F : Type) [Field F] [NumberField F] (ψ : AddChar (AF F) ℂ), Continuous ψ → ∀ x : AF F,
     (Function.mulSupport fun v : Pl F => GlobalTheory.LatVac.psiAt ψ v (evFin F v x)).Finite ∧
-    ψ x = ψ (pairA F (fstA F x) 0) * ∏ᶠ v : Pl F, GlobalTheory.LatVac.psiAt ψ v (evFin F v x) := by
+    ψ x = ψ (pairA F (fstA F x) 0) * ∏ᶠ v : Pl (F := F), GlobalTheory.LatVac.psiAt ψ v (evFin F v x) := by
   intro F _ _ ψ hψ x
   classical
   obtain ⟨I, hI⟩ := exists_finset_trivial ψ hψ
@@ -132,7 +173,8 @@ theorem psi_prod : ∀ (F : Type) [Field F] [NumberField F] (ψ : AddChar (AF F)
   have hr : ∀ v ∈ I, r v = 0 := fun v hv => dif_pos (Finset.mem_union_left _ hv)
   have hdec : xf = ∑ v ∈ S, GlobalTheory.AdelicU.singleFin v (evalV F v xf) + intFin r := by
     refine GlobalTheory.AdelicU.af_ext fun w => ?_
-    rw [map_add, map_sum, evalV_intFin]
+
+    rw [map_add (f := _), map_sum, evalV_intFin]
     by_cases hw : w ∈ S
     · rw [Finset.sum_eq_single w (fun b _ hb => GlobalTheory.AdelicU.evalV_singleFin_ne (Ne.symm hb) _)
         (fun h => absurd hw h), GlobalTheory.AdelicU.evalV_singleFin_self]

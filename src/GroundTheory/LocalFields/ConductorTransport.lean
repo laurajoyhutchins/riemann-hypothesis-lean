@@ -1,7 +1,52 @@
-import Mathlib
-import GroundTheory.LocalFields.UpperNumbering
-import GroundTheory.LocalFields.LubinTateTowerMaps
-import GroundTheory.LocalFields.SeparableClosure
+module
+
+public import GroundTheory.LocalFields.LubinTateTowerMaps
+public import GroundTheory.LocalFields.SeparableClosure
+public import GroundTheory.LocalFields.HerbrandFunction
+public import GroundTheory.LocalFields.UpperNumbering
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -19,15 +64,11 @@ variable {K : Type*} [Field K] [ValuativeRel K] [TopologicalSpace K] [IsNonarchi
 
 def integerAlgEquivOfAlgEquiv (e : L₁ ≃ₐ[K] L₂) : 𝒪[L₁] ≃ₐ[𝒪[K]] 𝒪[L₂] :=
   AlgEquiv.ofAlgHom (integerAlgHom e.toAlgHom) (integerAlgHom e.symm.toAlgHom)
-    (by ext; simp) (by ext; simp)
+    (AlgHom.ext fun x => Subtype.ext (e.apply_symm_apply (x : L₂)))
+    (AlgHom.ext fun x => Subtype.ext (e.symm_apply_apply (x : L₁)))
 
-@[simp]
-theorem coe_integerAlgEquivOfAlgEquiv_apply (e : L₁ ≃ₐ[K] L₂) (x : 𝒪[L₁]) :
-    (integerAlgEquivOfAlgEquiv e x : L₂) = e x :=
-  rfl
 
 omit [IsNonarchimedeanLocalField K] in
-
 theorem addVal_ringEquiv {R S : Type*} [CommRing R] [IsDomain R] [IsDiscreteValuationRing R]
     [CommRing S] [IsDomain S] [IsDiscreteValuationRing S] (φ : R ≃+* S) (x : R) :
     addVal S (φ x) = addVal R x := by
@@ -46,7 +87,8 @@ theorem lowerIndex_autCongr (e : L₁ ≃ₐ[K] L₂) (σ : L₁ ≃ₐ[K] L₁)
   refine iInf_congr fun x => ?_
   have h : integerAlgEquiv K L₂ (e.autCongr σ) (φ x) - φ x = φ (integerAlgEquiv K L₁ σ x - x) := by
     apply Subtype.ext
-    simp [φ, AlgEquiv.autCongr_apply]
+    change (e.autCongr σ) (e (x : L₁)) - e (x : L₁) = e (σ (x : L₁) - (x : L₁))
+    simp [AlgEquiv.autCongr_apply]
   simp only [AlgEquiv.toEquiv_eq_coe, EquivLike.coe_coe]
   rw [h]
   exact addVal_ringEquiv (φ : 𝒪[L₁] ≃+* 𝒪[L₂]) _
@@ -99,7 +141,7 @@ theorem map_upperRamificationGroup_autCongr (e : L₁ ≃ₐ[K] L₂) (v : ℝ) 
     map_lowerRamificationGroupReal_autCongr]
 
 theorem upperRamificationGroup_eq_bot_of_ramificationIndex_eq_one [IsGalois K L₁]
-    (he : ramificationIndex K L₁ = 1) {v : ℝ} (hv : -1 < v) : upperRamificationGroup K L₁ v = ⊥ := by
+    (he : (_root_.Ideal.ramificationIdx (_root_.IsLocalRing.maximalIdeal (_root_.Valuation.integer (_root_.ValuativeRel.valuation L₁))) (_root_.Valuation.integer (_root_.ValuativeRel.valuation K))) = 1) {v : ℝ} (hv : -1 < v) : upperRamificationGroup K L₁ v = ⊥ := by
   have h0 : lowerRamificationGroup K L₁ 0 = ⊥ :=
     Subgroup.eq_bot_of_card_eq _ (by rw [card_lowerRamificationGroup_zero, he])
   rw [eq_bot_iff, ← h0, upperRamificationGroup, lowerRamificationGroupReal]

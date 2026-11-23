@@ -1,4 +1,42 @@
-import Development.WeilBound.RepresentationTheoryGL.TubeMeasures.DisjointTubes.TubeSt
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.TubeMeasures.DisjointTubes.TubeSt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 open NumberField IsDedekindDomain MeasureTheory Matrix GlobalTheory.AdLat GlobalTheory.UCls GlobalTheory.SUVol ReciprocityTheory.ChartRestriction.G.FD ReciprocityTheory.ChartRestriction.G.AR.Up
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.L2.Theta Formalism.MainNotions.StandardLattice Formalism.IndefR.Lev Formalism.IndefR.Datum GlobalTheory.AdelicScalar
@@ -52,13 +90,13 @@ theorem num : NumSt := by
       rw [Finset.prod_const, Finset.card_range, inv_pow, ← pow_mul, sq]
     rw [e]
     unfold ReciprocityTheory.ChartRestriction.DS.volU
-    exact Finset.prod_le_prod (fun i _ => by positivity)
+    exact Finset.prod_le_prod₀ (fun i _ => by positivity)
       (fun i hi => MainStatements.Tam.N.factor_lower r i (Finset.mem_range.mp hi))
   · have e : (13 : ℝ) ^ (r ^ 2) = ∏ _i ∈ Finset.range r, (13 : ℝ) ^ r := by
       rw [Finset.prod_const, Finset.card_range, ← pow_mul, sq]
     rw [e]
     unfold ReciprocityTheory.ChartRestriction.DS.volU
-    exact Finset.prod_le_prod (fun i _ => by positivity)
+    exact Finset.prod_le_prod₀ (fun i _ => by positivity)
       (fun i hi => MainStatements.Tam.N.factor_upper r i (Finset.mem_range.mp hi))
 
 end MainStatements.Tam

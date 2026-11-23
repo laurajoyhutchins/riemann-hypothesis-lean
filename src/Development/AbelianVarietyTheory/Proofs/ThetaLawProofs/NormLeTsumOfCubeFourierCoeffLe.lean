@@ -1,10 +1,70 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SymplecticGenerators.IsPluriharmonicSiegel
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SymplecticGenerators.SymplecticCharacters.GenMain
-import Development.AbelianVarietyTheory.Proofs.ToricGeometry.FourierCoeffUnitCubeTranslateOfEntirePeriodic
-import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.SetIntegralPowEqZeroOfPosFreqEuclidean
-import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.SndFDerivAddSndFDerivIEqZeroOfHarmonicAtLine
-import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.ExistsNatMulQuadraticLt
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SymplecticGenerators.IsPluriharmonicSiegel
+public import Mathlib.MeasureTheory.Integral.Bochner.Basic
+public import Mathlib.MeasureTheory.Measure.Haar.OfBasis
+public import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.EventuallyIteratedFDerivEqZeroOfRealSubspace
+public import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.FderivIntegralApplyOfHolomorphicOfDominated
+public import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.SetIntegralPowEqZeroOfPosFreqEuclidean
+public import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.ExistsNatMulQuadraticLt
+public import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.SndFDerivAddSndFDerivIEqZeroOfHarmonicAtLine
+public import Development.AbelianVarietyTheory.Proofs.ToricGeometry.FourierCoeffUnitCubeTranslateOfEntirePeriodic
+import Mathlib.Algebra.Order.Archimedean.Real.Hom
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Fourier.AddCircleMulti
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+public import Mathlib.Analysis.Matrix.Order
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Complex Matrix Filter Topology MeasureTheory
 open scoped BigOperators Real
@@ -106,8 +166,8 @@ theorem setIntegral_unitCube_tube {ι : Type*} [Fintype ι] [DecidableEq ι]
       congr 1
       funext x
       congr 1
-      funext j
-      simp
+      funext i
+      simp only [Pi.add_apply, Complex.ofReal_add]
       ring) hw hw'
 
 theorem exists_tube_fourierCoeff {ι : Type*} [Fintype ι] [DecidableEq ι]
@@ -276,9 +336,12 @@ theorem exists_siegel_fourierCoeff {g N : ℕ} (hN : 1 ≤ N) {F : Matrix (Fin g
     rw [← hsym τ hτ]
     convert h using 4
     funext q
-    simp only [Pi.add_apply, hz, ← hτY, Matrix.map_apply]
+    simp only [Pi.add_apply, hz]
     push_cast
-    rw [← add_div, mul_comm I, Complex.re_add_im]
+    rw [← add_div, mul_comm I]
+    have hy : (τ q.1 q.2).im = Y q.1 q.2 := by
+      simpa using congrFun (congrFun hτY q.1) q.2
+    rw [← hy, Complex.re_add_im]
   · obtain ⟨a, ha0, ha1, ha2⟩ := exists_tube_fourierCoeff hU hU' htube hf hp
     refine ⟨a, ha0, fun Y hY M hM m => ?_, fun τ hτ b hb hle => ?_⟩
     · set z : Fin g × Fin g → ℂ := fun q => I * Y q.1 q.2 with hz
@@ -390,8 +453,8 @@ theorem bound_of_invariant {g : ℕ} {F : Matrix (Fin g) (Fin g) ℂ → ℂ}
 
 end Koecher
 
-open ReciprocityTheory.PTheta ReciprocityTheory.ChartRestriction.G.Key Koecher in
 
+open ReciprocityTheory.PTheta ReciprocityTheory.ChartRestriction.G.Key Koecher in
 theorem phKoecher : PhKoecherStatement := by
   intro g hg N hN F hF hper hinv c hc
   have hNpos : (0 : ℝ) < N := by exact_mod_cast hN

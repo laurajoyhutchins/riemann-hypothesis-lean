@@ -1,4 +1,61 @@
-import GroundTheory.AutomorphicForms.DixmierMalliavin
+module
+
+public import GroundTheory.AutomorphicForms.DixmierMalliavinProducts
+public import GroundTheory.AutomorphicForms.HeckeAlgebra
+public import GroundTheory.AutomorphicForms.DixmierMalliavinHaar
+import GroundTheory.AutomorphicForms.DixmierMalliavinHaarCoord
+public import GroundTheory.AutomorphicForms.DixmierMalliavinLine
+public import GroundTheory.AutomorphicForms.DixmierMalliavinSeries
+import GroundTheory.AutomorphicForms.GKModules.SmoothVectors
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Algebra.Group.Units
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace PositivityTheory.DM
 
@@ -58,10 +115,10 @@ theorem decomp_direction {f : G → ℂ}
     rw [integral_tsum_of_summable_integral_norm hTi hsum]
     congr 1
     funext t
-    simp only [T, hD]
     rw [← tsum_mul_left]
     congr 1
     funext p
+    simp only [T, hD]
     ring
   · congr 1; funext t; rw [mul_comm]
 
@@ -71,21 +128,26 @@ theorem decomp_iter {ε : ℝ} (hε : 0 < ε) : ∀ {d : ℕ} (X : Fin d → �
       (∀ i, (letI := h.chartedSpace; ContMDiff 𝓘(ℝ, 𝔤) 𝓘(ℝ, ℂ) ∞ (F i)) ∧
         tsupport (F i) ⊆ tsupport f) ∧
       (∀ i, ContDiff ℝ ∞ (K i) ∧ tsupport (K i) ⊆ Metric.closedBall 0 ε) ∧
-      ∀ x, f x = ∑ i, ∫ t, K i t * F i (h.revProdExp X t * x)
-  | 0, X, f, hf, hfc => by
+      ∀ x, f x = ∑ i, ∫ t, K i t * F i (h.revProdExp X t * x) := by
+  intro d
+  induction d with
+  | zero =>
+    intro X f hf hfc
     refine ⟨1, fun _ => f, fun _ _ => 1, fun _ => ⟨hf, subset_rfl⟩, fun _ => ⟨contDiff_const, ?_⟩,
       fun x => ?_⟩
     · intro t _
       rw [Subsingleton.elim t 0]; exact Metric.mem_closedBall_self hε.le
     · have hv : (volume : Measure (Fin 0 → ℝ)).real univ = 1 := by
         simp [Measure.real, MeasureTheory.volume_pi]
-      simp [h.revProdExp_zero, hv]
-  | d + 1, X, f, hf, hfc => by
+      simp only [Fin.sum_univ_one, h.revProdExp_zero, one_mul, integral_const, hv, one_smul]
+  | succ d ih =>
+    intro X f hf hfc
     let := h.chartedSpace
     obtain ⟨f₁, hf₁, hf₁c, g, k, hg, hk, hgs, hks, hdec⟩ :=
-      decomp_direction h hf hfc (X 0) hε
-    obtain ⟨m₁, F₁, K₁, hF₁, hK₁, hd₁⟩ := decomp_iter hε (Fin.tail X) f₁ hf₁ (hfc.of_isClosed_subset (isClosed_tsupport _) hf₁c)
-    obtain ⟨m₂, F₂, K₂, hF₂, hK₂, hd₂⟩ := decomp_iter hε (Fin.tail X) f hf hfc
+      decomp_direction h (f := f) hf hfc (X 0) hε
+    obtain ⟨m₁, F₁, K₁, hF₁, hK₁, hd₁⟩ :=
+      ih (Fin.tail X) f₁ hf₁ (hfc.of_isClosed_subset (isClosed_tsupport _) hf₁c)
+    obtain ⟨m₂, F₂, K₂, hF₂, hK₂, hd₂⟩ := ih (Fin.tail X) f hf hfc
     refine ⟨m₁ + m₂, Fin.append F₁ F₂,
       Fin.append (fun i t => g (t 0) * K₁ i (Fin.tail t)) (fun i t => k (t 0) * K₂ i (Fin.tail t)),
       ?_, ?_, ?_⟩

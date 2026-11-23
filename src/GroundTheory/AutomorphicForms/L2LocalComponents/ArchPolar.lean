@@ -1,6 +1,49 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.AutomorphicFormSpaces.GKStableCartan
+module
+
+public import GroundTheory.AutomorphicForms.AutomorphicFormSpaces.GKStableCartan
 import GroundTheory.AutomorphicForms.RealGroupsPolar
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField NumberField.mixedEmbedding NumberField.InfinitePlace Matrix
 open scoped NumberField.AdeleRing
@@ -13,8 +56,8 @@ namespace AutomorphicForm
 
 variable {K : Type*} [Field K] [NumberField K] {n : ℕ}
 
-open Reduction in
 
+open Reduction in
 theorem mem_archCompact_of_unitary (x : archGroup K n)
     (hr : ∀ v : {w : InfinitePlace K // IsReal w},
       realCompM v ((x : (ArchMatrix K n)ˣ) : ArchMatrix K n) ∈ unitaryGroup (Fin n) ℝ)
@@ -35,8 +78,9 @@ theorem mem_archCompact_of_unitary (x : archGroup K n)
           Matrix (Fin n) (Fin n) w.Completion)) i)) =
           (fun i => ψ (y i)) ᵥ* realCompM ⟨w, hw⟩ ((x : (ArchMatrix K n)ˣ) : ArchMatrix K n) := by
         ext j
+
         simp only [vecMul, dotProduct, map_sum, map_mul, realCompM_apply, Matrix.map_apply,
-          realComp_apply]
+        realComp_apply]
         refine Finset.sum_congr rfl fun i _ => ?_
         rw [infAt_infEmb_apply, extensionEmbeddingOfIsReal_symm]
       rw [e, euclidNorm_vecMul_unitary hU]
@@ -51,8 +95,9 @@ theorem mem_archCompact_of_unitary (x : archGroup K n)
           Matrix (Fin n) (Fin n) w.Completion)) i)) =
           (fun i => ψ (y i)) ᵥ* complexCompM ⟨w, hcw⟩ ((x : (ArchMatrix K n)ˣ) : ArchMatrix K n) := by
         ext j
+
         simp only [vecMul, dotProduct, map_sum, map_mul, complexCompM_apply, Matrix.map_apply,
-          complexComp_apply]
+        complexComp_apply]
         refine Finset.sum_congr rfl fun i _ => ?_
         rw [infAt_infEmb_apply, extensionEmbedding_symm _ hcw]
       rw [e, euclidNorm_vecMul_unitary hU]

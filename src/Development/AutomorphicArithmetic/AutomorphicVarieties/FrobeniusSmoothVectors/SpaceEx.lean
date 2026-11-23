@@ -1,10 +1,62 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.FrobeniusSmoothVectors.Integral
-import Development.AutomorphicArithmetic.AutomorphicVarieties.FrobeniusSmoothVectors.RbarProd
-import Development.AutomorphicArithmetic.AutomorphicVarieties.FrobeniusSmoothVectors.OrdOfFlag
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.UnivLift
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.CoQuot
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.MonomialRepresentations.HenselDiag
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PatchingModules.DeterminantPadicFree.PhiSub
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.FrobeniusSmoothVectors.LeAdicClosure
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.MonomialRepresentations.HenselDiag
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.CoQuot
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.UnivLift
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.FrobeniusSmoothVectors.OrdOfFlag
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.FrobeniusSmoothVectors.RbarProd
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.AdicCompletion.Noetherian
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open IsLocalRing Matrix UpperTheory.V.Alg UpperTheory.V.U3 UpperTheory.V.Fr
 
@@ -83,8 +135,9 @@ private theorem cont_conj [TopologicalSpace H] (I : Ideal C) (M : H → Matrix (
   have := (lc_mat (fun s => (Ideal.Quotient.mk (I ^ N)).mapMatrix (M s)) fun a b => h a b N).comp
     fun X => ((Ideal.Quotient.mk (I ^ N)).mapMatrix Q * X * (Ideal.Quotient.mk (I ^ N)).mapMatrix P) i j
   convert this using 1
-  funext s
-  simp only [Function.comp_apply, ← map_mul]
+  funext g
+  change (Ideal.Quotient.mk (I ^ N)).mapMatrix (Q * M g * P) i j = _
+  rw [map_mul, map_mul]
   rfl
 
 end
@@ -150,7 +203,33 @@ theorem UpperTheory.V.Fr.space_ex :
     exact (hΨ.comp_continuous continuous_subtype_val).comp
       fun x => diagonal fun i => ((x ^ w n i : (ResidueField O)ˣ) : ResidueField O)
   haveI : CompactSpace F.G0 := isCompact_iff_compactSpace.1 (F.del.ker.isClosed_of_isOpen hF.del_open).isCompact
-  obtain ⟨R, _, _, _, u, hu⟩ := univ_lift l O F.G0 (Fin n) ρ₀.r (Pa.Det.phiSub l _ hF.del_open hF.phi) hc
+  have hphi : PhiCond (Γ := F.G0) l := by
+    unfold PhiCond at *
+    intro K hK
+    have hK' : IsOpen ((K.map F.del.ker.subtype : Subgroup F.Γ) : Set F.Γ) := by
+      rw [Subgroup.coe_map]
+      exact hF.del_open.isOpenMap_subtype_val _ hK
+    haveI := hF.phi (K.map F.del.ker.subtype) hK'
+    let e := Subgroup.equivMapOfInjective K F.del.ker.subtype F.del.ker.subtype_injective
+    have he : ∀ y : K.map F.del.ker.subtype, (((e.symm y : K) : F.G0) : F.Γ) = (y : F.Γ) :=
+      fun y => congrArg Subtype.val (e.apply_symm_apply y)
+    have hc : Continuous fun y : K.map F.del.ker.subtype => (e.symm y : K) := by
+      apply continuous_induced_rng.2
+      apply continuous_induced_rng.2
+      exact continuous_subtype_val.congr fun y => (he y).symm
+    refine Finite.of_injective
+      (β := {ψ : K.map F.del.ker.subtype →* Multiplicative (ZMod l) //
+        IsOpen (ψ.ker : Set (K.map F.del.ker.subtype))})
+      (fun φ => ⟨φ.1.comp e.symm.toMonoidHom, by
+        show IsOpen ((fun y => (e.symm y : K)) ⁻¹' (φ.1.ker : Set K))
+        exact φ.2.preimage hc⟩) ?_
+    intro φ ψ h
+    apply Subtype.ext
+    ext k
+    have h' := congrArg (fun χ : {ψ : K.map F.del.ker.subtype →* Multiplicative (ZMod l) //
+      IsOpen (ψ.ker : Set (K.map F.del.ker.subtype))} => χ.1 (e k)) h
+    simpa using h'
+  obtain ⟨R, _, _, _, u, hu⟩ := univ_lift l O F.G0 (Fin n) ρ₀.r hphi hc
   have hres : ∀ g, (res O R).mapMatrix (u.hom g) = ρ₀.r g := fun g => Matrix.ext (u.red g)
   choose g₀ hg₀ using hF.f3
   choose P Q d hPQ hP hQ hd using fun v => diag_ex (u.hom (F.loc0 v (g₀ v))) _

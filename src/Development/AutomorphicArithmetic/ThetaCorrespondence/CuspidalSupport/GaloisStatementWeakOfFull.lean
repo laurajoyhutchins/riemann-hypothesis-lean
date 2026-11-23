@@ -1,4 +1,46 @@
-import Formalism.SharpRestriction.LevelLetterCocycles.SumRepresentations
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.SumRepresentations
+import Mathlib.Algebra.AffineMonoid.UniqueSums
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -25,11 +67,6 @@ variable {N A}
 
 theorem RelA.refl {w : PlE H} (x : A.LP w) : RelA N A x x := ⟨rfl, id, fun _ _ _ => rfl⟩
 
-theorem RelA.of_eq {w : PlE H} {x y : A.LP w} (e : x = y) : RelA N A x y := e ▸ RelA.refl x
-
-theorem Cusp.of_eq {w : PlE H} {x y : A.LP w} (e : x = y) : Cusp N A x y :=
-  ⟨RelA.of_eq e, fun _ _ h => e ▸ h, fun _ => e⟩
-
 theorem comm_le_ine (w : PlE H) :
     ⁅Ine (F := H.E) (N.plOm.1 w), Ine (F := H.E) (N.plOm.1 w)⁆ ≤ Ine (F := H.E) (N.plOm.1 w) :=
   Subgroup.commutator_le.2 fun a ha b hb => by
@@ -40,13 +77,6 @@ theorem RelA.unr {w : PlE H} {x y : A.LP w} (h : RelA N A x y) (hy : A.unr y) : 
   obtain ⟨h0, h1⟩ := (A.unr_iff_ine y).1 hy
   refine (A.unr_iff_ine x).2 ⟨h.mono h0, fun σ hσ => ?_⟩
   rw [h.ine (fun τ hτ => h1 τ (comm_le_ine w hτ)) σ hσ, h1 σ hσ, h.dim]
-
-theorem RelA.tw {w : PlE H} {x y : A.LP w} (h : RelA N A x y) (s : ℝ) : RelA N A (A.lpTw x s) (A.lpTw y s) := by
-  refine ⟨by rw [A.lpDim_tw, A.lpDim_tw, h.dim], by rw [A.monomial_twist_iff, A.monomial_twist_iff]; exact h.mono, fun hy σ hσ => ?_⟩
-  rw [A.inePol_tw _ _ σ hσ, A.inePol_tw _ _ σ hσ]
-  refine h.ine (fun τ hτ => ?_) σ hσ
-  have := hy τ hτ
-  rwa [A.inePol_tw _ _ τ (comm_le_ine w hτ), A.lpDim_tw] at this
 
 theorem eq_pow_of_mul {p q : ℂ[X]} (hp : p.Monic) {n : ℕ} (h : p * q = (X - 1) ^ n) : p = (X - 1) ^ p.natDegree := by
   have hirr : Prime (X - C (1 : ℂ)) := prime_X_sub_C 1
@@ -107,10 +137,5 @@ def GaloisRepresentationsWeak : Prop :=
         ∀ w ∈ placesOver H.E (N.l i), A.IsdRW i ρ w ∧ A.wdOf i ρ w = A.lpTw (A.locG χ w) s ∧
           ∀ τ, InducesW N i τ w → (A.jumpsW i ρ τ).map (fun n : ℤ => (n : ℂ)) =
             (A.infG χ ((A.iotaQC i).toRingHom.comp τ)).map (fun z => -(z + (s : ℂ))))
-
-theorem galois_statement_weak_of_full (h : exists_galois_rep_local_global_compatible N A) : GaloisRepresentationsWeak N A := fun i =>
-  ⟨fun a ha π hc hr => by
-    obtain ⟨ρ, c, s, o, u⟩ := (h i).1 a ha π hc hr
-    exact ⟨ρ, c, s, o, fun w hw => ⟨(u w hw).1, (u w hw).2.1, Cusp.of_eq (u w hw).2.2⟩⟩, (h i).2⟩
 
 end UpperTheory.Lit.Car

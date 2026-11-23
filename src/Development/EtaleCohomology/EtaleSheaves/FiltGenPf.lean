@@ -1,4 +1,54 @@
-import Development.EtaleCohomology.EtaleSheaves.CechFiltPf
+module
+
+public import Mathlib.Algebra.Homology.HomotopyCategory.HomComplexSingle
+public import Mathlib.Algebra.Homology.HomotopyCategory.MappingCone
+public import Mathlib.Combinatorics.Quiver.ReflQuiver
+public import Mathlib.RingTheory.WittVector.IsPoly
+public import Mathlib.Tactic.ReduceModChar
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.Monoidal.Mon
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 open CategoryTheory Limits CochainComplex CochainComplex.HomComplex
@@ -160,51 +210,5 @@ lemma step {K L I : CochainComplex C ℤ} (φ : K ⟶ L) (k n : ℤ)
       simp
     · rw [(show ((Cochain.ofHom (mappingCone.inr φ)).comp z (zero_add n)).v p q hpq = 0 by rw [hβ]; exact hV2 p q hpq hkp), Cochain.single_v_eq_zero b _ p _ _ (by omega)]
       simp
-
-theorem FiltGen_of : LateralTheory.E.CechFiltPf.FiltGen.{u, v} := by
-  intro C _ _ K L I φ n hK hL hI hlev
-  have claim : ∀ m : ℕ, ∀ z : Cochain (mappingCone φ) I n, δ n (n + 1) z = 0 →
-      ∃ c : Cochain (mappingCone φ) I (n - 1), V φ (-(m : ℤ)) n (z - δ (n - 1) n c) := by
-    intro m
-    induction m with
-    | zero =>
-      intro z hz
-      refine ⟨0, ?_, ?_⟩
-      · intro p q hpq hp
-        exact (hK p (by omega)).eq_of_src _ _
-      · intro p q hpq hp
-        exact (hL p (by omega)).eq_of_src _ _
-    | succ m ih =>
-      intro z hz
-      obtain ⟨c, hc⟩ := ih z hz
-      obtain ⟨c', hc'⟩ := step φ (-(m : ℤ)) n (hlev _ (by omega)) (z - δ (n - 1) n c)
-        (by rw [δ_sub, δ_δ, sub_zero]; exact hz) hc
-      refine ⟨c + c', ?_⟩
-      have e : (-((m + 1 : ℕ) : ℤ)) = -(m : ℤ) - 1 := by push_cast; ring
-      rw [e, δ_add, ← sub_sub]
-      exact hc'
-  constructor
-  intro x y
-  suffices h : ∀ x : CohomologyClass (mappingCone φ) I n, x = 0 by rw [h x, h y]
-  intro x
-  obtain ⟨z, rfl⟩ := CohomologyClass.mk_surjective x
-  obtain ⟨c, hc1, hc2⟩ := claim (n.toNat + 1) z (Cocycle.δ_eq_zero z (n + 1))
-  rw [CohomologyClass.mk_eq_zero_iff, mem_coboundaries_iff _ (n - 1) (by omega)]
-  refine ⟨c, ?_⟩
-  have h0 : (z : Cochain (mappingCone φ) I n) - δ (n - 1) n c = 0 := by
-    rw [mappingCone.ext_cochain_from_iff φ (n - 1) n (by omega)]
-    constructor
-    · ext p q hpq
-      simp only [Cochain.comp_zero, Cochain.zero_v]
-      rcases lt_or_ge (-((n.toNat + 1 : ℕ) : ℤ)) p with hp | hp
-      · exact hc1 p q hpq hp
-      · exact (hI q (by omega)).eq_of_tgt _ _
-    · ext p q hpq
-      simp only [Cochain.comp_zero, Cochain.zero_v]
-      rcases lt_or_ge (-((n.toNat + 1 : ℕ) : ℤ)) p with hp | hp
-      · exact hc2 p q hpq hp
-      · exact (hI q (by omega)).eq_of_tgt _ _
-  rw [sub_eq_zero] at h0
-  exact h0.symm
 
 end LateralTheory.E.FiltGenPf

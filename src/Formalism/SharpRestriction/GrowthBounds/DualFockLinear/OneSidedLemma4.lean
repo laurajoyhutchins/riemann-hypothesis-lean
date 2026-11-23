@@ -1,4 +1,51 @@
-import Formalism.SharpRestriction.GrowthBounds.DualFockLinear.DvdOfCompl
+module
+
+public import Formalism.LocalToGlobal.GroupLattices.FockModels.FlatModels.MemNablaLTwLetter
+import Formalism.GradedWeylDivisibility.FinalD
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Formalism.LocalToGlobal.GroupLattices.FockModels.MkP
+
+@[expose] public section
 
 noncomputable section
 
@@ -60,7 +107,7 @@ theorem tr_multi_twist (K : Type) [Field K] (m : ℕ) (hm : 1 ≤ m) (vec : S �
     refine Finset.prod_congr rfl fun s _ => ?_
     rw [twist_theta K m hm (d s) (vec s) (M s) (hM s) _ (partS_Hd K d μ hμ s)]
   | zero => simp
-  | add x y _ _ hx hy => simp only [map_add, smul_add, hx, hy]
+  | add x y _ _ hx hy => simp only [map_add (f := _), smul_add, hx, hy]
   | smul a x _ hx => simp only [map_smul]; rw [smul_comm, hx]
 
 theorem tr_tens_int (O Kf : Type) [CommRing O] [Field Kf] [Algebra O Kf] (m : ℕ) (lam : S → Fin (m + 1) → ℤ)
@@ -86,7 +133,7 @@ theorem tr_tens_int (O Kf : Type) [CommRing O] [Field Kf] [Algebra O Kf] (m : �
   | add x y _ _ hx hy =>
     obtain ⟨R1, h1⟩ := hx
     obtain ⟨R2, h2⟩ := hy
-    exact ⟨R1 + R2, by rw [map_add, smul_add, h1, h2, map_add]⟩
+    exact ⟨R1 + R2, by rw [map_add (f := _), smul_add, h1, h2, map_add (f := _)]⟩
   | smul a x _ hx =>
     obtain ⟨R1, h1⟩ := hx
     refine ⟨a • R1, ?_⟩
@@ -122,7 +169,7 @@ theorem tr_tens_lift (O Kf : Type) [CommRing O] [Field Kf] [Algebra O Kf] (m : �
   | add x y _ _ hx hy =>
     obtain ⟨y1, m1, h1⟩ := hx
     obtain ⟨y2, m2, h2⟩ := hy
-    exact ⟨y1 + y2, Submodule.add_mem _ m1 m2, by rw [map_add, smul_add, h1, h2, map_add]⟩
+    exact ⟨y1 + y2, Submodule.add_mem _ m1 m2, by rw [map_add (f := _), smul_add, h1, h2, map_add (f := _)]⟩
   | smul a x _ hx =>
     obtain ⟨y1, m1, h1⟩ := hx
     refine ⟨a • y1, Submodule.smul_mem _ _ m1, ?_⟩

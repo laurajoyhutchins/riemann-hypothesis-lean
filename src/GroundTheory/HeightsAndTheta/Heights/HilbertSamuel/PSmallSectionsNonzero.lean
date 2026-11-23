@@ -1,5 +1,56 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsSmallSectionsNonzero
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsSmallSectionsNonzero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.HilbertSamuel
@@ -12,8 +63,8 @@ namespace SmallSectionsNonzero
 
 variable {K : Type} [Fintype K] {ι : K → Type} [∀ k, Fintype (ι k)] {Ω : Type} [Field Ω]
 
-omit [Fintype K] in
 
+omit [Fintype K] in
 theorem isMultiHomog_mul {g h : MRing ι} {a b : K → ℕ} (hg : IsMultiHomog g a)
     (hh : IsMultiHomog h b) : IsMultiHomog (g * h) (a + b) := by
   classical
@@ -22,8 +73,8 @@ theorem isMultiHomog_mul {g h : MRing ι} {a b : K → ℕ} (hg : IsMultiHomog g
   simp only [Finsupp.add_apply, Finset.sum_add_distrib, Pi.add_apply]
   rw [hg m₁ hm₁ k, hh m₂ hm₂ k]
 
-omit [Fintype K] in
 
+omit [Fintype K] in
 theorem isMultiHomog_sub {g h : MRing ι} {d : K → ℕ} (hg : IsMultiHomog g d)
     (hh : IsMultiHomog h d) : IsMultiHomog (g - h) d := by
   classical
@@ -32,17 +83,16 @@ theorem isMultiHomog_sub {g h : MRing ι} {d : K → ℕ} (hg : IsMultiHomog g d
   · exact hg m hm
   · exact hh m hm
 
-omit [Fintype K] in
 
+omit [Fintype K] in
 theorem isMultiHomog_monomial (e : (Σ k, ι k) →₀ ℕ) (r : ℤ) :
     IsMultiHomog (monomial e r : MRing ι) (fun k => ∑ i, e ⟨k, i⟩) := by
   classical
   intro m hm k
   rw [Finset.mem_singleton.mp (support_monomial_subset hm)]
 
-omit [Fintype K] in
-open Classical in
 
+open Classical in
 theorem sum_single_apply (k' : K) (j : ι k') (b : ℕ) (k : K) :
     ∑ i, (Finsupp.single (⟨k', j⟩ : Σ k, ι k) b) ⟨k, i⟩ = if k' = k then b else 0 := by
   classical
@@ -73,14 +123,14 @@ theorem isMultiHomog_chartMono (c : ∀ k, ι k) (d : K → ℕ) : IsMultiHomog 
   rw [hd] at hm
   exact hm
 
-omit [∀ k, Fintype (ι k)] in
 
+omit [∀ k, Fintype (ι k)] in
 theorem aeval_chartMono (y : (Σ k, ι k) → Ω) (c : ∀ k, ι k) (d : K → ℕ) :
     aeval y (chartMono c d) = ∏ k, y ⟨k, c k⟩ ^ d k := by
   simp [chartMono, map_prod]
 
-omit [∀ k, Fintype (ι k)] in
 
+omit [∀ k, Fintype (ι k)] in
 theorem eval_chartMono (z : (Σ k, ι k) → ℂ) (c : ∀ k, ι k) (d : K → ℕ) :
     eval z (map (Int.castRingHom ℂ) (chartMono c d)) = ∏ k, z ⟨k, c k⟩ ^ d k := by
   simp [chartMono, map_prod]
@@ -131,7 +181,7 @@ theorem exists_form_of_mem_chartRingZ (y : (Σ k, ι k) → Ω) (c : ∀ k, ι k
       · exact isMultiHomog_mul h₁ (isMultiHomog_chartMono c δ₂) m hm
       · rw [add_comm δ₁]
         exact isMultiHomog_mul h₂ (isMultiHomog_chartMono c δ₁) m hm
-    · rw [map_add, map_mul, map_mul, v₁, v₂, aeval_chartMono, aeval_chartMono, hpow]
+    · rw [map_add (f := _), map_mul, map_mul, v₁, v₂, aeval_chartMono, aeval_chartMono, hpow]
       ring
   | mul x w _ _ hx hw =>
     obtain ⟨δ₁, e₁, h₁, v₁⟩ := hx
@@ -164,15 +214,15 @@ theorem exists_chartForm (y : (Σ k, ι k) → Ω) (a : K → ℤ) (n : ℕ) {s 
     push_cast
     ring
 
-omit [∀ k, Fintype (ι k)] in
 
+omit [∀ k, Fintype (ι k)] in
 theorem one_mem_chartLat (y : (Σ k, ι k) → Ω) (a : K → ℤ) : (1 : Ω) ∈ chartLat y a 0 := by
   intro c _
   simp only [Nat.cast_zero, zero_mul, neg_zero, zpow_zero, Finset.prod_const_one, mul_one]
   exact one_mem _
 
-omit [∀ k, Fintype (ι k)] in
 
+omit [∀ k, Fintype (ι k)] in
 theorem mul_mem_chartLat {y : (Σ k, ι k) → Ω} {a : K → ℤ} {n j : ℕ} {s t : Ω} (hs : s ∈ chartLat y a n)
     (ht : t ∈ chartLat y a j) : s * t ∈ chartLat y a (n + j) := by
   intro c hc
@@ -188,8 +238,8 @@ theorem mul_mem_chartLat {y : (Σ k, ι k) → Ω} {a : K → ℤ} {n j : ℕ} {
       (s * ∏ k, y ⟨k, c k⟩ ^ (-((n : ℤ) * a k))) * (t * ∏ k, y ⟨k, c k⟩ ^ (-((j : ℤ) * a k))) by ring]
   exact mul_mem (hs c hc) (ht c hc)
 
-omit [∀ k, Fintype (ι k)] in
 
+omit [∀ k, Fintype (ι k)] in
 theorem pow_mem_chartLat {y : (Σ k, ι k) → Ω} {a : K → ℤ} {w : Ω} (hw : w ∈ chartLat y a 1) :
     ∀ j : ℕ, w ^ j ∈ chartLat y a j
   | 0 => by rw [pow_zero]; exact one_mem_chartLat y a
@@ -278,8 +328,8 @@ theorem isSmallH_pow {y : (Σ k, ι k) → Ω} {A : HermLine ι} {w : Ω} (hw : 
 
 end SmallSectionsNonzero
 
-open SmallSectionsNonzero in
 
+open SmallSectionsNonzero in
 theorem SmallSectionsNonzero.proof : SmallSectionsNonzero.Statement := by
   intro K _ ι _ Ω _ y D A P0 har _ hA j
   obtain ⟨q, w, hw, hgen, hsm⟩ := hA.gen

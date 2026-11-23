@@ -1,8 +1,58 @@
-import Mathlib
-import GroundTheory.GlobalFields.ComplexMultiplication.EllipticFunctions
+module
+
+public import GroundTheory.GlobalFields.ComplexMultiplication.EllipticFunctions
+public import GroundTheory.GlobalFields.ComplexMultiplication.EllipticConstant
 import GroundTheory.GlobalFields.ComplexMultiplication.EllipticRational
-import GroundTheory.GlobalFields.ComplexMultiplication.EllipticDegree
-import GroundTheory.GlobalFields.ComplexMultiplication.Uniformization
+public import GroundTheory.GlobalFields.ComplexMultiplication.Uniformization
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import GroundTheory.GlobalFields.ComplexMultiplication.EllipticDegree
+
+@[expose] public section
 
 open Complex Filter Topology Set
 open scoped PeriodPair
@@ -95,16 +145,16 @@ lemma eq_of_eventuallyEq_nhdsNE {f g : ℂ → ℂ} {x : ℂ} (hf : ContinuousAt
   tendsto_nhds_unique (hf.tendsto.mono_left nhdsWithin_le_nhds)
     ((hg.tendsto.mono_left nhdsWithin_le_nhds).congr' h.symm)
 
-variable (L) in
 
-def chordSlope (z w : ℂ) : ℂ := (℘'[L] z - ℘'[L] w) / (℘[L] z - ℘[L] w)
+variable (L) in
+def chordSlope (L : PeriodPair) (z w : ℂ) : ℂ := (℘'[L] z - ℘'[L] w) / (℘[L] z - ℘[L] w)
 
 lemma chordSlope_comm (z w : ℂ) : chordSlope L z w = chordSlope L w z := by
   rw [chordSlope, chordSlope, ← neg_div_neg_eq, neg_sub, neg_sub]
 
-variable (L) in
 
-def addDefect (w z : ℂ) : ℂ :=
+variable (L) in
+def addDefect (L : PeriodPair) (w z : ℂ) : ℂ :=
   ℘[L] (z + w) + ℘[L] z + ℘[L] w - chordSlope L z w ^ 2 / 4
 
 lemma weierstrassP_eq_except_zero (z : ℂ) : ℘[L] z = ℘[L - (0 : ℂ)] z + 1 / z ^ 2 := by
@@ -315,7 +365,7 @@ theorem weierstrassP_add_of_two_mul_notMem {z w : ℂ} (hw : w ∉ L.lattice)
         nhdsWithin_le_nhds ((L.isClosed_lattice.isOpen_compl.preimage
           (continuous_sub_right w)).mem_nhds (by simpa using hw')),
         nhdsWithin_le_nhds ((L.isClosed_lattice.isOpen_compl.preimage
-          (continuous_add_right w)).mem_nhds (by simpa using hw))] with u hu0 hu1 hu2 hu3
+          (continuous_add_const w)).mem_nhds (by simpa using hw))] with u hu0 hu1 hu2 hu3
       exact hc u (analyticAt_addDefect hw (fun h ↦ hu1 ⟨h, hu0⟩) hu2 hu3)
     have := eq_of_eventuallyEq_nhdsNE hH.continuousAt continuousAt_const (hev.symm.trans hgen)
     rw [← this, hH0]
@@ -390,7 +440,7 @@ theorem derivWeierstrassP_add {z w : ℂ} (hz : z ∉ L.lattice) (hw : w ∉ L.l
   have hopen : IsOpen {u : ℂ | u ∉ L.lattice ∧ u - w ∉ L.lattice ∧ u + w ∉ L.lattice} := by
     have h := L.isClosed_lattice.isOpen_compl
     exact h.inter ((h.preimage (continuous_sub_right w)).inter
-      (h.preimage (continuous_add_right w)))
+      (h.preimage (continuous_add_const w)))
   have hne : ℘[L] z - ℘[L] w ≠ 0 := fun h ↦
     (sub_mem_or_add_mem_of_weierstrassP_eq hz hw (sub_eq_zero.1 h)).elim hzw hzw'
   have hL : HasDerivAt (fun u ↦ ℘[L] (u + w)) (℘'[L] (z + w)) z :=
@@ -415,9 +465,9 @@ theorem derivWeierstrassP_add {z w : ℂ} (hz : z ∉ L.lattice) (hw : w ∉ L.l
   simp only [chordSlope]
   exact derivAdd_algebra _ _ _ _ _ _ hne (L.derivWeierstrassP_sq z hz) (L.derivWeierstrassP_sq w hw)
 
-variable (L) in
 
-def tangentSlope (w : ℂ) : ℂ := (6 * ℘[L] w ^ 2 - L.g₂ / 2) / ℘'[L] w
+variable (L) in
+def tangentSlope (L : PeriodPair) (w : ℂ) : ℂ := (6 * ℘[L] w ^ 2 - L.g₂ / 2) / ℘'[L] w
 
 lemma exists_continuousAt_chordSlope {w : ℂ} (hw : w ∉ L.lattice) (h2w : 2 * w ∉ L.lattice) :
     ∃ s : ℂ → ℂ, ContinuousAt s w ∧ s w = tangentSlope L w ∧
@@ -438,7 +488,7 @@ lemma exists_continuousAt_chordSlope {w : ℂ} (hw : w ∉ L.lattice) (h2w : 2 *
       nhdsWithin_le_nhds (L.isClosed_lattice.isOpen_compl.mem_nhds hw),
       nhdsWithin_le_nhds ((continuous_sub_right w).continuousAt.preimage_mem_nhds h0),
       nhdsWithin_le_nhds ((L.isClosed_lattice.isOpen_compl.preimage
-        (continuous_add_right w)).mem_nhds (show w + w ∉ L.lattice by rwa [← two_mul]))]
+        (continuous_add_const w)).mem_nhds (show w + w ∉ L.lattice by rwa [← two_mul]))]
       with z hz h1 h2 h3
     have hz' : z - w ≠ 0 := sub_ne_zero.2 hz
     refine ⟨h1, fun h ↦ h2 ⟨h, hz'⟩, h3, ?_⟩

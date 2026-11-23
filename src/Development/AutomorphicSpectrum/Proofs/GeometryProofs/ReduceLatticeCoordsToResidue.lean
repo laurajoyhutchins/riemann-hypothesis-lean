@@ -1,9 +1,56 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.GermSys
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsFlatAnIffIsConstMul
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.UniformisationConclusion
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HodgeAt
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.SumEmbeddingDualInt
+module
+
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HodgeAt
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.SumEmbeddingDualInt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.GermComp1ZeroPointLeft
+import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.IsSplitGaussChars
+import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.ExistsGenOfIsVBOne
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor GlobalTheory.CompanionTheory.Ar GlobalTheory.CompanionTheory.Ar.Crv GlobalTheory.CompanionTheory.Ar.Conj GlobalTheory.CompanionTheory.Ar.Flat GlobalTheory.CompanionTheory.Ar.Fl
@@ -61,12 +108,14 @@ variable {E : Type} [Field E] [NumberField E] {Ω : Type} [Field Ω] {Vs : Type}
 theorem psi_sum {J : Type} (ψ : R' →+* C) (s : Finset J) (c : J → R') (x : J → Fin g → R') :
     (fun k => ψ ((s.sum fun i : J => c i • x i) k)) = Finset.sum s (fun i : J => ψ (c i) • fun k => ψ (x i k)) := by
   funext k
+
   simp [Finset.sum_apply, map_sum]
 
 theorem rho_comb_mem {ρ : 𝓞 E →+* Module.End Ω Vs} {ℓ : Fin g → Vs}
     (hst : ∀ a i, ρ a (ℓ i) ∈ Submodule.span R' (Set.range ℓ)) (a : 𝓞 E) (x : Fin g → R') :
     ρ a (comb ℓ x) ∈ Submodule.span R' (Set.range ℓ) := by
   unfold comb
+
   rw [map_sum]
   refine Submodule.sum_mem _ fun i _ => ?_
   rw [map_smul]
@@ -178,6 +227,7 @@ theorem values_basis : ∀ (E : Type) [Field E] [NumberField E] (Ω Vs C : Type)
       have hv' : v = ∑ k, v k • (Pi.single k (1 : C) : Fin g → C) := by
         funext j
         simp [Finset.sum_apply, Pi.single_apply]
+
       rw [hv', map_sum]
       refine Submodule.sum_mem _ fun k _ => ?_
       rw [map_smul, hC]
@@ -191,7 +241,8 @@ theorem values_basis : ∀ (E : Type) [Field E] [NumberField E] (Ω Vs C : Type)
     have : comb ℓ y = ∑ i, (y i : Ω) • B i := by
       unfold comb
       exact Finset.sum_congr rfl fun i _ => by rw [hB]
-    rw [this, map_sum, Finsupp.finset_sum_apply]
+
+    rw [this, map_sum, Finsupp.finsetSum_apply]
     simp [Finsupp.single_apply]
   have htrΩ : (∑ k, ((∑ i, c k i • x i) k : R') : R') = (n : R') := by
     apply Subtype.ext
@@ -204,9 +255,11 @@ theorem values_basis : ∀ (E : Type) [Field E] [NumberField E] (Ω Vs C : Type)
   have htrC : (Module.finrank C (HT.eigSp ρC σC) : C) = (n : C) := by
     have h1 := HT.EigDim.trace_eigProj ρC σC
     rw [LinearMap.trace_eq_matrix_trace C (Pi.basisFun C (Fin g)), Matrix.trace] at h1
+
     rw [← h1, ← map_natCast ψ n, ← htrΩ, map_sum]
     refine Finset.sum_congr rfl fun k _ => ?_
     rw [Matrix.diag_apply, LinearMap.toMatrix_apply, Pi.basisFun_apply, hC]
+
     simp [Finset.sum_apply, map_sum]
   have hfr : Module.finrank C (HT.eigSp ρC σC) = n := by exact_mod_cast htrC
   refine ⟨?_, hspan⟩

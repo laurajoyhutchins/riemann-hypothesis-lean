@@ -1,6 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Foundations.ExistsRootOfIsAlgClosed
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.Letter
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Definitions.Foundations.EeProd
+import Development.AbelianVarietyTheory.Definitions.Foundations.ExistsRootOfIsAlgClosed
+
+@[expose] public section
+
 open GlobalTheory.KZ GlobalTheory.CyclotomicQExpansion GlobalTheory.Glue
 open scoped MatrixGroups
 
@@ -14,7 +59,12 @@ theorem tensor_padic_cls_eq {G : Type} [CommGroup G] (l : ℕ) [Fact l.Prime] (n
     ∃ u : G, f' = f * u ^ (l ^ n) := by
   classical
   let M := Additive G
-  let P : Submodule ℤ M := LinearMap.range (DistribMulAction.toLinearMap ℤ M (((l : ℤ)) ^ n))
+  let ψ : M →ₗ[ℤ] M := {
+    toFun := fun x : M => (((l : ℤ) ^ n) • x)
+    map_add' := fun x y => by simp
+    map_smul' := fun (k : ℤ) x => by simp [smul_smul, mul_comm]
+  }
+  let P : Submodule ℤ M := LinearMap.range ψ
   haveI : NeZero (l ^ n) := ⟨pow_ne_zero _ (Fact.out : l.Prime).ne_zero⟩
   have hkill : ∀ q : M ⧸ P, (l ^ n) • q = 0 := by
     intro q
@@ -40,14 +90,14 @@ theorem tensor_padic_cls_eq {G : Type} [CommGroup G] (l : ℕ) [Fact l.Prime] (n
     rw [PadicInt.ker_toZModPow, Ideal.span_singleton_pow]
   have hzero : ∀ x ∈ ((Ideal.span {(l : ℤ_[l])}) ^ n • (⊤ : Submodule ℤ_[l] (ℤ_[l] ⊗[ℤ] M))), φ x = 0 := by
     intro x hx
-    refine Submodule.smul_induction_on hx (fun r hr y hy => ?_) (fun a b ha hb => by rw [map_add, ha, hb, add_zero])
+    refine Submodule.smul_induction_on hx (fun r hr y hy => ?_) (fun a b ha hb => by rw [map_add (f := _), ha, hb, add_zero])
     rw [hI, RingHom.mem_ker] at hr
     clear hy
     induction y using TensorProduct.induction_on with
     | zero => simp
     | tmul c m =>
       rw [TensorProduct.smul_tmul', smul_eq_mul, hφ, map_mul, hr, zero_mul, zero_smul]
-    | add a b ha hb => rw [smul_add, map_add, ha, hb, add_zero]
+    | add a b ha hb => rw [smul_add, map_add (f := _), ha, hb, add_zero]
   have h0 := hzero _ h
   rw [map_sub, hφ, hφ, map_one, one_smul, one_smul, sub_eq_zero, Submodule.mkQ_apply, Submodule.mkQ_apply,
     Submodule.Quotient.eq] at h0

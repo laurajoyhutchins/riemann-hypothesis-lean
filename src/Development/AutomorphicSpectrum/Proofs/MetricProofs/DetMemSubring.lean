@@ -1,7 +1,48 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.ColFlags
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.BlockDiagonalMinorVanishing
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.YvEqSumMinorsGMat
+module
+
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.ColFlags
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory NumberField Matrix
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Geo ReciprocityTheory.ChartRestriction.G.Geo.Tor
@@ -21,8 +62,8 @@ def cMin (C : ∀ s, Matrix (Fin (n s)) (Fin (rk Ψ p q s)) Ω) (t : StepIx Ψ p
     (J : Fin ((t.2 : ℕ) + 1) → Fin (n t.1)) (I : Finset (Fin (p + q))) : Ω :=
   if e : I.card = (t.2 : ℕ) + 1 then ((aExt C t.1).submatrix J (I.orderEmbOfFin e)).det else 0
 
-open Classical in
 
+open Classical in
 def bExt (B : ∀ s, Matrix (Fin (rk Ψ p q s)) (Fin (n s)) Ω) (s : Ψ ⊕ Ψ) : Matrix (Fin (p + q)) (Fin (n s)) Ω :=
   fun a j => ∑ l, if posOf p q s l = a then B s l j else 0
 
@@ -30,12 +71,12 @@ def bMin (B : ∀ s, Matrix (Fin (rk Ψ p q s)) (Fin (n s)) Ω) (t : StepIx Ψ p
     (I : Finset (Fin (p + q))) (J : Fin ((t.2 : ℕ) + 1) → Fin (n t.1)) : Ω :=
   if e : I.card = (t.2 : ℕ) + 1 then ((bExt B t.1).submatrix (I.orderEmbOfFin e) J).det else 0
 
-variable (p q) in
 
+variable (p q) in
 def fullT (s : Ψ ⊕ Ψ) (h : 0 < rk Ψ p q s) : StepIx Ψ p q := ⟨s, ⟨rk Ψ p q s - 1, by omega⟩⟩
 
 theorem fullT_base (K₀ : Type) (s : Ψ ⊕ Ψ) (h : 0 < rk Ψ p q s) (r : Ψ × Fin (p + q)) :
-    blkF Ψ p q K₀ r ≠ some (.inr (fullT p q s h)) := by
+    blkF (Ψ := Ψ) (p := p) (q := q) K₀ r ≠ some (.inr (fullT p q s h)) := by
   intro hr
   unfold blkF at hr
   split_ifs at hr with hp
@@ -57,10 +98,11 @@ theorem fullT_base (K₀ : Type) (s : Ψ ⊕ Ψ) (h : 0 < rk Ψ p q s) (r : Ψ �
     simp [rk] at hx' h
     omega
 
-def baseFull (K₀ : Type) (s : Ψ ⊕ Ψ) (h : 0 < rk Ψ p q s) : NonPluckerBlocks (blkF Ψ p q K₀) :=
+def baseFull (K₀ : Type) (s : Ψ ⊕ Ψ) (h : 0 < rk Ψ p q s) :
+    NonPluckerBlocks (blkF (Ψ := Ψ) (p := p) (q := q) K₀) :=
   ⟨.inr (fullT p q s h), fullT_base K₀ s h⟩
 
-def baseInl {K₀ : Type} (k : K₀) : NonPluckerBlocks (blkF Ψ p q K₀) :=
+def baseInl {K₀ : Type} (k : K₀) : NonPluckerBlocks (blkF (Ψ := Ψ) (p := p) (q := q) K₀) :=
   ⟨.inl k, fun r => by
     classical
     unfold blkF
@@ -69,15 +111,18 @@ def baseInl {K₀ : Type} (k : K₀) : NonPluckerBlocks (blkF Ψ p q K₀) :=
 variable {K₀ : Type} {J₀ : K₀ → Type}
 
 def xcOf [Fintype K₀] (x₀ : (Σ k, J₀ k) → Ω)
-    (c : ∀ k : NonPluckerBlocks (blkF Ψ p q K₀), baseIdx (idx (p := p) (q := q) J₀ n) (blkF Ψ p q K₀) k) : Ω :=
+    (c : ∀ k : NonPluckerBlocks (blkF (Ψ := Ψ) (p := p) (q := q) K₀),
+      baseIdx (idx (p := p) (q := q) J₀ n) (blkF (Ψ := Ψ) (p := p) (q := q) K₀) k) : Ω :=
   ∏ k, x₀ ⟨k, c (baseInl k)⟩
 
-def rowsOf (c : ∀ k : NonPluckerBlocks (blkF Ψ p q K₀), baseIdx (idx (p := p) (q := q) J₀ n) (blkF Ψ p q K₀) k)
+def rowsOf (c : ∀ k : NonPluckerBlocks (blkF (Ψ := Ψ) (p := p) (q := q) K₀),
+      baseIdx (idx (p := p) (q := q) J₀ n) (blkF (Ψ := Ψ) (p := p) (q := q) K₀) k)
     (s : Ψ ⊕ Ψ) : Fin (rk Ψ p q s) → Fin (n s) :=
   fun a => c (baseFull K₀ s (by have := a.2; omega)) (Fin.cast (by have := a.2; show _ = rk Ψ p q s - 1 + 1; omega) a)
 
 def zOf (A : ∀ s, Matrix (Fin (n s)) (Fin (rk Ψ p q s)) Ω)
-    (c : ∀ k : NonPluckerBlocks (blkF Ψ p q K₀), baseIdx (idx (p := p) (q := q) J₀ n) (blkF Ψ p q K₀) k)
+    (c : ∀ k : NonPluckerBlocks (blkF (Ψ := Ψ) (p := p) (q := q) K₀),
+      baseIdx (idx (p := p) (q := q) J₀ n) (blkF (Ψ := Ψ) (p := p) (q := q) K₀) k)
     (s : Ψ ⊕ Ψ) : Ω :=
   ((A s).submatrix (rowsOf c s) id).det
 
@@ -92,7 +137,8 @@ theorem xb_full [Fintype Ψ] [Fintype K₀] [∀ k, Fintype (J₀ k)] (A : ∀ s
 
 theorem xb_rowsOf [Fintype Ψ] [Fintype K₀] [∀ k, Fintype (J₀ k)] (A : ∀ s, Matrix (Fin (n s)) (Fin (rk Ψ p q s)) Ω)
     (x₀ : (Σ k, J₀ k) → Ω)
-    (c : ∀ k : NonPluckerBlocks (blkF Ψ p q K₀), baseIdx (idx (p := p) (q := q) J₀ n) (blkF Ψ p q K₀) k)
+    (c : ∀ k : NonPluckerBlocks (blkF (Ψ := Ψ) (p := p) (q := q) K₀),
+      baseIdx (idx (p := p) (q := q) J₀ n) (blkF (Ψ := Ψ) (p := p) (q := q) K₀) k)
     (s : Ψ ⊕ Ψ) (h : 0 < rk Ψ p q s) :
     xb A x₀ ⟨baseFull K₀ s h, c (baseFull K₀ s h)⟩ = zOf A c s :=
   xb_full A x₀ s h (rowsOf c s)
@@ -104,8 +150,8 @@ theorem det_mem_subring {ι : Type} [Fintype ι] [DecidableEq ι] (R : Subring �
   rw [Units.smul_def]
   exact R.zsmul_mem (R.prod_mem fun i _ => h _ _) _
 
-open Classical in
 
+open Classical in
 def sMin (B : ∀ s, Matrix (Fin (rk Ψ p q s)) (Fin (n s)) Ω) (t : StepIx Ψ p q)
     (I : Finset (Fin (p + q))) (J : Fin ((t.2 : ℕ) + 1) → Fin (n t.1)) : Ω :=
   if StrictMono J then bMin B t I J else 0
@@ -131,7 +177,7 @@ theorem card_stepCols (r : Ψ × Fin (p + q)) :
   by_cases hc : (r.2 : ℕ) < p
   · have hs : stepOf Ψ p q r = ⟨Sum.inl r.1, ⟨r.2, by simp [rk]; omega⟩⟩ := by
       unfold stepOf
-      rw [dif_pos hc]
+      rw [dite_eq_left hc]
     have hc' : (r.2 : ℕ) + 1 ≤ p := hc
     rw [hs]
     simp only [if_pos hc']
@@ -139,7 +185,7 @@ theorem card_stepCols (r : Ψ × Fin (p + q)) :
     omega
   · have hs : stepOf Ψ p q r = ⟨Sum.inr r.1, ⟨r.2 - p, by simp [rk]; omega⟩⟩ := by
       unfold stepOf
-      rw [dif_neg hc]
+      rw [dite_eq_right hc]
     have hc' : ¬ ((r.2 : ℕ) + 1 ≤ p) := by omega
     rw [hs]
     simp only [if_neg hc']
@@ -157,7 +203,7 @@ theorem stepRows_pos (r : Ψ × Fin (p + q)) {I : Finset (Fin (p + q))} (h : IsS
   by_cases hc : (r.2 : ℕ) < p
   · have hs : stepOf Ψ p q r = ⟨Sum.inl r.1, ⟨r.2, by simp [rk]; omega⟩⟩ := by
       unfold stepOf
-      rw [dif_pos hc]
+      rw [dite_eq_left hc]
     have hc' : (r.2 : ℕ) + 1 ≤ p := hc
     rw [if_pos hc'] at hmem
     simp only [wIdx, Finset.mem_filter, Finset.mem_univ, true_and] at hmem
@@ -169,7 +215,7 @@ theorem stepRows_pos (r : Ψ × Fin (p + q)) {I : Finset (Fin (p + q))} (h : IsS
     omega
   · have hs : stepOf Ψ p q r = ⟨Sum.inr r.1, ⟨r.2 - p, by simp [rk]; omega⟩⟩ := by
       unfold stepOf
-      rw [dif_neg hc]
+      rw [dite_eq_right hc]
     have hc' : ¬ ((r.2 : ℕ) + 1 ≤ p) := by omega
     rw [if_neg hc'] at hmem
     simp only [omIdx, Finset.mem_filter, Finset.mem_univ, true_and] at hmem

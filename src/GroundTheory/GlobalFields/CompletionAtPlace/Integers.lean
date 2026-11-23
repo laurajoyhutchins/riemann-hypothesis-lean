@@ -1,5 +1,63 @@
-import Mathlib
-import GroundTheory.GlobalFields.CompletionAtPlace
+module
+
+public import GroundTheory.GlobalFields.CompletionAtPlace
+public import GroundTheory.LocalFields.Interface
+public import Mathlib.RingTheory.RegularLocalRing.Defs
+public import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+public import Mathlib.RingTheory.RamificationInertia.Basic
+public import Mathlib.RingTheory.Valuation.Integral
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.MetricSpace.Ultra.TotallySeparated
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -22,13 +80,12 @@ theorem adicCompletionIntegers_subset_closure_ringOfIntegers :
   obtain ⟨γ, hγ⟩ := Valued.mem_nhds.1 hs
   have h1 : {y : w.adicCompletion L | Valued.v.restrict (y - x) < γ.1} ∈ nhds x :=
     Valued.mem_nhds.2 ⟨γ, subset_rfl⟩
-  have h2 : {y : w.adicCompletion L | Valued.v.restrict (y - x) <
-      ((1 : (MonoidWithZeroHom.ValueGroup₀ (.ofClass (Valued.v :
-        Valuation (w.adicCompletion L) ℤᵐ⁰)))ˣ) : _)} ∈ nhds x :=
+  have h2 : {y : w.adicCompletion L | Valued.v.restrict (y - x) < 1} ∈ nhds x :=
     Valued.mem_nhds.2 ⟨1, subset_rfl⟩
   obtain ⟨k, hk1, hk2⟩ := (denseRange_algebraMap (R := 𝓞 L) (K := L) w).mem_nhds
     (Filter.inter_mem h1 h2)
-  simp only [Set.mem_ofPred_eq, Units.val_one, Valuation.restrict_lt_iff_lt_embedding] at hk1 hk2
+  simp only [Set.mem_ofPred_eq, Valuation.restrict_lt_iff_lt_embedding] at hk1
+  simp only [Set.mem_ofPred_eq, Valuation.restrict_lt_one_iff] at hk2
   set c := MonoidWithZeroHom.ValueGroup₀.embedding γ.1 with hc
   have hc0 : c ≠ 0 := by simp [hc]
   have hx1 : Valued.v x ≤ 1 := hx
@@ -67,10 +124,10 @@ theorem mem_integer_of_isIntegral {x : w.adicCompletion L}
   (Valuation.integer.integers (valuation (w.adicCompletion L))).mem_of_integral
     (hx.tower_top (A := 𝒪[w.adicCompletion L]))
 
+
 omit [Algebra K L] [w.asIdeal.LiesOver v.asIdeal]
   [ContinuousSMul (v.adicCompletion K) (w.adicCompletion L)]
   [IsScalarTower K (v.adicCompletion K) (w.adicCompletion L)] in
-
 theorem isIntegral_algebraMap_ringOfIntegers (r : 𝓞 L) :
     IsIntegral 𝒪[v.adicCompletion K]
       (algebraMap L (w.adicCompletion L) (algebraMap (𝓞 L) L r)) := by
@@ -81,9 +138,9 @@ theorem isIntegral_algebraMap_ringOfIntegers (r : 𝓞 L) :
       RingHom.ext_int _ _, ← Polynomial.hom_eval₂]
   exact (congrArg (algebraMap L (w.adicCompletion L)) hroot).trans (map_zero _)
 
+
 omit [Algebra K L] [w.asIdeal.LiesOver v.asIdeal]
   [IsScalarTower K (v.adicCompletion K) (w.adicCompletion L)] in
-
 theorem continuousSMul_integer :
     ContinuousSMul 𝒪[v.adicCompletion K] (w.adicCompletion L) := by
   refine continuousSMul_of_algebraMap _ _ ?_
@@ -141,13 +198,12 @@ section MaximalIdeal
 variable {F : Type*} [Field F] [NumberField F] (u : HeightOneSpectrum (𝓞 F))
 
 theorem integers_valued :
-    (Valued.v : Valuation (u.adicCompletion F) ℤᵐ⁰).Integers 𝒪[u.adicCompletion F] where
-  hom_inj a b h := Subtype.ext h
-  map_le_one y := by
-    have h : (y : u.adicCompletion F) ∈ u.adicCompletionIntegers F :=
-      (mem_valuationInteger_iff u (y : u.adicCompletion F)).1 y.2
-    exact h
-  exists_of_le_one x hx := ⟨⟨x, (mem_valuationInteger_iff u x).2 hx⟩, rfl⟩
+    (Valued.v : Valuation (u.adicCompletion F) ℤᵐ⁰).Integers 𝒪[u.adicCompletion F] := by
+  refine ⟨Subtype.val_injective, ?_, ?_⟩
+  · intro y
+    exact (mem_valuationInteger_iff u (y : u.adicCompletion F)).1 y.2
+  · intro x hx
+    exact ⟨⟨x, (mem_valuationInteger_iff u x).2 hx⟩, rfl⟩
 
 theorem mem_maximalIdeal_iff_valued_lt_one (y : 𝒪[u.adicCompletion F]) :
     y ∈ 𝓂[u.adicCompletion F] ↔ Valued.v (y : u.adicCompletion F) < 1 := by

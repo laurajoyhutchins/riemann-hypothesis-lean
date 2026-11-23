@@ -1,6 +1,48 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.TraceFormula.GlobalTraceComparison.AutomorphicRepresentations.SlotBasic
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.TraceFormula.GlobalTraceComparison.TraceAsymptotics.FinprodSplitAlt
-import Development.DiscreteGroups.PiInvariants.CompactSupportTwists.TraceUnique
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.TraceFormula.GlobalTraceComparison.AutomorphicRepresentations.SlotBasic
+public import Development.DiscreteGroups.PiInvariants.CompactSupportTwists.TraceUnique
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 open UpperTheory.V.Z.Tf.GlobalTraceComparison UpperTheory.V.Z.Tf.GlobalTraceComparison.Pi UpperTheory.Zero.ConvolutionTheory.EB PositivityTheory.Rg.BcB.Desc
 
@@ -15,7 +57,7 @@ private lemma lift_comm1 {X : Type} (u : X → Module.End ℂ Y) (z : Module.End
   | grade0 r => rw [AlgHom.commutes]; exact Algebra.commutes r z
   | grade1 x => simpa using h x
   | mul a b ha hb => rw [map_mul]; exact ha.mul_left hb
-  | add a b ha hb => rw [map_add]; exact ha.add_left hb
+  | add a b ha hb => rw [map_add (f := _)]; exact ha.add_left hb
 
 private lemma lift_comm2 {X X' : Type} (u : X → Module.End ℂ Y) (v : X' → Module.End ℂ Y)
     (h : ∀ x y, Commute (u x) (v y)) (p : FreeAlgebra ℂ X) (q : FreeAlgebra ℂ X') :
@@ -29,7 +71,7 @@ private lemma lift_conj {X : Type} (u v : X → Module.End ℂ Y) (A : Module.En
   | grade0 r => simpa using (Algebra.commutes r A).symm
   | grade1 x => simpa using h x
   | mul a b ha hb => rw [map_mul, map_mul, ← mul_assoc, ha, mul_assoc, hb, mul_assoc]
-  | add a b ha hb => rw [map_add, map_add, mul_add, add_mul, ha, hb]
+  | add a b ha hb => rw [map_add (f := _), map_add (f := _), mul_add, add_mul, ha, hb]
 
 private lemma pullbackSymmetry_lift_map_comm (x x' y c A : Module.End ℂ Y) (hA : A * x' = y * A) (hAA : A * A = 1)
     (h1 : Commute x' c) (h2 : Commute y x) (h3 : Commute y c) :
@@ -275,7 +317,7 @@ theorem UpperTheory.V.Z.Tf.GlobalTraceComparison.Pi.absCore_pf :
         rw [h0, mul_zero] at this
         exact (mul_eq_zero.1 this).resolve_left hDne
       | zero => simp
-      | add u v _ _ hu hv => rw [add_mul, map_add, hu, hv, add_zero]
+      | add u v _ _ hu hv => rw [add_mul, map_add (f := _), hu, hv, add_zero]
       | smul r u _ hu => rw [smul_mul_assoc, map_smul, hu, smul_zero]
     have := hz A (hLin A)
     rw [hAA, LinearMap.trace_one] at this

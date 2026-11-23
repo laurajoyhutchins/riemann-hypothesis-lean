@@ -1,8 +1,57 @@
-import Mathlib
-import Formalism.UnipotentAdelicQuotients.SiegelWeilUnitaryConvergent
-import Development.AutomorphicSpectrum.Proofs.GlobalProofs.ExistsSelfDualForm
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.TensorLocallyCompactRing
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.TensorLocallyCompactRingStatement
+module
+
+public import Formalism.UnipotentAdelicQuotients.SWXSDefs
+public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.TensorLocallyCompactRing
+public import Development.AutomorphicSpectrum.Proofs.GlobalProofs.ExistsSelfDualForm
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicLocalCompactness.AdeleLC
+import GroundTheory.AutomorphicForms.ReductionMeasure
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -55,7 +104,7 @@ theorem exists_basis {F E : Type} [Field F] [NumberField F] [Field E] [NumberFie
     rw [LinearIndependent.pair_iff]
     intro s t hst
     have h' := congrArg σ hst
-    simp only [map_add, hsm, map_one, hσδ, map_zero, smul_neg] at h'
+    simp only [map_add (f := _), hsm, map_one, hσδ, map_zero, smul_neg] at h'
     have ht : t = 0 := key s t (by rw [hst, sub_eq_add_neg, h'])
     subst ht
     simpa using hst
@@ -70,7 +119,7 @@ theorem exists_basis {F E : Type} [Field F] [NumberField F] [Field E] [NumberFie
   have hq : b.repr (δ * δ) 1 = 0 := by
     refine key (b.repr (δ * δ) 0) _ ?_
     have h' := congrArg σ hs
-    simp only [map_add, hsm, map_one, hσδ, hσ2, smul_neg] at h'
+    simp only [map_add (f := _), hsm, map_one, hσδ, hσ2, smul_neg] at h'
     rw [hs, sub_eq_add_neg, h']
   rw [hq, zero_smul, add_zero] at hs
   refine ⟨b, b.repr (δ * δ) 0, ?_, hb0, by rw [hb1, hσδ], ?_⟩
@@ -98,7 +147,7 @@ theorem rc_mk (a c : R) : rc R b (mk R b a c) = ![a, c] := by
     rw [mk, tmul_eq, tmul_eq]
   funext k
   rw [rc, h]
-  simp only [map_add, map_smul, Module.Basis.repr_self, Finsupp.add_apply, Finsupp.smul_apply]
+  simp only [map_add (f := _), map_smul, Module.Basis.repr_self, Finsupp.add_apply, Finsupp.smul_apply]
   fin_cases k <;> simp
 
 theorem mk_rc (y : R ⊗[F] E) : mk R b (rc R b y 0) (rc R b y 1) = y := by
@@ -108,7 +157,7 @@ theorem mk_rc (y : R ⊗[F] E) : mk R b (rc R b y 0) (rc R b y 1) = y := by
   exact this
 
 theorem rc_add (y z : R ⊗[F] E) (k : Fin 2) : rc R b (y + z) k = rc R b y k + rc R b z k := by
-  simp [rc, map_add]
+  simp [rc, map_add (f := _)]
 
 variable {R b}
 variable {σ : E →ₐ[F] E} {D : F}
@@ -270,8 +319,10 @@ theorem pair_eq (h2 : (2 : F) ≠ 0) (hb0 : b 0 = 1) (hσ : σ (b 1) = - b 1)
   have A : pairHerm R σ n S T = ∑ i, ∑ j, (rc R b (S.1 i j) 0 * rc R b (T.1 i j) 0 +
       (-algebraMap F R D * rc R b (S.1 i j) 1 * rc R b (T.1 i j) 1)) := by
     unfold pairHerm
+
     rw [map_sum, Finset.mul_sum]
     refine Finset.sum_congr rfl fun i _ => ?_
+
     rw [map_sum, Finset.mul_sum]
     refine Finset.sum_congr rfl fun j _ => ?_
     rw [trace_eq hb0 hD, ← mul_assoc, hh, one_mul, rc_mul hb0 hD, (herm_rc hb0 hσ hT j i).1,

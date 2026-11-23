@@ -1,7 +1,60 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.GL2.GJGlobalDefs
-import GroundTheory.GlobalFields.TateThesis.GlobalZetaFinite
-import GroundTheory.AutomorphicForms.CuspidalDiscreteness.CuspFormsDecay
+module
+
+public import GroundTheory.AutomorphicForms.GL2.GJGlobalDefs
+public import GroundTheory.AutomorphicForms.GL2.GJMatrixSchwartz
+import GroundTheory.AutomorphicForms.ReductionFinite
+import GroundTheory.GlobalFields.TateThesis.AdelePoisson
+public import GroundTheory.GlobalFields.TateThesis.GlobalZetaFinite
+import Mathlib.Algebra.Module.ZLattice.Summable
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+public import Mathlib.Analysis.Normed.Unbundled.RingSeminorm
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.Matrix.AbsoluteValue
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MeasureTheory NumberField Topology Filter Set
 open scoped NumberField.AdeleRing Classical nonZeroDivisors
@@ -66,6 +119,7 @@ theorem norm_apply_le_infNorm (X : Matrix (Fin n) (Fin n) 𝔸[K]) (i j : Fin n)
 theorem mul_apply_fst_apply (X Y : Matrix (Fin n) (Fin n) 𝔸[K]) (i j : Fin n)
     (w : InfinitePlace K) : ((X * Y) i j).1 w = ∑ k, (X i k).1 w * (Y k j).1 w := by
   change Reduction.infEval w ((X * Y) i j) = ∑ k, Reduction.infEval w (X i k) * Reduction.infEval w (Y k j)
+
   rw [Matrix.mul_apply, map_sum]
   simp only [map_mul]
 
@@ -595,7 +649,7 @@ theorem exists_le_infNorm_of_isInBox (hn : 0 < n) (I : (FractionalIdeal (𝓞 K)
       ((n.factorial : ℝ) * X ^ n) ^ d := by
     calc ∏ w : InfinitePlace K, ‖((u : 𝔸[K])).1 w‖ ^ w.mult
         ≤ ∏ w : InfinitePlace K, ((n.factorial : ℝ) * X ^ n) ^ w.mult :=
-          Finset.prod_le_prod (fun w _ => pow_nonneg (norm_nonneg _) _)
+          Finset.prod_le_prod₀ (fun w _ => pow_nonneg (norm_nonneg _) _)
             (fun w _ => pow_le_pow_left₀ (norm_nonneg _) (hinf w) _)
       _ = ((n.factorial : ℝ) * X ^ n) ^ d := by
           rw [Finset.prod_pow_eq_pow_sum, InfinitePlace.sum_mult_eq]

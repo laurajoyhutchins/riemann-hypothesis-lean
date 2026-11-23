@@ -1,4 +1,57 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.GlobalUnitaryForms.HodgeTateFromSandwich
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.LocalHermitianForms.EvenVal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Matrix QuadraticAlgebra
 
@@ -79,7 +132,7 @@ theorem exG_models {c : K} {d m : EL Δ τ} (h : IsDat c d m) (P : Sp Δ τ ≃�
   let f : (Fin 3 → Lsq K Δ) →ₗ[Lsq K Δ] (Fin 3 → Lsq K Δ) :=
     { toFun := fun w => P (semi d (P.symm (star w)))
       map_add' := fun u v => by
-        rw [← map_add, star_add, map_add]
+        rw [← map_add (f := _), star_add, map_add (f := _)]
         congr 1
         simp [semi, sg_add, mul_add]
       map_smul' := fun a u => by
@@ -143,7 +196,7 @@ theorem exG_norm [CharZero K] {c : K} {d m : EL Δ τ} (h : IsDat c d m) :
   have hy1 : y = algebraMap _ _ y.re := by ext1 <;> simp [him]
   have hy2 : sigL y = algebraMap _ _ (star y.re) := by ext1 <;> simp [him, sigL]
   refine ⟨y.re, QuadraticAlgebra.algebraMap_injective (a := -1) (b := algebraMap K (Lsq K Δ) τ) ?_⟩
-  rw [map_mul, map_mul, ← hy1, ← hy2, algebraMap_norm_eq_mul_star, hy, sg_mul, sg_mul, hs, ← h1, map_add, map_add, ← ht,
+  rw [map_mul, map_mul, ← hy1, ← hy2, algebraMap_norm_eq_mul_star, hy, sg_mul, sg_mul, hs, ← h1, map_add (f := _), map_add (f := _), ← ht,
     map_ofNat, map_ofNat]
   linear_combination (-(m * star m * (1 + star ω) ^ 2)) * hd - (m * star m * (2 + star ω)) * hn
 

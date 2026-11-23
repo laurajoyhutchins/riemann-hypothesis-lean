@@ -1,4 +1,51 @@
-import ReciprocityTheory.ThetaQuasiPeriods.ThetaQuasiPeriodStatement
+module
+
+public import ReciprocityTheory.ThetaQuasiPeriods.ThetaQuasiPeriodStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -49,12 +96,14 @@ theorem thetaRealTransl_holds : ThetaRealTranslStatement := by
   intro ι _ a b u v z τ hτ
   unfold theta
   rw [← tsum_mul_left]
-  congr 1
-  funext l
-  simp only [thetaTerm, shiftVec_add_char, ← eC_add, ofRealVec_add]
-  congr 1
-  simp only [mulVec_add, dotProduct_add, add_dotProduct,
-    dot_mulVec_symm hτ (shiftVec a l) (ofRealVec u)]
+  apply tsum_congr
+  intro l
+  unfold thetaTerm
+  rw [← eC_add]
+  apply congrArg eC
+  rw [ofRealVec_add]
+  simp only [shiftVec_add_char, mulVec_add, dotProduct_add, add_dotProduct]
+  rw [dot_mulVec_symm hτ (ofRealVec u) (shiftVec a l)]
   ring
 
 theorem shiftVec_add_int (a : ι → ℝ) (l n : ι → ℤ) :
@@ -74,11 +123,12 @@ theorem thetaIntChar_holds : ThetaIntCharStatement := by
   unfold theta
   rw [← tsum_mul_left]
   conv_rhs => rw [← (Equiv.addRight n).tsum_eq]
-  congr 1
-  funext l
-  simp only [Equiv.coe_addRight, thetaTerm, shiftVec_add_int, ofRealVec_add, ofRealVec_intCast]
+  apply tsum_congr
+  intro l
   have hk : ∀ x : ℂ, eC (x + (((l + n) ⬝ᵥ n' : ℤ) : ℂ)) = eC x := fun x => by
     rw [eC_add, eC_int, mul_one]
+  simp only [thetaTerm, Equiv.coe_addRight, shiftVec_add_int,
+    ofRealVec_intCast, ofRealVec_add]
   simp only [dotProduct_add, shiftVec_dot_int]
   conv_rhs => rw [← eC_add, ← hk]
   congr 1

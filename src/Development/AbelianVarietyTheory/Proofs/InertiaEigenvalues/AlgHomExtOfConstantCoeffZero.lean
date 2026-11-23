@@ -1,6 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.MemEurOfTeichmullerSeries
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CyclotomicPowerSeriesAlgHomActionLawsStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.MemEurOfTeichmullerSeries
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CyclotomicPowerSeriesAlgHomActionLawsStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PowerSeries.NoZeroDivisors
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.Foundations.HTBasis
+
+@[expose] public section
 
 open Formalism.BasicNotions Formalism.BasicNotions.Loc Formalism.WeaklyAdmissibleFiltrations GlobalTheory.Cyc
 
@@ -21,7 +66,7 @@ theorem algHom_ext_of_constantCoeff_zero {O : Type} [CommRing O]
         rw [← hb, PowerSeries.algebraMap_eq]; ring
       have : f a - g a = f PowerSeries.X * (f b - g b) := by
         conv_lhs => rw [ha]
-        rw [map_add, map_add, map_mul, map_mul, f.commutes, g.commutes, ← h]; ring
+        rw [map_add (f := _), map_add (f := _), map_mul, map_mul, f.commutes, g.commutes, ← h]; ring
       rw [this, pow_succ']
       exact mul_dvd_mul (PowerSeries.X_dvd_iff.2 h0) (ih b)
   ext a n
@@ -38,7 +83,7 @@ theorem constantCoeff_algHom {O : Type} [CommRing O]
   have ha : a = algebraMap O (PowerSeries O) (PowerSeries.constantCoeff a) + PowerSeries.X * b := by
     rw [← hb, PowerSeries.algebraMap_eq]; ring
   conv_lhs => rw [ha]
-  rw [map_add, map_mul, f.commutes, map_add, map_mul, h0, PowerSeries.algebraMap_eq]
+  rw [map_add (f := _), map_mul, f.commutes, map_add (f := _), map_mul, h0, PowerSeries.algebraMap_eq]
   simp
 
 theorem eq_of_commute_pow {O : Type} [CommRing O] [IsDomain O] (l : ℕ) (hl0 : (l : O) ≠ 0)
@@ -59,7 +104,7 @@ theorem eq_of_commute_pow {O : Type} [CommRing O] [IsDomain O] (l : ℕ) (hl0 : 
   have hd : φ (F - G) = (F - G) * ∑ i ∈ Finset.range l, (1 + F) ^ i * (1 + G) ^ (l - 1 - i) := by
     rw [map_sub, hf, hg, hφ]
     have := (Commute.all (1 + F) (1 + G)).mul_geom_sum₂ l
-    simp only [map_sub, map_pow, map_add, map_one, ← hF, ← hG]
+    simp only [map_sub, map_pow, map_add (f := _), map_one, ← hF, ← hG]
     rw [show (1 + F) - (1 + G) = F - G by ring] at this
     rw [this]; ring
   have key : ∀ n : ℕ, PowerSeries.X ^ (n + 2) ∣ F - G := by
@@ -76,9 +121,10 @@ theorem eq_of_commute_pow {O : Type} [CommRing O] [IsDomain O] (l : ℕ) (hl0 : 
       rw [he, map_mul, map_pow, hp, mul_pow, mul_assoc, mul_assoc] at hd
       have hc := congrArg PowerSeries.constantCoeff
         (mul_left_cancel₀ (pow_ne_zero _ PowerSeries.X_ne_zero) hd)
-      simp only [map_mul, map_pow, map_sum, map_add, map_one, PowerSeries.constantCoeff_X, hf0, hg0,
-        add_zero, one_pow, mul_one, Finset.sum_const, Finset.card_range, nsmul_eq_mul,
-        constantCoeff_algHom φ hφ0] at hc
+
+      simp only [map_mul, map_pow, map_sum, map_add (f := _), map_one, PowerSeries.constantCoeff_X, hf0, hg0,
+      add_zero, one_pow, mul_one, Finset.sum_const, Finset.card_range, nsmul_eq_mul,
+      constantCoeff_algHom φ hφ0] at hc
       have he0 : PowerSeries.constantCoeff e = 0 := by
         by_contra hne
         have h2 : (l : O) * ((l : O) ^ (n + 1) - 1) * PowerSeries.constantCoeff e = 0 := by

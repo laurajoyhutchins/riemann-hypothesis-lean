@@ -1,5 +1,48 @@
-import Mathlib
-import ReciprocityTheory.NeutralLocalFields.Duality
+module
+
+public import ReciprocityTheory.NeutralLocalFields.Duality
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace ReciprocityTheory.DiscreteGroups.LocalClassField
 
@@ -15,32 +58,7 @@ section Chain
 
 variable {C : Type} [AddCommGroup C]
 
-theorem chain_shift (c : ℕ → C) (hc : ∀ n, (n + 1) • c (n + 1) = c n) (n d : ℕ) :
-    ∃ e : ℕ, c n = e • c (n + d) := by
-  induction d with
-  | zero => exact ⟨1, by simp⟩
-  | succ d ih =>
-    obtain ⟨e, he⟩ := ih
-    refine ⟨e * (n + d + 1), ?_⟩
-    rw [mul_nsmul', ← add_assoc, hc, ← he]
-
-def chainSub (c : ℕ → C) (hc : ∀ n, (n + 1) • c (n + 1) = c n) : AddSubgroup C where
-  carrier := {x | ∃ (n : ℕ) (k : ℤ), x = k • c n}
-  zero_mem' := ⟨0, 0, by simp⟩
-  add_mem' := by
-    rintro _ _ ⟨n, k, rfl⟩ ⟨m, l, rfl⟩
-    obtain ⟨e, he⟩ := chain_shift c hc n m
-    obtain ⟨f, hf⟩ := chain_shift c hc m n
-    refine ⟨n + m, k * e + l * f, ?_⟩
-    rw [add_comm m n] at hf
-    rw [add_zsmul, mul_zsmul, mul_zsmul, natCast_zsmul, natCast_zsmul, ← he, ← hf]
-  neg_mem' := by
-    rintro _ ⟨n, k, rfl⟩
-    exact ⟨n, -k, by simp⟩
-
 end Chain
-
-noncomputable def qzc (n : ℕ) : QZ := QuotientAddGroup.mk (1 / (n ! : ℚ))
 
 theorem qz_torsion (x : QZ) : ∃ k : ℕ, 0 < k ∧ k • x = 0 := by
   obtain ⟨q, rfl⟩ := QuotientAddGroup.mk_surjective x

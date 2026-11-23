@@ -1,6 +1,57 @@
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.FockDegreeOne.OneDegOfHalves
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.FockDegreeOne.EqZeroOfFockInnerSelfRe
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.FockDegreeOne.OmEDiagMonomial
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.FockDegreeOne.OneDegOfHalves
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.FockDegreeOne.OmEDiagMonomial
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.FockDegreeOne.EqZeroOfFockInnerSelfRe
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -15,7 +66,7 @@ theorem pd_comm {σ : Type*} (i j : σ) (P : MvPolynomial σ ℂ) :
   classical
   induction P using MvPolynomial.induction_on with
   | C a => simp
-  | add p q hp hq => simp only [map_add, hp, hq]
+  | add p q hp hq => simp only [map_add (f := _), hp, hq]
   | mul_X p n hp =>
     have hc : ∀ a b : σ, pderiv a (pderiv b (X n : MvPolynomial σ ℂ)) = 0 := by
       intro a b
@@ -23,7 +74,7 @@ theorem pd_comm {σ : Type*} (i j : σ) (P : MvPolynomial σ ℂ) :
       split_ifs
       · exact Derivation.map_one_eq_zero _
       · exact map_zero _
-    simp only [Derivation.leibniz, map_add, smul_eq_mul]
+    simp only [Derivation.leibniz, map_add (f := _), smul_eq_mul]
     rw [hc i j, hc j i, hp]
     ring
 
@@ -34,7 +85,7 @@ theorem key {σ : Type*} (v : MvPolynomial σ ℂ) (ac ad bc bd : σ) (hne : bc 
     pd_comm ad ac]
 
 theorem coeff_zero_of_dd {σ : Type*} (v : MvPolynomial σ ℂ) (i j : σ) (hij : i ≠ j)
-    (h : pderiv i (pderiv j v) = 0) (α : σ →₀ ℕ) (hα : coeff α v ≠ 0) :
+    (h : pderiv i (pderiv j v) = 0) (α : σ →₀ ℕ) (hα : AddMonoidAlgebra.coeff v α ≠ 0) :
     α i = 0 ∨ α j = 0 := by
   classical
   by_contra hcon
@@ -47,8 +98,8 @@ theorem coeff_zero_of_dd {σ : Type*} (v : MvPolynomial σ ℂ) (i j : σ) (hij 
       Finsupp.single_apply, Finsupp.single_apply]
     split_ifs with h1 h2 h2 <;> (try subst_vars) <;> first | omega | exact (hij rfl).elim
   obtain ⟨m, hm⟩ : ∃ m, α = m + Finsupp.single i 1 + Finsupp.single j 1 := ⟨_, hsplit⟩
-  have hc := congrArg (coeff m) h
-  rw [coeff_pderiv, coeff_pderiv, coeff_zero, ← hm] at hc
+  have hc := congrArg (AddMonoidAlgebra.coeff · m) h
+  rw [coeff_pderiv, coeff_pderiv, AddMonoidAlgebra.coeff_zero, Finsupp.zero_apply, ← hm] at hc
   rcases mul_eq_zero.1 hc with h' | h'
   · rcases mul_eq_zero.1 h' with h'' | h''
     · exact hα h''
@@ -119,8 +170,10 @@ theorem sum_SS (v : Pol p q r s)
 
 theorem SS_swap (v : Pol p q r s) (a b : Ix p q) : SS v a b = starRingEnd ℂ (SS v b a) := by
   unfold SS
+
   rw [map_sum]
   refine Finset.sum_congr rfl fun c _ => ?_
+
   rw [map_sum]
   refine Finset.sum_congr rfl fun d _ => ?_
   exact fockInner_swap _ _
@@ -258,13 +311,13 @@ theorem exists_monomial_weight' {σ ι : Type*} [Fintype σ]
       ((f a β : ℚ) : ℂ) • MvPolynomial.monomial β 1)
     (μ : ι → ℚ) (d : ℕ) (P : MvPolynomial σ ℂ) (hP : P ∈ homog σ d) (h0 : P ≠ 0)
     (hw : ∀ a, (T a - ((μ a : ℚ) : ℂ) • (LinearMap.id : Module.End ℂ (MvPolynomial σ ℂ))) P = 0) :
-    ∃ α : σ →₀ ℕ, MvPolynomial.coeff α P ≠ 0 ∧ ∑ i, α i = d ∧ ∀ a, μ a = f a α := by
+    ∃ α : σ →₀ ℕ, AddMonoidAlgebra.coeff P α ≠ 0 ∧ ∑ i, α i = d ∧ ∀ a, μ a = f a α := by
   obtain ⟨α, hα⟩ := MvPolynomial.exists_coeff_ne_zero h0
   refine ⟨α, hα, ?_, fun a => ?_⟩
   · have hh : P.IsHomogeneous d := hP
     by_contra hne
     exact hα (hh.coeff_eq_zero (by rwa [Finsupp.degree_eq_sum]))
-  · have h1 := congrArg (MvPolynomial.coeff α) (hw a)
+  · have h1 := congrArg (AddMonoidAlgebra.coeff · α) (hw a)
     rw [LinearMap.sub_apply, MvPolynomial.coeff_sub,
       coeff_of_diag (T a) (fun β => ((f a β : ℚ) : ℂ)) (hT a),
       LinearMap.smul_apply, LinearMap.id_apply, MvPolynomial.coeff_smul, MvPolynomial.coeff_zero,

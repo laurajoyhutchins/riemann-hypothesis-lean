@@ -1,4 +1,60 @@
-import Formalism.SharpRestriction.GrowthBounds.DualFockLinear.IsMultiHom
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.DualFockLinear.IsMultiHom
+public import Formalism.GradedWeylDivisibility.FinalC
+public import Formalism.LocalToGlobal.GroupLattices.FockModels.FlatModels.LetterB
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Formalism.LocalToGlobal.GroupLattices.FockModels.MkP
+
+@[expose] public section
 
 noncomputable section
 
@@ -83,7 +139,7 @@ theorem fam_deg (F : Type) [Field F] (m : ℕ) (vec : Bool) (α : Fin (m + 1) �
 
 theorem dg_false_diag (m : ℕ) (c t : Fin (m + 1)) (ht : t.val < m) :
     dg m false c (t, t) = if t < c then 1 else 0 := by
-  simp only [dg, Bool.false_eq_true, if_false, Finsupp.finset_sum_apply, Finsupp.single_apply]
+  simp only [dg, Bool.false_eq_true, if_false, Finsupp.finsetSum_apply, Finsupp.single_apply]
   rw [Finset.sum_eq_single (⟨t.val, ht⟩ : Fin m)]
   · by_cases htc : t < c
     · rw [if_pos htc, if_pos]
@@ -195,7 +251,7 @@ theorem key_inj (m : ℕ) (top vec : Bool) (d : ℕ) (ν : Fin (m + 1) → ℕ) 
         · by_cases hnm : n ≤ m
           · have ht : n - 1 < m + 1 := by omega
             have he := congrArg (fun f => f ((⟨n - 1, ht⟩ : Fin (m + 1)), (⟨n - 1, ht⟩ : Fin (m + 1)))) h
-            simp only [Finsupp.add_apply, Finsupp.finset_sum_apply, Finsupp.smul_apply, smul_eq_mul] at he
+            simp only [Finsupp.add_apply, Finsupp.finsetSum_apply, Finsupp.smul_apply, smul_eq_mul] at he
             rw [hz x, hz x', add_zero, add_zero,
               sum_mul_dg_diag_eq_sum_filter m n α _ (by show n - 1 < m; omega) (by show n - 1 + 1 = n; omega),
               sum_mul_dg_diag_eq_sum_filter m n α' _ (by show n - 1 < m; omega) (by show n - 1 + 1 = n; omega)] at he
@@ -222,7 +278,7 @@ theorem key_inj (m : ℕ) (top vec : Bool) (d : ℕ) (ν : Fin (m + 1) → ℕ) 
           exact h00
         · exact Finset.sum_eq_zero_iff.mp hrest a (Finset.mem_erase.mpr ⟨ha, Finset.mem_univ a⟩)
       have he := congrArg (fun f => f (c, (0 : Fin (m + 1)))) h
-      simp only [Finsupp.add_apply, Finsupp.finset_sum_apply, Finsupp.smul_apply, smul_eq_mul] at he
+      simp only [Finsupp.add_apply, Finsupp.finsetSum_apply, Finsupp.smul_apply, smul_eq_mul] at he
       rw [hcol x, hcol x'] at he
       have hs1 : ∀ β : Fin (m + 1) →₀ ℕ, ∑ c', β c' * dg m true c' (c, 0) = β c := by
         intro β
@@ -245,11 +301,11 @@ private theorem linearIndependent_of_degree_injective {σ ι F : Type} [Field F]
   obtain ⟨i0, hi0, hmax⟩ := Finset.exists_max_image (s.filter fun j => g j ≠ 0)
     (fun j => M.toSyn (M.degree (v j))) hne'
   rw [Finset.mem_filter] at hi0
-  have hc := congrArg (MvPolynomial.coeff (M.degree (v i0))) hg
+  have hc := congrArg (AddMonoidAlgebra.coeff · (M.degree (v i0))) hg
   rw [MvPolynomial.coeff_sum, MvPolynomial.coeff_zero] at hc
   rw [Finset.sum_eq_single i0] at hc
   · rw [MvPolynomial.coeff_smul, smul_eq_mul] at hc
-    have hlc : MvPolynomial.coeff (M.degree (v i0)) (v i0) ≠ 0 := M.leadingCoeff_ne_zero_iff.mpr (hv i0)
+    have hlc : AddMonoidAlgebra.coeff (v i0) (M.degree (v i0)) ≠ 0 := M.leadingCoeff_ne_zero_iff.mpr (hv i0)
     exact mul_ne_zero hi0.2 hlc hc
   · intro j hj hji0
     rw [MvPolynomial.coeff_smul, smul_eq_mul]
@@ -289,7 +345,7 @@ theorem posInd : PosInd := by
       exact zero_ne_one h2
     rw [he, smul_mul_assoc]
     refine ⟨?_, smul_ne_zero hu hne⟩
-    rw [MonomialOrder.degree_smul_of_isRegular (isRegular_of_ne_zero hu), h1]
+    rw [MonomialOrder.degree_smul_of_isRegular (IsRegular.of_ne_zero hu), h1]
   apply linearIndependent_of_degree_injective (colLex (m + 1) (m + 1))
   · intro y
     exact (hdeg y).2

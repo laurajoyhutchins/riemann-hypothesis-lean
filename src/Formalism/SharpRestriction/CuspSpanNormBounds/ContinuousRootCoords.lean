@@ -1,4 +1,53 @@
-import Formalism.SharpRestriction.CuspSpanNormBounds.SpanMemOfImage
+module
+
+public import Formalism.SharpRestriction.CuspSpanNormBounds.SpanMemOfImage
+public import Formalism.SharpRestriction.CuspSpanNormBounds.StarVecMulDM
+import Formalism.SharpRestriction.CuspSpanNormBounds.DMiMulVecApply
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.Countable
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Sheaves.Init
+import Formalism.SharpRestriction.CuspSpanNormBounds.OnePlaceEstimates
+
+@[expose] public section
 
 open MeasureTheory Matrix Finset
 
@@ -20,6 +69,7 @@ theorem map_cjT_cjIT_smul (hκ : 0 < κ) (hτ : 0 < τ) {α : ℝ} (hα : 0 < α
   have e : cjT k r κ τ ∘ cjIT k r κ τ = id := funext (cjT_cjIT hκ hτ)
   rw [e, Measure.map_id, smul_smul, ENNReal.mul_inv_cancel (ofReal_ne_zero_of_pos hα) ENNReal.ofReal_ne_top,
     one_smul]
+  exact measurable_cjT.aemeasurable
 
 theorem phiP_phiPI (hκ : 0 < κ) (hτ : 0 < τ) (p : PairSp k r) : phiP k r κ τ (phiPI k r κ τ p) = p :=
   Prod.ext (Prod.ext (cjT_cjIT hκ hτ _) (cjT_cjIT hκ hτ _)) (Prod.ext (cjT_cjIT hκ hτ _) (cjT_cjIT hκ hτ _))
@@ -30,6 +80,7 @@ theorem use₉ (hκ : 0 < κ) (hτ : 0 < τ) {α : ℝ} (hα : 0 < α) (ν₁ : 
   have e : phiP k r κ τ ∘ phiPI k r κ τ = id := funext (phiP_phiPI hκ hτ)
   rw [e, Measure.map_id, smul_smul, ENNReal.inv_mul_cancel (ofReal_ne_zero_of_pos hα) ENNReal.ofReal_ne_top,
     one_smul]
+  exact measurable_phiP.aemeasurable
 
 theorem stabAct_phiP (hκ : 0 < κ) (hτ : 0 < τ) (g a : Mx k r) (x : PairSp k r) :
     stabAct (cj k r κ τ g) (cj k r κ τ a) (phiP k r κ τ x) = phiP k r κ τ (stabAct g a x) := by
@@ -180,6 +231,7 @@ theorem isRootMeas_map_iff (hκ : 0 < κ) (hτ : 0 < τ) (L L₁ : LocBessel k r
       ENNReal.ofReal (alphaPt κ τ γ) • (μR.map (rootCoords k r L.z γ)).map D := by
     rw [Measure.map_smul, Measure.map_map (continuous_rootCoords _ γ).measurable measurable_cjT, hcomp,
       ← Measure.map_map hDm hRc]
+    exact (continuous_rootCoords _ γ).measurable.aemeasurable
   have hnorm : (‖(κ : ℂ) * L.c‖ / (2 * Real.pi)) ^ (rootPat γ).card =
       κ ^ (rootPat γ).card * (‖L.c‖ / (2 * Real.pi)) ^ (rootPat γ).card := by
     rw [norm_mul, Complex.norm_real, Real.norm_of_nonneg hκ.le, mul_div_assoc, mul_pow]
@@ -216,12 +268,14 @@ theorem isRootMeas_map_iff (hκ : 0 < κ) (hτ : 0 < τ) (L L₁ : LocBessel k r
         ← ENNReal.ofReal_mul (mul_nonneg (inv_nonneg.mpr hApos.le) (mul_nonneg (pow_nonneg hκ.le _) hC0)), hA]
       congr 1
       exact ar1 hκn hB.ne'
+      all_goals exact hD'm.aemeasurable
     · intro h
       rw [h, Measure.map_smul, hvolD, smul_smul, smul_smul]
       congr 1
       rw [← ENNReal.ofReal_mul hApos.le, ← ENNReal.ofReal_mul (mul_nonneg hApos.le hC0), hA]
       congr 1
       exact ar2 hB.ne'
+      all_goals exact hDm.aemeasurable
 
 theorem IsRootMeas_trD_iff (hκ : 0 < κ) (hτ : 0 < τ) (L : LocBessel k r) (κN₁ : ENNReal)
     (hz : inWb k r ((τ : ℂ) • L.z) ∧ 0 < Tz k r ((τ : ℂ) • L.z))

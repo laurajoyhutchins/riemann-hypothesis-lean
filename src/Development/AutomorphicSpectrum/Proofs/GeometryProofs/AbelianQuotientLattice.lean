@@ -1,18 +1,65 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.GermSys
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsFlatAnIffIsConstMul
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.UniformisationConclusion
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.QQuasiCompact
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.FormalGermLieBasisStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExistsLieModel
+module
+
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.QQuasiCompact
+public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.LeftEqIffLieVecSmul
+public import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.GermComp1ZeroPointLeft
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsCocharLie
+import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.HomBaseChangeBijectiveOfLeNilradical
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExistsCocharacterLieModelStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExistsLieModel
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.FormalGermLieBasisStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LieModelExistsUniqueAct
 import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LieModelFunctorialMap
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LieModelExistsUniqueAct
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LieModelPullbackEquivalence
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExistsCocharacterLieModelStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.SmoothQ
-import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.LeftEqIffLieVecSmul
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LieModelPullbackEquivalence
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.SmoothQ
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.DualNumber
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
 import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.SabPull
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.PrecompleteBases.Torus2GammaBijective
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.PrecompleteBases.PsaRos
+import Development.AutomorphicSpectrum.Definitions.AdelicLattices.FactPrimes
+import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.ExistsGenOfIsVBOne
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor GlobalTheory.CompanionTheory.Ar GlobalTheory.CompanionTheory.Ar.Crv GlobalTheory.CompanionTheory.Ar.Conj GlobalTheory.CompanionTheory.Ar.Flat GlobalTheory.CompanionTheory.Ar.Fl
@@ -93,8 +140,8 @@ theorem chi_injective {a b : Ch} (h : chi (S := Sp k) Ch a = chi (S := Sp k) Ch 
   have h3 := congrArg (fun p => p.coeff a) this
   simp [AddMonoidAlgebra.coeff_single, Finsupp.single_apply, Ne.symm hab] at h3
 
-open Rosenlicht GlobalTheory.Diag in
 
+open Rosenlicht GlobalTheory.Diag in
 theorem exists_diagMap [TwoUniqueSums Ch] (t : splitTorus (Sp k) Ch ⟶ splitTorus (Sp k) Ch) [IsMonHom t] :
     ∃ h : Ch →+ Ch, t = diagMap (Sp k) h := by
   have key : ∀ y, ∃ a, (coord t).hom (AddMonoidAlgebra.single y 1) = chi (S := Sp k) Ch a := by
@@ -225,8 +272,8 @@ theorem isMonHom_of_comp {A A' C : Over (Sp k)} [GrpObj A] [GrpObj A'] [GrpObj C
     rw [Category.assoc, Category.assoc, h, IsMonHom.mul_hom, IsMonHom.mul_hom,
       tensorHom_comp_tensorHom_assoc, h])
 
-open GlobalTheory.Diag in
 
+open GlobalTheory.Diag in
 theorem exists_charAct [TwoUniqueSums Ch] (i : splitTorus (Sp k) Ch ⟶ G) (q : G ⟶ B) [IsMonHom i] [IsMonHom q]
     (ker : IsPullback i (toUnit _) q (η : 𝟙_ _ ⟶ B)) {O : Type} [CommRing O]
     (act : O → (G ⟶ G)) (actB : O → (B ⟶ B)) (hm : ∀ a, IsMonHom (act a)) (hmB : ∀ a, IsMonHom (actB a))
@@ -308,8 +355,7 @@ theorem tenMap_bijective [Module.Free ℤ Ch] [Module.Finite ℤ Ch] : Function.
   have : (tenMap (Ch := Ch) k : _ → _) = e := by
     funext z
     induction z with
-    | zero => simp
-    | add x y hx hy => simp only [map_add, hx, hy]
+    | add x y hx hy => simp only [map_add (f := _), hx, hy]
     | tmul c l =>
       rw [tenMap_tmul]
       refine AddMonoidHom.ext fun χ => ?_
@@ -340,7 +386,7 @@ def lamEnd {O : Type} [CommRing O] (h : O →+* AddMonoid.End Ch) : O →+* Modu
       change (show Ch →+ ℤ from l) ((h (a + b) : Ch →+ Ch) χ) =
         (show Ch →+ ℤ from l) ((h a : Ch →+ Ch) χ) + (show Ch →+ ℤ from l) ((h b : Ch →+ Ch) χ)
       have e : (h (a + b) : Ch →+ Ch) χ = (h a : Ch →+ Ch) χ + (h b : Ch →+ Ch) χ := by
-        rw [map_add]; rfl
+        rw [map_add (f := _)]; rfl
       rw [e]
       exact map_add (show Ch →+ ℤ from l) _ _)
 
@@ -408,11 +454,8 @@ theorem tenMap_end {k : Type} [Field k] {Ch : Type} [AddCommGroup Ch] {O : Type}
     (h : O →+* AddMonoid.End Ch) (a : O) (z : TensorProduct ℤ k (abelian₂ Ch)) :
     tenMap k (LinearMap.baseChange k (lamEnd h a) z) = (tenMap k z).comp (h a : Ch →+ Ch) := by
   induction z with
-  | zero =>
-    simp only [map_zero]
-    rfl
   | add x y hx hy =>
-    rw [map_add, map_add, hx, hy, map_add]
+    rw [map_add (f := _), map_add (f := _), hx, hy, map_add (f := _)]
     rfl
   | tmul c l =>
     rw [LinearMap.baseChange_tmul, tenMap_tmul, tenMap_tmul]

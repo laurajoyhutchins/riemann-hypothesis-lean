@@ -1,6 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.ShimuraVarieties.IrrelevantLeMapLinearGradedMap
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsGrpPullback
+module
+
+public import Development.AbelianVarietyTheory.Definitions.ShimuraVarieties.IrrelevantLeMapLinearGradedMap
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsGrpPullback
+public import Mathlib.Algebra.MvPolynomial.Nilpotent
+public import Mathlib.Algebra.Ring.IsFormallyReal
+public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.IsStandardSmoothOfRelativeDimensionAwayJacobian
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj
 
@@ -374,9 +420,6 @@ def projectivePointMulEquiv :
   toEquiv := Multiplicative.toAdd.trans (projectivePointEquiv W k)
   map_mul' p q := ofProjectivePoint_add W k p.toAdd q.toAdd
 
-@[simp] theorem projectivePointMulEquiv_ofAdd (p : (W.baseChange k).toProjective.Point) :
-    projectivePointMulEquiv W k (.ofAdd p) = ofProjectivePoint W k p := rfl
-
 variable [DecidableEq k]
 
 theorem ofAffinePoint_add (p q : (W.baseChange k).toAffine.Point) :
@@ -388,9 +431,6 @@ def affinePointMulEquiv :
     Multiplicative (W.baseChange k).toAffine.Point ≃* (specOver R k ⟶ schemeOver W) where
   toEquiv := Multiplicative.toAdd.trans (affinePointEquiv W k)
   map_mul' p q := ofAffinePoint_add W k p.toAdd q.toAdd
-
-@[simp] theorem affinePointMulEquiv_ofAdd (p : (W.baseChange k).toAffine.Point) :
-    affinePointMulEquiv W k (.ofAdd p) = ofAffinePoint W k p := rfl
 
 theorem ofAffinePoint_zsmul (n : ℤ) (p : (W.baseChange k).toAffine.Point) :
     ofAffinePoint W k (n • p) = ofAffinePoint W k p ^ n :=
@@ -408,10 +448,6 @@ section Examples
 
 private def sampleCurve : WeierstrassCurve ℚ := ⟨0, 0, 1, -1, 0⟩
 
-private instance : sampleCurve.IsElliptic := ⟨Ne.isUnit (by
-  norm_num [sampleCurve, WeierstrassCurve.Δ, WeierstrassCurve.b₂, WeierstrassCurve.b₄,
-    WeierstrassCurve.b₆, WeierstrassCurve.b₈])⟩
-
 private theorem sample_sol {a b : ℚ} (h : b ^ 2 + b = a ^ 3 - a) :
     IsUnimodularSol (sampleCurve.baseChange ℚ) ![a, b, 1] :=
   isUnimodularSol_some (by
@@ -419,29 +455,6 @@ private theorem sample_sol {a b : ℚ} (h : b ^ 2 + b = a ^ 3 - a) :
     simp only [sampleCurve, WeierstrassCurve.baseChange, WeierstrassCurve.map, map_zero, map_one,
       map_neg]
     linear_combination h)
-
-example : (ptOver sampleCurve ![0, 0, 1] (sample_sol (by norm_num)))⁻¹ =
-    ptOver sampleCurve (A := ℚ) ![0, -1, 1] (sample_sol (by norm_num)) := by
-  rw [ptOver_inv]
-  congr 1
-  simp [WeierstrassCurve.Projective.neg, WeierstrassCurve.Projective.negY, sampleCurve,
-    WeierstrassCurve.baseChange]
-
-example : ptOver sampleCurve ![0, 0, 1] (sample_sol (by norm_num)) *
-    ptOver sampleCurve ![0, 0, 1] (sample_sol (by norm_num)) =
-    ptOver sampleCurve (A := ℚ) ![1, 0, 1] (sample_sol (by norm_num)) := by
-  refine ptOver_mul_self _ _ _ fun i j => ?_
-  fin_cases i <;> fin_cases j <;>
-    simp [WeierstrassCurve.Projective.dblXYZ, WeierstrassCurve.Projective.dblX,
-      WeierstrassCurve.Projective.dblY, WeierstrassCurve.Projective.dblZ,
-      WeierstrassCurve.Projective.negDblY, WeierstrassCurve.Projective.negY, sampleCurve,
-      WeierstrassCurve.baseChange] <;> norm_num
-
-example : ptOver sampleCurve (A := ℚ) ![0, 0, 1] (sample_sol (by norm_num)) ≠ 1 := by
-  rw [one_eq_ptOver]
-  intro e
-  obtain ⟨v, hv⟩ := (ptOver_eq_ptOver_iff _ _ _).mp e
-  simpa using congrFun hv 1
 
 end Examples
 

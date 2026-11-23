@@ -1,20 +1,53 @@
-import Development.AutomorphicArithmetic.BlowupCategories.SpanScale
-import Development.AutomorphicArithmetic.BlowupCategories.AffC
-import Development.AutomorphicArithmetic.CommutativeAlgebra.IsIsoOfBijectiveOnSimplices
-import Development.AutomorphicArithmetic.CommutativeAlgebra.MonoOfInjectiveOnSimplices
-import Development.AutomorphicArithmetic.CommutativeAlgebra.IsPullbackOfUniqueSimplicesPullback
-import Development.AutomorphicArithmetic.CommutativeAlgebra.SimplicesPullbackExistsUniqueOfMapEq
-import Development.AutomorphicArithmetic.CommutativeAlgebra.MayerVietorisCoverOfMonoOfZariskiLocal
-import Development.AutomorphicArithmetic.CommutativeAlgebra.LocallyExistsIsUnitOfSpanRangeEqTop
-import Development.AutomorphicArithmetic.CommutativeAlgebra.IsIsoStackProductMapOfBijective
-import Development.AutomorphicArithmetic.CommutativeAlgebra.IsIsoStackProductPairOfBijective
-import Development.AutomorphicArithmetic.CommutativeAlgebra.StackProductIsPullbackOfActionPullback
-import Development.AutomorphicArithmetic.CommutativeAlgebra.LerayHirschOfIsoSquare
-import Development.AutomorphicArithmetic.CommutativeAlgebra.LerayHirschOneIffTwistEquiv
-import Development.AutomorphicArithmetic.CommutativeAlgebra.AffineLineActionFstTwistEquiv
-import Development.AutomorphicArithmetic.CommutativeAlgebra.MayerVietorisStackProductOfInjectiveOfLocallyCov
-import Development.AutomorphicArithmetic.CommutativeAlgebra.PullCupPowEqCupPowPull
-import Development.AutomorphicArithmetic.CommutativeAlgebra.LerayHirschOfMayerVietorisCover
+module
+
+public import Development.AutomorphicArithmetic.BlowupCategories.SpanScale
+public import Development.AutomorphicArithmetic.CommutativeAlgebra.LerayHirschOfIsoSquare
+public import Development.AutomorphicArithmetic.CommutativeAlgebra.LerayHirschOfMayerVietorisCover
+public import Development.AutomorphicArithmetic.CommutativeAlgebra.MayerVietorisStackProductOfInjectiveOfLocallyCov
+public import Development.AutomorphicArithmetic.CommutativeAlgebra.StackProductIsPullbackOfActionPullback
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 open CategoryTheory Limits AlgebraicGeometry Opposite CochainComplex CochainComplex.HomComplex GlobalTheory.EtC UpperTheory.Pbf UpperTheory.Blow
 
@@ -73,10 +106,12 @@ private theorem cover_tr {R : Type} [CommRing R] {U U' V V' E : Spc} (u : U ⟶ 
   refine ⟨?_, ?_, fun n => ?_⟩
   · have : u' = inv e ≫ e ≫ u' := by simp
     rw [this]
-    infer_instance
+    letI : Mono (e ≫ u') := h1
+    exact mono_comp (inv e) (e ≫ u')
   · have : v' = inv e' ≫ e' ≫ v' := by simp
     rw [this]
-    infer_instance
+    letI : Mono (e' ≫ v') := h2
+    exact mono_comp (inv e') (e' ≫ v')
   · have h4 := h3 n
     have : biprod.desc ((free R).map ((e ≫ u').app n)) ((free R).map ((e' ≫ v').app n)) =
         biprod.map ((free R).map (e.app n)) ((free R).map (e'.app n)) ≫
@@ -129,13 +164,16 @@ theorem UpperTheory.leraHirsch_of_local_cover_of_inf :
   have sq1 := UpperTheory.Glue.sq E π h₁
   have sq2 := UpperTheory.Glue.sq E π h₂
   have sqi := UpperTheory.Glue.sq_inf E h₁ h₂
+  letI := sq1.hasPullback
+  letI := sq2.hasPullback
+  letI := sqi.hasPullback
   have hloc' : ∀ (T : Scheme.{0}) (x : c.D.obj Γ(T, ⊤)), (Q.comap π).P _ x →
       Loc T fun V g => (Q₁.comap π).P _ (c.D.map g.appTop x) ∨ (Q₂.comap π).P _ (c.D.map g.appTop x) := by
     intro T x hx
     obtain ⟨S, hS, hP⟩ := hloc T _ hx
     refine ⟨S, hS, fun V g hg => ?_⟩
     show Q₁.P _ _ ∨ Q₂.P _ _
-    rw [FunctorToTypes.naturality]
+    rw [NatTrans.naturality_apply]
     exact hP V g hg
   have sq' : IsPullback (Sp.map E (inclLe (UpperTheory.Glue.comap_le π hinf)))
       (Sp.map E (π.sub (Q₁.inf Q₂)) ≫ sqi.isoPullback.hom) (Sp.map E (π.sub Q))
@@ -144,6 +182,7 @@ theorem UpperTheory.leraHirsch_of_local_cover_of_inf :
       (by simp) (by simp) (by simp) ?_
     rw [Iso.refl_hom, Category.comp_id, ← Category.assoc, IsPullback.isoPullback_hom_fst,
       UpperTheory.Glue.map_inclLe]
+  letI := sq'.hasPullback
   refine UpperTheory.lerayHirsch_of_mayerVietoris_cover q (Sp.map E (inclLe h₁)) (Sp.map E (inclLe h₂)) (Sp.map E (π.sub Q)) d e _
     (UpperTheory.Glue.cov _ E h₁ h₂ hloc) ?_ ?_ ?_ ?_
   · exact UpperTheory.Glue.cover_tr (Sp.map E (inclLe (UpperTheory.Glue.comap_le π h₁)))

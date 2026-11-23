@@ -1,6 +1,60 @@
-import Mathlib
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.RealDescent.RealLeviDescent.InjectiveDecompositionAction
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsPermOfMapEq
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.RealDescent.RealLeviDescent.InjectiveDecompositionAction
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsPermOfMapEq
+import CompanionTheory.HarishChandraModules.LowKTypeMultiplicity.EigenspaceCyclicDensity.CreationOperators.DifferentialCommutesWeightOperator
+import CompanionTheory.HarishChandraModules.LowKTypeMultiplicity.EigenspaceCyclicDensity.CreationOperators.WtProj
+import CompanionTheory.SpectralGeometry.LocalGlobalProofs.StableLattices.ExistsPowEqZero
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GelfandInvariantsDetermineMultiset
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Finiteness.Lattice
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Bool
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Finset
 
@@ -206,8 +260,9 @@ theorem bdL_isK (E1 E2 : Fin n → Fin n → Module.End ℂ V) :
 theorem frC_bd (B : Finset (Lt n)) (E1 E2 : Fin n → Fin n → Module.End ℂ V) (y : Cn n V) :
     frC B (bd (allT n) (kA E1 E2) y) = bdL isK E1 E2 (frC B y) := by
   rw [bdL_isK]
-  simp only [bd, cpt, true_and, if_true, LinearMap.add_apply, LinearMap.sum_apply, map_add, map_sum,
-    Module.End.mul_apply]
+
+  simp only [bd, cpt, true_and, if_true, LinearMap.add_apply, LinearMap.sum_apply, map_add (f := _), map_sum,
+  Module.End.mul_apply]
   congr 1
   · refine Finset.sum_congr rfl fun i _ => ?_
     rw [frC_lift, frC_ann]
@@ -304,8 +359,8 @@ theorem isN2_of_gelfand_values_eq (lam : Fin n → ℤ) (lev : Fin n → ℕ) (B
     rw [h1]
     ring
 
-open CompanionTheory.D.LK (LocFin) in
 
+open CompanionTheory.D.LK (LocFin) in
 theorem van_cn {lam : Fin n → ℤ} {lev : Fin n → ℕ} {V : Type} [NormedAddCommGroup V] [InnerProductSpace ℂ V]
     {E1 E2 : Fin n → Fin n → Module.End ℂ V} (h : AdmFor lam lev E1 E2) (B : Finset (Fin n × Fin n)) (hB : B.Nonempty)
     (hBl : ∀ p ∈ B, lev p.1 < lev p.2) (j : ℕ) (z : Cn n V) (hz : Sup (allT n) ∅ j z)

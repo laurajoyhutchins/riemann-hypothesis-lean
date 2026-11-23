@@ -1,5 +1,40 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.TwistDataAgreeAcrossCoefficientsLocalized
+module
+
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.TwistDataAgreeAcrossCoefficientsLocalized
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -10,8 +45,8 @@ open Formalism.BasicNotions Formalism.MainNotions Formalism.MainNotions.N Formal
 
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
 
-set_option synthInstance.maxHeartbeats 400000
-set_option maxHeartbeats 4000000
+
+
 
 variable {hL : GlobalTheory.Published.LocalLanglandsGL} {K : Ctx} {B : Base} {f : Fr B.toPre} {T : TwDat B} {w : ColW B f T} {P : Pre2 K w}
 variable {x : St P} (L : LocAll (lay0 (Dof x)))
@@ -76,6 +111,16 @@ theorem placesOK_B {Pg Q : Finset (HeightOneSpectrum (𝓞 (DL x L).host.E))} (h
 
 theorem wtL_good {n : ℕ} {u : GlobalTheory.ExportSeries.Weight (Dof x) n} (h : u.Good) : (wtL L u).Good := ⟨(by with_unfolding_all exact (h.le :)), (by with_unfolding_all exact (h.lam_eq :))⟩
 
+theorem thetaFun_L_iff {S U : Formalism.BasicNotions.TH.HSp (Dof x)}
+    (F : GlobalTheory.ExportSeries.Frame S U) (f : Formalism.IndefR.Datum.WO S U → ℂ) :
+    @Formalism.IndefR.Datum.IsThetaFunO (DL x L) (frL L F).ψ S U f ↔
+      @Formalism.IndefR.Datum.IsThetaFunO (Dof x) F.ψ S U f := by
+  constructor <;> intro h <;>
+    exact ⟨(by with_unfolding_all exact h.quasi),
+      (by with_unfolding_all exact h.level),
+      (by with_unfolding_all exact h.cont),
+      (by with_unfolding_all exact h.smooth)⟩
+
 theorem frL_good {S U : Formalism.BasicNotions.TH.HSp (Dof x)} {F : GlobalTheory.ExportSeries.Frame S U} (h : F.Good) : (frL L F).Good :=
   { rank_le := (by with_unfolding_all exact (h.rank_le :))
     onbS := (by with_unfolding_all exact (h.onbS :))
@@ -85,7 +130,16 @@ theorem frL_good {S U : Formalism.BasicNotions.TH.HSp (Dof x)} {F : GlobalTheory
     sdT := (by with_unfolding_all exact (h.sdT :))
     frS := (by with_unfolding_all exact (h.frS :))
     frT := (by with_unfolding_all exact (h.frT :))
-    vac := by tr_clause x.o.Z (oL x L).Z h.vac }
+    vac := by
+      rcases h.vac with ⟨hstd, hinf, htheta, hlat, hfock, hnorm⟩
+      exact ⟨(by with_unfolding_all exact hstd),
+        (by with_unfolding_all exact hinf), (by
+          exact ⟨(by with_unfolding_all exact htheta.quasi),
+            (by with_unfolding_all exact htheta.level),
+            (by with_unfolding_all exact htheta.cont),
+            (by with_unfolding_all exact htheta.smooth)⟩),
+        (by with_unfolding_all exact hlat), (by with_unfolding_all exact hfock),
+        (by with_unfolding_all exact hnorm)⟩ }
 
 theorem baseL_good {S U : Formalism.BasicNotions.TH.HSp (Dof x)} {Z : GlobalTheory.ExportSeries.Base S U} (h : Z.Good) : (baseL L Z).Good :=
   { even := (by with_unfolding_all exact (h.even :))
@@ -117,40 +171,45 @@ theorem setupL_good {ρ : GlobalTheory.SeriesTie.Setup (Dof x).ntw} (h : ρ.Good
     latS := (by with_unfolding_all exact (h.latS :))
     latT := (by with_unfolding_all exact (h.latT :))
     Pg := (by with_unfolding_all exact (h.Pg :))
-    delta := fun i j b => kc% (congrArg (twL L) (h.delta (kc% i) (kc% j) b))
+    delta := fun i j b => by
+      have hd := congrArg (twL L) (h.delta i j b)
+      -- Let the kernel compare the transported twists in this equality.
+      run_tac Lean.Elab.Tactic.closeMainGoalUsing `exact fun _ _ =>
+        Lean.Elab.Tactic.elabTerm (Lean.mkIdent `hd) none
     weil := fun i j b t ht => by
-      delta GlobalTheory.ExportSeries.Base.IsWeil
-      tr_leaves x.o.Z (oL x L).Z
-      exact (by with_unfolding_all exact ((h.weil ((i)) ((j)) b (twB L t) (twB_good L ht)) : _))
+      let t₀ := twB L t
+      have hw := GlobalTheory.Mem.R3.Tr.weilDatum_imp (a := x.o.Z) (oL x L).Z
+        _ _ _ _ _ _ (h.weil i j b t₀ (twB_good L ht))
+      run_tac Lean.Elab.Tactic.closeMainGoalUsing `exact fun _ _ =>
+        Lean.Elab.Tactic.elabTerm (Lean.mkIdent `hw) none
     classes := fun i j b t ht hA =>
       have h' := h.classes ((by with_unfolding_all exact (i :))) ((by with_unfolding_all exact (j :))) b (twB L t) (twB_good L ht) ⟨(by with_unfolding_all exact ((placesOK_B L hA.1) :)), (by with_unfolding_all exact (hA.2 :))⟩
       ⟨(by with_unfolding_all exact (h'.fin :)), (by with_unfolding_all exact (h'.reps :)), (by with_unfolding_all exact (h'.stab :))⟩ }
 
-theorem pinL (l : LC hL x) : GlobalTheory.SeriesTie.RealPin (datL x L).R (datL x L).cG (setupL L l.b.ser.ex.ρ) :=
-  have p := l.b.ser.ex.pin
-  ⟨(by with_unfolding_all exact (p.psi :)), (by with_unfolding_all exact (p.inf :)), (by with_unfolding_all exact (p.cartT :)), (by with_unfolding_all exact (p.onbS :)), (by with_unfolding_all exact (p.onbT :)), (by with_unfolding_all exact (p.latS :)), (by with_unfolding_all exact (p.latT :)), (by with_unfolding_all exact (p.frS :)), (by with_unfolding_all exact (p.frT :)), (by with_unfolding_all exact (p.vac :)), (by with_unfolding_all exact (p.Pg :)),
-    (by with_unfolding_all exact (p.grp :)), (by with_unfolding_all exact (p.mu0 :)), (by with_unfolding_all exact (p.eta :)), (by with_unfolding_all exact (p.delta :)), (by with_unfolding_all exact (p.deltaPl :)), (by with_unfolding_all exact (p.ap :)), (by with_unfolding_all exact (p.am :))⟩
-
-theorem univL (l : LC hL x) : GlobalTheory.UnivChar.IsUnivChar (DL x L).nexp := (by with_unfolding_all exact (l.b.ser.ex.univ :))
 
 open GlobalTheory.SeriesTie in
-
 theorem theta_eq (ρ : Setup (Dof x).ntw) :
     (setupL L ρ).theta = fun i j b h P => (by exact ρ.theta i j b h P) := by
   funext i j b h P
   delta GlobalTheory.SeriesTie.Setup.theta GlobalTheory.ExportSeries.Base.theta GlobalTheory.ExportSeries.Base.vecBase GlobalTheory.ExportSeries.Base.vecAt
     GlobalTheory.ExportSeries.Frame.vec GlobalTheory.ExportSeries.Frame.placeMap
-  tr_leaves x.o.Z (oL x L).Z
-  kexactB (Eq.refl (ρ.theta (kc% i) (kc% j) b (kc% h) (kc% P)))
+  rewrite [GlobalTheory.Mem.R3.Tr.placeModel_eq x.o.Z (oL x L).Z]
+  have hθ := Eq.refl (ρ.theta i j b h P)
+  -- After rewriting the place model, the kernel checks the remaining conversions.
+  run_tac Lean.Elab.Tactic.closeMainGoalUsing `exact fun _ _ =>
+    Lean.Elab.Tactic.elabTerm (Lean.mkIdent `hθ) none
+
 
 open GlobalTheory.SeriesTie in
-
 theorem isDatum_eq (ρ : Setup (Dof x).ntw) :
     (setupL L ρ).IsDatum = fun i j b s h P => (by exact ρ.IsDatum i j b s h P) := by
   funext i j b s h P
-  refine propext ⟨fun d => ?_, fun d => ?_⟩
-  · exact (by with_unfolding_all exact ((⟨(d.split), (d.off), (d.fin), (d.supp), (d.mem)⟩ : ρ.IsDatum ((i)) ((j)) b ((s)) ((h)) ((P))) : _))
-  · exact ⟨(by with_unfolding_all exact (d.split :)), (by with_unfolding_all exact (d.off :)), (by with_unfolding_all exact (d.fin :)), (by with_unfolding_all exact (d.supp :)), (by with_unfolding_all exact (d.mem :))⟩
+  refine propext ⟨fun d => ?_, fun d => ?_⟩ <;>
+    refine ⟨(by with_unfolding_all exact d.split), (by with_unfolding_all exact d.off),
+      (by with_unfolding_all exact d.fin), (by with_unfolding_all exact d.supp), ?_⟩
+  all_goals
+    run_tac Lean.Elab.Tactic.closeMainGoalUsing `exact fun _ _ =>
+      Lean.Elab.Tactic.elabTerm (Lean.mkIdent `d.mem) none
 
 end GlobalTheory.HeightCounting.Fin3
 

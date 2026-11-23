@@ -1,15 +1,57 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.IwahoriBlocks.SimpleIn
-import Development.AutomorphicArithmetic.Foundations.Convolution.GeneralizedMeasures.HeckeFinAlt
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.UnipotentBlockMatrices.ClosedKernelMinors.AdmissibleCuspFormsFinite
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.UnipotentBlockMatrices.ClosedKernelMinors.AdmCusp
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.UnipotentBlockMatrices.ClosedKernelMinors.TypeFin
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.IwahoriHeckeInjectivity.IdempotentTraces.TypeOf
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.IwahoriBlocks.IwahoriCentralBorel.OpenStab
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.IwahoriBlocks.IwahoriCentralBorel.LevLaws
-import Development.AutomorphicArithmetic.Foundations.Convolution.PowerSumTraces.FixLev
-import Development.AutomorphicArithmetic.Foundations.Convolution.PowerSumTraces.OpBasics
-import GroundTheory.AutomorphicForms.CuspidalDiscreteness.SummandsContRep
-import GroundTheory.AutomorphicForms.DiscreteSpectrumAbstract
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.IwahoriBlocks.SimpleIn
+import Development.AbelianVarietyTheory.Definitions.Foundations.MeasurePreservingRmulQuotMeas
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.IwahoriBlocks.IwahoriCentralBorel.LevLaws
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.IwahoriBlocks.IwahoriCentralBorel.OpenStab
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.IwahoriHeckeInjectivity.IdempotentTraces.TypeOf
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.UnipotentBlockMatrices.ClosedKernelMinors.AdmissibleCuspFormsFinite
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.UnipotentBlockMatrices.ClosedKernelMinors.TypeFin
+public import Development.AutomorphicArithmetic.Foundations.Convolution.PowerSumTraces.FixLev
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicLocalCompactness.AdeleLC
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.WeilStabilizerVolume.TopoAF
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.WeilStabilizerVolume.UnfoldAbs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.MeasureTheory.Function.AEEqOfIntegral
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Compactness.Paracompact
+import PositivityTheory.AutomorphicForms.PublishedInputs.CyclicBaseChange.PSConjSpaceR
+
+@[expose] public section
 
 open MeasureTheory NumberField IsDedekindDomain Filter Topology
 open GroundTheory.Automorphic GroundTheory.Automorphic.Reduction GroundTheory.Automorphic.RightCosetSpace
@@ -137,7 +179,7 @@ private theorem avg_rep {Y : Type*} [TopologicalSpace Y] [T2Space Y] [SecondCoun
     refine (integral_integral_swap (hint' s)).trans ?_
     exact setIntegral_congr_fun hs' fun x _ => (hΨQ_eq x).symm
   rw [← hV]
-  filter_upwards [(quasiMeasurePreserving_mk (Gam K n) μ).ae_eq_comp hVeq] with y hy
+  filter_upwards [QuasiMeasurePreserving.ae_eq_comp (quasiMeasurePreserving_mk (Gam K n) μ) hVeq] with y hy
   simp only [Function.comp_apply] at hy
   refine hy.trans ?_
   rw [hΨQ, quotFun_mk]
@@ -240,15 +282,15 @@ private theorem fix_gen {G : Type*} [Group G] [TopologicalSpace G] [IsTopologica
         simp only [← mul_assoc]
         rw [integral_mul_const, hid m hm]
 
-set_option synthInstance.maxHeartbeats 200000 in
+
 private theorem fix_avg (D : TypeDat K n) {F : G1 K n → ℂ} (hF : Continuous F) :
     D.Fix fun x => ∫ k, D.e k * F (x * k) ∂D.ν := by
   intro x
   haveI := D.prob
   exact fix_gen (typeFin D).1 D.supp D.inv D.cont D.idem hF x
 
-set_option maxHeartbeats 1000000 in
-set_option synthInstance.maxHeartbeats 200000 in
+
+
 private theorem fixed_of (D : TypeDat K n) {κ : Measure (archCompact K n)} {e : archCompact K n → ℂ} {U₀ : Subgroup (FA K n)}
     (hT : IsTy D κ e U₀) (he : IdemA κ e) (hac : Continuous (arc1 : archCompact K n → G1 K n)) (hcomp : CompactSpace (archCompact K n))
     {v : L2 μ} (hp : pOp μ κ e v = v) (hv : v ∈ fixF μ U₀) :
@@ -336,10 +378,10 @@ private theorem rep_in {τ : Submodule ℂ (L2 μ)} (hcl : IsClosed (τ : Set (L
 
 end Proj
 
-set_option maxHeartbeats 1000000 in
-set_option synthInstance.maxHeartbeats 200000 in
+
+
 theorem UpperTheory.V.Z.InvariantSubmoduleMonicPolynomial.IwahoriBlocks.exists_injection_into_l2_cusp :
-    ∀ {K : Type} [Field K] [NumberField K] [IsTotallyComplex K] (μ : Measure (G1 K 2)) [μ.IsHaarMeasure] (τ : Submodule ℂ (L2 μ)) (κ : Measure (archCompact K 2)) (p : archCompact K 2 → ℂ), CuspIrr μ τ → IdemA κ p → ∀ S : Finset (Pl K), ∃ J : Xs μ τ κ p S →ₗ[ℂ] L2 μ, Function.Injective J ∧ (∀ φ, Reps μ (J φ) φ ∧ InH μ τ κ p S (J φ)) ∧
+    ∀ {K : Type} [Field K] [NumberField K] [_root_.NumberField.IsTotallyComplex K] (μ : Measure (G1 K 2)) [μ.IsHaarMeasure] (τ : Submodule ℂ (L2 μ)) (κ : Measure (archCompact K 2)) (p : archCompact K 2 → ℂ), CuspIrr μ τ → IdemA κ p → ∀ S : Finset (Pl K), ∃ J : Xs μ τ κ p S →ₗ[ℂ] L2 μ, Function.Injective J ∧ (∀ φ, Reps μ (J φ) φ ∧ InH μ τ κ p S (J φ)) ∧
       (∀ (h : FA K 2) (φ φ' : Xs μ τ κ p S), (∀ x, φ'.1 x = φ.1 (x * fin1 h)) → J φ' = rhoF μ h (J φ)) ∧
       ∀ U, Lev U → (∀ v, InH μ τ κ p S v → v ∈ fixF μ (levOn S U) → ∃ φ, J φ = v ∧ FixF (levOn S U) φ.1) ∧
         ∃ E : Submodule ℂ (G1 K 2 → ℂ), FiniteDimensional ℂ E ∧ ∀ φ ∈ Xs μ τ κ p S, FixF (levOn S U) φ → φ ∈ E := by

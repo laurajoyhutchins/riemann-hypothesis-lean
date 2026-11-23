@@ -1,6 +1,45 @@
-import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.PublishedFoundations.ComplexMultiplicationJPremises
-import GroundTheory.GlobalFields.ComplexMultiplication.HilbertClassField
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.PublishedFoundations.ComplexMultiplicationJPremises
+public import GroundTheory.GlobalFields.ClassFieldConsequences.HilbertClassField
+public import GroundTheory.GlobalFields.ComplexMultiplication.ClassGroupAction
+public import GroundTheory.GlobalFields.ComplexMultiplication.HilbertClassField
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 open NumberField IsDedekindDomain IntermediateField GroundTheory.Global GroundTheory.Global.Elliptic
 open scoped nonZeroDivisors
@@ -34,14 +73,14 @@ theorem isUnramifiedAbelian_hilbertClassField :
   let v : HeightOneSpectrum (𝓞 K) := ⟨P.under (𝓞 K), inferInstance, under_ne_bot _ hP⟩
   exact (isUnramifiedEverywhere_hilbertClassField K ℂ).1 v P hp ⟨rfl⟩
 
-theorem isUnramifiedEverywhere_of_isUnramifiedAbelian [IsTotallyComplex K]
+theorem isUnramifiedEverywhere_of_isUnramifiedAbelian [_root_.NumberField.IsTotallyComplex K]
     {M : IntermediateField K ℂ} [NumberField M] (h : GlobalTheory.Published.IsUnramifiedAbelian M) :
     IsUnramifiedEverywhere K M := by
   refine ⟨fun v P hp hv => ?_, fun v w hw => ?_⟩
   · exact h.2.2 P (Ideal.ne_bot_of_liesOver_of_ne_bot v.ne_bot P)
   · exact InfinitePlace.isUnramified_iff.2 (Or.inr (hw ▸ IsTotallyComplex.isComplex v))
 
-theorem isHilbertClassField_hilbertClassField [IsTotallyComplex K] :
+theorem isHilbertClassField_hilbertClassField [_root_.NumberField.IsTotallyComplex K] :
     GlobalTheory.Published.IsHilbertClassField (hilbertClassField K ℂ) := by
   refine ⟨isUnramifiedAbelian_hilbertClassField, fun M hM => ?_⟩
   have := hM.1
@@ -73,9 +112,9 @@ theorem lattice_eq_idealLattice {𝔞 : (FractionalIdeal (𝓞 K)⁰ K)ˣ} {L : 
     (h : GlobalTheory.Published.IsIdealLattice 𝔞 L) : L.lattice = idealLattice (algebraMap K ℂ) 𝔞.1 :=
   SetLike.coe_injective h
 
-theorem latticeEnd_eq_cmRing [IsTotallyComplex K] (hK : Module.finrank ℚ K = 2)
+theorem latticeEnd_eq_cmRing [_root_.NumberField.IsTotallyComplex K] (hK : Module.finrank ℚ K = 2)
     {𝔞 : (FractionalIdeal (𝓞 K)⁰ K)ˣ} {L : PeriodPair} (h : GlobalTheory.Published.IsIdealLattice 𝔞 L) :
-    latticeEnd L = cmRing (algebraMap K ℂ) := by
+    GroundTheory.Global.Elliptic.periodLatticeEnd L = cmRingOfEmbedding (algebraMap K ℂ) := by
   rw [← latticeEnd_ideal (algebraMap K ℂ) hK 𝔞]
   ext α
   show (∀ l ∈ L.lattice, α * l ∈ L.lattice) ↔

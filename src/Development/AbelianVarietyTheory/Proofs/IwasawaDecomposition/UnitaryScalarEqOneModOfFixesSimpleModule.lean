@@ -1,9 +1,48 @@
-import Mathlib
-import Formalism.LocalToGlobal.HermitianForms.DefsGH
-import Formalism.LocalToGlobal.Columns.RecLevelLocT
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ImportsExtra
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ExistsSplittingOfCharacter
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ExistsAddEquivField
+module
+
+public import Formalism.LocalRingCardinality.DataLevel
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ExistsAddEquivField
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ExistsSplittingOfCharacter
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ImportsExtra
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Formalism.LocalToGlobal.Columns.AlgebraMapMemMaximalIdealPowIff
+import Formalism.LocalToGlobal.HermitianForms.IsLocBasis
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Formalism.BasicNotions Formalism.L2.Col Formalism.UG Formalism.L2.Forms Matrix
 open scoped TensorProduct
@@ -42,7 +81,7 @@ theorem eq_one_add_of_fixes : ∀ {F E : Type} [Field F] [NumberField F] [Field 
     key (T : intV E v) _ (by simp) (by rw [Nat.cast_smul_eq_nsmul, ← hM, card_nsmul_eq_zero'])
   have hrel : d₂ * d₁ = 1 + (T : v.adicCompletionIntegers F) * c₁ := by
     have h := congrArg (fun x => (s x).1) hc
-    simp only [map_mul, map_add, map_one, map_natCast, hs.2.1] at h
+    simp only [map_mul, map_add (f := _), map_one, map_natCast, hs.2.1] at h
     exact Subtype.ext (by simpa [hd₁, hd₂, hc₁, swapR] using h)
   have m2 : d₂ - 1 ∈ IsLocalRing.maximalIdeal (v.adicCompletionIntegers F) := by
     have : d₂ - 1 = (T : v.adicCompletionIntegers F) * c₁ - d₂ * (d₁ - 1) := by
@@ -62,7 +101,7 @@ theorem eq_one_add_of_fixes : ∀ {F E : Type} [Field F] [NumberField F] [Field 
       have h := congrArg Subtype.val hb₂
       push_cast at h
       exact h
-    rw [map_add, map_one, map_mul, map_natCast, s.apply_symm_apply]
+    rw [map_add (f := _), map_one, map_mul, map_natCast, s.apply_symm_apply]
     refine Prod.ext ?_ ?_
     · simpa using sub_eq_iff_eq_add'.1 e1
     · simpa using sub_eq_iff_eq_add'.1 e2

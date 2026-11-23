@@ -1,5 +1,48 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.StabIntPfEx
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.StabIntPfEx
+import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.LtOfBlkOfLt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -37,8 +80,8 @@ def trunc (y : FreeE w → D.host.E) (n : ℕ) : FreeE w → D.host.E := fun q =
 
 def cf (y : FreeE w → D.host.E) (q : FreeE w) : D.host.E := ((Xmat w (trunc w y (hgt w q)))⁻¹) q.1.1 q.1.2
 
-variable (D) in
 
+variable (D) in
 def mOdd : ℕ := (gS D + 1) / 2
 
 def τA (q : FreeE w) (y : FreeE w → D.host.E) : D.host.E :=
@@ -46,8 +89,8 @@ def τA (q : FreeE w) (y : FreeE w → D.host.E) : D.host.E :=
   else if upperM w q then sgq w (qbar w q) * D.conjF (-(y (qbar w q)) + cf w y (qbar w q))
   else 0
 
-variable (D) in
 
+variable (D) in
 def sLat (h : ℕ) (s : D.host.E) (_hs : D.conjF s = s) : AddSubgroup D.host.E where
   carrier := {z | z ∈ ddPow D h ∧ z + s * D.conjF z ∈ qdPow D h}
   zero_mem' := by
@@ -56,7 +99,7 @@ def sLat (h : ℕ) (s : D.host.E) (_hs : D.conjF s = s) : AddSubgroup D.host.E w
   add_mem' := by
     rintro a b ⟨ha1, ha2⟩ ⟨hb1, hb2⟩
     refine ⟨(ddPow D h : Submodule (𝓞 D.host.E) D.host.E).add_mem ha1 hb1, ?_⟩
-    rw [map_add, show a + b + s * (D.conjF a + D.conjF b) = (a + s * D.conjF a) + (b + s * D.conjF b) by ring]
+    rw [map_add (f := _), show a + b + s * (D.conjF a + D.conjF b) = (a + s * D.conjF a) + (b + s * D.conjF b) by ring]
     exact (qdPow D h : Submodule (𝓞 D.host.E) D.host.E).add_mem ha2 hb2
   neg_mem' := by
     rintro a ⟨ha1, ha2⟩
@@ -73,21 +116,13 @@ def Λq (q : FreeE w) : AddSubgroup D.host.E :=
   if selfP w q then sLat D (hgt w q) (sgq w q) (sgq_conj w q)
   else ((Iq w q : FI D) : Submodule (𝓞 D.host.E) D.host.E).toAddSubgroup
 
-variable (D) in
 
+variable (D) in
 def TwistC : Prop :=
   ∀ (δ : ∀ p : PlF D, (D.s.atP p).Fp) (M : ∀ p : PlF D, Loc.Model (D.s.atP p).Fp (D.s.atP p).Ep),
     (∀ p, Agree δ M p) → Odd (gS D) → ∀ (w : Point D.host.E (D.R.rS + 1)) (y : FreeE w → D.host.E),
       CondX w (Xmat w y) ↔ ∀ q, y q - τA w q y ∈ Λq w q
 
-variable (D) in
 
-def SelfIdxC : Prop :=
-  ∀ (w : Point D.host.E (D.R.rS + 1)) (q : FreeE w), selfP w q →
-    (Λq w q).relIndex ((Iq w q : Submodule (𝓞 D.host.E) D.host.E).toAddSubgroup) ≠ 0
-
-variable (D) in
-
-def OddC : Prop := Odd (gS D)
 
 end Formalism.L2.SG.Pf.StabIntLat

@@ -1,7 +1,44 @@
-import Mathlib
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.LefschetzSigmaSums.HeckeTraceSemi
-import Development.AbelianVarietyTheory.Definitions.Divisors.IwahoriRegularSeparable
-import Development.AbelianVarietyTheory.Definitions.Divisors.GenOf
+module
+
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.LefschetzSigmaSums.HeckeTraceSemi
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsGDatumOneOneOne
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -105,11 +142,6 @@ def ClsMove : Prop :=
   ∀ (p : ℕ) [Fact p.Prime] (G : HTGroup p) (V : Type) [AddCommGroup V] [Module ℂ V] (ξ : Representation ℂ (G.Cˣ × ℚˣ) V)
     (K : Subgroup G.GAf) (J : Type) (ψ : J → G.GAf → ℂ) (θ : J → ℂ) (e : G.GAf → ℂ), HasEig G ξ K ψ θ e → HasEigCls G ξ K ψ θ e
 
-def FinData : Prop :=
-  ∀ (p : ℕ) [Fact p.Prime] (G : HTGroup p), G.a = 1 → Finite (DFCls G) ∧ ∀ (Lv : G.Level) (V : Type) [AddCommGroup V] [Module ℂ V]
-    [FiniteDimensional ℂ V] (ξ : Representation ℂ (G.Cˣ × ℚˣ) V) (B : DForm G),
-    FiniteDimensional ℂ (HeckeTraceForms.forms B.emb (Lv.K.toSubgroup.prod (Kp G)) (ξ.comp (grp G B.β).subtype))
-
 def OpAlg : Prop :=
   ∀ (p : ℕ) [Fact p.Prime] (G : HTGroup p) (Lv : G.Level) (V : Type) [AddCommGroup V] [Module ℂ V]
     (ξ : Representation ℂ (G.Cˣ × ℚˣ) V) (B : DForm G),
@@ -124,16 +156,6 @@ def SpecAlg : Prop :=
     (∀ q, Rel (· * ·) (T q) (e q) (u q) (u' q)) → (∃ q, ∃ x : W q, x ≠ 0 ∧ e q x = x ∧ ∀ j, T q j x = θ j • x) →
     ∃ n : ℕ, 1 ≤ n ∧ ∃ a : List J →₀ ℂ, ∀ s : List J →₀ ℂ, wop θ s ≠ 0 →
       ∑ q, LinearMap.trace ℂ (W q) (wop (T q) (wmul a s) * (u q ^ n * e q)) ≠ 0
-
-def SpecOf : Prop := ForPlaces fun p _ G Lv C R =>
-  ∀ (D : Datum p) (L : GlobalTheory.LKGeo.Link D G) (lam : (D.F →+* ℂ) → Fin G.n → ℕ) (V : Type) [AddCommGroup V] [Module ℂ V]
-    [FiniteDimensional ℂ V] (ξ : Representation ℂ (G.Cˣ × ℚˣ) V), IsWt L lam ξ →
-    ∀ (J : Type) (ψ : J → G.GAf → ℂ) (θ : J → ℂ) (e u u' : G.GAf → ℂ),
-    (∀ j, ψ j ∈ Hecke ℂ Lv.K.toSubgroup) → e ∈ Hecke ℂ Lv.K.toSubgroup → u ∈ Hecke ℂ Lv.K.toSubgroup →
-    u' ∈ Hecke ℂ Lv.K.toSubgroup → Rel (conv Lv.K.toSubgroup) ψ e u u' → C e →
-    (∀ n : ℕ, 1 ≤ n → ∃ A : Set G.GAf, (∀ g ∈ A, R g ∧ RegAf G g) ∧ (∀ j a, ψ j a ≠ 0 → ∀ g ∈ A, a * g ∈ A) ∧
-      ∀ g, powFn Lv.K.toSubgroup u e n g ≠ 0 → g ∈ A) →
-    HasEig G ξ Lv.K.toSubgroup ψ θ e → ∃ n : ℕ, 1 ≤ n ∧ Spec L lam Lv.K.toSubgroup ψ θ (powFn Lv.K.toSubgroup u e n)
 
 def TypeSlice : Prop :=
   ∀ (k : Type) [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] [CharZero k] (n : ℕ)

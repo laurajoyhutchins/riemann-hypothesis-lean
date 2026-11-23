@@ -1,5 +1,45 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.MultiplicityOne.HeckeIntegrability.LevelTrAAlt
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.TraceFormula.GlobalTraceComparison.AutomorphicRepresentations.PiTermEqTraceSumOfDegreeFourTest
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.MultiplicityOne.HeckeIntegrability.LevelTrAAlt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 open UpperTheory.V.Z.Tf.GlobalTraceComparison.Pi UpperTheory.V.Z.Mult.Pi
 
@@ -14,7 +54,7 @@ private lemma lift_commute_of {X : Type} (u : X → Module.End ℂ Y) (z : Modul
   | grade0 r => rw [AlgHom.commutes]; exact Algebra.commutes r z
   | grade1 x => simpa using h x
   | mul p q hp hq => rw [map_mul]; exact hp.mul_left hq
-  | add p q hp hq => rw [map_add]; exact hp.add_left hq
+  | add p q hp hq => rw [map_add (f := _)]; exact hp.add_left hq
 
 private lemma lift_commute {X X' : Type} (u : X → Module.End ℂ Y) (v : X' → Module.End ℂ Y)
     (h : ∀ x y, Commute (u x) (v y)) (p : FreeAlgebra ℂ X) (q : FreeAlgebra ℂ X') :
@@ -28,7 +68,7 @@ private lemma lift_intertwine {X : Type} (u v : X → Module.End ℂ Y) (A : Mod
   | grade0 r => simpa using (Algebra.commutes r A).symm
   | grade1 x => simpa using h x
   | mul p q hp hq => rw [map_mul, map_mul, ← mul_assoc, hp, mul_assoc, hq, mul_assoc]
-  | add p q hp hq => rw [map_add, map_add, mul_add, add_mul, hp, hq]
+  | add p q hp hq => rw [map_add (f := _), map_add (f := _), mul_add, add_mul, hp, hq]
 
 private lemma lift_lift {X : Type} (u : X → Module.End ℂ Y) (p : FreeAlgebra ℂ (FreeAlgebra ℂ X)) :
     FreeAlgebra.lift ℂ (fun q => FreeAlgebra.lift ℂ u q) p =
@@ -54,7 +94,7 @@ private lemma mem_adjoin_iff {X : Type} (u : X → Module.End ℂ Y) (x : Module
     | grade1 t =>
       simpa using (Algebra.subset_adjoin (Set.mem_range_self t) : u t ∈ Algebra.adjoin ℂ (Set.range u))
     | mul p q hp hq => rw [map_mul]; exact Subalgebra.mul_mem _ hp hq
-    | add p q hp hq => rw [map_add]; exact Subalgebra.add_mem _ hp hq
+    | add p q hp hq => rw [map_add (f := _)]; exact Subalgebra.add_mem _ hp hq
 
 private lemma conj_mul (A x y : Module.End ℂ Y) (hAA : A * A = 1) :
     A * x * A * (A * y * A) = A * (x * y) * A := by

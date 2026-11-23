@@ -1,5 +1,57 @@
-import Mathlib
-import Formalism.UnipotentAdelicQuotients.HaarProductClosedCompact
+module
+
+public import Formalism.UnipotentAdelicQuotients.HaarProductClosedCompact
+public import Mathlib.MeasureTheory.Measure.Regular
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.MeasureTheory.Constructions.Polish.Basic
+public import Mathlib.MeasureTheory.Group.LIntegral
+public import Mathlib.MeasureTheory.Measure.Haar.Basic
+
+@[expose] public section
 
 noncomputable section
 
@@ -114,8 +166,9 @@ theorem exists_lift [SecondCountableTopology G] [T2Space G] (μ : Measure G)
     simpa using this⟩
   choose s hs r hr hsr using hPK
   let κ : G → Measure G := fun g => transl M η (s g)
-  haveI hκp : ∀ g, IsProbabilityMeasure (κ g) := fun g =>
-    Measure.isProbabilityMeasure_map (measurable_transl_fun M _).aemeasurable
+  haveI hκp : ∀ g, IsProbabilityMeasure (κ g) := fun g => by
+    change IsProbabilityMeasure (η.map _)
+    infer_instance
   have hκ : ∀ p ∈ P, ∀ k ∈ K, κ (p * k) = transl M η p := by
     intro p hp k hk
     have h := hsr (p * k)
@@ -148,7 +201,7 @@ theorem exists_lift [SecondCountableTopology G] [T2Space G] (μ : Measure G)
       exact ih.const_sub 1
     | iUnion f hd hf ih =>
       simp only [measure_iUnion hd hf]
-      exact Measurable.ennreal_tsum ih
+      exact Measurable.tsum ih
   have happ : ∀ g, ∀ A, MeasurableSet A → κ g A = η ((fun m : M => s g * (m : G)) ⁻¹' A) := fun g A hA =>
     Measure.map_apply (measurable_transl_fun M _) hA
   refine ⟨μ.bind κ, ?_, ?_, ?_, ?_⟩
@@ -234,7 +287,7 @@ theorem exists_eq_smul_subgroup [LocallyCompactSpace G] [SecondCountableTopology
   obtain ⟨μ', a1, a2, a3, a4⟩ := key μ hμ1 hμ2 hμ3 hμ4
   obtain ⟨ν', b1, b2, b3, b4⟩ := key ν hν1 hν2 hν3 hν4
   obtain ⟨c, c0, ct, hc⟩ := exists_eq_smul μ' ν' a3 b3
-  exact ⟨c, c0, ct, by rw [a4, b4, hc, Measure.map_smul]⟩
+  exact ⟨c, c0, ct, by rw [a4, b4, hc, Measure.map_smul c hemb.measurable.aemeasurable]⟩
 
 theorem haarProductClosedCompact_holds : Formalism.D.haarProductClosedCompact := by
   intro G _ _ _ _ _ _ _ _ μ _ _ hμ P K hP hK hPK μP μK p1 p2 p3 p4 k1 k2 k3

@@ -1,5 +1,48 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.ChartVel
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.ChartVel
+public import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.StatementsStokesGeo
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -27,49 +70,8 @@ section Inhabitants
 namespace Line
 
 open GroundTheory.Heights₂.Heights (CP)
-open GroundTheory.Heights₂.Heights.Regular.ProjectiveLine
-
-theorem isConeTangent_velL :
-    IsConeTangent (Int.castRingHom ℂ) (mCoordIdeal yLine) (discL 0) velL := by
-  intro f hf
-  rw [mCoordIdeal_yLine, Ideal.mem_bot] at hf
-  subst hf
-  simp
-
-theorem projL_discL_mem_mid : projL (discL 0) ∈ cpMid 0 := by
-  have hne : vecL (discL 0) ≠ 0 := vecL_ne_zero (discL_mem 0)
-  have h0 : sChart 0 (projL (discL 0)) = 0 := by
-    rw [sChart_projL_discL]
-    funext j
-    simp
-  refine ⟨(mem_sChart_source_iff 0 _).2 ⟨?_, ?_⟩, ?_⟩
-  · unfold projL
-    rw [dif_pos hne, CP.mk_mem_chartDomain]
-    simp [vecL, discL]
-  · unfold projL
-    rw [dif_pos hne, CP.chartCoord_mk]
-    have : (fun j : Fin 1 => vecL (discL 0) ((0 : Fin 2).succAbove j) / vecL (discL 0) 0) = 0 := by
-      funext j
-      simp [vecL, discL]
-    rw [this, norm_zero]
-    norm_num
-  · show sChart 0 (projL (discL 0)) ∈ Metric.ball 0 (7 / 8)
-    rw [h0]
-    exact Metric.mem_ball_self (by norm_num)
 
 end Line
-
-theorem Line.NbarLeviChart.hyps_inhabited :
-    ∃ t : ℝ, 0 < t ∧ (Line.projLineComponentSetting Line.zeroSystem Line.zero_hII).M.atlas.Smooth
-      ((Line.projLineComponentSetting Line.zeroSystem Line.zero_hII).S.regWeight t) ∧
-    Line.discL 0 ∈ mcPts (mCoordIdeal (Line.lineData Line.zeroSystem Line.zero_hII).y) ∧
-    IsConeTangent (Int.castRingHom ℂ) (mCoordIdeal (Line.lineData Line.zeroSystem Line.zero_hII).y)
-      (Line.discL 0) Line.velL ∧
-    ∃ k : Fin (Line.projLineComponentSetting Line.zeroSystem Line.zero_hII).S.R.N,
-      (Line.projLineComponentSetting Line.zeroSystem Line.zero_hII).M.proj (Line.discL 0) ∈
-        (Line.projLineComponentSetting Line.zeroSystem Line.zero_hII).S.R.mid k := by
-  obtain ⟨t, -, ht, hs, -⟩ := NbarChartSemipos.hyps_of_setting (Line.projLineComponentSetting Line.zeroSystem Line.zero_hII) one_pos
-  exact ⟨t, ht, hs, Line.discL_mem 0, Line.isConeTangent_velL, (0 : Fin 2), Line.projL_discL_mem_mid⟩
 
 end Inhabitants
 

@@ -1,4 +1,56 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutJDHatJDCapRGrpPRad
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutJDHatJDCapRGrpPRad
+import Formalism.FormalDegreeBessel.FormalDegreeRatio.GBasic
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.WCellMemOmPlus
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.WeylCellConjTransposeMulApply
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Formalism.REAL Formalism.QuantumDeterminants Formalism.FourierDecayAlt
 
@@ -97,13 +149,13 @@ omit h1 in
 theorem colR_eq (J : Fin (r + k) → Fin (2 * r + k + 1)) (q p : Fin (2 * r + k + 1)) (hq : q.val = r) :
     colR k r z x J q p = (ginvH k r x *ᵥ z) p := by
   unfold colR
-  rw [dif_neg (by omega), dif_pos hq]
+  rw [dite_eq_right (by omega), dif_pos hq]
 
 omit h1 in
 theorem colR_gt (J : Fin (r + k) → Fin (2 * r + k + 1)) (q p : Fin (2 * r + k + 1)) (hq : r < q.val) :
     colR k r z x J q p = if p = J ⟨q.val - r - 1, by have := q.isLt; omega⟩ then 1 else 0 := by
   unfold colR
-  rw [dif_neg (by omega), dif_neg (by omega)]
+  rw [dite_eq_right (by omega), dite_eq_right (by omega)]
   simp only [bvec, Pi.single_apply]
 
 include h2
@@ -212,7 +264,7 @@ theorem prod_rev_v : (∏ i : Fin (2 * r + k + 1), (if h : i.val < r then v ⟨r
       ∏ i ∈ Finset.range (2 * r + k + 1), F i := Fin.prod_univ_eq_prod_range F _
   rw [e1, ← Finset.prod_range_mul_prod_Ico F (show r ≤ 2 * r + k + 1 by omega)]
   rw [Finset.prod_eq_one (s := Finset.Ico r (2 * r + k + 1)) (fun i hi => by
-    simp only [F]; rw [dif_neg (by simp [Finset.mem_Ico] at hi; omega)]), mul_one]
+    simp only [F]; rw [dite_eq_right (by simp [Finset.mem_Ico] at hi; omega)]), mul_one]
   rw [← Fin.prod_univ_eq_prod_range F r]
   rw [← Equiv.prod_comp Fin.revPerm v]
   refine Finset.prod_congr rfl fun a _ => ?_
@@ -233,7 +285,7 @@ theorem claimB (t : Fin (k + 1)) :
     · rw [colR_lt z x v h1 _ i _ hi, if_pos (by rw [Pt_apply]; simp only [ptv]; rw [if_pos hi]), dif_pos hi,
         if_neg (fun e => by rw [e] at hi; simp at hi), mul_one]
     · have e : i = ⟨r, by omega⟩ := Fin.ext hi
-      rw [colR_eq z x _ i _ hi, dif_neg (by omega), if_pos e, one_mul]
+      rw [colR_eq z x _ i _ hi, dite_eq_right (by omega), if_pos e, one_mul]
       congr 1
       apply Fin.ext
       rw [Pt_apply]
@@ -245,7 +297,7 @@ theorem claimB (t : Fin (k + 1)) :
         simp only [ptv, Fin.val_mk]
         split_ifs <;> omega
       have hne : i ≠ ⟨r, by omega⟩ := fun e => by rw [e] at hi; simp at hi
-      rw [colR_gt z x _ i _ hi, if_pos hP, dif_neg (by omega), if_neg hne, mul_one]
+      rw [colR_gt z x _ i _ hi, if_pos hP, dite_eq_right (by omega), if_neg hne, mul_one]
   rw [Finset.prod_congr rfl (fun i _ => hf i), Finset.prod_mul_distrib, prod_rev_v (k := k) v,
     Finset.prod_eq_single (⟨r, by omega⟩ : Fin (2 * r + k + 1)) (fun b _ hb => if_neg hb) (by simp), if_pos rfl]
 
@@ -318,7 +370,7 @@ theorem x_esI (hg : g ∈ Q.Glev k r (Fin.last r)) (a : Fin r) :
     Finset.mem_univ, if_true, Pi.smul_apply, smul_eq_mul]
   unfold bigCell
   have ha := a.isLt
-  rw [dif_neg (by simp [esI]; omega), dif_neg (by simp [esI]; omega)]
+  rw [dite_eq_right (by simp [esI]; omega), dite_eq_right (by simp [esI]; omega)]
   by_cases hi : i = eI k r a
   · subst hi
     rw [if_pos (by simp [eI, esI]; omega), if_pos rfl]

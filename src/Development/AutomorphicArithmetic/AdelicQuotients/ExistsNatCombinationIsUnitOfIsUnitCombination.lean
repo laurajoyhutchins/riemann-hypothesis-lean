@@ -1,4 +1,65 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.Field.Defs
+public import Mathlib.Data.Matrix.Mul
+import Mathlib.Algebra.Module.StablyFree.Basic
+public import Mathlib.Algebra.MvPolynomial.Funext
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Algebra.BigOperators.Finsupp.Basic
+public import Mathlib.Algebra.Group.Pi.Units
+public import Mathlib.Algebra.MonoidAlgebra.Defs
+public import Mathlib.Algebra.MvPolynomial.Basic
+public import Mathlib.Algebra.MvPolynomial.Eval
+public import Mathlib.Data.Matrix.Basic
+public import Mathlib.LinearAlgebra.Dual.Defs
+public import Mathlib.LinearAlgebra.Dual.Lemmas
+public import Mathlib.LinearAlgebra.Matrix.Determinant.Basic
+public import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
+
+@[expose] public section
 
 open MvPolynomial in
 private lemma UpperTheory.rational_polynomial_vanishing_naturals {K : Type} [Field K] [CharZero K] {m : ℕ}
@@ -7,11 +68,11 @@ private lemma UpperTheory.rational_polynomial_vanishing_naturals {K : Type} [Fie
       eval (fun i => (a i : K)) P = 0 → eval (fun i => (a i : ℚ)) Q = 0 := by
   classical
   obtain ⟨d, hd⟩ := MvPolynomial.ne_zero_iff.mp hP
-  obtain ⟨φ, hφ⟩ : ∃ φ : Module.Dual ℚ K, φ (coeff d P) ≠ 0 := by
+  obtain ⟨φ, hφ⟩ : ∃ φ : Module.Dual ℚ K, φ (P.coeff d) ≠ 0 := by
     by_contra h
     push Not at h
     exact hd ((Module.forall_dual_apply_eq_zero_iff ℚ _).mp h)
-  refine ⟨∑ e ∈ P.support, monomial e (φ (coeff e P)), ?_, ?_⟩
+  refine ⟨∑ e ∈ P.support, monomial e (φ (P.coeff e)), ?_, ?_⟩
   · apply MvPolynomial.ne_zero_iff.mpr
     refine ⟨d, ?_⟩
     rw [coeff_sum]
@@ -20,11 +81,13 @@ private lemma UpperTheory.rational_polynomial_vanishing_naturals {K : Type} [Fie
     simpa [mem_support_iff, hd] using hφ
   · intro a ha
     have h1 := congrArg φ ha
+
     rw [eval_eq', map_sum, map_zero] at h1
+
     rw [map_sum, ← h1]
     refine Finset.sum_congr rfl fun e _ => ?_
     rw [eval_monomial, Finsupp.prod_fintype _ _ (by simp)]
-    have : coeff e P * ∏ i, (a i : K) ^ e i = (∏ i, (a i : ℚ) ^ e i) • coeff e P := by
+    have : P.coeff e * ∏ i, (a i : K) ^ e i = (∏ i, (a i : ℚ) ^ e i) • P.coeff e := by
       rw [Rat.smul_def, mul_comm]
       push_cast
       rfl

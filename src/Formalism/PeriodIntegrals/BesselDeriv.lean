@@ -1,4 +1,47 @@
-import Formalism.PeriodIntegrals.IsLowUnitH
+module
+
+public import Formalism.PeriodIntegrals.IsLowUnitH
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MeasureTheory Matrix Finset
 open scoped InnerProductSpace ComplexOrder ContDiff
@@ -27,24 +70,5 @@ def dsigC (σ : Matrix (Fin (2 * r + k + 1)) (Fin (2 * r + k + 1)) ℂ → (H �
     Complex.I • dsig (k := k) (r := r) σ ((-(Complex.I / 2)) • (X - thetaH k r X)) v
 
 end
-
-def BesselDeriv : Prop :=
-  ∀ (k r : ℕ) (ε : Fin (2 * r + k + 1) → Bool) (lam : Fin (2 * r + k + 1) → ℝ) (H : Type) [NormedAddCommGroup H]
-    [InnerProductSpace ℂ H] [CompleteSpace H] (σ : Matrix (Fin (2 * r + k + 1)) (Fin (2 * r + k + 1)) ℂ → (H →L[ℂ] H))
-    (Wp : Type) [NormedAddCommGroup Wp] [NormedSpace ℂ Wp] (B : H → Wp),
-    IsDSHpk k r ε lam σ →
-    (∀ v ∈ smoothVecs (k := k) (r := r) σ, ∀ w ∈ smoothVecs (k := k) (r := r) σ, B (v + w) = B v + B w) →
-    (∀ (c : ℂ), ∀ v ∈ smoothVecs (k := k) (r := r) σ, B (c • v) = c • B v) →
-    IsCWCont (k := k) (r := r) σ B →
-    ∀ (Y : Matrix (Fin (2 * r + k + 1)) (Fin (2 * r + k + 1)) ℂ) (θ : ℝ), Y * Y * Y = 0 →
-      (∀ t : ℝ, (1 + (t : ℂ) • Y + ((t : ℂ) ^ 2 / 2) • (Y * Y)) ∈ UH (Hpk k r)) →
-      (∀ t : ℝ, ∀ v ∈ smoothVecs (k := k) (r := r) σ,
-        B (σ (1 + (t : ℂ) • Y + ((t : ℂ) ^ 2 / 2) • (Y * Y)) v) = Complex.exp (((θ * t : ℝ) : ℂ) * Complex.I) • B v) →
-      ∀ w ∈ smoothVecs (k := k) (r := r) σ, ∀ g ∈ UH (Hpk k r),
-        (∀ i : Fin (2 * r + k + 1) × Fin (2 * r + k + 1),
-          dsigC (k := k) (r := r) σ (Matrix.single i.1 i.2 1) w ∈ smoothVecs (k := k) (r := r) σ) ∧
-        ((θ : ℂ) * Complex.I) • B (σ g w) =
-          ∑ i : Fin (2 * r + k + 1) × Fin (2 * r + k + 1),
-            (g⁻¹ * Y * g) i.1 i.2 • B (σ g (dsigC (k := k) (r := r) σ (Matrix.single i.1 i.2 1) w))
 
 end PI

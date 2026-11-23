@@ -1,10 +1,58 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.SplitPart
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.GaussianTwistedRealReadingEntireAndInjectiveStatement
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ComplexEmbeddingHermitianQuadrupleSum
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.EqZeroOfLintegralEqZero
+module
+
+public import Development.AbelianVarietyTheory.Definitions.LatticeFrames.SplitPart
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ComplexEmbeddingHermitianQuadrupleSum
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.EqZeroOfLintegralEqZero
 import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ExistsInverseChart
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.FoldrHolDEqIteratedFDeriv
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.GaussianTwistedRealReadingEntireAndInjectiveStatement
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.FoldrHolDEqIteratedFDeriv
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AbelianVarietyTheory.Definitions.LatticeFrames.FiniteDimensionalMram
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.L2.Theta Formalism.IndefR Formalism.IndefR.Datum Formalism.IndefR.Links Formalism.L2.Forms Formalism.L2.Ker Formalism.UG
 open NumberField IsDedekindDomain Matrix MeasureTheory GlobalTheory.Mem GlobalTheory.Mem.Col2 GlobalTheory.MixPer GlobalTheory.Core.Rk GlobalTheory.AdForm
 open scoped TensorProduct Classical
@@ -28,7 +76,7 @@ theorem pr_add_left (z z' U : VCx ι a b) : pr (z + z') U = pr z U + pr z' U := 
   simp only [pr, Pi.add_apply, add_mul, Finset.sum_add_distrib]
 
 theorem pr_add_right (z U U' : VCx ι a b) : pr z (U + U') = pr z U + pr z U' := by
-  simp only [pr, Pi.add_apply, map_add, mul_add, Finset.sum_add_distrib]
+  simp only [pr, Pi.add_apply, map_add (f := _), mul_add, Finset.sum_add_distrib]
 
 theorem pr_smul_left (c : ℂ) (z U : VCx ι a b) : pr (c • z) U = c * pr z U := by
   simp only [pr, Pi.smul_apply, smul_eq_mul, Finset.mul_sum, mul_assoc]
@@ -38,6 +86,7 @@ theorem pr_smul_right (c : ℂ) (z U : VCx ι a b) : pr z (c • U) = conj c * p
   refine Finset.sum_congr rfl fun _ _ => Finset.sum_congr rfl fun _ _ => Finset.sum_congr rfl fun _ _ => by ring
 
 theorem pr_swap (z U : VCx ι a b) : pr U z = conj (pr z U) := by
+
   simp only [pr, map_sum, map_mul, Complex.conj_conj]
   refine Finset.sum_congr rfl fun _ _ => Finset.sum_congr rfl fun _ _ => Finset.sum_congr rfl fun _ _ => by ring
 
@@ -112,7 +161,7 @@ theorem realPt_eq (h : GlobalTheory.FockCompare.Chart θ σ) (y : D.what₂.Tau 
 theorem zW_add_iota (h : GlobalTheory.FockCompare.Chart θ σ) (δ : ℂ) (w : WO S T) (x : VCx D.what₂.Tau S.rank T.rank) :
     zW θ S T δ (w + iotaW σ T S x) = zW θ S T δ w + -δ • x := by
   unfold zW
-  rw [AddMonoidHom.map_add, h.pi_iota, smul_add]
+  rw [AddMonoidHom.map_add (f := _), h.pi_iota, smul_add]
 
 theorem zW_zero (δ : ℂ) : zW θ S T δ (0 : WO S T) = 0 := by
   unfold zW; rw [AddMonoidHom.map_zero, smul_zero]
@@ -124,7 +173,7 @@ theorem isReal_add_iota (h : GlobalTheory.FockCompare.Chart θ σ) {w : WO S T} 
   have a1 := congrFun (congrFun hw i) j
   have a2 := congrFun (congrFun h2 i) j
   simp only [Matrix.map_apply, Matrix.zero_apply] at a1 a2 ⊢
-  rw [Matrix.add_apply, (finPart D).map_add, a1, a2, add_zero]
+  rw [Matrix.add_apply, map_add (finPart D), a1, a2, add_zero]
 
 theorem eq_gs_xiN (h : GlobalTheory.FockCompare.Chart θ σ) {δ : ℂ} (hδ : δ ≠ 0) (sc : ℝ) (f : WO S T → ℂ) {w : WO S T}
     (hw : w.map (finPart D) = 0) :
@@ -188,6 +237,7 @@ theorem omO_eq {δ : ℂ} {sc : ℝ} (hP : StdPair θ S T δ sc ψ) (y U : VCx D
   show ((∑ τ, formAt S T τ (y τ) (U τ) : ℝ) : ℂ) = _
   rw [Complex.ofReal_sum]
   simp only [formAt_eq hP]
+
   rw [Finset.sum_sub_distrib, ← Finset.mul_sum, ← Finset.mul_sum, ← map_sum, mul_sub]
   rfl
 
@@ -204,7 +254,7 @@ def lamU (D : D7) {ι : Type} [Fintype ι] {a b : ℕ} (δ : ℂ) (U z : VCx ι 
 
 theorem lamU_add {ι : Type} [Fintype ι] {a b : ℕ} (δ : ℂ) (U z z' : VCx ι a b) :
     lamU D δ U (z + z') = lamU D δ U z + lamU D δ U z' := by
-  simp only [lamU, pr_add_left, add_div, map_add]; ring
+  simp only [lamU, pr_add_left, add_div, map_add (f := _)]; ring
 
 theorem lamU_smul {ι : Type} [Fintype ι] {a b : ℕ} (δ : ℂ) (U z : VCx ι a b) (t : ℂ) :
     lamU D δ U (t • z) = conj t * lamU D δ U z := by

@@ -1,9 +1,60 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Degenerations.IsNormalSchemeSp
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.UniformisationConclusion
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.MemPadicAlgClValuationSubringIffNormLeOne
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.JacobsonClosedPointsToolsInt
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.KbIsAlgClosedAndConjStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Degenerations.IsNormalSchemeSp
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.JacobsonClosedPointsToolsInt
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.KbIsAlgClosedAndConjStatement
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.MemPadicAlgClValuationSubringIffNormLeOne
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IsDiscreteValuationRingIntegralClosurePadicInt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+
+@[expose] public section
+
 open CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj AlgebraicGeometry
 open scoped CategoryTheory.Obj
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor
@@ -67,7 +118,49 @@ theorem exists_integral_point_lifting_residue_point :
     fun x s => isClosed_image_point_of_forall_pow_eq_one hord x s
   refine ⟨fun x => ?_, hcl⟩
   let s : Sp (kb p) := IsLocalRing.closedPoint (kb p)
-  obtain ⟨q, hq, y, hy, hyU⟩ := padicAlgCl_integral_points.1 X π (x s) (hcl x s) U hU
+  have hlift : ∃ (q : ℕ) (_ : Fact q.Prime) (y : Sp (OO q) ⟶ X),
+      y (IsLocalRing.closedPoint (OO q)) = x s ∧ Set.range (gPt q ≫ y) ⊆ U := by
+    obtain ⟨q, hq, hqz⟩ := exists_prime_residueField_eq_zero π (hcl x s)
+    haveI : Fact q.Prime := ⟨hq⟩
+    obtain ⟨K, hK, y, hy, hyU, -⟩ := exists_padic_point_scheme π (hcl x s) hqz U hU
+    have hmem (a : PadicAlgCl q) : a ∈ OO q ↔ ‖a‖ ≤ 1 := by
+      rw [Valuation.mem_valuationSubring_iff, ← NNReal.coe_le_coe]
+      rfl
+    let j : integralClosure ℤ_[q] K →+* OO q :=
+      (K.val.toRingHom.comp (integralClosure ℤ_[q] K).val.toRingHom).codRestrict (OO q)
+        fun a => (hmem _).mpr ((mem_integralClosure_padicInt_iff K _).mp a.2)
+    haveI : IsLocalHom j := by
+      refine ⟨fun a ha => ?_⟩
+      obtain ⟨b, hb⟩ := ha.exists_right_inv
+      have hb' : ((a : K) : PadicAlgCl q) * (b : PadicAlgCl q) = 1 :=
+        congrArg (fun z : OO q => (z : PadicAlgCl q)) hb
+      have ha0 : (a : K) ≠ 0 := by
+        intro h
+        rw [h] at hb'
+        simp at hb'
+      have hinv : (a : K)⁻¹ ∈ integralClosure ℤ_[q] K := by
+        rw [mem_integralClosure_padicInt_iff, IntermediateField.coe_inv,
+          ← eq_inv_of_mul_eq_one_right hb']
+        exact (hmem _).mp b.2
+      exact IsUnit.of_mul_eq_one ⟨_, hinv⟩ (Subtype.ext (mul_inv_cancel₀ ha0))
+    refine ⟨q, inferInstance, spMap j ≫ y, ?_, ?_⟩
+    · refine (Scheme.Hom.comp_apply _ _ _).trans ((congrArg y ?_).trans hy)
+      exact IsLocalRing.comap_closedPoint j
+    · rintro _ ⟨t, rfl⟩
+      rw [← Category.assoc, Scheme.Hom.comp_apply]
+      have key : spMap j ((gPt q) t) = genericPoint (Sp (integralClosure ℤ_[q] K)) := by
+        rw [genericPoint_eq_bot_of_affine]
+        apply PrimeSpectrum.ext
+        apply le_antisymm _ bot_le
+        intro a ha
+        have ha' : ((a : K) : PadicAlgCl q) ∈ (t : PrimeSpectrum (PadicAlgCl q)).asIdeal := ha
+        haveI := (t : PrimeSpectrum (PadicAlgCl q)).isPrime
+        rw [Ideal.eq_bot_of_prime (t : PrimeSpectrum (PadicAlgCl q)).asIdeal,
+          Ideal.mem_bot] at ha'
+        exact Subtype.ext (Subtype.ext ha')
+      rw [Scheme.Hom.comp_apply, key]
+      exact hyU
+  obtain ⟨q, hq, y, hy, hyU⟩ := hlift
   have hfz := hfin _ (hcl x s)
   obtain ⟨r', hr'⟩ := exists_residueField_factor_of_apply_eq x s _ rfl
   have hy' : (rPt q ≫ y) (IsLocalRing.closedPoint (kb q)) = x s := by

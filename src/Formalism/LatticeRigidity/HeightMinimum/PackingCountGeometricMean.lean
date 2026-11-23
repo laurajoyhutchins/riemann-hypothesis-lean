@@ -1,4 +1,55 @@
-import Formalism.LatticeRigidity.PackCount
+module
+
+public import Mathlib.Analysis.Normed.Module.Basic
+public import Mathlib.LinearAlgebra.FiniteDimensional.Defs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.MeasureTheory.Constructions.BorelSpace.Basic
+public import Mathlib.MeasureTheory.Constructions.BorelSpace.Metric
+public import Mathlib.MeasureTheory.Measure.Haar.Basic
+public import Mathlib.MeasureTheory.Measure.Lebesgue.EqHaar
+
+@[expose] public section
 
 open MeasureTheory Metric Module
 
@@ -65,71 +116,5 @@ theorem card_le_of_separated {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ
     | (field_simp; ring)
   rw [hq, div_pow, le_div_iff₀ hpos]
   exact key3
-
-theorem packing_count_geometric_mean : Formalism.SA.P7.PackCount := by
-  unfold Formalism.SA.P7.PackCount
-  intro ι _ _ V _ _ _ N hN S lam X hlam hX hsep hbd
-  have hnpos : 0 < Fintype.card ι := Fintype.card_pos
-  have hnR : (0 : ℝ) < (Fintype.card ι : ℝ) := by exact_mod_cast hnpos
-  have hQpos : 0 < ∏ v, X v := Finset.prod_pos (fun v _ => hX v)
-  obtain ⟨P, hP⟩ : ∃ P : ℝ, P = (∏ v, X v) ^ (1 / (Fintype.card ι : ℝ)) := ⟨_, rfl⟩
-  have hPpos : 0 < P := by rw [hP]; exact Real.rpow_pos_of_pos hQpos _
-  have hPn : P ^ Fintype.card ι = ∏ v, X v := by
-    rw [hP, ← Real.rpow_natCast, ← Real.rpow_mul hQpos.le, one_div_mul_cancel hnR.ne',
-      Real.rpow_one]
-  obtain ⟨c, hcdef⟩ : ∃ c : ι → ℝ, c = fun v => P / X v := ⟨_, rfl⟩
-  have hc : ∀ v, 0 < c v := by
-    intro v
-    rw [hcdef]
-    exact div_pos hPpos (hX v)
-  have hcX : ∀ v, c v * X v = P := by
-    intro v
-    rw [hcdef]
-    exact div_mul_cancel₀ P (hX v).ne'
-  have hprodc : ∏ v, c v = 1 := by
-    rw [hcdef]
-    simp only [Finset.prod_div_distrib, Finset.prod_const, Finset.card_univ]
-    rw [hPn, div_self hQpos.ne']
-  obtain ⟨g, hg⟩ : ∃ g : ((v : ι) → V v) → ((v : ι) → V v),
-      ∀ x, g x = fun v => c v • x v := ⟨_, fun _ => rfl⟩
-  have hbdg : ∀ x ∈ S, ‖g x‖ ≤ P := by
-    intro x hx
-    refine (pi_norm_le_iff_of_nonneg hPpos.le).mpr fun v => ?_
-    have hgv : g x v = c v • x v := by rw [hg]
-    rw [hgv, norm_smul, Real.norm_eq_abs, abs_of_pos (hc v)]
-    calc c v * ‖x v‖ ≤ c v * X v := mul_le_mul_of_nonneg_left (hbd x hx v) (hc v).le
-      _ = P := hcX v
-  have hsepg : ∀ x ∈ S, ∀ y ∈ S, x ≠ y → lam ≤ ‖g x - g y‖ := by
-    intro x hx y hy hxy
-    have h1 := hsep x hx y hy hxy
-    have hM0 : 0 ≤ ‖g x - g y‖ := norm_nonneg _
-    have hcoord : ∀ v, c v * ‖x v - y v‖ ≤ ‖g x - g y‖ := by
-      intro v
-      have hd : (g x - g y) v = c v • (x v - y v) := by
-        simp only [Pi.sub_apply, hg, smul_sub]
-      have h2 := norm_le_pi_norm (g x - g y) v
-      rw [hd, norm_smul, Real.norm_eq_abs, abs_of_pos (hc v)] at h2
-      exact h2
-    have hprod : ∏ v, ‖x v - y v‖ ≤ ‖g x - g y‖ ^ Fintype.card ι := by
-      calc ∏ v, ‖x v - y v‖ = (∏ v, c v) * ∏ v, ‖x v - y v‖ := by rw [hprodc, one_mul]
-        _ = ∏ v, (c v * ‖x v - y v‖) := by rw [Finset.prod_mul_distrib]
-        _ ≤ ∏ _v : ι, ‖g x - g y‖ :=
-            Finset.prod_le_prod (fun v _ => mul_nonneg (hc v).le (norm_nonneg _))
-              (fun v _ => hcoord v)
-        _ = ‖g x - g y‖ ^ Fintype.card ι := by rw [Finset.prod_const, Finset.card_univ]
-    calc lam ≤ (∏ v, ‖x v - y v‖) ^ (1 / (Fintype.card ι : ℝ)) := h1
-      _ ≤ (‖g x - g y‖ ^ Fintype.card ι) ^ (1 / (Fintype.card ι : ℝ)) :=
-          Real.rpow_le_rpow (Finset.prod_nonneg fun v _ => norm_nonneg _) hprod (by positivity)
-      _ = ‖g x - g y‖ := by
-          rw [← Real.rpow_natCast, ← Real.rpow_mul hM0, mul_one_div_cancel hnR.ne',
-            Real.rpow_one]
-  have main := Formalism.SA.P.card_le_of_separated S g lam P hlam hPpos.le hsepg hbdg
-  have hdim : finrank ℝ ((v : ι) → V v) = N * Fintype.card ι := by
-    rw [Module.finrank_pi_fintype]
-    simp only [hN, Finset.sum_const, Finset.card_univ, smul_eq_mul]
-    ring
-  rw [hdim] at main
-  rw [← hP]
-  exact main
 
 end Formalism.SA.P

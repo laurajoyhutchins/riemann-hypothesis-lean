@@ -1,6 +1,47 @@
-import Mathlib
-import Formalism.SharpRestriction.CuspSpanNormBounds.IsPrimitiveSub
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.NormRepresentationLift.GlobalDual
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.NormRepresentationLift.ActsByFrameAct
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.NormRepresentationLift.HTOsmulRight
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.NormRepresentationLift.CoeCj
+
+@[expose] public section
 
 noncomputable section
 
@@ -25,6 +66,7 @@ theorem pre_rowvec (Λ : Submodule (𝓞 E) S.V) (hint : IntLat Λ) (Tn : ℕ) (
   have hv0e : ∀ i, S.hT v₀ (F.fl.e i) =
       if a < i then (t i.castSucc : E) * ((1 + g * q i : 𝓞 E) : E) else 0 := by
     intro i
+
     rw [map_sum, LinearMap.sum_apply, Finset.sum_eq_single i]
     · by_cases hai : a < i
       · rw [if_pos hai, if_pos hai, hT_cj_left, hq]
@@ -44,7 +86,7 @@ theorem pre_rowvec (Λ : Submodule (𝓞 E) S.V) (hint : IntLat Λ) (Tn : ℕ) (
   have hze : ∀ i, S.hT F.fl.z (F.fl.e i) = 0 := by
     intro i; rw [herm_eq, F.fl.z_orth i, star_zero]
   have hve : ∀ i, S.hT v (F.fl.e i) = S.hT v₀ (F.fl.e i) := by
-    intro i; simp only [v, map_add, LinearMap.add_apply, hT_cj_left, hze, mul_zero, add_zero]
+    intro i; simp only [v, map_add (f := _), LinearMap.add_apply, hT_cj_left, hze, mul_zero, add_zero]
   refine ⟨v, Λ.add_mem hv₀ (Λ.smul_mem _ hz), fun i hi => ?_, fun c hc => ?_⟩
   · rw [hve, hv0e, if_neg (not_lt.mpr hi)]
   · induction c using Fin.lastCases with
@@ -52,7 +94,7 @@ theorem pre_rowvec (Λ : Submodule (𝓞 E) S.V) (hint : IntLat Λ) (Tn : ℕ) (
       refine ⟨y' * (ζ - t (Fin.last r)), ?_⟩
       have hfz : frame F (Fin.last r) = F.fl.z := by simp [frame, FlagG.fvec]
       rw [hfz]
-      simp only [v, map_add, LinearMap.add_apply, hT_cj_left, F.fl.z_norm, hζ, m]
+      simp only [v, map_add (f := _), LinearMap.add_apply, hT_cj_left, F.fl.z_norm, hζ, m]
       push_cast
       linear_combination (-((ζ : E) - (t (Fin.last r) : E))) * hxyE
     | cast i =>
@@ -86,7 +128,7 @@ theorem trace_fix (Λ : Submodule (𝓞 E) S.V) (hint : IntLat Λ) {n : ℕ} (f 
     · obtain ⟨q, hq⟩ := hc c hcZ
       refine ⟨t c + (M : 𝓞 E) * q, ?_⟩
       rw [hT_cj_left, hq]
-      simp only [coe_nat, map_add, map_mul, map_natCast]
+      simp only [coe_nat, map_add (f := _), map_mul, map_natCast]
       linear_combination ((t c : E) + (g : E) * (q : E) - (g : E) * (q : E)) * hmg
   · refine ⟨v, hv, -(ω * o), ?_, hZ, hc⟩
     rw [ho]

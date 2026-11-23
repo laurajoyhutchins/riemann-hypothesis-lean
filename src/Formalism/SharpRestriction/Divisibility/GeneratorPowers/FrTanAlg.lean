@@ -1,4 +1,58 @@
-import Mathlib
+module
+
+public import Mathlib.NumberTheory.NumberField.Basic
+import Mathlib.Algebra.AffineMonoid.UniqueSums
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.Lagrange
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.Algebra.Hom.Rat
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -139,8 +193,8 @@ private theorem eig_lemma_5 (χ' : E →+* S) (ρ : 𝓞 E →+* Module.End S M)
     (hθ : IntermediateField.adjoin ℚ {(θ : E)} = ⊤) (v : M) (hv : ρ θ v = χ' (θ : E) • v) (a : 𝓞 E) :
     ρ a v = χ' (a : E) • v := by
   obtain ⟨p, hp⟩ := poly_lemma (θ : E) hθ (a : E)
-  obtain ⟨b, hb⟩ := IsLocalization.integerNormalization_map_to_map (nonZeroDivisors ℤ) p
-  have hb0 : ((b : ℤ) : S) ≠ 0 := Int.cast_ne_zero.mpr (nonZeroDivisors.ne_zero b.prop)
+  obtain ⟨b, hb_mem, hb⟩ := IsLocalization.integerNormalization_spec (nonZeroDivisors ℤ) p
+  have hb0 : (b : S) ≠ 0 := Int.cast_ne_zero.mpr (nonZeroDivisors.ne_zero hb_mem)
   have hE : aeval (θ : E) (IsLocalization.integerNormalization (nonZeroDivisors ℤ) p) = (b : ℤ) • (a : E) := by
     rw [← Polynomial.aeval_map_algebraMap (A := ℚ), hb, map_zsmul, hp]
   have hO : (b : ℤ) • a = aeval θ (IsLocalization.integerNormalization (nonZeroDivisors ℤ) p) := by
@@ -213,11 +267,13 @@ theorem decomp (χ : ι → (E →+* S)) (hχ : Function.Injective χ) (hcard : 
   refine ⟨fun m => ⟨fun σ => aeval (ρ θ) (Lagrange.basis Finset.univ (fun σ => χ σ (θ : E)) σ) m,
     fun σ a => eig_lemma_5 (χ σ) ρ θ hθ _ (hproj σ m) a, ?_⟩, ?_⟩
   · have h1 : (∑ σ, aeval (ρ θ) (Lagrange.basis Finset.univ (fun σ => χ σ (θ : E)) σ)) m = m := by
+
       rw [← map_sum, hLsum, map_one]
       rfl
     rwa [LinearMap.sum_apply] at h1
   · intro mσ hmσ hsum σ
     have h := congrArg (aeval (ρ θ) (Lagrange.basis Finset.univ (fun σ => χ σ (θ : E)) σ)) hsum
+
     rw [map_sum, map_zero, Finset.sum_eq_single σ] at h
     · rwa [aeval_eig (ρ θ) (χ σ (θ : E)) (mσ σ) (hmσ σ θ), hLself, one_smul] at h
     · intro τ _ hτ
@@ -235,6 +291,7 @@ theorem global_basis (χ : ι → (E →+* S)) (hχ : Function.Injective χ)
   have heig : ∀ σ (c : Fin (mult σ) → S) (a : 𝓞 E),
       ρ a (∑ i, c i • U ⟨σ, i⟩) = χ σ (a : E) • ∑ i, c i • U ⟨σ, i⟩ := by
     intro σ c a
+
     rw [map_sum, Finset.smul_sum]
     refine Finset.sum_congr rfl fun i _ => ?_
     rw [map_smul, hU, smul_comm]

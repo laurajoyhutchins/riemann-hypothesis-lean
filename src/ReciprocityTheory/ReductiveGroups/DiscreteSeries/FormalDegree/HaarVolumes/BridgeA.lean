@@ -1,5 +1,53 @@
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.HaarVolumes.VolUDensity
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.HaarVolumes.IntegralGaussEOmPhiOmE
+module
+
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.HaarVolumes.IntegralGaussEOmPhiOmE
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.VolUFactProdMulLe
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.Countable
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Matrix.FiniteDimensional
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.HaarVolumes.VolUDensity
+
+@[expose] public section
 
 noncomputable section
 
@@ -22,9 +70,6 @@ lemma Jpq_zero (N : ℕ) : Formalism.UG.Jpq N 0 = 1 := by
     · simp [Formalism.UG.Jpq, Matrix.one_apply]
     · exact j.elim0
   · exact i.elim0
-
-lemma Jm_true (N : ℕ) : Jm (fun _ : Fin N => true) = 1 := by
-  simp [Jm, Formalism.REAL.Jm]
 
 lemma cT_eq {m : Type} [Fintype m] (M : Matrix m m ℂ) : Formalism.UG.cT (starRingEnd ℂ) M = Mᴴ := by
   ext i j
@@ -74,12 +119,6 @@ def iso (N : ℕ) : Formalism.BasicNotions.UpqT N 0 ≃* UNgrp N where
 
 lemma toM_iso (N : ℕ) (g : Formalism.BasicNotions.UpqT N 0) :
     toM (iso N g) = reindex (eN N) (eN N) (Formalism.BasicNotions.UpqT.mat g) := psi_val N _
-
-lemma mat_iso_symm (N : ℕ) (k : UNgrp N) :
-    Formalism.BasicNotions.UpqT.mat ((iso N).symm k) = reindex (eN N).symm (eN N).symm (toM k) := psi_symm_val N _
-
-lemma continuous_mat (N : ℕ) : Continuous (fun g : Formalism.BasicNotions.UpqT N 0 => Formalism.BasicNotions.UpqT.mat g) :=
-  Units.continuous_val.comp continuous_subtype_val
 
 lemma continuous_iso (N : ℕ) : Continuous (iso N) := by
   have hpsi : Continuous fun u : GL (Fin N ⊕ Fin 0) ℂ => psi N u :=
@@ -160,7 +199,7 @@ lemma uToLie_coords {N : ℕ} (X : Formalism.BasicNotions.lieU N 0) :
   have hsk : (reindex (eN N) (eN N) (X : Matrix (Fin N ⊕ Fin 0) (Fin N ⊕ Fin 0) ℂ))ᴴ =
       -reindex (eN N) (eN N) (X : Matrix (Fin N ⊕ Fin 0) (Fin N ⊕ Fin 0) ℂ) := by
     rw [Matrix.conjTranspose_reindex, lie_skew X]
-    try rfl
+    rfl
   apply Subtype.ext
   show uToLieMat (coords (reindex (eN N) (eN N) (X : Matrix (Fin N ⊕ Fin 0) (Fin N ⊕ Fin 0) ℂ))) = X
   simp only [uToLieMat]
@@ -170,12 +209,12 @@ lemma uToLie_coords {N : ℕ} (X : Formalism.BasicNotions.lieU N 0) :
 
 lemma reindex_exp {m n : Type} [Fintype m] [Fintype n] [DecidableEq m] [DecidableEq n] (e : m ≃ n)
     (A : Matrix m m ℂ) : reindex e e (NormedSpace.exp A) = NormedSpace.exp (reindex e e A) := by
-  letI : NormedRing (Matrix m m ℂ) := Matrix.linftyOpNormedRing
-  letI : NormedRing (Matrix n n ℂ) := Matrix.linftyOpNormedRing
-  letI : NormedAlgebra ℂ (Matrix m m ℂ) := Matrix.linftyOpNormedAlgebra
-  letI : NormedAlgebra ℂ (Matrix n n ℂ) := Matrix.linftyOpNormedAlgebra
-  letI : NormedAlgebra ℚ (Matrix m m ℂ) := Matrix.linftyOpNormedAlgebra
-  letI : NormedAlgebra ℚ (Matrix n n ℂ) := Matrix.linftyOpNormedAlgebra
+  let : NormedRing (Matrix m m ℂ) := Matrix.linftyOpNormedRing
+  let : NormedRing (Matrix n n ℂ) := Matrix.linftyOpNormedRing
+  let : NormedAlgebra ℂ (Matrix m m ℂ) := Matrix.linftyOpNormedAlgebra
+  let : NormedAlgebra ℂ (Matrix n n ℂ) := Matrix.linftyOpNormedAlgebra
+  let : NormedAlgebra ℚ (Matrix m m ℂ) := Matrix.linftyOpNormedAlgebra
+  let : NormedAlgebra ℚ (Matrix n n ℂ) := Matrix.linftyOpNormedAlgebra
   exact NormedSpace.map_exp (Matrix.reindexAlgEquiv ℂ ℂ e)
     (Matrix.reindexAlgEquiv ℂ ℂ e).toLinearEquiv.toLinearMap.continuous_of_finiteDimensional A
 
@@ -184,7 +223,7 @@ lemma toM_preimage_exp_ball_eq_upqT_exp_ball (N : ℕ) (r : ℝ) :
       {g | ∃ X ∈ Formalism.BasicNotions.ballU N 0 r, Formalism.BasicNotions.UpqT.mat g =
         NormedSpace.exp (X : Matrix (Fin N ⊕ Fin 0) (Fin N ⊕ Fin 0) ℂ)} := by
   ext g
-  simp only [Set.mem_preimage, Set.mem_setOf_eq, toM_iso]
+  simp only [Set.mem_preimage, Set.mem_ofPred_eq, toM_iso]
   constructor
   · rintro ⟨x, hx, hxe⟩
     refine ⟨uToLie x, hx, ?_⟩
@@ -193,14 +232,14 @@ lemma toM_preimage_exp_ball_eq_upqT_exp_ball (N : ℕ) (r : ℝ) :
       ext i j
       simp
     rw [hm, hxe, reindex_exp]
-    try rfl
+    rfl
   · rintro ⟨X, hX, hXe⟩
     refine ⟨coords (reindex (eN N) (eN N) (X : Matrix (Fin N ⊕ Fin 0) (Fin N ⊕ Fin 0) ℂ)), ?_, ?_⟩
     · rw [uToLie_coords]
       exact hX
     · rw [hXe, reindex_exp, skMat_coords]
       rw [Matrix.conjTranspose_reindex, lie_skew X]
-      try rfl
+      rfl
 
 lemma volU_pos (N : ℕ) : 0 < volU N := by
   unfold volU
@@ -212,17 +251,17 @@ lemma continuous_skMat (N : ℕ) : Continuous (skMat : UCo N → Matrix (Fin N) 
   refine continuous_pi fun a => continuous_pi fun b => ?_
   simp only [skMat]
   by_cases h1 : a = b
-  · simp only [if_pos h1]
+  · simp only [ite_eq_left h1]
     exact continuous_const.mul (Complex.continuous_ofReal.comp ((continuous_apply a).comp continuous_fst))
-  · simp only [if_neg h1]
+  · simp only [ite_eq_right h1]
     by_cases h2 : b < a
-    · simp only [dif_pos h2]
+    · simp only [dite_eq_left h2]
       exact (continuous_apply _).comp continuous_snd
-    · simp only [dif_neg h2]
+    · simp only [dite_eq_right h2]
       by_cases h3 : a < b
-      · simp only [dif_pos h3]
+      · simp only [dite_eq_left h3]
         exact ((continuous_apply _).comp continuous_snd).star.neg
-      · simp only [dif_neg h3]
+      · simp only [dite_eq_right h3]
         exact continuous_const
 
 lemma continuous_uToLie (N : ℕ) : Continuous (uToLie (N := N)) := by
@@ -233,7 +272,7 @@ lemma isOpen_ballU (N : ℕ) (r : ℝ) : IsOpen (Formalism.BasicNotions.ballU N 
   have hv : Continuous (fun X : Formalism.BasicNotions.lieU N 0 => (X : Matrix (Fin N ⊕ Fin 0) (Fin N ⊕ Fin 0) ℂ)) :=
     continuous_subtype_val
   unfold Formalism.BasicNotions.ballU
-  exact isOpen_lt (continuous_finset_sum _ fun i _ => continuous_finset_sum _ fun j _ =>
+  exact isOpen_lt (continuous_finsetSum _ fun i _ => continuous_finsetSum _ fun j _ =>
     ((continuous_apply j).comp ((continuous_apply i).comp hv)).norm) continuous_const
 
 lemma uToLieMat_apply (x : UCo N) (a b : Fin N) : uToLieMat x ((eN N).symm a) ((eN N).symm b) = skMat x a b := by
@@ -279,8 +318,6 @@ theorem cOmega_pos' (N : ℕ) : 0 < 1 / (2 ^ (N * (N - 1) / 2) * volU N) :=
 theorem omegaDensity_main (μ : Measure (Formalism.BasicNotions.UpqT N 0)) [μ.IsHaarMeasure] [IsProbabilityMeasure μ] :
     Formalism.BasicNotions.OmegaDensity μ (ENNReal.ofReal (1 / (2 ^ (N * (N - 1) / 2) * volU N))) := by
   have hH : (μ.map (iso N)).IsHaarMeasure := (iso N).isHaarMeasure_map μ (continuous_iso N) (continuous_iso_symm N)
-  have hP : IsProbabilityMeasure (μ.map (iso N)) :=
-    Measure.isProbabilityMeasure_map (continuous_iso N).measurable.aemeasurable
   refine ⟨_, isOmegaLeb_uToLie, ?_⟩
   have hκ : (0 : ℝ) < 2 ^ (N * (N - 1) / 2) := by positivity
   have hV : 0 < volU N := volU_pos N
@@ -306,7 +343,7 @@ theorem omegaDensity_main (μ : Measure (Formalism.BasicNotions.UpqT N 0)) [μ.I
     rw [map_iso_apply, toM_preimage_exp_ball_eq_upqT_exp_ball]
   have hden : (ENNReal.ofReal (2 ^ (N * (N - 1) / 2)) • Measure.map (uToLie (N := N)) volume)
       (Formalism.BasicNotions.ballU N 0 r) = ENNReal.ofReal (2 ^ (N * (N - 1) / 2)) * volume (uToLie ⁻¹' Formalism.BasicNotions.ballU N 0 r) := by
-    rw [Measure.smul_apply, Measure.map_apply (continuous_uToLie N).measurable (isOpen_ballU N r).measurableSet,
+    rw [smul_apply, Measure.map_apply (continuous_uToLie N).measurable (isOpen_ballU N r).measurableSet,
       smul_eq_mul]
   obtain ⟨hup, hlo⟩ := hB _ hBo.measurableSet hBn
   simp only [Set.mem_Icc]

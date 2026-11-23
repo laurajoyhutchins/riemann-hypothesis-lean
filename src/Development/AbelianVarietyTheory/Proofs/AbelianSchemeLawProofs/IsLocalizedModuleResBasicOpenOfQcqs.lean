@@ -1,9 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AbelianSchemeLaws.IsScalarTowerOfAlgebraMapEq
-import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.ExistsIsGenOfUniqueFactorizationMonoid
-import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.RestrictPullbackIsoHomAppPullbackSections
-import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.ExistsSmulEqMapOfIsCompactOfIsQuasiSeparated
-import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.BijectiveToPushforwardComp
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AbelianSchemeLaws.IsScalarTowerOfAlgebraMapEq
+public import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.IsQuasicoherentOfForallExistsAffine
+public import Mathlib.RingTheory.PicardGroup
+public import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.BijectiveToPushforwardComp
+public import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.ExistsIsGenOfUniqueFactorizationMonoid
+public import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.ExistsSmulEqMapOfIsCompactOfIsQuasiSeparated
+public import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.RestrictPullbackIsoHomAppPullbackSections
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits AlgebraicGeometry TensorProduct
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Out ReciprocityTheory.ChartRestriction.G.Semi
@@ -17,13 +61,10 @@ open GlobalTheory.LB
 
 variable {M : LB X} {V W : X.Opens}
 
-variable (M) in
 
+variable (M) in
 def resBasicOpen (a : Γ(X, V)) : SecOn M V →ₗ[Γ(X, V)] SecOn M (X.basicOpen a) :=
   QCoh.resBasicOpen (toMod M) a
-
-@[simp] theorem resBasicOpen_apply (a : Γ(X, V)) (s : SecOn M V) :
-    resBasicOpen M a s = restrict M (X.basicOpen_le a) s := rfl
 
 theorem smul_basicOpen_def (a b : Γ(X, V)) (s : SecOn M (X.basicOpen a)) :
     b • s = rs X (X.basicOpen_le a) b • s := rfl
@@ -50,40 +91,8 @@ theorem exists_pow_smul_eq_restrict (hM : M.IsLB) (hV : IsCompact (V : Set X))
   haveI := isQuasicoherent_toMod hM
   QCoh.Qcqs.exists_pow_smul_eq_res_of_qcqs (toMod M) hV hV' a h hW s
 
-theorem isLocalizedModule_of_ringHom (hM : M.IsLB) (hV : IsCompact (V : Set X))
-    (hV' : IsQuasiSeparated (V : Set X)) {A : Type*} [CommRing A] (φ : A →+* Γ(X, V)) (a : A)
-    (h : W ≤ V) (hW : W = X.basicOpen (φ a)) [Module A (SecOn M V)] [Module A (SecOn M W)]
-    (hsV : ∀ (r : A) (s : SecOn M V), r • s = φ r • s)
-    (hsW : ∀ (r : A) (s : SecOn M W), r • s = rs X h (φ r) • s)
-    (l : SecOn M V →ₗ[A] SecOn M W) (hl : ∀ s, l s = restrict M h s) :
-    IsLocalizedModule.Away a l :=
-  haveI := isQuasicoherent_toMod hM
-  QCoh.Qcqs.isLocalizedModule_of_ringHom_of_qcqs (toMod M) hV hV' φ a h hW hsV hsW l hl
-
-theorem isBaseChange_restrict (hM : M.IsLB) (hV : IsAffineOpen V) (hW : IsAffineOpen W) (h : W ≤ V)
-    [Algebra Γ(X, V) Γ(X, W)] [Module Γ(X, V) (SecOn M W)]
-    [IsScalarTower Γ(X, V) Γ(X, W) (SecOn M W)]
-    (halg : ∀ r, algebraMap Γ(X, V) Γ(X, W) r = rs X h r)
-    (l : SecOn M V →ₗ[Γ(X, V)] SecOn M W) (hl : ∀ s, l s = restrict M h s) :
-    IsBaseChange Γ(X, W) l :=
-  haveI := isQuasicoherent_toMod hM
-  QCoh.isBaseChange_of_eq_res (toMod M) hV hW h halg l hl
-
 theorem invertible (hM : M.IsLB) (hV : IsAffineOpen V) : Module.Invertible Γ(X, V) (SecOn M V) :=
   invertible_sections hM hV
-
-theorem finite (hM : M.IsLB) (hV : IsAffineOpen V) : Module.Finite Γ(X, V) (SecOn M V) :=
-  haveI := invertible hM hV
-  inferInstance
-
-theorem projective (hM : M.IsLB) (hV : IsAffineOpen V) : Module.Projective Γ(X, V) (SecOn M V) :=
-  haveI := invertible hM hV
-  inferInstance
-
-theorem finitePresentation (hM : M.IsLB) (hV : IsAffineOpen V) :
-    Module.FinitePresentation Γ(X, V) (SecOn M V) :=
-  haveI := invertible hM hV
-  Module.finitePresentation_of_projective _ _
 
 theorem flat (hM : M.IsLB) (hV : IsAffineOpen V) : Module.Flat Γ(X, V) (SecOn M V) :=
   haveI := invertible hM hV
@@ -159,14 +168,6 @@ namespace SecOnR
 
 variable (f : X ⟶ Spec (CommRingCat.of R)) {M : LB X} {V W : X.Opens}
 
-theorem isLocalizedModule_restrict (hM : M.IsLB) (hV : IsCompact (V : Set X))
-    (hV' : IsQuasiSeparated (V : Set X)) (r : R) (h : W ≤ V) (hW : W = X.basicOpen (cst f V r)) :
-    IsLocalizedModule.Away r (restrict f M h) :=
-  letI : Module R (SecOn M V) := inferInstanceAs (Module R (SecOnR f M V))
-  letI : Module R (SecOn M W) := inferInstanceAs (Module R (SecOnR f M W))
-  SecOn.isLocalizedModule_of_ringHom hM hV hV' (cst f V) r h hW (fun _ _ => rfl)
-    (fun a s => congrArg (· • s) (rs_cst f h a).symm) (restrict f M h) fun _ => rfl
-
 theorem invertible (hM : M.IsLB) (hV : IsAffineOpen V) :
     Module.Invertible Γ(X, V) (SecOnR f M V) := SecOn.invertible hM hV
 
@@ -215,8 +216,8 @@ theorem isBaseChange_pull (hM : M.IsLB)
       E.restrictScalars R') fun s => ?_
   simp [hl, hE]
 
-variable (M) in
 
+variable (M) in
 def baseChangeHom (w : π ≫ f = f' ≫ Spec.map (CommRingCat.ofHom (algebraMap R R')))
     (V : X.Opens) (V' : X'.Opens) (e : V' ≤ π ⁻¹ᵁ V) :
     R' ⊗[R] SecOnR f M V →ₗ[R'] SecOnR f' (M.pull π) V' :=
@@ -240,7 +241,7 @@ theorem baseChangeHom_restrict
       restrict f' _ h' (baseChangeHom M w V V' e x) := by
   induction x using TensorProduct.induction_on with
   | zero => simp only [map_zero]
-  | add x y hx hy => simp only [map_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
   | tmul c s =>
     rw [LinearMap.baseChange_tmul, baseChangeHom_tmul, baseChangeHom_tmul, map_smul,
       pull_restrict w h h' e e']
@@ -265,11 +266,6 @@ def baseChangeEquiv (hM : M.IsLB)
     R' ⊗[R] SecOnR f M V ≃ₗ[R'] SecOnR f' (M.pull π) V' :=
   LinearEquiv.ofBijective _ (baseChangeHom_bijective hM H hV e)
 
-@[simp] theorem baseChangeEquiv_tmul (hM : M.IsLB)
-    (H : IsPullback π f' f (Spec.map (CommRingCat.ofHom (algebraMap R R')))) (hV : IsAffineOpen V)
-    {V' : X'.Opens} (e : V' = π ⁻¹ᵁ V) (c : R') (s : SecOnR f M V) :
-    baseChangeEquiv hM H hV e (c ⊗ₜ s) = c • pull M H.w V V' e.le s := rfl
-
 end BaseChange
 
 end SecOnR
@@ -279,8 +275,8 @@ section Cech
 variable {κ : Type} {f : X ⟶ Spec (CommRingCat.of R)} {f' : X' ⟶ Spec (CommRingCat.of R')}
   {π : X' ⟶ X} (M : LB X) (D : κ → X.Opens)
 
-variable {M D} in
 
+variable {M D} in
 theorem flat_cechLB_X [LinearOrder κ] [Finite κ] (f : X ⟶ Spec (CommRingCat.of R)) [Flat f]
     (hM : M.IsLB) (hD : ∀ s : Finset κ, s.Nonempty → IsAffineOpen (⨅ i ∈ s, D i)) (p : ℕ) :
     Module.Flat R ((cechLB f M D).X p) :=
@@ -293,7 +289,7 @@ variable [Algebra R R']
 
 def secCubeBaseChange (w : π ≫ f = f' ≫ Spec.map (CommRingCat.ofHom (algebraMap R R'))) :
     GlobalTheory.Cube.baseChange R' (secCube f M D) ⟶ secCube f' (M.pull π) fun i => π ⁻¹ᵁ D i :=
-  GlobalTheory.Cube.homMk (fun s => SecOnR.baseChangeHom M w _ _ (preimage_biInf D π s).ge)
+  GlobalTheory.Cube.homMk κ R' (fun s => SecOnR.baseChangeHom M w _ _ (preimage_biInf D π s).ge)
     fun {s t} h x => SecOnR.baseChangeHom_restrict w (iInf_le_iInf_of_subset D h)
       (iInf_le_iInf_of_subset (fun i => π ⁻¹ᵁ D i) h) (preimage_biInf D π s).ge
       (preimage_biInf D π t).ge x
@@ -303,8 +299,8 @@ theorem secCubeBaseChange_app_tmul
     (x : (secCube f M D).obj s) :
     ((secCubeBaseChange M D w).app s).hom (c ⊗ₜ[R] x) = c • secCubePull M D w s x := rfl
 
-variable {M} in
 
+variable {M} in
 theorem secCubeBaseChange_app_bijective (hM : M.IsLB)
     (H : IsPullback π f' f (Spec.map (CommRingCat.ofHom (algebraMap R R')))) {s : Finset κ}
     (hs : IsAffineOpen (⨅ i ∈ s, D i)) :
@@ -329,8 +325,8 @@ theorem d_secTermBaseChange [LinearOrder κ]
     (congrArg (GlobalTheory.Cube.termMap (secCubeBaseChange M D w) (p + 1))
       (GlobalTheory.Cube.d_termBaseChange R' (secCube f M D) p x))
 
-variable {M D} in
 
+variable {M D} in
 theorem secTermBaseChange_bijective [Finite κ] (hM : M.IsLB)
     (H : IsPullback π f' f (Spec.map (CommRingCat.ofHom (algebraMap R R')))) (p : ℕ)
     (hD : ∀ s : Finset κ, s.card = p → IsAffineOpen (⨅ i ∈ s, D i)) :
@@ -354,11 +350,6 @@ def cechLBBaseChange [LinearOrder κ] (w : π ≫ f = f' ≫ Spec.map (CommRingC
   cechComparison (ModuleCat.extendScalars g) (secCube f M D) ≫
     cechComplexMap (secCubeExtendScalars M D w)
 
-open ChangeOfRings in
-
-theorem cechLBBaseChange_f_tmul [LinearOrder κ] (w : π ≫ f = f' ≫ Spec.map (CommRingCat.ofHom g))
-    (p : ℕ) (c : R') (x : (cechLB f M D).X p) (s : {s : Finset κ // s.card = p + 1}) :
-    ((cechLBBaseChange M D w).f p).hom (c ⊗ₜ[R,g] x) s = c • secCubePull M D w s.1 (x s) := rfl
 
 variable {M D}
 
@@ -380,41 +371,10 @@ def cechLBBaseChangeIso [LinearOrder κ] [Finite κ] (hM : M.IsLB)
   haveI := isIso_cechLBBaseChange hM H hD
   asIso (cechLBBaseChange M D H.w)
 
-@[simp] theorem cechLBBaseChangeIso_hom [LinearOrder κ] [Finite κ] (hM : M.IsLB)
-    (H : IsPullback π f' f (Spec.map (CommRingCat.ofHom g)))
-    (hD : ∀ s : Finset κ, s.Nonempty → IsAffineOpen (⨅ i ∈ s, D i)) :
-    (cechLBBaseChangeIso hM H hD).hom = cechLBBaseChange M D H.w := rfl
-
 theorem isAffineOpen_biInf_preimage (H : IsPullback π f' f (Spec.map (CommRingCat.ofHom g)))
     {s : Finset κ} (hs : IsAffineOpen (⨅ i ∈ s, D i)) : IsAffineOpen (⨅ i ∈ s, π ⁻¹ᵁ D i) :=
   preimage_biInf D π s ▸ isAffineOpen_preimage_of_isPullback H hs
 
 end Cech
-
-theorem sections_over_affine_open {X : Scheme.{0}} {M : LB X} (hM : M.IsLB) :
-    (∀ V : X.Opens, IsCompact (V : Set X) → IsQuasiSeparated (V : Set X) → ∀ a : Γ(X, V),
-      IsLocalizedModule.Away a (SecOn.resBasicOpen M a)) ∧
-    (∀ V : X.Opens, IsAffineOpen V → ∀ a : Γ(X, V),
-      IsLocalizedModule.Away a (SecOn.resBasicOpen M a)) ∧
-    (∀ V : X.Opens, IsAffineOpen V → Module.Invertible Γ(X, V) (SecOn M V) ∧
-      Module.FinitePresentation Γ(X, V) (SecOn M V) ∧ Module.Projective Γ(X, V) (SecOn M V)) ∧
-    (∀ (R : Type) [CommRing R] (f : X ⟶ Spec (CommRingCat.of R)), Flat f →
-      ∀ V : X.Opens, IsAffineOpen V → Module.Flat R (SecOnR f M V)) ∧
-    (∀ (R R' : Type) [CommRing R] [CommRing R'] [Algebra R R'] (X' : Scheme.{0}) (π : X' ⟶ X)
-      (f : X ⟶ Spec (CommRingCat.of R)) (f' : X' ⟶ Spec (CommRingCat.of R'))
-      (H : IsPullback π f' f (Spec.map (CommRingCat.ofHom (algebraMap R R')))) (V : X.Opens),
-      IsAffineOpen V → Function.Bijective (SecOnR.baseChangeHom M H.w V (π ⁻¹ᵁ V) le_rfl)) ∧
-    (∀ (R R' : Type) [CommRing R] [CommRing R'] (g : R →+* R') (X' : Scheme.{0}) (π : X' ⟶ X)
-      (f : X ⟶ Spec (CommRingCat.of R)) (f' : X' ⟶ Spec (CommRingCat.of R'))
-      (H : IsPullback π f' f (Spec.map (CommRingCat.ofHom g)))
-      (κ : Type) [LinearOrder κ] [Finite κ] (D : κ → X.Opens),
-      (∀ s : Finset κ, s.Nonempty → IsAffineOpen (⨅ i ∈ s, D i)) →
-        IsIso (cechLBBaseChange M D H.w)) :=
-  ⟨fun _ => SecOn.isLocalizedModule_resBasicOpen_of_qcqs hM,
-    fun _ => SecOn.isLocalizedModule_resBasicOpen hM,
-    fun _ hV => ⟨SecOn.invertible hM hV, SecOn.finitePresentation hM hV, SecOn.projective hM hV⟩,
-    fun _ _ f _ _ hV => SecOnR.flat f hM hV,
-    fun _ _ _ _ _ _ _ _ _ H _ hV => SecOnR.baseChangeHom_bijective hM H hV rfl,
-    fun _ _ _ _ _ _ _ _ _ H _ _ _ _ hD => isIso_cechLBBaseChange hM H hD⟩
 
 end GlobalTheory.AbLaw

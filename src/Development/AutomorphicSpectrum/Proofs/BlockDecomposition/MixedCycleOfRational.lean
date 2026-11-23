@@ -1,18 +1,61 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IsSmoothHermCombLine
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.PointIdealMultiprojectivePrime
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.MemPointIdealIffEvalCoordsZero
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SpecializesIffPointIdealLe
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.MultiprojectivePrimeEqPointIdeal
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.HermRepMetricSmooth
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ComplexPointLiftsToMulticone
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.RestrictedFormNonzeroOnGenericPoint
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.HolomorphicLiftGivesHolomorphicSection
-import ReciprocityTheory.AnalyticForms.RegularLocalRings.ProjHypC
-import GroundTheory.HeightsAndTheta.Heights.Intersections.PDiagOrd
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FinsumLengthMulLogCardEqNegLogAdicAbvNorm
-import GroundTheory.HeightsAndTheta.Heights.HeightComparison.POrbitChartMult
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.MinimalPrimesMap
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IsSmoothHermCombLine
+public import GroundTheory.HeightsAndTheta.Heights.HeightComparison.HeightOrbitChart
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FinsumLengthMulLogCardEqNegLogAdicAbvNorm
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.MinimalPrimesMap
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ComplexPointLiftsToMulticone
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.HolomorphicLiftGivesHolomorphicSection
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.MemPointIdealIffEvalCoordsZero
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.MultiprojectivePrimeEqPointIdeal
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.PointIdealMultiprojectivePrime
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.RestrictedFormNonzeroOnGenericPoint
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SpecializesIffPointIdealLe
+public import GroundTheory.HeightsAndTheta.Heights.HeightComparison.POrbitChartMult
+import GroundTheory.HeightsAndTheta.Heights.HeightComparison.POrbitChartMultLemmas
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.PDiagOrd
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+public import ReciprocityTheory.AnalyticForms.RegularLocalRings.ProjHypC
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterDivSupp
+
+@[expose] public section
 
 set_option autoImplicit false
 noncomputable section
@@ -185,6 +228,7 @@ theorem cone_of_isMultiHomog {F : Pol n} {d : Fin (m + 1) → ℕ} (hF : IsMulti
   classical
   conv_lhs => rw [F.as_sum]
   conv_rhs => rw [F.as_sum]
+
   rw [map_sum, map_sum, map_sum, Finset.sum_mul]
   refine Finset.sum_congr rfl fun μ hμ => ?_
   have hX : ∏ p : Σ k, Bk n k, (MvPolynomial.X p.1 : MvPolynomial (Fin (m + 1)) D) ^ μ p =
@@ -237,6 +281,7 @@ theorem cone_eq_zero_iff {P : Ideal (Pol n)} (hh : IsMultiHomogIdeal P)
     (geoMultiHomog_iff _ _).2 (weightedHomogeneousComponent_isWeightedHomogeneous _ _)
   have hcone : cone ε F = ∑ e ∈ S, C (ε (weightedHomogeneousComponent (coordDeg n) e F)) *
       ∏ k, MvPolynomial.X k ^ e k := by
+
     conv_lhs => rw [hsum, map_sum]
     exact Finset.sum_congr rfl fun e _ => cone_of_isMultiHomog ε (hcomp e)
   constructor
@@ -244,7 +289,7 @@ theorem cone_eq_zero_iff {P : Ideal (Pol n)} (hh : IsMultiHomogIdeal P)
     rw [hsum]
     refine Ideal.sum_mem _ fun e he => (hP _ e (hcomp e)).2 ?_
     have := coeff_sum_C_mul_prod_X_pow S (fun e => ε (weightedHomogeneousComponent (coordDeg n) e F)) he
-    rw [← hcone, h0, coeff_zero] at this
+    rw [← hcone, h0] at this
     exact this.symm
   · intro hF
     rw [hcone]
@@ -371,8 +416,8 @@ end Mult
 
 section Sum
 
-open Classical in
 
+open Classical in
 def oS (i : X ⟶ MP ℤ m n) (s : Pol n) (z : X) : ℝ :=
   if Order.coheight z = 1 then (multAt (ptIdeal (i (genericPoint X)) ⊔ Ideal.span {s}) (ptIdeal (i z)) : ℝ) else 0
 

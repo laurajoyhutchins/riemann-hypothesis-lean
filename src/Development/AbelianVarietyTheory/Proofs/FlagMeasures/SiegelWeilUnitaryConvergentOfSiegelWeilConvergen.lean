@@ -1,8 +1,54 @@
-import Mathlib
-import Formalism.UnipotentAdelicQuotients.SiegelWeilUnitaryConvergent
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CasimirVolumeRatios.AdeleLC
-import Development.AbelianVarietyTheory.BlockTheory.SiegelWeilLocal.SiegelWeilGramDensity
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsNontrivialAdeleCharTrivialOnTotallyReal
+module
+
+public import Formalism.UnipotentAdelicQuotients.SWXSDefs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Algebra.Group.Units
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -21,7 +67,7 @@ theorem exists_coord_pi {X : Type} [AddCommGroup X] [TopologicalSpace X] {k : �
     (F := Fin (Module.finrank ℝ (κ → Fin k → ℝ)) → ℝ) (Module.finrank_fin_fun ℝ).symm
   refine ⟨_, e1.trans L.toHomeomorph, fun x y => ?_⟩
   show L (e1 (x + y)) = L (e1 x) + L (e1 y)
-  rw [h1, map_add]
+  rw [h1, map_add (f := _)]
 
 theorem exists_coord_Ainf (F : Type) [Field F] [NumberField F] [IsTotallyReal F] :
     ∃ (k : ℕ) (e : Ainf F ≃ₜ (Fin k → ℝ)), ∀ x y, e (x + y) = e x + e y := by
@@ -35,7 +81,7 @@ theorem exists_coord_Ainf (F : Type) [Field F] [NumberField F] [IsTotallyReal F]
     (F := Fin (Module.finrank ℝ (InfinitePlace F → ℝ)) → ℝ) (Module.finrank_fin_fun ℝ).symm
   refine ⟨_, e1.trans L.toHomeomorph, fun x y => ?_⟩
   show L (e1 (x + y)) = L (e1 x) + L (e1 y)
-  rw [h1, map_add]
+  rw [h1, map_add (f := _)]
 
 theorem exists_coord_tens (F E : Type) [Field F] [NumberField F] [IsTotallyReal F] [Field E]
     [NumberField E] [Algebra F E] :
@@ -55,13 +101,6 @@ theorem exists_coord_tens (F E : Type) [Field F] [NumberField F] [IsTotallyReal 
   refine ⟨k, e0.trans e1, fun x y => ?_⟩
   show e1 (e0 (x + y)) = e1 (e0 x) + e1 (e0 y)
   rw [show e0 (x + y) = e0 x + e0 y from eL.map_add x y, h1]
-
-theorem exists_coord_tup (F E : Type) [Field F] [NumberField F] [IsTotallyReal F] [Field E]
-    [NumberField E] [Algebra F E] (n M : ℕ) :
-    ∃ (N : ℕ) (e : (Fin n → Fin M → Ainf F ⊗[F] E) ≃ₜ (Fin N → ℝ)), ∀ x y, e (x + y) = e x + e y := by
-  obtain ⟨k, eK, hK⟩ := exists_coord_tens F E
-  obtain ⟨k1, e1, h1⟩ := exists_coord_pi eK hK (Fin M)
-  exact exists_coord_pi e1 h1 (Fin n)
 
 section Zero
 
@@ -110,37 +149,5 @@ def tensHomeo {κ : Type} [Finite κ] (b : Module.Basis κ F E) : R ⊗[F] E ≃
 
 end HermTop
 
-open GlobalTheory.IndefiniteRowSideFullHecke.SiegelWeilGramDensity in
-
-def SiegelFormulaCc : Prop :=
-  ∀ (F E : Type) [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E]
-    (σ : E →ₐ[F] E), IsCMExt F E σ →
-    ∀ (M : ℕ) (J : Matrix (Fin M) (Fin M) E), IsHermND σ J →
-    ∀ (n : ℕ), 1 ≤ n → 2 * n < M →
-    ∀ (T : Matrix (Fin n) (Fin n) E) (hT : IsHermND σ T),
-    ∀ (ψ : AddChar (AF F) ℂ), IsCharAF F ψ →
-    ∀ (b : Module.Basis (Fin 2) F E)
-      (Φ : (Fin n → Fin M → AF F ⊗[F] E) → ℂ)
-      (Φinf : (Fin n → Fin M → Ainf F ⊗[F] E) → ℂ)
-      (Φf : (Fin n → Fin M → Af F ⊗[F] E) → ℂ)
-      (Φv : ∀ v : HeightOneSpectrum (𝓞 F), (Fin n → Fin M → Fv F v ⊗[F] E) → ℂ),
-      IsProdInfFin Φ Φinf Φf → IsSmoothCc F E Φinf → IsPureFin b Φf Φv →
-      AllSome (fun μ : Measure (HA (AF F) σ J) => IsHaarH F E σ M J μ) fun μ =>
-      AllSome (fun 𝓕 : Set (HA (AF F) σ J) => IsFDH F E σ M J μ 𝓕) fun 𝓕 =>
-      AllSome (fun dX : Measure (Fin n → Fin M → Ainf F ⊗[F] E) =>
-          SdW F E σ M J (Ainf F) (psiInf F ψ) n dX) fun dXinf =>
-      AllSome (fun dS : Measure (HermR (Ainf F) σ n) =>
-          SdHerm F E σ (Ainf F) (psiInf F ψ) n dS) fun dSinf =>
-      AllSome (fun dX : ∀ v : HeightOneSpectrum (𝓞 F), Measure (Fin n → Fin M → Fv F v ⊗[F] E) =>
-          ∀ v, SdW F E σ M J (Fv F v) (psiV F ψ v) n (dX v)) fun dXv =>
-      AllSome (fun dS : ∀ v : HeightOneSpectrum (𝓞 F), Measure (HermR (Fv F v) σ n) =>
-          ∀ v, SdHerm F E σ (Fv F v) (psiV F ψ v) n (dS v)) fun dSv =>
-      AllSome (fun g : HermR (Ainf F) σ n → ℂ =>
-          IsGramDensity (Ainf F) σ J dXinf dSinf Φinf g) fun ginf =>
-      AllSome (fun g : ∀ v : HeightOneSpectrum (𝓞 F), HermR (Fv F v) σ n → ℂ =>
-          ∀ v, IsGramDensity (Fv F v) σ J (dXv v) (dSv v) (Φv v) (g v)) fun gv =>
-        Multipliable (fun v => gv v (hermOf (Fv F v) σ T hT.1)) ∧
-        meanC μ 𝓕 (thetaS F E σ M J Φ (gramFibre σ J T)) =
-          ginf (hermOf (Ainf F) σ T hT.1) * ∏' v, gv v (hermOf (Fv F v) σ T hT.1)
 
 end GlobalTheory.SiegelWeilConvCompare

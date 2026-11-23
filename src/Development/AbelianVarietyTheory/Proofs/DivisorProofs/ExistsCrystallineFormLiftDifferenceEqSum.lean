@@ -1,5 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DualMapCompDualMap
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DualMapCompDualMap
+public import Development.AbelianVarietyTheory.Definitions.ThetaMetrics.MemRangeCompIffOfIsClosedImmersion
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
+
 open CategoryTheory AlgebraicGeometry MonoidalCategory CartesianMonoidalCategory MonObj
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor Formalism.L2.Pj
 open GlobalTheory.CatCoh GlobalTheory.Cris GlobalTheory.DeRham GlobalTheory.CechKS
@@ -28,7 +72,7 @@ def diffDer (hJ : J ^ 2 = 0) (ρ₁ ρ₂ : B →ₐ[R] C) (hd : ∀ b, ρ₁ b 
     Derivation R B C :=
   letI : Algebra B C := (ρ₂ : B →+* C).toAlgebra
   { toFun := fun b ↦ ρ₁ b - ρ₂ b
-    map_add' := fun a b ↦ by simp only [map_add]; ring
+    map_add' := fun a b ↦ by simp only [map_add (f := _)]; ring
     map_smul' := fun r b ↦ by
       simp only [map_smul, RingHom.id_apply, smul_sub]
     map_one_eq_zero' := by simp
@@ -60,7 +104,7 @@ theorem diffLam_mem (m : Ω[B⁄R]) : diffLam hJ ρ₁ ρ₂ hd m ∈ J := by
   induction m using GlobalTheory.CechDR.ind1 with
   | h b c => rw [diffLam_smul, diffLam_D]; exact J.mul_mem_left _ (hd c)
   | h0 => rw [map_zero]; exact J.zero_mem
-  | ha x y hx hy => rw [map_add]; exact J.add_mem hx hy
+  | ha x y hx hy => rw [map_add (f := _)]; exact J.add_mem hx hy
 
 end Alg
 
@@ -73,11 +117,11 @@ def diagLift : TrivSqZeroExt B Ω[B⁄R] →ₐ[R] C where
   toFun c := ρ₂ c.fst + diffLam hJ ρ₁ ρ₂ hd c.snd
   map_one' := by simp
   map_zero' := by simp
-  map_add' a b := by simp only [TrivSqZeroExt.fst_add, TrivSqZeroExt.snd_add, map_add]; ring
+  map_add' a b := by simp only [TrivSqZeroExt.fst_add, TrivSqZeroExt.snd_add, map_add (f := _)]; ring
   map_mul' a b := by
     have h0 := mul_eq_zero_of_sq hJ (diffLam_mem hJ ρ₁ ρ₂ hd a.snd) (diffLam_mem hJ ρ₁ ρ₂ hd b.snd)
     have e : (MulOpposite.op b.fst • a.snd : Ω[B⁄R]) = b.fst • a.snd := rfl
-    simp only [TrivSqZeroExt.fst_mul, TrivSqZeroExt.snd_mul, map_mul, map_add, e, diffLam_smul]
+    simp only [TrivSqZeroExt.fst_mul, TrivSqZeroExt.snd_mul, map_mul, map_add (f := _), e, diffLam_smul]
     linear_combination -h0
   commutes' r := by
     simp [TrivSqZeroExt.algebraMap_eq_inl']
@@ -211,6 +255,7 @@ theorem ev_idLift_sub_eq_sum : ∀ (R : Type) [CommRing R] (X : Scheme.{0}) (s :
   have hc : (ev ω.1 ((diagExt R (CechDR.Sec s U)).secHom hx (diagExt R (CechDR.Sec s U)).i fun _ ↦ rfl) -
       ev ω.1 ((diagExt R (CechDR.Sec s U)).secHom hx (diagSec R (CechDR.Sec s U)) (fst_derSec _))).snd =
       connForm ω.1 (CechDR.affPt s ⟨U, hU⟩) hx := rfl
+
   rw [hc, hΩ, map_sum]
   refine Finset.sum_congr rfl fun k _ ↦ ?_
   rw [diffLam_smul, diffLam_D]

@@ -1,6 +1,51 @@
-import Mathlib
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.OpenFns
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
 import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.MirabolicDerivatives.LeibnizDerivatives.GenericProdIff
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.OpenFns
+
+@[expose] public section
 
 noncomputable section
 
@@ -77,14 +122,14 @@ theorem mkQ_update [DecidableEq α] (K : ∀ a, Submodule ℂ (X a)) {q : ∀ a,
   · simp [Function.update_of_ne hb, hy]
 
 def descend [Fintype α] (K : ∀ a, Submodule ℂ (X a)) :
-    MultilinearMap ℂ (fun a => X a ⧸ K a) ((⨂[ℂ] a, X a) ⧸ pureSpan K) where
+    (Π a, X a ⧸ K a) →ₘₗ[ℂ] ((⨂[ℂ] a, X a) ⧸ pureSpan K) where
   toFun := descendFun K
   map_update_add' := by
     intro _ q a u v
     obtain ⟨su, hu⟩ := Submodule.mkQ_surjective (K a) u
     obtain ⟨sv, hv⟩ := Submodule.mkQ_surjective (K a) v
     have hy := mkQ_rep K q
-    rw [descendFun_eq K _ _ (mkQ_update K hy a (w := su + sv) (by rw [map_add, hu, hv])),
+    rw [descendFun_eq K _ _ (mkQ_update K hy a (w := su + sv) (by rw [map_add (f := _), hu, hv])),
       descendFun_eq K _ _ (mkQ_update K hy a hu), descendFun_eq K _ _ (mkQ_update K hy a hv),
       MultilinearMap.map_update_add, map_add]
   map_update_smul' := by
@@ -145,6 +190,7 @@ theorem twKer_piTensor_le (π : ∀ a, Representation ℂ (Γ a) (X a)) (H : ∀
       rfl
     have e3 := (MultilinearMap.map_smul_univ (PiTensorProduct.tprod ℂ)
       (fun a => ((χ a ⟨(n : ∀ a, Γ a) a, n.2 a (Set.mem_univ a)⟩ : ℂˣ) : ℂ)) x).symm
+    simp only [RingHom.id_apply] at e3
     rw [map_smul, smul_comm, ← smul_sub]
     apply Submodule.smul_mem
     rw [e1, e2, e3]
@@ -153,7 +199,7 @@ theorem twKer_piTensor_le (π : ∀ a, Representation ℂ (Γ a) (X a)) (H : ∀
     apply Submodule.subset_span
     exact ⟨⟨(n : ∀ a, Γ a) a, n.2 a (Set.mem_univ a)⟩, x a, rfl⟩
   | add v₁ v₂ h₁ h₂ =>
-    rw [map_add, smul_add, add_sub_add_comm]
+    rw [map_add (f := _), smul_add, add_sub_add_comm]
     exact Submodule.add_mem _ h₁ h₂
 
 theorem pureSpan_le_twKer (π : ∀ a, Representation ℂ (Γ a) (X a)) (H : ∀ a, Subgroup (Γ a))
@@ -202,7 +248,7 @@ theorem pureSpan_le_twKer (π : ∀ a, Representation ℂ (Γ a) (X a)) (H : ∀
       have hw : PiTensorProduct.tprod ℂ (Function.update x a ((π a) (g : Γ a) v - ((χ a g : ℂˣ) : ℂ) • v)) =
           (piTensor π) (n : ∀ a, Γ a) (PiTensorProduct.tprod ℂ (Function.update x a v)) -
             ((piChar χ n : ℂˣ) : ℂ) • PiTensorProduct.tprod ℂ (Function.update x a v) := by
-        rw [MultilinearMap.map_update_sub, MultilinearMap.map_update_smul, e1, e2]
+        rw [MultilinearMap.map_update_sub, MultilinearMap.map_update_smul, RingHom.id_apply, e1, e2]
       rw [hw]
       exact Submodule.subset_span ⟨n, _, rfl⟩
     | zero =>

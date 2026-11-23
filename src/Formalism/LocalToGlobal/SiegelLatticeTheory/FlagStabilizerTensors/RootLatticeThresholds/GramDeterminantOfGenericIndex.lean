@@ -1,5 +1,55 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RootLatticeThresholds.LoopsTies
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RootLatticeThresholds.LoopsTies
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.WeightConstA
+import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RootLatticeThresholds.MemPerpMapFlag
+import Formalism.SharpRestriction.CuspSpanNormBounds.BruhatCellsKronecker.SplittingAdmissibleOfTermData
+import Mathlib.Algebra.AffineMonoid.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -94,13 +144,13 @@ theorem det_sub_lastDiag (M : Matrix (Fin (r + 1)) (Fin (r + 1)) E) (c : E) :
 
 theorem leadMinor_full (B : Matrix (Fin (r + 1)) (Fin (r + 1)) E) : leadMinorE B (r + 1) = B.det := by
   unfold leadMinorE
-  rw [dif_pos le_rfl]
+  rw [dite_eq_left le_rfl]
   congr 1
 
 theorem leadMinor_r (B : Matrix (Fin (r + 1)) (Fin (r + 1)) E) :
     leadMinorE B r = (B.submatrix Fin.castSucc Fin.castSucc).det := by
   unfold leadMinorE
-  rw [dif_pos (Nat.le_succ r)]
+  rw [dite_eq_left (Nat.le_succ r)]
   rfl
 
 theorem gram_det_eq (F : FlagG S r T) (F' : FlagG S r T') (hB : (Zhat F F').det ≠ 0) :
@@ -203,8 +253,8 @@ theorem aaF_star (a : Fin (D.R.rS + 1)) : ∀ x ∈ aaF D a, star x ∈ aaF D a 
     obtain ⟨o', ho'⟩ := star_int o
     exact (FractionalIdeal.mem_one_iff _).2 ⟨o', by rw [← ho']⟩
 
-theorem uu_eq (Λ : Submodule (𝓞 D.host.E) (hS D).V) {T T' : D.host.E} (F : LFlag (hS D) D.R.rS T)
-    (F' : LFlag (hS D) D.R.rS T') (hX : XLam Λ F = XS D F.fl) (hX' : XLam Λ F' = XS D F'.fl)
+theorem uu_eq (Λ : Submodule (𝓞 D.host.E) (hS D).V) {T T' : D.host.E} (F : LFlag (D.sp.Y 0) D.R.rS T)
+    (F' : LFlag (D.sp.Y 0) D.R.rS T') (hX : XLam Λ F = XS D F.fl) (hX' : XLam Λ F' = XS D F'.fl)
     (hz : F.zt = F.fl.z) (hz' : F'.zt = F'.fl.z) :
     UU Λ F F' = pseudoLat (DetUU.uCat F.fl F'.fl) (Sum.elim (aaF D) (aaF D)) := by
   unfold UU
@@ -262,6 +312,7 @@ theorem uCat_indep {T T' : D.host.E} (F : FlagG (hS D) D.R.rS T) (F' : FlagG (hS
   have hG : (DetUU.gramCat F F').mulVec c = 0 := by
     funext k
     have h1 := congrArg (fun v => (hS D).hT (DetUU.uCat F F' k) v) hc
+
     simp only [map_sum, map_smul, smul_eq_mul, map_zero] at h1
     simp only [DetUU.gramCat, Matrix.mulVec, dotProduct, Matrix.of_apply, Pi.zero_apply]
     rw [← h1]

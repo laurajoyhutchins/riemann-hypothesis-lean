@@ -1,15 +1,59 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.ModuliSpaces.FiniteHomogeneousInf
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.UniformisationConclusion
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.HeckeKer
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsHolPeriods
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.UnifUniqSt
+module
+
+public import Development.AbelianVarietyTheory.Definitions.ModuliSpaces.GoodClass
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.SecBaseChangeAnySt
+public import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.PolBaseChangeOfRelAmpleLocal
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsThetaConstantsLocallyOnBaseStatement
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.HasThetaConstantsRingBaseChangeStatement
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ThetaConstantsUniqueUpToUnitStatement
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ThetaCosetNonvanishingOfHasThStatement
 import Development.AbelianVarietyTheory.Proofs.ThetaFamilyOrigin.IsThetaPtOverMove
-import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.PolBaseChangeOfRelAmpleLocal
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.HasThetaConstantsRingBaseChangeStatement
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsThetaConstantsLocallyOnBaseStatement
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ThetaConstantsUniqueUpToUnitStatement
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ThetaCosetNonvanishingOfHasThStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.SpanEqTopOfFunctionals
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor
 open scoped CategoryTheory.Obj TensorProduct
@@ -46,7 +90,7 @@ theorem exists_ideal_of_locally {R : Type} [CommRing R]
   refine ⟨⟨⟨⟨{r | ∀ (R' : Type) [CommRing R'] (y : R →+* R'), Q R' y → y r = 0}, ?_⟩, ?_⟩, ?_⟩,
     fun R' _ y => ⟨fun hy r hr => hr R' y hy, fun hy => ?_⟩⟩
   · intro a b ha hb R' _ y hy
-    rw [map_add, ha R' y hy, hb R' y hy, add_zero]
+    rw [map_add (f := _), ha R' y hy, hb R' y hy, add_zero]
   · intro R' _ y _
     exact map_zero y
   · intro c a ha R' _ y hy
@@ -131,8 +175,8 @@ theorem span_map_eq_top {R R' I : Type} [CommRing R] [CommRing R'] (y : R →+* 
   have := congrArg (Ideal.map y) hv
   rwa [Ideal.map_span, Ideal.map_top, ← Set.range_comp] at this
 
-open ReciprocityTheory.ChartRestriction.G.Out in
 
+open ReciprocityTheory.ChartRestriction.G.Out in
 theorem isThetaPtOver_of_iso {S : Scheme.{0}} (P : PolAV S) {k : ℕ} {T T₀ : Over S} (β : T ⟶ T₀) [IsIso β.left]
     {I : Type} {x₀ : I → (T₀ ⟶ P.A)} (hk : ∀ i, x₀ i ^ (k ^ 2) = 1) {v₀ : I → Γ(T₀.left, ⊤)}
     (H : IsThetaPtOver P k x₀ v₀) : IsThetaPtOver P k (fun i => β ≫ x₀ i) (fun i => β.left.appTop.hom (v₀ i)) := by
@@ -145,8 +189,8 @@ theorem isThetaPtOver_of_iso {S : Scheme.{0}} (P : PolAV S) {k : ℕ} {T T₀ : 
   have e := VVRank.pullM_id P.A P.isLB 1 (SecM.ofSec P.A th)
   exact ⟨r, fun j => (hr j).trans (congrArg (_ * ·) (congrArg (fun q => q.1 j) e).symm)⟩
 
-open ReciprocityTheory.ChartRestriction.G.Out in
 
+open ReciprocityTheory.ChartRestriction.G.Out in
 theorem isThetaPt_of_local {S : Scheme.{0}} (P : PolAV S) {k : ℕ} {T : Over S} {I : Type} {x : I → (T ⟶ P.A)}
     {v : I → Γ(T.left, ⊤)} (ho : Odd k) (hu : IsUnit (k : Γ(T.left, ⊤))) (hk : ∀ i, x i ^ (k ^ 2) = 1)
     (H : ∀ p : T.left, ∃ (T' : Over S) (j : T' ⟶ T), IsOpenImmersion j.left ∧ p ∈ Set.range j.left ∧
@@ -253,7 +297,7 @@ theorem exists_ideal_hasTh_iff : Out.Laws → Out.Laws2 → ∀ (o : Type) [Comm
       ring)
     exact this hr
   · have hM : M ≤ RingHom.ker z := by
-      rw [← IsLocalization.map_comap (Submonoid.powers f) L M, Ideal.map_le_iff_le_comap]
+      rw [← IsLocalization.map_under (Submonoid.powers f) L M, Ideal.map_le_iff_le_comap]
       exact fun r hr => Hy r hr
     obtain ⟨u, hu⟩ := exists_unit_of_minors (span_map_eq_top (z.comp (algebraMap R L)) hv) (span_map_eq_top z hw)
       fun a c => by

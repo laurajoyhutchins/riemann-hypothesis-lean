@@ -1,10 +1,44 @@
-import Mathlib
-import Formalism.SharpRestriction.LevelLetterCocycles.IntegralHeckeForms
-import Formalism.SharpRestriction.LevelLetterCocycles.BlochKatoPhases
-import Formalism.LocalRingCardinality.DataNChoice
-import Formalism.LocalRingCardinality.DataNChTie
-import Formalism.SharpRestriction.ParConsts
-import Formalism.SharpRestriction.ParamsHeightRankConstant
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.IntegralHeckeForms
+public import Formalism.SharpRestriction.ParamsHeightRankConstant
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -84,18 +118,7 @@ def FamTwGood {eps : ℝ} (Fm : FamP eps) : Prop :=
   ∃ x0 : ℝ, ∀ x, x0 ≤ x → ∀ (hx : Fm.x1 < x) (i : Fm.Ix x),
     WithToricIntegralityConstant (Fm.D x i) fun N0 => TwGoodAt (Fm.ex x hx i).nch (Fm.ex x hx i).xd N0
 
-def FamExistsChoice {eps : ℝ} (Fm : FamP eps) : Prop :=
-  ∃ x0 : ℝ, ∀ x, x0 ≤ x → ∀ (hx : Fm.x1 < x) (i : Fm.Ix x),
-    WithToricIntegralityConstant (Fm.D x i) fun N0 => ExistsChoice (Fm.ex x hx i).xd N0
-
 def TwGoodClosed (𝒞 : FamClass) : Prop := Closed 𝒞 fun Fm _ => FamTwGood Fm
-
-def ExistsChoiceClosed (𝒞 : FamClass) : Prop := Closed 𝒞 fun Fm _ => FamExistsChoice Fm
-
-def Statement (𝒞 : FamClass) : Prop := ExistsChoiceClosed 𝒞 ∧ TwGoodClosed 𝒞
-
-theorem samePair_conj (w : D.what₂.places.Pl) : SamePair D w (D.what₂.places.conj w) :=
-  Or.inr fun _ => Iff.rfl
 
 open NumberField IsDedekindDomain in
 variable (D : _root_.Formalism.BasicNotions.D7) in
@@ -104,21 +127,6 @@ theorem _root_.GlobalTheory.IndefiniteRowSideFullHecke.GoodPairSystems.twisted_c
     _root_.GlobalTheory.IndefiniteRowSideFullHecke.GoodPairSystems.Twisted D (D.what₂.places.conj w) ↔ _root_.GlobalTheory.IndefiniteRowSideFullHecke.GoodPairSystems.Twisted D w := by
   unfold _root_.GlobalTheory.IndefiniteRowSideFullHecke.GoodPairSystems.Twisted
   rw [_root_.Formalism.BasicNotions.Rows.Data.muAt_conj]
-
-theorem TwistedPlaceSettings.inW1 {twI : D.what₂.places.Pl → D.ntw.Tw} (h : TwistedPlaceSettings D twI) {w : D.what₂.places.Pl}
-    (hw : Twisted D w) : D.ntw.NonzeroIndexPlace (twI w) := by
-  rcases (h.1 w hw).2 with h1 | h1
-  · exact ⟨w, hw, h1⟩
-  · exact ⟨_, (twisted_conj w).2 hw, h1⟩
-
-theorem TwGoodAt.goodTw {c : NChoice D} {xd : ThData D} {N0 : D.ntw.Tw → ℕ} (h : TwGoodAt c xd N0)
-    {w : D.what₂.places.Pl} (hw : Twisted D w) :
-    ∃ S, IntegralHeckeForms.GoodTw D.nexp (BlochKatoReduction.bk0 D) (expDat xd) N0 (c.twI w) (((D.ntw.l (c.twI w) : ℝ) ^ 2)⁻¹) S ∅
-      (c.Q w) (c.k' w) (BlochKatoReduction.Gen.psiAt (c.sd w) (c.psi' w)) := by
-  obtain ⟨-, -, -, -, S, -, hS⟩ := h.1.2.1 w hw
-  have := hS 1 isCoprime_one_left
-  rw [zpow_one] at this
-  exact ⟨S, this⟩
 
 end GlobalTheory.IndefiniteRowSideFullHecke.GoodPairSystems
 

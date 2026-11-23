@@ -1,7 +1,47 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.HermSysHypOneLeLambdaZero
-import Development.AbelianVarietyTheory.Definitions.Divisors.IntegralBound
-import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsCoordAtPoints
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.HermSysHypOneLeLambdaZero
+public import Development.AbelianVarietyTheory.Definitions.Divisors.WellChosen
+public import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsCoordAtPoints
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -23,7 +63,7 @@ theorem map_spec {F E K : Type} [CommRing F] [CommRing E] [CommRing K] [Algebra 
   unfold spec
   induction f using MvPolynomial.induction_on with
   | C a => simp [MvPolynomial.algebraMap_eq, ← IsScalarTower.algebraMap_apply, MvPolynomial.algebraMap_apply]
-  | add p q hp hq => simp only [map_add, hp, hq]
+  | add p q hp hq => simp only [map_add (f := _), hp, hq]
   | mul_X p i hp =>
     simp only [map_mul, hp, aeval_X]
     congr 1
@@ -32,17 +72,18 @@ theorem map_spec {F E K : Type} [CommRing F] [CommRing E] [CommRing K] [Algebra 
 
 theorem map_lin_smul {E K : Type} [CommRing E] [CommRing K] (φ : E →+* K) {N : ℕ} (c : E) (y : Fin N → E) :
     map φ (lin (c • y)) = C (φ c) * lin fun j => φ (y j) := by
+
   simp only [lin, map_sum, map_mul, map_X, map_C, Pi.smul_apply, smul_eq_mul, Finset.mul_sum]
   exact Finset.sum_congr rfl fun j _ => by ring
 
 theorem exists_eq_C_mul {E K σ : Type} [Field E] [Field K] (φ : E →+* K) {P Q : MvPolynomial σ E} (hP : P ≠ 0) {c : K}
     (hc : c ≠ 0) (h : map φ Q = C c * map φ P) : ∃ c₀ : E, c₀ ≠ 0 ∧ Q = C c₀ * P := by
   obtain ⟨m, hm⟩ := ne_zero_iff.1 hP
-  have e : φ (coeff m Q) = c * φ (coeff m P) := by
-    simpa only [coeff_map, coeff_C_mul] using congrArg (coeff m) h
-  have e' : φ (coeff m Q / coeff m P) = c := by
+  have e : φ (AddMonoidAlgebra.coeff Q m) = c * φ (AddMonoidAlgebra.coeff P m) := by
+    simpa only [coeff_map, coeff_C_mul] using congrArg (AddMonoidAlgebra.coeff · m) h
+  have e' : φ (AddMonoidAlgebra.coeff Q m / AddMonoidAlgebra.coeff P m) = c := by
     rw [map_div₀, e, mul_div_cancel_right₀ _ ((map_ne_zero φ).2 hm)]
-  refine ⟨coeff m Q / coeff m P, fun h0 => hc (by rw [← e', h0, map_zero]), map_injective φ φ.injective ?_⟩
+  refine ⟨AddMonoidAlgebra.coeff Q m / AddMonoidAlgebra.coeff P m, fun h0 => hc (by rw [← e', h0, map_zero]), map_injective φ φ.injective ?_⟩
   rw [map_mul, map_C, e', h]
 
 theorem exists_eq_C_mul_prod {E K ι : Type} [Field E] [Field K] [Fintype ι] (φ : E →+* K) {N : ℕ}

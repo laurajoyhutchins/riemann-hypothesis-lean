@@ -1,8 +1,50 @@
-import Mathlib
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.IsNsmul
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsCompletedStrictHens
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ValCalc
+import Development.AbelianVarietyTheory.BlockTheory.CMModuli.FlatIsoUnitGenerator
 import Development.AbelianVarietyTheory.Definitions.ModuliSpaces.AllTorsMap
-import Development.AbelianVarietyTheory.Definitions.Uniformization.TXFrame
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsTorsionPairRepresentativeStatement
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsTorsionHomImageStatement
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.QuadTie
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField IsLocalRing
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Out ReciprocityTheory.ChartRestriction.G.Geo.Tor
@@ -18,56 +60,13 @@ theorem isPull_trans {R : Type} [CommRing R] [IsDomain R] {D : DegPre R} {T T' T
     {a : T'.left ⟶ T.left} {b : T''.left ⟶ T'.left} {g : GtPt D T} {g' : GtPt D T'} {g'' : GtPt D T''}
     (h : GtPt.IsPull a g g') (h' : GtPt.IsPull b g' g'') : GtPt.IsPull (b ≫ a) g g'' := by
   refine ⟨by rw [h'.1, h.1, Category.assoc], fun χ => corr_of_val D.P.isLB fun y J hJ => ?_⟩
-  rw [val_corr hJ (h'.2 χ), val_pull hJ, val_corr hJ (h.2 χ), val_pull hJ, val_pull hJ, Category.assoc]
+  rw [val_corr hJ (h'.2 χ), val_pull hJ, val_corr hJ (h.2 χ), val_pull hJ, val_pull hJ]
+  simp only [Category.assoc]
 
 theorem isPullF_trans {R : Type} [CommRing R] [IsDomain R] {D : DegPre R} {T T' : Over (Sp R)}
     {F : Type} [Field F] [Algebra (FractionRing R) F]
     {a : T'.left ⟶ T.left} {b : Sp F ⟶ T'.left} {g : GtPt D T} {g' : GtPt D T'} {g'' : GtPtF D F}
     (h : GtPt.IsPull a g g') (h' : GtPt.IsPullF F b g' g'') : GtPt.IsPullF F (b ≫ a) g g'' :=
   isPull_trans (T'' := TF (R := R) F) (g'' := ⟨g''.b, g''.s, g''.isGen, g''.s_zero, g''.mult⟩) h h'
-
-theorem pair_trans {R : Type} [CommRing R] [IsDomain R] {D : DegPre R} {W : (Sp R).Opens} {ψW : PsiOn D W} {k : ℕ}
-    {T T' T'' : Over W.toScheme} {a : T' ⟶ T} {b : T'' ⟶ T'} {p : QkPtW D W ψW k T} {p' : QkPtW D W ψW k T'}
-    {p'' : QkPtW D W ψW k T''} (h : QkPtW.IsPull a p p') (h' : QkPtW.IsPull b p' p'') :
-    QkPtW.IsPull (b ≫ a) p p'' := by
-  have h₁ : p''.y = p.y := Eq.trans h'.1 h.1
-  have h₂ := isPull_trans (T := overW W T) (T' := overW W T') (T'' := overW W T'') (a := a.left) (b := b.left)
-    (g := p.g) (g' := p'.g) (g'' := p''.g) h.2 h'.2
-  exact ⟨h₁, h₂⟩
-
-theorem pairF_trans {R : Type} [CommRing R] [IsDomain R] {D : DegPre R} {W : (Sp R).Opens} {ψW : PsiOn D W} {k : ℕ}
-    {F : Type} [Field F] [Algebra (FractionRing R) F]
-    {T T' : Over W.toScheme} {a : T' ⟶ T} {x : Sp F ⟶ T'.left} {p : QkPtW D W ψW k T} {p' : QkPtW D W ψW k T'}
-    {q : QkPt D F k} (h : QkPtW.IsPull a p p') (h' : QkPtW.IsPullF F x p' q) :
-    QkPtW.IsPullF F (x ≫ a.left) p q := by
-  have h₁ : q.y = p.y := Eq.trans h'.1 h.1
-  have h₂ := isPullF_trans (T := overW W T) (T' := overW W T') (a := a.left) (b := x)
-    (g := p.g) (g' := p'.g) (g'' := q.g) h.2 h'.2
-  exact ⟨h₁, h₂⟩
-
-theorem exists_isTorsMap :
-    AllFlat fun {E} _ _ _ {H} {R} _ _ _ {t} P {W} ψW k => ∃ f, IsTorsMap P ψW k f := by
-  intro E _ _ _ H R _ _ _ _ hR t P W hW hp ψW k hk
-  choose N p₀ hN using GlobalTheory.T.exists_torsion_pair_representative E H R hR t P W hW hp ψW k hk
-  choose v hv hvF using fun y => GlobalTheory.T.exists_torsion_hom_image E H R hR t P W hW hp ψW k hk y (N y) (p₀ y) (hN y)
-  choose c hc hu using fun y => (hN y).2.2.2
-  have key : ∀ y T (p : QkPtW P.D.toPre W ψW k T) (hy : p.y = y),
-      (Over.map W.ι).map (c p.y T p rfl) ≫ v p.y = (Over.map W.ι).map (c y T p hy) ≫ v y := by
-    intro y T p hy
-    subst hy
-    rfl
-  refine ⟨fun T p => (Over.map W.ι).map (c p.y T p rfl) ≫ v p.y, fun T p => ?_, fun T T' h p p' hh => ?_,
-    fun F _ _ _ T x hx p q hq => ?_⟩
-  · rw [← MonObj.comp_pow, hv, MonObj.comp_one]
-  · have := hu p.y T' p' hh.1 (h ≫ c p.y T p rfl) (pair_trans (hc p.y T p rfl) hh)
-    refine (key p.y T' p' hh.1).trans ?_
-    rw [← this, Functor.map_comp, Category.assoc]
-  · have e : (c p.y T p rfl).left ≫ (overW W (N p.y)).hom = (overW W T).hom :=
-      Over.w ((Over.map W.ι).map (c p.y T p rfl))
-    have hx' : OverGen F (overW W (N p.y)) (x ≫ (c p.y T p rfl).left) :=
-      (Category.assoc _ _ _).trans ((congrArg (x ≫ ·) e).trans hx)
-    have := hvF p.y F (x ≫ (c p.y T p rfl).left) hx' q (pairF_trans (hc p.y T p rfl) hq)
-    rw [Category.assoc] at this
-    exact this
 
 end GlobalTheory.FlatTors.TorsMapExists

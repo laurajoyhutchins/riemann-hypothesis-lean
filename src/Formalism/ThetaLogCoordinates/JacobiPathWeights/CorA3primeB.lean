@@ -1,5 +1,48 @@
-import Mathlib
-import Formalism.ThetaLogCoordinates.JacobiPathWeights.StatementP
+module
+
+public import Formalism.ThetaLogCoordinates.JacobiPathWeights.IndexWeightsDominance
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -20,10 +63,6 @@ def geB (x : WithTop ℤ) (θ : WithBot ℤ) : Prop := ∀ t : ℤ, θ = (t : Wi
 
 def leT (y : WithBot ℤ) (M : WithTop ℤ) : Prop := ∀ t : ℤ, M = (t : WithTop ℤ) → y ≤ (t : WithBot ℤ)
 
-def GoodW {n : ℕ} (θ : WithBot ℤ) (M : WithTop ℤ) (μ : Fin n → ℤ) : Prop :=
-  (∀ m : Fin n, m.val + 1 = n → θ ≤ ((μ m : ℤ) : WithBot ℤ)) ∧
-  (∀ m : Fin n, m.val = 0 → ((μ m : ℤ) : WithTop ℤ) ≤ M)
-
 def GoodG {k : Type*} [Field k] {n : ℕ} (isVec : ℕ → Bool) (i : ℕ) (θ : WithBot ℤ) (M : WithTop ℤ)
     (G : MvPolynomial (ℕ × Fin n) k) : Prop :=
   geB (valP isVec i G) θ ∧ leT (lamP isVec i G) M
@@ -31,11 +70,6 @@ def GoodG {k : Type*} [Field k] {n : ℕ} (isVec : ℕ → Bool) (i : ℕ) (θ :
 def psiFam (R : Type*) [CommRing R] (n N : ℕ) (isVec : ℕ → Bool) (B : ℕ → ℕ) (x : PathIdx n N isVec B) :
     MvPolynomial (ℕ × Fin n) R :=
   psiPath R isVec x.1.1 N x.1.2
-
-def LemmaA3top : Prop :=
-  ∀ (k : Type) [Field k] (n N : ℕ) (isVec : ℕ → Bool) (B : ℕ → ℕ) (θ : WithBot ℤ) (M : WithTop ℤ)
-    (G : MvPolynomial (ℕ × Fin n) k), 1 ≤ n → G ∈ polB k n N B → GoodG isVec N θ M G →
-    G ∈ Submodule.span k (psiFam k n N isVec B '' {x | GoodW θ M (x.1.1 N)})
 
 def FactSplit : Prop :=
   ∀ (k : Type) [Field k] (n N i : ℕ) (isVec : ℕ → Bool) (B : ℕ → ℕ) (θ : WithBot ℤ) (M : WithTop ℤ)
@@ -45,40 +79,5 @@ def FactSplit : Prop :=
       (∀ β ∈ T, Gc β ∈ polB k n i B) ∧
       G = ∑ β ∈ T, Gc β * monomial β 1 ∧
       (GoodG isVec i θ M G → ∀ β ∈ T, GoodG isVec i θ M (Gc β))
-
-def LemmaA3one : Prop :=
-  ∀ (k : Type) [Field k] (n N i : ℕ) (isVec : ℕ → Bool) (B : ℕ → ℕ) (θ : WithBot ℤ) (M : WithTop ℤ)
-    (G : MvPolynomial (ℕ × Fin n) k), 1 ≤ n → i ≤ N → G ∈ polB k n N B → GoodG isVec i θ M G →
-    G ∈ Submodule.span k (psiFam k n N isVec B '' {x | GoodW θ M (x.1.1 i)})
-
-def LemmaA3field : Prop :=
-  ∀ (k : Type) [Field k] (n N : ℕ) (isVec : ℕ → Bool) (B : ℕ → ℕ) (θ : ℕ → WithBot ℤ) (M : ℕ → WithTop ℤ)
-    (G : MvPolynomial (ℕ × Fin n) k), 1 ≤ n →
-    ((G ∈ polB k n N B ∧ ∀ i ≤ N, GoodG isVec i (θ i) (M i) G) ↔
-      G ∈ Submodule.span k (psiFam k n N isVec B '' {x | ∀ i ≤ N, GoodW (θ i) (M i) (x.1.1 i)}))
-
-def LemmaA3int : Prop :=
-  ∀ (O Kf : Type) [CommRing O] [IsDomain O] [Field Kf] [Algebra O Kf] [IsFractionRing O Kf] (n N : ℕ)
-    (isVec : ℕ → Bool) (B : ℕ → ℕ) (θ : ℕ → WithBot ℤ) (M : ℕ → WithTop ℤ)
-    (G : MvPolynomial (ℕ × Fin n) O), 1 ≤ n →
-    ((G ∈ polB O n N B ∧ ∀ i ≤ N, GoodG isVec i (θ i) (M i) (map (algebraMap O Kf) G)) ↔
-      G ∈ Submodule.span O (psiFam O n N isVec B '' {x | ∀ i ≤ N, GoodW (θ i) (M i) (x.1.1 i)}))
-
-def CorA3primeA : Prop :=
-  ∀ (O Kf : Type) [CommRing O] [IsDomain O] [Field Kf] [Algebra O Kf] [IsFractionRing O Kf] (n N : ℕ)
-    (isVec : ℕ → Bool) (B : ℕ → ℕ) (θ : ℕ → WithBot ℤ) (M : ℕ → WithTop ℤ) (c : O)
-    (G : MvPolynomial (ℕ × Fin n) O), 1 ≤ n → G ∈ polB O n N B →
-    ((∀ i ≤ N, ∃ Z ∈ polB O n N B, ∃ H ∈ polB O n N B,
-        GoodG isVec i (θ i) (M i) (map (algebraMap O Kf) Z) ∧ G = Z + c • H) ↔
-      ∃ Z ∈ polB O n N B, ∃ H ∈ polB O n N B,
-        (∀ i ≤ N, GoodG isVec i (θ i) (M i) (map (algebraMap O Kf) Z)) ∧ G = Z + c • H)
-
-def CorA3primeB : Prop :=
-  ∀ (O Kf F : Type) [CommRing O] [IsDomain O] [Field Kf] [Algebra O Kf] [IsFractionRing O Kf] [Field F]
-    (π : O →+* F) (n N : ℕ) (isVec : ℕ → Bool) (B : ℕ → ℕ) (θ : ℕ → WithBot ℤ) (M : ℕ → WithTop ℤ)
-    (G : MvPolynomial (ℕ × Fin n) O), Function.Surjective π → 1 ≤ n → G ∈ polB O n N B →
-    (∀ i ≤ N, GoodG isVec i (θ i) (M i) (map π G)) →
-    ∃ Z ∈ polB O n N B, ∃ H ∈ polB O n N B,
-      (∀ i ≤ N, GoodG isVec i (θ i) (M i) (map (algebraMap O Kf) Z)) ∧ map π H = 0 ∧ G = Z + H
 
 end Formalism.InvariantFactorPaths.GelfandTsetlinBases

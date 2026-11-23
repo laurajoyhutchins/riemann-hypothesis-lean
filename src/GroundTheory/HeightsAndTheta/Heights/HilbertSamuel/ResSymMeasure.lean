@@ -1,7 +1,57 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsArith
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.ABridgeSt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.CNormSt
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.ArithRes
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+public import Mathlib.Topology.Algebra.MvPolynomial
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.ABridgeStA
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.CNormSt
+import Std.Tactic.BVDecide.Normalize.Prop
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.AParamStA
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.HilbertSamuel
@@ -19,20 +69,20 @@ section Normalise
 
 variable {J : Type} [Fintype J]
 
-open Classical in
 
+open Classical in
 def NZAt (z : J → ℂ) (k : ℕ) : Prop :=
   ∀ h : k < Fintype.card J, z ((Fintype.equivFin J).symm ⟨k, h⟩) ≠ 0
 
 theorem exists_nzAt (z : J → ℂ) : ∃ k, NZAt z k :=
   ⟨Fintype.card J, fun h => absurd h (lt_irrefl _)⟩
 
-open Classical in
 
+open Classical in
 def idx (z : J → ℂ) : ℕ := Nat.find (exists_nzAt z)
 
-open Classical in
 
+open Classical in
 def normPt (z : J → ℂ) : J → ℂ :=
   if h : idx z < Fintype.card J then (z ((Fintype.equivFin J).symm ⟨idx z, h⟩))⁻¹ • z else z
 
@@ -279,7 +329,7 @@ theorem symMeasure_compl_pts (d : HSMDatum D Ω κ) : symMeasure d (pts (coordId
 theorem map_conjPt_symMeasure (d : HSMDatum D Ω κ) : (symMeasure d).map conjPt = symMeasure d := by
   have hm := measurable_symPt d
   have hcj : Measurable (conjPt : (Ix κ → ℂ) → Ix κ → ℂ) := continuous_conjPt.measurable
-  rw [symMeasure, Measure.map_smul, Measure.map_add _ _ hcj, Measure.map_map hcj hm,
+  rw [symMeasure, Measure.map_smul _ hcj.aemeasurable, Measure.map_add _ _ hcj, Measure.map_map hcj hm,
     Measure.map_map hcj (hcj.comp hm)]
   have : conjPt ∘ (conjPt ∘ symPt d) = symPt d := by
     funext y

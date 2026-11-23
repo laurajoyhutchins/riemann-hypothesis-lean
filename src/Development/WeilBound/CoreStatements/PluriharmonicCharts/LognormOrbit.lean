@@ -1,7 +1,67 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.MinorIJEqSubmatrix
-import Development.WeilBound.CoreStatements.PluriharmonicCharts.BlockFnFieldCompLe
-import Development.WeilBound.CoreStatements.PluriharmonicCharts.IsOpenHoloPreimage
+module
+
+public import Development.WeilBound.CoreStatements.PluriharmonicCharts.LocalAnalyticSectionCoords
+import Development.AutomorphicSpectrum.Proofs.MetricProofs.BlockDiagonalMinorVanishing
+import Development.AutomorphicSpectrum.Proofs.MetricProofs.FlagCoverArithmeticFifth
+import Development.AutomorphicSpectrum.Proofs.MetricProofs.FlagCoverArithmeticFirst
+import Development.AutomorphicSpectrum.Proofs.MetricProofs.FlagCoverBasePointInPointsStatement
+import Development.AutomorphicSpectrum.Proofs.MetricProofs.FlagModelBaseProjectionPoints
+import Development.AutomorphicSpectrum.Proofs.MetricProofs.FlagModelBaseProjectionPointsStatement
+import Development.AutomorphicSpectrum.Proofs.MetricProofs.LogPeriodStatement
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.MinorIJEqSubmatrix
+public import Development.WeilBound.CoreStatements.PluriharmonicCharts.BlockFnFieldCompLe
+public import Development.WeilBound.CoreStatements.PluriharmonicCharts.IsOpenHoloPreimage
+import Development.WeilBound.CoreStatements.PluriharmonicCharts.PullDegSome
+import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PCoordConeArithVar
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterBridgeB
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open MvPolynomial MeasureTheory Filter Topology Matrix ReciprocityTheory.AnForm ReciprocityTheory.AnForm.M ReciprocityTheory.AnForm.P ReciprocityTheory.ChartRestriction.G.Geo ReciprocityTheory.ChartRestriction.G.AI.I1 ReciprocityTheory.ChartRestriction.G.AI.I2 ReciprocityTheory.ChartRestriction.G.AI.I4 GlobalTheory.CompanionTheory.Ar.PB GroundTheory.Heights₂.Heights GroundTheory.Heights₂.Heights.LowerBoundFree
 open scoped ComplexOrder Classical
 open GlobalTheory.CompanionTheory.Ar.PB.WSq GlobalTheory.CompanionTheory.Ar.PB.CovMap GlobalTheory.CompanionTheory.Ar.PB.CovGraph GlobalTheory.CompanionTheory.Ar.PB.CovMap.LocImg PositivityTheory.Xgp.c_algsq
@@ -169,7 +229,7 @@ theorem lognorm_orbit {τ : Ψ} {a : Fin N} {k₀ : K} {g h : MRing fun o : Opti
 
 theorem flag_of_exact (M : FlagModel y Ψ N j) {F : FrameData ι Ψ N M.Ω M.blk} {z : (Σ k, ι k) → ℂ}
     {h : Ψ → Matrix (Fin N) (Fin N) ℂ} (p₀ : Ψ × Fin N) (hh : ∀ τ, IsBlockDiag j (h τ) ∧ (h τ).det ≠ 0)
-    (H : ∀ p, M.ExactAt F p z (h p.1)) : M.IsFlagOf F z h :=
+    (H : ∀ p, ((fun {jExact : ℕ} (mExact : _root_.GlobalTheory.CompanionTheory.Ar.PB.FlagModel _ _ _ jExact) (fExact : _root_.GlobalTheory.CompanionTheory.Ar.PB.FrameData _ _ _ mExact.Ω mExact.blk) (pExact : _) (zExact : _ → ℂ) (hExact : _root_.Matrix _ _ ℂ) => (∀ kExact, _root_.GlobalTheory.CompanionTheory.Ar.PB.basePart mExact.blk zExact ⟨kExact, fExact.c kExact⟩ = 1) ∧ ∀ kExact, mExact.blk pExact = some kExact → ∀ iExact, zExact ⟨kExact, iExact⟩ = _root_.Finset.sum _root_.Finset.univ (fun aExact => _root_.GroundTheory.Heights₂.Heights.LowerBoundFree.valAt mExact.x (fExact.u ⟨kExact, iExact⟩ aExact) (_root_.GlobalTheory.CompanionTheory.Ar.PB.basePart mExact.blk zExact) * _root_.GlobalTheory.CompanionTheory.Ar.PB.minorIJ hExact aExact (_root_.GlobalTheory.CompanionTheory.Ar.PB.stepCols _ jExact pExact.2))) M) F p z (h p.1)) : M.IsFlagOf F z h :=
   ⟨(H p₀).1, hh, fun p k hk => ⟨1, one_ne_zero, fun m => by rw [one_mul]; exact (H p).2 k hk m⟩⟩
 
 theorem log_A (M : FlagModel y Ψ N j) {F : FrameData ι Ψ N M.Ω M.blk} {z : (Σ k, ι k) → ℂ}
@@ -243,7 +303,7 @@ theorem norm_pt (CR : CovReal FA Cv) (S' : Sw M' τ a b k₀' ca cb) (hy' : IsAr
   have hb := CPts.base_mem M' m₀
   have hG' : M'.GoodAt F' (mCoordIdeal (basePart M'.blk u₀)) := by rw [ideal_orbit (base_orbit o₀)]; exact hg'
   have hlc := LC _ hj F' hF' hG' (H τ) t (fl₀.2.1 τ).1 (fl₀.2.1 τ).2 (fun i => ex₀ (τ, i))
-    (by rw [e₁]; simpa only [Function.update_self] using ex₁ (τ, a))
+    (by rw [e₁]; simpa only [FlagModel.ExactAt, Function.update_self] using ex₁ (τ, a))
   rw [e₀] at hlc
   have ht : t ≠ 0 := fun e => g1 (by rw [hlc, e, zero_mul, zero_mul])
   have hbv := (GlobalTheory.T.flag_cover_base_point_in_points K ι Φ y Ψ N j M K' ι' Φ' y' M' Cv _ hb).1
@@ -266,7 +326,7 @@ theorem norm_pt (CR : CovReal FA Cv) (S' : Sw M' τ a b k₀' ca cb) (hy' : IsAr
   have hbz := mem_mcPts_of_sameOrbit (CoordinateConeArithVar.isMultiHomogIdeal _) bx₀ hbv
   refine ⟨z₀, z₁, F, Cv.trans F' F (basePart M'.blk u₀) τ * H τ, t, hF, hGz, orbit_trans oz₀ ox₀, orbit_trans oz₁ ox₁,
     (fx₀.2.1 τ).1, (fx₀.2.1 τ).2, ht, fun i => ez₀ (τ, i),
-    fun i => by simpa only [Function.update_self, Matrix.mul_assoc] using ez₁ (τ, i), ?_⟩
+    fun i => by simpa only [FlagModel.ExactAt, Function.update_self, Matrix.mul_assoc] using ez₁ (τ, i), ?_⟩
   have A' := fun i => log_A M' hb hG' τ a i (fl₀.2.1 τ).1 (fl₀.2.1 τ).2
   have A := fun i => log_A M hbz hGz τ a i (fx₀.2.1 τ).1 (fx₀.2.1 τ).2
   have hU' : ∀ p, M'.upsLog F' p u₁ = M'.upsLog F' p u₀ := fun p => by simp only [FlagModel.upsLog, bu]

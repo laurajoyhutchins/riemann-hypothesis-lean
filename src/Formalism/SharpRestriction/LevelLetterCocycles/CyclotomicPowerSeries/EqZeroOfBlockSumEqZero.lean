@@ -1,4 +1,49 @@
-import Formalism.SharpRestriction.LevelLetterCocycles.CyclotomicPowerSeries.ConstSectionStatement
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.CyclotomicPowerSeries.ConstSectionStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -19,7 +64,7 @@ def powerSeriesBlockSplit (m : ℕ) (g : ℕ → O) : Fin m → PowerSeries O :=
 
 theorem blockSum_add (ι : PowerSeries O →ₐ[O] PowerSeries O) (m : ℕ) (b b' : Fin m → PowerSeries O) :
     powerSeriesBlockSum ι m (b + b') = powerSeriesBlockSum ι m b + powerSeriesBlockSum ι m b' := by
-  simp only [powerSeriesBlockSum, Pi.add_apply, map_add, mul_add, Finset.sum_add_distrib]
+  simp only [powerSeriesBlockSum, Pi.add_apply, map_add (f := _), mul_add, Finset.sum_add_distrib]
 
 theorem blockSum_sub (ι : PowerSeries O →ₐ[O] PowerSeries O) (m : ℕ) (b b' : Fin m → PowerSeries O) :
     powerSeriesBlockSum ι m (b - b') = powerSeriesBlockSum ι m b - powerSeriesBlockSum ι m b' := by
@@ -51,6 +96,7 @@ theorem coeff_blockSum_eq_zero {ι : PowerSeries O →ₐ[O] PowerSeries O} {m :
     (hX : ι X = w * X ^ m) (hm : 0 < m) (h : ℕ → O) (n : ℕ) (hh : ∀ n' ≤ n, h n' = 0) :
     coeff n (powerSeriesBlockSum ι m (powerSeriesBlockSplit m h)) = 0 := by
   unfold powerSeriesBlockSum
+
   rw [map_sum]
   refine Finset.sum_eq_zero fun i _ => ?_
   rw [coeff_X_pow_mul']
@@ -135,7 +181,7 @@ theorem coeff_blockSum_triangular {ι : PowerSeries O →ₐ[O] PowerSeries O} {
     · simp
     · rw [if_neg (not_lt.mpr h.le), if_neg h.ne', if_pos h, zero_add, zero_add]
   conv_lhs => rw [hsplit]
-  rw [blockSplit_add, blockSplit_add, blockSum_add, blockSum_add, map_add, map_add,
+  rw [blockSplit_add, blockSplit_add, blockSum_add, blockSum_add, map_add (f := _), map_add (f := _),
     coeff_blockSum_single hX hm n (g n),
     coeff_blockSum_eq_zero hX hm (fun n' => if n < n' then g n' else 0) n
       (fun n' hn' => if_neg (not_lt.mpr hn')), add_zero]

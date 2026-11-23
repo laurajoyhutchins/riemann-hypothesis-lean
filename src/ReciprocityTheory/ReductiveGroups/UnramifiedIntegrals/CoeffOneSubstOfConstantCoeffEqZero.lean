@@ -1,5 +1,53 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.FgDefs
+module
+
+public import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.FgDefs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+public import Mathlib.RingTheory.PowerSeries.Inverse
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -44,11 +92,11 @@ theorem exists_rightInverse_weierstrassExp : ∃ t : PowerSeries K, constantCoef
 
 theorem lgS_const : constantCoeff (lgS g2 g3) = 0 := by
   unfold lgS
-  rw [dif_pos (exists_rightInverse_weierstrassExp g2 g3)]
+  rw [dite_eq_left (exists_rightInverse_weierstrassExp g2 g3)]
   exact (exists_rightInverse_weierstrassExp g2 g3).choose_spec.1
 theorem uSer_subst_lgS : (uSer g2 g3).subst (lgS g2 g3) = X := by
   unfold lgS
-  rw [dif_pos (exists_rightInverse_weierstrassExp g2 g3)]
+  rw [dite_eq_left (exists_rightInverse_weierstrassExp g2 g3)]
   exact (exists_rightInverse_weierstrassExp g2 g3).choose_spec.2
 theorem lgS_coeff_one : coeff 1 (lgS g2 g3) = 1 := by
   have h := congrArg (coeff 1) (uSer_subst_lgS g2 g3)
@@ -101,7 +149,7 @@ theorem mult_unique (b : K) (e : PowerSeries K) (he : constantCoeff e = 0)
 
 theorem ltLog_const (l : ℕ) (hl : 2 ≤ l) : constantCoeff (ltLog K l) = 0 := by
   first | unfold Formalism.G.ltLog | unfold Formalism.L2.Th1.CM.ltLog
-  rw [← coeff_zero_eq_constantCoeff_apply, coeff_mk, dif_neg]
+  rw [← coeff_zero_eq_constantCoeff_apply, coeff_mk, dite_eq_right]
   rintro ⟨j, hj⟩
   have h0 : 0 < (l ^ 2) ^ j := pow_pos (pow_pos (by omega) 2) j
   rw [← hj] at h0
@@ -137,7 +185,8 @@ theorem cW_map (k : ℕ) : φ (cW g2 g3 k) = cW (φ g2) (φ g3) k := by
     · rw [map_div₀]
       congr 1
       exact_mod_cast map_natCast φ 28
-    · simp only [map_mul, map_div₀, map_sum, map_ofNat, map_natCast, map_sub, map_add, map_one]
+    · set_option synthInstance.maxHeartbeats 100000 in
+        simp only [map_mul, map_div₀, map_sum, map_ofNat, map_natCast, map_sub, map_add (f := _), map_one]
       congr 1
       refine Finset.sum_congr rfl fun m _ => ?_
       have hm := m.2

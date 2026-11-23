@@ -1,9 +1,50 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.StatementsConeComponents
-import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.StatementsConeChart
-import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.LocalMultRadical
-import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.PRadicalBaseChange
-import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.PGenericFibreIdeal
+module
+
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Lean.Meta.Basic
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterGoodD
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterSt
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -12,35 +53,5 @@ namespace GroundTheory.Heights₂.Heights
 
 open MvPolynomial
 open ReciprocityTheory.ChartRestriction.G.Geo (MRing PBlk IsArithVar ptsIntegral ptsIntegralAt pot)
-
-theorem complexFibreIdeal_isRadical {n d : ℕ} {P : Ideal (MRing (PBlk n))} (hP : IsArithVar P d) :
-    (complexFibreIdeal P).IsRadical := by
-  have hprime : (ObjectsChow.genericIdeal P).IsPrime :=
-    (ObjectsChow.GenericFibreIdeal.proof n d P hP).1.isPrime
-  have hcomp : (MvPolynomial.map (algebraMap ℚ ℂ)).comp (MvPolynomial.map (Int.castRingHom ℚ)) =
-      (MvPolynomial.map (Int.castRingHom ℂ) : MvPolynomial (Fin n) ℤ →+* MvPolynomial (Fin n) ℂ) := by
-    refine RingHom.ext fun p => ?_
-    rw [RingHom.comp_apply, MvPolynomial.map_map,
-      (RingHom.ext_int _ _ : (algebraMap ℚ ℂ).comp (Int.castRingHom ℚ) = Int.castRingHom ℂ)]
-  have hmap : complexFibreIdeal P =
-      (ObjectsChow.genericIdeal P).map (MvPolynomial.map (algebraMap ℚ ℂ)) := by
-    rw [complexFibreIdeal, ObjectsChow.genericIdeal, Ideal.map_map, hcomp]
-  rw [hmap]
-  exact RadicalBaseChange.proof ℚ ℂ (algebraMap ℚ ℂ) (Fin n) _ hprime.isRadical
-
-theorem ConeIntegralPts.proof (hC : ConeIntegralComponents.Statement)
-    (hW : ConeIntegralChart.Statement) : ConeIntegralPts.Statement := by
-  intro n e S hS P u hP hu
-  have hrad := complexFibreIdeal_isRadical hP
-  have hΨ := ReciprocityTheory.ChartRestriction.G.Geo.goodProjExists Unit (PBlk n) P e hP
-  have hpts : ptsIntegral P (pot fun _ : Fin e => IndefiniteRowSideFullHecke.ArithBezout.hermLine S hS)
-      (IndefiniteRowSideFullHecke.ArithBezout.logFormNorm S hS u) =
-      ptsIntegralAt P hΨ.choose (pot fun _ : Fin e => IndefiniteRowSideFullHecke.ArithBezout.hermLine S hS)
-        (IndefiniteRowSideFullHecke.ArithBezout.logFormNorm S hS u) := by
-    unfold ptsIntegral
-    rw [dif_pos hΨ]
-  rw [hpts, ← hW n e S hS P u hΨ.choose hP hu hΨ.choose_spec, ← hC n e _ P u hP hu, cycleIntegral]
-  refine Finset.sum_congr rfl fun W hWm => ?_
-  rw [fundCycle_apply_of_isRadical hrad hWm, Nat.cast_one, one_mul]
 
 end GroundTheory.Heights₂.Heights

@@ -1,5 +1,58 @@
-import Mathlib
-import Formalism.PeriodIntegrals.IndexUBound
+module
+
+public import Mathlib.Algebra.BigOperators.Group.Finset.Defs
+public import Mathlib.Basic.Real.Basic
+public import Mathlib.Order.Interval.Finset.Nat
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.BigOperators.Group.Finset.Basic
+public import Mathlib.Algebra.BigOperators.Intervals
+public import Mathlib.Algebra.Order.BigOperators.GroupWithZero.Finset
+public import Mathlib.Algebra.Ring.GeomSum
+
+@[expose] public section
 
 namespace PI.UnitaryGroupMassFormula.IndexUBound
 
@@ -15,7 +68,7 @@ theorem one_sub_sum_le_prod {ι : Type*} [DecidableEq ι] (s : Finset ι) (P b :
     have hm : ∀ i ∈ s, i ∈ insert a s := fun i hi => Finset.mem_insert_of_mem hi
     have hQ0 : 0 ≤ ∏ i ∈ s, P i := Finset.prod_nonneg fun i hi => hP0 i (hm i hi)
     have hQ1 : ∏ i ∈ s, P i ≤ 1 :=
-      Finset.prod_le_one (fun i hi => hP0 i (hm i hi)) (fun i hi => hP1 i (hm i hi))
+      Finset.prod_le_one₀ (fun i hi => hP0 i (hm i hi)) (fun i hi => hP1 i (hm i hi))
     have h := ih (fun i hi => hP0 i (hm i hi)) (fun i hi => hP1 i (hm i hi))
       (fun i hi => hb i (hm i hi)) (fun i hi => hPb i (hm i hi))
     have ha1 := hP1 a (Finset.mem_insert_self a s)
@@ -49,7 +102,7 @@ theorem inner_bounds (g : ℝ) (hg : 2 ≤ g) (r : ℕ) :
   have hpow1 : ∀ i : ℕ, x ^ i ≤ 1 := fun i => pow_le_one₀ hx0.le hx1
   have hf0 : ∀ i ∈ Ico 1 r, 0 ≤ 1 - x ^ i := fun i _ => sub_nonneg.2 (hpow1 i)
   have hf1 : ∀ i ∈ Ico 1 r, 1 - x ^ i ≤ 1 := fun i _ => by linarith [hpow0 i]
-  refine ⟨Finset.prod_nonneg hf0, Finset.prod_le_one hf0 hf1, ?_⟩
+  refine ⟨Finset.prod_nonneg hf0, Finset.prod_le_one₀ hf0 hf1, ?_⟩
   have hS : (∑ i ∈ Ico 1 r, x ^ i) * (g - 1) ≤ 1 := by
     rcases Nat.eq_zero_or_pos r with rfl | hr
     · simp

@@ -1,18 +1,65 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.MetricPeriods.IsEigFrames
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.BdryChart
-import ReciprocityTheory.AnalyticForms.PlurisubharmonicFunctions.IsPshLocallyIntegrableStatement
+module
+
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.BdryChart
+public import Development.AutomorphicSpectrum.Definitions.MetricPeriods.ClopenCondOnto
+public import Mathlib.Analysis.Matrix.Order
+public import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.DifferentiableOnOfTendstoLocallyUniformlyOn
+public import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.StarInvMulVecDotProductMulVecInvMulVec
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.LogPeriodsSubframeDetBounds
 import Development.AutomorphicSpectrum.Proofs.MetricProofs.PeriodMatrixLocalTrivialization
 import Development.AutomorphicSpectrum.Proofs.MetricProofs.SubframeDetLogGrowth
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.LogPeriodsSubframeDetBounds
-import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.DifferentiableOnOfTendstoLocallyUniformlyOn
-import GroundTheory.HeightsAndTheta.Heights.Regularisation.Assembly
-import GroundTheory.HeightsAndTheta.Heights.Regularisation.PRiemannExtensionSlices
-import GroundTheory.HeightsAndTheta.Heights.Regularisation.PPuncturedExpOrder
-import GroundTheory.HeightsAndTheta.Heights.Regularisation.PLogCoverDescent
 import GroundTheory.HeightsAndTheta.Heights.MatrixCharts.PAnalyticDerivBound
 import GroundTheory.HeightsAndTheta.Heights.MatrixCharts.PGramEntryDeriv
 import GroundTheory.HeightsAndTheta.Heights.MatrixCharts.PInvEntryBound
+import GroundTheory.HeightsAndTheta.Heights.Regularisation.Assembly
+import GroundTheory.HeightsAndTheta.Heights.Regularisation.PHodgeDerivative
+import GroundTheory.HeightsAndTheta.Heights.Regularisation.PLogCoverDescent
+import GroundTheory.HeightsAndTheta.Heights.Regularisation.PPuncturedExpOrder
+import GroundTheory.HeightsAndTheta.Heights.Regularisation.PRiemannExtensionSlices
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AutomorphicSpectrum.Definitions.MetricPeriods.ExistsIntSmulIsAdicIntegralInTensorBasis
+import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.CoordinateIdeals.FubiniLevi
+
+@[expose] public section
 
 open NumberField Matrix Filter Topology GlobalTheory.CompanionTheory.Ar GlobalTheory.CompanionTheory.Ar.Cusp GroundTheory.Heights₂.Heights.LowerBoundFree GroundTheory.Heights₂.Heights.Regular
 open scoped ComplexOrder
@@ -181,8 +228,8 @@ theorem logBound_inv_diffOn {n k : ℕ} {S : Set (Fin n → ℂ)} (A : (Fin n �
 
 end LogBoundAux
 
-open scoped MatrixOrder in
 
+open scoped MatrixOrder in
 theorem logBound_subframe : ∀ (n a g m : ℕ) (Λ : Type) [AddCommGroup Λ] (L : Flat.LogPeriods n a g Λ) (u : Fin m → (Fin n → ℂ) → Fin g → ℂ) (Γ : (Fin n → ℂ) → Matrix (Fin m) (Fin m) ℂ), (∀ i, DifferentiableOn ℂ (u i) (Metric.ball 0 1)) → LinearIndependent ℂ (fun i => u i 0) → (∀ z i j, Γ z i j = Real.pi * (u j z ⬝ᵥ L.H z *ᵥ star (u i z))) → ∃ ρ c C : ℝ, 0 < ρ ∧ 0 < c ∧ 0 < C ∧ ∀ z ∈ Flat.punct n a ρ, ((Γ z)⁻¹ - (c : ℂ) • (1 : Matrix (Fin m) (Fin m) ℂ)).PosSemidef ∧ (((C * (Real.exp 1 + ∑ i : Fin n, if (i : ℕ) < a then Real.log (1 / ‖z i‖ ^ 2) else 0) : ℝ) : ℂ) • (1 : Matrix (Fin m) (Fin m) ℂ) - (Γ z)⁻¹).PosSemidef ∧ ∀ p q, ‖fderiv ℝ (fun t => Γ t p q) z‖ ≤ C * Real.exp ((Real.exp 1 + ∑ i : Fin n, if (i : ℕ) < a then Real.log (1 / ‖z i‖ ^ 2) else 0) / 2) := by
   intro n a g m Λ _ L u Γ hu hli hΓ
   obtain ⟨Q, A, hAd, hA0, hAH⟩ := GlobalTheory.CompanionTheory.Ar.Flat.exists_periodPolydisc_frame n a g Λ L

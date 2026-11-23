@@ -1,6 +1,57 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.IsAffineHomOfIsPullbackSpecMap
-import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.MvPolynomialIsHomogeneousComapWeighted
+module
+
+public import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.IsAffineHomOfIsPullbackSpecMap
+public import Mathlib.AlgebraicGeometry.IdealSheaf.Functorial
+public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.MvPolynomialIsHomogeneousComapWeighted
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+public import Mathlib.AlgebraicGeometry.Morphisms.SchemeTheoreticallyDominant
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.ExistsSmulEqMapOfIsCompactOfIsQuasiSeparated
+
+@[expose] public section
 
 open CategoryTheory Limits AlgebraicGeometry TopologicalSpace GlobalTheory.QCoh.Qcqs
 
@@ -8,8 +59,8 @@ universe u
 
 namespace GlobalTheory.GaloisDescent
 
-set_option backward.isDefEq.respectTransparency false in
 
+set_option backward.isDefEq.respectTransparency false in
 theorem ideal_le_comap_appLE {X Y : Scheme.{u}} (f : Y ⟶ X) {J : X.IdealSheafData}
     {I : Y.IdealSheafData} (h : J.comap f ≤ I) (U : X.affineOpens) (V : Y.affineOpens)
     (e : V.1 ≤ f ⁻¹ᵁ U.1) : J.ideal U ≤ (I.ideal V).comap (f.appLE U V e).hom := by
@@ -39,8 +90,8 @@ theorem isPushout_app {U : X.Opens} (hU : IsAffineOpen U) :
   · simp [Scheme.Hom.app_eq_appLE]
   · simp [baseRingHom]
 
-set_option backward.isDefEq.respectTransparency false in
 
+set_option backward.isDefEq.respectTransparency false in
 theorem idealSheaf_comap_map_of_stable (s : G → L →+* L)
     (hs : ∀ x, (∀ g, s g x = x) → x ∈ Set.range (algebraMap K L))
     (a : G → (Y ⟶ Y)) (haπ : ∀ g, a g ≫ π = π)
@@ -112,22 +163,8 @@ noncomputable def twist (σ : L →ₐ[K] L) : Y ⟶ Y :=
 @[reassoc (attr := simp)]
 theorem twist_fst (σ : L →ₐ[K] L) : twist H σ ≫ π = π := H.lift_fst _ _ _
 
-@[reassoc (attr := simp)]
 theorem twist_snd (σ : L →ₐ[K] L) :
     twist H σ ≫ q = q ≫ Spec.map (CommRingCat.ofHom σ.toRingHom) := H.lift_snd _ _ _
-
-@[simp]
-theorem twist_id : twist H (AlgHom.id K L) = 𝟙 Y := by
-  apply H.hom_ext
-  · simp
-  · rw [twist_snd, Category.id_comp]
-    exact (congrArg (q ≫ ·) (Spec.map_id _)).trans (Category.comp_id _)
-
-theorem twist_comp (σ τ : L →ₐ[K] L) : twist H (σ.comp τ) = twist H σ ≫ twist H τ := by
-  apply H.hom_ext
-  · simp
-  · rw [twist_snd, Category.assoc, twist_snd, twist_snd_assoc, ← Spec.map_comp]
-    rfl
 
 theorem idealSheaf_stable_iff_exists_comap (s : G → L →ₐ[K] L)
     (hs : ∀ x, (∀ g, s g x = x) → x ∈ Set.range (algebraMap K L)) (I : Y.IdealSheafData) :
@@ -139,17 +176,5 @@ theorem idealSheaf_stable_iff_exists_comap (s : G → L →ₐ[K] L)
     exact ⟨_, h1, fun J hJ => idealSheaf_comap_injective H (hJ.trans h1.symm)⟩
   · rintro ⟨J, rfl, -⟩ g
     rw [← Scheme.IdealSheafData.comap_comp, twist_fst]
-
-theorem existsUnique_comap_eq_vanishingIdeal (s : G → L →ₐ[K] L)
-    (hs : ∀ x, (∀ g, s g x = x) → x ∈ Set.range (algebraMap K L)) (Z : Closeds Y)
-    (hZ : ∀ g, ∀ y ∈ Z, twist H (s g) y ∈ Z) :
-    ∃! J : X.IdealSheafData, J.comap π = Scheme.IdealSheafData.vanishingIdeal Z := by
-  refine (idealSheaf_stable_iff_exists_comap H s hs _).1 fun g => ?_
-  rw [← Scheme.IdealSheafData.le_support_iff_le_vanishingIdeal,
-    Scheme.IdealSheafData.support_comap]
-  intro y hy
-  change twist H (s g) y ∈ ((Scheme.IdealSheafData.vanishingIdeal Z).support : Set Y)
-  rw [Scheme.IdealSheafData.coe_support_vanishingIdeal]
-  exact hZ g y hy
 
 end GlobalTheory.GaloisDescent

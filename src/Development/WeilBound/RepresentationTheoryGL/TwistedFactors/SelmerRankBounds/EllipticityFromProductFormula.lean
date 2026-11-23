@@ -1,4 +1,46 @@
-import Development.WeilBound.RepresentationTheoryGL.TwistedFactors.SelmerRankBounds.IsNormAlong
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.TwistedFactors.SelmerRankBounds.IsNormAlong
+public import GroundTheory.AutomorphicForms.AffineBruhat
+public import GroundTheory.AutomorphicForms.Cartan
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -37,8 +79,8 @@ def G3 : Prop := ∀ (F E : Type) [Field F] [NumberField F] [Field E] [NumberFie
     (θ : Twist μE), IsGalTwist σ θ → ∀ (c : ℂ) (fE : CC E n) (fF : CC F n),
       Ell σ fE → Ell (1 : F ≃ₐ[F] F) fF → GMatch σ μE μF c fE fF → twInt θ fE = c * twInt (Twist.id μF) fF
 
-open Classical in
 
+open Classical in
 def G4 : Prop := ∀ (F E : Type) [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] [IsGalois F E] (σ : E ≃ₐ[F] E),
     (∀ τ : E ≃ₐ[F] E, τ ∈ Subgroup.zpowers σ) → ∀ n : ℕ, 0 < n → (Module.finrank F E).Prime →
     ∀ [MeasurableSpace (GL (Fin n) (InfiniteAdeleRing E))] [BorelSpace (GL (Fin n) (InfiniteAdeleRing E))]
@@ -65,14 +107,6 @@ def G4 : Prop := ∀ (F E : Type) [Field F] [NumberField F] [Field E] [NumberFie
       Match (GroundTheory.Global.InfinitePlace.infiniteAdeleRingMap (K := F) (L := E)) (galInf σ) (Module.finrank F E) μiE μiF ci φi fi →
       (∀ v, Match (incFin E v) (galFin σ v) (Module.finrank F E) (mE v) (mF v) (c v) (φ v) (f v)) →
       GMatch σ μE μF ((κ : ℂ) * ci * ∏ v ∈ S, c v) (avg (tensE φi φ)) (avg (tensF fi f))
-
-def G5 : Prop := (∀ (E : Type) [Field E] [NumberField E] (n : ℕ), 0 < n → ∀ Φ : AdelicGLn.AdelicGL E n → ℂ, Continuous Φ →
-      HasCompactSupport Φ → Continuous (avg Φ) ∧ HasCompactSupport (avg Φ)) ∧
-  ∀ (F E : Type) [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] (n : ℕ)
-    (S : Finset (HeightOneSpectrum (𝓞 F))) (φi : GL (Fin n) (InfiniteAdeleRing E) → ℂ)
-    (φ : ∀ v : HeightOneSpectrum (𝓞 F), GL (Fin n) (CompletionsOver E v) → ℂ), Continuous φi → HasCompactSupport φi →
-    (∀ v, Continuous (φ v) ∧ HasCompactSupport (φ v)) → (∀ v ∉ S, φ v = (unitSet E n v).indicator 1) →
-    Continuous (tensE φi φ) ∧ HasCompactSupport (tensE φi φ)
 
 def Q1 : Prop := ∀ (X G T : Type) [Group X] [TopologicalSpace X] [IsTopologicalGroup X] [LocallyCompactSpace X] [T2Space X]
     [SecondCountableTopology X] [MeasurableSpace X] [BorelSpace X] [Group T] [TopologicalSpace T] [IsTopologicalGroup T] [LocallyCompactSpace T] [T2Space T]

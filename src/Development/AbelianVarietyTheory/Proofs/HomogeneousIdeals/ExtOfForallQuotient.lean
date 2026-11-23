@@ -1,5 +1,65 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.BijectiveRestrictPointsOfEtaleOfHenselian
+module
+
+public import Mathlib.AlgebraicGeometry.Morphisms.Proper
+public import Mathlib.CategoryTheory.Monoidal.Cartesian.Grp
+public import Mathlib.Combinatorics.Quiver.ReflQuiver
+public import Mathlib.RingTheory.LaurentSeries
+import Aesop.Frontend.Tactic
+import Aesop.Main
+public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.BijectiveRestrictPointsOfEtaleOfHenselian
+import Mathlib.Algebra.AffineMonoid.UniqueSums
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Morphisms.SchemeTheoreticallyDominant
+import Mathlib.AlgebraicGeometry.Morphisms.WeaklyEtale
+import Mathlib.AlgebraicGeometry.Sites.Fpqc
+public import Mathlib.AlgebraicGeometry.ValuativeCriterion
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.ExtremalEpi
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 namespace GlobalTheory.LaurentConst
 
@@ -26,17 +86,17 @@ theorem hom_ext {A : Type} [CommRing A] {f g : AddMonoidAlgebra L ℤ →+* A}
     (g := g.toMonoidHom.comp (AddMonoidAlgebra.of L ℤ)) h₁
   exact AddMonoidAlgebra.ringHom_ext h₀ fun n ↦ DFunLike.congr_fun this (Multiplicative.ofAdd n)
 
-variable (R) in
 
-noncomputable def var : (AddMonoidAlgebra R ℤ)ˣ where
+variable (R) in
+noncomputable def var (R : Type) [CommRing R] : (AddMonoidAlgebra R ℤ)ˣ where
   val := single 1 1
   inv := single (-1) 1
   val_inv := by simp [single_mul_single, one_def]
   inv_val := by simp [single_mul_single, one_def]
 
-variable (R) in
 
-noncomputable def svar : (LaurentSeries R)ˣ where
+variable (R) in
+noncomputable def svar (R : Type) [CommRing R] : (LaurentSeries R)ˣ where
   val := HahnSeries.single 1 1
   inv := HahnSeries.single (-1) 1
   val_inv := by simp [HahnSeries.single_mul_single]
@@ -50,13 +110,15 @@ theorem svar_zpow (n : ℤ) : ((svar R ^ n : (LaurentSeries R)ˣ) : LaurentSerie
   | pred n ih =>
     rw [zpow_sub_one, Units.val_mul, ih]; simp [svar, HahnSeries.single_mul_single, sub_eq_add_neg]
 
-variable (R) in
-
-noncomputable def atZero : AddMonoidAlgebra R ℤ →+* LaurentSeries R := evalAt HahnSeries.C (svar R)
 
 variable (R) in
+noncomputable def atZero (R : Type) [CommRing R] : AddMonoidAlgebra R ℤ →+* LaurentSeries R :=
+  evalAt HahnSeries.C (svar R)
 
-noncomputable def atInf : AddMonoidAlgebra R ℤ →+* LaurentSeries R := evalAt HahnSeries.C (svar R)⁻¹
+
+variable (R) in
+noncomputable def atInf (R : Type) [CommRing R] : AddMonoidAlgebra R ℤ →+* LaurentSeries R :=
+  evalAt HahnSeries.C (svar R)⁻¹
 
 theorem evalAt_const {A : Type} [CommRing A] (r : L →+* A) (u : Aˣ) (c : L) :
     evalAt r u (algebraMap L _ c) = r c := by
@@ -195,7 +257,7 @@ theorem comp_scaleP {A : Type} [CommRing A] [IsReduced A] (ht : IsNilpotent ((t 
     linear_combination (r (PowerSeries.coeff n p)) * hc n
   have h1 : ρ (PowerSeries.C (t : R)) = 1 := map_eq_one ht (ρ.comp PowerSeries.C)
   simp only [RingHom.comp_apply]
-  rw [e, map_add, map_mul, map_sub, h1, map_one, sub_self, zero_mul, add_zero]
+  rw [e, map_add (f := _), map_mul, map_sub, h1, map_one, sub_self, zero_mul, add_zero]
 
 end Algebra
 

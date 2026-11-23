@@ -1,5 +1,42 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.LiteratureResults.LieGeometryGrowth.PairFactsAlt
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ConjugateRepresentations.ConjugateCuspidalReps.IsConjRepRefl
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.LiteratureResults.LieGeometryGrowth.PairFactsAlt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -10,7 +47,7 @@ namespace UpperTheory.V.Cj
 
 section Defs
 
-variable {E : Type} [Field E] [NumberField E] [IsTotallyComplex E] {a : ℕ}
+variable {E : Type} [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] {a : ℕ}
 
 def ConjMat (σ : ℂ ≃+* ℂ) {Ξ Ξ' : AlgRep E a} (h : Ξ.d = Ξ'.d) : Prop :=
   ∀ γ i j, ratC Ξ' γ (Fin.cast h i) (Fin.cast h j) = σ (ratC Ξ γ i j)
@@ -35,7 +72,7 @@ def HasChar (m : (E →+* ℂ) → Multiset ℂ) (φ : Sm E a) : Prop :=
 end Defs
 
 def PartA : Prop :=
-  ∀ (E : Type) [Field E] [NumberField E] [IsTotallyComplex E] (a : ℕ), 1 ≤ a → ∀ (U : Subgroup (GL (Fin a) (Af E))),
+  ∀ (E : Type) [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] (a : ℕ), 1 ≤ a → ∀ (U : Subgroup (GL (Fin a) (Af E))),
     IsOpen (U : Set (GL (Fin a) (Af E))) → IsCompact (U : Set (GL (Fin a) (Af E))) →
     ∀ (σ : ℂ ≃+* ℂ) (Ξ Ξ' : AlgRep E a) (h : Ξ.d = Ξ'.d), ConjMat σ h → ∀ (q : ℕ) (α : Co Ξ q),
       IsLev U Ξ α → dCo (smLie Ξ) α = 0 → CSupp α →
@@ -43,7 +80,7 @@ def PartA : Prop :=
         ∃ β : Co Ξ' q, dCo (smLie Ξ') β = 0 ∧ CSupp β ∧ RelAt U' σ h α β
 
 def PartH : Prop :=
-  ∀ (E : Type) [Field E] [NumberField E] [IsTotallyComplex E] (a : ℕ), 1 ≤ a → ∀ (Ξ : AlgRep E a) (m : (E →+* ℂ) → Multiset ℂ),
+  ∀ (E : Type) [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] (a : ℕ), 1 ≤ a → ∀ (Ξ : AlgRep E a) (m : (E →+* ℂ) → Multiset ℂ),
     (∀ t, AlgInfChar Ξ t ((m t).map Neg.neg)) → ∀ q : ℕ, ∃ M : Submodule ℂ (Co Ξ q),
       (∀ x, ∀ ω ∈ M, trans x ω ∈ M) ∧ (∀ ω ∈ M, Lev Ξ ω ∧ dCo (smLie Ξ) ω = 0) ∧
       (∀ ω ∈ M, ∀ X i, IsAutForm (cmp i (ω X)) ∧ HasChar m (cmp i (ω X))) ∧
@@ -51,7 +88,7 @@ def PartH : Prop :=
       ∀ α : Co Ξ q, Lev Ξ α → dCo (smLie Ξ) α = 0 → CSupp α → ∃ ω ∈ M, Exact Ξ (α - ω)
 
 def PartHss : Prop :=
-  ∀ (E : Type) [Field E] [NumberField E] [IsTotallyComplex E] (a : ℕ), 1 ≤ a → ∀ (Ξ : AlgRep E a) (m : (E →+* ℂ) → Multiset ℂ),
+  ∀ (E : Type) [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] (a : ℕ), 1 ≤ a → ∀ (Ξ : AlgRep E a) (m : (E →+* ℂ) → Multiset ℂ),
     (∀ t, AlgInfChar Ξ t ((m t).map Neg.neg)) → ∀ q : ℕ, ∃ M : Submodule ℂ (Co Ξ q),
       (∀ x, ∀ ω ∈ M, trans x ω ∈ M) ∧ (∀ ω ∈ M, Lev Ξ ω ∧ dCo (smLie Ξ) ω = 0) ∧
       (∀ ω ∈ M, ∀ X i, IsAutForm (cmp i (ω X)) ∧ HasChar m (cmp i (ω X))) ∧
@@ -59,7 +96,7 @@ def PartHss : Prop :=
       ∀ α : Co Ξ q, Lev Ξ α → dCo (smLie Ξ) α = 0 → CSupp α → ∃ ω ∈ M, Exact Ξ (α - ω)
 
 def ExactSub : Prop :=
-  ∀ (E : Type) [Field E] [NumberField E] [IsTotallyComplex E] (a : ℕ) (Ξ : AlgRep E a) (q : ℕ),
+  ∀ (E : Type) [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] (a : ℕ) (Ξ : AlgRep E a) (q : ℕ),
     ∃ B : Submodule ℂ (Co Ξ q), (∀ ω, ω ∈ B ↔ Exact Ξ ω) ∧ ∀ x, ∀ ω ∈ B, trans x ω ∈ B
 
 theorem partH_of_ss (hB : ExactSub) (h : PartHss) : PartH := by

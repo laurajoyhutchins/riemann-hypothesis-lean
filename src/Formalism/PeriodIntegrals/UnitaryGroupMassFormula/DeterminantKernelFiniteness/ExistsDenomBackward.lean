@@ -1,7 +1,53 @@
-import Mathlib
-import Formalism.PeriodIntegrals.KerIso
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.DeterminantKernelFiniteness.ExistsNatMulMemFracFam
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.DeterminantKernelFiniteness.ValuationLeOneOfDenom
+module
+
+public import Formalism.PeriodIntegrals.KerIso
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.DeterminantKernelFiniteness.ExistsNatMulMemFracFam
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.DeterminantKernelFiniteness.ValuationLeOneOfDenom
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 open scoped BigOperators
@@ -31,6 +77,7 @@ lemma exists_denom_forward {K E : Type} [Field K] [NumberField K] [Field E] [Num
   refine ⟨N, hN0, fun x hx w => ?_⟩
   have hxs : g₀ x w = ∑ a, φ a w (x a) := by
     conv_lhs => rw [← Finset.univ_sum_single x]
+
     rw [map_sum, Finset.sum_apply]
     rfl
   have hterm : ∀ a, (N : K) * φ a w (x a) ∈ (algebraMap (𝓞 K) K).range := by
@@ -41,9 +88,11 @@ lemma exists_denom_forward {K E : Type} [Field K] [NumberField K] [Field E] [Num
         rw [hz, Algebra.smul_def, inv_mul_cancel_left₀ hα0]
       rw [h1]
       conv_lhs => rw [← b.sum_repr z]
+
       rw [map_sum, Finset.mul_sum]
       refine Finset.sum_congr rfl fun i _ => ?_
       rw [map_zsmul, mul_smul_comm]
+
     rw [hxa, map_sum, Finset.mul_sum]
     refine Subring.sum_mem _ fun i _ => ?_
     rw [map_zsmul, mul_smul_comm]
@@ -62,6 +111,7 @@ lemma exists_denom_backward {K E : Type} [Field K] [NumberField K] [Field E] [Nu
   refine ⟨N, hN0, fun v hv a => ?_⟩
   have hv' : g₀.symm v = ∑ w, v w • g₀.symm (Pi.single w 1) := by
     conv_lhs => rw [← Finset.univ_sum_single v]
+
     rw [map_sum]
     refine Finset.sum_congr rfl fun w _ => ?_
     rw [← map_smul]

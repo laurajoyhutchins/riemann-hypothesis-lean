@@ -1,8 +1,46 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.IsPotential
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.OneSubPhiOntoOfFilZero
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.BhattScholzeCrystallineLattices
-import Development.AbelianVarietyTheory.BlockTheory.NonGaloisCusps.ConductorExponents
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.IsPotential
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.CrisToODToOCr
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.PeriodRingsGaloisActionLawsFrobeniusComm
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 set_option synthInstance.maxHeartbeats 400000
 open Formalism Formalism.BasicNotions Formalism.BasicNotions.Loc Formalism.WeaklyAdmissibleFiltrations TensorProduct PowerSeries GlobalTheory.Prism GlobalTheory.BK GlobalTheory.BKReal GlobalTheory.BKGal GlobalTheory.Per Matrix
@@ -32,23 +70,23 @@ theorem TWact_smul_of {G Qp LL R : Type} [Group G] [TopologicalSpace G] [Field Q
   | tmul x y =>
     simp only [TWact, TensorProduct.smul_tmul', TensorProduct.map_tmul, AlgHom.toLinearMap_apply, smul_eq_mul,
       map_mul]
-  | add x y hx hy => simp only [smul_add, map_add, hx, hy]
+  | add x y hx hy => simp only [smul_add, map_add (f := _), hx, hy]
 
 def rhoD {LL : FinExt l} {ι : Type} (T : QLat LL)
     (jD : (ι → OD l ↥(OL LL)) ≃ₗ[OD l ↥(OL LL)] TW (OD l ↥(OL LL)) T) (g : Gl l)
     (y : ι → OD l ↥(OL LL)) : ι → OD l ↥(OL LL) :=
   jD.symm (TWact (galOD ↥(OL LL) (sQ l g)) T g (jD y))
 
+
 set_option synthInstance.maxHeartbeats 400000 in
 set_option maxHeartbeats 2000000 in
-
 theorem TWact_galOD_smul {LL : FinExt l} (T : QLat LL) (h : GQ l) (g : Gl l) (c : OD l ↥(OL LL))
     (z : TW (OD l ↥(OL LL)) T) :
     TWact (galOD ↥(OL LL) h) T g (c • z) = galOD ↥(OL LL) h c • TWact (galOD ↥(OL LL) h) T g z :=
   TWact_smul_of (galOD ↥(OL LL) h) T g c z
 
-set_option synthInstance.maxHeartbeats 400000 in
 
+set_option synthInstance.maxHeartbeats 400000 in
 theorem rhoD_smul {LL : FinExt l} {ι : Type} (T : QLat LL)
     (jD : (ι → OD l ↥(OL LL)) ≃ₗ[OD l ↥(OL LL)] TW (OD l ↥(OL LL)) T) (g : Gl l) (c : OD l ↥(OL LL))
     (y : ι → OD l ↥(OL LL)) : rhoD T jD g (c • y) = galOD ↥(OL LL) (sQ l g) c • rhoD T jD g y := by
@@ -62,18 +100,19 @@ variable {a : ℕ} [NeZero a] {e : ℕ} [NeZero e] [Module.Free ℤ_[l] O] [Modu
   {K : Type} [NormedField K] [IsUltrametricDist K] [Algebra O K] [IsUnitBall O K] [NormedAlgebra ℚ_[l] K]
   [CompleteSpace K] (t : Wq l a →ₐ[ℤ_[l]] O) (ϖ : PiSys l e) {ι : Type}
 
+
+open Classical in
 open Classical in
 variable (O) in
-
 def hatR (f : K⟦X⟧) : Ahat O K l e := if h : f ∈ Rpi O K l e then toHat O K l e ⟨f, h⟩ else 0
 
 theorem hatR_of_mem {f : K⟦X⟧} (h : f ∈ Rpi O K l e) : hatR O f = toHat O K l e ⟨f, h⟩ := by
-  rw [hatR, dif_pos h]
+  rw [hatR, dite_eq_left h]
 
 def YD (v : Vec K a ι) : ι → OD l O := fun i => ϖ.iD t K (fun τ => hatR O (v τ i))
 
-variable (K) in
 
+variable (K) in
 def ED : OD l O := ϖ.iD t K (fun _ => Ehat O K l e)
 
 end GlobalTheory.GalStep
@@ -92,7 +131,7 @@ theorem YD_add {P : PhiMod O K l e a ι} {v v' : Vec K a ι} (hv : v ∈ P.Man) 
     YD t ϖ (v + v') = YD t ϖ v + YD t ϖ v' := by
   funext i
   simp only [YD, Pi.add_apply]
-  rw [← map_add]
+  rw [← map_add (f := _)]
   congr 1
   funext τ
   rw [Pi.add_apply, hatR_of_mem (O := O) (add_mem (mem_Rpi_of_mem_Man hv τ i) (mem_Rpi_of_mem_Man hv' τ i)),

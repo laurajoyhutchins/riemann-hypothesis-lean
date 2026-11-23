@@ -1,8 +1,56 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsLieBasis
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.EigLatBasis
-import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.LocallyOfFinitePresentationDiagMap
-import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.FormallyUnramifiedOfTangentMapInjective
+module
+
+public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.LocallyOfFinitePresentationDiagMap
+public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.FormallyUnramifiedOfTangentMapInjective
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.TwoWeightEqOneAddRoot
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.EigLatBasis
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.UniversalCharts.SpanXLeKerAevalZero
+
+@[expose] public section
 
 noncomputable section
 
@@ -125,8 +173,8 @@ theorem left_eq_iff {A' : Type} [CommRing A'] {g' : Sp A' ⟶ S} (φ : A →+* A
       change w'.left ≫ (splitTorus S X).hom = (spMap φ ≫ w.left) ≫ (splitTorus S X).hom
       rw [e1, Category.assoc, e2, hg]
 
-variable (g) in
 
+variable (g) in
 def ofVal (f : Multiplicative X →* A) : Over.mk g ⟶ splitTorus S X :=
   ofChar _ ((Scheme.ΓSpecIso (CommRingCat.of A)).inv.hom.toMonoidHom.comp f)
 
@@ -142,8 +190,8 @@ section Eps
 variable {S : Scheme.{0}} {R : Type} [CommRing R] {g : Sp (DualNumber R) ⟶ S}
   {X Y : Type} [AddCommGroup X] [AddCommGroup Y]
 
-variable (g) in
 
+variable (g) in
 def epsVec (c : X →+ R) : Over.mk g ⟶ splitTorus S X :=
   ofVal g
     { toFun := fun x => 1 + inr (c x.toAdd)
@@ -300,13 +348,6 @@ theorem isLieComb_iff {n : ℕ} (a : Fin n → R) (c : Fin n → (X →+ R))
   unfold IsLieComb
   exact exists_prod_iff (fun b => epsScaleR_base b) a c w
 
-variable (R X) in
-
-def lieEquiv : {w : epsR R ⟶ splitTorus (Sp R) X // IsTangent w} ≃ (X →+ R) where
-  toFun w := epsCoeff w.1 ((isTangent_iff_charVal _).1 w.2)
-  invFun c := ⟨lieVec c, isTangent_lieVec c⟩
-  left_inv _ := Subtype.ext (epsVec_epsCoeff _ _)
-  right_inv _ := epsVec_injective (epsVec_epsCoeff _ _)
 
 theorem isLieBasis_iff {n : ℕ} (c : Fin n → (X →+ R)) :
     IsLieBasis (fun i => lieVec (c i)) ↔
@@ -363,8 +404,8 @@ section Basis
 
 variable {I J : Type} [Fintype I] [Fintype J]
 
-variable (R) in
 
+variable (R) in
 def dualBasis (b : Module.Basis I ℤ X) : Module.Basis I R (X →+ R) :=
   Module.Basis.ofEquivFun
     { toFun := fun c i => c (b i)
@@ -417,13 +458,6 @@ instance free_addHom [Module.Free ℤ X] [Module.Finite ℤ X] : Module.Free R (
 instance finite_addHom [Module.Free ℤ X] [Module.Finite ℤ X] : Module.Finite R (X →+ R) :=
   Module.Finite.of_basis (dualBasis R (Module.Free.chooseBasis ℤ X))
 
-theorem charpoly_transpose [Module.Free ℤ X] [Module.Finite ℤ X] (u : X →+ X) :
-    (transpose R u).charpoly = u.toIntLinearMap.charpoly.map (Int.castRingHom R) := by
-  classical
-  let b := Module.Free.chooseBasis ℤ X
-  rw [← LinearMap.charpoly_toMatrix (transpose R u) (dualBasis R b), toMatrix_transpose b b u,
-    Matrix.charpoly_transpose, Matrix.charpoly_map, LinearMap.charpoly_toMatrix]
-
 theorem isLieBasis_dualBasis {n : ℕ} (b : Module.Basis (Fin n) ℤ X) :
     IsLieBasis (fun i => lieVec (dualBasis R b i)) := isLieBasis_of_basis (dualBasis R b)
 
@@ -466,8 +500,8 @@ theorem isLieEigen_iff (v : epsPt t ⟶ splitTorus S X) :
     ext x
     simpa using hc a x
 
-variable (X) in
 
+variable (X) in
 def eigenHom {k : Type} [CommRing k] (τ : O →+* k) : Submodule k (X →+ k) where
   carrier := {c | ∀ (a : O) (x : X), c (a • x) = τ a * c x}
   add_mem' hc hd a x := by simp [hc a x, hd a x, mul_add]

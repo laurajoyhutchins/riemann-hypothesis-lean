@@ -1,5 +1,56 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.HolomorphicFamilies.EigRamCore
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.HolomorphicFamilies.IdemDataBasis
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.HolomorphicFamilies.EigRamCore
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.IdemDen
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.HolomorphicFamilies.IdemDataBasis
+public import Mathlib.Algebra.BigOperators.Field
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -44,6 +95,7 @@ theorem ev_D {k : Type} [Field k] (ψ : E →+* k) (δ : 𝓞 E) (hδ : ∀ i, I
     show ψ (omF (E := E) i : E) / ψ (δ : E) * ψ ((δ : E) * omDF i) = _
     rw [map_mul, map_mul]
     field_simp
+
   rw [Finset.sum_congr rfl fun i _ => e i, ← map_sum, sum_omDF_omF, map_one]
 
 theorem dual_mul_expand (a : 𝓞 E) (i : Module.Free.ChooseBasisIndex ℤ (𝓞 E)) :
@@ -61,8 +113,9 @@ theorem dual_mul_expand (a : 𝓞 E) (i : Module.Free.ChooseBasisIndex ℤ (𝓞
     ring
   rw [e1, ← (RingOfIntegers.basis E).sum_repr (a * RingOfIntegers.basis E j)]
   push_cast
+
   simp only [Finset.mul_sum, map_sum, mul_smul_comm, map_zsmul, ← hb,
-    ReciprocityTheory.ChartRestriction.G.PullbackSections.Pf.EigA.trace_dual_mul]
+  ReciprocityTheory.ChartRestriction.G.PullbackSections.Pf.EigA.trace_dual_mul]
   simp
 
 theorem eqv_D {k : Type} [Field k] (ψ : E →+* k) (δ : 𝓞 E) (hδ : ∀ i, IsIntegral ℤ ((δ : E) * omDF (E := E) i)) :
@@ -75,6 +128,7 @@ theorem eqv_D {k : Type} [Field k] (ψ : E →+* k) (δ : 𝓞 E) (hδ : ∀ i, 
     have h1 := dual_mul_expand (E := E) a ((Fintype.equivFin (Module.Free.ChooseBasisIndex ℤ (𝓞 E))).symm i)
     rw [← Equiv.sum_comp (Fintype.equivFin (Module.Free.ChooseBasisIndex ℤ (𝓞 E))).symm] at h1
     show algebraMap (𝓞 E) E (a * bD δ hδ i) = algebraMap (𝓞 E) E (∑ j, _ • bD δ hδ j)
+
     rw [map_mul, map_sum]
     show (a : E) * ((δ : E) * TB.trDual (integralBasis E) ((Fintype.equivFin (Module.Free.ChooseBasisIndex ℤ (𝓞 E))).symm i)) = _
     rw [show (a : E) * ((δ : E) * TB.trDual (integralBasis E) ((Fintype.equivFin (Module.Free.ChooseBasisIndex ℤ (𝓞 E))).symm i)) =
@@ -98,8 +152,9 @@ theorem eqv_D {k : Type} [Field k] (ψ : E →+* k) (δ : 𝓞 E) (hδ : ∀ i, 
     have h3 : ψ (a : E) * ψ (omF j : E) = ∑ i : Fin (nI E), (((RingOfIntegers.basis E).repr
         (a * RingOfIntegers.basis E ((Fintype.equivFin (Module.Free.ChooseBasisIndex ℤ (𝓞 E))).symm j))
         ((Fintype.equivFin (Module.Free.ChooseBasisIndex ℤ (𝓞 E))).symm i) : ℤ) : k) * ψ (omF i : E) := by
+
       rw [← map_mul, show (a : E) * (omF j : E) = ((a * RingOfIntegers.basis E
-        ((Fintype.equivFin (Module.Free.ChooseBasisIndex ℤ (𝓞 E))).symm j) : 𝓞 E) : E) by simp [omF], h2, map_sum]
+      ((Fintype.equivFin (Module.Free.ChooseBasisIndex ℤ (𝓞 E))).symm j) : 𝓞 E) : E) by simp [omF], h2, map_sum]
       simp [map_mul, map_intCast]
     rw [mul_div_assoc', h3, Finset.sum_div]
     refine Finset.sum_congr rfl fun i _ => ?_
@@ -128,6 +183,7 @@ theorem comp_D {k : Type} [Field k] [CharZero k] {Ty : Type} [Fintype Ty] (ψ : 
   have hsum : ∑ i, (z i : 𝓞 E) * bD (N : 𝓞 E) hδ i = (N : 𝓞 E) := by
     apply RingOfIntegers.ext
     show algebraMap (𝓞 E) E (∑ i, (z i : 𝓞 E) * bD (N : 𝓞 E) hδ i) = algebraMap (𝓞 E) E (N : 𝓞 E)
+
     rw [map_sum, map_natCast]
     have h1 := one_eq_sum_trace (E := E)
     have e : ∀ i, algebraMap (𝓞 E) E ((z i : 𝓞 E) * bD (N : 𝓞 E) hδ i) =
@@ -140,6 +196,7 @@ theorem comp_D {k : Type} [Field k] [CharZero k] {Ty : Type} [Fintype Ty] (ψ : 
     rw [Finset.sum_congr rfl fun i _ => e i, ← Finset.mul_sum, ← h1, mul_one]
   have hM : ∑ i, (z i : k) • M (bD (N : 𝓞 E) hδ i) = (N : k) • (1 : Matrix (Fin d) (Fin d) k) := by
     have := congrArg M hsum
+
     rw [map_sum, map_natCast] at this
     rw [Nat.cast_smul_eq_nsmul, nsmul_eq_mul, mul_one, ← this]
     refine Finset.sum_congr rfl fun i _ => ?_

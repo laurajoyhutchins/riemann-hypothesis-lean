@@ -1,17 +1,89 @@
-import Mathlib
-import Development.WeilBound.RepresentationTheoryGL.TubeMeasures.DisjointTubes.ConstantSupremum.SupremumConstantLogBound
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.WeightedFrameSumPositive
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.TubeMeasures.DisjointTubes.ConstantSupremum.SupremumConstantLogBound
+public import Development.AbelianVarietyTheory.Definitions.CMLattices.ExistsIsThetaDegOfIsLocalModel
+public import Development.AbelianVarietyTheory.Definitions.Divisors.CuspIso
+public import Development.AbelianVarietyTheory.Definitions.Divisors.QuoIff
+public import Development.AbelianVarietyTheory.Definitions.Divisors.ToKnownTheoremsOf
+public import Development.AbelianVarietyTheory.Definitions.Divisors.WedgeNrmLeOfWedgeNormLe
+public import Development.AbelianVarietyTheory.Definitions.Foundations.CanonicalExponents
+import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.LawsFieldsSeparately
+public import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.ClausesIffExistsUnique
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AdelicProbabilityEqNormalisedFundamentalSetsStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AntitoneWeightLogBound
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CuspFormRankLeBergmanBoundGoodCoverStatement
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CuspFormsFiniteDimensional
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.KroneckerCharacterFrameFirst
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.KroneckerCharacterFrameSecond
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.WeightedFrameSumSecond
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.KroneckerCharacterFrameThird
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LevelGeometryWeightBound
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SupConstantLogBound
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AntitoneWeightLogBound
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SlopeMaxSquaredBound
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AntitoneWeightLogBoundStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SlopeMaxSquaredBoundStatement
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DeepLevelCoverPrincipalLevelLawsGaloisStatement
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsSelfDualDataTransvectionPrincipalLevelStatement
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FramePointsOverComponentOpenSet
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HostBoundHolds
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.KroneckerCharacterFrameFirst
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LogPeriodEqKroneckerCharacterLogPeriodOfHostStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MaxSlopeSqLeOfNoShortVectorStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MeanLogSupNormLossLeLinearInWeightStatement
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MeanLogSupNormLowerBoundPrincipalLevelStatement
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.NormOneTorusClassNumberBoundProofStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PrincipalLevelLiftModuliLawsOfCore
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SlopeMaxSquaredBound
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SumWeightSpreadLeExponentNormAddStatement
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.WeightBoundHoldsStatement
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.WeightedFrameSumPositive
+import Development.AbelianVarietyTheory.Proofs.TorusHaarMeasure.FinMuUnconditional
+import Development.AbelianVarietyTheory.Proofs.TorusHaarMeasure.MajLactRmul
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.IsProbabilityMeasureAutQuotientNormalized
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ReadingLinearIndependentAndInjective
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.SupNormDefiniteOnCuspFormsGoodEmbedding
+import Development.AutomorphicArithmetic.FrobeniusLocalisation.RadBounds2
+import Development.WeilBound.RepresentationTheoryGL.TubeMeasures.DisjointTubes.ConstantSupremum.Imports
+import Formalism.LocalRingCardinality.HostCls
+import Formalism.LocalToGlobal.ProjectiveLattices.FreeBridge
+import Formalism.LocalToGlobal.ProjectiveLattices.NormLaws
+import Formalism.LocalToGlobal.ProjectiveLattices.RosatiLatticeNorms.LinkFD
+import Formalism.LocalToGlobal.ProjectiveLattices.TieReadSS
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.OrthogonalFrameDomain
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.OrthonormalFlagTranslateHolds
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.SiegelSpaceAlgebraHolds
+public import Development.AbelianVarietyTheory.BlockTheory.TorsionBlocks.LevelCarrying
+import Development.AbelianVarietyTheory.Definitions.Divisors.GenRatios
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IsCoprimeOfNatCast
+public import Development.AbelianVarietyTheory.Definitions.Divisors.MemLevEigenIffTransl
+import Development.AbelianVarietyTheory.Definitions.Divisors.Multiplier
+
+@[expose] public section
 
 section
 noncomputable section
@@ -38,8 +110,8 @@ variable {E : Type} [Field E] [NumberField E] [IsCMField E]
 
 end GlobalTheory.SupModel
 
-open GlobalTheory.SupModel in
 
+open GlobalTheory.SupModel in
 theorem _root_.UpperTheory.Lit.Tam.tamagawa_local_volume_factor : True → GlobalTheory.UCls.TorusBound → ∀ (D : D7) (j : ℕ) (H : ReciprocityTheory.ChartRestriction.G.Geo.Tor.Host D.host.E) (Dw : Datum H) (l : ReciprocityTheory.ChartRestriction.G.Geo.Tor.Level H) (Xo : Moduli Dw l) (c : Coeff l) (U : ∀ σ : c.F →+* ℂ, Unf Xo c σ D.R.r) (dict : ∀ σ : c.F →+* ℂ, GA D (D.sp.W j) → Σ k, Frame ((U σ).X k).Ψ D.R.r), Laws D j Xo c U dict → ∀ σ, GoodEmb c σ → ∀ (la : ∀ k, Wt ((U σ).X k).Ψ D.R.r) (w : ℝ), 0 < w → (∀ k, (∑ τ, ((U σ).X k).spread (la k) τ) ≤ w) → (∀ k, ∀ γ ∈ ((U σ).X k).Γ, ((U σ).X k).χ (la k) γ = 1) → ∀ P ∈ holSub (U σ).X la, supE (U σ).X la P ^ 2 ≤ ENNReal.ofReal (MainStatements.Tam.Plug.supConst2 D.host.E D.R.r D.host.d l.M w) * petE (D.sp.W j) (dict σ) (muQ1 (D.sp.W j)) la P ^ 2 := by
   classical
   intro hMB hTB D j H Dw l Xo c U dict hLw σ hσ la w hw0 hspread hχ P hP
@@ -84,12 +156,12 @@ theorem _root_.UpperTheory.Lit.Tam.tamagawa_local_volume_factor : True → Globa
 
   have hpet : (∫⁻ q, Φ (dict σ q.out).1 (dict σ q.out).2 ∂(muQ1 (D.sp.W j))) =
       petE (D.sp.W j) (dict σ) (muQ1 (D.sp.W j)) la P ^ 2 := by
-    rw [petE, eLpNorm_eq_lintegral_rpow_enorm (by norm_num) (by norm_num), ← ENNReal.rpow_natCast,
-      ← ENNReal.rpow_mul]
-    norm_num
+    rw [petE, ← ENNReal.rpow_natCast]
+    norm_num only [Nat.cast_ofNat]
+    rw [← lintegral_rpow_eNorm_eq_rpow_eLpNorm' (by norm_num : (0 : ℝ) < 2)]
     refine lintegral_congr fun q => ?_
     simp only [hΦdef, ptN]
-    rw [pnorm_piecewise_eq _ _ _ (hdom _), Real.enorm_eq_ofReal (pnorm_nonneg₀ _ _ _ _), ← ENNReal.ofReal_pow (pnorm_nonneg₀ _ _ _ _)]
+    rw [pnorm_piecewise_eq _ _ _ (hdom _), Real.eNorm_eq_ofReal (pnorm_nonneg₀ _ _ _ _), ENNReal.rpow_ofNat, ← ENNReal.ofReal_pow (pnorm_nonneg₀ _ _ _ _)]
   set S := ∑ k, muF ((U σ).X k) (x0 k) (FF k) with hSdef
 
   have hpt : ∀ p : Formalism.L2.Pj.FPt (U σ).X, ENNReal.ofReal (((U σ).X p.1).pnorm (la p.1) (P p.1) p.2) ^ 2 ≤
@@ -139,8 +211,9 @@ variable {D : D7} {r : ℕ} {Comp : Type} [Fintype Comp] {X : Comp → Data D.ho
 
 open Module
 
-set_option maxHeartbeats 1000000 in
 
+set_option maxHeartbeats 1000000 in
+set_option synthInstance.maxHeartbeats 400000 in
 theorem _root_.UpperTheory.Lit.Tam.finrank_cuspW_le_supConst2 : True → GlobalTheory.UCls.TorusBound → ∀ (D : D7) (j : ℕ) (H : ReciprocityTheory.ChartRestriction.G.Geo.Tor.Host D.host.E) (Dw : Datum H) (l : ReciprocityTheory.ChartRestriction.G.Geo.Tor.Level H) (Xo : Moduli Dw l) (c : Coeff l) (U : ∀ σ : c.F →+* ℂ, Unf Xo c σ D.R.r) (dict : ∀ σ : c.F →+* ℂ, GA D (D.sp.W j) → Σ k, Frame ((U σ).X k).Ψ D.R.r), Laws D j Xo c U dict → ∀ (a : (D.host.E →+* ℂ) × ℕ → ℕ) (n : ℕ), Dom a n → FiniteDimensional c.F (cuspW Xo c U (wtZ a n)) ∧ (Module.finrank c.F (cuspW Xo c U (wtZ a n)) : ℝ) ≤ MainStatements.Tam.Plug.supConst2 D.host.E D.R.r D.host.d l.M (((absA Dw a : ℕ) : ℝ) + ((fdeg D.host.E * D.R.r * n : ℕ) : ℝ) + 1) := by
   intro hM hT D j H Dw l Xo c U dict hL a n hDom
   obtain ⟨σ, hσ⟩ : ∃ σ : c.F →+* ℂ, GoodEmb c σ := ⟨_, goodEmb_goodOf c c.F.val.toRingHom⟩
@@ -172,7 +245,7 @@ theorem _root_.UpperTheory.Lit.Tam.finrank_cuspW_le_supConst2 : True → GlobalT
     · rw [(hs k).2.2 γ hγ x hx, hχ k γ hγ, one_mul]
     · classical
       show (if h : x ∈ ((U σ).X k).dom then _ else 0) = 0
-      rw [dif_neg hx]
+      rw [dite_eq_right hx]
   obtain ⟨S, hS_def⟩ : ∃ S : Submodule ℂ (FDSec (U σ).X), S = Submodule.span ℂ (rdU (U σ) '' (Cw : Set (Rul Xo c))) :=
     ⟨_, rfl⟩
   have hS : ∀ P ∈ S, P ∈ holSub (U σ).X (laU (U σ) a n) ∧ (∀ k, ContinuousOn (P k) ((U σ).X k).dom) ∧
@@ -219,7 +292,7 @@ theorem _root_.UpperTheory.Lit.Tam.finrank_cuspW_le_supConst2 : True → GlobalT
   haveI : Module.Free c.F Cw := Module.Free.of_divisionRing c.F Cw
   have hrank : Module.rank c.F Cw ≤ ((finrank ℂ S : ℕ) : Cardinal) := rank_le hcard
   have hfin : FiniteDimensional c.F Cw :=
-    Module.rank_lt_aleph0_iff.1 (lt_of_le_of_lt hrank (Cardinal.nat_lt_aleph0 _))
+    Module.rank_lt_aleph0_iff.1 (lt_of_le_of_lt hrank Cardinal.natCast_lt_aleph0)
   have h2 : finrank c.F Cw ≤ finrank ℂ S := finrank_le_of_rank_le hrank
   refine ⟨hfin, le_trans ?_ hSle⟩
   exact Nat.cast_le.2 h2
@@ -347,6 +420,7 @@ open scoped ENNReal
 
 namespace GlobalTheory
 
+set_option synthInstance.maxHeartbeats 400000 in
 theorem _root_.UpperTheory.Lit.Tam.tamagawa_measure_comparison : True → ∀ (D : D7) (j : ℕ) (H : ReciprocityTheory.ChartRestriction.G.Geo.Tor.Host D.host.E) (Dw : Datum H) (l : ReciprocityTheory.ChartRestriction.G.Geo.Tor.Level H) (Xo : Moduli Dw l) (c : Coeff l) (U : ∀ σ : c.F →+* ℂ, Unf Xo c σ D.R.r) (dict : ∀ σ : c.F →+* ℂ, GA D (D.sp.W j) → Σ k, Frame ((U σ).X k).Ψ D.R.r), Laws D j Xo c U dict → ∀ [NeZero H.d] (χ : DirichletCharacter ℂ H.d), GlobalTheory.IsKroneckerChar χ → ∀ (a : (D.host.E →+* ℂ) × ℕ → ℕ) (n : ℕ), Dom a n → GoodW U (xiR D) (fun _ => D.sp.W j) dict (wtZ a n) → latW U (wtZ a n) ≠ ⊥ → slopeMax_sq (normW U (xiR D) (fun _ => D.sp.W j) dict (wtZ a n)) (latW U (wtZ a n)) ≤ 2 * lamSup D.host.E D.R.r Dw.q D.host.d l.M (GlobalTheory.CM.logOm D.host.E χ).re ((absA Dw a : ℕ) : ℝ) ((fdeg D.host.E * D.R.r * n : ℕ) : ℝ) + 2 * Real.log (MainStatements.Tam.Plug.supConst2 D.host.E D.R.r D.host.d l.M (((absA Dw a : ℕ) : ℝ) + ((fdeg D.host.E * D.R.r * n : ℕ) : ℝ) + 1)) + Real.log |(discr c.F : ℝ)| / (Module.finrank ℚ c.F : ℝ) := fun hT =>
   UpperTheory.Lit.Tam.petersson_norm_local_factor_eq trivial GlobalTheory.T.normOneTorusClassNumberBound_proof
 
@@ -418,19 +492,26 @@ theorem _root_.UpperTheory.Lit.Tam.tamagawaPeterssonLambdaSq_nonneg : True → �
       have : ¬ (dict σ q.out).1 ∈ S := fun h => hn ((key _).2 h)
       show AllWt.ptN la P' (dict σ q.out) = 0
       rw [hpt, if_neg this]
+    have hrestrict : eLpNorm' (fun q : AutQ (D.sp.W j) => AllWt.ptN la P' (dict σ q.out)) 2
+        ((muQ1 (D.sp.W j)).restrict Cl) =
+        eLpNorm' (fun q : AutQ (D.sp.W j) => AllWt.ptN la P' (dict σ q.out)) 2 (muQ1 (D.sp.W j)) := by
+      simp_rw [eLpNorm'_eq_lintegral_eNorm]
+      congr 1
+      apply setLIntegral_eq_of_support_subset
+      simpa using hsupp
     unfold AllWt.petE
-    rw [← eLpNorm_restrict_eq_of_support_subset hsupp]
-    calc eLpNorm (fun q : AutQ (D.sp.W j) => AllWt.ptN la P' (dict σ q.out)) 2 ((muQ1 (D.sp.W j)).restrict Cl)
-        ≤ eLpNorm (fun q : AutQ (D.sp.W j) => AllWt.ptN la P (dict σ q.out)) 2 ((muQ1 (D.sp.W j)).restrict Cl) := by
-          refine eLpNorm_mono fun q => ?_
+    rw [← hrestrict]
+    calc eLpNorm' (fun q : AutQ (D.sp.W j) => AllWt.ptN la P' (dict σ q.out)) 2 ((muQ1 (D.sp.W j)).restrict Cl)
+        ≤ eLpNorm' (fun q : AutQ (D.sp.W j) => AllWt.ptN la P (dict σ q.out)) 2 ((muQ1 (D.sp.W j)).restrict Cl) := by
+          refine eLpNorm'_mono_ae (by norm_num) (Filter.Eventually.of_forall fun q => ?_)
           rw [Real.norm_of_nonneg (AllWt.ptN_nonneg _ _ _), Real.norm_of_nonneg (AllWt.ptN_nonneg _ _ _), hpt]
           split_ifs
           · exact le_rfl
           · exact AllWt.ptN_nonneg _ _ _
-      _ ≤ eLpNorm (fun q : AutQ (D.sp.W j) => AllWt.ptN la P (dict σ q.out)) 2
+      _ ≤ eLpNorm' (fun q : AutQ (D.sp.W j) => AllWt.ptN la P (dict σ q.out)) 2
             (AllWt.muOn (U σ) (D.sp.W j) (dict σ) Z) := by
-          show _ ≤ eLpNorm _ 2 ((muQ1 (D.sp.W j) Cl)⁻¹ • (muQ1 (D.sp.W j)).restrict Cl)
-          rw [eLpNorm_smul_measure_of_ne_top (by norm_num)]
+          show _ ≤ eLpNorm' _ 2 ((muQ1 (D.sp.W j) Cl)⁻¹ • (muQ1 (D.sp.W j)).restrict Cl)
+          rw [eLpNorm'_smul_measure (by norm_num)]
           refine le_mul_of_one_le_left (by simp) ?_
           exact ENNReal.one_le_rpow (ENNReal.one_le_inv.2 prob_le_one) (by norm_num)
   have h4 : ENNReal.ofReal (AllWt.ptN la P ⟨y.1, y.2.1⟩) ^ 2 ≤
@@ -591,8 +672,8 @@ namespace GlobalTheory.CovTop.LamCore
 variable {D : D7} {L : SizeData₂ D} {hT : GatTies D} {Gi : Formalism.MainNotions.G.Inst D L} {Gl : Formalism.MainNotions.G.LatInst D} {Kc : Formalism.MainNotions.G.Consts}
   {Y0 : DivX D} {cX : ExtraC} {ex : Extra D L hT Gi Gl Kc Y0 cX} {Csz : ℝ} (p : PtAt ex Csz) (i : Fin D.R.m)
 
-set_option maxHeartbeats 1000000 in
 
+set_option maxHeartbeats 1000000 in
 theorem _root_.UpperTheory.Lit.Tam.slopeMax_sq_latW_le_pow_mul (h6 : True) {PP A : ℝ} (hR : RecTied D L) (hG : GramAt p i)
     (hN : HostNum D L PP A 1) (hW : WtNum p i PP) :
     slopeMax_sq (nrmK p.fw i) (latW (p.T.U ((i : ℕ) + 1)) (Gk p i)) ≤ L.sc.x ^ (2 * A + 4) * L.sc.b := by
@@ -683,6 +764,3 @@ end GlobalTheory.CovTop.LamCore
 
 end
 end
-
-example : type_of% @UpperTheory.Lit.Tam.tamagawa_weight_bound = type_of% @GlobalTheory.T.antitone_weight_log_bound := rfl
-example : type_of% @UpperTheory.Lit.Tam.integral_cusp_slope_power_bound = type_of% @GlobalTheory.T.slope_max_squared_bound := rfl

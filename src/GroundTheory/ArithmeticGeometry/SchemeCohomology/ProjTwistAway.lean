@@ -1,5 +1,55 @@
-import Mathlib
-import GroundTheory.ArithmeticGeometry.SchemeCohomology.ProjTwist
+module
+
+public import GroundTheory.ArithmeticGeometry.SchemeCohomology.ProjTwist
+public import Mathlib.AlgebraicGeometry.ProjectiveSpectrum.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.Quiver.ReflQuiver
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Arith.SchemeCoh
@@ -50,9 +100,10 @@ lemma locMap_comp {f f' : A} (φ : Localization.Away f →+* Localization.Away f
     rw [← RingHom.comp_apply φ, hφ, locMap_algebraMap, locMap_algebraMap]
   exact congrArg (fun F => F z) this
 
-variable (𝒜) in
 
-def awayDeg {f : A} {d : ℕ} (hf : f ∈ 𝒜 d) (hd : 0 < d) (k : ℤ) :
+variable (𝒜) in
+def awayDeg (𝒜 : ℕ → σ) [GradedRing 𝒜] {f : A} {d : ℕ}
+    (hf : f ∈ 𝒜 d) (hd : 0 < d) (k : ℤ) :
     AddSubgroup (Localization.Away f) where
   carrier := {z | ∃ (n j : ℕ) (a : A), a ∈ 𝒜 j ∧ (j : ℤ) = n * d + k ∧
     z = Localization.mk a (fpow f n)}
@@ -116,10 +167,12 @@ def toSection {f : A} {d : ℕ} (hf : f ∈ 𝒜 d) (hd : 0 < d) (k : ℤ) :
       rw [hz]
       exact locMap_mk y.1 (nmem_of_mem y) a n)
   map_zero' := by
-    ext x
+    apply Subtype.ext
+    funext x
     exact map_zero _
   map_add' z w := by
-    ext x
+    apply Subtype.ext
+    funext x
     exact map_add _ _ _
 
 lemma val_mem_awayDeg_zero {f : A} {d : ℕ} (hf : f ∈ 𝒜 d) (hd : 0 < d)
@@ -149,12 +202,13 @@ lemma isLocallyFraction_locMap {f : A} {d : ℕ} (hf : f ∈ 𝒜 d) (hd : 0 < d
         locMap x.1 (nmem_of_mem x) z) :=
   (toSection hf hd k ⟨z, hz⟩).2
 
+
 set_option backward.isDefEq.respectTransparency.types false in
 open ProjectiveSpectrum in
-
 lemma exists_section_of_isLocallyFraction_zero {U : Opens (ProjectiveSpectrum.top 𝒜)}
     (t : ∀ x : U, Loc 𝒜 x.1) (ht : (isLocallyFraction 𝒜 0).pred t) :
-    ∃ t' : (Proj.structureSheaf 𝒜).obj.obj (op U), ∀ x, (t'.1 x).val = t x := by
+    ∃ t' : (ProjectiveSpectrum.Proj.structureSheaf 𝒜).obj.obj (op U),
+      ∀ x, (t'.1 x).val = t x := by
   have key : ∀ x : U, ∃ (V : Opens (ProjectiveSpectrum.top 𝒜)) (_ : x.1 ∈ V) (iV : V ⟶ U)
       (j : ℕ) (r s : 𝒜 j) (s_nin : ∀ y : V, s.1 ∉ y.1.asHomogeneousIdeal),
       ∀ y : V, t (iV y : U) = Localization.mk r.1 ⟨s.1, s_nin y⟩ := by
@@ -171,7 +225,8 @@ lemma exists_section_of_isLocallyFraction_zero {U : Opens (ProjectiveSpectrum.to
       (show s.1 ∈ x.1.asHomogeneousIdeal.toIdeal.primeCompl from hsn ⟨x.1, hxV⟩)⟩,
       by rw [HomogeneousLocalization.val_mk]; exact (w ⟨x.1, hxV⟩).symm⟩
   choose g hg using pt
-  refine ⟨(⟨g, fun x => ?_⟩ : (StructureSheaf.structureSheafInType 𝒜).obj.obj (op U)), hg⟩
+  refine ⟨(⟨g, fun x => ?_⟩ :
+    (ProjectiveSpectrum.StructureSheaf.structureSheafInType 𝒜).obj.obj (op U)), hg⟩
   obtain ⟨V, hxV, iV, j, r, s, hsn, w⟩ := key x
   refine ⟨V, hxV, iV, j, r, s, hsn, fun y => HomogeneousLocalization.val_injective _ ?_⟩
   rw [HomogeneousLocalization.val_mk]
@@ -244,7 +299,8 @@ theorem toSection_bijective {f u g : A} {e : ℕ} (hu : u ∈ 𝒜 1) (hg : g �
       rwa [add_zero] at this
     refine ⟨⟨c' * z₀.val, hmem⟩, ?_⟩
     subst hz₀'
-    ext x
+    apply Subtype.ext
+    funext x
     have e1 : locMap x.1 (nmem_of_mem x) z₀.val =
         (((Proj.awayToSection 𝒜 f).hom z₀).1 x).val :=
       (ProjectiveSpectrum.Proj.awayToSection_apply 𝒜 f z₀ x).symm

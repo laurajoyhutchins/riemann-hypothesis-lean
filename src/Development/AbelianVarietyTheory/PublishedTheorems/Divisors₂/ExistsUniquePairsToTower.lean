@@ -1,11 +1,45 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ConstGen
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.DeRhamVectorExtension
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.PoincareDeRhamDuality
-import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.WeilIsGrpPullbackIff
-import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.ExistsGenThetaOfIsAbelianScheme
-import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.CubicalOfNormalised
-import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.GlobalFnsHolds
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.DeRhamVectorExtension
+public import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.CrystallinePull2SumCup
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -34,47 +68,22 @@ def IsConnecting (x : G.VecExt) (b : G.A 1) : Prop :=
 
 variable {G}
 
-theorem IsConnecting.sub {x x' : G.VecExt} {b b' : G.A 1} (h : G.IsConnecting x b)
-    (h' : G.IsConnecting x' b') : G.IsConnecting (x - x') (b - b') := by
-  obtain ⟨c, B, rfl, h₁, h₂, rfl⟩ := h
-  obtain ⟨c', B', rfl, h₁', h₂', rfl⟩ := h'
-  exact ⟨c - c', B - B', rfl, by rw [map_sub, map_sub, h₁, h₁'], by rw [map_sub, h₂, h₂', sub_zero], rfl⟩
-
-theorem IsConnecting.unique (hp : (p : R) = 0) {x : G.VecExt} {b b' : G.A 1}
-    (h : G.IsConnecting x b) (h' : G.IsConnecting x b') : b = b' := by
-  obtain ⟨c, B, h₀, h₁, h₂, h₃⟩ := h.sub h'
-  rw [sub_self, Submodule.Quotient.mk_eq_zero] at h₀
-  obtain ⟨D, rfl⟩ := h₀
-  rw [cocyclesMap_cob, ← sub_eq_zero, ← map_sub] at h₁
-  set E := B - funsMap ((p : ℤ_[p]) • 𝟙 G) D with hE
-  have e₂ : cobOne R _ (E.1 2) = 0 := congrArg (fun z : G.cocycles ↦ z.1 2) h₁
-  have e₃ : G.mulP 1 (E.1 1) = 0 := by
-    rw [← E.2 1, mulP_res, (mulBy_of_cobOne_eq_zero e₂ p).1, ← Nat.cast_smul_eq_nsmul R, hp, zero_smul]
-  have e₁ : E.1 1 = 0 := CartierDual.eq_of_forall_apply (R := R) fun φ ↦ by
-    obtain ⟨ψ, rfl⟩ := G.dual_mulP_surjective 1 φ
-    exact (congrArg ψ.ofConv e₃).trans ((map_zero _).trans (map_zero _).symm)
-  have e₄ : b - b' = algebraMap R _ (Coalgebra.counit (D.1 1)) := by
-    rw [← h₃, ← G.mulBy_pow_self, pow_one, ← natCast_smul_id_app]
-    exact sub_eq_zero.1 e₁
-  rw [e₄, Bialgebra.counit_algebraMap] at h₂
-  rw [← sub_eq_zero, e₄, h₂, map_zero]
-
 end PDivGroup
 
 namespace EpsWeil
 
 variable {R : Type} [CommRing R] (D : Type) [CommRing D] [Algebra R D]
 
-variable {D} in
 
+variable {D} in
 def epsUnit (b : D) : (DualNumber D)ˣ where
   val := 1 + TrivSqZeroExt.inr b
   inv := 1 - TrivSqZeroExt.inr b
   val_inv := by ext <;> simp
   inv_val := by ext <;> simp
 
-variable (R) in
 
+variable (R) in
 def epsMap : DualNumber R →ₐ[R] DualNumber D :=
   DualNumber.lift ⟨(Algebra.ofId R _, DualNumber.eps), DualNumber.eps_mul_eps, fun _ ↦ Commute.all _ _⟩
 
@@ -132,13 +141,6 @@ def BarsottiTateDieudonne : Prop :=
   BarsottiTateDieudonne.WittModule ∧ BarsottiTateDieudonne.HodgeQuotient
 
 namespace BarsottiTateDieudonne
-
-theorem HodgeQuotient.deRhamVectorExtension (H : HodgeQuotient) : DeRhamVectorExtension := fun p _ ↦
-  have ⟨e, _, h₁, h₂, h₃, _⟩ := H p
-  ⟨e, h₁, h₂, h₃⟩
-
-theorem deRhamVectorExtension (H : BarsottiTateDieudonne) : DeRhamVectorExtension :=
-  H.2.deRhamVectorExtension
 
 end BarsottiTateDieudonne
 

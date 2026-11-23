@@ -1,4 +1,51 @@
-import Formalism.LocalToGlobal.GlobalTheory.GL5.TheoremTwoFamilyOfVolume
+module
+
+public import Formalism.LocalToGlobal.GlobalTheory.GL5.Statement
+public import Formalism.SharpRestriction.GlobalSchurBounds.ThickPlacesCorollaryOfAnyTranslate
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -41,8 +88,8 @@ def hitEquiv {Γ K : Subgroup G} (gj : G) (δ : Γ) (k : K) :
   left_inv γ := by ext; simp
   right_inv γ := by ext; simp
 
-open Classical in
 
+open Classical in
 theorem measure_fd_eq_sum {Γ K : Subgroup G} [Countable Γ] (μ : Measure G) [μ.IsMulLeftInvariant]
     (hK : MeasurableSet (K : Set G)) {ι : Type*} [Fintype ι] (g : ι → G)
     (hcov : ∀ x : G, ∃ i, ∃ γ : Γ, ∃ k : K, x = (γ : G) * g i * k)
@@ -209,6 +256,7 @@ attribute [local instance] Formalism.BasicNotions.Host.cmStar
 theorem mapAlg_mul {R A B : Type*} [CommSemiring R] [Semiring A] [Semiring B] [Algebra R A] [Algebra R B]
     (φ : A →ₐ[R] B) {n : ℕ} (X Y : Matrix (Fin n) (Fin n) A) : (X * Y).map φ = X.map φ * Y.map φ := by
   ext i j
+
   simp [Matrix.map_apply, Matrix.mul_apply, map_sum, map_mul]
 
 theorem mapAlg_one {R A B : Type*} [CommSemiring R] [Semiring A] [Semiring B] [Algebra R A] [Algebra R B]
@@ -371,13 +419,5 @@ theorem mass_volume_identity_of_class_decomp (D : D7) (hT : VolTie D) (hG : Genu
     | exact hG W
     | exact (hG W hW hdef).symm
     | (clear hT hall hvol hμ𝓕 hθall key e2 hpos hmpos; unfold GenusMassStd at hG; done)
-
-theorem family_mass_volume_identity_of_class_decomp {eps : ℝ} (Fm : Formalism.MainNotions.FamP eps) (hR : TiedRealF Fm) (hH : HostInputsF Fm)
-    (hC : ∀ x (i : Fm.Ix x), DefClassDecomp (Fm.D x i)) : ∀ x (i : Fm.Ix x), DefiniteVolumeEqMass (Fm.D x i) :=
-  fun x i => mass_volume_identity_of_class_decomp _ (Formalism.L2.Theta.VolTieG.volTie (hR x i).vol) (hH x i).2.2 (hC x i)
-
-theorem Link2_of_decomp (hC : ∀ (eps : ℝ) (Fm : Formalism.MainNotions.FamP eps) x (i : Fm.Ix x), DefClassDecomp (Fm.D x i)) :
-    Link2 :=
-  fun eps Fm hR _ hH hV => theorem_two_family_of_volume Fm hR hV (family_mass_volume_identity_of_class_decomp Fm hR hH (hC eps Fm))
 
 end Formalism.L2.GlobalTheoryTheory.GenusMassVolumes

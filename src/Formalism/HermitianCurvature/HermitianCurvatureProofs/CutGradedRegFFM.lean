@@ -1,14 +1,54 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutGraded
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutRegFF
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutJAFFStableLoc
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.SmoothWordsAll
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.LUFactorOrbitBounds
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.PsiNormalization
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.ConjugationInvarianceEverySetting
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutGraded
+public import Formalism.HermitianCurvature.StatementJF
+public import Formalism.FormalDegreeBessel.FormalDegreeRatio.BesselUnipotentEquivHolds
+public import Formalism.FormalDegreeBessel.FormalDegreeRatio.BesselUnitaryEquivHolds
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.ConjugationInvarianceEverySetting
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.LUFactorOrbitBounds
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.PsiNormalization
 import Formalism.HermitianCurvature.HermitianCurvatureProofs.RegularisedPairingViaPhase
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.BetaCutoffLimit
-import Formalism.FormalDegreeBessel.FormalDegreeRatio.BesselUnipotentEquivHolds
-import Formalism.FormalDegreeBessel.FormalDegreeRatio.BesselUnitaryEquivHolds
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.SmoothWordsAll
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Formalism.REAL Formalism.QuantumDeterminants Formalism.FourierDecayAlt Formalism.FourierDecayAlt.B Formalism.FourierDecayAlt.JF
 
@@ -21,34 +61,6 @@ noncomputable section
 attribute [local instance] Matrix.normedAddCommGroup Matrix.normedSpace
 
 section thr
-
-theorem thr_of_budget {k r m N : ℕ} {A₀ : ℝ}
-    (hm : 6 * ((r : ℝ) + 1) * m + 9 * ((r : ℝ) + 1) * ((2 * r + k + 1 : ℕ) : ℝ) ^ 2 ≤ A₀)
-    (hA : 10 * ((r : ℝ) + 1) ^ 4 * ((N : ℝ) * (2 * (r : ℝ) + k + 1) ^ 2 + (2 * (r : ℝ) + k + 1) ^ 3) ≤ A₀) :
-    JF.TransportedAlt k r A₀ m := by
-  unfold JF.TransportedAlt
-  have hr0 : (0 : ℝ) ≤ r := Nat.cast_nonneg r
-  have hk0 : (0 : ℝ) ≤ k := Nat.cast_nonneg k
-  have hn : ((2 * r + k + 1 : ℕ) : ℝ) = 2 * (r : ℝ) + k + 1 := by push_cast; ring
-  rw [hn] at hm ⊢
-  rw [lt_div_iff₀ (by positivity)]
-  rcases Nat.eq_zero_or_pos m with h0 | hpos
-  · subst h0
-    simp only [Nat.cast_zero, mul_zero, sub_zero] at hm ⊢
-    have hn1 : (1 : ℝ) ≤ 2 * (r : ℝ) + k + 1 := by linarith
-    have hr1 : (1 : ℝ) ≤ (r : ℝ) + 1 := by linarith
-    have hP : 1 ≤ ((r : ℝ) + 1) ^ 3 * (2 * (r : ℝ) + k + 1) :=
-      one_le_mul_of_one_le_of_one_le (one_le_pow₀ hr1) hn1
-    have h3 : ((r : ℝ) + 1) * (2 * (r : ℝ) + k + 1) ^ 2 ≤ ((r : ℝ) + 1) ^ 4 * (2 * (r : ℝ) + k + 1) ^ 3 := by
-      calc ((r : ℝ) + 1) * (2 * (r : ℝ) + k + 1) ^ 2 = ((r : ℝ) + 1) * (2 * (r : ℝ) + k + 1) ^ 2 * 1 := by ring
-        _ ≤ ((r : ℝ) + 1) * (2 * (r : ℝ) + k + 1) ^ 2 * (((r : ℝ) + 1) ^ 3 * (2 * (r : ℝ) + k + 1)) :=
-            mul_le_mul_of_nonneg_left hP (by positivity)
-        _ = ((r : ℝ) + 1) ^ 4 * (2 * (r : ℝ) + k + 1) ^ 3 := by ring
-    have hN : 0 ≤ ((r : ℝ) + 1) ^ 4 * ((N : ℝ) * (2 * (r : ℝ) + k + 1) ^ 2) := by positivity
-    have hpos2 : 0 < ((r : ℝ) + 1) * (2 * (r : ℝ) + k + 1) ^ 2 := by positivity
-    nlinarith [h3, hN, hpos2, hA]
-  · have hm1 : (1 : ℝ) ≤ m := by exact_mod_cast hpos
-    nlinarith [hm, hm1]
 
 end thr
 

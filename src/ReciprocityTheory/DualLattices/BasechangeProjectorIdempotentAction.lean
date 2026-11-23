@@ -1,4 +1,53 @@
-import ReciprocityTheory.DualLattices.RestrictedHopfOrderApproximationStatement
+module
+
+public import ReciprocityTheory.DualLattices.RestrictedHopfOrderApproximationStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -17,6 +66,7 @@ variable {p : ℕ} [Fact p.Prime] {g : ℕ} {C : Type} [Field C] {v : Valuation 
 private lemma reducedColumnMap_toZMod {r : ℕ} (Bw : Matrix (Ix g) (Fin r) ℤ_[p]) (x : Fin r → ℤ_[p]) :
     psiW Bw (fun i => PadicInt.toZMod (x i)) = red p g (Bw *ᵥ x) := by
   funext i
+
   simp [psiW, red, Matrix.mulVec, dotProduct, map_sum, map_mul]
 
 private lemma map_algebraMap_mulVec_comp {m n : Type} [Fintype n] (M : Matrix m n ℤ_[p]) (t : n → ℤ_[p]) :
@@ -55,7 +105,7 @@ private lemma isHopfApproximable_sum (H : HodgeTateDatum p g v R O σ cp) {r : �
     beta_reduce at hsS ⊢
     rw [Finset.sum_insert ha]
     rw [Pi.add_apply, Pi.smul_apply]
-    simp only [Algebra.smul_def, map_add, map_mul] at hsa hsS ⊢
+    simp only [Algebra.smul_def, map_add (f := _), map_mul] at hsa hsS ⊢
     linear_combination (algebraMap R C (c a)) * hsa + hsS
 
 private lemma isHopfApproximable_comp_mulVec (H : HodgeTateDatum p g v R O σ cp) {r : ℕ} (Bw : Matrix (Ix g) (Fin r) ℤ_[p])
@@ -272,7 +322,7 @@ theorem restrictedHopfOrderApproximation : RestrictedHopfOrderApproximationState
         ((PadicInt.toZMod (x i)).val : R) + (p : R) * algebraMap ℤ_[p] R (y i) := by
       intro i
       conv_lhs => rw [hy i]
-      simp only [map_add, map_mul, map_natCast]
+      simp only [map_add (f := _), map_mul, map_natCast]
     have hR : ∑ i, dj * lam i * ((PadicInt.toZMod (x i)).val : R) -
         dj * ∑ i, lam i * algebraMap ℤ_[p] R (x i) =
         -(dj * (p : R) * ∑ i, lam i * algebraMap ℤ_[p] R (y i)) := by
@@ -280,6 +330,7 @@ theorem restrictedHopfOrderApproximation : RestrictedHopfOrderApproximationState
       refine Finset.sum_congr rfl fun i _ => ?_
       rw [hxR i]
       ring
+
     rw [hFval, ← map_sum, ← map_sub, hR, map_neg, Valuation.map_neg]
     simp only [map_mul]
     calc v (algebraMap R C dj) * v (algebraMap R C (p : R)) *

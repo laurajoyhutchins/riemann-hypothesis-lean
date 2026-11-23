@@ -1,6 +1,47 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.FStarBwdBeta
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.FStarBwdBeta
 import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.SaturatedPf
+import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.CorankRelation
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.PairCorankPositivity.FinrankOrthAddLe
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -51,12 +92,12 @@ theorem sgRel_mapL (F : LFlag S r T) (F' : LFlag S r T') (y y' : S.V) (al al' : 
     obtain ⟨x0, hx0, rfl⟩ := Submodule.mem_map.1 hx
     obtain ⟨x0', hx0', rfl⟩ := Submodule.mem_map.1 hx'
     refine ⟨x0, hx0, x0', hx0', β.injective ?_⟩
-    simp only [map_sub, map_add, map_smul, LinearEquiv.coe_coe] at h ⊢
+    simp only [map_sub, map_add (f := _), map_smul, LinearEquiv.coe_coe] at h ⊢
     exact h
   · rintro ⟨x, hx, x', hx', h⟩
     refine ⟨β x, Submodule.mem_map_of_mem hx, β x', Submodule.mem_map_of_mem hx', ?_⟩
     rw [← map_sub, h]
-    simp only [map_add, map_smul]
+    simp only [map_add (f := _), map_smul]
 
 end Gen
 
@@ -71,23 +112,23 @@ variable {D : Formalism.BasicNotions.D7} (Zd : LocDat D) {u u' : D.what₂.Word}
 
 namespace BwdBetaCut
 
-def IotaC₂ (Λ Λ₂ : Submodule (𝓞 D.host.E) (VS D).V) {T : D.host.E} (F : LFlag (VS D) D.R.rS T) {T' : D.host.E}
-    (F' F₂ : LFlag (VS D) D.R.rS T') (β₂ : (VS D).V ≃ₗ[D.host.E] (VS D).V) : Prop :=
+def IotaC₂ (Λ Λ₂ : Submodule (𝓞 D.host.E) (VS D).V) {T : D.host.E} (F : LFlag (D.sp.Y 0) D.R.rS T) {T' : D.host.E}
+    (F' F₂ : LFlag (D.sp.Y 0) D.R.rS T') (β₂ : (VS D).V ≃ₗ[D.host.E] (VS D).V) : Prop :=
   ∀ x' ∈ Lrep Λ F', ∀ l ∈ Lrep Λ F, ∀ l₂ ∈ Lrep Λ₂ F, l - l₂ ∈ Xsp F →
     (l - x' ∈ NgX Λ (gS D) F F' ↔ l₂ - β₂ x' ∈ NgX Λ₂ (gS D) F F₂)
 
-def W0₂ (Λ Λ₂ : Submodule (𝓞 D.host.E) (VS D).V) {T : D.host.E} (F : LFlag (VS D) D.R.rS T) {T' : D.host.E}
-    (F' F₂ : LFlag (VS D) D.R.rS T') (β₂ : (VS D).V ≃ₗ[D.host.E] (VS D).V) : Prop :=
+def W0₂ (Λ Λ₂ : Submodule (𝓞 D.host.E) (VS D).V) {T : D.host.E} (F : LFlag (D.sp.Y 0) D.R.rS T) {T' : D.host.E}
+    (F' F₂ : LFlag (D.sp.Y 0) D.R.rS T') (β₂ : (VS D).V ≃ₗ[D.host.E] (VS D).V) : Prop :=
   ∀ w ∈ Hp Λ F F', ∃ w₂ ∈ Hp Λ₂ F F₂, w - w₂ ∈ Xsp F ∧ β₂ w - w₂ ∈ Xsp F₂
 
-def Scalar₂ (Λ Λ₂ : Submodule (𝓞 D.host.E) (VS D).V) {T : D.host.E} (F : LFlag (VS D) D.R.rS T) {T' : D.host.E}
-    (F' F₂ : LFlag (VS D) D.R.rS T') (β₂ : (VS D).V ≃ₗ[D.host.E] (VS D).V) : Prop :=
+def Scalar₂ (Λ Λ₂ : Submodule (𝓞 D.host.E) (VS D).V) {T : D.host.E} (F : LFlag (D.sp.Y 0) D.R.rS T) {T' : D.host.E}
+    (F' F₂ : LFlag (D.sp.Y 0) D.R.rS T') (β₂ : (VS D).V ≃ₗ[D.host.E] (VS D).V) : Prop :=
   ∀ y1 ∈ Ylift Λ F F', ∀ y2 ∈ Ylift Λ₂ F F₂, ∀ y1' ∈ Ylift' Λ F F', ∀ y2'' ∈ Ylift' Λ₂ F F₂,
     y1 - y2 ∈ Xsp F → y2'' - β₂ y1' ∈ Xsp F₂ →
       ∀ al al' : D.host.E, SgRel F F' y1 y1' al al' ↔ SgRel F F₂ y2 y2'' al al'
 
-def IsPair₂ (Λ Λ₂ : Submodule (𝓞 D.host.E) (VS D).V) {T : D.host.E} (F : LFlag (VS D) D.R.rS T) {T' : D.host.E}
-    (F' F₂ : LFlag (VS D) D.R.rS T') (β₂ : (VS D).V ≃ₗ[D.host.E] (VS D).V) : Prop :=
+def IsPair₂ (Λ Λ₂ : Submodule (𝓞 D.host.E) (VS D).V) {T : D.host.E} (F : LFlag (D.sp.Y 0) D.R.rS T) {T' : D.host.E}
+    (F' F₂ : LFlag (D.sp.Y 0) D.R.rS T') (β₂ : (VS D).V ≃ₗ[D.host.E] (VS D).V) : Prop :=
   β₂ ∈ Formalism.HermitianLatticesTheory.isom (VS D).hT ∧ Formalism.HermitianLatticesTheory.gmap β₂ Λ = Λ₂ ∧
     (∀ j, (Xflag F' j).map (β₂ : (VS D).V →ₗ[D.host.E] (VS D).V) = Xflag F₂ j) ∧ β₂ F'.fl.z = F₂.fl.z ∧
     IotaC₂ Λ Λ₂ F F' F₂ β₂ ∧ W0₂ Λ Λ₂ F F' F₂ β₂ ∧ Scalar₂ Λ Λ₂ F F' F₂ β₂
@@ -99,7 +140,7 @@ variable (u u' F0 what₂)
 def BetaCore₂ : Prop :=
   CtxP u u' F0 what₂ →
   ∀ (γ : TermDef.Term D u u' F0 what₂) (Z : PairVal.MatR D), Ctx γ Z →
-    ∀ (F'₂ : LFlag (VS D) D.R.rS ((Tu D u' : ℕ) : D.host.E))
+    ∀ (F'₂ : LFlag (D.sp.Y 0) D.R.rS (((D.mem u').A.T : ℕ) : D.host.E))
       (φ : ∀ p, (locH Zd p).Wb (tLoc Zd p γ).f ≃ₗ[(D.s.atP p).Ep] (locH Zd p).Wb (tLoc Zd p γ).f)
       (φ' : ∀ p, (locH Zd p).Wb (tLoc Zd p γ).f' ≃ₗ[(D.s.atP p).Ep] (locH Zd p).Wb (locF' Zd p F'₂)),
       StarHyp Zd γ Z F'₂ φ φ' →
@@ -130,8 +171,8 @@ theorem unipotent_inv_sub_mem {n : (VS D).V ≃ₗ[D.host.E] (VS D).V} (hn : n �
   have h2 := hn.2.2.1 _ h1
   rwa [LinearEquiv.apply_symm_apply] at h2
 
-theorem Hp_le_orthX (Λ : Submodule (𝓞 D.host.E) (VS D).V) (hΛ : Submodule.IsLattice D.host.E Λ) {T' : D.host.E}
-    (F' : LFlag (VS D) D.R.rS T') (hL : IsLift Λ (lf D F0)) (hL' : IsLift Λ F') :
+theorem Hp_le_orthX (Λ : Submodule (𝓞 D.host.E) (VS D).V) (hΛ : Submodule.IsFullLattice D.host.E Λ) {T' : D.host.E}
+    (F' : LFlag (D.sp.Y 0) D.R.rS T') (hL : IsLift Λ (lf D F0)) (hL' : IsLift Λ F') :
     Hp Λ (lf D F0) F' ≤ orth (VS D) (Xsp (lf D F0)) := by
   intro w hw
   rw [Formalism.L2.SG.Pf.mem_orth_iff_sat 1 (Subgroup.one_mem _)]
@@ -153,7 +194,7 @@ theorem map_mul_eq (a b : (VS D).V ≃ₗ[D.host.E] (VS D).V) (U : Submodule D.h
       (U.map (b : (VS D).V →ₗ[D.host.E] (VS D).V)).map (a : (VS D).V →ₗ[D.host.E] (VS D).V) := by
   rw [← Submodule.map_comp]; rfl
 
-theorem orth_Xplus_le {T : D.host.E} (F : LFlag (VS D) D.R.rS T) :
+theorem orth_Xplus_le {T : D.host.E} (F : LFlag (D.sp.Y 0) D.R.rS T) :
     orth (VS D) (Xplus F) ≤ orth (VS D) (Xsp F) := by
   intro v hv
   rw [Formalism.L2.SG.Pf.mem_orth_iff_sat 1 (Subgroup.one_mem _)] at hv ⊢

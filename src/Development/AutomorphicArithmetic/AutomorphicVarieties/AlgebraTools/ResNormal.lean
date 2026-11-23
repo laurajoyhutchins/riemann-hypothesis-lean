@@ -1,5 +1,49 @@
-import Mathlib
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.ProfDefs
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.ProfDefs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Filter UpperTheory.V.AlgebraTools
 open scoped TensorProduct
@@ -37,41 +81,36 @@ private theorem res_pow (l : ℕ) (G : Type) [Group G] [TopologicalSpace G] [IsT
   let t : ι → Set G := fun i => ((i.1.toOpenSubgroup : Subgroup G) : Set G)
   have ht : ∀ i, IsClosed (t i) := fun i => i.1.toOpenSubgroup.isClosed
   have hs : IsCompact ((K : Set G)ᶜ) := (hK.isClosed_compl).isCompact
-  have hempty : (K : Set G)ᶜ ∩ ⋂ i, t i = ∅ := by
-    ext y
-    simp only [Set.mem_inter_iff, Set.mem_compl_iff, Set.mem_iInter, Set.mem_empty_iff_false,
-      iff_false, not_and]
-    intro hy hall
+  have hdisjoint : Disjoint (K : Set G)ᶜ (⋂ i, t i) := by
+    simp only [Set.disjoint_left, Set.mem_compl_iff, Set.mem_iInter]
+    intro y hy hall
     apply hy
     apply h
     rw [mem_proLRes]
     intro N hN
     exact hall ⟨N, hN⟩
-  obtain ⟨u, hu⟩ := hs.elim_finite_subfamily_closed t ht hempty
+  obtain ⟨u, hu⟩ := hs.elim_finite_subfamily_closed t ht hdisjoint
   have hk : ∀ i : ι, ∃ k : ℕ, g ^ l ^ k ∈ (i.1.toOpenSubgroup : Subgroup G) := fun i =>
     (pq_iff l G _).mp i.2 g
   choose kf hkf using hk
   refine ⟨∑ i ∈ u, kf i, ?_⟩
   by_contra hg
-  have hmem : g ^ l ^ (∑ i ∈ u, kf i) ∈ (K : Set G)ᶜ ∩ ⋂ i ∈ u, t i := by
-    refine ⟨hg, ?_⟩
-    simp only [Set.mem_iInter]
-    intro i hi
-    have hle : kf i ≤ ∑ j ∈ u, kf j := Finset.single_le_sum (fun _ _ => Nat.zero_le _) hi
-    have heq : l ^ (∑ j ∈ u, kf j) = l ^ kf i * l ^ (∑ j ∈ u, kf j - kf i) := by
-      rw [← pow_add, Nat.add_sub_cancel' hle]
-    show g ^ l ^ (∑ j ∈ u, kf j) ∈ ((i.1.toOpenSubgroup : Subgroup G) : Set G)
-    rw [heq, pow_mul]
-    exact Subgroup.pow_mem _ (hkf i) _
-  rw [hu] at hmem
-  exact hmem
+  apply Set.disjoint_left.mp hu hg
+  simp only [Set.mem_iInter]
+  intro i hi
+  have hle : kf i ≤ ∑ j ∈ u, kf j := Finset.single_le_sum (fun _ _ => Nat.zero_le _) hi
+  have heq : l ^ (∑ j ∈ u, kf j) = l ^ kf i * l ^ (∑ j ∈ u, kf j - kf i) := by
+    rw [← pow_add, Nat.add_sub_cancel' hle]
+  show g ^ l ^ (∑ j ∈ u, kf j) ∈ ((i.1.toOpenSubgroup : Subgroup G) : Set G)
+  rw [heq, pow_mul]
+  exact Subgroup.pow_mem _ (hkf i) _
 
 theorem UpperTheory.V.AlgebraTools.proLResOf_normal :
     ∀ (l : ℕ) [Fact l.Prime] (G : Type) [Group G] [TopologicalSpace G] [IsTopologicalGroup G] [CompactSpace G] [TotallyDisconnectedSpace G] (H : Subgroup G) [H.Normal], IsClosed (H : Set G) →
       (proLResOf l H).Normal ∧ IsClosed (proLResOf l H : Set G) ∧ proLResOf l H ≤ H ∧
       ∀ (O : OpenNormalSubgroup G), proLResOf l H ≤ O.toSubgroup → ∀ h ∈ H, ∃ k : ℕ, h ^ l ^ k ∈ O.toSubgroup := by
   intro l _ G _ _ _ _ _ H _ hH
-  haveI : CompactSpace H := isCompact_iff_compactSpace.mp hH.isCompact
+  have : CompactSpace H := isCompact_iff_compactSpace.mp hH.isCompact
   refine ⟨?_, ?_, ?_, ?_⟩
   · constructor
     intro x hx g

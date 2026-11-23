@@ -1,6 +1,49 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.VectorIsomorphismLevels
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.PBFCstmt
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.LiftClosedUnderOperations
+module
+
+public import Formalism.HermitianCurvature.RealInputsClosedAdmissibleSettings
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -15,11 +58,16 @@ variable {k r : ℕ} {Wp Wq : Type} [NormedAddCommGroup Wp] [InnerProductSpace �
 
 theorem uInv_zero_at (s : ℂ) (g : B.Mat k r) :
     ∀ (w : List C.Letter) (x : Wd.Ix (Fin w.length) → B.Mat k r → (Wq →L[ℂ] Wp)),
-      (∀ e', x e' g = 0) → ∀ e, KB.uInv s w x e g = 0
-  | [], x, hx, e => hx e
-  | l :: w, x, hx, e => by
-    have h0 := uInv_zero_at s g w (fun e' => x (Fin.cons (0 : Fin 2) e')) (fun e' => hx _)
-    have h1 := uInv_zero_at s g w (fun e' => x (Fin.cons (1 : Fin 2) e')) (fun e' => hx _)
+      (∀ e', x e' g = 0) → ∀ e, KB.uInv s w x e g = 0 := by
+  intro w
+  induction w with
+  | nil =>
+    intro x hx e
+    exact hx e
+  | cons l w ih =>
+    intro x hx e
+    have h0 := ih (fun e' => x (Fin.cons (0 : Fin 2) e')) (fun e' => hx (Fin.cons (0 : Fin 2) e'))
+    have h1 := ih (fun e' => x (Fin.cons (1 : Fin 2) e')) (fun e' => hx (Fin.cons (1 : Fin 2) e'))
     show (if e (0 : Fin (w.length + 1)) = 0 then KB.uInv s w (fun e' => x (Fin.cons (0 : Fin 2) e')) (fun a => e a.succ)
       else KB.uInv s w (fun e' => x (Fin.cons (1 : Fin 2) e')) (fun a => e a.succ) +
         (if l.1 then s else (starRingEnd ℂ) s) • KB.uInv s w (fun e' => x (Fin.cons (0 : Fin 2) e')) fun a => e a.succ) g = 0

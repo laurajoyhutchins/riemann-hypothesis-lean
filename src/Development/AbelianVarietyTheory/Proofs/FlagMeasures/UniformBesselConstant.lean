@@ -1,24 +1,72 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.OnePlaceKF
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.CellDataExists
-import Development.AbelianVarietyTheory.Definitions.Jets.SumIoPr
-import Formalism.SharpRestriction.CuspSpanNormBounds.LeadMinorK
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.OrbitalIntegralAeConvergenceContinuity
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.SettingConstruction
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.UnipotentUpperFacts
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.BigCellHermitian
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.ContinuousMulMt
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.OnePlaceKF
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.OrbitalIntegralAeConvergenceContinuity
+public import Development.AbelianVarietyTheory.Definitions.Jets.SideFam
+public import Formalism.SharpRestriction.CuspSpanNormBounds.NormalizedLocalScale
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.CellDataExists
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.BesselFunctionEqScalarSqNormalisedBesselTorusCon
+import Development.AbelianVarietyTheory.Proofs.FlagMeasures.BesselTorusElementProperties
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsIsType
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.HaarLieIsHaarOnUnipotentRadicalStatement
+import Development.AbelianVarietyTheory.Proofs.FlagMeasures.LebesgueRootCoordinatesMapBesselTorusConj
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.BesselDatumBothSidesAreSides
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.BesselGapExistsFunctional
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.BesselSettingUniformConstant
 import Development.AbelianVarietyTheory.Proofs.JetHarmonics.DiscreteSeriesUnitarySmoothBasic
 import Development.AbelianVarietyTheory.Proofs.JetHarmonics.HaarEqSmul
 import Development.AbelianVarietyTheory.Proofs.JetHarmonics.IsHaarOnIffGroupsUnitaryUnipotent
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.BesselGapExistsFunctional
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.BesselDatumBothSidesAreSides
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.BesselSettingUniformConstant
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.BesselTorusElementProperties
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.LebesgueRootCoordinatesMapBesselTorusConj
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.BesselFunctionEqScalarSqNormalisedBesselTorusCon
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsIsType
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.HaarLieIsHaarOnUnipotentRadicalStatement
+import Formalism.FormalDegreeBessel.FinalBF
+import Formalism.FormalDegreeBessel.FinalG
+import Formalism.FormalDegreeBessel.FormalDegreeRatio.UnitaryWeylNormalHolds
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.BigCellHermitian
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.SettingConstruction
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.UnipotentUpperFacts
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LowerSmoothStability.ExistsFinStableOfMemSSup
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.Admissible
+
+@[expose] public section
 
 open BranchingSupport GlobalTheory.CellAmp Formalism.BasicNotions Formalism.MainNotions.S Formalism.QuantumDeterminants Matrix MeasureTheory Finset
 open scoped InnerProductSpace ENNReal
@@ -36,8 +84,8 @@ variable (c : Fin r → ℂ) (μ : Matrix (Fin (k + 1)) (Fin (k + 1)) ℂ)
 theorem mul_bigCell_low (M : B.Mat k r) (i j : Fin (2 * r + k + 1)) (hj : j.val < r) :
     (M * bigCell k r c μ) i j = M i (esI k r ⟨j.val, hj⟩) * c ⟨j.val, hj⟩ := by
   rw [Matrix.mul_apply, Finset.sum_eq_single (esI k r ⟨j.val, hj⟩)]
-  · unfold bigCell; rw [dif_pos hj, if_pos rfl]
-  · intro l _ hl; unfold bigCell; rw [dif_pos hj, if_neg hl, mul_zero]
+  · unfold bigCell; rw [dite_eq_left hj, if_pos rfl]
+  · intro l _ hl; unfold bigCell; rw [dite_eq_left hj, if_neg hl, mul_zero]
   · simp
 
 theorem bigCell_row (i j : Fin (2 * r + k + 1)) (hi : i.val < r) (h : i.val + j.val ≠ 2 * r + k) :
@@ -56,7 +104,7 @@ theorem bigCell_row (i j : Fin (2 * r + k + 1)) (hi : i.val < r) (h : i.val + j.
 theorem bigCell_col (i j : Fin (2 * r + k + 1)) (hj : r + k < j.val) (h : i.val + j.val ≠ 2 * r + k) :
     bigCell k r c μ i j = 0 := by
   unfold bigCell
-  rw [dif_neg (by omega), dif_neg (by omega), if_neg (by omega)]
+  rw [dite_eq_right (by omega), dite_eq_right (by omega), if_neg (by omega)]
 
 theorem rStab_bigCell (hc : ∀ a, c a ≠ 0) (hg : bigCell k r c μ ∈ UH (Hpk k r)) :
     RStab k r (bigCell k r c μ) = {1} := by
@@ -117,7 +165,7 @@ theorem rStab_bigCell (hc : ∀ a, c a ≠ 0) (hg : bigCell k r c μ ∈ UH (Hpk
       have : g i l = 0 := by
         rw [hgdef]
         unfold bigCell
-        rw [dif_pos hl', if_neg]
+        rw [dite_eq_left hl', if_neg]
         rw [Fin.ext_iff]
         simp only [esI, m] at hl ⊢
         omega
@@ -127,14 +175,22 @@ theorem rStab_bigCell (hc : ∀ a, c a ≠ 0) (hg : bigCell k r c μ ∈ UH (Hpk
 end stab
 
 theorem haar_smul {U : Set (B.Mat k r)} {μ : Measure (Mt k r)} (h : B.IsHaarOn U μ) {x : ℝ} (hx : 0 < x) :
-    B.IsHaarOn U (ENNReal.ofReal x • μ) where
-  conc := by rw [Measure.smul_apply, h.conc, smul_zero]
-  left a ha := by rw [Measure.map_smul, h.left a ha]
-  right a ha := by rw [Measure.map_smul, h.right a ha]
-  finite_compact K hK := by
+    B.IsHaarOn U (ENNReal.ofReal x • μ) := by
+  refine ⟨?_, ?_, ?_, ?_, ?_⟩
+  · rw [Measure.smul_apply, h.conc, smul_zero]
+  · intro a ha
+    have hcont : Continuous (lmulM a : Mt k r → Mt k r) :=
+      continuous_const.matrix_mul continuous_id
+    rw [Measure.map_smul _ hcont.measurable.aemeasurable, h.left a ha]
+  · intro a ha
+    have hcont : Continuous (B.rmulF a : Mt k r → Mt k r) :=
+      continuous_id.matrix_mul continuous_const
+    rw [Measure.map_smul _ hcont.measurable.aemeasurable, h.right a ha]
+  · intro K hK
     rw [Measure.smul_apply, smul_eq_mul]
     exact ENNReal.mul_lt_top ENNReal.ofReal_lt_top (h.finite_compact K hK)
-  ne_zero h0 := h.ne_zero <| by
+  · intro h0
+    apply h.ne_zero
     have h1 := Measure.measure_univ_eq_zero.2 h0
     rw [Measure.smul_apply, smul_eq_mul] at h1
     exact Measure.measure_univ_eq_zero.1 ((mul_eq_zero.1 h1).resolve_left (ENNReal.ofReal_pos.2 hx).ne')

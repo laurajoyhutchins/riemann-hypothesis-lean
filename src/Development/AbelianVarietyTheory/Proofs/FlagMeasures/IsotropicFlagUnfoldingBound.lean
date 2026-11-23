@@ -1,17 +1,62 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Statements.CuspFrameWeights.SameKindIsometric
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.IsLatMeasurableConst
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.AdelicLatticeStabiliserIsCompactIsOpen
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.SecondCountableFiniteAdelicUnitaryPoints
+module
+
+public import Development.AbelianVarietyTheory.Statements.CuspFrameWeights.SameKindIsometric
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.IsLatMeasurableConst
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.AdelicLatticeStabiliserIsCompactIsOpen
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.AutomorphicInstanceExistsFundamentalDomain
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.CovolProdLeTsumSlices
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsAdaptedBasisChangeModelsStatement
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsAdaptedBasisSaturatedIsotropicFlagStatement
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsIsSatFlag
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.FlagClassMeasureBoundLatticeStabiliserStatement
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.FlagsConjugateOfSameAdaptedModelsStatement
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.LeftQuotientCovolumeEqMeasureInterFundamentalDom
 import Development.AbelianVarietyTheory.Proofs.FlagMeasures.RationalPointsCountableDiscreteSubgroupAdelic
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsIsSatFlag
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsAdaptedBasisSaturatedIsotropicFlagStatement
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsAdaptedBasisChangeModelsStatement
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.FlagsConjugateOfSameAdaptedModelsStatement
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.CovolProdLeTsumSlices
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.FlagClassMeasureBoundLatticeStabiliserStatement
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.LeftQuotientCovolumeEqMeasureInterFundamentalDom
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.AutomorphicInstanceExistsFundamentalDomain
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.SecondCountableFiniteAdelicUnitaryPoints
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Algebra.Group.Units
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open MeasureTheory NumberField Matrix Finset Formalism.MainNotions.S GlobalTheory.Count GlobalTheory.FlagMeas GlobalTheory.FlagBase
 
@@ -32,8 +77,8 @@ theorem tsum_pi_prod_le {ι : Type} [Fintype ι] {α : ι → Type} (f : ∀ i, 
     _ ≤ _ := Finset.prod_le_prod' fun i _ => ENNReal.sum_le_tsum _
 
 abbrev latRel (E : Type) [Field E] [NumberField E] (j : ℕ) :
-    {Λ : Submodule (𝓞 E) (Fin j → E) // Submodule.IsLattice E Λ} →
-      {Λ : Submodule (𝓞 E) (Fin j → E) // Submodule.IsLattice E Λ} → Prop :=
+    {Λ : Submodule (𝓞 E) (Fin j → E) // Submodule.IsFullLattice E Λ} →
+      {Λ : Submodule (𝓞 E) (Fin j → E) // Submodule.IsFullLattice E Λ} → Prop :=
   fun Λ Λ' => ∃ γ : GL (Fin j) E, ∀ y, (γ : Matrix (Fin j) (Fin j) E) *ᵥ y ∈ Λ'.1 ↔ y ∈ Λ.1
 
 theorem latRel_equiv (E : Type) [Field E] [NumberField E] (j : ℕ) : Equivalence (latRel E j) := by
@@ -46,10 +91,11 @@ theorem latRel_equiv (E : Type) [Field E] [NumberField E] (j : ℕ) : Equivalenc
     rw [Units.val_mul, ← Matrix.mulVec_mulVec, h', h]
 
 theorem countable_lattices (E : Type) [Field E] [NumberField E] (j : ℕ) :
-    Countable {Λ : Submodule (𝓞 E) (Fin j → E) // Submodule.IsLattice E Λ} := by
+    Countable {Λ : Submodule (𝓞 E) (Fin j → E) // Submodule.IsFullLattice E Λ} := by
   have : Countable E := Countable.of_equiv _ (Module.finBasis ℚ E).equivFun.toEquiv.symm
-  have h : ∀ Λ : {Λ : Submodule (𝓞 E) (Fin j → E) // Submodule.IsLattice E Λ},
-      ∃ s : Finset (Fin j → E), Submodule.span (𝓞 E) (s : Set (Fin j → E)) = Λ.1 := fun Λ => Λ.2.fg
+  have h : ∀ Λ : {Λ : Submodule (𝓞 E) (Fin j → E) // Submodule.IsFullLattice E Λ},
+      ∃ s : Finset (Fin j → E), Submodule.span (𝓞 E) (s : Set (Fin j → E)) = Λ.1 := fun Λ =>
+    Λ.2.toIsLattice.fg
   choose s hs using h
   refine Function.Injective.countable (f := s) fun a b hab => Subtype.ext ?_
   rw [← hs a, ← hs b, hab]

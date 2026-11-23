@@ -1,11 +1,57 @@
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ThetaParseval.BlockDeterminants.Decomp
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ThetaParseval.HalfIndexLattices.SplitStab
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ThetaParseval.HalfIndexLattices.IsLatRepL
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ThetaParseval.ThetaKernels.GalTPDefs
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ThetaParseval.ThetaKernels.ThkTowStab
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ThetaParseval.ThetaKernels.ThkBaseBadA
+module
 
-set_option synthInstance.maxHeartbeats 200000
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ThetaParseval.ThetaKernels.GalTPDefs
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AdeleEqZeroOfComp
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ThetaParseval.ThetaKernels.ThkBaseBadA
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ThetaParseval.ThetaKernels.ThkTowStab
+import Development.WeilBound.ThetaLifts.LatticeBasics.CommuteTheta
+import Development.WeilBound.ThetaLifts.LatticeBasics.EulerProd
+public import Development.WeilBound.ThetaLifts.LocalTheory.ArchimedeanBumps.TracePiReal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Matrix.FiniteDimensional
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
+
 
 section
 noncomputable section
@@ -256,7 +302,52 @@ theorem UpperTheory.TP.decomp_k :
     · rw [map_mul, map_inv, Euler.mem_loc.1 (Euler.prj_mem b), inv_mul_cancel]
     · have := pr_sum_mem_pk H b S hH
       rwa [pr_eq_pk.2 (mem_gAt_pk.1 hb)] at this
-  · exact (Filter.eventually_cofinite.1 ((Euler.ae_mulVec hX.lat (mat g)).and (Euler.ae_mulVec hX.lat (mat g⁻¹)))).subset
+  · have hFull : X.L.IsFullLattice E := by
+      let := hX.lat
+      refine { span_eq_top := ?_ }
+      let W := Submodule.span E (X.L : Set (Fin n → E))
+      change W = ⊤
+      by_contra hW
+      let g : (Fin n → E) →ₗ[E] Module.Dual E W :=
+        ((dotProductBilin E E).compl₂ (Matrix.mulVecLin X.Jᵀ)).domRestrict₂ W
+      have hdim : Module.finrank E (Module.Dual E W) < Module.finrank E (Fin n → E) := by
+        rw [Subspace.dual_finrank_eq]
+        exact Submodule.finrank_lt hW
+      obtain ⟨z, hz, hz₀⟩ :=
+        Submodule.exists_mem_ne_zero_of_ne_bot (LinearMap.ker_ne_bot_of_finrank_lt (f := g) hdim)
+      let y : Fin n → E := fun i => σ (z i)
+      have hy₀ : y ≠ 0 := by
+        intro hy
+        apply hz₀
+        exact funext fun i => σ.injective ((congrFun hy i).trans (map_zero σ).symm)
+      have hJ : X.Jᵀ.map σ = X.J := Matrix.ext hX.herm
+      -- Self-duality puts every scalar multiple of an orthogonal vector in the lattice.
+      have hline (a : E) : a • y ∈ X.L := (hX.dual _).2 fun x hx => by
+        have hz' : z ⬝ᵥ X.Jᵀ *ᵥ x = 0 :=
+          congrArg (fun f : Module.Dual E W => f ⟨x, Submodule.subset_span hx⟩)
+            (LinearMap.mem_ker.mp hz)
+        have horth : form σ X.J y x = 0 := by
+          have he := σ.toRingHom.map_dotProduct z (X.Jᵀ *ᵥ x)
+          rw [hz', map_zero] at he
+          have hm : σ.toRingHom ∘ (X.Jᵀ *ᵥ x) = X.J *ᵥ (fun i => σ (x i)) := by
+            funext i
+            rw [Function.comp_apply, σ.toRingHom.map_mulVec]
+            exact congrFun (congrArg (fun M => M *ᵥ (fun j => σ (x j))) hJ) i
+          rw [hm] at he
+          exact he.symm
+        have : form σ X.J (a • y) x = 0 := by
+          simpa only [form, smul_dotProduct, smul_eq_mul] using
+            (show a * form σ X.J y x = 0 by rw [horth, mul_zero])
+        rw [this]
+        exact isIntegral_zero
+      let i : E →ₗ[𝓞 E] X.L :=
+        ((LinearMap.toSpanSingleton E _ y).restrictScalars (𝓞 E)).codRestrict X.L hline
+      let : Module.Finite (𝓞 E) X.L := Module.Finite.iff_fg.mpr hX.lat.fg
+      let : Module.Finite (𝓞 E) E := Module.Finite.of_injective i fun a b hab =>
+        smul_left_injective E hy₀ (congrArg Subtype.val hab)
+      exact RingOfIntegers.not_isField E
+        (isField_of_isIntegral_of_isField (IsFractionRing.injective (𝓞 E) E) (Field.toIsField E))
+    exact (Filter.eventually_cofinite.1 ((Euler.ae_mulVec hFull (mat g)).and (Euler.ae_mulVec hFull (mat g⁻¹)))).subset
       fun v hv h => hv fun z hz h3 => ⟨h.1 z hz h3, h.2 z hz h3⟩
 end
 end

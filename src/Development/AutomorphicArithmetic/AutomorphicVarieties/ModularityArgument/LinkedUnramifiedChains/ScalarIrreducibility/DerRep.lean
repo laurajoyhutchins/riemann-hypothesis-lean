@@ -1,7 +1,48 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.LinkedUnramifiedChains.RedDefs
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.LinkedUnramifiedChains.ScalarIrreducibility.DerCont
-import Development.AutomorphicArithmetic.AutomorphicVarieties.FrobeniusSmoothVectors.ArtinRees
-import Development.AutomorphicArithmetic.AutomorphicVarieties.FrobeniusSmoothVectors.CoB
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.LinkedUnramifiedChains.RedDefs
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.FrobeniusSmoothVectors.ArtinRees
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.FrobeniusSmoothVectors.CoB
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.LinkedUnramifiedChains.ScalarIrreducibility.DerCont
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 set_option linter.overlappingInstances false
 
@@ -26,7 +67,7 @@ private theorem bdd_of_small {R K : Type} [CommRing R] [NormedField K] (I : Idea
   refine ⟨C + 1, fun b => ?_⟩
   have h1 : b - s (Ideal.Quotient.mk I b) ∈ I := Ideal.Quotient.eq.1 (hs _).symm
   have h2 : φ b = φ (s (Ideal.Quotient.mk I b)) + φ (b - s (Ideal.Quotient.mk I b)) := by
-    rw [← map_add, add_sub_cancel]
+    rw [← map_add (f := _), add_sub_cancel]
   rw [h2]
   exact (norm_add_le _ _).trans (add_le_add (hC _) (h _ h1))
 
@@ -63,7 +104,7 @@ private theorem small_smul {B A K : Type} [CommRing B] [CommRing A] [Algebra B A
     | mem t ht => exact (hC₁ t ht).trans h1
     | zero => simpa using h2
     | add a b _ _ ha hb =>
-      rw [map_add]
+      rw [map_add (f := _)]
       exact (IsUltrametricDist.norm_add_le_max _ _).trans (max_le ha hb)
     | smul b e _ he =>
       rw [hsm]
@@ -86,9 +127,9 @@ private theorem small_smul {B A K : Type} [CommRing B] [CommRing A] [Algebra B A
     · exact (by simpa using hmul _ _ 1 _ (hx e) (hk b hbk).1 zero_le_one : _ ≤ _).trans hδ1
   · rw [Algebra.smul_def, map_mul]
     exact (by simpa using hmul _ _ _ 1 (hk b hbk).2 (hx e) hδ.le : _ ≤ _).trans hδ1
-  · rw [map_add]
+  · rw [map_add (f := _)]
     exact (IsUltrametricDist.norm_add_le_max _ _).trans (max_le h.1 h'.1)
-  · rw [map_add]
+  · rw [map_add (f := _)]
     exact (IsUltrametricDist.norm_add_le_max _ _).trans (max_le h.2 h'.2)
 
 private theorem entry_cont {X B A K : Type} [TopologicalSpace X] [CommRing B] [CommRing A] [Algebra B A] [NormedField K]
@@ -158,6 +199,7 @@ private theorem char_cont' {O X B A K : Type} [CommRing O] [TopologicalSpace X] 
     char_cont I (D.toAddMonoidHom.comp (algebraMap B A).toAddMonoidHom)
       (fun ε hε => (hs ε hε).imp fun _ h b hb => (h b hb).1) χ hc⟩
 
+set_option synthInstance.maxHeartbeats 200000 in
 theorem UpperTheory.V.J.derRep :
     ∀ (l : ℕ) [Fact l.Prime] (c : Coef l) [Fr.IsCoef l c.O] (F : Fr.Frame l (ResidueField c.O)) (C₀ n : ℕ), F.Ok C₀ → (n = 2 ∨ n = 3) →
         ∀ (S : Fr.Space c.O F n), ∀ ξ : S.A →ₐ[c.O] Qbar l, IntPt S ξ → ∀ D ∈ PtDer ξ (Qbar l),

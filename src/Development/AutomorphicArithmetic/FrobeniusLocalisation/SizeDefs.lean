@@ -1,5 +1,46 @@
-import Formalism.SharpRestriction.RamificationFrobenius.TotientGaloisClasses.PrimePairSizeCondition
-import Formalism.SharpRestriction.RamificationFrobenius.TotientGaloisClasses.HostFacts
+module
+
+public import Formalism.SharpRestriction.RamificationFrobenius.TotientGaloisClasses.ConjEMemHostFIff
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -12,12 +53,6 @@ namespace Frame
 open _root_.Formalism.HC.Frame
 
 variable (φ : Frame)
-
-def oh : ℕ := Nat.card φ.hH.ker
-
-def Thick (T : Finset ℕ) (u : φ.A) (π : φ.GG) : Prop := ∃ s ∈ T, π = φ.tau2 (φ.dig s + u)
-
-def letter {φ : Frame} (g τ : φ.GG) (i : ℤ) : φ.GG := placeOf (g ^ i * τ)
 
 end Frame
 
@@ -32,29 +67,7 @@ def frobG (p : ℕ) : φ.GG :=
 
 def Inert (p : ℕ) : Prop := p.Prime ∧ jacobiSym (-(H.d : ℤ)) p = -1
 
-def DRC (B : ℝ) : Set ℕ :=
-  {p | H.Inert p ∧ (p : ℝ) ≤ B ∧ φ.cc ∈ Subgroup.zpowers (H.frobG p) ∧ H.frobG p ≠ φ.cc}
-
-def DRh (B : ℝ) : Set ℕ := {p | H.Inert p ∧ (p : ℝ) ≤ B ∧ φ.hH (H.frobG p).2 = 1}
-
 theorem frobG_of_coprime {p : ℕ} (h : Nat.Coprime p H.condN) : H.frobG p = H.art (ZMod.unitOfCoprime p h) := dif_pos h
-
-theorem Inert.ne_two {H : HostRaw φ} {p : ℕ} (h : H.Inert p) : p ≠ 2 := by
-  rintro rfl
-  have h1 := h.2
-  have h8 := H.d_mod_eight
-  have h2 : jacobiSym (-(H.d : ℤ)) 2 = jacobiSym 1 2 := by
-    apply jacobiSym.mod_left'
-    push_cast
-    omega
-  rw [h2, jacobiSym.one_left] at h1
-  exact absurd h1 (by decide)
-
-theorem Inert.not_dvd {H : HostRaw φ} {p : ℕ} (h : H.Inert p) : ¬ p ∣ H.condN :=
-  H.not_dvd_condN_of_inert h.1 h.ne_two h.2
-
-theorem Inert.coprime {H : HostRaw φ} {p : ℕ} (h : H.Inert p) : Nat.Coprime p H.condN :=
-  h.1.coprime_iff_not_dvd.2 h.not_dvd
 
 end HostRaw
 

@@ -1,6 +1,48 @@
-import Formalism.SharpRestriction.GrowthBounds.ChartComparison.StepIn
-import Formalism.LocalToGlobal.HermitianForms.TiedTwSym
-import Formalism.LocalToGlobal.GroupLattices.TiedFamilies.TiePtOneRec
+module
+
+public import Formalism.LocalToGlobal.HermitianForms.TiedTw
+public import Formalism.SharpRestriction.GrowthBounds.ChartComparison.CmpGlMemMIff
+public import Formalism.LocalToGlobal.GroupLattices.TiedFamilies.TiePtOneRec
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Formalism.LocalToGlobal.HermitianColumns.TiedCh
+public import Formalism.LocalToGlobal.HermitianForms.TiedSym
+public import Formalism.LocalToGlobal.HermitianForms.TiedTwSym
+
+@[expose] public section
 
 noncomputable section
 
@@ -24,25 +66,6 @@ variable {D : D7} {Tw : TwForms D} {inQ : D.what₂.Tup → HeightOneSpectrum (�
   {T : Formalism.L2.Herm.TwChTied D inQ} {H : Formalism.L2.Herm.HermColsCh D} {J : Formalism.L2.Herm.TwChJointS T H}
   {F : ∀ u, FormsTiedSym D u (H.Ch u) (H.chOf u)}
 
-set_option maxHeartbeats 4000000 in
-
-def stepInTw (W : TwFormsTiedS D Tw T J F) (u : D.what₂.Word) (μ : D.what₂.Tup) (hμ : μ ≠ D.what₂.mu0) (i : ℕ) (h1 : 1 ≤ i)
-    (hm : i ≤ D.R.m) {p : ℕ} (G : GAtP p) (dt : ∀ β, DetTie (W.ch u μ hμ i h1 hm β).lev)
-    (L : LocPart D G (T.Ch u μ i) (D.R.N i)) : StepIn (Tw.fm u μ) i hm G where
-  T := (D.mem u).A.T
-  bad := badQ D (T.Q μ)
-  eY := twYS T F u μ i hm
-  okW := okQ D (T.Q μ)
-  Ch := T.Ch u μ i
-  chOf := T.chOf u μ i
-  lat := fun c => latCrd D i hm (T.lat u μ i c)
-  K := W.ch u μ hμ i h1 hm
-  val := W.val u μ hμ i h1 hm
-  tw := fun β => DetTw.ofChiD (dt β) (cTw D i)
-  cmpt := L.cmpt
-  eC := L.eC
-  loc := L.loc
-  pos := L.pos
 
 theorem badQ_notOver (u : D.what₂.Word) (w : D.what₂.places.Pl) (hg : GIdx D.host (D.mem u).A.T (D.what₂.places.resChar w))
     (Q : Finset (HeightOneSpectrum (𝓞 D.host.F))) (hQ : okQ D Q w) (w' : HeightOneSpectrum (𝓞 D.host.F)) (hw : w' ∈ badQ D Q) :

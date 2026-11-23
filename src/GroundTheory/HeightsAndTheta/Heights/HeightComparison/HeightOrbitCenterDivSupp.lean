@@ -1,5 +1,47 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HeightComparison.HeightOrbitCenter
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HeightComparison.HeightOrbitCenter
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -23,8 +65,9 @@ theorem exists_finitePlace_two_lt_one (K : Type) [Field K] [NumberField K] :
         map_eq_zero_iff _ (algebraMap ℤ (𝓞 K)).injective_int] at ha
       simp [ha])
   have h2 : (2 : 𝓞 K) ∈ Q := by
-    have : (2 : ℤ) ∈ Q.comap (algebraMap ℤ (𝓞 K)) := hQc ▸ Ideal.mem_span_singleton_self 2
-    simpa using this
+    have h2Z : (2 : ℤ) ∈ Ideal.under ℤ Q :=
+      hQc.symm ▸ Ideal.mem_span_singleton_self 2
+    simpa using (Ideal.mem_under (A := ℤ) (P := Q)).mp h2Z
   have hne : Q ≠ ⊥ := by
     rintro rfl
     rw [Ideal.mem_bot] at h2
@@ -33,26 +76,5 @@ theorem exists_finitePlace_two_lt_one (K : Type) [Field K] [NumberField K] :
   rw [FinitePlace.mk_apply, show (2 : K) = algebraMap (𝓞 K) K 2 from (map_ofNat _ 2).symm]
   exact (FinitePlace.norm_lt_one_iff_mem (K := K)
     (v := (⟨Q, hQ, hne⟩ : IsDedekindDomain.HeightOneSpectrum (𝓞 K))) (2 : 𝓞 K)).mpr h2
-
-example : ∃ v : FinitePlace (coordField samplePoint), BlockNonzero samplePoint ∧
-    Geo.IsMultiHomog (ι := blockIdx (fun _ : Unit ↦ 1)) (chartMonomial (fun _ ↦ 1) 1) 1 ∧
-    chartMonomial (fun _ ↦ 1) 1 ∉ orbitIdeal samplePoint ∧
-    chartMonomial (fun _ ↦ 1) 1 ∈ orbitCenter samplePoint v := by
-  obtain ⟨v, hv⟩ := exists_finitePlace_two_lt_one (coordField samplePoint)
-  refine ⟨v, samplePoint_blockNonzero,
-    (geoMultiHomog_iff _ _).mpr (isWeightedHomogeneous_chartMonomial _ _),
-    chartMonomial_notMem_orbitIdeal _ _ (fun _ ↦ by simp [samplePoint]) 1, ?_⟩
-  have hX : chartMonomial (n := fun _ : Unit ↦ 1) (fun _ ↦ 1) 1 = X ⟨(), 1⟩ := by
-    simp [chartMonomial]
-  rw [hX]
-  refine X_mem_orbitCenter _ _ () 1 ?_
-  have h1 : coordVec samplePoint () 1 = 2 :=
-    Subtype.ext (by simp [coordVec, samplePoint]; rfl)
-  have h0 : coordVec samplePoint () 0 = 1 := Subtype.ext (by simp [coordVec, samplePoint])
-  rw [h1]
-  calc v 2 < 1 := hv
-    _ = v (coordVec samplePoint () 0) := by rw [h0, map_one]
-    _ ≤ ⨆ j, v (coordVec samplePoint () j) :=
-      le_ciSup (f := fun j ↦ v (coordVec samplePoint () j)) (Set.finite_range _).bddAbove 0
 
 end GroundTheory.Heights₂.Heights

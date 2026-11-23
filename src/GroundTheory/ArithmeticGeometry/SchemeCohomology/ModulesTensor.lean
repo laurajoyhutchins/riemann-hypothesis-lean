@@ -1,4 +1,63 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.Category.ModuleCat.Presheaf.Monoidal
+public import Mathlib.Algebra.Category.ModuleCat.Presheaf.Sheafification
+public import Mathlib.CategoryTheory.Localization.Monoidal.Braided
+public import Mathlib.Combinatorics.Quiver.ReflQuiver
+public import Mathlib.Order.CompletePartialOrder
+import Mathlib.Algebra.Category.ModuleCat.Sheaf.Localization
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Algebra.Colimit.TensorProduct
+public import Mathlib.Algebra.Exact.Basic
+public import Mathlib.LinearAlgebra.TensorProduct.RightExactness
+public import Mathlib.RingTheory.TensorProduct.Finite
+public import Mathlib.Algebra.Category.Ring.Limits
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 open CategoryTheory MonoidalCategory Opposite TensorProduct
@@ -45,7 +104,7 @@ lemma zeroSieve_add {U : Cᵒᵖ} (x y : M.obj U) :
     zeroSieve x ⊓ zeroSieve y ≤ zeroSieve (x + y) := by
   rintro W h ⟨hx, hy⟩
   change M.map h.op (x + y) = 0
-  rw [map_add]
+  rw [map_add (f := _)]
   erw [hx, hy]
   exact add_zero _
 
@@ -53,7 +112,7 @@ lemma imSieve_add (φ : M ⟶ N) {U : Cᵒᵖ} (x y : N.obj U) :
     imSieve φ x ⊓ imSieve φ y ≤ imSieve φ (x + y) := by
   rintro W h ⟨⟨a, ha⟩, ⟨b, hb⟩⟩
   refine ⟨a + b, ?_⟩
-  rw [map_add, ha, hb, map_add]
+  rw [map_add (f := _), ha, hb, map_add (f := _)]
   rfl
 
 section
@@ -89,6 +148,7 @@ lemma zeroSieve_mem_of_rTensor_rangeRestrict (φ : M ⟶ N)
     (V : Cᵒᵖ) (z : (M ⊗ P).obj V)
     (hz : ((φ.app V).hom.rangeRestrict.rTensor (P.obj V)) z = 0) :
     zeroSieve z ∈ J V.unop := by
+  letI : CommRing ((R ⋙ forget₂ CommRingCat RingCat).obj V) := inferInstanceAs (CommRing (R.obj V))
   have hex : Function.Exact (LinearMap.ker (φ.app V).hom.rangeRestrict).subtype
       (φ.app V).hom.rangeRestrict := by
     rw [LinearMap.exact_iff, Submodule.range_subtype]
@@ -105,7 +165,7 @@ lemma zeroSieve_mem_of_rTensor_rangeRestrict (φ : M ⟶ N)
     rw [LinearMap.mem_ker] at this
     exact congrArg Subtype.val this
   | add a b ha hb =>
-    rw [map_add]
+    rw [map_add (f := _)]
     exact J.superset_covering (zeroSieve_add (M := M ⊗ P) _ _) (J.intersection_covering ha hb)
 
 end
@@ -122,6 +182,7 @@ lemma whiskerRight_zeroSieve_mem (φ : M ⟶ N)
     (hinj : ∀ (U : Cᵒᵖ) (x : M.obj U), φ.app U x = 0 → zeroSieve x ∈ J U.unop)
     (hsurj : ∀ (U : Cᵒᵖ) (y : N.obj U), imSieve φ y ∈ J U.unop)
     (U : Cᵒᵖ) (x : (M ⊗ P).obj U) (hx : (φ ▷ P).app U x = 0) : zeroSieve x ∈ J U.unop := by
+  letI : CommRing ((R ⋙ forget₂ CommRingCat RingCat).obj U) := inferInstanceAs (CommRing (R.obj U))
   have hx' : (φ.app U).hom.rTensor (P.obj U) x = 0 := hx
   obtain ⟨A, hA, y, rfl⟩ := Submodule.exists_fg_le_eq_rTensor_subtype (x : (M.obj U) ⊗[_] (P.obj U))
   set f := (φ.app U).hom with hf
@@ -152,6 +213,7 @@ lemma whiskerRight_zeroSieve_mem (φ : M ⟶ N)
       map_zero' := Subtype.ext (map_zero _)
       map_add' := fun a b => Subtype.ext (map_add _ _ _) }
   let RW := (R ⋙ forget₂ CommRingCat RingCat).obj (op W)
+  letI : CommRing RW := inferInstanceAs (CommRing (R.obj (op W)))
   let pW : P.obj U →+ P.obj (op W) :=
     { toFun := fun p => (P.map g.op p : P.obj (op W))
       map_zero' := map_zero (P.map g.op).hom
@@ -166,7 +228,7 @@ lemma whiskerRight_zeroSieve_mem (φ : M ⟶ N)
       (LinearMap.range (φ.app (op W)).hom) ⊗[RW] P.obj (op W) :=
     TensorProduct.liftAddHom (R := (R ⋙ forget₂ CommRingCat RingCat).obj U)
       { toFun := fun b => AddMonoidHom.mk' (fun p => ρ b ⊗ₜ[RW] pW p)
-          (fun p q => by rw [map_add, tmul_add])
+          (fun p q => by rw [map_add (f := _), tmul_add])
         map_zero' := by ext p; simp
         map_add' := fun a b => by ext p; simp [add_tmul] }
       (fun r b p => by
@@ -184,7 +246,7 @@ lemma whiskerRight_zeroSieve_mem (φ : M ⟶ N)
       congr 1
       exact Subtype.ext (PresheafOfModules.naturality_apply φ g.op (a : M.obj U))
     | add a b ha hb =>
-      simp only [map_add] at ha hb ⊢
+      simp only [map_add (f := _)] at ha hb ⊢
       exact (congrArg _ (map_add ((M ⊗ P).map g.op).hom _ _)).trans
         ((map_add _ _ _).trans (congrArg₂ (· + ·) ha hb))
   erw [key, hB0, map_zero]
@@ -224,9 +286,10 @@ lemma W_toPresheaf_iff (φ : M ⟶ N) :
 
 end
 
-variable (J R) in
 
-abbrev W : MorphismProperty (PresheafOfModules.{u} (R ⋙ forget₂ CommRingCat RingCat)) :=
+variable (J R) in
+abbrev W (J : GrothendieckTopology C) (R : Cᵒᵖ ⥤ CommRingCat.{u}) :
+    MorphismProperty (PresheafOfModules.{u} (R ⋙ forget₂ CommRingCat RingCat)) :=
   J.W.inverseImage (PresheafOfModules.toPresheaf _)
 
 variable [J.WEqualsLocallyBijective AddCommGrpCat.{u}]

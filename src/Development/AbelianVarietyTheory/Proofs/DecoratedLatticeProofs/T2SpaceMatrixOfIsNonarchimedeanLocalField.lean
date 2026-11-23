@@ -1,8 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.PlacesToAdeles
-import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.IndicatorFunctionIdentity
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.LinearChangeOfVariablesLocalFieldMatrix
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.AddCharConductorAndHaarIntegersExist
+module
+
+public import Development.AbelianVarietyTheory.Definitions.LatticeFrames.IsSumFrame
+public import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.IndicatorFunctionIdentity
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.AddCharConductorAndHaarIntegersExist
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -111,11 +155,11 @@ theorem isCompact_lat (L : Submodule 𝒪[k] (n → k)) [L.IsLattice k] : IsComp
     ext x
     rw [SetLike.mem_coe, ← hv, Submodule.mem_span_range_iff_exists_fun, Set.mem_range]
   rw [hset]
-  refine isCompact_range (continuous_finset_sum _ fun i _ => continuous_pi fun j => ?_)
+  refine isCompact_range (continuous_finsetSum _ fun i _ => continuous_pi fun j => ?_)
   change Continuous fun c : Fin m → 𝒪[k] => (c i : k) * v i j
   exact (continuous_subtype_val.comp (continuous_apply i)).mul continuous_const
 
-theorem dual_compact_open (L : Submodule 𝒪[k] (n → k)) [L.IsLattice k] :
+theorem dual_compact_open (L : Submodule 𝒪[k] (n → k)) [L.IsFullLattice k] :
     IsCompact {η | InDual L η} ∧ IsOpen {η | InDual L η} := by
   obtain ⟨m, v, hv⟩ := Submodule.fg_iff_exists_fin_generating_family.mp (inferInstance : L.IsLattice k).fg
   have hvL : ∀ i, v i ∈ L := fun i => by
@@ -149,7 +193,7 @@ theorem dual_compact_open (L : Submodule 𝒪[k] (n → k)) [L.IsLattice k] :
   refine ⟨?_, hopen⟩
   have htop : Submodule.span k (Set.range v) = ⊤ := by
     rw [← Submodule.span_span_of_tower 𝒪[k] k (Set.range v), hv]
-    exact (inferInstance : L.IsLattice k).span_eq_top
+    exact Submodule.IsFullLattice.span_eq_top
   have hcoef : ∀ j : n, ∃ a : Fin m → k, ∑ i, a i • v i = Pi.single j 1 := fun j =>
     (Submodule.mem_span_range_iff_exists_fun k).mp (by rw [htop]; exact Submodule.mem_top)
   choose a ha using hcoef
@@ -161,14 +205,14 @@ theorem dual_compact_open (L : Submodule 𝒪[k] (n → k)) [L.IsLattice k] :
     simp only [dotProduct_sum, dotProduct_smul, smul_eq_mul, dotProduct_single, mul_one] at this
     simpa using this
   refine IsCompact.of_isClosed_subset (isCompact_univ_pi fun j => isCompact_range ?_) hclosed hsub
-  exact continuous_finset_sum _ fun i _ =>
+  exact continuous_finsetSum _ fun i _ =>
     continuous_const.mul (continuous_subtype_val.comp (continuous_apply i))
 
-theorem vecInd_mem (L : Submodule 𝒪[k] (n → k)) [L.IsLattice k] : vecInd L ∈ SB (n → k) := by
+theorem vecInd_mem (L : Submodule 𝒪[k] (n → k)) [L.IsFullLattice k] : vecInd L ∈ SB (n → k) := by
   haveI := t2Space_of_isNonarchimedeanLocalField_decorated_lattice k
   exact ite_mem_SB (P := fun y => y ∈ L) (isCompact_lat L) (isOpen_lat L)
 
-theorem dualInd_mem (L : Submodule 𝒪[k] (n → k)) [L.IsLattice k] : dualInd L ∈ SB (n → k) := by
+theorem dualInd_mem (L : Submodule 𝒪[k] (n → k)) [L.IsFullLattice k] : dualInd L ∈ SB (n → k) := by
   haveI := t2Space_of_isNonarchimedeanLocalField_decorated_lattice k
   exact ite_mem_SB (P := fun η => InDual L η) (dual_compact_open L).1 (dual_compact_open L).2
 
@@ -216,10 +260,10 @@ private theorem measurableSet_of_isCompact_of_mem_nhds_of_add_mem (G : Set (n �
   rw [heq]
   exact MeasurableSet.biUnion hbfin.countable fun g _ => hcmeas g
 
-open Classical in
 
+open Classical in
 theorem fpair_ne_zero (χ : AddChar k Circle) (hχ : Continuous χ) (ε : k) (hε : ε = 1 ∨ ε = -1) (μ : Measure (n → k))
-    [μ.IsAddHaarMeasure] (L : Submodule 𝒪[k] (n → k)) [L.IsLattice k] : fpair χ ε μ (vecInd L) (dualInd L) ≠ 0 := by
+    [μ.IsAddHaarMeasure] (L : Submodule 𝒪[k] (n → k)) [L.IsFullLattice k] : fpair χ ε μ (vecInd L) (dualInd L) ≠ 0 := by
   obtain ⟨s, hs⟩ := exists_cball_addChar_eq_one χ hχ
   have hcb : ∀ y : k, valuation k y ≤ valuation k (s : k) → y ∈ cball s := by
     intro y hy

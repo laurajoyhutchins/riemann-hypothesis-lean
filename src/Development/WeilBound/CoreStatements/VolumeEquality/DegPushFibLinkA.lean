@@ -1,4 +1,55 @@
-import Development.WeilBound.CoreStatements.VolumeEquality.DegPushDefs
+module
+
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsGenericFlag
+public import Mathlib.RingTheory.Valuation.ValuationSubring
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -63,11 +114,6 @@ theorem self_mem_flagStep (f : Fin r → V) (m : Fin r) : f m ∈ flagStep Ω f 
 
 theorem flagStep_mono (f : Fin r → V) {n n' : ℕ} (h : n ≤ n') : flagStep Ω f n ≤ flagStep Ω f n' :=
   Submodule.span_mono (Set.image_mono fun _ hk => lt_of_lt_of_le hk h)
-
-theorem exists_lead (f : Fin r → V) (m : Fin r) {x : V} (hx : x ∈ flagStep Ω f (m + 1)) :
-    ∃ t : Ω, x - t • f m ∈ flagStep Ω f m := by
-  obtain ⟨B, hB, rfl⟩ := (mem_flagStep_iff f _ _).1 hx
-  exact ⟨B m, sum_sub_mem f m hB⟩
 
 theorem gr_span {b₀ bb : Fin r → V} (h₀ : LinearIndependent Ω b₀) (hb : LinearIndependent Ω bb)
     (hf : ∀ n, flagStep Ω bb n = flagStep Ω b₀ n) (R : Subring Ω) (m : Fin r) {t : Ω}
@@ -134,18 +180,13 @@ theorem sup_minor_eq_one {n r : ℕ} (H : Matrix (Fin n) (Fin r) Ω₃) (G : Mat
     refine (mul_le_of_le_one_left' ((O.valuation_le_one_iff _).2 (prod_mem fun a _ => hH _ _))).trans ?_
     exact Finset.le_sup (f := fun I : Fin n → Fin r => O.valuation (Matrix.of fun a b => G (I a) b).det) (Finset.mem_univ I)
 
-theorem mul_sup {ι : Type} [Fintype ι] (γ : O.ValueGroup) (f : ι → O.ValueGroup) :
-    γ * Finset.univ.sup f = Finset.univ.sup fun I => γ * f I :=
-  Finset.apply_sup_eq_sup_comp_of_linearOrder (fun x => γ * x) (fun _ _ h => mul_le_mul_right h γ)
-    (by rw [show (⊥ : O.ValueGroup) = 0 from le_antisymm bot_le zero_le']; exact mul_zero γ)
-
 theorem val_le_of_mem_span {Ω : Type} [Field Ω] (i : Ω →+* Ω₃) (R : Subring Ω) (hR : ∀ a ∈ R, i a ∈ O) {S : Set Ω}
     {γ : O.ValueGroup} (hS : ∀ s ∈ S, O.valuation (i s) ≤ γ) {x : Ω} (hx : x ∈ Submodule.span R S) :
     O.valuation (i x) ≤ γ := by
   induction hx using Submodule.span_induction with
   | mem x hx => exact hS x hx
   | zero => simp
-  | add x y _ _ hx hy => rw [map_add]; exact (Valuation.map_add _ _ _).trans (max_le hx hy)
+  | add x y _ _ hx hy => rw [map_add (f := _)]; exact (Valuation.map_add _ _ _).trans (max_le hx hy)
   | smul a x _ hx =>
     show O.valuation (i ((a : Ω) * x)) ≤ γ
     rw [map_mul, map_mul]
@@ -155,36 +196,6 @@ theorem val_eq_of_span_eq {Ω : Type} [Field Ω] (i : Ω →+* Ω₃) (R : Subri
     (h : Submodule.span R {x} = Submodule.span R {y}) : O.valuation (i x) = O.valuation (i y) :=
   le_antisymm (val_le_of_mem_span O i R hR (S := {y}) (by rintro _ rfl; rfl) (h ▸ Submodule.mem_span_singleton_self x))
     (val_le_of_mem_span O i R hR (S := {x}) (by rintro _ rfl; rfl) (h ▸ Submodule.mem_span_singleton_self y))
-
-theorem prod_castLE {M : Type} [CommMonoid M] {r : ℕ} (m : Fin r) (f : Fin r → M) :
-    ∏ a : Fin (m + 1), f (Fin.castLE m.2 a) = ∏ m' ∈ Finset.Iic m, f m' := by
-  refine Finset.prod_bij (fun a _ => Fin.castLE m.2 a) (fun a _ => ?_) (fun a _ b _ h => Fin.castLE_injective _ h)
-    (fun b hb => ⟨⟨b, ?_⟩, Finset.mem_univ _, rfl⟩) fun _ _ => rfl
-  · exact Finset.mem_Iic.2 (Fin.le_def.2 (Nat.lt_succ_iff.1 a.2))
-  · exact Nat.lt_succ_iff.2 (Fin.le_def.1 (Finset.mem_Iic.1 hb))
-
-theorem minor_mul {r : ℕ} (u B : Matrix (Fin r) (Fin r) Ω₃) (hB : ∀ m' m : Fin r, (m : ℕ) + 1 ≤ m' → B m' m = 0) (m : Fin r)
-    (I : Fin (m + 1) → Fin r) :
-    (Matrix.of fun a b : Fin (m + 1) => (u * B) (I a) (Fin.castLE m.2 b)).det =
-      (∏ m' ∈ Finset.Iic m, B m' m') * (Matrix.of fun a b : Fin (m + 1) => u (I a) (Fin.castLE m.2 b)).det := by
-  have e : (Matrix.of fun a b : Fin (m + 1) => (u * B) (I a) (Fin.castLE m.2 b)) =
-      (Matrix.of fun a b : Fin (m + 1) => u (I a) (Fin.castLE m.2 b)) *
-        Matrix.of fun a b : Fin (m + 1) => B (Fin.castLE m.2 a) (Fin.castLE m.2 b) := by
-    ext a b
-    simp only [Matrix.mul_apply, Matrix.of_apply]
-    symm
-    refine Finset.sum_of_injOn (Fin.castLE m.2) (fun _ _ _ _ h => Fin.castLE_injective _ h) (by simp) (fun l _ hl => ?_)
-      fun _ _ => rfl
-    rw [hB, mul_zero]
-    by_contra h
-    refine hl ⟨⟨l, ?_⟩, by simp, rfl⟩
-    have := b.2
-    simp only [Fin.val_castLE] at h
-    omega
-  rw [e, Matrix.det_mul, mul_comm, Matrix.det_of_isUpperTriangular, ← prod_castLE m fun m' => B m' m']
-  · rfl
-  · intro a b h
-    exact hB _ _ h
 
 end
 

@@ -1,9 +1,59 @@
-import Mathlib
-import Formalism.LocalRingCardinality.AdicCompletionLocal.LocTied
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.ConvZero
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.NormRootSubOneLt
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CyclotomicCharacterPadicBasicProperties
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CyclotomicTowerTraceAlmostSurjective
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.ConvZero
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CyclotomicCharacterPadicBasicProperties
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CyclotomicTowerTraceAlmostSurjective
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.NormRootSubOneLt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.FieldTheory.Galois.Profinite
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Development.AbelianVarietyTheory.Definitions.Foundations.HTBasis
+
+@[expose] public section
 
 open Formalism.BasicNotions Formalism.BasicNotions.Loc Formalism.WeaklyAdmissibleFiltrations TensorProduct GlobalTheory.HWL GlobalTheory.Cyc GlobalTheory.Cyc.TraceTilt
 
@@ -140,28 +190,33 @@ theorem near_of_tilt {P : LocPrime l} (AI : LocAinf l P) (T : Finset (GQ l)) (d 
   have hr0 : 0 ≤ r := (norm_nonneg _).trans hb
   choose z hz hz' using fun s => AI.actT_coeff s x 0 y hy
   have hd' : ∑ t ∈ T, AI.actT (d * t) x = ∑ t ∈ T, AI.actT t x := by
+
     rw [← hd, map_sum]
     refine Finset.sum_congr rfl fun t _ => ?_
     rw [map_mul AI.actT, RingAut.mul_apply]
   have h1 := congrArg (PreTilt.coeff 0) hd'
+
   rw [map_sum, map_sum, Finset.sum_congr rfl fun s _ => hz' (d * s),
-    Finset.sum_congr rfl fun s _ => hz' s] at h1
+  Finset.sum_congr rfl fun s _ => hz' s] at h1
   have h2 : Ideal.Quotient.mk (Ideal.span {((l : ℕ) : OC l)})
       (∑ s ∈ T, (z (d * s) - z s)) = 0 := by
+
     rw [Finset.sum_sub_distrib, map_sub, map_sum, map_sum]
     exact sub_eq_zero.2 h1
   rw [mk_eq_zero_iff] at h2
   have h3 : ((∑ s ∈ T, (z (d * s) - z s) : OC l) : PadicComplex l) =
       ∑ s ∈ T, (AI.actC (d * s) y - AI.actC s y) := by
+
     rw [show ((∑ s ∈ T, (z (d * s) - z s) : OC l) : PadicComplex l) =
-      ∑ s ∈ T, ((z (d * s) - z s : OC l) : PadicComplex l) from
-      map_sum (PadicComplexInt l).subtype _ _]
+    ∑ s ∈ T, ((z (d * s) - z s : OC l) : PadicComplex l) from
+    map_sum (PadicComplexInt l).subtype _ _]
     refine Finset.sum_congr rfl fun s _ => ?_
     rw [← hz, ← hz]
     rfl
   have h5 : ((d (∑ t ∈ T, t b) - ∑ t ∈ T, t b : Om l) : PadicComplex l) =
       ∑ s ∈ T, (AI.actC (d * s) ((b : PadicComplex l) - y) - AI.actC s ((b : PadicComplex l) - y)) +
         ∑ s ∈ T, (AI.actC (d * s) y - AI.actC s y) := by
+
     rw [← Finset.sum_add_distrib, map_sum, ← Finset.sum_sub_distrib, PadicComplex.coe_eq, map_sum]
     refine Finset.sum_congr rfl fun s _ => ?_
     rw [map_sub, map_sub, map_sub, AI.actC_ext, AI.actC_ext, PadicComplex.coe_eq,
@@ -243,6 +298,7 @@ theorem fixed_of_near (hn : ∀ (g : GQ l) (x : Om l), ‖g x‖ = ‖x‖) (D A
       mul_inv_cancel₀ (zpow_pos hapos k).ne', mul_one, mul_comm ‖a‖, ← zpow_add_one₀ hapos.ne'] at h2
     linarith
   have htr : ∀ d ∈ D, d (∑ s ∈ S, s y) = ∑ s ∈ S, s y := fun d hd => by
+
     rw [map_sum]
     refine sum_shift D A S hS.1 hS.2 (fun g => g y) ?_ d hd
     intro g v _ hv
@@ -352,6 +408,7 @@ theorem faithH : ∀ (l : ℕ) [Fact l.Prime] (P : LocPrime l) (AI : LocAinf l P
         exact h1)
     refine near_of_tilt AI T d x y hxy b0 _ ((le_max_right _ _).trans hra3)
       (le_trans hy ((le_max_left _ _).trans hra3)) (hd.2 _ fun h hh => ?_)
+
     rw [map_sum]
     have := sum_shift A N T hT.1 hT.2 (fun g => AI.actT g x)
       (fun g v _ hv => by rw [map_mul AI.actT, RingAut.mul_apply, hxN v hv]) h hh
@@ -369,8 +426,10 @@ theorem faithH : ∀ (l : ℕ) [Fact l.Prime] (P : LocPrime l) (AI : LocAinf l P
     rw [← hn s (∑ s ∈ S₂, s (∑ t ∈ T, t e))]
     apply le_of_eq
     congr 1
+
     rw [hs₂ (fun r => (s * r) e), map_sum]
     refine Finset.sum_congr rfl fun s' _ => ?_
+
     rw [map_sum, map_sum]
     rfl
   · intro w hw1 hw d hd

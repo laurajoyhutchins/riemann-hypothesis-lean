@@ -1,8 +1,49 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.RowFrameCoherence.ClassFrameOO3FrameValTrans
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.StepPtRepPf
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.SpanPreservation
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.HermitianCombinationZ
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.RowFrameCoherence.ClassFrameOO3FrameValTrans
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.HermitianCombinationZ
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.SpanPreservation
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.StepPtRepPf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -16,22 +57,22 @@ variable {D : Formalism.BasicNotions.D7} (X : HidaSetting D)
 
 theorem frameLoc (w : D.what₂.Word) (v : NumberField.InfinitePlace X.B.I.F) :
     PI.SchurPlaces.LeviLA.Frame (X.B.I.ε v) (fun a => rv X.B.I v (X.eR a)) (fun a => rv X.B.I v (X.fR a))
-      (rv X.B.I v (X.zR w)) (X.wfr w v) where
-  ee := (Formalism.L2.SG.RealObj.InfCut.PtRepPf.frU X w v).ee
-  ef := (Formalism.L2.SG.RealObj.InfCut.PtRepPf.frU X w v).ef
-  ff := (Formalism.L2.SG.RealObj.InfCut.PtRepPf.frU X w v).ff
-  ez := (Formalism.L2.SG.RealObj.InfCut.PtRepPf.frU X w v).ez
-  fz := (Formalism.L2.SG.RealObj.InfCut.PtRepPf.frU X w v).fz
-  ew := (Formalism.L2.SG.RealObj.InfCut.PtRepPf.frU X w v).ew
-  fw := (Formalism.L2.SG.RealObj.InfCut.PtRepPf.frU X w v).fw
-  zw := (Formalism.L2.SG.RealObj.InfCut.PtRepPf.frU X w v).zw
-  ww := (Formalism.L2.SG.RealObj.InfCut.PtRepPf.frU X w v).ww
-  zz := fun h0 =>
-    (Formalism.L2.SG.RealObj.InfCut.PtRepPf.frU X w v).T_ne
-      (neg_eq_zero.1 (((Formalism.L2.SG.RealObj.InfCut.PtRepPf.frU X w v).zz).symm.trans h0))
-  card := by
-    have h := (Formalism.L2.SG.RealObj.InfCut.PtRepPf.frU X w v).card
-    omega
+      (rv X.B.I v (X.zR w)) (X.wfr w v) := by
+  let fr := Formalism.L2.SG.RealObj.InfCut.PtRepPf.frU X w v
+  exact
+    { ee := fr.ee
+      ef := fr.ef
+      ff := fr.ff
+      ez := fr.ez
+      fz := fr.fz
+      ew := fr.ew
+      fw := fr.fw
+      zw := fr.zw
+      ww := fr.ww
+      zz := fun h0 => fr.T_ne (neg_eq_zero.1 (fr.zz.symm.trans h0))
+      card := by
+        have h := fr.card
+        omega }
 
 end LocalFrameDecomposition
 

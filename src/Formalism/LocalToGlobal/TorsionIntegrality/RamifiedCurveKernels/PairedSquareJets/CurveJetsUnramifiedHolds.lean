@@ -1,5 +1,57 @@
-import Formalism.LocalToGlobal.TorsionIntegrality.RamifiedCurveKernels.StatementV
-import Formalism.LocalToGlobal.TorsionIntegrality.RamifiedCurveKernels.FinalC
+module
+
+public import Formalism.LocalToGlobal.TorsionIntegrality.RamifiedCurveKernels.StatementV
+public import Formalism.LocalToGlobal.TorsionIntegrality.RamifiedCurveKernels.StatementS
+public import Formalism.LocalToGlobal.TorsionIntegrality.RamifiedCurveKernels.PairedSquareJets.CurveKernelUnramOf
+import Formalism.LocalToGlobal.TorsionIntegrality.RamifiedCurveKernels.PairedSquareJets.Hurwitz
+import Formalism.LocalToGlobal.TorsionIntegrality.RamifiedCurveKernels.PairedSquareJets.Several
+import Formalism.LocalToGlobal.TorsionIntegrality.SecondCoefficientNorms.BinomialSeriesCoefficients.CoeffPowEqZeroOfCc
+import Formalism.LocalToGlobal.TorsionIntegrality.SecondCoefficientNorms.BinomialSeriesCoefficients.IntPSDerivativeOfLG
+import Formalism.LocalToGlobal.TorsionIntegrality.SecondCoefficientNorms.SecondCoeffConsistency
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 open scoped BigOperators
@@ -50,11 +102,6 @@ theorem jetsIn_half_sqSum {K : Type} [Field K] [CharZero K] {R : Subring K} {n :
   exact jetsIn_sum _ _ fun i _ => jetsIn_mul (jetsIn_C (R.mul_mem hS (hc i)))
     (jetsIn_divPow (MvPowerSeries.constantCoeff_X i) (jetsIn_X i) 2)
 
-theorem mem_of_binomScalar {K : Type} [Field K] {R : Subring K} {z : K} (h : IsBinomScalar R z) :
-    z ∈ R := by
-  have := h 1
-  simpa [binom] using this
-
 theorem shapeAt_one {K : Type} [NormedField K] [IsUltrametricDist K] [CharZero K]
     {l linv ph : PowerSeries K} (hlp : IsLogPair l linv) (hph : PowerSeries.constantCoeff ph = 0)
     (hj : ∀ i : ℕ, 1 ≤ i → ‖jet l ph i‖ ≤ 1) : ShapeAt l linv ph 1 := by
@@ -86,21 +133,6 @@ theorem shapeAt_one {K : Type} [NormedField K] [IsUltrametricDist K] [CharZero K
 end InflationOneCocycles
 
 open InflationOneCocycles
-
-theorem integral_unramified_holds : IntUnram := by
-  intro K _ _ _ l linv ph hF hu h1 hj O _ _ τ hE hB hN hA n m _ _ _ w hw δ hδ Th G hG hT
-  obtain ⟨J, hJ, hJe⟩ := intAtD K l linv ph 1 hF hu h1 (shapeAt_one hF.1 hF.2.2 hj) O τ hE hB hN hA
-    n m w hw δ hδ Th G hG hT
-  have hq : JetsIn (unitBall K) (MvPowerSeries.C (jet l ph 2 / 2) * sqSum (fun j => τ (w j))) :=
-    jetsIn_half_sqSum (hj 2 (by norm_num)) fun j => mem_of_binomScalar (hB (w j) (hw j))
-  have c0 : MvPowerSeries.constantCoeff
-      (-(MvPowerSeries.C (jet l ph 2 / 2) * sqSum (fun j => τ (w j)))) = 0 := by
-    rw [map_neg, map_mul, cc_sqSum, mul_zero, neg_zero]
-  have key : JetsIntegral Th := by
-    rw [hJe]
-    exact jetsIn_mul (R := unitBall K) (jetsIn_mvExp c0 (jetsIn_neg hq)) hJ
-  refine ⟨key, fun ν _ A hAx P hP => ?_⟩
-  exact Formalism.DworkPowerSeriesWeights.intOp K ν _ (jetsIn_linSub (R := unitBall K) hAx key) P hP
 
 theorem curve_jets_unramified_holds : CurveJetsUnram := by
   intro K _ _ _ W hc h2 s2 al albar t ι _ neg xP yP hE hx hy hNal hal ht hd hb hs

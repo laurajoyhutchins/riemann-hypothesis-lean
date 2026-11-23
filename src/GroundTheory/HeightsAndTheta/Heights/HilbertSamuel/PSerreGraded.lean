@@ -1,5 +1,64 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsSerreGraded
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsSerreGraded
+public import Mathlib.Algebra.MvPolynomial.Eval
+public import Mathlib.Algebra.Polynomial.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.Group.Subgroup.Finite
+public import Mathlib.Algebra.Polynomial.Coeff
+public import Mathlib.Algebra.Polynomial.Degree.Defs
+public import Mathlib.Algebra.Polynomial.Degree.Operations
+public import Mathlib.RingTheory.Finiteness.Defs
+public import Mathlib.RingTheory.Noetherian.Basic
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.HilbertSamuel
@@ -219,11 +278,11 @@ theorem torsion_bound (hA : algebraMap (MvPolynomial (Fin q) ℤ) (Polynomial Ω
   rw [MvPolynomial.as_sum (f g), Finset.sum_smul, finsetSum_coeff]
   refine AddSubgroup.sum_mem _ fun v _ => ?_
   by_cases hlow : ∀ j, v j < Dm
-  · have hdeg : (MvPolynomial.monomial v (MvPolynomial.coeff v (f g)) • g).natDegree < k + 1 := by
+  · have hdeg : (MvPolynomial.monomial v (AddMonoidAlgebra.coeff (f g) v) • g).natDegree < k + 1 := by
       rw [smul_eq w hA, act_monomial]
-      have h1 := natDegree_mul_le (p := C (((MvPolynomial.coeff v (f g) : ℤ) : Ω) * ∏ j, w j ^ v j) *
+      have h1 := natDegree_mul_le (p := C (((AddMonoidAlgebra.coeff (f g) v : ℤ) : Ω) * ∏ j, w j ^ v j) *
         X ^ (∑ j, v j)) (q := g)
-      have h2 := natDegree_C_mul_X_pow_le (((MvPolynomial.coeff v (f g) : ℤ) : Ω) * ∏ j, w j ^ v j)
+      have h2 := natDegree_C_mul_X_pow_le (((AddMonoidAlgebra.coeff (f g) v : ℤ) : Ω) * ∏ j, w j ^ v j)
         (∑ j, v j)
       have h3 : ∑ j, v j ≤ q * Dm := by
         calc ∑ j, v j ≤ ∑ _j : Fin q, Dm := Finset.sum_le_sum fun j _ => (hlow j).le
@@ -234,8 +293,8 @@ theorem torsion_bound (hA : algebraMap (MvPolynomial (Fin q) ℤ) (Polynomial Ω
     exact zero_mem _
   · simp only [not_forall, not_lt] at hlow
     obtain ⟨j, hj⟩ := hlow
-    have hsplit : MvPolynomial.monomial v (MvPolynomial.coeff v (f g)) =
-        MvPolynomial.monomial (v - Finsupp.single j Dm) (MvPolynomial.coeff v (f g)) *
+    have hsplit : MvPolynomial.monomial v (AddMonoidAlgebra.coeff (f g) v) =
+        MvPolynomial.monomial (v - Finsupp.single j Dm) (AddMonoidAlgebra.coeff (f g) v) *
           MvPolynomial.X j ^ Dm := by
       rw [← MvPolynomial.monomial_add_single, tsub_add_cancel_of_le (Finsupp.single_le_iff.mpr hj)]
     rw [hsplit, mul_smul]

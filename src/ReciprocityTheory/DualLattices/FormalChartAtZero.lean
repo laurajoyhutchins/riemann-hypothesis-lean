@@ -1,6 +1,51 @@
-import ReciprocityTheory.DualLattices.CotangentSurjective
-import ReciprocityTheory.DualLattices.HtLinStatement
-import ReciprocityTheory.DualLattices.StThmAFull
+module
+
+public import ReciprocityTheory.DualLattices.CotangentSurjective
+public import ReciprocityTheory.DualLattices.HtLinStatement
+public import Mathlib.FieldTheory.Perfect
+public import Mathlib.RingTheory.MvPowerSeries.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -17,8 +62,8 @@ def tEval {σ : Type} [Fintype σ] [DecidableEq σ] {S : Type} [CommRing S] [Alg
   ∑ e : σ → Fin N, algebraMap R₀ S (MvPowerSeries.coeff
     (Finsupp.equivFunOnFinite.symm fun i => (e i : ℕ)) f) * ∏ i, a i ^ (e i : ℕ)
 
-open Classical in
 
+open Classical in
 def nEval {σ : Type} [Fintype σ] [DecidableEq σ] {S : Type} [CommRing S] [Algebra R₀ S]
     (f : MvPowerSeries σ R₀) (a : σ → S) : S :=
   if h : ∃ N, ∀ i, a i ^ N = 0 then tEval (Nat.find h) f a else 0
@@ -32,7 +77,7 @@ def IsNilOver {R K : LAlg R₀} (ρ : LHom R K) : Prop :=
 
 lemma map_add_ker (B : BX R₀) {R K : LAlg R₀} (ρ : LHom R K) (x y : {x : B.G R // B.map ρ x = 0}) :
     B.map ρ (x.1 + y.1) = 0 := by
-  rw [map_add, x.2, y.2, add_zero]
+  rw [map_add (f := _), x.2, y.2, add_zero]
 
 lemma map_nat_ker (B : BX R₀) {R R' K : LAlg R₀} (ρ : LHom R K) (ρ' : LHom R' K) (f : LHom R R')
     (hf : ρ'.comp f = ρ) (x : {x : B.G R // B.map ρ x = 0}) : B.map ρ' (B.map f x.1) = 0 := by

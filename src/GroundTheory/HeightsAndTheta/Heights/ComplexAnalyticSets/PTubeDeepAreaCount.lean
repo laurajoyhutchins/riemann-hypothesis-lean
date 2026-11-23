@@ -1,9 +1,67 @@
-import Mathlib
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StTubeDeepAreaCount
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StIsolatedPointsCount
+public import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.PAreaMultiplicityWeight
+import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.PAreaMultiplicity
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.PSheetAreaCompare
+import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.PSheetSumMeasurable
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Calculus.InverseFunctionTheorem.FDeriv
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+public import Mathlib.RingTheory.Complex
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Algebra.MvPolynomial
+import Mathlib.Topology.Sheaves.Init
 import ReciprocityTheory.AnalyticForms.AnalyticCharts.Osgood
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StTubeDeepAreaCount
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StIsolatedPointsCount
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.PSheetAreaCompare
-import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.PAreaMultiplicityWeight
+public import Mathlib.RingTheory.Norm.Transitivity
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -23,7 +81,7 @@ theorem differentiable_eval {k : ℕ} (P : MvPolynomial (Fin k) ℂ) :
   induction P using MvPolynomial.induction_on with
   | C a => simp
   | add p q hp hq =>
-    simp only [map_add]
+    simp only [map_add (f := _)]
     exact hp.add hq
   | mul_X p i hp =>
     simp only [map_mul, eval_X]
@@ -39,7 +97,7 @@ theorem differentiableOn_deepMap (P : MvPolynomial (Fin (d + 1)) ℂ) {s : (Fin 
 
 theorem measurable_deepMap (P : MvPolynomial (Fin (d + 1)) ℂ) {s : (Fin (d + 1) → ℂ) → Fin n → ℂ}
     (I : Fin d → Fin n) (hs : Measurable s) : Measurable (deepMap P s I) := by
-  refine measurable_pi_lambda _ fun j => ?_
+  refine Measurable.of_eval fun j => ?_
   cases j using Fin.cases with
   | zero => simpa [deepMap] using (MvPolynomial.continuous_eval P).measurable
   | succ i =>
@@ -121,8 +179,8 @@ theorem mem_isolatedFibrePts {J : Ideal (MvPolynomial (Fin n) ℂ)} {A : Matrix 
 
 end TubeDeepAreaCount
 
-open TubeDeepAreaCount SheetAreaCompare in
 
+open TubeDeepAreaCount SheetAreaCompare in
 theorem TubeDeepAreaCount.proof (hB : IsolatedPointsCount.Statement) : TubeDeepAreaCount.Statement := by
   classical
   intro n d J A P R _ _ _
@@ -248,7 +306,9 @@ theorem TubeDeepAreaCount.proof (hB : IsolatedPointsCount.Statement) : TubeDeepA
           · obtain ⟨k, hk⟩ := hEcover x hx.1 hx.2
             rw [Set.indicator_of_mem hxf]
             exact (Set.indicator_of_mem (show x ∈ E k ∩ fibre J A y from ⟨hk, hxf⟩)
-              (fun x => ENNReal.ofReal (t y x))).symm.le.trans (ENNReal.le_tsum k)
+              (fun x => ENNReal.ofReal (t y x))).symm.le.trans
+                (ENNReal.le_tsum (f := fun k =>
+                  (E k ∩ fibre J A y).indicator (fun x => ENNReal.ofReal (t y x)) x) k)
           · have : t y x = 0 := by
               simp only [ht]
               split_ifs with h

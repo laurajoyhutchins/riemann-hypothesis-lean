@@ -1,8 +1,57 @@
-import Formalism.HermitianCurvature.StatementG
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.AdditiveCharacterPsi
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.StabilizerBlockPoint
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.ContinuousInvUpper
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.RemainderNormLeStrictUpper
+module
+
+public import Formalism.HermitianCurvature.StatementG
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.AdditiveCharacterPsi
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.RemainderNormLeStrictUpper
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Matrix MeasureTheory
 
@@ -120,33 +169,6 @@ namespace Formalism.FourierDecayAlt.P
 
 open Formalism.FourierDecayAlt.G Formalism.FourierDecayAlt.P.FourierUniquenessMirabolic
 
-theorem quotient_measure_long_orbit : Formalism.FourierDecayAlt.G.QuotientMeasureLong := by
-  intro d β
-  have hι : MeasurePreserving (fun k : UT d → ℂ => coordU (wMat d * (upper k)⁻¹ * wMat d)ᵀ)
-      (muPi β (UT d)) (muPi β (UT d)) := by
-    simp only [G5.coordU_conj]
-    exact (G5.mp_comp_equiv β (G5.revEquiv d)).comp (G5.mp_invU β d)
-  have hm : Measurable (Function.uncurry fun (k : UT d → ℂ) (u : UT d → ℂ) => coordU (upper k * upper u)) := by
-    refine Continuous.measurable ?_
-    exact (G5.continuous_coordU d).comp
-      (((G5.continuous_upper d).comp continuous_fst).matrix_mul ((G5.continuous_upper d).comp continuous_snd))
-  exact hι.skew_product (μc := muPi β (UT d)) (μd := muPi β (UT d)) hm
-    (Filter.Eventually.of_forall fun k => (G5.mp_lmulU β d k).map_eq)
-
-theorem stabilizer_invariant : Formalism.FourierDecayAlt.G.StabInvariant := by
-  intro n β g l u k k' hg hl hu hk hk' hs
-  have h0 : subSum k + superSum k' = 0 := by
-    rcases hg with ⟨z, hz, rfl⟩ | ⟨t, c, ht, rfl⟩
-    · exact (stabilizer_long_point n z hz k k' hk hk').2 hs
-    · exact (stabilizer_block_point n t c ht k k' hk hk').2 hs
-  constructor
-  · calc l * k * g * (k' * u) = l * (k * g * k') * u := by simp only [Matrix.mul_assoc]
-      _ = l * g * u := by rw [hs]
-  · rw [(character_additive n l k).2 hl hk, (character_additive n k' u).1 hk' hu,
-      ← (additive_character_psi β _ _).1, ← (additive_character_psi β _ _).1]
-    congr 1
-    linear_combination h0
-
 theorem cofactor_lower_bound_radius : Formalism.FourierDecayAlt.G.CofLowerR := by
   intro m Kc hK h0 R hR
   obtain ⟨d, hd, hball⟩ := Metric.isOpen_iff.mp hK.isClosed.isOpen_compl 0 h0
@@ -207,14 +229,6 @@ theorem cofactor_lower_bound_radius : Formalism.FourierDecayAlt.G.CofLowerR := b
     rw [hLdef]; field_simp
   rw [hinv, e, div_le_iff₀ hL0]
   exact h5
-
-theorem smooth_cutoff_spec : Formalism.FourierDecayAlt.G.Chi0Spec := by
-  refine ⟨fun r hr => ?_, fun r hr => ?_, fun r => ⟨?_, ?_⟩, fun k => ?_⟩
-  · exact Real.smoothTransition.one_of_one_le (by linarith)
-  · exact Real.smoothTransition.zero_of_nonpos (by linarith)
-  · exact Real.smoothTransition.nonneg _
-  · exact Real.smoothTransition.le_one _
-  · exact (Real.smoothTransition.contDiff).comp (contDiff_const.sub contDiff_id)
 
 theorem amplitude_eq : Formalism.FourierDecayAlt.G.AmpEq := by
   intro m β D t ht V _ _ Φ p

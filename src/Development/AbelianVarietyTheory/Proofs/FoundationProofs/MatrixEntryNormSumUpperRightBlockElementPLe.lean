@@ -1,16 +1,64 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.StarMulOfMemKc
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IsInvInvariantOfRight
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.SumNormEntriesLeSumSingularValuesStatement
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.MeasurableCoshPowStatement
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.LintegralExpNegMulSumNormStatement
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.LamBallULeStatement
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExpLogNearOneStatement
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsHermitianLogUnitaryBlockDiagonalStatement
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.SumNormSqExpHermSubOneLeBlockMatStatement
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsIsometricChartBlockHermitianStatement
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.InvariantMeasureLowerBoundOfChartStatement
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.CoshConstNumericalBoundStatement
+module
+
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.StarMulOfMemKc
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.CoshConstNumericalBoundStatement
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsHermitianLogUnitaryBlockDiagonalStatement
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsIsometricChartBlockHermitianStatement
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExpLogNearOneStatement
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.InvariantMeasureLowerBoundOfChartStatement
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IsInvInvariantOfRight
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.LamBallULeStatement
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.LintegralExpNegMulSumNormStatement
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.MeasurableCoshPowStatement
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.SumNormEntriesLeSumSingularValuesStatement
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.SumNormSqExpHermSubOneLeBlockMatStatement
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.UpqLocallyCompactGroup
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.MatrixExponential
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.MeasureTheory.Measure.Lebesgue.VolumeOfBalls
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.SchurIrreducible GlobalTheory.PolarU GlobalTheory.IndefiniteRowSideFullHecke.CartanCoshPower GlobalTheory.CartanInt Matrix MeasureTheory
 
@@ -244,7 +292,7 @@ theorem integrand_le {c : ℝ} (hc : 2 * (((p + q : ℕ) : ℝ) - 1) < c) {k : U
     rw [cartanB_mul_eP hk, Real.rpow_mul_natCast (by norm_num), Finset.mul_sum, ← Finset.sum_neg_distrib,
       Real.exp_sum, ← Finset.card_range (min p q), ← Finset.prod_const, Finset.card_range,
       ← Finset.prod_mul_distrib]
-    refine Finset.prod_le_prod (fun i _ => (Real.rpow_pos_of_pos (Real.cosh_pos _) _).le) fun i hi => ?_
+    refine Finset.prod_le_prod₀ (fun i _ => (Real.rpow_pos_of_pos (Real.cosh_pos _) _).le) fun i hi => ?_
     have hi' := Finset.mem_range.1 hi
     have hc0 : 0 ≤ c := by
       have : (1 : ℝ) ≤ ((p + q : ℕ) : ℝ) := by exact_mod_cast (by omega : 1 ≤ p + q)
@@ -288,7 +336,7 @@ theorem lintegral_coshPow_le (m mK : Measure (UpqT p q)) (C : ℝ) (hC : 0 < C)
   exact ENNReal.ofReal_le_ofReal (integrand_le hc hk B)
 
 theorem coshPow_anti {c c' : ℝ} (h : c ≤ c') (g : UpqT p q) : coshPow c' g ≤ coshPow c g :=
-  Finset.prod_le_prod (fun _ _ => (Real.rpow_pos_of_pos (Real.cosh_pos _) _).le) fun _ _ =>
+  Finset.prod_le_prod₀ (fun _ _ => (Real.rpow_pos_of_pos (Real.cosh_pos _) _).le) fun _ _ =>
     Real.rpow_le_rpow_of_exponent_le (Real.one_le_cosh _) (neg_le_neg h)
 
 theorem coshFinite : CoshFinite := by

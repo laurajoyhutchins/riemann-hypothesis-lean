@@ -1,4 +1,51 @@
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.CechPairings.InstAddCommGroup
+module
+
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.CechPairings.InstAddCommGroup
+import Development.AbelianVarietyTheory.Proofs.SatakeParameters.FaceFaceApply
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
@@ -29,6 +76,7 @@ theorem Cos.d_apply (K : Cos.{w} R) (n : ℕ) (x : K.X n) : K.d n x = ∑ i : Fi
 
 theorem Cos.dd (K : Cos.{w} R) (n : ℕ) (x : K.X n) : K.d (n + 1) (K.d n x) = 0 := by
   rw [Cos.d_apply, Cos.d_apply]
+
   simp only [map_sum, map_zsmul, Finset.smul_sum, smul_smul]
   rw [← Fintype.sum_prod_type']
   refine Finset.sum_involution (fun p _ => (p.1.succAbove p.2, p.2.predAbove p.1)) ?_ ?_ ?_ ?_
@@ -235,6 +283,7 @@ abbrev CosCx.dcx (S : CosCx.{w} R) : DCx.{w} R where
   hh p q := (S.cos q).dd p
   vv p q := (S.K p).dd q
   hv p q x := by
+
     rw [Cos.d_apply, Cos.d_apply, map_sum]
     exact Finset.sum_congr rfl fun i _ => by rw [map_zsmul]; exact congrArg _ ((S.δ p i).comm q x).symm
 
@@ -248,12 +297,5 @@ def CxPairing.cup {K : Cx.{w} R} {L : Cx.{w'} R} {M : Cx.{w''} R} (P : CxPairing
   M.cls (P.μ h (Quotient.out x).1 (Quotient.out y).1) (by
     rw [P.leib, show K.d p (Quotient.out x).1 = 0 from (Quotient.out x).2,
       show L.d q (Quotient.out y).1 = 0 from (Quotient.out y).2]; simp)
-
-structure DPairing (K : DCx.{w} R) (L : DCx.{w'} R) (M : DCx.{w''} R) where
-  μ : ∀ {p q p' q' a b : ℕ}, p + p' = a → q + q' = b → (K.X p q →ₗ[R] L.X p' q' →ₗ[R] M.X a b)
-  lh : ∀ {p q p' q' a b : ℕ} (h : p + p' = a) (h' : q + q' = b) x y, M.dh a b (μ h h' x y) =
-    μ (p := p + 1) (p' := p') (by omega) h' (K.dh p q x) y + (-1 : ℤ) ^ p • μ (p := p) (p' := p' + 1) (by omega) h' x (L.dh p' q' y)
-  lv : ∀ {p q p' q' a b : ℕ} (h : p + p' = a) (h' : q + q' = b) x y, M.dv a b (μ h h' x y) =
-    μ (q := q + 1) (q' := q') h (by omega) (K.dv p q x) y + (-1 : ℤ) ^ q • μ (q := q) (q' := q' + 1) h (by omega) x (L.dv p' q' y)
 
 end CrystallineSemistableComparison

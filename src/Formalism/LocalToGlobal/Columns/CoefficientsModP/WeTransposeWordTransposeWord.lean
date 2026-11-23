@@ -1,11 +1,61 @@
-import Formalism.GradedWeylDivisibility.FinalD
-import Formalism.GradedWeylDivisibility.StatementE
-import Formalism.GradedWeylDivisibility.FockSpaceTableaux.FockQHW
-import Formalism.GradedWeylDivisibility.FockSpaceTableaux.FockQWordAdj
-import Formalism.GradedWeylDivisibility.FockSpaceTableaux.LClosedeqLemmas
-import Formalism.PieriBlockIdeals.PieriColumnMinors.LowerTriangularIntegral
-import Formalism.PieriBlockIdeals.PieriColumnMinors.LrfcApplyWordAppendSingle
-import Formalism.HermitianLattices.HermitianLatticesProofs.DualLattice
+module
+
+public import Formalism.GradedWeylDivisibility.StatementE
+public import Formalism.HermitianLattices.StatementLat
+import Formalism.GradedWeylDivisibility.DualWeylDominanceOf
+import Formalism.GradedWeylDivisibility.FinalB
+public import Formalism.GradedWeylDivisibility.FinalC
+public import Formalism.GradedWeylDivisibility.FinalD
+public import Formalism.GradedWeylDivisibility.FockSpaceTableaux.FockQHW
+public import Formalism.GradedWeylDivisibility.FockSpaceTableaux.FockQWordAdj
+public import Formalism.GradedWeylDivisibility.FockSpaceTableaux.LClosedeqLemmas
+public import Formalism.HermitianLattices.HermitianLatticesProofs.DualLattice
+public import Formalism.PieriBlockIdeals.PieriColumnMinors.LowerTriangularIntegral
+public import Formalism.PieriBlockIdeals.PieriColumnMinors.LrfcApplyWordAppendSingle
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MvPolynomial
 
@@ -91,7 +141,7 @@ theorem nabla_eq_dual_weyl_holds : NablaEqDualWeyl := by
     | add x y _ _ hx hy =>
       obtain ⟨a, ha⟩ := hx
       obtain ⟨b, hb⟩ := hy
-      exact ⟨a + b, by rw [map_add, we_fock_add_right, ha, hb]; push_cast; ring⟩
+      exact ⟨a + b, by rw [map_add (f := _), we_fock_add_right, ha, hb]; push_cast; ring⟩
     | smul c x _ hx =>
       obtain ⟨a, ha⟩ := hx
       refine ⟨c * a, ?_⟩
@@ -219,7 +269,7 @@ theorem we_span_weyl (hν : Antitone ν) :
   exact we_intQ_word hn ν w
 
 theorem we_weyl_lattice (hν : Antitone ν) :
-    Submodule.IsLattice ℚ (weCut r n ν ((weyl ℤ r n hn ν).map (intQ r n))) := by
+    Submodule.IsFullLattice ℚ (weCut r n ν ((weyl ℤ r n hn ν).map (intQ r n))) := by
   have himg : (weCut r n ν ((weyl ℤ r n hn ν).map (intQ r n))).map
       ((dualWeyl ℚ r n ν).subtype.restrictScalars ℤ) = (weyl ℤ r n hn ν).map (intQ r n) := by
     ext x
@@ -228,18 +278,17 @@ theorem we_weyl_lattice (hν : Antitone ν) :
       exact hy
     · intro hx
       exact ⟨⟨x, we_weyl_le hn ν hν x hx⟩, hx, rfl⟩
-  constructor
+  refine { toIsLattice := Submodule.IsLattice.of_fg ℚ ?_, span_eq_top := ?_ }
   · refine Submodule.fg_of_fg_map_injective ((dualWeyl ℚ r n ν).subtype.restrictScalars ℤ)
       (dualWeyl ℚ r n ν).injective_subtype ?_
     rw [himg]
     exact (Submodule.FG.of_le (we_nabla_fg r n ν) (weylLeDual ℤ r n hn ν hν)).map _
-  · apply Submodule.map_injective_of_injective (f := (dualWeyl ℚ r n ν).subtype) (dualWeyl ℚ r n ν).injective_subtype
-    rw [Submodule.map_top, Submodule.range_subtype, Submodule.map_span]
-    have h2 : ((dualWeyl ℚ r n ν).subtype '' (weCut r n ν ((weyl ℤ r n hn ν).map (intQ r n)) : Set (dualWeyl ℚ r n ν))) =
-        (((weyl ℤ r n hn ν).map (intQ r n) : Submodule ℤ _) : Set (MvPolynomial (Fin r × Fin n) ℚ)) := by
-      conv_rhs => rw [← himg]
-      rfl
-    rw [h2, we_span_weyl hn ν hν]
+  · apply Submodule.map_injective_of_injective (f := (dualWeyl ℚ r n ν).subtype)
+      (dualWeyl ℚ r n ν).injective_subtype
+    rw [Submodule.map_subtype_top, Submodule.map_span]
+    have hspan := congrArg (fun S : Submodule ℤ (MvPolynomial (Fin r × Fin n) ℚ) =>
+      Submodule.span ℚ (S : Set (MvPolynomial (Fin r × Fin n) ℚ))) himg
+    exact hspan.trans (we_span_weyl hn ν hν)
 
 end Double
 

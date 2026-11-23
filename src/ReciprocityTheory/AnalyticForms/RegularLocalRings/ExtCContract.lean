@@ -1,4 +1,52 @@
-import ReciprocityTheory.AnalyticForms.RegularLocalRings.BaseChangeC
+module
+
+public import ReciprocityTheory.AnalyticForms.RegularLocalRings.BaseChangeC
+public import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.LinearAlgebra.Dual.Lemmas
+
+@[expose] public section
 
 namespace ReciprocityTheory.AnForm.R
 
@@ -15,10 +63,10 @@ theorem exists_linearForm_one : ∃ ℓ : ℂ →ₗ[ℚ] ℚ, ℓ 1 = 1 := by
   exact ⟨(φ 1)⁻¹ • φ, by simp [hφ]⟩
 
 noncomputable def projQ (ℓ : ℂ →ₗ[ℚ] ℚ) (q : MvPolynomial σ ℂ) : MvPolynomial σ ℚ :=
-  ∑ m ∈ q.support, monomial m (ℓ (coeff m q))
+  ∑ m ∈ q.support, monomial m (ℓ (AddMonoidAlgebra.coeff q m))
 
 theorem coeff_projQ (ℓ : ℂ →ₗ[ℚ] ℚ) (q : MvPolynomial σ ℂ) (m : σ →₀ ℕ) :
-    coeff m (projQ ℓ q) = ℓ (coeff m q) := by
+    AddMonoidAlgebra.coeff (projQ ℓ q) m = ℓ (AddMonoidAlgebra.coeff q m) := by
   classical
   rw [projQ, coeff_sum]
   simp only [coeff_monomial]
@@ -41,7 +89,7 @@ theorem projQ_map (ℓ : ℂ →ₗ[ℚ] ℚ) (hℓ : ℓ 1 = 1) (g : MvPolynomi
     projQ ℓ (MvPolynomial.map (algebraMap ℚ ℂ) g) = g := by
   ext m
   rw [coeff_projQ, coeff_map]
-  have : algebraMap ℚ ℂ (coeff m g) = coeff m g • (1 : ℂ) := by
+  have : algebraMap ℚ ℂ (AddMonoidAlgebra.coeff g m) = AddMonoidAlgebra.coeff g m • (1 : ℂ) := by
     rw [Algebra.smul_def, mul_one]
   rw [this, map_smul, hℓ, smul_eq_mul, mul_one]
 
@@ -49,10 +97,11 @@ theorem projQ_map_mul (ℓ : ℂ →ₗ[ℚ] ℚ) (g : MvPolynomial σ ℚ) (h :
     projQ ℓ (MvPolynomial.map (algebraMap ℚ ℂ) g * h) = g * projQ ℓ h := by
   classical
   ext m
+
   rw [coeff_projQ, coeff_mul, coeff_mul, map_sum]
   refine Finset.sum_congr rfl fun x _ => ?_
   rw [coeff_map, coeff_projQ]
-  have : algebraMap ℚ ℂ (coeff x.1 g) * coeff x.2 h = coeff x.1 g • coeff x.2 h := by
+  have : algebraMap ℚ ℂ (AddMonoidAlgebra.coeff g x.1) * AddMonoidAlgebra.coeff h x.2 = AddMonoidAlgebra.coeff g x.1 • AddMonoidAlgebra.coeff h x.2 := by
     rw [Algebra.smul_def]
   rw [this, map_smul, smul_eq_mul]
 

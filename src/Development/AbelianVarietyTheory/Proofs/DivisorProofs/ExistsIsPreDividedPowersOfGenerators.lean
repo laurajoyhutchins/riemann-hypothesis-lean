@@ -1,5 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.RatBasisLinearIndependentInt
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.RatBasisLinearIndependentInt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -199,7 +245,7 @@ theorem gam_L (h0 : ∀ i, g i 0 = 1) (hm : ∀ i m n, g i m * g i n = ((m + n).
     gam x g n (L x c) = coeff n (E g c) := by
   have h : ∃ c', L x c' = L x c := ⟨c, rfl⟩
   unfold gam
-  rw [dif_pos h, E_eq x g h0 hm hE h.choose_spec]
+  rw [dite_eq_left h, E_eq x g h0 hm hE h.choose_spec]
 
 end Gen
 
@@ -207,8 +253,8 @@ end GlobalTheory.PDA.Gen
 
 namespace GlobalTheory.PDA
 
-open Gen in
 
+open Gen in
 theorem exists_isPreDividedPowers_of_generators₂ : ∀ (B ι : Type) [CommRing B] (x : ι → B) (g : ι → ℕ → B), (∀ i, g i 0 = 1) →
     (∀ i, g i 1 = x i) → (∀ i n, n ≠ 0 → g i n ∈ Ideal.span (Set.range x)) →
     (∀ i m n, g i m * g i n = ((m + n).choose m : B) * g i (m + n)) →
@@ -221,7 +267,7 @@ theorem exists_isPreDividedPowers_of_generators₂ : ∀ (B ι : Type) [CommRing
   refine ⟨gam x g, ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_⟩, ?_⟩
   · intro n y hy
     unfold gam
-    rw [dif_neg fun h ↦ hy (mem_span_iff.2 h)]
+    rw [dite_eq_right fun h ↦ hy (mem_span_iff.2 h)]
   · intro y hy
     obtain ⟨c, rfl⟩ := mem_span_iff.1 hy
     rw [G]; exact (P c).1

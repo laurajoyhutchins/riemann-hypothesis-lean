@@ -1,5 +1,45 @@
-import Formalism.LocalToGlobal.GlobalTheory.GL6.Statement
-import Formalism.SharpRestriction.GlobalSchurBounds.FiniteModelOfAdmissibleTransports
+module
+
+public import Formalism.LocalToGlobal.GlobalTheory.GL6.Statement
+public import Formalism.SharpRestriction.GlobalSchurBounds.FiniteModelOfAdmissibleTransports
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -30,11 +70,6 @@ def SecondBranchInclusionLength : Prop :=
             (D.R.k : ℚ)))
 
 variable {D u}
-
-theorem secondBranchInclusionLength_of_lemB (hB : LemB D u) : SecondBranchInclusionLength D u := by
-  unfold LemB at hB
-  intro w hw hs v hb
-  exact (hB w hw hs v).2 hb
 
 theorem rational_level_zero_of_integral (w : D.what₂.places.Pl) (hw : OverT D u w) (hs : (D.fm u).seenP w = true) (h4 : HeckeIntegralLevelZero D u) :
     Rat0 D u := fun v =>
@@ -156,12 +191,6 @@ theorem congruence_no_kernel_minimal (hS : HidaSetting D u) (hB : SecondBranchIn
     unfold len
     rw [Submodule.comap_subtype_self]
     simp
-
-theorem congruence_no_kernel_family_minimal
-    (h : ∀ (D : D7) (u : D.what₂.Word), FormsCompatible D u → HidaSetting D u → admS D u →
-      HeckeIntegralLevelZero D u ∧ HeckeRamifiedLevelZero D u ∧ SecondBranchInclusionLength D u) : CongruenceLatticeLengthBoundFamily := fun D u hF hS hA =>
-  have h' := h D u hF hS hA
-  congruence_no_kernel_minimal hS h'.2.2 h'.1 h'.2.1
 
 end Min
 

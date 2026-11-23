@@ -1,4 +1,55 @@
-import Formalism.SharpRestriction.GrowthBounds.StandardPolynomials.HomGMonomial
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.StandardPolynomials.ColsS
+public import Formalism.SharpRestriction.GrowthBounds.StandardPolynomials.IdentityLiftWeightedHomog
+public import Formalism.SharpRestriction.GrowthBounds.StandardPolynomials.TCoreDef
+public import Formalism.SharpRestriction.GrowthBounds.StandardPolynomials.YcondFactor
+import Formalism.SharpRestriction.GrowthBounds.ProjectionOfIsotypicDecomposition
+public import Formalism.SharpRestriction.GrowthBounds.StandardPolynomials.ColXSeg
+public import Formalism.SharpRestriction.GrowthBounds.StandardPolynomials.HomGMonomial
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -72,7 +123,7 @@ private theorem homG_monomial_mul_of_homG {σ R : Type} [CommRing R] (φ : (σ �
   classical
   intro m hm
   obtain ⟨a, ha, b, hb, rfl⟩ := Finset.mem_add.mp (MvPolynomial.support_mul _ _ hm)
-  rw [map_add, Finset.mem_singleton.mp (MvPolynomial.support_monomial_subset ha), hQ b hb]
+  rw [map_add (f := _), Finset.mem_singleton.mp (MvPolynomial.support_monomial_subset ha), hQ b hb]
 
 theorem sg_hom (φ : MonH X →+ ℕ) (wt : Fin (2 * segS X.TT j + 1) → ℕ)
     (hwt : ∀ a b, φ (Finsupp.single (phiS X j (a.succ, Fin.natAdd 1 b)) 1) = wt a) (c : ℤ) (J : Finset (Fin X.m)) :
@@ -85,7 +136,7 @@ theorem sg_hom (φ : MonH X →+ ℕ) (wt : Fin (2 * segS X.TT j + 1) → ℕ)
       (ioD O C0 CE1 CE2 mu X β j (rename (chainEmb _ X.m _) (xOf (KK O) (2 * segS X.TT j + 1) X.m a b))) := by
     intro a b
     by_cases h : a < 2 * segS X.TT j + 1
-    · rw [dif_pos h]
+    · rw [dite_eq_left h]
       have e : xOf (KK O) (2 * segS X.TT j + 1) X.m a b = MvPolynomial.X (⟨a, h⟩, b) := by
         simp [xOf, h]
       rw [e, ioD_chain]
@@ -110,7 +161,7 @@ theorem sg_hom (φ : MonH X →+ ℕ) (wt : Fin (2 * segS X.TT j + 1) → ℕ)
     rw [Finset.sum_range]
     refine Finset.sum_congr rfl fun a _ => ?_
     have ha := a.isLt
-    rw [dif_pos a.isLt]
+    rw [dite_eq_left a.isLt]
     have e1 : hsOf ka c a = colH (ka a.castSucc) c := by
       unfold hsOf
       congr 2

@@ -1,10 +1,55 @@
-import Mathlib
-import GroundTheory.GlobalFields.ComplexMultiplication.EllipticFunctions
-import GroundTheory.GlobalFields.ComplexMultiplication.EllipticConstant
-import GroundTheory.GlobalFields.ComplexMultiplication.EllipticRational
-import GroundTheory.GlobalFields.ComplexMultiplication.Residue
+module
+
+public import GroundTheory.GlobalFields.ComplexMultiplication.EllipticResidues
+public import GroundTheory.GlobalFields.ComplexMultiplication.EllipticRational
 import GroundTheory.GlobalFields.ComplexMultiplication.ResidueTheorem
-import GroundTheory.GlobalFields.ComplexMultiplication.EllipticResidues
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Complex Filter Topology Set
 open scoped PeriodPair
@@ -16,9 +61,9 @@ namespace Elliptic
 
 variable {L : PeriodPair}
 
-variable (L) in
 
-def torusOrder (f : ℂ → ℂ) (x : Torus L) : ℤ :=
+variable (L) in
+def torusOrder (L : PeriodPair) (f : ℂ → ℂ) (x : Torus L) : ℤ :=
   (meromorphicOrderAt f x.out).untopD 0
 
 lemma torusOrder_mk {f : ℂ → ℂ} (hf : IsEllipticFunction L f) (z : ℂ) :
@@ -83,9 +128,9 @@ theorem finsum_torusOrder_eq_zero {f : ℂ → ℂ} (hf : IsEllipticFunction L f
   rw [← hc] at h
   exact_mod_cast h
 
-variable (L) in
 
-def degree (f : ℂ → ℂ) : ℕ :=
+variable (L) in
+def degree (L : PeriodPair) (f : ℂ → ℂ) : ℕ :=
   ∑ᶠ x : Torus L, (-torusOrder L f x).toNat
 
 lemma toNat_neg_untopD_sub_const {f : ℂ → ℂ} {z : ℂ} (hf : MeromorphicAt f z) (c : ℂ) :
@@ -187,35 +232,12 @@ theorem finsum_toNat_torusOrder_sub_const {f : ℂ → ℂ} (hf : IsEllipticFunc
     exact hsum
   exact_mod_cast this
 
-theorem finsum_toNat_torusOrder_eq_degree {f : ℂ → ℂ} (hf : IsEllipticFunction L f) :
-    ∑ᶠ x : Torus L, (torusOrder L f x).toNat = degree L f := by
-  simpa using finsum_toNat_torusOrder_sub_const hf 0
-
 lemma eq_zero_of_finsum_eq_zero_nat {α : Type*} {u : α → ℕ} (hu : (Function.support u).Finite)
     (h : ∑ᶠ x, u x = 0) (x : α) : u x = 0 := by
   classical
   by_contra hx
   rw [finsum_eq_sum_of_support_subset u (s := hu.toFinset) (by simp)] at h
   exact hx ((Finset.sum_eq_zero_iff.1 h) x (by simpa using hx))
-
-theorem degree_eq_zero_iff {f : ℂ → ℂ} (hf : IsEllipticFunction L f) :
-    degree L f = 0 ↔ ∃ c : ℂ, f =ᶠ[codiscrete ℂ] fun _ ↦ c := by
-  constructor
-  · intro h0
-    have hall := eq_zero_of_finsum_eq_zero_nat (finite_support_toNat_neg_torusOrder hf) h0
-    apply exists_eventuallyEq_const_of_meromorphicOrderAt_nonneg L hf.1 hf.2
-    intro z
-    have := hall (Torus.mk L z)
-    rw [torusOrder_mk hf] at this
-    exact nonneg_of_toNat_neg_untopD_eq_zero this
-  · rintro ⟨c, hc⟩
-    rw [degree]
-    have : ∀ x : Torus L, (-torusOrder L f x).toNat = 0 := by
-      intro x
-      apply toNat_neg_untopD_eq_zero_of_nonneg
-      rw [meromorphicOrderAt_congr (eventually_nhdsNE_of_eventually_codiscrete hc x.out)]
-      exact analyticAt_const.meromorphicOrderAt_nonneg
-    simp [this]
 
 theorem degree_ne_one {f : ℂ → ℂ} (hf : IsEllipticFunction L f) : degree L f ≠ 1 := by
   classical

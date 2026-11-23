@@ -1,7 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DualMapCompDualMap
-import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.IsAffineOpenInfOfIsSeparated
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DualMapCompDualMap
+public import Development.AbelianVarietyTheory.Definitions.ThetaMetrics.MemRangeCompIffOfIsClosedImmersion
 import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.GlobalFnsHolds
+import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.IsAffineOpenInfOfIsSeparated
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
+
 open CategoryTheory AlgebraicGeometry MonoidalCategory CartesianMonoidalCategory MonObj
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor Formalism.L2.Pj
 open GlobalTheory.CatCoh GlobalTheory.Cris GlobalTheory.DeRham GlobalTheory.CechKS
@@ -60,7 +107,8 @@ def transSnd (P : GPt A) (v : epsR K ⟶ A) : transSrc P ⟶ A :=
     change (spMap _ ≫ v.left) ≫ A.hom = spMap _
     rw [Category.assoc, Over.w v]
     change spMap _ ≫ spMap _ = spMap _
-    rw [← Cris.spMap_comp, dualMap_comp_algebraMap])
+    rw [← Cris.spMap_comp]
+    exact congrArg spMap (dualMap_comp_algebraMap (algebraMap K P.B)))
 
 def transPair (P : GPt A) (v : epsR K ⟶ A) : Sp (DualNumber P.B) ⟶ (A ⊗ A).left :=
   (lift (transFst P) (transSnd P v)).left
@@ -84,7 +132,9 @@ theorem transPair_map {P Q : GPt A} (φ : P.Hom Q) (v : epsR K ⟶ A) :
     spMap (dualMap (φ.ρ : P.B →+* Q.B)) ≫ transPair P v = transPair Q v := by
   let j : transSrc Q ⟶ transSrc P := Over.homMk (spMap (dualMap (φ.ρ : P.B →+* Q.B))) (by
     change spMap _ ≫ spMap _ = spMap _
-    rw [← Cris.spMap_comp, ← RingHom.comp_assoc, dualMap_comp_algebraMap, RingHom.comp_assoc,
+    rw [← Cris.spMap_comp]
+    apply congrArg spMap
+    rw [← RingHom.comp_assoc, dualMap_comp_algebraMap, RingHom.comp_assoc,
       φ.ρ.comp_algebraMap])
   have h1 : j ≫ transFst P = transFst Q := by
     apply Over.OverMorphism.ext
@@ -197,8 +247,8 @@ theorem pairCocycle_cocycle (V : J → A.left.Opens) (φ : ∀ a b, Γ(A.left, V
     (fun _ h ↦ (ha h).2) (fun _ h ↦ (hb h).2) (fun _ h ↦ (hd h).2)
   linear_combination e1 - e2 - e3
 
-omit [GrpObj A] in
 
+omit [GrpObj A] in
 theorem axis_coboundary {I : Type} (V : J → A.left.Opens) (φ : ∀ a b, Γ(A.left, V a ⊓ V b))
     (hφ : ∀ (a b c : J) (P : GPt A), P.In (V a) → P.In (V b) → P.In (V c) →
       valR P.x _ (φ a b) + valR P.x _ (φ b c) = valR P.x _ (φ a c))
@@ -220,9 +270,6 @@ theorem axis_coboundary {I : Type} (V : J → A.left.Opens) (φ : ∀ a b, Γ(A.
   have e3 := cocycle_at hφ (x ≫ e) (GlobalTheory.Points.le_preimage_comp x e (hr t) ht)
     (GlobalTheory.Points.le_preimage_comp x e (hr t') ht') (GlobalTheory.Points.le_preimage_comp x e he (GlobalTheory.Points.le_preimage_top x))
   linear_combination e1 - e2 - e3
-
-theorem exists_one_in (V : J → A.left.Opens) (hV : ⨆ a, V a = ⊤) : ∃ c, ⊤ ≤ η[A].left ⁻¹ᵁ V c :=
-  GlobalTheory.Points.exists_le_preimage_of_iSup_eq_top (C := K) η[A].left hV
 
 theorem pairCocycle_left (V : J → A.left.Opens) (φ : ∀ a b, Γ(A.left, V a ⊓ V b))
     (hφ : ∀ (a b c : J) (P : GPt A), P.In (V a) → P.In (V b) → P.In (V c) →

@@ -1,4 +1,52 @@
-import Mathlib
+module
+
+public import Mathlib.Analysis.Normed.Lp.MeasurableSpace
+public import Mathlib.MeasureTheory.Constructions.Pi
+public import Mathlib.MeasureTheory.Measure.Haar.OfBasis
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.MeasureTheory.Measure.Haar.InnerProductSpace
+
+@[expose] public section
 
 noncomputable section
 
@@ -77,9 +125,9 @@ theorem measurePreserving_of_normSq {ι V : Type} [Fintype ι] [Fintype V] {α :
           rw [Equiv.apply_symm_apply]
           rfl
         rw [this]
-        exact measurable_pi_lambda _ fun v =>
+        exact Measurable.of_eval fun v =>
           (PiLp.volume_preserving_toLp (α v)).measurable.comp
-            (measurable_pi_lambda _ fun a => (measurable_pi_apply _).comp (PiLp.volume_preserving_ofLp _).measurable) }
+            (Measurable.of_eval fun a => (measurable_pi_apply _).comp (PiLp.volume_preserving_ofLp _).measurable) }
   have hFe : MeasurePreserving Fe (Measure.pi fun v => volume) volume := hF
   have key := hFe.symm.comp hGe
   convert key using 1
@@ -93,29 +141,28 @@ def piProdEquiv {V : Type} (A B : V → Type) [∀ v, MeasurableSpace (A v)] [�
   invFun p v := (p.1 v, p.2 v)
   left_inv _ := rfl
   right_inv _ := rfl
-  measurable_toFun := (measurable_pi_lambda _ fun v => measurable_fst.comp (measurable_pi_apply v)).prodMk
-    (measurable_pi_lambda _ fun v => measurable_snd.comp (measurable_pi_apply v))
-  measurable_invFun := measurable_pi_lambda _ fun v =>
+  measurable_toFun := (Measurable.of_eval fun v => measurable_fst.comp (measurable_pi_apply v)).prodMk
+    (Measurable.of_eval fun v => measurable_snd.comp (measurable_pi_apply v))
+  measurable_invFun := Measurable.of_eval fun v =>
     ((measurable_pi_apply v).comp measurable_fst).prodMk ((measurable_pi_apply v).comp measurable_snd)
 
 theorem measurePreserving_piProdEquiv {V : Type} [Fintype V] (A B : V → Type) [∀ v, MeasurableSpace (A v)]
     [∀ v, MeasurableSpace (B v)] (μ : ∀ v, Measure (A v)) (ν : ∀ v, Measure (B v)) [∀ v, SigmaFinite (μ v)]
     [∀ v, SigmaFinite (ν v)] :
     MeasurePreserving (piProdEquiv A B) (Measure.pi fun v => (μ v).prod (ν v))
-      ((Measure.pi fun v => μ v).prod (Measure.pi fun v => ν v)) where
-  measurable := (piProdEquiv A B).measurable
-  map_eq := by
-    refine (Measure.FiniteSpanningSetsIn.ext ?_ (isPiSystem_pi.prod isPiSystem_pi)
-      ((Measure.FiniteSpanningSetsIn.pi fun i ↦ (μ i).toFiniteSpanningSetsIn).prod
-      (Measure.FiniteSpanningSetsIn.pi (fun i ↦ (ν i).toFiniteSpanningSetsIn))) ?_).symm
-    · refine (generateFrom_eq_prod generateFrom_pi generateFrom_pi ?_ ?_).symm
-      · exact (Measure.FiniteSpanningSetsIn.pi (fun i ↦ (μ i).toFiniteSpanningSetsIn)).isCountablySpanning
-      · exact (Measure.FiniteSpanningSetsIn.pi (fun i ↦ (ν i).toFiniteSpanningSetsIn)).isCountablySpanning
-    · rintro _ ⟨s, ⟨s, _, rfl⟩, ⟨_, ⟨t, _, rfl⟩, rfl⟩⟩
-      rw [MeasurableEquiv.map_apply]
-      rw [show (piProdEquiv A B) ⁻¹' (Set.univ.pi s ×ˢ Set.univ.pi t) =
-          (Set.univ.pi fun i ↦ s i ×ˢ t i) by
-          ext; simp [Set.mem_pi, forall_and, piProdEquiv]]
-      simp_rw [Measure.pi_pi, Measure.prod_prod, Measure.pi_pi, Finset.prod_mul_distrib]
+      ((Measure.pi fun v => μ v).prod (Measure.pi fun v => ν v)) := by
+  refine ⟨(piProdEquiv A B).measurable, ?_⟩
+  refine (Measure.FiniteSpanningSetsIn.ext ?_ (isPiSystem_pi.prod isPiSystem_pi)
+    ((Measure.FiniteSpanningSetsIn.pi fun i ↦ (μ i).toFiniteSpanningSetsIn).prod
+    (Measure.FiniteSpanningSetsIn.pi (fun i ↦ (ν i).toFiniteSpanningSetsIn))) ?_).symm
+  · refine (generateFrom_eq_prod generateFrom_pi generateFrom_pi ?_ ?_).symm
+    · exact (Measure.FiniteSpanningSetsIn.pi (fun i ↦ (μ i).toFiniteSpanningSetsIn)).isCountablySpanning
+    · exact (Measure.FiniteSpanningSetsIn.pi (fun i ↦ (ν i).toFiniteSpanningSetsIn)).isCountablySpanning
+  · rintro _ ⟨s, ⟨s, _, rfl⟩, ⟨_, ⟨t, _, rfl⟩, rfl⟩⟩
+    rw [MeasurableEquiv.map_apply]
+    rw [show (piProdEquiv A B) ⁻¹' (Set.univ.pi s ×ˢ Set.univ.pi t) =
+        (Set.univ.pi fun i ↦ s i ×ˢ t i) by
+        ext; simp [Set.mem_pi, forall_and, piProdEquiv]]
+    simp_rw [Measure.pi_pi, Measure.prod_prod, Measure.pi_pi, Finset.prod_mul_distrib]
 
 end PI.AprimeInfG

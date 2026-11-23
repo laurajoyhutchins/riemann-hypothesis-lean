@@ -1,6 +1,45 @@
-import Mathlib
-import Formalism.LocalToGlobal.IndefiniteForms.IndefSide
-import Formalism.LocalToGlobal.Divisibility.RowLat
+module
+
+public import Formalism.LocalToGlobal.Divisibility.RowLat
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Module NumberField IsDedekindDomain
 open scoped Matrix ComplexOrder InnerProductSpace
@@ -22,8 +61,8 @@ def cptL (σ : K →+* ℂ) (n : ℕ) : (Fin n → K) →ₛₗ[σ] (Fin n → �
   map_add' x y := by funext i; simp [cpt]
   map_smul' a x := by funext i; simp [cpt]
 
-open Classical in
 
+open Classical in
 def kOf (σ : K →+* ℂ) (z : ℂ) : K := if h : ∃ a : K, σ a = z then h.choose else 0
 
 def kMat (σ : K →+* ℂ) {m n : ℕ} (M : Matrix (Fin m) (Fin n) ℂ) : Matrix (Fin m) (Fin n) K := M.map (kOf σ)
@@ -33,8 +72,8 @@ def IsRat (σ : K →+* ℂ) {m n : ℕ} (M : Matrix (Fin m) (Fin n) ℂ) : Prop
 def lin {E : Type} [AddCommGroup E] [Module ℂ E] {n : ℕ} (v : Fin n → E) : (Fin n → ℂ) →ₗ[ℂ] E :=
   Fintype.linearCombination ℂ v
 
-open Classical in
 
+open Classical in
 def solve {E : Type} [AddCommGroup E] [Module ℂ E] {n : ℕ} (f : (Fin n → ℂ) →ₗ[ℂ] E) (e : E) : Fin n → ℂ :=
   if h : ∃ y, f y = e then h.choose else 0
 
@@ -246,7 +285,7 @@ def KForm : Prop :=
 
 def EWnorm : Prop := ∀ j (x y : X.WC b j Bs.v0), ⟪X.eW b j x, X.eW b j y⟫_ℂ = ((X.nP b : ℝ) : ℂ) * ⟪x, y⟫_ℂ
 
-def MLat : Prop := ∀ j, Submodule.IsLattice K (X.M b j)
+def MLat : Prop := ∀ j, Submodule.IsFullLattice K (X.M b j)
 
 def H5 : Prop :=
   ∀ j t, Function.Injective (X.tC cr b j t) ∧ LinearMap.range (X.tC cr b j t) = LinearMap.range (X.w0C b j)
@@ -271,68 +310,6 @@ def GalD : Prop :=
         ((X.lam j Bs.μ0 p v : ℝ) : ℂ) * Formalism.HermitianLatticesTheory.majAt (Pi.basisFun K _) ((lv (fc X.zs) b).XT j Bs.μ0) v x y
 
 end Links
-
-structure CxLinks (X : CxData A) (Y : CxCol (fc := fc) X) (C CH : ℝ) : Prop where
-
-  stable : X.zs.Stable
-
-  inBlock : X.zs.InBlock
-
-  ratZ : X.RatZ
-
-  pos : ∀ b, (lv (fc X.zs) b).Pos
-
-  proviso : ∀ b, (lv (fc X.zs) b).Proviso
-
-  types : ∀ b, (lv (fc X.zs) b).Types
-
-  partsOrth : ∀ b, X.PartsOrth b (fc := fc)
-
-  h0 : X.H0
-
-  h2 : ∀ b, X.H2 cr b
-
-  ratMu : ∀ b, X.RATmu cr b
-
-  h3 : ∀ b, X.H3 cr b
-
-  h4pos : X.H4pos
-
-  h4 : ∀ b, X.H4 cr b
-
-  kForm : ∀ b, X.KForm b
-
-  mLat : ∀ b, X.MLat b
-
-  ewNorm : ∀ b, X.EWnorm b
-
-  h5 : ∀ b, X.H5 cr b
-
-  ratTh : ∀ b, X.RATth cr b
-
-  h3W : ∀ b, X.H3W cr b
-
-  thmA : ∀ b, X.ThmA cr b
-
-  galD : ∀ b, X.GalD cr b
-
-  l1d : ∀ b, (X.data cr b).DimensionsOfPartsAgree
-
-  l3 : (X.data cr false).L3 ((fc X.zs).Z.num C CH)
-
-  on : (X.data cr false).ON ((fc X.zs).Z.num C CH)
-
-  l6 : (X.data cr true).L6 ((fc X.zs).Z.num C CH)
-
-  l1b : (X.colOf cr Y).PairingFactorsThroughPeriods
-
-  l1e : (X.colOf cr Y).L1e
-
-  untw : (X.data cr false).Untwisted ((fc X.zs).Z.num C CH)
-
-  passage : Passage ((fc X.zs).Z.num C CH) (X.data cr false) (X.data cr true)
-
-  fun0 : (X.data cr false).FUN ((fc X.zs).Z.num C CH)
 
 end CxData
 

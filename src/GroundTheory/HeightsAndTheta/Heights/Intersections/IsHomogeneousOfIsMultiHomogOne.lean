@@ -1,9 +1,60 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.MultihomogeneousIdeals.MemDivSuppOfDivCycleNeZero
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.MultihomogeneousIdeals.ExistsMonomialNotMem
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.MultihomogeneousIdeals.InhDivCycleOfSuppEmpty
-import GroundTheory.HeightsAndTheta.Heights.Intersections.StatementsLineFibre
-import GroundTheory.HeightsAndTheta.Heights.Intersections.StatementsLinearQuotient
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.StatementsLineFibre
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.StatementsLinearQuotient
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+public import Mathlib.RingTheory.KrullDimension.Field
+public import Mathlib.RingTheory.KrullDimension.Polynomial
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.MultihomogeneousIdeals.CycDim
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.MultihomogeneousIdeals.ExistsMonomialNotMem
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.MultihomogeneousIdeals.InhDivCycleOfSuppEmpty
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.MultihomogeneousIdeals.MemDivSuppOfDivCycleNeZero
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -17,7 +68,7 @@ section Helpers
 variable {F : Type} [Field F]
 
 theorem linearForm_fin_one_eq {g : MvPolynomial (Fin 1) F} (hg : g.IsHomogeneous 1) :
-    g = C (coeff (Finsupp.single 0 1) g) * X 0 := by
+    g = C (AddMonoidAlgebra.coeff g (Finsupp.single 0 1)) * X 0 := by
   ext d
   rw [coeff_C_mul, coeff_X]
   by_cases h : Finsupp.single 0 1 = d
@@ -71,8 +122,9 @@ theorem LineFibreBlocks.proof (hLin : LinearQuotient.Statement) : LineFibreBlock
   rw [hWdef, ringKrullDim_eq_of_ringEquiv (Ideal.quotientKerAlgEquivOfSurjective hφs).toRingEquiv,
     MvPolynomial.ringKrullDim_of_isNoetherianRing, ringKrullDim_eq_zero_of_field, zero_add] at hdimW
   have hr : r = 1 := by
-    have : ((Nat.card (Fin r) : ℕ) : WithBot ℕ∞) = ((1 : ℕ) : WithBot ℕ∞) := hdimW
-    have h2 : Nat.card (Fin r) = 1 := by exact_mod_cast this
+    have h : ENat.card (Fin r) = (1 : ℕ∞) := WithBot.coe_injective hdimW
+    rw [ENat.card_eq_coe_natCard] at h
+    have h2 : Nat.card (Fin r) = 1 := by exact_mod_cast h
     simpa using h2
   subst hr
 
@@ -87,7 +139,7 @@ theorem LineFibreBlocks.proof (hLin : LinearQuotient.Statement) : LineFibreBlock
       simp [h0]
     obtain ⟨f, hf⟩ := hφs (X 0)
     rw [hφ0] at hf
-    have := congrArg (coeff (Finsupp.single 0 1)) hf
+    have := congrArg (AddMonoidAlgebra.coeff · (Finsupp.single 0 1)) hf
     simp [Algebra.ofId_apply, coeff_X, algebraMap_eq, coeff_C] at this
     rw [if_neg (Finsupp.single_ne_zero.mpr one_ne_zero).symm] at this
     exact zero_ne_one this
@@ -110,7 +162,7 @@ theorem LineFibreBlocks.proof (hLin : LinearQuotient.Statement) : LineFibreBlock
   set j : ∀ k, ι₀ k := fun k => (hWrel k).choose with hjdef
   have hj : IsChart W j := fun k => (hWrel k).choose_spec
   set p₁ : Σ k, ι₀ k := ⟨k₀, j k₀⟩ with hp₁
-  set a : (Σ k, ι₀ k) → F := fun s => coeff (Finsupp.single 0 1) (φ (X s)) with hadef
+  set a : (Σ k, ι₀ k) → F := fun s => AddMonoidAlgebra.coeff (φ (X s)) (Finsupp.single 0 1) with hadef
   have hφXs : ∀ s, φ (X s) = C (a s) * X 0 := fun s => linearForm_fin_one_eq (hφX s)
   have ha1 : a p₁ ≠ 0 := by
     intro h0

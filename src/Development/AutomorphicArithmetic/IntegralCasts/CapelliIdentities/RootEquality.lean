@@ -1,6 +1,79 @@
-import Mathlib
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.ResMapBijective
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.CoboundaryCriterion
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.ResMapBijective
+public import Mathlib.FieldTheory.KrullTopology
+public import Mathlib.NumberTheory.NumberField.Basic
+public import Mathlib.RepresentationTheory.Basic
+public import Mathlib.RingTheory.AdicCompletion.Noetherian
+public import Mathlib.RingTheory.DedekindDomain.Ideal.Lemmas
+public import Mathlib.RingTheory.Flat.FaithfullyFlat.Basic
+public import Mathlib.RingTheory.Flat.TorsionFree
+public import Mathlib.RingTheory.Henselian
+public import Mathlib.RingTheory.PicardGroup
+public import Mathlib.RingTheory.SimpleRing.Principal
+public import Mathlib.RingTheory.Valuation.RamificationGroup
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.CoboundaryCriterion
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.FieldTheory.Galois.Profinite
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.FreeModule.IdealQuotient
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+public import Mathlib.RingTheory.Invariant.Profinite
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.RootsOfUnity.AlgebraicallyClosed
+import Mathlib.RingTheory.Valuation.LocalSubring
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.FieldTheory.Finite.Basic
+public import Mathlib.FieldTheory.Galois.Infinite
+public import Mathlib.RingTheory.DedekindDomain.AdicValuation.Valuation
+public import Mathlib.RingTheory.Invariant.Defs
+public import Mathlib.RingTheory.RootsOfUnity.EnoughRootsOfUnity
+
+@[expose] public section
 
 @[reducible] noncomputable def UpperTheory.Reformulated.B.RootEquality.G.{u_1, u_2} :
     (F : Type u_1) →
@@ -482,7 +555,7 @@ theorem UpperTheory.Reformulated.B.RootEquality.aux5 :
                         (@Pi.addCommMonoid Γ (fun (a : Γ) ↦ M) fun (i : Γ) ↦ @AddCommGroup.toAddCommMonoid M inst_2))))))
               x y) := by
   exact fun ρ _ _ _ hx hy ↦ ⟨hx.1.add hy.1, fun g h ↦ by
-    simp only [Pi.add_apply, hx.2 g h, hy.2 g h, map_add]; abel⟩
+    simp only [Pi.add_apply, hx.2 g h, hy.2 g h, map_add (f := _)]; abel⟩
 
 theorem UpperTheory.Reformulated.B.RootEquality.aux6 :
     ∀ {R Γ M : Type} [inst : CommRing R] [inst_1 : Group Γ] [inst_2 : AddCommGroup M]
@@ -798,23 +871,11 @@ theorem UpperTheory.Reformulated.B.RootEquality.aux7 :
   exact fun ρ _ c _ hx ↦ ⟨hx.1.comp (fun m ↦ c • m), fun g h ↦ by
     simp only [Pi.smul_apply, hx.2 g h, map_smul, smul_add]⟩
 
-noncomputable def UpperTheory.Reformulated.B.RootEquality.Zl :
-    {R Γ M : Type} →
-      [inst : CommRing R] →
-        [inst_1 : Group Γ] →
-          [inst_2 : AddCommGroup M] →
-            [inst_3 :
-                @_root_.Module R M (@CommSemiring.toSemiring R (@CommRing.toCommSemiring R inst))
-                  (@AddCommGroup.toAddCommMonoid M inst_2)] →
-              @Representation R Γ M (@CommSemiring.toSemiring R (@CommRing.toCommSemiring R inst))
-                  (@DivInvMonoid.toMonoid Γ (@Group.toDivInvMonoid Γ inst_1)) (@AddCommGroup.toAddCommMonoid M inst_2)
-                  inst_3 →
-                [TopologicalSpace Γ] →
-                  @Submodule R (Γ → M) (@CommSemiring.toSemiring R (@CommRing.toCommSemiring R inst))
-                    (@Pi.addCommMonoid Γ (fun (a : Γ) ↦ M) fun (i : Γ) ↦ @AddCommGroup.toAddCommMonoid M inst_2)
-                    (@Pi.Function.module Γ R M (@CommSemiring.toSemiring R (@CommRing.toCommSemiring R inst))
-                      (@AddCommGroup.toAddCommMonoid M inst_2) inst_3) :=
-    fun {R Γ M : Type} [inst : CommRing R] [inst_1 : Group Γ] [inst_2 : AddCommGroup M]
+noncomputable def UpperTheory.Reformulated.B.RootEquality.Zl : {R Γ M : Type} →
+  [inst : CommRing R] →
+    [inst_1 : Group Γ] →
+      [inst_2 : AddCommGroup M] →
+        [inst_3 : Module R M] → Representation R Γ M → [TopologicalSpace Γ] → Submodule R (Γ → M) := fun {R Γ M : Type} [inst : CommRing R] [inst_1 : Group Γ] [inst_2 : AddCommGroup M]
         [inst_3 :
           @_root_.Module R M (@CommSemiring.toSemiring R (@CommRing.toCommSemiring R inst))
             (@AddCommGroup.toAddCommMonoid M inst_2)]
@@ -1500,7 +1561,7 @@ private def Fix (K : Subgroup D) : Submodule R M where
 
 private def cob : M →ₗ[R] (D → M) where
   toFun b := fun g ↦ ρ g b - b
-  map_add' a b := by ext g; simp only [map_add, Pi.add_apply]; abel
+  map_add' a b := by ext g; simp only [map_add (f := _), Pi.add_apply]; abel
   map_smul' c b := by ext g; simp [smul_sub]
 
 omit [TopologicalSpace D] [IsTopologicalGroup D] in
@@ -1846,7 +1907,9 @@ private theorem dec_closed [Algebra.IsAlgebraic F Ω] :
     ext σ
     simp [mem_dec]
   rw [this]
-  exact isClosed_iInter fun x ↦ ⟨lc_apply x _ᶜ⟩
+  exact isClosed_iInter fun x ↦ ⟨by
+    simpa only [Set.preimage_compl] using
+      (lc_apply x {y | y ∈ A ↔ x ∈ A}ᶜ)⟩
 
 private theorem root_eq {N : ℕ} (hN : A.valuation (N : Ω) = 1) {x y : Ω} (hx : x ^ N = 1)
     (hy : y ^ N = 1) (h : A.valuation (x - y) < 1) : x = y := by
@@ -1925,7 +1988,7 @@ private theorem invariant : Algebra.IsInvariant (𝓞 F) (𝓞 Ω) (G F Ω) := b
   have h1 : IsIntegral ℤ x := by
     have : IsIntegral ℤ (b : Ω) := b.isIntegral_coe
     rw [← hx] at this
-    exact (isIntegral_algebraMap_iff (algebraMap F Ω).injective).1 this
+    exact (isIntegral_algebraMap_iff ).1 this
   exact ⟨⟨x, h1⟩, Subtype.ext hx⟩
 
 attribute [local instance] Ideal.Quotient.field in

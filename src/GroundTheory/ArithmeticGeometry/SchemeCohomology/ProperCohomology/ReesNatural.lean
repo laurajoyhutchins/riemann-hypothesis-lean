@@ -1,5 +1,49 @@
-import Mathlib
-import GroundTheory.ArithmeticGeometry.SchemeCohomology.ProperCohomology.ReesSheaf
+module
+
+public import GroundTheory.ArithmeticGeometry.SchemeCohomology.ProperCohomology.ReesSheaf
+public import GroundTheory.ArithmeticGeometry.SchemeCohomology.ProjectiveCohomology.QcohLocal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Arith.SchemeCoh
@@ -18,8 +62,8 @@ lemma algV_res (a : A) : resO hle (algV X V a) = algV X V' a := by
   exact congrArg (fun f : Γ(Spec (.of A), ⊤) ⟶ Γ(X, V') => f.hom ((Scheme.ΓSpecIso (.of A)).inv a))
     this
 
-variable (I) in
 
+variable (I) in
 abbrev resS : Γ(reesScheme I X, reesPr I X ⁻¹ᵁ V) →+* Γ(reesScheme I X, reesPr I X ⁻¹ᵁ V') :=
   resO (Scheme.Hom.preimage_mono _ hle)
 
@@ -55,8 +99,8 @@ lemma reesRingHom_res (hV : IsAffineOpen V) (hV' : IsAffineOpen V')
   exact congrArg (fun f : Γ(reesScheme I X, reesPr I X ⁻¹ᵁ V) ⟶
     CommRingCat.of (Polynomial Γ(X, V')) => f.hom s) h
 
-variable (F) in
 
+variable (F) in
 def resFA : Γ(F, V) →ₗ[A] Γ(F, V') where
   toFun := resF F hle
   map_add' := map_add _
@@ -94,10 +138,11 @@ lemma theta₁_res_coeff
     · exact (map_zero _).symm
   | zero => simp
   | add z z' _ _ hz hz' =>
-    simp only [map_add, PolynomialModule.coeff_add, Finsupp.add_apply, hz, hz']
+    simp only [map_add (f := _), PolynomialModule.coeff_add, Finsupp.add_apply, hz, hz']
   | smul s z _ hz =>
+
     rw [Scheme.Modules.map_smul, theta₁_smul, theta₁_smul, reesRingHom_res hle hV hV',
-      PolynomialModule.smul_apply, PolynomialModule.smul_apply, map_sum]
+    PolynomialModule.smul_apply, PolynomialModule.smul_apply, map_sum]
     refine Finset.sum_congr rfl fun x _ => ?_
     rw [Polynomial.coeff_map, hz, resF_smul]
 
@@ -118,19 +163,7 @@ section Base
 
 variable {A : Type u} [CommRing A] (I : Ideal A) (X : Scheme.{u}) [X.Over (Spec (.of A))]
 
-instance [LocallyOfFiniteType (X ↘ Spec (.of A))] :
-    LocallyOfFiniteType (reesScheme I X ↘ Spec (.of (reesAlgebra I))) := by
-  change LocallyOfFiniteType (pullback.snd (X ↘ Spec (.of A)) (reesStructure I))
-  infer_instance
-
 variable {I X}
-
-attribute [local instance] algebraOfOver in
-
-lemma reesInr_eq_resO_algebraMap (V : X.Opens) (r : reesAlgebra I) :
-    reesInr I V r = resO (le_top : reesPr I X ⁻¹ᵁ V ≤ ⊤)
-      (algebraMap (reesAlgebra I) Γ(reesScheme I X, ⊤) r) :=
-  rfl
 
 end Base
 

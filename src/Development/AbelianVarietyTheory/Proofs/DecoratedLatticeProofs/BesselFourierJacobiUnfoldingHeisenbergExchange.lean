@@ -1,13 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.PlacesToAdeles
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.BesselLineContractionHeisenbergInvariant
+module
+
+public import Development.AbelianVarietyTheory.Definitions.LatticeFrames.IsSumFrame
+import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ComplexEmbeddingHermitianQuadrupleSum
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.BesselLineContractionHeisenbergInvariant
+import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.BesselLineLinkGramSimilitudeBijective
+import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.HermitianLinkMapAdditiveRationalEquivariant
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.L2.Theta Formalism.IndefR.Datum MeasureTheory IsDedekindDomain NumberField Matrix
 open GlobalTheory.MixModel GlobalTheory.MixPer GlobalTheory.Grow GlobalTheory.Unf GlobalTheory.LatPair GlobalTheory.SplitWeil ValuativeRel IsLocalRing
 open GlobalTheory.FinPl
-open scoped TensorProduct Pointwise
+open scoped TensorProduct Pointwise Matrix
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
 
 namespace GlobalTheory.FinPl.HeisExchange
@@ -44,8 +86,7 @@ theorem quasi_resT {ψ : AddChar (AF D.host.F) ℂ} {T A L : HSp D} (o : OrthDec
     f ((o.resT S).symm (0, γ + v)) = ψ (-symplOH S L γ v) * f ((o.resT S).symm (0, v)) := by
   have r : (o.resT S).symm (0, γ) ∈ ratMx D T.rank S.rank := by
     refine (o.mem_ratL_resT S _).2 ?_
-    rw [AddEquiv.apply_symm_apply]
-    exact ⟨zero_mem _, hγ⟩
+    simpa only [AddEquiv.apply_symm_apply, Prod.fst, Prod.snd] using (show (0 : WO S A) ∈ ratL A S ∧ γ ∈ ratL L S from ⟨zero_mem _, hγ⟩)
   obtain ⟨γ₂, hγ₂⟩ := r
   have q := hf.quasi γ₂ ((o.resT S).symm (0, v))
   have e : ratW T S γ₂ = (o.resT S).symm (0, γ) := hγ₂
@@ -56,8 +97,7 @@ theorem quasi_resS {ψ : AddChar (AF D.host.F) ℂ} {T A L : HSp D} (o : OrthDec
     f ((o.resS S).symm (0, γ + v)) = ψ (-symplOH L S γ v) * f ((o.resS S).symm (0, v)) := by
   have r : (o.resS S).symm (0, γ) ∈ ratMx D S.rank T.rank := by
     refine (o.mem_ratL_resS S _).2 ?_
-    rw [AddEquiv.apply_symm_apply]
-    exact ⟨zero_mem _, hγ⟩
+    simpa only [AddEquiv.apply_symm_apply, Prod.fst, Prod.snd] using (show (0 : WO A S) ∈ ratL S A ∧ γ ∈ ratL S L from ⟨zero_mem _, hγ⟩)
   obtain ⟨γ₂, hγ₂⟩ := r
   have q := hf.quasi γ₂ ((o.resS S).symm (0, v))
   have e : ratW S T γ₂ = (o.resS S).symm (0, γ) := hγ₂
@@ -115,12 +155,12 @@ theorem besselFourierJacobi_unfolding_heisenberg_exchange : ∀ (D : D7) (ψ : A
     rw [← integral_const_mul]
     refine integral_congr_ae (Filter.Eventually.of_forall fun a => ?_)
     beta_reduce
-    rw [s₁.weil₀.om_heis _ _ _ _ hΞ, act_resS, ← kappa_mul, heisO, sympl_resS, symplOH_kappa, ← map_add,
+    rw [s₁.weil₀.om_heis _ _ _ _ hΞ, act_resS, ← kappa_mul, heisO, sympl_resS, symplOH_kappa, ← map_add (f := _),
       Prod.mk_add_mk, add_zero, ← kappa_add]
     ring
   · refine integral_congr_ae (Filter.Eventually.of_forall fun v => ?_)
     beta_reduce
-    rw [s₂.weil₀.om_heis _ _ _ _ hΘ, act_resT, heisO, sympl_resT, ← map_add, Prod.mk_add_mk, add_zero, Matrix.neg_mul]
+    rw [s₂.weil₀.om_heis _ _ _ _ hΘ, act_resT, heisO, sympl_resT, ← map_add (f := _), Prod.mk_add_mk, add_zero, Matrix.neg_mul]
 
 end GlobalTheory.FinPl.HeisExchange
 

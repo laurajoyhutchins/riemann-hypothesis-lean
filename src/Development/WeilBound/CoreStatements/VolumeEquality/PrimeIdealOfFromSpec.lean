@@ -1,6 +1,51 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.EtaleLocalizationAtPrimeTensorOfLowHeight
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.RegAtFractionNoetherianClosed
+module
+
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.CoordsAt
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.RegAtFractionNoetherianClosed
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -70,7 +115,7 @@ theorem mem_range_ev {U : X.Opens} (hU : IsAffineOpen U) (hg : genPt ξ ∈ U) (
     { carrier := {t | ev ξ U hg t * a ∈ (ev ξ U hg).range}
       add_mem' := fun {t t'} ht ht' => by
         show ev ξ U hg (t + t') * a ∈ (ev ξ U hg).range
-        rw [map_add, add_mul]; exact add_mem ht ht'
+        rw [map_add (f := _), add_mul]; exact add_mem ht ht'
       zero_mem' := by
         show ev ξ U hg 0 * a ∈ (ev ξ U hg).range
         rw [map_zero, zero_mul]; exact zero_mem _
@@ -87,12 +132,6 @@ theorem mem_range_ev {U : X.Opens} (hU : IsAffineOpen U) (hg : genPt ξ ∈ U) (
     obtain ⟨s, t, ht, e⟩ := exists_frac hU ⟨_, hs _ hy⟩ hy hg (ha _ hy)
     rw [primeIdealOf_fromSpec hU y hy] at ht
     exact absurd (hIm (show ev ξ U hg t * a ∈ (ev ξ U hg).range from ⟨s, e.symm⟩)) ht
-
-theorem regAt_mono {p q : Cpt ξ} (h : q.1 ⤳ p.1) : regAt ξ p ≤ regAt ξ q := by
-  rintro _ ⟨g, rfl⟩
-  refine ⟨X.presheaf.stalkSpecializes h g, ?_⟩
-  have := congrArg (fun φ => φ.hom g) (X.presheaf.stalkSpecializes_comp q.2 h)
-  exact congrArg (Scheme.stalkClosedPointTo ξ).hom this
 
 theorem mem_regAt_gen (hξ : IsCptGen ξ) (a : Ω) : a ∈ regAt ξ ⟨genPt ξ, specializes_rfl⟩ := by
   obtain ⟨g, rfl⟩ := hξ.bij.2 a

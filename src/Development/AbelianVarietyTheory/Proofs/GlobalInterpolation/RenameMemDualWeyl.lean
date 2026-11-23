@@ -1,6 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.BlockTheory.GlobalSignature.SubstitutionAdjoint
-import Formalism.GradedWeylDivisibility.FinalC
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.GlobalSignature.SubstitutionAdjoint
+import Formalism.GradedWeylDivisibility.FockSpaceTableaux.LBidetLemmas
+import Formalism.GradedWeylDivisibility.FockSpaceTableaux.LBidetMinor
+public import Formalism.GradedWeylDivisibility.FockSpaceTableaux.LRowstLemmas
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open NumberField IsDedekindDomain MvPolynomial Formalism.BasicNotions Formalism.HermitianLatticesTheory Formalism.L2.DIV Formalism.L2.Ker GlobalTheory.IndefiniteRowSideFullHecke.SubstitutionAdjoint
 open scoped Matrix
@@ -13,10 +59,10 @@ open Formalism.GradedWeylDivisibility
 
 variable {K : Type} [Field K]
 
+
 open NumberField IsDedekindDomain MvPolynomial in
 open scoped Matrix in
 variable {K : Type} [Field K] in
-
 theorem _root_.GlobalTheory.SubstMem.rename_mem_dualWeyl {a b : ℕ} (hab : a ≤ b) (ν : Fin a → ℕ) (ν' : Fin b → ℕ)
     (h1 : ∀ i, ν' (Fin.castLE hab i) = ν i) (h2 : ∀ j : Fin b, a ≤ (j : ℕ) → ν' j = 0)
     (f : MvPolynomial (Fin a × Fin a) K) (hf : f ∈ _root_.Formalism.GradedWeylDivisibility.dualWeyl K a a ν) :
@@ -63,7 +109,7 @@ theorem _root_.GlobalTheory.SubstMem.rename_mem_dualWeyl {a b : ℕ} (hab : a �
         · subst hv
           simp only [AlgHom.comp_apply, rename_X, _root_.Formalism.GradedWeylDivisibility.colAddGen, aeval_X, Prod.map_snd, Prod.map_fst,
             if_pos rfl]
-          simp only [ite_true, if_true, map_add, map_mul, rename_X]
+          simp only [ite_true, if_true, map_add (f := _), map_mul, rename_X]
           rfl
         · have hv' : Fin.castLE hab v2 ≠ Fin.castLE hab j' :=
             fun h => hv (Fin.castLE_injective hab h)
@@ -83,10 +129,10 @@ theorem _root_.GlobalTheory.SubstMem.rename_mem_dualWeyl {a b : ℕ} (hab : a �
         simp only [AlgHom.comp_apply, rename_X, _root_.Formalism.GradedWeylDivisibility.colAddGen, aeval_X, Prod.map_snd, if_neg hne]
       exact DFunLike.congr_fun key f
 
+
 open NumberField IsDedekindDomain MvPolynomial in
 open scoped Matrix in
 variable {K : Type} [Field K] in
-
 theorem _root_.GlobalTheory.SubstMem.det_pow_mem (a m : ℕ) :
     _root_.Formalism.GradedWeylDivisibility.initMinor K (id : Fin a → Fin a) le_rfl ^ m ∈ _root_.Formalism.GradedWeylDivisibility.dualWeyl K a a (fun _ => m) := by
   refine _root_.Formalism.GradedWeylDivisibility.dualWeyl_of_eq (_root_.Formalism.GradedWeylDivisibility.dualWeyl_pow (_root_.Formalism.GradedWeylDivisibility.initMinor_mem (R := K) (id : Fin a → Fin a) le_rfl) m) ?_
@@ -109,6 +155,7 @@ theorem _root_.GlobalTheory.SubstMem.substAdj_blockEmb {ι : Type} {a b : ℕ} (
         (rename (Prod.map (Fin.castLE hab) (Fin.castLE hab)))) := by
     apply MvPolynomial.algHom_ext
     intro v
+
     simp [_root_.GlobalTheory.IndefiniteRowSideFullHecke.SubstitutionAdjoint.substAdj, _root_.Formalism.GradedWeylDivisibility.blockEmb, _root_.Formalism.GradedWeylDivisibility.rowAct, _root_.GlobalTheory.SubstMem.padRows, map_sum]
   exact DFunLike.congr_fun key f
 
@@ -118,7 +165,7 @@ variable {K : Type} [Field K] in
 private theorem DomWeight_detShift_eq_w_last {N : ℕ} (l : _root_.Formalism.BasicNotions.DomWeight N) (h : 0 < N) :
     l.detShift = l.w ⟨N - 1, by omega⟩ := by
   unfold _root_.Formalism.BasicNotions.DomWeight.detShift
-  rw [dif_pos h]
+  rw [dite_eq_left h]
 
 open NumberField IsDedekindDomain MvPolynomial in
 open scoped Matrix in
@@ -135,11 +182,12 @@ private theorem isWeightedHomogeneous_colW_rowAct_of_isWeightedHomogeneous {R : 
     (hf : IsWeightedHomogeneous (_root_.Formalism.GradedWeylDivisibility.colW r n) f ν) :
     IsWeightedHomogeneous (_root_.Formalism.GradedWeylDivisibility.colW r n) (_root_.Formalism.GradedWeylDivisibility.rowAct R g f) ν := by
   rw [← mem_weightedHomogeneousSubmodule]
+
   rw [← support_sum_monomial_coeff f, map_sum]
   refine Submodule.sum_mem _ fun d hd => ?_
   rw [mem_weightedHomogeneousSubmodule, ← hf (mem_support_iff.1 hd)]
-  have e : _root_.Formalism.GradedWeylDivisibility.rowAct R g (monomial d (coeff d f)) =
-      C (coeff d f) * d.prod (fun v k => (_root_.Formalism.GradedWeylDivisibility.rowAct R g (X v)) ^ k) := by
+  have e : _root_.Formalism.GradedWeylDivisibility.rowAct R g (monomial d (AddMonoidAlgebra.coeff f d)) =
+      C (AddMonoidAlgebra.coeff f d) * d.prod (fun v k => (_root_.Formalism.GradedWeylDivisibility.rowAct R g (X v)) ^ k) := by
     simp only [_root_.Formalism.GradedWeylDivisibility.rowAct, aeval_monomial, aeval_X, algebraMap_eq]
   rw [e, Finsupp.weight_apply, ← zero_add (d.sum fun i c => c • _root_.Formalism.GradedWeylDivisibility.colW r n i)]
   exact (isWeightedHomogeneous_C _ _).mul
@@ -165,10 +213,10 @@ private theorem frDet_eq_blockEmb_initMinor_id {K : Type} [Field K] {ι : Type} 
   ext p q
   simp [_root_.Formalism.GradedWeylDivisibility.blockEmb]
 
+
 open NumberField IsDedekindDomain MvPolynomial in
 open scoped Matrix in
 variable {K : Type} [Field K] in
-
 theorem _root_.GlobalTheory.SubstMem.substAdj_sharp_mem : ∀ (K : Type) [Field K] (ι : Type) [Fintype ι]
     (a b : ℕ) (hab : a < b) (lam : ι → _root_.Formalism.BasicNotions.DomWeight a) (lam' : ι → _root_.Formalism.BasicNotions.DomWeight b) (s s' : ι → ℤ)
     (n : ι → ℕ), _root_.GlobalTheory.IndefiniteRowSideFullHecke.SubstitutionAdjoint.WtCompat hab lam lam' s s' n →
@@ -211,7 +259,7 @@ theorem _root_.GlobalTheory.SubstMem.substAdj_sharp_mem : ∀ (K : Type) [Field 
       rw [frDet_eq_blockEmb_initMinor_id, ← map_pow, ← map_mul, _root_.GlobalTheory.SubstMem.substAdj_blockEmb]
   | zero => simp [hsharp]
   | add x y _ _ hx hy =>
-    rw [hsharp, add_mul, map_add]
+    rw [hsharp, add_mul, map_add (f := _)]
     exact add_mem (by rw [← hsharp]; exact hx) (by rw [← hsharp]; exact hy)
   | smul c x _ hx =>
     rw [hsharp, smul_mul_assoc, map_smul]

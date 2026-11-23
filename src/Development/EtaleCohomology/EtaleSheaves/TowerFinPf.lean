@@ -1,4 +1,47 @@
-import Development.EtaleCohomology.EtaleSheaves.FiltPf
+module
+
+public import Development.EtaleCohomology.EtaleSheaves.FiltPf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+
+@[expose] public section
 
 noncomputable section
 open CategoryTheory Limits Category Pretriangulated GlobalTheory.EtC LateralTheory.E.TruncationPieces LateralTheory.E.FiltPf
@@ -75,7 +118,7 @@ theorem hom_nat {C : Type*} [Category C] [Preadditive C] {S₁ S₂ : ShortCompl
       φ.τ₃ ≫ CochainComplex.homOfDegreewiseSplit S₂ σ₂ := by
   ext n
   simp [CochainComplex.cocycleOfDegreewiseSplit, CochainComplex.shiftFunctor_map_f']
-  exact aux _ _ _ _ _ _ _ _ _ _ (hs n) (φ.τ₂.comm n (n + 1)) (hr (n + 1))
+  simpa only [assoc] using aux _ _ _ _ _ _ _ _ _ _ (hs n) (φ.τ₂.comm n (n + 1)) (hr (n + 1))
 
 section Step
 variable {R : Type} [CommRing R]
@@ -152,14 +195,12 @@ theorem hs (m : ℤ) : (phiS f a hK hL).τ₃.f m ≫ (spl L a hL m).s = (spl K 
     exact @inv_nat' _ _ _ _ _ _ _ _ (qK_iso K m hK) (qK_iso L m hL) _ _ (HomologicalComplex.congr_hom (phiS f m hK hL).comm₂₃ m).symm
   · simp only [ShortComplex.Splitting.ofIsIsoOfIsZero]
     erw [comp_zero, zero_comp]
-    rfl
 
 theorem hr (m : ℤ) : (phiS f a hK hL).τ₂.f m ≫ (spl L a hL m).r = (spl K a hK m).r ≫ (phiS f a hK hL).τ₁.f m := by
   unfold spl
   split_ifs with h
   · simp only [ShortComplex.Splitting.ofIsZeroOfIsIso]
     erw [comp_zero, zero_comp]
-    rfl
   · exact @inv_nat' _ _ _ _ _ _ _ _ (ι_iso K a hK m h) (ι_iso L a hL m h) _ _ (HomologicalComplex.congr_hom (phiS f a hK hL).comm₁₂ m).symm
 
 def triMap : CochainComplex.triangleOfDegreewiseSplit (MainNotions K a hK) (spl K a hK) ⟶

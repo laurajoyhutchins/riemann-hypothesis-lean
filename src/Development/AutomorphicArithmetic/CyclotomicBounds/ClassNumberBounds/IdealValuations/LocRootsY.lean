@@ -1,5 +1,57 @@
-import Development.AutomorphicArithmetic.CyclotomicBounds.ClassNumberBounds.IdealValuations.LocDefY
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.ExistsRootCongruence
+module
+
+public import Mathlib.NumberTheory.Padics.Complex
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.ExistsRootCongruence
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+public import Mathlib.FieldTheory.Finite.Extension
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Development.AutomorphicArithmetic.CyclotomicBounds.ClassNumberBounds.TotallyRealRoots.LeNuIffPowMemPrinc
+public import Mathlib.Algebra.Algebra.ZMod
+public import Mathlib.FieldTheory.Finite.Basic
+
+@[expose] public section
 
 open KStar.TotallyRealRoots
 
@@ -85,23 +137,6 @@ private theorem lr_field_pow {k : Type*} [Field k] [CharP k l] (φ : k →+* k) 
   rw [Nat.card_zmod] at h
   exact h
 
-private theorem lr_int_pow {k : Type*} [Field k] [CharP k l] [Algebra (ZMod l) k] {a : k}
-    (ha : IsIntegral (ZMod l) a) (h0 : a ≠ 0) : ∃ m : ℕ, ¬ l ∣ m ∧ a ^ m = 1 := by
-  have hl : l.Prime := Fact.out
-  let F := IntermediateField.adjoin (ZMod l) {a}
-  have : FiniteDimensional (ZMod l) F := IntermediateField.adjoin.finiteDimensional ha
-  have : Finite F := Module.finite_of_finite (ZMod l)
-  let : Fintype F := Fintype.ofFinite F
-  have : CharP F l := charP_of_injective_algebraMap (algebraMap (ZMod l) F).injective l
-  obtain ⟨n, -, hn⟩ := FiniteField.card F l
-  let b : F := ⟨a, IntermediateField.mem_adjoin_simple_self _ _⟩
-  have hb : b ≠ 0 := fun h => h0 (congrArg Subtype.val h)
-  refine ⟨Fintype.card F - 1, fun h => ?_,
-    congrArg Subtype.val (FiniteField.pow_card_sub_one_eq_one b hb)⟩
-  have h1 : l ∣ Fintype.card F := hn ▸ dvd_pow_self l n.ne_zero
-  have h2 := (Nat.dvd_sub_iff_right Fintype.card_pos h1).mp h
-  exact hl.one_lt.ne' (Nat.dvd_one.mp h2)
-
 theorem norm_aut_and_roots :
     (∀ (g : Gal(PadicAlgCl l/ℚ_[l])) (x : PadicAlgCl l), ‖g x‖ = ‖x‖) ∧
       ∀ (m : ℕ) (ζ ζ' : PadicAlgCl l), ¬ l ∣ m → ζ ^ m = 1 → ζ' ^ m = 1 → ‖ζ - ζ'‖ < 1 →
@@ -118,6 +153,7 @@ theorem norm_aut_and_roots :
   rw [ha, hb, sub_self, mul_eq_zero_iff_right hab] at h1
   have h2 := congrArg (IsLocalRing.residue (lrO l)) h1
   have h3 := (lr_res a b).mpr hlt
+
   simp only [map_sum, map_mul, map_pow, map_zero, h3] at h2
   rw [geom_sum₂_self, mul_eq_zero] at h2
   rcases h2 with h2 | h2
@@ -146,25 +182,5 @@ theorem exists_pow_of_aut (g : Gal(PadicAlgCl l/ℚ_[l])) {m : ℕ} (hm : ¬ l �
 theorem exists_root_congr {x : PadicAlgCl l} (hx : ‖x‖ = 1) :
     ∃ (m : ℕ) (ζ : PadicAlgCl l), ¬ l ∣ m ∧ ζ ^ m = 1 ∧ ‖x - ζ‖ < 1 :=
   _root_.UpperTheory.Reformulated.B.ExistsRootCongruence.exists_root_congr hx
-
-theorem mem_locInertia_iff (g : Gal(PadicAlgCl l/ℚ_[l])) :
-    g ∈ locInertia l ↔ IsResTrivial l g := by
-  constructor
-  · intro hg x hx
-    rcases hx.lt_or_eq with hx | hx
-    · rw [sub_eq_add_neg]
-      refine (IsUltrametricDist.norm_add_le_max _ _).trans_lt (max_lt ?_ ?_)
-      · rwa [lr_aut]
-      · rwa [norm_neg]
-    · obtain ⟨m, ζ, hm, h, hlt⟩ := exists_root_congr hx
-      have h1 : g x - x = g (x - ζ) + -(x - ζ) := by
-        rw [map_sub, hg m ζ hm h]; ring
-      rw [h1]
-      refine (IsUltrametricDist.norm_add_le_max _ _).trans_lt (max_lt ?_ ?_)
-      · rwa [lr_aut]
-      · rwa [norm_neg]
-  · intro hg m ζ hm h
-    exact norm_aut_and_roots.2 m _ _ hm (by rw [← map_pow, h, map_one]) h
-      (hg ζ (lr_norm_root hm h).le)
 
 end KStar.IdealValuations

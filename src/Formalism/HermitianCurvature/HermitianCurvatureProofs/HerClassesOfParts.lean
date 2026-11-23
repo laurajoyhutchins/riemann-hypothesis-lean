@@ -1,7 +1,46 @@
-import Formalism.HermitianCurvature.TopDensNonnegOfKappa
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.ThmPActualFromInputs
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.HasFDerivAtFsvOther
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.HsInnerAddSmulRight
+module
+
+public import Formalism.HermitianCurvature.StatementQ
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MeasureTheory
 
@@ -33,26 +72,6 @@ variable {S : Type} [Fintype S] [DecidableEq S]
 variable {P : M.Par} {z z' : Fin (2 * P.r + P.k + 1) → ℂ} {π : Mx P.k P.r → (Wp →L[ℂ] Wp)}
   {π' : Mx P.k P.r → (Wq →L[ℂ] Wq)} {L : R.LevelData (Pr (RadSp P.k P.r z z' π π')) P.r}
   {st : Fr.Start (Pr (RadSp P.k P.r z z' π π'))} {l0 : ℕ} {D : B.RealPlaceData P.k P.r Wp Wq}
-
-theorem herK_sliceIn : SliceIn (S := S) P z z' π π' L st (herK S P z z' π π' L st l0 D) l0 := by
-  intro w hw l x hx
-  exact inK_act_span _ (fun a b Φ hΦ => Submodule.subset_span (HerGen.slice l w a b Φ hw hΦ)) x hx
-
-theorem herK_waveK : WaveK (S := S) P z z' π π' st (herK S P z z' π π' L st l0 D) l0 := by
-  intro w hw l s Wv Wv' hW hW' x hx
-  exact inK_act_span _
-    (fun a b Φ hΦ => Submodule.subset_span (HerGen.waveC l w s Wv Wv' a b Φ hw hW hW' hΦ)) x hx
-
-theorem herK_waveZ (w : List (Letter ℂ S)) (hw : WordOK P z z' π π' st l0 w) (s : ℂ)
-    (Wv Wv' : Module.End ℂ (RadSp P.k P.r z z' π π')) (hW : multiplicationOperator Wv (fun _ g => fsv s (zeta P.k P.r z z' g)))
-    (hW' : multiplicationOperator Wv' (fun _ g => fsv (-s) (zeta P.k P.r z z' g))) (x : Ix S → RadSp P.k P.r z z' π π')
-    (hx : InK (herK S P z z' π π' L st l0 D (Fin.last P.r)) x) :
-    InK (herK S P z z' π π' L st l0 D (Fin.last P.r)) (act (Vw (mkP Wv Wv') s w) x) :=
-  inK_act_span _ (fun a b Φ hΦ => Submodule.subset_span (HerGen.waveZ w s Wv Wv' a b Φ hw hW hW' hΦ)) x hx
-
-theorem herK_jf (F : Mx P.k P.r → (Wq →L[ℂ] Wp)) (hF : JFOK P z z' F) (Φ : RadSp P.k P.r z z' π π')
-    (hΦ : IsRadJF P z z' π π' D F Φ) : Φ ∈ herK S P z z' π π' L st l0 D 0 :=
-  Submodule.subset_span (HerGen.jf F Φ hF hΦ)
 
 end Classes
 

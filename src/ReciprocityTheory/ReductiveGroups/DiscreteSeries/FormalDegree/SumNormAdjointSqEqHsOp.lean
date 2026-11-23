@@ -1,6 +1,55 @@
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.SumInnerBasisSqEqAdjoint
+module
+
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.AdKMeasurePreserving
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.Countable
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.CasimirCoefficients.KFacts
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.IntegrableOfContinuousCompact
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.KSchur
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.KinstSecondCountable
 import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.PBridge
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.IntegrableOfContinuousCompact
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.PolarBasicA
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.SumInnerBasisSqEqAdjoint
+
+@[expose] public section
 
 noncomputable section
 
@@ -84,6 +133,13 @@ theorem hsOp_ge_integral {ε : Fin n → Bool} {Λ : Fin n → ℝ} (T : KType �
 open CompactHaarProbability in
 theorem continuous_fF (ε : Fin n → Bool) (lam : Fin n → ℝ) {Λ : Fin n → ℝ} (T : KType ε Λ) :
     Continuous fun z : PCoord ε → ℂ => fF ε lam T (pmat z) := by
+  letI : IsProbabilityMeasure (dk ε) := ⟨by
+    change (muK ε Set.univ)⁻¹ * muK ε Set.univ = 1
+    exact ENNReal.inv_mul_cancel
+      (ENNReal.toReal_pos_iff.mp (muK_univ_pos ε)).1.ne'
+      (ENNReal.toReal_pos_iff.mp (muK_univ_pos ε)).2.ne⟩
+  letI : IsFiniteMeasureOnCompacts (dk ε) := ⟨fun K hK =>
+    (measure_mono (Set.subset_univ K)).trans_lt (measure_lt_top (dk ε) Set.univ)⟩
   have hf : Continuous (fun p : (PCoord ε → ℂ) × KG ε =>
       ((Real.exp (-Ph lam (toMK p.2⁻¹ * pmat p.1 * toMK p.2)) : ℝ) : ℂ) • (T.op p.2 * projW T * T.op p.2⁻¹)) :=
     (Complex.continuous_ofReal.comp (Real.continuous_exp.comp (continuous_potential_conj_prod lam).neg)).smul
@@ -110,6 +166,14 @@ theorem formal_degree_inequality {ε : Fin n → Bool} {lam : Fin n → ℝ} {H 
     ENNReal.ofReal (cPQ ε) *
         ∫⁻ z : PCoord ε → ℂ, ENNReal.ofReal (‖⟪T.w, fF ε lam T (pmat z) T.w⟫_ℂ‖ ^ 2 * Jac z) ≤
       ENNReal.ofReal ((Module.finrank ℂ T.V : ℝ) / d) := by
+  letI : IsProbabilityMeasure (dk ε) := ⟨by
+    change (muK ε Set.univ)⁻¹ * muK ε Set.univ = 1
+    exact ENNReal.inv_mul_cancel
+      (ENNReal.toReal_pos_iff.mp (muK_univ_pos ε)).1.ne'
+      (ENNReal.toReal_pos_iff.mp (muK_univ_pos ε)).2.ne⟩
+  letI : IsFiniteMeasureOnCompacts (dk ε) := ⟨fun K hK =>
+    (measure_mono (Set.subset_univ K)).trans_lt (measure_lt_top (dk ε) Set.univ)⟩
+  letI : SFinite (dk ε) := by infer_instance
   have hpos : 0 < (Module.finrank ℂ T.V : ℝ) := by
     have : Nontrivial T.V := ⟨⟨T.w, 0, fun h => by
       have := T.w_norm; rw [h, norm_zero] at this; exact zero_ne_one this⟩⟩
@@ -135,7 +199,8 @@ theorem formal_degree_inequality {ε : Fin n → Bool} {lam : Fin n → ℝ} {H 
     simp only [h, G, inner_fF_conj, jac_adK]
   have s2 : ∫⁻ z, ENNReal.ofReal (G z * Jac z) = ∫⁻ z, ∫⁻ k, ENNReal.ofReal (h k z) ∂(dk ε) := by
     have e : ∫⁻ z, ENNReal.ofReal (G z * Jac z) = ∫⁻ k, (∫⁻ z, ENNReal.ofReal (h k z)) ∂(dk ε) := by
-      simp only [s1, lintegral_const, measure_univ, mul_one]
+      simp only [s1, lintegral_const]
+      rw [measure_univ, mul_one]
     rw [e, lintegral_lintegral_swap (f := fun k z => ENNReal.ofReal (h k z)) (μ := dk ε) (ν := volume)
       (ENNReal.measurable_ofReal.comp hhc.measurable).aemeasurable]
   have s3 : ∀ z, ENNReal.ofReal D * ∫⁻ k, ENNReal.ofReal (h k z) ∂(dk ε) ≤

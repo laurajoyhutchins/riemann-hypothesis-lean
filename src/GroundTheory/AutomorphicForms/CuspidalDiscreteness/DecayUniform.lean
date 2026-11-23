@@ -1,5 +1,54 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.CuspidalDiscreteness.ExistsNormRconvLeSiegel
+module
+
+public import GroundTheory.AutomorphicForms.CuspidalDiscreteness.ExistsLintegralConstantTermL2SqLe
+public import GroundTheory.AutomorphicForms.CuspidalDiscreteness.SmoothingFinite
+public import GroundTheory.AutomorphicForms.CuspidalDiscreteness.ExistsNormRconvLeSiegel
+import GroundTheory.AutomorphicForms.CuspidalDiscreteness.SiegelCount
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Presheaf
+
+@[expose] public section
 
 open MeasureTheory Set Filter Topology Function
 open NumberField IsDedekindDomain
@@ -17,29 +66,29 @@ open Reduction AutomorphicForm RightCosetSpace
 
 variable {K : Type*} [Field K] [NumberField K] {n : ℕ}
 
-local notation "Γ₁" => rationalGLOne K n
+local notation "Γ₁" => rationalGLOne (K := K) (n := n)
 
-variable (μ : Measure (normOneGL K n)) [μ.IsHaarMeasure]
+variable (μ : Measure (normOneGL (K := K) (n := n))) [μ.IsHaarMeasure]
 
-theorem exists_norm_rconv_le_siegel_basic (f : CompactlySupportedContinuousMap (normOneGL K n) ℂ)
+theorem exists_norm_rconv_le_siegel_basic (f : CompactlySupportedContinuousMap (normOneGL (K := K) (n := n)) ℂ)
     {ω : Set (AdelicGLn.AdelicGL K n)} (hω : IsCompact ω) {t : ℝ} (ht : 0 < t) :
     ∃ (C : ℝ) (N : ℕ), ∀ φ : Lp ℂ 2 (quotientMeasure Γ₁ μ), ∀ b ∈ ω, ∀ (ρ : Fin n → ℝ)
       (hρ : ∀ i, 0 < ρ i), (∀ i j : Fin n, (j : ℕ) = i + 1 → t * ρ j ≤ ρ i) →
-      ∀ kk ∈ (maxCompact : Subgroup (AdelicGLn.AdelicGL K n)), ∀ x : normOneGL K n,
+      ∀ kk ∈ (maxCompact : Subgroup (AdelicGLn.AdelicGL K n)), ∀ x : normOneGL (K := K) (n := n),
       (x : AdelicGLn.AdelicGL K n) = b * diagUnits n (fun i => posIdele (K := K) (ρ i) (hρ i)) * kk →
       ∀ R : ℝ, 1 ≤ R → (∀ i j : Fin n, i < j → ρ i / ρ j ≤ R) →
       ‖rconv Γ₁ μ f φ x‖ ≤ C * √(R ^ N) * ‖φ‖ := by
   obtain ⟨Cc, N, hCc⟩ := exists_encard_le_siegel hω ht f.hasCompactSupport
   have hf2 : ∫⁻ y, ‖f y‖ₑ ^ 2 ∂μ ≠ ⊤ := by
-    have := (f.continuous.memLp_of_hasCompactSupport (μ := μ) (p := 2) f.hasCompactSupport).2
-    rw [← L2Kernel.eLpNorm_two_sq]
-    exact (ENNReal.pow_lt_top this).ne
+    have hf : MemLp (⇑f) 2 μ := f.continuous.memLp_of_hasCompactSupport f.hasCompactSupport
+    simpa only [ENNReal.toReal_ofNat, ENNReal.rpow_two] using
+      (lintegral_rpow_eNorm_lt_top_of_eLpNorm_lt_top (by norm_num) (by simp) hf.eLpNorm_lt_top).ne
   set A := (∫⁻ y, ‖f y‖ₑ ^ 2 ∂μ).toReal
   have hA : 0 ≤ A := ENNReal.toReal_nonneg
   refine ⟨√(A * max Cc 0), N, ?_⟩
   intro φ b hb ρ hρ hsieg kk hkk x hx R hR1 hR
   obtain ⟨m, hmC, hm⟩ := hCc b hb ρ hρ hsieg kk hkk x hx R hR1 hR
-  have hS : MeasurableSet ((fun y => x * y) '' tsupport (f : normOneGL K n → ℂ)) :=
+  have hS : MeasurableSet ((fun y => x * y) '' tsupport (f : normOneGL (K := K) (n := n) → ℂ)) :=
     (f.hasCompactSupport.image (continuous_const_mul x)).measurableSet
   have h1 := enorm_rconv_sq_le Γ₁ μ f φ x hS (fun y hy => image_eq_zero_of_notMem_tsupport
     fun h' => hy ⟨x⁻¹ * y, h', by simp⟩) hm
@@ -94,13 +143,13 @@ theorem exists_norm_rconv_le_decay {β : ArchMatrix K n → ℝ}
     (hβu : tsupport β ⊆ range (Units.val : ArchUnits K n → ArchMatrix K n))
     (U : Subgroup (AdelicGLn.integralFiniteGL K n))
     (hU : IsOpen (U : Set (AdelicGLn.integralFiniteGL K n)))
-    (g : CompactlySupportedContinuousMap (normOneGL K n) ℂ)
+    (g : CompactlySupportedContinuousMap (normOneGL (K := K) (n := n)) ℂ)
     {ω : Set (AdelicGLn.AdelicGL K n)} (hω : IsCompact ω)
     (hωB : ω ⊆ ((adelicBorel : Subgroup (AdelicGLn.AdelicGL K n)) : Set (AdelicGLn.AdelicGL K n)))
     {t : ℝ} (ht : 0 < t) (N' : ℕ) :
     ∃ C : ℝ, ∀ φ ∈ cuspidalL2 μ, ∀ b ∈ ω, ∀ (ρ : Fin n → ℝ) (hρ : ∀ i, 0 < ρ i),
       (∀ i j : Fin n, (j : ℕ) = i + 1 → t * ρ j ≤ ρ i) →
-      ∀ kk ∈ (maxCompact : Subgroup (AdelicGLn.AdelicGL K n)), ∀ x : normOneGL K n,
+      ∀ kk ∈ (maxCompact : Subgroup (AdelicGLn.AdelicGL K n)), ∀ x : normOneGL (K := K) (n := n),
       (x : AdelicGLn.AdelicGL K n) = b * diagUnits n (fun i => posIdele (K := K) (ρ i) (hρ i)) * kk →
       ∀ R : ℝ, 1 ≤ R → (∃ i j : Fin n, i < j ∧ R ≤ ρ i / ρ j) →
       ‖rconv Γ₁ μ (archConv ν hβ.continuous hβc hβu (finAvg U hU g)) φ x‖ ≤
@@ -181,8 +230,8 @@ theorem exists_norm_rconv_le_uniform {β : ArchMatrix K n → ℝ}
     (hβu : tsupport β ⊆ range (Units.val : ArchUnits K n → ArchMatrix K n))
     (U : Subgroup (AdelicGLn.integralFiniteGL K n))
     (hU : IsOpen (U : Set (AdelicGLn.integralFiniteGL K n)))
-    (g : CompactlySupportedContinuousMap (normOneGL K n) ℂ) :
-    ∃ B : ℝ, ∀ φ ∈ cuspidalL2 μ, ∀ x : normOneGL K n,
+    (g : CompactlySupportedContinuousMap (normOneGL (K := K) (n := n)) ℂ) :
+    ∃ B : ℝ, ∀ φ ∈ cuspidalL2 μ, ∀ x : normOneGL (K := K) (n := n),
       ‖rconv Γ₁ μ (archConv ν hβ.continuous hβc hβu (finAvg U hU g)) φ x‖ ≤ B * ‖φ‖ := by
   set f := archConv ν hβ.continuous hβc hβu (finAvg U hU g)
   obtain ⟨ω, hω, hωB, t, ht, hsieg⟩ := exists_siegelSet (K := K) n
@@ -190,12 +239,12 @@ theorem exists_norm_rconv_le_uniform {β : ArchMatrix K n → ℝ}
   obtain ⟨C₁, hC₁⟩ := exists_norm_rconv_le_decay μ ν hβ hβc hβu U hU g hω hωB ht 0
   refine ⟨max C₀ 0 + max C₁ 0, fun φ hφ x => ?_⟩
   obtain ⟨γ, hγ⟩ := hsieg (x : AdelicGLn.AdelicGL K n)
-  have hγ1 : AdelicGLn.diagonal K n γ ∈ normOneGL K n := rationalGL_le_normOneGL ⟨γ, rfl⟩
-  set γ₁ : normOneGL K n := ⟨AdelicGLn.diagonal K n γ, hγ1⟩
+  have hγ1 : AdelicGLn.diagonal K n γ ∈ normOneGL (K := K) (n := n) := rationalGL_le_normOneGL ⟨γ, rfl⟩
+  set γ₁ : normOneGL (K := K) (n := n) := ⟨AdelicGLn.diagonal K n γ, hγ1⟩
   have hγΓ : γ₁ ∈ Γ₁ := ⟨γ, rfl⟩
   rw [← rconv_mul_left Γ₁ μ f φ hγΓ x]
   obtain ⟨b, hb, a, ⟨ρ, hρ, hs, rfl⟩, kk, hkk, hx⟩ := hγ
-  have hx' : ((γ₁ * x : normOneGL K n) : AdelicGLn.AdelicGL K n) =
+  have hx' : ((γ₁ * x : normOneGL (K := K) (n := n)) : AdelicGLn.AdelicGL K n) =
       b * diagUnits n (fun i => posIdele (K := K) (ρ i) (hρ i)) * kk := hx
   have hB0 : 0 ≤ max C₀ 0 + max C₁ 0 := add_nonneg (le_max_right _ _) (le_max_right _ _)
   by_cases hcase : ∃ i j : Fin n, i < j ∧ 1 ≤ ρ i / ρ j

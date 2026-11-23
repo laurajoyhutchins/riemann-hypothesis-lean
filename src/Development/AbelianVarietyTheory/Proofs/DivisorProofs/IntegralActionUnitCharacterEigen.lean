@@ -1,9 +1,61 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsApprox
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.WeilOperatorFixesCosetVector
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.StandardLatticeDoubleCosetClassesStabilisers
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.FirstStandardPairMemberHasThetaFunction
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MulMemHatMul
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsApprox
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.StandardLatticeDoubleCosetClassesStabilisers
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsSplitInertFactor
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.PredMemGamRanks
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsIdealMatrixApproxCongruentOneTranslate
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsSplitCompDet
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MemPrincipalCongruenceLevelSubgroupIffIntegralCo
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MulMemHatMul
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.UnitaryCongruentOneDetSubOneMemIdealMulConj
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.WeilOperatorFixesCosetVector
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsHalfIdem
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.VacuumUnderAdelicPairModulusOne
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IdempotentMulEqZeroOfOrthogonal
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsEqMulOfResSNeOne
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.FirstStandardPairMemberHasThetaFunction
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 open NumberField IsDedekindDomain
 open scoped Classical Pointwise
@@ -67,7 +119,7 @@ theorem rho_hat (P : Formalism.L2.DIV.Pl D.host.E) {x : Formalism.MainNotions.St
     obtain ⟨h3, h4⟩ := hb
     refine ⟨add_mem h1 h3, ?_⟩
     change rho P (⟨_, h1⟩ + ⟨_, h3⟩) = 0
-    rw [RingHom.map_add, h2, h4, add_zero]
+    rw [RingHom.map_add (f := _), h2, h4, add_zero]
   | neg a _ ha =>
     obtain ⟨h1, h2⟩ := ha
     refine ⟨neg_mem h1, ?_⟩
@@ -82,7 +134,7 @@ theorem hat_of_rho (P : Formalism.L2.DIV.Pl D.host.E) {x : Formalism.MainNotions
     AddSubgroup.subset_closure ⟨_, Ideal.absNorm_mem _, w, hw, by simp⟩
   obtain ⟨h1, h2⟩ := rho_hat P hN
   have e' : (⟨x, h⟩ : OhE D) = ⟨_, inc_int b⟩ + ⟨_, h1⟩ := Subtype.ext e
-  rw [e', RingHom.map_add, h2, add_zero, rho_inc, Ideal.Quotient.eq_zero_iff_mem] at h0
+  rw [e', RingHom.map_add (f := _), h2, add_zero, rho_inc, Ideal.Quotient.eq_zero_iff_mem] at h0
   rw [e]
   exact add_mem (AddSubgroup.subset_closure ⟨b, h0, 1, one_mem _, (mul_one _).symm⟩) hN
 
@@ -136,6 +188,7 @@ theorem one_sub_eps_mem (he : IsIdemSum e S) {P : Formalism.L2.DIV.Pl D.host.E} 
   have e1 : (⟨_, hO⟩ : OhE D) = ∑ Q ∈ S.attach, ⟨_, finQ_int (hi Q.1 Q.2)⟩ := Subtype.ext (by
     refine Eq.trans ?_ (map_sum (OhE D).subtype _ _).symm
     change finQ D e = ∑ Q ∈ S.attach, finQ D (es Q.1)
+
     rw [hs, map_sum, Finset.sum_attach S fun P => finQ D (es P)])
   rw [RingHom.map_sub, RingHom.map_one, e1, StandardFirstTheta.GlobalTheory.CompanionTheory.StdFstTheta.hom_sum,
     Finset.sum_eq_single ⟨P, hP⟩ (fun Q _ hQ => ?_) (fun h => (h (Finset.mem_attach _ _)).elim), hr P hP,
@@ -164,6 +217,7 @@ theorem eps_zeroAt (he : IsIdemSum e S) {q : ℕ} (hp : q.Prime) (hq : Formalism
   refine ⟨1, one_pos, Nat.coprime_one_left _,
     finQ D (e * incA D ((((q : 𝓞 D.host.E) ^ k : 𝓞 D.host.E) : D.host.E)⁻¹)), ?_, ?_⟩
   · obtain ⟨es, hes, hs⟩ := he.1
+
     rw [hs, Finset.sum_mul, map_sum]
     refine sum_mem fun P hP => finQ_int (GlobalTheory.IdemRes.toEAf_mem_of_finPart ?_)
     by_contra hn
@@ -245,9 +299,9 @@ theorem unitChar_eq (ν : (AE D)ˣ →* Circle) (e : AE D) {a : ℕ} (N : Matrix
   have e1 : h.choose = x := Units.ext (StandardFirstTheta.GlobalTheory.CompanionTheory.StdFstTheta.eq_of_parts (h.choose_spec.1.trans hx.1.symm)
     (h.choose_spec.2.1.trans hx.2.1.symm))
   unfold unitChar
-  rw [dif_pos h, e1]
+  rw [dite_eq_left h, e1]
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem om_vac_eq : ∀ {D : D7}, GlobalTheory.NormSum.Inp D → ∀ {δ t0 : ℂ} {Q : ℕ} (P : Pair D ⊤ δ t0 Q) (e : AE D) (𝔪 : Ideal (𝓞 D.host.E)), GoodMod e 𝔪 →
   ∀ ν : (AE D)ˣ →* Circle, HasFinPart ν⁻¹ P.W.chV' P.W.ep' → KillsCong ν 𝔪 →
@@ -273,7 +327,7 @@ theorem om_vac_eq : ∀ {D : D7}, GlobalTheory.NormSum.Inp D → ∀ {δ t0 : �
     have c' := congrArg (Formalism.MainNotions.StandardLatticesGL3.sgA D) c
     rw [map_mul, map_mul, map_pow, map_natCast, map_natCast] at c'
     rw [mul_add, mul_add, c, c']
-  have hse : Formalism.MainNotions.StandardLatticesGL3.sgA D (ε + Formalism.MainNotions.StandardLatticesGL3.sgA D ε) = ε + Formalism.MainNotions.StandardLatticesGL3.sgA D ε := by rw [map_add, hss, add_comm]
+  have hse : Formalism.MainNotions.StandardLatticesGL3.sgA D (ε + Formalism.MainNotions.StandardLatticesGL3.sgA D ε) = ε + Formalism.MainNotions.StandardLatticesGL3.sgA D ε := by rw [map_add (f := _), hss, add_comm]
   generalize hη : Formalism.MainNotions.StandardLatticesGL3.sgA D ε = η at h2 h1' hss hm' hηO hz' hse
   have hee : (ε + η) * (ε + η) = ε + η := by linear_combination h1 + h1' + 2 * h2
   have hsf : Formalism.MainNotions.StandardLatticesGL3.sgA D (1 - (ε + η)) = 1 - (ε + η) := by rw [map_sub, map_one, hse]
@@ -313,7 +367,7 @@ theorem om_vac_eq : ∀ {D : D7}, GlobalTheory.NormSum.Inp D → ∀ {δ t0 : �
   obtain ⟨x, hx, hx1, hx2⟩ := exists_finIdl y
   have hU : IsUnitDet e (matE k) x := by
     refine ⟨hx.1, ?_, ?_⟩
-    · rw [hx1, hyv, hdet, RingHom.map_add, RingHom.map_sub, RingHom.map_mul, RingHom.map_one, hte]
+    · rw [hx1, hyv, hdet, RingHom.map_add (f := _), RingHom.map_sub, RingHom.map_mul, RingHom.map_one, hte]
     · rw [hx2, toE_int_iff, hyi]
       exact add_mem (sub_mem (one_mem _) hO) (mul_mem hO (GlobalTheory.NormSum.VacMove.sgA_mem D huO))
   have hsp := om_split P (GlobalTheory.CongSplitFactor.part_intG hee hse hfO hk) (fun q hq hi i j => by
@@ -327,7 +381,7 @@ theorem om_vac_eq : ∀ {D : D7}, GlobalTheory.NormSum.Inp D → ∀ {δ t0 : �
       rw [Units.val_mul, hdv]
       change (1 - ε) + ε * u = w * Formalism.MainNotions.StandardLatticesGL3.sgA D ((1 - ε) + ε * u)
       have hw : w = 1 - (ε + η) + (ε + η) * u := by linear_combination d1 + d2
-      rw [map_add, map_mul, map_sub, map_one, hη, hw]
+      rw [map_add (f := _), map_mul, map_sub, map_one, hη, hw]
       linear_combination (-η) * hn + (-1 + u + Formalism.MainNotions.StandardLatticesGL3.sgA D u - u * Formalism.MainNotions.StandardLatticesGL3.sgA D u) * (h1' + h2))
   have em := P.W.mul (GlobalTheory.CongSplitFactor.part hee hse k) (GlobalTheory.CongSplitFactor.part hff hsf k) 1 1 P.e0
     (GlobalTheory.NormSum.VacMove.vac_TT hI.g1 P.crv P.vac.1)

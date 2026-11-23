@@ -1,6 +1,53 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.Statements
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.StatementsSerrePoly
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.StatementsSerrePoly
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.Kleiman
@@ -18,8 +65,8 @@ def negSet (a : Fin (N + 1) → ℤ) : Finset (Fin (N + 1)) := Finset.univ.filte
 theorem mem_negSet {a : Fin (N + 1) → ℤ} {j : Fin (N + 1)} : j ∈ negSet a ↔ a j < 0 := by
   simp [negSet]
 
-variable (S) in
 
+variable (S) in
 def part (J : Finset (Fin (N + 1))) : Laurent S N →ₗ[S] Laurent S N where
   toFun f := f.filter fun a => negSet a = J
   map_add' _ _ := Finsupp.filter_add
@@ -36,8 +83,8 @@ theorem sum_part (f : Laurent S N) : ∑ J, part S J f = f := by
   rw [Finset.sum_ite_eq]
   simp
 
-variable (S N) in
 
+variable (S N) in
 def wPart (c : ℤ) (J : Finset (Fin (N + 1))) : Submodule S (Laurent S N) :=
   Finsupp.supported S S {a | negSet a = J ∧ ∑ j, a j = c}
 
@@ -84,16 +131,16 @@ theorem part_mem_deg {c : ℤ} {J : Finset (Fin (N + 1))} {I : StdCell N} {f : L
     (hf : f ∈ laurentDeg S N c I) : part S J f ∈ laurentDeg S N c I :=
   mem_deg_of_w (part_mem_w hf) (part_eq_zero hf)
 
-variable (S N) in
 
+variable (S N) in
 abbrev G : StdCell N → Type u := fun _ => Laurent S N
 
-variable (S N) in
 
+variable (S N) in
 abbrev ρ := Cech.idRes S (Laurent S N) (Finset.univ : Finset (Fin (N + 1)))
 
-variable (S) in
 
+variable (S) in
 def partC (J : Finset (Fin (N + 1))) (i : ℕ) : Cech.Cochain (G S N) i →ₗ[S] Cech.Cochain (G S N) i :=
   Cech.mapC (fun _ => part S J) i
 
@@ -215,8 +262,8 @@ theorem mk_eq {c : ℤ} {i : ℕ} {z w : Cech.Cochain (G S N) i}
 
 end LaurentCohomProof
 
-open LaurentCohomProof in
 
+open LaurentCohomProof in
 theorem SerrePoly.LaurentCohom.proof (hC : Cech.Cone.Statement.{u, u}) :
     SerrePoly.LaurentCohom.Statement.{u} := by
   intro S _ _ N

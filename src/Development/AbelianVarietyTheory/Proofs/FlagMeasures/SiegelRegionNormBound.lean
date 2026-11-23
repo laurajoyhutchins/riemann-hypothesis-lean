@@ -1,10 +1,56 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.MatrixOfBesselTwoSidedAction
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.NormLowerLe
-import Development.AbelianVarietyTheory.Proofs.TorusHaarMeasure.ExistsLowerUnitriangularMulUpperTriangular
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.LeadingMinorInvariant
-import Formalism.FormalDegreeBessel.FinalG
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ImportsBisMore
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.MatrixOfBesselTwoSidedAction
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.LeadingMinorInvariant
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ImportsBisMore
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.NormLowerLe
+public import Development.AbelianVarietyTheory.Proofs.TorusHaarMeasure.ExistsLowerUnitriangularMulUpperTriangular
+public import Formalism.FormalDegreeBessel.FinalG
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.CStarAlgebra.ContinuousLinearMap
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Matrix.FiniteDimensional
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MeasureTheory Matrix Formalism.QuantumDeterminants Formalism.MainNotions.S GlobalTheory.SgInf GlobalTheory.LeadingMinorInv
 open scoped InnerProductSpace
@@ -60,13 +106,13 @@ theorem upUni_mul {n : ℕ} {A B : Matrix (Fin n) (Fin n) ℂ} (hA : IsUpUni A) 
   intro i j
   constructor
   · intro h
-    rw [mul_apply]
+    rw [Matrix.mul_apply]
     refine Finset.sum_eq_zero fun c _ => ?_
     by_cases hc : c < i
     · rw [(hA i c).1 hc, zero_mul]
     · rw [(hB c j).1 (lt_of_lt_of_le h (not_lt.1 hc)), mul_zero]
   · rintro rfl
-    rw [mul_apply, Finset.sum_eq_single i]
+    rw [Matrix.mul_apply, Finset.sum_eq_single i]
     · rw [(hA i i).2 rfl, (hB i i).2 rfl, one_mul]
     · intro c _ hc
       rcases lt_or_gt_of_ne hc with h | h
@@ -196,7 +242,7 @@ theorem eucl_frame_le (z : Fin (2 * r + k + 1) → ℂ) (s : Mat k r) (P : Matri
   refine (eucl_le_sum _).trans ?_
   rw [Finset.sum_mul]
   refine Finset.sum_le_sum fun i _ => ?_
-  rw [← mul_flagMat, e, mul_apply, Finset.sum_mul]
+  rw [← mul_flagMat, e, Matrix.mul_apply, Finset.sum_mul]
   refine (norm_sum_le _ _).trans (Finset.sum_le_sum fun c _ => ?_)
   rw [norm_mul]
   exact mul_le_mul_of_nonneg_left (hP c b) (norm_nonneg _)

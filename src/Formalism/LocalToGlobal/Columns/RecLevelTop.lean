@@ -1,7 +1,62 @@
-import Formalism.LocalToGlobal.Columns.RecLevel
+module
+
+public import Formalism.LocalToGlobal.Columns.RecLevel
+public import Formalism.LocalToGlobal.Columns.AdelicLemmas
 import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.CsGlobApprox
 import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.CsScale
-import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.Levelaf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.FreeModule.IdealQuotient
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+public import Mathlib.Topology.Algebra.Group.Units
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.MetricSpace.Ultra.TotallySeparated
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Matrix
 open scoped TensorProduct Valued RestrictedProduct Topology
@@ -51,10 +106,6 @@ theorem rlt_compact_int (v : HeightOneSpectrum (𝓞 F)) : CompactSpace 𝒪[v.a
   · exact (Valued.isClosed_integer (v.adicCompletion F)).isComplete.completeSpace_coe
   · exact inferInstanceAs (IsDiscreteValuationRing (v.adicCompletionIntegers F))
 
-theorem rlt_isCompact_int (v : HeightOneSpectrum (𝓞 F)) :
-    IsCompact (v.adicCompletionIntegers F : Set (v.adicCompletion F)) :=
-  isCompact_iff_compactSpace.2 (rlt_compact_int v)
-
 theorem rlt_isOpen_intAd : IsOpen (Formalism.UG.intAd F : Set (FiniteAdeleRing (𝓞 F) F)) := by
   have := RestrictedProduct.isOpen_forall_mem (R := fun v : HeightOneSpectrum (𝓞 F) => v.adicCompletion F)
     (A := fun v => (v.adicCompletionIntegers F : Set (v.adicCompletion F)))
@@ -85,7 +136,7 @@ section Tens
 variable (F E : Type) [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E]
 
 local notation "𝔸" => FiniteAdeleRing (𝓞 F) F
-local notation "𝒜" => E ⊗[F] FiniteAdeleRing (𝓞 F) F
+local notation "𝒜" => E ⊗[F] 𝔸
 
 attribute [local instance] Algebra.TensorProduct.rightAlgebra
 
@@ -167,7 +218,7 @@ def rlt_comm : 𝒜 →ₗ[𝔸] 𝔸 ⊗[F] E where
     | tmul e b =>
       rw [rlt_smul_tmul]
       simp only [TensorProduct.comm_tmul, RingHom.id_apply, TensorProduct.smul_tmul', smul_eq_mul]
-    | add x y hx hy => rw [smul_add, map_add, hx, hy, map_add, smul_add]
+    | add x y hx hy => rw [smul_add, map_add (f := _), hx, hy, map_add (f := _), smul_add]
 
 theorem adeles_t2Space : T2Space 𝒜 := by
   let bas := Algebra.TensorProduct.basis 𝔸 (Module.finBasis F E)
@@ -197,7 +248,7 @@ section Alg
 variable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [StarRing E] [Algebra F E]
 variable (hc : Formalism.BasicNotions.CMData F E) (n : ℕ) [NeZero n] (ST SG : Finset (Pl E))
 
-local notation "𝒜" => E ⊗[F] Formalism.L2.Herm.Af F
+local notation "𝒜" => E ⊗[F] FiniteAdeleRing (𝓞 F) F
 
 theorem rlt_inv_eq {u : GL (Fin n) 𝒜} (hu : u ∈ UAd hc n) :
     ((u⁻¹ : GL (Fin n) 𝒜) : Matrix (Fin n) (Fin n) 𝒜) =
@@ -251,7 +302,7 @@ theorem mem_kOne_of_congruent_one (a : 𝓞 E) (haT : ∀ P ∈ ST, a ∈ P.asId
       congr 1
       rw [Matrix.one_apply, Matrix.one_apply]
       split_ifs <;> rfl
-    rw [e, map_add, map_mul, Formalism.L2.DIV.resS_oToS, Ideal.Quotient.eq_zero_iff_mem.2 hP, zero_mul, add_zero]
+    rw [e, map_add (f := _), map_mul, Formalism.L2.DIV.resS_oToS, Ideal.Quotient.eq_zero_iff_mem.2 hP, zero_mul, add_zero]
     show _ = (1 : Matrix (Fin n) (Fin n) (kP P)) i j
     rw [Matrix.one_apply, Matrix.one_apply]
     split_ifs <;> simp
@@ -278,7 +329,7 @@ end Alg
 section GLTop
 
 variable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [StarRing E] [Algebra F E]
-variable (hc : Formalism.BasicNotions.CMData F E) (n : ℕ) [NeZero n] (ST SG : Finset (Pl E)) (H : Subgroup (GLG E n SG))
+variable (hc : Formalism.BasicNotions.CMData F E) (n : ℕ) [NeZero n] (ST SG : Finset (Pl E)) (H : Subgroup (GLG (E := E) (n := n) (SG := SG)))
 
 local notation "𝒜" => E ⊗[F] FiniteAdeleRing (𝓞 F) F
 
@@ -368,7 +419,7 @@ end GLTop
 section Final
 
 variable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [StarRing E] [Algebra F E]
-variable (hc : Formalism.BasicNotions.CMData F E) (n : ℕ) [NeZero n] (ST SG : Finset (Pl E)) (H : Subgroup (GLG E n SG))
+variable (hc : Formalism.BasicNotions.CMData F E) (n : ℕ) [NeZero n] (ST SG : Finset (Pl E)) (H : Subgroup (GLG (E := E) (n := n) (SG := SG)))
 
 theorem levU_compact : letI := Formalism.BasicNotions.tensTopL (F := F) (E := E) (FiniteAdeleRing (𝓞 F) F)
     IsCompact (levU hc n ST SG H : Set (GL (Fin n) (E ⊗[F] FiniteAdeleRing (𝓞 F) F))) :=

@@ -1,13 +1,49 @@
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.BoundAtTwoAndThreeForFamily
-import Formalism.SharpRestriction.GlobalTheoremInputs
-import Development.AutomorphicArithmetic.CyclotomicBounds.SmallFacts
-import Formalism.SharpRestriction.LevelLetterCocycles.JointConditionsZpowers.JointConditionTameBound
-import Formalism.SharpRestriction.LevelLetterCocycles.JointConditionsZpowers.CrysOnCond
-import Formalism.SharpRestriction.LevelLetterCocycles.WachCoordinates
-import Formalism.SharpRestriction.LevelLetterCocycles.RamifiedCoefficientChains
-import Formalism.SharpRestriction.LevelLetterCocycles.ArcLiftingSetup
-import Development.AbelianVarietyTheory.BlockTheory.NonGaloisCusps.BaseSizes
-import Formalism.SharpRestriction.LevelLetterCocycles.NEqRZeroMulXPow
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.BoundAtTwoThreeFamily
+public import Formalism.SharpRestriction.LevelLetterCocycles.NEqRZeroMulXPow
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Formalism.SharpRestriction.LevelLetterCocycles.MemPrimesOverOfMem
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Formalism Formalism.ConjugateSelfDual ReciprocityTheory.Gal Formalism.BasicNotions Formalism.BasicNotions.Loc Formalism.MainNotions Formalism.MainNotions.N Formalism.WeaklyAdmissibleFiltrations GlobalTheory.NLink
 
 noncomputable section
@@ -47,8 +83,8 @@ theorem midG_alg (C f r m b l S t η large₂ P : ℝ) (hC : 0 ≤ C) (hf : 1 �
     rw [mul_assoc]; exact mul_le_mul_of_nonneg_left (hP.trans hfm) hC
   nlinarith
 
-open Formalism.MainNotions.TwistedPlaces in
 
+open Formalism.MainNotions.TwistedPlaces in
 theorem not_inert_three {D : D7} (h : 3 ≤ D.host.splitBound) : ¬ TwistedPlaces.InertK D 3 := by
   have hj := D.host.split_small 3 Nat.prime_three (by norm_num) h
   have hq : (3 : ℕ) ≠ D.host.q := fun e => D.host.q_ne_three e.symm
@@ -67,8 +103,8 @@ theorem not_inert_three {D : D7} (h : 3 ≤ D.host.splitBound) : ¬ TwistedPlace
   · rw [if_neg h3, if_neg hq, if_neg hd, if_pos hj]
     simp
 
-open Formalism.MainNotions.TwistedPlaces in
 
+open Formalism.MainNotions.TwistedPlaces in
 theorem qd_le_lStar {D : D7} (L : SizeData₂ D) (P : ParameterChoice' D L) :
     (D.host.q : ℝ) ≤ TwistedPlaces.lStar L ∧ (D.host.d : ℝ) ≤ TwistedPlaces.lStar L ∧
       ∀ l ∈ D.host.small, (l : ℝ) ≤ TwistedPlaces.lStar L := by
@@ -237,8 +273,8 @@ theorem at_one {D : D7} (L : SizeData₂ D) (P : ParameterChoice' D L) (hS : Siz
 
 end GlobalTheory.SpecialSmall
 
-open Filter in
 
+open Filter in
 theorem GlobalTheory.SpecialSmall.special_primes_small : ∀ {eps : ℝ} (Fm : FamP eps), ∀ C : ℝ, 1 ≤ C → ∃ x0 : ℝ, ∀ x ≥ x0, Fm.x1 < x → ∀ i : Fm.Ix x, Small (Fm.L x i) C ∧ 8 ≤ (Fm.L x i).sc.L ∧ 60 ≤ (Fm.D x i).host.splitBound ∧ C ≤ (Fm.L x i).sc.b := by
   intro eps Fm C hC
   have he : 0 < eps := by

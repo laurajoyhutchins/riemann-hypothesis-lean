@@ -1,6 +1,51 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.SingleMemDualLatticeStandard
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PDualArithVar
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.SingleMemDualLatticeStandard
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PDualArithVar
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -18,8 +63,8 @@ variable {K : Type} [Field K] [NumberField K] {i : ℕ} {T : Type} [Fintype T]
 def genPt (K : Type) [Field K] (i : ℕ) : (Σ _ : Unit, Fin i) → ProjField K i :=
   fun q => algebraMap (MvPolynomial (Fin i) K) (ProjField K i) (X q.2)
 
-omit [Fintype T] in
 
+omit [Fintype T] in
 theorem aeval_eq_zero_of_mem (b : Module.Basis T ℤ (dualLattice (HermLattice.standard K i)))
     {f : MRing (dualBlocks T)} (hf : f ∈ dualIdeal b) : aeval (dualLatticeCoord b) f = 0 := by
   have h : ∀ g : MRing (dualBlocks T),
@@ -28,7 +73,7 @@ theorem aeval_eq_zero_of_mem (b : Module.Basis T ℤ (dualLattice (HermLattice.s
     intro g
     induction g using MvPolynomial.induction_on with
     | C a => simp [mConeMap]
-    | add p q hp hq => simp only [map_add, hp, hq]
+    | add p q hp hq => simp only [map_add (f := _), hp, hq]
     | mul_X p n hp =>
       simp only [map_mul, hp]
       simp [mConeMap]
@@ -43,7 +88,9 @@ theorem aeval_linForm (b : Module.Basis T ℤ (dualLattice (HermLattice.standard
     aeval (dualLatticeCoord b) (linForm (ι₂ := PBlk i) (dualStdCoordMat b) q) = genPt K i q := by
   obtain ⟨⟨⟩, j⟩ := q
   have hs := congrArg (evalForm (K := K) i) (dualStdCoordMat_sum b j)
+
   rw [map_sum, evalForm, Fintype.linearCombination_apply_single, one_smul, ← evalForm] at hs
+
   rw [genPt, ← hs, linForm, map_sum]
   refine Finset.sum_congr rfl fun t _ => ?_
   rw [map_mul, aeval_C, aeval_X, map_zsmul, ← dualLatticeCoord_eq, zsmul_eq_mul, eq_intCast]
@@ -53,7 +100,9 @@ theorem evalQ_graphMap (b : Module.Basis T ℤ (dualLattice (HermLattice.standar
       (rename (inrV (ι := dualBlocks T) (ι₂ := PBlk i)) f)) = aeval (genPt K i) f := by
   induction f using MvPolynomial.induction_on with
   | C a => simp [graphMap, evalQ]
-  | add p q hp hq => simp only [map_add, hp, hq]
+  | add p q hp hq =>
+    set_option synthInstance.maxHeartbeats 200000 in
+      simp only [map_add, hp, hq]
   | mul_X p q hp =>
     rw [map_mul, map_mul, map_mul, hp, map_mul, aeval_X, rename_X, ← aeval_linForm b q]
     simp [graphMap, inrV, evalQ]
@@ -70,8 +119,8 @@ theorem aeval_genPt_injective : Function.Injective (aeval (R := ℤ) (genPt K i)
 
 end StandardDualImageBottom
 
-open StandardDualImageBottom in
 
+open StandardDualImageBottom in
 theorem DualStdImageBot.proof : DualStdImageBot.Statement := by
   intro K _ _ i T _ _ b
   refine eq_bot_iff.mpr fun f hf => (Ideal.mem_bot).mpr (aeval_genPt_injective (K := K) (i := i) ?_)

@@ -1,6 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Foundations.FinalTheorems
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.CupProductCoboundaryMod
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.FinalTheorems
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.ResMapBijective
+public import Mathlib.RingTheory.AdicCompletion.Noetherian
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.CupProductCoboundaryMod
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.MetricSpace.Ultra.TotallySeparated
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Formalism.ConjugateSelfDual ReciprocityTheory.Gal Formalism.MainNotions.N GlobalTheory.GalOfCusp UpperTheory.V UpperTheory.V.Af UpperTheory.V.HV GlobalTheory.Ord2
 open scoped Matrix
 
@@ -87,6 +130,7 @@ instance (c : Coef l) (n : ℕ) : Finite (Qn c n) := by
   obtain ⟨a, ha⟩ := (Submodule.mem_span_range_iff_exists_fun ℤ_[l]).1 hx
   refine ⟨fun i => PadicInt.toZModPow n (a i), ?_⟩
   show ∑ i, _ = _
+
   rw [← ha, map_sum]
   exact Finset.sum_congr rfl fun i _ => (red_smul c n (a i) (s i)).symm
 
@@ -120,6 +164,7 @@ theorem matQ_mul (c : Coef l) (n : ℕ) (W : R2 Ω l) (hint : ∀ s i j, mat W s
     simp only [mat, map_mul, Matrix.GeneralLinearGroup.coe_mul, Matrix.mul_apply]
     push_cast
     rfl
+
   rw [matQ_apply, e, map_sum, Matrix.mul_apply]
   simp only [map_mul, matQ_apply]
 
@@ -201,8 +246,8 @@ theorem contAction_rhoS (c : Coef l) (n : ℕ) (W : R2 Ω l) (hint : ∀ s i j, 
 
 variable [IsAlgClosure ℚ Ω]
 
-open Classical in
 
+open Classical in
 def Av (A : ValuationSubring Ω) (S : Finset Pl) (v : S) : ValuationSubring Ω :=
   if IsPlaceOver A v.1 then A else placeOf Ω v.1
 
@@ -236,8 +281,8 @@ def ordCond (c : Coef l) (n : ℕ) (W : R2 Ω l) (hint : ∀ s i j, mat W s i j 
   ((ordZ c n W hint B).comap (Z1 ((rhoS c n W hint S hN).comp (locHom (S : Set Pl) B))).subtype).map
     (Submodule.mkQ _)
 
-open Classical in
 
+open Classical in
 def Lc (c : Coef l) (n : ℕ) (W : R2 Ω l) (hint : ∀ s i j, mat W s i j ∈ c.O) (S : Finset Pl)
     (hN : ∀ a ∈ NS Ω (S : Set Pl), W a = 1) (A : ValuationSubring Ω) :
     LocCond (rhoS c n W hint S hN) (locFam S (Av A S)) := fun v =>

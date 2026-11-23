@@ -1,10 +1,59 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.WeightedSumBounds.PeriodValuationTheory
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.WeightedSumBounds.WtSubOneLe
-import Development.AbelianVarietyTheory.Definitions.Foundations.IsSatFrame
-import Development.AbelianVarietyTheory.Definitions.ThetaMetrics.EqZeroOrSingleOfDegreeLtTwo
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FormalGroupExpTwoSidedInverseUniqueStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FrameDualStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.IsSatFrame
+public import Mathlib.RingTheory.MvPolynomial.Homogeneous
+public import Development.AbelianVarietyTheory.Definitions.ThetaMetrics.EqZeroOrSingleOfDegreeLtTwo
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FormalGroupExpTwoSidedInverseUniqueStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FrameDualStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Presheaf
+import Std.Tactic.BVDecide.Normalize.Prop
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.WeightedSumBounds.PtOrderProdSub
+
+@[expose] public section
 
 open MvPowerSeries ReciprocityTheory.PGsh ReciprocityTheory.ChartRestriction.G.Sh GlobalTheory.FGDepth
 
@@ -50,7 +99,7 @@ theorem Near.prod {σ : Type} {k : ℕ} {a b : σ → MvPowerSeries τ S}
   | zero => simpa using Near.one k
   | add f g hf hg =>
     rw [Finsupp.prod_add_index' (by simp) (by simp [pow_add]),
-      Finsupp.prod_add_index' (by simp) (by simp [pow_add]), map_add]
+      Finsupp.prod_add_index' (by simp) (by simp [pow_add]), map_add (f := _)]
     exact hf.mul hg
   | single s n =>
     rw [Finsupp.prod_single_index (by simp), Finsupp.prod_single_index (by simp),
@@ -100,8 +149,8 @@ theorem isInt_mul {τ : Type} {f g : MvPowerSeries τ C} (hf : MvIsInt v f) (hg 
   rw [v.map_mul]
   exact add_nonneg (hf _) (hg _)
 
-open Classical in
 
+open Classical in
 def intSub (τ : Type) : Subring (MvPowerSeries τ C) where
   carrier := {f | MvIsInt v f}
   mul_mem' := isInt_mul v
@@ -109,7 +158,7 @@ def intSub (τ : Type) : Subring (MvPowerSeries τ C) where
     classical
     intro α; unfold IsIntV; rw [coeff_one]; split_ifs <;> simp
   add_mem' := by
-    intro f g hf hg α; unfold IsIntV; rw [map_add]
+    intro f g hf hg α; unfold IsIntV; rw [map_add (f := _)]
     exact le_trans (le_min (hf α) (hg α)) (v.map_add _ _)
   zero_mem' := by intro α; unfold IsIntV; simp
   neg_mem' := by intro f hf α; unfold IsIntV; rw [map_neg, v.map_neg]; exact hf α
@@ -160,6 +209,7 @@ theorem depth_le_content : ∀ (C : Type) [Field C] [CharZero C] (v : AddValuati
       (∑ a, u b a e • (X ⟨b, a⟩ : MvPowerSeries (Σ b, Fin (n b)) C)) =
         ∑ a, u b a e * if y = ⟨b, a⟩ then 1 else 0 := by
     intro b e y
+
     simp only [map_sum, coeff_smul, coeff_X, Finsupp.single_left_inj one_ne_zero, smul_eq_mul]
   set A := expAlong G u with hAdef
   have hA0 : ∀ x, constantCoeff (A x) = 0 := fun x =>
@@ -179,8 +229,9 @@ theorem depth_le_content : ∀ (C : Type) [Field C] [CharZero C] (v : AddValuati
     rw [GlobalTheory.FormalSeries.two_le_order_iff]
     refine ⟨by simp [hYdef, hA0], fun z => ?_⟩
     rw [map_sub, hYdef]
+
     simp only [map_sum, coeff_smul, hA1, smul_eq_mul, coeff_X,
-      Finsupp.single_left_inj one_ne_zero]
+    Finsupp.single_left_inj one_ne_zero]
     simp_rw [Finset.mul_sum]
     rw [sub_eq_zero]
     have key : ∀ a : Fin (n y.1), ∑ e, l y.1 y.2 e * (u y.1 a e * if z = ⟨y.1, a⟩ then (1 : C) else 0)
@@ -204,6 +255,7 @@ theorem depth_le_content : ∀ (C : Type) [Field C] [CharZero C] (v : AddValuati
   have hfint : MvIsInt v f := isInt_prod v L hLint α
   have hsub : subst A f = α.prod fun y k => Y y ^ k := by
     rw [hfdef, ← coe_substAlgHom hAs, map_finsuppProd]
+
     simp only [map_pow, hLdef, hYdef, map_sum, map_smul, substAlgHom_X]
   have hord := lead_prod Y hY α
   rw [← hsub] at hord

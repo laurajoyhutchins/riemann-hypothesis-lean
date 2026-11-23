@@ -1,8 +1,45 @@
-import Mathlib
-import Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow
-import Formalism.HermitianLattices.StatementLat
-import Formalism.SharpRestriction.CuspSpanNormBounds.BlockEnds
-import Formalism.SharpRestriction.CuspSpanNormBounds.SArith
+module
+
+public import Formalism.SharpRestriction.CuspSpanNormBounds.BlockEnds
+public import Formalism.SharpRestriction.CuspSpanNormBounds.SArith
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -52,8 +89,8 @@ def idx (A B : Submodule (𝓞 E) S.V) : ℕ := Nat.card (A ⧸ B.comap A.subtyp
 
 def nrm (τ : E →+* ℂ) (x : S.V) : ℝ := (τ (S.hT x x)).re
 
-omit [NumberField E] in
 
+omit [NumberField E] in
 def placeProd (X : (E →+* ℂ) → ℝ) : ℝ := Real.sqrt (∏ τ : E →+* ℂ, X τ)
 
 def NE (g : ℕ) : ℝ := (g : ℝ) ^ (Module.finrank ℚ E)
@@ -273,11 +310,8 @@ def NLam {T : E} (F : LFlag S r T) : Set (S.V ≃ₗ[E] S.V) :=
   {n | IsAutLam S Λ n ∧ (∀ j, ∀ x ∈ Xflag F (j + 1), n x - x ∈ Xflag F j) ∧
     (∀ x ∈ orth S (Xsp F), n x - x ∈ Xsp F)}
 
-def NEquiv {T T' : E} (F : LFlag S r T) (F' F'₂ : LFlag S r T') : Prop :=
-  ∃ n ∈ NLam Λ F, (∀ a, n (F'.fl.e a) = F'₂.fl.e a) ∧ n F'.fl.z = F'₂.fl.z
 
 omit [NumberField E] [StarRing E] in
-
 def ZEquiv {n : ℕ} (Z Z₂ : Matrix (Fin n) (Fin n) E) : Prop :=
   ∃ A B : Matrix (Fin n) (Fin n) (𝓞 E),
     (∀ a b, a < b → A a b = 0) ∧ (∀ a, A a a = 1) ∧ (∀ a b, b < a → B a b = 0) ∧ (∀ a, B a a = 1) ∧

@@ -1,7 +1,52 @@
-import Mathlib
-import GroundTheory.ArithmeticGeometry.SchemeCohomology.ProjTwistAway
-import GroundTheory.ArithmeticGeometry.SchemeCohomology.CechSeparated
-import GroundTheory.ArithmeticGeometry.SchemeCohomology.ProjCechModel
+module
+
+public import GroundTheory.ArithmeticGeometry.SchemeCohomology.ProjCechModel
+import Mathlib.Algebra.Category.ModuleCat.Sheaf.LocallyFree
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Arith.SchemeCoh
@@ -39,6 +84,7 @@ lemma cechAcyclic_of_bijective_le (φ : ∀ W : Opens X, W ≤ D → Q.obj (op W
     funext i
     rw [d_apply]
     change _ = φ _ (hI i) (d Q U m σ i)
+
     rw [d_apply, map_sum]
     refine Finset.sum_congr rfl fun a _ => ?_
     rw [map_zsmul]
@@ -151,16 +197,34 @@ def AffineUnder {ι : Type w} (v : ι → A) (V : (Proj 𝒜).Opens) : Prop :=
 
 lemma isCoverSystem_affineUnder {ι : Type w} (v : ι → A) :
     IsCoverSystem (X := (Proj 𝒜).toTopCat) (AffineUnder v)
-      (fun {κ} V U => IsBasicCover (κ := κ) V U ∧ AffineUnder v V) where
-  iSup_eq V κ U hU := isCoverSystem_isBasicCover.iSup_eq V U hU.1
-  inter_mem V κ U hU n i := by
-    refine ⟨isCoverSystem_isBasicCover.inter_mem V U hU.1 i, ?_⟩
+      (fun {κ} V U => IsBasicCover (κ := κ) V U ∧ AffineUnder v V) := by
+  constructor
+  · intro V κ U hU
+    exact hU.1.2.choose_spec.2
+  · intro V κ U hU n i
+    have hAffine : IsAffineOpen (inter U i) := by
+      obtain ⟨hV, h, hUh, _⟩ := hU.1
+      have hEq : U = fun a => (Proj 𝒜).basicOpen (h a) := funext hUh
+      rw [hEq, inter_basicOpen h i]
+      exact hV.basicOpen _
     obtain ⟨j, hj⟩ := hU.2.2
-    refine ⟨j, (inter_le U i 0).trans ((le_iSup U (i 0)).trans ?_)⟩
-    exact (isCoverSystem_isBasicCover.iSup_eq V U hU.1).le.trans hj
-  exists_refinement V hV O hO := by
-    obtain ⟨κ, hκ, U, hU, hsub⟩ := isCoverSystem_isBasicCover.exists_refinement V hV.1 O hO
-    exact ⟨κ, hκ, U, ⟨hU, hV⟩, hsub⟩
+    exact ⟨hAffine, j, (inter_le U i 0).trans
+      ((le_iSup U (i 0)).trans (hU.1.2.choose_spec.2.le.trans hj))⟩
+  · intro V hV O hO
+    have hAffine := hV.1
+    choose f hfO hxf using fun x : V => hAffine.exists_basicOpen_le (V := O x) ⟨x.1, hO x⟩ x.2
+    obtain ⟨fs, hfs⟩ := hAffine.isCompact.elim_finite_subcover
+      (fun x : V => ((Proj 𝒜).basicOpen (f x) : Set (Proj 𝒜)))
+      (fun x => ((Proj 𝒜).basicOpen (f x)).isOpen)
+      (fun y hy => Set.mem_iUnion.2 ⟨⟨y, hy⟩, hxf _⟩)
+    refine ⟨{x // x ∈ fs}, inferInstance, fun a => (Proj 𝒜).basicOpen (f a.1),
+      ⟨⟨hAffine, fun a => f a.1, fun a => rfl, ?_⟩, hV⟩, fun a => ⟨a.1, hfO a.1⟩⟩
+    refine le_antisymm (iSup_le fun a => (Proj 𝒜).basicOpen_le (f a.1)) ?_
+    intro y hy
+    have hyCover := hfs hy
+    simp only [Set.mem_iUnion] at hyCover
+    obtain ⟨x, hx, hyx⟩ := hyCover
+    exact Opens.mem_iSup.2 ⟨⟨x, hx⟩, hyx⟩
 
 lemma goodAcyclic_twist {ι : Type w} (v : ι → A) (hv : ∀ j, v j ∈ 𝒜 1) (k : ℤ) :
     GoodAcyclic (X := (Proj 𝒜).toTopCat) (AffineUnder v)
@@ -168,8 +232,9 @@ lemma goodAcyclic_twist {ι : Type w} (v : ι → A) (hv : ∀ j, v j ∈ 𝒜 1
       (modulesAb (twistingSheaf 𝒜 k)) := by
   intro V hV κ _ U hU
   obtain ⟨j, hj⟩ := hV.2
+  have hSup : iSup U = V := hU.1.2.choose_spec.2
   have hUV : ∀ a, U a ≤ V := fun a =>
-    (le_iSup U a).trans (isCoverSystem_isBasicCover.iSup_eq V U hU.1).le
+    (le_iSup U a).trans hSup.le
   refine cechAcyclic_of_bijective_le
     (Q := (modulesAb (SheafOfModules.unit (Proj 𝒜).ringCatSheaf)).obj)
     (D := Proj.basicOpen 𝒜 (v j))
@@ -217,7 +282,7 @@ variable {A : Type u} [CommRing A] {n : ℕ}
 theorem nonempty_cechH_equiv_H (k : ℤ) (p : ℕ)
     [HasExt.{w'} (Sheaf (Opens.grothendieckTopology (projectiveSpace A n).toTopCat)
       AddCommGrpCat.{u})] :
-    Nonempty (cechH (twistAb A n k) (cover A n) p ≃+
+    Nonempty (cechH (twistAb (A := A) (n := n) k) (cover (A := A) (n := n)) p ≃+
       Sheaf.H.{w'} (modulesAb (twistingSheaf (grading A n) k)) p) :=
   nonempty_cechH_equiv_H_twist (fun j => MvPolynomial.X j) (fun j => X_mem j) iSup_stdOpen k p
 

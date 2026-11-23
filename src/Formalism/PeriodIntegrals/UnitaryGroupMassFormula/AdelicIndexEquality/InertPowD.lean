@@ -1,7 +1,58 @@
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicIndexEquality.InertPowDefs
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicIndexEquality.InertQRG
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicIndexEquality.InertPowDefs
+public import Formalism.LocalRingCardinality.SpanPowerMembership.Adelic
 import Formalism.LocalRingCardinality.SpanPowerMembership.LocAtA
-import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.Hensel
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+public import Mathlib.RingTheory.AdicCompletion.Topology
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.MetricSpace.Ultra.TotallySeparated
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -13,7 +64,7 @@ open Formalism.MainNotions.S
 
 theorem exists_nonfixed (I : AutInst) : ∃ θ : I.E, star θ ≠ θ := by
   by_contra h
-  push_neg at h
+  push Not at h
   have htop : (⊥ : Subalgebra I.F I.E) = ⊤ := by
     refine eq_top_iff.2 fun x _ => ?_
     obtain ⟨a, ha⟩ := RingHom.mem_range.1 ((I.cm.fixed x).1 (h x))
@@ -50,8 +101,7 @@ theorem decompE (I : AutInst) (θ : I.E) (hθ : star θ ≠ θ) (e : I.E) :
 theorem decompV (I : AutInst) (v : HeightOneSpectrum (𝓞 I.F)) (θ : I.E) (hθ : star θ ≠ θ)
     (x : Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes.Fv I.F v ⊗[I.F] I.E) :
     ∃ p q : Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes.Fv I.F v, x = p ⊗ₜ 1 + q ⊗ₜ θ := by
-  induction x using TensorProduct.induction_on with
-  | zero => exact ⟨0, 0, by simp⟩
+  induction x using TensorProduct.inductionOn with
   | tmul a e =>
     obtain ⟨f, g, rfl⟩ := decompE I θ hθ e
     exact ⟨f • a, g • a, by rw [TensorProduct.tmul_add, TensorProduct.smul_tmul, TensorProduct.smul_tmul]⟩
@@ -74,7 +124,7 @@ theorem fixed_incL (I : AutInst) (v : HeightOneSpectrum (𝓞 I.F)) (hv : IsFiel
   obtain ⟨θ, hθ⟩ := exists_nonfixed I
   obtain ⟨p, q, rfl⟩ := decompV I v θ hθ x
   refine ⟨p, ?_⟩
-  haveI : Nontrivial (Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes.Fv I.F v ⊗[I.F] I.E) := ⟨hv.exists_pair_ne⟩
+  have : Nontrivial (Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes.Fv I.F v ⊗[I.F] I.E) := ⟨hv.exists_pair_ne⟩
   have hsig : I.cm.sig θ = star θ := rfl
   have hs : sigV I v (p ⊗ₜ 1 + q ⊗ₜ θ) = p ⊗ₜ 1 + q ⊗ₜ star θ := by
     simp [sigV, hsig]
@@ -95,16 +145,15 @@ theorem fixed_incL (I : AutInst) (v : HeightOneSpectrum (𝓞 I.F)) (hv : IsFiel
 
 theorem trace_integral' : TraceInt := by
   intro I v hv α hα
-  haveI : Nontrivial (Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes.Fv I.F v ⊗[I.F] I.E) := ⟨hv.exists_pair_ne⟩
+  have : Nontrivial (Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes.Fv I.F v ⊗[I.F] I.E) := ⟨hv.exists_pair_ne⟩
   have hinv : ∀ y : Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes.Fv I.F v ⊗[I.F] I.E, sigV I v (sigV I v y) = y := by
     intro y
-    induction y using TensorProduct.induction_on with
-    | zero => simp
+    induction y using TensorProduct.inductionOn with
     | tmul a e =>
       have h1 : ∀ e' : I.E, I.cm.sig e' = star e' := fun _ => rfl
       simp [sigV, h1]
-    | add x y hx hy => rw [map_add, map_add, hx, hy]
-  obtain ⟨τ, hτ⟩ := fixed_incL I v hv (α + sigV I v α) (by rw [map_add, hinv, add_comm])
+    | add x y hx hy => rw [map_add (f := _), map_add (f := _), hx, hy]
+  obtain ⟨τ, hτ⟩ := fixed_incL I v hv (α + sigV I v α) (by rw [map_add (f := _), hinv, add_comm])
   by_cases hτi : τ ∈ v.adicCompletionIntegers I.F
   · exact ⟨τ, hτi, hτ⟩
 
@@ -118,7 +167,7 @@ theorem trace_integral' : TraceInt := by
       rcases ValuationSubring.mem_or_inv_mem (v.adicCompletionIntegers I.F) r₀ with h | h
       · exact h
       · rwa [inv_eq_of_mul_eq_one_right hr0] at h
-    exact ⟨r₀ + r₀, add_mem hmem hmem, by rw [sigV_incL, map_add]⟩
+    exact ⟨r₀ + r₀, add_mem hmem hmem, by rw [sigV_incL, map_add (f := _)]⟩
   have hdom : ∀ x y : Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes.Fv I.F v ⊗[I.F] I.E, x * y = 0 → x = 0 ∨ y = 0 := by
     intro x y hxy
     by_cases hx : x = 0
@@ -155,14 +204,64 @@ theorem trace_integral' : TraceInt := by
       field_simp
     rw [hτeq]
     exact mul_mem (((u⁻¹ : (v.adicCompletionIntegers I.F)ˣ) : v.adicCompletionIntegers I.F)).2 hτinv
-  haveI : HenselianLocalRing (v.adicCompletionIntegers I.F) := inferInstance
-  obtain ⟨a, ha, -⟩ := HenselianLocalRing.is_henselian
+  let K := v.adicCompletion I.F
+  let O := ↥(v.adicCompletionIntegers I.F)
+  let w : Valuation K (WithZero (Multiplicative ℤ)) := Valued.v
+  let m := IsLocalRing.maximalIdeal O
+  have hcomplete : IsAdicComplete m O := by
+    have hIntegers := Formalism.BasicNotions.Examples₂.adicInt_integers (K := I.F) v
+    obtain ⟨π, hπ⟩ := Formalism.BasicNotions.Examples₂.adicInt_exists_unif (K := I.F) v
+    have hm : m = Ideal.span {π} := by
+      ext x
+      change x ∈ IsLocalRing.maximalIdeal _ ↔ x ∈ Ideal.span {π}
+      rw [Formalism.BasicNotions.Examples₂.adicInt_mem_max_iff v x,
+        Ideal.mem_span_singleton, hIntegers.dvd_iff_le]
+      change Valued.v (x : K) < 1 ↔ Valued.v (x : K) ≤ Valued.v (π : K)
+      rw [hπ]
+      exact Formalism.BasicNotions.Examples₂.wz_lt_one_iff _
+    have hpow (n : ℕ) (x : O) : x ∈ m ^ n ↔ w (x : K) ≤ w ((π : K) ^ n) := by
+      rw [hm, Ideal.span_singleton_pow, Ideal.mem_span_singleton, hIntegers.dvd_iff_le]
+      rfl
+    have hAdic : IsAdic m := by
+      rw [isAdic_iff]
+      constructor
+      · intro n
+        have hπ0 : (π : K) ≠ 0 := by
+          apply (map_ne_zero w).mp
+          change Valued.v (π : K) ≠ 0
+          rw [hπ]
+          exact WithZero.exp_ne_zero
+        have hopen := Valued.isOpen_closedBall K
+          (r := w.restrict ((π : K) ^ n)) ((map_ne_zero w.restrict).mpr (pow_ne_zero n hπ0))
+        convert hopen.preimage (continuous_subtype_val : Continuous (fun x : O => (x : K))) using 1
+        ext x
+        exact (hpow n x).trans (w.restrict_le_iff).symm
+      · intro U hU
+        rw [show nhds (0 : O) = Filter.comap (fun x : O => (x : K)) (nhds (0 : K)) from
+          nhds_subtype_eq_comap] at hU
+        obtain ⟨γ, -, hγ⟩ :=
+          ((Valued.hasBasis_nhds_zero K (WithZero (Multiplicative ℤ))).comap _).mem_iff.mp hU
+        have hγ0 : MonoidWithZeroHom.ValueGroup₀.embedding γ.1 ≠ 0 := by
+          exact (_root_.map_ne_zero MonoidWithZeroHom.ValueGroup₀.embedding).mpr γ.ne_zero
+        obtain ⟨n, hn⟩ := Formalism.BasicNotions.Examples₂.wz_exists_nat_lt _ hγ0
+        have hπn : w ((π : K) ^ n) = WithZero.exp (-(n : ℤ)) := by
+          change Valued.v ((π : K) ^ n) = _
+          rw [map_pow, hπ, ← WithZero.exp_nsmul]
+          simp
+        refine ⟨n, fun x hx => hγ ?_⟩
+        apply w.restrict_lt_iff_lt_embedding.mpr
+        refine ((hpow n x).mp hx).trans_lt ?_
+        rwa [hπn]
+    exact hAdic.isAdicComplete_iff.mpr
+      ⟨completeSpace_coe_iff_isComplete.mpr (Valued.isClosed_valuationSubring K).isComplete,
+        inferInstance⟩
+  obtain ⟨a, ha, -⟩ := HenselianRing.is_henselian (I := m)
     (Polynomial.X ^ 2 + (Polynomial.C s - Polynomial.X)) (by monicity!) 0
-    (by simpa using hsm) (by simp)
+    (by simpa [m] using hsm) (by simp)
   have ha2 : a ^ 2 + (s - a) = 0 := by simpa using ha
   have haK : (a : v.adicCompletion I.F) ^ 2 + (τ⁻¹ * τ⁻¹ - a) = 0 := by
     have h := congrArg (v.adicCompletionIntegers I.F).subtype ha2
-    rw [map_add, map_pow, map_sub, map_zero] at h
+    rw [map_add (f := _), map_pow, map_sub, map_zero] at h
     exact h
   have hr : (τ * a) * (τ - τ * a) = 1 := by
     have e1 : (a : v.adicCompletion I.F) - a ^ 2 = τ⁻¹ * τ⁻¹ := by linear_combination -haK
@@ -172,7 +271,7 @@ theorem trace_integral' : TraceInt := by
   have e2 : incL I v (τ * a) * incL I v (τ - τ * a) = 1 := by
     rw [← map_mul, hr, map_one]
   have e3 : incL I v (τ * a) + incL I v (τ - τ * a) = α + sigV I v α := by
-    rw [← map_add, show τ * a + (τ - τ * a) = τ by ring, hτ]
+    rw [← map_add (f := _), show τ * a + (τ - τ * a) = τ by ring, hτ]
   have hprod : (α - incL I v (τ * a)) * (α - incL I v (τ - τ * a)) = 0 := by
     linear_combination (-α) * e3 + e2 - hα
   rcases hdom _ _ hprod with h | h

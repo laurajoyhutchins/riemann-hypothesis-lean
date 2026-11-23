@@ -1,7 +1,46 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.LineBundleGlobalSectionsDimCongrPicardClass
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsUnitMkOfFormallyUnramified
-import Development.AbelianVarietyTheory.Definitions.Divisors.SmoothOfRelativeDimensionPspace
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.LineBundleGlobalSectionsDimCongrPicardClass
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IsUnitMkOfFormallyUnramified
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -16,7 +55,7 @@ namespace GlobalTheory.Published
 def KawamataViehweg : Prop :=
   ∀ (k : Type) [Field k] [IsAlgClosed k] [CharZero k] (X : Scheme.{0}) [Algebra k Γ(X, ⊤)]
     [IsIntegral X] (D : ℕ) [SmoothOfRelativeDimension D (strHom k X)],
-    IsProjOver (strHom k X) →
+    IsProjOver (strHom k (X := X)) →
     ∀ (K : CanonLB (strHom k X) D) (N : LB X), IsNef k N → IsBig k N →
       ∀ q : ℕ, 0 < q → Subsingleton (coh (LB.toMod (tens K.bundle N)) q)
 
@@ -40,15 +79,5 @@ theorem KawamataViehweg.twist (h : KawamataViehweg) {k : Type} [Field k] [IsAlgC
   exact (cohOn.mapIso Γ(X, ⊤) ⊤ q (i ≪≫ Twist.unitTwistIso _)).toEquiv.subsingleton_congr.2
     (h.of_hom hp hX K h₁ h₂ hq)
 
-open GlobalTheory.ProjSpace in
-
-example (D : ℕ) : IsIntegral (PSpace ℂ D) ∧ IsProjOver (strHom ℂ (PSpace ℂ D)) ∧
-    IsNef ℂ (O1 ℂ D) ∧ IsBig ℂ (O1 ℂ D) ∧
-    ∃ _ : SmoothOfRelativeDimension D (strHom ℂ (PSpace ℂ D)),
-      Nonempty (CanonLB (strHom ℂ (PSpace ℂ D)) D) := by
-  rw [strHom_eq (algebraMap_top_eq ℂ D)]
-  have hs := Adelic.smoothOfRelativeDimension_pspace ℂ D
-  exact ⟨inferInstance, isProjOver_str ℂ D, isNef_twistingSheaf ℂ D, isBig_twistingSheaf ℂ D,
-    hs, CanonLB.nonempty⟩
 
 end GlobalTheory.Published

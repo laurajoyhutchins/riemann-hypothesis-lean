@@ -1,10 +1,59 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.IsotropicNormalFormFullStatement
+module
+
+public import Formalism.HermitianCurvature.OperatorsCommuteTranslations
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.ChainFirstIdentity
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.DpsiIsDerivation
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.FirstExpansionIdentity
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.IsotropicNormalFormFullStatement
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.LeadingTermIdentity
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.ScalarInverseSimplification
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.SecondExpansionIdentity
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.SignPermutationIdentity
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.ThirdPeelingMinorMemIdeal
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.ThirdPolynomialExpansion
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 theorem Formalism.FourierDecayAlt.P.sign_permutation_identity : Formalism.FourierDecayAlt.C3.SignE :=
   Formalism.FourierDecayAlt.P.SignAntidiagonal.sign_permutation_identity
-
-theorem Formalism.FourierDecayAlt.P.antidiagonal_determinant : Formalism.FourierDecayAlt.C3.AntiDiagDet :=
-  Formalism.FourierDecayAlt.P.SignAntidiagonal.antidiagonal_determinant
 
 theorem Formalism.FourierDecayAlt.P.derivative_leading_zb : Formalism.FourierDecayAlt.C3.DleadZb :=
   Formalism.FourierDecayAlt.P.SignAntidiagonal.derivative_leading_zb
@@ -24,12 +73,6 @@ theorem Formalism.FourierDecayAlt.P.second_peeling_identity : Formalism.FourierD
 theorem Formalism.FourierDecayAlt.P.third_peeling_identity : Formalism.FourierDecayAlt.C3.PeelingDualColumn :=
   Formalism.FourierDecayAlt.P.SignAntidiagonal.third_peeling_identity
 
-theorem Formalism.FourierDecayAlt.P.fourth_peeling_identity : Formalism.FourierDecayAlt.C3.PeelingDualCovector :=
-  Formalism.FourierDecayAlt.P.SignAntidiagonal.fourth_peeling_identity
-
-theorem Formalism.FourierDecayAlt.P.peeling_of_parts : Formalism.FourierDecayAlt.C3.PeelOfParts :=
-  Formalism.FourierDecayAlt.P.SignAntidiagonal.peeling_of_parts
-
 theorem Formalism.FourierDecayAlt.P.first_expansion_identity : Formalism.FourierDecayAlt.C3.ExpansionOmittedColumn :=
   Formalism.FourierDecayAlt.P.SignAntidiagonal.first_expansion_identity
 
@@ -39,29 +82,8 @@ theorem Formalism.FourierDecayAlt.P.second_expansion_identity : Formalism.Fourie
 theorem Formalism.FourierDecayAlt.P.column_indicator_expansion : Formalism.FourierDecayAlt.C3.ExpansionCovector :=
   Formalism.FourierDecayAlt.P.SignAntidiagonal.column_indicator_expansion
 
-theorem Formalism.FourierDecayAlt.P.fourth_expansion_identity : Formalism.FourierDecayAlt.C3.ExpansionDualCovector :=
-  Formalism.FourierDecayAlt.P.SignAntidiagonal.fourth_expansion_identity
-
-theorem Formalism.FourierDecayAlt.P.first_expansion_of_parts : Formalism.FourierDecayAlt.C3.ExpansionFirstCaseFromComponents :=
-  Formalism.FourierDecayAlt.P.SignAntidiagonal.first_expansion_of_parts
-
-theorem Formalism.FourierDecayAlt.P.second_expansion_of_parts : Formalism.FourierDecayAlt.C3.ExpansionSecondCaseFromComponents :=
-  Formalism.FourierDecayAlt.P.SignAntidiagonal.second_expansion_of_parts
-
-theorem Formalism.FourierDecayAlt.P.third_expansion_of_parts : Formalism.FourierDecayAlt.C3.ExpansionThirdCaseFromComponents :=
-  Formalism.FourierDecayAlt.P.SignAntidiagonal.third_expansion_of_parts
-
-theorem Formalism.FourierDecayAlt.P.fourth_expansion_of_parts : Formalism.FourierDecayAlt.C3.ExpansionFourthCaseFromComponents :=
-  Formalism.FourierDecayAlt.P.SignAntidiagonal.fourth_expansion_of_parts
-
 theorem Formalism.FourierDecayAlt.P.chain_first_identity : Formalism.FourierDecayAlt.C3.LastColumnChain :=
   Formalism.FourierDecayAlt.P.SignAntidiagonal.chain_first_identity
-
-theorem Formalism.FourierDecayAlt.P.chain_first_of_parts : Formalism.FourierDecayAlt.C3.LastColumnChainFromComponents :=
-  Formalism.FourierDecayAlt.P.SignAntidiagonal.chain_first_of_parts
-
-theorem Formalism.FourierDecayAlt.P.right_derivative_rule_psi : Formalism.FourierDecayAlt.C3.RuleRightDpsi :=
-  Formalism.FourierDecayAlt.P.SignAntidiagonal.right_derivative_rule_psi
 
 theorem Formalism.FourierDecayAlt.P.leading_term_identity : Formalism.FourierDecayAlt.C3.LeadAA :=
   Formalism.FourierDecayAlt.P.SignAntidiagonal.leading_term_identity

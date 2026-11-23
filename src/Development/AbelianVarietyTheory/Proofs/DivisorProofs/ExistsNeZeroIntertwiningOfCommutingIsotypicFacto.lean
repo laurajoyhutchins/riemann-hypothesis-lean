@@ -1,6 +1,56 @@
-import Mathlib
-import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.BlockProductIsomorphism
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.BlockProductIsomorphism
+public import Mathlib.RepresentationTheory.Character
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.IsCuspidalIffCompositions
+
+@[expose] public section
 
 open Formalism.L2.DIV GlobalTheory.FinGL GlobalTheory.Parabolic GlobalTheory.IndefiniteRowSideFullHecke.BlockProductIsomorphism
 
@@ -31,6 +81,7 @@ theorem classSum_scalar [Fintype H] [FiniteDimensional ℂ W] (ρ : Representati
     (hρ : ρ.IsIrreducible) (h : H) : ∃ s : ℂ, ∀ w, (∑ k, ρ (k * h * k⁻¹)) w = s • w := by
   have hT : ∀ g v, (∑ k, ρ (k * h * k⁻¹)) (ρ g v) = ρ g ((∑ k, ρ (k * h * k⁻¹)) v) := by
     intro g v
+
     simp only [LinearMap.sum_apply, map_sum]
     rw [← Equiv.sum_comp (Equiv.mulLeft g)]
     refine Finset.sum_congr rfl fun s _ => ?_
@@ -51,6 +102,7 @@ theorem classSum_of_isotypic [Fintype H] (τ : Representation ℂ H V) (ρ : Rep
     rintro _ ⟨w, rfl⟩
     rw [LinearMap.mem_eqLocus]
     have e := congrArg f.toLinearMap (hs w)
+
     simp only [LinearMap.sum_apply, map_sum, map_smul] at e
     simp only [LinearMap.sum_apply, LinearMap.smul_apply, Module.End.one_apply, ← e]
     exact Finset.sum_congr rfl fun k _ => (f.isIntertwining _ _ _ w).symm
@@ -61,6 +113,7 @@ theorem card_mul_character {M : Type} [Group M] [Fintype H] (τ : Representation
     (ha : ∀ k, Commute (f k) a) :
     (Fintype.card H : ℂ) * τ.character (f h * a) = s * τ.character a := by
   have e := congrArg (fun T => LinearMap.trace ℂ V (T * τ a)) hs
+
   simp only [Finset.sum_mul, map_sum, smul_mul_assoc, one_mul, map_smul, smul_eq_mul] at e
   have e2 : ∀ k, LinearMap.trace ℂ V (τ (f (k * h * k⁻¹)) * τ a) = τ.character (f h * a) := by
     intro k

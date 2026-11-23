@@ -1,8 +1,54 @@
-import Mathlib
-import GroundTheory.GlobalFields.TateThesis.IdeleMeasureNormOne
-import GroundTheory.GlobalFields.TateThesis.IdeleMeasureCosets
-import GroundTheory.GlobalFields.IdeleGroups.NormOneCompact
-import GroundTheory.GlobalFields.Adele.Discrete
+module
+
+public import GroundTheory.GlobalFields.TateThesis.IdeleMeasureNormOne
+public import GroundTheory.GlobalFields.Adele.Discrete
+public import GroundTheory.GlobalFields.IdeleGroups.NormOneCompact
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Topology Filter MeasureTheory TopologicalSpace
 open scoped NumberField.AdeleRing ENNReal NNReal Pointwise
@@ -56,12 +102,6 @@ def diagonalNormOneEquiv : Kˣ ≃ diagonalNormOne K where
   left_inv k := diagonal_injective K ((⟨diagonalToNormOne K k, ⟨k, rfl⟩⟩ :
     diagonalNormOne K).2.choose_spec)
   right_inv x := Subtype.ext (Subtype.ext x.2.choose_spec)
-
-@[simp]
-theorem coe_diagonalNormOneEquiv (k : Kˣ) :
-    (((diagonalNormOneEquiv K k : diagonalNormOne K) : normOneSubgroup K) : IdeleGroup K) =
-      diagonal K k :=
-  rfl
 
 instance countable_units : Countable Kˣ := by
   have : Countable K := (Module.finBasis ℚ K).equivFun.injective.countable
@@ -239,20 +279,11 @@ theorem normOneMeasure_normOneFundamentalDomain_lt_top :
 def normOneClassMeasure : Measure (normOneSubgroup K ⧸ diagonalNormOne K) :=
   Measure.map QuotientGroup.mk ((normOneMeasure K).restrict (normOneFundamentalDomain K))
 
-instance quotientMeasureEqMeasurePreimage_normOneClassMeasure :
-    QuotientMeasureEqMeasurePreimage (normOneMeasure K) (normOneClassMeasure K) :=
-  (isFundamentalDomain_normOneFundamentalDomain K _).quotientMeasureEqMeasurePreimage_quotientMeasure
-
 instance isFiniteMeasure_normOneClassMeasure : IsFiniteMeasure (normOneClassMeasure K) := by
   have : Fact (normOneMeasure K (normOneFundamentalDomain K) < ∞) :=
     ⟨normOneMeasure_normOneFundamentalDomain_lt_top K⟩
   unfold normOneClassMeasure
   infer_instance
-
-theorem map_restrict_eq_normOneClassMeasure {F : Set (normOneSubgroup K)}
-    (hF : IsFundamentalDomain (diagonalNormOne K).op F (normOneMeasure K)) :
-    Measure.map QuotientGroup.mk ((normOneMeasure K).restrict F) = normOneClassMeasure K :=
-  hF.quotientMeasure_eq _ (isFundamentalDomain_normOneFundamentalDomain K _)
 
 end NormOneClasses
 
@@ -318,48 +349,6 @@ end Unfolding
 section Volume
 
 variable {K : Type*} [Field K] [NumberField K]
-
-theorem finiteIdeleMeasure_eq_inv_relindex (W : Subgroup (FiniteAdeleRing (𝓞 K) K)ˣ)
-    (hWo : IsOpen (W : Set (FiniteAdeleRing (𝓞 K) K)ˣ)) (hW : W ≤ finiteIntegralUnits K) :
-    finiteIdeleMeasure K W = ((W.relIndex (finiteIntegralUnits K) : ℕ) : ℝ≥0∞)⁻¹ := by
-  set H := finiteIntegralUnits K
-  have hHm : MeasurableEmbedding (Subtype.val : H → (FiniteAdeleRing (𝓞 K) K)ˣ) :=
-    MeasurableEmbedding.subtype_coe (isOpen_finiteIntegralUnits K).measurableSet
-  set μ' : Measure H := Measure.comap Subtype.val (finiteIdeleMeasure K)
-  have hinv : μ'.IsMulLeftInvariant := by
-    refine ⟨fun g ↦ Measure.ext fun s hs ↦ ?_⟩
-    rw [Measure.map_apply (measurable_const_mul g) hs, hHm.comap_apply, hHm.comap_apply]
-    have : Subtype.val '' ((fun x : H ↦ g * x) ⁻¹' s) =
-        (fun x ↦ (g : (FiniteAdeleRing (𝓞 K) K)ˣ) * x) ⁻¹' (Subtype.val '' s) := by
-      ext x
-      constructor
-      · rintro ⟨y, hy, rfl⟩
-        exact ⟨g * y, hy, rfl⟩
-      · rintro ⟨y, hy, hyx⟩
-        refine ⟨g⁻¹ * y, by simpa using hy, ?_⟩
-        simp [hyx]
-    rw [this, measure_preimage_mul]
-  have hc : CompactSpace H := isCompact_iff_compactSpace.1 (isCompact_finiteIntegralUnits K)
-  have hWHo : IsOpen ((W.subgroupOf H : Subgroup H) : Set H) :=
-    hWo.preimage continuous_subtype_val
-  have : Finite (H ⧸ W.subgroupOf H) := Subgroup.quotient_finite_of_isOpen _ hWHo
-  have : (W.subgroupOf H).FiniteIndex := Subgroup.finiteIndex_of_finite_quotient
-  have h := Subgroup.index_mul_measure (W.subgroupOf H) hWHo.measurableSet μ'
-  have h1 : μ' Set.univ = 1 := by
-    rw [hHm.comap_apply, Set.image_univ, Subtype.range_coe]
-    exact finiteIdeleMeasure_finiteIntegralUnits K
-  have h2 : μ' (W.subgroupOf H : Set H) = finiteIdeleMeasure K W := by
-    rw [hHm.comap_apply]
-    congr 1
-    ext x
-    constructor
-    · rintro ⟨y, hy, rfl⟩
-      exact hy
-    · intro hx
-      exact ⟨⟨x, hW hx⟩, hx, rfl⟩
-  rw [h1, h2] at h
-  rw [Subgroup.relIndex]
-  exact ENNReal.eq_inv_of_mul_eq_one_left (by rwa [mul_comm] at h)
 
 end Volume
 

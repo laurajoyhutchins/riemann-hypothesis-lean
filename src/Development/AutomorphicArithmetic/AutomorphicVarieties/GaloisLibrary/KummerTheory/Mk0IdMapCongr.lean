@@ -1,6 +1,55 @@
-import Mathlib
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PartsSign
-import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.SelmerTransport.ConjStableShaFam
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.SelmerTransport.ConjStableShaFam
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PartsConj
+public import Mathlib.RingTheory.DedekindDomain.SelmerGroup
+public import Mathlib.RingTheory.PicardGroup
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -35,7 +84,7 @@ theorem mk0_idMap_congr (τ : K ≃+* K') {I J : (Ideal (𝓞 K))⁰} (h : Class
   rw [Ideal.map_mul, Ideal.map_mul, Ideal.map_span, Ideal.map_span, Set.image_singleton, Set.image_singleton] at this
   exact this
 
-private def clFun (τ : K ≃+* K') (c : ClassGroup (𝓞 K)) : ClassGroup (𝓞 K') :=
+def clFun (τ : K ≃+* K') (c : ClassGroup (𝓞 K)) : ClassGroup (𝓞 K') :=
   ClassGroup.mk0 (idMap τ (ClassGroup.mk0_surjective c).choose)
 
 private theorem class_fun_mk0 (τ : K ≃+* K') (I : (Ideal (𝓞 K))⁰) :
@@ -51,8 +100,8 @@ def clMap (τ : K ≃+* K') : ClassGroup (𝓞 K) →* ClassGroup (𝓞 K') :=
 theorem class_map_mk0 (τ : K ≃+* K') (I : (Ideal (𝓞 K))⁰) : clMap τ (ClassGroup.mk0 I) = ClassGroup.mk0 (idMap τ I) :=
   class_fun_mk0 τ I
 
-variable (K) in
 
+variable (K) in
 def ClDual (N : ℕ) (R M : Type) [CommRing R] [AddCommGroup M] [Module R M] : Submodule R (ClassGroup (𝓞 K) → M) where
   carrier := {θ | (∀ a b, θ (a * b) = θ a + θ b) ∧ ∀ v ∈ Above K N, θ (primeCl v) = 0}
   zero_mem' := ⟨by simp, by simp⟩
@@ -75,8 +124,8 @@ def SelK (S : Set (HeightOneSpectrum (𝓞 K))) (n : ℕ) : Subgroup Kˣ where
   mul_mem' {a b} ha hb v hv := by rw [ordv_mul]; exact dvd_add (ha v hv) (hb v hv)
   inv_mem' {a} ha v hv := by rw [ordv_inv]; exact (ha v hv).neg_right
 
-variable (K) in
 
+variable (K) in
 def powK (n : ℕ) : Subgroup Kˣ := (powMonoidHom n : Kˣ →* Kˣ).range
 
 def radCl (n : ℕ) (a : Kˣ) : ClassGroup (𝓞 K) := ∏ᶠ v : HeightOneSpectrum (𝓞 K), primeCl v ^ (ordv v a / n)
@@ -112,12 +161,12 @@ def EqHom (N : ℕ) (U : Subgroup (G F Ω)) (ρ : Representation R (G F Ω) M) :
 def EqEig (N : ℕ) (U : Subgroup (G F Ω)) (ρ : Representation R (G F Ω) M) (σ : Ω ≃+* Ω) (s : R) : Submodule R (U → M) :=
   EqHom N U ρ ⊓ conjCond U σ (s • LinearMap.id)
 
-variable (R M) in
 
+variable (R M) in
 def restr {U V : Subgroup (G F Ω)} (h : U ≤ V) : (V → M) →ₗ[R] (U → M) := LinearMap.funLeft R M (Subgroup.inclusion h)
 
-variable (R M) in
 
+variable (R M) in
 def funRep (U : Subgroup (G F Ω)) [U.Normal] : Representation R (G F Ω) (U → M) where
   toFun g := LinearMap.funLeft R M (conjHom U g)
   map_one' := LinearMap.ext fun φ => funext fun u => congrArg φ (Subtype.ext (by simp [conjHom]))
@@ -198,8 +247,6 @@ abbrev Xinf (N : ℕ) (U : Subgroup (G F Ω)) : Type := Dinf l N U →ₗ[ℤ_[l
 
 end Tower
 
-def errTwo (l : ℕ) : ℕ∞ := if l = 2 then 1 else 0
-
 section Res
 
 def resTriv {R Γ M U : Type} [CommRing R] [Group Γ] [TopologicalSpace Γ] [AddCommGroup M] [Module R M]
@@ -226,9 +273,6 @@ def zmTw (D : LData F Ω l) (r : ℕ) (e : ℤ) :
 
 def ShaZm (D : LData F Ω l) (r : ℕ) (e : ℤ) : Submodule (ZMod (l ^ r)) (H1 (zmTw D r e)) :=
   Sha1 (zmTw D r e) (locFam D.S D.A) (continuous_locFam D.S D.A)
-
-def resZm (D : LData F Ω l) (r : ℕ) : H1 (zmTw D r 0) →ₗ[ZMod (l ^ r)] (G F Ω → ZMod (l ^ r)) :=
-  resTriv (zmTw D r 0) (toGS Ω _) fun u m => by simp [zmTw]
 
 end Res
 

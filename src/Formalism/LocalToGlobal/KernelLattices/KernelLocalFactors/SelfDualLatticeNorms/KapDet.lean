@@ -1,10 +1,57 @@
-import Formalism.LocalToGlobal.KernelLattices.KerStd
-import Formalism.LocalToGlobal.KernelLattices.KernelLocalFactors.BaseEx
-import Formalism.LocalToGlobal.GlobalTheory.GL3.PStdOK
+module
+
+public import Formalism.LocalToGlobal.KernelLattices.KerStd
+public import Formalism.LocalToGlobal.KernelLattices.KernelLocalFactors.IsAdmissibleFlagPairOfUnitriangularLeftAutomorph
+public import Formalism.LocalToGlobal.GlobalTheory.GL3.PStdOK
+public import Formalism.LocalToGlobal.TorsionIntegrality.QuadraticSemicharacters.CayleyGaussianIntegrals.RelIndexNeZeroOfNsmulMem
 import Formalism.LocalToGlobal.TorsionIntegrality.QuadraticSemicharacters.QuadraticSemicharacterIdentityReformulated2
-import Formalism.LocalToGlobal.TorsionIntegrality.QuadraticSemicharacters.CayleyGaussianIntegrals.RelIndexNeZeroOfNsmulMem
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.UnitDeterminantRoot.NormLeOneOfRoot
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.UnitDeterminantRoot.NsmulRelIdxMem
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.UnitDeterminantRoot.NormLeOneOfRoot
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.UnitDeterminantRoot.NsmulRelIdxMem
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.UnitDeterminantRoot.GlobalLUnit
+
+@[expose] public section
 
 noncomputable section
 open scoped BigOperators ComplexConjugate
@@ -36,7 +83,7 @@ theorem good_add {p : ℕ} (hp : p.Prime) (Lt : AddSubgroup V) (T : V →ₗ[ℂ
   obtain ⟨k, hk, h1⟩ := hx
   obtain ⟨l, hl, h2⟩ := hy
   refine ⟨l * k, fun h => (hp.dvd_mul.1 h).elim hl hk, ?_⟩
-  rw [map_add, smul_add]
+  rw [map_add (f := _), smul_add]
   refine Lt.add_mem (mul_smul_mem Lt h1 l) ?_
   rw [mul_comm]
   exact mul_smul_mem Lt h2 k
@@ -67,7 +114,7 @@ theorem good_unif {p : ℕ} (hp : p.Prime) (Lt : AddSubgroup V) [hfin : Module.F
         exact mul_smul_mem Lt (hk2 y) r
       | zero => simp only [ZeroMemClass.coe_zero, map_zero, smul_zero]; exact Lt.zero_mem
       | add y z _ _ h1 h2 =>
-        simp only [AddSubgroup.coe_add, map_add, smul_add]
+        simp only [AddSubgroup.coe_add, map_add (f := _), smul_add]
         exact Lt.add_mem h1 h2
       | smul n y _ h1 =>
         have e : ((n • y : Lt) : V) = n • (y : V) := rfl
@@ -135,8 +182,6 @@ variable (D : D7)
 abbrev Ix : Type := Fin 4 × D.what₂.Tau
 
 def fK : D.host.K →+* ℂ := D.host.φ₀.comp (algebraMap D.host.K D.host.E)
-
-theorem fK_apply (x : D.host.K) : fK D x = D.host.φ₀ (x : D.host.E) := rfl
 
 def vec (v : Ix D → D.host.K) : Ix D → ℂ := fun w => fK D (v w)
 

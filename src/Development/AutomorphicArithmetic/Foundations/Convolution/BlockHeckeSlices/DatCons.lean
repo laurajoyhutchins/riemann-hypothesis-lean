@@ -1,7 +1,50 @@
-import Development.AutomorphicArithmetic.Foundations.Convolution.BlockHeckeSlices.SliceShift
+module
+
+public import Development.AutomorphicArithmetic.Foundations.Convolution.BlockHeckeSlices.SliceShift
+public import Development.AutomorphicArithmetic.Foundations.Convolution.BlockHeckeSlices.CuspidalNormBounds.SliceBound
+public import Development.AutomorphicArithmetic.Foundations.Convolution.BlockHeckeSlices.CuspidalNormBounds.SliceUmg
 import Development.AutomorphicArithmetic.Foundations.Convolution.BlockHeckeSlices.CuspidalNormBounds.UmgOps
-import Development.AutomorphicArithmetic.Foundations.Convolution.BlockHeckeSlices.CuspidalNormBounds.SliceBound
-import Development.AutomorphicArithmetic.Foundations.Convolution.BlockHeckeSlices.CuspidalNormBounds.SliceUmg
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -10,7 +53,7 @@ open GroundTheory.Automorphic GroundTheory.Automorphic.Reduction UpperTheory.V.C
 
 namespace UpperTheory.ConvolutionTheory.BW
 
-variable {E : Type} [Field E] [NumberField E] [IsTotallyComplex E] {S : Set (Pl E)} {n r s : ℕ}
+variable {E : Type} [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] {S : Set (Pl E)} {n r s : ℕ}
 
 namespace Dat
 
@@ -185,12 +228,7 @@ namespace Lnk
 
 variable {X X' : Module.End ℂ (Sm E (r + s))} {Y Y' : Module.End ℂ (Sm E s)}
 
-theorem one : Lnk (s := s) b 1 1 := fun _ _ _ h e => ⟨h, e⟩
-
 theorem zero : Lnk (s := s) b 0 0 := fun t _ _ _ _ => ⟨(umgOps E (r + s)).1, (slice_zero b t).symm⟩
-
-theorem mul (h : Lnk b X Y) (h' : Lnk b X' Y') : Lnk b (X * X') (Y * Y') := fun t φ ψ hφ e =>
-  h t _ _ (h' t φ ψ hφ e).1 (h' t φ ψ hφ e).2
 
 theorem add (h : Lnk b X Y) (h' : Lnk b X' Y') : Lnk b (X + X') (Y + Y') := fun t φ ψ hφ e =>
   ⟨(h t φ ψ hφ e).1.add (h' t φ ψ hφ e).1, by
@@ -201,10 +239,6 @@ theorem smul (h : Lnk b X Y) (c : ℂ) : Lnk b (c • X) (c • Y) := fun t φ �
   ⟨(h t φ ψ hφ e).1.smul c, by
     rw [LinearMap.smul_apply, LinearMap.smul_apply, slice_smul b t c (h t φ ψ hφ e).1, ← (h t φ ψ hφ e).2]; rfl⟩
 
-theorem alg (c : ℂ) : Lnk (s := s) b (algebraMap ℂ _ c) (algebraMap ℂ _ c) := by
-  rw [Algebra.algebraMap_eq_smul_one, Algebra.algebraMap_eq_smul_one]
-  exact one.smul c
-
 theorem sum {ι : Type} {A : Finset ι} {X : ι → Module.End ℂ (Sm E (r + s))} {Y : ι → Module.End ℂ (Sm E s)}
     (h : ∀ i ∈ A, Lnk b (X i) (Y i)) : Lnk b (∑ i ∈ A, X i) (∑ i ∈ A, Y i) := by
   classical
@@ -213,13 +247,6 @@ theorem sum {ι : Type} {A : Finset ι} {X : ι → Module.End ℂ (Sm E (r + s)
   | insert a A ha ih =>
     rw [Finset.sum_insert ha, Finset.sum_insert ha]
     exact (h a (Finset.mem_insert_self _ _)).add (ih fun i hi => h i (Finset.mem_insert_of_mem hi))
-
-theorem prod : ∀ {k : ℕ} {X : Fin k → Module.End ℂ (Sm E (r + s))} {Y : Fin k → Module.End ℂ (Sm E s)},
-    (∀ i, Lnk b (X i) (Y i)) → Lnk b (List.ofFn X).prod (List.ofFn Y).prod
-  | 0, _, _, _ => by simpa using one
-  | k + 1, X, Y, h => by
-    rw [List.ofFn_succ, List.ofFn_succ, List.prod_cons, List.prod_cons]
-    exact (h 0).mul (prod fun i => h i.succ)
 
 theorem eop (τ : E →+* ℂ) (i j : Fin s) : Lnk b (Eop τ (Fin.natAdd r i) (Fin.natAdd r j)) (Eop τ i j) := fun t φ ψ hφ e => by
   obtain ⟨ψ', h1, -, h2, -⟩ := sliceUmg E S r s b t φ hφ

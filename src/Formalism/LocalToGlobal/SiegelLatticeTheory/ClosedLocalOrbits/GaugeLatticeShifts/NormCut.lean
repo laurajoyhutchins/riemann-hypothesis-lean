@@ -1,7 +1,48 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.TermOpStmt
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.NormCore
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.NormAsm
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.TermOpStmt
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.NormCore
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.NormAsm
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -42,6 +83,7 @@ theorem opOf_hsEmb (A : Wq →L[ℂ] Wp) : opOf (Formalism.L2.SG.PackageTie.hsEm
   ext e
   rw [opOf_apply]
   conv_rhs => rw [← (stdOrthonormalBasis ℂ Wq).sum_repr' e]
+
   rw [map_sum]
   simp only [map_smul, h]
 
@@ -72,7 +114,7 @@ def BlL (ρ : C) (ρ' : C') :
     Formalism.L2.SG.PackageTie.HS (PiLp 2 (fun _ : C' => V')) (PiLp 2 (fun _ : C => V)) →ₗ[ℂ]
       Formalism.L2.SG.PackageTie.HS V' V where
   toFun x := Formalism.L2.SG.PackageTie.hsEmb (blockOf (opOf x) ρ ρ')
-  map_add' x y := by rw [opOf_add, blockOf_add, map_add]
+  map_add' x y := by rw [opOf_add, blockOf_add, map_add (f := _)]
   map_smul' c x := by rw [opOf_smul, blockOf_smul, map_smul]; rfl
 
 def Bl (ρ : C) (ρ' : C') :
@@ -108,8 +150,8 @@ def UG : Set (Iof TR) := {x | ∀ v, Formalism.L2.SG.GGMirabolic.IsUni D.R.k (x 
 
 def psiG (x : Iof TR) : ℂ := ∏ v, Formalism.L2.SG.GGMirabolic.psiNat (TR.psi0 v) (x v)
 
-variable {TR} in
 
+variable {TR} in
 def lamQ {w : D.what₂.Word} {rs : Finset (Submodule (𝓞 D.host.E) (VS D).V)} (c : ColSys X w rs) (ρ : c.Cl) :
     {Λ // Λ ∈ rs} := ⟨c.lamOf ρ, c.lam_mem ρ⟩
 
@@ -119,16 +161,16 @@ def positionT (t : GTerm X u u' F0 F0' what₂ rows') : {Λ // Λ ∈ what₂} �
 def aT (t : GTerm X u u' F0 F0' what₂ rows') : Formalism.L2.SG.PackageTie.HS (X.Vpi u') (X.Vpi u) :=
   Formalism.L2.SG.PackageTie.hsEmb (ampN cs cs' FdN FdN' t)
 
-variable (F0 F0') in
 
+variable (F0 F0') in
 def ColPhase (sc : cs.Cl → Iof TR) (sc' : cs'.Cl → Iof TR) : Prop :=
   ∀ (t : GTerm X u u' F0 F0' what₂ rows') (ρ : cs.Cl) (ρ' : cs'.Cl), cs.lamOf ρ = t.lam → cs'.lamOf ρ' = t.lam' →
     (if kOf X u u' (cs.h ρ : X.B.I.Gf) (cs'.h ρ' : X.B.I.Gf) t.pt ∈ X.K2 then
       chiL X (kOf X u u' (cs.h ρ : X.B.I.Gf) (cs'.h ρ' : X.B.I.Gf) t.pt) else 0) =
     psiG TR ((sc ρ)⁻¹ * iotaOf TR cs cs' t * sc' ρ')
 
-variable (F0) in
 
+variable (F0) in
 def ColFree {w : D.what₂.Word} {rs : Finset (Submodule (𝓞 D.host.E) (VS D).V)} (c : ColSys X w rs)
     (A : {Λ // Λ ∈ rs} → Set (Iof TR)) (sc : c.Cl → Iof TR) : Prop :=
   ∀ q : {Λ // Λ ∈ rs},
@@ -136,8 +178,8 @@ def ColFree {w : D.what₂.Word} {rs : Finset (Submodule (𝓞 D.host.E) (VS D).
         (fun x : A q × {ρ : c.Cl // lamQ c ρ = q} × UG TR => (x.1 : Iof TR) * sc x.2.1.1 * (x.2.2 : Iof TR)) ∧
       wRow D F0 q.1 = ((Nat.card (A q) : ℝ))⁻¹
 
-variable (F0 F0') in
 
+variable (F0 F0') in
 def SatGram (S : Set (GTerm X u u' F0 F0' what₂ rows')) (A : {Λ // Λ ∈ what₂} → Set (Iof TR))
     (A' : {Λ' // Λ' ∈ rows'} → Set (Iof TR)) : Prop :=
   ∀ q : {Λ // Λ ∈ what₂} × {Λ' // Λ' ∈ rows'},
@@ -164,8 +206,8 @@ theorem blockOf_aTerm (t : GTerm X u u' F0 F0' what₂ rows') (ρ : cs.Cl) (ρ' 
   · intro h
     exact absurd (Finset.mem_univ _) h
 
-variable {TR cs cs' FdN FdN'} in
 
+variable {TR cs cs' FdN FdN'} in
 theorem hsEmb_blk {sc : cs.Cl → Iof TR} {sc' : cs'.Cl → Iof TR} (hChi : ChiNIndep F0 F0' cs cs')
     (hPh : ColPhase F0 F0' TR cs cs' sc sc') (t : GTerm X u u' F0 F0' what₂ rows') (ρ : cs.Cl) (ρ' : cs'.Cl) :
     Formalism.L2.SG.PackageTie.hsEmb (blk cs cs' FdN FdN' t ρ ρ') =
@@ -197,8 +239,8 @@ theorem hsEmb_blk {sc : cs.Cl → Iof TR} {sc' : cs'.Cl → Iof TR} (hChi : ChiN
       exact hs ⟨he.1.symm, he.2.symm⟩
     rw [hb, map_zero, if_neg hposition]
 
-variable (F0 F0') in
 
+variable (F0 F0') in
 theorem normExpansionOn_tOf (hHS : HSBlocks) (hGam : GamProdSum) (hPsi : PsiNatEquiv)
     (S : Set (GTerm X u u' F0 F0' what₂ rows')) (hAbs : (tOf F0 F0' TR cs cs' FdN FdN').AbsConv)
     (hChi : ChiNIndep F0 F0' cs cs') (sc : cs.Cl → Iof TR) (sc' : cs'.Cl → Iof TR)
@@ -265,8 +307,8 @@ theorem normExpansionOn_tOf (hHS : HSBlocks) (hGam : GamProdSum) (hPsi : PsiNatE
       rw [Real.sq_sqrt (by rw [(hF q.1).2, (hF' q.2).2]; positivity), (hF q.1).2, (hF' q.2).2, mul_inv])
     (hsatL := fun q => (hSat q).1) (hsatR := fun q => (hSat q).2) (hsum := hAbs.1) (hsumv := hAbs.2.1)
 
-variable (F0 F0') in
 
+variable (F0 F0') in
 theorem normExpSat_of (hHS : HSBlocks) (hGam : GamProdSum) (hPsi : PsiNatEquiv)
     (hAbs : (tOf F0 F0' TR cs cs' FdN FdN').AbsConv)
     (hChi : ChiNIndep F0 F0' cs cs') (sc : cs.Cl → Iof TR) (sc' : cs'.Cl → Iof TR)

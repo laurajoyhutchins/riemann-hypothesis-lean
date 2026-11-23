@@ -1,4 +1,49 @@
-import Formalism.PeriodIntegrals.UnfoldEquiv
+module
+
+public import Formalism.PeriodIntegrals.UnfoldEquiv
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open PI.UnfoldEquiv PI.UnfoldEquiv.Loc
 
@@ -12,13 +57,6 @@ theorem eN_apply (N i : ℕ) (l : Fin N) : eN k N i l = if l.1 = i then 1 else 0
 
 theorem mem_Ufl {n c i : ℕ} {v : Fin (n + c) → k} :
     v ∈ Ufl k n c i ↔ ∀ l : Fin (n + c), ¬ (l.1 < n + i) → v l = 0 := Iff.rfl
-
-theorem inX_apply {n c : ℕ} (x : Fin n → k) (l : Fin (n + c)) :
-    inX k n c x l = if h : l.1 < n then x ⟨l.1, h⟩ else 0 := by
-  simp only [inX, LinearMap.pi_apply]
-  split_ifs with h
-  · rfl
-  · rfl
 
 theorem atN_add {N : ℕ} (v w : Fin N → k) (i : ℕ) : atN (v + w) i = atN v i + atN w i := by
   simp only [atN]
@@ -35,7 +73,7 @@ theorem atN_of_mem {n c i : ℕ} {v : Fin (n + c) → k} (hv : v ∈ Ufl k n c i
   · rfl
 
 theorem atN_eN {N i : ℕ} (h : i < N) : atN (eN k N i) i = 1 := by
-  rw [atN, dif_pos h, eN_apply]
+  rw [atN, dite_eq_left h, eN_apply]
   exact if_pos rfl
 
 theorem atN_eN_ne {N i j : ℕ} (h : j ≠ i) : atN (eN k N j) i = 0 := by
@@ -61,11 +99,5 @@ theorem fillMatrix_single {n' n c : ℕ} (xj : (Fin n' → k) →ₗ[k] (Fin n �
     xx1 xj t (Pi.single s 1) l = if hf : IsFree n' n c l.1 s.1 then t ⟨(l, s), hf⟩ else base xj l s := by
   simp only [xx1, Matrix.toLin'_apply, Matrix.mulVec_single, MulOpposite.op_one, one_smul, Matrix.col_apply,
     Matrix.of_apply, base]
-
-theorem extractFree_fillMatrix {n' n c : ℕ} (xj : (Fin n' → k) →ₗ[k] (Fin n → k)) (t : FC n' (c + 1) n c → k) :
-    fe (xx1 xj t) = t := by
-  funext p
-  show xx1 xj t (Pi.single p.1.2 1) p.1.1 = t p
-  rw [fillMatrix_single, dif_pos p.2]
 
 end PI.UnfoldEquiv.UnitaryGroupMassFormula

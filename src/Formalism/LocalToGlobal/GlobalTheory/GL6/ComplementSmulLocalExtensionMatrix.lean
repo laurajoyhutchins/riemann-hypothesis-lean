@@ -1,4 +1,48 @@
-import Formalism.LocalToGlobal.GlobalTheory.GL6.AdelicFunctionRightTranslateDiamond
+module
+
+public import Formalism.LocalToGlobal.GlobalTheory.GL6.AdelicFunctionRightTranslateDiamond
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -59,7 +103,7 @@ theorem proj_local_extension_same_place (v : HeightOneSpectrum (𝓞 F)) (t : E 
     simp only [prV, AlgHom.toRingHom_eq_coe, RingHom.coe_coe, Algebra.TensorProduct.map_tmul, AlgHom.id_apply]
     congr 1
     exact local_adele_single_same_place v y
-  | add a b ha hb => rw [map_add, map_add, ha, hb]
+  | add a b ha hb => rw [map_add (f := _), map_add (f := _), ha, hb]
 
 theorem proj_local_extension_other_place (v w : HeightOneSpectrum (𝓞 F)) (h : w ≠ v) (t : E ⊗[F] v.adicCompletion F) :
     prV (E := E) w (localExtensionTensor v t) = 0 := by
@@ -70,7 +114,7 @@ theorem proj_local_extension_other_place (v w : HeightOneSpectrum (𝓞 F)) (h :
     simp only [prV, AlgHom.toRingHom_eq_coe, RingHom.coe_coe, Algebra.TensorProduct.map_tmul, AlgHom.id_apply]
     have : (evalV F w) (localAdeleSingle v y) = 0 := local_adele_single_other_place v w h y
     rw [this, TensorProduct.tmul_zero]
-  | add a b ha hb => rw [map_add, map_add, ha, hb, add_zero]
+  | add a b ha hb => rw [map_add (f := _), map_add (f := _), ha, hb, add_zero]
 
 theorem local_extension_tensor_mul (v : HeightOneSpectrum (𝓞 F)) (t t' : E ⊗[F] v.adicCompletion F) :
     localExtensionTensor v (t * t') = localExtensionTensor v t * localExtensionTensor v t' := by
@@ -82,8 +126,8 @@ theorem local_extension_tensor_mul (v : HeightOneSpectrum (𝓞 F)) (t t' : E �
     | tmul x' y' =>
       rw [Algebra.TensorProduct.tmul_mul_tmul, local_extension_tensor_tmul, local_extension_tensor_tmul, local_extension_tensor_tmul, Algebra.TensorProduct.tmul_mul_tmul,
         local_adele_single_mul]
-    | add a b ha hb => rw [mul_add, map_add, map_add, ha, hb, mul_add]
-  | add a b ha hb => rw [add_mul, map_add, map_add, ha, hb, add_mul]
+    | add a b ha hb => rw [mul_add, map_add (f := _), map_add (f := _), ha, hb, mul_add]
+  | add a b ha hb => rw [add_mul, map_add (f := _), map_add (f := _), ha, hb, add_mul]
 
 theorem local_extension_mul_incl (v : HeightOneSpectrum (𝓞 F)) (t : E ⊗[F] v.adicCompletion F) (j : E) :
     localExtensionTensor v (t * inclE (F := F) (v.adicCompletion F) j) = localExtensionTensor v t * inclE (F := F) (FiniteAdeleRing (𝓞 F) F) j := by
@@ -92,7 +136,7 @@ theorem local_extension_mul_incl (v : HeightOneSpectrum (𝓞 F)) (t : E ⊗[F] 
   | tmul x y =>
     simp only [inclE, Algebra.TensorProduct.includeLeftRingHom_apply, Algebra.TensorProduct.tmul_mul_tmul, mul_one,
       local_extension_tensor_tmul]
-  | add a b ha hb => rw [add_mul, map_add, map_add, ha, hb, add_mul]
+  | add a b ha hb => rw [add_mul, map_add (f := _), map_add (f := _), ha, hb, add_mul]
 
 theorem local_extension_conj_comm (σ : E →ₐ[F] E) (v : HeightOneSpectrum (𝓞 F)) (t : E ⊗[F] v.adicCompletion F) :
     sigR σ (FiniteAdeleRing (𝓞 F) F) (localExtensionTensor v t) = localExtensionTensor v (sigR σ (v.adicCompletion F) t) := by
@@ -101,7 +145,7 @@ theorem local_extension_conj_comm (σ : E →ₐ[F] E) (v : HeightOneSpectrum (�
   | tmul x y =>
     simp only [sigR, AlgHom.toRingHom_eq_coe, RingHom.coe_coe, local_extension_tensor_tmul, Algebra.TensorProduct.map_tmul,
       AlgHom.id_apply]
-  | add a b ha hb => rw [map_add, map_add, ha, hb, map_add, map_add]
+  | add a b ha hb => rw [map_add (f := _), map_add (f := _), ha, hb, map_add (f := _), map_add (f := _)]
 
 section Mat
 
@@ -127,16 +171,19 @@ theorem complement_local_idempotent_idem : (1 - localIdempotent (E := E) v) * (1
 
 theorem local_extension_matrix_mul (M N : Matrix (Fin n) (Fin n) (E ⊗[F] v.adicCompletion F)) : localExtensionMatrix v M * localExtensionMatrix v N = localExtensionMatrix v (M * N) := by
   ext i j
+
   simp only [localExtensionMatrix, Matrix.mul_apply, Matrix.map_apply, map_sum, local_extension_tensor_mul]
 
 theorem local_extension_matrix_mul_gram (M : Matrix (Fin n) (Fin n) (E ⊗[F] v.adicCompletion F)) (J : Matrix (Fin n) (Fin n) E) :
     localExtensionMatrix v M * J.map (inclE (F := F) (FiniteAdeleRing (𝓞 F) F)) = localExtensionMatrix v (M * J.map (inclE (F := F) (v.adicCompletion F))) := by
   ext i j
+
   simp only [localExtensionMatrix, Matrix.mul_apply, Matrix.map_apply, map_sum, local_extension_mul_incl]
 
 theorem gram_mul_local_extension_matrix (M : Matrix (Fin n) (Fin n) (E ⊗[F] v.adicCompletion F)) (J : Matrix (Fin n) (Fin n) E) :
     J.map (inclE (F := F) (FiniteAdeleRing (𝓞 F) F)) * localExtensionMatrix v M = localExtensionMatrix v (J.map (inclE (F := F) (v.adicCompletion F)) * M) := by
   ext i j
+
   simp only [localExtensionMatrix, Matrix.mul_apply, Matrix.map_apply, map_sum]
   refine Finset.sum_congr rfl fun k _ => ?_
   rw [mul_comm, ← local_extension_mul_incl, mul_comm]
@@ -264,9 +311,6 @@ theorem diamond_elements_of_local (Tf : FormsTied D u) (h : LocalDiamondElements
   intro i hi v a
   obtain ⟨k, hk, hl⟩ := h i hi v a
   exact ⟨k, hk, is_diamond_of_local_diamond _ _ _ k hl⟩
-
-theorem diamond_mul_of_local_diamonds (Tf : FormsTied D u) (h : LocalDiamondElementsExist Tf) : Formalism.MainNotions.product_first_zeroth_parts.DiaMul D u :=
-  diamond_mul_of_diamond_elements Tf (diamond_elements_of_local Tf h)
 
 end Tied
 

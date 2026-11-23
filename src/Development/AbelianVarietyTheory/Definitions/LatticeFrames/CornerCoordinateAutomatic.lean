@@ -1,5 +1,44 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.CxTiesOf
+module
+
+public import Formalism.LocalToGlobal.HilbertRowConditions.ColumnsFunctionAtSubspaces
+public import Formalism.LocalToGlobal.IndefiniteReal.RecTie
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Formalism.LocalToGlobal.IndefiniteReal.RealSeparation.NormFr
+
+@[expose] public section
 
 noncomputable section
 
@@ -18,39 +57,6 @@ theorem mu_eq_of_heq (P : RowSideFamily ex) {Zs : DefSub P.A3.fam3.amb3} (h : Zs
     (S : IndefData (P.A3.side3 P.P0 P.ψ0 Zs)) (hS : HEq S P.S0) : S.μ = P.S0.μ := by
   subst h
   rw [eq_of_heq hS]
-
-theorem used_all (W : RealPack ex) (t : W.P.T) : Formalism.IndefR.RecTie.Used0 D (W.P.I.tup t) := by
-  rcases W.Q.charW.tup.mu_used t with h | ⟨w, h⟩
-  · rw [h]; exact used_base W.P
-  · right
-    have e : W.Q.Rl.mu = W.P.S0.μ := mu_eq_of_heq W.P W.Q.zs _ W.Q.s0
-    refine ⟨D.plEq.symm w, ?_⟩
-    rw [W.P.tied.div.tup.muAt, Equiv.apply_symm_apply, ← h, e]
-    rfl
-
-theorem dcPtG_iff (W : RealPack ex) : DcPtG W.P ↔ RowsHoldDcPt3 W.P :=
-  ⟨fun h u t x F => h u t (used_all W t) x F, fun h u t _ x F => h u t x F⟩
-
-theorem hypAt_iff (W : RealPack ex) : HypAt W ↔
-    Nonempty (Formalism.L2.SG.JoinSI.JoinSI W.R W.S W.Q) ∧ RowsHoldDcPt3 W.P ∧ W.Q.Rl.Char3 W.Q.F ∧ FramesOKg2 W.Q.Rl :=
-  ⟨fun h => ⟨h.1, (dcPtG_iff W).1 h.2.2.1, h.2.2.2⟩, fun h => ⟨h.1, W.S.lev, (dcPtG_iff W).2 h.2.1, h.2.2⟩⟩
-
-theorem hypAt_of (W : RealPack ex) (hJ : Nonempty (Formalism.L2.SG.JoinSI.JoinSI W.R W.S W.Q)) (hP : RowsHoldDcPt3 W.P)
-    (hE : W.Q.Rl.toRealDat.ExAt) (hF : W.Q.FramesEx) : HypAt W :=
-  (hypAt_iff W).2 ⟨hJ, hP, RealDat3.characterisation_of_weak W.Q.charW hE, W.Q.frames hF⟩
-
-theorem period_rational {P : RowSideFamily ex} (h : DcPtG P) (u : D.what₂.Word) (x : Fin (P.Dc.a (P.I.wU u)) → D.what₂.LL)
-    (F : Fin ((P.A3.side3 P.Ps P.ψs P.Zs).nV P.A3.A.μ0) → D.what₂.LL) :
-    D.what₂.perCol u (P.I.tup P.A3.A.μ0) (D.jN u (P.I.eNu u x))
-      (P.I.jA P.A3.A.μ0 ((rV0 D P.A3.A P.Ps P.ψs P.A3.A.μ0).mulVec F)) ∈ Set.range D.what₂.embLL :=
-  ⟨_, h u _ (used_base P) x F⟩
-
-theorem cornerCoordinate_automatic (W : RealPack ex) : (cxW W).CoordinatesInGoodPart W.Q.F.cr W.Q.F.cv true :=
-  Formalism.IndefR.Cx.definite_coordinates_in_good_part _ true
-
-theorem tiesRest_of_cxTies (W : RealPack ex)
-    (h : CxTies (cxW W) W.Q.F.cr W.Q.F.cv (W.Q.F.eV (cxW W).zs)) : TiesRest W :=
-  ⟨h.1, h.2.1, h.2.2.1, h.2.2.2.2.2.2.2.1⟩
 
 end GlobalTheory.MiS.Check
 

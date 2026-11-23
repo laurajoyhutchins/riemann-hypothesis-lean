@@ -1,9 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Degenerations.ArithBase
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Degenerations.ArithBase
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.AddHomExtSingle
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsBasisAdaptedToIdempotents
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsBasisLatticeNear
 import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.OrthogonalFreeOfPerfectAltZmod
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsBasisAdaptedToIdempotents
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.AddHomExtSingle
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsBasisLatticeNear
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 open CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj AlgebraicGeometry
 open scoped CategoryTheory.Obj
@@ -18,8 +63,9 @@ theorem exists_eStd_eq_linear (g n : ℕ) (f : (Fin g ⊕ Fin g → ZMod n) →�
     ∃ b, ∀ y, eStd g n b y = f y := by
   refine ⟨Sum.elim (fun i => f (Pi.single (.inr i) 1)) (fun i => -f (Pi.single (.inl i) 1)),
     fun y => ?_⟩
+
   conv_rhs => rw [← Finset.univ_sum_single y, map_sum, Fintype.sum_sum_type,
-    ← Finset.sum_add_distrib]
+  ← Finset.sum_add_distrib]
   refine Finset.sum_congr rfl fun i _ => ?_
   have h : ∀ j, f (Pi.single j (y j)) = y j * f (Pi.single j 1) := fun j => by
     rw [← smul_eq_mul, ← map_smul, ← Pi.single_smul, smul_eq_mul, _root_.mul_one]
@@ -90,6 +136,7 @@ theorem exists_proj_ne_zero {α : τ.X} (hα : ∀ v₀, τ.q α ≤ τ.q (α + 
     simp only [ThetaSys.FF, finsum_eq_sum_of_fintype, AddSubmonoidClass.coe_finsetSum, MulMemClass.coe_mul]
     rfl
   rw [h1] at h
+
   simp only [map_sum, map_mul, h0, zero_mul, Finset.sum_const_zero, mul_zero, norm_zero] at h
   exact (mul_pos τ.δ_pos (Real.exp_pos _)).ne h
 
@@ -97,8 +144,8 @@ end GlobalTheory.ZH.TestBasis
 
 namespace GlobalTheory.ZH
 
-open FreeNear TestBasis in
 
+open FreeNear TestBasis in
 theorem exists_adapted_basis_testLattice : ∀ (o Ω : Type) [CommRing o] [Field Ω] [Algebra o Ω] [ArithBase o Ω] (S : ThetaSys o Ω) (p : ℕ) [Fact p.Prime] (y₀ : S.R →+* PadicAlgCl p) (τ : S.Test p y₀), (∀ a : o, ‖y₀ (algebraMap o S.R a)‖ ≤ 1) → ∃ (B : Matrix S.J S.J (PadicAlgCl p)) (l : S.J → PadicAlgCl p) (α : S.J → τ.X), (∀ i j, ‖B i j‖ ≤ 1) ∧ ‖B.det‖ = 1 ∧ (∀ i v₀, τ.q (α i) ≤ τ.q (α i + S.N • v₀)) ∧ (∀ i, ‖l i‖ = Real.exp (τ.q (α i) / S.N)) ∧ (∀ c, ∃ i, τ.wt (α i) = c) ∧ (∀ i, ((S.proj _ (τ.wt (α i))).map fun a => y₀ (algebraMap o S.R a)).mulVec (B i) = B i) ∧ τ.E = Submodule.span (OO p) (Set.range fun i j => l i * B i j) := by
   intro o Ω _ _ _ hA S p _ y₀ τ hint
   have : IsDomain o := hA.inj.isDomain
@@ -133,6 +180,7 @@ theorem exists_adapted_basis_testLattice : ∀ (o Ω : Type) [CommRing o] [Field
   · rw [hwa]
     funext j
     have h1 := congrArg (fun a => y₀ (algebraMap o S.R a)) (congrFun (congrFun (hmul (κ i) (κ i)) j) (col i))
+
     simp only [if_true, Matrix.mul_apply, map_sum, map_mul] at h1
     exact h1
   · refine le_antisymm (Submodule.span_le.2 ?_) (Submodule.span_mono ?_)

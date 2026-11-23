@@ -1,5 +1,65 @@
-import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.Assembly
-import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.PConeMeetNull
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.ConeBall
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.RingTheory.RegularLocalRing.Defs
+public import Mathlib.RingTheory.SimpleRing.Principal
+public import Mathlib.Topology.Separation.CompletelyRegular
+public import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.Assembly
+import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.LocalMultRadical
+import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.PBaseChangeAvoid
+public import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.PConeLogBound
+public import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.PConeMeetNull
+import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.PRadicalBaseChange
+import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.PZeroLocusDimH
+import GroundTheory.HeightsAndTheta.Heights.ChowForms.Assembly
+import GroundTheory.HeightsAndTheta.Heights.ChowForms.PConeDimOfChowForm
+import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.Assembly
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.KrullDimension.Field
+import Mathlib.RingTheory.KrullDimension.Polynomial
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -116,7 +176,7 @@ theorem cone_side {K : Type} [Field K] [NumberField K] {e : ℕ} {I : Ideal (MvP
   refine ⟨?_, ?_, ?_, fun q hq => ?_⟩
   · have h1 := (hDim K n (e + 1) I f hI hf).ge.trans (ringKrullDim_quotient_le I)
     rw [MvPolynomial.ringKrullDim_of_isNoetherianRing, ringKrullDim_eq_zero_of_field] at h1
-    simp only [Nat.card_eq_fintype_card, Fintype.card_fin, zero_add] at h1
+    simp only [ENat.card_eq_coe_natCard, Nat.card_eq_fintype_card, Fintype.card_fin, zero_add] at h1
     exact_mod_cast h1
   · exact (integrableOn_finset_iUnion.2 hint).congr_set_ae hae
   · unfold cycleIntegral

@@ -1,7 +1,44 @@
-import Formalism.SharpRestriction.LevelLetterCocycles.CrystallineMapLemmas
-import Formalism.SharpRestriction.LevelLetterCocycles.FrobeniusPowUniformizerFactorisation
-import Formalism.SharpRestriction.LevelLetterCocycles.LemmasUnramifiedOfRingCondition
-import Formalism.SharpRestriction.LevelLetterCocycles.ArcLiftingSetup
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.LemmasUnramifiedOfRingCondition
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -25,19 +62,12 @@ variable {V V' : Type} [AddCommGroup V] [Module LL V] [Module Qp V] [IsScalarTow
     [AddCommGroup V'] [Module LL V'] [Module Qp V'] [IsScalarTower Qp LL V']
     {ρ : Representation LL G V} {ρ' : Representation LL G V'} (f : V →ₗ[LL] V')
 
-theorem ιV_crisMap (z : V ⊗[Qp] B) :
-    ιV PD (LL := LL) (V := V') (crisMap B f z) = crisMap BdR f (ιV PD (LL := LL) (V := V) z) := by
-  induction z using TensorProduct.induction_on with
-  | zero => simp
-  | tmul v b => simp [crisMap, ιV]
-  | add x y hx hy => simp only [map_add, hx, hy]
-
 theorem crisMap_mulVB (c : K₀) (z : V ⊗[Qp] B) :
     crisMap B f (mulVB (LL := LL) (V := V) (B := B) c z) = mulVB (LL := LL) (V := V') (B := B) c (crisMap B f z) := by
   induction z using TensorProduct.induction_on with
   | zero => simp
   | tmul v b => simp [crisMap, mulVB]
-  | add x y hx hy => simp only [map_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
 
 theorem mem_DcrisL_iff (τ₀ : K₀ →ₐ[Qp] LL) (z : V ⊗[Qp] B) :
     z ∈ DcrisL PD ρ τ₀ ↔ z ∈ Dcris PD ρ ∧ ∀ c : K₀, mulVB (LL := LL) (V := V) (B := B) c z = τ₀ c • z := by
@@ -48,11 +78,6 @@ end Funct
 section SES
 
 variable {v : AddValuation LL (WithTop ℚ)} {n : ℕ}
-
-def StrictOne (W : LocWach PD LL O v n) : Prop :=
-  ∀ (T₂ Y : LocLat G Qp LL O) (ι : LatHom T₂.L Y.L) (π : LatHom Y.L W.one.L), IsSESLat (Qp := Qp) ι π →
-    IsCrys PD T₂.ρ → IsCrys PD Y.ρ → ∀ u : ℤ,
-      (FilCris PD Y.ρ u).comap (crisMap B ι.f) ⊓ Dcris PD T₂.ρ = FilCris PD T₂.ρ u
 
 end SES
 

@@ -1,6 +1,43 @@
-import Mathlib
-import Development.WeilBound.RepresentationTheoryGL.RegularisedSiegelWeil.SingularNullSets.WeakApproximationFinitePlace
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.SiegelParabolicUnnMatrixBlockUpperTriangular
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.RegularisedSiegelWeil.SingularNullSets.WeakApproximationFinitePlace
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -26,36 +63,6 @@ def InCell (e : AE D) (g : G D p) : Prop := ∃ y : Mx D p p, mm y (lowC g) = e 
 
 def IsB (e : AE D) (g : G D p) (x : hermS D p e) : Prop := InCell e g ∧ mm (lowC g) x.1.1 = e • lowD g
 
-open Classical in
-
-def cellFn (e : AE D) (ξ : hermS D p e → ℝ) (g : G D p) : ℝ :=
-  if h : ∃ x, IsB e g x then ξ h.choose else 0
-
-def secV (D : D7) (p : ℕ) (S : Finset (Pl D)) : Submodule ℝ (G D p → ℝ) where
-  carrier := {f | IsRho (fun g => (f g : ℂ)) ∧ ∀ u ∈ KOff D p S, ∀ g, f (g * u) = f g}
-  add_mem' := by
-    rintro f f' ⟨⟨c, l⟩, k⟩ ⟨⟨c', l'⟩, k'⟩
-    refine ⟨⟨?_, ?_⟩, fun u hu g => by simp [k u hu, k' u hu]⟩
-    · exact (c.add c').congr fun g => by simp
-    · intro q hq a ha g
-      have h1 := l q hq a ha g
-      have h2 := l' q hq a ha g
-      simp only [Pi.add_apply, Complex.ofReal_add] at *
-      rw [h1, h2]; ring
-  zero_mem' := by
-    refine ⟨⟨by simpa using continuous_const, ?_⟩, fun _ _ _ => rfl⟩
-    intro q hq a ha g
-    simp
-  smul_mem' := by
-    rintro t f ⟨⟨c, l⟩, k⟩
-    refine ⟨⟨?_, ?_⟩, fun u hu g => by simp [k u hu]⟩
-    · exact ((continuous_const (y := (t : ℂ))).mul c).congr fun g => by simp
-    · intro q hq a ha g
-      have h1 := l q hq a ha g
-      simp only [Pi.smul_apply, smul_eq_mul, Complex.ofReal_mul] at *
-      rw [h1]; ring
-
-def Lf (mu : (G D p → ℂ) → ℂ) (f : G D p → ℝ) : ℝ := (mu fun g => (f g : ℂ)).re
 
 end GlobalTheory.CompanionTheory.MuC
 

@@ -1,7 +1,48 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.PartFixed
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.UnitaryAdelicInfFinSplitPeriodsUnimodular
-import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.IsVacFOfIsVacVec
+module
+
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.PartFixed
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.UnitaryAdelicInfFinSplitPeriodsUnimodular
+import Development.AbelianVarietyTheory.Proofs.HeightProofs.IsTopologicalRingAE
+import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.IdemElt
+import Formalism.LocalToGlobal.IndefiniteReal.PHeisFC
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicLocalCompactness.T2SpaceTensorProductFiniteExtension
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.L2.Theta Formalism.IndefR Formalism.IndefR.Datum Formalism.IndefR.Links MeasureTheory IsDedekindDomain NumberField Matrix
 open GlobalTheory.MixModel GlobalTheory.MixPer GlobalTheory.Grow GlobalTheory.Unf GlobalTheory.ChiGrid GlobalTheory.FunObj GlobalTheory.SepRows
 open scoped TensorProduct
@@ -48,7 +89,7 @@ theorem eInf_mul (z : AE D) : eInf D * z = ιInf D (infPart D z) := by
     congr 1
     exact Prod.ext (α := Ainf D.host.F) (β := Af D.host.F) (by change (1 : Ainf D.host.F) * a.1 = a.1; exact one_mul _)
       (by change (0 : Af D.host.F) * a.2 = 0; exact zero_mul _)
-  | add z z' hz hz' => rw [mul_add, hz, hz', RingHom.map_add, LinearMap.map_add]
+  | add z z' hz hz' => rw [mul_add, hz, hz', RingHom.map_add (f := _), LinearMap.map_add (f := _)]
 
 theorem eFin_mul (z : AE D) : eFin D * z = ιFin D (finPart D z) := by
   induction z using TensorProduct.induction_on with
@@ -58,7 +99,7 @@ theorem eFin_mul (z : AE D) : eFin D * z = ιFin D (finPart D z) := by
     congr 1
     exact Prod.ext (α := Ainf D.host.F) (β := Af D.host.F) (by change (0 : Ainf D.host.F) * a.1 = 0; exact zero_mul _)
       (by change (1 : Af D.host.F) * a.2 = a.2; exact one_mul _)
-  | add z z' hz hz' => rw [mul_add, hz, hz', RingHom.map_add, LinearMap.map_add]
+  | add z z' hz hz' => rw [mul_add, hz, hz', RingHom.map_add (f := _), LinearMap.map_add (f := _)]
 
 theorem eInf_add_eFin : eInf D + eFin D = 1 := by
   rw [eInf, eFin, ← TensorProduct.add_tmul, Algebra.TensorProduct.one_def]
@@ -192,7 +233,7 @@ theorem unit_mix {ρ : ℕ} (m' : Matrix (Fin ρ) (Fin ρ) (AE D)) (hlo : ∀ i 
   refine ⟨((Matrix.isUnit_iff_isUnit_det v).2 hvdet).unit, ?_, hv⟩
   exact (GlobalTheory.UniIndexPrime.mem_uniSub _).2 ⟨hvlo, hvd⟩
 
-set_option maxHeartbeats 1000000 in
+
 theorem mem_Rgrp_of (W : HSp D) {ρ : ℕ} {X : Mx D W.rank ρ} {Y : Mx D ρ W.rank} {q : GA D W} (hq : q ∈ GinfC W)
     (u : GL (Fin ρ) (AE D)) (hu : u ∈ UX D ρ) (hQ : eInf D • (mt W q ⬝ X ⬝ u.1) ∈ Qset X Y) : q ∈ Rgrp W X := by
   obtain ⟨w, hw⟩ : ∃ w, w = eInf D • (mt W q ⬝ X ⬝ u.1) := ⟨_, rfl⟩

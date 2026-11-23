@@ -1,8 +1,59 @@
-import Formalism.PieriBlockIdeals.ExponentBoundCounterexample
-import Formalism.PieriBlockIdeals.PieriColumnMinors.ProdInitialMinorsMemDetSpan
-import Formalism.PieriBlockIdeals.PieriColumnMinors.CountLeftInvSeqAlternatingWordEven
-import Formalism.PieriBlockIdeals.PieriColumnMinors.MaxValEqZeroOfLt
-import Formalism.RankGapBounds.RankGapProofs.FormsTensorLocalization
+module
+
+public import Formalism.PieriBlockIdeals.ExponentBoundCounterexample
+public import Formalism.PieriBlockIdeals.PieriColumnMinors.MaxValEqZeroOfLt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Formalism.GradedWeylDivisibility.FockSpaceTableaux.LCassemLemmas
+import Formalism.PieriBlockIdeals.StatementLA
+public import Mathlib.Data.Nat.Choose.Cast
+public import Mathlib.Data.Nat.Choose.Factorization
+
+@[expose] public section
 
 open MvPolynomial CategoryTheory TensorProduct
 
@@ -16,11 +67,6 @@ universe u v u' v'
 
 theorem maxVal_le_log_alt (l n : ℕ) : Formalism.RankGapBounds.JumpSetsAlt.maxVal l n ≤ Nat.log l n :=
   Finset.sup_le fun _ _ => Nat.factorization_choose_le_log
-
-theorem flat_baseChange_injective : FlatBaseChangeInj := by
-  intro R O _ _ _ _ M _ _ N
-  rw [LinearMap.baseChange_eq_ltensor]
-  exact Module.Flat.lTensor_preserves_injective_linearMap N.subtype N.injective_subtype
 
 theorem log_le_log_bound : LgLog := by
   intro l y
@@ -68,16 +114,6 @@ theorem card_posPairs (N : ℕ) : (posPairs N).card = N.choose 2 := by
   rw [h1]
   simp only [Fin.card_Iio]
   rw [Fin.sum_univ_eq_sum_range (fun i => i) N, Finset.sum_range_id, Nat.choose_two_right]
-
-theorem raising_exponent_interval : EExpInterval := by
-  intro l N h U lo hl hU hr
-  have h1 := sum_maxVal_le_card_mul_log U l h hl.pos (posPairs N) (by
-    intro p _
-    have h2 := hr p.1
-    have h3 := hr p.2
-    omega)
-  rw [card_posPairs] at h1
-  exact h1
 
 theorem nat_le_mul_log_real (ex c l y : ℕ) (h : ex ≤ c * Nat.log l y) :
     (ex : ℝ) * Real.log l ≤ (c : ℝ) * Real.log y := by
@@ -269,138 +305,5 @@ theorem size_large : SizeLarge := by
     have a5 := mul_le_mul a4 a1 (Real.log_natCast_nonneg h) (by positivity)
     have a6 := mul_le_mul (choose_two_le_sq k) a2 (Real.log_natCast_nonneg S) (by positivity)
     linarith
-
-theorem maxVal_thirteen_eq_sup (n : ℕ) (hn : n < 169) :
-    Formalism.RankGapBounds.JumpSetsAlt.maxVal 13 n =
-      (Finset.range (n + 1)).sup fun i => if 13 ≤ i % 13 + (n - i) % 13 then 1 else 0 := by
-  unfold Formalism.RankGapBounds.JumpSetsAlt.maxVal
-  apply Finset.sup_congr rfl
-  intro i hi
-  have hi' : i ≤ n := Nat.lt_succ_iff.1 (Finset.mem_range.1 hi)
-  have hlog : Nat.log 13 n < 2 := by
-    rcases Nat.eq_zero_or_pos n with rfl | hpos
-    · simp
-    · exact Nat.log_lt_of_lt_pow hpos.ne' (by norm_num; exact hn)
-  rw [Nat.factorization_choose (by norm_num : Nat.Prime 13) hi' hlog]
-  have h12 : Finset.Ico 1 2 = {1} := by decide
-  rw [h12, Finset.filter_singleton]
-  split_ifs with h1 h2 h2
-  · rfl
-  · exact absurd (by simpa using h1) h2
-  · exact absurd (by simpa using h2) h1
-  · rfl
-
-theorem witness_thirteen : ExponentBoundCounterexample := by
-  constructor
-  · unfold eExp
-    have h : ∀ p ∈ posPairs 24, Formalism.RankGapBounds.JumpSetsAlt.maxVal 13
-        (((46 : ℤ) - 2 * (p.1.val : ℤ)) - ((46 : ℤ) - 2 * (p.2.val : ℤ)) - 1).toNat = _ :=
-      fun p _ => maxVal_thirteen_eq_sup _ (by
-        have h1 := p.1.isLt
-        have h2 := p.2.isLt
-        omega)
-    rw [Finset.sum_congr rfl h]
-    decide +kernel
-  · norm_num
-
-theorem polyBC_tmul (R O : Type) [CommRing R] [CommRing O] [Algebra R O] (r n : ℕ) (a : O)
-    (f : MvPolynomial (Fin r × Fin n) R) :
-    polyBC R O r n (a ⊗ₜ[R] f) = a • map (algebraMap R O) f :=
-  MvPolynomial.algebraTensorAlgEquiv_tmul R O a f
-
-theorem map_baseChange_polyBC_eq_span (R O : Type) [CommRing R] [CommRing O] [Algebra R O] (r n : ℕ)
-    (q : Submodule R (MvPolynomial (Fin r × Fin n) R)) :
-    (q.baseChange O).map (polyBC R O r n).toLinearMap =
-      Submodule.span O (map (algebraMap R O) '' (q : Set (MvPolynomial (Fin r × Fin n) R))) := by
-  rw [Submodule.baseChange_eq_span, Submodule.map_span]
-  congr 1
-  ext g
-  constructor
-  · rintro ⟨_, ⟨f, hf, rfl⟩, rfl⟩
-    refine ⟨f, hf, ?_⟩
-    have h := polyBC_tmul R O r n 1 f
-    rw [one_smul] at h
-    exact h.symm
-  · rintro ⟨f, hf, rfl⟩
-    refine ⟨_, ⟨f, hf, rfl⟩, ?_⟩
-    have h := polyBC_tmul R O r n 1 f
-    rw [one_smul] at h
-    exact h
-
-theorem map_algebraMap_smul_alt (R O : Type) [CommRing R] [CommRing O] [Algebra R O] {σ : Type} (a : R)
-    (f : MvPolynomial σ R) :
-    map (algebraMap R O) (a • f) = algebraMap R O a • map (algebraMap R O) f := by
-  rw [MvPolynomial.smul_eq_C_mul, map_mul, map_C, ← MvPolynomial.smul_eq_C_mul]
-
-theorem map_mem_weyl_alt (R O : Type) [CommRing R] [CommRing O] [Algebra R O] {r n : ℕ} (hn : n ≤ r)
-    (ν : Fin n → ℕ) (f : MvPolynomial (Fin r × Fin n) R) (hf : f ∈ weyl R r n hn ν) :
-    map (algebraMap R O) f ∈ weyl O r n hn ν := by
-  induction hf using Submodule.span_induction with
-  | mem g hg =>
-    obtain ⟨w, rfl⟩ := hg
-    simp only
-    rw [← lclosedeq_applyWord_map, lclosedeq_hw_map]
-    exact la_word_mem O hn ν w
-  | zero => simp
-  | add x y _ _ hx hy => rw [map_add]; exact Submodule.add_mem _ hx hy
-  | smul a x _ hx =>
-    rw [map_algebraMap_smul_alt]
-    exact Submodule.smul_mem _ _ hx
-
-theorem lattice_tensor : LatticeTensor := by
-  intro R O _ _ _ r n hn ν
-  constructor
-  · rw [map_baseChange_polyBC_eq_span]
-    apply le_antisymm
-    · apply Submodule.span_le.2
-      rintro _ ⟨f, hf, rfl⟩
-      exact map_mem_weyl_alt R O hn ν f hf
-    · apply Submodule.span_le.2
-      rintro _ ⟨w, rfl⟩
-      apply Submodule.subset_span
-      refine ⟨applyWord R w (hw R hn ν), la_word_mem R hn ν w, ?_⟩
-      rw [← lclosedeq_applyWord_map, lclosedeq_hw_map]
-  · intro _
-    rw [map_baseChange_polyBC_eq_span]
-    apply le_antisymm
-    · apply Submodule.span_le.2
-      rintro _ ⟨f, hf, rfl⟩
-      exact dualWeylMap R O (algebraMap R O) r n ν f hf
-    · rw [standardMonomialSpanDomain O r n ν]
-      apply Submodule.span_le.2
-      rintro _ ⟨K, sz, hsz, I, hshape, rfl⟩
-      apply Submodule.subset_span
-      exact ⟨bideterminant R sz hsz I, hshape ▸ bidetMem R r n K sz hsz I, ldlat_map_bidet _ sz hsz I⟩
-
-theorem lattice_baseChange_alt : LatticeBaseChange := by
-  intro R O _ _ _ _ _ r n hn ν t e
-  obtain ⟨hW, hD⟩ := lattice_tensor R O r n hn ν
-  have hD := hD inferInstance
-  rw [map_baseChange_polyBC_eq_span] at hD
-  constructor
-  · intro h x hx
-    rw [← hD] at hx
-    induction hx using Submodule.span_induction with
-    | mem g hg =>
-      obtain ⟨f, hf, rfl⟩ := hg
-      rw [← map_pow, ← map_algebraMap_smul_alt]
-      exact map_mem_weyl_alt R O hn ν _ (h f hf)
-    | zero => simp
-    | add x y _ _ hx hy => rw [smul_add]; exact Submodule.add_mem _ hx hy
-    | smul a x _ hx => rw [smul_comm]; exact Submodule.smul_mem _ _ hx
-  · intro h
-    set p : Submodule R (MvPolynomial (Fin r × Fin n) R) :=
-      (dualWeyl R r n ν).map (LinearMap.lsmul R _ (t ^ e)) with hp
-    have h1 : p.baseChange O ≤ (weyl R r n hn ν).baseChange O := by
-      rw [← Submodule.map_le_map_iff_of_injective (polyBC R O r n).injective, hW,
-        map_baseChange_polyBC_eq_span]
-      apply Submodule.span_le.2
-      rintro _ ⟨_, ⟨f, hf, rfl⟩, rfl⟩
-      have h2 := h _ (dualWeylMap R O (algebraMap R O) r n ν f hf)
-      rw [← map_pow, ← map_algebraMap_smul_alt] at h2
-      exact h2
-    have h3 : p ≤ weyl R r n hn ν := Submodule.baseChange_le_iff.1 h1
-    intro x hx
-    exact h3 ⟨x, hx, rfl⟩
 
 end Formalism.CohomologicalDescent.SL2BinomialLattices

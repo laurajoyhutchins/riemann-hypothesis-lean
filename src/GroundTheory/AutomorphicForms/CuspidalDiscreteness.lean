@@ -1,7 +1,47 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.CuspidalDiscreteness.CuspCompact
-import GroundTheory.AutomorphicForms.CuspidalDiscreteness.DecayUniform
-import GroundTheory.AutomorphicForms.DiscreteSpectrumAbstract
+module
+
+public import GroundTheory.AutomorphicForms.CuspidalDiscreteness.CuspCompact
+public import GroundTheory.AutomorphicForms.CuspidalDiscreteness.DecayUniform
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MeasureTheory Set Filter Topology Function
 open NumberField IsDedekindDomain
@@ -60,26 +100,24 @@ open Reduction AutomorphicForm RightCosetSpace
 
 variable {K : Type*} [Field K] [NumberField K] {n : ℕ}
 
-variable (μ : Measure (normOneGL K n)) [μ.IsHaarMeasure]
+variable (μ : Measure (normOneGL (K := K) (n := n))) [μ.IsHaarMeasure]
 
 include μ in
-
 theorem exists_approx_bound (ν : Measure (ArchUnits K n)) [ν.IsHaarMeasure]
-    (g : CompactlySupportedContinuousMap (normOneGL K n) ℂ) {ε : ℝ} (hε : 0 < ε) :
-    ∃ f' : CompactlySupportedContinuousMap (normOneGL K n) ℂ,
-      (∃ B : ℝ, ∀ φ ∈ cuspidalL2 μ, ∀ x, ‖rconv (rationalGLOne K n) μ f' φ x‖ ≤ B * ‖φ‖) ∧
+    (g : CompactlySupportedContinuousMap (normOneGL (K := K) (n := n)) ℂ) {ε : ℝ} (hε : 0 < ε) :
+    ∃ f' : CompactlySupportedContinuousMap (normOneGL (K := K) (n := n)) ℂ,
+      (∃ B : ℝ, ∀ φ ∈ cuspidalL2 μ, ∀ x, ‖rconv (rationalGLOne (K := K) (n := n)) μ f' φ x‖ ≤ B * ‖φ‖) ∧
         ∫ x, ‖g x - f' x‖ ∂μ ≤ ε := by
   obtain ⟨U, hU, β, hβ, hβc, hβu, -, hclose⟩ := exists_smooth_approx μ ν g hε
   obtain ⟨B, hB⟩ := exists_norm_rconv_le_uniform μ ν hβ hβc hβu U hU g
-  exact ⟨_, ⟨B, hB⟩,
-    le_of_eq_of_le (integral_congr_ae (Eventually.of_forall fun x => norm_sub_rev _ _)) hclose⟩
+  refine ⟨archConv ν hβ.continuous hβc hβu (finAvg U hU g), ⟨B, hB⟩, ?_⟩
+  exact le_of_eq_of_le (integral_congr_ae (Eventually.of_forall fun x => norm_sub_rev _ _)) hclose
 
-theorem isCompactOperator_cuspRep (f : CompactlySupportedContinuousMap (normOneGL K n) ℂ) :
-    IsCompactOperator ((cuspRep μ).integrated μ (UnitaryRep.ccToL1 μ f)) :=
-  Exists.elim (⟨Measure.haar, inferInstance⟩ : ∃ ν : Measure (ArchUnits K n), ν.IsHaarMeasure)
-    fun ν hν => (cuspRep μ).isCompactOperator_integrated_of_approx μ (fun g _ hε =>
-      (@exists_approx_bound K _ _ n μ _ ν hν g _ hε).imp fun f' hf' =>
-        ⟨isCompactOperator_of_forall_norm_rconv_le μ f' hf'.1.choose hf'.1.choose_spec, hf'.2⟩) f
+theorem isCompactOperator_cuspRep (f : CompactlySupportedContinuousMap (normOneGL (K := K) (n := n)) ℂ) :
+    IsCompactOperator ((cuspRep μ).integrated μ (UnitaryRep.ccToL1 μ f)) := by
+  refine (cuspRep μ).isCompactOperator_integrated_of_approx μ (fun g _ hε => ?_) f
+  obtain ⟨f', ⟨B, hB⟩, hclose⟩ := exists_approx_bound μ (Measure.haar : Measure (ArchUnits K n)) g hε
+  exact ⟨f', isCompactOperator_of_forall_norm_rconv_le μ f' B hB, hclose⟩
 
 theorem exists_isHilbertSum_isIrreducible_cuspidal :
     ∃ s : Set (Submodule ℂ (cuspidalL2 μ)),

@@ -1,7 +1,62 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsEmbeddingWeight
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PCoordConeArithVar
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterBridgeB
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsEmbeddingWeight
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PCoordConeArithVar
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.Geometry.Manifold.PartitionOfUnity
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import Mathlib.Topology.Algebra.MvPolynomial
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterBridgeB
+public import Mathlib.Analysis.InnerProductSpace.Calculus
+public import Mathlib.Geometry.Manifold.ContMDiff.NormedSpace
+public import Mathlib.Geometry.Manifold.ContMDiffMap
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.HilbertSamuel
@@ -60,18 +115,18 @@ theorem conjVec_mem_blockNonzero {z : (Σ k, ι k) → ℂ} (hz : ∀ k, ∃ i, 
   ⟨i, (map_ne_zero _).2 hi⟩
 
 theorem contDiff_conjVec : ContDiff ℝ ((⊤ : ℕ∞) : WithTop ℕ∞) (conjVec (ι := ι)) :=
-  contDiff_pi.2 fun p => Complex.conjCLE.contDiff.comp (contDiff_apply ℝ ℂ p)
+  contDiff_pi.2 fun p => Complex.conjCLE.contDiff.comp (contDiff_apply ℝ (fun _ => ℂ) p)
 
 theorem contDiffOn_projPt :
     ContDiffOn ℝ ((⊤ : ℕ∞) : WithTop ℕ∞) (projPt (ι := ι)) {z | ∀ k, ∃ i, z ⟨k, i⟩ ≠ 0} := by
   refine contDiffOn_pi.2 fun q => ?_
   have hN : ContDiff ℝ ((⊤ : ℕ∞) : WithTop ℕ∞) fun z : (Σ k, ι k) → ℂ => blockNormSq z q.1 :=
-    ContDiff.sum fun i _ => (contDiff_norm_sq ℝ).comp (contDiff_apply ℝ ℂ _)
+    ContDiff.sum fun i _ => (contDiff_norm_sq ℝ).comp (contDiff_apply ℝ (fun _ => ℂ) _)
   have hinv := hN.contDiffOn.inv (s := {z : (Σ k, ι k) → ℂ | ∀ k, ∃ i, z ⟨k, i⟩ ≠ 0})
     fun z hz => (blockNormSq_pos hz q.1).ne'
   have hconj : ContDiff ℝ ((⊤ : ℕ∞) : WithTop ℕ∞) fun z : (Σ k, ι k) → ℂ => conj (z ⟨q.1, q.2.2⟩) :=
-    Complex.conjCLE.contDiff.comp (contDiff_apply ℝ ℂ _)
-  have := (((contDiff_apply ℝ ℂ ⟨q.1, q.2.1⟩).mul hconj).contDiffOn).mul
+    Complex.conjCLE.contDiff.comp (contDiff_apply ℝ (fun _ => ℂ) _)
+  have := (((contDiff_apply ℝ (fun _ => ℂ) ⟨q.1, q.2.1⟩).mul hconj).contDiffOn).mul
     (Complex.ofRealCLM.contDiff.comp_contDiffOn hinv)
   refine this.congr fun z _ => ?_
   simp [projPt, div_eq_mul_inv]
@@ -145,7 +200,7 @@ theorem isClosed_zeros (P : Ideal (MRing ι)) :
 
 theorem isCompact_sphere : IsCompact {z : (Σ k, ι k) → ℂ | ∀ k, blockNormSq z k = 1} := by
   have hN : ∀ k, Continuous fun z : (Σ k, ι k) → ℂ => blockNormSq z k := fun k =>
-    continuous_finset_sum _ fun i _ => ((continuous_apply _).norm).pow 2
+    continuous_finsetSum _ fun i _ => ((continuous_apply _).norm).pow 2
   refine Metric.isCompact_of_isClosed_isBounded ?_ ?_
   · simp only [Set.setOf_forall]
     exact isClosed_iInter fun k => isClosed_eq (hN k) continuous_const
@@ -172,8 +227,8 @@ theorem exists_smul_sphere {z : (Σ k, ι k) → ℂ} (hz : ∀ k, ∃ i, z ⟨k
 
 end EmbeddingWeight
 
-open EmbeddingWeight in
 
+open EmbeddingWeight in
 theorem EmbeddingWeight.proof : EmbeddingWeight.Statement := by
   intro K _ ι _ Ω _ F _ _ _ y Λ hpos hconjΛ huniq
   classical
@@ -253,7 +308,8 @@ theorem EmbeddingWeight.proof : EmbeddingWeight.Statement := by
     simp only [u, projPt_smul c hc, h2]
   refine ⟨HermLine.ofWeight (fun z => -u z) hu_smul, rfl, ?_, ?_, ?_⟩
   · have h1 := hg.comp_contDiffOn (contDiffOn_projPt (ι := ι))
-    have h2 := hg.comp_contDiffOn ((contDiffOn_projPt (ι := ι)).comp contDiff_conjVec.contDiffOn
+    have h2 := hg.comp_contDiffOn ((contDiffOn_projPt (ι := ι)).comp
+      (contDiff_conjVec.contDiffOn (s := {z | ∀ k, ∃ i, z ⟨k, i⟩ ≠ 0}))
       fun z hz => conjVec_mem_blockNonzero hz)
     have hu := ((h1.add h2).div_const (2 : ℝ)).neg.neg
     exact Real.contDiff_exp.comp_contDiffOn hu

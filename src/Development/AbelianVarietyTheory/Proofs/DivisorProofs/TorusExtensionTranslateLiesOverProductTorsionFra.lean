@@ -1,10 +1,63 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsStalkZeta
-import ReciprocityTheory.AnalyticForms.RegularLocalRings.FinalTheorems
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.TxFrameTranslate
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IsActIffIsDiagEnd
+public import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.SpanEqTopOfFunctionals
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CoefTwistPull
+import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ThetaTableAlgClosedCompleteSingleValued
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExhaustOfLabels
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.QkToAkULevelField
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SectionValueEqAdicSumAtImageOfZeroPair
+import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.ExistsGenOfSection
+import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.AllUniformizationLawsHold
+import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExistsActValue
+import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExistsAutomorphismInducingFrobeniusAllDegrees
+import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExistsGenMulPullPowUnif
+import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExistsNsmulAndNeg
+import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExistsSecNeZero
+import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.PullMulValue
+import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.SectionValueAtTorsionPointEqSumTerms
 import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.SumFCalculus
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.AdmissibleBaseOfCompleteNormalLocalCharZero
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.QkToAkULevelField
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.TxFrameTranslate
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.LBPull
+import Development.AbelianVarietyTheory.Definitions.Divisors.FromBase
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EqOneOfFiniteOrderAny
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj IsLocalRing
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Out ReciprocityTheory.ChartRestriction.G.Geo.Tor
@@ -231,8 +284,8 @@ theorem isTorsFrame_of_liesOver [CharZero R] (hB : AdmBase R I) (hG : IsSemiAbel
 
 end Field
 
-attribute [local instance] TorusExt.gtGroup in
 
+attribute [local instance] TorusExt.gtGroup in
 theorem exists_liesOver (hB : AdmBase R I) (hG : IsSemiAbelian G) (U : Unif I D A G)
     {w₀ : W0 U.toUnifPre} (hw₀ : w₀.IsGen) {n : ℕ} (hn : 1 ≤ n)
     {g₁ g₂ : GtPtF D.toPre (FractionRing R)} {w₁ : Frm D.toPre (FractionRing R) 1 g₁.b} (hw₁ : w₁.IsGen)
@@ -280,8 +333,8 @@ theorem exists_liesOver (hB : AdmBase R I) (hG : IsSemiAbelian G) (U : Unif I D 
       obtain ⟨s, hs, -⟩ := (hbij k (by omega) w₀ hw₀).1 t
       exact ⟨_, c, ⟨t, s, hs, ht, rfl⟩, hc⟩)
     (fun m hm => by
-      let q : QkPt D.toPre (FractionRing R) (n * m) := TorusExt.qkMk D.tau_bimult (m • p.y) p.g (by
-        rw [mul_nsmul, TorusExt.qk_nsmul D.tau_bimult p, map_nsmul])
+      let q : QkPt D.toPre (FractionRing R) (n * m) :=
+        ⟨m • p.y, p.g, GlobalTheory.InducingAut.exists_qk_mul D.tau_bimult p m⟩
       have hq := qkToAkU_level_field hL R _ hB D A G hG U _ n m _ hn hm rfl p q x rfl rfl hx
       obtain ⟨κ, hκ, Hκ⟩ := value_at_level hB hG U hw₀ hw₁ he₁ H₁ (Nat.mul_pos hn hm) q x hq hadd hx₂ e he (Ω _) (hΩ _)
       refine ⟨κ, hκ, ?_⟩

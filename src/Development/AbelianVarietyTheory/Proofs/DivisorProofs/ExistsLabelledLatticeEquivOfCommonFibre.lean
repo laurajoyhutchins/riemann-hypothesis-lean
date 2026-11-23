@@ -1,29 +1,74 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LatAtIffOfSpecializes
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsTorusTorsionPointStandardAlternatingForm
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsLabelMapTorsionCharacters
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.LineBundleSymmetryHypothesisBaseChange
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.LabRange
+public import Development.AbelianVarietyTheory.Definitions.Divisors.SharpOverIff
+public import Development.AbelianVarietyTheory.Definitions.Divisors.TorMatch
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsTorPartTorusExtension
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IsActIffIsDiagEnd
+import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.IsAbelianSchemeAndExtendOfGenericHoms
 import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsAdaptedBasisTestLattice
+import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsLabelMapTorsionCharacters
 import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsMulPowMemOOfIsAffineOpen
+import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsTorusPoint
+import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsTorusTorsionPointStandardAlternatingForm
+import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.LineBundleSymmetryHypothesisBaseChange
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BetaPos
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EndCharExistsOfIsMonHom
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EndomorphismMatrixTorsionAdjointOnCharactersStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsCommonPullbackSemiAbelianDvrStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsDvrFactorPointPadicAlgClosureStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FibreConstOfSpecialisationInvariantStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GenericFibreIsoSpecialisesToFieldPointsStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GenericFibreSemiAbelianEndoTorsionExtendStatement
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsGrpPullbackGenMap
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsLabOntoAndKer
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsMonHomRescaledRealisationSameGenericFibreStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LatAtIffOfSpecializes
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LatticeOfUniformisationEqModelLatticeStatement
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SemiAbelianHomExtensionHolds
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ThetaGroupOfPointEqAlongModelHomStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TorusRankEqRankThetaGroupOfPointPerpStatement
+import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.GenericExistsUniqueOActOfIsGrpPullback
 import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.AllSixAbelianSchemeLawsHold
 import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.UTorsClosed
-import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.GenericExistsUniqueOActOfIsGrpPullback
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SemiAbelianHomExtensionHolds
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsGrpPullbackGenMap
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EndCharExistsOfIsMonHom
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsLabOntoAndKer
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BetaPos
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsActIffIsDiagEnd
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsMonHomRescaledRealisationSameGenericFibreStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FibreConstOfSpecialisationInvariantStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TorusRankEqRankThetaGroupOfPointPerpStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GenericFibreSemiAbelianEndoTorsionExtendStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GenericFibreIsoSpecialisesToFieldPointsStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsDvrFactorPointPadicAlgClosureStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EndomorphismMatrixTorsionAdjointOnCharactersStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LatticeOfUniformisationEqModelLatticeStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsCommonPullbackSemiAbelianDvrStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ThetaGroupOfPointEqAlongModelHomStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsToricRankOne
+
+@[expose] public section
 
 noncomputable section
 
@@ -181,7 +226,7 @@ theorem latAt_of_isLab (X₁ : Setup F W i) (ε₁ : Matrix (Fin 8) (Fin 8) ℤ 
     rw [← hχ]
     refine QuotientAddGroup.eq.2 ⟨j.symm v, j.injective ?_⟩
     simp only [nsmulAddMonoidHom_apply] at hv ⊢
-    rw [map_nsmul, j.apply_symm_apply, hv, map_add, map_neg, j.apply_symm_apply]
+    rw [map_nsmul, j.apply_symm_apply, hv, map_add (f := _), map_neg, j.apply_symm_apply]
   have hker : l.yy.ker = H := by
     rw [← hH]
     ext b
@@ -250,7 +295,7 @@ theorem exists_equiv_of_fibre : ∀ (g n : ℕ) (F : SFam g n (zetaAway n)) (W :
   have hζκ : ∀ (κ : Type) [Field κ] (a : X₁.o₁ →+* κ), IsPrimitiveRoot (a ζ) (X₁.S.r * X₁.S.N) := fun κ _ a => by
     have : NeZero ((X₁.S.r * X₁.S.N : ℕ) : κ) := ⟨by simpa using (X₁.S.unit.map a).ne_zero⟩
     rw [← Polynomial.isRoot_cyclotomic_iff, ← Polynomial.map_cyclotomic _ a]
-    exact (hζp.isRoot_cyclotomic hL).map
+    exact (hζp.isRoot_cyclotomic hL).map a
   obtain ⟨A₀, _, a₀, ψ, ha₀, hψ, hend, hpts⟩ := GlobalTheory.T.genericFibre_semiAbelian_endo_torsion_extend _ _ X₁.S X₁.ρ Y U₀ EE FinalForm hO.ne
   choose adj hadj using exists_adj hW
   choose f hf hf' using fun E => hend (ε₁ (adj E)) (Sep.IsAct.isMonHom hε _)

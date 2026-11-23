@@ -1,4 +1,60 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.PBCChain
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.PBBStmt
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.PBCGlob
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.PBCStmt
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.AdmissibleWordMemBoundedLetterLists
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.PBBLiftV
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.PBCChain
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.PBCLat
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.PBCLoc
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.PBCStep
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.TheoremPIntegralOfPlaces
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.PBCHerg
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.PBCLim
+
+@[expose] public section
 
 namespace Formalism.FourierDecayAlt.P.PBC
 
@@ -69,7 +125,7 @@ theorem size_step (f : ℕ) (Cs : ℝ) (hCs1 : 1 ≤ Cs) (dl R g : ℝ) (hdl : 0
   refine le_trans ?_ hV
   refine div_le_div_of_nonneg_right ?_ (by positivity)
   refine mul_le_mul_of_nonneg_left (hM.trans ?_) hdl
-  refine Finset.prod_le_prod (fun v _ => by positivity) fun v _ => ?_
+  refine Finset.prod_le_prod₀ (fun v _ => by positivity) fun v _ => ?_
   refine mul_le_mul_of_nonneg_left ?_ (by linarith)
   have h1 : R * L v / g ≤ R * thr v / g := div_le_div_of_nonneg_right (mul_le_mul_of_nonneg_left (hL v).2 hR.le) hg.le
   have h0 : 0 ≤ R * L v / g := div_nonneg (mul_nonneg hR.le (hL v).1) hg.le

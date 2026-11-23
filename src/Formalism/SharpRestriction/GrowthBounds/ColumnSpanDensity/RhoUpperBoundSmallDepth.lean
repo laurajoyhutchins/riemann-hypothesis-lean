@@ -1,4 +1,56 @@
-import Formalism.SharpRestriction.GrowthBounds.ColumnSpanDensity.MapMDetUnit
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.ColumnSpanDensity.MemColSpanIff
+public import Formalism.SharpRestriction.GrowthBounds.ColumnSpanDensity.RhoLowerBoundOfEdgeCount
+public import Formalism.SharpRestriction.GrowthBounds.ColumnSpanDensity.RhoUpperBoundOfEdgeCount
+public import Formalism.SharpRestriction.GrowthBounds.ColumnSpanDensity.MapMDetUnit
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.Projectivization.Cardinality
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.LinearAlgebra.Projectivization.Basic
+
+@[expose] public section
 
 noncomputable section
 
@@ -89,7 +141,7 @@ theorem famS (v : Fin k → R.W ⧸ Ideal.span {(p : R.W)}) (hv : v ≠ 0) :
     | add x y _ _ hx hy =>
       obtain ⟨y1, s1, rfl⟩ := hx
       obtain ⟨y2, s2, rfl⟩ := hy
-      exact ⟨y1 + y2, s1 + s2, by funext i; simp only [Pi.add_apply, map_add]; ring⟩
+      exact ⟨y1 + y2, s1 + s2, by funext i; simp only [Pi.add_apply, map_add (f := _)]; ring⟩
     | smul r x _ hx =>
       obtain ⟨y1, s1, rfl⟩ := hx
       exact ⟨r * y1, r • s1, by
@@ -152,7 +204,7 @@ theorem famT (c : Fin k → R.W ⧸ Ideal.span {(p : R.W)}) (j : Fin k) (a : Fin
       · funext i
         simp [emb]
       · unfold phi at h1 h2 ⊢
-        simp only [Pi.add_apply, map_add, mul_add, Finset.sum_add_distrib, h1, h2, add_zero]
+        simp only [Pi.add_apply, map_add (f := _), mul_add, Finset.sum_add_distrib, h1, h2, add_zero]
     | smul r x _ hx =>
       obtain ⟨w, rfl, hw⟩ := hx
       refine ⟨r • w, ?_, ?_⟩
@@ -209,7 +261,7 @@ theorem restEdgeCountSrc : RestEdgeCountSrc := by
       intro l
       have e1 := congrFun hys l
       apply IsFractionRing.injective R.W R.Qq
-      rw [map_add, map_mul, map_mul, map_natCast]
+      rw [map_add (f := _), map_mul, map_mul, map_natCast]
       linear_combination (p : R.Qq) * e1 -
         (algebraMap R.W R.Qq (vt l) - algebraMap R.W R.Qq (vt0 l) * algebraMap R.W R.Qq y) * hpp
     have hv : (R.res y) • v i = v i' := by

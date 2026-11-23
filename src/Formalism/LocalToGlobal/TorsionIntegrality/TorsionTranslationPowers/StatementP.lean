@@ -1,6 +1,48 @@
-import Formalism.LocalToGlobal.TorsionIntegrality.TorsionTranslationPowers.StatementT
-import Formalism.LocalToGlobal.TorsionIntegrality.SecondCoefficientNorms.IsotropicVanish
-import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.StatementB
+module
+
+public import Formalism.LocalToGlobal.TorsionIntegrality.SecondCoefficientNorms.IsotropicVanish
+public import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.StatementB
+public import Formalism.LocalToGlobal.TorsionIntegrality.TorsionTranslationPowers.IsTransSys
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open PowerSeries
 
@@ -53,25 +95,6 @@ def CongIffSimeq : Prop :=
     (∀ a, a ∈ R ↔ ‖a‖ ≤ 1) → ∀ (σ : Type) (f g : MvPowerSeries σ K),
       Formalism.L2.Th1.C.Cong R f g ↔ Simeq f g
 
-def IntHyp : Prop :=
-  ∀ (K : Type) [NormedField K] [IsUltrametricDist K] [CharZero K] (R : Subring K),
-    (∀ a, a ∈ R ↔ ‖a‖ ≤ 1) → ∀ (l linv ph : PowerSeries K), Formalism.L2.Th1.C.Frame R l linv ph →
-    ∀ (O : Type) [CommRing O] [StarRing O] (τ : O →+* K),
-    (∀ α, Formalism.L2.Th1.C.EndInt R l linv (τ α)) →
-    (∀ z : O, star z = z → Formalism.L2.Th1.C.IsBinomScalar R (τ z)) →
-    Formalism.L2.Th1.C.F1 R l linv ph →
-    (∀ α : O, Formalism.L2.Th1.C.PhNormAt R l linv ph (τ α) (τ (star α))) →
-    (∀ α : O, Formalism.L2.Th1.C.AdjAt R l linv ph (τ α) (τ (star α))) →
-    ∀ (n ι : Type) [Fintype n] [Fintype ι] [DecidableEq ι] (f f' : ι → n → O),
-    (∀ e e', ∑ i, star (f e i) * f e' i = 0) → (∀ e e', ∑ i, star (f' e i) * f' e' i = 0) →
-    (∀ e e', ∑ i, star (f e i) * f' e' i = if e = e' then 1 else 0) →
-    ∀ (κ : Type) [Fintype κ] (r : κ → K) (V : κ → n → PowerSeries K),
-      (∀ k, ‖r k‖ ≤ 1) → (∀ k i, IntS (V k i)) →
-      ∃ U0 Φ : MvPowerSeries (Bool × ι) K, Integral U0 ∧ MvPowerSeries.constantCoeff Φ = 0 ∧
-        Simeq Φ (beSum l linv ph) ∧
-        MvPowerSeries.subst (hypCoord l linv τ f f')
-            (thetaProd r (fun k i => (mvExp (-ph) : PowerSeries K) * V k i)) = mvExp (-Φ) * U0
-
 def SumEBridge : Prop :=
   ∀ (K : Type) [Field K] [CharZero K] (l linv : PowerSeries K), Formalism.L2.Th1.C.IsLogPair l linv →
     ∀ F : MvPowerSeries (Fin 2) K, MvPowerSeries.constantCoeff F = 0 → cob F l = 0 →
@@ -83,37 +106,5 @@ def MapCob : Prop :=
   ∀ (K0 K : Type) [Field K0] [Field K] (j : K0 →+* K) (F : MvPowerSeries (Fin 2) K0) (f : PowerSeries K0),
     MvPowerSeries.constantCoeff F = 0 →
       MvPowerSeries.map j (cob F f) = cob (MvPowerSeries.map j F) (PowerSeries.map j f)
-
-def IntThetaZ : Prop :=
-  ∀ (K0 K : Type) [NormedField K0] [IsUltrametricDist K0] [CharZero K0] [NormedField K]
-    [IsUltrametricDist K] [CharZero K] (l d N0 N1 : ℕ) [NeZero d] (σ : K0 →+* K0) (j : K0 →+* K),
-    UnrOK K0 l σ → (∀ a, ‖j a‖ = ‖a‖) → 2 ≤ d → Even d →
-    ∀ F : MvPowerSeries (Fin 2) K0, IsLawOfLog l F → ∀ ph0 : PowerSeries K0, constantCoeff ph0 = 0 →
-    Formalism.L2.Th1.D.F1 F (cob F ph0) → Formalism.L2.Th1.D.F2 l σ (cob F ph0) →
-    ∀ (ι : Type) [Fintype ι] [DecidableEq ι] (om oms : ι → K0), Formalism.L2.Th1.D.OwOK d σ om oms →
-      Formalism.L2.Th1.D.TrDual d σ om oms → ∀ ζ : K0, IsPrimitiveRoot ζ (l ^ d - 1) →
-    ∀ (R : Subring K), (∀ a, a ∈ R ↔ ‖a‖ ≤ 1) →
-    Formalism.L2.Th1.C.Frame R (lgF K l) (Formalism.L2.Th1.D.expF K l) (PowerSeries.map j ph0) →
-    ∀ (O : Type) [CommRing O] [StarRing O] (τ : O →+* K),
-    (∀ α, Formalism.L2.Th1.C.EndInt R (lgF K l) (Formalism.L2.Th1.D.expF K l) (τ α)) →
-    (∀ z : O, star z = z → Formalism.L2.Th1.C.IsBinomScalar R (τ z)) →
-    Formalism.L2.Th1.C.F1 R (lgF K l) (Formalism.L2.Th1.D.expF K l) (PowerSeries.map j ph0) →
-    (∀ α : O, Formalism.L2.Th1.C.PhNormAt R (lgF K l) (Formalism.L2.Th1.D.expF K l) (PowerSeries.map j ph0)
-      (τ α) (τ (star α))) →
-    (∀ α : O, Formalism.L2.Th1.C.AdjAt R (lgF K l) (Formalism.L2.Th1.D.expF K l) (PowerSeries.map j ph0)
-      (τ α) (τ (star α))) →
-    ∀ (n : Type) [Fintype n] (f f' : ι × Fin N0 × Fin N1 → n → O),
-    (∀ e e', ∑ i, star (f e i) * f e' i = 0) → (∀ e e', ∑ i, star (f' e i) * f' e' i = 0) →
-    (∀ e e', ∑ i, star (f e i) * f' e' i = if e = e' then 1 else 0) →
-    ∀ (κ : Type) [Fintype κ] (r : κ → K) (V : κ → n → PowerSeries K),
-      (∀ k, ‖r k‖ ≤ 1) → (∀ k i, IntS (V k i)) →
-      ∃ U : MvPowerSeries (Formalism.DworkPowerSeriesWeights.ZV d N0 N1) K, Integral U ∧
-        ∀ g : Formalism.DworkPowerSeriesWeights.ZV d N0 N1 → MvPowerSeries (Formalism.DworkPowerSeriesWeights.ZV d N0 N1) K,
-          (∀ y, MvPowerSeries.constantCoeff (g y) = 0) →
-          (∀ y, MvPowerSeries.subst g (Formalism.DworkPowerSeriesWeights.entLog (K := K) l y) = MvPowerSeries.X y) →
-          Formalism.L2.Th1.D.thetaInZ l j σ om oms
-                    (MvPowerSeries.subst (hypCoord (lgF K l) (Formalism.L2.Th1.D.expF K l) τ f f')
-                      (thetaProd r (fun k i => (mvExp (-(PowerSeries.map j ph0)) : PowerSeries K) * V k i))) =
-            Formalism.DworkPowerSeriesWeights.thetaZ g U (-1) (MvPowerSeries.map j (Formalism.L2.Th1.D.beMean l σ (cob F ph0) om oms ζ))
 
 end Formalism.L2.Th1.E

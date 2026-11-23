@@ -1,8 +1,57 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.BuiltBoundsCompactOfParts
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.ExistsNormBoundThreeFamilies
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.BuiltBoundsCompactOfParts
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.ModuleFormPosCompactSupport
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.BlockOfCauchySchwarz
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.BlockOfChoices
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.ComponentFamilySettingOfSettingBis
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.ExistsNormBoundThreeFamilies
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.PBCutInside
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.SizeAtMinusW
 import Formalism.HermitianCurvature.HermitianCurvatureProofs.SliceCompactSupportCoefficient
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.ModuleFormPosCompactSupport
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.StepFormCptAllOfStepFormAll
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.AeNeZeroComplex
+
+@[expose] public section
 
 namespace Formalism.FourierDecayAlt.P.PBASM
 
@@ -52,11 +101,11 @@ theorem rr_top_rep (p : KB.Pl P Wp Wq) (F : B.Mat P.k P.r → (Wq →L[ℂ] Wp))
     unfold KB.Pl.RR D.RRplace
     by_cases hx : D.IsLocPt x (P.r + 1)
     · by_cases hy : D.IsLocPt y (P.r + 1)
-      · rw [dif_pos ⟨hx, hy⟩, dif_neg (by omega), if_pos rfl, if_pos hw]
+      · rw [dite_eq_left ⟨hx, hy⟩, dite_eq_right (by omega), if_pos rfl, if_pos hw]
         simp only [hx, hy, if_true, B.hsInner]
-      · rw [dif_neg (fun h => hy h.2)]
+      · rw [dite_eq_right (fun h => hy h.2)]
         simp [hy]
-    · rw [dif_neg (fun h => hx h.1)]
+    · rw [dite_eq_right (fun h => hx h.1)]
       simp [hx]
   · refine ⟨Wd.Ix (Fin w.length) × M.Ty P, inferInstance, fun k x => if D.IsLocPt x (P.r + 1) then
       ((Top.dH P p.l0 (Tz P.k P.r p.T.base.z * Tz P.k P.r p.T.base.z') w x k.1 k.2 : ℝ) : ℂ) •
@@ -65,15 +114,15 @@ theorem rr_top_rep (p : KB.Pl P Wp Wq) (F : B.Mat P.k P.r → (Wq →L[ℂ] Wp))
     unfold KB.Pl.RR D.RRplace
     by_cases hx : D.IsLocPt x (P.r + 1)
     · by_cases hy : D.IsLocPt y (P.r + 1)
-      · rw [dif_pos ⟨hx, hy⟩, dif_neg (by omega), if_pos rfl, if_neg hw]
+      · rw [dite_eq_left ⟨hx, hy⟩, dite_eq_right (by omega), if_pos rfl, if_neg hw]
         unfold Top.topOf
         refine Finset.sum_congr rfl fun e _ => Finset.sum_congr rfl fun ρ _ => ?_
         simp only [hx, hy, if_true, B.hsInner, inner_smul_left, inner_smul_right, Complex.conj_ofReal]
         push_cast
         ring
-      · rw [dif_neg (fun h => hy h.2)]
+      · rw [dite_eq_right (fun h => hy h.2)]
         simp [hy]
-    · rw [dif_neg (fun h => hx h.1)]
+    · rw [dite_eq_right (fun h => hx h.1)]
       simp [hx]
 
 end top

@@ -1,22 +1,74 @@
-import Mathlib
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.InertiaQuadraticRamification.InertSplitAlt
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.FinitePlacesInertiaNotLeOpenSubgroupStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.TameKummerInertiaSurjective
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsSolvableCmExtensionSplitPlace
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.QuadraticNormHeckeCharRamifiedBelowRamifiedPrime
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.InfiniteQuadraticCMGoodBaseChangeSplit
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.ValPrimeOfLt
+module
+
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsValuationEqOfIneFixes
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.TameKummerInertiaSurjective
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ValSubOneLtOfRed
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsSolvableCmExtensionSplitPlace
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.InertiaQuadraticRamification.InertSplitAlt
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.ValPrimeOfLt
+import Formalism.SharpRestriction.GrowthBounds.MonomialOrderSegments.BrData
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+public import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.BaseChangeDefiniteUnitary
+import Development.AutomorphicArithmetic.AutomorphicVarieties.PublishedTheorems.GelfandKazhdanReal
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Formalism.L2.Host Formalism.ConjugateSelfDual ReciprocityTheory.Gal GlobalTheory.HeckeGal GlobalTheory.CuspRep UpperTheory.V.Published GlobalTheory.RealGal GlobalTheory.UnitaryBC
 open UpperTheory.Gal.UnramifiedFromSplittingCriterion
 
 namespace UpperTheory.Gal.UnramifiedFromSplittingCriterion.WeylLatticeInDetCoeffSpan
 
 private theorem normV_mem' {K : Type} [Field K] [NumberField K] (v : HeightOneSpectrum (𝓞 K)) :
-    ((normV v : ℕ) : 𝓞 K) ∈ v.asIdeal := Ideal.absNorm_mem v.asIdeal
+    ((normV v : ℕ) : 𝓞 K) ∈ v.asIdeal := by
+  have h : Nat.card (𝓞 K ⧸ v.asIdeal) = Ideal.absNorm v.asIdeal := by
+    rw [Ideal.absNorm_apply, Submodule.cardQuot_apply]
+  show ((Nat.card (𝓞 K ⧸ v.asIdeal) : ℕ) : 𝓞 K) ∈ v.asIdeal
+  rw [h]
+  exact Ideal.absNorm_mem _
 
 private theorem normV_pos' {K : Type} [Field K] [NumberField K] (v : HeightOneSpectrum (𝓞 K)) : 0 < normV v := by
-  have h : Ideal.absNorm v.asIdeal ≠ 0 := fun h => v.ne_bot (Ideal.absNorm_eq_zero_iff.1 h)
-  exact Nat.pos_of_ne_zero h
+  have h : Nat.card (𝓞 K ⧸ v.asIdeal) = Ideal.absNorm v.asIdeal := by
+    rw [Ideal.absNorm_apply, Submodule.cardQuot_apply]
+  show 0 < Nat.card (𝓞 K ⧸ v.asIdeal)
+  rw [h]
+  exact Nat.pos_of_ne_zero (fun h0 => v.ne_bot (Ideal.absNorm_eq_zero_iff.1 h0))
 
 private theorem val_lt_of_dvd {K Ω : Type} [Field K] [NumberField K] [Field Ω] [Algebra K Ω] (A : ValuationSubring Ω)
     (v : HeightOneSpectrum (𝓞 K)) (hA : IsPlaceOver A v) {c : ℕ} (h : normV v ∣ c) : A.valuation (c : Ω) < 1 := by
@@ -127,7 +179,7 @@ private theorem fix_of_real {Z Ω F' : Type} [Field Z] [NumberField Z] [IsCMFiel
     · exact h
   intro y
   have ha : (y + c y) / 2 ∈ maximalRealSubfield Z := by
-    rw [← IsCMField.complexConj_eq_self_iff, map_div₀, map_add, IsCMField.complexConj_apply_apply, map_ofNat]
+    rw [← IsCMField.complexConj_eq_self_iff, map_div₀, map_add (f := _), IsCMField.complexConj_apply_apply, map_ofNat]
     ring
   have hb : (y - c y) / (2 * X) ∈ maximalRealSubfield Z := by
     rw [← IsCMField.complexConj_eq_self_iff, map_div₀, map_sub, map_mul, IsCMField.complexConj_apply_apply, map_ofNat, ← hc, hcX]
@@ -138,7 +190,7 @@ private theorem fix_of_real {Z Ω F' : Type} [Field Z] [NumberField Z] [IsCMFiel
     ring
   have h1 : g (algebraMap Z Ω ((y + c y) / 2)) = algebraMap Z Ω ((y + c y) / 2) := hreal ⟨_, ha⟩
   have h2 : g (algebraMap Z Ω ((y - c y) / (2 * X))) = algebraMap Z Ω ((y - c y) / (2 * X)) := hreal ⟨_, hb⟩
-  rw [hy, map_add, map_mul, map_add, map_mul, h1, h2, hgx]
+  rw [hy, map_add (f := _), map_mul, map_add (f := _), map_mul, h1, h2, hgx]
 
 private theorem conj_of_sq {u : ℂ} {q : ℕ} (hq : 0 < q) (h : u ^ 2 = (q : ℂ)) : star u = u := by
   have h1 := congrArg Complex.re h

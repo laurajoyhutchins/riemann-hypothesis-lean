@@ -1,5 +1,50 @@
-import Formalism.HermitianCurvature.WeylElementCommutesLevelOne
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.BlochKatoDuality
+module
+
+public import Formalism.HermitianCurvature.WeylElementCommutesLevelOne
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.BlochKatoDuality
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.MeasureTheory.Measure.Haar.Unique
+
+@[expose] public section
 
 open Matrix MeasureTheory Filter Topology
 open scoped ENNReal NNReal
@@ -68,7 +113,6 @@ instance : MeasurableSpace (Gp U hU) := inferInstanceAs (MeasurableSpace {x : Mt
 instance : BorelSpace (Gp U hU) := inferInstanceAs (BorelSpace {x : Mt k r // x ∈ amb U})
 instance : SecondCountableTopology (Gp U hU) :=
   inferInstanceAs (SecondCountableTopology {x : Mt k r // x ∈ amb U})
-instance : T2Space (Gp U hU) := inferInstanceAs (T2Space {x : Mt k r // x ∈ amb U})
 
 def inc (x : Gp U hU) : Mt k r := x.1
 
@@ -156,6 +200,7 @@ theorem haarUnique : HaarUnique := by
         rw [← Measure.isMulLeftInvariant_eq_smul (pull hU ν) (pull hU μ)]
     _ = Measure.haarScalarFactor (pull hU ν) (pull hU μ) • μ := by
         rw [Measure.map_smul, map_pull μ hμ.conc]
+        exact inc_cont.measurable.aemeasurable
 
 theorem haarInvFromUnique : HaarInvFromUnique :=
   _root_.UpperTheory.Reformulated.B.BlochKatoDuality.haarInvFromUnique
@@ -270,13 +315,9 @@ namespace Formalism.FourierDecayAlt.P
 
 theorem haar_measure_unique_up_to_scalar : Formalism.FourierDecayAlt.B2.HaarUnique := B2x1.haarUnique
 
-theorem haar_inversion_of_uniqueness : Formalism.FourierDecayAlt.B2.HaarInvFromUnique := B2x1.haarInvFromUnique
-
 theorem haar_measure_inversion : Formalism.FourierDecayAlt.B2.HaarInv := B2x1.haarInvFromUnique B2x1.haarUnique
 
 theorem conjugation_preserves_haar : Formalism.FourierDecayAlt.B2.ConjHaar := B2x1.conjHaar
-
-theorem compact_conjugation_of_uniqueness : Formalism.FourierDecayAlt.B2.CompactConjFromUnique := B2x1.compactConjFromUnique
 
 theorem compact_subgroup_conjugation : Formalism.FourierDecayAlt.B2.CompactConj := B2x1.compactConjFromUnique B2x1.haarUnique B2x1.conjHaar
 

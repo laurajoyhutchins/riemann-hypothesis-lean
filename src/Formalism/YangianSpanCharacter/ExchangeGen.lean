@@ -1,53 +1,58 @@
-import Formalism.YangianSpanCharacter.StatementT
+module
+
+public import Mathlib.Algebra.Group.End
+public import Mathlib.LinearAlgebra.Matrix.Defs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace Formalism.YangianSpanCharacter.T
 
 open Matrix
-
-def pt3 {R : Type*} (M : Matrix (Fin 2 × Fin 2 × Fin 2) (Fin 2 × Fin 2 × Fin 2) R) :
-    Matrix (Fin 2 × Fin 2 × Fin 2) (Fin 2 × Fin 2 × Fin 2) R :=
-  Matrix.of fun a b => M (a.1, a.2.1, b.2.2) (b.1, b.2.1, a.2.2)
-
-def Tbt {R A : Type*} [CommRing R] [Ring A] [Algebra R A] (Y : R) (p c ci : A) :
-    Matrix (Fin 2 × Fin 2) (Fin 2 × Fin 2) A :=
-  Matrix.of fun ik jl => if ik.1 = jl.1 then Tm Y p c ci jl.2 ik.2 else 0
-
-def YBEt : Prop :=
-  ∀ (R : Type) [CommRing R] (Y Y' Yb : R),
-    ((Y' - Y) • (1 : Matrix (Fin 2 × Fin 2 × Fin 2) (Fin 2 × Fin 2 × Fin 2) R) - sizeConstantAtParamsWeight R) *
-        pt3 ((Yb - Y') • 1 - flipOneThree R) * pt3 ((Yb - Y) • 1 - flipTwoThree R) =
-      pt3 ((Yb - Y) • 1 - flipTwoThree R) * pt3 ((Yb - Y') • 1 - flipOneThree R) *
-        ((Y' - Y) • (1 : Matrix (Fin 2 × Fin 2 × Fin 2) (Fin 2 × Fin 2 × Fin 2) R) - sizeConstantAtParamsWeight R)
-
-def ExchangeT : Prop :=
-  ∀ (R A : Type) [CommRing R] [Ring A] [Algebra R A] (p c ci : A) (Y Yb : R),
-    WeylRel p c ci →
-      Tbt Yb p c ci * pt1 ((Yb - Y) • (1 : Matrix (Fin 2 × Fin 2) (Fin 2 × Fin 2) A) - Pf A) *
-          T1 Y p c ci =
-        T1 Y p c ci * pt1 ((Yb - Y) • (1 : Matrix (Fin 2 × Fin 2) (Fin 2 × Fin 2) A) - Pf A) *
-          Tbt Yb p c ci
-
-def Gauge : Prop :=
-  ∀ (R A : Type) [CommRing R] [Ring A] [Algebra R A] (p c ci hi θ : A) (Y : R),
-    hi * c = c * hi → hi * ci = ci * hi → p * hi = hi * p - hi * θ →
-      Tm Y p c ci * Matrix.diagonal (fun _ => hi) =
-        Matrix.diagonal (fun _ => hi) * (Tm Y p c ci - !![θ, 0; 0, 0])
-
-def JFlip : Prop :=
-  ∀ (R : Type) [CommRing R],
-    J0 R * (-J0 R) = 1 ∧ J0 R * (1 - Pf R) * (-J0 R) = pt1 (Pf R)
 
 def E1 {A : Type*} [Ring A] (M : Matrix (Fin 2) (Fin 2) A) : Matrix (Fin 2 × Fin 2) (Fin 2 × Fin 2) A :=
   Matrix.of fun ik jl => if ik.2 = jl.2 then M ik.1 jl.1 else 0
 
 def E2 {A : Type*} [Ring A] (M : Matrix (Fin 2) (Fin 2) A) : Matrix (Fin 2 × Fin 2) (Fin 2 × Fin 2) A :=
   Matrix.of fun ik jl => if ik.1 = jl.1 then M ik.2 jl.2 else 0
-
-def ExchangeGen : Prop :=
-  ∀ (R A : Type) [CommRing R] [Ring A] [Algebra R A] (M0 Mb : Matrix (Fin 2) (Fin 2) A) (d : R),
-    (d • (1 : Matrix (Fin 2 × Fin 2) (Fin 2 × Fin 2) A) - Pf A) * E1 Mb * E2 M0 =
-        E2 M0 * E1 Mb * (d • (1 : Matrix (Fin 2 × Fin 2) (Fin 2 × Fin 2) A) - Pf A) →
-      E2 Mbᵀ * pt1 (d • (1 : Matrix (Fin 2 × Fin 2) (Fin 2 × Fin 2) A) - Pf A) * E1 M0 =
-        E1 M0 * pt1 (d • (1 : Matrix (Fin 2 × Fin 2) (Fin 2 × Fin 2) A) - Pf A) * E2 Mbᵀ
 
 end Formalism.YangianSpanCharacter.T

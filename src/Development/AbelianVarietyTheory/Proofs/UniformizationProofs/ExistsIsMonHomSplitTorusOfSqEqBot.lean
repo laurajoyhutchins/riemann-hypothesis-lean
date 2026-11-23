@@ -1,13 +1,53 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.CubeVal
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsMonHomOfMul
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.UnifUniqSt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.IsNsmul
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.QkToAkU
-import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.ReductionSurjectiveOfIsNilpotent
-import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.LeftEqIffLieVecSmul
-import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.HomBaseChangeBijectiveOfLeNilradical
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IsUnitAddMonoidAlgebraIffOfTwoUniqueSums
+module
+
+public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.ReductionSurjectiveOfIsNilpotent
+public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.LeftEqIffLieVecSmul
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IsUnitAddMonoidAlgebraIffOfTwoUniqueSums
+public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.HomBaseChangeBijectiveOfLeNilradical
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsMonHomOfMul
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.UniversalCharts.ChartLawPf
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -42,8 +82,8 @@ theorem charVal_spMap (φ : C →ₐ[A] C') (w : sp C ⟶ splitTorus (Spec (Comm
     exact h.symm
   · rw [Over.comp_left, spMap_left]
 
-variable (A X) in
 
+variable (A X) in
 def univ : sp (AddMonoidAlgebra A X) ⟶ splitTorus (Spec (CommRingCat.of A)) X :=
   ofVal _ (AddMonoidAlgebra.of A X)
 
@@ -219,8 +259,8 @@ theorem kerEquiv_pullKer (hv : IsLieBasis v) (hJ : J ^ 2 = ⊥) (u : X →+ Y)
   rw [e, h]
   simp
 
-open AddMonoidHom in
 
+open AddMonoidHom in
 theorem exists_coboundary (hv : IsLieBasis v) (hJ : J ^ 2 = ⊥)
     (δ : redKer (R := A) G (J.map (algebraMap A (AddMonoidAlgebra A (X × X)))))
     (hδ : pullKer G J (inr X (X × X)) δ / pullKer G J ((AddMonoidHom.fst X X).prod (AddMonoidHom.id _)) δ *
@@ -237,7 +277,7 @@ theorem exists_coboundary (hv : IsLieBasis v) (hJ : J ^ 2 = ⊥)
     intro i
     have h := congrArg (fun z => ((kerEquiv hv (map_algebraMap_sq hJ) (Additive.ofMul z) i :
       AddMonoidAlgebra A (X × (X × X))))) hδ
-    simp only [ofMul_div, ofMul_mul, ofMul_one, map_sub, map_add, map_zero, Pi.sub_apply,
+    simp only [ofMul_div, ofMul_mul, ofMul_one, map_sub, map_add (f := _), map_zero, Pi.sub_apply,
       Pi.add_apply, Pi.zero_apply, AddSubgroupClass.coe_sub, AddMemClass.coe_add,
       ZeroMemClass.coe_zero] at h
     rw [kerEquiv_pullKer hv hJ, kerEquiv_pullKer hv hJ, kerEquiv_pullKer hv hJ,
@@ -262,14 +302,14 @@ theorem exists_coboundary (hv : IsLieBasis v) (hJ : J ^ 2 = ⊥)
   apply Subtype.ext
   have e2 : (⇑(AddMonoidHom.inl X X + AddMonoidHom.inr X X) : X → X × X) = fun y => (y, y) :=
     funext fun y => by simp
-  simp only [ofMul_div, ofMul_mul, map_sub, map_add, Pi.sub_apply, Pi.add_apply,
+  simp only [ofMul_div, ofMul_mul, map_sub, map_add (f := _), Pi.sub_apply, Pi.add_apply,
     AddSubgroupClass.coe_sub, AddMemClass.coe_add]
   rw [kerEquiv_pullKer hv hJ, kerEquiv_pullKer hv hJ, kerEquiv_pullKer hv hJ]
   simp only [ofMul_toMul, AddEquiv.apply_symm_apply, e2]
   exact hg i
 
-open AddMonoidHom in
 
+open AddMonoidHom in
 theorem exists_correction (hv : IsLieBasis v) (hJ : J ^ 2 = ⊥) (h : sp (AddMonoidAlgebra A X) ⟶ G)
     (hh : pull G (inr X X) h / pull G (inl X X + inr X X) h * pull G (inl X X) h ∈
       redKer (R := A) G (J.map (algebraMap A (AddMonoidAlgebra A (X × X))))) :

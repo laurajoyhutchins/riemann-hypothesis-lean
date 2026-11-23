@@ -1,18 +1,68 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IsUnitHermOfDet
-import CompanionTheory.SpectralGeometry.CountingDefinitions.AdelicEulerProducts.IsEulerProd
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.UnitsOpenEmbeddingLocalTensor
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.HermitianMatricesLocallyCompactBorel
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.GramRightActionIdentities
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.InfiniteAdelesLocalRingTotallyRealStatement
+module
+
+public import CompanionTheory.SpectralGeometry.CountingDefinitions.AdelicEulerProducts.IsEulerProd
+public import Development.AbelianVarietyTheory.PublishedTheorems.GlobalTheta.IsSchwartzBruhatOfProd
+public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.CoordinateHaarMeasureStatement
+public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.GramRightActionIdentities
+public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.HermitianMatricesLocallyCompactBorel
+public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.InfiniteAdeleHaarMapEqScaledVolumeStatement
+public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.InfiniteAdelesLocalRingTotallyRealStatement
 import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.TensorLocallyCompactRingStatement
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.CoordinateHaarMeasureStatement
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.InfiniteAdeleHaarMapEqScaledVolumeStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LocalUniqueSquareRootNearOneStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.UniformLowerBoundNearInjectiveStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LintegralUniformNearParameterStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsBumpWithNonzeroIntegralStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LocalGramFibrationUniqueStatement
+public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.UnitsOpenEmbeddingLocalTensor
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsBumpWithNonzeroIntegralStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LintegralUniformNearParameterStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LocalGramFibrationUniqueStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LocalUniqueSquareRootNearOneStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.UniformLowerBoundNearInjectiveStatement
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerVolume.TensTop
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IsUnitHermOfDet
+import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ThetaPartD
+
+@[expose] public section
+
 open NumberField IsDedekindDomain MeasureTheory Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes GlobalTheory.Published.SiegelOneVector GlobalTheory.CompanionTheory.SiegelND GlobalTheory.CompanionTheory.SiegelND.Coef
 open scoped TensorProduct ENNReal NNReal Topology
 
@@ -214,7 +264,7 @@ theorem fibre_schwartzN : ∀ (F E : Type) [Field F] [NumberField F] [Field E] [
         show e0 ((Algebra.TensorProduct.basis (Ainf F) b).repr (x + y) k) w =
           e0 ((Algebra.TensorProduct.basis (Ainf F) b).repr x k) w +
             e0 ((Algebra.TensorProduct.basis (Ainf F) b).repr y k) w
-        simp only [map_add, Finsupp.add_apply, Pi.add_apply] }
+        simp only [map_add (f := _), Finsupp.add_apply, Pi.add_apply] }
   have hεc : Continuous ε := Hc.continuous
   have hεs : Continuous ε.symm := Hc.symm.continuous
   let ψ := matCoords ε n
@@ -309,7 +359,7 @@ theorem fibre_schwartzN : ∀ (F E : Type) [Field F] [NumberField F] [Field E] [
     intro h
     refine continuous_pi fun b => continuous_pi fun i => ?_
     simp only [GlobalTheory.CompanionTheory.SW.rmul]
-    refine continuous_finset_sum _ fun k _ => ?_
+    refine continuous_finsetSum _ fun k _ => ?_
     have h1 : Continuous fun Y : Fin n → Fin M → Ainf F ⊗[F] E => Y k i :=
       (continuous_apply i).comp (continuous_apply k)
     exact h1.mul continuous_const
@@ -318,7 +368,7 @@ theorem fibre_schwartzN : ∀ (F E : Type) [Field F] [NumberField F] [Field E] [
     intro X
     refine continuous_pi fun b => continuous_pi fun i => ?_
     simp only [GlobalTheory.CompanionTheory.SW.rmul]
-    refine continuous_finset_sum _ fun k _ => ?_
+    refine continuous_finsetSum _ fun k _ => ?_
     have h1 : Continuous fun h : Matrix (Fin n) (Fin n) (Ainf F ⊗[F] E) => h k b :=
       (continuous_apply b).comp (continuous_apply k)
     exact continuous_const.mul h1

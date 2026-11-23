@@ -1,7 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.MemContraIff
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.MemBddFormsOfWithSmoothings
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ContinuousOfMemSmoothSpan
+module
+
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.MemBddFormsOfWithSmoothings
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ContinuousOfMemSmoothSpan
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.DecaysOfMemSmoothSpan
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AutomorphicFormsFiniteGL
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CuspRapidDecaySiegelGLOfFinite
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.MemContraIff
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IdeleModuleDetDiagUnitsPosIdele
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -11,7 +57,7 @@ open GlobalTheory.RSTheta GlobalTheory.ShortVecDecay GlobalTheory.Petersson Glob
 
 namespace GlobalTheory.RSThetaLow
 
-variable {E : Type} [Field E] [NumberField E] [IsTotallyComplex E] {a : ℕ}
+variable {E : Type} [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] {a : ℕ}
 
 theorem continuous_invT {R : Type} [CommRing R] [TopologicalSpace R] : Continuous (invT a R) :=
   Units.continuous_iff.2 ⟨Units.continuous_coe_inv.matrix_transpose, Units.continuous_val.matrix_transpose⟩
@@ -60,11 +106,11 @@ theorem continuous_bounded {π : CuspSub E a} (hπ : π.IsUnitary) {φ : Sm E a}
     (GlobalTheory.cuspRapidDecaySiegelGL_of_finite GlobalTheory.automorphicFormsFiniteGL)) hω (CuspSub.hasCentral_iff.1 h) hφ
   exact ⟨this.1, this.2.2.2⟩
 
-omit [IsTotallyComplex E] in
 
+omit [_root_.NumberField.IsTotallyComplex E] in
 def rowInv (ℓ : Fin a) (y : Fin a → Cinf E) : Lie E a := invL (toL (rowMat ℓ y))
 
-omit [IsTotallyComplex E] in
+omit [_root_.NumberField.IsTotallyComplex E] in
 theorem contDiff_rowMat (ℓ : Fin a) : ContDiff ℝ ∞ fun y : Fin a → Cinf E => toL (rowMat ℓ y) := by
   refine contDiff_pi.2 fun i => ?_
   by_cases h : i = ℓ
@@ -75,11 +121,11 @@ theorem contDiff_rowMat (ℓ : Fin a) : ContDiff ℝ ∞ fun y : Fin a → Cinf 
       funext fun y => updateRow_ne h
     rw [this]; exact contDiff_const
 
-omit [IsTotallyComplex E] in
+omit [_root_.NumberField.IsTotallyComplex E] in
 theorem contDiffAt_rowInv {ℓ : Fin a} {y : Fin a → Cinf E} (hy : y ∈ rowSet E ℓ) : ContDiffAt ℝ ∞ (rowInv ℓ) y :=
   (contDiffAt_invL (isUnit_rowMat_iff.2 (isUnit_of_mem_rowSet hy))).comp y (contDiff_rowMat ℓ).contDiffAt
 
-omit [IsTotallyComplex E] in
+omit [_root_.NumberField.IsTotallyComplex E] in
 theorem rowInv_eq {ℓ : Fin a} {y : Fin a → Cinf E} (hy : y ∈ rowSet E ℓ) : rowInv ℓ y = toL ((rowGL ℓ y)⁻¹).val := by
   rw [rowInv, ← val_rowGL (isUnit_of_mem_rowSet hy), invL_val]
 
@@ -92,12 +138,12 @@ theorem contDiffAt_translate (F : Sm E a) (g : GA E a) {ℓ : Fin a} {y : Fin a 
   ((contDiffAt_chart F.2 g (rowInv_eq hy ▸ val_mem_invSet _)).comp y (contDiffAt_rowInv hy)).congr_of_eventuallyEq
     (Filter.eventually_of_mem ((isOpen_rowSet ℓ).mem_nhds hy) fun _ hz => chart_rowInv _ g hz)
 
-omit [IsTotallyComplex E] in
 
+omit [_root_.NumberField.IsTotallyComplex E] in
 def rowCoef (ℓ : Fin a) (v : Fin a → Cinf E) (β : Fin (Module.finrank ℝ (Lie E a))) (y : Fin a → Cinf E) : ℂ :=
   ((Module.finBasis ℝ (Lie E a)).coord β (toL (rowMat ℓ y * Matrix.of (fderiv ℝ (rowInv ℓ) y v))) : ℝ)
 
-omit [IsTotallyComplex E] in
+omit [_root_.NumberField.IsTotallyComplex E] in
 theorem contDiffOn_rowCoef (ℓ : Fin a) (v : Fin a → Cinf E) (β : Fin (Module.finrank ℝ (Lie E a))) :
     ContDiffOn ℝ ∞ (rowCoef ℓ v β) (rowSet E ℓ) := fun y hy => by
   refine ContDiffAt.contDiffWithinAt (Complex.ofRealCLM.contDiff.contDiffAt.comp y
@@ -124,6 +170,7 @@ theorem fderiv_translate (F : Sm E a) (g : GA E a) {ℓ : Fin a} {y : Fin a → 
     ((contDiffAt_rowInv hy).differentiableAt (by simp)), ContinuousLinearMap.comp_apply, ← h1, ← chart_lieD F.2 X g hm,
     ← chart_rowInv _ g hy]
   change fderiv ℝ (chart F.1 _) (oneL E a) X = _
+
   conv_lhs => rw [← (Module.finBasis ℝ (Lie E a)).sum_repr X, map_sum]
   refine Finset.sum_congr rfl fun β _ => ?_
   rw [map_smul, Complex.real_smul]
@@ -150,9 +197,10 @@ theorem fderiv_rsInf {ℓ : Fin a} (F F' : Sm E a) {Φ : (Fin a → Cinf E) → 
     have h4 := ((h1.mul (Complex.conjCLE.hasFDerivAt.comp y h2)).mul h3).fderiv
     refine (congrArg (· v) h4).trans ?_
     have hc : ∀ β, conj (rowCoef ℓ v β y) = rowCoef ℓ v β y := fun β => Complex.conj_ofReal _
+
     simp only [ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply, ContinuousLinearMap.comp_apply,
-      fderiv_translate _ g (hΦ.2.2 hy), rsInf, smul_eq_mul, Pi.mul_apply, Function.comp_apply,
-      ContinuousLinearEquiv.coe_coe, Complex.conjCLE_apply, map_sum, map_mul, hc, Finset.mul_sum, mul_add]
+    fderiv_translate _ g (hΦ.2.2 hy), rsInf, smul_eq_mul, Pi.mul_apply, Function.comp_apply,
+    ContinuousLinearEquiv.coe_coe, Complex.conjCLE_apply, map_sum, map_mul, hc, Finset.mul_sum, mul_add]
     rw [add_comm, add_comm (∑ _, _)]
     congr 2 <;> exact Finset.sum_congr rfl fun _ _ => by ring
   · have h0 : Φ y = 0 := image_eq_zero_of_notMem_tsupport hy
@@ -165,7 +213,7 @@ theorem fderiv_rsInf {ℓ : Fin a} (F F' : Sm E a) {Φ : (Fin a → Cinf E) → 
     rw [h2]
     simp [rsInf, h0, h1]
 
-omit [IsTotallyComplex E] in
+omit [_root_.NumberField.IsTotallyComplex E] in
 theorem isTest_rowCoef_mul {ℓ : Fin a} {Φ : (Fin a → Cinf E) → ℂ} (hΦ : IsTest (rowSet E ℓ) Φ) (v : Fin a → Cinf E)
     (β : Fin (Module.finrank ℝ (Lie E a))) : IsTest (rowSet E ℓ) fun y => rowCoef ℓ v β y * Φ y := by
   have hs : tsupport (fun y => rowCoef ℓ v β y * Φ y) ⊆ tsupport Φ := tsupport_mul_subset_right
@@ -174,7 +222,7 @@ theorem isTest_rowCoef_mul {ℓ : Fin a} {Φ : (Fin a → Cinf E) → ℂ} (hΦ 
   · exact ((contDiffOn_rowCoef ℓ v β).contDiffAt ((isOpen_rowSet ℓ).mem_nhds (hΦ.2.2 hy))).mul hΦ.1.contDiffAt
   · exact contDiffAt_const.congr_of_eventuallyEq (notMem_tsupport_iff_eventuallyEq.1 fun h => hy (hs h))
 
-omit [IsTotallyComplex E] in
+omit [_root_.NumberField.IsTotallyComplex E] in
 theorem integrable_infMeasure {f : (Fin a → Cinf E) → ℂ} (h : Continuous f) (hc : HasCompactSupport f) :
     Integrable f (infMeasure E a) :=
   (h.integrable_of_hasCompactSupport hc).smul_measure (by simp)

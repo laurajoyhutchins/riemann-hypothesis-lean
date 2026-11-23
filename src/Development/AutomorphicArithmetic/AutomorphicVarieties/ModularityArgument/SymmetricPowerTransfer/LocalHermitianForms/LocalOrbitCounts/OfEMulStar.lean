@@ -1,8 +1,64 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.LocalHermitianForms.LocalOrbitCounts.Descent
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.LocalHermitianForms.LocalOrbitCounts.NormEx
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.LocalHermitianForms.LocalOrbitCounts.WCard
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.LocalHermitianForms.LocalOrbitCounts.HsNE
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.LocalHermitianForms.LocalOrbitCounts.DatLam
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.LocalHermitianForms.NormOneIsCoboundaryUnramifiedQuadratic
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.LocalHermitianForms.LocalOrbitCounts.DatLam
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.LocalHermitianForms.LocalOrbitCounts.Descent
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.LocalHermitianForms.LocalOrbitCounts.HsNE
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.LocalHermitianForms.LocalOrbitCounts.NormEx
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.LocalHermitianForms.LocalOrbitCounts.WCard
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RingTheory.Finiteness.Prod
+public import Mathlib.RingTheory.Nakayama
+
+@[expose] public section
 
 open QuadraticAlgebra UpperTheory.V.Z.Sym UpperTheory.V.Z.Sym.Loc
 
@@ -39,7 +95,7 @@ private theorem ofE_inv (y : (Etau K τ)ˣ) : ofE Δ ((y⁻¹ : (Etau K τ)ˣ) :
   rw [← ofE_mul, Units.inv_mul, ofE_one]
 
 private theorem herm_add (c : K) (m : EL Δ τ) (x y z : Sp Δ τ) : herm c m (x + y) z = herm c m x z + herm c m y z := by
-  simp only [herm, Prod.fst_add, Prod.snd_add, mul_add, add_mul, map_add]; ring
+  simp only [herm, Prod.fst_add, Prod.snd_add, mul_add, add_mul, map_add (f := _)]; ring
 private theorem herm_smul (c : K) (m : EL Δ τ) (k : Lsq K Δ) (x y : Sp Δ τ) : herm c m (k • x) y = k * herm c m x y := by
   simp only [herm, Prod.smul_fst, Prod.smul_snd, mul_smul_comm, smul_mul_assoc, map_smul, smul_eq_mul]; ring
 private theorem herm_smul' (c : K) (m : EL Δ τ) (k : Lsq K Δ) (x y : Sp Δ τ) :
@@ -89,8 +145,8 @@ private theorem int_star {y : Lsq K Δ} (hy : IsInt O y) : IsInt O (star y) := b
         ext <;> simp }
   exact hy.map φ
 
-variable (O) in
 
+variable (O) in
 private def IB (x : EL Δ τ) : Prop := IsInt O x.re ∧ IsInt O x.im
 
 private theorem IB.mul (hτ : τ ∈ (algebraMap O K).range) {x y : EL Δ τ} (hx : IB O x) (hy : IB O y) : IB O (x * y) := by
@@ -147,8 +203,8 @@ private theorem IB.of_tr (hτ : τ ∈ (algebraMap O K).range) (u : Oˣ) (hu : a
     simp only [trace_def, re_mul, im_mul, omega_re, omega_im, map_sub, map_pow, map_ofNat]
     ring
 
-variable (O Δ) in
 
+variable (O Δ) in
 private def lat (r : K) (y : (Etau K τ)ˣ) : Set (Sp Δ τ) :=
   {x | IsInt O (algebraMap K (Lsq K Δ) r * x.1) ∧ IB O (ofE Δ ((y⁻¹ : (Etau K τ)ˣ) : Etau K τ) * x.2)}
 
@@ -418,7 +474,7 @@ private theorem fx_gen [IsDomain O] [IsDiscreteValuationRing O] (hl : IsLoc O Δ
       convert e ▸ h using 2
       ring
     obtain ⟨a, ha⟩ := IsIntegrallyClosed.isIntegral_iff.mp
-      ((isIntegral_algebraMap_iff (algebraMap K (Lsq K Δ)).injective).mp h')
+      ((isIntegral_algebraMap_iff ).mp h')
     by_cases hau : IsUnit a
     · have hn : QuadraticAlgebra.norm y ≠ 0 := fun h0 => (hau.map (algebraMap O K)).ne_zero (by rw [ha, h0, mul_zero])
       have hyu : IsUnit y := isUnit_iff_norm_isUnit.2 (Ne.isUnit hn)
@@ -537,7 +593,7 @@ private theorem IB_of_int (hl : IsLoc O Δ) (hτ : τ ∈ (algebraMap O K).range
     have h : IsIntegral O (x + star x) := hx.add (hx.map φ)
     rw [← algebraMap_trace_eq_add_star] at h
     obtain ⟨a, ha⟩ := IsIntegrallyClosed.isIntegral_iff.mp
-      ((isIntegral_algebraMap_iff (algebraMap K (Etau K τ)).injective).mp h)
+      ((isIntegral_algebraMap_iff ).mp h)
     rw [trace_ofE, ← ha]
     exact int_of a
   have hω : IsIntegral O (ω : Etau K τ) := by
@@ -625,16 +681,16 @@ theorem UpperTheory.V.Z.Sym.Loc.caseG :
   have hD : τ ^ 2 - 4 ≠ 0 := hu ▸ (u.isUnit.map (algebraMap O K)).ne_zero
   obtain ⟨a, ha⟩ : ∃ a : O, algebraMap O K a = τ := by
     refine IsIntegrallyClosed.isIntegral_iff.mp (IsIntegral.of_pow two_pos ?_)
-    have : τ ^ 2 = algebraMap O K (u + 4) := by rw [map_add, hu, map_ofNat]; ring
+    have : τ ^ 2 = algebraMap O K (u + 4) := by rw [map_add (f := _), hu, map_ofNat]; ring
     exact this ▸ isIntegral_algebraMap
   have hp : IsUnit ((2 - a) * (2 + a)) := by
     have : (2 - a) * (2 + a) = -(u : O) := IsFractionRing.injective O K (by
-      simp only [map_mul, map_sub, map_add, map_neg, map_ofNat, ha, hu]; ring)
+      simp only [map_mul, map_sub, map_add (f := _), map_neg, map_ofNat, ha, hu]; ring)
     exact this ▸ u.isUnit.neg
   obtain ⟨u₁, hu₁⟩ := isUnit_of_mul_isUnit_left hp
   obtain ⟨u₂, hu₂⟩ := isUnit_of_mul_isUnit_right hp
   have h₁ : algebraMap O K u₁ = 2 - τ := by rw [hu₁, map_sub, map_ofNat, ha]
-  have h₂ : algebraMap O K u₂ = 2 + τ := by rw [hu₂, map_add, map_ofNat, ha]
+  have h₂ : algebraMap O K u₂ = 2 + τ := by rw [hu₂, map_add (f := _), map_ofNat, ha]
   have hc0 : c ≠ 0 := hc ▸ mul_ne_zero (e.isUnit.map (algebraMap O K)).ne_zero (pow_ne_zero _ hr)
   have hd := (datLam K Δ τ c hD hc0 lam hn z hz).d_norm
   rw [ofE_omega] at hd

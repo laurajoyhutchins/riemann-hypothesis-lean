@@ -1,4 +1,50 @@
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.CasimirCoefficients.PsiExistsStatement
+module
+
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.CasimirCoefficients.PsiExistsStatement
+public import Mathlib.MeasureTheory.Integral.Bochner.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -31,20 +77,18 @@ lemma isClosed_Kset (ε : Fin n → Bool) : IsClosed (Kset ε) := by
     isClosed_eq (continuous_id.mul continuous_const) (continuous_const.mul continuous_id)
   convert h1.inter h2 using 1
   ext g
-  simp only [Kset, Set.mem_setOf_eq, Set.mem_inter_iff, Matrix.unitaryGroup]
+  simp only [Kset, Set.mem_ofPred_eq, Set.mem_inter_iff, Matrix.unitaryGroup]
   exact Iff.rfl
 
 lemma isClosed_KG (ε : Fin n → Bool) : IsClosed ((KG ε : Set (UJ ε))) := by
   show IsClosed {g : UJ ε | toM g ∈ Kset ε}
-  exact (isClosed_Kset ε).preimage (by first
-    | fun_prop
-    | continuity
-    | exact continuous_subtype_val
-    | exact Units.continuous_val.comp continuous_subtype_val)
+  exact (isClosed_Kset ε).preimage (continuous_toM ε)
 
 instance (ε : Fin n → Bool) : LocallyCompactSpace (KG ε) := (isClosed_KG ε).locallyCompactSpace
 
-instance (ε : Fin n → Bool) : MeasurableSpace (KG ε) := borel _
+-- Keep the instance name stable across builds of the downstream Haar modules.
+instance instMeasurableSpaceSubtypeUnitsMatrixFinComplexMemSubgroupUJKG
+    (ε : Fin n → Bool) : MeasurableSpace (KG ε) := borel _
 
 instance (ε : Fin n → Bool) : BorelSpace (KG ε) := ⟨rfl⟩
 
@@ -58,8 +102,8 @@ def psM {ε : Fin n → Bool} {Λ : Fin n → ℝ} (T : KType ε Λ) (μ : Fin n
   ((Module.finrank ℂ T.V : ℂ) / ((muK ε Set.univ).toReal : ℂ)) •
     ∫ k, PhiM μ (toMK k⁻¹ * x * toMK k) • (T.op k * projW T * T.op k⁻¹) ∂(muK ε)
 
-open Classical in
 
+open Classical in
 def PsiM {ε : Fin n → Bool} {Λ : Fin n → ℝ} (T : KType ε Λ) (μ : Fin n → ℤ)
     (g : Matrix (Fin n) (Fin n) ℂ) : T.V →L[ℂ] T.V :=
   if h : ∃ (k : KG ε) (X : Matrix (Fin n) (Fin n) ℂ), inP ε X ∧ g = toMK k * NormedSpace.exp X then

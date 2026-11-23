@@ -1,6 +1,47 @@
-import Mathlib
-import CompanionTheory.RealGroups.DiscreteSeries.DiscreteSeriesClassification.DiscreteSeriesExhaustion.SimpleDistinctness.ScalarCharacterOfL2Embedding
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.KTypesAboveOfDsClass
+module
+
+public import CompanionTheory.RealGroups.DiscreteSeries.DiscreteSeriesClassification.DiscreteSeriesExhaustion.L2Embedding
+public import CompanionTheory.RealGroups.DiscreteSeries.DiscreteSeriesClassification.InConeRefl
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.KTypesAboveOfDsClass
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import CompanionTheory.RealGroups.DiscreteSeries.DiscreteSeriesClassification.ExplicitFunctionSquareIntegrable
+
+@[expose] public section
 
 noncomputable section
 
@@ -9,7 +50,9 @@ open Finset
 namespace GlobalTheory.CompanionTheory.LowestData
 
 open Formalism.REAL (KHighest)
-open GlobalTheory.LowestKTypeDetermines (rhoC_perm lowK_add strictAnti_add_rho nsq_add_cone eq_zero_of_nsq nsq_comp)
+open _root_.CompanionTheory.RgExh (GMod AlgDS)
+open _root_.CompanionTheory.RgDs (InCone)
+open GlobalTheory.LowestKTypeDetermines (lt_of_perm_lt rhoC_perm lowK_add strictAnti_add_rho nsq_add_cone eq_zero_of_nsq nsq_comp)
 
 variable {n : ℕ}
 
@@ -25,19 +68,20 @@ theorem kHighest_renumber {V : Type} [AddCommGroup V] [Module ℂ V] (ε : Fin n
     simpa using this
   · have hlt := hs a b hab he
     have key : s'.symm (s a) < s'.symm (s b) := by
-      by_contra hn
-      have hle := not_lt.1 hn
-      rcases hle.lt_or_eq with hl | he'
-      · have := hs' _ _ hl (by simpa using he.symm)
-        simp only [Equiv.apply_symm_apply] at this
-        exact absurd this (not_lt.2 hlt.le)
-      · have := s'.symm.injective he'
-        exact absurd this hlt.ne'
+      refine lt_of_perm_lt (s := s') hs' ?_ ?_
+      · simpa only [Equiv.apply_symm_apply] using hlt
+      · simpa only [Function.comp_apply, Equiv.apply_symm_apply] using he
     have := h2 _ _ key (by simpa using he)
     simpa using this
 
-theorem dataUniq : CompanionTheory.RgExh.Fin.DataUniq := by
-  intro n ε X s s' mu mu' h hc h'
+-- Unfold DataUniq and ConeDS to depend directly on AlgDS and InCone.
+theorem dataUniq (n : ℕ) (ε : Fin n → Bool) (X : GMod n)
+    (s s' : Equiv.Perm (Fin n)) (mu mu' : Fin n → ℝ)
+    (h : AlgDS ε X s mu)
+    (hc : ∀ (ν : Fin n → ℝ) (x : X.V), x ≠ 0 →
+      KHighest (ε ∘ s) (fun a b => X.E (s a) (s b)) ν x →
+      InCone (PI.UpqRep.lowK (ε ∘ s) mu) ν)
+    (h' : AlgDS ε X s' mu') : s = s' ∧ mu = mu' := by
   obtain ⟨hl, hs, -, v, hv0, hv⟩ := h
   obtain ⟨hl', hs', hmin', v', hv0', hv'⟩ := h'
   have add : ∀ (ε : Fin n → Bool) (lam : Fin n → ℝ),

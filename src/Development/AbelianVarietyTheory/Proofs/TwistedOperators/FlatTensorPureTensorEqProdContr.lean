@@ -1,7 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MeasurePreservingPiProdSplit
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.ContrFactor
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.FlatMapsPreserveSchwartzBruhatAndSurjective
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MeasurePreservingPiProdSplit
+public import Development.AbelianVarietyTheory.Definitions.LatticeFrames.ContrFactor
+import Development.AbelianVarietyTheory.Definitions.Foundations.SecondCountableAndT2LocalField
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.FlatMapsPreserveSchwartzBruhatAndSurjective
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.MeasureTheory.Integral.Pi
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open MeasureTheory ValuativeRel Matrix
 
@@ -198,14 +245,14 @@ variable {k : Type} [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchim
   [BorelSpace k] {n n' n'' : Type} [Fintype n] [DecidableEq n] [Fintype n'] [DecidableEq n'] [Fintype n''] [DecidableEq n'']
   {ψ : AddChar k Circle} (ν : Measure k) [ν.IsAddHaarMeasure]
 
-omit [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] [BorelSpace k] [ν.IsAddHaarMeasure] in
 
+omit [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] [BorelSpace k] [ν.IsAddHaarMeasure] in
 theorem measurePreserving_comp_equiv {A B : Type} [Fintype A] [Fintype B] [SigmaFinite ν] (e : A ≃ B) :
     MeasurePreserving (MeasurableEquiv.piCongrLeft (fun _ : B => k) e).symm (Measure.pi fun _ => ν)
       (Measure.pi fun _ => ν) := (measurePreserving_piCongrLeft (fun _ : B => ν) e).symm
 
-omit [DecidableEq n] [DecidableEq n'] in
 
+omit [DecidableEq n] [DecidableEq n'] in
 theorem integrable_col {Ψ : Matrix n (n' ⊕ Unit) k → ℂ} (hΨ : Ψ ∈ SB _) (x : Matrix n n' k) :
     Integrable (fun y : n → k => Ψ (fromCols x (Matrix.of fun r _ => y r))) (Measure.pi fun _ => ν) := by
   obtain ⟨_, _⟩ := SplitWeil.Model.secondCountable_and_t2_local_field (k := k)
@@ -217,8 +264,8 @@ theorem integrable_col {Ψ : Matrix n (n' ⊕ Unit) k → ℂ} (hΨ : Ψ ∈ SB 
     · exact continuous_apply r
   exact (hΨ.1.continuous.comp h.continuous).integrable_of_hasCompactSupport (hΨ.2.comp_isClosedEmbedding h)
 
-omit [DecidableEq n] [DecidableEq n''] in
 
+omit [DecidableEq n] [DecidableEq n''] in
 theorem integrable_row {Ψ : Matrix (n'' ⊕ Unit) n k → ℂ} (hΨ : Ψ ∈ SB _) (x : Matrix n'' n k) :
     Integrable (fun u : n → k => Ψ (fromRows x (Matrix.of fun _ => u))) (Measure.pi fun _ => ν) := by
   obtain ⟨_, _⟩ := SplitWeil.Model.secondCountable_and_t2_local_field (k := k)
@@ -246,8 +293,8 @@ theorem integral_pair_eq_contr (hψ : Continuous ψ) {Ψ₁ : Matrix n (n' ⊕ U
   refine integral_congr_ae (Filter.Eventually.of_forall fun y => ?_)
   ring
 
-open Classical in
 
+open Classical in
 theorem integral_double_step (hψ : Continuous ψ) {c c' : ℕ} (hc : Even c) (hc' : Odd c')
     {Φ₁ : Matrix (n ⊕ Fin c) (n' ⊕ Fin (c + 1)) k → ℂ} {Φ₂ : Matrix (n'' ⊕ Fin c') (n ⊕ Fin (c' + 1)) k → ℂ}
     (h₁ : Φ₁ ∈ SB _) (h₂ : Φ₂ ∈ SB _) (x₁ : Matrix n n' k) (x₂ : Matrix n'' n k) :
@@ -266,8 +313,8 @@ theorem integral_double_step (hψ : Continuous ψ) {c c' : ℕ} (hc : Even c) (h
   simp only [flatStep_eq_flCol ψ ν hc, flatStep_eq_flRow ψ ν hc']
   rfl
 
-open Classical in
 
+open Classical in
 theorem integral_last_step {c : ℕ} (hc : Even c) (Φ : Matrix (n ⊕ Fin c) (n' ⊕ Fin (c + 1)) k → ℂ) (x : Matrix n n' k)
     (z : n → k) :
     ∫ w : KeptVar n c n' → k, flatStep ψ ν Φ x w * (ψ (-∑ r, z r * w (colIx hc r)) : ℂ) ∂(Measure.pi fun _ => ν) =

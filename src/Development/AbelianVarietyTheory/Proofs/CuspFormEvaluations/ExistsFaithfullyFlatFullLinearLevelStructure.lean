@@ -1,11 +1,59 @@
-import Mathlib
-import Formalism.LocalToGlobal.ProjectiveLattices.ThShort
-import Formalism.LocalToGlobal.ProjectiveLattices.ThGerm
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.SecBaseChangeAnySt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.VtUniq
-import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.ExistsIsIdempotentElemRangeSpMapSubset
-import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.FaithfullyFlatPointsBaseChangeDescent
-import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.ExistsFlatUniversalTorsionTuple
+module
+
+public import Formalism.LocalToGlobal.ProjectiveLattices.IsThRule
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.HeckeKer
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.GlobalSectionsRankAlgClosed
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.ExistsFlatUniversalTorsionTuple
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.ExistsIsIdempotentElemRangeSpMapSubset
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.GroupTheory.FiniteAbelian.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -147,13 +195,13 @@ private lemma modN_smul' {E : Type} [Field E] [NumberField E] [IsCMField E] {H :
 
 end LevelFlat
 
-open LevelFlat in
 
+open LevelFlat in
 theorem exists_faithfullyFlat_linear_level :
     Laws → ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (H : Host E) (Dw : Datum H) (l : Level H) (Xo : Moduli Dw l) (S : Type) [CommRing S] (x0 : Sp S ⟶ Xo.X) (k : ℕ), 0 < k → ∃ (B : Type) (_ : CommRing B) (φ : S →+* B) (ev : Dw.La → (ptO Xo (spMap φ ≫ x0) ⟶ Xo.univ.t.G)), φ.FaithfullyFlat ∧ (∀ a b, ev (a + b) = ev a * ev b) ∧ (∀ (o : 𝓞 E) a, ev (o • a) = ev a ≫ Xo.univ.t.act.act o) ∧ (∀ a, ev (k • a) = 1) ∧ ∀ (K : Type) [Field K] (χ : B →+* K) (a b : Dw.La), spMap χ ≫ (ev a).left = spMap χ ≫ (ev b).left → Dw.ModN k (a - b) := by
   intro hL E _ _ _ H Dw l Xo S _ x0 k hk
   classical
-  obtain ⟨J, hJ, π, r, hπr, hπ⟩ := exists_finite_quotient Dw k hk
+  obtain ⟨J, hJ, π, r, hπr, hπ⟩ := LevelFlat.exists_finite_quotient Dw k hk
   obtain ⟨B, _, φ, w, hφ, hw, huniv⟩ :=
     exists_flat_universal_torsion_tuple hL E H Dw l Xo S x0 k hk J
 
@@ -180,12 +228,12 @@ theorem exists_faithfullyFlat_linear_level :
     · show (w q.2 ≫ Xo.univ.t.act.act (q.1 : 𝓞 E)) ^ k = 1
       have := Xo.univ.t.act.hom (q.1 : 𝓞 E)
       rw [← MonObj.pow_comp, hw, MonObj.one_comp]
-  obtain ⟨e, he1, he2⟩ := exists_element hL Xo B (spMap φ ≫ x0) k hk _ _ fa fb fc fd hfa hfb
+  obtain ⟨e, he1, he2⟩ := LevelFlat.exists_element hL Xo B (spMap φ ≫ x0) k hk _ _ fa fb fc fd hfa hfb
     (fun p => hw _) (fun p => hw _)
   set B' := Localization.Away e
   set alg := algebraMap B B'
   have halg : spMap alg ≫ (spMap φ ≫ x0) = spMap (alg.comp φ) ≫ x0 := by
-    rw [spMap_comp_moduli_spaces φ alg, Category.assoc]
+    rw [LevelFlat.spMap_comp_moduli_spaces φ alg, Category.assoc]
   let m : ptO Xo (spMap (alg.comp φ) ≫ x0) ⟶ ptO Xo (spMap φ ≫ x0) := Over.homMk (spMap alg) halg
   have hm : ∀ f : ptO Xo (spMap φ ≫ x0) ⟶ Xo.univ.t.G, (m ≫ f).left = spMap alg ≫ f.left := by
     intro f; rfl
@@ -198,7 +246,7 @@ theorem exists_faithfullyFlat_linear_level :
     intro a b
     have hab : π (a + b) = π (r (π a) + r (π b)) := by
       rw [hπ]
-      have := modN_add' (hrep a) (hrep b)
+      have := LevelFlat.modN_add' (hrep a) (hrep b)
       convert this using 1
       abel
     show m ≫ w (π (a + b)) = (m ≫ w (π a)) * (m ≫ w (π b))
@@ -230,7 +278,7 @@ theorem exists_faithfullyFlat_linear_level :
       have hu : ∀ j, u j ^ k = 1 := fun j => (I.onto k hk (u j)).mpr ⟨r j, rfl⟩
       obtain ⟨χ, hχφ, hχu⟩ := huniv Kp ψ u hu
       have hmχ : spMap χ ≫ (spMap φ ≫ x0) = spMap ψ ≫ x0 := by
-        rw [← hχφ, spMap_comp_moduli_spaces φ χ, Category.assoc]
+        rw [← hχφ, LevelFlat.spMap_comp_moduli_spaces φ χ, Category.assoc]
       let mχ : ptO Xo (spMap ψ ≫ x0) ⟶ ptO Xo (spMap φ ≫ x0) := Over.homMk (spMap χ) hmχ
       have hmχw : ∀ j, mχ ≫ w j = u j := fun j =>
         Over.OverMorphism.ext (by rw [hχu j]; rfl)
@@ -249,7 +297,7 @@ theorem exists_faithfullyFlat_linear_level :
           rw [hsplit, h, _root_.one_mul]
       have hrepI : ∀ c, I.ev k (r (π c)) = I.ev k c := fun c => by
         rw [hIeq]
-        have := modN_neg' (hrep c)
+        have := LevelFlat.modN_neg' (hrep c)
         rwa [neg_sub] at this
       have hχe : IsUnit (χ e) := by
         apply he2 Kp χ
@@ -281,11 +329,11 @@ theorem exists_faithfullyFlat_linear_level :
         Ideal.algebraMap_residueField_eq_zero]
   ·
     intro o a
-    refine lin_of_generators Xo.univ.t.act ev hadd hgen ?_ o a
+    refine LevelFlat.lin_of_generators Xo.univ.t.act ev hadd hgen ?_ o a
     intro o ho a
     have hoa : π (o • a) = π (o • r (π a)) := by
       rw [hπ, ← smul_sub]
-      exact modN_smul' o (hrep a)
+      exact LevelFlat.modN_smul' o (hrep a)
     show m ≫ w (π (o • a)) = (m ≫ w (π a)) ≫ Xo.univ.t.act.act o
     rw [hoa, Category.assoc]
     exact heq' (Sum.inr (⟨o, ho⟩, π a))
@@ -302,7 +350,7 @@ theorem exists_faithfullyFlat_linear_level :
     have := (he1 K (χ.comp alg) hK).2 inferInstance ⟨(π a, π b), hne'⟩
     apply this
     show spMap (χ.comp alg) ≫ (w (π a)).left = spMap (χ.comp alg) ≫ (w (π b)).left
-    rw [spMap_comp_moduli_spaces alg χ, Category.assoc, Category.assoc]
+    rw [LevelFlat.spMap_comp_moduli_spaces alg χ, Category.assoc, Category.assoc]
     exact hab
 
 end GlobalTheory

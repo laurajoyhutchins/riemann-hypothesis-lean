@@ -1,5 +1,49 @@
-import Mathlib
-import GroundTheory.GlobalFields.IdeleGroups.ClassGroup
+module
+
+public import GroundTheory.GlobalFields.IdeleGroups.InfiniteProjInfiniteEmbeddingOfNe
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GroundTheory.Global
 
@@ -53,13 +97,6 @@ def openSubgroupEquivQuotient {G : Type*} [CommGroup G] [TopologicalSpace G]
     continuous_toFun := hc
     continuous_invFun := (e.toEquiv.toHomeomorphOfContinuousOpen hc ho).symm.continuous }
 
-@[simp]
-theorem openSubgroupEquivQuotient_apply {G : Type*} [CommGroup G] [TopologicalSpace G]
-    [IsTopologicalGroup G] (H N : Subgroup G) (hH : IsOpen (H : Set G)) (hinf : H ⊓ N = ⊥)
-    (hsup : H ⊔ N = ⊤) (h : H) :
-    openSubgroupEquivQuotient H N hH hinf hsup h = ((h : G) : G ⧸ N) :=
-  rfl
-
 namespace IdeleGroup
 
 variable {K : Type*} [Field K] [NumberField K]
@@ -71,12 +108,6 @@ def localIntegerUnit (v : HeightOneSpectrum (𝓞 K)) (x : standardOpenSubgroup 
     ((mem_standardOpenSubgroup K).1 x.2 v).2⟩
   val_inv := Subtype.ext (congrArg (fun y : 𝔸[K] ↦ y.2 v) (x : IdeleGroup K).mul_inv)
   inv_val := Subtype.ext (congrArg (fun y : 𝔸[K] ↦ y.2 v) (x : IdeleGroup K).inv_mul)
-
-@[simp]
-theorem coe_localIntegerUnit (v : HeightOneSpectrum (𝓞 K)) (x : standardOpenSubgroup K) :
-    (((localIntegerUnit v x : (v.adicCompletionIntegers K)ˣ) : v.adicCompletionIntegers K) :
-      v.adicCompletion K) = ((x : IdeleGroup K) : 𝔸[K]).2 v :=
-  rfl
 
 theorem continuous_localIntegerUnit (v : HeightOneSpectrum (𝓞 K)) :
     Continuous (localIntegerUnit (K := K) v) := by
@@ -95,20 +126,6 @@ def ofIntegerUnits (a : (InfiniteAdeleRing K)ˣ)
     _root_.RestrictedProduct.structureMap _ _ _ fun v ↦ ((u v)⁻¹ : (v.adicCompletionIntegers K)ˣ))
   val_inv := Prod.ext a.mul_inv (Subtype.ext (funext fun v ↦ congrArg Subtype.val (u v).mul_inv))
   inv_val := Prod.ext a.inv_mul (Subtype.ext (funext fun v ↦ congrArg Subtype.val (u v).inv_mul))
-
-@[simp]
-theorem coe_ofIntegerUnits_fst (a : (InfiniteAdeleRing K)ˣ)
-    (u : Π v : HeightOneSpectrum (𝓞 K), (v.adicCompletionIntegers K)ˣ) :
-    ((ofIntegerUnits a u : IdeleGroup K) : 𝔸[K]).1 = a :=
-  rfl
-
-@[simp]
-theorem coe_ofIntegerUnits_snd (a : (InfiniteAdeleRing K)ˣ)
-    (u : Π v : HeightOneSpectrum (𝓞 K), (v.adicCompletionIntegers K)ˣ)
-    (v : HeightOneSpectrum (𝓞 K)) :
-    ((ofIntegerUnits a u : IdeleGroup K) : 𝔸[K]).2 v =
-      ((u v : v.adicCompletionIntegers K) : v.adicCompletion K) :=
-  rfl
 
 theorem ofIntegerUnits_mem (a : (InfiniteAdeleRing K)ˣ)
     (u : Π v : HeightOneSpectrum (𝓞 K), (v.adicCompletionIntegers K)ˣ) :
@@ -131,8 +148,8 @@ theorem continuous_ofIntegerUnits :
         (continuous_pi fun v ↦
           Units.continuous_coe_inv.comp ((continuous_apply v).comp continuous_snd)))
 
-variable (K) in
 
+variable (K) in
 def standardOpenSubgroupEquiv :
     standardOpenSubgroup K ≃ₜ* (InfiniteAdeleRing K)ˣ ×
       Π v : HeightOneSpectrum (𝓞 K), (v.adicCompletionIntegers K)ˣ where
@@ -145,24 +162,6 @@ def standardOpenSubgroupEquiv :
   continuous_toFun := ((continuous_toInfinite K).comp continuous_subtype_val).prodMk
     (continuous_pi fun v ↦ continuous_localIntegerUnit v)
   continuous_invFun := continuous_ofIntegerUnits.subtype_mk _
-
-@[simp]
-theorem standardOpenSubgroupEquiv_apply_fst (x : standardOpenSubgroup K) :
-    (standardOpenSubgroupEquiv K x).1 = toInfinite K (x : IdeleGroup K) :=
-  rfl
-
-@[simp]
-theorem standardOpenSubgroupEquiv_apply_snd (x : standardOpenSubgroup K)
-    (v : HeightOneSpectrum (𝓞 K)) :
-    (standardOpenSubgroupEquiv K x).2 v = localIntegerUnit v x :=
-  rfl
-
-@[simp]
-theorem coe_standardOpenSubgroupEquiv_symm_apply
-    (p : (InfiniteAdeleRing K)ˣ × Π v : HeightOneSpectrum (𝓞 K), (v.adicCompletionIntegers K)ˣ) :
-    (((standardOpenSubgroupEquiv K).symm p : standardOpenSubgroup K) : IdeleGroup K) =
-      ofIntegerUnits p.1 p.2 :=
-  rfl
 
 end IdeleGroup
 

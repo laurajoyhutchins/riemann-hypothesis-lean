@@ -1,5 +1,51 @@
-import Mathlib
+module
+
+public import Mathlib.RingTheory.Ideal.Maps
+public import Mathlib.RingTheory.PowerSeries.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Definitions.Divisors.IsAdmissibleIntegralBasisChangeOne
+
+@[expose] public section
 
 open scoped IntermediateField Polynomial RatFunc
 open GlobalTheory.Nef
@@ -50,7 +96,7 @@ theorem ringHom_powerSeries_eq_of_rescale :
     have hlowδ : ∀ f, ∀ i < j, PowerSeries.coeff i (γ f - γ' f) = 0 := by
       intro f i hi; rw [map_sub, ih i hi f, sub_self]
     have Dadd : ∀ f g, D (f + g) = D f + D g := by
-      intro f g; simp only [hD, map_add]; ring
+      intro f g; simp only [hD, map_add (f := _)]; ring
     have Dsub : ∀ f g, D (f - g) = D f - D g := by
       intro f g; simp only [hD, map_sub]; ring
     have Dmul : ∀ f g, D (f * g) = β (ε f) * D g + β (ε g) * D f := by
@@ -61,7 +107,7 @@ theorem ringHom_powerSeries_eq_of_rescale :
       have h2 := coeff_mul_of_coeff_lt_eq_zero (γ' g) _ j (hlowδ f)
       have h3 : D (f * g) = PowerSeries.coeff j (γ (f * g) - γ' (f * g)) := by
         rw [hD, map_sub]
-      rw [h3, e, map_add, h1, h2, hc0, hc0', map_sub, map_sub, hD, hD]
+      rw [h3, e, map_add (f := _), h1, h2, hc0, hc0', map_sub, map_sub, hD, hD]
     have Dπ : ∀ b, D (π b) = 0 := by
       intro b; rw [hD, hγπ', hγ'π', PowerSeries.coeff_C, if_neg hj0, sub_self]
     have Dsq : ∀ x ∈ RingHom.ker ε ^ 2, D x = 0 := by

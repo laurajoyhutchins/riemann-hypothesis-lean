@@ -1,8 +1,60 @@
-import Mathlib
-import GroundTheory.LocalFields.MaximalUnramified
-import GroundTheory.LocalFields.SeparableClosureValuation
-set_option maxHeartbeats 4000000
-set_option synthInstance.maxHeartbeats 400000
+module
+
+public import GroundTheory.LocalFields.MaximalUnramified
+public import GroundTheory.LocalFields.IntermediateField
+public import Mathlib.RingTheory.Flat.TorsionFree
+public import Mathlib.RingTheory.Henselian
+public import GroundTheory.LocalFields.SeparableClosure
+public import GroundTheory.LocalFields.SeparableClosureValuation
+import GroundTheory.LocalFields.UnramifiedGalois
+import GroundTheory.LocalFields.UnramifiedRootsOfUnity
+import Mathlib.Algebra.GroupWithZero.Submonoid.CancelMulZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
+
+
 
 noncomputable section
 
@@ -55,11 +107,6 @@ def integerInclusion [ValuativeRel K] [ValuativeExtension K Ω] {E F : Intermedi
   map_add' _ _ := rfl
   commutes' _ := rfl
 
-@[simp]
-theorem coe_integerInclusion [ValuativeRel K] [ValuativeExtension K Ω] {E F : IntermediateField K Ω}
-    (h : E ≤ F) (x : 𝒪[E]) : (((integerInclusion h x : 𝒪[F]) : F) : Ω) = ((x : E) : Ω) :=
-  rfl
-
 theorem integerInclusion_injective [ValuativeRel K] [ValuativeExtension K Ω]
     {E F : IntermediateField K Ω} (h : E ≤ F) : Function.Injective (integerInclusion h) := by
   intro x y hxy
@@ -86,7 +133,7 @@ theorem exists_valuation_eq_algebraMap {x : Ω} (hx : x ∈ 𝔼) (hx0 : x ≠ 0
     ∃ a : K, a ≠ 0 ∧ valuation Ω x = valuation Ω (algebraMap K Ω a) := by
   obtain ⟨L, hL, hxL⟩ := mem_maximalUnramifiedExtension_iff.mp hx
   have := hL.1
-  have he : ramificationIndex K L = 1 := hL.ramificationIndex_eq_one
+  have he : (_root_.Ideal.ramificationIdx (_root_.IsLocalRing.maximalIdeal (_root_.Valuation.integer (_root_.ValuativeRel.valuation L))) (_root_.Valuation.integer (_root_.ValuativeRel.valuation K))) = 1 := hL.ramificationIndex_eq_one
   set y : L := ⟨x, hxL⟩
   obtain ⟨a, ha, hay⟩ := exists_ord_eq K (ord y)
   refine ⟨a, ha, ?_⟩
@@ -98,22 +145,21 @@ theorem exists_valuation_eq_algebraMap {x : Ω} (hx : x ∈ 𝔼) (hx0 : x ≠ 0
 
 omit [TopologicalSpace K] [IsNonarchimedeanLocalField K] [TopologicalSpace Ω]
   [IsValuativeTopology Ω] [Algebra.IsAlgebraic K Ω] [HasUnramifiedRoots K Ω] in
-
 @[simp]
 theorem coe_algebraMap_integer_intermediateField (E : IntermediateField K Ω) (a : 𝒪[K]) :
     (((algebraMap 𝒪[K] 𝒪[E] a : 𝒪[E]) : E) : Ω) = algebraMap K Ω (a : K) :=
   rfl
 
+
 omit [TopologicalSpace K] [IsNonarchimedeanLocalField K] [TopologicalSpace Ω]
   [IsValuativeTopology Ω] [Algebra.IsAlgebraic K Ω] [HasUnramifiedRoots K Ω] in
-
 theorem valuation_algebraMap_eq_one_iff (x : K) :
     valuation Ω (algebraMap K Ω x) = 1 ↔ valuation K x = 1 := by
   simpa using valuation_algebraMap_eq_iff (G := Ω) x 1
 
+
 omit [TopologicalSpace K] [IsNonarchimedeanLocalField K] [TopologicalSpace Ω]
   [IsValuativeTopology Ω] [Algebra.IsAlgebraic K Ω] [HasUnramifiedRoots K Ω] in
-
 theorem not_isUnit_algebraMap_uniformizer (E : IntermediateField K Ω) {ϖ : 𝒪[K]}
     (hϖ : Irreducible ϖ) : ¬ IsUnit (algebraMap 𝒪[K] 𝒪[E] ϖ) := by
   rw [isUnit_integer_intermediateField_iff, coe_algebraMap_integer_intermediateField,
@@ -193,8 +239,8 @@ variable {K : Type*} [Field K] [ValuativeRel K] [TopologicalSpace K] [IsNonarchi
   {L : Type*} [Field L] [ValuativeRel L] [Algebra K L] [ValuativeExtension K L]
   [Algebra.IsAlgebraic K L]
 
-variable (K L) in
 
+variable (K L) in
 def integerAlgEquivOfIsAlgebraic : (L ≃ₐ[K] L) →* (𝒪[L] ≃ₐ[𝒪[K]] 𝒪[L]) where
   toFun ρ :=
     { toFun x := ⟨ρ x, by
@@ -227,7 +273,6 @@ variable {K : Type*} [Field K] [ValuativeRel K] [TopologicalSpace K] [IsNonarchi
 local notation "𝔼" => maximalUnramifiedExtension K Ω
 
 omit [TopologicalSpace Ω] [IsValuativeTopology Ω] [Algebra.IsAlgebraic K Ω] in
-
 instance isAlgebraic_maximalUnramifiedExtension : Algebra.IsAlgebraic K 𝔼 :=
   inferInstance
 
@@ -247,7 +292,7 @@ theorem exists_pow_card_pow_sub_mem_maximalIdeal (x : 𝒪[𝔼]) :
       Nat.card_eq_fintype_card, FiniteField.pow_card, sub_self]
   rw [mem_maximalIdeal_intermediateField_iff] at hz ⊢
   rw [← hxz]
-  simpa using hz
+  simpa using! hz
 
 theorem exists_isPrimitiveRoot_residue {n : ℕ} (hn : n ≠ 0) :
     ∃ ζ : ResidueField 𝒪[𝔼], IsPrimitiveRoot ζ (Nat.card 𝓀[K] ^ n - 1) := by
@@ -277,7 +322,7 @@ theorem exists_isPrimitiveRoot_residue {n : ℕ} (hn : n ≠ 0) :
     mem_maximalIdeal_intermediateField_iff]
   rw [← map_one (residue 𝒪[𝔼]), ← sub_eq_zero, ← map_sub, residue_eq_zero_iff,
     mem_maximalIdeal_intermediateField_iff] at hl
-  simpa using hl
+  simpa using! hl
 
 variable [IsGalois K Ω]
 
@@ -327,11 +372,11 @@ variable {k k' : Type*} [Field k] [Finite k] [Field k'] [Algebra k k']
 
 theorem isAlgebraic_of_pow_card_pow_eq_self {y : k'} {n : ℕ} (hn : n ≠ 0)
     (hy : y ^ (Nat.card k ^ n) = y) : IsAlgebraic k y :=
-  ⟨X ^ (Nat.card k ^ n) - X, FiniteField.X_pow_card_pow_sub_X_ne_zero k hn Finite.one_lt_card,
+  ⟨X ^ (Nat.card k ^ n) - X, X_pow_sub_X_ne_zero (Nat.one_lt_pow hn Finite.one_lt_card),
     by simp [hy]⟩
 
-omit [Algebra k k'] in
 
+omit [Algebra k k'] in
 theorem splits_X_pow_card_pow_sub_X_of_isPrimitiveRoot {m : ℕ} {ζ : k'}
     (hζ : IsPrimitiveRoot ζ (Nat.card k ^ m - 1)) :
     Splits (X ^ (Nat.card k ^ m) - X : k'[X]) := by
@@ -371,7 +416,7 @@ theorem isAlgClosed_of_isPrimitiveRoot [Algebra.IsAlgebraic k k']
     simp only [Polynomial.map_sub, Polynomial.map_pow, map_X, IsRoot.def, eval_sub, eval_pow,
       eval_X, hα, sub_self]
   obtain ⟨β, hβ⟩ := (splits_X_pow_card_pow_sub_X_of_isPrimitiveRoot hζ).mem_range_of_isRoot
-    (FiniteField.X_pow_card_pow_sub_X_ne_zero k' hm Finite.one_lt_card) hroot
+    (X_pow_sub_X_ne_zero (Nat.one_lt_pow hm Finite.one_lt_card)) hroot
   refine ⟨β, ?_⟩
   have h0 : aeval α p = 0 := by rw [AdjoinRoot.aeval_eq, AdjoinRoot.mk_self]
   rw [← hβ, aeval_algebraMap_apply_eq_algebraMap_eval] at h0
@@ -402,12 +447,6 @@ instance isAlgebraic_residueField : Algebra.IsAlgebraic 𝓀[K] 𝓀[𝔼] := by
 
 instance isAlgClosed_residueField : IsAlgClosed 𝓀[𝔼] :=
   isAlgClosed_of_isPrimitiveRoot (k := 𝓀[K]) fun _ hm ↦ exists_isPrimitiveRoot_residue hm
-
-instance isAlgClosure_residueField :
-    letI : Module.IsTorsionFree 𝓀[K] 𝓀[𝔼] := DivisionSemiring.to_moduleIsTorsionFree
-    IsAlgClosure 𝓀[K] 𝓀[𝔼] :=
-  letI : Module.IsTorsionFree 𝓀[K] 𝓀[𝔼] := DivisionSemiring.to_moduleIsTorsionFree
-  ⟨isAlgClosed_residueField, isAlgebraic_residueField⟩
 
 end Residue
 

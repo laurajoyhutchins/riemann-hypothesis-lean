@@ -1,6 +1,44 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.ExistsIterateDerivative
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.BhattScholzeCrystallineLattices
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.ExistsIterateDerivative
+public import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.BhattScholzeCrystallineLattices
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -18,23 +56,23 @@ section Lat
 
 variable {G : Type} [Group G] [TopologicalSpace G] {T T' : LocLat G ℚ_[l] K O}
 
-omit [Module.Free ℤ_[l] O] [Module.Finite ℤ_[l] O] [IsUltrametricDist K] [IsUnitBall O K] in
 
+omit [Module.Free ℤ_[l] O] [Module.Finite ℤ_[l] O] [IsUltrametricDist K] [IsUnitBall O K] in
 theorem latW_smul (f : LatHom T.L T'.L) (r : OW l O) (y : TW (OW l O) T) :
     latW f (r • y) = r • latW f y := by
   induction y using TensorProduct.induction_on with
   | zero => simp only [smul_zero, map_zero]
   | tmul w x => rfl
-  | add x y hx hy => simp only [smul_add, map_add, hx, hy]
+  | add x y hx hy => simp only [smul_add, map_add (f := _), hx, hy]
+
 
 omit [Module.Free ℤ_[l] O] [Module.Finite ℤ_[l] O] [IsUltrametricDist K] [IsUnitBall O K] in
-
 theorem latW_frob (f : LatHom T.L T'.L) (y : TW (OW l O) T) :
     latW f (TWmap (frobOW l O) T y) = TWmap (frobOW l O) T' (latW f y) := by
   induction y using TensorProduct.induction_on with
   | zero => simp only [map_zero]
   | tmul w x => rfl
-  | add x y hx hy => simp only [map_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
 
 def latZ (f : LatHom T.L T'.L) :
     letI := zlLat T
@@ -46,8 +84,8 @@ def latZ (f : LatHom T.L T'.L) :
     map_add' := map_add _
     map_smul' := fun z x => ((f.f.restrictScalars O).restrict f.T_le).map_smul (algebraMap ℤ_[l] O z) x }
 
-omit [Module.Free ℤ_[l] O] [Module.Finite ℤ_[l] O] [IsUltrametricDist K] [IsUnitBall O K] in
 
+omit [Module.Free ℤ_[l] O] [Module.Finite ℤ_[l] O] [IsUltrametricDist K] [IsUnitBall O K] in
 theorem kappa_latZ (f : LatHom T.L T'.L) :
     letI := zlLat T
     letI := zlLat T'
@@ -58,7 +96,7 @@ theorem kappa_latZ (f : LatHom T.L T'.L) :
   induction y using TensorProduct.induction_on with
   | zero => simp only [map_zero]
   | tmul w x => rfl
-  | add x y hx hy => simp only [map_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
 
 variable {P : PhiMod O K l e a ι} {Q : PhiMod O K l e a κ}
 
@@ -89,7 +127,9 @@ theorem exists_isMapOf (I : Ident t ϖ P T) (I' : Ident t ϖ Q T') (f : LatHom T
       ext1 i
       rw [Finset.sum_apply]
       exact Finset.sum_congr rfl fun j _ => mul_comm _ _
+
     conv_rhs => rw [pi_eq_sum_univ' v, map_sum, map_sum]
+
     rw [h1, map_sum]
     refine Finset.sum_congr rfl fun j _ => ?_
     rw [map_smul I.j, latW_smul, hmj, hY, map_smul I'.j]
@@ -110,6 +150,7 @@ theorem exists_isMapOf (I : Ident t ϖ P T) (I' : Ident t ϖ Q T') (f : LatHom T
     ∑ k, ϖ.iW t K _ * frobOW l O (inclO l O (ϖ.iTot t K _)) at h1
   simp only [frobOW_inclO, ← PiSys.iTot_frob] at h1
   simp only [← ϖ.iW_of_mem t K, ← map_mul] at h1
+
   rw [← map_sum, ← map_sum] at h1
   have h2 := congrArg Subtype.val (congrFun (ϖ.iW_injective t K h1) τ)
   rw [Finset.sum_apply, Finset.sum_apply, AddSubmonoidClass.coe_finsetSum,

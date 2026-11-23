@@ -1,8 +1,50 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.MaxWeightGL1EqOne
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.MaxWeightGL1EqOne
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MassFormulaConjugationActionStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.OrbitSumLocalParts
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.StabilizerEquivLocPart
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MassFormulaConjugationActionStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.OrbitSumLocalParts
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open scoped Classical
 
@@ -65,7 +107,7 @@ theorem unfolded_eq_orbital : ∀ (G : Type) [Group G] (Γ K : Subgroup G) (W : 
     | h x =>
     induction x using QuotientGroup.induction_on with
     | H g =>
-    obtain ⟨h, k, hh, hk, e⟩ := DoubleCoset.mk_out_eq_mul Γ K g
+    obtain ⟨h, hh, k, hk, e⟩ := DoubleCoset.mk_out_eq_mul Γ K g
     refine ⟨DoubleCoset.mk Γ K g, Quotient.sound ⟨⟨h, hh⟩, ?_⟩⟩
     show (h : G) • (QuotientGroup.mk g : G ⧸ K) = QuotientGroup.mk (Quotient.out (DoubleCoset.mk Γ K g))
     rw [MulAction.Quotient.smul_mk, e, QuotientGroup.eq]
@@ -138,21 +180,21 @@ theorem finsum_doubleCoset_conj {G : Type} [Group G] (A B K : Subgroup G) (f : G
     · intro q1 q2 h
       rw [DoubleCoset.eq] at h
       obtain ⟨h', hh', k, hk, e⟩ := h
-      rw [← DoubleCoset.out_eq' B K q1, ← DoubleCoset.out_eq' B K q2, DoubleCoset.eq]
+      rw [← DoubleCoset.out_eq' q1, ← DoubleCoset.out_eq' q2, DoubleCoset.eq]
       refine ⟨a⁻¹ * h' * a, (hAB h').1 hh', k, hk, ?_⟩
       calc Quotient.out q2 = a⁻¹ * (a * Quotient.out q2) := by group
         _ = _ := by rw [e]; group
     · intro p
       refine ⟨DoubleCoset.mk B K (a⁻¹ * Quotient.out p), ?_⟩
-      obtain ⟨b, k, hb, hk, e⟩ := DoubleCoset.mk_out_eq_mul B K (a⁻¹ * Quotient.out p)
+      obtain ⟨b, hb, k, hk, e⟩ := DoubleCoset.mk_out_eq_mul B K (a⁻¹ * Quotient.out p)
       show DoubleCoset.mk A K (a * Quotient.out (DoubleCoset.mk B K (a⁻¹ * Quotient.out p))) = p
-      conv_rhs => rw [← DoubleCoset.out_eq' A K p]
+      conv_rhs => rw [← DoubleCoset.out_eq' p]
       rw [e, DoubleCoset.eq]
       refine ⟨(a * b * a⁻¹)⁻¹, A.inv_mem (hB b hb), k⁻¹, K.inv_mem hk, by group⟩
   rw [← finsum_comp_equiv (Equiv.ofBijective F hbij)]
   refine finsum_congr fun q => ?_
   simp only [Equiv.ofBijective_apply, F]
-  obtain ⟨h, k, hh, hk, e⟩ := DoubleCoset.mk_out_eq_mul A K (a * Quotient.out q)
+  obtain ⟨h, hh, k, hk, e⟩ := DoubleCoset.mk_out_eq_mul A K (a * Quotient.out q)
   rw [e, show h * (a * Quotient.out q) * k = (h * a) * Quotient.out q * k by group]
   have hAB' : ∀ y, y ∈ A ↔ (h * a)⁻¹ * y * (h * a) ∈ B := by
     intro y

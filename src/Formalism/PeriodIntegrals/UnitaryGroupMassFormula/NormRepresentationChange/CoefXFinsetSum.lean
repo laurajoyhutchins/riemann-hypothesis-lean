@@ -1,10 +1,50 @@
-import Mathlib
-import Formalism.PeriodIntegrals.PairValDefs
-import Formalism.PeriodIntegrals.NormRepChange
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.NormRepresentationChange.Development
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.NormRepresentationChange.NlamFrameMem
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.NormRepresentationChange.Development
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.NormRepresentationChange.CoefXOfMemSpanO
 import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.NormRepresentationChange.CoefXOfMemXS
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.NormRepresentationChange.CoefXOfMemSpanO
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.NormRepresentationChange.NlamFrameMem
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -21,10 +61,10 @@ variable {E : Type} [Field E] [NumberField E] [StarRing E] {S : HSpace E} {r : �
 theorem sgUp_eq_sum {K : Type} [Field K] [NumberField K] (U : Matrix (Fin (r + 1)) (Fin (r + 1)) K) :
     sgUp U = ∑ a : Fin r, U a.castSucc a.succ := by
   unfold sgUp
-  rw [Fin.sum_univ_castSucc, dif_neg (by simp), add_zero]
+  rw [Fin.sum_univ_castSucc, dite_eq_right (by simp), add_zero]
   apply Finset.sum_congr rfl
   intro a _
-  rw [dif_pos (by simp)]
+  rw [dite_eq_left (by simp)]
   rfl
 
 theorem frame_d_mem {Λ : Submodule (𝓞 E) S.V} (G : LFlag S r T) {n : S.V ≃ₗ[E] S.V} (hn : n ∈ NLam Λ G)
@@ -50,15 +90,15 @@ end Gen
 
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
 
-theorem fmat_sup (D : D7) {T : D.host.E} (G : LFlag (VS D) D.R.rS T) (n : (VS D).V ≃ₗ[D.host.E] (VS D).V)
+theorem fmat_sup (D : D7) {T : D.host.E} (G : LFlag (D.sp.Y 0) D.R.rS T) (n : (VS D).V ≃ₗ[D.host.E] (VS D).V)
     (a : Fin D.R.rS) :
     fmat D G n a.castSucc a.succ = G.fl.coefX (n (frame G a.succ) - frame G a.succ) a := by
   unfold fmat
-  rw [if_neg (fun h => by have := congrArg Fin.val h; simp at this), zero_add, dif_pos (by simp)]
+  rw [if_neg (fun h => by have := congrArg Fin.val h; simp at this), zero_add, dite_eq_left (by simp)]
   rfl
 
-theorem loc_entry (D : D7) (Λ : Submodule (𝓞 D.host.E) (VS D).V) {T T' : D.host.E} (G : LFlag (VS D) D.R.rS T)
-    (G₁ G₂ : LFlag (VS D) D.R.rS T') (n m : (VS D).V ≃ₗ[D.host.E] (VS D).V) (hn : n ∈ NLam Λ G)
+theorem loc_entry (D : D7) (Λ : Submodule (𝓞 D.host.E) (VS D).V) {T T' : D.host.E} (G : LFlag (D.sp.Y 0) D.R.rS T)
+    (G₁ G₂ : LFlag (D.sp.Y 0) D.R.rS T') (n m : (VS D).V ≃ₗ[D.host.E] (VS D).V) (hn : n ∈ NLam Λ G)
     (hm : m ∈ NLam Λ G₁) (hfr : ∀ a, frame G₂ a = n (m (frame G₁ a))) (hC : IsFixedConv Λ (gS D) G)
     (hC₁ : IsFixedConv Λ (gS D) G₁) (hA1 : AdmWit Λ (gS D) G G₁ 1) (hA2 : AdmWit Λ (gS D) G G₂ 1)
     (hz₁ : G₁.fl.z ∈ Λ) (P : HeightOneSpectrum (𝓞 D.host.E)) (hP : ((gS D : ℕ) : 𝓞 D.host.E) ∈ P.asIdeal)
@@ -103,7 +143,8 @@ theorem loc_entry (D : D7) (Λ : Submodule (𝓞 D.host.E) (VS D).V) {T T' : D.h
   have hYeq : Y = (frame G₂ b - frame G b) - (frame G₁ b - frame G b) + (frame G₁ b - frame G b) -
       n (frame G₁ b - frame G b) - n (∑ c, M' c • (G₁.fl.e c - G.fl.e c)) := by
     rw [hY, hfr b, hd'sum]
-    simp only [map_add, map_sub, map_sum, map_smul, smul_sub, Finset.sum_sub_distrib]
+
+    simp only [map_add (f := _), map_sub, map_sum, map_smul, smul_sub, Finset.sum_sub_distrib]
     abel
   have hYLg : Y ∈ LP P (Ideal.span {((gS D : ℕ) : 𝓞 D.host.E)} • Λ) := by
     rw [hYeq]

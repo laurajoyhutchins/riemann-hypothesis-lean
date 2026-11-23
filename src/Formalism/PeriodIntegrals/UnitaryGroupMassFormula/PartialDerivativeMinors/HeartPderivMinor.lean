@@ -1,5 +1,49 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.PartialDerivativeMinors.PMinorAff
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.PartialDerivativeMinors.PMinorAff
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -13,23 +57,6 @@ open PI.EntAtD
 section Ker
 
 variable {A : Type} [CommRing A] (D : Derivation ℤ A A)
-
-def heartKer : Subring A where
-  carrier := {f | D f = 0}
-  mul_mem' := by
-    intro a b ha hb
-    simp only [Set.mem_ofPred_eq] at *
-    rw [Derivation.leibniz, ha, hb, smul_zero, smul_zero, add_zero]
-  one_mem' := D.map_one_eq_zero
-  add_mem' := by
-    intro a b ha hb
-    simp only [Set.mem_ofPred_eq] at *
-    rw [map_add, ha, hb, add_zero]
-  zero_mem' := D.map_zero
-  neg_mem' := by
-    intro a ha
-    simp only [Set.mem_ofPred_eq] at *
-    rw [map_neg, ha, neg_zero]
 
 end Ker
 
@@ -48,6 +75,7 @@ private theorem derivation_prod_eq_zero_of_forall' {R A ι : Type} [CommRing R] 
 private theorem derivation_det_eq_zero_of_entries {R A : Type} [CommRing R] [CommRing A] [Algebra R A]
     (D : Derivation R A A) {k : ℕ} (M : Matrix (Fin k) (Fin k) A) (h : ∀ i j, D (M i j) = 0) :
     D M.det = 0 := by
+
   rw [Matrix.det_apply, map_sum]
   refine Finset.sum_eq_zero fun σ _ => ?_
   rw [Units.smul_def, map_zsmul, derivation_prod_eq_zero_of_forall' D _ _ (fun i _ => h _ _), smul_zero]
@@ -58,6 +86,7 @@ theorem heart_pderiv_minor {Lt : Type} [Fintype Lt] [DecidableEq Lt] (N0 N1 : �
   simp only [minorXZ]
   apply derivation_det_eq_zero_of_entries
   intro i j
+
   rw [Matrix.of_apply, map_sum]
   refine Finset.sum_eq_zero fun a0 _ => ?_
   rw [Derivation.leibniz, MvPolynomial.pderiv_X, MvPolynomial.pderiv_X]

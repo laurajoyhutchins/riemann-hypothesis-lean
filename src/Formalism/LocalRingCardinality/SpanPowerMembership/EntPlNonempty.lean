@@ -1,60 +1,51 @@
-import Formalism.LocalRingCardinality.DataKerI
-import Formalism.LocalRingCardinality.SpanPowerMembership.ExistsHomOfBasis
+module
+
+public import Formalism.LocalRingCardinality.DataKerI
+public import Formalism.LocalRingCardinality.SpanPowerMembership.ExistsHomOfBasis
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Formalism.MainNotions.G Formalism.BasicNotions NumberField
 
 noncomputable section
 
 namespace Formalism.BasicNotions.Examples₂
-
-def zeroEnt (D : D7) (Dx : DivX D) (Tw : TwForms D)
-    (lam : ∀ w : D.what₂.places.Pl, (algebraicClosure ℚ ℂ) →+* ℂ_[D.what₂.places.resChar w])
-    (iL : ∀ w : D.what₂.places.Pl, D.what₂.LL →+* ℂ_[D.what₂.places.resChar w])
-    (h1 : ∀ w x, iL w x = lamV (lam w) (D.what₂.embLL x))
-    (h2 : ∀ w x, x ∈ intW D.what₂.places w ↔ ‖iL w x‖ ≤ 1)
-    (h0 : ∀ u μ i, Subsingleton ((Tw.fm u μ).lat i).V) : KerEnt D Dx Tw where
-  lam := lam
-  iL := iL
-  iL_lam := h1
-  iL_int := h2
-  Th := fun _ _ _ _ _ _ => 0
-  VQ := fun _ _ _ _ => PUnit
-  ev := fun _ _ _ _ => 0
-  ev_inj := fun _ _ _ _ a b _ => Subsingleton.elim a b
-  prS := fun _ _ _ _ _ => 0
-  prT := fun _ _ _ _ _ => 0
-  prT_val := fun _ _ _ _ _ _ _ _ _ => ⟨0, by simp⟩
-  lat_S := by
-    intro u μ w _ i _ φ
-    have := h0 u μ i
-    constructor
-    · rintro ⟨x, _, rfl⟩
-      have hx : x = 0 := Subsingleton.elim _ _
-      subst hx
-      refine ⟨by rw [map_zero]; exact Submodule.zero_mem _, fun c => ⟨PUnit.unit, by simp, by simp⟩⟩
-    · rintro ⟨_, h⟩
-      refine ⟨0, Submodule.zero_mem _, ?_⟩
-      rw [map_zero]
-      funext c
-      obtain ⟨v, hv, _⟩ := h c
-      simpa using hv
-  levelFree_lattice_condition := by
-    intro u μ w _ i _ φ
-    have := h0 u μ (i + 1)
-    constructor
-    · rintro ⟨x, _, rfl⟩
-      have hx : x = 0 := Subsingleton.elim _ _
-      subst hx
-      refine ⟨by rw [map_zero]; exact Submodule.zero_mem _, fun c => ⟨PUnit.unit, by simp, by simp⟩⟩
-    · rintro ⟨_, h⟩
-      refine ⟨0, Submodule.zero_mem _, ?_⟩
-      rw [map_zero]
-      funext c
-      obtain ⟨v, hv, _⟩ := h c
-      simpa using hv
-  un := fun _ _ _ _ _ _ => 1
-  un_ne := by intros; exact one_ne_zero
-  kform := by intros; simp
 
 structure EntPl (D : D7) where
   lam : ∀ w : D.what₂.places.Pl, (algebraicClosure ℚ ℂ) →+* ℂ_[D.what₂.places.resChar w]
@@ -67,12 +58,6 @@ theorem entPl_nonempty (D : D7) : Nonempty (EntPl D) := by
   choose lam iL h1 h2 using fun w => exists_placeEmb D w
   exact ⟨⟨lam, iL, fun w x => by
     obtain ⟨hx, e⟩ := h1 w x
-    rw [lamV, dif_pos hx, e], fun w x _ => (h1 w x).choose_spec, h2⟩⟩
-
-def entZero (D : D7) (Dx : DivX D) (Tw : TwForms D) (P : EntPl D)
-    (h0 : ∀ u μ i, Subsingleton ((Tw.fm u μ).lat i).V) : KerEnt D Dx Tw :=
-  zeroEnt D Dx Tw P.lam P.iL P.iL_lam P.iL_int h0
-
-theorem entZero_lam (D : D7) (Dx Tw P h0) : (entZero D Dx Tw P h0).lam = P.lam := rfl
+    rw [lamV, dite_eq_left hx, e], fun w x _ => (h1 w x).choose_spec, h2⟩⟩
 
 end Formalism.BasicNotions.Examples₂

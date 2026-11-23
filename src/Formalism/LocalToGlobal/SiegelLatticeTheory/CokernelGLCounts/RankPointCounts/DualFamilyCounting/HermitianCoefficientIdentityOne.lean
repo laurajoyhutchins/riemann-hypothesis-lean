@@ -1,4 +1,54 @@
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.MemSpanSSelf
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.SplitAtOf
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.MemSpanSSelf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Module
 
@@ -48,13 +98,13 @@ theorem spans_eq {κ ι : Type} [Fintype κ] [Fintype ι] {f : κ → V} {g : ι
 
 theorem form_pair (x y : V) (hxy : h x y = 0) (hyx : h y x = 0) (α β γ δ : K) :
     h (α • x + β • y) (γ • x + δ • y) = star α * γ * h x x + star β * δ * h y y := by
-  simp only [map_add, map_smulₛₗ, LinearMap.add_apply, LinearMap.smul_apply, map_smul, hxy, hyx,
+  simp only [map_add (f := _), map_smulₛₗ, LinearMap.add_apply, LinearMap.smul_apply, map_smul, hxy, hyx,
     smul_eq_mul, starRingEnd_apply, RingHom.id_apply, mul_zero, add_zero, zero_add]
   ring
 
 theorem form_pair_orth (x y z : V) (hxz : h x z = 0) (hyz : h y z = 0) (α β : K) :
     h (α • x + β • y) z = 0 := by
-  simp only [map_add, map_smulₛₗ, LinearMap.add_apply, LinearMap.smul_apply, hxz, hyz,
+  simp only [map_add (f := _), map_smulₛₗ, LinearMap.add_apply, LinearMap.smul_apply, hxz, hyz,
     smul_eq_mul, mul_zero, add_zero]
 
 theorem hermitian_coefficient_identity_one {A B D α β : K} (hA : A ≠ 0) (hD : D ≠ 0)
@@ -162,11 +212,11 @@ theorem rot2 (hS : IsHermSemilocal S) (hπ : IsUnif S π) (hs : h.IsSymm) {ι : 
   have hkY : ∀ k, k ≠ i₀ → k ≠ j → h (b k) Y = 0 := by
     intro k h1 h2
     show h (b k) (α • b i₀ + β • b j) = 0
-    rw [map_add, map_smul, map_smul, ho k i₀ h1, ho k j h2, smul_zero, smul_zero, add_zero]
+    rw [map_add (f := _), map_smul, map_smul, ho k i₀ h1, ho k j h2, smul_zero, smul_zero, add_zero]
   have hkZ : ∀ k, k ≠ i₀ → k ≠ j → h (b k) Z = 0 := by
     intro k h1 h2
     show h (b k) ((-(star β * (B * A⁻¹))) • b i₀ + star α • b j) = 0
-    rw [map_add, map_smul, map_smul, ho k i₀ h1, ho k j h2, smul_zero, smul_zero, add_zero]
+    rw [map_add (f := _), map_smul, map_smul, ho k i₀ h1, ho k j h2, smul_zero, smul_zero, add_zero]
   have ortho : ∀ p q, p ≠ q → h (c p) (c q) = 0 := by
     intro p q hpq
     by_cases hp0 : p = i₀

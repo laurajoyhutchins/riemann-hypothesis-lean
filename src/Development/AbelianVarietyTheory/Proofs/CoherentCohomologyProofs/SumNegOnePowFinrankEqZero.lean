@@ -1,6 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.QuasicoherentCohomology.HdimEqZeroOfSubsingleton
-import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.MapFOneInjectiveOfSectionsSurjective
+module
+
+public import Development.AbelianVarietyTheory.Definitions.QuasicoherentCohomology.HdimEqZeroOfSubsingleton
+public import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.MapFOneInjectiveOfSectionsSurjective
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+
+@[expose] public section
 
 open CategoryTheory AlgebraicGeometry TopologicalSpace Opposite Limits Module
 
@@ -45,29 +93,6 @@ theorem finrank_le {A B C : Type*} [AddCommGroup A] [AddCommGroup B]
   have : Module.Finite k B := finite h
   rw [finrank_eq_range_add_range h]
   exact add_le_add f.finrank_range_le (Submodule.finrank_le _)
-
-theorem sum_neg_one_pow_finrank {V : ℕ → Type*} [∀ i, AddCommGroup (V i)] [∀ i, Module k (V i)]
-    (f : ∀ i, V i →ₗ[k] V (i + 1)) (N : ℕ) (hV : ∀ i < N, Module.Finite k (V i))
-    (h : ∀ i < N, Function.Exact (f i) (f (i + 1))) :
-    ∑ i ∈ Finset.range N, (-1 : ℤ) ^ i * finrank k (V i) =
-      finrank k (LinearMap.ker (f 0)) - (-1) ^ N * finrank k (LinearMap.ker (f N)) := by
-  induction N with
-  | zero => simp
-  | succ N ih =>
-    have := hV N N.lt_succ_self
-    rw [Finset.sum_range_succ, ih (fun i hi ↦ hV i (by omega)) (fun i hi ↦ h i (by omega)),
-      ← (f N).finrank_range_add_finrank_ker, (h N N.lt_succ_self).linearMap_ker_eq]
-    push_cast
-    ring
-
-theorem sum_neg_one_pow_finrank_eq_zero {V : ℕ → Type*} [∀ i, AddCommGroup (V i)]
-    [∀ i, Module k (V i)] (f : ∀ i, V i →ₗ[k] V (i + 1)) (N : ℕ)
-    (hV : ∀ i < N, Module.Finite k (V i)) (h₀ : Function.Injective (f 0))
-    (h : ∀ i < N, Function.Exact (f i) (f (i + 1))) (hN : Subsingleton (V N)) :
-    ∑ i ∈ Finset.range N, (-1 : ℤ) ^ i * finrank k (V i) = 0 := by
-  rw [sum_neg_one_pow_finrank f N hV h, LinearMap.ker_eq_bot.2 h₀, finrank_bot,
-    finrank_zero_of_subsingleton (M := LinearMap.ker (f N))]
-  simp
 
 variable {A B C : ℕ → Type*} [∀ i, AddCommGroup (A i)] [∀ i, AddCommGroup (B i)]
   [∀ i, AddCommGroup (C i)] [∀ i, Module k (A i)] [∀ i, Module k (B i)] [∀ i, Module k (C i)]
@@ -115,15 +140,8 @@ end ExactSeq
 variable {X : Scheme.{u}}
 
 theorem shortExact_toAbSheaf {S : ShortComplex X.Modules} (hS : S.ShortExact) :
-    (S.map (toAbSheaf X)).ShortExact :=
+    (S.map (toAbSheaf (X := X))).ShortExact :=
   SheafLES.shortExact_map_toSheaf X.ringCatSheaf hS
-
-@[simps] def smulShortComplexHom (S : ShortComplex X.Modules) (r : Γ(X, ⊤)) : S ⟶ S where
-  τ₁ := smulHom S.X₁ r
-  τ₂ := smulHom S.X₂ r
-  τ₃ := smulHom S.X₃ r
-  comm₁₂ := smulHom_comp S.f r
-  comm₂₃ := smulHom_comp S.g r
 
 namespace cohOn
 
@@ -134,55 +152,77 @@ def δ (U : X.Opens) (n : ℕ) : cohOn S.X₃ U n →ₗ[R] cohOn S.X₁ U (n + 
   WithAction.linearMap (action S.X₃ U n) (action S.X₁ U (n + 1)) R
     (SheafLES.δ.{u} (shortExact_toAbSheaf hS) n U) fun r x ↦ by
       rw [action_apply, action_apply]
-      exact (SheafLES.δ_naturality.{u} (shortExact_toAbSheaf hS) (shortExact_toAbSheaf hS)
-        ((toAbSheaf X).mapShortComplex.map (smulShortComplexHom S r)) n U x).symm
+      let φ : S ⟶ S :=
+        { τ₁ := smulHom S.X₁ r
+          τ₂ := smulHom S.X₂ r
+          τ₃ := smulHom S.X₃ r
+          comm₁₂ := smulHom_comp r S.f
+          comm₂₃ := smulHom_comp r S.g }
+      simpa only [SheafLES.map, SiteCoh.map, Functor.mapShortComplex_map_τ₁,
+        Functor.mapShortComplex_map_τ₃, φ] using
+        (SheafLES.δ_naturality.{u} (shortExact_toAbSheaf hS) (shortExact_toAbSheaf hS)
+          ((toAbSheaf (X := X)).mapShortComplex.map φ) n U x).symm
 
 variable (U : X.Opens) (n : ℕ)
 
 lemma toH'_δ (x : cohOn S.X₃ U n) :
     toH' S.X₁ U (n + 1) (δ R hS U n x) =
-      SheafLES.δ.{u} (shortExact_toAbSheaf hS) n U (toH' S.X₃ U n x) := rfl
+      SheafLES.δ.{u} (shortExact_toAbSheaf hS) n U (toH' S.X₃ U n x) := by
+  unfold δ toH'
+  apply WithAction.toBase_linearMap
 
-lemma δ_eq_δ (R' : Type t) [CommRing R'] [Algebra R' Γ(X, ⊤)] (x : cohOn S.X₃ U n) :
-    δ R hS U n x = δ R' hS U n x := rfl
+-- Check the conversion to linear maps with the scalar actions and additive maps abstract.
+private theorem exact_withAction {A M₁ M₂ M₃ : Type*} [CommRing A]
+    [AddCommGroup M₁] [AddCommGroup M₂] [AddCommGroup M₃]
+    (ρ₁ : A →+* AddMonoid.End M₁) (ρ₂ : A →+* AddMonoid.End M₂)
+    (ρ₃ : A →+* AddMonoid.End M₃) (R' : Type*) [CommRing R'] [Algebra R' A]
+    (f : M₁ →+ M₂) (g : M₂ →+ M₃)
+    (hf : ∀ a x, f (ρ₁ a x) = ρ₂ a (f x)) (hg : ∀ a x, g (ρ₂ a x) = ρ₃ a (g x))
+    (h : Function.Exact f g) : Function.Exact
+      (WithAction.linearMap ρ₁ ρ₂ R' f hf) (WithAction.linearMap ρ₂ ρ₃ R' g hg) := h
+
 
 include hS in
+theorem exact₂ : Function.Exact (map R S.f U n) (map R S.g U n) := by
+  have h : Function.Exact
+      (SheafLES.map.{u} ((toAbSheaf (X := X)).map S.f) n U)
+      (SheafLES.map.{u} ((toAbSheaf (X := X)).map S.g) n U) :=
+    SheafLES.exact₂.{u} (shortExact_toAbSheaf hS) n U
+  unfold map
+  apply exact_withAction
+  exact h
 
-theorem exact₂ : Function.Exact (map R S.f U n) (map R S.g U n) :=
-  SheafLES.exact₂.{u} (shortExact_toAbSheaf hS) n U
+theorem exact₃ : Function.Exact (map R S.g U n) (δ R hS U n) := by
+  have h : Function.Exact
+      (SheafLES.map.{u} ((toAbSheaf (X := X)).map S.g) n U)
+      (SheafLES.δ.{u} (shortExact_toAbSheaf hS) n U) :=
+    SheafLES.exact₃.{u} (shortExact_toAbSheaf hS) n U
+  unfold map δ
+  apply exact_withAction
+  exact h
 
-theorem exact₃ : Function.Exact (map R S.g U n) (δ R hS U n) :=
-  SheafLES.exact₃.{u} (shortExact_toAbSheaf hS) n U
-
-theorem exact₁ : Function.Exact (δ R hS U n) (map R S.f U (n + 1)) :=
-  SheafLES.exact₁.{u} (shortExact_toAbSheaf hS) n U
+theorem exact₁ : Function.Exact (δ R hS U n) (map R S.f U (n + 1)) := by
+  have h : Function.Exact
+      (SheafLES.δ.{u} (shortExact_toAbSheaf hS) n U)
+      (SheafLES.map.{u} ((toAbSheaf (X := X)).map S.f) (n + 1) U) :=
+    SheafLES.exact₁.{u} (shortExact_toAbSheaf hS) n U
+  unfold δ map
+  apply exact_withAction
+  exact h
 
 theorem map_zero_injective_of_mono {F G : X.Modules} (φ : F ⟶ G) [Mono φ] :
     Function.Injective (map R φ U 0) :=
-  SheafLES.map_zero_injective_of_mono.{u} ((toAbSheaf X).map φ) U
+  SheafLES.map_zero_injective_of_mono.{u} ((toAbSheaf (X := X)).map φ) U
+
 
 include hS in
-
-theorem injective_zero : Function.Injective (map R S.f U 0) :=
-  SheafLES.injective_zero.{u} (shortExact_toAbSheaf hS) U
+theorem injective_zero : Function.Injective (map R S.f U 0) := by
+  have := hS.mono_f
+  exact map_zero_injective_of_mono R U S.f
 
 @[simp] lemma δ_map (x : cohOn S.X₂ U n) : δ R hS U n (map R S.g U n x) = 0 :=
   (exact₃ R hS U n).apply_apply_eq_zero x
 
-@[simp] lemma map_δ (x : cohOn S.X₃ U n) : map R S.f U (n + 1) (δ R hS U n x) = 0 :=
-  (exact₁ R hS U n).apply_apply_eq_zero x
-
-theorem δ_naturality {S' : ShortComplex X.Modules} (hS' : S'.ShortExact) (φ : S ⟶ S')
-    (x : cohOn S.X₃ U n) :
-    map R φ.τ₁ U (n + 1) (δ R hS U n x) = δ R hS' U n (map R φ.τ₃ U n x) :=
-  SheafLES.δ_naturality.{u} (shortExact_toAbSheaf hS) (shortExact_toAbSheaf hS')
-    ((toAbSheaf X).mapShortComplex.map φ) n U x
-
-variable {U} in
-
-theorem res_δ {V : X.Opens} (h : V ≤ U) (x : cohOn S.X₃ U n) :
-    res R S.X₁ h (n + 1) (δ R hS U n x) = δ R hS V n (res R S.X₃ h n x) :=
-  SheafLES.δ_res.{u} (shortExact_toAbSheaf hS) n (homOfLE h) x
 
 include hS
 
@@ -190,30 +230,21 @@ theorem map_g_surjective (h : Subsingleton (cohOn S.X₁ U (n + 1))) :
     Function.Surjective (map R S.g U n) :=
   fun x ↦ (exact₃ R hS U n x).1 (Subsingleton.elim _ _)
 
-theorem map_f_injective (h : Subsingleton (cohOn S.X₃ U n)) :
-    Function.Injective (map R S.f U (n + 1)) := by
-  rw [injective_iff_map_eq_zero]
-  intro x hx
-  obtain ⟨y, rfl⟩ := (exact₁ R hS U n x).1 hx
-  rw [Subsingleton.elim y 0, map_zero]
-
-theorem app_surjective (h : Subsingleton (cohOn S.X₁ U 1)) : Function.Surjective (S.g.app U) :=
-  SheafLES.sections_surjective_of_subsingleton.{u} (shortExact_toAbSheaf hS) U h
+theorem app_surjective (h : Subsingleton (cohOn S.X₁ U 1)) : Function.Surjective (S.g.app U) := by
+  have h₁ : Subsingleton (Sheaf.H'.{u} ((toAbSheaf (X := X)).obj S.X₁) 1 U) := h
+  exact SheafLES.sections_surjective_of_subsingleton.{u} (shortExact_toAbSheaf hS) U h₁
 
 theorem subsingleton₂ (h₁ : Subsingleton (cohOn S.X₁ U n)) (h₃ : Subsingleton (cohOn S.X₃ U n)) :
-    Subsingleton (cohOn S.X₂ U n) :=
-  SheafLES.subsingleton₂.{u} (shortExact_toAbSheaf hS) n U h₁ h₃
+    Subsingleton (cohOn S.X₂ U n) := by
+  refine subsingleton_of_forall_eq 0 fun x ↦ ?_
+  obtain ⟨y, rfl⟩ := (exact₂ ℤ hS U n x).1 (h₃.elim _ _)
+  rw [h₁.elim y 0, map_zero]
 
 theorem subsingleton₃ (h₂ : Subsingleton (cohOn S.X₂ U n))
-    (h₁ : Subsingleton (cohOn S.X₁ U (n + 1))) : Subsingleton (cohOn S.X₃ U n) :=
-  SheafLES.subsingleton₃.{u} (shortExact_toAbSheaf hS) n U h₂ h₁
-
-theorem subsingleton₁ (h₃ : Subsingleton (cohOn S.X₃ U n))
-    (h₂ : Subsingleton (cohOn S.X₂ U (n + 1))) : Subsingleton (cohOn S.X₁ U (n + 1)) :=
-  SheafLES.subsingleton₁.{u} (shortExact_toAbSheaf hS) n U h₃ h₂
-
-theorem subsingleton₁_zero (h₂ : Subsingleton (cohOn S.X₂ U 0)) : Subsingleton (cohOn S.X₁ U 0) :=
-  (injective_zero ℤ hS U).subsingleton
+    (h₁ : Subsingleton (cohOn S.X₁ U (n + 1))) : Subsingleton (cohOn S.X₃ U n) := by
+  have hg : map ℤ S.g U n = 0 :=
+    LinearMap.ext fun x ↦ (congrArg (map ℤ S.g U n) (h₂.elim x 0)).trans (map_zero _)
+  exact ((LinearMap.injective_iff_eq_zero_of_exact (exact₃ ℤ hS U n)).2 hg).subsingleton
 
 section Finite
 
@@ -258,11 +289,6 @@ theorem finrank₂_le (h₁ : Module.Finite k (cohOn S.X₁ U n))
     finrank k (cohOn S.X₂ U n) ≤ finrank k (cohOn S.X₁ U n) + finrank k (cohOn S.X₃ U n) :=
   ExactSeq.finrank_le (exact₂ k hS U n)
 
-theorem finrank₃_le (h₂ : Module.Finite k (cohOn S.X₂ U n))
-    (h₁ : Module.Finite k (cohOn S.X₁ U (n + 1))) :
-    finrank k (cohOn S.X₃ U n) ≤ finrank k (cohOn S.X₂ U n) + finrank k (cohOn S.X₁ U (n + 1)) :=
-  ExactSeq.finrank_le (exact₃ k hS U n)
-
 theorem finrank₁_le (h₃ : Module.Finite k (cohOn S.X₃ U n))
     (h₂ : Module.Finite k (cohOn S.X₂ U (n + 1))) :
     finrank k (cohOn S.X₁ U (n + 1)) ≤
@@ -272,17 +298,6 @@ theorem finrank₁_le (h₃ : Module.Finite k (cohOn S.X₃ U n))
 theorem finrank₁_zero_le (h₂ : Module.Finite k (cohOn S.X₂ U 0)) :
     finrank k (cohOn S.X₁ U 0) ≤ finrank k (cohOn S.X₂ U 0) :=
   LinearMap.finrank_le_finrank_of_injective (injective_zero k hS U)
-
-theorem sum_neg_one_pow_finrank (N : ℕ) (h₁ : ∀ i < N, Module.Finite k (cohOn S.X₁ U i))
-    (h₂ : ∀ i < N, Module.Finite k (cohOn S.X₂ U i))
-    (h₃ : ∀ i < N, Module.Finite k (cohOn S.X₃ U i)) :
-    ∑ i ∈ Finset.range N, (-1 : ℤ) ^ i * (finrank k (cohOn S.X₁ U i) -
-        finrank k (cohOn S.X₂ U i) + finrank k (cohOn S.X₃ U i)) =
-      -(-1) ^ N * finrank k (LinearMap.ker (map k S.f U N)) := by
-  rw [ExactSeq.sum_neg_one_pow_finrank₃ (fun i ↦ map k S.f U i) (fun i ↦ map k S.g U i)
-    (fun i ↦ δ k hS U i) N h₁ h₂ h₃ (fun i _ ↦ exact₂ k hS U i) (fun i _ ↦ exact₃ k hS U i)
-    (fun i _ ↦ exact₁ k hS U i), LinearMap.ker_eq_bot.2 (injective_zero k hS U), finrank_bot]
-  simp
 
 theorem sum_neg_one_pow_finrank_eq_add (N : ℕ)
     (h₁ : ∀ i < N, Module.Finite k (cohOn S.X₁ U i))
@@ -310,11 +325,6 @@ theorem hdim₂_le (n : ℕ) (h₁ : Module.Finite k (coh S.X₁ n)) (h₃ : Mod
     hdim k S.X₂ n ≤ hdim k S.X₁ n + hdim k S.X₃ n :=
   cohOn.finrank₂_le hS ⊤ n k h₁ h₃
 
-theorem hdim₃_le (n : ℕ) (h₂ : Module.Finite k (coh S.X₂ n))
-    (h₁ : Module.Finite k (coh S.X₁ (n + 1))) :
-    hdim k S.X₃ n ≤ hdim k S.X₂ n + hdim k S.X₁ (n + 1) :=
-  cohOn.finrank₃_le hS ⊤ n k h₂ h₁
-
 theorem hdim₁_le (n : ℕ) (h₃ : Module.Finite k (coh S.X₃ n))
     (h₂ : Module.Finite k (coh S.X₂ (n + 1))) :
     hdim k S.X₁ (n + 1) ≤ hdim k S.X₃ n + hdim k S.X₂ (n + 1) :=
@@ -330,8 +340,8 @@ theorem sum_neg_one_pow_hdim_eq_add (N : ℕ) (h₁ : ∀ i < N, Module.Finite k
         ∑ i ∈ Finset.range N, (-1 : ℤ) ^ i * hdim k S.X₃ i :=
   cohOn.sum_neg_one_pow_finrank_eq_add hS ⊤ k N h₁ h₃ (Function.injective_of_subsingleton _)
 
-omit hS in
 
+omit hS in
 theorem finsum_neg_one_pow_hdim_eq_sum (F : X.Modules) (N : ℕ)
     (hN : ∀ i, N ≤ i → Subsingleton (coh F i)) :
     ∑ᶠ i, (-1 : ℤ) ^ i * hdim k F i = ∑ i ∈ Finset.range N, (-1 : ℤ) ^ i * hdim k F i := by
@@ -356,36 +366,5 @@ theorem finsum_neg_one_pow_hdim_eq_add (h₁ : ∀ i, Module.Finite k (coh S.X�
   exact sum_neg_one_pow_hdim_eq_add k hS _ (fun i _ ↦ h₁ i) (fun i _ ↦ h₃ i) (e₁ _ le_rfl)
 
 end hdim
-
-theorem linear_longExact {S : ShortComplex X.Modules} (hS : S.ShortExact) :
-    (∀ (R : Type v) [CommRing R] [Algebra R Γ(X, ⊤)] (U : X.Opens),
-      (∃ d : ∀ n, cohOn S.X₃ U n →ₗ[R] cohOn S.X₁ U (n + 1),
-        (∀ n x, cohOn.toH' S.X₁ U (n + 1) (d n x) =
-          SheafLES.δ.{u} (shortExact_toAbSheaf hS) n U (cohOn.toH' S.X₃ U n x)) ∧
-        Function.Injective (cohOn.map R S.f U 0) ∧ ∀ n,
-          Function.Exact (cohOn.map R S.f U n) (cohOn.map R S.g U n) ∧
-          Function.Exact (cohOn.map R S.g U n) (d n) ∧
-          Function.Exact (d n) (cohOn.map R S.f U (n + 1))) ∧
-      (IsNoetherianRing R →
-        (Module.Finite R (cohOn S.X₂ U 0) → Module.Finite R (cohOn S.X₁ U 0)) ∧ ∀ n,
-        (Module.Finite R (cohOn S.X₁ U n) → Module.Finite R (cohOn S.X₃ U n) →
-          Module.Finite R (cohOn S.X₂ U n)) ∧
-        (Module.Finite R (cohOn S.X₂ U n) → Module.Finite R (cohOn S.X₁ U (n + 1)) →
-          Module.Finite R (cohOn S.X₃ U n)) ∧
-        (Module.Finite R (cohOn S.X₃ U n) → Module.Finite R (cohOn S.X₂ U (n + 1)) →
-          Module.Finite R (cohOn S.X₁ U (n + 1))))) ∧
-    ∀ (k : Type v) [Field k] [Algebra k Γ(X, ⊤)],
-      (∀ n, Module.Finite k (coh S.X₁ n) → Module.Finite k (coh S.X₃ n) →
-        hdim k S.X₂ n ≤ hdim k S.X₁ n + hdim k S.X₃ n) ∧
-      ∀ N, (∀ i < N, Module.Finite k (coh S.X₁ i)) → (∀ i < N, Module.Finite k (coh S.X₃ i)) →
-        Subsingleton (coh S.X₁ N) →
-        ∑ i ∈ Finset.range N, (-1 : ℤ) ^ i * hdim k S.X₂ i =
-          ∑ i ∈ Finset.range N, (-1 : ℤ) ^ i * hdim k S.X₁ i +
-            ∑ i ∈ Finset.range N, (-1 : ℤ) ^ i * hdim k S.X₃ i :=
-  ⟨fun R _ _ U ↦ ⟨⟨cohOn.δ R hS U, cohOn.toH'_δ R hS U, cohOn.injective_zero R hS U,
-      fun n ↦ ⟨cohOn.exact₂ R hS U n, cohOn.exact₃ R hS U n, cohOn.exact₁ R hS U n⟩⟩,
-    fun _ ↦ ⟨cohOn.finite₁_zero R hS U, fun n ↦
-      ⟨cohOn.finite₂ R hS U n, cohOn.finite₃ R hS U n, cohOn.finite₁ R hS U n⟩⟩⟩,
-   fun k _ _ ↦ ⟨hdim₂_le k hS, sum_neg_one_pow_hdim_eq_add k hS⟩⟩
 
 end GlobalTheory

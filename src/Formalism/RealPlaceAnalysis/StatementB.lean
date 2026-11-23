@@ -1,4 +1,47 @@
-import Formalism.RealPlaceAnalysis.StatementA
+module
+
+public import Formalism.RealPlaceAnalysis.StatementA
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Finset
 
@@ -22,9 +65,6 @@ def lsh {n : ℕ} (ν : Fin n → ℂ) : Fin n → ℂ := fun a => ν a + ((n : 
 def Amat {n : ℕ} (l : Fin n → ℂ) : Matrix (Fin n) (Fin n) ℂ :=
   Matrix.of fun a b => if a = b then l a else if a < b then -1 else 0
 
-def Dfac {n : ℕ} (l : Fin n → ℂ) (s : Fin n) : ℂ :=
-  ∏ a ∈ univ.erase s, (l s - l a - 1) / (l s - l a)
-
 def vand {n : ℕ} (l : Fin n → ℂ) : ℂ :=
   ∏ a, ∏ b ∈ univ.filter (fun b => a < b), (l a - l b)
 
@@ -37,11 +77,6 @@ def EpowCov : Prop :=
 def EtrCentral : Prop :=
   ∀ (A : Type) [Ring A] (n : ℕ) (E : Fin n → Fin n → A), GlRel E →
     ∀ (k : ℕ) (c d : Fin n), etr E k * E c d = E c d * etr E k
-
-def UpperKill : Prop :=
-  ∀ (V : Type) [AddCommGroup V] [Module ℂ V] (n : ℕ) (E : Fin n → Fin n → Module.End ℂ V)
-    (ν : Fin n → ℂ) (v : V), GlRel E → IsHW E ν v →
-    ∀ (k : ℕ) (a b : Fin n), a < b → epow E k a b v = 0
 
 def HWDiag : Prop :=
   ∀ (V : Type) [AddCommGroup V] [Module ℂ V] (n : ℕ) (E : Fin n → Fin n → Module.End ℂ V)
@@ -56,22 +91,5 @@ def DiagChar : Prop :=
     ∀ a : Fin n,
       ∑ i ∈ range (n + 1),
         (∏ s : Fin n, (Polynomial.X - Polynomial.C (lsh ν s))).coeff i • epow E i a a v = 0
-
-def PPGen : Prop :=
-  ∀ (n : ℕ) (l : Fin n → ℂ) (u : ℂ), (∀ a, u ≠ l a) →
-    ∑ a, ∑ b, ((u • (1 : Matrix (Fin n) (Fin n) ℂ) - Amat l)⁻¹) a b =
-      1 - ∏ a, (u - l a - 1) / (u - l a)
-
-def DsVand : Prop :=
-  ∀ (n : ℕ) (l : Fin n → ℂ), Function.Injective l →
-    ∀ s, Dfac l s = vand (l - Pi.single s 1) / vand l
-
-def DsSum : Prop :=
-  ∀ (n : ℕ) (l : Fin n → ℂ), Function.Injective l → ∑ s, Dfac l s = (n : ℂ)
-
-def TrPowHW : Prop :=
-  ∀ (V : Type) [AddCommGroup V] [Module ℂ V] (n : ℕ) (E : Fin n → Fin n → Module.End ℂ V)
-    (ν : Fin n → ℂ) (v : V), GlRel E → IsHW E ν v → Function.Injective (lsh ν) →
-    ∀ k : ℕ, etr E k v = (∑ s, Dfac (lsh ν) s * lsh ν s ^ k) • v
 
 end Formalism.REAL

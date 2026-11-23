@@ -1,19 +1,72 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.AlgWeightHighestWeightExistsUniqueAntitoneStatement
+module
+
+public import Formalism.LocalToGlobal.Columns.MtAdWtIrr
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsPolyRep
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.HighestWeightConjugacy.DetLowUni
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.MulVecEqProdSmul
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.AlgWeightHighestWeightExistsUniqueAntitoneStatement
 import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.AlgebraicWeightPolyMatrixMultiplicativeStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsPolynomialRepGLComplexAlgebraicWeightEvalPointStatement
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ConjugateNeSelf
 import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsBorelEigenvectorOfPolynomialRepGLComplexStatement
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsPolynomialRepGLComplexAlgebraicWeightEvalPointStatement
 import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.SpanRationalPointOrbitAlgebraicWeight
-import Formalism.LocalToGlobal.Columns.MtAdWtIrr
-import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.HwFixEx
-import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.HwFixLine
+import Formalism.PadicSubsetSums.StableGradedCounts.ZBrauerNesbittAlg
+import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.AlgWtHwUnq
+public import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.HwFixEx
+public import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.HwFixLine
 import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.HighestWeightConjugacy.GLDense
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.UnivChar
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.NoFormsOff
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.SubsetTwistExceptionalPlaces
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.FrameEquivApply
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.ExistsUniqueHcharOfFiniteOrder
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.MulVecEqProdSmul
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Algebra.MvPolynomial
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -54,6 +107,7 @@ theorem exists_beig_mem {Ψ : GL (Fin n) ℂ → Matrix κ κ ℂ} (hΨ : IsPoly
       rw [hact, ← Matrix.mulVec_mulVec, hact, hact, hep _ (hst _ _ (heS y)), hΨ.mul, Matrix.mulVec_mulVec]
     · choose Q hQ using hΨ.poly
       refine ⟨∑ l, (∑ k, MvPolynomial.C (Pm i k) * Q k l) * MvPolynomial.C (I l j), fun B => ?_⟩
+
       simp only [Matrix.mul_apply, map_sum, map_mul, MvPolynomial.eval_C, hQ]
   obtain ⟨w, lam, hw0, hw⟩ := GlobalTheory.T.exists_borelEigenvector_of_polynomialRepGLComplex n _ _ hR
   refine ⟨e w, heS w, lam, fun h => hw0 (he (by rw [h, map_zero])), fun B hB => ?_⟩
@@ -221,7 +275,7 @@ def coef {G : Type} (Φ : G → Matrix κ κ ℂ) (u : κ → ℂ) : (κ → ℂ
 
 theorem coef_injective {G : Type} {Φ : G → Matrix κ κ ℂ} {u : κ → ℂ} (hu : u ≠ 0)
     (hspan : ∀ x, x ≠ 0 → ∀ w, w ∈ Submodule.span ℂ (Set.range fun g => Φ g *ᵥ x)) : Function.Injective (coef Φ u) := by
-  rw [injective_iff_map_eq_zero]
+  set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
   intro x hx
   by_contra hx0
   apply hu
@@ -395,7 +449,7 @@ theorem iso_of_hwAt (a a' : AlgWt L n) (lam : ι → Fin n → ℤ) (ha : ∀ τ
       (∀ l : ι → GL (Fin n) ℂ, (∀ τ, PI.UnitaryGroupMassFormula.HwConjInf.LowUni (l τ).val) → u ᵥ* Φ l = u) ∧
       (∀ g : ι → GL (Fin n) ℂ, (∀ τ, (g τ).val.BlockTriangular id) →
         Φ g *ᵥ v = (∏ τ, ∏ i, ((g τ).val i i) ^ (lam τ i)) • v) ∧
-      ∀ γ, LinearMap.toMatrix b b (c.ρ γ) = Φ (mtwEmb emb (mtwRat γ)) := by
+      ∀ γ, LinearMap.toMatrix b b (c.ρ γ) = Φ (mtwEmb emb (mtwRat (L := L) (n := n) γ)) := by
     intro c hc
     obtain ⟨_, κ, _, _, b, P, hP⟩ := c.alg
     have hP' : Agrees c b P := hP
@@ -430,21 +484,21 @@ theorem iso_of_hwAt (a a' : AlgWt L n) (lam : ι → Fin n → ℤ) (ha : ∀ τ
       rintro _ ⟨γ₀, hγ, rfl⟩
       exact ⟨mtwEmb emb γ₀, by simp only [ptOf_rat emb hinj hcm hall γ₀ hγ]⟩
     · simp only [ptOf_rat emb hinj hcm hall _ (mtwRat_mem γ)]
-      exact hP' γ (mtwRat γ) (congrArg Units.val (mtwInc_mtwRatFun γ)).symm
+      exact hP' γ (mtwRat (L := L) (n := n) γ) (congrArg Units.val (mtwInc_mtwRatFun γ)).symm
   obtain ⟨κ, _, _, b, Φ, u, v, m1, m2, m3, m4, m5, m6, m7, m8⟩ := data a ha
   obtain ⟨κ', _, _, b', Φ', u', v', n1, n2, n3, n4, n5, n6, n7, n8⟩ := data a' ha'
   obtain ⟨e, he⟩ := exists_equiv m1 n1 m2 n2 m3 n3 m4 m5 n4 n5 m6 n6 _ m7 n7
   refine ⟨(b.equivFun.trans e).trans b'.equivFun.symm, fun γ x => b'.equivFun.injective ?_⟩
-  have k1 : b.equivFun (a.ρ γ x) = Φ (mtwEmb emb (mtwRat γ)) *ᵥ b.equivFun x := by
+  have k1 : b.equivFun (a.ρ γ x) = Φ (mtwEmb emb (mtwRat (L := L) (n := n) γ)) *ᵥ b.equivFun x := by
     rw [← m8]; exact (LinearMap.toMatrix_mulVec_repr b b _ x).symm
-  have k2 : ∀ y, b'.equivFun (a'.ρ γ y) = Φ' (mtwEmb emb (mtwRat γ)) *ᵥ b'.equivFun y := fun y => by
+  have k2 : ∀ y, b'.equivFun (a'.ρ γ y) = Φ' (mtwEmb emb (mtwRat (L := L) (n := n) γ)) *ᵥ b'.equivFun y := fun y => by
     rw [← n8]; exact (LinearMap.toMatrix_mulVec_repr b' b' _ y).symm
   simp only [LinearEquiv.trans_apply, LinearEquiv.apply_symm_apply, k1, k2, he]
 
 end Wt
 
-open Formalism.BasicNotions Formalism.L2 Formalism.L2.DIV Formalism.L2.Col in
 
+open Formalism.BasicNotions Formalism.L2 Formalism.L2.DIV Formalism.L2.Col in
 theorem exists_equiv_VV : ∀ (L : Type) [Field L] [NumberField L] [IsCMField L] (n : ℕ) (ι : Type) [Fintype ι]
     (emb : ι → L →+* ℂ), Function.Injective emb → (∀ t t', emb t ≠ ComplexEmbedding.conjugate (emb t')) →
     (∀ σ : L →+* ℂ, ∃ t, σ = emb t ∨ σ = ComplexEmbedding.conjugate (emb t)) → ∀ a : NG.AlgWt L n,

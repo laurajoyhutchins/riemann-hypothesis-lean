@@ -1,6 +1,51 @@
-import Mathlib
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ThetaParseval.AllCoreOf
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.DenseSplitFrobInvAway
+module
+
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ThetaParseval.AllCoreOf
+public import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.IsRegAlgTwistOfHalfIntegral
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.MkMemAdmissibleAtIffCocycle
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HasString
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ThetaParseval.SplitLineSubtraction.SubtractOf
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HeckeCharacterUnramifiedAeAndExistsLevel
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.DenseSplitFrobInvAway
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ThetaParseval.CoreAtIffRowAt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.TripleAtt
+
+@[expose] public section
 
 noncomputable section
 
@@ -13,34 +58,34 @@ attribute [local instance] GlobalTheory.LocalData.complRel GlobalTheory.LocalDat
 
 namespace UpperTheory.Gal.TP
 
-open Sub
+open _root_.UpperTheory.Gal.TP.Sub
 
 variable {E Ω : Type} [Field E] [NumberField E] [IsCMField E] [Field Ω] [Algebra E Ω] [IsAlgClosure E Ω] {l : ℕ} [Fact l.Prime]
 
-variable (Ω l) in
 
+variable (Ω l) in
 structure GoodGuard (Q : HeightOneSpectrum (𝓞 E) → Prop) : Prop where
   split : ∀ w, Q w → IsSplitAt w
   dense : ∀ S : Set (HeightOneSpectrum (𝓞 E)), S.Finite →
     Dense {g : G E Ω | ∃ w : HeightOneSpectrum (𝓞 E), w ∉ S ∧ Q w ∧ ((l : ℕ) : 𝓞 E) ∉ w.asIdeal ∧
       ∃ A : ValuationSubring Ω, IsPlaceOver A w ∧ IsFrob A (normV w) g⁻¹}
 
-variable (Ω) in
 
+variable (Ω) in
 def CoreAtQ (Q : HeightOneSpectrum (𝓞 E) → Prop) (ι : Qbar l ≃+* ℂ) (m : ℕ) : Prop :=
   ∀ U : Submodule ℂ (UA E m → ℂ), IsAutRepU U → ∀ lam : (E →+* ℂ) → DomWeight m, (∀ τ, HasWeightAt U τ (lam τ)) →
     ∃ r : G E Ω →* GL (Fin m) (Qbar l), Continuous r ∧ IsSSRep r ∧
       ∀ w B, Q w → GlobalTheory.Row9.SatU U w B → ∀ c, GlobalTheory.Row9.SphG c ι r w B fun τ => infOfWeight (lam τ)
 
-omit [IsAlgClosure E Ω] in
 
+omit [IsAlgClosure E Ω] in
 def WeakQ (Q : HeightOneSpectrum (𝓞 E) → Prop) (ι : Qbar l ≃+* ℂ) {a : ℕ} (U : Submodule ℂ (UA E a → ℂ))
     (r : G E Ω →* GL (Fin a) (Qbar l)) : Prop :=
   Continuous r ∧ IsSSRep r ∧ ∀ᶠ w : HeightOneSpectrum (𝓞 E) in Filter.cofinite,
     Q w → ∀ B, SatU U w B → FrobEig ι r w (algSat a (normV w) B)
 
-variable (Ω) in
 
+variable (Ω) in
 def RowQ (Q : HeightOneSpectrum (𝓞 E) → Prop) (ι : Qbar l ≃+* ℂ) (a : ℕ) : Prop :=
   ∀ (U : Submodule ℂ (UA E a → ℂ)), IsAutRepU U → ∀ lam : (E →+* ℂ) → DomWeight a, (∀ τ, HasWeightAt U τ (lam τ)) →
     (∃ r : G E Ω →* GL (Fin a) (Qbar l), WeakQ Q ι U r) ∧
@@ -78,12 +123,13 @@ theorem frobIdQ (hDI : DenseId) (hCp : CpFacts) (hQ : GoodGuard Ω l Q) (ι : Qb
     intro s e hs
     have h := (hs A hA).2 g⁻¹ hF
     rw [inv_inv] at h
-    rw [cp, h, Multiset.map_add, Multiset.prod_add, Multiset.map_map]
-    rfl
+    rw [cp, h, Multiset.map_add (f := _), Multiset.prod_add, Multiset.map_map,
+      Finset.prod_map_val]
+    simp only [Function.comp_apply]
   apply Polynomial.map_injective ι.toRingHom ι.injective
   rw [Polynomial.map_mul, Polynomial.map_mul, cp_map r c h1, cp_map r' c' h2, lin_map a' c' h4,
     lin_map a c h3]
-  ring
+  exact mul_right_comm _ _ _
 
 theorem weakIsoQ (hA : SatAE) (hQ : GoodGuard Ω l Q) (ι : Qbar l ≃+* ℂ) {a : ℕ} (U : Submodule ℂ (UA E a → ℂ)) (hU : IsAutRepU U)
     (r r' : G E Ω →* GL (Fin a) (Qbar l)) (hr : WeakQ Q ι U r) (hr' : WeakQ Q ι U r') : RepIso r r' := by
@@ -150,7 +196,6 @@ theorem atPlaceQ (hCE : CharEx) (hSat : SatAE) (hDI : DenseId) (hCp : CpFacts) (
         (fun τ => (GlobalTheory.GalDef.jumpsOf ι lam τ).map (· + m (ι.toRingHom.comp τ))) τ +
           Finset.univ.val.map fun i => (fun i τ => -p₁ i (ι.toRingHom.comp τ)) i τ := by
       funext τ
-      simp only [jumpsOf_eq]
       exact h1.inf _
     rw [hj] at c1
     have c2 := hcl w _ (fun i => (((ψ₁ i).val w : ℂˣ) : ℂ)) _ (fun i τ => -p₁ i (ι.toRingHom.comp τ))

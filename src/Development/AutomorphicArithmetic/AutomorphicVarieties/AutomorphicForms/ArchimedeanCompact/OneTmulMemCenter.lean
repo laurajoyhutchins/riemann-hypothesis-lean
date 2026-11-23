@@ -1,7 +1,54 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.ArchimedeanCompact.GrpEqMemArchCompact
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.SiegelHeights.MultiCentre
-import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.WignerHighestWeights.SLApply
-import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.WignerHighestWeights.LieDecomp
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.ArchimedeanCompact.InfEmbGrpEq
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.WignerHighestWeights.IsAlgIsoRefl
+public import GroundTheory.AutomorphicForms.AutomorphicFormSpaces.HasModerateGrowthZero
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.ArchimedeanCompact.GrpEqMemArchCompact
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.SiegelHeights.MultiCentre
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.WignerHighestWeights.LieDecomp
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.WignerHighestWeights.SLApply
+import Formalism.RealPlaceAnalysis.ThirdArithmeticHolds
+public import GroundTheory.AutomorphicForms.AutomorphicFormSpaces.SmoothKZ
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -12,7 +59,7 @@ namespace UpperTheory.V.Cm
 
 attribute [local instance 100] LieRing.ofAssociativeRing
 
-variable (E : Type) [Field E] [NumberField E] [IsTotallyComplex E] (a : ℕ)
+variable (E : Type) [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] (a : ℕ)
 
 theorem sm_eq : Sm E a = archSmooth E a :=
   le_antisymm (fun _ h => isArchSmooth_of_mem h) fun _ h => mem_Sm_of h
@@ -85,6 +132,7 @@ theorem ιC_eq_sum (X : Lie E a) : ιC E a X = ∑ τ : E →+* ℂ, ∑ i, ∑ 
   AlgRepEndIrreducible.lieDecomp E a _ (ιC E a) (Matrix.of X)
 
 theorem lie_eq_sum (X : Lie E a) : lie E a X = ∑ τ : E →+* ℂ, ∑ i, ∑ j, coord τ (X i j) • Eop τ i j := by
+
   simp only [← uC_ιC, ιC_eq_sum, map_sum, map_smul, uC_genC]
 
 theorem adjoin_genC : Algebra.adjoin ℂ {x : UC E a | ∃ τ i j, x = genC τ i j} = ⊤ := by
@@ -156,17 +204,16 @@ theorem Zalg_eq_map : Zalg E a = (Subalgebra.center ℂ (UC E a)).map (uC E a) :
   · rintro ⟨_, ⟨τ, u, rfl⟩, rfl⟩
     exact ⟨τ, u, uC_capC τ u⟩
 
-omit [IsTotallyComplex E] in
+omit [_root_.NumberField.IsTotallyComplex E] in
 theorem one_tmul_mem_center {z : UEnv E a} (hz : z ∈ (isExpLieAlgebra E a).centerU) :
     (1 : ℂ) ⊗ₜ[ℝ] z ∈ Subalgebra.center ℂ (UC E a) := by
   refine Subalgebra.mem_center_iff.2 fun w => ?_
   induction w with
-  | zero => rw [zero_mul, mul_zero]
   | tmul c x => simp only [Algebra.TensorProduct.tmul_mul_tmul, mul_one, one_mul, Subalgebra.mem_center_iff.1 hz x]
   | add x y hx hy => rw [add_mul, mul_add, hx, hy]
 
-omit [IsTotallyComplex E] in
 
+omit [_root_.NumberField.IsTotallyComplex E] in
 theorem exists_re_im_center {w : UC E a} (hw : w ∈ Subalgebra.center ℂ (UC E a)) :
     ∃ p ∈ (isExpLieAlgebra E a).centerU, ∃ q ∈ (isExpLieAlgebra E a).centerU, w = (1 : ℂ) ⊗ₜ p + Complex.I ⊗ₜ q :=
   Fb.exists_re_im w fun _ => Subalgebra.mem_center_iff.1 hw _

@@ -1,6 +1,53 @@
-import Mathlib
+module
+
+public import Formalism.LocalRingCardinality.DataTheta
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.InnerProductSpace.Spectrum
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
 import Formalism.SharpRestriction.Divisibility.SchurIrreducible
-import Formalism.LocalToGlobal.BesselHermitianTheta.DefsReal
+
+@[expose] public section
 
 open Formalism.BasicNotions.TH Formalism.MainNotions.SchurIrreducible MeasureTheory
 open scoped ComplexOrder
@@ -103,7 +150,7 @@ theorem isometric_case (p q : ℕ) (T : GrpData p q)
     have hc2 : ∀ w, j₂ (c w) = π₂.π k (j₂ w) := fun w => (hc w).2.symm
     let cl : E →ₗ[ℂ] E :=
       { toFun := c
-        map_add' := fun x y => j₂.injective (by simp only [map_add, hc2])
+        map_add' := fun x y => j₂.injective (by simp only [map_add (f := _), hc2])
         map_smul' := fun a x => j₂.injective (by simp only [map_smul, hc2, RingHom.id_apply]) }
     have hcn : ∀ w, ‖cl w‖ = ‖w‖ := fun w => by
       have e1 := j₂.norm_map (c w)
@@ -144,7 +191,7 @@ theorem isometric_case (p q : ℕ) (T : GrpData p q)
     exact hpos Y hY
   have hcont : Continuous Φ := by
     rw [show Φ = _ from funext hΦ2]
-    refine continuous_finset_sum _ fun l _ => continuous_finset_sum _ fun i _ => ?_
+    refine continuous_finsetSum _ fun l _ => continuous_finsetSum _ fun i _ => ?_
     exact (continuous_const.inner (π₁.7 _)).mul (continuous_const.inner (π₂.7 _)).star
   have hΦi : MeasureTheory.Integrable Φ T.haar := by
     rw [show Φ = _ from funext hΦ2]
@@ -171,6 +218,7 @@ theorem isometric_case (p q : ℕ) (T : GrpData p q)
     rw [hΦ]
     refine Finset.sum_congr rfl fun l _ => ?_
     rw [map_one, map_one, ContinuousLinearMap.one_apply, ContinuousLinearMap.one_apply, hD₂j, hD₁]
+
   rw [hΦ1, map_sum] at h1
   simp only [inner_self_eq_norm_sq] at h1
   have hz' := (Finset.sum_eq_zero_iff_of_nonneg (fun l _ => sq_nonneg ‖j₁ (ob l)‖)).1 h1

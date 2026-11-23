@@ -1,4 +1,47 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.FramedTwoCoboundaries
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.ResMapBijective
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open IsLocalRing MvPowerSeries UpperTheory.V.Alg
 
@@ -50,7 +93,7 @@ theorem UpperTheory.V.Alg.ker_coef :
     intro x a hx u
     have h : ∃ a : κ → O, x = ∑ v, a v • ε v := ⟨a, hx⟩
     simp only [co]
-    rw [dif_pos h]
+    rw [dite_eq_left h]
     have hd : ∑ v, (h.choose v - a v) • ε v = 0 := by
       simp only [sub_smul, Finset.sum_sub_distrib]
       rw [← h.choose_spec, ← hx, sub_self]
@@ -63,7 +106,7 @@ theorem UpperTheory.V.Alg.ker_coef :
     have hxy : x + y = ∑ v, (a + b) v • ε v := by
       rw [ha, hb, ← Finset.sum_add_distrib]
       simp only [Pi.add_apply, add_smul]
-    rw [hco _ _ hxy u, hco _ _ ha u, hco _ _ hb u, Pi.add_apply, map_add]
+    rw [hco _ _ hxy u, hco _ _ ha u, hco _ _ hb u, Pi.add_apply, map_add (f := _)]
   · intro u a x hx
     obtain ⟨b, hb⟩ := hrep x hx
     obtain ⟨c, hc⟩ := IsCO.res_surj (O := O) a
@@ -90,16 +133,19 @@ theorem UpperTheory.V.Alg.ker_coef :
     obtain ⟨g, hg, hgx⟩ := Submodule.mem_map.1 hxP'
     simp only [AlgHom.toLinearMap_apply] at hfε hgx
     have hk : g - ∑ v, a v • f v ∈ RingHom.ker W.π := by
+
       rw [RingHom.mem_ker, map_sub, map_sum]
       simp only [map_smul, hfε]
       rw [hgx, ← ha, sub_self]
     have hh := W.homog _ hk (wf u)
     have hfw : ∀ v, wcomp O W.wt (wf u) (f v) = if wf v = wf u then f v else 0 :=
       fun v => wcomp_of_mem_ite W.wt (hf v)
+
     rw [map_sub, map_sum, wcomp_of_mem_ite W.wt hg, if_neg hj] at hh
     simp only [map_smul, hfw] at hh
     have hrel0 : ∑ v, (if wf v = wf u then a v else 0) • ε v = 0 := by
       have h2 := RingHom.mem_ker.1 hh
+
       rw [map_sub, map_zero, map_sum, zero_sub, neg_eq_zero] at h2
       rw [← h2]
       apply Finset.sum_congr rfl

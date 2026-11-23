@@ -1,4 +1,60 @@
-import Mathlib
+module
+
+public import Mathlib.Basic.Complex.Basic
+public import Mathlib.NumberTheory.NumberField.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.Algebra.Hom.Rat
+public import Mathlib.NumberTheory.NumberField.InfinitePlace.Embeddings
+
+@[expose] public section
+
 open NumberField
 
 namespace GlobalTheory
@@ -15,13 +71,14 @@ private theorem aeval_mulVec_of_eigenvector {K R : Type} [Field K] [CommRing R] 
     | succ k ih =>
       rw [pow_succ', ← Matrix.mulVec_mulVec, ih, Matrix.mulVec_smul, hx, smul_smul, pow_succ',
         map_mul, mul_comm]
+
   rw [aeval_eq_sum_range, Matrix.sum_mulVec, eval_eq_sum_range, map_sum, Finset.sum_smul]
   refine Finset.sum_congr rfl fun i _ => ?_
   simp only [Matrix.smul_mulVec, hpow, map_mul, mul_smul, algebraMap_smul]
 
+
 open NumberField Matrix in
 open Polynomial in
-
 theorem _root_.GlobalTheory.exists_eigen_projector_ringOfIntegers : ∀ (E K : Type) [Field E] [NumberField E] [Field K] (emb : (E →+* ℂ) → (E →+* K)), Function.Injective emb → ∀ τ : E →+* ℂ, ∃ (m : ℕ) (a : Fin m → 𝓞 E) (κ : Fin m → K), ∀ (R : Type) [CommRing R] [Algebra K R] (n : ℕ) (ρ : 𝓞 E →+* Matrix (Fin n) (Fin n) R), (∀ b : 𝓞 E, ρ b * (∑ k, algebraMap K R (κ k) • ρ (a k)) = algebraMap K R (emb τ (b : E)) • ∑ k, algebraMap K R (κ k) • ρ (a k)) ∧ ∀ x : Fin n → R, (∀ b : 𝓞 E, (ρ b).mulVec x = algebraMap K R (emb τ (b : E)) • x) → (∑ k, algebraMap K R (κ k) • ρ (a k)).mulVec x = x := by
   intro E K _ _ _ emb hemb τ
   classical
@@ -49,9 +106,9 @@ theorem _root_.GlobalTheory.exists_eigen_projector_ringOfIntegers : ∀ (E K : T
     have hb : (b : E) ∈ Algebra.adjoin ℚ {α0} := hadj ▸ Algebra.mem_top
     rw [Algebra.adjoin_singleton_eq_range_aeval] at hb
     obtain ⟨p, hp⟩ := hb
-    obtain ⟨c, hc⟩ := IsLocalization.integerNormalization_map_to_map (nonZeroDivisors ℤ)
+    obtain ⟨c, hc⟩ := IsLocalization.integerNormalization_spec (nonZeroDivisors ℤ)
       (p.comp (C ((y : ℚ)⁻¹) * X))
-    refine ⟨c, nonZeroDivisors.ne_zero c.2, IsLocalization.integerNormalization (nonZeroDivisors ℤ)
+    refine ⟨c, nonZeroDivisors.ne_zero hc.1, IsLocalization.integerNormalization (nonZeroDivisors ℤ)
       (p.comp (C ((y : ℚ)⁻¹) * X)), ?_⟩
     have hy' : (y : E) ≠ 0 := by exact_mod_cast hy0
     have hθα : aeval (θ : E) (C ((y : ℚ)⁻¹) * X) = α0 := by
@@ -61,7 +118,7 @@ theorem _root_.GlobalTheory.exists_eigen_projector_ringOfIntegers : ∀ (E K : T
     apply FaithfulSMul.algebraMap_injective (𝓞 E) E
     rw [← aeval_algebraMap_apply]
     have hθc : algebraMap (𝓞 E) E θ = (θ : E) := rfl
-    rw [hθc, ← aeval_map_algebraMap ℚ, hc, map_zsmul, aeval_comp, hθα]
+    rw [hθc, ← aeval_map_algebraMap ℚ, hc.2, map_zsmul, aeval_comp, hθα]
     have hp' : aeval α0 p = (b : E) := hp
     rw [hp', zsmul_eq_mul, map_mul, map_intCast]
   have hθint : IsIntegral ℤ (θ : E) := hyint
@@ -137,7 +194,7 @@ theorem _root_.GlobalTheory.exists_eigen_projector_ringOfIntegers : ∀ (E K : T
         _ = C r * G + ((hK - C r) /ₘ (X - C (σ τ))) * ((X - C (σ τ)) * G) := by ring
         _ = _ := by rw [hXG]; ring
     have hev := congrArg (aeval (ρ θ)) hkey
-    rw [map_add, map_mul, map_mul, map_mul, hPρ R n ρ, mul_zero, add_zero, aeval_C] at hev
+    rw [map_add (f := _), map_mul, map_mul, map_mul, hPρ R n ρ, mul_zero, add_zero, aeval_C] at hev
     have hρh : aeval (ρ θ) hK = algebraMap K _ (D : K) * ρ b := by
       rw [hKdef, aeval_map_algebraMap, show ρ θ = ρ.toIntAlgHom θ from rfl, aeval_algHom_apply,
         ← hh]

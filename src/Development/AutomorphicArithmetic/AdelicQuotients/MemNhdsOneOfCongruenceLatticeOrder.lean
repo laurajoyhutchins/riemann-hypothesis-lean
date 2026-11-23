@@ -1,6 +1,52 @@
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ThetaParseval.BlockDeterminants.BumpLat
-import Development.WeilBound.ThetaLifts.LatticeBasics.NearUnits
-import Development.WeilBound.CoreStatements.LocalThetaKernels.ExistsSmallSubgroups
+module
+
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ThetaParseval.BlockDeterminants.BumpLat
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.LcscAdelicUnitaryGroup
+public import Development.WeilBound.CoreStatements.LocalThetaKernels.ExistsSmallSubgroups
+public import Development.WeilBound.ThetaLifts.LatticeBasics.NearUnits
+import GroundTheory.GlobalFields.LocalFieldAtPlace
+import GroundTheory.LocalFields.PadicLogSeries
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Algebra.Valued.WithZeroMulInt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open scoped Matrix
 open NumberField IsDedekindDomain Filter Topology Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes GlobalTheory.WeilM GlobalTheory.AdelicU GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels UpperTheory.TP.BA
@@ -9,7 +55,7 @@ noncomputable section
 
 namespace UpperTheory.TP.BA.LamTop
 
-variable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] {n : ℕ} {v : Pl F}
+variable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] {n : ℕ} {v : Pl (F := F)}
 
 private theorem sg_one_smul {M : Type} [AddCommGroup M] [Module (AF F) M] {z : M} (h : At (evFin F v) z) : sg v 1 • z = z := by
   have := h (1 - sg v 1) (by rw [map_sub, map_one, PositivityTheory.ThKH.Iwas.ev_sg, sub_self])
@@ -21,10 +67,10 @@ private theorem eq_sg {a : AF F} (h : At (evFin F v) a) : a = sg v (evFin F v a)
   rw [smul_eq_mul, mul_comm, PositivityTheory.ThKH.Iwas.mul_sg, mul_one] at this
   exact this.symm
 
-private theorem continuous_sg (v : Pl F) : Continuous (sg v : Fv F v → AF F) :=
+private theorem continuous_sg (v : Pl (F := F)) : Continuous (sg v : Fv F v → AF F) :=
   (continuous_const.prodMk (continuous_singleFin v) : Continuous fun a => ((0 : Ainf F), singleFin v a))
 
-private theorem oh_sub (v : Pl F) : ∃ (ι : Type) (_ : Fintype ι) (o : ι → 𝓞 E), ∀ z ∈ Oh E v, ∃ t : ι → Fv F v,
+private theorem oh_sub (v : Pl (F := F)) : ∃ (ι : Type) (_ : Fintype ι) (o : ι → 𝓞 E), ∀ z ∈ Oh E v, ∃ t : ι → Fv F v,
     (∀ i, t i ∈ v.adicCompletionIntegers F) ∧ z = ∑ i, sg v (t i) • inclR (F := F) (AF F) (o i : E) := by
   classical
   let bs := RingOfIntegers.basis E
@@ -37,6 +83,7 @@ private theorem oh_sub (v : Pl F) : ∃ (ι : Type) (_ : Fintype ι) (o : ι →
       conv_lhs => rw [← bs.sum_repr o]
       simp
     conv_lhs => rw [e]
+
     rw [map_sum, Finset.smul_sum]
     refine Finset.sum_congr rfl fun i _ => ?_
     beta_reduce
@@ -54,7 +101,7 @@ private theorem oh_sub (v : Pl F) : ∃ (ι : Type) (_ : Fintype ι) (o : ι →
     refine ⟨-t, fun i => neg_mem (ht i), ?_⟩
     simp [neg_smul, Finset.sum_neg_distrib]
 
-private theorem small_oh (v : Pl F) {ϖ : Fv F v} (h1 : Valued.v ϖ < 1) {V : Set (AE F E)} (hV : V ∈ 𝓝 0) :
+private theorem small_oh (v : Pl (F := F)) {ϖ : Fv F v} (h1 : Valued.v ϖ < 1) {V : Set (AE F E)} (hV : V ∈ 𝓝 0) :
     ∃ k₀ : ℕ, ∀ k, k₀ ≤ k → ∀ z ∈ Oh E v, sg v (ϖ ^ k) • z ∈ V := by
   have : IsTopologicalRing (AE F E) := IsModuleTopology.isTopologicalRing (AF F) _
   have : ContinuousSMul (AF F) (AE F E) := IsModuleTopology.toContinuousSMul _ _
@@ -62,7 +109,7 @@ private theorem small_oh (v : Pl F) {ϖ : Fv F v} (h1 : Valued.v ϖ < 1) {V : Se
   obtain ⟨ι, _, o, ho⟩ := oh_sub (E := E) v
   let J : Fv F v × (ι → v.adicCompletionIntegers F) → AE F E :=
     fun p => ∑ i, sg v (p.1 * p.2 i) • inclR (F := F) (AF F) (o i : E)
-  have cJ : Continuous J := continuous_finset_sum _ fun i _ => by
+  have cJ : Continuous J := continuous_finsetSum _ fun i _ => by
     have c1 : Continuous fun p : Fv F v × (ι → v.adicCompletionIntegers F) => sg v (p.1 * (p.2 i : Fv F v)) :=
       (continuous_sg v).comp (continuous_fst.mul (continuous_subtype_val.comp ((continuous_apply i).comp continuous_snd)))
     exact c1.smul (continuous_const (y := inclR (F := F) (AF F) (o i : E)))
@@ -90,7 +137,7 @@ private theorem exists_basis : ∃ (ι : Type) (_ : Fintype ι) (e : Module.Basi
   change ((y i : ℤ) : F) • Module.finBasis F E i = y i • Module.finBasis F E i
   exact Int.cast_smul_eq_zsmul F _ _
 
-private theorem open_oh (v : Pl F) : ∃ V ∈ 𝓝 (0 : AE F E), ∀ z ∈ V, At (evFin F v) z → z ∈ Oh E v := by
+private theorem open_oh (v : Pl (F := F)) : ∃ V ∈ 𝓝 (0 : AE F E), ∀ z ∈ V, At (evFin F v) z → z ∈ Oh E v := by
   classical
   obtain ⟨ι, _, e, o, he⟩ := exists_basis F E
   let bb := Algebra.TensorProduct.basis (AF F) e
@@ -233,7 +280,7 @@ private theorem part2 {σ : E →ₐ[F] E} {X : Spc F E n} (b c : Matrix (Fin n)
 end UpperTheory.TP.BA.LamTop
 
 theorem UpperTheory.mem_nhds_one_of_congruence_latticeOrder :
-    ∀ (F E : Type) [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] (σ : E →ₐ[F] E) (n : ℕ) (X : Spc F E n) (v : Pl F) (b c : Matrix (Fin n) (Fin n) (AE F E)), IsFr X v b c → ∀ ϖ : Fv F v, ϖ ≠ 0 → Valued.v ϖ < 1 →
+    ∀ (F E : Type) [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] (σ : E →ₐ[F] E) (n : ℕ) (X : Spc F E n) (v : Pl (F := F)) (b c : Matrix (Fin n) (Fin n) (AE F E)), IsFr X v b c → ∀ ϖ : Fv F v, ϖ ≠ 0 → Valued.v ϖ < 1 →
       (∀ U ∈ 𝓝 (1 : UA σ X.J), ∃ k₀ : ℕ, ∀ k, k₀ ≤ k → ∀ g ∈ UAt σ X (evFin F v),
         (∃ a ∈ abelian₂ (E := E) v b c, mat g - 1 = sg v (ϖ ^ k) • a) → (∃ a ∈ abelian₂ (E := E) v b c, mat g⁻¹ - 1 = sg v (ϖ ^ k) • a) → g ∈ U) ∧
       ∀ k : ℕ, ∃ O : Set (UA σ X.J), IsOpen O ∧ 1 ∈ O ∧ ∀ g ∈ UAt σ X (evFin F v), g ∈ O →

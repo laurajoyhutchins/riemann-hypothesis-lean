@@ -1,49 +1,58 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.Algebra.Subalgebra.Basic
+public import Mathlib.Basic.Complex.Basic
+public import Mathlib.LinearAlgebra.FiniteDimensional.Defs
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.MulApply
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Proofs.HeightProofs.IsLieDataCircle
-import Development.AbelianVarietyTheory.Proofs.HeightProofs.MulApply
+
+@[expose] public section
+
 open GlobalTheory.SmoothForms NumberField Matrix
 open scoped ContDiff Topology
 
 namespace GlobalTheory.FiniteOrbit
 
 variable {M : Type} [AddCommGroup M] [Module ℂ M]
-
-def orb (A : Subalgebra ℂ (Module.End ℂ M)) (x : M) : Submodule ℂ M :=
-  Submodule.span ℂ {y : M | ∃ a ∈ A, y = a x}
-
-theorem apply_mem_orb (A : Subalgebra ℂ (Module.End ℂ M)) (x : M) {a : Module.End ℂ M}
-    (ha : a ∈ A) : a x ∈ orb A x :=
-  Submodule.subset_span ⟨a, ha, rfl⟩
-
-theorem orb_le {A : Subalgebra ℂ (Module.End ℂ M)} {x : M} {N : Submodule ℂ M}
-    (h : ∀ a ∈ A, a x ∈ N) : orb A x ≤ N := by
-  refine Submodule.span_le.2 ?_
-  rintro y ⟨a, ha, rfl⟩
-  exact h a ha
-
-def finVec (A : Subalgebra ℂ (Module.End ℂ M)) : Submodule ℂ M where
-  carrier := {x | FiniteDimensional ℂ (orb A x)}
-  add_mem' := by
-    intro x y hx hy
-    have hx' : FiniteDimensional ℂ (orb A x) := hx
-    have hy' : FiniteDimensional ℂ (orb A y) := hy
-    have : orb A (x + y) ≤ orb A x ⊔ orb A y := orb_le fun a ha => by
-      rw [map_add]
-      exact Submodule.add_mem_sup (apply_mem_orb A x ha) (apply_mem_orb A y ha)
-    exact Submodule.finiteDimensional_of_le this
-  zero_mem' := by
-    have : orb A (0 : M) ≤ ⊥ := orb_le fun a _ => by simp
-    exact Submodule.finiteDimensional_of_le this
-  smul_mem' := by
-    intro c x hx
-    have hx' : FiniteDimensional ℂ (orb A x) := hx
-    have : orb A (c • x) ≤ orb A x := orb_le fun a ha => by
-      rw [map_smul]
-      exact Submodule.smul_mem _ _ (apply_mem_orb A x ha)
-    exact Submodule.finiteDimensional_of_le this
-
-def orbSub (A : Subalgebra ℂ (Module.End ℂ M)) (W : Submodule ℂ M) : Submodule ℂ M :=
-  Submodule.span ℂ {y : M | ∃ a ∈ A, ∃ x ∈ W, y = a x}
 
 theorem exists_finiteDimensional_stable (M : Type) [AddCommGroup M] [Module ℂ M] (ι : Type)
     [Finite ι] (A : ι → Subalgebra ℂ (Module.End ℂ M))

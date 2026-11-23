@@ -1,4 +1,70 @@
-import Mathlib
+module
+
+public import Mathlib.LinearAlgebra.Complex.FiniteDimensional
+public import Mathlib.MeasureTheory.Constructions.BorelSpace.Complex
+public import Mathlib.MeasureTheory.Constructions.Pi
+public import Mathlib.MeasureTheory.Measure.Haar.OfBasis
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+public import Mathlib.Analysis.SpecialFunctions.PolarCoord
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.Complex
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Analysis.Calculus.Deriv.Add
+public import Mathlib.Analysis.Calculus.Deriv.Inv
+public import Mathlib.Analysis.Calculus.Deriv.Mul
+public import Mathlib.Analysis.Calculus.Deriv.Pow
+public import Mathlib.MeasureTheory.Integral.IntegralEqImproper
+public import Mathlib.RingTheory.Norm.Transitivity
+
+@[expose] public section
 
 open MeasureTheory Real Set Filter Topology
 open scoped ENNReal Nat
@@ -27,7 +93,7 @@ theorem lintegral_radial {A : ℝ} (hA : 0 < A) (m : ℕ) :
   have hl : Tendsto (fun r : ℝ ↦ -(2 * (m + 1) * (A + r ^ 2) ^ (m + 1))⁻¹) atTop (𝓝 0) := by
     rw [← neg_zero]
     refine Tendsto.neg (Tendsto.inv_tendsto_atTop ?_)
-    refine Tendsto.const_mul_atTop (by positivity) ?_
+    refine Tendsto.const_mul_atTop (by change (0 : ℝ) < 2 * ((m : ℝ) + 1); positivity) ?_
     exact (tendsto_pow_atTop (Nat.succ_ne_zero m)).comp
       (tendsto_atTop_add_const_left _ _ (tendsto_pow_atTop two_ne_zero))
   rw [← ofReal_integral_eq_lintegral_ofReal (integrableOn_Ioi_deriv_of_nonneg' hd hnn hl)
@@ -86,44 +152,6 @@ theorem lintegral_pi_inv_pow (n : ℕ) : ∀ (m : ℕ) {A : ℝ}, 0 < A →
     rw [lintegral_const_mul _ (by fun_prop), lintegral_complex_inv_pow hA,
       ← ENNReal.ofReal_mul (by positivity), show m + 1 + n = m + n + 1 by ring,
       Nat.factorial_succ m]
-    congr 1
-    push_cast
-    field_simp
-    ring
-
-theorem lintegral_prod_partial_sums (n : ℕ) : ∀ {A : ℝ}, 0 < A →
-    ∫⁻ z : Fin n → ℂ, ENNReal.ofReal
-      (∏ i : Fin n, ((A + ∑ k, if k ≤ i then ‖z k‖ ^ 2 else 0) ^ 2)⁻¹) =
-      ENNReal.ofReal (π ^ n / n ! * (A ^ n)⁻¹) := by
-  induction n with
-  | zero =>
-    intro A hA
-    simp [volume_pi]
-  | succ n ih =>
-    intro A hA
-    have hm : ∀ (N : ℕ) (B : ℝ), Measurable fun z : Fin N → ℂ ↦ ENNReal.ofReal
-        (∏ i : Fin N, ((B + ∑ k, if k ≤ i then ‖z k‖ ^ 2 else 0) ^ 2)⁻¹) := fun N B ↦ by
-      refine ENNReal.measurable_ofReal.comp (Finset.measurable_prod _ fun i _ ↦ ?_)
-      refine ((Measurable.const_add (Finset.measurable_sum _ fun k _ ↦ ?_) B).pow_const 2).inv
-      split_ifs <;> fun_prop
-    rw [lintegral_fin_succ (hm _ _)]
-    simp only [Fin.prod_univ_succ, Fin.sum_univ_succ, Fin.cons_zero, Fin.cons_succ, ← add_assoc,
-      Fin.zero_le, if_true, Fin.succ_le_succ_iff, Fin.le_zero_iff, Fin.succ_ne_zero, if_false,
-      Finset.sum_const_zero, add_zero]
-    have h : ∀ z : ℂ, ∫⁻ w : Fin n → ℂ,
-        ENNReal.ofReal (((A + ‖z‖ ^ 2) ^ 2)⁻¹ *
-          ∏ i : Fin n, ((A + ‖z‖ ^ 2 + ∑ k, if k ≤ i then ‖w k‖ ^ 2 else 0) ^ 2)⁻¹) =
-        ENNReal.ofReal (π ^ n / n !) *
-          ENNReal.ofReal (((A + ‖z‖ ^ 2) ^ (n + 2))⁻¹) := fun z ↦ by
-      simp only [ENNReal.ofReal_mul (show 0 ≤ ((A + ‖z‖ ^ 2) ^ 2)⁻¹ by positivity)]
-      rw [lintegral_const_mul _ (hm _ _), ih (by positivity),
-        ← ENNReal.ofReal_mul (by positivity), ← ENNReal.ofReal_mul (by positivity)]
-      congr 1
-      field_simp
-      ring
-    simp only [h]
-    rw [lintegral_const_mul _ (by fun_prop), lintegral_complex_inv_pow hA,
-      ← ENNReal.ofReal_mul (by positivity), Nat.factorial_succ n]
     congr 1
     push_cast
     field_simp

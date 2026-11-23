@@ -1,8 +1,46 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.NatCastMemPlaceAt
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.ExistsIsScalar
-import Formalism.LocalToGlobal.IndefiniteReal.FWTie
-import Formalism.LocalToGlobal.IndefiniteReal.FWExist
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.NatCastMemPlaceAt
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.ExistsIsScalar
+public import Formalism.LocalToGlobal.IndefiniteReal.FWExist
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.EvLawsGenFrNonemptyComp
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.FreeModule.IdealQuotient
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -102,30 +140,14 @@ abbrev Pts (j : ℕ) : Type := PtC (T0.Q.Xo j) T0.Q.c (embC YS iC b)
 
 def kurAt : Subfield (FractionRing (D.ntw.O i)) := (kurC (embC YS iC b)).comap iC
 
-theorem sideK_mem_kurAt (a : T0.Q.c.F) : sideK YS i b a ∈ kurAt YS iC b := mem_kurC (embC YS iC b) a
-
-theorem kurAt_eq (h : ∀ x : S.Ks, ∃ y : S.Ks, algebraMap S.Ks D.what₂.LL y = star (algebraMap S.Ks D.what₂.LL x)) :
-    kurAt YS iC true = kurAt YS iC false := by
-  have key : ∀ x y : S.Ks, algebraMap S.Ks D.what₂.LL y = star (algebraMap S.Ks D.what₂.LL x) →
-      embC YS iC false (eKs YS x) = embC YS iC true (eKs YS y) := fun x y hxy => by
-    change iC (sideK YS i false _) = iC (sideK YS i true _)
-    rw [sideK_eKs, sideK_eKs]
-    exact congrArg (fun z => iC (IsFractionRing.map (K := FractionRing (D.ntw.O0 i)) (D.ntw.O_inj i) z))
-      (D.ntw.restX_coefficientEmbedding_conj i (S.kKs x) (S.kKs y) (by rw [S.kKs_spec, S.kKs_spec, hxy]))
-  have : (embC YS iC true).fieldRange = (embC YS iC false).fieldRange := by
-    refine le_antisymm ?_ ?_ <;> rintro _ ⟨a, rfl⟩ <;> obtain ⟨x, rfl⟩ := (eKs YS).surjective a <;> obtain ⟨y, hy⟩ := h x
-    · exact ⟨_, key y x (by rw [hy, star_star])⟩
-    · exact ⟨_, (key x y hy).symm⟩
-  rw [kurAt, kurAt, kurC_congr _ this]
 
 variable {iC b} in
-
 def valAt (j : Fin D.R.m) (z : FrC YS iC b ((j : ℕ) + 1)) : NX.Fm S i ((j : ℕ) + 1) b →+ ℂ_[D.ntw.l i] :=
   TensorProduct.liftAddHom (R := S.Ks) (M := NX.KB S i b) (N := NX.FmK S ((j : ℕ) + 1))
     { toFun := fun a =>
         { toFun := fun x => iC a * valC z (cuspOf YS fw j x : T0.R ((j : ℕ) + 1))
           map_zero' := by rw [map_zero]; exact (congrArg _ (valC_zero z)).trans (mul_zero _)
-          map_add' := fun x y => by rw [map_add, ← mul_add]; exact congrArg _ (valC_add z _ _) }
+          map_add' := fun x y => by rw [map_add (f := _), ← mul_add]; exact congrArg _ (valC_add z _ _) }
       map_zero' := by ext x; exact (congrArg (· * _) (map_zero iC)).trans (zero_mul _)
       map_add' := fun a a' => by ext x; exact (congrArg (· * _) (map_add iC a a')).trans (add_mul _ _ _) }
     fun c a x => by
@@ -170,8 +192,8 @@ theorem valAt_frBor (j : Fin D.R.m) {z z' : FrC YS iC b ((j : ℕ) + 1)} {t : Ix
       rfl
   exact key x
 
-variable (S) in
 
+variable (S) in
 def ratForms (j : ℕ) (b : Bool) (L : Subfield (FractionRing (D.ntw.O i))) : AddSubgroup (NX.Fm S i j b) :=
   AddSubgroup.closure {x | ∃ a ∈ L, ∃ f : NX.FmK S j, x = (show NX.KB S i b from a) ⊗ₜ[S.Ks] f}
 
@@ -204,15 +226,6 @@ theorem span_ratForms (j : ℕ) (L : Subfield (FractionRing (D.ntw.O i))) :
       exact e ▸ h
   exact key x
 
-theorem ratForms_top (j : ℕ) : ratForms S j b (⊤ : Subfield (FractionRing (D.ntw.O i))) = ⊤ := by
-  refine eq_top_iff.2 fun x _ => ?_
-  have key : ∀ x : NX.KB S i b ⊗[S.Ks] NX.FmK S j, x ∈ ratForms S j b (⊤ : Subfield (FractionRing (D.ntw.O i))) := fun x => by
-    induction x using TensorProduct.induction_on with
-    | zero => exact zero_mem _
-    | add x y hx hy => exact add_mem hx hy
-    | tmul a f => exact tmul_mem_ratForms (Subfield.mem_top _) f
-  exact key x
-
 variable (iC b) (j : Fin D.R.m)
 
 def urBall (B : ℝ) : Set (NX.Fm S i ((j : ℕ) + 1) b) :=
@@ -235,8 +248,8 @@ def HeckeGeo : Prop :=
 def HeckeStable : Prop := ∀ k P, HkIdx i k P → ∀ (z : Pts YS iC b ((j : ℕ) + 1)) (C : HkKer P.asIdeal (charAt P) k z.1),
   ∃ z' : Pts YS iC b ((j : ℕ) + 1), IsHkQuot P.asIdeal (charAt P) k z.1 C z'.1
 
-omit j in
 
+omit j in
 def KerCard (j k : ℕ) (P : PlE D.host) (n : ℕ) : Prop :=
   ∀ (b : Bool) (z : Pts YS iC b j), Nonempty (Fin n ≃ HkKer P.asIdeal (charAt P) k z.1)
 

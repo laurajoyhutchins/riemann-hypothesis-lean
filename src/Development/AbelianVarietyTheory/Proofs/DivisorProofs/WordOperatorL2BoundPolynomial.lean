@@ -1,10 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.SiegelWeilAnisotropicHermitian
-import Development.AbelianVarietyTheory.Definitions.Divisors.CTSmallCone
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.WordAppend
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AppSmul
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ArchimedeanDecayOperatorApplyMemAdelicSchwartz
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AdelicSchwartzMemL2
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AppSmul
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AdelicSchwartzMemL2
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ArchimedeanDecayOperatorApplyMemAdelicSchwartz
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AbelianVarietyTheory.Definitions.Divisors.MatchingOfParts
+
+@[expose] public section
+
 open NumberField IsDedekindDomain MeasureTheory Filter Topology Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes
 open GlobalTheory.WeilM GlobalTheory.AdelicU GlobalTheory.LFun GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels GlobalTheory.ThK
 open scoped TensorProduct NNReal Matrix
@@ -42,7 +85,7 @@ theorem dD_dir {Φ : (κ → AF F) → ℂ} (hΦ : Φ ∈ schA F κ) :
   | mem Φ h =>
     obtain ⟨f, g, hg, rfl⟩ := h
     refine ⟨fun v w => funext fun x => ?_, fun r v => funext fun x => ?_⟩
-    · simp only [Pi.add_apply, dD_pureA_apply, map_add, add_mul]
+    · simp only [Pi.add_apply, dD_pureA_apply, map_add (f := _), add_mul]
     · simp only [Pi.smul_apply, dD_pureA_apply, map_smul, smul_eq_mul, Complex.real_smul]
       ring
   | zero =>
@@ -151,12 +194,10 @@ theorem dR_expand {ι : Type} [Fintype ι] (b : Module.Basis ι ℝ (Dir F κ)) 
     _ = ∑ i, b.repr ζ i • dRL T c hΦ (b i) := by rw [map_sum]; simp only [map_smul]
     _ = _ := Finset.sum_congr rfl fun i _ => real_smul_fun _ _
 
-theorem lintegral_enorm_sq {X : Type} {m : MeasurableSpace X} (μ : Measure X) (f : X → ℂ) :
+theorem lintegral_enorm_sq {X : Type} {m : MeasurableSpace X} (μ : Measure X) (f : X → ℂ) (hf : AEStronglyMeasurable f μ) :
     ∫⁻ x, ‖f x‖ₑ ^ 2 ∂μ = eLpNorm f 2 μ ^ 2 := by
-  rw [eLpNorm_eq_lintegral_rpow_enorm two_ne_zero ENNReal.ofNat_ne_top, ← ENNReal.rpow_natCast, ← ENNReal.rpow_mul]
-  simp only [ENNReal.toReal_ofNat, Nat.cast_ofNat, one_div]
-  rw [inv_mul_cancel₀ two_ne_zero, ENNReal.rpow_one]
-  simp only [ENNReal.rpow_two]
+  have h := eLpNorm_nnreal_pow_eq_lintegral (f := f) (μ := μ) (p := 2) (by norm_num) hf
+  simpa only [NNReal.coe_ofNat, ENNReal.coe_ofNat, ENNReal.rpow_ofNat] using h.symm
 
 end GlobalTheory.ArchDecay.WordL2Estimates
 
@@ -200,8 +241,7 @@ theorem eLpNorm_wordR_le (μ : @Measure (κ → AF F) (borel _)) (hμ : @Measure
       rw [wordR_concat, dR_expand T c b hΦ ζ, wordR_sum T c zs' _ _ fun i => dR_mem T c (b i) hΦ]
       calc eLpNorm (∑ i, ((b.repr ζ i : ℝ) : ℂ) • wordR F T c zs' (dR F T c (b i) Φ)) 2 μ
           ≤ ∑ i, eLpNorm (((b.repr ζ i : ℝ) : ℂ) • wordR F T c zs' (dR F T c (b i) Φ)) 2 μ :=
-            eLpNorm_sum_le (fun i _ => ((hL2 _ (wordR_mem T c zs' (dR_mem T c (b i) hΦ))).const_smul _).1)
-              one_le_two
+            eLpNorm_sum_le one_le_two
         _ ≤ ∑ i, ENNReal.ofReal (κ₀ * ρ * (C i * ρ ^ P)) := by
             refine Finset.sum_le_sum fun i _ => ?_
             rw [eLpNorm_const_smul, ← ofReal_norm_eq_enorm, Complex.norm_real,
@@ -226,7 +266,10 @@ theorem wordR_L2_le : ∀ (F : Type) [Field F] [NumberField F] (κ : Type) [Fint
   obtain ⟨C, hC0, hC⟩ := WordL2Estimates.eLpNorm_wordR_le T c μ hμ P Φ hΦ
   refine ⟨C ^ 2, fun ρ hρ zs hl hu => ?_⟩
   have h := hC ρ hρ zs hl hu
-  rw [WordL2Estimates.lintegral_enorm_sq]
+  letI : MeasurableSpace (κ → AF F) := borel _
+  have hf := (GlobalTheory.WeilM.schA_memLp_two F κ μ hμ _
+    (WordL2Estimates.wordR_mem T c zs hΦ)).aestronglyMeasurable
+  rw [WordL2Estimates.lintegral_enorm_sq μ _ hf]
   calc eLpNorm (wordR F T c zs Φ) 2 μ ^ 2 ≤ ENNReal.ofReal (C * ρ ^ P) ^ 2 := pow_le_pow_left' h 2
     _ = ENNReal.ofReal (C ^ 2 * ρ ^ (2 * P)) := by
       rw [← ENNReal.ofReal_pow (mul_nonneg hC0 (pow_nonneg (zero_le_one.trans hρ) _))]

@@ -1,12 +1,56 @@
-import Mathlib
-import ReciprocityTheory.DualLattices.TowerZeroSurjective
-import ReciprocityTheory.DualLattices.LinPairStatement
-import ReciprocityTheory.DualLattices.SubMemOfCompat
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.Clauses
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import ReciprocityTheory.DualLattices.CotangentSurjective
+import ReciprocityTheory.DualLattices.FormalChartAtZero
+import ReciprocityTheory.DualLattices.SqZeroOfSpan
 import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.UniversalCharts.LePreimageOfNil
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.RosVal
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.Biextensions.GenericFiberCubeInclusion
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PlaceDivisors.AlWellDefSt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.Clauses
+
+@[expose] public section
+
 open TensorProduct IsLocalRing Matrix CategoryTheory AlgebraicGeometry MonoidalCategory CartesianMonoidalCategory MonObj ReciprocityTheory.PGsh ReciprocityTheory.PGsh.Up ReciprocityTheory.PGsh.L2 ReciprocityTheory.PGsh.Be2 ReciprocityTheory.ChartRestriction.G.Chart
 open scoped CategoryTheory.Obj CategoryTheory.MonObj
 attribute [local instance] Over.cartesianMonoidalCategory
@@ -47,7 +91,7 @@ private theorem exists_root_lift_of_ker_sq_eq_bot {R' R : Type} [CommRing R'] [C
     have := Ideal.pow_mem_pow h1 2
     rwa [hk, Ideal.mem_bot] at this
   refine ⟨z₀ + -(v * Polynomial.aeval z₀ f), ?_, ?_⟩
-  · rw [map_add, RingHom.mem_ker.mp h1, add_zero]
+  · rw [map_add (f := _), RingHom.mem_ker.mp h1, add_zero]
   · rw [Polynomial.aeval_add_of_sq_eq_zero _ _ _ h2, mul_neg, ← _root_.mul_assoc, hv, _root_.one_mul,
       add_neg_cancel]
 
@@ -61,7 +105,7 @@ private theorem isUnit_aeval_derivative_cyclotomic {R : Type} [CommRing R] (M : 
     simpa [sub_eq_zero] using this
   have hzu : IsUnit z := IsUnit.of_pow_eq_one h1 hM
   have h2 := congrArg (fun q => Polynomial.aeval z (derivative q)) hg
-  simp only [derivative_mul, map_add, map_mul, hz, zero_mul, add_zero, derivative_sub,
+  simp only [derivative_mul, map_add (f := _), map_mul, hz, zero_mul, add_zero, derivative_sub,
     derivative_one, sub_zero, derivative_X_pow, map_natCast, map_pow, aeval_X] at h2
   have h3 : IsUnit ((M : R) * z ^ (M - 1)) := hu.mul (hzu.pow _)
   rw [h2] at h3
@@ -133,7 +177,7 @@ private theorem exists_mul_eq_aeval_zeta_of_mem (p M : ℕ) (x : ℂ) (hx : x �
     obtain ⟨n, hn, g, hg⟩ := hx
     obtain ⟨m, hm, k, hk⟩ := hy
     refine ⟨n * m, mul_mem hn hm, g * (m : ℤ[X]) + k * (n : ℤ[X]), ?_⟩
-    simp only [map_add, map_mul, map_natCast, Nat.cast_mul, ← hg, ← hk]
+    simp only [map_add (f := _), map_mul, map_natCast, Nat.cast_mul, ← hg, ← hk]
     ring
   | neg x _ hx =>
     obtain ⟨n, hn, g, hg⟩ := hx

@@ -1,5 +1,47 @@
-import Formalism.SharpRestriction.LevelLetterCocycles.ArcLiftingSetup
-import Formalism.SharpRestriction.LevelLetterCocycles.ConstantCoeffAlgHom
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.ArcLiftingSetup
+public import Formalism.SharpRestriction.LevelLetterCocycles.ConstantCoeffAlgHom
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.PowerSeries.Inverse
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -42,7 +84,8 @@ theorem π₀_mem : W.π₀ ∈ W.AΔ := by
   rw [γA_apply]
   show W.γ₀ δ W.π₀₁ = W.π₀₁
   unfold LocWach.π₀₁
-  rw [map_add, map_sub, map_one, map_natCast, map_sum]
+
+  rw [map_add (f := _), map_sub, map_one, map_natCast, map_sum]
   congr 1
   refine Finset.sum_equiv (Equiv.mulLeft δ) (fun g => ?_) (fun g _ => ?_)
   · rw [delF_iff, delF_iff]
@@ -71,20 +114,10 @@ theorem φpow_mem (t : ℕ) {a : LetA O n} (ha : a ∈ W.AΔ) : (W.φA ^ t) a �
 
 theorem ps_mem (s : ℕ) : ps W s ∈ W.AΔ := φpow_mem W s (qA_mem W)
 
-theorem piPs_mem {f : LetA O n} (hf : f ∈ PiPs W) : f ∈ W.AΔ := by
-  have h : insert W.π₀ (Set.range (ps W)) ⊆ (W.AΔ.toSubmonoid : Set (LetA O n)) :=
-    Set.insert_subset_iff.2 ⟨π₀_mem W, Set.range_subset_iff.2 fun s => ps_mem W s⟩
-  exact (Submonoid.closure_le.2 h) hf
-
 theorem γD_smulA (T : LocLat G Qp LL O) (g : W.Gam) (a : LetA O n) (x : W.DD T) :
     W.γD T g (a • x) = W.γA g a • W.γD T g x := by
   rw [← algebraMap_smul W.EE a x, W.γD_smul, W.γE_ext, algebraMap_smul]
   rfl
-
-theorem smul_mem_NΔ (T : LocLat G Qp LL O) {a : LetA O n} (ha : a ∈ W.AΔ) {y : W.DD T}
-    (hy : y ∈ W.NΔ T) : a • y ∈ W.NΔ T := by
-  refine ⟨(W.N T).smul_mem a hy.1, fun δ hδ => ?_⟩
-  rw [γD_smulA, ha δ hδ, hy.2 δ hδ]
 
 theorem γA_letE (g : W.Gam) (c : ZMod n) : W.γA g (letE c) = letE c := by
   funext i
@@ -95,15 +128,6 @@ theorem γA_letE (g : W.Gam) (c : ZMod n) : W.γA g (letE c) = letE c := by
 
 theorem γE_ι (g : W.Gam) (a : LetA O n) :
     W.γE g (algebraMap (LetA O n) W.EE a) = algebraMap (LetA O n) W.EE (W.γA g a) := W.γE_ext g a
-
-theorem ι_φpow (t : ℕ) (a : LetA O n) :
-    algebraMap (LetA O n) W.EE ((W.φA ^ t) a) = (W.φE ^ t) (algebraMap (LetA O n) W.EE a) := by
-  induction t generalizing a with
-  | zero => simp
-  | succ t ih =>
-    rw [pow_succ, AlgHom.mul_apply, ih, pow_succ, AlgHom.mul_apply]
-    congr 1
-    exact (W.φE_ext a).symm
 
 theorem isUnit_p_add (x : W.EE) : IsUnit (((PD.p : ℕ) : W.EE) * x + 1) := by
   have := W.EE_complete
@@ -170,7 +194,7 @@ theorem isUnit_qA (hR : RD W) : IsUnit (algebraMap (LetA O n) W.EE (qA W)) := by
   obtain ⟨u, hu⟩ := isUnit_π₀ hR
   have e : algebraMap (LetA O n) W.EE (qA W) =
       (u : W.EE) * (((PD.p : ℕ) : W.EE) * ((u⁻¹ : W.EEˣ) : W.EE) + 1) := by
-    rw [mul_add, mul_one, mul_left_comm, Units.mul_inv, mul_one, hu, qA, lA, map_add, map_natCast,
+    rw [mul_add, mul_one, mul_left_comm, Units.mul_inv, mul_one, hu, qA, lA, map_add (f := _), map_natCast,
       add_comm]
   rw [e]
   exact u.isUnit.mul (isUnit_p_add W _)
@@ -246,7 +270,7 @@ theorem φpow_π₀ (hR : RD W) (t : ℕ) :
 theorem γqA {w : LetA O n} (hw : W.γA W.gam W.π₀ = W.π₀ * (1 + w * qA W)) :
     W.γA W.gam (qA W) = qA W * (1 + w * W.π₀) := by
   have : W.γA W.gam (qA W) = W.γA W.gam W.π₀ + lA W := by
-    simp only [qA, lA, map_add, map_natCast]
+    simp only [qA, lA, map_add (f := _), map_natCast]
   rw [this, hw]
   simp only [qA]
   ring
@@ -259,7 +283,7 @@ theorem gam_ps_core (hR : RD W) (s : ℕ) (hs : 1 ≤ s) :
   have hγ : W.γA W.gam (ps W (t + 1)) =
       ps W (t + 1) * (1 + (W.φA ^ (t + 1)) (w : LetA O n) * (W.φA ^ (t + 1)) W.π₀) := by
     show W.γA W.gam ((W.φA ^ (t + 1)) (qA W)) = (W.φA ^ (t + 1)) (qA W) * _
-    rw [← φpow_γA, γqA hw, map_mul, map_add, map_one, map_mul]
+    rw [← φpow_γA, γqA hw, map_mul, map_add (f := _), map_one, map_mul]
   refine ⟨(W.φA ^ (t + 1)) (w : LetA O n) * h, quot_mem W π₀qA_mem (isUnit_π₀qA hR) ?_, ?_⟩
   · have : W.π₀ * qA W * ((W.φA ^ (t + 1)) (w : LetA O n) * h) =
         (W.φA ^ (t + 1)) (w : LetA O n) * (W.φA ^ (t + 1)) W.π₀ := by rw [hh]; ring
@@ -294,7 +318,7 @@ theorem exists_inverse_in_S1 (hR : RD W) {r : LetA O n} (hr : r ∈ S1 W) : ∃ 
     intro i
     rw [PowerSeries.isUnit_iff_constantCoeff]
     show IsUnit (constantCoeff (1 + W.π₀₁ * y i))
-    rw [map_add, map_mul, hcc, zero_mul, add_zero, map_one]
+    rw [map_add (f := _), map_mul, hcc, zero_mul, add_zero, map_one]
     exact isUnit_one
   set z : LetA O n := ((hu.unit⁻¹ : (LetA O n)ˣ) : LetA O n) with hzdef
   have hz : (1 + W.π₀ * y) * z = 1 := hu.mul_val_inv
@@ -324,7 +348,7 @@ theorem psγ (hR : RD W) (t : ℕ) :
   obtain ⟨r', hr', hrr⟩ := exists_inverse_in_S1 hR hS
   refine ⟨_, hS, r', hr', hrr, ?_⟩
   show W.γA W.gam ((W.φA ^ t) (qA W)) = _ * (W.φA ^ t) (qA W)
-  rw [← φpow_γA, γqA hw, map_mul, map_add, map_one, map_mul, ha]
+  rw [← φpow_γA, γqA hw, map_mul, map_add (f := _), map_one, map_mul, ha]
   ring
 
 theorem γ_prod (r : ℕ → LetA O n) (hγ : ∀ t, W.γA W.gam (ps W t) = r t * ps W t) (e : ℕ)

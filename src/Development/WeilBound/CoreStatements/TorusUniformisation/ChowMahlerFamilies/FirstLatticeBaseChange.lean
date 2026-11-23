@@ -1,10 +1,62 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.LieLatticeData
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.MemSpanOverOfMem
-import Development.WeilBound.CoreStatements.TorusUniformisation.ChowMahlerFamilies.XDotdualBc
-import Development.WeilBound.CoreStatements.TorusUniformisation.ChowMahlerFamilies.XSummandBc
-import Development.WeilBound.CoreStatements.TorusUniformisation.ChowMahlerFamilies.XSummandOfQuot
-import Development.WeilBound.CoreStatements.TorusUniformisation.ChowMahlerFamilies.XGraphRestrictBc
+module
+
+public import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.LieLatticeData
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.MemSpanOverOfMem
+public import Development.WeilBound.CoreStatements.TorusUniformisation.ChowMahlerFamilies.XDotdualBc
+public import Development.WeilBound.CoreStatements.TorusUniformisation.ChowMahlerFamilies.XGraphRestrictBc
+public import Development.WeilBound.CoreStatements.TorusUniformisation.ChowMahlerFamilies.XSummandBc
+public import Development.WeilBound.CoreStatements.TorusUniformisation.ChowMahlerFamilies.XSummandOfQuot
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TensorProduct.IsBaseChangePi
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open GlobalTheory.CompanionTheory.Ar.Num
 
 namespace PositivityTheory.Xgn.GoodLatticeBaseChange
@@ -101,7 +153,7 @@ theorem xId_retract [One F] (χ : F → Ω) (h1 : χ 1 = 1) (i : Fin n)
   · obtain ⟨m, hm, v, hv, h⟩ := (mem_xId D χ i c).1 hc
     show c • e - ρ (c • e) ∈ D.M
     have h' : c • e = m + v := h.symm
-    rw [h', map_add, a2 v hv, add_sub_add_right_eq_sub]
+    rw [h', map_add (f := _), a2 v hv, add_sub_add_right_eq_sub]
     exact D.M.sub_mem hm (a3 m hm)
   · obtain ⟨y, hy, z, hz, h⟩ := Submodule.mem_sup.1 (b1 v)
     obtain ⟨c, rfl⟩ := Submodule.mem_span_singleton.1 hz
@@ -169,7 +221,7 @@ theorem charSub_bc (χ : F → Ω) (i : Fin n) :
     rintro _ ⟨g, hg, rfl⟩
     obtain ⟨y, hy, z, hz, rfl⟩ := Submodule.mem_sup.1 hg
     obtain ⟨c, rfl⟩ := Submodule.mem_span_singleton.1 hz
-    rw [map_add, map_smul, ← algebraMap_smul C c]
+    rw [map_add (f := _), map_smul, ← algebraMap_smul C c]
     refine Submodule.add_mem_sup ?_ (Submodule.smul_mem _ _ (Submodule.subset_span rfl))
     rw [vanSub_bc (Ω := Ω)]
     exact Submodule.subset_span ⟨y, hy, rfl⟩
@@ -188,6 +240,7 @@ theorem range_bc (χ : F → Ω) :
   · rintro _ ⟨g, rfl⟩
     have h := eq_sum g (1 : Ω)
     rw [map_one, one_smul] at h
+
     rw [h, map_sum]
     refine Submodule.sum_mem _ fun x _ => ?_
     rw [map_smul, linMap_bc]
@@ -223,7 +276,7 @@ theorem first_lattice_base_change (hR : ∀ a ∈ R, algebraMap Ω C a ∈ RC) :
   · refine (AddSubgroup.closure_le _).2 ?_
     rintro _ ⟨a, ha, _, ⟨v, hv, rfl⟩, rfl⟩
     obtain ⟨y, hy, _, ⟨z, hz, rfl⟩, rfl⟩ := AddSubgroup.mem_sup.1 hv
-    rw [map_add, smul_add]
+    rw [map_add (f := _), smul_add]
     refine AddSubgroup.add_mem_sup (smul_mem ha (mem_span ⟨y, hy, rfl⟩))
       ⟨a • bcMap Ω C _ z, (mem_stdLat RC _).2 fun x => ?_, ?_⟩
     · exact RC.mul_mem ha (hR _ ((mem_stdLat R z).1 hz x))
@@ -245,6 +298,7 @@ theorem af_bc [One F] (hR : ∀ a ∈ R, algebraMap Ω C a ∈ RC) (χ : F → �
     have hid : τ (linMap n (fun a => algebraMap Ω C (χ a)) w) = w := by
       have h := eq_sum w (1 : Ω)
       rw [map_one, one_smul] at h
+
       rw [h, map_sum, map_sum]
       refine Finset.sum_congr rfl fun x _ => ?_
       rw [map_smul, map_smul, linMap_bc, hτ, a1]
@@ -280,7 +334,7 @@ theorem xId_bc [One F] (χ : F → Ω) (h1 : χ 1 = 1) (i : Fin n)
       rw [a3, map_one] at this
       exact this
     have h2 := congrArg τ h
-    rw [map_add, h0, add_zero, map_smul, h1, smul_eq_mul, mul_one] at h2
+    rw [map_add (f := _), h0, add_zero, map_smul, h1, smul_eq_mul, mul_one] at h2
     rw [← h2]
     refine map_mem τ ?_ hm
     rintro _ ⟨v, hv, rfl⟩
@@ -293,7 +347,7 @@ theorem xId_bc [One F] (χ : F → Ω) (h1 : χ 1 = 1) (i : Fin n)
       a • bcMap Ω C _ v, Submodule.smul_mem _ _ ?_, ?_⟩
     · rw [vanSub_bc (Ω := Ω)]
       exact Submodule.subset_span ⟨v, hv, rfl⟩
-    · rw [← smul_add, ← map_add, h]
+    · rw [← smul_add, ← map_add (f := _), h]
       funext x
       show a * algebraMap Ω C (c * χ (x i)) = a * algebraMap Ω C c * algebraMap Ω C (χ (x i))
       rw [map_mul, mul_assoc]

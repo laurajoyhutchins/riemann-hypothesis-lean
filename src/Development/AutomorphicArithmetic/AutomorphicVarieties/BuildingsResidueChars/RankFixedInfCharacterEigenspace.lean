@@ -1,4 +1,47 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.CuspidalDescent.GLDenseRanges.KirCusp
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.CuspidalDescent.GLDenseRanges.KirCusp
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open ValuativeRel Matrix GlobalTheory.SmGL GlobalTheory.SplitWeil UpperTheory.V.Hi UpperTheory.V.Z.Desc.V0
 
@@ -75,6 +118,7 @@ private theorem rank_isotypic_character_projection {Q I W : Type} [Group Q] [Fin
     refine Submodule.mem_inf.2 ⟨?_, (Submodule.mem_iInf _).2 fun y => ?_⟩
     · rw [he_apply]
       exact Submodule.smul_mem V _ (Submodule.sum_mem V fun x _ => Submodule.smul_mem V _ (hV x v hv))
+
     · rw [Module.End.mem_eigenspace_iff, he_apply, map_smul, map_sum]
       have h1 : ∀ x, T y ((((χ t x)⁻¹ : ℂˣ) : ℂ) • T x v) = (((χ t x)⁻¹ : ℂˣ) : ℂ) • T (y * x) v := by
         intro x
@@ -127,6 +171,7 @@ private theorem rank_isotypic_character_projection {Q I W : Type} [Group Q] [Fin
   have hsum : ∀ (w : ∀ t, ↥(V ⊓ ⨅ x, Module.End.eigenspace (T x) ((χ t x : ℂˣ) : ℂ))) t,
       e t (∑ s, (w s : W)) = w t := by
     intro w t
+
     rw [map_sum, Finset.sum_eq_single t]
     · rw [hproj t t _ (w t).2, if_pos rfl]
     · intro s _ hst
@@ -142,7 +187,7 @@ private theorem rank_isotypic_character_projection {Q I W : Type} [Group Q] [Fin
       map_add' := fun v w => by
         funext t
         apply Subtype.ext
-        simp [map_add]
+        simp [map_add (f := _)]
       map_smul' := fun a v => by
         funext t
         apply Subtype.ext
@@ -187,7 +232,7 @@ theorem UpperTheory.rank_fixed_inf_character_eigenspace :
       map_mul ι, map_mul τ, Module.End.mul_apply]
   have hE : opE τ (∑ x, Finsupp.single (ι (s x)) (c x)) = ∑ x, c x • τ (ι (s x)) := by
     unfold opE
-    rw [← Finsupp.sum_finset_sum_index (h := fun g (n : ℤ) => n • τ g)
+    rw [Finsupp.sum_finsetSum _ _ (fun g (n : ℤ) => n • τ g)
       (fun _ => zero_smul _ _) (fun _ _ _ => add_smul _ _ _)]
     simp [Finsupp.sum_single_index]
   have hR : ∀ t, fixd τ K ⊓ ⨅ y : A, Module.End.eigenspace (τ (ι y)) ((χ t (π y) : ℂˣ) : ℂ) =

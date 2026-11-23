@@ -1,15 +1,57 @@
-import Mathlib
-import Development.AutomorphicArithmetic.Foundations.Convolution.TraceSplitting.NormCharSplit
-import Development.AutomorphicArithmetic.Foundations.Convolution.PowerSumTraces.OpBasics
-import Development.AutomorphicArithmetic.Foundations.Convolution.PowerSumTraces.EigSummands
-import Development.AutomorphicArithmetic.Foundations.Convolution.PowerSumTraces.EigSplit
-import Development.AutomorphicArithmetic.Foundations.Convolution.CentreSplitting.CuspidalMultiplicityOneTotallyComplex
-import Development.AutomorphicArithmetic.Foundations.Convolution.PowerSumTraces.SummandsSpan
-import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.KernelTransforms.EvExSub
-import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.KernelTransforms.CompatEx
-import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.KernelTransforms.RrTens
+module
+
+public import Development.AutomorphicArithmetic.Foundations.Convolution.TraceSplitting.NormCharSplit
+public import Development.AutomorphicArithmetic.Foundations.Convolution.CentreSplitting.CuspidalMultiplicityOneTotallyComplex
+public import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.KernelTransforms.CompatEx
+public import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.KernelTransforms.EvExSub
 import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.KernelTransforms.PrjFix
+public import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.KernelTransforms.RrTens
+public import Development.AutomorphicArithmetic.Foundations.Convolution.PowerSumTraces.EigSplit
+public import Development.AutomorphicArithmetic.Foundations.Convolution.PowerSumTraces.EigSummands
+public import Development.AutomorphicArithmetic.Foundations.Convolution.PowerSumTraces.OpBasics
+public import Development.AutomorphicArithmetic.Foundations.Convolution.PowerSumTraces.SummandsSpan
 import GroundTheory.AutomorphicForms.CompactSelfAdjoint
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MeasureTheory NumberField IsDedekindDomain
 open GroundTheory.Automorphic GroundTheory.Automorphic.Reduction GroundTheory.Automorphic.RightCosetSpace
@@ -64,7 +106,7 @@ private theorem exists_pos_eig {H : Type} [NormedAddCommGroup H] [InnerProductSp
     exact V.smul_mem _ (hPV _)
   have hAw : A (b i) = ((l i : ℝ) : ℂ) • b i := by rw [← hBv _ hwV, hTb i]
   have hpos : 0 < l i := by
-    have h1 := ((ContinuousLinearMap.nonneg_iff_isPositive A).1 hA).re_inner_nonneg_right (b i)
+    have h1 := ((ContinuousLinearMap.nonneg_iff_isPositive).1 hA).re_inner_nonneg_right (b i)
     have hn : ⟪b i, b i⟫_ℂ = 1 := by
       rw [inner_self_eq_norm_sq_to_K, b.orthonormal.1 i]
       simp

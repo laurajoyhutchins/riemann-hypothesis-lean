@@ -1,4 +1,63 @@
-import Mathlib
+module
+
+public import Mathlib.LinearAlgebra.Charpoly.Basic
+public import Mathlib.LinearAlgebra.FreeModule.PID
+public import Mathlib.LinearAlgebra.Trace
+public import Mathlib.RingTheory.Flat.TorsionFree
+public import Mathlib.RingTheory.PowerSeries.Basic
+public import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.Charpoly.ToMatrix
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.PowerSeries.Derivative
+public import Mathlib.RingTheory.PowerSeries.Inverse
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.RingTheory.Derivation.Basic
+
+@[expose] public section
 
 noncomputable section
 
@@ -15,6 +74,7 @@ def matrixGeomSeries (M : Matrix n n R) : Matrix n n (PowerSeries R) :=
 
 theorem coeff_map_C_mul_matrixGeomSeries (M : Matrix n n R) (k : ℕ) (i j : n) :
     PowerSeries.coeff k ((M.map PowerSeries.C * matrixGeomSeries M) i j) = (M ^ (k + 1)) i j := by
+
   rw [pow_succ', Matrix.mul_apply, Matrix.mul_apply, map_sum]
   refine Finset.sum_congr rfl fun l _ => ?_
   simp [matrixGeomSeries, PowerSeries.coeff_C_mul]
@@ -33,8 +93,10 @@ theorem trace_matrixGeomSeries_mul (M : Matrix n n R) :
     (matrixGeomSeries M * M.map PowerSeries.C).trace =
       PowerSeries.mk fun k => (M ^ (k + 1)).trace := by
   ext k
+
   rw [PowerSeries.coeff_mk, pow_succ, Matrix.trace, Matrix.trace, map_sum]
   refine Finset.sum_congr rfl fun i _ => ?_
+
   rw [Matrix.diag_apply, Matrix.diag_apply, Matrix.mul_apply, Matrix.mul_apply, map_sum]
   refine Finset.sum_congr rfl fun l _ => ?_
   simp [matrixGeomSeries, PowerSeries.coeff_mul_C]
@@ -93,25 +155,6 @@ section LogSeries
 
 variable {k : Type*} [Field k] [CharZero k]
 
-theorem mul_derivative_logOf (f : PowerSeries k) (hf : PowerSeries.constantCoeff f = 1) :
-    f * PowerSeries.derivative k (PowerSeries.logOf f) = PowerSeries.derivative k f := by
-  have h0 : PowerSeries.constantCoeff (f - 1) = 0 := by rw [map_sub, map_one, hf, sub_self]
-  have ha : PowerSeries.HasSubst (f - 1) := PowerSeries.HasSubst.of_constantCoeff_zero' h0
-  have hgeom : (1 + PowerSeries.X) * PowerSeries.derivative k (PowerSeries.log k) = 1 := by
-    rw [PowerSeries.deriv_log]
-    ext n
-    rcases n with _ | n
-    · simp
-    · simp [add_mul, PowerSeries.coeff_succ_X_mul, pow_succ]
-  have h1 : (1 : PowerSeries k).subst (f - 1) = 1 := by
-    rw [← PowerSeries.coe_substAlgHom ha, map_one]
-  have hs : f * (PowerSeries.derivative k (PowerSeries.log k)).subst (f - 1) = 1 := by
-    have := congrArg (PowerSeries.subst (f - 1)) hgeom
-    rwa [PowerSeries.subst_mul ha, PowerSeries.subst_add ha, PowerSeries.subst_X ha, h1,
-      add_sub_cancel] at this
-  rw [PowerSeries.logOf_eq, PowerSeries.derivative_subst ha, map_sub,
-    Derivation.map_one_eq_zero, sub_zero, ← mul_assoc, hs, one_mul]
-
 end LogSeries
 
 section Endomorphism
@@ -140,34 +183,6 @@ theorem coe_derivative_reverse_charpoly (A : Module.End k W) :
   funext m
   rw [LinearMap.trace_eq_matrix_trace k b, LinearMap.toMatrix_pow]
 
-theorem logOf_inv_reverse_charpoly [CharZero k] (A : Module.End k W) :
-    PowerSeries.logOf ((A.charpoly.reverse : PowerSeries k)⁻¹) =
-      PowerSeries.mk fun m => if m = 0 then 0 else LinearMap.trace k W (A ^ m) / m := by
-  set P : PowerSeries k := ((A.charpoly.reverse : k[X]) : PowerSeries k) with hPdef
-  set D : PowerSeries k := PowerSeries.mk fun m => LinearMap.trace k W (A ^ (m + 1))
-  have hP : PowerSeries.constantCoeff P = 1 := constantCoeff_reverse_charpoly A
-  have hPinv : PowerSeries.constantCoeff P⁻¹ = 1 := by
-    rw [PowerSeries.constantCoeff_inv, hP, inv_one]
-  have hPP : P * P⁻¹ = 1 := PowerSeries.mul_inv_cancel P (by rw [hP]; exact one_ne_zero)
-  have hdP : PowerSeries.derivative k P = -P * D := by
-    rw [hPdef, PowerSeries.derivative_coe, coe_derivative_reverse_charpoly]
-  have key := mul_derivative_logOf P⁻¹ hPinv
-  rw [PowerSeries.derivative_inv', hdP] at key
-  apply PowerSeries.derivative.ext
-  · have hD : PowerSeries.derivative k (PowerSeries.mk fun m =>
-        if m = 0 then 0 else LinearMap.trace k W (A ^ m) / m) = D := by
-      ext n
-      rw [PowerSeries.coeff_derivative, PowerSeries.coeff_mk, PowerSeries.coeff_mk, if_neg n.succ_ne_zero,
-        Nat.cast_add_one, div_mul_cancel₀ _ (Nat.cast_add_one_ne_zero n)]
-    rw [hD]
-    calc PowerSeries.derivative k (PowerSeries.logOf P⁻¹)
-        = P * (P⁻¹ * PowerSeries.derivative k (PowerSeries.logOf P⁻¹)) := by
-          rw [← mul_assoc, hPP, one_mul]
-      _ = P * (P⁻¹ * D * (P * P⁻¹)) := by rw [key]; ring
-      _ = D := by rw [hPP, mul_one, ← mul_assoc, hPP, one_mul]
-  · rw [PowerSeries.constantCoeff_logOf hPinv, ← PowerSeries.coeff_zero_eq_constantCoeff_apply,
-      PowerSeries.coeff_mk, if_pos rfl]
-
 theorem reverse_charpoly_eq_of_trace_pow_eq [CharZero k] (A : Module.End k W)
     (B : Module.End k W')
     (h : ∀ m, 0 < m → LinearMap.trace k W (A ^ m) = LinearMap.trace k W' (B ^ m)) :
@@ -178,9 +193,9 @@ theorem reverse_charpoly_eq_of_trace_pow_eq [CharZero k] (A : Module.End k W)
   have hP : PowerSeries.constantCoeff P = 1 := constantCoeff_reverse_charpoly A
   have hQ : PowerSeries.constantCoeff Q = 1 := constantCoeff_reverse_charpoly B
   have hQQ : Q⁻¹ * Q = 1 := PowerSeries.inv_mul_cancel Q (by rw [hQ]; exact one_ne_zero)
-  have hdP : PowerSeries.derivative k P = -P * D := by
+  have hdP : PowerSeries.derivative P = -P * D := by
     rw [hPdef, PowerSeries.derivative_coe, coe_derivative_reverse_charpoly]
-  have hdQ : PowerSeries.derivative k Q = -Q * D := by
+  have hdQ : PowerSeries.derivative Q = -Q * D := by
     rw [hQdef, PowerSeries.derivative_coe, coe_derivative_reverse_charpoly]
     congr 2
     funext m

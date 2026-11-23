@@ -1,5 +1,61 @@
-import Mathlib
-import Formalism.LocalToGlobal.Columns.BrzColLatOneLattice
+module
+
+public import Formalism.GL3MeanSquares.ConcavityEquidistribution
+public import Formalism.LocalToGlobal.GlobalTheory.HLatOps
+public import Formalism.HarderNarasimhan.HarderNarasimhanProofs.HtGram
+public import Formalism.HarderNarasimhan.ShiftInvariance
+public import Formalism.LocalToGlobal.GlobalTheory.HLatOpsP
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Formalism.LocalToGlobal.Columns.AbelianHostFieldConditions
+import Formalism.LocalToGlobal.Columns.CoefficientsModP.WeTransposeWordTransposeWord
+public import Formalism.LocalToGlobal.Columns.GSetLemmas
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Module
 open scoped Matrix ComplexOrder
@@ -119,69 +175,8 @@ section GSDOrth
 
 variable {K : Type} [Field K] [NumberField K] [StarRing K] (S : GSD K) (h : S.Ok) (hf : S.Free)
 
-open Classical in
 
-def GSD.extZ (c : S.Cl) : S.V →ₗ[K] S.EqFun :=
-  (S.resFree h S.outSec hf).symm.toLinearMap ∘ₗ LinearMap.single K (fun _ : S.Cl => S.V) c
 
-open Classical in
-theorem GSD.extZ_apply (c c' : S.Cl) (x : S.V) :
-    ((S.extZ h hf c x : S.EqFun) : S.D → S.V) (S.outSec.rep c') = if c' = c then x else 0 := by
-  have h1 := congrFun ((S.resFree h S.outSec hf).apply_symm_apply (Pi.single c x)) c'
-  rw [GSD.resFree_apply] at h1
-  rw [Pi.single_apply] at h1
-  exact h1
-
-theorem GSD.extZ_injective (c : S.Cl) : Function.Injective (S.extZ h hf c) := by
-  classical
-  intro x y hxy
-  have h1 := S.extZ_apply h hf c c x
-  have h2 := S.extZ_apply h hf c c y
-  rw [if_pos rfl] at h1 h2
-  rw [← h1, ← h2, hxy]
-
-theorem GSD.brzo_pairAt_zero_left (v : InfinitePlace K) (y : S.V) : S.pairAt v 0 y = 0 := by
-  simp [GSD.pairAt]
-
-theorem GSD.brzo_pairAt_zero_right (v : InfinitePlace K) (x : S.V) : S.pairAt v x 0 = 0 := by
-  simp [GSD.pairAt]
-
-open Classical in
-
-theorem GSD.ipAt_extZ (v : InfinitePlace K) (c c' : S.Cl) (x y : S.V) :
-    S.ipAt h v (S.extZ h hf c x) (S.extZ h hf c' y) = if c = c' then S.pairAt v x y else 0 := by
-  unfold GSD.ipAt
-  simp only [S.extZ_apply h hf, S.wt_eq_one h S.outSec hf, Nat.cast_one, inv_one, one_mul]
-  let _ : Fintype S.Cl := h.fintypeCl
-  rw [Finset.sum_eq_single c]
-  · rw [if_pos rfl]
-    split_ifs with hc
-    · rfl
-    · exact S.brzo_pairAt_zero_right v x
-  · intro b _ hb
-    rw [if_neg hb]
-    exact S.brzo_pairAt_zero_left v _
-  · intro hc
-    exact absurd (Finset.mem_univ _) hc
-
-def GSD.extL (c : S.Cl) : Submodule (𝓞 K) S.EqFun :=
-  (S.Del (S.outSec.rep c)).map ((S.extZ h hf c).restrictScalars (𝓞 K))
-
-theorem GSD.iSup_extL : (⨆ c, S.extL h hf c) = S.intDel := by
-  classical
-  have : Finite S.Cl := h.fin_orb
-  have e1 : S.intDel = (Submodule.pi Set.univ fun c => S.Del (S.outSec.rep c)).map
-      (((S.resFree h S.outSec hf).symm : (S.Cl → S.V) →ₗ[K] S.EqFun).restrictScalars (𝓞 K)) := by
-    rw [← S.map_intDel_free h S.outSec hf, ← Submodule.map_comp]
-    have : (((S.resFree h S.outSec hf).symm : (S.Cl → S.V) →ₗ[K] S.EqFun).restrictScalars (𝓞 K)) ∘ₗ
-        ((S.resFree h S.outSec hf : S.EqFun →ₗ[K] (S.Cl → S.V)).restrictScalars (𝓞 K)) = LinearMap.id := by
-      ext1 φ
-      exact (S.resFree h S.outSec hf).symm_apply_apply φ
-    rw [this, Submodule.map_id]
-  rw [e1, ← Submodule.iSup_map_single, Submodule.map_iSup]
-  refine iSup_congr fun c => ?_
-  rw [← Submodule.map_comp]
-  rfl
 
 end GSDOrth
 
@@ -189,84 +184,12 @@ section GSDOrth2
 
 variable {K : Type} [Field K] [NumberField K] [StarRing K] {S : GSD K}
 
-theorem GSD.orth_of_free (h : S.Ok) (hf : S.Free) [Nontrivial S.V] [Nonempty S.Cl] (R : S.Rat) (hD : ∀ d, Submodule.IsLattice K (S.Del d)) :
-    S.OrthMean h ∧ S.OrthMax h := by
-  classical
-  let _ : Fintype S.Cl := h.fintypeCl
-  have hfin : Module.Finite K S.V := Module.Finite.of_basis S.bV
-  have hA : FrameOK (S.toH h S.intDel) := (R.posH h).frameOK _
-  have hmaj : ∀ v (φ ψ : S.EqFun), majAt (S.toH h S.intDel).b (S.toH h S.intDel).X v φ ψ = S.ipAt h v φ ψ :=
-    fun v φ ψ => R.maj_eq h v φ ψ
-  have hnorm : ∀ c v (x : S.V), normAt (S.valH (S.outSec.rep c)).b (S.valH (S.outSec.rep c)).X v x =
-      normAt (S.toH h S.intDel).b (S.toH h S.intDel).X v (S.extZ h hf c x) := by
-    intro c v x
-    rw [(GSD.valH_spec R (S.outSec.rep c)).2.2 v x, normAt_eq_sqrt, hmaj, S.ipAt_extZ h hf, if_pos rfl]
-  have hnum := fun c => (emb_numbers K (S.valH (S.outSec.rep c)) (S.toH h S.intDel) (S.extZ h hf c) hA
-    (S.extZ_injective h hf c) (hnorm c)).2 (S.Del (S.outSec.rep c))
-  have hrk : ∀ c, Formalism.HN.rkK (S.extL h hf c) = finrank K S.V := by
-    intro c
-    unfold GSD.extL
-    rw [rkK_map _ (S.extZ_injective h hf c)]
-    unfold Formalism.HN.rkK
-    rw [(hD _).span_eq_top, finrank_top]
-  have hr : 0 < finrank K S.V := Module.finrank_pos
-  have hne : ∀ c, S.extL h hf c ≠ ⊥ := by
-    intro c h0
-    have h1 := hrk c
-    rw [h0] at h1
-    have h2 : Formalism.HN.rkK (⊥ : Submodule (𝓞 K) S.EqFun) = 0 := by
-      unfold Formalism.HN.rkK
-      rw [Submodule.bot_coe, Submodule.span_zero_singleton, finrank_bot]
-    omega
-  have hrkT : Formalism.HN.rkK (⨆ c, S.extL h hf c) = Fintype.card S.Cl * finrank K S.V := by
-    rw [S.iSup_extL h hf]
-    unfold Formalism.HN.rkK
-    rw [(S.intDel_isLattice h hD).span_eq_top, finrank_top, S.finrank_free h hf, Nat.card_eq_fintype_card]
-  have key := hlat_orth_sum (A := S.toH h S.intDel) (S.extL h hf) hA (fun c => (hD _).fg.map _) hne
-    (by
-      intro c c' hcc x hx y hy v
-      obtain ⟨x', -, rfl⟩ := hx
-      obtain ⟨y', -, rfl⟩ := hy
-      exact (hmaj v _ _).trans ((S.ipAt_extZ h hf v c c' x' y').trans (if_neg hcc)))
-    (finrank K S.V) hr hrk hrkT
-  rw [S.iSup_extL h hf] at key
-  constructor
-  · refine key.1.trans ?_
-    congr 1
-    funext c
-    exact (((hnum c).2 (hD _).fg).1).symm
-  · obtain ⟨c, hc⟩ := key.2
-    exact ⟨c, hc.trans (le_of_eq (((hnum c).2 (hD _).fg).2.1).symm)⟩
-
 end GSDOrth2
 
 section Cols
 
 variable {X : Fields} {Pr : Primes X} {R : Ranks} (W : Wts X Pr.Word R) (Ch : Chars X Pr R.m)
 
-theorem col_orthMean (hX : X.Ok) (hPr : Pr.Ok) (hbig : 2 * X.f * R.k < Pr.g 0 - 1) (u : Pr.Word) :
-    (colGSD W Ch u 0).OrthMean (colOk W Ch hX u 0) :=
-  haveI := colCl_nonempty W Ch u
-  haveI : Nontrivial (colGSD W Ch u 0).V := (colVal W u 0 (Pr.vT u) Pr.vGs).V_nontrivial
-  (GSD.orth_of_free (colOk W Ch hX u 0) (colFree W Ch hX hPr hbig u) (colRat W Ch hX u 0) (thl_colDel_isLattice W Ch u 0)).1
-
-theorem col_orthMax (hX : X.Ok) (hPr : Pr.Ok) (hbig : 2 * X.f * R.k < Pr.g 0 - 1) (u : Pr.Word) :
-    (colGSD W Ch u 0).OrthMax (colOk W Ch hX u 0) :=
-  haveI := colCl_nonempty W Ch u
-  haveI : Nontrivial (colGSD W Ch u 0).V := (colVal W u 0 (Pr.vT u) Pr.vGs).V_nontrivial
-  (GSD.orth_of_free (colOk W Ch hX u 0) (colFree W Ch hX hPr hbig u) (colRat W Ch hX u 0) (thl_colDel_isLattice W Ch u 0)).2
-
 end Cols
-
-theorem propZ_col' : ∀ C₀ : ℝ, 0 ≤ C₀ → ∃ C : ℝ, 0 ≤ C ∧ ∀ {X : Fields} {Pr : Primes X} {R : Ranks} (W : Wts X Pr.Word R)
-    (Ch : Chars X Pr R.m) (hX : X.Ok) (_ : Pr.Ok) (_ : 2 * X.f * R.k < Pr.g 0 - 1) (u : Pr.Word) (a b' L eta S : ℝ),
-    NumbersC Pr R u C₀ a b' L eta S → WtWin W u C₀ a b' S → SummandSlopeAtDecoratedLattice W Ch u → MaxSlopeSummandWithConstant W Ch u C₀ →
-    (∀ τ, DualSlope X.K (W.lamTrue u 0 τ)) → (∀ τ, MaxSlopeNablaBound X.K (kap_succ R) (W.lamTrue u 0 τ)) →
-    ZiiC W u C a b' L S ≤ (Mu0H W Ch hX u).mu ∧ (Mu0H W Ch hX u).muMax ≤ ZiiiC W u C a b' L S := by
-  intro C₀ h0
-  obtain ⟨C, hC0, hC⟩ := propZ_col C₀ h0
-  exact ⟨C, hC0, fun W Ch hX hPr hbig u a b' L eta S hN hW h5 h5' hD h4 =>
-    hC W Ch hX u a b' L eta S hN hW (col_orthMean W Ch hX hPr hbig u) (col_orthMax W Ch hX hPr hbig u) h5 h5' hD
-      (fun τ => slopeLeMax _ _) h4⟩
 
 end Formalism.L2.Col

@@ -1,10 +1,59 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Foundations.EigenOfTwoStep
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.HeckeLetterPreservesBasisSet
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.HermiteRightFactorOfPrimeDvdDetStatement
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.Sl2CoprimeFactorizationUniqueStatement
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.HeckeStableCongruenceConjDiamondMatrixStatement
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.DiamondMatrixMulCommModGamma1CapGamma0Statement
+module
+
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.HeckeLetterPreservesBasisSet
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.DiamondMatrixMulCommModGamma1CapGamma0Statement
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.HeckeStableCongruenceConjDiamondMatrixStatement
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.HermiteRightFactorOfPrimeDvdDetStatement
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.Sl2CoprimeFactorizationUniqueStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open scoped MatrixGroups TensorProduct
 open Matrix GlobalTheory.KZ
 
@@ -167,7 +216,6 @@ theorem sum_swap (X : Tower Ω ε) (N l : ℕ) [Fact l.Prime] {ι κ : Type} [Fi
     exact ⟨(i', k'), g, hg, by rw [hy, hg', Matrix.mul_assoc]⟩
   have hdis : ∀ x x' : ι × κ, ∀ h : SL(2, ℤ), (h : M₂) * (r2 x.2 * r1 x.1) = r2 x'.2 * r1 x'.1 → x = x' := by
     rintro ⟨i, k⟩ ⟨i', k'⟩ h H
-    dsimp only at H
     rw [← Matrix.mul_assoc] at H
     obtain ⟨g, hg⟩ := bezout (p2 : ℤ) (p1 : ℤ) hcop.symm hp1' _ _ _ _
       (by rw [det_mul, Matrix.SpecialLinearGroup.det_coe, one_mul, hd2]) (hd2 k') (hd1 i) (hd1 i') H
@@ -209,6 +257,7 @@ theorem sum_act_sum (X : Tower Ω ε) (l : ℕ) [Fact l.Prime] {ι κ : Type} [F
     (r1 : ι → M₂) (r2 : κ → M₂) (h1 : ∀ i, 0 < (r1 i).det) (h2 : ∀ k, 0 < (r2 k).det) (b : X.Fn l) :
     ∑ i, X.act l (r1 i) (∑ k, X.act l (r2 k) b) = ∑ i, ∑ k, X.act l (r2 k * r1 i) b := by
   refine Finset.sum_congr rfl fun i _ => ?_
+
   rw [map_sum]
   exact Finset.sum_congr rfl fun k _ => act_act X l _ _ (h1 i) (h2 k) b
 
@@ -218,7 +267,7 @@ theorem B_inv (X : Tower Ω ε) (N l w : ℕ) [Fact l.Prime] (b : X.Fn l) (hb : 
   induction hb using Submodule.span_induction with
   | mem x hx => exact hx.2 g hg
   | zero => exact map_zero _
-  | add x y _ _ hx hy => rw [map_add, hx, hy]
+  | add x y _ _ hx hy => rw [map_add (f := _), hx, hy]
   | smul c x _ hx => rw [map_smul, hx]
 
 theorem det1 (g : SL(2, ℤ)) : 0 < (g : M₂).det := by
@@ -275,6 +324,7 @@ theorem comm_TD (X : Tower Ω ε) (N l : ℕ) [Fact l.Prime] (hN : N ≠ 0) (q d
   have hσd : IsDiam N l d (sgD N l d) := Betti.isDiam_sgD hN hl.ne_zero hD
   show X.heckeT N l q (X.act l (sgD N l d : M₂) b) = X.act l (sgD N l d : M₂) (X.heckeT N l q b)
   simp only [heckeT_eq]
+
   rw [map_sum]
   have e1 : ∀ o, X.act l (repT q (sgD N l q) o) (X.act l (sgD N l d : M₂) b) =
       X.act l ((sgD N l d : M₂) * repT q (sgD N l q) o) b := fun o => act_act X l _ _ (pos_repT hq _ o) (det1 _) b
@@ -290,6 +340,7 @@ theorem comm_UD (X : Tower Ω ε) (N l : ℕ) [Fact l.Prime] (hN : N ≠ 0) (d :
   have hσd : IsDiam N l d (sgD N l d) := Betti.isDiam_sgD hN hl.ne_zero hD
   show X.heckeU l (X.act l (sgD N l d : M₂) b) = X.act l (sgD N l d : M₂) (X.heckeU l b)
   simp only [heckeU_eq]
+
   rw [map_sum]
   have e1 : ∀ j, X.act l (repU l j) (X.act l (sgD N l d : M₂) b) =
       X.act l ((sgD N l d : M₂) * repU l j) b := fun j => act_act X l _ _ (pos_repU hl j) (det1 _) b

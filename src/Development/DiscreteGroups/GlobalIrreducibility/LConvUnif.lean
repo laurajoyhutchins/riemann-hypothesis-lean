@@ -1,5 +1,58 @@
-import Mathlib
-import Development.DiscreteGroups.GlobalIrreducibility.LConvUnifB
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.T2SpaceGeneralLinearGroup
+public import Development.DiscreteGroups.GlobalIrreducibility.LConvCut
+public import Development.DiscreteGroups.GlobalIrreducibility.LConvUnifA
+public import GroundTheory.AutomorphicForms.Cartan
+public import Development.DiscreteGroups.GlobalIrreducibility.LConvUnifB
+public import GroundTheory.AutomorphicForms.JacquetAdmissible
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -26,26 +79,26 @@ theorem hop_diagPow_mul (hr : 1 ≤ r) {μ ν : Fin n → ℤ} (hμ : IsDominant
   have hbc : ρ (b * c) w = w := hw _ (mul_mem hb hc)
   rw [h, show a * (diagPow F n μ * diagPow F n ν) * b * c =
       a * ((diagPow F n μ * diagPow F n ν) * (b * c)) by group,
-    map_mul, Module.End.mul_apply, fixedProj_apply_act hρ hKc hKo ha, map_mul,
-    Module.End.mul_apply, hbc]
+    map_mul, mul_apply_eq_comp, fixedProj_apply_act hρ hKc hKo ha, map_mul,
+    mul_apply_eq_comp, hbc]
 
 theorem hop_integral_mul {k : GL (Fin n) F} (hk : k ∈ GLnLocal.integralGL F n)
     (g : GL (Fin n) F) :
     hop ρ hρ hKc hKo k * hop ρ hρ hKc hKo g = hop ρ hρ hKc hKo (k * g) := by
   refine hop_mul hρ hKc hKo fun w _ κ hκ => ?_
-  rw [show k * κ * g = (k * κ * k⁻¹) * (k * g) by group, map_mul, Module.End.mul_apply,
+  rw [show k * κ * g = (k * κ * k⁻¹) * (k * g) by group, map_mul, mul_apply_eq_comp,
     fixedProj_apply_act hρ hKc hKo (GLnLocal.conj_mem_congruenceSubgroup F n hk hκ)]
 
 theorem hop_mul_integral (g : GL (Fin n) F) {k : GL (Fin n) F}
     (hk : k ∈ GLnLocal.integralGL F n) :
     hop ρ hρ hKc hKo g * hop ρ hρ hKc hKo k = hop ρ hρ hKc hKo (g * k) := by
   refine hop_mul hρ hKc hKo fun w hw κ hκ => ?_
-  rw [show g * κ * k = (g * k) * (k⁻¹ * κ * k⁻¹⁻¹) by group, map_mul, Module.End.mul_apply,
+  rw [show g * κ * k = (g * k) * (k⁻¹ * κ * k⁻¹⁻¹) by group, map_mul, mul_apply_eq_comp,
     hw _ (GLnLocal.conj_mem_congruenceSubgroup F n (inv_mem hk) hκ)]
 
-local notation "Kr" => GLnLocal.congruenceSubgroup F n r
 local notation "K0" => GLnLocal.integralGL F n
-local notation "W" => fixedVectors ρ (GLnLocal.congruenceSubgroup F n r)
+local notation "Kr" => GLnLocal.congruenceSubgroup F n r
+local notation "W" => fixedVectors ρ Kr
 local notation "T" => hop ρ hρ hKc hKo
 
 theorem finrank_le_of_commBound (hr : 1 ≤ r) [ρ.IsIrreducible] [FiniteDimensional ℂ W]

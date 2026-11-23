@@ -1,9 +1,51 @@
-import Mathlib
-import Formalism.LocalRingCardinality.AdicCompletionLocal.LocTied
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.ConvZero
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.SandZero
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.PeriodDiscExtensionTateElement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.SeriesTransport
+module
+
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.PeriodDiscExtensionTateElement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.SeriesTransport
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.Interval.Finset.Box
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -46,7 +88,7 @@ variable {G : Type} [Group G] {Qp K₀ K : Type} [Field Qp] [Field K₀] [Field 
     [IsScalarTower K₀ K BdR] [IsScalarTower Qp K₀ BdR]
     (PD : _root_.Formalism.WeaklyAdmissibleFiltrations.PeriodData G Qp K₀ K B BdR) in
 private theorem fil_antitone' {a b : ℤ} (h : b ≤ a) : PD.Fil a ≤ PD.Fil b := by
-  induction a, h using Int.le_induction with
+  induction a, h using Int.leInduction with
   | base => exact le_rfl
   | succ n _ ih => exact (PD.Fil_anti n).trans ih
 
@@ -67,7 +109,9 @@ private theorem filV_antitone' {a b : ℤ} (h : b ≤ a) :
   induction t using TensorProduct.induction_on with
   | zero => simp
   | tmul v y => simpa using tmul_mem_filV_of_mem_fil PD b v (fil_antitone' PD h y.2)
-  | add x y hx hy => rw [map_add]; exact add_mem hx hy
+  | add x y hx hy =>
+    rw [LinearMap.map_add]
+    exact add_mem hx hy
 
 open TensorProduct in
 variable {G : Type} [Group G] {Qp K₀ K : Type} [Field Qp] [Field K₀] [Field K]
@@ -107,7 +151,7 @@ private theorem mulVR_mulVR' (β γ : BdR) (x : T.V ⊗[Qp] BdR) :
   induction x using TensorProduct.induction_on with
   | zero => simp
   | tmul v y => simp only [mulVR_tmul', mul_assoc]
-  | add x y hx hy => simp only [map_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
 
 open TensorProduct in
 variable {G : Type} [Group G] [TopologicalSpace G] {Qp : Type} [Field Qp] {BdR : Type}
@@ -123,7 +167,9 @@ private theorem mulVR_mem_compKer (ι : LL →ₐ[Qp] BdR) (β : BdR) {x : T.V �
     refine ⟨c, _root_.Formalism.BasicNotions.mulVR T β y, ?_⟩
     rw [map_sub, LinearMap.map_smul, mulVR_mulVR', mulVR_mulVR', mul_comm]
   | zero => simp
-  | add x y _ _ hx hy => rw [map_add]; exact add_mem hx hy
+  | add x y _ _ hx hy =>
+    rw [LinearMap.map_add]
+    exact add_mem hx hy
   | smul c x _ hx => rw [LinearMap.map_smul]; exact Submodule.smul_mem _ c hx
 
 open TensorProduct in
@@ -144,7 +190,9 @@ private theorem mulRight_mem_filV_lemma_4 {G : Type} [Group G] [TopologicalSpace
     simp only [AlgebraTensorModule.map_tmul, LinearMap.id_apply, Submodule.coe_subtype,
       mulVR_tmul']
     exact tmul_mem_filV_of_mem_fil PD _ v (PD.Fil_mul _ _ _ _ hβ y.2)
-  | add x y hx hy => rw [map_add, map_add]; exact add_mem hx hy
+  | add x y hx hy =>
+    simp only [LinearMap.map_add]
+    exact add_mem hx hy
 
 open TensorProduct in
 variable {G : Type} [Group G] [TopologicalSpace G] {Qp : Type} [Field Qp] {BdR : Type}
@@ -155,7 +203,7 @@ private theorem mulVR_add' (β γ : BdR) (x : T.V ⊗[Qp] BdR) :
   induction x using TensorProduct.induction_on with
   | zero => simp
   | tmul v y => simp only [mulVR_tmul', add_mul, TensorProduct.tmul_add]
-  | add x y hx hy => simp only [map_add, hx, hy]; abel
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]; abel
 
 open TensorProduct in
 variable {G : Type} [Group G] [TopologicalSpace G] {Qp : Type} [Field Qp] {BdR : Type}
@@ -165,7 +213,7 @@ private theorem mulVR_zero' (x : T.V ⊗[Qp] BdR) : _root_.Formalism.BasicNotion
   induction x using TensorProduct.induction_on with
   | zero => simp
   | tmul v y => simp only [mulVR_tmul', zero_mul, TensorProduct.tmul_zero]
-  | add x y hx hy => simp only [map_add, hx, hy, add_zero]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy, add_zero]
 
 open TensorProduct in
 variable {G : Type} [Group G] [TopologicalSpace G] {Qp : Type} [Field Qp] {BdR : Type}
@@ -187,8 +235,8 @@ private theorem smul_sub_mulVR_mem_compKer (ι : LL →ₐ[Qp] BdR) (c : LL) (x 
   unfold _root_.Formalism.BasicNotions.compKer
   exact Submodule.subset_span ⟨c, x, rfl⟩
 
-open TensorProduct in
 
+open TensorProduct in
 theorem _root_.GlobalTheory.HWL.Cmp.filt_expansion_component : ∀ {G : Type} [Group G]
     [TopologicalSpace G] {Qp K₀ K : Type} [Field Qp] [Field K₀] [Field K] [Algebra Qp K₀]
     [Algebra Qp K] [Algebra K₀ K] [IsScalarTower Qp K₀ K] {B BdR : Type} [CommRing B]
@@ -246,7 +294,7 @@ theorem _root_.GlobalTheory.HWL.Cmp.filt_expansion_component : ∀ {G : Type} [G
       _root_.Formalism.BasicNotions.mulVR T β x ∈ C ⊔ _root_.Formalism.WeaklyAdmissibleFiltrations.FilV PD (LL := LL) (V := T.V) (q + n) := by
     intro β q n x hβ hx
     obtain ⟨y, hy, y', hy', rfl⟩ := Submodule.mem_sup.mp hx
-    rw [map_add]
+    rw [map_add (f := _)]
     exact Submodule.add_mem_sup (mulVR_mem_compKer T ι β hy) (mulRight_mem_filV_lemma_4 PD T hβ hy')
   have hsupmono : ∀ {m n : ℤ}, n ≤ m → C ⊔ _root_.Formalism.WeaklyAdmissibleFiltrations.FilV PD (LL := LL) (V := T.V) m ≤
       C ⊔ _root_.Formalism.WeaklyAdmissibleFiltrations.FilV PD (LL := LL) (V := T.V) n := fun h => sup_le_sup_left (filV_antitone' PD h) _
@@ -340,6 +388,7 @@ theorem _root_.GlobalTheory.HWL.Cmp.filt_expansion_component : ∀ {G : Type} [G
     rw [mulVR_mulVR', mulVR_mulVR', hβ₀_def, mul_assoc, hτw, mul_comm]
   have eqC : _root_.Formalism.BasicNotions.mulVR T pk (∑ k ∈ Finset.range M, _root_.Formalism.BasicNotions.mulVR T (tS ^ k) (L ((k : ℤ) - (a : ℤ)))) =
       ∑ k ∈ Finset.range M, H ((k : ℤ) - a) := by
+
     rw [map_sum]
     refine Finset.sum_congr rfl fun k _ => ?_
     rw [mulVR_mulVR', hH_def]
@@ -406,6 +455,7 @@ theorem _root_.GlobalTheory.HWL.Cmp.filt_expansion_component : ∀ {G : Type} [G
       ∑ k ∈ Finset.range (M + w), _root_.Formalism.BasicNotions.mulVR T (β₀ * tS ^ k) (∑ j, PowerSeries.coeff k (e j) • D j) := by
     rw [Finset.sum_comm]
     refine Finset.sum_congr rfl fun k _ => ?_
+
     rw [map_sum]
     simp only [LinearMap.map_smul]
   rw [Finset.sum_add_distrib, eqA] at m2

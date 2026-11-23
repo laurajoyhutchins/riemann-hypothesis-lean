@@ -1,4 +1,48 @@
-import Formalism.SharpRestriction.CuspSpanNormBounds.UnimodularSchurMeasures.BesselExistenceUniformOfFacts
+module
+
+public import Formalism.SharpRestriction.CuspSpanNormBounds.CayleySignature
+public import Formalism.SharpRestriction.CuspSpanNormBounds.RelevantZeroGramTerms
+public import Formalism.SharpRestriction.CuspSpanNormBounds.UnimodularSchurMeasures.BesselExistenceUniformOfFacts
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -24,7 +68,7 @@ theorem smooth_vectors_add {v1 v2 : H} (h1 : v1 ∈ smoothVecs (k := k) (r := r)
   have a1 : σ g v1 = F1 g := e1 g hg.1 hgU
   have a2 : σ g v2 = F2 g := e2 g hg.2 hgU
   show σ g (v1 + v2) = F1 g + F2 g
-  rw [map_add, a1, a2]
+  rw [map_add (f := _), a1, a2]
 
 theorem smooth_vectors_smul (c : ℂ) {v : H} (h1 : v ∈ smoothVecs (k := k) (r := r) σ) :
     c • v ∈ smoothVecs (k := k) (r := r) σ := by
@@ -56,70 +100,7 @@ namespace BData
 
 variable (X : BData)
 
-def LowSmooth : Prop := X.w ∈ smoothVecs (k := X.k) (r := X.r) X.σ
-
-def SmoothCyc : Prop :=
-  ∀ x ∈ smoothVecs (k := X.k) (r := X.r) X.σ, ∀ Ws : List (List (Mat X.k X.r)),
-    (∀ w ∈ Ws, ∀ Y ∈ w, InLieHpk X.k X.r Y) → ∀ δ : ℝ, 0 < δ →
-    ∃ (N : ℕ) (c : Fin N → ℂ) (g : Fin N → Mat X.k X.r), (∀ i, g i ∈ X.G) ∧
-      (Ws.map fun w => ‖dsigW (k := X.k) (r := X.r) X.σ w (x - ∑ i, c i • X.σ (g i) X.w)‖).sum < δ
-
 variable {X}
-
-theorem orbitSmooth_of (hX : X.Hyp) (hw : X.LowSmooth) : X.OrbitSmooth :=
-  fun _ hg => smooth_vectors_translate_unitary (fun _ ha _ hb => discrete_series_map_mul hX.2.1 ha hb) hw hg
-
-theorem orbitNZ_of (hX : X.Hyp) {B : X.H → X.Vp} (hB : X.IsFun B) (hw : X.LowSmooth) (hc : X.SmoothCyc) :
-    X.OrbitNZ B := by
-  by_contra hne
-  have hz : ∀ g ∈ X.G, B (X.σ g X.w) = 0 := by
-    intro g hg
-    by_contra h
-    exact hne ⟨g, hg, h⟩
-  obtain ⟨⟨hadd, hsm, -, -⟩, ⟨C, Ws, hWs, hbd⟩, x, hx, hBx⟩ := hB
-  have hos := orbitSmooth_of hX hw
-  have hpos : 0 < ‖B x‖ := norm_pos_iff.2 hBx
-  have hsum0 : ∀ v : X.H, 0 ≤ (Ws.map fun w => ‖dsigW (k := X.k) (r := X.r) X.σ w v‖).sum := by
-    intro v
-    refine List.sum_nonneg fun a ha => ?_
-    obtain ⟨w, -, rfl⟩ := List.mem_map.1 ha
-    exact norm_nonneg _
-  have hC : 0 < C := by
-    by_contra hC
-    have h1 := hbd x hx
-    have h2 : C * (Ws.map fun w => ‖dsigW (k := X.k) (r := X.r) X.σ w x‖).sum ≤ 0 :=
-      mul_nonpos_of_nonpos_of_nonneg (not_lt.1 hC) (hsum0 x)
-    linarith
-  obtain ⟨N, c, g, hg, hlt⟩ := hc x hx Ws (fun w hw' => (hWs w hw').2) (‖B x‖ / C) (div_pos hpos hC)
-  have h00 : (0 : X.H) ∈ smoothVecs (k := X.k) (r := X.r) X.σ ∧ B 0 = 0 := by
-    have h1 := smooth_vectors_smul (σ := X.σ) 0 hw
-    have h2 := hsm 0 X.w hw
-    rw [zero_smul] at h1 h2
-    rw [zero_smul] at h2
-    exact ⟨h1, h2⟩
-  have hy : ∀ s : Finset (Fin N), (∑ i ∈ s, c i • X.σ (g i) X.w) ∈ smoothVecs (k := X.k) (r := X.r) X.σ ∧
-      B (∑ i ∈ s, c i • X.σ (g i) X.w) = 0 := by
-    intro s
-    induction s using Finset.induction_on with
-    | empty => simpa using h00
-    | insert a s ha ih =>
-      rw [Finset.sum_insert ha]
-      have h1 := smooth_vectors_smul (σ := X.σ) (c a) (hos (g a) (hg a))
-      refine ⟨smooth_vectors_add h1 ih.1, ?_⟩
-      rw [hadd _ h1 _ ih.1, ih.2, hsm _ _ (hos (g a) (hg a)), hz _ (hg a), smul_zero, add_zero]
-  obtain ⟨y1, y2⟩ := hy Finset.univ
-  set y : X.H := ∑ i, c i • X.σ (g i) X.w with hydef
-  have hny := smooth_vectors_smul (σ := X.σ) (-1) y1
-  have hxy : x - y = x + (-1 : ℂ) • y := by rw [neg_one_smul, sub_eq_add_neg]
-  have hsm' : x - y ∈ smoothVecs (k := X.k) (r := X.r) X.σ := by rw [hxy]; exact smooth_vectors_add hx hny
-  have hBxy : B (x - y) = B x := by
-    rw [hxy, hadd _ hx _ hny, hsm _ _ y1, y2, smul_zero, add_zero]
-  have h3 := hbd (x - y) hsm'
-  rw [hBxy] at h3
-  have h4 : C * (Ws.map fun w => ‖dsigW (k := X.k) (r := X.r) X.σ w (x - y)‖).sum < C * (‖B x‖ / C) :=
-    mul_lt_mul_of_pos_left hlt hC
-  rw [mul_div_cancel₀ _ hC.ne'] at h4
-  linarith
 
 end BData
 

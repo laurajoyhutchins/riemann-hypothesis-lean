@@ -1,6 +1,54 @@
-import Mathlib
-import GroundTheory.GlobalFields.IdeleGroups.UnitBound
-import GroundTheory.GlobalFields.IdeleGroups.ClassGroup
+module
+
+public import GroundTheory.GlobalFields.IdeleGroups.IdeleNorms
+public import GroundTheory.GlobalFields.IdeleGroups.ClassGroup
+public import GroundTheory.GlobalFields.IdeleGroups.UnitBound
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Positive.Field
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.NumberField.ClassNumber
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GroundTheory.Global
 
@@ -67,25 +115,6 @@ theorem exists_isCompact_normOneSubgroup :
     Set.inter_subset_right, fun x hx ↦ ?_⟩
   obtain ⟨k, hk⟩ := hxD x hx
   exact ⟨k, hk, mul_mem (range_diagonal_le_normOneSubgroup K ⟨k, rfl⟩) hx⟩
-
-instance compactSpace_normOneSubgroup_quotient :
-    CompactSpace (normOneSubgroup K ⧸ (diagonal K).range.subgroupOf (normOneSubgroup K)) := by
-  obtain ⟨D, hD, -, hxD⟩ := exists_isCompact_normOneSubgroup K
-  have hD' : IsCompact ((Subtype.val : normOneSubgroup K → IdeleGroup K) ⁻¹' D) :=
-    (isClosed_normOneSubgroup K).isClosedEmbedding_subtypeVal.isCompact_preimage hD
-  have h : (QuotientGroup.mk : normOneSubgroup K →
-      normOneSubgroup K ⧸ (diagonal K).range.subgroupOf (normOneSubgroup K)) ''
-      ((Subtype.val : normOneSubgroup K → IdeleGroup K) ⁻¹' D) = Set.univ := by
-    refine Set.eq_univ_of_forall fun q ↦ ?_
-    obtain ⟨x, rfl⟩ := QuotientGroup.mk_surjective q
-    obtain ⟨k, hk⟩ := hxD x x.2
-    refine ⟨⟨diagonal K k * x, mul_mem (range_diagonal_le_normOneSubgroup K ⟨k, rfl⟩) x.2⟩, hk,
-      (QuotientGroup.eq.2 ?_).symm⟩
-    rw [Subgroup.mem_subgroupOf]
-    refine ⟨k, ?_⟩
-    change diagonal K k = ((x : IdeleGroup K))⁻¹ * (diagonal K k * x)
-    rw [mul_comm (diagonal K k) x, inv_mul_cancel_left]
-  exact isCompact_univ_iff.1 (h ▸ hD'.image QuotientGroup.continuous_mk)
 
 end IdeleGroup
 

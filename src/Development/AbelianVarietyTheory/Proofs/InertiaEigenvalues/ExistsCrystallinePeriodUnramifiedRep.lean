@@ -1,9 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.TwistStep
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.NormSubLtOneOfFix
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsLiftsOfNormLeOne
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.PowMulMemLatIff
-import Formalism.SharpRestriction.LevelLetterCocycles.ProdOneSubPrimitiveRoots
+module
+
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.NormSubLtOneOfFix
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.AdmSt
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsLiftsOfNormLeOne
+public import Formalism.SharpRestriction.LevelLetterCocycles.ProdOneSubPrimitiveRoots
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -25,12 +70,12 @@ def act (g : G) : Matrix n n (WittVector p R) →+* Matrix n n (WittVector p R) 
 theorem act_apply (g : G) (M : Matrix n n (WittVector p R)) (i j : n) :
     act ρ g M i j = WittVector.map (ρ g).toRingHom (M i j) := rfl
 
-variable (p) in
 
+variable (p) in
 def Dv (N : ℕ) (M : Matrix n n (WittVector p R)) : Prop := ∀ i j, (p : WittVector p R) ^ N ∣ M i j
 
-variable (p) in
 
+variable (p) in
 def Jset : Set G := {g : G | ∀ m, 0 < m → g ∈ fixer ρ p m}
 
 omit [TopologicalSpace G] [IsTopologicalGroup G] [CompactSpace G] [IsDomain R] [CharP R p]
@@ -83,7 +128,7 @@ theorem approx_step
     have e : (A g * Y) i j = Y i j + ((A g - 1) * Y) i j := by rw [sub_mul, one_mul]; simp
     have h2 := Dv_mul_right Y (h1 g) i j
     rw [pow_one] at h2
-    rw [e, ← WittVector.constantCoeff_apply, map_add, WittVector.constantCoeff_apply,
+    rw [e, ← WittVector.constantCoeff_apply, map_add (f := _), WittVector.constantCoeff_apply,
       WittVector.constantCoeff_apply, cc0 _ h2, add_zero]
   have hD : ∀ g, ∃ D : Matrix n n (WittVector p R), A g * act ρ g Q - Q = (p : WittVector p R) ^ N • D :=
     fun g => ⟨Matrix.of fun i j => (hE g i j).choose, by
@@ -108,7 +153,7 @@ theorem approx_step
     exact mul_left_cancel₀ hp0 this
   have hec : ∀ g h i j, (D (g * h) i j).coeff 0 = (D g i j).coeff 0 + ρ g ((D h i j).coeff 0) := by
     intro g h i j
-    rw [hcoc, Matrix.add_apply, ← WittVector.constantCoeff_apply, map_add, WittVector.constantCoeff_apply,
+    rw [hcoc, Matrix.add_apply, ← WittVector.constantCoeff_apply, map_add (f := _), WittVector.constantCoeff_apply,
       WittVector.constantCoeff_apply, ccA, act_apply, WittVector.map_coeff]
     rfl
   have hnear : ∀ᶠ g in 𝓝ˢ (Jset p ρ), ∀ i j, (D g i j).coeff 0 = 0 := by
@@ -203,7 +248,7 @@ theorem exists_solution
         simp only [RingHom.mapMatrix_apply, Matrix.map_apply, Matrix.zero_apply,
           WittVector.constantCoeff_apply]
         exact cc0 _ this
-      rw [e, map_add, h0, map_one, zero_add]
+      rw [e, map_add (f := _), h0, map_one, zero_add]
     have hdet : WittVector.constantCoeff Q.det = 1 := by
       rw [RingHom.map_det, hmap, Matrix.det_one]
     have hmem : Q.det - 1 ∈ Ideal.span {(p : WittVector p R)} := by

@@ -1,7 +1,59 @@
-import Development.WeilBound.ThetaLifts.LocalTheory.ConeShifts.CoefficientSpans
-import Development.WeilBound.ThetaLifts.LocalTheory.ConeShifts.FinStmt
-import Development.WeilBound.ThetaLifts.LocalTheory.ConeShifts.IdealStmt
-import Development.WeilBound.ThetaLifts.LeviDeterminants.ActsEx
+module
+
+public import Development.WeilBound.ThetaLifts.LocalTheory.ConeShifts.CoefficientSpans
+public import Development.WeilBound.ThetaLifts.LocalTheory.ConeShifts.FinStmt
+public import Development.WeilBound.ThetaLifts.LocalTheory.ConeShifts.IdealStmt
+import Development.WeilBound.CoreStatements.CompactAveragingSplitting.EigenvectorLifting.Kcompact
+import Development.WeilBound.CoreStatements.CompactAveragingSplitting.EigenvectorLifting.VaceigenDual
+public import Development.WeilBound.CoreStatements.LocalThetaKernels.Locrep
+public import Development.WeilBound.ThetaLifts.LeviDeterminants.ActsEx
+import Development.WeilBound.ThetaLifts.LocalTheory.ConeShifts.PureCancel
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicLocalCompactness.AdeleLC
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicLocalCompactness.T2SpaceTensorProductFiniteExtension
+import GroundTheory.GlobalFields.CompletionAtPlace.Integers
+import GroundTheory.LocalFields.PadicLogSeries
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.Divisors.MatchingOfParts
+
+@[expose] public section
 
 noncomputable section
 
@@ -28,8 +80,8 @@ theorem cont_wt {ν : Chr F E} (hν : Continuous ν) (z : ℕ) : Continuous (wt 
   (continuous_subtype_val.comp hν).mul
     ((Complex.continuous_ofReal.comp (NNReal.continuous_coe.comp GlobalTheory.Doubling.continuous_absE)).pow z)
 
-variable (σ X) in
 
+variable (σ X) in
 def uSub (v : Pl F) : Subgroup (UA σ X.J) where
   carrier := UAt σ X (evFin F v)
   one_mem' := fun u _ => by rw [show mat (1 : UA σ X.J) = 1 from rfl, sub_self, smul_zero]
@@ -118,7 +170,7 @@ theorem tate (hI : IdeleFub) (hJ : IdealId0) (hS : StabEx) {B : Base F E} {M : M
       congr 1
       have q : algebraMap (AF F) (AE F E) (idem F v) * algebraMap (AF F) (AE F E) (idem F v) =
           algebraMap (AF F) (AE F E) (idem F v) := by rw [← map_mul, idem_sq]
-      rw [Subgroup.coe_mul, Units.val_mul, map_mul, hl₀, map_add, map_smul, map_smul, map_natCast, map_one]
+      rw [Subgroup.coe_mul, Units.val_mul, map_mul, hl₀, map_add (f := _), map_smul, map_smul, map_natCast, map_one]
       simp only [Algebra.smul_def, smul_eq_mul, map_mul, map_sub, map_one, map_natCast, Algebra.algebraMap_self, RingHom.id_apply]
       linear_combination ((N : AE F E) * c l.1.1 - c l.1.1) * q
     have h0 : (0 : ℝ) < absE F E l₀.1 := by
@@ -191,13 +243,13 @@ theorem finCone2_of (hI : IdeleFub) (hJ : IdealId0) (hS : StabEx) : FinCone2 := 
       simp only [coneF, op _ _ φ hφ, A, wt, mul_assoc]
   have Al : ∀ φ ∈ SB _, ∀ φ' ∈ SB _, ∀ (a : ℂ) y, A (φ + a • φ') y = A φ y + a * A φ' y := fun φ hφ φ' hφ' a y => by
     letI : MeasurableSpace (idAt E (evFin F v)) := borel _
-    simp only [A, rv, schr_lin, map_add, map_smul, Pi.add_apply, Pi.smul_apply, smul_eq_mul, add_mul, mul_assoc]
+    simp only [A, rv, schr_lin, map_add (f := _), map_smul, Pi.add_apply, Pi.smul_apply, smul_eq_mul, add_mul, mul_assoc]
     rw [integral_add ((hA φ hφ).1 y) (((hA φ' hφ').1 y).const_mul a), integral_const_mul]
   have cl : ∀ φ ∈ SB _, ∀ φ' ∈ SB _, ∀ a : ℂ, coneF B M om m v (ev v) u ν z (φ + a • φ') =
       coneF B M om m v (ev v) u ν z φ + a • coneF B M om m v (ev v) u ν z φ' := fun φ hφ φ' hφ' a => by
     rw [ce _ hφ, ce _ hφ', ce _ (add_mem hφ (Submodule.smul_mem _ a hφ'))]
     funext y
-    simp only [map_add, map_smul, Al _ (sb _ φ hφ) _ (sb _ φ' hφ'), Pi.add_apply, Pi.smul_apply, smul_eq_mul]
+    simp only [map_add (f := _), map_smul, Al _ (sb _ φ hφ) _ (sb _ φ' hφ'), Pi.add_apply, Pi.smul_apply, smul_eq_mul]
     rw [integral_add ((hk φ hφ).1 y) (((hk φ' hφ').1 y).const_mul a), integral_const_mul]
   have c0 : coneF B M om m v (ev v) u ν z 0 = 0 := by
     have := cl 0 (zero_mem _) 0 (zero_mem _) 1

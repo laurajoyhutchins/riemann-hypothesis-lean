@@ -1,6 +1,50 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.CountingFormula.Development
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.CountingFormula.FiniteLeOfPosDef
+module
+
+public import Formalism.SharpRestriction.CuspSpanNormBounds.BlockEnds
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.CountingFormula.FiniteLeOfPosDef
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.CntLocal
+import Formalism.SharpRestriction.CuspSpanNormBounds.IsPrimitiveSub
+import Formalism.SharpRestriction.CuspSpanNormBounds.LocalGroupInFamilyNontrivial
+
+@[expose] public section
 
 noncomputable section
 
@@ -40,8 +84,8 @@ theorem defFinW_of (hW : WPos) : DefFinW := by
         (VS D).hT D.sp.zm w = 0}
       add_mem' := by
         rintro x y ⟨hx1, hx2, hx3⟩ ⟨hy1, hy2, hy3⟩
-        exact ⟨fun a => by rw [map_add, hx1, hy1, add_zero],
-          fun a => by rw [map_add, hx2, hy2, add_zero], by rw [map_add, hx3, hy3, add_zero]⟩
+        exact ⟨fun a => by rw [map_add (f := _), hx1, hy1, add_zero],
+          fun a => by rw [map_add (f := _), hx2, hy2, add_zero], by rw [map_add (f := _), hx3, hy3, add_zero]⟩
       zero_mem' := ⟨fun a => map_zero _, fun a => map_zero _, map_zero _⟩
       smul_mem' := by
         rintro q x ⟨hx1, hx2, hx3⟩
@@ -67,9 +111,9 @@ theorem defFinW_of (hW : WPos) : DefFinW := by
     exact (Submodule.mem_inf.mp hx').2
   let B : LinearMap.BilinForm ℚ U := LinearMap.mk₂ ℚ
     (fun u v : U => (Algebra.trace ℚ D.host.E ((VS D).hT u v) + Algebra.trace ℚ D.host.E ((VS D).hT v u)) / 2)
-    (fun m1 m2 n => by simp only [Submodule.coe_add, map_add, LinearMap.add_apply]; ring)
+    (fun m1 m2 n => by simp only [Submodule.coe_add, map_add (f := _), LinearMap.add_apply]; ring)
     (fun q m n => by simp only [Submodule.coe_smul, hsmL, hsmR, htr, smul_eq_mul]; ring)
-    (fun m n1 n2 => by simp only [Submodule.coe_add, map_add, LinearMap.add_apply]; ring)
+    (fun m n1 n2 => by simp only [Submodule.coe_add, map_add (f := _), LinearMap.add_apply]; ring)
     (fun q m n => by simp only [Submodule.coe_smul, hsmL, hsmR, htr, smul_eq_mul]; ring)
   have hS : ∀ x y, B x y = B y x := fun x y => by
     simp only [B, LinearMap.mk₂_apply]

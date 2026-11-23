@@ -1,6 +1,44 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RootLatticeThresholds.CarrierInputExistsRepaired
-import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.TheoremSClosedP
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RootLatticeThresholds.CarrierInputExistsBuilt
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.SpectralTiesReal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -31,21 +69,5 @@ def CarrierSideBoundPositive (Cb : ℝ) : Prop :=
       Formalism.L2.SG.Pf.CarrierT.CarrierDataBound T.X u u' 1 i0 i0' (T.Y.FN u) (T.Y.FN u') νq
         (massDataY T.X T.hb T.Y u u' X0 T.ψ sd C Th vR Q i0 i0' νq).IntN CA (gOf D e) (deOf D τ u) (deOf D τ u')
         (lOf D (deOf D τ u) (deOf D τ u')) C₆ Cc Cb
-
-theorem carrierP_of_repaired_model (hPA : P5.ThmPActual) (hLEM : MA.LemmaEModel) (hMP : JCT.ModelPlaceBuilt2)
-    (hBB : KB.BuiltBounds2) (Cb : ℝ) (hX : CarrierSideBoundPositive Cb) : Formalism.L2.SG.PoincareAmplitudeLowerBounds.CarrierP := by
-  obtain ⟨C₆, Cc, C₄, hC6, hC4, hmain⟩ :=
-    Formalism.L2.SG.Pf.CarrierT.carrier_input_exists_repaired hPA hLEM hMP hBB Cb
-  obtain ⟨CA₀, hrest⟩ := hX C₆ Cc hC6
-  refine ⟨C₄, CA₀, hC4, fun CA hCA h1CA C0 CG CDel cT Cb' a2 a3 a4 a5 a6 a7 => ?_⟩
-  obtain ⟨k0, hk0⟩ := hrest CA hCA h1CA C0 CG CDel cT Cb' a2 a3 a4 a5 a6 a7
-  refine ⟨k0, fun Cg cb Cw cTf CT C0f hcb hcT => ?_⟩
-  obtain ⟨C'₀, Cl₀, hcl⟩ := hk0 Cg cb Cw cTf CT C0f hcb hcT
-  refine ⟨C'₀, Cl₀, ?_⟩
-  intro C' Cl hC' hCl D L T u u' e τ Cp Th' i0 i0' νq X0 sd C Th F0 what₂ vR Q hTi hne hk hH0 hPl hSz hi hPt hNu
-  obtain ⟨Wp, Wq, i1, i2, i3, i4, i5, S, T', f, χ, ν', m₀, top, A₀, τ', Qm, Qim, eP, eQ, h1, h2, h3, h4, h5, h6, -, -,
-    h9, h10, h11, h12⟩ := hmain D T.X u u' 1 i0 i0' (T.Y.FN u) (T.Y.FN u') νq T.Y.δ T.Y.M _ CA _ _ _ _
-    (hcl C' Cl hC' hCl D L T u u' e τ Cp Th' i0 i0' νq X0 sd C Th vR Q hTi hne hk hH0 hPl hSz hi hPt hNu)
-  exact ⟨Wp, Wq, i1, i2, i3, i4, i5, S, T', f, ν', m₀, τ', Qm, Qim, eP, eQ, h1, h2, h3, h4, h5, h6, h9, h10, h11, h12⟩
 
 end Formalism.L2.SG.SpectralTiesReal

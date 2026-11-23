@@ -1,4 +1,56 @@
-import Mathlib
+module
+
+public import Mathlib.RingTheory.DedekindDomain.Different
+public import Mathlib.RingTheory.RamificationInertia.Inertia
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace KStar.Ram
 
@@ -53,12 +105,6 @@ private theorem locDiffY_sep {A B : Type*} [CommRing A] [CommRing B] [Algebra A 
   have : Algebra.IsAlgebraic (FractionRing A) (FractionRing B) :=
     isAlgebraic_of_isFractionRing A B ..
   infer_instance
-
-private theorem locDiffY_ne_bot {A B : Type*} [CommRing A] [CommRing B] [Algebra A B]
-    [IsDedekindDomain A] [IsDedekindDomain B] [IsTorsionFree A B] [Module.Finite A B] [CharZero A] :
-    differentIdeal A B ≠ ⊥ := by
-  have := locDiffY_sep (A := A) (B := B)
-  exact differentIdeal_ne_bot
 
 private theorem locDiffY_iff {A B : Type*} [CommRing A] [CommRing B] [Algebra A B]
     [IsDedekindDomain A] [IsDedekindDomain B] [IsTorsionFree A B] [Module.Finite A B] [CharZero A]
@@ -149,8 +195,8 @@ theorem dvd_differentIdeal_iff_trace {a : A} (ha : a ≠ 0) {I J : Ideal B}
     (by rw [h, Ideal.map_span, Set.image_singleton]), Algebra.intTrace_eq_trace]
   simp only [Ideal.mem_span_singleton]
 
-omit [CharZero A] in
 
+omit [CharZero A] in
 theorem mk_trace_eq_trace_quotient {p : A} (hp : Prime p) (n : ℕ) {Q₁ Q₂ : Ideal B}
     (hc : IsCoprime Q₁ Q₂) (h : Q₁ * Q₂ = Ideal.span {algebraMap A B (p ^ n)})
     [Algebra (A ⧸ Ideal.span {p ^ n}) (B ⧸ Q₁)]

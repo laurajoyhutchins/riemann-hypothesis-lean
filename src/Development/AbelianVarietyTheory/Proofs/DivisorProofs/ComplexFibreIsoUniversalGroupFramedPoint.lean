@@ -1,21 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FrameCoord
-import Development.AbelianVarietyTheory.Definitions.Divisors.VolMeasureOfAdd
-import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.ImDiagEqTrace
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.NonemptyUnitAt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.HolomorphicFamilies.SupAtUnit
-import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.UnifMetricScalar
-import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.HermFormPullEqOfLbIsoPow
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.IsCombAtIffIsDerivAt0
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SumSqNormEqDot
-import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.CmCurveBaseChangeComp
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.SabComp
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.BCTools
-import Development.AbelianVarietyTheory.Definitions.ThetaMetrics.MemNonzeroLocusIffPowFn
-import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.ExistsNormalFormArcDatumFramedPointRootOfUnity
-import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.ExistsEqPowOfTorsionCompEqOne
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsFrPtOfEigFrame
-import Development.AbelianVarietyTheory.Statements.PrincipalLattices.LogHermFormOfUnitDiscriminant
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FrameCoord
+public import Formalism.LocalToGlobal.ProjectiveLattices.PetersonNormSubspace
+public import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.ExistsEqPowOfTorsionCompEqOne
+public import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.CmCurveBaseChangeComp
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsFrPtOfEigFrame
+public import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.ExistsNormalFormArcDatumFramedPointRootOfUnity
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Development.AbelianVarietyTheory.Definitions.Divisors.AevalEqZeroOfMemConeIdeal
+import Development.AbelianVarietyTheory.Definitions.Divisors.HtValOnSubset
+import Development.AbelianVarietyTheory.Definitions.Foundations.ExistsFlatSecRankZero
+public import Development.AbelianVarietyTheory.Definitions.ThetaMetrics.MemNonzeroLocusIffPowFn
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory ReciprocityTheory.ChartRestriction.G.Semi NumberField IsDedekindDomain Module Formalism.BasicNotions Formalism.L2.Pj ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.FD GlobalTheory.AllWt GlobalTheory.FlatLine GlobalTheory.CompHt GlobalTheory.FlatCore
 noncomputable section
 
@@ -90,15 +121,41 @@ theorem fibre_iso_frame : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E]
             rw [hu2, Category.assoc, hFw, Category.assoc]
         _ = spMap (algebraMap K (DualNumber K)) ≫ spMap (algebraMap (𝓞 K) K) := by rw [Over.w w]; rfl
     obtain ⟨q', hq', -⟩ := GlobalTheory.existsUnique_isVecOver hQ.2.1.1 w
-    have hq'c : IsLieComb (fun k => σ (v i k)) v' q' :=
-      GlobalTheory.ArcQ.NormalForm.isLieComb_baseChange hQ.2.1 (fun k => hv' k) hq' hw
+    have hq'c : IsLieComb (fun k => σ (v i k)) v' q' := by
+      let d := ReciprocityTheory.ChartRestriction.G.Chart.dualMapR σ
+      have dover : spMap d ≫ spMap (algebraMap K (DualNumber K)) =
+          spMap (algebraMap ℂ (DualNumber ℂ)) ≫ spMap σ := by
+        rw [GlobalTheory.spMap_comp_spMap, GlobalTheory.spMap_comp_spMap]
+        congr 1
+        ext r <;> simp [d, ReciprocityTheory.ChartRestriction.G.Chart.dualMapR, TrivSqZeroExt.algebraMap_eq_inl]
+      have dscale (a : K) : spMap d ≫ spMap (epsScaleR a) =
+          spMap (epsScaleR (σ a)) ≫ spMap d := by
+        rw [GlobalTheory.spMap_comp_spMap, GlobalTheory.spMap_comp_spMap]
+        congr 1
+        ext r <;> simp [d, ReciprocityTheory.ChartRestriction.G.Chart.dualMapR, epsScaleR, TrivSqZeroExt.algebraMap_eq_inl]
+      rw [GlobalTheory.ArcQ.NormalForm.isLieComb_iff] at hw ⊢
+      let U : Over.mk ((epsR ℂ).hom ≫ spMap σ) ⟶ epsR K := Over.homMk (spMap d) dover
+      have e₁ := map_list_prod (pushHom hQ.2.1 (epsR ℂ)) (List.ofFn fun k => GlobalTheory.ArcQ.NormalForm.sc (σ (v i k)) ≫ v' k)
+      have e₂ := map_list_prod (ReciprocityTheory.ChartRestriction.G.Geo.Tor.preHom (G := F.P₀.A) U) (List.ofFn fun k => GlobalTheory.ArcQ.NormalForm.sc (v i k) ≫ F.v k)
+      rw [List.map_ofFn] at e₁ e₂
+      have e₃ : (pushHom hQ.2.1 (epsR ℂ)) ∘ (fun k => GlobalTheory.ArcQ.NormalForm.sc (σ (v i k)) ≫ v' k) =
+          (ReciprocityTheory.ChartRestriction.G.Geo.Tor.preHom (G := F.P₀.A) U) ∘ fun k => GlobalTheory.ArcQ.NormalForm.sc (v i k) ≫ F.v k :=
+        funext fun k => Over.OverMorphism.ext (by
+          show (spMap (epsScaleR (σ (v i k))) ≫ (v' k).left) ≫ ψ =
+            spMap d ≫ spMap (epsScaleR (v i k)) ≫ (F.v k).left
+          rw [Category.assoc, hv', ← Category.assoc, ← Category.assoc, dscale])
+      rw [e₃, ← e₂, ← hw] at e₁
+      apply Over.OverMorphism.ext
+      apply hQ.2.1.1.hom_ext
+      · exact hq'.trans (congrArg (·.left) e₁).symm
+      · rw [Over.w, Over.w]
     have hqq : q = q' := by
       obtain ⟨a, ha, rfl⟩ := hq
       obtain ⟨b, hb, rfl⟩ := hq'c
       have hab : a = b := funext fun k => Over.OverMorphism.ext ((ha k).trans (hb k).symm)
       rw [hab]
     subst hqq
-    have key : q.left ≫ χ₀ = spMap (dualMap σ) ≫ u := by
+    have key : q.left ≫ χ₀ = spMap (ReciprocityTheory.ChartRestriction.G.Chart.dualMapR σ) ≫ u := by
       apply m2.cart.1.hom_ext
       · rw [Category.assoc, hχ₀2, Category.assoc, hu2, ← Category.assoc, ← Category.assoc]
         exact congrArg (· ≫ F.φ) hq'
@@ -106,7 +163,7 @@ theorem fibre_iso_frame : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E]
         show spMap (algebraMap ℂ (DualNumber ℂ)) ≫ spMap σ = _
         rw [GlobalTheory.spMap_comp_spMap, GlobalTheory.spMap_comp_spMap]
         congr 1
-        ext a <;> simp [dualMap, TrivSqZeroExt.algebraMap_eq_inl]
+        ext a <;> simp [ReciprocityTheory.ChartRestriction.G.Chart.dualMapR, TrivSqZeroExt.algebraMap_eq_inl]
     apply Over.OverMorphism.ext
     apply m.cart.1.hom_ext
     · rw [hw', hz.2.1, ← hu1, hφσ]

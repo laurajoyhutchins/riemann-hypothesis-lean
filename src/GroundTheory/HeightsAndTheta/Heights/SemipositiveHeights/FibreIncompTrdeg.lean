@@ -1,5 +1,50 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.MixedFieldContraction.GenericFibreKerTarget
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.MixedFieldContraction.GenericFibreKerTarget
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -32,11 +77,11 @@ theorem aeval_scale {A : Type} [CommRing A] [Algebra S A] {g : MRingOver S ι'} 
 
 theorem coeff_eval₂_scale {σ R A : Type} [Fintype σ] [CommRing R] [CommRing A] (f : R →+* A) (b : σ → A)
     (P : MvPolynomial σ R) (m : σ →₀ ℕ) :
-    coeff m (eval₂ ((C : A →+* MvPolynomial σ A).comp f) (fun k => X k * C (b k)) P) =
-      f (coeff m P) * ∏ k, b k ^ m k := by
+    AddMonoidAlgebra.coeff (eval₂ ((C : A →+* MvPolynomial σ A).comp f) (fun k => X k * C (b k)) P) m =
+      f (AddMonoidAlgebra.coeff P m) * ∏ k, b k ^ m k := by
   classical
-  have hterm : ∀ d : σ →₀ ℕ, ((C : A →+* MvPolynomial σ A).comp f) (coeff d P) *
-      ∏ k, (X k * C (b k)) ^ d k = monomial d (f (coeff d P) * ∏ k, b k ^ d k) := by
+  have hterm : ∀ d : σ →₀ ℕ, ((C : A →+* MvPolynomial σ A).comp f) (AddMonoidAlgebra.coeff P d) *
+      ∏ k, (X k * C (b k)) ^ d k = monomial d (f (AddMonoidAlgebra.coeff P d) * ∏ k, b k ^ d k) := by
     intro d
     have hX : ∏ k, (X k : MvPolynomial σ A) ^ d k = monomial d 1 := by
       rw [monomial_eq, C_1, one_mul, Finsupp.prod_fintype _ _ (fun _ => pow_zero _)]
@@ -52,13 +97,13 @@ theorem coeff_eval₂_scale {σ R A : Type} [Fintype σ] [CommRing R] [CommRing 
   · rfl
   · rw [notMem_support_iff.mp hm, map_zero, zero_mul]
 
-open Classical in
 
+open Classical in
 def scaleWt (κ : K → K') (A : Type) [CommRing A] (k' : K') : MvPolynomial (FibreBlock κ) A :=
   if h : k' ∈ Set.range κ then 1 else X ⟨k', h⟩
 
-omit [∀ k, Fintype (ι k)] in
 
+omit [∀ k, Fintype (ι k)] in
 theorem algebraicIndependent_forgotten {κ : K → K'} {v : (Σ k, ι k) → (Σ k', ι' k')} (hv : IsBlockMap κ v)
     (V' : Ideal (MRingOver S ι')) [V'.IsPrime] (hV' : IsMultiHomogIdeal V') (i : ∀ k : FibreBlock κ, ι' k.1)
     (hi : ∀ k : FibreBlock κ, (X ⟨k.1, i k⟩ : MRingOver S ι') ∉ V') :
@@ -137,12 +182,12 @@ theorem algebraicIndependent_forgotten {κ : K → K'} {v : (Σ k, ι k) → (Σ
     rw [← this, hP, map_zero]
   ext m
   have hc := coeff_eval₂_scale j y P m
-  rw [h0, coeff_zero] at hc
-  rw [coeff_zero]
+  simp only [h0, AddMonoidAlgebra.coeff_zero] at hc
+  simp only [AddMonoidAlgebra.coeff_zero]
   exact hjinj ((mul_eq_zero.mp hc.symm).resolve_right (hyprod m) |>.trans (map_zero j).symm)
 
-omit [∀ k, Fintype (ι k)] in
 
+omit [∀ k, Fintype (ι k)] in
 theorem trdeg_add_card_le [Nontrivial S] {κ : K → K'} {v : (Σ k, ι k) → (Σ k', ι' k')} (hv : IsBlockMap κ v)
     (V' : Ideal (MRingOver S ι')) [V'.IsPrime] (hV' : IsMultiHomogIdeal V') (hrel : IsRelevant V')
     (hinj : Function.Injective (algebraMap S

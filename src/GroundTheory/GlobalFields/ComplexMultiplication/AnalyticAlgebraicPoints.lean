@@ -1,7 +1,54 @@
-import Mathlib
-import GroundTheory.GlobalFields.ComplexMultiplication.AnalyticAlgebraicGerm
-import GroundTheory.GlobalFields.ComplexMultiplication.UniformizationGroup
-import GroundTheory.ArithmeticGeometry.AbelianVarieties.DualIsogeny
+module
+
+public import GroundTheory.GlobalFields.ComplexMultiplication.AnalyticAlgebraicGerm
+public import GroundTheory.GlobalFields.ComplexMultiplication.UniformizationGroup
+public import GroundTheory.ArithmeticGeometry.AbelianVarieties.DualIsogeny
+import GroundTheory.GlobalFields.ComplexMultiplication.EllipticRational
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Filter Topology Set Polynomial WeierstrassCurve.Affine GroundTheory.Arith.Abelian
 open scoped PeriodPair
@@ -101,7 +148,7 @@ theorem equation_germ {x y : ℂ → ℂ} (hx : Meromorphic x) (hy : Meromorphic
       Pi.zero_apply, Pi.algebraMap_apply, Algebra.algebraMap_self, RingHom.id_apply, X, Y, coe_mero]
     linear_combination hz
   rw [← mkₐ_eq_germ hx, ← mkₐ_eq_germ hy, equation_iff]
-  simp only [map_sub, map_add, map_mul, map_pow, AlgHom.commutes] at key
+  simp only [map_sub, map_add (f := _), map_mul, map_pow, AlgHom.commutes] at key
   simp only [WeierstrassCurve.baseChange, WeierstrassCurve.map_a₁, WeierstrassCurve.map_a₂,
     WeierstrassCurve.map_a₃, WeierstrassCurve.map_a₄, WeierstrassCurve.map_a₆]
   linear_combination key
@@ -311,7 +358,7 @@ theorem exists_isEllipticFunction_ellEval_eq (a : (weierstrassCurve L).toAffine.
         rintro a b ⟨f, hf, ha⟩ ⟨g, hg, hb⟩
         refine ⟨f + g, ⟨hf.1.add hg.1, fun z l hl ↦ ?_⟩, ?_⟩
         · simp only [Pi.add_apply, hf.2 z l hl, hg.2 z l hl]
-        · rw [map_add, ha, hb, germ_add hf.1 hg.1]
+        · rw [map_add (f := _), ha, hb, germ_add hf.1 hg.1]
       zero_mem' := ⟨fun _ ↦ 0, ⟨Meromorphic.const 0, fun _ _ _ ↦ rfl⟩, by
         rw [map_zero, germ_const, map_zero]⟩
       algebraMap_mem' := fun c ↦ ⟨fun _ ↦ c, ⟨Meromorphic.const c, fun _ _ _ ↦ rfl⟩, by
@@ -353,7 +400,7 @@ theorem exists_ellEval_eq_germ {f : ℂ → ℂ} (hf : IsEllipticFunction L f) :
   refine ⟨aeval (genX (weierstrassCurve L)) P / aeval (genX (weierstrassCurve L)) Q +
     2 * genY (weierstrassCurve L) * (aeval (genX (weierstrassCurve L)) R /
       aeval (genX (weierstrassCurve L)) S), ?_⟩
-  rw [map_add, map_mul, map_mul, map_div₀, map_div₀, map_ofNat, ← aeval_algHom_apply,
+  rw [map_add (f := _), map_mul, map_mul, map_div₀, map_div₀, map_ofNat, ← aeval_algHom_apply,
     ← aeval_algHom_apply, ← aeval_algHom_apply, ← aeval_algHom_apply, ellEval_genX, ellEval_genY,
     h2, germ_aeval m℘ P, germ_aeval m℘ Q, germ_aeval m℘ R, germ_aeval m℘ S, ← germ_div mP mQ,
     ← germ_div mR mS, ← germ_mul md (mR.div mS), ← germ_add (mP.div mQ) (md.mul (mR.div mS))]

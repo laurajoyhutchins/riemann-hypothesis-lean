@@ -1,8 +1,50 @@
-import Mathlib
-import Development.AbelianVarietyTheory.BlockTheory.GlobalSignature.InterlacingEquivariance
-import Development.AbelianVarietyTheory.BlockTheory.GlobalSignature.OnePlaceBranchStatement
-import Formalism.LocalToGlobal.Columns.PolyFnLemmas
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.GlobalSignature.InterlacingEquivariance
+import Formalism.GradedWeylDivisibility.DualWeylDominanceOf
+import Formalism.GradedWeylDivisibility.FinalD
+import Formalism.GradedWeylDivisibility.FockSpaceTableaux.LClosedeqLemmas
 import Formalism.LocalToGlobal.Columns.CoefficientsModP.FkMapInitMinor
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MvPolynomial NumberField
 
@@ -17,6 +59,7 @@ section BaseChange
 variable {K K' : Type} [Field K] [Field K'] (φ : K →+* K')
 
 theorem fockB_map {σ : Type} (f g : MvPolynomial σ K) : fockB (map φ f) (map φ g) = φ (fockB f g) := by
+
   rw [fockB_eq_sum _ _ f.support (support_map_subset _ _), fockB, map_sum]
   refine Finset.sum_congr rfl fun m _ => ?_
   simp [coeff_map]
@@ -51,7 +94,7 @@ theorem map_mem_VV {ι : Type} [Fintype ι] {n : ℕ} (lam : ι → DomWeight n)
     rw [h]
     exact ten_mem lam _ fun τ => Formalism.GradedWeylDivisibility.dualWeylMap K K' φ n n _ _ (hf τ)
   | zero => rw [map_zero]; exact Submodule.zero_mem _
-  | add x y _ _ hx hy => rw [map_add]; exact Submodule.add_mem _ hx hy
+  | add x y _ _ hx hy => rw [map_add (f := _)]; exact Submodule.add_mem _ hx hy
   | smul c x _ hx =>
     rw [MvPolynomial.smul_eq_C_mul, map_mul, MvPolynomial.map_C, ← MvPolynomial.smul_eq_C_mul]
     exact Submodule.smul_mem _ _ hx
@@ -88,6 +131,7 @@ theorem gramB_det_ne_zero [CharZero K] (sg : ι → DomWeight n) : (Br.gramB (K 
     refine eq_zero_of_fockB sg _ fun i => ?_
     have := congrFun hv0 i
     simp only [Matrix.mulVec, dotProduct, Br.gramB, Matrix.of_apply, Pi.zero_apply] at this
+
     rw [← fockBL_apply, Submodule.coe_sum, map_sum, ← this]
     refine Finset.sum_congr rfl fun j _ => ?_
     rw [Submodule.coe_smul, map_smul, bVV_coe, fockBL_apply, smul_eq_mul, mul_comm]
@@ -100,8 +144,9 @@ theorem fockB_projVV_basis [CharZero K] (sg : ι → DomWeight n) (F : Pol K ι 
   have h1 : fockB (bVVfun K sg k) (Br.projVV sg F : Pol K ι n) =
       ∑ i, ∑ j, Br.gramB (K := K) sg k i * (Br.gramB (K := K) sg)⁻¹ i j * fockB (bVVfun K sg j) F := by
     rw [← fockBL_apply]
+
     simp only [Br.projVV, LinearMap.sum_apply, LinearMap.smul_apply, LinearMap.smulRight_apply, Submodule.coe_sum,
-      Submodule.coe_smul, map_sum, map_smul, bVV_coe, fockBL_apply, smul_eq_mul]
+    Submodule.coe_smul, map_sum, map_smul, bVV_coe, fockBL_apply, smul_eq_mul]
     refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
     rw [show Br.gramB (K := K) sg k i = fockB (bVVfun K sg k) (bVVfun K sg i) from rfl]
     ring
@@ -116,7 +161,7 @@ theorem fockB_projVV [CharZero K] (sg : ι → DomWeight n) (F y : Pol K ι n) (
   induction hy using Submodule.span_induction with
   | mem x hx => obtain ⟨k, rfl⟩ := hx; exact fockB_projVV_basis sg F k
   | zero => simp
-  | add x y _ _ hx hy => simp only [map_add, LinearMap.add_apply, hx, hy]
+  | add x y _ _ hx hy => simp only [map_add (f := _), LinearMap.add_apply, hx, hy]
   | smul c x _ hx => simp only [map_smul, LinearMap.smul_apply, hx]
 
 theorem projVV_map [CharZero K] [CharZero K'] (sg : ι → DomWeight n) (F : Pol K ι n) :
@@ -141,7 +186,7 @@ theorem coefLast_map (b : ι → Fin n → ℕ) (F : Pol K ι N) :
     split_ifs
     · simp [smul_monomial, map_monomial]
     · simp
-  | add p q hp hq => simp only [map_add, hp, hq]
+  | add p q hp hq => simp only [map_add (f := _), hp, hq]
 
 theorem xiBr_map (lam : DomWeight N) (sg : DomWeight n) : map φ (Br.xiBr K hN lam sg) = Br.xiBr K' hN lam sg := by
   simp only [Br.xiBr, Br.zMinor, map_prod, map_mul, map_pow, fk_map_initMinor, Formalism.GradedWeylDivisibility.lclosedeq_lpMinor_map]
@@ -162,15 +207,5 @@ theorem brOne_map [CharZero K] [CharZero K'] (lam : DomWeight N) (sg : DomWeight
   rw [← map_rename, branchingProjection_map, map_rename]
 
 end BaseChange
-
-theorem baseChange : GlobalTheory.IndefiniteRowSideFullHecke.InterlacingEquivariance.BaseChange := by
-  intro K K' _ _ _ φ N n hN lam sg _ _ f _
-  haveI : CharZero K' := (RingHom.charZero_iff φ.injective).mp inferInstance
-  exact brOne_map φ hN lam sg f
-
-def FamilyNonzero : Prop :=
-  ∀ (K : Type) [Field K] [CharZero K] (ι : Type) [Fintype ι] (N n : ℕ) (hN : N = n + 1)
-    (lam : ι → DomWeight N) (sg : ι → DomWeight n),
-    (∀ τ, Br.Interlace hN (lam τ) (sg τ)) → (∀ τ, Br.SameShift (lam τ) (sg τ)) → Br.brStd (K := K) hN lam sg ≠ 0
 
 end GlobalTheory.Proof.TensorMapDescent

@@ -1,19 +1,56 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.LevelChainValuations.ChainOf
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.LevelChainValuations.RHof
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.DividedPowerReduction.CoefficientReductionFirstChernClassTateTwist
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.DividedPowerReduction.ReductionChangeLevel
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.IsProperOfProj
+module
+
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.LevelChainValuations.ChainOf
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.IsProperOfProj
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.DividedPowerReduction.IsFirstChernThickening
 import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.CechPairings.TotPairing
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.BocksteinBaseChange.DatPull
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.BocksteinBaseChange.LimitBilinearCup.OmCup
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.DividedPowerReduction.JEqPdPow
+
+@[expose] public section
 
 set_option backward.isDefEq.respectTransparency false
 set_option autoImplicit false
 
 noncomputable section
 
-set_option maxHeartbeats 1000000
+
 
 open CategoryTheory AlgebraicGeometry Limits GlobalTheory.LogCris DividedPowers
 
@@ -67,49 +104,6 @@ variable {m : ℕ} {L : Lev (per l K) m} (hL : L.Good) (M : Model l K) (s : ℕ)
   (hc : ∀ n (c : Acris l), (d n).ρ ((PAlg.base l).cris n c) = Ideal.Quotient.mk _ (L.lam c))
 
 namespace CupProductChain
-
-theorem cg_r (n i j : ℕ) (x : M.Hc false n i) (y : M.Hc false n j) :
-    rHof d hc M s n (i + j) (cupS M n i j x y) = cupZn L M s n i j (rHof d hc M s n i x) (rHof d hc M s n j y) := by
-  refine (congrArg (rHof d hc M s n (i + j)) (cupS_apply M n i j x y)).trans ?_
-  refine Eq.trans ?_ (cupZn_apply L M s n i j _ _).symm
-  exact (red_cup (d n) M.p s {⊤} ((PAlg.base l).cris n) L.lam (hc n) none).1 rfl x y
-
-theorem cg_red (n i j : ℕ) (z : HO (QA L M s) i) (w : HO (QA L M s) j) :
-    redM (QA L M s) none ((l : L.A) ^ n) (i + j) (cupZ L M s i j z w) =
-      cupZn L M s n i j (redM (QA L M s) none ((l : L.A) ^ n) i z) (redM (QA L M s) none ((l : L.A) ^ n) j w) := by
-  refine (congrArg (redM (QA L M s) none ((l : L.A) ^ n) (i + j)) (cupZ_apply L M s i j z w)).trans ?_
-  refine Eq.trans ?_ (cupZn_apply L M s n i j _ _).symm
-  exact redM_cup (QA L M s) none ((l : L.A) ^ n) rfl z w
-
-theorem cg_b (i j : ℕ) (z : HO (QA L M s) i) (w : HO (QA L M s) j) :
-    bMap M s hL hQ (i + j) (cupZ L M s i j z w) = cupW L M s i j (bMap M s hL hQ i z) (bMap M s hL hQ j w) := by
-  refine (congrArg (bMap M s hL hQ (i + j)) (cupZ_apply L M s i j z w)).trans ?_
-  refine Eq.trans ?_ (cupW_apply L M s i j _ _).symm
-  exact (smor_cup (smB M s hL hQ)).1 rfl z w
-
-theorem cg_mu (i j : ℕ) (v : HdR M.q i) (w : HdR M.q j) :
-    muB L.γB M.q 1 s {⊤} (i + j) (cupR M i j v w) =
-      cupW L M s i j (muB L.γB M.q 1 s {⊤} i v) (muB L.γB M.q 1 s {⊤} j w) := by
-  refine (congrArg (muB L.γB M.q 1 s {⊤} (i + j)) (cupR_eq M i j v w)).trans ?_
-  refine Eq.trans ?_ (cupW_apply L M s i j _ _).symm
-  exact (muB_cup L.γB M.q 1 s {⊤}).1 rfl v w
-
-theorem cg_tS (n i j : ℕ) (x : M.Hc false (n + 1) i) (y : M.Hc false (n + 1) j) :
-    (M.HS false (i + j)).r n (cupS M (n + 1) i j x y) = cupS M n i j ((M.HS false i).r n x) ((M.HS false j).r n y) := by
-  refine (congrArg ((M.HS false (i + j)).r n) (cupS_apply M (n + 1) i j x y)).trans ?_
-  refine Eq.trans ?_ (cupS_apply M n i j _ _).symm
-  exact CrystallineSemistableComparison.CupAbs.om_cup _ _ _ rfl x y
-
-theorem cg_oneS (n : ℕ) : (M.HS false 0).r n (CH.oneH (B.OcA (B.schFn M.p) (okToOC l K) false (n + 1))) =
-    CH.oneH (B.OcA (B.schFn M.p) (okToOC l K) false n) :=
-  CrystallineSemistableComparison.CupAbs.om_one _ _ _
-
-theorem cg_one_r (n : ℕ) : redM (QA L M s) none ((l : L.A) ^ n) 0 (CH.oneH (sP (QA L M s)).A) =
-    rHof d hc M s n 0 (CH.oneH (B.OcA (B.schFn M.p) (okToOC l K) false n)) :=
-  (red_cup (d n) M.p s {⊤} ((PAlg.base l).cris n) L.lam (hc n) none).2.symm
-
-theorem cg_one_b : bMap M s hL hQ 0 (CH.oneH (sP (QA L M s)).A) = muB L.γB M.q 1 s {⊤} 0 (oneK M.q) :=
-  (smor_cup (smB M s hL hQ)).2.trans (muB_cup L.γB M.q 1 s {⊤}).2.symm
 
 end CupProductChain
 

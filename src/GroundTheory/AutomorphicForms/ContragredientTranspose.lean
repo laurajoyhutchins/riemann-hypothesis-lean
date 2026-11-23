@@ -1,8 +1,56 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.ContragredientTranspose.GelfandKazhdan
-import GroundTheory.AutomorphicForms.ContragredientTranspose.Character
-import GroundTheory.AutomorphicForms.WhittakerLocal
-import GroundTheory.PowerSubgroups.CountableNeighbourhoods.MapThetaTInvariant
+module
+
+public import GroundTheory.AutomorphicForms.ContragredientTranspose.GelfandKazhdan
+public import GroundTheory.AutomorphicForms.ContragredientTranspose.Character
+public import GroundTheory.AutomorphicForms.WhittakerGroups
+public import GroundTheory.AutomorphicForms.MeasuresGL
+public import GroundTheory.AutomorphicForms.WhittakerLocal
+public import GroundTheory.PowerSubgroups.CountableNeighbourhoods.MapThetaTInvariant
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GroundTheory.Automorphic.ContragredientTranspose
 
@@ -45,8 +93,8 @@ theorem nonempty_equiv_contragredient {V : Type*} [AddCommGroup V] [Module ℂ V
   have hc' : Continuous (thetaT : GL (Fin n) F ≃* GL (Fin n) F).symm := continuous_thetaT
   have := isIrreducible_contragredient hπ
   have := isIrreducible_comp π (thetaT : GL (Fin n) F ≃* GL (Fin n) F)
-  refine nonempty_equiv_of_distChar_eq (μ := μ) (isAdmissible_contragredient hπ)
-    (isAdmissible_comp _ hc hc' hπ) ?_
+  apply nonempty_equiv_of_distChar_eq (μ := μ) (isAdmissible_contragredient hπ)
+    (isAdmissible_comp _ hc hc' hπ)
   refine LinearMap.ext fun f => ?_
   rw [distChar_contragredient, distChar_comp μ _ hc hc' (map_thetaT_eq μ) hπ]
   have e : compHomeoL (mulEquivHomeo (thetaT : GL (Fin n) F ≃* GL (Fin n) F) hc hc').symm f =
@@ -62,8 +110,8 @@ theorem longestWeyl_mul_self : (longestWeyl : GL (Fin n) F) * longestWeyl = 1 :=
   have : (Fin.revPerm (n := n)) * Fin.revPerm = 1 := Equiv.ext fun i => by simp
   rw [this, map_one]
 
-omit [ValuativeRel F] [TopologicalSpace F] [IsNonarchimedeanLocalField F] in
 
+omit [ValuativeRel F] [TopologicalSpace F] [IsNonarchimedeanLocalField F] in
 theorem thetaT_eq_longestWeyl (g : GL (Fin n) F) :
     thetaT g = longestWeyl * theta g * longestWeyl := by
   have hs : sigma g = longestWeyl * transposeGL g * longestWeyl :=

@@ -1,8 +1,48 @@
-import Formalism.SharpRestriction.LevelLetterCocycles.CocyclesToWachVectorsBoundOfExtTool
-import Formalism.SharpRestriction.LevelLetterCocycles.BaseChangePreservesUnitaryOf
-import Formalism.SharpRestriction.LevelLetterCocycles.ExistsPosConstLagrangeCondition
-import Formalism.SharpRestriction.LevelLetterCocycles.RingConditionOfDeltaInvariants
-import Formalism.SharpRestriction.LevelLetterCocycles.LevelClauseOfOpenTool
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.BaseChangePreservesUnitaryOf
+public import Formalism.SharpRestriction.LevelLetterCocycles.CrystallineLiftingInputs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.Interval.Finset.Box
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -105,8 +145,8 @@ theorem invariantLetter_polynomial_derivation (hπΔ : W.π₀ ∈ W.AΔ) (hU : 
     Formalism.MainNotions.CrystallineLiftingInputs.DL W T c (Polynomial.aeval (derivationOnWachModule W T) P x) := by
   induction P using Polynomial.induction_on'
   next p q hp hq =>
-    rw [map_add, LinearMap.add_apply]
-    exact ⟨by rw [smul_add, hp.1, hq.1], fun δ hδ => by rw [map_add, hp.2 δ hδ, hq.2 δ hδ]⟩
+    rw [map_add (f := _), LinearMap.add_apply]
+    exact ⟨by rw [smul_add, hp.1, hq.1], fun δ hδ => by rw [map_add (f := _), hp.2 δ hδ, hq.2 δ hδ]⟩
   next k a =>
     rw [Polynomial.aeval_monomial, Module.End.mul_apply, Module.algebraMap_end_apply]
     have hk := invariantLetter_derivation_pow W T hπΔ hU k h
@@ -128,7 +168,7 @@ theorem qLattice_add {c : ZMod n} {k : ℕ} {x y : W.DD T} (hx : QLattice W T c 
     (hy : QLattice W T c k y) : QLattice W T c k (x + y) := by
   refine ⟨⟨?_, fun δ hδ => ?_⟩, ?_⟩
   · rw [smul_add, hx.1.1, hy.1.1]
-  · rw [map_add, hx.1.2 δ hδ, hy.1.2 δ hδ]
+  · rw [map_add (f := _), hx.1.2 δ hδ, hy.1.2 δ hδ]
   · rw [smul_add]
     exact add_mem hx.2 hy.2
 
@@ -165,7 +205,7 @@ theorem qLattice_polynomial_derivation [NeZero n] (hDS : DerivationPreservesQLat
     | succ j ih => rw [pow_succ', Module.End.mul_apply]; exact qLattice_derivation W T hDS hA hT c k ih
   induction P using Polynomial.induction_on'
   next p q hp hq =>
-    rw [map_add, LinearMap.add_apply]
+    rw [map_add (f := _), LinearMap.add_apply]
     exact qLattice_add W T hp hq
   next j a =>
     rw [Polynomial.aeval_monomial, Module.End.mul_apply, Module.algebraMap_end_apply]

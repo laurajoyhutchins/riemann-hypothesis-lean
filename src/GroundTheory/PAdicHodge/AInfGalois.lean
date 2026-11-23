@@ -1,9 +1,51 @@
-import Mathlib
-import GroundTheory.PAdicHodge.KerFontaineThetaCompFrobeniusEquivSymmPow
-import GroundTheory.PAdicHodge.AInfTopology
-import GroundTheory.PAdicHodge.TiltMap
-import GroundTheory.PAdicHodge.TiltAlgebra
-import GroundTheory.PAdicHodge.GaloisOnCp
+module
+
+public import GroundTheory.PAdicHodge.KerFontaineThetaCompFrobeniusEquivSymmPow
+public import GroundTheory.PAdicHodge.TiltAlgebra
+public import GroundTheory.PAdicHodge.GaloisOnCp
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -20,8 +62,8 @@ variable {K L M : Type*} [NontriviallyNormedField K] [IsUltrametricDist K]
 variable {p : ℕ} [hp : Fact p.Prime] [IsPerfectoidField K p] [IsPerfectoidField L p]
   [IsPerfectoidField M p]
 
-variable (p) in
 
+variable (p) in
 def map (φ : K →+* L) (hφ : ∀ x, ‖φ x‖ = ‖x‖) : AInf K p →+* AInf L p :=
   WittVector.map (preTiltMap p φ hφ)
 
@@ -66,37 +108,8 @@ theorem map_frobeniusEquiv (φ : K →+* L) (hφ : ∀ x, ‖φ x‖ = ‖x‖) 
   rw [map_coeff, WittVector.frobeniusEquiv_coeff, WittVector.frobeniusEquiv_coeff, map_coeff,
     map_pow]
 
-theorem map_frobeniusEquiv_symm (φ : K →+* L) (hφ : ∀ x, ‖φ x‖ = ‖x‖) (x : AInf K p) :
-    map p φ hφ ((WittVector.frobeniusEquiv p _).symm x) =
-      (WittVector.frobeniusEquiv p _).symm (map p φ hφ x) := by
-  refine WittVector.ext fun n => ?_
-  rw [map_coeff, WittVector.frobeniusEquiv_symm_coeff, WittVector.frobeniusEquiv_symm_coeff,
-    map_coeff, RingHom.map_frobeniusEquiv_symm]
 
-omit [IsUltrametricDist K] in
 
-theorem norm_toRingHom_apply (σ : K ≃+* K) (hσ : ∀ x, ‖σ x‖ = ‖x‖) (x : K) :
-    ‖(σ : K →+* K) x‖ = ‖x‖ :=
-  hσ x
-
-omit [IsUltrametricDist K] in
-
-theorem norm_symm_toRingHom_apply (σ : K ≃+* K) (hσ : ∀ x, ‖σ x‖ = ‖x‖) (x : K) :
-    ‖(σ.symm : K →+* K) x‖ = ‖x‖ := by
-  change ‖σ.symm x‖ = ‖x‖
-  rw [← hσ, RingEquiv.apply_symm_apply]
-
-variable (p) in
-
-def mapEquiv (σ : K ≃+* K) (hσ : ∀ x, ‖σ x‖ = ‖x‖) : AInf K p ≃+* AInf K p :=
-  RingEquiv.ofRingHom (map p (σ : K →+* K) (norm_toRingHom_apply σ hσ))
-    (map p (σ.symm : K →+* K) (norm_symm_toRingHom_apply σ hσ))
-    (by
-      rw [← map_comp, ← map_id]
-      exact map_congr (RingHom.ext fun x => σ.apply_symm_apply x) _ _)
-    (by
-      rw [← map_comp, ← map_id]
-      exact map_congr (RingHom.ext fun x => σ.symm_apply_apply x) _ _)
 
 end Functor
 

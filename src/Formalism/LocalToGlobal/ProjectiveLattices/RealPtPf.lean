@@ -1,10 +1,49 @@
-import Formalism.LocalToGlobal.ProjectiveLattices.ValuedUnif
-import Formalism.LocalToGlobal.ProjectiveLattices.RealPtGeo
-import Formalism.LocalToGlobal.ProjectiveLattices.PtOfSInst
-import Formalism.LocalToGlobal.ProjectiveLattices.ComplPf
-import Formalism.LocalToGlobal.ProjectiveLattices.CoreProofs
-import Formalism.LocalToGlobal.ProjectiveLattices.ValSetAlgSubset
-import Formalism.LocalToGlobal.ProjectiveLattices.CompHt
+module
+
+public import Formalism.LocalToGlobal.ProjectiveLattices.CompHt
+public import Formalism.LocalToGlobal.ProjectiveLattices.IntAtExtExtAll
+public import Formalism.LocalToGlobal.ProjectiveLattices.SecPtOrd
+public import Formalism.LocalToGlobal.ProjectiveLattices.SecPtRed
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 set_option synthInstance.maxHeartbeats 400000
 
@@ -73,7 +112,7 @@ theorem chiI_smul {Tc : CDVR} {io : T.Q.c.F →+* Tc.Fr} (y : IntFr (T.Q.Xo j) T
   refine AddMonoidAlgebra.induction_linear f ?_ ?_ ?_
   · rw [smul_zero, map_zero, mul_zero]
   · intro f g hf hg
-    rw [smul_add, map_add, map_add, hf, hg, mul_add]
+    rw [smul_add, map_add (f := _), map_add (f := _), hf, hg, mul_add]
   · intro d r
     rw [show a • AddMonoidAlgebra.single d r = AddMonoidAlgebra.single d (a • r) from AddMonoidAlgebra.smul_single a d r,
       chiI_single, chiI_single, evI_smul]
@@ -94,7 +133,7 @@ theorem evR_eq_of_map {j : ℕ}
     evR (T.Q.Xo j) T.Q.c f w = φ (f p y) := by
   have hT : FromTest (K := T.Q.c.F) (fun S _ _ => FrPt (T.Q.Xo j) T.Q.c S) (fun φ y z => FrMap φ y z) w := ⟨p, φ, y, h⟩
   unfold evR evalAt
-  rw [dif_pos hT]
+  rw [dite_eq_left hT]
   exact hWD f hf S _ _ _ _ _ _ w hT.choose_spec.choose_spec.choose_spec h
 
 def RealPtNZSt (h : LawsP T) (j : ℕ) (hj : InR D j) (hG : GenFrEx (T.Q.Xo j) T.Q.c) {ka wL wF : WeightFamilies.Wt D j}
@@ -110,16 +149,6 @@ def RealPtNZSt (h : LawsP T) (j : ℕ) (hj : InR D j) (hG : GenFrEx (T.Q.Xo j) T
         phiAt ζ Tc.Fr ι hU (addVal_map_of_unr ι hunr) (toOsK (recPlus h j hj) la G.w x)) ∧
     ∀ (w : WeightFamilies.Wt D j) (F : (recB h.toLawsCore).Cusp j w), NZAt hG (F : T.R j) →
       ev (emb (recPlus h j hj) la G.N ((recPJ h j hj).inc w F)) ≠ 0
-
-theorem realPtSt_of_NZ {h : LawsP T} {j : ℕ} {hj : InR D j} {hG : GenFrEx (T.Q.Xo j) T.Q.c} {ka wL wF : WeightFamilies.Wt D j}
-    {G : GlobalFamilyData (recPlus h j hj) ka wL wF} {la : HeightOneSpectrum (𝓞 (recB h.toLawsCore).KO)}
-    {hU : IsUnif (OsK (recPlus h j hj) la G.w) (unifO (recPlus h j hj) la G.N)} [∀ ζ : PtsG G la, IsDVRAt ζ]
-    (hR : RealPtNZSt h j hj hG G la hU) :
-    @RealPtSt D (recB h.toLawsCore) T.G.P j (recPJ h j hj) (extAll h j hj) (intAtExt_extAll h j hj) ka wL wF G la hU
-      ‹∀ ζ : PtsG G la, IsDVRAt ζ› := by
-  intro ζ
-  obtain ⟨y, Tc, ι, hl, hunr, ev, hu, hv, hdeg, -⟩ := hR ζ
-  exact ⟨y, Tc, ι, hl, hunr, ev, hu, hv, hdeg⟩
 
 end Main
 

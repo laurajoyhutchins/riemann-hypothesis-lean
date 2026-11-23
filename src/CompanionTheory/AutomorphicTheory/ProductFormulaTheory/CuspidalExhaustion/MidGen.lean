@@ -1,14 +1,53 @@
-import Mathlib
-import CompanionTheory.AutomorphicTheory.ProductFormulaTheory.CuspidalExhaustion.MidExact
-import CompanionTheory.AutomorphicTheory.TemperedLocalSpectra.ZelevinskyClassification.ZelevinskyCosets.Imports
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.StableLattices.ContragredientProductIrreducibleImports
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.GlobalTheory.ParabolicInductionFiniteLength
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ProductIrreducibleFiniteLengthStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ParabolicInductionInStagesProductOfProducts
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FiniteLengthExistsCoatomStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ContraMapInjective
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ParabolicProductHasFiniteLengthGL
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ZelevinskySegmentClassExistsForEveryPlacing
+module
+
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ParabolicInductionInStagesProductOfProducts
+import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.NotInSupportOfSubsingleton
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ContraMapInjective
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ParabolicProductHasFiniteLengthGL
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ZelevinskySegmentClassExistsForEveryPlacing
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FiniteLengthExistsCoatomStatement
+import GroundTheory.LocalFields.PadicLogSeries
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -33,6 +72,7 @@ variable {m N : ℕ}
 
 include hT in
 
+include hT in
 theorem Tm_equiv_injective {V W : Type} [AddCommGroup V] [Module ℂ V] [AddCommGroup W] [Module ℂ W]
     {τ : Representation ℂ (GL (Fin m) k) V} {τ' : Representation ℂ (GL (Fin m) k) W} (e : τ.Equiv τ') :
     Function.Injective (Tm e.toIntertwiningMap) := by
@@ -59,6 +99,7 @@ theorem codSub_injective {G V W : Type} [Group G] [AddCommGroup V] [Module ℂ V
 
 include hT in
 
+include hT in
 theorem mid_sub {V : Type} [AddCommGroup V] [Module ℂ V] {P : Representation ℂ (GL (Fin m) k) V}
     (hP : HasFiniteLength P) (hs : IsSmooth P) (x : IrrCl (GL (Fin N) k)) (S : Subrepresentation P)
     (hx : ∃ f : x.rep.ρ.IntertwiningMap (T S.toRepresentation).ρ, Function.Injective f) :
@@ -129,14 +170,16 @@ theorem mid_sub {V : Type} [AddCommGroup V] [Module ℂ V] {P : Representation �
       exact sub_eq_zero.1 ((Submodule.mem_bot ℂ).1 hm)
     have hsq := GlobalTheory.CosocleOfContra.isSmooth_quot hSs C
     have hirr := GlobalTheory.CosocleOfContra.isIrreducible_quot hC
-    let e := IrrGL.equivOf (quot C) hsq hirr
-    refine ⟨(IrrGL.of (quot C) hsq hirr).2, ?_, (Tm e.toIntertwiningMap).comp F,
+    let π : IrrRep (GL (Fin m) k) := ⟨_, quot C, hsq, hirr⟩
+    let e : (quot C).Equiv π.cl.rep.ρ := equivRep π
+    refine ⟨π.cl, ?_, (Tm e.toIntertwiningMap).comp F,
       (Tm_equiv_injective T Tm hT e).comp hFinj⟩
     exact (IsSubquotient.of_surjective e.toIntertwiningMap e.toLinearEquiv.surjective).trans
       ((IsSubquotient.of_surjective (quotMk C) C.toSubmodule.mkQ_surjective).trans hSsub)
 
 include hT in
 
+include hT in
 theorem mid_gen {V : Type} [AddCommGroup V] [Module ℂ V] {P : Representation ℂ (GL (Fin m) k) V}
     (hP : HasFiniteLength P) (hs : IsSmooth P) (x : IrrCl (GL (Fin N) k))
     (f : x.rep.ρ.IntertwiningMap (T P).ρ) (hf : Function.Injective f) :

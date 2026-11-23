@@ -1,4 +1,58 @@
-import Development.WeilBound.ThetaLifts.LocalTheory.StandardValuations.ContinuousCut
+module
+
+public import Development.WeilBound.ThetaLifts.LocalTheory.StandardValuations.ContinuousCut
+public import Development.AbelianVarietyTheory.Definitions.Divisors.RankEqCardIffExistsFrameMatrixFirstColumnBlock
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.PadicIsNonarchimedeanLocalField
+public import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.PairwiseDisjointCell
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Compactness.Paracompact
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 set_option linter.unusedSectionVars false
 
@@ -11,25 +65,20 @@ namespace PositivityTheory.ThKG.Std
 
 variable {k : Type} [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k]
 
-open Classical in
 
+open Classical in
 def dl (ν : kˣ →* ℂˣ) (x : k) : ℂ :=
   if h : x ≠ 0 ∧ valuation k x = 1 then (((ν (Units.mk0 x h.1))⁻¹ : ℂˣ) : ℂ) else 0
 
 variable {ν : kˣ →* ℂˣ} {ϖ : kˣ} {c : ℕ}
 
 theorem dl_unit (u : kˣ) (hu : valuation k (u : k) = 1) : dl ν u = (((ν u)⁻¹ : ℂˣ) : ℂ) := by
-  rw [dl, dif_pos ⟨u.ne_zero, hu⟩, Units.mk0_val]
+  rw [dl, dite_eq_left ⟨u.ne_zero, hu⟩, Units.mk0_val]
 
 theorem dl_of_ne {x : k} (h : valuation k x ≠ 1) : dl ν x = 0 := dif_neg fun h' => h h'.2
 
-theorem dl_ne {x : k} (h : dl ν x ≠ 0) : valuation k x = 1 := by
-  by_contra h'; exact h (dl_of_ne h')
-
 theorem exists_unit {x : k} (h : valuation k x = 1) : ∃ u : kˣ, (u : k) = x :=
   ⟨Units.mk0 x (by rintro rfl; simp at h), rfl⟩
-
-theorem dl_one : dl ν (1 : k) = 1 := by simpa using dl_unit (ν := ν) 1 (by simp)
 
 theorem dl_mul_unit {x : k} (hx : valuation k x = 1) (y : k) : dl ν (x * y) = dl ν x * dl ν y := by
   by_cases hy : valuation k y = 1
@@ -205,7 +254,7 @@ theorem int_cosets (hm : IsVol m) (hϖ : IsUnif ϖ) (c : ℕ) (f : k → ℂ) (h
       (HasCompactSupport.intro (IsNonarchimedeanLocalField.isCompact_closedBall k (valuation k ((ϖ : k) ^ c)))
         fun x hx => by unfold ind; exact if_neg hx)
   conv_lhs => rw [e]
-  rw [integral_finset_sum _ fun y _ => (hi.comp_sub_right _).const_mul _, finsum_eq_sum_of_fintype, Finset.mul_sum]
+  rw [MeasureTheory.integral_finsetSum _ fun y _ => (hi.comp_sub_right _).const_mul _, finsum_eq_sum_of_fintype, Finset.mul_sum]
   refine Finset.sum_congr rfl fun y _ => ?_
   rw [integral_const_mul, integral_sub_right_eq_self, int_ind_pow hm hϖ, mul_comm]
 
@@ -248,6 +297,6 @@ theorem gI_gauss (hm : IsVol m) (hψ : IsPsi ψ) (hϖ : IsUnif ϖ) (hc : 1 ≤ c
   · intro u _
     have h1 := (hu u.1).1 u.isUnit
     have h2 : ((Quotient.out u.1 : 𝒪[k]) : k) ≠ 0 := by intro h; simp [h] at h1
-    rw [dif_neg h2, dl, dif_pos ⟨h2, h1⟩, div_eq_inv_mul]
+    rw [dif_neg h2, dl, dite_eq_left ⟨h2, h1⟩, div_eq_inv_mul]
 
 end PositivityTheory.ThKG.Std

@@ -1,4 +1,53 @@
-import Formalism.SharpRestriction.GrowthBounds.MonomialOrderSegments.FockMonomialRight
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.MonomialOrderSegments.MemPolKIff
+public import Formalism.SharpRestriction.GrowthBounds.MonomialOrderSegments.FockMonomialRight
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -121,7 +170,7 @@ theorem euler_eq_dg {σ : Type} (x : σ) (G : MvPolynomial σ K) :
     X x * pderiv x G = dg (fun ξ => (ξ x : K)) G := by
   refine MvPolynomial.induction_on' G (fun α c => ?_) (fun P Q hP hQ => ?_)
   · rw [MvPolynomial.X_mul_pderiv_monomial, dg_monomial, MvPolynomial.smul_monomial, nsmul_eq_mul]
-  · rw [map_add, mul_add, hP, hQ, map_add]
+  · rw [map_add (f := _), mul_add, hP, hQ, map_add (f := _)]
 
 private theorem coeff_dg_eq_mul_coeff {σ : Type} (f : (σ →₀ ℕ) → K) (F : MvPolynomial σ K)
     (α : σ →₀ ℕ) : (dg f F).coeff α = f α * F.coeff α := by
@@ -154,7 +203,7 @@ theorem proj_keeps_letter (d : L → ℕ)
   have h := hcomm a _ hmono
   rw [euler_eq_dg, euler_eq_dg] at h
   simp only [dg_monomial, mul_one] at h
-  have h' := congrArg (fun G => MvPolynomial.coeff ζ' G) h
+  have h' := congrArg (fun G => AddMonoidAlgebra.coeff G ζ') h
   simp only [coeff_dg_eq_mul_coeff] at h'
   have hsm : (monomial ζ ((ζ (i, a) : ℕ) : K) : MvPolynomial (L × Fin r) K) =
       ((ζ (i, a) : ℕ) : K) • monomial ζ (1 : K) := by

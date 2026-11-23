@@ -1,5 +1,52 @@
-import Development.AutomorphicArithmetic.Foundations.Convolution.HermitianDescent.NormAlmostAll
-import Development.AutomorphicArithmetic.Foundations.Convolution.HermitianDescent.GalBase
+module
+
+public import Development.AutomorphicArithmetic.Foundations.Convolution.HermitianDescent.NormAlmostAll
+public import Development.AutomorphicArithmetic.Foundations.Convolution.HermitianDescent.GalBase
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RingTheory.QuasiFinite.Basic
+
+@[expose] public section
 
 namespace UpperTheory.ConvolutionTheory.D
 
@@ -27,6 +74,7 @@ private theorem exists_notMem {σ : T ≃ₐ[S] T} {q : ℕ} (h : IsGal σ q) (a
   have hz : ∀ t, a * σ (z t) = z t := by
     intro t
     have h1 : a * σ (z t) = ∑ j ∈ Finset.range q, c (j + 1) * (σ ^ (j + 1)) t := by
+
       simp only [z, map_sum, Finset.mul_sum, map_mul, ← hc, pow_succ_app, mul_assoc]
     have h2 := Finset.sum_range_succ (fun j => c j * (σ ^ j) t) q
     rw [Finset.sum_range_succ'] at h2
@@ -89,7 +137,7 @@ private theorem finite_max (k S : Type) [CommRing k] [IsLocalRing k] [CommRing S
     (fun m => ⟨m.asIdeal, m.isMaximal.isPrime, ⟨?_⟩⟩) ?_
   · have := m.isMaximal
     exact (IsLocalRing.eq_maximalIdeal
-      (Ideal.isMaximal_comap_of_isIntegral_of_isMaximal (R := k) m.asIdeal)).symm
+      (Ideal.isMaximal_under_of_isIntegral_of_isMaximal (R := k) m.asIdeal)).symm
   · intro m m' hm
     exact MaximalSpectrum.ext (congrArg Subtype.val hm)
 
@@ -119,7 +167,7 @@ theorem h90 : H90 := by
   have hu : IsUnit (∑ m, algebraMap S T (e m) * z m) := by
     by_contra hnu
     obtain ⟨P, hP, hmem⟩ := exists_max_ideal_of_mem_nonunits hnu
-    let m : MaximalSpectrum S := ⟨P.comap (algebraMap S T), Ideal.isMaximal_comap_of_isIntegral_of_isMaximal P⟩
+    let m : MaximalSpectrum S := ⟨P.comap (algebraMap S T), Ideal.isMaximal_under_of_isIntegral_of_isMaximal (R := S) P⟩
     apply hzP m P hP rfl
     rw [← Finset.add_sum_erase _ _ (Finset.mem_univ m)] at hmem
     have h1 : ∑ m' ∈ Finset.univ.erase m, algebraMap S T (e m') * z m' ∈ P :=
@@ -130,6 +178,7 @@ theorem h90 : H90 := by
     convert h3 using 1
     ring
   refine ⟨hu.unit, ?_⟩
+
   rw [hu.unit_spec, map_sum, Finset.mul_sum]
   refine Finset.sum_congr rfl fun m _ => ?_
   rw [map_mul, σ.commutes, mul_left_comm, hz]

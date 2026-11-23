@@ -1,4 +1,55 @@
-import Mathlib
+module
+
+public import Mathlib.RingTheory.Regular.RegularSequence
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+public import Mathlib.RingTheory.Depth.Rees
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+public import Mathlib.RingTheory.Regular.Category
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.Category.ModuleCat.Basic
+public import Mathlib.Algebra.Homology.DerivedCategory.Ext.Basic
+public import Mathlib.Algebra.Homology.DerivedCategory.Ext.ExactSequences
+
+@[expose] public section
 
 universe u_1 u_2
 
@@ -48,18 +99,24 @@ theorem exists_isRegular_quotSMulTop {R : Type u_1} [CommRing R] [IsNoetherianRi
   have hltQ : 𝔪 • (⊤ : Submodule R (QuotSMulTop y M)) < ⊤ :=
     maximalIdeal_smul_top_lt_top (QuotSMulTop y M)
 
-  have hM := (ModuleCat.exists_isRegular_tfae 𝔪 xs.length (ModuleCat.of R M) hltM).out 3 1
+  have hM := (ModuleCat.exists_isRegular_tfae 𝔪 xs.length (ModuleCat.of R M) hltM).out 4 1
   have hExtM := hM.mp ⟨xs, rfl, hmem, hxs⟩
 
   have hS := IsSMulRegular.smulShortComplex_shortExact (M := ModuleCat.of R M) hreg
+  have supp𝔪 : Module.support R (Shrink.{u_2} (R ⧸ 𝔪)) =
+      PrimeSpectrum.zeroLocus 𝔪 := by
+    rw [(Shrink.linearEquiv R _).support_eq, Module.support_eq_zeroLocus,
+      Ideal.annihilator_quotient]
   have hExtQ : ∀ i < n, Subsingleton (Abelian.Ext
       (ModuleCat.of R (Shrink.{u_2} (R ⧸ 𝔪))) (ModuleCat.of R (QuotSMulTop y M)) i) := by
     intro i hi
     have hE := Abelian.Ext.covariant_sequence_exact₃'
       (ModuleCat.of R (Shrink.{u_2} (R ⧸ 𝔪))) hS i (i + 1) rfl
     rw [ShortComplex.ab_exact_iff_function_exact] at hE
-    have h0 := hExtM i (by omega)
-    have h1 := hExtM (i + 1) (by omega)
+    have h0 := hExtM (ModuleCat.of R (Shrink.{u_2} (R ⧸ 𝔪))) inferInstance inferInstance
+      (by rw [supp𝔪]) i (by omega)
+    have h1 := hExtM (ModuleCat.of R (Shrink.{u_2} (R ⧸ 𝔪))) inferInstance inferInstance
+      (by rw [supp𝔪]) (i + 1) (by omega)
     have key : ∀ x : Abelian.Ext (ModuleCat.of R (Shrink.{u_2} (R ⧸ 𝔪)))
         (ModuleCat.of R (QuotSMulTop y M)) i, x = 0 := by
       intro x
@@ -69,7 +126,7 @@ theorem exists_isRegular_quotSMulTop {R : Type u_1} [CommRing R] [IsNoetherianRi
     exact ⟨fun a b => by rw [key a, key b]⟩
 
   have hQ := (ModuleCat.exists_isRegular_tfae 𝔪 n
-    (ModuleCat.of R (QuotSMulTop y M)) hltQ).out 1 3
+    (ModuleCat.of R (QuotSMulTop y M)) hltQ).out 2 4
   obtain ⟨zs, hlen, -, hzs⟩ := hQ.mp hExtQ
   exact ⟨zs, hlen, hzs⟩
 

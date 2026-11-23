@@ -1,13 +1,60 @@
-import Formalism.LocalToGlobal.AlgebraicTheory.StatementC
-import Formalism.LocalToGlobal.TorsionIntegrality.GaussianEigenFrames.GramFrameComposition.HasSubstBlock
-import Formalism.LocalToGlobal.TorsionIntegrality.GaussianEigenFrames.GramFrameComposition.GramFrameCompositionMvExpFact
-import Formalism.LocalToGlobal.TorsionIntegrality.GaussianEigenFrames.GramFrameComposition.IntOpTwoFreeOf
-import Formalism.LocalToGlobal.TorsionIntegrality.GaussianEigenFrames.GramFrameComposition.Inertia
-import Formalism.LocalToGlobal.TorsionIntegrality.GaussianEigenFrames.GramFrameComposition.AgreeOnAdjoin
-import Formalism.LocalToGlobal.TorsionIntegrality.GaussianEigenFrames.GramFrameComposition.EigenCompatOf
-import Formalism.LocalToGlobal.TorsionIntegrality.GaussianEigenFrames.GramFrameComposition.EigenFrameEOf
-import Formalism.LocalToGlobal.TorsionIntegrality.GaussianEigenFrames.GramFrameComposition.Tensor
-import Formalism.LocalToGlobal.TorsionIntegrality.GaussianEigenFrames.GramFrameComposition.EigenFinal
+module
+
+public import Formalism.LocalToGlobal.AlgebraicTheory.StatementC
+public import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.HasCMByStable
+public import Formalism.LocalToGlobal.TorsionIntegrality.GaussianEigenFrames.GramFrameComposition.IntOpTwoFreeOf
+public import Formalism.LocalToGlobal.TorsionIntegrality.QuadraticSemicharacters.CayleyGaussianIntegrals.QuadraticSemicharactersOfProductThetaMem
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.NormNatCastClOfNotDvd
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 open scoped BigOperators
@@ -209,6 +256,7 @@ private theorem sum_inverse_mul_sum_eq_ite_frameM {n ν J : Type} [Fintype n] [D
     intro u
     have h : ∑ w, g u w • g.symm (Pi.single w 1) = u := by
       simp_rw [← LinearEquiv.map_smul]
+
       rw [← map_sum]
       have : ∑ w, g u w • (Pi.single w (1 : ℂ) : Fin 4 × n → ℂ) = g u := by
         ext z
@@ -227,6 +275,7 @@ private theorem sum_inverse_mul_sum_eq_ite_frameM {n ν J : Type} [Fintype n] [D
     rw [map_mul]
     field_simp
   rw [Finset.sum_congr rfl (fun w _ => step w), Finset.sum_comm]
+
   simp_rw [← Finset.mul_sum, ← map_sum, key]
   unfold frameM
   split_ifs with hab
@@ -238,6 +287,7 @@ private theorem jetsIntegral_sum_C_mul {p : ℕ} [Fact p.Prime] {X κ : Type} [F
     (f : κ → MvPowerSeries X ℂ_[p]) (hr : ∀ k, ‖r k‖ ≤ 1) (hf : ∀ k, JetsIntegral (f k)) :
     JetsIntegral (∑ k, MvPowerSeries.C (r k) * f k) := by
   intro e
+
   rw [map_sum, Finset.mul_sum]
   apply IsUltrametricDist.norm_sum_le_of_forall_le_of_nonneg zero_le_one
   intro k _
@@ -248,7 +298,7 @@ private theorem jetsIntegral_sum_C_mul {p : ℕ} [Fact p.Prime] {X κ : Type} [F
     _ ≤ 1 * 1 := mul_le_mul (hr k) (hf k e) (norm_nonneg _) zero_le_one
     _ = 1 := one_mul 1
 private theorem norm_jetPair_le_one {p : ℕ} [Fact p.Prime] {X : Type} (P : MvPolynomial X ℂ_[p]) (T : MvPowerSeries X ℂ_[p])
-    (hP : ∀ k, ‖MvPolynomial.coeff k P‖ ≤ 1) (hT : JetsIntegral T) : ‖jetPair P T‖ ≤ 1 := by
+    (hP : ∀ k, ‖AddMonoidAlgebra.coeff P k‖ ≤ 1) (hT : JetsIntegral T) : ‖jetPair P T‖ ≤ 1 := by
   unfold jetPair
   apply IsUltrametricDist.norm_sum_le_of_forall_le_of_nonneg zero_le_one
   intro e _

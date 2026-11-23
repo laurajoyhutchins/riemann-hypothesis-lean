@@ -1,5 +1,47 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.IsScalarFormTraceForm
+module
+
+public import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.IsScalarFormTraceForm
+public import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.IsNsmulIffEq
+import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.RelationsAreFunctions
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -175,8 +217,8 @@ section Root
 variable {O : Type} [CommRing O] [StarRing O] [Module O D.X] {w : O} {t : D.X → D.X → (FractionRing R)ˣ} {k : ℕ}
   {r : D.X → D.X → Fˣ}
 
-variable (O) in
 
+variable (O) in
 def IsRootForm {X K F : Type} [AddCommGroup X] [Module O X] [Field K] [Field F] [Algebra K F] (k : ℕ) (t : X → X → Kˣ)
     (r : X → X → Fˣ) : Prop :=
   IsScalarForm O r ∧ ∀ y x, r y x ^ k = Units.map (algebraMap K F).toMonoidHom (t y x)
@@ -231,14 +273,6 @@ theorem qkAct {oa : D.OAct O} {oa' : (withPsi D ψ hψ).OAct O} (ho : oa'.onB = 
 theorem equiv_iff (h₁ : QkRel r p₁ p₁') (h₂ : QkRel r p₂ p₂') :
     QkPt.Equiv (withPsi D ψ hψ) F p₁' p₂' ↔ QkPt.Equiv D F p₁ p₂ :=
   ⟨equiv (D := withPsi D ψ hψ) hw ht.inv hq.symm hr.inv h₁.symm h₂.symm, equiv hw ht hq hr h₁ h₂⟩
-
-theorem qkAdd_iff (h₁ : QkRel r p₁ p₁') (h₂ : QkRel r p₂ p₂') (h₃ : QkRel r p₃ p₃') :
-    QkAdd p₁' p₂' p₃' ↔ QkAdd p₁ p₂ p₃ :=
-  ⟨qkAdd (D := withPsi D ψ hψ) hw ht.inv hq.symm hr.inv h₁.symm h₂.symm h₃.symm, qkAdd hw ht hq hr h₁ h₂ h₃⟩
-
-theorem qkAct_iff {oa : D.OAct O} {oa' : (withPsi D ψ hψ).OAct O} (ho : oa'.onB = oa.onB) {x : O} (h₁ : QkRel r p₁ p₁')
-    (h₂ : QkRel r p₂ p₂') : QkAct oa' x p₁' p₂' ↔ QkAct oa x p₁ p₂ :=
-  ⟨qkAct (D := withPsi D ψ hψ) hw ht.inv hq.symm hr.inv ho.symm h₁.symm h₂.symm, qkAct hw ht hq hr ho h₁ h₂⟩
 
 end QkRel
 

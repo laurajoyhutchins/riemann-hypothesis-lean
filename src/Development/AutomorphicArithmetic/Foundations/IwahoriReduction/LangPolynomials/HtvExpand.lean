@@ -1,11 +1,54 @@
-import Development.AutomorphicArithmetic.Foundations.IwahoriReduction.LangPolynomials.FixedIntegersIsUnitOfNotMemPrimeSpan
-import Development.AutomorphicArithmetic.Foundations.IwahoriReduction.LangPolynomials.PresTr
-import Development.AutomorphicArithmetic.Foundations.IwahoriReduction.LangPolynomials.PresDl
-import Development.AutomorphicArithmetic.Foundations.IwahoriReduction.LangPolynomials.PresMono
-import Development.AutomorphicArithmetic.Foundations.IwahoriReduction.LangPolynomials.KumAlg
+module
+
+public import Development.AutomorphicArithmetic.Foundations.IwahoriReduction.LangPolynomials.FixedIntegersIsUnitOfNotMemPrimeSpan
+public import Development.AutomorphicArithmetic.Foundations.IwahoriReduction.LangPolynomials.DvdOfNormLe
+public import Development.AutomorphicArithmetic.Foundations.IwahoriReduction.LangPolynomials.KumAlg
+public import Development.AutomorphicArithmetic.Foundations.IwahoriReduction.LangPolynomials.PEvHom
+public import Development.AutomorphicArithmetic.Foundations.IwahoriReduction.LangPolynomials.PresDl
+public import Development.AutomorphicArithmetic.Foundations.IwahoriReduction.LangPolynomials.PresMono
+public import Development.AutomorphicArithmetic.Foundations.IwahoriReduction.LangPolynomials.PresTr
 import Development.AutomorphicArithmetic.Foundations.IwahoriReduction.LangPolynomials.WdVal
-import Development.AutomorphicArithmetic.Foundations.IwahoriReduction.LangPolynomials.PEvHom
-import Development.AutomorphicArithmetic.Foundations.IwahoriReduction.LangPolynomials.DvdOfNormLe
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Formalism.ConjugateSelfDual ReciprocityTheory.Gal Formalism.MainNotions.N GlobalTheory.GalOfCusp UpperTheory.V UpperTheory.V.Af UpperTheory.V.HV GlobalTheory.Ord2 GlobalTheory.KZ GlobalTheory.Col UpperTheory.Kd.C7
 
 namespace UpperTheory.Kd.C7.Cl1
@@ -19,11 +62,11 @@ private lemma dl_mul {R : Type} [CommRing R] {f g : PowerSeries R} (hf : IsUnit 
     mul_inv_rev, Units.val_mul, smul_eq_mul, smul_eq_mul]
   have h1 := u.mul_inv
   have h2 := w.mul_inv
-  linear_combination ((1 + PowerSeries.X) * (PowerSeries.derivative R) (w : PowerSeries R) * ((w⁻¹ : (PowerSeries R)ˣ) : PowerSeries R)) * h1 +
-    ((1 + PowerSeries.X) * (PowerSeries.derivative R) (u : PowerSeries R) * ((u⁻¹ : (PowerSeries R)ˣ) : PowerSeries R)) * h2
+  linear_combination ((1 + PowerSeries.X) * (PowerSeries.derivative (R := R)) (w : PowerSeries R) * ((w⁻¹ : (PowerSeries R)ˣ) : PowerSeries R)) * h1 +
+    ((1 + PowerSeries.X) * (PowerSeries.derivative (R := R)) (u : PowerSeries R) * ((u⁻¹ : (PowerSeries R)ˣ) : PowerSeries R)) * h2
 
 private lemma der_eval {R : Type} [CommRing R] (P : Polynomial R) :
-    PowerSeries.derivative R (P.eval₂ PowerSeries.C (1 + PowerSeries.X)) =
+    PowerSeries.derivative (R := R) (P.eval₂ PowerSeries.C (1 + PowerSeries.X)) =
       (Polynomial.derivative P).eval₂ PowerSeries.C (1 + PowerSeries.X) := by
   induction P using Polynomial.induction_on' with
   | add f g hf hg => simp [Polynomial.eval₂_add, hf, hg]
@@ -45,7 +88,7 @@ private lemma eps_ser (Φ : Fr l A j) (ε : PowerSeries Φ.R →+* ℂ_[l]) (w :
     ε (Φ.ser P) = algebraMap (PadicAlgCl l) ℂ_[l] (j ((P.map (R0 A).subtype).eval w)) := by
   unfold Fr.ser
   induction P using Polynomial.induction_on' with
-  | add f g hf hg => simp only [Polynomial.map_add, Polynomial.eval₂_add, Polynomial.eval_add, map_add, hf, hg]
+  | add f g hf hg => simp only [Polynomial.map_add (f := _), Polynomial.eval₂_add, Polynomial.eval_add, map_add (f := _), hf, hg]
   | monomial n a =>
     simp only [Polynomial.map_monomial, Polynomial.eval₂_monomial, Polynomial.eval_monomial, map_mul, map_pow, hC, hz,
       Φ.jh_comp_incl]
@@ -56,7 +99,7 @@ private lemma eps_dl (Φ : Fr l A j) (ε : PowerSeries Φ.R →+* ℂ_[l]) (w : 
     (P : Polynomial (R0 A)) (hP : IsUnit (Φ.ser P)) :
     ε (dl (Φ.ser P)) = algebraMap (PadicAlgCl l) ℂ_[l]
       (j (w * (Polynomial.derivative (P.map (R0 A).subtype)).eval w / (P.map (R0 A).subtype).eval w)) := by
-  have h1 : PowerSeries.derivative Φ.R (Φ.ser P) = Φ.ser (Polynomial.derivative P) := by
+  have h1 : PowerSeries.derivative (R := Φ.R) (Φ.ser P) = Φ.ser (Polynomial.derivative P) := by
     unfold Fr.ser
     rw [der_eval, Polynomial.derivative_map]
   have h2 : ε (Ring.inverse (Φ.ser P)) = (ε (Φ.ser P))⁻¹ := by
@@ -74,15 +117,17 @@ private lemma lam_act (Φ : Fr l A j) {c : Coef l} (β : Bas c) (a : c.O) (x : F
     have h1 := β.e.sum_repr (a * β.e k)
     have h2 := congrArg (fun y : c.O => (y : PadicAlgCl l)) h1
     simp only [Bas.val, Bas.mat, Algebra.leftMulMatrix_eq_repr_mul]
-    simp only [AddSubmonoidClass.coe_finset_sum, MulMemClass.coe_mul] at h2
+    simp only [AddSubmonoidClass.coe_finsetSum, MulMemClass.coe_mul] at h2
     rw [← h2]
     refine Finset.sum_congr rfl fun i _ => ?_
     rw [mul_comm, ← Algebra.smul_def]
     rfl
   unfold Fr.lam
+
   simp only [map_sum, map_mul, Finset.mul_sum, Φ.jh_alg]
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun k _ => ?_
+
   rw [← mul_assoc, ← map_mul, ← h k, map_sum, Finset.sum_mul]
   simp only [map_mul, mul_assoc]
 
@@ -91,7 +136,9 @@ private lemma tw_succ (Φ : Fr l A j) {d : ℕ} (M : Matrix (Fin d) (Fin d) ℤ_
     (Φ.tw (m + 1) (D i)).coeff n = ∑ k, algebraMap ℤ_[l] Φ.R (M i k) * (Φ.tw m (D k)).coeff n := by
   haveI := Φ.fl.complete
   have h1 := congrArg (PowerSeries.coeff n) (h i)
+
   simp only [Fr.tw, Fr.act, PowerSeries.coeff_map, pow_one, map_sum, PowerSeries.coeff_C_mul] at h1 ⊢
+
   rw [pow_succ, RingHom.mul_def, RingHom.comp_apply, h1, map_sum]
   refine Finset.sum_congr rfl fun k _ => ?_
   rw [map_mul]
@@ -133,7 +180,7 @@ private lemma add_le {K : Type} [NormedField K] [IsUltrametricDist K] {x y : K} 
 
 private lemma coef_le {c : Coef l} (β : Bas c) (a : c.O) : ‖(a : PadicAlgCl l)‖ ≤ 1 := by
   have h2 := congrArg (fun y : c.O => (y : PadicAlgCl l)) (β.e.sum_repr a)
-  simp only [AddSubmonoidClass.coe_finset_sum] at h2
+  simp only [AddSubmonoidClass.coe_finsetSum] at h2
   have h3 : (a : PadicAlgCl l) = ∑ i, β.val i * algebraMap ℤ_[l] (PadicAlgCl l) (β.e.repr a i) := by
     rw [← h2]
     refine Finset.sum_congr rfl fun i _ => ?_
@@ -225,6 +272,7 @@ theorem UpperTheory.Kd.C7.pClause1 :
       ∑ i, algebraMap (PadicAlgCl l) ℂ_[l] (β.val i) * ε (ev Φ.R l m (dl (Φ.ser (Q i)))) := by
     intro Q hQ
     unfold htv
+
     rw [map_sum]
     exact Finset.sum_congr rfl fun i _ => by rw [map_mul, key _ (hQ i)]
   have hex : (d₀ : Qbar l) * htv j (ζ m) (fun i => (P i).map (R0 A).subtype) β.val
@@ -260,6 +308,7 @@ theorem UpperTheory.Kd.C7.pClause1 :
     exact mul_le_one₀ (pow_le_one₀ (norm_nonneg _) (coef_le β a)) (norm_nonneg _) ht
   have e5 : ∑ i, ι (β.val i) * ∑ k ∈ Finset.range (l ^ (3 * m)), Φ.jh ((Φ.tw m (D i)).coeff k) * (ι (j w) - 1) ^ k =
       v * (ι a ^ m * ι (tval Gs (l ^ (3 * m)) (j w))) := by
+
     simp only [tval, Finset.mul_sum, map_sum, map_mul, map_pow, map_sub, map_one]
     rw [Finset.sum_comm]
     refine Finset.sum_congr rfl fun k _ => ?_
@@ -271,6 +320,6 @@ theorem UpperTheory.Kd.C7.pClause1 :
   unfold Cg
   rw [hex, ← map_pow j, ← hw, ← norm_alg, ← norm_alg ((l : PadicAlgCl l) ^ n), ← hι, map_pow ι, map_natCast, map_sub, map_sub, hh P uP, hh _ uE]
   refine le_of_eq_of_le (congrArg _ ?_) (add_le (add_le (add_le e1 e2) e3) e4)
-  simp only [ser_mul, dl_mul (uS _) (uE _), map_add, mul_sub, mul_add, Finset.sum_sub_distrib, Finset.sum_add_distrib, e5,
+  simp only [ser_mul, dl_mul (uS _) (uE _), map_add (f := _), mul_sub, mul_add, Finset.sum_sub_distrib, Finset.sum_add_distrib, e5,
     map_mul, map_pow]
   ring

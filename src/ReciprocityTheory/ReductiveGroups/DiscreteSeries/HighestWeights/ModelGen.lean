@@ -1,7 +1,58 @@
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.HighestWeights.ModelCext
-import Formalism.RealPlaceAnalysis.StatementKT
-import Formalism.RealPlaceAnalysis.QuotientSettingHolds
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.HighestWeights.ModelGenA
+module
+
+public import Formalism.RealPlaceAnalysis.StatementKT
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.CasimirCoefficients.PsiExistsStatement
+public import Formalism.RealPlaceAnalysis.QuotientSettingHolds
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.HighestWeights.ModelGenA
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.HighestWeights.OneParam
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.HighestWeights.SingleMulJmComm
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -26,11 +77,6 @@ variable [FiniteDimensional ℂ V] {ε : Fin n → Bool} (τ : KG ε →* unitar
   (hder : ∀ X, inK ε X → ∀ γ : ℝ → KG ε, (∀ t : ℝ, toMK (γ t) = NormedSpace.exp ((t : ℂ) • X)) →
     HasDerivAt (fun t => ((τ (γ t) : unitary (V →L[ℂ] V)) : V →L[ℂ] V)) (dτ X) 0)
 
-include hcont hder in
-theorem pre_op_eq_exp (k : KG ε) :
-    ∃ Y : Matrix (Fin n) (Fin n) ℂ, inK ε Y ∧
-      ((τ k : unitary (V →L[ℂ] V)) : V →L[ℂ] V) = NormedSpace.exp (dτ Y) := by
-  exact pre_op_eq_exp' τ dτ hder k
 
 include hcont hder in
 theorem pre_kRel : Formalism.REAL.KRel ε (preUnits dτ) := by
@@ -63,8 +109,10 @@ theorem pre_kUnit : Formalism.REAL.KUnit ε (preUnits dτ) := by
 theorem pre_dτ_stable_of_kStable (W : Submodule ℂ V) (hW : Formalism.REAL.KStable ε (preUnits dτ) W) :
     ∀ Y, inK ε Y → ∀ v ∈ W, dτ Y v ∈ W := by
   intro Y hY v hv
+
   rw [Matrix.matrix_eq_sum_single Y, map_sum, _root_.sum_apply]
   refine W.sum_mem fun a _ => ?_
+
   rw [map_sum, _root_.sum_apply]
   refine W.sum_mem fun b _ => ?_
   by_cases hab : ε a = ε b
@@ -77,8 +125,8 @@ theorem pre_dτ_stable_of_kStable (W : Submodule ℂ V) (hW : Formalism.REAL.KSt
     rw [e, map_zero, _root_.zero_apply]
     exact W.zero_mem
 
-include hcont hder in
 
+include hcont hder in
 theorem pre_kStable_of_stable (W : Submodule ℂ V)
     (hW : ∀ k : KG ε, ∀ v ∈ W, ((τ k : unitary (V →L[ℂ] V)) : V →L[ℂ] V) v ∈ W) :
     Formalism.REAL.KStable ε (preUnits dτ) W := by
@@ -119,8 +167,8 @@ theorem pre_kStable_of_stable (W : Submodule ℂ V)
     _root_.smul_apply]
   exact W.sub_mem (W.smul_mem _ (hK _ h1 v hv)) (W.smul_mem _ (hK _ h2 v hv))
 
-include hcont hder in
 
+include hcont hder in
 theorem pre_kSpan_stable (x : V) (k : KG ε) :
     ∀ v ∈ Formalism.REAL.kSpan ε (preUnits dτ) x,
       ((τ k : unitary (V →L[ℂ] V)) : V →L[ℂ] V) v ∈ Formalism.REAL.kSpan ε (preUnits dτ) x := by
@@ -134,8 +182,8 @@ theorem pre_kSpan_stable (x : V) (k : KG ε) :
   rw [show ((τ k : unitary (V →L[ℂ] V)) : V →L[ℂ] V) = NormedSpace.exp (dτ Y) from he]
   exact exp_mem_of_stable _ _ (pre_dτ_stable_of_kStable dτ _ hS Y hY)
 
-include hcont hder in
 
+include hcont hder in
 theorem irred_of_gen {Λ : Fin n → ℝ} (w : V)
     (hwt : ∀ a, dτ (Matrix.single a a 1) w = ((Λ a : ℝ) : ℂ) • w)
     (hhw : ∀ a b, a < b → ε a = ε b → dτ (Matrix.single a b 1) w = 0)
@@ -178,11 +226,5 @@ def kTypeOfGen {ε : Fin n → Bool} {Λ : Fin n → ℝ} (V : Type) [NormedAddC
   w_norm := hw
   w_wt := hwt
   w_hw := hhw
-
-example (ε : Fin n → Bool) : KType ε 0 :=
-  kTypeOfGen ℂ 1 continuous_const 0
-    (fun _ _ _ _ => by simpa using hasDerivAt_const (0 : ℝ) (1 : ℂ →L[ℂ] ℂ)) 1 (by simp) (fun a => by simp)
-    (fun _ _ _ _ => by simp)
-    (fun W _ h => eq_top_iff.2 fun x _ => by simpa using W.smul_mem x h)
 
 end ReciprocityTheory.ChartRestriction.DS.HW

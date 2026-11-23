@@ -1,6 +1,49 @@
-import Mathlib
-import GroundTheory.ArithmeticGeometry.SchemeCohomology.ProjectiveCohomology.TwistingSheafCore
-import GroundTheory.ArithmeticGeometry.SchemeCohomology.ProjectiveCohomology.IsQuasicoherentTensorOfInvertible
+module
+
+public import GroundTheory.ArithmeticGeometry.SchemeCohomology.ProjectiveCohomology.TwistingSheafCore
+public import GroundTheory.ArithmeticGeometry.SchemeCohomology.ProjectiveCohomology.QcohLocal
+public import GroundTheory.ArithmeticGeometry.SchemeCohomology.ProjectiveCohomology.IsQuasicoherentTensorOfInvertible
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Arith.SchemeCoh
@@ -34,30 +77,6 @@ section Iso
 
 variable {X : Scheme.{u}}
 
-private theorem isCoherent_unit' : IsCoherent (𝟙_ X.Modules) := by
-  refine ⟨isQuasicoherent_unit X, fun U _ => ?_⟩
-  let one : Γ(𝟙_ X.Modules, U) := (1 : Γ(X, U))
-  refine ⟨⟨{one}, ?_⟩⟩
-  rw [eq_top_iff]
-  intro m _
-  have hm : m = (show Γ(X, U) from m) • one := (mul_one (show Γ(X, U) from m)).symm
-  rw [hm]
-  exact Submodule.smul_mem _ _ (Submodule.subset_span (Finset.mem_coe.2 (Finset.mem_singleton_self _)))
-
-private theorem isCoherent_of_iso' {M N : X.Modules} (e : M ≅ N) (hM : IsCoherent M) :
-    IsCoherent N := by
-  obtain ⟨hq, hf⟩ := hM
-  refine ⟨(SheafOfModules.isQuasicoherent X.ringCatSheaf).prop_of_iso e hq, fun U hU => ?_⟩
-  have := hf U hU
-  let φ : Γ(M, U) →ₗ[Γ(X, U)] Γ(N, U) :=
-    { toFun := e.hom.app U
-      map_add' := map_add _
-      map_smul' := fun r m => Scheme.Modules.Hom.app_smul e.hom r m }
-  refine Module.Finite.of_surjective φ fun n => ⟨e.inv.app U n, ?_⟩
-  change (e.inv ≫ e.hom).app U n = n
-  rw [e.inv_hom_id]
-  rfl
-
 end Iso
 
 namespace ProjSpace
@@ -65,14 +84,6 @@ namespace ProjSpace
 variable {A : Type u} [CommRing A] {n : ℕ}
 
 open ProjTwist
-
-theorem isCoherent_twistingSheaf (k : ℤ) : IsCoherent (twistingSheaf (grading A n) k) :=
-  isCoherent_of_iso' (λ_ _)
-    (isCoherent_tensor_of_invertible isCoherent_unit' (isInvertibleSheaf_twistingSheaf k))
-
-instance isQuasicoherent_twistingSheaf (k : ℤ) :
-    (twistingSheaf (grading A n) k).IsQuasicoherent :=
-  (isCoherent_twistingSheaf k).1
 
 def twistTwistIso (G : (projectiveSpace A n).Modules) (a b : ℤ) :
     twist (twist G a) b ≅ twist G (a + b) :=

@@ -1,9 +1,51 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.TwistSmulHomApp
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SubobjectLeIffAffineSectionsStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.QuasicoherentSupSectionsStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IdealPowerSubobjectSectionsStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CoherentSubobjectCoherentStatement
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.TwistSmulHomApp
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IdealPowerSubobjectSectionsStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.QuasicoherentSupSectionsStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SubobjectLeIffAffineSectionsStatement
+import GroundTheory.ArithmeticGeometry.SchemeCohomology.ProperCohomology.CokernelCoherent
+public import GroundTheory.ArithmeticGeometry.SchemeCohomology.ProperCohomology.ReesSheafBase
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -19,7 +61,7 @@ def liftSub {X : Scheme.{0}} {P : X.Modules} {S : ℕ → Subobject P} (hS : ∀
     (lvl S e).arrow.app V x = t ∧ (grπ hS e).app V x ∈ W}
   add_mem' := by
     rintro _ _ ⟨x, rfl, hx⟩ ⟨y, rfl, hy⟩
-    exact ⟨x + y, map_add _ _ _, by rw [map_add]; exact W.add_mem hx hy⟩
+    exact ⟨x + y, map_add _ _ _, by rw [map_add (f := _)]; exact W.add_mem hx hy⟩
   zero_mem' := ⟨0, map_zero _, by rw [map_zero]; exact W.zero_mem⟩
   smul_mem' := by
     rintro c _ ⟨x, rfl, hx⟩
@@ -66,7 +108,8 @@ theorem span_grT_eq_top {A : Type} [CommRing A] [IsNoetherianRing A] (I : Ideal 
       Submodule Γ(X, U) Γ(P, U)),
       toFunctions (A := A) (U : X.Opens) (g i) • n ∈ liftSub (anti hS) (e + 1) (U : X.Opens) W := by
     intro i n hn
-    obtain ⟨v, rfl⟩ := pow_smul_le_secs_lvl I hP hS e U hn
+    obtain ⟨v, hv⟩ := pow_smul_le_secs_lvl I hP (S := S) hS e U hn
+    rw [← hv]
     refine ⟨(mulLvl (hr i) e).app (U : X.Opens) v, ?_, ?_⟩
     · rw [← ConcreteCategory.comp_apply, ← Scheme.Modules.Hom.comp_app, mulLvl_arrow,
         Scheme.Modules.Hom.comp_app, ConcreteCategory.comp_apply, GroundTheory.Arith.SchemeCoh.smulHom_app_apply]
@@ -107,13 +150,13 @@ theorem span_grT_eq_top {A : Type} [CommRing A] [IsNoetherianRing A] (I : Ideal 
   obtain ⟨x', hx't, hx'W⟩ := hle ht
   have hdec : x = (incl (anti hS) (e + 1)).app (U : X.Opens) y + x' := by
     apply injective_app_of_mono (lvl S (e + 1)).arrow (U : X.Opens)
-    rw [map_add, hx't, hxy]
+    rw [map_add (f := _), hx't, hxy]
     exact congrArg (· + t) (incl_arrow_app (anti hS) (e + 1) (U : X.Opens) y).symm
   have hz : ∀ z : Γ((lvl S (e + 1 + 1) : X.Modules), (U : X.Opens)),
       (grπ (anti hS) (e + 1)).app (U : X.Opens)
         ((incl (anti hS) (e + 1)).app (U : X.Opens) z + x') =
       (grπ (anti hS) (e + 1)).app (U : X.Opens) x' := fun z => by
-    rw [map_add, incl_grπ_app, zero_add]
+    rw [map_add (f := _), incl_grπ_app, zero_add]
   rw [hdec]
   exact Eq.mpr (congrArg (· ∈ W) (hz y)) hx'W
 

@@ -1,6 +1,42 @@
-import Mathlib
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.RDual2
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PublishedTheorems.GelfandKazhdanReal
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.RDual2
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PublishedTheorems.GelfandKazhdanReal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -21,8 +57,8 @@ theorem conj_mem_Sm {φ : GA E a → ℂ} (hφ : φ ∈ Sm E a) : (fun x => star
   rw [chart_conj]
   exact Complex.conjCLE.contDiff.comp_contDiffOn (hφ g)
 
-variable (E a) in
 
+variable (E a) in
 def conjFn : Sm E a ≃ₗ⋆[ℂ] Sm E a where
   toFun φ := ⟨fun x => starRingEnd ℂ (φ.1 x), conj_mem_Sm φ.2⟩
   invFun φ := ⟨fun x => starRingEnd ℂ (φ.1 x), conj_mem_Sm φ.2⟩
@@ -68,9 +104,9 @@ def ConjSub : Prop :=
 def HeckeAdj : Prop :=
   ∀ (F : Type) [Field F] [NumberField F] (a : ℕ) (w : HeightOneSpectrum (𝓞 F)) (V : Type) [AddCommGroup V] [Module ℂ V]
     (ρ : Representation ℂ (GL (Fin a) (w.adicCompletion F)) V) (H : V →ₗ⋆[ℂ] V →ₗ[ℂ] ℂ),
-    (∀ g x y, H (ρ g x) (ρ g y) = H x y) → ∀ x ∈ GlobalTheory.PRep.fixed ρ (GlobalTheory.LFun.KGL w a), ∀ ϖ, Formalism.UG.IsUnifV F w ϖ → ∀ j : ℕ,
-      H (GlobalTheory.LFun.heckeVec ρ (GlobalTheory.LFun.KGL w a) (Formalism.UG.Tj ℂ a (Formalism.UG.Ov F w) ϖ j) x) x =
-        H x (GlobalTheory.LFun.heckeVec (ρ.comp (invT a (w.adicCompletion F))) (GlobalTheory.LFun.KGL w a) (Formalism.UG.Tj ℂ a (Formalism.UG.Ov F w) ϖ j) x)
+    (∀ g x y, H (ρ g x) (ρ g y) = H x y) → ∀ x ∈ GlobalTheory.PRep.fixed ρ (GlobalTheory.LFun.KGL w (n := a)), ∀ ϖ, Formalism.UG.IsUnifV F w ϖ → ∀ j : ℕ,
+      H (GlobalTheory.LFun.heckeVec ρ (GlobalTheory.LFun.KGL w (n := a)) (Formalism.UG.Tj ℂ a (Formalism.UG.Ov F w) ϖ j) x) x =
+        H x (GlobalTheory.LFun.heckeVec (ρ.comp (invT a (w.adicCompletion F))) (GlobalTheory.LFun.KGL w (n := a)) (Formalism.UG.Tj ℂ a (Formalism.UG.Ov F w) ϖ j) x)
 
 def SatConj : Prop :=
   ∀ (F : Type) [Field F] [NumberField F] (a : ℕ) (w : HeightOneSpectrum (𝓞 F)) (V W : Type) [AddCommGroup V] [Module ℂ V]

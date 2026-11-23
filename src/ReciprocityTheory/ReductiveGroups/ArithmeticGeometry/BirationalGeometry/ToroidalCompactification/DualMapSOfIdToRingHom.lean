@@ -1,4 +1,50 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.TanSRestrict
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.TanSRestrict
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.RankLie
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -43,7 +89,7 @@ theorem dAway_ext {T : Type} [CommRing T] {χ₁ χ₂ : DualNumber (Localizatio
   have h1 := RingHom.congr_fun hinl x.fst
   have h2 := RingHom.congr_fun hinl x.snd
   simp only [RingHom.comp_apply, TrivSqZeroExt.inlHom_apply] at h1 h2
-  rw [eq_inl_add_inr x, map_add, map_add, map_mul, map_mul, heps, h1, h2]
+  rw [eq_inl_add_inr x, map_add (f := _), map_add (f := _), map_mul, map_mul, heps, h1, h2]
 
 theorem dAway_lift {T : Type} [CommRing T] (gg : DualNumber S →+* T) (hu : IsUnit (gg (TrivSqZeroExt.inl s))) :
     ∃ χ : DualNumber (Localization.Away s) →+* T, χ.comp (dAway s) = gg := by
@@ -62,7 +108,7 @@ theorem dAway_lift {T : Type} [CommRing T] (gg : DualNumber S →+* T) (hu : IsU
                 MulOpposite.smul_eq_mul_unop, MulOpposite.unop_op, map_add, map_mul]
               linear_combination (-(φ x.snd * φ y.snd)) * he
             map_zero' := by simp
-            map_add' := fun x y => by simp only [TrivSqZeroExt.fst_add, TrivSqZeroExt.snd_add, map_add]; ring }, ?_⟩
+            map_add' := fun x y => by simp only [TrivSqZeroExt.fst_add, TrivSqZeroExt.snd_add, map_add (f := _)]; ring }, ?_⟩
   refine RingHom.ext fun x => ?_
   conv_rhs => rw [eq_inl_add_inr x]
   simp only [RingHom.comp_apply, RingHom.coe_mk, MonoidHom.coe_mk, OneHom.coe_mk, dAway, dualMapR,
@@ -98,21 +144,15 @@ theorem fromL_toL : (fromL s).comp (toL s) = RingHom.id _ := by
   apply dAway_ext s
   rw [RingHom.comp_assoc, toL_comp, fromL_comp, RingHom.id_comp]
 
-theorem toL_fromL : (toL s).comp (fromL s) = RingHom.id _ := by
-  apply IsLocalization.ringHom_ext (Submonoid.powers (TrivSqZeroExt.inl s : DualNumber S))
-  rw [RingHom.comp_assoc, fromL_comp, toL_comp, RingHom.id_comp]
-
 end Iso
 
 section Glue
 
 variable {S : Type} [CommRing S] {G : Over (Spec (CommRingCat.of S))} [GrpObj G]
 
-theorem dualMapS_ofId_toRingHom (s : S) :
-    (dualMapS (Algebra.ofId S (Localization.Away s)) : DualNumber S →+* DualNumber (Localization.Away s)) = dAway s := rfl
-
 set_option backward.isDefEq.respectTransparency false in
 
+set_option backward.isDefEq.respectTransparency false in
 theorem glue_tan {n : ℕ} (s : Fin n → S) (hs : Ideal.span (Set.range s) = ⊤)
     (w : ∀ k, sp (R₀ := S) (DualNumber (Localization.Away (s k))) ⟶ G) (hw : ∀ k, TanS (w k))
     (hc : ∀ k l (T : CommRingCat.{0}) (α : DualNumber (Localization.Away (s k)) →+* T)

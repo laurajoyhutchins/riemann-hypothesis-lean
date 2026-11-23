@@ -1,4 +1,50 @@
-import Mathlib
+module
+
+public import Mathlib.NumberTheory.NumberField.InfinitePlace.Embeddings
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -61,11 +107,12 @@ theorem exists_sepElt {E : Type} [Field E] [NumberField E] {F : Type} [Field F] 
     have ha : ((a : 𝓞 E) : E) ∈ Algebra.adjoin ℚ {((α : 𝓞 E) : E)} := by rw [hadj]; trivial
     rw [Algebra.adjoin_singleton_eq_range_aeval] at ha
     obtain ⟨r, hr⟩ := ha
-    obtain ⟨b, hb⟩ := IsLocalization.integerNormalization_map_to_map (nonZeroDivisors ℤ) r
-    refine ⟨(b : ℤ), IsLocalization.integerNormalization (nonZeroDivisors ℤ) r, nonZeroDivisors.coe_ne_zero b, ?_⟩
+    obtain ⟨b, hb⟩ := IsLocalization.integerNormalization_spec (nonZeroDivisors ℤ) r
+    refine ⟨(b : ℤ), IsLocalization.integerNormalization (nonZeroDivisors ℤ) r,
+      nonZeroDivisors.coe_ne_zero ⟨b, hb.1⟩, ?_⟩
     apply hinjE
     have hr' : aeval (algebraMap (𝓞 E) E α) r = algebraMap (𝓞 E) E a := hr
-    rw [← Polynomial.aeval_algebraMap_apply, ← Polynomial.aeval_map_algebraMap ℚ, hb, map_zsmul, hr', map_mul,
+    rw [← Polynomial.aeval_algebraMap_apply, ← Polynomial.aeval_map_algebraMap ℚ, hb.2, map_zsmul, hr', map_mul,
       map_intCast, zsmul_eq_mul]
 
 end ReciprocityTheory.ChartRestriction.G.PullbackSections

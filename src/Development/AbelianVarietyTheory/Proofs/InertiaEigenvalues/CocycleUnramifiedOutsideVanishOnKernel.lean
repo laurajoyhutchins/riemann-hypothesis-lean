@@ -1,7 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.PoitouTateNineTermTransgressionZeroApply
+module
+
+public import Formalism.GaloisCohomology.Statement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.ContinuousCycMod
-import Formalism.GaloisCohomology.Statement
+import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.PoitouTateNineTermTransgressionZeroApply
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Formalism.ConjugateSelfDual ReciprocityTheory.Gal GlobalTheory.Published GlobalTheory.Published.PoitouTate
 open Pointwise
@@ -46,7 +94,7 @@ def kerSub {Γ R M : Type} [Group Γ] [TopologicalSpace Γ] [CommRing R] [AddCom
   mul_mem' := by
     rintro a b ⟨ha, ha'⟩ ⟨hb, hb'⟩
     refine ⟨by rw [x.2.2, ha, hb]; simp, fun m => ?_⟩
-    rw [map_mul, Module.End.mul_apply, hb', ha']
+    rw [map_mul, mul_apply_eq_comp, hb', ha']
   inv_mem' := by
     rintro a ⟨ha, ha'⟩
     have h1 : x.1 1 = 0 := by simpa using x.2.2 1 1
@@ -55,7 +103,7 @@ def kerSub {Γ R M : Type} [Group Γ] [TopologicalSpace Γ] [CommRing R] [AddCom
       rw [mul_inv_cancel, h1, ha, ha', zero_add] at h
       exact h.symm
     · conv_lhs => rw [← ha' m]
-      rw [← Module.End.mul_apply, ← map_mul, inv_mul_cancel, map_one, Module.End.one_apply]
+      rw [← mul_apply_eq_comp, ← map_mul, inv_mul_cancel, map_one, one_apply_eq_self]
 
 theorem kerSub_normal {Γ R M : Type} [Group Γ] [TopologicalSpace Γ] [CommRing R] [AddCommGroup M]
     [Module R M] [TopologicalSpace M] [DiscreteTopology M] (ρ : Representation R Γ M)
@@ -66,10 +114,10 @@ theorem kerSub_normal {Γ R M : Type} [Group Γ] [TopologicalSpace Γ] [CommRing
     have h1 : x.1 1 = 0 := by simpa using x.2.2 1 1
     refine ⟨?_, fun m => ?_⟩
     ·
-      rw [x.2.2, x.2.2, hx, map_zero, add_zero, map_mul, Module.End.mul_apply, hρ, ← x.2.2,
+      rw [x.2.2, x.2.2, hx, map_zero, add_zero, map_mul, mul_apply_eq_comp, hρ, ← x.2.2,
         mul_inv_cancel, h1]
-    · rw [map_mul, map_mul, Module.End.mul_apply, Module.End.mul_apply, hρ,
-        ← Module.End.mul_apply, ← map_mul, mul_inv_cancel, map_one, Module.End.one_apply]
+    · rw [map_mul, map_mul, mul_apply_eq_comp, mul_apply_eq_comp, hρ,
+        ← mul_apply_eq_comp, ← map_mul, mul_inv_cancel, map_one, one_apply_eq_self]
 
 theorem kerSub_isClosed {Γ R M : Type} [Group Γ] [TopologicalSpace Γ] [CommRing R]
     [AddCommGroup M] [Module R M] [TopologicalSpace M] [DiscreteTopology M]
@@ -79,7 +127,7 @@ theorem kerSub_isClosed {Γ R M : Type} [Group Γ] [TopologicalSpace Γ] [CommRi
   have h1 : IsClosed {n : Γ | x.1 n = 0} := isClosed_eq x.2.1 continuous_const
   have hc : Continuous fun p : Γ × M => ρ p.1 p.2 := hρ
   have h2 : IsClosed {n : Γ | ∀ m, ρ n m = m} := by
-    simp only [Set.setOf_forall]
+    simp only [Set.ofPred_forall]
     exact isClosed_iInter fun m =>
       isClosed_eq (hc.comp (continuous_id.prodMk continuous_const)) continuous_const
   exact h1.inter h2
@@ -93,7 +141,7 @@ theorem vanish_on_NS : ∀ (F Ω : Type) [Field F] [NumberField F] [Field Ω] [A
     refine Subgroup.topologicalClosure_minimal _ ?_ (kerSub_isClosed ρ hρ x)
     refine Subgroup.normalClosure_le_normal ?_
     intro σ hσ
-    simp only [Set.mem_iUnion, Set.mem_setOf_eq, Set.mem_compl_iff, exists_prop] at hσ
+    simp only [Set.mem_iUnion, Set.mem_ofPred_eq, Set.mem_compl_iff, exists_prop] at hσ
     obtain ⟨v, hv, B, hB, hσB⟩ := hσ
 
     obtain ⟨g, hg⟩ := exists_smul_eq_of_isPlaceOver (A.2 v) hB

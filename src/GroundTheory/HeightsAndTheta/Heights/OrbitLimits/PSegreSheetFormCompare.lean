@@ -1,6 +1,66 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.StSegreSheetFormCompare
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.PSheetFormCompare
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.StSegreSheetFormCompare
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.BergmanProjective
+public import ReciprocityTheory.AnalyticForms.PlurisubharmonicFunctions.LintegralImageEqLintegralNormSqDetMul
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.PSheetFormCompare
+import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.PTubeFormCompare
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.PlaneIdealTwoOne
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.InnerProductSpace.Calculus
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.AnalyticForms.AnalyticCharts.Osgood
+import ReciprocityTheory.AnalyticForms.PlurisubharmonicFunctions.MdiscSt
+import ReciprocityTheory.AnalyticForms.PotentialTheory.HessCIsHermitian
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterSheet
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -41,15 +101,15 @@ theorem hessC_add_sum_log {D : ℕ} {α : Type*} (s : Finset α) (φ : (Fin D �
 
 variable {K : Type} [Fintype K] [DecidableEq K] {ι : K → Type} [∀ k, Fintype (ι k)]
 
-omit [DecidableEq K] in
 
+omit [DecidableEq K] in
 theorem sum_norm_segre_sq [DecidableEq K] (w : (Σ k, ι k) → ℂ) :
     ∑ i', ‖segre w i'‖ ^ 2 = ∏ k, ∑ j, ‖w ⟨k, j⟩‖ ^ 2 := by
   rw [Finset.prod_univ_sum, Fintype.piFinset_univ]
   simp [segre, norm_prod, Finset.prod_pow]
 
-omit [DecidableEq K] [∀ k, Fintype (ι k)] in
 
+omit [DecidableEq K] [∀ k, Fintype (ι k)] in
 theorem log_h_smul (A : HermLine ι) (c : K → ℂ) (w : (Σ k, ι k) → ℂ) (hc : ∀ k, c k ≠ 0)
     (hw : ∀ k, ∃ j, w ⟨k, j⟩ ≠ 0) :
     Real.log (A.h (fun p => c p.1 * w p)) = Real.log (A.h w) + ∑ k, (A.a k : ℝ) * Real.log ‖c k‖ := by
@@ -58,30 +118,30 @@ theorem log_h_smul (A : HermLine ι) (c : K → ℂ) (w : (Σ k, ι k) → ℂ) 
     Real.log_prod (fun k _ => (hp k).ne'), add_comm]
   simp [Real.log_zpow]
 
-variable (ι) in
 
+variable (ι) in
 def nk (k : K) : ℕ := Fintype.card (ι k) - 1
 
-open Classical in
 
+open Classical in
 def eK (jj : (k : K) → ι k) (k : K) : {j : ι k // j ≠ jj k} ≃ Fin (nk ι k) :=
   Fintype.equivFinOfCardEq (by simp [nk, Fintype.card_subtype_compl])
 
-variable (ι) in
 
+variable (ι) in
 def NN : ℕ := Fintype.card (Σ k, Fin (nk ι k))
 
-variable (ι) in
 
+variable (ι) in
 def eS : (Σ k, Fin (nk ι k)) ≃ Fin (NN ι) := Fintype.equivFin _
 
-variable (ι) in
 
+variable (ι) in
 def blk (k : K) : (Fin (NN ι) → ℂ) →L[ℂ] (Fin (nk ι k) → ℂ) :=
   ContinuousLinearMap.pi fun r => ContinuousLinearMap.proj (eS ι ⟨k, r⟩)
 
-open Classical in
 
+open Classical in
 def ins (jj : (k : K) → ι k) (t : Fin (NN ι) → ℂ) : (Σ k, ι k) → ℂ :=
   fun p => if h : p.2 = jj p.1 then 1 else t (eS ι ⟨p.1, eK jj p.1 ⟨p.2, h⟩⟩)
 
@@ -91,8 +151,8 @@ def pt (jj : (k : K) → ι k) (a : Fin (NN ι)) : Σ k, ι k :=
 def nrm (jj : (k : K) → ι k) (w : (Σ k, ι k) → ℂ) : Fin (NN ι) → ℂ :=
   fun a => w (pt jj a) / w ⟨(pt jj a).1, jj (pt jj a).1⟩
 
-variable (ι) in
 
+variable (ι) in
 def FSG (t : Fin (NN ι) → ℂ) : ℝ := ∑ k, (1 / 2) * HilbertSamuel.ProjFS.logPot (blk ι k t)
 
 section Chart
@@ -108,8 +168,8 @@ theorem ins_ne (t : Fin (NN ι) → ℂ) {k : K} {j : ι k} (h : j ≠ jj k) :
     ins jj t ⟨k, j⟩ = t (eS ι ⟨k, eK jj k ⟨j, h⟩⟩) := by
   simp [ins, h]
 
-omit [DecidableEq K] in
 
+omit [DecidableEq K] in
 theorem ins_blockNonzero (t : Fin (NN ι) → ℂ) : ∀ k, ∃ j, ins jj t ⟨k, j⟩ ≠ 0 :=
   fun k => ⟨jj k, by rw [ins_anchor]; exact one_ne_zero⟩
 
@@ -122,7 +182,7 @@ theorem contDiff_ins : ContDiff ℝ ∞ (ins jj) := by
     simp only [ins_anchor]
     exact contDiff_const
   · simp only [ins_ne jj _ h]
-    exact contDiff_apply ℝ ℂ _
+    exact contDiff_apply ℝ (fun _ => ℂ) _
 
 omit [DecidableEq K] in
 theorem pt_eS {k : K} {j : ι k} (h : j ≠ jj k) : pt jj (eS ι ⟨k, eK jj k ⟨j, h⟩⟩) = ⟨k, j⟩ := by
@@ -130,8 +190,8 @@ theorem pt_eS {k : K} {j : ι k} (h : j ≠ jj k) : pt jj (eS ι ⟨k, eK jj k �
   rw [Equiv.symm_apply_apply]
   simp
 
-omit [DecidableEq K] in
 
+omit [DecidableEq K] in
 theorem eq_smul_ins (w : (Σ k, ι k) → ℂ) (hw : ∀ k, w ⟨k, jj k⟩ ≠ 0) :
     w = fun p => w ⟨p.1, jj p.1⟩ * ins jj (nrm jj w) p := by
   funext ⟨k, j⟩
@@ -144,8 +204,8 @@ theorem eq_smul_ins (w : (Σ k, ι k) → ℂ) (hw : ∀ k, w ⟨k, jj k⟩ ≠ 
     dsimp only
     rw [mul_div_cancel₀ _ (hw k)]
 
-omit [DecidableEq K] in
 
+omit [DecidableEq K] in
 theorem sum_ins_sq (t : Fin (NN ι) → ℂ) (k : K) :
     ∑ j, ‖ins jj t ⟨k, j⟩‖ ^ 2 = 1 + ∑ r, ‖blk ι k t r‖ ^ 2 := by
   classical
@@ -157,8 +217,8 @@ theorem sum_ins_sq (t : Fin (NN ι) → ℂ) (k : K) :
   rw [ins_ne jj _ ((eK jj k).symm r).2]
   simp [blk]
 
-omit [DecidableEq K] in
 
+omit [DecidableEq K] in
 theorem norm_nrm_le (w : (Σ k, ι k) → ℂ) (hmax : ∀ k j, ‖w ⟨k, j⟩‖ ≤ ‖w ⟨k, jj k⟩‖) :
     ‖nrm jj w‖ ≤ 1 := by
   refine (pi_norm_le_iff_of_nonneg zero_le_one).2 fun a => ?_
@@ -189,8 +249,8 @@ theorem log_segre_eq (w : (Σ k, ι k) → ℂ) (hw : ∀ k, w ⟨k, jj k⟩ ≠
   push_cast
   ring
 
-omit [DecidableEq K] in
 
+omit [DecidableEq K] in
 theorem pot_eq {e : ℕ} (L : Fin e → HermLine ι) (j : Fin e) (w : (Σ k, ι k) → ℂ)
     (hw : ∀ k, w ⟨k, jj k⟩ ≠ 0) :
     pot L j w = pot L j (ins jj (nrm jj w)) + ∑ k, ((L j).a k : ℝ) * Real.log ‖w ⟨k, jj k⟩‖ := by
@@ -212,8 +272,8 @@ theorem contDiff_FSG : ContDiff ℝ 2 (FSG ι) := by
     (((SheetFormComparison.contDiff_logPot _).of_le (WithTop.coe_le_coe.2 le_top)).comp
       ((blk ι k).contDiff.restrict_scalars ℝ))
 
-omit [DecidableEq K] in
 
+omit [DecidableEq K] in
 theorem contDiff_pot_ins {e : ℕ} (L : Fin e → HermLine ι) (j : Fin e) (hL : IsSmoothHerm (L j)) :
     ContDiff ℝ 2 (fun t => pot L j (ins jj t)) := by
   refine contDiff_iff_contDiffAt.2 fun t => ?_
@@ -223,8 +283,8 @@ theorem contDiff_pot_ins {e : ℕ} (L : Fin e → HermLine ι) (j : Fin e) (hL :
   exact (hh.comp t ((contDiff_ins jj).of_le (WithTop.coe_le_coe.2 le_top)).contDiffAt).log
     ((L j).pos _ (ins_blockNonzero jj t)).ne'
 
-omit [DecidableEq K] in
 
+omit [DecidableEq K] in
 theorem sum_jacC_blk (t : Fin (NN ι) → ℂ) :
     ∑ k, (jacC (⇑(blk ι k)) t)ᵀ * (jacC (⇑(blk ι k)) t).map (starRingEnd ℂ) = 1 := by
   classical
@@ -243,8 +303,8 @@ theorem sum_jacC_blk (t : Fin (NN ι) → ℂ) :
       (starRingEnd ℂ) ((Pi.single c (1 : ℂ) : Fin (NN ι) → ℂ) a))]
   simp [Pi.single_apply, Matrix.one_apply, eq_comm]
 
-omit [DecidableEq K] in
 
+omit [DecidableEq K] in
 theorem hessC_FSG_lower (t : Fin (NN ι) → ℂ) (ht : ‖t‖ ≤ 1) :
     ((((2 * (1 + NN ι : ℝ) ^ 2 : ℝ)) : ℂ) • hessC (FSG ι) t - 1).PosSemidef := by
   set m : ℝ := (1 + NN ι : ℝ) ^ 2 with hm
@@ -304,8 +364,8 @@ end Analysis
 
 end SegreSheetFormComparison
 
-open SegreSheetFormComparison in
 
+open SegreSheetFormComparison in
 theorem SegreSheetFormCompare.proof : SegreSheetFormCompare.Statement := by
   classical
   intro K _ _ ι _ e L hL

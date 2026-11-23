@@ -1,6 +1,48 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.LeviEmbMemNormalizerLower
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.ExpoConjOfIsCsd
+public import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.HarishChandraFinite
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
 import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.AffineGLForms.GenSpace
-import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.LeviEmbMemNormalizerLower
+
+@[expose] public section
 
 noncomputable section
 
@@ -11,7 +53,7 @@ namespace GlobalTheory.CompanionTheory.CTFin
 abbrev lev (R : Type) [CommRing R] (r s : ℕ) : GL (Fin r) R × GL (Fin s) R →* GL (Fin (r + s)) R :=
   GlobalTheory.SmGL.emb₂ R (GlobalTheory.SmGL.stdSum (rfl : r + s = r + s))
 
-variable {E : Type} [Field E] [NumberField E] [IsTotallyComplex E] {r s : ℕ}
+variable {E : Type} [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] {r s : ℕ}
 
 def goodCT (L : Subgroup (GL (Fin (r + s)) (Af E))) {W : Type} [AddCommGroup W] [Module ℂ W]
     (ρ : Representation ℂ (Kinf E (r + s)) W) (J : Set (Module.End ℂ (Sm E (r + s)))) :
@@ -30,7 +72,7 @@ def goodCT (L : Subgroup (GL (Fin (r + s)) (Af E))) {W : Type} [AddCommGroup W] 
       rw [a1, b1]
     · change F.1 _ + G.1 _ = F.1 _ + G.1 _
       rw [a2, b2]
-    · rw [map_add, a3 k hk, b3 k hk]
+    · rw [map_add (f := _), a3 k hk, b3 k hk]
     · convert (GlobalTheory.Published.AutFin.coeffSpan ρ).add_mem (a4 g) (b4 g) using 1
       funext k
       simp
@@ -50,7 +92,7 @@ def goodCT (L : Subgroup (GL (Fin (r + s)) (Af E))) {W : Type} [AddCommGroup W] 
           (mul_le_mul_of_nonneg_left e1 (abs_nonneg _))
       · exact (mul_le_mul_of_nonneg_right (le_abs_self C') p2).trans
           (mul_le_mul_of_nonneg_left e2 (abs_nonneg _))
-    · rw [map_add, a6 z hz, b6 z hz, add_zero]
+    · rw [map_add (f := _), a6 z hz, b6 z hz, add_zero]
   zero_mem' := by
     refine ⟨fun x g => rfl, fun γ g => rfl, fun k _ => map_zero _, fun g => ?_, fun g => ⟨0, 0, fun y => ?_⟩,
       fun z _ => map_zero z⟩
@@ -75,12 +117,6 @@ def goodCT (L : Subgroup (GL (Fin (r + s)) (Af E))) {W : Type} [AddCommGroup W] 
       rw [norm_smul, mul_assoc]
       exact mul_le_mul_of_nonneg_left (h y) (norm_nonneg _)
     · rw [map_smul, a6 z hz, smul_zero]
-
-theorem one_mem_goodCT (L : Subgroup (GL (Fin (r + s)) (Af E))) :
-    oneFn E (r + s) ∈ goodCT L (Representation.trivial ℂ (Kinf E (r + s)) ℂ) ∅ := by
-  refine ⟨fun x g => rfl, fun γ g => rfl, fun k _ => rfl, fun g => Submodule.subset_span ⟨LinearMap.id, 1, rfl⟩,
-    fun g => ⟨1, 0, fun y => ?_⟩, fun z hz => hz.elim⟩
-  simp [oneFn]
 
 end GlobalTheory.CompanionTheory.CTFin
 

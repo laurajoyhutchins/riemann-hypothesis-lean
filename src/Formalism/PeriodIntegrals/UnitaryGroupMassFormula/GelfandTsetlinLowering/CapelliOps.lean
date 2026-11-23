@@ -1,7 +1,54 @@
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.GelfandTsetlinLowering.ZScalarVanish
-import Formalism.RealPlaceAnalysis.RealPlaceTaylor.SatisfiesGlRelationsBilinearLeft
-import Formalism.GradedWeylDivisibility.FockSpaceTableaux.RowDivStable
-import Formalism.GradedWeylDivisibility.FockSpaceTableaux.HWRaise
+module
+
+public import Formalism.GradedWeylDivisibility.StatementA
+public import Formalism.GradedWeylDivisibility.FockSpaceTableaux.RowDivStable
+public import Formalism.RealPlaceAnalysis.RealPlaceTaylor.SatisfiesGlRelationsBilinearLeft
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.LocalRingCardinality.Params
+
+@[expose] public section
 
 noncomputable section
 
@@ -58,9 +105,9 @@ theorem deriv_rowGen (R : Type) [CommRing R] {r m : ℕ} (a b : Fin r) (f : MvPo
     have : rowGen R a b (C c : MvPolynomial (Fin r × Fin m) R) = Polynomial.C (C c) := by
       simp [rowGen]
     rw [this, Polynomial.derivative_C, mul_zero]
-  | add p q hp hq => rw [map_add, Polynomial.derivative_add, mul_add, hp, hq, map_add, map_add]
+  | add p q hp hq => rw [map_add (f := _), Polynomial.derivative_add, mul_add, hp, hq, map_add (f := _), map_add (f := _)]
   | mul_X p v hp =>
-    rw [map_mul, Polynomial.derivative_mul, mul_add, pol_mul, map_add, map_mul, map_mul, ← hp, pol_X]
+    rw [map_mul, Polynomial.derivative_mul, mul_add, pol_mul, map_add (f := _), map_mul, map_mul, ← hp, pol_X]
     have hg : (if a = b then 1 + Polynomial.X else 1) * Polynomial.derivative (rowGen R a b (X v)) =
         rowGen R a b (if v.1 = b then X (a, v.2) else 0) := by
       rw [rowGen_X']
@@ -93,7 +140,7 @@ theorem rowDiv_succ (R : Type) [CommRing R] {r m : ℕ} (a b : Fin r) (k : ℕ)
     rowDiv R a b (k + 1) f * ((k : MvPolynomial (Fin r × Fin m) R) + 1) +
       (if a = b then rowDiv R a b k f * (k : MvPolynomial (Fin r × Fin m) R) else 0) =
       rowDiv R a b k (pol R a b f) := by
-  have h := congrArg (fun p => Polynomial.coeff p k) (deriv_rowGen R a b f)
+  have h := congrArg (fun p => _root_.AddMonoidAlgebra.coeff (M := ℕ) p k) (deriv_rowGen R a b f)
   unfold rowDiv
   rw [← h]
   by_cases hab : a = b
@@ -115,7 +162,8 @@ theorem pol_eq_rowDiv (R : Type) [CommRing R] {r m : ℕ} (a b : Fin r) (f : MvP
 theorem pol_map {R S : Type} [CommRing R] [CommRing S] (ψ : R →+* S) {r m : ℕ} (a b : Fin r)
     (f : MvPolynomial (Fin r × Fin m) R) :
     pol S a b (MvPolynomial.map ψ f) = MvPolynomial.map ψ (pol R a b f) := by
-  simp [pol_apply, pderiv_map, map_sum]
+  set_option synthInstance.maxHeartbeats 100000 in
+    simp [pol_apply, pderiv_map, map_sum]
 
 theorem pol_mem_dualWeyl (R : Type) [CommRing R] {r m : ℕ} (ν : Fin m → ℕ) (a b : Fin r)
     (f : MvPolynomial (Fin r × Fin m) R) (hf : f ∈ dualWeyl R r m ν) : pol R a b f ∈ dualWeyl R r m ν := by

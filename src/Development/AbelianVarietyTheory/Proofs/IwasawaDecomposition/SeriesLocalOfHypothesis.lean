@@ -1,21 +1,60 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsCompOfOne
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LiftFormLvlOp
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.BaseFrameUnitaryDivisorSplit
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.TrivOutsideListProd
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsSplitReductionStandardFrameConj
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.DetOneAddVecMulVecSingle
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.EqOrIsConjPlaceOfOverSplitPlace
+module
+
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsCompOfOne
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.IsComp
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.StrictHenselianAcyclic
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.IsTypeGroupBlockLift
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.BaseFrameUnitaryDivisorSplit
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.DetOneAddVecMulVecSingle
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsLatticeCongruenceInLevelCharacterOne
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsSplitPlaceWPlGw
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsSplitReductionStandardFrameConj
 import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HeckeDoubleCosetOperatorsStandardFacts
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsSplitPlaceWPlGw
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.PlacesUnder
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsLatticeCongruenceInLevelCharacterOne
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.ExistsXdAllIff
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.EventuallyConjunctionMono
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.PinOfNTrue
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ChebSplitNd
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.CentralOfTameCoupled
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ProvisionalRowsFurtherCompatibilitiesAtState
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LiftFormLvlOp
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LocalizationFreeStageTrueGroupColumnChoiceStep
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.PlacesUnder
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ProvisionalRowsFurtherCompatibilitiesAtState
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.TrivOutsideListProd
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.EqOrIsConjPlaceOfOverSplitPlace
+import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.IdemSum
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.MainNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice IsDedekindDomain NumberField Formalism.L2 Formalism.L2.Theta Formalism.L2.DIV Formalism.IndefR Formalism.IndefR.Links Formalism.IndefR.Lev Formalism.IndefR.RecTie GlobalTheory.Mem GlobalTheory.Mem.R3 GlobalTheory.HeightCounting
 open scoped TensorProduct
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
@@ -80,7 +119,7 @@ theorem conj_blocks (hn : n' = n) (h : n = r + t) (ht : 0 < t) (hr : r ≤ n) (h
   obtain rfl : x = b * e * b⁻¹ := Units.ext (Matrix.ext fun a c => hx a c)
   have hb' : b ∈ blockTri (blk2 r) := mem_twoBlockTriangular_of_blockTriangular hb
   have he' : e ∈ blockTri (blk2 r) := mem_twoBlockTriangular_of_blockTriangular fun a c ha hc => by
-    rw [he, dif_neg (by omega), if_neg (by rintro rfl; omega)]
+    rw [he, dite_eq_right (by omega), if_neg (by rintro rfl; omega)]
   have hd : dBlk (blk2 r) 1 e = 1 := by
     refine Units.ext ?_
     rw [diag_block_det_val 1 he']
@@ -91,7 +130,7 @@ theorem conj_blocks (hn : n' = n) (h : n = r + t) (ht : 0 < t) (hr : r ≤ n) (h
         unfold blk2 at this
         rw [if_pos h'] at this
         omega
-      rw [Matrix.submatrix_apply, he, dif_neg (fun h' => ha h'.1)]
+      rw [Matrix.submatrix_apply, he, dite_eq_right (fun h' => ha h'.1)]
       simp [Matrix.one_apply, Subtype.ext_iff]
     rw [e1]
     simp
@@ -99,7 +138,7 @@ theorem conj_blocks (hn : n' = n) (h : n = r + t) (ht : 0 < t) (hr : r ≤ n) (h
     refine Units.ext ?_
     rw [upper_block_val_submatrix hr he']
     ext a c
-    rw [Matrix.submatrix_apply, he, dif_pos ⟨a.2, c.2⟩]
+    rw [Matrix.submatrix_apply, he, dite_eq_left ⟨a.2, c.2⟩]
     rfl
   rw [blkOf_eq h ht]
   refine ⟨mul_mem (mul_mem hb' he') (inv_mem hb'), ?_, ?_⟩
@@ -136,7 +175,7 @@ theorem red_of_isLiftAt (s : ReciprocityTheory.Aut.SplitPlace L) {k : Type} [Com
   have h := hl a c
   show φ (y.val a c) = _
   by_cases hac : (a : ℕ) < r ∧ (c : ℕ) < r
-  · rw [dif_pos hac] at h ⊢
+  · rw [dite_eq_left hac] at h ⊢
     rw [← hy a c] at h
     have h2 : φ (y.val a c - ((g.val ⟨a, hac.1⟩ ⟨c, hac.2⟩).val : Os s)) = 0 := (hφ.ker _).2 (by
       have e : ((y.val a c - ((g.val ⟨a, hac.1⟩ ⟨c, hac.2⟩).val : Os s) : Os s) : s.v.adicCompletion (maximalRealSubfield L)) =
@@ -148,7 +187,7 @@ theorem red_of_isLiftAt (s : ReciprocityTheory.Aut.SplitPlace L) {k : Type} [Com
     rw [h2]
     show _ = iso (g.val ⟨a, hac.1⟩ ⟨c, hac.2⟩)
     rw [← map_natCast iso, ZMod.natCast_zmod_val]
-  · rw [dif_neg hac] at h ⊢
+  · rw [dite_eq_right hac] at h ⊢
     rw [← hy a c] at h
     by_cases e : a = c
     · rw [if_pos e] at h ⊢
@@ -225,7 +264,7 @@ theorem two_le_r (D : D7) : 2 ≤ D.R.r := by have := D.R.m_add_three_le_k; have
 
 theorem r_lt_nV (D : D7) : D.R.r < D.R.nV := by have := t_pos D; unfold Ranks.nV; omega
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem local_red (hL : R.toLevCh.Is A.μ0) (hPg : ∀ PP ∈ R.Pg, ∃ kv : (Σ k : Fin 2, D.nd.PlG k), PP = D.naut.plGw kv.1 kv.2)
     (i : Fin D.R.m) (t : T) (Pl : LevelP R.Pg D.R.r ℂ) {hF : D.host.F = maximalRealSubfield D.host.E}
@@ -297,7 +336,7 @@ section Main
 variable {D : D7} {G : Type} [Group G] [Fintype G] {Pl0 I0 T : Type} {A3 : FamIn3 D.what₂.LL G Pl0 I0 (List ℕ) T D.R.m} {Ks : Type}
   [Field Ks] [NumberField Ks] [Algebra Ks D.what₂.LL] {R : RealDat3 D A3 Ks} {F : Face3 D A3} {X0 : BaseLevelRowSide D}
 
-set_option maxHeartbeats 2000000 in
+
 
 theorem cen_used (Y : R3.Read (A3 := A3) R.toRealDat F.lv2 X0) (cG : G0 R.Pg D.R.r ≃* G0g D.nd) (hB : R.toRealDat.BaseW F.lv2)
     (hK : Keep (A3 := A3) R.toRealDat F.lv2 cG) (hO : A3.A.fam.Ok 1) (hC : CenRead Y cG) (M : MtFam D) (ad : MtAd Y M)
@@ -373,6 +412,7 @@ theorem cen_used (Y : R3.Read (A3 := A3) R.toRealDat F.lv2 X0) (cG : G0 R.Pg D.R
   funext y
   refine (ad.eW _ hμ i).injective ?_
   letI : Fintype (G0g D.nd) := Fintype.ofEquiv G e
+
   rw [hread, hact, GlobalTheory.PendOf.actSum, Finsupp.sum_fintype _ _ (by intro _; exact zero_smul _ _), Finset.sum_apply, map_sum, ← e.sum_comp]
   refine Finset.sum_congr rfl fun g _ => ?_
   have hz : (z : MonoidAlgebra ℂ (G0g D.nd)).coeff (e g) = (z : MonoidAlgebra ℂ (G0g D.nd)).coeff ((R.eG.trans cG) g) := by
@@ -414,8 +454,8 @@ theorem cen_heq {K : Type} [Field K] [NumberField K] [StarRing K] {G : Type} [Gr
   rw [eq_of_heq (he _), eq_of_heq (he _)]
   exact (tL μ).cen z a ha x
 
+
 open Formalism.L2.Indef Formalism.L2.Rows Formalism.IndefR.Cx GlobalTheory.Mem.R3.Tr in
-set_option maxHeartbeats 4000000 in
 
 theorem cenRead_state {K : Ctx} {B : Base} {f : Fr B.toPre} {T : TwDat B} {w : ColW B f T} {P : Pre2 K w} (x : St P) :
     CenRead x.r.Y x.m.z.cG := by
@@ -431,73 +471,16 @@ theorem cenRead_state {K : Ctx} {B : Base} {f : Fr B.toPre} {T : TwDat B} {w : C
     (congrFun x.r.tup t) (x.m.t.hL i t) (fun y => (by with_unfolding_all exact ((x.r.Y.eMt i t ((y))) : _))) ((by with_unfolding_all exact ((x.r.eMt i t) :))) z' ((by with_unfolding_all exact (a :))) ((by with_unfolding_all exact (ha' :))) ((by with_unfolding_all exact (v :)))
   exact (by with_unfolding_all exact ((h1.trans h2) :))
 
-set_option maxHeartbeats 4000000 in
 
-theorem cenLoc_third {hL : GlobalTheory.Published.LocalLanglandsGL} {K : Ctx} {B : Base} {f : Fr B.toPre} {T : TwDat B} {w : ColW B f T}
-    {P : Pre2 K w} (x : St P) (l : LC hL x) (Lc : LocAll (lay0 (Dof x))) : CenLoc (withLoc Lc) (mtL Lc l.mt.M) := by
-  intro i
-  have h := cen_twisted x.r.Y x.m.z.cG x.m.z.pins.char.base x.m.z.pins.keep x.m.intersectionNumber_baseChange.ok.ok2 (cenRead_state x) l.mt.M l.mt.ad l.mt.mt
-    ((withLoc Lc).nd.w i) ((withLoc Lc).nd.w_tw i) ((withLoc Lc).nd.mu i) ((withLoc Lc).nd.mu_w i) ((withLoc Lc).nd.j i)
-    ((withLoc Lc).nd.j_range i).1 ((withLoc Lc).nd.j_range i).2
-  exact (by with_unfolding_all exact (h :))
 
-set_option maxHeartbeats 4000000 in
 
-theorem pin_withLoc (hL : GlobalTheory.Published.LocalLanglandsGL) (hP : PrN) {K : Ctx} {B : Base} {f : Fr B.toPre} {T : TwDat B}
-    {w : ColW B f T} {P : Pre2 K w} (x : St P) (l : LC hL x) (big : (Dof x).what₂.places.Pl → Finset ℂ)
-    (L : LocAll (lay0 (Dof x))) (hB : GlobalTheory.CoefDuty.Built l.a.A l.mt.M l.c.ch l.c.tp.tup big L) :
-    ∃ Q : GlobalTheory.NPin.Pin hL (withLoc L), Q.M = mtL L l.mt.M := by
-  obtain ⟨Sp, ⟨Au⟩, ss⟩ := hB
-  have hmt : MtInput (Dof x) l.mt.M l.c.tp.tup l.c.ch.Q := by
-    have key : ∀ (xi : (Dof x).what₂.Tup → HChar (Dof x).host.E) (Q : (Dof x).what₂.places.Pl → Finset (PlE (Dof x).host)),
-        MtInput (Dof x) l.mt.M (fun μ j => (cfOf x).mu0 j * xi μ) Q → l.c.tp.xi = xi → l.c.ch.Q = Q →
-          MtInput (Dof x) l.mt.M l.c.tp.tup l.c.ch.Q := by
-      intro xi Q h hx hQ
-      subst hx hQ
-      exact h
-    exact key _ _ l.mt.mt l.c.xi_eq l.c.Q_eq
-  let nt : NTrue hL (withLoc L) (cfL L (cfOf x)) (chL L l.c.ch) (tpL L l.c.tp) :=
-    { D := Dof x, cf := cfOf x, jE := l.a.jE, A := l.a.A, cg := l.a.cg, au := l.a.au, rep := repOf x.r.Y, row := l.a.row,
-      low := lowAll (Dof x), Pq := l.Pq, S := l.rat.S, hL := l.rat.In.hL, eig := l.rat.In.eig, θ := l.rat.In.θ, Bs := l.b.Bs,
-      M := l.mt.M, C := l.c.ch, tp := l.c.tp, ch := l.c.side, mt := hmt, big := big, L := L, Sp := Sp, Au := Au, ss := ss,
-      eq := rfl, pack := rfl }
-  have hval : ValLL0 (withLoc L) (cfL L (cfOf x)) :=
-    ⟨l.a.val.mu0, l.a.val.eta, l.a.val.chiPsi, l.a.val.del, l.a.val.del'⟩
-  obtain ⟨Q, -, -, -, -, h5⟩ := GlobalTheory.NPin.pin_of_nTrue hL _ _ _ _ nt hval
-    (fun σ σ' h => x.r.Y.eFT.injective (Formalism.IndefR.principalLevelFrame.rowRepR_inj _ _ _ h)) l.a.elem.star l.a.elem.int l.a.elem.split
-    (GlobalTheory.ChebSplitDense.chebSplit_nd hP.what₂.cheb _)
-  exact ⟨Q, eq_of_heq h5⟩
-
-set_option maxHeartbeats 2000000 in
 
 theorem labTie_withLoc {K : Ctx} {B : Base} {f : Fr B.toPre} {T : TwDat B} {w : ColW B f T} {P : Pre2 K w}
     (x : St P) (Lc : LocAll (lay0 (Dof x))) :
     GlobalTheory.SerSys.LabTie (withLoc Lc) fun k => GlobalTheory.Mem.TypePl.labDat ((withLoc Lc).host.g k) :=
   fun k => ⟨(x.fits.grp.teich k).symm, x.fits.grp.ser k⟩
 
-set_option maxHeartbeats 2000000 in
 
-theorem tame_withLoc {hL : GlobalTheory.Published.LocalLanglandsGL} {K : Ctx} {B : Base} {f : Fr B.toPre} {T : TwDat B} {w : ColW B f T}
-    {P : Pre2 K w} (x : St P) (l : LC hL x) (Lc : LocAll (lay0 (Dof x))) :
-    ∀ k v, ∃ κ : IsLocalRing.ResidueField ((withLoc Lc).nd.plOm.1 ((withLoc Lc).naut.plGw k v)) ≃+* Formalism.CyclotomicNorms.Fbar ((withLoc Lc).host.g k),
-      Formalism.L2.NT.TameCoupled ((withLoc Lc).nd.plOm.1 ((withLoc Lc).naut.plGw k v)) κ ((withLoc Lc).ntypes.tg k v)
-        (GlobalTheory.Mem.TypePl.labDat ((withLoc Lc).host.g k)).gen :=
-  fun k v => ⟨l.a.A.grp.kv k v, by
-    have h := l.a.A.grp.tg_tame k v
-    rw [l.a.zeta k] at h
-    exact h⟩
-
-set_option maxHeartbeats 4000000 in
-
-theorem main : ∀ hL : GlobalTheory.Published.LocalLanglandsGL, PrN → AllSt fun _ _ _ _ _ _ x =>
-    ∀ l : LC hL x, GlobalTheory.CoefDuty.EvO l.a.A l.mt.M l.c.ch l.c.tp.tup fun D' => SumRepresentations.hypO D' → GlobalTheory.TypeLeaf.SerLoc D' := by
-  intro hL hP
-  refine StepW.of_all ?_
-  intro K B f T w _ _ _ P x l
-  refine ⟨fun _ => ∅, fun Lc hB _ => ?_⟩
-  obtain ⟨Pn, hM⟩ := pin_withLoc hL hP x l _ Lc hB
-  exact GlobalTheory.SerSys.Assembly.serLoc_concrete hP.what₂ hP.green hP.zel hP.dz hL (withLoc Lc) Pn _ (labTie_withLoc x Lc) (tame_withLoc x l Lc)
-    (hM ▸ cenLoc_third x l Lc)
 
 end GlobalTheory.SerThird
 

@@ -1,4 +1,58 @@
-import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.SiegelWeilActions.EllA
+module
+
+public import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.SiegelWeilActions.EllA
+public import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.FourierCompactness.SigmaSigmaOfGood
+import Development.WeilBound.CoreStatements.AutomorphicKernels.EisensteinSeriesG2.G2HaarMeasure.CountableRationalPointsDoubled
+public import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.AwayActions.IsUnitDetInFrame
+public import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.SiegelWeilActions.ContinuousNilpotentFramePart
+import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.UnfoldingCompactness.IncMTranspose
+import Development.WeilBound.ThetaLifts.LatticeBasics.UnfoldB
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -131,7 +185,7 @@ theorem sB_cond (b : Fin L.n → AE F E) : sB R L b ∈ kfour.nCond σ d.n R.ε 
 
 theorem continuous_sB : Continuous (sB R L) := by
   unfold sB
-  refine continuous_finset_sum _ fun j _ => Continuous.add ?_ ?_
+  refine continuous_finsetSum _ fun j _ => Continuous.add ?_ ?_
   · have e : (fun b : Fin L.n → AE F E => Matrix.single L.i₀ (L.em j) (b j)) =
         fun b => b j • Matrix.single L.i₀ (L.em j) (1 : AE F E) := by
       funext b; rw [Matrix.smul_single, smul_eq_mul, mul_one]
@@ -146,7 +200,7 @@ theorem inFrame_sM' (b : Fin L.n → AE F E) : inFrame d.b (sM R L b) = bMat (sB
   have hex : ∃ x : d.G, inFrame d.b x = bMat (sB R L b) :=
     ⟨⟨kfour.nU d.b (sB R L b), kfour.nU_mem (sig2 d) R.hε (sB_cond b)⟩, kfour.inFrame_nU _ _⟩
   unfold sM elt
-  rw [dif_pos hex]
+  rw [dite_eq_left hex]
   exact hex.choose_spec
 
 theorem sig_delta (h : Hyp L nb uM nb' w₁ cM δ) : σ δ = -(((R.ε : ℤ) : E)) * δ := by
@@ -155,8 +209,9 @@ theorem sig_delta (h : Hyp L nb uM nb' w₁ cM δ) : σ δ = -(((R.ε : ℤ) : E
     simp [uA, kfour.nM, Matrix.transpose_one]
   have hc := kfour.cond_of_inFrame R.hε (cM (0, 1)) _ hx
   have e := congrFun (congrFun hc L.i₀) L.i₀
+  have c_incl : cA σ (inclR (F := F) (AF F) δ) = inclR (F := F) (AF F) (σ δ) := rfl
   simp only [aB, Matrix.transpose_apply, Matrix.neg_apply, Matrix.smul_apply, Matrix.map_apply, Matrix.single_apply_same,
-    one_smul, smul_eq_mul, GlobalTheory.EisBL.DoubledUnipotentRadical.cA_inclR] at e
+    one_smul, smul_eq_mul, c_incl] at e
   have e' : inclR (F := F) (AF F) δ = inclR (F := F) (AF F) (-(((R.ε : ℤ) : E) * σ δ)) := by
     rw [e, map_neg, map_mul, map_intCast]
   have hδ := Algebra.TensorProduct.includeRight_injective (AdeleRing.algebraMap_injective (𝓞 F) F) e'
@@ -247,9 +302,9 @@ theorem eig (h : Hyp L nb uM nb' w₁ cM δ) (y : AE F E) (hy : cA σ y = -(((R.
         TensorProduct.smul_tmul', smul_eq_mul, mul_one, TensorProduct.smul_tmul]
       exact congrArg (a ⊗ₜ[F] ·) hl
     | add x z hx hz =>
-      rw [map_add, mul_add, add_sub_add_comm, map_add, add_smul, hx, hz]
+      rw [map_add (f := _), mul_add, add_sub_add_comm, map_add (f := _), add_smul, hx, hz]
   have key := hψ y
-  rw [hy, neg_mul, mul_neg, ← mul_assoc, eps_mul R, one_mul, sub_neg_eq_add, map_add, add_smul] at key
+  rw [hy, neg_mul, mul_neg, ← mul_assoc, eps_mul R, one_mul, sub_neg_eq_add, map_add (f := _), add_smul] at key
   have h2 : (2 : F) • (ellA δ y • inclR (F := F) (AF F) δ) = (2 : F) • y := by
     rw [two_smul, two_smul]; exact key
   exact smul_right_injective (AE F E) (two_ne_zero) h2

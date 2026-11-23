@@ -1,10 +1,62 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.WeightedSumBounds.PeriodValuationTheory
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.WeightedSumBounds.WtSubOneLe
-import Development.AbelianVarietyTheory.Definitions.Foundations.IsSatFrame
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FormalGroupExpTwoSidedInverseUnique
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DerivAt0EqSumOfSubset
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FormalGroupDifferentialOperatorDepthEqIInfMonomiStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.IsSatFrame
+public import Mathlib.Algebra.MvPolynomial.Variables
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DerivAt0EqSumOfSubset
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FormalGroupDifferentialOperatorDepthEqIInfMonomiStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FormalGroupExpTwoSidedInverseUnique
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Presheaf
+import Std.Tactic.BVDecide.Normalize.Prop
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.WeightedSumBounds.PtOrderProdSub
+
+@[expose] public section
 
 open MvPowerSeries ReciprocityTheory.PGsh ReciprocityTheory.ChartRestriction.G.Sh GlobalTheory.FGDepth
 
@@ -61,7 +113,7 @@ theorem suppIn_finsuppProd {T : Set σ} {τ : Type} (β : τ →₀ ℕ) (a : τ
 theorem suppIn_add {T : Set σ} {f g : MvPowerSeries σ C} (hf : SuppIn T f) (hg : SuppIn T g) :
     SuppIn T (f + g) := by
   intro α hα
-  rw [map_add] at hα
+  rw [map_add (f := _)] at hα
   by_cases h : coeff α f = 0
   · rw [h, zero_add] at hα; exact hg α hα
   · exact hf α h
@@ -220,8 +272,8 @@ theorem expAlong_const (x : Σ b, Fin (d b)) : constantCoeff (expAlong G u x) = 
   exact constantCoeff_subst_eq_zero (hasSubst_of_constantCoeff_eq_zero (colLin_const u x.1))
     (colLin_const u x.1) ((expOf_twoSided_unique C v (d x.1) (G x.1)).1.1 x.2)
 
-omit [CharZero C] [Fintype κ] in
 
+omit [CharZero C] [Fintype κ] in
 theorem expAlong_suppIn (x : Σ b, Fin (d b)) :
     SuppIn {y : Σ b, ι b | y.1 = x.1} (expAlong G u x) := by
   unfold expAlong
@@ -300,8 +352,8 @@ end
 
 end DepthAdd
 
-open DepthAdd in
 
+open DepthAdd in
 theorem depth_mul_of_disjoint_columns : ∀ (C : Type) [Field C] [CharZero C]
     (v : AddValuation C (WithTop ℝ)) (κ : Type) [Fintype κ] [DecidableEq κ] (d : κ → ℕ)
     (G : ∀ b, LogFGL v (d b)) (ι : κ → Type) [∀ b, Fintype (ι b)] [∀ b, DecidableEq (ι b)]
@@ -311,9 +363,9 @@ theorem depth_mul_of_disjoint_columns : ∀ (C : Type) [Field C] [CharZero C]
   intro C _ _ v κ _ _ d G ι _ _ u S P Q hP hQ
   classical
   have hP' : ∀ α ∈ P.support, ∀ y ∈ α.support, y ∈ {y : Σ b, ι b | y.1 ∈ S} :=
-    fun α hα y hy => hP y ((MvPolynomial.mem_vars y).2 ⟨α, hα, hy⟩)
+    fun α hα y hy => hP y ((MvPolynomial.mem_vars_iff_mem_support y).2 ⟨α, hα, hy⟩)
   have hQ' : ∀ α ∈ Q.support, ∀ y ∈ α.support, y ∉ {y : Σ b, ι b | y.1 ∈ S} :=
-    fun α hα y hy => hQ y ((MvPolynomial.mem_vars y).2 ⟨α, hα, hy⟩)
+    fun α hα y hy => hQ y ((MvPolynomial.mem_vars_iff_mem_support y).2 ⟨α, hα, hy⟩)
   let l : ((Σ b, Fin (d b)) →₀ ℕ) → ((Σ b, Fin (d b)) →₀ ℕ) := fun γ => γ.filter fun x => x.1 ∈ S
   let r : ((Σ b, Fin (d b)) →₀ ℕ) → ((Σ b, Fin (d b)) →₀ ℕ) := fun γ => γ.filter fun x => x.1 ∉ S
   have hsplit : ∀ γ, monAlong G u γ = monAlong G u (l γ) * monAlong G u (r γ) := fun γ => by

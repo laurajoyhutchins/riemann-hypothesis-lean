@@ -1,4 +1,58 @@
-import Formalism.CharacterColumnKernels.StatGlobalModule
+module
+
+public import Formalism.CharacterColumnKernels.StatGlobalModule
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace Formalism.NG
 open Module
@@ -65,7 +119,7 @@ private def colFreeMap (φY : Ymod r χ E →ₗ[A] V) (n : ι → V) (s : (l : 
     ColFreeJ A r χ E ι j →ₗ[A] V where
   toFun x := φY x.1 + ∑ l, ((x.2 l).1 • n l + ∑ a, (x.2 l).2.1 a • s l a + (x.2 l).2.2 • s0 l)
   map_add' x y := by
-    simp only [Prod.fst_add, Prod.snd_add, Pi.add_apply, map_add, add_smul, Finset.sum_add_distrib]
+    simp only [Prod.fst_add, Prod.snd_add, Pi.add_apply, map_add (f := _), add_smul, Finset.sum_add_distrib]
     abel
   map_smul' c x := by
     simp only [Prod.smul_fst, Prod.smul_snd, Pi.smul_apply, map_smul, smul_eq_mul, mul_smul,
@@ -258,18 +312,18 @@ theorem cupKillAdm : StatCupKillAdm := by
     intro g h k
     simp only [cup1]
     rw [← hβ g (a h) (ρ₂ h (b k)), ha g h, hb h k, map_mul, Module.End.mul_apply]
-    simp only [map_add, LinearMap.add_apply]
+    simp only [map_add (f := _), LinearMap.add_apply]
     abel
   obtain ⟨c, hcN, hc⟩ := hH2 _ hz hc2 ⟨_, hc1, by
     intro g h
     simp only [cup1, hcomp, map_neg]
     rw [hj g (b h), he h, ← hβ' g (a h) (ρ₂' h e), ha g h, map_mul, Module.End.mul_apply]
-    simp only [map_sub, map_add, LinearMap.add_apply]
+    simp only [map_sub, map_add (f := _), LinearMap.add_apply]
     abel⟩
   refine ⟨fun g => ψ (c g), hCP _ hcN, ?_⟩
   intro g h
   simp only [cup1]
-  rw [← hφ g (b h), hγ, ← hψ g, ← map_sub, ← map_add]
+  rw [← hφ g (b h), hγ, ← hψ g, ← map_sub, ← map_add (f := _)]
   exact congrArg ψ (hc g h)
 
 theorem finPres : StatFinPres := by

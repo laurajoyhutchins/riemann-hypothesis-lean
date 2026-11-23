@@ -1,5 +1,53 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.GNSandwich
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.ConjugationInvarianceEverySetting
+module
+
+public import Formalism.HermitianCurvature.BesselNonvanishingReduction
+public import Formalism.FormalDegreeBessel.FinalG
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.ConjugationInvarianceEverySetting
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.ContinuousMulMt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -14,16 +62,19 @@ open Formalism.FourierDecayAlt Formalism.FourierDecayAlt.ThreeDimData
 
 variable {k r : ℕ}
 
-private theorem lintegral_comp_eq_of_map_eq {α : Type*} [MeasurableSpace α] {μ : Measure α} {f : α → α}
+private theorem lintegral_comp_eq_of_map_eq {α : Type*} [MeasurableSpace α] [MeasurableSingletonClass α] {μ : Measure α} {f : α → α}
     (hμ : μ.map f = μ) {G : α → ℝ≥0∞} (hG : Measurable G) :
     ∫⁻ x, G (f x) ∂μ = ∫⁻ x, G x ∂μ := by
   by_cases hf : AEMeasurable f μ
   · conv_rhs => rw [← hμ]
     rw [lintegral_map' hG.aemeasurable hf]
-  · have h0 : μ = 0 := by
-      rw [← hμ]
-      exact Measure.map_of_not_aemeasurable hf
-    simp [h0]
+  · by_cases h0 : μ = 0
+    · simp [h0]
+    · haveI : Nonempty α := Measure.nonempty_of_not_aemeasurable hf
+      have hd : μ = Measure.dirac (Classical.ofNonempty : α) :=
+        hμ.symm.trans (Measure.map_of_not_aemeasurable_of_ne_zero hf h0)
+      rw [hd] at hf
+      exact (hf aemeasurable_dirac).elim
 
 theorem lint_lmul {μ : Measure (Formalism.QuantumDeterminants.Mt k r)} {a : Mx k r} (hμ : μ.map (Formalism.QuantumDeterminants.lmulM a) = μ)
     {G : Formalism.QuantumDeterminants.Mt k r → ℝ≥0∞} (hG : Measurable G) :

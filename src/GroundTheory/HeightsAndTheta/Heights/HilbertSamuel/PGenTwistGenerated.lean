@@ -1,5 +1,54 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsAmpleOfGenTwist
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsAmpleOfGenTwist
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.Interval.Finset.Box
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.HilbertSamuel
@@ -102,7 +151,7 @@ theorem cellRes_mk {M : Type*} [AddCommGroup M] [Module (MRingOver S ι) M] {J I
     (h : KH.cellMon S J ≤ KH.cellMon S I) (m : M) (t : KH.cellMon S J) :
     KH.cellRes S M J I (LocalizedModule.mk m t) = LocalizedModule.mk m ⟨t.1, h t.2⟩ := by
   unfold KH.cellRes
-  rw [dif_pos h, IsLocalizedModule.mk_eq_mk', IsLocalizedModule.liftOfLE_mk', ← IsLocalizedModule.mk_eq_mk']
+  rw [dite_eq_left h, IsLocalizedModule.mk_eq_mk', IsLocalizedModule.liftOfLE_mk', ← IsLocalizedModule.mk_eq_mk']
 
 theorem cellRes_mul {J I : ∀ k, Finset (ι k)} (x y : LocalizedModule (KH.cellMon S J) (MRingOver S ι ⧸ V)) :
     KH.cellRes S (MRingOver S ι ⧸ V) J I (x * y) =
@@ -182,8 +231,8 @@ theorem cechD_zero_apply {M : Type*} [AddCommGroup M] [Module (MRingOver S ι) M
     by unfold KH.faceSign; exact neg_one_pow_eq_or ℤ _, fun f => ?_⟩
   change (∑ k : K, ∑ i ∈ I.1 k, _ :
     KH.CechC S ι M 0 →ₗ[MRingOver S ι] LocalizedModule (KH.cellMon S I.1) M) f = _
-  rw [Finset.sum_eq_single k₀, Finset.sum_eq_add_of_mem x y hx hy hxy, dif_pos (hface x hx),
-    dif_pos (hface y hy)]
+  rw [Finset.sum_eq_single k₀, Finset.sum_eq_add_of_mem x y hx hy hxy, dite_eq_left (hface x hx),
+    dite_eq_left (hface y hy)]
   · rw [hsign, LinearMap.add_apply]
     change KH.faceSign I.1 k₀ x • (KH.cellRes S M _ I.1 (f _)) +
       (-KH.faceSign I.1 k₀ x) • (KH.cellRes S M _ I.1 (f _)) = _
@@ -289,11 +338,11 @@ theorem generated_diag (n : ℕ) : KH.GeneratedV S V (fun _ => (n : ℤ)) := by
     fun _ => ?_, ?_⟩
   · refine mk_mem_locPart _ _ 0 (isMultiHomog_one _ fun _ => rfl) ?_
     convert hpq using 2
-    funext k
+    ext k
     simp
   · refine mk_mem_locPart _ _ (fun _ => n) hph ?_
     convert h1q using 2
-    funext k
+    ext k
     simp
   · have e : Ideal.Quotient.mk V p = (⟨p, hpm⟩ : KH.cellMon S I.1) • (1 : MRingOver S ι ⧸ V) :=
       ((Algebra.smul_def p (1 : MRingOver S ι ⧸ V)).trans (mul_one _)).symm

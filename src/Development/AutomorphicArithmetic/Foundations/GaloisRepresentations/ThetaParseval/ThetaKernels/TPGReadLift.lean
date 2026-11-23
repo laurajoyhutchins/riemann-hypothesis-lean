@@ -1,10 +1,51 @@
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ThetaParseval.BlockDeterminants.ReadLift
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ThetaParseval.HalfIndexLattices.SplitStab
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ThetaParseval.HalfIndexLattices.IsLatRepL
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ThetaParseval.ThetaKernels.ThetaBasicK
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ThetaParseval.ThetaKernels.GalTPDefs
+module
 
-set_option synthInstance.maxHeartbeats 200000
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ThetaParseval.ThetaKernels.GalTPDefs
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsFactorPureTensorComponentAtPlace
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.SplitPlaceUnitaryLocalPointsEquivGL
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.AutRepDefiniteUnitarySpannedBySplitComponent
+public import Development.WeilBound.ThetaLifts.CartanFactorisation.TensOfEval
+public import Development.WeilBound.ThetaLifts.LatticeBasics.LocUnrInert
+public import Development.WeilBound.ThetaLifts.LocalTheory.ConeShifts.ActsRhoFin
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
+
 
 section
 noncomputable section
@@ -17,7 +58,7 @@ open scoped Classical
 section Gen
 variable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] {σ : E →ₐ[F] E} {n d : ℕ}
   {X : Spc F E n} {W : Spc F E d}
-private theorem pure_mem_pol_pk {B : Base F E} {M : Model σ X W} {f : SInf F (Fin n × Fin d)} (hf : f ∈ M.Pol B.ψ B.emb)
+theorem pure_mem_pol_pk {B : Base F E} {M : Model σ X W} {f : SInf F (Fin n × Fin d)} (hf : f ∈ M.Pol B.ψ B.emb)
     {φ : ∀ v : Pl F, (Fin n × Fin d → Fv F v) → ℂ} (h : IsFin M φ) : pure f φ ∈ PolData B M :=
   Submodule.subset_span ⟨f, hf, φ, h.1, h.2, rfl⟩
 private theorem pure_add'_pk {κ : Type} [Fintype κ] (f g : SInf F κ) (φ : ∀ v : Pl F, (κ → Fv F v) → ℂ) :
@@ -80,6 +121,7 @@ private theorem read_pair_pk {n d : ℕ} (w : HeightOneSpectrum (𝓞 E)) (hw : 
     (GlobalTheory.UnitaryBC.locU d w) (τ'.ρ.comp ((GlobalTheory.UnitaryBC.cLoc w).comp (GlobalTheory.UnitaryBC.locU d w).subtype))
     (decomp_loc_pk d w hw) hU'.stable hU'.irred (irr_pull_pk _ _ (cLoc_surj_pk d w hw) hirr') f' hf0' hfU' hfe' (P φ) (hPU φ hφ)).2 hne
   have hs : ∑ i, p (P (c i (x i))) ≠ 0 := by
+
     rw [← map_sum, ← map_sum, ← hsum]
     exact hp0
   obtain ⟨i, -, hi⟩ := Finset.exists_ne_zero_of_sum_ne_zero hs
@@ -109,13 +151,13 @@ theorem real_part_k (hP : _root_.GlobalTheory.ThK.IsPair_k B M χX χW om n 0 d 
   let Ψ : nablaSq ℂ d lam' → PolData B M := fun x => ⟨pure (i x) φf, pure_mem_pol_pk (hi x) hfin⟩
   have hadd : ∀ x y, Ψ (x + y) = Ψ x + Ψ y := fun x y => Subtype.ext (by
     change pure (i (x + y)) φf = pure (i x) φf + pure (i y) φf
-    rw [map_add, pure_add'_pk])
+    rw [map_add (f := _), pure_add'_pk])
   have hsm : ∀ (a : ℂ) x, Ψ (a • x) = a • Ψ x := fun a x => Subtype.ext (by
     change pure (i (a • x)) φf = a • pure (i x) φf
     rw [map_smul, pure_smul'_pk])
   refine ⟨hirr, { toFun := fun x => pr (Θ (Ψ x) φ), map_add' := fun x y => ?_, map_smul' := fun a x => ?_ }, ?_,
     fun x => (hp _ (hΘ _ _ hφ).2.1).1, fun k x => ?_⟩
-  · simp only [hadd, map_add, LinearMap.add_apply]
+  · simp only [hadd, map_add (f := _), LinearMap.add_apply]
   · simp only [hsm, map_smul, LinearMap.smul_apply, RingHom.id_apply]
   · intro h0
     apply hne
@@ -209,9 +251,9 @@ theorem split_part_k (T : _root_.UpperTheory.TP.Tools_k) (hA : AbsIso) (hP : _ro
     exact this)
   let A : SB (Fin n × Fin d → Fv (maximalRealSubfield E) v) →ₗ[ℂ] τ.V →ₛₗ[starRingEnd ℂ] τ'.V :=
     LinearMap.mk₂'ₛₗ (RingHom.id ℂ) (starRingEnd ℂ) (fun ψ x => p (pr (Θ (Ψ ψ) (c x))))
-      (fun a b x => by simp only [hadd, map_add, LinearMap.add_apply])
+      (fun a b x => by simp only [hadd, map_add (f := _), LinearMap.add_apply])
       (fun r a x => by simp only [hsm, map_smul, LinearMap.smul_apply, RingHom.id_apply])
-      (fun a x y => by simp only [map_add])
+      (fun a x y => by simp only [map_add (f := _)])
       (fun r a x => by simp only [map_smul, map_smulₛₗ])
   refine ⟨A ∘ₗ ιe.symm.toLinearMap, ?_, fun g h Φ Φ₁ hΦ x => ?_⟩
   · intro h0

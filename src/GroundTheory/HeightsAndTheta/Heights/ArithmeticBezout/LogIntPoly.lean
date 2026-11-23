@@ -1,6 +1,66 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.Statements
-import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.LogIntCircle
+module
+
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.Analysis.SpecialFunctions.Complex.CircleMap
+public import Mathlib.CategoryTheory.Category.Basic
+public import Mathlib.LinearAlgebra.Complex.FiniteDimensional
+public import Mathlib.MeasureTheory.Integral.IntegrableOn
+public import Mathlib.MeasureTheory.Measure.Haar.OfBasis
+public import Mathlib.RingTheory.MvPolynomial.WeightedHomogeneous
+public import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.LogIntCircle
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.Isometry
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+public import Mathlib.Analysis.SpecialFunctions.Log.NegMulLog
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.MeasureTheory.Constructions.HaarToSphere
+public import Mathlib.MeasureTheory.Integral.Pi
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+public import Mathlib.Topology.Algebra.MvPolynomial
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -39,7 +99,7 @@ theorem eval_scaleP (p : ι → Prop) [DecidablePred p] (a : ℂ) (u : ι → �
       ∑ d ∈ Finset.range (D + 1), eval u (weightedHomogeneousComponent (indW p) d g) * a ^ d := by
   classical
   have hc : ∀ d, eval u (weightedHomogeneousComponent (indW p) d g) =
-      ∑ m ∈ g.support, (if Finsupp.weight (indW p) m = d then coeff m g else 0) *
+      ∑ m ∈ g.support, (if Finsupp.weight (indW p) m = d then AddMonoidAlgebra.coeff g m else 0) *
         ∏ i ∈ m.support, u i ^ m i := by
     intro d
     rw [eval_eq]
@@ -56,7 +116,7 @@ theorem eval_scaleP (p : ι → Prop) [DecidablePred p] (a : ℂ) (u : ι → �
   refine Finset.sum_congr rfl fun m hm => ?_
   rw [prod_scaleP]
   rw [Finset.sum_eq_single (Finsupp.weight (indW p) m)]
-  · simp only [if_true]; ring
+  · simp only [ite_true]; ring
   · intro d _ hd; simp [Ne.symm hd]
   · intro h; exact absurd (Finset.mem_range.mpr (Nat.lt_succ_of_le (hD m hm))) h
 
@@ -75,8 +135,8 @@ theorem measurePreserving_scaleP [Fintype ι] (p : ι → Prop) [DecidablePred p
     (f := fun x => if p x then (fun z : ℂ => circleMap 0 1 θ * z) else id)
     (fun x => by
       by_cases h : p x
-      · simp only [h, if_true]; exact measurePreserving_mul_circleMap θ
-      · simp only [h, if_false]; exact MeasurePreserving.id _)
+      · simp only [h, ite_true]; exact measurePreserving_mul_circleMap θ
+      · simp only [h, ite_false]; exact MeasurePreserving.id _)
   have e : scaleP p (circleMap 0 1 θ) =
       fun a x => (if p x then (fun z : ℂ => circleMap 0 1 θ * z) else id) (a x) := by
     funext u x
@@ -89,9 +149,9 @@ theorem measurable_scaleP [Fintype ι] (p : ι → Prop) [DecidablePred p] :
   apply Continuous.measurable
   refine continuous_pi fun x => ?_
   by_cases h : p x
-  · simp only [Function.uncurry, scaleP, h, if_true]
+  · simp only [Function.uncurry, scaleP, h, ite_true]
     exact ((continuous_circleMap 0 1).comp continuous_fst).mul ((continuous_apply x).comp continuous_snd)
-  · simp only [Function.uncurry, scaleP, h, if_false]
+  · simp only [Function.uncurry, scaleP, h, ite_false]
     exact (continuous_apply x).comp continuous_snd
 
 theorem norm_scaleP_circleMap (p : ι → Prop) [DecidablePred p] (θ : ℝ) (u : ι → ℂ) (x : ι) :
@@ -174,7 +234,7 @@ theorem weight_indW_le (p : ι → Prop) [DecidablePred p] (m : ι →₀ ℕ) :
 
 theorem eq_monomial_of_homog [DecidableEq ι] (g : MvPolynomial ι ℂ) (hg : g ≠ 0)
     (h : ∀ x, ∃ d, IsWeightedHomogeneous (indW (· = x)) g d) :
-    ∃ m, g = monomial m (coeff m g) ∧ coeff m g ≠ 0 := by
+    ∃ m, g = monomial m (AddMonoidAlgebra.coeff g m) ∧ AddMonoidAlgebra.coeff g m ≠ 0 := by
   choose d hd using h
   have key : ∀ m ∈ g.support, ∀ x, m x = d x := by
     intro m hm x
@@ -214,10 +274,10 @@ theorem logPoly [Fintype ι] [DecidableEq ι] (r : ℝ) :
   ·
     obtain ⟨m, hgm, hc⟩ := eq_monomial_of_homog g hg h0
     rw [hgm]
-    have hmeas : Measurable fun u : ι → ℂ => Real.log ‖eval u (monomial m (coeff m g))‖ :=
+    have hmeas : Measurable fun u : ι → ℂ => Real.log ‖eval u (monomial m (AddMonoidAlgebra.coeff g m))‖ :=
       Real.measurable_log.comp (continuous_eval _).measurable.norm
     refine ⟨?_, ?_⟩
-    · refine Integrable.mono' (g := fun u => |Real.log ‖coeff m g‖| +
+    · refine Integrable.mono' (g := fun u => |Real.log ‖AddMonoidAlgebra.coeff g m‖| +
           ∑ i ∈ m.support, (m i : ℝ) * |Real.log ‖u i‖|) ?_ hmeas.aestronglyMeasurable
           (Filter.Eventually.of_forall fun u => ?_)
       · have : IsFiniteMeasure (volume.restrict (polydisc ι r)) :=
@@ -248,8 +308,8 @@ theorem logPoly [Fintype ι] [DecidableEq ι] (r : ℝ) :
     set g' := weightedHomogeneousComponent w d0 g with hg'
     have hg'0 : g' ≠ 0 := by
       intro h
-      have := congrArg (coeff m0) h
-      rw [hg', coeff_weightedHomogeneousComponent, if_pos rfl, coeff_zero] at this
+      have := congrArg (AddMonoidAlgebra.coeff · m0) h
+      rw [hg', coeff_weightedHomogeneousComponent, ite_eq_left rfl, AddMonoidAlgebra.coeff_zero] at this
       exact mem_support_iff.mp hm0 this
     have hsub : nonHomog g' ⊆ (nonHomog g).erase x := by
       intro y hy

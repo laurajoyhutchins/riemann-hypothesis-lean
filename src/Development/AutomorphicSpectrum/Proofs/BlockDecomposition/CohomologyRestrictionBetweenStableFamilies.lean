@@ -1,9 +1,52 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.Coords
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.CechPairings.Imports
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.ZariskiEtaleLifting.ZariskiCocycleRefinement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CrystallineSiteZariskiCoveredByAtlas
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.PolynomialSiteTraces.AdmissibleMap
+module
+
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.PolynomialSiteTraces.AdmissibleMap
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.InclStd
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.ZariskiEtaleLifting.XSmulSucc
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExtendedDividedPowers
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.ZariskiEtaleLifting.ZariskiCocycleRefinement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+
+@[expose] public section
+
 set_option backward.isDefEq.respectTransparency false
 set_option autoImplicit false
 noncomputable section
@@ -43,11 +86,6 @@ theorem span_lift (T : Thick (nlFun γ p X q κ)) {m : ℕ} (f : Fin m → T.B) 
     have := (nil_of_mem T hj).isUnit_add_one
     simpa using this
   exact Ideal.eq_top_of_isUnit_mem _ ha hu
-
-theorem locH_φ (T : Thick (nlFun γ p X q κ)) (a : T.B) :
-    (locH T a).φ = algebraMap T.B (Localization.Away a) := rfl
-
-theorem comp_φ {T T' T'' : Thick (nlFun γ p X q κ)} (f : T ⟶ T') (g : T' ⟶ T'') : (f ≫ g).φ = g.φ.comp f.φ := rfl
 
 theorem locT_univ (T : Thick (nlFun γ p X q κ)) (a : T.B) {T'' : Thick (nlFun γ p X q κ)} (ψ : T ⟶ T'')
     (hu : IsUnit (ψ.φ a)) : ∃! χ : locT T a ⟶ T'', locH T a ≫ χ = ψ := by
@@ -316,11 +354,9 @@ theorem bij_of_upTo {M N : Type*} [AddCommGroup M] [AddCommGroup N] [Module R M]
     exact ⟨x, by simpa using hx⟩⟩
 
 theorem onto {Q₁ : ObjectProperty (Thick (nlFun γ p X q κ))} (h : Q₁ ≤ Q') :
-    B.Onto (ObjectProperty.ιOfLE h) fun T : Q'.FullSubcategory => Q₁ T.obj where
-  full := inferInstance
-  faithful := inferInstance
-  mem T := T.property
-  ess T hT := ⟨⟨T.obj, hT⟩, ⟨Iso.refl _⟩⟩
+    B.Onto (ObjectProperty.ιOfLE h) (fun T : Q'.FullSubcategory => Q₁ T.obj) :=
+  ⟨ObjectProperty.full_ιOfLE h, ObjectProperty.faithful_ιOfLE h,
+    fun T => T.property, fun T hT => ⟨⟨T.obj, hT⟩, ⟨Iso.refl _⟩⟩⟩
 
 theorem mor_eq {C C' : Type 1} [Category.{0} C] [Category.{0} C'] {F : C ⥤ ModuleCat.{0} R} {F' : C' ⥤ ModuleCat.{0} R}
     (G : C' ⥤ C) (m m' : CH.Mor F F' (RingHom.id R)) (h1 : m.G = G) (h2 : m'.G = G)
@@ -377,8 +413,8 @@ theorem bij_std (Q₀ : ObjectProperty (Thick (nlFun γ p X q κ))) (hQ : Used Q
 
 end GlobalTheory.CompanionTheory.ZarCosieve
 
-open GlobalTheory.CompanionTheory.ZarCosieve in
 
+open GlobalTheory.CompanionTheory.ZarCosieve in
 theorem GlobalTheory.CompanionTheory.ZarCosieve.main : ∀ {O R : Type} [CommRing O] [CommRing R] {I : Ideal R} {γ : DividedPowers I} {p : ℕ} {X : Scheme.{0}}
     {q : X ⟶ Spec (CommRingCat.of O)} {κ : O →+* R ⧸ I} (Q₀ : ObjectProperty (Thick (nlFun γ p X q κ))) (hQ : Used Q₀)
     (𝒱 : Set X.Opens) (Q' : ObjectProperty (Thick (nlFun γ p X q κ))) (h : St Q₀ 𝒱 ≤ Q') (h' : Q' ≤ St Q₀ {sSup 𝒱})

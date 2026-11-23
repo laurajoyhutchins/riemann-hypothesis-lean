@@ -1,4 +1,65 @@
-import Mathlib
+module
+
+public import Mathlib.Analysis.Analytic.Basic
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.Analysis.Calculus.Deriv.Basic
+public import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+public import Mathlib.Analysis.SpecialFunctions.Complex.LogDeriv
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Analysis.Calculus.Deriv.Add
+public import Mathlib.Analysis.Calculus.Deriv.Comp
+public import Mathlib.Analysis.Calculus.Deriv.Inv
+public import Mathlib.Analysis.Calculus.Deriv.Mul
+public import Mathlib.Analysis.Calculus.Deriv.Shift
+public import Mathlib.Analysis.Complex.CauchyIntegral
+import Mathlib.NumberTheory.DirichletCharacter.Basic
+
+@[expose] public section
+
 open Complex DirichletCharacter ArithmeticFunction MeasureTheory
 
 namespace GlobalTheory.ResRect
@@ -41,7 +102,7 @@ theorem bdInt_sum {a b c d : ℝ} {B : Set ℂ} (h : SidesIn a b c d B) {ι : Ty
   | insert i S hi ih =>
     simp only [Finset.sum_insert hi]
     rw [bdInt_add h (hf i (Finset.mem_insert_self _ _))
-      (continuousOn_finset_sum _ fun j hj => hf j (Finset.mem_insert_of_mem hj)),
+      (continuousOn_finsetSum _ fun j hj => hf j (Finset.mem_insert_of_mem hj)),
       ih fun j hj => hf j (Finset.mem_insert_of_mem hj)]
 
 theorem bdInt_congr {a b c d : ℝ} {B : Set ℂ} (h : SidesIn a b c d B) {f g : ℂ → ℂ}
@@ -99,7 +160,7 @@ theorem bdInt_sq {a b c d : ℝ} {p : ℂ} (h1 : a < p.re) (h2 : p.re < b) (h3 :
     (h4 : p.im < d) (k : ℂ) : bdInt a b c d (fun s => k / (s - p) ^ 2) = 0 := by
   refine bdInt_eq_zero_of_primitive (sidesIn_compl h1 h2 h3 h4) (F := fun s => -k * (s - p)⁻¹)
     ?_ fun s hs => ?_
-  · exact ContinuousOn.div (by fun_prop) (by fun_prop)
+  · exact ContinuousOn.div₀ (by fun_prop) (by fun_prop)
       fun s hs => pow_ne_zero _ (sub_ne_zero.2 hs)
   · have hs' : s - p ≠ 0 := sub_ne_zero.2 hs
     have := (((hasDerivAt_id s).sub_const p).inv hs').const_mul (-k)
@@ -110,7 +171,7 @@ theorem bdInt_sq {a b c d : ℝ} {p : ℂ} (h1 : a < p.re) (h2 : p.re < b) (h3 :
 theorem bdInt_inv {a b c d : ℝ} {p : ℂ} (h1 : a < p.re) (h2 : p.re < b) (h3 : c < p.im)
     (h4 : p.im < d) (k : ℂ) : bdInt a b c d (fun s => k / (s - p)) = 2 * Real.pi * I * k := by
   have hc : ∀ B : Set ℂ, (∀ s ∈ B, s - p ≠ 0) → ContinuousOn (fun s => k / (s - p)) B :=
-    fun B hB => ContinuousOn.div (by fun_prop) (by fun_prop) hB
+    fun B hB => ContinuousOn.div₀ (by fun_prop) (by fun_prop) hB
   have hc1 := hc {s | s - p ∈ slitPlane} fun s hs => slitPlane_ne_zero hs
   have hc2 := hc {s | -(s - p) ∈ slitPlane} fun s hs => neg_ne_zero.1 (slitPlane_ne_zero hs)
   have hd1 : ∀ s ∈ {s | s - p ∈ slitPlane},
@@ -203,15 +264,15 @@ theorem residue_rectangle :
   rw [bdInt_congr hB (g := fun s => h s + ∑ q ∈ S, P q s) (fun s hs => by
       have ht' : s ∉ S := hs.2
       simp only [h, if_neg ht']; ring),
-    bdInt_add hB (hh.continuousOn.mono Set.diff_subset) (continuousOn_finset_sum _ hPc), h0,
+    bdInt_add hB (hh.continuousOn.mono Set.diff_subset) (continuousOn_finsetSum _ hPc), h0,
     zero_add, bdInt_sum hB S hPc, Finset.mul_sum]
   refine Finset.sum_congr rfl fun p hp => ?_
   obtain ⟨h1, h2, h3, h4⟩ := hS p hp
   simp only [P]
   rw [bdInt_add (sidesIn_compl h1 h2 h3 h4) (f := fun s => a p / (s - p) ^ 2)
     (g := fun s => r p / (s - p))
-    (ContinuousOn.div (by fun_prop) (by fun_prop) fun s hs => pow_ne_zero _ (sub_ne_zero.2 hs))
-    (ContinuousOn.div (by fun_prop) (by fun_prop) fun s hs => sub_ne_zero.2 hs),
+    (ContinuousOn.div₀ (by fun_prop) (by fun_prop) fun s hs => pow_ne_zero _ (sub_ne_zero.2 hs))
+    (ContinuousOn.div₀ (by fun_prop) (by fun_prop) fun s hs => sub_ne_zero.2 hs),
     bdInt_sq h1 h2 h3 h4, bdInt_inv h1 h2 h3 h4, zero_add]
 
 end GlobalTheory.ResRect

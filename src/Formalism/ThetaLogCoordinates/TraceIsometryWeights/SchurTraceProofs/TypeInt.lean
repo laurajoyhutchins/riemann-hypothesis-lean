@@ -1,6 +1,60 @@
-import Formalism.ThetaLogCoordinates.TraceIsometryWeights.StatementB
-import Formalism.ThetaLogCoordinates.TraceIsometryWeights.SchurTraceProofs.HomRelationHolds
-import Formalism.ThetaLogCoordinates.TraceIsometryWeights.SchurTraceProofs.InvInt
+module
+
+public import Formalism.ThetaLogCoordinates.TraceIsometryWeights.StatementB
+public import Formalism.ThetaLogCoordinates.TraceIsometryWeights.SchurTraceProofs.HomRelationHolds
+public import Formalism.PolynomialDimension.MultinomialDepth.MonoCount
+public import Formalism.ThetaLogCoordinates.TraceIsometryWeights.SchurTraceProofs.InvInt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Presheaf
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 namespace Formalism.InvariantFactorPaths.PW
 
@@ -28,6 +82,7 @@ theorem weightZeroProj_weight (G₁ : GlW K U n) (G₂ : GlW K V n) (S : Finset 
   ext x
   have hd : dl c c = 0 := sub_self _
   change G₂.E c c (pr0 G₁ G₂ S φ x) - pr0 G₁ G₂ S φ (G₁.E c c x) = 0
+
   rw [scalar_projection_apply, scalar_projection_apply, map_sum, sub_eq_zero]
   refine Finset.sum_congr rfl fun ν _ => ?_
   rw [G₂.diag, G₁.shift, hd, sub_zero, G₁.diag, map_smul, map_smul]
@@ -55,6 +110,7 @@ theorem comp_comm2 (G₁ : GlW K U n) (G₂ : GlW K V n) (θ : U →ₗ[K] V)
   have hx : ∑ ν ∈ insert μ S, G₁.comp ν x = x :=
     G₁.sum_comp x _ (fun ν hν => hS ν (fun h => hν (Finset.mem_insert_of_mem h)))
   conv_rhs => rw [← hx]
+
   rw [map_sum, map_sum, Finset.sum_eq_single μ]
   · exact (hw μ).symm
   · intro ν _ hne
@@ -66,6 +122,7 @@ theorem weightZeroProj_comp (G₁ : GlW K U n) (G₂ : GlW K V n) (S : Finset (F
     (hθ : ∀ μ x, θ (G₁.comp μ x) = G₂.comp μ (θ x)) (φ : U →ₗ[K] U) :
     pr0 G₁ G₂ S (θ ∘ₗ φ) = θ ∘ₗ pr0 G₁ G₁ S φ := by
   ext x
+
   simp only [LinearMap.comp_apply, scalar_projection_apply, map_sum, hθ]
 
 theorem weightZeroProj_trace (G₁ : GlW K U n) (S : Finset (Fin n → ℤ)) (hS : ∀ x, ∀ μ ∉ S, G₁.comp μ x = 0) (φ : U →ₗ[K] U) :
@@ -81,12 +138,14 @@ theorem weightZeroProj_trace (G₁ : GlW K U n) (S : Finset (Fin n → ℤ)) (hS
   have hp : pr0 G₁ G₁ S φ = ∑ ν ∈ S, G₁.comp ν * (φ * G₁.comp ν) := by
     ext x
     simp [scalar_projection_apply]
+
   rw [hp, map_sum]
   calc ∑ ν ∈ S, LinearMap.trace K U (G₁.comp ν * (φ * G₁.comp ν))
       = ∑ ν ∈ S, LinearMap.trace K U (φ * G₁.comp ν) := by
         refine Finset.sum_congr rfl fun ν _ => ?_
         rw [LinearMap.trace_mul_comm, mul_assoc, hidem ν]
     _ = LinearMap.trace K U φ := by
+
         rw [← map_sum, ← Finset.mul_sum, hsum, mul_one]
 
 def Psi (G₁ : GlW K U n) (G₂ : GlW K V n) (S : Finset (Fin n → ℤ)) (l : ℕ) : Module.End K (U →ₗ[K] V) :=
@@ -160,6 +219,7 @@ theorem QQ_id (hNat : InvNat) (G₁ : GlW K U n) (G₂ : GlW K V n) (S : Finset 
     rw [smul_smul, hc, map_smul]
   rw [QQ_apply, Finset.smul_sum]
   simp_rw [key, hsc]
+
   rw [← map_sum, b.sum_repr]
 
 end gen
@@ -303,7 +363,7 @@ theorem exists_transport (G : GlW K V n) {W : Submodule K V} (hW : G.Stable W) (
       obtain ⟨y, hy, z, hz, rfl⟩ := Submodule.mem_sup.mp hx
       have hy' : G.E c d y ∈ G.gS {h} := G.gS_stable _ c d y hy
       have hz' : G.E c d z ∈ G.gS {h'} := G.gS_stable _ c d z hz
-      simp only [map_add]
+      simp only [map_add (f := _)]
       cases i
       · rw [hπ2 false _ hy', hπ2 false _ hy, hπ3 false true (by decide) _ hz', hπ3 false true (by decide) _ hz,
           map_zero]
@@ -312,7 +372,7 @@ theorem exists_transport (G : GlW K V n) {W : Submodule K V} (hW : G.Stable W) (
     have hW' : G.Stable (G.gS {h} ⊔ G.gS {h'}) := by
       intro a b x hx
       obtain ⟨y, hy, z, hz, rfl⟩ := Submodule.mem_sup.mp hx
-      rw [map_add]
+      rw [map_add (f := _)]
       exact Submodule.add_mem _ (Submodule.mem_sup_left (G.gS_stable _ a b y hy))
         (Submodule.mem_sup_right (G.gS_stable _ a b z hz))
     have hWf' : G.FinW (G.gS {h} ⊔ G.gS {h'}) := ⟨S, fun x hx => hS x (sup_le hUW hU'W hx)⟩

@@ -1,25 +1,67 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Statements.MetricStatements.AgreementIffGuarded
-import Development.AutomorphicSpectrum.Definitions.MetricPeriods.MetricsProjectionFormulaNef
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterNamed
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.BlowupProjections.BlowupProjStatement
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.MoriwakiSt
-import GroundTheory.HeightsAndTheta.Heights.KernelsLattice
-import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.StatementsPushDown
-import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.FlagIndices
-import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.StatementsFlagGrassPush
-import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.PFlagGrassPush
-import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.PHFlProdLinear
-import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.PFsInvPow
-import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.PFlagArithVar
-import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.PFlagImageGrass
-import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.PVandCount
+module
+
+public import Development.AutomorphicSpectrum.Definitions.MetricPeriods.MetricsProjectionFormulaNef
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterNamed
+public import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.StatementsFlagGrassPush
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.ExistsPermAppendSnoc
+public import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.StatementsFlagGrassSteps
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.FlagPointsIntegralProductFormulaStatement
 import GroundTheory.HeightsAndTheta.Heights.HeightKernels.Assembly
+import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.PFlagArithVar
+public import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.PFlagGrassPush
+public import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.PFlagImageGrass
+public import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.PFsInvPow
+import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.PHFlProdLinear
+public import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.PVandCount
 import GroundTheory.HeightsAndTheta.Heights.Intersections.PConsequences
+import GroundTheory.HeightsAndTheta.Heights.Intersections.PThmAExpand
+public import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.ChangeOfModel
 import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.ExistsUnique
-import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.ChangeOfModel
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.ExistsPermAppendSnoc
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.FlagPointsIntegralProductFormulaStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -65,7 +107,7 @@ theorem snoc_update_add (hI : IsIntersectionFamily I) (hP : IsArithVar P (n + 1)
   exact FlagHeightMultilinear.I_snoc_fsHerm_add hI hP _ (fun i => hL _) a b
 
 def snocMultilin (hI : IsIntersectionFamily I) (hP : IsArithVar P (n + 1)) {c : HermLine ι}
-    (hc : IsSmoothHerm c) : MultilinearMap ℤ (fun _ : Fin n => K → ℤ) ℝ where
+    (hc : IsSmoothHerm c) : MultilinearMap (RingHom.id ℤ) (fun _ : Fin n => K → ℤ) ℝ where
   toFun v := I P (n + 1) (Fin.snoc (α := fun _ => HermLine ι) (fun i => fsHerm ι (v i)) c)
   map_update_add' := by
     intro inst v j a b
@@ -96,10 +138,11 @@ theorem pts_fsHerm_sum (hI : IsIntersectionFamily I) (hP : IsArithVar P (n + 1))
       ∑ r : Fin n → α, (∏ i, (ℓ i (r i) : ℝ)) *
         ptsIntegral P (pot fun i => fsHerm ι (x (r i))) (fun _ => 1) := by
   refine mul_left_cancel₀ log_two_ne ?_
+
   rw [← snocMultilin_apply hI hP, MultilinearMap.map_sum, Finset.mul_sum]
   refine Finset.sum_congr rfl fun r _ => ?_
-  rw [MultilinearMap.map_smul_univ _ (fun i => ℓ i (r i)) (fun i => x (r i)), snocMultilin_apply hI hP,
-    zsmul_eq_mul, Int.cast_prod]
+  rw [MultilinearMap.map_smul_univ _ (fun i => ℓ i (r i)) (fun i => x (r i)), snocMultilin_apply hI hP]
+  simp only [RingHom.id_apply, zsmul_eq_mul, Int.cast_prod]
   ring
 
 theorem pts_neg_eq (hI : IsIntersectionFamily I) (hP : IsArithVar P (n + 1)) :
@@ -120,8 +163,8 @@ theorem pts_neg_eq (hI : IsIntersectionFamily I) (hP : IsArithVar P (n + 1)) :
     funext _ _
     simp
   rw [← snocMultilin_apply hI hP, e, MultilinearMap.map_smul_univ, snocMultilin_apply hI hP]
-  simp only [Finset.prod_const, Finset.card_univ, Fintype.card_fin, zsmul_eq_mul, Int.cast_pow, Int.cast_neg,
-    Int.cast_one]
+  simp only [RingHom.id_apply, Finset.prod_const, Finset.card_univ, Fintype.card_fin, zsmul_eq_mul,
+    Int.cast_pow, Int.cast_neg, Int.cast_one]
   ring
 
 end Multilinear
@@ -133,7 +176,7 @@ variable (Ψ : Type) [Fintype Ψ] [DecidableEq Ψ] (N : ℕ)
 def flagIntAdd : RootPoly Ψ N →+ ℚ :=
   AddMonoidHom.mk' (flagInt Ψ N) fun a b => by
     unfold flagInt LowerBoundFree.antisym
-    simp only [map_add, smul_add, Finset.sum_add_distrib, coeff_add]
+    simp only [map_add (f := _), smul_add, Finset.sum_add_distrib, MvPolynomial.coeff_add]
 
 theorem flagInt_prod_linForm {d : ℕ} (ℓ : Fin d → Ψ × Fin N → ℤ) :
     flagInt Ψ N (∏ i, LowerBoundFree.linForm Ψ N (ℓ i)) =

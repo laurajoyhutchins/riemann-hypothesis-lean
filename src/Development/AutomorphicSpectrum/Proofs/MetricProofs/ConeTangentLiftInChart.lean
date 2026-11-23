@@ -1,9 +1,70 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.PotentialsBoundedRegSettingEqReference
-import GroundTheory.HeightsAndTheta.Heights.Regularisation.BoundedStatements
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterSt
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.ExistsAnalyticLogResolution
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.InverseDerivativeContinuity
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.CoordinateIdeals
+public import ReciprocityTheory.AnalyticForms.RegularLocalRings.ConeChartB
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterPC
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.ExistsAnalyticLogResolution
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.InverseDerivativeContinuity
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Matrix.FiniteDimensional
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import ReciprocityTheory.AnalyticForms.RegularLocalRings.ConeChartA
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterMinor
+import Development.AutomorphicSpectrum.Definitions.MetricPeriods.ExistsIntSmulIsAdicIntegralInTensorBasis
+public import Mathlib.Algebra.MvPolynomial.Funext
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsCompletedStrictHens
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.CubicalStructures.CubeSymmetricSwapFirst
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField Matrix Filter Topology
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Geo ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.Semi
 open GroundTheory.Heights₂.Heights.LowerBoundFree GlobalTheory.CompanionTheory.Ar GlobalTheory.CompanionTheory.Ar.Cusp
@@ -24,7 +85,7 @@ def tanIdeal (w v : σ → ℂ) : Ideal (MvPolynomial σ ℂ) where
   add_mem' := by
     rintro a b ⟨ha, ha'⟩ ⟨hb, hb'⟩
     refine ⟨by simp [ha, hb], ?_⟩
-    simp only [map_add, add_mul, Finset.sum_add_distrib, ha', hb', add_zero]
+    simp only [map_add (f := _), add_mul, Finset.sum_add_distrib, ha', hb', add_zero]
   zero_mem' := by simp
   smul_mem' := by
     rintro c f ⟨h, h'⟩
@@ -56,7 +117,7 @@ theorem eval_bind_scale (l w : σ → ℂ) (F : MvPolynomial σ ℂ) :
   induction F using MvPolynomial.induction_on with
   | C a => simp
   | add p q hp hq => simp [hp, hq]
-  | mul_X p r hp => simp [hp]
+  | mul_X p r hp => simp [hp, MvPolynomial.bind₁_X_right]
 
 theorem pderiv_bind_scale (l : σ → ℂ) (q : σ) (F : MvPolynomial σ ℂ) :
     pderiv q (bind₁ (fun r => C (l r) * X r) F) =
@@ -66,7 +127,7 @@ theorem pderiv_bind_scale (l : σ → ℂ) (q : σ) (F : MvPolynomial σ ℂ) :
   | C a => simp
   | add p r hp hr => simp [hp, hr, mul_add]
   | mul_X p r hp =>
-    rw [map_mul, bind₁_X_right, Derivation.leibniz, hp, Derivation.leibniz (pderiv q) p (X r), map_add,
+    rw [map_mul, bind₁_X_right, Derivation.leibniz, hp, Derivation.leibniz (pderiv q) p (X r), map_add (f := _),
       pderiv_C_mul]
     simp only [smul_eq_mul, map_mul, bind₁_X_right]
     by_cases h : r = q
@@ -231,7 +292,7 @@ theorem finrank_tanSub_le {I : Ideal (MvPolynomial (Σ k, J k) ℂ)}
     LinearMap.prod ((Φ₁.comp (tanSub I z).subtype).codRestrict Vp fun v => hmem v v.2)
       (Φ₂.comp (tanSub I z).subtype)
   have hinj : Function.Injective Φ := by
-    rw [injective_iff_map_eq_zero]
+    set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
     intro v hv
     have h1 : Φ₁ v = 0 := congrArg Subtype.val (congrArg Prod.fst hv)
     have h2 : Φ₂ v = 0 := congrArg Prod.snd hv
@@ -312,7 +373,7 @@ theorem coneTangent_eq_fderiv_add_torusSmul : ∀ (K : Type) [Fintype K] (J : K 
     filter_upwards [Metric.isOpen_ball.mem_nhds ht] with t' ht'
     exact (D.chart a).mem t' ht'
   have hinj : Function.Injective L := by
-    rw [injective_iff_map_eq_zero]
+    set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
     rintro ⟨u, c⟩ h
     rw [hL] at h
     have hu : u = 0 := (D.chart a).immersion t ht u ⟨fun k => -c k, by

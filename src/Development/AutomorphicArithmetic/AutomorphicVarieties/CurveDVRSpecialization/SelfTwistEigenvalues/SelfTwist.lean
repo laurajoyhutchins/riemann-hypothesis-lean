@@ -1,5 +1,60 @@
-import Mathlib
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CurveDVRSpecialization.SelfTwistEigenvalues.CliffordSS
+module
+
+public import Mathlib.FieldTheory.IsAlgClosed.Basic
+public import Mathlib.RepresentationTheory.Basic
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CurveDVRSpecialization.SelfTwistEigenvalues.CliffordSS
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.Eigenspace.Triangularizable
+import Mathlib.LinearAlgebra.Matrix.FiniteDimensional
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.LinearAlgebra.Eigenspace.Basic
+
+@[expose] public section
+
 open Polynomial Matrix
 
 private theorem selfTwist_commonEig {K M ι : Type} [Field K] [IsAlgClosed K] [AddCommGroup M]
@@ -45,7 +100,7 @@ private theorem selfTwist_abstract {K G M : Type} [Field K] [IsAlgClosed K] [Gro
     intro a b x; rw [map_mul]; rfl
   let E : Submodule K M :=
     { carrier := {x | ∀ n ∈ N, c n x = x}
-      add_mem' := fun {a b} ha hb n hn => by rw [map_add, ha n hn, hb n hn]
+      add_mem' := fun {a b} ha hb n hn => by rw [map_add (f := _), ha n hn, hb n hn]
       zero_mem' := fun n hn => map_zero _
       smul_mem' := fun r x hx n hn => by rw [map_smul, hx n hn] }
   have hE : ∀ x, x ∈ E ↔ ∀ n ∈ N, c n x = x := fun x => Iff.rfl
@@ -92,7 +147,7 @@ private theorem selfTwist_abstract {K G M : Type} [Field K] [IsAlgClosed K] [Gro
       induction k with
       | zero => simp
       | succ k ih =>
-        rw [pow_succ', ← hmul, ih, map_add, map_smul, h3, h4, Nat.cast_succ, add_smul, one_smul]
+        rw [pow_succ', ← hmul, ih, map_add (f := _), map_smul, h3, h4, Nat.cast_succ, add_smul, one_smul]
         abel
     have h6 := h5 N.index
     rw [hx _ (N.pow_index_mem g₀)] at h6
@@ -135,7 +190,7 @@ theorem UpperTheory.V.Pr.T.selfTwist :
     ext v
     have hv : v ∈ W ⊔ W' := by rw [hc.sup_eq_top]; trivial
     obtain ⟨a, ha, b, hb, rfl⟩ := Submodule.mem_sup.mp hv
-    rw [hc', map_add, map_add, map_add p, hpW _ (hW _ (N.inv_mem hn) a ha),
+    rw [hc', map_add (f := _), map_add (f := _), map_add p, hpW _ (hW _ (N.inv_mem hn) a ha),
       hpW' _ (hW' _ (N.inv_mem hn) b hb), hpW a ha, hpW' b hb, add_zero, add_zero, hinv']
   obtain ⟨g₀, hg₀⟩ : ∃ g₀, (Representation.linHom ρ ρ) g₀ p ≠ p := by
     by_contra hall

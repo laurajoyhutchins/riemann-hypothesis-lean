@@ -1,48 +1,53 @@
-import Mathlib
-import CompanionTheory.RealGroups.DiscreteSeries.DiscreteSeriesClassification.DiscreteSeriesExhaustion.SimpleDistinctness.ScalarCharacterOfL2Embedding
-import CompanionTheory.HarishChandraModules.LowKTypeMultiplicity.DiscreteSeriesCharacters.DiscreteSeriesInfinitesimalCharacter
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.WeylGroupActions.ExistsIsAlgebraicRatFuncFractionRingDedekind
+module
+
+public import CompanionTheory.RealGroups.DiscreteSeries.DiscreteSeriesClassification.DiscreteSeriesExhaustion.SimpleDistinctness.ScalarCharacterOfL2Embedding
+public import CompanionTheory.HarishChandraModules.LowKTypeMultiplicity.DiscreteSeriesCharacters.DiscreteSeriesInfinitesimalCharacter
+public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.StableLattices.CapelliPolynomialPermutationMatch
+public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.WeylGroupActions.ExistsIsAlgebraicRatFuncFractionRingDedekind
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Formalism.REAL
 
 noncomputable section
 
 namespace GlobalTheory.CompanionTheory.CharOfLowK
-
-theorem roots_prod_X_sub_C {n : ℕ} (k : Fin n → ℂ) :
-    (∏ a, (Polynomial.X - Polynomial.C (k a))).roots = Multiset.map k Finset.univ.val := by
-  have hprod : (∏ a, (Polynomial.X - Polynomial.C (k a))) =
-      ((Multiset.map k Finset.univ.val).map fun x => Polynomial.X - Polynomial.C x).prod := by
-    rw [Multiset.map_map]
-    rfl
-  rw [hprod, Polynomial.roots_multiset_prod_X_sub_C]
-
-theorem exists_perm_of_capelliPolynomial_eq {n : ℕ} (f g : Fin n → ℂ)
-    (h : ∀ Y, Formalism.QuantumDeterminants.capP f Y = Formalism.QuantumDeterminants.capP g Y) :
-    ∃ τ : Equiv.Perm (Fin n), ∀ a, f a = g (τ a) := by
-  classical
-  have hp : (∏ a, (Polynomial.X - Polynomial.C (-f a))) = ∏ a, (Polynomial.X - Polynomial.C (-g a)) := by
-    apply Polynomial.funext
-    intro Y
-    simp only [Polynomial.eval_prod, Polynomial.eval_sub, Polynomial.eval_X, Polynomial.eval_C, sub_neg_eq_add]
-    exact h Y
-  have hmap : Multiset.map (fun a => -f a) Finset.univ.val = Multiset.map (fun a => -g a) Finset.univ.val := by
-    rw [← roots_prod_X_sub_C (fun a => -f a), ← roots_prod_X_sub_C (fun a => -g a)]
-    exact congrArg Polynomial.roots hp
-  have hcard : ∀ c : ℂ, Fintype.card {a // -f a = c} = Fintype.card {a // -g a = c} := by
-    intro c
-    have hc := congrArg (Multiset.count c) hmap
-    rw [Multiset.count_map, Multiset.count_map] at hc
-    rw [Fintype.card_subtype, Fintype.card_subtype, Finset.card, Finset.card, Finset.filter_val,
-      Finset.filter_val]
-    convert hc using 3 <;> simp [eq_comm]
-  let e : ∀ c, {a // -f a = c} ≃ {a // -g a = c} := fun c => Fintype.equivOfCardEq (hcard c)
-  let τ : Equiv.Perm (Fin n) :=
-    ((Equiv.sigmaFiberEquiv (fun a => -f a)).symm.trans (Equiv.sigmaCongrRight e)).trans
-      (Equiv.sigmaFiberEquiv (fun a => -g a))
-  refine ⟨τ, fun a => ?_⟩
-  have key : -g (τ a) = -f a := (e (-f a) ⟨a, rfl⟩).2
-  exact neg_inj.mp key.symm
 
 theorem charOfAlgDS : CompanionTheory.RgExh.Fin.CharOfAlgDS := by
   intro n ε V _ _ E hE χ s mu hU hLF hSC hDS

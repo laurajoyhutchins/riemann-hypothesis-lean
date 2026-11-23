@@ -1,4 +1,49 @@
-import Development.WeilBound.RepresentationTheoryGL.SiegelWeilProof.HolomorphicContinuation.GaussianPlaneIntegrals.CycFFTC
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.SiegelWeilProof.HolomorphicContinuation.GaussianPlaneIntegrals.CycFFTC
+public import Development.WeilBound.RepresentationTheoryGL.SiegelWeilProof.HolomorphicContinuation.GaussianPlaneIntegrals.CycFFTB
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -14,6 +59,7 @@ theorem coeff_inv (v : Matrix (Rw ε true) (Rw ε true) ℂ) (Q : PX m n) (hQ : 
   have h1 : act (blk ε true v) Q = ∑ ν ∈ (Th ε Q).support,
       emb ε true (sub v (v.map star) ((Th ε Q).coeff ν)) * emb ε false (monomial ν 1) := by
     conv_lhs => rw [decomp (ε := ε) Q]
+
     rw [map_sum]
     refine Finset.sum_congr rfl (fun ν _ => ?_)
     rw [map_mul]
@@ -21,12 +67,13 @@ theorem coeff_inv (v : Matrix (Rw ε true) (Rw ε true) ℂ) (Q : PX m n) (hQ : 
     · exact DFunLike.congr_fun (act_emb_same true v) _
     · exact DFunLike.congr_fun (act_emb_other true false (by decide) v) _
   rw [hQ] at h1
-  have h2 := congrArg (fun P => coeff μ (Th ε P)) h1
+  have h2 := congrArg (fun P => AddMonoidAlgebra.coeff (Th ε P) μ) h1
+
   simp only [map_sum, th_prod, coeff_sum_monomial] at h2
   by_cases hμ : μ ∈ (Th ε Q).support
   · rw [if_pos hμ] at h2
     exact h2.symm
-  · have : coeff μ (Th ε Q) = 0 := notMem_support_iff.1 hμ
+  · have : AddMonoidAlgebra.coeff (Th ε Q) μ = 0 := notMem_support_iff.1 hμ
     rw [this, map_zero]
 
 end PositivityTheory.Rg.Sw.FFTSteps.CycF
@@ -60,12 +107,14 @@ theorem cycFFT : CycFFT := by
     conv_lhs => rw [decomp (ε := ε) Q]
     rw [← Finset.sum_coe_sort (Th ε Q).support]
     simp_rw [← ha]
+
     simp only [r, map_sum, map_smul, Finset.sum_mul, Finset.mul_sum, smul_mul_assoc, mul_smul_comm]
     exact Finset.sum_comm
   have hr : ∀ j, r j ∈ pairAlg (Rw ε false) (Fin n) (Fin n) := by
     intro j
     refine hF _ _ _ (r j) (fun u hu => ?_)
     have h1 := hact _ (blk_unitary false u hu) (blk_block false u)
+
     rw [hQ', map_sum] at h1
     have h2 : ∀ i : bs, act (blk ε false u) (emb ε true (i : PV (Rw ε true) (Fin n) (Fin n)) * emb ε false (r i)) =
         emb ε true (i : PV (Rw ε true) (Fin n) (Fin n)) * emb ε false (sub u (u.map star) (r i)) := by

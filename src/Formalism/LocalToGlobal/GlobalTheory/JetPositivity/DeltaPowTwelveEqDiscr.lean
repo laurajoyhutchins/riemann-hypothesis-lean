@@ -1,7 +1,44 @@
-import Mathlib
-import Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow
-import Formalism.SharpRestriction.GlobalSchurBounds.GeneralLinearActions.IsDiscriminantTwelfthRootOfIdealLattice
-import Formalism.LocalToGlobal.GlobalTheory.LinkTiesTh
+module
+
+public import Formalism.SharpRestriction.GlobalSchurBounds.GeneralLinearActions.IsDiscriminantTwelfthRootOfIdealLattice
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -26,9 +63,6 @@ def mmMH (M : IntermediateField ℚ ℂ) [NumberField M] : Submodule (𝓞 M) (T
 def ellTH (M : IntermediateField ℚ ℂ) [NumberField M] (τ : Tau) : Submodule (𝓞 M) M :=
   (mmMH host eTau M).comap (LinearMap.single (𝓞 M) (fun _ : Tau => (M : Type)) τ)
 
-def conjOfH {M : IntermediateField ℚ ℂ} (e : LL ≃+* M) (s : LL →+* ℂ) : M →ₐ[ℚ] ℂ :=
-  (s.comp (e.symm : M →+* LL)).toRatAlgHom
-
 structure CurveDat where
   δ : ℂ
   delta_pow_twelve_eq_discr : δ ^ 12 = TaylorLogMetric.discr (lamOfH host host.ccK 1)
@@ -43,33 +77,6 @@ structure CurveDat where
 attribute [instance] CurveDat.nf
 
 variable {host embLL eTau}
-
-def lamS (K : CurveDat host embLL eTau) (s : LL →+* ℂ) : AddSubgroup ℂ :=
-  TaylorLogMetric.lamConj K.M (conjOfH K.eL s) (lamOfH host host.ccK K.δ)
-
-def th0S (K : CurveDat host embLL eTau) (s : LL →+* ℂ) : ℂ → ℂ :=
-  Classical.epsilon fun G => GlobalTheoryTheory.IsTheta0 host.d (lamS K s) G
-
-def omVal (K : CurveDat host embLL eTau) (τ : Tau) (s : LL →+* ℂ) : ℝ :=
-  (Real.pi * ‖conjOfH K.eL s (K.fr τ)‖ ^ 2 / TaylorLogMetric.area (lamS K s))⁻¹
-
-def thOneVal (K : CurveDat host embLL eTau) (s : LL →+* ℂ) : ℝ :=
-  Real.sqrt (GlobalTheoryTheory.normSq1 (lamS K s) (th0S K s))
-
-def guardPos (x : ℝ) : ℝ := if 0 < x then x else 1
-
-theorem guardPos_pos (x : ℝ) : 0 < guardPos x := by
-  unfold guardPos; split_ifs with h
-  · exact h
-  · exact one_pos
-
-theorem guardPos_of_pos {x : ℝ} (h : 0 < x) : guardPos x = x := if_pos h
-
-def gxOf (K : CurveDat host embLL eTau) : GlobalExtra LL Tau where
-  Om τ s := guardPos (omVal K τ s)
-  Om_pos _ _ := guardPos_pos _
-  thOne s := guardPos (thOneVal K s)
-  thOne_pos _ := guardPos_pos _
 
 end Pieces
 

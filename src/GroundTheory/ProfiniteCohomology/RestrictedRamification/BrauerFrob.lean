@@ -1,23 +1,73 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.RestrictedRamification.BrauerLocalVal
-import GroundTheory.ProfiniteCohomology.Characters
+module
+
+public import GroundTheory.ProfiniteCohomology.Characters
+public import GroundTheory.LocalFields.MaximalUnramified
+public import GroundTheory.GlobalFields.CompletionAtPlace.Integers
+public import GroundTheory.ProfiniteCohomology.LocalClassFormation.CupSymbolBridge
+public import GroundTheory.ProfiniteCohomology.RestrictedRamification.DivisorModule
+public import GroundTheory.ProfiniteCohomology.RestrictedRamification.MulDistribMulActionGalUnitsFiniteSubfield
+public import Mathlib.FieldTheory.Galois.Profinite
+public import GroundTheory.LocalFields.LocalArtinTransport
+public import GroundTheory.LocalFields.TameExtension
+import GroundTheory.ProfiniteCohomology.CohomologyFunctoriality.Naturality
+import GroundTheory.ProfiniteCohomology.CupProducts.Cocycles
 import GroundTheory.ProfiniteCohomology.CupProducts.ExistsCocycleMapFEqD
-import GroundTheory.LocalFields.MaximalUnramified
-import GroundTheory.LocalFields.TameExtension
-import GroundTheory.LocalFields.ExistsUnitFiltrationUnitsLeRangeNormUnits
-import GroundTheory.LocalFields.LocalArtinTransport
-import GroundTheory.LocalFields.Uniqueness
-import GroundTheory.LocalFields.SeparableClosure
-import GroundTheory.GlobalFields.CompletionAtPlace.Integers
+import GroundTheory.ProfiniteCohomology.CyclicCupBrauer
+public import GroundTheory.ProfiniteCohomology.RestrictedRamification.BrauerOrd
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Topology.Separation.CompletelyRegular
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
 
 open CategoryTheory NumberField IsDedekindDomain IntermediateField GroundTheory.Global groupCohomology
 
-local notation "ℚ̄" => AlgebraicClosure ℚ
-
 noncomputable section
+
+local notation "ℚ̄" => AlgebraicClosure ℚ
 
 section Characters
 
@@ -210,7 +260,7 @@ open GroundTheory.LocalField ValuativeRel FiniteSubfield GroundTheory.Global.Sem
 variable {K : FiniteSubfield} {v : HeightOneSpectrum (𝓞 K.1)}
   (ι : ℚ̄ →ₐ[K.1] AlgebraicClosure (v.adicCompletion K.1))
 
-set_option maxHeartbeats 4000000 in
+
 
 theorem compField_le_maximalUnramifiedExtension (N : FiniteSubfield) [Fact (K ≤ N)] [Normal K.1 N.1]
     (he : (placeOfEmbedding ι N).1.asIdeal.ramificationIdx (𝓞 K.1) = 1) :
@@ -241,6 +291,7 @@ theorem compField_le_maximalUnramifiedExtension (N : FiniteSubfield) [Fact (K �
       ((placeOfEmbedding ι N).1.adicCompletion N.1) (ϖ : v.adicCompletion K.1)) =
       algebraMap (v.adicCompletion K.1) (compField ι N) (ϖ : v.adicCompletion K.1) :=
     (compEquiv ι N).commutes _
+  dsimp only [ramificationIndex] at hM
   rw [Units.val_mk0, h4, h2, h1, hM] at h3
   exact_mod_cast h3
 
@@ -253,8 +304,8 @@ open GroundTheory.LocalField FiniteSubfield
 variable {K : FiniteSubfield} (S : Set (HeightOneSpectrum (𝓞 K.1))) {v : HeightOneSpectrum (𝓞 K.1)}
   (ι : ℚ̄ →ₐ[K.1] AlgebraicClosure (v.adicCompletion K.1)) (hv : v ∉ S)
 
-include hv in
 
+include hv in
 theorem decompHomS_eq_one_of_unramifiedDegree_eq_one
     (g : Gal(AlgebraicClosure (v.adicCompletion K.1)/v.adicCompletion K.1))
     (hg : unramifiedDegree (v.adicCompletion K.1) (AlgebraicClosure (v.adicCompletion K.1)) g = 1) :
@@ -280,9 +331,9 @@ theorem decompHomS_eq_one_of_unramifiedDegree_eq_one
   apply ι.injective
   exact h1.trans h2
 
-set_option maxHeartbeats 2000000 in
-include hv in
 
+
+include hv in
 theorem eq_zero_of_decompHomS_of_unramifiedDegree
     (χ : Additive Gal(AlgebraicClosure (v.adicCompletion K.1)/v.adicCompletion K.1) →ₜ+ QZ)
     (hχ : ∀ g, decompHomS (v.adicCompletion K.1) S ι g = 1 → χ (Additive.ofMul g) = 0)
@@ -322,7 +373,7 @@ theorem eq_zero_of_decompHomS_of_unramifiedDegree
   have h2 := hχ _ (decompHomS_eq_one_of_unramifiedDegree_eq_one S ι hv _ h1)
   have hx : x = Additive.ofMul k + Additive.ofMul (k⁻¹ * Additive.toMul x) := by
     rw [← ofMul_mul, mul_inv_cancel_left, ofMul_toMul]
-  rw [hx, map_add, h2, add_zero]
+  rw [hx, map_add (f := _), h2, add_zero]
   exact hk
 
 theorem gvChar_decompHomS_eq_zero {A : Rep.{0} (ULift.{0} ℤ) (galUnramifiedOutside K.1 ℚ̄ S)} [IsDiscreteRep A]

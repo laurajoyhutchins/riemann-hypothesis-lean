@@ -1,6 +1,58 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AdelicHermitianForms.IsHermHyperbolic
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AdelicHermitianForms.IsHermHyperbolic
+public import Mathlib.Basic.Real.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.TransvectionIdentitiesUnitary
+public import Mathlib.Algebra.QuadraticDiscriminant
+public import Mathlib.Analysis.Real.Sqrt
+public import Mathlib.RingTheory.SimpleRing.Basic
+
+@[expose] public section
 
 open scoped Matrix
 
@@ -12,6 +64,7 @@ private theorem sigma_hf_eq_hf_swap {R : Type} [CommRing R] {n : ℕ} (σ : R �
     (G : Matrix (Fin n) (Fin n) R) (hσ : ∀ a, σ (σ a) = a) (hG : ∀ a b, σ (G a b) = G b a)
     (x y : Fin n → R) : σ (GlobalTheory.UTrans.hf σ G x y) = GlobalTheory.UTrans.hf σ G y x := by
   unfold GlobalTheory.UTrans.hf
+
   simp only [map_sum, map_mul, hσ, hG]
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun a _ => Finset.sum_congr rfl fun b _ => ?_
@@ -22,7 +75,7 @@ private theorem hf_add_smul_self {R : Type} [CommRing R] {n : ℕ} (σ : R →+*
     GlobalTheory.UTrans.hf σ G (x + c • y) (x + c • y) = GlobalTheory.UTrans.hf σ G x x
       + c * (GlobalTheory.UTrans.hf σ G y x + GlobalTheory.UTrans.hf σ G x y) + c * c * GlobalTheory.UTrans.hf σ G y y := by
   unfold GlobalTheory.UTrans.hf
-  simp only [Pi.add_apply, Pi.smul_apply, smul_eq_mul, map_add, map_mul, hc, Finset.mul_sum,
+  simp only [Pi.add_apply, Pi.smul_apply, smul_eq_mul, map_add (f := _), map_mul, hc, Finset.mul_sum,
     ← Finset.sum_add_distrib]
   refine Finset.sum_congr rfl fun a _ => Finset.sum_congr rfl fun b _ => ?_
   ring
@@ -33,7 +86,7 @@ private theorem exists_eq_algebraMap_of_fixed' {K L : Type} [Field K] [Field L] 
     (z : L) (hz : σ z = z) : ∃ k : K, z = algebraMap K L k := by
   obtain ⟨a, b, rfl⟩ := hspan z
   refine ⟨a, ?_⟩
-  rw [map_add, map_mul, hK, hK, hσδ] at hz
+  rw [map_add (f := _), map_mul, hK, hK, hσδ] at hz
   have h2 : (2 : L) * (algebraMap K L b * δ) = 0 := by linear_combination -hz
   rcases mul_eq_zero.mp h2 with h | h
   · exact absurd h two_ne_zero
@@ -44,7 +97,7 @@ private theorem involutive_of_anti_fixed_generator {K L : Type} [Field K] [Field
     (hσδ : σ δ = -δ) (hspan : ∀ x : L, ∃ a b : K, x = algebraMap K L a + algebraMap K L b * δ)
     (x : L) : σ (σ x) = x := by
   obtain ⟨a, b, rfl⟩ := hspan x
-  simp only [map_add, map_mul, hK, hσδ, map_neg, neg_neg]
+  simp only [map_add (f := _), map_mul, hK, hσδ, map_neg, neg_neg]
 
 private theorem hf_smul_smul' {R : Type} [CommRing R] {n : ℕ} (σ : R →+* R)
     (G : Matrix (Fin n) (Fin n) R) (y : Fin n → R) (c : R) (hc : σ c = c) :
@@ -67,7 +120,7 @@ theorem real_isotropic_or_one_class : ∀ (K L : Type) [Field K] [Field L] [Char
   obtain ⟨p, hp⟩ := hfix _ (sigma_hf_eq_hf_swap σ G hσ hG x x)
   obtain ⟨q, hq⟩ := hfix _ (sigma_hf_eq_hf_swap σ G hσ hG y y)
   obtain ⟨m, hm⟩ := hfix (GlobalTheory.UTrans.hf σ G y x + GlobalTheory.UTrans.hf σ G x y)
-    (by rw [map_add, sigma_hf_eq_hf_swap σ G hσ hG, sigma_hf_eq_hf_swap σ G hσ hG, add_comm])
+    (by rw [map_add (f := _), sigma_hf_eq_hf_swap σ G hσ hG, sigma_hf_eq_hf_swap σ G hσ hG, add_comm])
   have hp0 : e p ≠ 0 := by
     intro h
     apply hx
@@ -95,7 +148,7 @@ theorem real_isotropic_or_one_class : ∀ (K L : Type) [Field K] [Field L] [Char
     set t : ℝ := (-(e m) + Real.sqrt (discrim (e q) (e m) (e p))) / (2 * e q) with ht_def
     have hT : q * (e.symm t * e.symm t) + m * e.symm t + p = 0 := by
       apply e.injective
-      simp only [map_add, map_mul, RingEquiv.apply_symm_apply, map_zero]
+      simp only [map_add (f := _), map_mul, RingEquiv.apply_symm_apply, map_zero]
       linear_combination ht
     have hTK : σ (algebraMap K L (e.symm t)) = algebraMap K L (e.symm t) := hK _
     apply hiso (x + algebraMap K L (e.symm t) • y)
@@ -109,7 +162,7 @@ theorem real_isotropic_or_one_class : ∀ (K L : Type) [Field K] [Field L] [Char
       simp only [map_mul, RingEquiv.apply_symm_apply] at hpk
       rw [hpk] at hlt
       nlinarith [mul_self_nonneg (t * e q)]
-    · rw [hf_add_smul_self σ G x y _ hTK, hm, hp, hq, ← map_mul, ← map_mul, ← map_mul, ← map_add,
+    · rw [hf_add_smul_self σ G x y _ hTK, hm, hp, hq, ← map_mul, ← map_mul, ← map_mul, ← map_add (f := _),
         ← map_add, ← map_zero (algebraMap K L)]
       congr 1
       linear_combination hT

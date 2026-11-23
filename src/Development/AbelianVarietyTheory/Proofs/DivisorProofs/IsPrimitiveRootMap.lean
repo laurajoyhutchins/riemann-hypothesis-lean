@@ -1,10 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.LamRange
-import ReciprocityTheory.AnalyticForms.RegularLocalRings.FinalTheorems
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DividingThetaConstantsGenerateIntegralTorsionLabStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ThetaConstantsTorusTranslatesTwistedSumsStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SurjectiveLabelHomLatticeModLevelThetaMemberStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IsActIffIsDiagEnd
+import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.AddHomExtSingle
 import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsAdaptedBasisTestLattice
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DividingThetaConstantsGenerateIntegralTorsionLabStatement
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SurjectiveLabelHomLatticeModLevelThetaMemberStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ThetaConstantsTorusTranslatesTwistedSumsStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RootsOfUnity.Lemmas
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Development.AbelianVarietyTheory.Definitions.Divisors.FromBase
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj IsLocalRing
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Out ReciprocityTheory.ChartRestriction.G.Geo.Tor
 open GlobalTheory.Toroidal GlobalTheory.LocM GlobalTheory.PolFan GlobalTheory.ZM GlobalTheory.SiegelTor GlobalTheory.TorRef GlobalTheory.PolDeg
@@ -211,6 +253,7 @@ theorem exists_classSum_fun : ∀ (g n : ℕ) (F : SFam g n (zetaAway n)) (W : M
         (fun a' mu ha' => by simp only [hwt]; rw [hdiff a' mu ha' τ τ.2])
     have hhe : h = ∑ τ : X₁.S.TT X₁.M z₁, ι₀ (u * (X₁.S.ζ ^ (X₁.S.r * X₁.S.N)) ^ (K a τ).val) * hτ τ := by
       apply X₁.M.stalkHom_injective z₁
+
       rw [hh, map_sum]
       refine Finset.sum_congr rfl fun τ _ => ?_
       rw [(X₁.M.stalkHom z₁).map_mul, hι, hhτ']
@@ -219,6 +262,7 @@ theorem exists_classSum_fun : ∀ (g n : ℕ) (F : SFam g n (zetaAway n)) (W : M
         (ev (ι₀ (X₁.S.ζ ^ (X₁.S.r * X₁.S.N))) ^ (wt τ mu).val * T mu c))
       (fun τ => ev (ι₀ (u * (X₁.S.ζ ^ (X₁.S.r * X₁.S.N)) ^ (K a τ).val)) • ev (hτ τ)) (fun τ _ => sumI_smul _ (hS τ))
     have hev : ∑ τ ∈ Finset.univ, ev (ι₀ (u * (X₁.S.ζ ^ (X₁.S.r * X₁.S.N)) ^ (K a τ).val)) • ev (hτ τ) = ev h := by
+
       rw [hhe, map_sum]
       exact Finset.sum_congr rfl fun τ _ => by simp only [smul_eq_mul, map_mul]
     rw [hev] at hsum

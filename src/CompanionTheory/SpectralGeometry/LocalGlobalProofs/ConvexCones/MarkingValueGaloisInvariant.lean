@@ -1,7 +1,45 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.MarkedFormIndicatorValueInvariantHostFixingAut
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.MarkValEqZeroOrOne
-import CompanionTheory.SpectralGeometry.CountingDefinitions.VoronoiMeans.VorFunEvalEqFineMean
+module
+
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.MarkValEqZeroOrOne
+public import CompanionTheory.SpectralGeometry.CountingDefinitions.VoronoiMeans.VorFunEvalEqFineMean
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.MarkedFormIndicatorValueInvariantHostFixingAut
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HomExtNormalSt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -16,14 +54,16 @@ variable {O : Type} [CommRing O]
 def twPi (σ : O ≃+* O) (n : ℕ) : (Fin n → O) ≃+ (Fin n → O) :=
   AddEquiv.piCongrRight fun _ => σ.toAddEquiv
 
-@[simp] theorem twPi_apply (σ : O ≃+* O) (n : ℕ) (a : Fin n → O) : twPi σ n a = fun j => σ (a j) := rfl
-
 def twForm (σ : O ≃+* O) (n : ℕ) :
     LinearMap.BilinForm ℤ (Fin n → O) ≃+ LinearMap.BilinForm ℤ (Fin n → O) where
   toFun β := β.compl₁₂ (twPi σ n).toIntLinearEquiv.toLinearMap (twPi σ n).toIntLinearEquiv.toLinearMap
   invFun β := β.compl₁₂ (twPi σ.symm n).toIntLinearEquiv.toLinearMap (twPi σ.symm n).toIntLinearEquiv.toLinearMap
-  left_inv β := LinearMap.ext₂ fun a b => by simp
-  right_inv β := LinearMap.ext₂ fun a b => by simp
+  left_inv β := LinearMap.ext₂ fun a b => by
+    change β (fun j => σ (σ.symm (a j))) (fun j => σ (σ.symm (b j))) = β a b
+    simp only [RingEquiv.apply_symm_apply]
+  right_inv β := LinearMap.ext₂ fun a b => by
+    change β (fun j => σ.symm (σ (a j))) (fun j => σ.symm (σ (b j))) = β a b
+    simp only [RingEquiv.symm_apply_apply]
   map_add' _ _ := LinearMap.ext₂ fun a b => by simp
 
 @[simp] theorem twForm_apply (σ : O ≃+* O) (n : ℕ) (β : LinearMap.BilinForm ℤ (Fin n → O)) (a b : Fin n → O) :
@@ -64,7 +104,7 @@ theorem markVal_twist : ∀ (O : Type) [CommRing O] [IsDedekindDomain O] [CharZe
   by_cases h2 : ∃ β : LinearMap.BilinForm ℤ (Fin n → O), ∀ a b, B a b = β a b
   · have h1 : ∃ β : LinearMap.BilinForm ℤ (Fin n → O), ∀ a b, B (fun j => σ (a j)) (fun j => σ (b j)) = β a b :=
       ⟨twForm σ n h2.choose, fun a b => h2.choose_spec _ _⟩
-    rw [dif_pos h1, dif_pos h2]
+    rw [dite_eq_left h1, dite_eq_left h2]
     have e : h1.choose = twForm σ n h2.choose := LinearMap.ext₂ fun a b => by
       have := (h1.choose_spec a b).symm.trans (h2.choose_spec _ _)
       exact_mod_cast this
@@ -75,6 +115,6 @@ theorem markVal_twist : ∀ (O : Type) [CommRing O] [IsDedekindDomain O] [CharZe
       h2 ⟨twForm σ.symm n β, fun a b => by
         have := hβ (fun j => σ.symm (a j)) (fun j => σ.symm (b j))
         simpa using this⟩
-    rw [dif_neg h1, dif_neg h2]
+    rw [dite_eq_right h1, dite_eq_right h2]
 
 end GlobalTheory.CompanionTheory.Ar.Fan.TwistedForm

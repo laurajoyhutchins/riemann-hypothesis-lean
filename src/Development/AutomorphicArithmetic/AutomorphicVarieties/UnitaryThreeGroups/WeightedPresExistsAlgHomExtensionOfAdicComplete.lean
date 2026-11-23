@@ -1,8 +1,54 @@
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.ResMapBijective
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsUniqueFixedPointOfAdicContraction
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.PartSpan
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AutomorphicArithmetic.AutomorphicVarieties.HeightAndVanishing.DirichletPrimeToLPartMulLPowerPart
 import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeGroups.MopBase
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.PartSpan
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsUniqueAlgEquivOfCompatibleQuotient
-import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.ExistsAbsoluteValueOfIsDiscreteValuationRing
-import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.MvPowerSeriesEvalOfPowMem
+import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeGroups.UnitaryThreeReflectionRight
+
+@[expose] public section
 
 open Matrix IsLocalRing UpperTheory.V.U3 UpperTheory.V.Alg UpperTheory.V.HV UpperTheory.V.U3.Mop
 
@@ -37,6 +83,7 @@ private theorem pf_approx {O X σ : Type} [CommRing O] [AddCommGroup X] [Finite 
   have hd' : Finsupp.degree d < n := by exact_mod_cast hd
   have hmem : Finsupp.weight wt d ∈ T.image (Finsupp.weight wt) :=
     Finset.mem_image_of_mem _ (hT d hd')
+
   rw [map_sub, map_sum]
   simp only [coeff_wcomp]
   rw [Finset.sum_ite_eq, if_pos hmem, sub_self]
@@ -49,6 +96,7 @@ private theorem pf_vanish {O X σ S : Type} [CommRing O] [AddCommGroup X] [Finit
   obtain ⟨s, hs⟩ := pf_approx wt F n
   have h1 := GlobalTheory.algHom_mem_pow_of_le_order φ hφ hs
   have h2 : φ (∑ j ∈ s, wcomp O wt j F) = 0 := by
+
     rw [map_sum]
     exact Finset.sum_eq_zero fun j _ => h j
   rw [map_sub, h2, sub_zero] at h1
@@ -82,6 +130,7 @@ private theorem pf_step (hg : ∀ s, ι (g (MvPowerSeries.X s)) = t (Multiplicat
       apply Subtype.ext
       rw [hx, hFb]
       show _ = W.A.val _
+
       rw [map_sum, map_sum]
       refine Finset.sum_congr rfl fun m _ => ?_
       rw [map_mul, map_mul]
@@ -95,11 +144,13 @@ private theorem pf_step (hg : ∀ s, ι (g (MvPowerSeries.X s)) = t (Multiplicat
       rw [h1, pf_prod W.wt t (fun s => ξ (W.zA s)) m, hS m (hμS (Finset.mem_coe.mpr hm)),
         map_finsuppProd]
       simp only [map_pow]
+
     rw [hx', map_sum ι, map_sum ξ, Finset.mul_sum]
     refine Finset.sum_congr rfl fun m hm => ?_
     rw [map_mul ι, map_mul ξ, hc m, hgm m hm]
     ring
-  · rw [hFb, map_sum, ← Finset.sum_sub_distrib]
+  · set_option synthInstance.maxHeartbeats 100000 in
+      rw [hFb, map_sum, ← Finset.sum_sub_distrib]
     refine Ideal.sum_mem _ fun m hm => ?_
     rw [map_mul, ← sub_mul]
     exact Ideal.mul_mem_mul (hcI m) (hJ m (hμS (Finset.mem_coe.mpr hm)))
@@ -154,7 +205,7 @@ private theorem exists_lift_sub_mem_pow_of_mem_wtPart_zero
       {m : W.σ →₀ ℕ | Finsupp.weight W.wt m = 0 ∧ m ≠ 0} 0 (fun m hm => hm.1)
       (fun m hm => mono_lemma g J hJ m hm.2) ih _ hF x' hx'
     refine ⟨algebraMap O B b0 + c', ?_, ?_⟩
-    · rw [map_add, AlgHom.commutes, hc', ofAdd_zero, map_one, Units.val_one, one_mul,
+    · rw [map_add (f := _), AlgHom.commutes, hc', ofAdd_zero, map_one, Units.val_one, one_mul,
         ← AlgHom.commutes ξ b0, ← map_add, hxe]
       congr 1
       abel
@@ -242,5 +293,5 @@ theorem UpperTheory.weightedPres_exists_algHom_extension_of_adicComplete :
       exact ⟨W.part_le_A hz, fun h => by simpa using hf j ⟨z, h⟩ hz⟩
     · exact ⟨W.A.zero_mem, fun h => by rw [map_zero]; exact (map_zero τ).symm⟩
     · intro z w hz hw
-      exact ⟨W.A.add_mem hz.1 hw.1, fun h => by rw [map_add, hz.2 hz.1, hw.2 hw.1, ← map_add]; rfl⟩
+      exact ⟨W.A.add_mem hz.1 hw.1, fun h => by rw [map_add (f := _), hz.2 hz.1, hw.2 hw.1, ← map_add (f := _)]; rfl⟩
   exact (key a a.2).2 a.2

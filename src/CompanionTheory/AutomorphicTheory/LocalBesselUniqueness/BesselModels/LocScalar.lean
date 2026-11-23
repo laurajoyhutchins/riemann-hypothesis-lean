@@ -1,12 +1,63 @@
-import Formalism.LocalToGlobal.SiegelLatticeTheory.WeightedGaugeFactors.FactsDS
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RootLatticeThresholds.WuDecayAll
-import CompanionTheory.AutomorphicTheory.LocalBesselUniqueness.BesselModels.CoefWeightedLocHolds
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RootLatticeThresholds.WuDecayAll
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.WeilQuotientHaar.HaarExist
+public import CompanionTheory.AutomorphicTheory.LocalBesselUniqueness.BesselModels.CoefWeightedLocHolds
 import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedVolumeStatements.LevelSubgroupProperties
-import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.QuotProdK
-import Formalism.RealPlaceAnalysis.FinalF
+import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.InHHDef
+import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.QuotRaw
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.WFLStepsLocHNProps
 import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.FormalDegreeSquareIntegrable.Closed
-import Formalism.SharpRestriction.CuspSpanNormBounds.ExpansionFromLemmaB
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.WeilQuotientHaar.BruhatDecomposition
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.WeilQuotientHaar.ConjugationInvariantMeasure
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.WeilQuotientHaar.HaarMeasureUniqueness
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.WeilQuotientHaar.LocalWeilRepresentation
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.WeilQuotientHaar.ProdSetIsClosed
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.WeilQuotientHaar.SiegelMeasureDefinition
+import Formalism.RealPlaceAnalysis.FinalF
+import Formalism.SharpRestriction.CuspSpanNormBounds.UnimodularSchurMeasures.RightRegularIsometricMultiplicative
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -29,7 +80,8 @@ def Hfix (v : InfinitePlace X.B.I.F) : Set (Formalism.REAL.UJ (X.B.I.ε v)) :=
     (∀ a, uMat g *ᵥ rv X.B.I v (X.fR a) = rv X.B.I v (X.fR a)) ∧ uMat g *ᵥ rv X.B.I v (X.zR u) = rv X.B.I v (X.zR u)}
 
 theorem NHloc_eq (v : InfinitePlace X.B.I.F) : NHloc X u v = QPK.prodSet (Nloc X u v) (Hfix X u v) := by
-  unfold NHloc QPK.prodSet Hfix; rw [Hloc_eq]
+  change QPK.prodSet (Nloc X u v) (Hloc X u v) = QPK.prodSet (Nloc X u v) (Hfix X u v)
+  exact congrArg (QPK.prodSet (Nloc X u v)) (Hloc_eq X u v)
 
 theorem place_facts (v : InfinitePlace X.B.I.F) :
     IsClosed (Nloc X u v) ∧ IsCompact (Hfix X u v) ∧ QPK.IsGrp (Nloc X u v) ∧ QPK.IsGrp (Hfix X u v) ∧
@@ -249,21 +301,21 @@ theorem local_scalar_reduction : LocScalarStep := by
     intro s hs x
     obtain ⟨m, hm, h, hh, rfl⟩ := hs
     have hs' : m * h ∈ Sloc X u v := mul_mem_Sloc X u v (Nloc_sub X u v hm) (Hloc_sub X u v hh)
-    rw [← enorm_norm (f (m * h * x)), norm_Wloc_inv X u v hs', enorm_norm]
+    rw [← eNorm_norm (f (m * h * x)), norm_Wloc_inv X u v hs', eNorm_norm]
   have hK1 : ∀ y, ∫⁻ x, ‖f (x * y)‖ₑ ^ 2 ∂ν' = L := fun y => by
-    rw [← htr (fun x => ‖f (x * y)‖ₑ ^ 2) ((hfc.comp (continuous_id.mul continuous_const)).enorm.measurable.pow_const 2)
+    rw [← htr (fun x => ‖f (x * y)‖ₑ ^ 2) ((hfc.comp (continuous_id.mul continuous_const)).eNorm.measurable.pow_const 2)
       (fun s hs x => by simp only [mul_assoc]; exact hinvN s hs (x * y))]
-    exact quot_rightInv X u hQ v (fun x => ‖f x‖ₑ ^ 2) (hfc.enorm.measurable.pow_const 2) hinvN y
-  have hL' : ∫⁻ y, ‖f y‖ₑ ^ 2 ∂ν' = L := (htr _ (hfc.enorm.measurable.pow_const 2) hinvN).symm
+    exact quot_rightInv X u hQ v (fun x => ‖f x‖ₑ ^ 2) (hfc.eNorm.measurable.pow_const 2) hinvN y
+  have hL' : ∫⁻ y, ‖f y‖ₑ ^ 2 ∂ν' = L := (htr _ (hfc.eNorm.measurable.pow_const 2) hinvN).symm
   have hin : ∀ y, ∫⁻ x, ‖f x‖ₑ * ‖f (x * y)‖ₑ ∂ν' ≤ 2 * L := by
     intro y
     calc ∫⁻ x, ‖f x‖ₑ * ‖f (x * y)‖ₑ ∂ν' ≤ ∫⁻ x, (‖f x‖ₑ ^ 2 + ‖f (x * y)‖ₑ ^ 2) ∂ν' :=
           lintegral_mono fun x => ennreal_mul_le_sq _ _
       _ = L + L := by
-          rw [lintegral_add_left (hfc.enorm.measurable.pow_const 2), hK1 y, hL']
+          rw [lintegral_add_left (hfc.eNorm.measurable.pow_const 2), hK1 y, hL']
       _ = 2 * L := (two_mul L).symm
-  have mf : Measurable fun y => ‖f y‖ₑ := hfc.enorm.measurable
-  have mp : Measurable fun y => ‖ph y‖ₑ := hpc.enorm.measurable
+  have mf : Measurable fun y => ‖f y‖ₑ := hfc.eNorm.measurable
+  have mp : Measurable fun y => ‖ph y‖ₑ := hpc.eNorm.measurable
   set A : Formalism.REAL.UJ (X.B.I.ε v) → ℝ≥0∞ := fun x =>
     ∫⁻ g, ‖ph g‖ₑ * ∫⁻ h, ‖ph h‖ₑ * ‖f (x * g * h)‖ₑ ∂μ ∂μ with hA
 
@@ -275,7 +327,7 @@ theorem local_scalar_reduction : LocScalarStep := by
         f (p.1.1 * p.1.2 * p.2) :=
       hfc.comp (((continuous_fst.comp continuous_fst).mul (continuous_snd.comp continuous_fst)).mul continuous_snd)
     exact (mf.comp (measurable_fst.comp measurable_fst)).mul ((mp.comp (measurable_snd.comp measurable_fst)).mul
-      ((mp.comp measurable_snd).mul h3.enorm.measurable))
+      ((mp.comp measurable_snd).mul h3.eNorm.measurable))
   have hTm' : ∀ g, Measurable fun p : Formalism.REAL.UJ (X.B.I.ε v) × Formalism.REAL.UJ (X.B.I.ε v) => T p.1 g p.2 := by
     intro g
     exact hTm.comp (measurable_fst.prodMk measurable_const |>.prodMk measurable_snd)
@@ -284,9 +336,9 @@ theorem local_scalar_reduction : LocScalarStep := by
       intro x
       rw [hA]
       simp only []
-      rw [← lintegral_const_mul' _ _ enorm_ne_top]
+      rw [← lintegral_const_mul' _ _ eNorm_ne_top]
       refine lintegral_congr fun g => ?_
-      rw [← lintegral_const_mul' _ _ enorm_ne_top, ← lintegral_const_mul' _ _ enorm_ne_top]
+      rw [← lintegral_const_mul' _ _ eNorm_ne_top, ← lintegral_const_mul' _ _ eNorm_ne_top]
     simp only [step1]
     rw [lintegral_lintegral_swap (hTm.lintegral_prod_right').aemeasurable]
     refine lintegral_congr fun g => ?_
@@ -298,7 +350,7 @@ theorem local_scalar_reduction : LocScalarStep := by
       have : ∀ x, T x g h = ‖ph g‖ₑ * (‖ph h‖ₑ * (‖f x‖ₑ * ‖f (x * (g * h))‖ₑ)) := by
         intro x; simp only [hTdef, mul_assoc]; ring
       simp only [this]
-      rw [lintegral_const_mul' _ _ enorm_ne_top, lintegral_const_mul' _ _ enorm_ne_top]
+      rw [lintegral_const_mul' _ _ eNorm_ne_top, lintegral_const_mul' _ _ eNorm_ne_top]
       gcongr
       exact hin _
     calc ∫⁻ g, ∫⁻ h, ∫⁻ x, T x g h ∂ν' ∂μ ∂μ ≤ ∫⁻ g, ∫⁻ h, ‖ph g‖ₑ * (‖ph h‖ₑ * (2 * L)) ∂μ ∂μ :=
@@ -306,7 +358,7 @@ theorem local_scalar_reduction : LocScalarStep := by
       _ = (∫⁻ g, ‖ph g‖ₑ ∂μ) * ((∫⁻ h, ‖ph h‖ₑ ∂μ) * (2 * L)) := by
           rw [← lintegral_mul_const _ mp]
           refine lintegral_congr fun g => ?_
-          rw [lintegral_const_mul' _ _ enorm_ne_top, lintegral_mul_const _ mp]
+          rw [lintegral_const_mul' _ _ eNorm_ne_top, lintegral_mul_const _ mp]
       _ < ⊤ := ENNReal.mul_lt_top hpI.2 (ENNReal.mul_lt_top hpI.2
           (ENNReal.mul_lt_top (by norm_num) (lt_top_iff_ne_top.2 hLt)))
 
@@ -328,7 +380,7 @@ theorem local_scalar_reduction : LocScalarStep := by
       intro y
       by_cases hy : y ∈ E
       · rw [Set.indicator_of_mem hy, top_le_iff, top_le_iff.1 (hcon y hy), ENNReal.mul_top]
-        exact enorm_ne_zero.2 hy
+        exact eNorm_ne_zero.2 hy
       · rw [Set.indicator_of_notMem hy]; exact zero_le
     have := lt_of_le_of_lt (lintegral_mono hle) hT
     rw [lintegral_indicator_const hEm, ENNReal.top_mul hE0] at this
@@ -342,10 +394,10 @@ theorem local_scalar_reduction : LocScalarStep := by
   have hΦi : Integrable Φ (μ.prod μ) := by
     refine ⟨hΦc.aestronglyMeasurable, ?_⟩
     show ∫⁻ p, ‖Φ p‖ₑ ∂(μ.prod μ) < ⊤
-    rw [lintegral_prod _ hΦc.enorm.aemeasurable]
+    rw [lintegral_prod _ hΦc.eNorm.aemeasurable]
     have e2 : ∀ g, ∫⁻ h, ‖Φ (g, h)‖ₑ ∂μ = ‖ph g‖ₑ * ∫⁻ h, ‖ph h‖ₑ * ‖f (x * g * h)‖ₑ ∂μ := fun g => by
-      simp only [hΦ, enorm_smul]
-      rw [lintegral_const_mul' _ _ enorm_ne_top]
+      simp only [hΦ, eNorm_smul]
+      rw [lintegral_const_mul' _ _ eNorm_ne_top]
     simp only [e2]
     exact hAx
   have hΦv : ∫ p, Φ p ∂(μ.prod μ) = c • c • f x := by

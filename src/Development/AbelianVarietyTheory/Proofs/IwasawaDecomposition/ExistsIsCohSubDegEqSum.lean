@@ -1,5 +1,48 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsTorsionFreeOfForallExists
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IsTorsionFreeOfForallExists
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -14,8 +57,8 @@ namespace GlobalTheory.TriangularFrames
 variable {C : Scheme.{0}} {F : C.Modules} {J : Type} {T : J → C.Opens} {κ : J → Type}
   [∀ j, Fintype (κ j)] {v : ∀ j, κ j → Γ(F, T j)} {α : Type}
 
-variable (v) in
 
+variable (v) in
 abbrev spn (e : ∀ j, α ↪ κ j) (S : Finset α) (j : J) {V : C.Opens} (h : V ≤ T j) :
     Submodule Γ(C, V) Γ(F, V) :=
   Submodule.span Γ(C, V) ((fun a => resM F h (v j (e j a))) '' (S : Set α))
@@ -41,7 +84,8 @@ def sub (hv : ∀ j, IsFrame (v j)) (e : ∀ j, α ↪ κ j) (S : Finset α) : S
   sec V :=
     { carrier := {x | ∀ j (W : C.Opens) (h₁ : W ≤ V) (h₂ : W ≤ T j), resM F h₁ x ∈ spn v e S j h₂}
       add_mem' := fun hs ht j W h₁ h₂ => by
-        rw [map_add]; exact add_mem (hs j W h₁ h₂) (ht j W h₁ h₂)
+        rw [map_add (f := resM F h₁)]
+        exact add_mem (hs j W h₁ h₂) (ht j W h₁ h₂)
       zero_mem' := fun j W h₁ h₂ => by rw [map_zero]; exact zero_mem _
       smul_mem' := fun a s hs j W h₁ h₂ => by
         rw [resM_smul]; exact Submodule.smul_mem _ _ (hs j W h₁ h₂) }
@@ -64,8 +108,8 @@ theorem res_mem_spn (hv : ∀ j, IsFrame (v j)) {e : ∀ j, α ↪ κ j} {S : Fi
 
 variable [Fintype α] {rk : α → ℕ} {e : ∀ j, α ↪ κ j}
 
-variable (v rk e) in
 
+variable (v rk e) in
 def IsTriangular (g : α → ∀ j j', Γ(C, T j ⊓ T j')) : Prop :=
   ∀ j j' a, ∃ cf : α → Γ(C, T j ⊓ T j'), cf a = g a j j' ∧ (∀ b, b ≠ a → rk a ≤ rk b → cf b = 0) ∧
     resM F inf_le_right (v j' (e j' a)) = ∑ b, cf b • resM F inf_le_left (v j (e j b))
@@ -80,6 +124,7 @@ theorem IsTriangular.res (H : IsTriangular v rk e g) (j j' : J) (a : α) {V : C.
   refine ⟨fun b => resG C (le_inf h h') (cf b), by dsimp only; rw [h1], fun b hb hr => by dsimp only; rw [h2 b hb hr, map_zero], ?_⟩
   have e1 : resM F h' (v j' (e j' a)) = resM F (le_inf h h') (resM F inf_le_right (v j' (e j' a))) := by
     rw [resM_resM]
+
   rw [e1, h3, map_sum]
   refine Finset.sum_congr rfl fun b _ => ?_
   rw [resM_smul, resM_resM]
@@ -132,14 +177,15 @@ theorem IsTriangular.repr_eq (H : IsTriangular v rk e g) (hv : ∀ j, IsFrame (v
         (e j').injective.eq_iff]
     change ((hv j).basis h).repr (resM F h' (v j' (e j' b))) (e j a) =
       resG C (le_inf h h') (g a j j') * ((hv j').basis h').repr (resM F h' (v j' (e j' b))) (e j' a)
-    rw [hr, h3, map_sum, Finsupp.coe_finset_sum, Finset.sum_apply]
+
+    rw [hr, h3, map_sum, Finset.sum_apply']
     simp only [hB, map_smul, Module.Basis.repr_self, Finsupp.smul_apply, Finsupp.single_apply,
       (e j).injective.eq_iff, smul_eq_mul, mul_ite, mul_one, mul_zero, Finset.sum_ite_eq',
       Finset.mem_univ, if_true]
     rwa [mul_ite, mul_one, mul_zero] at hcf
   | zero => simp
   | add x y _ _ hx hy =>
-    rw [map_add, map_add, Finsupp.add_apply, Finsupp.add_apply, hx, hy, mul_add]
+    rw [map_add (f := _), map_add (f := _), Finsupp.add_apply, Finsupp.add_apply, hx, hy, mul_add]
   | smul c x _ hx =>
     rw [map_smul, map_smul, Finsupp.smul_apply, Finsupp.smul_apply, hx, smul_eq_mul, smul_eq_mul,
       mul_left_comm]
@@ -171,6 +217,7 @@ theorem IsTriangular.isVB (H : IsTriangular v rk e g) (hT : ⨆ j, T j = ⊤)
       (Fintype.linearCombination Γ(C, V) (fun k => resM (sub hv e S).toMod h (w k)) c) =
         ∑ k, c k • (hv j).basis h (ι' k) := by
     intro c
+
     rw [Fintype.linearCombination_apply, ← GlobalTheory.QCoh.appLinear_apply, map_sum]
     refine Finset.sum_congr rfl fun k _ => ?_
     rw [map_smul, GlobalTheory.QCoh.appLinear_apply, hinc]
@@ -202,7 +249,7 @@ def refine (M : LB C) (idx : J → M.ι) (hle : ∀ j, T j ≤ M.U (idx j)) : LB
   g j j' := res (inf_le_inf (hle j) (hle j')) (M.g (idx j) (idx j'))
 
 theorem isLB_refine (hT : ⨆ j, T j = ⊤) {M : LB C} (hM : M.IsLB) (idx : J → M.ι)
-    (hle : ∀ j, T j ≤ M.U (idx j)) : (refine M idx hle).IsLB where
+    (hle : ∀ j, T j ≤ M.U (idx j)) : (refine M idx hle).IsLB := {
   cover := hT
   g_self j := by
     have hg : ((refine M idx hle).g j j).val =
@@ -226,7 +273,7 @@ theorem isLB_refine (hT : ⨆ j, T j = ⊤) {M : LB C} (hM : M.IsLB) (idx : J �
     have h1 := congrArg (resG C (inf_le_inf (inf_le_inf (hle i) (hle j)) (hle k))) h0
     rw [map_mul, resG_resG, resG_resG, resG_resG] at h1
     exact (congrArg₂ (· * ·) (resG_resG _ _ _) (resG_resG _ _ _)).trans
-      (h1.trans (resG_resG _ _ _).symm)
+      (h1.trans (resG_resG _ _ _).symm) }
 
 private theorem res_transition_mul_comm_square {M : LB C} (hM : M.IsLB) (i i' k k' : M.ι) {W : C.Opens}
     (h₁ : W ≤ M.U i) (h₂ : W ≤ M.U i') (h₃ : W ≤ M.U k) (h₄ : W ≤ M.U k') :
@@ -300,7 +347,7 @@ theorem IsTriangular.exists_hom (H : IsTriangular v rk e g) (hv : ∀ j, IsFrame
       map_add' := fun s t => by
         refine GlobalTheory.LB.sec_ext fun j => ?_
         rw [GlobalTheory.LB.coord_add, GlobalTheory.LB.coord_mkSec, GlobalTheory.LB.coord_mkSec, GlobalTheory.LB.coord_mkSec]
-        simp only [f, map_add, Finsupp.add_apply]
+        simp only [f, map_add (f := _), Finsupp.add_apply]
       map_smul' := fun c s => by
         refine GlobalTheory.LB.sec_ext fun j => ?_
         rw [RingHom.id_apply, GlobalTheory.LB.coord_smul, GlobalTheory.LB.coord_mkSec, GlobalTheory.LB.coord_mkSec]

@@ -1,5 +1,57 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsCombIn
+module
+
+public import Mathlib.GroupTheory.MonoidLocalization.Away
+public import Mathlib.RingTheory.FinitePresentation
+public import Mathlib.RingTheory.OreLocalization.Ring
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RingTheory.Localization.Defs
+public import Mathlib.RingTheory.Localization.Ideal
+import Mathlib.Topology.Sheaves.Presheaf
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsCompletedStrictHens
+
+@[expose] public section
+
 open CategoryTheory AlgebraicGeometry ReciprocityTheory.ChartRestriction.G.Geo.Tor
 
 noncomputable section
@@ -19,7 +71,7 @@ def sqZeroInterp {R B S : Type} [CommRing R] [CommRing B] [CommRing S] [Algebra 
     simp only [map_mul]
     linear_combination (c - c ^ 2) * hxy
   map_zero' := by simp
-  map_add' x y := by simp only [map_add]; ring
+  map_add' x y := by simp only [map_add (f := _)]; ring
   commutes' r := by simp
 
 @[simp] theorem sqZeroInterp_apply {R B S : Type} [CommRing R] [CommRing B] [CommRing S]
@@ -131,7 +183,7 @@ theorem exists_sqZero_extend_base (R' A S : Type) [CommRing R'] [CommRing A] [Co
     obtain ⟨p, rfl⟩ := hπ x
     rw [hχ₀, hθ, sqZeroInterp_apply]
     have : φ (π p) = α₀ p := rfl
-    rw [this, map_add, map_mul, map_sub, hloc, map_pow, pow_add]
+    rw [this, map_add (f := _), map_mul, map_sub, hloc, map_pow, pow_add]
     ring
 
 theorem exists_sqZero_extend_pow : ∀ (R' A S : Type) [CommRing R'] [CommRing A] [CommRing S] [Algebra R' A] [Algebra R' S]
@@ -148,7 +200,7 @@ theorem exists_sqZero_extend_pow : ∀ (R' A S : Type) [CommRing R'] [CommRing A
     rw [sqZeroInterp_apply, add_sub_cancel_left]
     exact J.mul_mem_left _ (h1 x)
   · intro x
-    rw [sqZeroInterp_apply, map_add, map_mul, map_sub, h2, map_pow, add_sub_cancel_left,
+    rw [sqZeroInterp_apply, map_add (f := _), map_mul, map_sub, h2, map_pow, add_sub_cancel_left,
       ← mul_assoc, ← pow_add, Nat.sub_add_cancel hN]
 
 end GlobalTheory.SecGlue

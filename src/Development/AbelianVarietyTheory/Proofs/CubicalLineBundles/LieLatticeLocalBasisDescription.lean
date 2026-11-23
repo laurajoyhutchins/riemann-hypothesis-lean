@@ -1,12 +1,56 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.CMLattices.ExistsIsThetaDegOfIsLocalModel
-import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.CmCurveBaseChangeComp
-import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.SemiAbelianHomExtensionUnique
-import Development.AbelianVarietyTheory.Proofs.GenericRegularity.LieCombBaseChange
-import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.IsLieBasisIffIsUnitDet
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsIsLieBasisBaseChange
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.UnivChartOfStandardSmooth
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.IsAbelianSchemeOfIsGrpPullback
+module
+
+public import Development.AbelianVarietyTheory.Definitions.CMLattices.IsDiffOf
+import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.PolBaseChangeOfRelAmpleLocal
+public import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.CmCurveBaseChangeComp
+public import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.SemiAbelianHomExtensionUnique
+public import Development.AbelianVarietyTheory.Proofs.GenericRegularity.LieCombBaseChange
+import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.IsSchemeTheoreticallyDominantSpecOfInjective
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.IsAbelianSchemeOfIsGrpPullback
+public import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.IsLieBasisIffIsUnitDet
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsIsLieBasisBaseChange
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.UnivChartOfStandardSmooth
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.BCTools
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.ExistsRosatiGen
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField IsDedekindDomain
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.GeometryOfNumbersTheory
@@ -40,7 +84,7 @@ theorem isPullback_dualMap (f : R →+* R') :
   · have hs : ∀ x, s.inl.hom (algebraMap R (DualNumber R) x) = s.inr.hom (f x) := fun x =>
       RingHom.congr_fun (congrArg CommRingCat.Hom.hom s.condition) x
     refine CommRingCat.hom_ext (RingHom.ext fun x => ?_)
-    conv_rhs => rw [dec x, map_add, map_mul, hs, hs]
+    conv_rhs => rw [dec x, map_add (f := _), map_mul, hs, hs]
     simp [DualNumber.lift_apply_apply, Chart.dualMapR]
     rfl
   · refine CommRingCat.hom_ext (RingHom.ext fun x => ?_)
@@ -50,7 +94,7 @@ theorem isPullback_dualMap (f : R →+* R') :
       rw [← h₁, ← he]; rfl
     have e₂ : ∀ x, m.hom (algebraMap R' (DualNumber R') x) = s.inr.hom x := fun x => by rw [← h₂]; rfl
     refine CommRingCat.hom_ext (RingHom.ext fun x => ?_)
-    conv_lhs => rw [dec x, map_add, map_mul, e₁, e₂, e₂]
+    conv_lhs => rw [dec x, map_add (f := _), map_mul, e₁, e₂, e₂]
     simp [DualNumber.lift_apply_apply]
     rfl
 
@@ -119,8 +163,8 @@ theorem exists_matrix (hψ : IsGrpPullback A G (spMap g) ψ) (hs : Smooth G.hom)
   choose M hM using fun j => (hv.2 _ (he'.1 j)).exists
   exact ⟨M, (((LieComb.lieComb_algebra K A n v hv.1).2.2.2.2 M e' hv hM).1 he').ne_zero, fun j => ⟨e' j, h j, hM j⟩⟩
 
-omit [IsCommMonObj G] in
 
+omit [IsCommMonObj G] in
 theorem isVecOver_iff (hψ : IsGrpPullback A G (spMap g) ψ) (hv : IsLieBasis v) {M : Matrix (Fin n) (Fin n) K}
     (hM : ∀ j, ∃ w, IsVecOver g ψ (e j) w ∧ IsLieComb (M j) v w) {a : Fin n → R} {t : epsR R ⟶ G}
     (ht : IsLieComb a e t) (w : epsR K ⟶ A) : IsVecOver g ψ t w ↔ IsLieComb (∑ j, g (a j) • M j) v w := by

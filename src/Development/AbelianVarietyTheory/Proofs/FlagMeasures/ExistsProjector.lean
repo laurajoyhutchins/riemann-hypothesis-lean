@@ -1,6 +1,64 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.IsGaugeAll
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsTraceOne
+module
+
+public import Formalism.HermitianLattices.StatementMass
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsTraceOne
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Matrix.FiniteDimensional
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.DefClassNum
+import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.LayerProd
+import Formalism.SharpRestriction.CuspSpanNormBounds.Point
+public import Mathlib.Algebra.Module.FinitePresentation
+public import Mathlib.RingTheory.Flat.EquationalCriterion
+public import Mathlib.RingTheory.Flat.TorsionFree
+public import Mathlib.RingTheory.Localization.Finiteness
+
+@[expose] public section
 
 open MeasureTheory NumberField Matrix Finset Formalism.MainNotions.S GlobalTheory.Count GlobalTheory.FlagMeas
 
@@ -117,7 +175,40 @@ theorem split_of_trace (E : Type) [Field E] [NumberField E] [StarRing E] (w : �
       (∀ y ∈ W', (∀ x ∈ W, star x ⬝ᵥ (J *ᵥ y) = 0) → y = 0) ∧
       ∀ z ∈ Λ, ∃ x ∈ Λ, ∃ y ∈ Λ, x ∈ W ∧ y ∈ W' ∧
         ∀ t ∈ W ⊔ W', star t ⬝ᵥ (J *ᵥ (z - x - y)) = 0 := by
-  obtain ⟨P, hPΛ, hPW, hPid⟩ := exists_projector Λ hΛ.fg hΛ.span_eq_top W
+  have hspan : Submodule.span E (Λ : Set (Fin n → E)) = ⊤ := by
+    let U := Submodule.span E (Λ : Set (Fin n → E))
+    change U = ⊤
+    by_contra hU
+    let g : (Fin n → E) →ₗ[E] Module.Dual E U :=
+      ((dotProductBilin E E).compl₂ (Matrix.mulVecLin J)).domRestrict₂ U
+    have hdim : Module.finrank E (Module.Dual E U) < Module.finrank E (Fin n → E) := by
+      rw [Subspace.dual_finrank_eq]
+      exact Submodule.finrank_lt hU
+    obtain ⟨z, hz, hz₀⟩ :=
+      Submodule.exists_mem_ne_zero_of_ne_bot (LinearMap.ker_ne_bot_of_finrank_lt (f := g) hdim)
+    let y : Fin n → E := star z
+    have hy₀ : y ≠ 0 := by
+      intro hy
+      apply hz₀
+      have := congrArg star hy
+      simpa [y] using this
+    have hline (a : E) : a • y ∈ Λ := (hself _).2 fun x hx => by
+      have hz' : z ⬝ᵥ (J *ᵥ x) = 0 :=
+        congrArg (fun f : Module.Dual E U => f ⟨x, Submodule.subset_span hx⟩)
+          (LinearMap.mem_ker.mp hz)
+      have horth : star x ⬝ᵥ (J *ᵥ y) = 0 := by
+        rw [← form_star hJ y x]
+        simp [y, hz']
+      simp only [Matrix.mulVec_smul, dotProduct_smul, horth, smul_zero]
+      exact ⟨0, map_zero _⟩
+    let i : E →ₗ[𝓞 E] Λ :=
+      ((LinearMap.toSpanSingleton E _ y).restrictScalars (𝓞 E)).codRestrict Λ hline
+    let : Module.Finite (𝓞 E) Λ := Module.Finite.iff_fg.mpr hΛ.fg
+    let : Module.Finite (𝓞 E) E := Module.Finite.of_injective i fun a b hab =>
+      smul_left_injective E hy₀ (congrArg Subtype.val hab)
+    exact RingOfIntegers.not_isField E
+      (isField_of_isIntegral_of_isField (IsFractionRing.injective (𝓞 E) E) (Field.toIsField E))
+  obtain ⟨P, hPΛ, hPW, hPid⟩ := exists_projector Λ hΛ.fg hspan W
   obtain ⟨Q, hPQ, htr⟩ := exists_adjoint hd P
   have hQP : ∀ x y, star (Q x) ⬝ᵥ (J *ᵥ y) = star x ⬝ᵥ (J *ᵥ P y) := fun x y => by
     rw [← form_star hJ, ← hPQ, form_star hJ]

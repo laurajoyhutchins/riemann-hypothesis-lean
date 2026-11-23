@@ -1,8 +1,54 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.StickelbergerCharacterEval.ExistsIntHigherStickelbergerDenomSmul
-import Development.AutomorphicArithmetic.AutomorphicVarieties.StickelbergerCharacterEval.Detprod
-import Development.AutomorphicArithmetic.AutomorphicVarieties.StickelbergerCharacterEval.Chcard
-import Development.AutomorphicArithmetic.AutomorphicVarieties.StickelbergerCharacterEval.NormCharEvalHigherStickelbergerLe
-import Development.AutomorphicArithmetic.AutomorphicVarieties.StickelbergerCharacterEval.GroupRingCharEvalStickelbergerYNeZeroOfParity
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.StickelbergerCharacterEval.MemZpowersIff
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.StickelbergerCharacterEval.Chcard
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.StickelbergerCharacterEval.Detprod
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.StickelbergerCharacterEval.ExistsIntHigherStickelbergerDenomSmul
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.StickelbergerCharacterEval.GroupRingCharEvalStickelbergerYNeZeroOfParity
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.StickelbergerCharacterEval.NormCharEvalHigherStickelbergerLe
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Finset UpperTheory.V.Bern UpperTheory.V.B4 UpperTheory.V.B5
 
@@ -34,7 +80,7 @@ theorem UpperTheory.V.B5.higherStickelberger_det_exists_int_bounded :
     · exact this (by rw [h, map_zero])
   · have h1 : ‖algebraMap ℚ ℂ (detR (π (-1)) ((-1) ^ k) (yEl k a ha π))‖ ≤ (sizeY N a k : ℝ) ^ (Nat.card Γ / 2) := by
       rw [hp, norm_prod, ← card_Qc' hcc hc, ← card_signedInvolutionChar_eq_card_involutionQuotient (Ω := ℂ) _ _ hcc hc hε, ← Finset.card_univ, ← Finset.prod_const]
-      exact Finset.prod_le_prod (fun _ _ => norm_nonneg _) fun χ _ => norm_charEval_higherStickelberger_le π χ.1 a ha k hN (by omega)
+      exact Finset.prod_le_prod₀ (fun _ _ => norm_nonneg _) fun χ _ => norm_charEval_higherStickelberger_le π χ.1 a ha k hN (by omega)
     have h2 : (((detR (π (-1)) ((-1) ^ k) z).natAbs : ℕ) : ℝ) = ‖algebraMap ℚ ℂ ((detR (π (-1)) ((-1) ^ k) z : ℤ) : ℚ)‖ := by
       rw [map_intCast, Complex.norm_intCast, Nat.cast_natAbs, Int.cast_abs]
     have h3 : (((detR (π (-1)) ((-1) ^ k) z).natAbs : ℕ) : ℝ) ≤ ((bdX N a k ^ (Nat.card Γ / 2) : ℕ) : ℝ) := by

@@ -1,5 +1,53 @@
-import Mathlib
-import Formalism.LocalToGlobal.IndefiniteReal.AllPartsTransfer
+module
+
+public import Formalism.LocalToGlobal.IndefiniteReal.AllPartsTransfer
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RingTheory.Localization.Finiteness
+
+@[expose] public section
 
 open Module NumberField IsDedekindDomain
 
@@ -83,6 +131,7 @@ variable {p₀ p : V →ₗ[K] V} {x y : Fin n → V →ₗ[K] V} {c : Matrix (F
 
 theorem Tr.yx_sum (h : Tr p₀ p x y c) (a : Fin n → V) (ha : ∀ j, p₀ (a j) = a j) (i : Fin n) :
     y i (∑ j, x j (a j)) = ∑ j, c i j • a j := by
+
   rw [map_sum]
   exact Finset.sum_congr rfl fun j _ => h.2.2.2.2.2.1 i j _ (ha j)
 
@@ -118,7 +167,7 @@ theorem Tr.rank [FiniteDimensional K V] (h : Tr p₀ p x y c) :
       LinearMap.pi fun i => LinearMap.codRestrict _ (y i ∘ₗ (LinearMap.range p).subtype)
         fun a => ⟨_, h.2.2.2.1 i a (hfix a)⟩
     refine LinearMap.finrank_le_finrank_of_injective (f := Y) ?_
-    rw [injective_iff_map_eq_zero]
+    set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
     intro a ha
     apply Subtype.ext
     refine h.inj_y a (hfix a) fun i => ?_
@@ -129,7 +178,7 @@ theorem Tr.rank [FiniteDimensional K V] (h : Tr p₀ p x y c) :
           rw [LinearMap.sum_apply]
           exact Submodule.sum_mem _ fun j _ => ⟨_, h.2.2.1 j (a j) (hfix0 _)⟩
     refine LinearMap.finrank_le_finrank_of_injective (f := X) ?_
-    rw [injective_iff_map_eq_zero]
+    set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
     intro a ha
     have h1 := congrArg Subtype.val ha
     simp only [X, LinearMap.codRestrict_apply, LinearMap.sum_apply, LinearMap.comp_apply,
@@ -223,6 +272,7 @@ theorem sandwich (hE : IdemE) (hP : IdemP) (hτ : IsGood τ) (ρ : Representatio
   · obtain ⟨haA, z, hz⟩ := ha
     have hz' : a = ∑ s, epP H χ ρ (eS (τ s) ρ z) := by
       rw [← hz]
+
       simp only [LinearMap.comp_apply, eGood, LinearMap.sum_apply, map_sum]
     have hs : ∀ s, eS (τ s) ρ a = epP H χ ρ (eS (τ s) ρ z) := by
       intro s
@@ -231,6 +281,7 @@ theorem sandwich (hE : IdemE) (hP : IdemP) (hτ : IsGood τ) (ρ : Representatio
       have h3 : eS (τ s) ρ (eGood τ ρ z) = eS (τ s) ρ z := by
         classical
         unfold eGood
+
         rw [LinearMap.sum_apply, map_sum, Finset.sum_eq_single s]
         · exact LinearMap.congr_fun (he s) z
         · intro t _ hts

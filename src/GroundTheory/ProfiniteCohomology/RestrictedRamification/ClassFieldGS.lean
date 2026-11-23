@@ -1,6 +1,53 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.RestrictedRamification.ClassFieldGSUnram
-import GroundTheory.GlobalFields.GlobalArtinMap.Kernel
+module
+
+public import GroundTheory.GlobalFields.GlobalArtinMap.ArtinMap
+public import GroundTheory.ProfiniteCohomology.RestrictedRamification.ClassFieldGSDefs
+public import GroundTheory.ProfiniteCohomology.RestrictedRamification.IsUnramifiedOutsideIffLeMaxUnramifiedOutside
+public import GroundTheory.GlobalFields.GlobalArtinMap.Kernel
+public import GroundTheory.ProfiniteCohomology.RestrictedRamification.ClassFieldGSUnram
+import Mathlib.Algebra.Lie.OfAssociative
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
@@ -148,15 +195,15 @@ theorem charToSIdelePos_mk_eq (x : IdeleGroup K) (g : Gal(Ω/K))
 
 end Character
 
-omit [NumberField K] in
 
+omit [NumberField K] in
 theorem liftNormal_apply_of_mem (σ : maximalAbelianExtension K Ω ≃ₐ[K] maximalAbelianExtension K Ω)
     (y : Ω) (hy : y ∈ maximalAbelianExtension K Ω) :
     σ.liftNormal Ω y = (σ ⟨y, hy⟩ : Ω) :=
   AlgEquiv.liftNormal_commutes σ Ω ⟨y, hy⟩
 
-variable (K Ω S n) in
 
+variable (K Ω S n) in
 def charToSIdelePosHom :
     ContinuousMonoidHom (galUnramifiedOutside K Ω S) (Multiplicative (ZMod n)) →*
       (SIdeleClassGroupPos S →* Multiplicative (ZMod n)) where
@@ -174,8 +221,8 @@ def charToSIdelePosHom :
       charToSIdelePos_mk_eq _ x _ (liftNormal_apply_of_mem _),
       charToSIdelePos_mk_eq _ x _ (liftNormal_apply_of_mem _), ContinuousMonoidHom.mul_apply]
 
-variable (S) in
 
+variable (S) in
 def ofIdeleClassPos : IdeleClassGroup K →* SIdeleClassGroupPos S :=
   QuotientGroup.map _ _ (MonoidHom.id _) le_sup_left
 
@@ -268,8 +315,8 @@ theorem charToSIdelePosHom_bijective [IsAlgClosure K Ω] (hS : S.Finite) [NeZero
     Bijective (charToSIdelePosHom K Ω S n) :=
   ⟨charToSIdelePosHom_injective, charToSIdelePosHom_surjective hS⟩
 
-variable (Ω) in
 
+variable (Ω) in
 def charEquivPos [IsAlgClosure K Ω] (hS : S.Finite) [NeZero n] :
     ContinuousMonoidHom (galUnramifiedOutside K Ω S) (Multiplicative (ZMod n)) ≃*
       (SIdeleClassGroupPos S →* Multiplicative (ZMod n)) :=

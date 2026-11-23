@@ -1,13 +1,60 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.OmLongContinuousOn
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CcCoefMMono
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.GermPartsCompactSupport
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.FormLevLimit
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.SecondDefectNonneg
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.LimitOfModuleForms
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.BuiltBoundsCompactOfParts
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.GermPartsCompactSupport
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.FormLevLimit
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.AeNeZeroComplex
 import Formalism.HermitianCurvature.HermitianCurvatureProofs.AdmissibleWordMemBoundedLetterLists
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.PBCutInside
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CcCoefMMono
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.CccoefMono
 import Formalism.HermitianCurvature.HermitianCurvatureProofs.ComponentFamilySettingOfSettingBis
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.LimitOfModuleForms
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.OmLongContinuousOn
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.PBCutInside
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.PositiveDensityModerateGrowth
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Matrix MeasureTheory Filter Topology
 
@@ -161,7 +208,7 @@ theorem rrTop_cont (P : M.Par) (p : KB.Pl P Wp Wq) (F : B.Mat P.k P.r → (Wq �
       have l1 := isLocPt_app hh1 hm hcc.1 hsz
       have l2 := isLocPt_app hh2 hm hcc.2 hsz'
       unfold KB.Pl.RR D.RRplace
-      rw [dif_pos ⟨l1, l2⟩, dif_neg (by omega), if_pos rfl]
+      rw [dite_eq_left ⟨l1, l2⟩, dite_eq_right (by omega), if_pos rfl]
       rfl
     by_cases hw0 : w = []
     · refine (hsV_continuousOn P p F hF h h' hh1 hh2 m hm hsz hsz').congr fun cc hcc => ?_
@@ -217,7 +264,7 @@ theorem rrBelow_cont (P : M.Par) (p : KB.Pl P Wp Wq) (χ : ℝ → ℝ) (ε : �
       have l1 := isLocPt_app hh1 hm hcc.1 hsz
       have l2 := isLocPt_app hh2 hm hcc.2 hsz'
       unfold KB.Pl.RR D.RRplace
-      rw [dif_pos ⟨l1, l2⟩, dif_pos hi]
+      rw [dite_eq_left ⟨l1, l2⟩, dite_eq_left hi]
       rfl
     rintro ⟨c0, c0'⟩ ⟨hc0, hc0'⟩
     obtain ⟨ε1, hε1, H1⟩ := hS hh1 c0 hc0
@@ -297,12 +344,13 @@ end below
 
 section final
 
-theorem ptSize_toStd' (r : ℕ) (g : ℝ) : ∀ (b : ℕ) (P : C.LPt), D.ptSize (D.toStd r g b P) = D.ptSize P
-  | _, [] => rfl
-  | b, (s, t) :: rest => by
-    have ih := ptSize_toStd' r g (b + s) rest
-    simp only [D.toStd, D.ptSize, List.map_cons, List.sum_cons] at ih ⊢
-    rw [ih]
+theorem ptSize_toStd' (r : ℕ) (g : ℝ) : ∀ (b : ℕ) (P : C.LPt), D.ptSize (D.toStd r g b P) = D.ptSize P := by
+  intro b P
+  induction P generalizing b with
+  | nil => rfl
+  | cons block rest ih =>
+    obtain ⟨s, t⟩ := block
+    simpa only [D.toStd, D.ptSize, List.map_cons, List.sum_cons] using congrArg (s + ·) (ih (b + s))
 
 theorem bS_app {E : Type} [Field E] [NumberField E] [IsCMField E] {Wp Wq : InfinitePlace E → Type}
     [∀ x, NormedAddCommGroup (Wp x)] [∀ x, InnerProductSpace ℂ (Wp x)] [∀ x, NormedAddCommGroup (Wq x)]
@@ -416,10 +464,19 @@ theorem level_forms_joint_continuity : GermFibreKernels.KerContB := by
     Complex.I ^ (m - 1) with hlQ
   have hlP0 : lP ≠ 0 := mul_ne_zero (Complex.ofReal_ne_zero.mpr (zpow_pos hg0 _).ne') (pow_ne_zero _ Complex.I_ne_zero)
   have hlQ0 : lQ ≠ 0 := mul_ne_zero (Complex.ofReal_ne_zero.mpr (zpow_pos hg0 _).ne') (pow_ne_zero _ Complex.I_ne_zero)
+  have std_append (h : C.LPt) (b : ℕ) (c : ℂ) :
+      D.toStd S.G.r (S.g : ℝ) b (h ++ [(m, c)]) = D.toStd S.G.r (S.g : ℝ) b h ++
+        [(m, ((((S.g : ℝ) / (2 * Real.pi)) ^ S6.nuBlock S.G.r
+          ((b + D.ptSize h : ℕ) : ℤ) (m : ℤ) : ℝ) : ℂ) * Complex.I ^ (m - 1) * c)] := by
+    induction h generalizing b with
+    | nil => simp [D.toStd, D.ptSize]
+    | cons block rest ih =>
+      obtain ⟨s, t⟩ := block
+      simp only [List.cons_append, D.toStd, ih, D.ptSize, List.map_cons, List.sum_cons, add_assoc]
   have eP : ∀ c : ℂ, PBL.stdS S (P ++ [(m, c)]) = PBL.stdS S P ++ [(m, lP * c)] := fun c =>
-    PBL.toStd_append_blkT _ _ _ _ _ _
+    std_append P 1 c
   have eQ : ∀ c : ℂ, PBL.stdS S (Q ++ [(m, c)]) = PBL.stdS S Q ++ [(m, lQ * c)] := fun c =>
-    PBL.toStd_append_blkT _ _ _ _ _ _
+    std_append Q 1 c
   have hgN : ∀ cc : ℂ × ℂ, KB.gN (PBL.setC S p (PBASM.cutSeq S p f χ n)) v ε i a (P ++ [(m, cc.1)]) (Q ++ [(m, cc.2)]) =
       (((√(PBL.nnS S (P ++ [(m, cc.1)])) * √(PBL.nnS S (Q ++ [(m, cc.2)])) : ℝ) : ℂ) *
         ((1 / (PBL.bS S (P ++ [(m, 1)]) * PBL.bS S (Q ++ [(m, 1)]) * PBL.ΓS S i) : ℝ) : ℂ) *

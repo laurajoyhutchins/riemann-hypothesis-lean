@@ -1,6 +1,55 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.ConeSectionRestriction.GeoDefs
-import GroundTheory.ArithmeticGeometry.ModularCurves.WeierstrassGenus
+module
+
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.ConeSectionRestriction.GeoDefs
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.ConeSectionRestriction.SeamDefs
+public import GroundTheory.ArithmeticGeometry.ModularCurves.WeierstrassGenus
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
@@ -215,7 +264,7 @@ theorem aeval_mem_torusS {K : Type} [Field K] {X : Scheme.{0}} {N d e : ℕ} (i 
     exact Submodule.smul_mem _ r hu
   have key : ∀ s : Finset (Fin (d + 1) →₀ ℕ), s ⊆ c.support → ∀ h,
       evV i (yS y S) V hS (HomogeneousLocalization.Away.mk (grK K N) (yS_mem y hy S) j
-        (∑ α ∈ s, MvPolynomial.C (MvPolynomial.coeff α c) * ∏ k, y k ^ α k) h) ∈
+        (∑ α ∈ s, MvPolynomial.C (AddMonoidAlgebra.coeff c α) * ∏ k, y k ^ α k) h) ∈
         torusS K (fun k => (ht k).unit) S := by
     intro s
     induction s using Finset.induction_on with
@@ -228,17 +277,17 @@ theorem aeval_mem_torusS {K : Type} [Field K] {X : Scheme.{0}} {N d e : ℕ} (i 
       intro hs h
       have hs' : s ⊆ c.support := (Finset.subset_insert a s).trans hs
       have hA : a ∈ c.support := hs (Finset.mem_insert_self a s)
-      have hrest : ∑ α ∈ s, MvPolynomial.C (MvPolynomial.coeff α c) * ∏ k, y k ^ α k ∈ grK K N (j • (S.card * e)) :=
+      have hrest : ∑ α ∈ s, MvPolynomial.C (AddMonoidAlgebra.coeff c α) * ∏ k, y k ^ α k ∈ grK K N (j • (S.card * e)) :=
         Submodule.sum_mem _ fun α hα => hCm _ _ (hmono α (hs' hα))
       simp only [Finset.sum_insert ha]
-      rw [mk_add' _ (hCm _ _ (hmono a hA)) hrest, map_add]
+      rw [mk_add' _ (hCm _ _ (hmono a hA)) hrest, map_add (f := _)]
       refine add_mem ?_ (ih hs' hrest)
       rw [mk_C_mul _ _ (hC _) (hmono a hA), map_mul, evV_const i q hq]
       refine mul_mem ?_ ?_
       · exact Subalgebra.algebraMap_mem _ _
       · rw [evV_monomial i y hy hV S hS ht (fun k => a k) (hdeg a hA)]
         exact Algebra.subset_adjoin ⟨_, mem_expS S j _ (hdeg a hA), rfl⟩
-  have hsum : MvPolynomial.aeval y c = ∑ α ∈ c.support, MvPolynomial.C (MvPolynomial.coeff α c) * ∏ k, y k ^ α k := by
+  have hsum : MvPolynomial.aeval y c = ∑ α ∈ c.support, MvPolynomial.C (AddMonoidAlgebra.coeff c α) * ∏ k, y k ^ α k := by
     rw [MvPolynomial.aeval_def, MvPolynomial.eval₂_eq']
     rfl
   have gen : ∀ (p : MvPolynomial (Fin (N + 1)) K) (hp : p ∈ grK K N (j • (S.card * e))), MvPolynomial.aeval y c = p →

@@ -1,7 +1,42 @@
-import Mathlib
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.PAdicHensel.DatExOf
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.Coordinates
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.PDiscInt
+module
+
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.PAdicHensel.DatExOf
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.PDiscInt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -10,30 +45,6 @@ open NumberField IsDedekindDomain UpperTheory.Gal.W2.Seed
 namespace UpperTheory.Gal.G1
 
 variable {E : Type} [Field E] [NumberField E] [IsCMField E]
-
-private theorem int_of_rat (z : 𝓞 E) (q : ℚ) (h : algebraMap (𝓞 E) E z = (q : E)) : ∃ n : ℤ, q = n := by
-  have h1 : IsIntegral ℤ (algebraMap ℚ E q) := by
-    have h0 : IsIntegral ℤ (algebraMap (𝓞 E) E z) := RingOfIntegers.isIntegral_coe z
-    rw [h] at h0
-    simpa using h0
-  have h2 : IsIntegral ℤ q := (isIntegral_algebraMap_iff (algebraMap ℚ E).injective).1 h1
-  obtain ⟨n, hn⟩ := IsIntegrallyClosed.isIntegral_iff.1 h2
-  exact ⟨n, by simpa using hn.symm⟩
-
-private theorem tr_coe (A : Arith E) : (A.ω : E) + (A.bar A.ω : 𝓞 E) = (A.tr : E) := by
-  have h := congrArg (fun x : 𝓞 E => (x : E)) A.tr_eq
-  simpa using h
-
-private theorem nm_coe (A : Arith E) : (A.ω : E) * (A.bar A.ω : 𝓞 E) = (A.nm : E) := by
-  have h := congrArg (fun x : 𝓞 E => (x : E)) A.nm_eq
-  simpa using h
-
-private theorem sq_coe (A : Arith E) : (A.ω : E) * A.ω = A.tr * A.ω - A.nm := by
-  rw [← tr_coe A, ← nm_coe A]; ring
-
-private theorem coords (A : Arith E) (z : E) (hz : z ∈ IntermediateField.adjoin ℚ {(A.ω : E)}) :
-    ∃ α β : ℚ, z = (α : E) + (β : E) * A.ω :=
-  _root_.UpperTheory.Reformulated.B.AdjoinSimpleRationalCoordinates.coords A z hz
 
 theorem pDiscInt : DiscInt :=
   _root_.UpperTheory.Reformulated.B.Qk39.pDiscInt

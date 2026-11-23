@@ -1,22 +1,58 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.RestrictedRamification.ClassFieldGSFull
-import GroundTheory.ProfiniteCohomology.RestrictedRamification.ClassFieldGSPresentation
-import GroundTheory.ProfiniteCohomology.RestrictedRamification.BaseChangePlaces
-import GroundTheory.ProfiniteCohomology.RestrictedRamification.BrauerFrob
-import GroundTheory.ProfiniteCohomology.LocalClassFormation.CupSymbolSep
-import GroundTheory.ProfiniteCohomology.LocalClassFormation.CupSymbolNorm
-import GroundTheory.ProfiniteCohomology.GlobalClassFormation.SymbolBridge
-import GroundTheory.ProfiniteCohomology.PoincareDuality.Torsion
-import GroundTheory.GlobalFields.TateThesis.ChebotarevAbelian
-import GroundTheory.ProfiniteCohomology.GlobalClassFormation.LocalInvariants
+module
+
+public import GroundTheory.ProfiniteCohomology.RestrictedRamification.ClassFieldGSFull
+public import GroundTheory.ProfiniteCohomology.LocalClassFormation.CupSymbolNorm
+public import GroundTheory.ProfiniteCohomology.PoincareDuality.Torsion
+public import GroundTheory.ProfiniteCohomology.GlobalClassFormation.LocalInvariants
+public import GroundTheory.GlobalFields.CyclotomicCharacters.Character
+public import GroundTheory.ProfiniteCohomology.RestrictedRamification.BaseChangePlaces
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
 
 open NumberField IsDedekindDomain IntermediateField GroundTheory.Global GroundTheory.Global.SemiLocal GroundTheory.LocalField
   GroundTheory.Global.IdeleGroup Function
-
-local notation "ℚ̄" => AlgebraicClosure ℚ
 
 noncomputable section
 
@@ -90,20 +126,6 @@ theorem liftNormal_localArtinMap_apply (v : HeightOneSpectrum (𝓞 K)) (b : (v.
 
 variable {S : Set (HeightOneSpectrum (𝓞 K))} {n : ℕ}
 
-theorem charToSIdelePos_finiteEmbedding
-    (χ : ContinuousMonoidHom (galUnramifiedOutside K Ω S) (Multiplicative (ZMod n)))
-    (v : HeightOneSpectrum (𝓞 K)) (ι : Ω →ₐ[K] AlgebraicClosure (v.adicCompletion K))
-    (b : (v.adicCompletion K)ˣ) {g : Gal(AlgebraicClosure (v.adicCompletion K)/v.adicCompletion K)}
-    (hg : ∀ (y : AlgebraicClosure (v.adicCompletion K))
-      (hy : y ∈ maximalAbelianExtension (v.adicCompletion K) (AlgebraicClosure (v.adicCompletion K))),
-      g y = (localArtinMap (v.adicCompletion K) (AlgebraicClosure (v.adicCompletion K)) b ⟨y, hy⟩ :
-        AlgebraicClosure (v.adicCompletion K))) :
-    charToSIdelePos χ (SIdeleClassGroupPos.mk S (finiteEmbedding v b)) =
-      χ (decompHomS (v.adicCompletion K) S ι g) := by
-  rw [charToSIdelePos_mk_eq χ _ (decompHom (v.adicCompletion K) ι g)
-    (decompHom_apply_of_localArtinMap v ι b hg), decompHomS_eq]
-  rfl
-
 theorem charEquiv_finiteEmbedding [IsAlgClosure K Ω] (hS : S.Finite) [NeZero n]
     (h : Odd n ∨ IsTotallyComplex K)
     (χ : ContinuousMonoidHom (galUnramifiedOutside K Ω S) (Multiplicative (ZMod n)))
@@ -138,6 +160,8 @@ theorem brauerInvZ_galCupClass_decompHomS [IsAlgClosure K Ω] (hS : S.Finite) [N
     contCharComp_apply, charEquiv_finiteEmbedding hS h χ v ι a (liftNormal_localArtinMap_apply v a)]
   rfl
 
+local notation "ℚ̄" => AlgebraicClosure ℚ
+
 theorem placeInv_galCupClass_decompHomS {K : FiniteSubfield} {S : Set (HeightOneSpectrum (𝓞 K.1))}
     (hS : S.Finite) [NeZero n] (h : Odd n ∨ IsTotallyComplex K.1)
     (χ : ContinuousMonoidHom (galUnramifiedOutside K.1 ℚ̄ S) (Multiplicative (ZMod n)))
@@ -154,61 +178,8 @@ end Cup
 
 section Frobenius
 
-theorem unramifiedDegree_liftNormal_localArtinMap_localUniformizer {K : Type} [Field K] [NumberField K]
-    (v : HeightOneSpectrum (𝓞 K)) :
-    unramifiedDegree (v.adicCompletion K) (AlgebraicClosure (v.adicCompletion K))
-      ((localArtinMap (v.adicCompletion K) (AlgebraicClosure (v.adicCompletion K))
-        (localUniformizer v)).liftNormal (AlgebraicClosure (v.adicCompletion K))) =
-      Multiplicative.ofAdd 1 := by
-  have e := unramifiedDegree_of_mk_eq_localReciprocityLimit
-    (mk_eq_localReciprocityLimit_of_forall (liftNormal_localArtinMap_apply v (localUniformizer v)))
-  have ho : GroundTheory.LocalField.ord ((localUniformizer v : (v.adicCompletion K)ˣ) : v.adicCompletion K) = 1 :=
-    ord_eq_one_of_valued_eq_exp v (valued_localUniformizer v)
-  refine e.trans ?_
-  rw [ho, Int.cast_one]
-
 variable {K : FiniteSubfield} {S : Set (HeightOneSpectrum (𝓞 K.1))} {n : ℕ}
 
-theorem sPresentation_single [Finite S] (v : HeightOneSpectrum (𝓞 K.1)) (hv : v ∉ S) :
-    sPresentation S (1, Multiplicative.ofAdd (Finsupp.single ⟨v, hv⟩ 1)) =
-      SIdeleClassGroup.mk S (finiteEmbedding v (localUniformizer v)) := by
-  rw [sPresentation_apply, map_one, one_mul, toAdd_ofAdd, divisorIdele_single, zpow_one]
-
-set_option maxHeartbeats 4000000 in
-
-theorem charEquiv_sPresentation_single_of (hS : S.Finite) [NeZero n] (h : Odd n ∨ IsTotallyComplex K.1)
-    (χ : ContinuousMonoidHom (galUnramifiedOutside K.1 ℚ̄ S) (Multiplicative (ZMod n)))
-    (v : HeightOneSpectrum (𝓞 K.1)) (hv : v ∉ S) (ι : ℚ̄ →ₐ[K.1] AlgebraicClosure (v.adicCompletion K.1))
-    (σ g : Gal(AlgebraicClosure (v.adicCompletion K.1)/v.adicCompletion K.1))
-    (hσ : unramifiedDegree (v.adicCompletion K.1) (AlgebraicClosure (v.adicCompletion K.1)) σ =
-      Multiplicative.ofAdd 1)
-    (hg : ∀ (y : AlgebraicClosure (v.adicCompletion K.1))
-      (hy : y ∈ maximalAbelianExtension (v.adicCompletion K.1) (AlgebraicClosure (v.adicCompletion K.1))),
-      g y = (localArtinMap (v.adicCompletion K.1) (AlgebraicClosure (v.adicCompletion K.1)) (localUniformizer v)
-        ⟨y, hy⟩ : AlgebraicClosure (v.adicCompletion K.1)))
-    (hdeg : unramifiedDegree (v.adicCompletion K.1) (AlgebraicClosure (v.adicCompletion K.1)) g =
-      Multiplicative.ofAdd 1) :
-    have := hS.to_subtype
-    χ (decompHomS (v.adicCompletion K.1) S ι σ) =
-      charEquiv ℚ̄ hS h χ (sPresentation S (1, Multiplicative.ofAdd (Finsupp.single ⟨v, hv⟩ 1))) := by
-  intro _
-  have h1 : unramifiedDegree (v.adicCompletion K.1) (AlgebraicClosure (v.adicCompletion K.1)) (σ⁻¹ * g) = 1 := by
-    rw [map_mul, map_inv, hσ, hdeg, inv_mul_cancel]
-  have h2 := decompHomS_eq_one_of_unramifiedDegree_eq_one S ι hv _ h1
-  rw [map_mul, map_inv, inv_mul_eq_one] at h2
-  rw [sPresentation_single, charEquiv_finiteEmbedding hS h χ v ι (localUniformizer v) hg, h2]
-
-theorem charEquiv_sPresentation_single (hS : S.Finite) [NeZero n] (h : Odd n ∨ IsTotallyComplex K.1)
-    (χ : ContinuousMonoidHom (galUnramifiedOutside K.1 ℚ̄ S) (Multiplicative (ZMod n)))
-    (v : HeightOneSpectrum (𝓞 K.1)) (hv : v ∉ S) (ι : ℚ̄ →ₐ[K.1] AlgebraicClosure (v.adicCompletion K.1))
-    (σ : Gal(AlgebraicClosure (v.adicCompletion K.1)/v.adicCompletion K.1))
-    (hσ : unramifiedDegree (v.adicCompletion K.1) (AlgebraicClosure (v.adicCompletion K.1)) σ =
-      Multiplicative.ofAdd 1) :
-    have := hS.to_subtype
-    χ (decompHomS (v.adicCompletion K.1) S ι σ) =
-      charEquiv ℚ̄ hS h χ (sPresentation S (1, Multiplicative.ofAdd (Finsupp.single ⟨v, hv⟩ 1))) :=
-  charEquiv_sPresentation_single_of hS h χ v hv ι σ _ hσ (liftNormal_localArtinMap_apply v _)
-    (unramifiedDegree_liftNormal_localArtinMap_localUniformizer v)
 
 end Frobenius
 

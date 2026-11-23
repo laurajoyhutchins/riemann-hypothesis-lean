@@ -1,23 +1,50 @@
-import Mathlib
-import Development.ResolutionOfSingularities.Foundations.Blowup.BlowupBasic
-import Development.ResolutionOfSingularities.Foundations.Blowup.BlowupExistence
-import Development.ResolutionOfSingularities.Foundations.Blowup.BlowupProperties
-import Development.ResolutionOfSingularities.EmbeddedResolution.IteratedBlowups.ClopenRestriction
-import Development.ResolutionOfSingularities.EmbeddedResolution.EtaleCoordinates.AffineSpaceCoordinates
-import Development.ResolutionOfSingularities.EmbeddedResolution.EtaleCoordinates.SmoothCoordinateCodimension
+module
+
+public import Development.ResolutionOfSingularities.EmbeddedResolution.ResolutionDescent.AffineSpaceZeroSection
 import Development.ResolutionOfSingularities.EmbeddedResolution.EtaleCoordinates.SmoothCoordinateCodimensionPullback
-import Development.ResolutionOfSingularities.EmbeddedResolution.EtaleCoordinates.StrictNormalCrossings
-import Development.ResolutionOfSingularities.EmbeddedResolution.ResolutionDescent.AffineResolutionRule
-import Development.ResolutionOfSingularities.EmbeddedResolution.ResolutionDescent.AffineSpaceOrigin
-import Development.ResolutionOfSingularities.EmbeddedResolution.ResolutionDescent.AffineSpaceZeroSection
-import Development.ResolutionOfSingularities.EmbeddedResolution.ResolutionDescent.AffineSpaceProduct
-import Development.ResolutionOfSingularities.EmbeddedResolution.ResolutionDescent.AffineSpaceChartPresentation
-import Development.ResolutionOfSingularities.EmbeddedResolution.ResolutionDescent.AffineSpaceLinearEmbeddings
 import Development.ResolutionOfSingularities.Foundations.Schemes.IdealSheafData
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.OrderReductionProperties
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MonomialCase.CenterInvariant
-import Development.ResolutionOfSingularities.Foundations.BlowupUniversalProperty
-import Development.ResolutionOfSingularities.EmbeddedResolution.ResolutionOfSingularities
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 universe u
 
 open CategoryTheory AlgebraicGeometry TopologicalSpace
@@ -105,7 +132,7 @@ private theorem appTop_comp_projLeft_coord (k : Type u) [Field k] (M : ℕ) {T :
           (⟨Sum.inl j⟩ : ULift.{u, 0} (Fin M ⊕ Fin 1))) := by
   rw [Scheme.Hom.comp_appTop, CommRingCat.comp_apply, projLeft_appTop_coord]
 
-private theorem exists_replaceLastCoord (k : Type u) [Field k] (M : ℕ)
+theorem exists_replaceLastCoord (k : Type u) [Field k] (M : ℕ)
     (G : ↑((affineSpaceIndexedBy k (ULift.{u, 0} (Fin M))).presheaf.obj (Opposite.op ⊤)))
     (s : ↑((↑(pullbackBasicOpen k M G) : Scheme.{u}).presheaf.obj (Opposite.op ⊤))) :
     ∃ f : (↑(pullbackBasicOpen k M G) : Scheme.{u}) ⟶ affineSpaceTimesLine k M,
@@ -188,14 +215,6 @@ theorem replaceLastCoord_comp_projLeft (k : Type u) [Field k] (M : ℕ)
     replaceLastCoord k M G s ≫ projLeft k M 1 = (pullbackBasicOpen k M G).ι ≫ projLeft k M 1 :=
   (exists_replaceLastCoord k M G s).choose_spec.2.2.2
 
-@[simp]
-theorem replaceLastCoord_comp_projLeft_assoc (k : Type u) [Field k] (M : ℕ)
-    (G : ↑((affineSpaceIndexedBy k (ULift.{u, 0} (Fin M))).presheaf.obj (Opposite.op ⊤)))
-    (s : ↑((↑(pullbackBasicOpen k M G) : Scheme.{u}).presheaf.obj (Opposite.op ⊤))) {Z : Scheme.{u}}
-    (g : affineSpaceIndexedBy k (ULift.{u, 0} (Fin M)) ⟶ Z) :
-    replaceLastCoord k M G s ≫ projLeft k M 1 ≫ g = (pullbackBasicOpen k M G).ι ≫ projLeft k M 1 ≫ g := by
-  rw [← Category.assoc, replaceLastCoord_comp_projLeft, Category.assoc]
-
 private theorem mem_pullbackBasicOpen_iff (k : Type u) [Field k] (M : ℕ)
     (G : ↑((affineSpaceIndexedBy k (ULift.{u, 0} (Fin M))).presheaf.obj (Opposite.op ⊤)))
     (y : ↥(affineSpaceTimesLine k M)) :
@@ -204,7 +223,7 @@ private theorem mem_pullbackBasicOpen_iff (k : Type u) [Field k] (M : ℕ)
   Iff.symm (iff_of_eq (congrArg (fun U : (affineSpaceTimesLine k M).Opens => y ∈ U)
     (Scheme.preimage_basicOpen (projLeft k M 1) G)))
 
-private theorem exists_comp_ι_eq_replaceLastCoord (k : Type u) [Field k] (M : ℕ)
+theorem exists_comp_ι_eq_replaceLastCoord (k : Type u) [Field k] (M : ℕ)
     (G : ↑((affineSpaceIndexedBy k (ULift.{u, 0} (Fin M))).presheaf.obj (Opposite.op ⊤)))
     (s : ↑((↑(pullbackBasicOpen k M G) : Scheme.{u}).presheaf.obj (Opposite.op ⊤))) :
     ∃ g : (↑(pullbackBasicOpen k M G) : Scheme.{u}) ⟶ (↑(pullbackBasicOpen k M G) : Scheme.{u}),
@@ -256,7 +275,7 @@ private theorem appTop_surjective_of_isAffine {X Y : Scheme.{u}} (f : X ⟶ Y)
     Function.Surjective (ConcreteCategory.hom (Scheme.Hom.appTop f)) :=
   (IsClosedImmersion.isAffine_surjective_of_isAffine ..).2
 
-private theorem exists_appTop_eq_of_isClosedImmersion (k : Type u) [Field k] (M : ℕ) {A : Scheme.{u}}
+theorem exists_appTop_eq_of_isClosedImmersion (k : Type u) [Field k] (M : ℕ) {A : Scheme.{u}}
     (ρ : A ⟶ affineSpaceIndexedBy k (ULift.{u, 0} (Fin M))) [IsClosedImmersion ρ]
     (F : ↑(A.presheaf.obj (Opposite.op ⊤))) :
     ∃ G : ↑((affineSpaceIndexedBy k (ULift.{u, 0} (Fin M))).presheaf.obj (Opposite.op ⊤)),
@@ -352,7 +371,7 @@ private theorem isIso_shiftLastCoord_lastCoordinate_add_inv (k : Type u) [Field 
       ← Scheme.Hom.comp_appTop, shiftLastCoord_comp_ι, replaceLastCoord_appTop_lastCoordinate]
     ring
   · apply shiftLastCoord_comp_shiftLastCoord
-    rw [map_add, shiftLastCoord_appTop_unitOnPullbackBasicOpen_inv_val, ← CommRingCat.comp_apply,
+    rw [map_add (f := _), shiftLastCoord_appTop_unitOnPullbackBasicOpen_inv_val, ← CommRingCat.comp_apply,
       ← Scheme.Hom.comp_appTop, shiftLastCoord_comp_ι, replaceLastCoord_appTop_lastCoordinate]
     ring
 
@@ -388,7 +407,7 @@ private theorem exists_isClosedImmersion_pullbackBasicOpen (k : Type u) [Field k
       replaceLastCoord_appTop_lastCoordinate, replaceLastCoord_appTop_pullbackAlongProjection, ← unitOnPullbackBasicOpen_val, map_mul,
       map_add, h0, zero_add, ← map_mul, Units.inv_mul, map_one]
 
-private theorem exists_isClosedImmersion_basicOpen_pullbackBasicOpen (k : Type u) [Field k] (M : ℕ) {A : Scheme.{u}}
+theorem exists_isClosedImmersion_basicOpen_pullbackBasicOpen (k : Type u) [Field k] (M : ℕ) {A : Scheme.{u}}
     (ρ : A ⟶ affineSpaceIndexedBy k (ULift.{u, 0} (Fin M))) [IsClosedImmersion ρ]
     (F : ↑(A.presheaf.obj (Opposite.op ⊤))) :
     ∃ e : (↑(A.basicOpen F) : Scheme.{u}) ⟶

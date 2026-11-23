@@ -1,8 +1,52 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.UnipotentBlockMatrices.UnipotentBlockPairs
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.UnipotentBlockMatrices.ClosureOrbits.FinClosure
-import Development.AutomorphicArithmetic.Foundations.Convolution.CentreSplitting.FormsIrr
-import Development.AutomorphicArithmetic.Foundations.Convolution.CentreSplitting.ClsBasic
-import GroundTheory.AutomorphicForms.UnitaryAdmissible
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.UnipotentBlockMatrices.UnipotentBlockPairs
+public import Development.AutomorphicArithmetic.Foundations.Convolution.CentreSplitting.LocalRepresentationL2
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.UnipotentBlockMatrices.ClosureOrbits.FinClosure
+public import Development.AutomorphicArithmetic.Foundations.Convolution.CentreSplitting.ClsBasic
+public import Development.AutomorphicArithmetic.Foundations.Convolution.CentreSplitting.FormsIrr
+import GroundTheory.AutomorphicForms.CuspidalDiscreteness.SummandsAreCuspForms
+import GroundTheory.AutomorphicForms.UnitaryAdmissible.CuspFinite
+import GroundTheory.AutomorphicForms.UnitaryAdmissible.CuspScalar
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MeasureTheory NumberField Set Filter Topology
 open GroundTheory.Automorphic GroundTheory.Automorphic.Reduction GroundTheory.Automorphic.RightCosetSpace
@@ -77,6 +121,7 @@ private theorem exists_level (F : Submodule ℂ (L2 μ)) [FiniteDimensional ℂ 
       have := congrArg Subtype.val (b.sum_repr ⟨x, hx⟩)
       rw [Submodule.coe_sum] at this
       exact this.symm
+
     rw [e, map_sum]
     refine Finset.sum_congr rfl fun i _ => ?_
     rw [map_smul, hUx i u (Subgroup.mem_iInf.1 hu i)]
@@ -136,9 +181,9 @@ theorem kfin {V : Submodule ℂ (L2 μ)} (hV : IsSummand μ V) {v : L2 μ} (hv :
     exact hS _ _ hψ
   have hFo := orth_stable (rk μ) (rk_adj μ) hF
   have hq : FiniteDimensional ℂ (U ⧸ Fᗮ.comap ι) := by
-    have e : Fᗮ.comap ι = LinearMap.ker ((F.orthogonalProjection : L2 μ →ₗ[ℂ] F) ∘ₗ ι) := by
+    have e : Fᗮ.comap ι = LinearMap.ker ((F.orthogonalProjectionOnto : L2 μ →ₗ[ℂ] F) ∘ₗ ι) := by
       ext x
-      simp [Submodule.orthogonalProjection_eq_zero_iff]
+      simp [Submodule.orthogonalProjectionOnto_eq_zero_iff]
     rw [e]
     exact (LinearMap.quotKerEquivRange _).symm.finiteDimensional
   obtain ⟨q, hqm, hqd, hqN⟩ := exists_monic_aeval_mem C (Fᗮ.comap ι) (hCS _ hFo)
@@ -152,7 +197,7 @@ theorem kfin {V : Submodule ℂ (L2 μ)} (hV : IsSummand μ V) {v : L2 μ} (hv :
     · rw [zero_smul]
       exact ρ_centralZ_eq_zero (hUc hφ.1.1)
     · have := LinearMap.mem_ker.1 ((Submodule.mem_iInf _).1 ((Submodule.mem_iInf _).1 hφ.2 u) hu)
-      rwa [LinearMap.sub_apply, Module.End.one_apply, sub_eq_zero] at this
+      rwa [LinearMap.sub_apply, one_apply_eq_self, sub_eq_zero] at this
   refine mem_of_mem_closure_of_finite (rk μ) (rk_adj μ) _ F (E.map (clsL μ)) hF (loc_fin μ hV) ?_ (mem_orbit μ v)
     (by rw [hcl]; exact hv)
   intro S hSW hS hbot x hx
@@ -176,12 +221,13 @@ theorem kfin {V : Submodule ℂ (L2 μ)} (hV : IsSummand μ V) {v : L2 μ} (hv :
       rw [e2, Submodule.mem_orthogonal]
       intro f hf
       have h3 : ⟪f, r (clsL μ φ)⟫_ℂ = ⟪f, clsL μ φ⟫_ℂ := by
+        set_option synthInstance.maxHeartbeats 100000 in
         have h4 := (rightRegularRep (Gam K n) μ).inner_map_map (finOne K n u) f (clsL μ φ)
         rw [hfix u hu f hf] at h4
         exact h4
       rw [inner_sub_right, h3, sub_self]
     have h0 := hz ψ h1 h2
-    rw [LinearMap.mem_ker, LinearMap.sub_apply, Module.End.one_apply]
+    rw [LinearMap.mem_ker, LinearMap.sub_apply, one_apply_eq_self]
     exact congrArg Subtype.val h0
 
 end

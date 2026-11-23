@@ -1,5 +1,47 @@
-import Formalism.LocalToGlobal.GlobalTheory.BlockActions.NfAllBrTenLe
+module
+
+public import Formalism.LocalToGlobal.GlobalTheory.BlockActions.NfAllBrTenLe
 import Formalism.LocalToGlobal.Columns.CoefficientsModP.FkPderivBlockEmbNe
+import Formalism.LocalToGlobal.KernelLattices.KernelLocalFactors.InterlaceDifferenceShiftInvariant
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Matrix.Order
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -26,14 +68,14 @@ theorem tf_add_left (f f' g : MvPolynomial σ ℂ) :
     tf_eq_sum f g (f.support ∪ f'.support) Finset.subset_union_left,
     tf_eq_sum f' g (f.support ∪ f'.support) Finset.subset_union_right, ← Finset.sum_add_distrib]
   refine Finset.sum_congr rfl fun m _ => ?_
-  rw [coeff_add]
+  rw [MvPolynomial.coeff_add]
   ring
 
 theorem tf_smul_left (c : ℂ) (f g : MvPolynomial σ ℂ) :
     Formalism.REAL.fockF (c • f) g = c * Formalism.REAL.fockF f g := by
   rw [tf_eq_sum (c • f) g f.support support_smul, tf_eq_sum f g f.support le_rfl, Finset.mul_sum]
   refine Finset.sum_congr rfl fun m _ => ?_
-  rw [coeff_smul, smul_eq_mul]
+  rw [MvPolynomial.coeff_smul, smul_eq_mul]
   ring
 
 theorem tf_add_right (f g g' : MvPolynomial σ ℂ) :
@@ -41,7 +83,7 @@ theorem tf_add_right (f g g' : MvPolynomial σ ℂ) :
   unfold Formalism.REAL.fockF
   rw [← Finset.sum_add_distrib]
   refine Finset.sum_congr rfl fun m _ => ?_
-  rw [coeff_add, star_add]
+  rw [MvPolynomial.coeff_add, star_add]
   ring
 
 theorem tf_smul_right (c : ℂ) (f g : MvPolynomial σ ℂ) :
@@ -49,7 +91,7 @@ theorem tf_smul_right (c : ℂ) (f g : MvPolynomial σ ℂ) :
   unfold Formalism.REAL.fockF
   rw [Finset.mul_sum]
   refine Finset.sum_congr rfl fun m _ => ?_
-  rw [coeff_smul, smul_eq_mul, star_mul']
+  rw [MvPolynomial.coeff_smul, smul_eq_mul, star_mul']
   ring
 
 def tfB : MvPolynomial σ ℂ →ₗ[ℂ] MvPolynomial σ ℂ →ₗ⋆[ℂ] ℂ :=
@@ -77,8 +119,9 @@ theorem tf_quad {k : ℕ} (w : Fin k → MvPolynomial σ ℂ) (x : Fin k → ℂ
     star x ⬝ᵥ (Matrix.of fun i j => Formalism.REAL.fockF (w j) (w i)) *ᵥ x =
       Formalism.REAL.fockF (∑ j, x j • w j) (∑ i, x i • w i) := by
   rw [← tfB_apply]
+
   simp only [map_sum, LinearMap.sum_apply, map_smul, LinearMap.smul_apply, map_smulₛₗ, tfB_apply, smul_eq_mul,
-    dotProduct, mulVec, Matrix.of_apply, Pi.star_apply, Finset.mul_sum]
+  dotProduct, mulVec, Matrix.of_apply, Pi.star_apply, Finset.mul_sum]
   refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
   simp only [starRingEnd_apply]
   ring
@@ -163,6 +206,7 @@ theorem blkFockLe : BlockFockBound := by
   have hP' : P = ∑ i, a i • Formalism.MainNotions.product_first_zeroth_parts.ten (f i) := by
     rw [← hsum]; exact Finset.sum_congr rfl fun i _ => by rw [hfeq i]
   have hblk : Formalism.MainNotions.product_first_zeroth_parts.blk (fun τ => F τ) P = ∑ i, a i • Formalism.MainNotions.product_first_zeroth_parts.ten (fun τ => F τ (f i τ)) := by
+
     rw [hP', map_sum]
     exact Finset.sum_congr rfl fun i _ => by rw [map_smul, Formalism.MainNotions.product_first_zeroth_parts.blk_ten]
   set G : ι → Matrix (Fin k) (Fin k) ℂ := fun τ => Matrix.of fun i j => Formalism.REAL.fockF (f j τ) (f i τ) with hG

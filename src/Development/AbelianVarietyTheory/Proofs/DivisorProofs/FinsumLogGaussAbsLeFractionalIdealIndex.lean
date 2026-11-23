@@ -1,8 +1,62 @@
-import Mathlib
+module
+
+public import ReciprocityTheory.SemistableReduction.SphereLogIntegrableStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FinsumLogISupInt
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.NormalizedPointHeightLatticeAlgebraMap
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AbelianVarietyTheory.Definitions.Divisors.HasBoundedPolesGlobalData
 import Development.AbelianVarietyTheory.Definitions.Divisors.HermSysHypOneLeLambdaZero
-import ReciprocityTheory.SemistableReduction.TorusL2CauchyInequality
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FinsumLogISupInt
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GaussAbsEqISup
+import Development.AbelianVarietyTheory.Definitions.Divisors.JoinCastSucc
+import Development.AbelianVarietyTheory.Definitions.Divisors.LinearIndependentBasisCoords
+import ReciprocityTheory.GeometryOfNumbers.LatticeCovolumes.EllipsoidStA
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -14,6 +68,30 @@ open GlobalTheory GlobalTheory.ChowHt GlobalTheory.Adelic GlobalTheory.HermTools
 namespace GlobalTheory.GaussFrac
 
 variable {F : Type} [Field F] [NumberField F]
+
+private theorem gaussAbs_eq_iSup_local {K ι : Type} [Field K] [NumberField K]
+    (v : FinitePlace K) (g : MvPolynomial ι K) (s : Finset (ι →₀ ℕ))
+    (hs : g.support ⊆ s) (hne : s.Nonempty) :
+    gaussAbs v g = ⨆ k : s, v (AddMonoidAlgebra.coeff g (k : ι →₀ ℕ)) := by
+  classical
+  have : Nonempty s := hne.to_subtype
+  have hsup : (g.support.sup fun m => (v (AddMonoidAlgebra.coeff g m)).toNNReal) =
+      s.sup fun m => (v (AddMonoidAlgebra.coeff g m)).toNNReal := by
+    refine le_antisymm (Finset.sup_mono hs) (Finset.sup_le fun m hm => ?_)
+    by_cases hm' : m ∈ g.support
+    · exact Finset.le_sup (f := fun m => (v (AddMonoidAlgebra.coeff g m)).toNNReal) hm'
+    · rw [MvPolynomial.notMem_support_iff.1 hm', map_zero, Real.toNNReal_zero]
+      exact bot_le
+  unfold gaussAbs
+  rw [hsup]
+  obtain ⟨k, hk, hkeq⟩ := Finset.exists_mem_eq_sup s hne fun m => (v (AddMonoidAlgebra.coeff g m)).toNNReal
+  rw [hkeq, Real.coe_toNNReal _ (apply_nonneg _ _)]
+  refine le_antisymm (le_ciSup (f := fun k : s => v (AddMonoidAlgebra.coeff g (k : ι →₀ ℕ)))
+    (Set.finite_range _).bddAbove ⟨k, hk⟩) (ciSup_le fun m => ?_)
+  have h1 : (v (AddMonoidAlgebra.coeff g (m : ι →₀ ℕ))).toNNReal ≤ (v (AddMonoidAlgebra.coeff g k)).toNNReal := by
+    rw [← hkeq]
+    exact Finset.le_sup (f := fun m => (v (AddMonoidAlgebra.coeff g m)).toNNReal) m.2
+  exact (Real.toNNReal_le_toNNReal_iff (apply_nonneg _ _)).1 h1
 
 def scaledIdeal (c : 𝓞 F) (I : Submodule (𝓞 F) F) : Ideal (𝓞 F) :=
   (I.map (LinearMap.lsmul (𝓞 F) F c)).comap (Algebra.linearMap (𝓞 F) F)
@@ -60,7 +138,7 @@ theorem absNorm_span_eq (c : 𝓞 F) (hc : c ≠ 0) (I : Submodule (𝓞 F) F) (
 
 theorem finsum_log_gaussAbs_le : ∀ (F : Type) [Field F] [NumberField F] (τ : Type) (g : MvPolynomial τ F), g ≠ 0 →
     ∀ (I : Submodule (𝓞 F) F) (δ : F), δ ≠ 0 → 1 ≤ I →
-    (∃ c : 𝓞 F, c ≠ 0 ∧ ∀ y ∈ I, c • y ∈ (1 : Submodule (𝓞 F) F)) → (∀ m, coeff m g / δ ∈ I) →
+    (∃ c : 𝓞 F, c ≠ 0 ∧ ∀ y ∈ I, c • y ∈ (1 : Submodule (𝓞 F) F)) → (∀ m, AddMonoidAlgebra.coeff g m / δ ∈ I) →
     ∑ᶠ q : FinitePlace F, Real.log (gaussAbs q g) ≤
       Real.log ((1 : Submodule (𝓞 F) F).toAddSubgroup.relIndex I.toAddSubgroup) +
         ∑ᶠ q : FinitePlace F, Real.log (q δ) := by
@@ -69,13 +147,13 @@ theorem finsum_log_gaussAbs_le : ∀ (F : Type) [Field F] [NumberField F] (τ : 
   have hne : g.support.Nonempty := MvPolynomial.support_nonempty.2 hg
   set n := g.support.card
   set e := g.support.equivFin
-  have hz : ∀ i : Fin n, ∃ z : 𝓞 F, algebraMap (𝓞 F) F z = c • (coeff (e.symm i : τ →₀ ℕ) g / δ) :=
+  have hz : ∀ i : Fin n, ∃ z : 𝓞 F, algebraMap (𝓞 F) F z = c • (AddMonoidAlgebra.coeff g (e.symm i : τ →₀ ℕ) / δ) :=
     fun i => Submodule.mem_one.1 (hcI _ (hcoef _))
   choose b hb using hz
   have hc' : (c : F) ≠ 0 := by exact_mod_cast hc
-  have hb' : ∀ i, (b i : F) = (c : F) * (coeff (e.symm i : τ →₀ ℕ) g / δ) := fun i => by
+  have hb' : ∀ i, (b i : F) = (c : F) * (AddMonoidAlgebra.coeff g (e.symm i : τ →₀ ℕ) / δ) := fun i => by
     simpa [Algebra.smul_def] using hb i
-  have hcoeff : ∀ i : Fin n, coeff (e.symm i : τ →₀ ℕ) g = δ * ((b i : F) / c) := by
+  have hcoeff : ∀ i : Fin n, AddMonoidAlgebra.coeff g (e.symm i : τ →₀ ℕ) = δ * ((b i : F) / c) := by
     intro i
     rw [hb' i]
     field_simp
@@ -94,7 +172,7 @@ theorem finsum_log_gaussAbs_le : ∀ (F : Type) [Field F] [NumberField F] (τ : 
       lt_of_lt_of_le (FinitePlace.pos_iff.2 (div_ne_zero hbi₀ hc'))
         (le_ciSup (f := fun i => q ((b i : F) / c)) (Set.finite_range _).bddAbove i₀)
     have hqδ : 0 < q δ := FinitePlace.pos_iff.2 hδ
-    rw [← Real.log_mul hqδ.ne' hpos.ne', GlobalTheory.HSChoice.BaseChange.gaussAbs_eq_iSup q g g.support subset_rfl ⟨m₀, hm₀⟩,
+    rw [← Real.log_mul hqδ.ne' hpos.ne', gaussAbs_eq_iSup_local q g g.support subset_rfl ⟨m₀, hm₀⟩,
       ← e.symm.iSup_comp, Real.mul_iSup_of_nonneg hqδ.le]
     congr 1
     refine iSup_congr fun i => ?_

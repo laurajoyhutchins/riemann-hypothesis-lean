@@ -1,5 +1,53 @@
-import Development.AutomorphicArithmetic.CommutativeAlgebra.EtaleCohomology.AddIff
-import Development.AutomorphicArithmetic.CommutativeAlgebra.EtaleCohomology.EvalExact
+module
+
+public import Development.AutomorphicArithmetic.CommutativeAlgebra.EtaleCohomology.ZeroPull
+public import Development.AutomorphicArithmetic.CommutativeAlgebra.EtaleCohomology.AddIff
+public import Development.AutomorphicArithmetic.CommutativeAlgebra.EtaleCohomology.EvalExact
+import Mathlib.Algebra.Category.Grp.Abelian
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+public import Mathlib.CategoryTheory.Abelian.Exact
+import Mathlib.CategoryTheory.Abelian.FunctorCategory
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -21,12 +69,14 @@ private theorem sum_sec_eq_zero (Pa : Parts C) (F : Coef C) (hF : Pa.Add F) {Q P
   have hnat : ∀ i, (F.map (S.f s)).hom (a i • c A ((u i).app A y)) =
       a i • c (S.B s) ((u i).app _ (Q.map (S.f s) y)) := by
     intro i
-    rw [map_zsmul, hc' (S.f s) _, FunctorToTypes.naturality]
+    rw [map_zsmul, hc' (S.f s) _, NatTrans.naturality_apply]
+
   rw [map_zero, map_sum]
   simp only [hnat]
   rcases hs s with h0 | h0
   · have hL := congrArg
       (Finsupp.liftAddHom fun p : P.obj (S.B s) => zmultiplesHom (F.obj (S.B s)) (c (S.B s) p)) h0
+
     simpa [map_sum] using hL
   · apply (hF _ _ h0).1
     funext e
@@ -41,8 +91,9 @@ private theorem locSum_zero (Pa : Parts C) (T : Theory C) (F : Coef C) (hF : Pa.
   funext A y
   let E : T.H Q F 0 →+ F.obj A := AddMonoidHom.mk' (fun z => (T.zero Q F z).1 A y) (by
     intro z w
-    simp [map_add])
+    simp [map_add (f := _)])
   show E (∑ i, a i • T.pull (u i) F 0 x) = 0
+
   rw [map_sum]
   have hE : ∀ i, E (a i • T.pull (u i) F 0 x) = a i • (T.zero P F x).1 A ((u i).app A y) := by
     intro i
@@ -60,6 +111,7 @@ private theorem locSum_shift (T : Theory C) {Q P : C ⥤ Type} {I : Type} [Finty
   obtain ⟨w, rfl⟩ := (T.ex₁ P S hS j x).1 (hsub.elim _ _)
   have hδ : ∑ i, a i • T.δ Q S hS j (T.pull (u i) S.X₃ j w) =
       T.δ Q S hS j (∑ i, a i • T.pull (u i) S.X₃ j w) := by
+
     rw [map_sum]
     simp only [map_zsmul]
   simp only [T.pull_δ]

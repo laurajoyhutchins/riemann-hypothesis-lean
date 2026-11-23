@@ -1,5 +1,53 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.HkDefs
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.ProdPrimesDvd
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.HkDefs
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.ProdPrimesDvd
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.MvPolynomial.IrreducibleQuadratic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open MvPolynomial Equiv UpperTheory.V.AlgebraTools.Hk
 
@@ -16,7 +64,7 @@ private theorem dvd_sub_sb {R : Type} [CommRing R] {n : ℕ} (i j : Fin n) (y : 
   | C a => simp
   | add p q hp hq =>
     have := dvd_add hp hq
-    rw [map_add]
+    rw [map_add (f := _)]
     convert this using 1
     ring
   | mul_X p k hp =>
@@ -57,6 +105,7 @@ private theorem alt_sb {R : Type} [CommRing R] {n : ℕ} {i j : Fin n} (h : i �
     · by_cases h2 : k = j
       · subst h2; simp [sb]
       · rw [swap_apply_of_ne_of_ne h1 h2]
+
   rw [alt, map_sum]
   refine Finset.sum_involution (fun w _ => swap i j * w) (fun w _ => ?_) (fun w _ _ e => ?_)
     (fun w _ => Finset.mem_univ _) (fun w _ => ?_)
@@ -88,5 +137,5 @@ theorem UpperTheory.V.AlgebraTools.hkDdSpec :
     · exact absurd e h2.ne'
   obtain ⟨y, hy⟩ := hd
   have h : ∃ y, De R n * y = alt x := ⟨y, hy.symm⟩
-  rw [dd, dif_pos h]
+  rw [dd, dite_eq_left h]
   exact h.choose_spec

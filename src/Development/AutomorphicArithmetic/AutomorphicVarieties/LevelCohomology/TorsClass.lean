@@ -1,14 +1,59 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.LevelCohomology.UnramifiedCocycleIsCoboundaryOfBernoulliUnit
-import Development.AutomorphicArithmetic.AutomorphicVarieties.HeightAndVanishing.Counts
-import Development.AutomorphicArithmetic.AutomorphicVarieties.GeneratorCountTuples.LemmaK
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.ExistsPrimitiveRootPow
-import Formalism.GaloisCohomology.LocalTateDualityK
-import Development.AutomorphicArithmetic.AutomorphicVarieties.LevelCohomology.KwlOnto
-import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.SelmerTransport.Control
-import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.SelmerTransport.ContTw
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CharacterLevelBounds.ShaFamMono
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.SelmerTransport.ContTw
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.SelmerTransport.Control
+import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.SelmerTransport.DvrFacts
 import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.SelmerTransport.Places
 import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.SelmerTransport.QoFacts
-import Development.AutomorphicArithmetic.AutomorphicVarieties.OddResidueBounds.FixLev
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.LevelCohomology.KwlOnto
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.OddResidueBounds.FixLev
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.FieldTheory.Galois.Profinite
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.GroupTheory.Nilpotent
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Development.AutomorphicArithmetic.AutomorphicVarieties.LevelCohomology.UnramifiedCocycleIsCoboundaryOfBernoulliUnit
+import Development.AutomorphicArithmetic.AutomorphicVarieties.PrimitiveFrobeniusFixed.IsAdmissiblePrimeListNil
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Formalism.ConjugateSelfDual ReciprocityTheory.Gal Formalism.GaloisCohomology UpperTheory.V UpperTheory.V.Base UpperTheory.V.Odd UpperTheory.V.ML UpperTheory.V.X
 
@@ -44,7 +89,7 @@ private theorem hom_kill (Ω : Type) [Field Ω] [Algebra ℚ Ω] [IsAlgClosure �
       refine ⟨hι.comp φ, ?_, ?_⟩
       · intro a b
         show φ (ι (a * b)) = φ (ι a) + φ (ι b)
-        rw [← map_add]
+        rw [← map_add (f := _)]
         congr 1
         exact Subtype.ext (h2 a b)
       · intro A hA g' hg'
@@ -93,7 +138,7 @@ private theorem tors_class {R Γ M : Type} [CommRing R] [Group Γ] [TopologicalS
     exact hbound g
   rw [← Submodule.Quotient.mk_smul, hzero, Submodule.Quotient.mk_zero]
 
-set_option maxHeartbeats 1000000 in
+
 theorem UpperTheory.V.X.zOne :
     ∀ (Ω : Type) [Field Ω] [Algebra ℚ Ω] [IsAlgClosure ℚ Ω] (l : ℕ) [Fact l.Prime] (O : Type) [CommRing O] [IsDomain O] [IsDiscreteValuationRing O] [Algebra ℤ_[l] O] [Module.Finite ℤ_[l] O], l ≠ 2 → ∀ e : ℕ, 1 ≤ e → l - 1 ∣ e → Chr.V l e (1 : G ℚ Ω →* Oˣ) = 0 := by
   intro Ω _ _ _ l _ O _ _ _ _ _ hl e he1 he
@@ -123,7 +168,7 @@ theorem UpperTheory.V.X.zOne :
     obtain ⟨c, hc⟩ := pow_cong l (cycZ ℚ Ω l g) e he
     have hA : algebraMap ℤ_[l] O (((cycZ ℚ Ω l g ^ (-(e : ℤ)) : ℤ_[l]ˣ) : ℤ_[l])) =
         1 + (l : O) * algebraMap ℤ_[l] O c := by
-      rw [← map_natCast (algebraMap ℤ_[l] O), ← map_mul, ← hc, ← map_one (algebraMap ℤ_[l] O), ← map_add]
+      rw [← map_natCast (algebraMap ℤ_[l] O), ← map_mul, ← hc, ← map_one (algebraMap ℤ_[l] O), ← map_add (f := _)]
       congr 1
       ring
     rw [act, hA, add_smul, one_smul, mul_comm, mul_smul, Nat.cast_smul_eq_nsmul, hy, smul_zero, add_zero]
@@ -140,7 +185,7 @@ theorem UpperTheory.V.X.zOne :
     obtain ⟨y, hyS⟩ := x
     obtain ⟨z, rfl⟩ := Submodule.Quotient.mk_surjective _ y
     have hx' : (l : O) • (Submodule.Quotient.mk z : H1U ρ ⊤) = 0 := by
-      simpa using congrArg Subtype.val hx
+      simpa only [Submodule.coe_smul, Submodule.coe_zero] using congrArg Subtype.val hx
     obtain ⟨m, hm⟩ := (mk_eq_mk ρ ⊤ ((l : O) • z) 0).1
       (by rw [Submodule.Quotient.mk_smul, Submodule.Quotient.mk_zero]; exact hx')
     simp only [Submodule.coe_smul, Submodule.coe_zero, Pi.smul_apply, Pi.zero_apply, sub_zero] at hm
@@ -200,6 +245,6 @@ theorem UpperTheory.V.X.zOne :
   have hall : ∀ x : ShaU ρ l ⊤, x = 0 := by
     intro x
     obtain ⟨n, hn⟩ := tors_class (ρ.comp (⊤ : Subgroup (G ℚ Ω)).subtype) l (qoFacts l O).2.1 (x : H1U ρ ⊤)
-    exact hgen n x (Subtype.ext (by simpa using hn))
+    exact hgen n x (Subtype.ext (by simpa only [Submodule.coe_smul, Submodule.coe_zero] using hn))
   rw [Module.length_eq_zero_iff]
   exact ⟨fun a b => by rw [hall a, hall b]⟩

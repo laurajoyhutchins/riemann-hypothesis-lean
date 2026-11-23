@@ -1,6 +1,48 @@
-import Formalism.LocalToGlobal.TorsionIntegrality.RamifiedCurveKernels.StatementS
-import Formalism.LocalToGlobal.TorsionIntegrality.RamifiedCurveKernels.StatementR
-import Formalism.GaussJetBounds.StatementQ
+module
+
+public import Formalism.LocalToGlobal.TorsionIntegrality.SecondCoefficientNorms.CurveEndoAll
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Formalism.GaussJetBounds.StatementI
+public import Formalism.GaussJetBounds.StatementN
+
+@[expose] public section
 
 noncomputable section
 open scoped BigOperators
@@ -11,25 +53,6 @@ open Formalism.L2.Th1.C
 open Formalism.L2.Th1.A (logSer expSer wpReg)
 open Formalism.G (unitBall)
 open Formalism.DworkPowerSeriesWeights (JetsIntegral jetPair)
-
-def IntUnram : Prop :=
-  ∀ (K : Type) [NormedField K] [IsUltrametricDist K] [CharZero K] (l linv ph : PowerSeries K),
-    Frame (unitBall K) l linv ph → IsOneUnit (unitBall K) (PowerSeries.derivative K l) →
-    F1 (unitBall K) l linv ph → (∀ i : ℕ, 1 ≤ i → ‖jet l ph i‖ ≤ 1) →
-    ∀ (O : Type) [CommRing O] [StarRing O] (τ : O →+* K),
-    (∀ α, EndInt (unitBall K) l linv (τ α)) →
-    (∀ z : O, star z = z → IsBinomScalar (unitBall K) (τ z)) →
-    (∀ α : O, PhNormAt (unitBall K) l linv ph (τ α) (τ (star α))) →
-    (∀ α : O, AdjAt (unitBall K) l linv ph (τ α) (τ (star α))) →
-    ∀ (n m : Type) [Fintype n] [DecidableEq n] [Fintype m] (w : n → O), (∀ j, star (w j) = w j) →
-    ∀ δ : m → Fin 4 × n → O,
-      (∀ a b, ∑ i, star (δ i a) * δ i b = if a = b then w a.2 else 0) →
-    ∀ (Th : MvPowerSeries n K) (G : MvPowerSeries (Fin 4 × n) K), IntMv (unitBall K) G →
-      tens4 Th = toZ linv (mvExp (-(phIso τ l linv ph δ)) * G) →
-    JetsIntegral Th ∧
-    ∀ (ν : Type) [Fintype ν] (A : n → ν → K), (∀ i x, ‖A i x‖ ≤ 1) →
-    ∀ P : MvPolynomial ν K, (∀ k, ‖MvPolynomial.coeff k P‖ ≤ 1) →
-      ‖jetPair P (linSub A Th)‖ ≤ 1
 
 def CurveJetsUnram : Prop :=
   ∀ (K : Type) [NormedField K] [IsUltrametricDist K] [CharZero K] (W : WeierstrassCurve K),

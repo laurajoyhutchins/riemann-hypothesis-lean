@@ -1,6 +1,50 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.CechPairings.Imports
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.CapOComp
+module
+
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.DpZeroRight
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.Monoidal.Mon
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 set_option backward.isDefEq.respectTransparency false
 set_option autoImplicit false
@@ -108,10 +152,6 @@ variable {E : Frame Φ (d + 1)}
 
 theorem hom_ext {X Y : Cut E} {f g : X ⟶ Y} (h : f.1 = g.1) : f = g := Subtype.ext h
 
-@[simp] theorem comp_val {X Y Z : Cut E} (f : X ⟶ Y) (g : Y ⟶ Z) : (f ≫ g).1 = f.1 ≫ g.1 := rfl
-
-@[simp] theorem id_val (X : Cut E) : (𝟙 X : X ⟶ X).1 = 𝟙 X.T := rfl
-
 variable (E)
 
 def U : Cut E ⥤ C where
@@ -167,13 +207,13 @@ theorem val_comp {X Y Z : Pt E} (f : X.T ⟶ Y.T) (g : Y.T ⟶ Z.T) :
   have h1 : (Φ.A.map (Pmap Q g)).hom ((Φ.A.map (Q.j Y.T)).hom (E.τ 0 (X.s ≫ f) Y.s)) =
       (Φ.A.map (Q.j Z.T)).hom ((Φ.A.map g).hom (E.τ 0 (X.s ≫ f) Y.s)) := by
     rw [← mapA_comp, ← mapA_comp, Pmap_j]
-  simp only [val, map_add, Pmap_X, h1]
-  rw [τ_comp 0 X.s Y.s Z.s f g, map_add]
+  simp only [val, map_add (f := _), Pmap_X, h1]
+  rw [τ_comp 0 X.s Y.s Z.s f g, map_add (f := _)]
   abel
 
 theorem Pmap_cut {X Y : Pt E} (φ : X.T ⟶ Y.T) : E.τ 0 (sec Q X ≫ Pmap Q φ) (sec Q Y) = 0 := by
-  rw [τ_sec, if_pos rfl, Pmap, Q.lift_X, Q.lift_j, E.add 0 _ (Y.s ≫ Q.j Y.T), ← Category.assoc,
-    E.nat, sec_spec, if_pos rfl, val]
+  rw [τ_sec, ite_eq_left rfl, Pmap, Q.lift_X, Q.lift_j, E.add 0 _ (Y.s ≫ Q.j Y.T), ← Category.assoc,
+    E.nat, sec_spec, ite_eq_left rfl, val]
   ring
 
 def P0 : Pt E ⥤ Cut E where
@@ -199,14 +239,14 @@ theorem truncation_hom_ext {X : Pt E} {Y : Cut E} {ψ ψ' : (P0 Q).obj X ⟶ Y} 
     intro ψ
     have := ψ.2
     change E.τ 0 (sec Q X ≫ ψ.1) Y.s = 0 at this
-    rw [τ_sec, if_pos rfl] at this
+    rw [τ_sec, ite_eq_left rfl] at this
     linear_combination -this
   exact hom_ext (Q.hom_ext h ((e ψ).trans ((congrArg (fun t => E.τ 0 (X.s ≫ t) Y.s) h).trans (e ψ').symm)))
 
 def adjInv (X : Pt E) (Y : Cut E) (φ : X.T ⟶ Y.T) : (P0 Q).obj X ⟶ Y :=
   ⟨Q.lift φ (E.τ 0 (X.s ≫ φ) Y.s) (E.mem 0 (X.s ≫ φ) Y.s), by
     change E.τ 0 (sec Q X ≫ _) Y.s = 0
-    rw [τ_sec, if_pos rfl, Q.lift_X, Q.lift_j]
+    rw [τ_sec, ite_eq_left rfl, Q.lift_X, Q.lift_j]
     ring⟩
 
 theorem adjInv_j (X : Pt E) (Y : Cut E) (φ : X.T ⟶ Y.T) : Q.j X.T ≫ (adjInv Q X Y φ).1 = φ :=

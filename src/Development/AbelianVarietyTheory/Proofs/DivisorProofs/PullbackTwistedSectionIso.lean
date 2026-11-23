@@ -1,7 +1,48 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.GlobalHeightBoundIffAtGoodPrimes
-import Development.AbelianVarietyTheory.Definitions.Divisors.ToKnownTheoremsOf
-import Development.AbelianVarietyTheory.Definitions.ThetaMetrics.MemNonzeroLocusIffPowFn
+module
+
+public import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.EventuallyExistsFiniteSubsetNonzeroLocus
+public import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.ExistsUniqueLbIsoPullEqOfCoheightLeOne
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Definitions.Divisors.ToNatLengthEqRangeAddRange
+
+@[expose] public section
+
 open CategoryTheory Limits AlgebraicGeometry IsLocalRing
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.Out
 open GlobalTheory GlobalTheory.QCoh GlobalTheory.CechPic GlobalTheory.Vert GlobalTheory.Twist
@@ -34,7 +75,22 @@ theorem pullback_mulSecOfEq (hL : L.IsLB) (G : X.Modules) {n m k : ℤ} (σ : LB
   apply ((Scheme.Modules.pullbackPushforwardAdjunction f).homEquiv _ _).injective
   rw [Adjunction.homEquiv_naturality_left, Adjunction.homEquiv_naturality_right,
     homEquiv_pullbackZIso_hom, homEquiv_pullbackZIso_hom, Category.assoc]
-  have e := projZIso_mulSecOfEq f hL ((Scheme.Modules.pullback f).obj G) σ h
+  have e : (Scheme.Modules.pushforward f).map
+      (mulSecOfEq ((Scheme.Modules.pullback f).obj G) (zpull f σ) h) ≫
+        (projZIso f hL ((Scheme.Modules.pullback f).obj G) k).hom =
+      (projZIso f hL ((Scheme.Modules.pullback f).obj G) n).hom ≫
+        mulSecOfEq ((Scheme.Modules.pushforward f).obj ((Scheme.Modules.pullback f).obj G)) σ h := by
+    refine zhom_ext fun V (s : Γ(twistZ ((Scheme.Modules.pullback f).obj G) (L.pull f) n, f ⁻¹ᵁ V)) i => ?_
+    refine (zcoord_projZIso_hom_app f hL _ ((mulSecOfEq _ (zpull f σ) h).app _ s) i).trans ?_
+    refine Eq.trans ?_ (zcoord_mulSecOfEq_app σ h ((projZIso f hL _ n).hom.app V s) i).symm
+    have e : (f.app (V ⊓ L.U i)).hom (resG X inf_le_right (zfun σ i)) =
+        (f.appLE (L.U i) _ (f.preimage_mono (inf_le_right : V ⊓ L.U i ≤ L.U i))).hom (zfun σ i) := by
+      rw [← Scheme.Hom.appLE_eq_app, LB.appLE_resG]
+    rw [zcoord_mulSecOfEq_app, resM_smul, resG_resG, zfun_zpull, LB.resG_appLE]
+    refine Eq.trans (congrArg (· • resM _ (le_pidx_inf f V i) (zcoord s (pidx L f i))) e.symm) ?_
+    exact congrArg (fun t : Γ((Scheme.Modules.pullback f).obj G, f ⁻¹ᵁ (V ⊓ L.U i)) =>
+      (f.app (V ⊓ L.U i)).hom (resG X inf_le_right (zfun σ i)) • t)
+      (zcoord_projZIso_hom_app f hL _ s i).symm
   have e' : (projZIso f hL ((Scheme.Modules.pullback f).obj G) n).inv ≫
       (Scheme.Modules.pushforward f).map (mulSecOfEq ((Scheme.Modules.pullback f).obj G) (zpull f σ) h) =
         mulSecOfEq ((Scheme.Modules.pushforward f).obj ((Scheme.Modules.pullback f).obj G)) σ h ≫
@@ -43,14 +99,19 @@ theorem pullback_mulSecOfEq (hL : L.IsLB) (G : X.Modules) {n m k : ℤ} (σ : LB
     exact e
   rw [e', ← Category.assoc, ← Category.assoc]
   congr 1
-  exact (mulSecOfEq_naturality σ h _).symm
+  symm
+  refine zhom_ext fun V s i => ?_
+  change zcoord ((mulSecOfEq _ σ h).app V ((Twist.map (lbZPow L n) _).app V s)) i =
+    zcoord ((Twist.map (lbZPow L k) _).app V ((mulSecOfEq G σ h).app V s)) i
+  rw [zcoord_mulSecOfEq_app, zcoord_map_app, zcoord_map_app, zcoord_mulSecOfEq_app,
+    Scheme.Modules.Hom.app_smul]
 
 end GlobalTheory.CutPull
 
 namespace GlobalTheory
 
-open GlobalTheory.CutPull in
 
+open GlobalTheory.CutPull in
 theorem cut_pullback_iso : ∀ {X Y : Scheme.{0}} (f : Y ⟶ X) (G : X.Modules) [G.IsQuasicoherent] {L : LB X} (hL : L.IsLB) (s : L.Sec) (hL' : (L.pull f).IsLB), Nonempty ((Scheme.Modules.pullback f).obj (cut G hL s) ≅ cut ((Scheme.Modules.pullback f).obj G) hL' (secPull s f)) := by
   intro X Y f G _ L hL s hL'
   have : PreservesColimits (Scheme.Modules.pullback f) :=
@@ -71,6 +132,6 @@ theorem cut_pullback_iso : ∀ {X Y : Scheme.{0}} (f : Y ⟶ X) (G : X.Modules) 
     simp
   exact ⟨PreservesCokernel.iso (Scheme.Modules.pullback f) (cutHom G hL s) ≪≫ cokernelIsoOfEq key ≪≫
     cokernelEpiComp _ _ ≪≫ cokernelCompIsIso _ _ ≪≫
-    (cokernelCompIsIso _ (twistZZeroIso ((Scheme.Modules.pullback f).obj G) hL').inv).symm⟩
+    (cokernelCompIsIso (twistZZeroIso ((Scheme.Modules.pullback f).obj G) hL').inv _).symm⟩
 
 end GlobalTheory

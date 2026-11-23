@@ -1,4 +1,54 @@
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.CasimirCoefficients.KFactsA
+module
+
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.CasimirCoefficients.IsClosedKset
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+public import Mathlib.Analysis.CStarAlgebra.Matrix
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.CasimirCoefficients.KFactsA
+public import Mathlib.MeasureTheory.Measure.Haar.Unique
+
+@[expose] public section
 
 noncomputable section
 
@@ -13,8 +63,8 @@ attribute [local instance] Matrix.normedAddCommGroup Matrix.normedSpace
 
 variable {n : ℕ}
 
-instance kf_isHaar (ε : Fin n → Bool) : (muK ε).IsHaarMeasure := by
-  unfold muK; infer_instance
+instance kf_isHaar (ε : Fin n → Bool) : (muK ε).IsHaarMeasure :=
+  Measure.isHaarMeasure_haarMeasure _
 
 theorem compactSpace_KG (ε : Fin n → Bool) : CompactSpace (KG ε) := by
   have hc : IsCompact (Kset ε) := by
@@ -29,10 +79,9 @@ theorem compactSpace_KG (ε : Fin n → Bool) : CompactSpace (KG ε) := by
   exact isCompact_iff_compactSpace.mp hK
 
 theorem muK_univ_pos (ε : Fin n → Bool) : 0 < (muK ε Set.univ).toReal := by
-  haveI := compactSpace_KG ε
-  unfold muK
-  exact ENNReal.toReal_pos (isOpen_univ.measure_ne_zero _ Set.univ_nonempty)
-    (isCompact_univ.measure_lt_top).ne
+  have := compactSpace_KG ε
+  exact ENNReal.toReal_pos (isOpen_univ.measure_ne_zero (muK ε) Set.univ_nonempty)
+    (isCompact_univ.measure_lt_top (μ := muK ε)).ne
 
 theorem muK_rightInvariant (ε : Fin n → Bool) : (muK ε).IsMulRightInvariant := by
   have := compactSpace_KG ε
@@ -45,7 +94,7 @@ theorem muK_rightInvariant (ε : Fin n → Bool) : (muK ε).IsMulRightInvariant 
     rw [hν, Measure.map_apply (measurable_mul_const k) MeasurableSet.univ, Set.preimage_univ]
   have hpos : muK ε Set.univ ≠ 0 := (isOpen_univ.measure_pos (muK ε) Set.univ_nonempty).ne'
   have htop : muK ε Set.univ ≠ ⊤ := (isCompact_univ.measure_lt_top).ne
-  rw [h, Measure.smul_apply, ENNReal.smul_def, smul_eq_mul] at hu
+  rw [h, smul_apply, ENNReal.smul_def, smul_eq_mul] at hu
   have hc : (Measure.haarScalarFactor ν (muK ε) : ℝ≥0∞) = 1 := by
     have := (ENNReal.mul_eq_right hpos htop).mp hu
     exact this

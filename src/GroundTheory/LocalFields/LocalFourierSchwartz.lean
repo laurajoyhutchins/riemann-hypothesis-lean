@@ -1,5 +1,61 @@
-import Mathlib
-import GroundTheory.LocalFields.LocalFourierChar
+module
+
+public import GroundTheory.LocalFields.LocalFourierChar
+public import GroundTheory.LocalFields.LocalFourierHaar
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.Topology.LocallyConstant.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Algebra.Nonarchimedean.TotallyDisconnected
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Separation.Connected
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -12,8 +68,8 @@ variable {K : Type*} [Field K] [ValuativeRel K] [TopologicalSpace K] [IsNonarchi
 
 section SchwartzBruhat
 
-variable (K) in
 
+variable (K) in
 def schwartzBruhat : Submodule ℂ (K → ℂ) where
   carrier := {f | IsLocallyConstant f ∧ HasCompactSupport f}
   add_mem' hf hg := ⟨hf.1.add hg.1, hf.2.add hg.2⟩
@@ -89,8 +145,8 @@ section Fourier
 
 variable [MeasurableSpace K] [BorelSpace K] (μ : Measure K) [μ.IsAddHaarMeasure]
 
-open scoped Classical in
 
+open scoped Classical in
 theorem integral_valBall_char (χ : AddChar K Circle) (k : ℤ) :
     ∫ x in valBall K k, (χ x : ℂ) ∂μ =
       if IsTrivialOn χ k then (μ.real (valBall K k) : ℂ) else 0 := by
@@ -132,11 +188,6 @@ theorem integrable_of_mem_schwartzBruhat {f : K → ℂ} (hf : f ∈ schwartzBru
 variable {ψ} (hψ : Continuous ψ) (hψ1 : ψ ≠ 1)
 include hψ hψ1
 
-omit hψ1 in
-theorem integrable_mul_char_of_mem_schwartzBruhat {f : K → ℂ} (hf : f ∈ schwartzBruhat K)
-    (y : K) : Integrable (fun x => f x * (ψ (x * y) : ℂ)) μ :=
-  (hf.1.continuous.mul ((continuous_subtype_val.comp hψ).comp
-    (continuous_id.mul continuous_const))).integrable_of_hasCompactSupport hf.2.mul_right
 
 theorem localFourier_eq_zero_of_notMem {f : K → ℂ} {N : ℤ}
     (hfN : ∀ x, ∀ h ∈ valBall K N, f (x + h) = f x) {y : K}
@@ -157,8 +208,8 @@ theorem localFourier_eq_zero_of_notMem {f : K → ℂ} {N : ℤ}
   rw [mul_comm]
   exact Circle.coe_eq_one.mp h'
 
-omit [BorelSpace K] [μ.IsAddHaarMeasure] in
 
+omit [BorelSpace K] [μ.IsAddHaarMeasure] in
 theorem localFourier_add_eq {f : K → ℂ} {M : ℤ} (hfM : ∀ x, f x ≠ 0 → x ∈ valBall K M) (y : K)
     {h : K} (hh : h ∈ valBall K (addCharConductor ψ - M)) :
     localFourier μ ψ f (y + h) = localFourier μ ψ f y := by

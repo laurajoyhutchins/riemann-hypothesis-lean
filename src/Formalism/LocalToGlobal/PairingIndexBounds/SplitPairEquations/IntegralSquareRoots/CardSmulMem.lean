@@ -1,5 +1,54 @@
-import Formalism.LocalToGlobal.PairingIndexBounds.SplitPairEquations.IntegralSquareRoots.ConstCopies
-import Formalism.LocalToGlobal.PairingIndexBounds.SplitPairEquations.SemiCharImg
+module
+
+public import Formalism.LocalToGlobal.TorsionIntegrality.QuadraticSemicharacters.UnitaryConstant
+public import Formalism.LocalToGlobal.PairingIndexBounds.SplitPairEquations.IntegralSquareRoots.MemImgLatIff
+public import Formalism.LocalToGlobal.TorsionIntegrality.QuadraticSemicharacters.CayleyGaussianIntegrals.LocalComponentGL
+public import Formalism.LocalToGlobal.TorsionIntegrality.QuadraticSemicharacters.SelfDualCovolume
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 open scoped BigOperators ComplexConjugate
@@ -82,7 +131,7 @@ theorem phi_conj (hU : UnitaryData H Λ α δ Ae) (hM : Multipliers H Λ δ ℓ 
     phiC H α Ae (ℓ x) = conj (phiC H α Ae x) := by
   obtain ⟨hskew, hre, -, -⟩ := phiBasic V H Λ α δ Ae hU
   have h1 : H (cayC Ae (ℓ x)) (ℓ x) = -H (cayC Ae x) x + (4 * e : ℂ) * H (cayC Ae x) (σ x) := by
-    rw [cayC_comm hU.cay ℓ hM.lδ, hM.adj, hM.rel, map_add, map_neg, map_nsmul, nsmul_eq_mul]
+    rw [cayC_comm hU.cay ℓ hM.lδ, hM.adj, hM.rel, map_add (f := _), map_neg, map_nsmul, nsmul_eq_mul]
     push_cast
     rfl
   have hXre : (H (cayC Ae x) (σ x)).re = 0 := by
@@ -153,6 +202,7 @@ theorem gauss_sq (hU : UnitaryData H Λ α δ Ae) (hM : Multipliers H Λ δ ℓ 
   have hsum := sum_reps_perm hS ℓ hM.lΛ hinj (phiC H α Ae) hwd
   have hreal : conj (gaussC H α Ae S) = gaussC H α Ae S := by
     unfold gaussC
+
     rw [map_mul, map_inv₀, Complex.conj_ofReal, map_sum, ← hsum]
     congr 1
     exact Finset.sum_congr rfl fun x hx => (phi_conj hU hM he hα (hS.1 x hx)).symm

@@ -1,6 +1,53 @@
-import Mathlib
-import GroundTheory.GlobalFields.CompletionAtPlace.Galois
-import GroundTheory.LocalFields.Ramification
+module
+
+public import GroundTheory.GlobalFields.CompletionAtPlace.Galois
+public import GroundTheory.GlobalFields.CompletionAtPlace.Degree
+public import GroundTheory.LocalFields.Uniqueness
+public import Mathlib.FieldTheory.Galois.IsGaloisGroup
+public import Mathlib.RingTheory.Frobenius
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.RamificationInertia.Galois
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -54,40 +101,6 @@ theorem integerAlgEquiv_mem_maximalIdeal_iff (τ : Gal(w.adicCompletion L/v.adic
       x ∈ 𝓂[w.adicCompletion L] := by
   simpa using integerAlgEquiv_mem_maximalIdeal_pow_iff τ 1 x
 
-theorem mem_inertia_iff_decompositionToLocal_mem (σ : MulAction.stabilizer Gal(L/K) w.asIdeal) :
-    (σ : Gal(L/K)) ∈ w.asIdeal.inertia Gal(L/K) ↔
-      decompositionToLocal v w σ ∈
-        lowerRamificationGroup (v.adicCompletion K) (w.adicCompletion L) 0 := by
-  have h0 : ((0 : ℕ) : ℤ) = 0 := rfl
-  rw [← h0, mem_lowerRamificationGroup_natCast_iff, zero_add, pow_one]
-  change (∀ r : 𝓞 L, (σ : Gal(L/K)) • r - r ∈ w.asIdeal) ↔ _
-  constructor
-  · intro h x
-    obtain ⟨r, hr⟩ := exists_sub_ringOfIntegersToInteger_mem w x
-    have h1 := (integerAlgEquiv_mem_maximalIdeal_iff v w (decompositionToLocal v w σ) _).2 hr
-    have h2 : integerAlgEquiv (v.adicCompletion K) (w.adicCompletion L)
-        (decompositionToLocal v w σ) (ringOfIntegersToInteger w r) -
-          ringOfIntegersToInteger w r ∈ 𝓂[w.adicCompletion L] := by
-      rw [integerAlgEquiv_ringOfIntegersToInteger, ← map_sub,
-        ringOfIntegersToInteger_mem_maximalIdeal_iff]
-      exact h r
-    rw [map_sub] at h1
-    have : integerAlgEquiv (v.adicCompletion K) (w.adicCompletion L)
-        (decompositionToLocal v w σ) x - x =
-        (integerAlgEquiv (v.adicCompletion K) (w.adicCompletion L)
-          (decompositionToLocal v w σ) x - integerAlgEquiv (v.adicCompletion K)
-            (w.adicCompletion L) (decompositionToLocal v w σ) (ringOfIntegersToInteger w r)) +
-        (integerAlgEquiv (v.adicCompletion K) (w.adicCompletion L)
-          (decompositionToLocal v w σ) (ringOfIntegersToInteger w r) -
-            ringOfIntegersToInteger w r) - (x - ringOfIntegersToInteger w r) := by
-      ring
-    rw [this]
-    exact sub_mem (add_mem h1 h2) hr
-  · intro h r
-    have := h (ringOfIntegersToInteger w r)
-    rwa [integerAlgEquiv_ringOfIntegersToInteger, ← map_sub,
-      ringOfIntegersToInteger_mem_maximalIdeal_iff] at this
-
 end Inertia
 
 section Frobenius
@@ -102,11 +115,11 @@ variable {K L : Type*} [Field K] [NumberField K] [Field L] [NumberField L] [Alge
 def arithFrobAtDecomposition : MulAction.stabilizer Gal(L/K) w.asIdeal :=
   ⟨arithFrobAt (𝓞 K) Gal(L/K) w.asIdeal, IsArithFrobAt.arithFrobAt_mem_stabilizer (𝓞 K) Gal(L/K) w.asIdeal⟩
 
+
 omit [NumberField L] [IsGalois K L] [Algebra (v.adicCompletion K) (w.adicCompletion L)]
   [ContinuousSMul (v.adicCompletion K) (w.adicCompletion L)]
   [IsScalarTower K (v.adicCompletion K) (w.adicCompletion L)] in
 include v in
-
 theorem natCard_residueField_eq_under :
     Nat.card 𝓀[v.adicCompletion K] = Nat.card (𝓞 K ⧸ w.asIdeal.under (𝓞 K)) := by
   rw [natCard_residueField_integer v, ← Ideal.over_def w.asIdeal v.asIdeal]
@@ -149,17 +162,11 @@ theorem isArithFrobAt_iff_decompositionToLocal (σ : MulAction.stabilizer Gal(L/
     rwa [integerAlgEquiv_ringOfIntegersToInteger, ← map_pow, ← map_sub,
       ringOfIntegersToInteger_mem_maximalIdeal_iff] at this
 
-theorem decompositionToLocal_arithFrobAt (x : 𝒪[w.adicCompletion L]) :
-    integerAlgEquiv (v.adicCompletion K) (w.adicCompletion L)
-        (decompositionToLocal v w (arithFrobAtDecomposition w)) x -
-      x ^ Nat.card 𝓀[v.adicCompletion K] ∈ 𝓂[w.adicCompletion L] :=
-  (isArithFrobAt_iff_decompositionToLocal v w _).1 (IsArithFrobAt.arithFrobAt _ _ _) x
 
 omit [Algebra (v.adicCompletion K) (w.adicCompletion L)]
   [ContinuousSMul (v.adicCompletion K) (w.adicCompletion L)]
   [IsScalarTower K (v.adicCompletion K) (w.adicCompletion L)] in
 include v in
-
 theorem natCard_inertia :
     Nat.card (w.asIdeal.inertia Gal(L/K)) = w.asIdeal.ramificationIdx (𝓞 K) := by
   rw [Ideal.card_inertia_eq_ramificationIdxIn (G := Gal(L/K)) v.asIdeal w.asIdeal,
@@ -190,21 +197,6 @@ variable {K L : Type*} [Field K] [NumberField K] [Field L] [NumberField L] [Alge
   [Algebra (v.adicCompletion K) (w.adicCompletion L)]
   [ContinuousSMul (v.adicCompletion K) (w.adicCompletion L)]
   [IsScalarTower K (v.adicCompletion K) (w.adicCompletion L)]
-
-theorem map_inertia_decompositionMulEquiv :
-    ((w.asIdeal.inertia Gal(L/K)).subgroupOf (MulAction.stabilizer Gal(L/K) w.asIdeal)).map
-        (decompositionMulEquiv v w).toMonoidHom =
-      lowerRamificationGroup (v.adicCompletion K) (w.adicCompletion L) 0 := by
-  ext τ
-  obtain ⟨σ, rfl⟩ := (decompositionMulEquiv v w).surjective τ
-  rw [Subgroup.mem_map]
-  constructor
-  · rintro ⟨σ', hσ', h⟩
-    rw [← h]
-    exact (mem_inertia_iff_decompositionToLocal_mem v w σ').1 (Subgroup.mem_subgroupOf.1 hσ')
-  · intro h
-    exact ⟨σ, Subgroup.mem_subgroupOf.2 ((mem_inertia_iff_decompositionToLocal_mem v w σ).2 h),
-      rfl⟩
 
 end InertiaGalois
 

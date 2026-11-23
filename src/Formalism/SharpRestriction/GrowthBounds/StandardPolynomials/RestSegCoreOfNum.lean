@@ -1,6 +1,52 @@
-import Formalism.SharpRestriction.GrowthBounds.StandardPolynomials.BlockYZeroLeOfBound
-import Formalism.SharpRestriction.GrowthBounds.StandardPolynomials.YcondCongr
-import Formalism.SharpRestriction.GrowthBounds.StandardPolynomials.TCNumDef
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.StandardPolynomials.TCNumDef
+public import Formalism.SharpRestriction.GrowthBounds.StandardPolynomials.RestSegCore
+public import Formalism.SharpRestriction.GrowthBounds.RootWeights.DvrFractionFieldCharZeroPrime
+public import Formalism.SharpRestriction.GrowthBounds.StandardPolynomials.BlockYZeroLeOfBound
+public import Formalism.SharpRestriction.GrowthBounds.StandardPolynomials.YcondCongr
+import Formalism.SharpRestriction.GrowthBounds.ValuationLowestDegreeMapFractionField
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.BitVec
+public import Formalism.SharpRestriction.GrowthBounds.StandardPolynomials.DensitySumsAndDomination
+
+@[expose] public section
 
 noncomputable section
 
@@ -21,7 +67,7 @@ theorem jE_add {s : ℕ} (S : SegData s) (f g : Fin S.t → ℕ) (i : ℕ) : jE 
 theorem jE_uTop {s : ℕ} (S : SegData s) (g : Fin s → ℕ) (i : Fin s) (h : S.sigma ≤ i.val) :
     jE S (fun l => g (uTop S l)) i.val = g i := by
   unfold jE
-  rw [dif_pos ⟨h, i.2⟩]
+  rw [dite_eq_left ⟨h, i.2⟩]
   have e : uTop S ⟨i.val - S.sigma, by unfold SegData.t; have := i.2; omega⟩ = i := by
     apply Fin.ext
     show S.sigma + (i.val - S.sigma) = i.val
@@ -37,7 +83,7 @@ theorem ch_cases {s : ℕ} (a : Fin (2 * s + 1)) : a = chU s ∨ (∃ i : Fin s,
     · exact Or.inr (Or.inl ⟨⟨a.val / 2, by omega⟩, Fin.ext (by show a.val = 2 * (a.val / 2); omega)⟩)
     · exact Or.inr (Or.inr ⟨⟨a.val / 2, by omega⟩, Fin.ext (by show a.val = 2 * (a.val / 2) + 1; omega)⟩)
 
-set_option maxHeartbeats 1600000 in
+
 theorem segCoreAt_of_num {C0 CYb Cde Ck CD Cb CE1 CE2 Cc : ℝ} (hN : NumCoreAt C0 CYb Cde Ck CD Cb CE1 CE2 Cc) :
     SegCoreAt C0 CYb Cde Ck CD Cb CE1 CE2 Cc := by
   intro X _ _ O _ _ _ _ S hSq hD hH hc mm hmm n hn1 hnc β hβ L e he1 hen j

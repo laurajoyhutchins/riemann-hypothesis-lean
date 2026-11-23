@@ -1,4 +1,52 @@
-import Mathlib
+module
+
+public import Mathlib.NumberTheory.LocalField.Basic
+public import Mathlib.RepresentationTheory.Basic
+public import Mathlib.Topology.Instances.Matrix
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable def UpperTheory.Reformulated.B.BlockHomomorphism.IsSmooth :
     {k G V : Type} →
@@ -319,29 +367,7 @@ theorem UpperTheory.Reformulated.B.BlockHomomorphism.aux4 :
   intro k _ n r A B
   simp [Matrix.fromBlocks_multiply]
 
-noncomputable def UpperTheory.Reformulated.B.BlockHomomorphism.blkHom :
-    (k : Type) →
-      [inst : Field k] →
-        (n r : Nat) →
-          @MonoidHom (Matrix (Fin n) (Fin n) k) (Matrix (Sum (Fin n) (Fin r)) (Sum (Fin n) (Fin r)) k)
-            (@Matrix.instMulOneOfFintypeOfDecidableEqOfAddCommMonoid (Fin n) k (Fin.fintype n) (instDecidableEqFin n)
-              (@MulOneClass.toMulOne k
-                (@MulZeroOneClass.toMulOneClass k
-                  (@instMulZeroOneClassOfSemiring k
-                    (@DivisionSemiring.toSemiring k (@Semifield.toDivisionSemiring k (@Field.toSemifield k inst))))))
-              (@Semiring.toAddCommMonoid k
-                (@DivisionSemiring.toSemiring k (@Semifield.toDivisionSemiring k (@Field.toSemifield k inst)))))
-            (@Matrix.instMulOneOfFintypeOfDecidableEqOfAddCommMonoid (Sum (Fin n) (Fin r)) k
-              (@instFintypeSum (Fin n) (Fin r) (Fin.fintype n) (Fin.fintype r))
-              (fun (a b : Sum (Fin n) (Fin r)) ↦
-                @instDecidableEqSum (Fin n) (Fin r) (instDecidableEqFin n) (instDecidableEqFin r) a b)
-              (@MulOneClass.toMulOne k
-                (@MulZeroOneClass.toMulOneClass k
-                  (@instMulZeroOneClassOfSemiring k
-                    (@DivisionSemiring.toSemiring k (@Semifield.toDivisionSemiring k (@Field.toSemifield k inst))))))
-              (@Semiring.toAddCommMonoid k
-                (@DivisionSemiring.toSemiring k (@Semifield.toDivisionSemiring k (@Field.toSemifield k inst))))) :=
-    fun (k : Type) [inst : Field k] (n r : Nat) ↦
+noncomputable def UpperTheory.Reformulated.B.BlockHomomorphism.blkHom : (k : Type) → [inst : Field k] → (n r : ℕ) → Matrix (Fin n) (Fin n) k →* Matrix (Fin n ⊕ Fin r) (Fin n ⊕ Fin r) k := fun (k : Type) [inst : Field k] (n r : Nat) ↦
       @MonoidHom.mk (Matrix (Fin n) (Fin n) k) (Matrix (Sum (Fin n) (Fin r)) (Sum (Fin n) (Fin r)) k)
         (@Matrix.instMulOneOfFintypeOfDecidableEqOfAddCommMonoid (Fin n) k (Fin.fintype n) (instDecidableEqFin n)
           (@MulOneClass.toMulOne k

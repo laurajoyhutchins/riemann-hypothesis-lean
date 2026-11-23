@@ -1,4 +1,47 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PublishedTheorems.KisinCrTrivial
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.FiniteCohomology
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.LocalPrimeGaloisActionPeriodT
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -41,29 +84,6 @@ def TypeLit (n : ℕ) (t : ↥(GK K) → B) : Prop :=
       (∀ b, (actBst (γ : GQ l)).comp ((x b).comp (ρ γ⁻¹)) = ∑ a, (LinearMap.mulLeft B (toSt (M a b))).comp (x a)) →
       M.trace = t γ ⊗ₜ[ℚ_[l]] 1
 
-def PotCr : Prop := ∃ (L : FinExt l) (h : K.1 ≤ L.1), Crys L (ρ.comp (incl h))
-
 end
-
-def KisinLit : Prop :=
-  ∀ (l : ℕ) [Fact l.Prime] (K : FinExt l) (E : Type) [Field E] [Algebra ℚ_[l] E] [FiniteDimensional ℚ_[l] E]
-    (O : Type) [CommRing O] [IsDomain O] [IsDiscreteValuationRing O] [Algebra ℤ_[l] O] [Module.Finite ℤ_[l] O] [Algebra O E]
-    [IsFractionRing O E], (∀ z : ℤ_[l], algebraMap ℚ_[l] E (z : ℚ_[l]) = algebraMap O E (algebraMap ℤ_[l] O z)) →
-  ∀ (A₀ : Type) [CommRing A₀] [IsLocalRing A₀] [IsNoetherianRing A₀] [IsAdicComplete (maximalIdeal A₀) A₀]
-    [Finite (ResidueField A₀)] [Algebra O A₀] [IsLocalHom (algebraMap O A₀)], (∀ a : A₀, (l : A₀) * a = 0 → a = 0) →
-  ∀ (A : Type) [CommRing A] [Algebra A₀ A] [IsLocalization.Away ((l : ℕ) : A₀) A] [Algebra E A],
-    (∀ a : O, algebraMap E A (algebraMap O E a) = algebraMap A₀ A (algebraMap O A₀ a)) →
-  ∀ (n : ℕ) (r : ↥(GK K) →* GL (Fin n) A₀),
-    (∀ (N : ℕ) (i j : Fin n), IsLocallyConstant fun g =>
-      Ideal.Quotient.mk (maximalIdeal A₀ ^ N) ((r g : Matrix (Fin n) (Fin n) A₀) i j)) →
-  ∀ (h : ℕ) (m : ℕ → ℕ), ∑ i ∈ Finset.range (h + 1), m i = n →
-  ∀ (τ : ↥((Iq l).subgroupOf (GK K)) →* GL (Fin n) E), IsOpen (τ.ker : Set ↥((Iq l).subgroupOf (GK K))) →
-  ∀ (t : ↥(GK K) → E), (∀ γ : ↥((Iq l).subgroupOf (GK K)), t γ = (τ γ : Matrix (Fin n) (Fin n) E).trace) →
-  ∃ I : Ideal A,
-    ∀ (B : Type) [CommRing B] [IsLocalRing B] [Algebra E B] [Module.Finite E B] [Algebra ℚ_[l] B] [IsScalarTower ℚ_[l] E B]
-      (x : A →ₐ[E] B) (ρ : ↥(GK K) →* GL (Fin n) B),
-      ρ = (Matrix.GeneralLinearGroup.map ((x : A →+* B).comp (algebraMap A₀ A))).comp r →
-      (I ≤ RingHom.ker x ↔
-        PotCr K (colRep ρ) ∧ TypeLit K (colRep ρ) n (fun γ => algebraMap E B (t γ)) ∧ HodgeLit K (colRep ρ) h m)
 
 end UpperTheory.V.Lit

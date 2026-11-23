@@ -1,4 +1,49 @@
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.TraceMulSelfEqSumEigenvaluesSq
+module
+
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.PmatIsHermitian
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+public import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+public import Mathlib.Topology.ContinuousMap.Weierstrass
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -56,7 +101,7 @@ theorem pairpow_continuous (ε : Fin n → Bool) (k : ℕ) :
     simp_rw [sub_eq_add_neg, add_pow, Finset.sum_mul_sum, Finset.sum_mul]
     conv_rhs => rw [Finset.sum_comm]; arg 2; ext a; rw [Finset.sum_comm]
   rw [h]
-  exact continuous_finset_sum _ fun i _ =>
+  exact continuous_finsetSum _ fun i _ =>
     ((psum_continuous ε i).mul (negpsum_continuous ε (k - i))).mul continuous_const
 
 theorem pairpoly_continuous (ε : Fin n → Bool) (P : Polynomial ℝ) :
@@ -67,7 +112,7 @@ theorem pairpoly_continuous (ε : Fin n → Bool) (P : Polynomial ℝ) :
     simp_rw [Polynomial.eval_eq_sum_range, Finset.mul_sum]
     conv_rhs => rw [Finset.sum_comm]; arg 2; ext a; rw [Finset.sum_comm]
   rw [h]
-  exact continuous_finset_sum _ fun i _ => continuous_const.mul (pairpow_continuous ε i)
+  exact continuous_finsetSum _ fun i _ => continuous_const.mul (pairpow_continuous ε i)
 
 theorem pb_abs_pev_le {ε : Fin n → Bool} (z : PCoord ε → ℂ) (a : Fin n) :
     |pev z a| ≤ Real.sqrt (∑ b, pev z b ^ 2) := by

@@ -1,7 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ConvUAbsU
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ConvUAbsU
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MemShellUIffDepth
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.WeylRepInvMulDiag
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.HasBoundedSumsOne
+
+@[expose] public section
 
 noncomputable section
 
@@ -37,7 +84,74 @@ theorem mem_cellU_last_iff : ∀ (L : Type) [Field L] [Valued L (WithZero (Multi
   have hw : simpleU k = Equiv.swap (lo k) (lo k).rev := by simp [simpleU, hk]
   have hA := val_rev_lo_of_last k hk hn
   rw [hw] at hy
-  rw [cellU, Subgroup.mem_subgroupOf, GKFactor.mem_cell_iff hy, mem_unipB, Equiv.swap_inv]
+  let M : GL (Fin n) L → Matrix (Fin n) (Fin n) L := fun x => x.val
+  have weylRep_inv_mul_diag {w : Equiv.Perm (Fin n)} {x : GL (Fin n) L} (hx : IsWeylRep w x) (p : Fin n) :
+      (M x⁻¹) p (w p) * (M x) (w p) p = 1 := by
+    have h : (M (x⁻¹ * x)) p p = (M (1 : GL (Fin n) L)) p p := by rw [inv_mul_cancel]
+    dsimp only [M] at h
+    rw [Units.val_mul, Matrix.mul_apply, Units.val_one, Matrix.one_apply_eq] at h
+    rwa [Finset.sum_eq_single (w p) (fun b _ hb => by rw [hx b p hb, mul_zero]) (by simp)] at h
+
+  have weylRep_mul_inv_diag {w : Equiv.Perm (Fin n)} {x : GL (Fin n) L} (hx : IsWeylRep w x) (p : Fin n) :
+      (M x) (w p) p * (M x⁻¹) p (w p) = 1 := by
+    have h : (M (x * x⁻¹)) (w p) (w p) = (M (1 : GL (Fin n) L)) (w p) (w p) := by rw [mul_inv_cancel]
+    dsimp only [M] at h
+    rw [Units.val_mul, Matrix.mul_apply, Units.val_one, Matrix.one_apply_eq] at h
+    rwa [Finset.sum_eq_single p (fun b _ hb => by
+        rw [hx (w p) b (fun e => hb (w.injective e).symm), zero_mul]) (by simp)] at h
+
+  have weylRep_inv {w : Equiv.Perm (Fin n)} {x : GL (Fin n) L} (hx : IsWeylRep w x) : IsWeylRep w⁻¹ x⁻¹ := by
+    intro p a hpa
+    have hne : (M x) a (w⁻¹ a) ≠ 0 := by
+      intro h0
+      have := weylRep_mul_inv_diag hx (w⁻¹ a)
+      rw [show w (w⁻¹ a) = a by simp] at this
+      rw [h0, zero_mul] at this
+      exact zero_ne_one this
+    have h : (M (x⁻¹ * x)) p (w⁻¹ a) = (M (1 : GL (Fin n) L)) p (w⁻¹ a) := by rw [inv_mul_cancel]
+    dsimp only [M] at h
+    rw [Units.val_mul, Matrix.mul_apply, Units.val_one, Matrix.one_apply_ne hpa] at h
+    rw [Finset.sum_eq_single a (fun b _ hb => by
+        rw [hx b (w⁻¹ a) (by simpa using hb), mul_zero]) (by simp)] at h
+    exact (mul_eq_zero.1 h).resolve_right hne
+
+  have weylRep_conj_apply {w : Equiv.Perm (Fin n)} {x : GL (Fin n) L} (hx : IsWeylRep w x) (u : GL (Fin n) L)
+      (p q : Fin n) : (M (x⁻¹ * u * x)) p q = (M x⁻¹) p (w p) * (M u) (w p) (w q) * (M x) (w q) q := by
+    have hi := weylRep_inv hx
+    dsimp only [M]
+    rw [Units.val_mul, Units.val_mul, Matrix.mul_apply, Finset.sum_eq_single (w q)
+      (fun b _ hb => by rw [hx b q hb, mul_zero]) (by simp), Matrix.mul_apply,
+      Finset.sum_eq_single (w p) (fun b _ hb => by rw [hi p b (fun e => hb (by rw [e]; simp)), zero_mul]) (by simp)]
+
+  dsimp only [M] at weylRep_inv_mul_diag weylRep_mul_inv_diag weylRep_conj_apply
+  have mem_cell_iff {w : Equiv.Perm (Fin n)} {x : GL (Fin n) L} (hx : IsWeylRep w x) (u : GL (Fin n) L) :
+      u ∈ cell x ↔ u ∈ unipB L (Fin n) ∧ ∀ a b, a < b → w⁻¹ a < w⁻¹ b → (M u) a b = 0 := by
+    dsimp only [M]
+    rw [mem_cell, mem_unipBLower]
+    refine and_congr_right fun hu => ?_
+    rw [mem_unipB] at hu
+    constructor
+    · rintro ⟨hl, -⟩ a b hab hw
+      have h := hl _ _ hw
+      rw [weylRep_conj_apply hx, show w (w⁻¹ a) = a by simp, show w (w⁻¹ b) = b by simp] at h
+      have h1 := weylRep_inv_mul_diag hx (w⁻¹ a)
+      have h2 := weylRep_mul_inv_diag hx (w⁻¹ b)
+      rw [show w (w⁻¹ a) = a by simp] at h1
+      rw [show w (w⁻¹ b) = b by simp] at h2
+      rcases mul_eq_zero.1 h with h | h
+      · rcases mul_eq_zero.1 h with h | h
+        · rw [h, zero_mul] at h1; exact absurd h1 zero_ne_one
+        · exact h
+      · rw [h, zero_mul] at h2; exact absurd h2 zero_ne_one
+    · intro h
+      refine ⟨fun p q hpq => ?_, fun p => ?_⟩
+      · rw [weylRep_conj_apply hx]
+        rcases lt_or_gt_of_ne (fun e : w p = w q => hpq.ne (w.injective e)) with hl | hl
+        · rw [h _ _ hl (by simpa using hpq), mul_zero, zero_mul]
+        · rw [hu.1 _ _ hl, mul_zero, zero_mul]
+      · rw [weylRep_conj_apply hx, hu.2, mul_one, weylRep_inv_mul_diag hx]
+
+  rw [cellU, Subgroup.mem_subgroupOf, mem_cell_iff hy, mem_unipB, Equiv.swap_inv]
   unfold IsUnipU IsBorelU
   refine and_congr_right fun _ => forall₂_congr fun a b => ?_
   constructor

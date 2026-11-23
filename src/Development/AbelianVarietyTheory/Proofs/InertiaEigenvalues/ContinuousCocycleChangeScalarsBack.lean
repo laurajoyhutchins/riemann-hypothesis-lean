@@ -1,12 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.Small2
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.PoitouTateNineTermTransgressionZeroApply
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.CohDimTwoLocalOfLocalFiniteness
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.ContinuousCycMod
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.ExistsCoprimePowOfMemIneKer
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.Small2
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsOpenNormalSubgroupUnderInertia
 import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsPlaceOverMoveValCc
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.TameInertiaElementActsByScalar
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsOpenNormalSubgroupUnderInertia
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.TameInertiaElementActsByScalar
+public import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.ExistsCoprimePowOfMemIneKer
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.FieldTheory.Galois.Profinite
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.ContinuousCycMod
+
+@[expose] public section
 
 noncomputable section
 
@@ -64,7 +107,7 @@ theorem unrAt_eq_top {F Ω : Type} [Field F] [NumberField F] [Field Ω] [Algebra
     have h4 := hc φ' φ'⁻¹
     rw [mul_inv_cancel, hc1] at h4
     have h5 : c.1 (φ' * ι γ' * φ'⁻¹) = rho φ (c.1 (ι γ')) := by
-      rw [mul_assoc, hc, hc, htriv _ (show ((ι γ' : Dec (F := F) A) : G F Ω) ∈ Ine (F := F) A from hγ.1), map_add,
+      rw [mul_assoc, hc, hc, htriv _ (show ((ι γ' : Dec (F := F) A) : G F Ω) ∈ Ine (F := F) A from hγ.1), map_add (f := _),
         add_left_comm, ← h4, add_zero]
     exact congrArg Multiplicative.ofAdd (hφ φ hφ' _ (h5.symm.trans h3.symm))
   have hall : Ine (F := F) A ≤ f.ker.map (Ine (F := F) A).subtype := by
@@ -129,7 +172,7 @@ theorem exists_equiv_of_surjective {Λ Λ' V W W' : Type} [CommRing Λ] [CommRin
     { toFun := fun x => ⟨f (e ⟨x.1, (hK _).1 x.2⟩).1, (hS _).2 (Subtype.prop _)⟩
       map_add' := fun x y => Subtype.ext (by
         change _ = f _ + f _
-        rw [← map_add, ← Submodule.coe_add, ← map_add]; rfl)
+        rw [← map_add (f := _), ← Submodule.coe_add, ← map_add (f := _)]; rfl)
       map_smul' := fun a x => Subtype.ext (by
         obtain ⟨a, rfl⟩ := hπ a
         change _ = π a • f _
@@ -170,7 +213,7 @@ theorem chLoc_mem_bkOn (hπ : Function.Surjective π) (v : PlE D.host) (hv : v �
     chLoc i π hκ ρ hs v y ∈ bkOn bkP i ρ κ' B v ↔ y ∈ bkOn bkP i ρ κ B v := by
   have : RingHomSurjective (π : Λ →+* Λ') := ⟨hπ⟩
   unfold bkOn
-  rw [dif_pos hv, dif_pos hv]
+  rw [dite_eq_left hv, dite_eq_left hv]
   refine Iff.trans ?_ (Submodule.apply_mem_span_image_iff_mem_span (f := chLoc i π hκ ρ hs v) (h1Ch_bijective _ _ _ _ _).1)
   refine iff_of_eq (congrArg (fun S => chLoc i π hκ ρ hs v y ∈ Submodule.span Λ' S) (Set.ext fun w => ⟨?_, ?_⟩))
   · rintro ⟨z, c, y, b, h1, h2, h3, rfl⟩
@@ -374,7 +417,7 @@ theorem resLam_toLam (F : MvPolynomial ι (X.O0 i)) :
       congr 3
       funext t
       by_cases ht : t = q <;> simp [Pi.single_apply, he.eq_iff, ht]
-    · rw [MvPolynomial.killCompl, MvPolynomial.aeval_X, dif_neg hq, map_zero, sub_eq_zero, ← map_one (MonoidAlgebra.of _ _)]
+    · rw [MvPolynomial.killCompl, MvPolynomial.aeval_X, dite_eq_right hq, map_zero, sub_eq_zero, ← map_one (MonoidAlgebra.of _ _)]
       congr 1
       apply Multiplicative.toAdd.injective
       funext t

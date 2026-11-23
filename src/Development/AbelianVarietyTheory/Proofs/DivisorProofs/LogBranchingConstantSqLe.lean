@@ -1,6 +1,46 @@
-import Mathlib
-import Formalism.SharpRestriction.Divisibility.PrimeDegreeVariant
-import Development.AbelianVarietyTheory.PublishedTheorems.GlobalTheta.FiniteDimensionalNablaSq
+module
+
+public import Formalism.SharpRestriction.Divisibility.PrimeDegreeVariant
+public import Development.AbelianVarietyTheory.PublishedTheorems.GlobalTheta.FiniteDimensionalNablaSq
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Formalism.BasicNotions
 
@@ -57,9 +97,9 @@ theorem finrank_delSq_le (N : ℕ) (lam : DomWeight N) (B : ℝ) (hB : 1 ≤ B)
   calc ∏ i : Fin N, ∏ j ∈ Finset.Ioi i,
       (((lam.w i : ℝ) - (lam.w j : ℝ) + ((j : ℕ) : ℝ) - ((i : ℕ) : ℝ)) / (((j : ℕ) : ℝ) - ((i : ℕ) : ℝ)))
         ≤ ∏ _i : Fin N, (6 * B) ^ N := by
-          refine Finset.prod_le_prod (fun i _ => Finset.prod_nonneg fun j hj => (hf i j hj).1) fun i _ => ?_
+          refine Finset.prod_le_prod₀ (fun i _ => Finset.prod_nonneg fun j hj => (hf i j hj).1) fun i _ => ?_
           calc _ ≤ ∏ _j ∈ Finset.Ioi i, (6 * B) :=
-                Finset.prod_le_prod (fun j hj => (hf i j hj).1) fun j hj => (hf i j hj).2
+                Finset.prod_le_prod₀ (fun j hj => (hf i j hj).1) fun j hj => (hf i j hj).2
             _ = (6 * B) ^ (Finset.Ioi i).card := Finset.prod_const _
             _ ≤ (6 * B) ^ N := by
                 apply pow_le_pow_right₀ h6
@@ -83,7 +123,7 @@ theorem log_brBd_sq_le : ∀ {n N : ℕ} (h : n + 1 = N) (lam : DomWeight N) (sg
 
   have hsp : lam.spread = lam.w 0 - lam.w (Fin.last n) + ((n + 1 : ℕ) : ℤ) := by
     unfold DomWeight.spread
-    rw [dif_pos (Nat.succ_pos n)]
+    rw [dite_eq_left (Nat.succ_pos n)]
     rfl
   have h0 := abs_le.mp (hw 0)
   have hl := abs_le.mp (hw (Fin.last n))

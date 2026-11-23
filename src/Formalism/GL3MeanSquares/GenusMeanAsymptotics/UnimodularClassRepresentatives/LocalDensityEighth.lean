@@ -1,4 +1,50 @@
+module
+
+public import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.CardLiftMatrix
+public import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.CardQuotExtPPow
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
 import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.LocalDensitySeventh
+
+@[expose] public section
 
 open NumberField Module Matrix
 
@@ -11,8 +57,6 @@ open HermitianSublattices idealPowerSpanBounds traceDeterminantCongruences
 variable {K F : Type} [Field K] [NumberField K] [StarRing K] [Field F] [NumberField F] [Algebra F K]
 variable [Fact (IsFixF K F)]
 variable {m r : Type} [Fintype m] [Fintype r] [DecidableEq m] [DecidableEq r]
-
-local notation "ι" => algebraMap (𝓞 F) (𝓞 K)
 
 abbrev mkk (K : Type) {F : Type} [Field K] [Field F] [Algebra F K] (𝔭 : Ideal (𝓞 F)) (k : ℕ) :
     𝓞 K →+* 𝓞 K ⧸ extP K 𝔭 ^ k := Ideal.Quotient.mk (extP K 𝔭 ^ k)
@@ -96,7 +140,7 @@ theorem card_rep_succ (hK : Formalism.HermitianLatticesTheory.IsCMUnram K) {𝔭
     choose Y0 hY0 hY0' using hY'
     have hsum : X0.map (mkk K 𝔭 (k + 1)) + Y = (X0 + Matrix.of Y0).map (mkk K 𝔭 (k + 1)) := by
       ext a b
-      simp only [Matrix.add_apply, Matrix.map_apply, Matrix.of_apply, map_add, hY0']
+      simp only [Matrix.add_apply, Matrix.map_apply, Matrix.of_apply, map_add (f := _), hY0']
     rw [hsum, map_map_piQ, map_map_piQ]
     exact hinv X0 (Matrix.of Y0) hY0
   have RC' : ∀ X : Matrix m r (𝓞 K ⧸ extP K 𝔭 ^ (k + 1)), p' (X.map (piQ K 𝔭 k)) →
@@ -135,7 +179,7 @@ theorem card_rep_succ (hK : Formalism.HermitianLatticesTheory.IsCMUnram K) {𝔭
     rw [hSmap, map_form, map_form]
     ext a b
     simp only [Matrix.add_apply, Matrix.map_apply]
-    rw [← map_add, Ideal.Quotient.eq]
+    rw [← map_add (f := _), Ideal.Quotient.eq]
     have h4 := hY0' a b
     simpa only [Matrix.sub_apply, Matrix.add_apply] using h4
   have h := card_lift_matrix (piQ K 𝔭 k) (piQ_surjective 𝔭 k) (piQ_star 𝔭 k)

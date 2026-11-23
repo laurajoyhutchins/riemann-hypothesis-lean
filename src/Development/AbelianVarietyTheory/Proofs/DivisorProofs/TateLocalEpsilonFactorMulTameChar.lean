@@ -1,7 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.HeckeTateFunctionalEquationCM
-import Development.AbelianVarietyTheory.Definitions.Foundations.TupleConstantsNeZero
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.HeckeTateFunctionalEquationCM
 import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.GlintPrincRelIndexNeZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -84,8 +132,8 @@ theorem locK_eq_of_levelLe {ξ : HChar E} {w : HeightOneSpectrum (𝓞 E)} {m : 
   have h2 : ξ.locK w (a * b⁻¹) = 1 := h1
   rwa [map_mul, map_inv, mul_inv_eq_one] at h2
 
-open Classical in
 
+open Classical in
 def twInv (ξ : HChar E) (w : HeightOneSpectrum (𝓞 E)) (y : E) : ℂ :=
   if h : y = 0 then 0 else (((ξ.locK w (Units.mk0 y h))⁻¹ : ℂˣ) : ℂ)
 
@@ -105,7 +153,7 @@ theorem gaussTerm_mul_one_add (χ : HChar E) (w : HeightOneSpectrum (𝓞 E)) (c
   have h1 : r * (1 + z) ≠ 0 := by rw [← he]; exact mul_ne_zero hr e.ne_zero
   have hu : Units.mk0 _ h1 = Units.mk0 r hr * e := by ext; simp [he]
   have hψ : r * (1 + z) / c = r / c + r * z / c := by ring
-  rw [gaussTerm, gaussTerm, dif_neg h1, dif_neg hr, hu, map_mul, hψ, map_add, psiAt_add]
+  rw [gaussTerm, gaussTerm, dif_neg h1, dif_neg hr, hu, map_mul, hψ, map_add (f := _), psiAt_add]
   simp only [mul_inv, Units.val_mul]
   ring
 
@@ -117,7 +165,7 @@ theorem psiAt_mul_congr {w : HeightOneSpectrum (𝓞 E)} {c : Eˣ}
   have e : (r : E) * z / c = (r' : E) * z / c + (((r - r') * z : 𝓞 E) : E) / c := by push_cast; ring
   have hm : (r - r') * z - 0 ∈ w.asIdeal ^ 2 := by rw [sub_zero, pow_two]; exact Ideal.mul_mem_mul h hz
   have hv := valuation_sub_le (E := E) hm
-  rw [e, map_add, psiAt_add, psiAt_eq_one (t := algebraMap E _ ((((r - r') * z : 𝓞 E) : E) / c)), mul_one]
+  rw [e, map_add (f := _), psiAt_add, psiAt_eq_one (t := algebraMap E _ ((((r - r') * z : 𝓞 E) : E) / c)), mul_one]
   have hval : ∀ x : E, Valued.v (algebraMap E (w.adicCompletion E) x) = w.valuation E x := fun x =>
     HeightOneSpectrum.valuedAdicCompletion_eq_valuation' w x
   rw [hval, map_div₀, hc,
@@ -266,7 +314,7 @@ theorem gaussSumAt_mul_tame {χ ξ : HChar E} {w : HeightOneSpectrum (𝓞 E)} (
       show φ h = 1
       rw [hh]
       show Ideal.Quotient.mk w.asIdeal (1 + z) = 1
-      rw [map_add, map_one, Ideal.Quotient.eq_zero_iff_mem.2 hz, add_zero]
+      rw [map_add (f := _), map_one, Ideal.Quotient.eq_zero_iff_mem.2 hz, add_zero]
 
     have key : ∀ u : (𝓞 E ⧸ w.asIdeal ^ 2)ˣ,
         (¬ ∃ h ∈ H, ∃ μ : ℂ, μ ≠ 1 ∧ ∀ k ∈ H, f (u * k * h) = μ * f (u * k)) →
@@ -284,7 +332,7 @@ theorem gaussSumAt_mul_tame {χ ξ : HChar E} {w : HeightOneSpectrum (𝓞 E)} (
     have eu := key u hu
     have e2 : ((rep u : E) * z / c) = (rep v : E) * z / c + (((rep u - rep v : 𝓞 E) : E) * z / c) := by
       push_cast; ring
-    rw [e2, map_add, psiAt_add, ev] at eu
+    rw [e2, map_add (f := _), psiAt_add, ev] at eu
     have := (χ.locK w e).ne_zero
     exact (mul_eq_left₀ this).1 eu
   obtain ⟨u₀, hu₀⟩ := sum_mul_eq_of_concentrated H f g hg huniq
@@ -308,14 +356,18 @@ theorem locEps_mul_tame : ∀ (E : Type) [Field E] [NumberField E] (χ ξ : HCha
     h x hx (hd.trans (WithZero.exp_le_exp.2 (by omega)))
   have hξ1 : ξ.LevelLe w 1 := hξ
   have hmul : ∀ {θ θ' : HChar E} {m : ℕ}, θ.LevelLe w m → θ'.LevelLe w m → (θ * θ').LevelLe w m :=
-    fun h h' x hx hd => by rw [Formalism.L2.Host.HChar.loc_mul, h x hx hd, h' x hx hd, one_mul]
+    fun {θ θ' m} h h' x hx hd => by
+      change θ.loc w x * θ'.loc w x = 1
+      rw [h x hx hd, h' x hx hd, one_mul]
   have hχ2 : χ.LevelLe w 2 := (hχ 2).2 le_rfl
   refine ⟨fun m => ⟨fun h => ?_, fun hm => hmul ((hχ m).2 hm) (mono (by omega) hξ1)⟩, ?_⟩
   · by_contra hm
     have h1 : (χ * ξ).LevelLe w 1 := mono (by omega) h
     have h2 : χ.LevelLe w 1 := by
       have h3 : (χ * ξ * ξ⁻¹).LevelLe w 1 :=
-        hmul h1 (fun x hx hd => by rw [Formalism.L2.Host.HChar.loc_inv, hξ1 x hx hd, inv_one])
+        hmul h1 (fun x hx hd => by
+          change (ξ.loc w x)⁻¹ = 1
+          rw [hξ1 x hx hd, inv_one])
       rwa [mul_inv_cancel_right] at h3
     exact absurd ((hχ 1).1 h2) (by omega)
   · obtain ⟨x₀, hx₀⟩ := gaussSumAt_mul_tame hχ2 hξ (valuation_unif_pow w (2 + diffExp w))

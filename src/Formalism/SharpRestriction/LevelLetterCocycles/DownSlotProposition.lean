@@ -1,4 +1,44 @@
-import Formalism.SharpRestriction.LevelLetterCocycles.MixedPositionHypothesis
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.LamPS
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -17,8 +57,8 @@ variable {G : Type} [Group G] [TopologicalSpace G] {Qp K₀ K : Type} [Field Qp]
     [CommRing O] [Algebra O LL] {v : AddValuation LL (WithTop ℚ)} {n : ℕ}
     (W : LocWach PD LL O v n)
 
-open Classical in
 
+open Classical in
 def valAt (T : LocLat G Qp LL O) (c : ZMod n) (ζ : LL) (x : W.DD T) : T.V ⊗[Qp] BdR :=
   if h : ∃ k : ℕ, W.Q ^ k • W.φD T x ∈ W.N T then
     ((PowerSeries.coeff 1 (W.lev c ζ W.Q)) ^ Nat.find h)⁻¹ •
@@ -169,8 +209,8 @@ def IsCoord (Pt : ZMod n → LL → (K →ₐ[Qp] LL) → Prop) (π' Eπ : LetA 
     ∃ g ∈ W.AΔ, algebraMap (LetA O n) W.EE (Eπ ^ h') * (W.γE W.gamK f - f) =
       algebraMap (LetA O n) W.EE (π' * g)
 
-open Classical in
 
+open Classical in
 def OmF (c : ZMod n) (S h' : ℕ) (up : (K →ₐ[Qp] LL) → Bool) (b : (K →ₐ[Qp] LL) → ℕ) : Finset ℤ :=
   (Finset.Icc (-(h' : ℤ)) h').filter fun i => ∃ τ, Formalism.MainNotions.DeltaInvariantLattices.OverLetter W τ c ∧
     ((up τ = true ∧ -((b τ : ℤ) + S) ≤ i ∧ i < -(b τ : ℤ)) ∨ (up τ = false ∧ (b τ : ℤ) ≤ i ∧ i < b τ + S))

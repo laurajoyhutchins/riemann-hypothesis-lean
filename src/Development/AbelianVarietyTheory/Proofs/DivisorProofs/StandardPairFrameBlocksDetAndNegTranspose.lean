@@ -1,6 +1,62 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsLocPart
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PrimitiveFrameDatumZetaIntegralEqSmaller
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsLocPart
+public import Development.AbelianVarietyTheory.Definitions.Divisors.RankEqCardIffExistsFrameMatrixFirstColumnBlock
+public import Formalism.DoubleCosetMeasures.StatementZ
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PrimitiveFrameDatumZetaIntegralEqSmaller
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsContinuousPadic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.Divisors.MatchingOfParts
+public import Development.AbelianVarietyTheory.Definitions.Foundations.T2SpaceTensorProductFiniteExtension
+
+@[expose] public section
 
 open scoped TensorProduct NNReal Matrix
 open NumberField IsDedekindDomain MeasureTheory Filter Topology Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes ValuativeRel
@@ -98,7 +154,7 @@ theorem measurableSet_and_vol {a : ℕ} (g₁ : GL (Fin a) k) :
   refine ⟨?_, ?_⟩
   · letI : MeasurableSpace (GL (Fin a) k) := Units.instMeasurableSpace
     haveI : BorelSpace (GL (Fin a) k) := borel_GL
-    exact (isOpen_KO.preimage (continuous_mul_right _)).measurableSet
+    exact (isOpen_KO.preimage (continuous_mul_const _)).measurableSet
   · simp [Measure.real, measure_preimage_mul_right, haarVol_self isOpen_KO le_rfl]
 
 theorem shellSum_indicator {ϖ : kˣ} (hϖ : IsUnif ϖ) {a : ℕ} (ν : kˣ →* ℂˣ) (z C : ℂ)
@@ -160,7 +216,7 @@ theorem bigF_stdA : ∀ {k : Type} [Field k] [ValuativeRel k] [TopologicalSpace 
   intro k _ _ _ _ _ _ ν ϖ c a a' hϖ
   refine ⟨fun X hX => ?_, fun X g₁ hg => ?_⟩
   · have h0 : ∀ g : GL (Fin a) k, stdA ν ϖ c a a' (g.val * X) = 0 := fun g => by
-      rw [stdA, dif_neg]
+      rw [stdA, dite_eq_right]
       rintro ⟨h, -⟩
       exact h (by rw [blk₁_mul, Matrix.det_mul, hX, mul_zero])
     simp [bigF, shellSum, shell, h0]
@@ -170,10 +226,10 @@ theorem bigF_stdA : ∀ {k : Type} [Field k] [ValuativeRel k] [TopologicalSpace 
     · have h' : (blk₁ (g.val * X)).det ≠ 0 ∧ IsGLO (blk₁ (g.val * X)) ∧
           ∀ i j, blk₂ (g.val * X) i j ∈ cball (ϖ ^ c) := by
         rw [blk₁_mul, blk₂_mul, ← hg]; exact h
-      rw [stdA, dif_pos h']
+      rw [stdA, dite_eq_left h']
       congr 3
       exact Units.ext (by simp [blk₁_mul, hg])
-    · rw [stdA, dif_neg]
+    · rw [stdA, dite_eq_right]
       rwa [blk₁_mul, blk₂_mul, ← hg]
 
 theorem smallF_stdB : ∀ {k : Type} [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k]
@@ -187,7 +243,7 @@ theorem smallF_stdB : ∀ {k : Type} [Field k] [ValuativeRel k] [TopologicalSpac
   intro k _ _ _ _ _ _ ν ϖ c a a'
   refine ⟨fun Y hY => ?_, fun Y g₂ hg => ?_⟩
   · have h0 : ∀ g : GL (Fin a') k, stdB ν ϖ c a a' (g.val * Y) = 0 := fun g => by
-      rw [stdB, dif_neg]
+      rw [stdB, dite_eq_right]
       rintro ⟨h, -⟩
       exact h (by rw [blk₂_mul, Matrix.det_mul, hY, mul_zero])
     simp [smallF, h0]
@@ -197,10 +253,10 @@ theorem smallF_stdB : ∀ {k : Type} [Field k] [ValuativeRel k] [TopologicalSpac
     · have h' : (blk₂ (g.val * Y)).det ≠ 0 ∧ IsGLO (blk₂ (g.val * Y)) ∧
           ∀ i j, blk₁ (g.val * Y) i j ∈ cball (ϖ ^ c) := by
         rw [blk₁_mul, blk₂_mul, ← hg]; exact h
-      rw [stdB, dif_pos h']
+      rw [stdB, dite_eq_left h']
       congr 3
       exact Units.ext (by simp [blk₂_mul, hg])
-    · rw [stdB, dif_neg]
+    · rw [stdB, dite_eq_right]
       rwa [blk₁_mul, blk₂_mul, ← hg]
 
 theorem standardPair_frameBlocks_det_and_neg_transpose : ∀ {k : Type} [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k]

@@ -1,5 +1,59 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.FgAnWp
+module
+
+public import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.EndoZInstance
+public import Formalism.LocalToGlobal.TorsionIntegrality.WeierstrassTwoTorsion.StatementK
+public import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.IsogenyFormulaInstance
+public import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.MulStableIntegral
+public import Formalism.LocalToGlobal.TorsionIntegrality.WeierstrassTwoTorsion.BridgeTwoMore
+import Formalism.LocalToGlobal.TorsionIntegrality.WeierstrassTwoTorsion.FlowTwoTorsionWp
+import Formalism.LocalToGlobal.TorsionIntegrality.WeierstrassTwoTorsion.TwoTorsionU
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.TorsionNormIteration.InvIntegralOfClass
+
+@[expose] public section
 
 noncomputable section
 
@@ -56,9 +110,9 @@ theorem trans_taylor_cubic (f : ℂ → ℂ) (hf : AnalyticAt ℂ f 0) (a b c : 
   rw [h6, h5, h4, h3, h2, h1, hC, hC, hC]
 
 theorem trans_taylor (L : PeriodPair) (t : ℂ) (ht : t ∉ L.lattice) :
-    derivative ℂ (F.taylor0 (fun z => L.weierstrassP (z + t)))
+    PowerSeries.derivative (F.taylor0 (fun z => L.weierstrassP (z + t)))
         = F.taylor0 (fun z => L.derivWeierstrassP (z + t)) ∧
-    derivative ℂ (F.taylor0 (fun z => L.derivWeierstrassP (z + t)))
+    PowerSeries.derivative (F.taylor0 (fun z => L.derivWeierstrassP (z + t)))
         = C 6 * (F.taylor0 (fun z => L.weierstrassP (z + t))
             * F.taylor0 (fun z => L.weierstrassP (z + t))) + C (-(L.g₂ / 2)) ∧
     F.taylor0 (fun z => L.derivWeierstrassP (z + t)) * F.taylor0 (fun z => L.derivWeierstrassP (z + t))
@@ -87,7 +141,7 @@ theorem trans_taylor (L : PeriodPair) (t : ℂ) (ht : t ∉ L.lattice) :
     linear_combination this
 
 theorem trans_derivative_map {R S : Type*} [CommRing R] [CommRing S] (φ : R →+* S) (f : R⟦X⟧) :
-    derivative S (PowerSeries.map φ f) = PowerSeries.map φ (derivative R f) := by
+    PowerSeries.derivative (PowerSeries.map φ f) = PowerSeries.map φ (PowerSeries.derivative f) := by
   ext n
   simp [coeff_derivative]
 
@@ -138,8 +192,8 @@ theorem trans_bridge (l : ℕ) [Fact l.Prime] (L : PeriodPair) (ι : ℂ ≃+* �
   have i2 : ι 2 = 2 := map_ofNat ι 2
   have i4 : ι 4 = 4 := map_ofNat ι 4
   have i6 : ι 6 = 6 := map_ofNat ι 6
-  have E1 : derivative ℂ_[l] P = Q := by rw [hP, trans_derivative_map, e1]
-  have E2 : derivative ℂ_[l] Q = C 6 * (P * P) + C (-(ι L.g₂ / 2)) := by
+  have E1 : PowerSeries.derivative P = Q := by rw [hP, trans_derivative_map, e1]
+  have E2 : PowerSeries.derivative Q = C 6 * (P * P) + C (-(ι L.g₂ / 2)) := by
     rw [hQ, trans_derivative_map, e2]
     simp [hP, i2, i6]
   have E3 : Q * Q = C 4 * (P * (P * P)) + (C (-ι L.g₂) * P + C (-ι L.g₃)) := by
@@ -148,7 +202,7 @@ theorem trans_bridge (l : ℕ) [Fact l.Prime] (L : PeriodPair) (ι : ℂ ≃+* �
   have h2 : (C (1 / 2 : ℂ_[l]) : ℂ_[l]⟦X⟧) * 2 = 1 := by
     rw [← map_ofNat (C : ℂ_[l] →+* ℂ_[l]⟦X⟧) 2, ← map_mul]
     norm_num
-  have hfl' : A.IsFlow (A.curveS W) (derivative ℂ_[l]) P (C (1 / 2 : ℂ_[l]) * Q) := by
+  have hfl' : A.IsFlow (A.curveS W) PowerSeries.derivative P (C (1 / 2 : ℂ_[l]) * Q) := by
     have c4 : (C (-ι L.g₂ / 4) : ℂ_[l]⟦X⟧) = C (1 / 2) * C (1 / 2) * C (-ι L.g₂) := by
       rw [← map_mul, ← map_mul]; congr 1; ring
     have c6 : (C (-ι L.g₃ / 4) : ℂ_[l]⟦X⟧) = C (1 / 2) * C (1 / 2) * C (-ι L.g₃) := by

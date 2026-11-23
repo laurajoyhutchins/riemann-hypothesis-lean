@@ -1,5 +1,60 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.LeadMinor
+module
+
+public import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.IsCompactUnitaryPointsAtPlaceFstMemCompact
+public import Mathlib.Algebra.AffineMonoid.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RingTheory.DedekindDomain.Factorization
+
+@[expose] public section
 
 noncomputable section
 
@@ -26,8 +81,9 @@ theorem projective_of_factor {A M : Type} [CommRing A] [AddCommGroup M] [Module 
     (DirectSum.toModule A _ M (fun i => c i • g i)) ?_
   apply LinearMap.ext
   intro x
+
   simp only [LinearMap.comp_apply, LinearMap.sum_apply, map_sum,
-    DirectSum.toModule_lof, LinearMap.smul_apply, hfg, LinearMap.id_apply, smul_smul]
+  DirectSum.toModule_lof, LinearMap.smul_apply, hfg, LinearMap.id_apply, smul_smul]
   rw [← Finset.sum_smul]
   rw [Finsupp.sum] at hc
   simp only [smul_eq_mul] at hc
@@ -64,8 +120,8 @@ theorem exists_smul_mem (m : Ideal A) [hm : m.IsPrime] (R : Subring Ω)
     rw [mul_smul, key, smul_comm]
     exact M.smul_mem _ hy'
 
-omit [Algebra A Ω] [Module Ω V] [IsScalarTower A Ω V] in
 
+omit [Algebra A Ω] [Module Ω V] [IsScalarTower A Ω V] in
 theorem exists_smul_le (m : Ideal A) [hm : m.IsPrime] {M N : Submodule A V} (hM : M.FG)
     (h : ∀ x ∈ M, ∃ t ∉ m, t • x ∈ N) : ∃ t ∉ m, ∀ x ∈ M, t • x ∈ N := by
   classical
@@ -258,6 +314,7 @@ private theorem integralBasis_repr_eq_trace_mul_dualInt (z : E) (k : Module.Free
       (Algebra.traceForm_isSymm ℚ) (integralBasis E) i k
     simpa [dualInt, Algebra.traceForm_apply] using this
   conv_rhs => rw [← (integralBasis E).sum_repr z]
+
   rw [Finset.sum_mul, map_sum]
   simp only [smul_mul_assoc, map_smul, hd, smul_eq_mul, mul_ite, mul_one, mul_zero,
     Finset.sum_ite_eq', Finset.mem_univ, if_true]
@@ -266,8 +323,9 @@ private theorem sum_dualInt_mul_integralBasis_eq_one : ∑ k, dualInt E k * inte
   classical
   have key : ∀ y : E, Algebra.traceForm ℚ E (∑ k, dualInt E k * integralBasis E k - 1) y = 0 := by
     intro y
+
     rw [Algebra.traceForm_apply, sub_mul, one_mul, map_sub, Finset.sum_mul, map_sum,
-      Algebra.trace_eq_matrix_trace (integralBasis E) y, Matrix.trace, sub_eq_zero]
+    Algebra.trace_eq_matrix_trace (integralBasis E) y, Matrix.trace, sub_eq_zero]
     apply Finset.sum_congr rfl
     intro k _
     rw [Matrix.diag_apply, Algebra.leftMulMatrix_eq_repr_mul, integralBasis_repr_eq_trace_mul_dualInt]
@@ -307,6 +365,7 @@ private theorem rho_mul_eigProj' {K L : Type} [Field K] [AddCommGroup L] [Module
         apply Finset.sum_congr rfl
         intro l _
         conv_lhs => rw [← (RingOfIntegers.basis E).sum_repr (a * RingOfIntegers.basis E l)]
+
         simp only [map_sum, map_zsmul, Int.cast_smul_eq_zsmul]
     _ = ∑ j, (∑ l, ((RingOfIntegers.basis E).repr (a * RingOfIntegers.basis E l) j : K) * σ (dualInt E l)) •
           ρ (RingOfIntegers.basis E j) := by
@@ -320,6 +379,7 @@ private theorem rho_mul_eigProj' {K L : Type} [Field K] [AddCommGroup L] [Module
     _ = ∑ j, (σ (a : E) * σ (dualInt E j)) • ρ (RingOfIntegers.basis E j) := by
         apply Finset.sum_congr rfl
         intro j _
+
         rw [← map_mul, coe_mul_dualInt_eq_sum, map_sum]
         simp only [map_mul, map_intCast]
     _ = σ (a : E) • eigProj ρ σ := by
@@ -335,6 +395,7 @@ private theorem eigProj_eq_self_of_eigenvector {K L : Type} [Field K] [AddCommGr
   simp only [LinearMap.sum_apply, LinearMap.smul_apply, hx, smul_smul]
   rw [← Finset.sum_smul]
   have h1 : ∑ k, σ (dualInt E k) * σ ((RingOfIntegers.basis E k : 𝓞 E) : E) = 1 := by
+
     rw [← map_one σ, ← sum_dualInt_mul_integralBasis_eq_one, map_sum]
     apply Finset.sum_congr rfl
     intro k _
@@ -360,7 +421,7 @@ theorem factor_omHT (m : Ideal A) [hm : m.IsPrime] (hp : (p : A) ∉ m) (σ : E 
     unfold HTChart.om' at hx ⊢
     obtain ⟨y, hy, z, hz, rfl⟩ := Submodule.mem_sup.mp hx
     clear hx
-    rw [map_add]
+    rw [map_add (f := _)]
     apply Submodule.add_mem
     · induction hy using Submodule.span_induction with
       | mem w hw =>
@@ -377,7 +438,7 @@ theorem factor_omHT (m : Ideal A) [hm : m.IsPrime] (hp : (p : A) ∉ m) (σ : E 
           simp only [LinearMap.smul_apply, LinearMap.id_apply, ← Nat.cast_pow, Nat.cast_smul_eq_nsmul]
       | zero => simp
       | add u v _ _ hu hv =>
-        rw [map_add]
+        rw [map_add (f := _)]
         exact Submodule.add_mem _ hu hv
       | smul c u _ hu =>
         rw [LinearMap.map_smul_of_tower]

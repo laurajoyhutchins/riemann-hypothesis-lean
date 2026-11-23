@@ -1,5 +1,50 @@
-import Formalism.HermitianCurvature.StatementHeads
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.PBGWaveMain
+module
+
+public import Formalism.HermitianCurvature.StatementHeads
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.PBGDegW
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.LevelFormSesquilinearFiniteClass
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.PBGSlice
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Matrix Finset
 open scoped ComplexConjugate
@@ -53,9 +98,9 @@ theorem sum_pad {V : Type} [AddCommGroup V] [Module ℂ V] {d n : ℕ} (hdn : d 
   · apply Finset.sum_congr rfl
     intro m _
     simp only [Fin.castLEEmb_apply, Fin.val_castLE]
-    rw [dif_pos (by omega)]
+    rw [dite_eq_left (by omega)]
   · intro l _ hl
-    rw [dif_neg, smul_zero]
+    rw [dite_eq_right, smul_zero]
     intro hle
     apply hl
     rw [Finset.mem_map]
@@ -129,12 +174,12 @@ theorem reduceJ {k r : ℕ} (T : D.LevTower k r Wp Wq) (F : B.Mat k r → (Wq �
     · rw [show B.JF (T.bs j) (C1 l a') g = _ from hcl']
       by_cases h2 : (l : ℕ) = j - s
       · simp only [hE, if_neg h1, if_pos h2]
-        rw [dif_pos (by omega)]
+        rw [dite_eq_left (by omega)]
         have e3 : (⟨(l : ℕ), by omega⟩ : Fin (j - s + 1)) = Fin.last (j - s) := Fin.ext (by simp [h2])
         rw [e3, hcl]
         exact (Formalism.FourierDecayAlt.P.JCx2.bc_JF_smul _ _ _).symm
       · simp only [hE, if_neg h1, if_neg h2]
-        rw [dif_neg (by omega)]
+        rw [dite_eq_right (by omega)]
         exact (Formalism.FourierDecayAlt.P.JCx2.bc_JF_zero g).symm
 
 theorem nice_lincomb {k ρ : ℕ} {Bs : B.RealPlaceData k ρ Wp Wq} {S ι : Type} [Fintype S] [Fintype ι] [Nonempty ι]

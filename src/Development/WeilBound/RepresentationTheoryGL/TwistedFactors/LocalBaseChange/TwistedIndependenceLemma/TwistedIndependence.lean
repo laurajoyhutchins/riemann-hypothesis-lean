@@ -1,6 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Foundations.SmoothPartStable
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.SmoothPartStable
+public import Mathlib.Basic.Complex.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.IsUnitarisableOfCharIff
+
+@[expose] public section
 
 noncomputable section
 
@@ -9,69 +52,14 @@ open scoped TensorProduct
 
 namespace PositivityTheory.Lbc
 
-def cycShift (W : Type) [AddCommGroup W] [Module ℂ W] (l : ℕ) :
-    (⨂[ℂ] _ : Fin l, W) ≃ₗ[ℂ] (⨂[ℂ] _ : Fin l, W) :=
-  PiTensorProduct.reindex ℂ (fun _ : Fin l => W) (finRotate l)
-
-def revProd {W : Type} [AddCommGroup W] [Module ℂ W] {l : ℕ} (T : Fin l → Module.End ℂ W) : Module.End ℂ W :=
-  (List.ofFn T).reverse.prod
-
-def CyclicTrace : Prop :=
-  ∀ (W : Type) [AddCommGroup W] [Module ℂ W] [FiniteDimensional ℂ W] (l : ℕ), 1 ≤ l →
-    ∀ T : Fin l → Module.End ℂ W,
-      LinearMap.trace ℂ (⨂[ℂ] _ : Fin l, W)
-          ((cycShift W l : (⨂[ℂ] _ : Fin l, W) →ₗ[ℂ] (⨂[ℂ] _ : Fin l, W)) ∘ₗ PiTensorProduct.map T) =
-        LinearMap.trace ℂ W (revProd T)
-
 def IsHeckeOpG {G V : Type} [Group G] [AddCommGroup V] [Module ℂ V] (π : Representation ℂ G V) (K : Subgroup G)
     (g : G) (T : Module.End ℂ (fixed π K)) : Prop :=
   ∀ (v : fixed π K) (f : Module.Dual ℂ V), (∀ x ∈ K, f ∘ₗ π x = f) → f (π g (v : V)) = f ((T v : fixed π K) : V)
-
-def IsoRep {G V W : Type} [Group G] [AddCommGroup V] [Module ℂ V] [AddCommGroup W] [Module ℂ W]
-    (π : Representation ℂ G V) (σ : Representation ℂ G W) : Prop :=
-  ∃ e : V ≃ₗ[ℂ] W, ∀ (g : G) (v : V), e (π g v) = σ g (e v)
 
 def HeckeExistsUnique : Prop :=
   ∀ (G : Type) [Group G] [TopologicalSpace G] [IsTopologicalGroup G] (K : Subgroup G), IsOpen (K : Set G) →
     IsCompact (K : Set G) → ∀ (V : Type) [AddCommGroup V] [Module ℂ V] (π : Representation ℂ G V), IsSmooth π →
       ∀ g : G, ∃! T : Module.End ℂ (fixed π K), IsHeckeOpG π K g T
-
-def HeckeDensity : Prop :=
-  ∀ (G : Type) [Group G] [TopologicalSpace G] [IsTopologicalGroup G] (K : Subgroup G), IsOpen (K : Set G) →
-    IsCompact (K : Set G) → ∀ (ι : Type) [Fintype ι] (V : ι → Type) [∀ i, AddCommGroup (V i)] [∀ i, Module ℂ (V i)]
-      (π : ∀ i, Representation ℂ G (V i)), (∀ i, IsAdmissible (π i)) → (∀ i, (π i).IsIrreducible) →
-        (∀ i j, i ≠ j → ¬ IsoRep (π i) (π j)) →
-        ∀ T : ∀ i, G → Module.End ℂ (fixed (π i) K), (∀ i g, IsHeckeOpG (π i) K g (T i g)) →
-          Submodule.span ℂ (Set.range fun (g : G) (i : ι) => T i g) = ⊤
-
-def TwistedIndependence : Prop :=
-  ∀ (G : Type) [Group G] [TopologicalSpace G] [IsTopologicalGroup G] (K : Subgroup G), IsOpen (K : Set G) →
-    IsCompact (K : Set G) → ∀ (ι : Type) [Fintype ι] (V : ι → Type) [∀ i, AddCommGroup (V i)] [∀ i, Module ℂ (V i)]
-      (π : ∀ i, Representation ℂ G (V i)), (∀ i, IsAdmissible (π i)) → (∀ i, (π i).IsIrreducible) →
-        (∀ i j, i ≠ j → ¬ IsoRep (π i) (π j)) →
-        ∀ T : ∀ i, G → Module.End ℂ (fixed (π i) K), (∀ i g, IsHeckeOpG (π i) K g (T i g)) →
-          ∀ A : ∀ i, Module.End ℂ (fixed (π i) K),
-            (∀ g : G, ∑ i, LinearMap.trace ℂ (fixed (π i) K) (T i g * A i) = 0) → ∀ i, A i = 0
-
-def tpow {G V : Type} [Group G] [AddCommGroup V] [Module ℂ V] (π : Representation ℂ G V) (l : ℕ) :
-    Representation ℂ (Fin l → G) (⨂[ℂ] _ : Fin l, V) :=
-  piTensor (fun _ : Fin l => π)
-
-def powSub {G : Type} [Group G] (K : Subgroup G) (l : ℕ) : Subgroup (Fin l → G) :=
-  Subgroup.pi Set.univ fun _ => K
-
-def SplitIdentity : Prop :=
-  ∀ (G : Type) [Group G] [TopologicalSpace G] [IsTopologicalGroup G] (K : Subgroup G), IsOpen (K : Set G) →
-    IsCompact (K : Set G) → ∀ (V : Type) [AddCommGroup V] [Module ℂ V] (π : Representation ℂ G V), IsAdmissible π →
-      ∀ (l : ℕ), 1 ≤ l →
-        (∃ A : Module.End ℂ (fixed (tpow π l) (powSub K l)), ∀ v, ((A v : fixed (tpow π l) (powSub K l)) :
-            ⨂[ℂ] _ : Fin l, V) = cycShift V l (v : ⨂[ℂ] _ : Fin l, V)) ∧
-        ∀ (A : Module.End ℂ (fixed (tpow π l) (powSub K l))), (∀ v, ((A v : fixed (tpow π l) (powSub K l)) :
-            ⨂[ℂ] _ : Fin l, V) = cycShift V l (v : ⨂[ℂ] _ : Fin l, V)) →
-          ∀ (g : Fin l → G) (TP : Module.End ℂ (fixed (tpow π l) (powSub K l))),
-            IsHeckeOpG (tpow π l) (powSub K l) g TP →
-            ∀ T : Fin l → Module.End ℂ (fixed π K), (∀ i, IsHeckeOpG π K (g i) (T i)) →
-              LinearMap.trace ℂ _ (A * TP) = LinearMap.trace ℂ _ (revProd T)
 
 end PositivityTheory.Lbc
 

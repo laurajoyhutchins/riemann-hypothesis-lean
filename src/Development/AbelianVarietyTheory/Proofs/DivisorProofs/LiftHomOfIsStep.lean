@@ -1,9 +1,48 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.PrimitiveCrystalHodgeLiftClasses
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsIntermediateGrpPullbackAbelianSchemeStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HodgeFiltrationMiddleEqReductionOfTopStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DeRhamCrystalTwoReductionsAgreeFiltrationStatement
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.UniformBaseChange.PullGt
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.PrimitiveCrystalHodgeLiftClasses
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DeRhamCrystalTwoReductionsAgreeFiltrationStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsIntermediateGrpPullbackAbelianSchemeStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HodgeFiltrationMiddleEqReductionOfTopStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.UniformBaseChange.PullGt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -27,7 +66,12 @@ theorem IsStep.spMap_eq (st : IsStep κ π hJ ρ κ₁ π₁) : spMap π = spMap
 
 theorem IsStep.idMor (st : IsStep κ π hJ ρ κ₁ π₁) (A₀ : Over (Sp R₀)) [GrpObj A₀] :
     GrpMor κ (spMap π) A₀ κ₁ (spMap π₁) A₀ ρ (𝟙 _) (𝟙 _) :=
-  GrpMor.of_hom st.dp st.spMap_eq (𝟙 A₀)
+  ⟨st.dp, by simpa using st.spMap_eq, by simp, by
+    intro T x y x₀ y₀ hx hy
+    have ex : x₀ = x := Over.OverMorphism.ext (by simpa using hx)
+    have ey : y₀ = y := Over.OverMorphism.ext (by simpa using hy)
+    subst x₀; subst y₀
+    exact Category.comp_id _ |>.symm⟩
 
 def redSub (hρ : Function.Surjective ρ) {A₁ : Over (Sp R₁)} [GrpObj A₁] {A : Over (Sp R)} [GrpObj A]
     {i₂ : A₁.left ⟶ A.left} (h₂ : IsGrpPullback A₁ A (spMap ρ) i₂) (F : Submodule R (HdR A)) :
@@ -36,7 +80,7 @@ def redSub (hρ : Function.Surjective ρ) {A₁ : Over (Sp R₁)} [GrpObj A₁] 
   add_mem' := by
     rintro y y' ⟨x, hx, e⟩ ⟨x', hx', e'⟩
     exact ⟨x + x', F.add_mem hx hx', fun c ↦ by
-      rw [LinearMap.add_apply, LinearMap.add_apply, e, e', map_add]⟩
+      rw [LinearMap.add_apply, LinearMap.add_apply, e, e', map_add (f := _)]⟩
   zero_mem' := ⟨0, F.zero_mem, fun c ↦ by simp⟩
   smul_mem' := by
     rintro r₁ y ⟨x, hx, e⟩
@@ -66,7 +110,27 @@ theorem dualMap_push {A₀ B₀ : Over (Sp R₀)} [GrpObj A₀] [GrpObj B₀] {A
       push (divided₂ hJ) (spMap ρ) f₁
         ((NA.pull : prim (divided₂ hJ) (spMap ρ) A₁ →ₗ[R] prim κ (spMap π) A₀).dualMap d) := by
   refine LinearMap.ext fun c ↦ ?_
-  have m := (homMor (divided₂ hJ) (spMap ρ) f₁).comp NA
+  let m : GrpMor (divided₂ hJ) (spMap ρ) B₁ κ (spMap π) A₀
+      (RingHom.id R) (spMap π₁ ≫ 𝟙 _) (i₁ ≫ f₁.left) := by
+    refine ⟨NA.dp, ?_, ?_, ?_⟩
+    · simpa using NA.base
+    · simpa only [Category.comp_id, Category.assoc, Over.w f₁] using NA.w
+    · intro T x y x₀ y₀ hx hy
+      let x₁ : Over.mk (T.hom ≫ spMap π₁) ⟶ A₁ :=
+        Over.homMk (x.left ≫ i₁) (by simp only [Over.mk_hom, Category.assoc, NA.w, reassoc_of% (Over.w x)])
+      let y₁ : Over.mk (T.hom ≫ spMap π₁) ⟶ A₁ :=
+        Over.homMk (y.left ≫ i₁) (by simp only [Over.mk_hom, Category.assoc, NA.w, reassoc_of% (Over.w y)])
+      let x₂ : Over.mk ((Over.mk (T.hom ≫ spMap π₁)).hom ≫ 𝟙 _) ⟶ B₁ :=
+        Over.homMk x₀.left (by simpa using Over.w x₀)
+      let y₂ : Over.mk ((Over.mk (T.hom ≫ spMap π₁)).hom ≫ 𝟙 _) ⟶ B₁ :=
+        Over.homMk y₀.left (by simpa using Over.w y₀)
+      have h₁ := NA.mul T x y x₁ y₁ rfl rfl
+      have h₂ := (homMor (divided₂ hJ) (spMap ρ) f₁).mul _ x₁ y₁ x₂ y₂
+        (by simpa [x₂, x₁, Category.assoc] using hx)
+        (by simpa [y₂, y₁, Category.assoc] using hy)
+      have h₃ : (x₀ * y₀).left = (x₂ * y₂).left := by
+        simp [Hom.mul_def, Over.comp_left, Over.lift_left, x₂, y₂]
+      rw [h₃, h₂, h₁, Category.assoc]
   have e1 : (homMor κ (spMap π) f₀).pull (NB.pull c) = m.pull c :=
     GrpMor.pull_pull NB (homMor κ (spMap π) f₀) m (fun _ ↦ rfl) e.symm c
   have e2 : NA.pull ((homMor (divided₂ hJ) (spMap ρ) f₁).pull c) = m.pull c :=

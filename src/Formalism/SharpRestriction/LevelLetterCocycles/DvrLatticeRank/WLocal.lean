@@ -1,9 +1,57 @@
-import Formalism.SharpRestriction.LevelLetterCocycles.DeltaInvariantUniformizer
-import Formalism.SharpRestriction.LevelLetterCocycles.MapCompZero
-import Formalism.SharpRestriction.LevelLetterCocycles.BaseChangePreservesUnitaryOf
-import Formalism.SharpRestriction.LevelLetterCocycles.DvrLatticeRank.GradNPfB
-import Formalism.SharpRestriction.LevelLetterCocycles.DvrLatticeRank.FrobPiNPf
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.DeltaInvariantUniformizer
+public import Formalism.EisensteinCokernelLengths.FactorialValuationBounds.FactorialValuationBoundsProofFact
 import Formalism.PadicSubsetSums.StableGradedCounts.ARCReuse
+import Formalism.SharpRestriction.LevelLetterCocycles.BaseChangePreservesUnitaryOf
+public import Formalism.SharpRestriction.LevelLetterCocycles.DvrLatticeRank.FrobPiNPf
+public import Formalism.SharpRestriction.LevelLetterCocycles.DvrLatticeRank.GradNPfA
+public import Formalism.SharpRestriction.LevelLetterCocycles.DvrLatticeRank.GradNPfB
+import Formalism.SharpRestriction.LevelLetterCocycles.DvrLatticeRank.GradNPfC
+import Formalism.SharpRestriction.LevelLetterCocycles.MapCompZero
+import Formalism.WindowSums.PowerSeriesRelationList
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -67,8 +115,8 @@ theorem w_div {R : Type*} [CommRing R] (c L : R) (hc : IsUnit c) (l : ℕ) [Fact
       padicValNat l (2 * a - 1).factorial := by
     have hkN : k ≤ 2 * a - 1 := by omega
     have hd := Nat.factorial_mul_factorial_dvd_factorial hkN
-    rw [← padicValNat.mul (Nat.factorial_ne_zero _) (Nat.factorial_ne_zero _)]
-    exact (padicValNat_dvd_iff_le (Nat.factorial_ne_zero _)).1 (dvd_trans pow_padicValNat_dvd hd)
+    rw [← (show ∀ {p a b : ℕ} [_root_.Fact (_root_.Nat.Prime p)], a ≠ 0 → b ≠ 0 → _root_.padicValNat p (a * b) = _root_.padicValNat p a + _root_.padicValNat p b from by simpa only [← _root_.Nat.padicValNat_def] using @_root_.Nat.multiplicity_mul) (Nat.factorial_ne_zero _) (Nat.factorial_ne_zero _)]
+    exact ((by simpa only [_root_.Nat.padicValNat_def] using @_root_.multiplicity_dvd_iff_le : ∀ {p : _root_.Nat} [hp : _root_.Fact (_root_.Nat.Prime p)] {a n : _root_.Nat} (ha : a ≠ 0), p ^ n ∣ a ↔ n ≤ _root_.padicValNat p a) (Nat.factorial_ne_zero _)).1 (dvd_trans (_root_.Dvd.intro_left _ (_root_.Nat.divMaxPow_mul_pow_padicValNat _ _)) hd)
   rw [hsplit, Finset.prod_union hdisj, hA, hB]
   refine dvd_trans ?_ (pow_dvd_pow L (show k + padicValNat l k.factorial +
     (2 * a - 1 - k + padicValNat l (2 * a - 1 - k).factorial) ≤
@@ -90,7 +138,7 @@ theorem w_coker {R V : Type} [CommRing R] [IsDomain R] [AddCommGroup V] [Module 
     obtain ⟨y, hy, hyy⟩ := hN a z hz
     have e : γ ((ϖ ^ a) z) = (ϖ ^ a) (c ^ a • z + ϖ y) := by
       have e0 : (ϖ ^ a) (ϖ y) = (ϖ ^ (a + 1)) y := by rw [pow_succ, Module.End.mul_apply]
-      rw [map_add, map_smul, e0, ← hyy]; abel
+      rw [map_add (f := _), map_smul, e0, ← hyy]; abel
     show γ ((ϖ ^ a) z) ∈ W
     rw [e]
     exact ⟨_, N'.add_mem (N'.smul_mem _ hz) (hst y hy), rfl⟩
@@ -308,7 +356,7 @@ theorem w_avg (T₁ T₂ : LocLat G Qp LL O) (F : LatHom T₁.L T₂.L) (π' : L
 
 end WLocal
 
-set_option maxHeartbeats 1000000 in
+
 theorem w_pf : Formalism.MainNotions.N.Ln34.WStep := by
   intro D HW F Cm CA CB CK hA l hlp hl K LL hG π' E hR T₁ T₂ Fm h' hT₁ hT₂ hOnto hJ
   have hpl : ((D.loc l).PD K).p = l := (D.loc l).PD_p K

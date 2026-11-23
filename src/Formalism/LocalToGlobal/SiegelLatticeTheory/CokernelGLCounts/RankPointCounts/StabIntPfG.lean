@@ -1,5 +1,49 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.StabIntPfL
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.StabIntPfL
+import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.TermLoc
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.Valuation.Integral
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -11,8 +55,8 @@ namespace Formalism.L2.SG.Pf.StabIntSh
 
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
 
-variable (D) in
 
+variable (D) in
 def QLocG : Prop :=
   ∀ (δ : ∀ p : PlF D, (D.s.atP p).Fp) (M : ∀ p : PlF D, Loc.Model (D.s.atP p).Fp (D.s.atP p).Ep),
     (∀ q, Agree δ M q) → ∀ (p : PlF D) (g : Loc.SplitG (M p).L), (M p).split = some g →
@@ -60,15 +104,15 @@ theorem ratio {F : Type*} [Field F] {γ : F} (hγ : γ ≠ 0) {m n : ℕ} (h : m
     (γ ^ m)⁻¹ / (γ ^ n)⁻¹ = γ ^ (n - m) := by
   rw [inv_div_inv, pow_sub₀ γ hγ h, div_eq_mul_inv]
 
-include hA hs in
 
+include hA hs in
 theorem e_conj (z : D.host.E) :
     g.e ((D.s.atP p).ιE (D.conjF z)) = (g.e ((D.s.atP p).ιE z)).swap := by
   rw [← (D.s.atP p).cj_ιE, ← (hA p).2.2.1]
   exact g.e_cj _
 
-include hA in
 
+include hA in
 theorem mem_O_split (w : (D.s.atP p).Ep) :
     w ∈ (D.s.atP p).O ↔ (g.e w).1 ∈ 𝒪[(D.s.atP p).Fp] ∧ (g.e w).2 ∈ 𝒪[(D.s.atP p).Fp] := by
   have hint : ∀ s : (D.s.atP p).Fp, IsIntegral 𝒪[(D.s.atP p).Fp] s ↔ s ∈ 𝒪[(D.s.atP p).Fp] := fun s =>
@@ -80,8 +124,8 @@ theorem mem_O_split (w : (D.s.atP p).Ep) :
     IsIntegral.pair_iff, hint, hint]
   rfl
 
-include hs in
 
+include hs in
 theorem mem_R_split (w : (D.s.atP p).Ep) :
     w ∈ (M p).R ↔ (g.e w).1 ∈ 𝒪[(D.s.atP p).Fp] ∧ (g.e w).2 ∈ 𝒪[(D.s.atP p).Fp] ∧
       ∃ t ∈ 𝒪[(D.s.atP p).Fp], (g.e w).1 - (g.e w).2 = (g.q : (D.s.atP p).Fp) * t := by

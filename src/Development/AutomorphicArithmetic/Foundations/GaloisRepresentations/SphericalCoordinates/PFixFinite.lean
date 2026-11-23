@@ -1,4 +1,45 @@
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.SphericalCoordinates.LevelChange
+module
+
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.SphericalCoordinates.LevelChange
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.QuasiAffine
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -24,7 +65,7 @@ private theorem iso_alg {R : Type} [CommRing R] [Algebra ℂ R] [IsNoetherianRin
   let dl : R →ₗ[ℂ] R ⧸ m ^ 2 :=
     { toFun := fun x => Ideal.Quotient.mk (m ^ 2) (x - algebraMap ℂ R (e x))
       map_add' := fun x y => by
-        simp only [map_add, map_sub]
+        simp only [map_add (f := _), map_sub]
         ring
       map_smul' := fun c x => by
         simp only [RingHom.id_apply, Algebra.smul_def, map_mul, map_sub, AlgHom.commutes,
@@ -32,7 +73,7 @@ private theorem iso_alg {R : Type} [CommRing R] [Algebra ℂ R] [IsNoetherianRin
         ring }
   let dd : Derivation ℂ R (R ⧸ m ^ 2) := Derivation.mk' dl (fun a b => by
     simp only [dl, LinearMap.coe_mk, AddHom.coe_mk, Algebra.smul_def, Ideal.Quotient.algebraMap_eq]
-    rw [← map_mul, ← map_mul, ← map_add, Ideal.Quotient.eq]
+    rw [← map_mul, ← map_mul, ← map_add (f := _), Ideal.Quotient.eq]
     have h2 : (a - algebraMap ℂ R (e a)) * (b - algebraMap ℂ R (e b)) ∈ m ^ 2 := by
       rw [pow_two]
       exact Ideal.mul_mem_mul (hsub a) (hsub b)
@@ -64,15 +105,18 @@ private theorem iso_alg {R : Type} [CommRing R] [Algebra ℂ R] [IsNoetherianRin
       simp [Matrix.vecMul, dotProduct, Finset.sum_apply]
     set x' := x - ∑ j, c j • g j with hx'Eq
     have hx' : φ (D ℂ R x') = 0 := by
+
       simp only [hx'Eq, map_sub, map_sum, Derivation.map_smul, map_smul, hM, hc, sub_self]
     obtain ⟨k, b, ω', hb, hω⟩ := hk _ hx'
     have hx'm : x' ∈ m ^ 2 := by
       have h1 : dd.liftKaehlerDifferential (D ℂ R x') = 0 := by
+
         rw [hω, map_sum]
         exact Finset.sum_eq_zero fun i _ => by
           rw [map_smul]
           exact hkill _ ((hmem _).mpr (hb i)) _
       have hex' : e x' = 0 := by
+
         simp [hx'Eq, map_sub, map_sum, map_smul, hg, (hmem x).mp hx]
       rw [hL, hd, hex', map_zero, sub_zero, Ideal.Quotient.eq_zero_iff_mem] at h1
       exact h1

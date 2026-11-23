@@ -1,4 +1,62 @@
-import Mathlib
+module
+
+public import Mathlib.Data.Matrix.Mul
+public import Mathlib.RingTheory.RootsOfUnity.PrimitiveRoots
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.Module.ZMod
+public import Mathlib.Order.Filter.Ultrafilter.Basic
+public import Mathlib.RingTheory.Artinian.Module
+public import Mathlib.RingTheory.PrincipalIdealDomain
+
+@[expose] public section
+
 open Matrix
 
 namespace GlobalTheory.SympTower
@@ -72,7 +130,7 @@ theorem exists_pairs {n : ℕ} [NeZero n] {g : ℕ}
   have hsk : ∀ x y, ω x y = - ω y x := by
     intro x y
     have := halt (x + y)
-    simp only [map_add, LinearMap.add_apply, halt] at this
+    simp only [map_add (f := _), LinearMap.add_apply, halt] at this
     linear_combination this
   induction k with
   | zero => exact ⟨Fin.elim0, Fin.elim0, fun i => i.elim0, fun i => i.elim0, fun i => i.elim0⟩
@@ -94,12 +152,15 @@ theorem exists_pairs {n : ℕ} [NeZero n] {g : ℕ}
       intro x j
       rw [hφψ]
       constructor
+
       · simp [map_sum, hv, hvw]
+
       · simp [map_sum, LinearMap.sum_apply, hw, hvw]
     have hKp : ∀ x ∈ K, ∀ y, ω x (y - φ (ψ y)) = ω x y := by
       intro x hx y
       have h1 : ∀ j, ω x (v j) = 0 := fun j => by rw [hsk, (hx j).1, neg_zero]
       rw [hφψ]
+
       simp [map_sum, h1, fun j => (hx j).2]
     obtain ⟨x, hx⟩ := exists_faithful (n := n) (V := K) (by
       intro c hc
@@ -167,9 +228,9 @@ theorem exists_level {F : Type} [Field F] {ζ : Fˣ} {n : ℕ} (hn : 0 < n)
     exact ⟨i, by rw [χint]; exact hi⟩
   choose b hb using hex
   have b1 : ∀ x y z, b (x + y) z = b x z + b y z := fun x y z =>
-    χinj (by rw [χadd, hb, hb, hb, map_add, h1])
+    χinj (by rw [χadd, hb, hb, hb, map_add (f := _), h1])
   have b2 : ∀ x y z, b x (y + z) = b x y + b x z := fun x y z =>
-    χinj (by rw [χadd, hb, hb, hb, map_add, h2])
+    χinj (by rw [χadd, hb, hb, hb, map_add (f := _), h2])
   let ω : (Fin (2 * g) → ZMod n) →ₗ[ZMod n] (Fin (2 * g) → ZMod n) →ₗ[ZMod n] ZMod n :=
     LinearMap.mk₂ (ZMod n) b b1
       (fun c x y => ZMod.map_smul (AddMonoidHom.mk' (fun x => b x y) (fun x z => b1 x z y)) c x)
@@ -180,7 +241,7 @@ theorem exists_level {F : Type} [Field F] {ζ : Fˣ} {n : ℕ} (hn : 0 < n)
   have hsk : ∀ x y, ω x y = - ω y x := by
     intro x y
     have := halt (x + y)
-    simp only [map_add, LinearMap.add_apply, halt] at this
+    simp only [map_add (f := _), LinearMap.add_apply, halt] at this
     linear_combination this
   obtain ⟨v, w, hv, hw, hvw⟩ := exists_pairs ω halt (by
     intro x hx
@@ -201,6 +262,7 @@ theorem exists_level {F : Type} [Field F] {ζ : Fˣ} {n : ℕ} (hn : 0 < n)
   change e (Φ.symm (E a)) (Φ.symm (E c)) = _
   rw [← hω, ← χint]
   congr 1
+
   simp [E, map_sum, LinearMap.sum_apply, hv, hw, hvw, hwv, dotProduct, mul_comm]
   ring
 
@@ -243,7 +305,7 @@ theorem ker_and_surj {F : Type} [Field F] {ζ : Fˣ} {n : ℕ} (hn : 0 < n)
       simp at this ⊢
       linarith
   · rintro ⟨c, rfl⟩
-    rw [map_add, map_nsmul, hnx, add_zero]
+    rw [map_add (f := _), map_nsmul, hnx, add_zero]
   · let f : (Fin g → ZMod n) × (Fin g → ZMod n) → G :=
       fun a => ev (fun i => ((a.1 i).val : ℤ), fun i => ((a.2 i).val : ℤ))
     have hf : Function.Injective f := by
@@ -299,7 +361,7 @@ theorem exists_compatible_symplectic : ∀ (F : Type) [Field F] (ζ : ℕ → F�
       choose f hf using this
       refine ⟨AddMonoidHom.mk' f fun a b => ?_, fun _ => hf⟩
       obtain ⟨k, hk1, hk2, hk3⟩ := ((hf a).and ((hf b).and (hf (a + b)))).exists
-      rw [← hk1, ← hk2, ← hk3, map_add, map_add]
+      rw [← hk1, ← hk2, ← hk3, map_add (f := _), map_add (f := _)]
     · exact ⟨0, fun h => absurd h hn⟩
   choose ev hev using hlim
   have hpair : ∀ n, 0 < n → ∀ a b, e n (ev n a) (ev n b) = ζ n ^ (a.1 ⬝ᵥ b.2 - a.2 ⬝ᵥ b.1) := by

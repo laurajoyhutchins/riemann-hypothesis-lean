@@ -1,5 +1,53 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.Objects
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.Objects
+public import Mathlib.FieldTheory.RatFunc.Basic
+public import Mathlib.FieldTheory.Relrank
+public import Mathlib.Tactic.Continuity
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.FieldNumbers
@@ -28,13 +76,15 @@ def homFracDegZero (P : Ideal (MRing ι F)) [P.IsPrime] :
     x = algebraMap (MRing ι F ⧸ P) _ (Ideal.Quotient.mk P f) /
       algebraMap (MRing ι F ⧸ P) _ (Ideal.Quotient.mk P g)}
 
-open Classical in
 
+open scoped Classical in
+open Classical in
 def resDeg (P : Ideal (MRing ι F)) : ℕ :=
   if h : P.IsPrime then haveI := h; Module.finrank F (homFracDegZero P) else 0
 
-open Classical in
 
+open scoped Classical in
+open Classical in
 def topCycle [Fintype K] (I : Ideal (MRing ι F)) (n : ℕ) (W : Ideal (MRing ι F)) : ℤ :=
   if h : W ∈ I.minimalPrimes ∧ IsRelevant W ∧ relDim W = n then
     haveI : W.IsPrime := h.1.1.1
@@ -78,29 +128,6 @@ def relDeg [DecidableEq K] [DecidableEq K'] (j : K ↪ K') {ι' : K' → Type*}
     (P' : Ideal (MRing ι' F)) [P'.IsPrime] : ℕ :=
   IntermediateField.relfinrank ((homFracDegZero (contractPrime j P')).map (contractFracMap j P'))
     (homFracDegZero P')
-
-def addBlock (ι : K → Type) (N : ℕ) : Option K → Type :=
-  fun o => Option.elim o (Fin (N + 1)) ι
-
-instance addBlock.fintype (ι : K → Type) [∀ k, Fintype (ι k)] (N : ℕ) :
-    ∀ o, Fintype (addBlock ι N o)
-  | none => (inferInstance : Fintype (Fin (N + 1)))
-  | some k => (inferInstance : Fintype (ι k))
-
-instance addBlock.nonempty (ι : K → Type) [∀ k, Nonempty (ι k)] (N : ℕ) :
-    ∀ o, Nonempty (addBlock ι N o)
-  | none => (inferInstance : Nonempty (Fin (N + 1)))
-  | some k => (inferInstance : Nonempty (ι k))
-
-def addBlockIncl (ι : K → Type) (N : ℕ) : (Σ k, ι k) → (Σ o, addBlock ι N o) :=
-  fun v => ⟨some v.1, v.2⟩
-
-def addBlockPrime {ι : K → Type} (N : ℕ) (P : Ideal (MRing ι F)) :
-    Ideal (MRing (addBlock ι N) F) :=
-  P.map (rename (addBlockIncl ι N))
-
-def newBlockDeg : Option K → ℤ :=
-  fun o => Option.elim o 1 (fun _ => 0)
 
 end Blocks
 
@@ -168,8 +195,8 @@ def IntNumBase.Statement : Prop :=
     FiniteDimensional F (homFracDegZero P) ∧
       intNum F P (n := 0) ![] = Module.finrank F (homFracDegZero P)
 
-open Classical in
 
+open Classical in
 def PrimeFiltration.Statement : Prop :=
   ∀ (F : Type u) [Field F] (K : Type) [Fintype K] [DecidableEq K] (ι : K → Type)
     [∀ k, Fintype (ι k)] (I : Ideal (MRing ι F)), IsMultiHomogIdeal I →
@@ -203,12 +230,6 @@ def CutRational.Statement : Prop :=
     IsMultiHomog f bf → IsMultiHomog g bg → f ∉ P → g ∉ P → ∀ bs : Fin n → K → ℤ,
       intNum F P (Fin.snoc (α := fun _ => K → ℤ) bs (fun k => (bf k : ℤ) - bg k)) =
         cycEval (fun W => intNum F W bs) (ratDiv P f g)
-
-def DivPrincipalDegree.Statement : Prop :=
-  ∀ (F : Type u) [Field F] (K : Type) [Fintype K] [DecidableEq K] (ι : K → Type)
-    [∀ k, Fintype (ι k)] (P : Ideal (MRing ι F)), IsMultiProjPrime P → relDim P = 1 →
-    ∀ (b : K → ℕ) (f g : MRing ι F), IsMultiHomog f b → IsMultiHomog g b → f ∉ P → g ∉ P →
-      cycEval (fun x => (resDeg x : ℤ)) (ratDiv P f g) = 0
 
 def ExistsForm.Statement : Prop :=
   ∀ (F : Type u) [Field F] (K : Type) [Fintype K] [DecidableEq K] (ι : K → Type)
@@ -257,15 +278,6 @@ def ProjectionFormulaDegree.Statement : Prop :=
       (homFracDegZero (contractPrime j P')).map (contractFracMap j P') ≤ homFracDegZero P' ∧
         intNum F P' (fun i => pullDeg j (bs i)) =
           relDeg j P' * intNum F (contractPrime j P') bs
-
-def ProductWithProjectiveSpace.Statement : Prop :=
-  ∀ (F : Type u) [Field F] (K : Type) [Fintype K] [DecidableEq K] (ι : K → Type)
-    [∀ k, Fintype (ι k)] (P : Ideal (MRing ι F)), IsMultiProjPrime P →
-    ∀ e N r m : ℕ, relDim P = e → r + m = e + N → ∀ cs : Fin r → K → ℤ,
-      intNum F (addBlockPrime N P)
-          (Fin.append (fun _ : Fin m => (newBlockDeg : Option K → ℤ))
-            (fun i => pullDeg Function.Embedding.some (cs i))) =
-        if m = N then intNum F P cs else 0
 
 end
 

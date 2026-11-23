@@ -1,4 +1,61 @@
-import Mathlib
+module
+
+public import Mathlib.NumberTheory.Padics.Complex
+public import Mathlib.NumberTheory.Padics.PadicIntegers
+public import Mathlib.RingTheory.Henselian
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.MvPolynomial.Symmetric.FundamentalTheorem
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.RingTheory.MvPolynomial.Symmetric.Defs
+public import Mathlib.RingTheory.Polynomial.Vieta
+
+@[expose] public section
 
 open Polynomial Finset MvPolynomial in
 private theorem exF {B : Type} [CommRing B] (σ : Type) [Fintype σ] [DecidableEq σ] (Q : B[X]) (r : ℕ) :
@@ -121,7 +178,7 @@ private theorem key {B S : Type} [CommRing B] [HenselianLocalRing B] [CommRing S
   have hcomap : ∀ n : Ideal S, n.IsMaximal →
       n.comap (algebraMap B S) = IsLocalRing.maximalIdeal B := by
     intro n hn
-    have := Ideal.isMaximal_comap_of_isIntegral_of_isMaximal (R := B) n
+    have := Ideal.isMaximal_under_of_isIntegral_of_isMaximal (R := B) n
     exact IsLocalRing.eq_maximalIdeal this
   have hkerI : ∀ n : Ideal S, n.IsMaximal → ∀ b, algebraMap B S b ∈ n ↔ b ∈ IsLocalRing.maximalIdeal B := by
     intro n hn b
@@ -252,17 +309,18 @@ private theorem ext_hom {B S C : Type} [CommRing B] [CommRing S] [Algebra B S] [
       have : algebraMap B S b = 0 := hb
       have hb0 : b = 0 := hinj (by rw [this, map_zero])
       rw [hb0]; exact Ideal.zero_mem _)
-  set q := P.comap (algebraMap B S) with hq
+  set q := P.comap (algebraMap B S)
+  have hq : q = RingHom.ker f := hc
   have hqk : ∀ b ∈ q, f b = 0 := by
     intro b hb
-    rw [hc] at hb
+    rw [hq] at hb
     exact hb
   let f1 : B ⧸ q →+* C := Ideal.Quotient.lift q f hqk
   have hf1 : Function.Injective f1 := by
-    rw [injective_iff_map_eq_zero]
+    set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
     intro a ha
     obtain ⟨b, rfl⟩ := Ideal.Quotient.mk_surjective a
-    have : b ∈ q := by rw [hc]; exact ha
+    have : b ∈ q := by rw [hq]; exact ha
     exact Ideal.Quotient.eq_zero_iff_mem.mpr this
   letI : Algebra (B ⧸ q) C := f1.toAlgebra
   have hi : Function.Injective (algebraMap (B ⧸ q) (S ⧸ P)) := by
@@ -273,7 +331,11 @@ private theorem ext_hom {B S C : Type} [CommRing B] [CommRing S] [Algebra B S] [
   haveI : Module.IsTorsionFree (B ⧸ q) (S ⧸ P) := Module.isTorsionFree_iff_algebraMap_injective.mpr hi
   haveI : Module.IsTorsionFree (B ⧸ q) C := Module.isTorsionFree_iff_algebraMap_injective.mpr hf1
   haveI : Algebra.IsAlgebraic (B ⧸ q) (S ⧸ P) := Algebra.IsIntegral.isAlgebraic
-  let L : (S ⧸ P) →ₐ[B ⧸ q] C := IsAlgClosed.lift
+  let L : (S ⧸ P) →ₐ[B ⧸ q] C := (by
+    refine @_root_.IsAlgClosed.lift _ _ _ _ _ _ _ _ _ _ _ ?_ ?_ ?_
+    solve_by_elim* (maxDepth := 2) only [*,
+      @_root_.DivisionSemiring.to_moduleIsTorsionFree,
+      @_root_.Algebra.IsIntegral.isAlgebraic, @_root_.inferInstance])
   refine ⟨(L : (S ⧸ P) →+* C).comp (Ideal.Quotient.mk P), ?_⟩
   ext b
   have h1 : Ideal.Quotient.mk P (algebraMap B S b) = algebraMap (B ⧸ q) (S ⧸ P) (Ideal.Quotient.mk q b) := rfl

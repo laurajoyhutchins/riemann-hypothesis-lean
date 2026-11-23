@@ -1,8 +1,54 @@
-import Mathlib
-import Formalism.SatakeDualWeyl.KpqSubgroupCompact
-import Development.AbelianVarietyTheory.Definitions.Divisors.LineOppositeParabolicUnitaryLeviSectionEq
-import Development.AbelianVarietyTheory.Definitions.Foundations.NormEulerPolySubOneLe
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.FinsumDosetIndSmul
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.LineOppositeParabolicUnitaryLeviSectionEq
+public import Formalism.SatakeDualWeyl.StatementE
+public import Development.AbelianVarietyTheory.Definitions.Foundations.NormEulerPolySubOneLe
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.FinsumDosetIndSmul
+public import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.FSatakeA
+public import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.FiniteCosetsInDoset
+public import Formalism.SatakeDualWeyl.KpqSubgroupCompact
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -108,16 +154,16 @@ section Linear
 variable {E : Type} [Field E] [NumberField E] (w : HeightOneSpectrum (𝓞 E)) {n : ℕ}
   {V W : Type} [AddCommGroup V] [Module ℂ V] [AddCommGroup W] [Module ℂ W]
 
-variable (n) in
 
+variable (n) in
 abbrev KGL : Subgroup (GL (Fin n) (w.adicCompletion E)) := GLint (Fin n) (Ov E w)
 
 def IsSatVecGL (ρ : Representation ℂ (GL (Fin n) (w.adicCompletion E)) V) (x : V) (B : Multiset ℂˣ) : Prop :=
-  x ≠ 0 ∧ x ∈ fixed ρ (KGL w n) ∧ B.card = n ∧
-    ∀ ϖ, IsUnifV E w ϖ → ∀ j ≤ n, heckeVec ρ (KGL w n) (Tj ℂ n (Ov E w) ϖ j) x = satEig (qV E w) n B j • x
+  x ≠ 0 ∧ x ∈ fixed ρ (KGL w (n := n)) ∧ B.card = n ∧
+    ∀ ϖ, IsUnifV E w ϖ → ∀ j ≤ n, heckeVec ρ (KGL w (n := n)) (Tj ℂ n (Ov E w) ϖ j) x = satEig (qV E w) n B j • x
 
 def HasSatGL (ρ : Representation ℂ (GL (Fin n) (w.adicCompletion E)) V) (B : Multiset ℂˣ) : Prop :=
-  GlobalTheory.LGrp.IsSpherical ρ (KGL w n) ∧ ∀ x ∈ fixed ρ (KGL w n), x ≠ 0 → IsSatVecGL w ρ x B
+  GlobalTheory.LGrp.IsSpherical ρ (KGL w (n := n)) ∧ ∀ x ∈ fixed ρ (KGL w (n := n)), x ≠ 0 → IsSatVecGL w ρ x B
 
 theorem exists_isUnifV : ∃ ϖ, IsUnifV E w ϖ := ⟨_, Formalism.L2.Host.unif_spec w⟩
 
@@ -131,7 +177,7 @@ theorem mem_Ov_of_isUnifV {ϖ : w.adicCompletion E} (h : IsUnifV E w ϖ) : ϖ �
   exact (by decide : ((Multiplicative.ofAdd (-1 : ℤ) : Multiplicative ℤ) : WithZero (Multiplicative ℤ)) ≤ 1)
 
 theorem Tj_mem_hecke {ϖ : w.adicCompletion E} (h : IsUnifV E w ϖ) (j : ℕ) :
-    Tj ℂ n (Ov E w) ϖ j ∈ Hecke ℂ (KGL w n) :=
+    Tj ℂ n (Ov E w) ϖ j ∈ Hecke ℂ (KGL w (n := n)) :=
   Final.TjMem _ _ ϖ ℂ n j fun h0 => by simp [IsUnifV, h0] at h
 
 variable {ρ : Representation ℂ (GL (Fin n) (w.adicCompletion E)) V} {x : V} {B B' : Multiset ℂˣ}
@@ -182,16 +228,16 @@ theorem isSatVecGL_of_isSpherical {α : Fin n → ℂˣ} {φ : GL (Fin n) (w.adi
       Final.SatakeTj E w n ϖ (mem_Ov_of_isUnifV hϖ) hϖ _ (fun i => (α i).ne_zero) φ h j hj, satEig, Multiset.map_map]
     rfl
 
-variable (w) in
 
+variable (w) in
 def psSpaceGL (α : Fin n → ℂˣ) : Submodule ℂ (GL (Fin n) (w.adicCompletion E) → ℂ) where
   carrier := {φ | ∀ b g, IsUpperB E w b → φ (b * g) = chiDelta E w (fun i => (α i : ℂ)) b * φ g}
   add_mem' h h' b g hb := by simp [h b g hb, h' b g hb, mul_add]
   zero_mem' b g _ := by simp
   smul_mem' c φ h b g hb := by simp [h b g hb, mul_left_comm]
 
-variable (w) in
 
+variable (w) in
 def psFunGL (α : Fin n → ℂˣ) : Representation ℂ (GL (Fin n) (w.adicCompletion E)) (psSpaceGL w α) :=
   sub (rightReg ℂ _ ℂ) _ fun g φ h b y hb => by
     simpa [rightReg, LinearMap.funLeft, mul_assoc] using h b (y * g) hb
@@ -270,16 +316,16 @@ theorem isSatVecU_of_isSphericalU (hU : IsUnramInv ϖ σ q) {φ : GU σ n → �
   · rw [heckeVec_rightReg (P.isCommensurated_integral_unitary_of_unramified hU n) ht,
       Final.SatakeInert L ϖ σ q n (n / 2) hU (by omega) (by omega) _ (fun i => (α i).ne_zero) t ht φ h]
 
-variable (σ) in
 
+variable (σ) in
 def psSpaceU (q : ℕ) (α : Fin (n / 2) → ℂˣ) : Submodule ℂ (GU σ n → ℂ) where
   carrier := {φ | ∀ b g, IsBorelU b → φ (b * g) = chiDeltaU q (fun i => (α i : ℂ)) b * φ g}
   add_mem' h h' b g hb := by simp [h b g hb, h' b g hb, mul_add]
   zero_mem' b g _ := by simp
   smul_mem' c φ h b g hb := by simp [h b g hb, mul_left_comm]
 
-variable (σ) in
 
+variable (σ) in
 def psFunU (q : ℕ) (α : Fin (n / 2) → ℂˣ) : Representation ℂ (GU σ n) (psSpaceU σ q α) :=
   sub (rightReg ℂ _ ℂ) _ fun g φ h b y hb => by
     simpa [rightReg, LinearMap.funLeft, mul_assoc] using h b (y * g) hb
@@ -300,14 +346,6 @@ theorem hasSatU_psFunU (hU : IsUnramInv ϖ σ q) (α : Fin (n / 2) → ℂˣ) : 
     exact (congrFun (congrArg Subtype.val (GlobalTheory.LGrp.mem_fixed.1 hφ k hk)) (b * g)).trans (φ.2 b g hb)
 
 end U
-
-example (q : ℕ) (a b : ℂˣ) :
-    satEig q 2 {a, b} 2 = a * b ∧ satEig q 2 {a, b} 1 = (q : ℂ) ^ (1 / 2 : ℂ) * (a + b) := by
-  constructor
-  · simp [satEig, Multiset.esymm, Multiset.powersetCard_cons, Multiset.powersetCard_one]
-  · simp [satEig, Multiset.esymm, Multiset.powersetCard_one]; norm_num [add_comm]
-
-example (a : ℂˣ) : GlobalTheory.LGrp.bcParam 3 (fun _ => a) = {a, a⁻¹, 1} := rfl
 
 end GlobalTheory.LFun
 

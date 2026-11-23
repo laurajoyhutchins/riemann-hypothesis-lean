@@ -1,5 +1,55 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.StatementsSpanBundleTrdegLe
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.StatementsSpanBundleTrdegLe
+import Mathlib.Algebra.Lie.OfAssociative
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.FieldTheory.IntermediateField.Adjoin.Defs
+public import Mathlib.RingTheory.AlgebraicIndependent.TranscendenceBasis
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.IsSemipositiveOn
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.NumbersDVR
@@ -8,8 +58,8 @@ open MvPolynomial ReciprocityTheory.ChartRestriction.G.Geo IntermediateField.alg
 
 noncomputable section
 
-set_option maxHeartbeats 400000 in
 
+set_option maxHeartbeats 400000 in
 theorem SpanBundleTrdegLe.proof : SpanBundleTrdegLe.Statement := by
   intro F _ Ω _ _ K _ ι y M i G c a H _hc hH hGH Φ _ _ s
 
@@ -119,7 +169,8 @@ theorem SpanBundleTrdegLe.proof : SpanBundleTrdegLe.Statement := by
       calc G l m' = Matrix.of G l m' := rfl
         _ = _ := h.symm
         _ = _ := Finset.sum_congr rfl fun m _ => by rw [hGm]
-    simp_rw [hG, map_sum, map_mul, Finset.mul_sum]
+    set_option synthInstance.maxHeartbeats 100000 in
+      simp_rw [hG, map_sum, map_mul, Finset.mul_sum]
     rw [Finset.sum_comm]
     exact Finset.sum_congr rfl fun m _ => Finset.sum_congr rfl fun m' _ => by ring
   have hnone : ∀ l : Fin M, gz ⟨none, l⟩ = ∑ m, κ (g l m) * w m := by
@@ -130,7 +181,8 @@ theorem SpanBundleTrdegLe.proof : SpanBundleTrdegLe.Statement := by
     have e2 : gz ⟨none, l⟩ = κΦ (∑ m', s m' * algebraMap Ω Φ (G l m')) * Xo none := by
       simp only [gz, e1, map_mul]
       rfl
-    rw [e2, hΦ l, map_sum, Finset.sum_mul]
+    set_option synthInstance.maxHeartbeats 100000 in
+      rw [e2, hΦ l, map_sum, Finset.sum_mul]
     refine Finset.sum_congr rfl fun m _ => ?_
     simp only [w, κ, RingHom.comp_apply, map_mul]
     ring
@@ -142,7 +194,8 @@ theorem SpanBundleTrdegLe.proof : SpanBundleTrdegLe.Statement := by
     rintro ⟨_ | k, j⟩
     · rw [hnone j]
       refine ⟨∑ m, C ⟨κ (g j m), hgL j m⟩ * X m, ?_⟩
-      simp
+      set_option synthInstance.maxHeartbeats 200000 in
+        simp
     · rw [hsome k j]
       exact ⟨C ⟨gy ⟨k, j⟩, IntermediateField.subset_adjoin _ _ ⟨_, rfl⟩⟩, by simp⟩
 
@@ -181,7 +234,7 @@ theorem SpanBundleTrdegLe.proof : SpanBundleTrdegLe.Statement := by
   have hAz : Algebra.trdeg F (MRing (bundleIdx ι M) F ⧸ projIdeal F y (Pi.basisFun Ω (Fin i))
       (fun l => LinearMap.proj l ∘ₗ (Matrix.of G).mulVecLin) s) ≤ Algebra.trdeg F T := by
     refine trdeg_le_of_injective (Ideal.Quotient.liftₐ _ φT fun f hf => (hmem f).2 hf) ?_
-    rw [injective_iff_map_eq_zero]
+    set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
     intro x hx
     obtain ⟨f, rfl⟩ := Ideal.Quotient.mk_surjective x
     exact Ideal.Quotient.eq_zero_iff_mem.2 ((hmem f).1 hx)

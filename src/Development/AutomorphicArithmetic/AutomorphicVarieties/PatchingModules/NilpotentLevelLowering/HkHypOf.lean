@@ -1,16 +1,57 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PatchingModules.NilpotentLevelLowering.ActUVariableEqPow
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.IwBernHk
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.IwBernFaith
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.HkSum
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.HkSandwich
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.HkBern
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.IwHkEv
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.IwHkTrace
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PatchingModules.NilpotentLevelLowering.ActUVariableEqPow
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.HkBern
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.HkSandwich
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.HkSum
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.IwBernFaith
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.IwBernHk
 import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.IwBruhatKO
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.IwMemIwC
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.IwHkApply
 import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.IwHeckePairIwC
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.MemFixedPiIff
+import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.IwHkApply
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.IwHkEv
+import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.IwHkTrace
+import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.IwMemIwC
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.MemFixedPiIff
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Formalism.ConjugateSelfDual ReciprocityTheory.Gal Formalism.BasicNotions Formalism.MainNotions.N ValuativeRel IsLocalRing
 open GlobalTheory.CuspRep GlobalTheory.WeilDeligne GlobalTheory.LocLanglands GlobalTheory.LocGL GlobalTheory.GalOfCusp GlobalTheory.SmGL GlobalTheory.SplitWeil
 open UpperTheory.V.Alg UpperTheory.V.W UpperTheory.V.Hi UpperTheory.V.AlgebraTools UpperTheory.V.Pa UpperTheory.V.Pa.Lev
@@ -44,7 +85,8 @@ private theorem bern_ev {O H E : Type} [CommRing O] [IsDomain O] [Ring H] [Algeb
     congr 1
     rw [Hk.Bern.one, Finset.sum_mul, Finset.mul_sum]
     exact Finset.sum_congr rfl fun w _ => (hkBern O n _ _ b).2 z hz w
-  · simp only [AlgHom.comp_apply, ← map_mul, ← map_sum]
+  · set_option synthInstance.maxHeartbeats 100000 in
+      simp only [AlgHom.comp_apply, ← map_mul, ← map_sum]
     rw [hkSum O n _ _ b hF ι a c hd]
   · simp only [AlgHom.comp_apply]
     rw [← map_mul, ← map_mul, hkSandwich O n _ _ b hF y, map_mul]
@@ -179,12 +221,13 @@ private theorem locA (O A M V : Type) [CommRing O] [IsDomain O] [CommRing A] [Al
       intro v
       apply Subtype.ext
       rw [hC, hj, map_smul, ← MvPolynomial.algebraMap_eq, th.commutes, Module.algebraMap_end_apply, Submodule.coe_smul, hs, hj]
-    | add p q hp hq => intro v; simp only [map_add, LinearMap.add_apply, hp, hq]
+    | add p q hp hq => intro v; simp only [map_add (f := _), LinearMap.add_apply, hp, hq]
     | mul_X p i hp => intro v; simp only [map_mul, Module.End.mul_apply, hp, jX]
   refine ⟨fun z hz => LinearMap.ext fun v => jinj ?_, fun J _ a b hd => LinearMap.ext fun v => jinj ?_, fun y v hv => ?_⟩
   · simp only [Module.End.mul_apply, je, jφ]
     exact LinearMap.congr_fun (hsym z hz) _
   · rw [jφ, ← hsum J a b hd]
+
     simp only [LinearMap.sum_apply, map_sum, Module.End.mul_apply, je, jφ]
   · have h1 : e v = ((iwC k n ⊤).relIndex (KO k (Fin n))) • v := hι (by rw [he, map_nsmul, (dc_K ρ).2 _ hv])
     have h2 : e (φ y (e v)) = φ (Hk.dd (Hk.NN n (resCard k : O) * y)) (e v) := jinj (by

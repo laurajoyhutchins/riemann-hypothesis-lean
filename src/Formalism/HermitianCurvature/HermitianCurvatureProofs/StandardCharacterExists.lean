@@ -1,4 +1,56 @@
-import Formalism.HermitianCurvature.StatementG
+module
+
+public import Formalism.HermitianCurvature.StatementG
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.Complex
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Analysis.Calculus.Deriv.Inv
+public import Mathlib.MeasureTheory.Measure.Lebesgue.EqHaar
+
+@[expose] public section
 
 open Formalism.FourierDecayAlt.G Matrix MeasureTheory Finset
 
@@ -54,21 +106,6 @@ theorem wM_zero_cast {n : ℕ} (X : Matrix (Fin n) (Fin n) ℂ) (B ρ : Fin n �
 theorem wM_zero_last {n : ℕ} (X : Matrix (Fin n) (Fin n) ℂ) (B ρ : Fin n → ℂ) (σ : ℂ) :
     (wMat (n + 1) * Mcoord 0 X B ρ σ) 0 (Fin.last n) = σ := by
   rw [wMat_mul_apply, Fin.rev_zero, Mcoord, blk_ll]
-
-theorem blk_strictUpper {n : ℕ} (X : Matrix (Fin n) (Fin n) ℂ) (B : Fin n → ℂ) (hX : IsStrictUpper X) :
-    IsStrictUpper (blk X B 0 0) := by
-  intro i j hji
-  refine Fin.lastCases ?_ (fun i => ?_) i hji
-  · intro _
-    refine Fin.lastCases ?_ (fun j => ?_) j
-    · rw [blk_ll]
-    · rw [blk_lc]; rfl
-  · refine Fin.lastCases ?_ (fun j => ?_) j
-    · intro h
-      exact absurd h (not_le.mpr (Fin.castSucc_lt_last i))
-    · intro h
-      rw [blk_cc]
-      exact hX i j (by simpa using h)
 
 def ex {d : ℕ} (N : Matrix (Fin d) (Fin d) ℂ) (a b : ℕ) : ℂ :=
   if h : a < d ∧ b < d then N ⟨a, h.1⟩ ⟨b, h.2⟩ else 0
@@ -211,7 +248,10 @@ instance (β : ℂ) : SigmaFinite (mu β) := by unfold mu; infer_instance
 theorem map_mul_mu (β α : ℂ) (hα : α ≠ 0) :
     Measure.map (fun ρ : ℂ => α * ρ) (mu β) = Real.toNNReal ((‖α‖ ^ 2)⁻¹) • mu β := by
   unfold mu
-  rw [Measure.map_smul, map_mul_vol α hα]
+  have hmeas : AEMeasurable (fun ρ : ℂ => α * ρ) (volume : Measure ℂ) :=
+    (measurable_const_mul α).aemeasurable
+  rw [Measure.map_smul (c := (‖β‖ / (2 * Real.pi)).toNNReal)
+    (f := fun ρ : ℂ => α * ρ) hmeas, map_mul_vol α hα]
   rw [smul_comm]
   congr 1
 
@@ -273,26 +313,6 @@ end Formalism.FourierDecayAlt.P.StandardCharacterExists
 namespace Formalism.FourierDecayAlt.P
 
 open Formalism.FourierDecayAlt.P.StandardCharacterExists
-
-theorem limit_shape : Formalism.FourierDecayAlt.G.LimitShape := by
-  intro m z σ ρ' X B hX hx i j hji
-  rw [Matrix.sub_apply, Matrix.smul_apply, smul_eq_mul]
-  refine Fin.cases ?_ (fun i => ?_) i hji
-  · intro h
-    have hj : j = 0 := le_antisymm h (Fin.zero_le _)
-    subst hj
-    have := wM_zero_cast X B (Fin.cons z ρ') σ 0
-    simp only [Fin.castSucc_zero, Fin.cons_zero] at this
-    rw [this]; simp
-  · intro h
-    rw [wM_succ]
-    rcases h.eq_or_lt with h | h
-    · subst h
-      have := hx i
-      unfold xOf at this
-      rw [this]; simp
-    · rw [blk_strictUpper X B hX _ _ (Fin.le_castSucc_iff.mpr h), Matrix.one_apply_ne h.ne']
-      simp
 
 theorem limit_matrix : Formalism.FourierDecayAlt.G.LimitMatrix := by
   intro n z hz y

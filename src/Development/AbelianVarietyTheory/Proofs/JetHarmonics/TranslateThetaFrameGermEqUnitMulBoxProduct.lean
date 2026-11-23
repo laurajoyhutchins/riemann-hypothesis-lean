@@ -1,28 +1,68 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Jets.ExistsSecTieFOfTies
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.UnifUniqSt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.TwistBCPf
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PlaceDivisors.StChartF
-import Formalism.SharpRestriction.Divisibility.GeneratorPowers.ThExprUniqOfChartIndep2
-import Formalism.LocalToGlobal.ProjectiveLattices.ConjNeSelfOfCM
-import Formalism.LocalToGlobal.ProjectiveLattices.BetaAtSymm
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Jets.JetsOnCopiesCompatibleFrames
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.DvdOfPullEqZero
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ExistsBoxFamilyMultilinearMap
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ExistsFramesEL
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ExistsGermLinearMap
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ExistsIsBoxQkToA
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.FiniteOrderThetaOperatorsRatioRootOfUnityStatement
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.FrameNStHolds
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.GermBoxProductEqProdGerms
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.PowEqOneOfMultilinear
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ProdPullZero
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.StalkMapInjectiveOfFlat
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ThetaFrameFamiliesDifferByValuationZeroUnitStatement
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.UniversalJetsPowerProductStatement
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.UniversalStatementStatement
+import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.ExistsBoxSec
+public import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.PsiWeightZeroProduct
 import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.AllUniformizationLawsHold
 import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.TwistBaseChangeAndValuationStatements
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ExistsGermLinearMap
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ExistsFramesEL
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.GermBoxProductEqProdGerms
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.PowEqOneOfMultilinear
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ExistsBoxFamilyMultilinearMap
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ProdPullZero
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ExistsIsBoxQkToA
-import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.ExistsBoxSec
-import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.IsNsmulIffEq
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FirstCohomology.ClosedPointWeilPower
 import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FirstCohomology.FinOrdExists
 import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FirstCohomology.PhiPow
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FirstCohomology.ClosedPointWeilPower
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ThetaFrameFamiliesDifferByValuationZeroUnitStatement
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.DvdOfPullEqZero
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.FiniteOrderThetaOperatorsRatioRootOfUnityStatement
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AbelianVarietyTheory.Definitions.Jets.ExistsSecTieFOfTies
+
+@[expose] public section
 
 set_option autoImplicit false
 noncomputable section
@@ -77,8 +117,15 @@ theorem main : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (H : Host 
   obtain ⟨gm₁, -, hgm₁⟩ := PairingLinear.exists_germ_linearMap hL hL2 hL4 hT T.V P.D P.A C.I.G.G P.U _ _ hz₁ τ hτ
     (hT₀ hTr) F (1 * N) hk
   choose σ₁ hσ₁ hf using fun i => hgm₁ (ζ₁ i • Φ₁ i θα₁)
-  obtain ⟨bx₁, hbx₁⟩ := exists_boxFam_multilinear hG T.V n P.D.toPre D'.toPre pD F 1
-  obtain ⟨bx, hbx⟩ := exists_boxFam_multilinear hG T.V n P.D.toPre D'.toPre pD F (1 * N)
+  have exists_boxFam_multilinear : ∀ k : ℕ, ∃ bx : ((i : Fin n) → Fam P.D.toPre F k) →ₘₗ[F] Fam D'.toPre F k, ∀ (s : Fin n → Fam P.D.toPre F k) (S : Fam D'.toPre F k), IsBoxFam pD F k S s ↔ S = bx s := by
+    intro k
+    choose bx hbx using BoxFamily.exists_isBoxFam hG T.V n P.D.toPre D'.toPre pD F k
+    refine ⟨⟨bx, fun s i a b => BoxLinear.box_add pD (hbx _) (hbx _) (hbx _),
+      fun s i c a => BoxLinear.box_smul pD (hbx _) (hbx _)⟩, fun s S => ⟨fun h => ?_, fun h => ?_⟩⟩
+    · exact BoxLinear.box_unique pD h (hbx s)
+    · rw [h]; exact hbx s
+  obtain ⟨bx₁, hbx₁⟩ := exists_boxFam_multilinear 1
+  obtain ⟨bx, hbx⟩ := exists_boxFam_multilinear (1 * N)
   obtain ⟨u₀, hu₀, hθu⟩ := GlobalTheory.T.thetaFrameFamilies_differ_by_valuationZero_unit T.V ϖ hϖ D' F v hv _ θ
     (BoxFrame.main T.V ϖ hϖ n P.D D' pD F θ₁ _ hθ₁ ((hbx₁ _ _).2 rfl)) hθ
   have hw0 : TraceFormTwistIso D'.toPre oD' H.w0 := GlobalTheory.PsiWZeroProd.main T.V n P.D.toPre D'.toPre pD (𝓞 E)
@@ -97,6 +144,7 @@ theorem main : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (H : Host 
   have ht : t = (u₁ * u₀) • bx fun i => ζ₁ i • Φ₁ i θα₁ := by
     rw [(isSmul_iff _ _ _).1 (hu₁ θα _ _ t₀ t ((hΦ' _ _).2 rfl) ((isSmul_iff _ _ _).2 rfl) hΦt hsm), hθα', map_smul,
       MultilinearMap.map_smul_univ, hbΦ, smul_comm (∏ i, ζ₁ i) u₀, smul_smul]
+    rfl
   obtain ⟨τn, hτn, hτT, hiff⟩ := frameNSt_holds E H T.V C.I.G P _ C.FT C.actT C.ph1T C.ph2T C.syT C.adT C.tgT C.xT C.eT
     C.wPT C.chartT C.frameT C.primT n D' A' G' pD pA pG U' PU
   have hz := GlobalTheory.T.universalJets_power_product T.V C.I.G.G G' n _ pG C.xT hz₁

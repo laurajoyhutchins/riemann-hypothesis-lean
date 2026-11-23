@@ -1,6 +1,52 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.GaloisTorsionConjugacy.WpBridge
-import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.MulStableIntegral
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.GaloisTorsionConjugacy.WpBridge
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.EllipticOnePole
+public import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.MulStableIntegral
+import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.SigmaLogDeriv2
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -88,28 +134,28 @@ lemma stepB (L : PeriodPair) {z w : ℂ} (hz : z ∉ L.lattice) (hw : w ∉ L.la
 
 end OriginCoordinatesAdd
 
-open OriginCoordinatesAdd in
 
+open OriginCoordinatesAdd in
 theorem addLaw : AddLaw := by
   intro L z w hz hw hm hp
-  have hB := stepB L hz hw hm hp
+  have hB := OriginCoordinatesAdd.stepB L hz hw hm hp
   refine ⟨hB, ?_⟩
-  have hA := stepA L hz hw hm hp
-  have hne := wp_ne L hz hw hm hp
+  have hA := OriginCoordinatesAdd.stepA L hz hw hm hp
+  have hne := OriginCoordinatesAdd.wp_ne L hz hw hm hp
   have hF : HasDerivAt (fun z' => L.weierstrassP (z' + w)) (L.derivWeierstrassP (z + w)) z :=
-    HasDerivAt.comp_add_const z w (hasDerivAt_wp L hp)
-  have hG := ((((hasDerivAt_lam L hz hne).pow 2).div_const 4).sub (hasDerivAt_wp L hz)).sub_const
-    (L.weierstrassP w)
+    HasDerivAt.comp_add_const z w (OriginCoordinatesAdd.hasDerivAt_wp L hp)
+  have hG := ((((OriginCoordinatesAdd.hasDerivAt_lam L hz hne).pow 2).div_const 4).sub
+    (OriginCoordinatesAdd.hasDerivAt_wp L hz)).sub_const (L.weierstrassP w)
   have hEq : (fun z' => L.weierstrassP (z' + w)) =ᶠ[𝓝 z]
-      (fun z' => lam L w z' ^ 2 / 4 - L.weierstrassP z' - L.weierstrassP w) := by
-    filter_upwards [ev_adm L hz hm hp] with z' ⟨h1, h2, h3⟩
-    rw [stepB L h1 hw h2 h3]
+      (fun z' => OriginCoordinatesAdd.lam L w z' ^ 2 / 4 - L.weierstrassP z' - L.weierstrassP w) := by
+    filter_upwards [OriginCoordinatesAdd.ev_adm L hz hm hp] with z' ⟨h1, h2, h3⟩
+    rw [OriginCoordinatesAdd.stepB L h1 hw h2 h3]
     rfl
   have hD := hF.unique (hG.congr_of_eventuallyEq hEq)
   rw [hD]
   unfold addY
   rw [← hB, hA]
-  unfold lam
+  unfold OriginCoordinatesAdd.lam
   norm_num
   ring
 

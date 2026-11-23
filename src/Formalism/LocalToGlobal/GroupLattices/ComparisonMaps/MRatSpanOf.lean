@@ -1,4 +1,48 @@
-import Formalism.LocalToGlobal.GroupLattices.ComparisonMaps.MRatSpanRec
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.DataG
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Formalism.SharpRestriction.GrowthBounds.LatticeSystems
+import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
+
+@[expose] public section
 
 open MvPolynomial
 
@@ -14,55 +58,5 @@ def RatX (ξ : G.P.Xsp) : Prop := ∃ Q : MvPolynomial _ LL, MvPolynomial.map e 
 
 def RatActG : Prop := ∀ (i : G.comp) (γ : (G.lev i).Γ) (ξ : G.P.Xsp), RatX G e ξ →
   RatX G e (((G.lev i).χ γ : G.O) • (G.lev i).actX γ ξ)
-
-def HRat : Prop := ∀ L : G.P.Tup, G.P.IsLatTup L →
-  G.P.HtupW L ≤ Submodule.span G.O {ξ | ξ ∈ G.P.HtupW L ∧ RatX G e ξ}
-
-theorem delta_rat (hA : RatActG G e) (i : G.comp) (L0 : G.P.Tup) (ξ : G.P.Xsp) (hξ : RatX G e ξ) :
-    RatFn G e (delta G i L0 ξ) := by
-  intro i' L
-  simp only [delta]
-  split_ifs with h h'
-  · subst h'
-    exact hA i' _ ξ hξ
-  · exact ⟨0, map_zero _⟩
-  · exact ⟨0, map_zero _⟩
-
-theorem mRatSpan_of (h1 : G.TrivStab) (h2 : G.FinClasses) (hE : EquivSys G G.P.HtupW) (hA : RatActG G e)
-    (hH : HRat G e) : MRatSpan G.P G.comp e G.M := by
-  classical
-  unfold MRatSpan
-  apply le_antisymm
-  · rw [Submodule.span_le]
-    rintro _ ⟨x, hx, rfl⟩
-    exact hx
-  · intro F hF
-    obtain ⟨reps, hR⟩ := jd_reps G h2
-    rw [jd_decomp G h1 reps hR G.P.HtupW F hF]
-    refine Submodule.sum_mem _ (fun r hr => ?_)
-    have hL := hR.1 r hr
-    have hmem : F r.1 r.2 ∈ G.P.HtupW r.2 := ((jd_fmem G _ F).1 hF r.1).1 r.2 hL
-    suffices key : ∀ ξ ∈ Submodule.span G.O {ξ | ξ ∈ G.P.HtupW r.2 ∧ RatX G e ξ},
-        delta G r.1 r.2 ξ ∈ Submodule.span G.O
-          (cmpF G.P G.comp e G.M '' intLL G.P G.comp e G.M) from key _ (hH r.2 hL hmem)
-    intro ξ hξ
-    induction hξ using Submodule.span_induction with
-    | mem ξ hξ =>
-      obtain ⟨hξW, hξR⟩ := hξ
-      have hD := jd_mem G h1 _ hE r.1 r.2 hL ξ hξW
-      exact Submodule.subset_span
-        ⟨⟨delta G r.1 r.2 ξ, ⟨Submodule.subset_span hD, delta_rat G e hA r.1 r.2 ξ hξR⟩⟩, hD, rfl⟩
-    | zero =>
-      have h0 : delta G r.1 r.2 0 = 0 := by
-        have h3 := jd_smul G r.1 r.2 0 0
-        rwa [zero_smul, zero_smul] at h3
-      rw [h0]
-      exact Submodule.zero_mem _
-    | add ξ η _ _ hξ hη =>
-      rw [jd_add]
-      exact Submodule.add_mem _ hξ hη
-    | smul a ξ _ hξ =>
-      rw [jd_smul]
-      exact Submodule.smul_mem _ a hξ
 
 end Formalism.L2.G.Cmp

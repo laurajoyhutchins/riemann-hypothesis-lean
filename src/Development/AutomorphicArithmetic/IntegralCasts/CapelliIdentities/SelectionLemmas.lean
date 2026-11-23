@@ -1,27 +1,63 @@
-import Mathlib
+module
 
-theorem UpperTheory.Reformulated.B.SelectionLemmas.aux1.{u_1} :
-    ∀ {K : Type u_1} [inst : Field K],
-      @SMulCommClass K K K
-        (@Algebra.toSMul K K (@Semifield.toCommSemiring K (@Field.toSemifield K inst))
-          (@CommSemiring.toSemiring K (@Semifield.toCommSemiring K (@Field.toSemifield K inst)))
-          (@Algebra.id K (@Semifield.toCommSemiring K (@Field.toSemifield K inst))))
-        (@instSMulOfMul K
-          (@Distrib.toMul K
-            (@instDistribOfSemiring K
-              (@CommSemiring.toSemiring K (@Semifield.toCommSemiring K (@Field.toSemifield K inst)))))) := by
+public import Mathlib.NumberTheory.NumberField.Basic
+public import Mathlib.RingTheory.DedekindDomain.Factorization
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
+theorem UpperTheory.Reformulated.B.SelectionLemmas.aux1.{u_1} : ∀ {K : Type u_1} [inst : Field K], SMulCommClass K K K := by
   intros; infer_instance
 
-theorem UpperTheory.Reformulated.B.SelectionLemmas.aux2.{u_1} :
-    ∀ {K : Type u_1} [inst : Field K],
-      @SMulCommClass K K K
-        (@Algebra.toSMul K K (@Semifield.toCommSemiring K (@Field.toSemifield K inst))
-          (@CommSemiring.toSemiring K (@Semifield.toCommSemiring K (@Field.toSemifield K inst)))
-          (@Algebra.id K (@Semifield.toCommSemiring K (@Field.toSemifield K inst))))
-        (@instSMulOfMul K
-          (@Distrib.toMul K
-            (@instDistribOfSemiring K
-              (@CommSemiring.toSemiring K (@Semifield.toCommSemiring K (@Field.toSemifield K inst)))))) := by
+theorem UpperTheory.Reformulated.B.SelectionLemmas.aux2.{u_1} : ∀ {K : Type u_1} [inst : Field K], SMulCommClass K K K := by
   intros; infer_instance
 
 theorem UpperTheory.Reformulated.B.SelectionLemmas.aux3.{u_1, u_2, u_3} :
@@ -2716,48 +2752,11 @@ theorem UpperTheory.Reformulated.B.SelectionLemmas.padic_embedding_algebra_compa
           (@Semiring.toModule K (@CommSemiring.toSemiring K (@Semifield.toCommSemiring K (@Field.toSemifield K inst))))) := by
   intros; infer_instance
 
-noncomputable def UpperTheory.Reformulated.B.SelectionLemmas.matLat :
-    {K : Type} →
-      [inst : Field K] →
-        {d d' : Nat} →
-          Matrix (Fin d') (Fin d) K →
-            @Submodule (@NumberField.RingOfIntegers K inst) (Fin d → K)
-                (@CommSemiring.toSemiring (@NumberField.RingOfIntegers K inst)
-                  (@CommRing.toCommSemiring (@NumberField.RingOfIntegers K inst)
-                    (@NumberField.instCommRingRingOfIntegers K inst)))
-                (@Pi.addCommMonoid (Fin d) (fun (a : Fin d) ↦ K) fun (i : Fin d) ↦
-                  @Semiring.toAddCommMonoid K
-                    (@DivisionSemiring.toSemiring K (@Semifield.toDivisionSemiring K (@Field.toSemifield K inst))))
-                (@Pi.Function.module (Fin d) (@NumberField.RingOfIntegers K inst) K
-                  (@CommSemiring.toSemiring (@NumberField.RingOfIntegers K inst)
-                    (@CommRing.toCommSemiring (@NumberField.RingOfIntegers K inst)
-                      (@NumberField.instCommRingRingOfIntegers K inst)))
-                  (@Semiring.toAddCommMonoid K
-                    (@DivisionSemiring.toSemiring K (@Semifield.toDivisionSemiring K (@Field.toSemifield K inst))))
-                  (@Algebra.toModule (@NumberField.RingOfIntegers K inst) K
-                    (@CommRing.toCommSemiring (@NumberField.RingOfIntegers K inst)
-                      (@NumberField.instCommRingRingOfIntegers K inst))
-                    (@DivisionSemiring.toSemiring K (@Semifield.toDivisionSemiring K (@Field.toSemifield K inst)))
-                    (@NumberField.RingOfIntegers.instAlgebra_1 K inst))) →
-              @Submodule (@NumberField.RingOfIntegers K inst) (Fin d' → K)
-                (@CommSemiring.toSemiring (@NumberField.RingOfIntegers K inst)
-                  (@CommRing.toCommSemiring (@NumberField.RingOfIntegers K inst)
-                    (@NumberField.instCommRingRingOfIntegers K inst)))
-                (@Pi.addCommMonoid (Fin d') (fun (a : Fin d') ↦ K) fun (i : Fin d') ↦
-                  @Semiring.toAddCommMonoid K
-                    (@DivisionSemiring.toSemiring K (@Semifield.toDivisionSemiring K (@Field.toSemifield K inst))))
-                (@Pi.Function.module (Fin d') (@NumberField.RingOfIntegers K inst) K
-                  (@CommSemiring.toSemiring (@NumberField.RingOfIntegers K inst)
-                    (@CommRing.toCommSemiring (@NumberField.RingOfIntegers K inst)
-                      (@NumberField.instCommRingRingOfIntegers K inst)))
-                  (@Semiring.toAddCommMonoid K
-                    (@DivisionSemiring.toSemiring K (@Semifield.toDivisionSemiring K (@Field.toSemifield K inst))))
-                  (@Algebra.toModule (@NumberField.RingOfIntegers K inst) K
-                    (@CommRing.toCommSemiring (@NumberField.RingOfIntegers K inst)
-                      (@NumberField.instCommRingRingOfIntegers K inst))
-                    (@DivisionSemiring.toSemiring K (@Semifield.toDivisionSemiring K (@Field.toSemifield K inst)))
-                    (@NumberField.RingOfIntegers.instAlgebra_1 K inst))) :=
-    fun {K : Type} [inst : Field K] {d d' : Nat} (φ : Matrix (Fin d') (Fin d) K)
+noncomputable def UpperTheory.Reformulated.B.SelectionLemmas.matLat : {K : Type} →
+  [inst : Field K] →
+    {d d' : ℕ} →
+      Matrix (Fin d') (Fin d) K →
+        Submodule (NumberField.RingOfIntegers K) (Fin d → K) → Submodule (NumberField.RingOfIntegers K) (Fin d' → K) := fun {K : Type} [inst : Field K] {d d' : Nat} (φ : Matrix (Fin d') (Fin d) K)
         (L :
           @Submodule (@NumberField.RingOfIntegers K inst) (Fin d → K)
             (@CommSemiring.toSemiring (@NumberField.RingOfIntegers K inst)

@@ -1,6 +1,51 @@
-import Mathlib
-import Formalism.QuotientMetricDivisors.RatHermLcvTwist
-import Formalism.QuotientMetricDivisors.ClassSumDualGeF
+module
+
+public import Formalism.QuotientMetricDivisors.RatHermLcvTwist
+public import Formalism.QuotientMetricDivisors.ClassSumDualGeF
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Module NumberField IsDedekindDomain
 open scoped Matrix ComplexOrder
@@ -52,7 +97,7 @@ def Forms : Submodule K (S.Cl → S.V) where
   carrier := {f | ∀ c (γ : S.Gam c), S.ρ c γ (f c) = f c}
   add_mem' := by
     intro f g hf hg c γ
-    simp only [Pi.add_apply, map_add, hf c γ, hg c γ]
+    simp only [Pi.add_apply, map_add (f := _), hf c γ, hg c γ]
   zero_mem' := by
     intro c γ
     simp
@@ -66,8 +111,8 @@ def IsRat (f : S.Cl → S.V) : Prop := ∀ c i, S.bV.repr (f c) i ∈ cmMax K
 
 def HasRatBasis : Prop := ∃ b : Basis (Fin S.dim) K S.Forms, ∀ i, S.IsRat (b i : S.Cl → S.V)
 
-open Classical in
 
+open Classical in
 def basis : Basis (Fin S.dim) K S.Forms :=
   if h : S.HasRatBasis then h.choose else finBasis K S.Forms
 

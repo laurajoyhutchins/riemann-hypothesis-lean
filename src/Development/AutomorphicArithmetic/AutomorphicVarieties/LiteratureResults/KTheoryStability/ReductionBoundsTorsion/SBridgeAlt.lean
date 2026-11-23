@@ -1,4 +1,51 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.LiteratureResults.KTheoryStability.ReductionBoundsTorsion.ActLPos
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.LiteratureResults.KTheoryStability.ReductionBoundsTorsion.ActLPos
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.TensorHomCubes.StabDirectedSystem
+public import Mathlib.Analysis.Calculus.DifferentialForm.Basic
+public import Mathlib.NumberTheory.NumberField.InfinitePlace.TotallyRealComplex
+public import Mathlib.RingTheory.Ideal.Norm.AbsNorm
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -46,13 +93,6 @@ def SFin : Prop :=
 def SPsi : Prop :=
   ∀ (R : Type) [CommRing R] (d n k : ℕ) (h : n ≤ (d + 1) * n) (z : Chn (GL (Fin n) R) (k + 1)), IsCyc z → IsPrim z →
     IsBd (cmap (psi R (d + 1) n) (k + 1) z - ((d : ℝ) + 1) • cmap (stab R n ((d + 1) * n) h) (k + 1) z)
-
-def PV (R : Type) [CommRing R] (k : ℕ) : Prop :=
-  ∀ n : ℕ, 2 * (k + 1) + 4 ≤ n → ∀ z : Chn (GL (Fin n) R) (k + 1), IsCyc z → IsPrim z → IsBd z
-
-def SBig : Prop :=
-  ∀ k : ℕ, (∀ (L : Type) [Field L] [NumberField L], IsTotallyComplex L → k + 1 < nrComplexPlaces L → PV (𝓞 L) k) →
-    ∀ (L : Type) [Field L] [NumberField L], IsTotallyComplex L → PV (𝓞 L) k
 
 def SAff : Prop :=
   ∀ (L : Type) [Field L] [NumberField L], IsTotallyComplex L → ∀ k : ℕ, k + 1 < nrComplexPlaces L →
@@ -139,12 +179,6 @@ def SInv : Prop :=
   ∀ (L : Type) [Field L] [NumberField L] (N k : ℕ) (ω : Form (HS L N) (k + 1)), (∀ g, FInv ω g) →
     Good ω ∧ (Odd k → ∀ (n : ℕ) (h : n ≤ N) (z : Chn (Gm L n) (k + 1)), IsCyc z → IsPrim z →
       ev (emb L N) (intP ω) (one L N) (cmap (stab (𝓞 L) n N h) (k + 1) z) = 0)
-
-def PVBig : Prop :=
-  ∀ k : ℕ, Odd k → ∀ (L : Type) [Field L] [NumberField L], IsTotallyComplex L → k + 1 < nrComplexPlaces L → PV (𝓞 L) k
-
-def SJoin : Prop :=
-  SChain → SEv → SSep → SStab → SPrime → SHecke → SHt → SPU → SMom → SWhit → SCen → SGap → SLoc → SMean → SInv → PVBig
 
 end PositivityTheory.KB
 

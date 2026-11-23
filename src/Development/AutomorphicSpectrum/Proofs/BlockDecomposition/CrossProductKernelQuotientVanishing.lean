@@ -1,5 +1,47 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IotaQInjective
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IotaQInjective
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -64,7 +106,7 @@ theorem mp_box {a a' b b' : C} (φ : a ⟶ a') (ψ : b ⟶ b') (t : F.obj a ⊗[
   induction t using TensorProduct.induction_on with
   | zero => simp
   | tmul x y => rfl
-  | add u v hu hv => simp only [map_add, hu, hv]
+  | add u v hu hv => simp only [map_add (f := _), hu, hv]
 
 theorem shuffle_cup (f h : Z1 F) (x : Ar C × Ar C) :
     shuffle F (cupZ (box F) ((boxL F).pullbackOneCocycle f) ((boxR F).pullbackOneCocycle h)).1 x =
@@ -126,7 +168,7 @@ theorem phi_right (Φ : C1 F ⊗[R] C1 F ≃ₗ[R] E F)
     simp only [TensorProduct.map_tmul, LinearMap.id_apply, hΦ, hΦ₁, amitsur_d0_apply, TensorProduct.tmul_sub]
     rfl
   | add u v hu hv =>
-    simp only [map_add, Pi.add_apply, hu, hv]
+    simp only [map_add (f := _), Pi.add_apply, hu, hv]
     abel
 
 theorem phi_left (Φ : C1 F ⊗[R] C1 F ≃ₗ[R] E F)
@@ -141,7 +183,7 @@ theorem phi_left (Φ : C1 F ⊗[R] C1 F ≃ₗ[R] E F)
     simp only [TensorProduct.map_tmul, LinearMap.id_apply, hΦ, hΦ₂, amitsur_d0_apply, TensorProduct.sub_tmul]
     rfl
   | add u v hu hv =>
-    simp only [map_add, Pi.add_apply, hu, hv]
+    simp only [map_add (f := _), Pi.add_apply, hu, hv]
     abel
 
 variable (F)
@@ -157,7 +199,7 @@ theorem mk_crossZ (s : Z1 F ⊗[R] Z1 F) :
   induction s using TensorProduct.induction_on with
   | zero => simp
   | tmul f h => rfl
-  | add u v hu hv => simp only [map_add, hu, hv]
+  | add u v hu hv => simp only [map_add (f := _), hu, hv]
 
 theorem shuffle_crossZ (Φ : C1 F ⊗[R] C1 F ≃ₗ[R] E F)
     (hΦ : ∀ f g x, Φ (f ⊗ₜ g) x = f _ _ x.1.2.2 ⊗ₜ g _ _ x.2.2.2) (s : Z1 F ⊗[R] Z1 F) :
@@ -169,7 +211,7 @@ theorem shuffle_crossZ (Φ : C1 F ⊗[R] C1 F ≃ₗ[R] E F)
     rw [crossZ_tmul, shuffle_cup, TensorProduct.map_tmul, hΦ]
     rfl
   | add u v hu hv =>
-    simp only [map_add, Submodule.coe_add, hu, hv]
+    simp only [map_add (f := _), Submodule.coe_add, hu, hv]
 
 theorem exists_boundary [Finite C] [Quiver.IsThin C] (s : Z1 F ⊗[R] Z1 F) (w : C1 (box F))
     (hw : d1 (box F) w = (crossZ F s).1) :
@@ -200,17 +242,17 @@ theorem map_iotaQ_eq_zero (R : Type) [CommRing R] (C : Type) [Category.{0} C] [F
     induction s using TensorProduct.induction_on with
     | zero => simp
     | tmul f h => rfl
-    | add a b ha hb => simp only [map_add, ha, hb]
+    | add a b ha hb => simp only [map_add (f := _), ha, hb]
   have h2 : ∀ v : C0 F ⊗[R] C1 F, TensorProduct.map q q (TensorProduct.map (d0 F) LinearMap.id v) = 0 := fun v ↦ by
     induction v using TensorProduct.induction_on with
     | zero => simp
     | tmul f h => simp [hq]
-    | add a b ha hb => simp only [map_add, ha, hb, add_zero]
+    | add a b ha hb => simp only [map_add (f := _), ha, hb, add_zero]
   have h3 : ∀ u : C1 F ⊗[R] C0 F, TensorProduct.map q q (TensorProduct.map LinearMap.id (d0 F) u) = 0 := fun u ↦ by
     induction u using TensorProduct.induction_on with
     | zero => simp
     | tmul f h => simp [hq]
-    | add a b ha hb => simp only [map_add, ha, hb, add_zero]
+    | add a b ha hb => simp only [map_add (f := _), ha, hb, add_zero]
   rw [h1, huv, map_sub, h2, h3, sub_zero]
 
 end GlobalTheory.CompanionTheory.WedgeOf.Shuffle

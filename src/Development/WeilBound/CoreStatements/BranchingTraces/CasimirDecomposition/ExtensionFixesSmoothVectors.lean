@@ -1,9 +1,49 @@
+module
+
+public import Development.WeilBound.CoreStatements.BranchingTraces.HeBranching
+public import CompanionTheory.AutomorphicTheory.ZuckermanCommutation.ZuckermanFunctors.IsSimpleFam
+public import Development.AbelianVarietyTheory.PublishedTheorems.DiscreteSeries₂.Poulsen
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
 import Development.WeilBound.CoreStatements.BranchingTraces.CasimirDecomposition.CasApply
-import Development.WeilBound.CoreStatements.BranchingTraces.HeBranching
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.SmoothVectorsComplexDerivedActionCayleyTransport
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.DerivedActionExpandMatrixUnitsStatement
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.StableLattices.CasimirDiagonalSum
-import Formalism.SharpRestriction.CuspSpanNormBounds.NonemptyParameterModels.NumericSettingWithGapSatisfiable
+
+@[expose] public section
 
 open Matrix Finset
 open scoped InnerProductSpace Classical
@@ -228,11 +268,11 @@ theorem invForm {U T T' : URep k r} {P : Mx k r} (hP : IsCayleyU k r ε P) (i : 
   unfold BranchingSupport.IsInvForm
   refine ⟨?_, ?_, ?_, ?_, ?_, ?_⟩
   · intro x hx x' hx' y hy
-    simp only [ext1_add' T hx hx', map_add, formT_add_right]
+    simp only [ext1_add' T hx hx', map_add (f := _), formT_add_right]
   · intro a x hx y hy
     simp only [ext1_smul T a hx, map_smul, formT_smul_right]
   · intro x hx y hy y' hy'
-    simp only [ext1_add' T' hy hy', map_add, formT_add_left]
+    simp only [ext1_add' T' hy hy', map_add (f := _), formT_add_left]
   · intro a x hx y hy
     simp only [ext1_smul T' a hy, map_smul, formT_smul_left]
   · intro g hg x hx y hy
@@ -254,6 +294,7 @@ theorem invForm {U T T' : URep k r} {P : Mx k r} (hP : IsCayleyU k r ε P) (i : 
       funext c
       show ∑ d, P⁻¹ d c • ((CompanionTheory.Zuck.act (vr k r true, U) g w d : U.R.H)) =
         ∑ d, (P * g * P⁻¹)⁻¹ d c • U.R.σ g (∑ e, P⁻¹ e d • (w e : U.R.H))
+
       simp only [act_coe U hg, map_sum, map_smul]
       rw [sum_comp, sum_comp, eB]
     have hB : (P * g * P⁻¹)⁻¹ * Jm ε * ((P * g * P⁻¹)⁻¹)ᴴ = Jm ε := by

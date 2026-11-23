@@ -1,9 +1,50 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.TripleAtt
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.InjPrimeTo
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.OffRange
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.GaloisSideTwistedSelmerAuxiliaryPrimes
-import Formalism.LocalRingCardinality.AdicCompletionLocal.LocTied
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.TripleAtt
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -41,6 +82,7 @@ theorem isJumpV_zero_of_invariant [CharZero Qp] (ρ : Representation LL G V) (x 
     conv_lhs => rw [← b.sum_repr z]
     refine Finset.sum_congr rfl fun j _ => ?_
     congr 1
+
     conv_rhs => rw [← b.sum_repr z, Finset.sum_mul, map_sum]
     simp only [b', smul_mul_assoc, map_smul, Module.Basis.trace_mul_traceDual]
     simp
@@ -56,6 +98,7 @@ theorem isJumpV_zero_of_invariant [CharZero Qp] (ρ : Representation LL G V) (x 
     · simp only [DdR, SetLike.mem_coe, Submodule.mem_iInf, LinearMap.mem_ker, LinearMap.sub_apply,
         LinearMap.id_apply, sub_eq_zero]
       intro g
+
       simp [y, actVdR, map_sum, hinv]
     · simp only [SetLike.mem_coe, Submodule.mem_iInf, LinearMap.mem_ker, LinearMap.sub_apply,
         LinearMap.id_apply, sub_eq_zero, LinearMap.smul_apply]
@@ -63,9 +106,11 @@ theorem isJumpV_zero_of_invariant [CharZero Qp] (ρ : Representation LL G V) (x 
       have l : mulVdR (LL := LL) (V := V) c y =
           ∑ i, ∑ j, Algebra.trace Qp K (c * b i * b' j) •
             ((τ (b' i) • x) ⊗ₜ[Qp] algebraMap K BdR (b j)) := by
+
         simp only [y, map_sum, mulVdR, AlgebraTensorModule.map_tmul, LinearMap.id_apply,
-          LinearMap.mulLeft_apply, ← map_mul]
+        LinearMap.mulLeft_apply, ← map_mul]
         refine Finset.sum_congr rfl fun i _ => ?_
+
         conv_lhs => rw [e1 (c * b i), map_sum, tmul_sum]
         refine Finset.sum_congr rfl fun j _ => ?_
         rw [← tmul_smul, Algebra.smul_def, map_mul, ← IsScalarTower.algebraMap_apply, ← Algebra.smul_def]
@@ -74,6 +119,7 @@ theorem isJumpV_zero_of_invariant [CharZero Qp] (ρ : Representation LL G V) (x 
             ((τ (b' i) • x) ⊗ₜ[Qp] algebraMap K BdR (b j)) := by
         simp only [y, Finset.smul_sum, smul_tmul', smul_smul, ← map_mul]
         refine Finset.sum_congr rfl fun j _ => ?_
+
         conv_lhs => rw [e2 (c * b' j), map_sum, Finset.sum_smul, sum_tmul]
         refine Finset.sum_congr rfl fun i _ => ?_
         rw [map_smul, smul_assoc]
@@ -99,10 +145,11 @@ theorem isJumpV_zero_of_invariant [CharZero Qp] (ρ : Representation LL G V) (x 
     induction w using TensorProduct.induction_on with
     | zero => simp
     | tmul v c => simpa [m] using ((PD.Fil (0 + 1)).restrictScalars Qp).smul_mem (φ (f v)) c.2
-    | add a b ha hb => simpa only [map_add] using Submodule.add_mem _ ha hb
+    | add a b ha hb => simpa only [map_add (f := _)] using Submodule.add_mem _ ha hb
   have h1 := hm w
   rw [hw] at h1
   have h2 : m y = algebraMap K BdR (∑ i, φ (τ (b' i)) • b i) := by
+
     simp only [y, map_sum]
     refine Finset.sum_congr rfl fun i _ => ?_
     simp [m, hf, Algebra.smul_def, ← IsScalarTower.algebraMap_apply]
@@ -117,8 +164,8 @@ end Generic
 
 open GlobalTheory.TripleGal Formalism Formalism.BasicNotions Formalism.BasicNotions.Loc Formalism.MainNotions Formalism.MainNotions.N Formalism.MainNotions.BlochKatoReduction Formalism.MainNotions.BlochKatoReduction.Gen Formalism.ConjugateSelfDual ReciprocityTheory.Gal NumberField IsDedekindDomain Polynomial
 
-open scoped Pointwise in
 
+open scoped Pointwise in
 theorem noInv_of_noJump : ∀ (D : D7) (bkP : BlochKatoReduction.BK D) (i : D.ntw.Tw) (s : D.ntw.Sig i), NoJump bkP i s → ∀ v ∈ placesOver D.host.E (D.ntw.l i), NoInv i (Tmat i s) v := by
   intro D bkP i s hJ v hv A hA x hx
   by_contra hx0
@@ -137,6 +184,7 @@ theorem noInv_of_noJump : ∀ (D : D7) (bkP : BlochKatoReduction.BK D) (i : D.nt
   have hz : ∀ g ∈ Dec (F := D.host.E) A, (M g).mulVec z = z := fun g hg => by
     funext a
     have := congrArg ψ (congrFun (hx g hg) a)
+
     simpa [Matrix.mulVec, dotProduct, map_sum, hψ, M, z] using this
   have hz0 : (M k⁻¹).mulVec z ≠ 0 := fun h => hx0 (by
     have h1 := congrArg (M k).mulVec h

@@ -1,13 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsChartMember
-import ReciprocityTheory.AnalyticForms.RegularLocalRings.FinalTheorems
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsPullbackDegPreStrictLineBundleIso
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsGenOfIsoRel
+import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.AbelianSchemeLawsUnconditional
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GsAppTopOfSection
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsDominantToUnitLeft
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GmSpMapUnitOn
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ThetaNonvanishTorsion
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ExistsIntegralSectionUnitAt
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsPullbackDegPreStrictLineBundleIso
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsGenOfIsoRel
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ThetaNonvanishTorsion
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ValMemOfCorrPull
+import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.ValuationThetaRatioEqBilinear
+import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.IsScalarFormTraceForm
+import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExistsFrameRatio
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.GtPtsVal
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj IsLocalRing
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Out ReciprocityTheory.ChartRestriction.G.Geo.Tor
 open GlobalTheory.Toroidal GlobalTheory.LocM GlobalTheory.PolFan GlobalTheory.ZM GlobalTheory.SiegelTor GlobalTheory.TorRef GlobalTheory.PolDeg
@@ -106,7 +148,7 @@ theorem exists_sec_fibre {K : Type} [Field K] (ev : V₁ →+* K) (θ : LB.Sec (
   rw [← v₁ _ _ z J hJ]
   exact (sval_of θ₁ _ z J _ (fun _ => by rw [Category.comp_id]; rfl)).symm
 
-set_option maxHeartbeats 400000 in
+
 
 theorem exists_torsion_ne {K : Type} [Field K] [IsAlgClosed K] (ev : V₁ →+* K)
     (θ : FieldBaseChange.SecOver D.P.A.hom (LB.LinComb D.P.L (D.famφB 0) (DegPre.famε 1)))
@@ -231,8 +273,8 @@ theorem gs_ev (ev : V₁ →+* K) (a : Γ(Sp V₁, ⊤)) (z : Sp K) :
     gs (Y := Sp K) (toUnit (Over.mk (spMap ev))).left z ⊤ a = toStk z (ev ((Scheme.ΓSpecIso (CommRingCat.of V₁)).hom.hom a)) :=
   GlobalTheory.RatioVal.gs_specMap ev z a
 
-omit [IsAlgClosed K] in
 
+omit [IsAlgClosed K] in
 theorem triv_elt (ev : V₁ →+* K) {P v} (G : GRep D.P.L (𝟙_ (Over (Sp V₁))) P v)
     (hP : ∀ (U : Type) [CommGroup U] (h : _ → U), P U h = 1) :
     ∃ a : V₁, (∀ z J, Good D.P.L z J → (v (TF (R := V₁) (FractionRing V₁)) (toUnit _) z J).val =

@@ -1,5 +1,58 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.LineKroneckerRightMatrixConjTranspose
+module
+
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.CommuteRowOpRightMixedOp
+public import Formalism.LocalRingCardinality.DataTheta
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.ExistsEqMulProdMinors
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ISupEigenspaceEqTop
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.LineKroneckerRightMatrixConjTranspose
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Monotonicity.Lemmas
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Presheaf
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -13,7 +66,7 @@ variable {σ : Type} {k l n : ℕ}
 
 def harmSub (z : Fin k × Fin n → σ) (y : Fin l × Fin n → σ) : Submodule ℂ (MvPolynomial σ ℂ) where
   carrier := {P | ∀ i j, ∑ t, pderiv (z (i, t)) (pderiv (y (j, t)) P) = 0}
-  add_mem' := fun ha hb i j => by simp only [map_add, Finset.sum_add_distrib, ha i j, hb i j, add_zero]
+  add_mem' := fun ha hb i j => by simp only [map_add (f := _), Finset.sum_add_distrib, ha i j, hb i j, add_zero]
   zero_mem' := fun i j => by simp
   smul_mem' := fun c _ ha i j => by
     simp only [Derivation.map_smul, ← Finset.smul_sum, ha i j, smul_zero]
@@ -22,7 +75,7 @@ theorem pderiv_pderiv_polar [DecidableEq σ] (u v a b : σ) (P : MvPolynomial σ
     pderiv u (pderiv v (X a * pderiv b P)) = X a * pderiv b (pderiv u (pderiv v P)) +
       (if u = a then pderiv b (pderiv v P) else 0) +
       (if v = a then pderiv u (pderiv b P) else 0) := by
-  rw [pderiv_X_mul', map_add, pderiv_X_mul', pderiv_swap v b, pderiv_swap u b]
+  rw [pderiv_X_mul', map_add (f := _), pderiv_X_mul', pderiv_swap v b, pderiv_swap u b]
   split_ifs <;> simp [pderiv_swap u b]
 
 theorem lap_colOp [DecidableEq σ] (z : Fin k × Fin n → σ) (y : Fin l × Fin n → σ) {I J : Type}
@@ -30,8 +83,10 @@ theorem lap_colOp [DecidableEq σ] (z : Fin k × Fin n → σ) (y : Fin l × Fin
     ∑ t, pderiv (z (i, t)) (pderiv (y (j, t)) (colOp ℂ x a b P)) =
       ∑ t, ∑ c, (if z (i, t) = x (c, a) then pderiv (x (c, b)) (pderiv (y (j, t)) P) else 0) +
       ∑ t, ∑ c, (if y (j, t) = x (c, a) then pderiv (z (i, t)) (pderiv (x (c, b)) P) else 0) := by
+
   simp only [colOp_apply, map_sum, pderiv_pderiv_polar, Finset.sum_add_distrib]
   rw [Finset.sum_comm]
+
   simp only [← Finset.mul_sum, ← map_sum, hP i j]
   simp
 
@@ -104,8 +159,8 @@ theorem Sep.mixed {z : Fin k × Fin n → σ} {y : Fin l × Fin n → σ} {A B :
 theorem mixed_weight (z : Fin k × Fin n → σ) (y : Fin l × Fin n → σ) {P : MvPolynomial σ ℂ}
     {t : Fin n} {w : ℚ} (h : mixedOp ℂ z y t t P = (w : ℂ) • P) {m : σ →₀ ℕ} (hm : m ∈ P.support) :
     w = ((∑ i, m (z (i, t)) : ℕ) : ℚ) - (∑ j, m (y (j, t)) : ℕ) := by
-  have := congrArg (coeff m) h
-  rw [mixedOp_apply, coeff_sub, coeff_sum, coeff_sum, coeff_smul] at this
+  have := congrArg (AddMonoidAlgebra.coeff · m) h
+  rw [mixedOp_apply, MvPolynomial.coeff_sub, coeff_sum, coeff_sum, MvPolynomial.coeff_smul] at this
   simp only [GlobalTheory.Harm.HighestUnique.coeff_X_mul_pderiv, ← Finset.sum_mul, ← sub_mul,
     smul_eq_mul] at this
   have h2 := mul_right_cancel₀ (mem_support_iff.1 hm) this

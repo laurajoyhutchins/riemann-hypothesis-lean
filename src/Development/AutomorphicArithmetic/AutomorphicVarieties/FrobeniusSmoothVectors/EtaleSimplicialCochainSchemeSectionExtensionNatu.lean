@@ -1,6 +1,47 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.FrobeniusSmoothVectors.FrobeniusSplitPrimeDatum
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CyclotomicInertiaSpan.CycIne
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PlacesOfRationals.PlacesQ
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.FrobeniusSmoothVectors.FrobeniusSplitPrimeDatum
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PlacesOfRationals.GenLeOfFintype
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CyclotomicInertiaSpan.CycIne
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PlacesOfRationals.PlacesQ
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+public import Mathlib.NumberTheory.LSeries.PrimesInAP
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 open NumberField Formalism.ConjugateSelfDual ReciprocityTheory.Gal IsLocalRing UpperTheory.V.HV UpperTheory.V.U3 UpperTheory.V.Base UpperTheory.V.Pr UpperTheory.V.Fr UpperTheory.V
 
@@ -13,7 +54,7 @@ private theorem decomposition_fixes_sqrt {Ω : Type} [Field Ω] [CharZero Ω] (B
     (hx : x ^ 2 = ((1 + 4 * k : ℤ) : Ω)) (hk : B.valuation (k : Ω) < 1) {s : G ℚ Ω} (hs : s ∈ Dec (F := ℚ) B) : s x = x := by
   refine (galois_sqrt_sign s hx).resolve_right fun h => ?_
   set y : Ω := (1 + x) / 2 with hy
-  have h1 : s y = 1 - y := by rw [hy, map_div₀, map_add, map_one, h, map_ofNat]; ring
+  have h1 : s y = 1 - y := by rw [hy, map_div₀, map_add (f := _), map_one, h, map_ofNat]; ring
   have h2 : y * (1 - y) = -k := by
     push_cast at hx
     rw [hy]; linear_combination (-1 / 4 : Ω) * hx
@@ -25,7 +66,9 @@ private theorem decomposition_fixes_sqrt {Ω : Type} [Field Ω] [CharZero Ω] (B
     rw [h2, Valuation.map_neg] at h6
     exact absurd hk (not_lt.2 h6)
   have h7 := B.valuation.map_add_lt h4 (h3.2 h4)
-  simp at h7
+  have hy' : y + (1 - y) = 1 := by ring
+  rw [hy', map_one] at h7
+  exact lt_irrefl _ h7
 
 private theorem etaleSimplicialCochain_scheme_section_extension_naturality {Ω : Type} [Field Ω] (B : ValuationSubring Ω) {p n : ℕ} (hp : B.valuation (p : Ω) < 1)
     (h : p.Coprime n) : ¬ B.valuation (n : Ω) < 1 := by
@@ -75,6 +118,7 @@ private theorem gauss_sqrt_inertia_negates {Ω : Type} [Field Ω] [CharZero Ω] 
   refine ⟨gaussSum χ ψ, by rw [gaussSum_sq hχ hq hψ, hm, ZMod.card]; simp, s, hs, ?_⟩
   have h3 := gaussSum_mulShift χ ψ (-1)
   rw [Units.val_neg, Units.val_one, hm, neg_one_mul, neg_eq_iff_eq_neg] at h3
+
   rw [← h3, gaussSum, gaussSum, map_sum]
   refine Finset.sum_congr rfl fun a _ => ?_
   rw [map_mul]

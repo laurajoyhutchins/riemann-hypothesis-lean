@@ -1,7 +1,49 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.LocalClassFormation.CupSymbolPrime
-import GroundTheory.LocalFields.LocalArtinMap
-import GroundTheory.LocalFields.LocalReciprocityUniversal
+module
+
+public import GroundTheory.ProfiniteCohomology.LocalClassFormation.CupSymbolPrime
+import GroundTheory.ProfiniteCohomology.CyclicCupBrauer
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
@@ -82,7 +124,7 @@ theorem brauerInvZ_galCupClass (χ : Additive Gal(Ω/K) →ₜ+ QZ) (a : Kˣ) (g
     obtain ⟨g₂, rfl⟩ := AlgEquiv.restrictNormalHom_surjective (E := Ω) τ₂
     rw [← map_mul, ← map_mul, ← mul_inv_eq_one, ← map_inv, ← map_mul, ← MonoidHom.mem_ker,
       IntermediateField.restrictNormalHom_ker, hker]
-    simp only [mul_inv_rev, ofMul_mul, ofMul_inv, map_add, map_neg]
+    simp only [mul_inv_rev, ofMul_mul, ofMul_inv, map_add (f := _), map_neg]
     abel⟩⟩
   have : IsAbelianGalois K M := ⟨⟩
   let L := fixingOpenSubgroup M
@@ -136,7 +178,7 @@ theorem brauerInvZ_galCupClass (χ : Additive Gal(Ω/K) →ₜ+ QZ) (a : Kˣ) (g
   rw [brauerInvZ_eq_inv_top, cohomologyRes_eq]
   change (localClassFormationZ K Ω).inv ⊤ ((cohomologyMapAlong _ _ (𝟙 _) 2).hom
     ((cupCharClassProf (galUnitsZ K Ω) χ).hom (unitsInvariant K Ω a))) = _
-  rw [hres, hdec, fixedToInvariants_mul, map_add, map_add, fixedToInvariants_norm,
+  rw [hres, hdec, fixedToInvariants_mul, map_add (f := _), map_add (f := _), fixedToInvariants_norm,
     fixedToInvariants_norm, ClassFormation.inv_cupCharClassProf_invariantsNormLE,
     ClassFormation.inv_cupCharClassProf_invariantsNormLE, hL0, cupCharClassProf_zero, map_zero,
     add_zero, localClassFormationZ_inv_cupCharClassProf_of_prime' S χ π₀ hπ₀
@@ -159,7 +201,7 @@ theorem brauerInvZ_galCupClass (χ : Additive Gal(Ω/K) →ₜ+ QZ) (a : Kˣ) (g
     rw [AlgEquiv.mul_apply, ← hgy y hy]
     exact g.symm_apply_apply y
   have e := (hker _).1 hmem
-  rw [ofMul_mul, map_add, ofMul_inv, map_neg, neg_add_eq_zero] at e
+  rw [ofMul_mul, map_add (f := _), ofMul_inv, map_neg, neg_add_eq_zero] at e
   exact e.symm
 
 end Reciprocity

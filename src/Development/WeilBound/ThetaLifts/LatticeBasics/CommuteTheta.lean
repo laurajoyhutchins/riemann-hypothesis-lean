@@ -1,6 +1,57 @@
-import Development.WeilBound.ThetaLifts.LatticeBasics.EulerProd
-import Development.WeilBound.ThetaLifts.LatticeBasics.ContinuousFlat
-import Development.WeilBound.ThetaLifts.LocalTheory.ConeShifts.EvFinIdemSelf
+module
+
+public import Development.WeilBound.ThetaLifts.LatticeBasics.HodgeTateFromSandwich
+public import Development.WeilBound.ThetaLifts.LocalTheory.IsArchimedeanLocalEquivariantMap
+public import Development.WeilBound.ThetaLifts.LatticeBasics.EulerProd
+import Development.WeilBound.ThetaLifts.LatticeBasics.FdEqZero
+public import Development.WeilBound.ThetaLifts.LatticeBasics.UnfoldB
+public import Development.WeilBound.ThetaLifts.LocalTheory.ConeShifts.EvFinIdemSelf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Development.WeilBound.ThetaLifts.LatticeBasics.EulerB
+
+@[expose] public section
 
 noncomputable section
 
@@ -35,6 +86,7 @@ theorem cartan_pm {M θ : Matrix (Fin n) (Fin n) ℂ} {r s : ℕ} (hs : HasSig M
     rw [this, Matrix.mulVec_mulVec]
   have re : ∀ a : Fin n → ℂ, a ⬝ᵥ M *ᵥ star a = ((a ⬝ᵥ M *ᵥ star a).re : ℂ) := fun a => by
     refine (Complex.conj_eq_iff_re.1 ?_).symm
+
     simp only [Matrix.mulVec, dotProduct, Finset.mul_sum, map_sum, map_mul, Pi.star_apply, Complex.star_def, Complex.conj_conj]
     rw [Finset.sum_comm]
     exact Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => by rw [← hM i j, Complex.star_def]; ring
@@ -99,7 +151,7 @@ theorem mulVec_mem (hL : Y.L.IsLattice E) {A : Matrix (Fin n) (Fin n) (AE F E)}
 theorem stab_iff (hB : B.IsGood σ) (h : Y.IsHerm σ B r s) (h0 : min r s = 0) {K : Subgroup (UA σ Y.J)} (hK : IsStab B K)
     {g : UA σ Y.J} : g ∈ K ↔ ∀ v, IntAt v g :=
   (hK g).trans ⟨fun a _ z hz _ => a.2 z hz, fun a => ⟨fun w => commute_theta hB h h0 w _, fun _ hz =>
-    ⟨mulVec_mem h.lat (fun v z h1 h2 => (a v z h1 h2).1) hz, mulVec_mem h.lat (fun v z h1 h2 => (a v z h1 h2).2) hz⟩⟩⟩
+    ⟨mulVec_mem h.lat.toIsLattice (fun v z h1 h2 => (a v z h1 h2).1) hz, mulVec_mem h.lat.toIsLattice (fun v z h1 h2 => (a v z h1 h2).2) hz⟩⟩⟩
 
 theorem emb_mem (hB : B.IsGood σ) (h : Y.IsHerm σ B r s) (h0 : min r s = 0) {K : Subgroup (G2 σ Y)} (hK : IsStab2 B K)
     {e : UA σ Y.J × UA σ Y.J →* G2 σ Y} (he : ∀ g g', IsEmb g g' (e (g, g'))) {g : UA σ Y.J} (hg : ∀ v, IntAt v g) :
@@ -110,14 +162,14 @@ theorem emb_mem (hB : B.IsGood σ) (h : Y.IsHerm σ B r s) (h0 : min r s = 0) {K
       (commute_theta hB h h0 w _).eq, (commute_theta hB h h0 w _).neg_right.eq]
   · obtain ⟨g', e1, hg'⟩ : ∃ g', k = e (g', 1) ∧ mat g' *ᵥ z ∈ latHat Y := by
       rcases hk with rfl | rfl
-      · exact ⟨g, rfl, mulVec_mem h.lat (fun v z h1 h2 => (hg v z h1 h2).1) hz⟩
-      · exact ⟨g⁻¹, by rw [← map_inv, Prod.inv_mk, inv_one], mulVec_mem h.lat (fun v z h1 h2 => (hg v z h1 h2).2) hz⟩
+      · exact ⟨g, rfl, mulVec_mem h.lat.toIsLattice (fun v z h1 h2 => (hg v z h1 h2).1) hz⟩
+      · exact ⟨g⁻¹, by rw [← map_inv, Prod.inv_mk, inv_one], mulVec_mem h.lat.toIsLattice (fun v z h1 h2 => (hg v z h1 h2).2) hz⟩
     rw [e1, he g' 1, Matrix.fromBlocks_mulVec, show mat (1 : UA σ Y.J) = 1 from rfl]
     simpa using ⟨hg', hz'⟩
 
-theorem int_nhds (hL : Y.L.IsLattice E) : {g : UA σ Y.J | ∀ v, IntAt v g} ∈ 𝓝 (1 : UA σ Y.J) := by
+theorem int_nhds (hL : Y.L.IsFullLattice E) : {g : UA σ Y.J | ∀ v, IntAt v g} ∈ 𝓝 (1 : UA σ Y.J) := by
   classical
-  obtain ⟨m, x, hs, hx⟩ := Euler.lat_gen hL
+  obtain ⟨m, x, hs, hx⟩ := Euler.lat_gen hL.toIsLattice
   have : IsTopologicalRing (AE F E) := IsModuleTopology.isTopologicalRing (AF F) _
   let U : Set (Fin m → AF F) := {a | ∀ i v, evFin F v (a i) ∈ v.adicCompletionIntegers F}
   have hO : IsOpen {a : Af F | ∀ v, a v ∈ v.adicCompletionIntegers F} :=
@@ -158,7 +210,7 @@ theorem idem_off {z : AE F E} (h : compFin F E v z = 0) : idem F v • z = 0 := 
   have : ∀ z, idem F v • z = j (compFin F E v z) := fun z => by
     induction z using TensorProduct.induction_on with
     | zero => rw [smul_zero, map_zero, map_zero]
-    | add x y hx hy => rw [smul_add, map_add, map_add, hx, hy]
+    | add x y hx hy => rw [smul_add, map_add (f := _), map_add (f := _), hx, hy]
     | tmul a x =>
       refine congrArg (· ⊗ₜ[F] x) (af_ext' ((evI_mul _ _).trans (by rw [evI_idem, zero_mul]; exact evI_zero.symm)) fun u => ?_)
       rcases eq_or_ne u v with rfl | h

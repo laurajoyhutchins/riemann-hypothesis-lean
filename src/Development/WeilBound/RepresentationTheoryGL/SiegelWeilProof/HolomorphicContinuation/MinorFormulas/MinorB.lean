@@ -1,4 +1,53 @@
-import Development.WeilBound.RepresentationTheoryGL.SiegelWeilProof.HolomorphicContinuation.MinorFormulas.MinorDefs
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.SiegelWeilProof.HolomorphicContinuation.MinorFormulas.MinorDefs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -24,6 +73,7 @@ theorem deriv_det {R A : Type*} [CommRing R] [CommRing A] [Algebra R A] (D : Der
     (M : Matrix (Fin ρ) (Fin ρ) A) :
     D M.det = ∑ c, (Matrix.updateCol M c (fun a => D (M a c))).det := by
   simp only [Matrix.det_apply]
+
   rw [map_sum, Finset.sum_comm]
   refine Finset.sum_congr rfl fun σ _ => ?_
   rw [Derivation.map_smul_of_tower, deriv_prod, Finset.smul_sum]
@@ -44,8 +94,7 @@ theorem delDet : DelDet := by
     intro c
     congr 1
     funext a
-    simp only [Xm, del, mkDerivation_X]
-    ring
+    simp [Xm, del, mkDerivation_X, mul_comm]
   simp only [h1]
   have h2 : ∀ c, (Matrix.updateCol (Xm R ρ) c (fun a => X (q, c) * X (a, p))).det =
       X (q, c) * (Matrix.updateCol (Xm R ρ) c (fun a => Xm R ρ a p)).det := by
@@ -68,15 +117,15 @@ theorem delDet : DelDet := by
 
 theorem renInt : RenInt := by
   intro R _ r s I J α p q f
-  simp only [opE, LinearMap.add_apply, LinearMap.mulLeft_apply, Derivation.coeFn_coe, map_add, map_mul]
+  simp only [opE, LinearMap.add_apply, LinearMap.mulLeft_apply, Derivation.coeFn_coe, map_add (f := _), map_mul]
   congr 1
   · simp [ren, rename_X]
   · induction f using MvPolynomial.induction_on with
     | C a => simp [ren]
-    | add f g hf hg => simp only [map_add, hf, hg]
+    | add f g hf hg => simp only [map_add (f := _), hf, hg]
     | mul_X f ad hf =>
       have e1 : ren I J (f * X ad) = ren I J f * X (J ad.1, I ad.2) := by simp [ren, rename_X]
-      rw [e1, Derivation.leibniz, Derivation.leibniz, map_add, hf, smul_eq_mul, smul_eq_mul, smul_eq_mul, smul_eq_mul,
+      rw [e1, Derivation.leibniz, Derivation.leibniz, map_add (f := _), hf, smul_eq_mul, smul_eq_mul, smul_eq_mul, smul_eq_mul,
         map_mul, map_mul]
       simp only [del, mkDerivation_X, ren, map_mul, rename_X]
 
@@ -90,9 +139,9 @@ theorem del_comm {R : Type} [CommRing R] {ρ : ℕ} (p q p' q' : Fin ρ) (g : Pm
     del p q (del p' q' g) = del p' q' (del p q g) := by
   induction g using MvPolynomial.induction_on with
   | C a => simp [del]
-  | add f g hf hg => simp only [map_add, hf, hg]
+  | add f g hf hg => simp only [map_add (f := _), hf, hg]
   | mul_X f ad hf =>
-    simp only [Derivation.leibniz, map_add, smul_eq_mul, hf]
+    simp only [Derivation.leibniz, map_add (f := _), smul_eq_mul, hf]
     simp only [del, mkDerivation_X, Derivation.leibniz, smul_eq_mul]
     ring
 
@@ -100,7 +149,7 @@ theorem mComm : MComm := by
   intro R _ ρ α p q p' q'
   apply LinearMap.ext
   intro f
-  simp only [LinearMap.comp_apply, opE, LinearMap.add_apply, LinearMap.mulLeft_apply, Derivation.coeFn_coe, map_add]
+  simp only [LinearMap.comp_apply, opE, LinearMap.add_apply, LinearMap.mulLeft_apply, Derivation.coeFn_coe, map_add (f := _)]
   rw [del_CX_mul, del_CX_mul, del_comm p q p' q']
   ring
 

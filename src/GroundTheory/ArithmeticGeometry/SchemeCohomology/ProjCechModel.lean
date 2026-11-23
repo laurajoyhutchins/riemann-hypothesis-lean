@@ -1,6 +1,50 @@
-import Mathlib
-import GroundTheory.ArithmeticGeometry.SchemeCohomology.ProjLaurent
-import GroundTheory.ArithmeticGeometry.SchemeCohomology.CechSeparated
+module
+
+public import GroundTheory.ArithmeticGeometry.SchemeCohomology.ProjLaurent
+public import GroundTheory.ArithmeticGeometry.SchemeCohomology.CechSeparated
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Arith.SchemeCoh
@@ -17,8 +61,8 @@ namespace ProjSpace
 
 variable {A : Type u} [CommRing A] {n : ℕ}
 
-variable (A n) in
 
+variable (A n) in
 abbrev twistAb (k : ℤ) : (Opens (projectiveSpace A n).toTopCat)ᵒᵖ ⥤ AddCommGrpCat.{u} :=
   (modulesAb (twistingSheaf (grading A n) k)).obj
 
@@ -51,8 +95,8 @@ def resEquiv {X : TopCat.{u}} (P : (Opens X)ᵒᵖ ⥤ AddCommGrpCat.{u}) {V W :
   right_inv x := by rw [res_res, res_refl]
   map_add' := map_add _
 
-variable (A n) in
 
+variable (A n) in
 abbrev cover : Fin (n + 1) → Opens (projectiveSpace A n).toTopCat := stdOpen A n
 
 def theta {p : ℕ} (i : Fin (p + 1) → Fin (n + 1)) (k : ℤ) :
@@ -76,10 +120,14 @@ lemma res_theta {p q : ℕ} {i : Fin (p + 1) → Fin (n + 1)} {i' : Fin (q + 1) 
     (h : Set.range i ⊆ Set.range i') (hle : inter (cover A n) i' ≤ inter (cover A n) i) (k : ℤ)
     (ℓ : LDeg A (Set.range i) k) :
     res (twistAb A n k) hle (theta i k ℓ) = theta i' k ⟨ℓ.1, LDeg_mono h k ℓ.2⟩ := by
-  apply ProjTwist.ext
+  apply Subtype.ext
   funext x
-  change ProjTwist.val (theta i k ℓ) ⟨x.1, hle x.2⟩ = _
-  rw [val_theta, val_theta]
+  change ProjTwist.val (theta i k ℓ) ⟨x.1, hle x.2⟩ =
+    ProjTwist.val (theta i' k ⟨ℓ.1, LDeg_mono h k ℓ.2⟩) x
+  change ProjTwist.locMap x.1 (nmem_of_mem_inter ⟨x.1, hle x.2⟩)
+      ((awayDegEquiv i k).symm ℓ).1 =
+    ProjTwist.locMap x.1 (nmem_of_mem_inter x)
+      ((awayDegEquiv i' k).symm ⟨ℓ.1, LDeg_mono h k ℓ.2⟩).1
   apply locMap_eq_of_awayToLaurent_eq h
   rw [← awayDegEquiv_apply, ← awayDegEquiv_apply, AddEquiv.apply_symm_apply,
     AddEquiv.apply_symm_apply]
@@ -111,10 +159,6 @@ lemma cochain_ext {k : ℤ} {p : ℕ} {σ τ : Cochain (twistAb A n k) (cover A 
     lval (0 : Cochain (twistAb A n k) (cover A n) p) i = 0 := by
   simp [lval]
 
-@[simp] lemma lval_sub {k : ℤ} {p : ℕ} (σ τ : Cochain (twistAb A n k) (cover A n) p) (i) :
-    lval (σ - τ) i = lval σ i - lval τ i := by
-  simp [lval]
-
 def ofL {k : ℤ} {p : ℕ} (f : ∀ i : Fin (p + 1) → Fin (n + 1), LDeg A (Set.range i) k) :
     Cochain (twistAb A n k) (cover A n) p :=
   fun i => theta i k (f i)
@@ -133,6 +177,7 @@ lemma lval_d {k : ℤ} {p : ℕ} (σ : Cochain (twistAb A n k) (cover A n) p)
     lval (d _ _ p σ) i = ∑ a : Fin (p + 2), ((-1 : ℤ) ^ (a : ℕ)) • lval σ (i ∘ a.succAbove) := by
   have key : d _ _ p σ i = theta i k (∑ a : Fin (p + 2), ((-1 : ℤ) ^ (a : ℕ)) •
       ⟨lval σ (i ∘ a.succAbove), LDeg_mono (range_comp_subset _ _) k (lval_mem σ _)⟩) := by
+
     rw [d_apply, map_sum]
     refine Finset.sum_congr rfl fun a _ => ?_
     rw [map_zsmul]

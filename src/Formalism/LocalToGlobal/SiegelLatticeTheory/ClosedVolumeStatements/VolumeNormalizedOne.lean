@@ -1,50 +1,52 @@
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.Volumes
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.SupportG
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.LocVol
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.SupportLoc
-import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.VolSemiDirect
-import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.LevelKSplit
-import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.VolumeUnipotentOne
-import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.VolStabSW
-import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.SupportDatum
-import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.LocProdFormula
-import Formalism.PeriodIntegrals.LocProdFormula
-import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.DiffGenLoc
-import Formalism.SharpRestriction.CuspSpanNormBounds.BruhatCellsKronecker.FamilySeparationBound
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.SupportG
+public import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.LocProdFormula
+public import Formalism.SharpRestriction.CuspSpanNormBounds.BruhatCellsKronecker.FamilySeparationBound
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace Formalism.L2.SG.Closed
-
-theorem volume_normalized_all : Formalism.L2.SG.Volumes.VolumeUnipotentAllCM := volume_unipotent_all_cm
-theorem LevelSAll_holds : Formalism.L2.SG.Volumes.LevelSAll := level_s_all_split
-theorem volume_normalized_one : Formalism.L2.SG.Volumes.VolumeUnipotentOneFrom := volumeUnipotentOne
-
-theorem VolumesFromSW_holds (hS0 : PI.VolFromSW.VolumeDegenerateFromSiegelWeil) : Formalism.L2.SG.Volumes.VolumesFromSW := by
-  have hS := volume_stabilizer_from_siegel_weil
-  unfold PI.VolFromSW.VolStabFromSW at hS
-  unfold PI.VolFromSW.VolumeDegenerateFromSiegelWeil at hS0
-  unfold Formalism.L2.SG.Volumes.VolumesFromSW
-  unfold Formalism.MainNotions.UnusedSlot34.ForAllCM at *
-  intros
-  beta_reduce
-  intro h1 h2
-  constructor
-  · apply hS <;> assumption
-  · apply hS0 <;> assumption
 
 theorem NormProd_holds (D : Formalism.BasicNotions.D7) : Formalism.L2.SG.SupportG.NormProd D := by
   intro δ M hA x hx
   exact local_product_formula D.host.F D.host.E (Formalism.MainNotions.BridgeLemma.szf_finrankFE D) D.conjF D.s.atP M
     (fun p => (hA p).1) x hx
-
-theorem SupportLoc_holds (D : Formalism.BasicNotions.D7) : Formalism.L2.SG.SupportG.SupportLoc D := Formalism.L2.SG.Pf.localSupport_holds D
-
-theorem SupportLemma_holds (D : Formalism.BasicNotions.D7) : Formalism.L2.SG.SupportG.SupportLemma D :=
-  Formalism.L2.SG.SupportG.supportLemma_of_loc (SupportLoc_holds D) (NormProd_holds D)
-
-theorem SupportVec_holds (D : Formalism.BasicNotions.D7) : Formalism.L2.SG.SupportG.SupportVec D := support_vector_all D
-
-theorem DiffExists_holds {F : Type} [Field F] [NumberField F]
-    (v : IsDedekindDomain.HeightOneSpectrum (NumberField.RingOfIntegers F)) : Formalism.L2.SG.LocVol.DiffExists v :=
-  diffExists v
 
 end Formalism.L2.SG.Closed

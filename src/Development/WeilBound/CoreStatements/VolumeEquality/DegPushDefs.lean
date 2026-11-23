@@ -1,6 +1,47 @@
-import Development.WeilBound.CoreStatements.VolumeEquality.BaseUnifEx2
-import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.Statements
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.BundleObjects
+module
+
+public import Development.AutomorphicSpectrum.Definitions.DivisibilityTowers.GoodOrigin
+public import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.Statements
+public import Development.AutomorphicSpectrum.Definitions.DivisibilityTowers.HeckeSectionsIsotropicCommutatorPairingPower
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsPeriodAtRestrict
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AutomorphicSpectrum.Definitions.MetricPeriods.ExistsIntSmulIsAdicIntegralInTensorBasis
+
+@[expose] public section
 
 noncomputable section
 
@@ -19,8 +60,8 @@ variable (k : Type) [Field k] {Ω : Type} [Field Ω] [Algebra k Ω] {K : Type} [
 def fnField (y : (Σ b, ι b) → Ω) : IntermediateField k Ω :=
   IntermediateField.adjoin k {t | ∃ p q : Σ b, ι b, p.1 = q.1 ∧ t = y p / y q}
 
-open Classical in
 
+open Classical in
 def inum (y : (Σ b, ι b) → Ω) {n : ℕ} (a : Fin n → K → ℤ) : ℤ := intNum k (pointIdeal k y) a
 
 def num (y : (Σ b, ι b) → Ω) {n : ℕ} (a : Fin n → K → ℤ) : ℤ := (Module.finrank (fnField k y) Ω : ℤ) * inum k y a
@@ -57,8 +98,8 @@ abbrev PlIx (r : S → ℕ) (b : Σ s, Fin (r s)) : Type := Fin (b.2 + 1) → Fi
 def plPt (u : ∀ s, Matrix (Fin (r s)) (Fin (r s)) Ω) : (Σ b : (Σ s, Fin (r s)), PlIx r b) → Ω := fun x =>
   Matrix.det (Matrix.of fun a b : Fin (x.1.2 + 1) => u x.1.1 (x.2 a) (Fin.castLE x.1.2.2 b))
 
-open Classical in
 
+open Classical in
 def plDeg (b : Σ s, Fin (r s)) : (Σ s, Fin (r s)) → ℤ := fun b' => if b' = b then -1 else 0
 
 variable {Ψ : Type} {p q : ℕ} {K : Type}
@@ -85,8 +126,8 @@ def Dom {X : Scheme.{0}} {Ω Ω₃ : Type} [Field Ω] [Field Ω₃] (O : Valuati
     (q : Cpt ξ) : Prop :=
   (∀ a ∈ regAt ξ q, i a ∈ O) ∧ ∀ a ∈ regAt ξ q, a ≠ 0 → (i a)⁻¹ ∈ O → a⁻¹ ∈ regAt ξ q
 
-open Classical in
 
+open Classical in
 def PtDim : Prop :=
   ∀ (k : Type) [Field k] (Ω : Type) [Field Ω] [Algebra k Ω] (K : Type) [Fintype K] (ι : K → Type) [∀ b, Fintype (ι b)]
     (y : (Σ b, ι b) → Ω) (d : ℕ), IsPt k y d →

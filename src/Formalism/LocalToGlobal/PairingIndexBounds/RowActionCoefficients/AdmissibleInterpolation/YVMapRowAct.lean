@@ -1,4 +1,47 @@
-import Formalism.LocalToGlobal.PairingIndexBounds.RowActionCoefficients.AdmissibleInterpolation.FinalTheorems
+module
+
+public import Formalism.LocalToGlobal.PairingIndexBounds.RowActionCoefficients.ColHLe
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.LocalToGlobal.GroupLattices.FockModels.TransposeWords.FockR
+
+@[expose] public section
 
 open MvPolynomial
 
@@ -20,6 +63,7 @@ theorem map_hvE (f : A →+* A') {n : ℕ} (x : Fin n → ℕ → A) (y : Matrix
   rw [RingHom.map_det]
   congr 1
   ext i t
+
   simp [Matrix.map_apply, map_sum, map_mul]
 
 theorem map_hvO (f : A →+* A') {n : ℕ} (x : Fin n → ℕ → A) (y : Matrix (Fin n) (Fin n) A) (c : ℕ) (h : Fin c → ℕ) :
@@ -68,6 +112,7 @@ theorem rowAct_hvE (g : Matrix (Fin n) (Fin n) K) (x : Fin n → ℕ → K) (c :
   rw [h1, yV_map_rowAct g, hvE_mul]
   congr 1
   funext a i
+
   simp only [mulC, Matrix.transpose_apply, Matrix.map_apply, map_sum, map_mul]
   refine Finset.sum_congr rfl fun b _ => ?_
   congr 1
@@ -85,6 +130,7 @@ theorem rowAct_hvO (g gi : Matrix (Fin n) (Fin n) K) (hg : g * gi = 1) (x : Fin 
     rw [show rowAct K (n := n) g (C (x a i)) = C (x a i) from (rowAct K g).commutes _]
     have h3 : x a i = mulC g (mulC gi x) a i := by rw [← mulC_mul, hg]; simp [mulC, Matrix.one_apply]
     rw [h3]
+
     simp only [mulC, Matrix.map_apply, map_sum, map_mul]
   rw [h2, hvO_mul, smul_eq_C_mul, map_pow]
   congr 2

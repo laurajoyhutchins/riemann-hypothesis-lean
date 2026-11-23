@@ -1,11 +1,50 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.TheoremsMuLinked.AutP
-import Development.AutomorphicArithmetic.AutomorphicVarieties.TheoremsMuLinked.PurityTempered.AlgPowConst
-import Development.AutomorphicArithmetic.AutomorphicVarieties.TheoremsMuLinked.PurityTempered.Temper
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SemisimpleLevels.CompatPSOf
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SemisimpleLevels.SsCalcP
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SemisimpleLevels.FlagPol
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.LevelIso
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.TemperedLocalComponents.LocCompC
+module
+
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsContinuousPadic
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.BlochKatoSelmerVanishes
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.WeilGroupCharacters.UniversalOrdinaryDeterminantRing
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.Valuation.LocalSubring
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.NonemptyEquivOfRangeEq
+import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.HasExponentZeroIff
+import Development.AutomorphicArithmetic.AutomorphicVarieties.TheoremsMuLinked.OrdZero
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Neutral.B1 Formalism.L2.Host Formalism.ConjugateSelfDual ReciprocityTheory.Gal Formalism.BasicNotions Formalism.BasicNotions.Loc Formalism.MainNotions.N Polynomial
 open GlobalTheory.CuspRep GlobalTheory.WeilDeligne GlobalTheory.Pst GlobalTheory.LocLanglands GlobalTheory.HeckeGal GlobalTheory.LocGL GlobalTheory.GalOfCusp UpperTheory.V UpperTheory.V.Af UpperTheory.V.Th
@@ -23,7 +62,7 @@ private theorem place_under {F Ω : Type} [Field F] [NumberField F] [Field Ω] [
   let f : 𝓞 F →+* A := ((algebraMap F Ω).comp (algebraMap (𝓞 F) F)).codRestrict A hA
   have hf : ∀ x : 𝓞 F, A.valuation (algebraMap F Ω (x : F)) < 1 ↔ x ∈ (IsLocalRing.maximalIdeal A).comap f := fun x =>
     (A.valuation_lt_one_iff (f x)).symm
-  have hm : (p : 𝓞 F) ∈ (IsLocalRing.maximalIdeal A).comap f := (hf _).1 (by simpa using hp)
+  have hm : (p : 𝓞 F) ∈ (IsLocalRing.maximalIdeal A).comap f := (hf _).1 (by simpa only [map_natCast] using hp)
   refine ⟨⟨(IsLocalRing.maximalIdeal A).comap f, inferInstance, fun h => ?_⟩, hf, hm⟩
   rw [h, Ideal.mem_bot] at hm
   exact hp0 (Nat.cast_eq_zero.1 hm)
@@ -55,37 +94,3 @@ private theorem charpoly_of_flag {H k : Type} [Group H] [CommRing k] {n : ℕ} {
   simp only [(ha s).2] at h1
   rw [← h1]
   simp only [Units.val_mul, Matrix.coe_units_inv, Matrix.charpoly_units_conj]
-
-theorem UpperTheory.V.Th.freePU :
-    Af.HypothesesH → ∀ (K Ω : Type) [Field K] [NumberField K] [IsCMField K] [Field Ω] [Algebra K Ω] [IsAlgClosure K Ω], Module.finrank ℚ K = 2 → ∀ (l : ℕ) [Fact l.Prime], l ≠ 2 → ∀ (ι : Qbar l ≃+* ℂ) (n : ℕ), 2 ≤ n → ∀ (r : G K Ω →* GL (Fin n) (Qbar l)) (M : ℕ) (m : Fin n → ℤ), 1 ≤ M → StrictAnti m → Continuous r → AutP ι r → Unl l M m r → FreeAt l r := by
-  intro PH K Ω _ _ _ _ _ _ hK l _ hl ι n hn r M m hM hm hr haut hU B hB
-  have P : Af.Hypotheses₂ := PH.toClassicalTheorems
-  obtain ⟨w, hBw, hw⟩ := place_under (F := K) (Fact.out : l.Prime).ne_zero hB
-  obtain ⟨π, hreg, hpol, hatt⟩ := haut
-  obtain ⟨A, hA, κ, hF, hunl⟩ := hU w hw
-  obtain ⟨χ, hχ, hflag, hκ⟩ := id hF
-  obtain ⟨rc, hrc⟩ := P.exists_rec hA
-  obtain ⟨⟨σ, hσ⟩, -⟩ := locCompC P K n π w
-  obtain ⟨k, hk, hpow⟩ := pow_eq_one_of_kills (F := K) (Ω := Ω) hM
-  have hflag' : W.HasFlag (r.comp (Dec (F := K) A).subtype) κ := hflag
-  obtain ⟨g, hg, hfree⟩ := purLocS P K Ω l hl ι n r hr w A hA hw (rc (algNorm σ))
-    (fun O _ _ _ Bw hj => by
-      obtain ⟨h1, h2⟩ := Lev.compatPSOf P P.ss K hK n hn l Ω ι r π hr hreg hpol hatt
-        w A hA O Bw hj
-      obtain ⟨μ, hμ, -⟩ := Lev.flagPol K Ω l ι n M hM m r hr w A hA O Bw hj κ hF h1
-      exact ⟨h1, fun _ => h2 σ hσ rc hrc ⟨μ, hμ⟩⟩)
-    (temper P K Ω n (by omega) π hreg hpol w A hA rc hrc σ hσ) κ m k hflag' hm hk
-    (fun i s hs => by
-      rw [hκ i s hs, zpow_neg, mul_inv_cancel_comm]
-      exact hpow _ _ (hχ i) _) (Or.inl hunl)
-  obtain ⟨t, rfl⟩ := exists_smul_eq_of_isPlaceOver (F := K) hA hBw
-  refine ⟨t * g * t⁻¹, ?_, ?_, fun i => κ i g, hfree, ?_⟩
-  · have h1 : (g : G K Ω) • A = A := g.2
-    show (t * (g : G K Ω) * t⁻¹) • t • A = t • A
-    rw [mul_smul, mul_smul, inv_smul_smul, h1]
-  · rw [map_mul, map_mul, map_inv, mul_inv_cancel_comm, hg]
-  · have h1 := charpoly_of_flag hflag' g (r t)
-    rw [← h1]
-    show (r (t * g * t⁻¹)).val.charpoly = _
-    rw [map_mul, map_mul, map_inv]
-    rfl

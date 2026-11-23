@@ -1,4 +1,49 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.Algebra.ZMod
+public import Mathlib.NumberTheory.MulChar.Basic
+public import Mathlib.RingTheory.Trace.Defs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace ReciprocityTheory.PGsh
 
@@ -10,12 +55,6 @@ def CharTableStatement : Prop :=
     (Matrix.of fun g h : G => e h g).det ^ 2 = (Fintype.card G : K) ^ Fintype.card G ∨
     (Matrix.of fun g h : G => e h g).det ^ 2 = -(Fintype.card G : K) ^ Fintype.card G
 
-def ColengthSumStatement : Prop :=
-  ∀ (K : Type) [Field K] (v : Valuation K NNReal) (G : Type) [AddCommGroup G] [Fintype G]
-    [DecidableEq G] (e : G ≃ AddChar G K) (B₁ B₂ : Matrix G G K),
-    (Matrix.of fun g h : G => e h g) = B₁ * B₂ᵀ →
-    (v B₁.det * v B₂.det) ^ 2 = v (Fintype.card G : K) ^ Fintype.card G
-
 def GaussCongruenceStatement : Prop :=
   ∀ (p : ℕ) [Fact p.Prime] (F : Type) [Field F] [Fintype F] [CharP F p]
     (O : Type) [CommRing O] [IsDomain O] (m : Ideal O) [m.IsPrime]
@@ -23,28 +62,5 @@ def GaussCongruenceStatement : Prop :=
     Fintype.card F ≠ 2 → ζ ^ p = 1 → (∀ a, Ideal.Quotient.mk m (ω a) = ι a) →
     letI : Algebra (ZMod p) F := ZMod.algebra F p
     ∃ y ∈ m, (∑ a : F, ω⁻¹ a * ζ ^ (Algebra.trace (ZMod p) F a).val) = (ζ - 1) * (y - 1)
-
-def DigitCountStatement : Prop :=
-  ∀ (R : Type) [CommRing R] (p h : ℕ) (e : Fin h → R),
-    2 * ∑ α : Fin h → Fin p, ∑ j, ((α j : ℕ) : R) * e j =
-      (p : R) ^ h * ((p : R) - 1) * ∑ j, e j
-
-def LinearMonomialBasisStatement : Prop :=
-  ∀ (p : ℕ) [Fact p.Prime] (h : ℕ) (k : Type) [Field k] [CharP k p]
-    (A : Matrix (Fin h) (Fin h) k), IsUnit A.det →
-    ∀ e : (Fin h → Fin p) ≃ (Fin h → ZMod p),
-      (Matrix.of fun x y : Fin h → ZMod p =>
-        ∏ j, (∑ i, A j i * ZMod.castHom (dvd_refl p) k (x i)) ^ ((e.symm y j : Fin p) : ℕ)).det ≠ 0
-
-def NearIdentityColengthStatement : Prop :=
-  ∀ (K : Type) [Field K] (v : Valuation K NNReal) (ι : Type) [Fintype ι] [DecidableEq ι]
-    (U : Matrix ι ι K) (s : ι → K),
-    (∀ i j, v (U i j) ≤ 1) → (∀ i j, v (U i j - (1 : Matrix ι ι K) i j) < 1) →
-    v (U * Matrix.diagonal s).det = ∏ i, v (s i)
-
-def ColengthZeroStatement : Prop :=
-  ∀ (K : Type) [Field K] (v : Valuation K NNReal) (ι : Type) [Fintype ι] [DecidableEq ι]
-    (T : Matrix ι ι K),
-    (∀ i j, v (T i j) ≤ 1) → v T.det = 1 → ∀ i j, v (T⁻¹ i j) ≤ 1
 
 end ReciprocityTheory.PGsh

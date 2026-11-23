@@ -1,6 +1,47 @@
-import Mathlib
-import Formalism.ThetaSupremumBounds.StatementA
-import Formalism.ThetaSupremumBounds.StatementB
+module
+
+public import Formalism.ThetaSupremumBounds.StatementA
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Finset MeasureTheory
 open scoped ComplexConjugate Real
@@ -25,27 +66,5 @@ def liftNormSq {Cl Cl' A B : Type} [Fintype Cl] [Fintype Cl'] [NormedAddCommGrou
     (T : Cl → Cl' → A →L[ℂ] B) : ℝ :=
   sInf {X : ℝ | 0 ≤ X ∧ ∀ fn : Cl → A,
     (∑ L', γ' L' * ‖liftOp γ ε T fn L'‖ ^ 2) ≤ X * ∑ L, γ L * ‖fn L‖ ^ 2}
-
-def LiftOperatorBound : Prop :=
-  ∀ (Pl ι Cl Cl' : Type) [Fintype Pl] [Fintype ι] [Fintype Cl] [Fintype Cl'] (A B : Type)
-    [NormedAddCommGroup A] [NormedSpace ℂ A] [NormedAddCommGroup B] [NormedSpace ℂ B]
-    [CompleteSpace B]
-    (r : ℕ) (ν : Pl → Fin r → ℝ) (n : Pl → ℕ) (s : Pl → (ι → ℂ) → Fin r → ℝ)
-    (Th : Cl → Cl' → (Pl × ι → ℂ) → ℂ) (c : Cl → Cl' → (Pl × ι → ℕ) → ℂ)
-    (Rc : (Pl × ι → ℕ) →₀ (A →L[ℂ] B)) (lam : Pl → ℂ) (Om : Pl → ℝ) (S : ℝ)
-    (γ : Cl → ℝ) (γ' : Cl' → ℝ) (ε : Cl → Cl' → ℂ),
-    (∀ τ i, 0 ≤ ν τ i) → (∀ τ, ∑ i, ν τ i = n τ) →
-    (∀ τ u i, 0 ≤ s τ u i) → (∀ τ u, ∑ i, s τ u i ^ 2 = nsq u) →
-    (∀ L L', Continuous (Th L L')) →
-    (∀ L L' u, HasSum (fun e => c L L' e * mono u e) (Th L L' u)) →
-    (∀ L L' u, ‖Th L L' u‖ ≤ S * Real.exp (nsq u / 2)) →
-    (∀ e ∈ Rc.support, ∀ τ, ∑ x, e (τ, x) = n τ) →
-    (∀ u, ‖Rc.sum (fun e X => mono (cj u) e • X)‖ ≤ ∏ τ, ∏ i, s τ (fun x => u (τ, x)) i ^ ν τ i) →
-    (∀ τ, 0 < Om τ) → (∀ τ, ‖lam τ‖ ^ 2 = (Om τ)⁻¹) →
-    (∀ L, 0 < γ L ∧ γ L ≤ 1) → (∀ L', 0 < γ' L' ∧ γ' L' ≤ 1) → (∀ L L', ‖ε L L'‖ = 1) →
-    liftNormSq γ γ' ε (fun L L' => liftBlock (c L L') Rc lam) ≤
-      ((Fintype.card Cl : ℝ) * (Fintype.card Cl' : ℝ)) *
-        (S ^ 2 * ∏ τ, ((Om τ)⁻¹ ^ n τ *
-          (Real.exp 1 * (2 * (n τ : ℝ) + 2) ^ (2 * Fintype.card ι) * Real.exp (∑ i, ph (ν τ i)))))
 
 end Formalism.DimensionVariation

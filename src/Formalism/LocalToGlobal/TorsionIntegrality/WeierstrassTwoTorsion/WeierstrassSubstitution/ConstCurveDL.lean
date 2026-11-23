@@ -1,8 +1,51 @@
-import Formalism.LocalToGlobal.TorsionIntegrality.WeierstrassTwoTorsion.StatementZ
-import Formalism.LocalToGlobal.TorsionIntegrality.WeierstrassTwoTorsion.StatementT
-import Formalism.LocalToGlobal.TorsionIntegrality.WeierstrassTwoTorsion.WeierstrassSubstitution.FlowBasic
-import Formalism.LocalToGlobal.TorsionIntegrality.WeierstrassTwoTorsion.WeierstrassSubstitution.Laurent
-import Formalism.LocalToGlobal.TorsionIntegrality.WeierstrassTwoTorsion.WeierstrassSubstitution.CurveSer
+module
+
+public import Formalism.LocalToGlobal.TorsionIntegrality.WeierstrassTwoTorsion.StatementZ
+public import Formalism.LocalToGlobal.TorsionIntegrality.WeierstrassTwoTorsion.WeierstrassSubstitution.CurveSer
+public import Formalism.LocalToGlobal.TorsionIntegrality.WeierstrassTwoTorsion.WeierstrassSubstitution.FlowBasic
+public import Formalism.LocalToGlobal.TorsionIntegrality.WeierstrassTwoTorsion.WeierstrassSubstitution.Laurent
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open PowerSeries
 
@@ -48,7 +91,7 @@ theorem fwAt_sig : fwAt (curveL W) (sig he X) (sig he (wSer W)) = sig he (fw W) 
     WeierstrassCurve.map_a₄, WeierstrassCurve.map_a₆]
 
 theorem fuAt_sig : fuAt (curveL W) (sig he X) (sig he (wSer W)) = sig he (fu W) := by
-  simp only [fuAt, fu, map_add, map_mul, map_pow, map_ofNat, sig_C,
+  simp only [fuAt, fu, map_add (f := _), map_mul, map_pow, map_ofNat, sig_C,
     WeierstrassCurve.map_a₁, WeierstrassCurve.map_a₂, WeierstrassCurve.map_a₄]
 
 theorem wEq_sig : WEq (curveL W) (sig he X) (sig he (wSer W)) := by
@@ -56,18 +99,18 @@ theorem wEq_sig : WEq (curveL W) (sig he X) (sig he (wSer W)) := by
       + C W.a₄ * X * wSer W ^ 2 + C W.a₆ * wSer W ^ 3 :=
     (Formalism.ELL.wSeriesUnique K W).choose_spec.1.2
   have h := congrArg (sig he) hw
-  simp only [map_add, map_mul, map_pow, sig_C] at h
+  simp only [map_add (f := _), map_mul, map_pow, sig_C] at h
   simp only [WEq, WeierstrassCurve.map_a₁, WeierstrassCurve.map_a₂, WeierstrassCurve.map_a₃,
     WeierstrassCurve.map_a₄, WeierstrassCurve.map_a₆]
   exact h
 
-theorem isFlowUW_sig (hc : ∀ f : K⟦X⟧, derivative K (f.subst e) = (D W f).subst e) :
+theorem isFlowUW_sig (hc : ∀ f : K⟦X⟧, derivative (f.subst e) = (D W f).subst e) :
     IsFlowUW (curveL W) dL (sig he X) (sig he (wSer W)) := by
   have hw : wSer W = X ^ 3 + C W.a₁ * X * wSer W + C W.a₂ * X ^ 2 * wSer W + C W.a₃ * wSer W ^ 2
       + C W.a₄ * X * wSer W ^ 2 + C W.a₆ * wSer W ^ 3 :=
     (Formalism.ELL.wSeriesUnique K W).choose_spec.1.2
-  have hd := congrArg (derivative K) hw
-  simp only [map_add, Derivation.leibniz, Derivation.leibniz_pow, PowerSeries.derivative_C,
+  have hd := congrArg PowerSeries.derivative hw
+  simp only [map_add (f := _), Derivation.leibniz, Derivation.leibniz_pow, PowerSeries.derivative_C,
     PowerSeries.derivative_X, smul_eq_mul, nsmul_eq_mul] at hd
   have hDw : D W (wSer W) = fu W := by
     rw [D, Derivation.smul_apply, smul_eq_mul, fw, fu]
@@ -94,7 +137,7 @@ theorem inv_mul_sig (hne : toL e ≠ 0) :
     _ = 1 := by rw [h1, h2, one_pow, one_mul]
 
 include he in
-theorem isFlow_sig (hc : ∀ f : K⟦X⟧, derivative K (f.subst e) = (D W f).subst e)
+theorem isFlow_sig (hc : ∀ f : K⟦X⟧, derivative (f.subst e) = (D W f).subst e)
     (hne : toL e ≠ 0) :
     IsFlow (curveL W) dL ((toL e)⁻¹ ^ 2 * toL ((xS W).subst e))
       ((toL e)⁻¹ ^ 3 * toL ((yS W).subst e)) := by

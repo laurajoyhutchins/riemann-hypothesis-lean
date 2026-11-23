@@ -1,5 +1,44 @@
-import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.IsConstAlongSingleton
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.IsConstAlongSingleton
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -40,31 +79,6 @@ theorem isSqInt_iff (H : GlobalTheory.Published.LanglandsSquareIntegrable) (h : 
   simpa only [isSqIntOn_empty, negExp_empty, Finset.empty_subset, forall_const] using
     H F E σ h n J hJ r X Y hW K hK ∅ φ (isAutOn_empty.2 hφ)
 
-theorem IsAutOn.isConstAlong_self {S : Finset (Fin r)} (hφ : IsAutOn σ J X Y S K φ) : IsConstAlong σ J X S φ φ :=
-  fun μ 𝓕 _ _ h1 g => by simp [fun u : unip σ J X S => hφ.leftN u u.2 g, Measure.real, h1]
-
-omit [NumberField E] in
-
-theorem isConstAlong_empty {c : GAd σ J → ℂ} (hc : IsConstAlong σ J X ∅ φ c) : c = φ := by
-  unfold IsConstAlong at hc
-  rw [unip_empty] at hc
-  haveI : Finite (⊥ : Subgroup (GAd σ J)) := inferInstance
-  haveI : Subsingleton ((ratPts σ J).subgroupOf ⊥) := inferInstance
-  have e : (Measure.haarMeasure ⊤ : Measure (⊥ : Subgroup (GAd σ J))) Set.univ = 1 := Measure.haarMeasure_self
-  funext g
-  rw [hc (Measure.haarMeasure ⊤) Set.univ inferInstance
-    ⟨nullMeasurableSet_univ, .of_forall fun _ => ⟨1, trivial⟩, Subsingleton.pairwise⟩ e g]
-  simp [fun u : (⊥ : Subgroup (GAd σ J)) => Subgroup.mem_bot.1 u.2, Measure.real, e]
-
-theorem isCuspComp_self (H : GlobalTheory.Published.LanglandsLemmaUnitary) (h : IsCMExt F E σ) (hJ : IsHermND σ J)
-    (hW : IsWittFrame σ J X Y) (hK : IsMaxCpt σ J K) (hφ : IsCuspOn σ J X Y ∅ K φ) : IsCuspComp σ J X Y ∅ K φ φ := by
-  obtain ⟨_, ⟨-, c, h1, h2⟩, -⟩ := (H F E σ h n J hJ r X Y hW K hK ∅ φ hφ.1).1 ∅ le_rfl
-  obtain rfl := isConstAlong_empty h1
-  exact ⟨hφ, c, h1, fun ψ hψ μ 𝓕 a b g g' => ⟨(h2 ψ hψ μ 𝓕 a b g g').1, (h2 ψ hψ μ 𝓕 a b g g').1, rfl⟩⟩
-
-example (H : GlobalTheory.Published.LanglandsSquareIntegrable) (h : IsCMExt F E σ) (hJ : IsHermND σ J) {X Y : Matrix (Fin n) (Fin 0) E}
-    (hW : IsWittFrame σ J X Y) (hK : IsMaxCpt σ J K) (hφ : IsAut σ J K φ) : IsSqInt σ J φ :=
-  (isSqInt_iff H h hJ hW hK hφ).2 fun _ _ _ k => k.elim0
 
 end GlobalTheory.StdPar
 

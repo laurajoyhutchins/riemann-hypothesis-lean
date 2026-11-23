@@ -1,6 +1,52 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.Objects
-import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PIntNumBaseChange
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.Objects
+public import Mathlib.Tactic.Continuity
+public import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PIntNumBaseChange
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Order.Filter.AtTopBot.Map
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.FieldNumbers
@@ -35,13 +81,13 @@ theorem eventualValue_congr {K K' : Type*} {f : (K → ℤ) → ℤ} {g : (K' �
   unfold eventualValue
   by_cases hf : ∃ c, ∀ᶠ m in atTop, f m = c
   · have hg : ∃ c, ∀ᶠ m in atTop, g m = c := hf.imp fun c hc => (h c).1 hc
-    rw [dif_pos hf, dif_pos hg]
+    rw [dite_eq_left hf, dite_eq_left hg]
     have h1 := (h _).1 hf.choose_spec
     have h2 := hg.choose_spec
     obtain ⟨m, hm1, hm2⟩ := (h1.and h2).exists
     exact hm1.symm.trans hm2
   · have hg : ¬ ∃ c, ∀ᶠ m in atTop, g m = c := fun ⟨c, hc⟩ => hf ⟨c, (h c).2 hc⟩
-    rw [dif_neg hf, dif_neg hg]
+    rw [dite_eq_right hf, dite_eq_right hg]
 
 theorem eventualValue_precomp (g : (K₁ → ℤ) → ℤ) :
     eventualValue (fun m : K₂ → ℤ => g (m ∘ e)) = eventualValue g := by
@@ -71,15 +117,15 @@ variable {K₁ K₂ : Type*} [DecidableEq K₁] [DecidableEq K₂] {ι₁ : K₁
   (e : K₁ ≃ K₂) (φ : (Σ k, ι₁ k) ≃ (Σ k, ι₂ k)) (hφ : ∀ v, (φ v).1 = e v.1)
   {F : Type*} [Field F]
 
-include hφ in
 
+include hφ in
 theorem weight_mapDomain (d : (Σ k, ι₁ k) →₀ ℕ) :
     Finsupp.weight (blockWeight ι₂) (Finsupp.mapDomain φ d) =
       Finsupp.weight (blockWeight ι₁) d ∘ e.symm := by
   induction d using Finsupp.induction_linear with
   | zero => funext k; simp
   | add a b ha hb =>
-    rw [Finsupp.mapDomain_add, map_add, map_add, ha, hb]
+    rw [Finsupp.mapDomain_add, map_add (f := _), map_add (f := _), ha, hb]
     rfl
   | single v c =>
     rw [Finsupp.mapDomain_single, Finsupp.weight_single, Finsupp.weight_single]
@@ -87,8 +133,8 @@ theorem weight_mapDomain (d : (Σ k, ι₁ k) →₀ ℕ) :
     simp only [blockWeight, hφ, Pi.smul_apply, Function.comp_apply, Pi.single_apply,
       Equiv.symm_apply_eq]
 
-include hφ in
 
+include hφ in
 theorem gradedPiece_map_rename (I : Ideal (MRing ι₁ F)) (d : K₂ → ℕ) :
     gradedPiece (I.map (renameEquiv F φ)) d =
       (gradedPiece I (d ∘ e)).map
@@ -114,15 +160,15 @@ theorem gradedPiece_map_rename (I : Ideal (MRing ι₁ F)) (d : K₂ → ℕ) :
     funext k
     simp
 
-include hφ in
 
+include hφ in
 theorem finrank_gradedPiece_map_rename (I : Ideal (MRing ι₁ F)) (d : K₂ → ℕ) :
     Module.finrank F (gradedPiece (I.map (renameEquiv F φ)) d) =
       Module.finrank F (gradedPiece I (d ∘ e)) := by
   rw [gradedPiece_map_rename e φ hφ, LinearEquiv.finrank_map_eq]
 
-include hφ in
 
+include hφ in
 theorem hilbFn_map_rename (I : Ideal (MRing ι₁ F)) (m : K₂ → ℤ) :
     hilbFn (I.map (renameEquiv F φ)) m = hilbFn I (m ∘ e) := by
   unfold hilbFn
@@ -133,8 +179,8 @@ theorem hilbFn_map_rename (I : Ideal (MRing ι₁ F)) (m : K₂ → ℤ) :
     exact congrArg _ (finrank_gradedPiece_map_rename e φ hφ I (fun k => (m k).toNat))
   · rw [if_neg h, if_neg (mt hpos.2 h)]
 
-include hφ in
 
+include hφ in
 theorem intNum_map_rename (I : Ideal (MRing ι₁ F)) {n : ℕ} (bs : Fin n → K₂ → ℤ) :
     intNum F (I.map (renameEquiv F φ)) bs = intNum F I (fun i => bs i ∘ e) := by
   unfold intNum

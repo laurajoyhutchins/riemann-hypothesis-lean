@@ -1,4 +1,54 @@
-import Formalism.SharpRestriction.GrowthBounds.BinomialPolynomialIdentities.RestSplit
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.BinomialPolynomialIdentities.RestSplit
+public import Formalism.ThetaLogCoordinates.JacobiPathWeights.JacobiMinorProofs.LemmaA2indepOf
+public import Formalism.ThetaLogCoordinates.JacobiPathWeights.JacobiMinorProofs.GoodWOfWeight
+public import Formalism.ThetaLogCoordinates.JacobiPathWeights.JacobiMinorProofs.JacobiMinorProof
+import Formalism.ThetaLogCoordinates.JacobiPathWeights.JacobiMinorProofs.LeIffLtColHeight
+import Formalism.ThetaLogCoordinates.JacobiPathWeights.JacobiMinorProofs.PathProductHighestWeight
+public import Formalism.ThetaLogCoordinates.JacobiPathWeights.JacobiMinorProofs.ValuationProductsComponents
+public import Formalism.ThetaLogCoordinates.JacobiPathWeights.PathBasisTheorem
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -11,11 +61,6 @@ open Formalism.InvariantFactorPaths.GelfandTsetlinBases
 section basic
 
 variable {L : Type} [CommRing L] {n : ℕ}
-
-theorem partialAct_X (isVec : ℕ → Bool) (i : ℕ) (g gi : Matrix (Fin n) (Fin n) L) (x : ℕ × Fin n) :
-    actI isVec i g gi (X x) = if x.1 < i then
-      (if isVec x.1 then ∑ b, X (x.1, b) * C (g b x.2) else ∑ b, X (x.1, b) * C (gi x.2 b)) else X x := by
-  simp [actI]
 
 theorem partialAct_eq_fullAct_of_vars_lt (isVec : ℕ → Bool) (i : ℕ) (g gi : Matrix (Fin n) (Fin n) L)
     {P : MvPolynomial (ℕ × Fin n) L} (hv : ∀ x ∈ P.vars, x.1 < i) :
@@ -63,9 +108,9 @@ theorem fullAct_pathWord_support_dominated (isVec : ℕ → Bool) (B : ℕ → �
   intro e he
   refine (Top.factEV L n i isVec B μ I' g hp hI).1 _ ?_
   intro h0
-  have h1 := congrArg (coeff e) h0
-  rw [coeff_weightedHomogeneousComponent, if_pos rfl, coeff_zero] at h1
-  exact (mem_support_iff.1 he) h1
+  have h1 := congrArg (AddMonoidAlgebra.coeff · e) h0
+  rw [coeff_weightedHomogeneousComponent, if_pos rfl] at h1
+  exact (mem_support_iff.1 he) (by simpa using h1)
 
 end basic
 
@@ -94,6 +139,7 @@ theorem restWord : RestWord := by
     rw [← Finset.prod_mul_distrib, ← Finset.prod_attach F]
     refine Finset.prod_congr rfl fun x _ => ?_
     simp [A3ev.extF, x.2]
+
   rw [hexp, map_sum] at he
   obtain ⟨p, -, hpe⟩ := Finset.mem_biUnion.1 (MvPolynomial.support_sum he)
   obtain ⟨I', hI'⟩ : ∃ I', I' = A3ev.extF F p := ⟨_, rfl⟩
@@ -118,7 +164,7 @@ theorem restWord : RestWord := by
     have hw1 : Finsupp.weight (wtI isVec i) e1 = Finsupp.weight (torusW isVec) e1 :=
       partialWeight_eq_torusWeight_of_lt isVec i fun x hx =>
         DominanceOrderLemmas.vars_act isVec g gi hv1 x ((mem_vars_iff_mem_support x).2 ⟨e1, he1, hx⟩)
-    rw [map_add, hw2, add_zero, hw1]
+    rw [map_add (f := _), hw2, add_zero, hw1]
     exact fullAct_pathWord_support_dominated isVec B μ i I' gu hpi hidx e1 he1
   · exfalso
     have hz : ∏ c ∈ F, pathWord isVec μ c (fun j a => (X (j, a) : MvPolynomial (ℕ × Fin n) L)) i (I' c) = 0 := by
@@ -154,6 +200,7 @@ theorem exists_dominant_top_weight_nonzero (k : Type) [Field k] (n N : ℕ) (isV
   have hanti : Antitone μ₀ := hμ₀ ▸ x₀.2.1.2.1 N le_rfl
   have hd₀ : DomLe (x₁.1.1 N) μ₀ := hμ₀ ▸ hx₀.2
   refine ⟨μ₀, hanti, hd₀, fun h1 => ?_⟩
+
   rw [Finsupp.sum, map_sum] at h1
   simp_rw [map_smul] at h1
   have h2 : ∑ x ∈ c.support.filter (fun x => x.1.1 N = μ₀), c x • fam k x = 0 := by

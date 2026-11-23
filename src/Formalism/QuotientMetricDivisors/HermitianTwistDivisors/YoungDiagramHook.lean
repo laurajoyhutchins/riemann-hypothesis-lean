@@ -1,7 +1,52 @@
-import Formalism.QuotientMetricDivisors.TheoremDivIneqRows
-import Formalism.LogFactorialIndices.SignedSubspaceIndex.SumInterlacedBoundFails
-import Formalism.LogFactorialIndices.SubspaceIndexSigned
-import Formalism.QuotientMetricDivisors.HermitianTwistDivisors.TheoremDivIneq
+module
+
+public import Formalism.QuotientMetricDivisors.TheoremDivIneqRows
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Finset
 
@@ -64,24 +109,6 @@ lemma ph_nat_lt (y y' : ℕ) (h : y < y') : ph (y : ℝ) - ph (y' : ℝ) ≤ 1 :
       mul_nonpos_of_nonpos_of_nonneg (by linarith) hlog0
     linarith
 
-lemma pair_one {La d : ℝ} (y y' : ℕ) (hy : Real.log (y : ℝ) ≤ La) (hLa : 1 ≤ La) (hd0 : 0 ≤ d)
-    (hd : (y : ℝ) - (y' : ℝ) ≤ d) : ph (y : ℝ) - ph (y' : ℝ) ≤ d * La + 1 := by
-  have hLa0 : 0 ≤ La := by linarith
-  have hdL : 0 ≤ d * La := mul_nonneg hd0 hLa0
-  rcases lt_or_ge y y' with hlt | hle
-  · have := ph_nat_lt y y' hlt
-    linarith
-  · rcases Nat.eq_zero_or_pos y with h0 | h0
-    · have hyy : y = y' := by omega
-      rw [hyy, sub_self]
-      linarith
-    · have hu : (0 : ℝ) < y := by exact_mod_cast h0
-      have ht := ph_sub_ph_le_mul_log hu (Nat.cast_nonneg (α := ℝ) y')
-      have hlog0 : 0 ≤ Real.log (y : ℝ) := Real.log_nonneg (Nat.one_le_cast.mpr h0)
-      have h1 : ((y : ℝ) - y') * Real.log y ≤ d * Real.log y := mul_le_mul_of_nonneg_right hd hlog0
-      have h2 : d * Real.log y ≤ d * La := mul_le_mul_of_nonneg_left hy hd0
-      linarith
-
 lemma pair_abs {La d : ℝ} (y y' : ℕ) (hy : Real.log (y : ℝ) ≤ La) (hLa : 1 ≤ La)
     (hd : |(y : ℝ) - (y' : ℝ)| ≤ d) : ph (y : ℝ) - ph (y' : ℝ) ≤ d * La := by
   have hd0 : 0 ≤ d := le_trans (abs_nonneg _) hd
@@ -108,7 +135,7 @@ lemma pair_abs {La d : ℝ} (y y' : ℕ) (hy : Real.log (y : ℝ) ≤ La) (hLa :
 
 lemma phRows_add (s t : Multiset ℕ) : phRows (s + t) = phRows s + phRows t := by
   unfold phRows
-  rw [Multiset.map_add, Multiset.sum_add]
+  rw [Multiset.map_add (f := _), Multiset.sum_add]
 
 lemma phRows_cons (a : ℕ) (s : Multiset ℕ) : phRows (a ::ₘ s) = ph (a : ℝ) + phRows s := by
   unfold phRows
@@ -123,7 +150,7 @@ lemma phRows_univ {n : ℕ} (g : Fin n → ℕ) :
 lemma logFactRows_add (s t : Multiset ℕ) :
     logFactRows (s + t) = logFactRows s + logFactRows t := by
   unfold logFactRows
-  rw [Multiset.map_add, Multiset.sum_add]
+  rw [Multiset.map_add (f := _), Multiset.sum_add]
 
 lemma logFactRows_univ {n : ℕ} (g : Fin n → ℕ) :
     logFactRows (Finset.univ.val.map g) = ∑ i, Real.log ((g i).factorial : ℝ) := by
@@ -397,7 +424,7 @@ theorem young_diagram_hook : RowsHook := by
       exact YoungDiagram.mem_iff_lt_rowLen.mpr h.2
   have hle : ∏ x ∈ μ.cells, (μ.rowLen x.1 - x.2) ≤ Formalism.LatticeIndexTer.hookProd μ := by
     unfold Formalism.LatticeIndexTer.hookProd
-    apply Finset.prod_le_prod (fun _ _ => Nat.zero_le _)
+    apply Finset.prod_le_prod₀ (fun _ _ => Nat.zero_le _)
     rintro ⟨i, j⟩ h
     have h1 : i < μ.colLen j := YoungDiagram.mem_iff_lt_colLen.mp h
     show μ.rowLen i - j ≤ μ.rowLen i - j + (μ.colLen j - i) - 1

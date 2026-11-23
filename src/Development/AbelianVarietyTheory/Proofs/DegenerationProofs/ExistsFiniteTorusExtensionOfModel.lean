@@ -1,14 +1,56 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.UniformisationConclusion
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.SabPull
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.SabComp
-import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.HomBaseChangeBijectiveOfLeNilradical
+module
+
+public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.HomBaseChangeBijectiveOfLeNilradical
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsFinsetModelOfIsAffineStatement
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.GlueModelsOverSubfieldStatement
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.GroupSchemeMorphismDescendsStatement
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.HomDescendsToSubfieldContainingFinsetStatement
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.SplitTorusExtensionDescendsStatement
 import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.LocallyOfFinitePresentationDiagMap
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.HomDescendsToSubfieldContainingFinsetStatement
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsFinsetModelOfIsAffineStatement
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.GlueModelsOverSubfieldStatement
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.GroupSchemeMorphismDescendsStatement
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.SplitTorusExtensionDescendsStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.QuasiAffine
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.SabPull
+
+@[expose] public section
 
 noncomputable section
 
@@ -173,8 +215,14 @@ end Square
 theorem bcMap_comp {S S₁ S₀ : Scheme.{0}} {a : S₁ ⟶ S₀} {b : S ⟶ S₁} {c : S ⟶ S₀} (h : b ≫ a = c) (X : Type)
     [AddCommGroup X] : SplitTorus.bcMap b X ≫ SplitTorus.bcMap a X = SplitTorus.bcMap c X := by
   apply pullback.hom_ext
-  · exact (Category.assoc _ _ _).trans ((congrArg _ (SplitTorus.bcMap_torusFst a X)).trans
-      ((SplitTorus.bcMap_torusFst b X).trans (SplitTorus.bcMap_torusFst c X).symm))
+  · change _ ≫ Rosenlicht.torusFst S₀ X = _ ≫ Rosenlicht.torusFst S₀ X
+    have ha : SplitTorus.bcMap a X ≫ Rosenlicht.torusFst S₀ X = Rosenlicht.torusFst S₁ X :=
+      pullback.lift_fst _ _ _
+    have hb : SplitTorus.bcMap b X ≫ Rosenlicht.torusFst S₁ X = Rosenlicht.torusFst S X :=
+      pullback.lift_fst _ _ _
+    have hc : SplitTorus.bcMap c X ≫ Rosenlicht.torusFst S₀ X = Rosenlicht.torusFst S X :=
+      pullback.lift_fst _ _ _
+    rw [Category.assoc, ha, hb, hc]
   · change _ ≫ (splitTorus S₀ X).hom = _ ≫ (splitTorus S₀ X).hom
     rw [Category.assoc, SplitTorus.bcMap_hom, SplitTorus.bcMap_hom_assoc, SplitTorus.bcMap_hom, h]
 

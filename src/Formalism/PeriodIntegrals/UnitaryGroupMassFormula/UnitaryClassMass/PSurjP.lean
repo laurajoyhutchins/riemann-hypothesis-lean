@@ -1,4 +1,48 @@
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.UnitaryClassMass.PSurjA
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.UnitaryClassMass.Development
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.UnitaryClassMass.PSurjH
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField PI.UJClassFin PI.UJClassMass Formalism.HermitianLatticesTheory Matrix
 open scoped TensorProduct
@@ -6,24 +50,6 @@ open scoped TensorProduct
 noncomputable section
 
 namespace PI.UnitaryGroupMassFormula.UJClassMass
-
-def IdemStep : Prop :=
-  ∀ (F E : Type) [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] [StarRing E]
-    (σ : E →ₐ[F] E), (∀ a, σ a = star a) →
-    ∀ W : Finset (Ideal (𝓞 E)), (∀ p ∈ W, p.IsMaximal) →
-      (∀ p ∈ W, ∀ q ∈ W, hcompl (K := E) p = hcompl (K := E) q → p = q) →
-    ∃ e : Option W → AF F ⊗[F] E,
-      (∀ i, e i * e i = e i) ∧ (∀ i j, i ≠ j → e i * e j = 0) ∧ (∑ i, e i = 1) ∧
-      (∀ i, sigR (AF F) σ (e i) = e i) ∧
-      (∀ i, finE F E (e i) ∈ PI.UnitaryGroupMassFormula.UJClassFin.Oh F E) ∧
-      ∀ (V : Type) [AddCommGroup V] [Module E V] [Module (𝓞 E) V] [IsScalarTower (𝓞 E) E V]
-        [FiniteDimensional E V] (M : ℕ) (b : Module.Basis (Fin M) E V) (L0 : Submodule (𝓞 E) V),
-        Submodule.IsLattice E L0 → ∀ v : V,
-        (∀ p : W, finE F E (e (some p)) • PI.UnitaryGroupMassFormula.UJClassFin.vinc (F := F) (b.equivFun v) ∈
-            latHat F E (crdOf b L0) ↔ v ∈ loc (K := E) (p : Ideal (𝓞 E)) L0) ∧
-        (finE F E (e none) • PI.UnitaryGroupMassFormula.UJClassFin.vinc (F := F) (b.equivFun v) ∈ latHat F E (crdOf b L0) ↔
-            ∀ q : Ideal (𝓞 E), q.IsMaximal → (∀ p ∈ W, hcompl (K := E) q ≠ hcompl (K := E) p) →
-              v ∈ loc (K := E) q L0)
 
 theorem linOf_one_symm_apply {E : Type} [Field E] {V : Type} [AddCommGroup V] [Module E V] {M : ℕ}
     (b : Module.Basis (Fin M) E V) (v : V) : (linOf b (1 : GL (Fin M) E)).symm v = v := by

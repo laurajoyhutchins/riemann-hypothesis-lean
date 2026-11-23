@@ -1,7 +1,56 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutJAPolyRadialCut
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutJAPRTWNeAlgSt
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutJASSnRepThtFacts
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutJATCLineNonzero
+module
+
+public import Formalism.HermitianCurvature.FrameExists2
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutJABddSSn
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutJASSnRepDatumUnit
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutJASSnRepThtFacts
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.DifferentialOperatorBracket
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.FrameExtension
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.InterlaceSignTwo
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.ProductIntervalFrames
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.RestrictionIrrelevantDoubleLevelOperator
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Matrix Finset Formalism.REAL Formalism.QuantumDeterminants Formalism.FourierDecayAlt
 
@@ -27,7 +76,7 @@ theorem eb_intertwine {k r m : ℕ} {Wp Wq : Type} [NormedAddCommGroup Wp] [Norm
   have hky := Qx8.hpart_kill Bs a b (Qx8.frame_orth h (v := y) (by simp))
   have hc := Qx8.hpart_conj Bs a b hg
   show A (dRep π' _ v + Complex.I • dRep π' _ v) = dRep π _ (A v) + Complex.I • dRep π _ (A v)
-  rw [map_add, map_smul, hc.1, hc.2]
+  rw [map_add (f := _), map_smul, hc.1, hc.2]
   congr 1
   · refine Qx8.dRep_intertwine A (Qx8.rep_hasDeriv hR'.1 hR'.2 hU.1 v) fun t => ?_
     rw [Qx8.exp_conj_uh hg]

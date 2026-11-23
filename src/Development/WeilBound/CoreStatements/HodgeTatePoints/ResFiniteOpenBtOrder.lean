@@ -1,14 +1,63 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.AbelianSchemeQuotients.IsAbelianScheme
-import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.TranslateMemIndOrder
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.ExistsUnitFormLocalizationEtaleNbhd
-import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.DualOrder
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.BtOrderComapHomStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.BaseChangePointsCompatStatement
-import Development.WeilBound.CoreStatements.HodgeTatePoints.TwhopfInd
-import Development.WeilBound.CoreStatements.HodgeTatePoints.HtatHopf
-import Development.WeilBound.CoreStatements.HodgeTatePoints.HtatHens
-import Development.WeilBound.CoreStatements.HodgeTatePoints.HtatBcPull
+module
+
+public import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.TranslateMemIndOrder
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.ExistsUnitFormLocalizationEtaleNbhd
+public import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.DualOrder
+public import Mathlib.RingTheory.IntegralClosure.IntegrallyClosed
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.BaseChangePointsCompatStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.BtOrderComapHomStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.FiniteOpenHopfOrder
+public import Development.WeilBound.CoreStatements.HodgeTatePoints.HtatBcPull
+public import Development.WeilBound.CoreStatements.HodgeTatePoints.HtatDesc
+public import Development.WeilBound.CoreStatements.HodgeTatePoints.HtatHens
+public import Development.WeilBound.CoreStatements.HodgeTatePoints.HtatHopfFlat
+public import Development.WeilBound.CoreStatements.HodgeTatePoints.HtatHopfTop
+import Development.WeilBound.CoreStatements.HodgeTatePoints.TwhopfFin
+public import Development.WeilBound.CoreStatements.HodgeTatePoints.TwhopfInd
+import Development.WeilBound.CoreStatements.HodgeTatePoints.TwhopfSec
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExistsBaseChangeGroupStatement
+
+@[expose] public section
 
 open CategoryTheory Limits AlgebraicGeometry MonoidalCategory CartesianMonoidalCategory MonObj TensorProduct
 open GlobalTheory.CompanionTheory.Ar.BT ReciprocityTheory.ChartRestriction.G.Semi
@@ -21,11 +70,8 @@ include hE
 theorem sub_eq_top_of : ∀ (R : Type) [CommRing R] [IsDomain R] [IsIntegrallyClosed R] (T : Type) [CommGroup T] [Finite T] (Γ : QFGroup R T) (U : Γ.G.left.Opens), Γ.IsFinOpenSub U → Γ.btOrder U = Γ.btOrder ⊤ :=
   Htat.bt_sub_eq_top_of @Htat.hens_normal hE @Htat.reg_pull
 
-theorem hopf_of : ∀ (R : Type) [CommRing R] [IsDomain R] [IsIntegrallyClosed R] [IsNoetherianRing R] (T : Type) [CommGroup T] [Finite T] (Γ : QFGroup R T), IsHopfOrder (Γ.btOrder ⊤) :=
-  Htat.bt_hopf_of @Htat.hens_normal hE @Htat.reg_pull
 
 omit hE in
-
 theorem exists_ind {R T H : Type} [CommRing R] [CommGroup T] [CommGroup H] (K : Subgroup T) (A : Subalgebra R (K → R))
     (hA : ∀ f ∈ A, ∀ t, (fun h => f (t * h)) ∈ A) (α : H →* T) (g : H → R)
     (hg : ∀ h₀, ∃ a ∈ A, ∀ (h : H) (hh : α h ∈ K), a ⟨α h, hh⟩ = g (h₀ * h)) :
@@ -145,10 +191,6 @@ theorem res_fin_core (Γ : QFGroup R T) {H : Type} [CommGroup H] [Finite H] (Γ�
 
 end
 
-theorem res_finite_open_bt_order : ∀ (R : Type) [CommRing R] [IsDomain R] [IsIntegrallyClosed R] (T : Type) [CommGroup T] [Finite T] (Γ : QFGroup R T) (H : Type) [CommGroup H] [Finite H] (Γ₁ : QFGroup R H) (a : Γ₁.G ⟶ Γ.G) [IsMonHom a] (α : H →* T), (∀ h, Γ₁.pt h ≫ a = Γ.pt (α h)) → IsClosedImmersion a.left → ∀ U : Γ.G.left.Opens, Γ.IsFinOpenSub U → Γ₁.IsFinOpenSub (a.left ⁻¹ᵁ U) ∧ resOrder α (Γ.btOrder ⊤) = Γ₁.btOrder ⊤ := by
-  intro R _ _ _ T _ _ Γ H _ _ Γ₁ a _ α hα hcl U hU
-  exact res_fin_core hE Γ Γ₁ a (fun S x y => MonObj.mul_comp x y a) α hα hcl U hU
-
 theorem res_core {R : Type} [CommRing R] [IsDomain R] [IsIntegrallyClosed R] {T : Type} [CommGroup T] [Finite T]
     (Γ : QFGroup R T) {H : Type} [CommGroup H] [Finite H] (Γ₁ : QFGroup R H) (a : Γ₁.G ⟶ Γ.G)
     (hmul : ∀ (S : Over (Spec (CommRingCat.of R))) (x y : S ⟶ Γ₁.G), (x * y) ≫ a = (x ≫ a) * (y ≫ a))
@@ -211,7 +253,7 @@ theorem res_core {R : Type} [CommRing R] [IsDomain R] [IsIntegrallyClosed R] {T 
     obtain ⟨f, hf, rfl⟩ := hx
     exact Submodule.subset_span ⟨_, ⟨f, hf, rfl⟩, rfl⟩
   | zero => simp
-  | add x y _ _ hx hy => rw [map_add]; exact Submodule.add_mem _ hx hy
+  | add x y _ _ hx hy => rw [map_add (f := _)]; exact Submodule.add_mem _ hx hy
   | smul c x _ hx => exact Submodule.smul_mem _ c hx
 
 theorem res_bt_order_top : ∀ (R : Type) [CommRing R] [IsDomain R] [IsIntegrallyClosed R] [IsNoetherianRing R] (T : Type) [CommGroup T] [Finite T] (Γ : QFGroup R T) (H : Type) [CommGroup H] [Finite H] (Γ₁ : QFGroup R H) (a : Γ₁.G ⟶ Γ.G) [IsMonHom a] (α : H →* T), (∀ h, Γ₁.pt h ≫ a = Γ.pt (α h)) → IsClosedImmersion a.left → resOrder α (Γ.btOrder ⊤) = Γ₁.btOrder ⊤ := by

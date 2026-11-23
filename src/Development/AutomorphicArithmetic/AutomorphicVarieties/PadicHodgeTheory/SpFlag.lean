@@ -1,4 +1,50 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.IsFirstOrderDeformationOfRZero
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.IsFirstOrderDeformationOfRZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Formalism.ConjugateSelfDual ReciprocityTheory.Gal Module UpperTheory.V.Loc UpperTheory.V.Alg UpperTheory.V.GradeZeroInterpolatingElement UpperTheory.V.HV UpperTheory.V.Base IsLocalRing
 
@@ -11,7 +57,7 @@ variable {R E : Type} [CommRing R] [CommRing E]
 theorem aeval_semi {X h : M4 R} {c : Fin 4 → R} (H : X * h = h * Matrix.diagonal c) (p : R[X]) :
     aeval X p * h = h * Matrix.diagonal fun a => p.eval (c a) := by
   refine Polynomial.induction_on' p (fun p q hp hq => ?_) (fun n a => ?_)
-  · rw [map_add, add_mul, hp, hq, ← mul_add, Matrix.diagonal_add]
+  · rw [map_add (f := _), add_mul, hp, hq, ← mul_add, Matrix.diagonal_add]
     simp only [Polynomial.eval_add]
   · have e : h * Matrix.diagonal c ^ n = X ^ n * h :=
       SemiconjBy.pow_right (show SemiconjBy h (Matrix.diagonal c) X from H.symm) n
@@ -24,10 +70,9 @@ theorem aeval_semi {X h : M4 R} {c : Fin 4 → R} (H : X * h = h * Matrix.diagon
 theorem aeval_red (π : R →+* E) {X : M4 R} {c : Fin 4 → R} (H : X.map π = Matrix.diagonal fun a => π (c a)) (p : R[X]) :
     (aeval X p).map π = Matrix.diagonal fun a => π (p.eval (c a)) := by
   refine Polynomial.induction_on' p (fun p q hp hq => ?_) (fun n a => ?_)
-  · rw [map_add, Matrix.map_add _ (map_add π), hp, hq, Matrix.diagonal_add]
+  · rw [map_add (f := _), Matrix.map_add _ (map_add π), hp, hq, Matrix.diagonal_add]
     congr 1
-    funext i
-    simp
+    simp only [Polynomial.eval_add, map_add]
   · have H' : π.mapMatrix X = Matrix.diagonal fun a => π (c a) := H
     change π.mapMatrix _ = _
     rw [Polynomial.aeval_monomial, map_mul, map_pow, H', Matrix.diagonal_pow, RingHom.mapMatrix_apply,
@@ -38,7 +83,7 @@ theorem aeval_red (π : R →+* E) {X : M4 R} {c : Fin 4 → R} (H : X.map π = 
 
 theorem aeval_tri {X : M4 R} (H : X.BlockTriangular id) (p : R[X]) : (aeval X p).BlockTriangular id := by
   refine Polynomial.induction_on' p (fun p q hp hq => ?_) (fun n a => ?_)
-  · rw [map_add]
+  · rw [map_add (f := _)]
     exact hp.add hq
   · rw [Polynomial.aeval_monomial]
     exact (Matrix.blockTriangular_algebraMap a).mul (H.pow n)
@@ -444,7 +489,7 @@ theorem UpperTheory.V.Loc.spFlag :
     rw [sub_eq_zero] at h0
     have h1 := IsFractionRing.injective ℤ_[l] ℚ_[l] h0
     have h2 : cycZ ℚ Ω l (D.s0 : G ℚ Ω) ^ D.wts4 i = cycZ ℚ Ω l (D.s0 : G ℚ Ω) ^ D.wts4 j := by
-      ext
+      apply Units.ext
       simpa using h1
     exact hij (hw i j ((pow_inj_iff_of_orderOf_eq_zero (orderOf_eq_zero_iff.mpr hD.decompSigma_ord)).mp h2))
   have hu : ∀ i, IsUnit (algebraMap c.O B (D.ps i (D.s0 : G ℚ Ω))) := fun i =>

@@ -1,6 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.QuasicoherentCohomology.ExistsAwayFracOfMemHomLoc
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.UniformSerreSectionsStatement
+module
+
+public import Mathlib.RingTheory.MvPolynomial.Homogeneous
+public import Mathlib.RingTheory.Noetherian.Defs
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.UniformSerreSectionsStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open MvPolynomial
 
 namespace GlobalTheory.UnifCorr
@@ -8,7 +53,7 @@ namespace GlobalTheory.UnifCorr
 variable {R : Type} [CommRing R] {σ : Type}
 
 theorem coeff_X_pow_mul_mem (I : Ideal R) (i : σ) (k : ℕ) (G : MvPolynomial σ R)
-    (h : ∀ m, coeff m G ∈ I) : ∀ m, coeff m ((X i : MvPolynomial σ R) ^ k * G) ∈ I := by
+    (h : ∀ m, AddMonoidAlgebra.coeff G m ∈ I) : ∀ m, AddMonoidAlgebra.coeff ((X i : MvPolynomial σ R) ^ k * G) m ∈ I := by
   intro m
   rw [X_pow_eq_monomial, coeff_monomial_mul']
   split_ifs
@@ -16,21 +61,21 @@ theorem coeff_X_pow_mul_mem (I : Ideal R) (i : σ) (k : ℕ) (G : MvPolynomial �
   · exact I.zero_mem
 
 theorem mem_of_coeff_mem (I : Ideal R) (K : Ideal (MvPolynomial σ R))
-    (hC : ∀ a ∈ I, C a ∈ K) (G : MvPolynomial σ R) (h : ∀ m, coeff m G ∈ I) : G ∈ K := by
+    (hC : ∀ a ∈ I, C a ∈ K) (G : MvPolynomial σ R) (h : ∀ m, AddMonoidAlgebra.coeff G m ∈ I) : G ∈ K := by
   rw [G.as_sum]
   refine K.sum_mem fun v _ => ?_
-  rw [← mul_one (coeff v G), ← C_mul_monomial]
+  rw [← mul_one (AddMonoidAlgebra.coeff G v), ← C_mul_monomial]
   exact K.mul_mem_right _ (hC _ (h v))
 
 end GlobalTheory.UnifCorr
 
 open GlobalTheory.UnifCorr in
-theorem GlobalTheory.homogeneous_correction_next_level : ∀ (R : Type) [CommRing R] [IsNoetherianRing R] (I : Ideal R), ∀ (n : ℕ) (K : ℕ → Ideal (MvPolynomial (Fin (n + 1)) R)), (∀ (e t : ℕ) (F : MvPolynomial (Fin (n + 1)) R), F.IsHomogeneous t → (∀ i, ∃ N : ℕ, (X i : MvPolynomial (Fin (n + 1)) R) ^ N * F ∈ K e) → F ∈ K e) → (∀ e, ∀ a ∈ I ^ (e + 1), C a ∈ K e) → (∀ (e t : ℕ) (F : MvPolynomial (Fin (n + 1)) R), F.IsHomogeneous t → F ∈ K e → ∀ i, ∃ (N : ℕ) (G : MvPolynomial (Fin (n + 1)) R), G.IsHomogeneous (t + N) ∧ (∀ m, coeff m G ∈ I ^ (e + 1)) ∧ (X i : MvPolynomial (Fin (n + 1)) R) ^ N * F - G ∈ K (e + 1)) → ∃ t₀ : ℕ, ∀ t, t₀ ≤ t → ∀ (e : ℕ) (F : MvPolynomial (Fin (n + 1)) R), F.IsHomogeneous t → F ∈ K e → ∃ G : MvPolynomial (Fin (n + 1)) R, G.IsHomogeneous t ∧ (∀ m, coeff m G ∈ I ^ (e + 1)) ∧ F - G ∈ K (e + 1) := by
+theorem GlobalTheory.homogeneous_correction_next_level : ∀ (R : Type) [CommRing R] [IsNoetherianRing R] (I : Ideal R), ∀ (n : ℕ) (K : ℕ → Ideal (MvPolynomial (Fin (n + 1)) R)), (∀ (e t : ℕ) (F : MvPolynomial (Fin (n + 1)) R), F.IsHomogeneous t → (∀ i, ∃ N : ℕ, (X i : MvPolynomial (Fin (n + 1)) R) ^ N * F ∈ K e) → F ∈ K e) → (∀ e, ∀ a ∈ I ^ (e + 1), C a ∈ K e) → (∀ (e t : ℕ) (F : MvPolynomial (Fin (n + 1)) R), F.IsHomogeneous t → F ∈ K e → ∀ i, ∃ (N : ℕ) (G : MvPolynomial (Fin (n + 1)) R), G.IsHomogeneous (t + N) ∧ (∀ m, AddMonoidAlgebra.coeff G m ∈ I ^ (e + 1)) ∧ (X i : MvPolynomial (Fin (n + 1)) R) ^ N * F - G ∈ K (e + 1)) → ∃ t₀ : ℕ, ∀ t, t₀ ≤ t → ∀ (e : ℕ) (F : MvPolynomial (Fin (n + 1)) R), F.IsHomogeneous t → F ∈ K e → ∃ G : MvPolynomial (Fin (n + 1)) R, G.IsHomogeneous t ∧ (∀ m, AddMonoidAlgebra.coeff G m ∈ I ^ (e + 1)) ∧ F - G ∈ K (e + 1) := by
   intro R _ _ I n K hsat hC hstep
-  have hcoef : ∀ e (G : MvPolynomial (Fin (n + 1)) R), (∀ m, coeff m G ∈ I ^ (e + 1)) → G ∈ K e :=
+  have hcoef : ∀ e (G : MvPolynomial (Fin (n + 1)) R), (∀ m, AddMonoidAlgebra.coeff G m ∈ I ^ (e + 1)) → G ∈ K e :=
     fun e G h => mem_of_coeff_mem (I ^ (e + 1)) (K e) (hC e) G h
   have hJ : ∀ (e t : ℕ) (a : R) (F : MvPolynomial (Fin (n + 1)) R), a ∈ I → F.IsHomogeneous t →
-      (∀ m, coeff m F ∈ I ^ e) → F ∈ K e → C a * F ∈ K (e + 1) := by
+      (∀ m, AddMonoidAlgebra.coeff F m ∈ I ^ e) → F ∈ K e → C a * F ∈ K (e + 1) := by
     intro e t a F ha hF _ hFK
     have hCF : (C a * F).IsHomogeneous t := by
       have := (isHomogeneous_C (Fin (n + 1)) a).mul hF
@@ -60,7 +105,7 @@ theorem GlobalTheory.homogeneous_correction_next_level : ∀ (R : Type) [CommRin
     show (X i ^ (M - N i) * G i).IsHomogeneous (t + M)
     rw [show t + M = (M - N i) + (t + N i) by have := hNM i; omega]
     exact (isHomogeneous_X_pow i (M - N i)).mul (hG i)
-  have hG'c : ∀ i m, coeff m (G' i) ∈ I ^ (e + 1) := fun i => coeff_X_pow_mul_mem _ i _ _ (hGc i)
+  have hG'c : ∀ i m, AddMonoidAlgebra.coeff (G' i) m ∈ I ^ (e + 1) := fun i => coeff_X_pow_mul_mem _ i _ _ (hGc i)
   have hk' : ∀ i, (X i : MvPolynomial (Fin (n + 1)) R) ^ M * F - G' i ∈ K (e + 1) := fun i => by
     have : (X i : MvPolynomial (Fin (n + 1)) R) ^ M * F - G' i = X i ^ (M - N i) * (X i ^ N i * F - G i) := by
       simp only [G', hXM i]; ring

@@ -1,9 +1,54 @@
-import Development.AbelianVarietyTheory.Definitions.Divisors.HasDefect
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.HasDefect
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsDerivationExtendingCotangentFormStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.StalkDerivationMemSpanInvariantSemiAbelianStatement
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.GeometricallyIntegralIffGeometricallyConnectedOf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Development.AbelianVarietyTheory.Definitions.Divisors.IsProperToroidalModelStructureMap
 import Development.AbelianVarietyTheory.Definitions.Divisors.RigidForFan
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.ToroidalCompactificationBis
-import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.ExistsUniqueIsPointOfDualNumber
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.StalkDerivationMemSpanInvariantSemiAbelianStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsDerivationExtendingCotangentFormStatement
+
+@[expose] public section
+
 open CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj AlgebraicGeometry NumberField IsLocalRing
 open scoped CategoryTheory.Obj Matrix TensorProduct
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Out ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor Formalism.L2.Pj
@@ -117,9 +162,9 @@ theorem exists_stalkDer (Z : Scheme) (d : Fld Z) (hd : IsField ⊤ d) (z : Z) :
       rw [TopCat.Presheaf.germ_res_apply]; exact (hg w).symm
     have e : u + w = Z.presheaf.germ V z hV
         (Z.presheaf.map iu.op (g u) + Z.presheaf.map iw.op (g w)) := by
-      rw [map_add, ← eu, ← ew]
+      rw [map_add (f := _), ← eu, ← ew]
     show Z.presheaf.germ (W (u + w)) z (hW _) (d _ (g (u + w))) = _
-    rw [wd _ _ _ hV _ _ ((hg (u + w)).trans e), hadd V le_top, map_add, hres', hres',
+    rw [wd _ _ _ hV _ _ ((hg (u + w)).trans e), hadd V le_top, map_add (f := _), hres', hres',
       TopCat.Presheaf.germ_res_apply, TopCat.Presheaf.germ_res_apply]
   · intro u w
     let V := W u ⊓ W w
@@ -134,13 +179,13 @@ theorem exists_stalkDer (Z : Scheme) (d : Fld Z) (hd : IsField ⊤ d) (z : Z) :
         (Z.presheaf.map iu.op (g u) * Z.presheaf.map iw.op (g w)) := by
       rw [map_mul, ← eu, ← ew]
     show Z.presheaf.germ (W (u * w)) z (hW _) (d _ (g (u * w))) = _
-    rw [wd _ _ _ hV _ _ ((hg (u * w)).trans e), hmul V le_top, map_add, map_mul, map_mul, hres', hres']
+    rw [wd _ _ _ hV _ _ ((hg (u * w)).trans e), hmul V le_top, map_add (f := _), map_mul, map_mul, hres', hres']
     simp only [TopCat.Presheaf.germ_res_apply, hg]
 
 theorem germ_mem_of_valR_eq_zero (A : Type) [CommRing A] (Z : Scheme) (x : Sp A ⟶ Z) (W : Z.Opens)
     (hW : ⊤ ≤ x ⁻¹ᵁ W) (q₀ : Sp A) (h : x.base q₀ ∈ W) (g : Γ(Z, W)) (hg : valR x W g = 0) :
     Z.presheaf.germ W _ h g ∈ maximalIdeal (Z.presheaf.stalk (x.base q₀)) := by
-  rw [valR, dif_pos hW] at hg
+  rw [valR, dite_eq_left hW] at hg
   have h0 : Scheme.Hom.appLE x W ⊤ hW g = 0 := by
     have := congrArg (Scheme.ΓSpecIso (CommRingCat.of A)).inv.hom hg
     rwa [← CommRingCat.comp_apply, Iso.hom_inv_id, CommRingCat.id_apply, map_zero] at this
@@ -184,6 +229,7 @@ theorem euler_of_span (B : Type) [CommRing B] [IsLocalRing B] [IsNoetherianRing 
     apply Subtype.ext; simp [hre]
   show z - ∑ a, (∑ i, (y i : B) * b i a) * D a z ∈ _
   refine ((maximalIdeal B).toCotangent_eq_zero ⟨_, hmem⟩).1 ?_
+
   rw [← hw, map_sub, map_sum]
   simp only [map_smul, hy]
   have hcoord : ∀ i, c i • β i = β.coord i ((maximalIdeal B).toCotangent ⟨z, hz⟩) • β i := by

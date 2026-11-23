@@ -1,31 +1,46 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.TraceFormula.GlobalTraceComparison.OrbitalCosetFiniteness.CvGelfandAlt
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.TraceFormula.GlobalTraceComparison.TraceAsymptotics.CvHecke
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.HeckeGelfandPair
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.TraceFormula.GlobalTraceComparison.OrbitalCosetFiniteness.CvGelfandAlt
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.HeckeGelfandPair
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 open GlobalTheory.BCT UpperTheory.V.Z.Tf.GlobalTraceComparison.Asm
 
 namespace UpperTheory.V.Z.Tf.GlobalTraceComparison.Th
-
-private theorem sum_reindex {G : Type} [Group G] (K : Subgroup G) (φ ψ : G → G)
-    (hφ : ∀ z, ∀ k ∈ K, (φ z)⁻¹ * φ (z * k) ∈ K) (hψ : ∀ z, ∀ k ∈ K, (ψ z)⁻¹ * ψ (z * k) ∈ K)
-    (hψφ : ∀ z, ψ (φ z) = z) (hφψ : ∀ z, φ (ψ z) = z) (u : G → ℂ)
-    (hu : ∀ k ∈ K, ∀ x, u (x * k) = u x) :
-    ∑ᶠ q : G ⧸ K, u (φ q.out) = ∑ᶠ q : G ⧸ K, u q.out := by
-  have back : ∀ (a b : G → G), (∀ z, ∀ k ∈ K, (b z)⁻¹ * b (z * k) ∈ K) → (∀ z, b (a z) = z) →
-      ∀ q : G ⧸ K, ((b (((a q.out : G) : G ⧸ K)).out : G) : G ⧸ K) = q := by
-    intro a b hb hba q
-    obtain ⟨k, hk⟩ := QuotientGroup.mk_out_eq_mul K (a q.out)
-    rw [hk, ← QuotientGroup.eq.2 (hb (a q.out) k k.2), hba, QuotientGroup.out_eq']
-  let e : G ⧸ K ≃ G ⧸ K :=
-    { toFun := fun q => ((φ q.out : G) : G ⧸ K)
-      invFun := fun q => ((ψ q.out : G) : G ⧸ K)
-      left_inv := back φ ψ hψ hψφ
-      right_inv := back ψ φ hφ hφψ }
-  rw [← finsum_comp_equiv e (f := fun q : G ⧸ K => u q.out)]
-  refine finsum_congr fun q => ?_
-  obtain ⟨k, hk⟩ := QuotientGroup.mk_out_eq_mul K (φ q.out)
-  change u (φ q.out) = u (((φ q.out : G) : G ⧸ K)).out
-  rw [hk, hu k k.2]
 
 theorem cvGelfand : CvGelfand :=
   _root_.UpperTheory.Reformulated.B.HeckeGelfandPair.cvGelfand

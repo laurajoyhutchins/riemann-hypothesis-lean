@@ -1,4 +1,61 @@
-import Mathlib
+module
+
+public import Mathlib.RingTheory.Flat.Basic
+public import Mathlib.RingTheory.Ideal.Colon
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.MvPolynomial.IrreducibleQuadratic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.LinearAlgebra.Basis.VectorSpace
+public import Mathlib.RingTheory.Flat.EquationalCriterion
+public import Mathlib.RingTheory.Flat.Stability
+public import Mathlib.RingTheory.Ideal.BigOperators
+
+@[expose] public section
 
 namespace BaseChangeColon.BC
 
@@ -88,15 +145,14 @@ theorem ram_colon {O O' σ : Type} [CommRing O] [CommRing O'] [IsDomain O'] [Alg
       obtain ⟨s, hs, rfl⟩ := hx
       intro h
       induction h using hb.inductionOn with
-      | zero => simp
       | tmul t =>
         change Λ i (MvPolynomial.map (algebraMap O O') t * _) = 0
         rw [← map_mul, hΛ, hlam, Ideal.Quotient.eq_zero_iff_mem.2 (J.mul_mem_left t hs)]
-        simp
+        rw [map_zero, map_zero]
       | smul a t ht => rw [smul_mul_assoc, map_smul, ht, smul_zero]
-      | add a t ha ht => rw [add_mul, map_add, ha, ht, add_zero]
+      | add a t ha ht => rw [add_mul, map_add (f := _), ha, ht, add_zero]
     | zero => simp
-    | add x y _ _ hx hy => intro h; rw [mul_add, map_add, hx, hy, add_zero]
+    | add x y _ _ hx hy => intro h; rw [mul_add, map_add (f := _), hx, hy, add_zero]
     | smul a x _ hx => intro h; rw [smul_eq_mul, ← mul_assoc, hx]
   choose B hB using fun i => Ideal.Quotient.mk_surjective (I := J) (b i)
   let U : Submodule O' (MvPolynomial σ O') :=
@@ -136,7 +192,6 @@ theorem ram_colon {O O' σ : Type} [CommRing O] [CommRing O'] [IsDomain O'] [Alg
   have hU : ∀ w, w ∈ U := by
     intro w
     induction w using hb.inductionOn with
-    | zero => exact U.zero_mem
     | tmul t => exact hU1 _ (by rw [b.span_eq]; trivial) t rfl
     | smul a t ht => exact U.smul_mem a ht
     | add a t ha ht => exact U.add_mem ha ht
@@ -145,8 +200,9 @@ theorem ram_colon {O O' σ : Type} [CommRing O] [CommRing O'] [IsDomain O'] [Alg
   refine Ideal.add_mem _ (Ideal.mem_sup_right ?_) (Ideal.mem_sup_left hw)
   refine Ideal.sum_mem _ fun i hi => ?_
   have h1 := hkill i _ hg
-  rw [← C_pow, ← smul_eq_C_mul, map_smul, map_add, hkill i w hw, add_zero, Finsupp.sum, map_sum,
-    Finset.sum_eq_single i] at h1
+
+  rw [← C_pow, ← smul_eq_C_mul, map_smul, map_add (f := _), hkill i w hw, add_zero, Finsupp.sum, map_sum,
+  Finset.sum_eq_single i] at h1
   · rw [map_smul, hΛ, hlam, hB] at h1
     have h2 : Ideal.Quotient.mk m' (ϖ' ^ k * c i) = 0 := by
       rw [← h1]

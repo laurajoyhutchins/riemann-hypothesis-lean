@@ -1,10 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.BaseChangeDefiniteUnitary
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.ContinuousMapPFin
-import Development.AbelianVarietyTheory.Definitions.Divisors.LineOppositeParabolicUnitaryLeviSectionEq
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.SplitPlaceUnitaryLocalPointsEquivGL
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsContinuousRetractionOntoUnitaryLocalPoints
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IrreducibleRepIsotypicOfCentraliserFactor
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.BaseChangeDefiniteUnitary
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.ContinuousMapPFin
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsContinuousRetractionOntoUnitaryLocalPoints
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IrreducibleRepIsotypicOfCentraliserFactor
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.SplitPlaceUnitaryLocalPointsEquivGL
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -61,7 +100,7 @@ theorem sum_fixed_eq_zero (ρ : Representation ℂ G V) (σ : Representation ℂ
         intro g hg
         apply hA
         have h1 := hfix g hg
-        rw [map_add] at h1
+        rw [map_add (f := _)] at h1
         have h2 : ρ g (f a x) - f a x = z - ρ g z := by
           rw [sub_eq_sub_iff_add_eq_add, h1, add_comm]
         rw [map_sub, hf, h2]
@@ -71,7 +110,7 @@ theorem sum_fixed_eq_zero (ρ : Representation ℂ G V) (σ : Representation ℂ
         have h1 := hfix g hg
         have h2 := hd g hg
         rw [map_sub, sub_eq_zero, hf] at h2
-        rw [map_add, h2] at h1
+        rw [map_add (f := _), h2] at h1
         exact add_left_cancel h1
       have hz0 : z = 0 := ih z hz hzfix
       subst hz0
@@ -101,7 +140,7 @@ theorem split_spherical2 {E : Type} [Field E] [NumberField E] [IsCMField E] {n :
     {π : Submodule ℂ (UA E n → ℂ)} (hπ : IsAutRepU π) {w : HeightOneSpectrum (𝓞 E)} (hw : IsSplitAt w)
     (P : GlobalTheory.CuspRep.SmIrr (GL (Fin n) (w.adicCompletion E)))
     (hc : IsCompAlong π (locU n w) ((cLoc w).comp (locU n w).subtype) P.ρ) (hu : IsUnramU π w) :
-    GlobalTheory.LGrp.IsSpherical P.ρ (GlobalTheory.LFun.KGL w n) := by
+    GlobalTheory.LGrp.IsSpherical P.ρ (GlobalTheory.LFun.KGL w (n := n)) := by
   let p : locU n w →* GL (Fin n) (w.adicCompletion E) := (cLoc w).comp (locU n w).subtype
   obtain ⟨e, he⟩ := GlobalTheory.locU_equiv_GL E n w hw
   have hp : Function.Surjective p := fun g => ⟨e.symm g, (he _).symm.trans (e.apply_symm_apply g)⟩
@@ -109,7 +148,7 @@ theorem split_spherical2 {E : Type} [Field E] [NumberField E] [IsCMField E] {n :
   obtain ⟨hσirr, f, hf0, hfm, hf⟩ := hc
   by_contra hns
 
-  have hfix : ∀ v, (∀ k ∈ GlobalTheory.LFun.KGL w n, P.ρ k v = v) → v = 0 := fun v hv => by
+  have hfix : ∀ v, (∀ k ∈ GlobalTheory.LFun.KGL w (n := n), P.ρ k v = v) → v = 0 := fun v hv => by
     by_contra hv0
     exact hns ((Submodule.ne_bot_iff _).2 ⟨v, GlobalTheory.LGrp.mem_fixed.2 hv, hv0⟩)
   let Ψ : GlobalTheory.DefU.AutSub E n := ⟨π, hπ⟩
@@ -130,7 +169,7 @@ theorem split_spherical2 {E : Type} [Field E] [NumberField E] [IsCMField E] {n :
   have key := fixed_eq_zero_of_mem_iSup (Ψ.rep.comp (locU n w).subtype) τ hirr
     (fun i : τ.IntertwiningMap (Ψ.rep.comp (locU n w).subtype) => i.toLinearMap)
     (fun i g x => Representation.IntertwiningMap.isIntertwining _ _ i g x)
-    (((GlobalTheory.LFun.KGL w n).comap p : Subgroup (locU n w)) : Set (locU n w))
+    (((GlobalTheory.LFun.KGL w (n := n)).comap p : Subgroup (locU n w)) : Set (locU n w))
     (fun v hv => hfix v fun k hk => by
       obtain ⟨x, rfl⟩ := hp k
       exact hv x hk)

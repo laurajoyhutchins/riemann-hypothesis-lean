@@ -1,5 +1,44 @@
-import Formalism.LocalToGlobal.CharacterGerms.ValBlocksCChart
-import Formalism.LocalToGlobal.CharacterGerms.NormOneIntegral
+module
+
+public import Formalism.LocalToGlobal.CharacterGerms.NormOneIntegral
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -27,7 +66,7 @@ structure SelfConjugatePlaceSetting {C : Type} [Field C] {V : VF C} {T : Type} (
     {J : Orb → Fin 2 → Type} [∀ o g, Fintype (J o g)]
     (X : ∀ o, RowData C V 2 (fun _ => IIs r tau o) (J o)) (F : ∀ o, Flag (X o))
     (gaC : Orb → ZMod 2 → ℕ → ℕ) (N : ℕ) (L : Orb → List (GlobalTheory 2 × ℝ))
-    (pl : (Σ o, Σ i : Fin (L o).length, Fin (rowsAt X L o i)) → Fin N) : Prop where
+    (pl : (Σ o, Σ i : Fin (L o).length, Fin (rowsAt (X := X) L o i)) → Fin N) : Prop where
 
   inj : Function.Injective fun x : Orb × ZMod 2 => tau x.1 x.2
   conj : ∀ o t, cc (tau o t) = tau o (t + 1)
@@ -52,7 +91,7 @@ def IsotropicToStdSubstHarmonic : Prop :=
     (J : Orb → Fin 2 → Type) [∀ o g, Fintype (J o g)]
     (X : ∀ o, RowData C V 2 (fun _ => IIs r tau o) (J o)) (F : ∀ o, Flag (X o))
     (gaC : Orb → ZMod 2 → ℕ → ℕ) (N : ℕ) (L : Orb → List (GlobalTheory 2 × ℝ))
-    (pl : (Σ o, Σ i : Fin (L o).length, Fin (rowsAt X L o i)) → Fin N),
+    (pl : (Σ o, Σ i : Fin (L o).length, Fin (rowsAt (X := X) L o i)) → Fin N),
     SelfConjugatePlaceSetting r cc a tau gm X F gaC N L pl → ∀ (n : ℕ) (plc : Fin N × Fin 2 ↪ Fin n) (isX : T → Prop),
       subG r tau gm plc (blkProd X F N L pl) ∈ harmK r n C cc isX (fun _ => 1)
 
@@ -62,7 +101,7 @@ def IsotropicToStdSubstLineInvariant : Prop :=
     (J : Orb → Fin 2 → Type) [∀ o g, Fintype (J o g)]
     (X : ∀ o, RowData C V 2 (fun _ => IIs r tau o) (J o)) (F : ∀ o, Flag (X o))
     (gaC : Orb → ZMod 2 → ℕ → ℕ) (N : ℕ) (L : Orb → List (GlobalTheory 2 × ℝ))
-    (pl : (Σ o, Σ i : Fin (L o).length, Fin (rowsAt X L o i)) → Fin N),
+    (pl : (Σ o, Σ i : Fin (L o).length, Fin (rowsAt (X := X) L o i)) → Fin N),
     SelfConjugatePlaceSetting r cc a tau gm X F gaC N L pl → ∀ (n : ℕ) (plc : Fin N × Fin 2 ↪ Fin n),
       RowInv r n C (subG r tau gm plc (blkProd X F N L pl))
 
@@ -72,7 +111,7 @@ def IsotropicToStdSubstLineDegree : Prop :=
     (J : Orb → Fin 2 → Type) [∀ o g, Fintype (J o g)]
     (X : ∀ o, RowData C V 2 (fun _ => IIs r tau o) (J o)) (F : ∀ o, Flag (X o))
     (gaC : Orb → ZMod 2 → ℕ → ℕ) (N : ℕ) (L : Orb → List (GlobalTheory 2 × ℝ))
-    (pl : (Σ o, Σ i : Fin (L o).length, Fin (rowsAt X L o i)) → Fin N),
+    (pl : (Σ o, Σ i : Fin (L o).length, Fin (rowsAt (X := X) L o i)) → Fin N),
     SelfConjugatePlaceSetting r cc a tau gm X F gaC N L pl → ∀ (n : ℕ) (plc : Fin N × Fin 2 ↪ Fin n),
       RowDeg r n C a (subG r tau gm plc (blkProd X F N L pl))
 
@@ -82,7 +121,7 @@ def IsotropicToStdSubstIntegral : Prop :=
     (J : Orb → Fin 2 → Type) [∀ o g, Fintype (J o g)]
     (X : ∀ o, RowData C V 2 (fun _ => IIs r tau o) (J o)) (F : ∀ o, Flag (X o))
     (N : ℕ) (L : Orb → List (GlobalTheory 2 × ℝ))
-    (pl : (Σ o, Σ i : Fin (L o).length, Fin (rowsAt X L o i)) → Fin N) (n : ℕ) (plc : Fin N × Fin 2 ↪ Fin n)
+    (pl : (Σ o, Σ i : Fin (L o).length, Fin (rowsAt (X := X) L o i)) → Fin N) (n : ℕ) (plc : Fin N × Fin 2 ↪ Fin n)
     (O : Subring C), (∀ o t q s, gm o t q s ∈ O) → ∀ m, (subG r tau gm plc (blkProd X F N L pl)).coeff m ∈ O
 
 section Mem
@@ -131,7 +170,7 @@ theorem aeval_mem_OP {C : Type} [Field C] {O : Subring C} {σ τ : Type} (f : σ
     rw [MvPolynomial.map_C, MvPolynomial.aeval_C, eq_intCast (Int.castRingHom C) z, map_intCast]
     exact intCast_mem _ z
   · rename_i p q hp hq
-    rw [map_add, map_add]
+    rw [map_add (f := _), map_add (f := _)]
     exact add_mem hp hq
   · rename_i p x hp
     rw [map_mul, map_mul, MvPolynomial.map_X, MvPolynomial.aeval_X]

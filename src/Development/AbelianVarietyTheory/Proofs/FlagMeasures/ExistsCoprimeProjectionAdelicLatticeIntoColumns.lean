@@ -1,10 +1,50 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.LevelMatchIff
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.FrLink
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.LevelMatchIff
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.FrLink
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.HermitianETransportInvariant
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.AdelicColumnLatticeEqSpanPartTransportedFrameStatement
 import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ColumnWittFrameBasisBlockGramStatement
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.AdelicColumnLatticeEqSpanPartTransportedFrameStatement
-import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.HermitianETransportInvariant
-import Formalism.LocalRingCardinality.IntCastDvdOfDvdIntegers
+public import Formalism.LocalRingCardinality.IntCastDvdOfDvdIntegers
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -116,7 +156,7 @@ theorem T_pc_Lf (y : VA X.B.I) (hy : y ∈ X.B.I.Lf) :
     have := X.B.I.L.smul_mem a (zR_mem X u)
     rwa [← IsScalarTower.algebraMap_smul X.B.I.E a] at this
   | zero => simp
-  | add y z _ _ hy hz => rw [map_add, smul_add]; exact add_mem hy hz
+  | add y z _ _ hy hz => rw [map_add (f := _), smul_add]; exact add_mem hy hz
   | smul c y _ hy =>
     rw [Subring.smul_def, map_smul, smul_comm]
     exact X.B.I.Lf.smul_mem c hy
@@ -238,8 +278,9 @@ theorem GlobalTheory.St.G.g_proj : ∀ (D : D7) (X : HidaSetting D) (u : D.what�
       have e : embA X wt ιA (Pi.single j 1) = qA X wt j := by
         simp [embA, Pi.single_apply]
       rwa [e] at h
-    simp only [map_add, map_sum, map_smul, Proj.pc_e, Proj.pc_f, Proj.orthogonalProjection_anisotropic_eq_zero, hqj, smul_zero,
-      Finset.sum_const_zero, add_zero]
+
+    simp only [map_add (f := _), map_sum, map_smul, Proj.pc_e, Proj.pc_f, Proj.orthogonalProjection_anisotropic_eq_zero, hqj, smul_zero,
+    Finset.sum_const_zero, add_zero]
     simp [embA]
   · intro y hy h1 h2
     exact Proj.T_pc_sub_mem X u hT hy h1 h2

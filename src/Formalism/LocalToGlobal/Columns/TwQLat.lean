@@ -1,5 +1,58 @@
-import Formalism.LocalToGlobal.Columns.TwQTop
-import Formalism.LocalToGlobal.Columns.MemLocPOfSmul
+module
+
+public import Formalism.LocalToGlobal.Columns.TwQDCls
+import Formalism.LocalToGlobal.Columns.CoefColLemmas
+public import Formalism.LocalToGlobal.Columns.HeckeSpCount
+public import Formalism.LocalToGlobal.Columns.MemLocPOfSmul
+import Formalism.LocalToGlobal.Columns.RecLevelCls
+import Formalism.LocalToGlobal.Columns.TwQOrb
+import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.CsApprox
+import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.CsSpan
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Matrix
 open scoped TensorProduct
@@ -16,15 +69,17 @@ section QLat
 variable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [StarRing E] [Algebra F E]
 variable {hc : Formalism.BasicNotions.CMData F E} {n : ℕ} [NeZero n] {ST SG Q : Finset (Pl E)} {K : Type} [Field K] {Θ : LevQFam E K n Q}
 
-theorem qdf_frExists : FrExists (n := n) ST SG Q := fun d P => DetChrL.frame_exists P.1 d.2.lat
+theorem qdf_frExists : FrExists (n := n) ST SG Q := by
+  intro d P
+  first
+  | exact DetChrL.frame_exists P.1 ((let d := d; _root_.Formalism.L2.Col.hcnt_isFullLattice_of_unimodular d.2.lat d.2.uni))
+  | exact DetChrL.frame_exists P.1 d.2.lat
 
 abbrev qPi (q : QLoc hc n Q Θ) (P : Q) : E ⊗[F] Formalism.L2.Herm.Af F →+* (qv F P.1).adicCompletion F :=
   ((RingHom.fst _ _).comp (q.sp P).toRingHom).comp (prV (E := E) (qv F P.1))
 
 theorem qdf_at_val (q : QLoc hc n Q Θ) (P : Q) (x : GL (Fin n) (E ⊗[F] Formalism.L2.Herm.Af F)) :
     ((q.at P x : GL (Fin n) _) : Matrix (Fin n) (Fin n) _) = (x : Matrix (Fin n) (Fin n) _).map (qPi q P) := rfl
-
-theorem qdf_pi_iA (q : QLoc hc n Q Θ) (P : Q) (e : E) : qPi q P (iA F E e) = q.phi P e := rfl
 
 theorem qdf_phi_int (q : QLoc hc n Q Θ) (P : Q) (r : 𝓞 E) : q.phi P (r : E) ∈ (qv F P.1).adicCompletionIntegers F := by
   have h : Formalism.UG.inclE (F := F) ((qv F P.1).adicCompletion F) (r : E) ∈ Formalism.BasicNotions.intV E (qv F P.1) :=
@@ -66,11 +121,6 @@ theorem qdf_phi_intAt (q : QLoc hc n Q Θ) (P : Q) {a : E} (h : IntAt P.1 a) : q
     exact hm
   rw [ha]
   exact mul_mem (qdf_phi_int q P r) hu.2
-
-theorem qdf_gl_inv_val {R S : Type} [CommRing R] [CommRing S] (f : R →+* S) (A : GL (Fin n) R) :
-    (((bc f A)⁻¹ : GL (Fin n) S) : Matrix (Fin n) (Fin n) S) = ((A⁻¹ : GL (Fin n) R) : Matrix (Fin n) (Fin n) R).map f := by
-  rw [← map_inv]
-  rfl
 
 theorem qdf_frLat (q : QLoc hc n Q Θ) : FrLat ST SG q := by
   intro x p hx P
@@ -128,8 +178,15 @@ theorem qdf_frLat (q : QLoc hc n Q Θ) : FrLat ST SG q := by
     intro i j
     have hz : (fun k => (xm : Matrix (Fin n) (Fin n) _) k j) ∈ Formalism.L2.Herm.hatL (F := F)
         (Formalism.UG.CS.globLat (x : GL (Fin n) (E ⊗[F] Formalism.L2.Herm.Af F)) (stdLat E n)) := by
+      have hspan : Submodule.span E (stdLat E n : Set (Sp E n)) = ⊤ := by
+        apply top_unique
+        rw [← (Pi.basisFun E (Fin n)).span_eq]
+        apply Submodule.span_le.mpr
+        rintro _ ⟨i, rfl⟩
+        apply Submodule.subset_span
+        simpa using (single_mem_stdLat (E := E) (n := n) i 1)
       refine (Formalism.UG.P.span_recovery_of_integral_adelic_approx Formalism.UG.P.integral_adele_approximation_holds F E (Fin n) (stdLat E n)
-        (Module.Finite.iff_fg.2 (stdLat_lattice (E := E) (n := n)).fg) (stdLat_lattice (E := E) (n := n)).span_eq_top xm _).2 ?_
+        (Module.Finite.iff_fg.2 (stdLat_lattice (E := E) (n := n)).fg) hspan xm _).2 ?_
       have e3 : (((xm⁻¹ : GL (Fin n) _) : Matrix (Fin n) (Fin n) _) *ᵥ
           fun k => (xm : Matrix (Fin n) (Fin n) _) k j) = fun k => iA F E ((Pi.single j (1 : E) : Sp E n) k) := by
         have : (fun k => (xm : Matrix (Fin n) (Fin n) _) k j) =
@@ -182,12 +239,7 @@ theorem qdf_frLat (q : QLoc hc n Q Θ) : FrLat ST SG q := by
     rw [e4]
     exact mul_mem hinv (qdf_pi_int q P (hpull i))
 
-variable {H : Subgroup (GLG E n SG)}
-
-def recClsFOf' (hS : DecoPtSurj hc n ST SG) (hQ : QOff (F := F) ST SG Q) (q : QLoc hc n Q Θ)
-    (s : DecoFCl (K := K) n ST SG Q H Θ → DecoF E n ST SG Q)
-    (hs : ∀ c, (Quotient.mk'' (s c) : DecoFCl (K := K) n ST SG Q H Θ) = c) : RecClsF hc n ST SG Q H q s :=
-  recClsFOf hS hQ q (qdf_frLat q) qdf_frExists s hs
+variable {H : Subgroup (GLG (E := E) (n := n) (SG := SG))}
 
 end QLat
 

@@ -1,23 +1,63 @@
-import Mathlib
-import Formalism.LocalToGlobal.ProjectiveLattices.CurveAsm
-import Formalism.LocalToGlobal.ProjectiveLattices.TieUpC
-import Formalism.LocalToGlobal.ProjectiveLattices.SupNDataOfNonneg
-import Formalism.LocalToGlobal.ProjectiveLattices.AxHInst
-import Formalism.LocalToGlobal.ProjectiveLattices.ESecPfA
-import Development.AbelianVarietyTheory.Definitions.UpperBounds.PhRec
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.PoinStatementPfD
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.ArakelovInstances.CurvatureStatementHolds
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.FourierCoefficientDomain
-import Development.AbelianVarietyTheory.Proofs.GenericRegularity.FinrankHostDivTwo
-import Development.AbelianVarietyTheory.Proofs.GenericRegularity.CompSplitRecord
-import Development.AbelianVarietyTheory.Proofs.GenericRegularity.CuspEqZeroOfGenericValues
-import Development.AbelianVarietyTheory.Proofs.GenericRegularity.GenFrExAndGenFromTest
-import Development.AbelianVarietyTheory.Proofs.TorusHaarMeasure.CptDifferentiable
-import Development.AbelianVarietyTheory.Proofs.TorusHaarMeasure.BoundOfIneqs
-import Development.AbelianVarietyTheory.Proofs.TorusHaarMeasure.ExistsCompactOfDefinite
-import Development.AbelianVarietyTheory.Proofs.TorusHaarMeasure.EqZeroOfDetFderivNeZero
-import Development.AbelianVarietyTheory.Proofs.TorusHaarMeasure.ExistsOpenSameModel
-import Development.AbelianVarietyTheory.Proofs.TorusHaarMeasure.ExtendByZeroStrictAntiOfPositiveGaps
+module
+
+public import Development.AbelianVarietyTheory.Definitions.UpperBounds.PhRec
+public import Formalism.LocalToGlobal.ProjectiveLattices.IntAtExtExtAll
+public import Formalism.LocalToGlobal.ProjectiveLattices.IsGenFrGenFr
+public import Development.AbelianVarietyTheory.Proofs.GenericRegularity.CompSplitRecord
+public import Development.AbelianVarietyTheory.Proofs.GenericRegularity.CuspEqZeroOfGenericValues
+public import Development.AbelianVarietyTheory.Proofs.GenericRegularity.FinrankHostDivTwo
+public import Development.AbelianVarietyTheory.Proofs.GenericRegularity.GenFrExAndGenFromTest
+public import Development.AbelianVarietyTheory.Proofs.TorusHaarMeasure.BoundOfIneqs
+public import Development.AbelianVarietyTheory.Proofs.TorusHaarMeasure.CptDifferentiable
+public import Development.AbelianVarietyTheory.Proofs.TorusHaarMeasure.EqZeroOfDetFderivNeZero
+public import Development.AbelianVarietyTheory.Proofs.TorusHaarMeasure.ExistsCompactOfDefinite
+public import Development.AbelianVarietyTheory.Proofs.TorusHaarMeasure.ExistsOpenSameModel
+public import Development.AbelianVarietyTheory.Proofs.TorusHaarMeasure.ExtendByZeroStrictAntiOfPositiveGaps
+public import Formalism.LocalToGlobal.ProjectiveLattices.ESecPfA
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.ArakelovInstances.CurvatureStatementHolds
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.PoinStatementPfD
+
+@[expose] public section
 
 noncomputable section
 
@@ -253,8 +293,8 @@ section Record
 
 variable {D : D7} {T : Top D} (h : LawsP T) {j : ℕ} (hj : InR D j)
 
-set_option maxHeartbeats 4000000 in
-set_option synthInstance.maxHeartbeats 400000 in
+
+
 include hj in
 theorem isSec_rd {σ : T.Q.c.F →+* ℂ} (hσ : GoodEmb T.Q.c σ) {u : WeightFamilies.Wt D j}
     (F : (recB h.toLawsCore).Cusp j u) (k : (T.U j σ).Comp) :
@@ -264,8 +304,8 @@ theorem isSec_rd {σ : T.Q.c.F →+* ℂ} (hσ : GoodEmb T.Q.c σ) {u : WeightFa
   have hm : F.1 ∈ sec (T.Q.Xo j) T.Q.c (wtA u) u.n := (Submodule.mem_inf.mp ((esec_mem_C h hj).mp F.2)).1
   exact hU.2.2.2.2.1 (wtA u) u.n (dom_wtA u) F.1 hm k
 
-set_option maxHeartbeats 4000000 in
-set_option synthInstance.maxHeartbeats 400000 in
+
+
 
 theorem evC_ne_zero_of_nonZeroComp (hG : GenFrEx (T.Q.Xo j) T.Q.c) {u u' : WeightFamilies.Wt D j}
     (F : (recB h.toLawsCore).Cusp j u) (hF : (recPlus h j hj).NonZeroComp u F)
@@ -303,10 +343,10 @@ theorem evC_ne_zero_of_nonZeroComp (hG : GenFrEx (T.Q.Xo j) T.Q.c) {u u' : Weigh
   rw [← hg'Z]
   simpa using hz
 
-set_option maxHeartbeats 4000000 in
-set_option synthInstance.maxHeartbeats 400000 in
-include hj in
 
+
+
+include hj in
 theorem trdeg_of_ratiosFree (hG : GenFrEx (T.Q.Xo j) T.Q.c) {σ : T.Q.c.F →+* ℂ} (hσ : GoodEmb T.Q.c σ)
     {wL : WeightFamilies.Wt D j} {N : ℕ} (w : Fin N → (recB h.toLawsCore).Cusp j wL)
     (Z : Comp (T.Q.Xo j) T.Q.c) (k : (T.U j σ).Comp)
@@ -342,8 +382,8 @@ theorem trdeg_of_ratiosFree (hG : GenFrEx (T.Q.Xo j) T.Q.c) {σ : T.Q.c.F →+* 
 
 end Record
 
-set_option maxHeartbeats 4000000 in
-set_option synthInstance.maxHeartbeats 400000 in
+
+
 
 theorem trdeg_ratios_record : ∀ (D : D7) (T : Top D) (h : LawsP T) (j : ℕ) (hj : InR D j) (hG : GenFrEx (T.Q.Xo j) T.Q.c) (ka wL wF : WeightFamilies.Wt D j) (G : GlobalFamilyData (recPlus h j hj) ka wL wF) (c : ℝ) (large₂ : SizeData₂ D) (CK C1 A1 h0 : ℝ) (Tn nP nW : ℕ), SetC large₂ (recPlus h j hj) CK C1 A1 ka wL wF Tn nP nW h0 → NoCommonZero (T.Q.Xo j) T.Q.c (fun i => (G.w i).1) → (j < D.R.m → 0 < G.iet ∧ (recPlus h j hj).NonZeroComp _ G.et ∧ ∃ σ, GoodEmb T.Q.c σ ∧ PhRec h j σ G.w G.iet G.et c) → 0 ≤ c → 2 * c * g0 D ≤ 1 → ∀ Z : Comp (T.Q.Xo j) T.Q.c, ∃ k₀, evC hG Z (G.w k₀).1 ≠ 0 ∧ Algebra.trdeg T.Q.c.F (IntermediateField.adjoin T.Q.c.F (Set.range fun k => evC hG Z (G.w k).1 / evC hG Z (G.w k₀).1)) = WeightFamilies.dimY D j := by
   intro D T h j hj hG ka wL wF G c large₂ CK C1 A1 h0 Tn nP nW hS hN hrun hc hc2 Z

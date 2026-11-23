@@ -1,5 +1,59 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.ArchimedeanWhittaker.ComplexWhittaker.IsSmCCre
+module
+
+public import GroundTheory.AutomorphicForms.ArchimedeanWhittaker.ComplexWhittaker.InstMeasurableSpaceU2
+public import GroundTheory.AutomorphicForms.UnitaryRepresentations.IsInvariantIffCommuteStarProjection
+import GroundTheory.AutomorphicForms.RealGroupsIwasawa
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.MeasureTheory.Function.L2Space
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 namespace GroundTheory.Automorphic.ArchWhittakerC
 
@@ -98,7 +152,7 @@ theorem Kint_add {φ : U2 → ℂ} (hφ : Continuous φ) (x y : H) :
     Kint σ φ (x + y) = Kint σ φ x + Kint σ φ y := by
   unfold Kint
   rw [← integral_add (integrable_Kint σ hφ x) (integrable_Kint σ hφ y)]
-  congr 1; funext k; rw [map_add, smul_add]
+  congr 1; funext k; rw [map_add (f := _), smul_add]
 
 theorem Kint_smul (φ : U2 → ℂ) (c : ℂ) (x : H) : Kint σ φ (c • x) = c • Kint σ φ x := by
   unfold Kint
@@ -136,8 +190,9 @@ theorem map_Q (n : ℕ) (q : ℤ) (l : U2) (x : H) :
   rw [Q, map_kC_Kint σ (continuous_conj_psi n q n)]
   simp only [Q, Kint]
   simp_rw [← integral_smul]
-  rw [← integral_finset_sum]
+  rw [← integral_finsetSum]
   · congr 1; funext k
+
     rw [psi_inv_mul, map_sum, Finset.sum_smul]
     refine Finset.sum_congr rfl fun i _ => ?_
     rw [smul_smul]
@@ -159,7 +214,7 @@ theorem map_tC_Q (n : ℕ) (q : ℤ) {i : ℕ} (hi : i ≤ n) (a b : ℝ) (x : H
     ext r s; fin_cases r <;> fin_cases s <;> simp [← Complex.exp_add]
   rw [hinv, psi_tC_mul n q hi, smul_smul, map_mul, ← Complex.exp_conj]
   congr 2
-  simp only [map_mul, conj_I, map_add, map_sub, map_neg, Complex.conj_ofReal, map_intCast,
+  simp only [map_mul, conj_I, map_add (f := _), map_sub, map_neg, Complex.conj_ofReal, map_intCast,
     map_natCast]
   push_cast
   ring
@@ -219,7 +274,7 @@ theorem collapse (n : ℕ) (q : ℤ) (u : ℕ → H) :
   have e : (fun k => conj (psi n q n k) • ∑ i ∈ range (n + 1), ((n.choose i : ℂ) * psi n q i k) • u i) =
       fun k => ∑ i ∈ range (n + 1), (conj (psi n q n k) * ((n.choose i : ℂ) * psi n q i k)) • u i := by
     funext k; rw [Finset.smul_sum]; simp_rw [smul_smul]
-  rw [e, integral_finset_sum _ (fun i _ => (hint i).smul_const _)]
+  rw [e, integral_finsetSum _ (fun i _ => (hint i).smul_const _)]
   simp_rw [integral_smul_const]
   rw [Finset.sum_eq_single n]
   · have h1 : ∫ k, conj (psi n q n k) * ((n.choose n : ℂ) * psi n q n k) ∂μK = (normSqInt n q : ℂ) := by
@@ -296,9 +351,6 @@ def W (n : ℕ) (q : ℤ) : Submodule ℂ H where
     rw [P_smul, show P σ n q x = x from hx]
 
 theorem mem_W {n : ℕ} {q : ℤ} {x : H} : x ∈ W σ n q ↔ P σ n q x = x := Iff.rfl
-
-theorem isClosed_divisorComponent (n : ℕ) (q : ℤ) : IsClosed (W σ n q : Set H) :=
-  isClosed_eq (PL σ n q).continuous continuous_id
 
 theorem P_mem_alt (n : ℕ) (q : ℤ) (x : H) : P σ n q x ∈ W σ n q := P_P σ n q x
 

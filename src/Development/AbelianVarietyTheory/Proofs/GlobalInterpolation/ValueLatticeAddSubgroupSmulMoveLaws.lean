@@ -1,7 +1,48 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.FormsStable
-import Formalism.LocalRingCardinality.RankBoundMonotoneInDimension
+module
+
+public import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.FormsStable
+public import Formalism.LocalRingCardinality.RankBoundMonotoneInDimension
 import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.Wlocal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -110,6 +151,7 @@ theorem exists_frame_ker (p : LocF.PP Lc n) :
       have h1 := hf fun b => ⟨y b, hy b⟩
       have h2 := Lc.res_ker (∑ b, c b * ⟨y b, hy b⟩)
       have h3 : ∑ b, Lc.res ⟨y b, hy b⟩ * p.1.f (e b) = Lc.res (∑ b, c b * ⟨y b, hy b⟩) * p.1.f (e a) := by
+
         rw [map_sum, Finset.sum_mul]
         refine Finset.sum_congr rfl fun b _ => ?_
         rw [← hc b, map_mul]; ring
@@ -231,14 +273,21 @@ theorem ten_mem_intSpan {n : ℕ} (w : D.what₂.places.Pl) (lam : D.what₂.Tau
       embO D w (c τ a) • MvPolynomial.map (Int.castRingHom ℂ)
         (Formalism.GradedWeylDivisibility.applyWord ℤ a (Formalism.GradedWeylDivisibility.hw ℤ le_rfl (lam τ).natW)) := by
     funext τ
+
     rw [← hc τ, Finsupp.sum, map_sum]
     refine Finset.sum_congr rfl fun a _ => ?_
     rw [wlocal_map_smul, wlocal_map_applyWord, wlocal_map_applyWord, wlocal_map_hw, wlocal_map_hw]
-  rw [h1, ← Formalism.MainNotions.product_first_zeroth_parts.tenM_apply, MultilinearMap.map_sum_finset]
+  let T : (D.what₂.Tau → MvPolynomial (Fin n × Fin n) ℂ) →ₘₗ[ℂ]
+      MvPolynomial (D.what₂.Tau × Fin n × Fin n) ℂ :=
+    (MultilinearMap.mkPiAlgebra ℂ D.what₂.Tau _).compLinearMap
+      (fun τ => (MvPolynomial.rename (Prod.mk τ) : MvPolynomial (Fin n × Fin n) ℂ →ₐ[ℂ] _).toLinearMap)
+  have hT (f : D.what₂.Tau → MvPolynomial (Fin n × Fin n) ℂ) : T f = ten f := by
+    simp [T, Formalism.MainNotions.product_first_zeroth_parts.ten]
+  rw [h1, ← hT, MultilinearMap.map_sum_finset]
   refine AddSubgroup.sum_mem _ fun a _ => ?_
-  rw [MultilinearMap.map_smul_univ, Formalism.MainNotions.product_first_zeroth_parts.tenM_apply, ← map_prod]
+  rw [MultilinearMap.map_smul_univ, hT, ← map_prod]
   exact AddSubgroup.subset_closure ⟨_, fun τ => Formalism.GradedWeylDivisibility.applyWord ℤ (a τ) (Formalism.GradedWeylDivisibility.hw ℤ le_rfl (lam τ).natW),
-    (∏ τ, c τ (a τ)).2, fun τ => Submodule.subset_span ⟨a τ, rfl⟩, rfl⟩
+    (∏ τ, c τ (a τ)).2, fun τ => Submodule.subset_span ⟨a τ, rfl⟩, by simp [embO, map_prod]⟩
 
 theorem blk_mem_intSpan {n : ℕ} (w : D.what₂.places.Pl) (lam : D.what₂.Tau → DomWeight n) (s : ℤ)
     (g : D.what₂.Tau → GL (Fin n) (Ow D w))
@@ -260,7 +309,7 @@ theorem blk_mem_intSpan {n : ℕ} (w : D.what₂.places.Pl) (lam : D.what₂.Tau
     funext τ
     rw [map_roundAct, MvPolynomial.map_map, RingHom.ext_int ((embO D w).comp (Int.castRingHom _)) (Int.castRingHom ℂ)]
   | zero => rw [map_zero]; exact AddSubgroup.zero_mem _
-  | add x y _ _ hx hy => rw [map_add]; exact AddSubgroup.add_mem _ hx hy
+  | add x y _ _ hx hy => rw [map_add (f := _)]; exact AddSubgroup.add_mem _ hx hy
   | neg x _ hx => rw [map_neg]; exact AddSubgroup.neg_mem _ hx
 
 theorem exists_lift {K L : Type} [Field K] [Field L] (A : Subring L) (j : K →+* L) {n : ℕ} (k : GL (Fin n) K)
@@ -272,6 +321,7 @@ theorem exists_lift {K L : Type} [Field K] [Field L] (A : Subring L) (j : K →+
     intro m m' hm hm' h
     ext a b
     have := congrArg j (congrFun (congrFun h a) b)
+
     rw [Matrix.mul_apply, map_sum] at this
     rw [Matrix.mul_apply]
     by_cases hab : a = b <;> simpa [Matrix.one_apply, hab] using this
@@ -353,7 +403,7 @@ theorem valB_laws : ∀ (D : D7) (u : D.what₂.Word) (X : Ch D u) (i : ℕ) (M 
     refine ⟨h, hh, z + Co.mov w (fun v => (h v)⁻¹ * h' v) z',
       AddSubgroup.add_mem _ hz (mov_mem Co w hw _ (fun v x => ?_) z' hz'), ?_⟩
     · rw [← hh v, ← hh' v x, Matrix.mulVec_mulVec, ← Units.val_mul, mul_inv_cancel_left]
-    · rw [map_add, map_add, ← mov_mul, hy, hy']
+    · rw [map_add (f := _), map_add (f := _), ← mov_mul, hy, hy']
       simp only [mul_inv_cancel_left]
   · rintro r hr y ⟨h, hh, z, hz, hy⟩
     exact ⟨h, hh, _, smul_mem_intSpan w _ r hr z hz, by rw [map_smul, map_smul, hy]⟩

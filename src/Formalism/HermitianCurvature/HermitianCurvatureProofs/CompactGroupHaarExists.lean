@@ -1,5 +1,57 @@
-import Formalism.HermitianCurvature.WeylElementCommutesLevelOne
-import Formalism.FormalDegreeBessel.FinalG
+module
+
+public import Formalism.HermitianCurvature.WeylElementCommutesLevelOne
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+public import Mathlib.Topology.Algebra.Group.Units
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.MeasureTheory.Measure.Haar.Unique
+
+@[expose] public section
 
 open Matrix MeasureTheory Filter Topology
 open scoped ENNReal NNReal
@@ -206,7 +258,9 @@ theorem shellInt : ShellInt := by
       _ = {x | N x ≤ (2:ℝ) ^ m0}.indicator (fun _ => ENNReal.ofReal (((2:ℝ) ^ m0 / 2) ^ (-A))) x := by
           rw [Set.indicator_of_mem (show x ∈ {x | N x ≤ (2:ℝ) ^ m0} from hm0)]
       _ ≤ ∑' m : ℕ, {x | N x ≤ (2:ℝ) ^ m}.indicator
-            (fun _ => ENNReal.ofReal (((2:ℝ) ^ m / 2) ^ (-A))) x := ENNReal.le_tsum m0
+            (fun _ => ENNReal.ofReal (((2:ℝ) ^ m / 2) ^ (-A))) x :=
+        ENNReal.le_tsum (f := fun m : ℕ => {x | N x ≤ (2:ℝ) ^ m}.indicator
+          (fun _ => ENNReal.ofReal (((2:ℝ) ^ m / 2) ^ (-A))) x) m0
   have hq0 : 0 ≤ (2:ℝ) ^ (d - A) := by positivity
   have hq1 : (2:ℝ) ^ (d - A) < 1 := Real.rpow_lt_one_of_one_lt_of_neg (by norm_num) (by linarith)
   have hsum : Summable fun m : ℕ => |C| * 2 ^ A * ((2:ℝ) ^ (d - A)) ^ m :=
@@ -522,7 +576,7 @@ theorem invM_meas {k r : ℕ} : Measurable (invM : Mt k r → Mt k r) := by
     simp only [invM, inv_eq, Matrix.smul_apply, smul_eq_mul]
   rw [h]
   have hof : Continuous (fun x : Mt k r => (Matrix.of x : Mat k r)) := continuous_id
-  refine measurable_pi_lambda _ fun i => measurable_pi_lambda _ fun j => ?_
+  refine Measurable.of_eval fun i => Measurable.of_eval fun j => ?_
   exact hof.matrix_det.measurable.inv.mul ((hof.matrix_adjugate).matrix_elem i j).measurable
 
 theorem sfin {k r : ℕ} {U : Set (Mat k r)} {μ : Measure (Mt k r)} (h : IsHaarOn U μ) : SigmaFinite μ := by

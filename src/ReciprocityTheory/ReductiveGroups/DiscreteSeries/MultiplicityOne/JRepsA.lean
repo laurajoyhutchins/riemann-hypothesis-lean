@@ -1,4 +1,51 @@
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.MultiplicityOne.StDiagExists
+module
+
+public import Formalism.HermitianCurvature.WeylElementCommutesLevelOne
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -39,12 +86,12 @@ def mono {n : ℕ} (s : Fin n → Fin n) (a : Fin n → ℂ) : Matrix (Fin n) (F
 
 theorem mul_mono {n : ℕ} (s : Fin n → Fin n) (a : Fin n → ℂ) (M : Matrix (Fin n) (Fin n) ℂ) (i j : Fin n) :
     (M * mono s a) i j = M i (s j) * a j := by
-  rw [mul_apply]
+  rw [Matrix.mul_apply]
   simp only [mono, of_apply, mul_ite, mul_zero, Finset.sum_ite_eq', Finset.mem_univ, if_true]
 
 theorem conjT_mono_mul {n : ℕ} (s : Fin n → Fin n) (a : Fin n → ℂ) (M : Matrix (Fin n) (Fin n) ℂ) (i j : Fin n) :
     ((mono s a)ᴴ * M) i j = star (a i) * M (s i) j := by
-  rw [mul_apply]
+  rw [Matrix.mul_apply]
   simp only [mono, of_apply, conjTranspose_apply, apply_ite, star_zero, ite_mul, zero_mul, Finset.sum_ite_eq', Finset.mem_univ, if_true]
 
 def bt (k r : ℕ) (c : Fin r → ℂ) (j : Fin (2 * r + k + 1)) : ℂ :=
@@ -68,7 +115,7 @@ theorem bigCell_one_mono (c : Fin r → ℂ) :
     · have hs := sg_val_in (k := k) (r := r) (i := j) ⟨by omega, hj2⟩
       simp only [dif_pos hj2, hs]
       by_cases hi : r ≤ i.val ∧ i.val ≤ r + k
-      · rw [dif_pos hi, one_apply]
+      · rw [dif_pos hi, Matrix.one_apply]
         congr 1
         apply propext; constructor
         · intro h; apply Fin.ext; have := congrArg Fin.val h; simp at this; omega
@@ -164,7 +211,7 @@ theorem bigCell_star_mul (c : Fin r → ℂ) (hc : ∀ a, c a ≠ 0) :
   rw [bigCell_one_mono, bigCell_one_mono]
   ext i j
   rw [mul_mono]
-  simp only [mono, of_apply, sg_sg, one_apply]
+  simp only [mono, of_apply, sg_sg, Matrix.one_apply]
   by_cases hij : i = j
   · subst hij
     rw [if_pos rfl, if_pos rfl]
@@ -245,21 +292,21 @@ theorem embWb_mulVec (X : Matrix (Fin (k + 1)) (Fin (k + 1)) ℂ) (v : Fin (k + 
 theorem embWb_mul (X Y : Matrix (Fin (k + 1)) (Fin (k + 1)) ℂ) :
     embWb k r (X * Y) = embWb k r X * embWb k r Y := by
   ext i j
-  rw [mul_apply]
+  rw [Matrix.mul_apply]
   by_cases hi : r ≤ i.val ∧ i.val ≤ r + k
   · by_cases hj : r ≤ j.val ∧ j.val ≤ r + k
     · rw [sum_wb (f := fun l => embWb k r X i l * embWb k r Y l j)
         (by intro l hl; show embWb k r X i l * embWb k r Y l j = 0; rw [embWb_out_right X hl, if_neg (fun h : i = l => hl (h ▸ hi)), zero_mul])]
-      simp only [embWb_in _ hi hj, embWb_in _ hi (wI_in _), embWb_in _ (wI_in _) hj, wI_sub, mul_apply]
+      simp only [embWb_in _ hi hj, embWb_in _ hi (wI_in _), embWb_in _ (wI_in _) hj, wI_sub, Matrix.mul_apply]
     · simp only [embWb_out_right _ hj, mul_ite, mul_one, mul_zero, Finset.sum_ite_eq', Finset.mem_univ, if_true]
   · simp only [embWb_out_left _ hi, ite_mul, one_mul, zero_mul, Finset.sum_ite_eq, Finset.mem_univ, if_true]
 
 theorem embWb_one : embWb k r (1 : Matrix (Fin (k + 1)) (Fin (k + 1)) ℂ) = 1 := by
   ext i j
-  rw [one_apply]
+  rw [Matrix.one_apply]
   by_cases hi : r ≤ i.val ∧ i.val ≤ r + k
   · by_cases hj : r ≤ j.val ∧ j.val ≤ r + k
-    · rw [embWb_in _ hi hj, one_apply]
+    · rw [embWb_in _ hi hj, Matrix.one_apply]
       congr 1; apply propext; constructor
       · intro h; apply Fin.ext; have := congrArg Fin.val h; simp at this; omega
       · rintro rfl; rfl

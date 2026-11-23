@@ -1,5 +1,56 @@
-import Formalism.WachLatticeTwists.RamifiedBlockRings.RamifiedBlockProofs.RingDataObjects
-import Formalism.TruncatedSeriesCounting.TruncatedSeriesProofs.LemmaDetPoly
+module
+
+public import Formalism.WachLatticeTwists.RamifiedBlockRings.Statement
+public import Formalism.TruncatedSeriesCounting.TruncatedSeriesProofs.LemmaDetPoly
+public import Formalism.WachLatticeTwists.RamifiedBlockRings.RamifiedBlockProofs.RingDataObjects
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Finset Classical Polynomial
 
@@ -58,6 +109,7 @@ theorem lift_mem {a : Xs → Matrix d d O} (ha : a ∈ tSpan T r) :
   refine ⟨s, fun g x => C (c g x), fun g => C_mem_polyT T (hc g), ?_⟩
   funext x
   ext i j
+
   simp [rPoly, Finset.sum_apply, Matrix.sum_apply, map_sum]
 
 private theorem matrix_charpolyRev_map {R S : Type*} [CommRing R] [CommRing S] (f : R →+* S)
@@ -97,19 +149,6 @@ theorem detT (hG1 : ∀ (g : G) (k : ℕ), (fun x => (Matrix.charpolyRev (r g x)
   exact hu k
 
 end
-
-theorem charT : StatCharT := by
-  intro O _ X T d _ _ G _ r hG1 a ha k
-  have hA : (fun x => (a x).map C) ∈ spanSub (polyT T) (rPoly r) := lift_mem T r ha
-  have hM : (fun x => 1 - (Polynomial.X : O[X]) • (a x).map C) ∈ spanSub (polyT T) (rPoly r) := by
-    have he : (fun x => 1 - (Polynomial.X : O[X]) • (a x).map C) =
-        1 - algebraMap O[X] (X → Matrix d d O[X]) Polynomial.X * (fun x => (a x).map C) := by
-      funext x
-      simp [Algebra.algebraMap_eq_smul_one, smul_mul_assoc]
-    rw [he]
-    exact Subalgebra.sub_mem _ (Subalgebra.one_mem _)
-      (Subalgebra.mul_mem _ (Subalgebra.algebraMap_mem _ _) hA)
-  exact detT T r hG1 _ hM k
 
 theorem blockPolyT : StatBlockPolyT := by
   intro O _ X T d _ _ G _ r hG1 e he a ha k

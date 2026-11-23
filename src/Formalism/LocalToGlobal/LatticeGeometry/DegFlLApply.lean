@@ -1,8 +1,50 @@
-import Mathlib
-import Formalism.LocalRingCardinality.DataDIV
-import Formalism.DegreeFormula.FlagDegFormula
-import Formalism.DegreeFormula.Statement
-import Formalism.LocalRingCardinality.RankBoundMonotoneInDimension
+module
+
+public import Formalism.LocalRingCardinality.DataDIV
+public import Formalism.DegreeFormula.Statement
+public import Formalism.LocalRingCardinality.RankBoundMonotoneInDimension
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -26,10 +68,6 @@ variable {D : D7} {Lev : Type} (w : Dat D Lev)
 def N : ℕ := letI := D.host.cmStar; w.S.rank
 
 def Indef : Prop := 1 ≤ w.j ∧ w.j < w.N
-
-def Defin : Prop := w.j = w.N
-
-theorem j_le_N : w.j ≤ w.N := w.j_le
 
 end Dat
 
@@ -138,26 +176,5 @@ theorem wtL_nonneg (D : D7) (p : ℕ) (la : PlL D p) : 0 ≤ wtL D p la := by
   unfold wtL
   exact div_nonneg (mul_nonneg (Nat.cast_nonneg _) (Real.log_natCast_nonneg _))
     (mul_nonneg (Real.log_natCast_nonneg _) (Nat.cast_nonneg _))
-
-theorem datW_indef (D : D7) {Lev : Type} (κ : Lev) {j : ℕ} (h1 : 1 ≤ j) (h2 : j < D.R.m) : (datW D κ j).Indef := by
-  have hk := D.R.m_add_three_le_k
-  refine ⟨?_, ?_⟩
-  · rw [datW_j D κ h1 h2.le]; simp only [Ranks.sigW]; omega
-  · rw [datW_j D κ h1 h2.le, datW_N]; simp only [Ranks.sigW, Ranks.r]; omega
-
-theorem datW_S (D : D7) {Lev : Type} (κ : Lev) {j : ℕ} (h1 : 1 ≤ j) (h2 : j ≤ D.R.m) :
-    (datW D κ j).S = (letI := D.host.cmStar; D.sp.W j) := by
-  simp only [datW, jcl_eq D h1 h2]
-
-theorem dat_ext (D : D7) {Lev : Type} (w w' : Dat D Lev) (hS : w.S = w'.S) (hκ : w.κ = w'.κ) : w = w' := by
-  obtain ⟨S, κ, j, a, b, c, d⟩ := w
-  obtain ⟨S', κ', j', a', b', c', d'⟩ := w'
-  simp only at hS hκ
-  subst hS; subst hκ
-  have : j = j' := by
-    have τ : D.what₂.Tau := D.eTau.symm 1
-    have := (d τ).symm.trans (d' τ)
-    exact (Prod.mk.inj this).1
-  subst this; rfl
 
 end Formalism.L2.Geo

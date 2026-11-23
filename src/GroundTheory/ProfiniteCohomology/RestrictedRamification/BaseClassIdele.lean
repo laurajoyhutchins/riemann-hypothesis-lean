@@ -1,13 +1,57 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.RestrictedRamification.BaseClass
-import GroundTheory.ProfiniteCohomology.GaloisCohomology.IsZeroGroupCohomologyQuotientToInvariantsGalAdd
+module
+
+public import GroundTheory.ProfiniteCohomology.RestrictedRamification.BaseClass
+public import GroundTheory.ProfiniteCohomology.RestrictedRamification.ClassFieldGSDefs
+import GroundTheory.ProfiniteCohomology.CupProducts.ExistsCocycleMapFEqD
+import GroundTheory.ProfiniteCohomology.InflationRestriction.DegreeOne
+public import GroundTheory.ProfiniteCohomology.RestrictedRamification.ClassFieldGSPresentation
+import GroundTheory.ProfiniteCohomology.RestrictedRamification.SPicFinite
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.Finsupp.Pointwise
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
 
 open CategoryTheory IsDedekindDomain NumberField GroundTheory.Global IdeleGroup
-
-local notation "ℚ̄" => AlgebraicClosure ℚ
 
 noncomputable section
 
@@ -133,6 +177,8 @@ theorem dataHom_eq_zero_of_boundary {D : Type} [AddCommGroup D] (xOf : D →+ (c
 end General
 
 section Concrete
+
+local notation "ℚ̄" => AlgebraicClosure ℚ
 
 variable {K : FiniteSubfield} (S : Set (HeightOneSpectrum (𝓞 K.1)))
   (ιs : ∀ v : S, ℚ̄ →ₐ[K.1] AlgebraicClosure ((v : HeightOneSpectrum (𝓞 K.1)).adicCompletion K.1))
@@ -265,8 +311,8 @@ theorem gsUnitsClass_apply (d : GsUnitsDatum S) :
       Multiplicative.ofAdd (-divAbove S d.1))) :=
   rfl
 
-omit [Finite S] in
 
+omit [Finite S] in
 theorem mul_sInvOfUnit_mem_sUnitsMax (t : Additive (sInvariantSubgroup (F := K.1) ℚ̄ S)) (x : (K.1)ˣ)
     (h : divS S (Additive.ofMul x) = -divAbove S t) :
     ((Additive.toMul (t + Additive.ofMul (sInvOfUnit S x)) : sInvariantSubgroup (F := K.1) ℚ̄ S) :

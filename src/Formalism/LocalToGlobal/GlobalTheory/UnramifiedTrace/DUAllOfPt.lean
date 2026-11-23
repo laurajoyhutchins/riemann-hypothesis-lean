@@ -1,5 +1,44 @@
-import Formalism.LocalToGlobal.GlobalTheory.UnramifiedTrace.DuFormulaOfFibreCount
-import Formalism.LocalToGlobal.GlobalTheory.UnramifiedTrace.CardFilterSubtype
+module
+
+public import Formalism.LocalToGlobal.GlobalTheory.UnramifiedTrace.EopUEq
+public import Formalism.LocalToGlobal.GlobalTheory.UnramifiedTrace.CardFilterSubtype
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -39,7 +78,7 @@ def DUPt0F (T : Forms0 D u) : Prop :=
           ∀ δ, IsDia T.cls0.lev (T.atT.eV v).1 (T.atT.eV v).2 k δ →
           G (T.cls0.y c * hcomp T (η q.1.1) (κ q.1.1) (Mu q.1.1 q.2)) = G (T.cls0.y c * δ))
 
-set_option maxHeartbeats 4000000 in
+
 theorem duFib_of_pt (T : Forms0 D u) (h : DUPt0F T) : DUFib0F T := by
   intro v c
   obtain ⟨γ, η, κ, Mu, hmv, hMu, ι, τ, hι, hu, hval⟩ := h v c
@@ -70,8 +109,6 @@ theorem duFib_of_pt (T : Forms0 D u) (h : DUPt0F T) : DUFib0F T := by
         g ((D.fm u).te 0 v c) = 1) (fun g _ => and_self_iff), card_dual_one _ hte, hK, hr]
     · exact card_dual_line _ y h2 h1
     · rw [card_dual_two _ y hte h2, hK, hr]
-
-theorem dUAll_of_pt (h : ∀ (D : D7) (u : D.what₂.Word) (T : Forms0 D u), DUPt0F T) : Formalism.L2.GlobalTheoryTheory.UnramifiedDiagonal.DUAll := fun D u T => du_formula_of_fibre_count T (duFib_of_pt T (h D u T))
 
 end Formalism.L2.GlobalTheoryTheory.UnramifiedTrace
 

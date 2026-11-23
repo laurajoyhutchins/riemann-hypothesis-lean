@@ -1,5 +1,56 @@
-import Mathlib
+module
+
+public import Mathlib.NumberTheory.NumberField.Basic
+public import Mathlib.RingTheory.DedekindDomain.Ideal.Lemmas
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Ideal.Int
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.LevelChainSharpColumnValuationOwnChainIff
 import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.MemUnitOff
+import Formalism.LocalToGlobal.Columns.AbelianHostFieldConditions
+public import Formalism.LocalToGlobal.Columns.DecoFin
+public import Formalism.SharpRestriction.GlobalSchurBounds.ProductFirstZerothParts
+import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
+
+@[expose] public section
 
 open Formalism.BasicNotions Classical NumberField IsDedekindDomain Matrix GlobalTheory.LvT GlobalTheory.LvT.Inh
 open Formalism.MainNotions.product_first_zeroth_parts (Ow ten blk CSpan IntSpan wSh)
@@ -20,41 +71,5 @@ theorem infinite_places (K : Type) [Field K] [NumberField K] : Infinite (HeightO
   have e : Ideal.span {((p : ℕ) : ℤ)} = Ideal.span {((q : ℕ) : ℤ)} := by rw [← hf p, ← hf q, hpq]
   have := Int.associated_iff_natAbs.1 (Ideal.span_singleton_eq_span_singleton.1 e)
   exact Subtype.ext (by simpa using this)
-
-theorem finite_residue {K : Type} [Field K] [NumberField K] (Q : HeightOneSpectrum (𝓞 K)) :
-    Finite (IsLocalRing.ResidueField (Q.valuation K).valuationSubring) := by
-  let ι : 𝓞 K →+* (Q.valuation K).valuationSubring :=
-    (algebraMap (𝓞 K) K).codRestrict (Q.valuation K).valuationSubring fun a => Q.valuation_le_one a
-  have key : ∀ x : (Q.valuation K).valuationSubring,
-      IsLocalRing.residue _ x = 0 ↔ Q.valuation K (x : K) < 1 := fun x => by
-    rw [IsLocalRing.residue_eq_zero_iff, Valuation.mem_maximalIdeal_iff]
-  let φ : 𝓞 K ⧸ Q.asIdeal →+* IsLocalRing.ResidueField (Q.valuation K).valuationSubring :=
-    Ideal.Quotient.lift Q.asIdeal ((IsLocalRing.residue _).comp ι) fun a ha => by
-      rw [RingHom.comp_apply, key]
-      exact (Q.valuation_lt_one_iff_mem (K := K) a).2 ha
-  haveI : Finite (𝓞 K ⧸ Q.asIdeal) := Ideal.finiteQuotientOfFreeOfNeBot _ Q.ne_bot
-  refine Finite.of_surjective φ fun y => ?_
-  obtain ⟨x, rfl⟩ := IsLocalRing.residue_surjective y
-  obtain ⟨a, ha⟩ := Q.exists_valuation_sub_lt_of_integer (K := K) x.2 1
-  refine ⟨Ideal.Quotient.mk _ a, ?_⟩
-  change IsLocalRing.residue _ (ι a) = _
-  rw [← sub_eq_zero, ← map_sub, key]
-  exact ha
-
-def redHom {K k ι : Type} [Field K] [CommRing k] [Fintype ι] [DecidableEq ι] (O : Subring K) (φ : O →+* k)
-    (G : Subgroup (GL ι K)) (hG : ∀ g ∈ G, IntGL O g) : G →* Matrix ι ι k where
-  toFun g := Matrix.of fun a b => φ ⟨((g : GL ι K) : Matrix ι ι K) a b, (hG g g.2 a b).1⟩
-  map_one' := by
-    ext a b
-    simp only [Matrix.of_apply, Matrix.one_apply, OneMemClass.coe_one, Units.val_one]
-    split_ifs
-    · exact map_one φ
-    · exact map_zero φ
-  map_mul' g h := by
-    ext a b
-    simp only [Matrix.of_apply, Matrix.mul_apply, ← map_mul, ← map_sum]
-    congr 1
-    apply Subtype.ext
-    simp [Matrix.mul_apply]
 
 end GlobalTheory.LvT.Inh.ResFin

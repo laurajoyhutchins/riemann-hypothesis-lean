@@ -1,8 +1,57 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.GaloisSideTwistedSelmerAuxiliaryPrimes
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.LengthKerMatActKmodEqAddValDet
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.RestrictionH1MemBlochKato
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IsIntegralOfNormLeOne
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.GaloisSideTwistedSelmerAuxiliaryPrimes
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IsIntegralOfNormLeOne
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.RestrictionH1MemBlochKato
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.LengthKerMatActKmodEqAddValDet
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.LocalProperties.Reduced
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Development.AbelianVarietyTheory.BlockTheory.TorsionBlocks.SelmerCrystallineCocycles
+
+@[expose] public section
 
 noncomputable section
 
@@ -87,11 +136,11 @@ theorem mem_selAll_iff {F Ω Λ O M : Type} [Field F] [NumberField F] [Field Ω]
   rw [← trH_res]
   unfold Formalism.GaloisCohomology.bkCond
   by_cases h1 : ((l : ℕ) : 𝓞 F) ∈ v.asIdeal
-  · simp only [if_pos h1]
+  · simp only [ite_eq_left h1]
     exact hL v h1 _
   · by_cases h2 : v ∈ Sig
-    · simp only [if_neg h1, if_pos h2, Submodule.mem_top]
-    · simp only [if_neg h1, if_neg h2]
+    · simp only [ite_eq_right h1, ite_eq_left h2, Submodule.mem_top]
+    · simp only [ite_eq_right h1, ite_eq_right h2]
       exact mem_H1ur_iff _ _ _ _ _
 
 theorem mem_span_iff {Λ O W W' : Type} [CommRing Λ] [CommRing O] [AddCommGroup W] [Module Λ W] [AddCommGroup W']
@@ -103,7 +152,7 @@ theorem mem_span_iff {Λ O W W' : Type} [CommRing Λ] [CommRing O] [AddCommGroup
     induction hx using Submodule.span_induction with
     | mem x hx => exact Submodule.subset_span (h1 x hx)
     | zero => rw [map_zero]; exact zero_mem _
-    | add x y _ _ hx hy => rw [map_add]; exact add_mem hx hy
+    | add x y _ _ hx hy => rw [map_add (f := T)]; exact add_mem hx hy
     | smul a x _ hx => rw [hT]; exact Submodule.smul_mem _ _ hx
   · intro hx
     have : ∀ y ∈ Submodule.span O S', ∀ t : O, T.symm (t • y) ∈ Submodule.span Λ S := by
@@ -111,7 +160,7 @@ theorem mem_span_iff {Λ O W W' : Type} [CommRing Λ] [CommRing O] [AddCommGroup
       induction hy using Submodule.span_induction with
       | mem x hx => exact fun t => Submodule.subset_span (h2 t x hx)
       | zero => intro t; rw [smul_zero, map_zero]; exact zero_mem _
-      | add x y _ _ hx hy => intro t; rw [smul_add, map_add]; exact add_mem (hx t) (hy t)
+      | add x y _ _ hx hy => intro t; rw [smul_add, map_add (f := _)]; exact add_mem (hx t) (hy t)
       | smul a x _ hx => intro t; rw [smul_smul]; exact hx _
     simpa using this _ hx 1
 
@@ -125,7 +174,7 @@ theorem length_eq_of_equiv {Λ O V W W' : Type} [CommRing Λ] [CommRing O] [AddC
       map_add' := fun x y => by
         apply Subtype.ext
         change T _ = T _ + T _
-        rw [← map_add, ← Submodule.coe_add, ← map_add]
+        rw [← map_add (f := _), ← Submodule.coe_add, ← map_add (f := _)]
         rfl
       map_smul' := fun t x => Subtype.ext (he t _ _ rfl) }
   refine (LinearEquiv.ofBijective f ⟨fun x y hxy => ?_, fun y => ?_⟩).length_eq.symm
@@ -186,9 +235,9 @@ def intSet : Set (H1 ((Trep i s k ψ).comp (DecV N v).subtype)) :=
       (∀ g a, (z : ↥(DecV N v) → Fin D.R.r → KmodO (X.Ok i k)) g a = phiK X i k (y g a) • b) ∧
       x = Submodule.Quotient.mk z}
 
-set_option maxHeartbeats 1000000 in
+
 theorem bk_le : bk bkP i s k ψ v ≤ Submodule.span (X.Ok i k) (intSet bkP i s k ψ v hv) := by
-  rw [bk, dif_pos hv]
+  rw [bk, dite_eq_left hv]
   refine Submodule.span_mono ?_
   rintro x ⟨z, c, y, hc, hy, hz, rfl⟩
   let Bw := bkP.br i v hv
@@ -221,10 +270,10 @@ theorem bk_le : bk bkP i s k ψ v ≤ Submodule.span (X.Ok i k) (intSet bkP i s 
   rw [h4, ← h2]
   ring
 
-set_option maxHeartbeats 1000000 in
+
 theorem le_bk (hψ : ∀ σ ∈ DecV N v, ψ σ = 1) :
     Submodule.span (X.Ok i k) (intSet bkP i s k ψ v hv) ≤ bk bkP i s k ψ v := by
-  rw [bk, dif_pos hv]
+  rw [bk, dite_eq_left hv]
   refine Submodule.span_le.2 ?_
   rintro x ⟨z, c, f, b, hc, hy, hz, rfl⟩
   obtain ⟨a, rfl⟩ := Submodule.Quotient.mk_surjective _ b
@@ -249,8 +298,9 @@ theorem le_bk (hψ : ∀ σ ∈ DecV N v, ψ σ = 1) :
         one_smul]
       beta_reduce
       rw [GlobalTheory.BKIntegralToRational.cocycle_of_crys _ _ hf g h j]
-      simp only [← Submodule.mkQ_apply, map_add, map_sum, map_mul, add_div, Finset.sum_div, mul_div_assoc,
-        ← LinearMap.map_smul, Algebra.smul_def]⟩
+
+      simp only [← Submodule.mkQ_apply, map_add (f := _), map_sum, map_mul, add_div, Finset.sum_div, mul_div_assoc,
+      ← LinearMap.map_smul, Algebra.smul_def]⟩
   have hzz : z = x • z' := by
     apply Subtype.ext
     funext g j
@@ -303,7 +353,7 @@ theorem lamChar_toLam (F : MvPolynomial ι (X.O0 i)) :
   classical
   induction F using MvPolynomial.induction_on with
   | C a => rw [MvPolynomial.algHom_C, lamChar_algebraMap, MvPolynomial.eval₂_C]
-  | add p q hp hq => rw [map_add, map_add, hp, hq, MvPolynomial.eval₂_add]
+  | add p q hp hq => rw [map_add (f := _), map_add (f := _), hp, hq, MvPolynomial.eval₂_add]
   | mul_X p q hp =>
     rw [map_mul, map_mul, hp, MvPolynomial.eval₂_mul, MvPolynomial.eval₂_X, toLam, MvPolynomial.aeval_X, map_sub,
       map_one, lamChar_of]
@@ -325,7 +375,7 @@ theorem lamChar_delInv (d : ι → (GE N →* Multiplicative (ZMod (X.l i ^ M)))
 
 end Char
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem length_selT {Λ : Type} [CommRing Λ] [Algebra (X.O0 i) Λ] [Module Λ (KmodO (X.Ok i k))] (χ : Λ →+* X.Ok i k)
     (hχ : ∀ (c : Λ) (b : KmodO (X.Ok i k)), c • b = χ c • b) (hχ0 : ∀ c, χ (algebraMap (X.O0 i) Λ c) = phiK X i k c)
@@ -351,7 +401,7 @@ theorem length_selT {Λ : Type} [CommRing Λ] [Algebra (X.O0 i) Λ] [Module Λ (
     simp [matAct, hχ]
   · refine mem_selAll_iff _ _ h _ _ _ _ _ (fun v hv y => ?_) w
     have hv' : v ∈ placesOver D.host.E (X.l i) := hv
-    rw [le_antisymm (bk_le bkP i s k ψ v hv') (le_bk bkP i s k ψ v hv' (hψ v hv' _ (N.plOm.2 v))), bkOn, dif_pos hv']
+    rw [le_antisymm (bk_le bkP i s k ψ v hv') (le_bk bkP i s k ψ v hv' (hψ v hv' _ (N.plOm.2 v))), bkOn, dite_eq_left hv']
     refine mem_span_iff _ χ (fun c x => trH_smul _ _ _ c (χ c) (fun m => funext fun j => hχ c (m j)) x) _ _ ?_ ?_ y
     · rintro _ ⟨z, c, y, b, hc, hy, hz, rfl⟩
       exact ⟨trZ _ _ (fun g m => h (Subgroup.subtype _ g) m) z, c, y, b, hc, hy,

@@ -1,5 +1,48 @@
-import Formalism.LocalToGlobal.Columns.RecLevelDiv
-import Formalism.LocalToGlobal.Columns.RowFormsSym
+module
+
+public import Formalism.LocalToGlobal.Columns.RowFormsSym
+public import Formalism.LocalToGlobal.Columns.RecLevel
+public import Formalism.LocalRingCardinality.RankBoundMonotoneInDimension
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Matrix
 open scoped TensorProduct
@@ -52,15 +95,7 @@ def colLevSym (Ch : Chars X Pr R.m) (j : ℕ) : LevFam X.E X.K (R.N j) Pr.vGs :=
     ⟨HXmsym (𝓞 X.E ⧸ w.1.asIdeal) (R.N j) R.k R.r R.t R.m R.rS (r_le_N_of_le (by omega)),
       lamXmsym (Ch.psi0 w) (extChi fun s => Ch.chi s w) (R.N j) R.k R.r R.t R.m R.rS (r_le_N_of_le (by omega))⟩
 
-@[reducible] def colGSDSym (W : Wts X Pr.Word R) (Ch : Chars X Pr R.m) (u : Pr.Word) (j : ℕ) : GSD X.K :=
-  formGSD (colVal W u j (Pr.vT u) Pr.vGs) (colLevSym Ch j)
-
 variable (hc : Formalism.BasicNotions.CMData X.F X.E) (Ch : Chars X Pr R.m)
-
-def colUSym (u : Pr.Word) (j : ℕ) : Subgroup (GL (Fin (R.N j)) (X.E ⊗[X.F] Formalism.L2.Herm.Af X.F)) :=
-  levU hc (R.N j) (Pr.vT u) Pr.vGs (colLevSym Ch j).grp
-
-def colTypSym (u : Pr.Word) (j : ℕ) : colUSym hc Ch u j →* X.Kˣ := levTyp (colLevSym Ch j).chr
 
 end ColsSym
 
@@ -74,14 +109,14 @@ theorem colLevSym_pred {j : ℕ} (hj : j + 1 = R.m) :
     colLevSym Ch j = parFam (r_le_N_of_le hj.ge) R.t j (rPsymF Ch) (fun w => extChi fun s => Ch.chi s w) := by
   funext w
   unfold colLevSym
-  rw [if_neg (by have := R.two_le_m; omega), dif_neg (by omega), dif_pos hj]
+  rw [if_neg (by have := R.two_le_m; omega), dite_eq_right (by omega), dite_eq_left hj]
   rfl
 
 theorem colLevSym_top_H {j : ℕ} (hj : R.m ≤ j) (w : Pr.vGs) :
     (colLevSym Ch j w).H = HXmsym (𝓞 X.E ⧸ w.1.asIdeal) (R.N j) R.k R.r R.t R.m R.rS (r_le_N_of_le (by omega)) := by
   have h2 := R.two_le_m
   unfold colLevSym
-  rw [if_neg (by omega), dif_neg (by omega), dif_neg (by omega)]
+  rw [if_neg (by omega), dite_eq_right (by omega), dite_eq_right (by omega)]
 
 theorem colLevSym_top_lam {j : ℕ} (hj : R.m ≤ j) (w : Pr.vGs) (M : ↥(colLevSym Ch j w).H)
     (hM : M.1 ∈ HXmsym (𝓞 X.E ⧸ w.1.asIdeal) (R.N j) R.k R.r R.t R.m R.rS (r_le_N_of_le (by omega))) :
@@ -93,7 +128,7 @@ theorem colLevSym_top_lam {j : ℕ} (hj : R.m ≤ j) (w : Pr.vGs) (M : ↥(colLe
     intro l hl M' hM'
     have hl' : l = ⟨HXmsym (𝓞 X.E ⧸ w.1.asIdeal) (R.N j) R.k R.r R.t R.m R.rS (r_le_N_of_le (by omega)),
         lamXmsym (Ch.psi0 w) (extChi fun s => Ch.chi s w) (R.N j) R.k R.r R.t R.m R.rS (r_le_N_of_le (by omega))⟩ := by
-      rw [hl]; unfold colLevSym; rw [if_neg (by have := R.two_le_m; omega), dif_neg (by omega), dif_neg (by omega)]
+      rw [hl]; unfold colLevSym; rw [if_neg (by have := R.two_le_m; omega), dite_eq_right (by omega), dite_eq_right (by omega)]
     subst hl'
     rfl
   exact key _ rfl M hM
@@ -103,14 +138,6 @@ theorem N_pred_eq {j : ℕ} (hj : j + 1 = R.m) : R.N j = R.r + j * R.t := by
   rw [show R.m - 1 - j = 0 by omega, add_zero] at h
   exact h.symm
 
-theorem colUSym_eq_lev (u : Pr.Word) {j : ℕ} (hj : j + 1 = R.m) :
-    colUSym hc Ch u j = Formalism.L2.DIV.lev hc 1 1
-        (parDat (r_le_N_of_le hj.ge) R.t j (rPsymF Ch) (fun w => extChi fun s => Ch.chi s w)) ⊓
-      ⨅ Q ∈ Pr.vT u, mirAt (F := X.F) (R.N j) Q := by
-  unfold colUSym
-  rw [colLevSym_pred Ch hj]
-  exact levU_parFam_eq_lev_inf hc (r_le_N_of_le hj.ge) (t_pos R) (N_pred_eq hj) _ _ _
-
 theorem colLevSym_zero : colLevSym Ch 0 = colLev Ch 0 := by
   funext w
   simp [colLevSym]
@@ -119,7 +146,7 @@ theorem colLevSym_mid_H {j : ℕ} (h0 : j ≠ 0) (h1 : j + 1 < R.m) (w : Pr.vGs)
     (colLevSym Ch j w).H = (HJsym (𝓞 X.E ⧸ w.1.asIdeal) (R.N j + (R.m - 1 - j)) R.k R.r R.t j R.rS (r_le_Y (by omega))).comap
       (insGL (𝓞 X.E ⧸ w.1.asIdeal) (R.N j) (R.m - 1 - j) R.k (R.N j + (R.m - 1 - j)) (colK_le_N R j) rfl) := by
   unfold colLevSym
-  rw [if_neg h0, dif_pos h1]
+  rw [if_neg h0, dite_eq_left h1]
 
 theorem colLevSym_mid_lam {j : ℕ} (h0 : j ≠ 0) (h1 : j + 1 < R.m) (w : Pr.vGs) (M : ↥(colLevSym Ch j w).H)
     (hM : insGL (𝓞 X.E ⧸ w.1.asIdeal) (R.N j) (R.m - 1 - j) R.k (R.N j + (R.m - 1 - j)) (colK_le_N R j) rfl M.1 ∈
@@ -135,7 +162,7 @@ theorem colLevSym_mid_lam {j : ℕ} (h0 : j ≠ 0) (h1 : j + 1 < R.m) (w : Pr.vG
           (insGL (𝓞 X.E ⧸ w.1.asIdeal) (R.N j) (R.m - 1 - j) R.k (R.N j + (R.m - 1 - j)) (colK_le_N R j) rfl),
         (lamJsym (Ch.psi0 w) (extChi fun s => Ch.chi s w) (R.N j + (R.m - 1 - j)) R.k R.r R.t j R.rS (r_le_Y (by omega))).comp
           ((insGL (𝓞 X.E ⧸ w.1.asIdeal) (R.N j) (R.m - 1 - j) R.k (R.N j + (R.m - 1 - j)) (colK_le_N R j) rfl).subgroupComap _)⟩ := by
-      rw [hl]; unfold colLevSym; rw [if_neg h0, dif_pos h1]
+      rw [hl]; unfold colLevSym; rw [if_neg h0, dite_eq_left h1]
     subst hl'
     rfl
   exact key _ rfl M hM
@@ -233,11 +260,6 @@ theorem r_eq_sym (R : Ranks) : R.r = R.k + 2 * R.rS + 1 := by
   omega
 
 variable {X : Fields} {Pr : Primes X} {R : Ranks} (Ch : Chars X Pr R.m)
-
-theorem rPsymF_lam_val (w : {w // w ∈ Pr.vGs}) (M : ↥(rPsymF Ch w).H) :
-    (((rPsymF Ch w).lam M : X.Kˣ) : X.K) =
-      Ch.psi0 w (supSum R.r (SPsymF R.r R.k) (M.1 : Matrix (Fin R.r) (Fin R.r) (𝓞 X.E ⧸ w.1.asIdeal))) :=
-  chiSymF_val (r_eq_sym R) (Ch.psi0 w) M
 
 end SymRanks
 

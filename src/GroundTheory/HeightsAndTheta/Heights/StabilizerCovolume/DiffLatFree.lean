@@ -1,6 +1,50 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.StabilizerCovolume.DifferentLatIndex
-import GroundTheory.HeightsAndTheta.Heights.StabilizerCovolume.PDifferentExtNorm
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.StabilizerCovolume.EigenLatDifferent
+public import GroundTheory.HeightsAndTheta.Heights.StabilizerCovolume.RecordEigenInputs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -42,8 +86,8 @@ theorem idealLat_relIndex {w : Fin ρ → Fin N → F} (hw : LinearIndependent F
   rw [AddSubgroup.index_pi, AddSubgroup.index_pi] at h
   simpa [Ideal.absNorm_eq_index] using h
 
-omit [NumberField F] in
 
+omit [NumberField F] in
 theorem idealLat_smul (w : Fin ρ → Fin N → F) (r : 𝓞 F) (a : Ideal (𝓞 F)) :
     idealLat (fun i => r • w i) a = idealLat w (Ideal.span {r} * a) := by
   ext x
@@ -59,8 +103,8 @@ theorem idealLat_smul (w : Fin ρ → Fin N → F) (r : 𝓞 F) (a : Ideal (𝓞
     refine ⟨d, hd, Finset.sum_congr rfl fun i _ => ?_⟩
     rw [← hdc i, smul_smul, mul_comm]
 
-omit [NumberField F] in
 
+omit [NumberField F] in
 theorem idealLat_top (w : Fin ρ → Fin N → F) :
     idealLat w ⊤ = Submodule.span (𝓞 F) (Set.range w) := by
   rw [idealLat, Submodule.pi_top, Submodule.map_top, Fintype.range_linearCombination]
@@ -71,8 +115,8 @@ section DiffLatSpan
 
 variable {Em K : Type} [Field Em] [NumberField Em] [Field K] [NumberField K] {N ρ : ℕ}
 
-omit [NumberField K] in
 
+omit [NumberField K] in
 theorem diffLat_mono (s : Em →+* K) {M M' : Submodule (𝓞 Em) (Fin N → Em)} (h : M ≤ M') :
     diffLat s M ≤ diffLat s M' :=
   Submodule.span_mono (Set.image_mono fun _ ⟨x, hx, y, hy, hu⟩ => ⟨x, hx, y, h hy, hu⟩)
@@ -86,8 +130,9 @@ theorem diffLat_span (s : Em →+* K) (w : Fin ρ → Fin N → Em) :
     refine ⟨fun a => RingOfIntegers.mapRingHom s (x * c a),
       fun a _ => Ideal.mem_map_of_mem _ (Ideal.mul_mem_right _ _ hx), ?_⟩
     funext i
+
     simp [Fintype.linearCombination_apply, Finset.sum_apply, map_sum, Algebra.smul_def, mul_assoc,
-      Finset.mul_sum]
+    Finset.mul_sum]
   · rw [idealLat, Submodule.map_le_iff_le_comap]
     intro c hc
     simp only [Submodule.mem_comap, Fintype.linearCombination_apply]

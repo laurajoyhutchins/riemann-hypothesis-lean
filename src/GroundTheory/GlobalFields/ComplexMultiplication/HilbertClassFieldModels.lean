@@ -1,5 +1,56 @@
-import Mathlib
-import GroundTheory.GlobalFields.ComplexMultiplication.FrobeniusAtPrimes
+module
+
+public import GroundTheory.GlobalFields.ComplexMultiplication.Algebraicity
+public import GroundTheory.GlobalFields.ComplexMultiplication.ReductionRespectsAdd
+public import GroundTheory.GlobalFields.ComplexMultiplication.AlgebraicityGalois
+public import GroundTheory.GlobalFields.ComplexMultiplication.BaseChangeField
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.EllipticCurve.IsomOfJ
+public import Mathlib.AlgebraicGeometry.EllipticCurve.ModelsWithJ
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import GroundTheory.GlobalFields.ComplexMultiplication.AlgebraicityClass
+
+@[expose] public section
 
 namespace GroundTheory.Global
 namespace Elliptic
@@ -32,8 +83,8 @@ section Models
 
 variable {K : Type} [Field K] [NumberField K] [Algebra K ℂ]
 
-omit [Algebra K ℂ] in
 
+omit [Algebra K ℂ] in
 theorem exists_cmCurve_toEll_of_j_eq (x : ELL K) (W : WeierstrassCurve ℂ) [W.IsElliptic]
     (hW : W.j = ELL.j x) :
     ∃ h : Nonempty (isogEnd W ≃+* 𝓞 K), (⟨W, h⟩ : CMCurve K).toEll = x := by
@@ -43,10 +94,10 @@ theorem exists_cmCurve_toEll_of_j_eq (x : ELL K) (W : WeierstrassCurve ℂ) [W.I
   refine ⟨⟨(vcEndEquiv C hC).symm.trans E.endIso.some⟩, ?_⟩
   exact (CMCurve.toEll_eq_iff _ _).2 ⟨C⁻¹, inv_smul_eq_of_smul_eq C hC⟩
 
-variable (hK : finrank ℚ K = 2) [IsTotallyComplex K]
+variable (hK : finrank ℚ K = 2) [_root_.NumberField.IsTotallyComplex K]
+
 
 include hK in
-
 theorem nonempty_isogeny_of_cmCurve (A B : CMCurve K) : Nonempty (Isogeny A.curve B.curve) := by
   classical
   obtain ⟨a, ha, -⟩ := existsUnique_smul_eq (algebraMap K ℂ) hK A.toEll B.toEll
@@ -67,8 +118,8 @@ theorem nonempty_isogeny_of_cmCurve (A B : CMCurve K) : Nonempty (Isogeny A.curv
     exact mul_ne_zero hc ((_root_.map_ne_zero _).2 ht0) hQ.symm
   exact ⟨isogOfHom Q hQ0⟩
 
-include hK in
 
+include hK in
 theorem exists_models_isogenous (M : IntermediateField K ℂ) [FiniteDimensional K M] :
     ∃ L : IntermediateField K ℂ, M ≤ L ∧ FiniteDimensional K L ∧ IsGalois K L ∧
       ∃ _ : ∀ x : ELL K, ELL.j x ∈ L, ∃ (E : ELL K → WeierstrassCurve L) (_ : ∀ x, (E x).IsElliptic),

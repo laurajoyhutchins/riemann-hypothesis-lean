@@ -1,6 +1,45 @@
-import Mathlib
+module
+
+public import Formalism.SharpRestriction.CuspSpanNormBounds.BruhatCellsKronecker.NormAdditiveCharacterTypePrimeEqOne
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Formalism.SharpRestriction.CuspSpanNormBounds.BruhatCellsKronecker.CellDef
 import Formalism.SharpRestriction.CuspSpanNormBounds.KappaEndpoints
-import Formalism.FlagUnipotentLattices.GlobalAssemblyDoubled
+
+@[expose] public section
 
 noncomputable section
 
@@ -119,62 +158,5 @@ def Steps (k : ℕ) {P : FPair H r} (R : Reps P) (d0 : Datum P) : Prop :=
   StepFin R ∧ StepBB P ∧ MassBoundIndexSets k R ∧ MassBoundLevelSets k R d0 ∧ StepAl P ∧ StepE k R ∧ StepTypes P
 
 end Steps
-
-def DictAll (k r : ℕ) : Prop :=
-  ∀ (F : Type) [Field F] [ValuativeRel F] [TopologicalSpace F]
-    (E : Type) [CommRing E] [Algebra F E] [TopologicalSpace E] [MeasurableSpace E]
-    (M : Model F E), M.OK →
-    ∀ (V : Type) [AddCommGroup V] [Module E V] (H : HermSp M V),
-      Module.finrank E V = k + 2 * r + 1 → 4 * r + 7 ≤ k →
-      ∀ P : FPair H r, P.RelG (theta M) → (∃ (d : Datum P) (t : Term V M r), IsTermOver P d t) → ¬ P.PrimeTo →
-        StepHp P ∧ ∀ (R : Reps P) (d0 : Datum P), Steps k R d0
-
-def Glue (k r : ℕ) : Prop :=
-  ∀ (F : Type) [Field F] [ValuativeRel F] [TopologicalSpace F]
-    (E : Type) [CommRing E] [Algebra F E] [TopologicalSpace E] [MeasurableSpace E]
-    (M : Model F E), M.OK →
-    ∀ (V : Type) [AddCommGroup V] [Module E V] (H : HermSp M V),
-      Module.finrank E V = k + 2 * r + 1 → 4 * r + 7 ≤ k →
-      ∀ P : FPair H r, P.RelG (theta M) → (∃ (d : Datum P) (t : Term V M r), IsTermOver P d t) → StepHp P →
-        ∀ (R : Reps P) (d0 : Datum P), Steps k R d0 →
-          Nonempty (NGCore1 k R d0 22 7) ∧ Nonempty (NGCore2 k R d0 22 (fun t => ¬ BBne (H := H) t)) ∧
-            Nonempty (NGCore2 k R d0 22 (fun _ => True))
-
-def AssemblyConstantThirtyNine (k r : ℕ) : Prop :=
-  ∀ (F : Type) [Field F] [ValuativeRel F] [TopologicalSpace F]
-    (E : Type) [CommRing E] [Algebra F E] [TopologicalSpace E] [MeasurableSpace E]
-    (M : Model F E), M.OK →
-    ∀ (V : Type) [AddCommGroup V] [Module E V] (H : HermSp M V),
-      Module.finrank E V = k + 2 * r + 1 → 4 * r + 7 ≤ k →
-      ∀ P : FPair H r, P.RelG (theta M) → (∃ (d : Datum P) (t : Term V M r), IsTermOver P d t) → StepHp P →
-        ∀ (R : Reps P) (d0 : Datum P), Steps k R d0 →
-          sumSq R d0 (BBne (H := H)) ≤ ENNReal.ofReal (P.Hp ^ ((39 : ℝ) * ((r : ℝ) + 1) ^ 2) *
-              (qF F : ℝ) ^ (-((k : ℝ) - 2 * r - 5))) * nn R d0 ∧
-          sumSq R d0 (fun t => ¬ BBne (H := H) t) ≤ ENNReal.ofReal (P.Hp ^ ((39 : ℝ) * ((r : ℝ) + 1) ^ 2)) * nn R d0 ∧
-          sumSq R d0 (fun _ => True) ≤ ENNReal.ofReal (P.Hp ^ ((39 : ℝ) * ((r : ℝ) + 1) ^ 2)) * nn R d0
-
-theorem NGLeft_of_dict (k r : ℕ) (hk : 4 * r + 7 ≤ k) (hG : Glue k r) (hD : DictAll k r) : NGLeft k r 22 7 := by
-  intro F _ _ _ E _ _ _ _ M hOK V _ _ H hV P hR hT
-  refine ⟨fun hP => ⟨NGOrbit0_of hP hR, NGUnimod_of hOK hR.1⟩, fun hP R d0 => ?_⟩
-  obtain ⟨hHp, hS⟩ := hD F E M hOK V H hV hk P hR hT hP
-  exact hG F E M hOK V H hV hk P hR hT hHp R d0 (hS R d0)
-
-theorem local_counting_bound_of_dictionary (k r : ℕ) (C : ℝ) (hk : 4 * r + 7 ≤ k) (hC1 : (gainBoundConstant 22 7 : ℝ) ≤ C) (hC2 : (nongenericConstantNoGain 22 : ℝ) ≤ C)
-    (hG : Glue k r) (hD : DictAll k r) : Formalism.MainNotions.NonGenericAndKTwoTheorems.NonGenericLocalBound k r C :=
-  nongeneric_local_of_remainder k r 22 7 C hk hC1 hC2 (NGLeft_of_dict k r hk hG hD)
-
-theorem local_counting_bound_thirty_nine (k r : ℕ) (hk : 4 * r + 7 ≤ k) (hG : AssemblyConstantThirtyNine k r) (hD : DictAll k r) :
-    Formalism.MainNotions.NonGenericAndKTwoTheorems.NonGenericLocalBound k r 39 := by
-  intro F _ _ _ E _ _ _ _ M hOK V _ _ H hV P hR
-  by_cases hP : P.PrimeTo
-  · exact NGAt_of_good hOK k 39 hP hR
-  by_cases hT : ∃ (d : Datum P) (t : Term V M r), IsTermOver P d t
-  · obtain ⟨hHp, hS⟩ := hD F E M hOK V H hV hk P hR hT hP
-    exact NGAt_of hOK k 39 (fun R d0 => hG F E M hOK V H hV hk P hR hT hHp R d0 (hS R d0))
-      (fun h => absurd h hP)
-  · refine NGAt_of_noTerms hOK k 39 (fun R d => ?_)
-    ext t
-    simp only [Set.mem_empty_iff_false, iff_false]
-    exact fun ht => hT ⟨d, t, (R.hRT d).1 ht⟩
 
 end Formalism.L2.SG.NGDict

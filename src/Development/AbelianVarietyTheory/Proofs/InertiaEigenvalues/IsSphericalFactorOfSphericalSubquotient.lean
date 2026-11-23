@@ -1,18 +1,60 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.Langlands
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.LocalLanglandsExists
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.DepthZeroCuspidalLL
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.LocalConverseGL
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.LanglandsExhaustionGL
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.DepthZeroInduction
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.BrauerDegreeZero
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.LanglandsMultisegments
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.StandardCosocleGL
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.ExistsCellOfIsSubquotient
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.HasFiniteLengthOfIsIrreducible
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.ExistsUniqueHcharOfFiniteOrder
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.ChevalleyUnits
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.NonemptyEquivMultiProdOne
+public import Development.AbelianVarietyTheory.Definitions.Divisors.EqOfHasValueAtInfinite
+import Development.AbelianVarietyTheory.Definitions.Divisors.T2SpaceGeneralLinearGroup
+import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.EmbedsLevelZeroDepthZero
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsContinuousPadic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.PiTensorProduct.Basis
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.ExistsNotCongPow
+import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.ExistsReadingLaws
 import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsContractNeZero
+import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.HasExponentZeroIff
+import Formalism.ConjugateSelfDual.Statement
+import ReciprocityTheory.GaloisValuations.GlobalA
+
+@[expose] public section
 
 open NumberField IsDedekindDomain ValuativeRel Matrix Polynomial Formalism.ConjugateSelfDual ReciprocityTheory.Gal GlobalTheory.PRep GlobalTheory.SmGL GlobalTheory.SplitWeil GlobalTheory.LocGL GlobalTheory.WeilDeligne GlobalTheory.LocLanglands GlobalTheory.Published
 attribute [local instance] GlobalTheory.LocalData.complRel GlobalTheory.LocalData.isLocalField
@@ -213,7 +255,7 @@ private theorem exists_fixed_ne_zero_of_piTensor_fixed {Γ X : α → Type} [∀
   let S : Finset α := Finset.univ.erase a
   have hSne : ∀ b ∈ S, b ≠ a := fun b hb => Finset.ne_of_mem_erase hb
   have hSmem : ∀ b, b ≠ a → b ∈ S := fun b hb => Finset.mem_erase.2 ⟨hb, Finset.mem_univ _⟩
-  let C : MultilinearMap ℂ X (X a) :=
+  let C : (∀ i, X i) →ₘₗ[ℂ] X a :=
     { toFun := fun x => (∏ b ∈ S, (B b).repr (x b) (t b)) • x a
       map_update_add' := by
         intro _ x i y z
@@ -242,7 +284,7 @@ private theorem exists_fixed_ne_zero_of_piTensor_fixed {Γ X : α → Type} [∀
               (∏ b ∈ S, (B b).repr (Function.update x i u b) (t b)) =
               ∏ b ∈ S, (B b).repr (x b) (t b) := fun u =>
             Finset.prod_congr rfl fun b hb => by rw [Function.update_of_ne (hSne b hb)]
-          rw [hp, hp, Function.update_self, Function.update_self, smul_comm]
+          rw [hp, hp, Function.update_self, Function.update_self, smul_comm, RingHom.id_apply]
         · have hia : i ∈ S := hSmem i hi
           have hp : ∀ [DecidableEq α] (u : X i),
               (∏ b ∈ S, (B b).repr (Function.update x i u b) (t b)) =
@@ -252,7 +294,7 @@ private theorem exists_fixed_ne_zero_of_piTensor_fixed {Γ X : α → Type} [∀
             congr 1
             exact Finset.prod_congr rfl fun b hb => by rw [Function.update_of_ne (Finset.ne_of_mem_erase hb)]
           rw [hp, hp, Function.update_of_ne (Ne.symm hi), Function.update_of_ne (Ne.symm hi), map_smul,
-            Finsupp.smul_apply, smul_eq_mul, mul_assoc, mul_smul] }
+            Finsupp.smul_apply, smul_eq_mul, mul_assoc, mul_smul, RingHom.id_apply] }
   let C' := PiTensorProduct.lift C
   have hC : ∀ y, C' y = 0 → (Bt.repr y) t = 0 := by
     intro y hy
@@ -266,7 +308,7 @@ private theorem exists_fixed_ne_zero_of_piTensor_fixed {Γ X : α → Type} [∀
         show (B a).repr ((∏ b ∈ S, (B b).repr (x b) (t b)) • x a) (t a) = _
         rw [map_smul, Finsupp.smul_apply, smul_eq_mul]
         exact Finset.prod_erase_mul _ _ (Finset.mem_univ a)
-      | add y z hy hz => simp only [map_add, Finsupp.add_apply, hy, hz]
+      | add y z hy hz => simp only [map_add (f := _), Finsupp.add_apply, hy, hz]
     rw [← key, hy, map_zero, Finsupp.zero_apply]
   have hequi : ∀ (κ : Γ a) y, C' (piTensor ρ (Pi.mulSingle a κ) y) = ρ a κ (C' y) := by
     intro κ y
@@ -280,7 +322,7 @@ private theorem exists_fixed_ne_zero_of_piTensor_fixed {Γ X : α → Type} [∀
       congr 1
       exact Finset.prod_congr rfl fun b hb => by
         rw [Pi.mulSingle_eq_of_ne (Finset.ne_of_mem_erase hb), map_one, Module.End.one_apply]
-    | add y z hy hz => simp only [map_add, hy, hz]
+    | add y z hy hz => simp only [map_add (f := _), hy, hz]
   refine ⟨C' w, GlobalTheory.Parabolic.mem_fixed.2 fun κ hκ => ?_, fun h => ht (hC w h)⟩
   rw [← hequi]
   congr 1
@@ -318,7 +360,7 @@ theorem exists_fixed_of_parInd_KO (e : (Σ a, m a) ≃ n) {W : Type} [AddCommGro
     simp only [mul_one, leviProj_leviEmb, deltaHalf_eq_one_of_KO hg, Units.val_one, one_smul] at h1
     rw [← h1, h2]
 
-set_option maxHeartbeats 1000000 in
+
 private theorem exists_parInd_fixed_ne_zero_of_subquotient (e : (Σ a, m a) ≃ n) {X : α → Type} [∀ a, AddCommGroup (X a)]
     [∀ a, Module ℂ (X a)] (σ : ∀ a, Representation ℂ (GL (m a) k) (X a)) {V : Type} [AddCommGroup V] [Module ℂ V]
     {π : Representation ℂ (GL n k) V} (h : GlobalTheory.SmGL.IsSubquotient π (multiProd e σ))
@@ -369,7 +411,7 @@ theorem fixed_KO_of_isSubquotient (e : (Σ a, m a) ≃ n) {X : α → Type} [∀
   obtain ⟨w, hw0, hw⟩ := exists_fixed_of_parInd_KO e (piTensor σ) hf hf0
   exact exists_fixed_ne_zero_of_piTensor_fixed σ (fun a => KO k (m a)) hw0 hw a
 
-theorem isSpherical_factor : ∀ (k : Type) [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] [CharZero k] (h N : ℕ) (x : Fin h → IrrGL k) (hd : ∑ a, (x a).1 = N) (V : Type) [AddCommGroup V] [Module ℂ V] (π : Representation ℂ (GL (Fin N) k) V), GlobalTheory.SmGL.IsSubquotient π (prodIrr x hd) → IsSpherical π → ∀ a, IsSpherical (x a).rep := by
+theorem isSpherical_factor : ∀ (k : Type) [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] [CharZero k] (h N : ℕ) (x : Fin h → IrrGL (k := k)) (hd : ∑ a, (x a).1 = N) (V : Type) [AddCommGroup V] [Module ℂ V] (π : Representation ℂ (GL (Fin N) k) V), GlobalTheory.SmGL.IsSubquotient π (prodIrr x hd) → IsSpherical π → ∀ a, IsSpherical (x a).rep := by
   intro k _ _ _ _ _ h N x hd V _ _ π hsub hsph a
   obtain ⟨v, hv, hv0⟩ := (Submodule.ne_bot_iff _).1 hsph
   obtain ⟨w, hw, hw0⟩ := fixed_KO_of_isSubquotient (stdBlocks (fun a => (x a).1) hd) (fun a => (x a).rep) hsub

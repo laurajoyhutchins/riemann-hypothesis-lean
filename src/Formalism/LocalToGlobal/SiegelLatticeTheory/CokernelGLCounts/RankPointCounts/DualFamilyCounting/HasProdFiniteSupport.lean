@@ -1,4 +1,54 @@
-import Mathlib
+module
+
+public import Mathlib.Analysis.SpecialFunctions.Pow.Real
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Analysis.SpecialFunctions.Pow.Continuity
+
+@[expose] public section
 
 noncomputable section
 
@@ -19,35 +69,6 @@ theorem hasProd_rpow' {f : ι → ℝ} {a : ℝ} (p : ℝ) (hf : ∀ i, 0 ≤ f 
   unfold HasProd at h ⊢
   refine (h.rpow_const (Or.inl ha)).congr (fun s => ?_)
   exact (Real.finsetProd_rpow s f (fun i _ => hf i) p).symm
-
-theorem hasProd_of_compl (P : ι → Prop) [DecidablePred P] [Fintype {i // P i}] {f : ι → ℝ} {a : ℝ}
-    (h : HasProd (fun i : {i // ¬ P i} => f i) a) : HasProd f (a * ∏ i : {i // P i}, f i) := by
-  have h1 : HasProd ({i | ¬ P i}.mulIndicator f) a :=
-    (hasProd_subtype_iff_mulIndicator (s := {i | ¬ P i})).mp h
-  have h2 : HasProd ({i | P i}.mulIndicator f) (∏ i : {i // P i}, f i) :=
-    letI : Fintype ({i | P i} : Set ι) := inferInstanceAs (Fintype {i // P i})
-    (hasProd_subtype_iff_mulIndicator (s := {i | P i})).mp (hasProd_fintype _)
-  have h3 := h1.mul h2
-  convert h3 using 1
-  funext i
-  by_cases hp : P i <;> simp [Set.mulIndicator, hp]
-
-theorem hasProd_compl_of (P : ι → Prop) [DecidablePred P] [Fintype {i // P i}] {f : ι → ℝ} {a : ℝ}
-    (h : HasProd f a) (hf : ∀ i, P i → f i ≠ 0) :
-    HasProd (fun i : {i // ¬ P i} => f i) (a * (∏ i : {i // P i}, f i)⁻¹) := by
-  have h2 : HasProd (fun i => ({i | P i}.mulIndicator f i)⁻¹) (∏ i : {i // P i}, f i)⁻¹ := by
-    have h0 : HasProd ({i | P i}.mulIndicator f) (∏ i : {i // P i}, f i) :=
-      letI : Fintype ({i | P i} : Set ι) := inferInstanceAs (Fintype {i // P i})
-    (hasProd_subtype_iff_mulIndicator (s := {i | P i})).mp (hasProd_fintype _)
-    exact hasProd_inv₀' h0 (Finset.prod_ne_zero_iff.mpr fun i _ => hf i i.2)
-  have h3 := h.mul h2
-  have h4 : HasProd ({i | ¬ P i}.mulIndicator f) (a * (∏ i : {i // P i}, f i)⁻¹) := by
-    convert h3 using 1
-    funext i
-    by_cases hp : P i
-    · simp [Set.mulIndicator, hp, hf i hp]
-    · simp [Set.mulIndicator, hp]
-  exact (hasProd_subtype_iff_mulIndicator (s := {i | ¬ P i})).mpr h4
 
 theorem hasProd_of_finite_support {f : ι → ℝ} (s : Set ι) (hs : s.Finite) (h1 : ∀ i ∉ s, f i = 1) :
     HasProd f (∏ i ∈ hs.toFinset, f i) :=

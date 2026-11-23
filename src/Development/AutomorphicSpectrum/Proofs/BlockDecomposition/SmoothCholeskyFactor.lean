@@ -1,6 +1,58 @@
-import Mathlib
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.ArchimedeanGelfandKernels.LeftEquivariantFunctions.SymZeroCommFrame
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.DiscreteSeriesTopClasses.IsInvOne
+public import Mathlib.Analysis.Matrix.Normed
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+public import Mathlib.Analysis.SpecialFunctions.Sqrt
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
 import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ConeMeas
+import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.ArchimedeanGelfandKernels.IsMultZero
+public import Mathlib.Analysis.Calculus.ContDiff.Operations
+
+@[expose] public section
+
 open MeasureTheory Matrix Topology Filter
 open scoped ContDiff ENNReal ComplexOrder Pointwise
 open PositivityTheory.RgTw (Mat G hb)
@@ -137,24 +189,24 @@ lemma step_mul {σ : Mat n → Mat n} {P : Mat (n + 1)} (hP : P.PosDef)
     exact_mod_cast Real.mul_self_sqrt (lead_pos hP).le
   ext i j
   refine Fin.cases ?_ (fun i => ?_) i <;> refine Fin.cases ?_ (fun j => ?_) j
-  · simp only [mul_apply, conjTranspose_apply, Fin.sum_univ_succ, step_zero_zero, step_zero_succ]
+  · simp only [Matrix.mul_apply, conjTranspose_apply, Fin.sum_univ_succ, step_zero_zero, step_zero_succ]
     simp [hrr]
-  · simp only [mul_apply, conjTranspose_apply, Fin.sum_univ_succ, step_zero_zero, step_zero_succ,
+  · simp only [Matrix.mul_apply, conjTranspose_apply, Fin.sum_univ_succ, step_zero_zero, step_zero_succ,
       step_succ_zero]
     simp only [col, star_mul', hH]
     simp
     linear_combination (P 0 j.succ) * hr
-  · simp only [mul_apply, conjTranspose_apply, Fin.sum_univ_succ, step_zero_zero, step_zero_succ,
+  · simp only [Matrix.mul_apply, conjTranspose_apply, Fin.sum_univ_succ, step_zero_zero, step_zero_succ,
       step_succ_zero, step_succ_succ]
     simp [col]
     linear_combination (P i.succ 0) * hr
   · have h := congrFun (congrFun hσ i) j
-    simp only [mul_apply, conjTranspose_apply] at h
-    simp only [mul_apply, conjTranspose_apply, Fin.sum_univ_succ, step_succ_zero, step_succ_succ, h]
+    simp only [Matrix.mul_apply, conjTranspose_apply] at h
+    simp only [Matrix.mul_apply, conjTranspose_apply, Fin.sum_univ_succ, step_succ_zero, step_succ_succ, h]
     simp [schur]
 
 lemma contDiff_entry (i j : Fin m) : ContDiff ℝ ∞ (fun P : Mat m => P i j) :=
-  contDiff_apply_apply ℝ ℂ i j
+  contDiff_apply_apply ℝ i j
 
 lemma contDiffOn_mat {s : Set (Mat k)} {f : Mat k → Mat m}
     (h : ∀ i j, ContDiffOn ℝ ∞ (fun P => f P i j) s) : ContDiffOn ℝ ∞ f s :=

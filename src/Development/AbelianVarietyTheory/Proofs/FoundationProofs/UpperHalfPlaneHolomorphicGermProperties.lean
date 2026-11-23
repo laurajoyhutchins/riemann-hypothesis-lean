@@ -1,7 +1,60 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.ExpUpper
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.GlTwoPosRatMobiusBasicLawsStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+public import Mathlib.Analysis.Complex.Convex
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
 import Development.AbelianVarietyTheory.Definitions.Foundations.IsRootOne
-import Development.AbelianVarietyTheory.Definitions.Foundations.EigenOfTwoStep
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.GlTwoPosRatMobiusBasicLawsStatement
+public import Mathlib.Analysis.Analytic.IsolatedZeros
+public import Mathlib.Analysis.Calculus.Deriv.Mul
+public import Mathlib.Analysis.Complex.CauchyIntegral
+public import Mathlib.RingTheory.Polynomial.Cyclotomic.Basic
+
+@[expose] public section
+
 open GlobalTheory.KZ GlobalTheory.KZ.H3 Matrix
 open scoped MatrixGroups TensorProduct
 open Filter Topology
@@ -27,7 +80,7 @@ theorem eq_zero_or_eq_zero {a b : ℂ → ℂ} (ha : DifferentiableOn ℂ a Hs) 
   by_cases hA : ∀ z ∈ Hs, a z = 0
   · exact Or.inl hA
   · right
-    push_neg at hA
+    push Not at hA
     obtain ⟨z₀, hz₀, hne⟩ := hA
     have hcont : ContinuousAt a z₀ := (ha.continuousOn).continuousAt (isOpen_Hs.mem_nhds hz₀)
     have hev : ∀ᶠ z in 𝓝 z₀, a z ≠ 0 := hcont.eventually_ne hne
@@ -48,9 +101,7 @@ theorem exists_eq_zero_of_prod {ι : Type} [DecidableEq ι] (s : Finset ι) (f :
     simpa using h _ hI
   | insert j s hj ih =>
     have hP : DifferentiableOn ℂ (fun z => ∏ i ∈ s, f i z) Hs := by
-      have := DifferentiableOn.finset_prod (u := s) (f := f) (fun i hi => hf i (Finset.mem_insert_of_mem hi))
-      rw [show (fun z => ∏ i ∈ s, f i z) = ∏ i ∈ s, f i from by funext z; simp [Finset.prod_apply]]
-      exact this
+      exact DifferentiableOn.fun_finsetProd (fun i hi => hf i (Finset.mem_insert_of_mem hi))
     rcases eq_zero_or_eq_zero (hf j (Finset.mem_insert_self j s)) hP
         (fun z hz => by have := h z hz; rwa [Finset.prod_insert hj] at this) with h1 | h1
     · exact ⟨j, Finset.mem_insert_self j s, h1⟩
@@ -95,7 +146,7 @@ theorem main : (∀ a b : ℂ → ℂ, DifferentiableOn ℂ a Hs → Differentia
       exact h z hz
   · intro m a b hm ha hb h
     have hm0 : m ≠ 0 := hm.ne'
-    haveI : NeZero m := ⟨hm0⟩
+    have : NeZero m := ⟨hm0⟩
     have hζ := Complex.isPrimitiveRoot_exp m hm0
     obtain ⟨ξ, hξ, hξ'⟩ := exists_eq_zero_of_prod (Polynomial.nthRootsFinset m (1 : ℂ)) (fun ξ z => a z - ξ * b z)
       (fun ξ _ => ha.sub (hb.const_mul ξ))

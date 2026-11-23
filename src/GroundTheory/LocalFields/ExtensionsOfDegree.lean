@@ -1,11 +1,61 @@
-import Mathlib
-import GroundTheory.LocalFields.FiniteExtension
-import GroundTheory.LocalFields.Eisenstein
-import GroundTheory.LocalFields.SeparableClosure
-import GroundTheory.LocalFields.UnramifiedExistence
-import GroundTheory.LocalFields.MaximalUnramified
-set_option maxHeartbeats 4000000
-set_option synthInstance.maxHeartbeats 400000
+module
+
+public import Mathlib.Analysis.Normed.Module.Basic
+public import Mathlib.FieldTheory.IntermediateField.Adjoin.Defs
+public import Mathlib.FieldTheory.Separable
+public import Mathlib.Topology.MetricSpace.Ultra.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+public import Mathlib.Analysis.Normed.Field.Krasner
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Analysis.Normed.Algebra.Ultra
+public import Mathlib.NumberTheory.LocalField.Basic
+
+@[expose] public section
+
+
+
 
 noncomputable section
 
@@ -79,13 +129,17 @@ theorem exists_adjoin_eq_of_norm_coeff_sub_lt (f : L[X]) (hm : f.Monic) (hirr : 
     intro a ha b hb hab
     have hmem : ‖a - b‖ ∈ D :=
       Finset.mem_image.2 ⟨(a, b), Finset.mem_filter.2 ⟨Finset.mem_product.2 ⟨ha, hb⟩, hab⟩, rfl⟩
-    rw [hr_def, dif_pos ⟨_, hmem⟩]
+    rw [hr_def, dite_eq_left ⟨_, hmem⟩]
     exact D.min'_le _ hmem
   refine ⟨r ^ f.natDegree, pow_pos hr _, ?_⟩
   intro g hgm hdeg hgc hclose β hβ
   have hβint : IsIntegral L β := ⟨g, hgm, by rwa [← aeval_def]⟩
   have : FiniteDimensional L L⟮β⟯ := adjoin.finiteDimensional hβint
-  let ψ : L⟮β⟯ →ₐ[L] C := IsAlgClosed.lift
+  let ψ : L⟮β⟯ →ₐ[L] C := (by
+    refine @_root_.IsAlgClosed.lift _ _ _ _ _ _ _ _ _ _ _ ?_ ?_ ?_
+    solve_by_elim* (maxDepth := 2) only [*,
+      @_root_.DivisionSemiring.to_moduleIsTorsionFree,
+      @_root_.Algebra.IsIntegral.isAlgebraic, @_root_.inferInstance])
   set β' : C := ψ (AdjoinSimple.gen L β) with hβ'_def
   have hgen : aeval (AdjoinSimple.gen L β) g = 0 := by
     apply (algebraMap L⟮β⟯ Ω').injective
@@ -122,7 +176,7 @@ theorem exists_adjoin_eq_of_norm_coeff_sub_lt (f : L[X]) (hm : f.Monic) (hirr : 
     push Not at hcon
     have : r ^ f.natDegree ≤ ‖aeval β' f‖ := by
       rw [heval, norm_prod, ← hcard, ← Finset.prod_const]
-      exact Finset.prod_le_prod (fun _ _ ↦ hr.le) hcon
+      exact Finset.prod_le_prod₀ (fun _ _ ↦ hr.le) hcon
     exact absurd hsmall (not_lt.2 this)
   have hfC : f.map (algebraMap L C) ≠ 0 := (hm.map _).ne_zero
   have haroot : aeval a f = 0 := by

@@ -1,7 +1,49 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.RemainderTerms.Statements
-import GroundTheory.HeightsAndTheta.Heights.RemainderTerms.AltCoeff
-import GroundTheory.HeightsAndTheta.Heights.RemainderTerms.Lattice
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.RemainderTerms.AltCoeff
+public import GroundTheory.HeightsAndTheta.Heights.RemainderTerms.Lattice
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.RestTerms
@@ -108,24 +150,6 @@ def CombCfVandermondePsumOne.Statement : Prop :=
   ∀ (m n : ℕ) (l : Fin m → ℕ), ∑ i, l i = ∑ i, stair m i + n →
     cf l (alternantPsum m (List.replicate n 1)) =
       (n.factorial : ℚ) * vandermondeOf (fun i => (l i : ℚ)) / ∏ i, ((l i).factorial : ℚ)
-
-def CombVandermondeSucc.Statement : Prop :=
-  ∀ (n : ℕ) (v : Fin (n + 1) → ℚ),
-    vandermondeOf v = (∏ j : Fin n, (v 0 - v j.succ)) * vandermondeOf (fun j : Fin n => v j.succ)
-
-def CombHookShapeFacts.Statement : Prop :=
-  ∀ r s l : ℕ, l < s → s ≤ r → Antitone (hookShape r s l) ∧ ∑ i, hookShape r s l i = s
-
-def CombHookBranch.Statement : Prop :=
-  ∀ r s l : ℕ, 1 ≤ s → l ≤ s → s + 1 ≤ r → ∀ a : Fin r,
-    (if 1 ≤ hookShape r (s + 1) l a then
-      (latticeWords s (Function.update (hookShape r (s + 1) l) a
-        (hookShape r (s + 1) l a - 1))).card else 0) =
-      (if (a : ℕ) = 0 ∧ l < s then (latticeWords s (hookShape r s l)).card else 0) +
-        (if (a : ℕ) = l ∧ 1 ≤ l then (latticeWords s (hookShape r s (l - 1))).card else 0)
-
-def CombHookCount.Statement : Prop :=
-  ∀ r s l : ℕ, l < s → s ≤ r → (latticeWords s (hookShape r s l)).card = (s - 1).choose l
 
 def CombSortLe.Statement : Prop :=
   ∀ (m : ℕ) (u l : Fin m → ℕ) (σ : Perm (Fin m)), Antitone l → (∀ i, u i ≤ l i) →

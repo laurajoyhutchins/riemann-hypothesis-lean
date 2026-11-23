@@ -1,5 +1,63 @@
-import ReciprocityTheory.L2DbarEstimates.ChartDerivatives.MeasurableSetImageOfIsLocalHomeomorph
-import ReciprocityTheory.L2DbarEstimates.ChartDerivatives.ExistsChartPartition
+module
+
+public import Mathlib.LinearAlgebra.Complex.FiniteDimensional
+public import Mathlib.Topology.Separation.CompletelyRegular
+public import ReciprocityTheory.L2DbarEstimates.IsLocalHomeomorph
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+public import Mathlib.Analysis.Calculus.LineDeriv.IntegrationByParts
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Mathlib.Topology.UniformSpace.Uniformizable
+public import ReciprocityTheory.L2DbarEstimates.ChartDerivatives.ChartSymmEventuallyEq
+public import ReciprocityTheory.L2DbarEstimates.ChartDerivatives.ExistsChartPartition
+public import ReciprocityTheory.L2DbarEstimates.ChartDerivatives.MeasurableSetImageOfIsLocalHomeomorph
+import ReciprocityTheory.L2DbarEstimates.ChartDerivatives.TsupportDbSubset
+public import Mathlib.Analysis.Calculus.ContDiff.Basic
+public import Mathlib.Analysis.Calculus.ContDiff.Operations
+public import Mathlib.Analysis.Calculus.FDeriv.Mul
+
+@[expose] public section
 
 namespace ReciprocityTheory.L2DbarEstimates
 
@@ -55,9 +113,6 @@ theorem integrable_of_continuous_real {M : Type*} [TopologicalSpace M] [T2Space 
   have h := integrable_of_continuous n z hz (fun x => (f x : ℂ)) (Complex.continuous_ofReal.comp hf)
     (hc.comp_left Complex.ofReal_zero)
   simpa using h.re
-
-theorem Smooth.integrable {M : Type*} [TopologicalSpace M] [T2Space M] [SecondCountableTopology M] [MeasurableSpace M] [BorelSpace M] (n : ℕ) (z : M → V n) (hz : IsLocalHomeomorph z) (f : M → ℂ) (hf : Smooth n z f) (hc : HasCompactSupport f) :
-    Integrable f (vol n z) := integrable_of_continuous n z hz f (Smooth.continuous n z hz f hf) hc
 
 theorem chart_extend {M : Type*} [TopologicalSpace M] (n : ℕ) (z : M → V n)
     (e : OpenPartialHomeomorph M (V n)) (he : IsChart n z e) (h : M → ℂ) (hh : Ck n z 1 h)
@@ -127,12 +182,6 @@ theorem integral_db_chart_eq_zero {M : Type*} [TopologicalSpace M] [T2Space M] [
     exact (wdb_congr n j _ _ y (hHo y hy)).trans (wdb_zero_fun n j y)
   rw [h1, h2, integral_wdb_eq_zero n j H hH1 hHc]
 
-theorem Ck.finset_sum {M : Type*} [TopologicalSpace M] (n : ℕ) (z : M → V n) {ι : Type*}
-    (s : Finset ι) (F : ι → M → ℂ) (hF : ∀ i, Ck n z 1 (F i)) :
-    Ck n z 1 (fun y => ∑ i ∈ s, F i y) := by
-  intro e he
-  exact ContDiffOn.sum fun i _ => hF i e he
-
 private theorem wd_wdb_finset_sum {ι : Type*} {n : ℕ} (s : Finset ι) (G : ι → V n → ℂ) (y : V n)
     (hG : ∀ i ∈ s, DifferentiableAt ℝ (G i) y) (j : Fin n) :
     wd n j (fun w => ∑ i ∈ s, G i w) y = ∑ i ∈ s, wd n j (G i) y ∧
@@ -201,7 +250,7 @@ theorem integral_db_eq_zero {M : Type*} [TopologicalSpace M] [T2Space M] [Second
         exact hx (d_db_eq_zero_of_not_mem_tsupport n z hz j _ x hx').2)
   have hsum : (fun x => db n z j (fun x => ∑ i, h i x) x) = fun x => ∑ i, db n z j (h i) x :=
     funext fun x => db_finset_sum n z Finset.univ h (fun i => hh i) j x
-  rw [hsum, integral_finset_sum _ fun i _ => dint i]
+  rw [hsum, MeasureTheory.integral_finsetSum _ fun i _ => dint i]
   exact Finset.sum_eq_zero fun i _ =>
     integral_db_chart_eq_zero n z hz (e i) (he i) j (h i) (hh i) (hc' i) (hs i)
 

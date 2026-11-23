@@ -1,6 +1,45 @@
-import Development.AutomorphicArithmetic.Foundations.Convolution.TensFun
-import Development.AutomorphicArithmetic.Foundations.Convolution.PowerSumTraces.DecayTraceClassAlt
-import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.GalTwistEx
+module
+
+public import Development.AutomorphicArithmetic.Foundations.Convolution.TensFun
+public import Development.AutomorphicArithmetic.Foundations.Convolution.PowerSumTraces.DecayTraceClassAlt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -12,10 +51,10 @@ namespace UpperTheory.ConvolutionTheory
 
 section One
 
-variable {K : Type} [Field K] [NumberField K] {n : ℕ} {μ : Measure (normOneGL K n)} [μ.IsHaarMeasure]
+variable {K : Type} [Field K] [NumberField K] {n : ℕ} {μ : Measure (normOneGL (K := K) (n := n))} [μ.IsHaarMeasure]
 
-def Inner (μ : Measure (normOneGL K n)) [μ.IsHaarMeasure] (T : LL μ →L[ℂ] LL μ) : Prop :=
-  ∀ V : Submodule ℂ (LL μ), IsClosed (V : Set (LL μ)) → (rightRegularRep (rationalGLOne K n) μ).IsInvariant V →
+def Inner (μ : Measure (normOneGL (K := K) (n := n))) [μ.IsHaarMeasure] (T : LL μ →L[ℂ] LL μ) : Prop :=
+  ∀ V : Submodule ℂ (LL μ), IsClosed (V : Set (LL μ)) → (rightRegularRep (rationalGLOne (K := K) (n := n)) μ).IsInvariant V →
     T ∘L prj V = prj V ∘L T
 
 structure Side (θ : Twist μ) (l : ℕ) extends Amp μ where
@@ -40,20 +79,20 @@ def Side.Rep {θ : Twist μ} {l : ℕ} (𝔰 : Side θ l) (P : LL μ →L[ℂ] L
 end One
 
 def EvEx : Prop :=
-  ∀ (K : Type) [Field K] [NumberField K] [IsTotallyComplex K] (n : ℕ), 0 < n →
-    ∀ (μ : Measure (normOneGL K n)) [μ.IsHaarMeasure] (𝔞 : Amp μ),
+  ∀ (K : Type) [Field K] [NumberField K] [_root_.NumberField.IsTotallyComplex K] (n : ℕ), 0 < n →
+    ∀ (μ : Measure (normOneGL (K := K) (n := n))) [μ.IsHaarMeasure] (𝔞 : Amp μ),
       0 ≤ 𝔞.A ∧ ‖𝔞.A‖ ≤ 1 ∧ (∀ v, 𝔞.A v ∈ fixF μ 𝔞.U) ∧ ∃ ev, 𝔞.IsEv ev ∧ ∀ P, Inner μ (ev P)
 
 def ParEx : Prop :=
-  ∀ (K : Type) [Field K] [NumberField K] [IsTotallyComplex K] (n : ℕ), 0 < n →
-    ∀ (μ : Measure (normOneGL K n)) [μ.IsHaarMeasure] (V : Submodule ℂ (LL μ)), IsSummand μ V →
+  ∀ (K : Type) [Field K] [NumberField K] [_root_.NumberField.IsTotallyComplex K] (n : ℕ), 0 < n →
+    ∀ (μ : Measure (normOneGL (K := K) (n := n))) [μ.IsHaarMeasure] (V : Submodule ℂ (LL μ)), IsSummand μ V →
       (∀ τ, ∃! m, SInf μ V τ m) ∧
       (∀ w, V ⊓ fixL μ w (GLnLocal.integralGL (w.adicCompletion K) n) ≠ ⊥ → ∃! B, SSat μ V w B) ∧
       ∀ w B, SSat μ V w B → 0 ∉ B
 
 def Kill : Prop :=
-  ∀ (K : Type) [Field K] [NumberField K] [IsTotallyComplex K] (n : ℕ), 0 < n →
-    ∀ (μ : Measure (normOneGL K n)) [μ.IsHaarMeasure] (𝔞 : Amp μ) (η : ℝ), 0 < η →
+  ∀ (K : Type) [Field K] [NumberField K] [_root_.NumberField.IsTotallyComplex K] (n : ℕ), 0 < n →
+    ∀ (μ : Measure (normOneGL (K := K) (n := n))) [μ.IsHaarMeasure] (𝔞 : Amp μ) (η : ℝ), 0 < η →
     ∃ (B : Type) (_ : Fintype B) (b : B → Datum K n), (∀ i, ∃ Λ t, (b i).Pt 𝔞.S Λ t) ∧
       ∀ ev, 𝔞.IsEv ev → ∀ χ : ℝ → ℝ, Continuous χ → (∀ x ≤ η / 2, χ x = 0) → (∀ x, |χ x| ≤ 1) →
       ∀ F G, admitted 𝔞.S F → (∀ i, Kills 𝔞.S F (b i)) → IsGen F G →
@@ -62,7 +101,7 @@ def Kill : Prop :=
 section Two
 
 variable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] {n l : ℕ}
-  {μE : Measure (normOneGL E n)} [μE.IsHaarMeasure] {μF : Measure (normOneGL F n)} [μF.IsHaarMeasure] {θ : Twist μE}
+  {μE : Measure (normOneGL (K := E) (n := n))} [μE.IsHaarMeasure] {μF : Measure (normOneGL (K := F) (n := n))} [μF.IsHaarMeasure] {θ : Twist μE}
 
 def GeoPair (𝔢 : Side θ l) (𝔣 : Side (Twist.id μF) l) (c : ℂ) : Prop :=
   (∀ w : Pl E, w ∈ 𝔢.S ↔ w.under (𝓞 F) ∈ 𝔣.S) ∧ ∃ (p : ℕ) (C₀ : ℝ), 0 < p ∧
@@ -81,9 +120,9 @@ def OffFam (F : Type) [Field F] [NumberField F] [Algebra F E] (n : ℕ) (SE : Se
 end Two
 
 def CI : Prop :=
-  ∀ (F E : Type) [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] [IsTotallyComplex F] [IsTotallyComplex E]
+  ∀ (F E : Type) [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] [_root_.NumberField.IsTotallyComplex F] [_root_.NumberField.IsTotallyComplex E]
     (n l : ℕ), 0 < n → 0 < l →
-    ∀ (μE : Measure (normOneGL E n)) [μE.IsHaarMeasure] (μF : Measure (normOneGL F n)) [μF.IsHaarMeasure] (θ : Twist μE)
+    ∀ (μE : Measure (normOneGL (K := E) (n := n))) [μE.IsHaarMeasure] (μF : Measure (normOneGL (K := F) (n := n))) [μF.IsHaarMeasure] (θ : Twist μE)
       (𝔢 : Side θ l) (𝔣 : Side (Twist.id μF) l) (c : ℂ), GeoPair 𝔢 𝔣 c →
     ∀ (Λ : (E →+* ℂ) → Multiset ℂ) (t : Pl E → Multiset ℂ), (∀ τ, (Λ τ).card = n) → (∀ w ∉ 𝔢.S, (t w).card = n ∧ 0 ∉ t w) →
       OffFam F n 𝔢.S 𝔣.S Λ t → ∀ x : ℝ, 0 < x → ∀ᶠ j : ℕ in atTop,

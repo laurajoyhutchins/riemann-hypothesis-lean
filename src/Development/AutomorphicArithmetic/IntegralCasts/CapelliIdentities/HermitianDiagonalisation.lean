@@ -1,10 +1,64 @@
-import Mathlib
+module
+
+public import Mathlib.LinearAlgebra.Matrix.GeneralLinearGroup.Defs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.LinearAlgebra.Matrix.Hermitian
+
+@[expose] public section
+
 
 open Matrix in
-
 private def Dz {E ι : Type} [Field E] [StarRing E] [Fintype ι] [DecidableEq ι]
     (T : Matrix ι ι E) : Prop :=
-  ∃ g : Matrix ι ι E, g.det ≠ 0 ∧ ∃ D : ι → E, gᴴ * T * g = diagonal D
+  ∃ g : Matrix ι ι E, g.det ≠ 0 ∧ ∃ D : ι → E, Matrix.conjTranspose g * T * g = Matrix.diagonal D
 
 open Matrix in
 private theorem Dz.of_submatrix {E ι κ : Type} [Field E] [StarRing E] [Fintype ι] [DecidableEq ι]
@@ -68,7 +122,7 @@ private theorem Dz.sum {E A B : Type} [Field E] [StarRing E] [Fintype A] [Decida
   rw [key]
   obtain ⟨gA, hgA, DA, hDA⟩ := hA X h1
   obtain ⟨gB, hgB, DB, hDB⟩ := hB S hSH
-  refine ⟨fromBlocks gA 0 0 gB, ?_, Sum.elim DA DB, ?_⟩
+  refine ⟨fromBlocks gA (0 : Matrix A B E) (0 : Matrix B A E) gB, ?_, Sum.elim DA DB, ?_⟩
   · rw [det_fromBlocks_zero₂₁]; exact mul_ne_zero hgA hgB
   · rw [fromBlocks_conjTranspose, fromBlocks_multiply, fromBlocks_multiply, ← fromBlocks_diagonal]
     simp [hDA, hDB]
@@ -110,7 +164,7 @@ private theorem Dz.all {E : Type} [Field E] [StarRing E] [CharZero E] :
   push_neg at hd
   by_cases h0 : T = 0
   · subst h0
-    exact ⟨1, by simp, 0, by simp⟩
+    exact ⟨1, by simp, 0, by ext i j; simp [Matrix.diagonal]⟩
   obtain ⟨i, j, hij⟩ : ∃ i j, T i j ≠ 0 := by
     by_contra hc
     push_neg at hc

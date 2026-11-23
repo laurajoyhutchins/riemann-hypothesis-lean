@@ -1,6 +1,44 @@
-import Formalism.LocalToGlobal.ProjectiveLattices.IntegralExtensionOfRegR1
-import Formalism.LocalToGlobal.ProjectiveLattices.IntAtExtExtAll
-import Formalism.LocalToGlobal.ProjectiveLattices.ValSetAlgSubset
+module
+
+public import Formalism.LocalToGlobal.ProjectiveLattices.IntegralExtensionOfRegR1
+public import Formalism.LocalToGlobal.ProjectiveLattices.IntAtExtExtAll
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -10,24 +48,14 @@ open NumberField IsDedekindDomain ReciprocityTheory.ChartRestriction.G.Geo.Tor F
 
 variable {D : D7} {T : Top D} (h : LawsP T) (j : ℕ) (hj : InR D j)
 
-include h hj in
 
+include h hj in
 theorem pt_realise (la : HeightOneSpectrum (𝓞 T.Q.c.F))
     (y : PtV (T.Q.Xo j) T.Q.c (algCls _ _) Unit (fun _ _ _ _ => True) la) :
     ∃ y' : T.PtA j la, ∀ f, vAtV y' f = vAtV y f := by
   rcases y with ⟨q, S, io, e, ho, z, hz, η, hη, rfl⟩
   obtain ⟨η', hη'⟩ := T.G.liesTotal h.points_condition h.bc66 hj la S io e ho z hz
   exact ⟨PtV.mk la ho z hz η' hη', fun _ => rfl⟩
-
-theorem regularity_R1_extended_points : RegularityR1 (recPJ h j hj) (extAll h j hj) := by
-  intro w F hF la y'
-  rw [extAll_vAt_inc]
-  refine (h.reg j hj).int (dom_wtA w) (cutR_le T.C j w F.2) ?_ la y'.1 y'.2
-  rintro la' _ ⟨y, rfl⟩
-  obtain ⟨y', hy'⟩ := pt_realise h j hj la' y
-  have := hF la' y'
-  rw [recPJ_vAt_inc, hy'] at this
-  exact this
 
 theorem ereal_lin (a c : ℝ) (v : EReal) (h0 : 0 ≤ v) (ht : v ≠ ⊤) :
     (((a + c * v.toReal : ℝ)) : EReal) = (a : EReal) + (c : EReal) * v := by

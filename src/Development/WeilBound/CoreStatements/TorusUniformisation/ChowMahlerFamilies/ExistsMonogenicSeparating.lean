@@ -1,4 +1,65 @@
-import Mathlib
+module
+
+public import Mathlib.NumberTheory.NumberField.Basic
+public import Mathlib.RingTheory.Valuation.ValuationRing
+import Mathlib.Algebra.AffineMonoid.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.FreeModule.IdealQuotient
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.FieldTheory.Finite.Basic
+public import Mathlib.RingTheory.DedekindDomain.Ideal.Basic
+public import Mathlib.RingTheory.DedekindDomain.Ideal.Lemmas
+public import Mathlib.RingTheory.Nakayama
+
+@[expose] public section
+
 open NumberField
 
 namespace PositivityTheory.Xgn.MonogenicSeparating
@@ -36,7 +97,7 @@ private theorem exists_finite_subalgebra_pi_of_ringHom_lemma_2 {O V S : Type} [C
       rw [← Algebra.smul_def]
       exact Submodule.smul_mem _ v (Submodule.subset_span ⟨a, rfl⟩)
     | add t₁ t₂ h₁ h₂ =>
-      rw [map_add]
+      rw [map_add (f := _)]
       exact Submodule.add_mem _ h₁ h₂
 
 theorem sep_poly (E : Type) [Field E] [NumberField E] (P : Ideal (𝓞 E)) (hP : P.IsPrime)
@@ -216,7 +277,7 @@ theorem adjoin_top {O V R : Type} [CommRing O] [CommRing V] [IsLocalRing V] [Com
       refine ⟨v₁ + v₂, z₁ + z₂, ?_⟩
       have h₁₂ := Ideal.add_mem _ h₁ h₂
       convert h₁₂ using 1
-      rw [map_add]
+      rw [map_add (f := _)]
       ring
     | smul r x _ hx =>
       obtain ⟨v, z, h⟩ := hx
@@ -281,14 +342,14 @@ theorem ex_poly (E : Type) [Field E] [NumberField E] (V : Type) [CommRing V] [Is
     ∃ π : 𝓞 E, ∀ a : 𝓞 E, ∃ g : V[X], ∀ s, e s a = g.eval (e s π) := by
   have hP : ((IsLocalRing.maximalIdeal V).comap c).IsPrime := Ideal.comap_isPrime c _
   obtain ⟨π, hπP, hπ⟩ := PositivityTheory.Xgn.MonogenicSeparating.ex_unif E _ hP
-  obtain ⟨R, hRfin, hFR, hRspan⟩ := exists_finite_subalgebra_pi_of_ringHom_lemma_2 (Pi.ringHom e)
+  obtain ⟨R, hRfin, hFR, hRspan⟩ := exists_finite_subalgebra_pi_of_ringHom_lemma_2 (RingHom.pi e)
   haveI := hRfin
   obtain ⟨φ, hφ⟩ : ∃ φ : 𝓞 E →+* R, ∀ a s, (φ a : S → V) s = e s a :=
-    ⟨(Pi.ringHom e).codRestrict R hFR, fun a s => rfl⟩
+    ⟨(RingHom.pi e).codRestrict R hFR, fun a s => rfl⟩
   have hgen : Submodule.span V (Set.range φ) = ⊤ := by
     rw [eq_top_iff]
     rintro ⟨x, hx⟩ -
-    have key : ∀ y (hy : y ∈ Submodule.span V (Set.range (Pi.ringHom e))),
+    have key : ∀ y (hy : y ∈ Submodule.span V (Set.range (RingHom.pi e))),
         ∃ h : y ∈ R, (⟨y, h⟩ : R) ∈ Submodule.span V (Set.range φ) := by
       intro y hy
       induction hy using Submodule.span_induction with
@@ -309,7 +370,8 @@ theorem ex_poly (E : Type) [Field E] [NumberField E] (V : Type) [CommRing V] [Is
     intro a
     apply Subtype.ext
     funext s
-    rw [SubmonoidClass.coe_finset_prod, Finset.prod_apply]
+    change (R.val (∏ s', (φ a - algebraMap V R (e s' a)))) s = 0
+    rw [map_prod, Finset.prod_apply]
     exact Finset.prod_eq_zero (Finset.mem_univ s) (by simp [hφ])
   have hnil : ∀ a, ∃ n, (φ a - algebraMap V R (c a)) ^ n ∈
       (IsLocalRing.maximalIdeal V).map (algebraMap V R) := by
@@ -373,7 +435,7 @@ theorem ex_idem {O V ι : Type} [CommRing O] [CommRing V] [IsLocalRing V] [Finty
     intro r hr
     have hex : ∃ a, IsUnit (e r a - e σ a) := by
       by_contra hcon
-      push_neg at hcon
+      push Not at hcon
       exact hr ((hK r).mpr hcon)
     have hu := hA r hex
     rw [hy, IsUnit.prod_iff]

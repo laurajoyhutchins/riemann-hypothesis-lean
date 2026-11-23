@@ -1,4 +1,47 @@
-import Formalism.SharpRestriction.GrowthBounds.LogarithmicSums.PartnerCountOfCentral
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.LogarithmicSums.PartnerCountOfCentral
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -200,14 +243,6 @@ theorem second_level_lt_good_of_log {D : D7} (L : SizeData₂ D) (hS : Formalism
 
 def CStar (eps : ℝ) (K : Consts) (C31 : ℝ) : ℝ :=
   3 + K.tII * (rE eps : ℝ) + (2 * (3 : ℝ) + 4 * K.tII + 160 * C31 + 7) + K.Pr1 * C31 + K.kappaThresholdOne * |cNE eps|
-
-theorem CStar_nonneg (eps : ℝ) (K : Consts) (hK : K.Nonneg) (C31 : ℝ) (hC31 : 0 < C31) : 0 ≤ CStar eps K C31 := by
-  obtain ⟨-, -, -, htII, -, -, -, -, htI1, -, -, -, -, hPr1, -⟩ := hK
-  unfold CStar
-  have a := mul_nonneg htII (Nat.cast_nonneg (α := ℝ) (rE eps))
-  have b := mul_nonneg hPr1 hC31.le
-  have c := mul_nonneg htI1 (abs_nonneg (cNE eps))
-  linarith
 
 def SmallB (D : D7) (L : SizeData₂ D) (K : Consts) (C31 bo : ℝ) : Prop :=
   (∀ p : ℕ, p.Prime → (p : ℝ) < L.sc.p0 D.R.k → (D.R.k : ℝ) * Qp L.sc p ≤ L.sc.b') ∧

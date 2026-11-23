@@ -1,7 +1,57 @@
-import CompanionTheory.HarishChandraModules.LowKTypeMultiplicity.DiscreteSeriesCharacters.CapelliDeterminantBlockProduct
+module
+
+public import CompanionTheory.HarishChandraModules.LowKTypeMultiplicity.DiscreteSeriesCharacters.CapelliDeterminantBlockProduct
+public import Formalism.HermitianCurvature.StatementQ
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.LemmaDDeterminantIdentity
 import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.QnCovDet
 import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.QnCovLin
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.LemmaDDeterminantIdentity
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Matrix Finset
 open scoped InnerProductSpace
@@ -15,11 +65,12 @@ open Formalism.REAL Formalism.FourierDecayAlt.Q
 theorem map_qminor {A B : Type} [Ring A] [Algebra ℂ A] [Ring B] [Algebra ℂ B] (f : A →ₐ[ℂ] B) {n t : ℕ}
     (E : Fin n → Fin n → A) (a b : Fin t → Fin n) (u : ℂ) :
     f (qminor E a b u) = qminor (fun c d => f (E c d)) a b u := by
+
   simp only [qminor, map_sum, map_mul, map_intCast, map_list_prod, List.map_ofFn]
   refine Finset.sum_congr rfl fun σ _ => ?_
   congr 3
   funext k
-  simp only [Function.comp, Tm, map_add]
+  simp [Tm]
   split_ifs <;> simp
 
 theorem qminor_mem {A : Type} [Ring A] [Algebra ℂ A] (T : Subalgebra ℂ A) {n t : ℕ}
@@ -129,7 +180,7 @@ theorem capelli_spread : Spread := by
   let c : ℂ → ℂ := fun Y => Formalism.QuantumDeterminants.capP (fun s => (lam s : ℂ)) Y
   let K : Submodule ℂ S :=
     { carrier := {x | ∀ Y : ℂ, qdet E (Y + ((n : ℂ) - 1) / 2) x = c Y • x}
-      add_mem' := fun ha hb Y => by rw [map_add, ha Y, hb Y, smul_add]
+      add_mem' := fun ha hb Y => by rw [map_add (f := _), ha Y, hb Y, smul_add]
       zero_mem' := fun Y => by simp
       smul_mem' := fun s x hx Y => by rw [map_smul, hx Y, smul_comm] }
   have hK : ∀ g ∈ PI.UpqRep.UJset ε, ∀ x ∈ K.map S.subtype, σ g x ∈ K.map S.subtype := by

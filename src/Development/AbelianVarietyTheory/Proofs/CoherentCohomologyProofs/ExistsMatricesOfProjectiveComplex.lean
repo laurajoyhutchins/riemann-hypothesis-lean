@@ -1,5 +1,58 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.QuasicoherentCohomology.ExistsAwayFracOfMemHomLoc
+module
+
+public import Mathlib.Algebra.Exact.Basic
+public import Mathlib.LinearAlgebra.Matrix.ToLin
+public import Mathlib.LinearAlgebra.TensorProduct.Pi
+public import Mathlib.RingTheory.Finiteness.Defs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.WeightAddLeOfMemSupportDividedContraction
+public import Mathlib.RingTheory.Finiteness.Projective
+
+@[expose] public section
+
 open CategoryTheory CategoryTheory.Limits DirectSum MvPolynomial TensorProduct GlobalTheory
 
 namespace GlobalTheory
@@ -48,7 +101,7 @@ theorem projMatrix_abstract {S : Type} [CommRing S] {P₀ P₁ P₂ F₀ F₁ G�
     rw [hw, map_zero] at e₂ e₁ e₀
     obtain ⟨x, hx⟩ := (hex _).mp e₂.symm
     refine ⟨s₀ x + q₀ w, ?_⟩
-    have hp : p₀ (s₀ x + q₀ w) = x := by rw [map_add, h₀, ← e₀, add_zero]
+    have hp : p₀ (s₀ x + q₀ w) = x := by rw [map_add (f := _), h₀, ← e₀, add_zero]
     rw [← hi (D₀ _), hq₁, hq₀, hp, hx, ← sub_eq_zero.mp e₁.symm, add_sub_cancel_left, hi]
 
 theorem projMatrix_mulVec {R : Type} [CommRing R] (R' : Type) [CommRing R'] [Algebra R R']
@@ -58,15 +111,16 @@ theorem projMatrix_mulVec {R : Type} [CommRing R] (R' : Type) [CommRing R'] [Alg
       TensorProduct.piScalarRight R R' R' (Fin b) (f.baseChange R' x) := by
   induction x using TensorProduct.induction_on with
   | zero => simp
-  | add x y hx hy => simp only [map_add, Matrix.mulVec_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), Matrix.mulVec_add, hx, hy]
   | tmul r y =>
     ext i
     have hy : f y = (LinearMap.toMatrix' f).mulVec y := by
       rw [LinearMap.toMatrix'_mulVec]
     rw [LinearMap.baseChange_tmul, hy]
+
     simp only [TensorProduct.piScalarRight_apply, TensorProduct.piScalarRightHom_tmul,
-      Matrix.mulVec, dotProduct, Matrix.map_apply, Finset.sum_smul, Algebra.smul_def, map_mul,
-      map_sum, Finset.sum_mul, mul_assoc]
+    Matrix.mulVec, dotProduct, Matrix.map_apply, Finset.sum_smul, Algebra.smul_def, map_mul,
+    map_sum, Finset.sum_mul, mul_assoc]
 
 theorem projMatrix_sum {R : Type} [CommRing R] (R' : Type) [CommRing R'] [Algebra R R']
     {a : ℕ} {P : Type} [AddCommGroup P] [Module R P] (p : (Fin a → R) →ₗ[R] P)
@@ -76,9 +130,10 @@ theorem projMatrix_sum {R : Type} [CommRing R] (R' : Type) [CommRing R'] [Algebr
   induction x using TensorProduct.induction_on with
   | zero => simp
   | add x y hx hy =>
-    simp only [map_add, Pi.add_apply, TensorProduct.add_tmul, Finset.sum_add_distrib, hx, hy]
+    simp only [map_add (f := _), Pi.add_apply, TensorProduct.add_tmul, Finset.sum_add_distrib, hx, hy]
   | tmul r y =>
     have hy : p y = ∑ k, y k • p (Pi.single k 1) := by
+
       simp only [← map_smul, ← map_sum]
       congr 1
       ext j
@@ -119,7 +174,7 @@ theorem exists_matrices_of_projective_complex :
   have hq₁ : q₁ ∘ₗ f₀ = s₁ ∘ₗ d₀ ∘ₗ p₀ := LinearMap.ext fun x => by simp [q₁, f₀]
   have hq₀ : q₀ ∘ₗ f₀ = LinearMap.id - s₀ ∘ₗ p₀ := LinearMap.ext fun x => by simp [q₀, f₀]
   have hi : i₁ ∘ₗ q₁ + i₀ ∘ₗ q₀ = LinearMap.id := LinearMap.ext fun x => by
-    simp [q₀, q₁, i₀, i₁, ← map_add]
+    simp [q₀, q₁, i₀, i₁, ← map_add (f := _)]
   have hr₂ : r₂ ∘ₗ f₁ = d₁ ∘ₗ p₁ ∘ₗ q₁ := LinearMap.ext fun x => by simp [r₂, f₁, h₂']
   have hr₁ : r₁ ∘ₗ f₁ = q₁ - s₁ ∘ₗ p₁ ∘ₗ q₁ := LinearMap.ext fun x => by simp [r₁, f₁, q₁]
   have hr₀ : r₀ ∘ₗ f₁ = p₀ ∘ₗ q₀ := LinearMap.ext fun x => by simp [r₀, f₁, q₀, h₀']

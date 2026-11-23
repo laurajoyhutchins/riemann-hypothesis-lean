@@ -1,4 +1,51 @@
-import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.LocalCharacterIntegrals.MeasurePreservingOfAddEquiv
+module
+
+public import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.LocalCharacterIntegrals.ShellP
+public import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.LocalCharacterIntegrals.MeasurePreservingOfAddEquiv
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -7,8 +54,8 @@ namespace PositivityTheory.SiegelWeilFormula.SwLocFin.DualA
 open HeckeCharacterZeroLocus.SiegelWeilU NumberField IsDedekindDomain MeasureTheory GlobalTheory.Cont PositivityTheory.PfSWUS.Loc Filter Topology
 open scoped TensorProduct Matrix
 
-open Classical in
 
+open Classical in
 theorem setIntegral_char_subgroup {G : Type*} [AddCommGroup G] [MeasurableSpace G] [MeasurableAdd G]
     (ν : Measure G) [ν.IsAddRightInvariant] (Λ : AddSubgroup G) (hΛ : MeasurableSet (Λ : Set G))
     (χ : G → ℂ) (hχ : ∀ x y, χ (x + y) = χ x * χ y) :
@@ -62,7 +109,7 @@ theorem trPair_comm (S T : Matrix (Fin n) (Fin n) (R ⊗[F] E)) : trPair R S T =
 theorem trPair_add_right (S T T' : Matrix (Fin n) (Fin n) (R ⊗[F] E)) :
     trPair R S (T + T') = trPair R S T + trPair R S T' := by
   unfold trPair
-  simp only [Matrix.add_apply, mul_add, Finset.sum_add_distrib, map_add]
+  simp only [Matrix.add_apply, mul_add, Finset.sum_add_distrib, map_add (f := _)]
 
 theorem trPair_neg_right (S T : Matrix (Fin n) (Fin n) (R ⊗[F] E)) : trPair R S (-T) = -trPair R S T := by
   unfold trPair
@@ -92,7 +139,7 @@ theorem sigR_invol' (R : Type) [CommRing R] [Algebra F R] (σ : E →ₐ[F] E) (
   induction x using TensorProduct.induction_on with
   | zero => simp
   | tmul r e => simp [sigR, hσ]
-  | add x y hx hy => rw [map_add, map_add, hx, hy]
+  | add x y hx hy => rw [map_add (f := _), map_add (f := _), hx, hy]
 
 theorem gramR_mem' (R : Type) [CommRing R] [Algebra F R] (σ : E →ₐ[F] E) (hσ : ∀ x, σ (σ x) = x) {M n : ℕ}
     (J : Matrix (Fin M) (Fin M) E) (hJ : ∀ i j, σ (J j i) = J i j)
@@ -100,6 +147,7 @@ theorem gramR_mem' (R : Type) [CommRing R] [Algebra F R] (σ : E →ₐ[F] E) (h
   intro a b
   have hJR : ∀ i j, sigR R σ (JR R J i j) = JR R J j i := by
     intro i j; simp [JR, inclR, sigR, hJ]
+
   simp only [gramR, hR, hform, map_sum, map_mul, sigR_invol' R σ hσ, hJR]
   rw [Finset.sum_comm]
   exact Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => by ring
@@ -152,7 +200,7 @@ theorem trace_sigR (σ : E →ₐ[F] E) (hσ : ∀ x, σ (σ x) = x) (x : Fv F v
     induction y using TensorProduct.induction_on with
     | zero => simp
     | tmul r e => rfl
-    | add y z hy hz => rw [map_add, map_add, hy, hz]
+    | add y z hy hz => rw [map_add (f := _), map_add (f := _), hy, hz]
   have hinv : Function.Involutive f := fun y => by
     rw [hf, hf]; exact sigR_invol' (Fv F v) σ hσ y
   have h := Algebra.trace_eq_of_algEquiv (AlgEquiv.ofBijective f hinv.bijective) x
@@ -178,11 +226,12 @@ theorem trPair_herm {n : ℕ} (σ : E →ₐ[F] E) (hσ : ∀ x, σ (σ x) = x) 
     rw [Finset.sum_comm]; simp_rw [hD']
   have h1 : ∑ a, ∑ c, (X + (X.map (sigR (Fv F v) σ))ᵀ) a c * D c a =
       (∑ a, ∑ c, X a c * D c a) + sigR (Fv F v) σ (∑ a, ∑ c, X a c * D c a) := by
+
     simp only [Matrix.add_apply, Matrix.transpose_apply, Matrix.map_apply, add_mul, Finset.sum_add_distrib, map_sum,
-      map_mul]
+    map_mul]
     rw [h2]
   unfold trPair
-  rw [h1, map_add, trace_sigR σ hσ, ← two_mul, ← mul_assoc, half_mul_two, one_mul]
+  rw [h1, map_add (f := _), trace_sigR σ hσ, ← two_mul, ← mul_assoc, half_mul_two, one_mul]
 
 end Inv
 
@@ -255,7 +304,7 @@ theorem perp_bound (σ : E →ₐ[F] E) (hcm : IsCMExt F E σ) {ψ : AddChar (AF
       _ ≤ C1 := le_max_right _ _
   have hM : t • M ∈ HermR (Fv F v) σ n := by
     intro a b
-    simp only [M, Matrix.smul_apply, Matrix.add_apply, Matrix.transpose_apply, Matrix.map_apply, sigR_smul, map_add,
+    simp only [M, Matrix.smul_apply, Matrix.add_apply, Matrix.transpose_apply, Matrix.map_apply, sigR_smul, map_add (f := _),
       sigR_invol' (Fv F v) σ hσ]
     rw [add_comm]
   have hnM : nM v (t • M) ≤ R := by

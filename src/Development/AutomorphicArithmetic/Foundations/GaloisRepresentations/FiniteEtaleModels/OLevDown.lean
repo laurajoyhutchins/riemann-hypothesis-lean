@@ -1,6 +1,45 @@
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.FiniteEtaleModels.LiftUnit
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.FiniteEtaleModels.MOne
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsEtLevZero
+module
+
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.FiniteEtaleModels.LiftUnit
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IsEtLevZero
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.FiniteEtaleModels.MOne
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -34,7 +73,7 @@ private theorem functional_mem (hb : Function.Surjective (algebraMap A B)) (f : 
   | add x y _ _ hx hy =>
     obtain ⟨d₁, h₁, e₁⟩ := hx
     obtain ⟨d₂, h₂, e₂⟩ := hy
-    exact ⟨d₁ + d₂, 𝔞.add_mem h₁ h₂, by rw [map_add, e₁, e₂, map_add]⟩
+    exact ⟨d₁ + d₂, 𝔞.add_mem h₁ h₂, by rw [map_add (f := _), e₁, e₂, map_add (f := _)]⟩
   | smul b x _ hx =>
     obtain ⟨d, hd, e⟩ := hx
     obtain ⟨a, rfl⟩ := hb b
@@ -77,7 +116,7 @@ private theorem exists_sub_mem {ε : A} {𝔟 : Ideal A} {z : M}
     obtain ⟨u, hu, v, hv, rfl⟩ := Submodule.mem_sup.mp hc
     obtain ⟨a, rfl⟩ := Ideal.mem_span_singleton'.mp hu
     refine ⟨algebraMap A B a • z', ?_⟩
-    rw [smul_smul, ← map_mul, mul_comm ε a, map_add, add_smul, add_sub_cancel_left]
+    rw [smul_smul, ← map_mul, mul_comm ε a, map_add (f := _), add_smul, add_sub_cancel_left]
     exact smul_mem_idealSub hv z'
   | zero =>
     refine ⟨0, ?_⟩
@@ -119,7 +158,7 @@ private theorem smul_mem_of_eps {ε c : A} {𝔟 : Ideal A} {y : M} (hc : c ∈ 
     (hy : algebraMap A B ε • y ∈ idealSub B M 𝔟) : algebraMap A B c • y ∈ idealSub B M 𝔟 := by
   obtain ⟨u, hu, v, hv, rfl⟩ := Submodule.mem_sup.mp hc
   obtain ⟨a, rfl⟩ := Ideal.mem_span_singleton'.mp hu
-  rw [map_add, add_smul, map_mul, ← smul_smul]
+  rw [map_add (f := _), add_smul, map_mul, ← smul_smul]
   exact Submodule.add_mem _ (Submodule.smul_mem _ _ hy) (smul_mem_idealSub hv y)
 
 end Generic
@@ -129,7 +168,7 @@ private theorem wSub_one {q : ℕ} [Fact q.Prime] (D : Datum q) (𝔟 : Ideal (�
   unfold wSub idealSub
   rw [pow_one]
 
-set_option maxHeartbeats 800000 in
+
 theorem levDown : LevDown := by
   unfold LevDown
   intro q _ D hm R _ b N S s o 𝔟₁ 𝔟₂ ε h𝔟 hmul l hl

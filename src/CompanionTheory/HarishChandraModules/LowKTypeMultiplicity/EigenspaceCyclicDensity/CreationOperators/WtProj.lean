@@ -1,6 +1,52 @@
-import Mathlib
-import CompanionTheory.HarishChandraModules.LowKTypeMultiplicity.EigenspaceCyclicDensity.LowKMultOneP
-import Formalism.RealPlaceAnalysis.ThirdArithmeticHolds
+module
+
+public import CompanionTheory.HarishChandraModules.LowKTypeMultiplicity.EigenspaceCyclicDensity.LowKMultOneP
+public import Mathlib.LinearAlgebra.Eigenspace.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.InnerProductSpace.Spectrum
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Finset
 open scoped InnerProductSpace
@@ -40,7 +86,7 @@ theorem exists_proj {M : Type} [AddCommGroup M] [Module ℂ M] (F : Module.End �
     · rw [Module.End.mul_apply, hQ3 z hz, hP3 z hz]
     · have h1 : (P * Q) x = P x := by rw [hPQ.eq, Module.End.mul_apply, hQ3 _ hP4]
       have h2 : (P * Q) y = Q y := by rw [Module.End.mul_apply, hP3 _ hQ4]
-      rw [map_add, h1, h2, map_add, hP4, hQ4, smul_add]
+      rw [map_add (f := _), h1, h2, map_add (f := _), hP4, hQ4, smul_add]
 
 theorem mem_iSup_eigenspace {V : Type} [NormedAddCommGroup V] [InnerProductSpace ℂ V] (T : Module.End ℂ V)
     (hT : T.IsSymmetric) (S : Submodule ℂ V) [FiniteDimensional ℂ S] (hS : ∀ v ∈ S, T v ∈ S) (x : V) (hx : x ∈ S) :
@@ -92,7 +138,7 @@ theorem Ft_commute {n : ℕ} {V : Type} [AddCommGroup V] [Module ℂ V] (ε₀ �
       exact this
   refine LinearMap.ext fun x => funext fun A => ?_
   have h' : E c c (E d d (x A)) = E d d (E c c (x A)) := LinearMap.congr_fun h (x A)
-  simp only [Module.End.mul_apply, Ft_apply, map_add, map_smul, h', smul_add, smul_smul,
+  simp only [Module.End.mul_apply, Ft_apply, map_add (f := _), map_smul, h', smul_add, smul_smul,
     mul_comm (wt (A.filter (cpt ε₀)) c : ℂ)]
   abel
 

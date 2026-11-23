@@ -1,4 +1,62 @@
-import Mathlib
+module
+
+public import Mathlib.RingTheory.DiscreteValuationRing.Basic
+public import Mathlib.RingTheory.RamificationInertia.Inertia
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+public import Mathlib.Data.ENat.BigOperators
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+public import Mathlib.RingTheory.OrderOfVanishing.Noetherian
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RingTheory.DedekindDomain.Dvr
+public import Mathlib.RingTheory.Flat.Localization
+public import Mathlib.RingTheory.OrderOfVanishing.Basic
+
+@[expose] public section
 
 namespace GlobalTheory
 
@@ -96,7 +154,8 @@ variable (R : Type*) {S : Type*} [CommRing R] [IsLocalRing R] [CommRing S] [Alge
   [Module.Finite R S]
 
 lemma liesOver_maximalIdeal (n : Ideal S) [n.IsMaximal] : n.LiesOver (maximalIdeal R) :=
-  ⟨(eq_maximalIdeal (Ideal.isMaximal_comap_of_isIntegral_of_isMaximal n)).symm⟩
+  ⟨(eq_maximalIdeal (Ideal.isMaximal_comap_of_isIntegral_of_isMaximal
+    (algebraMap R S) (algebraMap_isIntegral_iff.mpr inferInstance) n)).symm⟩
 
 lemma length_quot_maximal (n : Ideal S) [n.IsMaximal] :
     Module.length R (S ⧸ n) = n.inertiaDeg R := by
@@ -107,47 +166,6 @@ lemma length_quot_maximal (n : Ideal S) [n.IsMaximal] :
   rw [← Module.length_eq_finrank]
   exact Module.length_eq_of_surjective Ideal.Quotient.mk_surjective
 
-lemma isLocalHom_algebraMap (n : Ideal S) [n.IsMaximal] (B : Type*) [CommRing B] [IsLocalRing B]
-    [Algebra S B] [IsLocalization.AtPrime B n] [Algebra R B] [IsScalarTower R S B] :
-    IsLocalHom (algebraMap R B) := by
-  have := liesOver_maximalIdeal R n
-  refine ⟨fun a ha => ?_⟩
-  rw [IsScalarTower.algebraMap_apply R S B, IsLocalization.AtPrime.isUnit_to_map_iff B n] at ha
-  by_contra hu
-  exact ha ((Ideal.mem_of_liesOver n (maximalIdeal R) a).1 hu)
-
-lemma inertiaDeg_eq_finrank_residueField (n : Ideal S) [n.IsMaximal] (B : Type*) [CommRing B]
-    [IsLocalRing B] [Algebra S B] [IsLocalization.AtPrime B n] [Algebra R B]
-    [IsScalarTower R S B] [IsLocalHom (algebraMap R B)] :
-    n.inertiaDeg R = Module.finrank (ResidueField R) (ResidueField B) := by
-  have := liesOver_maximalIdeal R n
-  rw [Ideal.inertiaDeg_eq_of_isMaximal (maximalIdeal R) n]
-  refine Algebra.finrank_eq_of_equiv_equiv (RingEquiv.refl _)
-    (IsLocalization.AtPrime.equivQuotMaximalIdeal n B) ?_
-  ext a
-  change residue B (algebraMap R B a) =
-    IsLocalization.AtPrime.equivQuotMaximalIdeal n B (Ideal.Quotient.mk n (algebraMap R S a))
-  rw [IsLocalization.AtPrime.equivQuotMaximalIdeal_apply_mk, ← IsScalarTower.algebraMap_apply]
-  rfl
-
-lemma finite_residueField (n : Ideal S) [n.IsMaximal] (B : Type*) [CommRing B]
-    [IsLocalRing B] [Algebra S B] [IsLocalization.AtPrime B n] [Algebra R B]
-    [IsScalarTower R S B] [IsLocalHom (algebraMap R B)] :
-    Module.Finite (ResidueField R) (ResidueField B) :=
-  Module.finite_of_finrank_pos <| by
-    rw [← inertiaDeg_eq_finrank_residueField R n B]
-    exact Ideal.inertiaDeg_pos n R
-
-include R in
-
-lemma finite_maximalSpectrum : Finite (MaximalSpectrum S) := by
-  have := Algebra.QuasiFinite.finite_primesOver (R := R) (S := S) (maximalIdeal R)
-  have := this.to_subtype
-  refine Finite.of_injective (fun n : MaximalSpectrum S =>
-    (⟨n.asIdeal, n.isMaximal.isPrime, liesOver_maximalIdeal R n.asIdeal⟩ :
-      (maximalIdeal R).primesOver S)) ?_
-  intro a b h
-  exact MaximalSpectrum.ext (congrArg Subtype.val h)
 
 lemma length_localization_quot_maximal (m n : MaximalSpectrum S) [Decidable (n = m)]
     (B : Type*) [CommRing B] [Algebra S B] [IsLocalization.AtPrime B n.asIdeal] :
@@ -281,27 +299,26 @@ theorem addVal_norm_eq_sum (x : S) :
     rw [hx', addVal_zero, ENat.top_mul]
     exact_mod_cast (Ideal.inertiaDeg_pos n.asIdeal R).ne'
 
-include R in
 
+include R in
 theorem addVal_localization_ne_top {x : S} (hx : x ∈ nonZeroDivisors S) (n : MaximalSpectrum S) :
     addVal (A n) (algebraMap S (A n) x) ≠ ⊤ := by
+  rw [Ne, addVal_eq_top_iff]
   intro h
-  refine (addVal_norm_ne_top_iff R x).2 hx ?_
-  rw [addVal_norm_eq_sum R A, ENat.sum_eq_top]
-  refine ⟨n, Finset.mem_univ _, ?_⟩
-  rw [h, ENat.top_mul]
-  exact_mod_cast (Ideal.inertiaDeg_pos n.asIdeal R).ne'
+  obtain ⟨s, hs⟩ := (IsLocalization.map_eq_zero_iff n.asIdeal.primeCompl (A n) x).1 h
+  have : (s : S) = 0 := (mem_nonZeroDivisors_iff_left.mp hx) s (by simpa [mul_comm] using hs)
+  exact s.2 (this ▸ n.asIdeal.zero_mem)
 
 variable [∀ n, Algebra R (A n)] [∀ n, IsScalarTower R S (A n)]
   [∀ n, IsLocalHom (algebraMap R (A n))]
 
 end Local
 
-include R in
 
+include R in
 theorem isDiscreteValuationRing_localization_of_isDedekindDomain [IsDedekindDomain S]
     (n : MaximalSpectrum S) : IsDiscreteValuationRing (Localization.AtPrime n.asIdeal) := by
-  have := liesOver_maximalIdeal R n.asIdeal
+  have := NormVal.liesOver_maximalIdeal R n.asIdeal
   exact IsLocalization.AtPrime.isDiscreteValuationRing_of_dedekind_domain S
     (Ideal.ne_bot_of_liesOver_of_ne_bot (IsDiscreteValuationRing.not_a_field R) n.asIdeal) _
 

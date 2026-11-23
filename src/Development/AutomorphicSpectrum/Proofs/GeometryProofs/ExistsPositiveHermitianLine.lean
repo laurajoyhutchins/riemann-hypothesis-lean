@@ -1,15 +1,63 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsPeriodAtRestrict
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.EmbedsGeneric
-import Development.AutomorphicSpectrum.Definitions.DivisibilityTowers.GoodOrigin
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.GlobalSectionsRankAlgClosed
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IntegralClosureHeightEqOneOfLiesOver
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.PotentialsBoundedRegSettingEqReference
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PFsLineLevi
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PFsLineSmooth
-import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.CoordinateIdeals.FubiniLeviGen
-import GroundTheory.HeightsAndTheta.Heights.ElementarySymmetric.PSmallGenHeightsNonneg
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.IsMultiHomogXpow
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.IsMultiHomogXpow
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.StatementsGrassHeight
+public import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.CoordinateIdeals
+public import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.CoordinateIdeals.FubiniLevi
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterNamed
+public import GroundTheory.HeightsAndTheta.Heights.ElementarySymmetric.PSmallGenHeightsNonneg
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PFsLineLevi
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PFsLineSmooth
+import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.ArithModel
+public import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.CoordinateIdeals.FubiniLeviGen
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.AnalyticForms.PotentialTheory.PshShiftA
+import Mathlib.CategoryTheory.Monoidal.Cartesian.Basic
+import Mathlib.CategoryTheory.Monoidal.Category
+import Mathlib.CategoryTheory.Monoidal.Mon
+import Mathlib.Topology.Sheaves.Presheaf
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsCompletedStrictHens
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.CubicalStructures.CubeSymmetricSwapFirst
+
+@[expose] public section
 
 noncomputable section
 
@@ -21,7 +69,7 @@ open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.G
 open GroundTheory.Heights₂.Heights GroundTheory.Heights₂.Heights.LowerBoundFree GroundTheory.Heights₂.Heights.FubiniStudyLeviForm
 
 theorem log_rho_eq_phi (I : Type) [Fintype I] :
-    (fun z : I → ℂ => Real.log ((fsMetric I).ρ z)) = FubiniLevi.phi := by
+    (fun z : I → ℂ => Real.log ((fsMetric («ι» := I)).ρ z)) = FubiniLevi.phi := by
   funext z
   change Real.log ‖WithLp.toLp 2 z‖ = _
   rw [EuclideanSpace.norm_eq, Real.log_sqrt (Finset.sum_nonneg fun _ _ => sq_nonneg _)]
@@ -45,28 +93,32 @@ theorem levi_fsMulti_pos {z w : (Σ k, J k) → ℂ} (hz : ∀ k, ∃ i, z ⟨k,
   classical
   obtain ⟨k₀, hk₀⟩ := exists_block_ne hw
   set F : K → ((Σ k, J k) → ℂ) → ℝ :=
-    fun k y => Real.log ((fsMetric (J k)).ρ (fun i => y ⟨k, i⟩)) with hF
+    fun k y => Real.log ((fsMetric («ι» := J k)).ρ (fun i => y ⟨k, i⟩)) with hF
   have hev : (fun y => Real.log ((fsMulti J).h y)) =ᶠ[𝓝 z] fun y => ∑ k ∈ Finset.univ, F k y := by
     have hopen : ∀ k, ∀ᶠ y in 𝓝 z, ∃ i, y ⟨k, i⟩ ≠ 0 := fun k => by
       obtain ⟨i, hi⟩ := hz k
       exact Filter.mem_of_superset (((continuous_apply _).isOpen_preimage _ isOpen_ne).mem_nhds hi)
         fun y hy => ⟨i, hy⟩
     filter_upwards [Filter.eventually_all.mpr hopen] with y hy
-    have hpos : ∀ k, 0 < (fsMetric (J k)).ρ (fun i => y ⟨k, i⟩) := fun k => by
+    have hpos : ∀ k, 0 < (fsMetric («ι» := J k)).ρ (fun i => y ⟨k, i⟩) := fun k => by
       obtain ⟨i, hi⟩ := hy k
-      exact (fsMetric (J k)).pos _ fun h0 => hi (congrFun h0 i)
+      exact (fsMetric («ι» := J k)).pos _ fun h0 => hi (congrFun h0 i)
     simp only [fsMulti, HermLine.ofMetrics, zpow_one, hF]
     exact Real.log_prod fun k _ => (hpos k).ne'
   have hk0 : ∀ k, (fun i => z ⟨k, i⟩) ≠ 0 := fun k h0 => by
     obtain ⟨i, hi⟩ := hz k
     exact hi (congrFun h0 i)
-  have hφ : ∀ k, ContDiffAt ℝ 2 (fun u => Real.log ((fsMetric (J k)).ρ u)) (blockProj J k z) := fun k =>
-    ReciprocityTheory.ChartRestriction.G.ArakelovGeometry.adens_contDiffAt_logρ_id
-      (HilbertSamuel.ProjLine.isSmoothMetric_fs (J := J k)) (hk0 k)
-  have hFk : ∀ k, F k = (fun u => Real.log ((fsMetric (J k)).ρ u)) ∘ blockProj J k := fun k => rfl
+  have hφ : ∀ k, ContDiffAt ℝ 2 (fun u => Real.log ((fsMetric («ι» := J k)).ρ u)) (blockProj J k z) := by
+    intro k
+    have hne : blockProj J k z ≠ 0 := hk0 k
+    have hsm := HilbertSamuel.ProjLine.isSmoothMetric_fs (J := J k)
+    have hρ : ContDiffAt ℝ 2 (fsMetric («ι» := J k)).ρ (blockProj J k z) :=
+      (hsm.contDiffAt (isOpen_ne.mem_nhds hne)).of_le (WithTop.coe_le_coe.2 le_top)
+    exact hρ.log ((fsMetric («ι» := J k)).pos _ hne).ne'
+  have hFk : ∀ k, F k = (fun u => Real.log ((fsMetric («ι» := J k)).ρ u)) ∘ blockProj J k := fun k => rfl
   have hC : ∀ k, ContDiffAt ℝ 2 (F k) z := fun k =>
     hFk k ▸ (hφ k).comp z ((blockProj J k).restrictScalars ℝ).contDiff.contDiffAt
-  have hL : ∀ k v, ReciprocityTheory.AnForm.levi (F k) z v = leviForm (fun u => Real.log ((fsMetric (J k)).ρ u))
+  have hL : ∀ k v, ReciprocityTheory.AnForm.levi (F k) z v = leviForm (fun u => Real.log ((fsMetric («ι» := J k)).ρ u))
       (fun i => z ⟨k, i⟩) (fun i => v ⟨k, i⟩) := fun k v => by
     rw [hFk, ReciprocityTheory.AnForm.levi_comp v ((blockProj J k).analyticAt z) (hφ k), (blockProj J k).fderiv]
     rfl
@@ -108,7 +160,7 @@ theorem chartForm_le (c : ∀ k, J k) (z : (Σ k, J k) → ℂ) :
     simp [chartForm, map_prod]
   rw [e, norm_prod]
   simp only [fsMulti, HermLine.ofMetrics, zpow_one]
-  refine Finset.prod_le_prod (fun _ _ => norm_nonneg _) fun k _ => ?_
+  refine Finset.prod_le_prod₀ (fun _ _ => norm_nonneg _) fun k _ => ?_
   exact PiLp.norm_apply_le (WithLp.toLp 2 (fun i => z ⟨k, i⟩)) (c k)
 
 theorem exists_chartForm_notMem {Q : Ideal (MRing J)} (hQ : IsMultiProjPrime Q) :

@@ -1,7 +1,45 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.BetaModuloX.Skeleton
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.BetaUniqueness.Lemmas
-import Formalism.HermitianLattices.HermitianLatticesProofs.AutFinite
+module
+
+public import Formalism.SharpRestriction.CuspSpanNormBounds.IsPrimitiveSub
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -29,7 +67,7 @@ theorem hXz (F' : LFlag S r T') : ∀ x ∈ Xsp F', S.hT x F'.fl.z = 0 := by
     obtain ⟨j, rfl⟩ := hy
     exact F'.fl.z_orth j
   | zero => simp
-  | add x y _ _ hx hy => rw [map_add, LinearMap.add_apply, hx, hy, add_zero]
+  | add x y _ _ hx hy => rw [map_add (f := _), LinearMap.add_apply, hx, hy, add_zero]
   | smul a x _ hx => rw [LinearMap.map_smulₛₗ, LinearMap.smul_apply, hx, smul_zero]
 
 theorem hzX (F' : LFlag S r T') : ∀ x ∈ Xsp F', S.hT F'.fl.z x = 0 := by
@@ -45,9 +83,9 @@ abbrev Qt (F' : LFlag S r T') : Type := (Uo F') ⧸ (Pk F')
 def hV (F' : LFlag S r T') (c : E) : S.V →ₗ⋆[E] S.V →ₗ[E] E :=
   LinearMap.mk₂'ₛₗ (starRingEnd E) (RingHom.id E)
     (fun a b => S.hT a b + c * (S.hT a F'.fl.z * S.hT F'.fl.z b))
-    (fun a a' b => by simp only [map_add, LinearMap.add_apply]; ring)
+    (fun a a' b => by simp only [map_add (f := _), LinearMap.add_apply]; ring)
     (fun t a b => by simp only [LinearMap.map_smulₛₗ, LinearMap.smul_apply, smul_eq_mul]; ring)
-    (fun a b b' => by simp only [map_add]; ring)
+    (fun a b b' => by simp only [map_add (f := _)]; ring)
     (fun t a b => by simp only [map_smul, smul_eq_mul, RingHom.id_apply]; ring)
 
 theorem hV_apply (F' : LFlag S r T') (c : E) (a b : S.V) :

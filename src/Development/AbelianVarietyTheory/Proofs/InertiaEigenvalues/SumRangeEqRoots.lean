@@ -1,7 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.GreenRegularCharacters
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CuspidalCharExistsOfGreen
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.FixedMemRange
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.GreenRegularCharacters
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.MemRootsBarXSubC
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CuspidalCharExistsOfGreen
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.FixedMemRange
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -121,11 +163,11 @@ def th (L : LabelDatum g) {d : ℕ} (hd : 0 < d) (x : Fbar g) : (KK g d)ˣ →* 
 
 theorem th_apply (L : LabelDatum g) {d : ℕ} (hd : 0 < d) {x : Fbar g} (hx : x ^ (g ^ d - 1) = 1)
     (k : (KK g d)ˣ) : ((th L hd x k : ℂˣ) : ℂ) = thetaOf L d x (emb g d k) := by
-  rw [th, dif_pos hx, theta_apply]
+  rw [th, dite_eq_left hx, theta_apply]
 
 theorem th_uu (L : LabelDatum g) {d : ℕ} (hd : 0 < d) {x : Fbar g} (hx : x ^ (g ^ d - 1) = 1) :
     ((th L hd x (uu L hd) : ℂˣ) : ℂ) = L.teich x := by
-  rw [th, dif_pos hx, theta_uu, tu, Units.val_mk0]
+  rw [th, dite_eq_left hx, theta_uu, tu, Units.val_mk0]
 
 theorem th_ext (L : LabelDatum g) {d : ℕ} (hd : 0 < d) {θ θ' : (KK g d)ˣ →* ℂˣ}
     (h : ((θ (uu L hd) : ℂˣ) : ℂ) = θ' (uu L hd)) : θ = θ' :=
@@ -191,7 +233,7 @@ theorem rootOf_spec {d : ℕ} {P : (ZMod g)[X]} (hP : IsPrimeLab d P) : aeval (r
   have hex : ∃ x, x ∈ rootsBar P := by
     obtain ⟨z, hz⟩ := IsAlgClosed.exists_aeval_eq_zero (Fbar g) P (degree_pos_of_irreducible hP.2.1).ne'
     exact ⟨z, (mem_rootsBar_iff hP0).2 hz⟩
-  rw [rootOf, dif_pos hex]
+  rw [rootOf, dite_eq_left hex]
   exact (mem_rootsBar_iff hP0).1 hex.choose_spec
 
 theorem root_unit {d : ℕ} {P : (ZMod g)[X]} (hP : IsPrimeLab d P) {x : Fbar g} (hx : aeval x P = 0) :

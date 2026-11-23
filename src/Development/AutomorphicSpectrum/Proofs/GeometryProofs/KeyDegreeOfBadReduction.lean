@@ -1,22 +1,67 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Statements.GeometryStatements.KeyBadSt
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsThetaMeanSquareNorm
-import Development.AutomorphicSpectrum.Statements.GeometryStatements.ZhangDimensionPushDownGrassmannianHeightBounds
-import GroundTheory.HeightsAndTheta.Heights.KernelsLattice
-import GroundTheory.HeightsAndTheta.Heights.LatticeLemmas.StatementsBundles
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExactKeyFormulaProofStatement
+module
+
+public import Development.AutomorphicSpectrum.Statements.GeometryStatements.KeyBadSt
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsThetaMeanSquareNorm
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExactKeyFormulaProofStatement
+public import Development.AutomorphicSpectrum.Proofs.AdelicProofs.GramMatrixPosDefConjugate
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.FundamentalDomainRiemannFormStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HodgeMetricFrameInnerStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.KeyDegreePpDataStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.KeyInputFromPpDataStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.KeyOverLieBasisDegreeStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.NonvanishingSectionFieldExtStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.NormalizedDegreeGramDetStatement
 import Development.AutomorphicSpectrum.Proofs.GeometryProofs.PolarizedDataFieldExtensionStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ThetaFunctionArchimedeanFrameStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ThetaMultiplierQuadraticCharacterStatement
-import Development.AutomorphicSpectrum.Proofs.AdelicProofs.GramMatrixPosDefConjugate
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LeWchartOne
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.NonvanishingSectionFieldExtStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.KeyInputFromPpDataStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.KeyOverLieBasisDegreeStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.KeyDegreePpDataStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HodgeMetricFrameInnerStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.FundamentalDomainRiemannFormStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.NormalizedDegreeGramDetStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ThetaFunctionArchimedeanFrameStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ThetaMultiplierQuadraticCharacterStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import Development.AutomorphicSpectrum.Proofs.AdelicProofs.GramMat
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField MeasureTheory
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Geo ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.Semi
 open GroundTheory.Heights₂.Heights TensorProduct
@@ -42,8 +87,8 @@ private theorem gramMat_eq_pi_smul_transpose {L : Type} [Field L] [NumberField L
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl (fun a _ => Finset.sum_congr rfl (fun b _ => by ring))
 
-open Matrix in
 
+open Matrix in
 theorem gramDet_norm {L : Type} [Field L] [NumberField L] (B : HermitianBundle.{0} L) (σ : L →+* ℂ) {g : ℕ}
     (e : Fin g → B.carrier) (W Hm : Matrix (Fin g) (Fin g) ℂ)
     (h : ∀ i j, ((B.metric.form σ).inner ((1 : ComplexAt σ) ⊗ₜ[𝓞 L] e i) ((1 : ComplexAt σ) ⊗ₜ[𝓞 L] e j) : ℂ) =
@@ -218,8 +263,8 @@ theorem is_L2_of_gram_det_pos {E : Type} [Field E] [NumberField E] [IsCMField E]
 
 end KeyDeg
 
-open scoped ComplexOrder in
 
+open scoped ComplexOrder in
 theorem keyDeg_of_keyBad : KeyBadSt → KeyDegSt := by
   intro hb
   have hKF := GlobalTheory.T.exactKeyFormula_proof

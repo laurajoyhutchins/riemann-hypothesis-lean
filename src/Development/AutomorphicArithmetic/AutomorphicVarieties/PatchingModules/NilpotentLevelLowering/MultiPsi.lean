@@ -1,6 +1,49 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PatchingModules.NilpotentLevelLowering.ActUVariableEqPow
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.HkDdProps
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.HkDualExp
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PatchingModules.NilpotentLevelLowering.ActUVariableEqPow
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.HkDdProps
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.HkDualExp
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.MvPolynomial.Symmetric.FundamentalTheorem
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Formalism.ConjugateSelfDual ReciprocityTheory.Gal Formalism.BasicNotions Formalism.MainNotions.N ValuativeRel IsLocalRing
 open GlobalTheory.CuspRep GlobalTheory.WeilDeligne GlobalTheory.LocLanglands GlobalTheory.LocGL GlobalTheory.GalOfCusp GlobalTheory.SmGL GlobalTheory.SplitWeil
 open UpperTheory.V.Alg UpperTheory.V.W UpperTheory.V.Hi UpperTheory.V.AlgebraTools UpperTheory.V.Pa UpperTheory.V.Pa.Lev
@@ -20,6 +63,7 @@ private theorem one_place {O A N ι : Type} [CommRing O] [IsDomain O] [CommRing 
       = ∑ m, Φ (e (a k * Hk.dd (c k * (x * a m))) * s) (e (c m) * t) := by
     intro k
     have : e (c k) * t * e x = ∑ m, e (c m) * t * e (Hk.dd (c k * (x * a m))) := by
+
       rw [mul_right_comm, ← map_mul, ← (hd (c k * x)).2, map_sum, Finset.sum_mul]
       refine Finset.sum_congr rfl fun m _ => ?_
       rw [map_mul, mul_right_comm, show a m * (c k * x) = c k * (x * a m) by ring]
@@ -28,6 +72,7 @@ private theorem one_place {O A N ι : Type} [CommRing O] [IsDomain O] [CommRing 
     rw [h3 _ _ _ (hs _), map_mul, mul_right_comm]
   rw [Finset.sum_congr rfl fun k _ => e1 k, Finset.sum_comm]
   refine Finset.sum_congr rfl fun m _ => ?_
+
   rw [← h2, ← Finset.sum_mul, ← map_sum, (hd _).1, map_mul, mul_assoc]
 
 private theorem many_places {O A N ι : Type} [CommRing O] [IsDomain O] [CommRing A] [AddCommGroup N] [Fintype ι] {n q : ℕ}
@@ -59,6 +104,7 @@ private theorem esymm_root {O R B : Type} [CommRing O] [CommRing R] [Algebra O R
   rw [map_mul, ← h0, Finset.prod_eq_multiset_prod]
   simp only [Function.comp_def] at h1
   rw [h1, map_pow, map_neg, map_one, ← mul_assoc, ← mul_pow]
+
   simp [emb, MvPolynomial.esymm, MSplitAlg.root, map_sum, map_prod]
 
 theorem UpperTheory.V.Pa.Lev.multiPsi :
@@ -91,7 +137,7 @@ theorem UpperTheory.V.Pa.Lev.multiPsi :
       exact hC _
     | add p p' hp hp' =>
       intro y w
-      rw [map_add, map_add, map_add, map_add, LinearMap.add_apply, map_add, TensorProduct.tmul_add, hp, hp', mul_add,
+      rw [map_add (f := _), map_add (f := _), map_add (f := _), map_add (f := _), LinearMap.add_apply, map_add (f := _), TensorProduct.tmul_add, hp, hp', mul_add,
         TensorProduct.add_tmul]
     | mul_X p i hp =>
       intro y w
@@ -107,7 +153,7 @@ theorem UpperTheory.V.Pa.Lev.multiPsi :
       smul_eq_mul, mul_comm]
   | add p p' hp hp' =>
     intro v
-    rw [map_add, map_add, LinearMap.add_apply, map_add, hp, hp', add_smul]
+    rw [map_add (f := _), map_add (f := _), LinearMap.add_apply, map_add (f := _), hp, hp', add_smul]
   | mul_X p ji hp =>
     intro v
     obtain ⟨j, i⟩ := ji

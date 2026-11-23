@@ -1,4 +1,54 @@
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CasimirReductionTheory.OneParameterDerivatives.TauReduction.LatticeVectorsBoundedBelow
+module
+
+public import Formalism.SharpRestriction.CuspSpanNormBounds.GlobAut
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.Matrix.Order
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Formalism.LocalToGlobal.SiegelLatticeTheory.CasimirReductionTheory.OneParameterDerivatives.TauReduction.Imports
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -31,7 +81,7 @@ theorem complex_embedding_cases (I : AutInst) (σ : I.E →+* ℂ) :
     intro a
     have ht := hF (a + star a) (by rw [star_add, star_star, add_comm])
     have hm := hF (a * star a) (by rw [star_mul, star_star])
-    rw [map_add, map_add] at ht
+    rw [map_add (f := _), map_add (f := _)] at ht
     rw [map_mul, map_mul] at hm
     have hprod : (σ a - I.φ v a) * (σ a - I.φ v (star a)) = 0 := by
       linear_combination (σ a) * ht - hm
@@ -55,10 +105,10 @@ theorem complex_embedding_cases (I : AutInst) (σ : I.E →+* ℂ) :
   have hb' := (key b).resolve_right hb
   rcases key (a + b) with h | h
   · apply ha
-    rw [map_add, map_add] at h
+    rw [map_add (f := _), map_add (f := _)] at h
     linear_combination h - hb'
   · apply hb
-    rw [map_add, map_add, map_add] at h
+    rw [map_add (f := _), map_add (f := _), map_add (f := _)] at h
     linear_combination h - ha'
 
 theorem embedding_linear_independent (I : AutInst) :
@@ -84,8 +134,9 @@ theorem embedding_linear_independent (I : AutInst) :
       rw [hv]
       exact this
     · have := congrArg (starRingEnd ℂ) (congrFun hg v)
+
       simp only [Finset.sum_apply, Pi.smul_apply, Pi.zero_apply, Complex.real_smul, map_sum, map_mul,
-        Complex.conj_ofReal, map_zero] at this
+      Complex.conj_ofReal, map_zero] at this
       rw [hv]
       simp only [RingHom.coe_comp, Function.comp_apply]
       exact this
@@ -134,8 +185,8 @@ def complexToEuclidean {ι : Type} [Fintype ι] [DecidableEq ι] {d : ℕ} (e : 
   ((Complex.basisOneI.smulTower (Pi.basisFun ℂ ι)).reindex e).equivFun.trans
     (EuclideanSpace.equiv (Fin d) ℝ).toLinearEquiv.symm
 
-open scoped MatrixOrder in
 
+open scoped MatrixOrder in
 theorem gram_factor_invertible {n j : ℕ} (C : Matrix (Fin n) (Fin j) ℂ) (hC : Function.Injective C.mulVec) :
     ∃ R : Matrix (Fin j) (Fin j) ℂ, Cᴴ * C = Rᴴ * R ∧ R.det ≠ 0 := by
   have hpd : (Cᴴ * C).PosDef := Matrix.PosDef.conjTranspose_mul_self C hC

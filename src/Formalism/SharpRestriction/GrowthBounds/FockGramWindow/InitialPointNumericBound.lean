@@ -1,4 +1,46 @@
-import Formalism.SharpRestriction.GrowthBounds.FockGramWindow.FirstCoefficientLeDiv
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.FockGramWindow.RestWinOfLvl
+public import Formalism.SharpRestriction.GrowthBounds.MonomialFactorials.CoarseCLower
+public import Formalism.SharpRestriction.GrowthBounds.FockGramWindow.FirstCoefficientLeDiv
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -8,7 +50,7 @@ open MvPolynomial Finset Formalism.MainNotions.G Formalism.MainNotions.flipOneTh
 
 theorem clog_le_lg (p : ℕ) (hp : 1 < p) (x : ℕ) (hx : 2 ≤ x) : (Nat.clog p x : ℝ) ≤ Real.logb p x + 1 := by
   have hpos : 0 < Nat.clog p x := Nat.clog_pos hp (by omega)
-  have hk := Nat.pow_pred_clog_lt_self hp (by omega : 1 < x)
+  have hk := Nat.pow_pred_clog_lt_self p (by omega : 1 < x)
   have hpR : (1 : ℝ) < p := by exact_mod_cast hp
   have hxR : (0 : ℝ) < x := by positivity
   have h1 : (p : ℝ) ^ (Nat.clog p x).pred < x := by exact_mod_cast hk

@@ -1,6 +1,60 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.ExistsShortBasisAdaptedOfSubsetSpan
-import Development.AbelianVarietyTheory.Definitions.ThetaMetrics.SumFinsuppAntidiagProdPowDivMultiFactorial
+module
+
+public import Development.AbelianVarietyTheory.Definitions.ThetaMetrics.SumFinsuppAntidiagProdPowDivMultiFactorial
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.NumberTheory.NumberField.InfinitePlace.Embeddings
+public import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.ExistsShortBasisAdaptedOfSubsetSpan
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+public import Mathlib.NumberTheory.NumberField.House
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -18,7 +72,7 @@ theorem exists_short_basis_of_ratSpan {V E ι : Type*} [AddCommGroup V] [Module 
   classical
   let ψ : H →ₗ[ℤ] E := φ.toIntLinearMap ∘ₗ H.subtype
   have hψ : Function.Injective ψ := by
-    rw [injective_iff_map_eq_zero]
+    set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
     intro x hx
     by_contra h
     have := hφ x x.2 (fun h' => h (Subtype.ext h'))
@@ -97,8 +151,8 @@ theorem mem_integralPart {W : Submodule K (MvPolynomial σ K)} {P : MvPolynomial
 theorem smul_mem_integralPart {W : Submodule K (MvPolynomial σ K)} (c : 𝓞 K)
     {P : MvPolynomial σ K} (hP : P ∈ integralPart W) : c • P ∈ integralPart W :=
   ⟨W.smul_mem (c : K) hP.1, fun α => by
-    change IsIntegral ℤ (coeff α ((c : K) • P))
-    rw [coeff_smul, smul_eq_mul]
+    change IsIntegral ℤ (AddMonoidAlgebra.coeff ((c : K) • P) α)
+    rw [MvPolynomial.coeff_smul, smul_eq_mul]
     exact c.isIntegral_coe.mul (hP.2 α)⟩
 
 theorem span_ringOfIntegers_basis_integralPart {W : Submodule K (MvPolynomial σ K)} {ι : Type*}
@@ -134,10 +188,11 @@ theorem norm_conjCoeffs_sq [DecidableEq σ] {D : ℕ} {P : MvPolynomial σ K}
     Real.sq_sqrt (Finset.sum_nonneg fun _ _ => sq_nonneg _), ← Finset.sum_coe_sort (monomialsLE σ D)]
   simp only [conjCoeffs, coeff_map, AddMonoidHom.coe_mk, ZeroHom.coe_mk]
 
-omit [NumberField K] in
 
+omit [NumberField K] in
 theorem finrank_le_one_add_pow {W : Submodule K (MvPolynomial σ K)} {D : ℕ}
     (hD : ∀ P ∈ W, P.totalDegree ≤ D) : finrank K W ≤ (1 + D) ^ Fintype.card σ := by
+  classical
   have h : W ≤ restrictTotalDegree σ K D := fun P hP => (mem_restrictTotalDegree σ D P).2 (hD P hP)
   refine (Submodule.finrank_mono h).trans ?_
   rw [finrank_restrictTotalDegree]
@@ -186,7 +241,7 @@ theorem exists_basis_integralPart_sum_l2Norm_sq_le {κ : Type*}
     have h1 : ∀ s : K →+* ℂ, l2Norm (map s (v p)) ≤ A * B := fun s => by
       have : map s (v p) = s (ω p.1) • map s (p.2 : MvPolynomial σ K) := by
         ext α
-        rw [coeff_smul, coeff_map, coeff_map, smul_eq_mul, ← map_mul]
+        rw [MvPolynomial.coeff_smul, coeff_map, coeff_map, smul_eq_mul, ← map_mul]
         rfl
       rw [this, vectorL2Norm_const_mul]
       exact mul_le_mul (hA s _) (hB _ p.2.2 s) (l2Norm_nonneg _) ((norm_nonneg _).trans (hA s p.1))
@@ -243,20 +298,6 @@ theorem exists_reduced_basis_integralPart {κ : Type*}
   simp only [Nat.cast_ofNat, ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, div_mul_cancel₀,
     Real.rpow_natCast]
   exact_mod_cast choose_add_le_one_add_pow _ _
-
-example : (X 0 : MvPolynomial (Fin 1) ℚ) ∈ integralPart (span ℚ {X 0}) ∧
-    (1 / 2 : ℚ) • (X 0 : MvPolynomial (Fin 1) ℚ) ∉ integralPart (span ℚ {X 0}) := by
-  refine ⟨⟨mem_span_singleton_self _, fun α => ?_⟩, fun h => ?_⟩
-  · change IsIntegral ℤ (coeff α (X 0))
-    rw [coeff_X]
-    split_ifs
-    exacts [isIntegral_one, isIntegral_zero]
-  · have h1 := (mem_integralPart.1 h).2 (Finsupp.single 0 1)
-    rw [coeff_smul, coeff_X, if_pos rfl, smul_eq_mul, mul_one] at h1
-    obtain ⟨m, hm⟩ := IsIntegrallyClosed.isIntegral_iff.mp h1
-    rw [eq_intCast] at hm
-    have h2 : (2 * m : ℤ) = 1 := by exact_mod_cast (by rw [hm]; norm_num : (2 * m : ℚ) = 1)
-    omega
 
 end MvPoly
 

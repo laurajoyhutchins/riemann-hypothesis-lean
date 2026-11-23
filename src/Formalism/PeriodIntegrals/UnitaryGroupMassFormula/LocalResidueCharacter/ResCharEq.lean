@@ -1,5 +1,52 @@
-import Mathlib
-import Formalism.PeriodIntegrals.PinHostLoc
+module
+
+public import Formalism.SharpRestriction.CuspSpanNormBounds.PsiEDef
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -126,24 +173,5 @@ theorem unit {n : ℕ} (hn : ((n : ℕ) : 𝓞 F) ∉ p.asIdeal) :
   exact absurd hv (ne_of_lt hu)
 
 end
-
-theorem target : PI.PinHostLoc.Target := by
-  unfold PI.PinHostLoc.Target
-  intro F E _ _ _ _ _ sig p A g hg hne i hin hnot
-  have hres : Formalism.MainNotions.S.Loc.resChar p = g i := resChar_eq p (hg i) hin
-  refine ⟨?_, ?_⟩
-  · rw [hres]
-    exact irr A (hg i).ne_zero hin hnot
-  · obtain rfl | rfl : i = 0 ∨ i = 1 := by fin_cases i <;> simp
-    · have h1 : ((g 1 : ℕ) : 𝓞 F) ∉ p.asIdeal := fun h1 =>
-        hne ((resChar_eq p (hg 1) h1).symm.trans hres).symm
-      obtain ⟨u, hu, hu'⟩ := unit A h1
-      refine ⟨u, hu, ?_⟩
-      rw [hu', mul_div_cancel_left₀ _ (Nat.cast_ne_zero.mpr (hg 0).ne_zero)]
-    · have h0 : ((g 0 : ℕ) : 𝓞 F) ∉ p.asIdeal := fun h0 =>
-        hne ((resChar_eq p (hg 0) h0).symm.trans hres)
-      obtain ⟨u, hu, hu'⟩ := unit A h0
-      refine ⟨u, hu, ?_⟩
-      rw [hu', mul_div_cancel_right₀ _ (Nat.cast_ne_zero.mpr (hg 1).ne_zero)]
 
 end PI.PinHostLoc.UnitaryGroupMassFormula

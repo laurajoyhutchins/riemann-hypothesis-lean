@@ -1,5 +1,49 @@
-import Development.EtaleCohomology.EtaleSheaves.LeafProjModelPf
-import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.IsProjOverCompOfIsClosedImmersion
+module
+
+public import Development.EtaleCohomology.EtaleSheaves.LeafProjModelPf
+public import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.IsProjOverCompOfIsClosedImmersion
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.ProjectiveSpectrum.Proper
+import Mathlib.AlgebraicGeometry.QuasiAffine
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.ExistsSmulEqMapOfIsCompactOfIsQuasiSeparated
+
+@[expose] public section
 
 noncomputable section
 open CategoryTheory AlgebraicGeometry TopologicalSpace MvPolynomial
@@ -29,7 +73,12 @@ theorem exists_finset_adjoin_laurent_preimage {k A : Type} [Field k] [CommRing A
   obtain ⟨a, rfl⟩ := fnOn_top_bijective.2 g
   obtain ⟨p, rfl⟩ := hf a
   refine ⟨rename Fin.succ p, ?_⟩
-  rw [coe_eval₂Hom, eval₂_rename, pt_str]
+  have hstr : pt (algebraMap k A) v hv ≫ PSpace.str k n = spMap (algebraMap k A) := by
+    rw [pt, PSpace.str, GlobalTheory.ProjPoint.ofHom_toSpecZero_assoc, ← Spec.map_comp]
+    congr 1
+    ext1
+    exact RingHom.ext fun r => MvPolynomial.eval₂Hom_C _ v r
+  rw [coe_eval₂Hom, eval₂_rename, hstr]
   have hfx : f = aeval (fun j => f (X j)) := algHom_ext fun j => by simp
   conv_rhs => rw [hfx, aeval_def, MvPolynomial.hom_eval₂ ]
   congr 1
@@ -48,7 +97,12 @@ theorem leafQProjImm : LateralTheory.E.LeafProjModelPf.LeafQProjImm := by
     Ideal.eq_top_of_isUnit_mem _ (Ideal.subset_span ⟨0, rfl⟩) isUnit_one
   have hU : pt (algebraMap k A) v hv ⁻¹ᵁ chart k n 0 = ⊤ := by
     rw [pt_preimage_chart]; ext1; simp [v, spOpen]; rfl
-  refine ⟨n, pt (algebraMap k A) v hv, ?_, ?_, pt_str _ _ _⟩
+  have hstr : pt (algebraMap k A) v hv ≫ PSpace.str k n = spMap (algebraMap k A) := by
+    rw [pt, PSpace.str, GlobalTheory.ProjPoint.ofHom_toSpecZero_assoc, ← Spec.map_comp]
+    congr 1
+    ext1
+    exact RingHom.ext fun r => MvPolynomial.eval₂Hom_C _ v r
+  refine ⟨n, pt (algebraMap k A) v hv, ?_, ?_, hstr⟩
   · have h1 : IsAffine (chart k n 0) := isAffineOpen_chart k n 0
     have hWa : IsAffineOpen (pt (algebraMap k A) v hv ⁻¹ᵁ chart k n 0) := by rw [hU]; exact isAffineOpen_top _
     have : IsAffine (pt (algebraMap k A) v hv ⁻¹ᵁ chart k n 0) := hWa

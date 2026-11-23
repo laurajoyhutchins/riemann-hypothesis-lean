@@ -1,9 +1,58 @@
-import Development.WeilBound.CoreStatements.LocallyConstantCoinvariants.PfDictDef
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsLocallyConstantSplitOm
-import Development.AutomorphicSpectrum.Proofs.MembershipProofs.IntegrablePair
-import Development.AutomorphicSpectrum.Proofs.MembershipProofs.CyclicAndLine
-import Development.AutomorphicSpectrum.Proofs.MembershipProofs.ExistsInvariantForm
-import Development.AutomorphicSpectrum.Proofs.MembershipProofs.DualNumberGraphFiltrationIsotropicOfSkew
+module
+
+public import Development.WeilBound.CoreStatements.LocallyConstantCoinvariants.PfDictDef
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IsLocallyConstantSplitOm
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsLocallyConstantAddChar
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.PadicIsNonarchimedeanLocalField
+public import Development.AutomorphicSpectrum.Proofs.MembershipProofs.CyclicAndLine
+public import Development.AutomorphicSpectrum.Proofs.MembershipProofs.DualNumberGraphFiltrationIsotropicOfSkew
+public import Development.AutomorphicSpectrum.Proofs.MembershipProofs.ExistsInvariantForm
+public import Development.AutomorphicSpectrum.Proofs.MembershipProofs.IntegrablePair
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Development.AutomorphicSpectrum.Definitions.MembershipCriteria.GoodChar
+
+@[expose] public section
 
 noncomputable section
 
@@ -115,7 +164,7 @@ theorem model (hc : Continuous ψ) (h1 : ψ ≠ 1) (e : ((μ → k) × (μ → k
   let ι : ((κ → k) → ℂ) →ₗ[ℂ] ((μ → k) → ℂ) :=
     { toFun := fun φ y => l (schr ψ (e (y, 0)) φ)
       map_add' := fun φ φ' => funext fun y => by
-        rw [Pi.add_apply, ← map_add]
+        rw [Pi.add_apply, ← map_add (f := _)]
         congr 1
         funext x
         simp [schr, mul_add]
@@ -128,8 +177,8 @@ theorem model (hc : Continuous ψ) (h1 : ψ ≠ 1) (e : ((μ → k) × (μ → k
   have h0 : ∀ φ, ι φ 0 = l φ := fun φ => by rw [hι, show ((0 : μ → k), (0 : μ → k)) = 0 from rfl, map_zero, schr_zero]
   have hint : ∀ w, ∀ φ ∈ SB (κ → k), ι (schr ψ (e w) φ) = schr ψ w (ι φ) := fun w φ hφ => funext fun y => by
     have a := hl' w.2 _ (schr_mem hc (e (y + w.1, 0)) hφ)
-    rw [schr_schr, he, ← map_add, map_smul] at a
-    rw [hι, schr_schr, he, ← map_add, map_smul, schr, hι, ← a,
+    rw [schr_schr, he, ← map_add (f := _), map_smul] at a
+    rw [hι, schr_schr, he, ← map_add (f := _), map_smul, schr, hι, ← a,
       show ((y, 0) + w : (μ → k) × (μ → k)) = (0, w.2) + (y + w.1, 0) from Prod.ext (by simp) (by simp),
       smul_eq_mul, smul_eq_mul, ← mul_assoc, ← AddChar.map_add_eq_mul]
     congr 2

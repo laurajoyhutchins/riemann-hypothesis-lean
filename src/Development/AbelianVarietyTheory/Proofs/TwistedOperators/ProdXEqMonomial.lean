@@ -1,7 +1,51 @@
-import Mathlib
-import Formalism.SharpRestriction.Divisibility.SchurIrreducible
-import Formalism.LocalToGlobal.BesselHermitianTheta.DefsReal
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.SymbolCongr
+module
+
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.SymbolCongr
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Formalism.BasicNotions.TH Formalism.MainNotions.SchurIrreducible GlobalTheory.InducedPBW
 
@@ -109,34 +153,7 @@ theorem cls_mem_of_kc (v : V) (l l' : List (Mat p q)) {Y : Mat p q} (hY : IsKC Y
   rw [e]
   exact Submodule.add_mem _ h₁ h₂
 
-theorem pLin_add (x y : Mat p q) : pLin (x + y) = pLin x + pLin y := by
-  simp only [pLin, Matrix.add_apply, map_add, add_mul, Finset.sum_add_distrib]
-
-theorem pLin_smul (c : ℂ) (x : Mat p q) : pLin (c • x) = c • pLin x := by
-  simp only [pLin, Finset.smul_sum, Matrix.smul_apply, smul_eq_mul, map_mul, MvPolynomial.smul_eq_C_mul, mul_assoc]
-
-theorem pLin_kc {Y : Mat p q} (hY : IsKC Y) : pLin Y = 0 := by
-  refine Finset.sum_eq_zero fun ab _ => ?_
-  rw [hY _ _ ab.2, map_zero, zero_mul]
-
 def unitP (ab : PIx p q) : Mat p q := Eab ab.1.1 ab.1.2
-
-theorem pLin_unitP (ab : PIx p q) : pLin (unitP ab) = MvPolynomial.X ab := by
-  unfold pLin
-  rw [Finset.sum_eq_single ab]
-  · simp [unitP, Eab]
-  · intro b _ hb
-    have hne : ¬ (ab.1.1 = b.1.1 ∧ ab.1.2 = b.1.2) := fun e => hb (Subtype.ext (Prod.ext e.1.symm e.2.symm))
-    simp [unitP, Eab, Matrix.single_apply_of_ne (h := hne)]
-  · intro h
-    exact absurd (Finset.mem_univ ab) h
-
-theorem isKC_Eab {a b : Ix p q} (h : sameBlock a b) : IsKC (Eab a b) := by
-  intro c d hcd
-  have hne : ¬ (a = c ∧ b = d) := by
-    rintro ⟨rfl, rfl⟩
-    exact hcd h
-  simp [Eab, Matrix.single_apply_of_ne (h := hne)]
 
 theorem prod_X_eq_monomial (a : List (PIx p q)) :
     (a.map (MvPolynomial.X : PIx p q → MvPolynomial (PIx p q) ℂ)).prod =
@@ -218,6 +235,7 @@ theorem mixed_mem (v : V) (l : List (Mat p q)) : ∀ a : List (PIx p q),
     set P : Mat p q := ∑ ab : PIx p q, x ab.1.1 ab.1.2 • unitP ab with hP
     have hY : IsKC (x - P) := isKC_sub_sum_unitP x
     have hx : ugι p q x = ∑ ab : PIx p q, x ab.1.1 ab.1.2 • ugι p q (unitP ab) + ugι p q (x - P) := by
+
       rw [map_sub, hP, map_sum]
       simp only [map_smul]
       abel
@@ -239,7 +257,8 @@ theorem mixed_mem (v : V) (l : List (Mat p q)) : ∀ a : List (PIx p q),
       refine Finset.sum_congr rfl fun ab _ => ?_
       simp only [List.map_append, List.map_singleton, List.prod_append, List.prod_singleton,
         smul_mul_assoc, mul_smul_comm, mul_assoc]
-    rw [hL, hR, map_add, map_sum, map_sum, map_sum]
+
+    rw [hL, hR, map_add (f := _), map_sum, map_sum, map_sum]
     simp only [map_smul]
     rw [add_sub_right_comm, ← Finset.sum_sub_distrib]
     refine Submodule.add_mem _ (Submodule.sum_mem _ fun ab _ => ?_) ?_

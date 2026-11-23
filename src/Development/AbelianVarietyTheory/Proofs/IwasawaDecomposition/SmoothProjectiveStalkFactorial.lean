@@ -1,13 +1,47 @@
-import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.SiegelToroidalIntegral
-import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.ExistsHasProjectiveDimensionLEOfResidueField
-import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.IsPrincipalMapAwayOfHasProjectiveDimensionLE
-import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.UniqueFactorizationMonoidOfIsRegularRingOfIsLoca
-import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.IsRegularRingOfSmooth
-import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.IsRegularRingOfIsDiscreteValuationRing
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.IsLocalizationOfLeClosure
-import ReciprocityTheory.AnalyticForms.RegularLocalRings.RegDom
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.AbProj
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.SiegelToroidalIntegral
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.IsLocalizationOfLeClosure
+import Formalism.FrobeniusOrbits.FrobeniusOrbitsProofs.EqZeroOfNegEq
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.NumberField.Cyclotomic.Basic
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits
 open ReciprocityTheory.ChartRestriction.G.Geo.Tor GlobalTheory.SiegelTor
 
@@ -77,25 +111,5 @@ theorem isDedekindDomain_cycAway (n : ℕ) : IsDedekindDomain (cycAway n) := by
 end GlobalTheory.CycAwayReg
 
 namespace GlobalTheory.CycAwayReg
-
-theorem smooth_over_projective_factorial : ∀ (n : ℕ) (S : Scheme.{0}) (s : S ⟶ Sp (cycAway n)) (X : Scheme.{0}) (p : X ⟶ S), IsProjOver s → Smooth s → Smooth p → QuasiCompact p → IsLocallyNoetherian X ∧ CompactSpace X ∧ ∀ x : X, IsDomain (X.presheaf.stalk x) ∧ UniqueFactorizationMonoid (X.presheaf.stalk x) := by
-  intro n S s X p hproj hs hp hq
-  haveI : IsDedekindDomain (cycAway n) := isDedekindDomain_cycAway n
-  haveI : IsRegularRing (cycAway n) := inferInstance
-  haveI : Smooth (p ≫ s) := inferInstance
-  refine ⟨LocallyOfFiniteType.isLocallyNoetherian (p ≫ s), ?_, fun x => ?_⟩
-  · obtain ⟨N, i, hi, hcomp⟩ := hproj
-    haveI : IsProper (PSpace.str (cycAway n) N) := isProper_str (cycAway n) N
-    haveI : CompactSpace S := by
-      rw [← hcomp] at *
-      exact QuasiCompact.compactSpace_of_compactSpace (i ≫ PSpace.str (cycAway n) N)
-    exact QuasiCompact.compactSpace_of_compactSpace p
-  · haveI : IsRegularRing (X.presheaf.stalk x) :=
-      GlobalTheory.ExtendRig.isRegularRing_stalk GlobalTheory.isRegularRing_of_smooth (cycAway n) (p ≫ s) x
-    haveI : IsRegularLocalRing (X.presheaf.stalk x) := IsRegularLocalRing.of_isRegularRing_of_isLocalRing _
-    haveI : IsDomain (X.presheaf.stalk x) := ReciprocityTheory.AnForm.R.isDomain_of_isRegularLocalRing
-    exact ⟨inferInstance, GlobalTheory.uniqueFactorizationMonoid_of_isRegularRing_of_isLocalRing
-      GlobalTheory.exists_hasProjectiveDimensionLE_of_isRegularLocalRing
-      GlobalTheory.isPrincipal_map_away_of_hasProjectiveDimensionLE _⟩
 
 end GlobalTheory.CycAwayReg

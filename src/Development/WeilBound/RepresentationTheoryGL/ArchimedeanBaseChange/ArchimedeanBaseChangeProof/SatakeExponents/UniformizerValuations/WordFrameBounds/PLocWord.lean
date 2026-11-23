@@ -1,6 +1,52 @@
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.SatakeExponents.UniformizerValuations.WordFrameBounds.WordIdAt
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.SatakeExponents.UniformizerValuations.AdelicHeckeBlocks.Imports
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.SatakeExponents.UniformizerValuations.AdelicHeckeBlocks.DoubleSumFinprodFactor
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.SatakeExponents.UniformizerValuations.WordFrameBounds.WordIdAt
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.SatakeExponents.UniformizerValuations.AdelicHeckeBlocks.IsCompactMaximalPairPlace
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.SatakeExponents.UniformizerValuations.AdelicHeckeBlocks.IsHeckeSmul
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.SatakeExponents.UniformizerValuations.AdelicHeckeBlocks.DoubleSumFinprodFactor
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.SatakeExponents.UniformizerValuations.AdelicHeckeBlocks.Imports
+import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.SatakeExponents.UniformizerValuations.AdelicHeckeBlocks.PLocComm
+import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.SatakeExponents.UniformizerValuations.LocalOperatorSums.LocOp3
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -11,7 +57,7 @@ open PositivityTheory.RgTw (Mat G)
 open PositivityTheory.Rg.BcB.SpectralAccumulation (Hf)
 open scoped Classical
 
-set_option synthInstance.maxHeartbeats 200000
+
 
 open PositivityTheory.Rg.BcB.F.Eig PositivityTheory.Rg.BcN.F2
 
@@ -214,10 +260,12 @@ theorem hL_off {a : ℕ} (ha : a ≤ n) {w w' : Pl E} (hne : w ≠ w') (k : ℕ)
 
 theorem offB (hd : d.Ok) {a : ℕ} (ha : a ≤ n) {w : Pl E} (hP : w ∉ d.P) : ∀ ls : List (LL d),
     ((ls.map (locL d a ha)).foldr LM.mul (d.eL a)).s w = (MLM.wordLS d a ha w (atPlace d w ls)).s w ∧
-    ((ls.map (locL d a ha)).foldr LM.mul (d.eL a)).t w = (MLM.wordLS d a ha w (atPlace d w ls)).t w
-  | [] => ⟨rfl, rfl⟩
-  | p :: ls => by
-    obtain ⟨ih1, ih2⟩ := offB hd ha hP ls
+    ((ls.map (locL d a ha)).foldr LM.mul (d.eL a)).t w = (MLM.wordLS d a ha w (atPlace d w ls)).t w := by
+  intro ls
+  induction ls with
+  | nil => exact ⟨rfl, rfl⟩
+  | cons p ls ih =>
+    obtain ⟨ih1, ih2⟩ := ih
     have hX := hg_foldr d hd ha ls
     have fin : ∀ l : LM d.kap a (n - a), l.s w = idem (d.lev a w) → l.t w = idem (d.lev₂ a w) →
         (l.mul ((ls.map (locL d a ha)).foldr LM.mul (d.eL a))).s w = (MLM.wordLS d a ha w (atPlace d w ls)).s w ∧
@@ -281,7 +329,7 @@ theorem locWord : LocWord := by
     simp only [LocData.B, LocData.P, Finset.mem_union] at h ⊢
     tauto)
   have hprod : prodL d ls a = (d.fixL a).mul ((ls.map (locL d a ha)).foldr LM.mul (d.eL a)) := by
-    rw [prodL, dif_pos ha]
+    rw [prodL, dite_eq_left ha]
     rfl
   refine ⟨fun p => ⟨?_, (unit_eqv d hd ha (hgL d hd ha p)).1, ?_⟩, fun w hw => ?_, fun w hw => ?_,
     fun w hw => atPlace_nil d hw ls⟩

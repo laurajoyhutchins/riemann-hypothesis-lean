@@ -1,6 +1,54 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.StatementsSegreFlagCutChartSection
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PSegreFlagCutForms
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.BundleObjects
+public import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.Statements
+public import Mathlib.Algebra.MvPolynomial.Monad
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PGenericProjClosureDivisor
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.NumbersDVR
@@ -40,7 +88,7 @@ theorem coneMap_component (z : (Σ k, ι k) → Φ) (b : K → ℕ) (f : MRing �
     · subst h
       rw [h1.weightedHomogeneousComponent_same, h2.weightedHomogeneousComponent_same]
     · rw [h1.weightedHomogeneousComponent_ne _ h, h2.weightedHomogeneousComponent_ne _ h, map_zero]
-  | add f g hf hg => simp only [map_add, hf, hg]
+  | add f g hf hg => simp only [map_add (f := _), hf, hg]
 
 theorem isMultiHomogIdeal_pointIdeal (z : (Σ k, ι k) → Φ) : IsMultiHomogIdeal (pointIdeal O z) := by
   intro f hf b
@@ -59,15 +107,17 @@ variable {K₁ K₂ : Type} [DecidableEq K₁] [DecidableEq K₂] {ι₁ : K₁ 
 theorem bind₁_isMultiHomog_of (Λ : (K₁ → ℕ) →+ (K₂ → ℕ)) (g : (Σ k, ι₁ k) → MRing ι₂ O)
     (hg : ∀ v, IsWeightedHomogeneous (blockWeight ι₂) (g v) (Λ (blockWeight ι₁ v))) {q : MRing ι₁ O}
     {d : K₁ → ℕ} (hq : IsMultiHomog q d) : IsMultiHomog (bind₁ g q) (Λ d) := by
+
   rw [← q.support_sum_monomial_coeff, map_sum]
   refine IsWeightedHomogeneous.sum _ _ _ fun m hm => ?_
   have hmd : Finsupp.weight (blockWeight ι₁) m = d := hq (mem_support_iff.mp hm)
   rw [bind₁_monomial]
-  have := (isWeightedHomogeneous_C (blockWeight ι₂) (coeff m q)).mul
+  have := (isWeightedHomogeneous_C (blockWeight ι₂) (AddMonoidAlgebra.coeff q m)).mul
     (IsWeightedHomogeneous.prod m.support (fun v => g v ^ m v) (fun v => m v • Λ (blockWeight ι₁ v))
       (fun v _ => (hg v).pow (m v)))
   rw [zero_add] at this
   have hΛ : Λ d = ∑ v ∈ m.support, m v • Λ (blockWeight ι₁ v) := by
+
     rw [← hmd, Finsupp.weight_apply, Finsupp.sum, map_sum]
     simp only [map_nsmul]
   rw [hΛ]
@@ -78,6 +128,7 @@ theorem bind₁_scale_of (o₀ : K₁) (u : MRing ι₂ O) (h : (Σ k, ι₁ k) 
     bind₁ (fun v => u ^ blockWeight ι₁ v o₀ * h v) q = u ^ d o₀ * bind₁ h q := by
   conv_lhs => rw [← q.support_sum_monomial_coeff]
   conv_rhs => rw [← q.support_sum_monomial_coeff]
+
   rw [map_sum, map_sum, Finset.mul_sum]
   refine Finset.sum_congr rfl fun m hm => ?_
   have hmd : Finsupp.weight (blockWeight ι₁) m = d := hq (mem_support_iff.mp hm)
@@ -94,7 +145,7 @@ theorem rename_eq_bind₁ {σ τ R : Type*} [CommRing R] (f : σ → τ) (q : Mv
     rename f q = bind₁ (fun p => X (f p)) q := by
   induction q using MvPolynomial.induction_on with
   | C r => simp
-  | add p q hp hq => simp only [map_add, hp, hq]
+  | add p q hp hq => simp only [map_add (f := _), hp, hq]
   | mul_X p v hp => simp only [map_mul, hp, rename_X, bind₁_X_right]
 
 theorem bind₁_sub_mem_of {σ τ R : Type*} [CommRing R] (I : Ideal (MvPolynomial τ R))
@@ -103,7 +154,7 @@ theorem bind₁_sub_mem_of {σ τ R : Type*} [CommRing R] (I : Ideal (MvPolynomi
   induction q using MvPolynomial.induction_on with
   | C r => simp
   | add p q hp hq =>
-    rw [map_add, map_add, add_sub_add_comm]
+    rw [map_add (f := _), map_add (f := _), add_sub_add_comm]
     exact I.add_mem hp hq
   | mul_X p v hp =>
     rw [map_mul, map_mul, bind₁_X_right, bind₁_X_right,
@@ -189,6 +240,7 @@ theorem saturate (j : K₁ ↪ K₂) (o₀ : K₁) (pt : (Σ k, ι₂ k) → Φ)
     conv_lhs => rw [← sum_weightedHomogeneousComponent (blockWeight (fun k => ι₂ (j k))) q]
     exact finsum_eq_sum _ hfin
   refine ⟨∑ d ∈ S, nn d, ?_⟩
+
   rw [hS, map_sum, Finset.mul_sum]
   refine Ideal.sum_mem _ fun d hd => ?_
   rw [← Nat.sub_add_cancel (Finset.single_le_sum (f := nn) (fun _ _ => Nat.zero_le _) hd), pow_add,

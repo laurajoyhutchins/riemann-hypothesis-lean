@@ -1,11 +1,62 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutSERDSOpR
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutJDHatOpRFinal
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutJDHatPolyOK
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutSERDSOpR
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutJDHatJDCapRAsm
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutJDHatJDCapRGrpMBeta
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutJDHatJDCapRGrpMConseq
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutJDHatJDCapRGrpMContPf
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutJDHatJDCapRGrpMStepAPf
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutJDHatJDCapRGrpMTop
 import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutJDHatJDRInvFinal
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.RegularisedPairingViaPhase
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.NormDiagonalEntryDilationGeneratorLeOne
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutJDHatJDRStepA
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutJDHatJDRStepB
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutJDHatJDRvStepB
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutJDHatPolyOK
 import Formalism.HermitianCurvature.HermitianCurvatureProofs.LevelFormSesquilinearFiniteClass
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.NormDiagonalEntryDilationGeneratorLeOne
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.RegularisedPairingViaPhase
 import Formalism.HermitianCurvature.HermitianCurvatureProofs.WCellMemOmPlus
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open MeasureTheory
 open scoped Matrix
@@ -28,40 +79,6 @@ section swap
 
 variable {k r : ℕ} {Wp Wq : Type} [NormedAddCommGroup Wp] [InnerProductSpace ℂ Wp] [NormedAddCommGroup Wq]
   [InnerProductSpace ℂ Wq] [FiniteDimensional ℂ Wq]
-
-def swapT (T : B.DTerm k r Wp Wq) : B.DTerm k r Wp Wq where
-  coef := T.coefAdj
-  coefAdj := T.coef
-  word := T.word
-  word_lie := T.word_lie
-  adj_id := fun x A₁ B₁ => by
-    have h := T.adj_id x B₁ A₁
-    simp only [B.hsInner] at h ⊢
-    simpa only [inner_conj_symm] using (congrArg (starRingEnd ℂ) h).symm
-
-theorem polyOp_swap {o κ : ℕ} {Θ : B.DiffOp k r Wp Wq} (h : CutMP.PolyOp o κ Θ) :
-    CutMP.PolyOp o κ (Θ.map swapT) := by
-  intro Tm hTm
-  rw [List.mem_map] at hTm
-  obtain ⟨T, hT, rfl⟩ := hTm
-  obtain ⟨hlen, P, ⟨q, hq, hPq⟩, hc, hca⟩ := h T hT
-  refine ⟨hlen, fun g => star (P g), ?_, fun g => hca g, fun g => ?_⟩
-  · refine ⟨MvPolynomial.rename Sum.swap (MvPolynomial.map (starRingEnd ℂ) q), ?_, fun g => ?_⟩
-    · exact le_trans (MvPolynomial.totalDegree_rename_le _ _) (le_trans (show (MvPolynomial.map (starRingEnd ℂ) q).totalDegree ≤ q.totalDegree from
-        Finset.sup_mono (MvPolynomial.support_map_subset _ _)) hq)
-    · show star (P g) = _
-      rw [hPq g, MvPolynomial.eval_rename, MvPolynomial.eval_map]
-      have e0 : (starRingEnd ℂ) ∘ (Sum.elim (fun x : Fin _ × Fin _ => g x.1 x.2) fun x => star (g x.1 x.2)) =
-          (Sum.elim (fun x : Fin _ × Fin _ => g x.1 x.2) fun x => star (g x.1 x.2)) ∘ Sum.swap := by
-        funext x
-        cases x <;> simp
-      have e1 := MvPolynomial.eval₂_comp_left (starRingEnd ℂ) (RingHom.id ℂ)
-        (Sum.elim (fun x : Fin _ × Fin _ => g x.1 x.2) fun x => star (g x.1 x.2)) q
-      rw [RingHom.comp_id, e0] at e1
-      exact e1
-  · show T.coef g = star (star (P g)) • ContinuousLinearMap.id ℂ (Wq →L[ℂ] Wp)
-    rw [star_star]
-    exact hc g
 
 end swap
 

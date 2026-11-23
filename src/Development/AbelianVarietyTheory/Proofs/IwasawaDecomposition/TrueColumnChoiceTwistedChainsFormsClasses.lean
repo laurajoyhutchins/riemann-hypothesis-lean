@@ -1,23 +1,67 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.StdLvPr
-import Formalism.LocalToGlobal.HermitianForms.TiedTwJSym
-import Formalism.LocalToGlobal.HermitianForms.TiedTwSym
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ChartsTupleTrivQ
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ChartLastStepTwistBasePointStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HermitianChartComplexRationalIntegralFormsStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.DiamondOperatorsOnChartsStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.UnitaryOfIsON
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ChartWiden
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.InclMulInvMul
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.NonemptyClassMapAboveLastStepStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.TwistPlacesPrimeToLevelAndTypePrimesStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.NotTwistPlaceReferenceTupleStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.StdLvPr
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ChartWiden
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.InclMulInvMul
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.StepZeroFormsIdentificationReferenceTupleEqSelfStatement
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.StepZeroTwistReferenceTupleEqId
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.BaseFieldsDefiniteLaws
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ChartLastStepTwistBasePointStatement
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ChartsTupleTrivQ
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.DecoStabTrivial
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.DiamondOperatorsOnChartsStatement
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsLevelJCharacterEqMemberOffPlacesStatement
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsPenultimateLevelCouplingCosetsStatement
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HermitianChartComplexRationalIntegralFormsStatement
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.NonemptyClassMapAboveLastStepStatement
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.NotTwistPlaceReferenceTupleStatement
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.StepQOfReindex
 import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.StepZeroClassEquivReferenceTupleEqSelfStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.StepZeroFormsIdentificationReferenceTupleEqSelfStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.DecoStabTrivial
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.StepQOfReindex
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsPenultimateLevelCouplingCosetsStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsLevelJCharacterEqMemberOffPlacesStatement
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.TrueColumnSpacesStandardInFrameCoords
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.TwistPlacesPrimeToLevelAndTypePrimesStatement
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.UnitaryOfIsON
+import Formalism.LocalToGlobal.Columns.RecLevelLocP
+import Formalism.LocalToGlobal.Columns.RecLevelStep
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Formalism.BasicNotions Formalism.MainNotions Formalism.L2.Col Formalism.L2.DIV Formalism.L2.Ker Formalism.UG Formalism.L2.Forms GlobalTheory.Mem GlobalTheory.Mem.Chr GlobalTheory.Mem.Col2 GlobalTheory.Mem.Col2.TC Matrix
 attribute [local instance] GlobalTheory.Mem.Col2.starE Formalism.BasicNotions.Host.cmStar
 
@@ -27,7 +71,7 @@ open scoped TensorProduct
 section
 variable {B : Base} {X : PreX B.toPre} (I : TC B X) (l : I.Laws) (Z : Later B (I.cols l))
 
-set_option maxHeartbeats 4000000 in
+
 
 structure TwStep (H : Formalism.L2.Herm.HermColsCh (I.rec7 l Z)) (F : ∀ u, FormsTiedSym (I.rec7 l Z) u (H.Ch u) (H.chOf u))
     (Q : Finset (HeightOneSpectrum (𝓞 (I.rec7 l Z).host.F))) (u : B.Word) (a : I.ι) (i : ℕ) where
@@ -76,14 +120,14 @@ theorem twStep_out {H : Formalism.L2.Herm.HermColsCh (I.rec7 l Z)} {F : ∀ u, F
      offU := fun h1 hm => absurd ⟨h1, hm⟩ hout
      offL := fun h1 hm => absurd ⟨h1, hm⟩ hout
      offK := fun h1 h2 => absurd ⟨h1, le_of_succ_m h2⟩ hout
-     uniq := fun e => absurd ⟨by have := B.R.two_le_m; omega, by omega⟩ hout
+     uniq := fun e => (hout ⟨(one_le_m B.R).trans e.ge, e.le⟩).elim
      chiFin := fun _ h1 hm => absurd ⟨h1, hm⟩ hout
      chiC := fun h1 h2 => absurd ⟨h1, le_of_succ_m h2⟩ hout }⟩
 
 theorem swap_ex (hok : I.Ok) (pins : TC.Pins B X) (u : B.Word) (a : I.ι) (i : ℕ) (hi : i ≤ B.R.m) {bad : Set (HeightOneSpectrum (𝓞 B.host.F))}
     {Ch : Type} {chOf : (I.stp u a i).Cl → Ch}
-    (K : ∀ β : Ch, LevelChart (I.rec7 l Z) (B.T u) bad i hi (fun c : {c // chOf c = β} => (I.chain l u a).stab i c.1)
-      (fun c => latCrd (I.rec7 l Z) i hi (I.latAt u a i c.1)))
+    (K : ∀ β : Ch, LevelChart (_root_.GlobalTheory.Mem.assemble _ _ Z.W Z.V Z.S Z.N Z.G) (B.T u) bad i hi (fun c : {c // chOf c = β} => (I.chain l u a).stab i c.1)
+      (fun c => latCrd (_root_.GlobalTheory.Mem.assemble _ _ Z.W Z.V Z.S Z.N Z.G) i hi (I.latAt u a i c.1)))
     (hK : I.ReadsK l Z u a i hi chOf K) (β : Ch) :
     ∃ Kr, ∃ hl : GlobalTheory.Mem.Col2.Reside.SwapLaws (K β).lev Kr, FunKilled (GlobalTheory.Mem.Col2.Reside.swap (K β).lev Kr hl) (X.piT u) := by
   have hPr := l.pr
@@ -97,12 +141,12 @@ theorem swap_ex (hok : I.Ok) (pins : TC.Pins B X) (u : B.Word) (a : I.ι) (i : �
     ext x
     exact (hk.lb β x).trans (GlobalTheory.Mem.Col2.Reside.mem_baseLb hPr u _ x).symm
   exact ⟨_, GlobalTheory.Mem.Col2.Reside.swapLaws B.sp.cm hB (hPr.T_prime u) (hPr.piT_norm u) (rls_vT_iff hX hPr u)
-    (fun P hP => hPr.vT_norm u P hP) hgr (K β).lev hLb⟩
+    (fun P hP => by simpa only [Ideal.absNorm_eq_natCard] using hPr.vT_norm u P hP) hgr (K β).lev hLb⟩
 
 def killK (hok : I.Ok) (pins : TC.Pins B X) (u : B.Word) (a : I.ι) (i : ℕ) (hi : i ≤ B.R.m) {bad : Set (HeightOneSpectrum (𝓞 B.host.F))}
     {Ch : Type} {chOf : (I.stp u a i).Cl → Ch}
-    (K : ∀ β : Ch, LevelChart (I.rec7 l Z) (B.T u) bad i hi (fun c : {c // chOf c = β} => (I.chain l u a).stab i c.1)
-      (fun c => latCrd (I.rec7 l Z) i hi (I.latAt u a i c.1)))
+    (K : ∀ β : Ch, LevelChart (_root_.GlobalTheory.Mem.assemble _ _ Z.W Z.V Z.S Z.N Z.G) (B.T u) bad i hi (fun c : {c // chOf c = β} => (I.chain l u a).stab i c.1)
+      (fun c => latCrd (_root_.GlobalTheory.Mem.assemble _ _ Z.W Z.V Z.S Z.N Z.G) i hi (I.latAt u a i c.1)))
     (hK : I.ReadsK l Z u a i hi chOf K) (β : Ch) :
     LevelChart (I.rec7 l Z) (B.T u) bad i hi (fun c : {c // chOf c = β} => (I.chain l u a).stab i c.1)
       (fun c => latCrd (I.rec7 l Z) i hi (I.latAt u a i c.1)) :=
@@ -155,7 +199,7 @@ theorem twStep_mid (hok : I.Ok) (pins : TC.Pins B X) {H : Formalism.L2.Herm.Herm
     {Q : Finset (HeightOneSpectrum (𝓞 (I.rec7 l Z).host.F))} (u : B.Word) (a : I.ι) (i : ℕ) (h1 : 1 ≤ i) (h2 : i + 1 ≤ B.R.m)
     (hQ : ∀ v, v ∈ Q ↔ I.UnderQ a v)
     (hF : ∀ u, I.StdF l Z u (F u)) (hC : CarH H F) : Nonempty (TwStep I l Z H F Q u a i) := by
-  have hoff : ∀ v ∈ Q, ((B.T u : ℕ) : 𝓞 (I.rec7 l Z).host.F) ∉ v.asIdeal ∧ ∀ j, (((I.rec7 l Z).host.g j : ℕ) : 𝓞 (I.rec7 l Z).host.F) ∉ v.asIdeal :=
+  have hoff : ∀ v ∈ Q, ((B.T u : ℕ) : 𝓞 (_root_.GlobalTheory.Mem.assemble _ _ Z.W Z.V Z.S Z.N Z.G).host.F) ∉ v.asIdeal ∧ ∀ j, (((_root_.GlobalTheory.Mem.assemble _ _ Z.W Z.V Z.S Z.N Z.G).host.g j : ℕ) : 𝓞 (_root_.GlobalTheory.Mem.assemble _ _ Z.W Z.V Z.S Z.N Z.G).host.F) ∉ v.asIdeal :=
     fun v hv => GlobalTheory.T.twistPlaces_prime_to_levelAndTypePrimes I hok l u a v ((hQ v).1 hv)
   have hi : i ≤ B.R.m := le_of_succ_m h2
   by_cases ha : a = I.mu0
@@ -169,19 +213,16 @@ theorem twStep_mid (hok : I.Ok) (pins : TC.Pins B X) {H : Formalism.L2.Herm.Herm
       (fun e => by omega) (fun h => absurd rfl h) (fun _ _ β κ κ' e _ => ?_)⟩
     · exact (hC.carC u i h1 h2 β).Lb_eq
     · exact (hC.carC u i h1 h2 β).Uloc_eq v
-    · have : κ = κ' := Subtype.ext e
-      subst this
-      rfl
+    · exact congrArg ((F u).ch i h1 h2 β).lev.chi (Subtype.ext e)
   · obtain ⟨Ch, fin, chOf, K, g, hrQ, hp⟩ := GlobalTheory.Mem.Col2.TC.ChTw.charts_tuple_trivQ I hok pins l Z u a Q i hi (H.Ch u i) (H.chOf u i) ((F u).ch i h1 h2) h1 (by omega) hQ
       ((hF u).mid i h1 h2)
     have hr : I.ReadsK l Z u a i hi chOf K := hrQ.elim fun k hk => ⟨k, hk.1⟩
     have hoU : ∀ β v, v ∉ Q → (K β).lev.Uloc v = ((F u).ch i h1 h2 (g β)).lev.Uloc v := fun β v hv => (hp β).1 v hv
     refine ⟨twStep_mk hok pins u a i h1 hi hoff Ch fin chOf g K hr (fun _ => hrQ) (fun β => ?_) (fun β v hv => ?_) (fun _ _ β v hv => hoU β v hv)
       (fun e => by omega) (fun _ β => (hp β).2.1) (fun _ _ β κ κ' e hv => (hp β).2.2 κ κ' e hv)⟩
-    · rw [reads_lb_eq hr ((hF u).mid i h1 h2) β (g β)]
-      exact (hC.carC u i h1 h2 (g β)).Lb_eq
-    · rw [hoU β v hv]
-      exact (hC.carC u i h1 h2 (g β)).Uloc_eq v
+    · exact (reads_lb_eq (K := K) (K' := (F u).ch i h1 h2)
+        hr ((hF u).mid i h1 h2) β (g β)).trans (hC.carC u i h1 h2 (g β)).Lb_eq
+    · exact (hoU β v hv).trans ((hC.carC u i h1 h2 (g β)).Uloc_eq v)
 
 structure TopP {H : Formalism.L2.Herm.HermColsCh (I.rec7 l Z)} {F : ∀ u, FormsTiedSym (I.rec7 l Z) u (H.Ch u) (H.chOf u)}
     {Q : Finset (HeightOneSpectrum (𝓞 (I.rec7 l Z).host.F))} {u : B.Word} {a : I.ι} (S : TwStep I l Z H F Q u a B.R.m) : Prop where
@@ -200,11 +241,11 @@ theorem twStep_top (hok : I.Ok) (pins : TC.Pins B X) {H : Formalism.L2.Herm.Herm
     {Q : Finset (HeightOneSpectrum (𝓞 (I.rec7 l Z).host.F))} (u : B.Word) (a : I.ι)
     (hQ : ∀ v, v ∈ Q ↔ I.UnderQ a v)
     (hF : ∀ u, I.StdF l Z u (F u)) (hC : CarH H F) : ∃ S : TwStep I l Z H F Q u a B.R.m, TopP S := by
-  have hoff : ∀ v ∈ Q, ((B.T u : ℕ) : 𝓞 (I.rec7 l Z).host.F) ∉ v.asIdeal ∧ ∀ j, (((I.rec7 l Z).host.g j : ℕ) : 𝓞 (I.rec7 l Z).host.F) ∉ v.asIdeal :=
+  have hoff : ∀ v ∈ Q, ((B.T u : ℕ) : 𝓞 (_root_.GlobalTheory.Mem.assemble _ _ Z.W Z.V Z.S Z.N Z.G).host.F) ∉ v.asIdeal ∧ ∀ j, (((_root_.GlobalTheory.Mem.assemble _ _ Z.W Z.V Z.S Z.N Z.G).host.g j : ℕ) : 𝓞 (_root_.GlobalTheory.Mem.assemble _ _ Z.W Z.V Z.S Z.N Z.G).host.F) ∉ v.asIdeal :=
     fun v hv => GlobalTheory.T.twistPlaces_prime_to_levelAndTypePrimes I hok l u a v ((hQ v).1 hv)
   have h1m : 1 ≤ B.R.m := one_le_m B.R
   have hr0 := (hF u).ends B.R.m le_rfl (Or.inr rfl)
-  have hno : ∀ h2 : B.R.m + 1 ≤ B.R.m, False := fun h2 => by omega
+  have hno := Nat.not_succ_le_self B.R.m
   by_cases ha : a = I.mu0
   · subst ha
     let K : ∀ β : Unit, LevelChart (I.rec7 l Z) (B.T u) (badQ (I.rec7 l Z) Q) B.R.m le_rfl
@@ -212,39 +253,31 @@ theorem twStep_top (hok : I.Ok) (pins : TC.Pins B X) {H : Formalism.L2.Herm.Herm
         (fun c => latCrd (I.rec7 l Z) B.R.m le_rfl (I.latAt u I.mu0 B.R.m c.1)) :=
       chartAll (chartWiden Set.subset_union_left ((F u).cls B.R.m le_rfl (Or.inr rfl)).toChart)
     have hr : I.ReadsK l Z u I.mu0 B.R.m le_rfl (fun _ => ()) K := hr0
-    refine ⟨twStep_mk hok pins u I.mu0 B.R.m h1m le_rfl hoff Unit inferInstance (fun _ => ()) (fun _ => chM H u) K hr (fun h2 => (hno h2).elim) (fun β => ?_) (fun β v _ => ?_)
-      (fun _ h2 => (hno h2).elim) (fun _ => ⟨inferInstance⟩) (fun h => absurd rfl h) (fun _ h2 => (hno h2).elim), ?_, ?_, ?_⟩
-    · exact (hC.carM u).Lb_eq
-    · exact (hC.carM u).Uloc_eq v
-    · intro _ β κ κ' e _
-      have : κ = κ' := Subtype.ext e
-      subst this
-      rfl
-    · exact fun h => absurd rfl h
-    · exact fun h => absurd rfl h
-  · obtain ⟨K1, ⟨k1, hR1, hk1⟩, htop, hoU, hfin, hchi⟩ := GlobalTheory.T.chart_lastStep_twistBasePoint I hok pins l Z u a Q ((F u).cls B.R.m le_rfl (Or.inr rfl)) hQ hr0
-    have hr : I.ReadsK l Z u a B.R.m le_rfl (fun _ => ()) K1 := ⟨k1, hR1⟩
-    refine ⟨twStep_mk hok pins u a B.R.m h1m le_rfl hoff Unit inferInstance (fun _ => ()) (fun _ => chM H u) K1 hr (fun h2 => (hno h2).elim) (fun β => ?_) (fun β v hv => ?_)
-      (fun _ h2 => (hno h2).elim) (fun _ => ⟨inferInstance⟩) (fun _ β => hfin) (fun _ h2 => (hno h2).elim), ?_, ?_, ?_⟩
-    · have e0 : (K1 β).lev.Lb = ((F u).cls B.R.m le_rfl (Or.inr rfl)).lev.Lb := by
-        obtain ⟨k, R⟩ := hr
-        obtain ⟨k', R'⟩ := hr0
-        ext x
-        exact (R.lb β x).trans (R'.lb () x).symm
-      rw [e0]
-      exact (hC.carM u).Lb_eq
-    · have : β = () := rfl
-      subst this
-      rw [hoU v hv]
-      exact (hC.carM u).Uloc_eq v
-    · intro _ β κ κ' e hv
-      exact hchi κ κ' e hv
-    · intro _ _ β
-      exact htop
-    · intro _ _
-      exact ⟨k1, hR1, hk1⟩
+    let S := twStep_mk (F := F) hok pins u I.mu0 B.R.m h1m le_rfl hoff
+      Unit inferInstance (fun _ => ()) (fun _ => chM H u) K hr (fun h2 => (hno h2).elim)
+      (fun _ => (hC.carM u).Lb_eq) (fun _ v _ => (hC.carM u).Uloc_eq v)
+      (fun _ h2 => (hno h2).elim) (fun _ => ⟨inferInstance⟩)
+      (fun h => (h rfl).elim) (fun _ h2 => (hno h2).elim)
+    let χ := ((F u).cls B.R.m le_rfl (Or.inr rfl)).lev.chi
+    have hχ (κ κ' : ((F u).cls B.R.m le_rfl (Or.inr rfl)).lev.U)
+        (e : κ.1 = κ'.1) : χ κ = χ κ' := congrArg χ (Subtype.ext e)
+    exact ⟨S, ⟨fun _ _ κ κ' e _ => hχ κ κ' e, fun h => (h rfl).elim, fun h => (h rfl).elim⟩⟩
+  · obtain ⟨K1, hk, htop, hoU, hfin, hchi⟩ := GlobalTheory.T.chart_lastStep_twistBasePoint I hok pins l Z u a Q ((F u).cls B.R.m le_rfl (Or.inr rfl)) hQ hr0
+    have hr : I.ReadsK l Z u a B.R.m le_rfl (fun _ => ()) K1 :=
+      hk.elim fun k h => ⟨k, h.1⟩
+    have hLb (β : Unit) : (K1 β).lev.Lb = ((F u).cls B.R.m le_rfl (Or.inr rfl)).lev.Lb := by
+      obtain ⟨_, R⟩ := hr
+      obtain ⟨_, R'⟩ := hr0
+      exact Submodule.ext fun x => (R.lb β x).trans (R'.lb () x).symm
+    let S := twStep_mk (F := F) hok pins u a B.R.m h1m le_rfl hoff
+      Unit inferInstance (fun _ => ()) (fun _ => chM H u) K1 hr (fun h2 => (hno h2).elim)
+      (fun β => (hLb β).trans (hC.carM u).Lb_eq)
+      (fun _ v hv => (hoU v hv).trans ((hC.carM u).Uloc_eq v))
+      (fun _ h2 => (hno h2).elim) (fun _ => ⟨inferInstance⟩)
+      (fun _ _ => hfin) (fun _ h2 => (hno h2).elim)
+    exact ⟨S, ⟨fun _ _ => hchi, fun _ _ _ => htop, fun _ _ => hk⟩⟩
 
-set_option maxHeartbeats 8000000 in
+
 
 structure TwPack (H : Formalism.L2.Herm.HermColsCh (I.rec7 l Z)) (F : ∀ u, FormsTiedSym (I.rec7 l Z) u (H.Ch u) (H.chOf u))
     (Q : Finset (HeightOneSpectrum (𝓞 (I.rec7 l Z).host.F))) (u : B.Word) (a : I.ι) where
@@ -268,7 +301,7 @@ theorem twBefore_cl_nonempty (hOk : I.Ok) (u : B.Word) (a : I.ι) : Nonempty (I.
     exact ⟨0, zero_mem _, rfl⟩⟩
   exact ⟨(I.stp u a (B.R.m - 1)).cl b0 q0⟩
 
-set_option maxHeartbeats 8000000 in
+
 theorem twPack_ex (hok : I.Ok) (pins : TC.Pins B X) {H : Formalism.L2.Herm.HermColsCh (I.rec7 l Z)}
     {F : ∀ u, FormsTiedSym (I.rec7 l Z) u (H.Ch u) (H.chOf u)}
     {Q : Finset (HeightOneSpectrum (𝓞 (I.rec7 l Z).host.F))} (u : B.Word) (a : I.ι)
@@ -303,19 +336,9 @@ theorem twPack_ex (hok : I.Ok) (pins : TC.Pins B X) {H : Formalism.L2.Herm.HermC
   obtain ⟨J⟩ := GlobalTheory.T.exists_penultimateLevel_couplingCosets I hok pins l Z H.Ch H.chOf F u a Q h1 (St (B.R.m - 1)).Ch (St (B.R.m - 1)).fin (St (B.R.m - 1)).chOf
     (fun β => (St (B.R.m - 1)).K h1 (Nat.sub_le _ _) β) (St (B.R.m - 1)).gOf hQ hF hJ ((St (B.R.m - 1)).readsQ h1 (Nat.sub_le _ _) h2) hfin
     (fun β v hv => (St (B.R.m - 1)).offK h1 h2 β v hv) (fun β κ κ' e hv => (St (B.R.m - 1)).chiC h1 h2 β κ κ' e hv)
-  have hLb : (F u).levJ.Lb = reL (rankN (I.rec7 l Z) (B.R.m - 1) (Nat.sub_le _ _)) J.levJ.Lb := by
-    obtain ⟨c⟩ := twBefore_cl_nonempty hok u a
-    rw [← J.lb ((St (B.R.m - 1)).chOf c), ← (F u).levJ_Lb h1 ((St (B.R.m - 1)).gOf ((St (B.R.m - 1)).chOf c))]
-    exact (reads_lb_eq ((St (B.R.m - 1)).reads h1 (Nat.sub_le _ _)) ((hF u).mid (B.R.m - 1) h1 h2) _ _).symm
-  have hoffx := GlobalTheory.T.exists_levelJ_character_eq_member_off_places I hok pins l Z H.Ch H.chOf F u a Q h1 (St (B.R.m - 1)).Ch (St (B.R.m - 1)).fin (St (B.R.m - 1)).chOf
+  obtain ⟨χ, hχ, hχ'⟩ := GlobalTheory.T.exists_levelJ_character_eq_member_off_places I hok pins l Z H.Ch H.chOf F u a Q h1 (St (B.R.m - 1)).Ch (St (B.R.m - 1)).fin (St (B.R.m - 1)).chOf
     (fun β => (St (B.R.m - 1)).K h1 (Nat.sub_le _ _) β) (St (B.R.m - 1)).gOf hQ hF hJ ((St (B.R.m - 1)).reads h1 (Nat.sub_le _ _))
     (fun β v hv => (St (B.R.m - 1)).offK h1 h2 β v hv) (fun β κ κ' e hv => (St (B.R.m - 1)).chiC h1 h2 β κ κ' e hv) J
-  have fin : (∃ χ : J.levJ.U →* ℂˣ, (∀ β (κ : J.levJ.U) (κ' : ((St (B.R.m - 1)).K h1 (Nat.sub_le _ _) β).lev.U),
-      κ'.1 = reGL (rankN (I.rec7 l Z) (B.R.m - 1) (Nat.sub_le _ _)) _ κ.1 → ((St (B.R.m - 1)).K h1 (Nat.sub_le _ _) β).lev.chi κ' = χ κ) ∧
-      ∀ (κ : J.levJ.U) (κ' : (F u).levJ.U), κ'.1 = reGL (rankN (I.rec7 l Z) (B.R.m - 1) (Nat.sub_le _ _)) _ κ.1 →
-        (∀ v ∈ Q, bc (prV (E := (I.rec7 l Z).host.E) v) κ.1 = 1) → χ κ = (F u).levJ.chi κ') := by
-    first | exact hoffx hLb | exact hoffx
-  obtain ⟨χ, hχ, hχ'⟩ := fin
   exact ⟨⟨St, hSt ▸ hSm, { J with chiJ := χ, chiJ_eq := hχ }, hχ'⟩⟩
 
 theorem reL_inj {a b : ℕ} (h : a = b) {E : Type} [Field E] [NumberField E] {L L' : Submodule (𝓞 E) (Fin a → E)}
@@ -333,7 +356,7 @@ def stab0Equiv (u : B.Word) (a : I.ι) (c : (I.stp u I.mu0 0).Cl) (c' : (I.stp u
     right_inv := fun _ => Subsingleton.elim _ _
     map_mul' := fun _ _ => Subsingleton.elim _ _ }
 
-set_option maxHeartbeats 4000000 in
+
 
 def twT {H : Formalism.L2.Herm.HermColsCh (I.rec7 l Z)} {F : ∀ u, FormsTiedSym (I.rec7 l Z) u (H.Ch u) (H.chOf u)}
     {inQ : I.ι → HeightOneSpectrum (𝓞 (I.rec7 l Z).host.F) → Prop}
@@ -379,7 +402,7 @@ def twT {H : Formalism.L2.Herm.HermColsCh (I.rec7 l Z)} {F : ∀ u, FormsTiedSym
       (reGL (rankN (I.rec7 l Z) (B.R.m - 1) (Nat.sub_le _ _)) _).injective).symm.trans e2
   DGam_one _ _ := rfl
 
-set_option maxHeartbeats 4000000 in
+
 
 def twJ {H : Formalism.L2.Herm.HermColsCh (I.rec7 l Z)} {F : ∀ u, FormsTiedSym (I.rec7 l Z) u (H.Ch u) (H.chOf u)}
     {inQ : I.ι → HeightOneSpectrum (𝓞 (I.rec7 l Z).host.F) → Prop}
@@ -408,7 +431,7 @@ theorem idY_twYS {inQ : I.ι → HeightOneSpectrum (𝓞 (I.rec7 l Z).host.F) �
   · exact (hF u).eY i hi h y
   · exact (hF u).eYC i (by omega) (by omega) y
 
-set_option maxHeartbeats 8000000 in
+
 
 def twW (hok : I.Ok) (pins : TC.Pins B X) (l0 : I.Law0 l) {H : Formalism.L2.Herm.HermColsCh (I.rec7 l Z)}
     {F : ∀ u, FormsTiedSym (I.rec7 l Z) u (H.Ch u) (H.chOf u)} (hF : ∀ u, I.StdF l Z u (F u))
@@ -459,7 +482,7 @@ def twJS {H : Formalism.L2.Herm.HermColsCh (I.rec7 l Z)} {F : ∀ u, FormsTiedSy
 
 end
 
-set_option maxHeartbeats 8000000 in
+
 
 theorem tw_chains : ∀ {B : Base} {X : PreX B.toPre} (I : TC B X), I.Ok → TC.Pins B X → ∀ (l : I.Laws) (Z : TC.Later B (I.cols l)), ∀ (l0 : I.Law0 l) (inQ : I.ι → HeightOneSpectrum (𝓞 (I.rec7 l Z).host.F) → Prop) (H : Formalism.L2.Herm.HermColsCh (I.rec7 l Z)) (F : ∀ u, FormsTiedSym (I.rec7 l Z) u (H.Ch u) (H.chOf u)), (∀ a v, inQ a v ↔ I.UnderQ a v) → (∀ u, I.StdF l Z u (F u) ∧ I.StdLvC l Z u (F u)) → CarH H F → (∀ u j v h, (F u).glevJ.fr j v h = 1) → ∃ (T : Formalism.L2.Herm.TwChTied (I.rec7 l Z) inQ) (J : Formalism.L2.Herm.TwChJointS T H) (W : TwFormsTiedS (I.rec7 l Z) (I.tw l l0 Z) T J F), Formalism.L2.Herm.TwChMu0 T ∧ I.StdW l Z l0 W ∧ Nonempty (SymmetricTwistedJointForms T F) := by
   intro B X I hok pins l Z l0 inQ H F hin hF hC hJ
@@ -483,10 +506,6 @@ theorem tw_chains : ∀ {B : Base} {X : PreX B.toPre} (I : TC B X), I.Ok → TC.
   rw [(hF' u).res]
   exact ((A u a).eFv v).symm_apply_eq.2 (hA' u a v r).symm
 
-set_option maxHeartbeats 8000000 in
-
-theorem tw_chains_std : ∀ {B : Base} {X : PreX B.toPre} (I : TC B X), I.Ok → TC.Pins B X → ∀ (l : I.Laws) (Z : TC.Later B (I.cols l)), ∀ (l0 : I.Law0 l) (inQ : I.ι → HeightOneSpectrum (𝓞 (I.rec7 l Z).host.F) → Prop) (H : Formalism.L2.Herm.HermColsCh (I.rec7 l Z)) (F : ∀ u, FormsTiedSym (I.rec7 l Z) u (H.Ch u) (H.chOf u)), (∀ a v, inQ a v ↔ I.UnderQ a v) → (∀ u, I.StdF l Z u (F u) ∧ I.StdLvC l Z u (F u)) → CarH H F → ∃ (T : Formalism.L2.Herm.TwChTied (I.rec7 l Z) inQ) (J : Formalism.L2.Herm.TwChJointS T H) (W : TwFormsTiedS (I.rec7 l Z) (I.tw l l0 Z) T J F), Formalism.L2.Herm.TwChMu0 T ∧ I.StdW l Z l0 W ∧ Nonempty (SymmetricTwistedJointForms T F) :=
-  fun I hok pins l Z l0 inQ H F hin hF hC => tw_chains I hok pins l Z l0 inQ H F hin hF hC fun u => (hF u).2.2
 
 end GlobalTheory.Mem.Col2.TC
 end

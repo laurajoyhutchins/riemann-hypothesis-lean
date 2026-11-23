@@ -1,5 +1,52 @@
-import Development.WeilBound.ThetaLifts.Reductions.SiegelPar
+module
+
+public import Development.WeilBound.ThetaLifts.Reductions.SiegelPar
+import Aesop.Main
+import Development.WeilBound.ThetaLifts.FrameEstimates.LeHeightOfIsTorusElt
+public import Development.WeilBound.ThetaLifts.FrameEstimates.LintegralLeOfCover
 import Development.WeilBound.ThetaLifts.Reductions.SiegelHaar
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.MeasureTheory.Integral.Pi
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.Divisors.MatchingOfParts
+
+@[expose] public section
 
 noncomputable section
 
@@ -38,8 +85,8 @@ theorem isClosed_logCone (c : ℝ) : IsClosed {s : Fin r → ℝ | (fun i => Rea
     isClosed_le (by fun_prop) (by fun_prop)) (isClosed_iInter fun i => isClosed_iInter fun _ =>
     isClosed_le (by fun_prop) (by fun_prop))
 
-open scoped Pointwise in
 
+open scoped Pointwise in
 theorem siegelSet_eq (h : IsCMExt F E σ) (hJ : IsHermND σ J) (hW : IsWittFrame σ J X Y) {a : (Fin r → ℝ) → GAd σ J}
     (ha : IsTorus σ J X Y a) (K : Subgroup (GAd σ J)) (Ω : Set (GAd σ J)) (c : ℝ) :
     siegelSet σ J X Y Ω c K = Ω * a '' {s : Fin r → ℝ | (fun i => Real.exp (s i)) ∈ cone r c} * (K : Set (GAd σ J)) := by
@@ -111,7 +158,7 @@ theorem lintegral_logCone (F : Type) [Field F] [NumberField F] (n r : ℕ) {c : 
     LinearMap.toContinuousLinearMap (Matrix.toLin' (Matrix.diagonal (Φ s)))
   set D := {s : Fin r → ℝ | (fun i => Real.exp (s i)) ∈ cone r c} with hD
   have hDm : MeasurableSet D :=
-    (measurableSet_cone r c).preimage (measurable_pi_lambda _ fun i => Real.measurable_exp.comp (measurable_pi_apply i))
+    (measurableSet_cone r c).preimage (Measurable.of_eval fun i => Real.measurable_exp.comp (measurable_pi_apply i))
   have hd : ∀ s ∈ D, HasFDerivWithinAt Φ (Φ' s) D s := fun s _ => by
     refine HasFDerivAt.hasFDerivWithinAt (hasFDerivAt_pi'.2 fun i => ?_)
     have := (hasFDerivAt_apply (𝕜 := ℝ) i s).exp
@@ -219,7 +266,7 @@ theorem siegel_measure (h : IsCMExt F E σ) (hJ : IsHermND σ J) (hW : IsWittFra
         C * ∫⁻ t in cone r c, h t * ENNReal.ofReal ((modulus F n t * ∏ i, t i)⁻¹) := by
     intro f h' hh hf
     have hh' : Measurable fun s : Fin r → ℝ => h' fun i => Real.exp (s i) :=
-      hh.comp (measurable_pi_lambda _ fun i => Real.measurable_exp.comp (measurable_pi_apply i))
+      hh.comp (Measurable.of_eval fun i => Real.measurable_exp.comp (measurable_pi_apply i))
     have e := hC _ _ (isClosed_logCone c).measurableSet hS hSΩ f (fun s => h' fun i => Real.exp (s i)) hh'
       (fun p hp s hs k hk => hf p hp _ hs (a s) (ha.tor s) k hk)
     rwa [lintegral_logCone F n r hc h' hh] at e

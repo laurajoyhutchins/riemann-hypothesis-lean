@@ -1,4 +1,60 @@
-import Formalism.LocalToGlobal.GroupLattices.FockModels.FlatModels.Letter
+module
+
+public import Formalism.LocalToGlobal.GroupLattices.FockModels.FlatModels.Letter
+public import Formalism.SharpRestriction.GrowthBounds.ObjSeg
+public import Formalism.GradedWeylDivisibility.FinalD
+public import Formalism.GradedWeylDivisibility.FockSpaceTableaux.ColLexInitMinor
+import Formalism.GradedWeylDivisibility.FockSpaceTableaux.LBidetLemmas
+import Formalism.GradedWeylDivisibility.FockSpaceTableaux.LBidetMinor
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.Interval.Finset.Box
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Formalism.SharpRestriction.GrowthBounds.LatticeSystems
+
+@[expose] public section
 
 open MvPolynomial
 
@@ -96,30 +152,6 @@ theorem Nv_true_eq (R : Type) [CommRing R] (m : ℕ) (c : Fin (m + 1)) :
   rw [lcminor_initMinor_eq, Fintype.sum_subsingleton _ 1]
   simp [Nv, MvPolynomial.X]
 
-theorem shape_one (m : ℕ) (vec : Bool) : shapeDeg (n := m + 1) (fun _ : Fin 1 => s0 m vec) = nuL m 1 vec := by
-  funext t
-  unfold shapeDeg s0 nuL
-  cases vec
-  · simp only [Bool.false_eq_true, ↓reduceIte]
-    by_cases ht : t = Fin.last m
-    · subst ht
-      simp
-    · have h1 : (t : ℕ) < m := Fin.val_lt_last ht
-      simp [ht, h1]
-  · simp only [↓reduceIte]
-    by_cases ht : t = 0
-    · subst ht
-      simp
-    · have h1 : ¬ (t : ℕ) < 1 := by
-        intro h
-        apply ht
-        ext
-        first
-          | (rw [Fin.val_zero]; omega)
-          | (simp only [Fin.coe_ofNat_eq_mod, Nat.zero_mod]; omega)
-          | (norm_num; omega)
-      simp [ht, h1]
-
 theorem Nv_mem (R : Type) [CommRing R] (m : ℕ) (vec : Bool) (c : Fin (m + 1)) :
     Nv R m vec c ∈ dualWeyl R (m + 1) (m + 1) (nuL m 1 vec) := by
   cases vec
@@ -203,6 +235,7 @@ theorem theta_Hd_le (R : Type) [CommRing R] (m d : ℕ) (vec : Bool) :
   intro y hy
   obtain ⟨P, hP, rfl⟩ := Submodule.mem_map.1 hy
   rw [mem_Hd] at hP
+
   rw [AlgHom.toLinearMap_apply, P.as_sum, map_sum]
   refine Submodule.sum_mem _ (fun μ hμ => ?_)
   unfold theta

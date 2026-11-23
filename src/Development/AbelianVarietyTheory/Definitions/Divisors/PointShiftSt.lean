@@ -1,7 +1,46 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsLatBasisHtLatIffSpanEq
-import Development.AbelianVarietyTheory.Definitions.CMLattices.ExistsIsThetaDegOfIsLocalModel
-import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.EigenvectorLieDegree
+module
+
+public import Development.AbelianVarietyTheory.Definitions.CMLattices.IsDiffOf
+public import Mathlib.LinearAlgebra.ExteriorPower.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Definitions.Divisors.AevalEqZeroOfMemConeIdeal
+import Development.AbelianVarietyTheory.Definitions.Divisors.LogAbsVpOfNormalised
+import Development.AbelianVarietyTheory.Definitions.ExistenceOfLattices.UnivFrame
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsAdicCompleteDualNumber
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -17,17 +56,14 @@ section Index
 
 variable {K V : Type} [Field K] [NumberField K] [AddCommGroup V] [Module K V] [Module (𝓞 K) V] [IsScalarTower (𝓞 K) K V]
 
-variable (K) in
 
+variable (K) in
 def detSpan (m : ℕ) (L : Submodule (𝓞 K) V) : Submodule (𝓞 K) (⋀[K]^m V) :=
   Submodule.span (𝓞 K) {w | ∃ y : Fin m → V, (∀ i, y i ∈ L) ∧ w = exteriorPower.ιMulti K m y}
 
+
 variable (K) in
-
 def idx (m : ℕ) (L N : Submodule (𝓞 K) V) : Ideal (𝓞 K) := (detSpan K m N).colon (detSpan K m L)
-
-example (m : ℕ) (L : Submodule (𝓞 K) V) : idx K m L L = ⊤ :=
-  (Ideal.eq_top_iff_one _).2 (Submodule.mem_colon.2 fun _ h => by simpa using h)
 
 end Index
 
@@ -54,38 +90,6 @@ def subP (τ : 𝓞 E →+* 𝓞 K) : Submodule (𝓞 K) (Fin FB.P₀.g → K) :
 
 def subQ (τ : 𝓞 E →+* 𝓞 K) : Submodule (𝓞 K) (Fin FB.P₀.g → K) :=
   ⨆ a, (FQ.eigLat (X.A false).t.act τ).map ((MQ a).restrictScalars (𝓞 K))
-
-def IdealSt : Prop :=
-  ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (H : Host E), GlobalTheory.IndefiniteRowSideFullHecke.EigenvectorLieDegree.IsHostField H →
-    ∀ (K : Type) [Field K] [NumberField K] (ρ : 𝓞 K) (σ₁ : K →+* ℂ) (p q : ℕ) (X : CMObj H K ρ σ₁ p q)
-      (gP : Matrix (Fin p) (Fin p) (𝓞 E)) (gQ : Matrix (Fin q) (Fin q) (𝓞 E)), IsGram X gP gQ →
-      ∃ 𝔫 : Ideal (𝓞 E), 𝔫 * 𝔫.map (H.bar : 𝓞 E →+* 𝓞 E) = Ideal.span {gP.det * gQ.det} ∧
-        ∀ (FP : GenFib (X.A true).pol) (FQ : GenFib (X.A false).pol) (FB : GenFib X.B.pol)
-          (MP : Fin p → ((Fin FP.P₀.g → K) →ₗ[K] (Fin FB.P₀.g → K)))
-          (MQ : Fin q → ((Fin FQ.P₀.g → K) →ₗ[K] (Fin FB.P₀.g → K))), IsDiffs FP FQ FB MP MQ →
-          ∀ τ : 𝓞 E →+* 𝓞 K, τ H.rt = ρ →
-            idx K p (FB.eigLat X.B.t.act τ) (subP FP FB MP τ) * Ideal.span {τ gQ.det} =
-              𝔫.map τ * idx K q (FB.eigLat X.B.t.act (τ.comp (H.bar : 𝓞 E →+* 𝓞 E)))
-                (subQ FQ FB MQ (τ.comp (H.bar : 𝓞 E →+* 𝓞 E)))
-
-def PointShiftSt : Prop :=
-  ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (H : Host E), GlobalTheory.IndefiniteRowSideFullHecke.EigenvectorLieDegree.IsHostField H →
-    ∀ (ℓ : ℕ) [Fact ℓ.Prime] (τ : E →+* ℂ_[ℓ]), ∃ κ₁ κ₂ : ℝ,
-      letI := H.starRing; letI := algPadicInt ℓ; letI := algPadicField ℓ; haveI := towerPadic ℓ; haveI := factPadic ℓ
-      ∀ [IsAdicComplete (Ideal.span {(ℓ : 𝓞_ℂ_[ℓ])}) 𝓞_ℂ_[ℓ]]
-        (P : Point ℓ (Valued.v : Valuation ℂ_[ℓ] ℝ≥0) 𝓞_ℂ_[ℓ] (𝓞 E)) (p q : ℕ),
-        (∀ φ : E →+* ℂ_[ℓ], Module.finrank ℂ_[ℓ] (P.eigW (embO P.integers φ)) =
-          open Classical in if φ (H.rt : E) = τ (H.rt : E) then p else q) →
-        ∀ (x : Fin p → LieG P.Gt) (x' : Fin q → LieG P.Gt) (g : Matrix (Fin p) (Fin p) ℂ_[ℓ])
-          (g' : Matrix (Fin q) (Fin q) ℂ_[ℓ]),
-          Submodule.span 𝓞_ℂ_[ℓ] (Set.range fun i => P.bLie (x i)) = P.wRec (embO P.integers τ) →
-          Submodule.span 𝓞_ℂ_[ℓ] (Set.range fun i => P.bLie (x' i)) =
-            P.wRec ((embO P.integers τ).comp (starRingEnd (𝓞 E))) →
-          IsLatBasis ℂ_[ℓ] (open Classical in P.latTQuot (σ := fun φ : E →+* ℂ_[ℓ] => embO P.integers φ)
-            (isSplitting_embO P.integers) τ) (fun i => ∑ j, g i j • P.bLie (x j)) →
-          IsLatBasis ℂ_[ℓ] (P.latTSub ((embO P.integers τ).comp (starRingEnd (𝓞 E))))
-            (fun i => ∑ j, g' i j • P.bLie (x' j)) →
-          Real.log ‖g.det‖ - Real.log ‖g'.det‖ = p * κ₁ + q * κ₂
 
 end GlobalTheory.FlatCM
 

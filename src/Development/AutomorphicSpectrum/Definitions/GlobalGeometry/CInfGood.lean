@@ -1,9 +1,45 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.SlCTendsto
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.ConjEmbRtOfNe
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.GenOver
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.ChartSpec
-import Development.AbelianVarietyTheory.Definitions.ThetaValues.Generic
+module
+
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.ConjEmbRtOfNe
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.EvLApply
+public import Formalism.LocalToGlobal.ProjectiveLattices.IntAll
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.ArakelovInstances.IsStrictDom
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.LiftFactorization
+
+@[expose] public section
 
 noncomputable section
 
@@ -38,53 +74,9 @@ def WEq (Dw : Datum H) (a b : WZ E) : Prop := ∀ τ i, i < Dw.mult τ → a (τ
 def towerWt (Dw : Datum H) (a : WZ E) : Top.Wt (CMType H) (Dw.p + Dw.q) :=
   fun τ n => if (n : ℕ) < Dw.p then (a (τ.1, n) : ℝ) else -(a (conjEmb τ.1, Dw.p + Dw.q - 1 - n) : ℝ)
 
-open Classical in
-
-def flatZ (H : ReciprocityTheory.ChartRestriction.G.Geo.Tor.Host E) (w : CMType H → ℤ) : WZ E :=
-  fun x => if h : x.1 (H.rt : E) = H.rt0 then w ⟨x.1, h⟩ else -w ⟨conjEmb x.1, Small.conjEmb_rt_of_ne h⟩
-
-def GoodLat (U : ∀ σ : c.F →+* ℂ, Unf Xo c σ r) (h : GenFrEx Xo c) (a : WZ E) (Z : Comp Xo c) : Prop :=
-  (latOn U h a Z).FG ∧ Submodule.span c.F (latOn U h a Z : Set (Rul Xo c)) = cuspOn U h a Z
-
-def OntoZ (U : ∀ σ : c.F →+* ℂ, Unf Xo c σ r) (h : GenFrEx Xo c) (e : Comp Xo c → Rul Xo c) (a : WZ E)
-    (Z : Comp Xo c) : Prop :=
-  ∀ σ, GoodEmb c σ → ∀ k, Over (U σ) (e Z) k → ∀ P ∈ ((U σ).X k).SS (laZ (U σ) a k),
-    ∃ (m : ℕ) (as : Fin m → ℂ) (fs : Fin m → Rul Xo c), (∀ i, fs i ∈ cuspOn U h a Z) ∧
-      ∀ x ∈ ((U σ).X k).dom, P x = ∑ i, as i * rdU (U σ) (fs i) k x
-
-structure FlatSec (U : ∀ σ : c.F →+* ℂ, Unf Xo c σ r) (x : ℝ) (e₀ : Rul Xo c) (b : WZ E) where
-
-  s : Rul Xo c
-
-  s' : Rul Xo c
-  s_sec : s ∈ secZ Xo c b
-  s'_sec : s' ∈ secZ Xo c (-b)
-  mul_eq : s * s' = e₀
-  s_supp : s * e₀ = s
-  s'_supp : s' * e₀ = s'
-
-  cInf : (c.F →+* ℂ) → ℝ
-  cInf_pos : ∀ σ, 0 < cInf σ
-  cInf_good : ∀ σ, cInf σ = cInf (goodOf c σ)
-  inf_eq : ∀ σ, GoodEmb c σ → ∀ k, Over (U σ) e₀ k → ∀ y ∈ ((U σ).X k).dom,
-    lieFacZ Dw x b * ((U σ).X k).pnorm (laZ (U σ) b k) (rdU (U σ) s k) y = cInf σ
-
-  cFin : HeightOneSpectrum (𝓞 c.F) →₀ ℝ
-  fin_eq : ∀ la, ∀ v ∈ valSet Xo c (algCls Xo c) la, v e₀ = 0 → v s = ((cFin la : ℝ) : EReal)
-
-def FlatSec.deg {U : ∀ σ : c.F →+* ℂ, Unf Xo c σ r} {x : ℝ} {e₀ : Rul Xo c} {b : WZ E} (F : FlatSec U x e₀ b) : ℝ :=
-  ((F.cFin.sum fun la t => t * Real.log (Ideal.absNorm la.asIdeal)) - ∑ σ : c.F →+* ℂ, Real.log (F.cInf σ)) /
-    (Module.finrank ℚ c.F : ℝ)
 
 def BirOn (h : GenFrEx Xo c) (Z : Comp Xo c) {N : ℕ} (g : Fin (N + 1) → Rul Xo c) : Prop :=
   evC h Z (g 0) ≠ 0 ∧ IntermediateField.adjoin c.F (Set.range fun j => evC h Z (g j) / evC h Z (g 0)) = ⊤
-
-def ArchTie (U : ∀ σ : c.F →+* ℂ, Unf Xo c σ r) (h : GenFrEx Xo c) (e : Comp Xo c → Rul Xo c) (a₁ : WZ E)
-    (Z : Comp Xo c) (σ : c.F →+* ℂ) (k : (U σ).Comp) (Xa : ArchInM ((U σ).X k)) : Prop :=
-  GoodEmb c σ ∧ Over (U σ) (e Z) k ∧ Xa.L = laZ (U σ) a₁ k ∧ GlobalTheory.Shares.RelIn σ ((U σ).X k) Xa ∧
-    ∃ (N : ℕ) (hN : N + 1 = Xa.N) (g : Fin (N + 1) → Rul Xo c),
-      Submodule.span (𝓞 c.F) (Set.range g) = latOn U h a₁ Z ∧ BirOn h Z g ∧
-      ∀ j, Xa.w (Fin.cast hN j) = rdU (U σ) (g j) k
 
 section Read
 

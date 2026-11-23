@@ -1,9 +1,58 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Foundations.TupleConstantsNeZero
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ExistsUniqueIdeleOfLinearEquivQuotientLocal
-import Formalism.QuotientMetricDivisors.HermitianTwistDivisors.ValBasic
-import Formalism.QuotientMetricDivisors.ReductionLemmaZero
-import Formalism.QuotientMetricDivisors.ProdFormula
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.TupleConstantsNeZero
+public import Formalism.QuotientMetricDivisors.HermitianTwistDivisors.IdxChange
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RingTheory.DedekindDomain.AdicValuation.Valuation
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Finset GlobalTheory.Square
 open Formalism.DivisionValues (vw conjPl)
@@ -15,10 +64,10 @@ namespace GlobalTheory.Square.AwayClosure
 
 variable {K : Type} [Field K] [NumberField K]
 
+
 open NumberField IsDedekindDomain Finset in
 open scoped nonZeroDivisors in
 variable {K : Type} [Field K] [NumberField K] in
-
 theorem _root_.GlobalTheory.Square.AwayClosure.of_integral {m k l : ℕ} {x : K} (hx : x ≠ 0) {a b : 𝓞 K}
     (ha : x * (m : K) ^ k = a) (hb : x⁻¹ * (m : K) ^ l = b) : _root_.GlobalTheory.Square.IsAwayUnit m x := by
   have hab : ((m : K)) ^ (k + l) = (a : K) * (b : K) := by
@@ -46,14 +95,20 @@ open scoped nonZeroDivisors in
 variable {K : Type} [Field K] [NumberField K] in
 theorem _root_.GlobalTheory.Square.AwayClosure.of_dvd {m k : ℕ} {a : 𝓞 K} (h : a ∣ (m : 𝓞 K) ^ k) :
     _root_.GlobalTheory.Square.IsAwayUnit m (a : K) :=
-  _root_.GlobalTheory.Square.IsAwayUnit.of_dvd h
+  ⟨a, 0, k, h, by simp⟩
 
 open NumberField IsDedekindDomain Finset in
 open scoped nonZeroDivisors in
 variable {K : Type} [Field K] [NumberField K] in
 theorem _root_.GlobalTheory.Square.AwayClosure.mul {m : ℕ} {x y : K} (hx : _root_.GlobalTheory.Square.IsAwayUnit m x)
     (hy : _root_.GlobalTheory.Square.IsAwayUnit m y) : _root_.GlobalTheory.Square.IsAwayUnit m (x * y) :=
-  _root_.GlobalTheory.Square.IsAwayUnit.mul hx hy
+  by
+    obtain ⟨a, k, j, ha, hx⟩ := hx
+    obtain ⟨b, l, i, hb, hy⟩ := hy
+    refine ⟨a * b, k + l, j + i, by rw [pow_add]; exact mul_dvd_mul ha hb, ?_⟩
+    calc
+      x * y * (m : K) ^ (k + l) = (x * (m : K) ^ k) * (y * (m : K) ^ l) := by rw [pow_add]; ring
+      _ = ((a * b : 𝓞 K) : K) := by rw [hx, hy]; push_cast; rfl
 
 open NumberField IsDedekindDomain Finset in
 open scoped nonZeroDivisors in
@@ -170,10 +225,10 @@ private lemma exists_mul_pow_integer_of_count_eq_zero_coprime {m : ℕ} (hm : 0 
         positivity
   exact ⟨n, b, hb⟩
 
+
 open NumberField IsDedekindDomain Finset in
 open scoped nonZeroDivisors in
 variable {K : Type} [Field K] [NumberField K] in
-
 theorem _root_.GlobalTheory.Square.isAwayUnit_closure : ∀ (K : Type) [Field K] [NumberField K]
     [StarRing K] (m : ℕ), 0 < m →
     (∀ (x : K) (k : ℕ), 0 < k → x ^ k = 1 → _root_.GlobalTheory.Square.IsAwayUnit m x) ∧

@@ -1,4 +1,51 @@
-import Mathlib
+module
+
+public import Mathlib.RingTheory.Etale.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open IsLocalRing Polynomial TensorProduct
 
 namespace GlobalTheory
@@ -36,25 +83,25 @@ theorem tensor_directedSystem_of_flat (R : Type) [CommRing R] {ι : Type} [Preor
     induction y using TensorProduct.induction_on with
     | zero => simp
     | tmul p z => rw [hh, he, he, hsub_comp]
-    | add a b ha hb => rw [map_add, map_add, ha, hb, map_add]
+    | add a b ha hb => rw [map_add (f := _), map_add (f := _), ha, hb, map_add (f := _)]
   refine ⟨h, e, hh, he, hcompat, ?_, ?_, ?_, ?_⟩
   · intro k hkk y
     induction y using TensorProduct.induction_on with
     | zero => simp
     | tmul p z => rw [hh, hinc_id]
-    | add a b ha hb => rw [map_add, ha, hb]
+    | add a b ha hb => rw [map_add (f := _), ha, hb]
   · intro k l m hkl hlm hkm y
     induction y using TensorProduct.induction_on with
     | zero => simp
     | tmul p z => rw [hh, hh, hh, hinc_comp k l m hkl hlm hkm]
-    | add a b ha hb => rw [map_add, map_add, map_add, ha, hb]
+    | add a b ha hb => rw [map_add (f := _), map_add (f := _), map_add (f := _), ha, hb]
   · intro k
     have hfun : ⇑(e k) = ⇑(LinearMap.rTensor E₀ (sub k).toLinearMap) := by
       funext z
       induction z using TensorProduct.induction_on with
       | zero => simp
       | tmul p y => rw [he, LinearMap.rTensor_tmul, AlgHom.toLinearMap_apply]
-      | add a b ha hb => rw [map_add, map_add, ha, hb]
+      | add a b ha hb => rw [map_add (f := _), map_add (f := _), ha, hb]
     rw [hfun]
     exact Module.Flat.rTensor_preserves_injective_linearMap _ (hsub_inj k)
   · intro z
@@ -67,7 +114,7 @@ theorem tensor_directedSystem_of_flat (R : Type) [CommRing R] {ι : Type} [Preor
       obtain ⟨k₁, y₁, rfl⟩ := ha
       obtain ⟨k₂, y₂, rfl⟩ := hb
       obtain ⟨m, h₁, h₂⟩ := directed_of (· ≤ ·) k₁ k₂
-      exact ⟨m, h k₁ m h₁ y₁ + h k₂ m h₂ y₂, by rw [map_add, hcompat, hcompat]⟩
+      exact ⟨m, h k₁ m h₁ y₁ + h k₂ m h₂ y₂, by rw [map_add (f := _), hcompat, hcompat]⟩
 
 theorem directedSystem_etaleBaseChange : ∀ (T : Type) [CommRing T] (ι : Type) [Preorder ι] [IsDirected ι (· ≤ ·)]
     (𝒜 : ι → Subring T) (hA : Monotone 𝒜), (∀ x : T, ∃ i, x ∈ 𝒜 i) →
@@ -127,7 +174,7 @@ theorem directedSystem_etaleBaseChange : ∀ (T : Type) [CommRing T] (ι : Type)
       | monomial n c =>
         obtain ⟨j, hj⟩ := hcov c
         refine ⟨j, fun m => ?_⟩
-        rw [coeff_monomial]
+        rw [coeff_monomial_apply]
         split_ifs
         · exact hj
         · exact zero_mem _

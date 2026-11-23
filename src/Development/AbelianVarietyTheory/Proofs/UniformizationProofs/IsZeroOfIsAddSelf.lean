@@ -1,8 +1,48 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.GtPtBridgeSt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ExistsZeroGt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.BCTools
-import Development.AbelianVarietyTheory.BlockTheory.UniformisationCharts.TorusPointForms
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.GtPtBridgeSt
+public import Development.AbelianVarietyTheory.BlockTheory.UniformisationCharts.TorusPointForms
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ExistsZeroGt
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.CubeVal
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -185,32 +225,6 @@ theorem rel_iff {k : ℕ} (p p' : QPair D F k) :
     exact ⟨z, hz, ptEquiv D F w, (isIota_iff _ _).2 hi, (isAdd_iff _ _ _).2 ha⟩
 
 variable (D F)
-
-def qkEquiv (k : ℕ) : Qk D F k ≃ Quot (QkPt.Equiv D F (k := k)) :=
-  Quot.congr (pairEquiv D F k) fun p p' => (rel_iff p p').symm
-
-theorem isDatumIso_iff (E : SplitExt (Spec (CommRingCat.of F))) (β : E.B ≅ baseF D F)
-    (ξ : E.X ≃+ D.X) :
-    IsDatumIso D F E β ξ ↔ ∃ h : SplitExtIsD D F E, h.e = β ∧ h.chi = ξ.symm := by
-  constructor
-  · rintro ⟨hm, ht⟩
-    refine ⟨⟨β, hm, ξ.symm, fun χ => ?_⟩, rfl, rfl⟩
-    have := LBIso.symm (ht (ξ.symm χ))
-    rwa [AddEquiv.apply_symm_apply] at this
-  · rintro ⟨⟨e, hm, chi, ht⟩, rfl, rfl⟩
-    refine ⟨hm, fun χ => ?_⟩
-    have := LBIso.symm (ht (ξ χ))
-    rwa [AddEquiv.symm_apply_apply] at this
-
-def datumEquiv (E : SplitExt (Spec (CommRingCat.of F))) :
-    {p : (E.B ≅ baseF D F) × (E.X ≃+ D.X) // IsDatumIso D F E p.1 p.2} ≃ SplitExtIsD D F E where
-  toFun p := ⟨p.1.1, p.2.1, p.1.2.symm, by
-    obtain ⟨h, h₁, h₂⟩ := (isDatumIso_iff D F E _ _).1 p.2
-    have := h.oIso
-    rwa [h₁, h₂] at this⟩
-  invFun h := ⟨(h.e, h.chi.symm), (isDatumIso_iff D F E _ _).2 ⟨h, rfl, rfl⟩⟩
-  left_inv _ := rfl
-  right_inv _ := rfl
 
 variable {D F}
 

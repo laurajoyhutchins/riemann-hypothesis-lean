@@ -1,6 +1,50 @@
-import Mathlib
-import Formalism.LocalToGlobal.KernelLattices.LateralTheory
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ImaginaryQuadraticFieldStructure
+module
+
+public import Formalism.LocalToGlobal.KernelLattices.LateralTheory
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ImaginaryQuadraticFieldStructure
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Formalism.L2.Ker Matrix
 open scoped BigOperators
 
@@ -13,6 +57,7 @@ theorem linearIndependent_of_orthogonal {K V J : Type} [Field K] [AddCommGroup V
   rw [linearIndependent_iff']
   intro s g hs j hj
   have := congrArg (h (v j)) hs
+
   rw [map_sum, map_zero, Finset.sum_eq_single j] at this
   · rw [map_smul, smul_eq_mul] at this
     exact (mul_eq_zero.1 this).resolve_right (h0 j)
@@ -85,16 +130,20 @@ theorem nonempty_isoKG : ∀ (K E : Type) [Field K] [CharZero K] [Field E] [Alge
   have hco : ∀ x w, H (b w) x = B.equivFun x w := by
     intro x w
     conv_lhs => rw [← B.sum_equivFun x]
+
     simp only [map_sum, map_smul, hB, hb, smul_eq_mul, mul_ite, mul_one, mul_zero]
     simp
   refine ⟨⟨B.equivFun, fun x y => ?_⟩⟩
   have hy : ∀ k, cj (y k) = ∑ w, algebraMap K E (σ (B.equivFun y w)) * cj (b w k) := by
     intro k
     conv_lhs => rw [← B.sum_equivFun y]
+
     simp only [Finset.sum_apply, Pi.smul_apply, map_sum, hB]
     simp only [Algebra.smul_def, map_mul, hσ]
+
   simp only [hσ, ← map_mul, ← map_sum]
   congr 1
+
   simp only [hy, Finset.mul_sum, map_sum]
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun w _ => ?_

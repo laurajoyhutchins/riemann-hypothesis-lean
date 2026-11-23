@@ -1,13 +1,58 @@
-import Mathlib
-import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.SplitLinearModelNorm
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IdempotentMulCutSubOneEntry
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.WeilRepThetaDatumHalfEqSmul
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsPlaceChartOfSplitIdempotent
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsSplitSupportedUnitaryComponent
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsNsmulActO
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.SplitChartUniformiserAndResidueCard
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.RelativeLatticeVolumeOfDetValuation
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsUnitaryGroupCharacterOfHeckeChar
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.SplitLinearModelNorm
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.IsIntOv
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsUnitaryGroupCharacterOfHeckeChar
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.SplitChartUniformiserAndResidueCard
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.ExistsSplitIdempotentsOfRelTraceOneModTwo
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsNsmulActO
+import Formalism.LocalRingCardinality.SpanPowerMembership.LocAtA
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Matrix.FiniteDimensional
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.CoassocSimps
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 noncomputable section
 
@@ -21,10 +66,12 @@ open GlobalTheory.IndefiniteRowSideFullHecke.SplitLinearModelNorm
 
 theorem relIndex_comap_lattice {O K W : Type} [CommRing O] [IsDomain O] [IsDiscreteValuationRing O] [Field K]
     [Algebra O K] [IsFractionRing O K] [AddCommGroup W] [Module K W] [Module O W] [IsScalarTower O K W]
-    (M : Submodule O W) [Submodule.IsLattice K M] (B : W →ₗ[K] W) (hB : Function.Bijective B) (hM : ∀ m ∈ M, B m ∈ M)
+    (M : Submodule O W) [Submodule.IsFullLattice K M] (B : W →ₗ[K] W) (hB : Function.Bijective B) (hM : ∀ m ∈ M, B m ∈ M)
     {p : O} (hp : Irreducible p) : ∃ (m : ℕ) (u : Oˣ), LinearMap.det B * algebraMap O K u = algebraMap O K p ^ m ∧
       M.toAddSubgroup.relIndex (M.toAddSubgroup.comap B.toAddMonoidHom) = Nat.card (O ⧸ Ideal.span {p}) ^ m := by
   classical
+  letI : Module.Finite O M := Submodule.IsLattice.finite K M
+  letI : Module.Free O M := Submodule.IsLattice.free K M
 
   let f : M →ₗ[O] M := (B.restrictScalars O).restrict hM
   have hinj : Function.Injective f := fun x y hxy => Subtype.ext (hB.1 (congrArg Subtype.val hxy))
@@ -63,16 +110,16 @@ theorem relIndex_comap_lattice {O K W : Type} [CommRing O] [IsDomain O] [IsDiscr
     exact Associated.prod _ _ _ fun i _ => hassoc i
 
   have hdet : LinearMap.det B = algebraMap O K (LinearMap.det f) := by
-    let bK := b'.extendOfIsLattice K
+    let bK := b'.extendOfIsFullLattice K
     rw [← LinearMap.det_toMatrix bK, ← LinearMap.det_toMatrix b', RingHom.map_det]
     congr 1
     ext i j
     rw [RingHom.mapMatrix_apply, Matrix.map_apply, LinearMap.toMatrix_apply, LinearMap.toMatrix_apply]
     have h1 : B (bK j) = ((f (b' j) : M) : W) := by
-      rw [Module.Basis.extendOfIsLattice_apply]; rfl
+      rw [show bK j = (b' j : W) from Module.Basis.extendOfIsFullLattice_apply K b' j]; rfl
     have h2 : ((f (b' j) : M) : W) = ∑ x, algebraMap O K (b'.repr (f (b' j)) x) • bK x := by
       conv_lhs => rw [← b'.sum_repr (f (b' j))]
-      simp only [Submodule.coe_sum, Submodule.coe_smul_of_tower, bK, Module.Basis.extendOfIsLattice_apply,
+      simp only [Submodule.coe_sum, Submodule.coe_smul_of_tower, bK, Module.Basis.extendOfIsFullLattice_apply,
         algebraMap_smul]
     rw [h1, h2]
     exact congrFun (bK.repr_sum_self _) i
@@ -181,7 +228,8 @@ theorem relIndex_matrix_lattice : ∀ (F : Type) [Field F] [NumberField F] (v : 
       rw [← Nat.cast_smul_eq_nsmul (Fv F v), inv_smul_smul₀ (hq n hn)]
     rw [h1]
     exact Submodule.smul_mem _ _ (Submodule.subset_span hnw)
-  have hlat : Submodule.IsLattice (Fv F v) MO := ⟨hfg, htop⟩
+  have hlat : Submodule.IsFullLattice (Fv F v) MO :=
+    { Submodule.IsLattice.of_fg (Fv F v) hfg with span_eq_top := htop }
 
   obtain ⟨B, hBw, hBdet⟩ := exists_mul_map H G
   have hdetB : LinearMap.det B ≠ 0 := by
@@ -298,7 +346,7 @@ theorem norm_off (he : IsSplitIdem D e) (hπ : GlobalTheory.SplitHecke.Chart e v
   have hv : v' = v := by
     by_contra hne
     have h1 := hπ.2.2.1 (pairA D.host.F 0 α)
-    rw [← hsum, map_add, chart_e hee hπ, (hπ.2.1 _).2 hec, add_zero] at h1
+    rw [← hsum, map_add (f := _), chart_e hee hπ, (hπ.2.1 _).2 hec, add_zero] at h1
     have h2 : evalV D.host.F v (sndA D.host.F (pairA D.host.F 0 α)) = 0 := hα0 v (Ne.symm hne)
     rw [h2] at h1
     exact one_ne_zero h1

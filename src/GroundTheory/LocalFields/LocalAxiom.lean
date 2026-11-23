@@ -1,9 +1,53 @@
-import Mathlib
-import GroundTheory.LocalFields.LocalAxiomDictionary
-import GroundTheory.LocalFields.HerbrandLocal
-import GroundTheory.LocalFields.MaximalUnramified
-import GroundTheory.LocalFields.SeparableClosure
-import GroundTheory.LocalFields.SeparableClosureValuation
+module
+
+public import GroundTheory.LocalFields.LocalAxiomDictionary
+public import GroundTheory.LocalFields.MaximalUnramified
+public import Mathlib.FieldTheory.Galois.Profinite
+public import GroundTheory.LocalFields.HerbrandLocal
+public import GroundTheory.LocalFields.SeparableClosure
+public import GroundTheory.LocalFields.SeparableClosureValuation
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GroundTheory.LocalField
 
@@ -25,8 +69,8 @@ theorem toAdd_ordUnitsHom (x : Kˣ) :
     (ordUnitsHom K x).toAdd = ((ord (x : K) : ℤ) : ℤ̂) :=
   rfl
 
-variable {K} in
 
+variable {K} in
 theorem exists_ordUnitsHom_eq (n : ℤ) :
     ∃ x : Kˣ, ordUnitsHom K x = Multiplicative.ofAdd (n : ℤ̂) := by
   obtain ⟨x, hx, h⟩ := exists_ord_eq K n
@@ -62,7 +106,7 @@ theorem range_localValuation_comp_norm_of_eq (H : Subgroup (Ω ≃ₐ[K] Ω))
   have hsc : IsSepClosed Ω := IsSepClosure.sep_closed K
   rw [inertiaDegree_unramifiedDegree_fixingSubgroup]
   have key : ∀ u : Lˣ, ordUnitsHom K (normUnits K L u) =
-      Multiplicative.ofAdd (((residueDegree K L : ℤ) * ord (u : L) : ℤ) : ℤ̂) := fun u => by
+      Multiplicative.ofAdd (((((IsLocalRing.maximalIdeal 𝒪[L]).inertiaDeg (𝒪[K])) : ℤ) * ord (u : L) : ℤ) : ℤ̂) := fun u => by
     apply Multiplicative.toAdd.injective
     rw [toAdd_ordUnitsHom, coe_normUnits, ord_norm, toAdd_ofAdd]
   ext z
@@ -144,8 +188,8 @@ theorem natCard_tate_of_isCyclic (K' L' : Subgroup (Ω ≃ₐ[K] Ω)) [(L'.subgr
       IsGalois.card_aut_eq_finrank]
   · rw [T.natCard_tateNegOne, natCard_tateNegOne_units]
 
-variable (K Ω) in
 
+variable (K Ω) in
 theorem classFieldAxiom_units : ClassFieldAxiom (Ω ≃ₐ[K] Ω) Ωˣ := by
   intro U V hVU _ hcyc
   exact natCard_tate_of_isCyclic (U : Subgroup (Ω ≃ₐ[K] Ω)) (V : Subgroup (Ω ≃ₐ[K] Ω))
@@ -168,10 +212,6 @@ noncomputable def localClassFieldTheory : ClassFieldTheory (Ω ≃ₐ[K] Ω) Ω�
 
 @[simp]
 theorem localClassFieldTheory_deg : (localClassFieldTheory K Ω).deg = unramifiedDegree K Ω :=
-  rfl
-
-@[simp]
-theorem localClassFieldTheory_val : (localClassFieldTheory K Ω).val = localValuation K Ω :=
   rfl
 
 theorem localClassFieldTheory_val_apply (a : fixedModule Ωˣ (⊤ : Subgroup (Ω ≃ₐ[K] Ω))) :

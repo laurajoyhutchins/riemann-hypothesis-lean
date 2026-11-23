@@ -1,6 +1,55 @@
-import Formalism.ThetaLogCoordinates.SandwichModelDomains.SpreadSquare
-import Formalism.ThetaLogCoordinates.TraceIsometryWeights.SchurTraceProofs.FischerAdjointnessHolds
-import Formalism.GradedWeylDivisibility.FockSpaceTableaux.LRowdivLemmas
+module
+
+public import Formalism.ThetaLogCoordinates.SandwichModelDomains.SpreadSquare
+public import Formalism.GradedWeylDivisibility.FockSpaceTableaux.LRowdivLemmas
+import Formalism.MahlerMeasure.MahlerMeasureProofs.FreezeBij
+import Formalism.MahlerMeasure.MahlerMeasureProofs.FreezeInto
+public import Formalism.ThetaLogCoordinates.TraceIsometryWeights.SchurTraceProofs.FischerAdjointnessHolds
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open MvPolynomial
 
@@ -72,7 +121,7 @@ theorem rgl_rowDiv_zero (a b : Fin r) (f : MvPolynomial (Fin r × Fin n) R) : ro
 
 theorem rgl_mapDomain_apply (m : Fin r × Fin n →₀ ℕ) (a : Fin r) (s : Fin n) :
     Finsupp.mapDomain (Equiv.prodComm (Fin r) (Fin n)) m (s, a) = m (a, s) :=
-  Finsupp.mapDomain_apply (Equiv.injective _) m (a, s)
+  Finsupp.mapDomain_apply_of_injective (Equiv.injective _) m (a, s)
 
 theorem rgl_support_swp (f : MvPolynomial (Fin r × Fin n) R) :
     (swp R r n f).support =
@@ -128,8 +177,9 @@ theorem gl_first_line_divided_powers : RowGlDiv := by
     | 0 => simp [rgl_rowDiv_C_zero, rgl_swp_C]
     | k + 1 =>
       rw [rgl_rowDiv_C_succ, pow_succ, Module.End.mul_apply, glAct_C', map_zero, map_zero, smul_zero]
-  | add f g hf hg => rw [rowDiv_add, map_add, map_add, map_add, smul_add, hf, hg]
+  | add f g hf hg => rw [rowDiv_add, map_add (f := _), map_add (f := _), map_add (f := _), smul_add, hf, hg]
   | mul_X f v hf =>
+
     rw [rgl_rowDiv_mul, map_mul, divPow_mul _ (Formalism.GM.M.FB.glAct_mul (vecL ν) n a b), map_sum]
     refine Finset.sum_congr rfl fun ij _ => ?_
     rw [map_mul, hf, rgl_div_X ν a b hab]
@@ -139,7 +189,7 @@ theorem gl_one_first_line_action : RowGlOne := by
   rw [rgl_E]
   induction f using MvPolynomial.induction_on with
   | C c => rw [rgl_rowDiv_C_succ, rgl_swp_C, glAct_C', map_zero]
-  | add f g hf hg => rw [rowDiv_add, map_add, map_add, map_add, hf, hg]
+  | add f g hf hg => rw [rowDiv_add, map_add (f := _), map_add (f := _), map_add (f := _), hf, hg]
   | mul_X f v hf =>
     obtain ⟨c, s⟩ := v
     have h1 : Finset.HasAntidiagonal.antidiagonal 1 = {(0, 1), (1, 0)} := rfl

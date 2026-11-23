@@ -1,5 +1,55 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.StatementsHomLocRingLocal
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.StatementsHomLocRingLocal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.NumbersDVR
@@ -35,8 +85,8 @@ abbrev img : MRing ι R →+* FractionRing (MRing ι R ⧸ P) :=
 
 variable {P}
 
-omit [DecidableEq K] in
 
+omit [DecidableEq K] in
 theorem img_eq_zero_iff {f : MRing ι R} : img P f = 0 ↔ f ∈ P := by
   simp [img, Ideal.Quotient.eq_zero_iff_mem]
 
@@ -48,8 +98,8 @@ theorem img_component_congr (hP : IsMultiHomogIdeal P) {u v : MRing ι R} (huv :
   rw [← map_sub]
   exact hP _ huv d
 
-omit [DecidableEq K] in
 
+omit [DecidableEq K] in
 theorem img_ne_zero {W : Ideal (MRing ι R)} (hPW : P ≤ W) {t : MRing ι R} (ht : t ∉ W) :
     img P t ≠ 0 := fun h0 => ht (hPW (img_eq_zero_iff.mp h0))
 
@@ -59,8 +109,8 @@ theorem quot_mem {W : Ideal (MRing ι R)} {b : K → ℕ} {f g : MRing ι R} (hf
 
 end HomLocRingNoetherian
 
-open HomLocRingNoetherian in
 
+open HomLocRingNoetherian in
 theorem HomLocRingNoetherian.proof (hmem : HomLocRingMem.Statement.{u}) :
     HomLocRingNoetherian.Statement.{u} := by
   intro R _ _ K _ _ ι _ P W _ hP hW _ hPW
@@ -124,9 +174,9 @@ theorem HomLocRingNoetherian.proof (hmem : HomLocRingMem.Statement.{u}) :
         (by simp only [map_mul]; rw [← hb₂]; ring) _ _ hτ hτW
       refine ⟨a₁ + a₂, I.add_mem ha₁I ha₂I, ?_⟩
       have hsum : img P (h₁ * (s * t₂) + h₂ * (s * t₁)) = img P ((t₁ * t₂) * h) := by
-        simp only [map_mul, map_add]; rw [← hb₁, ← hb₂, ← hy]; ring
+        simp only [map_mul, map_add (f := _)]; rw [← hb₁, ← hb₂, ← hy]; ring
       have hc := img_component_congr hP hsum ((e₁ + e₂) + d)
-      rw [component_form_mul (ht₁.mul ht₂), map_add, map_add] at hc
+      rw [component_form_mul (ht₁.mul ht₂), map_add (f := _), map_add (f := _)] at hc
       have h1 := img_ne_zero hPW ht₁W
       have h2 := img_ne_zero hPW ht₂W
       have h3 := img_ne_zero hPW htW

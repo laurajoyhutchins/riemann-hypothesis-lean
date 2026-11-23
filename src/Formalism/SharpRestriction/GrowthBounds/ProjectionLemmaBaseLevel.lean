@@ -1,12 +1,44 @@
-import Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow
-import Formalism.SharpRestriction.ParConsts
-import Formalism.SharpRestriction.GrowthBounds.ObjSeg
-import Formalism.SharpRestriction.GrowthBounds.ObjBridge
-import Formalism.SharpRestriction.GrowthBounds.CovariantDegrees
-import Formalism.SharpRestriction.GrowthBounds.StatementOfDegreeAndBound
-import Formalism.SharpRestriction.GrowthBounds.ConclusionA2
-import Formalism.SharpRestriction.GrowthBounds.ColumnSystems
-import Formalism.SharpRestriction.GrowthBounds.FlipOneThree
+module
+
+public import Formalism.SharpRestriction.ParConsts
+public import Formalism.SharpRestriction.GrowthBounds.FlipOneThree
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -61,8 +93,8 @@ def WeightI {n' m : ℕ} (TT : Finset (Fin n')) (Y a bl bu : ℝ) (ccl : ℕ) (a
   IsBaseWeight TT aw bw ccl lam0 ∧ IsDominant lam0 ∧
     ∀ s ∈ TT, aw s ∈ IaZ m Y a ∧ bw s ∈ IbZ bl bu
 
-open Classical in
 
+open Classical in
 def tI (C₀ C : ℝ) (p n' m : ℕ) (TT : Finset (Fin n')) (G' N₁ : ℕ) (a b' : ℝ) (ccl cStar : ℕ)
     (aw bw : Fin n' → ℤ) : ℝ :=
   let k : ℝ := (m : ℝ) + 1
@@ -240,10 +272,6 @@ def AdmB (D : Formalism.BasicNotions.D7) (C₀ CH CA CE1 CE2 Cm Ckap Ct Cc Cs : 
   PathPairCorrespondence D C₀ CH CA CE1 CE2 Cc ∧ admB2 D C₀ CH CA CE1 CE2 Cm Ckap Ct Cc ∧ admB3 D C₀ CH CE1 CE2 Ckap Cc Cs ∧
     ColumnFamilyLowerSet D C₀ CH CE1 CE2 Ct Cc ∧ AdmT D
 
-def HodgeTateFromSandwich (D : Formalism.BasicNotions.D7) (C₀ CH CA CE1 CE2 Cm Ckap Ct Cc Cs : ℝ) : Prop :=
-  4 ≤ Cc → AdmB D C₀ CH CA CE1 CE2 Cm Ckap Ct Cc Cs →
-    ∃ T C : ℝ, 0 < T ∧ 0 < C ∧ ∀ CH' : ℝ, T ≤ CH' → Conclusion2 D C₀ CH' C
-
 def ClosedA (P : ℝ → ℝ → ℝ → ℝ → ℝ → ℝ → ℝ → ℝ → ℝ → ℝ → Prop) : Prop :=
   ∀ Cc : ℝ, 0 ≤ Cc → ∃ T0 : ℝ, 0 < T0 ∧ ∀ C₀ : ℝ, T0 ≤ C₀ →
     ∃ T1 : ℝ, 0 < T1 ∧ ∀ CE1 CE2 Cm : ℝ, T1 ≤ CE1 → T1 ≤ CE2 → T1 ≤ Cm →
@@ -259,22 +287,8 @@ def projection_lemma_base_level (D : Formalism.BasicNotions.D7) : Prop := Closed
 
 def SecondPartClosed (D : Formalism.BasicNotions.D7) : Prop := AdmBE D → projection_lemma_base_level D
 
-def AdmBF {eps : ℝ} (Fm : Formalism.MainNotions.FamP eps) (C₀ CH CA CE1 CE2 Cm Ckap Ct Cc Cs : ℝ) : Prop :=
-  ∀ x (i : Fm.Ix x), AdmB (Fm.D x i) C₀ CH CA CE1 CE2 Cm Ckap Ct Cc Cs
-
 def Conclusion2Family {eps : ℝ} (Fm : Formalism.MainNotions.FamP eps) (C₀ CH C : ℝ) : Prop :=
   ∀ x (i : Fm.Ix x), Conclusion2 (Fm.D x i) C₀ CH C
-
-def SecondPartFamily {eps : ℝ} (Fm : Formalism.MainNotions.FamP eps) (C₀ CH CA CE1 CE2 Cm Ckap Ct Cc Cs : ℝ) : Prop :=
-  4 ≤ Cc → AdmBF Fm C₀ CH CA CE1 CE2 Cm Ckap Ct Cc Cs →
-    ∃ T C : ℝ, 0 < T ∧ 0 < C ∧ ∀ CH' : ℝ, T ≤ CH' → Conclusion2Family Fm C₀ CH' C
-
-def SecondPartFamilyClosed {eps : ℝ} (Fm : Formalism.MainNotions.FamP eps) : Prop := ClosedA (AdmBF Fm) → ClosedP (Conclusion2Family Fm)
-
-def UniformEpsilonConclusionClosedOfHypothesesClosed (Fm : Formalism.MainNotions.DFamP) : Prop :=
-  ClosedA (fun C₀ CH CA CE1 CE2 Cm Ckap Ct Cc Cs =>
-      ∀ (ε : ℝ) (h0 : 0 < ε) (h1 : ε < 1 / 52), AdmBF (Fm ε h0 h1) C₀ CH CA CE1 CE2 Cm Ckap Ct Cc Cs) →
-    ClosedP fun C₀ CH C => ∀ (ε : ℝ) (h0 : 0 < ε) (h1 : ε < 1 / 52), Conclusion2Family (Fm ε h0 h1) C₀ CH C
 
 end Formalism.MainNotions.flipOneThree
 

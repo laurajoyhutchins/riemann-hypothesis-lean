@@ -1,10 +1,58 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Foundations.IsProbabilityMeasureMuPart
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsKSValueOneOfRetraction
-import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.ChartCoverFOfSecBaseChange
-import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.FrameChangeComposeInvertBaseChangeTriangular
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.FramedPointBaseChangeUniqueReflIff
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.IsProbabilityMeasureMuPart
+public import Development.AbelianVarietyTheory.Definitions.ExistenceOfLattices.UnivFrame
+public import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.LawsFieldsSeparately
+public import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.ChartCoverFOfSecBaseChange
+public import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.FrameChangeComposeInvertBaseChangeTriangular
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsFactorOpenImmersion
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsFramedPointBaseChangeAlgebraMapStatement
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsOpenChartFramedPointTestRingStatement
 import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsUniqueFrameChangeByMatrices
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsUniversalFrameTestRingStatement
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.FrameChangeExistsUniqueOfSamePoint
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.FramedPointBaseChangeUniqueReflIff
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 set_option autoImplicit false
 set_option synthInstance.maxHeartbeats 400000
@@ -75,7 +123,7 @@ theorem evR_eq {f : Rul Xo c}
     {φ : p.R →ₐ[c.F] S} {u : FrPt Xo c p.R} {w : FrPt Xo c S} (h : FrMap φ u w) : evR Xo c f w = φ (f p u) := by
   have hT : FromTest (K := c.F) (fun S _ _ => FrPt Xo c S) (fun φ y z => FrMap φ y z) w := ⟨p, φ, u, h⟩
   unfold evR evalAt
-  rw [dif_pos hT]
+  rw [dite_eq_left hT]
   exact evalWD_fr (frChartF_of (chartCoverF_of_secBaseChange GlobalTheory.lawsFieldsSeparately.2.1 E H Dw l Xo c)) f hf S
     _ _ _ _ _ _ w hT.choose_spec.choose_spec.choose_spec h
 
@@ -134,23 +182,12 @@ def val (φ : K₀ →ₐ[c.F] S) (y : FrPt Xo c S) : RulK Xo c K₀ →ₗ[c.F]
 @[simp] theorem val_tmul (φ : K₀ →ₐ[c.F] S) (y : FrPt Xo c S) (a : K₀) (f : Rul Xo c) :
     val φ y (a ⊗ₜ f) = φ a * evR Xo c f y := rfl
 
-theorem val_smul (φ : K₀ →ₐ[c.F] S) (y : FrPt Xo c S) (a : K₀) (s : RulK Xo c K₀) :
-    val φ y (a • s) = φ a * val φ y s := by
-  induction s using TensorProduct.induction_on with
-  | zero => simp
-  | add s s' h h' => rw [smul_add, map_add, map_add, h, h', mul_add]
-  | tmul b f => rw [TensorProduct.smul_tmul', val_tmul, val_tmul, smul_eq_mul, map_mul, mul_assoc]
-
-theorem tmul_mem_secK {e : Ix Dw → ℤ} {f : Rul Xo c} (hf : f ∈ secZ Xo c e) (a : K₀) : a ⊗ₜ f ∈ secK Xo c K₀ e :=
-  Submodule.tmul_mem_baseChange_of_mem a hf
-
 theorem secK_induction {e : Ix Dw → ℤ} {P : RulK Xo c K₀ → Prop} (h0 : P 0)
     (h1 : ∀ a f, f ∈ secZ Xo c e → P (a ⊗ₜ f)) (h2 : ∀ s s', P s → P s' → P (s + s')) {s : RulK Xo c K₀}
     (hs : s ∈ secK Xo c K₀ e) : P s := by
   obtain ⟨z, rfl⟩ : ∃ z, (secZ Xo c e).subtype.baseChange K₀ z = s := hs
   induction z with
-  | zero => simpa using h0
-  | add s s' h h' => rw [map_add]; exact h2 _ _ h h'
+  | add s s' h h' => rw [map_add (f := _)]; exact h2 _ _ h h'
   | tmul a f => exact h1 a f.1 f.2
 
 theorem val_frMap [IsLocalRing S] {e : Ix Dw → ℤ} {s : RulK Xo c K₀} (hs : s ∈ secK Xo c K₀ e)
@@ -159,7 +196,7 @@ theorem val_frMap [IsLocalRing S] {e : Ix Dw → ℤ} {s : RulK Xo c K₀} (hs :
   refine secK_induction (P := fun s => val χ z s = ψ (val φ y s)) (by simp) (fun a f hf => ?_)
     (fun s s' k k' => ?_) hs
   · simp only [val_tmul, map_mul, hχ, evR_frMap hf.1 h]
-  · simp only [map_add, k, k']
+  · simp only [map_add (f := _), k, k']
 
 theorem val_frBor [IsLocalRing S] {e : Ix Dw → ℤ} {s : RulK Xo c K₀} (hs : s ∈ secK Xo c K₀ e)
     (φ : K₀ →ₐ[c.F] S) {t : Ix Dw → Sˣ} {y y' : FrPt Xo c S} (h : FrBor t y y') :
@@ -167,7 +204,7 @@ theorem val_frBor [IsLocalRing S] {e : Ix Dw → ℤ} {s : RulK Xo c K₀} (hs :
   refine secK_induction (P := fun s => val φ y' s = ((∏ i, t i ^ e i : Sˣ) : S) * val φ y s) (by simp)
     (fun a f hf => ?_) (fun s s' k k' => ?_) hs
   · simp only [val_tmul, evR_frBor hf h]; ring
-  · simp only [map_add, k, k', mul_add]
+  · simp only [map_add (f := _), k, k', mul_add]
 
 end Coef
 
@@ -184,8 +221,8 @@ instance isLocalRing_trivSqZeroExt {M : Type} [AddCommGroup M] [Module K M] [Mod
     simp only [isUnit_iff_isUnit_fst, fst_sub, fst_one]
     exact IsLocalRing.isUnit_or_isUnit_one_sub_self _
 
-variable (Dw) in
 
+variable (Dw) in
 abbrev FIx : Type := Option (Σ σ : E →+* ℂ, Fin (Dw.mult σ) × Fin (Dw.mult σ))
 
 section
@@ -214,16 +251,16 @@ end
 
 variable [Algebra c.F K]
 
-variable (c K) in
 
+variable (c K) in
 abbrev red : DualNumber K →ₐ[c.F] K := fstHom c.F K K
 
-variable (c K) in
 
+variable (c K) in
 abbrev cst : K →ₐ[c.F] DualNumber K := inlAlgHom c.F K K
 
-variable (c) in
 
+variable (c) in
 def dir {ι : Type} [Fintype ι] (m : ι → K) : TrivSqZeroExt K (ι → K) →ₐ[c.F] DualNumber K :=
   (TrivSqZeroExt.map (Fintype.linearCombination K m)).restrictScalars c.F
 

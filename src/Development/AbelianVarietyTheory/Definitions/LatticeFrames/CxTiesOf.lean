@@ -1,10 +1,45 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.MiStarOfMid
-import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.JoinSI
-import Formalism.LocalToGlobal.IndefiniteReal.RecTie
-import Formalism.LocalToGlobal.IndefiniteReal.RealSeparation.FramesOKg2
-import Formalism.LocalToGlobal.IndefiniteReal.RealSeparation.SignsG
-import Formalism.LocalToGlobal.IndefiniteReal.RealSeparation.SEEPin
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.JoinSI
+public import Formalism.LocalToGlobal.IndefiniteReal.RecTie
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Formalism.LocalToGlobal.IndefiniteReal.CxPass
+import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.KerJoinS
+
+@[expose] public section
 
 noncomputable section
 
@@ -63,20 +98,6 @@ def LevHyp (W : RealPack ex) : Prop :=
       PrincipalLevelBijectivity W.P.A3 (cxW W) (P1 := W.P.Ps) (ψ1 := W.P.ψs) (Dc := W.Dcf) (Sp := W.Spf) (Zsc := W.Zscf) ∧
       LevType3 W.P.A3 (cxW W) (P1 := W.P.Ps) (ψ1 := W.P.ψs) (Dc := W.Dcf) (Sp := W.Spf) (Zsc := W.Zscf) gE false W.P.P0 W.P.ψ0 ∧
       LevType3 W.P.A3 (cxW W) (P1 := W.P.Ps) (ψ1 := W.P.ψs) (Dc := W.Dcf) (Sp := W.Spf) (Zsc := W.Zscf) gE true W.P.Ps W.P.ψs
-
-def TiesRest (W : RealPack ex) : Prop :=
-  (W.Q.F.fc (cxW W).zs).Df1.WF ∧ (cxW W).H2 W.Q.F.cr true ∧ (cxW W).RATmu W.Q.F.cr true ∧ (cxW W).CoordinatesInGoodPart W.Q.F.cr W.Q.F.cv true
-
-theorem cxTies_of {W : RealPack ex} (hH : HypAt W) (hLv : LevHyp W) (hR : TiesRest W) :
-    CxTies (cxW W) W.Q.F.cr W.Q.F.cv (W.Q.F.eV (cxW W).zs) := by
-  obtain ⟨-, -, -, hC, -⟩ := hH
-  obtain ⟨hok, hRZ, gE, hU, hG, h2, hl0, hl1⟩ := hLv
-  obtain ⟨s, hs⟩ := hok
-  obtain ⟨hW, h2', hr, hcv⟩ := hR
-  have hK := RealDat3.kFormR_of (R := W.Q.Rl) (F := W.Q.F) hC.models
-  have hJ := RealDat3.jIsoR_of (R := W.Q.Rl) (F := W.Q.F) hC.models
-  exact ⟨hW, h2', hr, hJ, rationality_at_level_of_equivariance hs hK hJ hRZ hU hG true, descent_of_types hs hK hJ hRZ hU hG h2 hl0 hl1 true,
-    upper_level_of_types hs hK hJ hU hG hl0 hl1 true, hcv, Formalism.IndefR.Links.EvTie.evTie_real ⟨s, hs⟩ W.Q.Rl W.Q.F⟩
 
 end GlobalTheory.MiS
 

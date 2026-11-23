@@ -1,6 +1,49 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.ImportsMoreAlt
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.IsVerticalDivOfIsVerticalDivisorAlt
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.ImportsMoreAlt
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.Objects
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.IsVerticalDivOfIsVerticalDivisorAlt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.NumbersDVR
@@ -34,7 +77,7 @@ theorem mcMap_rename_midVar (R : Type) [CommRing R] {Ω : Type} [Field Ω] [Alge
       rename (Sum.map id Sum.inr) (mcMap R (joinCoord x z) h) := by
   induction h using MvPolynomial.induction_on with
   | C a => simp [mcMap, algebraMap_eq]
-  | add p q hp hq => simp only [map_add, hp, hq]
+  | add p q hp hq => simp only [map_add (f := _), hp, hq]
   | mul_X p v hp =>
     simp only [map_mul, hp, rename_X]
     congr 1
@@ -60,13 +103,13 @@ theorem weight_mapDomain_midVar [DecidableEq K] [DecidableEq K'] [DecidableEq K�
   rcases l with k | k | k
   · change _ = Finsupp.weight (blockWeight (Sum.elim ι ι')) d (.inl k)
     rw [Objects.weight_blockWeight_apply]
-    exact Finset.sum_congr rfl fun i _ => Finsupp.mapDomain_apply midVar_injective d ⟨.inl k, i⟩
+    exact Finset.sum_congr rfl fun i _ => Finsupp.mapDomain_apply_of_injective midVar_injective d ⟨.inl k, i⟩
   · change _ = 0
     refine Finset.sum_eq_zero fun i _ => Finsupp.mapDomain_of_notMem_range _ _ ?_
     rintro ⟨⟨k' | k', j⟩, h⟩ <;> dsimp only [midVar] at h <;> cases h
   · change _ = Finsupp.weight (blockWeight (Sum.elim ι ι')) d (.inr k)
     rw [Objects.weight_blockWeight_apply]
-    exact Finset.sum_congr rfl fun i _ => Finsupp.mapDomain_apply midVar_injective d ⟨.inr k, i⟩
+    exact Finset.sum_congr rfl fun i _ => Finsupp.mapDomain_apply_of_injective midVar_injective d ⟨.inr k, i⟩
 
 theorem isMultiHomog_rename [DecidableEq K] [DecidableEq K'] [DecidableEq K₂] {R : Type} [CommRing R]
     {f : MvPolynomial (Σ k : K ⊕ K', Sum.elim ι ι' k) R} {a : K ⊕ K' → ℕ} (hf : IsMultiHomog f a) :
@@ -74,7 +117,7 @@ theorem isMultiHomog_rename [DecidableEq K] [DecidableEq K'] [DecidableEq K₂] 
   unfold IsMultiHomog at hf ⊢
   induction hf using IsWeightedHomogeneous.induction_on with
   | zero => simpa using isWeightedHomogeneous_zero R _ _
-  | add p q hp hq ihp ihq => simpa [map_add] using ihp.add ihq
+  | add p q hp hq ihp ihq => simpa [map_add (f := _)] using ihp.add ihq
   | monomial d r hr =>
     rw [rename_monomial]
     exact isWeightedHomogeneous_monomial _ _ _ (by rw [weight_mapDomain_midVar, hr])
@@ -103,7 +146,7 @@ theorem rename_weightedHomogeneousComponent [DecidableEq K] [DecidableEq K'] [De
     · rw [IsWeightedHomogeneous.weightedHomogeneousComponent_ne b hm hb,
         IsWeightedHomogeneous.weightedHomogeneousComponent_ne _ hj (fun e => hb (midNat_injective e)),
         map_zero]
-  | add p q hp hq => simp only [map_add, hp, hq]
+  | add p q hp hq => simp only [map_add (f := _), hp, hq]
 
 theorem comap_isMultiProjPrime {R : Type} [CommRing R]
     {Q : Ideal (MvPolynomial (Σ k : K ⊕ (K₂ ⊕ K'), Sum.elim ι (Sum.elim ι₂ ι') k) R)}
@@ -124,8 +167,8 @@ theorem comap_isMultiProjPrime {R : Type} [CommRing R]
 
 end JoinVerticalDivisorRight
 
-open JoinVerticalDivisorRight in
 
+open JoinVerticalDivisorRight in
 theorem JoinVerticalDivisorRight.proof : JoinVerticalDivisorRight.Statement := by
   intro O _ _ _ Ω _ _ K _ ι _ x K' _ ι' _ z K₂ _ ι₂ _ w b f g hD
   obtain ⟨⟨α, β, hf, hg, hb⟩, hfP, hgP, hU⟩ := hD

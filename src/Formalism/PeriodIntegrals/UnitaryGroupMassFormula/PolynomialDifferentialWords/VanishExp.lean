@@ -1,4 +1,53 @@
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.PolynomialDifferentialWords.KappaRight
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.PolynomialDifferentialWords.KappaRight
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MvPolynomial
 
@@ -47,7 +96,7 @@ lemma rop_iter_mul_X (a b : Fin k) (hab : a ≠ b) (g : Pol K k) (i : Fin k ⊕ 
       Function.iterate_succ_apply' _ _ _
     have e3 : (Rop K k a b)^[n + 1] g = Rop K k a b ((Rop K k a b)^[n] g) :=
       Function.iterate_succ_apply' _ _ _
-    rw [e1, ih, map_add, map_nsmul, rop_mul, rop_mul, rop_rop_X a b hab i, e2, ← e3]
+    rw [e1, ih, map_add (f := _), map_nsmul, rop_mul, rop_mul, rop_rop_X a b hab i, e2, ← e3]
     rw [mul_zero, add_zero, succ_nsmul _ (n + 1)]
     abel
 
@@ -80,10 +129,10 @@ theorem expFormula (a b : Fin k) (hab : a ≠ b) (s : K) (g : Pol K k) : ExpForm
     obtain ⟨N1, hz1, hs1⟩ := hp
     obtain ⟨N2, hz2, hs2⟩ := hq
     refine ⟨max N1 N2, fun n hn => ?_, fun M hM x => ?_⟩
-    · rw [← Module.End.coe_pow, map_add, Module.End.coe_pow, hz1 n (by omega), hz2 n (by omega), add_zero]
-    · rw [map_add, hs1 M (by omega) x, hs2 M (by omega) x, ← Finset.sum_add_distrib]
+    · rw [← Module.End.coe_pow, map_add (f := _), Module.End.coe_pow, hz1 n (by omega), hz2 n (by omega), add_zero]
+    · rw [map_add (f := _), hs1 M (by omega) x, hs2 M (by omega) x, ← Finset.sum_add_distrib]
       refine Finset.sum_congr rfl fun n _ => ?_
-      rw [← Module.End.coe_pow, map_add, map_add]
+      rw [← Module.End.coe_pow, map_add (f := _), map_add (f := _)]
       ring
   next p i hp =>
     obtain ⟨N, hz, hsum⟩ := hp
@@ -95,7 +144,7 @@ theorem expFormula (a b : Fin k) (hab : a ≠ b) (s : K) (g : Pol K k) : ExpForm
           eval x ((Rop K k a b)^[m + 1] p) * x i +
             ((m : K) + 1) * (eval x ((Rop K k a b)^[m] p) * eval x (Rop K k a b (X i))) := by
         intro m
-        rw [rop_iter_mul_X a b hab p i m, map_add, eval_mul, eval_X, map_nsmul, eval_mul, nsmul_eq_mul]
+        rw [rop_iter_mul_X a b hab p i m, map_add (f := _), eval_mul, eval_X, map_nsmul, eval_mul, nsmul_eq_mul]
         push_cast
         ring
       have hTM : s ^ M / (M.factorial : K) * eval x ((Rop K k a b)^[M] p) = 0 := by

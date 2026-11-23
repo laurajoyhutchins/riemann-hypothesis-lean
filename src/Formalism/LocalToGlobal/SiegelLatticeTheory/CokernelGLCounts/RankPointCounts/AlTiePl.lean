@@ -1,8 +1,49 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.LocVol
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.DataInst
-import Formalism.LocalToGlobal.SiegelLatticeTheory.AFTransport
-import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RootLatticeThresholds.LocalAdditiveCharContinuous
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.LocVol
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.DataInst
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.AFTransport
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RootLatticeThresholds.LocalAdditiveCharContinuous
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -107,9 +148,9 @@ theorem continuous_withVal {R S : Type} [Field R] [Field S] {v : Valuation R (Wi
   intro s hs'
   rw [map_zero] at hs'
   obtain ⟨γ, hγ⟩ := Valued.mem_nhds_zero.mp hs'
-  obtain ⟨x0, hx0⟩ := hs (embedding (γ : ValueGroup₀ (.ofClass (Valued.v : Valuation (WithVal v') _))))
-  have hpos : 0 < embedding (γ : ValueGroup₀ (.ofClass (Valued.v : Valuation (WithVal v') _))) := by
-    rw [← map_zero (embedding (f := .ofClass (Valued.v : Valuation (WithVal v') _)))]
+  obtain ⟨x0, hx0⟩ := hs (embedding γ.val)
+  have hpos : 0 < embedding γ.val := by
+    rw [← map_zero (embedding (f := ((Valued.v : Valuation (WithVal v') _) : WithVal v' →*₀ _)))]
     exact embedding_strictMono (Units.zero_lt γ)
   have hx0' : 0 < Valued.v.restrict (WithVal.toVal v x0) := by
     rw [Valuation.restrict_pos_iff, WithVal.valued_toVal, hx0]
@@ -141,24 +182,6 @@ def compEquiv (j : E ≃+* L) (w : HeightOneSpectrum (𝓞 E)) :
   (HeightOneSpectrum.adicCompletion.equiv E w).trans ((UniformSpace.Completion.mapRingEquiv
     (WithVal.congr (w.valuation E) ((mapPl j w).valuation L) j) (continuous_congrVal j w)
     (continuous_congrVal_symm j w)).trans (HeightOneSpectrum.adicCompletion.equiv L (mapPl j w)).symm)
-
-theorem continuous_compEquiv (j : E ≃+* L) (w : HeightOneSpectrum (𝓞 E)) : Continuous (compEquiv j w) := by
-  have h : Continuous (fun y : w.adicCompletion E =>
-      (HeightOneSpectrum.adicCompletion.ofCompletion (UniformSpace.Completion.map
-        (WithVal.congr (w.valuation E) ((mapPl j w).valuation L) j) y.toCompletion) : (mapPl j w).adicCompletion L)) :=
-    (HeightOneSpectrum.adicCompletion.continuous_ofCompletion L (mapPl j w)).comp
-      (UniformSpace.Completion.continuous_map.comp (HeightOneSpectrum.adicCompletion.continuous_toCompletion E w))
-  exact h.congr fun y => rfl
-
-theorem continuous_compEquiv_symm (j : E ≃+* L) (w : HeightOneSpectrum (𝓞 E)) :
-    Continuous (compEquiv j w).symm := by
-  have h : Continuous (fun y : (mapPl j w).adicCompletion L =>
-      (HeightOneSpectrum.adicCompletion.ofCompletion (UniformSpace.Completion.map
-        (WithVal.congr (w.valuation E) ((mapPl j w).valuation L) j).symm y.toCompletion) : w.adicCompletion E)) :=
-    (HeightOneSpectrum.adicCompletion.continuous_ofCompletion E w).comp
-      (UniformSpace.Completion.continuous_map.comp
-        (HeightOneSpectrum.adicCompletion.continuous_toCompletion L (mapPl j w)))
-  exact h.congr fun y => rfl
 
 theorem compEquiv_algebraMap (j : E ≃+* L) (w : HeightOneSpectrum (𝓞 E)) (x : E) :
     compEquiv j w (algebraMap E (w.adicCompletion E) x) = algebraMap L ((mapPl j w).adicCompletion L) (j x) := by
@@ -249,13 +272,13 @@ theorem tensFrom_tensTo (x : v.adicCompletion F ⊗[F] E) : tensFrom j k hjk v (
   induction x using TensorProduct.induction_on with
   | zero => simp
   | tmul a e => rw [tensTo_tmul, tensFrom_tmul, RingEquiv.symm_apply_apply, RingEquiv.symm_apply_apply]
-  | add x y hx hy => rw [map_add, map_add, hx, hy]
+  | add x y hx hy => rw [map_add (f := _), map_add (f := _), hx, hy]
 
 theorem tensTo_tensFrom (y : (mapPl j v).adicCompletion F' ⊗[F'] E') : tensTo j k hjk v (tensFrom j k hjk v y) = y := by
   induction y using TensorProduct.induction_on with
   | zero => simp
   | tmul a e => rw [tensFrom_tmul, tensTo_tmul, RingEquiv.apply_symm_apply, RingEquiv.apply_symm_apply]
-  | add x y hx hy => rw [map_add, map_add, hx, hy]
+  | add x y hx hy => rw [map_add (f := _), map_add (f := _), hx, hy]
 
 end Tens
 
@@ -332,9 +355,6 @@ def plEquiv : HeightOneSpectrum (𝓞 X.B.I.F) ≃ PlF D where
     show RingOfIntegers.mapRingEquiv (Formalism.L2.GlobalTheoryTheory.AFTransport.iotaF X)
       ((RingOfIntegers.mapRingEquiv (Formalism.L2.GlobalTheoryTheory.AFTransport.iotaF X)).symm x) ∈ w.asIdeal ↔ x ∈ w.asIdeal
     rw [RingEquiv.apply_symm_apply]
-
-theorem plEquiv_apply (v : HeightOneSpectrum (𝓞 X.B.I.F)) :
-    plEquiv X v = mapPl (Formalism.L2.GlobalTheoryTheory.AFTransport.iotaF X) v := rfl
 
 theorem absNorm_plEquiv (v : HeightOneSpectrum (𝓞 X.B.I.F)) :
     Ideal.absNorm (plEquiv X v).asIdeal = Ideal.absNorm v.asIdeal := absNorm_mapPl (Formalism.L2.GlobalTheoryTheory.AFTransport.iotaF X) v

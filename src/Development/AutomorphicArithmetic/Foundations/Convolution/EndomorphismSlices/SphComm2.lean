@@ -1,4 +1,43 @@
-import Development.AutomorphicArithmetic.Foundations.Convolution.EndomorphismSlices.CommStar
+module
+
+public import Development.AutomorphicArithmetic.Foundations.Convolution.EndomorphismSlices.CommStar
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ConjugateRepresentations.CuspidalSupport.HeckeLocalBlock
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.EigenvalueSeparation.FaceMapCompSuccAboveCastSucc
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -11,7 +50,7 @@ open UpperTheory.V.Z.Tf.GlobalTraceComparison
 open UpperTheory.V.Af.Bc (cPl)
 open scoped Classical
 
-set_option synthInstance.maxHeartbeats 200000
+
 
 namespace UpperTheory.Zero.ConvolutionTheory.EB
 
@@ -149,8 +188,8 @@ def GenSt : Prop := ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (a b 
   ∀ T e₁ e₂, GenOk (A.gen S L T e₁ e₂) ∧ Countable (Gam a b S Z)
 
 def KgFacts : Prop := ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (n : ℕ) (S : Set (Pl E)) (Z : Finset (Pl E)) (L : ∀ w : Pl E, Subgroup (GLw n w)),
-  IsSection S → SplitIn S Z → (∀ w, IsOpen (L w : Set (GLw n w)) ∧ L w ≤ KGL w n) → (∀ w ∉ Z, L w = KGL w n) →
-  IsOpen (Kg S L : Set (GL (Fin n) (Af E))) ∧ Kg S L ≤ Kf E n ∧ ∀ w, Off Z w → ∀ k ∈ KGL w n, locGL E n w k ∈ Kg S L
+  IsSection S → SplitIn S Z → (∀ w, IsOpen (L w : Set (GLw n w)) ∧ L w ≤ KGL w (n := n)) → (∀ w ∉ Z, L w = KGL w (n := n)) →
+  IsOpen (Kg S L : Set (GL (Fin n) (Af E))) ∧ Kg S L ≤ Kf E n ∧ ∀ w, Off Z w → ∀ k ∈ KGL w (n := n), locGL E n w k ∈ Kg S L
 
 def IdmAct : Prop := ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (a b : ℕ) (l₁ : InfinitePlace E → DomWeight a) (l₂ : InfinitePlace E → DomWeight b)
   (D : Dom E a b) (A : Ar l₁ l₂ D) (S : Set (Pl E)) (Z : Finset (Pl E)) (L : Lv a b Z), IsSection S → SplitIn S Z →
@@ -282,7 +321,7 @@ def CmbPi : Prop := ∀ (E : Type) [Field E] [NumberField E] [IsCMField E], Glob
     ∀ (u₁ : GL (Fin n) E) (u₂ : GL (Fin 0) E), IsTransl u₁ → ∃ c : ℂ, c ≠ 0 ∧
     ∀ (L : Lv n 0 Z) φ T (e₁ e₂ : Pl E → Ex (Fin (n + 1) × Fin (0 + 1))) (C : Cmb A.blk) (R : ℝ), L.Fix φ → TEv S T e₂ →
       Disjoint T Z → C.Ok (rt u₁ u₂ (A.fx S L T φ e₁ e₂)) R → IsTwTr D.μ π (trM C.Φ A.tw)
-        (c * C.val (chi l₁) (chi l₂) * (∏ w ∈ Z, trc (τ w).ρ (KGL w n) fun g => φ w (g, 1)) * val T e₁ e₂ B 0)
+        (c * C.val (chi l₁) (chi l₂) * (∏ w ∈ Z, trc (τ w).ρ (KGL w (n := n)) fun g => φ w (g, 1)) * val T e₁ e₂ B 0)
 
 def ValNil : Prop := ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (n : ℕ) (Z T : Finset (Pl E)) (S : Set (Pl E)) (D : CD E 0) (B₁ B₂ : Pl E → Multiset ℂˣ)
   (e₁ e₂ : Pl E → Ex (Fin (n + 1) × Fin (0 + 1))), IsSection S → SplitIn S Z → (∀ w ∈ T, w ∈ S) → Disjoint T Z →

@@ -1,64 +1,110 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.AssemblyBundles
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PFlagBundleDim
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PTwistedDualGensSpan
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PSpanBundleDim
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PPointIdealMultiProj
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PSpanBundleTrdegGe
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PSpanBundleTrdegLe
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PFlagBundleSectionForms
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PFlagBundleSectionDiv
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PMultAtOfSaturated
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.StatementsBundles
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.StatementsFlagBundle
+public import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.StatementsDivPushForwardLocal
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.AssemblyBundles
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PFlagBundleChartSection
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PFlagBundleDim
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PFlagBundleSectionDiv
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PFlagBundleSectionForms
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PFlagLineDegree
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PFlagLineSection
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PMultAtOfSaturated
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PPointIdealMultiProj
 import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PProjIdealFormValue
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PTruncSpecialize
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PFlagBundleChartSection
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PFlagLineSection
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PFlagLineDegree
-import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PConeLocalFlat
-import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PConeLocalLength
-import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PConePolyLocalization
-import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PConeVarInj
-import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PConeVarNumerator
-import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PConeVarSurj
-import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PConeVarUnit
-import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PDegZeroLocalRing
-import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PDegZeroLocDim
-import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PDegZeroLocFrac
-import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PDegZeroLocLocalize
-import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PDegZeroLocLocal
-import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PDegZeroLocNoetherian
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PSpanBundleDim
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PSpanBundleTrdegGe
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PSpanBundleTrdegLe
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PTruncSpecialize
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PTwistedDualGensSpan
+public import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PConeLocalFlat
+public import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PConeLocalLength
+public import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PConePolyLocalization
+public import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PConeVarInj
+public import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PConeVarNumerator
+public import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PConeVarSurj
+public import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PConeVarUnit
+public import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PDegZeroLocDim
+public import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PDegZeroLocFrac
+public import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PDegZeroLocLocal
+public import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PDegZeroLocLocalize
+public import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PDegZeroLocNoetherian
 import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PDegZeroLocQuot
-import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PDegZeroLocResidue
-import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PDegZeroLocSeparate
-import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PDegZeroLocUnits
-import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PDivCycleMinimal
-import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PFibreFinite
-import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PFibreNonempty
-import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PFibreRelDim
-import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PFiniteAlgebraLengthSum
-import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PFunctionFieldFinite
-import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PLocalIntegralClosureFinite
-import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PLocalizedQuotientLength
-import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PMChartDehomog
-import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PMChartHomog
-import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PMChartLocDim
-import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PMChartTrdeg
-import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PNoetherIntegralClosure
-import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PSemilocalFinite
+public import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PDegZeroLocResidue
+public import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PDegZeroLocSeparate
+public import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PDegZeroLocUnits
+public import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PDegZeroLocalRing
+public import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PDivCycleMinimal
+public import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PDivPushForwardLocal
+public import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PFibreFinite
+public import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PFibreNonempty
+public import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PFibreRelDim
+public import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PFiniteAlgebraLengthSum
+public import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PFunctionFieldFinite
+public import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PLocalIntegralClosureFinite
+public import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PLocalizedQuotientLength
+public import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PMChartDehomog
+public import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PMChartHomog
+public import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PMChartLocDim
+public import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PMChartTrdeg
+public import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PNoetherIntegralClosure
+public import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PSemilocalFinite
 import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PSemilocalFiniteRank
-import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PSemilocalIntegral
-import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PSemilocalLength
-import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PSemilocalLengthSum
-import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PSemilocalMaxIdeals
-import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PSemilocalResidueLength
-import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PValuativeCentre
-import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PDivPushForwardLocal
+public import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PSemilocalIntegral
+public import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PSemilocalLength
+public import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PSemilocalLengthSum
+public import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PSemilocalMaxIdeals
+public import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PSemilocalResidueLength
+public import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PValuativeCentre
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.NumbersDVR
 
-open GroundTheory.Heights₂.Heights.FieldNumbers in
 
+open GroundTheory.Heights₂.Heights.FieldNumbers in
 theorem DivPushForwardLocalZero : FieldNumbers.DivPushForwardLocal.Statement.{0} := by
   have hq := DegZeroLocQuot.proof.{0}
   have hdzl := DegZeroLocLocal.proof hq

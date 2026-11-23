@@ -1,8 +1,52 @@
-import Mathlib
-import Formalism.LocalToGlobal.GroupLattices.DownNaturalLevelZero
-import Formalism.LocalToGlobal.GlobalTheory.GL6.PRLocV
-import Formalism.LocalToGlobal.GlobalTheory.GL6.PBwLocBases
-import Formalism.LocalToGlobal.GlobalTheory.GL6.PBwLcInt
+module
+
+public import Formalism.LocalToGlobal.HermitianForms.PrkSmul
+public import Formalism.LocalToGlobal.GlobalTheory.GL6.PBwLcInt
+public import Formalism.LocalToGlobal.GlobalTheory.GL6.PRLocV
+import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.CsScale
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Formalism.LocalToGlobal.GlobalTheory.GL6.Statement
+
+@[expose] public section
 
 noncomputable section
 
@@ -41,15 +85,6 @@ structure Red (res : R →+* k) (t : R) (Λ : Submodule R V) {W : Type} [AddComm
   surj : ∀ w, ∃ x ∈ Λ, π x = w
   ker : ∀ x ∈ Λ, π x = 0 ↔ ∃ y ∈ Λ, ∃ s, res s ≠ 0 ∧ s • x = t • y
 
-example : Pr.Ok (RingHom.id k) (⟨⊤, id⟩ : Pr k k k) :=
-  ⟨fun _ _ _ _ => trivial, fun _ _ _ _ => rfl, fun _ _ _ => rfl, fun _ h => (h trivial).elim, ⟨1, one_ne_zero⟩⟩
-
-example : Red (RingHom.id k) 0 (⊤ : Submodule k k) (id : k → k) :=
-  ⟨fun _ _ _ _ => rfl, fun _ _ _ => rfl, fun w => ⟨w, trivial, rfl⟩, fun x _ =>
-    ⟨fun h => ⟨0, trivial, 1, one_ne_zero, by simpa using h⟩, fun ⟨_, _, s, hs, h⟩ => by
-      have h' : s * x = 0 := by simpa using h
-      exact (mul_eq_zero.1 h').resolve_left hs⟩⟩
-
 def Unram (res : R →+* k) (t : R) : Prop := res t = 0 ∧ ∀ a, res a = 0 → ∃ s b, res s ≠ 0 ∧ s * a = t * b
 
 abbrev loc (res : R →+* k) (M : Submodule R V) : Submodule R V :=
@@ -78,7 +113,7 @@ theorem locExt_spec (res : R →+* k) (M : Submodule R V) (pr : M →+ W) (hs : 
     (x : V) (hx : x ∈ loc res M) (a : R) (h : a • x ∈ M) : pr ⟨a • x, h⟩ = res a • locExt res M pr x := by
   have h0 := (mem_loc res M x).1 hx
   unfold locExt
-  rw [dif_pos h0]
+  rw [dite_eq_left h0]
   have h1 := h0.choose_spec
   have e : h0.choose • (⟨a • x, h⟩ : M) = a • ⟨_, h1.2⟩ := Subtype.ext (smul_comm _ _ _)
   have := congrArg pr e
@@ -149,7 +184,7 @@ theorem pairOf_ok (res : R →+* k) (M : Submodule R V) (pr : M →+ W) (φ : Mo
     (pairOf res M pr φ).Ok res := by
   refine ⟨loc_sat res M, fun x hx y hy => ?_, fun a x hx => ?_, fun x hx => ?_, ?_⟩
   · show φ _ = φ _ + φ _
-    rw [locExt_add res M pr hs x hx y hy, map_add]
+    rw [locExt_add res M pr hs x hx y hy, map_add (f := _)]
   · show φ _ = _ * φ _
     rw [locExt_smul res M pr hs a x hx, map_smul, smul_eq_mul]
   · show φ _ = 0
@@ -199,7 +234,7 @@ theorem Pr.Ok.act {res : R →+* k} {p : Pr R V k} (h : p.Ok res) (g : V ≃ₗ[
     rw [map_smul] at hx; exact h.sat s _ hs hx
   · rw [Pr.mem_act] at hx hy
     show p.f _ = p.f _ + p.f _
-    rw [map_add, h.add _ hx _ hy]
+    rw [map_add (f := _), h.add _ hx _ hy]
   · rw [Pr.mem_act] at hx
     show p.f _ = _ * p.f _
     rw [map_smul, h.smul _ _ hx]
@@ -308,8 +343,8 @@ abbrev dualV (K : ClsTied u i hi) (v : HeightOneSpectrum (𝓞 D.host.F)) :=
   latS (F := D.host.F) (v.adicCompletion D.host.F) (intV D.host.E v)
     (Submodule.span (𝓞 D.host.E) (dualSet (sigD D : D.host.E →+* D.host.E) (gramN D i hi) K.lev.Lb))
 
-set_option maxHeartbeats 1000000 in
-set_option synthInstance.maxHeartbeats 400000 in
+
+
 
 theorem cls_le_dual (K : ClsTied u i hi) (c : (D.mem u).C.cls i) : clsCrd D u i hi c ≤ Ld D u i hi c := by
   intro x hx

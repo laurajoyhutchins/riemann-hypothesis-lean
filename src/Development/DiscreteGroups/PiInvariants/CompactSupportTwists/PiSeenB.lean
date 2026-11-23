@@ -1,4 +1,46 @@
-import Development.DiscreteGroups.PiInvariants.CompactSupportTwists.PiSeenA
+module
+
+public import Development.DiscreteGroups.PiInvariants.CompactSupportTwists.PiSeenA
+import Development.DiscreteGroups.PiInvariants.CompactSupportTwists.LogAbsEqLogIdeleNorm
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+
+@[expose] public section
 
 set_option linter.all false
 
@@ -16,6 +58,7 @@ variable {E : Type} [Field E] [NumberField E] [IsCMField E] {n : ℕ}
 
 theorem conj_sum_mul {ι : Type*} (s : Finset ι) (c f : ι → ℂ) (U V : ℂ) :
     starRingEnd ℂ ((∑ a ∈ s, c a * f a) * U) * V = ∑ a ∈ s, starRingEnd ℂ (c a) * (starRingEnd ℂ (f a * U) * V) := by
+
   rw [Finset.sum_mul, map_sum, Finset.sum_mul]
   refine Finset.sum_congr rfl fun a _ => ?_
   simp only [map_mul]
@@ -56,7 +99,7 @@ theorem poly_vanish (hn : 1 ≤ n) (D : Dom E n 0) {π : CuspSub E n} (hθ : The
     refine Finset.sum_congr rfl fun k _ => ?_
     ring
   simp_rw [e]
-  rw [integral_finset_sum]
+  rw [integral_finsetSum]
   · refine Finset.sum_eq_zero fun k _ => ?_
     rw [integral_const_mul, h k, mul_zero]
   · intro k _

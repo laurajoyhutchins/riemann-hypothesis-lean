@@ -1,4 +1,62 @@
-import Mathlib
+module
+
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.Analysis.Calculus.FDeriv.Defs
+public import Mathlib.Analysis.Complex.Exponential
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Mathlib.Topology.UniformSpace.Uniformizable
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Analysis.Analytic.Basic
+public import Mathlib.Analysis.Analytic.OfScalars
+public import Mathlib.Analysis.Analytic.Uniqueness
+public import Mathlib.Analysis.Complex.CauchyIntegral
+import Mathlib.NumberTheory.NumberField.CanonicalEmbedding.Basic
+
+@[expose] public section
+
 open NumberField IsDedekindDomain NumberField.mixedEmbedding MeasureTheory Complex Classical
 open scoped ContDiff nonZeroDivisors
 
@@ -40,9 +98,9 @@ private theorem hasSum_prod_fin_pow {ι : Type} (z : ι → ℂ) (g : ℂ)
       rw [← hnorm] at H
       exact (Equiv.summable_iff e).mp H
 
+
 open NumberField IsDedekindDomain NumberField.mixedEmbedding MeasureTheory Complex Classical in
 open scoped ContDiff nonZeroDivisors in
-
 theorem _root_.GlobalTheory.hasSum_tuple_prod_exp {ι : Type} (z : ι → ℂ) (g : ℂ) (h : HasSum z g) :
     HasSum (fun p : (Σ n : ℕ, Fin n → ι) => (∏ k, z (p.2 k)) / (p.1.factorial : ℂ))
       (Complex.exp g) := by
@@ -78,9 +136,9 @@ theorem _root_.GlobalTheory.hasSum_tuple_prod_exp {ι : Type} (z : ι → ℂ) (
   exact HasSum.sigma_of_hasSum hexp
     (fun n => ((hasSum_prod_fin_pow z g hz h n).1.div_const (n.factorial : ℂ))) hsum
 
+
 open NumberField IsDedekindDomain NumberField.mixedEmbedding MeasureTheory Complex Classical in
 open scoped ContDiff nonZeroDivisors in
-
 theorem _root_.GlobalTheory.landau_exp_summable : ∀ (ι : Type) (a l : ι → ℝ) (F : ℂ → ℂ),
     (∀ i, 0 ≤ a i) → (∀ i, 0 ≤ l i) → Differentiable ℂ F →
     (∀ s : ℂ, 1 < s.re → ∃ g : ℂ, HasSum (fun i => (a i : ℂ) * Complex.exp (-(l i : ℂ) * s)) g ∧
@@ -189,15 +247,14 @@ theorem _root_.GlobalTheory.landau_exp_summable : ∀ (ι : Type) (a l : ι → 
       simp only [r, ← tsum_mul_right]
       congr 1
       funext p
-      simp only [T]
-      rw [mul_pow, mul_pow, one_pow]
+      simp only [T, mul_one]
       ring
     rw [hcn, hrn]
     exact (hK2' ρ hρ0 hρ1).le_tsum n fun m _ => tsum_nonneg fun p => hT ρ hρ0 (p, m)
   have hps : HasFPowerSeriesOnBall F (FormalMultilinearSeries.ofScalars ℂ c) 2 1 := by
     refine ⟨hrad, one_pos, fun {y} hy => ?_⟩
     have hy1 : ‖y‖ < 1 := by
-      simpa [EMetric.mem_ball, edist_zero_right, ← ofReal_norm, ENNReal.ofReal_lt_one] using hy
+      simpa [Metric.mem_eball, edist_zero_right, ← ofReal_norm, ENNReal.ofReal_lt_one] using hy
     simp only [FormalMultilinearSeries.ofScalars_apply_eq, smul_eq_mul]
     let E : (Σ n : ℕ, Fin n → ι) × ℕ → ℂ := fun q =>
       ((b q.1 * Real.exp (-(2 * L q.1)) : ℝ) : ℂ) * ((-(L q.1 : ℂ) * y) ^ q.2 / (q.2.factorial : ℂ))
@@ -252,7 +309,7 @@ theorem _root_.GlobalTheory.landau_exp_summable : ∀ (ι : Type) (a l : ι → 
   have hent := hF.hasFPowerSeriesOnBall 2 (R := 1) one_pos
   have hpeq := hps.hasFPowerSeriesAt.eq_formalMultilinearSeries hent.hasFPowerSeriesAt
   rw [← hpeq] at hent
-  have H0 := hent.hasSum (y := -2) (EMetric.mem_ball.mpr (edist_lt_top _ _))
+  have H0 := hent.hasSum (y := -2) (Metric.mem_eball.mpr (edist_lt_top _ _))
   simp only [FormalMultilinearSeries.ofScalars_apply_eq, smul_eq_mul] at H0
   have hterm : ∀ n, c n * (-2) ^ n = ((∑' p, T 2 (p, n) : ℝ) : ℂ) := by
     intro n

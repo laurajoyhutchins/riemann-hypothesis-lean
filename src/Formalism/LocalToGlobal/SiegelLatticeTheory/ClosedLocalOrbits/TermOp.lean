@@ -1,11 +1,49 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.TermDef
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.FourParts
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.Corank
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GGMirabolic
-import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.HidaSetting
-import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.PoincareInHH
-import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.PackageTie
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.FourParts
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GGMirabolic
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.PoincareInHH
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.PackageTie
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -98,7 +136,7 @@ def GTerm.pt (t : GTerm X u u' F0 F0' what₂ rows') : X.B.I.GA := t.rep.1.1
 
 def GTerm.lin (t : GTerm X u u' F0 F0' what₂ rows') : (VS D).V ≃ₗ[D.host.E] (VS D).V := t.rep.1.2
 
-def GTerm.frame (t : GTerm X u u' F0 F0' what₂ rows') : LFlag (VS D) D.R.rS ((Tu D u' : ℕ) : D.host.E) :=
+def GTerm.frame (t : GTerm X u u' F0 F0' what₂ rows') : LFlag (D.sp.Y 0) D.R.rS (((D.mem u').A.T : ℕ) : D.host.E) :=
   mapLF t.lin (lf D F0')
 
 def GTerm.toTerm (t : GTerm X u u' F0 F0' what₂ rows') : TermDef.Term D u u' F0 what₂ :=
@@ -135,8 +173,8 @@ variable {D : D7} {X : Formalism.L2.SG.HidaSetting.HidaSetting D} {u u' : D.what
   {F0 : FlagG (VS D) D.R.rS ((Tu D u : ℕ) : D.host.E)} {F0' : FlagG (VS D) D.R.rS ((Tu D u' : ℕ) : D.host.E)}
   {what₂ rows' : Finset (Submodule (𝓞 D.host.E) (VS D).V)}
 
-variable (X F0 F0') in
 
+variable (X F0 F0') in
 def ROset (Λ Λ' : Submodule (𝓞 D.host.E) (VS D).V) (γ : (VS D).V ≃ₗ[D.host.E] (VS D).V) : Set X.B.I.Ginf :=
   {y | ∃ (x : X.B.I.GA) (n : (VS D).V ≃ₗ[D.host.E] (VS D).V), RatLink X x n ∧ y = x.1 ∧
     n ∈ NLam Λ (lf D F0) ∧ γ⁻¹ * n * γ ∈ NLam Λ' (lf D F0')}
@@ -173,13 +211,13 @@ attribute [local instance] Formalism.BasicNotions.Host.cmStar
 
 variable {D : D7} (X : Formalism.L2.SG.HidaSetting.HidaSetting D)
 
-open Formalism.L2.SG.HidaSetting in
 
+open Formalism.L2.SG.HidaSetting in
 def chiN (κ : X.B.I.Gf) : ℂ :=
   X.psiEf (divN X.B.I X.B.g (∑ a, hA X.B.I (X.f0 a) (X.B.I.fmat κ *ᵥ nxt X.e0 X.z0 a)))
 
-open Formalism.L2.SG.HidaSetting in
 
+open Formalism.L2.SG.HidaSetting in
 def chiL (κ : X.B.I.Gf) : ℂ :=
   X.psiEf (divN X.B.I X.B.g (∑ i : Fin D.R.k,
     if h : i.1 + 1 < D.R.k then hA X.B.I (X.bwd i) (X.B.I.fmat κ *ᵥ X.bw ⟨i.1 + 1, h⟩) else 0))
@@ -322,15 +360,15 @@ variable {D : D7} {X : Formalism.L2.SG.HidaSetting.HidaSetting D} {u u' : D.what
 def iotaOf (t : GTerm X u u' F0 F0' what₂ rows') : Iof TR :=
   levi TR (kOf X u u' (cs.h (cs.base t.lam) : X.B.I.Gf) (cs'.h (cs'.base t.lam') : X.B.I.Gf) t.pt)
 
-variable (what₂ rows') in
 
+variable (what₂ rows') in
 abbrev Rw : Type := {Λ // Λ ∈ what₂} × {Λ' // Λ' ∈ rows'} × Iof TR
 
 def rowOf (t : GTerm X u u' F0 F0' what₂ rows') : Rw what₂ rows' TR :=
   (⟨t.lam, t.mem⟩, ⟨t.lam', t.mem'⟩, iotaOf TR cs cs' t)
 
-variable (X u u' what₂ rows') in
 
+variable (X u u' what₂ rows') in
 abbrev H1 : Type :=
   PiLp 2 (fun _ : {Λ // Λ ∈ what₂} × {Λ' // Λ' ∈ rows'} => Formalism.L2.SG.PackageTie.HS (X.Vpi u') (X.Vpi u))
 
@@ -359,8 +397,8 @@ def scalT (t₁ t₂ : GTerm X u u' F0 F0' what₂ rows') : Prop :=
     Lat.s0 t₁.lam (lf D F0) t₁.frame t₂.frame (t₂.lin * t₁.lin⁻¹) D.R.k = 1 ∧
     IsScalar t₁.lam (lf D F0) t₁.frame t₂.frame (t₂.lin * t₁.lin⁻¹)
 
-variable (F0 F0') in
 
+variable (F0 F0') in
 def tOf : Formalism.FourierDecayAlt.PB.Terms (GTerm X u u' F0 F0' what₂ rows') (Rw what₂ rows' TR) (Iof TR)
     (Formalism.L2.SG.PackageTie.HS (CM cs') (CM cs)) (H1 X u u' what₂ rows') where
   op := op cs cs' FdN FdN'

@@ -1,7 +1,44 @@
-import Mathlib
-import Development.AutomorphicArithmetic.Foundations.Convolution.BlockHeckeSlices.SliceShift
-import Development.AutomorphicArithmetic.Foundations.Convolution.PolynomialCoefficientBounds.Reduce
-import Development.AutomorphicArithmetic.Foundations.Convolution.PolynomialCoefficientBounds.Taylor
+module
+
+public import Development.AutomorphicArithmetic.Foundations.Convolution.BlockHeckeSlices.SliceShift
+public import Development.AutomorphicArithmetic.Foundations.Convolution.PolynomialCoefficientBounds.Reduce
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open PositivityTheory.Rg.Fx UpperTheory.ConvolutionTheory.BW
 
@@ -22,7 +59,7 @@ theorem UpperTheory.ConvolutionTheory.FX.abs_growth :
       c (MvPolynomial.aeval Z G • ψ) = c (MvPolynomial.aeval ξ (MvPolynomial.aeval blockE G) • ψ) := fun G => by
     induction G using MvPolynomial.induction_on with
     | C a => intro ψ; simp
-    | add p q hp hq => intro ψ; simp only [map_add, add_smul, hp, hq]
+    | add p q hp hq => intro ψ; simp only [map_add (f := _), add_smul, hp, hq]
     | mul_X p j hp =>
       intro ψ
       rw [map_mul, map_mul, map_mul, MvPolynomial.aeval_X, MvPolynomial.aeval_X, mul_smul, hp, smul_comm, S.cen, mul_comm, mul_smul]
@@ -41,19 +78,21 @@ theorem UpperTheory.ConvolutionTheory.FX.abs_growth :
       obtain ⟨B, hB, h1⟩ := hp
       obtain ⟨B', hB', h2⟩ := hq
       refine ⟨B + B', by positivity, fun α x hx => ?_⟩
-      rw [map_add, mul_add, add_smul, map_add, Pi.add_apply, add_mul]
+      rw [map_add (f := _), mul_add, add_smul, map_add (f := _), Pi.add_apply, add_mul]
       exact (norm_add_le _ _).trans (add_le_add (h1 α x hx) (h2 α x hx))
   choose B hB0 hB using fun β : τ × Fin n → Fin n => L (∏ u, (MvPolynomial.C (Λ u) + MvPolynomial.X (idx u.2)) ^ (β u : ℕ))
   refine ⟨∑ β, B β, fun α x hx => ?_⟩
   obtain ⟨G, h1, h2, h3⟩ := hR α
   have hl : ∀ p : MvPolynomial (τ × Fin n) ℂ, 0 ≤ l1 p := fun p => Finset.sum_nonneg fun _ _ => norm_nonneg _
+
   rw [h1, map_sum, Finset.sum_smul, map_sum, Finset.sum_apply, Finset.sum_mul]
   refine (norm_sum_le _ _).trans (Finset.sum_le_sum fun β _ => ?_)
   have e : MvPolynomial.aeval ξ (∏ u, (MvPolynomial.X u : MvPolynomial (τ × Fin n) ℂ) ^ (β u : ℕ)) =
       MvPolynomial.aeval I (∏ u, (MvPolynomial.C (Λ u) + MvPolynomial.X (idx u.2) : MvPolynomial (Fin r) ℂ) ^ (β u : ℕ)) := by
     simp [hξ]
+
   rw [map_mul, mul_smul, ← cen, e, ← mul_smul, MvPolynomial.aeval_def Z, MvPolynomial.eval₂_eq, Finset.sum_mul, Finset.sum_smul,
-    map_sum, Finset.sum_apply]
+  map_sum, Finset.sum_apply]
   have hG : l1 (G β) ≤ K ^ α.degree := (Finset.single_le_sum (fun β _ => hl (G β)) (Finset.mem_univ β)).trans h2
   calc _ ≤ ∑ γ ∈ (G β).support, ‖(G β).coeff γ‖ * (B β * max |C| 1 ^ α.degree) := by
         refine (norm_sum_le _ _).trans (Finset.sum_le_sum fun γ hγ => ?_)

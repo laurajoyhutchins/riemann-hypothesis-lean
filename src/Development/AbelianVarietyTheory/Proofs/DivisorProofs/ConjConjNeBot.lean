@@ -1,17 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GoodIdemEmpty
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.StandardLatticeDoubleCosetClassesStabilisers
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsThetaFunctionStandardPairSecond
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.MemCompletedLatticeHalfIffFrameMatrixIntegral
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GoodIdemEmpty
+public import Development.AbelianVarietyTheory.Definitions.Divisors.FinitePrimesUnder
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.OmAtSmulRight
+import Development.AbelianVarietyTheory.Counterexamples.HeightSurvey.StarPurelyImaginaryEqNeg
+import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.SelfDualLatticePairingDual
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EqTopOfOneMem
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FinTensAlgebraMap
 import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsLevelDatumReferenceTupleSmallField
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.TranslateSumVacuumMovedByAdelicPair
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.MemCompletedLatticeConjugateHalfIffDual
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.RationalFinitePartMemHomLatticeCompletionIff
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.StandardPairLatticeLocallyOrthonormalBasis
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FinTensAlgebraMap
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.TranslateSumVacuumMovedByAdelicPair
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsNsmulIntMemLatO
 import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IdempotentSumInfPartIntegralOneSubMem
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.UnitBlockCosetIffMaximalLevelCongruentConjIdeal
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EqTopOfOneMem
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.ExistsMatchOver
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsCongLevelIntG
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.IndefR Formalism.IndefR.Datum Formalism.IndefR.Links Formalism.L2.Theta IsDedekindDomain NumberField Finset MeasureTheory
 open Formalism.MainNotions.TaylorLogMetric Formalism.MainNotions.StandardLatticesGL3 Formalism.L2.Indef.Tree.ArchimedeanLeafBounds.Cuts
 open Formalism.DivisionValues (vw)
@@ -26,8 +64,8 @@ open scoped nonZeroDivisors
 
 noncomputable section
 
-set_option synthInstance.maxHeartbeats 400000
-set_option maxHeartbeats 1000000
+
+
 
 namespace GlobalTheory.SkewLevel
 
@@ -79,6 +117,7 @@ theorem kill_of_inId (hψ : IsStdChar D ψ (-1)) (hcc : D.host.ccK = ⊤) (hLS :
     choose c hc using fun k => toEAf_surj (D := D) (r k : EAf D)
     refine ⟨c, fun k => hc k ▸ (r k).2, ?_⟩
     have h3 := congrArg (Formalism.L2.Herm.intAf D.host.F D.host.E).subtype hr
+
     rw [map_sum] at h3
     refine h3.symm.trans (Finset.sum_congr rfl fun k _ => ?_)
     rw [map_mul, hc, mul_comm]
@@ -99,6 +138,7 @@ theorem kill_of_inId (hψ : IsStdChar D ψ (-1)) (hcc : D.host.ccK = ⊤) (hLS :
       exact Finset.sum_congr rfl fun k _ => mul_left_comm _ _ _
   have e2 : t = ∑ k, incA D (f k : D.host.E) • u k := half_ext hinf ht
     (fun i j => by rw [hent, ← mul_assoc, hee]) fun i j => by
+
       rw [hent, ← ht i j, RingHom.map_mul, RingHom.map_mul, hc2, map_sum]
       simp only [RingHom.map_mul]
   rw [e2]
@@ -148,7 +188,7 @@ theorem inId_of_kill (hψ : IsStdChar D ψ (-1)) (hcc : D.host.ccK = ⊤) (gS : 
         rfl
       rw [e1, RingHom.map_mul (incA D), mul_assoc]
       exact inId_mul (mem_conj_smul.1 hm') (h1 s hs)
-    · rw [star_add, RingHom.map_add, add_mul, RingHom.map_add]
+    · rw [star_add, RingHom.map_add (f := _), add_mul, RingHom.map_add (f := _)]
       exact inId_add hx hy
   obtain ⟨b, hb, a, ha, hab⟩ := Ideal.isCoprime_iff_exists.1 (isCoprime_conj he.1 c)
   have h3 := h2 _ (FractionalIdeal.mem_coeIdeal_of_mem _ (Ideal.smul_mem_pointwise_smul D.host.conj _ _ ha))
@@ -157,9 +197,9 @@ theorem inId_of_kill (hψ : IsStdChar D ψ (-1)) (hcc : D.host.ccK = ⊤) (gS : 
     rw [← star_eq, star_star]
   have e3 : t i j = incA D (b : D.host.E) * t i j + incA D (a : D.host.E) * t i j := by
     have : (b : D.host.E) + (a : D.host.E) = 1 := by exact_mod_cast congrArg (algebraMap (𝓞 D.host.E) D.host.E) hab
-    rw [← add_mul, ← RingHom.map_add, this, RingHom.map_one, one_mul]
+    rw [← add_mul, ← RingHom.map_add (f := _), this, RingHom.map_one, one_mul]
   rw [e2] at h3
-  rw [e3, RingHom.map_add]
+  rw [e3, RingHom.map_add (f := _)]
   exact inId_add (inId_mul hb ((half_mem_iff hcc hLS hLT hS hT he _ ht).1 htΛ i j)) h3
 
 theorem heisO_eq_half (hψ : IsStdChar D ψ (-1)) (hcc : D.host.ccK = ⊤) (gS : S.gram = 1) (hLS : IsStdLat LS)
@@ -194,7 +234,7 @@ theorem heisO_eq_half (hψ : IsStdChar D ψ (-1)) (hcc : D.host.ccK = ⊤) (gS :
       exact kill hψ hS hT hy (GlobalTheory.PlaceModelSum.idem_smul_latO hee ((finRat_mem_iff hψ hcc gS hLS hLT hS hT _).2 hγ)) hb'
     | zero => rw [map_zero, smul_zero, smul_zero, GlobalTheory.PlaceModel.symplO_zero_left, AddChar.map_zero_eq_one]
     | add x y _ _ hx hy =>
-      rw [map_add, smul_add, smul_add, GlobalTheory.PlaceModel.symplO_add_left, AddChar.map_add_eq_mul, hx, hy, one_mul]
+      rw [map_add (f := _), smul_add, smul_add, GlobalTheory.PlaceModel.symplO_add_left, AddChar.map_add_eq_mul, hx, hy, one_mul]
     | neg x _ hx =>
       have h := AddChar.map_zero_eq_one ψ
       rw [← GlobalTheory.PlaceModel.symplO_zero_left S T (GlobalTheory.VacUnique.finRat S T (2 • z)),

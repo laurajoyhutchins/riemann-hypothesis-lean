@@ -1,6 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.NonemptyEquivMultiProdOne
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.InductionContragredient
+module
+
+public import Mathlib.NumberTheory.LocalField.Basic
+public import Mathlib.Topology.Compactification.OnePoint.Basic
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.EmbedsLevelZeroDepthZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -16,15 +64,13 @@ def Stable (S : Submodule ℂ (OnePoint k → ℂ)) : Prop :=
   ∀ F ∈ S, ∀ F' : OnePoint k → ℂ, F' ∞ = F ((0 : k) : OnePoint k) → F' ((0 : k) : OnePoint k) = F ∞ →
     (∀ x : k, x ≠ 0 → F' x = F ((x⁻¹ : k) : OnePoint k)) → F' ∈ S
 
-open Classical in
 
+open Classical in
 def ballFn (a r : k) : OnePoint k → ℂ := fun x =>
   x.elim 0 fun y => if valuation k (y - a) ≤ valuation k r then 1 else 0
 
-@[simp] theorem ballFn_infty (a r : k) : ballFn a r ∞ = 0 := rfl
 
 open Classical in
-
 theorem ballFn_coe (a r x : k) :
     ballFn a r x = if valuation k (x - a) ≤ valuation k r then 1 else 0 := rfl
 
@@ -58,7 +104,7 @@ theorem exists_vball_subset {U : Set k} (hU : U ∈ nhds (0 : k)) :
     ∃ r : k, r ≠ 0 ∧ ∀ x, valuation k x ≤ valuation k r → x ∈ U := by
   obtain ⟨γ, hγ⟩ := (IsValuativeTopology.mem_nhds_zero_iff U).1 hU
   obtain ⟨s, hs⟩ := valuation_surjective (γ : ValueGroupWithZero k)
-  obtain ⟨ϖ, hϖ⟩ := exists_uniformizer k
+  obtain ⟨ϖ, hϖ⟩ := GlobalTheory.LocGL.exists_uniformizer k
   have h0 : s ≠ 0 := by rintro rfl; exact γ.ne_zero (by simpa using hs.symm)
   refine ⟨ϖ * s, mul_ne_zero ϖ.ne_zero h0, fun x hx => hγ (hx.trans_lt ?_)⟩
   rw [map_mul, hs, hϖ]
@@ -94,7 +140,7 @@ theorem exists_eq_sum_ballFn {r R : k} (hr : r ≠ 0) (hle : valuation k r ≤ v
     rwa [neg_zero, zero_add] at h4
   · rw [Finset.sum_image ho.injOn, Finset.sum_apply]
     induction x using OnePoint.rec with
-    | infty => simp [h0]
+    | infty => simp [ballFn, h0]
     | coe x =>
       by_cases hx : valuation k x ≤ valuation k R
       · simp only [Pi.smul_apply, ballFn_coe, key _ ⟨x, hx⟩, smul_eq_mul, mul_ite, mul_one, mul_zero,

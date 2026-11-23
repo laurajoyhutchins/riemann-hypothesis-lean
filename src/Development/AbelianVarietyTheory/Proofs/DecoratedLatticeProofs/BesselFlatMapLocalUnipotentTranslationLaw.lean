@@ -1,9 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.ExistsUnitarySupportedAtPlaceOfMulEqIdem
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.PlacesToAdeles
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.WeilCharacterSplitPlaceExistsContinuousNontrivia
+module
+
+public import Development.AbelianVarietyTheory.Definitions.LatticeFrames.ExistsUnitarySupportedAtPlaceOfMulEqIdem
+public import Development.AbelianVarietyTheory.Definitions.LatticeFrames.PlacesToAdeles
+import Development.AbelianVarietyTheory.Counterexamples.HeightSurvey.StarPurelyImaginaryEqNeg
 import Development.AbelianVarietyTheory.Definitions.Foundations.SimpleSumRowCol
-import Formalism.LocalToGlobal.IndefiniteReal.DatumLemmas
+import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.WittHyperbolicAnisotropicCommuteLevi
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.WeilCharacterSplitPlaceExistsContinuousNontrivia
+public import Formalism.LocalToGlobal.IndefiniteReal.DatumLemmas
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.L2.Theta Formalism.IndefR.Datum MeasureTheory Matrix ValuativeRel GlobalTheory.MixModel GlobalTheory.MixPer GlobalTheory.Unf GlobalTheory.SplitWeil GlobalTheory.RootEx GlobalTheory.LocMod
 
@@ -149,6 +191,7 @@ theorem exists_lift {k : Type} [Field k] {ρ : ℕ} (f : k →+ AE D) (α : Matr
     rw [Matrix.isUnit_iff_isUnit_det, Matrix.det_of_upperTriangular (fun i j h => u0 i j h)]
     simp [u1]
   refine ⟨hU.unit, fun i j => ⟨u0 i j, u1 i⟩, fun _ _ => rfl, ?_⟩
+
   simp only [upSum, map_sum]
   refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
   split_ifs with h
@@ -183,7 +226,7 @@ theorem smul_three {A : Type} [CommRing A] {ρ m : ℕ} (η : A) (x y : Matrix (
 theorem suppAt_levi {e : AE D} {S S₀ : HSp D} {ρ : ℕ} (d : HypDec S S₀ ρ) (a : GL (Fin ρ) (AE D))
     (h : (1 - (e + cA D e)) • a.val = (1 - (e + cA D e)) • 1) : SuppAt e S (d.levi a) := by
   have hc : cA D (1 - (e + cA D e)) = 1 - (e + cA D e) := by
-    rw [map_sub, map_add, map_one, GlobalTheory.DualPairCheck.cA_cA, add_comm]
+    rw [map_sub, map_add (f := _), map_one, GlobalTheory.DualPairCheck.cA_cA, add_comm]
   generalize hη : 1 - (e + cA D e) = η at h hc
   have h2 : η • adj (a⁻¹).val = η • 1 := by
     rw [← hc, ← adj_smul, smul_inv_one η a h, adj_smul, adj_one]
@@ -290,14 +333,14 @@ theorem exists_levi {ψ : AddChar (AF D.host.F) ℂ} {ψk : AddChar k Circle} (h
     (fun i => by simp [hδ, h1])
   have eb' : ∀ i j, b.val i j = (1 : Mx D ρ ρ) i j + cA D (p.ι ((δᵀ - 1) i j)) := eb
   have a1 : a.val.map p.π = α := by
-    ext i j; rw [Matrix.map_apply, ea, map_add, one_map, p.π_ι, Matrix.sub_apply, add_sub_cancel]
+    ext i j; rw [Matrix.map_apply, ea, map_add (f := _), one_map, p.π_ι, Matrix.sub_apply, add_sub_cancel]
   have a2 : a.val.map (p.π.comp (cA D)) = 1 := by
-    ext i j; rw [Matrix.map_apply, ea, map_add, one_map, RingHom.comp_apply, π_c_ι, add_zero]
+    ext i j; rw [Matrix.map_apply, ea, map_add (f := _), one_map, RingHom.comp_apply, π_c_ι, add_zero]
   have b1 : b.val.map p.π = 1 := by
-    ext i j; rw [Matrix.map_apply, eb', map_add, one_map, π_c_ι, add_zero]
+    ext i j; rw [Matrix.map_apply, eb', map_add (f := _), one_map, π_c_ι, add_zero]
   have b2 : b.val.map (p.π.comp (cA D)) = δᵀ := by
     ext i j
-    rw [Matrix.map_apply, eb', map_add, one_map, RingHom.comp_apply, GlobalTheory.DualPairCheck.cA_cA, p.π_ι, Matrix.sub_apply,
+    rw [Matrix.map_apply, eb', map_add (f := _), one_map, RingHom.comp_apply, GlobalTheory.DualPairCheck.cA_cA, p.π_ι, Matrix.sub_apply,
       add_sub_cancel]
   have hm : a * b⁻¹ ∈ UX D ρ := mul_mem ha (inv_mem hb')
   refine ⟨a * b⁻¹, hm, ⟨suppAt_levi _ _ ?_, ?_⟩, ?_⟩

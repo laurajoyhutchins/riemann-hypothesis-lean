@@ -1,9 +1,56 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.MetricPeriods.GroupDict
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsSheetCover
-import GroundTheory.HeightsAndTheta.Heights.FiniteCovolume.StatementsProved
-import GroundTheory.HeightsAndTheta.Heights.CountingLowerBound.Assembly
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.IntEmbInjective
+module
+
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.IntEmbInjective
+public import GroundTheory.AutomorphicForms.HermitianOrthogonal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsCompletedStrictHens
+
+@[expose] public section
+
 open NumberField Matrix MeasureTheory Filter Topology GlobalTheory.CompanionTheory.Ar GlobalTheory.CompanionTheory.Ar.Cusp ReciprocityTheory.ChartRestriction.G.Geo ReciprocityTheory.ChartRestriction.G.Geo.Tor GroundTheory.Heights₂.Heights.FiniteCovolume GroundTheory.Automorphic GlobalTheory.CompanionTheory.Ar.Cusp.Dict
 open scoped ENNReal InnerProductSpace
 open scoped ComplexOrder
@@ -41,12 +88,12 @@ theorem conj_eq_complexConj (x : E) : conj (maximalRealSubfield E) E x = IsCMFie
     intro a ha
     obtain ⟨b, rfl⟩ := conj_eq_self_iff.1 ha
     exact (IsCMField.complexConj_eq_self_iff E _).2 b.2
-  have ha : t (x + y) = x + y := fix _ (by rw [map_add, hyy, ← hy, add_comm])
+  have ha : t (x + y) = x + y := fix _ (by rw [map_add (f := _), hyy, ← hy, add_comm])
   have hb : t (x * y) = x * y := fix _ (by rw [map_mul, hyy, ← hy, mul_comm])
   have hz : (t x - x) * (t x - y) = 0 := by
     have h0 : x * x - (x + y) * x + x * y = 0 := by ring
     have h1 := congrArg t h0
-    rw [map_add, map_sub, map_mul, map_mul, ha, hb, map_zero] at h1
+    rw [map_add (f := _), map_sub, map_mul, map_mul, ha, hb, map_zero] at h1
     linear_combination h1
   rcases mul_eq_zero.1 hz with h | h
   · have hx : t x = x := sub_eq_zero.1 h
@@ -124,15 +171,17 @@ theorem gr_apply (τ : Ψ) (u w : Fin (j + j') → E) :
   have hB : C.h.toSesq u w = ∑ a, ∑ b, conjHom (maximalRealSubfield E) E (u a) * (w b *
       gram C.h.toSesq (Pi.basisFun E (Fin (j + j'))) a b) := by
     conv_lhs => rw [hu, hw]
+
     simp only [map_sum, LinearMap.sum_apply, LinearMap.map_smulₛₗ, LinearMap.smul_apply, smul_eq_mul,
-      RingHom.id_apply, GroundTheory.Automorphic.gram]
+    RingHom.id_apply, GroundTheory.Automorphic.gram]
     simp only [Finset.mul_sum]
     rw [Finset.sum_comm]
     refine Finset.sum_congr rfl fun a _ => Finset.sum_congr rfl fun b _ => ?_
     ring
   rw [hB]
+
   simp only [dotProduct, mulVec, map_sum, map_mul, embOf_conj, Finset.mul_sum, Pi.star_apply,
-    RCLike.star_def]
+  RCLike.star_def]
   refine Finset.sum_congr rfl fun a _ => Finset.sum_congr rfl fun b _ => ?_
   have hg : C.gr τ a b = embOf (F.σ τ) (gram C.h.toSesq (Pi.basisFun E (Fin (j + j'))) a b) := rfl
   rw [hg]
@@ -251,7 +300,7 @@ theorem perExt_single_tw (h : C.IsAdapted R A) (τ : Ψ) (v : Sg j j' → ℂ) :
     rw [hp, hq, ← mulVec_smul, ← mulVec_smul, ← mulVec_neg, ← mulVec_add]
     congr 1
     ext (i | i) <;> simp [tw]
-  rw [hl', hl', hv, hw, map_add, map_add, map_neg, smul_add]
+  rw [hl', hl', hv, hw, map_add (f := _), map_add (f := _), map_neg, smul_add]
   have e1 : Complex.I • l p = -l (Complex.I • p) := by rw [h1, hII]
   have e2 : Complex.I • l q = l (Complex.I • q) := by
     rw [h2, smul_neg, hII, neg_neg]
@@ -263,6 +312,7 @@ theorem perExt_tw (h : C.IsAdapted R A) (y : Ψ → Fin (j + j') → ℂ) :
   have hs : ∀ u : Ψ → Fin (j + j') → ℂ, u = ∑ τ, Pi.single τ (u τ) := fun u => (Finset.univ_sum_single u).symm
   conv_lhs => rw [hs (fun τ => A τ *ᵥ tw (C.cinv (A τ) τ *ᵥ y τ))]
   conv_rhs => rw [hs y]
+
   rw [map_sum, map_sum, Finset.smul_sum]
   refine Finset.sum_congr rfl fun τ _ => ?_
   rw [perExt_single_tw h]

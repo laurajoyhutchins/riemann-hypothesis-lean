@@ -1,8 +1,59 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Jets.CmLatticeCommutatorPairingPowEqOneOfGoodLift
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.UwEllipticFlow
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.RingHomPointBijective
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.CpTransportedTaylorSeriesInChartRingHomLaws
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Jets.CmLatticeCommutatorPairingPowEqOneOfGoodLift
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.RingHomPointBijective
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.UwEllipticFlow
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Connected.Separation
+public import Mathlib.Topology.MetricSpace.Contracting
+import Mathlib.Topology.MetricSpace.Ultra.TotallySeparated
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open PowerSeries GlobalTheory.MomOne
 open scoped ComplexConjugate BigOperators Topology
@@ -215,7 +266,7 @@ lemma ev_cub_small (h : M.Ok) {p : ℂ} (hp : M.Small p) :
     have hY := one_lt_norm_y_of_small_of_not_mem h hp hL
     have hy' : M.ι (M.y p) ≠ 0 := fun e => by rw [e, norm_zero] at hY; linarith
     have E := congrArg M.ι (UW.equation M h hL)
-    simp only [map_add, map_mul, map_pow, RingEquiv.apply_symm_apply] at E
+    simp only [map_add (f := _), map_mul, map_pow, RingEquiv.apply_symm_apply] at E
     simp only [map_div₀, map_neg, map_one]
     field_simp
     linear_combination (-1 : ℂ_[q]) * E
@@ -384,7 +435,10 @@ theorem at_exists_unique : ∀ (q : ℕ) [Fact q.Prime] (M : Mdl q) (ω : ℂ_[q
   obtain ⟨h, hℓ0, hbd, hc1⟩ := hch
   have hu0 : M.u 0 = 0 := by unfold Mdl.u; simp [zero_mem]
   have hg0 : constantCoeff (hat M.ι (C ω * logS) M.u) = 0 := by
-    rw [(TaylorRead.hat_laws q M.ι _ hℓ0).2.2.2.1 M.u, hu0, map_zero]
+    unfold hat
+    apply PowerSeries.constantCoeff_subst_eq_zero hℓ0
+    rw [← coeff_zero_eq_constantCoeff_apply, coeff_map]
+    simp [tay, hu0]
   have hev0 : ev (hat M.ι (C ω * logS) M.u) 0 = 0 := by rw [ev_zero, hg0]
   have hAt : ∀ ζ p, M.At ω ζ p ↔ M.Small p ∧ ‖ζ - 1‖ < 1 ∧
       ev (hat M.ι (C ω * logS) M.u) (ζ - 1) = M.ι (M.u p) := fun ζ p => Iff.rfl

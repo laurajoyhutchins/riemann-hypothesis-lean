@@ -1,4 +1,42 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.HolomorphicFamilies.UnitHmD
+module
+
+public import Formalism.LocalToGlobal.ProjectiveLattices.PetersonNormSubspace
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -34,40 +72,5 @@ theorem relab_rt (c : Coeff l) (σ : c.F →+* ℂ) (hσ : GoodEmb c σ) (τ : E
     rw [hy, hg, h]
   · have hy : embF c τ (H.rt : E) = -(IntermediateField.inclusion c.le) (baseKA l).ρ := Subtype.ext h
     rw [hy, map_neg, hg, h]
-
-theorem letter_sum (c : Coeff l) (σ : c.F →+* ℂ) (hσ : GoodEmb c σ) (Dw : Datum H) {g : ℕ}
-    (e : Fin g ≃ Σ τ : E →+* ℂ, Fin (Dw.mult τ)) (Ψ : Finset (E →+* ℂ))
-    (hΨ : ∀ τ : E →+* ℂ, τ ∈ Ψ ↔ τ (H.rt : E) = H.rt0)
-    (hcm : ∀ τ : E →+* ℂ, τ ∈ Ψ ↔ conjEmb τ ∉ Ψ) (G : (E →+* ℂ) → ℕ → ℝ) :
-    ∑ j : Fin g, G (relab c σ (e j).1) (e j).2 =
-      ∑ τ ∈ Ψ, ((∑ n ∈ Finset.range Dw.p, G τ n) + ∑ n ∈ Finset.range Dw.q, G (conjEmb τ) n) := by
-  classical
-  have hrel : ∀ τ : E →+* ℂ, Dw.mult τ = if relab c σ τ ∈ Ψ then Dw.p else Dw.q := by
-    intro τ
-    unfold Datum.mult
-    by_cases h : τ (H.rt : E) = H.rt0
-    · rw [if_pos h, if_pos ((hΨ _).mpr ((relab_rt c σ hσ τ).mpr h))]
-    · rw [if_neg h, if_neg (fun h' => h ((relab_rt c σ hσ τ).mp ((hΨ _).mp h')))]
-  have hinv : ∀ τ : E →+* ℂ, conjEmb (conjEmb τ) = τ := fun τ => RingHom.ext fun x => by simp [conjEmb]
-  rw [Equiv.sum_comp e (fun x => G (relab c σ x.1) x.2), Fintype.sum_sigma]
-  rw [Finset.sum_congr rfl (fun τ _ => Fin.sum_univ_eq_sum_range (G (relab c σ τ)) (Dw.mult τ))]
-  rw [Fintype.sum_bijective (relab c σ) (relab_injective c σ).bijective_of_finite
-      (fun τ => ∑ n ∈ Finset.range (Dw.mult τ), G (relab c σ τ) n)
-      (fun τ' => ∑ n ∈ Finset.range (if τ' ∈ Ψ then Dw.p else Dw.q), G τ' n)
-      (fun τ => by rw [hrel τ])]
-  rw [← Finset.sum_add_sum_compl Ψ, Finset.sum_add_distrib]
-  congr 1
-  · exact Finset.sum_congr rfl (fun τ hτ => by rw [if_pos hτ])
-  · refine Finset.sum_nbij' conjEmb conjEmb ?_ ?_ ?_ ?_ ?_
-    · intro a ha
-      exact (hcm (conjEmb a)).mpr (by rw [hinv]; exact Finset.mem_compl.mp ha)
-    · intro a ha
-      exact Finset.mem_compl.mpr ((hcm a).mp ha)
-    · intro a _
-      exact hinv a
-    · intro a _
-      exact hinv a
-    · intro a ha
-      rw [if_neg (Finset.mem_compl.mp ha), hinv]
 
 end ReciprocityTheory.ChartRestriction.G.PullbackSections.UH

@@ -1,6 +1,48 @@
-import Mathlib
-import GroundTheory.ArithmeticGeometry.SchemeCohomology.CurvePlaces
-import GroundTheory.FunctionField.Divisor
+module
+
+public import GroundTheory.ArithmeticGeometry.SchemeCohomology.CurvePlaces
+public import GroundTheory.FunctionField.Divisor
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 open CategoryTheory AlgebraicGeometry Order Topology Module
@@ -18,23 +60,6 @@ variable {k : Type u} [Field k] {X : Scheme.{u}} [X.Over (Spec (.of k))] [IsInte
 
 namespace PrimeDivisor
 
-omit [IsLocallyNoetherian X] [IsNormalScheme X] in
-lemma algebraMap_stalk_injective (x : X) :
-    Function.Injective (algebraMap (X.presheaf.stalk x) X.functionField) :=
-  IsFractionRing.injective _ _
-
-noncomputable def stalkAlgEquiv (Z : PrimeDivisor X) :
-    X.presheaf.stalk Z.point ≃ₐ[k] (Z.toPlace (k := k)).ring :=
-  AlgEquiv.ofBijective
-    { toRingHom := (Z.stalkToPlaceRing (k := k)).hom
-      commutes' := fun c => by
-        apply Subtype.val_injective
-        change algebraMap (X.presheaf.stalk Z.point) X.functionField
-          (algebraMap k (X.presheaf.stalk Z.point) c) = algebraMap k X.functionField c
-        rw [← IsScalarTower.algebraMap_apply] }
-    ⟨fun a b h => algebraMap_stalk_injective Z.point (congrArg Subtype.val h), fun r => by
-      obtain ⟨a, ha⟩ := (Z.valuation_le_one_iff r).mp ((Z.mem_toPlace_ring r).mp r.2)
-      exact ⟨a, Subtype.val_injective ha⟩⟩
 
 noncomputable def degree (Z : PrimeDivisor X) : ℕ :=
   finrank k (IsLocalRing.ResidueField (X.presheaf.stalk Z.point))
@@ -50,26 +75,6 @@ noncomputable def divisorEquiv (hX : topologicalKrullDim X ≤ 1) :
     WeilDivisor X ≃+ Divisor k X.functionField :=
   Finsupp.domCongr (placeEquiv hX)
 
-@[simp]
-lemma divisorEquiv_apply_toPlace (hX : topologicalKrullDim X ≤ 1) (D : WeilDivisor X)
-    (Z : PrimeDivisor X) : divisorEquiv (k := k) hX D Z.toPlace = D Z := by
-  change Finsupp.equivMapDomain (placeEquiv hX) D (placeEquiv (k := k) hX Z) = D Z
-  rw [Finsupp.equivMapDomain_apply, Equiv.symm_apply_apply]
-
 variable [IsFunctionField k X.functionField]
-
-theorem mem_L_divisorEquiv (hX : topologicalKrullDim X ≤ 1) (D : WeilDivisor X)
-    (f : X.functionField) :
-    f ∈ Divisor.L (divisorEquiv (k := k) hX D) ↔
-      ∀ Z : PrimeDivisor X, Z.valuation f ≤ WithZero.exp (D Z) := by
-  rw [Divisor.mem_L]
-  constructor
-  · intro h Z
-    have := h Z.toPlace
-    rwa [PrimeDivisor.toPlace_valuation, divisorEquiv_apply_toPlace] at this
-  · intro h v
-    obtain ⟨Z, rfl⟩ := PrimeDivisor.toPlace_surjective (k := k) hX v
-    rw [PrimeDivisor.toPlace_valuation, divisorEquiv_apply_toPlace]
-    exact h Z
 
 end GroundTheory.Arith.SchemeCoh

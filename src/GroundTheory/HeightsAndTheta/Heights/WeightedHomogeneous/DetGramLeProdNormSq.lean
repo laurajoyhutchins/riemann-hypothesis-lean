@@ -1,5 +1,51 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.WeightedHomogeneous.Statements
+module
+
+public import Mathlib.Analysis.InnerProductSpace.GramMatrix
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Analysis.InnerProductSpace.GramSchmidtOrtho
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -24,59 +70,12 @@ theorem det_gram_le_prod_norm_sq {V : Type*} [NormedAddCommGroup V] [InnerProduc
     ext i j
     simp [Module.Basis.toMatrix_apply]
   rw [hM, ← Module.Basis.det_apply, hdet, star_trivial, ← sq, ← Finset.prod_pow]
-  refine Finset.prod_le_prod (fun i _ => sq_nonneg _) (fun i _ => ?_)
+  refine Finset.prod_le_prod₀ (fun i _ => sq_nonneg _) (fun i _ => ?_)
   have h1 := abs_real_inner_le_norm (gb i) (w' i)
   rw [gb.orthonormal.1 i, one_mul] at h1
   have h2 : ‖w' i‖ = ‖w i‖ := rfl
   rw [← h2, ← sq_abs]
   exact pow_le_pow_left₀ (abs_nonneg _) h1 2
-
-theorem gram_comb {V : Type*} [NormedAddCommGroup V] [InnerProductSpace ℝ V] {r : ℕ}
-    (M : Matrix (Fin r) (Fin r) ℝ) (b : Fin r → V) :
-    Matrix.gram ℝ (fun i => ∑ j, M i j • b j) = M * Matrix.gram ℝ b * M.transpose := by
-  ext i k
-  simp only [Matrix.gram_apply, Matrix.mul_apply, Matrix.transpose_apply, sum_inner, inner_sum,
-    real_inner_smul_left, real_inner_smul_right, Finset.sum_mul]
-  exact Finset.sum_congr rfl fun _ _ => Finset.sum_congr rfl fun _ _ => by ring
-
-theorem proof : HadamardGramBound.Statement := by
-  intro V _ _ r v b hv hn hb
-  choose M hM using fun i => (Submodule.mem_span_range_iff_exists_fun ℤ).mp (hb i)
-  set N : Matrix (Fin r) (Fin r) ℝ := (Matrix.of M).map (Int.cast : ℤ → ℝ) with hNdef
-  have hvN : v = fun i => ∑ j, N i j • b j := by
-    funext i
-    rw [← hM i]
-    refine Finset.sum_congr rfl fun j _ => ?_
-    simp [N, Int.cast_smul_eq_zsmul]
-  have hG : Matrix.gram ℝ v = N * Matrix.gram ℝ b * N.transpose := by
-    rw [hvN]
-    exact gram_comb N b
-  have hdet : (Matrix.gram ℝ v).det = N.det ^ 2 * (Matrix.gram ℝ b).det := by
-    rw [hG, Matrix.det_mul, Matrix.det_mul, Matrix.det_transpose]
-    ring
-  have hvpos : 0 < (Matrix.gram ℝ v).det := (Matrix.posDef_gram_of_linearIndependent hv).det_pos
-  have hbnn : 0 ≤ (Matrix.gram ℝ b).det := (Matrix.posSemidef_gram ℝ b).det_nonneg
-  have hNdet : N.det = (((Matrix.of M).det : ℤ) : ℝ) := by
-    rw [hNdef]
-    exact ((Int.castRingHom ℝ).map_det (Matrix.of M)).symm
-  have hN0 : N.det ≠ 0 := by
-    intro h
-    rw [hdet, h] at hvpos
-    simp at hvpos
-  have hN1 : 1 ≤ N.det ^ 2 := by
-    rw [hNdet] at hN0 ⊢
-    have hd : (Matrix.of M).det ≠ 0 := by exact_mod_cast hN0
-    have : (1 : ℤ) ≤ (Matrix.of M).det ^ 2 := by
-      rcases lt_or_gt_of_ne hd with h | h <;> nlinarith
-    exact_mod_cast this
-  have hHad := det_gram_le_prod_norm_sq v hv
-  have hprod : ∏ i, ‖v i‖ ^ 2 ≤ 1 :=
-    Finset.prod_le_one (fun i _ => sq_nonneg _) fun i _ => pow_le_one₀ (norm_nonneg _) (hn i)
-  change 0 < (Matrix.gram ℝ b).det ∧ (Matrix.gram ℝ b).det ≤ 1
-  refine ⟨lt_of_le_of_ne hbnn fun h => ?_, ?_⟩
-  · rw [hdet, ← h] at hvpos
-    simp at hvpos
-  · nlinarith
 
 end HadamardGramBound
 

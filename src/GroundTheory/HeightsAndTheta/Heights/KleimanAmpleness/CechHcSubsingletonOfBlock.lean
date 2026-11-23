@@ -1,6 +1,48 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.ImportsMoreFurther
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.IsMultiHomogIdealSpanSingleton
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.Objects
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.KleimanNefness.AmpleSt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.Kleiman.SectionsOverLocalization
@@ -33,8 +75,8 @@ section Vanish
 variable {F : Type} [Field F] {K : Type} [Fintype K] [LinearOrder K] {ι : K → Type} [∀ k, Fintype (ι k)]
   [∀ k, LinearOrder (ι k)]
 
-omit [Fintype K] [LinearOrder K] [∀ k, Fintype (ι k)] [∀ k, LinearOrder (ι k)] in
 
+omit [Fintype K] [LinearOrder K] [∀ k, Fintype (ι k)] [∀ k, LinearOrder (ι k)] in
 theorem subsingleton_loc_of_block {V : Ideal (MvPolynomial (Σ k, ι k) F)} {k : K}
     (hk : ∀ i, (X ⟨k, i⟩ : MvPolynomial (Σ k, ι k) F) ∈ V) (I : ∀ k, Finset (ι k)) (hI : (I k).Nonempty) :
     Subsingleton (LocalizedModule (cellMon F I) (MvPolynomial (Σ k, ι k) F ⧸ V)) := by
@@ -68,30 +110,6 @@ theorem cechHc_subsingleton_of_block {V : Ideal (MvPolynomial (Σ k, ι k) F)} {
   rw [Subsingleton.elim x y]
 
 end Vanish
-
-theorem EulerVar.hyps :
-    let v : (Σ _ : Unit, Fin 1) := ⟨(), 0⟩
-    let V : Ideal (MvPolynomial (Σ _ : Unit, Fin 1) ℚ) := Ideal.span {X v}
-    NumbersDVR.IsMultiHomogIdeal V ∧
-      (∀ (m : Unit → ℤ) (i : ℕ), FiniteDimensional ℚ (cechHc (fun _ : Unit => Fin 1) (quotPart ℚ V) m i)) ∧
-      (∀ (m : Unit → ℤ) (i : ℕ), FiniteDimensional ℚ
-        (cechHc (fun _ : Unit => Fin 1) (quotPart ℚ (V.colon (Ideal.span {(X v : MvPolynomial (Σ _ : Unit, Fin 1) ℚ)}))) m i)) ∧
-      (∀ (m : Unit → ℤ) (i : ℕ), FiniteDimensional ℚ
-        (cechHc (fun _ : Unit => Fin 1) (quotPart ℚ (V ⊔ Ideal.span {(X v : MvPolynomial (Σ _ : Unit, Fin 1) ℚ)})) m i)) := by
-  intro v V
-  have hX : (X v : MvPolynomial (Σ _ : Unit, Fin 1) ℚ) ∈ V := Ideal.subset_span rfl
-  have hfin : ∀ W : Ideal (MvPolynomial (Σ _ : Unit, Fin 1) ℚ), (X v : MvPolynomial _ ℚ) ∈ W →
-      ∀ (m : Unit → ℤ) (i : ℕ), FiniteDimensional ℚ (cechHc (fun _ : Unit => Fin 1) (quotPart ℚ W) m i) := by
-    intro W hW m i
-    have := cechHc_subsingleton_of_block (ι := fun _ : Unit => Fin 1) (V := W) (k := ())
-      (fun j : Fin 1 => by rw [Subsingleton.elim j 0]; exact hW) m i
-    have : Finite (cechHc (fun _ : Unit => Fin 1) (quotPart ℚ W) m i) := Finite.of_subsingleton
-    exact Module.Finite.of_finite
-  refine ⟨NumbersDVR.isMultiHomogIdeal_span_singleton
-    (isWeightedHomogeneous_X ℚ (NumbersDVR.blockWeight (fun _ : Unit => Fin 1)) v), hfin V hX, hfin _ ?_,
-    hfin _ (Ideal.mem_sup_left hX)⟩
-  rw [Submodule.mem_colon_span_singleton, smul_eq_mul]
-  exact V.mul_mem_left _ hX
 
 end
 

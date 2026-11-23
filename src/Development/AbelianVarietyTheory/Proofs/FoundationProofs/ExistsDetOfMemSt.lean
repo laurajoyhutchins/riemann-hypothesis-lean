@@ -1,7 +1,45 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Foundations.ThetaSeriesTies
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.TwistTrivialOnRational
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LevelGroupLatticeCongruence
+module
+
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.TwistTrivialOnRational
+public import Development.AbelianVarietyTheory.Definitions.ExistenceOfLattices.Hat1
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LevelGroupLatticeCongruence
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.AdelicElementLatticeFullAndCompletion
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -38,8 +76,8 @@ open GlobalTheory.AdLat
 
 variable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E]
 
-variable (F E) in
 
+variable (F E) in
 def swapF : RA F E →+* E ⊗[F] Formalism.L2.Herm.Af F :=
   (Algebra.TensorProduct.comm F (FiniteAdeleRing (𝓞 F) F) E).toAlgHom.toRingHom
 
@@ -58,7 +96,7 @@ theorem exists_res_eq_zero {I : Ideal (𝓞 E)} {PP : Pl E} (hI : I ≤ PP.asIde
   | add x y _ _ hx hy =>
     obtain ⟨s, hs, hs'⟩ := hx
     obtain ⟨t, ht, ht'⟩ := hy
-    exact ⟨s + t, by rw [RingHom.map_add, ← hs, ← ht]; rfl, by rw [RingHom.map_add, hs', ht', add_zero]⟩
+    exact ⟨s + t, by rw [RingHom.map_add (f := _), ← hs, ← ht]; rfl, by rw [RingHom.map_add (f := _), hs', ht', add_zero]⟩
   | neg x _ hx =>
     obtain ⟨s, hs, hs'⟩ := hx
     exact ⟨-s, by rw [RingHom.map_neg, ← hs]; rfl, by rw [RingHom.map_neg, hs', neg_zero]⟩
@@ -92,7 +130,7 @@ theorem det_eq_one_of_lift {n : ℕ} (L : Submodule (𝓞 E) (Fin n → E)) (hfg
         AddSubgroup.subset_closure ⟨1, fun v => one_mem _, _, hr ▸ LinearMap.mem_range_self ι _, rfl⟩
       rw [map_smul, hfv, hfv, Matrix.mulVec_smul, ← Nat.cast_smul_eq_nsmul (RA F E), ← map_natCast ρ] at e
       have e' : (ρ c • k) *ᵥ fv F (ι a) - fv F (ι (f a)) = -(ρ m • fv F (ι (f a))) - ρ (N : 𝓞 E) • w := by
-        have : ρ m = 1 - ρ c := by rw [← map_one ρ, ← hmc, map_add, add_sub_cancel_right]
+        have : ρ m = 1 - ρ c := by rw [← map_one ρ, ← hmc, map_add (f := _), add_sub_cancel_right]
         rw [← e, this, Matrix.smul_mulVec, sub_smul, one_smul]
         abel
       rw [e']
@@ -109,7 +147,7 @@ theorem det_eq_one_of_lift {n : ℕ} (L : Submodule (𝓞 E) (Fin n → E)) (hfg
     rw [ht, Matrix.det_smul, RingHom.map_sub, RingHom.map_mul, RingHom.map_pow, hρ, hs, Fintype.card_fin]
     rfl
   have h4 : Ideal.Quotient.mk PP.asIdeal c = 1 := by
-    rw [← map_one (Ideal.Quotient.mk PP.asIdeal), ← hmc, map_add, Ideal.Quotient.eq_zero_iff_mem.2 (hle hm), zero_add]
+    rw [← map_one (Ideal.Quotient.mk PP.asIdeal), ← hmc, map_add (f := _), Ideal.Quotient.eq_zero_iff_mem.2 (hle hm), zero_add]
   rw [e, RingHom.map_sub, RingHom.map_mul, RingHom.map_pow, resS_oToS, resS_oToS, hdet PP hP, h4, one_pow, one_mul,
     sub_eq_zero] at ht0
   rw [← Ideal.Quotient.eq, ← ht0, map_one]

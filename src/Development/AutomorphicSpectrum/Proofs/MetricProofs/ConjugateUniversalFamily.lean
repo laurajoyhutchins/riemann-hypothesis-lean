@@ -1,8 +1,51 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.MetricPeriods.GroupDict
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsSheetCover
-import GroundTheory.HeightsAndTheta.Heights.FiniteCovolume.StatementsProved
-import GroundTheory.HeightsAndTheta.Heights.CountingLowerBound.Assembly
+module
+
+public import Development.AutomorphicSpectrum.Definitions.MetricPeriods.IsFundSet
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import GroundTheory.HeightsAndTheta.Heights.FiniteCovolume.PUnipotentModulusMatrix
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsCompletedStrictHens
+
+@[expose] public section
+
 open NumberField Matrix MeasureTheory Filter Topology GlobalTheory.CompanionTheory.Ar GlobalTheory.CompanionTheory.Ar.Cusp ReciprocityTheory.ChartRestriction.G.Geo ReciprocityTheory.ChartRestriction.G.Geo.Tor GroundTheory.Heights₂.Heights.FiniteCovolume
 open scoped ENNReal InnerProductSpace
 
@@ -15,7 +58,7 @@ open scoped ComplexOrder
 def conjEnd (g : ℕ) : Module.End ℂ (Fin g → ℂ) →+* Module.End ℂ (Fin g → ℂ) where
   toFun f :=
     { toFun := fun x => star (f (star x))
-      map_add' := fun x y => by simp only [star_add, map_add]
+      map_add' := fun x y => by simp only [star_add, map_add (f := _)]
       map_smul' := fun c x => by simp only [star_smul, map_smul, star_star, RingHom.id_apply] }
   map_one' := by ext x; simp
   map_mul' f f' := by ext x; simp
@@ -51,7 +94,9 @@ theorem finrank_eigSp_conj {g : ℕ} {O : Type} [CommRing O] (ρ : O →+* Modul
       left_inv := fun x => Subtype.ext (star_star _)
       right_inv := fun y => Subtype.ext (star_star _)
       map_add' := fun x y => Subtype.ext (star_add _ _) }
-  have hr := rank_eq_of_equiv_equiv (R := ℂ) (R' := ℂ) (starRingEnd ℂ) j
+  set_option synthInstance.maxHeartbeats 400000 in
+  have hr := rank_eq_of_equiv_equiv (R := ℂ) (R' := ℂ)
+    (M := eigSp ((conjEnd g).comp ρ) σ) (M₁ := eigSp ρ ((starRingEnd ℂ).comp σ)) (starRingEnd ℂ) j
     (Function.Involutive.bijective (f := starRingEnd ℂ) (fun z => by simp)) (fun r m => Subtype.ext (by simp [j, star_smul]))
   exact congrArg Cardinal.toNat hr
 
@@ -70,7 +115,7 @@ theorem differentiableOn_conj {n g : ℕ} {U U' : Set (Fin n → ℂ)} {f : (Fin
   obtain ⟨L, hL⟩ := hf (star t) (hU t ht)
   let L' : (Fin n → ℂ) →L[ℂ] (Fin g → ℂ) :=
     { toFun := fun v => star (L (star v))
-      map_add' := fun x y => by simp only [star_add, map_add]
+      map_add' := fun x y => by simp only [star_add, map_add (f := _)]
       map_smul' := fun c x => by simp only [star_smul, map_smul, star_star, RingHom.id_apply]
       cont := continuous_star.comp (L.continuous.comp continuous_star) }
   refine ⟨L', ?_⟩
@@ -158,7 +203,7 @@ theorem eqvBy_conj {R₁ R₂ R₁' R₂' : RiemLat E g Λ} {γ : Λ ≃ₗ[𝓞
   let e' : (Fin g → ℂ) ≃ₗ[ℂ] (Fin g → ℂ) :=
     { toFun := fun x => star (e (star x))
       invFun := fun x => star (e.symm (star x))
-      map_add' := fun x y => by simp only [star_add, map_add]
+      map_add' := fun x y => by simp only [star_add, map_add (f := _)]
       map_smul' := fun c x => by simp only [star_smul, map_smul, star_star, RingHom.id_apply]
       left_inv := fun x => by simp
       right_inv := fun x => by simp }
@@ -198,6 +243,7 @@ theorem one_sub_star (q : Ψ × Fin j × Fin j' ≃ Fin n) (t : Fin n → ℂ) (
       (1 - (ballMat q t τ)ᴴ * ballMat q t τ).map (starRingEnd ℂ) := by
   rw [ballMat_star]
   ext a b
+
   simp [Matrix.mul_apply, Matrix.one_apply, Matrix.sub_apply, Matrix.conjTranspose_apply, map_sum, apply_ite]
 
 theorem star_mem_ballDom {q : Ψ × Fin j × Fin j' ≃ Fin n} {t : Fin n → ℂ} (ht : t ∈ ballDom q) :

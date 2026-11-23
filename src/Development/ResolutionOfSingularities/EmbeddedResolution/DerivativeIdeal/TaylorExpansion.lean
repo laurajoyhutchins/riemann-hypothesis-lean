@@ -1,4 +1,54 @@
-import Mathlib
+module
+
+public import Mathlib.RingTheory.Derivation.Basic
+public import Mathlib.RingTheory.Ideal.Quotient.Defs
+public import Mathlib.RingTheory.Ideal.Span
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RingTheory.Ideal.BigOperators
+
+@[expose] public section
 
 namespace FunctorialResolution.EmbeddedResolution.TaylorExpansion
 
@@ -59,6 +109,7 @@ private theorem iterate_deriv_mul_eq_sum_nsmul (D : Derivation A R R) (n : ℕ) 
       _ = ⇑D (∑ i ∈ Finset.range (n + 1), n.choose i • ((⇑D)^[i] f * (⇑D)^[n - i] g)) := by
             rw [ih]
       _ = ∑ i ∈ Finset.range (n + 1), ⇑D (n.choose i • ((⇑D)^[i] f * (⇑D)^[n - i] g)) := by
+
             rw [map_sum]
       _ = ∑ i ∈ Finset.range (n + 1), (n.choose i • ((⇑D)^[i] f * (⇑D)^[n - i + 1] g)
             + n.choose i • ((⇑D)^[i + 1] f * (⇑D)^[n - i] g)) :=
@@ -152,6 +203,7 @@ theorem truncatedSeries_mul (σ : R →+* S) (D : Derivation A R R) (β : S) (N 
           coeff σ D i f * coeff σ D (j - i) g := by
   rw [truncatedSeries_apply]
   refine Finset.sum_congr rfl fun j _ => ?_
+
   rw [iterate_deriv_mul D j f g, map_sum, Finset.mul_sum, Finset.sum_mul, Finset.mul_sum]
   refine Finset.sum_congr rfl fun i hi => ?_
   have hij : i ≤ j := Nat.lt_succ_iff.mp (Finset.mem_range.mp hi)
@@ -174,11 +226,11 @@ theorem truncatedSeries_add (σ : R →+* S) (D : Derivation A R R) (β : S) (N 
     induction j with
     | zero => simp
     | succ k ih =>
-      simp only [Function.iterate_succ_apply', ih, map_add]
+      simp only [Function.iterate_succ_apply', ih, map_add (f := _)]
   simp only [truncatedSeries_apply]
   rw [← Finset.sum_add_distrib]
   refine Finset.sum_congr rfl fun j _ => ?_
-  rw [key j, map_add]
+  rw [key j, map_add (f := _)]
   ring
 
 theorem truncatedSeries_one (σ : R →+* S) (D : Derivation A R R) (β : S) (N : ℕ) (hN : 1 ≤ N) :
@@ -282,14 +334,14 @@ theorem truncatedSeries_mul_sub_mem (σ : R →+* S) (D : Derivation A R R) (β 
   exact sum_convolution_sub_mul_mem β N J hβ (fun i => coeff σ D i f)
     (fun i => coeff σ D i g)
 
-private theorem mk_truncatedSeries_one (σ : R →+* S) (D : Derivation A R R) (β : S) (N : ℕ)
+theorem mk_truncatedSeries_one (σ : R →+* S) (D : Derivation A R R) (β : S) (N : ℕ)
     (J : Ideal S) (hN : 1 ≤ N) :
     Ideal.Quotient.mk J (truncatedSeries σ D β N 1) = 1 := by
   have h1 : D 1 = 0 := by simp
   rw [truncatedSeries_of_deriv_eq_zero σ D β N hN 1 h1]
   simp
 
-private theorem mk_truncatedSeries_mul (σ : R →+* S) (D : Derivation A R R) (β : S) (N : ℕ)
+theorem mk_truncatedSeries_mul (σ : R →+* S) (D : Derivation A R R) (β : S) (N : ℕ)
     (J : Ideal S) (hβ : β ^ N ∈ J) (f g : R) :
     Ideal.Quotient.mk J (truncatedSeries σ D β N (f * g)) =
       Ideal.Quotient.mk J (truncatedSeries σ D β N f) *
@@ -302,17 +354,17 @@ private theorem mk_truncatedSeries_mul (σ : R →+* S) (D : Derivation A R R) (
     Ideal.Quotient.eq.mpr h
   rw [h2, map_mul]
 
-private theorem mk_truncatedSeries_zero (σ : R →+* S) (D : Derivation A R R) (β : S) (N : ℕ)
+theorem mk_truncatedSeries_zero (σ : R →+* S) (D : Derivation A R R) (β : S) (N : ℕ)
     (J : Ideal S) :
     Ideal.Quotient.mk J (truncatedSeries σ D β N 0) = 0 := by
   rw [truncatedSeries_zero, map_zero]
 
-private theorem mk_truncatedSeries_add (σ : R →+* S) (D : Derivation A R R) (β : S) (N : ℕ)
+theorem mk_truncatedSeries_add (σ : R →+* S) (D : Derivation A R R) (β : S) (N : ℕ)
     (J : Ideal S) (f g : R) :
     Ideal.Quotient.mk J (truncatedSeries σ D β N (f + g)) =
       Ideal.Quotient.mk J (truncatedSeries σ D β N f) +
         Ideal.Quotient.mk J (truncatedSeries σ D β N g) := by
-  rw [truncatedSeries_add, map_add]
+  rw [truncatedSeries_add, map_add (f := _)]
 
 def truncatedSeriesRingHom (σ : R →+* S) (D : Derivation A R R) (β : S) (N : ℕ) (J : Ideal S)
     (hN : 1 ≤ N) (hβ : β ^ N ∈ J) : R →+* S ⧸ J :=

@@ -1,5 +1,56 @@
-import Mathlib
-import ReciprocityTheory.ClassFieldTheory.LocalClassField.IsTwoCocycleCoboundary
+module
+
+public import ReciprocityTheory.ClassFieldTheory.LocalClassField.IsTwoCocycleCoboundary
+public import ReciprocityTheory.GroupCohomology.ContinuousContractNth
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.GroupCohomology.ComapZeroCoboundariesEqBot
+public import ReciprocityTheory.GroupCohomology.InfRes
+public import ReciprocityTheory.GroupCohomology.PartialProdCoe
+
+@[expose] public section
 
 namespace ReciprocityTheory.DiscreteGroups.LocalClassField.Deg2
 
@@ -106,7 +157,8 @@ theorem normA (hN : IsOpen (N : Set G)) (x : M.coch.X 2) (hx : M.coch.d 2 x = 0)
     (continuous_cur M x (continuous_retr' N hN) (continuous_rep N hN)).neg
   refine ⟨mk1 M _ hc, fun n hn g => ?_⟩
   rw [cur_sub, curried_coboundary_eq]
-  exact stepA (isTwoCocycle_curried M x hx) (retr_mul_rep N) (fun g => (retr N g).2) (retr_mul' N) (rep_mul' N) h0 n hn g
+  exact stepA (isTwoCocycle_curried M x hx) (retr_mul_rep N)
+    (fun g => (retr N g).property) (retr_mul' N) (rep_mul' N) h0 n hn g
 
 theorem normB [N.Normal] (hN : IsOpen (N : Set G)) (h1 : Subsingleton ((M.resSub N).H 1)) (x : M.coch.X 2)
     (hx : M.coch.d 2 x = 0) (h0 : ∀ n ∈ N, ∀ g, cur M x n g = 0) :
@@ -142,7 +194,8 @@ theorem normB [N.Normal] (hN : IsOpen (N : Set G)) (h1 : Subsingleton ((M.resSub
       ((continuous_retr' N hN).prodMk (continuous_comp_rep N hN e))
   refine ⟨mk1 M _ hc, fun n hn g => ?_⟩
   rw [cur_sub, curried_coboundary_eq, cur_sub, curried_coboundary_eq]
-  exact stepB hC (retr_mul_rep N) (fun g => (retr N g).2) (retr_mul' N) (rep_mul' N) h0 e he0 he n hn g
+  exact stepB hC (retr_mul_rep N) (fun g => (retr N g).property)
+    (retr_mul' N) (rep_mul' N) h0 e he0 he n hn g
 
 theorem norm_all [N.Normal] (hN : IsOpen (N : Set G)) (h1 : Subsingleton ((M.resSub N).H 1)) (x : M.coch.X 2)
     (hx : M.coch.d 2 x = 0)
@@ -153,7 +206,7 @@ theorem norm_all [N.Normal] (hN : IsOpen (N : Set G)) (h1 : Subsingleton ((M.res
   obtain ⟨w2, hB⟩ := normB M N hN h1 _ (d_sub_d M _ (d_sub_d M x hx w0) w1) hA
   refine ⟨w0 + w1 + w2, ?_⟩
   have : x - M.coch.d 1 (w0 + w1 + w2) = x - M.coch.d 1 w0 - M.coch.d 1 w1 - M.coch.d 1 w2 := by
-    rw [map_add, map_add]; abel
+    rw [map_add (f := _), map_add (f := _)]; abel
   rw [this]
   exact hB
 

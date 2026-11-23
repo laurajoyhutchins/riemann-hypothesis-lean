@@ -1,20 +1,66 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.GenPtSSubset
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.SmulOfMapsInlMemS
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.HTensMixHalfS
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AtWAtPlSelf
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.InfPartAlgebraMapLiftV
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BoxGraphGraphHeis
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AdelicHeisenbergActsByLocalSchrodinger
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EqOfComponentTensorAdelicFunctionEq
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.WeilRepresentationPreservesSchwartz
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SelfDualLocalImageLatticeSupportedAtPlace
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TensorLatticeLocalDarbouxCoordsBounded
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.StandardAdelicCharacterNontrivialAtPlaces
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EqAdeleSupportedAtFinitePlaceOfSupportedAt
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsNatDatumSquareFlip
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GridLocalTensorPlacesSplitIdempotentSumStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HeisenbergStableRelationOfVacuaStatement
+module
+
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.GenPtSSubset
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AtWAtPlSelf
+public import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsNotRelZero
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.IsSelfDualCLatFrame
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LatAtVAtStable
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SquareStanding
+import Development.AbelianVarietyTheory.Counterexamples.HeightSurvey.StarPurelyImaginaryEqNeg
+import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.MemRangeOfOneTmulMem
+import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.SelfDualLatticePairingDual
+import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.SmulMemLatO
+import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ThetaAtEqSumHeisOfFourierSum
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BoxGraphGraphHeis
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsINeZeroKind
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsNatMulIntegralOfIsCompact
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GridLocalTensorPlacesSplitIdempotentSumStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HeisenbergStableRelationOfVacuaStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.InfPartAlgebraMapLiftV
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ValuationLeOneOfMem
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.WeilRepresentationPreservesSchwartz
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.EqZeroOrEqOfPlaceIdem
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsNsmulIntMemLatO
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.HTensMixHalfS
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.SmulOfMapsInlMemS
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.L2.Theta Formalism.IndefR.Datum Formalism.IndefR.Links Formalism.L2.DIV
 open IsDedekindDomain NumberField MeasureTheory Matrix
@@ -235,8 +281,8 @@ def boxGraph (t : T) (e : Num G i j) (ε : AE D) (T₁ : (HomA G t i j → ℂ) 
   Submodule.span ℂ {p | ∃ φ₁ φ₂, IsSBHalf ε (latA G t i j) φ₁ ∧ IsSBHalf ε (latB G i j) φ₂ ∧
     p = (boxS t e φ₁ φ₂, boxS t e (T₁ φ₁) (T₂ φ₂))}
 
-set_option synthInstance.maxHeartbeats 400000
-set_option maxHeartbeats 1600000
+
+
 
 def graphMap (t : T) (e : Num G i j) (T₁ : (HomA G t i j → ℂ) →ₗ[ℂ] (HomA G t i j → ℂ))
     (T₂ : (HomB G i j → ℂ) →ₗ[ℂ] (HomB G i j → ℂ)) : (PtS G i j → ℂ) →ₗ[ℂ] (PtS G i j → ℂ) where
@@ -246,9 +292,9 @@ def graphMap (t : T) (e : Num G i j) (T₁ : (HomA G t i j → ℂ) →ₗ[ℂ] 
         (fun x => T₂ (fun y => g (ofMaps t e (x, y))) (mapB e u)) + fun x => T₂ (fun y => g' (ofMaps t e (x, y))) (mapB e u) :=
       funext fun x => by
         show T₂ ((fun y => g (ofMaps t e (x, y))) + fun y => g' (ofMaps t e (x, y))) (mapB e u) = _
-        rw [map_add]; rfl
+        rw [map_add (f := _)]; rfl
     show T₁ (fun x => T₂ (fun y => (g + g') (ofMaps t e (x, y))) (mapB e u)) (mapA t e u) = _
-    rw [h, map_add]; rfl
+    rw [h, map_add (f := _)]; rfl
   map_smul' c g := funext fun u => by
     have h : (fun x => T₂ (fun y => (c • g) (ofMaps t e (x, y))) (mapB e u)) =
         c • fun x => T₂ (fun y => g (ofMaps t e (x, y))) (mapB e u) :=
@@ -323,10 +369,14 @@ theorem boxGraph_graph_heis : ∀ {D : D7} {T : Type} {L : LevCh D T} {sc : Cons
       have hx₂ : IsHalf ε (mapB e x) := hx.2
       have s₁ : IsSBHalf ε (latA G t i j) (fun y' => φ₁ (y' + mapA t e x)) :=
         sb_trans_latO (S := spW₁ G i j) (T := spV G i j) (ΛS := G.Λ (.grid (i : ℕ) (j : ℕ)))
-          (ΛT := G.Λ (.grid (i : ℕ) ((j : ℕ) + 1))) sdW'.1 sdV.1 hinf hφ₁ hx₁
+          (ΛT := G.Λ (.grid (i : ℕ) ((j : ℕ) + 1)))
+          (GlobalTheory.PlaceVec.selfDual_isFullLattice _ _ sdW')
+          (GlobalTheory.PlaceVec.selfDual_isFullLattice _ _ sdV) hinf hφ₁ hx₁
       have s₂ : IsSBHalf ε (latB G i j) (fun y' => φ₂ (y' + mapB e x)) :=
         sb_trans_latO (S := negSp (spV₁ G i j)) (T := spW₁ G i j) (ΛS := G.Λ (.grid ((i : ℕ) + 1) (j : ℕ)))
-          (ΛT := G.Λ (.grid (i : ℕ) (j : ℕ))) sdV₁.1 sdW.1 hinf hφ₂ hx₂
+          (ΛT := G.Λ (.grid (i : ℕ) (j : ℕ)))
+          (GlobalTheory.PlaceVec.selfDual_isFullLattice (negSp (spV₁ G i j)) _ sdV₁)
+          (GlobalTheory.PlaceVec.selfDual_isFullLattice _ _ sdW) hinf hφ₂ hx₂
       show (fun u => boxS t e φ₁ φ₂ (u + x), heisS Γ W.ψ x (boxS t e (T₁ φ₁) (T₂ φ₂))) ∈ boxGraph t e ε T₁ T₂
       rw [heisS_box t e Γ hW hWW]
       refine Submodule.subset_span ⟨_, _, s₁, s₂, ?_⟩
@@ -404,10 +454,10 @@ theorem mem_of_sum_smul {m n : ℕ} {ι : Type} {P : Finset ι} {a : ι → AE D
   rw [this]
   exact sum_mem h
 
-set_option maxHeartbeats 1600000 in
 
-theorem exists_scalar_datum : ∀ {D : D7} {T : Type} {L : LevCh D T} {sc : Consts} {G : GridData L sc} {μ₀ : T} (hL : L.Is μ₀) (W : G.Weil) (B : Frames G) (ρ : RealMatch W) (t : T) (i j : Fin D.R.m) (M : Vol G) (hst : SquareStanding G t) (e : Num G i j) (Bs : Base D.host.F D.host.E) (Γ : GlobalTheory.IndefiniteRowSideFullHecke.UnitaryConjugation.Geo G i j) (X : Chars D.host.F D.host.E)
-    (om : Rep D.sp.cm.sig Γ.V Γ.W) (om' : Rep D.sp.cm.sig Γ.V' Γ.W) (h : IsTripleOf W M t i j e Bs Γ X), IsTriple Bs Γ X om om' → IsDoublyCompatible t i j e Bs Γ X →
+
+theorem exists_scalar_datum : ∀ {D : D7} {T : Type} {L : LevCh D T} {sc : Consts} {G : GridData L sc} {μ₀ : T} (hL : L.Is μ₀) (W : G.Weil) (B : Frames G) (ρ : RealMatch W) (t : T) (i j : Fin D.R.m) (M : Vol G) (hst : SquareStanding G t) (e : Num G i j) (Bs : _root_.GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.Base D.host.F D.host.E) (Γ : GlobalTheory.IndefiniteRowSideFullHecke.UnitaryConjugation.Geo G i j) (X : _root_.GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.Chars D.host.F D.host.E)
+    (om : _root_.GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.Rep D.sp.cm.sig Γ.V Γ.W) (om' : _root_.GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.Rep D.sp.cm.sig Γ.V' Γ.W) (h : IsTripleOf W M t i j e Bs Γ X), IsTriple Bs Γ X om om' → IsDoublyCompatible t i j e Bs Γ X →
     ∀ f₀, IsDatumB (t := t) W e Γ (Finsupp.single (((), ρ.vT i j), ρ.vX i j) 1) (GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.pure f₀ Γ.M'.vac) →
     ∀ ι : ∀ w : Pl D.host.E, ((Fin (spW₁ G i j).rank × Fin ((spW G i j).rank + (spW₁ G i j).rank) → Fv D.host.F (w.under (𝓞 D.host.F))) → ℂ) →ₗ[ℂ]
       (Matrix (Fin ((locGrid G t w).rank (i, j))) ((locGrid G t w).Cols i j) (Kw w) → ℂ),

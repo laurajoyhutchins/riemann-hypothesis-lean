@@ -1,6 +1,47 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.SumMulEqZeroOfSumToReal
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.SysExOfPol
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.SumMulEqZeroOfSumToReal
+import Mathlib.Algebra.AffineMonoid.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HomExtNormalSt
+
+@[expose] public section
 
 noncomputable section
 
@@ -68,14 +109,14 @@ def redMap (M : ℕ) {n m : ℕ} (r : (Fin n → ℤ) →ₗ[ℤ] (Fin m → ℤ
     set c := (redV_surjective M n (y + y')).choose
     obtain ⟨d, hd⟩ := exists_eq_add_of_redV_eq (M := M) (a := c) (a' := a + b)
       (by rw [h2, redV_add, h0, h1])
-    rw [hd, map_add, map_smul, redV_add_smul, map_add, redV_add]
+    rw [hd, map_add (f := _), map_smul, redV_add_smul, map_add (f := _), redV_add]
 
 theorem redMap_redV (M : ℕ) {n m : ℕ} (r : (Fin n → ℤ) →ₗ[ℤ] (Fin m → ℤ)) (a : Fin n → ℤ) :
     redMap M r (redV M a) = redV M (r a) := by
   have h0 := (redV_surjective M n (redV M a)).choose_spec
   obtain ⟨d, hd⟩ := exists_eq_add_of_redV_eq h0
   change redV M (r (redV_surjective M n (redV M a)).choose) = _
-  rw [hd, map_add, map_smul, redV_add_smul]
+  rw [hd, map_add (f := _), map_smul, redV_add_smul]
 
 theorem redMap_surjective (M : ℕ) {n m : ℕ} {r : (Fin n → ℤ) →ₗ[ℤ] (Fin m → ℤ)} (hr : Function.Surjective r) :
     Function.Surjective (redMap M r) := fun y => by
@@ -98,7 +139,7 @@ theorem classMin_comp (M : ℕ) {n m : ℕ} {r : (Fin n → ℤ) →ₗ[ℤ] (Fi
     obtain ⟨d, hd⟩ := exists_eq_add_of_redV_eq hb
     obtain ⟨e, rfl⟩ := hr d
     refine ⟨a + ((M : ℤ) + 1) • e, redV_add_smul _ _, ?_⟩
-    simp only [map_add, map_smul, ← hd]
+    simp only [map_add (f := _), map_smul, ← hd]
 
 theorem mean_comp {A A' : Type} [AddCommGroup A] [AddCommGroup A'] [Fintype A] [Fintype A'] (f : A →+ A')
     (hf : Function.Surjective f) (g : A' → ℝ) :
@@ -155,28 +196,6 @@ def fineMean (M : ℕ) : InvFun ℤ where
     rw [Fintype.sum_unique, e]
     simp
 
-example : (fineMean 1).toFun 1 (fun a b => ((a 0 * b 0 : ℤ) : ℝ)) = 1 / 2 := by
-  have h0 : classMin 1 (fun a b : Fin 1 → ℤ => ((a 0 * b 0 : ℤ) : ℝ)) (fun _ => 0) = 0 := by
-    refine IsLeast.csInf_eq ⟨⟨0, funext fun i => by simp [redV], by simp⟩, ?_⟩
-    rintro x ⟨a, -, rfl⟩
-    show (0 : ℝ) ≤ ((a 0 * a 0 : ℤ) : ℝ)
-    exact_mod_cast mul_self_nonneg (a 0)
-  have h1 : classMin 1 (fun a b : Fin 1 → ℤ => ((a 0 * b 0 : ℤ) : ℝ)) (fun _ => 1) = 1 := by
-    refine IsLeast.csInf_eq ⟨⟨1, funext fun i => by simp [redV], by simp⟩, ?_⟩
-    rintro x ⟨a, ha, rfl⟩
-    have h2 : a 0 ≠ 0 := fun h => by
-      have := congrFun ha 0
-      simp [redV, h] at this
-    have : (1 : ℤ) ≤ a 0 * a 0 := mul_self_pos.2 h2
-    show (1 : ℝ) ≤ ((a 0 * a 0 : ℤ) : ℝ)
-    exact_mod_cast this
-  have hs : ∀ f : (Fin 1 → ZMod (1 + 1)) → ℝ, ∑ y, f y = f (fun _ => 0) + f (fun _ => 1) := fun f => by
-    rw [← (Equiv.funUnique (Fin 1) (ZMod (1 + 1))).symm.sum_comp f]
-    exact Fin.sum_univ_two _
-  show ((((1 : ℕ) : ℝ) + 1) ^ 1)⁻¹ * ∑ y, classMin 1 _ y - _ = _
-  rw [hs, h0, h1]
-  norm_num
-
 end Mean
 
 section Base
@@ -222,7 +241,6 @@ variable {O : Type} [CommRing O] (bar : O → O) (φ : InvFun O) (X : Type) [Add
   {m : ℕ}
 
 variable {X} in
-
 structure IsCell (γ : Fin m → LinearMap.BilinForm ℤ X) : Prop where
 
   mem : ∀ i, γ i ∈ balForms bar X
@@ -235,15 +253,15 @@ structure IsCell (γ : Fin m → LinearMap.BilinForm ℤ X) : Prop where
 
 structure IsPolyFanOn : Prop where
 
-  homog : ∀ B ∈ psdCone bar X, ∀ t : ℝ, 0 ≤ t → evalR φ (t • B) = t * evalR φ B
+  homog : ∀ B ∈ psdCone (bar := bar) (X := X), ∀ t : ℝ, 0 ≤ t → evalR φ (t • B) = t * evalR φ B
 
-  superadd : ∀ B ∈ psdCone bar X, ∀ B' ∈ psdCone bar X, evalR φ B + evalR φ B' ≤ evalR φ (B + B')
+  superadd : ∀ B ∈ psdCone (bar := bar) (X := X), ∀ B' ∈ psdCone (bar := bar) (X := X), evalR φ B + evalR φ B' ≤ evalR φ (B + B')
 
   integral : ∀ β ∈ balForms bar X, (∀ y, 0 ≤ β y y) → ∃ n : ℤ, φ.evalZ β = n
 
   pos : ∀ β ∈ balForms bar X, (∀ y, 0 ≤ β y y) → β ≠ 0 → 0 < φ.evalZ β
 
-  finite : ∃ S : Set (LinearMap.BilinForm ℤ X), S.Finite ∧ ∀ B ∈ psdCone bar X, ∃ (e : X ≃ₗ[O] X) (m : ℕ)
+  finite : ∃ S : Set (LinearMap.BilinForm ℤ X), S.Finite ∧ ∀ B ∈ psdCone (bar := bar) (X := X), ∃ (e : X ≃ₗ[O] X) (m : ℕ)
     (γ : Fin m → LinearMap.BilinForm ℤ X) (c : Fin m → ℝ), IsCell bar φ γ ∧ (∀ i, γ i ∈ S) ∧ (∀ i, 0 ≤ c i) ∧
       pullR e.toLinearMap B = ∑ i, c i • toReal (γ i)
 
@@ -256,24 +274,16 @@ variable {bar φ X}
 theorem IsCone.isCell {γ : Fin m → LinearMap.BilinForm ℤ X} (h : IsCone bar φ γ) : IsCell bar φ γ :=
   ⟨h.mem, h.nonneg, h.linear, h.strict⟩
 
-theorem IsPolFanOn.isPolyFanOn (h : IsPolFanOn bar φ X) : IsPolyFanOn bar φ X where
-  homog := h.homog
-  superadd := h.superadd
-  integral := h.integral
-  pos := h.pos
-  finite := by
-    obtain ⟨S, hS, h1⟩ := h.finite
-    refine ⟨S, hS, fun B hB => ?_⟩
-    obtain ⟨m, γ, c, hγ, hc, rfl⟩ := h.cover B hB
-    obtain ⟨e, he⟩ := h1 m γ hγ
-    refine ⟨e, m, _, c, (hγ.pull_equiv e).isCell, he, hc, LinearMap.ext₂ fun a b => ?_⟩
-    simp [LinearMap.sum_apply]
-
-theorem isPolyFanOn_minVal_int : IsPolyFanOn id (InvFun.minVal ℤ) ℤ := isPolFanOn_minVal_int.isPolyFanOn
+theorem IsPolFanOn.isPolyFanOn (h : IsPolFanOn bar φ X) : IsPolyFanOn bar φ X := by
+  refine ⟨h.homog, h.superadd, h.integral, h.pos, ?_⟩
+  obtain ⟨S, hS, h1⟩ := h.finite
+  refine ⟨S, hS, fun B hB => ?_⟩
+  obtain ⟨m, γ, c, hγ, hc, rfl⟩ := h.cover B hB
+  obtain ⟨e, he⟩ := h1 m γ hγ
+  refine ⟨e, m, _, c, (hγ.pull_equiv e).isCell, he, hc, LinearMap.ext₂ fun a b => ?_⟩
+  simp [LinearMap.sum_apply]
 
 theorem isPolyFan_minVal_one : IsPolyFan id 1 (InvFun.minVal ℤ) := fun X _ _ _ _ hX => (isPolFan_minVal_one X hX).isPolyFanOn
-
-example : IsCell id (InvFun.minVal ℤ) ![mulForm] := isCone_mulForm.isCell
 
 end Poly
 
@@ -284,7 +294,7 @@ variable {O : Type} [CommRing O] (bar : O → O) (X : Type) [AddCommGroup X] [Mo
 def HasRedCover : Prop :=
   ∃ (k : ℕ) (n : Fin k → ℕ) (P : ∀ j, Fin (n j) → LinearMap.BilinForm ℤ X),
     (∀ j i y z, P j i y z = P j i z y) ∧ (∀ j i y, 0 ≤ P j i y y) ∧
-    ∀ B ∈ psdCone bar X, ∃ (e : X ≃ₗ[O] X) (j : Fin k) (c : Fin (n j) → ℝ), (∀ i, 0 ≤ c i) ∧
+    ∀ B ∈ psdCone (bar := bar) (X := X), ∃ (e : X ≃ₗ[O] X) (j : Fin k) (c : Fin (n j) → ℝ), (∀ i, 0 ≤ c i) ∧
       pullR e.toLinearMap B = ∑ i, c i • toReal (P j i)
 
 def Dominates : Prop :=

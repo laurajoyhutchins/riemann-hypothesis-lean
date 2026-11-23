@@ -1,5 +1,57 @@
-import Mathlib
-import GroundTheory.GlobalFields.GlobalReciprocity.PrimesAbove
+module
+
+public import GroundTheory.GlobalFields.CyclotomicCharacters.Degree
+public import GroundTheory.GlobalFields.IdeleClassGroup.IdeleClassMapIdeleClassMap
+public import GroundTheory.GlobalFields.CyclotomicCharacters.ClosedSubgroups
+public import GroundTheory.GlobalFields.CyclotomicCharacters.DegreeDecomposition
+public import GroundTheory.GlobalFields.NormResidueSymbol.CyclotomicCompositum
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.Separation.CompletelyRegular
+public import GroundTheory.GlobalFields.IdeleClassGroup.Invariants
+
+@[expose] public section
 
 namespace GroundTheory.Global
 
@@ -7,8 +59,6 @@ namespace Cyclotomic
 
 open IsDedekindDomain NumberField IntermediateField GroundTheory.LocalField.Abstract ProfiniteInteger
 open scoped Pointwise GroundTheory.LocalField.Abstract
-
-local notation "ℚ̄" => AlgebraicClosure ℚ
 
 noncomputable section
 
@@ -72,6 +122,8 @@ end FiniteLevel
 
 section Lift
 
+local notation "ℚ̄" => AlgebraicClosure ℚ
+
 variable (P : Ideal (𝓞 ℚ̄))
 
 def decompositionDegreeImageIn (L : IntermediateField ℚ ℚ̄) : AddSubgroup ℤ̂ where
@@ -123,7 +175,7 @@ theorem exists_mem_stabilizer_toPadicInt_ne_zero [P.IsPrime] (p : ℕ) [Fact p.P
   obtain ⟨h, ⟨hP, hL⟩, hh⟩ := hy
   have hh : Multiplicative.toAdd (degree h) = ofPadics f := hh
   refine ⟨h, hP, hL, fun q ↦ ?_⟩
-  rw [map_mul, toAdd_mul, map_add]
+  rw [map_mul, toAdd_mul, map_add (f := _)]
   change toPadicInt q t₀ + toPadicInt q (Multiplicative.toAdd (degree h)) ≠ 0
   rw [hh, hf]
   by_cases h0 : toPadicInt q t₀ = 0

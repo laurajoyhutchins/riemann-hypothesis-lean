@@ -1,6 +1,49 @@
-import Mathlib
+module
+
+public import Development.AutomorphicSpectrum.Definitions.MetricPeriods.IsEigFrames
+public import Development.WeilBound.CoreStatements.VolumeEquality.BaseUnifRiem
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
 import Development.AutomorphicSpectrum.Proofs.MetricProofs.BigZe
-import Development.WeilBound.CoreStatements.VolumeEquality.BaseUnifRiem
+import GroundTheory.HeightsAndTheta.Heights.FiniteCovolume.PUnipotentModulusMatrix
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsCompletedStrictHens
+
+@[expose] public section
 
 open NumberField Matrix MeasureTheory Filter Topology GlobalTheory.CompanionTheory.Ar GlobalTheory.CompanionTheory.Ar.Cusp ReciprocityTheory.ChartRestriction.G.Geo ReciprocityTheory.ChartRestriction.G.Geo.Tor GroundTheory.Heights₂.Heights.FiniteCovolume
 open scoped ENNReal InnerProductSpace
@@ -43,6 +86,7 @@ theorem exists_realExt {E : Type} [Field E] [NumberField E] [IsCMField E] {g : �
   let v : Fin (2 * g) → Fin g → ℂ := fun k => R.P (b k)
   have hsum : ∀ (Q : Λ →+ (Fin g → ℂ)) (x : Λ), Q x = ∑ k, (b.repr x k : ℝ) • Q (b k) := by
     intro Q x
+
     conv_lhs => rw [← b.sum_repr x, map_sum]
     refine Finset.sum_congr rfl fun k _ => ?_
     rw [map_zsmul, Int.cast_smul_eq_zsmul]
@@ -63,6 +107,7 @@ theorem exists_realExt {E : Type} [Field E] [NumberField E] [IsCMField E] {g : �
     exact c.constr_basis ℝ _ k
   have hL : ∀ x, L (R.P x) = R'.P x := by
     intro x
+
     rw [hsum R.P x, hsum R'.P x, map_sum]
     refine Finset.sum_congr rfl fun k _ => ?_
     rw [map_smul, hLb]
@@ -76,7 +121,7 @@ theorem exists_realExt {E : Type} [Field E] [NumberField E] [IsCMField E] {g : �
         obtain ⟨y, rfl⟩ := hw
         rw [hL, hL, R'.im, R.im, hf]
       | zero => simp
-      | add w w' _ _ h h' => rw [map_add, imH_add_right, imH_add_right, h, h']
+      | add w w' _ _ h h' => rw [map_add (f := _), imH_add_right, imH_add_right, h, h']
       | smul r w _ h => rw [map_smul, imH_smul_right, imH_smul_right, h]
     intro z w
     induction hall z using Submodule.span_induction with
@@ -84,7 +129,7 @@ theorem exists_realExt {E : Type} [Field E] [NumberField E] [IsCMField E] {g : �
       obtain ⟨x, rfl⟩ := hz
       exact h1 x w
     | zero => simp
-    | add z z' _ _ h h' => rw [map_add, imH_add_left, imH_add_left, h, h']
+    | add z z' _ _ h h' => rw [map_add (f := _), imH_add_left, imH_add_left, h, h']
     | smul r z _ h => rw [map_smul, imH_smul_left, imH_smul_left, h]
   · intro a z
     induction hall z using Submodule.span_induction with
@@ -92,7 +137,7 @@ theorem exists_realExt {E : Type} [Field E] [NumberField E] [IsCMField E] {g : �
       obtain ⟨x, rfl⟩ := hz
       rw [← R.act, hL, hL, R'.act]
     | zero => simp
-    | add z z' _ _ h h' => simp only [map_add, h, h']
+    | add z z' _ _ h h' => simp only [map_add (f := _), h, h']
     | smul r z _ h =>
       rw [LinearMap.map_smul_of_tower, map_smul, h, map_smul, LinearMap.map_smul_of_tower]
 

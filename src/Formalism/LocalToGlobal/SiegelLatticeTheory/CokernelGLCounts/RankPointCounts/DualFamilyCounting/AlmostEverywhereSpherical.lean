@@ -1,7 +1,57 @@
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.ExistsOrthGen
-import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.IsUnimodularAtIffVd
-import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.ExistsFracOfFixed
-import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.ExtPPowLeSpanSup
+module
+
+public import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.AlgebraMapNeZeroOfMemHcompl
+public import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.ExistsOrthTuple
+public import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.LocalDensityRatio
+public import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.ExistsFracOfFixed
+public import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.IsUnimodularAtIffVd
+public import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.StarAlgebraMap
+import Formalism.HermitianLattices.HermitianLatticesProofs.LocDual
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField Module
 
@@ -21,7 +71,7 @@ theorem setOf_mem_pow_eq (h𝔭 : 𝔭.IsMaximal) {n : 𝓞 F} (hn : n ≠ 0) :
     FiniteMultiplicity.of_not_isUnit (by rw [Ideal.isUnit_iff]; exact h𝔭.ne_top)
       (by rw [Ne, Ideal.zero_eq_bot, Ideal.span_singleton_eq_bot]; exact hn)
   ext e
-  simp only [Set.mem_setOf_eq, Set.mem_Iic]
+  simp only [Set.mem_ofPred_eq, Set.mem_Iic]
   rw [← hfin.pow_dvd_iff_le_multiplicity, Ideal.dvd_iff_le, Ideal.span_singleton_le_iff_mem]
 
 theorem vF_eq_multiplicity (h𝔭 : 𝔭.IsMaximal) {n : 𝓞 F} (hn : n ≠ 0) :
@@ -31,7 +81,7 @@ theorem vF_eq_multiplicity (h𝔭 : 𝔭.IsMaximal) {n : 𝓞 F} (hn : n ≠ 0) 
 
 theorem mem_pow_iff (h𝔭 : 𝔭.IsMaximal) {n : 𝓞 F} (hn : n ≠ 0) (e : ℕ) :
     n ∈ 𝔭 ^ e ↔ e ≤ vF 𝔭 n := by
-  rw [vF_eq_multiplicity h𝔭 hn, ← Set.mem_Iic, ← setOf_mem_pow_eq h𝔭 hn, Set.mem_setOf_eq]
+  rw [vF_eq_multiplicity h𝔭 hn, ← Set.mem_Iic, ← setOf_mem_pow_eq h𝔭 hn, Set.mem_ofPred_eq]
 
 theorem vF_mul (h𝔭 : 𝔭.IsMaximal) {a b : 𝓞 F} (ha : a ≠ 0) (hb : b ≠ 0) :
     vF 𝔭 (a * b) = vF 𝔭 a + vF 𝔭 b := by
@@ -42,7 +92,7 @@ theorem vF_mul (h𝔭 : 𝔭.IsMaximal) {a b : 𝓞 F} (ha : a ≠ 0) (hb : b �
   have hp : Prime 𝔭 := Ideal.prime_of_isPrime hne h𝔭.isPrime
   rw [vF_eq_multiplicity h𝔭 ha, vF_eq_multiplicity h𝔭 hb, vF_eq_multiplicity h𝔭 (mul_ne_zero ha hb),
     ← Ideal.span_singleton_mul_span_singleton]
-  refine multiplicity_mul hp (FiniteMultiplicity.of_not_isUnit hp.not_unit ?_)
+  refine multiplicity_mul hp (FiniteMultiplicity.of_not_isUnit hp.not_isUnit ?_)
   rw [Ideal.span_singleton_mul_span_singleton]
   exact hz (mul_ne_zero ha hb)
 
@@ -84,22 +134,6 @@ theorem sup_top_of_notMem {R : Type*} [CommRing R] {P : Ideal R} (hP : P.IsMaxim
 
 variable {K F : Type} [Field K] [NumberField K] [StarRing K] [Field F] [NumberField F] [Algebra F K]
 
-theorem mem_of_dv {P : Ideal (𝓞 K)} (hP : P.IsMaximal) {π : K}
-    (h3 : ∀ z : 𝓞 K, Dv (locRing P) π (algebraMap (𝓞 K) K z * π⁻¹) →
-      z ∈ extP K (P.comap (algebraMap (𝓞 F) (𝓞 K))) ^ 2)
-    {z : 𝓞 K} (hz : Dv (locRing P) π (algebraMap (𝓞 K) K z)) : z ∈ P := by
-  have hzz : z * z ∈ extP K (P.comap (algebraMap (𝓞 F) (𝓞 K))) ^ 2 := by
-    apply h3
-    have e : algebraMap (𝓞 K) K (z * z) * π⁻¹ * π⁻¹ =
-        (algebraMap (𝓞 K) K z * π⁻¹) * (algebraMap (𝓞 K) K z * π⁻¹) := by
-      rw [map_mul]; ring
-    show algebraMap (𝓞 K) K (z * z) * π⁻¹ * π⁻¹ ∈ locRing P
-    rw [e]
-    exact (locRing P).mul_mem hz hz
-  have hle : extP K (P.comap (algebraMap (𝓞 F) (𝓞 K))) ^ 2 ≤ P :=
-    (Ideal.pow_le_self two_ne_zero).trans Ideal.map_comap_le
-  exact (hP.isPrime.mem_or_mem (hle hzz)).elim id id
-
 theorem exists_unif_fin (hF : IsFixF K F) {P : Ideal (𝓞 K)} (hP : P.IsMaximal) :
     ∃ π : K, IsUnif (locRing P) π ∧ ∀ a : K, a ≠ 0 → ∃ N : ℕ, a * π⁻¹ ^ N ∉ locRing P := by
   obtain ⟨π, hπ, -, -⟩ := exists_isUnif hF hP
@@ -131,7 +165,7 @@ theorem exists_unif_fin (hF : IsFixF K F) {P : Ideal (𝓞 K)} (hP : P.IsMaximal
   obtain ⟨u, hu⟩ := Submodule.mem_one.mp hu
   have hu_not : u ∈ P ∨ ∃ t ∈ P, algebraMap (𝓞 K) K t = star (algebraMap (𝓞 K) K u) := by
     by_contra hcon
-    push_neg at hcon
+    push Not at hcon
     have hu_h : u ∈ Formalism.HermitianLatticesTheory.hcompl (K := K) P :=
       Submonoid.subset_closure ⟨hcon.1, fun t ht htP => hcon.2 t htP ht⟩
     have hinv : π⁻¹ ∈ locRing P := by
@@ -151,7 +185,7 @@ theorem exists_unif_fin (hF : IsFixF K F) {P : Ideal (𝓞 K)} (hP : P.IsMaximal
     intro h
     exact nonZeroDivisors.ne_zero hY (inj (by rw [h, map_zero]))
   by_contra hall
-  push_neg at hall
+  push Not at hall
   have key : ∀ N, ∃ s ∈ Formalism.HermitianLatticesTheory.hcompl (K := K) P, ∃ r : 𝓞 K, s * X * s0 ^ N = r * Y * u ^ N := by
     intro N
     have hm : algebraMap (𝓞 K) K X / algebraMap (𝓞 K) K Y * π⁻¹ ^ N ∈ Formalism.HermitianLatticesTheory.locR (K := K) P :=

@@ -1,5 +1,57 @@
-import ReciprocityTheory.L2DbarEstimates.Localization.UnweightBackStatement
-import ReciprocityTheory.L2DbarEstimates.ChartDerivatives.Imports
+module
+
+public import ReciprocityTheory.L2DbarEstimates.Localization.UnweightBackStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Analysis.Calculus.ContDiff.Basic
+public import Mathlib.Analysis.Calculus.ContDiff.Operations
+public import Mathlib.Analysis.Calculus.FDeriv.Mul
+
+@[expose] public section
 
 namespace ReciprocityTheory.L2DbarEstimates.F
 
@@ -45,7 +97,7 @@ private theorem db_apply_eq_wdb_of_mem_source {M : Type*} [TopologicalSpace M] (
     (hy : y ∈ e.source) : db n z k f y = wdb n k (f ∘ e.symm) (z y) := by
   have hex : ∃ e : OpenPartialHomeomorph M (V n), IsChart n z e ∧ y ∈ e.source := ⟨e, he, hy⟩
   unfold db
-  rw [dif_pos hex]
+  rw [dite_eq_left hex]
   apply wdb_apply_congr_of_eventuallyEq
   exact (coe_symm_apply_of_isChart_val n z e (Classical.choose hex) he (Classical.choose_spec hex).1 y hy
     (Classical.choose_spec hex).2).fun_comp f
@@ -55,7 +107,7 @@ private theorem d_apply_eq_wd_of_mem_source {M : Type*} [TopologicalSpace M] (n 
     (hy : y ∈ e.source) : d n z k f y = wd n k (f ∘ e.symm) (z y) := by
   have hex : ∃ e : OpenPartialHomeomorph M (V n), IsChart n z e ∧ y ∈ e.source := ⟨e, he, hy⟩
   unfold d
-  rw [dif_pos hex]
+  rw [dite_eq_left hex]
   apply wd_apply_congr_of_eventuallyEq
   exact (coe_symm_apply_of_isChart_val n z e (Classical.choose hex) he (Classical.choose_spec hex).1 y hy
     (Classical.choose_spec hex).2).fun_comp f
@@ -76,8 +128,8 @@ theorem leviZ_wd_coord (n : ℕ) (j l : Fin n) (y : V n) :
   rw [hL]
   by_cases h : j = l
   · subst h
-    simp [bas, EuclideanSpace.single_apply, Complex.I_mul_I]
-  · simp [bas, EuclideanSpace.single_apply, h, Ne.symm h]
+    simp [bas, PiLp.single_apply, Complex.I_mul_I]
+  · simp [bas, PiLp.single_apply, h, Ne.symm h]
 
 theorem leviZ_d_coord {M : Type*} [TopologicalSpace M] (n : ℕ) (z : M → V n)
     (hz : IsLocalHomeomorph z) (j l : Fin n) (x : M) :
@@ -107,7 +159,7 @@ private theorem wdb_sum_mul_conj_eq_coord (n : ℕ) (k : Fin n) (p : V n) :
     HasFDerivAt.fun_sum (fun l _ => (hP l).mul (hC l))
   unfold wdb
   rw [hF.fderiv]
-  simp [bas, EuclideanSpace.single_apply]
+  simp [bas, PiLp.single_apply]
   simp only [apply_ite (starRingEnd ℂ), map_zero, mul_ite, mul_zero, Complex.conj_I,
     Finset.sum_add_distrib, Finset.sum_ite_eq', Finset.mem_univ, if_true]
   linear_combination ((starRingEnd ℂ (p.ofLp k) - p.ofLp k) / 2) * Complex.I_sq

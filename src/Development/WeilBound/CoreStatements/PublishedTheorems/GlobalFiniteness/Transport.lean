@@ -1,12 +1,59 @@
-import ReciprocityTheory.Hypotheses.GalCoh
-import ReciprocityTheory.NeutralLocalFields.LocalFieldComparison.Transport
-import Development.WeilBound.CoreStatements.EulerCharacteristicCounts.GcohCmp
+module
+
+public import GroundTheory.ProfiniteCohomology.CohomologyFunctoriality
+public import GroundTheory.ProfiniteCohomology.RestrictedRamification.MaxUnramifiedOutside
+public import ReciprocityTheory.Hypotheses.GalCohDefs
+public import Development.AutomorphicSpectrum.Proofs.GlobalProofs.GaloisUnramifiedOutsideCohomologyStatement
+public import Development.AutomorphicSpectrum.Proofs.GlobalProofs.NormalSubgroupLeUnramifiedFixingStatement
+public import Development.WeilBound.CoreStatements.EulerCharacteristicCounts.GcohCmp
 import GroundTheory.ProfiniteCohomology.RestrictedRamification.IsUnramifiedOutsideIffLeMaxUnramifiedOutside
-import GroundTheory.ProfiniteCohomology.RestrictedRamification.Finite
-import GroundTheory.ProfiniteCohomology.CohomologyFunctoriality
-import Development.AutomorphicSpectrum.Proofs.GlobalProofs.NormalSubgroupLeUnramifiedFixingStatement
-import Development.AutomorphicSpectrum.Proofs.GlobalProofs.GaloisUnramifiedOutsideCohomologyStatement
-import Development.AutomorphicSpectrum.Proofs.GlobalProofs.CohomologicalDimensionTopologicalIso
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+public import Mathlib.FieldTheory.Galois.Profinite
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.NeutralLocalFields.LocalFieldComparison.Transport
+import ReciprocityTheory.NeutralLocalFields.LocalFieldComparison.TransportA
+import GroundTheory.GlobalFields.HerbrandQuotients.RationalForm
+
+@[expose] public section
 
 noncomputable section
 
@@ -46,31 +93,6 @@ theorem gsEquiv (F Ω : Type) [Field F] [NumberField F] [Field Ω] [Algebra F Ω
   exact ⟨{ q with
     continuous_toFun := hq
     continuous_invFun := Continuous.continuous_symm_of_equiv_compact_to_t2 (f := q.toEquiv) hq }⟩
-
-theorem gsTransportK (F Ω : Type) [Field F] [NumberField F] [Field Ω] [Algebra F Ω] [IsAlgClosure F Ω] (S : Finset (HeightOneSpectrum (𝓞 F))) :
-    ∃ (K : FiniteSubfield) (S' : Set (HeightOneSpectrum (𝓞 K.1))) (_ : Finite S')
-      (_ : galUnramifiedOutside F Ω (S : Set (HeightOneSpectrum (𝓞 F))) ≃ₜ*
-        galUnramifiedOutside K.1 (AlgebraicClosure ℚ) S'),
-      ∀ n : ℕ, (∀ v : HeightOneSpectrum (𝓞 F), (n : 𝓞 F) ∈ v.asIdeal → v ∈ S) →
-        ∀ v' : HeightOneSpectrum (𝓞 K.1), (n : 𝓞 K.1) ∈ v'.asIdeal → v' ∈ S' := by
-  haveI : IsGalois F Ω := IsAlgClosure.isGalois F Ω
-  obtain ⟨K, ψ, e, he⟩ := GlobalTheory.CompanionTheory.GSCd.Transport.exists_embedded F Ω
-  classical
-  let T : Finset (HeightOneSpectrum (𝓞 K.1)) :=
-    S.map (GlobalTheory.CompanionTheory.GSCd.Transport.placeEquiv (RingOfIntegers.mapRingEquiv ψ)).toEmbedding
-  have hC : GlobalTheory.CompanionTheory.GSCd.Transport.Corr ψ (S : Set (HeightOneSpectrum (𝓞 F)))
-      (T : Set (HeightOneSpectrum (𝓞 K.1))) := by
-    intro v
-    simp [T]
-  obtain ⟨θ⟩ := GlobalTheory.CompanionTheory.GSCd.Transport.nonempty_gal ψ e he hC
-  refine ⟨K, (T : Set (HeightOneSpectrum (𝓞 K.1))), inferInstance, θ, ?_⟩
-  intro n hn w hw
-  have hv : (GlobalTheory.CompanionTheory.GSCd.Transport.placeEquiv (RingOfIntegers.mapRingEquiv ψ)).symm w ∈ S := by
-    apply hn
-    change RingOfIntegers.mapRingEquiv ψ (n : 𝓞 F) ∈ w.asIdeal
-    rw [map_natCast]
-    exact hw
-  exact Finset.mem_coe.2 (Finset.mem_map.2 ⟨_, hv, (GlobalTheory.CompanionTheory.GSCd.Transport.placeEquiv _).apply_symm_apply w⟩)
 
 theorem mapAlong_eq_id_of_eq_id {k G : Type} [CommRing k] [Group G] [TopologicalSpace G]
     [IsTopologicalGroup G]
@@ -114,19 +136,6 @@ theorem finite_cohomology_transport {k G H : Type} [CommRing k] [Group G] [Topol
   refine Finite.of_surjective q.hom fun x => ⟨p.hom x, ?_⟩
   rw [← ModuleCat.comp_apply, hpq]
   rfl
-
-theorem subsingleton_cohomology_transport {k G H : Type} [CommRing k] [Group G] [TopologicalSpace G]
-    [IsTopologicalGroup G] [Group H] [TopologicalSpace H] [IsTopologicalGroup H] (θ : G ≃ₜ* H)
-    (A : Rep.{0} k G) [IsDiscreteRep A] (n : ℕ)
-    (h : haveI := IsDiscreteRep.res θ.symm.continuous (φ := (θ.symm : H ≃* G).toMonoidHom) A;
-      Subsingleton (cohomology (Rep.res (θ.symm : H ≃* G).toMonoidHom A) n)) :
-    Subsingleton (cohomology A n) := by
-  have := IsDiscreteRep.res θ.symm.continuous (φ := (θ.symm : H ≃* G).toMonoidHom) A
-  obtain ⟨p, q, hpq⟩ := mapAlong_transport_comp θ A n
-  refine ⟨fun x y => ?_⟩
-  have hx : q.hom (p.hom x) = x := by rw [← ModuleCat.comp_apply, hpq]; rfl
-  have hy : q.hom (p.hom y) = y := by rw [← ModuleCat.comp_apply, hpq]; rfl
-  rw [← hx, ← hy, Subsingleton.elim (p.hom x) (p.hom y)]
 
 theorem cohDict {F Ω : Type} [Field F] [NumberField F] [Field Ω] [Algebra F Ω] [IsAlgClosure F Ω]
     {l : ℕ} [Fact l.Prime] {r : ℕ} {M : Type} [AddCommGroup M] [Module (ZMod (l ^ r)) M] [Finite M]

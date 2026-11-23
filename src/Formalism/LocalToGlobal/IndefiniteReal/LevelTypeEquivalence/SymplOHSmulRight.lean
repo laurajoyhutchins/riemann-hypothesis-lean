@@ -1,4 +1,45 @@
-import Formalism.LocalToGlobal.IndefiniteReal.LevelTypeEquivalence.SobFrame
+module
+
+public import Formalism.LocalToGlobal.IndefiniteReal.LevelTypeEquivalence.SobFrame
+public import Formalism.LocalToGlobal.IndefiniteReal.LocalNewformFunction
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -27,12 +68,11 @@ theorem eInf_add_eFin : eInf D + eFin D = 1 := by
 theorem cA_smul (c : AF D.host.F) (z : AE D) : cA D (c • z) = c • cA D z := by
 
   unfold cA sigR
-  refine TensorProduct.induction_on z ?_ ?_ ?_
-  · simp
-  · intro a b
-    simp [TensorProduct.smul_tmul', Algebra.TensorProduct.map_tmul]
-  · intro x y hx hy
-    rw [smul_add, map_add, map_add, hx, hy, smul_add]
+  induction z using TensorProduct.induction_on with
+  | zero => simp
+  | tmul a b => simp [TensorProduct.smul_tmul', Algebra.TensorProduct.map_tmul]
+  | add x y hx hy =>
+    rw [smul_add, map_add (f := _), map_add (f := _), hx, hy, smul_add]
 
 theorem hO_smul_right (c : AF D.host.F) (x y : WO S T) : hO S T x (c • y) = c • hO S T x y := by
 
@@ -51,19 +91,6 @@ theorem symplOH_smul_left (c : AF D.host.F) (x y : WO S T) : symplOH S T (c • 
 
   simp only [symplOH, symplO, hO_smul_left, mul_smul_comm, map_smul, smul_eq_mul]
   ring
-
-theorem symplOH_snd (x y : WO S T) (hy : eInf D • y = y) : (symplOH S T x y).2 = 0 := by
-
-  rw [← hy, symplOH_smul_right]
-  simp only [eInf, pairA]
-  first
-  | exact zero_mul _
-  | simp
-
-theorem symplOH_fin_real (u y : WO S T) (hu : eFin D • u = u) (hy : eInf D • y = y) : symplOH S T u y = 0 := by
-
-  rw [← hu, ← hy, symplOH_smul_left, symplOH_smul_right, ← mul_assoc, mul_comm (eFin D) (eInf D), eInf_mul_eFin,
-    zero_mul]
 
 theorem symplOH_real_fin (y u : WO S T) (hy : eInf D • y = y) (hu : eFin D • u = u) : symplOH S T y u = 0 := by
 
@@ -86,10 +113,6 @@ theorem wo_fin_iff (w : WO S T) : w.map (infPart D) = 0 ↔ eFin D • w = w := 
   · intro h
     ext i j
     exact (infPart_eq_zero_iff_smul (w i j)).mpr (congrFun (congrFun h i) j)
-
-theorem eFin_smul_sub (w : WO S T) : w - eInf D • w = eFin D • w := by
-
-  rw [eq_sub_of_add_eq' (eInf_add_eFin (D := D)), sub_smul, one_smul]
 
 end Formalism.IndefR.Eqv
 

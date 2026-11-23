@@ -1,5 +1,57 @@
-import Mathlib
-import GroundTheory.ArithmeticGeometry.AbelianVarieties.FunctionFieldPoint
+module
+
+public import GroundTheory.ArithmeticGeometry.AbelianVarieties.FunctionFieldPoint
+public import GroundTheory.ArithmeticGeometry.AbelianVarieties.DivisionPoints
+public import Mathlib.FieldTheory.RatFunc.AsPolynomial
+public import GroundTheory.ArithmeticGeometry.AbelianVarieties.KernelCard
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Degree
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+public import Mathlib.FieldTheory.RatFunc.IntermediateField
+public import Mathlib.FieldTheory.Relrank
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 namespace GroundTheory.Arith.Abelian
 
@@ -265,7 +317,7 @@ theorem isSeparable_of_quadratic {L K : Type*} [Field L] [Field K] [Algebra L K]
     (hD' : algebraMap L K b ^ 2 + 4 * algebraMap L K c ≠ 0) :
     IsSeparable L y := by
   have hD : b ^ 2 + 4 * c ≠ 0 := fun h => hD' (by
-    rw [← map_pow, ← map_ofNat (algebraMap L K) 4, ← map_mul, ← map_add, h, map_zero])
+    rw [← map_pow, ← map_ofNat (algebraMap L K) 4, ← map_mul, ← map_add (f := _), h, map_zero])
   have hq' : derivative (X ^ 2 + C b * X - C c : L[X]) = C 2 * X + C b := by
     simp only [derivative_sub, derivative_add, derivative_X_pow, derivative_C_mul_X, derivative_C]
     simp
@@ -273,14 +325,14 @@ theorem isSeparable_of_quadratic {L K : Type*} [Field L] [Field K] [Algebra L K]
     rw [Polynomial.separable_def, hq']
     refine ⟨C (-4 * (b ^ 2 + 4 * c)⁻¹), C (b ^ 2 + 4 * c)⁻¹ * (C 2 * X + C b), ?_⟩
     have e : (C 2 * X + C b) ^ 2 - 4 * (X ^ 2 + C b * X - C c) = C (b ^ 2 + 4 * c) := by
-      simp only [map_add, map_pow, map_mul, map_ofNat]; ring
+      simp only [map_add (f := _), map_pow, map_mul, map_ofNat]; ring
     calc C (-4 * (b ^ 2 + 4 * c)⁻¹) * (X ^ 2 + C b * X - C c) +
           C (b ^ 2 + 4 * c)⁻¹ * (C 2 * X + C b) * (C 2 * X + C b)
         = C (b ^ 2 + 4 * c)⁻¹ * ((C 2 * X + C b) ^ 2 - 4 * (X ^ 2 + C b * X - C c)) := by
           simp only [map_mul, map_neg, map_ofNat]; ring
       _ = 1 := by rw [e, ← C_mul, inv_mul_cancel₀ hD, C_1]
   have hq : aeval y (X ^ 2 + C b * X - C c : L[X]) = 0 := by
-    simp only [map_sub, map_add, map_mul, map_pow, aeval_X, aeval_C]
+    simp only [map_sub, map_add (f := _), map_mul, map_pow, aeval_X, aeval_C]
     exact hy
   exact hsep.of_dvd (minpoly.dvd L y hq)
 
@@ -307,7 +359,7 @@ theorem isSeparable_genY (L : IntermediateField F E.toAffine.FunctionField)
     simp only [IntermediateField.algebraMap_apply] at h'
     have : aeval (genX E) E.Ψ₂Sq = 0 := by
       rw [← h']
-      simp only [Ψ₂Sq, map_add, map_mul, map_pow, aeval_C, aeval_X, b₂, b₄, b₆, map_ofNat]
+      simp only [Ψ₂Sq, map_add (f := _), map_mul, map_pow, aeval_C, aeval_X, b₂, b₄, b₆, map_ofNat]
       ring
     rw [aeval_genX_eq_zero_iff] at this
     exact Ψ₂Sq_ne_zero E this

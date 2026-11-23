@@ -1,6 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.KaehlerOneFormsToExtensionDeRhamMulSelf
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.FormsBaseChangeStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.KaehlerOneFormsToExtensionDeRhamMulSelf
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.FormsBaseChangeStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.Divisors.CupPair
+
+@[expose] public section
+
 open GlobalTheory.W1 GlobalTheory.PD GlobalTheory.CechDR KaehlerDifferential
 
 namespace GlobalTheory.W1
@@ -19,6 +67,7 @@ theorem trDR_isTrDR_unique : ∀ (k K L : Type) [Field k] [CharZero k] [Field K]
     intro T T' hT hT'
     refine LinearMap.ext fun y => ?_
     obtain ⟨m, b, ω, rfl⟩ := hspan y
+
     simp only [map_sum]
     exact Finset.sum_congr rfl fun j _ => by rw [hT, hT']
   let e := Module.finBasis K L
@@ -40,6 +89,7 @@ theorem trDR_isTrDR_unique : ∀ (k K L : Type) [Field k] [CharZero k] [Field K]
       obtain ⟨m, b, ω, rfl⟩ := hspan y
       refine ⟨fun j => ∑ i, e.repr (b i) j • ω i, ?_⟩
       change ∑ j, e j • mapDR k K L (∑ i, e.repr (b i) j • ω i) = _
+
       simp only [map_sum, Finset.smul_sum]
       rw [Finset.sum_comm]
       refine Finset.sum_congr rfl fun i _ => ?_
@@ -67,11 +117,12 @@ theorem trDR_isTrDR_unique : ∀ (k K L : Type) [Field k] [CharZero k] [Field K]
     simp only [smul_smul, ← Finset.sum_smul]
     congr 1
     conv_rhs => rw [← e.sum_repr b]
+
     simp only [map_sum, map_smul, smul_eq_mul, mul_comm]
   have htr : IsTrDR k K L (trDR k K L) := by
     have h : ∃ T, IsTrDR k K L T := ⟨_, ex⟩
     unfold trDR
-    rw [dif_pos h]
+    rw [dite_eq_left h]
     exact h.choose_spec
   exact ⟨htr, fun T hT => uniq T _ hT htr⟩
 

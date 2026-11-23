@@ -1,5 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.ExistsCellOfIsSubquotient
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.NontrivialOfIrreducible
+public import Mathlib.Topology.Instances.Matrix
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -9,8 +53,8 @@ namespace GlobalTheory.SmGL.SegModel
 
 variable {k : Type} [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k]
 
-omit [ValuativeRel k] [IsNonarchimedeanLocalField k] in
 
+omit [ValuativeRel k] [IsNonarchimedeanLocalField k] in
 theorem subsingleton_irrCl_zero : Subsingleton (IrrCl (GL (Fin 0) k)) := by
   have key : ∀ σ : IrrRep (GL (Fin 0) k),
       Nonempty ((ofChar (1 : GL (Fin 0) k →* ℂˣ)).Equiv σ.ρ) := by
@@ -28,56 +72,5 @@ theorem subsingleton_irrCl_zero : Subsingleton (IrrCl (GL (Fin 0) k)) := by
   obtain ⟨ψ⟩ := key b.rep
   rw [← a.cl_rep, ← b.cl_rep]
   exact IrrRep.cl_eq_iff.2 ⟨φ.symm.trans ψ⟩
-
-theorem segmentClass_unique {Z Z' : ∀ Δ : Segment k, IrrCl (GL (Fin (Δ.len * Δ.d)) k)}
-    (h : IsSegmentClass k Z) (h' : IsSegmentClass k Z') : Z = Z' := by
-  funext Δ
-  let e : (Σ _ : Fin Δ.len, Fin Δ.d) ≃ Fin (Δ.len * Δ.d) := Fintype.equivOfCardEq (by simp)
-  have a := (h Δ Δ.start.rep Δ.start.cl_rep e (Z Δ).rep).2.1 (Z Δ).cl_rep
-  exact (Z Δ).cl_rep.symm.trans ((h' Δ Δ.start.rep Δ.start.cl_rep e (Z Δ).rep).2.2 a)
-
-theorem prod_ne_det (h : Published.ZelevinskyPolynomialRing) {χ ψ ω : kˣ →* ℂˣ} (hχ : IsSmoothChar χ)
-    (hψ : IsSmoothChar ψ) (hω : IsSmoothChar ω) :
-    IsEmpty ((prod₂ (detRep (Fin 1) χ) (detRep (Fin 1) ψ)).Equiv
-      (detRep (Fin 2) (ω * absPow k ((((2 : ℕ) : ℂ) - 1) / 2)))) := by
-  refine ⟨fun φ => ?_⟩
-  obtain ⟨Z, Ψ, hZ, hΨ, hX⟩ := h k
-  have one : ∀ {χ : kˣ →* ℂˣ} (hχ : IsSmoothChar χ), Ψ (clsGL (IrrRep.det (Fin 1) χ hχ).ρ
-      (IrrRep.hasFiniteLength _)) = MvPolynomial.X (Segment.ofChar χ hχ 1 one_pos) := by
-    intro χ hχ
-    rw [clsGL_irr, ← hX, hZ.ofChar hχ one_pos]
-    congr 3
-    simp
-  obtain ⟨hf, e⟩ := hΨ.2 1 1 _ _ (IrrRep.det (Fin 1) χ hχ).ρ (IrrRep.det (Fin 1) ψ hψ).ρ
-    (IrrRep.hasFiniteLength _) (IrrRep.hasFiniteLength _) (IrrRep.smooth _) (IrrRep.smooth _)
-  rw [one, one] at e
-  have two := hX (Segment.ofChar ω hω 2 two_pos)
-  rw [hZ.ofChar hω two_pos] at two
-  let τ := IrrRep.det (Fin (2 * 1)) (ω * absPow k ((((2 : ℕ) : ℂ) - 1) / 2))
-      (hω.mul (isSmoothChar_of_isUnram (isUnram_absPow k _)))
-  have e2 : clsGL (prod₂ (IrrRep.det (Fin 1) χ hχ).ρ (IrrRep.det (Fin 1) ψ hψ).ρ) hf =
-      clsGL τ.ρ τ.hasFiniteLength := clsGL_congr φ _ _
-  rw [e2, clsGL_irr] at e
-  have e3 := two.symm.trans e
-  have := congrArg (MvPolynomial.eval fun _ => (2 : ℤ)) e3
-  simp at this
-
-theorem sizeMatrix_two (b : SizeMatrix (fun _ : Fin 2 => Fin 1) (fun _ : Fin 2 => Fin 1)) :
-    b.1 = ![![1, 0], ![0, 1]] ∨ b.1 = ![![0, 1], ![1, 0]] := by
-  obtain ⟨b, h1, h2⟩ := b
-  have a0 := h1 0
-  have a1 := h1 1
-  have b0 := h2 0
-  simp only [Fin.sum_univ_two, Fintype.card_fin] at a0 a1 b0
-  rcases Nat.eq_zero_or_pos (b 0 0) with h | h
-  · right
-    funext i j
-    fin_cases i <;> fin_cases j <;> simp <;> omega
-  · left
-    funext i j
-    fin_cases i <;> fin_cases j <;> simp <;> omega
-
-example : Unique (SizeMatrix (fun _ : Empty => Empty) (fun _ : Empty => Empty)) :=
-  ⟨⟨⟨fun i => i.elim, fun i => i.elim, fun i => i.elim⟩⟩, fun _ => Subtype.ext (funext fun i => i.elim)⟩
 
 end GlobalTheory.SmGL.SegModel

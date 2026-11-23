@@ -1,4 +1,59 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.MvPolynomial.Monad
+public import Mathlib.Algebra.MvPolynomial.PDeriv
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.MvPolynomial.IrreducibleQuadratic
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.Polynomial.Roots
+
+@[expose] public section
+
+attribute [local simp] MvPolynomial.bind₁
 
 open MvPolynomial
 
@@ -30,7 +85,7 @@ theorem eval_rowAddGeneric (u w : ι → σ) (t : K) (P : MvPolynomial σ K) :
 theorem eval_zero_rowAddGeneric (u w : ι → σ) (P : MvPolynomial σ K) :
     Polynomial.eval 0 (rowAddGeneric u w P) = P := by
   have h := eval_rowAddGeneric u w (0 : K) P
-  simpa using h
+  simpa [MvPolynomial.aeval_X_left_apply] using h
 
 theorem rowAddGeneric_rowAddTerm (u w : ι → σ) (huw : ∀ k l, u k ≠ w l) (s : σ) :
     rowAddGeneric u w (rowAddTerm K u w s) = Polynomial.C (rowAddTerm K u w s) := by
@@ -38,6 +93,7 @@ theorem rowAddGeneric_rowAddTerm (u w : ι → σ) (huw : ∀ k l, u k ≠ w l) 
     simp [rowAddTerm, huw k]
   conv_lhs => rw [rowAddTerm]
   conv_rhs => rw [rowAddTerm]
+
   rw [map_sum, map_sum]
   refine Finset.sum_congr rfl fun k _ => ?_
   split_ifs
@@ -58,7 +114,7 @@ theorem derivative_rowAddGeneric (u w : ι → σ) (huw : ∀ k l, u k ≠ w l)
   induction P using MvPolynomial.induction_on with
   | C a => simp [rowAddGeneric, Polynomial.algebraMap_apply]
   | add p q hp hq =>
-    simp only [map_add, mul_add, Finset.sum_add_distrib, hp, hq]
+    simp only [map_add (f := _), mul_add, Finset.sum_add_distrib, hp, hq]
   | mul_X p s hp =>
     have h : ∑ k, X (u k) * pderiv (w k) (p * X s) =
         (∑ k, X (u k) * pderiv (w k) p) * X s + p * rowAddTerm K u w s := by
@@ -66,7 +122,7 @@ theorem derivative_rowAddGeneric (u w : ι → σ) (huw : ∀ k l, u k ≠ w l)
       refine Finset.sum_congr rfl fun k _ => ?_
       rw [Derivation.leibniz, smul_eq_mul, smul_eq_mul]
       ring
-    rw [h, map_add, map_mul (rowAddGeneric u w), map_mul (rowAddGeneric u w),
+    rw [h, map_add (f := _), map_mul (rowAddGeneric u w), map_mul (rowAddGeneric u w),
       map_mul (rowAddGeneric u w), Polynomial.derivative_mul, hp,
       rowAddGeneric_rowAddTerm u w huw]
     have hX : Polynomial.derivative (rowAddGeneric u w (X s : MvPolynomial σ K)) =
@@ -76,8 +132,8 @@ theorem derivative_rowAddGeneric (u w : ι → σ) (huw : ∀ k l, u k ≠ w l)
 
 end RowAdd
 
-set_option linter.unusedVariables false in
 
+set_option linter.unusedVariables false in
 theorem rowAdd_invariant_iff {K σ ι : Type*} [Field K] [CharZero K] [DecidableEq σ] [Fintype ι]
     (u w : ι → σ) (hw : Function.Injective w)
     (huw : ∀ k l, u k ≠ w l) (P : MvPolynomial σ K) :

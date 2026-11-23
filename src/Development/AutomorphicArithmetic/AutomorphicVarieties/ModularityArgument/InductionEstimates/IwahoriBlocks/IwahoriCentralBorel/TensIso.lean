@@ -1,5 +1,46 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.IwahoriBlocks.SimpleIn
-import Development.AutomorphicArithmetic.Foundations.Convolution.GeneralizedMeasures.HeckeFinAlt
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.IwahoriBlocks.SimpleIn
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import Lean.Meta.ExprDefEq
+
+@[expose] public section
 
 open MeasureTheory NumberField IsDedekindDomain Filter Topology
 open GroundTheory.Automorphic GroundTheory.Automorphic.Reduction GroundTheory.Automorphic.RightCosetSpace
@@ -31,7 +72,7 @@ private theorem tensIso_dens {κ : Type} (ρ : Representation ℂ P V) (σ : P �
         add_mem' := by
           rintro u u' ⟨v, hv⟩ ⟨v', hv'⟩
           refine ⟨v + v', ?_⟩
-          simp only [Pi.add_apply, map_add, Finset.sum_add_distrib]
+          simp only [Pi.add_apply, map_add (f := _), Finset.sum_add_distrib]
           rw [add_add_add_comm, hv, hv', add_zero]
         zero_mem' := ⟨0, by simp⟩
         smul_mem' := by
@@ -43,7 +84,8 @@ private theorem tensIso_dens {κ : Type} (ρ : Representation ℂ P V) (σ : P �
         b a (ρ p u) + ∑ j ∈ s, b j (ρ p (v j)) = 0 := by
       intro p u v hv
       simp only [hbe]
-      rw [← map_sum, ← map_add, hv, map_zero]
+
+      rw [← map_sum, ← map_add (f := _), hv, map_zero]
     have huniq : ∀ (u : V) (v v' : κ → V), b a u + ∑ j ∈ s, b j (v j) = 0 →
         b a u + ∑ j ∈ s, b j (v' j) = 0 → ∀ j ∈ s, v j = v' j := by
       intro u v v' h1 h2 j hj
@@ -78,7 +120,7 @@ private theorem tensIso_dens {κ : Type} (ρ : Representation ℂ P V) (σ : P �
         · let T : V →ₗ[ℂ] V :=
             { toFun := fun u => g u j
               map_add' := fun u u' => huniq (u + u') _ (g u + g u') (hg _) (by
-                simp only [Pi.add_apply, map_add, Finset.sum_add_distrib]
+                simp only [Pi.add_apply, map_add (f := _), Finset.sum_add_distrib]
                 rw [add_add_add_comm, hg, hg, add_zero]) j hj
               map_smul' := fun c u => huniq (c • u) _ (c • g u) (hg _) (by
                 simp only [Pi.smul_apply, map_smul]
@@ -172,13 +214,14 @@ theorem UpperTheory.V.Z.InvariantSubmoduleMonicPolynomial.IwahoriBlocks.tensIso 
   have hf' : (⟨f, hfe⟩ : tensIso_B ρ y) ≠ 0 := fun h => hf (congrArg Subtype.val h)
   have hnt : Nontrivial (tensIso_B ρ y) := nontrivial_of_ne _ _ hf'
   have hinj : Function.Injective ev := by
-    rw [injective_iff_map_eq_zero]
+    set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
     intro x hx
     let β := Module.Basis.ofVectorSpace ℂ (tensIso_B ρ y)
     obtain ⟨c, rfl⟩ := TensorProduct.eq_repr_basis_right β x
     have hli : LinearIndependent ℂ (fun j => (β j).1) :=
       β.linearIndependent.map' (tensIso_B ρ y).subtype (Submodule.ker_subtype _)
     have h0 := tensIso_dens ρ (fun p => y (p, 1)) hρ hS _ hli (fun j => (β j).2) c.support c (by
+
       rw [← hx, Finsupp.sum, map_sum]
       rfl)
     refine Finset.sum_eq_zero fun j hj => ?_
@@ -231,7 +274,7 @@ theorem UpperTheory.V.Z.InvariantSubmoduleMonicPolynomial.IwahoriBlocks.tensIso 
   · intro p c x
     induction x using TensorProduct.induction_on with
     | zero => simp
-    | add a b ha hb => simp only [map_add, ha, hb]
+    | add a b ha hb => simp only [map_add (f := _), ha, hb]
     | tmul v b =>
       have : extTensor ρ (tensIso_m ρ y) (p, c) (v ⊗ₜ b) = ρ p v ⊗ₜ tensIso_m ρ y c b := rfl
       rw [this, he, he]

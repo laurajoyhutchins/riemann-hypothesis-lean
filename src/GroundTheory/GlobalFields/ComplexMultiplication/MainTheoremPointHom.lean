@@ -1,6 +1,52 @@
-import Mathlib
-import GroundTheory.GlobalFields.ComplexMultiplication.ReductionAtPoint
-import GroundTheory.GlobalFields.ComplexMultiplication.InseparableFrobenius
+module
+
+public import GroundTheory.GlobalFields.ComplexMultiplication.InseparableFrobenius
+public import GroundTheory.GlobalFields.ComplexMultiplication.BaseChangeField
+public import GroundTheory.GlobalFields.ComplexMultiplication.ReductionMap
+public import GroundTheory.GlobalFields.ComplexMultiplication.ReductionAtPoint
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Global
@@ -34,7 +80,7 @@ theorem pointHomOver_comp {E E' E'' : WeierstrassCurve F} [E.IsElliptic] [E'.IsE
 
   have e : φ.1 + constMap E' E.toAffine.FunctionField R' =
       Point.map φ.comap (genericPoint E' + constMap E' E'.toAffine.FunctionField R') := by
-    rw [map_add, Isogeny.map_comap_genericPoint, map_constMap]
+    rw [map_add (f := _), Isogeny.map_comap_genericPoint, map_constMap]
   have hY : IsGenPt E' (φ.1 + constMap E' E.toAffine.FunctionField R') := by
     rw [e]
     exact isGenPt_map E' φ.comap hX'
@@ -42,7 +88,7 @@ theorem pointHomOver_comp {E E' E'' : WeierstrassCurve F} [E.IsElliptic] [E'.IsE
       Point.map φ.comap (ψ.1 + constMap E'' E'.toAffine.FunctionField (pointHomOver Ω ψ R')) := by
     rw [← app_genericPoint_add_constMap Ω ψ R', Isogeny.map_app]
     exact app_eq_of_eq ψ e _ _
-  rw [Isogeny.app_comp, app_eq_of_eq ψ e0 _ hY, h2, map_add, map_constMap, ← Isogeny.comp_val,
+  rw [Isogeny.app_comp, app_eq_of_eq ψ e0 _ hY, h2, map_add (f := _), map_constMap, ← Isogeny.comp_val,
     add_right_inj] at h1
   exact h1.symm
 

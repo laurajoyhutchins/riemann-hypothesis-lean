@@ -1,5 +1,57 @@
-import Mathlib
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.FundamentalEquivalence.LevelIntersectParabolic
+public import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.Bridge
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
 import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.Measures
+public import Mathlib.LinearAlgebra.SymplecticGroup
+
+@[expose] public section
+
 open NumberField IsDedekindDomain MeasureTheory Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.L2.SG.Sub Formalism.L2.SG.Measures
 open scoped TensorProduct ENNReal
 
@@ -15,7 +67,7 @@ variable {A : Type} [CommRing A] {n : ℕ} (s : A →+* A) (J : Matrix (Fin n) (
 
 theorem hf_add_l (x y z : Fin n → A) :
     Formalism.UG.hform s J (x + y) z = Formalism.UG.hform s J x z + Formalism.UG.hform s J y z := by
-  simp only [Formalism.UG.hform, Pi.add_apply, map_add, add_mul, Finset.sum_add_distrib]
+  simp only [Formalism.UG.hform, Pi.add_apply, map_add (f := _), add_mul, Finset.sum_add_distrib]
 
 theorem hf_smul_l (c : A) (x z : Fin n → A) :
     Formalism.UG.hform s J (c • x) z = s c * Formalism.UG.hform s J x z := by
@@ -39,6 +91,7 @@ theorem hf_sum_l {ι : Type} (t : Finset ι) (c : ι → A) (x : ι → Fin n �
 
 theorem hf_symm (hs : ∀ a, s (s a) = a) (hJ : ∀ i j, s (J j i) = J i j) (x y : Fin n → A) :
     s (Formalism.UG.hform s J x y) = Formalism.UG.hform s J y x := by
+
   simp only [Formalism.UG.hform, map_sum, map_mul, hs]
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
@@ -90,13 +143,14 @@ theorem sigR_invol (hσ : ∀ e, σ (σ e) = e) (a : R ⊗[F] E) : sigR R σ (si
   induction a using TensorProduct.induction_on with
   | zero => simp
   | tmul a b => simp [sigR, hσ]
-  | add x y hx hy => rw [map_add, map_add, hx, hy]
+  | add x y hx hy => rw [map_add (f := _), map_add (f := _), hx, hy]
 
 theorem JR_herm (hJ : IsHermND σ J) (i j : Fin n) : sigR R σ (JR R J j i) = JR R J i j := by
   simp only [JR, Matrix.map_apply, sigR_inclR, hJ.1 i j]
 
 theorem h_rat (x y : Fin n → E) :
     Formalism.UG.hform (sigR R σ) (JR R J) (ratV (F := F) R x) (ratV (F := F) R y) = inclR R (hE σ J x y) := by
+
   simp [Formalism.UG.hform, hE, ratV, JR, map_sum, map_mul, sigR_inclR]
 
 variable {r : ℕ}
@@ -210,7 +264,7 @@ theorem cc_cond (hσ : ∀ e, σ (σ e) = e) (hJ : IsHermND σ J) (hP : P.IsStd 
       field_simp
       ring
     have h1 := congrArg (fun t => inclR (F := F) R (algebraMap F E t)) h0
-    simp only [map_add, map_mul, map_neg, map_zero] at h1 ⊢
+    simp only [map_add (f := _), map_mul, map_neg, map_zero] at h1 ⊢
     linear_combination h1
   | cast j =>
     simp only [wv, cc, Fin.lastCases_castSucc]
@@ -376,14 +430,14 @@ theorem unitri_section : ∀ (F E : Type) [Field F] [NumberField F] [Field E] [N
       induction a using TensorProduct.induction_on with
       | zero => simp
       | tmul a b => simp [sigR, L]
-      | add x y hx hy => rw [map_add, map_add, hx, hy]
+      | add x y hx hy => rw [map_add (f := _), map_add (f := _), hx, hy]
     have hc : Continuous L := IsModuleTopology.continuous_of_linearMap L
     exact hc.congr fun a => (hL a).symm
   have hdet := JR_det_isUnit (Fv F v) σ J hJ
   have hy : ∀ b, Continuous fun x : {p : Fin (r + 1) × Fin (r + 1) // p.1 < p.2} → Fv F v ⊗[F] E =>
       yv (Fv F v) P x b := by
     intro b
-    refine continuous_finset_sum _ fun a _ => ?_
+    refine continuous_finsetSum _ fun a _ => ?_
     have hc : Continuous fun x : {p : Fin (r + 1) × Fin (r + 1) // p.1 < p.2} → Fv F v ⊗[F] E =>
         coef (Fv F v) x b a := by
       by_cases h : a < b

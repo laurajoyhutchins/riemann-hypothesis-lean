@@ -1,14 +1,56 @@
-import CompanionTheory.RealGroups.GeneralUnitaryRepresentations.ArchimedeanJacquetSegments.Complementary
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.StableLattices.ProductTransposeInverseDualReverseImports
-import Mathlib
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.StableLattices.GelfandKazhdanContragredientImports
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.StableLattices.ContragredientProductIrreducibleImports
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.StableLattices.DualClassInvolutiveImports
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.GlobalTheory.ParabolicInductionFiniteLength
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LanglandsSocleOfOrderFree
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.StableLattices.LocalLanglandsOfIrreducibleAdmissibleImports
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.DualClassTwistNegStatement
-import CompanionTheory.AutomorphicTheory.TemperedLocalSpectra.BernsteinZelevinsky.TopAdm
+module
+
+public import CompanionTheory.RealGroups.GeneralUnitaryRepresentations.ArchimedeanJacquetSegments.Complementary
+public import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.ZelevinskyJacquet.ZelevinskyCosocles.GKLocal
+public import GroundTheory.LocalFields.PadicLogSeries
+public import CompanionTheory.AutomorphicTheory.TemperedLocalSpectra.BernsteinZelevinsky.TopAdm
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.DualClassTwistNeg
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.DualClassTwistNegStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LanglandsSocleOfOrderFree
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LocalLanglandsOfIrreducibleAdmissibleStatement
+import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ProductTransposeInverseDualReverseStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.ZelevinskyJacquet.ZelevinskyCosocles.LUnlinkedComm
+
+@[expose] public section
 
 noncomputable section
 
@@ -27,12 +69,12 @@ theorem nontriv {G V : Type} [Group G] [AddCommGroup V] [Module ℂ V] (ρ : Rep
   have hne : (⊥ : Subrepresentation ρ) ≠ ⊤ := bot_ne_top
   exact hne (Subrepresentation.toSubmodule_injective (Subsingleton.elim _ _))
 
-theorem congrProd {h N : ℕ} {x y : Fin h → IrrGL k} (e : x = y) (hx : ∑ a, (x a).1 = N) (hy : ∑ a, (y a).1 = N) :
+theorem congrProd {h N : ℕ} {x y : Fin h → IrrGL (k := k)} (e : x = y) (hx : ∑ a, (x a).1 = N) (hy : ∑ a, (y a).1 = N) :
     Nonempty ((prodIrr x hx).Equiv (prodIrr y hy)) := by
   subst e
   exact ⟨Representation.Equiv.refl _⟩
 
-def yy (x : IrrGL k) (s : ℝ) : Fin 2 → IrrGL k := ![x.nu (-(s : ℂ)), x.nu (s : ℂ)]
+def yy (x : IrrGL (k := k)) (s : ℝ) : Fin 2 → IrrGL (k := k) := ![x.nu (-(s : ℂ)), x.nu (s : ℂ)]
 
 theorem eqv {G V W : Type} [Group G] [AddCommGroup V] [Module ℂ V] [AddCommGroup W] [Module ℂ W]
     {ρ : Representation ℂ G V} {σ : Representation ℂ G W} (e : ρ.Equiv σ) (g : G) (v : V) :
@@ -59,7 +101,7 @@ theorem hasSesq_of {G V V₁ V₂ : Type} [Group G] [TopologicalSpace G] [IsTopo
   haveI := nontriv _ hi
   refine ⟨LinearMap.mk₂'ₛₗ (RingHom.id ℂ) (starRingEnd ℂ) (fun v w => (Φ w : Module.Dual ℂ V) v)
     (fun v v' w => map_add _ v v') (fun c v w => map_smul _ c v)
-    (fun v w w' => by rw [map_add]; rfl) (fun c v w => by rw [map_smulₛₗ]; rfl), ?_, ?_⟩
+    (fun v w w' => by rw [map_add (f := _)]; rfl) (fun c v w => by rw [map_smulₛₗ]; rfl), ?_, ?_⟩
   · intro hB
     obtain ⟨w, hw⟩ := exists_ne (0 : V)
     refine hw (hΦb ((Subtype.ext (LinearMap.ext fun v => ?_)).trans (map_zero Φ).symm))
@@ -70,7 +112,7 @@ theorem hasSesq_of {G V V₁ V₂ : Type} [Group G] [TopologicalSpace G] [IsTopo
 
 end HermB
 
-set_option maxHeartbeats 2000000 in
+
 open HermB in
 theorem herm_ofB (k : Type) [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k]
     (h1 : ConjProd k) (h2 : ConjDual k) : Herm k := by
@@ -81,7 +123,7 @@ theorem herm_ofB (k : Type) [Field k] [ValuativeRel k] [TopologicalSpace k] [IsN
   change (prodIrr (yy x s) hd).IsIrreducible at hirr
 
   obtain ⟨E5⟩ := theta_contra hGK (prodIrr (yy x s) hd) (isSmooth_prodIrr _ _) hirr
-  obtain ⟨hd', ⟨E4⟩⟩ := GlobalTheory.T.product_transpose_inverse_dual_reverse hA hGK (yy x s) hd
+  obtain ⟨hd', ⟨E4⟩⟩ := GlobalTheory.T.product_transpose_inverse_dual_reverse (k := k) (h := 2) (N := N) hA hGK (yy x s) hd
 
   let c : Fin 2 → ℝ := ![-s, s]
   have hM : ∑ _a : Fin 2, x.1 = N := by

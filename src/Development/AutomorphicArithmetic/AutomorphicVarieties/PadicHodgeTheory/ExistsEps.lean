@@ -1,8 +1,60 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.IsInertiaInfiniteCyclotomic
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PublishedTheorems.KisinCrTrivial
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.TriLift
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.OrdDual
-open Formalism.BasicNotions Formalism.BasicNotions.Loc ReciprocityTheory.Gal Module UpperTheory.V.Loc UpperTheory.V.U3 UpperTheory.V.Alg UpperTheory.V.Published IsLocalRing Polynomial
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.IsInertiaInfiniteCyclotomic
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.OrdDual
+import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.OrdinaryDeformation
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.TriLift
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.AdicCompletion.Noetherian
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Noetherian.Nilpotent
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
+open Formalism.BasicNotions Formalism.BasicNotions.Loc ReciprocityTheory.Gal Module UpperTheory.V.Loc UpperTheory.V.U3 UpperTheory.V.Alg IsLocalRing Polynomial
 open UpperTheory.V.Loc.OrdinaryDeformation TrivSqZeroExt
 
 section Fibre
@@ -28,7 +80,7 @@ private noncomputable def p3 (ε : B) (h0 : π ε = 0) (hε : ∀ b, b * ε = π
     have h' : π c'.1.1 = c'.1.2.fst := c'.2
     simp only [Subalgebra.coe_mul, Prod.fst_mul, Prod.snd_mul, DualNumber.snd_mul, add_mul, mul_add, mul_smul_comm,
       smul_mul_assoc, mul_comm ε c'.1.1, hε, h, h', h0, smul_smul, add_smul, mul_zero, zero_smul, add_zero]
-    rw [map_add, map_smul, h0, smul_zero, add_zero, h, mul_comm c'.1.2.snd, mul_comm c.1.2.snd]
+    rw [map_add (f := _), map_smul, h0, smul_zero, add_zero, h, mul_comm c'.1.2.snd, mul_comm c.1.2.snd]
     abel
   commutes' a := by simp [algebraMap_eq_inl]
 
@@ -57,7 +109,7 @@ private theorem exists_eps [IsNoetherianRing B] (hπ : ∀ a, π a = 0 → IsNil
 end Fibre
 
 theorem UpperTheory.V.Loc.ordEq :
-    LocalPublishedTheorems → ∀ {l : ℕ} [Fact l.Prime] {O : Type} [CommRing O] [IsDomain O] [IsDiscreteValuationRing O] [CharZero O] [Algebra ℤ_[l] O] [Module.Finite ℤ_[l] O] [IsAdicComplete (maximalIdeal O) O] (D : Dat3 l O) (E : Type) [Field E] [Algebra ℚ_[l] E] [Module.Finite ℚ_[l] E] [Algebra O E] [Algebra ℤ_[l] E] [IsScalarTower ℤ_[l] O E] [IsScalarTower ℤ_[l] ℚ_[l] E] [IsFractionRing O E] (B : Type) [CommRing B] [Algebra ℚ_[l] B] [Module.Finite ℚ_[l] B] [Algebra O B] [Algebra ℤ_[l] B] [IsScalarTower ℤ_[l] O B] [IsScalarTower ℤ_[l] ℚ_[l] B] [Algebra E B] [IsScalarTower O E B] [IsScalarTower ℚ_[l] E B] (π : B →ₐ[E] E) (hπ : ∀ a, π a = 0 → IsNilpotent a) (r : GQ l →* GG 3 B), D.InDcr (π : B →+* E) r ↔ D.InDord (π : B →+* E) r := by
+    LocalPublishedTheorems → ∀ {l : ℕ} [Fact l.Prime] {O : Type} [CommRing O] [IsDomain O] [IsDiscreteValuationRing O] [CharZero O] [Algebra ℤ_[l] O] [Module.Finite ℤ_[l] O] [IsAdicComplete (maximalIdeal O) O] (D : Dat3 l O) (E : Type) [Field E] [Algebra ℚ_[l] E] [Module.Finite ℚ_[l] E] [Algebra O E] [Algebra ℤ_[l] E] [IsScalarTower ℤ_[l] O E] [IsScalarTower ℤ_[l] ℚ_[l] E] [IsFractionRing O E] (B : Type) [CommRing B] [Algebra ℚ_[l] B] [Module.Finite ℚ_[l] B] [Algebra O B] [Algebra ℤ_[l] B] [IsScalarTower ℤ_[l] O B] [IsScalarTower ℤ_[l] ℚ_[l] B] [Algebra E B] [IsScalarTower O E B] [IsScalarTower ℚ_[l] E B] (π : B →ₐ[E] E) (hπ : ∀ a, π a = 0 → IsNilpotent a) (r : GQ l →* GG (m := 3) (R := B)), D.InDcr (π : B →+* E) r ↔ D.InDord (π : B →+* E) r := by
   intro hP l _ O _ _ _ _ _ _ _ D E _ _ _ _ _ _ _ _ B _ _ _ _ _ _ _ _ _ _ π hπ r
   refine ⟨fun hr => ?_, dcr_of_dord⟩
   induction hn : finrank ℚ_[l] B using Nat.strong_induction_on generalizing B with
@@ -121,7 +173,7 @@ theorem UpperTheory.V.Loc.ordEq :
       (π : B →+* E).comp (f₁ : fib π →+* B) := RingHom.ext fun c => Eq.symm c.2
   have k3 : (π : B →+* E).comp (f₃ : fib π →+* B) = (π : B →+* E).comp (f₁ : fib π →+* B) := RingHom.ext fun c => by
     change π (c.1.1 + c.1.2.snd • ε) = π c.1.1
-    rw [map_add, map_smul, h0, smul_zero, add_zero]
+    rw [map_add (f := _), map_smul, h0, smul_zero, add_zero]
   obtain ⟨R, hR1, hR3⟩ := glue_hom (f₁ : fib π →+* B) (f₃ : fib π →+* B) (q : B →+* B ⧸ I) (q : B →+* B ⧸ I) i13 g13
     (conjBy n₁ u₁) r ((map_conjBy _ _ _).trans e'.symm)
   have hR := dcr_pair f₁ f₃ i13 (hR1 ▸ hr₁) (hR3 ▸ hr)

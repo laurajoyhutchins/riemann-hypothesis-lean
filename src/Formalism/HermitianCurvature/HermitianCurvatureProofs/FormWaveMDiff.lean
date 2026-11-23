@@ -1,5 +1,55 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.WaveDiffForm
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.WaveDiffForm
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.IntegrableOfDecay4
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.PBFVnice
 import Formalism.HermitianCurvature.HermitianCurvatureProofs.PBGSlice
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.VectorIsomorphismCompactSupport
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Matrix
 
@@ -14,7 +64,7 @@ theorem fsv_mul_fsv (a b t : ℂ) : P5.fsv a t * P5.fsv b t = P5.fsv (a + b) t :
   unfold P5.fsv
   rw [← Complex.exp_add]
   congr 1
-  simp only [map_add]
+  simp only [map_add (f := _)]
   ring
 
 section wave
@@ -34,7 +84,7 @@ theorem uInv_cons0 (s : ℂ) (l : C.Letter) (w : List C.Letter)
     (x : Wd.Ix (Fin (w.length + 1)) → B.Mat k ρ → (Wq →L[ℂ] Wp)) :
     (fun e' => KB.uInv s (l :: w) x (Fin.cons (0 : Fin 2) e')) = KB.uInv s w (fun e' => x (Fin.cons 0 e')) := by
   funext e'
-  rw [uInv_cons_apply, if_pos (by simp)]
+  rw [uInv_cons_apply, ite_eq_left (by simp)]
   simp
 
 theorem uInv_cons1 (s : ℂ) (l : C.Letter) (w : List C.Letter)
@@ -42,21 +92,40 @@ theorem uInv_cons1 (s : ℂ) (l : C.Letter) (w : List C.Letter)
     (fun e' => KB.uInv s (l :: w) x (Fin.cons (1 : Fin 2) e')) =
       KB.uInv s w (fun e' => x (Fin.cons 1 e')) + (if l.1 then s else conj s) • KB.uInv s w (fun e' => x (Fin.cons 0 e')) := by
   funext e'
-  rw [uInv_cons_apply, if_neg (by simp)]
+  rw [uInv_cons_apply, ite_eq_right (by simp)]
   simp only [Fin.cons_succ, Pi.add_apply, Pi.smul_apply]
 
 theorem uInv_comp (s σ : ℂ) : ∀ (w : List C.Letter) (x : Wd.Ix (Fin w.length) → B.Mat k ρ → (Wq →L[ℂ] Wp)),
     KB.uInv s w (KB.uInv σ w x) = KB.uInv (s + σ) w x
   | [], x => rfl
   | l :: w, x => by
+    have hlinear : ∀ (v : List C.Letter)
+        (a b : Wd.Ix (Fin v.length) → B.Mat k ρ → (Wq →L[ℂ] Wp)) (c : ℂ),
+        KB.uInv s v (a + c • b) = KB.uInv s v a + c • KB.uInv s v b := by
+      intro v
+      induction v with
+      | nil => intros; rfl
+      | cons m v ih =>
+        intro a b c
+        funext e
+        have htail (j : Fin 2) :
+            KB.uInv s v (fun i => a (Fin.cons j i) + c • b (Fin.cons j i)) (fun i => e i.succ) =
+              KB.uInv s v (fun i => a (Fin.cons j i)) (fun i => e i.succ) +
+                c • KB.uInv s v (fun i => b (Fin.cons j i)) (fun i => e i.succ) :=
+          congrFun (ih (fun i => a (Fin.cons j i)) (fun i => b (Fin.cons j i)) c) (fun i => e i.succ)
+        by_cases h : e 0 = 0
+        · simpa only [uInv_cons_apply, ite_eq_left h, Pi.add_apply, Pi.smul_apply] using htail 0
+        · simp only [uInv_cons_apply, ite_eq_right h, Pi.add_apply, Pi.smul_apply, htail 0, htail 1,
+            smul_add, smul_smul, mul_comm c]
+          abel
     funext e
-    rw [uInv_cons_apply, uInv_cons0, uInv_cons1, uInv_cons_apply (s + σ), Formalism.FourierDecayAlt.P.PBG.uInv_add_smul,
+    rw [uInv_cons_apply, uInv_cons0, uInv_cons1, uInv_cons_apply (s + σ), hlinear,
       uInv_comp s σ w, uInv_comp s σ w]
     split_ifs with h0 hl
     · rfl
     · simp only [Pi.add_apply, Pi.smul_apply]
       rw [add_assoc, ← add_smul, add_comm σ s]
-    · simp only [Pi.add_apply, Pi.smul_apply, map_add]
+    · simp only [Pi.add_apply, Pi.smul_apply, map_add (f := _)]
       rw [add_assoc, ← add_smul, add_comm (conj σ) (conj s)]
 
 theorem uInv_smulFun (s : ℂ) (φ : B.Mat k ρ → ℂ) : ∀ (w : List C.Letter)
@@ -65,18 +134,12 @@ theorem uInv_smulFun (s : ℂ) (φ : B.Mat k ρ → ℂ) : ∀ (w : List C.Lette
   | [], x => rfl
   | l :: w, x => by
     funext e g
-    rw [uInv_cons_apply, uInv_cons_apply]
-    have h0 : (fun e' => (fun e g => φ g • x e g) (Fin.cons (0 : Fin 2) e')) =
-        fun e' g => φ g • (fun e' => x (Fin.cons (0 : Fin 2) e')) e' g := rfl
-    have h1 : (fun e' => (fun e g => φ g • x e g) (Fin.cons (1 : Fin 2) e')) =
-        fun e' g => φ g • (fun e' => x (Fin.cons (1 : Fin 2) e')) e' g := rfl
-    rw [h0, h1, uInv_smulFun s φ w, uInv_smulFun s φ w]
-    split_ifs
-    · rfl
-    · simp only [Pi.add_apply, Pi.smul_apply, smul_add]
-      rw [smul_comm]
-    · simp only [Pi.add_apply, Pi.smul_apply, smul_add]
-      rw [smul_comm]
+    have ih0 := congrFun (congrFun (uInv_smulFun s φ w (fun i => x (Fin.cons 0 i))) (fun a => e a.succ)) g
+    have ih1 := congrFun (congrFun (uInv_smulFun s φ w (fun i => x (Fin.cons 1 i))) (fun a => e a.succ)) g
+    by_cases h : e 0 = 0
+    · simpa only [uInv_cons_apply, ite_eq_left h] using ih0
+    · simp only [uInv_cons_apply, ite_eq_right h, Pi.add_apply, Pi.smul_apply, ih0, ih1, smul_add]
+      rw [smul_comm (φ g)]
 
 theorem waveG_comp (Bs : B.RealPlaceData k ρ Wp Wq) (s σ : ℂ) (w : List C.Letter)
     (x : Wd.Ix (Fin w.length) → B.Mat k ρ → (Wq →L[ℂ] Wp)) :
@@ -109,7 +172,7 @@ theorem mDiff_eq (Bs : B.RealPlaceData k ρ Wp Wq) (σ : ℂ) (w : List C.Letter
     rw [waveG_comp]; congr 1; ring
   have e3 : KB.waveG Bs σ w (KB.waveG Bs (2 * σ) w x) = KB.waveG Bs (3 * σ) w x := by
     rw [waveG_comp]; congr 1; ring
-  simp only [mDiff, pow_succ, pow_zero, one_mul, Module.End.mul_apply, LinearMap.sub_apply, Module.End.one_apply,
+  simp only [mDiff, pow_succ, pow_zero, one_mul, mul_apply_eq_comp, LinearMap.sub_apply, one_apply_eq_self,
     map_sub, hV]
   rw [e2, e3]
   module
@@ -180,7 +243,7 @@ theorem form_wave_mDiff (P : M.Par) (p : KB.Pl P Wp Wq) (j : ℕ) (hj : j ≤ P.
       _ = waveL (p.T.bs j) s w (KB.waveG (p.T.bs j) (3 * σ) w x) -
             (3 : ℂ) • waveL (p.T.bs j) s w (KB.waveG (p.T.bs j) (2 * σ) w x) +
             (3 : ℂ) • waveL (p.T.bs j) s w (KB.waveG (p.T.bs j) σ w x) - waveL (p.T.bs j) s w x := by
-          simp only [map_sub, map_add, map_smul]
+          simp only [map_sub, map_add (f := _), map_smul]
       _ = _ := by
           simp only [hV, waveG_comp]
           module

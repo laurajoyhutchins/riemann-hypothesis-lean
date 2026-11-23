@@ -1,4 +1,52 @@
-import Mathlib
+module
+
+public import Mathlib.Analysis.Calculus.IteratedDeriv.Defs
+public import Mathlib.Analysis.Calculus.LineDeriv.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+public import Mathlib.Analysis.Analytic.IteratedFDeriv
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Analysis.Calculus.Deriv.Shift
+
+@[expose] public section
 
 open Filter Topology
 open scoped ContDiff
@@ -16,8 +64,6 @@ noncomputable def lineDerivList : List E → (E → V) → E → V
   | v :: l, F => fun z => lineDeriv 𝕜 (lineDerivList l F) z v
 
 variable {𝕜}
-
-@[simp] theorem lineDerivList_nil (F : E → V) : lineDerivList 𝕜 [] F = F := rfl
 
 theorem lineDerivList_cons (v : E) (l : List E) (F : E → V) :
     lineDerivList 𝕜 (v :: l) F = fun z => lineDeriv 𝕜 (lineDerivList 𝕜 l F) z v := rfl
@@ -48,7 +94,7 @@ theorem lineDerivList_comp_linearMap {E' : Type*} [AddCommGroup E'] [Module 𝕜
   | nil => rfl
   | cons v l ih =>
     funext z
-    simp only [lineDerivList_cons, ih, lineDeriv, List.map_cons, map_add, map_smul]
+    simp only [lineDerivList_cons, ih, lineDeriv, List.map_cons, map_add (f := _), map_smul]
 
 theorem lineDerivList_comp_add_const (c : E) (l : List E) (F : E → V) :
     lineDerivList 𝕜 l (fun z => F (z + c)) = fun z => lineDerivList 𝕜 l F (z + c) := by
@@ -74,7 +120,7 @@ theorem lineDerivList_replicate (n : ℕ) (v : E) (F : E → V) (z : E) (t : �
     lineDerivList 𝕜 (List.replicate n v) F (z + t • v)
       = iteratedDeriv n (fun s : 𝕜 => F (z + s • v)) t := by
   induction n generalizing t with
-  | zero => simp
+  | zero => simp [lineDerivList]
   | succ n ih =>
     rw [List.replicate_succ, lineDerivList_cons, iteratedDeriv_succ]
     simp only [lineDeriv, add_assoc, ← add_smul, ih]
@@ -115,7 +161,7 @@ theorem analyticAt_lineDerivList {F : E → V} {a : E} (h : AnalyticAt 𝕜 F a)
 theorem lineDerivList_ofFn {F : E → V} {a : E} (h : AnalyticAt 𝕜 F a) {n : ℕ} (m : Fin n → E) :
     lineDerivList 𝕜 (List.ofFn m) F a = iteratedFDeriv 𝕜 n F a m := by
   induction n generalizing a with
-  | zero => simp
+  | zero => simp [lineDerivList]
   | succ n ih =>
     have hev : lineDerivList 𝕜 (List.ofFn fun i => m i.succ) F
         =ᶠ[𝓝 a] fun z => iteratedFDeriv 𝕜 n F z (Fin.tail m) := by

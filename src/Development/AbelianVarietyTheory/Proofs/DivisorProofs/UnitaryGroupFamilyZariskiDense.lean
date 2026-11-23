@@ -1,5 +1,60 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DetGNeZero
+module
+
+public import Mathlib.Algebra.MvPolynomial.Monad
+public import Mathlib.Basic.Complex.Basic
+public import Mathlib.LinearAlgebra.UnitaryGroup
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.MvPolynomial.Funext
+public import Mathlib.LinearAlgebra.Matrix.PosDef
+
+@[expose] public section
+
 open Classical MvPolynomial
 open scoped Matrix ComplexOrder
 
@@ -56,7 +111,7 @@ theorem eq_zero_of_eval_skew (R : MvPolynomial (ι × Fin a × Fin a) ℂ)
     rw [eval_bind₁_subst]
     congr 2
     funext v
-    simp
+    simp only [eval_add, eval_mul, eval_C, eval_X]
   have hS0 : bind₁ (fun v => C cα * X v + C cβ * X (tr v)) R = 0 := by
     apply eq_zero_of_eval_real
     intro u
@@ -70,7 +125,7 @@ theorem eq_zero_of_eval_skew (R : MvPolynomial (ι × Fin a × Fin a) ℂ)
   have := hev (fun v => cγ * x v + cδ * x (tr v))
   rw [hS0, map_zero] at this
   rw [map_zero, this]
-  congr 2
+  apply congrArg (fun y => eval y R)
   funext v
   simp only [tr_tr]
   linear_combination (-(x v)) * c_one - x (tr v) * c_zero
@@ -140,7 +195,7 @@ theorem mapMatrix_varMat (x : ι × Fin a × Fin a → ℂ) (τ : ι) :
 
 theorem eval_det_one_add (x : ι × Fin a × Fin a → ℂ) (τ : ι) :
     eval x (1 + varMat (a := a) τ).det = (1 + famOf x τ).det := by
-  rw [RingHom.map_det, map_add, map_one, mapMatrix_varMat]
+  rw [RingHom.map_det, map_add (f := _), map_one, mapMatrix_varMat]
 
 theorem eval_cay_entry (x : ι × Fin a × Fin a → ℂ) (τ : ι) (i j : Fin a) :
     eval x (((1 - varMat (a := a) τ) * (1 + varMat τ).adjugate :
@@ -148,7 +203,7 @@ theorem eval_cay_entry (x : ι × Fin a × Fin a → ℂ) (τ : ι) (i j : Fin a
       ((1 - famOf x τ) * (1 + famOf x τ).adjugate) i j := by
   have e : ∀ M : Matrix (Fin a) (Fin a) (MvPolynomial (ι × Fin a × Fin a) ℂ),
       eval x (M i j) = ((eval x).mapMatrix M) i j := fun _ => rfl
-  rw [e, map_mul, map_sub, map_one, RingHom.map_adjugate, map_add, map_one, mapMatrix_varMat]
+  rw [e, map_mul, map_sub, map_one, RingHom.map_adjugate, map_add (f := _), map_one, mapMatrix_varMat]
 
 variable [Fintype ι]
 
@@ -160,7 +215,7 @@ def numer (v : ι × Fin a × Fin a) : MvPolynomial (ι × Fin a × Fin a) ℂ :
     ∏ τ ∈ Finset.univ.erase v.1, (1 + varMat τ).det
 
 def clearQ (Q : MvPolynomial (ι × Fin a × Fin a) ℂ) : MvPolynomial (ι × Fin a × Fin a) ℂ :=
-  ∑ d ∈ Q.support, C (coeff d Q) * (∏ v ∈ d.support, numer v ^ d v) *
+  ∑ d ∈ Q.support, C (AddMonoidAlgebra.coeff Q d) * (∏ v ∈ d.support, numer v ^ d v) *
     denom ^ (Q.totalDegree - d.sum fun _ e => e)
 
 theorem eval_denom (x : ι × Fin a × Fin a → ℂ) :
@@ -174,7 +229,7 @@ theorem eval_numer (x : ι × Fin a × Fin a → ℂ) (v : ι × Fin a × Fin a)
 
 theorem eval_div_mul_pow_totalDegree_clear_denominators {σ : Type} (Q : MvPolynomial σ ℂ) (p : σ → ℂ) (D : ℂ) (hD : D ≠ 0) :
     eval (fun v => p v / D) Q * D ^ Q.totalDegree =
-      ∑ d ∈ Q.support, coeff d Q * (∏ v ∈ d.support, p v ^ d v) *
+      ∑ d ∈ Q.support, AddMonoidAlgebra.coeff Q d * (∏ v ∈ d.support, p v ^ d v) *
         D ^ (Q.totalDegree - d.sum fun _ e => e) := by
   rw [eval_eq, Finset.sum_mul]
   refine Finset.sum_congr rfl fun d hd => ?_
@@ -205,6 +260,7 @@ theorem eval_clearQ (Q : MvPolynomial (ι × Fin a × Fin a) ℂ) (x : ι × Fin
     rw [cay, Matrix.inv_def, Ring.inverse_eq_inv', Matrix.mul_smul, Matrix.smul_apply, smul_eq_mul]
     field_simp [hdet v.1, hE]
   rw [hfun, eval_div_mul_pow_totalDegree_clear_denominators Q _ _ hD]
+
   simp only [clearQ, map_sum, map_mul, map_prod, map_pow, eval_C]
 
 theorem unitary_zariski_dense : ∀ {ι : Type} [Fintype ι] {a : ℕ} (Q : MvPolynomial (ι × Fin a × Fin a) ℂ),

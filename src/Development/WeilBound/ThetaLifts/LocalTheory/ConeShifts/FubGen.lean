@@ -1,4 +1,57 @@
-import Mathlib
+module
+
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.Analysis.InnerProductSpace.Basic
+public import Mathlib.MeasureTheory.Integral.Bochner.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.MeasureTheory.Integral.Prod
+public import Mathlib.MeasureTheory.Measure.Haar.Unique
+
+@[expose] public section
 
 noncomputable section
 
@@ -96,23 +149,24 @@ theorem Sys.closed (s : Sys P K U good) {a : R} (ha : good a) : IsClosed (part P
   s.cK.inter (isClosed_eq (s.cont a ha) continuous_id)
 
 theorem Sys.split (s : Sys P K U good) {a b : R} (ha : good a) (hb : good b) (hab : a * b = 0) :
-    Split (part P K (a + b)) (part P K a) (part P K b) (P a) (P b) where
-  cp := s.cont a ha
-  cq := s.cont b hb
-  cA := s.closed ha
-  cB := s.closed hb
-  cS := s.closed (s.add a b ha hb hab).1
-  mA g hg := ⟨s.mK a ha g hg.1, by show P a (P a g) = P a g; rw [s.comp a a ha ha, s.idem a ha]⟩
-  mB g hg := ⟨s.mK b hb g hg.1, by show P b (P b g) = P b g; rw [s.comp b b hb hb, s.idem b hb]⟩
-  mul g hg := ((s.add a b ha hb hab).2 g).symm.trans hg.2
-  hA g hg := by
-    have h0 : P a g = g := hg.2
-    have h1 : P b g = 1 := by rw [← h0, s.comp b a hb ha, mul_comm, hab, s.zero]
-    exact ⟨⟨hg.1, by show P (a + b) g = g; rw [(s.add a b ha hb hab).2, h0, h1, mul_one]⟩, h0, h1⟩
-  hB g hg := by
-    have h0 : P b g = g := hg.2
-    have h1 : P a g = 1 := by rw [← h0, s.comp a b ha hb, hab, s.zero]
-    exact ⟨⟨hg.1, by show P (a + b) g = g; rw [(s.add a b ha hb hab).2, h0, h1, one_mul]⟩, h0, h1⟩
+    Split (part P K (a + b)) (part P K a) (part P K b) (P a) (P b) := by
+  exact {
+    cp := s.cont a ha
+    cq := s.cont b hb
+    cA := s.closed ha
+    cB := s.closed hb
+    cS := s.closed (s.add a b ha hb hab).1
+    mA g hg := ⟨s.mK a ha g hg.1, by show P a (P a g) = P a g; rw [s.comp a a ha ha, s.idem a ha]⟩
+    mB g hg := ⟨s.mK b hb g hg.1, by show P b (P b g) = P b g; rw [s.comp b b hb hb, s.idem b hb]⟩
+    mul g hg := ((s.add a b ha hb hab).2 g).symm.trans hg.2
+    hA g hg := by
+      have h0 : P a g = g := hg.2
+      have h1 : P b g = 1 := by rw [← h0, s.comp b a hb ha, mul_comm, hab, s.zero]
+      exact ⟨⟨hg.1, by show P (a + b) g = g; rw [(s.add a b ha hb hab).2, h0, h1, mul_one]⟩, h0, h1⟩
+    hB g hg := by
+      have h0 : P b g = g := hg.2
+      have h1 : P a g = 1 := by rw [← h0, s.comp a b ha hb, hab, s.zero]
+      exact ⟨⟨hg.1, by show P (a + b) g = g; rw [(s.add a b ha hb hab).2, h0, h1, one_mul]⟩, h0, h1⟩ }
 
 def CO (P : R → G →* G) (K : Subgroup G) (U : Set G) (a : R) : Prop :=
   IsCompact {x : part P K a | x.1 ∈ U} ∧ IsOpen {x : part P K a | x.1 ∈ U}
@@ -188,8 +242,8 @@ theorem Sys.prod (s : Sys P K U good) {ι : Type} [DecidableEq ι] (e : ι → R
     refine ⟨j1, ?_⟩
     rw [j2, i2, hk, Finset.prod_insert hi]; simp [mul_assoc]
 
-omit [IsTopologicalGroup G] [LocallyCompactSpace G] [SecondCountableTopology G] [T2Space G] in
 
+omit [IsTopologicalGroup G] [LocallyCompactSpace G] [SecondCountableTopology G] [T2Space G] in
 theorem transport {S S' : Subgroup G} (h : S = S') (mS : MeasurableSpace S) (hm : mS = borel S) (x : @Measure S mS) :
     ∃ x' : Measure S', (@Measure.IsHaarMeasure _ _ _ mS x → x'.IsHaarMeasure) ∧
       (∀ U : Set G, x' {y | y.1 ∈ U} = x {y | y.1 ∈ U}) ∧ ∀ f : G → ℂ,
@@ -213,11 +267,11 @@ def unitP {A : Type} [Ring A] [Algebra R A] (a : R) : Aˣ →* Aˣ := by
 
 theorem coe_unitP {A : Type} [Ring A] [Algebra R A] {a : R} (h : a * a = a) (x : Aˣ) :
     (unitP a x : A) = a • (x : A) + (1 - a) • (1 : A) := by
-  unfold unitP; rw [dif_pos h]; rfl
+  unfold unitP; rw [dite_eq_left h]; rfl
 
 theorem unitInvariant_continuous {A : Type} [Ring A] [Algebra R A] [TopologicalSpace A] [IsTopologicalRing A] [ContinuousConstSMul R A] {a : R}
     (h : a * a = a) : Continuous (unitP (A := A) a) := by
-  unfold unitP; rw [dif_pos h]
+  unfold unitP; rw [dite_eq_left h]
   exact Continuous.units_map _ (by show Continuous fun x : A => a • x + (1 - a) • (1 : A); fun_prop)
 
 theorem unitInvariant_comp {A : Type} [Ring A] [Algebra R A] {a b : R} (ha : a * a = a) (hb : b * b = b) (x : Aˣ) :

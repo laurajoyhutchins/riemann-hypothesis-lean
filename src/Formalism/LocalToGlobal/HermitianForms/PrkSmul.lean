@@ -1,4 +1,44 @@
-import Formalism.LocalToGlobal.HermitianForms.TiedStep
+module
+
+public import Formalism.LocalToGlobal.HermitianForms.TiedStep
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -60,7 +100,7 @@ abbrev Lk {u : D.what₂.Word} (A : AtTTied u) (i : ℕ) (hi : i ≤ D.R.m) (v :
     Submodule (𝓞 D.host.E) (Fin (D.R.N i) → D.host.E) :=
   clsCrd D u i hi c ⊔ A.Pv v • Ld D u i hi c
 
-set_option maxHeartbeats 1000000 in
+
 
 structure LvTied (u : D.what₂.Word) (A : AtTTied u) (i : ℕ) (hi : i ≤ D.R.m) where
 
@@ -81,7 +121,7 @@ structure LvTied (u : D.what₂.Word) (A : AtTTied u) (i : ℕ) (hi : i ≤ D.R.
 
 variable {u : D.what₂.Word} {A : AtTTied u} {i : ℕ} {hi : i ≤ D.R.m}
 
-set_option maxHeartbeats 1000000 in
+
 
 def FvTie (P : LvTied u A i hi) (K : ClsTied u i hi)
     (fMe : ∀ v, K.lev.fM (A.eV v).1 (A.eV v).2 ≃+ (D.mem u).A.Fv v) : Prop :=
@@ -92,7 +132,7 @@ def FvTie (P : LvTied u A i hi) (K : ClsTied u i hi)
         (Submodule.span (𝓞 D.host.E) (dualSet (sigD D : D.host.E →+* D.host.E) (gramN D i hi) K.lev.Lb))),
     (D.fm u).fv i v c (P.pr v c z) = fMe v (K.lev.fT (A.eV v).1 (A.eV v).2 ⟨_, hz⟩)
 
-set_option maxHeartbeats 1000000 in
+
 
 def UpTie (P : LvTied u A i hi) (K : ClsTied u i hi) (W : ValTied u A.eV i hi K) : Prop :=
   ∀ v c (z : ↥(Ld D u i hi c)), (D.fm u).fv i v c (P.pr v c z) = 1 →
@@ -113,23 +153,8 @@ def UpTie (P : LvTied u A i hi) (K : ClsTied u i hi) (W : ValTied u A.eV i hi K)
         (D.fm u).upT i v c (P.pr v c z) (fun s => g (K.y ((D.fm u).up i v c (P.pr v c z))) (W.eY s)) =
           fun s => g (K.y c * η) (W.eY s)
 
-set_option maxHeartbeats 1000000 in
 
-def DnTie (P : LvTied u A i hi) (K : ClsTied u i hi) (W : ValTied u A.eV i hi K) : Prop :=
-  ∀ v c (g : Module.Dual ((D.mem u).A.Fv v) ((D.fm u).lk i v c)), g ≠ 0 →
-    ∃ (γ : UJ (sigD D : D.host.E →+* D.host.E) (gramN D i hi))
-      (η : UPts (sigD D) (gramN D i hi) (FiniteAdeleRing (𝓞 D.host.F) D.host.F)) (κ : K.lev.U),
-      (∀ v', v' ≠ (A.eV v).1 → bc (prV (E := D.host.E) v') η.1 = 1) ∧
-      bc (inclE (F := D.host.F) (FiniteAdeleRing (𝓞 D.host.F) D.host.F)) γ.1 *
-        (K.y ((D.fm u).dn i v c g)).1 = (K.y c).1 * η.1 * κ.1 ∧
-      Formalism.HermitianLatticesTheory.localization₂ (A.Pv v) (mulLat γ.1.1 (Ld D u i hi ((D.fm u).dn i v c g))) =
-        Formalism.HermitianLatticesTheory.localization₂ (A.Pv v) (clsCrd D u i hi c) ∧
-      (∀ (x : ↥(Ld D u i hi ((D.fm u).dn i v c g))) (hx : γ.1.1 *ᵥ x.1 ∈ Lk A i hi v c),
-        (D.fm u).fv i v _ (P.pr v _ x) = g (P.prk v c ⟨_, hx⟩)) ∧
-      ∀ f ∈ AdFun K.lev (embT D),
-        (D.fm u).dnT i v c g (fun s => f (K.y ((D.fm u).dn i v c g)) (W.eY s)) = fun s => f (K.y c * η) (W.eY s)
 
-set_option maxHeartbeats 1000000 in
 
 def UpNatTie (P : LvTied u A i hi) (K : ClsTied u i hi) (W : ValTied u A.eV i hi K) : Prop :=
   ∀ v c (z : ↥(Ld D u i hi c)), (D.fm u).fv i v c (P.pr v c z) = 1 →
@@ -149,7 +174,7 @@ def UpNatTie (P : LvTied u A i hi) (K : ClsTied u i hi) (W : ValTied u A.eV i hi
       ∀ (h : (D.mem u).C.Y i → ℂ) s s', IsTr (atInf (embT D) γ.1.1) (W.eY s') (W.eY s) →
         (D.fm u).upT i v c (P.pr v c z) h s = (((K.lev.chi κ)⁻¹ : ℂˣ) : ℂ) * h s'
 
-set_option maxHeartbeats 1000000 in
+
 
 def DnNatTie (P : LvTied u A i hi) (K : ClsTied u i hi) (W : ValTied u A.eV i hi K) : Prop :=
   ∀ v c (g : Module.Dual ((D.mem u).A.Fv v) ((D.fm u).lk i v c)), g ≠ 0 →

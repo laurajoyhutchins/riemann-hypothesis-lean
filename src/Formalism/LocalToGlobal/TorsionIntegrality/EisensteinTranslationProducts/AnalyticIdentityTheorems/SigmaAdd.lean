@@ -1,4 +1,54 @@
-import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.ThetaLine
+module
+
+public import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.ThetaLine
+public import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.Legendre
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Analysis.Complex.CauchyIntegral
+
+@[expose] public section
 
 noncomputable section
 open Filter Topology
@@ -121,19 +171,6 @@ private lemma exists_twistedGamma_eq_sq_mul_analytic (he : SigmaEntire) (ho : Si
   rw [← e1, ← e2]
   ring
 
-lemma additionNumerator_order (he : SigmaEntire) (ho : SigmaOdd) (hz : SigmaZero) (hs : SigmaSimple) :
-    (2 : WithTop ℤ) ≤ meromorphicOrderAt (frobeniusStickelbergerDetMulSigmaCube L w) 0 := by
-  obtain ⟨m, hm, hgm⟩ := exists_twistedGamma_eq_sq_mul_analytic L w he ho hz hs
-  have hfun : frobeniusStickelbergerDetMulSigmaCube L w = (fun y : ℂ => y ^ 2) * m := funext fun y => hgm y
-  have hmer : MeromorphicAt (fun y : ℂ => y ^ 2) 0 := (analyticAt_id.pow 2).meromorphicAt
-  have h2 : meromorphicOrderAt (fun y : ℂ => y ^ 2) 0 = ((2 : ℤ) : WithTop ℤ) :=
-    (meromorphicOrderAt_eq_int_iff hmer).2
-      ⟨fun _ => 1, analyticAt_const, one_ne_zero, Filter.Eventually.of_forall fun y => by simp⟩
-  rw [hfun, meromorphicOrderAt_mul hmer hm.meromorphicAt, h2]
-  have h3 := hm.meromorphicOrderAt_nonneg
-  calc (2 : WithTop ℤ) = ((2 : ℤ) : WithTop ℤ) + 0 := by norm_cast
-    _ ≤ ((2 : ℤ) : WithTop ℤ) + meromorphicOrderAt m 0 := add_le_add le_rfl h3
-
 private lemma meromorphicAt_weierstrassP (z : ℂ) : MeromorphicAt L.weierstrassP z := by
   classical
   obtain ⟨l, hl⟩ : ∃ l : L.lattice, z ∉ (L.lattice : Set ℂ) \ {(l : ℂ)} := by
@@ -196,12 +233,6 @@ private lemma exists_analytic_eq_additionQuotient_near_zero (he : SigmaEntire) (
   rw [eq_div_iff (pow_ne_zero _ h2)]
   apply mul_left_cancel₀ (pow_ne_zero 2 hy)
   linear_combination h1
-
-lemma additionQuotient_order_zero (he : SigmaEntire) (ho : SigmaOdd) (hz : SigmaZero) (hs : SigmaSimple)
-    (hord : SigmaOrder) : 0 ≤ meromorphicOrderAt (additionQuotient L w) 0 := by
-  obtain ⟨A, hA, hfA⟩ := exists_analytic_eq_additionQuotient_near_zero L w he ho hz hs
-  rw [meromorphicOrderAt_congr hfA]
-  exact hA.meromorphicOrderAt_nonneg
 
 lemma additionQuotient_order (he : SigmaEntire) (ho : SigmaOdd) (hz : SigmaZero) (hs : SigmaSimple)
     (hq : SigmaQuasi) (hord : SigmaOrder) (z : ℂ) : 0 ≤ meromorphicOrderAt (additionQuotient L w) z := by

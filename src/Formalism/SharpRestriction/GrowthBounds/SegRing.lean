@@ -1,4 +1,48 @@
-import Formalism.SharpRestriction.GrowthBounds.ObjPol
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.ObjPol
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -18,15 +62,15 @@ namespace Frames
 
 variable {n' r : ℕ} [NeZero n'] (F : Frames n' r)
 
-open Classical in
 
+open Classical in
 def letters (j : ℤ) : Finset ℤ :=
   (Finset.Icc (F.fr (j - 1) 0) (F.fr j (r - 1))).filter fun x => posOf n' x ∈ F.TT
 
 def IsW (j x : ℤ) : Prop := x ≤ F.fr (j - 1) (r - 1)
 
-open Classical in
 
+open Classical in
 def LLset (j : ℤ) : Finset ℤ :=
   (Finset.Ioo (F.fr (j - 1) (r - 1)) (F.fr j 0)).filter fun x => posOf n' x ∈ F.TT
 
@@ -35,14 +79,14 @@ def dist (j x : ℤ) : ℕ := (F.fr j (r - 1) - x).toNat
 def GapGt (L : ℕ) (j x : ℤ) : Prop :=
   ∀ y ∈ F.letters j, y < x → (∀ z ∈ F.letters j, z < x → z ≤ y) → (L : ℤ) < x - y
 
-open Classical in
 
+open Classical in
 def oldest (j x : ℤ) : ℤ :=
   let l := ((F.letters j).filter fun z => Even z ∧ z < x).sort (· ≤ ·)
   l.getD (l.length - r) 0
 
-open Classical in
 
+open Classical in
 def Valid (L₁ N₁ : ℕ) : Prop :=
   1 ≤ F.J ∧
   (∀ j : ℤ, ∀ i, F.fr (j + F.J) i = F.fr j i + n') ∧

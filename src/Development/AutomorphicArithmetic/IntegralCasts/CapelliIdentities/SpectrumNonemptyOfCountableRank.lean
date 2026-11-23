@@ -1,4 +1,62 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.Algebra.Subalgebra.Basic
+public import Mathlib.Basic.Complex.Basic
+public import Mathlib.LinearAlgebra.Dimension.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+public import Mathlib.FieldTheory.IsAlgClosed.Spectrum
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.Algebra.Spectrum.Basic
+public import Mathlib.Algebra.Polynomial.AlgebraMap
+public import Mathlib.Algebra.Polynomial.Splits
+public import Mathlib.Analysis.Complex.Cardinality
+public import Mathlib.FieldTheory.IsAlgClosed.Basic
+
+@[expose] public section
 
 open Polynomial in
 private lemma spectrum_nonempty_of_countable_rank {V : Type} [AddCommGroup V] [_root_.Module ℂ V]
@@ -31,8 +89,10 @@ private lemma spectrum_nonempty_of_countable_rank {V : Type} [AddCommGroup V] [_
     rw [this, hR, mul_one]
   have hp : aeval T p v = 0 := by
     have h1 := congrArg (aeval T (∏ j ∈ s, (X - C j))) hm
+
     rw [map_zero, map_sum] at h1
     rw [← h1]
+
     simp only [p, map_sum, LinearMap.sum_apply]
     refine Finset.sum_congr rfl fun a ha => ?_
     rw [map_mul, aeval_C, ← key a ha, map_smul]
@@ -40,7 +100,7 @@ private lemma spectrum_nonempty_of_countable_rank {V : Type} [AddCommGroup V] [_
   have hp0 : p ≠ 0 := by
     intro h0
     have h1 : eval i p = m i * ∏ j ∈ s.erase i, (i - j) := by
-      simp only [p, eval_finset_sum, eval_mul, eval_C]
+      simp only [p, Polynomial.eval_finsetSum, eval_mul, eval_C]
       rw [Finset.sum_eq_single_of_mem i hi]
       · simp [q, eval_prod]
       · intro b hb hbi
@@ -111,7 +171,7 @@ theorem UpperTheory.Reformulated.B.DYhd6.main :
     let e : V →ₗ[B] V :=
       { toFun := fun x => a • x - d x
         map_add' := fun x y => by
-          rw [smul_add, d.map_add]
+          rw [smul_add, map_add d x y]
           abel
         map_smul' := fun b x => by
           simp only [RingHom.id_apply]

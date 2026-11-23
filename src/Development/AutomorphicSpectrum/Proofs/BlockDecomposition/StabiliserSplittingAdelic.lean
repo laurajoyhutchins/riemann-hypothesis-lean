@@ -1,8 +1,51 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ActWOneApply
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FinsetFinTwoEqCases
+import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.AdelesLocallyCompactSecondCountable
 import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.HaarFundamentalDomainOrthogonalSum
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FinsetFinTwoEqCases
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AdeleQuotientCompactRepresentatives
+import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.TensorLocallyCompactRingStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AdeleQuotientCompactRepresentatives
+import Development.AbelianVarietyTheory.Proofs.HeightProofs.ExistsCompactAdeleRingModNumberField
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -18,14 +61,14 @@ section Cont
 theorem continuous_rowv {A X : Type} [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
     [TopologicalSpace X] {M : ℕ} {s : A →+* A} (hs : Continuous s) (J : Matrix (Fin M) (Fin M) A)
     {w : X → Fin M → A} (hw : Continuous w) (b : Fin M) : Continuous fun x => rowv s J (w x) b :=
-  continuous_finset_sum _ fun a _ =>
+  continuous_finsetSum _ fun a _ =>
     (hs.comp ((continuous_apply a).comp hw)).mul continuous_const
 
 theorem continuous_hv {A X : Type} [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
     [TopologicalSpace X] {M : ℕ} {s : A →+* A} (hs : Continuous s) (J : Matrix (Fin M) (Fin M) A)
     {w v : X → Fin M → A} (hw : Continuous w) (hv' : Continuous v) :
     Continuous fun x => hv s J (w x) (v x) :=
-  continuous_finset_sum _ fun b _ =>
+  continuous_finsetSum _ fun b _ =>
     (continuous_rowv hs J hw b).mul ((continuous_apply b).comp hv')
 
 theorem continuous_nM {A X : Type} [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
@@ -54,7 +97,7 @@ theorem lift_hz {w : Fin M → E} {z : E} (hz : z + σ z + hv (σ : E →+* E) J
     inclR R z + sigR R σ (inclR R z) +
       hv (sigR R σ) (JR R J) (fun i => inclR R (w i)) (fun i => inclR R (w i)) = 0 := by
   have h := congrArg (inclR (F := F) (E := E) R) hz
-  rw [map_add, map_add, hv_map (inclR R) (s := (σ : E →+* E)) (s' := sigR R σ)
+  rw [map_add (f := _), map_add (f := _), hv_map (inclR R) (s := (σ : E →+* E)) (s' := sigR R σ)
     (fun x => (sigR_incl R σ x).symm), map_zero] at h
   rw [sigR_incl]
   exact h
@@ -95,7 +138,7 @@ theorem exists_move_alt [CharZero E] (hσ : ∀ x, σ (σ x) = x) (hJ : ∀ i j,
   have hHs := sigR_halfR (F := F) (E := E) R σ
   have hskt : sigR R σ (z + halfR F E R * hv (sigR R σ) (JR R J) w w) =
       -(z + halfR F E R * hv (sigR R σ) (JR R J) w w) := by
-    rw [map_add, map_mul, hHs, s_hv hsR hJR]
+    rw [map_add (f := _), map_mul, hHs, s_hv hsR hJR]
     linear_combination hz + (hv (sigR R σ) (JR R J) w w) * hH
   obtain ⟨b, hb⟩ := eq_tmul_of_skew R h2 hδ hσδ hskt
   obtain ⟨x, hx⟩ := hC₀c b
@@ -199,14 +242,16 @@ theorem exists_ker_top [CharZero E] (hσ : ∀ x, σ (σ x) = x) (hJ : ∀ i j, 
   have hsw : ∀ a, sigR R σ (w a) = u a := fun a => hsR _
   have e1 : hv (sigR R σ) (JR R J) w (fun i => inclR R (Y j' i)) =
       ∑ a, u a * inclR R ((J *ᵥ Y j') a) := by
+
     simp only [hv, rowv, hsw, Finset.sum_mul, Matrix.mulVec, dotProduct, map_sum, map_mul,
-      Finset.mul_sum, JR, Matrix.map_apply]
+    Finset.mul_sum, JR, Matrix.map_apply]
     rw [Finset.sum_comm]
     exact Finset.sum_congr rfl fun a _ => Finset.sum_congr rfl fun b _ => by ring
   have e2 : ∀ v : Fin M → E, ∑ a, u a * inclR R (v a) = -∑ j, t j * inclR R ((C *ᵥ v) j) := by
     intro v
+
     simp only [u, neg_mul, Finset.sum_neg_distrib, Finset.sum_mul, Matrix.mulVec, dotProduct,
-      map_sum, map_mul, Finset.mul_sum]
+    map_sum, map_mul, Finset.mul_sum]
     rw [Finset.sum_comm]
     refine congrArg Neg.neg (Finset.sum_congr rfl fun a _ => Finset.sum_congr rfl fun b _ => ?_)
     ring
@@ -251,7 +296,7 @@ theorem stab_structure : ∀ (F E : Type) [Field F] [NumberField F] [Field E] [N
   · have hm : Continuous fun m : (piR (AF F) σ J).ker => matP (AF F) σ J m.1 :=
       (continuous_matStab (AF F) σ J).1.comp continuous_subtype_val
     refine continuous_pi fun _ => continuous_pi fun j => ?_
-    exact continuous_finset_sum _ fun i _ => (hm.matrix_elem _ _).mul continuous_const
+    exact continuous_finsetSum _ fun i _ => (hm.matrix_elem _ _).mul continuous_const
   · intro x y
     funext _ j
     exact topRow_ker_mul (AF F) σ J x y _

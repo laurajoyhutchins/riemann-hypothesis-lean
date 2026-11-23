@@ -1,5 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.QuasicoherentCohomology.ExistsAwayFracOfMemHomLoc
+module
+
+public import Development.AbelianVarietyTheory.Definitions.QuasicoherentCohomology.ExistsAwayFracOfMemHomLoc
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open CategoryTheory CategoryTheory.Limits DirectSum MvPolynomial TensorProduct GlobalTheory
 
 noncomputable section
@@ -21,9 +65,9 @@ theorem exists_awayFrac_common {f : A₀} (z w : LocalizedModule.Away f N₀) :
   exact ⟨k + j, f ^ j • m, f ^ k • m', awayFrac_add_pow_smul _ _ _ _,
     by rw [add_comm, awayFrac_add_pow_smul]⟩
 
+
 omit [Algebra R A] [IsScalarTower R₀ R A] [Module R N] [IsScalarTower R A N]
   [IsScalarTower R₀ R N] in
-
 theorem exists_away_map_of_intertwine (ψ : N₀ →ₗ[R₀] N) (x₀ : A₀) (x : A)
     (h : ∀ (k : ℕ) y, ψ (x₀ ^ k • y) = x ^ k • ψ y) :
     ∃ θ : LocalizedModule.Away x₀ N₀ →ₗ[R₀] LocalizedModule.Away x N,
@@ -36,7 +80,7 @@ theorem exists_away_map_of_intertwine (ψ : N₀ →ₗ[R₀] N) (x₀ : A₀) (
     exact awayFrac_eq_iff.2 ⟨l, by rw [← h, ← h, hl]⟩
   refine ⟨⟨⟨fun z => awayFrac N x (d z) (ψ (n z)), fun z w => ?_⟩, fun r z => ?_⟩, key⟩
   · obtain ⟨k, m, m', rfl, rfl⟩ := exists_awayFrac_common z w
-    rw [← map_add, key, key, key, map_add, map_add]
+    rw [← map_add (f := _), key, key, key, map_add (f := _), map_add (f := _)]
   · obtain ⟨k, m, rfl⟩ := exists_awayFrac z
     simp only [RingHom.id_apply]
     rw [← LinearMap.map_smul_of_tower, key, key, map_smul, LinearMap.map_smul_of_tower]
@@ -51,30 +95,26 @@ theorem isBaseChange_away_of_intertwine (ψ : N₀ →ₗ[R₀] N) (hψ : IsBase
     ((LinearMap.lsmul A₀ N₀ (x₀ ^ k)).restrictScalars R₀).baseChange R
   have hFP (k l : ℕ) (t : R ⊗[R₀] N₀) : F (k + l) (P l t) = F k t := by
     induction t with
-    | zero => simp
     | tmul r y => exact congrArg (r ⊗ₜ[R₀] ·) (awayFrac_add_pow_smul x₀ k l y)
-    | add a b ha hb => simp only [map_add, ha, hb]
+    | add a b ha hb => simp only [map_add (f := _), ha, hb]
   have hP (l : ℕ) (t : R ⊗[R₀] N₀) : hψ.equiv (P l t) = x ^ l • hψ.equiv t := by
     induction t with
-    | zero => simp
     | tmul r y => simp [P, IsBaseChange.equiv_tmul, h, smul_comm r]
-    | add a b ha hb => simp only [map_add, ha, hb, smul_add]
+    | add a b ha hb => simp only [map_add (f := _), ha, hb, smul_add]
   have hF (k : ℕ) (t : R ⊗[R₀] N₀) :
       θ.liftBaseChange R (F k t) = awayFrac N x k (hψ.equiv t) := by
     induction t with
-    | zero => simp
     | tmul r y => simp [F, IsBaseChange.equiv_tmul, hθ, LinearMap.map_smul_of_tower]
-    | add a b ha hb => simp only [map_add, ha, hb]
+    | add a b ha hb => simp only [map_add (f := _), ha, hb]
   have hsurj (z : R ⊗[R₀] LocalizedModule.Away x₀ N₀) : ∃ k t, F k t = z := by
     induction z with
-    | zero => exact ⟨0, 0, map_zero _⟩
     | tmul r z =>
       obtain ⟨k, y, rfl⟩ := exists_awayFrac z
       exact ⟨k, r ⊗ₜ y, by simp [F]⟩
     | add a b ha hb =>
       obtain ⟨k, t, rfl⟩ := ha
       obtain ⟨j, u, rfl⟩ := hb
-      exact ⟨k + j, P j t + P k u, by rw [map_add, hFP, add_comm k j, hFP]⟩
+      exact ⟨k + j, P j t + P k u, by rw [map_add (f := _), hFP, add_comm k j, hFP]⟩
   suffices hb : Function.Bijective (θ.liftBaseChange R) from
     IsBaseChange.of_equiv (LinearEquiv.ofBijective _ hb) fun z => by simp
   constructor

@@ -1,4 +1,48 @@
-import Development.WeilBound.CoreStatements.PublishedTheorems.JacquetShalikaRigidity.ColumnConjugationMeasure
+module
+
+public import Development.WeilBound.CoreStatements.PublishedTheorems.JacquetShalikaRigidity.ColumnConjugationMeasure
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -59,7 +103,7 @@ theorem fourier_column_of : N0 → P0 → P1 → CornerEmbedding → FourierSeri
       intro i c hic
       rw [hιE (gam ρ)]
       simp only [PositivityTheory.AdelicQuotientData.embM, Matrix.of_apply]
-      rw [dif_neg (by omega)]
+      rw [dite_eq_right (by omega)]
     obtain ⟨⟨ξ'', p⟩, ⟨hp, hγ⟩, -⟩ := huniqM _ hBlk
     have hξ : ξ'' = lift ρ := by
       apply Subtype.ext
@@ -74,9 +118,9 @@ theorem fourier_column_of : N0 → P0 → P1 → CornerEmbedding → FourierSeri
       rw [← hrow, hlift ρ c]
       simp only [PositivityTheory.AdelicQuotientData.embM, Matrix.of_apply]
       by_cases hc : (c : ℕ) < k
-      · rw [dif_pos ⟨by show k - 1 < k; omega, hc⟩, dif_pos hc]
+      · rw [dite_eq_left ⟨by show k - 1 < k; omega, hc⟩, dite_eq_left hc]
         exact (hgamK ρ).2 _ _ (by show k - 1 + 1 = k; omega)
-      · rw [dif_neg (fun h => hc h.2), dif_neg hc, Matrix.one_apply, if_neg]
+      · rw [dite_eq_right (fun h => hc h.2), dite_eq_right hc, Matrix.one_apply, if_neg]
         intro h
         apply hc
         rw [← h]
@@ -94,7 +138,7 @@ theorem fourier_column_of : N0 → P0 → P1 → CornerEmbedding → FourierSeri
     have h1 := congrFun h (Subtype.mk ((⟨j, lt_trans j.isLt hkm⟩ : Fin m), (⟨k, hkm⟩ : Fin m))
       ⟨j.isLt, le_rfl, le_rfl⟩ : UnipotentBlockColumnIndex m k k)
     beta_reduce at h1
-    rw [hlift, hlift, dif_pos j.isLt, dif_pos j.isLt] at h1
+    rw [hlift, hlift, dite_eq_left j.isLt, dite_eq_left j.isLt] at h1
     exact h1
   have hkey : ∀ t : UnipotentBlockColumnIndex m k k, t = (Subtype.mk ((⟨((Subtype.val t).1 : ℕ), ((Subtype.val t).1).isLt⟩ : Fin m),
       (⟨k, hkm⟩ : Fin m)) ⟨(Subtype.property t).1, le_rfl, le_rfl⟩ : UnipotentBlockColumnIndex m k k) := by
@@ -123,7 +167,7 @@ theorem fourier_column_of : N0 → P0 → P1 → CornerEmbedding → FourierSeri
     refine ⟨ρ, ?_⟩
     funext t
     show Subtype.val (lift ρ) (Subtype.val t).1 = c t
-    rw [hlift, dif_pos (Subtype.property t).1, hρ]
+    rw [hlift, dite_eq_left (Subtype.property t).1, hρ]
     exact congrArg c (hkey t).symm
   have hoff : ∀ c : UnipotentBlockColumnIndex m k k → E,
       c ∉ Set.range (fun ρ : RowT E k k => fun t : UnipotentBlockColumnIndex m k k => Subtype.val (lift ρ) (Subtype.val t).1) →

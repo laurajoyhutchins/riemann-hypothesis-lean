@@ -1,6 +1,55 @@
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.SemidefG
-import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.ExistsVecOfHermRep
-import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.MassLand
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.SemidefG
+public import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.MassLandSt
+public import Formalism.SharpRestriction.CuspSpanNormBounds.BlockEnds
+public import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.ExistsVecOfHermRep
+public import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.MassLand
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -24,6 +73,7 @@ theorem surj_pairing {m : ℕ} (f : Fin m → S.V) (hf : LinearIndependent E f) 
   have hφx : ∀ x : Fin m → E, φ x = ∑ a, x a * c a := by
     intro x
     conv_lhs => rw [pi_eq_sum_univ x]
+
     simp [map_sum, map_smul, hc]
   have hv : ∀ v : S.V, S.hT (∑ a, star (c a) • f a) v = 0 := by
     intro v
@@ -33,6 +83,7 @@ theorem surj_pairing {m : ℕ} (f : Fin m → S.V) (hf : LinearIndependent E f) 
       have h2 := Submodule.mem_map_of_mem (f := φ) this
       exact (Submodule.eq_bot_iff _).1 hφ _ h2
     rw [hφx] at h1
+
     rw [map_sum, LinearMap.sum_apply]
     simp only [LinearMap.map_smulₛₗ, starRingEnd_apply, star_star, LinearMap.smul_apply, smul_eq_mul]
     rw [← h1]
@@ -64,7 +115,8 @@ theorem exists_dual_gen (e : Fin r → S.V) (z : S.V) (N : ℕ) (hN : 0 < N) (hi
     simp only [f, Fin.snoc_castSucc, Fin.snoc_last] at hc
     have hl : c (Fin.last r) = 0 := by
       have h1 := congrArg (S.hT z) hc
-      rw [map_add, map_sum, map_zero] at h1
+
+      rw [map_add (f := _), map_sum, map_zero] at h1
       simp only [map_smul, smul_eq_mul, hze, mul_zero, Finset.sum_const_zero, zero_add] at h1
       exact (mul_eq_zero.1 h1).resolve_right hzz0
     rw [hl, zero_smul, add_zero] at hc
@@ -89,10 +141,12 @@ theorem exists_dual_gen (e : Fin r → S.V) (z : S.V) (N : ℕ) (hN : 0 < N) (hi
     intro a d; rw [hsw, hey0]; split_ifs <;> simp
   have hL : ∀ (c : Fin r → E) (v : S.V), S.hT (∑ d, c d • e d) v = ∑ d, star (c d) * S.hT (e d) v := by
     intro c v
+
     rw [map_sum, LinearMap.sum_apply]
     simp only [LinearMap.map_smulₛₗ, LinearMap.smul_apply, smul_eq_mul, starRingEnd_apply]
   have hR : ∀ (c : Fin r → E) (v : S.V), S.hT v (∑ d, c d • e d) = ∑ d, c d * S.hT v (e d) := by
     intro c v
+
     simp only [map_sum, map_smul, smul_eq_mul]
   set c : Fin r → Fin r → E := fun a d => S.hT (y0 d) (y0 a) / 2 with hc
   set y : Fin r → S.V := fun a => y0 a - ∑ d, c a d • e d with hy
@@ -171,8 +225,8 @@ theorem two_le_Wsp (e y : Fin D.R.rS → (VS D).V) (z : (VS D).V) : 2 ≤ finran
   generalize finrank D.host.E (Wsp e y z) = w at h1 ⊢
   omega
 
-variable [Fact Formalism.HermitianLattices.Ext.L3.HermRepUnram] in
 
+variable [Fact Formalism.HermitianLattices.Ext.L3.HermRepUnram] in
 theorem exists_W_vec {N : ℕ} (hN : 0 < N) {e y : Fin D.R.rS → (VS D).V} {z : (VS D).V} (h : Dual e y z N)
     (t : D.host.E) (ht : star t = t) (htp : Formalism.HermitianLattices.Ext.L3.TotPos t) :
     ∃ w : (VS D).V, IsW e y z w ∧ (VS D).hT w w = t := by

@@ -1,11 +1,56 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Degenerations.ArithBase
+public import Development.AbelianVarietyTheory.Definitions.Degenerations.Ser
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.AddHomExtSingle
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsAdaptedBasisTestLattice
 import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsBasisLatticeNear
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.AddHomExtSingle
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsAdaptedBasisTestLattice
-import Development.AbelianVarietyTheory.Definitions.Degenerations.BaseFacts
-import Development.AbelianVarietyTheory.Definitions.Degenerations.IsAffineSplitTorusLeft
-import Development.AbelianVarietyTheory.Definitions.Degenerations.CompanionTheory
-import Development.AbelianVarietyTheory.Statements.SemistableTorsion.UTorsSt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
+
 open CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj AlgebraicGeometry
 open scoped CategoryTheory.Obj
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor
@@ -179,6 +224,7 @@ theorem bdd_stable (φ : o →+* OO p) (hφ : ∀ a, (φ a : PadicAlgCl p) = y�
   obtain ⟨k, hk⟩ := hev h a
   have h1 : ∀ i, ∑ n, (φ (S.ρ h n i) : PadicAlgCl p) * y₀ ⟨S.ev a n, S.ev_mem a n⟩ =
       (φ (S.ζ ^ k) : PadicAlgCl p) * y₀ ⟨S.ev (a + S.r • h) i, S.ev_mem _ i⟩ := fun i => by
+
     simp only [hφ, ← map_mul, ← map_sum]
     congr 1
     apply Subtype.ext
@@ -207,8 +253,9 @@ theorem proj_stable (φ : o →+* OO p) (T : AddSubgroup S.Gam) (c : T →+ ZMod
         (((S.ρ t).map φ).map (OO p).subtype).mulVec e := by
     funext j
     rw [ThetaSys.proj, finsum_eq_sum_of_fintype, Finset.sum_apply]
+
     simp only [Matrix.mulVec, dotProduct, Matrix.map_apply, Matrix.smul_apply, Matrix.sum_apply, smul_eq_mul,
-      Finset.mul_sum, map_sum, Finset.sum_mul, Pi.smul_apply, Finset.smul_sum]
+    Finset.mul_sum, map_sum, Finset.sum_mul, Pi.smul_apply, Finset.smul_sum]
     rw [Finset.sum_comm]
     refine Finset.sum_congr rfl fun t _ => Finset.sum_congr rfl fun i _ => ?_
     change _ = (OO p).subtype _ * _
@@ -230,8 +277,10 @@ theorem exists_le_norm (hint : ∀ a : o, ‖y₀ (algebraMap o S.R a)‖ ≤ 1)
     apply Subtype.ext
     simp only [ThetaSys.FF, finsum_eq_sum_of_fintype, AddSubmonoidClass.coe_finsetSum, MulMemClass.coe_mul]
     rfl
+
   rw [h1, map_sum] at h
   refine (norm_sum_lt _ (mul_pos τ.δ_pos (Real.exp_pos _)) fun t => ?_).ne h
+
   rw [map_mul, norm_mul, map_sum]
   simp only [map_mul]
   exact (mul_le_mul_of_nonneg_right (hint _) (norm_nonneg _)).trans_lt (by simpa using h0 t t.2 k.1)
@@ -261,6 +310,7 @@ theorem E_eq_bdd [ArithBase o Ω] (φ : o →+* OO p) (hφ : ∀ a, (φ a : Padi
   have hst := bdd_stable y₀ φ hφ hev τ.yy.ker τ.δ τ.δ_pos.le
   let ψ : o →+* PadicAlgCl p := (OO p).subtype.comp φ
   have he' : e = ∑ c : S.perp τ.yy.ker →+ ZMod S.N, (ψ.mapMatrix (S.proj _ c)).mulVec e := by
+
     rw [← Matrix.sum_mulVec, ← map_sum, hsum, map_one, Matrix.one_mulVec]
   rw [he']
   refine Submodule.sum_mem _ fun c _ => ?_

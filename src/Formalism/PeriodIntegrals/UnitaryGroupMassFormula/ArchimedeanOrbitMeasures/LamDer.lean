@@ -1,8 +1,53 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.ArchimedeanOrbitMeasures.LamCut
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.ArchimedeanOrbitMeasures.PolarMapContDiffAtBase
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.ArchimedeanOrbitMeasures.GoodChartExOfWitt
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.ArchimedeanOrbitMeasures.LamCut
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.ArchimedeanOrbitMeasures.FixIffSpan
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.ArchimedeanOrbitMeasures.DetNZHolds
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.ArchimedeanOrbitMeasures.GoodChartExOfWitt
 import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.ArchimedeanOrbitMeasures.MatNDHHolds
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.ArchimedeanOrbitMeasures.StdConjExOfWitt
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.ArchimedeanOrbitMeasures.T2SpaceTensorProductFiniteExtension
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -55,7 +100,7 @@ theorem map_symm_of_map {E F : Type} [NormedAddCommGroup E] [InnerProductSpace �
     rw [Measure.map_map e.symm.continuous.measurable e.continuous.measurable]
     have : (e.symm ∘ e : E → E) = id := by funext x; simp
     rw [this, Measure.map_id]
-  rw [h, Measure.map_smul] at h1
+  rw [h, Measure.map_smul _ e.symm.continuous.measurable.aemeasurable] at h1
   rw [← h1, smul_smul, ENNReal.inv_mul_cancel ha0 hat, one_smul]
 
 theorem add_zero_of {A B : Type} [AddCommGroup A] [AddCommGroup B] (f : A → B) (hf : ∀ x y, f (x + y) = f x + f y) :
@@ -128,7 +173,7 @@ theorem lamDet_of (hB : BetaIso) (hM : MuBridge) (hN : NuBridge) (hD : DKForm) (
       congr 1
       funext S'
       simp [hThe]
-    rw [hνT, hν, Measure.map_smul] at h1
+    rw [hνT, hν, Measure.map_smul _ Th.continuous.measurable.aemeasurable] at h1
     have hc0 : ENNReal.ofReal cν ≠ 0 := by
       intro h0
       rw [h0, zero_smul] at h1
@@ -152,7 +197,7 @@ theorem lamDet_of (hB : BetaIso) (hM : MuBridge) (hN : NuBridge) (hD : DKForm) (
       congr 1
       funext Y
       exact (hBc Y).symm
-    rw [hμB, hμT, Measure.map_smul] at h2
+    rw [hμB, hμT, Measure.map_smul _ Bc.continuous.measurable.aemeasurable] at h2
     have hs0' : ENNReal.ofReal s ≠ 0 := (ENNReal.ofReal_pos.2 hs0).ne'
     calc (volume : Measure (EuclideanSpace ℝ (KapI X))).map Bc
         = (ENNReal.ofReal s)⁻¹ • (ENNReal.ofReal s • (volume : Measure (EuclideanSpace ℝ (KapI X))).map Bc) := by
@@ -173,7 +218,7 @@ theorem lamDet_of (hB : BetaIso) (hM : MuBridge) (hN : NuBridge) (hD : DKForm) (
   · apply Bc.injective
     rw [hΦ, ContinuousLinearEquiv.apply_symm_apply, hFe]
     unfold LamMap
-    rw [map_add, map_smul]
+    rw [map_add (f := _), map_smul]
     have e1 : Bc (fderiv ℝ (KapOrb X u' (kap0 X hb c L)) 0 z.1) =
         reimV (fun v => uMat (c v) * L z.1 v * uMat (c v)⁻¹ * betaV X v (Y0 X u')) := by
       rw [← (tupCoord X).apply_symm_apply (fderiv ℝ (KapOrb X u' (kap0 X hb c L)) 0 z.1), hBc]
@@ -190,12 +235,10 @@ theorem lamDet_of (hB : BetaIso) (hM : MuBridge) (hN : NuBridge) (hD : DKForm) (
     rw [e1, e2, ← reimV_smul, ← reimV_add]
     congr 1
     funext v
-    simp only [hw, Matrix.mul_add, Matrix.mul_smul, Pi.add_apply]
-    congr 1
-    · simp only [Matrix.mul_assoc]
-    · rw [show ((1 / 2 : ℝ) : ℂ) = (1 / 2 : ℂ) by push_cast; ring]
-      congr 1
-      simp only [← Matrix.mul_assoc, hcc, Matrix.one_mul]
+    simp only [Pi.add_apply, hw, Matrix.mul_add, Matrix.mul_assoc, ← Matrix.smul_mul,
+      hcc, Matrix.one_mul]
+    norm_num
+    rw [← Matrix.mul_assoc, hcc, Matrix.one_mul]
   ·
     have hTw : (0 : ℝ) < Tw u' := by
       unfold Tw
@@ -234,7 +277,9 @@ theorem lamDet_of (hB : BetaIso) (hM : MuBridge) (hN : NuBridge) (hD : DKForm) (
           ((ContinuousLinearEquiv.refl ℝ (EuclideanSpace ℝ ι)).prodCongr Th).continuous.measurable),
         ← Measure.map_map Fe.continuous.measurable
           ((ContinuousLinearEquiv.refl ℝ (EuclideanSpace ℝ ι)).prodCongr Th).continuous.measurable,
-        hP1, Measure.map_smul, hvolF, Measure.map_smul, Measure.map_smul, hB2, smul_smul, smul_smul]
+        hP1, Measure.map_smul _ Fe.continuous.measurable.aemeasurable, hvolF,
+        Measure.map_smul _ Bc.symm.continuous.measurable.aemeasurable,
+        Measure.map_smul _ Bc.symm.continuous.measurable.aemeasurable, hB2, smul_smul, smul_smul]
       congr 1
       have h1 : (0 : ℝ) < s⁻¹ * 2 ^ N := by positivity
       have h2 : (0 : ℝ) ≤ cν⁻¹ * DP := by positivity

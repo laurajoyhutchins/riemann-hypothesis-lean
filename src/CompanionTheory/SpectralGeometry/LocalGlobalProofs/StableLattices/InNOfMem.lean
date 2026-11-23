@@ -1,6 +1,53 @@
-import Mathlib
-import CompanionTheory.HarishChandraModules.LowKTypeMultiplicity.EigenspaceCyclicDensity.LowKMultOneP
-import Formalism.RealPlaceAnalysis.ThirdArithmeticHolds
+module
+
+public import CompanionTheory.HarishChandraModules.LowKTypeMultiplicity.EigenspaceCyclicDensity.LowKMultOneP
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.Eigenspace.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -85,7 +132,7 @@ theorem HH_NV {E : Fin n → Fin n → Module.End ℂ V} (hE : GlRel E) {y : V} 
     exact (NV E).add_mem ((NV E).smul_mem _ (mem_NV E i.2 _)) (mem_NV E i.2 _)
   · simp
   · intro x y hx hy
-    rw [map_add]; exact (NV E).add_mem hx hy
+    rw [map_add (f := _)]; exact (NV E).add_mem hx hy
 
 theorem adH_JJ {E : Fin n → Fin n → Module.End ℂ V} (hE : GlRel E) :
     JJ E ≤ (JJ E).comap (adH E) := by
@@ -115,7 +162,7 @@ theorem adH_evd {E : Fin n → Fin n → Module.End ℂ V} (hE : GlRel E) (b : F
   | grade1 c =>
     simp only [evd, FreeAlgebra.lift_ι_apply, adH_apply, HH_comm hE, sub_self, zero_smul]
   | mul a b ha hb => rw [map_mul, adH_mul, ha, hb]; simp
-  | add a b ha hb => rw [map_add, map_add, ha, hb, add_zero]
+  | add a b ha hb => rw [map_add (f := _), map_add (f := _), ha, hb, add_zero]
 
 theorem mem_JJ_of {E : Fin n → Fin n → Module.End ℂ V} (hE : GlRel E) {t p : Module.End ℂ V}
     (ht : adH E t = 0) (hp : p ∈ PP E) (h : t - p ∈ JJ E) : t ∈ JJ E := by
@@ -134,7 +181,7 @@ theorem mem_JJ_of {E : Fin n → Fin n → Module.End ℂ V} (hE : GlRel E) {t p
       rw [Module.End.mem_eigenspace_iff, hD, Submodule.mkQ_apply, Submodule.mapQ_apply, hk]
       rfl
     | zero => simp
-    | add x y _ _ hx hy => rw [map_add]; exact Submodule.add_mem _ hx hy
+    | add x y _ _ hx hy => rw [map_add (f := _)]; exact Submodule.add_mem _ hx hy
     | smul c x _ hx => rw [map_smul]; exact Submodule.smul_mem _ c hx
   have h3 : (JJ E).mkQ t = (JJ E).mkQ p := (Submodule.Quotient.eq _).mpr h
   rw [← h3] at h2
@@ -193,7 +240,7 @@ theorem Low.mul' {u : FreeAlgebra ℂ (Fin n × Fin n)} (hu : Low u) :
     obtain ⟨b', hb'⟩ := hv
     refine ⟨b + b', fun V _ _ E hE => ?_⟩
     have := (PP E).add_mem (hb V E hE) (hb' V E hE)
-    rw [map_add, map_add]
+    rw [map_add (f := _), map_add (f := _)]
     convert this using 1; abel
   | smul c u _ hu =>
     obtain ⟨b, hb⟩ := hu
@@ -210,7 +257,7 @@ theorem Red.add {a a' : FreeAlgebra ℂ (Fin n × Fin n)} (h : Red a) (h' : Red 
   obtain ⟨u', hu', h'⟩ := h'
   refine ⟨u + u', Low.add _ _ hu hu', fun V _ _ E hE => ?_⟩
   have := (JJ E).add_mem (h V E hE) (h' V E hE)
-  rw [map_add, map_add]
+  rw [map_add (f := _), map_add (f := _)]
   convert this using 1; abel
 
 theorem Red.smul (c : ℂ) {a : FreeAlgebra ℂ (Fin n × Fin n)} (h : Red a) : Red (c • a) := by
@@ -257,7 +304,7 @@ theorem Low.red_mul {u : FreeAlgebra ℂ (Fin n × Fin n)} (hu : Low u) :
       · exact Red.of_low Low.zero
     refine ((((ih p).mul_low y hy).add h1).add (h2.smul (-1))).congr fun V _ _ E hE => ?_
     have h := sub_eq_iff_eq_add.mp (hE y.1 y.2 p.1 p.2)
-    simp only [map_add, map_mul, ev_ι, map_smul, apply_ite (ev E), map_zero, mul_assoc, h]
+    simp only [map_add (f := _), map_mul, ev_ι, map_smul, apply_ite (ev E), map_zero, mul_assoc, h]
     split_ifs <;> simp [mul_add, mul_sub] <;> abel
   | add u v _ _ hu hv => intro p; rw [add_mul]; exact (hu p).add (hv p)
   | smul c u _ hu => intro p; rw [smul_mul_assoc]; exact (hu p).smul c

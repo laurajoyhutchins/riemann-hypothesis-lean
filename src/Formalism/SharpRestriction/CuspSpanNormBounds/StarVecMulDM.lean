@@ -1,4 +1,52 @@
-import Formalism.SharpRestriction.CuspSpanNormBounds.TrD
+module
+
+public import Formalism.SharpRestriction.CuspSpanNormBounds.ContinuousCjIT
+public import Formalism.SharpRestriction.CuspSpanNormBounds.DMiMulVecApply
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.SharpRestriction.CuspSpanNormBounds.OnePlaceEstimates
+
+@[expose] public section
 
 open MeasureTheory Matrix Finset
 
@@ -49,19 +97,19 @@ theorem bigCell_cj (hκ : 0 < κ) (hτ : 0 < τ) (c : Fin r → ℂ) (μ : Matri
   rw [cj_apply]
   unfold bigCell
   by_cases hj : j.val < r
-  · rw [dif_pos hj, dif_pos hj]
+  · rw [dite_eq_left hj, dite_eq_left hj]
     by_cases hi : i = esI k r ⟨j.val, hj⟩
     · rw [if_pos hi, if_pos hi, hi, tV_esI]
       have : tV k r κ τ j = tF r κ τ j.val := by unfold tV; rw [if_pos hj]
       rw [this, inv_inv]; push_cast; ring
     · rw [if_neg hi, if_neg hi, mul_zero]
-  · rw [dif_neg hj, dif_neg hj]
+  · rw [dite_eq_right hj, dite_eq_right hj]
     by_cases hj2 : j.val ≤ r + k
-    · rw [dif_pos hj2, dif_pos hj2]
+    · rw [dite_eq_left hj2, dite_eq_left hj2]
       by_cases hi : r ≤ i.val ∧ i.val ≤ r + k
-      · rw [dif_pos hi, tV_wb i hi.1 hi.2, tV_wb j (by omega) hj2]; simp
-      · rw [dif_neg hi, mul_zero]
-    · rw [dif_neg hj2, dif_neg hj2]
+      · rw [dite_eq_left hi, tV_wb i hi.1 hi.2, tV_wb j (by omega) hj2]; simp
+      · rw [dite_eq_right hi, mul_zero]
+    · rw [dite_eq_right hj2, dite_eq_right hj2]
       by_cases hi : i.val = 2 * r + k - j.val
       · rw [if_pos hi, if_pos hi]
         have hti : tV k r κ τ i = tF r κ τ (2 * r + k - j.val) := by
@@ -82,7 +130,7 @@ theorem flagMat_cj (hκ : 0 < κ) (hτ : 0 < τ) {z : Fin (2 * r + k + 1) → �
     flagMat k r ((τ : ℂ) • z) (cj k r κ τ x) i j =
       ((tF r κ τ j.val / tF r κ τ i.val : ℝ) : ℂ) * flagMat k r z x i j := by
   unfold flagMat
-  rw [dif_pos hi, dif_pos hi, cj_mulVec, dM_mulVec_fvec hz j, Matrix.mulVec_smul, dMi_mulVec_apply, tV_eI,
+  rw [dite_eq_left hi, dite_eq_left hi, cj_mulVec, dM_mulVec_fvec hz j, Matrix.mulVec_smul, dMi_mulVec_apply, tV_eI,
     Pi.smul_apply, smul_eq_mul]
   push_cast; ring
 
@@ -118,11 +166,11 @@ theorem cj_blockW (hκ : 0 < κ) (hτ : 0 < τ) (h : Matrix (Fin k) (Fin k) ℂ)
   rw [cj_apply]
   unfold blockW
   by_cases hi : r ≤ i.val ∧ i.val < r + k
-  · rw [dif_pos hi]
+  · rw [dite_eq_left hi]
     by_cases hj : r ≤ j.val ∧ j.val < r + k
-    · rw [dif_pos hj, tV_wb i hi.1 (by omega), tV_wb j hj.1 (by omega)]; simp
-    · rw [dif_neg hj, mul_zero]
-  · rw [dif_neg hi]
+    · rw [dite_eq_left hj, tV_wb i hi.1 (by omega), tV_wb j hj.1 (by omega)]; simp
+    · rw [dite_eq_right hj, mul_zero]
+  · rw [dite_eq_right hi]
     by_cases e : i = j
     · rw [if_pos e, cj_fac_diag hκ hτ i j e, one_mul]
     · rw [if_neg e, mul_zero]

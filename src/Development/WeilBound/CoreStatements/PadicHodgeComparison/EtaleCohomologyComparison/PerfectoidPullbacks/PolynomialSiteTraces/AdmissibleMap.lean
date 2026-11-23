@@ -1,8 +1,52 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.InclStd
-import Development.WeilBound.CoreStatements.AbelianHeightsDuality.DividedPowerAlgebras.ExistsDividedPowersAug
-import Development.WeilBound.CoreStatements.AbelianHeightsDuality.DividedPowerAlgebras.FilIsSubDPIdeal
-import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsIsStdOfInjective
+module
+
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.SEqOne
+public import Development.WeilBound.LevelCriteria.IsLevOneIff
+public import Mathlib.RingTheory.DividedPowers.SubDPIdeal
+public import Development.WeilBound.CoreStatements.AbelianHeightsDuality.DividedPowerAlgebras.ExistsDividedPowersAug
+public import Development.WeilBound.CoreStatements.AbelianHeightsDuality.DividedPowerAlgebras.FilIsSubDPIdeal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
@@ -33,8 +77,6 @@ variable (T : Thick (nlFun γ p X q κ)) {B : Type} [CommRing B] (f : T.B →+* 
 
 def homOf : T ⟶ ofMap T f J δ hJ hdp adm := mkH f (fun _ => rfl) hdp hJ rfl
 
-theorem homOf_φ : (homOf T f J δ hJ hdp adm).φ = f := rfl
-
 variable {T f J δ hJ hdp adm}
 
 def descOf {T' : Thick (nlFun γ p X q κ)} (φ : T ⟶ T') (g : B →+* T'.B) (hg : g.comp f = φ.φ)
@@ -50,10 +92,6 @@ def descOf {T' : Thick (nlFun γ p X q κ)} (φ : T ⟶ T') (g : B →+* T'.B) (
         rfl
       rw [← φ.pt, ← e, Functor.map_comp]
       rfl)
-
-theorem descOf_φ {T' : Thick (nlFun γ p X q κ)} (φ : T ⟶ T') (g : B →+* T'.B) (hg : g.comp f = φ.φ)
-    (hdp' : IsDPMorphism δ T'.δ g) (hle : J ≤ T'.J.comap g) :
-    (descOf (hJ := hJ) (hdp := hdp) (adm := adm) φ g hg hdp' hle).φ = g := rfl
 
 end OfMap
 
@@ -134,21 +172,5 @@ def locT (T : Thick (nlFun γ p X q κ)) (f : T.B) : Thick (nlFun γ p X q κ) :
   ofMap T (algebraMap T.B (Localization.Away f)) _ (locD T f) Ideal.le_comap_map (locD_dp T f) (admissible_map T _)
 
 def locH (T : Thick (nlFun γ p X q κ)) (f : T.B) : T ⟶ locT T f := homOf _ _ _ _ _ _ _
-
-def quoD (T : Thick (nlFun γ p X q κ)) {K : Ideal T.B} (hK : T.δ.IsSubDPIdeal K) :
-    DividedPowers (T.J.map (Ideal.Quotient.mk K)) :=
-  Classical.choose (FubiniStudyChowHeightFormula₂.Adr.Fil.exists_quot T.δ K hK)
-
-theorem quoD_spec (T : Thick (nlFun γ p X q κ)) {K : Ideal T.B} (hK : T.δ.IsSubDPIdeal K) :
-    IsDPMorphism T.δ (quoD T hK) (Ideal.Quotient.mk K) ∧
-      ∀ (C : Type) [CommRing C] (J'' : Ideal C) (δ'' : DividedPowers J'') (g : T.B ⧸ K →+* C),
-        IsDPMorphism T.δ δ'' (g.comp (Ideal.Quotient.mk K)) → IsDPMorphism (quoD T hK) δ'' g :=
-  Classical.choose_spec (FubiniStudyChowHeightFormula₂.Adr.Fil.exists_quot T.δ K hK)
-
-def quoT (T : Thick (nlFun γ p X q κ)) {K : Ideal T.B} (hK : T.δ.IsSubDPIdeal K) : Thick (nlFun γ p X q κ) :=
-  ofMap T (Ideal.Quotient.mk K) _ (quoD T hK) Ideal.le_comap_map (quoD_spec T hK).1 (admissible_map T _)
-
-def quoH (T : Thick (nlFun γ p X q κ)) {K : Ideal T.B} (hK : T.δ.IsSubDPIdeal K) : T ⟶ quoT T hK :=
-  homOf _ _ _ _ _ _ _
 
 end CrystallineSemistableComparison.Pb.Site

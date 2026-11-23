@@ -1,5 +1,47 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.FlagLevelCharacterEqPsiDivN
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.FlagLevelCharacterEqPsiDivN
+import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.LevelSubgroupCharacterUnitary
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Matrix Formalism.MainNotions.S Formalism.L2.SG.HidaSetting Formalism.L2.DIV GlobalTheory.FlagBasis
 open scoped TensorProduct
 
@@ -96,21 +138,21 @@ theorem flagVec_cases {V : Type} [AddCommGroup V] {ρ k : ℕ} (e0 f0 : Fin ρ �
   by_cases h1 : j < ρ
   · refine Or.inl ⟨⟨j, h1⟩, rfl, ?_, ?_⟩
     · unfold dualIdx; rw [if_pos h1]
-    · unfold flagVec; rw [dif_pos h1]
+    · unfold flagVec; rw [dite_eq_left h1]
   by_cases h2 : j - ρ < k
   · refine Or.inr (Or.inl ⟨⟨j - ρ, h2⟩, ?_, ?_, ?_⟩)
     · show j = ρ + (j - ρ); omega
     · show dualIdx ρ k j = ρ + (k - (j - ρ + 1)); unfold dualIdx; split_ifs <;> omega
-    · unfold flagVec; rw [dif_neg h1, dif_pos h2]
+    · unfold flagVec; rw [dite_eq_right h1, dite_eq_left h2]
   by_cases h3 : j = ρ + k
   · refine Or.inr (Or.inr (Or.inl ⟨h3, ?_, ?_⟩))
     · unfold dualIdx; split_ifs <;> omega
-    · unfold flagVec; rw [dif_neg h1, dif_neg h2, if_pos h3]
+    · unfold flagVec; rw [dite_eq_right h1, dite_eq_right h2, if_pos h3]
   have h4 : 2 * ρ + k - j < ρ := by omega
   refine Or.inr (Or.inr (Or.inr ⟨⟨2 * ρ + k - j, h4⟩, ?_, ?_, ?_⟩))
   · show j = 2 * ρ + k - (2 * ρ + k - j); omega
   · show dualIdx ρ k j = 2 * ρ + k - j; unfold dualIdx; split_ifs <;> omega
-  · unfold flagVec; rw [dif_neg h1, dif_neg h2, if_neg h3, dif_pos h4]
+  · unfold flagVec; rw [dite_eq_right h1, dite_eq_right h2, if_neg h3, dite_eq_left h4]
 
 section
 variable {R : Type} [CommRing R] {n ρ k : ℕ} {i j : Fin n}

@@ -1,6 +1,56 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.PluriharmonicCharts.IsBlockMapInitialVertex
-import GroundTheory.HeightsAndTheta.Heights.Intersections.PProjBundleFibre
+module
+
+public import Development.WeilBound.CoreStatements.PluriharmonicCharts.IsBlockMapInitialVertex
+import Development.AutomorphicSpectrum.Proofs.MetricProofs.FlagModelBaseProjectionPoints
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.PProjBundleFibre
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import GroundTheory.HeightsAndTheta.Heights.Intersections.IsSmoothHermFubiniStudyO1
+
+@[expose] public section
+
 open MvPolynomial Matrix ReciprocityTheory.ChartRestriction.G.Geo ReciprocityTheory.ChartRestriction.G.AI.I1 ReciprocityTheory.ChartRestriction.G.AI.I4 GlobalTheory.CompanionTheory.Ar.PB GroundTheory.Heights₂.Heights GroundTheory.Heights₂.Heights.LowerBoundFree
 open scoped Classical
 
@@ -9,8 +59,6 @@ noncomputable section
 set_option linter.unusedSectionVars false
 
 namespace PositivityTheory.Xgp.W
-
-local instance (priority := 2000) intAlg4 {Φ : Type} [Field Φ] : Algebra ℤ (RatFunc Φ) := Ring.toIntAlgebra _
 
 open GlobalTheory.CompanionTheory.Ar.PB.CovGraph.GenIdeal GlobalTheory.CompanionTheory.Ar.PB.WSq
 
@@ -108,6 +156,7 @@ theorem exists_positive_period_line {E : Type} [Field E] (i₀ : MvPolynomial K 
       rw [Equiv.sum_comp eF fun m => u m * w m]
       apply ψ.injective
       rw [hs, ← h]
+
       simp only [map_sum, map_mul, hu, hw]
     intro a b
     fin_cases a <;> fin_cases b
@@ -151,8 +200,8 @@ theorem exists_positive_period_line {E : Type} [Field E] (i₀ : MvPolynomial K 
       obtain ⟨D₂, f₂, h₂, a₂, b₂⟩ := hg
       refine ⟨D₁ * D₂, f₁ * rename (v₀ k₀) D₂ + f₂ * rename (v₀ k₀) D₁, by rw [map_mul]; exact mul_ne_zero h₁ h₂,
         ?_, ?_⟩
-      · simp only [map_add, map_mul, r1, a₁, a₂]; ring
-      · simp only [map_add, map_mul, r2, b₁, b₂]; ring
+      · simp only [map_add (f := _), map_mul, r1, a₁, a₂]; ring
+      · simp only [map_add (f := _), map_mul, r2, b₁, b₂]; ring
     | mul_X f q hf =>
       obtain ⟨D₁, f₁, h₁, a₁, b₁⟩ := hf
       refine ⟨D₁, f₁ * X ⟨q.1.1, q.2⟩, h₁, ?_, ?_⟩

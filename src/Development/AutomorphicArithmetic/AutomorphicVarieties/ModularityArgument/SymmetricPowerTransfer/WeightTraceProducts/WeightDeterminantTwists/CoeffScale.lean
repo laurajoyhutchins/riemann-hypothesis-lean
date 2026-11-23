@@ -1,10 +1,61 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.WeightTraceProducts.ThFacts
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.WeightTraceProducts.ThFacts
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Polynomial UpperTheory.V.Z.Sym.Wt
 
 open MvPolynomial in
 private theorem coeff_scale {σ : Type} [Fintype σ] (t : σ → ℂ) (P : MvPolynomial σ ℂ) (m : σ →₀ ℕ) :
-    coeff m (aeval (fun p => MvPolynomial.C (t p) * MvPolynomial.X p) P : MvPolynomial σ ℂ) = (∏ p, t p ^ m p) * coeff m P := by
+    (aeval (fun p => MvPolynomial.C (t p) * MvPolynomial.X p) P : MvPolynomial σ ℂ).coeff m =
+      (∏ p, t p ^ m p) * P.coeff m := by
   classical
   induction P using MvPolynomial.induction_on' with
   | monomial u a =>
@@ -17,7 +68,8 @@ private theorem coeff_scale {σ : Type} [Fintype σ] (t : σ → ℂ) (P : MvPol
     split_ifs with h
     · rw [h]
     · simp
-  | add p q hp hq => rw [map_add, MvPolynomial.coeff_add, MvPolynomial.coeff_add, hp, hq, mul_add]
+  | add p q hp hq =>
+    simp only [map_add, AddMonoidAlgebra.coeff_add, Finsupp.add_apply, hp, hq, mul_add]
 
 open MvPolynomial in
 private theorem eval_scale {σ : Type} (t x : σ → ℂ) (P : MvPolynomial σ ℂ) :
@@ -25,7 +77,7 @@ private theorem eval_scale {σ : Type} (t x : σ → ℂ) (P : MvPolynomial σ �
       MvPolynomial.eval (fun p => t p * x p) P := by
   induction P using MvPolynomial.induction_on with
   | C a => simp
-  | add p q hp hq => simp only [map_add, hp, hq]
+  | add p q hp hq => simp only [map_add (f := _), hp, hq]
   | mul_X p i hp => simp only [map_mul, hp, MvPolynomial.aeval_X, MvPolynomial.eval_C, MvPolynomial.eval_X]
 
 theorem UpperTheory.V.Z.Sym.Wt.memMH :
@@ -40,7 +92,7 @@ theorem UpperTheory.V.Z.Sym.Wt.memMH :
     have h1 : (MvPolynomial.aeval (fun p : K × Fin d => MvPolynomial.C (Function.update (fun _ => (1 : ℂ)) k 2 p.1) * MvPolynomial.X p) P :
         MvPolynomial (K × Fin d) ℂ) = MvPolynomial.C (∏ v, Function.update (fun _ => (1 : ℂ)) k 2 v ^ n v) * P :=
       MvPolynomial.funext fun x => by rw [eval_scale, map_mul, MvPolynomial.eval_C]; exact h _ x
-    have h2 := congrArg (MvPolynomial.coeff m) h1
+    have h2 := congrArg (AddMonoidAlgebra.coeff · m) h1
     rw [coeff_scale, MvPolynomial.coeff_C_mul, e] at h2
     have h3 := mul_right_cancel₀ (MvPolynomial.mem_support_iff.1 hm) h2
     have h4 : ∀ a : K → ℕ, ∏ v, Function.update (fun _ => (1 : ℂ)) k 2 v ^ a v = 2 ^ a k := fun a => by

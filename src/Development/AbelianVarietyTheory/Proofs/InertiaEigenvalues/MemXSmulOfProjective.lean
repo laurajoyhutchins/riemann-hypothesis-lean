@@ -1,6 +1,65 @@
-import Mathlib
-import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.DvrComplete
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
+public import Mathlib.RingTheory.Flat.Basic
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.DvrComplete
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.PowerSeries.Ideal
+import Mathlib.RingTheory.Radical.NatInt
+public import Mathlib.RingTheory.Regular.Free
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.Unramified.LocalStructure
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.Module.FinitePresentation
+public import Mathlib.RingTheory.LocalRing.Module
+public import Mathlib.RingTheory.PowerSeries.Inverse
+public import Mathlib.RingTheory.QuasiFinite.Basic
+public import Mathlib.RingTheory.Unramified.Finite
+
+@[expose] public section
 
 open PowerSeries Formalism.WeaklyAdmissibleFiltrations Formalism.BasicNotions Formalism.BasicNotions.Loc TensorProduct
 
@@ -85,7 +144,7 @@ theorem free_of_regular {O M : Type} [CommRing O] [IsDomain O] [IsDiscreteValuat
         sub_add_cancel])
     exact ⟨z, trivial, hz.symm⟩
   refine (Module.free_quotSMulTop_iff_free O⟦X⟧ M ?_ hX).mp inferInstance
-  rw [IsLocalRing.jacobson_eq_maximalIdeal _ bot_ne_top, IsLocalRing.mem_maximalIdeal,
+  rw [IsLocalRing.ringJacobson_eq_maximalIdeal, IsLocalRing.mem_maximalIdeal,
     mem_nonunits_iff, isUnit_iff_constantCoeff]
   simp
 
@@ -123,7 +182,8 @@ theorem basis_of_baseChange {ι R N E D : Type} [Finite ι] [CommRing R] [IsLoca
       (IsLocalRing.maximalIdeal R)).to_subtype
     refine Finite.of_injective (fun n : MaximalSpectrum (ι → R) =>
       (⟨n.asIdeal, n.isMaximal.isPrime, ⟨(IsLocalRing.eq_maximalIdeal
-        (@Ideal.isMaximal_comap_of_isIntegral_of_isMaximal R _ _ _ _ _ n.asIdeal n.isMaximal)).symm⟩⟩ :
+        (@Ideal.isMaximal_comap_of_isIntegral_of_isMaximal R _ _ _ _
+          (algebraMap_isIntegral_iff.mpr inferInstance) n.asIdeal n.isMaximal)).symm⟩⟩ :
         (IsLocalRing.maximalIdeal R).primesOver (ι → R))) fun a b hab => ?_
     exact MaximalSpectrum.ext (congrArg Subtype.val hab)
   refine Module.nonempty_basis_of_flat_of_finrank_eq _ _ _ fun P => ?_
@@ -181,7 +241,7 @@ theorem basis_of_regular {ι O N E D : Type} [Finite ι] [CommRing O] [IsDomain 
   haveI : Module.Free O⟦X⟧ N := free_of_regular c hc hc' hX h
   exact basis_of_baseChange hE f hf
 
-set_option maxHeartbeats 1600000 in
+
 
 theorem wach_free {l : ℕ} [Fact l.Prime] (P : LocPrime l) (H : LocHW l P) (K : FinExt l) (s : ℕ)
     (LL : FinExt l) (h : Good K s LL) (T : LocLat ↥(GK K) ℚ_[l] ↥LL.1 ↥(OL LL))

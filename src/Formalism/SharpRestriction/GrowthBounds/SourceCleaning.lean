@@ -1,12 +1,44 @@
-import Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow
-import Formalism.SharpRestriction.ParConsts
-import Formalism.SharpRestriction.GrowthBounds.ObjPol
-import Formalism.SharpRestriction.GrowthBounds.SegRing
-import Formalism.SharpRestriction.GrowthBounds.UnramifiedQuadraticSetting
-import Formalism.SharpRestriction.GrowthBounds.CovariantDegrees
-import Formalism.SharpRestriction.GrowthBounds.StatementOfDegreeAndBound
-import Formalism.SharpRestriction.GrowthBounds.ConclusionA2
-import Formalism.SharpRestriction.GrowthBounds.ValuationLowestDegreeRename
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.ValuationLowestDegreeRename
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -421,32 +453,8 @@ def admitted (D : Formalism.BasicNotions.D7) (CLa Ck Crk Cdeg : ℝ) : Prop :=
 def aux₃ (D : Formalism.BasicNotions.D7) (CLa' CD Csz : ℝ) : Prop :=
   Conclusion1 D ∧ Conclusion2 D ∧ PointsLemma D ∧ Conclusion4 D ∧ Conclusion5 D ∧ Conclusion6 D CLa' CD Csz
 
-def Stmt (D : Formalism.BasicNotions.D7) (CLa Ck Crk Cdeg CLa' CD Csz : ℝ) : Prop :=
-  admitted D CLa Ck Crk Cdeg → aux₃ D CLa' CD Csz
-
 def ClosedFormOfAdmitted (D : Formalism.BasicNotions.D7) : Prop :=
   ∀ CLa Ck Crk Cdeg : ℝ, admitted D CLa Ck Crk Cdeg →
     ∃ CLa' CD Csz : ℝ, 0 < CLa' ∧ 0 < CD ∧ 0 < Csz ∧ aux₃ D CLa' CD Csz
-
-def AdmF (CLa Ck Crk Cdeg : ℝ) {eps : ℝ} (Fm : Formalism.MainNotions.FamP eps) : Prop :=
-  ∀ x (i : Fm.Ix x), admitted (Fm.D x i) CLa Ck Crk Cdeg
-
-def OrbitValuationBound (CLa' CD Csz : ℝ) {eps : ℝ} (Fm : Formalism.MainNotions.FamP eps) : Prop :=
-  ∃ x0 : ℝ, ∀ x, x0 ≤ x → ∀ i : Fm.Ix x, aux₃ (Fm.D x i) CLa' CD Csz
-
-def KudlaFamilyStatement (CLa Ck Crk Cdeg CLa' CD Csz : ℝ) {eps : ℝ} (Fm : Formalism.MainNotions.FamP eps) : Prop :=
-  AdmF CLa Ck Crk Cdeg Fm → OrbitValuationBound CLa' CD Csz Fm
-
-def DerivativeStatementDesign (CLa Ck Crk Cdeg CLa' CD Csz : ℝ) (Fm : Formalism.MainNotions.DFamP) : Prop :=
-  ∀ (ε : ℝ) (h0 : 0 < ε) (h1 : ε < 1 / 52), KudlaFamilyStatement CLa Ck Crk Cdeg CLa' CD Csz (Fm ε h0 h1)
-
-def FamilyClosedForm {eps : ℝ} (Fm : Formalism.MainNotions.FamP eps) : Prop :=
-  ∀ CLa Ck Crk Cdeg : ℝ, AdmF CLa Ck Crk Cdeg Fm →
-    ∃ CLa' CD Csz : ℝ, 0 < CLa' ∧ 0 < CD ∧ 0 < Csz ∧ OrbitValuationBound CLa' CD Csz Fm
-
-def DerivativeStatementClosedDesign (Fm : Formalism.MainNotions.DFamP) : Prop :=
-  ∀ CLa Ck Crk Cdeg : ℝ, (∀ (ε : ℝ) (h0 : 0 < ε) (h1 : ε < 1 / 52), AdmF CLa Ck Crk Cdeg (Fm ε h0 h1)) →
-    ∃ CLa' CD Csz : ℝ, 0 < CLa' ∧ 0 < CD ∧ 0 < Csz ∧
-      ∀ (ε : ℝ) (h0 : 0 < ε) (h1 : ε < 1 / 52), OrbitValuationBound CLa' CD Csz (Fm ε h0 h1)
 
 end Formalism.MainNotions.SourceCleaning

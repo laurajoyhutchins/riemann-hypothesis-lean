@@ -1,8 +1,51 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.LiteratureResults.KTheoryStability.ReductionBoundsTorsion.MomentEntryBounds.InstLCSL
-import GroundTheory.AutomorphicForms.ReductionSiegel
-import GroundTheory.AutomorphicForms.NormDetDiagUnitsPosRealToUnits
-import GroundTheory.AutomorphicForms.ReductionLocalVolume
-import GroundTheory.GlobalFields.Adele.Discrete
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.LiteratureResults.KTheoryStability.ReductionBoundsTorsion.ActLPos
+public import GroundTheory.AutomorphicForms.ReductionHeight
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AutomorphicArithmetic.AutomorphicVarieties.TensorHomCubes.StabDirectedSystem
+
+@[expose] public section
 
 noncomputable section
 
@@ -34,8 +77,8 @@ theorem exists_bound_omega {ω : Set (AdelicGLn.AdelicGL L N)} (hω : IsCompact 
     exact continuous_norm.comp ((continuous_apply j).comp ((continuous_apply i).comp h2))
   let F : AdelicGLn.AdelicGL L N → ℝ := fun b => ∑ w, ∑ i, ∑ j, (e w i j b + e w i j b⁻¹)
   have hF : Continuous F := by
-    refine continuous_finset_sum _ fun w _ => continuous_finset_sum _ fun i _ =>
-      continuous_finset_sum _ fun j _ => ?_
+    refine continuous_finsetSum _ fun w _ => continuous_finsetSum _ fun i _ =>
+      continuous_finsetSum _ fun j _ => ?_
     exact (hc w i j).add ((hc w i j).comp continuous_inv)
   obtain ⟨M, hM⟩ := (hω.image hF).bddAbove
   refine ⟨max M 0, le_max_right _ _, fun b hb w i j => ?_⟩

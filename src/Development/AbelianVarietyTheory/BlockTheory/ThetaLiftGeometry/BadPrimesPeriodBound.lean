@@ -1,10 +1,46 @@
-import Mathlib
-import Formalism.SharpRestriction.Divisibility.LiftErrorLocal
-import Formalism.LocalRingCardinality.DataDIV
-import Formalism.SharpRestriction.GlobalSchurBounds.GL3Theta
-import Formalism.LocalToGlobal.Columns.FiniteSumNonzeroLargeDepth
-import Formalism.LocalToGlobal.KernelLattices.ThDistC
-import Formalism.LocalToGlobal.KernelLattices.LateralTheory
+module
+
+public import Formalism.SharpRestriction.Divisibility.LiftErrorLocal
+public import Formalism.LocalToGlobal.KernelLattices.ThDistC
+public import Formalism.LocalToGlobal.Columns.RowFormsSym
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -45,11 +81,7 @@ def badS (D : D7) : Set ℕ :=
   hostS D.host.q D.host.d (D.host.g 0) (D.host.g 1)
     ((Set.range fun u : D.what₂.Word => (D.mem u).A.T) ∪ (D.host.small : Set ℕ))
 
-theorem T_mem_badS (D : D7) (u : D.what₂.Word) : (D.mem u).A.T ∈ badS D := Or.inr (Or.inl ⟨u, rfl⟩)
-
 theorem small_mem_badS (D : D7) (l : ℕ) (h : l ∈ D.host.small) : l ∈ badS D := Or.inr (Or.inr (Finset.mem_coe.2 h))
-
-theorem g_mem_badS (D : D7) (i : Fin 2) : D.host.g i ∈ badS D := Or.inl (by fin_cases i <;> simp)
 
 abbrev Twist (D : D7) : Type := Tup (recFields D).F (recFields D).E (recFields D).K (badS D)
 
@@ -78,8 +110,8 @@ def SizeAt (D : D7) (i : Fin 2) : Prop :=
 def TwistTie {D : D7} (Dx : DivX D) (μ : D.what₂.Tup) (ξ : Twist D) : Prop :=
   ((Dx.Qp μ : Set ℕ) = QprimeN (ξ : Chr (recFields D).F (recFields D).E (recFields D).K)) ∧ (μ = D.what₂.mu0 → ξ = 1)
 
-open Classical in
 
+open Classical in
 def JetsRatDeg {X : Fields} (A : Amb X) (a b : ℕ) (Sb : Finset (HeightOneSpectrum (𝓞 X.E))) (M : ℕ) (deg : X.Tau → ℤ) : Prop :=
   ∀ (N : Submodule (𝓞 X.E) (Sp X.E a)) (N' : Submodule (𝓞 X.E) (Sp X.E b)) (c : ℕ) (x : HomE X.E a b),
     InRange Sb M c N N' x → ∀ e : DVar X.Tau a b →₀ ℕ,
@@ -138,17 +170,6 @@ def BoundAt {D : D7} (L : SizeData₂ D) (EX : ErrX D) (C1 : ℝ) (i : Fin 2) (w
   ∀ φ ∈ DV.MramL D u, ∀ F ∈ (D.what₂.Mtilde μ).carrier, ∃ y : D.what₂.LL,
     D.what₂.embLL y = D.what₂.perCol u μ (D.jN u φ) F ∧
       (y = 0 ∨ -(∑ j ∈ LiftErrorLocal.lifts D, vNN EX i u j w) - C1 * LiftErrorLocal.errC D L ≤ LiftErrorLocal.vG D w y)
-
-def periodBound_at (D : D7) (L : SizeData₂ D) (EX : ErrX D) (Dx : DivX D)
-    (Ch : Chars (recFields D) (recPrimes EX) D.R.m)
-    (mu0 : Fin D.R.m → Formalism.L2.Host.HChar D.host.E) (eta : Formalism.L2.Host.HChar D.host.E)
-    (sel : HeightOneSpectrum (𝓞 D.host.F) → HeightOneSpectrum (𝓞 D.host.E))
-    {δ : ℂ} (B : Base D D.host.ccK δ) (χ : TaylorLogMetric.IdE D → ℂ) (cD : D.what₂.Tau → ℂ) (C1 : ℝ) : Prop :=
-  HostTie EX → CharTie Ch mu0 eta sel → AnTie D δ χ cD →
-    ∀ (i : Fin 2), SizeAt D i → ∀ w : LiftErrorLocal.Pl D, LiftErrorLocal.Over D i w →
-      ∀ u : D.what₂.Word, D.what₂.places.resChar w ≠ (D.mem u).A.T →
-        ∀ μ : D.what₂.Tup, D.host.g i ∉ Dx.Qp μ →
-          ChainTie Ch sel Dx mu0 (ambOf (recSeam D) B χ cD) u μ → BoundAt L EX C1 i w u μ
 
 theorem recSeam_emb (D : D7) (τ : D.what₂.Tau) (x : D.host.E) :
     (recSeam D).σ₀ ((recFields D).emb τ x) = TaylorLogMetric.embT D ((recSeam D).iT τ) ((recSeam D).iE x) := by

@@ -1,5 +1,55 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.InvariantTopologyComparison.EntriesLat
+module
+
+public import Formalism.SharpRestriction.CuspSpanNormBounds.GlobAut
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Formalism.LocalToGlobal.SiegelLatticeTheory.FundamentalEquivalence.AdBridge
+import Formalism.SharpRestriction.GlobalSchurBounds.GeneralLinearActions.GenusMassVolumes
+
+@[expose] public section
 
 noncomputable section
 
@@ -11,16 +61,6 @@ open Formalism.MainNotions.S (AutInst uMat)
 open Formalism.L2.SG.AdBridge
 
 variable (I : AutInst)
-
-instance instIsModuleTopologyT :
-    IsModuleTopology (Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes.AF I.F) (Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes.AF I.F ⊗[I.F] I.E) := ⟨rfl⟩
-
-instance instContinuousAddT : ContinuousAdd (Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes.AF I.F ⊗[I.F] I.E) :=
-  IsModuleTopology.toContinuousAdd (Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes.AF I.F) _
-
-instance instContinuousSMulT :
-    ContinuousSMul (Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes.AF I.F) (Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes.AF I.F ⊗[I.F] I.E) :=
-  IsModuleTopology.toContinuousSMul _ _
 
 theorem exists_not_mem_range : ∃ x : I.E, x ∉ Set.range (algebraMap I.F I.E) := by
   by_contra h
@@ -90,40 +130,5 @@ theorem basisE_mem (k : Fin 2) : basisE I k ∈ Formalism.UG.intOE I.E := by
   fin_cases k
   · exact one_mem _
   · exact beta_mem I
-
-def basisT : Module.Basis (Fin 2) (Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes.AF I.F)
-    (Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes.AF I.F ⊗[I.F] I.E) :=
-  Algebra.TensorProduct.basis (Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes.AF I.F) (basisE I)
-
-def coord (k : Fin 2) :
-    (Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes.AF I.F ⊗[I.F] I.E) →ₗ[Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes.AF I.F] Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes.AF I.F :=
-  (basisT I).coord k
-
-theorem sum_coord (t : Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes.AF I.F ⊗[I.F] I.E) :
-    ∑ k, coord I k t ⊗ₜ[I.F] basisE I k = t := by
-  conv_rhs => rw [← (basisT I).sum_repr t]
-  simp [coord, basisT, Module.Basis.coord_apply, Algebra.TensorProduct.basis_apply,
-    TensorProduct.smul_tmul']
-
-theorem continuous_coord (k : Fin 2) : Continuous (coord I k) := by
-  haveI : Module.Finite (Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes.AF I.F) (Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes.AF I.F ⊗[I.F] I.E) := Module.Finite.of_basis (basisT I)
-  exact IsModuleTopology.continuous_of_linearMap (coord I k)
-
-theorem thetaV_eq (v : InfinitePlace I.F) (t : Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes.AF I.F ⊗[I.F] I.E) :
-    thetaV I v t = ∑ k, evV I v (coord I k t) * I.φ v (basisE I k) := by
-  conv_lhs => rw [← sum_coord I t]
-  rw [map_sum]
-  refine Finset.sum_congr rfl fun k _ => ?_
-  rfl
-
-theorem tauF_eq (t : Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes.AF I.F ⊗[I.F] I.E) :
-    tauF I t = ∑ k, basisE I k ⊗ₜ[I.F] (coord I k t).2 := by
-  conv_lhs => rw [← sum_coord I t]
-  rw [map_sum]
-  refine Finset.sum_congr rfl fun k _ => ?_
-  show (1 : I.E) ⊗ₜ[I.F] Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes.sndA I.F (coord I k t) *
-      (basisE I k ⊗ₜ[I.F] (1 : Formalism.MainNotions.S.Af I.F)) = _
-  rw [Algebra.TensorProduct.tmul_mul_tmul, one_mul, mul_one]
-  rfl
 
 end PI.InvTopW

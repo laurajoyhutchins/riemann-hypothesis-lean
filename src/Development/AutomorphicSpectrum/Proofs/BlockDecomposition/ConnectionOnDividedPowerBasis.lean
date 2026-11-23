@@ -1,6 +1,71 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.ZariskiEtaleLifting.SubThickRees
+module
+
+public import Mathlib.Algebra.Algebra.Operations
+public import Mathlib.LinearAlgebra.Basis.Defs
+public import Mathlib.LinearAlgebra.DFinsupp
+public import Mathlib.RingTheory.Ideal.Defs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.Noetherian.Nilpotent
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AbelianVarietyTheory.Definitions.Divisors.RatBasisLinearIndependentInt
+import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.IsDPMorphismBot
+import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.CechPairings.InstAddCommGroup
 import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.WittExactSequences.IsCompl
+import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.ZariskiEtaleLifting.XSmulSucc
+public import Mathlib.Algebra.Ring.GeomSum
+import Mathlib.RingTheory.DividedPowers.Basic
+public import Mathlib.RingTheory.Finiteness.Basic
+public import Mathlib.RingTheory.Ideal.BigOperators
+public import Mathlib.RingTheory.Ideal.Operations
+public import Mathlib.RingTheory.Nilpotent.Basic
+import Mathlib.Topology.Sheaves.Presheaf
+
+@[expose] public section
+
 set_option backward.isDefEq.respectTransparency false
 open CategoryTheory AlgebraicGeometry Polynomial DividedPowers GlobalTheory.LogCris GlobalTheory.PDA CrystallineSemistableComparison CrystallineSemistableComparison.CH CrystallineSemistableComparison.B
 
@@ -12,6 +77,7 @@ lemma map_mem_of_repr (e : Module.Basis ℕ B M) (P : Submodule B M) (L : M →�
     (h : ∀ k, L (e.repr z k • e k) ∈ P) : L z ∈ P := by
   have hz := e.linearCombination_repr z
   rw [Finsupp.linearCombination_apply, Finsupp.sum] at hz
+
   rw [← hz, map_sum]
   exact P.sum_mem fun k _ => h k
 
@@ -76,7 +142,7 @@ lemma exists_nilpotent_ideal (p q : B) (ν : ℕ → B) (hp : IsNilpotent p) (hq
   obtain ⟨N, hN⟩ := hN
   let S : Set B := {p, q - 1} ∪ ν '' {m | 2 ≤ m ∧ m < N}
   have hS : S.Finite :=
-    (Set.toFinite _).union (((Set.finite_Iio N).subset fun m hm => hm.2).image ν)
+    (Set.toFinite _).union (((Set.finite_Iio N).subset (show {m : ℕ | 2 ≤ m ∧ m < N} ⊆ Set.Iio N from fun _ hm => hm.2)).image ν)
   refine ⟨Ideal.span S, ?_, Ideal.subset_span (by simp [S]), Ideal.subset_span (by simp [S]), ?_⟩
   · rw [Ideal.FG.isNilpotent_iff_le_nilradical (Submodule.fg_span hS), Ideal.span_le]
     rintro x (hx | ⟨m, hm, rfl⟩)
@@ -106,7 +172,7 @@ lemma nilpotent_of_pow_mem (J : Ideal B) (hJ : IsNilpotent J) (A : Module.End B 
         rw [map_smul]
         exact Submodule.smul_mem_smul hr (ih n)
       · intro x y hx hy
-        rw [map_add]
+        rw [map_add (f := _)]
         exact Submodule.add_mem _ hx hy
   refine ⟨L, ?_⟩
   ext z
@@ -211,7 +277,7 @@ theorem ker_and_surjective : ∀ {B M : Type} [CommRing B] [AddCommGroup M] [Mod
       rw [map_smul]
       exact Submodule.smul_mem_smul hr trivial
     · intro x y hx hy
-      rw [map_add]
+      rw [map_add (f := _)]
       exact Submodule.add_mem _ hx hy
   have hVp : ∀ z, ((D * shift e - 1) ^ p) z ∈ J • (⊤ : Submodule B M) := by
     intro z

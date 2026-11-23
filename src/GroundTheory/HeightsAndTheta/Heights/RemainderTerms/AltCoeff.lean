@@ -1,6 +1,59 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.RemainderTerms.Statements
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.VandermondeOfEqDet
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.RemainderTerms.Statements
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.VandermondeOfEqDet
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+public import Mathlib.Data.Fin.Tuple.Sort
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.MvPolynomial.IrreducibleQuadratic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.RestTerms.Comb
@@ -13,7 +66,7 @@ variable {m : ℕ}
 
 abbrev ex (v : Fin m → ℕ) : Fin m →₀ ℕ := Finsupp.equivFunOnFinite.symm v
 
-def cf (v : Fin m → ℕ) (P : MvPolynomial (Fin m) ℚ) : ℚ := coeff (ex v) P
+def cf (v : Fin m → ℕ) (P : MvPolynomial (Fin m) ℚ) : ℚ := AddMonoidAlgebra.coeff P (ex v)
 
 def alt (v : Fin m → ℕ) : MvPolynomial (Fin m) ℚ :=
   (Matrix.of fun i j : Fin m => (X i : MvPolynomial (Fin m) ℚ) ^ v j).det
@@ -27,7 +80,7 @@ theorem ex_comp_symm (v : Fin m → ℕ) (σ : Perm (Fin m)) :
     Finsupp.mapDomain σ (ex v) = ex (v ∘ σ.symm) := by
   ext i
   conv_lhs => rw [← σ.apply_symm_apply i]
-  rw [Finsupp.mapDomain_apply σ.injective]
+  rw [Finsupp.mapDomain_apply_of_injective σ.injective]
   simp
 
 theorem cf_rename (v : Fin m → ℕ) (σ : Perm (Fin m)) (P : MvPolynomial (Fin m) ℚ) :
@@ -54,7 +107,7 @@ theorem cf_perm {P : MvPolynomial (Fin m) ℚ} (hP : IsAlt P) (σ : Perm (Fin m)
   have h := cf_rename v σ P
   rw [hP σ] at h
   unfold cf at h ⊢
-  rw [coeff_smul, zsmul_eq_mul] at h
+  rw [MvPolynomial.coeff_smul, zsmul_eq_mul] at h
   rw [← h, ← mul_assoc, sign_mul_self, one_mul]
 
 theorem cf_eq_zero_of_eq {P : MvPolynomial (Fin m) ℚ} (hP : IsAlt P) {v : Fin m → ℕ} {i j : Fin m}
@@ -99,7 +152,7 @@ theorem cf_sum {ι : Type*} (s : Finset ι) (v : Fin m → ℕ) (P : ι → MvPo
 
 theorem cf_zsmul (v : Fin m → ℕ) (z : ℤ) (P : MvPolynomial (Fin m) ℚ) :
     cf v (z • P) = z * cf v P := by
-  unfold cf; rw [coeff_smul, zsmul_eq_mul]
+  unfold cf; rw [MvPolynomial.coeff_smul, zsmul_eq_mul]
 
 theorem cf_alt (l v : Fin m → ℕ) :
     cf l (alt v) = ∑ σ : Perm (Fin m), ((Perm.sign σ : ℤ) : ℚ) * if l = v ∘ σ.symm then 1 else 0 := by
@@ -176,7 +229,7 @@ theorem IsAlt.mul_symm {P S : MvPolynomial (Fin m) ℚ} (hP : IsAlt P) (hS : S.I
   rw [map_mul, hP σ, hS σ, smul_mul_assoc]
 
 theorem IsAlt.add {P Q : MvPolynomial (Fin m) ℚ} (hP : IsAlt P) (hQ : IsAlt Q) : IsAlt (P + Q) := by
-  intro σ; rw [map_add, hP σ, hQ σ, smul_add]
+  intro σ; rw [map_add (f := _), hP σ, hQ σ, smul_add]
 
 theorem IsAlt.sub {P Q : MvPolynomial (Fin m) ℚ} (hP : IsAlt P) (hQ : IsAlt Q) : IsAlt (P - Q) := by
   intro σ; rw [map_sub, hP σ, hQ σ, smul_sub]
@@ -218,8 +271,8 @@ theorem exists_perm_strictAnti {u : Fin m → ℕ} (hu : Function.Injective u) :
 theorem IsAlt.eq_zero_of_cf {P : MvPolynomial (Fin m) ℚ} (hP : IsAlt P)
     (h : ∀ l : Fin m → ℕ, StrictAnti l → cf l P = 0) : P = 0 := by
   ext d
-  rw [coeff_zero]
-  have hd : coeff d P = cf (⇑d) P := by unfold cf; simp
+  simp only [AddMonoidAlgebra.coeff_zero, Pi.zero_apply]
+  have hd : AddMonoidAlgebra.coeff P d = cf (⇑d) P := by unfold cf; simp
   rw [hd]
   by_cases hinj : Function.Injective (⇑d)
   · obtain ⟨σ, hσ⟩ := exists_perm_strictAnti hinj
@@ -232,18 +285,18 @@ theorem IsAlt.eq_zero_of_cf {P : MvPolynomial (Fin m) ℚ} (hP : IsAlt P)
     exact cf_eq_zero_of_eq hP hne hij
 
 theorem IsAlt.eq_sum_alt {P : MvPolynomial (Fin m) ℚ} (hP : IsAlt P) :
-    P = ∑ d ∈ P.support.filter (fun d : Fin m →₀ ℕ => StrictAnti (⇑d)), coeff d P • alt (⇑d) := by
+    P = ∑ d ∈ P.support.filter (fun d : Fin m →₀ ℕ => StrictAnti (⇑d)), AddMonoidAlgebra.coeff P d • alt (⇑d) := by
   rw [← sub_eq_zero]
   refine (hP.sub (IsAlt.sum _ fun d _ => (alt_isAlt _).smul _)).eq_zero_of_cf fun l hl => ?_
   unfold cf
-  rw [coeff_sub, coeff_sum, sub_eq_zero]
+  rw [MvPolynomial.coeff_sub, coeff_sum, sub_eq_zero]
   have hterm : ∀ d ∈ P.support.filter (fun d : Fin m →₀ ℕ => StrictAnti (⇑d)),
-      coeff (ex l) (coeff d P • alt (⇑d)) = if d = ex l then coeff d P else 0 := by
+      AddMonoidAlgebra.coeff (AddMonoidAlgebra.coeff P d • alt (⇑d)) (ex l) = if d = ex l then AddMonoidAlgebra.coeff P d else 0 := by
     intro d hd
     rw [Finset.mem_filter] at hd
     have := cf_alt_of_strictAnti hl hd.2
     unfold cf at this
-    rw [coeff_smul, this, smul_eq_mul]
+    rw [MvPolynomial.coeff_smul, this, smul_eq_mul]
     by_cases hdl : d = ex l
     · subst hdl; simp
     · rw [if_neg, if_neg hdl, mul_zero]

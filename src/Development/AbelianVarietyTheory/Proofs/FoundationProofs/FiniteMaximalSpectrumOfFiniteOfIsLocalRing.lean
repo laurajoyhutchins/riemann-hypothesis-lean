@@ -1,4 +1,60 @@
-import Mathlib
+module
+
+public import Mathlib.RingTheory.Etale.Basic
+public import Mathlib.RingTheory.Henselian
+public import Mathlib.RingTheory.Spectrum.Maximal.Localization
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.Etale.QuasiFinite
+import Mathlib.RingTheory.Radical.NatInt
+public import Mathlib.RingTheory.Unramified.LocalStructure
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.RingTheory.Etale.StandardEtale
+public import Mathlib.RingTheory.Unramified.Finite
+
+@[expose] public section
 
 noncomputable section
 
@@ -18,7 +74,7 @@ theorem idempotent_eq_of_sub_mem_jacobson {S : Type*} [CommRing S] {a b : S}
 
 theorem isUnit_of_isUnit_mk_of_le_jacobson {S : Type*} [CommRing S] {J : Ideal S}
     (hJ : J ≤ (⊥ : Ideal S).jacobson) {x : S} (hx : IsUnit (Ideal.Quotient.mk J x)) : IsUnit x :=
-  have := isLocalHom_of_le_jacobson_bot J hJ
+  have := isLocalHom_of_le_jacobson (Ideal.jacobson_bot (R := S) ▸ hJ)
   IsUnit.of_map (Ideal.Quotient.mk J) x hx
 
 theorem algHom_ext_of_sub_mem_jacobson {R A B : Type*} [CommRing R] [CommRing A] [CommRing B]
@@ -31,14 +87,13 @@ theorem algHom_ext_of_sub_mem_jacobson {R A B : Type*} [CommRing R] [CommRing A]
       (⊥ : Ideal B).jacobson := by
     intro x
     induction x with
-    | zero => simp
     | tmul a b =>
       have : f (Algebra.TensorProduct.lmul' R (a ⊗ₜ b)) - φ (a ⊗ₜ b) = f a * (f b - g b) := by
         simp [φ, mul_sub]
       rw [this]
       exact Ideal.mul_mem_left _ _ (h b)
     | add x y hx hy =>
-      rw [map_add, map_add, map_add, add_sub_add_comm]
+      rw [map_add (f := _), map_add (f := _), map_add (f := _), add_sub_add_comm]
       exact add_mem hx hy
   have hu : IsUnit (φ t) := by
     have h1 := key t
@@ -55,7 +110,7 @@ theorem exists_algHom_lift_of_etale_of_isLocalRing {R A S : Type*} [CommRing R] 
     [CommRing S] [Algebra R A] [Algebra R S] [Algebra.Etale R A] [IsLocalRing S] (J : Ideal S)
     [HenselianRing S J] (φ : A →ₐ[R] S ⧸ J) :
     ∃ ψ : A →ₐ[R] S, ∀ a, Ideal.Quotient.mk J (ψ a) = φ a := by
-  have hJ : J ≤ (⊥ : Ideal S).jacobson := HenselianRing.jac
+  have hJ : J ≤ (⊥ : Ideal S).jacobson := by simpa [Ideal.jacobson_bot] using (HenselianRing.jac (R := S) (I := J))
   have hJtop : J ≠ ⊤ := by
     rintro rfl
     rw [IsLocalRing.jacobson_eq_maximalIdeal _ bot_ne_top] at hJ
@@ -99,13 +154,16 @@ theorem exists_algHom_lift_of_etale_of_isLocalRing {R A S : Type*} [CommRing R] 
 theorem comap_eq_maximalIdeal_of_finite {R S : Type*} [CommRing R] [IsLocalRing R] [CommRing S]
     [Algebra R S] [Module.Finite R S] (n : Ideal S) [n.IsMaximal] :
     n.comap (algebraMap R S) = maximalIdeal R :=
-  IsLocalRing.eq_maximalIdeal (Ideal.isMaximal_comap_of_isIntegral_of_isMaximal n)
+  IsLocalRing.eq_maximalIdeal
+    (Ideal.isMaximal_comap_of_isIntegral_of_isMaximal (algebraMap R S)
+      (fun x ↦ IsIntegral.of_finite R x) n)
 
 theorem map_maximalIdeal_le_jacobson_of_finite (R S : Type*) [CommRing R] [IsLocalRing R]
     [CommRing S] [Algebra R S] [Module.Finite R S] :
     (maximalIdeal R).map (algebraMap R S) ≤ (⊥ : Ideal S).jacobson := by
-  rw [Ideal.jacobson, le_sInf_iff]
-  rintro n ⟨-, hn⟩
+  rw [Ideal.jacobson_bot, Ring.jacobson_eq_sInf_isMaximal, le_sInf_iff]
+  rintro n hn
+  letI : n.IsMaximal := hn
   rw [Ideal.map_le_iff_le_comap, comap_eq_maximalIdeal_of_finite]
 
 theorem finite_maximalSpectrum_of_finite_of_isLocalRing (R S : Type*) [CommRing R] [IsLocalRing R]
@@ -154,8 +212,9 @@ theorem exists_idempotent_notMem_iff_of_henselian (R : Type*) {S : Type*} [CommR
 
 theorem mem_jacobson_bot_of_forall_isMaximal {S : Type*} [CommRing S] {x : S}
     (h : ∀ n : Ideal S, n.IsMaximal → x ∈ n) : x ∈ (⊥ : Ideal S).jacobson := by
-  rw [Ideal.jacobson, Ideal.mem_sInf]
-  rintro n ⟨-, hn⟩
+  rw [Ideal.jacobson_bot, Ring.jacobson_eq_sInf_isMaximal, Ideal.mem_sInf]
+  rintro n hn
+  letI : n.IsMaximal := hn
   exact h n hn
 
 theorem one_sub_mem_iff_notMem_of_isIdempotentElem {S : Type*} [CommRing S] {e : S}
@@ -218,9 +277,10 @@ theorem existsUnique_idempotent_lift_of_henselian (R : Type*) {S C : Type*} [Com
 
 theorem henselianRing_of_finite (R : Type*) {S : Type*} [CommRing R]
     [HenselianLocalRing R] [CommRing S] [Algebra R S] [Module.Finite R S] (J : Ideal S)
-    (hJ : J ≤ (⊥ : Ideal S).jacobson) : HenselianRing S J where
-  jac := hJ
-  is_henselian f hf a₀ h₁ h₂ := by
+    (hJ : J ≤ (⊥ : Ideal S).jacobson) : HenselianRing S J := by
+  have hJac : J ≤ Ring.jacobson S := Ideal.jacobson_bot (R := S) ▸ hJ
+  refine ⟨hJac, ?_⟩
+  · intro f hf a₀ h₁ h₂
     nontriviality S using Subsingleton.elim _ (0 : S)
     obtain ⟨u, hu⟩ := (isUnit_of_isUnit_mk_of_le_jacobson hJ h₂).exists_left_inv
     set g := f /ₘ (X - C a₀) with hg
@@ -271,7 +331,7 @@ theorem henselianRing_of_finite (R : Type*) {S : Type*} [CommRing R]
       rwa [← mul_add, add_sub_cancel] at this
     let μ : T →ₗ[S] T := LinearMap.mulRight S e
     have hle : (⊤ : Submodule S T).map μ ≤ Submodule.span S {e} := by
-      refine Submodule.le_of_le_smul_of_le_jacobson_bot (Module.Finite.fg_top.map _) hJ ?_
+      refine Submodule.le_of_le_smul_of_le_jacobson (Module.Finite.fg_top.map _) hJac ?_
       rintro _ ⟨y, -, rfl⟩
       obtain ⟨p, rfl⟩ := AdjoinRoot.mk_surjective y
       rw [← AdjoinRoot.aeval_eq]
@@ -390,7 +450,7 @@ theorem surjective_algebraMap_localization_of_henselian (R : Type*) {S : Type*} 
   refine ⟨a * v, ?_⟩
   rw [IsLocalization.eq_mk'_iff_mul_eq]
   have := congr(algebraMap S (Localization.AtPrime q) $hv)
-  simp only [map_mul, map_add, map_sub, map_one, he1, one_mul, sub_self, add_zero] at this
+  simp only [map_mul, map_add (f := _), map_sub, map_one, he1, one_mul, sub_self, add_zero] at this
   rw [map_mul, mul_assoc, this, mul_one]
 
 theorem finite_localization_of_henselian (R : Type*) {S : Type*} [CommRing R]
@@ -419,6 +479,7 @@ theorem bijective_toPiLocalization_of_henselian (R S : Type*) [CommRing R]
     fun q ↦ (IsIdempotentElem.iff_eq_one_of_isUnit (IsLocalization.map_units _
       (⟨e q, (H q _ q.isMaximal).2 rfl⟩ : q.asIdeal.primeCompl))).1 ((he.idem q).map _)
   refine ⟨∑ q, e q * a q, funext fun q ↦ ?_⟩
+
   rw [MaximalSpectrum.toPiLocalization_apply_apply, map_sum, Finset.sum_eq_single q]
   · rw [map_mul, h1, one_mul, ha]
   · intro p _ hpq

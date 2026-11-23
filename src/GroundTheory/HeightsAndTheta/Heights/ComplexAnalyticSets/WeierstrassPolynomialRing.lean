@@ -1,7 +1,61 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.WeierstrassRemainderUnique
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.PAnalyticGermsNoetherian
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.PAnalyticGermsNoetherian
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StGermWeierstrassPreparation
+public import Mathlib.Topology.Germ
 import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.PHolGermsDomain
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.WeierstrassRemainderUnique
+import Mathlib.Algebra.AffineMonoid.UniqueSums
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.IndefiniteRowSideFullHecke.ComplexSets
@@ -63,11 +117,13 @@ theorem polyToGerm_finPoly {σ : Type} [Fintype σ] {d : ℕ} (a : Fin d → (σ
   have hι : ∀ j, ((germLift σ (mkGerm (a j) (ha j)) : holGerms (0 : Option σ → ℂ)) :
       Germ (𝓝 (0 : Option σ → ℂ)) ℂ) = ↑(a j ∘ lastProj σ) :=
     fun j => germPull_coe _ _ _ (mkGerm (a j) (ha j)) (a j) rfl
+
   simp only [finPoly, polyToGerm, map_sum, map_mul, map_pow, coe_eval₂RingHom, eval₂_C, eval₂_X]
   rw [AddSubmonoidClass.coe_finsetSum]
   simp only [Subring.coe_mul, Subring.coe_pow, hι]
   change ∑ j : Fin d, Germ.coeRingHom _ (a j ∘ lastProj σ) *
       Germ.coeRingHom _ (fun x : Option σ → ℂ => x none) ^ (j : ℕ) = Germ.coeRingHom _ _
+
   simp only [← map_mul, ← map_pow, ← map_sum]
   congr 1
   funext x
@@ -77,13 +133,13 @@ theorem polyToGerm_weierstrassPoly {σ : Type} [Fintype σ] {d : ℕ} (c : Fin d
     (hc : ∀ j, AnalyticAt ℂ (c j) 0) :
     ((polyToGerm σ (weierstrassPoly c hc) : holGerms (0 : Option σ → ℂ)) : Germ (𝓝 (0 : Option σ → ℂ)) ℂ) =
       ↑(weierstrassPolynomial c) := by
-  rw [weierstrassPoly, map_add, Subring.coe_add, polyToGerm_finPoly, map_pow, Subring.coe_pow]
+  rw [weierstrassPoly, map_add (f := _), Subring.coe_add, polyToGerm_finPoly, map_pow, Subring.coe_pow]
   have hX : ((polyToGerm σ X : holGerms (0 : Option σ → ℂ)) : Germ (𝓝 (0 : Option σ → ℂ)) ℂ) =
       ↑(fun x : Option σ → ℂ => x none) := by
     simp only [polyToGerm, coe_eval₂RingHom, eval₂_X]; rfl
   rw [hX]
   change Germ.coeRingHom _ (fun x : Option σ → ℂ => x none) ^ d + Germ.coeRingHom _ _ = Germ.coeRingHom _ _
-  rw [← map_pow, ← map_add]
+  rw [← map_pow, ← map_add (f := _)]
   rfl
 
 theorem germValue_polyToGerm {σ : Type} [Fintype σ] (p : (holGerms (0 : σ → ℂ))[X]) :
@@ -122,7 +178,7 @@ theorem weierstrassPoly_dvd_of_polyToGerm_dvd {σ : Type} [Fintype σ] {d : ℕ}
   have himg : polyToGerm σ (p %ₘ weierstrassPoly c hc) =
       polyToGerm σ (weierstrassPoly c hc) * (Q - polyToGerm σ (p /ₘ weierstrassPoly c hc)) := by
     have e := congrArg (polyToGerm σ) (modByMonic_add_div p (weierstrassPoly c hc))
-    rw [map_add, map_mul] at e
+    rw [map_add (f := _), map_mul] at e
     rw [mul_sub, ← hQ, ← e]; ring
   obtain ⟨m, hmA, hmQ⟩ := (Q - polyToGerm σ (p /ₘ weierstrassPoly c hc)).2
   have hgerm := congrArg (fun φ : holGerms (0 : Option σ → ℂ) => (φ : Germ (𝓝 (0 : Option σ → ℂ)) ℂ)) himg
@@ -156,8 +212,9 @@ theorem weierstrassPoly_irreducible {σ : Type} [Fintype σ] {d : ℕ} (c : Fin 
     rw [hab, show (a * C (↑u⁻¹ : holGerms (0 : σ → ℂ))) * (b * C (u : holGerms (0 : σ → ℂ))) =
       a * b * C ((↑u⁻¹ : holGerms (0 : σ → ℂ)) * u) by rw [C_mul]; ring, Units.inv_mul, C_1, mul_one]
   have hmap : (weierstrassPoly c hc).map (germValue 0) = X ^ d := by
-    simp only [weierstrassPoly, finPoly, Polynomial.map_add, Polynomial.map_pow, map_X, Polynomial.map_sum,
-      Polynomial.map_mul, map_C]
+
+    simp only [weierstrassPoly, finPoly, Polynomial.map_add (f := _), Polynomial.map_pow, map_X, Polynomial.map_sum,
+    Polynomial.map_mul, map_C]
     have : ∀ j, germValue 0 (mkGerm (c j) (hc j)) = 0 := fun j => hc0 j
     simp [this]
 

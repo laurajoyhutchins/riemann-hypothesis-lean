@@ -1,9 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.InvMemIntV
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.InvMemIntV
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsIsUnitMulSubMemJacobsonOfFiniteResidueFielStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HenselianNormLift
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PadicIntegersHenselianFiniteResidueStatement
 import Development.AbelianVarietyTheory.Proofs.FoundationProofs.FiniteMaximalSpectrumOfFiniteOfIsLocalRing
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HenselianNormLift
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsIsUnitMulSubMemJacobsonOfFiniteResidueFielStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PadicIntegersHenselianFiniteResidueStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -16,7 +60,7 @@ variable {p : ℕ} [Fact p.Prime]
 
 theorem normStep_isIntV_add {G : HTGroup p} {v : AwayP p} {y z : Qv v ⊗[ℚ] G.C} (hy : IsIntV G v y)
     (hz : IsIntV G v z) : IsIntV G v (y + z) := by
-  intro i; rw [map_add, Finsupp.add_apply]; exact add_mem (hy i) (hz i)
+  intro i; rw [map_add (f := _), Finsupp.add_apply]; exact add_mem (hy i) (hz i)
 
 theorem normStep_isIntV_neg {G : HTGroup p} {v : AwayP p} {y : Qv v ⊗[ℚ] G.C} (hy : IsIntV G v y) :
     IsIntV G v (-y) := by
@@ -34,7 +78,7 @@ theorem normStep_star_star (G : HTGroup p) (R : Type) [CommRing R] [Algebra ℚ 
   induction y using TensorProduct.induction_on with
   | zero => simp
   | tmul r x => rw [starT_tmul, starT_tmul, G.star_star]
-  | add x y hx hy => simp only [map_add, MulOpposite.unop_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), MulOpposite.unop_add, hx, hy]
 
 theorem normStep_star_mul (G : HTGroup p) (R : Type) [CommRing R] [Algebra ℚ R] (y z : R ⊗[ℚ] G.C) :
     (starT G.star R (y * z)).unop = (starT G.star R z).unop * (starT G.star R y).unop := by
@@ -102,7 +146,7 @@ theorem normStep_exists (p : ℕ) [Fact p.Prime] (G : HTGroup p) (v : AwayP p) (
       map_add' := fun a b => Subtype.ext (by
         show (starT G.star (Qv v) ((a : Qv v ⊗[ℚ] G.C) + b)).unop =
           (starT G.star (Qv v) a).unop + (starT G.star (Qv v) b).unop
-        rw [map_add, MulOpposite.unop_add]) }
+        rw [map_add (f := _), MulOpposite.unop_add]) }
   have hτinv : ∀ a, τ (τ a) = a := fun a => Subtype.ext (normStep_star_star G (Qv v) a)
   let O := v.1.adicCompletionIntegers ℚ
   let φ : O →+* A := ((algebraMap (Qv v) (Qv v ⊗[ℚ] G.C)).comp (algebraMap O (Qv v))).codRestrict A
@@ -116,7 +160,7 @@ theorem normStep_exists (p : ℕ) [Fact p.Prime] (G : HTGroup p) (v : AwayP p) (
       map_add' := fun a b => by
         funext i; apply Subtype.ext
         show (basV G v).repr ((a : Qv v ⊗[ℚ] G.C) + b) i = (basV G v).repr a i + (basV G v).repr b i
-        rw [map_add, Finsupp.add_apply]
+        rw [map_add (f := _), Finsupp.add_apply]
       map_smul' := fun r a => by
         funext i; apply Subtype.ext
         show (basV G v).repr (algebraMap (Qv v) (Qv v ⊗[ℚ] G.C) (algebraMap O (Qv v) r) * a) i =
@@ -146,7 +190,7 @@ theorem normStep_exists (p : ℕ) [Fact p.Prime] (G : HTGroup p) (v : AwayP p) (
     rw [Ideal.mem_jacobson_bot] at ha ⊢
     intro b
     have := (ha (τ b)).map τ
-    rwa [map_add, map_mul, hτinv, map_one] at this
+    rwa [τ.map_add, τ.map_mul, hτinv, τ.map_one] at this
   have h2A : IsUnit (2 : A) := IsUnit.of_mul_eq_one (a := (2 : A)) (⟨h, hhg, hhi⟩ : A) (Subtype.ext (by
     show ((2 : A) : Qv v ⊗[ℚ] G.C) * h = 1
     rw [show ((2 : A) : Qv v ⊗[ℚ] G.C) = 2 from map_ofNat A.subtype 2]

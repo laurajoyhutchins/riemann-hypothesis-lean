@@ -1,4 +1,52 @@
-import CompanionTheory.AutomorphicTheory.PadicCyclotomicFields.GcohDefs
+module
+
+public import GroundTheory.ProfiniteCohomology.CupProducts
+public import ReciprocityTheory.GaloisValuations.SeparatedDvrSecondCohomologyMem
+public import GroundTheory.ProfiniteCohomology.FilteredHomology
+import Mathlib.Algebra.Homology.ShortComplex.ModuleCat
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open CategoryTheory GroundTheory.ProfCoh ReciprocityTheory.Gal ValuativeRel
 
@@ -59,9 +107,9 @@ theorem core_hom {Z : Type} [AddCommGroup Z] (n : ℕ) (φ : Z →+ ((Fin n → 
       ∀ z x, cochainOf A (cocycleι A n x) = φ z → f z = cohomologyπ A n x := by
   choose ψ hψ using hex
   have hadd : ∀ z z', ψ (z + z') = ψ z + ψ z' := fun z z' => coc_inj A n (by
-    rw [map_add, cochainOf_add, hψ, hψ, hψ, map_add])
+    rw [map_add (f := _), cochainOf_add, hψ, hψ, hψ, map_add (f := _)])
   let f : Z →+ cohomology A n := AddMonoidHom.mk' (fun z => cohomologyπ A n (ψ z))
-    (fun z z' => by rw [hadd, map_add])
+    (fun z z' => by rw [hadd, map_add (f := _)])
   have hf : ∀ z x, cochainOf A (cocycleι A n x) = φ z → f z = cohomologyπ A n x := fun z x h => by
     have : ψ z = x := coc_inj A n ((hψ z).trans h.symm)
     change cohomologyπ A n (ψ z) = _
@@ -118,7 +166,8 @@ include he in
 theorem d_comp (n : ℕ) (f : (Fin n → G) → M) :
     (inhomogeneousCochains.d A n).hom (fun s => e (f s)) = fun s => e (dn rho n f s) := by
   funext s
-  rw [inhomogeneousCochains.d_hom_apply, dn_app, map_add, map_sum, he]
+
+  rw [inhomogeneousCochains.d_hom_apply, dn_app, map_add (f := _), map_sum, he]
   congr 1
   refine Finset.sum_congr rfl fun j _ => ?_
   rw [neg_one_pow_smul' (S := k), neg_one_pow_smul' (S := R), map_zsmul]

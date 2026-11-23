@@ -1,4 +1,52 @@
-import Formalism.HermitianCurvature.StatementSz
+module
+
+public import Formalism.HermitianCurvature.StatementSz
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace Formalism.FourierDecayAlt.P
 
@@ -272,7 +320,7 @@ theorem nodeBound : NodeBound := by
     exact s1.trans s2
   simp only [Cfg.Nd, Cfg.prodb]
   calc ∏ j ∈ Icc 1 c.m, Real.sqrt ((c.b j + y) * (c.b j + y - 1))
-      ≤ ∏ j ∈ Icc 1 c.m, (c.b j * E) := prod_le_prod (fun _ _ => Real.sqrt_nonneg _) hterm
+      ≤ ∏ j ∈ Icc 1 c.m, (c.b j * E) := prod_le_prod₀ (fun _ _ => Real.sqrt_nonneg _) hterm
     _ = (∏ j ∈ Icc 1 c.m, c.b j) * E ^ c.m := by
         rw [prod_mul_distrib, prod_const, Nat.card_Icc]; simp
     _ = Real.exp c.vth * ∏ j ∈ Icc 1 c.m, c.b j := by
@@ -475,7 +523,7 @@ theorem Sz6.positionsBefore_of (H1 : PositionBefore) (H2 : ProdOneAddTwoDivLeSqr
   have hk4 : (4:ℝ) ≤ c.k := by exact_mod_cast h.hk
   have step1 : ∏ i ∈ Ico 1 l, c.rho de de' (-Y) i ≤
       ∏ i ∈ Ico 1 l, (fun j : ℕ => (1 + 2 / (4 * (j : ℝ) - 1))) (l - i) := by
-    apply prod_le_prod
+    apply Finset.prod_le_prod₀
     · intro i hi
       rw [mem_Ico] at hi
       have hnt : ¬ (c.top = true ∧ i + 1 = c.k) := by rintro ⟨_, h2⟩; omega

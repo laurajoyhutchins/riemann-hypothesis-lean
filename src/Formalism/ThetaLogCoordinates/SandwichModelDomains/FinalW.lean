@@ -1,9 +1,53 @@
-import Formalism.ThetaLogCoordinates.SandwichModelDomains.SandwichModelProofs.GlFirstLineDividedPowers
-import Formalism.ThetaLogCoordinates.SandwichModelDomains.SandwichModelProofs.SwappedHighestWeightNeZero
-import Formalism.ThetaLogCoordinates.SandwichModelDomains.SandwichModelProofs.Spread
-import Formalism.ThetaLogCoordinates.SandwichModelDomains.SandwichModelProofs.Descent
+module
+
+public import Formalism.ThetaLogCoordinates.SandwichModelDomains.SpreadSquare
 import Formalism.ThetaLogCoordinates.SandwichModelDomains.SandwichModelProofs.Ascent
-import Formalism.ThetaLogCoordinates.SandwichModelDomains.SandwichModelProofs.Assemble
+public import Formalism.ThetaLogCoordinates.SandwichModelDomains.SandwichModelProofs.Assemble
+import Formalism.ThetaLogCoordinates.SandwichModelDomains.SandwichModelProofs.Descent
+public import Formalism.ThetaLogCoordinates.SandwichModelDomains.SandwichModelProofs.GlFirstLineDividedPowers
+public import Formalism.ThetaLogCoordinates.SandwichModelDomains.SandwichModelProofs.Spread
+import Formalism.ThetaLogCoordinates.SandwichModelDomains.SandwichModelProofs.SwappedHighestWeightNeZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace Formalism.InvariantFactorPaths.INST.Top
 
@@ -50,25 +94,5 @@ theorem sandwichDomain : SandwichDomain := sandwichDomain_of sandwichZ ascentDom
 theorem sandwichLocal : SandwichLocal := by
   intro p hp r n hn ν hν l hL O _ _ _ hpu
   exact sandwichDomain p r n hn ν hν l hL O (unitsOfLocal p O hpu)
-theorem sandwichModel : SandwichModel := by
-  intro p hp O Kf _ _ _ _ hO m lam hlam
-  have hanti : Antitone (fun t : Fin (m + 1) => (lam t - lam (Fin.last m)).toNat) := by
-    intro s t hst
-    exact Int.toNat_le_toNat (sub_le_sub_right (hlam hst) _)
-  have hL : LBound (m + 1) (fun t : Fin (m + 1) => (lam t - lam (Fin.last m)).toNat)
-      ((lam 0 - lam (Fin.last m)).toNat) := by
-    left
-    intro t
-    exact Int.toNat_le_toNat (sub_le_sub_right (hlam (Fin.zero_le t)) _)
-  obtain ⟨h1, h2⟩ := sandwichDomain p (m + 1) (m + 1) le_rfl _ hanti _ hL O hO
-  refine ⟨?_, Submodule.map_mono h2⟩
-  intro x hx
-  obtain ⟨y, hy, rfl⟩ := Submodule.mem_map.1 hx
-  refine Submodule.mem_map.2 ⟨_, h1 y hy, ?_⟩
-  rw [map_smul]
-  all_goals rfl
-theorem sandwichModelLocal : SandwichModelLocal := by
-  intro p hp O Kf _ _ _ _ _ hpu m lam hlam
-  exact sandwichModel p O Kf (unitsOfLocal p O hpu) m lam hlam
 
 end Formalism.InvariantFactorPaths.INST.Top

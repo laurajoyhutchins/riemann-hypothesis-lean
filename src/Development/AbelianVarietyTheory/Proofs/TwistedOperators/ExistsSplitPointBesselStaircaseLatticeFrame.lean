@@ -1,14 +1,61 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.IsAuxiliaryVectorWittDec
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.SplitPlaceHermitianFrameProperties
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.ExistsSplitPointFrameCharacter
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.SelfDualSplitComponentIsLatticeStabilizerEq
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.UnramifiedCharacterDetLatticeStabilizerEqOne
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.ContinuousSingleAt
+module
+
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.IsAuxiliaryVectorWittDec
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsContinuousPadic
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ExistsIntegralSplitIdempotentOverTwo
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.ContinuousSingleAt
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.ExistsSplitPointFrameCharacter
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.SelfDualSplitComponentIsLatticeStabilizerEq
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.UnramifiedCharacterDetLatticeStabilizerEqOne
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AuxiliaryVectorDecompositionEqZero
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MemMulInvIff
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.UnderMemAndPlaceAboveEqOfMem
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ValuationLeOneOfMem
 import Development.AbelianVarietyTheory.Proofs.SatakeParameters.SplitChartUniformiserAndResidueCard
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AuxiliaryVectorDecompositionEqZero
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.UnderMemAndPlaceAboveEqOfMem
-import GroundTheory.GlobalFields.TateThesis.AdelePoisson
+public import GroundTheory.GlobalFields.TateThesis.AdelePoisson
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsGivenStageEqOne
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.L2.Theta Formalism.IndefR Formalism.IndefR.Datum Formalism.IndefR.Links MeasureTheory IsDedekindDomain NumberField Matrix
 open GlobalTheory.MixModel GlobalTheory.MixPer GlobalTheory.Grow GlobalTheory.Unf GlobalTheory.ChiGrid GlobalTheory.FunObj GlobalTheory.SepRows GlobalTheory.Asc
 open scoped TensorProduct
@@ -89,6 +136,7 @@ theorem map_latV {A B : HSp D} {L : Lat A} {L' : Lat B} (M : Matrix (Fin B.rank)
 theorem sec_mulVec {m n : ℕ} (M : Matrix (Fin m) (Fin n) D.host.E) (u : Fin n → k) :
     (fun i => p.sec ((M.map (emb p) *ᵥ u) i)) = M.map (incA D) *ᵥ fun j => p.sec (u j) := by
   funext i
+
   simp only [mulVec, dotProduct, map_apply, map_sum]
   refine Finset.sum_congr rfl fun j _ => ?_
   rw [mul_comm (incA D _), sec_mul_right, mul_comm, emb_apply]
@@ -102,6 +150,20 @@ theorem exists_basis {A : HSp D} {Λ : Lat A} (hΛ : IsSelfDualC A Λ) : ∃ g :
     ∀ x : Fin A.rank → k, (∀ i, x i ∈ 𝒪[k]) ↔ (fun i => p.sec ((g.val *ᵥ x) i)) ∈ latV A Λ (· = p.v) := by
   obtain ⟨β, hβ⟩ := ((GlobalTheory.InhPt.exists_splitPt_frame_char D).2 k p).1 A (Fin A.rank) 1 1 (by simp) (by simp)
   obtain ⟨Λ', h1, h2, -⟩ := exists_lat D k p A (Fin A.rank) β Λ hΛ
+  letI : Λ'.IsLattice k := h1
+  letI : Λ'.IsFullLattice k := by
+    refine ⟨?_⟩
+    rw [eq_top_iff]
+    intro x _
+    obtain ⟨m, s, c, hs, hc, -⟩ := exists_gen (p := p) hΛ
+    have hexp := hc (β.b *ᵥ x)
+    have hexp' := congrArg (β.b' *ᵥ ·) hexp
+    simp only [mulVec_sum, mulVec_smul, mulVec_mulVec, β.b'b, one_mulVec] at hexp'
+    rw [hexp']
+    refine Submodule.sum_mem _ fun l _ => Submodule.smul_mem _ _ ?_
+    apply Submodule.subset_span
+    apply (h2 _).2
+    simpa [mulVec_mulVec, β.bb', one_mulVec] using (sec_inc_mem (p := p) (hs l))
   obtain ⟨g, hg⟩ := GlobalTheory.LatPair.Det.exists_smul_stdLat_eq Λ'
   refine ⟨g, fun x => ?_⟩
   have h3 := h2 (g • x)
@@ -122,7 +184,7 @@ theorem perp_left {A B : HSp D} {c : ℕ} {ε : D.host.E} (d : HermitianOrthogon
   rw [← e, Finset.sum_comm]
   exact Finset.sum_congr rfl fun l _ => Finset.sum_congr rfl fun j _ => by ring
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem exists_frame {A B : HSp D} {c : ℕ} {ε : D.host.E} (d : HermitianOrthogonalExtensionData A B c ε) (hε : ε ≠ 0) {Λ : Lat A}
     (hΛ : IsSelfDualC A Λ) (𝔟 : Fin c → FractionalIdeal (𝓞 D.host.E)⁰ D.host.E) (s : Fin c → k) (hs : ∀ q, s q ≠ 0)
@@ -178,8 +240,9 @@ theorem exists_frame {A B : HSp D} {c : ℕ} {ε : D.host.E} (d : HermitianOrtho
       have e : (fun i => p.sec ((β.b *ᵥ x) i)) = (fun i => p.sec ((F' *ᵥ (g.val *ᵥ fun l => x (σ (Sum.inl l)))) i)) +
           ∑ q, fun i => p.sec (s q * x (σ (Sum.inr q))) * incA D (d.a i q) := by
         funext i
-        rw [hbv, Pi.add_apply, map_add, Pi.add_apply, Finset.sum_apply]
+        rw [hbv, Pi.add_apply, map_add (f := _), Pi.add_apply, Finset.sum_apply]
         congr 1
+
         simp only [mulVec, dotProduct, map_sum, a', map_apply]
         exact Finset.sum_congr rfl fun q _ => by rw [sec_mul_right, mul_comm, emb_apply]
       rw [e]
@@ -216,7 +279,8 @@ theorem exists_frame {A B : HSp D} {c : ℕ} {ε : D.host.E} (d : HermitianOrtho
             mul_inv_cancel_left₀ (hs _)]
           rw [e1]
           funext i
-          simp only [Pi.add_apply, mulVec, dotProduct, map_add, map_sum, map_mul, F', a', map_apply]
+
+          simp only [Pi.add_apply, mulVec, dotProduct, map_add (f := _), map_sum, map_mul, F', a', map_apply]
         rw [e, mulVec_mulVec, β.b'b, one_mulVec]
         obtain ⟨t, rfl⟩ := σ.surjective j
         simp only [x', Function.comp_apply, Equiv.symm_apply_apply]

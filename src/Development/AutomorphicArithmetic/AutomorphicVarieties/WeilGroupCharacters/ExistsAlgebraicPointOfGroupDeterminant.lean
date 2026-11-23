@@ -1,36 +1,64 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.WeilGroupCharacters.Inertia
-import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.LocalRingsCompletion.nakayama
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.AlgebraicPointIntegral
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.FinitelyGeneratedModPow
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.ResMapBijective
+public import Mathlib.RingTheory.Algebraic.Defs
+public import Mathlib.RingTheory.DiscreteValuationRing.Basic
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.LocalRingsCompletion.nakayama
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.AlgebraicPointIntegral
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.FinitelyGeneratedModPow
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.AdicCompletion.Noetherian
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AutomorphicArithmetic.AutomorphicVarieties.WeilGroupCharacters.RepAlg
+
+@[expose] public section
 
 open IsLocalRing UpperTheory.V.Alg UpperTheory.V.W
 
 section SlopeTestRemainingChoices
 
 open Polynomial
-
-private theorem algpt_fac {O : Type} [CommRing O] [IsLocalRing O] [IsAdicComplete (maximalIdeal O) O]
-    (p : O[X]) (hp : p.map (residue O) ≠ 0) :
-    ∃ g q : O[X], g.Monic ∧ IsUnit (q.coeff 0) ∧ p = g * q := by
-  have hp' : (p : PowerSeries O).map (residue O) ≠ 0 := by
-    rw [← Polynomial.polynomial_map_coe]
-    exact_mod_cast hp
-  obtain ⟨g, h, H⟩ := PowerSeries.exists_isWeierstrassFactorization hp'
-  have hd := H.isDistinguishedAt
-  have hord : g.natDegree = _ := congr(ENat.toNat $(hd.coe_natDegree_eq_order_map g 1
-    (by rw [PowerSeries.constantCoeff_one, ← Ideal.ne_top_iff_one]; exact (maximalIdeal.isMaximal O).ne_top)
-    (by simp)))
-  have hdiv : g * (p /ₘ g) + p %ₘ g = p := by rw [add_comm]; exact modByMonic_add_div p g
-  have hlt : (p %ₘ g).degree < (g.natDegree : ℕ) := by
-    rw [← degree_eq_natDegree hd.monic.ne_zero]
-    exact degree_modByMonic_lt p hd.monic
-  have key := hd.isWeierstrassDivisorAt'.eq_of_mul_add_eq_mul_add (q := (p /ₘ g : O[X])) (q' := h)
-    (r := p %ₘ g) (r' := 0) (hord ▸ hlt) (by rw [degree_zero]; exact WithBot.bot_lt_coe _)
-    (by rw [← Polynomial.coe_mul, ← Polynomial.coe_add, hdiv, Polynomial.coe_zero, add_zero]; exact H.eq_mul)
-  refine ⟨g, p /ₘ g, hd.monic, ?_, by rw [← hdiv, key.2, add_zero, mul_divByMonic_cancel_left _ hd.monic]⟩
-  have hu := PowerSeries.isUnit_iff_constantCoeff.1 H.isUnit
-  rw [← key.1] at hu
-  simpa using hu
 
 private theorem algpt_int {O : Type} [CommRing O] [IsDomain O] [IsDiscreteValuationRing O]
     [IsAdicComplete (maximalIdeal O) O] {R : Type} [CommRing R] [Algebra O R] [IsLocalRing R]
@@ -59,7 +87,8 @@ private theorem algpt_finite {O S : Type} [CommRing O] [IsLocalRing O] [IsAdicCo
     have h1 : maximalIdeal O ≤ P.comap (algebraMap O S) := Ideal.map_le_iff_le_comap.1 hJP
     have h2 : P.comap (algebraMap O S) = maximalIdeal O :=
       ((maximalIdeal.isMaximal O).eq_of_le (Ideal.comap_ne_top _ hP.ne_top) h1).symm
-    have h3 : P.IsMaximal := Ideal.isMaximal_of_isIntegral_of_isMaximal_comap (R := O) P
+    have h3 : P.IsMaximal := Ideal.isMaximal_of_isIntegral_of_isMaximal_comap
+      (algebraMap O S) (algebraMap_isIntegral_iff.mpr ‹Algebra.IsIntegral O S›) P
       (h2 ▸ maximalIdeal.isMaximal O)
     exact (eq_maximalIdeal h3).ge
   obtain ⟨n, hn⟩ := Ideal.exists_pow_le_of_le_radical_of_fg hrad (IsNoetherian.noetherian _)

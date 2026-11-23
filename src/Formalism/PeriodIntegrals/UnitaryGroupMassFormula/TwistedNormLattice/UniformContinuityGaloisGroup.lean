@@ -1,4 +1,52 @@
-import Formalism.PeriodIntegrals.TwNormLat
+module
+
+public import Formalism.PeriodIntegrals.TwNormLat
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain
 
@@ -14,9 +62,6 @@ theorem one_notMem' : (1 : 𝓞 E) ∉ P.asIdeal :=
 theorem mul_notMem' {s t : 𝓞 E} (hs : s ∉ P.asIdeal) (ht : t ∉ P.asIdeal) : s * t ∉ P.asIdeal :=
   fun h => (P.isPrime.mem_or_mem h).elim hs ht
 
-theorem intAt_alg (x : 𝓞 E) : IntAt P (algebraMap (𝓞 E) E x) :=
-  ⟨x, 1, PI.TwNormLat.W.one_notMem' P, by simp⟩
-
 theorem intAt_zero : IntAt P (0 : E) := by
   exact ⟨0, 1, PI.TwNormLat.W.one_notMem' P, by simp⟩
 
@@ -30,7 +75,7 @@ theorem intAt_add {a b : E} (ha : IntAt P a) (hb : IntAt P b) : IntAt P (a + b) 
   obtain ⟨r, s, hs, h⟩ := ha
   obtain ⟨r', s', hs', h'⟩ := hb
   refine ⟨r * s' + s * r', s * s', PI.TwNormLat.W.mul_notMem' P hs hs', ?_⟩
-  simp only [map_add, map_mul]
+  simp only [map_add (f := _), map_mul]
   rw [← h, ← h']
   ring
 
@@ -58,9 +103,6 @@ theorem intAt_pow {a : E} (ha : IntAt P a) (k : ℕ) : IntAt P (a ^ k) := by
   | succ k ih =>
     rw [pow_succ]
     exact PI.TwNormLat.W.intAt_mul P ih ha
-
-theorem intAt_sum {ι : Type*} (s : Finset ι) (f : ι → E) (h : ∀ i ∈ s, IntAt P (f i)) : IntAt P (∑ i ∈ s, f i) := by
-  exact Finset.sum_induction f (IntAt P) (fun _ _ ha hb => PI.TwNormLat.W.intAt_add P ha hb) (PI.TwNormLat.W.intAt_zero P) h
 
 abbrev qE : E := ((Ideal.absNorm P.asIdeal : ℕ) : E)
 

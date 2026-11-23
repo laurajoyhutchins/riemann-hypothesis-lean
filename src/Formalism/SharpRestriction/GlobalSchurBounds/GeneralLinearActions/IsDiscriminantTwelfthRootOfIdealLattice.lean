@@ -1,5 +1,48 @@
-import Mathlib
-import Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow
+module
+
+public import Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow
+public import Mathlib.AlgebraicGeometry.EllipticCurve.VariableChange
+public import Mathlib.NumberTheory.Harmonic.EulerMascheroni
+public import Mathlib.NumberTheory.LSeries.DirichletContinuation
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -467,34 +510,5 @@ def chgB (D : D7) {p : ℕ} [Fact p.Prime] (lam : Qbar →+* ℂ_[p]) {N N' : �
 def OrthoBasisW (D : D7) {p : ℕ} [Fact p.Prime] (ρ : D.host.E → ℂ_[p]) {N : ℕ}
     (L : Submodule (𝓞 D.host.E) (Fin N → D.host.E)) (P : Matrix (Fin N) (Fin N) D.host.E) : Prop :=
   LocBasisW D ρ L P ∧ (P.map D.host.conj).transpose * P = 1
-
-def JetTorsionCompatibility (D : D7) (T : Tor D) (e : FamE D) : Prop :=
-  (∀ i : D.jet.Sit, ∃ (lam : Qbar →+* ℂ_[(D.jet.loc i).l]) (Po : Pos D (D.jet.loc i).l (D.jet.loc i).d)
-      (v : {v // v ∈ Po.V})
-      (L : Submodule (𝓞 D.host.E) (Fin (D.jet.loc i).N0 → D.host.E))
-      (L' : Submodule (𝓞 D.host.E) (Fin (D.jet.loc i).N1 → D.host.E))
-      (P : {v // v ∈ Po.V} → Matrix (Fin (D.jet.loc i).N0) (Fin (D.jet.loc i).N0) D.host.E)
-      (P' : {v // v ∈ Po.V} → Matrix (Fin (D.jet.loc i).N1) (Fin (D.jet.loc i).N1) D.host.E)
-      (F : MvPowerSeries (D.what₂.Tau × Fin (D.jet.loc i).N1 × Fin (D.jet.loc i).N0) ℂ_[(D.jet.loc i).l])
-      (c : ℂ_[(D.jet.loc i).l]), ‖c‖ = 1 ∧ admitted D _ _ L L' ∧
-      (∀ v, LocBasisW D (posEmb D lam Po.φ v.1 (0 : ZMod (D.jet.loc i).d)) L (P v)) ∧
-      (∀ v, LocBasisW D (posEmb D lam Po.φ v.1 (0 : ZMod (D.jet.loc i).d)) L' (P' v)) ∧
-      IsComb D T e lam L L' F ∧
-      (D.jet.loc i).Th = atLin (fun k (j : ZMod (D.jet.loc i).d × Fin (D.jet.loc i).N0 × Fin (D.jet.loc i).N1) =>
-        c * chg D lam Po P P' k (j.1, (v, j.2))) (fun j => MvPowerSeries.X j) F ∧
-      ∀ s, D.jetTau i s = letterOf D Po.φ v.1 s) ∧
-  (∀ i : D.jet.Sit1, IsFrobC D (D.jet.loc1 i).l ∧
-    ∃ (lam : Qbar →+* ℂ_[(D.jet.loc1 i).l]) (τ : D.what₂.Tau)
-      (L : Submodule (𝓞 D.host.E) (Fin (D.jet.loc1 i).N0 → D.host.E))
-      (L' : Submodule (𝓞 D.host.E) (Fin (D.jet.loc1 i).N1 → D.host.E))
-      (P : D.what₂.Tau → Matrix (Fin (D.jet.loc1 i).N0) (Fin (D.jet.loc1 i).N0) D.host.E)
-      (P' : D.what₂.Tau → Matrix (Fin (D.jet.loc1 i).N1) (Fin (D.jet.loc1 i).N1) D.host.E)
-      (F : MvPowerSeries (D.what₂.Tau × Fin (D.jet.loc1 i).N1 × Fin (D.jet.loc1 i).N0) ℂ_[(D.jet.loc1 i).l])
-      (c : ℂ_[(D.jet.loc1 i).l]), ‖c‖ = 1 ∧ admitted D _ _ L L' ∧
-      (∀ τ, OrthoBasisW D (tauEmb D lam τ) L (P τ)) ∧ (∀ τ, OrthoBasisW D (tauEmb D lam τ) L' (P' τ)) ∧
-      IsComb D T e lam L L' F ∧
-      (D.jet.loc1 i).Th = atLin (fun k (j : ZMod 1 × Fin (D.jet.loc1 i).N0 × Fin (D.jet.loc1 i).N1) =>
-        c * chgB D lam P P' k (j.1, (τ, j.2))) (fun j => MvPowerSeries.X j) F ∧
-      D.jetTau1 i = τ)
 
 end Formalism.MainNotions.TaylorLogMetric

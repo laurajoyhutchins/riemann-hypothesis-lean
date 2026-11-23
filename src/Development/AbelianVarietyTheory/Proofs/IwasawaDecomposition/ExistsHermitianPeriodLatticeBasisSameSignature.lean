@@ -1,6 +1,45 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.PerValNeZero
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.EmbRtSq
+module
+
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.PerValNeZero
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.EmbRtSq
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -87,9 +126,11 @@ theorem exists_isPerBasis : ∀ (E : Type) [Field E] [NumberField E] [IsCMField 
     have hk := congrFun hker k'
     simp only [Matrix.vecMul, dotProduct, Matrix.of_apply, Pi.zero_apply] at hk
     have : ((Di.EF (a • v) (x k') : ℤ) : ℚ) = 0 := by
+
       rw [hv, Finset.smul_sum, map_sum, LinearMap.sum_apply]
       push_cast
       simp_rw [← mul_smul, hhm]
+
       rw [← map_sum]
       have : ∑ k, ((a * c k : 𝓞 E) : E) * hm k k' = (a : E) * ((d : 𝓞 E) : E) * ∑ k, c₀ k * hm k k' := by
         rw [Finset.mul_sum]
@@ -109,7 +150,7 @@ theorem exists_isPerBasis : ∀ (E : Type) [Field E] [NumberField E] [IsCMField 
       have := h1 (H.bar.symm a) k
       rwa [Di.adj, RingEquiv.apply_symm_apply] at this
     | zero => simp
-    | add y z _ _ hy hz => intro a; rw [smul_add, map_add, hy, hz, add_zero]
+    | add y z _ _ hy hz => intro a; rw [smul_add, map_add (f := _), hy, hz, add_zero]
     | smul b y _ hy => intro a; rw [← mul_smul, hy]
   have h3 : v = 0 := by
     apply Di.unimod.1

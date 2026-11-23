@@ -1,5 +1,49 @@
-import PositivityTheory.AutomorphicForms.PublishedInputs.HilbertEisenstein.ArchInt
-import PositivityTheory.AutomorphicForms.PublishedInputs.HilbertEisenstein.LibFresh
+module
+
+public import PositivityTheory.AutomorphicForms.PublishedInputs.HilbertEisenstein.ArchInt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+public import PositivityTheory.AutomorphicForms.PublishedInputs.HilbertEisenstein.LibFresh
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.ExistsUniqueHcharOfFiniteOrder
+import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.SelmerTransport.RestrictionMemInvariantH1
+import Development.AutomorphicArithmetic.AutomorphicVarieties.IdeleGenerators.ConstSmall
+import Development.AutomorphicArithmetic.AutomorphicVarieties.PublishedTheorems.GelfandKazhdanReal
+
+@[expose] public section
 
 noncomputable section
 
@@ -79,8 +123,8 @@ theorem dvd_fin {m : Ideal (𝓞 F)} (hm : m ≠ ⊥) : {r : Ideal (𝓞 F) | r 
   have := UniqueFactorizationMonoid.fintypeSubtypeDvd m hm
   exact Set.finite_coe_iff.1 (Finite.of_fintype {r // r ∣ m})
 
-open Classical in
 
+open Classical in
 def ext (S : Finset (HeightOneSpectrum (𝓞 F))) (p : S → ℕ) (w : HeightOneSpectrum (𝓞 F)) : ℕ :=
   if h : w ∈ S then p ⟨w, h⟩ else 0
 
@@ -114,13 +158,13 @@ theorem divS_eq (ω : HChar F) (c : HeightOneSpectrum (𝓞 F) → ℕ) {m : Ide
     rw [Fresh.ordI_mul_of_ne_bot v (prodS_ne_bot _ _) (prodS_ne_bot _ _), ordI_prod_ext, ordI_prodS]
     by_cases hv : v ∈ S
     · rw [if_pos hv]
-      have h1 : ext S p v = p ⟨v, hv⟩ := by unfold ext; rw [dif_pos hv]
+      have h1 : ext S p v = p ⟨v, hv⟩ := by unfold ext; rw [dite_eq_left hv]
       have h2 : p ⟨v, hv⟩ ≤ ordI v m := hp' ⟨v, hv⟩
       rw [h1]
       omega
     · rw [if_neg hv, hS v hv]
       unfold ext
-      rw [dif_neg hv]
+      rw [dite_eq_right hv]
   · intro r hr
     rw [Set.Finite.mem_toFinset, Set.mem_setOf_eq] at hr
     rw [Fintype.mem_piFinset]
@@ -131,7 +175,7 @@ theorem divS_eq (ω : HChar F) (c : HeightOneSpectrum (𝓞 F) → ℕ) {m : Ide
     funext w
     rw [ordI_prod_ext]
     unfold ext
-    rw [dif_pos w.2]
+    rw [dite_eq_left w.2]
   · intro r hr
     rw [Set.Finite.mem_toFinset, Set.mem_setOf_eq] at hr
     have hr0 : r ≠ ⊥ := fun h0 => hm (by rw [h0] at hr; exact zero_dvd_iff.1 hr)
@@ -150,14 +194,14 @@ theorem divS_eq (ω : HChar F) (c : HeightOneSpectrum (𝓞 F) → ℕ) {m : Ide
       refine Finset.prod_congr rfl fun w _ => ?_
       rw [ordI_prod_ext]
       unfold ext L4.chiW
-      rw [dif_pos w.2]
+      rw [dite_eq_left w.2]
     · intro v hv
       by_contra hvS
       apply hv
       beta_reduce
       rw [ordI_prod_ext]
       unfold ext
-      rw [dif_neg fun h => hvS (Finset.mem_coe.2 h), pow_zero]
+      rw [dite_eq_right fun h => hvS (Finset.mem_coe.2 h), pow_zero]
 
 end UpperTheory.HilbertEisensteinWeightOne.FourierExpansionEisenstein.DivisorSumOrder
 
@@ -178,7 +222,7 @@ theorem coefficient_divisor_holds : CoefDiv := by
       by_cases hw : w ∈ S
       · rw [if_pos hw, Int.toNat_of_nonneg (hpos w hw)]; rfl
       · rw [if_neg hw, hS w hw]; rfl
-    rw [dif_pos hex]
+    rw [dite_eq_left hex]
     have hspec := hex.choose_spec
     set 𝔪 := hex.choose
     have hord : ∀ w, (ordI w 𝔪 : ℤ) = m w := by
@@ -192,7 +236,7 @@ theorem coefficient_divisor_holds : CoefDiv := by
     congr 2
     have := hord w
     omega
-  · rw [if_neg hpos, dif_neg]
+  · rw [if_neg hpos, dite_eq_right]
     rintro ⟨𝔪, -, h𝔪⟩
     apply hpos
     intro w _

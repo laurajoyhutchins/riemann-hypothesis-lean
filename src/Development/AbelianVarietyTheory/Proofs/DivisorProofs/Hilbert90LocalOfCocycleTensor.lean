@@ -1,6 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.ExistsUniqueBaseChangeEqOfMem
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.InvertibleOfFaithfullyFlat
+module
+
+public import Mathlib.RingTheory.Flat.FaithfullyFlat.Basic
+public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.ExistsUniqueBaseChangeEqOfMem
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open TensorProduct
 
 namespace GlobalTheory.FlatDescent
@@ -28,14 +76,14 @@ theorem hilbert90_local_of_cocycle : ∀ (R S : Type) [CommRing R] [CommRing S] 
     intro x
     induction x using TensorProduct.induction_on with
     | zero => simp
-    | add x y hx hy => simp only [map_add, hx, hy, tmul_add]
+    | add x y hx hy => simp only [map_add (f := _), hx, hy, tmul_add]
     | tmul a b => simp [ψ]
   have h3 : ∀ x, ψ (Algebra.TensorProduct.map (Algebra.TensorProduct.includeLeft (R := R) (S := R) (A := S) (B := S))
       (AlgHom.id R S) x) = x := by
     intro x
     induction x using TensorProduct.induction_on with
     | zero => simp
-    | add x y hx hy => simp only [map_add, hx, hy]
+    | add x y hx hy => simp only [map_add (f := _), hx, hy]
     | tmul a b => simp [ψ]
   have hμ : Algebra.TensorProduct.lmul' R (c : S ⊗[R] S) = 1 := by
     have h := congrArg ψ hc
@@ -47,7 +95,7 @@ theorem hilbert90_local_of_cocycle : ∀ (R S : Type) [CommRing R] [CommRing S] 
     intro x
     induction x using TensorProduct.induction_on with
     | zero => simp
-    | add x y hx hy => simp only [map_add, hx, hy]
+    | add x y hx hy => simp only [map_add (f := _), hx, hy]
     | tmul a b => simp
   have hcounit : ∀ n, act R S S (θ n) = n := by
     intro n
@@ -62,7 +110,7 @@ theorem hilbert90_local_of_cocycle : ∀ (R S : Type) [CommRing R] [CommRing S] 
     intro a b z
     induction z using TensorProduct.induction_on with
     | zero => simp
-    | add x y hx hy => simp only [map_add, hx, hy, mul_add, smul_add, tmul_add]
+    | add x y hx hy => simp only [map_add (f := _), hx, hy, mul_add, smul_add, tmul_add]
     | tmul a' b' =>
       simp only [Algebra.TensorProduct.map_tmul, Algebra.TensorProduct.includeRight_apply,
         Algebra.TensorProduct.includeLeft_apply, AlgHom.id_apply,
@@ -75,7 +123,7 @@ theorem hilbert90_local_of_cocycle : ∀ (R S : Type) [CommRing R] [CommRing S] 
     intro x
     induction x using TensorProduct.induction_on with
     | zero => simp
-    | add x y hx hy => simp only [map_add, hx, hy, add_mul]
+    | add x y hx hy => simp only [map_add (f := _), hx, hy, add_mul]
     | tmul a b =>
       rw [LinearMap.lTensor_tmul, LinearMap.coe_restrictScalars]
       exact hL0 a b _
@@ -85,14 +133,14 @@ theorem hilbert90_local_of_cocycle : ∀ (R S : Type) [CommRing R] [CommRing S] 
     intro x
     induction x using TensorProduct.induction_on with
     | zero => simp
-    | add x y hx hy => simp only [map_add, hx, hy]
+    | add x y hx hy => simp only [map_add (f := _), hx, hy]
     | tmul a b => simp [e]
   have hsmul : ∀ (g : S →ₗ[R] S ⊗[R] S) (n : S) (x : S ⊗[R] S),
       g.lTensor S (n • x) = n • g.lTensor S x := by
     intro g n x
     induction x using TensorProduct.induction_on with
     | zero => simp
-    | add x y hx hy => simp only [smul_add, map_add, hx, hy]
+    | add x y hx hy => simp only [smul_add, map_add (f := _), hx, hy]
     | tmul a b => simp [smul_tmul']
   have hcoassoc : ∀ n, (θ.restrictScalars R).lTensor S (θ n) = (TensorProduct.mk R S S 1).lTensor S (θ n) := by
     intro n
@@ -107,6 +155,7 @@ theorem hilbert90_local_of_cocycle : ∀ (R S : Type) [CommRing R] [CommRing S] 
     obtain ⟨T, hT⟩ := ((Module.Invertible.linearEquiv R (invariants θ)).symm 1).exists_finset
     have h1 : (1 : R) = ∑ i ∈ T, i.1 i.2 := by
       have := congrArg (Module.Invertible.linearEquiv R (invariants θ)) hT
+
       simpa [Module.Invertible.linearEquiv, map_sum] using this
     exact hp.ne_top ((Ideal.eq_top_iff_one _).2 (h1 ▸ Ideal.sum_mem _ fun i _ => hcon i.1 i.2))
   have hcomm : ∀ x : invariants θ, f m • x = f x • m := by
@@ -120,7 +169,7 @@ theorem hilbert90_local_of_cocycle : ∀ (R S : Type) [CommRing R] [CommRing S] 
     intro y
     induction y using TensorProduct.induction_on with
     | zero => simp
-    | add x y hx hy => rw [map_add, mul_add]; exact Ideal.add_mem _ hx hy
+    | add x y hx hy => rw [map_add (f := _), mul_add]; exact Ideal.add_mem _ hx hy
     | tmul b x =>
       have hx : algebraMap R S (f m) * (x : S) = algebraMap R S (f x) * (m : S) := by
         have := congrArg Subtype.val (hcomm x)

@@ -1,6 +1,55 @@
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.HeckeFubiniCompatibility.PActPi
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.HeckeFubiniCompatibility.PActLoc
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.HeckeFubiniCompatibility.PActEq
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.HeckeFubiniCompatibility.CompatFub
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.HeckeFubiniCompatibility.PSplit
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.HeckeFubiniCompatibility.MultHasCompactSupport
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.HeckeFubiniCompatibility.PActEq
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.HeckeFubiniCompatibility.PActLoc
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.HeckeFubiniCompatibility.PActPi
+import GroundTheory.AutomorphicForms.RealGroups
+import GroundTheory.AutomorphicForms.RealIwasawaIntegration
+import GroundTheory.AutomorphicForms.ReductionMeasure
+import GroundTheory.GlobalFields.Adele.Topology
+import GroundTheory.GlobalFields.TateThesis.IdeleMeasure
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -184,13 +233,16 @@ theorem actVal (hMA : MultAlg) (hCF : CompatFub) (hTT : TensTest) : ActVal := by
   have hQc : Continuous Q := hFc.comp ((splitH a b).continuous.comp (by fun_prop))
   have hQs : HasCompactSupport Q :=
     hFs.comp_homeomorph ((Homeomorph.prodAssoc _ _ _).trans (splitH a b).toHomeomorph)
-  have hQi : Integrable Q ((A.prod B).prod ν') := hQc.integrable_of_hasCompactSupport hQs
+  have hQi : Integrable Q ((A.prod B).prod ν') := by
+    set_option synthInstance.maxHeartbeats 200000 in
+      exact hQc.integrable_of_hasCompactSupport hQs
   have hQh : ∀ h, Integrable (fun p => Q (p, h)) (A.prod B) := fun h =>
     (hQc.comp (continuous_id.prodMk continuous_const)).integrable_of_hasCompactSupport (actHcsSlice hQs h)
   have step1 : ∫ ya, ∫ yb, ∫ h, F (splitH a b (ya, yb, h)) ∂ν' ∂B ∂A =
       ∫ h, ∫ ya, ∫ yb, Q ((ya, yb), h) ∂B ∂A ∂ν' := by
-    rw [← integral_prod (fun p => ∫ h, Q (p, h) ∂ν') hQi.integral_prod_left,
-      integral_integral_swap (f := fun p h => Q (p, h)) hQi]
+    set_option synthInstance.maxHeartbeats 200000 in
+      rw [← integral_prod (fun p => ∫ h, Q (p, h) ∂ν') hQi.integral_prod_left,
+        integral_integral_swap (f := fun p h => Q (p, h)) hQi]
     exact integral_congr_ae (Filter.Eventually.of_forall fun h => integral_prod _ (hQh h))
   rw [step1]
   have hpt : ∀ (h : Hf E a b) ya yb, x * splitH a b (ya, yb, h) = x * finH h * (infP a ya, 1) * (1, infP b yb) := by

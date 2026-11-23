@@ -1,4 +1,53 @@
-import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.ExistsPrimitiveNorm
+module
+
+public import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.ExistsPrimitiveNorm
+public import Formalism.HermitianLattices.StatementLat
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -34,14 +83,22 @@ theorem proj_mem (hM : IsLatIn S h W M) {X : V} (hX : X ∈ M) (hu : IsUnitIn S 
   refine ⟨M.sub_mem hm (hM.smul_mem _ hc _ hX), ?_⟩
   rw [map_sub, map_smul, smul_eq_mul, mul_assoc, inv_mul_cancel₀ hu.1, mul_one, sub_self]
 
-theorem IsLatIn.cut (hM : IsLatIn S h W M) (X : V) : IsLatIn S h (cutW h W X) (cutM h M X) where
-  le := fun m hm => mem_cutW.mpr ⟨hM.le m (mem_cutM.mp hm).1, (mem_cutM.mp hm).2⟩
-  smul_mem := fun a ha m hm => mem_cutM.mpr ⟨hM.smul_mem a ha m (mem_cutM.mp hm).1, by
-    rw [map_smul, (mem_cutM.mp hm).2, smul_zero]⟩
-  int := fun x hx y hy => hM.int x (mem_cutM.mp hx).1 y (mem_cutM.mp hy).1
-  span := fun x hx => by
-    obtain ⟨t, ht0, ht⟩ := hM.span x (mem_cutW.mp hx).1
-    exact ⟨t, ht0, mem_cutM.mpr ⟨ht, by rw [map_smul, (mem_cutW.mp hx).2, smul_zero]⟩⟩
+theorem IsLatIn.cut (hM : IsLatIn S h W M) (X : V) : IsLatIn S h (cutW h W X) (cutM h M X) := by
+  refine ⟨?_, ?_, ?_, ?_⟩
+  · intro m hm
+    obtain ⟨hmM, hm0⟩ := mem_cutM.mp hm
+    exact mem_cutW.mpr ⟨hM.le m hmM, hm0⟩
+  · intro a ha m hm
+    obtain ⟨hmM, hm0⟩ := mem_cutM.mp hm
+    refine mem_cutM.mpr ⟨hM.smul_mem a ha m hmM, ?_⟩
+    rw [map_smul, hm0, smul_zero]
+  · intro x hx y hy
+    exact hM.int x (mem_cutM.mp hx).1 y (mem_cutM.mp hy).1
+  · intro x hx
+    obtain ⟨hxW, hx0⟩ := mem_cutW.mp hx
+    obtain ⟨t, ht0, ht⟩ := hM.span x hxW
+    refine ⟨t, ht0, mem_cutM.mpr ⟨ht, ?_⟩⟩
+    rw [map_smul, hx0, smul_zero]
 
 theorem int_of_cut (hM : IsLatIn S h W M) {X : V} (hX : X ∈ M)
     (hu : IsUnitIn S (h X X)) {x : V} (hXx : h X x = 0) (hx : ∀ m ∈ cutM h M X, h m x ∈ S) :
@@ -170,14 +227,14 @@ theorem exists_isom_scale (hs : h.IsSymm) {z : V} (hz : h z z ≠ 0) {b : K} (hb
   have hf' : ∀ v, f' v = v + ((star b - 1) * (h z z)⁻¹ * h z v) • z := fun v => by simp [f']
   have c1 : f ∘ₗ f' = LinearMap.id := by
     refine LinearMap.ext fun v => ?_
-    rw [LinearMap.comp_apply, LinearMap.id_apply, hf, hf', map_add, map_smul, smul_eq_mul, add_assoc,
+    rw [LinearMap.comp_apply, LinearMap.id_apply, hf, hf', map_add (f := _), map_smul, smul_eq_mul, add_assoc,
       ← add_smul]
     apply hz0
     linear_combination ((h z z)⁻¹ * h z v) * hb +
       ((h z z)⁻¹ * h z v * (b - 1) * (star b - 1)) * hNi
   have c2 : f' ∘ₗ f = LinearMap.id := by
     refine LinearMap.ext fun v => ?_
-    rw [LinearMap.comp_apply, LinearMap.id_apply, hf, hf', map_add, map_smul, smul_eq_mul, add_assoc,
+    rw [LinearMap.comp_apply, LinearMap.id_apply, hf, hf', map_add (f := _), map_smul, smul_eq_mul, add_assoc,
       ← add_smul]
     apply hz0
     linear_combination ((h z z)⁻¹ * h z v) * hb +
@@ -185,7 +242,7 @@ theorem exists_isom_scale (hs : h.IsSymm) {z : V} (hz : h z z ≠ 0) {b : K} (hb
   refine ⟨LinearEquiv.ofLinear f f' c1 c2, fun a c => ?_, ?_, fun v hv => ?_⟩
   · change h (f a) (f c) = h a c
     rw [hf a, hf c]
-    simp only [map_add, LinearMap.add_apply, map_smul, LinearMap.map_smulₛₗ₂, LinearMap.smul_apply,
+    simp only [map_add (f := _), LinearMap.add_apply, map_smul, LinearMap.map_smulₛₗ₂, LinearMap.smul_apply,
       smul_eq_mul, map_mul, map_inv₀, map_sub, map_one, hN]
     rw [← hs.eq z a]
     simp only [starRingEnd_apply]

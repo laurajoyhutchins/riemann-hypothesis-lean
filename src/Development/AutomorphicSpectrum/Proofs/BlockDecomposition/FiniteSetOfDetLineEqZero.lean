@@ -1,6 +1,56 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.BlkConjTranspose
-import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.IsAdmOnOfFiniteDimensional
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.BlkConjTranspose
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.IsAdmOnOfFiniteDimensional
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+public import Mathlib.Analysis.Normed.Module.Connected
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Matrix
 
@@ -69,20 +119,21 @@ theorem blk_inv (e : Fin a × ι ≃ Fin n) {M : Matrix (Fin a) (Fin a) (ι → 
   refine Matrix.inv_eq_right_inv ?_
   rw [← blk_mul, Matrix.mul_nonsing_inv _ ((Matrix.isUnit_iff_isUnit_det _).1 hM), blk_one]
 
-theorem isLinRed_blkG (e : Fin a × ι ≃ Fin n) : GlobalTheory.LinRed.IsLinRed (blkG e) where
-  one_mem := ⟨1, isUnit_one, blk_one e⟩
-  mul_mem := by
-    rintro _ ⟨M, hM, rfl⟩ _ ⟨N, hN, rfl⟩
+theorem isLinRed_blkG (e : Fin a × ι ≃ Fin n) : GlobalTheory.LinRed.IsLinRed (blkG e) := by
+  refine
+    { one_mem := ⟨1, isUnit_one, blk_one e⟩
+      mul_mem := ?_
+      isUnit := fun g hg => ((mem_blkG_iff e).1 hg).1
+      inv_mem := ?_
+      closed := fun g hg hcl => (mem_blkG_iff e).2 ⟨hg, blk_unblk_of_mem_closure e hcl⟩
+      connected := isPreconnected_blkG e
+      star_mem := ?_ }
+  · rintro _ ⟨M, hM, rfl⟩ _ ⟨N, hN, rfl⟩
     exact ⟨M * N, IsUnit.mul hM hN, blk_mul e M N⟩
-  isUnit := fun g hg => ((mem_blkG_iff e).1 hg).1
-  inv_mem := by
-    rintro _ ⟨M, hM, rfl⟩
+  · rintro _ ⟨M, hM, rfl⟩
     refine ⟨M⁻¹, ?_, (blk_inv e hM).symm⟩
     exact (Matrix.isUnit_nonsing_inv_iff).2 hM
-  closed := fun g hg hcl => (mem_blkG_iff e).2 ⟨hg, blk_unblk_of_mem_closure e hcl⟩
-  connected := isPreconnected_blkG e
-  star_mem := by
-    rintro _ ⟨M, hM, rfl⟩
+  · rintro _ ⟨M, hM, rfl⟩
     refine ⟨Mᴴ, ?_, blk_conjTranspose e M⟩
     have : IsUnit (star M) := IsUnit.star hM
     exact this

@@ -1,14 +1,60 @@
-import Development.AbelianVarietyTheory.Definitions.Divisors.DivisorSupportCondition
-import Development.AbelianVarietyTheory.Definitions.Divisors.SecClass
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ChosenInjectiveResolutionEtaleSheafSectionsExactStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EtaleCochainEvalOnSimplexBasicPropertiesStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SchClsCocycleSecStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PositiveDegreeClassesDieOnEtaleCoverStatement
-import Development.AutomorphicArithmetic.CommutativeAlgebra.PicMain
-import Development.AutomorphicArithmetic.CommutativeAlgebra.PicUnit
-import Development.AutomorphicArithmetic.CommutativeAlgebra.ExistsUniqueSectionOfEtaleFaithfullyFlatDescent
-import Development.AutomorphicArithmetic.CommutativeAlgebra.UnitSectionsMultiplicativeGroupBijectiveAffine
-import Development.AutomorphicArithmetic.CommutativeAlgebra.MultiplicativeGroupOneCocycleEtaleLocallyCobound
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.GalMapMul
+public import Mathlib.RingTheory.PicardGroup
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ChosenInjectiveResolutionEtaleSheafSectionsExactStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EtaleCochainEvalOnSimplexBasicPropertiesStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SchClsCocycleSecStatement
+public import Development.AutomorphicArithmetic.CommutativeAlgebra.ExistsUniqueSectionOfEtaleFaithfullyFlatDescent
+public import Development.AutomorphicArithmetic.CommutativeAlgebra.MultiplicativeGroupOneCocycleEtaleLocallyCobound
+public import Development.AutomorphicArithmetic.CommutativeAlgebra.PicMain
+public import Development.AutomorphicArithmetic.CommutativeAlgebra.PicUnit
+public import Development.AutomorphicArithmetic.CommutativeAlgebra.UnitSectionsMultiplicativeGroupBijectiveAffine
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import Development.AbelianVarietyTheory.Definitions.Divisors.PullHlComp
+public import Development.AbelianVarietyTheory.Definitions.Divisors.SecClass
+public import Development.AutomorphicArithmetic.CommutativeAlgebra.PicData
+
+@[expose] public section
 
 open CategoryTheory Limits AlgebraicGeometry Opposite CochainComplex CochainComplex.HomComplex GlobalTheory.EtC
 
@@ -97,7 +143,7 @@ private def PD : Data where
 
 end UpperTheory.PicD
 
-set_option maxHeartbeats 1000000 in
+
 open UpperTheory.PicD in
 theorem UpperTheory.exists_injective_h1_gm_to_pic :
     ∀ (A : Type) [CommRing A], ∃ φ : H ℤ (sp A) Gm 1 →+ Additive (CommRing.Pic A), Function.Injective φ := by
@@ -127,7 +173,7 @@ theorem UpperTheory.exists_injective_h1_gm_to_pic :
     rw [AddMonoidHom.mem_ker, AddMonoidHom.comp_apply, hψ]
     exact ((hT.2 α).2.mp ((CohomologyClass.mk_eq_zero_iff α).mpr hα))
   refine ⟨CohomologyClass.descAddMonoidHom (ψ.comp τ) hf, ?_⟩
-  rw [injective_iff_map_eq_zero]
+  set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
   intro c hc
   obtain ⟨α, rfl⟩ := CohomologyClass.mk_surjective c
   rw [CohomologyClass.descAddMonoidHom_cohomologyClass, AddMonoidHom.comp_apply, hψ] at hc

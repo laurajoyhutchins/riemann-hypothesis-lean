@@ -1,7 +1,62 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.GeometricLemmaJacquetCell
-import GroundTheory.LocalFields.LocalFourierHaar
-import GroundTheory.AutomorphicForms.CuspidalAdmissible
+module
+
+public import GroundTheory.AutomorphicForms.GeometricLemmaJacquetCell
+public import GroundTheory.LocalFields.LocalFourierHaar
+public import GroundTheory.AutomorphicForms.Cartan
+public import GroundTheory.AutomorphicForms.CuspidalAdmissible
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.Countable
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -24,8 +79,8 @@ variable (γ : Fin n → ℕ) (T : Fin n → Fin n → Prop) [DecidableRel T]
 
 abbrev PatIdx : Type := {p : Fin n × Fin n // T p.1 p.2}
 
-variable (F) in
 
+variable (F) in
 def patMat (X : PatIdx T → F) : Matrix (Fin n) (Fin n) F :=
   fun i j => if h : T i j then X ⟨(i, j), h⟩ else 0
 
@@ -59,7 +114,7 @@ theorem det_one_add_patMat (X : PatIdx T → F) : (1 + patMat F T X).det = 1 := 
   refine Finset.prod_eq_one fun a _ => ?_
   have : (1 + patMat F T X).toSquareBlock γ a = 1 := by
     ext i j
-    simp only [Matrix.toSquareBlock_def, Matrix.of_apply, Matrix.add_apply, one_apply]
+    simp only [Matrix.toSquareBlock_def, Matrix.of_apply, Matrix.add_apply, Matrix.one_apply]
     have hij : ¬ T i j := fun h => by
       have := hT _ _ h
       rw [i.2, j.2] at this
@@ -68,8 +123,8 @@ theorem det_one_add_patMat (X : PatIdx T → F) : (1 + patMat F T X).det = 1 := 
     simp [Subtype.ext_iff]
   rw [this, det_one]
 
-variable (F) in
 
+variable (F) in
 def patUnip (X : PatIdx T → F) : GL (Fin n) F :=
   Matrix.GeneralLinearGroup.mkOfDetNeZero (1 + patMat F T X)
     (by rw [det_one_add_patMat hT]; exact one_ne_zero)
@@ -77,9 +132,9 @@ def patUnip (X : PatIdx T → F) : GL (Fin n) F :=
 theorem coe_patUnip (X : PatIdx T → F) :
     ((patUnip F hT X : GL (Fin n) F) : Matrix (Fin n) (Fin n) F) = 1 + patMat F T X := rfl
 
+
 omit hT in
 variable (T) in
-
 def patCoord (g : GL (Fin n) F) : PatIdx T → F := fun p => (g : Matrix (Fin n) (Fin n) F) p.1.1 p.1.2
 
 theorem patCoord_patUnip (X : PatIdx T → F) : patCoord T (patUnip F hT X) = X := by
@@ -138,7 +193,7 @@ theorem mem_integralGL_iff_patCoord {g : GL (Fin n) F} (hg : g ∈ U) :
       intro i j
       by_cases hij : T i j
       · exact h ⟨(i, j), hij⟩
-      · rw [(hU g).1 hg i j hij, one_apply]
+      · rw [(hU g).1 hg i j hij, Matrix.one_apply]
         split_ifs
         · exact one_mem _
         · exact zero_mem _
@@ -158,9 +213,9 @@ theorem patMat_smul (c : F) (X : PatIdx T → F) : patMat F T (c • X) = c • 
   · simp [patMat_apply_of_mem T h]
   · simp [patMat_apply_of_not T h]
 
+
 omit hT hU in
 variable (T) in
-
 def patLeft (k : GL (Fin n) F) : (PatIdx T → F) →ₗ[F] (PatIdx T → F) where
   toFun X := fun p => ((k : Matrix (Fin n) (Fin n) F) * patMat F T X) p.1.1 p.1.2
   map_add' X Y := by
@@ -184,7 +239,7 @@ theorem patMat_patLeft {k : GL (Fin n) F} (hk : k ∈ U) (X : PatIdx T → F) :
   by_cases h : T i j
   · rw [patMat_apply_of_mem T h]
     rfl
-  · rw [patMat_apply_of_not T h, mul_apply]
+  · rw [patMat_apply_of_not T h, Matrix.mul_apply]
     refine (Finset.sum_eq_zero fun l _ => ?_).symm
     by_cases hlj : T l j
     · have hil : ¬ T i l := fun hil => h (hTt i l j hil hlj)
@@ -206,8 +261,8 @@ theorem patLeft_one (X : PatIdx T → F) : patLeft T (1 : GL (Fin n) F) X = X :=
   show ((1 : GL (Fin n) F) * patMat F T X : Matrix (Fin n) (Fin n) F) p.1.1 p.1.2 = X p
   rw [Units.val_one, Matrix.one_mul, patMat_apply_of_mem T p.2]
 
-variable (T) in
 
+variable (T) in
 def patLeftEquiv {k : GL (Fin n) F} (hk : k ∈ U) : (PatIdx T → F) ≃ₗ[F] (PatIdx T → F) where
   toLinearMap := patLeft T k
   invFun := patLeft T k⁻¹
@@ -217,9 +272,6 @@ def patLeftEquiv {k : GL (Fin n) F} (hk : k ∈ U) : (PatIdx T → F) ≃ₗ[F] 
   right_inv X := by
     show patLeft T k (patLeft T k⁻¹ X) = X
     rw [← patLeft_mul hT hU hTt (U.inv_mem hk), mul_inv_cancel, patLeft_one hT hU]
-
-theorem coe_patLeftEquiv {k : GL (Fin n) F} (hk : k ∈ U) (X : PatIdx T → F) :
-    patLeftEquiv T hT hU hTt hk X = patLeft T k X := rfl
 
 theorem patCoord_mul {k u : GL (Fin n) F} (hu : u ∈ U) :
     patCoord T (k * u) = patCoord T k + patLeft T k (patCoord T u) := by
@@ -233,13 +285,14 @@ theorem patCoord_mul {k u : GL (Fin n) F} (hu : u ∈ U) :
 
 theorem distribHaarChar_patLeftEquiv {k : GL (Fin n) F} (hk : k ∈ U ⊓ integralGL F n) :
     distribHaarChar (PatIdx T → F) (patLeftEquiv T hT hU hTt hk.1) = 1 := by
-  have hbox : ∀ {k' : GL (Fin n) F}, k' ∈ integralGL F n → ∀ X ∈ Measures.box F (PatIdx T),
-      patLeft T k' X ∈ Measures.box F (PatIdx T) := by
+  have hbox : ∀ {k' : GL (Fin n) F}, k' ∈ integralGL F n →
+      ∀ X ∈ Measures.box (F := F) (ι := PatIdx T),
+        patLeft T k' X ∈ Measures.box (F := F) (ι := PatIdx T) := by
     intro k' hk' X hX
     rw [Measures.mem_box] at hX ⊢
     intro p
     show ((k' : Matrix (Fin n) (Fin n) F) * patMat F T X) p.1.1 p.1.2 ∈ 𝒪[F]
-    rw [mul_apply]
+    rw [Matrix.mul_apply]
     refine sum_mem fun l _ => mul_mem (((mem_integralGL_iff F n).1 hk').1 _ _) ?_
     by_cases hl : T l p.1.2
     · rw [patMat_apply_of_mem T hl]
@@ -257,7 +310,7 @@ theorem measure_box_eq_relIndex_mul [MeasurableSpace F] [BorelSpace F]
     (μ : Measure (PatIdx T → F)) [μ.IsAddHaarMeasure] [μ.Regular] {L : Subgroup (GL (Fin n) F)}
     (hL : L ≤ U ⊓ integralGL F n) (hLc : IsCompact (L : Set (GL (Fin n) F)))
     (hfin : L.relIndex (U ⊓ integralGL F n) ≠ 0) :
-    μ (Measures.box F (PatIdx T)) = (L.relIndex (U ⊓ integralGL F n) : ℝ≥0∞) *
+    μ (Measures.box (F := F) (ι := PatIdx T)) = (L.relIndex (U ⊓ integralGL F n) : ℝ≥0∞) *
       μ (patCoord T '' (L : Set (GL (Fin n) F))) := by
   classical
   set U₀ := U ⊓ integralGL F n
@@ -267,7 +320,7 @@ theorem measure_box_eq_relIndex_mul [MeasurableSpace F] [BorelSpace F]
   let _ := Fintype.ofFinite (U₀ ⧸ S)
   set piece : U₀ ⧸ S → Set (PatIdx T → F) := fun q =>
     patCoord T '' ((fun l => ((Quotient.out q : U₀) : GL (Fin n) F) * l) '' (L : Set (GL (Fin n) F)))
-  have hbox : Measures.box F (PatIdx T) = ⋃ q, piece q := by
+  have hbox : Measures.box (F := F) (ι := PatIdx T) = ⋃ q, piece q := by
     ext X
     simp only [mem_iUnion]
     constructor
@@ -527,7 +580,7 @@ theorem relIndex_inf_map_conj_diagPow (ν : Fin n → ℤ) :
     exact relIndex_map_conj_diagPow_ne_zero hT hTt hU hUc ν
   have key := measure_box_eq_relIndex_mul hT hU hTt μ (L := U₀ ⊓ M) inf_le_left hVc hfin
   rw [patCoord_image_inf_map_conj hT hU ν] at key
-  have hbox : μ (Measures.box F (PatIdx T)) = 1 := by
+  have hbox : μ (Measures.box (F := F) (ι := PatIdx T)) = 1 := by
     rw [Measures.box, Measure.pi_pi]
     simp [GroundTheory.LocalField.haarIntegers_integers]
   have hchart : μ (Set.univ.pi fun p : PatIdx T =>
@@ -663,8 +716,8 @@ theorem diagPow_mem_cellLeviParabolic (ν : Fin n → ℤ) :
   rintro rfl
   exact lt_irrefl _ hij
 
-variable (β γ w) in
 
+variable (β γ w) in
 theorem cellChar_eq_one_of_mem_integralGL {k : GL (Fin n) F}
     (hk : k ∈ cellLeviParabolic F β γ w) (hk' : k ∈ integralGL F n) :
     cellChar F β γ w k = 1 := by
@@ -685,8 +738,8 @@ theorem prod_patIdx {P : Fin n → Fin n → Prop} [DecidableRel P] (f : Fin n �
   (Finset.prod_subtype (Finset.univ.filter fun p : Fin n × Fin n => P p.1 p.2) (fun p => by simp)
     f).symm
 
-variable (β γ w) in
 
+variable (β γ w) in
 theorem cellChar_diagPow_eq_prod_zpow (ν : Fin n → ℤ) :
     cellChar F β γ w (diagPow F n ν) =
       ∏ p ∈ Finset.univ.filter (fun p : Fin n × Fin n => γ p.1 < γ p.2 ∧ β (w p.2) < β (w p.1)),
@@ -730,8 +783,8 @@ theorem cellChar_diagPow_eq_prod_zpow (ν : Fin n → ℤ) :
   refine Finset.prod_congr rfl fun p _ => ?_
   rw [← _root_.zpow_neg, neg_sub]
 
-variable (β γ w) in
 
+variable (β γ w) in
 theorem cellChar_diagPow (ν : Fin n → ℤ) :
     cellChar F β γ w (diagPow F n ν) =
       ∏ p ∈ Finset.univ.filter (fun p : Fin n × Fin n => γ p.1 < γ p.2 ∧ β (w p.2) < β (w p.1)),

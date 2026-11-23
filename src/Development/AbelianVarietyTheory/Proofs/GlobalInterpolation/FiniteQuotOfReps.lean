@@ -1,5 +1,56 @@
-import Mathlib
-import Formalism.LocalToGlobal.KernelLattices.KernelLocalFactors.ThDistC
+module
+
+public import Formalism.LocalToGlobal.KernelLattices.ThDistC
+import Formalism.HermitianLattices.HermitianLatticesProofs.DualBasic
+public import Formalism.HermitianLattices.HermitianLatticesProofs.IndexBasic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.FreeModule.IdealQuotient
+import Mathlib.LinearAlgebra.Matrix.FiniteDimensional
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain
 
@@ -118,7 +169,7 @@ def homG (N : Submodule (𝓞 E) (Sp E a)) (N' : Submodule (𝓞 E) (Sp E b)) : 
   zero_mem' := fun _ _ => zero_mem _
   smul_mem' := fun r _ hx y hy => Submodule.smul_mem _ r (hx y hy)
 
-theorem homG_fg (N : Submodule (𝓞 E) (Sp E a)) (N' : Submodule (𝓞 E) (Sp E b)) (hN : Submodule.IsLattice E N)
+theorem homG_fg (N : Submodule (𝓞 E) (Sp E a)) (N' : Submodule (𝓞 E) (Sp E b)) (hN : Submodule.IsFullLattice E N)
     (hN' : Submodule.IsLattice E N') : (homG N N').FG := by
   obtain ⟨G, hG⟩ := hN.fg
   have : Module.Finite (𝓞 E) ↥N' := Module.Finite.iff_fg.2 hN'.fg
@@ -130,8 +181,8 @@ theorem homG_fg (N : Submodule (𝓞 E) (Sp E a)) (N' : Submodule (𝓞 E) (Sp E
     intro x x' h
     apply Subtype.ext
     have hspan : Submodule.span E (G : Set (Sp E a)) = ⊤ := by
-      rw [eq_top_iff, ← hN.span_eq_top, Submodule.span_le, ← hG]
-      exact fun y hy => Submodule.span_subset_span (𝓞 E) E _ hy
+      rw [← Submodule.span_span_of_tower (𝓞 E), hG]
+      exact hN.span_eq_top
     refine LinearMap.ext_on hspan fun g hg => ?_
     exact congrArg Subtype.val (congrFun h ⟨g, hg⟩)
   have : Module.Finite (𝓞 E) ↥(homG N N') := Module.Finite.of_injective ev hinj
@@ -169,7 +220,7 @@ theorem homAt_clear (S : Finset (HeightOneSpectrum (𝓞 E))) (N : Submodule (�
       rw [hc, mul_comm, mul_smul]
       exact N'.smul_mem _ (hsx g hg)
     | zero => rw [map_zero]; exact N'.zero_mem
-    | add y y' _ _ h h' => rw [map_add]; exact N'.add_mem h h'
+    | add y y' _ _ h h' => rw [map_add (f := _)]; exact N'.add_mem h h'
     | smul r y _ h => rw [LinearMap.map_smul_of_tower]; exact N'.smul_mem _ h
 
 theorem homAt_div (S : Finset (HeightOneSpectrum (𝓞 E))) (N : Submodule (𝓞 E) (Sp E a)) (N' : Submodule (𝓞 E) (Sp E b)) (k : ℕ) (hk : 0 < k)
@@ -198,7 +249,36 @@ theorem homAt_div (S : Finset (HeightOneSpectrum (𝓞 E))) (N : Submodule (𝓞
 
 theorem latFin (X : Fields) (a b : ℕ) (Sall : Finset (HeightOneSpectrum (𝓞 X.E))) : LatFin (X := X) a b Sall := by
   intro N N' c c' hN hN' _ hc'
-  obtain ⟨F, hF, hFM⟩ := semilocal_reps Sall (homG N N') (homAt Sall N N') (homG_fg N N' hN.1 hN'.1) (homG_le Sall N N')
+  have full_of_sd : ∀ {n : ℕ} {L : Submodule (𝓞 X.E) (Sp X.E n)}, IsSdLat L → Submodule.IsFullLattice X.E L := by
+    intro n L hL
+    let := hL.1
+    refine { span_eq_top := ?_ }
+    let W := Submodule.span X.E (L : Set (Sp X.E n))
+    change W = ⊤
+    by_contra hW
+    let e : Sp X.E n ≃ₗ⋆[X.E] Sp X.E n := starLinearEquiv X.E
+    let g : Sp X.E n →ₗ[X.E] Module.Dual X.E W :=
+      (LinearMap.domRestrict' W).comp ((hStd X.E n).comp e.toLinearMap)
+    have hdim : Module.finrank X.E (Module.Dual X.E W) < Module.finrank X.E (Sp X.E n) := by
+      rw [Subspace.dual_finrank_eq]
+      exact Submodule.finrank_lt hW
+    obtain ⟨x, hx, hx₀⟩ :=
+      Submodule.exists_mem_ne_zero_of_ne_bot (LinearMap.ker_ne_bot_of_finrank_lt (f := g) hdim)
+    have hsmul (a : X.E) : a • e x ∈ L := by
+      rw [← hL.2, dualBasic_mem_dual]
+      intro y hy
+      apply hStd_mem_one_symm
+      have hxy : hStd X.E n (e x) y = 0 :=
+        congrArg (fun f : Module.Dual X.E W => f ⟨y, Submodule.subset_span hy⟩) (LinearMap.mem_ker.mp hx)
+      simp [LinearMap.map_smulₛₗ, LinearMap.smul_apply, hxy]
+    let i : X.E →ₗ[𝓞 X.E] L :=
+      ((LinearMap.toSpanSingleton X.E _ (e x)).restrictScalars (𝓞 X.E)).codRestrict L hsmul
+    let : Module.Finite (𝓞 X.E) L := Module.Finite.iff_fg.mpr hL.1.fg
+    let : Module.Finite (𝓞 X.E) X.E := Module.Finite.of_injective i fun a b hab =>
+      smul_left_injective X.E (fun hz => hx₀ (e.map_eq_zero_iff.mp hz)) (congrArg Subtype.val hab)
+    exact RingOfIntegers.not_isField X.E
+      (isField_of_isIntegral_of_isField (IsFractionRing.injective (𝓞 X.E) X.E) (Field.toIsField X.E))
+  obtain ⟨F, hF, hFM⟩ := semilocal_reps Sall (homG N N') (homAt Sall N N') (homG_fg N N' (full_of_sd hN) hN'.1) (homG_le Sall N N')
     (fun x hx P hP => homAt_clear Sall N N' hN.1.fg x hx P hP) c' hc' (fun x hx j hj => homAt_div Sall N N' c' hc' x hx j hj)
   exact finite_quot_of_reps _ c c' F hF hFM
 

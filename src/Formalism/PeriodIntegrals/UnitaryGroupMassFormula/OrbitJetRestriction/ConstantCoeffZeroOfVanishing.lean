@@ -1,6 +1,49 @@
-import Formalism.PeriodIntegrals.OrbRestr
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.OrbitPowerSeriesCoefficients.OrbEmb
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
 import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.OrbitPowerSeriesCoefficients.KillSubst
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.OrbitPowerSeriesCoefficients.OrbEmb
+
+@[expose] public section
 
 noncomputable section
 
@@ -12,15 +55,12 @@ open Formalism.BasicNotions Formalism.MainNotions.G MvPowerSeries Finsupp PI.Orb
 
 variable {σ τ υ R : Type*} [CommRing R]
 
-theorem subst_zero_fam {a : σ → MvPowerSeries τ R} (ha : HasSubst a) : subst a (0 : MvPowerSeries σ R) = 0 := by
-  simpa [coe_substAlgHom] using (substAlgHom ha).map_zero
-
 theorem killCompl_subst_of (e : υ ↪ τ) (g : τ → MvPowerSeries τ R) (K : υ → MvPowerSeries υ R)
     (hg : HasSubst g) (hK : HasSubst K) (h1 : ∀ w, killCompl e (g (e w)) = K w)
     (h0 : ∀ t, (¬ ∃ w, e w = t) → killCompl e (g t) = 0) (f : MvPowerSeries τ R) :
     killCompl e (subst g f) = subst K (killCompl e f) := by
   have hc : ∀ (F : MvPowerSeries τ R) (x : υ →₀ ℕ),
-      coeff x (killCompl e F) = coeff (embDomain e x) F := fun F x => rfl
+      coeff x (killCompl e F) = coeff (embDomain e x) F := fun F x => coeff_killCompl F x
   have key : ∀ (x : υ →₀ ℕ) (d : τ →₀ ℕ), coeff (embDomain e x) (d.prod fun s n => g s ^ n) =
       coeff x (d.prod fun s n => killCompl e (g s) ^ n) := by
     intro x d
@@ -77,7 +117,7 @@ private theorem killCompl_X_of_not_mem_range (e : υ ↪ τ) (t : τ) (ht : ¬ �
     killCompl e (X t : MvPowerSeries τ R) = 0 := by
   ext x
   rw [show coeff x (killCompl e (X t : MvPowerSeries τ R)) =
-      coeff (embDomain e x) (X t : MvPowerSeries τ R) from rfl, coeff_X, if_neg, map_zero]
+      coeff (embDomain e x) (X t : MvPowerSeries τ R) from coeff_killCompl _ _, coeff_X, if_neg, map_zero]
   intro hx
   have h1 : (embDomain e x) t ≠ 0 := by rw [hx]; simp
   rw [← Finsupp.mem_support_iff, Finsupp.support_embDomain, Finset.mem_map] at h1
@@ -102,18 +142,17 @@ private theorem coeff_killCompl_subst (e : υ ↪ τ) {a : σ → MvPowerSeries 
     (f : MvPowerSeries σ R) (x : υ →₀ ℕ) :
     coeff x (killCompl e (subst a f)) =
       ∑ᶠ d : σ →₀ ℕ, coeff d f • coeff x (d.prod fun s n => killCompl e (a s) ^ n) := by
-  show coeff (embDomain e x) (subst a f) = _
-  rw [coeff_subst ha]
+  rw [coeff_killCompl, coeff_subst ha]
   refine finsum_congr fun d => ?_
   rw [show coeff (embDomain e x) (d.prod fun s n => a s ^ n) =
-      coeff x (killCompl e (d.prod fun s n => a s ^ n)) from rfl, map_finsuppProd]
+      coeff x (killCompl e (d.prod fun s n => a s ^ n)) from (coeff_killCompl _ _).symm, map_finsuppProd]
   simp only [map_pow]
 
 private theorem killCompl_X_emb (e : υ ↪ τ) (w : υ) :
     killCompl e (X (e w) : MvPowerSeries τ R) = X w := by
   ext x
   rw [show coeff x (killCompl e (X (e w) : MvPowerSeries τ R)) =
-      coeff (embDomain e x) (X (e w) : MvPowerSeries τ R) from rfl, coeff_X, coeff_X]
+      coeff (embDomain e x) (X (e w) : MvPowerSeries τ R) from coeff_killCompl _ _, coeff_X, coeff_X]
   by_cases hx : x = single w 1
   · rw [if_pos hx, if_pos (by rw [hx, embDomain_single])]
   · rw [if_neg hx, if_neg (fun h => hx (embDomain_injective e (h.trans (embDomain_single e w 1).symm)))]
@@ -125,10 +164,13 @@ theorem killCompl_beAll (D : D7) (p : ℕ) [Fact p.Prime] {N0 N1 : ℕ} (R : Fin
       sg r • ∑ a : Fin N0, ∑ b : Fin N1, subst (fun s : ZMod (nP D p) =>
         (X (s, a, b) : MvPowerSeries (ZMod (nP D p) × Fin N0 × Fin N1) ℂ_[p])) (be r) := by
   unfold beAll
+
   rw [map_sum, Finset.sum_eq_single r ?_ (fun h => absurd hr h)]
-  · rw [map_smul, map_sum]
+  · set_option synthInstance.maxHeartbeats 100000 in
+      rw [map_smul, map_sum]
     congr 1
     refine Finset.sum_congr rfl fun a _ => ?_
+
     rw [map_sum]
     refine Finset.sum_congr rfl fun b _ => ?_
     have hX : ∀ s : ZMod (nP D p), killCompl (orbEmb D p r (Fin N0 × Fin N1))
@@ -139,8 +181,10 @@ theorem killCompl_beAll (D : D7) (p : ℕ) [Fact p.Prime] {N0 N1 : ℕ} (R : Fin
       coeff_subst (hasSubst_of_constantCoeff_zero fun s => constantCoeff_X _)]
     simp only [hX]
   · intro r' hr' hne
+
     rw [map_smul, map_sum, Finset.sum_eq_zero, smul_zero]
     intro a _
+
     rw [map_sum]
     refine Finset.sum_eq_zero fun b _ => ?_
     ext x

@@ -1,8 +1,49 @@
-import Formalism.LocalToGlobal.ProjectiveLattices.IsChartIff
-import Formalism.SharpRestriction.Divisibility.GeneratorPowers.GermDJet
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.LBCorr
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.LBTransport
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.LBLocal
+module
+
+public import Formalism.LocalToGlobal.ProjectiveLattices.IsChartIff
+public import Mathlib.Tactic.ENatToNat
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.LBLocal
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -72,25 +113,6 @@ theorem corr_scaleGenG {φ : K → (Y ⟶ t.G.left)} {ε : K → ℤ} {φ' : K' 
   dsimp only
   erw [res_top_mul, res_top_mul, e]
 
-theorem scale_eq_of_corr (hL : t.PP.L.IsLB) {φ : K → (Y ⟶ t.G.left)} {ε : K → ℤ}
-    {φ' : K' → (Y ⟶ t.G.left)} {ε' : K' → ℤ}
-    {g : LB.Gen (LB.LinComb t.PP.L φ ε)} {g' : LB.Gen (LB.LinComb t.PP.L φ' ε')}
-    (hc : LB.Gen.Corr t.PP.L φ ε φ' ε' g g') {v v' : Γ(Y, ⊤)ˣ}
-    (h : LB.Gen.Corr t.PP.L φ ε φ' ε' (scaleGenG t φ ε v g) (scaleGenG t φ' ε' v' g')) : v = v' := by
-  refine DVR.units_ext_cover ⊤ (fun ρ => ⊤ ⊓ DVR.piece t.PP.L φ φ' ρ) (fun _ => inf_le_left)
-    (DVR.le_iSup_piece t.PP.L φ φ' hL ⊤) v v' fun ρ => ?_
-  have hj : LB.Coh t.PP.L φ (ρ ∘ φ) := fun k₁ k₂ e => by simp [e]
-  have hj' : LB.Coh t.PP.L φ' (ρ ∘ φ') := fun k₁ k₂ e => by simp [e]
-  have hm : ∀ k k', φ k = φ' k' → (ρ ∘ φ) k = (ρ ∘ φ') k' := fun k k' e => by simp [e]
-  have e1 := h _ _ hj hj' hm
-  have e2 := hc _ _ hj hj' hm
-  unfold scaleGenG at e1
-  dsimp only at e1
-  erw [res_top_mul, res_top_mul, e2, mul_left_inj] at e1
-  have e3 := congrArg (res (show ⊤ ⊓ DVR.piece t.PP.L φ φ' ρ ≤
-    LB.wchart t.PP.L φ (ρ ∘ φ) ⊓ LB.wchart t.PP.L φ' (ρ ∘ φ') from inf_le_right)) e1
-  simpa only [DVR.res_res'] using e3
-
 variable {S : Type} [CommRing S] (x0 : Sp S ⟶ X0)
 
 theorem unitΓ_homAt {A B : Type} [CommRing A] [Algebra S A] [CommRing B] [Algebra S B] (f : A →ₐ[S] B)
@@ -101,13 +123,5 @@ theorem unitΓ_homAt {A B : Type} [CommRing A] [Algebra S A] [CommRing B] [Algeb
     RingHom.toMonoidHom_eq_coe]
   rw [← CommRingCat.comp_apply, ← Scheme.ΓSpecIso_inv_naturality]
   rfl
-
-theorem unitΓ_injective {A : Type} [CommRing A] : Function.Injective (unitΓ (A := A)) := by
-  intro u u' h
-  ext
-  have h1 := congrArg Units.val h
-  simp only [unitΓ, Units.coe_map, MonoidHom.coe_coe, RingHom.toMonoidHom_eq_coe, toΓ] at h1
-  have h2 := congrArg (Scheme.ΓSpecIso (CommRingCat.of A)).hom.hom h1
-  simpa using h2
 
 end Formalism.MainNotions.ModuliIntegralCharts.H1.FBIdLB

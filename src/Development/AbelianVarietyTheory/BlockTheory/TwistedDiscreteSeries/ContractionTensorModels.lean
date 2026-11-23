@@ -1,5 +1,59 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.IsStepWeil
+module
+
+public import Mathlib.Analysis.CStarAlgebra.Module.Constructions
+public import Mathlib.Analysis.Calculus.Deriv.Basic
+public import Mathlib.Analysis.InnerProductSpace.Orthogonal
+public import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+public import Mathlib.LinearAlgebra.PiTensorProduct.Basic
+public import Mathlib.RingTheory.MvPolynomial.IrreducibleQuadratic
+public import Formalism.LocalRingCardinality.DataHost
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+public import Mathlib.Analysis.Calculus.Deriv.Star
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.InnerProductSpace.Dual
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.LocalRingCardinality.DataTheta
+import Formalism.LocalToGlobal.IndefiniteReal.IndefiniteWeightData
+import Formalism.LocalToGlobal.IndefiniteReal.LinksDefs
+
+@[expose] public section
 
 noncomputable section
 
@@ -95,28 +149,7 @@ open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.IndefR Formalism
 
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
 
-def ContrTensorModels : Prop :=
-  ∀ (D : D7) (V W : HSp D) (S S' : D.what₂.Tau → SPar) (M : DSModel V S) (M' : DSModel W S')
-    (Itl : ∀ τ, MvPolynomial (Fin W.rank × Fin V.rank) ℂ →ₗ[ℂ] M'.sm τ →ₗ[ℂ] M.sm τ),
-    ∃ It : PolF D W.rank V.rank →ₗ[ℂ] SmT M' →ₗ[ℂ] SmT M,
-      (∀ (P : D.what₂.Tau → MvPolynomial (Fin W.rank × Fin V.rank) ℂ) (v : M'.Vec),
-        It (∏ τ, MvPolynomial.rename (fun s => (τ, s)) (P τ)) (PiTensorProduct.tprod ℂ v) =
-          PiTensorProduct.tprod ℂ fun τ => Itl τ (P τ) (v τ)) ∧
-      ((∀ τ, Itl τ ≠ 0) → It ≠ 0)
-
-theorem contrTensorModels_of (h : ContrTensor) : ContrTensorModels := fun D V W _ _ M M' Itl =>
-  h D.what₂.Tau (fun _ => Fin W.rank × Fin V.rank) _ (Equiv.sigmaEquivProd _ _) (fun τ => M'.sm τ)
-    (fun τ => M.sm τ) Itl
-
 end Models
-
-example (a b x y : ℂ) : LinearMap.mul ℂ ℂ (a * x) (b * y) = (a * b) * LinearMap.mul ℂ ℂ x y := by
-  simp only [LinearMap.mul_apply']; ring
-
-example (It : ℂ →ₗ[ℂ] ℂ →ₛₗ[starRingEnd ℂ] ℂ) (h : IsContr (LinearMap.mul ℂ ℂ) It) (φ y : ℂ) :
-    It φ y = φ * starRingEnd ℂ y := by
-  have := h φ y 1
-  simpa using this
 
 theorem contrProps_of {H₁ H₂ FF : Type}
     [NormedAddCommGroup H₁] [InnerProductSpace ℂ H₁] [CompleteSpace H₁]
@@ -202,16 +235,6 @@ theorem contrProps_of {H₁ H₂ FF : Type}
       rw [← Set.range_comp]; congr 1; funext k; simp [he]
     rw [this, ← Submodule.map_span]
     infer_instance
-
-def contrMul : ℂ →ₗ[ℂ] ℂ →ₛₗ[starRingEnd ℂ] ℂ :=
-  LinearMap.mk₂'ₛₗ (RingHom.id ℂ) (starRingEnd ℂ) (fun φ y => φ * starRingEnd ℂ y)
-    (fun a b y => by ring) (fun c a y => by simp [mul_assoc]) (fun a y z => by simp [mul_add])
-    (fun c a y => by simp; ring)
-
-def circ : Circle →* (ℂ ≃ₗᵢ[ℂ] ℂ) where
-  toFun a := { LinearEquiv.smulOfNeZero ℂ ℂ (a : ℂ) a.coe_ne_zero with norm_map' := fun z => by simp [Circle.norm_coe a] }
-  map_one' := by ext; simp
-  map_mul' a b := by ext; simp [mul_assoc]
 
 end GlobalTheory.IndefiniteRowSideFullHecke.ContractionTensorModels
 

@@ -1,6 +1,45 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PatchingModules.NilpotentLevelLowering.ActUVariableEqPow
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.ExistsGroupRingSurj
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.InjOfSandwich
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PatchingModules.NilpotentLevelLowering.LevelModule
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.ExistsGroupRingSurj
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.InjOfSandwich
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Formalism.ConjugateSelfDual ReciprocityTheory.Gal Formalism.BasicNotions Formalism.MainNotions.N ValuativeRel IsLocalRing
 open GlobalTheory.CuspRep GlobalTheory.WeilDeligne GlobalTheory.LocLanglands GlobalTheory.LocGL GlobalTheory.GalOfCusp GlobalTheory.SmGL GlobalTheory.SplitWeil
@@ -14,7 +53,7 @@ private def fsSub {Λ R M P : Type} [CommRing Λ] [CommRing R] [Algebra Λ R] [A
   carrier := {x | E x ∈ N}
   add_mem' := fun {x y} hx hy => by
     change E (x + y) ∈ N
-    rw [map_add]; exact N.add_mem hx hy
+    rw [map_add (f := _)]; exact N.add_mem hx hy
   zero_mem' := by
     change E 0 ∈ N
     rw [map_zero]; exact N.zero_mem
@@ -43,7 +82,7 @@ private theorem fs_abs {Λ R M P : Type} [CommRing Λ] [CommRing R] [IsLocalRing
       refine ⟨E.symm y, (show E (E.symm y) ∈ N by simpa using hy), E.symm z,
         (show E (E.symm z) ∈ C by simpa using hz), ?_⟩
       apply E.injective
-      rw [map_add, E.apply_symm_apply, E.apply_symm_apply, hyz]
+      rw [map_add (f := _), E.apply_symm_apply, E.apply_symm_apply, hyz]
   haveI : Module.Projective R P' :=
     Module.Projective.of_split P'.subtype (Submodule.linearProjOfIsCompl P' Q' hc)
       (Submodule.linearProjOfIsCompl_comp_subtype hc)
@@ -86,7 +125,7 @@ private def fsAgree {Λ S M : Type} [CommRing Λ] [CommRing S] [Algebra Λ S] [A
   mul_mem' := fun {x y} hx hy m => by
     rw [map_mul, map_mul, Module.End.mul_apply, Module.End.mul_apply, hx, hy]
   add_mem' := fun {x y} hx hy m => by
-    rw [map_add, map_add, LinearMap.add_apply, LinearMap.add_apply, Submodule.coe_add, hx, hy]
+    rw [map_add (f := _), map_add (f := _), LinearMap.add_apply, LinearMap.add_apply, Submodule.coe_add, hx, hy]
   algebraMap_mem' := fun r m => by
     simp
 
@@ -100,13 +139,13 @@ theorem UpperTheory.V.Pa.Lev.freeSummand :
     intro r
     induction r using MonoidAlgebra.induction_on with
     | of g => intro m hm; rw [Representation.asAlgebraHom_of]; exact hN g m hm
-    | add x y hx hy => intro m hm; rw [map_add, LinearMap.add_apply]; exact N.add_mem (hx m hm) (hy m hm)
+    | add x y hx hy => intro m hm; rw [map_add (f := _), LinearMap.add_apply]; exact N.add_mem (hx m hm) (hy m hm)
     | smul c x hx => intro m hm; rw [map_smul, LinearMap.smul_apply]; exact N.smul_mem c (hx m hm)
   have hθC : ∀ r, ∀ m ∈ C, ρ.asAlgebraHom r m ∈ C := by
     intro r
     induction r using MonoidAlgebra.induction_on with
     | of g => intro m hm; rw [Representation.asAlgebraHom_of]; exact hC g m hm
-    | add x y hx hy => intro m hm; rw [map_add, LinearMap.add_apply]; exact C.add_mem (hx m hm) (hy m hm)
+    | add x y hx hy => intro m hm; rw [map_add (f := _), LinearMap.add_apply]; exact C.add_mem (hx m hm) (hy m hm)
     | smul c x hx => intro m hm; rw [map_smul, LinearMap.smul_apply]; exact C.smul_mem c (hx m hm)
   haveI : Module.Finite Λ ρ.asModule := Module.Finite.equiv ρ.asModuleEquiv.symm
   haveI : Module.Finite (MonoidAlgebra Λ (Del l n a)) ρ.asModule :=

@@ -1,9 +1,54 @@
-import Mathlib
-import Formalism.LocalToGlobal.IndefiniteReal.ConcretePkgSpec
-import Formalism.LocalToGlobal.IndefiniteReal.CutTuples2
-import Formalism.LocalToGlobal.Divisibility.LiftLatLemmas
+module
+
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.FiniteResidueFieldAdicCompletionIntegers
+public import Formalism.LocalToGlobal.IndefiniteReal.SubgroupCharExtensionOneApply
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsLocalConjugationSelfDualLatticesHost
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.MemAdelicLatticeIffLocalSelfDualCompletion
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.IsIdemOfAlgebraMap
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Development.AbelianVarietyTheory.BlockTheory.HeightDefect.AdelicUnitaryGroups
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FinRepApply
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.IsIdemOfAlgebraMap
+import Formalism.LocalToGlobal.IndefiniteForms.IndefSide
+import Formalism.LocalToGlobal.IndefiniteReal.LinksDefs
+
+@[expose] public section
 
 noncomputable section
 
@@ -27,24 +72,17 @@ def ev (v : HeightOneSpectrum (𝓞 𝔽)) : 𝔸 →+* LocAlg v :=
   (Algebra.TensorProduct.map (Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes.evalV 𝔽 v) (AlgHom.id 𝔽 E)).toRingHom.comp
     (Algebra.TensorProduct.comm 𝔽 E (Formalism.L2.Herm.Af 𝔽)).toAlgHom.toRingHom
 
-omit [IsCMField E] in
-theorem ev_tmul (v : HeightOneSpectrum (𝓞 𝔽)) (x : E) (a : Formalism.L2.Herm.Af 𝔽) :
-    ev v (x ⊗ₜ a) = (a v) ⊗ₜ x := rfl
 
 omit [IsCMField E] in
-theorem ev_ext {z z' : 𝔸} (h : ∀ v, ev v z = ev v z') : z = z' :=
+theorem ev_ext {z z' : 𝔸} (h : ∀ v, ev (E := E) v z = ev (E := E) v z') : z = z' :=
   (Algebra.TensorProduct.comm 𝔽 E (Formalism.L2.Herm.Af 𝔽)).injective
     (GlobalTheory.LatticeLocalGlobal.ext_components _ _ h)
 
-omit [IsCMField E] in
-theorem ev_inclE (v : HeightOneSpectrum (𝓞 𝔽)) (x : E) :
-    ev v (Formalism.UG.inclE (F := 𝔽) (Formalism.L2.Herm.Af 𝔽) x) = locEmb v x := rfl
 
 theorem ev_sigR (hc : CMData 𝔽 E) (v : HeightOneSpectrum (𝓞 𝔽)) (z : 𝔸) :
     ev v (Formalism.UG.sigR hc.sig (Formalism.L2.Herm.Af 𝔽) z) = locConj v (ev v z) := by
-  induction z using TensorProduct.induction_on with
-  | zero => simp
-  | add x y hx hy => simp only [map_add, hx, hy]
+  induction z using TensorProduct.inductionOn with
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
   | tmul x a => rfl
 
 theorem ev_mem (v : HeightOneSpectrum (𝓞 𝔽)) {z : 𝔸} (hz : z ∈ 𝕆) : ev v z ∈ locOrder v := by
@@ -73,8 +111,10 @@ theorem exists_coeff {k : ℕ} (x : Fin k → 𝓞 E) (hx : Submodule.span ℤ (
     have : y ∈ Submodule.span ℤ (Set.range x) := hx ▸ Submodule.mem_top
     obtain ⟨n, rfl⟩ := (Submodule.mem_span_range_iff_exists_fun ℤ).1 this
     have e : ((∑ j, n j • x j : 𝓞 E) : E) = ∑ j, n j • (x j : E) := by
+
       rw [RingOfIntegers.coe_eq_algebraMap, map_sum]
       exact Finset.sum_congr rfl fun j _ => map_zsmul _ _ _
+
     rw [e, map_sum]
     refine Submodule.sum_mem _ fun j _ => ?_
     rw [map_zsmul]
@@ -105,7 +145,7 @@ theorem exists_coeff {k : ℕ} (x : Fin k → 𝓞 E) (hx : Submodule.span ℤ (
   exact mul_one _
 
 theorem exists_of_components (z : ∀ v : HeightOneSpectrum (𝓞 𝔽), LocAlg v) (hz : ∀ v, z v ∈ locOrder v) :
-    ∃ Z : 𝕆, ∀ v, ev v Z = z v := by
+    ∃ Z : 𝕆, ∀ v, ev (E := E) v Z = z v := by
   obtain ⟨k, x, hx⟩ := Module.Finite.exists_fin (R := ℤ) (M := 𝓞 E)
   choose a ha using fun v => exists_coeff x hx v (hz v)
   let A : Fin k → Formalism.L2.Herm.Af 𝔽 := fun j =>
@@ -124,7 +164,7 @@ theorem ev_mem_locLattice (v : HeightOneSpectrum (𝓞 𝔽)) {Λ : Submodule (�
   · simp only [Pi.zero_apply, map_zero]
     exact zero_mem _
   · intro a b _ _ ha hb
-    simp only [Pi.add_apply, map_add]
+    simp only [Pi.add_apply, map_add (f := _)]
     exact add_mem ha hb
   · intro c a _ ha
     have := smul_mem_locLattice v (ev_mem v c.2) ha
@@ -168,7 +208,8 @@ theorem exists_orth (hc : CMData 𝔽 E) {G : Matrix (Fin n) (Fin n) E} (hG : �
       rwa [← Units.inv_mul β] at this)) i
   choose A hA using fun i j => exists_of_components _ (ha i j)
   choose B hB using fun i j => exists_of_components _ (hb i j)
-  have ext : ∀ M M' : Matrix (Fin n) (Fin n) 𝔸, (∀ v, M.map (ev v) = M'.map (ev v)) → M = M' := fun M M' H =>
+  have ext : ∀ M M' : Matrix (Fin n) (Fin n) 𝔸,
+      (∀ v, M.map (ev (E := E) v) = M'.map (ev (E := E) v)) → M = M' := fun M M' H =>
     Matrix.ext fun i j => ev_ext fun v => congrFun (congrFun (H v) i) j
   let A' : Matrix (Fin n) (Fin n) 𝕆 := A
   let B' : Matrix (Fin n) (Fin n) 𝕆 := B
@@ -176,11 +217,13 @@ theorem exists_orth (hc : CMData 𝔽 E) {G : Matrix (Fin n) (Fin n) E} (hG : �
     fun v => Matrix.ext fun i j => hA i j v
   have eB : ∀ v, (B'.map (Subring.subtype 𝕆)).map (ev v) = ((h v)⁻¹).1 * β.1.map (ev v) :=
     fun v => Matrix.ext fun i j => hB i j v
-  have o : ∀ v, (1 : Matrix (Fin n) (Fin n) 𝔸).map (ev v) = 1 := fun v => Matrix.map_one _ (map_zero _) (map_one _)
+  have o : ∀ v, (1 : Matrix (Fin n) (Fin n) 𝔸).map (ev (E := E) v) = 1 :=
+    fun v => map_one (ev (E := E) v).mapMatrix
   have p1 : A' * B' = 1 := by
     apply Matrix.map_injective (f := Subring.subtype 𝕆) Subtype.val_injective
     change (A' * B').map _ = Matrix.map 1 _
-    rw [Matrix.map_mul, Matrix.map_one _ (map_zero _) (map_one _)]
+    rw [Matrix.map_mul, Matrix.map_one (Subring.subtype 𝕆)
+      (map_zero (Subring.subtype 𝕆)) (map_one (Subring.subtype 𝕆))]
     refine ext _ _ fun v => ?_
     rw [Matrix.map_mul, eA, eB, Matrix.mul_assoc, ← Matrix.mul_assoc (h v).1, Units.mul_inv, Matrix.one_mul,
       ← Matrix.map_mul, Units.inv_mul]
@@ -220,7 +263,6 @@ theorem isLattice_of_commensurable (V : HSpace E) {Λ : Submodule (𝓞 E) (Fin 
     have := Submodule.smul_mem (Submodule.span E (Λ : Set (Fin V.rank → E))) (N : E)⁻¹
       (Submodule.subset_span (h1 x ((mem x).1 hx)))
     rwa [smul_smul, inv_mul_cancel₀ hN', one_smul] at this
-
 theorem selfDual_iff (hc : CMData 𝔽 E) (V : HSpace E) {Λ : Submodule (𝓞 E) (Fin V.rank → E)}
     (h : Formalism.L2.Herm.dualL hc V Λ = Λ) (x : Fin V.rank → E) :
     x ∈ Λ ↔ ∀ y ∈ Λ, IsIntegral ℤ (herm V.gramᵀ x y) := by

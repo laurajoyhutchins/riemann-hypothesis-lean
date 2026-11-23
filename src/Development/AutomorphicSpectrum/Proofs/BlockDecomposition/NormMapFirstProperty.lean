@@ -1,5 +1,62 @@
-import Mathlib
-import Development.WeilBound.RepresentationTheoryGL.TwistedFactors.IntegralUnitBaseChange.Development
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.TwistedFactors.IntegralUnitBaseChange.Development
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.FieldTheory.Finite.GaloisField
+public import Mathlib.RingTheory.Flat.Basic
+
+@[expose] public section
 
 open scoped TensorProduct
 open Finset
@@ -163,8 +220,10 @@ theorem local_step [Finite B] (T : RingAut B) (ℓ : ℕ) (hℓ : 0 < ℓ) (hT :
       rw [← hρ, h1]
       rfl
     have := congrArg (Ideal.Quotient.mk m) h0
+
     simp only [map_sum, map_mul, hy, map_zero] at this
     have h2 := congrArg (Ideal.Quotient.mk m) h1'
+
     simp only [map_sum, map_mul, pow_zero, map_one] at h2
     have h3 : ∀ i, Ideal.Quotient.mk m (((1 : RingAut B)) (y i)) = Ideal.Quotient.mk m (y i) :=
       fun i => rfl
@@ -321,6 +380,7 @@ theorem fixed_tensor {κ κ' A : Type*} [Field κ] [CommRing κ'] [Algebra κ κ
       b.sum (fun i m => m ⊗ₜ[κ] C i)
     rw [Finsupp.sum_mapRange_index (by simp)]
     conv_rhs => rw [← hs]
+
     simp [Finsupp.sum, map_sum]
   have hb : ∀ i, τ (b i) = b i := fun i => by
     have := DFunLike.congr_fun hbb i
@@ -346,7 +406,6 @@ theorem norm_onto : PositivityTheory.Rg.Tf.Loc.N1 := by
       have hz : ∀ s : κ' ⊗[κ] A, s = 0 := by
         intro s
         induction s with
-        | zero => rfl
         | tmul z b => rw [Subsingleton.elim z 0, TensorProduct.zero_tmul]
         | add u v hu hv => rw [hu, hv, add_zero]
       rw [hz p, hz q]
@@ -370,16 +429,14 @@ theorem norm_onto : PositivityTheory.Rg.Tf.Loc.N1 := by
       Algebra.TensorProduct.map ((τ ^ i : κ' ≃ₐ[κ] κ').toAlgHom) (AlgHom.id κ A) s = (T ^ i) s := by
     intro i s
     induction s with
-    | zero => simp
     | tmul z b => rw [hTm]; rfl
-    | add u v hu hv => rw [map_add, map_add, hu, hv]
+    | add u v hu hv => rw [map_add (f := _), map_add (f := _), hu, hv]
   have hT : T ^ ℓ = 1 := by
     ext s
     rw [← hTi, hτ]
     induction s with
-    | zero => simp
     | tmul z b => rfl
-    | add u v hu hv => rw [map_add, hu, hv]; rfl
+    | add u v hu hv => rw [map_add (f := _), hu, hv]; rfl
   have hXY : ∀ j < ℓ, ∑ i, (x i ⊗ₜ[κ] (1 : A)) * (T ^ j) (y i ⊗ₜ[κ] (1 : A)) =
       if j = 0 then 1 else 0 := by
     intro j hj

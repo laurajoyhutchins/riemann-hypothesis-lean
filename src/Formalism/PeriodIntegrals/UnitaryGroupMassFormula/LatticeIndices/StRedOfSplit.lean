@@ -1,6 +1,44 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LatticeIndices.GOfPrime
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LatticeIndices.GlRedEqOneIff
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LatticeIndices.MeasBAll
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -24,61 +62,6 @@ def StLatGL (p : TypX X) : Prop :=
     ∃ ψ : K →* GL (Formalism.FourierDecayAlt.S3.Idx D.R.rS D.R.k) (Op X p), Function.Surjective ψ ∧
       ∀ x : K, (∀ i j, ((ψ x : Matrix (Formalism.FourierDecayAlt.S3.Idx D.R.rS D.R.k) (Formalism.FourierDecayAlt.S3.Idx D.R.rS D.R.k) (Op X p))
         - 1) i j ∈ Ideal.span {((gOf p : ℕ) : Op X p)}) ↔ (x : HAp X p) ∈ KgX X p
-
-theorem stRed_of_split (p : TypX X) (hR : StResZ X p) (hL : StLatGL X p) : StRed X p := by
-  classical
-  intro K hK
-  obtain ⟨π, hπs, hπk⟩ := hR
-  obtain ⟨ψ, hψs, hψ⟩ := hL K hK
-  refine ⟨(Matrix.GeneralLinearGroup.map π).comp ψ, ?_, ?_⟩
-  · intro N
-    have hsi : ∀ b, π (Function.surjInv hπs b) = b := Function.surjInv_eq hπs
-    let M' : Matrix (Formalism.FourierDecayAlt.S3.Idx D.R.rS D.R.k) (Formalism.FourierDecayAlt.S3.Idx D.R.rS D.R.k) (Op X p) :=
-      fun i j => Function.surjInv hπs ((N : Matrix (Formalism.FourierDecayAlt.S3.Idx D.R.rS D.R.k) (Formalism.FourierDecayAlt.S3.Idx D.R.rS D.R.k) (ZMod (gOf p))) i j)
-    have hM' : ∀ i j, π (M' i j) = (N : Matrix (Formalism.FourierDecayAlt.S3.Idx D.R.rS D.R.k) (Formalism.FourierDecayAlt.S3.Idx D.R.rS D.R.k) (ZMod (gOf p))) i j := fun i j => hsi _
-    have hdet : π M'.det = (N : Matrix (Formalism.FourierDecayAlt.S3.Idx D.R.rS D.R.k) (Formalism.FourierDecayAlt.S3.Idx D.R.rS D.R.k) (ZMod (gOf p))).det := by
-      rw [RingHom.map_det]
-      congr 1
-      ext i j
-      exact hM' i j
-    obtain ⟨e, he⟩ := (Matrix.isUnits_det_units N).exists_right_inv
-    have h1 : π (M'.det * Function.surjInv hπs e) = 1 := by
-      rw [map_mul, hdet, hsi, he]
-    rcases IsLocalRing.isUnit_or_isUnit_one_sub_self (M'.det * Function.surjInv hπs e) with hu | hu
-    · have hd : IsUnit M'.det := isUnit_of_mul_isUnit_left hu
-      have hM : IsUnit M' := (Matrix.isUnit_iff_isUnit_det M').mpr hd
-      obtain ⟨k, hk⟩ := hψs hM.unit
-      refine ⟨k, ?_⟩
-      apply Units.ext
-      ext i j
-      rw [MonoidHom.comp_apply, hk, Matrix.GeneralLinearGroup.map_apply, IsUnit.unit_spec]
-      exact hM' i j
-    · have h0 : IsUnit (π (1 - M'.det * Function.surjInv hπs e)) := hu.map π
-      rw [map_sub, map_one, h1, sub_self] at h0
-      haveI : Subsingleton (ZMod (gOf p)) := subsingleton_of_zero_eq_one (isUnit_zero_iff.mp h0)
-      refine ⟨1, ?_⟩
-      apply Units.ext
-      ext i j
-      exact Subsingleton.elim _ _
-  · intro x
-    rw [← hψ x]
-    have key : ∀ i j, ((((Matrix.GeneralLinearGroup.map π).comp ψ) x : GL (Formalism.FourierDecayAlt.S3.Idx D.R.rS D.R.k) (ZMod (gOf p))) :
-        Matrix (Formalism.FourierDecayAlt.S3.Idx D.R.rS D.R.k) (Formalism.FourierDecayAlt.S3.Idx D.R.rS D.R.k) (ZMod (gOf p))) i j - (1 : Matrix (Formalism.FourierDecayAlt.S3.Idx D.R.rS D.R.k) (Formalism.FourierDecayAlt.S3.Idx D.R.rS D.R.k) (ZMod (gOf p))) i j =
-        π ((((ψ x : GL (Formalism.FourierDecayAlt.S3.Idx D.R.rS D.R.k) (Op X p)) : Matrix (Formalism.FourierDecayAlt.S3.Idx D.R.rS D.R.k) (Formalism.FourierDecayAlt.S3.Idx D.R.rS D.R.k) (Op X p)) - 1) i j) := by
-      intro i j
-      rw [MonoidHom.comp_apply, Matrix.GeneralLinearGroup.map_apply, Matrix.sub_apply, map_sub,
-        Matrix.one_apply, Matrix.one_apply]
-      split_ifs <;> simp
-    constructor
-    · intro h i j
-      rw [← hπk, RingHom.mem_ker, ← key, h]
-      simp
-    · intro h
-      apply Units.ext
-      ext i j
-      have hij := h i j
-      rw [← hπk, RingHom.mem_ker, ← key, sub_eq_zero] at hij
-      simpa using hij
 
 end Loc
 

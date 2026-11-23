@@ -1,5 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.QuasicoherentCohomology.IsQuasiRegularSeqSelfIffLocalizationMaximal
+module
+
+public import Development.AbelianVarietyTheory.Definitions.QuasicoherentCohomology.IsQuasiRegularSeqSelfIffLocalizationMaximal
+public import Mathlib.RingTheory.Regular.RegularSequence
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RingTheory.Filtration
+
+@[expose] public section
 
 open RingTheory.Sequence
 
@@ -40,13 +89,13 @@ noncomputable def MonoDeg.optionEquiv (ι : Type*) (a : ℕ) :
           ext o
           cases o with
           | none => rw [Finsupp.mapDomain_of_notMem_range _ _ (by simp), h0]
-          | some i => rw [Finsupp.mapDomain_apply (Option.some_injective _), Finsupp.some_apply]
+          | some i => rw [Finsupp.mapDomain_apply_of_injective (Option.some_injective _), Finsupp.some_apply]
         refine ⟨Sum.inl ⟨α.some, ?_⟩, Subtype.ext h1⟩
         rw [← hα, ← h1, Finsupp.degree_mapDomain, h1]
       · have h1 : α - Finsupp.single none 1 + Finsupp.single none 1 = α :=
           tsub_add_cancel_of_le (Finsupp.single_le_iff.mpr (Nat.pos_of_ne_zero h0))
         refine ⟨Sum.inr ⟨α - Finsupp.single none 1, ?_⟩, Subtype.ext h1⟩
-        rw [← h1, map_add, Finsupp.degree_single] at hα
+        rw [← h1, map_add (f := _), Finsupp.degree_single] at hα
         omega
 
 variable {R : Type*} [CommRing R]
@@ -228,6 +277,7 @@ theorem IsQuasiRegularSeq.quotSMulTop {f : Option ι → R} (h : IsQuasiRegularS
   obtain rfl : c = fun α => Submodule.Quotient.mk (d α) := funext fun α => (hd α).symm
   have hc' : (Submodule.Quotient.mk (∑ α, monoVal (f ∘ some) α.1 • d α) :
       QuotSMulTop (f none) M) = 0 := by
+
     rw [← hc, ← Submodule.mkQ_apply, map_sum]
     rfl
   obtain ⟨ω, -, hω⟩ := (Submodule.mem_smul_pointwise_iff_exists _ _ _).mp
@@ -320,11 +370,8 @@ theorem IsQuasiRegularSeq.isWeaklyRegular [IsNoetherianRing R] [Module.Finite R 
       ih h.quotSMulTop_tail fun i => hf _⟩
     rw [Ideal.span_le]
     rintro _ ⟨i, rfl⟩
-    exact hf i
-
-example : IsQuasiRegularSeq ℤ ![(2 : ℤ)] :=
-  isQuasiRegularSeq_of_isWeaklyRegular (by
-    simpa using IsSMulRegular.of_ne_zero (M := ℤ) (two_ne_zero (α := ℤ)))
+    change f i ∈ Ring.jacobson R
+    simpa only [Ideal.jacobson_bot] using hf i
 
 end Main
 

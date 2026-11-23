@@ -1,8 +1,53 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.OmStable
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.NonemptyLinearEquivOfPiFinPowFinite
-import Development.AutomorphicSpectrum.PublishedTheorems.Algebra₂.FarguesHodgeTate
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.AbelianSchemeQuotients.IsAbelianScheme
+module
+
+public import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.OmStable
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.NonemptyLinearEquivOfPiFinPowFinite
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.AbelianSchemeQuotients.IsAbelianScheme
+public import Mathlib.RingTheory.RootsOfUnity.PrimitiveRoots
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+public import Mathlib.RingTheory.RootsOfUnity.CyclotomicUnits
+public import Mathlib.RingTheory.RootsOfUnity.Lemmas
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -49,19 +94,13 @@ def PointHT : Prop :=
       (EF : La →ₗ[ℤ] La →ₗ[ℤ] ℤ) (N : ℕ) (u : Fin N → La), IsPolLattice c p EF u →
     ∀ (X : TorsTower p G y La) (L : Type) [AddCommGroup L] [Module O L] (M : LieModel G y L)
       (act : 𝓞 E → (G ⟶ G)) (ρL : 𝓞 E →+* Module.End O L), (∀ a, IsMonHom (act a)) → M.IsActOf act ρL →
-      (∀ a : 𝓞 E, X.Induces (act a) (DistribMulAction.toAddMonoidHom La a)) →
+      (∀ a : 𝓞 E, X.Induces (act a) (DistribSMul.toAddMonoidHom La a)) →
       2 * Module.finrank O L = Module.finrank ℤ La →
     ∀ ζ : ℕ → Oˣ, (∀ n, IsPrimitiveRoot (ζ n) (p ^ n)) → (∀ n, ζ (n + 1) ^ p = ζ n) → X.PairingRegular EF ζ →
     ∀ κ : O, IsHTConst v p κ →
       ∃ P : HTPoint C O c κ N (C ⊗[ℤ] La) (C ⊗[O] Module.Dual O L), IsPointOf p (X.IsDer M) EF ζ ρL u P
 
 namespace PointTest
-
-def toInt : 𝓞 ℚ ≃+* ℤ := Rat.ringOfIntegersEquiv
-
-def planeForm : (Fin 2 → 𝓞 ℚ) →ₗ[ℤ] (Fin 2 → 𝓞 ℚ) →ₗ[ℤ] ℤ :=
-  LinearMap.mk₂ ℤ (fun x y => toInt (x 0 * y 1 - x 1 * y 0)) (by intros; simp; ring) (by intros; simp; ring)
-    (by intros; simp; ring) (by intros; simp; ring)
 
 variable {C O : Type} [Field C] [CommRing O] [Algebra O C] {v : Valuation C NNReal} {p : ℕ}
 
@@ -92,12 +131,6 @@ theorem isHTConst_sub_one [hp : Fact p.Prime] {ζ : O} (hζ : IsPrimitiveRoot (a
   refine ⟨?_, ?_⟩ <;> rw [map_sub, map_one]
   · exact hζ.sub_one_ne_zero hp.out.one_lt
   · exact (val_sub_one_pow hζ).le
-
-theorem isHTConst_two [CharZero C] : IsHTConst v 2 (2 : O) :=
-  ⟨by rw [map_ofNat]; exact two_ne_zero, by rw [map_ofNat]; simp⟩
-
-theorem not_isHTConst_one (h : v (p : C) < 1) : ¬ IsHTConst v p (1 : O) := fun h1 =>
-  absurd (by simpa using h1.2) (not_le.2 h)
 
 end PointTest
 

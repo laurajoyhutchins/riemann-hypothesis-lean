@@ -1,4 +1,57 @@
-import Formalism.ThetaLogCoordinates.ResidueClassEstimates.StatementL
+module
+
+public import Formalism.ThetaLogCoordinates.ResidueClassEstimates.StatementL
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Algebra.BigOperators.Fin
+public import Mathlib.Algebra.Order.BigOperators.Group.Finset
+public import Mathlib.Data.Nat.ModEq
+
+@[expose] public section
 
 noncomputable section
 
@@ -10,44 +63,6 @@ namespace Formalism.InvariantFactorPaths.BranchingDimensions
 section Digits
 
 variable {I1 I2 : Type}
-
-def cTgt : CoarseVar I1 I2 → I1 ⊕ I2
-  | Sum.inl i => Sum.inl i
-  | Sum.inr (Sum.inl i) => Sum.inr i
-  | Sum.inr (Sum.inr i) => Sum.inr i
-
-def cWt (P : I1 ⊕ I2 → ℕ) (Q : I2 → ℕ) : CoarseVar I1 I2 → ℕ
-  | Sum.inl i => P (Sum.inl i)
-  | Sum.inr (Sum.inl i) => P (Sum.inr i)
-  | Sum.inr (Sum.inr i) => P (Sum.inr i) * Q i
-
-def cExp (P : I1 ⊕ I2 → ℕ) (Q : I2 → ℕ) : (CoarseVar I1 I2 →₀ ℕ) →+ ((I1 ⊕ I2) →₀ ℕ) :=
-  Finsupp.liftAddHom fun x => (Finsupp.singleAddHom (cTgt x)).comp (AddMonoidHom.mulRight (cWt P Q x))
-
-def digM (P : I1 ⊕ I2 → ℕ) (Q : I2 → ℕ) (e : (I1 ⊕ I2) →₀ ℕ) : CoarseVar I1 I2 →₀ ℕ :=
-  Finsupp.sumElim
-    (Finsupp.onFinset (e.comapDomain Sum.inl Sum.inl_injective.injOn).support
-      (fun i => e (Sum.inl i) / P (Sum.inl i)) (by
-        intro i hi
-        rw [Finsupp.mem_support_iff, Finsupp.comapDomain_apply]
-        intro h0; rw [h0] at hi; simp at hi))
-    (Finsupp.sumElim
-      (Finsupp.onFinset (e.comapDomain Sum.inr Sum.inr_injective.injOn).support
-        (fun i => (e (Sum.inr i) / P (Sum.inr i)) % Q i) (by
-          intro i hi
-          rw [Finsupp.mem_support_iff, Finsupp.comapDomain_apply]
-          intro h0; rw [h0] at hi; simp at hi))
-      (Finsupp.onFinset (e.comapDomain Sum.inr Sum.inr_injective.injOn).support
-        (fun i => (e (Sum.inr i) / P (Sum.inr i)) / Q i) (by
-          intro i hi
-          rw [Finsupp.mem_support_iff, Finsupp.comapDomain_apply]
-          intro h0; rw [h0] at hi; simp at hi)))
-
-def digL (P : I1 ⊕ I2 → ℕ) (e : (I1 ⊕ I2) →₀ ℕ) : (I1 ⊕ I2) →₀ ℕ :=
-  Finsupp.onFinset e.support (fun i => e i % P i) (by
-    intro i hi
-    rw [Finsupp.mem_support_iff]
-    intro h0; rw [h0] at hi; simp at hi)
 
 end Digits
 

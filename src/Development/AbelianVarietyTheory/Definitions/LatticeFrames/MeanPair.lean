@@ -1,6 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.SphericalEisensteinSeriesOnGroup
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.HalfData
+module
+
+public import Formalism.LocalToGlobal.BesselHermitianTheta.TiedSmooth
+public import Formalism.LocalToGlobal.IndefiniteReal.LocalNewformFunction
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.ModerateGrowthSchwartz
+import Development.AbelianVarietyTheory.Definitions.Foundations.AestronglyMeasurableQuotMeasureIffLift
+import Development.AbelianVarietyTheory.Definitions.Foundations.AnalyticOnNhdTsumNpow
+import Development.AbelianVarietyTheory.Definitions.Foundations.EventuallyEqOfIsPreconnected
+import Development.AbelianVarietyTheory.Definitions.Foundations.IsIwasawaOfIsCompact
+import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.CovolOneIntegralAdd
+import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.RegularisedSiegelWeilFirstTerm
+import Formalism.LocalToGlobal.ProjectiveLattices.ErealAddIInf
+
+@[expose] public section
 
 noncomputable section
 
@@ -17,26 +63,8 @@ variable {D : D7}
 
 def ConjBy {G : Type} [Group G] (q : G) (K K' : Subgroup G) : Prop := ∀ k, k ∈ K ↔ q⁻¹ * k * q ∈ K'
 
-def gelfT (θ : InfFam D) (V : HSp D) (τ : D.what₂.Tau) (k : ℕ) (f : GA D V → ℂ) : GA D V → ℂ :=
-  (-1 : ℂ) ^ (k + 1) • ∑ idx : Fin (k + 1) → Fin V.rank,
-    (List.ofFn fun a : Fin (k + 1) => RderC θ V τ (Matrix.single (idx a) (idx (a + 1)) 1)).reverse.foldr (fun A acc => A acc) f
-
 def wordDer (θ : InfFam D) (V : HSp D) (τ : D.what₂.Tau) (w : List (Matrix (Fin V.rank) (Fin V.rank) ℂ)) (f : GA D V → ℂ) :
     GA D V → ℂ := w.foldr (fun Z g => RderC θ V τ Z g) f
-
-def meanPair (V : HSp D) (m : Measure (GA D V)) (F E : GA D V → ℂ) : ℂ :=
-  ⨍ q, descend (GQ V) (fun h => F h * E h) q ∂autMeasure V m
-
-structure Pass (ψ : AddChar (AF D.host.F) ℂ) (θ : InfFam D) (A B : HSp D) (χ : (AE D)ˣ →* Circle)
-    (om : GA D (dblSp A) × GA D B →* Module.End ℂ (WO (dblSp A) B → ℂ)) (ν : Measure (WO A B)) (𝓨 : Set (WO A B))
-    (μ : D.host.E) (κ : GA D (dblSp A) ≃* StdUnn.G D A.rank)
-    (omS : StdUnn.G D A.rank →* Module.End ℂ (schwartzA θ B.rank A.rank)) : Prop where
-  weil : IsWeilDatumO ψ (dblSp A) B 1 χ om
-  cov : IsCovolOne (ratL B A) ν 𝓨
-  inf : IsInfFam θ
-  skew : StdUnn.IsSkew μ
-  chart : StdUnn.IsChart A μ κ
-  trans : StdUnn.IsTransport ψ θ A B ν 𝓨 om κ omS
 
 end GlobalTheory.RegSch
 

@@ -1,5 +1,48 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerVolume.FibGlue
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerVolume.FibGlue
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -180,7 +223,7 @@ theorem meas_fib : ∀ A, MeasurableSet A → Measurable fun b => fib b A := by
         rw [iUnion_inter, measure_iUnion (fun i j hij => (hd hij).mono inter_subset_left
           inter_subset_left) (fun i => (hgm i).inter (hW n).1.measurableSet)]
       simp_rw [e]
-      exact Measurable.ennreal_tsum IH
+      exact Measurable.tsum IH
   intro A hA
   have hD : ∀ n, MeasurableSet (disjointed W n) :=
     MeasurableSet.disjointed fun n => (hW n).1.measurableSet
@@ -193,7 +236,7 @@ theorem meas_fib : ∀ A, MeasurableSet A → Measurable fun b => fib b A := by
       measure_iUnion (fun i j hij => ((disjoint_disjointed W) hij).mono inter_subset_right
         inter_subset_right) (fun n => hA.inter (hD n))]
   simp_rw [e]
-  refine Measurable.ennreal_tsum fun n => ?_
+  refine Measurable.tsum fun n => ?_
   have := hP n (A ∩ disjointed W n) (hA.inter (hD n))
   simpa only [inter_eq_left.2 (inter_subset_right.trans (disjointed_subset W n))] using this
 

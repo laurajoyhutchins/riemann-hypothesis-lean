@@ -1,6 +1,54 @@
-import CompanionTheory.HarishChandraModules.KFiniteAnalyticVectors.AnalyticIntertwiners.GrowthOfBasic
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.HighestWeights.UniqueA
+module
+
+public import Formalism.RealPlaceAnalysis.StatementKT
+public import Formalism.SharpRestriction.CuspSpanNormBounds.RelevantZeroGramTerms
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.DiscreteSeriesExistence.BridgeExpK
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.DiscreteSeriesExistence.Smooth
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.AnalyticVectors.ConjTransposeEqOfInG
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.AnalyticVectors.ExistsExpEqOfMemKset
 import ReciprocityTheory.ReductiveGroups.DiscreteSeries.AnalyticVectors.Taylor
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.AnalyticVectors.Unitary
+
+@[expose] public section
 
 open Matrix
 open scoped InnerProductSpace
@@ -86,7 +134,9 @@ theorem intertwiner_actM_pow_comm {W W' : Submodule ℂ (smD ε σ)} (hW : IsKSt
       by_cases hab : ε a = ε b
       · rw [resB_apply hW hab]
       · rw [inK_apply_eq_zero hZ hab, zero_smul, zero_smul]
+
     rw [e1, map_sum]
+
     simp only [map_sum, map_smul, Submodule.coe_sum, Submodule.coe_smul]
     rw [pow_succ', Module.End.mul_apply, ← ih x]
     simp only [actM, LinearMap.sum_apply, LinearMap.smul_apply]
@@ -108,12 +158,12 @@ theorem intertwiner_comm_kset (hσ : Formalism.MainNotions.S.IsURepOn (Formalism
   let e : W ≃ₗ[ℂ] Wh := Submodule.equivMapOfInjective _ Subtype.val_injective W
   let Φ : H →L[ℂ] H := ((smD ε σ).subtypeL.comp W'.subtypeL).comp
     ((LinearMap.toContinuousLinearMap φ).comp
-      ((LinearMap.toContinuousLinearMap (e.symm : Wh →ₗ[ℂ] W)).comp Wh.orthogonalProjection))
+      ((LinearMap.toContinuousLinearMap (e.symm : Wh →ₗ[ℂ] W)).comp Wh.orthogonalProjectionOnto))
   have hΦ : ∀ z : W, Φ ((z : smD ε σ) : H) = (((φ z : W') : smD ε σ) : H) := by
     intro z
     have hz : ((z : smD ε σ) : H) ∈ Wh := Submodule.mem_map_of_mem z.2
-    have h1 : Wh.orthogonalProjection ((z : smD ε σ) : H) = ⟨_, hz⟩ :=
-      Submodule.orthogonalProjection_mem_subspace_eq_self (⟨_, hz⟩ : Wh)
+    have h1 : Wh.orthogonalProjectionOnto ((z : smD ε σ) : H) = ⟨_, hz⟩ :=
+      Submodule.orthogonalProjectionOnto_mem_subspace_eq_self (⟨_, hz⟩ : Wh)
     have h2 : e.symm ⟨_, hz⟩ = z := by
       rw [LinearEquiv.symm_apply_eq]
       rfl

@@ -1,15 +1,69 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.FromNAdd
-import Development.AutomorphicSpectrum.Statements.AlgebraStatements.PolarisedFlagStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ArithVarietyModelHodgeRelayStatement
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.PtAfTypeMain
-import Development.WeilBound.CoreStatements.TorusUniformisation.ChowMahlerFamilies.TestOrderSections
-import Development.WeilBound.CoreStatements.TorusUniformisation.ChowMahlerFamilies.KernelMem
-import Development.WeilBound.CoreStatements.TorusUniformisation.ChowMahlerFamilies.ReducesAtOfWithE
-import Development.WeilBound.CoreStatements.TorusUniformisation.ChowMahlerFamilies.ExistsDualFamily
-import Development.WeilBound.CoreStatements.TorusUniformisation.ChowMahlerFamilies.Typed
-import Development.WeilBound.CoreStatements.TorusUniformisation.ChowMahlerFamilies.IsUnitOfVal
-import Development.WeilBound.CoreStatements.HodgeTatePoints.ValCastSub
+module
+
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.FromNAdd
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsLatFlagPair
+public import Development.AutomorphicSpectrum.PublishedTheorems.Algebra₂.FarguesHodgeTate
+public import Development.AutomorphicSpectrum.PublishedTheorems.Algebra₂.QuotientByFiniteFlatStatement
+public import Development.AutomorphicSpectrum.PublishedTheorems.Algebra₂.ZarhinStatement
+public import Development.AutomorphicSpectrum.Statements.AlgebraStatements.HodgeTateDatumStatement
+public import Development.AutomorphicSpectrum.Statements.AlgebraStatements.OrdinaryCurveStatement
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.DifferentGeneratorDualIntegral
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.PtAfTypeMain
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ArithVarietyModelHodgeRelayStatement
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HodgeTateFreeIntegralModelsStatement
+public import Development.WeilBound.CoreStatements.HodgeTatePoints.ValCastSub
+public import Development.WeilBound.CoreStatements.TorusUniformisation.ChowMahlerFamilies.ExistsCmTypeEmbedding
+public import Development.WeilBound.CoreStatements.TorusUniformisation.ChowMahlerFamilies.ExistsDualFamily
+public import Development.WeilBound.CoreStatements.TorusUniformisation.ChowMahlerFamilies.IsUnitOfVal
+public import Development.WeilBound.CoreStatements.TorusUniformisation.ChowMahlerFamilies.KernelMem
+public import Development.WeilBound.CoreStatements.TorusUniformisation.ChowMahlerFamilies.ReducesAtOfWithE
+import Development.WeilBound.CoreStatements.TorusUniformisation.ChowMahlerFamilies.SequenceDifferentialsExist
+public import Development.WeilBound.CoreStatements.TorusUniformisation.ChowMahlerFamilies.TestOrderSections
+public import Development.WeilBound.CoreStatements.TorusUniformisation.ChowMahlerFamilies.Typed
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AutomorphicSpectrum.Definitions.DivisibilityTowers.CompactGapsGE
+public import Development.WeilBound.CoreStatements.HodgeTatePoints.ExistsDualOf
+public import Development.WeilBound.CoreStatements.TorusUniformisation.ChowMahlerFamilies.IsIntegrallyClosedOfDenomBis
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory NumberField MvPolynomial ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Geo ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.Semi GlobalTheory.CompanionTheory.Ar GlobalTheory.CompanionTheory.Ar.Num GlobalTheory.CompanionTheory.Ar.Top
 open GroundTheory.Heights₂.Heights.NumbersDVR (pointIdeal segreVec IsFlagFrame IsFlagPair SameGenericFibre IsModelOver divCycle)
 open GroundTheory.Heights₂.Heights.IndefiniteRowSideFullHecke.NumbersDVR.Bundles (mseg fnField)
@@ -33,7 +87,7 @@ theorem mem_spanOver {o Ω C : Type} [CommRing o] [Field Ω] [Field C] [Algebra 
 def smallSub {C : Type} [Field C] (v : Valuation C NNReal) (t : NNReal) {r : ℕ} {I : Type}
     (f : I → ((Fin r → C) →ₗ[C] C)) : AddSubgroup (Fin r → C) where
   carrier := {a | ∀ m, v (f m a) ≤ t}
-  add_mem' ha hb m := by rw [map_add]; exact v.map_add_le (ha m) (hb m)
+  add_mem' ha hb m := by rw [map_add (f := _)]; exact v.map_add_le (ha m) (hb m)
   zero_mem' m := by simp
   neg_mem' ha m := by rw [map_neg, Valuation.map_neg]; exact ha m
 
@@ -140,7 +194,7 @@ theorem PositivityTheory.Xgn.test_group_point_exists : GlobalTheory.CompanionThe
   have hWl : ∀ a ∈ ((chartD e b pq sc w P i).bc RC).W τ, algebraMap O C w • a ∈ ((chartD e b pq sc w P i).bc RC).lie τ :=
     fun a ha => spanOver_ind RC _ (divLat (algebraMap O C w) (((chartD e b pq sc w P i).bc RC).lie τ))
       (fun t ht a ha => by
-        simp only [divLat, AddSubgroup.mem_comap, DistribMulAction.toAddMonoidHom_apply] at ha ⊢
+        simp only [divLat, AddSubgroup.mem_comap, DistribSMul.toAddMonoidHom_apply] at ha ⊢
         rw [smul_comm]
         exact smul_mem_spanOver RC _ ht ha)
       (fun a ha => by
@@ -152,7 +206,7 @@ theorem PositivityTheory.Xgn.test_group_point_exists : GlobalTheory.CompanionThe
           change _ = algebraMap Ω C (algebraMap O Ω w * a k)
           rw [map_mul, hOC']
           rfl
-        simp only [divLat, AddSubgroup.mem_comap, DistribMulAction.toAddMonoidHom_apply]
+        simp only [divLat, AddSubgroup.mem_comap, DistribSMul.toAddMonoidHom_apply]
         rw [e]
         exact h2) ha
   have heig : ∀ t a k, 𝔐.ρ a (b t k) = 𝔐.emb t a • b t k := fun t a k => by

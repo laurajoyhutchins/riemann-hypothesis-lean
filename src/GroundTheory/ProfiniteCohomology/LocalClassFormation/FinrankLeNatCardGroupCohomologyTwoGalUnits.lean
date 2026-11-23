@@ -1,9 +1,57 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.LocalClassFormation.OrderInfRes
-import GroundTheory.ProfiniteCohomology.LocalClassFormation.OrderScalars
-import GroundTheory.ProfiniteCohomology.LocalClassFormation.UnramifiedRes
-import GroundTheory.LocalFields.UnramifiedExistence
+module
+
+public import GroundTheory.ProfiniteCohomology.LocalClassFormation.OrderInfRes
+public import GroundTheory.ProfiniteCohomology.LocalClassFormation.OrderScalars
+public import GroundTheory.ProfiniteCohomology.LocalClassFormation.UnramifiedRes
 import GroundTheory.LocalFields.FiniteExtension
+import GroundTheory.LocalFields.IntermediateField
+public import GroundTheory.LocalFields.UnramifiedExistence
+public import GroundTheory.ProfiniteCohomology.LocalClassFormation.OrderBound
+import GroundTheory.ProfiniteCohomology.LocalClassFormation.OrderCyclic
+import Mathlib.Algebra.Lie.OfAssociative
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
@@ -122,6 +170,7 @@ theorem finrank_le_natCard_groupCohomology_two_galUnits :
     exact this ▸ hy
   have : IsUnramified L M0 := by
     have h1 : IsUnramified L L⟮ζM⟯ := (isUnramified_iff _ _).2 hF.1.ramificationIndex_eq_one
+    set_option synthInstance.maxHeartbeats 200000 in
     have hfr : Module.finrank L⟮ζM⟯ M0 = 1 := by
       have h := Module.finrank_mul_finrank L L⟮ζM⟯ M0
       have h' : Module.finrank L L⟮ζM⟯ = Module.finrank L M0 := by

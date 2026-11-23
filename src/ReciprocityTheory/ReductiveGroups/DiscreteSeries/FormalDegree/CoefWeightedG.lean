@@ -1,8 +1,53 @@
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.CoefIntVG
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.CoefIntCpt
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.CoefDec
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.HaarMirror
-import Formalism.SharpRestriction.CuspSpanNormBounds.GlobAut
+module
+
+public import Formalism.SharpRestriction.CuspSpanNormBounds.GlobAut
+public import Formalism.SharpRestriction.CuspSpanNormBounds.RelevantZeroGramTerms
+public import Mathlib.Analysis.CStarAlgebra.Matrix
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.CasimirCoefficients.PsiExistsStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.CoefDec
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.CoefIntCpt
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.CoefIntVG
+
+@[expose] public section
 
 noncomputable section
 
@@ -17,24 +62,16 @@ theorem coefWeightedN {n : ℕ} (ε : Fin n → Bool) (lam : Fin n → ℝ) {H :
     (hgap : Formalism.QuantumDeterminants.GapAtLeast ε lam h) (N : ℝ) (hN : 0 ≤ N)
     (hthr : 1 ≤ S7.q0 ε → (n : ℝ) * (pOf ε : ℝ) * (qOf ε : ℝ) + 1 < h ∧
       8 * Real.sqrt (2 * (S7.q0 ε : ℝ)) * (N + 2 * (n : ℝ) * S7.q0 ε) < h)
-    (μ : Measure (Formalism.REAL.UJ ε)) [μ.IsHaarMeasure] :
+    (μ : Measure (Formalism.REAL.UJ ε)) [hμ : μ.IsHaarMeasure] :
     ∫⁻ g, ‖⟪w, σ (Formalism.MainNotions.S.uMat g) w⟫_ℂ‖ₑ *
         ENNReal.ofReal (‖Matrix.toEuclideanCLM (𝕜 := ℂ) (Formalism.MainNotions.S.uMat g)‖ ^ N) ∂μ < ⊤ := by
   haveI : CompleteSpace H := hDS.1
   obtain ⟨hcont, hle⟩ := coef_continuousOn_le_one hDS hw
-  haveI hH : Measure.IsHaarMeasure (μ : Measure (S7.UJ ε)) := by
-    first
-    | assumption
-    | exact ‹_›
-    | exact inferInstanceAs (Measure.IsHaarMeasure (μ : Measure (Formalism.REAL.UJ ε)))
-    | (unfold S7.UJ; assumption)
+  have hH : Measure.IsHaarMeasure (μ : Measure (S7.UJ ε)) := hμ
   have hI : Integrable (fun g : S7.UJ ε =>
       ‖⟪w, σ (S7.toM g) w⟫_ℂ‖ * ‖Matrix.toEuclideanCLM (𝕜 := ℂ) (S7.toM g)‖ ^ N) μ := by
     rcases Nat.eq_zero_or_pos (S7.q0 ε) with hq | hq
-    · first
-      | exact @integrable_opPow_of_compact _ _ hq _ hcont hle _ hN μ hH
-      | exact @integrable_opPow_of_compact _ _ hq _ hcont hle _ hN μ (by first | exact ‹_› | infer_instance)
-      | exact @integrable_opPow_of_compact _ _ hq _ hcont hle _ hN μ (by unfold S7.UJ at *; exact ‹_›)
+    · exact @integrable_opPow_of_compact _ _ hq _ hcont hle _ hN μ hH
     · have hq1 : 1 ≤ S7.q0 ε := hq
       obtain ⟨hstd, h8'⟩ := hthr hq1
       have hq1r : (1 : ℝ) ≤ S7.q0 ε := by exact_mod_cast hq1
@@ -48,26 +85,14 @@ theorem coefWeightedN {n : ℕ} (ε : Fin n → Bool) (lam : Fin n → ℝ) {H :
         le_mul_of_one_le_left hP0 hs1
       have h8 : 8 * (n : ℝ) * S7.q0 ε < h := by
         nlinarith [mul_nonneg hn0 hq0]
-      first
-      | exact @integrable_opPow_of_dec _ _ _ hcont hle _ hq1
-          (fun k X hX => coef_dec_of_isDS hDS hlam hgap hq1 h8 hstd hw k hX) _ hN h8' μ hH
-      | exact @integrable_opPow_of_dec _ _ _ hcont hle _ hq1
-          (fun k X hX => coef_dec_of_isDS hDS hlam hgap hq1 h8 hstd hw k hX) _ hN h8' μ (by exact ‹_›)
+      exact @integrable_opPow_of_dec _ _ _ hcont hle _ hq1
+        (fun k X hX => coef_dec_of_isDS hDS hlam hgap hq1 h8 hstd hw k hX) _ hN h8' μ hH
   refine lt_of_le_of_lt (le_of_eq ?_) hI.hasFiniteIntegral
   refine lintegral_congr fun g => ?_
   have hpos : 0 ≤ ‖Matrix.toEuclideanCLM (𝕜 := ℂ) (Formalism.MainNotions.S.uMat g)‖ ^ N :=
     Real.rpow_nonneg (norm_nonneg _) N
   show _ = ‖‖⟪w, σ (Formalism.MainNotions.S.uMat g) w⟫_ℂ‖ * ‖Matrix.toEuclideanCLM (𝕜 := ℂ) (Formalism.MainNotions.S.uMat g)‖ ^ N‖ₑ
-  rw [Real.enorm_eq_ofReal (mul_nonneg (norm_nonneg _) hpos), ENNReal.ofReal_mul (norm_nonneg _),
-    ofReal_norm_eq_enorm]
-
-def CoefWeightedG : Prop :=
-  ∀ (n : ℕ) (ε : Fin n → Bool) (lam : Fin n → ℝ) (H : Type) [NormedAddCommGroup H] [InnerProductSpace ℂ H]
-    [CompleteSpace H] (σ : Matrix (Fin n) (Fin n) ℂ → (H →L[ℂ] H)), Formalism.QuantumDeterminants.IsHCParam lam →
-    Formalism.MainNotions.S.IsDS ε lam σ → ∀ w : H, Formalism.MainNotions.S.IsLowUnit ε lam σ w → ∀ h : ℝ, Formalism.QuantumDeterminants.GapAtLeast ε lam h →
-    1000 * (n : ℝ) ^ 2 * ((Finset.univ.filter fun i => ε i = false).card : ℝ) < h → ∀ N : ℝ, 0 ≤ N →
-    N ≤ 4 * (n : ℝ) ^ 2 * Real.sqrt (2 * ((Finset.univ.filter fun i => ε i = false).card : ℝ)) →
-    ∫⁻ g : Formalism.REAL.UJ ε, ‖⟪w, σ (Formalism.MainNotions.S.uMat g) w⟫_ℂ‖ₑ *
-        ENNReal.ofReal (‖Matrix.toEuclideanCLM (𝕜 := ℂ) (Formalism.MainNotions.S.uMat g)‖ ^ N) ∂(Formalism.REAL.muG ε) < ⊤
+  rw [Real.eNorm_eq_ofReal (mul_nonneg (norm_nonneg _) hpos), ENNReal.ofReal_mul (norm_nonneg _),
+    ofReal_norm]
 
 end ReciprocityTheory.ChartRestriction.DS

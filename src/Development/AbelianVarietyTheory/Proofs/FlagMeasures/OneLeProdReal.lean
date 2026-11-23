@@ -1,8 +1,54 @@
-import Mathlib
-import Formalism.SharpRestriction.CuspSpanNormBounds.CongruenceAtSplitFrobeniusHolds
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsPartnerLift
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.IdxNOneMulAbsNorm
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.CountTermsGramClassOverSublatticeStatement
+module
+
+public import Formalism.SharpRestriction.CuspSpanNormBounds.CongruenceAtSplitFrobeniusHolds
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.CountTermsGramClassOverSublatticeStatement
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsPartnerLift
+import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsUniquePlace
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.IdxNOneMulAbsNorm
+import Development.AbelianVarietyTheory.Proofs.FlagMeasures.MemOfPerpPerp
+import Development.AbelianVarietyTheory.Proofs.FlagMeasures.StandardBaseFlagComplementIntegralLattice
+import Formalism.SharpRestriction.CuspSpanNormBounds.AbsoluteAmplitudeSecondOfSource
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.RowMinor
+
+@[expose] public section
 
 open NumberField Module IsDedekindDomain Formalism.BasicNotions Formalism.MainNotions Formalism.MainNotions.S Formalism.MainNotions.S.Lat
 open scoped Classical
@@ -81,12 +127,12 @@ theorem prod_Gz_le {b C B T T' : ℝ} (hb : 1 ≤ b) (hC : 0 ≤ C) (hr : 1 ≤ 
         max 1 (absDl D Z D.R.rS τ / b ^ (C * (D.R.m : ℝ) ^ 2))) ^ 2) :=
     calc ∏ τ, Gz D T T' Z τ ≤ |∏ τ, Gz D T T' Z τ| := le_abs_self _
       _ = ∏ τ, |Gz D T T' Z τ| := Finset.abs_prod _ _
-      _ ≤ _ := Finset.prod_le_prod (fun τ _ => abs_nonneg _) (fun τ _ => hpt τ)
+      _ ≤ _ := Finset.prod_le_prod₀ (fun τ _ => abs_nonneg _) (fun τ _ => hpt τ)
   rw [Finset.prod_mul_distrib, Finset.prod_const, Finset.card_univ, hcard, Finset.prod_pow] at hprod
   have hsz : ∏ τ, (max 1 (absDl D Z (D.R.rS + 1) τ / b ^ (C * (D.R.m : ℝ) ^ 2)) *
       max 1 (absDl D Z D.R.rS τ / b ^ (C * (D.R.m : ℝ) ^ 2))) ≤ sizeZ D b C Z := by
     unfold sizeZ
-    refine Finset.prod_le_prod (fun τ _ => mul_nonneg (zero_le_one.trans (hM1 _ _)) (zero_le_one.trans (hM1 _ _))) ?_
+    refine Finset.prod_le_prod₀ (fun τ _ => mul_nonneg (zero_le_one.trans (hM1 _ _)) (zero_le_one.trans (hM1 _ _))) ?_
     intro τ _
     have hmem1 : D.R.rS + 1 ∈ Finset.Icc 1 (D.R.rS + 1) := Finset.mem_Icc.2 ⟨by omega, le_rfl⟩
     have hmem2 : D.R.rS ∈ (Finset.Icc 1 (D.R.rS + 1)).erase (D.R.rS + 1) :=
@@ -302,9 +348,13 @@ theorem partners_le : ∀ Cg cb Cu cT CT C0 A : ℝ, ∃ C : ℝ, ∀ (D : D7) (
     rwa [sub_add_sub_cancel] at this
   have hPL0 : seen D (lf D F0) (Thp Λ (lf D F0) F') ≤ L0X D Λ (lf D F0) :=
     seen_le_L0X (lf D F0) (Hp Λ (lf D F0) F') hHle
+  have hfull : Submodule.IsFullLattice D.host.E Λ :=
+    { toIsLattice := hlat
+      span_eq_top := GlobalTheory.LoopC.Base.span_eq_top_of_unimodular
+        (hS D).hT (hS D).herm (hS D).nondeg hlat huni }
   have hrk : rkW D (seen D (lf D F0) (Thp Λ (lf D F0) F')) = D.R.k - 1 := by
     rw [← hrank]
-    exact rk_seen (lf D F0) hlat hW (Hp Λ (lf D F0) F') hHle hHX
+    exact rk_seen (lf D F0) hfull hW (Hp Λ (lf D F0) F') hHle hHX
   have hXle : Xplus (lf D F0) ≤ spanE (hS D) (UU Λ (lf D F0) F') := by
     show Xplus (lf D F0) ≤ UUE Λ (lf D F0) F'
     rw [hUUE]

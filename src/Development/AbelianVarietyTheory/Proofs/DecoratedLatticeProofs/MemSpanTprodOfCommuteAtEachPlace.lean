@@ -1,5 +1,59 @@
-import Mathlib
+module
+
+public import Mathlib.Basic.Complex.Basic
+public import Mathlib.LinearAlgebra.FiniteDimensional.Defs
+public import Mathlib.LinearAlgebra.PiTensorProduct.Dual
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.CoassocSimps
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
 import Development.AbelianVarietyTheory.Definitions.LatticeFrames.EvalAtOneExtremalMul
+import Formalism.LocalToGlobal.HermitianForms.IsLocBasis
+import Formalism.LocalToGlobal.KernelLattices.XiIndCClass
+import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
+
+@[expose] public section
 
 open MvPolynomial Formalism.BasicNotions Formalism.L2.Forms Formalism.L2.Ker GlobalTheory.KJInf MeasureTheory
 open scoped TensorProduct
@@ -73,12 +127,15 @@ theorem piTensorHomMap_eq_zero [∀ τ, FiniteDimensional ℂ (V τ)]
     intro t
     simp only [χ, LinearMap.coe_sum, Finset.sum_apply, LinearMap.comp_apply, LinearMap.coe_mk,
       AddHom.coe_mk, LinearMap.applyₗ_apply_apply]
+
     rw [← map_sum]
     congr 1
     apply LinearMap.ext
     intro v
     simp [Basis.coord_apply]
+
     simp_rw [← map_smul, ← map_sum, (b σ).sum_repr v]
+
   rw [hψ, MultilinearMap.map_sum, map_sum, LinearMap.sum_apply]
   apply Finset.sum_eq_zero
   intro J _
@@ -111,7 +168,7 @@ theorem mem_range_piTensorHomMap [∀ τ, FiniteDimensional ℂ (V τ)]
     obtain ⟨a₁, ha₁⟩ := h₁
     obtain ⟨a₂, ha₂⟩ := h₂
     refine ⟨a₁ + a₂, ?_⟩
-    rw [map_add, ha₁, ha₂]
+    rw [map_add (f := _), ha₁, ha₂]
     ext x
     simp
 
@@ -154,7 +211,7 @@ theorem prod_erase_update_self (ψ : ∀ σ, Module.Dual ℂ (M σ)) (t : ∀ σ
   intro σ hσ
   rw [Function.update_of_ne (Finset.ne_of_mem_erase hσ)]
 
-def sliceML (ψ : ∀ σ, Module.Dual ℂ (M σ)) (τ : ι) : MultilinearMap ℂ M (M τ) where
+def sliceML (ψ : ∀ σ, Module.Dual ℂ (M σ)) (τ : ι) : (∀ σ, M σ) →ₘₗ[ℂ] M τ where
   toFun t := (∏ σ ∈ Finset.univ.erase τ, ψ σ (t σ)) • t τ
   map_update_add' := by
     intro inst t i x y
@@ -168,6 +225,7 @@ def sliceML (ψ : ∀ σ, Module.Dual ℂ (M σ)) (τ : ι) : MultilinearMap ℂ
   map_update_smul' := by
     intro inst t i c x
     obtain rfl : inst = hdec := Subsingleton.elim _ _
+    simp only [RingHom.id_apply]
     by_cases h : i = τ
     · subst h
       simp only [prod_erase_update_self, Function.update_self, smul_comm _ c]
@@ -255,7 +313,7 @@ theorem piTensorHomMap_map_update (y : PiTensorProduct ℂ (fun σ => V σ →�
     rw [e1, e2]
     exact (PiTensorProduct.mapMultilinear ℂ V W).map_update_sub t τ _ _
   | add a b ha hb =>
-    simp only [map_add, ha, hb, LinearMap.add_comp, LinearMap.comp_add]
+    simp only [map_add (f := _), ha, hb, LinearMap.add_comp, LinearMap.comp_add]
     abel
 
 end GlobalTheory.PiTensorCommute
@@ -345,7 +403,7 @@ theorem mem_span_map_of_commute :
       rw [map_smul, map_smul, PiTensorProduct.map_tprod, PiTensorProduct.piTensorHomMap_tprod_eq_map]
       exact Submodule.smul_mem _ _ (Submodule.subset_span
         ⟨fun σ => π σ (t σ), fun τ p hp => (memH τ _).1 (hπmem τ _) p hp, rfl⟩)
-    | add a b ha hb => rw [map_add, map_add]; exact Submodule.add_mem _ ha hb
+    | add a b ha hb => rw [map_add (f := _), map_add (f := _)]; exact Submodule.add_mem _ ha hb
   rw [hy]
   exact key y
 

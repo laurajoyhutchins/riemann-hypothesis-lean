@@ -1,7 +1,55 @@
-import Mathlib
-import GroundTheory.GlobalFields.ComplexMultiplication.AnalyticAlgebraic
-import GroundTheory.ArithmeticGeometry.AbelianVarieties.KodairaNeron
-import GroundTheory.GlobalFields.ComplexMultiplication.JInvariantSurjective
+module
+
+public import GroundTheory.GlobalFields.ComplexMultiplication.AnalyticAlgebraic
+public import GroundTheory.ArithmeticGeometry.AbelianVarieties.KodairaNeron
+public import GroundTheory.GlobalFields.ComplexMultiplication.JInvariantSurjective
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
+abbrev periodLatticeEnd (L : PeriodPair) : Subring ℂ where
+  carrier := {a | ∀ z ∈ L.lattice, a * z ∈ L.lattice}
+  zero_mem' z _ := by rw [zero_mul]; exact zero_mem _
+  one_mem' z hz := by simpa only [one_mul] using hz
+  add_mem' ha hb z hz := by rw [add_mul]; exact add_mem (ha z hz) (hb z hz)
+  neg_mem' ha z hz := by rw [neg_mul]; exact neg_mem (ha z hz)
+  mul_mem' ha hb z hz := by rw [mul_assoc]; exact ha _ (hb z hz)
 
 open WeierstrassCurve WeierstrassCurve.Affine GroundTheory.Arith.Abelian
 
@@ -160,8 +208,8 @@ theorem homConst_homId : homConst E E (homId : isogEnd E) = 1 := by
   rw [algebraMap_homConst, map_one]
   exact invCoeff_invariantDifferential E
 
-variable (E) in
 
+variable (E) in
 def endConst : isogEnd E →+* F where
   toFun := homConst E E
   map_one' := homConst_homId
@@ -185,18 +233,17 @@ section Complex
 
 variable {E : WeierstrassCurve ℂ} [E.IsElliptic]
 
-theorem endConst_latticeEndEquiv (L : PeriodPair) (α : latticeEnd L) :
+theorem endConst_latticeEndEquiv (L : PeriodPair) (α : periodLatticeEnd L) :
     endConst (weierstrassCurve L) (latticeEndEquiv L α) = α :=
   homConst_latticeEndEquiv L α
 
 theorem range_endConst_weierstrassCurve (L : PeriodPair) :
-    (endConst (weierstrassCurve L)).range = latticeEnd L := by
+    (endConst (weierstrassCurve L)).range = periodLatticeEnd L := by
   ext z
   constructor
   · rintro ⟨f, rfl⟩
     obtain ⟨α, rfl⟩ := (latticeEndEquiv L).surjective f
-    rw [endConst_latticeEndEquiv]
-    exact α.2
+    exact (endConst_latticeEndEquiv L α).symm ▸ α.2
   · intro hz
     exact ⟨latticeEndEquiv L ⟨z, hz⟩, endConst_latticeEndEquiv L ⟨z, hz⟩⟩
 
@@ -212,7 +259,7 @@ theorem endConst_injective : Function.Injective (endConst E) := by
   rw [← hf, ← hg, hfg]
 
 theorem range_endConst {L : PeriodPair} {C : VariableChange ℂ} (hC : C • E = weierstrassCurve L) :
-    (endConst E).range = latticeEnd L := by
+    (endConst E).range = periodLatticeEnd L := by
   rw [← range_endConst_weierstrassCurve]
   ext z
   constructor

@@ -1,5 +1,43 @@
-import Mathlib
-import Formalism.LocalToGlobal.IndefiniteReal.LinksDefs
+module
+
+public import Formalism.LocalToGlobal.IndefiniteReal.LinksDefs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -149,7 +187,7 @@ def capX (L : Submodule (𝓞 D.host.E) Y.V) : Lat X :=
   Formalism.L2.Herm.crdLat X (L.comap (ι.restrictScalars (𝓞 D.host.E)))
 
 def IsBasePair (u : D.what₂.Word) (π : 𝓞 D.host.E) (L₀ : Lat X) (f₀ : Pl D.host.E → Fin X.rank → EAf D) : Prop :=
-  Submodule.IsLattice D.host.E L₀ ∧
+  Submodule.IsFullLattice D.host.E L₀ ∧
   (∀ (w : Pl D.host.E) (e : EAf D), IsPlIdem w e → (((D.mem u).A.T : ℕ) : 𝓞 D.host.E) ∉ w.asIdeal →
     ∀ y, InCmp e L₀ y ↔ InCmp e (Formalism.L2.Herm.dualL D.sp.cm X L₀) y) ∧
   ∀ (w : Pl D.host.E) (e : EAf D), IsPlIdem w e → π ∈ w.asIdeal →
@@ -217,18 +255,6 @@ def FrameSt (D : D7) : Prop :=
 def AdelicIsometries (D : D7) : Prop :=
   PlIdemSt D ∧ TransportSt D ∧ CorrectionSt D ∧ SplitGlueSt D ∧ ImageSt D ∧ RationalSt D ∧ StdIsomSt D ∧ RecordDecSt D ∧
     GluedSt D ∧ UngluedSt D ∧ LamNSt D ∧ FrameSt D
-
-example (h : AdelicIsometries D) :
-    (∀ j, ∃ β Λ, IsSDFrame (Yc D j) β Λ (D.host.g 0 * D.host.g 1)) ∧ (∃ β Λ, IsSDFrame D.sp.X' β Λ 1) ∧
-      (∀ i, ∃ β Λ, IsSDFrame (Vc D i) β Λ 1) ∧ ∀ i, ∃ β Λ, IsSDFrame (Wc D i) β Λ 1 :=
-  have hf := h.2.2.2.2.2.2.2.2.2.2.2.1
-  ⟨fun _ => hf _ _, hf _ _, fun _ => hf _ _, fun _ => hf _ _⟩
-
-example (V : HSp D) (L : Lat V) (S : Finset (Pl D.host.E)) {n : ℕ}
-    (be : Pl D.host.E → Matrix (Fin V.rank) (Fin n) (EAf D)) : IsTransport V V L L S be be 1 := by
-  refine ⟨⟨?_, fun a b => by simp⟩, fun a => by simp, fun w _ => by simp⟩
-  have : ((1 : Matrix (Fin V.rank) (Fin V.rank) (EAf D)).mulVec) = id := by funext a; simp
-  rw [this]; exact Function.bijective_id
 
 end GlobalTheory.IndefiniteRowSideFullHecke.FlatSpaceComponents
 

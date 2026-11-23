@@ -1,5 +1,45 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.PushInvertible
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.TwoWeightEqOneAddRoot
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -7,26 +47,6 @@ namespace GlobalTheory.IndefiniteRowSideFullHecke.SiegelFamilyZetaUnit
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor
-
-def cycloLocal (p M : ℕ) : Subring ℂ :=
-  Subring.closure ({x : ℂ | ∃ q : ℚ, ¬ p ∣ q.den ∧ x = (q : ℂ)} ∪ {zeta M})
-
-def zetaElt (p M : ℕ) : cycloLocal p M :=
-  ⟨zeta M, Subring.subset_closure (Or.inr rfl)⟩
-
-theorem zetaElt_isPrimitiveRoot (p : ℕ) {M : ℕ} (hM : M ≠ 0) : IsPrimitiveRoot (zetaElt p M) M := by
-  refine IsPrimitiveRoot.of_map_of_injective (f := (cycloLocal p M).subtype) ?_ Subtype.val_injective
-  simpa [zetaElt, ReciprocityTheory.ChartRestriction.G.Geo.Tor.zeta] using Complex.isPrimitiveRoot_exp M hM
-
-def zetaUnit (p : ℕ) {M : ℕ} (hM : M ≠ 0) : (cycloLocal p M)ˣ :=
-  Units.ofPowEqOne (zetaElt p M) M (zetaElt_isPrimitiveRoot p hM).pow_eq_one hM
-
-abbrev intRing (C : Type) [NormedField C] [IsUltrametricDist C] : ValuationSubring C :=
-  (NormedField.valuation (K := C)).valuationSubring
-
-theorem mem_intRing {C : Type} [NormedField C] [IsUltrametricDist C] (x : C) : x ∈ intRing C ↔ ‖x‖ ≤ 1 := by
-  simp [intRing, Valuation.mem_valuationSubring_iff]
-  exact ge_iff_le
 
 section Triple
 
@@ -42,20 +62,11 @@ def IsSymmetricPair (h : ℕ) (A : Over S) [GrpObj A] (P : LB (A ⊗ A).left) : 
     IsTrivial (P.pull (lift (𝟙 A) (1 : A ⟶ A)).left) ∧
     LBIso P (P.pull (lift (snd A A) (fst A A)).left)
 
-example (A : Over S) [GrpObj A] : (1 : A ⟶ A) = toUnit A ≫ η[A] := rfl
-
 def slice (A : Over S) (P : LB (A ⊗ A).left) {T : Over S} (x : T ⟶ A) : LB (T ⊗ A).left :=
   P.pull (lift (fst T A ≫ x) (snd T A)).left
 
 def IsPrincipal (A : Over S) [GrpObj A] (P : LB (A ⊗ A).left) : Prop :=
   Out.RelAmple A (diagPull A P) ∧ ∀ (T : Over S) (x : T ⟶ A), IsTrivial (slice A P x) → x = 1
-
-def DiagAmpleAlong (A : Over S) (P : LB (A ⊗ A).left) {S' : Scheme.{0}} (t : S' ⟶ S) : Prop :=
-  Out.RelAmple ((Over.pullback t).obj A) ((diagPull A P).pull (pullback.fst A.hom t))
-
-def IsPrincipalAlong (A : Over S) [GrpObj A] (P : LB (A ⊗ A).left) {S' : Scheme.{0}} (t : S' ⟶ S) : Prop :=
-  DiagAmpleAlong A P t ∧
-    ∀ (T : Scheme.{0}) (τ : T ⟶ S') (x : Over.mk (τ ≫ t) ⟶ A), IsTrivial (slice A P x) → x = 1
 
 abbrev Std (h M : ℕ) : Type := (Fin h → ZMod M) × (Fin h → ZMod M)
 
@@ -82,33 +93,5 @@ def IsPullbackTriple {h M : ℕ} {S' : Scheme.{0}} (A' : Over S') [GrpObj A'] (P
     ∀ a, (lv' a).left ≫ φ = f ≫ (lv a).left
 
 end Triple
-
-def IsSiegelFamily (h p : ℕ) {M : ℕ} (hM : M ≠ 0) (X : Scheme.{0}) (s : X ⟶ Sp (cycloLocal p M))
-    (A : Over X) [GrpObj A] (P : LB (A ⊗ A).left) (lv : Std h M → (𝟙_ (Over X) ⟶ A)) : Prop :=
-
-  SmoothOfRelativeDimension (h * (h + 1) / 2) s ∧ LocallyOfFiniteType s ∧ QuasiCompact s ∧
-
-  IsSymmetricPair h A P ∧ IsPrincipal A P ∧ IsLevel A lv ∧ IsSymplectic (zetaUnit p hM) s A P lv ∧
-
-  (∀ (C : Type) [NormedField C] [IsUltrametricDist C] [CompleteSpace C] [IsAlgClosed C] [CharZero C],
-    ‖(p : C)‖ < 1 →
-    ∀ (β : cycloLocal p M →+* intRing C)
-      (B : Over (Sp (intRing C))) [GrpObj B] (P' : LB (B ⊗ B).left)
-      (lv' : Std h M → (𝟙_ (Over (Sp (intRing C))) ⟶ B)),
-      IsSymmetricPair h B P' → IsLevel B lv' → IsSymplectic (zetaUnit p hM) (spMap β) B P' lv' →
-      IsPrincipalAlong B P' (spMap (intRing C).subtype) →
-      DiagAmpleAlong B P' (spMap (IsLocalRing.residue (intRing C))) →
-      ∃ y : Sp (intRing C) ⟶ X, y ≫ s = spMap β ∧ IsPullbackTriple B P' lv' A P lv y) ∧
-
-  (∀ (k : Type) [Field k] (x : Sp (DualNumber k) ⟶ X)
-      (B : Over (Sp (DualNumber k))) [GrpObj B] (P' : LB (B ⊗ B).left)
-      (lv' : Std h M → (𝟙_ (Over (Sp (DualNumber k))) ⟶ B)),
-      P'.IsLB → IsPullbackTriple B P' lv' A P lv x → IsPullbackTriple B P' lv' A P lv (constPt x) → x = constPt x)
-
-def SiegelFamilyExists : Prop :=
-  ∀ (h p n : ℕ), 1 ≤ h → p.Prime → n.Prime → Odd n → n ≠ p →
-    ∃ (M : ℕ) (hM : 3 ≤ M), (∃ j : ℕ, M = n ^ j) ∧
-      ∃ (X : Scheme.{0}) (s : X ⟶ Sp (cycloLocal p M)) (A : Over X) (_ : GrpObj A) (P : LB (A ⊗ A).left)
-        (lv : Std h M → (𝟙_ (Over X) ⟶ A)), IsSiegelFamily h p (M := M) (by omega) X s A P lv
 
 end GlobalTheory.IndefiniteRowSideFullHecke.SiegelFamilyZetaUnit

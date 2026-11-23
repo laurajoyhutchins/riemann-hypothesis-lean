@@ -1,10 +1,52 @@
-import Mathlib
-import Formalism.SharpRestriction.LevelLetterCocycles.UsedLocalConclusion
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.NotFullBot
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.WachLatticeSandwichAinf
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.FrobeniusIntegralityTensorAinfCoefficients
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.NBasisLoc
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.WachInclusionXQFrobenius
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.NotFullBot
+public import Formalism.SharpRestriction.LevelLetterCocycles.DeltaInvariantLattices
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.FrobeniusIntegralityTensorAinfCoefficients
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.NBasisLoc
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.WachInclusionXQFrobenius
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.WachLatticeSandwichAinf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+public import Mathlib.RingTheory.TensorProduct.IsBaseChangeFree
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Formalism.WeaklyAdmissibleFiltrations Formalism.BasicNotions Formalism.BasicNotions.Loc TensorProduct GlobalTheory.NL Formalism.MainNotions.DeltaInvariantLattices Module
 
@@ -51,6 +93,7 @@ theorem basis_of_free (T : LocLat G Qp LL O) (S : Submodule (LetA O n) (W.DD T))
   · rw [Fintype.linearIndependent_iff]
     intro g hg
     have h1 := congrArg S.subtype hg
+
     rw [map_sum, map_zero] at h1
     have h2 : g = 0 := (hu 0 S.zero_mem).unique h1.symm (by simp)
     intro i; rw [h2]; rfl
@@ -59,6 +102,7 @@ theorem basis_of_free (T : LocLat G Qp LL O) (S : Submodule (LetA O n) (W.DD T))
     rw [Submodule.mem_span_range_iff_exists_fun]
     refine ⟨a, Subtype.ext ?_⟩
     change S.subtype _ = _
+
     rw [map_sum]
     exact ha.symm
 
@@ -95,6 +139,7 @@ theorem sand_of
     intro y hy
     refine ⟨fun j => b.repr ⟨y, hy⟩ j, ?_⟩
     have := congrArg S.subtype (b.sum_repr ⟨y, hy⟩)
+
     rw [map_sum] at this
     exact this.symm
   have hexpE : ∀ y : W.DD T, ∃ c : Fin (Module.finrank O ↥T.L.T) → W.EE,
@@ -108,12 +153,14 @@ theorem sand_of
       (w : Fin (Module.finrank O ↥T.L.T) → W.DD T),
       E.jD T (∑ j, c j • w j) = ∑ j, inclR (E.io (c j)) • E.jD T (w j) := by
     intro c w
+
     rw [map_sum]
     exact Finset.sum_congr rfl fun j _ => jD_smulA E T _ _
   have hjE : ∀ (c : Fin (Module.finrank O ↥T.L.T) → W.EE)
       (w : Fin (Module.finrank O ↥T.L.T) → W.DD T),
       E.jD T (∑ j, c j • w j) = ∑ j, E.ioE (c j) • E.jD T (w j) := by
     intro c w
+
     rw [map_sum]
     exact Finset.sum_congr rfl fun j _ => E.jD_smul T _ _
   have hsp : ⊤ ≤ Submodule.span RW (Set.range fun i => E.jD T (b i : W.DD T)) := by
@@ -158,6 +205,7 @@ theorem sand_of
         refine Submodule.span_le.mpr ?_
         rintro _ ⟨z, hz, rfl⟩
         obtain ⟨c, rfl⟩ := hexp z hz
+
         rw [map_sum]
         refine Submodule.sum_mem _ fun j _ => ?_
         rw [φD_smulA]
@@ -185,6 +233,7 @@ theorem sand_of
         intro a k
         simp [ta, TWincl, Algebra.TensorProduct.basis_apply, TensorProduct.smul_tmul']
       conv_lhs => rw [← ta.sum_repr w]
+
       simp only [map_sum, hk, Finset.smul_sum, Finset.sum_smul, map_mul]
       rw [Finset.sum_comm]
       refine Finset.sum_congr rfl fun k _ => ?_
@@ -230,7 +279,7 @@ theorem compare
 
 end Generic
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem main : ∀ (D : Formalism.BasicNotions.D7) (HW : HWOf D.loc) (F : FonOf D.loc D.locA HW) (l : ℕ) [Fact l.Prime] (K : FinExt l) (s : ℕ) (LL : FinExt l) (h : Good K s LL), let W := (HW l).W K s LL h; let E := ((F l).E K s LL h).tie; ∀ T : Lt K LL, IsCrys ((D.loc l).PD K) T.ρ → ∀ N₁ : Submodule (AA K LL) (W.DD T), FreeA W T N₁ → IsBaseChange W.EE N₁.subtype → (∀ x ∈ N₁, ∃ k : ℕ, W.Q ^ k • W.φD T x ∈ N₁) → (∀ y ∈ N₁, ∃ k : ℕ, W.Q ^ k • y ∈ φspan W T N₁) → ∃ a : ℕ, (∀ x ∈ N₁, W.X ^ a • x ∈ W.N T) ∧ ∀ x ∈ W.N T, W.X ^ a • x ∈ N₁ := by
   intro D HW F l _ K s LL h

@@ -1,7 +1,50 @@
-import Mathlib
-import GroundTheory.GlobalFields.SUnits
-import GroundTheory.GlobalFields.SemilocalAlgebras.Galois
-import GroundTheory.GlobalFields.HerbrandQuotients.SUnitsPerm
+module
+
+public import GroundTheory.GlobalFields.HerbrandQuotients.SUnitsPerm
+public import GroundTheory.GlobalFields.SUnitsKernel
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Mathlib.NumberTheory.NumberField.Units.Basic
+
+@[expose] public section
 
 namespace GroundTheory.Global
 
@@ -20,7 +63,6 @@ def unitsMap (g : L ≃ₐ[K] L) : (𝓞 L)ˣ →* (𝓞 L)ˣ :=
   Units.map (MulSemiringAction.toRingHom (L ≃ₐ[K] L) (𝓞 L) g : 𝓞 L →* 𝓞 L)
 
 variable (K L) in
-
 def unitsRep : Representation ℤ (L ≃ₐ[K] L) (Additive (𝓞 L)ˣ) where
   toFun g := (unitsMap g).toAdditive.toIntLinearMap
   map_one' := by
@@ -98,10 +140,10 @@ theorem ofUnits_unitsRep (hS : ∀ (g : L ≃ₐ[K] L), ∀ w ∈ S, g • w ∈
 
 theorem valuationVector_sUnitRep (hS : ∀ (g : L ≃ₐ[K] L), ∀ w ∈ S, g • w ∈ S)
     (g : L ≃ₐ[K] L) (x : Additive (S.unit L)) :
-    letI := stableMulAction S hS
+    letI _ := stableMulAction S hS
     SUnit.valuationVector S (sUnitRep S hS g x) =
       funPermRep ℤ (L ≃ₐ[K] L) S g (SUnit.valuationVector S x) := by
-  let := stableMulAction S hS
+  let _ := stableMulAction S hS
   funext w
   rw [funPermRep_apply, ← ofMul_toMul x, sUnitRep_apply, toMul_ofMul,
     SUnit.valuationVector_apply, SUnit.valuationVector_apply]

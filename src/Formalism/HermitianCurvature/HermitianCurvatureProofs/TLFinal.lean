@@ -1,19 +1,70 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.TLChoiceChk
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.MinusId
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.LetterLiftOfParts
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.MatrixUnitZeroZeroEqInsert
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.IdentityOperator
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.BigCellValues
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.LiftClosedUnderOperations
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.ActualAlgebraFacts
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.LiftCapelliOperators
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.LiftZeroOrder
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.LiftOfFunctions
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.LiftOfXOfParts
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.InvMulVecOfFixedVector
+module
+
+public import Formalism.HermitianCurvature.StatementTL
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.ActualAlgebraFacts
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.AdmissibleRecOfAdmissibleWord
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.BasicLift
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.BigCellValues
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CapelliVectorEquivariance
 import Formalism.HermitianCurvature.HermitianCurvatureProofs.CapelliVectorFrame
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CapelliVectorEquivariance
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.XFibreOfParts
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.IdentityOperator
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.Interlace
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.InterlaceSignTwo
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.InvMulVecOfFixedVector
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.LetterLiftOfParts
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.LiftCapelliOperators
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.LiftClosedUnderOperations
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.LiftOfFunctions
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.LiftOfXOfParts
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.LiftZeroOrder
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.MatrixUnitZeroZeroEqInsert
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.MinusId
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.ModelWordsAssemble
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.TLChoiceChk
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.XFibreOfParts
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace Formalism.FourierDecayAlt.P
 
@@ -21,7 +72,7 @@ theorem lift_of_x : Formalism.FourierDecayAlt.TL.LiftX :=
   lift_of_x_of_parts lift_zero_order lift_closed_under_operations
     (x_fibre_of_parts big_cell_values omega_polynomial_facts capelli_vector_frame capelli_vector_equivariance)
 
-set_option maxHeartbeats 400000 in
+
 
 theorem top_lift_exists : Formalism.FourierDecayAlt.TL.TopLiftExists3 := by
   classical
@@ -120,7 +171,8 @@ theorem top_lift_exists : Formalism.FourierDecayAlt.TL.TopLiftExists3 := by
         simp [D.positionted, Fr.ofWord, P5.bTall, P5.bTl, Wd.bT, Fr.Start.frame]
       have he : e = Wd.e1 := funext fun i => (Nat.not_lt_zero _ i.2).elim
       rw [h1, he]
-      simpa using hΦ
+      change Top.IsRadOf P Bs Φ F
+      exact hΦ
     · rw [if_neg hne]
       obtain ⟨nf, fib, -, -, hR⟩ := hDw w e hw
       exact hR F hFc Φ hΦ

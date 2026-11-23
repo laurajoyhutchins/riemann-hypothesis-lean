@@ -1,5 +1,43 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.LeviSmoothLocalization.WinUpDown
-import PositivityTheory.AutomorphicForms.PublishedInputs.CuspidalContinuity.ArchimedeanCuspidal.CyclicCharacterEigen.ToIdeleSq
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.LeviSmoothLocalization.WinUpDown
+import Formalism.DoubleCosetMeasures.Statement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import PositivityTheory.AutomorphicForms.PublishedInputs.CuspidalContinuity.ArchimedeanCuspidal.CyclicCharacterEigen.ToIdeleSq
+
+@[expose] public section
 
 noncomputable section
 
@@ -26,20 +64,5 @@ def Ram3 (ν c : kˣ →* ℂˣ) : Prop := ¬ IsUnram (ν * c) ∧ ¬ IsUnram c 
 end Loc
 
 def tri (a x : ℂˣ) : Multiset ℂ := (({a * x, x, a⁻¹ * x} : Multiset ℂˣ)).map fun b : ℂˣ => (b : ℂ)
-
-def par (D : Ad3.Dat) (χ : HChar ℚ) (p : Ad3.Pl) : Multiset ℂ := tri (D.ν p (unif (p.adicCompletion ℚ))) (χ.val p)
-
-def arch (k : ℕ) (s : ℂ) : ℂ := Ad3.lR k true s * Ad3.lR k false s
-
-structure EtaOK (K : Type) [Field K] [NumberField K] (η : HeckeCharacter ℚ) : Prop where
-  fin : IsOfFinOrder η
-  sgn : ∀ w : InfinitePlace ℚ, ((η.infiniteComponent w (-1) : Circle) : ℂ) = -1
-  ae : ∀ᶠ v : HeightOneSpectrum (𝓞 ℚ) in Filter.cofinite, (toH η).UnrAt v ∧ ∀ w : PlacesOver K v,
-    IsPrimitiveRoot ((toH η).val v) (fdeg w) ∧ Fintype.card (PlacesOver K v) * fdeg w = 2
-  loc : ∀ (v : HeightOneSpectrum (𝓞 ℚ)) (w : PlacesOver K v), ((toH η).loc v).comp (nm w) = 1 ∧
-    (∀ (w' : PlacesOver K v) (θ : (v.adicCompletion ℚ)ˣ →* ℂˣ), IsUnram (θ.comp (nm w)) → IsUnram (θ.comp (nm w'))) ∧
-    ∀ θ : (v.adicCompletion ℚ)ˣ →* ℂˣ, IsSmoothChar θ → IsSmoothChar (θ.comp (nm w)) ∧ (IsUnram θ → IsUnram (θ.comp (nm w))) ∧
-      (IsUnram (θ.comp (nm w)) → ((Finset.range 2).filter fun j => IsUnram (θ * ((toH η) ^ j).loc v)).card =
-        ∑ w' : PlacesOver K v, fdeg w')
 
 end UpperTheory.V.Z.ImaginaryQuadraticEtaCharacter.Ad

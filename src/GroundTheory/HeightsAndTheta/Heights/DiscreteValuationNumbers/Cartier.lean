@@ -1,5 +1,50 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.Objects
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.Objects
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.NumbersDVR
@@ -90,13 +135,13 @@ theorem divCycle_eq_of_mul_sub_mem {P : Ideal (MRing ι R)} {f g u v : MRing ι 
   by_cases hf : W ∈ (P ⊔ Ideal.span {f}).minimalPrimes ∧ IsRelevant W
   · have hg : W ∈ (P ⊔ Ideal.span {g}).minimalPrimes ∧ IsRelevant W :=
       ⟨mem_minimalPrimes_of_mul_mem hu hv h1 h2 hf.1, hf.2⟩
-    rw [dif_pos hf, dif_pos hg]
+    rw [dite_eq_left hf, dite_eq_left hg]
     have : W.IsPrime := hf.1.1.1
     unfold multAt
     rw [length_localized_eq_of_mul_mem hu hv h1 h2]
   · have hg : ¬ (W ∈ (P ⊔ Ideal.span {g}).minimalPrimes ∧ IsRelevant W) := fun hg =>
       hf ⟨mem_minimalPrimes_of_mul_mem hv hu h2 h1 hg.1, hg.2⟩
-    rw [dif_neg hf, dif_neg hg]
+    rw [dite_eq_right hf, dite_eq_right hg]
 
 theorem le_and_isRelevant_of_divCycle_ne_zero {P : Ideal (MRing ι R)} {f : MRing ι R}
     {W : Ideal (MRing ι R)} (h : divCycle P f W ≠ 0) : W.IsPrime ∧ P ≤ W ∧ IsRelevant W := by
@@ -112,8 +157,8 @@ section Vertical
 variable {K : Type*} [DecidableEq K] {ι : K → Type*}
 variable {O : Type*} [CommRing O] [IsDomain O] [IsDiscreteValuationRing O]
 
-omit [IsDomain O] [IsDiscreteValuationRing O] in
 
+omit [IsDomain O] [IsDiscreteValuationRing O] in
 theorem IsVerticalDivisor.of_unit_off_special {P : Ideal (MRing ι O)} {ϖ : O} {b : K → ℤ}
     {f g : MRing ι O}
     (degrees : ∃ bf bg : K → ℕ, IsMultiHomog f bf ∧ IsMultiHomog g bg ∧
@@ -121,24 +166,20 @@ theorem IsVerticalDivisor.of_unit_off_special {P : Ideal (MRing ι O)} {ϖ : O} 
     (hf : f ∉ P) (hg : g ∉ P)
     (hunit : ∀ W : Ideal (MRing ι O), W.IsPrime → P ≤ W → IsRelevant W →
       (C ϖ : MRing ι O) ∉ W → ∃ u v : MRing ι O, u ∉ W ∧ v ∉ W ∧ u * f - v * g ∈ P) :
-    IsVerticalDivisor P ϖ b f g where
-  degrees := degrees
-  num_not_mem := hf
-  den_not_mem := hg
-  unit_off_special := hunit
-  vertical := by
-    intro W hW
-    by_contra hϖ
-    have hsupp : W.IsPrime ∧ P ≤ W ∧ IsRelevant W := by
-      by_cases h1 : divCycle P f W = 0
-      · have h2 : divCycle P g W ≠ 0 := by
-          intro h2; apply hW; unfold ratDiv; rw [h1, h2, sub_zero]
-        exact le_and_isRelevant_of_divCycle_ne_zero h2
-      · exact le_and_isRelevant_of_divCycle_ne_zero h1
-    obtain ⟨u, v, hu, hv, h⟩ := hunit W hsupp.1 hsupp.2.1 hsupp.2.2 hϖ
-    apply hW
-    unfold ratDiv
-    rw [divCycle_eq_of_mul_sub_mem hu hv h, sub_self]
+    IsVerticalDivisor P ϖ b f g := by
+  refine ⟨degrees, hf, hg, ?_, hunit⟩
+  intro W hW
+  by_contra hϖ
+  have hsupp : W.IsPrime ∧ P ≤ W ∧ IsRelevant W := by
+    by_cases h1 : divCycle P f W = 0
+    · have h2 : divCycle P g W ≠ 0 := by
+        intro h2; apply hW; unfold ratDiv; rw [h1, h2, sub_zero]
+      exact le_and_isRelevant_of_divCycle_ne_zero h2
+    · exact le_and_isRelevant_of_divCycle_ne_zero h1
+  obtain ⟨u, v, hu, hv, h⟩ := hunit W hsupp.1 hsupp.2.1 hsupp.2.2 hϖ
+  apply hW
+  unfold ratDiv
+  rw [divCycle_eq_of_mul_sub_mem hu hv h, sub_self]
 
 end Vertical
 
@@ -152,15 +193,6 @@ section BlowUp
 
 variable {O : Type*} [CommRing O]
 
-abbrev TwoByTwo : Fin 2 → Type := fun _ => Fin 2
-
-def blowUpParam (ϖ : O) : (Σ k : Fin 2, TwoByTwo k) → MvPolynomial (Fin 4) O :=
-  fun v => ![![C ϖ * X 0 * X 2, X 1 * X 2], ![X 0 * X 3, X 1 * X 3]] v.1 v.2
-
-def blowUpWeight : Fin 4 → Fin 2 → ℕ := ![0, 0, Pi.single 0 1, Pi.single 1 1]
-
-def blowUpIdeal (ϖ : O) : Ideal (MRing TwoByTwo O) := RingHom.ker (aeval (blowUpParam ϖ))
-
 end BlowUp
 
 section BlowUpModel
@@ -172,19 +204,6 @@ end BlowUpModel
 section Nodal
 
 variable {O : Type*} [CommRing O] [IsDomain O]
-
-abbrev TwoByThree : Fin 2 → Type := fun _ => Fin 3
-
-def nodalParam (ϖ : O) : (Σ k : Fin 2, TwoByThree k) → MvPolynomial (Fin 3) O :=
-  fun v => ![![X 1 * X 0, X 1 * X 0 ^ 2, X 1 * (1 - C ϖ * X 0 ^ 3)],
-    ![X 2 * (C ϖ * X 0 ^ 2), X 2 * X 0, X 2 * (C ϖ ^ 2 * X 0 ^ 3 - 1)]] v.1 v.2
-
-def nodalWeight : Fin 3 → Fin 2 → ℕ := ![0, Pi.single 0 1, Pi.single 1 1]
-
-def nodalIdeal (ϖ : O) : Ideal (MRing TwoByThree O) := RingHom.ker (aeval (nodalParam ϖ))
-
-def nodeParam : (Σ k : Fin 2, TwoByThree k) → MvPolynomial (Fin 3) O :=
-  fun v => ![![0, 0, X 1], ![0, 0, -X 2]] v.1 v.2
 
 end Nodal
 

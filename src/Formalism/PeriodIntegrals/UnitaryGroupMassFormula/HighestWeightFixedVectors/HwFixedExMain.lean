@@ -1,5 +1,54 @@
-import Formalism.PeriodIntegrals.HwFixedLine
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.HighestWeightFixedVectors.MonomialMemGe
+module
+
+public import Formalism.PeriodIntegrals.HwFixedLine
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.HighestWeightFixedVectors.MonomialMemGe
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Formalism.LocalRingCardinality.Params
+
+@[expose] public section
 
 noncomputable section
 
@@ -38,7 +87,7 @@ theorem detTwK_uni {ι : Type} [Fintype ι] {n : ℕ} (lam : ι → DomWeight n)
   have hd : Matrix.GeneralLinearGroup.det (g τ) = 1 := by
     ext
     rw [Matrix.GeneralLinearGroup.val_det_apply,
-      Matrix.det_of_upperTriangular (fun i j hij => (hg τ).1 i j hij)]
+      Matrix.det_of_isUpperTriangular (fun i j hij => (hg τ).1 i j hij)]
     simp [(hg τ).2]
   rw [hd, _root_.one_zpow, Units.val_one]
 
@@ -48,10 +97,10 @@ theorem uni_X {ι : Type} [Fintype ι] {n : ℕ} (g : ι → GL (Fin n) ℂ) (hg
   have hX : ∀ u : ι × Fin n × Fin n, wt ι n (τ, a, c) + 1 ≤ wt ι n u →
       (X u : MvPolynomial (ι × Fin n × Fin n) ℂ) ∈ Ge (wt ι n) (wt ι n (τ, a, c) + 1) := by
     intro u hu
-    show ∀ m, Finsupp.weight (wt ι n) m < _ → coeff m (X u) = 0
+    show ∀ m, Finsupp.weight (wt ι n) m < _ → AddMonoidAlgebra.coeff (X u) m = 0
     intro m hm
     classical
-    rw [MvPolynomial.coeff_X', if_neg]
+    rw [MvPolynomial.coeff_X, if_neg]
     rintro rfl
     simp [Finsupp.weight_apply, Finsupp.sum_single_index] at hm
     omega
@@ -80,7 +129,7 @@ theorem vv_bound {ι : Type} [Fintype ι] {n : ℕ} (lam : ι → DomWeight n) :
   | mem x hx =>
     obtain ⟨i, rfl⟩ := hx
     ext m
-    rw [coeff_weightedHomogeneousComponent, coeff_zero]
+    rw [coeff_weightedHomogeneousComponent, AddMonoidAlgebra.coeff_zero, Finsupp.zero_apply]
     split_ifs with h
     · by_contra hc
       have h1 := Finset.le_sup (f := Finsupp.weight (wt ι n)) (mem_support_iff.mpr hc)
@@ -89,7 +138,7 @@ theorem vv_bound {ι : Type} [Fintype ι] {n : ℕ} (lam : ι → DomWeight n) :
       omega
     · rfl
   | zero => simp
-  | add x y _ _ hx hy => rw [map_add, hx, hy, add_zero]
+  | add x y _ _ hx hy => rw [map_add (f := _), hx, hy, add_zero]
   | smul a x _ hx => rw [map_smul, hx, smul_zero]
 
 theorem hwFixedEx_main : HwFixedEx := by
@@ -122,7 +171,7 @@ theorem hwFixedEx_main : HwFixedEx := by
         (fun m hm => Nat.lt_succ_of_le (Finset.le_sup hm))] at h
     · have h0 : weightedHomogeneousComponent w k F = 0 := by
         ext m
-        rw [coeff_weightedHomogeneousComponent, coeff_zero]
+        rw [coeff_weightedHomogeneousComponent, AddMonoidAlgebra.coeff_zero, Finsupp.zero_apply]
         split_ifs with h
         · by_contra hc
           have := Finset.le_sup (f := Finsupp.weight w) (mem_support_iff.mpr hc)
@@ -137,8 +186,8 @@ theorem hwFixedEx_main : HwFixedEx := by
   have hxS' : (x : Pol ℂ ι n) ∈ S' := Submodule.mem_map.mpr ⟨x, hxS, rfl⟩
   have hgood0 : good (Finsupp.weight w m0) := by
     refine ⟨x, hxS', fun h => hm0 ?_⟩
-    have := congrArg (coeff m0) h
-    rwa [coeff_weightedHomogeneousComponent, if_pos rfl, coeff_zero] at this
+    have := congrArg (AddMonoidAlgebra.coeff · m0) h
+    rwa [coeff_weightedHomogeneousComponent, if_pos rfl, AddMonoidAlgebra.coeff_zero, Finsupp.zero_apply] at this
   have hbound : ∀ k, good k → k ≤ D := by
     rintro k ⟨G, hG, hne⟩
     by_contra h
@@ -170,10 +219,10 @@ theorem hwFixedEx_main : HwFixedEx := by
       rwa [actP, LinearMap.smul_apply, detTwK_uni lam g hg, one_smul, AlgHom.toLinearMap_apply] at this
     rw [← sub_eq_zero]
     ext m
-    rw [coeff_zero]
+    rw [AddMonoidAlgebra.coeff_zero, Finsupp.zero_apply]
     by_cases hm : Finsupp.weight w m < Nat.findGreatest good D + 1
     · exact mem_Ge.1 hd m hm
-    · have := congrArg (coeff m) (hmax (Finsupp.weight w m) (by omega) _ hd')
-      rwa [coeff_weightedHomogeneousComponent, if_pos rfl, coeff_zero] at this
+    · have := congrArg (AddMonoidAlgebra.coeff · m) (hmax (Finsupp.weight w m) (by omega) _ hd')
+      rwa [coeff_weightedHomogeneousComponent, if_pos rfl, AddMonoidAlgebra.coeff_zero, Finsupp.zero_apply] at this
 
 end PI.HwFix.UnitaryGroupMassFormula

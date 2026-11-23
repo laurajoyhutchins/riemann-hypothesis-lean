@@ -1,12 +1,60 @@
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsSncModel
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.BlowupProjections.BlowupProjStatement
-import Development.AutomorphicSpectrum.Definitions.DivisibilityTowers.Proportional
-import Development.WeilBound.CoreStatements.HomogeneousNonvanishing.IsOpenHoloPreimage
-import Development.WeilBound.CoreStatements.HomogeneousNonvanishing.RSnc
-import Development.WeilBound.CoreStatements.HomogeneousNonvanishing.REnlarge
-import Development.WeilBound.CoreStatements.HomogeneousNonvanishing.FderivAffCoordZero
-import ReciprocityTheory.AnalyticForms.PotentialTheory.ContDiffAtOfIsPotential
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.SingularWeightMonotoneRegularizationStatement
+module
+
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.ConjugateHermitianLineIsometries
+public import Development.AutomorphicSpectrum.Definitions.MetricPeriods.IsTwiceDifferentiableAt
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterRes
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.SingularWeightMonotoneRegularizationStatement
+public import Development.WeilBound.CoreStatements.HomogeneousNonvanishing.ContinuousAtOfClosedRel
+public import Development.WeilBound.CoreStatements.HomogeneousNonvanishing.FderivAffCoordZero
+public import Development.WeilBound.CoreStatements.HomogeneousNonvanishing.IsOpenHoloPreimage
+public import Development.WeilBound.CoreStatements.HomogeneousNonvanishing.REnlarge
+public import Development.WeilBound.CoreStatements.HomogeneousNonvanishing.RSnc
+import Development.WeilBound.CoreStatements.HomogeneousNonvanishing.SmoothContinuousAt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.AnalyticForms.PotentialTheory.ContDiffAtOfIsPotential
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterRedB
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterRedC
+
+@[expose] public section
+
 open MvPolynomial ReciprocityTheory.ChartRestriction.G.Geo ReciprocityTheory.ChartRestriction.G.AI.I2 ReciprocityTheory.ChartRestriction.G.AI.I4 ReciprocityTheory.AnForm.M ReciprocityTheory.AnForm.P GlobalTheory.CompanionTheory.Ar.Cmp GlobalTheory.CompanionTheory.Ar.PB Filter Topology
 open ReciprocityTheory.ChartRestriction.G.AI.I1 (IsBlockMap pullDeg)
 
@@ -74,13 +122,13 @@ theorem exists_scale [CompactSpace X] {A : FinHolAtlas e X} {L : LocPot X} {s : 
 
 theorem exists_line {K : Type} [Fintype K] {ι : K → Type} [∀ k, Fintype (ι k)] (b : K → ℤ) :
     ∃ L : HermLine ι, IsSmoothHerm L ∧ L.a = b := by
-  refine ⟨HermLine.ofMetrics (fun k => fsMetric (ι k)) b, ?_, rfl⟩
-  change ContDiffOn ℝ _ (fun z => ∏ k, (fsMetric (ι k)).ρ (GP.blk (ι := ι) k z) ^ b k) _
+  refine ⟨HermLine.ofMetrics (fun k => fsMetric (ι := ι k)) b, ?_, rfl⟩
+  change ContDiffOn ℝ _ (fun z => ∏ k, (fsMetric (ι := ι k)).ρ (GP.blk (ι := ι) k z) ^ b k) _
   refine contDiffOn_prod fun k _ z hz => ContDiffAt.contDiffWithinAt ?_
-  have h1 : ContDiffAt ℝ ((⊤ : ℕ∞) : WithTop ℕ∞) (fun z => (fsMetric (ι k)).ρ (GP.blk (ι := ι) k z)) z :=
-    ContDiffAt.comp (g := (fsMetric (ι k)).ρ) z (GP.contDiffAt_fs (GP.blk_ne hz k))
+  have h1 : ContDiffAt ℝ ((⊤ : ℕ∞) : WithTop ℕ∞) (fun z => (fsMetric (ι := ι k)).ρ (GP.blk (ι := ι) k z)) z :=
+    ContDiffAt.comp (g := (fsMetric (ι := ι k)).ρ) z (GP.contDiffAt_fs (GP.blk_ne hz k))
       ((GP.blk (ι := ι) k).contDiff.restrict_scalars ℝ).contDiffAt
-  have h2 := ((fsMetric (ι k)).pos _ (GP.blk_ne hz k)).ne'
+  have h2 := ((fsMetric (ι := ι k)).pos _ (GP.blk_ne hz k)).ne'
   rcases b k with n | n
   · simpa using h1.pow n
   · simp only [zpow_negSucc]

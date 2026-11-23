@@ -1,4 +1,72 @@
-import Mathlib
+module
+
+public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Basic
+public import Mathlib.LinearAlgebra.QuadraticForm.Radical
+public import Mathlib.LinearAlgebra.SymplecticGroup
+public import Mathlib.NumberTheory.LegendreSymbol.ZModChar
+public import Mathlib.Topology.Instances.AddCircle.Defs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Analysis.SpecialFunctions.Complex.Log
+public import Mathlib.FieldTheory.IsAlgClosed.Basic
+public import Mathlib.LinearAlgebra.FreeModule.Finite.CardQuotient
+public import Mathlib.LinearAlgebra.Trace
+
+@[expose] public section
 
 open Finset Matrix
 
@@ -100,20 +168,24 @@ theorem sq_sum_bicharacter (hodd : Odd (Fintype.card A)) (B : A → AddChar A �
   let P : Matrix A A ℂ := Matrix.of fun x y => if x + y = 0 then 1 else 0
   have hFF : F * F = (Fintype.card A : ℂ) • P := by
     ext x z
-    simp only [F, P, mul_apply, of_apply, Matrix.smul_apply, smul_eq_mul, mul_ite, mul_one, mul_zero]
+    rw [Matrix.mul_apply]
+    simp only [F, P, of_apply, Matrix.smul_apply, smul_eq_mul, mul_ite, mul_one, mul_zero]
     rw [← hsum]
     refine sum_congr rfl fun y _ => ?_
     rw [hsymm x y, hsymm (x + z) y, AddChar.map_add_eq_mul]
   have hPP : P * P = 1 := by
     ext x z
-    simp only [P, mul_apply, of_apply, one_apply, add_eq_zero_iff_neg_eq, ite_mul, one_mul, zero_mul,
+    rw [Matrix.mul_apply, Matrix.one_apply]
+    simp only [P, of_apply, add_eq_zero_iff_neg_eq, ite_mul, one_mul, zero_mul,
       sum_ite_eq, mem_univ, if_true, neg_neg]
   have hP : P.trace = 1 := by
     have : ∀ x : A, x + x = 0 ↔ x = 0 := fun x =>
       ⟨eq_zero_of_add_self_eq_zero_of_odd_card hodd, fun h => by simp [h]⟩
     simp [P, trace, this]
   have hPF : (P * F).trace = ∑ x, B (-x) x := by
-    simp [P, F, trace, mul_apply, add_eq_zero_iff_neg_eq]
+    change (∑ x, (P * F) x x) = _
+    simp_rw [Matrix.mul_apply]
+    simp [P, F, add_eq_zero_iff_neg_eq]
   have hF : F.trace = ∑ x, B x x := by simp [F, trace]
   have hprod : F.trace * (P * F).trace = Fintype.card A := by
     rw [hF, hPF, sum_mul_sum, ← Fintype.sum_prod_type']
@@ -327,7 +399,7 @@ theorem ratCircleChar_pairQuadraticForm_mk (hd : d.det ≠ 0) (hs : (dᵀ * b).I
       Matrix.map_one _ (map_zero _) (map_one _)]
   rw [pairQuadraticForm_mk, ratCircleChar_coe, hinv]
   congr 1
-  simp only [dotProduct, mulVec, mul_apply, map_apply, Rat.coe_castHom]
+  simp only [dotProduct, mulVec, Matrix.mul_apply, map_apply, Rat.coe_castHom]
   push_cast
   ring
 
@@ -397,12 +469,12 @@ theorem sq_sum_pairQuadraticForm (hodd : Odd d.det) (hs : (dᵀ * b).IsSymm)
     (pairQuadraticForm_nondegenerate hd hs he hc), hcard]
   rw [← Int.cast_natCast (R := ℂ), ← Int.cast_mul, chi_four_natAbs_mul, Int.cast_mul]
 
-omit [DecidableEq n] in
 
+omit [DecidableEq n] in
 theorem even_dotProduct_mulVec_of_two_dvd (hb : ∀ i j, 2 ∣ b i j) (d : Matrix n n ℤ) (μ : n → ℤ) :
     Even (μ ⬝ᵥ (dᵀ * b) *ᵥ μ) := by
   rw [even_iff_two_dvd]
-  simp only [dotProduct, mulVec, mul_apply]
+  simp only [dotProduct, mulVec, Matrix.mul_apply]
   exact dvd_sum fun i _ => Dvd.dvd.mul_left (dvd_sum fun j _ => Dvd.dvd.mul_right
     (dvd_sum fun k _ => (hb k j).mul_left _) _) _
 

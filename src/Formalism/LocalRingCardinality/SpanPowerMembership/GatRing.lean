@@ -1,4 +1,56 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.QuadraticAlgebra.Basic
+public import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.AdicCompletion.Noetherian
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -39,8 +91,8 @@ theorem fact (hϖ : Irreducible ϖ) (z : QuadraticAlgebra W ϖ 0) (hz : z ≠ 0)
     refine ⟨2 * j + 1, ⟨v, a'⟩, isUnit_of_re hϖ _ v.isUnit, ?_⟩
     rw [pow_succ, om_pow, algebraMap_eq]
     ext
-    · simp only [re_mul, im_mul, omega_re, omega_im, h2]; ring
-    · simp only [re_mul, im_mul, omega_re, omega_im, h1]; ring
+    · simp only [re_mul, im_mul, omega_re, omega_im, re_C, im_C, h2]; ring
+    · simp only [re_mul, im_mul, omega_re, omega_im, re_C, im_C, h1]; ring
   by_cases ha : z.re = 0
   · have hb : z.im ≠ 0 := fun hb => hz (by ext <;> simp [ha, hb])
     obtain ⟨j, v, hv⟩ := IsDiscreteValuationRing.eq_unit_mul_pow_irreducible hb hϖ
@@ -51,8 +103,8 @@ theorem fact (hϖ : Irreducible ϖ) (z : QuadraticAlgebra W ϖ 0) (hz : z ≠ 0)
       refine ⟨2 * i, ⟨u, b'⟩, isUnit_of_re hϖ _ u.isUnit, ?_⟩
       rw [om_pow, algebraMap_eq]
       ext
-      · simp [hu]; ring
-      · simp [hb']
+      · simp [← map_pow, hu]; ring
+      · simp [← map_pow, hb']
     · have hb : z.im ≠ 0 := fun hb => hd (by rw [hb]; exact dvd_zero _)
       obtain ⟨j, v, hv⟩ := IsDiscreteValuationRing.eq_unit_mul_pow_irreducible hb hϖ
       have hji : j < i := by
@@ -109,9 +161,9 @@ theorem mem_span_om_pow (m : ℕ) (z : QuadraticAlgebra W ϖ 0) :
   rw [Ideal.mem_span_singleton, om_pow, algebraMap_eq]
   constructor
   · rintro ⟨t, rfl⟩
-    exact ⟨⟨t.re, by simp⟩, ⟨t.im, by simp⟩⟩
+    exact ⟨⟨t.re, by simp [← map_pow]⟩, ⟨t.im, by simp [← map_pow]⟩⟩
   · rintro ⟨⟨a, ha⟩, ⟨b, hb⟩⟩
-    exact ⟨⟨a, b⟩, by ext <;> simp [ha, hb]⟩
+    exact ⟨⟨a, b⟩, by ext <;> simp [← map_pow, ha, hb]⟩
 
 theorem isAdicComplete (hϖ : Irreducible ϖ) (hC : IsAdicComplete (Ideal.span {ϖ}) W) :
     haveI := isDomain hϖ; haveI := isDVR hϖ

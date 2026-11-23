@@ -1,7 +1,58 @@
-import Formalism.LocalToGlobal.InertKernelTheory.DefsFrONB
-import Formalism.LocalToGlobal.InertKernelTheory.InertCoprimeLemmas.IntBasis
-import Formalism.LocalToGlobal.GlobalTheory.GL3.IsometryLinkageTrivialLevel
+module
+
+public import Formalism.LocalToGlobal.InertKernelTheory.DefsFrONB
+public import Formalism.LocalToGlobal.GlobalTheory.GL3.IsometryLinkageTrivialLevel
+import Formalism.LocalRingCardinality.SpanPowerMembership.ExampleLayerExistsGenerators
+import Formalism.LocalToGlobal.GlobalTheory.GL3.PHfTrace
 import Formalism.LocalToGlobal.GlobalTheory.GL3.PSelfDual
+public import Formalism.LocalToGlobal.InertKernelTheory.InertCoprimeLemmas.IntBasis
+import Mathlib.Algebra.AffineMonoid.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.DedekindDomain.PID
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -50,6 +101,21 @@ theorem exists_loc_basis {V : Type*} [AddCommGroup V] [Module K V] (p : ℕ) [hp
       ∀ y ∈ A, ∃ s : ℕ, Nat.Coprime s p ∧ ∃ c : Fin n → 𝓞 K, (s : K) • y = ∑ i, ((c i : K)) • b i := by
   classical
   obtain ⟨T, hT⟩ := hfg
+  let U : Finset V := T.image Subtype.val
+  have hU : AddSubgroup.closure (U : Set V) = A := by
+    apply le_antisymm
+    · apply (AddSubgroup.closure_le A).2
+      intro y hy
+      obtain ⟨z, hz, rfl⟩ := Finset.mem_image.mp hy
+      exact z.property
+    · intro y hy
+      have hz : (⟨y, hy⟩ : A) ∈ AddSubsemigroup.closure (T : Set A) := by rw [hT]; trivial
+      have hall : ∀ z : A, z ∈ AddSubsemigroup.closure (T : Set A) → (z : V) ∈ AddSubgroup.closure (U : Set V) := by
+        intro z hz
+        induction hz using AddSubsemigroup.closure_induction with
+        | mem z hz => exact AddSubgroup.subset_closure (Finset.mem_image.mpr ⟨z, hz, rfl⟩)
+        | add x y _ _ hx hy => exact AddSubgroup.add_mem _ hx hy
+      exact hall ⟨y, hy⟩ hz
   have hS := Sp_le (K := K) p
   let R := Localization.subalgebra.ofField K (Sp K p) hS
   haveI : IsDedekindDomain R := IsLocalization.isDedekindDomain (𝓞 K) hS R
@@ -57,8 +123,8 @@ theorem exists_loc_basis {V : Type*} [AddCommGroup V] [Module K V] (p : ℕ) [hp
   haveI : IsPrincipalIdealRing R :=
     IsDedekindDomain.isPrincipalIdealRing_localization_over_prime (𝓞 K) (Ideal.span {(p : ℤ)}) hp0 (Sₚ := R)
   haveI : IsScalarTower R K V := IsScalarTower.of_algebraMap_smul (fun r v => rfl)
-  let M : Submodule R V := Submodule.span R (T : Set V)
-  haveI : Module.Finite R M := Module.Finite.span_of_finite R T.finite_toSet
+  let M : Submodule R V := Submodule.span R (U : Set V)
+  haveI : Module.Finite R M := Module.Finite.span_of_finite R U.finite_toSet
   haveI : Module.IsTorsionFree R V := ⟨fun r hr x y h => by
     have hr0 : (r : K) ≠ 0 := fun h0 => hr.ne_zero (Subtype.ext h0)
     exact smul_right_injective V hr0 h⟩
@@ -70,7 +136,7 @@ theorem exists_loc_basis {V : Type*} [AddCommGroup V] [Module K V] (p : ℕ) [hp
   have key : ∀ x ∈ M, ∃ s : ℕ, Nat.Coprime s p ∧ (s : K) • x ∈ A := by
     intro x hx
     induction hx using Submodule.span_induction with
-    | mem y hy => exact ⟨1, Nat.coprime_one_left p, by rw [Nat.cast_one, one_smul, ← hT]; exact AddSubgroup.subset_closure hy⟩
+    | mem y hy => exact ⟨1, Nat.coprime_one_left p, by rw [Nat.cast_one, one_smul, ← hU]; exact AddSubgroup.subset_closure hy⟩
     | zero => exact ⟨1, Nat.coprime_one_left p, by rw [smul_zero]; exact A.zero_mem⟩
     | add x y _ _ h1 h2 =>
       obtain ⟨s1, hs1, m1⟩ := h1
@@ -101,7 +167,7 @@ theorem exists_loc_basis {V : Type*} [AddCommGroup V] [Module K V] (p : ℕ) [hp
     exact (LinearIndependent.iff_fractionRing (R := R) (K := K)).1 h1
   · intro y hy
     have hyM : y ∈ M := by
-      rw [← hT] at hy
+      rw [← hU] at hy
       exact (AddSubgroup.closure_le M.toAddSubgroup).2 (fun z hz => Submodule.subset_span hz) hy
     have hsum := congrArg Subtype.val (bas.sum_repr ⟨y, hyM⟩)
     simp only [Submodule.coe_sum, Submodule.coe_smul] at hsum
@@ -162,10 +228,26 @@ theorem exists_loc_basis_unif {V : Type*} [AddCommGroup V] [Module K V] (p : ℕ
     ∃ (n : ℕ) (b : Fin n → V), LinearIndependent K b ∧
       (∀ i, ∃ s : ℕ, Nat.Coprime s p ∧ (s : K) • b i ∈ A) ∧
       ∃ S : ℕ, Nat.Coprime S p ∧ ∀ y ∈ A, ∃ c : Fin n → 𝓞 K, (S : K) • y = ∑ i, ((c i : K)) • b i := by
+  classical
   obtain ⟨n, b, hli, hmem, hsp⟩ := exists_loc_basis p A hfg hO
   obtain ⟨T, hT⟩ := hfg
-  obtain ⟨S, hS, hSp⟩ := uniform_den p b T (fun y hy => hsp y (hT ▸ AddSubgroup.subset_closure hy))
-  exact ⟨n, b, hli, hmem, S, hS, fun y hy => hSp y (hT ▸ hy)⟩
+  let U : Finset V := T.image Subtype.val
+  have hU : AddSubgroup.closure (U : Set V) = A := by
+    apply le_antisymm
+    · apply (AddSubgroup.closure_le A).2
+      intro y hy
+      obtain ⟨z, hz, rfl⟩ := Finset.mem_image.mp hy
+      exact z.property
+    · intro y hy
+      have hz : (⟨y, hy⟩ : A) ∈ AddSubsemigroup.closure (T : Set A) := by rw [hT]; trivial
+      have hall : ∀ z : A, z ∈ AddSubsemigroup.closure (T : Set A) → (z : V) ∈ AddSubgroup.closure (U : Set V) := by
+        intro z hz
+        induction hz using AddSubsemigroup.closure_induction with
+        | mem z hz => exact AddSubgroup.subset_closure (Finset.mem_image.mpr ⟨z, hz, rfl⟩)
+        | add x y _ _ hx hy => exact AddSubgroup.add_mem _ hx hy
+      exact hall ⟨y, hy⟩ hz
+  obtain ⟨S, hS, hSp⟩ := uniform_den p b U (fun y hy => hsp y (hU ▸ AddSubgroup.subset_closure hy))
+  exact ⟨n, b, hli, hmem, S, hS, fun y hy => hSp y (hU ▸ hy)⟩
 
 end Gen
 
@@ -194,7 +276,7 @@ theorem intAt_of_int {x : K} (h : IsIntegral ℤ x) : IntAt p x :=
 theorem intAt_mul {x y : K} (hx : IntAt p x) (hy : IntAt p y) : IntAt p (x * y) := by
   obtain ⟨s, hs, hx'⟩ := hx
   obtain ⟨t, ht, hy'⟩ := hy
-  refine ⟨s * t, Nat.Coprime.mul hs ht, ?_⟩
+  refine ⟨s * t, Nat.Coprime.mul_left hs ht, ?_⟩
   have e : ((s * t : ℕ) : K) * (x * y) = ((s : K) * x) * ((t : K) * y) := by push_cast; ring
   rw [e]
   exact isInt_cast (hx'.mul hy')
@@ -202,7 +284,7 @@ theorem intAt_mul {x y : K} (hx : IntAt p x) (hy : IntAt p y) : IntAt p (x * y) 
 theorem intAt_add {x y : K} (hx : IntAt p x) (hy : IntAt p y) : IntAt p (x + y) := by
   obtain ⟨s, hs, hx'⟩ := hx
   obtain ⟨t, ht, hy'⟩ := hy
-  refine ⟨s * t, Nat.Coprime.mul hs ht, ?_⟩
+  refine ⟨s * t, Nat.Coprime.mul_left hs ht, ?_⟩
   have e : ((s * t : ℕ) : K) * (x + y) = (t : K) * ((s : K) * x) + (s : K) * ((t : K) * y) := by
     push_cast; ring
   rw [e]
@@ -243,8 +325,8 @@ theorem norm_le_one_of_int {k : Type*} [NormedField k] [IsUltrametricDist k] {y 
   have hsum : y ^ P.natDegree = -∑ i ∈ Finset.range P.natDegree, (P.coeff i : k) * y ^ i := by
     have h := hP
     rw [hPm.as_sum] at h
-    simp only [Polynomial.eval₂_add, Polynomial.eval₂_X_pow, Polynomial.eval₂_finset_sum,
-      Polynomial.eval₂_mul, Polynomial.eval₂_C, Polynomial.eval₂_X_pow, algebraMap_int_eq, eq_intCast] at h
+    simp only [Polynomial.eval₂_add, Polynomial.eval₂_X_pow, Polynomial.eval₂_finsetSum,
+      Polynomial.eval₂_mul, Polynomial.eval₂_C, Polynomial.eval₂_X_pow, algebraMap_int_eq, eq_intCast, map_sum] at h
     refine eq_neg_of_add_eq_zero_left ?_
     rw [← h]
     congr 1
@@ -453,7 +535,15 @@ section Form
 
 variable (D : D7)
 
-theorem hK_symm (x y : D.host.E) : G0.hK D x y = G0.cK D (G0.hK D y x) := (G0.herm D).symm y x
+theorem hK_symm (x y : D.host.E) : G0.hK D x y = G0.cK D (G0.hK D y x) := by
+  apply Subtype.ext
+  apply D.host.φ₀.injective
+  show D.host.φ₀ ((Algebra.trace D.host.K D.host.E (x * D.host.conj y) : D.host.K) : D.host.E)
+    = D.host.φ₀ (D.host.conj ((Algebra.trace D.host.K D.host.E (y * D.host.conj x) : D.host.K) : D.host.E))
+
+  rw [CU.emb_conj, ← FL.sum_tau_trace, ← FL.sum_tau_trace, map_sum]
+  refine Finset.sum_congr rfl fun τ _ => ?_
+  rw [map_mul, map_mul, map_mul, CU.emb_conj, CU.emb_conj, Complex.conj_conj, mul_comm]
 
 theorem hK_smul_left (k : D.host.K) (x y : D.host.E) : G0.hK D (k • x) y = k * G0.hK D x y := by
   simp only [G0.hK, smul_mul_assoc, map_smul, smul_eq_mul]
@@ -471,6 +561,7 @@ private theorem hK_smul_right' (k : D.host.K) (x y : D.host.E) :
 theorem hK_sum_smul_right {ι : Type*} (s : Finset ι) (k : ι → D.host.K) (f : ι → D.host.E) (x : D.host.E) :
     G0.hK D x (∑ i ∈ s, k i • f i) = ∑ i ∈ s, G0.cK D (k i) * G0.hK D x (f i) := by
   rw [← Finset.sum_congr rfl fun i _ => hK_smul_right' D (k i) x (f i)]
+
   simp only [G0.hK, map_sum, Finset.mul_sum]
 
 theorem hK_smul_right (k : D.host.K) (x y : D.host.E) : G0.hK D x (k • y) = G0.cK D k * G0.hK D x y :=
@@ -497,7 +588,7 @@ def phiQ (D : D7) : D.host.E →+* Qbar :=
 theorem lamC_phi (D : D7) {p : ℕ} [Fact p.Prime] (lam : Qbar →+* ℂ_[p]) (x : D.host.E) :
     lamC lam (D.host.φ₀ x) = lam (phiQ D x) := by
   unfold lamC
-  rw [dif_pos (show D.host.φ₀ x ∈ Qbar from (phiQ D x).2)]
+  rw [dite_eq_left (show D.host.φ₀ x ∈ Qbar from (phiQ D x).2)]
   rfl
 
 theorem local_orthonormal_basis : LocBasisMM := by

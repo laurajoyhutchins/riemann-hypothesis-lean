@@ -1,12 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.ArchimedeanThetaValues.IsFramedPointChangedByLetters
-import Development.AbelianVarietyTheory.Definitions.RegularCharts.ModelAt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.UnifUniqSt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.LiePush
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ScaledBaseChangeFibreSectionCalculus
-import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.ExistsUniqueConstantTangentVectorsAlongArc
-import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.LieImgIffIsLieComb
-import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.ExistsUniqueThetaOf
+module
+
+public import Development.AbelianVarietyTheory.Definitions.ArchimedeanThetaValues.IsFramedPointChangedByLetters
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.SecBaseChangeAnySt
+public import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.ExistsUniqueConstantTangentVectorsAlongArc
+public import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.ExistsUniqueThetaOf
+public import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.LieImgIffIsLieComb
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ScaledBaseChangeFibreSectionCalculus
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.LiePush
+import Formalism.LocalToGlobal.ProjectiveLattices.ArchimedeanQuadraticData.ArcLineFunctions.ArcSPin
+
+@[expose] public section
 
 noncomputable section
 
@@ -93,7 +134,7 @@ theorem isArcFr_of_frChg_const : Out.Laws → Out.Laws2 → ∀ (E : Type) [Fiel
   obtain ⟨x', xo', u', t1', t2', t3', s', t4'⟩ := y'
   obtain ⟨hx, hcomb, hs⟩ := hchg
   dsimp only at hx hcomb hs
-  subst hx
+  subst x'
   obtain ⟨z, G, m1, m2, φ, zj, zx, φb, φ1, φ2, hu, θ, w1, w2, σ, s1, θ2, hθ, r1, r2, i1, i2, ps, hgx⟩ := hy
   have key : ∀ τ k, ∃ (v : epsR (PowerSeries A) ⟶ W.t.G) (q : epsR S ⟶ G.G), LieImg W (e τ k) v ∧
       q.left ≫ m1.φ = y.u τ k ∧ q.left ≫ m2.φ = spMap (dualMap io) ≫ v.left := fun τ k => by
@@ -113,7 +154,11 @@ theorem isArcFr_of_frChg_const : Out.Laws → Out.Laws2 → ∀ (E : Type) [Fiel
     have hc := (GlobalTheory.ConstLin.lieImg_iff_isLieComb hL.globalFns E H Dw l Xo c O β Y A b a χ W _ (g τ k) (e τ) (e' τ k) (v τ) w (hv τ)
       (hg τ k)).1 hw
     have hy : y.u τ = fun i => (q τ i).left ≫ m1.φ := funext fun i => (hq1 τ i).symm
-    obtain ⟨p, p1, p2⟩ := comb_transport io m1 m2 _ (v τ) w hc (q τ) (hq2 τ) (u' τ k) (hy ▸ hcomb τ k)
+    have hcoeff : (g τ).map (io.comp (PowerSeries.C (R := A))) k =
+        fun i => io (PowerSeries.C (R := A) (g τ k i)) :=
+      funext fun i => Matrix.map_apply
+    obtain ⟨p, p1, p2⟩ := comb_transport io m1 m2 _ (v τ) w hc (q τ) (hq2 τ) (u' τ k) (by
+      simpa only [hy, hcoeff] using hcomb τ k)
     exact ⟨w, p, hw, p1, p2⟩
   · show constFn _ _ _ * θ2.f j = (m2.φ.appLE _ _ h).hom (constFn _ _ _ * θ.f _)
     rw [map_mul, ← ps j h, appLE_const, m2.cart.1.w, const_spMap]

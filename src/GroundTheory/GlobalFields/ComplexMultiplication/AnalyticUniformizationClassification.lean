@@ -1,5 +1,51 @@
-import Mathlib
-import GroundTheory.GlobalFields.ComplexMultiplication.AnalyticUniformization
+module
+
+public import GroundTheory.GlobalFields.ComplexMultiplication.AnalyticUniformization
+import GroundTheory.GlobalFields.ComplexMultiplication.AnalyticAlgebraicConverse
+import GroundTheory.GlobalFields.ComplexMultiplication.JInvariantSurjective
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 open Complex Filter Topology Set WeierstrassCurve GroundTheory.Arith.Abelian
@@ -110,7 +156,7 @@ theorem IsAnalyticUniformization.meromorphic_ptY (hg : IsAnalyticUniformization 
 
 theorem IsAnalyticUniformization.map_add_mem (hg : IsAnalyticUniformization L.lattice g) (z : ℂ)
     {l : ℂ} (hl : l ∈ L.lattice) : g (z + l) = g z := by
-  rw [map_add, (hg.map_eq_zero_iff l).2 hl, add_zero]
+  rw [map_add (f := _), (hg.map_eq_zero_iff l).2 hl, add_zero]
 
 theorem IsAnalyticUniformization.equation_ptX_ptY (hg : IsAnalyticUniformization L.lattice g)
     {z : ℂ} (hz : z ∉ L.lattice) :
@@ -339,7 +385,7 @@ theorem IsAnalyticUniformization.exists_omegaFun_eq_const (hg : IsAnalyticUnifor
 theorem IsAnalyticUniformization.ptY_eq_zero_of_two_mul_mem (hg : IsAnalyticUniformization L.lattice g)
     {z : ℂ} (hz : z ∉ L.lattice) (h2 : 2 * z ∈ L.lattice) : ptY (g z) = 0 := by
   obtain ⟨h, e⟩ := exists_eq_some_ptX_ptY (fun h0 ↦ hz ((hg.map_eq_zero_iff z).1 h0))
-  have h0 : g z + g z = 0 := by rw [← map_add, ← two_mul]; exact (hg.map_eq_zero_iff _).2 h2
+  have h0 : g z + g z = 0 := by rw [← map_add (f := _), ← two_mul]; exact (hg.map_eq_zero_iff _).2 h2
   have hneg : g z = -g z := eq_neg_of_add_eq_zero_left h0
   rw [e, Affine.Point.neg_some, Affine.Point.some.injEq] at hneg
   have := hneg.2
@@ -353,7 +399,7 @@ theorem IsAnalyticUniformization.two_mul_mem_of_ptY_eq_zero (hg : IsAnalyticUnif
     rw [e, Affine.Point.neg_some, Affine.Point.some.injEq]
     refine ⟨rfl, ?_⟩
     simp only [Affine.negY, weierstrassCurve_a₁, weierstrassCurve_a₃, zero_mul, sub_zero, hY, neg_zero]
-  rw [← hg.map_eq_zero_iff, two_mul, map_add]
+  rw [← hg.map_eq_zero_iff, two_mul, map_add (f := _)]
   nth_rewrite 1 [← hneg]
   exact neg_add_cancel _
 
@@ -492,7 +538,7 @@ theorem exists_mul_of_isAnalyticUniformization {L L' : PeriodPair}
     obtain ⟨w, ⟨hw1, hw2⟩, hw3, hw4⟩ :=
       nonempty_of_mem_codiscrete (hG.and (eventually_affine hG (neg_ne_zero.2 one_ne_zero) z))
     have e : z = w + (-1 * w + z) := by ring
-    rw [e, map_add, good w hw1 hw2, good _ hw3 hw4, ← toPoint_add]
+    rw [e, map_add (f := _), good w hw1 hw2, good _ hw3 hw4, ← toPoint_add]
     congr 1
     ring
   obtain ⟨w, hw1, hw2⟩ := nonempty_of_mem_codiscrete hG

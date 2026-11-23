@@ -1,10 +1,62 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.ExistsPowSubMemSpanOfIsUnitModOfIsAlgClosed
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.RationalSections.ThmISt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterBridgeB
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PCoordConeArithVar
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ComplexPointConjugateStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ComplexPointExistsUniqueEmbeddingStatement
+module
+
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.ExistsPowSubMemSpanOfIsUnitModOfIsAlgClosed
+public import Mathlib.Order.CompletePartialOrder
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ComplexPointConjugateStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ComplexPointExistsUniqueEmbeddingStatement
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PCoordConeArithVar
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+public import Mathlib.Analysis.Calculus.BumpFunction.FiniteDimension
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import Mathlib.Topology.Algebra.MvPolynomial
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterBridgeB
+import Std.Tactic.BVDecide.Normalize.Prop
+import Mathlib.Geometry.Manifold.StructureGroupoid
+
+@[expose] public section
 
 noncomputable section
 
@@ -61,7 +113,7 @@ theorem isOpen_nzBlocks : IsOpen (nzBlocks K ι) := by
 theorem blockSq_contDiff (k : K) {n : WithTop ℕ∞} :
     ContDiff ℝ n fun z : (Σ k, ι k) → ℂ => blockSq z k := by
   unfold blockSq
-  exact ContDiff.sum fun i _ => (contDiff_norm_sq ℝ).comp (contDiff_apply ℝ ℂ (⟨k, i⟩ : Σ k, ι k))
+  exact ContDiff.sum fun i _ => (contDiff_norm_sq ℝ).comp (contDiff_apply ℝ (fun _ => ℂ) (⟨k, i⟩ : Σ k, ι k))
 
 theorem prMap_contDiffOn {n : WithTop ℕ∞} :
     ContDiffOn ℝ n (prMap (K := K) (ι := ι)) (nzBlocks K ι) := by
@@ -73,14 +125,14 @@ theorem prMap_contDiffOn {n : WithTop ℕ∞} :
     rw [Complex.real_smul, Complex.ofReal_inv, prMap, div_eq_inv_mul]
   rw [hq]
   have hs : ContDiff ℝ n fun z : (Σ k, ι k) → ℂ => (starRingEnd ℂ) (z ⟨q.1, q.2.2⟩) := by
-    have h0 := Complex.conjCLE.contDiff.comp (contDiff_apply ℝ ℂ (n := n) (⟨q.1, q.2.2⟩ : Σ k, ι k))
+    have h0 := Complex.conjCLE.contDiff.comp (contDiff_apply ℝ (fun _ => ℂ) (n := n) (⟨q.1, q.2.2⟩ : Σ k, ι k))
     simpa [Function.comp_def] using h0
   have h1 : ContDiffOn ℝ n (fun z : (Σ k, ι k) → ℂ => (blockSq z q.1)⁻¹) (nzBlocks K ι) :=
     (blockSq_contDiff q.1).contDiffOn.inv fun z hz =>
       (blockSq_pos ((show ∀ k, ∃ i, z ⟨k, i⟩ ≠ 0 from hz) q.1)).ne'
   have h2 : ContDiffOn ℝ n (fun z : (Σ k, ι k) → ℂ => z ⟨q.1, q.2.1⟩ * (starRingEnd ℂ) (z ⟨q.1, q.2.2⟩))
       (nzBlocks K ι) :=
-    ((contDiff_apply ℝ ℂ (n := n) (⟨q.1, q.2.1⟩ : Σ k, ι k)).mul hs).contDiffOn
+    ((contDiff_apply ℝ (fun _ => ℂ) (n := n) (⟨q.1, q.2.1⟩ : Σ k, ι k)).mul hs).contDiffOn
   exact ContDiffOn.smul h1 h2
 
 theorem prMap_continuousAt {z : (Σ k, ι k) → ℂ} (hz : z ∈ nzBlocks K ι) :
@@ -322,7 +374,7 @@ theorem cj_contDiff {n : WithTop ℕ∞} : ContDiff ℝ n (cj (K := K) (ι := ι
   rw [contDiff_pi]
   intro p
   show ContDiff ℝ n fun z : (Σ k, ι k) → ℂ => (starRingEnd ℂ) (z p)
-  have h0 := Complex.conjCLE.contDiff.comp (contDiff_apply ℝ ℂ (n := n) p)
+  have h0 := Complex.conjCLE.contDiff.comp (contDiff_apply ℝ (fun _ => ℂ) (n := n) p)
   simpa [Function.comp_def] using h0
 
 theorem cj_cj (z : (Σ k, ι k) → ℂ) : cj (cj z) = z := by
@@ -356,8 +408,8 @@ theorem average {y : (Σ k, ι k) → Ω} {φ : F →+* Ω} {t : (F →+* ℂ) �
 
 end PlaceWeightSmooth
 
-open PlaceWeightSmooth in
 
+open PlaceWeightSmooth in
 theorem exists_placeWeight (K : Type) [Fintype K] (ι : K → Type) [∀ k, Fintype (ι k)] (Ω : Type) [Field Ω]
     (F : Type) [Field F] [NumberField F] (y : (Σ k, ι k) → Ω) (φ : F →+* Ω) (t : (F →+* ℂ) → ℝ)
     (hO : OverInt y φ) :

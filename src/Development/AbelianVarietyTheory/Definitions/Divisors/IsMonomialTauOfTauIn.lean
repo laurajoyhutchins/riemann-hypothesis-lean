@@ -1,5 +1,42 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.FromBase
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.FromBase
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -14,34 +51,10 @@ namespace GlobalTheory.Poinc.Sep.Model
 
 variable {V : Type} [CommRing V] [IsDomain V]
 
-theorem exists_tauIn {Q : Data V} {N : ℕ} {s : Fin N → V} {ε : Fin N → LinearMap.BilinForm ℤ Q.X}
-    (h : Q.IsMonomialTau s ε) : ∃ τ₀ : Gens Q, TauIn Q τ₀ s ε := by
-  have h' : ∀ a b : Q.X, ∃ k : (FractionRing V)ˣ,
-      (k : FractionRing V) = ∏ i, algebraMap V (FractionRing V) (s i) ^ ε i a b ∧ Q.TauCoord a b k := h
-
-  choose k hk hc using h'
-  refine ⟨fun a b => Exists.choose (hc a b), fun a b => ⟨(Exists.choose_spec (hc a b)).1, k a b, hk a b, ?_⟩⟩
-  exact (Exists.choose_spec (hc a b)).2
-
 theorem isMonomialTau_of_tauIn {Q : Data V} {τ₀ : Gens Q} {N : ℕ} {s : Fin N → V}
     {ε : Fin N → LinearMap.BilinForm ℤ Q.X} (h : TauIn Q τ₀ s ε) : Q.IsMonomialTau s ε := by
   intro a b
   obtain ⟨hg, k, hk, hv⟩ := h a b
   exact ⟨k, hk, Exists.intro (τ₀ a b) ⟨hg, hv⟩⟩
-
-theorem tate_tauIn (k : ℤ) :
-    ∃ τ₀ : Gens (Wit.tate k), TauIn (Wit.tate k) τ₀ ![PowerSeries.X] ![k • mulForm] :=
-  exists_tauIn (Wit.tate_isMonomialTau k)
-
-theorem defOver_top {K : Type} [Field K] {Y : Scheme.{0}} (P : Sp K ⟶ Y) : DefOver (⊤ : Subfield K) P := by
-  refine ⟨spMap ((Subfield.topEquiv (K := K)).symm : K →+* (⊤ : Subfield K)) ≫ P, ?_⟩
-
-  have hid : (⊤ : Subfield K).subtype.comp ((Subfield.topEquiv (K := K)).symm : K →+* (⊤ : Subfield K)) =
-      RingHom.id K := by
-    ext x
-    rfl
-  rw [← Category.assoc]
-  unfold spMap
-  rw [← Spec.map_comp, ← CommRingCat.ofHom_comp, hid, CommRingCat.ofHom_id, Spec.map_id, Category.id_comp]
 
 end GlobalTheory.Poinc.Sep.Model

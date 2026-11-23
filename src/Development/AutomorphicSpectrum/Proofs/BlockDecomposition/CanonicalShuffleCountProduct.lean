@@ -1,8 +1,51 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.ZelevinskyJacquet.ZelevinskyCosocles.LUnlinkedComm
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.IrreducibleAdmissibleGL
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ContragredientProductIrreducibleStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.AlgebraMapIntertwiningMapBijectiveOfIsSmooth
+module
+
+public import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.ZelevinskyJacquet.ZelevinskyCosocles.LUnlinkedComm
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.BitVec
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open GlobalTheory.PRep GlobalTheory.SplitWeil GlobalTheory.SmGL GlobalTheory.LocGL GlobalTheory.JHMult Zc Zc.Cos
 open Classical
 
@@ -189,10 +232,10 @@ theorem shuffleCount_eq_T_reverse {h : ℕ} (W : List α) (D : Fin h → List α
 
 variable {k : Type} [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k]
 
-theorem ofFn_term_cons (Δ : Segment k) : ∃ B : List (IrrGL k), List.ofFn Δ.term = Δ.first :: B ∧
+theorem ofFn_term_cons (Δ : Segment k) : ∃ B : List (IrrGL (k := k)), List.ofFn Δ.term = Δ.first :: B ∧
     B.length + 1 = Δ.len ∧ ∀ a ∈ B, ∃ n : ℕ, 0 < n ∧ a = Δ.first.nu (n : ℂ) := by
-  have key : ∀ (m : ℕ) (f : Fin m → IrrGL k), 0 < m → (∀ a : Fin m, f a = Δ.first.nu ((a : ℕ) : ℂ)) →
-      ∃ B : List (IrrGL k), List.ofFn f = Δ.first :: B ∧ B.length + 1 = m ∧
+  have key : ∀ (m : ℕ) (f : Fin m → IrrGL (k := k)), 0 < m → (∀ a : Fin m, f a = Δ.first.nu ((a : ℕ) : ℂ)) →
+      ∃ B : List (IrrGL (k := k)), List.ofFn f = Δ.first :: B ∧ B.length + 1 = m ∧
         ∀ a ∈ B, ∃ n : ℕ, 0 < n ∧ a = Δ.first.nu (n : ℂ) := by
     intro m f hm hf
     cases m with
@@ -207,7 +250,7 @@ theorem ofFn_term_cons (Δ : Segment k) : ∃ B : List (IrrGL k), List.ofFn Δ.t
         exact ⟨(i.succ : ℕ), by simp, hf i.succ⟩
   exact key Δ.len Δ.term Δ.len_pos (fun a => rfl)
 
-theorem T_step {h : ℕ} (Γ : Fin (h + 1) → Segment k) (hc : IsCanon Γ) (R : List (IrrGL k)) :
+theorem T_step {h : ℕ} (Γ : Fin (h + 1) → Segment k) (hc : IsCanon Γ) (R : List (IrrGL (k := k))) :
     T (List.ofFn (Γ (Fin.last h)).term ++ R) (fun i => List.ofFn (Γ i).term) =
       (Finset.univ.filter fun g => Γ g = Γ (Fin.last h)).card *
         T R (fun i : Fin h => List.ofFn (Γ i.castSucc).term) := by

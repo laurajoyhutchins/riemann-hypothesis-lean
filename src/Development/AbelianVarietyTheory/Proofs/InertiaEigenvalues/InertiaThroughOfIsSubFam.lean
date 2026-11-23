@@ -1,7 +1,47 @@
-import Mathlib
-import Formalism.LocalRingCardinality.AdicCompletionLocal.LocTied
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.CentralIdemCoeff
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.EigenvectorMemOfSumMem
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.CentralIdemCoeff
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.EigenvectorMemOfSumMem
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Formalism Formalism.MainNotions Formalism.BasicNotions Formalism.BasicNotions.Loc Formalism.MainNotions.N Formalism.WeaklyAdmissibleFiltrations NumberField IsDedekindDomain Formalism.ConjugateSelfDual ReciprocityTheory.Gal Polynomial Module TensorProduct GlobalTheory.Pass
 
@@ -51,6 +91,7 @@ theorem subIner_pullback {L X Y I α J : Type} [Field L] [AddCommGroup X] [Modul
     rw [map_sub, hm, map_smul, (hx a ha).2, hy j a ha, sub_self]
   · rw [← sub_eq_zero]
     refine hinj _ fun j => ?_
+
     rw [map_sub, map_sum, ← hs j, sub_eq_zero]
     exact Finset.sum_congr rfl fun a ha => (hx a ha).2 j
 
@@ -64,6 +105,7 @@ theorem subIner_rTensor_inj {Qp LL B V U : Type} [Field Qp] [Field LL] [Algebra 
     (LinearMap.ker_eq_bot'.2 fun v hv => hp v fun j => congrFun hv j)
   have h1 : ∀ v, ∑ j, q (Pi.single j (p j v)) = v := by
     intro v
+
     rw [← map_sum, Finset.univ_sum_single]
     exact LinearMap.congr_fun hq v
   have h2 : ∀ z : V ⊗[Qp] B, ∑ j, AlgebraTensorModule.rTensor Qp B
@@ -74,7 +116,7 @@ theorem subIner_rTensor_inj {Qp LL B V U : Type} [Field Qp] [Field LL] [Algebra 
     | tmul v b =>
       conv_rhs => rw [← h1 v, TensorProduct.sum_tmul]
       simp
-    | add z w hz hw => simp only [map_add, Finset.sum_add_distrib, hz, hw]
+    | add z w hz hw => simp only [map_add (f := _), Finset.sum_add_distrib, hz, hw]
   rw [← h2 x]
   simp [hx]
 
@@ -102,7 +144,7 @@ theorem subIner_mem_Dpcris (ρ : Representation LL G V) (x : V ⊗[Qp] B) :
     induction z using TensorProduct.induction_on with
     | zero => simp
     | tmul v b => simp [actVB, PotCrysData.resH, PC.actB_eq]
-    | add z w hz hw => simp only [map_add, hz, hw]
+    | add z w hz hw => simp only [map_add (f := _), hz, hw]
   simp [PotCrysData.Dpcris, Dcris, Submodule.mem_iInf, sub_eq_zero, h1]
 
 theorem subIner_actVB_mul (ρ : Representation LL G V) (g h : G) (z : V ⊗[Qp] B) :
@@ -110,7 +152,7 @@ theorem subIner_actVB_mul (ρ : Representation LL G V) (g h : G) (z : V ⊗[Qp] 
   induction z using TensorProduct.induction_on with
   | zero => simp
   | tmul v b => simp [actVB]
-  | add z w hz hw => simp only [map_add, hz, hw]
+  | add z w hz hw => simp only [map_add (f := _), hz, hw]
 
 theorem subIner_Dpcris_stable (ρ : Representation LL G V) (g : G) (x : V ⊗[Qp] B)
     (hx : x ∈ PC.Dpcris ρ) : actVB PC.PD ρ g x ∈ PC.Dpcris ρ := by
@@ -129,7 +171,7 @@ theorem subIner_rTensor_actVB (ρ : Representation LL G V) (σ : Representation 
   induction z using TensorProduct.induction_on with
   | zero => simp
   | tmul v b => simp [actVB, hf]
-  | add z w hz hw => simp only [map_add, hz, hw]
+  | add z w hz hw => simp only [map_add (f := _), hz, hw]
 
 theorem subIner_mem_Eig (ρ : Representation LL G V) (I : Subgroup G) (a : I →* LLˣ) (x : V ⊗[Qp] B) :
     x ∈ PC.Eig ρ I a ↔ x ∈ PC.Dpcris ρ ∧ ∀ g : I, actVB PC.PD ρ g x = ((a g : LLˣ) : LL) • x := by

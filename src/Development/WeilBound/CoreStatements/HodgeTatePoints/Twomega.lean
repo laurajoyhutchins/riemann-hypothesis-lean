@@ -1,5 +1,47 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Statements.GeometryStatements.IsPolLatticePlane
+module
+
+public import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.PairingExtends
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.SplitTori.SplitTorusAff
+
+@[expose] public section
 
 noncomputable section
 
@@ -16,11 +58,11 @@ theorem cong_iff {ι : Type} [Finite ι] (b : Module.Basis ι O M) (n : ℕ) (w 
   constructor
   · rintro ⟨u, rfl⟩ i
     refine ⟨b.equivFun u i, ?_⟩
-    rw [map_add, map_nsmul, Pi.add_apply, Pi.smul_apply, nsmul_eq_mul, Nat.cast_pow, add_sub_cancel_left]
+    rw [map_add (f := _), map_nsmul, Pi.add_apply, Pi.smul_apply, nsmul_eq_mul, Nat.cast_pow, add_sub_cancel_left]
   · intro h
     choose c hc using h
     refine ⟨b.equivFun.symm c, b.equivFun.injective (funext fun i => ?_)⟩
-    rw [map_add, map_nsmul, Pi.add_apply, Pi.smul_apply, nsmul_eq_mul, Nat.cast_pow,
+    rw [map_add (f := _), map_nsmul, Pi.add_apply, Pi.smul_apply, nsmul_eq_mul, Nat.cast_pow,
       LinearEquiv.apply_symm_apply, ← hc, add_sub_cancel]
 
 theorem smod_iff (n : ℕ) (a b : O) :
@@ -110,7 +152,7 @@ theorem mem_sq_iff (hre : X.Realises G e τ) (n : ℕ) (a : G.A n) :
     rwa [← (e n).injective hab]
 
 theorem dUnit_eq_zero_iff (hre : X.Realises G e τ) (n : ℕ) (a : G.A n) :
-    dUnit O a = 0 ↔ X.der n (e n a).1 0 := by
+    dUnit (R := O) a = 0 ↔ X.der n (e n a).1 0 := by
   rw [dUnit, AugCot.d_eq_zero_iff, mem_sq_iff hre, map_sub, AlgEquiv.commutes]
   set c := Bialgebra.counitAlgHom O (G.A n) a with hc
   have hc' : X.der n (algebraMap O (X.A n) c).1 0 := X.der_const n c
@@ -126,7 +168,7 @@ theorem dUnit_eq_zero_iff (hre : X.Realises G e τ) (n : ℕ) (a : G.A n) :
     exact sub_self _
 
 theorem dUnit_eq_iff (hre : X.Realises G e τ) (n : ℕ) (a b : G.A n) (w : Module.Dual O L)
-    (h : X.der n (e n a).1 w) : dUnit O b = dUnit O a ↔ X.der n (e n b).1 w := by
+    (h : X.der n (e n a).1 w) : dUnit (R := O) b = dUnit (R := O) a ↔ X.der n (e n b).1 w := by
   rw [← sub_eq_zero, dUnit, dUnit, ← map_sub]
   refine (dUnit_eq_zero_iff hre n (b - a)).trans ?_
   rw [map_sub]
@@ -146,10 +188,10 @@ theorem exists_der (e : ∀ n, G.A n ≃ₐ[O] X.A n) (n : ℕ) (w : Module.Dual
   exact ⟨(e n).symm ⟨f, hf⟩, by rwa [AlgEquiv.apply_symm_apply]⟩
 
 def cls (e : ∀ n, G.A n ≃ₐ[O] X.A n) (n : ℕ) (w : Module.Dual O L) : Cot O (G.A n) :=
-  dUnit O (exists_der e n w).choose
+  dUnit (R := O) (exists_der e n w).choose
 
 theorem dUnit_eq_cls (hre : X.Realises G e τ) (n : ℕ) (a : G.A n) (w : Module.Dual O L) :
-    dUnit O a = cls e n w ↔ X.der n (e n a).1 w :=
+    dUnit (R := O) a = cls e n w ↔ X.der n (e n a).1 w :=
   dUnit_eq_iff hre n _ a w (exists_der e n w).choose_spec
 
 theorem der_res (hre : X.Realises G e τ) (n : ℕ) (a : G.A (n + 1)) (w : Module.Dual O L)
@@ -166,9 +208,9 @@ def toOmega (hre : X.Realises G e τ) : Module.Dual O L →ₗ[O] G.omega where
     obtain ⟨a, ha⟩ := exists_der e n w
     obtain ⟨b, hb⟩ := exists_der e n w'
     change cls e n (w + w') = cls e n w + cls e n w'
-    rw [← (dUnit_eq_cls hre _ a w).2 ha, ← (dUnit_eq_cls hre _ b w').2 hb, dUnit, dUnit, ← map_add, eq_comm]
+    rw [← (dUnit_eq_cls hre _ a w).2 ha, ← (dUnit_eq_cls hre _ b w').2 hb, dUnit, dUnit, ← map_add (f := _), eq_comm]
     refine (dUnit_eq_cls hre _ _ _).2 ?_
-    rw [map_add]
+    rw [map_add (f := _)]
     exact X.der_add n _ _ _ _ ha hb)
   map_smul' r w := Subtype.ext (funext fun n => by
     obtain ⟨a, ha⟩ := exists_der e n w
@@ -187,7 +229,7 @@ theorem toOmega_bijective (hO : IsAdicComplete (Ideal.span {(p : O)}) O) [Module
   · rw [injective_iff_map_eq_zero]
     intro w hw
     refine eq_zero_of_cong hO w fun n => ?_
-    have h0 : dUnit O (0 : G.A n) = 0 := map_zero _
+    have h0 : dUnit (R := O) (0 : G.A n) = 0 := map_zero _
     have h1 : cls e n w = 0 := congrArg (fun x : G.omega => x.1 n) hw
     exact (X.der_unique n _ 0 w ((dUnit_eq_zero_iff hre n 0).1 h0)).1
       ((dUnit_eq_cls hre n 0 w).1 (h0.trans h1.symm))

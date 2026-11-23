@@ -1,6 +1,58 @@
-import Mathlib
-import Development.WeilBound.RepresentationTheoryGL.TwistedFactors.AffineCharacterGenerators.Generators
-import Development.AutomorphicArithmetic.Foundations.Convolution.PolynomialCoefficientBounds.PieceAdd
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.TwistedFactors.AffineCharacterGenerators.Generators
+public import Development.AutomorphicArithmetic.Foundations.Convolution.PolynomialCoefficientBounds.PieceAdd
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.MvPolynomial.IrreducibleQuadratic
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Analysis.Normed.Algebra.Exponential
+public import Mathlib.Analysis.Normed.Module.FiniteDimension
+public import Mathlib.Analysis.SpecialFunctions.Exponential
+
+@[expose] public section
 
 open MvPolynomial Filter Topology PositivityTheory.Rg.Fx
 
@@ -38,6 +90,7 @@ private theorem exp_sum {A M : Type} [CommRing A] [Algebra ℂ A] [AddCommGroup 
   rw [e1.tsum_eq, h.tsum_eq] at t
   rw [t]
   refine (congrArg (HasSum · _) (funext fun k => ?_)).mpr s1.hasSum
+
   rw [add_pow, Finset.sum_smul, map_sum, Finset.mul_sum]
   refine Finset.sum_congr rfl fun b hb => ?_
   have hbk : b ≤ k := Nat.lt_succ_iff.1 (Finset.mem_range.1 hb)
@@ -63,21 +116,22 @@ theorem UpperTheory.ConvolutionTheory.FX.rearrange :
       simp only [fun k => (UpperTheory.ConvolutionTheory.FX.piece_add ι k).2.1, map_zero, zero_smul]
       exact hasSum_zero
     | add f g hf hg =>
-      simp only [fun k => (UpperTheory.ConvolutionTheory.FX.piece_add ι k).1 f g, map_add, add_smul]
+      simp only [fun k => (UpperTheory.ConvolutionTheory.FX.piece_add ι k).1 f g, map_add (f := _), add_smul]
       exact hf.add hg
     | single v p =>
       set c : ℂ := ∑ i, (v i : ℂ) * b.Λ i with hc
       set t := τ (Multiplicative.ofAdd (Matrix.vecMul v b.emb)) with ht
       have hl : aeval ξ (lin v) = algebraMap ℂ A c + ∑ j, ((Matrix.vecMul v b.emb j : ℝ) : ℂ) • D j := by
+
         simp only [lin, map_sum, map_mul, aeval_C, aeval_X, hξ, hc, mul_add, Finset.sum_add_distrib, Matrix.vecMul, dotProduct,
-          Complex.ofReal_sum, Complex.ofReal_mul, Finset.sum_smul, Finset.mul_sum, Algebra.smul_def, mul_assoc]
+        Complex.ofReal_sum, Complex.ofReal_mul, Finset.sum_smul, Finset.mul_sum, Algebra.smul_def, mul_assoc]
         rw [Finset.sum_comm]
         simp only [Finset.sum_mul, mul_assoc]
       have hp : ∀ q : MvPolynomial ι ℂ, lift D τ (aeval (fun i => (AddMonoidAlgebra.single 0 (C (b.Λ i) + lin (b.emb i)) : EP (Fin b.r))) q) =
           aeval ξ q := fun q => by
         induction q using MvPolynomial.induction_on with
         | C a => simp [AddMonoidAlgebra.coe_algebraMap, lift_single]
-        | add p q hp hq => rw [map_add, map_add, map_add, hp, hq]
+        | add p q hp hq => rw [map_add (f := _), map_add (f := _), map_add (f := _), hp, hq]
         | mul_X p j hp =>
           rw [map_mul, map_mul, map_mul, hp, aeval_X, aeval_X, lift_single]
           simp [hξ, lin, Algebra.smul_def]
@@ -90,20 +144,24 @@ theorem UpperTheory.ConvolutionTheory.FX.rearrange :
         (fun a => by rw [hl]; exact exp_sum φ _ c _ _ (hT _ _))
       convert h1 using 1
       · funext k
+
         rw [(UpperTheory.ConvolutionTheory.FX.piece_add ι k).2.2, map_sum, Finset.sum_smul, map_sum]
         refine Finset.sum_congr rfl fun j _ => ?_
         rw [map_mul, map_mul, aeval_C, map_pow, mul_comm, ← Algebra.smul_def, smul_mul_assoc, smul_assoc, map_smul, mul_smul,
           smul_eq_mul]
+
       · rw [hv, ← Finset.mul_sum, ← map_sum, ← Finset.smul_sum, ← Finset.sum_smul, ← map_sum, sum_homogeneousComponent,
-          mul_comm, smul_mul_assoc, smul_assoc, map_smul, mul_smul, smul_eq_mul]
+        mul_comm, smul_mul_assoc, smul_assoc, map_smul, mul_smul, smul_eq_mul]
   have h2 := hasSum_sum (s := F.support) fun β _ => hA (F.coeff β) ((β.prod fun k e => lift D τ (b.h k) ^ e) • m)
-  convert h2 using 1
+  convert (preTransparency := .reducible) h2 using 1
   · funext k
+
     rw [pieceK, eval₂_sum, Finset.sum_smul, map_sum]
     refine Finset.sum_congr rfl fun β _ => ?_
     rw [eval₂_monomial, mul_smul]
     rfl
   · conv_lhs => rw [F.as_sum]
+
     rw [map_sum, map_sum, Finset.sum_smul, map_sum]
     refine Finset.sum_congr rfl fun β _ => ?_
     rw [Fam.sub, eval₂Hom_monomial, map_mul, mul_smul, map_finsuppProd]

@@ -1,7 +1,58 @@
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicIndexEquality.InertPowDefs
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicIndexEquality.ChiEqOneOfClosure
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicIndexEquality.Reduce
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicUnimodularity.CartierFrobeniusFormLocal
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicIndexEquality.InertPowDefs
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicIndexEquality.ChiEqOneOfClosure
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicIndexEquality.CompactLocalGlobal
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicIndexEquality.Reduce
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicUnimodularity.CartierFrobeniusFormLocal
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicUnimodularity.ExistsNatVec
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.FiniteAdelicComparison.AdelicLatticeToLocalLattices
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.FiniteAdelicComparison.LocFrom
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.FiniteAdelicComparison.LocInj
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.FiniteAdelicComparison.LocLift
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -41,7 +92,7 @@ theorem inR_mul (I : AutInst) (v : HeightOneSpectrum (𝓞 I.F)) (α : Av I v)
   obtain ⟨c, d, hc, hd, rfl⟩ := hy
   refine ⟨a * c - b * d, a * d + b * c + b * d * t, sub_mem (mul_mem ha hc) (mul_mem hb hd),
     add_mem (add_mem (mul_mem ha hd) (mul_mem hb hc)) (mul_mem (mul_mem hb hd) htO), ?_⟩
-  simp only [map_sub, map_add, map_mul]
+  simp only [map_sub, map_add (f := _), map_mul]
   linear_combination (incL I v b * incL I v d) * ht
 
 theorem inR_pow (I : AutInst) (v : HeightOneSpectrum (𝓞 I.F)) (α : Av I v)
@@ -173,10 +224,19 @@ theorem local_bound (I : AutInst) (v : HeightOneSpectrum (𝓞 I.F))
     (M : Matrix (Fin I.n) (Fin I.n) (Av I v)) :
     ∃ N : ℕ, 0 < N ∧ ∀ z ∈ Formalism.L2.SG.Sub.latLoc v (I.L : Set (Fin I.n → I.E)),
       N • (M *ᵥ z) ∈ Formalism.L2.SG.Sub.latLoc v (I.L : Set (Fin I.n → I.E)) := by
-  obtain ⟨N, hN, h⟩ := adelic_bound I (liftMat I v M)
+  classical
+  have hlift (j : Fin I.n) :
+      ∃ w : Fin I.n → I.E ⊗[I.F] Af I.F, PI.FinKW.vecV I v w = fun i => M i j := by
+    obtain ⟨w, hw, _⟩ := PI.FinKW.local_vector_lift I v (fun i => M i j)
+    exact ⟨w, hw⟩
+  choose w hw using hlift
+  let Mx : Matrix (Fin I.n) (Fin I.n) (I.E ⊗[I.F] Af I.F) := fun i j => w j i
+  have hmap : Mx.map (PI.FinKW.psiV I v).toRingHom = M := by
+    ext i j
+    exact congrFun (hw j) i
+  obtain ⟨N, hN, h⟩ := adelic_bound I Mx
   refine ⟨N, hN, fun z hz => ?_⟩
-  have := loc_bound I v _ h z hz
-  rwa [liftMat_map_same] at this
+  simpa only [hmap] using loc_bound I v Mx h z hz
 
 theorem incL_smul_mem (I : AutInst) (v : HeightOneSpectrum (𝓞 I.F)) {a : v.adicCompletion I.F}
     (ha : a ∈ v.adicCompletionIntegers I.F) {y : Fin I.n → Av I v}

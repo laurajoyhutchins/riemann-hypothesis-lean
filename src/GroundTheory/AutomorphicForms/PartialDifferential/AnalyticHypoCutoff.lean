@@ -1,5 +1,46 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.PartialDifferential.AnalyticHypoBasic
+module
+
+public import GroundTheory.AutomorphicForms.PartialDifferential.AnalyticHypoBasic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GroundTheory.Automorphic.Sobolev
 
@@ -75,19 +116,18 @@ theorem memLp_two_of_continuous_hasCompactSupport {f : EuclideanSpace ℝ (Fin n
 
 theorem l2Norm_le_of_abs_le {f g : EuclideanSpace ℝ (Fin n) → ℝ} (hg : MemLp g 2 volume)
     (_hf : AEStronglyMeasurable f volume) (h : ∀ x, |f x| ≤ g x) : l2n f ≤ l2n g := by
-  refine ENNReal.toReal_mono hg.eLpNorm_ne_top (eLpNorm_mono_real fun x ↦ ?_)
+  refine ENNReal.toReal_mono hg.eLpNorm_ne_top (eLpNorm_mono_real _hf fun x ↦ ?_)
   rw [Real.norm_eq_abs]; exact h x
 
 theorem l2Norm_add_le_alt {f g : EuclideanSpace ℝ (Fin n) → ℝ} (hf : MemLp f 2 volume)
     (hg : MemLp g 2 volume) : l2n (fun x ↦ f x + g x) ≤ l2n f + l2n g := by
-  have h := eLpNorm_add_le hf.1 hg.1 (p := 2) (μ := volume) one_le_two
+  have h := eLpNorm_add_le (f := f) (g := g) (p := 2) (μ := volume) one_le_two
   rw [l2n, l2n, l2n, ← ENNReal.toReal_add hf.eLpNorm_ne_top hg.eLpNorm_ne_top]
   exact ENNReal.toReal_mono (ENNReal.add_ne_top.2 ⟨hf.eLpNorm_ne_top, hg.eLpNorm_ne_top⟩) h
 
 theorem l2Norm_finset_sum_le {ι : Type*} (s : Finset ι) (F : ι → EuclideanSpace ℝ (Fin n) → ℝ)
     (hF : ∀ i ∈ s, MemLp (F i) 2 volume) : l2n (fun x ↦ ∑ i ∈ s, F i x) ≤ ∑ i ∈ s, l2n (F i) := by
-  have h := eLpNorm_sum_le (μ := volume) (p := 2) (s := s) (f := F) (fun i hi ↦ (hF i hi).1)
-    one_le_two
+  have h := eLpNorm_sum_le (μ := volume) (p := 2) (s := s) (f := F) one_le_two
   have e : (fun x ↦ ∑ i ∈ s, F i x) = ∑ i ∈ s, F i := by
     funext x; simp [Finset.sum_apply]
   simp only [l2n]

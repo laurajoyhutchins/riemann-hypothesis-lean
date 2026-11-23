@@ -1,7 +1,51 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.RealPlaces.ConeDefs
-import GroundTheory.ProfiniteCohomology.CompactSupportCohomology.CupLeibniz
-import GroundTheory.ProfiniteCohomology.CoinducedModules.Acyclic
+module
+
+public import GroundTheory.ProfiniteCohomology.RealPlaces.ConeDefs
+public import GroundTheory.ProfiniteCohomology.CompactSupportCohomology.CupLeibniz
+public import GroundTheory.ProfiniteCohomology.CoinducedModules.Acyclic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
@@ -46,7 +90,7 @@ noncomputable def normHomotopyFun {s m : ℕ} (h : s = m + 1) (e : X) (y : (Fin 
 theorem normHomotopyFun_add_left {s m : ℕ} (h : s = m + 1) (e e' : X) (y : (Fin s → F) → Y) :
     normHomotopyFun μ h (e + e') y = normHomotopyFun μ h e y + normHomotopyFun μ h e' y := by
   funext g
-  simp only [normHomotopyFun, Pi.add_apply, TensorProduct.add_tmul, map_add,
+  simp only [normHomotopyFun, Pi.add_apply, TensorProduct.add_tmul, map_add (f := _),
     Finset.sum_add_distrib]
 
 theorem normHomotopyFun_smul_left {s m : ℕ} (h : s = m + 1) (c : k) (e : X) (y : (Fin s → F) → Y) :
@@ -57,7 +101,7 @@ theorem normHomotopyFun_smul_left {s m : ℕ} (h : s = m + 1) (c : k) (e : X) (y
 theorem normHomotopyFun_add_right {s m : ℕ} (h : s = m + 1) (e : X) (y y' : (Fin s → F) → Y) :
     normHomotopyFun μ h e (y + y') = normHomotopyFun μ h e y + normHomotopyFun μ h e y' := by
   funext g
-  simp only [normHomotopyFun, Pi.add_apply, TensorProduct.tmul_add, map_add,
+  simp only [normHomotopyFun, Pi.add_apply, TensorProduct.tmul_add, map_add (f := _),
     Finset.sum_add_distrib]
 
 theorem normHomotopyFun_smul_right {s m : ℕ} (h : s = m + 1) (c : k) (e : X)
@@ -76,6 +120,7 @@ theorem sum_ρ_μ_tmul_ρ_inv (e : X) (b : Y) :
       change TensorProduct.map (X.ρ a) (Y.ρ a) (e ⊗ₜ[k] Y.ρ a⁻¹ b) = _
       rw [TensorProduct.map_tmul, Representation.self_inv_apply]
     exact (Rep.hom_comm_apply μ a _).symm.trans (congrArg _ h2)
+
   rw [Finset.sum_congr rfl fun a _ => h1 a, ← map_sum, ← TensorProduct.sum_tmul]
   congr 2
   simp [Representation.norm]
@@ -102,9 +147,10 @@ theorem normHomotopyFun_d_add {m : ℕ} (e : X) (y : (Fin (m + 1) → F) → Y) 
         ∑ j : Fin (m + 1), (-1 : k) ^ ((j : ℕ) + 2) •
           normHomotopyFun μ rfl e y (Fin.contractNth j (· * ·) g) := by
     simp only [normHomotopyFun, consTuple_rfl]
+
     simp only [hdy, TensorProduct.tmul_add, TensorProduct.tmul_sub, TensorProduct.tmul_sum,
-      TensorProduct.tmul_smul, map_add, map_sub, map_sum, map_smul, Finset.sum_add_distrib,
-      Finset.sum_sub_distrib]
+    TensorProduct.tmul_smul, map_add, map_sub, map_sum, map_smul, Finset.sum_add_distrib,
+    Finset.sum_sub_distrib]
     rw [sum_ρ_μ_tmul_ρ_inv μ e (y g), Finset.sum_comm (β := Z.V)]
     congr 2
     · refine (Fintype.sum_equiv (Equiv.mulLeft (g 0)) _ _ fun a => ?_).symm
@@ -170,8 +216,8 @@ theorem cochainOf_normHomotopy {s m : ℕ} (h : s = m + 1) (e : X) (y : (cochain
     cochainOf Z (normHomotopy μ h e y) = normHomotopyFun μ h e (cochainOf Y y) :=
   rfl
 
-omit [Fintype F] in
 
+omit [Fintype F] in
 theorem cochainOf_cupPairingCochains_zeroCochain {n : ℕ} (x : X) (y : (cochainsComplex Y).X n)
     (g : Fin n → F) :
     cochainOf Z (cupPairingCochains μ (zero_add n) (zeroCochain X x) y) g =

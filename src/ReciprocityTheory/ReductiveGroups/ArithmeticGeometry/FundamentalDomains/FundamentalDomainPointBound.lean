@@ -1,5 +1,50 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.ModerateCoefficientPositivity
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.CoveringRadiusStatement
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.ModerateCoefficientPositivity
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.CoveringRadiusStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace ReciprocityTheory.ChartRestriction.G.FD
 
@@ -59,9 +104,6 @@ def Jz (x : Frame X.Ψ r) (u : X.Ψ → Fin r → ℂ) : X.Ψ → Fin r → ℂ 
 def Hf (x : Frame X.Ψ r) (τ : X.Ψ) (u w : Fin r → ℂ) : ℂ :=
   hermC τ.1 X.Gm ((2 : ℂ) • X.ppos x τ u - u) w
 
-def reHF (x : Frame X.Ψ r) (u w : X.Ψ → Fin r → ℂ) : ℝ :=
-  ∑ τ, X.c τ * (X.Hf x τ (u τ) (w τ)).re
-
 def Iperp (ξ : Fin r → E) : Set (X.Ψ → Fin r → ℂ) :=
   {u | ∀ τ : X.Ψ, hermC τ.1 X.Gm (u τ) (emb τ.1 ξ) = 0}
 
@@ -116,14 +158,6 @@ def flowEpsilonBound (g d f NA NC c1 w : ℝ) : ℝ :=
   let R2 := w + N2 * Real.log (2 * K2 * N2) + N2 + 2
   min 1 (f ^ 2 / (N0 ^ 2 * NC ^ 2 * c1 * R2))
 
-def OrthogonalRealDecomposition : Prop :=
-  ∀ (r : ℕ) (X : Data E r) (ξ : Fin r → E), X.IsIso ξ → ∀ x ∈ X.dom,
-    (∀ u : X.Ψ → Fin r → ℂ, ∃ s t : X.Ψ → ℂ,
-      u - X.lineV ξ s - X.Jz x (X.lineV ξ t) ∈ X.Uz x ξ) ∧
-    ∀ s t : X.Ψ → ℂ, ∀ w ∈ X.Uz x ξ,
-      X.reHF x (X.lineV ξ s) (X.Jz x (X.lineV ξ t)) = 0 ∧ X.reHF x (X.lineV ξ s) w = 0 ∧
-        X.reHF x (X.Jz x (X.lineV ξ t)) w = 0
-
 def ProjectionAlongComplement : Prop :=
   ∀ (r : ℕ) (X : Data E r) (ξ : Fin r → E), X.IsIso ξ → ∀ x ∈ X.dom, ∀ u ∈ X.Iperp ξ,
     X.ucomp x ξ u ∈ X.Uz x ξ
@@ -137,12 +171,6 @@ def PerfectPairingQuotient : Prop :=
 def PerpQuotientSelfDual : Prop :=
   ∀ (r : ℕ) (X : DataX E r) (ξ : Fin r → E), X.IsIso ξ → ∀ x : Fin r → E, herm X.Gm x ξ = 0 →
     (∀ y ∈ X.L', herm X.Gm y ξ = 0 → IsIntegral ℤ (herm X.Gm x y)) → ∃ e : E, x + e • ξ ∈ X.L'
-
-def FlowFixesComplement : Prop :=
-  ∀ (r : ℕ) (X : Data E r) (ξ : Fin r → E), X.IsIso ξ → ∀ x ∈ X.dom, ∀ s : X.Ψ → ℂ,
-    X.flow ξ s x ∈ X.dom →
-    X.Uz (X.flow ξ s x) ξ = X.Uz x ξ ∧ (∀ u ∈ X.Uz x ξ, X.Jz (X.flow ξ s x) u = X.Jz x u) ∧
-      ∀ u ∈ X.Iperp ξ, X.aproj (X.flow ξ s x) ξ u = X.aproj x ξ u
 
 def UnitaryComplementMove : Prop :=
   ∀ (r : ℕ) (X : Data E r) (ξ : Fin r → E), X.IsIso ξ → ∀ x ∈ X.dom,
@@ -168,14 +196,6 @@ def ReducedFrameDomainCovering : Prop :=
       (∀ u ∈ X.Uz x ξ, X.ucomp (X.lmulC n x) ξ (X.Jz x u) =
         X.Jz (X.lmulC n x) (X.ucomp (X.lmulC n x) ξ u)) ∧
       ∀ τ (v : Fin r → ℂ), X.maj x τ (Matrix.mulVec (n τ - 1) v) ≤ (3 * κ) ^ 2 * X.maj x τ v
-
-def ReducedFrameDomainFiniteOverlap : Prop :=
-  ∀ (r : ℕ) (X : DataX E r) (ξ : Fin r → E), X.IsIso ξ → ∀ x ∈ X.dom, ∀ n' : ℕ,
-    (∀ μ ∈ X.Λp ξ, ∃ e : E, e • ξ ∈ X.Λ ∧ (n' : ℂ) • X.aproj x ξ (X.embV μ) = X.embV (e • ξ)) →
-    (∀ μ ∈ X.Λp ξ, ∃ μ' ∈ X.Λp ξ, (n' : ℂ) • X.ucomp x ξ (X.embV μ) = X.embV μ') ∧
-    ∀ γ ∈ X.Λ, ∀ (s t : X.Ψ → ℂ) (u : X.Ψ → Fin r → ℂ), u ∈ X.Uz x ξ →
-      X.embV γ = X.lineV ξ s + X.Jz x (X.lineV ξ t) + u →
-      ∃ μ ∈ X.Λp ξ, (n' : ℂ) • u = X.ucomp x ξ (X.embV μ)
 
 def IntegerApproximationCount : Prop :=
   ∀ (r : ℕ) (X : Data E r),

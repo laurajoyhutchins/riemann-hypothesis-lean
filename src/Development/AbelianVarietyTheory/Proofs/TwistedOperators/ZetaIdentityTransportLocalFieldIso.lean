@@ -1,6 +1,47 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IsLocIsoRefl
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.NormalizedAbsValueLocalFieldUnitMapHomeomorph
+module
+
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IsLocIsoRefl
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.NormalizedAbsValueLocalFieldUnitMapHomeomorph
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.L2.Theta Formalism.IndefR.Datum Formalism.IndefR.Links Formalism.L2.DIV
 open IsDedekindDomain NumberField MeasureTheory Matrix
@@ -21,8 +62,8 @@ variable {k k' : Type} [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarc
   [Field k'] [ValuativeRel k'] [TopologicalSpace k'] [IsNonarchimedeanLocalField k'] {j : k ≃+* k'}
   {n : Type} [Fintype n] [DecidableEq n]
 
-omit [IsNonarchimedeanLocalField k] [IsNonarchimedeanLocalField k'] in
 
+omit [IsNonarchimedeanLocalField k] [IsNonarchimedeanLocalField k'] in
 theorem val_le_iff (hj : IsLocIso j) (x y : k) :
     valuation k' (j x) ≤ valuation k' (j y) ↔ valuation k x ≤ valuation k y := by
   by_cases hy : y = 0
@@ -75,14 +116,14 @@ theorem shellSet_subset {ϖ ϖ' : kˣ} (h : IsUnif ϖ) (h' : IsUnif ϖ') (m : n 
 def glEquiv (j : k ≃+* k') (n : Type) [Fintype n] [DecidableEq n] : GL n k ≃* GL n k' :=
   Units.mapEquiv (j.mapMatrix (m := n)).toMulEquiv
 
+
 omit [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] [ValuativeRel k'] [TopologicalSpace k']
   [IsNonarchimedeanLocalField k'] in
-
 theorem glEquiv_val (g : GL n k) : (glEquiv j n g).val = g.val.map j := rfl
 
+
 omit [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] [ValuativeRel k'] [TopologicalSpace k']
   [IsNonarchimedeanLocalField k'] in
-
 theorem gdet_glEquiv (g : GL n k) : gdet (glEquiv j n g) = Units.map (j : k →* k') (gdet g) :=
   Units.ext ((j : k →+* k').map_det g.val).symm
 
@@ -142,8 +183,8 @@ theorem shell_map (hj : IsLocIso j) {ϖ : kˣ} {ϖ' : k'ˣ} (h : IsUnif ϖ) (h' 
   show _ = φ (glEquiv j _ g).val * ν' (gdet (glEquiv j _ g)) * apow (gdet (glEquiv j _ g)) _
   rw [gdet_glEquiv, apow_map hj, ← hν, glEquiv_val]
 
-omit [DecidableEq C] in
 
+omit [DecidableEq C] in
 theorem bigF_map (hj : IsLocIso j) {a : ℕ} {ϖ : kˣ} {ϖ' : k'ˣ} (h : IsUnif ϖ) (h' : IsUnif ϖ')
     (hν : ∀ x, ν x = ν' (Units.map (j : k →* k') x)) (Ξ : Matrix (Fin a) C k' → ℂ) (X : Matrix (Fin a) C k) :
     bigF (haarVol (KO k (Fin a))) ϖ ν (fun X => Ξ (X.map j)) X = bigF (haarVol (KO k' (Fin a))) ϖ' ν' Ξ (X.map j) := by
@@ -152,8 +193,8 @@ theorem bigF_map (hj : IsLocIso j) {a : ℕ} {ϖ : kˣ} {ϖ' : k'ˣ} (h : IsUnif
   rw [← shell_map hj h h' hν]
   simp only [Matrix.map_mul]
 
-omit [DecidableEq C] in
 
+omit [DecidableEq C] in
 theorem smallF_map (hj : IsLocIso j) (μ : Measure (GL n k))
     (hν : ∀ x, ν x = ν' (Units.map (j : k →* k') x)) (Ψ : Matrix n C k' → ℂ) (Y : Matrix n C k) :
     smallF μ ν (fun Y => Ψ (Y.map j)) Y = smallF (μ.map (glMeas hj n)) ν' Ψ (Y.map j) := by

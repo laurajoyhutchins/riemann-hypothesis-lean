@@ -1,6 +1,48 @@
-import Development.AbelianVarietyTheory.Definitions.Divisors.DatumEquiv
-import Development.AbelianVarietyTheory.Definitions.Divisors.VdmSplit
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TraceGap.ExistsNonzeroPhysicalHighestWeightVectorTensFock
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.VdmSplit
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TraceGap.ExistsNonzeroPhysicalHighestWeightVectorTensFock
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GapConditionsOfLargeGaps
+
+@[expose] public section
 
 section
 open GlobalTheory.PsCo.PcEG
@@ -41,7 +83,7 @@ theorem card_split (ε : Fin n → Bool) (a : Fin n) :
   rw [h, card_union_of_disjoint d2, card_union_of_disjoint d1, card_singleton]
 
 theorem p_add_q (ε : Fin n → Bool) : pOf ε + qOf ε = n := by
-  unfold pOf qOf
+  delta pOf qOf
   have := card_filter_add_card_filter_not (s := (univ : Finset (Fin n))) (fun a => ε a = true)
   simpa using this
 
@@ -53,16 +95,19 @@ theorem gaW_eq (ε : Fin n → Bool) (lam : Fin n → ℝ) (m : Fin n → ℤ)
       ((univ.filter fun b => ε b = ε a).card : ℝ) := by exact_mod_cast card_split ε a
   have hpqR : (pOf ε : ℝ) + qOf ε = n := by exact_mod_cast p_add_q ε
   have hma := hm a
-  simp only [gaW, Pi.add_apply, Pi.sub_apply, rhoC, rhoHol, ReciprocityTheory.ChartRestriction.TR.Weyl.rhoK]
+  delta gaW rhoC rhoHol ReciprocityTheory.ChartRestriction.TR.Weyl.rhoK
+  simp only [Pi.add_apply, Pi.sub_apply]
   by_cases h : ε a = true
-  · have hs : ((univ.filter fun b => ε b = ε a).card : ℝ) = pOf ε := by simp [pOf, h]
-    rw [if_pos h, if_pos h]
+  · have hs : ((univ.filter fun b => ε b = ε a).card : ℝ) = pOf ε := by
+      delta pOf
+      rw [h]
+    simp only [ite_eq_left h]
     push_cast
     linarith
   · have hs : ((univ.filter fun b => ε b = ε a).card : ℝ) = qOf ε := by
-      simp only [Bool.not_eq_true] at h
-      simp [qOf, h]
-    rw [if_neg h, if_neg h]
+      delta qOf
+      rw [Bool.eq_false_of_not_eq_true h]
+    simp only [ite_eq_right h]
     push_cast
     linarith
 
@@ -91,12 +136,13 @@ theorem harishChandraWeight_integral_dominant : GaInt := by
       have h1 := hanti hab
       have h2 : (m b : ℝ) < m a := by linarith [hm a, hm b]
       have h3 : m b < m a := by exact_mod_cast h2
-      have h4 : ((m b : ℤ) : ℝ) + 1 ≤ m a := by exact_mod_cast h3
+      have h4 : ((m b : ℤ) : ℝ) + 1 ≤ m a := by exact_mod_cast Int.add_one_le_of_lt h3
       linarith [hm a, hm b]
     have h := lf_dom_block hBA a b hab he
     have e : lowK ε lam + (rhoHol ε - rhoN ε) = gaW ε lam := by
       funext x
-      simp only [lowK, gaW, Pi.add_apply, Pi.sub_apply]
+      delta lowK gaW
+      simp only [Pi.add_apply, Pi.sub_apply]
       ring
     rw [e, hg] at h
     have h' : (Λ b : ℝ) ≤ Λ a := h

@@ -1,7 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.DetCharacterMemPrincipalCongruenceFixedVectors
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.MemChainVecsDet
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.LabelEqOfSuppAdds
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.DetCharacterMemPrincipalCongruenceFixedVectors
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.MemChainVecsDet
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.LabelEqOfSuppAdds
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsUpperMulInc
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ReductionActionOnFixK1
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -29,7 +76,7 @@ theorem blk_eq_par (x : Gn g a) (y : Gn g b) : blk a b (a + b) x y = par finSumF
   show toG _ = _
   rw [hM]
   unfold toG
-  rw [dif_pos (Units.isUnit _)]
+  rw [dite_eq_left (Units.isUnit _)]
   exact Units.ext (IsUnit.unit_spec _)
 
 theorem exists_eq_par (u : Gn g (a + b)) (h0 : InPar a (u : Mt g (a + b))) (h1 : tl a (u : Mt g (a + b)) = 1)
@@ -147,6 +194,7 @@ theorem has_of_eqv (S : Sys g) {n : ℕ} (π : Representation ℂ (GL (Fin n) �
     rw [← h, red_invFun]
   have key : ∀ w : fixK1 π, actK σ (S.e a f) (T w) = T ((repK π).asAlgebraHom E w) := by
     intro w
+
     rw [hE, asAlgebraHom_mapDomain_apply_eq_sum, map_sum]
     simp only [actK, LinearMap.sum_apply, LinearMap.smul_apply, map_smul, hlift]
   refine ⟨T ((repK π).asAlgebraHom E u), ?_, ?_⟩
@@ -396,9 +444,10 @@ theorem series_of_mapsToProd (g : ℕ) [Fact g.Prime] (S : Sys g) (n a b : ℕ) 
     · rw [vanish S (repK π) F f₁ f₂ hF u1, map_zero]
   have hone : (1 : MonoidAlgebra ℂ (Gn g (a + b))) = ∑ f₁ ∈ Ta, ∑ f₂ ∈ Tb,
       mapDomainAlgHom ℂ ℂ (inA finSumFinEquiv) (S.e a f₁) * mapDomainAlgHom ℂ ℂ (inB finSumFinEquiv) (S.e b f₂) := by
+
     rw [← Finset.sum_mul_sum, ← map_sum (mapDomainAlgHom ℂ ℂ (inA (g := g) (finSumFinEquiv : Fin a ⊕ Fin b ≃ Fin (a + b))))
-      (S.e a) Ta, ← map_sum (mapDomainAlgHom ℂ ℂ (inB (g := g) (finSumFinEquiv : Fin a ⊕ Fin b ≃ Fin (a + b))))
-      (S.e b) Tb, hTa, hTb, map_one, map_one, one_mul]
+    (S.e a) Ta, ← map_sum (mapDomainAlgHom ℂ ℂ (inB (g := g) (finSumFinEquiv : Fin a ⊕ Fin b ≃ Fin (a + b))))
+    (S.e b) Tb, hTa, hTb, map_one, map_one, one_mul]
   have hX : eN g finSumFinEquiv * 1 * S.e (a + b) F = ∑ f₁ ∈ Ta, ∑ f₂ ∈ Tb, eN g finSumFinEquiv *
       mapDomainAlgHom ℂ ℂ (inA finSumFinEquiv) (S.e a f₁) *
       mapDomainAlgHom ℂ ℂ (inB finSumFinEquiv) (S.e b f₂) * S.e (a + b) F := by
@@ -412,8 +461,10 @@ theorem series_of_mapsToProd (g : ℕ) [Fact g.Prime] (S : Sys g) (n a b : ℕ) 
   have hsum : T0 u1 = ∑ f₁ ∈ Ta, ∑ f₂ ∈ Tb, T0 ((repK π).asAlgebraHom (eN g finSumFinEquiv *
       mapDomainAlgHom ℂ ℂ (inA finSumFinEquiv) (S.e a f₁) *
       mapDomainAlgHom ℂ ℂ (inB finSumFinEquiv) (S.e b f₂) * S.e (a + b) F) u1) := by
+
     rw [e1, hX, map_sum, LinearMap.sum_apply, map_sum]
     refine Finset.sum_congr rfl fun f₁ _ => ?_
+
     rw [map_sum, LinearMap.sum_apply, map_sum]
   rw [hsum]
   exact Finset.sum_eq_zero fun f₁ _ => Finset.sum_eq_zero fun f₂ _ => hterm f₁ f₂

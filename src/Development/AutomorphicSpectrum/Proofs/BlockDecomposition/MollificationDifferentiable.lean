@@ -1,5 +1,55 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.RwAppend
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.RwAppend
+public import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.HaarChartIntegralComparison
+import Mathlib.Algebra.Order.Archimedean.Real.Hom
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Algebra.Group.Units
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open MeasureTheory Matrix Finset Filter Topology
 open scoped ContDiff ComplexConjugate InnerProductSpace ZeroAtInfty
 open PositivityTheory.RgTw (Mat G)
@@ -55,8 +105,8 @@ theorem exists_compact_support {K B : Set (Mat n)} (hK : IsCompact K) (hKs : K �
 
 end GlobalTheory.CompanionTheory.PresSobA.MolDiff
 
-open GlobalTheory.CompanionTheory.PresSobA.MolDiff in
 
+open GlobalTheory.CompanionTheory.PresSobA.MolDiff in
 theorem GlobalTheory.CompanionTheory.PresSobA.mol_differentiableAt :
     ∀ (n : ℕ) [MeasurableSpace (G n)] [BorelSpace (G n)] (μ : Measure (G n)) [μ.IsHaarMeasure] (V : Type) [NormedAddCommGroup V] [InnerProductSpace ℂ V] [CompleteSpace V], Unimod → ∀ φ : Mat n → ℝ, IsTest φ → ∀ x : Lp V 2 μ, ∀ z ∈ GLs n, DifferentiableAt ℝ (Mol μ φ (⇑x)) z := by
   intro n _ _ μ _ V _ _ _ _ φ hφ x z hz
@@ -66,15 +116,15 @@ theorem GlobalTheory.CompanionTheory.PresSobA.mol_differentiableAt :
   have hcf : Continuous (fderiv ℝ φ) := hsm.continuous_fderiv (by simp)
   haveI : LocallyCompactSpace (Mat n) := inferInstanceAs (LocallyCompactSpace (Fin n → Fin n → ℂ))
   obtain ⟨B, hBn, hBs, hBc⟩ := local_compact_nhds (isOpen_GLs.mem_nhds hz)
-  obtain ⟨S, hSc, hS⟩ := exists_compact_support hcs hsub hBc hBs
+  obtain ⟨S, hSc, hS⟩ := MolDiff.exists_compact_support hcs hsub hBc hBs
   have hinv : Continuous (fun u : G n => (u⁻¹ : G n).val) :=
     Units.continuous_val.comp continuous_inv
   have hmul : Continuous (fun p : Mat n × G n => p.1 * (p.2⁻¹ : G n).val) :=
     continuous_fst.matrix_mul (hinv.comp continuous_snd)
   let g : Mat n → G n → CLof (Mat n) ℝ := fun z u =>
-    (fderiv ℝ φ (z * (u⁻¹ : G n).val)).comp (rmul (u⁻¹ : G n).val)
+    (fderiv ℝ φ (z * (u⁻¹ : G n).val)).comp (MolDiff.rmul (u⁻¹ : G n).val)
   have hg : Continuous (fun p : Mat n × G n => g p.1 p.2) :=
-    (hcf.comp hmul).clm_comp (continuous_rmul.comp (hinv.comp continuous_snd))
+    (hcf.comp hmul).clm_comp (MolDiff.continuous_rmul.comp (hinv.comp continuous_snd))
   obtain ⟨C, hC⟩ := (hBc.prod hSc).exists_bound_of_continuousOn hg.continuousOn
   obtain ⟨C0, hC0⟩ := hc1.bounded_above_of_compact_support hcs
   have hxS : IntegrableOn (⇑x) S μ := by
@@ -91,7 +141,9 @@ theorem GlobalTheory.CompanionTheory.PresSobA.mol_differentiableAt :
       (Lp.aestronglyMeasurable x)
   have hF'm : AEStronglyMeasurable (F' z) μ := by
     have hgz : Continuous (g z) := hg.comp (Continuous.prodMk_right z)
-    exact (ContinuousLinearMap.smulRightL ℝ (Mat n) V).aestronglyMeasurable_comp₂
+    let L : CLof (Mat n) ℝ →L[ℝ] V →L[ℝ] CLof (Mat n) V :=
+      StrongDual.smulRightL ℝ (Mat n) V
+    exact L.aestronglyMeasurable_comp₂
       hgz.aestronglyMeasurable (Lp.aestronglyMeasurable x)
   have hFb : ∀ u, ‖F z u‖ ≤ bound u := by
     intro u
@@ -115,8 +167,8 @@ theorem GlobalTheory.CompanionTheory.PresSobA.mol_differentiableAt :
       simp
   have hd : ∀ᵐ u ∂μ, ∀ z' ∈ B, HasFDerivAt (F · u) (F' z' u) z' := by
     refine ae_of_all _ fun u z' _ => ?_
-    have h1 : HasFDerivAt (fun w : Mat n => w * (u⁻¹ : G n).val) (rmul (u⁻¹ : G n).val) z' :=
-      (rmul (u⁻¹ : G n).val).hasFDerivAt
+    have h1 : HasFDerivAt (fun w : Mat n => w * (u⁻¹ : G n).val) (MolDiff.rmul (u⁻¹ : G n).val) z' :=
+      (MolDiff.rmul (u⁻¹ : G n).val).hasFDerivAt
     exact ((hdφ _).hasFDerivAt.comp z' h1).smul_const (x u)
   exact (hasFDerivAt_integral_of_dominated_of_fderiv_le hBn
     (Eventually.of_forall hFm) (hbi.mono' (hFm z) (ae_of_all _ hFb)) hF'm hF'b hbi hd).differentiableAt

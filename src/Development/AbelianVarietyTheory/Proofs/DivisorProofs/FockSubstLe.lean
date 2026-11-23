@@ -1,12 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.PaddedWittNormSquare
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ColumnInclusionRenaming
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DifferentiableOfUnitCoord
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ExistsMulOfApprox
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.NormLeOfCoord
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.DualWeylEqSpanColProd
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExtremalRowWeight
-import Formalism.ThetaSupremumBounds.LiftOperatorBoundOfFockJet
+module
+
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.DualWeylEqSpanColProd
+public import Development.AbelianVarietyTheory.Definitions.Foundations.ExistsUnitaryMulTriangular
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.RenameMemDualWeyl
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ColumnInclusionRenaming
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.DualWeylExtremalReproducingNormSqOneStatement
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExtremalRowWeight
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.NormLeOfCoord
+import Formalism.GradedWeylDivisibility.FinalC
+import Formalism.GradedWeylDivisibility.FockSpaceTableaux.LDlatLemmas
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Matrix.PosDef
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open MvPolynomial Formalism.GradedWeylDivisibility Formalism.BasicNotions Formalism.L2.DIV
 open Formalism.REAL (fockF)
@@ -47,6 +90,7 @@ theorem rowAct_pad {a b : ℕ} (h : a ≤ b) (A : Matrix (Fin a) (Fin b) ℂ) (f
       (rename (incl h)).comp (rowAct ℂ (A * Aᴴ)) := by
     apply MvPolynomial.algHom_ext
     rintro ⟨p, q⟩
+
     simp only [AlgHom.comp_apply, rename_X, rowAct, aeval_X, map_sum, map_mul, rename_C, Prod.map]
     rw [sum_castLE h]
     · refine Finset.sum_congr rfl fun β _ => ?_
@@ -143,8 +187,8 @@ theorem rename_hw {a b : ℕ} (h : a ≤ b) (ν : Fin a → ℕ) :
   ext p q : 2
   simp [GlobalTheory.Proof.ColumnInclusionRenaming.colIncl]
 
-open GlobalTheory.DualWeyl GlobalTheory.WeylMinorDual in
 
+open GlobalTheory.DualWeyl GlobalTheory.WeylMinorDual in
 theorem fock_mul_det {n : ℕ} (μ : Fin n → ℕ) (hμ : Antitone μ) (e : ℕ) {f : MvPolynomial (Fin n × Fin n) ℂ}
     (hf : f ∈ dualWeyl ℂ n n μ) :
     fockF (f * gdet ℂ n ^ e) (f * gdet ℂ n ^ e) /

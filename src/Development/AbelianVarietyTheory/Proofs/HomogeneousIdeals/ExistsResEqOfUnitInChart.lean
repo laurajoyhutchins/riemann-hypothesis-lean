@@ -1,5 +1,50 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.ExistsChartOfMemRedKer
+module
+
+public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.ExistsChartOfMemRedKer
+public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.SpanEqTopOfForallMaximal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -33,9 +78,6 @@ def addDer (φ : B →ₐ[R] A) (D : B →ₗ[R] A) (hD : ∀ b b', D (b * b') =
       simp only [LinearMap.add_apply, AlgHom.toLinearMap_apply, map_mul, hD]
       linear_combination - h0 b b')
 
-theorem addDer_apply (φ : B →ₐ[R] A) (D : B →ₗ[R] A) (hD) (h0) (b : B) :
-    addDer φ D hD h0 b = φ b + D b := rfl
-
 def addDers {κ : Type} [Fintype κ] (τ : κ → Derivation R B B) (φ : B →ₐ[R] A) (t : κ → A)
     (ht : ∀ i j, t i * t j = 0) : B →ₐ[R] A :=
   addDer φ
@@ -43,7 +85,7 @@ def addDers {κ : Type} [Fintype κ] (τ : κ → Derivation R B B) (φ : B →�
       map_add' := fun b b' => by simp [add_mul, Finset.sum_add_distrib]
       map_smul' := fun r b => by simp [Finset.smul_sum] }
     (fun b b' => by
-      simp only [LinearMap.coe_mk, AddHom.coe_mk, Derivation.leibniz, smul_eq_mul, map_add, map_mul,
+      simp only [LinearMap.coe_mk, AddHom.coe_mk, Derivation.leibniz, smul_eq_mul, map_add (f := _), map_mul,
         Finset.mul_sum, ← Finset.sum_add_distrib]
       exact Finset.sum_congr rfl fun i _ => by ring)
     (fun b b' => by
@@ -55,8 +97,8 @@ theorem addDers_apply {κ : Type} [Fintype κ] (τ : κ → Derivation R B B) (�
     (t : κ → A) (ht : ∀ i j, t i * t j = 0) (b : B) :
     addDers τ φ t ht b = φ b + ∑ i, φ (τ i b) * t i := rfl
 
-variable (R B) in
 
+variable (R B) in
 theorem exists_ders [Algebra.Smooth R B] :
     ∃ (κ : Type) (_ : Fintype κ) (β : κ → B) (τ : κ → Derivation R B B),
       ∀ (A : Type) [CommRing A] [Algebra R A] (φ φ' : B →ₐ[R] A),
@@ -87,7 +129,7 @@ theorem exists_ders [Algebra.Smooth R B] :
   have : IsScalarTower R B A := IsScalarTower.of_algebraMap_eq fun r => (φ'.commutes r).symm
   let δ : Derivation R B A :=
     { toFun := fun b => φ b - φ' b
-      map_add' := fun b b' => by simp only [map_add]; ring
+      map_add' := fun b b' => by simp only [map_add (f := _)]; ring
       map_smul' := fun r b => by simp [smul_sub]
       map_one_eq_zero' := by simp
       leibniz' := fun a b => by
@@ -95,6 +137,7 @@ theorem exists_ders [Algebra.Smooth R B] :
         rw [map_mul, map_mul]
         linear_combination hprod a b }
   have key := congrArg δ.liftKaehlerDifferential (hD b)
+
   simp only [map_sum, map_smul, Derivation.liftKaehlerDifferential_comp_D] at key
   exact key
 
@@ -307,6 +350,7 @@ theorem exists_res_eq_of_unitInChart (hS : UnitInChart G S) (hρ : IsAway ρ g)
       · have s := snd_eq_sum hτ (ρ.comp u) φ' hφ' b
         simp only [AlgHom.comp_apply, snd_dualScale, snd_dualMap, ψ, addDers_apply]
         rw [s, Finset.sum_mul]
+
         simp [TrivSqZeroExt.snd_sum, map_sum, mul_assoc, ha]
         exact Finset.sum_congr rfl fun i _ => mul_comm _ _
     dsimp only [res, scl]

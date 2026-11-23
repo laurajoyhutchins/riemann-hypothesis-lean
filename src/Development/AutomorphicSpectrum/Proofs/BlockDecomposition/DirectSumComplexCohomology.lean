@@ -1,9 +1,48 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.HodgeSurjectivity.FormUniq
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.HodgeSurjectivity.NLeA
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.CechPairings.Imports
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.ChartGrConst
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.HodgeXD
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.HodgeXD
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.CechPairings.MemBoundariesZeroIff
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 set_option backward.isDefEq.respectTransparency false
 open CategoryTheory AlgebraicGeometry TensorProduct DirectSum GlobalTheory.LogCris CrystallineSemistableComparison CrystallineSemistableComparison.Onto CrystallineSemistableComparison.Pb CrystallineSemistableComparison.HT GlobalTheory.CompanionTheory.KunGlue
 
@@ -32,8 +71,8 @@ def prj (i : I) : Cx.Hom (Dsum E) (E i) (RingHom.id K) where
       by_cases h : j = i
       · subst h
         simp only [DirectSum.component.lof_self]
-      · rw [DirectSum.component.of, DirectSum.component.of, dif_neg h, dif_neg h, map_zero]
-    | add x y hx hy => simp only [map_add, hx, hy]
+      · rw [DirectSum.component.of, DirectSum.component.of, dite_eq_right h, dite_eq_right h, map_zero]
+    | add x y hx hy => simp only [map_add (f := _), hx, hy]
 
 def toH (n : ℕ) : (⨁ i, (E i).H n) →ₗ[K] (Dsum E).H n :=
   DirectSum.toModule K I _ fun i => (inj E i).mapH n
@@ -55,12 +94,12 @@ theorem prj_toH (n : ℕ) (i : I) (y : ⨁ i, (E i).H n) :
     · subst hji
       rw [DirectSum.component.lof_self]
       exact hcl _ _ _ _ (DirectSum.component.lof_self K _ _)
-    · rw [DirectSum.component.of, dif_neg hji]
+    · rw [DirectSum.component.of, dite_eq_right hji]
       rw [← CrystallineSemistableComparison.CechClassBoundaries.cls_zero' (K := E i) (n := n) (map_zero _)]
       refine hcl _ _ _ _ ?_
       show DirectSum.component K I (fun i ↦ (E i).X n) i (DirectSum.lof K I (fun i ↦ (E i).X n) j a) = 0
-      rw [DirectSum.component.of, dif_neg hji]
-  | add y₁ y₂ h₁ h₂ => simp only [map_add, h₁, h₂]
+      rw [DirectSum.component.of, dite_eq_right hji]
+  | add y₁ y₂ h₁ h₂ => simp only [map_add (f := _), h₁, h₂]
 
 theorem toH_injective (n : ℕ) : Function.Injective (toH E n) := by
   refine (injective_iff_map_eq_zero (toH E n)).2 fun y hy ↦ ?_
@@ -88,6 +127,7 @@ theorem toH_surjective (n : ℕ) : Function.Surjective (toH E n) := by
     | insert j S hj ih =>
       intro h
       have hS : (Dsum E).d n (∑ i ∈ S, (inj E i).f n ((prj E i).f n x)) = 0 := by
+
         rw [map_sum]
         exact Finset.sum_eq_zero fun i _ ↦ hci i
       simp only [Finset.sum_insert hj]
@@ -96,6 +136,7 @@ theorem toH_surjective (n : ℕ) : Function.Surjective (toH E n) := by
     conv_rhs => rw [← DirectSum.sum_support_of x]
     rfl
   refine ⟨∑ i ∈ DFinsupp.support x, DirectSum.lof K I (fun i ↦ (E i).H n) i ((E i).cls _ (hc i)), ?_⟩
+
   rw [map_sum]
   simp only [toH, DirectSum.toModule_lof]
   have hx' : (Dsum E).d n (∑ i ∈ DFinsupp.support x, (inj E i).f n ((prj E i).f n x)) = 0 := by

@@ -1,6 +1,54 @@
-import Mathlib
-import GroundTheory.TateCohomology.DeltaMap
-import GroundTheory.TateCohomology.CoindOne
+module
+
+public import GroundTheory.TateCohomology.CoindOne
+public import Mathlib.Combinatorics.Quiver.ReflQuiver
+public import Mathlib.RepresentationTheory.Homological.GroupCohomology.Functoriality
+public import GroundTheory.TateCohomology.DeltaMap
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.EffectiveEpi.Comp
+import Mathlib.CategoryTheory.ExtremalEpi
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.GroupCoh
@@ -36,7 +84,6 @@ theorem inflation_comp_restriction (n : ℕ) :
   rw [← map_comp, Category.comp_id, groupCohomology.congr (QuotientGroup.mk'_comp_subtype S)
     (fun f φ => map f φ (n + 1)), map_one_succ]
 
-@[simps X₁ X₂ X₃ f g]
 noncomputable def infResShortComplex (n : ℕ) : ShortComplex (ModuleCat k) where
   X₁ := groupCohomology (A.quotientToInvariants S) (n + 1)
   X₂ := groupCohomology A (n + 1)
@@ -57,9 +104,10 @@ lemma invariants_map_surjective {X : ShortComplex (Rep k G)} (hX : X.ShortExact)
   exact (ModuleCat.epi_iff_surjective _).1 e3
 
 noncomputable def toCoindOne : A ⟶ coindOne k G A :=
-  ofHom ⟨LinearMap.pi fun x => A.ρ x, fun g => by ext a x; simp⟩
-
-lemma toCoindOne_hom_apply (a : A) (x : G) : (toCoindOne A).hom a x = A.ρ x a := rfl
+  ofHom ⟨LinearMap.pi fun x => A.ρ x, fun g => by
+    ext a x
+    change A.ρ x (A.ρ g a) = A.ρ (x * g) a
+    rw [map_mul, mul_apply_eq_comp]⟩
 
 lemma toCoindOne_injective : Function.Injective (toCoindOne A).hom := fun a b h => by
   have h' : A.ρ 1 a = A.ρ 1 b := congrFun h 1
@@ -82,13 +130,9 @@ noncomputable abbrev shiftSCQ : ShortComplex (Rep k (G ⧸ S)) :=
   (shiftSC A).map (quotientToInvariantsFunctor k S)
 
 lemma shiftSCQ_shortExact (h1 : IsZero (groupCohomology (res S.subtype A) 1)) :
-    (shiftSCQ A S).ShortExact where
-  mono_f := (Rep.mono_iff_injective _).2 fun x y h =>
-    Subtype.ext (toCoindOne_injective A (congrArg Subtype.val h))
-  epi_g := (Rep.epi_iff_surjective _).2
-    (invariants_map_surjective ((shortExact_res S.subtype).2 (shiftSC_shortExact A)) h1)
-  exact := by
-    rw [← ShortComplex.exact_map_iff_of_faithful _ (forget₂ (Rep k (G ⧸ S)) (ModuleCat k)),
+    (shiftSCQ A S).ShortExact := by
+  refine ShortComplex.ShortExact.mk' ?_ ?_ ?_
+  · rw [← ShortComplex.exact_map_iff_of_faithful _ (forget₂ (Rep k (G ⧸ S)) (ModuleCat k)),
       ShortComplex.moduleCat_exact_iff_ker_sub_range]
     intro x hx
     have hrk := ((shiftSC_shortExact A).exact.map
@@ -102,6 +146,11 @@ lemma shiftSCQ_shortExact (h1 : IsZero (groupCohomology (res S.subtype A) 1)) :
     refine (hom_comm_apply (toCoindOne A) (s : G) a).trans ?_
     rw [ha']
     exact x.2 s
+  · exact (Rep.mono_iff_injective _).2 fun x y h =>
+      Subtype.ext (toCoindOne_injective A (congrArg Subtype.val h))
+  · exact (Rep.epi_iff_surjective (shiftSCQ A S).g).2
+      (invariants_map_surjective (X := (shiftSC A).map (resFunctor S.subtype))
+        ((shortExact_res S.subtype).2 (shiftSC_shortExact A)) h1)
 
 theorem infRes_step (n : ℕ)
     (ih : ∀ B : Rep k G, (∀ i, 0 < i → i < n + 1 → IsZero (groupCohomology (res S.subtype B) i)) →

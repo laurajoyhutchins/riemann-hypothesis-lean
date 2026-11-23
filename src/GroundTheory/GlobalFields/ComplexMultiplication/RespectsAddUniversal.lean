@@ -1,6 +1,51 @@
-import Mathlib
-import GroundTheory.ArithmeticGeometry.AbelianVarieties.DualIsogeny
-import GroundTheory.ArithmeticGeometry.AbelianVarieties.ReductionTorsion
+module
+
+public import GroundTheory.ArithmeticGeometry.AbelianVarieties.DualIsogeny
+public import GroundTheory.ArithmeticGeometry.AbelianVarieties.ReductionTorsion
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GroundTheory.Global
 
@@ -24,8 +69,8 @@ def TransOver : (E.baseChange M).toAffine.Point → Prop
 def algPts : AddSubgroup (E.baseChange M).toAffine.Point :=
   (Point.map (W' := E) ((algebraicClosure L M).val.restrictScalars F)).range
 
-omit [DecidableEq M] in
 
+omit [DecidableEq M] in
 theorem isIntegral_y {x y : M} (h : (E.baseChange M).toAffine.Equation x y)
     (hx : x ∈ algebraicClosure L M) : y ∈ algebraicClosure L M := by
   set S := algebraicClosure L M
@@ -203,10 +248,10 @@ theorem halfUniversal (hQ : UnivAdd Q) {L M : Type*} [Field L] [Algebra F L] [Fi
   have c₁ : Point.map τ (univPt₁ E) = Point.map (IsScalarTower.toAlgHom F L M) A := by
     rw [univPt₁, Point.map_map, hcomp, ← Point.map_map, map_genEval_genericPoint]
   have e := congrArg (Point.map τ) hQ
-  rw [map_add, ← map_genEval_map Q τ _ (isGenPt_map E τ (isGenPt_univPt₁₂ E)),
+  rw [map_add (f := _), ← map_genEval_map Q τ _ (isGenPt_map E τ (isGenPt_univPt₁₂ E)),
     ← map_genEval_map Q τ _ (isGenPt_map E τ (isGenPt_univPt₁ E)),
     ← map_genEval_map Q τ _ (isGenPt_map E τ (isGenPt_univPt₂ E))] at e
-  rw [genEval_congr E (by rw [map_add, c₁, c₂]) _ (hB.add_left A).isGenPt,
+  rw [genEval_congr E (by rw [map_add (f := _), c₁, c₂]) _ (hB.add_left A).isGenPt,
     genEval_congr E c₁ _ (isGenPt_map E (IsScalarTower.toAlgHom F L M) hA),
     genEval_congr E c₂ _ hB.isGenPt] at e
   exact e
@@ -234,7 +279,7 @@ theorem respectsAdd_of_univAdd (hQ : UnivAdd Q) : RespectsAdd E E' Q := by
   have e₂ := halfUniversal Q hQ P₂ h₂ _ hnT
   have e₃ := halfUniversal Q hQ (P₁ + P₂) h₃ _ hnT
   have hsum : Point.map ι P₁ + (Point.map ι P₂ + -T) = Point.map ι (P₁ + P₂) + -T := by
-    rw [map_add, add_assoc]
+    rw [map_add (f := _), add_assoc]
   rw [genEval_congr E hsum _ (hnT.add_left (P₁ + P₂)).isGenPt, e₃, e₂] at e₁
   have key : Point.map (genEval E _ (isGenPt_map E ι h₃)) Q =
       Point.map (genEval E _ (isGenPt_map E ι h₁)) Q +
@@ -243,7 +288,7 @@ theorem respectsAdd_of_univAdd (hQ : UnivAdd Q) : RespectsAdd E E' Q := by
     simp only [add_sub_cancel_right] at this
     rw [this]
     abel
-  rw [map_genEval_map Q ι h₃, map_genEval_map Q ι h₁, map_genEval_map Q ι h₂, ← map_add] at key
+  rw [map_genEval_map Q ι h₃, map_genEval_map Q ι h₁, map_genEval_map Q ι h₂, ← map_add (f := _)] at key
   exact Point.map_injective ι key
 
 end Criterion

@@ -1,17 +1,57 @@
-import Mathlib
-import Development.AutomorphicArithmetic.AutomorphicVarieties.NumberFieldTowers.IdealNormClassCongr
-import Development.AutomorphicArithmetic.AutomorphicVarieties.NumberFieldTowers.CokerDual
-import Development.AutomorphicArithmetic.AutomorphicVarieties.NumberFieldTowers.LayerUniq
-import Development.AutomorphicArithmetic.AutomorphicVarieties.NumberFieldTowers.LayerGen
-import Development.AutomorphicArithmetic.AutomorphicVarieties.NumberFieldTowers.CycMemPrincIff
-import Development.AutomorphicArithmetic.AutomorphicVarieties.NumberFieldTowers.Imports
-import Development.AutomorphicArithmetic.AutomorphicVarieties.NumberFieldTowers.ShaDGen
-import Development.AutomorphicArithmetic.AutomorphicVarieties.NumberFieldTowers.GenGal
-import Development.AutomorphicArithmetic.AutomorphicVarieties.NumberFieldTowers.GenIff
-import Development.AutomorphicArithmetic.AutomorphicVarieties.NumberFieldTowers.RankBase
-import Development.AutomorphicArithmetic.AutomorphicVarieties.NumberFieldTowers.RankXRk
-import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.GaloisCohomologyLength.ShaLenEqShaInv
-import Formalism.GaloisCohomology.GaloisCohomologyProofs.LdataNonempty
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.NumberFieldTowers.XTwApplyApply
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AdditiveValuationNorms.CokLenLeOfRangeLe
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.StmtFields
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.GaloisCohomologyLength.ShaLenEqShaInv
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.NumberFieldTowers.CokerDual
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.NumberFieldTowers.CycMemPrincIff
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.NumberFieldTowers.GenGal
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.NumberFieldTowers.Imports
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.NumberFieldTowers.LayerGen
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.NumberFieldTowers.LayerUniq
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.NumberFieldTowers.ShaDGen
+public import Formalism.GaloisCohomology.GaloisCohomologyProofs.LdataNonempty
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Formalism.ConjugateSelfDual ReciprocityTheory.Gal Formalism.GaloisCohomology UpperTheory.V UpperTheory.V.LDataCardLeFinrank UpperTheory.V.Base UpperTheory.V.Kum UpperTheory.V.Tower
 
@@ -28,7 +68,11 @@ theorem step0 (hμ : HasMuQ l L₀) {γ : G L₀ Ω} (hγ : IsGen l ⊤ γ) {e :
     shaInv L₁ l e = cokerLen (xTw l l (⊤ : Subgroup (G L₀ Ω)) e γ ^ l ^ m - 1) := by
   haveI : IsAlgClosed Ω := IsAlgClosure.isAlgClosed L₀
   haveI : FiniteDimensional L₀ L₁ := Module.Finite.of_restrictScalars_finite ℚ L₀ L₁
-  let j : L₁ →ₐ[L₀] Ω := IsAlgClosed.lift
+  let j : L₁ →ₐ[L₀] Ω := (by
+    refine @_root_.IsAlgClosed.lift _ _ _ _ _ _ _ _ _ _ _ ?_ ?_ ?_
+    solve_by_elim* (maxDepth := 2) only [*,
+      @_root_.DivisionSemiring.to_moduleIsTorsionFree,
+      @_root_.Algebra.IsIntegral.isAlgebraic, @_root_.inferInstance])
   letI : Algebra L₁ Ω := j.toRingHom.toAlgebra
   haveI : IsScalarTower L₀ L₁ Ω := IsScalarTower.of_algebraMap_eq fun x => (j.commutes x).symm
   haveI : Algebra.IsAlgebraic L₀ Ω := IsAlgClosure.isAlgebraic
@@ -45,8 +89,8 @@ theorem step0 (hμ : HasMuQ l L₀) {γ : G L₀ Ω} (hγ : IsGen l ⊤ γ) {e :
   exact (cokerDual l _ _ _ fun x φ => by
     rw [LinearMap.sub_apply, LinearMap.sub_apply, LinearMap.sub_apply, map_sub, xTw_apply_apply]; rfl).symm
 
-variable (l L₀ Ω) in
 
+variable (l L₀ Ω) in
 theorem exists_descends (hμ : HasMuQ l L₀) : ∃ γ : G L₀ Ω, IsGen l ⊤ γ ∧
     PropA.IsLevel l (cycZ L₀ Ω l γ : ℤ_[l]ˣ) (cZero l L₀) ∧ (∃ ζ : L₀, IsPrimitiveRoot ζ (l ^ cZero l L₀)) ∧
     ∀ e : ℕ, 1 ≤ e → ∀ (m : ℕ) (L₁ : Type) [Field L₁] [NumberField L₁] [Algebra L₀ L₁], IsLayer l m L₀ L₁ →
@@ -56,17 +100,6 @@ theorem exists_descends (hμ : HasMuQ l L₀) : ∃ γ : G L₀ Ω, IsGen l ⊤ 
   exact ⟨γ, hγ, ((layerGen L₀ Ω l hμ).2 γ hγ).1, ((muQ L₀ Ω l).1 _).2 le_rfl, fun e he m L₁ _ _ _ hL =>
     step0 hμ hγ (by omega) m L₁ hL⟩
 
-variable (l L₀) in
-theorem isTower_iff (R : ℕ) : IsTower l L₀ R ↔ HasMuQ l L₀ ∧ 1 ≤ R ∧ rankN l L₀ l ≤ R :=
-  ⟨fun h => ⟨h.mu, h.pos, (genIff L₀ _ l l ⊤ R isClosed_univ).1 h.gen⟩, fun h =>
-    ⟨((muQ L₀ (AlgebraicClosure L₀) l).2.2.2.1 h.1).1, h.1, h.2.1, (genIff L₀ _ l l ⊤ R isClosed_univ).2 h.2.2⟩⟩
-
-theorem isTower_of_xRk (k : Type) [Field k] [NumberField k] [Algebra k L₀] [Algebra k Ω] [IsScalarTower k L₀ Ω]
-    [IsAlgClosure k Ω] (hμ : HasMuQ l L₀) {R : ℕ} (hR : 1 ≤ R) {U : Subgroup (G k Ω)}
-    (hU : cycU l U = cycU l (galOf k L₀ Ω)) (h : Two.XRk l 1 (cycU l U) R) : IsTower l L₀ R :=
-  (isTower_iff l L₀ R).2 ⟨hμ, hR, by
-    rw [← rankBase.1 k L₀ Ω l l U hU]
-    exact (rankXRk k Ω l l U R).2 (h.of_one l)⟩
 
 end Step0
 

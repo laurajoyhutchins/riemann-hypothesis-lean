@@ -1,9 +1,58 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Foundations.MemL2OfBoundedContinuousInvariant
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.SetIntegralNormRmulLe
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ContinuousIntegralInvMulOfLocallyIntegrable
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.MemL2OfBoundedContinuousInvariant
+import Aesop.Main
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ConstantTermAlongFlagEqZeroOfCuspidalStatement
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ContinuousIntegralInvMulOfLocallyIntegrable
 import Development.AbelianVarietyTheory.Proofs.FoundationProofs.MemExtSubSpanDepth
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ConstantTermAlongFlagEqZeroOfCuspidalStatement
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.MemLpLiftL2DiscreteQuotientOnCompact
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.SetIntegralNormRmulLe
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.MeasureTheory.Function.AEEqOfIntegral
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Compactness.Paracompact
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open MeasureTheory Set GlobalTheory.AutomorphicL2Unitary GlobalTheory.Cusp
 open scoped ENNReal Pointwise InnerProductSpace ComplexConjugate
@@ -16,8 +65,8 @@ variable {G : Type} [Group G] [TopologicalSpace G] [IsTopologicalGroup G] [Secon
   [LocallyCompactSpace G] [T2Space G] [MeasurableSpace G] [BorelSpace G] {Γ N : Subgroup G} [DiscreteTopology Γ]
   {μ : Measure G} [μ.IsHaarMeasure] {φ : G → ℂ} {S : Set G}
 
-omit [LocallyCompactSpace G] in
 
+omit [LocallyCompactSpace G] in
 theorem exists_setIntegral_norm_le (hS : IsCompact S) :
     ∃ c : ℝ, ∀ F : L2 Γ μ, ∫ y in S, ‖lift Γ F y‖ ∂μ ≤ c * ‖F‖ := by
   set a : ℝ≥0∞ := ({γ : Γ | (γ : G) ∈ S * S⁻¹}.encard : ℝ≥0∞) with ha
@@ -39,16 +88,16 @@ theorem exists_setIntegral_norm_le (hS : IsCompact S) :
   have h2 : eLpNorm (lift Γ F) 2 (μ.restrict S) ≤ a ^ (1 / 2 : ℝ) * eLpNorm F 2 (quotMeasure Γ μ) := by
     refine (eLpNorm_map_measure (Lp.stronglyMeasurable F).aestronglyMeasurable measurable_mk.aemeasurable).ge.trans
       ((eLpNorm_mono_measure _ hle).trans (le_of_eq ?_))
-    rw [eLpNorm_smul_measure_of_ne_top (by norm_num)]
+    rw [eLpNorm_smul_measure_of_ne_top (by norm_num) _ _ (Lp.stronglyMeasurable F).aestronglyMeasurable]
     norm_num
-  rw [integral_norm_eq_lintegral_enorm hm, ← eLpNorm_one_eq_lintegral_enorm, Lp.norm_def, ← ENNReal.toReal_mul]
+  rw [integral_norm_eq_lintegral_enorm hm, ← eLpNorm_one_eq_lintegral_enorm hm, Lp.norm_def, ← ENNReal.toReal_mul]
   refine ENNReal.toReal_mono (by have := Lp.eLpNorm_ne_top F; finiteness) (h1.trans ?_)
   rw [mul_right_comm, Measure.restrict_apply_univ]
   norm_num
   gcongr
 
-omit [SecondCountableTopology G] [LocallyCompactSpace G] in
 
+omit [SecondCountableTopology G] [LocallyCompactSpace G] in
 theorem setIntegral_norm_mul_left_le (hi : LocallyIntegrable φ μ) (hS : IsCompact S) {C : Set G} (hC : IsCompact C)
     {k : G} (hk : ∀ y ∈ S, k * y ∈ C) :
     IntegrableOn (fun y => φ (k * y)) S μ ∧ ∫ y in S, ‖φ (k * y)‖ ∂μ ≤ ∫ y in C, ‖φ y‖ ∂μ := by
@@ -58,10 +107,10 @@ theorem setIntegral_norm_mul_left_le (hi : LocallyIntegrable φ μ) (hS : IsComp
     (hp.integrableOn_comp_preimage he).2 (hi.integrableOn_isCompact hC)
   refine ⟨h1.mono_set hk, ?_⟩
   rw [← hp.setIntegral_preimage_emb he (fun y => ‖φ y‖) C]
-  exact setIntegral_mono_set h1.norm (.of_forall fun _ => norm_nonneg _) (HasSubset.Subset.eventuallyLE hk)
+  exact setIntegral_mono_set h1.norm (.of_forall fun _ => norm_nonneg _) (.of_forall hk)
+
 
 omit [SecondCountableTopology G] [LocallyCompactSpace G] [DiscreteTopology Γ] in
-
 theorem exists_compact_bound (hc : Cocompact Γ N) (hS : IsCompact S) : ∃ C : Set G, IsCompact C ∧
     ∀ φ : G → ℂ, LeftInv Γ φ → LocallyIntegrable φ μ → ∀ n : N,
       IntegrableOn (fun y => φ (n * y)) S μ ∧ ∫ y in S, ‖φ (n * y)‖ ∂μ ≤ ∫ y in C, ‖φ y‖ ∂μ := by
@@ -83,9 +132,21 @@ theorem integrable_prod (hc : Cocompact Γ N) (hφ : LeftInv Γ φ) (hm : Strong
   have e : (fun p : Quot (Γ.subgroupOf N) × G => φ ((p.1.out : N) * p.2)) =
       fun p => φ ((sec (Γ.subgroupOf N) p.1 : N) * p.2) := funext fun p =>
     (leftInv_integrand hφ p.2).eq_of_mk_eq ((Quotient.out_eq _).trans (mk_sec _).symm)
+  have hsec : Measurable (sec (Γ.subgroupOf N)) := by
+    intro s hs
+    have h : mk (Γ.subgroupOf N) ⁻¹' (sec (Γ.subgroupOf N) ⁻¹' s) =
+        ⋃ γ : Γ.subgroupOf N, (fun x : N => (γ : N) * x) ⁻¹' (s ∩ stdDom (Γ.subgroupOf N)) := by
+      ext x
+      simp only [mem_preimage, mem_iUnion, mem_inter_iff]
+      refine ⟨fun h => ?_, fun ⟨γ, h1, h2⟩ => by rwa [sec_eq h2 (mk_mul γ x)]⟩
+      obtain ⟨γ, e⟩ := mk_eq_iff.1 (mk_sec (mk (Γ.subgroupOf N) x)).symm
+      exact ⟨γ, e ▸ h, e ▸ sec_mem _⟩
+    change MeasurableSet (mk (Γ.subgroupOf N) ⁻¹' (sec (Γ.subgroupOf N) ⁻¹' s))
+    rw [h]
+    exact .iUnion fun γ => measurable_const_mul _ (hs.inter (measurableSet_stdDom _))
   have hm' : StronglyMeasurable fun p : Quot (Γ.subgroupOf N) × G => φ ((p.1.out : N) * p.2) :=
     e ▸ hm.comp_measurable
-      ((measurable_subtype_coe.comp (measurableEmbedding_sec.measurable.comp measurable_fst)).mul measurable_snd)
+      ((measurable_subtype_coe.comp (hsec.comp measurable_fst)).mul measurable_snd)
   refine (integrable_prod_iff hm'.aestronglyMeasurable).2 ⟨.of_forall fun q => (hC φ hφ hi q.out).1, ?_⟩
   refine .of_bound hm'.norm.integral_prod_right'.aestronglyMeasurable (∫ y in C, ‖φ y‖ ∂μ) (.of_forall fun q => ?_)
   rw [Real.norm_of_nonneg (integral_nonneg fun _ => norm_nonneg _)]
@@ -125,8 +186,8 @@ theorem constTermOn_convR (hc : Cocompact Γ N) (hφ : LeftInv Γ φ) (hm : Stro
 
 variable [μ.IsMulRightInvariant]
 
-omit [LocallyCompactSpace N] in
 
+omit [LocallyCompactSpace N] in
 theorem locallyIntegrable_lift (F : L2 Γ μ) : LocallyIntegrable (lift Γ F) μ :=
   locallyIntegrable_iff.2 fun C hC => (AutomorphicL2Local.memLp_restrict_compact G Γ μ F C hC).2
 
@@ -167,8 +228,8 @@ theorem constTermOn_ae_eq_zero (hc : Cocompact Γ N) {F : L2 Γ μ} (hF : F ∈ 
     (h5.symm.trans (by simp))
   exact (measurePreserving_mul_left μ ((q.out : N) : G)).quasiMeasurePreserving.ae h4
 
-omit [LocallyCompactSpace N] in
 
+omit [LocallyCompactSpace N] in
 theorem mem_of_forall_Rop_mem {W : Submodule ℂ (L2 Γ μ)} (hW : IsClosed (W : Set (L2 Γ μ))) {F : L2 Γ μ}
     (h : ∀ f : G → ℂ, Continuous f → HasCompactSupport f → Rop Γ μ f F ∈ W) : F ∈ W := by
   have := hW.completeSpace_coe

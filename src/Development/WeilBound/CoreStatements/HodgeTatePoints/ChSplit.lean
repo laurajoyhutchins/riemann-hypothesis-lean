@@ -1,6 +1,57 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.EigenProjectorsSplitActionStatement
-import Development.WeilBound.CoreStatements.HodgeTatePoints.DegLeOfEquiv
+module
+
+public import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.IsSplitGaussChars
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.EigenProjectorsSplitAction
+public import Development.WeilBound.CoreStatements.HodgeTatePoints.DegLeOfEquiv
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Coalgebra.CoassocSimps
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open GlobalTheory.CompanionTheory.Ar.Crv
 
@@ -16,6 +67,7 @@ theorem comb_eig {K O V k : Type} [Field K] [Field k] [Algebra k K] [AddCommGrou
     {m : ℕ} (c : Fin m → k) (a : Fin m → O) :
     ∑ j, algebraMap k K (c j) • ρ (a j) x = algebraMap k K (∑ j, c j * χ (a j)) • x := by
   have h := (mem_eig ρ _ x).1 hx
+
   simp only [h, smul_smul, ← map_mul, ← Finset.sum_smul, ← map_sum]
 
 theorem split_ses : ∀ (K : Type) [Field K] (C : ACurve K) (V : Type) [AddCommGroup V] [Module K V] [FiniteDimensional K V] (V' : Type) [AddCommGroup V'] [Module K V'] [FiniteDimensional K V'] (V'' : Type) [AddCommGroup V''] [Module K V''] [FiniteDimensional K V''] (L : C.I → AddSubgroup V) (L' : C.I → AddSubgroup V') (L'' : C.I → AddSubgroup V'') (f : V →ₗ[K] V') (g : V' →ₗ[K] V'') (O k S : Type) [CommRing O] [Field k] [Algebra k K] [Fintype S] [DecidableEq S] (χ : S → (O →+* k)), IsSplit χ → (∀ i (c : k), C.v i (algebraMap k K c) ≤ 1) → ∀ (ρ : O → V →ₗ[K] V) (ρ' : O →+* Module.End K V') (ρ'' : O → V'' →ₗ[K] V''), IsBun C L' → (∀ a, IsHom C L' L' (ρ' a)) → ShortExact C L L' L'' f g → (∀ a x, f (ρ a x) = ρ' a (f x)) → (∀ a y, g (ρ' a y) = ρ'' a (g y)) → ∀ s, subDeg C L' (eig (fun a => ρ' a) (fun a => algebraMap k K (χ s a))) = subDeg C L (eig (fun a => ρ a) (fun a => algebraMap k K (χ s a))) + subDeg C L'' (eig (fun a => ρ'' a) (fun a => algebraMap k K (χ s a))) := by
@@ -26,6 +78,7 @@ theorem split_ses : ∀ (K : Type) [Field K] (C : ACurve K) (V : Type) [AddCommG
   have key : ∀ y, g y ∈ eig ρ'' (fun a => algebraMap k K (χ s a)) → g (e s y) = g y := by
     intro y hy
     have h1 := comb_eig ρ'' (fun a => χ s a) hy c a
+
     rw [hes, LinearMap.sum_apply, map_sum]
     simp only [LinearMap.smul_apply, map_smul, hg]
     rw [h1, hc s, if_pos rfl, map_one, one_smul]
@@ -147,6 +200,7 @@ private theorem subDeg_top_eq_sum_subDeg_eig_of_ncard_le (K : Type) [Field K] (C
     have hcomm : ∀ s a x, e s (ρ a x) = ρ a (e s x) := by
       intro s a x
       obtain ⟨m, c, b, -, hes⟩ := he_comb s
+
       rw [hes, LinearMap.sum_apply, LinearMap.sum_apply, map_sum]
       refine Finset.sum_congr rfl fun j _ => ?_
       have hab : ρ (b j) (ρ a x) = ρ a (ρ (b j) x) := by
@@ -236,7 +290,7 @@ private theorem subDeg_top_eq_sum_subDeg_eig_of_ncard_le (K : Type) [Field K] (C
           intro a b
           refine LinearMap.ext fun x => Subtype.ext ?_
           show ρ (a + b) (x : V) = ρ a x + ρ b x
-          rw [map_add]
+          rw [map_add (f := _)]
           rfl }
     let ρW : O → Module.End K W0 := fun a =>
       ((ρ a).comp W0.subtype).codRestrict W0 fun x => hpresW a x x.2

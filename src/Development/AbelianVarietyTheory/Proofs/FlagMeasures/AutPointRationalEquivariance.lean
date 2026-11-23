@@ -1,9 +1,48 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.LayerProd
-import Formalism.HarderNarasimhan.ShiftInvariance
-import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.CsSpan
-import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.CsApprox
-import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.CsEquiv
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.LayerProd
+public import Formalism.SatakeDualWeyl.DefsCS
+public import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.CsApprox
+public import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.CsSpan
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open GlobalTheory.Count Formalism.MainNotions.S Formalism.HN Formalism.REAL Matrix NumberField MeasureTheory Finset
 
@@ -61,8 +100,8 @@ theorem largestSize_eq (hz : ∀ N, zl (Formalism.HermitianLatticesTheory.realiz
   · rintro ⟨S, hS, hne, rfl⟩
     exact ⟨Φ S, (hsat S).2 hS, fun h => hne (Φ.injective h), sizeQ_eq b X X' Φ hz hr A S⟩
 
-omit [NumberField K] [StarRing K] [Module K V] [IsScalarTower (𝓞 K) K V] in
 
+omit [NumberField K] [StarRing K] [Module K V] [IsScalarTower (𝓞 K) K V] in
 theorem sSup_eq (A : Submodule (𝓞 K) V) (p p' : Submodule (𝓞 K) V → Prop) (hp : ∀ N, p' (Φ N) ↔ p N) :
     sSup {N | N ≤ Φ A ∧ N ≠ ⊥ ∧ p' N} = Φ (sSup {N | N ≤ A ∧ N ≠ ⊥ ∧ p N}) := by
   rw [OrderIso.map_sSup Φ, ← sSup_image]
@@ -163,7 +202,7 @@ theorem embedding_eq (w : InfinitePlace I.E) :
     obtain ⟨s, hs⟩ := (hcm.fixed (e + star e)).1 (by rw [star_add, star_star, add_comm])
     obtain ⟨p, hp⟩ := (hcm.fixed (e * star e)).1 (by rw [star_mul, star_star, mul_comm])
     have ht : ψ e + ψ (star e) = w.embedding e + w.embedding (star e) := by
-      rw [← map_add, ← map_add, ← hs]
+      rw [← map_add (f := _), ← map_add (f := _), ← hs]
       exact (hF s).symm
     have hn : ψ e * ψ (star e) = w.embedding e * w.embedding (star e) := by
       rw [← map_mul, ← map_mul, ← hp]
@@ -187,9 +226,9 @@ theorem embedding_eq (w : InfinitePlace I.E) :
       have ha' := (hpt a).resolve_left ha
       have hb' := (hpt b).resolve_right hb
       rcases hpt (a + b) with h | h
-      · rw [map_add, map_add, hb'] at h
+      · rw [map_add (f := _), map_add (f := _), hb'] at h
         exact ha (add_right_cancel h)
-      · rw [map_add, map_add, map_add, ha'] at h
+      · rw [map_add (f := _), map_add (f := _), map_add (f := _), ha'] at h
         exact hb (add_left_cancel h)
 
 end Points

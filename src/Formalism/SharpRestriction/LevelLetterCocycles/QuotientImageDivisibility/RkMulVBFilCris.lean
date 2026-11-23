@@ -1,6 +1,44 @@
-import Mathlib
-import Formalism.SharpRestriction.LevelLetterCocycles.CrystallineLiftingInputs
-import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.RkMultVOfNotJump
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.RamifiedCoefficientChains
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -36,7 +74,7 @@ theorem rk_act_mulVB (g : G) (c : K₀) (x : V ⊗[Qp] B) :
   induction x using TensorProduct.induction_on with
   | zero => simp
   | tmul w b => simp [actVB, mulVB, map_mul]
-  | add x y hx hy => simp only [map_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
 
 theorem rk_mulVB_Dcris (c : K₀) {x : V ⊗[Qp] B} (hx : x ∈ Dcris PD ρ) :
     mulVB (K₀ := K₀) (B := B) (V := V) (LL := LL) c x ∈ Dcris PD ρ := by
@@ -55,7 +93,7 @@ theorem rk_ιV_mul (c : K₀) (y : V ⊗[Qp] B) :
       LinearMap.coe_restrictScalars, AlgHom.toLinearMap_apply, LinearMap.mulLeft_apply, map_mul,
       AlgHom.commutes]
     rw [← IsScalarTower.algebraMap_apply K₀ K BdR]
-  | add x y hx hy => simp only [map_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
 
 theorem rk_mulVdR_FilV (c : K) (a : ℤ) {y : V ⊗[Qp] BdR} (hy : y ∈ FilV PD (LL := LL) (V := V) a) :
     mulVdR (K := K) (BdR := BdR) (V := V) (LL := LL) c y ∈ FilV PD (LL := LL) (V := V) a := by
@@ -68,7 +106,7 @@ theorem rk_mulVdR_FilV (c : K) (a : ℤ) {y : V ⊗[Qp] BdR} (hy : y ∈ FilV PD
       exact (PD.Fil a).smul_mem c f.2
     · simp [mulVdR, AlgebraTensorModule.map_tmul]
   | add y z hy hz =>
-    rw [map_add, map_add]
+    rw [map_add (f := _), map_add (f := _)]
     exact Submodule.add_mem _ hy hz
 
 theorem rk_mulVB_FilCris (c : K₀) (a : ℤ) {x : V ⊗[Qp] B} (hx : x ∈ FilCris PD ρ a) :
@@ -86,7 +124,7 @@ theorem rk_mapVB_mulVB {V' : Type} [AddCommGroup V'] [Module LL V'] [Module Qp V
   induction x using TensorProduct.induction_on with
   | zero => simp
   | tmul w b => simp [Formalism.MainNotions.RamifiedCoefficientChains.mapVB, mulVB]
-  | add x y hx hy => simp only [map_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
 
 theorem rk_ιV_inj : Function.Injective (ιV PD (LL := LL) (V := V)) := by
   have h : ∀ y, ιV PD (LL := LL) (V := V) y =
@@ -94,17 +132,11 @@ theorem rk_ιV_inj : Function.Injective (ιV PD (LL := LL) (V := V)) := by
     induction y using TensorProduct.induction_on with
     | zero => simp
     | tmul x b => simp [ιV]
-    | add x y hx hy => rw [map_add, map_add, hx, hy]
+    | add x y hx hy => rw [map_add (f := _), map_add (f := _), hx, hy]
   have hi : Function.Injective (PD.ι.toLinearMap.restrictScalars Qp) := PD.ι_inj
   intro a b hab
   rw [h, h] at hab
   exact Module.Flat.lTensor_preserves_injective_linearMap _ hi hab
-
-def rkOp (c : K₀) (t : LL) : Module.End LL (V ⊗[Qp] B) :=
-  mulVB (K₀ := K₀) (B := B) (V := V) (LL := LL) c - t • LinearMap.id
-
-def rkPop {ι : Type} (cc : ι → K₀) (tt : ι → LL) (L : List ι) : Module.End LL (V ⊗[Qp] B) :=
-  (L.map fun j => rkOp (B := B) (V := V) (cc j) (tt j)).prod
 
 end Ops
 

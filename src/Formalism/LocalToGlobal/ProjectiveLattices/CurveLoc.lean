@@ -1,5 +1,44 @@
-import Formalism.LocalToGlobal.ProjectiveLattices.CurveComp
-import Formalism.LocalToGlobal.ProjectiveLattices.CurveCountA
+module
+
+public import Formalism.LocalToGlobal.ProjectiveLattices.CurveComp
+public import Formalism.LocalToGlobal.ProjectiveLattices.CurveCountA
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -28,7 +67,7 @@ def xw (i : Fin N) : ↥(Frac0 X la w) := fr0 X la N w 1 (X.inc wL (w i)) (emb_i
 def polX (Pw : MvPolynomial (Fin N) B.KO) : ↥(Frac0 X la w) := MvPolynomial.eval₂ (constF X la N w) (xw X la N w) Pw
 
 def secOf (g : Fin N → B.Cusp j wL) : Rp X la N :=
-  ∑ k, (algebraMap (Op X la N) (Kp X la N) (Tv X la N (0, k))) • emb X la N (X.inc wL (g k))
+  ∑ k, (@algebraMap (Op X la N) (Kp X la N) _ _ _ (Tv X la N (0, k))) • emb X la N (X.inc wL (g k))
 
 theorem secOf_self : secOf X la N w = Formalism.MainNotions.Gaps.EtaleWeightGaps.sec X la w 0 := rfl
 
@@ -100,10 +139,12 @@ theorem phiZ_polX {Pw : MvPolynomial (Fin N) B.KO} {k : ℕ} (hPw : Pw.IsHomogen
 
 theorem rzMap_secOf (g g' : Fin N → B.Cusp j wL) (h : ∀ k, gF (X.inc wL (g k)) = gF (X.inc wL (g' k))) :
     rzMap X la N Ω gF (secOf X la N g) = rzMap X la N Ω gF (secOf X la N g') := by
+
   simp only [secOf, map_sum, map_smul, rzMap_emb, h]
 
 theorem rzMap_secOf_zero (g : Fin N → B.Cusp j wL) (h : ∀ k, gF (X.inc wL (g k)) = 0) :
     rzMap X la N Ω gF (secOf X la N g) = 0 := by
+
   simp only [secOf, map_sum, map_smul, rzMap_emb, h, TensorProduct.tmul_zero, smul_zero, Finset.sum_const_zero]
 
 end One
@@ -168,7 +209,7 @@ theorem good_add {r s : RZs X la N Ω gF w} (hr : Good X la N w gF r) (hs : Good
   obtain ⟨a, p, hp, he⟩ := hr
   obtain ⟨a', p', hp', he'⟩ := hs
   refine ⟨p' * a + p * a', p * p', den_mul X la N w gF hp hp', ?_⟩
-  rw [map_mul, map_add, map_mul, map_mul, ← he, ← he']
+  rw [map_mul, map_add (f := _), map_mul, map_mul, ← he, ← he']
   ring
 
 theorem good_mul {r s : RZs X la N Ω gF w} (hr : Good X la N w gF r) (hs : Good X la N w gF s) :
@@ -231,8 +272,8 @@ theorem loc_of_bir (hB : BirAt X N w gF) (hC : CountQAt X la N w gF) (r : RZs X 
         | tmul l ω =>
           rw [tmul_eq, Algebra.smul_def, map_mul, ← IsScalarTower.algebraMap_apply, ← Algebra.smul_def]
           exact good_smul X la N w gF _ (good_psi X la N w gF hB hC ω)
-        | add v₁ v₂ h₁ h₂ => rw [TensorProduct.tmul_add, map_add]; exact good_add X la N w gF h₁ h₂
-      | add x y hx hy => rw [map_add]; exact good_add X la N w gF hx hy
+        | add v₁ v₂ h₁ h₂ => rw [TensorProduct.tmul_add, map_add (f := _)]; exact good_add X la N w gF h₁ h₂
+      | add x y hx hy => rw [map_add (f := _)]; exact good_add X la N w gF hx hy
     obtain ⟨⟨x, y⟩, hr⟩ :=
       IsLocalization.mk'_surjective (Submonoid.powers (rzMap X la N Ω gF (Formalism.MainNotions.Gaps.EtaleWeightGaps.sec X la w 0))) r
     obtain ⟨n, hn⟩ := (Submonoid.mem_powers_iff _ _).mp y.2

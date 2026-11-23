@@ -1,7 +1,57 @@
-import Formalism.LocalToGlobal.TorsionIntegrality.GaussianEigenFrames.StatementB
-import Formalism.LocalToGlobal.TorsionIntegrality.UniformGaussModels.OrthogonalGaussModels.NeZeroOfNorm
-import Formalism.LocalToGlobal.TorsionIntegrality.QuadraticSemicharacters.CayleyGaussianIntegrals.QuadraticSemicharactersOfProductThetaMem
-import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.AnalyticIdentityTheorems.QuasiPeriodConstUniqueOf
+module
+
+public import Formalism.LocalToGlobal.TorsionIntegrality.GaussianEigenFrames.StatementB
+public import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.AnalyticIdentityTheorems.QuasiPeriodConstUniqueOf
+public import Formalism.LocalToGlobal.TorsionIntegrality.TorsionTranslationPowers.NonsingularJetNorms.Taylor0ConstMul
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.KummerThetaLogarithms.SqrtInUnramifiedCompletion
+
+@[expose] public section
 
 noncomputable section
 open scoped BigOperators ComplexConjugate
@@ -20,7 +70,7 @@ lemma sqrt_sq_c (d : ℕ) : (Complex.I * ((Real.sqrt d : ℝ) : ℂ)) ^ 2 = -(d 
   ring
 
 lemma conj_omega (d : ℕ) : conj (omegaK d) = 1 - omegaK d := by
-  rw [omegaK, map_div₀, map_add, map_one, map_mul, Complex.conj_I, Complex.conj_ofReal, map_ofNat]
+  rw [omegaK, map_div₀, map_add (f := _), map_one, map_mul, Complex.conj_I, Complex.conj_ofReal, map_ofNat]
   ring
 
 def emb {n : Type} (b : Fin 4) (v : n → ℂ) : Fin 4 × n → ℂ := fun w => if w.1 = b then v w.2 else 0
@@ -133,13 +183,13 @@ theorem IotaOK_proof : IotaOK := by
   · rw [← hns, ← Real.sqrt_eq_rpow, Real.sqrt_sq (norm_nonneg _)]
   · intro m n
     refine ⟨?_, ?_⟩
-    · rw [map_add, map_mul, map_intCast, map_intCast]
+    · rw [map_add (f := _), map_mul, map_intCast, map_intCast]
       refine (IsUltrametricDist.norm_add_le_max _ _).trans (max_le (hint m) ?_)
       rw [norm_mul]
       exact mul_le_one₀ (hint n) (norm_nonneg _) hx
     · rw [← map_sub]
       have h1 : ((m : ℂ) + (n : ℂ) * omegaK d) - conj ((m : ℂ) + (n : ℂ) * omegaK d) = s * (n : ℂ) := by
-        rw [map_add, map_mul, conj_omega, map_intCast, map_intCast, hω]
+        rw [map_add (f := _), map_mul, conj_omega, map_intCast, map_intCast, hω]
         ring
       rw [h1, map_mul, map_intCast]
 
@@ -238,6 +288,7 @@ theorem GramTransfer_of (hM : MulRing) (hI : IotaOK) : GramTransfer := by
       ∑ w, g.symm (Pi.single w 1) q * z w = g.symm z q := by
     intro z q
     conv_rhs => rw [eq_sum_single z]
+
     rw [map_sum, Finset.sum_apply]
     refine Finset.sum_congr rfl fun w _ => ?_
     rw [map_smul, Pi.smul_apply, smul_eq_mul, mul_comm]
@@ -252,6 +303,7 @@ theorem GramTransfer_of (hM : MulRing) (hI : IotaOK) : GramTransfer := by
   · intro a' i b' j
     show ∑ w, ι (g.symm (Pi.single w 1) (a', i)) * ι (Y (b', j) w) = _
     simp_rw [← map_mul]
+
     rw [← map_sum, hsum, hY, LinearEquiv.symm_apply_apply]
     by_cases hab : a' = b' <;> simp [emb, hab]
   · intro x y
@@ -262,6 +314,7 @@ theorem GramTransfer_of (hM : MulRing) (hI : IotaOK) : GramTransfer := by
       refine Finset.sum_congr rfl fun w _ => ?_
       rw [hconj y w, map_mul ι (Y x w)]
       ring
+
     rw [e1, ← map_sum, hgram x y]
     by_cases hxy : x.1 = y.1 <;> simp [hxy]
 

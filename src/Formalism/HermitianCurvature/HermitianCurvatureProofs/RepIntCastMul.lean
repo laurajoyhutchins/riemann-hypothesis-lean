@@ -1,5 +1,54 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.DetRowsZero
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CvRhoOfParts
+module
+
+public import Formalism.HermitianCurvature.StatementB
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.BetaSesquilinearity
+
+@[expose] public section
 
 open Matrix Finset
 open scoped ContDiff
@@ -36,9 +85,6 @@ section RepLemmas
 theorem Rep.mono {d d' : ℕ} (h : d ≤ d') {a : AA k r E} (ha : Rep d a) : Rep d' a := by
   obtain ⟨L, hL, h'⟩ := ha
   exact ⟨L, fun p hp => (hL p hp).trans h, h'⟩
-
-theorem rep_zero (d : ℕ) : Rep d (0 : AA k r E) := by
-  exact ⟨[], by simp, fun Φ w => by simp⟩
 
 theorem rep_ell (x : Ix k r) : Rep 1 (ell x : AA k r E) := by
   exact ⟨[(1, [x])], by simp, fun Φ w => by simp [ell_apply]⟩
@@ -274,23 +320,6 @@ theorem ev_ck (hC : HC Eop) {d : ℕ} {a : AA k r E} (ha : Rep d a) (m : ℕ) (f
   obtain ⟨p, hp, rfl⟩ := hq
   exact Fw_ck Eop hC p.2 m f (ck_mono' (by have := hL p hp; omega) hf)
 
-theorem ev_zero (hC : HC Eop) (hL : HL Eop) (hS : HS Eop) {d : ℕ} {a : AA k r E} (ha : Rep d a) :
-    ∀ g ∈ GV k r, ev Eop a (fun _ => (0 : E)) g = 0 := by
-  obtain ⟨L, _, hrep⟩ := ev_rep_ex Eop ha
-  intro g hg
-  rw [hrep]
-  apply List.sum_eq_zero
-  intro y hy
-  simp only [List.mem_map] at hy
-  obtain ⟨p, _, rfl⟩ := hy
-  rw [Fw_zero Eop hC hL hS p.2 g hg, smul_zero]
-
-theorem ev_add (a b : AA k r E) (f : Mat k r → E) (x : Mat k r) : ev Eop (a + b) f x = ev Eop a f x + ev Eop b f x :=
-  rfl
-
-theorem ev_sub (a b : AA k r E) (f : Mat k r → E) (x : Mat k r) : ev Eop (a - b) f x = ev Eop a f x - ev Eop b f x :=
-  rfl
-
 theorem ev_smul (c : ℂ) (a : AA k r E) (f : Mat k r → E) (x : Mat k r) : ev Eop (c • a) f x = c • ev Eop a f x :=
   rfl
 
@@ -299,8 +328,6 @@ theorem ev_fsum {ι : Type*} (s : Finset ι) (F : ι → AA k r E) (f : Mat k r 
   first
     | (simp [ev, LinearMap.sum_apply, Finset.sum_apply]; done)
     | (simp only [ev, LinearMap.coeFn_sum, Finset.sum_apply])
-
-theorem ev_zero_el (f : Mat k r → E) (x : Mat k r) : ev Eop (0 : AA k r E) f x = 0 := rfl
 
 theorem ev_intCast_mul (z : ℤ) (a : AA k r E) (f : Mat k r → E) (x : Mat k r) :
     ev Eop ((z : AA k r E) * a) f x = (z : ℂ) • ev Eop a f x := by

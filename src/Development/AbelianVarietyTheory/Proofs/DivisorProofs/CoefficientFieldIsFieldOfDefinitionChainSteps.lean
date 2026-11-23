@@ -1,20 +1,58 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.KerSizes
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.AnalyticTiesTrueCols
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.BaseFieldsPrimesOk
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.KernelEntriesCompatibleTrueColumns
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.OrdSubDetSubStdL
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.TildeQDetPtEqChiId
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.H90USurjective
-import Development.AbelianVarietyTheory.Definitions.Foundations.NonemptyLiftObj
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.RecHeightSWith
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.IsEntC
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.ColNorm
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.JetsInIffStepField
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.FixedVectorEqOfStandardData
-import Formalism.LocalToGlobal.KernelLattices.TopPin
-import Formalism.LocalToGlobal.KernelLattices.InterlaceAll
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.JetsInIffStepField
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.JetsInIffStepField
+public import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.TopPlaceLogTheta
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.StdLvPr
+public import Development.AbelianVarietyTheory.Definitions.Foundations.NonemptyLiftObj
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.AnalyticTiesTrueCols
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.BaseFieldsPrimesOk
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.OrdSubDetSubStdL
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.UnitaryDeterminantKernelOpenAndFactor
+import Formalism.HermitianLattices.HermitianLatticesProofs.DualBasic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Formalism.BasicNotions Formalism.MainNotions Formalism.L2.Col Formalism.L2.DIV Formalism.L2.Ker Formalism.UG Formalism.L2.Forms GlobalTheory.Mem GlobalTheory.Mem.Chr GlobalTheory.Mem.Col2 GlobalTheory.Mem.Col2.TC Matrix
 attribute [local instance] GlobalTheory.Mem.Col2.starE Formalism.BasicNotions.Host.cmStar
 
@@ -23,7 +61,44 @@ namespace GlobalTheory.ColRows.FldDef
 theorem sd_of_isSdLat {B : Base} {n : ℕ} {L : Submodule (𝓞 B.host.E) (Fin n → B.host.E)}
     (h : Formalism.L2.Col.IsSdLat (E := B.fields.E) L) : letI := B.host.cmStar; IsSDLat B.host.E n L := by
   letI := B.host.cmStar
-  refine ⟨h.1.1, h.1.2, fun y => ?_⟩
+  have hspan : Submodule.span B.fields.E (L : Set (Fin n → B.fields.E)) = ⊤ := by
+    apply Submodule.dualAnnihilator_eq_bot_iff.mp
+    apply le_antisymm ?_ bot_le
+    intro f hf
+    let v : Fin n → B.fields.E := fun i => star (f (Pi.single i 1))
+    have hpair : hStd B.fields.E n v = f := by
+      apply (Pi.basisFun B.fields.E (Fin n)).ext
+      intro i
+      rw [Pi.basisFun_apply, hStd_apply, Finset.sum_eq_single i]
+      · simp [v]
+      · intro j _ hj
+        simp [hj]
+      · simp
+    have hline (r : B.fields.E) : r • v ∈ L := by
+      rw [← show Formalism.HermitianLatticesTheory.dual (hStd B.fields.E n) L = L from h.2,
+        Formalism.HermitianLatticesTheory.dualBasic_mem_dual]
+      intro y hy
+      have hy0 : hStd B.fields.E n v y = 0 := by
+        rw [hpair]
+        exact (Submodule.mem_dualAnnihilator f).mp hf y (Submodule.subset_span hy)
+      have hz : hStd B.fields.E n y v = 0 := by
+        simpa [hy0] using ((hStd_isSymm (E := B.fields.E) (n := n)).eq v y).symm
+      simp [hz]
+    have hv : v = 0 := by
+      funext i
+      change v i = 0
+      by_contra hi
+      let coord := (LinearMap.proj i : (Fin n → B.fields.E) →ₗ[B.fields.E] B.fields.E).restrictScalars (𝓞 B.fields.E)
+      have htop : L.map coord = ⊤ := by
+        rw [eq_top_iff]
+        intro x _
+        exact ⟨(x / v i) • v, hline _, div_mul_cancel₀ _ hi⟩
+      have : Module.Finite (𝓞 B.fields.E) B.fields.E := Module.finite_def.mpr (htop ▸ h.1.fg.map coord)
+      exact RingOfIntegers.not_isField B.fields.E
+        (isField_of_isIntegral_of_isField (IsFractionRing.injective (𝓞 B.fields.E) B.fields.E) (Field.toIsField B.fields.E))
+    rw [Submodule.mem_bot]
+    simpa [hv] using hpair.symm
+  refine ⟨h.1.fg, hspan, fun y => ?_⟩
   have h2 : y ∈ Formalism.HermitianLatticesTheory.dual (hStd B.fields.E n) L ↔ y ∈ L := by rw [h.2]
   rw [← h2, Formalism.L2.Col.mem_dual]
   refine forall₂_congr fun x _ => ?_
@@ -60,7 +135,7 @@ theorem chiRec_detId {idl : (I.rec7 l Z).Dt ⧸ (I.rec7 l Z).UO → TaylorLogMet
     rw [← h1, h6, h3]
   have h5 : ((tildeQ B.host I.SQ I.C.chiPsi t : ℂˣ) : ℂ) = ((tildeD B.host I.C.chiPsi (toDtT B.host I.SQ t) : ℂˣ) : ℂ) := by
     rw [tildeQ_eq_comp B.host I.SQ hK]; rfl
-  exact h5.trans (GlobalTheory.Mem.ChiDet.tildeD_eq_chiId B.R B.host I.C.chiPsi hχ n L ⟨hL.1, hL.2.1⟩ _ hr)
+  exact h5.trans (GlobalTheory.Mem.ChiDet.tildeD_eq_chiId B.R B.host I.C.chiPsi hχ n L (Submodule.IsLattice.of_fg _ hL.1) _ hr)
 end GlobalTheory.ColRows.FldDef
 
 namespace GlobalTheory.ColRows.FldDef
@@ -93,8 +168,8 @@ theorem fieldOfDefinition_congr {B : Base} (J : AmbIn B.host) (χ₁ χ₂ : Sub
   rfl
 end GlobalTheory.ColRows.FldDef
 
-open GlobalTheory.IndefiniteRowSideFullHecke.PlaceLogThetaBounds in
 
+open GlobalTheory.IndefiniteRowSideFullHecke.PlaceLogThetaBounds in
 theorem GlobalTheory.ColRows.fieldOfDefinition_of_stdKer : ∀ {B : Base} {X : PreX B.toPre} (I : TC B X), I.Ok → TC.Pins B X → ∀ (l : I.Laws) (Z : TC.Later B (I.cols l)), ∀ (L : SizeData₂ (I.rec7 l Z)) (hT : GatTies (I.rec7 l Z)) (Gi : G.Inst (I.rec7 l Z) L) (Gl : G.LatInst (I.rec7 l Z)) (K : G.Consts) (Y : DivX (I.rec7 l Z)) (cX : ExtraC) (ex : Extra (I.rec7 l Z) L hT Gi Gl K Y cX) (t : KerEntTied ex) (W : Formalism.L2.Col.Wts t.X t.Pr.Word (I.rec7 l Z).R), ColIn.JetsIn I → I.StdKer l Z t → HEq W B.wts → ∀ u a, GlobalTheory.IndefiniteRowSideFullHecke.PlaceLogThetaBounds.FieldOfDefinition W t.sel (t.tup a) (t.cst a) (t.word u) t.amb := by
   intro B X I hOk hPins l Z L hT Gi Gl K Y cX ex t W hJ hS hW u a
   obtain ⟨-, -, -, hFD⟩ := GlobalTheory.Core.Ht2.analyticTies_trueCols I hOk (GlobalTheory.Mem.Col2.base_fields_primes_ok B X).1 l Z hJ

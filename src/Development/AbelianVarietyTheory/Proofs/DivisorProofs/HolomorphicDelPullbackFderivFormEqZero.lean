@@ -1,8 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.IsTypeIsRealConst
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ClosedFormsMulClosed
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DelAtEqSumDOne
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DifferentiableAtReprPullbackHolomorphicFderiv
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.IsTypeIsRealConst
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ClosedFormsMulClosed
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DifferentiableAtReprPullbackHolomorphicFderiv
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.CStarAlgebra.ContinuousLinearMap
+import Mathlib.Analysis.Calculus.FDeriv.Symmetric
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+
+@[expose] public section
+
 open Set Matrix MeasureTheory Filter Topology
 open GlobalTheory.HermFrame
 open scoped ComplexOrder ContDiff ComplexConjugate
@@ -29,7 +73,7 @@ theorem delAt_add {F G : V n → Alt n} {v : V n}
       coefwise (fun f => del f v (coordVec a)) F + coefwise (fun f => del f v (coordVec a)) G := by
     simp only [coefwise, ← Finset.sum_add_distrib, ← add_smul]
     refine Finset.sum_congr rfl fun S _ => ?_
-    simp only [map_add, Finsupp.add_apply]
+    simp only [map_add (f := _), Finsupp.add_apply]
     rw [del_add (hF S) (hG S), ContinuousLinearMap.add_apply]
   simp only [delAt, key, mul_add, Finset.sum_add_distrib]
 
@@ -37,7 +81,8 @@ theorem repr_ι (x : Fin n ⊕ Fin n → ℂ) (S : Finset (Fin (n + n))) :
     (bas n).repr (ExteriorAlgebra.ι ℂ x) S =
       ∑ i, x i * (bas n).repr (ExteriorAlgebra.ι ℂ (Pi.single i 1)) S := by
   conv_lhs => rw [← Finset.univ_sum_single x]
-  simp only [map_sum, Finsupp.finset_sum_apply]
+
+  simp only [map_sum, Finsupp.finsetSum_apply]
   refine Finset.sum_congr rfl fun i _ => ?_
   rw [show (Pi.single i (x i) : Fin n ⊕ Fin n → ℂ) = x i • Pi.single i 1 by
     ext j; simp [Pi.single_apply]]
@@ -65,7 +110,10 @@ theorem sum_symm_dz_mul (s : Fin n → Fin n → ℂ) (hs : ∀ a b, s a b = s b
     conv_lhs => rw [hX, Finset.sum_comm]
     simp only [hX, ← Finset.sum_neg_distrib, ← smul_neg]
     refine Finset.sum_congr rfl fun a _ => Finset.sum_congr rfl fun b _ => ?_
-    rw [hs, dz, dz, eq_neg_of_add_eq_zero_left (ExteriorAlgebra.ι_add_mul_swap _ _)]
+    rw [hs, dz, dz]
+    congr 1
+    apply eq_neg_of_add_eq_zero_left
+    exact ExteriorAlgebra.ι_add_mul_swap _ _
   have h2 : (2 : ℂ) • X = 0 := by
     rw [two_smul]; nth_rewrite 2 [h]; exact add_neg_cancel X
   exact (smul_eq_zero.1 h2).resolve_left two_ne_zero
@@ -120,6 +168,7 @@ theorem delAt_pull_fderiv_ι {φ : V n → V n} {v : V n} (hφ : ContDiffAt ℂ 
       rw [del_sum (fun c _ => (hEc b c).mul_const _), ContinuousLinearMap.sum_apply]
       simp [del_mul_const (hEc _ _), hdelc, Finset.sum_apply, Pi.single_apply]
   rw [hF, delAt_ι hu]
+
   simp only [hw, map_sum, map_smul, Finset.mul_sum, mul_smul_comm]
   exact sum_symm_dz_mul s fun a b => by simp only [hs, hsymm (coordVec a) (coordVec b)]
 
@@ -136,7 +185,7 @@ theorem delAt_pull_fderiv : ∀ {n : ℕ} {φ : ReciprocityTheory.L2DbarEstimate
     simp only [map_mul]
     rw [hy, ha, hb, zero_mul, mul_zero, add_zero]
   | add a b ha hb =>
-    simp only [map_add]
+    simp only [map_add (f := _)]
     rw [delAt_add (hD a) (hD b), ha, hb, add_zero]
 
 end GlobalTheory.CxForm.DelVanish

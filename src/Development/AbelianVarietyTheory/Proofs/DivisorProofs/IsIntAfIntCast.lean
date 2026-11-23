@@ -1,5 +1,45 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.HasDivPlace
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.HasDivPlace
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsDimEqOne
+
+@[expose] public section
+
 open CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj AlgebraicGeometry NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor
 open GlobalTheory GlobalTheory.AV GlobalTheory.AV.AbVar GlobalTheory.PDivGroup GlobalTheory.Dieu GlobalTheory.UPel.HT GlobalTheory.LKTrip GlobalTheory.LKMid GlobalTheory.LKGeo GlobalTheory.LKRes
@@ -50,10 +90,10 @@ theorem isIntAf_EFA (D : Datum p) {v w : AfP p ⊗[ℚ] VQ D} (hv : v ∈ LaHat 
       obtain ⟨a', x', ha', rfl⟩ := hw
       rw [EFA_tmul]; exact isIntAf_mul (isIntAf_mul ha ha') (isIntAf_intCast _)
     | zero => simpa using isIntAf_zero
-    | add u u' _ _ h h' => rw [map_add]; exact isIntAf_add h h'
+    | add u u' _ _ h h' => rw [map_add (f := _)]; exact isIntAf_add h h'
     | neg u _ h => rw [map_neg]; exact isIntAf_neg h
   | zero => simpa using isIntAf_zero
-  | add u u' _ _ h h' => rw [map_add, LinearMap.add_apply]; exact isIntAf_add h h'
+  | add u u' _ _ h h' => rw [map_add (f := _), LinearMap.add_apply]; exact isIntAf_add h h'
   | neg u _ h => rw [map_neg, LinearMap.neg_apply]; exact isIntAf_neg h
 
 section Sim
@@ -65,11 +105,11 @@ theorem bc_adj {V : Type} [AddCommGroup V] [Module ℚ V] (A : Type) [CommRing A
     B.baseChange A (f.baseChange A v) w = B.baseChange A v (g.baseChange A w) := by
   induction v using TensorProduct.induction_on with
   | zero => simp
-  | add v v' hv hv' => simp only [map_add, LinearMap.add_apply, hv, hv']
+  | add v v' hv hv' => simp only [map_add (f := _), LinearMap.add_apply, hv, hv']
   | tmul a x =>
     induction w using TensorProduct.induction_on with
     | zero => simp
-    | add w w' hw hw' => simp only [map_add, hw, hw']
+    | add w w' hw hw' => simp only [map_add (f := _), hw, hw']
     | tmul a' y => simp only [LinearMap.baseChange_tmul, LinearMap.BilinForm.baseChange_tmul, h]
 
 theorem actOn_tmul {C V : Type} [Ring C] [Algebra ℚ C] [AddCommGroup V] [Module ℚ V]
@@ -85,7 +125,7 @@ theorem EFA_actOn (L : Link D G) (X : AfP p ⊗[ℚ] G.C) (v w : AfP p ⊗[ℚ] 
     EFA D (actOn L.rep (AfP p) X v) w = EFA D v (actOn L.rep (AfP p) (starT G.star (AfP p) X).unop w) := by
   induction X using TensorProduct.induction_on with
   | zero => simp
-  | add X X' hX hX' => simp only [map_add, MulOpposite.unop_add, LinearMap.add_apply, hX, hX']
+  | add X X' hX hX' => simp only [map_add (f := _), MulOpposite.unop_add, LinearMap.add_apply, hX, hX']
   | tmul r c =>
     rw [starT_tmul, actOn_tmul, actOn_tmul, LinearMap.smul_apply, LinearMap.smul_apply, map_smul,
       LinearMap.smul_apply, map_smul]

@@ -1,5 +1,52 @@
-import Development.WeilBound.ThetaLifts.LeviDeterminants.CartanPos
-import Development.WeilBound.ThetaLifts.LeviDeterminants.ExistsGaussBox
+module
+
+public import Development.WeilBound.ThetaLifts.LeviDeterminants.CartanPos
+public import Development.WeilBound.ThetaLifts.LeviDeterminants.MixedModels.AdaptC
+public import Development.WeilBound.ThetaLifts.LeviDeterminants.NormIteratedFDerivIdLeOneAdd
+import Development.AutomorphicSpectrum.Proofs.TwistedProofs.EqZeroOfPiInf
+public import Development.WeilBound.ThetaLifts.LeviDeterminants.ExistsGaussBox
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AbelianVarietyTheory.Definitions.Divisors.MatchingOfParts
+
+@[expose] public section
 
 noncomputable section
 
@@ -59,7 +106,7 @@ theorem omega_co (M : Model σ X W) (u u') : omega σ X W u u' = lOf M u' (aOf M
 
 theorem lin_glue {κ κ₀ κ₁ : Type} [Fintype κ] [Fintype κ₀] [Fintype κ₁] (ε : κ ≃ κ₀ ⊕ κ₁) (q a : κ₀ → mixedEmbedding.mixedSpace F)
     (c y : κ₁ → mixedEmbedding.mixedSpace F) : linForm (glue ε q c) (glue ε a y) = linForm q a + linForm c y := by
-  rw [linForm_apply, linForm_apply, linForm_apply, ← map_add]
+  rw [linForm_apply, linForm_apply, linForm_apply, ← map_add (f := _)]
   exact congrArg _ (glue_dot ε a q y c)
 
 theorem lin_zero {κ : Type} [Fintype κ] : linForm (0 : κ → mixedEmbedding.mixedSpace F) = 0 := by
@@ -71,7 +118,8 @@ theorem map_pure (w : InfinitePlace F) (a : Fin n → AE F E) (b : Fin d → E) 
     (Matrix.vecMulVec a (incV F b)).map (piInf (B.emb w)) =
       Matrix.vecMulVec (fun i => piInf (B.emb w) (a i)) fun i => (B.emb w).1 (b i) := by
   ext i j
-  simp only [Matrix.map_apply, Matrix.vecMulVec_apply, map_mul, incV, GlobalTheory.CompanionTheory.Ar.RT.Lie.piInf_inclR]
+  simp only [Matrix.map_apply, Matrix.vecMulVec_apply, map_mul, incV]
+  simp [piInf, inclR, compInf, infEmb]
 
 theorem at_pure {a : Fin n → AE F E} (ha : At (evI F) a) (b : Fin d → AE F E) : At (evI F) (Matrix.vecMulVec a b) := fun t ht => by
   rw [← Matrix.smul_vecMulVec, ha t ht, Matrix.zero_vecMulVec]
@@ -100,7 +148,7 @@ theorem decomp (hW : W.IsSkew σ B r' s') (hH : H.IsAdapted σ B W W₁ i₀ i�
 theorem rel_iota (hH : H.IsAdapted σ B W W₁ i₀ i₁) {e} {z z' : Matrix (Fin n) (Fin d₁) (AE F E)} (h : Rel B X W₁ e z z') :
     Rel B X W e (z * (incM F H.ι)ᵀ) (z' * (incM F H.ι)ᵀ) := fun w => by
   have h1 : ((incM F H.ι)ᵀ).map (piInf (B.emb w)) = (H.ι.map (B.emb w).1)ᵀ := by
-    ext i j; exact GlobalTheory.CompanionTheory.Ar.RT.Lie.piInf_inclR _ _
+    ext i j; simp [incM, piInf, inclR, compInf, infEmb]
   have h2 := congrArg Matrix.transpose (hH.cartan w).1
   rw [Matrix.transpose_mul, Matrix.transpose_mul] at h2
   rw [Matrix.map_mul, Matrix.map_mul, h1, h w, Matrix.smul_mul]
@@ -292,7 +340,7 @@ theorem exists_lift (hB : B.IsGood σ) (hX : X.IsHerm σ B r s) (hW : W.IsSkew �
   have hs : ∀ t t', linForm (q t') t = linForm (q t) t' := fun t t' => sym (hr t) (hr t') (hp t) (hp t') (hq' t) (hq' t')
   let Q : (κ₀ → mixedEmbedding.mixedSpace F) →ₗ[ℝ] (κ₀ → mixedEmbedding.mixedSpace F) →ₗ[ℝ] ℝ :=
     LinearMap.mk₂ ℝ (fun t t' => linForm (q t') t) (fun _ _ _ => map_add _ _ _) (fun _ _ _ => map_smul _ _ _)
-      (fun t _ _ => by rw [hs, map_add, hs _ t, hs _ t]) fun c t _ => by rw [hs, map_smul, hs _ t]
+      (fun t _ _ => by rw [hs, map_add (f := _), hs _ t, hs _ t]) fun c t _ => by rw [hs, map_smul, hs _ t]
   have hy : H.y ≠ 0 := fun h0 => by simpa [h0, form, dotProduct, Matrix.mulVec] using hH.xy
   obtain ⟨f, f0, f1, f2⟩ := exists_gauss_box ε Q hs (fun t ht => by
     obtain ⟨p, h1, h2⟩ := omega_pure hB hX hW (b t) hy (hr t)

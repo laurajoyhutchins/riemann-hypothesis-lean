@@ -1,5 +1,49 @@
-import Mathlib
-import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.ClosedProperAlt
+module
+
+public import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.ClosedProperAlt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import Mathlib.Topology.Algebra.Group.OpenMapping
+import Mathlib.Topology.Baire.LocallyCompactRegular
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Topology
 
@@ -22,7 +66,7 @@ theorem UpperTheory.ConvolutionTheory.L1.closedProper :
     UpperTheory.ConvolutionTheory.L1.ClosedProper := by
   intro G _ _ _ _ _ _ γ hO D hD
   set O : Set G := {y | ∃ x, y = x⁻¹ * γ * x} with hOdef
-  letI : MulAction G O :=
+  let : MulAction G O :=
     { smul := fun g y => ⟨g * y.1 * g⁻¹, by
         obtain ⟨x, hx⟩ := y.2
         exact ⟨x * g⁻¹, by rw [hx]; group⟩⟩
@@ -30,23 +74,23 @@ theorem UpperTheory.ConvolutionTheory.L1.closedProper :
       mul_smul := fun a b y => Subtype.ext (by
         change a * b * y.1 * (a * b)⁻¹ = a * (b * y.1 * b⁻¹) * a⁻¹; group) }
   have hsm : ∀ (g : G) (y : O), ((g • y : O) : G) = g * y.1 * g⁻¹ := fun _ _ => rfl
-  haveI : ContinuousSMul G O := ⟨by
+  have : ContinuousSMul G O := ⟨by
     refine continuous_induced_rng.2 ?_
     change Continuous fun p : G × O => p.1 * p.2.1 * p.1⁻¹
     fun_prop⟩
-  haveI : MulAction.IsPretransitive G O := ⟨by
+  have : MulAction.IsPretransitive G O := ⟨by
     rintro ⟨_, a, rfl⟩ ⟨_, b, rfl⟩
     exact ⟨b⁻¹ * a, Subtype.ext (by rw [hsm]; group)⟩⟩
-  haveI : LocallyCompactSpace O := hO.locallyCompactSpace
+  have : LocallyCompactSpace O := hO.locallyCompactSpace
   let γ₀ : O := ⟨γ, 1, by group⟩
   have hopen : IsOpenMap (fun g : G => g • γ₀) := isOpenMap_smul_of_sigmaCompact γ₀
   have hsurj : Function.Surjective (fun g : G => g • γ₀) := fun y => MulAction.exists_smul_eq G γ₀ y
   have hD' : IsCompact (Subtype.val ⁻¹' D : Set O) := hO.isClosedEmbedding_subtypeVal.isCompact_preimage hD
   obtain ⟨K, hK, hDK⟩ := UpperTheory.ConvolutionTheory.L1.compact_lift hopen hsurj hD'
-  refine ⟨K⁻¹, hK.inv, fun x hx => ?_⟩
+  refine ⟨(·⁻¹) '' K, hK.image continuous_inv, fun x hx => ?_⟩
   obtain ⟨g, hg, hgx⟩ := hDK (a := ⟨x⁻¹ * γ * x, x, rfl⟩) hx
   have h1 : g * γ * g⁻¹ = x⁻¹ * γ * x := congrArg Subtype.val hgx
-  refine ⟨x * g, ?_, g⁻¹, by simpa using hg, by group⟩
+  refine ⟨x * g, ?_, g⁻¹, ⟨g, hg, rfl⟩, by group⟩
   rw [Subgroup.mem_centralizer_iff]
   rintro h rfl
   calc h * (x * g) = x * (x⁻¹ * h * x) * g := by group

@@ -1,4 +1,44 @@
-import Formalism.SharpRestriction.GrowthBounds.MultisetValuation.TheoremOfAlternateForm
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.FormalGroupSystem
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -17,7 +57,7 @@ def ea_colH (t : ℕ) (lam0 : Fin n' → Fin (k1 + 1) → ℤ) (w : ℕ → Fin 
 theorem ea_lamI_anti (h : Std p n' k1 t m c r TT a b lam0 w) (s : Fin n') {i i' : ℕ} (h1 : 1 ≤ i) (h2 : i ≤ i')
     (h3 : i' ≤ k1 + 1) : lamI lam0 s i' ≤ lamI lam0 s i := by
   unfold lamI
-  rw [dif_pos (show 1 ≤ i' ∧ i' ≤ k1 + 1 by omega), dif_pos (show 1 ≤ i ∧ i ≤ k1 + 1 by omega)]
+  rw [dite_eq_left (show 1 ≤ i' ∧ i' ≤ k1 + 1 by omega), dite_eq_left (show 1 ≤ i ∧ i ≤ k1 + 1 by omega)]
   exact h.dom s (Fin.mk_le_mk.2 (by omega))
 
 theorem ea_block_le {J i : ℕ} (h1 : k1 + 1 < i) (h2 : i ≤ NN k1 t J) : (i - (k1 + 2)) / (t + 1) + 1 ≤ J := by
@@ -51,7 +91,7 @@ theorem ea_nu_nonneg (h : Std p n' k1 t m c r TT a b lam0 w) {J : ℕ} (hJ1 : 1 
     have hlow := (h.w_low s).2
     have hla : lam0 s (Fin.last k1) ≤ lamI lam0 s i := by
       unfold lamI
-      rw [dif_pos h1]
+      rw [dite_eq_left h1]
       exact h.dom s (Fin.le_last _)
     omega
   · have hb := ea_block_le (k1 := k1) (t := t) h2.1 h2.2
@@ -74,7 +114,7 @@ theorem ea_nu_le_two (h : Std p n' k1 t m c r TT a b lam0 w) {J : ℕ} (hJ : J �
     have hlow := (h.w_low s).2
     have hla : lam0 s (Fin.last k1) ≤ lamI lam0 s 2 := by
       unfold lamI
-      rw [dif_pos (show 1 ≤ 2 ∧ 2 ≤ k1 + 1 by omega)]
+      rw [dite_eq_left (show 1 ≤ 2 ∧ 2 ≤ k1 + 1 by omega)]
       exact h.dom s (Fin.le_last _)
     omega
 

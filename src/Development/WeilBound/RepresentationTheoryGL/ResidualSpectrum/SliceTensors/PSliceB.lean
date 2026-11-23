@@ -1,4 +1,54 @@
-import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.SliceTensors.BCountable
+module
+
+public import GroundTheory.AutomorphicForms.AutomorphicFormSpaces.GKStableParabolic
+public import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.SliceTensors.BCountable
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -71,7 +121,7 @@ theorem B_low_mul_block (hpq : p < q) (b : {x : PPos n {p, q} // ¬ IsTop p x} �
   by_cases h : B_low b i k = 0
   · rw [h, zero_mul]
   · have := B_low_apply_ne hpq b h
-    rw [blockEntry_apply, dif_neg (by omega), mul_zero]
+    rw [blockEntry_apply, dite_eq_right (by omega), mul_zero]
 
 theorem B_low_mul_low (hpq : p < q) (b : {x : PPos n {p, q} // ¬ IsTop p x} → R) : B_low b * B_low b = 0 := by
   ext i j
@@ -91,14 +141,14 @@ theorem B_parEntry_join (_hpq : p < q) (a : {x : PPos n {p, q} // IsTop p x} →
   ext i j
   simp only [B_low, Matrix.add_apply, parEntry_apply, blockEntry_apply, joinPos]
   by_cases hP : ∃ s ∈ ({p, q} : Finset ℕ), (i : ℕ) < s ∧ s ≤ (j : ℕ)
-  · rw [dif_pos hP, dif_pos hP]
+  · rw [dite_eq_left hP, dite_eq_left hP]
     by_cases hT : (i : ℕ) < p ∧ p ≤ (j : ℕ)
     · have hT' : IsTop p (⟨(i, j), hP⟩ : PPos n {p, q}) := hT
-      rw [dif_pos hT, dif_pos hT', dif_pos hT', Pi.zero_apply, zero_add]
+      rw [dite_eq_left hT, dite_eq_left hT', dite_eq_left hT', Pi.zero_apply, zero_add]
       rfl
     · have hT' : ¬ IsTop p (⟨(i, j), hP⟩ : PPos n {p, q}) := hT
-      rw [dif_neg hT, dif_neg hT', dif_neg hT', add_zero]
-  · rw [dif_neg hP, dif_neg hP, zero_add, dif_neg]
+      rw [dite_eq_right hT, dite_eq_right hT', dite_eq_right hT', add_zero]
+  · rw [dite_eq_right hP, dite_eq_right hP, zero_add, dite_eq_right]
     rintro hT
     exact hP ⟨p, by simp, hT⟩
 
@@ -126,7 +176,7 @@ theorem B_block_sub (hpq : p < q) (b : {x : PPos n {p, q} // ¬ IsTop p x} → R
     by_cases h' : B_low b k j = 0
     · rw [h', mul_zero]
     · have := B_low_apply_ne hpq b h'
-      rw [blockEntry_apply, dif_neg (by omega), zero_mul]
+      rw [blockEntry_apply, dite_eq_right (by omega), zero_mul]
 
 theorem B_shear_mat (hpq : p < q) (b : {x : PPos n {p, q} // ¬ IsTop p x} → R) (A : UPos n p → R) :
     parGL (joinPos 0 b) * unipGL A = unipGL (A - B_ell b A) * parGL (joinPos 0 b) := by

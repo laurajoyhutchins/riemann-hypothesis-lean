@@ -1,5 +1,62 @@
-import Development.WeilBound.CoreStatements.LocalThetaKernels.EvlLoc
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsLocallyConstantAddChar
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.HilbertNinetyQuotientHomEqIff
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsLocallyConstantAddChar
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.PadicIsNonarchimedeanLocalField
+public import Development.AutomorphicSpectrum.Proofs.MembershipProofs.DualNumberGraphFiltrationIsotropicOfSkew
+public import Development.WeilBound.CoreStatements.LocalThetaKernels.EvlLoc
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Development.AutomorphicSpectrum.Definitions.MembershipCriteria.GoodChar
+
+@[expose] public section
 
 noncomputable section
 
@@ -10,8 +67,8 @@ namespace PositivityTheory.ThK.LinAct
 variable {k : Type} [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] [Invertible (2 : k)]
   {κ ι : Type} [Fintype κ] [Fintype ι] {ψ : AddChar k ℂ}
 
-omit [Invertible (2 : k)] in
 
+omit [Invertible (2 : k)] in
 theorem norm_char (hc : Continuous ψ) (x : k) : ‖ψ x‖ = 1 := by
   have hle : ∀ y, ‖ψ y‖ ≤ 1 := fun y => by
     by_cases h0 : y = 0
@@ -66,8 +123,8 @@ theorem eventually_fix (hc : Continuous ψ) {φ : (κ → k) → ℂ} (hφ : φ 
     · exact image_eq_zero_of_notMem_tsupport hy
   rw [schr, h3, h0, mul_zero]
 
-omit [Invertible (2 : k)] in
 
+omit [Invertible (2 : k)] in
 theorem exists_compact_ann (hc : Continuous ψ) (h1 : ψ ≠ 1) {U : Set (ι → k)} (hU : U ∈ 𝓝 (0 : ι → k)) :
     ∃ C : Set (ι → k), IsCompact C ∧ ∀ x, (∀ y ∈ U, ψ (x ⬝ᵥ y) = 1) → x ∈ C := by
   classical
@@ -96,8 +153,8 @@ theorem schr_comm (w w' : (κ → k) × (κ → k)) (φ : (κ → k) → ℂ) :
   have h2 : ⅟(2 : k) * 2 = 1 := invOf_mul_self _
   linear_combination (w.1 ⬝ᵥ w'.2 - w'.1 ⬝ᵥ w.2) * h2
 
-omit [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] [Invertible (2 : k)] in
 
+omit [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] [Invertible (2 : k)] in
 theorem exists_section (large₂ : Submodule k ((κ → k) × (κ → k)))
     (hiso : ∀ w ∈ large₂, ∀ w' ∈ large₂, w.1 ⬝ᵥ w'.2 = w'.1 ⬝ᵥ w.2) (hdim : Module.finrank k large₂ = Fintype.card κ)
     (X : (ι → k) →ₗ[k] (κ → k) × (κ → k)) (hXL : ∀ x, X x ∈ large₂ → x = 0) :
@@ -106,14 +163,14 @@ theorem exists_section (large₂ : Submodule k ((κ → k) × (κ → k)))
   classical
   let B : (ι → k) →ₗ[k] large₂ →ₗ[k] k :=
     LinearMap.mk₂ k (fun x a => (X x).1 ⬝ᵥ a.1.2 - a.1.1 ⬝ᵥ (X x).2)
-      (fun a b c => by simp only [map_add, Prod.fst_add, Prod.snd_add, add_dotProduct, dotProduct_add]; ring)
+      (fun a b c => by simp only [map_add (f := _), Prod.fst_add, Prod.snd_add, add_dotProduct, dotProduct_add]; ring)
       (fun a b c => by
         simp only [map_smul, Prod.smul_fst, Prod.smul_snd, smul_dotProduct, dotProduct_smul, smul_eq_mul]; ring)
       (fun a b c => by simp only [Submodule.coe_add, Prod.fst_add, Prod.snd_add, add_dotProduct, dotProduct_add]; ring)
       (fun a b c => by
         simp only [Submodule.coe_smul, Prod.smul_fst, Prod.smul_snd, smul_dotProduct, dotProduct_smul, smul_eq_mul]; ring)
   have hinj : Function.Injective B := by
-    rw [injective_iff_map_eq_zero]
+    set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
     intro x hx
     refine hXL x (mem_of_orth large₂ hiso hdim _ fun w hw => ?_)
     exact (sub_eq_zero.1 (LinearMap.congr_fun hx ⟨w, hw⟩)).symm
@@ -139,7 +196,7 @@ theorem coeff_mem (hc : Continuous ψ) (h1 : ψ ≠ 1) (l : ((κ → k) → ℂ)
     have ht : Tendsto (fun y => X (y - x)) (𝓝 x) (𝓝 0) :=
       (cX.comp (continuous_id.sub continuous_const)).tendsto' _ _ (by simp)
     filter_upwards [ht.eventually hf] with y hy
-    conv_rhs => rw [← hy, schr_add (hX _ _), ← map_add, add_sub_cancel]
+    conv_rhs => rw [← hy, schr_add (hX _ _), ← map_add (f := _), add_sub_cancel]
   · obtain ⟨C, hC, h⟩ := exists_compact_ann (ι := ι) hc h1 ((cS.tendsto' 0 0 (map_zero S)).eventually hf)
     refine HasCompactSupport.intro hC fun x hx => ?_
     by_contra hne
@@ -178,7 +235,7 @@ theorem exists_avg [DecidableEq ι] (hc : Continuous ψ) (h1 : ψ ≠ 1) (large�
   let P : ((κ → k) → ℂ) →ₗ[ℂ] ((ι → k) → ℂ) :=
     { toFun := fun φ x => l (schr ψ (X x) φ)
       map_add' := fun a b => funext fun x => by
-        rw [Pi.add_apply, ← map_add]; congr 1; funext z; simp [schr, mul_add]
+        rw [Pi.add_apply, ← map_add (f := _)]; congr 1; funext z; simp [schr, mul_add]
       map_smul' := fun c a => funext fun x => by
         rw [RingHom.id_apply, Pi.smul_apply, ← map_smul]; congr 1; funext z; simp [schr, mul_left_comm] }
   have hL : ∀ φ ∈ SB (κ → k), (I ∘ₗ P) φ = ∫ x, l (schr ψ (X x) φ) ∂μ := fun φ hφ => hI' _ (hF φ hφ)
@@ -194,7 +251,7 @@ theorem exists_avg [DecidableEq ι] (hc : Continuous ψ) (h1 : ψ ≠ 1) (large�
           ψ (⅟(2 : k) * (w.1 ⬝ᵥ w.2)) • P (schr ψ (S w.2) (schr ψ (X w.1) φ)) := by
         funext x
         show _ = ψ _ * l (schr ψ (X x) (schr ψ (S w.2) (schr ψ (X w.1) φ)))
-        rw [schr_comm, map_smul, hS _ _ (schr_mem hc _ (schr_mem hc _ hφ)), hXS, schr_add (hX _ _), ← map_add, schr,
+        rw [schr_comm, map_smul, hS _ _ (schr_mem hc _ (schr_mem hc _ hφ)), hXS, schr_add (hX _ _), ← map_add (f := _), schr,
           AddChar.map_add_eq_mul, smul_eq_mul]
         ring
       rw [e2, map_smul]
@@ -210,7 +267,7 @@ theorem exists_avg [DecidableEq ι] (hc : Continuous ψ) (h1 : ψ ≠ 1) (large�
     · by_cases ht : t ∈ U <;> simp [ht]
     · simp [U.zero_mem]
   · rw [hL _ (schr_mem hc _ hφ), hL _ hφ]
-    simp only [schr_add (hX _ _), ← map_add]
+    simp only [schr_add (hX _ _), ← map_add (f := _)]
     exact integral_add_right_eq_self (fun t => l (schr ψ (X t) φ)) x
   · rw [hL _ (schr_mem hc _ hφ), hL _ hφ]
     refine integral_congr_ae (Eventually.of_forall fun x => ?_)

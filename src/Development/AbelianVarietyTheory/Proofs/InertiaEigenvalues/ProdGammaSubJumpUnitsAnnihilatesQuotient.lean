@@ -1,14 +1,55 @@
-import Mathlib
-import Formalism.SharpRestriction.LevelLetterCocycles.UsedLocalConclusion
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.NotFullBot
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.UnramifiedSubfieldLeCyclotomicExt
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.WachLatticeEqFiltrationSumAtLevel
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.NotFullBot
+public import Formalism.SharpRestriction.LevelLetterCocycles.DeltaInvariantLattices
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.UnramifiedSubfieldLeCyclotomicExt
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.MemWachNIffExpansionStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.PowerSeriesTwistedScalingTriangularLaurentStatement
 import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.UnramifiedSubfieldLeCyclotomicExt
 import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.WachExpansionBasisDivisibility
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.WachLatticeEqStdPowerSeriesAtZero
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.MemWachNIffExpansionStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.WachNInvQPowGammaStableStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.PowerSeriesTwistedScalingTriangularLaurentStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.WachLatticeEqFiltrationSumAtLevel
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.WachLatticeEqStdPowerSeriesAtZero
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.WachNInvQPowGammaStableStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GlobalTheory.NL.KillLevels
 
@@ -156,8 +197,8 @@ section Concrete
 variable {l : ℕ} [Fact l.Prime] {P : LocPrime l} {AI : LocAinf l P} {H : LocHW l P} {F : LocFon l P AI H}
   {K : FinExt l} {s : ℕ} {LL : FinExt l}
 
-open Classical in
 
+open Classical in
 def Ex (C : LocCmpT l P AI H F) (h : Good K s LL) (T : Lt K LL) (i : Let K) (ζ : ↥LL.1) (y : ℕ)
     (z : (H.W K s LL h).DD T) : ℤ → T.V ⊗[ℚ_[l]] P.R.B :=
   if hz : (H.W K s LL h).Q ^ y • z ∈ (H.W K s LL h).N T then ex C h T i ζ ⟨_, hz⟩ else 0
@@ -166,7 +207,7 @@ theorem Ex_eq (C : LocCmpT l P AI H F) (h : Good K s LL) (T : Lt K LL) (i : Let 
     (z : (H.W K s LL h).DD T) (hz : (H.W K s LL h).Q ^ y • z ∈ (H.W K s LL h).N T) :
     Ex C h T i ζ y z = ex C h T i ζ ⟨_, hz⟩ := by
   unfold Ex
-  rw [dif_pos hz]
+  rw [dite_eq_left hz]
 
 def SubF (H : LocHW l P) (h : Good K s LL) (T : Lt K LL) (i : Let K) (τ : ↥K.1 →ₐ[ℚ_[l]] ↥LL.1) (k : ℤ) :
     Submodule ↥LL.1 (T.V ⊗[ℚ_[l]] P.R.B) :=
@@ -179,7 +220,7 @@ theorem SubF_mono (H : LocHW l P) (h : Good K s LL) (T : Lt K LL) (i : Let K) (�
     antitone_int_of_succ_le (GlobalTheory.NL.Model.FilAt_anti T τ)
   exact inf_le_inf_left _ (Submodule.comap_mono (hanti (by omega)))
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem exists_jump (H : LocHW l P) (h : Good K s LL) (T : Lt K LL) (i : Let K)
     (τ : ↥K.1 →ₐ[ℚ_[l]] ↥LL.1) (y : ℕ) (k : ℤ) (hb : ¬ SubF H h T i τ k ≤ SubF H h T i τ (k - y)) :
@@ -208,8 +249,8 @@ theorem exists_jump (H : LocHW l P) (h : Good K s LL) (T : Lt K LL) (i : Let K)
   rw [hF]
   exact he
 
-set_option maxHeartbeats 1000000 in
-set_option synthInstance.maxHeartbeats 400000 in
+
+
 
 theorem Ex_sub_smul (C : LocCmpT l P AI H F) (h : Good K s LL) (T : Lt K LL) (i : Let K) (ζ : ↥LL.1) (y : ℕ)
     (z : (H.W K s LL h).DD T) (d : ↥(OL LL))
@@ -222,9 +263,9 @@ theorem Ex_sub_smul (C : LocCmpT l P AI H F) (h : Good K s LL) (T : Lt K LL) (i 
   rw [Ex_eq C h T i ζ y _ hz', Ex_eq C h T i ζ y _ hγz, Ex_eq C h T i ζ y z hz]
   exact he j
 
+
 set_option maxHeartbeats 1000000 in
 set_option synthInstance.maxHeartbeats 400000 in
-
 theorem step (C : LocCmpT l P AI H F) (h : Good K s LL) (T : Lt K LL) (i : Let K) (ζ : ↥LL.1)
     (τ : ↥K.1 →ₐ[ℚ_[l]] ↥LL.1) (y : ℕ) (w : PowerSeries ↥LL.1)
     (hw0 : PowerSeries.constantCoeff w = algebraMap ↥(OL LL) ↥LL.1
@@ -279,9 +320,9 @@ namespace GlobalTheory.NL.KillLevels
 
 open Formalism.WeaklyAdmissibleFiltrations Formalism.BasicNotions Formalism.BasicNotions.Loc TensorProduct GlobalTheory.NL Formalism.MainNotions.DeltaInvariantLattices
 
+
 set_option maxHeartbeats 2000000 in
 set_option synthInstance.maxHeartbeats 400000 in
-
 theorem annihilate : ∀ (D : Formalism.BasicNotions.D7) (HW : HWOf D.loc) (F : FonOf D.loc D.locA HW) (Cm : CmpOf D.loc D.locA HW F) (l : ℕ) [Fact l.Prime] (K : FinExt l) (s : ℕ) (LL : FinExt l) (h : Good K s LL), let W := (HW l).W K s LL h; ∀ T : Lt K LL, IsCrys ((D.loc l).PD K) T.ρ → ∀ y : ℕ, 1 ≤ y → ∀ Fs : Finset (↥(OL LL))ˣ, (∀ a ∈ Jumps (PD := (D.loc l).PD K) T, ∀ j : ℕ, 1 ≤ j → j ≤ y → uU W ^ (-(a + j)) ∈ Fs) → ∀ x ∈ invN W T (W.Q ^ y), Polynomial.aeval (W.γ T) (∏ c ∈ Fs, ((Polynomial.X : Polynomial ↥(OL LL)) - Polynomial.C (Units.val c))) x ∈ W.N T := by
   classical
   intro D HW F Cm l _ K s LL h W T hT y hy Fs hFs x hx

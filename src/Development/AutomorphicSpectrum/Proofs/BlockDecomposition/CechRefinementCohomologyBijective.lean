@@ -1,9 +1,50 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.Coords
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.CechPairings.Imports
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.ZariskiEtaleLifting.ZariskiCocycleRefinement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CrystallineSiteZariskiCoveredByAtlas
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.InOpenOfThickeningMorphism
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CrystallineSiteZariskiCoveredByAtlas
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.InclStd
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.InOpenOfThickeningMorphism
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.ZariskiEtaleLifting.ZariskiCocycleRefinement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+
+@[expose] public section
+
 set_option backward.isDefEq.respectTransparency false
 set_option autoImplicit false
 noncomputable section
@@ -71,7 +112,7 @@ def sqAct (a b : IdF A) : RAct A (sq a b) where
         rw [map_zero, zero_mul])
       map_add' := fun c c' => LinearMap.ext fun x => Subtype.ext (by
         change Ideal.Quotient.mk _ (c + c') * x.1 = Ideal.Quotient.mk _ c * x.1 + Ideal.Quotient.mk _ c' * x.1
-        rw [map_add, add_mul]) }
+        rw [map_add (f := _), add_mul]) }
   nat {T T'} φ c x := by
     obtain ⟨x, hx⟩ := x
     obtain ⟨y, rfl⟩ := Ideal.Quotient.mk_surjective x
@@ -159,12 +200,6 @@ def locN (T : Thick (nlFun γ p X q κ)) (a : T.B) : Thick (nlFun γ p X q κ) :
 
 def locNHom (T : Thick (nlFun γ p X q κ)) (a : T.B) : T ⟶ locN T a :=
   GlobalTheory.CompanionTheory.ThickZar.locHom (F := CrystallineSemistableComparison.B.schFn q) (b := nlBase R I γ p) (ht := rfl) (κ := κ) T a
-
-theorem locNHom_φ (T : Thick (nlFun γ p X q κ)) (a : T.B) :
-    (locNHom T a).φ = algebraMap T.B (Localization.Away a) := rfl
-
-theorem locN_i (T : Thick (nlFun γ p X q κ)) (a : T.B) :
-    (locN T a).i = (algebraMap T.B (Localization.Away a)).comp T.i := rfl
 
 theorem locN_univ (T : Thick (nlFun γ p X q κ)) (a : T.B) {T'' : Thick (nlFun γ p X q κ)} (ψ : T ⟶ T'')
     (hu : IsUnit (ψ.φ a)) : ∃! χ : locN T a ⟶ T'', locNHom T a ≫ χ = ψ :=
@@ -388,11 +423,9 @@ theorem bij_of_upTo {A : Type} [CommRing A] {M : Type*} {N : Type*} [AddCommGrou
     exact ⟨x, by simpa using hx⟩
 
 theorem onto_incl {Q Q' : ObjectProperty (Thick (nlFun γ p X q κ))} (h : Q' ≤ Q) :
-    CrystallineSemistableComparison.B.Onto (ObjectProperty.ιOfLE h) (fun T : Q.FullSubcategory => Q' T.obj) where
-  full := inferInstance
-  faithful := inferInstance
-  mem T := T.property
-  ess T hT := ⟨⟨T.obj, hT⟩, ⟨Iso.refl _⟩⟩
+    CrystallineSemistableComparison.B.Onto (ObjectProperty.ιOfLE h) (fun T : Q.FullSubcategory => Q' T.obj) :=
+  ⟨ObjectProperty.full_ιOfLE h, ObjectProperty.faithful_ιOfLE h,
+    fun T => T.property, fun T hT => ⟨⟨T.obj, hT⟩, ⟨Iso.refl _⟩⟩⟩
 
 theorem sq_eq_restrict {Q Q' : ObjectProperty (Thick (nlFun γ p X q κ))} (h : Q' ≤ Q) (a b : IdF (sP Q).A)
     (ha : (incl h).Le a (a.res (ObjectProperty.ιOfLE h) : IdF (sP Q').A))

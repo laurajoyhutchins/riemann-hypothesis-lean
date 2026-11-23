@@ -1,5 +1,49 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.IntegralCompression.LAbove
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.IntegralCompression.ContinuousEntryCharacters.LongWeylSwapsBlockDiagonal
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.IntegralCompression.LAbove
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.IntegralCompression.ContinuousEntryCharacters.LongWeylSwapsBlockDiagonal
+import GroundTheory.AutomorphicForms.RealIwasawaIntegration
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Algebra.Star.Unitary
+import Mathlib.Topology.Compactness.Paracompact
+
+@[expose] public section
 
 open MeasureTheory NumberField Filter Topology Matrix
 open GroundTheory.Automorphic GroundTheory.Automorphic.Reduction GroundTheory.Automorphic.RightCosetSpace GroundTheory.Automorphic.AutomorphicForm
@@ -15,6 +59,7 @@ private theorem chi_mul_neg (ν : Fin (2 + 2) → ℤ) (θ : Fin (2 + 2) → ℝ
 private theorem chi_mul_conj (ν : Fin (2 + 2) → ℤ) (θ : Fin (2 + 2) → ℝ) : chi ν θ * conj (chi ν θ) = 1 := by
   have h : conj (chi ν θ) = chi ν (-θ) := by
     unfold chi
+
     rw [← Complex.exp_conj, map_mul, map_sum, Complex.conj_I]
     congr 1
     simp only [map_mul, map_intCast, Complex.conj_ofReal, Pi.neg_apply, Complex.ofReal_neg, mul_neg, neg_mul,
@@ -70,7 +115,7 @@ theorem UpperTheory.V.Z.InvariantSubmoduleMonicPolynomial.EA.coefIdem :
       rw [hexp, Finset.mul_sum]
       exact Finset.sum_congr rfl fun j _ => (mul_assoc _ _ _).symm
     simp_rw [e1]
-    rw [integral_finset_sum (μ := μ) Finset.univ (f := fun j h => ψ h * a j h⁻¹ * b j k) fun j _ =>
+    rw [integral_finsetSum (μ := μ) Finset.univ (f := fun j h => ψ h * a j h⁻¹ * b j k) fun j _ =>
       hint _ ((hψc.mul ((hcont j).1.comp hinv)).mul continuous_const)]
     simp_rw [integral_mul_const]
     rw [Finset.sum_eq_single j₀]
@@ -93,7 +138,7 @@ theorem UpperTheory.V.Z.InvariantSubmoduleMonicPolynomial.EA.coefIdem :
       rw [hexp, Finset.mul_sum]
       exact Finset.sum_congr rfl fun j _ => by ring
     simp_rw [e1]
-    rw [integral_finset_sum (μ := μ) Finset.univ (f := fun j k => a j g * (conj (ψ k) * b j k)) fun j _ =>
+    rw [integral_finsetSum (μ := μ) Finset.univ (f := fun j k => a j g * (conj (ψ k) * b j k)) fun j _ =>
       hint _ (continuous_const.mul ((Complex.continuous_conj.comp hψc).mul (hcont j).2))]
     simp_rw [integral_const_mul]
     rw [Finset.sum_eq_single j₀]

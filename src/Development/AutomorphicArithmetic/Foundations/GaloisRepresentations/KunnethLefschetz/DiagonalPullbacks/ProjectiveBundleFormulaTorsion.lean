@@ -1,9 +1,50 @@
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.KunnethLefschetz.BasisOne
-import Development.AbelianVarietyTheory.Definitions.Divisors.IndEtOfForallFinset
-import Development.AbelianVarietyTheory.Definitions.Divisors.SecClass
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.HodgeSurjectivity.HodgeTateFromSandwich
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.KunnethLefschetz.EtaleCharts.PBData
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.KunnethLefschetz.EtaleCharts.BlowOfBl
+module
+
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.KunnethLefschetz.OneMul
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.BocksteinBaseChange.EtSide
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.KummerCupProducts.EtaleComparisonMapOfFacts
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.ConeSectionRestriction.IsTautologicalLineAt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.WeilBound.CoreStatements.PadicHodgeComparison.HodgeSurjectivity.CosieveRes
+
+@[expose] public section
 
 noncomputable section
 open CategoryTheory Limits AlgebraicGeometry Opposite GlobalTheory.EtC LateralTheory.EtaleTrace CrystallineSemistableComparison CrystallineSemistableComparison.Onto
@@ -43,8 +84,8 @@ def CupL {X : Scheme.{0}} {i j : ℕ} (x : TT l X i) (y : TT l X j) (z : TT l X 
 
 def castL {X : Scheme.{0}} {i j : ℕ} (h : i = j) (x : TT l X i) : TT l X j := h ▸ x
 
-variable (l) in
 
+variable (l) in
 def DiagQ (d : ℕ) {X P W : Scheme.{0}} (p₁ p₂ : P ⟶ X) (π : W ⟶ P) (e : V l W ((2 : ℕ) : ℤ)) : Prop :=
   ∃ (δ : V l P ((2 + 2 * d : ℕ) : ℤ)) (m : V l W ((2 * d : ℕ) : ℤ)) (s : ℕ) (a : Fin s → V l X ((2 + 2 * d : ℕ) : ℤ))
     (b : Fin s → V l X ((0 : ℕ) : ℤ)) (t : ℕ) (i j : Fin t → ℕ) (h : ∀ c, i c + j c = 2 + 2 * d) (u : ∀ c, V l X (i c))
@@ -53,8 +94,8 @@ def DiagQ (d : ℕ) {X P W : Scheme.{0}} (p₁ p₂ : P ⟶ X) (π : W ⟶ P) (e
     δ = ∑ c, cupV l P (add_zero _) (pb l p₁ _ (a c)) (pb l p₂ _ (b c)) +
       ∑ c, cupV l P (by rw [← h c, Nat.cast_add]) (pb l p₁ _ (u c)) (pb l p₂ _ (v c))
 
-variable (l) in
 
+variable (l) in
 def DiagL (d : ℕ) {X P W : Scheme.{0}} (p₁ p₂ : P ⟶ X) (π : W ⟶ P) (v : TT l W 2) : Prop :=
   ∃ (c : TT l P (2 + 2 * d)) (w : TT l W (2 * d)) (z : TT l W (2 + 2 * d))
     (m₀ : ℕ) (a₀ : Fin m₀ → TT l X (2 + 2 * d)) (b₀ : Fin m₀ → TT l X 0) (ab₀ : Fin m₀ → TT l P (2 + 2 * d + 0))

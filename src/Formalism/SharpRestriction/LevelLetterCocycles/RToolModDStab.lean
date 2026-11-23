@@ -1,6 +1,48 @@
-import Formalism.SharpRestriction.LevelLetterCocycles.Step1KillXList
-import Formalism.SharpRestriction.LevelLetterCocycles.SaturationUnramifiedOfRingCondition
-import Formalism.SharpRestriction.LevelLetterCocycles.LetterConditionGlobal
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.InvariantLetterPolynomialDerivation
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PowerSeries.Inverse
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -78,13 +120,13 @@ theorem rToolMod_dStab [NeZero n] (hP9 : Formalism.MainNotions.DeltaInvariantLat
   have hγq : W.γA W.gam (Formalism.MainNotions.LiftingTheory.qp W) =
       Formalism.MainNotions.LiftingTheory.qp W * (1 + W.π₀ * (w₂ : LetA O n)) := by
     have e1 : W.γA W.gam (Formalism.MainNotions.LiftingTheory.qp W) = W.γA W.gam W.π₀ + ((PD.p : ℕ) : LetA O n) := by
-      simp only [Formalism.MainNotions.LiftingTheory.qp, map_add, map_natCast]
+      simp only [Formalism.MainNotions.LiftingTheory.qp, map_add (f := _), map_natCast]
     rw [e1, hγπ]
     simp only [Formalism.MainNotions.LiftingTheory.qp]
     ring
   have hΔq : ∀ δ ∈ W.DelF, W.γA δ (Formalism.MainNotions.LiftingTheory.qp W) = Formalism.MainNotions.LiftingTheory.qp W := by
     intro δ hδ
-    simp only [Formalism.MainNotions.LiftingTheory.qp, map_add, map_natCast, hΔπ δ hδ]
+    simp only [Formalism.MainNotions.LiftingTheory.qp, map_add (f := _), map_natCast, hΔπ δ hδ]
   have ha : IsUnit (algebraMap (LetA O n) W.EE W.π₀) := by
     rw [hw₁, map_mul, map_pow]
     exact (w₁.isUnit.map _).mul (W.EE_π.pow _)
@@ -102,7 +144,7 @@ theorem rToolMod_dStab [NeZero n] (hP9 : Formalism.MainNotions.DeltaInvariantLat
     have hinv := Ring.mul_inverse_cancel _ ha
     have h2 : algebraMap (LetA O n) W.EE (Formalism.MainNotions.LiftingTheory.qp W) = algebraMap (LetA O n) W.EE W.π₀ *
         (((PD.p : ℕ) : W.EE) * Ring.inverse (algebraMap (LetA O n) W.EE W.π₀) * 1 + 1) := by
-      simp only [Formalism.MainNotions.LiftingTheory.qp, map_add, map_natCast]
+      simp only [Formalism.MainNotions.LiftingTheory.qp, map_add (f := _), map_natCast]
       linear_combination (-((PD.p : ℕ) : W.EE)) * hinv
     rw [h2]; exact ha.mul h1
   obtain ⟨e, he⟩ : ∃ e, e = Ring.inverse (algebraMap (LetA O n) W.EE W.π₀) := ⟨_, rfl⟩

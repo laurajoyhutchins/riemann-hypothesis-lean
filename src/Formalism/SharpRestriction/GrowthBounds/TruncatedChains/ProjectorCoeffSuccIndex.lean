@@ -1,4 +1,56 @@
-import Formalism.SharpRestriction.GrowthBounds.TruncatedChains.PfTrunc
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.TruncatedChains.RestPair
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.SharpRestriction.GrowthBounds.CovariantDegrees
+import Formalism.SharpRestriction.GrowthBounds.RootWeights.NontrivialIsotypicWeightZeroKilled
+
+@[expose] public section
 
 noncomputable section
 
@@ -166,7 +218,7 @@ theorem lemA (hef : e * f = f * e + h) (hhf : h * f = f * h - (2 : K) • f) {v 
   | zero => simp [hef', hv]
   | succ k ih =>
     have hfk := hF_pow hhf hv (k + 1)
-    rw [hp (k + 1) v, hef', ih, hfk, map_add, map_smul, ← hp (k + 1) (e v), ← hp k v,
+    rw [hp (k + 1) v, hef', ih, hfk, map_add (f := _), map_smul, ← hp (k + 1) (e v), ← hp k v,
       add_assoc, ← add_smul]
     congr 2
     push_cast
@@ -184,7 +236,7 @@ theorem lemB (hef : e * f = f * e + h) (hhe : h * e = e * h + (2 : K) • e) {v 
   | zero => simp [hef', hv]
   | succ k ih =>
     have hek := hE_pow hhe hv (k + 1)
-    rw [hp (k + 1) (f v), ih, map_add, map_smul, hef', hek, ← hp (k + 1) v, ← hp k v,
+    rw [hp (k + 1) (f v), ih, map_add (f := _), map_smul, hef', hek, ← hp (k + 1) v, ← hp k v,
       add_assoc, ← add_smul]
     congr 2
     push_cast
@@ -211,6 +263,7 @@ theorem R1 (hef : e * f = f * e + h) (hhe : h * e = e * h + (2 : K) • e) (hhf 
       push_cast
       ring
   have ht := tele (fun j => (f ^ j) ((e ^ j) (e x))) s T (c + 1) (by simp [he])
+
   rw [P_apply, P_apply, map_sum, show (s : K) - c - 1 = (s : K) - (c + 1) by ring, ← ht]
   refine Finset.sum_congr rfl fun k _ => ?_
   rw [map_smul, hk]
@@ -228,13 +281,14 @@ theorem sl2_projector_apply_f_eq_smul_f_projector_succ (hef : e * f = f * e + h)
     cases k with
     | zero => simp
     | succ j =>
-      rw [lemB hef hhe hz j, map_add, map_smul, ← hpf (j + 1), Nat.add_sub_cancel]
+      rw [lemB hef hhe hz j, map_add (f := _), map_smul, ← hpf (j + 1), Nat.add_sub_cancel]
       congr 2
       push_cast
       ring
   have ht := tele (fun k => (f ^ (k + 1)) ((e ^ k) z)) s T (c - 1)
     (by show (f ^ (T + 1)) ((e ^ T) z) = 0; rw [he]; simp)
   beta_reduce at ht
+
   rw [P_apply, P_apply, map_sum]
   simp only [key, map_smul, ← hpf']
   rw [ht]

@@ -1,8 +1,43 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.IsAbsIrrCharCompIff
-import Formalism.LocalToGlobal.BesselHermitianTheta.TiedWeil
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsUniqueIsStdChar
-import Formalism.LocalToGlobal.IndefiniteReal.LevelTypeEquivalence.InfFam
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.IsAbsIrrCharCompIff
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsUniqueIsStdChar
+public import Formalism.LocalToGlobal.IndefiniteReal.LevelTypeEquivalence.InfFam
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -26,44 +61,6 @@ theorem isStdChar_unique {D : D7} {ψ ψ' : AddChar (AF D.host.F) ℂ} {s : ℤ}
 theorem isInfFam_unique {D : D7} {θ θ' : Formalism.IndefR.Datum.InfFam D} (h : IsInfFam θ) (h' : IsInfFam θ') : θ = θ' :=
   Formalism.IndefR.Eqv.infFamUnique_holds D θ θ' h h'
 
-theorem exists_emb_of_range_le {K L : Type} [Field K] [Field L] (f : K →+* ℂ) (g : L →+* ℂ) (h : Set.range f ⊆ Set.range g) :
-    ∃ ι : K →+* L, ∀ x, g (ι x) = f x := by
-  let incl : K →+* g.fieldRange := f.codRestrict g.fieldRange fun x => by
-    obtain ⟨y, hy⟩ := h ⟨x, rfl⟩
-    exact ⟨y, hy⟩
-  refine ⟨(RingHom.rangeRestrictFieldEquiv g).symm.toRingHom.comp incl, fun x => ?_⟩
-  have := congrArg Subtype.val ((RingHom.rangeRestrictFieldEquiv g).apply_symm_apply (incl x))
-  simpa [incl] using this
-
-open Formalism.IndefR.Mult in
-
-theorem parAt_enl (X X' : Stages) (hB : X'.B.toPre = X.B.toPre) (ι : X.toD7.what₂.LL →+* X'.toD7.what₂.LL)
-    (hι : ∀ x, X'.toD7.what₂.embLL (ι x) = X.toD7.what₂.embLL x) (i : Fin X.toD7.R.m) (i' : Fin X'.toD7.R.m) (hi : (i : ℕ) = i')
-    (σ' : X'.toD7.what₂.LL →+* ℂ) : HEq (parAt (Wc X'.toD7 i') σ') (parAt (Wc X.toD7 i) (σ'.comp ι)) := by
-  obtain ⟨⟨P, LL, eL, _, eE, eφ⟩, C, W, V, S, N, G⟩ := X
-  obtain ⟨⟨P', LL', eL', _, eE', eφ'⟩, C', W', V', S', N', G'⟩ := X'
-  dsimp only at hB
-  subst hB
-  obtain ⟨i, hi0⟩ := i
-  obtain ⟨i', hi1⟩ := i'
-  dsimp only at hi
-  subst hi
-  have hE : ∀ x, ι (eE x) = eE' x := fun x => by
-    apply eL'.injective
-    have h1 := congrArg (fun f => f x) eφ
-    have h2 := congrArg (fun f => f x) eφ'
-    simp only [RingHom.coe_comp, Function.comp_apply] at h1 h2
-    exact (hι (eE x)).trans (h1.trans h2.symm)
-  apply heq_of_eq
-  funext ρ
-  have hc : ∀ τ, labE σ' τ = labE (σ'.comp ι) τ := fun τ => by
-    ext x
-    simp only [labE, labLL, RingHom.coe_comp, Function.comp_apply]
-    exact congrArg σ' (hE _).symm
-  have hl : labE σ' = labE (σ'.comp ι) := funext hc
-  unfold parAt kapAt lab
-  erw [hl]
-  rfl
 
 end GlobalTheory.Mem.R3.Rw
 

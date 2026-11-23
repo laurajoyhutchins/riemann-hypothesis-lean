@@ -1,6 +1,46 @@
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.RealDescent.RealLeviDescent.ThetaFixedGlobalCharacter
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.RealDescent.RealLeviDescent.HarmTop
-import Development.WeilBound.RepresentationTheoryGL.CasimirAlgebra.TensorRelationsGL.ClozelCohomologicalOf
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.RealDescent.RealLeviDescent.ThetaFixedGlobalCharacter
+public import Development.AbelianVarietyTheory.PublishedTheorems.GaloisGeometry₂.IsTemperedGLOfIsUnitaryLSeg
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.ArchimedeanGelfandKernels.InfinitesimalCharacterGL.EopW
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.RealDescent.RealLeviDescent.ConeWeightsNotSecondType
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Definitions.Divisors.Tpr
+
+@[expose] public section
 
 noncomputable section
 
@@ -119,11 +159,6 @@ def AbsGlob : Prop :=
         (∀ x, ((univ : Finset ι).toList.map P).prod x ∈ (⨅ i, isoSp (σ i) (E i) : Submodule ℂ U)) ∧
         ∀ j, trOn (⨅ i, isoSp (σ i) (E i)) (((univ : Finset ι).toList.map P).prod * R j * Θ) = c * trOn Y (R j * Θ)
 
-def DiracP : Prop :=
-  ∀ (n : ℕ) (lam : Fin n → ℤ), Antitone lam → ∀ (V : Type) [NormedAddCommGroup V] [InnerProductSpace ℂ V]
-    (E1 E2 : Fin n → Fin n → Module.End ℂ V) (σ : Un n →* (V →ₗ[ℂ] V)) (A : V →ₗ[ℂ] V), IsLoc (infOf lam) E1 E2 σ A →
-      ∀ ν : Fin n → ℝ, hwSp E1 E2 ν ≠ ⊥ → LSq lam ≤ spinSq ν
-
 def LowIso : Prop :=
   ∀ (n : ℕ) (lam : Fin n → ℤ), Antitone lam → ∀ (E : KMod n) (T : E.V →L[ℂ] E.V), IsLefK lam E T →
     ∀ (V : Type) [NormedAddCommGroup V] [InnerProductSpace ℂ V] (E1 E2 : Fin n → Fin n → Module.End ℂ V)
@@ -230,8 +265,8 @@ def LocAct : Prop := ForRl fun _ _ _ _ n π _ _ _ D => ∀ w lam, ChAt π w lam 
     (P : Module.End ℂ D.U), IsAvg ν (D.σ w) M T P → ∀ k val T', IsMult μC M k val T' → ∀ u g,
       ∫ y : G n, phiOf M T k y * along w g (D.i u).1.1 y.val ∂μC = val (infOf lam) * (D.i (P u)).1.1 g
 
-attribute [local instance] PositivityTheory.Rg.BcB.E.borelH in
 
+attribute [local instance] PositivityTheory.Rg.BcB.E.borelH in
 def OpForm : Prop := ForRl fun E _ _ _ n π K _ μf D => ∀ lam : InfinitePlace E → Fin n → ℤ, (∀ w, ChAt π w (lam w)) →
   ∀ [MeasurableSpace (Un n)] [BorelSpace (Un n)] (ν : Measure (Un n)) [ν.IsHaarMeasure], ν Set.univ = 1 →
   ∀ [MeasurableSpace (G n)] [BorelSpace (G n)] (μC : Measure (G n)) [μC.IsHaarMeasure]

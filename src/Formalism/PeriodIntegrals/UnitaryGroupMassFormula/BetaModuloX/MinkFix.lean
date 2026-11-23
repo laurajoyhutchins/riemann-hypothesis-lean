@@ -1,6 +1,48 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.BetaModuloX.MapEqOfIff
-import Formalism.FlagUnipotentLattices.MinkowskiFactorialBounds.IdealsOfNormEqIndexSet
+module
+
+public import Mathlib.NumberTheory.NumberField.Basic
+public import Formalism.FlagUnipotentLattices.MinkowskiFactorialBounds.IdealsOfNormEqIndexSet
+public import Formalism.HermitianLattices.HermitianLatticesProofs.ThetaSummable
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -20,7 +62,9 @@ theorem mink_fix (L : Submodule (𝓞 E) Q) (hL : L.FG) (φ : Q →ₗ[E] Q) (h�
     (hcong : ∀ x ∈ L, ∃ y ∈ L, φ x - x = g • y) : ∀ x ∈ L, φ x = x := by
   have hfinO : Module.Finite (𝓞 E) L := Module.Finite.iff_fg.2 hL
   have hfinZ : Module.Finite ℤ L := Module.Finite.trans (𝓞 E) L
-  have := Formalism.HermitianLatticesTheory.isAddTorsionFree_ringOfIntegers_submodule (K := E) L
+  have : IsAddTorsionFree L :=
+    Formalism.HermitianLatticesTheory.isAddTorsionFree_ringOfIntegers_submodule (K := E) L
+  have : HasUniqueDiv L := IsAddTorsionFree.hasUniqueDiv
   have hfree : Module.Free ℤ L := Module.free_of_finite_type_torsion_free'
   let ψ : L →ₗ[ℤ] L :=
     (((φ.restrictScalars (𝓞 E)).restrict hφL : L →ₗ[𝓞 E] L) : L →+ L).toIntLinearMap
@@ -34,7 +78,7 @@ theorem mink_fix (L : Submodule (𝓞 E) Q) (hL : L.FG) (φ : Q →ₗ[E] Q) (h�
       rw [Function.iterate_succ_apply', Function.iterate_succ_apply', hψ, ih]
   have hψn : ψ ^ n = 1 := by
     refine LinearMap.ext fun x => Subtype.ext ?_
-    rw [Module.End.pow_apply, hiter, hpow]
+    rw [pow_apply_eq_iterate, hiter, hpow]
     rfl
   have hc : ∀ x : L, ∃ y : L, ψ x - x = (g : ℤ) • y := by
     intro x
@@ -56,7 +100,7 @@ theorem mink_fix (L : Submodule (𝓞 E) Q) (hL : L.FG) (φ : Q →ₗ[E] Q) (h�
     rw [LinearMap.toMatrixAlgEquiv_apply]
     have h := hyf (b j)
     rw [sub_eq_iff_eq_add'] at h
-    rw [h, map_add, map_zsmul, Finsupp.add_apply, Finsupp.smul_apply, Module.Basis.repr_self,
+    rw [h, map_add (f := _), map_zsmul, Finsupp.add_apply, Finsupp.smul_apply, Module.Basis.repr_self,
       Finsupp.single_apply]
     simp [B, Matrix.one_apply, eq_comm]
   have hA1 := Formalism.HermitianLatticeCounting.P.finite_order_congruence _ n (g : ℤ) A B (by exact_mod_cast hg) hn hAn hAB

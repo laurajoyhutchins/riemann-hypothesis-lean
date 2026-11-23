@@ -1,11 +1,62 @@
-import Mathlib
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.SatakeExponents.UniformizerValuations.LeviMatchingWords.MatchLM
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SphericalOneOfLocalAlgebra
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FiniteSphNe
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.HeckeCosetSumCompact
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LevelFamInf
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ConstantTermHeckeFormula
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.HasCompactSupportTj
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.SatakeExponents.UniformizerValuations.LeviMatchingWords.MatchLM
+import Development.AbelianVarietyTheory.Definitions.Divisors.T2SpaceGeneralLinearGroup
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LeviProjectionMaximalCompact
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.HasSatakeGLOfIsSatVecGL
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ComapUNAndMapSM
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ConstantTermHeckeFormula
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FiniteSphNe
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.HasCompactSupportTj
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.HeckeCosetSumCompact
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LevelFamInf
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SphericalOneOfLocalAlgebra
+import GroundTheory.AutomorphicForms.GLnLocal
+import GroundTheory.LocalFields.LocalFourierHaar
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Separation.Connected
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -44,10 +95,10 @@ variable {E : Type} [Field E] [NumberField E] [IsCMField E]
 
 theorem blk_mem_KGL_iff {a b n : ℕ} (h : a + b = n) (w : Pl E) (m : GLw a w × GLw b w)
     (X : Multiplicative (Matrix (Fin a) (Fin b) (w.adicCompletion E))) :
-    blk h w m (Multiplicative.toAdd X) ∈ GlobalTheory.LFun.KGL w n ↔ m ∈ K2 a b w ∧ X ∈ intMat a b w := by
+    blk h w m (Multiplicative.toAdd X) ∈ GlobalTheory.LFun.KGL w (n := n) ↔ m ∈ K2 a b w ∧ X ∈ intMat a b w := by
   obtain ⟨hN, hM⟩ := GlobalTheory.CompanionTheory.LeviInt.comap_uN_and_map_sM E a b n h w
-  have hdiag : ∀ c ∈ K2 a b w, blk h w c 0 ∈ GlobalTheory.LFun.KGL w n := fun c hc => hM ⟨c, hc, rfl⟩
-  have hNK : ∀ Z, Z ∈ intMat a b w ↔ blk h w 1 (Multiplicative.toAdd Z) ∈ GlobalTheory.LFun.KGL w n := by
+  have hdiag : ∀ c ∈ K2 a b w, blk h w c 0 ∈ GlobalTheory.LFun.KGL w (n := n) := fun c hc => hM ⟨c, hc, rfl⟩
+  have hNK : ∀ Z, Z ∈ intMat a b w ↔ blk h w 1 (Multiplicative.toAdd Z) ∈ GlobalTheory.LFun.KGL w (n := n) := by
     intro Z
     rw [← hN, Subgroup.mem_comap, Subgroup.mem_subgroupOf, GlobalTheory.LeviFubini.uN_val]
   have hsplit : blk h w m (Multiplicative.toAdd X) = blk h w m 0 * blk h w 1 (Multiplicative.toAdd X) := by
@@ -77,10 +128,10 @@ theorem val_toSub {w : Pl E} (hU : UL n w = ⊤) (y : GLw n w) : ((toSub (UL n w
   simp [toSub, hy]
 
 theorem lone_toSub {w : Pl E} (hU : UL n w = ⊤) (y : GLw n w) :
-    lone (KL n w) (toSub (UL n w) y) = if y ∈ GlobalTheory.LFun.KGL w n then 1 else 0 := by
+    lone (KL n w) (toSub (UL n w) y) = if y ∈ GlobalTheory.LFun.KGL w (n := n) then 1 else 0 := by
   rw [GlobalTheory.CompanionTheory.UnitaryWord.lone_KL]
   unfold GlobalTheory.CompanionTheory.UnitaryWord.unitFn
-  by_cases hy : y ∈ GlobalTheory.LFun.KGL w n
+  by_cases hy : y ∈ GlobalTheory.LFun.KGL w (n := n)
   · have : toSub (UL n w) y ∈ (KL n w : Set (UL n w)) := by
       show toSub (UL n w) y ∈ KL n w
       rw [KL, Subgroup.mem_subgroupOf, val_toSub hU]
@@ -97,16 +148,16 @@ theorem lone_toSub {w : Pl E} (hU : UL n w = ⊤) (y : GLw n w) :
 theorem ct_lone {a b : ℕ} (h : a + b = n) {w : Pl E} (hU : UL n w = ⊤) (m : GLw a w × GLw b w) :
     ct h w (fun y => lone (KL n w) (toSub (UL n w) y)) m = if m ∈ K2 a b w then 1 else 0 := by
   have hk : ∀ X : Multiplicative (Matrix (Fin a) (Fin b) (w.adicCompletion E)),
-      GlobalTheory.BCT.avg (fun k : GlobalTheory.LFun.KGL w n => lone (KL n w) (toSub (UL n w)
+      GlobalTheory.BCT.avg (fun k : GlobalTheory.LFun.KGL w (n := n) => lone (KL n w) (toSub (UL n w)
         ((k : GLw n w)⁻¹ * blk h w m (Multiplicative.toAdd X) * k))) =
       if m ∈ K2 a b w ∧ X ∈ intMat a b w then 1 else 0 := by
     intro X
-    have e : (fun k : GlobalTheory.LFun.KGL w n => lone (KL n w) (toSub (UL n w)
+    have e : (fun k : GlobalTheory.LFun.KGL w (n := n) => lone (KL n w) (toSub (UL n w)
         ((k : GLw n w)⁻¹ * blk h w m (Multiplicative.toAdd X) * k))) =
         fun _ => if m ∈ K2 a b w ∧ X ∈ intMat a b w then (1 : ℂ) else 0 := by
       funext k
       rw [lone_toSub hU]
-      have hiff : (k : GLw n w)⁻¹ * blk h w m (Multiplicative.toAdd X) * k ∈ GlobalTheory.LFun.KGL w n ↔
+      have hiff : (k : GLw n w)⁻¹ * blk h w m (Multiplicative.toAdd X) * k ∈ GlobalTheory.LFun.KGL w (n := n) ↔
           m ∈ K2 a b w ∧ X ∈ intMat a b w := by
         rw [← blk_mem_KGL_iff h w m X, Subgroup.mul_mem_cancel_right _ k.2,
           Subgroup.mul_mem_cancel_left _ (inv_mem k.2)]
@@ -185,7 +236,7 @@ theorem isHecke_lone_KL (hE : Unr E) {w : Pl E} : IsHecke (KL n w) (lone (KL n w
 
 theorem isOpen_levelSubgroup' (a b : ℕ) (w : Pl E) : IsOpen (K2 a b w : Set (GLw a w × GLw b w)) := by
   have e : (K2 a b w : Set (GLw a w × GLw b w)) =
-      (GlobalTheory.LFun.KGL w a : Set (GLw a w)) ×ˢ (GlobalTheory.LFun.KGL w b : Set (GLw b w)) := rfl
+      (GlobalTheory.LFun.KGL w (n := a) : Set (GLw a w)) ×ˢ (GlobalTheory.LFun.KGL w (n := b) : Set (GLw b w)) := rfl
   rw [e]
   exact (GlobalTheory.LFun.SatCompare.isOpen_isCompact_KGL w a).1.prod (GlobalTheory.LFun.SatCompare.isOpen_isCompact_KGL w b).1
 

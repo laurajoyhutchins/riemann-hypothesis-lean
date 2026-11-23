@@ -1,5 +1,51 @@
-import Development.EtaleCohomology.EtaleSheaves.LeafHAWBounds
-import Development.EtaleCohomology.TateTwists.EtaleAlexanderWhitneyCupLeibnizOfPairing
+module
+
+public import Development.EtaleCohomology.EtaleSheaves.LeafHAWBounds
+public import Development.EtaleCohomology.EtaleSheaves.LeafTwPairUniquePf
+public import Development.EtaleCohomology.KummerTheory.CupAWCutEv
+public import Development.EtaleCohomology.TateTwists.EtaleAlexanderWhitneyCupLeibnizOfPairing
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+
+@[expose] public section
 
 noncomputable section
 open CategoryTheory Limits AlgebraicGeometry Opposite CochainComplex CochainComplex.HomComplex GlobalTheory.EtC
@@ -75,15 +121,15 @@ theorem comp_cast (N N' : ℕ) (e : N' = N) (hp : -(N : ℤ) = -(N' : ℤ)) (w :
   subst e
   simp
 
-include hF in
 
+include hF in
 theorem exists_cochain : ∃ η : Cochain ((chains R).obj E) K k,
     ∀ (N : ℕ) (w : ℤ) (h : -(N : ℤ) + k = w) (U : Scheme.{0}) (x : Sx E N U), ev η N w h U x = F N w h U x := by
   refine ⟨Cochain.mk fun p q hpq => if hp : p ≤ 0 then
     (((chains R).obj E).XIsoOfEq (by omega : p = -(((-p).toNat : ℕ) : ℤ))).hom ≫ comp F hF (-p).toNat q (by omega)
     else 0, fun N w h U x => ?_⟩
   unfold ev
-  rw [Cochain.mk_v, dif_pos (by omega), comp_cast F hF N _ (by omega) _ w h, comp, Iso.inv_hom_id_assoc]
+  rw [Cochain.mk_v, dite_eq_left (by omega), comp_cast F hF N _ (by omega) _ w h, comp, Iso.inv_hom_id_assoc]
   exact freeLift_gen _ _ _ _ U x
 
 end Lift
@@ -98,6 +144,7 @@ theorem LateralTheory.E.LeafHtpyAWPf.LeafHAWExists_of : LateralTheory.E.LeafHtpy
       (ev α p _ rfl U (x.sub 0 p (by omega))) (ev β (N - p) _ rfl U (x.sub p (N - p) (by omega)))) ?_
   intro N w hw V U g x
   show ((K.X w).obj.map g.op).hom _ = _
+
   rw [map_sum]
   refine Finset.sum_congr rfl fun p _ => ?_
   rw [Units.smul_def, map_zsmul, Units.smul_def, sub_nat, sub_nat, FreeSheafGeneratorLifts.ev_nat, FreeSheafGeneratorLifts.ev_nat, ← hnat]
@@ -181,11 +228,11 @@ theorem LeafHAWBounds_proved : LeafHAWBounds := by
       Fh H α.1 β.1 U w p (N' - p) (y.sub 0 p (by omega)) (y.sub p (N' - p) (by omega))) ?_ x]
   swap
   · intro N' y hN
-    rw [dif_pos (by omega), hc N' w _ U y]
+    rw [dite_eq_left (by omega), hc N' w _ U y]
     refine Finset.sum_congr rfl fun p _ => ?_
     rw [Units.smul_def]
     unfold Fh
-    rw [dif_pos (by omega)]
+    rw [dite_eq_left (by omega)]
   rw [bd_aw (Fh H α.1 β.1 U w) (fun p : ℕ => ((m * (p : ℤ)).negOnePow : ℤ)) (fun p : ℕ => ((m * ((p : ℤ) - 1)).negOnePow : ℤ))
     (fun p => by congr 2; push_cast; ring) N x]
   rw [secmap_sum, Finset.smul_sum, ← Finset.sum_add_distrib, ← Finset.sum_sub_distrib]
@@ -197,11 +244,11 @@ theorem LeafHAWBounds_proved : LeafHAWBounds := by
   refine recH _ _ _ _ _ _ _ _ _ _ _ _ _ _ ?_ ?_ ?_ ?_
   · refine bd_congr (fun q z hq => ?_) _
     unfold Fh
-    rw [dif_pos (by omega), dif_pos (by omega)]
+    rw [dite_eq_left (by omega), dite_eq_left (by omega)]
     exact hmul_congr H U α.1 β.1 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
   · refine bd_congr (fun q z hq => ?_) _
     unfold Fh
-    rw [dif_pos (by omega), dif_pos (by omega)]
+    rw [dite_eq_left (by omega), dite_eq_left (by omega)]
     exact hmul_congr H U α.1 β.1 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
   · subst hk
     simp only [← Units.val_mul, ← Int.negOnePow_add, ← Units.val_neg, ← Int.negOnePow_succ]

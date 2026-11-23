@@ -1,7 +1,44 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.ConjTupRefl
-import Formalism.LocalToGlobal.IndefiniteReal.LinksComap
-import Formalism.LocalToGlobal.IndefiniteReal.LinksExistW
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.ConjTupRefl
+public import Formalism.LocalToGlobal.IndefiniteReal.FWTie
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.MainNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.MainNotions.S MeasureTheory IsDedekindDomain NumberField Matrix Formalism.L2.Theta Formalism.L2.DIV Formalism.L2.Indef Formalism.IndefR Formalism.IndefR.Links Formalism.IndefR.Mult Formalism.IndefR.Datum Formalism.IndefR.FWT Formalism.L2.Pj
 open scoped TensorProduct InnerProductSpace
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
@@ -19,9 +56,6 @@ structure NewLev (D : D7) (N : Type) where
   xi : N → (AE D)ˣ →* Circle
   Q : N → Finset (Pl D.host.E)
   xiR : N → ∀ PP : Pl D.host.E, (kP PP)ˣ →* ℂˣ
-
-def NewLev.ofTuples (L : LevCh D T) (s : N → T) : NewLev D N :=
-  ⟨fun n => L.xiH (s n), fun n => L.xi (s n), fun n => L.Q (s n), fun n => L.xiR (s n)⟩
 
 def extL (L : LevCh D T) (V : NewLev D N) : LevCh D (T ⊕ N) :=
   { L with
@@ -58,14 +92,11 @@ def extA {K : Type} [Field K] [NumberField K] [StarRing K] {m : ℕ} (A : FamIn 
   leftGroupActionLift j τ := Sum.rec (A.leftGroupActionLift j) (X.actL j) τ
   heckeL j τ := Sum.rec (A.heckeL j) (X.opL j) τ
 
-theorem extA_comap {K : Type} [Field K] [NumberField K] [StarRing K] {m : ℕ} (A : FamIn K G Pl0 T m)
-    (X : NewFam A N) : (extA A X).comap Sum.inl A.μ0 = A := rfl
-
 variable {A : FamIn D.what₂.LL G Pl0 T D.R.m} {Ks : Type} [Field Ks] [NumberField Ks] [Algebra Ks D.what₂.LL]
+
 
 set_option genInjectivity false in
 set_option genSizeOfSpec false in
-set_option maxHeartbeats 2000000 in
 
 structure NewReal (R : RealDat D A Ks) (V : NewLev D N) (X : NewFam A N) where
   BR : ∀ n, Bridge.SideReal D D.sp.X'
@@ -101,7 +132,7 @@ structure NewReal (R : RealDat D A Ks) (V : NewLev D N) (X : NewFam A N) where
   thF : ∀ i n, (HV i n).H →ₗ[ℂ] MMap (R.MW i (sg0 D A))
   thG : ∀ i n, (HV i n).H →ₗ[ℂ] (R.HW i (sg0 D A)).H
 
-set_option maxHeartbeats 4000000 in
+
 
 def extR (R : RealDat D A Ks) {V : NewLev D N} {X : NewFam A N} (Y : NewReal R V X) : RealDat D (extA A X) Ks where
   toLevCh := extL R.toLevCh V
@@ -163,9 +194,6 @@ def extR (R : RealDat D A Ks) {V : NewLev D N} {X : NewFam A N} (Y : NewReal R V
   lam _ _ _ _ := 0
   err0 := R.err0
 
-set_option maxHeartbeats 4000000 in
-theorem extR_comap (R : RealDat D A Ks) {V : NewLev D N} {X : NewFam A N} (Y : NewReal R V X) :
-    (extR R Y).comap Sum.inl A.μ0 R.mu R.twPl R.FW R.kap R.lam R.err0 = R := rfl
 
 section Ties
 
@@ -194,7 +222,7 @@ variable {T : CoreJ D} [Algebra T.Q.c.F D.what₂.LL] {R : RealDat D A T.Q.c.F} 
   (Y : NewReal R V X) {κ : ∀ i : Fin D.R.m, WeightFamilies.Wt D ((i : ℕ) + 1)}
   {v₀ : ∀ (i : Fin D.R.m) (σ : D.what₂.LL →+* ℂ), (R.MW i σ).Vec}
 
-set_option maxHeartbeats 2000000 in
+
 
 def fwExt (t : FWTie T R κ v₀) : FWTie T (extR R Y) κ v₀ where
   alg_eq := t.alg_eq
@@ -210,7 +238,7 @@ def fwExt (t : FWTie T R κ v₀) : FWTie T (extR R Y) κ v₀ where
   ev0 := t.ev0
   ev := t.ev
 
-set_option maxHeartbeats 2000000 in
+
 
 def omExt {i : Fin D.R.m} (O : OMDat T.toCore R i Unit (fun _ => A.μ0)) :
     OMDat T.toCore (extR R Y) i Unit (fun _ => (extA A X).μ0) where
@@ -244,7 +272,7 @@ def omExt {i : Fin D.R.m} (O : OMDat T.toCore R i Unit (fun _ => A.μ0)) :
 
 variable {O : ∀ i, OMDat T.toCore R i Unit (fun _ => A.μ0)}
 
-set_option maxHeartbeats 4000000 in
+
 theorem omPins_ext (hT : TieExt R Y) {i : Fin D.R.m} (h : OMPins T R κ v₀ O i) :
     OMPins T (extR R Y) κ v₀ (fun i => omExt Y (O i)) i := by
   have hP := h.2
@@ -256,16 +284,16 @@ theorem omPins_ext (hT : TieExt R Y) {i : Fin D.R.m} (h : OMPins T R κ v₀ O i
   obtain ⟨g, c, c', h3, h4⟩ := h1.c0
   exact ⟨g, c, c', hT _ _ _ h3, h4⟩
 
-set_option maxHeartbeats 4000000 in
+
 theorem oneMapOf_ext {i : Fin D.R.m} (cc ph) :
     (omExt Y (O i)).OneMapOf (κ i) (v₀ i (sg0 D A)) cc ph ↔ (O i).OneMapOf (κ i) (v₀ i (sg0 D A)) cc ph := Iff.rfl
 
-set_option maxHeartbeats 4000000 in
+
 theorem phaseTie_ext {ph : Fin D.R.m → ℂ} {i : Fin D.R.m} (h : PhaseTie T R κ v₀ O ph i) :
     PhaseTie T (extR R Y) κ v₀ (fun i => omExt Y (O i)) ph i :=
   fun ⟨cc, p, h'⟩ => (oneMapOf_ext Y _ _).2 (h ⟨cc, p, (oneMapOf_ext Y _ _).1 h'⟩)
 
-set_option maxHeartbeats 4000000 in
+
 theorem fixBase_ext (i : Fin D.R.m) (τ : ℂ ≃+* ℂ) : GlobalTheory.ConjTwist.FixBase T (extR R Y) i τ ↔ GlobalTheory.ConjTwist.FixBase T R i τ :=
   ⟨fun h => ⟨h.core, h.host, h.curve, h.split, h.chi⟩, fun h => ⟨h.core, h.host, h.curve, h.split, h.chi⟩⟩
 

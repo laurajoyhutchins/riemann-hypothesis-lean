@@ -1,12 +1,57 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.SecBaseChangeAnySt
-import Development.AbelianVarietyTheory.Statements.SemistableTorsion.UTorsSt
-import Development.AbelianVarietyTheory.PublishedTheorems.SemistableReduction₂.SemistableReductionSt
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsRootStalk
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.UniformisedModelLabelledTorsionPointsStatement
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsFramesOnUniformisedModelFibreStatement
+module
+
+public import Development.AbelianVarietyTheory.Statements.SemistableTorsion.UTorsSt
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsFramesOnUniformisedModelFibreStatement
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsRootStalk
+import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ThetaPtEqUnitMulTh
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.UniformisedModelLabelledTorsionPointsStatement
+import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.IsNsmulIffEq
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExistsPrimGenerator
+import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.UniformisationTorsionIdentificationWithPairing
 import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ValueAtOrigin
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExistsPrimGenerator
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.ExistsRosatiGen
+public import Development.AbelianVarietyTheory.Definitions.Uniformization.TXFrame
+
+@[expose] public section
+
 open CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj AlgebraicGeometry
 open scoped CategoryTheory.Obj
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor GlobalTheory.ZH
@@ -36,8 +81,8 @@ theorem mk_add_smul {X : Type} [AddCommGroup X] (m : ℕ) (χ y : X) :
     (QuotientAddGroup.mk y : X ⧸ (nsmulAddMonoidHom m : X →+ X).range) = QuotientAddGroup.mk (m • χ + y) :=
   QuotientAddGroup.eq.2 ⟨χ, by simp⟩
 
-attribute [local instance] gtGroup in
 
+attribute [local instance] gtGroup in
 theorem exists_scale (hL : Laws) (hL₂ : Laws2) {ρ : S.Real} {p : ℕ} [Fact p.Prime] {y₀ : S.R →+* PadicAlgCl p}
     (u : ρ.UTest p y₀) (l : u.Lab) (h : ∀ a : o, ‖y₀ (algebraMap o S.R a)‖ ≤ 1) :
     ∃ sc : ℝ, 0 ≤ sc ∧
@@ -120,11 +165,32 @@ theorem exists_scale (hL : Laws) (hL₂ : Laws2) {ρ : S.Real} {p : ℕ} [Fact p
   · obtain ⟨q, hq₁, hq₂⟩ := ex a
     obtain ⟨z, hz⟩ := (QuotientAddGroup.eq_zero_iff _).1 (hq₂.symm.trans ha)
     have hz' : (S.r * S.N) • z = q.y := hz
-    let q₀ : QkPt u.D.toPre (PadicAlgCl p) (S.r * S.N) := qkMk hB 0 (q.g + iota hB _ (-z)) (by
-      rw [smul_add, qk_nsmul hB, ← map_nsmul, ← map_add, smul_neg, hz', add_neg_cancel])
-    have e₀ : f q = f q₀ := (f₃ _ _).2 ((equiv_iff hB _ _).2 ⟨-z, by
-      rw [smul_neg, hz', add_neg_cancel]; rfl, rfl⟩)
-    obtain ⟨q', x', hy', hx', hpow, hval⟩ := (key q₀ (x a) ((f₁ _ _).2 (((f₁ _ _).1 hq₁).trans e₀))).2 n hn hnm rfl
+    letI := gtGroup (D := u.D.toPre) (F := PadicAlgCl p)
+    let iota : u.D.toPre.X →+ GtPtF u.D.toPre (PadicAlgCl p) :=
+      AddMonoidHom.mk' (fun x => (exists_iota (F := PadicAlgCl p) hB x).choose) fun x x' => by
+        obtain ⟨b, v⟩ := (isIota_iff_val _ _).1 (exists_iota (F := PadicAlgCl p) hB x).choose_spec
+        obtain ⟨b', v'⟩ := (isIota_iff_val _ _).1 (exists_iota (F := PadicAlgCl p) hB x').choose_spec
+        obtain ⟨b'', v''⟩ := (isIota_iff_val _ _).1 (exists_iota (F := PadicAlgCl p) hB (x + x')).choose_spec
+        refine (isAdd_iff_eq _ _ _).1 ((isAdd_iff_val _ _ _).2 ⟨by rw [b, b', b'', cPoint_add], fun χ y J hJ => ?_⟩)
+        have C : IsCub (ReciprocityTheory.ChartRestriction.G.DVR.th u.D.toPre (T := TF (R := u.V) (PadicAlgCl p)) y J) := isCub_cubV u.D.toPre.cub hJ
+        rw [v χ y J hJ, v' χ y J hJ, v'' χ y J hJ, b, b', C.s01, C.s12]
+        exact tau_mul (𝟙 (TF (R := u.V) (PadicAlgCl p))) hJ hB x x' χ
+    have iota_spec (x : u.D.toPre.X) : GtPtF.IsIota x (iota x) := (exists_iota hB x).choose_spec
+    have iota_iff (x : u.D.toPre.X) (g : GtPtF u.D.toPre (PadicAlgCl p)) : GtPtF.IsIota x g ↔ g = iota x :=
+      ⟨fun h => isIota_unique h (iota_spec x), fun h => h ▸ iota_spec x⟩
+    have q_nsmul : (S.r * S.N) • q.g = iota q.y := by
+      obtain ⟨_, h₁, h₂⟩ := q.eq
+      exact ((isNsmul_iff_eq _ _ _).1 h₁).symm.trans ((iota_iff _ _).1 h₂)
+    let g₀ := q.g + iota (-z)
+    have hg₀ : (S.r * S.N) • g₀ = iota 0 := by
+      dsimp [g₀]
+      rw [smul_add, q_nsmul, ← map_nsmul, ← map_add (f := _), smul_neg, hz', add_neg_cancel]
+    let q₀ : QkPt u.D.toPre (PadicAlgCl p) (S.r * S.N) :=
+      ⟨0, g₀, _, (isNsmul_iff_eq _ _ _).2 rfl, (iota_iff _ _).2 hg₀⟩
+    have e₀ : f q = f q₀ := (f₃ _ _).2 ⟨-z, by
+      change 0 = q.y + (S.r * S.N) • (-z)
+      rw [smul_neg, hz', add_neg_cancel], _, iota_spec _, (isAdd_iff_eq _ _ _).2 rfl⟩
+    obtain ⟨q', x', hy', hx', hpow, hval⟩ := (key q₀ (x a) ((f₁ _ _).2 (((f₁ _ _).1 hq₁).trans e₀))).2 n hn hnm (by simp [q₀])
     obtain ⟨a', rfl⟩ := xonto x' (hx' w₀ hw₀.1).1
     have := u.A.isAb.comm
     let X : Multiplicative S.Gam →* (TFK (R := u.V) (PadicAlgCl p) ⟶ u.A.A) :=

@@ -1,16 +1,74 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.BasePsiLeviLowerBound
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.InterpStatementPfA
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.ExtFStatementPfA
-import Development.AbelianVarietyTheory.Proofs.TorusHaarMeasure.FirstMinimumInvariantContinuousPosOnFrames
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.MajPos
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.MajorantFamilyNorms
-import Development.AbelianVarietyTheory.BlockTheory.PoincareCuspForms.CurvatureFamilyNorm
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.BasePsiLeviLowerBound
+public import Development.AbelianVarietyTheory.BlockTheory.PoincareCuspForms.CurvatureFamilyNorm
+public import Development.AbelianVarietyTheory.Proofs.TorusHaarMeasure.BorelDiagNeZero
+public import Development.AbelianVarietyTheory.Proofs.TorusHaarMeasure.LeviFormWeightMetricOrthonormalDiagonal
+public import Development.AbelianVarietyTheory.Proofs.TorusHaarMeasure.MeasureStatements
 import Development.AbelianVarietyTheory.Proofs.TorusHaarMeasure.NormBcharMulNfacRmul
-import Development.AbelianVarietyTheory.Proofs.TorusHaarMeasure.LeviFormWeightMetricOrthonormalDiagonal
-import Development.AbelianVarietyTheory.Proofs.TorusHaarMeasure.BorelDiagNeZero
-import Development.AbelianVarietyTheory.Proofs.TorusHaarMeasure.PhlaBlockWtCpt
-import Development.AbelianVarietyTheory.Proofs.TorusHaarMeasure.MeasureStatements
+public import Development.AbelianVarietyTheory.Proofs.TorusHaarMeasure.PhlaBlockWtCpt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Calculus.ContDiff.WithLp
+import Mathlib.Analysis.Calculus.FDeriv.WithLp
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.L2DbarEstimates.ChartDerivatives.HoloSmooth
+import ReciprocityTheory.L2DbarEstimates.LeviForms.EventuallyDifferentiableAtOfContDiffAt
+import ReciprocityTheory.L2DbarEstimates.PlurisubharmonicCharts.DerivDerivNonposOfIsLocalMax
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.ExhaustFStatementPfD
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.ExtFStatementPfA
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.InterpStatementPfA
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.InterpStatementPfE
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.LUStatementPf
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.OrthoStatementPf
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.RhGradFPfA
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.FourierCoefficientDomain
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.OrthogonalFrameDomain
+
+@[expose] public section
 
 open NumberField ReciprocityTheory.ChartRestriction.G.FD ReciprocityTheory.ChartRestriction.G.AR.Inst ReciprocityTheory.ChartRestriction.G.AR.Up ReciprocityTheory.L2DbarEstimates Topology
 open scoped ContDiff
@@ -224,18 +282,6 @@ section Weights
 
 variable {X : Data E r} (w : Weights X)
 
-theorem second_degree_eq_on_gap {a b : Fin r} (h : IsGap X a b) (τ : X.Ψ) : de2 X τ a = de2 X τ b := by
-  obtain ⟨h1, h2⟩ := h
-  simp only [de2]
-  split_ifs <;> first | rfl | omega
-
-theorem gap_rem (τ : X.Ψ) (a b : Fin r) (h : IsGap X a b) : w.rem τ b ≤ w.rem τ a := by
-  have h2 := (w.gap_div τ a b h).1
-  have e : ((b : ℕ) : ℤ) = (a : ℕ) + 1 := by have := h.1; omega
-  simp only [Weights.rem, Weights.Fp, Weights.L, frameWt, kapW, Pi.add_apply, Pi.sub_apply,
-    Pi.smul_apply, smul_eq_mul, second_degree_eq_on_gap h τ, e]
-  linarith
-
 end Weights
 
 theorem isInv_iff (X : Data E r) (u : Frame X.Ψ r → ℝ) : IsInv X u ↔ IsInvFn X u := by
@@ -304,16 +350,6 @@ theorem bdd_of_upper (X : Data E r) (la : Wt X.Ψ r) (P : Frame X.Ψ r → ℂ) 
   have : 0 ≤ (i : ℝ) * ph x := mul_nonneg (Nat.cast_nonneg _) (h0 x hx)
   linarith
 
-theorem depth_iff (X : Data E r) {x : Frame X.Ψ r} (hx : x ∈ X.dom) {ξ : Fin r → E} (hξ : X.IsIso ξ)
-    (τ : X.Ψ) : X.c τ * X.maj x τ (Data.emb τ.1 ξ) ≤ 1 ↔ 1 ≤ X.tt ξ x τ := by
-  have h := mul_pos (MajorantFamilyNorms.c_pos X τ) (X.maj_pos hx τ (emb_ne_zero τ.1 hξ.2.2))
-  rw [Data.tt, le_div_iff₀ h, one_mul]
-
-theorem one_le_rd (X : Data E r) : 1 ≤ rd X := by
-  apply Real.one_le_rpow _ (by positivity)
-  have : (1 : ℤ) ≤ |discr E| := Int.one_le_abs (discr_ne_zero E)
-  exact_mod_cast this
-
 theorem card_pos {X : Data E r} (h : 2 ≤ nd X) : 0 < X.Ψ.card := by
   have : 0 < nd X := by omega
   obtain ⟨e⟩ := Fintype.card_pos_iff.1 this
@@ -322,75 +358,6 @@ theorem card_pos {X : Data E r} (h : 2 ≤ nd X) : 0 < X.Ψ.card := by
 section Clauses
 
 variable {X : Data E r} (I : ThetaInputs X)
-
-theorem T_pos (w : Weights X) : (0 : ℝ) < w.T := by
-  have := w.T_forty
-  exact_mod_cast (by omega : 0 < w.T)
-
-theorem dp_pos (w : Weights X) : 0 < dp X := by
-  have h1 : (0 : ℝ) < X.Ψ.card := by exact_mod_cast card_pos w.shape.D_ge
-  have h2 : (0 : ℝ) < X.p0 := by exact_mod_cast w.shape.p0_pos
-  unfold dp; positivity
-
-theorem one_le_RR (X : Data E r) : 1 ≤ RR X := one_le_pow₀ (one_le_rd X)
-
-theorem frame_theta_const_pos (w : Weights X) : 0 < w.c1 := by
-  have h1 := T_pos w
-  have h2 := dp_pos w
-  have h3 : (0 : ℝ) < X.p0 := by exact_mod_cast w.shape.p0_pos
-  have h4 := w.c_pos
-  have h5 := one_le_RR X
-  unfold Weights.c1; positivity
-
-theorem frame_theta_weight_pos (w : Weights X) : 0 < a1 X := by
-  have h1 : (0 : ℝ) < X.Ψ.card := by exact_mod_cast card_pos w.shape.D_ge
-  have h5 := one_le_rd X
-  unfold a1; positivity
-
-theorem w_nz (x : Frame X.Ψ r) (hx : x ∈ X.dom) : ∃ k, I.w k x ≠ 0 := by
-  by_contra h
-  push Not at h
-  obtain ⟨C, hC⟩ := I.w_lower
-  have := (Real.exp_pos _).trans_le (hC x hx)
-  simp [famNorm, Data.pnorm, h] at this
-
-theorem base_psi_weighted_cf : cfwM X I.ps0 (a1 X) := by
-  obtain ⟨C, hC⟩ := I.potential_bounded
-  obtain ⟨A, hA⟩ := I.potential_decay
-  refine ⟨⟨C, 0, fun x hx => by simpa using hC x hx⟩, fun η hη _ => ?_⟩
-  obtain ⟨C', h⟩ := hA η hη
-  exact ⟨C', A, fun x hx ξ hξ ht => h x hx ξ hξ fun τ => (depth_iff X hx hξ τ).2 (ht τ)⟩
-
-theorem base_psi_levi_lower_bound (x0 : Frame X.Ψ r) (z : V (nd X)) (hz : cpt X x0 z ∈ X.dom) (ξ : Fin (nd X) → ℂ) :
-    -(r * curvDe X x0 z ξ) ≤ lev X x0 I.ps0 z ξ := by
-  obtain ⟨x1, D, ho, -, h1, -, h2⟩ := transfer X x0 z hz
-  rw [h2 _ I.potential_invariant.1 I.potential_smooth, curvDe, h1]
-  exact I.curvature_lower_bound x1 ho 0 (IW.zero_mem_OmF X x1 ho) _
-
-theorem posL (x0 : Frame X.Ψ r) (z : V (nd X)) (hz : cpt X x0 z ∈ X.dom) (ξ : Fin (nd X) → ℂ)
-    (hξ : ξ ≠ 0) : 0 < curv X x0 I.toWeights.L z ξ := by
-  obtain ⟨x1, D, ho, hD, h1, -, -⟩ := transfer X x0 z hz
-  rw [h1]
-  exact I.curv_L x1 ho 0 (IW.zero_mem_OmF X x1 ho) _ fun h => hξ (hD (h.trans (map_zero D).symm))
-
-theorem weight_margin (w : Weights X) :
-    w.Fp - kapW X - nd X • w.L = (2 : ℤ) • w.L + w.rem := by
-  simp only [Weights.rem]; module
-
-theorem posF (u : ℝ) (hu : u ≤ 2 * I.T) (x0 : Frame X.Ψ r) (z : V (nd X))
-    (hz : cpt X x0 z ∈ X.dom) (ξ : Fin (nd X) → ℂ) :
-    curv X x0 I.toWeights.L z ξ ≤
-      curv X x0 (I.toWeights.Fp - kapW X - nd X • I.toWeights.L) z ξ - u * curvDe X x0 z ξ := by
-  obtain ⟨x1, D, ho, -, h1, -, -⟩ := transfer X x0 z hz
-  have h0 := IW.zero_mem_OmF X x1 ho
-  have h2 := I.margin_cut x1 ho 0 h0 (D ξ)
-  have h3 := curvDe_nonneg X h0 (D ξ)
-  have h4 := mul_le_mul_of_nonneg_right hu h3
-  have h5 := mul_nonneg (T_pos I.toWeights).le h3
-  rw [← curvDe_eq_omRh X ho h0] at h2
-  rw [weight_margin, curvDe, h1, h1, h1]
-  unfold curvDe at *
-  linarith
 
 end Clauses
 

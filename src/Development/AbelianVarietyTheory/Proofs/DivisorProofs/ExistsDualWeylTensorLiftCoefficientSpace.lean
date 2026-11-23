@@ -1,8 +1,57 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LamGApply
-import Formalism.LocalToGlobal.HermitianForms.IsLocBasis
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.VariableMatrixDetPolyPowMulMemDualWeylStatement
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LamGApply
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.VariableMatrixDetPolyPowMulMemDualWeylStatement
 import Formalism.GradedWeylDivisibility.DualWeylDominanceOf
+import Formalism.GradedWeylDivisibility.FinalD
+import Mathlib.Algebra.AffineMonoid.UniqueSums
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.Divisors.SumExpSt
+import Development.AbelianVarietyTheory.Definitions.Divisors.TupleReadBaseTupleEqFamily
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ClassesAt
+import Formalism.LocalToGlobal.IndefiniteReal.IndefiniteWeightData
+import Formalism.LocalToGlobal.IndefiniteReal.LinksDefs
+import Formalism.LocalToGlobal.ProjectiveLattices.ErealAddIInf
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -64,13 +113,16 @@ theorem linInd_map {F K σ ι : Type} [Field F] [Field K] (e : F →+* K) {v : �
   intro j
   have key : ∑ i ∈ s, (B.repr (c i) j) • v i = 0 := by
     ext m
-    have h1 := congrArg (coeff m) hsum
-    simp only [coeff_sum, coeff_smul, coeff_map, smul_eq_mul, coeff_zero] at h1 ⊢
+    have h1 := congrArg (AddMonoidAlgebra.coeff · m) hsum
+    simp only [coeff_sum, MvPolynomial.coeff_smul, coeff_map, smul_eq_mul] at h1 ⊢
+    change ∑ x ∈ s, c x * e ((v x).coeff m) = 0 at h1
+    change ∑ x ∈ s, (B.repr (c x)) j * (v x).coeff m = 0
     have h2 := congrArg (fun x => B.repr x j) h1
-    simp only [map_sum, map_zero, Finsupp.finset_sum_apply, Finsupp.coe_zero, Pi.zero_apply] at h2
+
+    simp only [map_sum, map_zero, Finsupp.finsetSum_apply, Finsupp.coe_zero, Pi.zero_apply] at h2
     rw [← h2]
     refine Finset.sum_congr rfl fun i _ => ?_
-    have h3 : c i * e (coeff m (v i)) = coeff m (v i) • c i := by
+    have h3 : c i * e (AddMonoidAlgebra.coeff (v i) m) = AddMonoidAlgebra.coeff (v i) m • c i := by
       rw [Algebra.smul_def, mul_comm]; rfl
     rw [h3, map_smul, Finsupp.smul_apply, smul_eq_mul, mul_comm]
   have := hv s (fun i => B.repr (c i) j) key i hi
@@ -135,14 +187,17 @@ theorem exists_phi (K C : Type) [Field K] [Field C] (e0 : K →+* C) (ι : Type)
     have hv' : v = ∑ i : VVIdx lam, (∏ τ, a τ (i τ)) • bVV K lam i := by
       apply Subtype.ext
       rw [hv]
+
       simp only [Submodule.coe_sum, Submodule.coe_smul, bVV_coe, bVVfun, ten, ← ha, map_sum, map_smul]
       rw [Finset.prod_univ_sum]
       simp only [Finset.prod_smul]
       refine Finset.sum_congr ?_ fun _ _ => rfl
       ext i; simp
     refine ⟨fun τ => ∑ j, e0 (a τ j) • u τ j, fun τ => ?_, ?_⟩
+
     · simp only [Submodule.coe_sum, Submodule.coe_smul, u, liftPol, ← ha, map_sum, Finset.mul_sum, smul_eq_C_mul, map_mul, map_C]
       refine Finset.sum_congr rfl fun j _ => by ring
+
     · rw [MultilinearMap.map_sum, hv', map_sum]
       simp only [LinearMap.map_smulₛₗ, semiConstr_basis, MultilinearMap.map_smul_univ, map_prod]
       refine Finset.sum_congr ?_ fun _ _ => rfl

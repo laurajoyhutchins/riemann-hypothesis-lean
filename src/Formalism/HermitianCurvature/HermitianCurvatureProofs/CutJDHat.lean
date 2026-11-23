@@ -1,5 +1,49 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutJD
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutGaugeCut
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutJD
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutGaugeCut
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Formalism.FourierDecayAlt
 
@@ -112,20 +156,6 @@ def JDOpR : Prop :=
           trJ S T v e (B.opApply Θ J) = MA.actA (D.parOf S v) (RhM (D.parOf S v) L y) (trJ S T v e J) ∧
           trJ S T v e (B.opApply Θv J) = MA.actA (D.parOf S v) (RhvM (D.parOf S v) L y) (trJ S T v e J)
 
-def JDGaugeQQ : Prop :=
-  ∀ (Cc : ℝ) (E : Type) [Field E] [NumberField E] [IsCMField E] (Wp Wq : InfinitePlace E → Type)
-    [∀ x, NormedAddCommGroup (Wp x)] [∀ x, InnerProductSpace ℂ (Wp x)]
-    [∀ x, NormedAddCommGroup (Wq x)] [∀ x, InnerProductSpace ℂ (Wq x)]
-    [∀ x, FiniteDimensional ℂ (Wp x)] [∀ x, FiniteDimensional ℂ (Wq x)]
-    (S : C.HidaSetting E Wp Wq) (T : ∀ v : Fin S.f, D.LevTower S.G.k S.G.r (Wp (S.pl v)) (Wq (S.pl v)))
-    (f : ∀ v : Fin S.f, B.Mat S.G.k S.G.r → (Wq (S.pl v) →L[ℂ] Wp (S.pl v))) (χ : ℝ → ℝ)
-    (ν' : Fin S.f → Fin (2 * S.G.r + S.G.k + 1) → ℂ) (m₀ : Fin S.f → B.Mat S.G.k S.G.r)
-    (top : ∀ v : Fin S.f, (B.Mat S.G.k S.G.r → (Wq (S.pl v) →L[ℂ] Wp (S.pl v))) → List C.Letter → C.LPt → C.LPt → ℂ)
-    (A₀ : ℝ),
-    BuiltOW Cc S T f χ ν' m₀ top A₀ →
-    ∀ v (e : M.Ty (D.parOf S v) → ℂ → (Wq (S.pl v) →L[ℂ] Wp (S.pl v))),
-      IsFrame S T v e → IsGauge S T v e → IsGaugeQQ S T v e
-
 section gen
 
 variable (P : M.Par)
@@ -182,8 +212,8 @@ variable {E : Type} [Field E] [NumberField E] [IsCMField E] {Wp Wq : InfinitePla
   {v : Fin S.f} {e : M.Ty (D.parOf S v) → ℂ → (Wq (S.pl v) →L[ℂ] Wp (S.pl v))}
   {L : R.LevelData (MA.A (D.parOf S v) (MA.DQ (D.parOf S v))) (D.parOf S v).r}
 
-variable (Cc S T v e L) in
 
+variable (Cc S T v e L) in
 def HReal (X : MA.A (D.parOf S v) (MA.DQ (D.parOf S v))) : Prop :=
   ∃ ts : List (MA.A (D.parOf S v) (MA.DQ (D.parOf S v)) × B.DiffOp S.G.k S.G.r (Wp (S.pl v)) (Wq (S.pl v))),
     (∀ t ∈ ts, t.1 ∈ Submonoid.closure (MA.bddSet (D.parOf S v) L) ∧ HatOK Cc S T v t.2) ∧
@@ -251,47 +281,6 @@ theorem hReal_sub {X Y : MA.A (D.parOf S v) (MA.DQ (D.parOf S v))} (hX : HReal C
   exact hReal_add hX (hReal_smul _ hY)
 
 end realise
-
-theorem jDHatOp_of_hatLeaves (hA : JDOpA) (hR : JDOpR) (hG : JDGaugeQQ) (h1 : ResidueSplittingModelAlgebra) (h2 : MirrorResidueSplittingModelAlgebra)
-    (h3 : JDHatLagrange) (h4 : JDHatNodes) : JDHatOp := by
-  obtain ⟨KA, hKA0, hA⟩ := hA
-  obtain ⟨KR, -, hR⟩ := hR
-  refine ⟨max KA KR, le_max_of_le_left hKA0, ?_⟩
-  intro E _ _ _ Wp Wq _ _ _ _ _ _ S T f χ ν' m₀ top A₀ hB v e L hFr hGa hL X hX
-  have hQQ := hG (max KA KR) E Wp Wq S T f χ ν' m₀ top A₀ hB v e hFr hGa
-  have hA' := hA (max KA KR) (le_max_left _ _) E Wp Wq S T f χ ν' m₀ top A₀ hB v e L hFr hL
-  have hR' := hR (max KA KR) (le_max_right _ _) E Wp Wq S T f χ ν' m₀ top A₀ hB v e L hFr hQQ hL
-  suffices hH : HReal (max KA KR) S T v e L X by
-    obtain ⟨ts, hts, hJ⟩ := hH
-    exact ⟨ts, hts, hJ⟩
-  have rA : ∀ y : ℂ, HReal (max KA KR) S T v e L (L.Ahat y) := fun y => by
-    obtain ⟨Θ, Θv, hΘ, -, h⟩ := hA' y
-    exact hReal_op Θ hΘ fun J hJ => (h J hJ).1
-  have rAv : ∀ y : ℂ, HReal (max KA KR) S T v e L (L.Ahatv y) := fun y => by
-    obtain ⟨Θ, Θv, -, hΘv, h⟩ := hA' y
-    exact hReal_op Θv hΘv fun J hJ => (h J hJ).2
-  have rR : ∀ y : ℝ, HReal (max KA KR) S T v e L (RhM (D.parOf S v) L y) := fun y => by
-    obtain ⟨Θ, Θv, hΘ, -, h⟩ := hR' y
-    exact hReal_op Θ hΘ fun J hJ => (h J hJ).1
-  have rRv : ∀ y : ℝ, HReal (max KA KR) S T v e L (RhvM (D.parOf S v) L y) := fun y => by
-    obtain ⟨Θ, Θv, -, hΘv, h⟩ := hR' y
-    exact hReal_op Θv hΘv fun J hJ => (h J hJ).2
-  obtain ⟨ν, hinj, hreg⟩ := h4 (D.parOf S v)
-  rcases hX with (((⟨y, rfl⟩ | ⟨y, rfl⟩) | ⟨y, rfl⟩) | ⟨y, rfl⟩)
-  · exact rA y
-  · rw [(h3 (D.parOf S v) L ν hinj y).1]
-    refine hReal_sum _ _ fun j _ => hReal_smul _ ?_
-    rw [h1 (D.parOf S v) L hL (ν j) (hreg j)]
-    refine hReal_sub (hReal_mul (jdh_kap_mem _ L _) (rR (ν j))) (hReal_sum _ _ fun l hl => ?_)
-    refine hReal_mul ?_ (rA _)
-    exact Submonoid.mul_mem _ (Submonoid.mul_mem _ (jdh_kap_mem _ L _) (jdh_SSn_mem _ L l hl)) (jdh_kap_mem _ L _)
-  · exact rAv y
-  · rw [(h3 (D.parOf S v) L ν hinj y).2]
-    refine hReal_sum _ _ fun j _ => hReal_smul _ ?_
-    rw [h2 (D.parOf S v) L hL (ν j) (hreg j)]
-    refine hReal_sub (hReal_mul (jdh_kap_mem _ L _) (rRv (ν j))) (hReal_sum _ _ fun l hl => ?_)
-    refine hReal_mul ?_ (rAv _)
-    exact Submonoid.mul_mem _ (Submonoid.mul_mem _ (jdh_kap_mem _ L _) (jdh_kap_mem _ L _)) (jdh_SSns_mem _ L l hl)
 
 end
 

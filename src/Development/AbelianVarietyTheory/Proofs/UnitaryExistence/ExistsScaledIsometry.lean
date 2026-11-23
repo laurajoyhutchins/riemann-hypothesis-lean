@@ -1,17 +1,56 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsHermCoordOfDatum
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.FinrankEqOfInjectiveOfSpan
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.HermitianFormsSameSignatureSameSpace
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.LandherrStOfHasseNormSt
-import Development.AbelianVarietyTheory.Definitions.ExistenceOfLattices.UnivFrame
+module
+
+public import Mathlib.NumberTheory.NumberField.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Definitions.ExistenceOfLattices.NormConst
-import Formalism.LocalToGlobal.ProjectiveLattices.CuspFree
-import Formalism.LocalToGlobal.ProjectiveLattices.RdOrbIntOfLatZ
-import Formalism.LocalToGlobal.ProjectiveLattices.AllTest
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.FundamentalDomainPointBound
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.SecBaseChangeAnySt
-import Development.AbelianVarietyTheory.PublishedTheorems.Landherr₂.ExistsNormTensor
-import Development.AbelianVarietyTheory.Statements.HyperbolicHypotheses.HypothesesInhabitedHyperbolic
+import Development.AbelianVarietyTheory.Definitions.ExistenceOfLattices.UnivFrame
+import Formalism.LocalToGlobal.ProjectiveLattices.AlgebraMapCAt
+import Formalism.LocalToGlobal.ProjectiveLattices.JFDFree
+public import Mathlib.RingTheory.Ideal.Norm.AbsNorm
+public import Mathlib.RingTheory.Localization.Finiteness
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsCompletedStrictHens
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.Signature
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.CubicalStructures.CubeSymmetricSwapFirst
+
+@[expose] public section
 
 open NumberField ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.FD Formalism.L2.Pj Formalism.L2.PjFree
 open AlgebraicGeometry CategoryTheory Limits ReciprocityTheory.ChartRestriction.G.Semi GlobalTheory.Frames GlobalTheory.FrameUnif
@@ -49,40 +88,7 @@ theorem exists_nat_smul_mem {E : Type} [Field E] [NumberField E] {M₁ M₂ V : 
     rw [hk, Nat.cast_mul, mul_comm, mul_smul]
     exact Submodule.smul_mem _ _ (hmem _)
   | zero => simp
-  | add a b _ _ ha hb => rw [map_add, smul_add]; exact Submodule.add_mem _ ha hb
+  | add a b _ _ ha hb => rw [map_add (f := _), smul_add]; exact Submodule.add_mem _ ha hb
   | smul c a _ ha => rw [map_smul, smul_comm]; exact Submodule.smul_mem _ _ ha
-
-theorem exists_scaled_isometry : GlobalTheory.Published.HasseNormSt → ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (H : ReciprocityTheory.ChartRestriction.G.Geo.Tor.Host E) (D₁ D₂ : Datum H), D₁.p = D₂.p → D₁.q = D₂.q → ∃ (N : ℕ) (f : D₁.La →ₗ[𝓞 E] D₂.La), 0 < N ∧ Function.Injective f ∧ ∀ x y, D₂.EF (f x) (f y) = (N : ℤ) ^ 2 * D₁.EF x y := by
-  intro hH E _ _ _ H D₁ D₂ hp hq
-  have hL := GlobalTheory.LocalQuad.landherrSt_of_hasseNormSt hH
-  have hξ := GlobalTheory.OneSpace.cc_rt H
-  obtain ⟨Gm, φ₂, hM₂⟩ := GlobalTheory.exists_herm_coord_of_datum E H D₂ (H.rt : E) hξ (GlobalTheory.OneSpace.rt_ne H) _ rfl
-  obtain ⟨φ₁, hinj₁, -, -, -, hEF₁⟩ :=
-    GlobalTheory.model_in_same_space hL hH E H D₂ D₁ _ (H.rt : E) Gm φ₂ hp hq hξ hM₂
-  obtain ⟨hinj₂, hspan₂, -, -, hEF₂⟩ := hM₂
-  have := D₁.fin
-  obtain ⟨N, hN, hmem⟩ := exists_nat_smul_mem φ₁ φ₂ hspan₂
-  let g : D₁.La →ₗ[𝓞 E] LinearMap.range φ₂ := ((N : 𝓞 E) • φ₁).codRestrict _ hmem
-  let f : D₁.La →ₗ[𝓞 E] D₂.La := (LinearEquiv.ofInjective φ₂ hinj₂).symm.toLinearMap ∘ₗ g
-  have hf : ∀ x, φ₂ (f x) = (N : E) • φ₁ x := by
-    intro x
-    have h1 : φ₂ (f x) = (N : 𝓞 E) • φ₁ x :=
-      LinearEquiv.ofInjective_symm_apply φ₂ (h := hinj₂) (g x)
-    rw [h1, Nat.cast_smul_eq_nsmul, Nat.cast_smul_eq_nsmul]
-  have hN0 : (N : E) ≠ 0 := by exact_mod_cast hN.ne'
-  refine ⟨N, f, hN, fun x y hxy => hinj₁ ?_, fun x y => ?_⟩
-  · have := congrArg φ₂ hxy
-    rw [hf, hf] at this
-    exact smul_right_injective _ hN0 this
-  · have h2 := hEF₂ (f x) (f y)
-    rw [hf, hf, GlobalTheory.HermModel.herm_smul_left, GlobalTheory.HermModel.herm_smul_right] at h2
-    have hc : FD.cc (N : E) = N := by simp [FD.cc]
-    have h3 : (H.rt : E) * ((N : E) * (FD.herm Gm (φ₁ x) (φ₁ y) * FD.cc (N : E))) =
-        ((N : ℚ) ^ 2) • ((H.rt : E) * FD.herm Gm (φ₁ x) (φ₁ y)) := by
-      rw [hc, Algebra.smul_def]
-      simp only [map_pow, map_natCast]
-      ring
-    rw [h3, map_smul, ← hEF₁, smul_eq_mul] at h2
-    exact_mod_cast h2
 
 end GlobalTheory.SelfDualIsom

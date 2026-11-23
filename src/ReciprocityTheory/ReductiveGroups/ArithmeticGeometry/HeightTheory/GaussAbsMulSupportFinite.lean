@@ -1,8 +1,65 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.Qdist
-import ReciprocityTheory.SemistableReduction.TorusL2CauchyInequality
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.IrreducibleFactorHeightBound
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+public import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
 import ReciprocityTheory.SemistableReduction.GaussAbsMulOfMonomialOrder
-import ReciprocityTheory.SemistableReduction.SemiDegCA
-import Mathlib.NumberTheory.Height.NumberField
+import ReciprocityTheory.SemistableReduction.LogNormCoeffSubLeBlockSphereLogMean
+public import ReciprocityTheory.SemistableReduction.SemiDegCA
+import ReciprocityTheory.SemistableReduction.TorusL2CauchyInequality
+public import Mathlib.RingTheory.FractionalIdeal.Norm
+
+@[expose] public section
 
 namespace ReciprocityTheory.ChartRestriction.G.T0.SatakeVectors
 
@@ -68,7 +125,7 @@ private lemma gaussAbs_cover_lemma_2 {κ : Type*} (F : MvPolynomial κ K) (hF : 
     ∀ w : FinitePlace K, w ∉ (⋃ s ∈ (F.support : Set (κ →₀ ℕ)),
       Function.mulSupport fun w : FinitePlace K => w (F.coeff s)) → ReciprocityTheory.MultiplicativeHeights.gaussAbs w F = 1 := by
   refine ⟨Set.Finite.biUnion F.support.finite_toSet fun s hs =>
-    FinitePlace.mulSupport_finite (MvPolynomial.mem_support_iff.mp (Finset.mem_coe.mp hs)), ?_⟩
+    FinitePlace.hasFiniteMulSupport (MvPolynomial.mem_support_iff.mp (Finset.mem_coe.mp hs)), ?_⟩
   intro w hw
   apply gaussAbs_of_lemma F hF w
   intro s hs
@@ -132,12 +189,10 @@ theorem finsum_log_norm (c : K) (hc : c ≠ 0) :
       | exact w.pos_iff.mpr hc
       | exact (FinitePlace.pos_iff).mpr hc
       | exact lt_of_le_of_ne (by positivity) (fun h => hc (by simpa using h.symm))
-  rw [finsum_log_eq (fun w : FinitePlace K => w c) hpos (FinitePlace.mulSupport_finite hc),
+  rw [finsum_log_eq (fun w : FinitePlace K => w c) hpos (FinitePlace.hasFiniteMulSupport hc),
     FinitePlace.prod_eq_inv_abs_norm hc]
-  first
-    | (rw [Rat.cast_inv, Rat.cast_abs, Real.log_inv])
-    | (push_cast; rw [Real.log_inv])
-    | simp [Real.log_inv]
+  push_cast
+  rw [Real.log_inv]
 
 theorem hT_C_mul {κ : Type} [Fintype κ] (F : MvPolynomial κ K) (hF : F ≠ 0) (c : K) (hc : c ≠ 0) :
     hT (MvPolynomial.C c * F) = hT F := by
@@ -260,7 +315,7 @@ theorem mem_inv_of {κ : Type*} (G₀ : MvPolynomial κ (𝓞 K)) (h : G₀ ≠ 
       refine ⟨z1 + z2, ?_⟩
       first
         | (push_cast; linear_combination h1 + h2)
-        | (simp only [map_add]; linear_combination h1 + h2)
+        | (simp only [map_add (f := _)]; linear_combination h1 + h2)
         | (simp; linear_combination h1 + h2)
     | smul r a _ ha =>
       obtain ⟨z, hz⟩ := ha
@@ -285,7 +340,7 @@ theorem relIndex_inv {κ : Type*} (G₀ : MvPolynomial κ (𝓞 K)) (h : G₀ �
   have hfg : ((J⁻¹ : FractionalIdeal (𝓞 K)⁰ K) : Submodule (𝓞 K) K).FG :=
     FractionalIdeal.fg_of_isNoetherianRing le_rfl _
   have h1 : (1 : Submodule (𝓞 K) K) ≤ ((J⁻¹ : FractionalIdeal (𝓞 K)⁰ K) : Submodule (𝓞 K) K) := by
-    have h2 := FractionalIdeal.inv_anti_mono hJ one_ne_zero FractionalIdeal.coeIdeal_le_one
+    have h2 := FractionalIdeal.inv_anti_mono hJ FractionalIdeal.coeIdeal_le_one
     rw [inv_one] at h2
     have h3 : ((1 : FractionalIdeal (𝓞 K)⁰ K) : Submodule (𝓞 K) K) ≤
         ((J⁻¹ : FractionalIdeal (𝓞 K)⁰ K) : Submodule (𝓞 K) K) := h2

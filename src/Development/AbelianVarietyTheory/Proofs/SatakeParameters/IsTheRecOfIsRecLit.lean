@@ -1,9 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.IsTheRecOfIsRec
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ReciprocityUniqueOf
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.TransportKeepsCuspidalTwistsCharacters
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.PlaceOverTransportRingIsoSymm
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.Langlands
+public import GroundTheory.LocalFields.PadicLogSeries
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.LocalLanglandsTransport
 import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.PlaceOverTransportRingIsoStatement
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.PlaceOverTransportRingIsoSymm
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.TransportKeepsCuspidalTwistsCharacters
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -54,7 +97,7 @@ section Rep
 variable {k k' : Type} [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k]
   [Field k'] [ValuativeRel k'] [TopologicalSpace k'] [IsNonarchimedeanLocalField k']
 
-theorem exists_of_repRel {i : k ≃+* k'} {n : ℕ} (π : IrrRep (GL (Fin n) k)) {x' : IrrGL k'} (H : RepRel i (cls π) x') :
+theorem exists_of_repRel {i : k ≃+* k'} {n : ℕ} (π : IrrRep (GL (Fin n) k)) {x' : IrrGL (k := k')} (H : RepRel i (cls π) x') :
     ∃ (π' : IrrRep (GL (Fin n) k')) (e : π.V ≃ₗ[ℂ] π'.V), x' = cls π' ∧
       ∀ g v, e (π.ρ g v) = π'.ρ (GeneralLinearGroup.map i.toRingHom g) (e v) := by
   obtain ⟨m, π₀, π', e, h1, rfl, he⟩ := H
@@ -83,7 +126,7 @@ theorem contra_transport (i : k ≃+* k') (hi : Continuous i) (hs : Continuous i
   show d (φ.toLinearEquiv (u.symm (τ'.ρ g v))) = contra π'.ρ g (d (φ.toLinearEquiv (u.symm v)))
   rw [symm_rel i τ τ' u hu, h2, hd, map_map_symm]
 
-theorem central_transport (i : k ≃+* k') {x : IrrGL k} {x' : IrrGL k'} (H : RepRel i x x') {ω : kˣ →* ℂˣ}
+theorem central_transport (i : k ≃+* k') {x : IrrGL (k := k)} {x' : IrrGL (k := k')} (H : RepRel i x x') {ω : kˣ →* ℂˣ}
     (hω : HasCentralChar x.rep ω) :
     HasCentralChar x'.rep (ω.comp (Units.map i.symm.toRingHom.toMonoidHom)) := by
   rw [← cls_rep x] at H
@@ -126,7 +169,7 @@ theorem equiv_lpDual (P : PlaceIso A w A' w' φ j i) (S : WD h ≃ WD h') (hS : 
     refine (hS _ _).1 ⟨n, b, GlobalTheory.WDTransport.pull c.symm.toMonoidHom hd1 hq.symm hs1 b, rfl,
       (GlobalTheory.WDTransport.pullWD_mk _ _ _ _ b).symm, rfl, fun σ σ' hσ => ?_⟩
     rw [← (hc σ σ').mp hσ]
-    simp
+    simp [GlobalTheory.WDTransport.pull]
   obtain ⟨n, b, rfl⟩ := WD.exists_rep y
   rw [hF, hF, WD.lpDual_mk, GlobalTheory.WDTransport.pullWD_mk, GlobalTheory.WDTransport.pullWD_mk, WD.lpDual_mk]
   refine WD.sound ⟨.refl _ _, fun σ v => ?_, fun v => rfl⟩

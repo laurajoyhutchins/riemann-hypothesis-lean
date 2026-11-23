@@ -1,5 +1,51 @@
-import Mathlib
-import GroundTheory.GlobalFields.IdeleGroups.IdeleNorms.BaseChange
+module
+
+public import GroundTheory.GlobalFields.IdeleGroups.IdeleNorms.BaseChange
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.MetricSpace.Ultra.TotallySeparated
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GroundTheory.Global
 
@@ -29,8 +75,8 @@ theorem completionMap_completionMap (v : HeightOneSpectrum (𝓞 K)) (w : Height
       IsScalarTower.algebraMap_apply L M (u.adicCompletion M),
       IsScalarTower.algebraMap_apply K M (u.adicCompletion M), ← IsScalarTower.algebraMap_apply K L M]
 
-omit [NumberField K] [NumberField L] [NumberField M] in
 
+omit [NumberField K] [NumberField L] [NumberField M] in
 theorem below_below (u : HeightOneSpectrum (𝓞 M)) : below K (below L u) = below K u :=
   HeightOneSpectrum.ext (Ideal.under_under (A := 𝓞 K) (B := 𝓞 L) u.asIdeal)
 
@@ -43,8 +89,8 @@ theorem finiteAdeleMap_finiteAdeleMap (x : FiniteAdeleRing (𝓞 K) K) :
     completionMap_completionMap (below K (below L u)) (below L u) u]
   exact completionMap_congr hb u x
 
-omit [NumberField K] [NumberField L] [NumberField M] in
 
+omit [NumberField K] [NumberField L] [NumberField M] in
 theorem algebraMap_completion_algebraMap (v : InfinitePlace K) (w : InfinitePlace L)
     (u : InfinitePlace M) [w.LiesOver v] [u.LiesOver w] [u.LiesOver v] (a : v.Completion) :
     algebraMap w.Completion u.Completion (algebraMap v.Completion w.Completion a) =
@@ -54,7 +100,11 @@ theorem algebraMap_completion_algebraMap (v : InfinitePlace K) (w : InfinitePlac
       (continuous_algebraMap v.Completion w.Completion))
     (continuous_algebraMap v.Completion u.Completion) (funext fun y ↦ ?_)
   · exact congrFun h a
-  · change algebraMap w.Completion u.Completion
+  · simp only [Function.comp_apply]
+    have hy : (y : v.Completion) = algebraMap K v.Completion y.ofAbs := by
+      simp [AbsoluteValue.Completion.algebraMap_def, WithAbs.algebraMap_right_apply]
+    rw [hy]
+    change algebraMap w.Completion u.Completion
         (algebraMap v.Completion w.Completion (algebraMap K v.Completion y.ofAbs)) =
       algebraMap v.Completion u.Completion (algebraMap K v.Completion y.ofAbs)
     rw [← IsScalarTower.algebraMap_apply K v.Completion w.Completion,
@@ -71,8 +121,8 @@ theorem algebraMap_completion_congr {v v' : InfinitePlace K} (h : v = v') (u : I
   subst h
   rfl
 
-omit [NumberField K] [NumberField L] [NumberField M] in
 
+omit [NumberField K] [NumberField L] [NumberField M] in
 theorem infiniteAdeleRingMap_infiniteAdeleRingMap (x : InfiniteAdeleRing K) :
     GroundTheory.Global.InfinitePlace.infiniteAdeleRingMap (K := L) (L := M)
         (GroundTheory.Global.InfinitePlace.infiniteAdeleRingMap (K := K) (L := L) x) =

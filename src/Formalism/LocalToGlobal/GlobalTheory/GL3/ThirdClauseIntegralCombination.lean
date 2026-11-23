@@ -1,5 +1,47 @@
-import Mathlib
-import Formalism.LocalToGlobal.GlobalTheory.GL3.DlAppendSingle
+module
+
+public import Formalism.SharpRestriction.GlobalSchurBounds.GeneralLinearActions.IsDiscriminantTwelfthRootOfIdealLattice
+public import Formalism.LocalToGlobal.GlobalTheory.GL3.DlAppendSingle
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.LocalToGlobal.KernelLattices.LateralTheory
+
+@[expose] public section
 
 noncomputable section
 
@@ -30,21 +72,6 @@ theorem integralMv_mul {F G : MvPowerSeries σ ℂ_[p]} (hF : IntegralMv F) (hG 
   rw [MvPowerSeries.coeff_mul]
   exact isPadicIntegral_sum _ _ fun x _ => isPadicIntegral_mul (hF _) (hG _)
 
-theorem integralMv_C {c : ℂ_[p]} (hc : IsIntP c) :
-    IntegralMv (algebraMap ℂ_[p] (MvPowerSeries σ ℂ_[p]) c) := fun n => by
-  classical
-  have e : MvPowerSeries.coeff n (algebraMap ℂ_[p] (MvPowerSeries σ ℂ_[p]) c) = if n = 0 then c else 0 := by
-    first
-      | exact MvPowerSeries.coeff_C n c
-      | exact MvPowerSeries.coeff_C (σ := σ) n c
-      | (rw [MvPowerSeries.algebraMap_apply']; exact MvPowerSeries.coeff_C n c)
-      | simp [MvPowerSeries.coeff_C]
-      | simp [MvPowerSeries.coeff_C, MvPowerSeries.algebraMap_apply']
-  rw [e]
-  split_ifs
-  · exact hc
-  · unfold IsIntP; simp
-
 end Int
 
 section Subst
@@ -73,6 +100,7 @@ def atLogA : D.what₂.Tau × Fin N' × Fin N → MvPowerSeries (Fin r) ℂ_[p] 
 theorem atLogA_hasSubst : MvPowerSeries.HasSubst (atLogA lam Λ C wq b) := by
   apply MvPowerSeries.hasSubst_of_constantCoeff_zero
   intro k
+
   simp only [atLogA, map_sum, map_mul]
   refine Finset.sum_eq_zero fun i _ => ?_
   rw [cc_psubst' (MvPowerSeries.constantCoeff_X i) (cc_flog _ wq), mul_zero]
@@ -87,19 +115,6 @@ section Clauses
 
 variable {D : D7} (T : Tor D) {N N' : ℕ} {p : ℕ} [Fact p.Prime] (lam : Qbar →+* ℂ_[p])
   (L : Submodule (𝓞 D.host.E) (Fin N → D.host.E)) (L' : Submodule (𝓞 D.host.E) (Fin N' → D.host.E))
-
-def Cl1 (F : MvPowerSeries (D.what₂.Tau × Fin N' × Fin N) ℂ_[p]) : Prop :=
-  ∀ (C : WeierstrassCurve.VariableChange ℂ_[p]) (wq : PowerSeries ℂ_[p]) (r : ℕ)
-      (b : Fin r → Matrix (Fin N') (Fin N) D.host.E),
-    IsModel lam T.abelian₂ C → IsWq (C • wModel lam T.abelian₂) wq → LocBasis D p (YYl D L L') b →
-    Orthonormal D b →
-    IntegralMv (atLog D lam T.abelian₂ C wq b F * ePh lam T.abelian₂ C wq r)
-
-def Cl3 (F : MvPowerSeries (D.what₂.Tau × Fin N' × Fin N) ℂ_[p]) : Prop :=
-  ∀ (C : WeierstrassCurve.VariableChange ℂ_[p]) (wq : PowerSeries ℂ_[p]) (r : ℕ)
-      (b : Fin r → Matrix (Fin N') (Fin N) D.host.E),
-    IsModel lam T.abelian₂ C → IsWq (C • wModel lam T.abelian₂) wq → LocBasis D p (YYl D L L') b →
-    IntegralMv (atLog D lam T.abelian₂ C wq b F)
 
 end Clauses
 

@@ -1,9 +1,46 @@
-import Mathlib
-import Formalism.LocalToGlobal.IndefiniteReal.OneMapT
-import Formalism.LocalToGlobal.IndefiniteReal.ConcretePkgSpec
-import Formalism.LocalToGlobal.IndefiniteReal.FWExist
-import Formalism.LocalRingCardinality.DataExtra
-import Formalism.LocalRingCardinality.DataTies
+module
+
+public import Formalism.LocalToGlobal.IndefiniteReal.LinksDefs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -49,7 +86,7 @@ theorem Syn.range_incl {X : Type} [AddCommGroup X] [Module ℂ X] (V : Submodule
       show ip (Syn.incl V (x + y)) (Syn.incl V z) = ip (Syn.incl V x) (Syn.incl V z) + ip (Syn.incl V y) (Syn.incl V z)
       have h1 := (h _ (Syn.incl_mem z) _ (Syn.incl_mem x) _ (Syn.incl_mem y) 1).1
       rw [one_smul, one_mul] at h1
-      rw [hs _ (Syn.incl_mem z) _ (Syn.incl_mem (x + y)), map_add, h1, star_add,
+      rw [hs _ (Syn.incl_mem z) _ (Syn.incl_mem (x + y)), map_add (f := _), h1, star_add,
         ← hs _ (Syn.incl_mem z) _ (Syn.incl_mem x), ← hs _ (Syn.incl_mem z) _ (Syn.incl_mem y)]
     smul_left := fun x y r => by
       show ip (Syn.incl V (r • x)) (Syn.incl V y) = starRingEnd ℂ r * ip (Syn.incl V x) (Syn.incl V y)
@@ -77,11 +114,6 @@ section Lift
 
 variable {X : Type} [AddCommGroup X] [Module ℂ X] {M : HMod X} {V : Submodule ℂ X} {ip : X → X → ℂ}
 
-theorem e_mem (hM : M.Is V ip) (x : M.H) : M.e x ∈ V := hM.2.1 ▸ LinearMap.mem_range_self M.e x
-
-theorem exists_e_eq (hM : M.Is V ip) {v : X} (hv : v ∈ V) : ∃ x : M.H, M.e x = v := by
-  rw [← hM.2.1] at hv; exact hv
-
 def equivSub (hM : M.Is V ip) : M.H ≃ₗ[ℂ] V :=
   (LinearEquiv.ofInjective M.e hM.1).trans (LinearEquiv.ofEq _ _ hM.2.1)
 
@@ -101,30 +133,7 @@ theorem exists_lift {R A : Type*} [Semiring R] [AddCommMonoid A] [Module R A] {�
     (f : A →ₛₗ[σ] X) (hf : ∀ a, f a ∈ V) : ∃ g : A →ₛₗ[σ] M.H, ∀ a, M.e (g a) = f a :=
   exists_lift_fun σ hM f f.map_add f.map_smulₛₗ hf
 
-theorem lift_unique {A : Type*} (hM : M.Is V ip) {g g' : A → M.H} {f : A → X}
-    (hg : ∀ a, M.e (g a) = f a) (hg' : ∀ a, M.e (g' a) = f a) : g = g' :=
-  funext fun a => hM.1 ((hg a).trans (hg' a).symm)
-
 variable {X' : Type} [AddCommGroup X'] [Module ℂ X'] {M' : HMod X'} {V' : Submodule ℂ X'} {ip' : X' → X' → ℂ}
-
-theorem exists_lift_range {σ : ℂ →+* ℂ} (M : HMod X) (M' : HMod X') (hinj : Function.Injective M'.e) (f : X →ₛₗ[σ] X')
-    (hf : ∀ x ∈ LinearMap.range M.e, f x ∈ LinearMap.range M'.e) :
-    ∃ g : M.H →ₛₗ[σ] M'.H, ∀ x, M'.e (g x) = f (M.e x) := by
-  choose s hs using fun x : M.H => LinearMap.mem_range.1 (hf _ (LinearMap.mem_range_self M.e x))
-  exact ⟨{ toFun := s
-           map_add' := fun a b => hinj (by simp [hs])
-           map_smul' := fun c a => hinj (by simp [hs, LinearMap.map_smulₛₗ]) }, hs⟩
-
-theorem exists_lift_models {σ : ℂ →+* ℂ} (hM : M.Is V ip) (hM' : M'.Is V' ip') (f : X →ₛₗ[σ] X')
-    (hf : ∀ x ∈ V, f x ∈ V') : ∃ g : M.H →ₛₗ[σ] M'.H, ∀ x, M'.e (g x) = f (M.e x) :=
-  exists_lift_range M M' hM'.1 f (by rw [hM.2.1, hM'.2.1]; exact hf)
-
-theorem exists_lift_models_on {σ : ℂ →+* ℂ} (hM : M.Is V ip) (hM' : M'.Is V' ip') (f : X → X')
-    (hadd : ∀ x ∈ V, ∀ y ∈ V, f (x + y) = f x + f y) (hsmul : ∀ (c : ℂ), ∀ x ∈ V, f (c • x) = σ c • f x)
-    (hf : ∀ x ∈ V, f x ∈ V') : ∃ g : M.H →ₛₗ[σ] M'.H, ∀ x, M'.e (g x) = f (M.e x) :=
-  exists_lift_fun σ hM' (fun x => f (M.e x))
-    (fun a b => by rw [map_add, hadd _ (e_mem hM a) _ (e_mem hM b)])
-    (fun c a => by rw [map_smul, hsmul c _ (e_mem hM a)]) (fun a => hf _ (e_mem hM a))
 
 end Lift
 

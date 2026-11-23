@@ -1,8 +1,56 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.ExistsHasCls
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.DiscreteSeriesCharacter
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.CompactUnitaryTorusRealPlaceTensorEqComplexPowStatement
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.MeasurableEmbeddingEquiv
+module
+
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.ExistsHasCls
+public import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.DiscreteSeriesCharacter
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.MeasurableEmbeddingEquiv
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.CompactUnitaryTorusRealPlaceTensorEqComplexPowStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.BitVec
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open MeasureTheory Set Filter Polynomial NumberField IsDedekindDomain
 open GlobalTheory.AdelicU GlobalTheory.Orb GlobalTheory.AutomorphicL2Unitary Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes
@@ -330,8 +378,9 @@ theorem infEmb_hform (hc : IsCMExt F E σ) (u v : Fin r → w.Completion ⊗[F] 
     infEmb τ (Formalism.UG.hform (sigR w.Completion σ) (JR w.Completion J) u v) =
       star (infEmb τ ∘ u) ⬝ᵥ (J.map τ.1 *ᵥ (infEmb τ ∘ v)) := by
   unfold Formalism.UG.hform
+
   simp only [map_sum, map_mul, dotProduct, Matrix.mulVec, Function.comp_apply, Pi.star_apply, Finset.mul_sum,
-    Matrix.map_apply]
+  Matrix.map_apply]
   refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
   have hJ : infEmb τ (JR w.Completion J i j) = τ.1 (J i j) := by
     rw [JR, Matrix.map_apply, inclR]
@@ -459,13 +508,15 @@ theorem exists_matrix (hc : IsCMExt F E σ) (h1 : ∀ y i, Ψ (sigR w.Completion
     have hy : y = ∑ j, e j • Ψ.symm (Pi.single j 1) := by
       apply Ψ.injective
       funext i
+
       rw [map_sum, Finset.sum_apply]
       simp only [Algebra.smul_def, map_mul, Pi.mul_apply, h2, he, RingEquiv.apply_symm_apply, Pi.single_apply,
         mul_ite, mul_one, mul_zero, Finset.sum_ite_eq, Finset.mem_univ, if_true]
     funext i
     conv_lhs => rw [hy]
+
     simp only [Function.comp_apply, map_sum, map_smul, Finset.sum_apply, Pi.smul_apply, smul_eq_mul, map_mul, he,
-      Matrix.mulVec, dotProduct, Matrix.of_apply]
+    Matrix.mulVec, dotProduct, Matrix.of_apply]
     exact Finset.sum_congr rfl fun j _ => mul_comm _ _
   refine ⟨N, ?_, ?_⟩
   · have key : ∀ a b : Fin r → ℂ, a ⬝ᵥ ((Nᴴ * J.map τ.1 * N) *ᵥ b) = a ⬝ᵥ (Matrix.diagonal (Ψ x) *ᵥ b) := by
@@ -492,6 +543,7 @@ theorem exists_matrix (hc : IsCMExt F E σ) (h1 : ∀ y i, Ψ (sigR w.Completion
         infEmb τ ∘ (mulMat φ (1 ⊗ₜ[F] alpha P) *ᵥ φ y) := by
       rw [← hg]
       funext i
+
       simp [Matrix.mulVec, dotProduct, map_sum, map_mul]
     rw [hm, mulMat_mulVec, hN, map_mul]
     congr 1

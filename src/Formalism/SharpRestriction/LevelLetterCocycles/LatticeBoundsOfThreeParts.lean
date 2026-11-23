@@ -1,6 +1,53 @@
-import Mathlib
-import Formalism.SharpRestriction.LevelLetterCocycles.LatticeFiniteCohomologyGeneratorBound
-import Formalism.SharpRestriction.LevelLetterCocycles.CrystallineLiftingInputs
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.LatticeFiniteCohomologyGeneratorBound
+public import Formalism.SharpRestriction.LevelLetterCocycles.CrystallineLiftingInputs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -322,7 +369,7 @@ theorem inPN_add {k : ℕ} {x x' : W.DD T} (h : Formalism.MainNotions.Crystallin
     (h' : Formalism.MainNotions.CrystallineLiftingInputs.InPN W T k x') : Formalism.MainNotions.CrystallineLiftingInputs.InPN W T k (x + x') := by
   obtain ⟨y, hy, hΔ, rfl⟩ := h
   obtain ⟨y', hy', hΔ', rfl⟩ := h'
-  exact ⟨y + y', (W.N T).add_mem hy hy', fun δ hδ => by rw [map_add, hΔ δ hδ, hΔ' δ hδ],
+  exact ⟨y + y', (W.N T).add_mem hy hy', fun δ hδ => by rw [map_add (f := _), hΔ δ hδ, hΔ' δ hδ],
     (smul_add _ _ _).symm⟩
 
 theorem dl_smul {i : ZMod n} {x : W.DD T} (a : O) (h : Formalism.MainNotions.CrystallineLiftingInputs.DL W T i x) :
@@ -331,7 +378,7 @@ theorem dl_smul {i : ZMod n} {x : W.DD T} (a : O) (h : Formalism.MainNotions.Cry
 
 theorem dl_add {i : ZMod n} {x x' : W.DD T} (h : Formalism.MainNotions.CrystallineLiftingInputs.DL W T i x)
     (h' : Formalism.MainNotions.CrystallineLiftingInputs.DL W T i x') : Formalism.MainNotions.CrystallineLiftingInputs.DL W T i (x + x') :=
-  ⟨by rw [smul_add, h.1, h'.1], fun δ hδ => by rw [map_add, h.2 δ hδ, h'.2 δ hδ]⟩
+  ⟨by rw [smul_add, h.1, h'.1], fun δ hδ => by rw [map_add (f := _), h.2 δ hδ, h'.2 δ hδ]⟩
 
 theorem pow_smul_mem_mul {M : Type} [AddCommGroup M] [Module (LetA O n) M]
     (N : Submodule (LetA O n) M) {a r : LetA O n} {x : M} {k K : ℕ} (hK : k ≤ K)
@@ -374,7 +421,7 @@ theorem inI_add {i : ZMod n} {x x' : W.DD T} (h : Formalism.MainNotions.Crystall
   obtain ⟨h1', h2', h3'⟩ := h'
   refine ⟨dl_add W T h1 h1', polesFin_add W T h2 h2', ?_⟩
   have e : W.γ T (x + x') - (x + x') = (W.γ T x - x) + (W.γ T x' - x') := by
-    rw [map_add]; abel
+    rw [map_add (f := _)]; abel
   rw [e]
   exact inPN_add W T h3 h3'
 
@@ -440,7 +487,7 @@ theorem lattice_bound_three_six_of [NeZero n] (W : LocWach PD LL O v n) (h345 : 
     have key : ((PD.p : O) ^ (j + (e₆ + e₂))) • w (Submodule.inclusion (h₂.trans h₁) f) -
         W.map F (((PD.p : O) ^ j) • (((PD.p : O) ^ e₆) • y (Submodule.inclusion h₂ f) + x)) =
         ((PD.p : O) ^ j) • (((PD.p : O) ^ e₆) • w' (Submodule.inclusion h₂ f) - W.map F x) := by
-      rw [hw', hinc, LinearMap.map_smul_of_tower, map_add, LinearMap.map_smul_of_tower]
+      rw [hw', hinc, LinearMap.map_smul_of_tower, map_add (f := _), LinearMap.map_smul_of_tower]
       module
     rw [key]
     exact inPN_smul W T₂ _ hxP
@@ -455,7 +502,7 @@ theorem lattice_bound_three_six_of [NeZero n] (W : LocWach PD LL O v n) (h345 : 
     have key : ((PD.p : O) ^ (j + (e₆ + e₂) + 3 * S)) • w f -
         W.map F (((PD.p : O) ^ j) • (((PD.p : O) ^ (e₆ + 2 * S)) • y0 f + x)) =
         ((PD.p : O) ^ j) • (((PD.p : O) ^ (e₆ + 2 * S)) • w'' f - W.map F x) := by
-      rw [hw'', LinearMap.map_smul_of_tower, map_add, LinearMap.map_smul_of_tower]
+      rw [hw'', LinearMap.map_smul_of_tower, map_add (f := _), LinearMap.map_smul_of_tower]
       module
     rw [key]
     exact inPN_smul W T₂ _ hxP
@@ -470,14 +517,6 @@ def LemmaGs [NeZero n] (W : LocWach PD LL O v n) : Prop :=
         x ∈ FilCris PD T₂.ρ (b i : ℤ) →
         ((PD.p : LL) ^ (⌈(E : ℝ) + Formalism.MainNotions.CrystallineLiftingInputs.sig2 PD.p (hpar n b S + η) +
           ((b (i - 1) + S : ℕ) : ℝ) - (b i : ℝ)⌉ : ℤ)) • x ∈ Formalism.MainNotions.CrystallineLiftingInputs.DlatImg W F i
-
-theorem lemmaG_of_sharp [NeZero n] (W : LocWach PD LL O v n) (h : LemmaGs W) :
-    Formalism.MainNotions.CrystallineLiftingInputs.LemmaG W := by
-  intro d T₁ T₂ F b S η m hS i hi
-  obtain ⟨E, hE, hx⟩ := h d T₁ T₂ F b S η m hS i hi
-  have hl : 11 ≤ PD.p := hS.2.1
-  have hlam := one_le_lam PD.p (hpar n b S + η) (by omega)
-  exact ⟨E, by linarith, hx⟩
 
 def NDl (W : LocWach PD LL O v n) (T : LocLat G Qp LL O) (i : ZMod n) : Submodule O (W.DD T) where
   carrier := {x | x ∈ W.N T ∧ Formalism.MainNotions.CrystallineLiftingInputs.DL W T i x}
@@ -576,12 +615,6 @@ def wachVectorLiftingBoundAtGoodExtensions (D : D7) (HW : HWOf D.loc) (F : FonOf
 def steps6 (D : D7) (HW : HWOf D.loc) (F : FonOf D.loc D.locA HW) : Prop :=
   ∀ (l : ℕ) [Fact l.Prime] (K LL : Loc.FinExt l) (hg : Loc.Good K 1 LL)
     [NeZero (Module.finrank ℚ_[l] ↥(Loc.K0 K))], LatticeBoundSix ((HW l).W K 1 LL hg)
-
-theorem lattice_bounds_of_four_parts (D : D7) (HW : HWOf D.loc) (F : FonOf D.loc D.locA HW)
-    (h12 : cocyclesToWachVectorsBoundAtGoodExtensions D HW F) (h345 : wachVectorLiftingBoundAtGoodExtensions D HW F) (h6 : steps6 D HW F) (hR : rhoLift D HW F) :
-    localLiftingConditionsGlobal D HW F := by
-  intro l _ K LL hg _
-  exact lattice_bounds_of_local _ (h12 l K LL hg) (lattice_bound_three_six_of _ (h345 l K LL hg) (h6 l K LL hg)) (hR l K LL hg)
 
 theorem lattice_bounds_of_admissible (D : D7) (HW : HWOf D.loc) (F : FonOf D.loc D.locA HW)
     (Cm : CmpOf D.loc D.locA HW F) (CR CA CB CK : ℝ)

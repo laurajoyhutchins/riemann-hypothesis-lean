@@ -1,10 +1,51 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.GlobalClassFormation.LocalResKill
-import GroundTheory.ProfiniteCohomology.GlobalClassFormation.ResLocal
+module
+
+public import GroundTheory.ProfiniteCohomology.GlobalClassFormation.ResLocal
+public import GroundTheory.LocalFields.MainTheorem
 import GroundTheory.ProfiniteCohomology.LocalClassFormation.CupSymbolUnramified
-import GroundTheory.ProfiniteCohomology.LocalClassFormation.CupSymbolNorm
-import GroundTheory.ProfiniteCohomology.LocalClassFormation.CupSymbolReal
-import GroundTheory.LocalFields.MainTheorem
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import GroundTheory.LocalFields.LocalArtinTransport
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
@@ -122,7 +163,7 @@ theorem exists_galCupClass_eq (x : cohomology (galUnitsZ F Ω) 2) :
         rw [map_one, toAdd_one, map_zero, map_zero]
       map_add' := fun g h => by
         change χ₀ (proj n (Multiplicative.toAdd (unramifiedDegree F Ω (Additive.toMul g * Additive.toMul h)))) = _
-        rw [map_mul, toAdd_mul, map_add, map_add]
+        rw [map_mul, toAdd_mul, map_add (f := _), map_add (f := _)]
       continuous_toFun := continuous_of_discreteTopology.comp ((continuous_proj n).comp
         (continuous_toAdd.comp ((continuous_unramifiedDegree (K := F) (Ω := Ω)).comp continuous_toMul))) }
   obtain ⟨π, hπ⟩ : ∃ π : Fˣ, ord (π : F) = 1 := by
@@ -150,10 +191,10 @@ variable {F F' Ω Ω' : Type} [Field F] [ValuativeRel F] [TopologicalSpace F] [I
   (f : Rep.res ρ (galUnitsZ F' Ω') ⟶ galUnitsZ F Ω)
   (hf : ∀ u : Ω'ˣ, ((Additive.toMul (f.hom (Additive.ofMul u)) : Ωˣ) : Ω) = ε.symm u)
 
+
 omit [ValuativeRel F] [TopologicalSpace F] [IsNonarchimedeanLocalField F] [ValuativeRel F']
   [TopologicalSpace F'] [IsNonarchimedeanLocalField F'] in
 include hε hf in
-
 theorem cohomologyMapAlong_galCupClass_transport (χ : Additive Gal(Ω'/F') →ₜ+ QZ) (a : Fˣ) :
     (cohomologyMapAlong ρ hρc f 2).hom (galCupClass F' Ω' χ (Units.map e.toRingHom.toMonoidHom a)) =
       galCupClass F Ω (contCharComp χ ρ hρc) a := by
@@ -166,8 +207,8 @@ theorem cohomologyMapAlong_galCupClass_transport (χ : Additive Gal(Ω'/F') →�
   change algebraMap F Ω a = ε.symm (algebraMap F' Ω' (e a))
   rw [← hε, RingEquiv.symm_apply_apply]
 
-include hε hρ in
 
+include hε hρ in
 theorem brauerInvZOfIsSepClosure_galCupClass_transport (he : ∀ x y : F, e x ≤ᵥ e y ↔ x ≤ᵥ y)
     (χ : Additive Gal(Ω'/F') →ₜ+ QZ) (a : Fˣ) :
     brauerInvZOfIsSepClosure F Ω (galCupClass F Ω (contCharComp χ ρ hρc) a) =
@@ -181,8 +222,8 @@ theorem brauerInvZOfIsSepClosure_galCupClass_transport (he : ∀ x y : F, e x �
   have hy : y ∈ maximalAbelianExtension F Ω := (mem_maximalAbelianExtension_transport_iff e ε hε).1 hy'
   rw [hρ, hg y hy, localArtinMap_transport e he ε hε a hy]
 
-include hε hρ hf in
 
+include hε hρ hf in
 theorem brauerInvZOfIsSepClosure_cohomologyMapAlong_transport (he : ∀ x y : F, e x ≤ᵥ e y ↔ x ≤ᵥ y)
     (x : cohomology (galUnitsZ F' Ω') 2) :
     brauerInvZOfIsSepClosure F Ω ((cohomologyMapAlong ρ hρc f 2).hom x) = brauerInvZOfIsSepClosure F' Ω' x := by

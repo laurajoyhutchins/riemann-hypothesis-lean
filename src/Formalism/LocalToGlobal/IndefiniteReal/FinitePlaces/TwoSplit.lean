@@ -1,6 +1,46 @@
-import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.TwoSplitIdem
-import Formalism.LocalRingCardinality.SpanPowerMembership.ExampleLayerExistsGenerators
-import Formalism.SharpRestriction.GlobalSchurBounds.GlobalRankLatticeProofs.EqOfLeOfAbsNormEq
+module
+
+public import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.TwoSplitIdem
+public import Formalism.LocalRingCardinality.SpanPowerMembership.ExampleLayerExistsGenerators
+public import Formalism.SharpRestriction.GlobalSchurBounds.GlobalRankLatticeProofs.EqOfLeOfAbsNormEq
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -33,7 +73,7 @@ theorem alphaH_integral (H : Host R) : IsIntegral ℤ (alphaH H) := by
 theorem star_alphaH (H : Host R) : (letI := H.cmStar; star (alphaH H)) = 1 - alphaH H := by
   rw [Formalism.BasicNotions.Examples₂.star_eq_conj]
   unfold alphaH
-  rw [map_div₀, map_add, map_one, Formalism.MainNotions.UnusedSlot33.HK.conj_b]
+  rw [map_div₀, map_add (f := _), map_one, Formalism.MainNotions.UnusedSlot33.HK.conj_b]
   have h2 : H.conj (2 : H.E) = 2 := map_ofNat _ 2
   rw [h2]
   ring
@@ -66,7 +106,7 @@ theorem twoSplits (D : D7) : TwoSplits D := by
   · obtain ⟨c', hc', hc'e⟩ := hstar a hm
     have h1 : a + c' = 1 := by
       apply inj
-      rw [map_add, map_one, hc'e, ha, hsa]; ring
+      rw [map_add (f := _), map_one, hc'e, ha, hsa]; ring
     exact hP.ne_top ((Ideal.eq_top_iff_one _).2 (h1 ▸ P.asIdeal.add_mem hm hc'))
   · obtain ⟨c', hc', hc'e⟩ := hstar _ hm
     have h1 : -c' - (a - 1) = 1 := by

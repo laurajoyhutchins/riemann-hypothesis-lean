@@ -1,4 +1,49 @@
-import Mathlib
+module
+
+public import Mathlib.RingTheory.AdicCompletion.Basic
+public import Mathlib.RingTheory.MvPolynomial.Homogeneous
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.MvPolynomial.CommRing
+
+@[expose] public section
 
 namespace GlobalTheory.Degen
 
@@ -9,21 +54,21 @@ theorem exists_form_limit_ideal (R : Type) [CommRing R] (I : Ideal R) (hI : IsAd
     (hK : ∀ e F, F.IsHomogeneous t → F ∈ K (e + 1) → F ∈ K e)
     (ha : ∀ e, ∀ a ∈ I ^ (e + 1), MvPolynomial.C a ∈ K e)
     (hs : ∀ e F, F.IsHomogeneous t → F ∈ K e → ∃ G : MvPolynomial σ R, G.IsHomogeneous t ∧
-      (∀ d, MvPolynomial.coeff d G ∈ I ^ (e + 1)) ∧ F - G ∈ K (e + 1))
+      (∀ d, AddMonoidAlgebra.coeff G d ∈ I ^ (e + 1)) ∧ F - G ∈ K (e + 1))
     (e : ℕ) (F : MvPolynomial σ R) (hF : F.IsHomogeneous t) (hFe : F ∈ K e) :
     ∃ F₁ : MvPolynomial σ R, F₁.IsHomogeneous t ∧ (∀ e', F₁ ∈ K e') ∧
-      ∀ d, MvPolynomial.coeff d (F - F₁) ∈ I ^ (e + 1) := by
+      ∀ d, AddMonoidAlgebra.coeff (F - F₁) d ∈ I ^ (e + 1) := by
   classical
   have hdesc : ∀ (P : MvPolynomial σ R), P.IsHomogeneous t → ∀ m k, P ∈ K (m + k) → P ∈ K m := by
     intro P hP m k
     induction k with
     | zero => exact id
     | succ k ih => exact fun h => ih (hK _ _ hP h)
-  have hcoef : ∀ (j : ℕ) (P : MvPolynomial σ R), (∀ d, coeff d P ∈ I ^ (j + 1)) → P ∈ K j := by
+  have hcoef : ∀ (j : ℕ) (P : MvPolynomial σ R), (∀ d, AddMonoidAlgebra.coeff P d ∈ I ^ (j + 1)) → P ∈ K j := by
     intro j P hP
     rw [P.as_sum]
     refine Ideal.sum_mem _ fun d _ => ?_
-    have : (monomial d (coeff d P) : MvPolynomial σ R) = C (coeff d P) * monomial d 1 := by
+    have : (monomial d (AddMonoidAlgebra.coeff P d) : MvPolynomial σ R) = C (AddMonoidAlgebra.coeff P d) * monomial d 1 := by
       rw [C_mul_monomial, mul_one]
     rw [this]
     exact Ideal.mul_mem_right _ _ (ha _ _ (hP d))
@@ -35,21 +80,21 @@ theorem exists_form_limit_ideal (R : Type) [CommRing R] (I : Ideal R) (hI : IsAd
   have hs0 : (s 0).1 = F := rfl
   have hsn : ∀ n, (s (n + 1)).1 = (s n).1 - G (e + n) (s n).1 (s n).2.1 (s n).2.2 :=
     fun n => rfl
-  have hd : ∀ d m n, m ≤ n → coeff d (s m).1 - coeff d (s n).1 ∈ I ^ (e + m + 1) := by
+  have hd : ∀ d m n, m ≤ n → AddMonoidAlgebra.coeff (s m).1 d - AddMonoidAlgebra.coeff (s n).1 d ∈ I ^ (e + m + 1) := by
     intro d m n hmn
     induction n, hmn using Nat.le_induction with
     | base => simp
     | succ n hmn ih =>
-      rw [hsn, coeff_sub, ← sub_add]
+      rw [hsn, MvPolynomial.coeff_sub, ← sub_add]
       exact Ideal.add_mem _ ih
         (Ideal.pow_le_pow_right (by omega) (hG2 (e + n) (s n).1 (s n).2.1 (s n).2.2 d))
   have hmem : ∀ (n : ℕ) (z : R), z ∈ (I ^ n • ⊤ : Submodule R R) ↔ z ∈ I ^ n := by
     intro n z
     rw [Ideal.smul_eq_mul, Ideal.mul_top]
-  have hlim : ∀ d, ∃ L : R, ∀ m, coeff d (s m).1 - L ∈ I ^ (e + m + 1) := by
+  have hlim : ∀ d, ∃ L : R, ∀ m, AddMonoidAlgebra.coeff (s m).1 d - L ∈ I ^ (e + m + 1) := by
     intro d
     obtain ⟨L, hL⟩ := IsPrecomplete.prec (I := I) (M := R) hI.toIsPrecomplete
-      (f := fun n => coeff d (s n).1) (by
+      (f := fun n => AddMonoidAlgebra.coeff (s n).1 d) (by
         intro m n hmn
         rw [SModEq.sub_mem, hmem]
         exact Ideal.pow_le_pow_right (by omega) (hd d m n hmn))
@@ -64,14 +109,14 @@ theorem exists_form_limit_ideal (R : Type) [CommRing R] (I : Ideal R) (hI : IsAd
   let F₁ : MvPolynomial σ R := ∑ d ∈ hfin.toFinset, monomial d (L d)
   have hF₁ : F₁.IsHomogeneous t :=
     IsHomogeneous.sum _ _ _ fun d hd => isHomogeneous_monomial _ (by simpa using hd)
-  have hc : ∀ m d, coeff d ((s m).1 - F₁) ∈ I ^ (e + m + 1) := by
+  have hc : ∀ m d, AddMonoidAlgebra.coeff ((s m).1 - F₁) d ∈ I ^ (e + m + 1) := by
     intro m d
     by_cases hdt : d.degree = t
-    · have : coeff d F₁ = L d := by
+    · have : AddMonoidAlgebra.coeff F₁ d = L d := by
         simp only [F₁, coeff_sum, coeff_monomial]
         rw [Finset.sum_ite_eq']
         simp [hdt]
-      rw [coeff_sub, this]
+      rw [MvPolynomial.coeff_sub, this]
       exact hL d m
     · rw [((s m).2.1.sub hF₁).coeff_eq_zero hdt]
       exact Ideal.zero_mem _

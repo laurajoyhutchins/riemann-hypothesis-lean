@@ -1,4 +1,45 @@
-import Formalism.AdmissibleDesigns.KoEquivSmul
+module
+
+public import Formalism.AdmissibleDesigns.TrivialBoundTargetOfDict
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 variable [hT2Core : Fact ReciprocityTheory.ChartRestriction.T2.Core]
 
@@ -28,7 +69,7 @@ variable {G : Type} [Group G] [TopologicalSpace G] {Qp K₀ K : Type} [Field Qp]
 
 theorem trC_add (z₁ z₂ : Dw → M) : trC Cd (z₁ + z₂) = trC Cd z₁ + trC Cd z₂ := by
   funext g
-  simp only [trC, Pi.add_apply, map_add]
+  simp only [trC, Pi.add_apply, map_add (f := _)]
 
 theorem trC_sub (z₁ z₂ : Dw → M) : trC Cd (z₁ - z₂) = trC Cd z₁ - trC Cd z₂ := by
   funext g
@@ -56,7 +97,7 @@ theorem trC_Z1D' (z : coZ1s (resRep (uRep O' (M := M) r χ) Dw)) (hz : IsLocally
     hc0 _ _
   show Cd.u ((z : Dw → M) (eG.symm (g * h))) =
     Cd.u ((z : Dw → M) (eG.symm g)) + actD Cd.Ce.L g (Cd.u ((z : Dw → M) (eG.symm h)))
-  rw [map_mul eG.symm g h, hc, map_add, Cd.u_act, MulEquiv.apply_symm_apply]
+  rw [map_mul eG.symm g h, hc, map_add (f := _), Cd.u_act, MulEquiv.apply_symm_apply]
 
 variable (F : Submodule O' (H1z (resRep (uRep O' (M := M) r χ) Dw))) (ℓ cB : ℕ)
 
@@ -119,7 +160,7 @@ def lenPre : ↥(Formalism.RepresentationBoundsCohomology.LocallyConstantCohomol
     rw [← trC_add]
     refine diff_mem Cd heG hW (rep F ℓ cB (y₁ + y₂)) (rep F ℓ cB y₁ + rep F ℓ cB y₂) (rep_lc F ℓ cB _)
       ((rep_lc F ℓ cB y₁).add (rep_lc F ℓ cB y₂)) ?_
-    rw [map_add, rep_mk, rep_mk, rep_mk, Submodule.coe_add, sub_self]
+    rw [map_add (f := _), rep_mk, rep_mk, rep_mk, Submodule.coe_add, sub_self]
     exact F.zero_mem
   map_smul' a y := by
     rw [← Submodule.Quotient.mk_smul, Submodule.Quotient.eq]
@@ -131,8 +172,8 @@ def lenPre : ↥(Formalism.RepresentationBoundsCohomology.LocallyConstantCohomol
     rw [map_smul, rep_mk, rep_mk, Submodule.coe_smul, sub_self]
     exact F.zero_mem
 
-include heG hp hW hB in
 
+include heG hp hW hB in
 theorem lenMap_gen : LenMap PD σ
     (↥(Formalism.RepresentationBoundsCohomology.LocallyConstantCohomology.lcH1 (resRep (uRep O' (M := M) r χ) Dw) ⊓ divBy F ((ℓ : O') ^ cB)) ⧸
       F.comap (Formalism.RepresentationBoundsCohomology.LocallyConstantCohomology.lcH1 (resRep (uRep O' (M := M) r χ) Dw) ⊓ divBy F ((ℓ : O') ^ cB)).subtype) Cd.Ce cB := by
@@ -234,8 +275,8 @@ theorem unr_exists (I' : Subgroup Dw) (z : coZ1s (resRep (uRep O' (M := M) r χ)
 
 variable {I : Subgroup G} {I' : Subgroup Dw}
 
-include heG in
 
+include heG in
 theorem hW_zero (hzero : divisibleCocycles Cd.Ce.L ⊓ HfD PD Cd.Ce.L = divisibleCocycles Cd.Ce.L ⊓ (Z1urD Cd.Ce.L I ⊔ BD Cd.Ce.L))
     (hI' : ∀ h ∈ I, eG.symm h ∈ I')
     (z : coZ1s (resRep (uRep O' (M := M) r χ) Dw)) (hz : IsLocallyConstant (z : Dw → M))
@@ -254,8 +295,8 @@ theorem hW_zero (hzero : divisibleCocycles Cd.Ce.L ⊓ HfD PD Cd.Ce.L = divisibl
   rw [← hzero] at hmem
   exact (Submodule.mem_inf.1 hmem).2
 
-include heG in
 
+include heG in
 theorem hB_zero (hzero : divisibleCocycles Cd.Ce.L ⊓ HfD PD Cd.Ce.L = divisibleCocycles Cd.Ce.L ⊓ (Z1urD Cd.Ce.L I ⊔ BD Cd.Ce.L))
     (hI : ∀ g : Dw, g ∈ I' → eG g ∈ I)
     (z : coZ1s (resRep (uRep O' (M := M) r χ) Dw)) (hz : IsLocallyConstant (z : Dw → M))
@@ -284,7 +325,7 @@ theorem hB_zero (hzero : divisibleCocycles Cd.Ce.L ⊓ HfD PD Cd.Ce.L = divisibl
   rw [← hg, map_sub, Cd.u_act, AddEquiv.apply_symm_apply]
   show actD Cd.Ce.L (eG (g : Dw)) (x + v) - (x + v) =
     (actD Cd.Ce.L (eG (g : Dw)) x - x) + (actD Cd.Ce.L (eG (g : Dw)) v - v)
-  rw [map_add]
+  rw [map_add (f := _)]
   abel
 
 end Conds

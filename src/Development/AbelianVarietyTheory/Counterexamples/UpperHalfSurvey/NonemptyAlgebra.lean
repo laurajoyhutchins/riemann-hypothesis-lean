@@ -1,14 +1,62 @@
-import Mathlib
-import ReciprocityTheory.DualLattices.Imports
-import ReciprocityTheory.DualLattices.CyclicRecursion
-import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.ValuationCoeEqNorm
+module
+
+public import Mathlib.Analysis.Normed.Field.Instances
+public import Mathlib.NumberTheory.Padics.Complex
+public import ReciprocityTheory.DualLattices.CyclicRecursionStatement
+public import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.ValuationCoeEqNorm
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.DualLattices.DvdOfCoeffZero
+import ReciprocityTheory.DualLattices.ExistsPrimitiveRoot
+public import ReciprocityTheory.DualLattices.MulIterateRootEqZero
+public import ReciprocityTheory.DualLattices.ValUntiltESubOne
+public import ReciprocityTheory.DualLattices.ZmodTrichotomy
+
+@[expose] public section
 
 open WittVector Ideal ReciprocityTheory.PGsh
 
 namespace GlobalTheory.AinfChecks
 
-open WittVector Ideal in
 
+open WittVector Ideal in
 theorem _root_.GlobalTheory.AinfChecks.padicComplex (p : ℕ) [Fact p.Prime] :
     ∃ (_ : Fact ¬IsUnit ((p : ℕ) : 𝓞_ℂ_[p])) (_ : IsAdicComplete (span {((p : ℕ) : 𝓞_ℂ_[p])}) 𝓞_ℂ_[p]),
       (∃ pflat : PreTilt 𝓞_ℂ_[p] p, pflat.untilt = ((p : ℕ) : 𝓞_ℂ_[p])) ∧
@@ -31,33 +79,7 @@ section
 variable (p : ℕ) [Fact p.Prime] (O : Type) [CommRing O] [Fact ¬IsUnit (p : O)]
   [IsAdicComplete (span {(p : O)}) O]
 
-omit [IsAdicComplete (span {(p : O)}) O] in
 
-theorem nonempty_algebra (pflat : PreTilt O p) :
-    Nonempty (Algebra (ZMod (p ^ 2)) (WittVector p (PreTilt O p) ⧸
-      span {(p : WittVector p (PreTilt O p)) ^ 2, teichmuller p pflat})) := by
-  refine ⟨((ZMod.castHom (ringChar.dvd ?_) _)).toAlgebra⟩
-  push_cast
-  rw [← map_natCast (Ideal.Quotient.mk _), ← map_pow, Ideal.Quotient.eq_zero_iff_mem]
-  exact subset_span (by simp)
 end
-
-theorem not_regular_zmod (p : ℕ) [Fact p.Prime] :
-    ∃ (_ : Fact ¬IsUnit ((p : ℕ) : ZMod p)) (_ : IsAdicComplete (span {((p : ℕ) : ZMod p)}) (ZMod p)),
-      ¬ RegularStatement p (ZMod p) := by
-  have h0 : ((p : ℕ) : ZMod p) = 0 := ZMod.natCast_self p
-  have hb : span {((p : ℕ) : ZMod p)} = ⊥ := by rw [h0, span_singleton_eq_bot]
-  have i1 : Fact ¬IsUnit ((p : ℕ) : ZMod p) := ⟨by rw [h0]; exact not_isUnit_zero⟩
-  have i2 : IsAdicComplete (span {((p : ℕ) : ZMod p)}) (ZMod p) := by rw [hb]; infer_instance
-  refine ⟨i1, i2, fun h => ?_⟩
-  have hz : (0 : PreTilt (ZMod p) p).untilt = ((p : ℕ) : ZMod p) := by
-    have := PreTilt.mk_untilt_eq_coeff_zero (0 : PreTilt (ZMod p) p)
-    rw [map_zero (PreTilt.coeff 0), Ideal.Quotient.eq_zero_iff_mem, mem_span_singleton] at this
-    exact (zero_dvd_iff.1 (h0 ▸ this)).trans h0.symm
-  obtain ⟨-, h2, h3⟩ := h 0 hz
-  apply h3
-  have h1 := h2 1 (by rw [teichmuller_zero, zero_mul]; exact zero_mem _)
-  rw [eq_top_iff_one]
-  exact span_mono (by simp) h1
 
 end GlobalTheory.AinfChecks

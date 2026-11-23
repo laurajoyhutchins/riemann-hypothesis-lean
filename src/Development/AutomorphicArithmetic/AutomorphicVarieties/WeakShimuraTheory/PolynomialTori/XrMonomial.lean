@@ -1,7 +1,59 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.Graded
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.PartSpan
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.KerGen
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.ResMapBijective
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.KerGen
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.PartSpan
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.AdicCompletion.Topology
+import Mathlib.RingTheory.MvPowerSeries.Evaluation
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
 import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.MapRepApply
+
+@[expose] public section
 
 open IsLocalRing UpperTheory.V.Alg UpperTheory.V.GradeZeroInterpolatingElement
 
@@ -67,8 +119,9 @@ private theorem xr_agree {O R X K : Type} [CommRing O] [CommRing R] [Algebra O R
   let p : MvPowerSeries W.σ O := ∑ m ∈ T, coeff m f • monomial m 1
   have hpc : ∀ m, coeff m p = if m ≤ n' then coeff m f else 0 := by
     intro m
+
     simp only [p, map_sum, MvPowerSeries.coeff_smul, MvPowerSeries.coeff_monomial, mul_ite, mul_one,
-      mul_zero]
+    mul_zero]
     rw [Finset.sum_ite_eq]
     simp only [T, Finset.mem_Iic]
   have hf' : ∀ n, Finsupp.weight W.wt n ≠ j → coeff n f = 0 := hf
@@ -86,14 +139,17 @@ private theorem xr_agree {O R X K : Type} [CommRing O] [CommRing R] [Algebra O R
   have hG : ∀ (K' : Type) [CommRing K'] [Algebra O K'] (G : MvPowerSeries W.σ O →ₐ[O] K'),
       G p = ∑ m ∈ T, coeff m f • ∏ s, G (MvPowerSeries.X s) ^ m s := by
     intro K' _ _ G
+
     simp only [p, map_sum, map_smul, mvPowerSeries_algHom_monomial_eq_prod_X_pow]
   let y : W.A := ∑ m ∈ T, coeff m f • ∏ s, W.zA s ^ m s
   have hy : F p = η y := by
     rw [hG K F]
+
     simp only [y, map_sum, map_smul, map_prod, map_pow, hX]
   have hyR : (y : R) = W.π p := by
     rw [hG R W.π]
     show W.A.val y = _
+
     simp only [y, map_sum, map_smul, map_prod, map_pow]
     rfl
   let e : W.A := ∑ m ∈ μ, (⟨W.π (b m), W.part_le_A (j := 0) (Submodule.mem_map_of_mem (hb m))⟩ : W.A) *
@@ -104,12 +160,14 @@ private theorem xr_agree {O R X K : Type} [CommRing O] [CommRing R] [Algebra O R
     rw [map_sub]
     show (x : R) - (y : R) = _
     rw [hx, hyR, ← map_sub, hg]
+
     simp only [e, map_sum, map_mul, map_prod, map_pow, mvPowerSeries_algHom_monomial_eq_prod_X_pow]
     rfl
   have hdiff : F f - η x = F (f - p) - η e := by
     rw [← he, map_sub, map_sub, hy]
     ring
   rw [hdiff, hg]
+
   simp only [e, map_sum, map_mul, mvPowerSeries_algHom_monomial_eq_prod_X_pow, hX, map_prod, map_pow]
   rw [← Finset.sum_sub_distrib]
   refine Ideal.sum_mem _ fun m hm => ?_
@@ -157,7 +215,7 @@ private theorem xr_const {O S σ : Type} [CommRing O] [CommRing S] [Algebra O S]
           · exact hn t ht
         · rfl
       have hgq : g = X s * q + r := by rw [← hq, sub_add_cancel]
-      rw [hgq, map_add, map_mul]
+      rw [hgq, map_add (f := _), map_mul]
       exact I.add_mem (I.mul_mem_right _ (hF s)) hrI
   have h := key Finset.univ (f - algebraMap O (MvPowerSeries σ O) (constantCoeff f)) ?_
   · rwa [map_sub, F.commutes] at h
@@ -220,7 +278,7 @@ theorem UpperTheory.V.Ws.Po.extR :
         exact (map_zero η).symm
       · rintro y z ⟨hy1, hy2⟩ ⟨hz1, hz2⟩
         refine ⟨W.A.add_mem hy1 hz1, fun h => ?_⟩
-        rw [map_add, hy2 hy1, hz2 hz1, ← map_add]
+        rw [map_add (f := _), hy2 hy1, hz2 hz1, ← map_add (f := _)]
         rfl
     exact (key a a.2).2 a.2
   · intro x hx

@@ -1,4 +1,62 @@
-import Mathlib
+module
+
+public import Mathlib.RingTheory.DiscreteValuationRing.Basic
+public import Mathlib.RingTheory.KrullDimension.Basic
+import Mathlib.Algebra.AffineMonoid.UniqueSums
+import Mathlib.Algebra.GroupWithZero.Submonoid.CancelMulZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.AdicCompletion.AsTensorProduct
+public import Mathlib.RingTheory.AdicCompletion.LocalRing
+public import Mathlib.RingTheory.Ideal.KrullsHeightTheorem
+public import Mathlib.RingTheory.OrderOfVanishing.Basic
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+public import Mathlib.RingTheory.Valuation.LocalSubring
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.GroupTheory.MonoidLocalization.Away
+public import Mathlib.RingTheory.Flat.TorsionFree
+public import Mathlib.RingTheory.Ideal.Height
+
+@[expose] public section
 
 open IsLocalRing
 
@@ -31,7 +89,7 @@ theorem fg_of_mem {A B : Type} [CommRing A] [IsNoetherianRing A] [CommRing B] [I
     obtain ⟨s, hs⟩ := Ideal.mem_span_singleton.1 h3
     obtain ⟨b, hb⟩ := Ideal.mem_span_singleton.1 (Ideal.mem_comap.1 hr')
     refine ⟨b, s, ?_⟩
-    rw [← hb, hα, ← map_mul, ← hs, ← map_add]
+    rw [← hb, hα, ← map_mul, ← hs, ← map_add (f := _)]
     congr 1; ring
   have down : ∀ (x : B) (j : ℕ),
       (∃ (b : B) (r : A), α ^ (l + j) * x = α ^ (l + j + 1) * b + algebraMap A B r) →
@@ -61,7 +119,7 @@ theorem fg_of_mem {A B : Type} [CommRing A] [IsNoetherianRing A] [CommRing B] [I
     obtain ⟨b, r, h⟩ := claim x
     refine Submodule.mem_span_singleton.2 ⟨r, ?_⟩
     have : φ x = Ideal.Quotient.mk Q (α ^ l * x) := rfl
-    rw [this, h, map_add, Ideal.Quotient.eq_zero_iff_mem.2
+    rw [this, h, map_add (f := _), Ideal.Quotient.eq_zero_iff_mem.2
       (Ideal.mem_span_singleton.2 (dvd_mul_right _ _)), zero_add, Algebra.smul_def, mul_one]
     rfl
   · have : (J : Submodule B B) ⊓ LinearMap.ker φ = Ideal.span {α} := by
@@ -215,7 +273,7 @@ theorem exists_complete (B : Type) [CommRing B] [IsDomain B] [IsDiscreteValuatio
     rw [Algebra.smul_def, hy]
   obtain ⟨hd, hD⟩ := dvr_of_principal W _ h1 (hr p hp.ne_zero)
   refine ⟨W, inferInstance, hd, hD, algebraMap B W, inferInstance, ?_, inferInstance⟩
-  rw [injective_iff_map_eq_zero]
+  set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
   intro x hx
   by_contra h
   exact nonZeroDivisors.ne_zero (hr x h) hx

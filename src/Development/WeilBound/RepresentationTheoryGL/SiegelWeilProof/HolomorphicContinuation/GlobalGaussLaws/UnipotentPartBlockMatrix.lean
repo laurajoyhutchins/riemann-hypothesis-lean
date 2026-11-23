@@ -1,7 +1,53 @@
-import Development.WeilBound.RepresentationTheoryGL.SiegelWeilProof.HolomorphicContinuation.GlobalGaussLaws.OpGenC
-import Development.WeilBound.RepresentationTheoryGL.SiegelWeilProof.HolomorphicContinuation.GlobalGaussLaws.OpGenA
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.MixedModelHeisenbergPhaseEqCexpRealPoints
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ArchimedeanMultiplierTemperate
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.SiegelWeilProof.HolomorphicContinuation.GlobalGaussLaws.LocCellSt
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.BlockMatrixTwoByTwoFinStandardSkewMap
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.UnipotentAtTauMemStabilizer
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.MixedModelHeisenbergPhaseEqCexpRealPoints
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ArchimedeanMultiplierTemperate
+public import Development.WeilBound.RepresentationTheoryGL.SiegelWeilProof.HolomorphicContinuation.GlobalGaussLaws.OpGenB
+public import Development.WeilBound.RepresentationTheoryGL.SiegelWeilProof.HolomorphicContinuation.GlobalGaussLaws.OpGenC
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -13,7 +59,7 @@ open GlobalTheory.StdUnn PositivityTheory.GramSchwartzFunctions PositivityTheory
 
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
 
-set_option synthInstance.maxHeartbeats 400000
+
 
 namespace PositivityTheory.Rg.Sw.Glob.UnipH
 
@@ -59,7 +105,7 @@ theorem mat_iota_nU {θ : InfFam D} (hθ : IsInfFam θ) {τ : D.what₂.Tau} {n 
       rfl
     · rw [h2 τ' h, e2 τ' h, one_eq_block_matrix]
 
-theorem theta_half (θ : InfFam D) (hθ : IsInfFam θ) (ρ : D.what₂.Tau) :
+theorem theta_half (θ : InfFam D) (_hθ : IsInfFam θ) (ρ : D.what₂.Tau) :
     θ ρ (algebraMap D.host.F (Ainf D.host.F) (1 / 2) ⊗ₜ[D.host.F] (1 : D.host.E)) = 1 / 2 := by
   have h2 : θ ρ (algebraMap D.host.F (Ainf D.host.F) 2 ⊗ₜ[D.host.F] (1 : D.host.E)) = 2 := by
     have : (algebraMap D.host.F (Ainf D.host.F) 2 ⊗ₜ[D.host.F] (1 : D.host.E)) = 2 := by
@@ -78,13 +124,15 @@ theorem theta_half (θ : InfFam D) (hθ : IsInfFam θ) (ρ : D.what₂.Tau) :
 theorem gramX_eq {m n : ℕ} (ε : Fin m → Bool) (u : Matrix (Fin m) (Fin n) ℂ) :
     gramX ε u = uᴴ * Matrix.diagonal (sgn ε) * u := by
   ext i j
+
   simp only [gramX, evX, Qp, Qb, map_sub, map_sum, map_mul, MvPolynomial.eval_X, Matrix.mul_apply,
-    Matrix.diagonal_apply, Matrix.conjTranspose_apply, if_true, Bool.false_eq_true, if_false]
+  Matrix.diagonal_apply, Matrix.conjTranspose_apply, ite_true, Bool.false_eq_true, ite_false]
   rw [Finset.sum_filter, Finset.sum_filter, ← Finset.sum_sub_distrib]
   refine Finset.sum_congr rfl fun a _ => ?_
-  rw [Finset.sum_eq_single a (fun k _ hk => by rw [if_neg hk, mul_zero]) (by simp), if_pos rfl]
+  rw [Finset.sum_eq_single a (fun k _ hk => by simp [hk]) (by simp)]
+  simp only [ite_true]
   unfold sgn
-  cases ε a <;> simp <;> ring
+  cases ε a <;> simp
 
 theorem psi_unip {θ : InfFam D} (hθ : IsInfFam θ) {ψ : AddChar (AF D.host.F) ℂ} {l : D.what₂.Tau → ℝ}
     (hl : HasRealPar ψ θ l) {V : HSp D} {n : ℕ} (τ : D.what₂.Tau) (ε : Fin V.rank → Bool)
@@ -137,7 +185,14 @@ theorem psi_unip {θ : InfFam D} (hθ : IsInfFam θ) {ψ : AddChar (AF D.host.F)
       simp only [Matrix.mul_assoc]
     rw [hcomp τ, hq]
     set T : ℂ := (b * gramX ε (fr⁻¹ * compAt θ τ x)).trace with hTdef
-    have hr : ((T.re : ℝ) : ℂ) = T := OpGenAH.trace_real ε b hb _
+    have hr : ((T.re : ℝ) : ℂ) = T := by
+      apply Complex.conj_eq_iff_re.1
+      change star T = T
+      have hg : (gramX ε (fr⁻¹ * compAt θ τ x))ᴴ = gramX ε (fr⁻¹ * compAt θ τ x) := by
+        ext i j
+
+        simp [Matrix.conjTranspose_apply, gramX, Qp, Qb, evX, map_sum, mul_comm]
+      rw [hTdef, ← Matrix.trace_conjTranspose, Matrix.conjTranspose_mul, hg, hb, Matrix.trace_mul_comm]
     rw [hr]
     congr 1
     unfold tLoc

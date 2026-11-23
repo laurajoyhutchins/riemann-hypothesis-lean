@@ -1,5 +1,56 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.KurDefs
+module
+
+public import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.KurDefs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.MetricSpace.Ultra.TotallySeparated
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -18,8 +69,8 @@ theorem semilin_norm_sub_le {a b : K} {t : ℝ} (ha : ‖a‖ ≤ t) (hb : ‖b�
   rw [sub_eq_add_neg]
   exact (IsUltrametricDist.norm_add_le_max _ _).trans (max_le ha (by rwa [norm_neg]))
 
-omit [CompleteSpace K] [CharZero K] in
 
+omit [CompleteSpace K] [CharZero K] in
 theorem semilin_norm_pow_sub_pow {a b : K} (ha : ‖a‖ ≤ 1) (hb : ‖b‖ ≤ 1) (n : ℕ) :
     ‖a ^ n - b ^ n‖ ≤ ‖a - b‖ := by
   induction n with
@@ -36,8 +87,8 @@ theorem semilin_norm_pow_sub_pow {a b : K} (ha : ‖a‖ ≤ 1) (hb : ‖b‖ �
             mul_le_mul_of_nonneg_left (pow_le_one₀ (norm_nonneg _) hb) (norm_nonneg _)
         _ = ‖a - b‖ := mul_one _
 
-omit [CompleteSpace K] [CharZero K] in
 
+omit [CompleteSpace K] [CharZero K] in
 theorem FrobField.norm_sq_sub_pow_le {l : ℕ} {σ : K →+* K} (h : FrobField K l σ) (x : K) (hx : ‖x‖ ≤ 1) :
     ‖σ (σ x) - x ^ (l ^ 2)‖ ≤ ‖(l : K)‖ := by
   have hp : x ^ (l ^ 2) = (x ^ l) ^ l := by rw [← pow_mul, sq]
@@ -51,9 +102,8 @@ theorem FrobField.norm_sq_sub_pow_le {l : ℕ} {σ : K →+* K} (h : FrobField K
   · refine (semilin_norm_pow_sub_pow (by rw [h.isom]; exact hx) ?_ l).trans h1
     rw [norm_pow]; exact pow_le_one₀ (norm_nonneg _) hx
 
-omit [CompleteSpace K] [CharZero K] in
-open Polynomial in
 
+open Polynomial in
 theorem semilin_root {l : ℕ} (hR : ResClosed K l) {m : ℕ} (hm : 2 ≤ m) (a b : K) (ha : ‖a‖ ≤ 1)
     (hb : ‖b‖ ≤ 1) : ∃ x : K, ‖x‖ ≤ 1 ∧ ‖x ^ m + a * x + b‖ ≤ ‖(l : K)‖ := by
   have hdeg : (C a * X + C b : K[X]).degree < (X ^ m : K[X]).degree := by
@@ -71,8 +121,8 @@ theorem semilin_root {l : ℕ} (hR : ResClosed K l) {m : ℕ} (hm : 2 ≤ m) (a 
   refine ⟨x, hx, ?_⟩
   simpa [add_assoc] using hev
 
-open Filter Topology in
 
+open Filter Topology in
 theorem lang_semilinear {l : ℕ} {σ : K →+* K} (h : FrobField K l σ) (hR : ResClosed K l)
     (c : K) (hc : ‖c‖ = 1) : ∃ ε : K, ‖ε‖ = 1 ∧ ε = c * σ (σ ε) := by
   have hl2 : 2 ≤ l := h.prime.two_le
@@ -127,7 +177,7 @@ theorem lang_semilinear {l : ℕ} {σ : K →+* K} (h : FrobField K l σ) (hR : 
     · rw [semilin_norm_add_of_lt (by rw [hε1]; exact hlδ.trans_lt hsm), hε1]
     · have e : ε + (l : K) ^ (n + 1) * δ - c * σ (σ (ε + (l : K) ^ (n + 1) * δ)) =
           (l : K) ^ (n + 1) * (-c * (δ ^ (l ^ 2) + -c⁻¹ * δ + -(c⁻¹ * ρ)) - c * (σ (σ δ) - δ ^ (l ^ 2))) := by
-        rw [map_add, map_add, map_mul, map_mul, hσl]
+        rw [map_add (f := _), map_add (f := _), map_mul, map_mul, hσl]
         linear_combination hρ - ((l : K) ^ (n + 1) * ρ + (l : K) ^ (n + 1) * δ) * hcc
       rw [e, norm_mul, hnl, pow_succ ‖(l : K)‖ (n + 1)]
       refine mul_le_mul_of_nonneg_left (semilin_norm_sub_le ?_ ?_) (by positivity)
@@ -149,12 +199,12 @@ theorem lang_semilinear {l : ℕ} {σ : K →+* K} (h : FrobField K l σ) (hR : 
     exact hud n
   obtain ⟨ε, hlim⟩ := cauchySeq_tendsto_of_complete hcau
   have hσc : Continuous σ := ((AddMonoidHomClass.isometry_iff_norm σ).mpr h.isom).continuous
-  have hres : Tendsto (fun n => u n - c * σ (σ (u n))) atTop (𝓝 (ε - c * σ (σ ε))) :=
+  have hres : Filter.Tendsto (fun n => u n - c * σ (σ (u n))) Filter.atTop (nhds (ε - c * σ (σ ε))) :=
     hlim.sub ((((hσc.comp hσc).tendsto ε).comp hlim).const_mul c)
-  have hres0 : Tendsto (fun n => u n - c * σ (σ (u n))) atTop (𝓝 0) :=
+  have hres0 : Filter.Tendsto (fun n => u n - c * σ (σ (u n))) Filter.atTop (nhds 0) :=
     squeeze_zero_norm (fun n => (hu n).2.trans (pow_le_pow_of_le_one (norm_nonneg _) hl1.le (Nat.le_succ n)))
       (tendsto_pow_atTop_nhds_zero_of_lt_one (norm_nonneg _) hl1)
-  have hn : Tendsto (fun n => ‖u n‖) atTop (𝓝 ‖ε‖) := hlim.norm
+  have hn : Filter.Tendsto (fun n => ‖u n‖) Filter.atTop (nhds ‖ε‖) := hlim.norm
   have hconst : (fun n => ‖u n‖) = fun _ => (1 : ℝ) := funext fun n => (hu n).1
   rw [hconst] at hn
   exact ⟨ε, tendsto_nhds_unique hn tendsto_const_nhds, sub_eq_zero.mp (tendsto_nhds_unique hres hres0)⟩

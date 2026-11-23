@@ -1,5 +1,59 @@
-import Formalism.CyclotomicNorms.StatementI
-import Formalism.GaloisIrreducibility.GaloisIrreducibilityProofs.PowerPCycle
+module
+
+public import Formalism.CyclotomicNorms.StatementI
+public import Formalism.GaloisIrreducibility.GaloisIrreducibilityProofs.PowerPCycle
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Finset Module
 
@@ -16,6 +70,7 @@ theorem repr_diag_apply (ρ : Representation k G V) (e : Module.Basis (Fin N) k 
     e.repr (ρ y v) m = χ m y * e.repr v m := by
   have h : ρ y v = ∑ i, (e.repr v i * χ i y) • e i := by
     conv_lhs => rw [← e.sum_repr v]
+
     rw [map_sum]
     refine Finset.sum_congr rfl fun i _ => ?_
     rw [map_smul, hy, smul_smul]
@@ -186,12 +241,13 @@ theorem restriction_of_blocks_and_jordan (hB : BlocksCycle) (hJ : JordanTransiti
       ∀ j, (∀ g, e j ∉ W.map (ρ g)) → e.repr x j = 0 :=
     ⟨{ carrier := {x | ∀ j, (∀ g, e j ∉ W.map (ρ g)) → e.repr x j = 0}
        add_mem' := fun {a b} ha hb j hj => by
-         rw [map_add, Finsupp.add_apply, ha j hj, hb j hj, add_zero]
+         rw [map_add (f := _), Finsupp.add_apply, ha j hj, hb j hj, add_zero]
        zero_mem' := fun j _ => by rw [map_zero, Finsupp.zero_apply]
        smul_mem' := fun c {x} hx j hj => by
          rw [map_smul, Finsupp.smul_apply, hx j hj, smul_zero] }, fun x => Iff.rfl⟩
   have hYst : ∀ g' : G, ∀ x ∈ Y, ρ g' x ∈ Y := by
     intro g' x hx
+
     rw [← e.sum_repr x, map_sum]
     refine Y.sum_mem fun i _ => ?_
     rw [map_smul]

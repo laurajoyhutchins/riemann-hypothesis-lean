@@ -1,9 +1,51 @@
-import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.SliceTensors.PIndMapA
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ConstantTermLeviParabolicFormula
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ConstantTermAuxiliaryStatementA
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsUnipLevIntegral
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.GenericFiniteByInduction
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CommuteRtOfMemZalg
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.SliceTensors.PIndMapA
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CommuteRtOfMemZalg
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ConstantTermAuxiliaryStatementA
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ConstantTermLeviParabolicFormula
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.GenericFiniteByInduction
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -13,7 +55,7 @@ open scoped ContDiff
 
 namespace PositivityTheory.Rg.Rs.InducedTensorMap
 
-variable {E : Type} [Field E] [NumberField E] [IsTotallyComplex E] {r s : ℕ}
+variable {E : Type} [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] {r s : ℕ}
 
 namespace B
 
@@ -21,19 +63,59 @@ variable {R : Type} [CommRing R]
 
 theorem lev_cc (m : GL (Fin r) R × GL (Fin s) R) (i j : Fin r) :
     (lev R r s m : Matrix (Fin (r + s)) (Fin (r + s)) R) (Fin.castAdd s i) (Fin.castAdd s j) = (m.1 : Matrix _ _ R) i j := by
-  simp [GlobalTheory.SmGL.val_emb₂, GlobalTheory.SmGL.stdSum]
+  have h : (GlobalTheory.SmGL.emb₂ R (GlobalTheory.SmGL.stdSum (rfl : r + s = r + s)) m).val =
+      Matrix.reindex (GlobalTheory.SmGL.stdSum (rfl : r + s = r + s))
+        (GlobalTheory.SmGL.stdSum (rfl : r + s = r + s))
+        (Matrix.fromBlocks m.1.val 0 0 m.2.val) := by
+    ext i j
+    simp [GlobalTheory.SmGL.emb₂, GlobalTheory.SmGL.leviEmb, GlobalTheory.SmGL.leviTwo,
+      GlobalTheory.SmGL.two, Matrix.reindex_apply, Matrix.blockDiagonal']
+    rcases (GlobalTheory.SmGL.stdSum (rfl : r + s = r + s)).symm i with a | a <;>
+      rcases (GlobalTheory.SmGL.stdSum (rfl : r + s = r + s)).symm j with b | b <;> simp
+  rw [lev, h]
+  simp [Matrix.reindex_apply, Matrix.submatrix_apply, GlobalTheory.SmGL.stdSum]
 
 theorem lev_nn (m : GL (Fin r) R × GL (Fin s) R) (i j : Fin s) :
     (lev R r s m : Matrix (Fin (r + s)) (Fin (r + s)) R) (Fin.natAdd r i) (Fin.natAdd r j) = (m.2 : Matrix _ _ R) i j := by
-  simp [GlobalTheory.SmGL.val_emb₂, GlobalTheory.SmGL.stdSum]
+  have h : (GlobalTheory.SmGL.emb₂ R (GlobalTheory.SmGL.stdSum (rfl : r + s = r + s)) m).val =
+      Matrix.reindex (GlobalTheory.SmGL.stdSum (rfl : r + s = r + s))
+        (GlobalTheory.SmGL.stdSum (rfl : r + s = r + s))
+        (Matrix.fromBlocks m.1.val 0 0 m.2.val) := by
+    ext i j
+    simp [GlobalTheory.SmGL.emb₂, GlobalTheory.SmGL.leviEmb, GlobalTheory.SmGL.leviTwo,
+      GlobalTheory.SmGL.two, Matrix.reindex_apply, Matrix.blockDiagonal']
+    rcases (GlobalTheory.SmGL.stdSum (rfl : r + s = r + s)).symm i with a | a <;>
+      rcases (GlobalTheory.SmGL.stdSum (rfl : r + s = r + s)).symm j with b | b <;> simp
+  rw [lev, h]
+  simp [Matrix.reindex_apply, Matrix.submatrix_apply, GlobalTheory.SmGL.stdSum]
 
 theorem lev_cn (m : GL (Fin r) R × GL (Fin s) R) (i : Fin r) (j : Fin s) :
     (lev R r s m : Matrix (Fin (r + s)) (Fin (r + s)) R) (Fin.castAdd s i) (Fin.natAdd r j) = 0 := by
-  simp [GlobalTheory.SmGL.val_emb₂, GlobalTheory.SmGL.stdSum]
+  have h : (GlobalTheory.SmGL.emb₂ R (GlobalTheory.SmGL.stdSum (rfl : r + s = r + s)) m).val =
+      Matrix.reindex (GlobalTheory.SmGL.stdSum (rfl : r + s = r + s))
+        (GlobalTheory.SmGL.stdSum (rfl : r + s = r + s))
+        (Matrix.fromBlocks m.1.val 0 0 m.2.val) := by
+    ext i j
+    simp [GlobalTheory.SmGL.emb₂, GlobalTheory.SmGL.leviEmb, GlobalTheory.SmGL.leviTwo,
+      GlobalTheory.SmGL.two, Matrix.reindex_apply, Matrix.blockDiagonal']
+    rcases (GlobalTheory.SmGL.stdSum (rfl : r + s = r + s)).symm i with a | a <;>
+      rcases (GlobalTheory.SmGL.stdSum (rfl : r + s = r + s)).symm j with b | b <;> simp
+  rw [lev, h]
+  simp [Matrix.reindex_apply, Matrix.submatrix_apply, GlobalTheory.SmGL.stdSum]
 
 theorem lev_nc (m : GL (Fin r) R × GL (Fin s) R) (i : Fin s) (j : Fin r) :
     (lev R r s m : Matrix (Fin (r + s)) (Fin (r + s)) R) (Fin.natAdd r i) (Fin.castAdd s j) = 0 := by
-  simp [GlobalTheory.SmGL.val_emb₂, GlobalTheory.SmGL.stdSum]
+  have h : (GlobalTheory.SmGL.emb₂ R (GlobalTheory.SmGL.stdSum (rfl : r + s = r + s)) m).val =
+      Matrix.reindex (GlobalTheory.SmGL.stdSum (rfl : r + s = r + s))
+        (GlobalTheory.SmGL.stdSum (rfl : r + s = r + s))
+        (Matrix.fromBlocks m.1.val 0 0 m.2.val) := by
+    ext i j
+    simp [GlobalTheory.SmGL.emb₂, GlobalTheory.SmGL.leviEmb, GlobalTheory.SmGL.leviTwo,
+      GlobalTheory.SmGL.two, Matrix.reindex_apply, Matrix.blockDiagonal']
+    rcases (GlobalTheory.SmGL.stdSum (rfl : r + s = r + s)).symm i with a | a <;>
+      rcases (GlobalTheory.SmGL.stdSum (rfl : r + s = r + s)).symm j with b | b <;> simp
+  rw [lev, h]
+  simp [Matrix.reindex_apply, Matrix.submatrix_apply, GlobalTheory.SmGL.stdSum]
 
 theorem unip_col (x : BlockIx (r + s) r → R) (i : Fin (r + s)) (k : Fin r) :
     ((unip x : GL (Fin (r + s)) R) : Matrix _ _ R) i (Fin.castAdd s k) =
@@ -41,14 +123,14 @@ theorem unip_col (x : BlockIx (r + s) r → R) (i : Fin (r + s)) (k : Fin r) :
   have := k.isLt
   rw [GlobalTheory.CompanionTheory.AffglAssembly.unip_eq_unipGL, GroundTheory.Automorphic.AutomorphicForm.coe_unipGL,
     GroundTheory.Automorphic.AutomorphicForm.unipMatrix, Matrix.add_apply, GroundTheory.Automorphic.AutomorphicForm.blockEntry_apply,
-    dif_neg (fun h => by have := h.2; simp only [Fin.val_castAdd] at this; omega), add_zero]
+    dite_eq_right (fun h => by have := h.2; simp only [Fin.val_castAdd] at this; omega), add_zero]
 
 theorem unip_row (x : BlockIx (r + s) r → R) (k : Fin s) (j : Fin (r + s)) :
     ((unip x : GL (Fin (r + s)) R) : Matrix _ _ R) (Fin.natAdd r k) j =
       (1 : Matrix (Fin (r + s)) (Fin (r + s)) R) (Fin.natAdd r k) j := by
   rw [GlobalTheory.CompanionTheory.AffglAssembly.unip_eq_unipGL, GroundTheory.Automorphic.AutomorphicForm.coe_unipGL,
     GroundTheory.Automorphic.AutomorphicForm.unipMatrix, Matrix.add_apply, GroundTheory.Automorphic.AutomorphicForm.blockEntry_apply,
-    dif_neg (fun h => by have := h.1; simp only [Fin.val_natAdd] at this; omega), add_zero]
+    dite_eq_right (fun h => by have := h.1; simp only [Fin.val_natAdd] at this; omega), add_zero]
 
 end B
 

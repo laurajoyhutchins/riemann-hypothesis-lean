@@ -1,6 +1,51 @@
-import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.KFiniteVectors.CharacterQuadraticDerivativeZero
-import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.KFiniteVectors.CommuteOfUnitaryConjugate
-import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.KFiniteVectors.FrameBlockPairingSign
+module
+
+public import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.KFiniteVectors.CharacterQuadraticDerivativeZero
+public import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.KFiniteVectors.FrameBlockPairingSign
+public import Development.WeilBound.ThetaLifts.LatticeBasics.BoxFinV
+import Development.AutomorphicSpectrum.Proofs.TwistedProofs.ExtensionEmbeddingEvInfRealAd
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -15,13 +60,13 @@ variable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algeb
 variable {d : SD σ}
 
 theorem T_add (Φ Ψ : d.Fn) (X : Mx F E d.m d.n) : d.T (Φ + Ψ) X = d.T Φ X + d.T Ψ X := by
-  simp only [SD.T, ← map_add]
+  simp only [SD.T, ← map_add (f := _)]
   congr 1
   funext z
   exact mul_add _ _ _
 
-variable (d) in
 
+variable (d) in
 abbrev b1 : Matrix (Fin d.n ⊕ Fin d.n) (Fin d.n) (AE F E) := incM F d.b.1.toCols₁
 
 theorem incM_mul {ι ι' ι'' : Type} [Fintype ι'] (x : Matrix ι ι' E) (y : Matrix ι' ι'' E) :
@@ -59,6 +104,7 @@ theorem first_frame_half_eq_mul : ∃ t : Matrix (Fin d.n) (Fin d.n) (AE F E), b
   ext i j
   rw [Matrix.mul_apply]
   change inclR (AF F) (d.b.1 i (Sum.inl j)) = _
+
   rw [h2, map_sum]
   refine Finset.sum_congr rfl fun k _ => ?_
   rw [map_mul]
@@ -91,7 +137,7 @@ theorem cw_add_smul (w : InfinitePlace F) (X Z : Mx F E d.m d.n) (t : ℝ) :
     d.cw w (X + realAd F t • Z) = d.cw w X + (t : ℂ) • d.cw w Z := by
   ext i j
   show piInf (d.B.emb w) ((X + realAd F t • Z) i j) = piInf (d.B.emb w) (X i j) + (t : ℂ) * piInf (d.B.emb w) (Z i j)
-  rw [Matrix.add_apply, Matrix.smul_apply, map_add, GlobalTheory.CompanionTheory.RealAdeleComponent.piInf_realAd_smul]
+  rw [Matrix.add_apply, Matrix.smul_apply, map_add (f := _), GlobalTheory.CompanionTheory.RealAdeleComponent.piInf_realAd_smul]
 
 theorem snd_add_realAd (t : ℝ) (a b : AF F) : (a + realAd F t * b).2 = a.2 := by
   show a.2 + (realAd F t).2 * b.2 = a.2
@@ -100,14 +146,13 @@ theorem snd_add_realAd (t : ℝ) (a b : AF F) : (a + realAd F t * b).2 = a.2 := 
 theorem crd_add_smul_snd (X Z : Mx F E d.m d.n) (t : ℝ) (k : Fin d.m × Fin d.n × Fin 2) :
     (d.crd (X + realAd F t • Z) k).2 = (d.crd X k).2 := by
   have e : d.crd (X + realAd F t • Z) k = d.crd X k + realAd F t * d.crd Z k := by
-    simp only [SD.crd, Matrix.add_apply, Matrix.smul_apply, map_add, map_smul, Finsupp.add_apply, Finsupp.smul_apply,
+    simp only [SD.crd, Matrix.add_apply, Matrix.smul_apply, map_add (f := _), map_smul, Finsupp.add_apply, Finsupp.smul_apply,
       smul_eq_mul]
   rw [e, snd_add_realAd]
 
 theorem realAd_zero : realAd F 0 = 0 := by
   unfold realAd
   rw [map_zero, map_zero, map_zero]
-  rfl
 
 def qL (R : RD d) (X Z : Mx F E d.m d.n) (t : ℝ) : ℝ :=
   ∑ w, ∑ a, ∑ i, ‖(((R.fr w)⁻¹).1 * d.cw w X) a i + (t : ℂ) * (((R.fr w)⁻¹).1 * d.cw w Z) a i‖ ^ 2
@@ -185,10 +230,6 @@ theorem map_mul_incM_transpose_eq {p q r : Type} [Fintype q] (w : InfinitePlace 
     (x * (incM F y)ᵀ).map (piInf (d.B.emb w)) = x.map (piInf (d.B.emb w)) * (y.map (d.B.emb w).1)ᵀ := by
   rw [Matrix.map_mul, Matrix.transpose_map, map_incM']
 
-theorem map_mul_incM {p q r : Type} [Fintype q] (w : InfinitePlace F) (x : Matrix p q (AE F E)) (y : Matrix q r E) :
-    (x * incM F y).map (piInf (d.B.emb w)) = x.map (piInf (d.B.emb w)) * y.map (d.B.emb w).1 := by
-  rw [Matrix.map_mul, map_incM']
-
 theorem T_D_vac (R : RD d) (g : (Fin d.m × Fin d.n × Fin 2 → Af F) → ℂ) {Φ : d.Fn} (hΦ : Φ ∈ d.sch)
     (hT : d.T Φ = vacF R g) {u : Matrix (Fin d.m) (Fin d.n ⊕ Fin d.n) (AE F E)} (hu : At (evI F) u) (X : Mx F E d.m d.n) :
     d.T (Box.D (d.dd.e u) Φ) X = (∑ w, Sw (d.A.J.map (d.B.emb w).1) ((R.fr w)⁻¹).1 (dbl (d.Y.J.map (d.B.emb w).1))
@@ -205,7 +246,7 @@ theorem T_D_vac (R : RD d) (g : (Fin d.m × Fin d.n × Fin 2 → Af F) → ℂ) 
   have hsplitD : Box.D (d.dd.e u) Φ = Box.D (d.dd.e ((W.toCols₁ * tAᵀ) * (dg d)ᵀ)) Φ +
       Box.D (d.dd.e (W.toCols₂ * (b2 d)ᵀ)) Φ := by
     conv_lhs => rw [hs]
-    rw [map_add, Box.D_add_left]
+    rw [map_add (f := _), Box.D_add_left]
   rw [hsplitD, T_add, T_D_dg hΦ h1, hT]
   have hder := theta_derivative_second_frame hΦ h2 X
   rw [hT] at hder

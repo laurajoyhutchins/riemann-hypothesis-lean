@@ -1,4 +1,53 @@
-import Development.AutomorphicArithmetic.CommutativeAlgebra.ExistsEtaleTrivializationOfTwoInvertibleModuleTo
+module
+
+public import Development.AutomorphicArithmetic.CommutativeAlgebra.PicData
+public import Development.AutomorphicArithmetic.CommutativeAlgebra.ExistsEtaleTrivializationOfTwoInvertibleModuleTo
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open CategoryTheory TensorProduct UpperTheory.PicD
 
 namespace UpperTheory.PicD
@@ -36,10 +85,10 @@ private theorem injective_and_range {A C M : Type} [CommRing A] [CommRing C] [Al
         intro x
         induction x using TensorProduct.induction_on with
         | zero => simp
-        | add x y hx hy => simp only [map_add, hx, hy, add_smul]
+        | add x y hx hy => simp only [map_add (f := _), hx, hy, add_smul]
         | tmul c m =>
           have h1 : c ⊗ₜ[A] t m = c • ((1 : C) ⊗ₜ[A] t m) := by simp [smul_tmul']
-          simp [h1, ← ht m, mul_smul]
+          simp [GlobalTheory.FlatDescent.canonical, h1, ← ht m, mul_smul]
       have hs : GlobalTheory.FlatDescent.canonical C M s = (1 : C) ⊗ₜ[A] s := by
         apply hinj
         rw [hcan, hb']
@@ -81,7 +130,7 @@ theorem UpperTheory.invertibleModule_equiv_of_same_cocycle :
     intro x
     induction x using TensorProduct.induction_on with
     | zero => simp
-    | add x y hx hy => simp only [map_add, hx, hy, mul_add]
+    | add x y hx hy => simp only [map_add (f := _), hx, hy, mul_add]
     | tmul c m => simp [t₁, mul_left_comm]
   have hbij : Function.Bijective (LinearMap.liftBaseChange C t₁) := by
     have : (LinearMap.liftBaseChange C t₁ : C ⊗[A] M → C) =

@@ -1,6 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.VecPairApply
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.DetMemSpanAdjugate
+module
+
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.VecPairApply
+public import Mathlib.Data.Matrix.ColumnRowPartitioned
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.DetMemSpanAdjugate
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Matrix GlobalTheory.NewPrime
 
@@ -46,7 +94,7 @@ theorem det_relations [Fintype m] [DecidableEq m] [Fintype n] [DecidableEq n] (P
   rw [Matrix.det_transpose, Matrix.det_transpose, h0, Ideal.mem_span_singleton, zero_dvd_iff] at h
   exact h
 
-theorem multilinear_add_smul [Fintype m] [DecidableEq m] (f : MultilinearMap R (fun _ : m => n → R) R)
+theorem multilinear_add_smul [Fintype m] [DecidableEq m] (f : (m → n → R) →ₘₗ[R] R)
     (M V : m → n → R) (x : R) (hx : x * x = 0) :
     f (M + x • V) = f M + x * ∑ i, f (Function.update M i (V i)) := by
   classical
@@ -64,12 +112,12 @@ theorem multilinear_add_smul [Fintype m] [DecidableEq m] (f : MultilinearMap R (
         · subst hi; simp [ha]
         · simp [Finset.piecewise_insert, hi]
       have h1 : f (Function.update N a (N a + x • V a)) = f N + x * f (Function.update N a (V a)) := by
-        rw [f.map_update_add, f.map_update_smul, Function.update_eq_self, smul_eq_mul]
+        rw [f.map_update_add, f.map_update_smul, Function.update_eq_self, RingHom.id_apply, smul_eq_mul]
       have h2 : ∀ i ∈ S, x * f (Function.update (Function.update N a (N a + x • V a)) i (V i)) =
           x * f (Function.update N i (V i)) := by
         intro i hi
         have hia : a ≠ i := fun h => ha (h ▸ hi)
-        rw [Function.update_comm hia, f.map_update_add, f.map_update_smul, smul_eq_mul, mul_add,
+        rw [Function.update_comm hia, f.map_update_add, f.map_update_smul, RingHom.id_apply, smul_eq_mul, mul_add,
           ← mul_assoc, hx, zero_mul, add_zero]
         congr 2
         conv_rhs => rw [← Function.update_eq_self a (Function.update N i (V i))]
@@ -334,6 +382,7 @@ theorem det_ne_zero : ∀ (A B : Type) [CommRing A] [CommRing B] (π : B →+* A
   rw [hTdef, det_expand x y hx hy D W'] at hTdet
   apply hne
   refine Eq.trans ?_ (hann _ hTdet)
+
   rw [map_sum]
   refine Finset.sum_congr rfl fun j _ => ?_
   have hN : π.mapMatrix ((fromRows D (fromCols (0 : Matrix μ (Fin a) B) (1 : Matrix μ μ B))).updateRow

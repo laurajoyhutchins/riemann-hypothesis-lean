@@ -1,6 +1,66 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.LocalHermitianForms.NormOneIsCoboundaryUnramifiedQuadratic
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.LocalHermitianForms.LocalOrbitCounts.Descent
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.LocalHermitianForms.LocalOrbitCounts.SqrtO
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.LocalHermitianForms.LcountNorm
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.LocalHermitianForms.LocalOrbitCounts.Descent
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.LocalHermitianForms.LocalOrbitCounts.SqrtO
+import Mathlib.Algebra.Module.Torsion.Prod
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.QuadraticAlgebra.IsQuadraticExtension
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.LinearAlgebra.FreeModule.PID
+
+@[expose] public section
 
 open QuadraticAlgebra UpperTheory.V.Z.Sym UpperTheory.V.Z.Sym.Loc Matrix
 
@@ -244,7 +304,7 @@ private theorem vanish_inert {O K : Type} [CommRing O] [IsDomain O] [IsDiscreteV
   have memI : ∀ w : Lsq K Δ, IsInt O w → w ∈ integralClosure O (Lsq K Δ) := fun w hw => hw
   have hK : ∀ k : K, IsIntegral O (algebraMap K (Lsq K Δ) k) → ∃ a : O, algebraMap O K a = k := by
     intro k hk
-    have h1 : IsIntegral O k := (isIntegral_algebraMap_iff (algebraMap K (Lsq K Δ)).injective).1 hk
+    have h1 : IsIntegral O k := (isIntegral_algebraMap_iff ).1 hk
     exact IsIntegrallyClosed.isIntegral_iff.1 h1
   haveI hfr : IsFractionRing (integralClosure O (Lsq K Δ)) (Lsq K Δ) :=
     integralClosure.isFractionRing_of_finite_extension K (Lsq K Δ)
@@ -402,10 +462,10 @@ private theorem vanish_split {O K : Type} [CommRing O] [IsDomain O] [IsDiscreteV
     intro z
     rw [hφ₁, hφ₂]
     apply QuadraticAlgebra.ext
-    · simp [he, QuadraticAlgebra.algebraMap_eq]
+    · simp [he, - algebraMap_eq]
       field_simp
       ring
-    · simp [he, QuadraticAlgebra.algebraMap_eq]
+    · simp [he, - algebraMap_eq]
       field_simp
       ring
   have intcrit : ∀ z : Lsq K Δ, φ₁ z ∈ (algebraMap O K).range →
@@ -467,7 +527,7 @@ private theorem vanish_split {O K : Type} [CommRing O] [IsDomain O] [IsDiscreteV
 
 private theorem vanish_sigL_mul {K : Type} [Field K] {Δ τ : K} (x y : EL Δ τ) : sigL (x * y) = sigL x * sigL y := by
   have hτ : star ((algebraMap K (Lsq K Δ)) τ) = (algebraMap K (Lsq K Δ)) τ := by
-    ext <;> simp [QuadraticAlgebra.algebraMap_eq]
+    ext <;> simp [- algebraMap_eq]
   apply QuadraticAlgebra.ext
   · simp [sigL, star_mul', star_add, star_neg, star_one]
   · simp [sigL, star_mul', star_add, hτ]
@@ -565,7 +625,7 @@ theorem UpperTheory.V.Z.Sym.Loc.vanish :
   have hτO : τ ∈ (algebraMap O K).range := by
     obtain ⟨o, ho⟩ := IsIntegrallyClosed.isIntegral_iff.1 hint
     refine ⟨o + 2, ?_⟩
-    rw [map_add, ho, map_ofNat]
+    rw [map_add (f := _), ho, map_ofNat]
     ring
   have hω1 : (ofE Δ ω : EL Δ τ) = ⟨0, 1⟩ := by
     ext <;> simp [ofE]

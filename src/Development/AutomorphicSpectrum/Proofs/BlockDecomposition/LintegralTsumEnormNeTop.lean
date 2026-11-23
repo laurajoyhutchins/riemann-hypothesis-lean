@@ -1,6 +1,54 @@
-import Mathlib
-import Development.WeilBound.RepresentationTheoryGL.TwistedFactors.IntegralUnitBaseChange.InvTransposeGLInvTransposeGL
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IntegralNonnegNormaliserEq
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.TwistedFactors.IntegralUnitBaseChange.InvTransposeGLInvTransposeGL
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.MeasureTheory.Group.FundamentalDomain
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IntegralNonnegNormaliserEq
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Dynamics.Ergodic.Action.Regular
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -34,7 +82,7 @@ theorem exists_small_cover [SecondCountableTopology G] (H : Subgroup G) [Discret
       ∀ i, ∀ a ∈ u i, ∀ b ∈ u i, a * b⁻¹ ∈ H → a = b := by
   obtain ⟨W, hWo, hW1, hW⟩ := exists_open_small H
   let s : G → Set G := fun g => (fun x => x * g⁻¹) ⁻¹' W
-  have hso : ∀ g, IsOpen (s g) := fun g => hWo.preimage (continuous_mul_right _)
+  have hso : ∀ g, IsOpen (s g) := fun g => hWo.preimage (continuous_mul_const _)
   obtain ⟨T, hTc, hT⟩ := TopologicalSpace.isOpen_iUnion_countable s hso
   have hcov : ∀ g, ∃ t ∈ T, g ∈ s t := by
     intro g
@@ -63,7 +111,7 @@ theorem exists_strict_domain [SecondCountableTopology G] [MeasurableSpace G] [Bo
       ext x; simp [A]
     rw [this]
     exact MeasurableSet.iUnion fun h =>
-      ((huo i).preimage (continuous_mul_left _)).measurableSet
+      ((huo i).preimage (continuous_const_mul _)).measurableSet
   let D : Set G := ⋃ i, (u i ∩ ⋂ j : Fin i, (A j)ᶜ)
   have hD : MeasurableSet D := MeasurableSet.iUnion fun i =>
     (huo i).measurableSet.inter (MeasurableSet.iInter fun j => (hAm j).compl)
@@ -244,7 +292,7 @@ theorem quotIntegral_unfold (hle : Γ₀ ≤ Γ) (hFd : IsFundamentalDomain Γ F
   rw [key]
   refine integral_congr_ae ?_
   have hmq : Measurable fun x => ∑' q : Γ ⧸ Γ₀.subgroupOf Γ, ‖F (((q.out : Γ) : G)⁻¹ * x)‖ₑ :=
-    Measurable.ennreal_tsum fun q => (hF.comp (measurable_const_mul _)).enorm
+    Measurable.tsum fun q => (hF.comp (measurable_const_mul _)).enorm
   filter_upwards [ae_lt_top hmq hint] with x hx
   refine tsum_complex_eq hle hD F hFH x ?_
   have h2 : ∑' γ : Γ, ‖D.indicator F ((γ : G) * x)‖ₑ ≠ ∞ := by

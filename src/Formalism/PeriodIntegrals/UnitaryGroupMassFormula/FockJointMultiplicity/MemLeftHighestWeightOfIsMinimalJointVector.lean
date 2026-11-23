@@ -1,4 +1,60 @@
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.FockJointMultiplicity.CauchyHW
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.FockJointMultiplicity.CauchyHW
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Bool
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -14,32 +70,33 @@ variable {σ : Type*}
 
 theorem coeff_diag (T : Module.End ℂ (MvPolynomial σ ℂ)) (w : (σ →₀ ℕ) → ℂ)
     (hT : ∀ m, T (monomial m 1) = w m • monomial m 1) (P : MvPolynomial σ ℂ) (e : σ →₀ ℕ) :
-    coeff e (T P) = w e * coeff e P := by
+    AddMonoidAlgebra.coeff (T P) e = w e * AddMonoidAlgebra.coeff P e := by
   classical
   refine MvPolynomial.induction_on' P (fun m a => ?_) (fun p q hp hq => ?_)
   · have h1 : monomial m a = a • monomial m (1 : ℂ) := by
       rw [smul_monomial, smul_eq_mul, mul_one]
     rw [h1, map_smul, hT, smul_smul]
-    simp only [coeff_smul, coeff_monomial, smul_eq_mul]
+    simp only [MvPolynomial.coeff_smul, coeff_monomial, smul_eq_mul]
     by_cases h : m = e
     · subst h
       rw [if_pos rfl]
       ring
     · rw [if_neg h]
       ring
-  · rw [map_add, coeff_add, coeff_add, hp, hq, mul_add]
+  · rw [map_add (f := _), MvPolynomial.coeff_add, MvPolynomial.coeff_add, hp, hq, mul_add]
 
 theorem eig_of_mem_support (T : Module.End ℂ (MvPolynomial σ ℂ)) (w : (σ →₀ ℕ) → ℂ)
     (hT : ∀ m, T (monomial m 1) = w m • monomial m 1) (P : MvPolynomial σ ℂ) (c : ℂ) (hP : T P = c • P)
     (e : σ →₀ ℕ) (he : e ∈ P.support) : w e = c := by
   have h1 := coeff_diag T w hT P e
   rw [hP] at h1
-  simp only [coeff_smul, smul_eq_mul] at h1
+  simp only [MvPolynomial.coeff_smul, smul_eq_mul] at h1
   exact (mul_right_cancel₀ (mem_support_iff.mp he) h1).symm
 
 def NoVar (P : MvPolynomial σ ℂ) (v : σ) : Prop := ∀ e ∈ P.support, e v = 0
 
 theorem pderiv_eq_zero_of_noVar {P : MvPolynomial σ ℂ} {v : σ} (h : NoVar P v) : pderiv v P = 0 := by
+
   rw [P.as_sum, map_sum]
   refine Finset.sum_eq_zero fun e he => ?_
   rw [pderiv_monomial]
@@ -48,6 +105,7 @@ theorem pderiv_eq_zero_of_noVar {P : MvPolynomial σ ℂ} {v : σ} (h : NoVar P 
 theorem noVar_pderiv {P : MvPolynomial σ ℂ} {v : σ} (h : NoVar P v) (u : σ) : NoVar (pderiv u P) v := by
   classical
   intro f hf
+
   rw [P.as_sum, map_sum] at hf
   obtain ⟨e, he, hfe⟩ := Finset.mem_biUnion.mp (support_sum hf)
   rw [pderiv_monomial] at hfe
@@ -58,8 +116,9 @@ theorem noVar_of_pderiv_eq_zero {P : MvPolynomial σ ℂ} {v : σ} (h : pderiv v
   classical
   intro e he
   by_contra hev
-  have hc : coeff (e - Finsupp.single v 1) (pderiv v P) = coeff e P * (e v : ℂ) := by
+  have hc : AddMonoidAlgebra.coeff (pderiv v P) (e - Finsupp.single v 1) = AddMonoidAlgebra.coeff P e * (e v : ℂ) := by
     conv_lhs => rw [P.as_sum]
+
     rw [map_sum, coeff_sum]
     simp only [pderiv_monomial, coeff_monomial]
     rw [Finset.sum_eq_single e]
@@ -75,7 +134,7 @@ theorem noVar_of_pderiv_eq_zero {P : MvPolynomial σ ℂ} {v : σ} (h : pderiv v
         rw [← tsub_add_cancel_of_le h1, ← tsub_add_cancel_of_le h2, hb]
     · intro h'
       exact absurd he h'
-  rw [h, coeff_zero] at hc
+  simp only [h, AddMonoidAlgebra.coeff_zero, Finsupp.zero_apply] at hc
   exact mul_ne_zero (mem_support_iff.mp he) (Nat.cast_ne_zero.mpr hev) hc.symm
 
 theorem exists_mem_support {P : MvPolynomial σ ℂ} (hP : P ≠ 0) : ∃ e, e ∈ P.support := by
@@ -106,6 +165,7 @@ theorem gR_pos_lemma (u v : κ → σ) (pos : κ → Bool) (hu : Function.Inject
     rw [Derivation.leibniz, pderiv_eq_zero_of_noVar (noVar_pderiv hno0 b), smul_zero, zero_add, smul_eq_mul]
   have h0 : pderiv (u c0) (gR u v pos P) = 0 := by rw [hR, map_zero]
   unfold gR at h0
+
   rw [map_sum, Finset.sum_eq_single c0] at h0
   · rw [if_pos hc0, key, pderiv_X_self, mul_one] at h0
     exact h0

@@ -1,12 +1,61 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IsHeatZero
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.UnitaryActHalfSpace
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.QuadCocycle
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.SchwartzBruhatInnerProductSelfNonnegBoundsStatement
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.HermitianWeilActionUnitaryGroupTestFunctionsStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.FirstCoordinateAdmissible
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.HermitianThetaEisensteinConvergeBoundedStatement
 import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.HermitianWeilActionSiegelParabolicExplicitStatement
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.HermitianThetaEisensteinConvergeBoundedStatement
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.PosSemidefSubSmulOne
+import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.HermitianWeilActionUnitaryGroupTestFunctionsStatement
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.PosSemidefSubSmulOne
+import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.QuadCocycle
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.SchwartzBruhatInnerProductSelfNonnegBoundsStatement
+import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.UnitaryActHalfSpace
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open Matrix Complex NumberField GlobalTheory.SW Filter Topology
 open ReciprocityTheory.ChartRestriction.G.FD (cc herm)
 open scoped ComplexConjugate ComplexOrder Real
@@ -15,18 +64,6 @@ namespace GlobalTheory.SW.EisTrans
 
 variable {N : ℕ}
 
-open scoped MatrixOrder in
-
-theorem exists_sub_posSemidef {Y : Matrix (Fin N) (Fin N) ℂ} (hY : Y.PosDef) :
-    ∃ δ : ℝ, 0 < δ ∧ (Y - (δ : ℂ) • (1 : Matrix (Fin N) (Fin N) ℂ)).PosSemidef := by
-  rcases Nat.eq_zero_or_pos N with rfl | hN
-  · exact ⟨1, one_pos, by rw [Subsingleton.elim (_ - _) 0]; exact PosSemidef.zero⟩
-  haveI : Nonempty (Fin N) := ⟨⟨0, hN⟩⟩
-  obtain ⟨r, hr, hle⟩ := (CFC.exists_pos_algebraMap_le_iff (A := Matrix (Fin N) (Fin N) ℂ)
-    hY.isStrictlyPositive.isSelfAdjoint).2 fun x hx => hY.isStrictlyPositive.spectrum_pos hx
-  refine ⟨r, hr, ?_⟩
-  have := Matrix.le_iff.mp hle
-  rwa [Algebra.algebraMap_eq_smul_one, ← Complex.coe_smul] at this
 
 theorem exists_mem_HnGe {E : Type} [Field E] (Ψ : Finset (E →+* ℂ)) {Z : CM Ψ N N}
     (hZ : Z ∈ Hn Ψ N) : ∃ δ : ℝ, 0 < δ ∧ Z ∈ HnGe Ψ N δ := by
@@ -81,8 +118,8 @@ theorem entry_bound {C D Z : Matrix (Fin N) (Fin N) ℂ} {δ : ℝ} (hδ : 0 < �
 
 variable {E : Type} [Field E] [NumberField E] [IsCMField E] (Ψ : Finset (E →+* ℂ)) {n : ℕ}
 
-omit [NumberField E] [IsCMField E] in
 
+omit [NumberField E] [IsCMField E] in
 theorem hFac_zero (γ : M2 E N) (Z : CM Ψ N N) :
     hFac Ψ γ Z (0 : CM Ψ n N) 0 = ∏ τ : Ψ, (hDen Ψ γ Z τ).det ^ n := by
   unfold hFac
@@ -99,7 +136,7 @@ theorem hFac_inv_bound {Z : CM Ψ N N} (hZ : Z ∈ Hn Ψ N) (z z' : CM Ψ n N) :
   rw [hFac_zero, hFac, Finset.prod_mul_distrib, mul_inv, norm_mul, mul_comm]
   refine mul_le_mul_of_nonneg_right ?_ (norm_nonneg _)
   rw [← Finset.prod_inv_distrib, norm_prod]
-  refine Finset.prod_le_prod (fun _ _ => norm_nonneg _) fun τ _ => ?_
+  refine Finset.prod_le_prod₀ (fun _ _ => norm_nonneg _) fun τ _ => ?_
   rw [← Complex.exp_neg]
   refine (Complex.norm_exp_le_exp_norm _).trans (Real.exp_le_exp.2 ?_)
   rw [norm_neg, norm_mul]
@@ -114,8 +151,8 @@ theorem hFac_inv_bound {Z : CM Ψ N N} (hZ : Z ∈ Hn Ψ N) (z z' : CM Ψ n N) :
   rw [norm_mul]
   exact mul_le_mul_of_nonneg_right (hb a b) (norm_nonneg _)
 
-omit [NumberField E] [IsCMField E] in
 
+omit [NumberField E] [IsCMField E] in
 theorem botSpan_mul (g γ : M2 E N) : botSpan (g * γ) = (botSpan g).map γ.vecMulLinear := by
   unfold botSpan
   rw [Submodule.map_span, ← Set.range_comp]
@@ -138,8 +175,8 @@ noncomputable def lagEquiv {γ : M2 E N} (hγ : γ ∈ UU E N) : Lag E N ≃ Lag
 
 end GlobalTheory.SW.EisTrans
 
-open GlobalTheory.SW.EisTrans in
 
+open GlobalTheory.SW.EisTrans in
 theorem GlobalTheory.SW.eis_automorphy_linear : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (Ψ : Finset (E →+* ℂ)), IsType Ψ → ∀ (n N : ℕ), Even n → 4 * N < n → ∀ φ : Matrix (Fin n) (Fin N) E → ℂ, IsSB φ → ∀ Z ∈ Hn Ψ N, (∀ z z', Summable fun U : Lag E N => ‖eisTerm Ψ U.2.choose φ Z z z'‖) ∧ (∀ γ ∈ UU E N, eis Ψ (weil Ψ γ φ) (hAct Ψ γ Z) 0 0 = hFac Ψ γ Z (0 : CM Ψ n N) 0 * eis Ψ φ Z 0 0) ∧ (∀ ψ, IsSB ψ → ∀ z z', eis Ψ (φ + ψ) Z z z' = eis Ψ φ Z z z' + eis Ψ ψ Z z z') ∧ ∀ (c : ℂ) z z', eis Ψ (c • φ) Z z z' = c * eis Ψ φ Z z z' := by
   intro E _ _ _ Ψ hΨ n N hn hN
   have hs : ∀ φ : Matrix (Fin n) (Fin N) E → ℂ, IsSB φ → ∀ Z ∈ Hn Ψ N, ∀ z z',

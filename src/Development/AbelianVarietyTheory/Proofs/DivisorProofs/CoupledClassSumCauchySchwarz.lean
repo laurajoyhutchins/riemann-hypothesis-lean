@@ -1,5 +1,48 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CosetRefinement
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CosetRefinement
+public import Formalism.LocalToGlobal.Divisibility.DivisionHeightBoundStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.TopPlaceLogTheta
+
+@[expose] public section
 
 noncomputable section
 
@@ -16,7 +59,8 @@ theorem diag_sum_le {V ι : Type} [AddCommGroup V] (B : V →+ V →+ ℝ) (hB :
     simp only [map_sub, AddMonoidHom.sub_apply] at this
     linarith
   have e : B (∑ i ∈ s, x i) (∑ i ∈ s, x i) = ∑ i ∈ s, ∑ j ∈ s, B (x i) (x j) := by
-    rw [map_sum B x s, AddMonoidHom.finset_sum_apply]
+
+    rw [map_sum B x s, AddMonoidHom.finsetSum_apply]
     exact Finset.sum_congr rfl fun i _ => map_sum _ _ _
   have e' : ∑ i ∈ s, ∑ j ∈ s, B (x j) (x i) = ∑ i ∈ s, ∑ j ∈ s, B (x i) (x j) := Finset.sum_comm
   have h2 : ∑ i ∈ s, ∑ j ∈ s, (B (x i) (x j) + B (x j) (x i)) ≤ ∑ i ∈ s, ∑ j ∈ s, (B (x i) (x i) + B (x j) (x j)) :=
@@ -30,11 +74,11 @@ variable {K : Type} [Field K] [NumberField K] [StarRing K]
 def reForm (S : GSD K) (v : InfinitePlace K) : S.V →+ S.V →+ ℝ :=
   AddMonoidHom.mk' (fun x => AddMonoidHom.mk' (fun y => (S.pairAt v x y).re) (by
       intro y z
-      simp only [GSD.pairAt, map_add, Finsupp.add_apply, mul_add, Finset.sum_add_distrib, Complex.add_re]))
+      simp only [GSD.pairAt, map_add (f := _), Finsupp.add_apply, mul_add, Finset.sum_add_distrib, Complex.add_re]))
     (by
       intro x y
       ext z
-      simp only [GSD.pairAt, map_add, Finsupp.add_apply, add_mul, Finset.sum_add_distrib, Complex.add_re,
+      simp only [GSD.pairAt, map_add (f := _), Finsupp.add_apply, add_mul, Finset.sum_add_distrib, Complex.add_re,
         AddMonoidHom.mk'_apply, AddMonoidHom.add_apply])
 
 theorem sq_nonneg' {S : GSD K} {v : InfinitePlace K} (h : PosAt S v) (x : S.V) : 0 ≤ (S.pairAt v x x).re := by
@@ -135,7 +179,7 @@ theorem cpl_le : ∀ (K : Type) [Field K] [NumberField K] [StarRing K] (Q : KerC
     intro d
     have e : (Q.cpl φ : Q.S₁.D → Q.S₁.V) d = ∑ b : (Q.F Q.n).β,
         ((Q.cp b).comp Q.hS Q.S.outSec).appOf (Q.hF Q.n b) ((Q.F Q.n).mem b).outSec (φ b) d := by
-      simp only [KerChain.cpl, LinearMap.sum_apply, AddSubmonoidClass.coe_finset_sum, Finset.sum_apply]
+      simp only [KerChain.cpl, LinearMap.sum_apply, AddSubmonoidClass.coe_finsetSum, Finset.sum_apply]
       rfl
     rw [e]
     refine (sq_sum_le p₁ _ _ (le_of_eq (by rw [Finset.card_univ]))).trans

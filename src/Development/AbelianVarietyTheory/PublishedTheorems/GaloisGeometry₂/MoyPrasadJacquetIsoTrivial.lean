@@ -1,5 +1,48 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.BlockSplitAll
+module
+
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.IsSubquotientDetRepParInd
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.ExistsReadingLaws
+
+@[expose] public section
 
 noncomputable section
 
@@ -23,28 +66,6 @@ theorem mapsTo_fixed_jacU {k : Type} [Field k] {n s : ℕ} {d : Fin s → ℕ} (
   have h1 : π (leviEmb k e h) v = v := by simpa using hv ⟨_, h.2⟩
   have h2 : jacU e π h (Submodule.Quotient.mk v) = Submodule.Quotient.mk (π (leviEmb k e h) v) := rfl
   simp only [h2, h1, MonoidHom.one_apply, Units.val_one, one_smul]
-
-theorem moyPrasadJacquetIso_trivial (k : Type) [Field k] [TopologicalSpace k] {n s : ℕ} {d : Fin s → ℕ}
-    (e : (Σ a, Fin (d a)) ≃ Fin n) (H : Subgroup (GL (Fin n) k)) :
-    IsAdmissible (Representation.trivial ℂ (GL (Fin n) k) ℂ) ∧
-    fixed (Representation.trivial ℂ (GL (Fin n) k) ℂ) H = ⊤ ∧
-    Set.BijOn (fun v : ℂ =>
-        (Submodule.Quotient.mk v : Jacquet (Representation.trivial ℂ (GL (Fin n) k) ℂ) (unipRad k e)))
-      (fixed (Representation.trivial ℂ (GL (Fin n) k) ℂ) H)
-      (fixed (jacU e (Representation.trivial ℂ (GL (Fin n) k) ℂ)) (H.comap (leviEmb k e))) := by
-  have htop : fixed (Representation.trivial ℂ (GL (Fin n) k) ℂ) H = ⊤ :=
-    eq_top_iff.2 fun v _ h => by simp
-  have hbot : twKer (Representation.trivial ℂ (GL (Fin n) k) ℂ) (unipRad k e) 1 = ⊥ := by
-    refine Submodule.span_eq_bot.2 ?_
-    rintro w ⟨u, v, rfl⟩
-    simp
-  refine ⟨⟨fun v => by simp, fun K _ _ => inferInstance⟩, htop, mapsTo_fixed_jacU e _ H, ?_, ?_⟩
-  · intro v _ w _ h
-    have := (Submodule.Quotient.eq _).1 h
-    rwa [hbot, Submodule.mem_bot, sub_eq_zero] at this
-  · intro x _
-    obtain ⟨v, rfl⟩ := Submodule.Quotient.mk_surjective _ x
-    exact ⟨v, by rw [htop]; trivial, rfl⟩
 
 end GlobalTheory.Published
 

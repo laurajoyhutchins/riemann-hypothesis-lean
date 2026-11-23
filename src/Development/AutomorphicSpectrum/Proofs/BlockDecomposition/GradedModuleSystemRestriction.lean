@@ -1,19 +1,61 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SubPairRight
-import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.ExistsHomLocBijectiveGrSum
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsFinsetSum
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SmulEqZeroOfMem
-import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.ExistsHomogeneousFamilySaturating
-import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.CubeComplexGradedModuleExactAtOfLargeDegree
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IsGradedMapGlueD
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsCoboundaryOfPairsCocycle
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.RestrictionCompatibleIteratedInjective
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.XProdPowSmulMemRangeResIter
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsCompatibleFamilyOfSingleton
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SmulEqZeroOfEvEqZero
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsXProdPowSmulEqEv
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SaturatedFgOfPowerTorsionKerCoker
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsHomLocPiecesCompatible
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IsGradedMapGlueD
+public import Development.AbelianVarietyTheory.Definitions.QuasicoherentCohomology.ExistsAwayFracOfMemHomLoc
+public import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.CubeComplexGradedModuleExactAtOfLargeDegree
+public import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.ExistsHomogeneousFamilySaturating
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsCoboundaryOfPairsCocycle
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsCompatibleFamilyOfSingleton
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsHomLocPiecesCompatible
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsXProdPowSmulEqEv
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.RestrictionCompatibleIteratedInjective
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SaturatedFgOfPowerTorsionKerCoker
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SmulEqZeroOfEvEqZero
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.XProdPowSmulMemRangeResIter
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Definitions.ThetaMetrics.TwistingSheafOneChartEqPreimageStandardChart
+import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.ExistsSmulEqMapOfIsCompactOfIsQuasiSeparated
+import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.FormalAlgebraisation.GEClosedProj
+
+@[expose] public section
+
 open CategoryTheory CategoryTheory.Limits AlgebraicGeometry ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Out ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor GlobalTheory GlobalTheory.AbLaw PositivityTheory.FormalThickening
 open GlobalTheory.ProjSpace GlobalTheory.QCoh.Qcqs GlobalTheory.Cartier GlobalTheory.CompanionTheory.FormalAlg GlobalTheory.CompanionTheory.FormalAlg.Lift
 open GlobalTheory.CompanionTheory.FormalAlg.Lift.Glue
@@ -22,8 +64,8 @@ set_option autoImplicit false
 
 namespace GlobalTheory.CompanionTheory.FormalAlg.Lift.Glue
 
-open MvPolynomial in
 
+open MvPolynomial in
 theorem exists_finite_sub (ι : Type) [LinearOrder ι] [Fintype ι] (R : Type)
     [CommRing R] (G : Type) [AddCommGroup G] [Module R G] [Module (MvPolynomial ι R) G]
     [IsScalarTower R (MvPolynomial ι R) G] (𝒢 : ℤ → Submodule R G) [PolyGradedSMul ι 𝒢]
@@ -72,7 +114,7 @@ theorem pairs_of_cube {ι : Type} [LinearOrder ι] {A : Type} [CommRing A] (C : 
   have hv (i j : ι) : (ψ _ (n2 i j) (c' i j) : P {i, j}) = c i j := congrArg Subtype.val (hc' i j)
   obtain ⟨b', hb'⟩ := hpairs c' fun i j k => by
     refine (hb _ (n3 i j k)).1 (Subtype.ext ?_)
-    rw [map_add, Submodule.coe_add, hr _ _ (n2 i j) (n3 i j k), hr _ _ (n2 j k) (n3 i j k),
+    rw [map_add (f := _), Submodule.coe_add, hr _ _ (n2 i j) (n3 i j k), hr _ _ (n2 j k) (n3 i j k),
       hr _ _ (n2 i k) (n3 i j k), hv, hv, hv, hcoc]
   refine ⟨fun i => ψ _ (n1 i) (b' i), fun i => (ψ _ (n1 i) (b' i)).2, fun i j => ?_⟩
   rw [← hv i j, hb' i j, map_sub, Submodule.coe_sub, hr _ _ (n1 i) (n2 i j),

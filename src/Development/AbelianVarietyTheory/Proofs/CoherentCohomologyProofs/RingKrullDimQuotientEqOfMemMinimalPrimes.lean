@@ -1,4 +1,77 @@
-import Mathlib
+module
+
+public import Mathlib.AlgebraicGeometry.FunctionField
+public import Mathlib.AlgebraicGeometry.Morphisms.FiniteType
+public import Mathlib.AlgebraicGeometry.Morphisms.Flat
+public import Mathlib.Combinatorics.Quiver.ReflQuiver
+public import Mathlib.RingTheory.AlgebraicIndependent.Basic
+public import Mathlib.RingTheory.Flat.TorsionFree
+public import Mathlib.RingTheory.QuasiFinite.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.AlgebraicGeometry.Morphisms.Immersion
+import Mathlib.AlgebraicGeometry.Morphisms.SchemeTheoreticallyDominant
+import Mathlib.AlgebraicGeometry.Morphisms.WeaklyEtale
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+public import Mathlib.RingTheory.Ideal.HasGoingUp
+public import Mathlib.RingTheory.Ideal.KrullsHeightTheorem
+public import Mathlib.RingTheory.KrullDimension.Field
+public import Mathlib.RingTheory.KrullDimension.Polynomial
+public import Mathlib.RingTheory.NoetherNormalization
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+public import Mathlib.RingTheory.ZariskisMainTheorem
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+public import Mathlib.AlgebraicGeometry.Morphisms.ClosedImmersion
+public import Mathlib.RingTheory.AlgebraicIndependent.TranscendenceBasis
+
+@[expose] public section
 
 open TensorProduct IsLocalRing
 
@@ -74,7 +147,7 @@ theorem quasiFiniteAt_of_isolated (R S : Type*) [CommRing R] [CommRing S] [Algeb
   have : Algebra.QuasiFiniteAt p.ResidueField (e q₀).asIdeal := by
     refine .of_isOpen_singleton _ ?_
     refine ((PrimeSpectrum.isOpen_singleton_tfae_of_isNoetherian_of_isJacobsonRing
-      (e q₀)).out 0 2).mpr (And.intro ?_ ?_)
+      (e q₀)).out 1 3).mpr (And.intro ?_ ?_)
     · rw [PrimeSpectrum.isClosed_singleton_iff_isMaximal, ← PrimeSpectrum.isMax_iff]
       exact (e.isMax_apply).mpr h₂
     · rw [PrimeSpectrum.stableUnderGeneralization_singleton, ← PrimeSpectrum.isMin_iff]
@@ -159,7 +232,7 @@ theorem trdeg_quotient_eq_of_mem_minimalPrimes (k : Type u) [Field k] [Algebra O
       MvPolynomial.ker_map, hker, Ideal.map_span, Set.image_singleton, Ideal.mem_span_singleton]
   have hϖA : algebraMap O A ϖ ≠ 0 := by simpa using hϖ.ne_zero
   have hinj : Function.Injective φ := by
-    rw [injective_iff_map_eq_zero]
+    set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
     intro r hr
     by_contra hr0
     have hnu : ¬ IsUnit (MvPolynomial.C ϖ : (MvPolynomial (Fin s) O)) := fun h ↦ hqp.ne_top <|
@@ -201,8 +274,8 @@ theorem trdeg_quotient_eq_of_mem_minimalPrimes (k : Type u) [Field k] [Algebra O
   rw [trdeg_eq_of_isAlgebraic_top k (MvPolynomial (Fin s) k), trdeg_eq_of_isAlgebraic_top O (MvPolynomial (Fin s) O) A,
     MvPolynomial.trdeg_of_isDomain, MvPolynomial.trdeg_of_isDomain]
 
-omit [IsDiscreteValuationRing O] [FaithfulSMul O A] [IsDomain A] in
 
+omit [IsDiscreteValuationRing O] [FaithfulSMul O A] [IsDomain A] in
 theorem exists_trdeg_eq_natCast : ∃ d : ℕ, Algebra.trdeg O A = d :=
   Cardinal.lt_aleph0.mp trdeg_lt_aleph0_of_finiteType
 
@@ -216,8 +289,8 @@ theorem ringKrullDim_quotient_eq_of_mem_minimalPrimes {q : Ideal A}
   refine ringKrullDim_eq_of_trdeg_eq (O ⧸ maximalIdeal O) _ ?_
   rw [trdeg_quotient_eq_of_mem_minimalPrimes O _ Ideal.Quotient.mk_surjective hq, hd]
 
-omit [Algebra.FiniteType O A] [IsDiscreteValuationRing O] in
 
+omit [Algebra.FiniteType O A] [IsDiscreteValuationRing O] in
 theorem trdeg_fractionRing_eq (K F : Type u) [Field K] [Algebra O K] [IsFractionRing O K]
     [Field F] [Algebra A F] [IsFractionRing A F] [Algebra O F] [Algebra K F]
     [IsScalarTower O A F] [IsScalarTower O K F] :
@@ -226,11 +299,12 @@ theorem trdeg_fractionRing_eq (K F : Type u) [Field K] [Algebra O K] [IsFraction
   have : Algebra.IsAlgebraic A F := IsLocalization.isAlgebraic _ (nonZeroDivisors A)
   rw [← trdeg_eq_of_isAlgebraic_bot O K F, trdeg_eq_of_isAlgebraic_top O A F]
 
+
 attribute [local instance] Algebra.TensorProduct.rightAlgebra in
 omit [IsDiscreteValuationRing O] in
-
 theorem ringKrullDim_genericFibre_eq (K : Type u) [Field K] [Algebra O K] [IsFractionRing O K]
     {d : ℕ} (hd : Algebra.trdeg O A = d) : ringKrullDim (K ⊗[O] A) = d := by
+  letI : Algebra A (K ⊗[O] A) := Algebra.TensorProduct.rightAlgebra
   have := IsLocalization.tensorRight (S := A) K (nonZeroDivisors O)
   have hle : Algebra.algebraMapSubmonoid A (nonZeroDivisors O) ≤ nonZeroDivisors A :=
     Submonoid.map_le_iff_le_comap.mpr fun x hx ↦ mem_nonZeroDivisors_of_ne_zero
@@ -298,14 +372,15 @@ theorem height_eq_one_and_ringKrullDim_eq_of_flat_canonical
     (A : Type u) [CommRing A] [IsDomain A] [Algebra O A] [Algebra.FiniteType O A]
     [Module.Flat O A] {ϖ : O} (hϖ : Irreducible ϖ) (q : Ideal A) [q.IsPrime]
     (hq : q ∈ (Ideal.span {algebraMap O A ϖ}).minimalPrimes) :
-    haveI := liesOver_maximalIdeal_of_mem_minimalPrimes O
-      (map_maximalIdeal_eq_span_of_irreducible O (A := A) hϖ ▸ hq)
-    haveI := isLocalHom_algebraMap_localization_of_liesOver O q
-    letI := FractionRing.liftAlgebra O (FractionRing A)
-    q.height = 1 ∧ ∃ d : ℕ, ringKrullDim (A ⧸ q) = d ∧
-      Algebra.trdeg (ResidueField O) q.ResidueField = d ∧
-      Algebra.trdeg (FractionRing O) (FractionRing A) = d ∧
-      ringKrullDim (FractionRing O ⊗[O] A) = d := by
+    (
+      haveI := liesOver_maximalIdeal_of_mem_minimalPrimes O
+        (map_maximalIdeal_eq_span_of_irreducible O (A := A) hϖ ▸ hq)
+      haveI := isLocalHom_algebraMap_localization_of_liesOver O q
+      letI := FractionRing.liftAlgebra O (FractionRing A)
+      q.height = 1 ∧ ∃ d : ℕ, ringKrullDim (A ⧸ q) = d ∧
+        Algebra.trdeg (ResidueField O) q.ResidueField = d ∧
+        Algebra.trdeg (FractionRing O) (FractionRing A) = d ∧
+        ringKrullDim (FractionRing O ⊗[O] A) = d) := by
   have := liesOver_maximalIdeal_of_mem_minimalPrimes O
     (map_maximalIdeal_eq_span_of_irreducible O (A := A) hϖ ▸ hq)
   have := isLocalHom_algebraMap_localization_of_liesOver O q
@@ -364,13 +439,32 @@ open AlgebraicGeometry CategoryTheory Topology
 variable {O : Type u} [CommRing O] [IsDomain O]
   {Y : Scheme.{u}} [IsIntegral Y] (f : Y ⟶ Spec (.of O)) [LocallyOfFiniteType f] [Flat f]
 
+private theorem ringKrullDim_genericFibre_eq_of_domain (A : Type u) [CommRing A] [IsDomain A]
+    [Algebra O A] [Algebra.FiniteType O A] [FaithfulSMul O A]
+    (K : Type u) [Field K] [Algebra O K] [IsFractionRing O K]
+    {d : ℕ} (hd : Algebra.trdeg O A = d) : ringKrullDim (K ⊗[O] A) = d := by
+  letI : Algebra A (K ⊗[O] A) := Algebra.TensorProduct.rightAlgebra
+  have := IsLocalization.tensorRight (S := A) K (nonZeroDivisors O)
+  have hle : Algebra.algebraMapSubmonoid A (nonZeroDivisors O) ≤ nonZeroDivisors A :=
+    Submonoid.map_le_iff_le_comap.mpr fun x hx ↦ mem_nonZeroDivisors_of_ne_zero
+      (by simpa using nonZeroDivisors.ne_zero hx)
+  have : IsDomain (K ⊗[O] A) := IsLocalization.isDomain_of_le_nonZeroDivisors _ hle
+  have : FaithfulSMul A (K ⊗[O] A) :=
+    (faithfulSMul_iff_algebraMap_injective _ _).mpr (IsLocalization.injective _ hle)
+  have : Algebra.IsAlgebraic O K := IsLocalization.isAlgebraic _ (nonZeroDivisors O)
+  have : Algebra.IsAlgebraic A (K ⊗[O] A) :=
+    IsLocalization.isAlgebraic _ (Algebra.algebraMapSubmonoid A (nonZeroDivisors O))
+  refine ringKrullDim_eq_of_trdeg_eq K _ ?_
+  rw [← trdeg_eq_of_isAlgebraic_bot O K, trdeg_eq_of_isAlgebraic_top O A, hd]
+
 theorem exists_affine_chart_trdeg_eq (x : Y) :
-    letI := (Spec.preimage (Y.fromSpecStalk (genericPoint Y) ≫ f)).hom.toAlgebra
-    ∃ (A : Type u) (_ : CommRing A) (_ : IsDomain A) (_ : Algebra O A)
-      (_ : Algebra.FiniteType O A) (_ : FaithfulSMul O A) (j : Spec (.of A) ⟶ Y)
-      (_ : IsOpenImmersion j), x ∈ Set.range j ∧
-      j ≫ f = Spec.map (CommRingCat.ofHom (algebraMap O A)) ∧
-      Algebra.trdeg O A = Algebra.trdeg O Y.functionField := by
+    (
+      letI := (Spec.preimage (Y.fromSpecStalk (genericPoint Y) ≫ f)).hom.toAlgebra
+      ∃ (A : Type u) (_ : CommRing A) (_ : IsDomain A) (_ : Algebra O A)
+        (_ : Algebra.FiniteType O A) (_ : FaithfulSMul O A) (j : Spec (.of A) ⟶ Y)
+        (_ : IsOpenImmersion j), x ∈ Set.range j ∧
+        j ≫ f = Spec.map (CommRingCat.ofHom (algebraMap O A)) ∧
+        Algebra.trdeg O A = Algebra.trdeg O Y.functionField) := by
   let := (Spec.preimage (Y.fromSpecStalk (genericPoint Y) ≫ f)).hom.toAlgebra
   obtain ⟨_, ⟨U, hU, rfl⟩, hxU, -⟩ :=
     Y.isBasis_affineOpens.exists_subset_of_mem_open (Set.mem_univ x) isOpen_univ
@@ -408,8 +502,8 @@ open AlgebraicGeometry CategoryTheory Topology Limits
 variable {O : Type u} [CommRing O] [IsDomain O]
   {Y : Scheme.{u}} [IsIntegral Y] (f : Y ⟶ Spec (.of O)) [LocallyOfFiniteType f] [Flat f]
 
-attribute [local instance] Algebra.TensorProduct.rightAlgebra in
 
+attribute [local instance] Algebra.TensorProduct.rightAlgebra in
 theorem topologicalKrullDim_preimage_genericPoint_eq {d : ℕ}
     (hd : letI := (Spec.preimage (Y.fromSpecStalk (genericPoint Y) ≫ f)).hom.toAlgebra
       Algebra.trdeg O Y.functionField = d) :
@@ -426,8 +520,10 @@ theorem topologicalKrullDim_preimage_genericPoint_eq {d : ℕ}
       (FaithfulSMul.algebraMap_injective O A))
   · obtain ⟨A, _, _, _, _, _, j, _, hx, hj, hA⟩ := exists_affine_chart_trdeg_eq f x
     refine ⟨Set.range j, j.isOpenEmbedding.isOpen_range, hx, ?_⟩
+    letI : Algebra A (FractionRing O ⊗[O] A) := Algebra.TensorProduct.rightAlgebra
     have := IsLocalization.tensorRight (S := A) (FractionRing O) (nonZeroDivisors O)
-    rw [← ringKrullDim_genericFibre_eq O (FractionRing O) (hA.trans hd),
+    rw [← ringKrullDim_genericFibre_eq_of_domain (A := A) (K := FractionRing O)
+        (hA.trans hd),
       ← PrimeSpectrum.topologicalKrullDim_eq_ringKrullDim]
     refine topologicalKrullDim_eq_of_isEmbedding (j.isOpenEmbedding.isEmbedding.comp
       (PrimeSpectrum.localization_comap_isEmbedding (FractionRing O ⊗[O] A)
@@ -450,8 +546,8 @@ theorem topologicalKrullDim_preimage_genericPoint_eq {d : ℕ}
 
 variable [IsDiscreteValuationRing O]
 
-omit [IsIntegral Y] [LocallyOfFiniteType f] [Flat f] in
 
+omit [IsIntegral Y] [LocallyOfFiniteType f] [Flat f] in
 theorem mem_minimalPrimes_of_mem_irreducibleComponents {S : Type*} [TopologicalSpace S]
     {i : S → Y} (hi : IsEmbedding i) (hr : Set.range i = f ⁻¹' {closedPoint O})
     {Z : Set S} (hZ : Z ∈ irreducibleComponents S)
@@ -480,8 +576,8 @@ theorem mem_minimalPrimes_of_mem_irreducibleComponents {S : Type*} [TopologicalS
   exact (PrimeSpectrum.le_iff_specializes q ⟨p, hp.1⟩).mpr
     (j.isOpenEmbedding.isInducing.specializes_iff.mp h₄)
 
-omit [IsIntegral Y] [LocallyOfFiniteType f] [Flat f] in
 
+omit [IsIntegral Y] [LocallyOfFiniteType f] [Flat f] in
 theorem isClosed_image_of_mem_irreducibleComponents {S : Type*} [TopologicalSpace S]
     {i : S → Y} (hi : IsEmbedding i) (hr : Set.range i = f ⁻¹' {closedPoint O})
     {Z : Set S} (hZ : Z ∈ irreducibleComponents S) : IsClosed (i '' Z) := by
@@ -550,15 +646,8 @@ theorem exists_topologicalKrullDim_fibres_eq_of_isEmbedding
     (topologicalKrullDim_preimage_genericPoint_eq f hd),
     fun Z hZ ↦ topologicalKrullDim_eq_of_mem_irreducibleComponents_of_trdeg_eq f hi hr hZ hd⟩
 
-theorem topologicalKrullDim_component_fiber_eq {Z : Set (f.fiber (closedPoint O))}
-    (hZ : Z ∈ irreducibleComponents (f.fiber (closedPoint O))) :
-    topologicalKrullDim Z = topologicalKrullDim (f.fiber (genericPoint (Spec (.of O)))) := by
-  obtain ⟨d, h₁, h₂⟩ := exists_topologicalKrullDim_fibres_eq_of_isEmbedding f
-    (f.fiberι _).isEmbedding (f.range_fiberι _) (f.fiberι _).isEmbedding (f.range_fiberι _)
-  rw [h₁, h₂ Z hZ]
 
 omit [IsDomain O] [IsDiscreteValuationRing O] [IsIntegral Y] [LocallyOfFiniteType f] [Flat f] in
-
 theorem isEmbedding_and_range_eq_of_isPullback {T P : Scheme.{u}} {g : T ⟶ Spec (.of O)}
     [IsPreimmersion g] {i : P ⟶ Y} {p : P ⟶ T} (h : IsPullback i p f g) :
     IsEmbedding i ∧ Set.range i = f ⁻¹' Set.range g := by
@@ -606,13 +695,5 @@ theorem exists_topologicalKrullDim_fibres_eq_of_isPullback
     ringKrullDim_stalk_eq_one_of_mem_irreducibleComponents f e₀ r₀ hZ hz⟩⟩
 
 end Fibres
-
-example (O : Type u) [CommRing O] [IsDomain O] [IsDiscreteValuationRing O] {ϖ : O}
-    (hϖ : Irreducible ϖ) : (Ideal.span {algebraMap O (Polynomial O) ϖ}).height = 1 := by
-  have : (Ideal.span {algebraMap O (Polynomial O) ϖ}).IsPrime :=
-    (Ideal.span_singleton_prime (by simpa using hϖ.ne_zero)).mpr
-      (Polynomial.prime_C_iff.mpr hϖ.prime)
-  exact (height_eq_one_and_ringKrullDim_eq_of_flat_canonical O (Polynomial O) hϖ _
-    (by rw [Ideal.minimalPrimes_eq_subsingleton_self]; rfl)).1
 
 end GlobalTheory

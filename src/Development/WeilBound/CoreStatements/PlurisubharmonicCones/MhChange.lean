@@ -1,9 +1,55 @@
-import Development.WeilBound.CoreStatements.PlurisubharmonicCones.LevelFree
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ComponentDataIntersectionBound
+module
+
+public import Development.WeilBound.CoreStatements.PlurisubharmonicCones.LevelFree
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ComplexPointsIffCentresStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ComponentDataHodgeFirstStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ComponentDataIntersectionBound
 import Development.AutomorphicSpectrum.Proofs.GeometryProofs.IntersectionSystemHodgeDegree
 import Development.AutomorphicSpectrum.Proofs.GeometryProofs.TensorWedgeDetChangeStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.VerticalHodgeMetricLogFormulaStatement
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.UnitValueFrameDomainStatement
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ValAtIffValueAtStatement
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.VerticalHodgeMetricLogFormulaStatement
 import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.PVertFactorPos
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory NumberField Matrix
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Geo ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.Semi
@@ -99,8 +145,10 @@ theorem mh_change (Or : CptOrigin Y S₀ Dc Hd) {bb : ∀ τ, Fin Dc.N → W τ}
       refine (Submodule.Quotient.eq (Hd.F τ)).1 ?_
       have := ht τ k
       simp_rw [← map_smul] at this
+
       rw [← map_sum] at this
       exact this.symm
+
     rw [Or.F_eq τ, Submodule.mem_comap, map_sub, map_sum] at h1
     rw [← sub_eq_zero]
     refine (Submodule.disjoint_def.1 (MuIndep.blocks_disjoint Or τ)) _ ?_
@@ -159,7 +207,7 @@ theorem muHodge : MuHodge := by
     · have h1 := (GlobalTheory.T.valAt_iff_value_at Or.𝔐.X Ω Or.𝔐.ξ K J Dc.y htie z w h hw _ _).2 hv1
       simp only [chartMono, Pi.neg_apply, _root_.zpow_neg, Finset.prod_inv_distrib] at h1
       rwa [← div_eq_mul_inv] at h1
-    · rw [ComponentData.vertFactor, dif_pos hex, valAt_eq hmc hv1, zMono, norm_prod]
+    · rw [ComponentData.vertFactor, dite_eq_left hex, valAt_eq hmc hv1, zMono, norm_prod]
       simp only [norm_zpow]
   have hQ1 : MhQ Or.𝔐.ξ Dc.y z w d.c Hd.aMu (lam * ∏ τ, (T τ).det)
       (‖valAt Dc.y d.u w‖ * ∏ k, ‖w ⟨k, d.c k⟩‖ ^ Hd.aMu k) := by

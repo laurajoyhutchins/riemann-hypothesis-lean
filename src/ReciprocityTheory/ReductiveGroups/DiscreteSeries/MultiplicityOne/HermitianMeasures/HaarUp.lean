@@ -1,5 +1,44 @@
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.MultiplicityOne.HermitianMeasures.OrbitIntegralAbsConvergent
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.MultiplicityOne.JHaarSF
+module
+
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.MultiplicityOne.JHaarSF
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -17,9 +56,15 @@ theorem haarUp (hSF : HaarUniqueSF) {k r : ℕ} {U : Set (Mat k r)} {μ₀ μ : 
   refine ⟨?_, ?_, ?_, ?_, ?_⟩
   · rw [Measure.smul_apply, h₀.conc, smul_zero]
   · intro a ha
-    rw [Measure.map_smul, h₀.left a ha]
+    have hcont : Continuous (lmulM a : Mt k r → Mt k r) := by
+      unfold lmulM
+      exact Continuous.matrix_mul continuous_const continuous_id
+    rw [Measure.map_smul c hcont.measurable.aemeasurable, h₀.left a ha]
   · intro a ha
-    rw [Measure.map_smul, h₀.right a ha]
+    have hcont : Continuous (rmulF a : Mt k r → Mt k r) := by
+      unfold rmulF
+      exact Continuous.matrix_mul continuous_id continuous_const
+    rw [Measure.map_smul c hcont.measurable.aemeasurable, h₀.right a ha]
   · intro K hK
     rw [Measure.smul_apply, ENNReal.smul_def, smul_eq_mul]
     exact ENNReal.mul_lt_top ENNReal.coe_lt_top (h₀.finite_compact K hK)
@@ -35,11 +80,6 @@ theorem haarUp_N (hSF : HaarUniqueSF) (hCN : ClosedN) (hHN : HaarNExists) {k r :
     {μN : Measure (Mt k r)} (hμ : Formalism.MainNotions.S.IsHaarOn (Nset k r) μN) : Formalism.FourierDecayAlt.B.IsHaarOn (Nset k r) μN := by
   obtain ⟨μ₀, h₀⟩ := hHN k r
   exact haarUp hSF (hCN k r) h₀ hμ
-
-theorem haarUp_G (hSF : HaarUniqueSF) (hCG : ClosedG) (hHG : HaarGExists) {k r : ℕ}
-    {μG : Measure (Mt k r)} (hμ : Formalism.MainNotions.S.IsHaarOn (UH (Hpk k r)) μG) : Formalism.FourierDecayAlt.B.IsHaarOn (GV k r) μG := by
-  obtain ⟨μ₀, h₀⟩ := hHG k r
-  exact haarUp hSF (hCG k r) h₀ hμ
 
 theorem haar_measure_univ_lt_infinity_of_compactW (hCpW : CompactW) {k r : ℕ} {z : Fin (2 * r + k + 1) → ℂ} {μW : Measure (Mt k r)}
     (hz : inWb k r z) (hT : 0 < Tz k r z) (hμ : Formalism.FourierDecayAlt.B.IsHaarOn (UWset k r z) μW) : μW Set.univ < ∞ := by

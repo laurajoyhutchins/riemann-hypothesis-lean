@@ -1,5 +1,56 @@
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.GelfandTsetlinLowering.LiftDefs
-import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.Wlocal
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.GelfandTsetlinLowering.LiftDefs
+public import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.Wlocal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Formalism.LocalRingCardinality.Params
+
+@[expose] public section
 
 noncomputable section
 
@@ -43,7 +94,7 @@ lemma sqAct_tv {r : ℕ} (ν : DomWeight r) (a b : Fin r) (hab : a ≠ b) (t : �
   rw [hdet, one_zpow, Units.val_one, one_smul, hu, wlocal_E_transpose]
   induction f using MvPolynomial.induction_on
   next c => simp [Formalism.GradedWeylDivisibility.rowAct, Formalism.GradedWeylDivisibility.rowGen]
-  next p q hp hq => simp only [map_add, Polynomial.eval_add, hp, hq]
+  next p q hp hq => simp only [map_add (f := _), Polynomial.eval_add, hp, hq]
   next p v hp =>
     rw [map_mul, map_mul, Polynomial.eval_mul, hp]
     congr 1
@@ -90,19 +141,21 @@ private theorem coeff_eq_of_eval_lemma {σ τ : Type*}
   by_cases hk : k < d
   · refine MvPolynomial.ext _ _ fun m => ?_
     let p : Polynomial ℂ :=
-      ∑ i ∈ Finset.range d, Polynomial.monomial i (MvPolynomial.coeff m (φ (P.coeff i)))
+      ∑ i ∈ Finset.range d, Polynomial.monomial i (AddMonoidAlgebra.coeff (φ (P.coeff i)) m)
     let q : Polynomial ℂ :=
-      ∑ i ∈ Finset.range d, Polynomial.monomial i (MvPolynomial.coeff m (Q.coeff i))
+      ∑ i ∈ Finset.range d, Polynomial.monomial i (AddMonoidAlgebra.coeff (Q.coeff i) m)
     have hpq : p = q := by
       apply Polynomial.funext
       intro t
-      have e := congrArg (MvPolynomial.coeff m) (hPQ t)
+      have e := congrArg (AddMonoidAlgebra.coeff · m) (hPQ t)
+
       rw [hP t, hQ t, map_sum] at e
       simp only [map_smul, MvPolynomial.coeff_sum, MvPolynomial.coeff_smul, smul_eq_mul] at e
-      simp only [p, q, Polynomial.eval_finset_sum, Polynomial.eval_monomial]
+      simp only [p, q, Polynomial.eval_finsetSum, Polynomial.eval_monomial]
       simpa [mul_comm] using e
-    have e2 := congrArg (fun r => Polynomial.coeff r k) hpq
-    simpa [p, q, Polynomial.finset_sum_coeff, Polynomial.coeff_monomial, hk] using e2
+    have e2 := congrArg (fun r : Polynomial ℂ => r.coeff k) hpq
+    simpa only [p, q, Polynomial.finsetSum_coeff, Polynomial.coeff_monomial_apply,
+      Finset.sum_ite_eq', Finset.mem_range, hk, if_true] using e2
   · have h1 : P.coeff k = 0 := Polynomial.coeff_eq_zero_of_natDegree_lt (by omega)
     have h2 : Q.coeff k = 0 := Polynomial.coeff_eq_zero_of_natDegree_lt (by omega)
     rw [h1, h2, map_zero]

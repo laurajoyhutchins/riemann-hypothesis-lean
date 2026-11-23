@@ -1,17 +1,55 @@
-import Mathlib
-import Formalism.CMTypeGalois.StatementField
+module
+
+public import Formalism.CMTypeGalois.StatementField
+public import Mathlib.Analysis.SpecialFunctions.Pow.Real
+public import Mathlib.NumberTheory.NumberField.Discriminant.Defs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField Ideal Filter Topology Finset Formalism.Q3
 
 noncomputable section
 
 namespace Formalism.HF
-
-def DirDensity (S : Set ℕ) (δ : ℝ) : Prop :=
-  Tendsto (fun x : ℝ =>
-      (∑' n : ℕ, {p : ℕ | p.Prime ∧ p ∈ S}.indicator (fun m : ℕ => 1 / (m : ℝ) ^ x) n)
-        / Real.log (1 / (x - 1)))
-    (𝓝[>] 1) (𝓝 δ)
 
 def LogDensity (S : Set ℕ) (δ : ℝ) : Prop :=
   Tendsto (fun x : ℝ =>
@@ -29,26 +67,8 @@ def MQDiscr : Prop :=
   ∀ (E : Type) [Field E] [NumberField E] (α : Fin k → E), IsMQ (fun i => -(q i : ℤ)) α →
     discr E = (-1) ^ (2 ^ (k - 1)) * ∏ i, (q i : ℤ) ^ (2 ^ (k - 1))
 
-def HostDiscr : Prop :=
-  ∀ q : Fin 3 → ℕ, Hyp3 q → ∀ (E : Type) [Field E] [NumberField E] (α : Fin 3 → E), IsHost q α →
-    discr E = ((q 0 * q 1 * q 2 : ℕ) : ℤ) ^ 4
-
 def APLogDensity : Prop :=
   ∀ (N : ℕ) [NeZero N] (a : ZMod N), IsUnit a →
     LogDensity {p : ℕ | (p : ZMod N) = a} (1 / (N.totient : ℝ))
-
-def LogToDir : Prop := ∀ (S : Set ℕ) (δ : ℝ), LogDensity S δ → DirDensity S δ
-
-def HostDensityArith : Prop :=
-  ∀ q : Fin 3 → ℕ, Hyp3 q → ∀ g : Gal3,
-    LogDensity {p : ℕ | (∀ i, p ≠ q i) ∧ ∀ i, chiQ (q i) p = ((g i : ℤˣ) : ℤ)} (1 / 8) ∧
-    DirDensity {p : ℕ | (∀ i, p ≠ q i) ∧ ∀ i, chiQ (q i) p = ((g i : ℤˣ) : ℤ)} (1 / 8)
-
-def HostDensity : Prop :=
-  ∀ q : Fin 3 → ℕ, Hyp3 q → ∀ (E : Type) [Field E] [NumberField E] (α : Fin 3 → E), IsHost q α →
-  ∀ g : Gal3,
-    DirDensity {p : ℕ | (∀ i, p ≠ q i) ∧
-      ∀ (P : Ideal (𝓞 E)) [P.IsPrime] [P.LiesOver (span {(p : ℤ)})] (σ : Gal(E/ℚ)),
-        IsArithFrobAt ℤ σ P → galSign α σ = g} (1 / 8)
 
 end Formalism.HF

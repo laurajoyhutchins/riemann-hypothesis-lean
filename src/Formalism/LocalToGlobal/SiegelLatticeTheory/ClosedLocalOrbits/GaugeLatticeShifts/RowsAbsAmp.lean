@@ -1,6 +1,48 @@
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.RowsAbsX
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RowsConc
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.KExpCut
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.PairVal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.PoincareConstantEq
+import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.HidaSetting
+
+@[expose] public section
 
 noncomputable section
 
@@ -21,37 +63,5 @@ theorem exists_wRow_lb {D : D7} (u : D.what₂.Word) (F0 : FlagG (VS D) D.R.rS (
     exact fun Λ hΛ => Formalism.L2.SG.PairVal.wRow_pos D F0 (hA Λ hΛ)
 
 variable {D : D7} {X : HidaSetting D} (Y : Full X) (u u' : D.what₂.Word)
-
-theorem ampLower_of (hV : 0 < X.volK2) (hc : 0 < Formalism.L2.SG.PoincareInHH.PoincareSetting.c0X X u (Y.FN u))
-    (hc' : 0 < Formalism.L2.SG.PoincareInHH.PoincareSetting.c0X X u' (Y.FN u'))
-    (hA : Formalism.L2.SG.PairVal.AutFin D (X.Fu u) (Y.what₂ u)) (hA' : Formalism.L2.SG.PairVal.AutFin D (X.Fu u') (Y.what₂ u')) :
-    AmpLower X Y u u' := by
-  obtain ⟨m, hm, hmle⟩ := exists_wRow_lb u (X.Fu u) (Y.what₂ u) hA
-  obtain ⟨m', hm', hmle'⟩ := exists_wRow_lb u' (X.Fu u') (Y.what₂ u') hA'
-  have ha : 0 < Formalism.L2.SG.TermOp.scl (Y.FN u) (Y.FN u') (X := X) (u := u) (u' := u') * X.volK2 :=
-    mul_pos (inv_pos.2 (Real.sqrt_pos.2 (mul_pos hc hc'))) hV
-  refine ⟨Real.sqrt (m * m') * (Formalism.L2.SG.TermOp.scl (Y.FN u) (Y.FN u') (X := X) (u := u) (u' := u') * X.volK2),
-    mul_pos (Real.sqrt_pos.2 (mul_pos hm hm')) ha, fun s => ?_⟩
-  rw [Formalism.L2.SG.RowsConc.norm_vec Y s]
-  have hχ : ∀ κ : X.B.I.Gf, ‖Formalism.L2.SG.TermOp.chiN X κ‖ = 1 := fun κ => by
-    unfold Formalism.L2.SG.TermOp.chiN
-    exact Formalism.L2.SG.TermOp.KExpCut.psiUnit X _
-  have e : ‖Formalism.L2.SG.PackageTie.hsEmb (Formalism.L2.SG.TermOp.ampN (Y.cs u) (Y.cs u') (Y.FN u) (Y.FN u') s)‖ =
-      (Formalism.L2.SG.TermOp.scl (Y.FN u) (Y.FN u') (X := X) (u := u) (u' := u') * X.volK2) *
-        ‖Formalism.L2.SG.PackageTie.hsEmb (Formalism.L2.SG.TermOp.OOt s)‖ := by
-    unfold Formalism.L2.SG.TermOp.ampN
-    rw [map_smul, map_smul, norm_smul, norm_smul, hχ, one_mul, Complex.norm_real, Real.norm_eq_abs, abs_of_pos ha]
-  rw [e]
-  have hw : Real.sqrt (m * m') ≤ Formalism.L2.SG.TermOp.wt s := by
-    unfold Formalism.L2.SG.TermOp.wt
-    exact Real.sqrt_le_sqrt (mul_le_mul (hmle _ s.mem) (hmle' _ s.mem') hm'.le (hm.le.trans (hmle _ s.mem)))
-  have h0 : 0 ≤ (Formalism.L2.SG.TermOp.scl (Y.FN u) (Y.FN u') (X := X) (u := u) (u' := u') * X.volK2) *
-      ‖Formalism.L2.SG.PackageTie.hsEmb (Formalism.L2.SG.TermOp.OOt s)‖ := mul_nonneg ha.le (norm_nonneg _)
-  calc Real.sqrt (m * m') * (Formalism.L2.SG.TermOp.scl (Y.FN u) (Y.FN u') (X := X) (u := u) (u' := u') * X.volK2) *
-        ‖Formalism.L2.SG.PackageTie.hsEmb (Formalism.L2.SG.TermOp.OOt s)‖
-      = Real.sqrt (m * m') * ((Formalism.L2.SG.TermOp.scl (Y.FN u) (Y.FN u') (X := X) (u := u) (u' := u') * X.volK2) *
-        ‖Formalism.L2.SG.PackageTie.hsEmb (Formalism.L2.SG.TermOp.OOt s)‖) := by ring
-    _ ≤ Formalism.L2.SG.TermOp.wt s * ((Formalism.L2.SG.TermOp.scl (Y.FN u) (Y.FN u') (X := X) (u := u) (u' := u') * X.volK2) *
-        ‖Formalism.L2.SG.PackageTie.hsEmb (Formalism.L2.SG.TermOp.OOt s)‖) := mul_le_mul_of_nonneg_right hw h0
 
 end Formalism.L2.SG.RowsAbsX

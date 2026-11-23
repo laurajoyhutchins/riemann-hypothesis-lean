@@ -1,12 +1,59 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.TrivIsCr
-import Formalism.SharpRestriction.LevelLetterCocycles.LocCoh
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.TwistStep
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.AcrisTorsionFreeComplete
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.DeRhamPotSemistable
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.TrivIsCr
+public import Formalism.SharpRestriction.LevelLetterCocycles.LocCoh
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.MkMemAdmissibleAtIffCocycle
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.EqZeroOfForallMemFilV
+public import Formalism.LocalRingCardinality.AdicCompletionLocal.LocTied
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CrystallineAndJumps
 import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsAdaptedOfSurjective
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.FontaineFormalismOfRegular
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CrystallineAndJumps
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Development.AbelianVarietyTheory.BlockTheory.NonGaloisCusps.CrystallineSubrepresentation
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.LocalPrimeGaloisActionPeriodT
+import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.PolyApproxZeroPadic
+
+@[expose] public section
+
 open Formalism Formalism.BasicNotions Formalism.BasicNotions.Loc Formalism.WeaklyAdmissibleFiltrations Formalism.MainNotions.N TensorProduct PowerSeries GlobalTheory.Prism GlobalTheory.BKReal GlobalTheory.Per GlobalTheory.BSP GlobalTheory.MemLoc GlobalTheory.Pst GlobalTheory.BKLim GlobalTheory.Cong Matrix
 open scoped Formalism.Per NNReal
 
@@ -33,12 +80,12 @@ theorem exists_read_map {Γ : Type} [Group Γ] {a d : ℕ} (ρ : Γ →* GL (Fin
     simp only [Φ, Finset.smul_sum, Pi.smul_apply, smul_eq_mul, map_mul, mul_smul, algebraMap_smul]
   have hΦa : ∀ x y, Φ (x + y) = Φ x + Φ y := by
     intro x y
-    simp only [Φ, Pi.add_apply, map_add, add_smul, Finset.sum_add_distrib]
+    simp only [Φ, Pi.add_apply, map_add (f := _), add_smul, Finset.sum_add_distrib]
   let F : (Fin d → ℚ_[l]) →ₗ[ℚ_[l]] (Fin a → ↥L.1) :=
     { toFun := fun x i => p ((Φ x *ᵥ w) i)
       map_add' := by
         intro x y; funext i
-        simp only [hΦa, Matrix.add_mulVec, Pi.add_apply, map_add]
+        simp only [hΦa, Matrix.add_mulVec, Pi.add_apply, map_add (f := _)]
       map_smul' := by
         intro c x; funext i
         have h1 : ((Φ (c • x)) *ᵥ w) i = c • ((Φ x *ᵥ w) i) := by
@@ -52,6 +99,7 @@ theorem exists_read_map {Γ : Type} [Group Γ] {a d : ℕ} (ρ : Γ →* GL (Fin
     intro g y
     rw [hq]
     simp only [Φ, Matrix.mul_sum, Matrix.mul_smul, hR.equi, Finset.smul_sum, smul_smul]
+
     simp only [Matrix.mulVec, dotProduct, Matrix.map_apply, map_sum, map_mul, Finset.sum_smul]
     rw [Finset.sum_comm]
     refine Finset.sum_congr rfl fun k _ => Finset.sum_congr rfl fun j _ => ?_
@@ -64,6 +112,7 @@ theorem exists_read_map {Γ : Type} [Group Γ] {a d : ℕ} (ρ : Γ →* GL (Fin
     rw [hΦg, ← Matrix.mulVec_mulVec]
     generalize Φ y *ᵥ w = z
     change p (∑ k, (r g).val i k * z k) = _
+
     rw [map_sum]
     refine Finset.sum_congr rfl fun k _ => ?_
     rw [← hr]
@@ -105,7 +154,7 @@ theorem crys_pass (T : LocTied l P AI) (K L : FinExt l) {V : Type} [AddCommGroup
       induction z using TensorProduct.induction_on with
       | zero => simp
       | tmul b w => simp [GlobalTheory.RegularRing.sig_tmul, hFe]
-      | add z z' hz hz' => simp only [map_add, hz, hz']
+      | add z z' hz hz' => simp only [map_add (f := _), hz, hz']
     rw [← hc, hy g]
   have h1 : Submodule.span P.R.B (DcrisK₀ (P.PD K) ρq : Set (P.R.B ⊗[ℚ_[l]] V)) ≤
       (Submodule.span P.R.B (DcrisK₀ (P.PD K) R : Set (P.R.B ⊗[ℚ_[l]] (Fin a → ↥L.1)))).comap
@@ -145,13 +194,13 @@ theorem dr_pass (T : LocTied l P AI) (K L : FinExt l) {LL0 : Type} [Field LL0] [
       induction z using TensorProduct.induction_on with
       | zero => simp
       | tmul u c' => simp [E]
-      | add z z' hz hz' => simp only [map_add, hz, hz']
+      | add z z' hz hz' => simp only [map_add (f := _), hz, hz']
     have hg : ∀ g z, E (actVdR (P.PD K) ρ0 g z) = actVdR (P.PD K) R g (E z) := by
       intro g z
       induction z using TensorProduct.induction_on with
       | zero => simp
       | tmul u c' => simp [E, actVdR, hFe]
-      | add z z' hz hz' => simp only [map_add, hz, hz']
+      | add z z' hz hz' => simp only [map_add (f := _), hz, hz']
     refine ⟨m, b, fun i => E (dd i), fun i => ?_, ?_⟩
     · have h1 := hd i
       simp only [DdR, Submodule.mem_iInf, LinearMap.mem_ker, LinearMap.sub_apply, LinearMap.id_apply,
@@ -159,6 +208,7 @@ theorem dr_pass (T : LocTied l P AI) (K L : FinExt l) {LL0 : Type} [Field LL0] [
       intro g
       rw [← hg, h1 g]
     · have h2 := congrArg E hx
+
       rw [map_sum] at h2
       simp only [hE] at h2
       simpa [E] using h2
@@ -193,7 +243,7 @@ theorem dr_pass_rat (T : LocTied l P AI) (K L : FinExt l) {V : Type} [AddCommGro
     induction x using TensorProduct.induction_on with
     | zero => simp
     | tmul v b => rfl
-    | add x z hx hz => rw [map_add, map_add, hx, hz]
+    | add x z hx hz => rw [map_add (f := _), map_add (f := _), hx, hz]
   have hmem : ∀ x : V ⊗[ℚ_[l]] P.R.BdR, x ∈ DdR (P.PD K) ρ' ↔ x ∈ DdR (P.PD K) ρq := by
     intro x
     simp only [DdR, Submodule.mem_iInf, LinearMap.mem_ker, LinearMap.sub_apply, LinearMap.id_apply,

@@ -1,5 +1,57 @@
-import Mathlib
+module
+
+public import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.LatNormGrLatNeZeroOfSpan
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.QuotientEigenDifference
+import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.ExistsGenOfIsVBOne
 import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.EigCoordApply
+
+@[expose] public section
 
 open scoped NNReal
 open NumberField GlobalTheory.IndefiniteRowSideFullHecke.QuotientEigenDifference GlobalTheory.CompanionTheory.Ar GlobalTheory.CompanionTheory.Ar.Flat GlobalTheory.CompanionTheory.Ar.Flat.ExG
@@ -29,6 +81,7 @@ theorem sum_embeddings_eq_trace (E : Type) [Field E] [NumberField E] (C : Type) 
   rw [← hbij.sum_comp (fun σ : E →ₐ[ℚ] Ω => σ x)] at key
   simp only [hf] at key
   apply (algebraMap C Ω).injective
+
   rw [map_sum, ← key, eq_ratCast (algebraMap ℚ Ω), eq_ratCast (algebraMap ℚ C), map_ratCast]
 
 theorem sum_eigProj (E : Type) [Field E] [NumberField E] (C : Type) [Field C] [CharZero C]
@@ -41,6 +94,7 @@ theorem sum_eigProj (E : Type) [Field E] [NumberField E] (C : Type) [Field C] [C
     calc (1 : E) = algebraMap (𝓞 E) E 1 := (map_one _).symm
       _ = algebraMap (𝓞 E) E (∑ j, b.repr 1 j • b j) := by rw [b.sum_repr]
       _ = ∑ j, ((b.repr 1 j : ℤ) : ℚ) • integralBasis E j := by
+
         rw [map_sum]
         refine Finset.sum_congr rfl fun j _ => ?_
         rw [integralBasis_apply, map_zsmul, Int.cast_smul_eq_zsmul]
@@ -50,6 +104,7 @@ theorem sum_eigProj (E : Type) [Field E] [NumberField E] (C : Type) [Field C] [C
           rw [Algebra.traceForm_apply, mul_one]
       _ = ∑ j, ((b.repr 1 j : ℤ) : ℚ) * Algebra.traceForm ℚ E (HT.dualInt E k) (integralBasis E j) := by
           conv_lhs => rw [h1]
+
           rw [map_sum]
           refine Finset.sum_congr rfl fun j _ => ?_
           rw [map_smul, smul_eq_mul]
@@ -72,6 +127,7 @@ theorem sum_eigProj (E : Type) [Field E] [NumberField E] (C : Type) [Field C] [C
         refine Finset.sum_congr rfl fun k _ => ?_
         rw [hsum]
     _ = ρ (∑ k, b.repr 1 k • b k) y := by
+
         rw [map_sum, LinearMap.sum_apply]
         refine Finset.sum_congr rfl fun k _ => ?_
         rw [map_zsmul, LinearMap.smul_apply, Int.cast_smul_eq_zsmul]

@@ -1,15 +1,62 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Foundations.NormSumPairRankZeroOfCurveCoordNorm
-import Formalism.PairingDivisors.StatementH
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.UnitaryDoubleCosetClassesFiniteCardLe
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.MeanInfPosLogLe
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.SumCoeffMonomial
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.UnitaryRationalConjIntersectionCardDvdInvariant
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.NormSumPairRankZeroOfCurveCoordNorm
+public import Formalism.PairingDivisors.StatementH
+public import Mathlib.Analysis.SpecialFunctions.Log.PosLog
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.DerivationDenominatorsAndHostFieldSizesStatement
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsBoundMeansPosLogAreaNormalisedThetaStatement
 import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsIntegerMapEqHalfOneAddSqrt
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ThetaPairCoordinatesConjugateBoundStatement
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsBoundMeansPosLogAreaNormalisedThetaStatement
 import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IntegralJAndAlgebraicDataStatement
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.DerivationDenominatorsAndHostFieldSizesStatement
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.MeanInfPosLogLe
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.SumCoeffMonomial
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ThetaPairCoordinatesConjugateBoundStatement
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.UnitaryDoubleCosetClassesFiniteCardLe
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.UnitaryRationalConjIntersectionCardDvdInvariant
+import Mathlib.Algebra.AffineMonoid.UniqueSums
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open NumberField Classical Formalism.BasicNotions Formalism.MainNotions Formalism.MainNotions.TaylorLogMetric Formalism.MainNotions.StandardLatticesGL3 GlobalTheory.NormSum
 open scoped BigOperators
 
@@ -44,7 +91,7 @@ theorem exists_extension (M : IntermediateField ℚ ℂ) [FiniteDimensional ℚ 
   refine ⟨φ, fun x hx => ?_⟩
   rw [← hφ]
   unfold TaylorLogMetric.liftM
-  rw [dif_pos hx, dif_pos (hle hx)]
+  rw [dite_eq_left hx, dite_eq_left (hle hx)]
   rfl
 
 theorem lattice_unitNormSq_nonneg (Λ : AddSubgroup ℂ) (g : ℂ → ℂ) : 0 ≤ nrm1Sq Λ g := by
@@ -63,14 +110,14 @@ theorem le_exp_posLog (y : ℝ) : y ≤ Real.exp (Real.posLog y) := by
 
 theorem posLog_le_of_le_exp {y E : ℝ} (hy : 0 ≤ y) (hE : 0 ≤ E) (h : y ≤ Real.exp E) :
     Real.posLog y ≤ E := by
-  refine (Real.posLog_le_posLog hy h).trans ?_
+  refine (Real.posLog_le_posLog (by linarith) h).trans ?_
   rw [Real.posLog_apply, Real.log_exp]
   exact max_le hE le_rfl
 
 theorem pow_le_exp {y t k : ℝ} {n : ℕ} (hy : 0 ≤ y) (ht : 0 ≤ t) (h : y ≤ Real.exp t) (hn : (n : ℝ) ≤ k) :
     y ^ n ≤ Real.exp (k * t) := by
   calc y ^ n ≤ Real.exp t ^ n := pow_le_pow_left₀ hy h n
-    _ = Real.exp (n * t) := (Real.exp_nat_mul t n).symm
+    _ = Real.exp (n * t) := (Real.exp_natCast_mul n t).symm
     _ ≤ _ := Real.exp_le_exp.2 (mul_le_mul_of_nonneg_right hn ht)
 
 theorem mul_le_exp {x y s t : ℝ} (hy : 0 ≤ y) (hx : x ≤ Real.exp s) (h : y ≤ Real.exp t) :
@@ -99,7 +146,7 @@ theorem cls_le_exp (f k : ℕ) (n r l L : ℝ) (hf : 1 ≤ f) (hk : (k : ℝ) �
     have := pow_le_pow_left₀ hk0 hk 2
     nlinarith
 
-set_option maxHeartbeats 1600000 in
+
 
 theorem sizes (f N a d s Q ch cT ca cd : ℕ) (B L r ν A : ℝ) (hf : 1 ≤ f) (hN : 1 ≤ N) (had : a ≤ d)
     (hd : d ≤ 2 * N) (hs : (s : ℝ) ≤ 2 * f * B) (hQ : 0 < Q) (hB : 1 ≤ B) (hL : 1 ≤ L) (hr : 1 ≤ r)
@@ -220,9 +267,9 @@ theorem sum_prod_le {α β : Type} [Fintype α] [Fintype β] (g : α × β → �
   refine (Finset.sum_le_card_nsmul _ _ X fun p _ => h p).trans (le_of_eq ?_)
   rw [Finset.card_univ, Fintype.card_prod, nsmul_eq_mul, Nat.cast_mul, Nat.card_eq_fintype_card]
 
-set_option maxHeartbeats 800000 in
 
-theorem norm_meanInf_posLog_le : ∃ C : ℝ, 0 < C ∧ ∀ (D : D7), Inp D → ∀ (cc : Ideal (𝓞 D.host.K)) (δ : ℂ) (t0 : ℂ) (Q : ℕ), Crv D cc δ → GL3Theta.IsTwoTorsionPointUnkilled D (lamOf D cc δ) t0 → 0 < Q → ∀ (K : Type) [Field K] [NumberField K] [IsTotallyComplex K] (σ : K →+* ℂ) (N : ℕ) (B L : ℝ) (P : Pair D cc δ t0 Q) (x : K), 1 ≤ N → 1 ≤ B → 1 ≤ L → Real.log D.host.rdE ≤ L → |logDerivativeAtOne D| ≤ L → P.Small N B → σ x = (P.norm : ℂ) → Formalism.PairingDivisionLocalBalance.meanInf K (fun v => Real.posLog ‖v.embedding x‖) ≤ C * fF D * (2 * (N : ℝ)) * B * (L + Real.log (B * (2 * (N : ℝ)))) + C * fF D * (N : ℝ) ^ 2 * (L + Real.log ((fF D : ℝ) * (2 * (N : ℝ)) * B)) + C * (N : ℝ) ^ 2 * Real.log Q := by
+
+theorem norm_meanInf_posLog_le : ∃ C : ℝ, 0 < C ∧ ∀ (D : D7), Inp D → ∀ (cc : Ideal (𝓞 D.host.K)) (δ : ℂ) (t0 : ℂ) (Q : ℕ), Crv D cc δ → GL3Theta.IsTwoTorsionPointUnkilled D (lamOf D cc δ) t0 → 0 < Q → ∀ (K : Type) [Field K] [NumberField K] [_root_.NumberField.IsTotallyComplex K] (σ : K →+* ℂ) (N : ℕ) (B L : ℝ) (P : Pair D cc δ t0 Q) (x : K), 1 ≤ N → 1 ≤ B → 1 ≤ L → Real.log D.host.rdE ≤ L → |logDerivativeAtOne D| ≤ L → P.Small N B → σ x = (P.norm : ℂ) → Formalism.PairingDivisionLocalBalance.meanInf K (fun v => Real.posLog ‖v.embedding x‖) ≤ C * fF D * (2 * (N : ℝ)) * B * (L + Real.log (B * (2 * (N : ℝ)))) + C * fF D * (N : ℝ) ^ 2 * (L + Real.log ((fF D : ℝ) * (2 * (N : ℝ)) * B)) + C * (N : ℝ) ^ 2 * Real.log Q := by
   obtain ⟨C₀, hC₀, hmean⟩ := GlobalTheory.T.exists_bound_means_posLog_area_normalisedTheta
   refine ⟨1100 + 4 * C₀, by positivity, ?_⟩
   intro D hI cc δ t0 Q hc ht hQ K _ _ _ σ N B L P x hN hB hL hrL hdL hsm hx
@@ -258,6 +305,7 @@ theorem norm_meanInf_posLog_le : ∃ C : ℝ, 0 < C ∧ ∀ (D : D7), Inp D → 
       · exact hdata.2.2
       · exact hwp)
   have hσ : ∀ y, σ y ∈ M := fun y => by
+
     rw [← b.sum_repr y, map_sum]
     refine sum_mem fun i _ => ?_
     rw [map_rat_smul]
@@ -323,7 +371,7 @@ theorem norm_meanInf_posLog_le : ∃ C : ℝ, 0 < C ∧ ∀ (D : D7), Inp D → 
         unfold cj
         rw [hρ _ (hzM p)]
         unfold TaylorLogMetric.liftM
-        rw [dif_pos (hzM p)]
+        rw [dite_eq_left (hzM p)]
       rw [he]
       exact mul_le_of_le_one_left (by positivity) hg1
   clear_value E₀

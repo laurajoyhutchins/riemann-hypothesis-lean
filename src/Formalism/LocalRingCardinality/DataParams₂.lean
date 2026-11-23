@@ -1,4 +1,46 @@
-import Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow
+module
+
+public import Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow
+public import Mathlib.NumberTheory.Harmonic.EulerMascheroni
+public import Mathlib.NumberTheory.LSeries.DirichletContinuation
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -207,8 +249,8 @@ def sz (w : D.what₂.places.Pl) (y : ℝ) : ℝ :=
 
 def lifts (D : D7) : Finset ℕ := Finset.Icc 1 D.R.m
 
-open Classical in
 
+open Classical in
 def gainD (j : ℕ) (w : D.what₂.places.Pl) : ℝ :=
   if D.what₂.places.resChar w ∈ L.drop then 0 else L.gain j w
 
@@ -235,13 +277,9 @@ def MAIN (u : D.what₂.Word) : ℝ :=
 
 def NuH (u : D.what₂.Word) : HLat D.what₂.LL := { D.div.Nu u with L := L.NuLat u }
 
-def VV (l : ℕ) : ℚ := ∑ e ∈ Finset.Ico 1 D.R.t, D.what₂.shaLen l e
-
 def vonMangoldtClassSum (j : ℕ) (t : D.host.TT) (p : ℕ) : ℝ :=
   ∑ i ∈ Finset.range (Nat.log p (L.aT t).toNat + 2),
     if Odd i then max 0 ((L.aT t : ℝ) / (p : ℝ) ^ i - L.wPart j t p i) else 0
-
-def EtaSupp : Prop := ∀ j w, 1 ≤ j → j ≤ D.R.m → w ∉ L.supp → D.what₂.etaJ j w = 0
 
 def ZeroAbove : Prop := ∀ u, ∀ j ∈ lifts D, ∀ w, L.sc.X'' D.R.n < (D.what₂.places.resChar w : ℝ) →
   D.what₂.places.resChar w ≠ (D.mem u).A.T →

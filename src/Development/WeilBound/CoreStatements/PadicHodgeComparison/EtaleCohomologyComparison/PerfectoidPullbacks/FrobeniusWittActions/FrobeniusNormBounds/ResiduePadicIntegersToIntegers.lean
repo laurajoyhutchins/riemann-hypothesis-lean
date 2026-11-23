@@ -1,5 +1,50 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.FrobeniusWittActions.TeichmullerCongruence
+module
+
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.FrobeniusWittActions.TeichmullerCongruence
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+
+@[expose] public section
 
 set_option backward.isDefEq.respectTransparency false
 
@@ -32,7 +77,7 @@ theorem residue_padicIntegers_to_integers (r : Res l K) (z : ℤ_[l]) :
   have e : z = (((PadicInt.toZMod z).val : ℕ) : ℤ_[l]) + w * l := by
     rw [hw, ZMod.cast_eq_val]; ring
   conv_lhs => rw [e]
-  simp only [map_add, map_mul, map_natCast, CharP.cast_eq_zero r.k l, mul_zero, add_zero]
+  simp only [map_add (f := _), map_mul, map_natCast, CharP.cast_eq_zero r.k l, mul_zero, add_zero]
   rw [← map_natCast (algebraMap (ZMod l) r.k), ZMod.natCast_zmod_val]
 
 theorem residue_field_card_le_finrank (r : Res l K) [FiniteDimensional ℚ_[l] K] (s : Finset r.k)
@@ -69,6 +114,7 @@ theorem residue_field_card_le_finrank (r : Res l K) [FiniteDimensional ℚ_[l] K
       rfl
     have hk : ∑ i ∈ t, PadicInt.toZMod (hZ i) • (i : r.k) = 0 := by
       have := congrArg r.ρ hsum
+
       rw [map_sum, map_zero] at this
       rw [← this]
       refine Finset.sum_congr rfl fun i _ => ?_
@@ -239,7 +285,7 @@ theorem cong (n : ℕ) (a b : OC l) (h : ‖((a - b : OC l) : ℂ_[l])‖ ≤ �
   have z : (l : (B.bs l true n).R ⧸ (B.bs l true n).I) = 0 := by
     rw [← map_natCast (Ideal.Quotient.mk (B.bs l true n).I), Ideal.Quotient.eq_zero_iff_mem]
     exact Ideal.mem_sup_left (Ideal.mem_span_singleton_self _)
-  rw [e, map_add, map_add, map_mul, map_mul, map_natCast, map_natCast]
+  rw [e, map_add (f := _), map_add (f := _), map_mul, map_mul, map_natCast, map_natCast]
   change _ + (l : (B.bs l true n).R ⧸ (B.bs l true n).I) * _ = _
   rw [z, zero_mul, add_zero]
 

@@ -1,8 +1,42 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.CountsIrreducibilityConstants
-import Formalism.LocalToGlobal.Divisibility.RecBridgeSel
-import Formalism.LocalToGlobal.Divisibility.TupUsed
-import Formalism.LocalToGlobal.GroupLattices.ServiceOfTiedSelection
+module
+
+public import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.CountsIrreducibilityConstants
+public import Formalism.LocalToGlobal.Divisibility.TupUsed
+public import Formalism.LocalToGlobal.Divisibility.RecBridgeTied
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 open Module NumberField IsDedekindDomain
 
@@ -76,56 +110,9 @@ end Col
 variable {D : D7} {L : SizeData₂ D} {hT : GatTies D} {Gi : MainNotions.G.Inst D L} {Gl : MainNotions.G.LatInst D} {Kc : MainNotions.G.Consts} {Y : DivX D}
   {cX : ExtraC} {ex : Extra D L hT Gi Gl Kc Y cX}
 
-@[reducible] def SquareIntegrableColumnsCompatible.toS {T : TiedDataSK ex} {P : RowSideFamily ex} (K : GlobalTheory.Cp.SquareIntegrableColumnsCompatible T P) : Formalism.L2.DIV.SquareIntegrableColumnsCompatible T P where
-  X := K.X
-  e := K.e
-  c := K.c.toS
-  Sp := K.Sp
-  colTie := K.colTie
-  kerTie := K.kerTie
-  wTie := K.wTie
-  lvTie := K.lvTie
-  sgTie := K.sgTie
-  v0 := K.v0
-  TU := K.TU
-  xiVal := K.xiVal
-  trIv := K.trIv
-  famEq := K.famEq
-  gEq := K.gEq
-  plEq := K.plEq
-  i0Eq := K.i0Eq
-  tEq := K.tEq
-  muTie := K.muTie
-  ok1 := K.ok1
-
-@[reducible] def SquareIntegrableColumnsCompatible.ofS {T : TiedDataSK ex} {P : RowSideFamily ex} (K : Formalism.L2.DIV.SquareIntegrableColumnsCompatible T P) : GlobalTheory.Cp.SquareIntegrableColumnsCompatible T P where
-  X := K.X
-  e := K.e
-  c := ColRec3.ofS K.c
-  Sp := K.Sp
-  colTie := K.colTie
-  kerTie := K.kerTie
-  wTie := K.wTie
-  lvTie := K.lvTie
-  sgTie := K.sgTie
-  v0 := K.v0
-  TU := K.TU
-  xiVal := K.xiVal
-  trIv := K.trIv
-  famEq := K.famEq
-  gEq := K.gEq
-  plEq := K.plEq
-  i0Eq := K.i0Eq
-  tEq := K.tEq
-  muTie := K.muTie
-  ok1 := K.ok1
-
 theorem divRows3G_iff (P : RowSideFamily ex) : GlobalTheory.Cp.DivRows3G P ↔ Formalism.L2.DIV.DivRows3G P :=
   ⟨fun h => ⟨h.sharpRR, h.baseRR, h.divisionRows_rationalLift, h.thTheta, ⟨h.num.Ij, h.num.jw, h.num.etaJ⟩, h.colsBk⟩,
     fun h => ⟨h.sharpRR, h.baseRR, h.divisionRows_rationalLift, h.thTheta, ⟨h.num.Ij, h.num.jw, h.num.etaJ⟩, h.colsBk⟩⟩
-
-theorem servT_iff (𝒞 : FamClass) (sel : Formalism.L2.TSel 𝒞) : GlobalTheory.Cp.ServT 𝒞 sel ↔ Formalism.L2.G.ServT.ServT 𝒞 sel :=
-  ⟨fun h => ⟨h.twU, h.pdv⟩, fun h => ⟨h.twU, h.pdv⟩⟩
 
 end GlobalTheory.Cp
 

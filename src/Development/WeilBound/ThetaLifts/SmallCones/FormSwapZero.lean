@@ -1,5 +1,59 @@
-import Development.WeilBound.ThetaLifts.SmallCones.SoKill
-import Development.WeilBound.ThetaLifts.SmallCones.ExpAlg
+module
+
+public import Development.WeilBound.ThetaLifts.SmallCones.SoDefs
+public import Development.WeilBound.ThetaLifts.SmallCones.ExpAlg
+public import Development.WeilBound.ThetaLifts.SmallCones.SoKill
+import Development.WeilBound.ThetaLifts.SmallCones.SoStab
+import GroundTheory.GlobalFields.CompletionAtPlace.Integers
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LatAtVAtStable
+public import Development.AutomorphicSpectrum.Proofs.DivisibilityProofs.ExistsNhdsInvariant
+public import Development.WeilBound.CoreStatements.LocallyConstantCoinvariants.CompFinLiftE
+public import Development.WeilBound.CoreStatements.LocallyConstantCoinvariants.SoStatement
+import Development.AbelianVarietyTheory.Definitions.Divisors.MatchingOfParts
+
+@[expose] public section
 
 noncomputable section
 
@@ -35,6 +89,7 @@ theorem sig_sig (h : IsCMExt F E σ) (x : E) : σ (σ x) = x := by
 
 theorem form_swap (hσ : ∀ x, σ (σ x) = x) {J : Matrix (Fin n) (Fin n) E} (ε : E) (h : ∀ i j, σ (J j i) = ε * J i j) (x y : Fin n → E) :
     σ (form σ J x y) = ε * form σ J y x := by
+
   simp only [form, dotProduct, mulVec, map_sum, map_mul, hσ, h, Finset.mul_sum]
   rw [Finset.sum_comm]
   exact Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => by ring
@@ -49,16 +104,17 @@ theorem hTens_vec (a c : AE F E) (x p : Fin n → E) (y q : Fin d → E) :
     hTens (cA σ) (incM F X.J) (incM F W.J) (a • incM F (vecMulVec x y)) (c • incM F (vecMulVec p q)) =
       a * cA σ c * inclR (F := F) (AF F) (form σ X.J x p * form σ W.J y q) := by
   have hc : ∀ z : E, cA σ (inclR (F := F) (AF F) z) = inclR (F := F) (AF F) (σ z) := fun z => rfl
+
   simp only [hTens, form, dotProduct, mulVec, incM, Matrix.smul_apply, map_apply, vecMulVec_apply, smul_eq_mul, map_mul, hc, map_sum,
-    Finset.mul_sum, Finset.sum_mul]
+  Finset.mul_sum, Finset.sum_mul]
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun j _ => ?_
   rw [Finset.sum_congr rfl fun i _ => Finset.sum_comm, Finset.sum_comm]
   exact Finset.sum_congr rfl fun l _ => Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun k _ => by ring
 
-theorem plane_span {H : Plane E n n₁} {i₀ i₁ : ℕ} (h : H.IsAdapted σ B X X₁ i₀ i₁) (hL : X.L.IsLattice E) (z : Fin n → E) :
+theorem plane_span {H : Plane E n n₁} {i₀ i₁ : ℕ} (h : H.IsAdapted σ B X X₁ i₀ i₁) (hL : X.L.IsFullLattice E) (z : Fin n → E) :
     ∃ (s t : E) (u : Fin n₁ → E), z = s • H.x + H.ι *ᵥ u + t • H.y := by
-  have hz : z ∈ Submodule.span E (X.L : Set (Fin n → E)) := by rw [hL.span_eq_top]; trivial
+  have hz : z ∈ Submodule.span E (X.L : Set (Fin n → E)) := by rw [Submodule.IsFullLattice.span_eq_top (self := hL)]; trivial
   induction hz using Submodule.span_induction with
   | mem z hz =>
     obtain ⟨s, t, u, -, -, -, e⟩ := h.split z hz
@@ -138,7 +194,7 @@ open Filter Topology NumberField IsDedekindDomain Matrix GlobalTheory.WeilM Glob
 
 attribute [local instance] GlobalTheory.LocalData.complRel GlobalTheory.LocalData.isLocalField Classical.propDecidable
 
-set_option maxHeartbeats 400000 in
+
 theorem soEv_of (hL : LinEx) (hLow : Low) : SoEv := by
   intro F E _ _ _ _ _ σ B n d n₁ d₁ X W X₁ W₁ H H' j₀ j₁ i₀ i₁ r s r' s' M M₀ hH hH' hB hX hW hM hM₀ e he Ψ hΨ
   refine ⟨ev_zero hL hB hX hW hM _ e (x_ne hH) (fun z => he.inv _ (Or.inl ⟨z, rfl⟩)) Ψ hΨ, fun a => ?_⟩
@@ -159,7 +215,7 @@ theorem soEv_of (hL : LinEx) (hLow : Low) : SoEv := by
   let L : Fn F n d →ₗ[ℂ] ℂ :=
     { toFun := fun Φ => ι₀ (fun y => e (M.co.rho B.ψ s₀ Φ) (repl B.v₁ z y)) (coB σ X₁ W₁ t x₀)
       map_add' := fun a b => by
-        rw [rho_add, map_add]
+        rw [rho_add, map_add (f := _)]
         exact congrFun (map_add ι₀ _ _) _
       map_smul' := fun c a => by
         rw [rho_smul, map_smul]

@@ -1,17 +1,61 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeDeformations.IsCharZeroPt
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeDeformations.IsCharZeroPt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Matrix IsLocalRing ReciprocityTheory.Gal UpperTheory.V.U3 UpperTheory.V.Alg UpperTheory.V.UnitaryThreeInertia
 
-private theorem gg_ext {R : Type} [CommRing R] {x y : GG 3 R} (h1 : x.right = y.right) (h2 : x.mat = y.mat) :
+private theorem gg_ext {R : Type} [CommRing R] {x y : GG (m := 3) (R := R)} (h1 : x.right = y.right) (h2 : x.mat = y.mat) :
     x = y := SemidirectProduct.ext (Units.ext h2) h1
 
-private theorem exists_weight_inv_det_left_mem_weight_piece {O R Γ : Type} [CommRing O] [IsLocalRing O] [CommRing R] [Algebra O R] [Group Γ] (u : Γ →* GG 3 R) (g : Γ) : ∃ j : ℤ, (((GeneralLinearGroup.det (u g).left)⁻¹ : Rˣ) : R) ∈ wpart O u j := by
+private theorem exists_weight_inv_det_left_mem_weight_piece {O R Γ : Type} [CommRing O] [IsLocalRing O] [CommRing R] [Algebra O R] [Group Γ] (u : Γ →* GG (m := 3) (R := R)) (g : Γ) : ∃ j : ℤ, (((GeneralLinearGroup.det (u g).left)⁻¹ : Rˣ) : R) ∈ wpart (O := O) u j := by
   have hth : ∀ {R' : Type} [CommRing R'] (k : GL (Fin 3) R'), GeneralLinearGroup.det (thetaAut 3 R' k) = (GeneralLinearGroup.det k)⁻¹ := by
     intro R' _ k
-    have hJ : GeneralLinearGroup.det (Jgl R' 3) * GeneralLinearGroup.det (Jgl R' 3) = 1 := by
-      rw [← map_mul]
-      have : Jgl R' 3 * Jgl R' 3 = 1 := Units.ext (Jgl R' 3).val_inv
-      rw [this, map_one]
+    have hJ : GeneralLinearGroup.det (Jgl (R := R') 3) * GeneralLinearGroup.det (Jgl (R := R') 3) = 1 := by
+      rw [← map_mul, Jgl_mul_Jgl, map_one]
     have hT : GeneralLinearGroup.det (trInv k) = (GeneralLinearGroup.det k)⁻¹ := by
       rw [← map_inv]
       apply Units.ext
@@ -26,7 +70,7 @@ private theorem exists_weight_inv_det_left_mem_weight_piece {O R Γ : Type} [Com
   refine ⟨if (u g).right = 1 then 0 else -(2 * (wt1 0 + wt1 1 + wt1 2)), ?_⟩
   intro R' _ _ _ f f' t h
   have hg := congrArg (fun φ => GeneralLinearGroup.det (φ g).left) h
-  simp only [push, conjBy, MonoidHom.comp_apply, MulEquiv.coe_toMonoidHom, MulAut.conj_apply, SemidirectProduct.mul_left, SemidirectProduct.inv_left, GG.ofGL, SemidirectProduct.left_inl, SemidirectProduct.right_inl, GG.map, SemidirectProduct.map_left, SemidirectProduct.map_right, map_mul, GeneralLinearGroup.map_det] at hg
+  simp only [push, conjBy, MonoidHom.comp_apply, MulEquiv.coe_toMonoidHom, MulAut.conj_apply, SemidirectProduct.mul_left, SemidirectProduct.inv_left, GG.ofGL, SemidirectProduct.left_inl, SemidirectProduct.right_inl, GG.map, SemidirectProduct.map_left, map_mul, GeneralLinearGroup.map_det] at hg
   simp only [map_one, inv_one, MulAut.one_apply, SemidirectProduct.mul_right, SemidirectProduct.right_inl, SemidirectProduct.map_right, MonoidHom.id_apply, one_mul, map_inv, htor] at hg
   have key : (Units.map (f' : R →+* R')) (GeneralLinearGroup.det (u g).left)⁻¹ = t ^ (if (u g).right = 1 then 0 else -(2 * (wt1 0 + wt1 1 + wt1 2))) * (Units.map (f : R →+* R')) (GeneralLinearGroup.det (u g).left)⁻¹ := by
     rw [map_inv, map_inv]
@@ -44,28 +88,28 @@ private theorem exists_weight_inv_det_left_mem_weight_piece {O R Γ : Type} [Com
   rw [e f', e f, key, Units.val_mul]
 
 theorem UpperTheory.V.UnitaryThreeInertia.existsUnique_isPtHom :
-    ∀ {O R Γ K : Type} [CommRing O] [IsLocalRing O] [CommRing R] [Algebra O R] [Group Γ] [CommRing K] [Algebra O K] (u : Γ →* GG 3 R) (ξ : Sring O u →ₐ[O] K), ∃! r, IsPtHom u ξ r := by
+    ∀ {O R Γ K : Type} [CommRing O] [IsLocalRing O] [CommRing R] [Algebra O R] [Group Γ] [CommRing K] [Algebra O K] (u : Γ →* GG (m := 3) (R := R)) (ξ : Sring (O := O) u →ₐ[O] K), ∃! r, IsPtHom u ξ r := by
   intro O R Γ K _ _ _ _ _ _ _ u ξ
-  have hmem : ∀ g a b, (u g).mat a b ∈ Sring O u := fun g a b => ptMat._proof_1 u g a b
-  have hinv : ∀ g a b, (((u g).left⁻¹ : GL (Fin 3) R) : Matrix (Fin 3) (Fin 3) R) a b ∈ Sring O u := by
+  have hmem : ∀ g a b, (u g).mat a b ∈ Sring (O := O) u := fun g a b =>
+    mem_Sring u (entry_mem u g a b)
+  have hinv : ∀ g a b, (((u g).left⁻¹ : GL (Fin 3) R) : Matrix (Fin 3) (Fin 3) R) a b ∈ Sring (O := O) u := by
     intro g a b
     obtain ⟨j, hj⟩ := exists_weight_inv_det_left_mem_weight_piece (O := O) u g
-    have hd : (((GeneralLinearGroup.det (u g).left)⁻¹ : Rˣ) : R) ∈ Sring O u := by
-      show _ ∈ (⨆ j, wpart O u j)
-      exact Submodule.mem_iSup_of_mem j hj
-    let M' : Matrix (Fin 3) (Fin 3) (Sring O u) := fun a b => ⟨(u g).mat a b, hmem g a b⟩
-    have hM : ((Sring O u).val : Sring O u →+* R).mapMatrix M' = ((u g).left : Matrix (Fin 3) (Fin 3) R) := by
+    have hd : (((GeneralLinearGroup.det (u g).left)⁻¹ : Rˣ) : R) ∈ Sring (O := O) u :=
+      mem_Sring u hj
+    let M' : Matrix (Fin 3) (Fin 3) (Sring (O := O) u) := fun a b => ⟨(u g).mat a b, hmem g a b⟩
+    have hM : ((Sring (O := O) u).val : Sring (O := O) u →+* R).mapMatrix M' = ((u g).left : Matrix (Fin 3) (Fin 3) R) := by
       ext a b; rfl
     have hdet : ((u g).left : Matrix (Fin 3) (Fin 3) R).det = ((GeneralLinearGroup.det (u g).left : Rˣ) : R) :=
       (GeneralLinearGroup.val_det_apply _).symm
     rw [Matrix.coe_units_inv, Matrix.inv_def, hdet, Ring.inverse_unit, ← hM, ← RingHom.map_adjugate]
     simp only [Matrix.smul_apply, smul_eq_mul, RingHom.mapMatrix_apply, Matrix.map_apply]
-    exact (Sring O u).mul_mem hd (M'.adjugate a b).2
-  have hinj : Function.Injective (((Sring O u).val : Sring O u →+* R).mapMatrix (m := Fin 3)) := by
+    exact (Sring (O := O) u).mul_mem hd (M'.adjugate a b).2
+  have hinj : Function.Injective (((Sring (O := O) u).val : Sring (O := O) u →+* R).mapMatrix (m := Fin 3)) := by
     intro x y h
     ext a b
     exact congrFun (congrFun h a) b
-  let large₂ : Γ → GL (Fin 3) (Sring O u) := fun g =>
+  let large₂ : Γ → GL (Fin 3) (Sring (O := O) u) := fun g =>
     { val := Matrix.of fun a b => ⟨(u g).mat a b, hmem g a b⟩
       inv := Matrix.of fun a b => ⟨(((u g).left⁻¹ : GL (Fin 3) R) : Matrix (Fin 3) (Fin 3) R) a b, hinv g a b⟩
       val_inv := by
@@ -76,7 +120,7 @@ theorem UpperTheory.V.UnitaryThreeInertia.existsUnique_isPtHom :
         apply hinj
         rw [map_mul, map_one]
         convert (u g).left.inv_val using 2 <;> ext a b <;> rfl }
-  have gmap_inj : Function.Injective (GG.map (m := 3) ((Sring O u).val : Sring O u →+* R)) := by
+  have gmap_inj : Function.Injective (GG.map (m := 3) ((Sring (O := O) u).val : Sring (O := O) u →+* R)) := by
     intro x y h
     apply gg_ext
     · have := congrArg (fun z => z.right) h
@@ -84,19 +128,19 @@ theorem UpperTheory.V.UnitaryThreeInertia.existsUnique_isPtHom :
     · ext a b
       have := congrArg (fun z => z.mat a b) h
       simpa [GG.map_mat] using this
-  let vf : Γ → GG 3 (Sring O u) := fun g => SemidirectProduct.mk (large₂ g) (u g).right
-  have hv : ∀ g, GG.map ((Sring O u).val : Sring O u →+* R) (vf g) = u g := by
+  let vf : Γ → GG (m := 3) (R := Sring (O := O) u) := fun g => SemidirectProduct.mk (large₂ g) (u g).right
+  have hv : ∀ g, GG.map ((Sring (O := O) u).val : Sring (O := O) u →+* R) (vf g) = u g := by
     intro g
     apply gg_ext
     · rw [GG.map_right]
     · ext a b
       rw [GG.map_mat]
       rfl
-  let v : Γ →* GG 3 (Sring O u) :=
+  let v : Γ →* GG (m := 3) (R := Sring (O := O) u) :=
     { toFun := vf
       map_one' := gmap_inj (by rw [hv, map_one, map_one])
       map_mul' := fun x y => gmap_inj (by rw [map_mul, hv, hv, hv, map_mul]) }
-  have h0 : IsPtHom u ξ ((GG.map (ξ : Sring O u →+* K)).comp v) := by
+  have h0 : IsPtHom u ξ ((GG.map (ξ : Sring (O := O) u →+* K)).comp v) := by
     intro g
     constructor
     · show (GG.map _ (vf g)).right = _

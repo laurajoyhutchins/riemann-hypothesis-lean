@@ -1,4 +1,49 @@
-import Formalism.CharacterColumnKernels.StatGlobalModule
+module
+
+public import Formalism.CharacterColumnKernels.StatementN
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Finset Classical
 
@@ -13,56 +58,5 @@ instance evalSpSMulComm (O : Type*) [CommRing O] [IsDomain O] [IsDiscreteValuati
     show (matEnd (FractionRing O) (FractionRing O) d (evalAt O d R' x' r)) (c • v) =
       c • (matEnd (FractionRing O) (FractionRing O) d (evalAt O d R' x' r)) v
     exact LinearMap.map_smul _ c v⟩
-
-def StatGlobalColumn : Prop :=
-  ∀ (O : Type*) [CommRing O] [IsDomain O] [IsDiscreteValuationRing O] (X X' : Type*)
-    (T : Subalgebra O (X → O)) (T' : Subalgebra O (X' → O)) (Z : Set X) (p : X' → X) (q : ℕ)
-    (b : Fin q → (X' → O)),
-    (∀ f' ∈ T', ∃ a : Fin q → (X → O), (∀ k, a k ∈ T) ∧ f' = ∑ k, (a k ∘ p) * b k) →
-    (∀ x ∉ Z, ∀ a : Fin q → O, (∀ x', p x' = x → ∑ k, a k * b k x' = 0) → a = 0) →
-    ∀ (d : Type) [Fintype d] [DecidableEq d] (R' : Subalgebra O (X' → Matrix d d (FractionRing O)))
-      [IsNoetherian R' R'],
-    (∀ (g : Type) [Fintype g] [DecidableEq g] (Θ : Matrix g g R'), ∃ f ∈ T', ∀ x',
-      algebraMap O (FractionRing O) (f x') =
-        (bigMat (fun r : R' => (r : X' → Matrix d d (FractionRing O)) x') Θ).det) →
-    ∀ (Tc : Type*) [CommRing Tc] [Algebra Tc R'] [∀ x', Module Tc (EvalSp O d R' x')]
-      [∀ x', IsScalarTower Tc R' (EvalSp O d R' x')]
-      (G : Type*) [Group G] (r : G →* R') (χ : G →* Tcˣ) (E e₁ : R') (δ : Tc)
-      (ι : Type*) [Fintype ι] [DecidableEq ι] (D : ι → Subgroup G) (j : ι → ℕ)
-      (Kc : ∀ l, Fin (j l) → G → R') (k0 : ι → G → R'),
-      E * E = algebraMap Tc R' δ * E → e₁ * e₁ = e₁ →
-    (∀ x', p x' ∉ Z →
-      ∃ δx : FractionRing O, δx ≠ 0 ∧ (∀ v : EvalSp O d R' x', δ • v = δx • v) ∧
-      Module.finrank (FractionRing O)
-        (LinearMap.range (DistribSMul.toLinearMap (FractionRing O) (EvalSp O d R' x') E)) = 1 ∧
-      Module.finrank (FractionRing O)
-        (LinearMap.range (DistribSMul.toLinearMap (FractionRing O) (EvalSp O d R' x') e₁)) = 1 ∧
-      (∀ η ∈ LinearMap.range (DistribSMul.toLinearMap (FractionRing O) (EvalSp O d R' x') E), η ≠ 0 →
-        ∃ g : G, ((((χ g)⁻¹ : Tcˣ) : Tc) • r g) • η ≠ η) ∧
-      (∀ l, ∃ L : Submodule (FractionRing O) (D l → EvalSp O d R' x'),
-        LinearMap.range (colD (K := FractionRing O) (V := EvalSp O d R' x') r χ (D l)) ≤ L ∧
-        (∀ a, ∀ s ∈ LinearMap.range
-            (DistribSMul.toLinearMap (FractionRing O) (EvalSp O d R' x') e₁),
-          (fun g : D l => Kc l a g • s) ∈ L) ∧
-        (∀ s ∈ LinearMap.range (DistribSMul.toLinearMap (FractionRing O) (EvalSp O d R' x') E),
-          (fun g : D l => k0 l g • s) ∈ L) ∧
-        Module.rank (FractionRing O)
-            (L ⧸ (LinearMap.range (colD (K := FractionRing O) (V := EvalSp O d R' x') r χ (D l))).comap
-              L.subtype) ≤
-          (j l + Module.finrank (FractionRing O)
-            (LinearMap.ker (colD (K := FractionRing O) (V := EvalSp O d R' x') r χ (D l))) : ℕ))) →
-    ∀ (g₀ : ℕ) (n : Fin g₀ → ColNNJ r χ E e₁ δ D j Kc k0),
-      Submodule.span R' (Set.range n) = ⊤ →
-    ∀ (π' : X') (ρπ : R' →ₐ[O] Matrix d d O),
-      (∀ r : R', (ρπ r).map (algebraMap O (FractionRing O)) = (r : X' → Matrix d d (FractionRing O)) π') →
-    ∀ (α : Type) [LinearOrder α] [Fintype α] (bl : d → α), (∀ r, (ρπ r).BlockTriangular bl) →
-    ∀ (ρk : ∀ k : α, R' →ₐ[O] Matrix {a // bl a = k} {a // bl a = k} O),
-      (∀ k, Function.Surjective (ρk k)) → (∀ r k, (ρπ r).toSquareBlock bl k = ρk k r) →
-      [∀ k, SMulCommClass R' O (LatQ O {a // bl a = k} (ρk k).toRingHom)] →
-      ((g₀ * ∑ k : α, Fintype.card {a // bl a = k} : ℕ) : Cardinal) <
-        Cardinal.mk (IsLocalRing.ResidueField O) →
-      vcc T Z (p π') ≤
-        ∑ k ∈ univ.image bl,
-          Module.length O (ColNNJ r χ E e₁ δ D j Kc k0 →ₗ[R'] LatQ O {a // bl a = k} (ρk k).toRingHom)
 
 end Formalism.NG

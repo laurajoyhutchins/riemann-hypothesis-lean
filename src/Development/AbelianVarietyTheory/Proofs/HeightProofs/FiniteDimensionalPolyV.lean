@@ -1,14 +1,48 @@
-import Mathlib
-import Formalism.LocalToGlobal.BesselHermitianTheta.AllTied
-import Development.AbelianVarietyTheory.BlockTheory.HeightDefect.FinitePartTypes
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.DiscreteSeriesUpqExistsIffDsExists
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.DiscreteSeriesUpqUniqueOfClassification
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.HarishChandraModulesOn
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.HasDRepIffHasDerivAt
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HasTypeAllAddOfEquiv
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.OneAddHsConjLe
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ContinuousOnAtTau
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.CoefBoundOfCasselmanWallach
+module
+
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.NormDwLeSobNorm
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+public import Mathlib.Data.Set.Finite.List
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Bool
+
+@[expose] public section
 
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.MainNotions.S Formalism.L2.Theta Matrix
 open Formalism.REAL GlobalTheory.SmoothGlob GlobalTheory.TypeSum
@@ -38,14 +72,15 @@ def IsKer (ε : Fin n → Bool) (i : ℕ) (e : KG ε → ℂ) : Prop :=
   e ∈ polyV ε i ∧ (∀ q ∈ lowV ε i, ∫ k, e k * q k ∂(muK ε) = 0) ∧
     ∀ p ∈ polyV ε i, (∀ q ∈ lowV ε i, ∫ k, star (q k) * p k ∂(muK ε) = 0) → ∫ k, e k * p k ∂(muK ε) = p 1
 
-open Classical in
 
-def kerE (ε : Fin n → Bool) (i : ℕ) : KG ε → ℂ :=
-  if h : ∃ e, IsKer ε i e then h.choose else 0
+open Classical in
+def kerE (ε : Fin n → Bool) (i : ℕ) : KG ε → ℂ := by
+  classical
+  exact if h : ∃ e, IsKer ε i e then h.choose else 0
 
 theorem isKer_kerE {ε : Fin n → Bool} {i : ℕ} (h : ∃ e, IsKer ε i e) : IsKer ε i (kerE ε i) := by
   unfold kerE
-  rw [dif_pos h]
+  rw [dite_eq_left h]
   exact h.choose_spec
 
 def rder (ε : Fin n → Bool) (l : List (Matrix (Fin n) (Fin n) ℂ)) (φ : KG ε → ℂ) : KG ε → ℂ :=
@@ -78,7 +113,7 @@ theorem toMK_one (ε : Fin n → Bool) : toMK (1 : KG ε) = 1 := rfl
 theorem toMK_expK {ε : Fin n → Bool} {X : Matrix (Fin n) (Fin n) ℂ} (h : inK ε X) (t : ℝ) :
     toMK (expK ε X t) = NormedSpace.exp ((t : ℂ) • X) := by
   unfold expK
-  rw [dif_pos h]
+  rw [dite_eq_left h]
   exact toM_expG ε X t h.1
 
 theorem inK_of_skew {ε : Fin n → Bool} {X : Matrix (Fin n) (Fin n) ℂ} (h1 : X ∈ GlobalTheory.SmoothGlob.lieSet ε)

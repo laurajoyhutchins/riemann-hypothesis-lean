@@ -1,16 +1,63 @@
-import Mathlib
-import Formalism.SharpRestriction.LevelLetterCocycles.UsedLocalConclusion
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.NotFullBot
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.NBasisLoc
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.NotFullBot
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.MkMemAdmissibleAtIffCocycle
+public import Formalism.SharpRestriction.LevelLetterCocycles.DeltaInvariantLattices
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CrystallineFrobeniusBijOnLettersDirectSum
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.FinrankDcrisLetterDeRhamComponentEqDim
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.NBasisLoc
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.UnramifiedSubfieldLeCyclotomicExt
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.WachExpansionBasisDivisibility
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.WachExpansionsSpanFullLattice
 import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.WachInclusionXQFrobenius
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.WachLatticeEqFiltrationSumAtLevel
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.WachLatticeExpansionsStdBelowLevel
 import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.WachLevelExpansionAtRootOfUnity
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.WachWeierstrassTestAndDensity
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.UnramifiedSubfieldLeCyclotomicExt
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.WachExpansionsSpanFullLattice
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CrystallineFrobeniusBijOnLettersDirectSum
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.WachExpansionBasisDivisibility
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.WachLatticeExpansionsStdBelowLevel
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.WachLatticeEqFiltrationSumAtLevel
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.WachWeierstrassTestAndDensity
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Formalism.WeaklyAdmissibleFiltrations Formalism.BasicNotions Formalism.BasicNotions.Loc TensorProduct GlobalTheory.NL Formalism.MainNotions.DeltaInvariantLattices
 
@@ -61,7 +108,7 @@ theorem dvd_of_low {ι : Type} [Fintype ι] (g : ι → ℤ → M) (b : ℤ) (hg
 
 theorem const_on {α : Type} (F : ℤ → α) (a b : ℤ) (hab : a ≤ b)
     (h : ∀ c, a ≤ c → c < b → F (c + 1) = F c) : F b = F a := by
-  induction b, hab using Int.le_induction with
+  induction b, hab using Int.leInduction with
   | base => rfl
   | succ b hb ih => rw [h b hb (by omega), ih fun c h1 h2 => h c h1 (by omega)]
 
@@ -133,6 +180,7 @@ theorem indep_const {r : ℕ} (g : Fin r → ℤ → M) {D D' : Submodule L M} {
     ⟨single_mem hd' 0, fun k hk => Pi.single_eq_of_ne hk.ne _⟩)
   have h1 := congrFun he 0
   rw [Pi.single_eq_same, Finset.sum_apply] at h1
+
   rw [h1, map_sum]
   refine Submodule.sum_mem _ fun j _ => ?_
   have h2 := conv_lead (e := e j) (a := 0) (by simp) ((hS _).1 (hg j)).2
@@ -207,7 +255,7 @@ theorem repr_mem_of_mem_smul {ι : Type} (nb : Module.Basis ι (LetA O n) ↥(W.
   · rintro a b ⟨ha, ha'⟩ ⟨hb, hb'⟩
     refine ⟨(W.N T).add_mem ha hb, fun j => ?_⟩
     have e : (⟨a + b, (W.N T).add_mem ha hb⟩ : ↥(W.N T)) = ⟨a, ha⟩ + ⟨b, hb⟩ := rfl
-    rw [e, map_add, Finsupp.add_apply]
+    rw [e, map_add (f := _), Finsupp.add_apply]
     exact I.add_mem (ha' j) (hb' j)
 
 theorem mem_iff_roots (hunit : IsUnit (algebraMap (LetA O n) W.EE W.Q)) {ι : Type} [Fintype ι]
@@ -289,7 +337,8 @@ theorem inv_pole_bound (hunit : IsUnit (algebraMap (LetA O n) W.EE W.Q)) {ι : T
     rw [Submodule.span_le]
     rintro _ ⟨z, hz, rfl⟩
     have h1 := congrArg Subtype.val (nb.sum_repr ⟨z, hz⟩)
-    simp only [AddSubmonoidClass.coe_finset_sum, SetLike.val_smul] at h1
+    simp only [AddSubmonoidClass.coe_finsetSum, SetLike.val_smul] at h1
+
     rw [← h1, map_sum]
     refine Submodule.sum_mem _ fun j _ => ?_
     rw [φD_smulA]
@@ -304,7 +353,7 @@ theorem inv_pole_bound (hunit : IsUnit (algebraMap (LetA O n) W.EE W.Q)) {ι : T
   have hid : W.Q ^ (η + m + k) • (⟨y₀, hy₀⟩ : ↥(W.N T)) =
       ∑ j, (W.Q ^ η * a j) • (⟨_, hx j⟩ : ↥(W.N T)) := by
     apply Subtype.ext
-    simp only [AddSubmonoidClass.coe_finset_sum, SetLike.val_smul]
+    simp only [AddSubmonoidClass.coe_finsetSum, SetLike.val_smul]
     rw [pow_add, mul_smul, ← ha, Finset.smul_sum]
     refine Finset.sum_congr rfl fun j _ => ?_
     rw [smul_smul, smul_smul]
@@ -319,6 +368,7 @@ theorem inv_pole_bound (hunit : IsUnit (algebraMap (LetA O n) W.EE W.Q)) {ι : T
       refine dvd_of_low (fun j => e i' ζ ⟨_, hx j⟩) m (fun j => hφ ζ hζ _ m (hx j)) (hind ζ hζ m hx)
         (fun j => W.lev i' ζ (W.Q ^ η * a j)) k (fun c hc => ?_) j
       simp only [← hsm]
+
       rw [← map_sum, ← hid, hsm, map_pow]
       refine conv_low (pow_dvd_pow_of_dvd (hQ ζ hζ) _) (hhi ζ hζ _) c ?_
       push_cast
@@ -376,9 +426,9 @@ theorem indep_lead {L M ι : Type} [Field L] [AddCommGroup M] [Module L M] {w : 
   rw [h1]
   exact hi.units_smul fun _ => Units.mk0 _ hc
 
+
 set_option synthInstance.maxHeartbeats 400000 in
 set_option maxHeartbeats 2000000 in
-
 theorem heights_from_jumps : ∀ (D : Formalism.BasicNotions.D7) (HW : HWOf D.loc) (F : FonOf D.loc D.locA HW) (Cm : CmpOf D.loc D.locA HW F), P5 D HW F := by
   intro D HW F Cm l _ K s LL h T Mi hi hT hJ
   set W := (HW l).W K s LL h with hW
@@ -466,7 +516,7 @@ theorem heights_from_jumps : ∀ (D : Formalism.BasicNotions.D7) (HW : HWOf D.lo
   · refine mem_iff_roots W T hunit nb fun k a ha => hdiv k a fun i ζ hζ => ha i ζ ⟨?_, ⟨s, ?_⟩, ?_⟩
     · obtain ⟨x, -, hx, -⟩ := (hlev i ζ ⟨s, hζ⟩).1
       refine ⟨x + 1, ?_⟩
-      rw [map_add, map_one]
+      rw [map_add (f := _), map_one]
       exact eq_sub_iff_add_eq.1 hx
     · rw [hp]
       exact hζ.pow_eq_one

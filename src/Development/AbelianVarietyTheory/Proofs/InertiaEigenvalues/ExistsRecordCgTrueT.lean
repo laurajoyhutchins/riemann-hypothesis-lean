@@ -1,9 +1,58 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.CGTrueT
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.NotNonemptyZero
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LawsT
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AutomorphicFormsFiniteGL
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.GoodToralTwistStable
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.CGTrueT
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.CGTrue
+public import Formalism.LocalRingCardinality.SpanPowerMembership.ExampleLayerExistsGenerators
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.NotNonemptyZero
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AutomorphicFormsFiniteGL
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ClsLocEqOfIsLocComp
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LawsT
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.GoodToralTwistStable
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsIsLocCompAndIsLocLoc
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsFixedIff
+import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.ExistsSteinberg
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 namespace GlobalTheory.HeightCounting
@@ -12,22 +61,22 @@ open Formalism.BasicNotions Formalism.MainNotions.N Formalism.L2.Host GlobalTheo
 attribute [local instance] GlobalTheory.LocalData.complRel GlobalTheory.LocalData.isLocalField
 
 section Loc
-variable {E : Type} [Field E] [NumberField E] [IsTotallyComplex E] {a : ℕ}
+variable {E : Type} [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] {a : ℕ}
 
 theorem good_loc_ofChar (χ : HChar E) (w : HeightOneSpectrum (𝓞 E)) :
-    UpperTheory.Zero.LLC.Good (⟨1, ParLaws.toCl ((CG.ofChar χ).loc w)⟩ : IrrGL (w.adicCompletion E)) := by
-  have h : (⟨1, ParLaws.toCl ((CG.ofChar χ).loc w)⟩ : IrrGL (w.adicCompletion E)) =
+    UpperTheory.Zero.LLC.Good (⟨1, ParLaws.toCl ((CG.ofChar χ).loc w)⟩ : IrrGL (k := w.adicCompletion E)) := by
+  have h : (⟨1, ParLaws.toCl ((CG.ofChar χ).loc w)⟩ : IrrGL (k := w.adicCompletion E)) =
       IrrGL.ofChar (χ.loc w) (ParLaws.isSmoothChar_loc χ w) := ParLawsT.cls_loc_eq_of_isLocComp (CG.isLoc_ofChar χ w)
   rw [h]
   exact ⟨_, hasSupport_self (IrrGL.isCusp_ofChar _ _), fun y hy => Or.inl (by rw [Multiset.mem_singleton.1 hy]; rfl)⟩
 
 theorem cls_loc_twist (π : CG E a) (χ : HChar E) (w : HeightOneSpectrum (𝓞 E)) :
-    (⟨a, ParLaws.toCl ((π.twist χ).loc w)⟩ : IrrGL (w.adicCompletion E)) =
+    (⟨a, ParLaws.toCl ((π.twist χ).loc w)⟩ : IrrGL (k := w.adicCompletion E)) =
       IrrGL.tw ⟨a, ParLaws.toCl (π.loc w)⟩ (χ.loc w) (ParLaws.isSmoothChar_loc χ w) := by
   induction π using Quotient.inductionOn with | _ π =>
   obtain ⟨σ, hσ, -⟩ := LocEx.exists_isLocComp GlobalTheory.automorphicFormsFiniteGL E a π w
   refine (ParLawsT.cls_loc_eq_of_isLocComp (hσ.twist χ)).trans ?_
-  rw [show (⟨a, ParLaws.toCl (CG.loc (Quotient.mk _ π) w)⟩ : IrrGL (w.adicCompletion E)) = _ from
+  rw [show (⟨a, ParLaws.toCl (CG.loc (Quotient.mk _ π) w)⟩ : IrrGL (k := w.adicCompletion E)) = _ from
     ParLawsT.cls_loc_eq_of_isLocComp hσ]
   exact (IrrGL.tw_of σ.ρ σ.smooth σ.irred _ _).symm
 
@@ -46,7 +95,7 @@ theorem goodAll_tw_iff (π : HostCGu H a) (χ : HostCGu H 1) :
   haveI := host_isCMField H
   refine forall_congr' fun w => ?_
   have h := cls_loc_twist π.1 χ.1.toChar w
-  have h2 := GlobalTheory.RecT.good_tw_iff (⟨a, ParLaws.toCl (π.1.loc w)⟩ : IrrGL (w.adicCompletion H.E)) (χ.1.toChar.loc w)
+  have h2 := GlobalTheory.RecT.good_tw_iff (⟨a, ParLaws.toCl (π.1.loc w)⟩ : IrrGL (k := w.adicCompletion H.E)) (χ.1.toChar.loc w)
     (ParLaws.isSmoothChar_loc _ w)
   rw [← h] at h2
   exact h2
@@ -56,7 +105,7 @@ end Host
 section Char
 open Formalism.ConjugateSelfDual ReciprocityTheory.Gal GlobalTheory.WeilDeligne GlobalTheory.SmGL GlobalTheory.PRep GlobalTheory.SplitWeil ValuativeRel
 
-variable {E Ω : Type} [Field E] [NumberField E] [Field Ω] [Algebra E Ω] [IsAlgClosure E Ω] [IsTotallyComplex E]
+variable {E Ω : Type} [Field E] [NumberField E] [Field Ω] [Algebra E Ω] [IsAlgClosure E Ω] [_root_.NumberField.IsTotallyComplex E]
   {A : ValuationSubring Ω} {w : HeightOneSpectrum (𝓞 E)}
 
 theorem locParT_unr (hT : UpperTheory.Zero.LLC.RecTExists) (χ : HChar E) (h : IsPlaceOver A w) (hu : χ.UnrAt w) :
@@ -89,8 +138,8 @@ theorem locParT_unr (hT : UpperTheory.Zero.LLC.RecTExists) (χ : HChar E) (h : I
 
 end Char
 
-set_option maxHeartbeats 2000000 in
-set_option synthInstance.maxHeartbeats 400000 in
+
+
 
 def trueKT (hT : UpperTheory.Zero.LLC.RecTExists) (D : D7) (T : GlobalTheory.RowTie.WDTie D.nd D.naut)
     (η η' : HostCGu D.host 1)
@@ -137,8 +186,8 @@ def trueKT (hT : UpperTheory.Zero.LLC.RecTExists) (D : D7) (T : GlobalTheory.Row
     etaT_split := fun w w' hs hc a b ha hb => by
       rw [Fr η w (h1 w)] at ha; rw [Fr η w' (h1 w')] at hb; exact h4 w w' hs hc a b ha hb }
 
-set_option maxHeartbeats 2000000 in
-set_option synthInstance.maxHeartbeats 400000 in
+
+
 
 def trueCGT (hT : UpperTheory.Zero.LLC.RecTExists) (D : D7) (hE : IsEmpty D.nd.Loc) (T : GlobalTheory.RowTie.WDTie D.nd D.naut)
     (η η' h1 h2 h3 h4) :
@@ -152,7 +201,7 @@ def trueCGT (hT : UpperTheory.Zero.LLC.RecTExists) (D : D7) (hE : IsEmpty D.nd.L
   inf := fun _ _ _ => rfl
   csd := fun _ _ => Iff.rfl
 
-set_option synthInstance.maxHeartbeats 400000 in
+
 
 theorem etaLawsT (hT : UpperTheory.Zero.LLC.RecTExists) (D : D7) {χ : HChar D.host.E} (hχ : IsEtaT D.host χ) :
     haveI := host_isCMField D.host
@@ -169,7 +218,9 @@ theorem etaLawsT (hT : UpperTheory.Zero.LLC.RecTExists) (D : D7) {χ : HChar D.h
     have := hχ.unitary x
     change ‖(((χ.1 x)⁻¹ : ℂˣ) : ℂ)‖ = 1
     rw [Units.val_inv_eq_inv_val, norm_inv, this, inv_one]
-  have hu : ∀ w, (χ⁻¹).UnrAt w := fun w x hx => by rw [HChar.loc_inv, hχ.unr w x hx, inv_one]
+  have hu : ∀ w, (χ⁻¹).UnrAt w := fun w x hx => by
+    have loc_inv : (χ⁻¹).loc w x = (χ.loc w x)⁻¹ := rfl
+    rw [loc_inv, hχ.unr w x hx, inv_one]
   have P := fun w => locParT_unr hT χ (D.nd.plOm.2 w) (hχ.unr w)
   have Q := fun w => locParT_unr hT χ⁻¹ (D.nd.plOm.2 w) (hu w)
   refine ⟨⟨CG.ofChar χ, CG.isUnitary_ofChar hχ.unitary⟩, ⟨CG.ofChar χ⁻¹, CG.isUnitary_ofChar hi⟩, rfl, rfl,
@@ -182,10 +233,6 @@ theorem etaLawsT (hT : UpperTheory.Zero.LLC.RecTExists) (D : D7) {χ : HChar D.h
     have hb' := (P w').2.symm.trans hb
     rw [Multiset.singleton_inj] at ha' hb'
     rw [← ha', ← hb', ← Units.val_mul, ← mul_inv, CGTrueModel.val_split hχ hw hc, inv_one, Units.val_one]
-
-theorem CGTrueT.ralg {hT D T} (C : CGTrueT hT D T) a (π : D.naut.CG a) :
-    haveI := host_isCMField D.host; D.naut.ralg π ↔ (C.e a π).IsRegAlg := by
-  rw [D.naut.ralg_def]; simp only [C.inf]; exact (GlobalTheory.CuspRep.CG.isRegAlg_iff _).symm
 
 end GlobalTheory.HeightCounting
 

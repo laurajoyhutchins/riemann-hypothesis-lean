@@ -1,5 +1,55 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.CuspidalSplittingProjective
+module
+
+public import GroundTheory.AutomorphicForms.CuspidalSplittingCoeff
+public import Mathlib.Order.CompletePartialOrder
+public import GroundTheory.AutomorphicForms.CuspidalSplittingProjective
+import GroundTheory.AutomorphicForms.JacquetAdmissible
+import GroundTheory.AutomorphicForms.SmoothRepSchur
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -24,9 +74,6 @@ def subrepIncl (Y : Subrepresentation ρ) :
   toLinearMap := Y.toSubmodule.subtype
   isIntertwining' _ := rfl
 
-omit [ValuativeRel F] [TopologicalSpace F] [IsNonarchimedeanLocalField F] in
-theorem subrepIncl_apply (Y : Subrepresentation ρ) (y : Y.toSubmodule) :
-    subrepIncl Y y = (y : U) := rfl
 
 theorem isSmooth_toRepresentation (hρ : IsSmooth ρ) (Y : Subrepresentation ρ) :
     IsSmooth Y.toRepresentation := by
@@ -47,17 +94,13 @@ theorem isSmooth_prod (hπ : IsSmooth π) (hρ : IsSmooth ρ) : IsSmooth (π.pro
   rw [mem_stabilizerOf] at h1 h2 ⊢
   exact Prod.ext h1 h2
 
-variable (π) in
 
+variable (π) in
 def piRep (m : ℕ) : Representation ℂ (GL (Fin n) F) (Fin m → V) where
   toFun g := LinearMap.pi fun i => π g ∘ₗ LinearMap.proj i
   map_one' := by ext; simp
   map_mul' g h := by ext; simp
 
-omit [ValuativeRel F] [IsNonarchimedeanLocalField F] [TopologicalSpace F] in
-@[simp]
-theorem piRep_apply (m : ℕ) (g : GL (Fin n) F) (x : Fin m → V) (i : Fin m) :
-    piRep π m g x i = π g (x i) := rfl
 
 theorem isSmooth_piRep (hπ : IsSmooth π) (m : ℕ) : IsSmooth (piRep π m) := by
   intro x
@@ -73,27 +116,17 @@ omit [ValuativeRel F] [IsNonarchimedeanLocalField F] [TopologicalSpace F] in
 theorem HasCentralChar.piRep (hωπ : HasCentralChar π ω) (m : ℕ) :
     HasCentralChar (piRep π m) ω := fun z hz x => funext fun i => hωπ z hz (x i)
 
-variable (π) in
 
+variable (π) in
 def piIncl (m : ℕ) (i : Fin m) : Representation.IntertwiningMap π (piRep π m) where
   toLinearMap := LinearMap.single ℂ (fun _ => V) i
   isIntertwining' g := by
     ext x j
-    by_cases h : j = i
-    · subst h; simp
-    · simp [h]
+    change (Pi.single i (π g x) : Fin m → V) j = π g ((Pi.single i x : Fin m → V) j)
+    exact (LinearMap.apply_single (fun _ : Fin m => π g) i j x).symm
 
-variable (π) in
 
-def piProj (m : ℕ) (i : Fin m) : Representation.IntertwiningMap (piRep π m) π where
-  toLinearMap := LinearMap.proj i
-  isIntertwining' _ := rfl
 
-omit [ValuativeRel F] [IsNonarchimedeanLocalField F] [TopologicalSpace F] in
-theorem piIncl_apply (m : ℕ) (i : Fin m) (x : V) : piIncl π m i x = Pi.single i x := rfl
-
-omit [ValuativeRel F] [IsNonarchimedeanLocalField F] [TopologicalSpace F] in
-theorem piProj_apply (m : ℕ) (i : Fin m) (x : Fin m → V) : piProj π m i x = x i := rfl
 
 end Constructions
 
@@ -114,7 +147,7 @@ theorem exists_retraction [π.IsIrreducible] (hπ : IsSmooth π) (hsc : IsSuperc
       (subrepIncl Y).comp (Representation.IntertwiningMap.snd ℂ π Y.toRepresentation)
   have hj : ∀ p : V × Y.toSubmodule, j p = t p.1 + (p.2 : U) := fun p => rfl
   have hjinj : Injective j := by
-    rw [injective_iff_map_eq_zero]
+    set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
     intro p hp
     rw [hj] at hp
     have h1 : p.1 = 0 := ht p.1 (by
@@ -133,8 +166,8 @@ theorem exists_retraction [π.IsIrreducible] (hπ : IsSmooth π) (hsc : IsSuperc
   · have := hF (0, ⟨y, hy⟩)
     rwa [hj, map_zero, zero_add] at this
 
-omit [ValuativeRel F] [TopologicalSpace F] [IsNonarchimedeanLocalField F] in
 
+omit [ValuativeRel F] [TopologicalSpace F] [IsNonarchimedeanLocalField F] in
 theorem iSup_range_stable (s : Finset (Representation.IntertwiningMap π ρ))
     (g : GL (Fin n) F) {y : U}
     (hy : y ∈ ⨆ t ∈ s, LinearMap.range (t : Representation.IntertwiningMap π ρ).toLinearMap) :
@@ -187,7 +220,7 @@ theorem exists_apply_ne_zero_of_mem_iSup [π.IsIrreducible] (hπ : IsSmooth π)
           exact hyY (Y.toSubmodule.add_mem hwL hb)
       obtain ⟨Fm, hFt, hFY⟩ := exists_retraction hπ hsc hωπ hρ hωρ Y t hL
       refine ⟨Fm, ?_⟩
-      rw [map_add, Representation.IntertwiningMap.toLinearMap_apply, hFt, hFY b hb, add_zero]
+      rw [map_add (f := _), Representation.IntertwiningMap.toLinearMap_apply, hFt, hFY b hb, add_zero]
       rintro rfl
       exact hyY (by rw [map_zero, zero_add]; exact hb)
 
@@ -199,13 +232,13 @@ variable {V U : Type*} [AddCommGroup V] [Module ℂ V] [AddCommGroup U] [Module 
   {π : Representation ℂ (GL (Fin n) F) V} {ρ : Representation ℂ (GL (Fin n) F) U}
   {ω : GL (Fin n) F → ℂ}
 
-variable (π ρ) in
 
+variable (π ρ) in
 def isotypicPart : Submodule ℂ U :=
   ⨆ t : Representation.IntertwiningMap π ρ, LinearMap.range t.toLinearMap
 
-variable (π ρ) in
 
+variable (π ρ) in
 def isotypicKernel : Submodule ℂ U :=
   ⨅ Fm : Representation.IntertwiningMap ρ π, LinearMap.ker Fm.toLinearMap
 
@@ -221,20 +254,9 @@ theorem apply_mem_isotypicPart (t : Representation.IntertwiningMap π ρ) (x : V
   (le_iSup (fun t : Representation.IntertwiningMap π ρ => LinearMap.range t.toLinearMap) t)
     ⟨x, rfl⟩
 
-omit [ValuativeRel F] [TopologicalSpace F] [IsNonarchimedeanLocalField F] in
 
-theorem isotypicPart_stable (g : GL (Fin n) F) {u : U} (hu : u ∈ isotypicPart π ρ) :
-    ρ g u ∈ isotypicPart π ρ := by
-  have hle : isotypicPart π ρ ≤ (isotypicPart π ρ).comap (ρ g) := by
-    refine iSup_le fun t => ?_
-    rintro _ ⟨x, rfl⟩
-    rw [Submodule.mem_comap, Representation.IntertwiningMap.toLinearMap_apply,
-      ← Representation.IntertwiningMap.isIntertwining]
-    exact apply_mem_isotypicPart t (π g x)
-  exact hle hu
 
 omit [ValuativeRel F] [TopologicalSpace F] [IsNonarchimedeanLocalField F] in
-
 theorem isotypicKernel_stable (g : GL (Fin n) F) {u : U} (hu : u ∈ isotypicKernel π ρ) :
     ρ g u ∈ isotypicKernel π ρ := by
   rw [mem_isotypicKernel] at hu ⊢
@@ -279,7 +301,7 @@ theorem exists_sub_mem_isotypicKernel (u : U) :
     { toLinearMap := LinearMap.pi fun i => (Gs i).toLinearMap
       isIntertwining' := fun g => by
         ext x i
-        simp [Representation.IntertwiningMap.isIntertwining] }
+        simp [piRep, Representation.IntertwiningMap.isIntertwining] }
   have hΓ : ∀ x i, Γ x i = Gs i x := fun _ _ => rfl
 
   let W0 : Subrepresentation ρ :=
@@ -299,7 +321,7 @@ theorem exists_sub_mem_isotypicKernel (u : U) :
       obtain ⟨g, rfl⟩ := hy
       rw [Representation.IntertwiningMap.isIntertwining, hH, map_zero]
     | zero => exact map_zero H
-    | add a b _ _ ha hb => rw [map_add, ha, hb, add_zero]
+    | add a b _ _ ha hb => rw [map_add (f := _), ha, hb, add_zero]
     | smul c a _ ha => rw [map_smul, ha, smul_zero]
   let Γ0 := Γ.comp (subrepIncl W0)
   have hΓ0 : ∀ x i, Γ0 x i = Gs i (x : U) := fun _ _ => rfl
@@ -346,6 +368,7 @@ theorem exists_sub_mem_isotypicKernel (u : U) :
     choose c hcx using hc
     have hΦ : ∀ y : Fin m → V, Φ y = ∑ i, c i • y i := fun y => by
       conv_lhs => rw [← Finset.univ_sum_single y]
+
       rw [map_sum]
       exact Finset.sum_congr rfl fun i _ => hcx i (y i)
     have hzero : ∑ i, c i • bE i = 0 := by
@@ -367,6 +390,7 @@ theorem exists_sub_mem_isotypicKernel (u : U) :
   have hGu' : ∀ i, Gs i u' = Gs i u := by
     intro i
     have h2 : Γ0 (∑ k, s k (Gs k u)) = Γ u := by
+
       rw [map_sum]
       have h3 : ∀ k, Γ0 (s k (Gs k u)) = Pi.single k (Gs k u) := fun k => by
         rw [← Representation.IntertwiningMap.comp_apply, hs]

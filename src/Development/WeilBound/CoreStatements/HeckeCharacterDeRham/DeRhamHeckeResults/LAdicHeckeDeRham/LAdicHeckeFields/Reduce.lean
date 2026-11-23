@@ -1,21 +1,66 @@
-import Mathlib
-import Development.AutomorphicArithmetic.ThetaCorrespondence.LocalComparison.CoeNeTo6
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.HeckeLAdicCharacterDeRham
-import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.DeRhamJacobian.IsdRJ
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.HasPeriods
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.HeckeLAdicCharacterDeRham
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.HasPeriods
+public import Development.WeilBound.CoreStatements.CrystallinePeriodRings.LocTied6
+public import Development.AutomorphicArithmetic.ThetaCorrespondence.LocalComparison.LocTied6
+public import Development.AutomorphicArithmetic.ThetaCorrespondence.LocalComparison.LocTiedOf6
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.DeRhamRankLubinTateLineStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsLubinTateCharacterUnitaryStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsOpenUnitSubgroupKerStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.GaloisCharacterArtinCompatStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.GaloisOpenSubgroupLocalUnitsStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ImportsTer
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LocalCharacterFiniteExtensionStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LocalCharacterInducedTiedSixStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LocalCharacterInducedTiedStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LocalGaloisEmbeddingExtensionStatement
 import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.UniqueEmbeddingExtension
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsLubinTateCharacterUnitaryStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LocalGaloisEmbeddingExtensionStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ImportsTer
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.DeRhamRankLubinTateLineStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.GaloisCharacterArtinCompatStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsOpenUnitSubgroupKerStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.GaloisOpenSubgroupLocalUnitsStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LocalCharacterFiniteExtensionStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LocalCharacterInducedTiedStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LocalCharacterInducedTiedSixStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.UnramifiedCharactersDeRhamJumpZeroStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.UniqueEmbeddingExtensionStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.UniqueEmbeddingExtensionStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.UnramifiedCharactersDeRhamJumpZeroStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.TripleAtt
+
+@[expose] public section
+
 noncomputable section
 open NumberField IsDedekindDomain Neutral.B1 Formalism.ConjugateSelfDual ReciprocityTheory.Gal Formalism.L2.Host Formalism.BasicNotions Formalism.BasicNotions.Loc Formalism.WeaklyAdmissibleFiltrations
 open GlobalTheory.HeckeGal GlobalTheory.Pst GlobalTheory.TripleGal GlobalTheory.CompanionTheory.LTHodge
@@ -76,7 +121,8 @@ theorem lubinTate_at_embedding (HP : LTPeriods) : ∀ {E Ω : Type} [Field E] [N
     rfl
   · intro g
     simpa [hψ] using (hnorm _).trans (hn (Bw.e g))
-  · show Module.finrank _ ↥(DdR (P.PD Bw.Kw) (Bw.repE LL' _)) = _
+  · set_option synthInstance.maxHeartbeats 100000 in
+    show Module.finrank _ ↥(DdR (P.PD Bw.Kw) (Bw.repE LL' _)) = _
     rw [repE_eq]; exact hd
   · intro τ' a
     show multV (P.PD Bw.Kw) (Bw.repE LL' _) τ' a = _
@@ -116,7 +162,7 @@ variable {E Ω : Type} [Field E] [NumberField E] [Field Ω] [Algebra E Ω] [IsAl
 include hT hA hI hLL
 
 theorem isdRJ_one_hlc : IsdRJ Bw P LL' 1 0 := by
-  refine GlobalTheory.T.local_character_induced_agree P AI hT w A hA O Bw hI LL' hLL 1 ?_ ?_ ⊤ ?_ ?_
+  refine GlobalTheory.T.local_character_induced_agree P AI (UpperTheory.Lit.Cmp.locTied_of6 l P AI hT) w A hA O Bw hI LL' hLL 1 ?_ ?_ ⊤ ?_ ?_
   · simp only [MonoidHom.one_apply, Units.val_one]
     exact continuous_const
   · intro g
@@ -132,10 +178,10 @@ theorem isdRJ_zpow_hlc {ψ : ↥(Dec (F := E) A) →* (↥LL'.1)ˣ} {J : (↥Bw.
   · simpa using isdRJ_one_hlc P AI hT hA Bw hI LL' hLL
   · intro i ih
     rw [zpow_add_one, add_smul, one_smul]
-    exact GlobalTheory.T.local_character_induced_tied P AI hT w A hA O Bw hI LL' hLL _ _ _ _ ih h
+    exact GlobalTheory.T.local_character_induced_tied P AI (UpperTheory.Lit.Cmp.locTied_of6 l P AI hT) w A hA O Bw hI LL' hLL _ _ _ _ ih h
   · intro i ih
     rw [zpow_sub_one, sub_smul, one_smul, sub_eq_add_neg]
-    exact GlobalTheory.T.local_character_induced_tied P AI hT w A hA O Bw hI LL' hLL _ _ _ _ ih
+    exact GlobalTheory.T.local_character_induced_tied P AI (UpperTheory.Lit.Cmp.locTied_of6 l P AI hT) w A hA O Bw hI LL' hLL _ _ _ _ ih
       (GlobalTheory.T.local_character_induced_tied_six P AI hT w A hA O Bw hI LL' hLL _ _ h)
 
 theorem isdRJ_prod_hlc {ι' : Type} (s : Finset ι') (ψ : ι' → (↥(Dec (F := E) A) →* (↥LL'.1)ˣ))
@@ -145,7 +191,7 @@ theorem isdRJ_prod_hlc {ι' : Type} (s : Finset ι') (ψ : ι' → (↥(Dec (F :
   | empty => simpa using isdRJ_one_hlc P AI hT hA Bw hI LL' hLL
   | insert a s ha ih =>
     rw [Finset.prod_insert ha, Finset.sum_insert ha]
-    exact GlobalTheory.T.local_character_induced_tied P AI hT w A hA O Bw hI LL' hLL _ _ _ _ (h a (Finset.mem_insert_self a s))
+    exact GlobalTheory.T.local_character_induced_tied P AI (UpperTheory.Lit.Cmp.locTied_of6 l P AI hT) w A hA O Bw hI LL' hLL _ _ _ _ (h a (Finset.mem_insert_self a s))
       (ih fun i hi => h i (Finset.mem_insert_of_mem hi))
 
 end Jumps
@@ -158,20 +204,21 @@ open PositivityTheory.HodgeLocalCharacter.HLC
 
 theorem field_of_ltPeriods (HP : LTPeriods) : GlobalTheory.Published.HeckeLAdicCharacterDeRham := by
   intro E Ω _ _ _ _ _ l _ P AI hT ι art hart χ n μ hχ hμ hL w A hA O _ _ _ Bw hI
+  have hT6 := UpperTheory.Lit.Cmp.locTied6 l P AI hT
   obtain ⟨LL', ψ, hLL, hmod, hψμ, hψc, hψn⟩ := GlobalTheory.T.local_character_finite_extension μ hμ w A hA O Bw
   have : Finite {j : w.adicCompletion E →+* Qbar l // Continuous j} := finite_contEmb w
   have : Fintype {j : w.adicCompletion E →+* Qbar l // Continuous j} := Fintype.ofFinite _
   choose lam hlc hln hlJ hlx using
     fun j : {j : w.adicCompletion E →+* Qbar l // Continuous j} =>
-      lubinTate_at_embedding HP P AI hT w A hA O Bw hI art hart LL' hLL j
+      lubinTate_at_embedding HP P AI hT6 w A hA O Bw hI art hart LL' hLL j
   let nj : {j : w.adicCompletion E →+* Qbar l // Continuous j} → ℤ :=
     fun j => n ((ι.toRingHom.comp j.1).comp (algebraMap E (w.adicCompletion E)))
   let Jj : {j : w.adicCompletion E →+* Qbar l // Continuous j} → (↥Bw.Kw.1 →ₐ[ℚ_[l]] ↥LL'.1) → ℤ :=
     fun j τ' => if IsInduced Bw (j.1.comp (algebraMap E (w.adicCompletion E))) τ' then -1 else 0
   let Λ : ↥(Dec (F := E) A) →* (↥LL'.1)ˣ := ∏ j, lam j ^ nj j
   have hΛ : IsdRJ Bw P LL' Λ (∑ j, nj j • Jj j) :=
-    isdRJ_prod_hlc P AI hT hA Bw hI LL' hLL _ _ _ fun j _ =>
-      isdRJ_zpow_hlc P AI hT hA Bw hI LL' hLL (hlJ j) (nj j)
+    isdRJ_prod_hlc P AI hT6 hA Bw hI LL' hLL _ _ _ fun j _ =>
+      isdRJ_zpow_hlc P AI hT6 hA Bw hI LL' hLL (hlJ j) (nj j)
   have hne : ∀ j g, ((lam j g : ↥LL'.1) : Qbar l) ≠ 0 := fun j g =>
     norm_ne_zero_iff.mp (by rw [hln j g]; exact one_ne_zero)
   have hΛv : ∀ g, ((Λ g : ↥LL'.1) : Qbar l) = ∏ j, ((lam j g : ↥LL'.1) : Qbar l) ^ nj j := fun g =>

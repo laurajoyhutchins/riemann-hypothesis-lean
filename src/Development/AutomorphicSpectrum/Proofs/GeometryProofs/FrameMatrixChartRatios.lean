@@ -1,5 +1,54 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.CoordTieCompEquiv
+module
+
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.CoordTieCompEquiv
+public import Mathlib.RingTheory.RegularLocalRing.Defs
+public import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+public import Mathlib.Algebra.BigOperators.Field
+
+@[expose] public section
 
 noncomputable section
 
@@ -26,7 +75,7 @@ theorem adjoin_int_mem {K : Type*} [Field K] (L : Subfield K) {t : Set K} (ht : 
     (hg : g ∈ Algebra.adjoin ℤ t) : g ∈ L := by
   induction hg using Algebra.adjoin_induction with
   | mem a ha => exact ht a ha
-  | algebraMap n => simpa using intCast_mem L n
+  | algebraMap n => simp
   | add a b _ _ ha hb => exact add_mem ha hb
   | mul a b _ _ ha hb => exact mul_mem ha hb
 
@@ -55,20 +104,20 @@ theorem genU_of_lt (s : S) {l k : Fin (r s)} (h : l < k) : genU Ω r s l k = 0 :
 theorem genU_self (s : S) (k : Fin (r s)) : genU Ω r s k k = 1 := by
   simp [genU]
 
-theorem det_genU_rows (s : S) (k l : Fin (r s)) (hkl : k ≤ l) :
+theorem det_genU_rows (s : S) (k l : Fin (r s)) (_hkl : k ≤ l) :
     ((genU Ω r s).submatrix
       (fun i : Fin ((k : ℕ) + 1) => if (i : ℕ) = k then l else Fin.castLE k.2 i) (Fin.castLE k.2)).det
       = genU Ω r s l k := by
-  rw [Matrix.det_of_lowerTriangular]
+  rw [Matrix.det_of_isLowerTriangular]
   · rw [Fin.prod_univ_castSucc]
     have h1 : ∀ i : Fin (k : ℕ), (genU Ω r s).submatrix
         (fun i : Fin ((k : ℕ) + 1) => if (i : ℕ) = k then l else Fin.castLE k.2 i) (Fin.castLE k.2)
         i.castSucc i.castSucc = 1 := by
       intro i
       have : ((i.castSucc : Fin ((k : ℕ) + 1)) : ℕ) ≠ k := by simpa using i.2.ne
-      simp only [Matrix.submatrix_apply, if_neg this]
+      simp only [Matrix.submatrix_apply, ite_eq_right this]
       exact genU_self s _
-    simp only [h1, Finset.prod_const_one, one_mul, Matrix.submatrix_apply, Fin.val_last, if_true]
+    simp only [h1, Finset.prod_const_one, one_mul, Matrix.submatrix_apply, Fin.val_last, ite_true]
     congr 1
   · intro i j hij
     have hij' : i < j := hij
@@ -76,7 +125,7 @@ theorem det_genU_rows (s : S) (k l : Fin (r s)) (hkl : k ≤ l) :
       have := j.2
       have : (i : ℕ) < j := hij'
       omega
-    simp only [Matrix.submatrix_apply, if_neg hi]
+    simp only [Matrix.submatrix_apply, ite_eq_right hi]
     exact genU_of_lt s (show Fin.castLE k.2 i < Fin.castLE k.2 j from hij')
 
 variable {E : Type} [AddCommGroup E] [Module Ω E] {n : S → ℕ}
@@ -125,7 +174,7 @@ theorem exists_minor_ne_zero (φ : ∀ s, Fin (n s) → Module.Dual Ω E) (c : �
     (hB : B * Matrix.of (fun j l => φ s j (c s l)) = 1) (k : Fin (r s)) :
     ∃ f : Fin ((k : ℕ) + 1) → Fin (n s), ((flagMat φ c s).submatrix f (Fin.castLE k.2)).det ≠ 0 := by
   by_contra hall
-  push_neg at hall
+  push Not at hall
   have h1 := det_genU_submatrix φ c s B hB k.2
     (fun i : Fin ((k : ℕ) + 1) => if (i : ℕ) = k then k else Fin.castLE k.2 i)
   rw [det_genU_rows s k k le_rfl, genU_self, Finset.sum_eq_zero (fun f _ => by rw [hall f, mul_zero])] at h1
@@ -169,7 +218,7 @@ theorem mem_of_genU_mem (L : Subfield (GenField Ω r)) (hbase : ∀ b : Ω, alge
       refine mul_mem hp ?_
       obtain ⟨s, ⟨⟨l, k⟩, h⟩⟩ := i
       have := hentry s k l (le_of_lt h)
-      rwa [genU, dif_pos h] at this
+      rwa [genU, dite_eq_left h] at this
   obtain ⟨p, q, -, rfl⟩ := IsFractionRing.div_surjective (A := MvPolynomial (GenIx r) Ω) a
   exact div_mem (hpoly p) (hpoly q)
 

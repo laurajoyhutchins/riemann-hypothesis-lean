@@ -1,4 +1,47 @@
-import Mathlib
+module
+
+public import Mathlib.NumberTheory.BernoulliPolynomials
+public import Mathlib.NumberTheory.LSeries.DirichletContinuation
+public import Mathlib.NumberTheory.Primorial
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -33,6 +76,7 @@ def bnd (N k : ℕ) : ℝ := 16 * (N : ℝ) ^ (k + 1) * (k.factorial : ℝ)
 theorem map_genB {R S : Type*} [CommRing R] [Algebra ℚ R] [CommRing S] [Algebra ℚ S] {N : ℕ} (f : R →+* S) (k : ℕ)
     (Φ : ZMod N → R) : f (genB k Φ) = genB k (fun a => f (Φ a)) := by
   unfold genB
+
   rw [map_sum]
   refine Finset.sum_congr rfl fun a _ => ?_
   rw [map_mul, RingHom.map_rat_algebraMap]
@@ -57,9 +101,6 @@ theorem den_pos {N : ℕ} (hN : 0 < N) (k : ℕ) : 0 < den N k := by
 theorem den_dvd {M N : ℕ} (h : M ∣ N) (k : ℕ) : den M k ∣ den N k := by
   unfold den
   exact Nat.mul_dvd_mul_right h _
-
-example : bcoef 1 1 1 = 1 / 2 := by norm_num [bcoef]
-example : bcoef 3 1 1 - bcoef 3 1 2 = -1 / 3 := by norm_num [bcoef]
 
 end UpperTheory.V.Bern
 

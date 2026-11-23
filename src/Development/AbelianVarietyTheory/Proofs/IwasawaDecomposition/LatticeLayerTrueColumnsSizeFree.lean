@@ -1,7 +1,44 @@
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.TiedColumnData
-import Formalism.SharpRestriction.GlobalSchurBounds.ThickPlacesCorollaryOfAnyTranslate
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.FixedVectorEqOfStandardData
-import Formalism.LocalToGlobal.GroupLattices.ComparisonMaps.ComparisonZeroEmbedding
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.TiedColumnData
+import Formalism.LocalRingCardinality.SpanPowerMembership.GatTies
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.MainNotions Formalism.MainNotions.Inhab Formalism.L2.Host GlobalTheory.EX GlobalTheory.EX.OB GlobalTheory.Mem GlobalTheory.Mem.Col2 GlobalTheory.Mem.Top GlobalTheory.Mem.Top.GroupRetwisting GlobalTheory.Mem.Top.Bl NumberField IsDedekindDomain
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
 
@@ -10,13 +47,13 @@ namespace GlobalTheory.GyLat
 open Formalism.L2.G Formalism.MainNotions.G Formalism.UG Formalism.FrobeniusOrbits
 open scoped TensorProduct
 
-open Classical in
 
+open Classical in
 theorem arith_bsH_eq {φ : Formalism.HC.Frame} (h t : φ.A) : Formalism.L2.GlobalTheoryTheory.Arith.bsH h t = Formalism.L2.G.bsH φ h t := by
   rw [bsH_eq_bsA]
   have hex : ∃ v : ℕ, ∃ i : ℕ, φ.ofNat v + i • h = t := ⟨t.val, 0, by simp⟩
   unfold Formalism.L2.GlobalTheoryTheory.Arith.bsH
-  rw [dif_pos hex]
+  rw [dite_eq_left hex]
   unfold Formalism.MainNotions.Inhab.bsA
   congr 1
   apply le_antisymm
@@ -122,9 +159,9 @@ theorem latTiedAt_canon {D : D7} (L : SizeData₂ D) (X : Inst D L) (hb : ∀ h 
       rw [hpos, tau_coe_val]
       unfold aL
       by_cases ht : Formalism.L2.G.bsH D.R.toFrame (hP D p) x + s.val • hP D p ∈ D.host.TT
-      · rw [if_pos ((tau_top_places_iff D _).2 ht), dif_pos ht]
+      · rw [if_pos ((tau_top_places_iff D _).2 ht), dite_eq_left ht]
         exact (lamRec_top L u _ ⟨_, ht⟩ rfl).1
-      · rw [if_neg (fun h => ht ((tau_top_places_iff D _).1 h)), dif_neg ht]
+      · rw [if_neg (fun h => ht ((tau_top_places_iff D _).1 h)), dite_eq_right ht]
     have hb' : (fillsRec D u (D.R.iota (hP D p)) hS (rRec L p) Lc I ψ y e c hcl).b
         (vOfH D.R.toFrame (hP D p) (Formalism.L2.G.bsH D.R.toFrame (hP D p) x)) s =
         bL L (Formalism.L2.G.bsH D.R.toFrame (hP D p) x + s.val • hP D p) := by
@@ -133,8 +170,8 @@ theorem latTiedAt_canon {D : D7} (L : SizeData₂ D) (X : Inst D L) (hb : ∀ h 
       rw [hpos, tau_coe_val]
       unfold bL
       by_cases ht : Formalism.L2.G.bsH D.R.toFrame (hP D p) x + s.val • hP D p ∈ D.host.TT
-      · rw [if_pos ((tau_top_places_iff D _).2 ht), dif_pos ht, (lamRec_top L u _ ⟨_, ht⟩ rfl).2, neg_neg]
-      · rw [if_neg (fun h => ht ((tau_top_places_iff D _).1 h)), dif_neg ht]
+      · rw [if_pos ((tau_top_places_iff D _).2 ht), dite_eq_left ht, (lamRec_top L u _ ⟨_, ht⟩ rfl).2, neg_neg]
+      · rw [if_neg (fun h => ht ((tau_top_places_iff D _).1 h)), dite_eq_right ht]
     refine ⟨?_, hmem, fun _ => ⟨ha, hb'⟩, fun jj hj => ?_⟩
     · show ((D.eTau (D.eTau.symm (posG (zH D.R.toFrame (hP D p)) _)) : D.R.Psi) : D.R.GG) = _
       rw [Equiv.apply_symm_apply, hpos]
@@ -164,7 +201,7 @@ noncomputable def fillsC (c : ℕ) (hcl : ∀ u, CloudBound (recG D sc Ce Lc X h
   fillsRec D u _ (X u w h).hS (rSc sc D.R.k (D.what₂.places.resChar w)) (Lc u) (X u w h).I (X u w h).ψ
     (repP (Lc u) _) (epSc D.R sc Ce (D.what₂.places.resChar w)) c ⟨(hcl u).top, (hcl u).off, (hcl u).fill⟩
 
-set_option maxHeartbeats 4000000 in
+
 
 theorem latTied_fillsC (c : ℕ) (hcl : ∀ u, CloudBound (recG D sc Ce Lc X hd) u c)
     (Lv : ∀ u w h, Levels (fillsC D sc Ce Lc X hd c hcl u w h)) (Ch : ∀ u w h, Chain (Lv u w h))
@@ -198,7 +235,7 @@ open Formalism.L2.G Formalism.MainNotions.G Formalism.UG Formalism.FrobeniusOrbi
 
 attribute [local instance] Formalism.BasicNotions.factResChar
 
-set_option maxHeartbeats 4000000 in
+
 
 theorem latLayer_of_eq (sc : Scale) (D : D7) (Gt : GatTies D) (D0 : D7) (Ce : ℝ)
     (Lc : ∀ u, ColLevel D0.R D0.host.F D0.host.E D0.sp D0.host.g (D0.mem u).C (D0.mem u).A (D0.clsLat u))
@@ -232,7 +269,7 @@ namespace GlobalTheory.Mem.Top.Bl
 
 open GlobalTheory.GyLat
 
-set_option maxHeartbeats 4000000 in
+
 
 theorem latLayer_free : ∀ {K : Ctx} {B : Base} {f : Fr B.toPre} {T : TwDat B} (w : ColW B f T), K.Over B.toPre → Forced K B T → Pinned K B f T w →
     ∀ (Z : w.Lt) (t : ColumnDataSplitPrimes K w Z) (Wt : Set B.places.Pl) (nch : NChoice (w.D Z)) (_ : NchT w Z Wt nch) (Y : DivX (w.D Z)),

@@ -1,4 +1,65 @@
-import Formalism.HermitianCurvature.StatementE
+module
+
+public import Formalism.HermitianCurvature.StatementE
+public import Mathlib.LinearAlgebra.Lagrange
+public import Mathlib.RingTheory.Polynomial.Chebyshev
+import Mathlib.Algebra.Order.Archimedean.Real.Hom
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+public import Mathlib.Analysis.Normed.Module.HahnBanach
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Chebyshev.Basic
+public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Chebyshev.RootsExtrema
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Analysis.Calculus.Deriv.Add
+public import Mathlib.Analysis.Calculus.Deriv.Comp
+public import Mathlib.Analysis.Calculus.Deriv.Mul
+public import Mathlib.Analysis.Calculus.Deriv.Polynomial
+public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Bounds
+
+@[expose] public section
 
 namespace Formalism.FourierDecayAlt.P.Markov
 
@@ -403,6 +464,7 @@ theorem markovVector_of : Formalism.FourierDecayAlt.E.AMarkov → Formalism.Four
     exact (natDegree_C_mul_X_pow_le _ _).trans (Nat.lt_succ_iff.mp k.2)
   have hQeval : ∀ s : ℝ, Q.eval s = φ (∑ k : Fin (d + 1), s ^ (k : ℕ) • a k) := by
     intro s
+
     rw [hQ, eval_finsetSum, map_sum]
     refine Finset.sum_congr rfl fun k _ => ?_
     rw [eval_mul, eval_C, eval_pow, eval_X, map_smul, smul_eq_mul, mul_comm]
@@ -415,6 +477,7 @@ theorem markovVector_of : Formalism.FourierDecayAlt.E.AMarkov → Formalism.Four
       _ ≤ M := by rw [one_mul]; exact hM s hs
   have hQder : (derivative^[q] Q).eval t =
       φ (∑ k : Fin (d + 1), (derivative^[q] ((X : ℝ[X]) ^ (k : ℕ))).eval t • a k) := by
+
     rw [hQ, iterate_derivative_sum, eval_finsetSum, map_sum]
     refine Finset.sum_congr rfl fun k _ => ?_
     rw [iterate_derivative_C_mul, eval_mul, eval_C, map_smul, smul_eq_mul, mul_comm]

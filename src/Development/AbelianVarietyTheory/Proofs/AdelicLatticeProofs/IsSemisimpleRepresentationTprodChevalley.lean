@@ -1,7 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AdelicHermitianForms.AdelicPair
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.IsSemisimpleRepresentationTprodOfIsIrreducibleAlStatement
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.IsSemisimpleRepresentationOfISupRangeEquivariantStatement
+module
+
+public import Mathlib.Basic.Complex.Basic
+public import Mathlib.RepresentationTheory.Irreducible
+public import Mathlib.RepresentationTheory.Semisimple
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.IsSemisimpleRepresentationOfISupRangeEquivariant
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.IsSemisimpleRepresentationTprodOfIsIrreducibleAl
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open Matrix GlobalTheory.ClassFin
 open scoped Kronecker ComplexOrder TensorProduct
 
@@ -10,10 +57,10 @@ namespace GlobalTheory.ClassFin
 section
 variable {G : Type} [Group G] {V : Type} [AddCommGroup V] [Module ℂ V] {ρ : Representation ℂ G V}
 
+
 open Matrix in
 open scoped Kronecker ComplexOrder TensorProduct in
 variable {G : Type} [Group G] {V : Type} [AddCommGroup V] [Module ℂ V] {ρ : Representation ℂ G V} in
-
 theorem _root_.GlobalTheory.ClassFin.isIrreducible_toRepresentation_of_isAtom (σ : Subrepresentation ρ) (h : IsAtom σ) :
     σ.toRepresentation.IsIrreducible := by
   let F : Subrepresentation σ.toRepresentation → Subrepresentation ρ := fun τ =>
@@ -58,29 +105,6 @@ theorem _root_.GlobalTheory.ClassFin.isIrreducible_toRepresentation_of_isAtom (�
   haveI : Nontrivial (Subrepresentation σ.toRepresentation) := ⟨⟨⊥, ⊤, hne⟩⟩
   exact ⟨fun τ => (hF τ).imp (hbot τ) (htop τ)⟩
 
-theorem iSup_atoms_eq_top [FiniteDimensional ℂ V] (h : ρ.IsSemisimpleRepresentation) :
-    (⨆ σ : {σ : Subrepresentation ρ // IsAtom σ}, σ.1.toSubmodule) = ⊤ := by
-  let S : Subrepresentation ρ :=
-    ⟨⨆ σ : {σ : Subrepresentation ρ // IsAtom σ}, σ.1.toSubmodule, by
-      intro g v hv
-      have : (⨆ σ : {σ : Subrepresentation ρ // IsAtom σ}, σ.1.toSubmodule) ≤
-          (⨆ σ : {σ : Subrepresentation ρ // IsAtom σ}, σ.1.toSubmodule).comap (ρ g) :=
-        iSup_le fun σ w hw =>
-          Submodule.mem_iSup_of_mem σ (σ.1.apply_mem_toSubmodule g hw)
-      exact this hv⟩
-  haveI : WellFoundedLT (Subrepresentation ρ) :=
-    StrictMono.wellFoundedLT (f := Subrepresentation.toSubmodule) (fun _ _ hab => hab)
-  haveI : IsAtomic (Subrepresentation ρ) := isAtomic_of_orderBot_wellFounded_lt wellFounded_lt
-  obtain ⟨T, hT⟩ := exists_isCompl S
-  rcases eq_bot_or_exists_atom_le T with h0 | ⟨a, ha, haT⟩
-  · subst h0
-    have : S = ⊤ := by simpa using hT.sup_eq_top
-    exact congrArg Subrepresentation.toSubmodule this
-  · exfalso
-    have haS : a ≤ S := fun w hw =>
-      Submodule.mem_iSup_of_mem (⟨a, ha⟩ : {σ : Subrepresentation ρ // IsAtom σ}) hw
-    exact ha.1 (hT.disjoint haS haT |> le_bot_iff.mp)
-
 end
 
 open Matrix in
@@ -117,9 +141,9 @@ private theorem iSup_atoms_toSubmodule_eq_whole_of_semisimple {G : Type} [Group 
     rwa [hβbot, sup_bot_eq] at this
   exact congrArg Subrepresentation.toSubmodule hαtop
 
+
 open Matrix in
 open scoped Kronecker ComplexOrder TensorProduct in
-
 theorem _root_.GlobalTheory.ClassFin.isSemisimpleRepresentation_tprod : ∀ (G : Type) [Group G] (V : Type) [AddCommGroup V] [Module ℂ V] (ρ : Representation ℂ G V) (W : Type) [AddCommGroup W] [Module ℂ W] (ρ' : Representation ℂ G W) [FiniteDimensional ℂ V] [FiniteDimensional ℂ W], ρ.IsSemisimpleRepresentation → ρ'.IsSemisimpleRepresentation → (ρ.tprod ρ').IsSemisimpleRepresentation := by
   intro G _ V _ _ ρ W _ _ ρ' _ _ hρ hρ'
   let J := {σ : Subrepresentation ρ // IsAtom σ} × {τ : Subrepresentation ρ' // IsAtom τ}

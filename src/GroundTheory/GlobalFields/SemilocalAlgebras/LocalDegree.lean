@@ -1,5 +1,61 @@
-import Mathlib
-import GroundTheory.GlobalFields.SemilocalAlgebras.ContinuousCompletionMap
+module
+
+public import GroundTheory.GlobalFields.SemilocalAlgebras.ContinuousCompletionMap
+public import Mathlib.RingTheory.RamificationInertia.Inertia
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Finiteness.Quotient
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Topology.Algebra.Valued.NormedValued
+
+@[expose] public section
 
 namespace GroundTheory.Global
 
@@ -83,8 +139,9 @@ theorem algebraMap_completion_algebraMap_int (r : 𝓞 K) :
 
 theorem valued_algebraMap_completion (x : v.adicCompletion K) :
     Valued.v (algebraMap (v.adicCompletion K) (w.adicCompletion L) x) =
-      Valued.v x ^ w.asIdeal.ramificationIdx (𝓞 K) :=
-  valued_completionMap v w x
+      Valued.v x ^ w.asIdeal.ramificationIdx (𝓞 K) := by
+  rw [algebraMap_completion_eq]
+  exact valued_completionMap v w x
 
 variable {ι : Type*} [Fintype ι]
 
@@ -108,7 +165,7 @@ theorem valued_sum_eq_one (ω : ι → 𝓞 L)
   refine le_antisymm (by simpa using valued_sum_le v w ω d 1 hd) ?_
   by_contra hlt
   replace hlt := not_le.1 hlt
-  have he0 : w.asIdeal.ramificationIdx (𝓞 K) ≠ 0 := (Ideal.ramificationIdx_pos w.asIdeal (𝓞 K)).ne'
+  have he0 : w.asIdeal.ramificationIdx (𝓞 K) ≠ 0 := (Ideal.ramificationIdx_pos (R := 𝓞 K) w.asIdeal).ne'
   choose r hr using fun j ↦ exists_int_valued_sub_lt_one v (d j) (hd j)
   have h1 : Valued.v (algebraMap (𝓞 L) (w.adicCompletion L)
       (∑ j, algebraMap (𝓞 K) (𝓞 L) (r j) * ω j)) < 1 := by
@@ -118,6 +175,7 @@ theorem valued_sum_eq_one (ω : ι → 𝓞 L)
         ∑ j, algebraMap (v.adicCompletion K) (w.adicCompletion L)
           (d j - algebraMap (𝓞 K) (v.adicCompletion K) (r j)) *
           algebraMap (𝓞 L) (w.adicCompletion L) (ω j) := by
+
       rw [← Finset.sum_sub_distrib, map_sum]
       refine Finset.sum_congr rfl fun j _ ↦ ?_
       rw [map_mul, map_sub, algebraMap_completion_algebraMap_int]
@@ -131,6 +189,7 @@ theorem valued_sum_eq_one (ω : ι → 𝓞 L)
           w.asIdeal.ramificationIdx (𝓞 K) * 1 :=
           mul_le_mul' le_rfl (valued_algebraMap_int_le_one w (ω j))
       _ < 1 := by rw [mul_one]; exact pow_lt_one' (hr j) he0
+
   rw [valued_algebraMap_int_lt_one_iff, ← Ideal.Quotient.eq_zero_iff_mem, map_sum] at h1
   have hsum : ∑ j, Ideal.Quotient.mk v.asIdeal (r j) • Ideal.Quotient.mk w.asIdeal (ω j) = 0 := by
     rw [← h1]
@@ -152,7 +211,7 @@ theorem valued_sum_eq [Fintype ι] (ω : ι → 𝓞 L)
     Valued.v (∑ j, algebraMap (v.adicCompletion K) (w.adicCompletion L) (c j) *
       algebraMap (𝓞 L) (w.adicCompletion L) (ω j)) =
       Valued.v (c j0) ^ w.asIdeal.ramificationIdx (𝓞 K) := by
-  have he0 : w.asIdeal.ramificationIdx (𝓞 K) ≠ 0 := (Ideal.ramificationIdx_pos w.asIdeal (𝓞 K)).ne'
+  have he0 : w.asIdeal.ramificationIdx (𝓞 K) ≠ 0 := (Ideal.ramificationIdx_pos (R := 𝓞 K) w.asIdeal).ne'
   by_cases h0 : c j0 = 0
   · have hc : ∀ j, c j = 0 := fun j ↦ by
       have := hj0 j
@@ -188,8 +247,8 @@ theorem eq_of_exp_mul_pow_eq {e i i' : ℕ} (hi : i < e) (hi' : i' < e) {a b : �
   have := Int.eq_zero_of_abs_lt_dvd hdvd (by rw [abs_lt]; constructor <;> omega)
   omega
 
-omit [Fintype ι] in
 
+omit [Fintype ι] in
 theorem linearIndependent_uniformizer_pow_mul [Finite ι] (ω : ι → 𝓞 L)
     (hω : LinearIndependent (𝓞 K ⧸ v.asIdeal) (fun j ↦ Ideal.Quotient.mk w.asIdeal (ω j)))
     (π : L) (hπ : w.valuation L π = exp (-1 : ℤ)) :
@@ -202,7 +261,7 @@ theorem linearIndependent_uniformizer_pow_mul [Finite ι] (ω : ι → 𝓞 L)
   rcases isEmpty_or_nonempty ι with hι | hι
   · exact linearIndependent_empty_type
   set e := w.asIdeal.ramificationIdx (𝓞 K) with he
-  have he0 : e ≠ 0 := (Ideal.ramificationIdx_pos w.asIdeal (𝓞 K)).ne'
+  have he0 : e ≠ 0 := (Ideal.ramificationIdx_pos (R := 𝓞 K) w.asIdeal).ne'
   set P := algebraMap L (w.adicCompletion L) π with hP
   rw [Fintype.linearIndependent_iff]
   intro g hg

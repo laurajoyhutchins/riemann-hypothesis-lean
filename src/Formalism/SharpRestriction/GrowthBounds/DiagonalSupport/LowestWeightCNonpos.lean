@@ -1,6 +1,48 @@
-import Formalism.SharpRestriction.GrowthBounds.DiagonalSupport.MembDefs
-import Formalism.SharpRestriction.GrowthBounds.ValuationLowestDegreeMapFractionField
-import Formalism.SharpRestriction.GrowthBounds.GLWeightTheory
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.DiagonalSupport.MembDefs
+public import Formalism.SharpRestriction.GrowthBounds.RootWeights.DerivativeValuationBounds
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -56,7 +98,7 @@ private lemma sDegs_smul_subset_sDegs (LL : Letters ι) (S : Set ι) (c : R) (F 
     rw [hs, AddMonoidAlgebra.coeff_single_zero_mul]
   rw [h1, MvPolynomial.coeff_C_mul] at hm hdm
   rw [key] at hdm
-  have hq : (MvPolynomial.coeff m (twistSub LL S j F)).coeff d ≠ 0 := right_ne_zero_of_mul hdm
+  have hq : (AddMonoidAlgebra.coeff (twistSub LL S j F) m).coeff d ≠ 0 := right_ne_zero_of_mul hdm
   refine ⟨m, fun h0 => ?_, hq⟩
   rw [h0] at hq
   exact hq rfl
@@ -65,13 +107,6 @@ theorem valS_smul_geR (LL : Letters ι) (S : Set ι) (c : R) (F : MvPolynomial (
     valS LL S F ≤ valS LL S (c • F) := by
   unfold valS
   exact Finset.inf_mono (sDegs_smul_subset_sDegs LL S c F _)
-
-theorem lowest_weight_C_nonpos (LL : Letters ι) (S : Set ι) (c : R) :
-    lam1S LL S (C c : MvPolynomial (ι × Fin n) R) ≤ 0 := by
-  unfold lam1S
-  refine Finset.sup_le fun d hd => ?_
-  rw [eq_zero_of_mem_sDegs_C LL S c _ d hd]
-  rfl
 
 theorem lowest_weight_smul_le (LL : Letters ι) (S : Set ι) (c : R) (F : MvPolynomial (ι × Fin n) R) :
     lam1S LL S (c • F) ≤ lam1S LL S F := by
@@ -89,14 +124,6 @@ end Sm
 section Sat
 
 variable {O : Type} [CommRing O] [IsDomain O] {ι : Type} {n : ℕ} [NeZero n]
-
-theorem map_smul_inv (c : O) (hc : c ≠ 0) (x : MvPolynomial (ι × Fin n) O) :
-    MvPolynomial.map (algebraMap O (KK O)) x =
-      (algebraMap O (KK O) c)⁻¹ • MvPolynomial.map (algebraMap O (KK O)) (c • x) := by
-  have ha : algebraMap O (KK O) c ≠ 0 :=
-    (map_ne_zero_iff _ (IsFractionRing.injective O (KK O))).mpr hc
-  rw [MvPolynomial.smul_eq_C_mul x c, map_mul, MvPolynomial.map_C, ← MvPolynomial.smul_eq_C_mul,
-    smul_smul, inv_mul_cancel₀ ha, one_smul]
 
 private lemma sDegs_subset_sDegs_smul_of_ne_zero (LL : Letters ι) (S : Set ι) (c : O) (hc : c ≠ 0) (x : MvPolynomial (ι × Fin n) O)
     (j : Fin n) : sDegs LL S j x ⊆ sDegs LL S j (c • x) := by
@@ -127,7 +154,7 @@ private lemma sDegs_subset_sDegs_smul_of_ne_zero (LL : Letters ι) (S : Set ι) 
       rw [LaurentPolynomial.single_eq_C_mul_T, LaurentPolynomial.T_zero, mul_one]
       rfl
     rw [hs, AddMonoidAlgebra.coeff_single_zero_mul]
-  have hq : (coefL O n c * MvPolynomial.coeff m (twistSub LL S j x)).coeff d ≠ 0 := by
+  have hq : (coefL O n c * AddMonoidAlgebra.coeff (twistSub LL S j x) m).coeff d ≠ 0 := by
     rw [key]
     exact fun h0 => hdm (hnz _ h0)
   refine ⟨m, ?_, ?_⟩
@@ -177,11 +204,6 @@ def XG (j : G) : Submodule O (MvPolynomial (ι × Fin n) O) where
     refine ⟨fun mo hmo => a1 mo (MvPolynomial.support_smul hmo), fun q hq => ?_, fun q hq => ?_⟩
     · exact le_trans (a2 q hq) (valS_smul_geR LL q.1 c A)
     · exact le_trans (lowest_weight_smul_le LL q.1 c A) (a3 q hq)
-
-theorem mem_XG (j : G) (A : MvPolynomial (ι × Fin n) O) : A ∈ XG π LL Cv Cl F j ↔
-    (∀ mo ∈ A.support, mo ∈ F.support.image (partOf π j)) ∧
-    (∀ q ∈ Cv j, ((q.2 : ℤ) : WithTop ℤ) ≤ valS LL q.1 A) ∧ ∀ q ∈ Cl j, lam1S LL q.1 A ≤ ((q.2 : ℤ) : WithBot ℤ) := by
-  exact Iff.rfl
 
 theorem sum_of_span [Fintype G] [Nonempty G] {σ : Type} (X : G → Submodule O (MvPolynomial σ O)) (P : MvPolynomial σ O)
     (h : P ∈ Submodule.span O {y | ∃ x : G → MvPolynomial σ O, (∀ j, x j ∈ X j) ∧ y = ∏ j, x j}) :
@@ -246,7 +268,7 @@ theorem decGen (hA : ATL) (hS : ValSlice) [IsPrincipalIdealRing O] [Fintype G] [
   · intro j x hx
     rw [MvPolynomial.mem_supported]
     intro v hv
-    obtain ⟨d, hd, hvd⟩ := (MvPolynomial.mem_vars v).mp hv
+    obtain ⟨d, hd, hvd⟩ := (MvPolynomial.mem_vars_iff_mem_support v).mp hv
     obtain ⟨mo, -, rfl⟩ := Finset.mem_image.mp (hx.1 d hd)
     unfold partOf at hvd
     rw [Finsupp.mem_support_iff, Finsupp.filter_apply] at hvd
@@ -269,7 +291,7 @@ theorem decGen (hA : ATL) (hS : ValSlice) [IsPrincipalIdealRing O] [Fintype G] [
           fun q hq => (hv j q hq).trans (hvals M hM q.1 (hCv j q hq)).1,
           fun q hq => (hvals M hM q.1 (hCl j q hq)).2.trans (hl j q hq)⟩
         · intro v hv
-          have hvars : v ∈ (cM M).vars := (MvPolynomial.mem_vars v).mpr ⟨mo, hmo, hv⟩
+          have hvars : v ∈ (cM M).vars := (MvPolynomial.mem_vars_iff_mem_support v).mpr ⟨mo, hmo, hv⟩
           exact (MvPolynomial.mem_supported.mp (hcM M hM)) hvars
         · intro v hv
           exact hMs M hM v hv

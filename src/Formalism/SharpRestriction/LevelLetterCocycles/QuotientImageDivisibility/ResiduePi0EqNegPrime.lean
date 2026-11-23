@@ -1,6 +1,56 @@
-import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.CmpOfMemX
-import Formalism.SharpRestriction.LevelLetterCocycles.LatticeMembershipPolynomialGamma
-import Formalism.SharpRestriction.LevelLetterCocycles.KillerLevCoreOf
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.CrystallineLiftingInputs
+public import Formalism.SharpRestriction.LevelLetterCocycles.LemmasUnramifiedOfRingCondition
+public import Formalism.SharpRestriction.LevelLetterCocycles.ArcCoordinatesOfMembership
+public import Formalism.SharpRestriction.LevelLetterCocycles.LatticeMembershipPolynomialGamma
+public import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.CmpOfMemX
+import Formalism.SharpRestriction.LevelLetterCocycles.SaturationPullbackOfRingCondition
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PowerSeries.Inverse
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Formalism.SharpRestriction.LevelLetterCocycles.KillerLevCoreOf
+
+@[expose] public section
 
 set_option linter.unusedVariables false
 
@@ -53,8 +103,8 @@ theorem letE_idem (i : ZMod n) : (letE i : LetA O n) * letE i = letE i := Formal
 
 theorem letE_mul_mem {i : ZMod n} {g : LetA O n} (hg : g ∈ W.AΔ) : (letE i : LetA O n) * g ∈ W.AΔ := W.AΔ.mul_mem (letE_mem_AΔ W i) hg
 
-include hAq in
 
+include hAq in
 def resq (i : ZMod n) (g : LetA O n) : O :=
   if h : g ∈ W.AΔ then
     Classical.choose (hAq i ((letE i : LetA O n) * g) (letE_mul_mem W h)
@@ -69,7 +119,7 @@ theorem resq_spec (i : ZMod n) {g : LetA O n} (hg : g ∈ W.AΔ) :
     (by rw [← mul_assoc, letE_idem]))
   refine ⟨g', hg', ?_⟩
   unfold resq
-  rw [dif_pos hg]
+  rw [dite_eq_left hg]
   exact he
 
 include hAq hqc in
@@ -105,7 +155,7 @@ theorem resq_add (hR : Formalism.MainNotions.UnusedSlot80.ToolsR.RingP W) (i : Z
   obtain ⟨g₁, hg₁, e₁⟩ := resq_spec W hAq i hg
   obtain ⟨h₁, hh₁, e₂⟩ := resq_spec W hAq i hh
   refine resq_eq W hAq hqc i (W.AΔ.add_mem hg hh) (W.AΔ.add_mem hg₁ hh₁) ?_
-  rw [mul_add, e₁, e₂, map_add]
+  rw [mul_add, e₁, e₂, map_add (f := _)]
   ring
 
 include hqc in
@@ -251,7 +301,7 @@ theorem gamma_structure_of [NeZero n] [IsDomain O] (h9 : Formalism.MainNotions.D
     rw [hVq1, Pi.isUnit_iff]
     intro j
     rw [PowerSeries.isUnit_iff_constantCoeff]
-    simp only [Pi.add_apply, Pi.mul_apply, Pi.one_apply, map_add, map_mul, map_one]
+    simp only [Pi.add_apply, Pi.mul_apply, Pi.one_apply, map_add (f := _), map_mul, map_one]
     rw [show W.π₀ j = W.π₀₁ from rfl, Formalism.MainNotions.UnusedSlot80.ToolsR.π₀₁_cc hR, zero_mul, add_zero]
     exact isUnit_one
   obtain ⟨VqU, hVqU'⟩ := hVqU
@@ -456,7 +506,7 @@ theorem gamma_structure_of [NeZero n] [IsDomain O] (h9 : Formalism.MainNotions.D
       calc (qp ^ k * Y) • x = (qp ^ k * Y) • ((letE i : LetA O n) • x) := by rw [hxD.1]
         _ = (qp ^ k * ((letE i : LetA O n) * Y)) • x := by rw [smul_smul]; congr 1; ring
         _ = (qp ^ (k + 1) * Y') • x := by rw [hY', pow_succ]; congr 1; ring
-    rw [map_add, dop_smulA W T₂ hπU dop hdop hγr, hdx, hdn]
+    rw [map_add (f := _), dop_smulA W T₂ hπU dop hdop hγr, hdx, hdn]
     simp only [← algebraMap_smul (LetA O n) c]
     have e1 : W.γA W.gam (qp ^ k * g) * (Vqi ^ bb * Vp ^ hh * qp ^ a) =
         qp ^ a * (W.γA W.gam (qp ^ k * g) * (Vqi ^ bb * Vp ^ hh)) := by ring

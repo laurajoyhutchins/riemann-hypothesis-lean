@@ -1,6 +1,48 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.RowMinor
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsTraceOneIntegerConjDiffPrimeTo
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.RowMinor
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsLatticeOfAdelicPoint
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsTraceOneIntegerConjDiffPrimeTo
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField Module Matrix Formalism.BasicNotions Formalism.MainNotions.S Formalism.MainNotions.S.Lat Formalism.MainNotions.S.Cnt GlobalTheory.LoopC
 open scoped ENNReal Classical
@@ -26,7 +68,7 @@ theorem eich_inv (σ w : S.V) (t : E) (hw : S.hT w w = 0) (hwσ : S.hT w σ = 0)
     (ht : t + star t = S.hT σ σ) (x : S.V) : eich S (-σ) w (star t) (eich S σ w t x) = x := by
   have hσw : S.hT σ w = 0 := by rw [herm, hwσ, star_zero]
   rw [eich_apply, eich_apply]
-  simp only [map_sub, map_add, map_neg, map_smul,
+  simp only [map_sub, map_add (f := _), map_neg, map_smul,
     LinearMap.neg_apply, smul_eq_mul, hw, hwσ, hσw, mul_zero, sub_zero, add_zero]
   rw [← ht]
   module
@@ -36,7 +78,7 @@ theorem eich_isom (σ w : S.V) (t : E) (hw : S.hT w w = 0) (hwσ : S.hT w σ = 0
     S.hT (eich S σ w t x) (eich S σ w t y) = S.hT x y := by
   have hσw : S.hT σ w = 0 := by rw [herm, hwσ, star_zero]
   rw [eich_apply, eich_apply]
-  simp only [map_sub, map_add, map_smul, LinearMap.map_smulₛₗ₂, LinearMap.sub_apply,
+  simp only [map_sub, map_add (f := _), map_smul, LinearMap.map_smulₛₗ₂, LinearMap.sub_apply,
     LinearMap.add_apply, smul_eq_mul, hw, hwσ, hσw, mul_zero, sub_zero, add_zero, starRingEnd_apply,
     star_mul']
   rw [herm S w x, herm S σ x, ← ht]
@@ -159,7 +201,7 @@ theorem eichler_mem_unipotent : ∀ (D : D7) (T : D.host.E) (F : Fg D T) (Λ : L
   obtain ⟨θ, hθ, -⟩ := GlobalTheory.TraceOne.exists_trace_one D 2 Nat.prime_two
   refine exists_eichler (hS D) θ ?_ F Λ hΛ σ hσ w hw
   have h := congrArg (fun z : 𝓞 D.host.E => (z : D.host.E)) hθ
-  simp only [map_add, map_one, GlobalTheory.InertSign.sgO_coe] at h
+  simp only [map_add (f := _), map_one, GlobalTheory.InertSign.sgO_coe] at h
   rw [GlobalTheory.NormSum.AdLattice.star_eq_conj D]
   exact h
 

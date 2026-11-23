@@ -1,6 +1,45 @@
-import Formalism.LocalToGlobal.ProjectiveLattices.DepLaws
-import Formalism.LocalToGlobal.ProjectiveLattices.DepthTie
-import Formalism.LocalToGlobal.ProjectiveLattices.ConjNeSelfOfCM
+module
+
+public import Formalism.LocalToGlobal.ProjectiveLattices.DepLaws
+public import Formalism.LocalToGlobal.ProjectiveLattices.DepthTie
+public import Formalism.LocalToGlobal.ProjectiveLattices.ConjNeSelfOfCM
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -37,6 +76,7 @@ theorem satDir_of (hS : ChartSaturated Xo c) {T : CDVR} {io : c.F →+* T.Fr} {y
     intro j
     rw [huv, map_mul, hw]
   refine (Finset.sum_congr rfl (fun j _ => e1 j)).trans ?_
+
   rw [← map_sum]
   have h3 := congrFun (congrFun hwA (emb i')) (emb i)
   simp only [Matrix.mul_apply, Matrix.of_apply, Matrix.one_apply] at h3
@@ -101,12 +141,11 @@ def depRun (T : Core D) (EX : ErrX D) (Tn : ℕ+) (vd : ℕ → ℝ) (wL wF ka :
     (fun j => ∑ τ, ∑ i, (ka j).aP τ i) fun j => ∑ τ, ∑ i, (ka j).aM τ i
 
 theorem lawsPi_depRun [StarRing (𝓞 D.host.E)] {T : Core D} (h : LawsM T) (EX : ErrX D) (Tn : ℕ+) (vd : ℕ → ℝ) (wL wF ka : ∀ j, WeightFamilies.Wt D j)
-    (hn : ∀ j, InR D j → 2 * D.R.f * D.R.r ≤ (wL j).n) : LawsPi T (depRun T EX Tn vd wL wF ka) where
-  page := ⟨rfl, rfl, rfl, rfl, rfl, rfl⟩
-  tPos := tPos_depDataOf ..
-  sm := rfl
-  wts j hj := ⟨(dom_wtA (wL j)).1, hn j hj⟩
-  piSplit := piSplit_depDataOf ..
-  piHalf := piHalf_depDataOf _ _ _ _ _ _ _ _ _ h
+    (hn : ∀ j, InR D j → 2 * D.R.f * D.R.r ≤ (wL j).n) : LawsPi T (depRun T EX Tn vd wL wF ka) := by
+  refine ⟨⟨rfl, rfl, rfl, rfl, rfl, rfl⟩, ?_, rfl, ?_, ?_, ?_⟩
+  · exact tPos_depDataOf ..
+  · exact fun j hj => ⟨(dom_wtA (wL j)).1, hn j hj⟩
+  · exact piSplit_depDataOf ..
+  · exact piHalf_depDataOf _ _ _ _ _ _ _ _ _ h
 
 end Formalism.L2.Pj

@@ -1,10 +1,51 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.PadicIsNonarchimedeanLocalField
+public import Mathlib.Data.Matrix.ColumnRowPartitioned
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.VolumeFlatSection
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ChainStepIdentities
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.PadicIsNonarchimedeanLocalField
-import Development.AbelianVarietyTheory.Definitions.Divisors.T2SpaceGeneralLinearGroup
-import Development.AbelianVarietyTheory.Definitions.Divisors.EntireEqOfHalfPlane
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RowBlockIndicatorFromLtIff
+import Development.AbelianVarietyTheory.Definitions.Foundations.IsIwasawaOfIsCompact
+import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.PairwiseDisjointCell
+
+@[expose] public section
 
 open MeasureTheory ValuativeRel Matrix GlobalTheory.SplitWeil GlobalTheory.Doubling GlobalTheory.GLDoubling GlobalTheory.IndefiniteRowSideFullHecke.VolumeFlatSection
 open scoped NNReal ENNReal
@@ -27,47 +68,10 @@ theorem StdSupp.det_ne {ϖ : kˣ} {c : ℕ} {x : Matrix (Fin n ⊕ Fin n') (Fin 
   rw [h0, map_zero] at this
   exact zero_ne_one this
 
-open Classical in
 
+open Classical in
 def stdDatum (μ : kˣ →* ℂˣ) (ϖ : kˣ) (c : ℕ) (x : Matrix (Fin n ⊕ Fin n') (Fin n) k) : ℂ :=
   if h : StdSupp ϖ c x then (((μ (Units.mk0 _ h.det_ne))⁻¹ : ℂˣ) : ℂ) else 0
-
-theorem int_mul {m p r : Type} [Fintype p] {A : Matrix m p k} {B : Matrix p r k} (hA : ∀ i j, A i j ∈ 𝒪[k])
-    (hB : ∀ i j, B i j ∈ 𝒪[k]) (i j) : (A * B) i j ∈ 𝒪[k] := by
-  rw [Matrix.mul_apply]
-  exact Subring.sum_mem _ fun l _ => mul_mem (hA i l) (hB l j)
-
-theorem cball_mul {m p r : Type} [Fintype p] {s : kˣ} {A : Matrix m p k} {B : Matrix p r k}
-    (hA : ∀ i j, A i j ∈ cball s) (hB : ∀ i j, B i j ∈ 𝒪[k]) (i j) : (A * B) i j ∈ cball s := by
-  rw [Matrix.mul_apply]
-  refine Finset.sum_induction _ (· ∈ cball s) (fun _ _ => add_mem_cball) (by simp [cball]) fun l _ => ?_
-  have h1 := hA i l
-  have h2 := hB l j
-  simp only [cball, Set.mem_setOf_eq, map_mul] at h1 ⊢
-  rw [Valuation.mem_integer_iff] at h2
-  calc valuation k (A i l) * valuation k (B l j) ≤ valuation k (s : k) * 1 := mul_le_mul' h1 h2
-    _ = _ := mul_one _
-
-theorem toRows₁_mul {m : Type} [Fintype m] (x : Matrix (Fin n ⊕ Fin n') m k) (g : Matrix m (Fin n) k) :
-    (x * g).toRows₁ = x.toRows₁ * g := by ext i j; simp [Matrix.toRows₁, Matrix.mul_apply]
-
-theorem toRows₂_mul {m : Type} [Fintype m] (x : Matrix (Fin n ⊕ Fin n') m k) (g : Matrix m (Fin n) k) :
-    (x * g).toRows₂ = x.toRows₂ * g := by ext i j; simp [Matrix.toRows₂, Matrix.mul_apply]
-
-theorem valuation_det_KO {g : GL (Fin n) k} (hg : g ∈ KO k (Fin n)) : valuation k g.val.det = 1 := by
-  obtain ⟨u, rfl⟩ := hg
-  have h1 : (Matrix.GeneralLinearGroup.map (algebraMap 𝒪[k] k) u).val.det = algebraMap 𝒪[k] k u.val.det :=
-    ((algebraMap 𝒪[k] k).map_det _).symm
-  rw [h1]
-  exact (Valuation.integer.integers (valuation k)).one_of_isUnit ((Matrix.isUnit_iff_isUnit_det _).1 u.isUnit)
-
-theorem StdSupp.mul {ϖ : kˣ} {c : ℕ} {x : Matrix (Fin n ⊕ Fin n') (Fin n) k} (h : StdSupp ϖ c x)
-    {g : GL (Fin n) k} (hg : g ∈ KO k (Fin n)) : StdSupp ϖ c (x * g.val) := by
-  have hgi := ((SplitFlip.mem_KO_iff g).1 hg).1
-  refine ⟨?_, ?_, ?_⟩
-  · rw [toRows₁_mul]; exact int_mul h.1 hgi
-  · rw [toRows₁_mul, Matrix.det_mul, map_mul, h.2.1, valuation_det_KO hg, one_mul]
-  · rw [toRows₂_mul]; exact cball_mul h.2.2 hgi
 
 end GlobalTheory.StdLocZeta
 

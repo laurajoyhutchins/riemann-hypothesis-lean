@@ -1,8 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.DuStarPos
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.SpreadLe
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.AssembleLattice
-import Formalism.SharpRestriction.InertJacobiLevels.HostFam
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.DuStarPos
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Formalism.BasicNotions NumberField IsDedekindDomain GlobalTheory.Mem
 open scoped TensorProduct
@@ -24,14 +70,14 @@ theorem mod_eq_one_of_norm {E : Type} [Field E] [NumberField E] (c : E →+* E) 
   have hm0 : (m : E) ≠ 0 := by exact_mod_cast (by omega : m ≠ 0)
   have hm0' : (m : ℚ) ≠ 0 := by exact_mod_cast (by omega : m ≠ 0)
   have hx : algebraMap ℚ E (((p : ℚ) - 1) / m) = (a : E) + c a + (m : E) * ((a : E) * c a) := by
-    rw [map_div₀, map_sub, map_natCast, map_natCast, map_one, ← hn, hπ, map_add, map_one, map_mul, map_natCast]
+    rw [map_div₀, map_sub, map_natCast, map_natCast, map_one, ← hn, hπ, map_add (f := _), map_one, map_mul, map_natCast]
     field_simp
     ring
   have hxi : IsIntegral ℤ (algebraMap ℚ E (((p : ℚ) - 1) / m)) := by
     rw [hx]
     exact (hai.add hci).add (hmi.mul (hai.mul hci))
   have hqi : IsIntegral ℤ (((p : ℚ) - 1) / m) :=
-    (isIntegral_algebraMap_iff (algebraMap ℚ E).injective).1 hxi
+    (isIntegral_algebraMap_iff ).1 hxi
   obtain ⟨k, hk⟩ := IsIntegrallyClosed.isIntegral_iff.1 hqi
   have hk' : ((p : ℚ) - 1) = (k : ℚ) * m := by
     have : (k : ℚ) = ((p : ℚ) - 1) / m := by simpa using hk

@@ -1,5 +1,49 @@
-import Formalism.WachLatticeTwists.RamifiedBlockRings.LocalToDisplayFree
-import Formalism.CharacterColumnKernels.StatementBC
+module
+
+public import Formalism.WachLatticeTwists.RamifiedBlockRings.DistinctEigenvalueCornerPerturbation
+public import Mathlib.FieldTheory.Separable
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Formalism.WachLatticeTwists.CoprimeLiftBounds.Statement
+
+@[expose] public section
 
 open Finset Classical
 
@@ -56,15 +100,6 @@ def StatBcSplit : Prop :=
       ∃ α : Fin t → K, Function.Injective α ∧
         blockPoly e a = ∏ i, (Polynomial.X - Polynomial.C (α i)))
 
-def StatBridge : Prop :=
-  ∀ (O : Type) [CommRing O] [IsDomain O] (X : Type) (T : Subalgebra O (X → O)) (d : Type) [Fintype d]
-    [DecidableEq d] (G : Type) [Group G] (r : G →* (X → Matrix d d O)) (π : X)
-    (eB : X → Matrix d d O), eB ∈ tSpan T r → eB * eB = eB →
-    ∀ (m : ℕ) (jj : Fin m → X → O) (a : Fin m → X → Matrix d d O),
-      (∀ i, jj i ∈ T ∧ jj i π = 0 ∧ a i ∈ tSpan T r) → ∀ c : O,
-      let s : X → Matrix d d O := fun x => c • ∑ i, jj i x • (eB x * a i x * eB x)
-      s ∈ tSpan T r ∧ eB * s = s ∧ s * eB = s ∧ s π = 0
-
 def StatStageC : Prop :=
   ∀ (O O' : Type) [CommRing O] [IsDomain O] [IsDiscreteValuationRing O]
     [CommRing O'] [IsDomain O'] [IsDiscreteValuationRing O'] [Algebra O O'] [Module.Free O O']
@@ -88,40 +123,6 @@ def StatStageC : Prop :=
     DistinctEigenvalueCornerPerturbation O' (bcT O' T) (bcR O' r) π t g₀ (bcM O' eB) (bcM O' s) ∧
     ∀ Z : Set X, vcc (bcT O' T) Z π = e * vcc T Z π
 
-def StatDeltaBc : Prop :=
-  ∀ (O O' : Type) [CommRing O] [IsDomain O] [IsDiscreteValuationRing O]
-    [CommRing O'] [IsDomain O'] [IsDiscreteValuationRing O'] [Algebra O O'] (e : ℕ),
-    (∀ y : O, IsDiscreteValuationRing.addVal O' (algebraMap O O' y) =
-      e * IsDiscreteValuationRing.addVal O y) →
-    (∀ (X d G : Type) [Fintype d] [DecidableEq d] [Group G] (t : ℕ) (bl : d → Fin (t + 1))
-      (T : Subalgebra O (X → O)) (r : G →* (X → Matrix d d O)) (π : X) (χ₁ ε : G →* Oˣ) (g₀ : G)
-      (eB e₁ s : X → Matrix d d O) (D' : RingData O' X d G t bl),
-      RingDef O' (bcT O' T) (bcR O' r) π (bcChar O' χ₁) (bcChar O' ε) g₀ (bcM O' eB) (bcM O' e₁)
-        (bcM O' s) D' →
-      D'.δO = algebraMap O O'
-        (∏ i ∈ Finset.Ioo 0 t, ((χ₁ g₀ : O) - (χ₁ g₀ : O) * (((ε g₀)⁻¹ ^ i : Oˣ) : O))) ∧
-      IsDiscreteValuationRing.addVal O' D'.δO = e * IsDiscreteValuationRing.addVal O
-        (∏ i ∈ Finset.Ioo 0 t, ((χ₁ g₀ : O) - (χ₁ g₀ : O) * (((ε g₀)⁻¹ ^ i : Oˣ) : O)))) ∧
-    ∀ ℓ : ℕ, Module.length O' (O' ⧸ Ideal.span {(ℓ : O')}) =
-      e * Module.length O (O ⧸ Ideal.span {(ℓ : O)})
-
-def ChainOver (O O' : Type) [CommRing O] [IsDomain O] [IsDiscreteValuationRing O]
-    [CommRing O'] [IsDomain O'] [IsDiscreteValuationRing O'] [Algebra O O'] (e : ℕ) {X d G : Type}
-    [Fintype d] [DecidableEq d] [Group G] (T : Subalgebra O (X → O)) (r : G →* (X → Matrix d d O))
-    (π : X) (t : ℕ) (ht : 1 ≤ t) (bl : d → Fin (t + 1)) (χ₁ ε : G →* Oˣ) (g₀ : G)
-    (eB e₁ s : X → Matrix d d O) : Prop :=
-  ∃ D : RingData O' X d G t bl,
-    RingDef O' (bcT O' T) (bcR O' r) π (bcChar O' χ₁) (bcChar O' ε) g₀ (bcM O' eB) (bcM O' e₁)
-      (bcM O' s) D ∧
-    (∃ (_ : IsNoetherian D.R' D.R') (_ : ∀ x', IsScalarTower D.T' D.R' (EvalSp O' d D.R' x'))
-      (_ : ∀ k, SMulCommClass D.R' O' (blockRestrictedRepresentationType bl D.ρk k))
-      (_ : ∀ k, IsScalarTower D.T' D.R' (blockRestrictedRepresentationType bl D.ρk k))
-      (_ : ∀ k, IsScalarTower O' D.R' (blockRestrictedRepresentationType bl D.ρk k)),
-      D.Top (bcT O' T) ht ∧
-      ∀ Z : Set X, LocalToDisplayFree O' X D.X' (bcT O' T) Z D.p d D.R' D.T' G D.r D.χ D.E D.e₁ D.δ D.π'
-        t ht bl D.ρk D.δO) ∧
-    ∀ Z : Set X, vcc (bcT O' T) Z (D.p D.π') = e * vcc T Z π
-
 def ChainHyp (O : Type) [CommRing O] [IsDomain O] [IsDiscreteValuationRing O] {X : Type}
     (T : Subalgebra O (X → O)) {d : Type} [Fintype d] [DecidableEq d] {G : Type} [Group G]
     (r : G →* (X → Matrix d d O)) (π : X) {t : ℕ} (bl : d → Fin (t + 1)) (χ₁ ε : G →* Oˣ) (g₀ : G) :
@@ -142,43 +143,5 @@ def ChainAB (O : Type) [CommRing O] [IsDomain O] {X : Type} (T : Subalgebra O (X
     s = fun x => c • ∑ i, jj i x • (eB x * a i x * eB x)) ∧
   (∀ x, (blockPoly ((eB x).map (algebraMap O (FractionRing O)))
     ((eB x * r g₀ x * eB x + s x).map (algebraMap O (FractionRing O)))).Separable)
-
-def ChainFromPrimitiveData : Prop :=
-  ∀ (O : Type) [CommRing O] [IsDomain O] [IsDiscreteValuationRing O]
-    [IsAdicComplete (IsLocalRing.maximalIdeal O) O] (X : Type) [Fintype X] (T : Subalgebra O (X → O))
-    (d : Type) [Fintype d] [DecidableEq d] (G : Type) [Group G] (r : G →* (X → Matrix d d O)) (π : X)
-    (t : ℕ) (ht : 1 ≤ t) (bl : d → Fin (t + 1)) (χ₁ ε : G →* Oˣ) (g₀ : G),
-    ChainHyp O T r π bl χ₁ ε g₀ → ∀ (L : ℕ) (ϖ : O), ϖ ≠ 0 →
-    ∃ eB e₁ s : X → Matrix d d O, ChainAB O T r π bl g₀ (ϖ ^ L) eB e₁ s ∧
-      ∀ (O' : Type) [CommRing O'] [IsDomain O'] [IsDiscreteValuationRing O'] [Algebra O O']
-        [Module.Free O O'] [Module.Finite O O'] (e : ℕ),
-        (∀ y : O, IsDiscreteValuationRing.addVal O' (algebraMap O O' y) =
-          e * IsDiscreteValuationRing.addVal O y) →
-        (∀ x, ((blockPoly (eB x) (eB x * r g₀ x * eB x + s x)).map
-          ((algebraMap O' (FractionRing O')).comp (algebraMap O O'))).Splits) →
-        ChainOver O O' e T r π t ht bl χ₁ ε g₀ eB e₁ s
-
-def StatSplitExt : Prop :=
-  ∀ (O : Type) [CommRing O] [IsDomain O] [IsDiscreteValuationRing O]
-    [IsAdicComplete (IsLocalRing.maximalIdeal O) O] (X : Type) [Fintype X] (P : X → Polynomial O),
-    (∀ x, (P x).Monic) → (∀ x, ((P x).map (algebraMap O (FractionRing O))).Separable) →
-    ∃ (O' : Type) (_ : CommRing O') (_ : IsDomain O') (_ : IsDiscreteValuationRing O')
-      (_ : Algebra O O') (_ : Module.Free O O') (_ : Module.Finite O O') (e : ℕ),
-      (∀ y : O, IsDiscreteValuationRing.addVal O' (algebraMap O O' y) =
-        e * IsDiscreteValuationRing.addVal O y) ∧
-      ∀ x, ((P x).map ((algebraMap O' (FractionRing O')).comp (algebraMap O O'))).Splits
-
-def ChainWithExtension : Prop :=
-  ∀ (O : Type) [CommRing O] [IsDomain O] [IsDiscreteValuationRing O]
-    [IsAdicComplete (IsLocalRing.maximalIdeal O) O] (X : Type) [Fintype X] (T : Subalgebra O (X → O))
-    (d : Type) [Fintype d] [DecidableEq d] (G : Type) [Group G] (r : G →* (X → Matrix d d O)) (π : X)
-    (t : ℕ) (ht : 1 ≤ t) (bl : d → Fin (t + 1)) (χ₁ ε : G →* Oˣ) (g₀ : G),
-    ChainHyp O T r π bl χ₁ ε g₀ → ∀ (L : ℕ) (ϖ : O), ϖ ≠ 0 →
-    ∃ eB e₁ s : X → Matrix d d O, ChainAB O T r π bl g₀ (ϖ ^ L) eB e₁ s ∧
-      ∃ (O' : Type) (_ : CommRing O') (_ : IsDomain O') (_ : IsDiscreteValuationRing O')
-        (_ : Algebra O O') (_ : Module.Free O O') (_ : Module.Finite O O') (e : ℕ),
-        (∀ y : O, IsDiscreteValuationRing.addVal O' (algebraMap O O' y) =
-          e * IsDiscreteValuationRing.addVal O y) ∧
-        ChainOver O O' e T r π t ht bl χ₁ ε g₀ eB e₁ s
 
 end Formalism.RepresentationBoundsCohomology.ringDataObjects

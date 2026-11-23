@@ -1,10 +1,56 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Foundations.CosetTrace
-import Development.AbelianVarietyTheory.Definitions.Foundations.NotIsTrDataGaussianIntOne
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.CosetRepresentativeTraceFixedProperties
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.SumMulCosetRepresentativeTraceEqStatement
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsValuationAlmostEtaleTowerFixerStatement
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.MemTowerUnionAdjoinOfGaloisFixedStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.CosetTrace
+public import Development.AbelianVarietyTheory.Definitions.Foundations.NotIsTrDataGaussianIntOne
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.CosetRepresentativeTraceFixedProperties
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsValuationAlmostEtaleTowerFixerStatement
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.MemTowerUnionAdjoinOfGaloisFixedStatement
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.SumMulCosetRepresentativeTraceEqStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -19,32 +65,41 @@ variable {L : Type*} [Field L] {G : Type*} [Group G] [MulSemiringAction G L]
 
 theorem isSep_mul_right {v : Valuation L ℝ≥0} {N : Subgroup G} {n : ℕ} {a b : Fin n → L} {c : L}
     (h : IsSep v N a b c) {d : L} (hd : d ∈ Fix L N) (hdv : v d ≤ 1) (hcd : v (c * d) ≤ 1) :
-    IsSep v N (fun i => a i * d) b (c * d) where
-  a_mem i := mul_mem (h.a_mem i) hd
-  b_mem := h.b_mem
-  c_mem := mul_mem h.c_mem hd
-  a_le i := by rw [map_mul]; exact mul_le_one' (h.a_le i) hdv
-  b_le := h.b_le
-  c_le := hcd
-  sum_in σ hσ := by
+    IsSep v N (fun i => a i * d) b (c * d) := by
+  refine
+    { a_mem := fun i => mul_mem (h.a_mem i) hd
+      b_mem := h.b_mem
+      c_mem := mul_mem h.c_mem hd
+      a_le := ?_
+      b_le := h.b_le
+      c_le := hcd
+      sum_in := ?_
+      sum_out := ?_ }
+  · intro i
+    rw [map_mul]
+    exact mul_le_one' (h.a_le i) hdv
+  · intro σ hσ
     simp_rw [mul_right_comm _ d]; rw [← Finset.sum_mul, h.sum_in σ hσ]
-  sum_out σ hσ := by
+  · intro σ hσ
     simp_rw [mul_right_comm _ d]; rw [← Finset.sum_mul, h.sum_out σ hσ, zero_mul]
 
 theorem isSep_swap {v : Valuation L ℝ≥0} {N : Subgroup G} {n : ℕ} {a b : Fin n → L} {c : L}
-    (h : IsSep v N a b c) : IsSep v N b a c where
-  a_mem := h.b_mem
-  b_mem := h.a_mem
-  c_mem := h.c_mem
-  a_le := h.b_le
-  b_le := h.a_le
-  c_le := h.c_le
-  sum_in σ hσ := by
+    (h : IsSep v N a b c) : IsSep v N b a c := by
+  refine
+    { a_mem := h.b_mem
+      b_mem := h.a_mem
+      c_mem := h.c_mem
+      a_le := h.b_le
+      b_le := h.a_le
+      c_le := h.c_le
+      sum_in := ?_
+      sum_out := ?_ }
+  · intro σ hσ
     have h1 := congrArg (σ • ·) (h.sum_in σ⁻¹ (inv_mem hσ))
     have hc : σ • c = c := h.c_mem ⟨σ, hσ⟩
     simp only [Finset.smul_sum, smul_mul', smul_inv_smul, hc] at h1
     simpa [mul_comm] using h1
-  sum_out σ hσ := by
+  · intro σ hσ
     have h1 := congrArg (σ • ·) (h.sum_out σ⁻¹ (fun h' => hσ (by simpa using inv_mem h')))
     simp only [Finset.smul_sum, smul_mul', smul_inv_smul, smul_zero] at h1
     simpa [mul_comm] using h1

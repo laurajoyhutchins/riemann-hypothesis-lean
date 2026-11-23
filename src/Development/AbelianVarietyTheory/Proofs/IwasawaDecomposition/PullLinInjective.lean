@@ -1,5 +1,45 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsBaryStageStart
+module
+
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsBaryStageStart
+import Development.AbelianVarietyTheory.Definitions.ShimuraVarieties.GlActionMemBalFormsOfSemilinear
+import Mathlib.Algebra.AffineMonoid.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HomExtNormalSt
+
+@[expose] public section
 
 noncomputable section
 
@@ -66,7 +106,7 @@ def orad (β : LinearMap.BilinForm ℤ X) : Submodule O X where
   carrier := {x | ∀ (a : O) (y : X), β (a • x) y = 0}
   add_mem' := by
     intro x x' hx hx' a y
-    rw [smul_add, map_add, LinearMap.add_apply, hx a y, hx' a y, add_zero]
+    rw [smul_add, map_add (f := _), LinearMap.add_apply, hx a y, hx' a y, add_zero]
   zero_mem' := by
     intro a y
     rw [smul_zero, map_zero, LinearMap.zero_apply]
@@ -92,9 +132,6 @@ theorem orad_pull {r : X →ₗ[O] X₁} (hr : Function.Surjective r) (β : Line
 def qEquiv {r : X →ₗ[O] X₁} (hr : Function.Surjective r) (N : Submodule O X₁) : (X ⧸ N.comap r) ≃ₗ[O] (X₁ ⧸ N) :=
   (Submodule.quotEquivOfEq _ _ (by rw [LinearMap.ker_comp, Submodule.ker_mkQ])).trans
     ((N.mkQ ∘ₗ r).quotKerEquivOfSurjective (N.mkQ_surjective.comp hr))
-
-theorem qEquiv_mk {r : X →ₗ[O] X₁} (hr : Function.Surjective r) (N : Submodule O X₁) (x : X) :
-    qEquiv hr N (Submodule.Quotient.mk x) = Submodule.Quotient.mk (r x) := rfl
 
 end Rad
 
@@ -157,8 +194,8 @@ section Fun
 
 variable {O : Type} [CommRing O] (bar : O → O) (ψ : InvFun O)
 
-open Classical in
 
+open Classical in
 def carFun : InvFun O where
   toFun n B := if h : ∃ β : LinearMap.BilinForm ℤ (Fin n → O), β ∈ balForms bar (Fin n → O) ∧ (∀ y, 0 ≤ β y y) ∧
       ∀ a b, B a b = β a b then (cdimQ bar ψ (Fin n → O) (orad h.choose) h.choose : ℝ) else 0
@@ -170,7 +207,7 @@ def carFun : InvFun O where
     · have h' : ∃ β : LinearMap.BilinForm ℤ (Fin n → O), β ∈ balForms bar (Fin n → O) ∧ (∀ y, 0 ≤ β y y) ∧
           ∀ a b, B (r a) (r b) = β a b :=
         ⟨pull r h.choose, pull_mem r h.choose_spec.1, fun y => h.choose_spec.2.1 _, fun a b => h.choose_spec.2.2 _ _⟩
-      rw [dif_pos h, dif_pos h']
+      rw [dite_eq_left h, dite_eq_left h']
       have e : h'.choose = pull r h.choose := LinearMap.ext₂ fun a b => by
         have h1 := h'.choose_spec.2.2 a b
         have h2 := h.choose_spec.2.2 (r a) (r b)
@@ -183,7 +220,7 @@ def carFun : InvFun O where
           ∀ a b, B (r a) (r b) = β a b := by
         rintro ⟨β, h1, h2, h3⟩
         exact h ⟨pull s β, pull_mem s h1, fun y => h2 _, fun a b => by rw [pull_apply, ← h3, hrs, hrs]⟩
-      rw [dif_neg h, dif_neg h']
+      rw [dite_eq_right h, dite_eq_right h']
   zero B := by
     split_ifs with h
     · have := Nat.sInf_eq_zero.2 (Or.inl (zero_mem_cdimSet (bar := bar) (ψ := ψ) (orad h.choose) h.choose))

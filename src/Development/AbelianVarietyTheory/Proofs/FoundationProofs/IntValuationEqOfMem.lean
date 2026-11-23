@@ -1,8 +1,44 @@
-import Mathlib
-import Formalism.LocalToGlobal.IndefiniteReal.ThPinsR
-import Formalism.LocalToGlobal.IndefiniteReal.FWExist
-import Formalism.LocalToGlobal.Columns.DecoFin
-import Development.AbelianVarietyTheory.Definitions.Foundations.AbsCharNotUnitary
+module
+
+public import Formalism.LocalToGlobal.IndefiniteReal.FWExist
+public import Development.AbelianVarietyTheory.Definitions.Foundations.AbsCharNotUnitary
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -17,7 +53,7 @@ variable {L : Type} [Field L] [NumberField L]
 theorem productRule (χ : HChar L) : χ.ProductRule :=
   GlobalTheory.Mem.Chr.CharModel.productRule (F := L) ⟨χ.1, χ.2⟩
 
-theorem inf_eq_one [IsTotallyComplex L] (χ : HChar L) {n : ℕ} (hn : 0 < n) (h : χ.OrderDvd n) (k : Lˣ) : χ.inf k = 1 := by
+theorem inf_eq_one [_root_.NumberField.IsTotallyComplex L] (χ : HChar L) {n : ℕ} (hn : 0 < n) (h : χ.OrderDvd n) (k : Lˣ) : χ.inf k = 1 := by
   have hpow : ∀ x, χ.1 x ^ n = 1 := fun x => by
     have h1 : (χ ^ n).1 x = 1 := by rw [show χ ^ n = 1 from h]; rfl
     simpa using h1
@@ -112,7 +148,7 @@ theorem exists_norm (hc : Formalism.BasicNotions.CMData F E) (a : 𝓞 E) :
     show star (algebraMap (𝓞 E) E (a * cO E a)) = algebraMap (𝓞 E) E (a * cO E a)
     rw [map_mul, algebraMap_cO, star_mul', star_star, mul_comm])
   have hi : IsIntegral ℤ f := by
-    rw [← isIntegral_algebraMap_iff (B := E) (algebraMap F E).injective, hf]
+    rw [← isIntegral_algebraMap_iff (B := E) , hf]
     exact (a * cO E a).2
   exact ⟨⟨f, hi⟩, RingOfIntegers.ext hf⟩
 
@@ -232,7 +268,7 @@ theorem rho_mem {V : HSp D} {C : Bridge.CoefDat D V} {lam : D.what₂.Tau → Do
   obtain ⟨γE, hγ⟩ := exists_isRatMat γ
   exact ⟨_, h.1 γ γE hγ v⟩
 
-set_option maxHeartbeats 1600000 in
+
 
 theorem exists_jV_eq (i : Fin D.R.m) (t : T0) {gramR c0R c0L} (hj : R.models_jV)
     (hT : Bridge.FamTie R.B R.pl (R.Sb : Set (Pl D.host.E)) R.Q (labLL D) (fun τ => Bridge.lamRdef (Ptw D) τ)
@@ -246,7 +282,7 @@ theorem exists_jV_eq (i : Fin D.R.m) (t : T0) {gramR c0R c0L} (hj : R.models_jV)
   have h3 := exists_ext_eq (R.B.L i t).pres (c0L i) h1 h2 x₀ g
   exact h3.imp fun k hk => hk.imp fun v hv => h0.trans hv
 
-set_option maxHeartbeats 1600000 in
+
 
 theorem placeEx_of_type_mem (i : Fin D.R.m) {K' : Type} [Field K'] (jL : D.what₂.LL →+* K') (σ' : K' →+* ℂ) (t : T0)
     {Cl : Type} [Fintype Cl] (h : Cl → GA D (Vc D i)) (c0' : VsV D i K' →ₛₗ[σ'] (R.cV i).W) {gramR c0R c0L}
@@ -345,13 +381,5 @@ theorem placeEx (i : Fin D.R.m) {K' : Type} [Field K'] (jL : D.what₂.LL →+* 
   obtain ⟨x, hx⟩ := h1 x₀
   choose y _ hy using hc
   exact ⟨fun k => y (x k), fun k => (hx k).trans (hy _).symm⟩
-
-theorem placeEx_of_char (F : Face D A) (hR : R.Char F) (i : Fin D.R.m) {K' : Type} [Field K'] (jL : D.what₂.LL →+* K') (σ' : K' →+* ℂ)
-    {v₀ : (R.MW i (sg0 D A)).Vec} {c0' : VsV D i K' →ₛₗ[σ'] (R.cV i).W}
-    {La : Type} [AddCommGroup La] [Module (𝓞 D.host.E) La] {ι : La →ₗ[𝓞 D.host.E] (Fin (Wc D i).rank → D.host.E)}
-    {M : ℕ} {Mh : Ideal (𝓞 D.host.E)} {lev : G → La →ₗ[𝓞 D.host.E] La} (hP : ThPinsR R i jL σ' v₀ c0' ι M Mh lev)
-    (t : T0) {Cl : Type} [Fintype Cl] (h : Cl → GA D (Vc D i)) : PlaceEx R i t h c0' := by
-  obtain ⟨_, _, _, hT, hc⟩ := hP.c0
-  exact placeEx R i jL σ' t h c0' hR.models.jV hT hc hR.lev hR.grp.chiW hR.fam.pl_onto hR.fam.muVal
 
 end GlobalTheory.RationalValues

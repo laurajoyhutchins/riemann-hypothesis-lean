@@ -1,13 +1,60 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.LinearIndependentEigProj
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.WedgeEqSpanOfIsFrameAt
+module
+
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.LinearIndependentEigProj
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsLineGenOn
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.ExistsGenOfIsVBOne
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.AdaptedSpan
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.EigProjMemOfFree
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExistsFrameInter
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExistsUnitWedge
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExtFrameOfQuotientKernel
 import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LatticeEigenVectorBundle
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExistsUnitWedge
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExtFrameOfQuotientKernel
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.MatrixEqOfLinearIndependent
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.AdaptedSpan
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.EigProjMemOfFree
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExistsFrameInter
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.MatrixEqOfLinearIndependent
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.WedgeEqSpanOfIsFrameAt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits NumberField GlobalTheory.CompanionTheory.Ar GlobalTheory.CompanionTheory.Ar.Flat
 
@@ -34,7 +81,7 @@ theorem iotaMulti_rows {K V : Type} [Field K] [AddCommGroup V] [Module K V] {n :
     rw [AlternatingMap.smulRight_apply, e1, one_smul, AlternatingMap.compLinearMap_apply]
     congr 1
     funext i
-    simp
+    simp [Fintype.linearCombination_apply, Pi.basisFun_apply]
   exact AlternatingMap.congr_fun hA M
 
 variable {X : Scheme.{0}} {Ω : Type} [Field Ω] {ξ : Spec (CommRingCat.of Ω) ⟶ X}
@@ -117,6 +164,7 @@ theorem key (𝓗 : HodgeLat L ρ bar (p + q)) {σ σ' : E →+* Ω} {v : Fin p 
   have hψinv : ∀ j, ψ j ∘ₗ HT.eigProj ρ σ' = ψ j := fun j => hinv (ψ j) (hc j ▸ hceig j)
   have hψb : ∀ j l, ψ j (b l) = if j = l then 1 else 0 := fun j l => by
     have e1 : ∀ k, φ k (b l) = Q l k := fun k => by
+
       simp only [b, map_sum, map_smul, φ, (had.2.2 k).2, smul_eq_mul, mul_ite, mul_one, mul_zero]
       simp
     have e2 : ψ j (b l) = (C * Q.transpose) j l := by
@@ -140,6 +188,7 @@ theorem key (𝓗 : HodgeLat L ρ bar (p + q)) {σ σ' : E →+* Ω} {v : Fin p 
     have e2 : HT.eigProj ρ σ' z ∈ (L.inter (HT.eigSp ρ σ')) x := ⟨hL' z hz, HT.LatBasic.eigProj_mem ρ σ' z⟩
     rw [hQ.2] at e2
     obtain ⟨r, hr⟩ := (Submodule.mem_span_range_iff_exists_fun _).1 e2
+
     rw [e1, ← hr, map_sum]
     refine sum_mem fun l _ => ?_
     have e3 : ψ j ((r l) • b l) = (r l : Ω) * ψ j (b l) := by
@@ -169,8 +218,10 @@ theorem key (𝓗 : HodgeLat L ρ bar (p + q)) {σ σ' : E →+* Ω} {v : Fin p 
         have e1 : θ z = θ (HT.eigProj ρ σ' z) := (LinearMap.congr_fun hθ z).symm
         have e2 : ∀ j, ψ j z = d j := fun j => by
           have : ψ j z = ψ j (HT.eigProj ρ σ' z) := (LinearMap.congr_fun (hψinv j) z).symm
+
           rw [this, ← hd, map_sum]
           simp [hψb]
+
         rw [e1, ← hd, map_sum, LinearMap.sum_apply]
         refine Finset.sum_congr rfl fun j _ => ?_
         simp only [LinearMap.smul_apply, map_smul, e2, smul_eq_mul]

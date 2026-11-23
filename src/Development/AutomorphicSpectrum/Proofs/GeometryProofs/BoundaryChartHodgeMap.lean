@@ -1,23 +1,65 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.BdryChart
-import ReciprocityTheory.AnalyticForms.PlurisubharmonicFunctions.IsPshLocallyIntegrableStatement
-import Development.AutomorphicSpectrum.Statements.GeometryStatements.FlatDegree
-import Development.AutomorphicSpectrum.Statements.GeometryStatements.NineGeoU
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.ExistsUniqueLeftBasisCoordsAdicCompletion
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.InteriorPointLatticeDataStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HodgeGramPullbackIff
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExistsLinearLiftOfAdditiveFamily
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExponentialSurjectiveSemiabelian
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.PeriodLatticeDiscreteFree
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.IsDerivAt0CompLinMap
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HodgeFormOfIsHodgeGram
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HodgeHermitianFormExists
+module
+
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.BdryChart
+public import Development.AutomorphicSpectrum.Definitions.DivisibilityTowers.GoodOrigin
+public import Development.AutomorphicSpectrum.Definitions.MetricPeriods.IsEigFrames
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.TorsionEqAndWeilIsOfIsHolTo
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.VerticalDerivativeInCoordinates
+public import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.ExistsHolUnifReparam
+public import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.SmulPeriodMapMkZeroFstEqNegForm
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.IsDerivAt0OfIsPullback
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExistsLieModel
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExistsLinearLiftOfAdditiveFamily
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExponentialSurjectiveSemiabelian
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HodgeFormOfIsHodgeGram
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HodgeGramPullbackIff
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HodgeHermitianFormExists
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.InteriorPointLatticeDataStatement
 import Development.AutomorphicSpectrum.Proofs.GeometryProofs.InteriorPointPolarised
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExistsLieModel
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.VerticalDerivativeInCoordinates
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.TorsionEqAndWeilIsOfIsHolTo
-import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.ExistsHolUnifReparam
-import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.SmulPeriodMapMkZeroFstEqNegForm
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.IsDerivAt0CompLinMap
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.PeriodLatticeDiscreteFree
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.BCTools
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField Matrix Filter Topology
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Geo ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.Semi
 open GroundTheory.Heights₂.Heights.LowerBoundFree GlobalTheory.CompanionTheory.Ar GlobalTheory.CompanionTheory.Ar.Cusp
@@ -59,10 +101,10 @@ theorem hermForm_adj {E : Type} [Field E] [NumberField E] [IsCMField E] {Λ : Ty
     hermForm R.Hm (R.B a x) y = hermForm R.Hm x (R.B a' y) := by
   let D : (Fin g → ℂ) → (Fin g → ℂ) → ℂ := fun x y => hermForm R.Hm (R.B a x) y - hermForm R.Hm x (R.B a' y)
   have hl : ∀ x x' y, D (x + x') y = D x y + D x' y := fun x x' y => by
-    simp only [D, map_add, hf_add_left]
+    simp only [D, map_add (f := _), hf_add_left]
     ring
   have hr : ∀ x y y', D x (y + y') = D x y + D x y' := fun x y y' => by
-    simp only [D, map_add, hf_add_right]
+    simp only [D, map_add (f := _), hf_add_right]
     ring
   have hc : ∀ (c : ℂ) x y, D (c • x) y = c * D x y := fun c x y => by
     simp only [D, map_smul, hf_smul_left]
@@ -150,21 +192,18 @@ def ptMap (hw : φ ≫ G.hom = A.hom ≫ y) (q : 𝟙_ (Over (Sp ℂ)) ⟶ A) : 
     show (q.left ≫ φ) ≫ G.hom = y
     rw [Category.assoc, hw, ← Category.assoc, h, Category.id_comp])
 
-@[simp] theorem ptMap_left (hw : φ ≫ G.hom = A.hom ≫ y) (q : 𝟙_ (Over (Sp ℂ)) ⟶ A) :
-    (ptMap hw q).left = q.left ≫ φ := rfl
-
 theorem ptMap_mul (hp : IsGrpPullback A G y φ) (q q' : 𝟙_ (Over (Sp ℂ)) ⟶ A) :
     ptMap hp.1.w (q * q') = ptMap hp.1.w q * ptMap hp.1.w q' := by
   let ρ : Over.mk y ⟶ Over.mk ((𝟙_ (Over (Sp ℂ))).hom ≫ y) := Over.homMk (𝟙 _) (by
     show 𝟙 _ ≫ (𝟙 _ ≫ y) = y
     simp)
   have e : ∀ a, ptMap hp.1.w a = ρ ≫ pushPt hp.1.w a := fun a =>
-    Over.OverMorphism.ext (by simp [ρ, pushPt])
+    Over.OverMorphism.ext (by simp [ρ, pushPt, ptMap])
   have h := hp.2 (𝟙_ _) q q' (pushPt hp.1.w q) (pushPt hp.1.w q') rfl rfl
   rw [e q, e q', ← MonObj.comp_mul]
   refine Over.OverMorphism.ext ?_
   rw [Over.comp_left, h]
-  simp [ρ]
+  simp [ρ, ptMap]
 
 theorem ptMap_injective (hp : IsGrpPullback A G y φ) : Function.Injective (ptMap (y := y) hp.1.w) := fun q q' h =>
   Over.OverMorphism.ext (hp.1.hom_ext (congrArg (fun p => p.left) h) (by
@@ -210,7 +249,7 @@ theorem isAH_reparam (u : HolUnif A L g) (X : (Fin g → ℂ) ≃ₗ[ℂ] (Fin g
     unfold hermForm at e1 e2
     show u.fr i (X z) / 1 = χ ⟨X l, l.2⟩ * Complex.exp (Real.pi * (z ⬝ᵥ Hf.mulVec (star (l : Fin g → ℂ))) +
       Real.pi / 2 * ((l : Fin g → ℂ) ⬝ᵥ Hf.mulVec (star (l : Fin g → ℂ)))) * (u.fr i (X (z + l)) / 1)
-    rw [div_one, div_one, map_add, h, e1, e2]
+    rw [div_one, div_one, map_add (f := _), h, e1, e2]
   · intro w v hv U h f
     rw [hv U h f]
     have key := X.toContinuousLinearEquiv.comp_right_fderiv
@@ -222,6 +261,27 @@ theorem isAH_reparam (u : HolUnif A L g) (X : (Fin g → ℂ) ≃ₗ[ℂ] (Fin g
 end Reparam
 
 section Fibre
+
+-- Restrict a family of exponentials to a single parameter.
+private def famExpAtPoint {R : Type} [CommRing R] {G : Over (Sp R)} [GrpObj G] {g n : ℕ}
+    {M : LieModel G (𝟙 (Sp R)) (Fin g → R)} {B : Set (Fin n → ℂ)}
+    {ψ : (Fin n → ℂ) → (R →+* ℂ)} (e : Flat.FamExp G M B ψ)
+    {b : Fin n → ℂ} (hb : b ∈ B) :
+    Flat.FamExp G M (Set.univ : Set (Fin 0 → ℂ)) (fun _ => ψ b) where
+  ex _ z := e.ex b z
+  add _ _ z w := e.add b hb z w
+  hol := Flat.ExpOnto.isHolTo_const_param (V := Fin 0 → ℂ) (X := G.left)
+    (c := fun z => (e.ex b z).left) (Flat.ExpOnto.isHolTo_ex e hb)
+  diff _ _ a := e.diff b hb a
+  log b₀ _ := by
+    obtain ⟨V, N, f, L, h1, h2, h3, h4⟩ := e.log b hb
+    have hφ : Continuous (fun p : (Fin 0 → ℂ) × (Fin N → ℂ) => (b, p.2)) := by fun_prop
+    have hφ' : Continuous (fun p : (Fin 0 → ℂ) × (Fin g → ℂ) => (b, p.2)) := by fun_prop
+    refine ⟨V, N, f, fun p => L (b, p.2), h1, ?_, ?_, ?_⟩
+    · exact AnalyticAt.comp (f := fun p : (Fin 0 → ℂ) × (Fin N → ℂ) => (b, p.2)) h2
+        (analyticAt_const.prod analyticAt_snd)
+    · exact (hφ'.tendsto (b₀, 0)).eventually h3
+    · exact (hφ.tendsto (b₀, _)).eventually h4
 
 variable {E : Type} [Field E] [NumberField E] [IsCMField E] {H : Host E}
 
@@ -250,7 +310,7 @@ theorem exists_fibre_lift {R : Type} [CommRing R] {t : SAB H (Sp R)} {T : Scheme
   have hol0 : IsHolTo Set.univ (fun z => (u'.ex z).left ≫ φ') :=
     GlobalTheory.HolTorsion.isHolTo_comp (Flat.PerGram.isHolTo_ex u') φ'
   obtain ⟨hf, -, hh⟩ := Flat.exists_linear_lift_of_additive_family R t.G g 0 M Set.univ (fun _ => ψ b)
-    (Flat.ExpOnto.atPoint e hb) g' Set.univ (fun _ z => uu z) isOpen_univ subset_rfl (fun _ _ z w => hadd z w)
+    (famExpAtPoint e hb) g' Set.univ (fun _ z => uu z) isOpen_univ subset_rfl (fun _ _ z w => hadd z w)
     (Flat.ExpOnto.isHolTo_const_param (V := Fin 0 → ℂ) (X := t.G.left) (c := fun z => (uu z).left) hol0)
   obtain ⟨hex, -, hder⟩ := hh 0 trivial
   have hex' : ∀ z, e.ex b (hf 0 z) = uu z := hex

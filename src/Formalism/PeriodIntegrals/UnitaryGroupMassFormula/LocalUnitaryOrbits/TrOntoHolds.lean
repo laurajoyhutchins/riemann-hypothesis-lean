@@ -1,6 +1,53 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalUnitaryOrbits.ResAlgOfSp
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalUnitaryOrbits.HRSumSmulRight
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalUnitaryOrbits.HRSumSmulRight
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalUnitaryOrbits.EtaVCases
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalUnitaryOrbits.QInertHolds
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalUnitaryOrbits.QSplitHolds
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalUnitaryOrbits.ThetaSpanHolds
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalUnitaryOrbits.ResAlgOfSpan
+
+@[expose] public section
 
 noncomputable section
 
@@ -32,7 +79,7 @@ theorem trOnto_holds (hstd : StdHyp σ J ψ) : TrOnto σ v := by
   have hind := theta_indep σ v hstd.1 θ h3
   set iθ : Fv F v ⊗[F] E := inclR (F := F) (Fv F v) (θ : E) with hiθ
   have hss : sigO σ (sigO σ θ) = θ := RingOfIntegers.ext (by simp only [sigO_coe]; exact sig_sig σ hstd.1 _)
-  obtain ⟨t, ht⟩ := fix_int σ hstd.1 (θ + sigO σ θ) (by rw [map_add, hss, add_comm])
+  obtain ⟨t, ht⟩ := fix_int σ hstd.1 (θ + sigO σ θ) (by rw [map_add (f := _), hss, add_comm])
   have hσθ : sigO σ θ = algebraMap (𝓞 F) (𝓞 E) t - θ := by rw [ht]; ring
   have hinc : ∀ a : 𝓞 F, inclR (F := F) (Fv F v) ((algebraMap (𝓞 F) (𝓞 E) a : 𝓞 E) : E) =
       sc (E := E) v (iO v a) := fun a => inclR_alg' v (a : F)
@@ -44,8 +91,8 @@ theorem trOnto_holds (hstd : StdHyp σ J ψ) : TrOnto σ v := by
   have htr : ∀ a b : Fv F v, (sc (E := E) v a + sc (E := E) v b * iθ) +
       sigR (Fv F v) σ (sc (E := E) v a + sc (E := E) v b * iθ) = sc (E := E) v (2 * a + b * iO v t) := by
     intro a b
-    rw [map_add, map_mul, sigR_sc, sigR_sc, hsiθ]
-    simp only [sc_eq', map_add, map_mul, map_ofNat]
+    rw [map_add (f := _), map_mul, sigR_sc, sigR_sc, hsiθ]
+    simp only [sc_eq', map_add (f := _), map_mul, map_ofNat]
     ring
   obtain ⟨s0, s1, hs01⟩ := hsp s hs
   have hs1 : (s1 : Fv F v) = 0 := by
@@ -53,7 +100,7 @@ theorem trOnto_holds (hstd : StdHyp σ J ψ) : TrOnto σ v := by
     rw [← hs01, hfix] at h
     have h' := hind (2 * s0 + s1 * iO v t - 2 * s0) (0 - 2 * s1) (by
       rw [hs01] at h
-      simp only [sc_eq', map_add, map_mul, map_sub, map_ofNat, map_zero] at h ⊢
+      simp only [sc_eq', map_add (f := _), map_mul, map_sub, map_ofNat, map_zero] at h ⊢
       linear_combination (-1 : Fv F v ⊗[F] E) * h)
     have h2 : (2 : Fv F v) ≠ 0 := by
       have : (2 : Fv F v) = algebraMap F (Fv F v) 2 := by rw [map_ofNat]
@@ -84,7 +131,7 @@ theorem trOnto_holds (hstd : StdHyp σ J ψ) : TrOnto σ v := by
         linear_combination (-(Ideal.Quotient.mk (IE (E := E) v) θ)) * h2Q
       refine RingHom.ext fun q => ?_
       obtain ⟨a0, a1, rfl⟩ := h4 q
-      rw [map_add, map_mul, sigQ_alg, sigQ_alg, hθf]
+      rw [map_add (f := _), map_mul, sigQ_alg, sigQ_alg, hθf]
       rfl
     have hvt : Valued.v (iO v t) = 1 := le_antisymm (v_iO_le v t)
       (not_lt.1 fun hlt => htv ((v_iO_lt_iff v t).1 hlt))

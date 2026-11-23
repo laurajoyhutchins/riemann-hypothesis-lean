@@ -1,9 +1,45 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.LiftFrameEmbeddingBase
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsUniqueDualWeylWeightProjectorStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EvalPol
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PolarisationOperatorFormulaGroupAndProjectorsStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CapelliCoeffDualWeylEqCoeffProdStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.LiftFrameEmbeddingBase
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EvalPol
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CapelliCoeffDualWeylEqCoeffProdStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsUniqueDualWeylWeightProjectorStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PolarisationOperatorFormulaGroupAndProjectorsStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -32,6 +68,7 @@ theorem pure_step {O : Type} [CommRing O] {N : ℕ} {ι : Type} [DecidableEq ι]
     · rw [AlgHom.commutes, Module.algebraMap_end_apply]; rfl
     · rw [AlgHom.commutes, AlgHom.commutes, Module.algebraMap_end_apply, MultilinearMap.map_update_smul,
         Function.update_eq_self]
+      rfl
   | grade1 p =>
     intro x
     obtain ⟨y, hy, he⟩ := hF p x
@@ -50,8 +87,8 @@ theorem pure_step {O : Type} [CommRing O] {N : ℕ} {ι : Type} [DecidableEq ι]
     obtain ⟨y₁, hy₁, he₁⟩ := h₁ x
     obtain ⟨y₂, hy₂, he₂⟩ := h₂ x
     refine ⟨y₁ + y₂, ?_, ?_⟩
-    · rw [Submodule.coe_add, hy₁, hy₂, map_add, LinearMap.add_apply]
-    · rw [map_add, map_add, LinearMap.add_apply, he₁, he₂, MultilinearMap.map_update_add]
+    · rw [Submodule.coe_add, hy₁, hy₂, map_add (f := _), LinearMap.add_apply]
+    · rw [map_add (f := _), map_add (f := _), LinearMap.add_apply, he₁, he₂, MultilinearMap.map_update_add]
 
 theorem scalar_of {O : Type} [CommRing O] {N : ℕ} {ι : Type} [DecidableEq ι] (τ : ι)
     (lam : ι → ℕ → ℕ) (P : ι → (Fin N → ℕ) → Module.End O (NablaT O N lam))
@@ -119,7 +156,7 @@ theorem compat {O : Type} [CommRing O] {N : ℕ} {ι : Type} [DecidableEq ι] {l
     exact h₁ _ _ (h₂ z y h)
   | add Φ₁ Φ₂ h₁ h₂ =>
     intro z y h
-    rw [map_add, map_add, add_smul, map_add, LinearMap.add_apply, h₁ z y h, h₂ z y h, Submodule.Quotient.mk_add]
+    rw [map_add (f := _), map_add (f := _), add_smul, map_add (f := _), LinearMap.add_apply, h₁ z y h, h₂ z y h, Submodule.Quotient.mk_add]
 
 theorem dvd_of_smul_eq_zero {O : Type} [CommRing O] [IsDomain O] [IsDiscreteValuationRing O] {V : Type}
     [AddCommGroup V] [Module O V] {ϖ : O} (hϖ : Irreducible ϖ) (d : O) (y : V)
@@ -150,8 +187,8 @@ theorem int_dvd_of {O : Type} [CommRing O] {ϖ : O} (hϖ : ¬ IsUnit ϖ) {l : �
   rw [huv, Int.cast_one] at h1
   exact hϖ (isUnit_of_dvd_one h1)
 
-set_option synthInstance.maxHeartbeats 400000 in
 
+set_option synthInstance.maxHeartbeats 400000 in
 theorem linkage : ∀ (O : Type) [CommRing O] [IsDomain O] [IsDiscreteValuationRing O] [CharZero O] (N : ℕ) (ι : Type)
     [Fintype ι] [DecidableEq ι] (lam : ι → ℕ → ℕ) (mu : ι → ℕ → ℕ) (l : ℕ) (ϖ : O), l.Prime → Irreducible ϖ →
     ϖ ∣ (l : O) → (∀ τ, Antitone (res N (lam τ))) → (∀ τ, Antitone (res N (mu τ))) →

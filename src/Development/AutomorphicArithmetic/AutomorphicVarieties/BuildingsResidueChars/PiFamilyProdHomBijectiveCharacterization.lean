@@ -1,5 +1,46 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.BuildingsResidueChars.IsotypicSeparatesAndEmbedsIntoInvariantSubspace
-import Development.AutomorphicArithmetic.AutomorphicVarieties.HeckeAlgebras.CoefficientRepTrivialOnUnramified
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.HeckeAlgebras.CoefficientRepTrivialOnUnramified
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.BuildingsResidueChars.IsotypicSeparatesAndEmbedsIntoInvariantSubspace
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Formalism.ConjugateSelfDual ReciprocityTheory.Gal Polynomial GlobalTheory.CuspRep GlobalTheory.WeilDeligne UpperTheory.V.Hi
 open UpperTheory.V.W (Plc)
 
@@ -73,8 +114,9 @@ private theorem inv_iff {S : Type} [Fintype S] [DecidableEq S] {H : S → Type}
     have hmul : ∀ k k' F, A (k * k') F = A k (A k' F) := by
       intro k k' F
       funext i
+
       simp only [A, map_mul, Matrix.mul_apply, Module.End.mul_apply, map_sum, map_smul,
-        Finset.smul_sum, Finset.sum_smul, smul_smul]
+      Finset.smul_sum, Finset.sum_smul, smul_smul]
       exact Finset.sum_comm
     have hone : ∀ F, A 1 F = F := by
       intro F
@@ -123,6 +165,7 @@ private theorem main {S : Type} [Fintype S] [DecidableEq S] {G : S → Type} [�
       simpa using congrFun h0 (i0 u)
     · intro k b
       have h1 := congrArg p (h u k (Function.update i0 u b))
+
       simp only [Function.update_self, Function.update_idem, map_sum, map_smul] at h1
       beta_reduce
       rw [← h1]
@@ -146,7 +189,7 @@ private theorem main {S : Type} [Fintype S] [DecidableEq S] {G : S → Type} [�
             ∑ b, c u k (i u) b • ρ (Pi.mulSingle u (k : G u)) (F (Function.update i u b)) = F i}
           add_mem' := by
             intro F F' hF hF' v hv k i
-            simp only [Pi.add_apply, map_add, smul_add, Finset.sum_add_distrib]
+            simp only [Pi.add_apply, map_add (f := _), smul_add, Finset.sum_add_distrib]
             rw [hF v hv k i, hF' v hv k i]
           zero_mem' := by intro v hv k i; simp
           smul_mem' := by
@@ -162,6 +205,7 @@ private theorem main {S : Type} [Fintype S] [DecidableEq S] {G : S → Type} [�
         have hne : v ≠ u := fun h => hu (h ▸ hv)
         change ∑ b, c v k (i v) b • ρ (Pi.mulSingle v (k : G v))
           (ρ (Pi.mulSingle u g) (F (Function.update i v b))) = ρ (Pi.mulSingle u g) (F i)
+
         rw [← hF v hv k i, map_sum]
         refine Finset.sum_congr rfl fun b _ => ?_
         rw [map_smul, ← Module.End.mul_apply, ← Module.End.mul_apply, ← map_mul, ← map_mul,
@@ -175,6 +219,7 @@ private theorem main {S : Type} [Fintype S] [DecidableEq S] {G : S → Type} [�
       · intro v hv k i
         rcases Finset.mem_insert.1 hv with rfl | hv
         · simp only [Function.update_self, Function.update_idem]
+
           rw [← hy v k (i v), map_sum, Finset.sum_apply]
           refine Finset.sum_congr rfl fun b _ => ?_
           rw [map_smul, Pi.smul_apply, hsρ]; rfl

@@ -1,4 +1,60 @@
-import Mathlib
+module
+
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.Analysis.Convex.Extreme
+public import Mathlib.RepresentationTheory.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.Convex.KreinMilman
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Lean.Elab.MutualDef
+
+@[expose] public section
 
 open Set ComplexConjugate
 
@@ -40,7 +96,7 @@ lemma norm_diag (herm : ∀ x y, (starRingEnd ℂ) (B x y) = B y x) (psd : ∀ x
 
 lemma diag_expand_add (x y : M) :
     B (x + y) (x + y) + B (x - y) (x - y) = B x x + B x x + (B y y + B y y) := by
-  simp only [map_add, map_sub, LinearMap.add_apply, LinearMap.sub_apply]
+  simp only [map_add (f := _), map_sub, LinearMap.add_apply, LinearMap.sub_apply]
   ring
 
 lemma re_add_le (psd : ∀ x, 0 ≤ (B x x).re) (x y : M) :
@@ -59,7 +115,7 @@ lemma re_smul (a : ℂ) (x : M) : (B (a • x) (a • x)).re = Complex.normSq a 
 lemma polar (x y : M) :
     4 * B x y = B (x + y) (x + y) - B (x - y) (x - y) - Complex.I * B (x + Complex.I • y) (x + Complex.I • y)
       + Complex.I * B (x - Complex.I • y) (x - Complex.I • y) := by
-  simp only [map_add, map_sub, map_smulₛₗ, map_smul, LinearMap.add_apply, LinearMap.sub_apply,
+  simp only [map_add (f := _), map_sub, map_smulₛₗ, map_smul, LinearMap.add_apply, LinearMap.sub_apply,
     LinearMap.smul_apply, smul_eq_mul, RingHom.id_apply, Complex.conj_I]
   linear_combination (2 * (B x y - B y x)) * Complex.I_sq
 
@@ -192,7 +248,7 @@ lemma convex_capSet : Convex ℝ (capSet ρ c xs) := by
   · intro α x z; simp only [comb_apply, f2 α x z, g2 α x z]; ring
   · intro x y z; simp only [comb_apply, f3 x y z, g3 x y z]; ring
   · intro α x y; simp only [comb_apply, f4 α x y, g4 α x y]; ring
-  · intro x y; simp only [comb_apply, map_add, map_mul, Complex.conj_ofReal, fh x y, gh x y]
+  · intro x y; simp only [comb_apply, map_add (f := _), map_mul, Complex.conj_ofReal, fh x y, gh x y]
   · intro x
     simp only [comb_apply, Complex.add_re, Complex.re_ofReal_mul]
     exact add_nonneg (mul_nonneg ha (fp x)) (mul_nonneg hb (gp x))

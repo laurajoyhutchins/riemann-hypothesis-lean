@@ -1,5 +1,53 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.ChowForms.StatementsSectionOrder
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.ChowForms.StatementsSectionOrder
+public import Mathlib.Algebra.MvPolynomial.Funext
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -31,7 +79,7 @@ theorem specFirst_eq_map_eval (g : MvPolynomial (Fin (k + 1) × Fin n) F) (t : F
       rw [bind₁_C_right, rename_C, sumAlgEquiv_C_inl, map_C, eval_C]
     · rintro ⟨i, m⟩
       cases i using Fin.cases <;>
-        simp [specFirstVar, specFirstSplit, sumAlgEquiv_X_inl, sumAlgEquiv_X_inr]
+        simp [specFirstVar, specFirstSplit, sumAlgEquiv_X_inl, sumAlgEquiv_X_inr, bind₁_X_right]
   exact RingHom.congr_fun h g
 
 theorem exists_specFirst_ne_zero [Infinite F] {f : MvPolynomial (Fin (k + 1) × Fin n) F} (hf : f ≠ 0) :
@@ -41,14 +89,15 @@ theorem exists_specFirst_ne_zero [Infinite F] {f : MvPolynomial (Fin (k + 1) × 
     (map_ne_zero_iff _ (sumAlgEquiv F (Fin k × Fin n) (Fin n)).injective).mpr
       ((map_ne_zero_iff _ (rename_injective _ specFirstSplit_injective)).mpr hf)
   obtain ⟨β, hβ⟩ := ne_zero_iff.mp hg
-  have ht : ∃ t : Fin n → F, eval t (coeff β g) ≠ 0 := by
+  have ht : ∃ t : Fin n → F, eval t (AddMonoidAlgebra.coeff g β) ≠ 0 := by
     by_contra h
     simp only [not_exists, not_not] at h
     exact hβ (MvPolynomial.funext fun x => by simp [h x])
   obtain ⟨t, ht⟩ := ht
   refine ⟨t, fun h0 => ht ?_⟩
-  have := congr_arg (coeff β) h0
-  rwa [specFirst_eq_map_eval, ← hg_def, coeff_map, coeff_zero] at this
+  have := congr_arg (AddMonoidAlgebra.coeff · β) h0
+  simpa only [specFirst_eq_map_eval, ← hg_def, coeff_map, AddMonoidAlgebra.coeff_zero,
+    Finsupp.zero_apply] using this
 
 end Choice
 

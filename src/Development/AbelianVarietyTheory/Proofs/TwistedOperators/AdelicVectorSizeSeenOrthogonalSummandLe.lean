@@ -1,4 +1,45 @@
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.VsizeNonneg
+module
+
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.VsizeNonneg
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.ContinuousResTSymm
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.L2.Theta Matrix
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
 
@@ -54,6 +95,7 @@ theorem vFin_mulVec_le {m n : ℕ} (Y : Matrix (Fin m) (Fin n) (AE D)) (x : Fin 
     (v : HeightOneSpectrum (𝓞 D.host.F)) : vFin v (Y *ᵥ x) ≤ bF Y v * vFin v x := by
   rw [vFin]
   refine Finset.sup_le fun i _ => ?_
+
   simp only [Matrix.mulVec, dotProduct, map_sum, map_mul]
   exact absFin_sum_le D.host.F v _ _ fun j _ =>
     (absFin_mul_le D.host.F v _ _).trans (mul_le_mul' (absFin_le_bF Y v i j) (le_vFin x v j))
@@ -67,8 +109,8 @@ open scoped NNReal
 
 variable {D : D7}
 
-open Classical in
 
+open Classical in
 def bI {m n : ℕ} (Y : Matrix (Fin m) (Fin n) (AE D)) (w : InfinitePlace D.host.F) : ℝ≥0 :=
   max 1 (Finset.univ.sup fun p : EmbOver D.host.E w × Fin m =>
     ∑ j, ‖infEmb p.1 (compInf D.host.F D.host.E w (Y p.2 j))‖₊)
@@ -95,6 +137,7 @@ theorem vInf_mulVec_le {m n : ℕ} (Y : Matrix (Fin m) (Fin n) (AE D)) (x : Fin 
     (w : InfinitePlace D.host.F) : vInf w (Y *ᵥ x) ≤ bI Y w * vInf w x := by
   rw [vInf]
   refine Finset.sup_le fun p _ => ?_
+
   simp only [Matrix.mulVec, dotProduct, map_sum, map_mul]
   refine (nnnorm_sum_le _ _).trans ?_
   refine le_trans ?_ (mul_le_mul' (sum_le_bI Y w p.1 p.2) le_rfl)

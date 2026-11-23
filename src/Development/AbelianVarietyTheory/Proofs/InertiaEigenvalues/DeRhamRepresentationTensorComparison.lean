@@ -1,12 +1,55 @@
-import Mathlib
-import Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow
-import Formalism.LocalRingCardinality.AdicCompletionLocal.LocTied
-import Formalism.SharpRestriction.LevelLetterCocycles.LocalSituation
-import Formalism.SharpRestriction.LevelLetterCocycles.LocCoh
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.JumpIffMultNeZero
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsEmbeddingIdempotentTensor
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.DeRhamSubrepQuotientAndStrictnessStatement
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.IsJumpVOfInjective
+module
+
+public import Formalism.LocalRingCardinality.AdicCompletionLocal.LocTied
+public import Formalism.SharpRestriction.LevelLetterCocycles.LocCoh
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.DeRhamSubrepQuotientAndStrictnessStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsEmbeddingIdempotentTensor
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.JumpIffMultNeZero
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.IsJumpVOfInjective
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Formalism Formalism.BasicNotions Formalism.BasicNotions.Loc Formalism.WeaklyAdmissibleFiltrations Formalism.MainNotions.N TensorProduct Module
 
@@ -49,7 +92,7 @@ theorem map_mul (f : V →ₗ[LL] V') (c : K) (x : V ⊗[Qp] BdR) :
   induction x using TensorProduct.induction_on with
   | zero => simp
   | tmul v b => simp [mulVdR]
-  | add y z hy hz => simp only [map_add, hy, hz]
+  | add y z hy hz => simp only [map_add (f := _), hy, hz]
 
 theorem map_act (ρ : Representation LL G V) (ρ' : Representation LL G V') (f : V →ₗ[LL] V')
     (he : ∀ g v, f (ρ g v) = ρ' g (f v)) (g : G) (x : V ⊗[Qp] BdR) :
@@ -58,7 +101,7 @@ theorem map_act (ρ : Representation LL G V) (ρ' : Representation LL G V') (f :
   induction x using TensorProduct.induction_on with
   | zero => simp
   | tmul v b => simp [actVdR, he]
-  | add y z hy hz => simp only [map_add, hy, hz]
+  | add y z hy hz => simp only [map_add (f := _), hy, hz]
 
 theorem act_mul (ρ : Representation LL G V) (g : G) (c : K) (x : V ⊗[Qp] BdR) :
     actVdR PD ρ g (mulVdR (LL := LL) (V := V) c x) =
@@ -66,7 +109,7 @@ theorem act_mul (ρ : Representation LL G V) (g : G) (c : K) (x : V ⊗[Qp] BdR)
   induction x using TensorProduct.induction_on with
   | zero => simp
   | tmul v b => simp [actVdR, mulVdR]
-  | add y z hy hz => simp only [map_add, hy, hz]
+  | add y z hy hz => simp only [map_add (f := _), hy, hz]
 
 theorem mul_mem_filV (a : ℤ) (c : K) (x : V ⊗[Qp] BdR) (hx : x ∈ FilV PD (LL := LL) (V := V) a) :
     mulVdR (LL := LL) (V := V) c x ∈ FilV PD (LL := LL) (V := V) a := by
@@ -76,7 +119,7 @@ theorem mul_mem_filV (a : ℤ) (c : K) (x : V ⊗[Qp] BdR) (hx : x ∈ FilV PD (
   | tmul v b =>
     refine ⟨v ⊗ₜ ⟨c • b.1, (PD.Fil a).smul_mem c b.2⟩, ?_⟩
     simp [mulVdR, Algebra.smul_def]
-  | add y z hy hz => rw [map_add, map_add]; exact Submodule.add_mem _ hy hz
+  | add y z hy hz => rw [map_add (f := _), map_add (f := _)]; exact Submodule.add_mem _ hy hz
 
 noncomputable def ev (x : V ⊗[Qp] BdR) : LL ⊗[Qp] K →ₗ[Qp] V ⊗[Qp] BdR :=
   TensorProduct.lift (LinearMap.mk₂ Qp (fun (c : LL) (k : K) => c • mulVdR (LL := LL) (V := V) k x)
@@ -87,7 +130,7 @@ noncomputable def ev (x : V ⊗[Qp] BdR) : LL ⊗[Qp] K →ₗ[Qp] V ⊗[Qp] BdR
       induction x using TensorProduct.induction_on with
       | zero => simp
       | tmul v b => simp [mulVdR, add_mul, tmul_add]
-      | add y z hy hz => simp only [map_add, hy, hz]; abel)
+      | add y z hy hz => simp only [map_add (f := _), hy, hz]; abel)
     (fun q c k => by
       rw [smul_comm q c]
       congr 1
@@ -98,7 +141,7 @@ noncomputable def ev (x : V ⊗[Qp] BdR) : LL ⊗[Qp] K →ₗ[Qp] V ⊗[Qp] BdR
           rw [← Algebra.smul_def, ← Algebra.smul_def, smul_assoc]
         simp only [mulVdR, AlgebraTensorModule.map_tmul, LinearMap.id_apply, LinearMap.mulLeft_apply, this,
           tmul_smul]
-      | add y z hy hz => simp only [map_add, hy, hz, smul_add]))
+      | add y z hy hz => simp only [map_add (f := _), hy, hz, smul_add]))
 
 theorem ev_tmul (x : V ⊗[Qp] BdR) (c : LL) (k : K) :
     ev (LL := LL) (K := K) x (c ⊗ₜ k) = c • mulVdR (LL := LL) (V := V) k x := rfl
@@ -108,7 +151,7 @@ theorem mul_mul (y k : K) (x : V ⊗[Qp] BdR) :
   induction x using TensorProduct.induction_on with
   | zero => simp
   | tmul v b => simp [mulVdR, mul_assoc]
-  | add y z hy hz => simp only [map_add, hy, hz]
+  | add y z hy hz => simp only [map_add (f := _), hy, hz]
 
 theorem map_fildR_eq [CharZero Qp] (ρ : Representation LL G V) (ρ' : Representation LL G V')
     (f : V →ₗ[LL] V') (he : ∀ g v, f (ρ g v) = ρ' g (f v)) (τ : K →ₐ[Qp] LL) (a : ℤ)
@@ -133,11 +176,15 @@ theorem map_fildR_eq [CharZero Qp] (ρ : Representation LL G V) (ρ' : Represent
     obtain ⟨m, c, k, hc, hk⟩ := GlobalTheory.exists_embedding_idempotent_tensor Qp K LL τ
     refine ⟨∑ j, c j • mulVdR (LL := LL) (V := V) (k j) x,
       (mem_fil PD ρ τ a _).2 ⟨⟨fun g => ?_, fun y => ?_⟩, ?_⟩, ?_⟩
+
     · simp only [map_sum, map_smul, act_mul, h1]
     · have := congrArg (ev (LL := LL) (K := K) x) (hk y)
+
       simp only [map_sum, ev_tmul, mul_mul] at this
+
       simp only [map_sum, map_smul, this, Finset.smul_sum, mul_smul]
     · exact Submodule.sum_mem _ fun j _ => Submodule.smul_mem _ _ (mul_mem_filV PD a _ x hx2)
+
     · simp only [map_sum, map_smul, map_mul, h2, ← mul_smul, ← Finset.sum_smul, hc, one_smul]
 
 variable {V₀ : Type} [AddCommGroup V₀] [Module LL V₀] [Module Qp V₀] [IsScalarTower Qp LL V₀]
@@ -153,14 +200,14 @@ theorem tensor_exact (ι : V₀ →ₗ[LL] V) (π : V →ₗ[LL] V') (hι : Func
     induction x using TensorProduct.induction_on with
     | zero => simp
     | tmul v b => simp
-    | add y z hy hz => simp only [map_add, hy, hz]
+    | add y z hy hz => simp only [map_add (f := _), hy, hz]
   have e2 : ∀ x, AlgebraTensorModule.map π (LinearMap.id : BdR →ₗ[Qp] BdR) x =
       (π.restrictScalars Qp).rTensor BdR x := by
     intro x
     induction x using TensorProduct.induction_on with
     | zero => simp
     | tmul v b => simp
-    | add y z hy hz => simp only [map_add, hy, hz]
+    | add y z hy hz => simp only [map_add (f := _), hy, hz]
   have hex : Function.Exact (ι.restrictScalars Qp) (π.restrictScalars Qp) :=
     (LinearMap.exact_iff.2 hk.symm : Function.Exact ι π)
   constructor

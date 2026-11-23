@@ -1,6 +1,62 @@
-import Formalism.HermitianCurvature.ThetaExistenceInductiveFromPieces
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.FirstKernelExplicitFormula
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.ModulusLocallyConstant
+module
+
+public import Formalism.HermitianCurvature.ThetaExistenceInductiveFromPieces
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.FirstKernelExplicitFormula
+public import Formalism.DoubleCosetMeasures.LowerUnipotentOrbits.LowUniMulVecELast
+import Formalism.DoubleCosetMeasures.LowerUnipotentOrbits.IsIntOfLatOfLe
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.KernelQuotientFinite
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.ModulusLocallyConstant
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Matrix Formalism.DoubleCosetMeasures Formalism.FourierDecayAlt.A5 Formalism.FourierDecayAlt.A6
 open scoped ComplexConjugate
@@ -76,10 +132,6 @@ theorem blkM_add : blkM hN A B C D + blkM hN A' B' C' D' =
   obtain ⟨p, rfl⟩ := (eN hN).surjective x
   obtain ⟨q, rfl⟩ := (eN hN).surjective y
   rcases p with p | p <;> rcases q with q | q <;> simp [blkM]
-
-theorem blkM_one : blkM hN (1 : Matrix (Fin a) (Fin a) K) 0 0 1 = 1 := by
-  unfold blkM
-  rw [Matrix.fromBlocks_one, Matrix.submatrix_one_equiv]
 
 theorem blkM_det_low : (blkM hN A 0 C D).det = A.det * D.det := by
   unfold blkM
@@ -197,8 +249,8 @@ end GlobalTheory
 section Phi
 variable {K : Type} [CommRing K] (R : Subring K)
 
-open Classical in
 
+open Classical in
 def Fz {n n' : ℕ} (Z' : Matrix (Fin n') (Fin n') K) (Z : Matrix (Fin n) (Fin n) K) : ℂ :=
   if IsInt R Z then (Nat.card (isoZZ R Z Z') : ℂ) else 0
 
@@ -1244,7 +1296,7 @@ theorem pert_unit (ϖ : R) (hu : ∀ r : R, IsUnit (1 + ϖ * r)) {N : ℕ}
     have hz : (Ideal.Quotient.mk (Ideal.span {ϖ})).mapMatrix (ϖ • M) = 0 := by
       ext i j
       simp [h0]
-    rw [map_add, map_one, hz, add_zero, Matrix.det_one]
+    rw [map_add (f := _), map_one, hz, add_zero, Matrix.det_one]
   obtain ⟨a, ha⟩ := Ideal.mem_span_singleton'.1 (Ideal.Quotient.eq.1 hq)
   have e : (1 + ϖ • M).det = 1 + ϖ * a := by linear_combination -ha
   rw [e]
@@ -1721,10 +1773,10 @@ theorem head_reduction_lemma : Formalism.FourierDecayAlt.A6.HeadReduction := by
         rw [← mul_assoc, Units.mul_inv, one_mul]
     refine ⟨?_, ?_⟩
     · rw [e]
-      exact hD.isOpen.preimage (continuous_mul_left _)
+      exact hD.isOpen.preimage (continuous_const_mul _)
     · unfold mulR
       rw [AddSubgroup.coe_map, AddMonoidHom.coe_mulLeft]
-      exact hD.isCompact.image (continuous_mul_left _)
+      exact hD.isCompact.image (continuous_const_mul _)
   refine ⟨mulR R ((hdpt.unit⁻¹ : Kˣ) : K), mulR R ((hdpt.unit ^ 2 * ϖ ^ (2 * k + 1 + j) : Kˣ) : K),
     hlat _, hlat _, fun n' Z' => ⟨fun n => PhiH R ψ h Z' n, ?_,
       fun t c => sum_identity R (two_block_point_size_sum h m t c) (two_block_point_block_matrix h m t c) ψ hD Z',

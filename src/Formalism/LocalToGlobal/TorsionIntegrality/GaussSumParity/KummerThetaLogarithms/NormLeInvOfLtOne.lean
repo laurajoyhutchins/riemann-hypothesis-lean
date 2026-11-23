@@ -1,6 +1,56 @@
-import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.BiextensionHypothesesOfLevelOne
-import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.StatementC
-import Formalism.ThetaLogCoordinates.UniformThetaSubstitution.FinalS
+module
+
+public import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.StatementC
+public import Formalism.ThetaLogCoordinates.UniformThetaSubstitution.FinalS
+import Formalism.ThetaLogCoordinates.UniformThetaSubstitution.FrobeniusLiftNorms.TopsChoicePartA
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.MetricSpace.Ultra.TotallySeparated
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 open scoped BigOperators
@@ -21,7 +71,7 @@ theorem poly_id (l : ℕ) (hl : l.Prime) : ∃ Q : Polynomial ℤ,
       (Polynomial.X ^ l - Polynomial.X : Polynomial (ZMod l)) := by
     have hr := FiniteField.roots_X_pow_card_sub_X (ZMod l)
     rw [ZMod.card] at hr
-    have hdeg := FiniteField.X_pow_card_sub_X_natDegree_eq (ZMod l) hl.one_lt
+    have hdeg := Polynomial.natDegree_X_pow_sub_X (R := (ZMod l)) hl.one_lt
     have hmon : (Polynomial.X ^ l - Polynomial.X : Polynomial (ZMod l)).Monic := by
       apply Polynomial.monic_X_pow_sub
       rw [Polynomial.degree_X]
@@ -51,7 +101,7 @@ theorem poly_id (l : ℕ) (hl : l.Prime) : ∃ Q : Polynomial ℤ,
       Polynomial.map_prod]
     simp only [Polynomial.map_sub, Polynomial.map_X, Polynomial.map_natCast]
     rw [hrange, hprod, sub_self]
-  have h := congrArg (fun P => Polynomial.coeff P i) hmap
+  have h := congrArg (fun P => _root_.AddMonoidAlgebra.coeff (M := ℕ) P i) hmap
   simp only [Polynomial.coeff_map, Polynomial.coeff_zero, eq_intCast] at h
   exact h
 
@@ -190,7 +240,7 @@ theorem fixed_is_limit : FixedIsLimit := by
       exact absurd (norm_le_inv_of_lt_one hp.one_lt hval (not_le.1 hlt)) (not_le.2 (hc n))
     have h5 : (1 : ℝ) ≤ ‖∏ n ∈ Finset.range l, (x - (n : K))‖ := by
       rw [norm_prod]
-      have := Finset.prod_le_prod (s := Finset.range l) (f := fun _ => (1 : ℝ))
+      have := Finset.prod_le_prod₀ (s := Finset.range l) (f := fun _ => (1 : ℝ))
         (g := fun n : ℕ => ‖x - (n : K)‖) (fun _ _ => zero_le_one) h4
       simpa using this
     linarith

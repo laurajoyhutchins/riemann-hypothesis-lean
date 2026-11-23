@@ -1,5 +1,50 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.DisjointSpanPerpLat
+module
+
+public import Formalism.SatakeDualWeyl.Statement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open scoped Matrix
 open Formalism.UG
@@ -28,6 +73,7 @@ theorem hform_smul_right (a : A) (x z : Fin M → A) :
 
 theorem conj_hform (hc : ∀ a, c (c a) = a) (hJ : ∀ i j, c (J j i) = J i j) (x y : Fin M → A) :
     c (hform c J x y) = hform c J y x := by
+
   simp only [Formalism.UG.hform, map_sum, map_mul, hc, hJ]
   exact Finset.sum_comm.trans
     (Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => by ring)
@@ -121,7 +167,7 @@ theorem exists_norm_one (hc : ∀ a, c (c a) = a) (hf : ∀ a, c a = a → a ≠
   by_cases h1 : (b - t) * c (b - t) = 0
   · by_cases h1' : (b + t) * c (b + t) = 0
     · rw [map_sub, hcb] at h1
-      rw [map_add, hcb] at h1'
+      rw [map_add (f := _), hcb] at h1'
       have h4 : (2 * b) * (t + c t) = (2 * b) * 0 := by linear_combination h1' - h1
       have htc : t + c t = 0 := (h2.mul hb).mul_left_cancel h4
       have hct : c t = -t := by linear_combination htc
@@ -154,31 +200,31 @@ theorem exists_norm_one (hc : ∀ a, c (c a) = a) (hf : ∀ a, c a = a → a ≠
       obtain ⟨θ, hθu⟩ := hθ
       have hcδ : c (θ - c θ) = -(θ - c θ) := by rw [map_sub, hc]; ring
       by_cases hd : (1 + (θ - c θ)) * c (1 + (θ - c θ)) = 0
-      · rw [map_add, map_one, hcδ] at hd
+      · rw [map_add (f := _), map_one, hcδ] at hd
         apply key (2 + (θ - c θ))
         · have e : (2 + (θ - c θ)) * c (2 + (θ - c θ)) = 3 := by
-            rw [map_add, map_ofNat, hcδ]
+            rw [map_add (f := _), map_ofNat, hcδ]
             linear_combination hd
           rw [e]
           exact hf 3 (map_ofNat c 3) h3
         · have e : 2 + (θ - c θ) - c (2 + (θ - c θ)) = 2 * (θ - c θ) := by
-            rw [map_add, map_ofNat, hcδ]
+            rw [map_add (f := _), map_ofNat, hcδ]
             ring
           rw [e]
           exact h2.mul hθu
         · have e : 2 + (θ - c θ) + c (2 + (θ - c θ)) = 2 * 2 := by
-            rw [map_add, map_ofNat, hcδ]
+            rw [map_add (f := _), map_ofNat, hcδ]
             ring
           rw [e]
           exact h2.mul h2
       · apply key (1 + (θ - c θ)) (hN _ hd)
         · have e : 1 + (θ - c θ) - c (1 + (θ - c θ)) = 2 * (θ - c θ) := by
-            rw [map_add, map_one, hcδ]
+            rw [map_add (f := _), map_one, hcδ]
             ring
           rw [e]
           exact h2.mul hθu
         · have e : 1 + (θ - c θ) + c (1 + (θ - c θ)) = 2 := by
-            rw [map_add, map_one, hcδ]
+            rw [map_add (f := _), map_one, hcδ]
             ring
           rw [e]
           exact h2

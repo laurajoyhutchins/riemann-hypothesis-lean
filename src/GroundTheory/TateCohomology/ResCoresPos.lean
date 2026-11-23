@@ -1,5 +1,56 @@
-import Mathlib
-import GroundTheory.TateCohomology.ResCores
+module
+
+public import GroundTheory.TateCohomology.ResCores
+public import Mathlib.Tactic.Continuity
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.Monoidal.Mon
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.GroupCoh
@@ -39,13 +90,14 @@ lemma barInclF_comm (j : ℕ) :
   simp only [Rep.hom_comp, Representation.IntertwiningMap.comp_apply]
   rw [barInclF_single, barComplex.d_single]
   rw [Rep.resMap_hom_apply, OneMemClass.coe_one, barComplex.d_single]
-  rw [map_add, map_sum, barInclF_single]
+
+  rw [map_add (f := _), map_sum, barInclF_single]
   refine congrArg₂ (· + ·) rfl (Finset.sum_congr rfl fun i _ => ?_)
   rw [barInclF_single, OneMemClass.coe_one]
   exact congrArg (fun v => Finsupp.single v _) (contractNth_subtype S i x)
 
-set_option backward.isDefEq.respectTransparency false in
 
+set_option backward.isDefEq.respectTransparency false in
 noncomputable def barIncl :
     (barResolution k S).complex ⟶ (resBarResolution (k := k) S).complex where
   f n := barInclF S n
@@ -59,8 +111,8 @@ noncomputable def barIncl :
     rw [barComplex.d_def, barComplex.d_def]
     exact h
 
-set_option backward.isDefEq.respectTransparency false in
 
+set_option backward.isDefEq.respectTransparency false in
 lemma barIncl_π : barIncl (k := k) S ≫ (resBarResolution (k := k) S).π = (barResolution k S).π := by
   ext : 1
   refine free_ext _ _ _ _ _ fun x => ?_
@@ -84,8 +136,8 @@ section Key
 
 variable {k G : Type u} [CommRing k] [Group G] (S : Subgroup G)
 
-set_option backward.isDefEq.respectTransparency false in
 
+set_option backward.isDefEq.respectTransparency false in
 noncomputable def resHomComplex (A : Rep.{u} k G) :
     (barComplex k G).linearYonedaObj k A ⟶
       (resBarResolution (k := k) S).complex.linearYonedaObj k (res S.subtype A) where
@@ -98,8 +150,8 @@ noncomputable def resHomComplex (A : Rep.{u} k G) :
     simp [resBarResolution, Functor.mapProjectiveResolution]
     rfl
 
-set_option backward.isDefEq.respectTransparency false in
 
+set_option backward.isDefEq.respectTransparency false in
 lemma freeLift_cochainsMap_subtype (A : Rep.{u} k G) (n : ℕ) (y : (Fin n → G) → A) :
     freeLift k S (res S.subtype A) (((cochainsMap S.subtype (𝟙 (res S.subtype A))).f n).hom y) =
       barInclF S n ≫ (resFunctor S.subtype).map (freeLift k G A y) := by
@@ -110,8 +162,8 @@ lemma freeLift_cochainsMap_subtype (A : Rep.{u} k G) (n : ℕ) (y : (Fin n → G
   exact (show (freeLift k G A y).hom (Finsupp.single (Subtype.val ∘ w) (MonoidAlgebra.single 1 1)) =
     y (Subtype.val ∘ w) by simp).symm
 
-set_option backward.isDefEq.respectTransparency false in
 
+set_option backward.isDefEq.respectTransparency false in
 lemma cochainsMap_subtype_comp_iso (A : Rep.{u} k G) :
     cochainsMap S.subtype (𝟙 (res S.subtype A)) ≫ (inhomogeneousCochainsIso (res S.subtype A)).hom =
       (inhomogeneousCochainsIso A).hom ≫ resHomComplex S A ≫
@@ -119,8 +171,8 @@ lemma cochainsMap_subtype_comp_iso (A : Rep.{u} k G) :
   ext n y : 3
   exact freeLift_cochainsMap_subtype S A n y
 
-set_option backward.isDefEq.respectTransparency false in
 
+set_option backward.isDefEq.respectTransparency false in
 lemma iso_resHomComplex_adj_iso (A : Rep.{u} k G) :
     (inhomogeneousCochainsIso A).hom ≫ resHomComplex S A ≫
       (linearYonedaObjResProjectiveResolutionIso (barResolution k G) (res S.subtype A)).hom ≫
@@ -175,7 +227,6 @@ theorem homologyMap_cochainsMap_unit (A : Rep.{u} k G) (n : ℕ) :
     rw [linearYonedaObjMap_id, Category.id_comp, Category.assoc]
     exact iso_resHomComplex_adj_iso S A
   rw [← e2, ← H.homologyMap_eq, e1, HomologicalComplex.homologyMap_comp]
-  rfl
 
 end Key
 

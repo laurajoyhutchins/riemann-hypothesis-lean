@@ -1,8 +1,56 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.JacConst
-import Formalism.SharpRestriction.CuspSpanNormBounds.BridgeLemma3
-import Formalism.SharpRestriction.CuspSpanNormBounds.BridgeCSB
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.OrbitalIntegralAeConvergenceContinuity
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.JacConst
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CompactGroupHaarExists
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.ConjugationInvarianceEverySetting
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.LongWeylElement
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.OrbitalIntegralAeConvergenceContinuity
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.TwoByOneBlock
+public import Formalism.SharpRestriction.CuspSpanNormBounds.BridgeCSB
+public import Formalism.SharpRestriction.CuspSpanNormBounds.BridgeLemma3
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Matrix.MeasurableSpace
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -57,18 +105,6 @@ theorem meas_conjM (h : Matrix (Fin (2 * r + k + 1)) (Fin (2 * r + k + 1)) ℂ) 
   rw [e]
   exact mulMt_meas (mulMt_meas measurable_const measurable_id) measurable_const
 
-theorem meas_nxmn (x : Matrix (Fin (2 * r + k + 1)) (Fin (2 * r + k + 1)) ℂ) :
-    Measurable fun p : (Mt k r × Mt k r) × Mt k r =>
-      (fun i j => (Matrix.of p.1.1 * x * Matrix.of p.1.2 * (Matrix.of p.2)⁻¹) i j : Mt k r) := by
-  have e : (fun p : (Mt k r × Mt k r) × Mt k r =>
-      (fun i j => (Matrix.of p.1.1 * x * Matrix.of p.1.2 * (Matrix.of p.2)⁻¹) i j : Mt k r)) = fun p =>
-      (fun i j => (Matrix.of (fun i j => (Matrix.of (fun i j => (Matrix.of p.1.1 * Matrix.of (x : Mt k r)) i j : Mt k r) *
-        Matrix.of p.1.2) i j : Mt k r) * Matrix.of (fun i j => ((Matrix.of p.2)⁻¹) i j : Mt k r)) i j : Mt k r) := by
-    funext p; rfl
-  rw [e]
-  exact mulMt_meas (mulMt_meas (mulMt_meas (measurable_fst.comp measurable_fst) measurable_const)
-    (measurable_snd.comp measurable_fst)) (invMt_meas measurable_snd)
-
 theorem meas_hnxhn :
     Measurable fun p : ((((Mt k r × Mt k r) × Mt k r) × Mt k r) × Mt k r) =>
       (fun i j => (Matrix.of p.1.1.1.2 * Matrix.of p.1.2 * Matrix.of p.1.1.1.1 *
@@ -87,7 +123,7 @@ theorem meas_hnxhn :
 theorem meas_bigCell :
     Measurable fun p : (Fin r → ℂ) × (Fin (k + 1) → Fin (k + 1) → ℂ) =>
       (fun i j => bigCell k r p.1 (Matrix.of p.2) i j : Mt k r) := by
-  refine measurable_pi_lambda _ fun i => measurable_pi_lambda _ fun j => ?_
+  refine Measurable.of_eval fun i => Measurable.of_eval fun j => ?_
   unfold bigCell
   split_ifs <;> fun_prop
 
@@ -268,11 +304,6 @@ theorem jacConst_nonneg {T T' a a' κ : ℝ} (hT : 0 < T) (hT' : 0 < T') (ha : 0
   have hV := volU_pos (k - 1)
   unfold jacConst; positivity
 
-theorem wbConst_nonneg {T T' a a' : ℝ} (hT : 0 < T) (hT' : 0 < T') (ha : 0 < a) (ha' : 0 < a') :
-    0 ≤ wbConst k T T' a a' := by
-  have hV := volU_pos (k - 1)
-  unfold wbConst; positivity
-
 theorem sphere_null (t : ℝ) (ht : 0 ≤ t) : (volume : Measure ℂ) {ζ | Complex.normSq ζ = t} = 0 := by
   have e : {ζ : ℂ | Complex.normSq ζ = t} = Metric.sphere 0 (Real.sqrt t) := by
     ext ζ
@@ -292,7 +323,7 @@ theorem aemeas_F {φ : Mt k r → ℝ≥0∞} (hφ : Measurable φ) (μW μW' : 
   have hUo : IsOpen U := isOpen_lt continuous_const Complex.continuous_normSq
   let sM : ℂ → (Fin (k + 1) → Fin (k + 1) → ℂ) := fun ζ i j => U.piecewise (fun ζ => μsec ζ i j) (fun _ => (1 : Matrix (Fin (k + 1)) (Fin (k + 1)) ℂ) i j) ζ
   have hsM : Measurable sM := by
-    refine measurable_pi_lambda _ fun i => measurable_pi_lambda _ fun j => ?_
+    refine Measurable.of_eval fun i => Measurable.of_eval fun j => ?_
     exact ContinuousOn.measurable_piecewise (hsec.1 i j).continuousOn continuousOn_const hUo.measurableSet
   have hbw : Measurable fun q : (Fin r → ℂ) × ℂ => bcWeight k r (Tz k r z) (Tz k r z') q := by
     unfold bcWeight

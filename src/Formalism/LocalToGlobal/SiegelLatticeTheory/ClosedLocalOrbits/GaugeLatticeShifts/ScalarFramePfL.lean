@@ -1,5 +1,56 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.ScalarFramePfK
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.ScalarFramePfD
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.ScalarFramePfH
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.ScalarFramePfI
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.ScalarFramePfJ
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.ScalarFramePfK
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.BetaUniqueness.GramNondeg
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.PairCorankPositivity.EqZeroOfMulVec
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.ScalarPairOrthogonal.MemThPairs
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.ScalarPairOrthogonal.XLeOrthXplus
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.ScalarFramePfG
+
+@[expose] public section
 
 noncomputable section
 
@@ -17,7 +68,7 @@ section GF
 
 variable {D : D7} (Λ : Submodule (𝓞 D.host.E) (VS D).V) {T T' : D.host.E}
 
-theorem span_sum_elim_frameAct (F : LFlag (VS D) D.R.rS T) (F' : LFlag (VS D) D.R.rS T')
+theorem span_sum_elim_frameAct (F : LFlag (D.sp.Y 0) D.R.rS T) (F' : LFlag (D.sp.Y 0) D.R.rS T')
     (ξ : Matrix (Fin (D.R.rS + 1)) (Fin (D.R.rS + 1)) (𝓞 D.host.E))
     (h1 : ∀ a b, b < a → ξ a b = 0) (h2 : ∀ a, ξ a a = 1) :
     Submodule.span D.host.E (Set.range (Sum.elim F.fl.fvec (frameAct F'.fl.fvec ξ⁻¹))) =
@@ -25,30 +76,30 @@ theorem span_sum_elim_frameAct (F : LFlag (VS D) D.R.rS T) (F' : LFlag (VS D) D.
   rw [Set.Sum.elim_range, Set.Sum.elim_range, Submodule.span_union, Submodule.span_union,
     span_frameAct_inv _ ξ h1 h2]
 
-theorem Dl_eq_GDl_top (F : LFlag (VS D) D.R.rS T) (F' : LFlag (VS D) D.R.rS T') :
+theorem Dl_eq_GDl_top (F : LFlag (D.sp.Y 0) D.R.rS T) (F' : LFlag (D.sp.Y 0) D.R.rS T') :
     Dl F.fl F'.fl (D.R.rS + 1) = GDl F.fl.fvec F'.fl.fvec (D.R.rS + 1) := by
   rw [PI.PairCorankPos.W.Dl_top, GDl_top']
   rfl
 
-theorem Dl_eq_GDl_r (F : LFlag (VS D) D.R.rS T) (F' : LFlag (VS D) D.R.rS T') :
+theorem Dl_eq_GDl_r (F : LFlag (D.sp.Y 0) D.R.rS T) (F' : LFlag (D.sp.Y 0) D.R.rS T') :
     Dl F.fl F'.fl D.R.rS = GDl F.fl.fvec F'.fl.fvec D.R.rS := by
   rw [PI.PairCorankPos.W.Dl_r, GDl_r']
   rfl
 
-theorem Gval_eq (F : LFlag (VS D) D.R.rS T) (F' : LFlag (VS D) D.R.rS T') :
+theorem Gval_eq (F : LFlag (D.sp.Y 0) D.R.rS T) (F' : LFlag (D.sp.Y 0) D.R.rS T') :
     Gval F F' = GDl F.fl.fvec F'.fl.fvec (D.R.rS + 1) * star (GDl F.fl.fvec F'.fl.fvec (D.R.rS + 1)) -
       T * T' * (GDl F.fl.fvec F'.fl.fvec D.R.rS * star (GDl F.fl.fvec F'.fl.fvec D.R.rS)) := by
   show Gflag F.fl F'.fl = _
   rw [Gflag, Dl_eq_GDl_top, Dl_eq_GDl_r]
 
-theorem gfacts_of (F : LFlag (VS D) D.R.rS T) (F' F'' : LFlag (VS D) D.R.rS T')
+theorem gfacts_of (F : LFlag (D.sp.Y 0) D.R.rS T) (F' F'' : LFlag (D.sp.Y 0) D.R.rS T')
     (β : (VS D).V ≃ₗ[D.host.E] (VS D).V)
     (hF : FixedHyp D Λ F) (hl' : IsLift Λ F') (hl'' : IsLift Λ F'') (hc' : IsFixedConv Λ (gS D) F')
     (hc'' : IsFixedConv Λ (gS D) F'') (hP : IsPair Λ F F' F'' β (gS D))
     (hs : Lat.s0 Λ F F' F'' β D.R.k = 1) (hsc : IsScalar Λ F F' F'' β)
     (hG' : Gval F F' ≠ 0) (hG'' : Gval F F'' ≠ 0) (hT0 : T ≠ 0) (hT0' : T' ≠ 0) :
     GFacts Λ (frame F) (frameAct (frame F') (admXi D Λ F F')⁻¹) (frameAct (frame F'') (admXi D Λ F F'')⁻¹) β := by
-  obtain ⟨hlat, -, hlF, hcF⟩ := hF
+  obtain ⟨-, -, hlF, hcF⟩ := hF
   have hξ1 := admissibility_witness_unitriangular Λ F F'
   have hξ2 := admissibility_witness_unitriangular Λ F F''
   have hη1 := inv_unitri _ hξ1.1 hξ1.2
@@ -58,8 +109,8 @@ theorem gfacts_of (F : LFlag (VS D) D.R.rS T) (F' F'' : LFlag (VS D) D.R.rS T')
   have hXF'' := X_le_spanE_of_conv Λ F'' _ hc''
   have hU1 := PI.ScalarPairDr.W.UUE_eq Λ F F' hlF.2 hl'.2 hXF hXF'
   have hU2 := PI.ScalarPairDr.W.UUE_eq Λ F F'' hlF.2 hl''.2 hXF hXF''
-  have hGN1 := PI.UnitaryGroupMassFormula.BetaLUniq.gram_matrix_nondegenerate (VS D) Λ F F' hlat hlF hl' hG'
-  have hGN2 := PI.UnitaryGroupMassFormula.BetaLUniq.gram_matrix_nondegenerate (VS D) Λ F F'' hlat hlF hl'' hG''
+  have hGN1 := PI.UnitaryGroupMassFormula.BetaLUniq.gram_matrix_nondegenerate_of_span_eq Λ F F' hU1 hG'
+  have hGN2 := PI.UnitaryGroupMassFormula.BetaLUniq.gram_matrix_nondegenerate_of_span_eq Λ F F'' hU2 hG''
   have hn := PI.UnitaryGroupMassFormula.BetaLUniq.finrank_hS D
   obtain ⟨hTh, hTh''⟩ := theta_eq Λ D.R.k F F' F'' β hn hGN1.1 hGN2.1 hU1 hG' hs
   have hXg1 : Xs (S := VS D) (frameAct (frame F') (admXi D Λ F F')⁻¹) = Xsp F' :=
@@ -219,6 +270,7 @@ theorem gfacts_of (F : LFlag (VS D) D.R.rS T) (F' F'' : LFlag (VS D) D.R.rS T')
       intro i
       have := congrFun hc i
       simp only [Matrix.mulVec, dotProduct, Matrix.of_apply, brS, Pi.zero_apply] at this
+
       rw [hu, map_sum, LinearMap.sum_apply]
       simp only [LinearMap.map_smulₛₗ, LinearMap.smul_apply, smul_eq_mul, starRingEnd_apply, star_star]
       rw [← this]

@@ -1,9 +1,53 @@
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.HaarScaling.MapEqSelfOfIterate
+public import Formalism.LocalToGlobal.IndefiniteReal.SubgroupCharExtensionOneApply
 import Formalism.LocalRingCardinality.SpanPowerMembership.HaarDensityNeZero
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.HaarScaling.MapEqSelfOfIterate
-import Formalism.LocalToGlobal.IndefiniteReal.LevelTypeEquivalence.UnimodGA
-import Formalism.LocalToGlobal.IndefiniteReal.SubgroupCharExtensionOneApply
-import Formalism.LocalToGlobal.IndefiniteReal.LevelTypeEquivalence.MinfLev
-import Formalism.LocalToGlobal.IndefiniteReal.HaarTransfer.MinfUniqueP
+public import Formalism.LocalToGlobal.IndefiniteReal.HaarTransfer.MinfUniqueP
+public import Formalism.LocalToGlobal.IndefiniteReal.HaarTransfer.UnimodP
+public import Formalism.LocalToGlobal.IndefiniteReal.LevelTypeEquivalence.MinfLev
+public import Formalism.LocalToGlobal.IndefiniteReal.LevelTypeEquivalence.UnimodGA
+import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.Upqcpt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Formalism.LocalRingCardinality.SpanPowerMembership.ExistsOmegaLeb
+
+@[expose] public section
 
 noncomputable section
 
@@ -44,8 +88,11 @@ theorem omegaLeb_unique {p q : ℕ} {lam lam' : Measure (lieU p q)} (h : IsOmega
   set a := Measure.addHaarScalarFactor lam' lam
   have hs : lam' = (a : ENNReal) • lam := by
     rw [← ENNReal.smul_def]; exact Measure.isAddLeftInvariant_eq_smul lam' lam
+  have hmeas := (Examples₂.CD.psiE p q).continuous.measurable
+  rw [Examples₂.CD.psiE_coe] at hmeas
   have e2 := h'.2
-  rw [hs, Measure.prod_smul_left, Measure.prod_smul_right, smul_smul, Measure.map_smul, h.2] at e2
+  rw [hs, Measure.prod_smul_left, Measure.prod_smul_right, smul_smul,
+    Measure.map_smul _ hmeas.aemeasurable, h.2] at e2
   have hpos : 0 < (volume : Measure ((Fin p ⊕ Fin q) × (Fin p ⊕ Fin q) → ℂ)) (Metric.ball 0 1) :=
     Metric.isOpen_ball.measure_pos _ ⟨0, Metric.mem_ball_self one_pos⟩
   have hfin : (volume : Measure ((Fin p ⊕ Fin q) × (Fin p ⊕ Fin q) → ℂ)) (Metric.ball 0 1) ≠ ⊤ :=

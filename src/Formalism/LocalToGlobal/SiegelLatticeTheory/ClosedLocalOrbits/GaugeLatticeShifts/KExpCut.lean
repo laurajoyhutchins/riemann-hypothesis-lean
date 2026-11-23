@@ -1,11 +1,58 @@
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.TermOpStmt
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GGMirabolicInhab
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.TermOpInhab
-import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.PoincareConstantEq
-import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.InHHCut
-import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.PoincareSeriesInner
-import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.ConcreteLevelAdelicSubset
-import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.InHHAlg
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.PoincareConstantEq
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.InHHCut
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.TermOpInhab
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.ConcreteLevelAdelicSubset
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.InHHAlg
+public import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.PoincareSeriesInner
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+set_option backward.isDefEq.respectTransparency false
+
+@[expose] public section
 
 noncomputable section
 
@@ -100,24 +147,24 @@ theorem norm_blk_le (hK : X.LevelSubgroupCharacter) (t : GTerm X u u' F0 F0' wha
   · rw [norm_zero]
     exact mul_nonneg (abs_nonneg _) (norm_nonneg _)
 
-variable (F0 F0' what₂ rows') in
 
+variable (F0 F0' what₂ rows') in
 def OOAbs : Prop := Summable (fun t : GTerm X u u' F0 F0' what₂ rows' => ‖OOt t‖)
 
-variable (F0 F0') in
 
+variable (F0 F0') in
 def EntryUnfold (hK : X.LevelSubgroupCharacter) (Dt Dt' : Set X.B.I.GA) : Prop :=
   ∀ (T : Cu X u hK) (T' : Cu X u' hK),
     Kform X u u' hK Dt Dt' FdN FdN' T T' =
       ∑ ρ, ∑ ρ', inner ℂ ((∑' t : GTerm X u u' F0 F0' what₂ rows', blk cs cs' FdN FdN' t ρ ρ') (sharp hK cs' T' ρ'))
         (sharp hK cs T ρ)
 
-variable (F0 F0' what₂ rows') in
 
+variable (F0 F0' what₂ rows') in
 def OOVanish : Prop := ∀ t : GTerm X u u' F0 F0' what₂ rows', ¬ t.relevant → OOt t = 0
 
-variable (F0 F0') in
 
+variable (F0 F0') in
 def IdOffBlocks : Prop :=
   u ≠ u' → ∀ (ρ : cs.Cl) (ρ' : cs'.Cl),
     HasSum (fun t : {t : GTerm X u u' F0 F0' what₂ rows' // t.isId} => blk cs cs' FdN FdN' t.1 ρ ρ') 0
@@ -140,8 +187,8 @@ variable {D : D7} {X : Formalism.L2.SG.HidaSetting.HidaSetting D} {u : D.what₂
   {F0 : FlagG (VS D) D.R.rS ((Tu D u : ℕ) : D.host.E)} {what₂ : Finset (Submodule (𝓞 D.host.E) (VS D).V)}
   (cs : ColSys X u what₂) (FdN : Set X.B.I.Ginf)
 
-variable (F0) in
 
+variable (F0) in
 def IdDiagBlocks : Prop :=
   Formalism.L2.SG.HidaSetting.IsSFund X.B.I (NOinf X u) FdN → ∀ ρ ρ' : cs.Cl,
     HasSum (fun t : {t : GTerm X u u F0 F0 what₂ what₂ // t.isId} => blk cs cs FdN FdN t.1 ρ ρ')
@@ -267,12 +314,12 @@ variable {D : D7} {X : Formalism.L2.SG.HidaSetting.HidaSetting D} {u u' : D.what
   {what₂ rows' : Finset (Submodule (𝓞 D.host.E) (VS D).V)}
   (TR : TypedRed X) (cs : ColSys X u what₂) (cs' : ColSys X u' rows') (FdN FdN' : Set X.B.I.Ginf)
 
-variable (X) in
 
+variable (X) in
 def PsiUnit : Prop := ∀ x, ‖X.psiEf x‖ = 1
 
-variable (X) in
 
+variable (X) in
 theorem psiUnit : PsiUnit X := by
   exact fun x => psi_unit_of X.psiEf X.psiEf_add X.psiEf_int x
 
@@ -332,8 +379,8 @@ theorem absConvT_of (hK : X.LevelSubgroupCharacter) (hψ : PsiUnit X) (hO : OOAb
           mul_le_mul (wt_le t) (hb3 _) (norm_nonneg _) (le_trans (abs_nonneg _) (wt_le t))
       _ = _ := by rw [hamp]; ring
 
-variable (F0 F0' what₂ rows') in
 
+variable (F0 F0' what₂ rows') in
 def OOLint : Prop :=
   ∀ t : GTerm X u u' F0 F0' what₂ rows',
     ∫⁻ x in FundOf t, ‖X.Wu u x‖ₑ * ‖X.Wu u' (t.pt.1⁻¹ * x)‖ₑ ∂(Formalism.L2.SG.ProjRows.muInf X.B.I) < ⊤
@@ -351,7 +398,7 @@ theorem ooIntAll_of (h : OOLint F0 F0' what₂ rows' (X := X) (u := u) (u' := u'
   have h1 : Continuous fun x : X.B.I.Ginf => innerSL ℂ (X.Wu u' (t.pt.1⁻¹ * x)) :=
     (innerSL ℂ).continuous.comp (hW'.comp (continuous_const.mul continuous_id))
   have hcont : Continuous fun x : X.B.I.Ginf => rk1 (X.Wu u x) (X.Wu u' (t.pt.1⁻¹ * x)) := by
-    have h2 := ((ContinuousLinearMap.smulRightL ℂ (X.Vpi u') (X.Vpi u)).continuous.comp h1).clm_apply hW
+    have h2 := ((StrongDual.smulRightL ℂ (X.Vpi u') (X.Vpi u)).continuous.comp h1).clm_apply hW
     simpa [rk1] using h2
   refine ⟨hcont.aestronglyMeasurable, ?_⟩
   unfold HasFiniteIntegral
@@ -506,8 +553,8 @@ theorem integral_conj_mul {α : Type*} [MeasurableSpace α] (μ : Measure α) (f
   funext x
   simp
 
-variable (F0 F0') in
 
+variable (F0 F0') in
 def DCTerms (hK : X.LevelSubgroupCharacter) (R : Set X.B.I.GA) (Fs : X.B.I.GA → Set X.B.I.GA) : Prop :=
   ∀ (T : Cu X u hK) (T' : Cu X u' hK),
     ((scl FdN FdN' (X := X) (u := u) (u' := u') : ℝ) : ℂ) *
@@ -617,8 +664,8 @@ variable {D : D7} {X : Formalism.L2.SG.HidaSetting.HidaSetting D} {u u' : D.what
   {what₂ rows' : Finset (Submodule (𝓞 D.host.E) (VS D).V)}
   (cs : ColSys X u what₂) (cs' : ColSys X u' rows') (FdN FdN' : Set X.B.I.Ginf)
 
-variable (F0) in
 
+variable (F0) in
 def NOcol (ρ : cs.Cl) : Set X.B.I.Ginf :=
   {y | ∃ (x : X.B.I.GA) (n : (VS D).V ≃ₗ[D.host.E] (VS D).V), RatLink X x n ∧ y = x.1 ∧
     n ∈ NLam (cs.lamOf ρ) (lf D F0)}
@@ -626,8 +673,8 @@ def NOcol (ρ : cs.Cl) : Set X.B.I.Ginf :=
 def slab (ρ : cs.Cl) (Ω : Set X.B.I.Ginf) : Set X.B.I.GA :=
   Ω ×ˢ ((((cs.h ρ : X.B.I.Gf) * X.xu u) * ·) '' X.K2)
 
-variable (F0) in
 
+variable (F0) in
 def SlabFD : Prop :=
   ∀ (FS : Set X.B.I.GA), IsFundamentalDomain (Srat X u) FS (X.B.I.muA X.B.μf) →
   ∀ (Ωs : cs.Cl → Set X.B.I.Ginf), (∀ ρ, Formalism.L2.SG.HidaSetting.IsSFund X.B.I (NOcol F0 cs ρ) (Ωs ρ)) →
@@ -636,8 +683,8 @@ def SlabFD : Prop :=
     (∀ ρ, IntegrableOn f (slab cs ρ (Ωs ρ)) (X.B.I.muA X.B.μf)) ∧
       ∫ x in FS, f x ∂(X.B.I.muA X.B.μf) = ∑ ρ, ∫ x in slab cs ρ (Ωs ρ), f x ∂(X.B.I.muA X.B.μf)
 
-variable (F0 F0') in
 
+variable (F0 F0') in
 def Regroup (hK : X.LevelSubgroupCharacter) (Dt' : Set X.B.I.GA) : Prop :=
   ∀ (Ωs : cs.Cl → Set X.B.I.Ginf), (∀ ρ, Formalism.L2.SG.HidaSetting.IsSFund X.B.I (NOcol F0 cs ρ) (Ωs ρ)) →
   ∀ (T : Cu X u hK) (T' : Cu X u' hK) (ρ : cs.Cl),
@@ -722,7 +769,7 @@ theorem dcTerms_of [SigmaFinite (Formalism.L2.SG.ProjRows.muInf X.B.I)] (hK : X.
     apply hy
     simp only [f]
     unfold Ph
-    rw [dif_neg hn]
+    rw [dite_eq_right hn]
     simp
   have hfeq : f = fun x => conj (Ph X u hK T x * conj (∑' δ : Dt', Ph X u' hK T' ((δ : X.B.I.GA) * x))) := by
     funext x

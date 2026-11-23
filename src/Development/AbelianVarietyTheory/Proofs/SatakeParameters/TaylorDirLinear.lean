@@ -1,8 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.BlockTheory.ThetaLiftGeometry.IntegralJetsPairing
-import Formalism.SharpRestriction.GlobalSchurBounds.StandardLatticesGL3
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.TaylorCoeffConjugateSeries
-import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.ConstantCoeffDpolyOfAdditiveTaylorPts
+module
+
+public import Development.AbelianVarietyTheory.Definitions.ThetaValues.MemAnalyticAtZeroOfEventuallyDifferentiableAt
+public import Formalism.SharpRestriction.GlobalSchurBounds.GeneralLinearActions.IsDiscriminantTwelfthRootOfIdealLattice
+public import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.DifferentiableOnOfTendstoLocallyUniformlyOn
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.ConstantCoeffDpolyOfAdditiveTaylorPts
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Filter Topology
 
@@ -18,10 +62,10 @@ theorem map_subst_linear {σ κ R S : Type*} [Finite σ] [Fintype κ] [CommRing 
   rw [MvPowerSeries.map_subst (MvPowerSeries.hasSubst_of_constantCoeff_zero fun k => by simp)]
   simp
 
-open Formalism.MainNotions.G Formalism.BasicNotions Formalism.MainNotions Formalism.MainNotions.TaylorLogMetric NumberField GlobalTheory.IndefiniteRowSideFullHecke.IntegralJetsPairing
+open Formalism.MainNotions.G Formalism.BasicNotions Formalism.MainNotions Formalism.MainNotions.TaylorLogMetric NumberField
+
 
 open Classical in
-
 theorem taylorDir_linear (D : D7) {N N' : ℕ} (G : VC D N N' → ℂ)
     (c : D.what₂.Tau × Fin N' × Fin N → D.what₂.Tau × Fin N' × Fin N → ℂ)
     (hG : Differentiable ℂ G) :
@@ -61,32 +105,5 @@ theorem taylorDir_linear (D : D7) {N N' : ℕ} (G : VC D N N' → ℂ)
     refine Finset.sum_congr rfl fun x _ => ?_
     rw [MvPowerSeries.smul_eq_C_mul, hℓ, hc]
     simp [hL, Pi.single_apply]
-
-theorem pSer_linear : ∀ (D : D7) (N N' p : ℕ) [Fact p.Prime] (lam : Qbar →+* ℂ_[p]) (G : VC D N N' → ℂ) (c : D.what₂.Tau × Fin N' × Fin N → D.what₂.Tau × Fin N' × Fin N → ℂ), Differentiable ℂ G → CoefIn D G Qbar → (∀ k x, c k x ∈ Qbar) → pSer D lam (fun z : VC D N N' => G (fun τ i j => ∑ x : D.what₂.Tau × Fin N' × Fin N, c (τ, i, j) x * z x.1 x.2.1 x.2.2)) = linAt (fun k x => lamC lam (c k x)) (pSer D lam G) := by
-  intro D N N' p _ lam G c hG hco hc
-  let F₀ : MvPowerSeries (D.what₂.Tau × Fin N' × Fin N) Qbar := fun α => ⟨_, hco α⟩
-  let c₀ : D.what₂.Tau × Fin N' × Fin N → D.what₂.Tau × Fin N' × Fin N → Qbar :=
-    fun k x => ⟨_, hc k x⟩
-  have hl : ∀ x : Qbar, lamC lam x = lam x := fun x => by simp [lamC]
-  have h1 : MvPowerSeries.map (algebraMap Qbar ℂ) F₀ = taylorDir (Formalism.MainNotions.TaylorLogMetric.coordV D) G := by
-    ext α
-    rw [MvPowerSeries.coeff_map, ← ConjSeries.taylor_eq_coeff]
-    rfl
-  have h2 : MvPowerSeries.map lam F₀ = pSer D lam G := by
-    ext α
-    rw [MvPowerSeries.coeff_map, ← hl]
-    rfl
-  have h3 := map_subst_linear (algebraMap Qbar ℂ) c₀ F₀
-  have h4 := map_subst_linear lam c₀ F₀
-  rw [h1] at h3
-  rw [h2] at h4
-  have h5 := h3.trans (taylorDir_linear D G c hG).symm
-  simp only [← hl] at h4
-  refine Eq.trans ?_ h4
-  ext α
-  rw [MvPowerSeries.coeff_map, ← hl]
-  change lamC lam (Formalism.MainNotions.TaylorLogMetric.taylor D _ α) = _
-  rw [ConjSeries.taylor_eq_coeff, ← h5, MvPowerSeries.coeff_map]
-  rfl
 
 end GlobalTheory.PSerLin

@@ -1,20 +1,65 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.HasDefect
-import Development.AbelianVarietyTheory.Definitions.Divisors.RigidForFan
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.ToroidalCompactificationBis
-import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.ExistsUniqueIsPointOfDualNumber
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TorusInvariantHeatOperatorActsOnFourierTermsStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HeatOperatorValueAtPointEqRingOperatorStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsGeneratingFramesComplete
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FramesGeneratingAtPoint
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.HasDefect
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IsProperToroidalModelStructureMap
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.DivCalc
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ToStkAInjective
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.ThetaGen
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HeatOperatorValueAtPointEqRingOperatorStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TorusInvariantHeatOperatorActsOnFourierTermsStatement
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsGeneratingFramesComplete
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FramesGeneratingAtPoint
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ConstantCoeffDmonOfProdLinear
 import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ExistsDivOfExpandsAt
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.LogDerivativePrincipalPolarisationIndependent
 import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.ExistsGeneratorOfBasis
-import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.ExpansionOfIntegralSectionIsIntegral
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ConstantCoeffDmonOfProdLinear
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.LogDerivativePrincipalPolarisationIndependent
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExpansionTranslateTorus
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.FamMod
+public import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.ExpansionOfIntegralSectionIsIntegral
+import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.GermEqZeroOfThickenings
+import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExistsLimitUnit
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExpansionTranslateTorus
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ThetaCore
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.GenCalc
 import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.SectionScalarValuation
+import Development.AbelianVarietyTheory.Definitions.Divisors.RigidForFan
+
+@[expose] public section
+
 open CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj AlgebraicGeometry NumberField IsLocalRing
 open scoped CategoryTheory.Obj Matrix TensorProduct
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Out ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor Formalism.L2.Pj
@@ -49,7 +94,7 @@ theorem ringOp_add {Ω : Type} [CommRing Ω] {n : ℕ} (d : Derivation ℤ Ω Ω
     ringOp ⇑d (fun a => ⇑(δ a)) Θ u p p' k (f + g) =
       ringOp ⇑d (fun a => ⇑(δ a)) Θ u p p' k f + ringOp ⇑d (fun a => ⇑(δ a)) Θ u p p' k g := by
   unfold ringOp
-  simp only [map_add, mul_add, Finset.sum_add_distrib]
+  simp only [map_add (f := _), mul_add, Finset.sum_add_distrib]
   ring
 
 theorem ringOp_mul {Ω : Type} [CommRing Ω] {n : ℕ} (d : Derivation ℤ Ω Ω)
@@ -89,6 +134,7 @@ theorem eq_of_adic {Ω Idx : Type} [CommRing Ω] (J : Ideal Ω) [IsHausdorff J �
     rw [Finset.union_comm, split, sub_add_eq_sub_sub]
     exact sub_mem hS2' (Ideal.sum_mem _ fun α hα => hS1' α (Finset.mem_sdiff.1 hα).2)
   have e : s' - c * T s = (s' - ∑ α ∈ S ∪ S', t' α) + c * T (-(s - ∑ α ∈ S ∪ S', t α)) := by
+
     simp only [ht, ← Finset.mul_sum, ← map_sum, map_neg, map_sub]
     ring
   rw [e]
@@ -112,7 +158,7 @@ noncomputable def cstR {A : Type} [CommRing A] {Z : Scheme.{0}} (q : Z ⟶ Sp A)
   map_one' := by simp only [cst, map_one, gs_eq q z ⊤ (show q z ∈ (⊤ : (Sp A).Opens) from trivial)]
   map_mul' a b := by simp only [cst, map_mul, gs_mul q z ⊤ (show q z ∈ (⊤ : (Sp A).Opens) from trivial)]
   map_zero' := by simp only [cst, map_zero, gs_eq q z ⊤ (show q z ∈ (⊤ : (Sp A).Opens) from trivial)]
-  map_add' a b := by simp only [cst, map_add, gs_add q z ⊤ (show q z ∈ (⊤ : (Sp A).Opens) from trivial)]
+  map_add' a b := by simp only [cst, map_add (f := _), gs_add q z ⊤ (show q z ∈ (⊤ : (Sp A).Opens) from trivial)]
 
 theorem cstR_id {Ω : Type} [CommRing Ω] (z : Sp Ω) (a : Ω) : cstR (𝟙 (Sp Ω)) z a = toStkA z a :=
   gs_id_eq z a
@@ -327,7 +373,7 @@ theorem core {R : Type} [CommRing R] [IsDomain R] [IsLocalRing R] [IsNoetherianR
     rw [GlobalTheory.ExpInt.gs_scal,
       Category.assoc, hx', cst_comp, mul_pow, Units.val_mul, Units.val_pow_eq_pow_val (gm r z ⊤ ρ), hρc]
     change cstR r z s₂ * _ + cstR r z (φ c') * (cstR r z ω * _) = cstR r z _ * _
-    rw [map_add, map_mul, map_mul, map_pow]
+    rw [map_add (f := _), map_mul, map_mul, map_pow]
     ring
   · rw [hs₂e, hTs, show (ρU * uU⁻¹)⁻¹ = uU * ρU⁻¹ by rw [mul_inv_rev, inv_inv], Units.val_mul, Units.val_mul]
     have hX : s₀ * (uU : Ω) ^ k = φ r₀ * (((uU : Ω) * ((ρU⁻¹ : Ωˣ) : Ω)) ^ k * ω) := by

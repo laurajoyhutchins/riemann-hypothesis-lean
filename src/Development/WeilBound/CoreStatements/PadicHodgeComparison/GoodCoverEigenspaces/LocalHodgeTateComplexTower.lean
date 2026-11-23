@@ -1,8 +1,50 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.IdTower
-import Development.AbelianVarietyTheory.Statements.PlaceShiftStatements.HTSpecAllHodge
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.OmegaPullOmegaTraceOfSecTraceOne
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.FiniteDimensionalWdSpace
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IdTower
+public import Development.AbelianVarietyTheory.Statements.PlaceShiftStatements.HTSpecAllHodge
+public import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.OmegaPullOmegaTraceOfSecTraceOne
+public import Formalism.ConjugateSelfDual.Statement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.LocalPrimeGaloisActionPeriodT
+import Formalism.SharpRestriction.LevelLetterCocycles.DataN
+
+@[expose] public section
 
 noncomputable section
 
@@ -41,33 +83,6 @@ def HTCover {K : FinExt l} (H : HTower ↥K.1) {J : Type} (ι : J → H.Γ) (n :
 def HTOcc {K : FinExt l} {d : ℕ} (ρ : ↥(GK K) → Matrix (Fin d) (Fin d) (Qbar l)) (a : ℤ) : Prop :=
   ∃ (S : Finset (Qbar l)) (z : Fin d → ℂ_[l]), z ≠ 0 ∧ ∀ σ : ↥(GK K), (∀ x ∈ S, (σ : GQ l) x = x) →
     ((ρ σ).map (algebraMap (Qbar l) ℂ_[l])).mulVec (fun q => Formalism.Per.σC (σ : GQ l) (z q)) = chiPow (σ : GQ l) (-a) • z
-
-def LocalHodgeTateComplexTower : Prop :=
-  ∀ (l : ℕ) [Fact l.Prime] (K : FinExt l) (ιC : Qbar l ≃+* ℂ) (H : HTower ↥K.1) [IsProper H.q] (J : Type) (ι : J → H.Γ)
-    (H' : HTower ℂ) (ι' : J → H'.Γ) [∀ j, IsFinite (H'.s (ι' j))] [∀ j, Etale (H'.s (ι' j))]
-    (_ : TowerBC (ιC.toRingHom.comp (algebraMap ↥K.1 (Qbar l))) H H' ι ι') (θ : J → Qbar l) (a : ℕ),
-    (∀ j, IsFinite (H.s (ι j)) ∧ Etale (H.s (ι j))) → (∀ n, HTCover H ι n) → HodgeOcc H' ι' (fun j => ιC (θ j)) a →
-    ∀ (d : ℕ) (ρ : (Qbar l ≃ₐ[↥K.1] Qbar l) → Matrix (Fin d) (Fin d) (Qbar l)), IsRepOf H (Qbar l) ι θ ρ →
-      HTOcc (K := K) (fun σ => ρ (IntermediateField.fixingSubgroupEquiv K.1 σ)) a
-
-def HodgeTateTowerNumberField : Prop :=
-  ∀ (E Ω : Type) [Field E] [NumberField E] [Field Ω] [Algebra E Ω] [IsAlgClosure E Ω] (l : ℕ) [Fact l.Prime]
-    (ιC : Qbar l ≃+* ℂ) (H : HTower E) [IsProper H.q] (J : Type) (ι : J → H.Γ) (θ : J → Qbar l) (a : ℕ)
-    (Gw : Subgroup (Ω ≃ₐ[E] Ω)) (O : Type) [CommRing O] [Algebra ℤ_[l] O] [TopologicalSpace O] (Bw : LocBridge l E Ω Gw O)
-    (τK : E →+* ↥Bw.Kw.1), (∀ x, (τK x : Qbar l) = Bw.j (algebraMap E Ω x)) →
-    ∀ (HK : HTower ↥Bw.Kw.1) (ιK : J → HK.Γ) (_ : TowerBC τK H HK ι ιK)
-      (H' : HTower ℂ) (ι' : J → H'.Γ) [∀ j, IsFinite (H'.s (ι' j))] [∀ j, Etale (H'.s (ι' j))]
-      (_ : TowerBC (ιC.toRingHom.comp (Bw.j.comp (algebraMap E Ω))) H H' ι ι'),
-    (∀ j, IsFinite (H.s (ι j)) ∧ Etale (H.s (ι j))) → (∀ n, HTCover HK ιK n) → HodgeOcc H' ι' (fun j => ιC (θ j)) a →
-    ∀ (d : ℕ) (ρ : (Ω ≃ₐ[E] Ω) →* GL (Fin d) (Qbar l)), IsRepOf H Ω ι θ (fun σ => (ρ σ).val) →
-      HTOcc (K := Bw.Kw) (fun σ => (ρ (Bw.e.symm σ : Gw)).val) a
-
-def JumpOfHT : Prop :=
-  ∀ (E Ω : Type) [Field E] [NumberField E] [Field Ω] [Algebra E Ω] [IsAlgClosure E Ω] (l : ℕ) [Fact l.Prime]
-    (P : LocPrime l) (AI : LocAinf l P), Nonempty (LocTied l P AI) →
-    ∀ (Gw : Subgroup (Ω ≃ₐ[E] Ω)) (O : Type) [CommRing O] [Algebra ℤ_[l] O] [TopologicalSpace O] (Bw : LocBridge l E Ω Gw O)
-      (d : ℕ) (r : ↥Gw →* GL (Fin d) (Qbar l)) (a : ℤ) (Jm : Multiset ℤ),
-      HTOcc (K := Bw.Kw) (fun σ => (r (Bw.e.symm σ)).val) a → IsJumpsAt P Bw r (Bw.j.comp (algebraMap E Ω)) Jm → a ∈ Jm
 
 end PositivityTheory.AutomorphicGaloisHodgeTate.G8
 

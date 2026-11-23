@@ -1,16 +1,65 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.FerreroWashingtonIndex.TwSingle
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.FerreroWashingtonIndex.TwSingle
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open UpperTheory.V.FW
 
 theorem UpperTheory.V.FW.pTwo :
-    ∀ (C : Type) [CommGroup C] [Finite C] (J : C →* C), (∀ x, J (J x) = x) → (powR C 2).index ≤ ((difR J).relIndex (minK J) * Nat.card (difR J ⊓ torK C 2 : Subgroup C)) ^ 2 := by
+    ∀ (C : Type) [CommGroup C] [Finite C] (J : C →* C), (∀ x, J (J x) = x) →
+      (powR (C := C) 2).index ≤
+        ((difR J).relIndex (minK J) * Nat.card (difR J ⊓ torK (C := C) 2 : Subgroup C)) ^ 2 := by
   intro C _ _ J hJ
   classical
   have hcard : ∀ {G H : Type} [Group G] [Group H] (f : G →* H),
       Nat.card G = Nat.card f.ker * Nat.card f.range := by
     intro G H _ _ f
     rw [← f.ker.card_mul_index, Subgroup.index_ker]
-  set T := torK C 2 with hT
+  set T := torK (C := C) 2 with hT
   set D := difR J with hD
   set K := minK J with hK
   have memT : ∀ x : C, x ∈ T ↔ x ^ 2 = 1 := fun x => by simp [hT, torK]
@@ -20,11 +69,12 @@ theorem UpperTheory.V.FW.pTwo :
     intro x hx
     obtain ⟨y, rfl⟩ := (memD x).1 hx
     rw [memK, map_div, hJ, div_mul_div_comm, mul_comm (J y) y, div_self']
-  have h1 : (powR C 2).index = Nat.card T := by
+  have h1 : (powR (C := C) 2).index = Nat.card T := by
     have e1 := hcard (powMonoidHom 2 : C →* C)
-    have e2 := (powR C 2).card_mul_index
-    have hpos : 0 < Nat.card (powR C 2) := Nat.card_pos
-    have e3 : Nat.card (powR C 2) * (powR C 2).index = Nat.card (powR C 2) * Nat.card T := by
+    have e2 := (powR (C := C) 2).card_mul_index
+    have hpos : 0 < Nat.card (powR (C := C) 2) := Nat.card_pos
+    have e3 : Nat.card (powR (C := C) 2) * (powR (C := C) 2).index =
+        Nat.card (powR (C := C) 2) * Nat.card T := by
       rw [e2, mul_comm]
       exact e1
     exact Nat.eq_of_mul_eq_mul_left hpos e3

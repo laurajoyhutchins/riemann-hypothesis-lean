@@ -1,7 +1,60 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.HodgeWedgeFields.H1CommutesBaseChange
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CechTripleRestrictCompositeInjectiveSecond
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.CrystallinePull2SumCup
+module
+
+public import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.HodgeWedgeFields.H1CommutesBaseChange
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CechTripleRestrictCompositeInjectiveSecond
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsUniqueIsPullForm
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CompatFamilyExtend
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsPairBelowTwo
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FormPowSmulEqZeroOfResBasicOpen
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GlueCommaOfBasis
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HasLocOAff
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsLocalizationOfData
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.OneCocycleCoboundaryCommaLocalBasis
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PairCoverAffine
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.Pull1RestrictSurjectiveOfComma
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RestrictGlob1Bijective
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RestrictPull1InjectiveOfSepGlue
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SepOfFactoringCover
+public import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.CrystallinePull2SumCup
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.AbelianSchemeGerms
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -47,10 +100,6 @@ theorem Bas.glob [Quiver.IsThin C] (h : Bas s G) :
     Function.Bijective (pullGlob1 (CoefMap.restrict (OAff s) G)) :=
   _root_.GlobalTheory.restrict_glob1_bijective _ _ (_root_.GlobalTheory.CechDR.form_eq_zero_of_basis_cover s G h.1)
     (_root_.GlobalTheory.CechDR.FormExt.glue_one_forms s G h.1 h.2)
-
-theorem Bas.hyp [Quiver.IsThin C] (h : Bas s G) :
-    Function.Bijective (pullHyp1 (CoefMap.restrict (OAff s) G)) :=
-  restrict_bijective_one_of_basis s G h.1 h.2
 
 theorem Bas.extend [Quiver.IsThin C] (h : Bas s G) (g' : ∀ t, (OAff s).obj (G.obj t))
     (hg' : ∀ ⦃t t' : C⦄ (a : t ⟶ t'), g' t' = mp (OAff s) (G.map a) (g' t)) :
@@ -397,7 +446,7 @@ theorem base_surj : Function.Surjective (algebraMap R ((OAff s).obj (topAff s)))
   have e : s.appLE ⊤ ⊤ le_top = s.appTop := by
     simp only [Scheme.Hom.appLE]
     exact (congrArg _ ((X.presheaf.map_id _))).trans (Category.comp_id _)
-  haveI : IsIso s.appTop := inferInstanceAs (IsIso (Scheme.Hom.app _ ⊤))
+  haveI : IsIso s.appTop := inferInstanceAs (IsIso (s.app ⊤))
   have h : IsIso (secMap s ⊤) := by
     have h1 : IsIso (s.appLE ⊤ ⊤ le_top) := by
       rw [e]
@@ -457,13 +506,25 @@ theorem PH_id (c : HH1 Y.hom) : PH (𝟙 Y) c = c :=
 instance : IsIso (𝟙_ (Over (Sp R))).hom := inferInstanceAs (IsIso (𝟙 (Sp R)))
 
 theorem PO_one {A : Over (Sp R)} [GrpObj A] (c : HO1 A.hom) : PO (1 : Y ⟶ A) c = 0 := by
-  rw [Hom.one_def, PO_comp, base_first_cohomology_zero _ (PO η[A] c), map_zero]
+  calc
+    PO (1 : Y ⟶ A) c = PO (toUnit Y ≫ η[A]) c := congrArg (fun f : Y ⟶ A ↦ PO f c) Hom.one_def
+    _ = PO (toUnit Y) (PO η[A] c) := PO_comp _ _ c
+    _ = PO (toUnit Y) 0 := congrArg (PO (toUnit Y)) (base_first_cohomology_zero _ (PO η[A] c))
+    _ = 0 := (PO (toUnit Y)).map_zero
 
 theorem PF_one {A : Over (Sp R)} [GrpObj A] (c : GlobForm A.hom) : PF (1 : Y ⟶ A) c = 0 := by
-  rw [Hom.one_def, PF_comp, base_form _ (PF η[A] c), map_zero]
+  calc
+    PF (1 : Y ⟶ A) c = PF (toUnit Y ≫ η[A]) c := congrArg (fun f : Y ⟶ A ↦ PF f c) Hom.one_def
+    _ = PF (toUnit Y) (PF η[A] c) := PF_comp _ _ c
+    _ = PF (toUnit Y) 0 := congrArg (PF (toUnit Y)) (base_form _ (PF η[A] c))
+    _ = 0 := (PF (toUnit Y)).map_zero
 
 theorem PH_one {A : Over (Sp R)} [GrpObj A] (c : HH1 A.hom) : PH (1 : Y ⟶ A) c = 0 := by
-  rw [Hom.one_def, PH_comp, base_hyp _ (PH η[A] c), map_zero]
+  calc
+    PH (1 : Y ⟶ A) c = PH (toUnit Y ≫ η[A]) c := congrArg (fun f : Y ⟶ A ↦ PH f c) Hom.one_def
+    _ = PH (toUnit Y) (PH η[A] c) := PH_comp _ _ c
+    _ = PH (toUnit Y) 0 := congrArg (PH (toUnit Y)) (base_hyp _ (PH η[A] c))
+    _ = 0 := (PH (toUnit Y)).map_zero
 
 end Over
 
@@ -479,7 +540,7 @@ theorem sum_bijective (ua : ∀ x, u (a x) = x) (ub : ∀ x, u (b x) = 0) (va : 
   · have e' : a x.1 + b x.2 = a y.1 + b y.2 := e
     have e1 := congrArg u e'
     have e2 := congrArg v e'
-    simp only [map_add, ua, ub, va, vb, add_zero, zero_add] at e1 e2
+    simp only [map_add (f := _), ua, ub, va, vb, add_zero, zero_add] at e1 e2
     exact Prod.ext e1 e2
   · refine sub_eq_zero.1 (hz _ ?_ ?_) <;> simp [ua, ub, va, vb]
 
@@ -529,10 +590,10 @@ theorem hyp_primitive (sA : Stein (OAff A.hom))
     PH (μ : A ⊗ A ⟶ A) c = PH (fst A A) c + PH (snd A A) c := by
   set d : HH1 (A ⊗ A).hom := PH (μ : A ⊗ A ⟶ A) c - (PH (fst A A) c + PH (snd A A) c) with hd
   have d1 : PH (ax₁ A) d = 0 := by
-    simp only [hd, map_sub, map_add, ← PH_comp, ax₁_mul, lift_fst, lift_snd, PH_id, PH_one]
+    simp only [hd, map_sub, map_add (f := _), ← PH_comp, ax₁_mul, lift_fst, lift_snd, PH_id, PH_one]
     simp
   have d2 : PH (ax₂ A) d = 0 := by
-    simp only [hd, map_sub, map_add, ← PH_comp, ax₂_mul, lift_fst, lift_snd, PH_id, PH_one]
+    simp only [hd, map_sub, map_add (f := _), ← PH_comp, ax₂_mul, lift_fst, lift_snd, PH_id, PH_one]
     simp
   have toO0 : ∀ f : A ⟶ A ⊗ A, PH f d = 0 → IsPullO (wOver f) (toHO1 _ d) 0 := fun f e ↦ by
     have := IsPull1.toO (isPull1_pullHH1 (wOver f) d)
@@ -547,39 +608,68 @@ theorem hyp_primitive (sA : Stein (OAff A.hom))
 
 variable {A}
 
+private theorem restrict_sum {M N : Type} [AddCommMonoid M] [AddCommMonoid N]
+    [Module R M] [Module R N] (r : M →ₗ[R] N) {x y : M} {x' y' : N}
+    (hx : x' = r x) (hy : y' = r y) : x' + y' = r (x + y) :=
+  (congrArg₂ (· + ·) hx hy).trans (r.map_add x y).symm
+
+private theorem bi_of_restriction {C D E J : Type} [Category.{0} C] [Category.{0} D] [Category.{0} E]
+    {F : C ⥤ CommAlgCat.{0} R} {F' : D ⥤ CommAlgCat.{0} R} (G : E ⥤ D)
+    (pull : J → CoefMap (RingHom.id R) F (G ⋙ F'))
+    (o : J → H1 F →ₗ[R] H1 F') (ω : J → Glob1 F →ₗ[R] Glob1 F') (h : J → Hyp1 F →ₗ[R] Hyp1 F')
+    (m p q : J) (sG : Stein (G ⋙ F')) (pG : Par (G ⋙ F'))
+    (rO : Function.Bijective (CoefMap.restrict F' G).pull1)
+    (rF : Function.Bijective (pullGlob1 (CoefMap.restrict F' G)))
+    (eO : ∀ i x, (pull i).pull1 x = (CoefMap.restrict F' G).pull1 (o i x))
+    (eF : ∀ i x, pullGlob1 (pull i) x = pullGlob1 (CoefMap.restrict F' G) (ω i x))
+    (eH : ∀ i x, pullHyp1 (pull i) x = pullHyp1 (CoefMap.restrict F' G) (h i x))
+    (hO : Function.Bijective fun x : H1 F × H1 F ↦ o p x.1 + o q x.2)
+    (hF : Function.Bijective fun x : Glob1 F × Glob1 F ↦ ω p x.1 + ω q x.2)
+    (mO : ∀ c, o m c = o p c + o q c) (mF : ∀ c, ω m c = ω p c + ω q c)
+    (mH : ∀ c, h m c = h p c + h q c) : Bi F := by
+  let r := CoefMap.restrict F' G
+  refine ⟨E, inferInstance, G ⋙ F', pull m, pull p, pull q, sG, pG, ?_, ?_, fun c ↦ ?_, fun c ↦ ?_, fun c ↦ ?_⟩
+  · have eq := funext fun x : H1 F × H1 F ↦ restrict_sum r.pull1 (eO p x.1) (eO q x.2)
+    exact eq.symm ▸ rO.comp hO
+  · have eq := funext fun x : Glob1 F × Glob1 F ↦ restrict_sum (pullGlob1 r) (eF p x.1) (eF q x.2)
+    exact eq.symm ▸ rF.comp hF
+  · exact (eO m c).trans ((congrArg r.pull1 (mO c)).trans (restrict_sum r.pull1 (eO p c) (eO q c)).symm)
+  · exact (eF m c).trans ((congrArg (pullGlob1 r) (mF c)).trans
+      (restrict_sum (pullGlob1 r) (eF p c) (eF q c)).symm)
+  · exact (eH m c).trans ((congrArg (pullHyp1 r) (mH c)).trans
+      (restrict_sum (pullHyp1 r) (eH p c) (eH q c)).symm)
+
 theorem bi_of_fam {Y : Over (Sp R)} {J : Type} [Finite J] (f : J → (Y ⟶ A)) (m p q : J)
     (sY : Stein (OAff Y.hom)) (pY : Par (OAff Y.hom))
     (hO : Function.Bijective fun x : HO1 A.hom × HO1 A.hom ↦ PO (f p) x.1 + PO (f q) x.2)
     (hF : Function.Bijective fun x : GlobForm A.hom × GlobForm A.hom ↦ PF (f p) x.1 + PF (f q) x.2)
     (mO : ∀ c, PO (f m) c = PO (f p) c + PO (f q) c) (mF : ∀ c, PF (f m) c = PF (f p) c + PF (f q) c)
     (mH : ∀ c, PH (f m) c = PH (f p) c + PH (f q) c) : Bi (OAff A.hom) := by
-  let φ : J → (Y.left ⟶ A.left) := fun i ↦ (f i).left
-  have h : ∀ i, φ i ≫ A.hom = Y.hom ≫ spMap (RingHom.id R) := fun i ↦ wOver (f i)
-  have hb : Bas Y.hom (famFst φ) := bas_fam φ Y.hom
-  have eO : ∀ i x, (famPull h i).pull1 x =
-      (CoefMap.restrict (OAff Y.hom) (famFst φ)).pull1 (PO (f i) x) := famPull_pull1 h
-  have eF : ∀ i x, pullGlob1 (famPull h i) x =
-      pullGlob1 (CoefMap.restrict (OAff Y.hom) (famFst φ)) (PF (f i) x) := famPull_glob h
-  have eH : ∀ i x, pullHyp1 (famPull h i) x =
-      pullHyp1 (CoefMap.restrict (OAff Y.hom) (famFst φ)) (PH (f i) x) := famPull_hyp h
-  refine ⟨(Fam φ)ᵒᵖ, inferInstance, famFst φ ⋙ OAff Y.hom, famPull h m, famPull h p, famPull h q,
-    hb.stein sY, hb.par pY, ?_, ?_, fun c ↦ ?_, fun c ↦ ?_, fun c ↦ ?_⟩
-  · convert hb.pull1.comp hO using 1
-    funext x
-    simp only [Function.comp_apply, map_add, eO]
-  · convert hb.glob.comp hF using 1
-    funext x
-    simp only [Function.comp_apply, map_add, eF]
-  · rw [eO, eO, eO, ← map_add, mO]
-  · rw [eF, eF, eF, ← map_add, mF]
-  · rw [eH, eH, eH, ← map_add, mH]
+  have h (i : J) := wOver (f i)
+  have hb := bas_fam (fun i ↦ (f i).left) Y.hom
+  exact bi_of_restriction (famFst fun i ↦ (f i).left) (famPull (φ := fun i ↦ (f i).left) h)
+    (fun i ↦ PO (f i)) (fun i ↦ PF (f i)) (fun i ↦ PH (f i)) m p q
+    (hb.stein sY) (hb.par pY) hb.pull1 hb.glob
+    (famPull_pull1 (φ := fun i ↦ (f i).left) h) (famPull_glob (φ := fun i ↦ (f i).left) h)
+    (famPull_hyp (φ := fun i ↦ (f i).left) h) hO hF mO mF mH
+
+-- Reduce the vector entries while the predicate is abstract, before unfolding any pullback maps.
+private theorem of_fin_three {M : Type} (P : M → M → M → Prop)
+    (h : ∀ f : Fin 3 → M, P (f 0) (f 1) (f 2)) (m p q : M) : P m p q :=
+  h ![m, p, q]
 
 theorem bi_of_pull {Y : Over (Sp R)} (m p q : Y ⟶ A) (sY : Stein (OAff Y.hom)) (pY : Par (OAff Y.hom))
     (hO : Function.Bijective fun x : HO1 A.hom × HO1 A.hom ↦ PO p x.1 + PO q x.2)
     (hF : Function.Bijective fun x : GlobForm A.hom × GlobForm A.hom ↦ PF p x.1 + PF q x.2)
     (mO : ∀ c, PO m c = PO p c + PO q c) (mF : ∀ c, PF m c = PF p c + PF q c)
-    (mH : ∀ c, PH m c = PH p c + PH q c) : Bi (OAff A.hom) :=
-  bi_of_fam ![m, p, q] 0 1 2 sY pY hO hF mO mF mH
+    (mH : ∀ c, PH m c = PH p c + PH q c) : Bi (OAff A.hom) := by
+  let P (m p q : Y ⟶ A) : Prop :=
+    Function.Bijective (fun x : HO1 A.hom × HO1 A.hom ↦ PO p x.1 + PO q x.2) →
+    Function.Bijective (fun x : GlobForm A.hom × GlobForm A.hom ↦ PF p x.1 + PF q x.2) →
+    (∀ c, PO m c = PO p c + PO q c) → (∀ c, PF m c = PF p c + PF q c) →
+    (∀ c, PH m c = PH p c + PH q c) → Bi (OAff A.hom)
+  have h (f : Fin 3 → (Y ⟶ A)) : P (f 0) (f 1) (f 2) := bi_of_fam f 0 1 2 sY pY
+  exact of_fin_three P h m p q hO hF mO mF mH
 
 end Main
 

@@ -1,4 +1,52 @@
-import Formalism.SharpRestriction.GrowthBounds.RootWeights.MatrixSubstTransvectionMonomialOfFixed
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.RootWeights.MatrixSubstTransvectionMonomialOfFixed
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -132,6 +180,7 @@ theorem matrixSubst_transvection_monomial (N : ℕ) (hN : (m.sum fun _ e => e) <
 theorem map_dividedPowerMonomial (k : ℕ) :
     MvPolynomial.map φ (divPowMono R LL S a b k m) = divPowMono B LL S a b k m := by
   unfold Formalism.MainNotions.G.divPowMono
+
   rw [map_sum]
   refine Finset.sum_congr rfl fun f _ => ?_
   have h : ∀ l, φ (if LL.vec l then ((m (l, b)).choose (f l) : R) else (-1 : R) ^ (f l) * ((m (l, a)).choose (f l) : R)) =
@@ -153,23 +202,25 @@ theorem transvectionExpansion : TransvectionExpansion := by
   unfold TransvectionExpansion
   intro R B _ _ ι _ LL n S φ a b _ t F N hF
   have key : ∀ v ∈ F.support,
-      matrixSubst LL S φ (Matrix.transvection a b t) (Matrix.transvection a b (-t)) (monomial v (coeff v F)) =
-        ∑ k ∈ Finset.range N, C (t ^ k) * MvPolynomial.map φ (Formalism.MainNotions.G.divPow R LL S a b k (monomial v (coeff v F))) := by
+      matrixSubst LL S φ (Matrix.transvection a b t) (Matrix.transvection a b (-t)) (monomial v (AddMonoidAlgebra.coeff F v)) =
+        ∑ k ∈ Finset.range N, C (t ^ k) * MvPolynomial.map φ (Formalism.MainNotions.G.divPow R LL S a b k (monomial v (AddMonoidAlgebra.coeff F v))) := by
     intro v hv
     have hv' : (v.sum fun _ e => e) < N := lt_of_le_of_lt (MvPolynomial.le_totalDegree hv) hF
-    have hmono : (monomial v (coeff v F) : MvPolynomial (ι × Fin n) R) = C (coeff v F) * monomial v 1 := by
+    have hmono : (monomial v (AddMonoidAlgebra.coeff F v) : MvPolynomial (ι × Fin n) R) = C (AddMonoidAlgebra.coeff F v) * monomial v 1 := by
       rw [MvPolynomial.C_mul_monomial, mul_one]
-    have hL : matrixSubst LL S φ (Matrix.transvection a b t) (Matrix.transvection a b (-t)) (monomial v (coeff v F)) =
-        C (φ (coeff v F)) * ∑ k ∈ Finset.range N, C (t ^ k) * Formalism.MainNotions.G.divPowMono B LL S a b k v := by
+    have hL : matrixSubst LL S φ (Matrix.transvection a b t) (Matrix.transvection a b (-t)) (monomial v (AddMonoidAlgebra.coeff F v)) =
+        C (φ (AddMonoidAlgebra.coeff F v)) * ∑ k ∈ Finset.range N, C (t ^ k) * Formalism.MainNotions.G.divPowMono B LL S a b k v := by
       rw [hmono, map_mul, matrixSubst_C, matrixSubst_transvection_monomial LL S a b t v φ N hv']
     rw [hL, Finset.mul_sum]
     refine Finset.sum_congr rfl fun k _ => ?_
     rw [dividedPower_monomial, MvPolynomial.smul_eq_C_mul, map_mul, MvPolynomial.map_C, map_dividedPowerMonomial]
     ring
   conv_lhs => rw [F.as_sum]
+
   rw [map_sum]
   refine (Finset.sum_congr rfl key).trans ?_
   conv_rhs => rw [F.as_sum]
+
   simp only [map_sum, Finset.mul_sum]
   exact Finset.sum_comm
 

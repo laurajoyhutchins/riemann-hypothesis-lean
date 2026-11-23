@@ -1,5 +1,47 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.ThetaWeightBounds
-import Formalism.LocalToGlobal.LatticeGeometry.CmTypeMeetsConjugatePair
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.ThetaWeightBounds
+import Formalism.LocalRingCardinality.RankBoundMonotoneInDimension
+public import Formalism.LocalToGlobal.LatticeGeometry.CmTypeMeetsConjugatePair
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -82,7 +124,7 @@ theorem lastPos_wtA {D : D7} {T : Top D} (h : LawsP T) {j : ℕ} (hj : InR D j) 
   have h1 : 1 ≤ w.aP t ⟨(D.R.sigW j).1 - 1, by omega⟩ := hw t _ (by show (D.R.sigW j).1 - 1 + 1 = _; omega)
   have h2 : ext0 (w.aP t) ((D.R.sigW j).1 - 1) = w.aP t ⟨(D.R.sigW j).1 - 1, by omega⟩ := by
     unfold ext0
-    rw [dif_pos (by omega)]
+    rw [dite_eq_left (by omega)]
   unfold wtA
   classical
   refine lt_of_lt_of_le ?_ (Finset.single_le_sum (fun _ _ => Nat.zero_le _) (Finset.mem_univ t))
@@ -98,8 +140,10 @@ theorem theta_weight_bounds : ReciprocityTheory.ChartRestriction.G.PullbackSecti
     have : (((WeightFamilies.dimY D j + 4) * WeightAlgebra.DF wL + 2 : ℕ) : ℝ) ≤ (qq D : ℝ) := by push_cast; linarith
     exact_mod_cast this
   have hf : 1 ≤ D.R.f := by
+    have hm := D.R.two_le_m
+    have hmf := D.R.m_le_f
     unfold Ranks.f Ranks.n
-    exact Nat.succ_le_of_lt (by positivity)
+    omega
   have hr : D.R.r ≤ nP := by
     have : 1 * D.R.r ≤ 8 * D.R.f * D.R.r := Nat.mul_le_mul_right _ (by omega)
     omega
@@ -111,7 +155,7 @@ theorem theta_weight_bounds : ReciprocityTheory.ChartRestriction.G.PullbackSecti
     have h3 := hL.2.1 τ i
     rw [if_neg hn] at h3
     unfold gapZ at h3
-    rw [dif_neg hn] at h3
+    rw [dite_eq_right hn] at h3
     have hc : (2 * (Tn : ℝ) ^ 2) ≤ (ka.aP τ i : ℝ) := by have := h6 τ i hi; linarith
     have hc' : 2 * Tn ^ 2 ≤ ka.aP τ i := by exact_mod_cast hc
     exact weight_floor_inequalities (ka.aP τ i) (wL.aP τ i) (WeightFamilies.dimY D j) (((WeightFamilies.dimY D j : ℤ) + 2) * nW) (2 * D.R.r) Tn (Tp D j Tn)

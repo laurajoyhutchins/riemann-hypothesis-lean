@@ -1,16 +1,62 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.HermiteNormalForms.SmulNeZeroLat
-import Development.AutomorphicArithmetic.AutomorphicVarieties.HermiteNormalForms.Imports
-import Development.AutomorphicArithmetic.AutomorphicVarieties.HermiteNormalForms.Spanpsd
-import Development.AutomorphicArithmetic.AutomorphicVarieties.HermiteNormalForms.Exbasis
-import Development.AutomorphicArithmetic.AutomorphicVarieties.HermiteNormalForms.DetPull
-import Development.AutomorphicArithmetic.AutomorphicVarieties.HermiteNormalForms.Hnf
-import Development.AutomorphicArithmetic.AutomorphicVarieties.HermiteNormalForms.Nearvx
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ConvexNerveComplexes.SimpSpan
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.HermiteNormalForms.SmulNeZeroLat
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.TorsionBoundsChains.FaceDSingle
+public import Mathlib.NumberTheory.NumberField.InfinitePlace.TotallyRealComplex
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ConvexNerveComplexes.SimpSpan
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.HermiteNormalForms.DetPull
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.HermiteNormalForms.Exbasis
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.HermiteNormalForms.Hnf
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.HermiteNormalForms.Imports
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.HermiteNormalForms.Nearvx
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.HermiteNormalForms.Spanpsd
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField Matrix UpperTheory.V UpperTheory.V.KT
 open scoped ComplexOrder
 
-private theorem sx_basis (L : Type) [Field L] [NumberField L] [IsTotallyComplex L] (N p : ℕ)
+private theorem sx_basis (L : Type) [Field L] [NumberField L] [_root_.NumberField.IsTotallyComplex L] (N p : ℕ)
     (t : Sx L N p) :
     ∃ A : Matrix (Fin N) (Fin N) (𝓞 L), A.det ≠ 0 ∧ ∀ j, ColsMin A (t.1 j).1 := by
   have hs : Spans {y : Lat L N | ∀ j, q (t.1 j).1 y = 1} := by
@@ -32,7 +78,7 @@ private theorem colsMin_smul {L : Type} [Field L] [NumberField L] {N : ℕ} (g :
   exact H a
 
 theorem UpperTheory.V.KT.orb :
-    ∀ (L : Type) [Field L] [NumberField L] [IsTotallyComplex L] (N : ℕ) (p : ℕ),
+    ∀ (L : Type) [Field L] [NumberField L] [_root_.NumberField.IsTotallyComplex L] (N : ℕ) (p : ℕ),
     KH.OrbLe (Gm L N) (Sx L N p) (orbBound L N p) := by
   intro L _ _ _ N p
   classical

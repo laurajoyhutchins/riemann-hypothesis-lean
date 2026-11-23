@@ -1,4 +1,56 @@
-import Mathlib
+module
+
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.MeasureTheory.Measure.Haar.Basic
+public import Mathlib.Topology.Instances.Matrix
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Algebra.Group.Units
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.MeasureTheory.Measure.Haar.Unique
+
+@[expose] public section
 
 noncomputable def UpperTheory.Reformulated.B.InvolutionInvariants.Jm :
     {n : Nat} → (Fin n → Bool) → Matrix (Fin n) (Fin n) Complex :=
@@ -684,10 +736,7 @@ theorem UpperTheory.Reformulated.B.InvolutionInvariants.laurent_T_neg_one_mul_T_
       Units.continuous_val) continuous_const
   exact hc.locallyCompactSpace
 
-noncomputable def UpperTheory.Reformulated.B.InvolutionInvariants.muG :
-    {n : Nat} →
-      (ε : Fin n → Bool) → @MeasureTheory.Measure (↥(@UpperTheory.Reformulated.B.InvolutionInvariants.UJ n ε)) (UpperTheory.Reformulated.B.InvolutionInvariants.instMeasurableSpaceUJ n ε) :=
-    fun {n : Nat} (ε : Fin n → Bool) ↦
+noncomputable def UpperTheory.Reformulated.B.InvolutionInvariants.muG : {n : ℕ} → (ε : Fin n → Bool) → MeasureTheory.Measure ↥(UpperTheory.Reformulated.B.InvolutionInvariants.UJ ε) := fun {n : Nat} (ε : Fin n → Bool) ↦
       @MeasureTheory.Measure.haar (↥(@UpperTheory.Reformulated.B.InvolutionInvariants.UJ n ε))
         (@Subgroup.toGroup
           (@Units (Matrix (Fin n) (Fin n) Complex)
@@ -790,6 +839,7 @@ noncomputable def UpperTheory.Reformulated.B.InvolutionInvariants.InvInvariant :
           (@UpperTheory.Reformulated.B.InvolutionInvariants.muG n ε))
         (@UpperTheory.Reformulated.B.InvolutionInvariants.muG n ε)
 
+open scoped Pointwise in
 open MeasureTheory MeasureTheory.Measure in
 private theorem UpperTheory.Reformulated.B.InvolutionInvariants.haar_map_inv {G : Type*} [Group G] [TopologicalSpace G]
     [IsTopologicalGroup G] [MeasurableSpace G] [BorelSpace G] [LocallyCompactSpace G]
@@ -804,7 +854,7 @@ private theorem UpperTheory.Reformulated.B.InvolutionInvariants.haar_map_inv {G 
   have h0 : (haar : Measure G) K ≠ 0 := (measure_pos_of_nonempty_interior _ K.interior_nonempty).ne'
   have ht : (haar : Measure G) K ≠ ⊤ := K.isCompact.measure_lt_top.ne
   have h1 : ∀ s : Set G, (haar : Measure G) s⁻¹ = c * haar s := fun s => by
-    rw [← inv_apply, hc, Measure.smul_apply, smul_eq_mul]
+    rw [← MeasureTheory.Measure.inv_apply, hc, Measure.smul_apply, smul_eq_mul]
   have h2 : c ^ 2 * (haar : Measure G) K = 1 ^ 2 * (haar : Measure G) K := by
     rw [pow_two, mul_assoc, ← h1, ← h1, inv_inv, one_pow, one_mul]
   have h3 : c = 1 :=

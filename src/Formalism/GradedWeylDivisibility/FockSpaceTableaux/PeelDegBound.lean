@@ -1,5 +1,55 @@
-import Formalism.GradedWeylDivisibility.StatementC
-import Formalism.GradedWeylDivisibility.FockSpaceTableaux.LCdegLemmas
+module
+
+public import Formalism.GradedWeylDivisibility.StatementC
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Algebra.MvPolynomial.Monad
+
+@[expose] public section
 
 open MvPolynomial
 
@@ -18,12 +68,12 @@ private theorem degreeOf_eq_zero_of_not_mem_vars {τ B : Type*} [CommRing B] (i 
     (p : MvPolynomial τ B) (h : i ∉ p.vars) : degreeOf i p = 0 := by
   refine Nat.le_zero.1 (degreeOf_le_iff.2 fun m hm => ?_)
   by_contra hne
-  exact h ((mem_vars i).2 ⟨m, hm, Finsupp.mem_support_iff.2 (by omega)⟩)
+  exact h ((MvPolynomial.mem_vars_iff_mem_support i).2 ⟨m, hm, Finsupp.mem_support_iff.2 (by omega)⟩)
 
 private theorem not_mem_vars_of_degreeOf_eq_zero {τ B : Type*} [CommRing B] (i : τ)
     (p : MvPolynomial τ B) (h : degreeOf i p = 0) : i ∉ p.vars := by
   intro hi
-  obtain ⟨m, hm, hmi⟩ := (mem_vars i).1 hi
+  obtain ⟨m, hm, hmi⟩ := (MvPolynomial.mem_vars_iff_mem_support i).1 hi
   have h1 := degreeOf_le_iff.1 h.le m hm
   exact Finsupp.mem_support_iff.1 hmi (by omega)
 
@@ -53,6 +103,7 @@ private theorem le_and_degreeOf_top_le_of_degreeOf_sum_le {B τ : Type} [CommRin
     simp [(hW k i hi).1, (hW k i hi).2]
   have hsum : aeval (fun v : τ => if v = x then (1 : MvPolynomial τ B) else if v = y then -X c
       else X v) Q = W K := by
+
     rw [hQ, map_sum, Finset.sum_eq_single K]
     · rw [Nat.sub_self, pow_zero, mul_one, map_mul, map_pow, hWσ, aeval_X]
       simp
@@ -143,7 +194,7 @@ theorem peelDegBound_of (hE : EvalDeg) : PeelDegBound := by
     have hi3 := vars_bind₁ _ _ hi2
     rw [Finset.mem_biUnion] at hi3
     obtain ⟨v, hv, hiv⟩ := hi3
-    obtain ⟨m, hm, hmv⟩ := (mem_vars v).1 hv
+    obtain ⟨m, hm, hmv⟩ := (MvPolynomial.mem_vars_iff_mem_support v).1 hv
     have hvl : v ≠ (a0, l) := by
       rintro rfl; exact (Finsupp.mem_support_iff.1 hmv) (hw k m hm).1
     have hvj : v ≠ (a0, j) := by
@@ -172,6 +223,7 @@ theorem peelDegBound_of (hE : EvalDeg) : PeelDegBound := by
       (X (some (a0, j)) + X none * X (some (a0, l))) ^ e * ∑ k ∈ Finset.range (K + 1),
         X (some (a0, l)) ^ k * (X (some (a0, j)) + X none * X (some (a0, l))) ^ (K - k) *
           colAddGen B l j (w k) := by
+
     rw [map_sum, Finset.mul_sum]
     refine Finset.sum_congr rfl fun k _ => ?_
     rw [map_mul, map_mul, map_pow, map_pow, e1, e2, pow_add]

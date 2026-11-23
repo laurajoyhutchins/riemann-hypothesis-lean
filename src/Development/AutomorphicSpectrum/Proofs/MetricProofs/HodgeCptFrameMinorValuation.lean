@@ -1,6 +1,55 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.ColFlags
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.FrameChangeByUnitMatrix
+module
+
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.ColFlags
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.FrameChangeByUnitMatrix
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -186,6 +235,7 @@ theorem frame_of_cols {X : Scheme.{0}} {Ω : Type} [Field Ω] {ξ : Spec (CommRi
     ext j k
     rw [Matrix.mul_apply, Matrix.smul_apply, smul_eq_mul]
     show ∑ l, φ j (e l) * f k l = x c ^ m * (φ j (b k) / x c ^ m)
+
     rw [mul_div_cancel₀ _ hX, ← hf k, map_sum]
     exact Finset.sum_congr rfl fun l _ => by rw [map_smul, smul_eq_mul, mul_comm]
   choose G hGr hGC using fun a => exists_left_inv hg hc hb a
@@ -255,8 +305,8 @@ variable {Ψ : Type} [Fintype Ψ] {p q : ℕ} {Ω : Type} [Field Ω] {n : Ψ ⊕
   (A : ∀ s, Matrix (Fin (n s)) (Fin (rk Ψ p q s)) Ω)
   {K₀ : Type} [Fintype K₀] {J₀ : K₀ → Type} [∀ k, Fintype (J₀ k)] (x₀ : (Σ k, J₀ k) → Ω) (m : Ψ ⊕ Ψ → ℕ)
 
-omit [Fintype Ψ] [Fintype K₀] in
 
+omit [Fintype Ψ] [Fintype K₀] in
 theorem eq_fullW_iff (t : StepIx Ψ p q) (hk : ∀ r, blkF Ψ p q K₀ r ≠ some (.inr t)) (τ : Ψ) (hp : 0 < p) :
     (⟨.inr t, hk⟩ : NonPluckerBlocks (blkF Ψ p q K₀)) = fullW τ hp ↔ t.1 = .inl τ ∧ (t.2 : ℕ) + 1 = p := by
   constructor
@@ -272,8 +322,8 @@ theorem eq_fullW_iff (t : StepIx Ψ p q) (hk : ∀ r, blkF Ψ p q K₀ r ≠ som
     have : (i : ℕ) + 1 = p := h2
     omega
 
-omit [Fintype Ψ] [Fintype K₀] in
 
+omit [Fintype Ψ] [Fintype K₀] in
 theorem eq_fullO_iff (t : StepIx Ψ p q) (hk : ∀ r, blkF Ψ p q K₀ r ≠ some (.inr t)) (τ : Ψ) (hq : 0 < q) :
     (⟨.inr t, hk⟩ : NonPluckerBlocks (blkF Ψ p q K₀)) = fullO τ hq ↔ t.1 = .inr τ ∧ (t.2 : ℕ) + 1 = q := by
   constructor
@@ -386,8 +436,8 @@ theorem posOf_injective (s : Ψ ⊕ Ψ) : Function.Injective (posOf (Ψ := Ψ) p
   · exact (wEmb_strictMono p q).injective
   · exact (omEmb_strictMono p q).injective
 
-omit [Fintype Ψ] in
 
+omit [Fintype Ψ] in
 theorem step_facts (r : Ψ × Fin (p + q)) (s : Ψ ⊕ Ψ) (i₀ : Fin (rk Ψ p q s)) (hi : (i₀ : ℕ) = 0)
     (hst : stepOf Ψ p q r = ⟨s, i₀⟩) :
     stepCols (p + q) p r.2 = {posOf p q s i₀} ∧
@@ -573,8 +623,8 @@ theorem detFac_eq {i : Fin (p + q)} (T : Matrix (Fin (p + q)) (Fin (p + q)) Ω) 
   unfold detFac
   rw [minorIJ_wIdx, minorIJ_omIdx]
 
-variable (A x₀) in
 
+variable (A x₀) in
 def aW (F : FrameD n J₀ Ω p q) (τ : Ψ) : Ω := if h : 0 < p then (zW A x₀ F τ h)⁻¹ else 1
 
 theorem aW_eq (F : FrameD n J₀ Ω p q) (r : Ψ × Fin (p + q)) (h : p ≤ (r.2 : ℕ) + 1) :
@@ -790,6 +840,7 @@ theorem isFrameAt_of_goodAt : ∀ (E : Type) [Field E] [NumberField E] [IsCMFiel
         colFrame (cc 𝔐 bW bO (.inl τ)) (wBlock (F.T τ)) := by
       funext b
       unfold colFrame
+
       rw [map_sum]
       exact Finset.sum_congr rfl fun a _ => map_smul _ _ _
     refine frame_unmap (inW_injective 𝔐) ?_
@@ -803,6 +854,7 @@ theorem isFrameAt_of_goodAt : ∀ (E : Type) [Field E] [NumberField E] [IsCMFiel
         colFrame (cc 𝔐 bW bO (.inr τ)) (omBlock (F.T τ)) := by
       funext b
       unfold colFrame
+
       rw [map_sum]
       exact Finset.sum_congr rfl fun a _ => map_smul _ _ _
     refine frame_unmap (inO_injective 𝔐 τ) ?_

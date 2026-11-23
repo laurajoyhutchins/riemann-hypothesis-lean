@@ -1,8 +1,55 @@
-import Mathlib
-import Formalism.SharpRestriction.LevelLetterCocycles.DataN
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.MonodromyZeroOfWeilDeligneRepClassIff
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.PadicIntHomUnique
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsAlgEquivRootOfUnityEqPow
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.FieldTheory.Galois.Infinite
+
+@[expose] public section
 
 noncomputable section
 
@@ -210,7 +257,7 @@ def actSt : GQ l →* (Bst P →ₐ[ℚ_[l]] Bst P) where
   map_one' := stHom_ext P (fun b => by simp) (by simp)
   map_mul' g h := stHom_ext P (fun b => by simp [AlgHom.mul_apply]) (by
     have e : (P.actQ g : P.R.B →ₐ[ℚ_[l]] P.R.B) P.tB = (P.χQ g : ℚ_[l]) • P.tB := localPrime_galoisAction_periodT P g
-    simp only [AlgHom.mul_apply, stHom_X, map_add, stHom_C, map_smul, e,
+    simp only [AlgHom.mul_apply, stHom_X, map_add (f := _), stHom_C, map_smul, e,
       kummer_mul, add_smul, smul_smul, add_assoc, mul_comm])
 
 @[simp] theorem actSt_C (g : GQ l) (b : P.R.B) : actSt P g (C b) = C (P.actQ g b) := stHom_C _ _ _ _
@@ -231,7 +278,7 @@ def monSt : Bst P →ₗ[ℚ_[l]] Bst P := -(derivative.restrictScalars ℚ_[l])
 theorem phiSt_actSt (g : GQ l) (p : Bst P) : phiSt P (actSt P g p) = actSt P g (phiSt P p) := by
   have : (phiSt P).comp (actSt P g) = (actSt P g).comp (phiSt P) :=
     stHom_ext P (fun b => by simp [phiB_actQ]) (by
-      simp only [AlgHom.comp_apply, actSt_X, phiSt_X, map_add, phiSt_C, map_smul, localPrime_frobenius_periodT, map_mul,
+      simp only [AlgHom.comp_apply, actSt_X, phiSt_X, map_add (f := _), phiSt_C, map_smul, localPrime_frobenius_periodT, map_mul,
         map_natCast, mul_add]
       rw [smul_comm, Nat.cast_smul_eq_nsmul, nsmul_eq_mul, map_mul, map_natCast])
   exact AlgHom.congr_fun this p
@@ -262,8 +309,8 @@ theorem exists_monSt_pow_eq_zero (p : Bst P) : ∃ n : ℕ, (monSt P ^ n) p = 0 
 theorem monSt_eq_zero_iff (p : Bst P) : monSt P p = 0 ↔ ∃ b, p = C b := by
   constructor
   · intro h
-    have : IsAddTorsionFree P.R.B := ⟨fun n hn a b hab => by
-      have h1 : (n : ℚ_[l]) • a = (n : ℚ_[l]) • b := by simpa only [Nat.cast_smul_eq_nsmul] using hab
+    have : HasUniqueDiv P.R.B := ⟨fun n hn a b h => by
+      have h1 : (n : ℚ_[l]) • a = (n : ℚ_[l]) • b := by simpa only [Nat.cast_smul_eq_nsmul] using h
       exact smul_right_injective _ (Nat.cast_ne_zero.mpr hn) h1⟩
     rw [monSt_apply, neg_eq_zero] at h
     exact ⟨_, eq_C_of_derivative_eq_zero h⟩
@@ -279,8 +326,6 @@ theorem phiSt_injective : Function.Injective (phiSt P) := by
       ← map_mul, ← map_natCast (algebraMap ℚ_[l] P.R.B), ← map_mul, mul_inv_cancel₀ hl, map_one,
       map_one, one_mul, comp_X]
   exact map_injective (P.φB : P.R.B →+* P.R.B) (phiB_injective P) (by rw [← e, ← e, hpq])
-
-example : monSt P X = -1 := by simp
 
 end Ring
 

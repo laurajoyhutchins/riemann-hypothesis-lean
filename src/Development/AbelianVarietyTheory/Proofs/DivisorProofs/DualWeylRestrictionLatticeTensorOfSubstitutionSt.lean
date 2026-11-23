@@ -1,7 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.NablaSchur
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.NablaSchur
+public import Mathlib.RingTheory.Flat.Basic
 import Formalism.GradedWeylDivisibility.DualWeylDominanceOf
-import Formalism.GradedWeylDivisibility.FinalC
+public import Formalism.GradedWeylDivisibility.FinalC
+import Mathlib.Algebra.AffineMonoid.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.Module.Torsion.Basic
+public import Mathlib.RingTheory.Flat.TorsionFree
+
+@[expose] public section
 
 open MvPolynomial Formalism.GradedWeylDivisibility TensorProduct
 
@@ -119,19 +167,17 @@ theorem mul_mem_range_lTensor {A B : Type} [CommRing A] [CommRing B] (N : Submod
     (x : A ⊗[ℤ] B) (hx : x ∈ LinearMap.range (LinearMap.lTensor A N.subtype)) :
     (u ⊗ₜ (1 : B)) * x ∈ LinearMap.range (LinearMap.lTensor A N.subtype) := by
   obtain ⟨w, rfl⟩ := hx
-  induction w using TensorProduct.induction_on with
-  | zero => simp
+  induction w using TensorProduct.inductionOn with
   | tmul a n => exact ⟨(u * a) ⊗ₜ n, by simp⟩
-  | add x y hx hy => rw [map_add, mul_add]; exact add_mem hx hy
+  | add x y hx hy => rw [map_add (f := _), mul_add]; exact add_mem hx hy
 
 theorem mul_mem_range_rTensor {A B : Type} [CommRing A] [CommRing B] (N : Submodule ℤ A) (u : B)
     (x : A ⊗[ℤ] B) (hx : x ∈ LinearMap.range (LinearMap.rTensor B N.subtype)) :
     ((1 : A) ⊗ₜ u) * x ∈ LinearMap.range (LinearMap.rTensor B N.subtype) := by
   obtain ⟨w, rfl⟩ := hx
-  induction w using TensorProduct.induction_on with
-  | zero => simp
+  induction w using TensorProduct.inductionOn with
   | tmul n b => exact ⟨n ⊗ₜ (u * b), by simp⟩
-  | add x y hx hy => rw [map_add, mul_add]; exact add_mem hx hy
+  | add x y hx hy => rw [map_add (f := _), mul_add]; exact add_mem hx hy
 
 theorem resT_mem_lTensor (hS : SubstMem) (p q : ℕ) (ν : Fin (p + q) → ℕ)
     (f : MvPolynomial (Fin (p + q) × Fin (p + q)) ℤ) (hf : f ∈ dualWeyl ℤ (p + q) (p + q) ν) :
@@ -236,11 +282,10 @@ theorem resLat_of_substMem : SubstMem → ResLat := by
     (resT_mem_lTensor hS p q ν f hf) (resT_mem_rTensor hS p q ν f hf)
   rw [← toQ_resT, ← hw]
   clear hw
-  induction w using TensorProduct.induction_on with
-  | zero => simp
+  induction w using TensorProduct.inductionOn with
   | tmul a b =>
     rw [TensorProduct.map_tmul, toQ_tmul]
     exact Submodule.subset_span ⟨a.1, a.2, b.1, b.2, rfl⟩
-  | add x y hx hy => rw [map_add, map_add]; exact add_mem hx hy
+  | add x y hx hy => simp only [map_add]; exact add_mem hx hy
 
 end GlobalTheory.LeviCut

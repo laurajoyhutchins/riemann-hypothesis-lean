@@ -1,4 +1,51 @@
-import Development.WeilBound.RepresentationTheoryGL.CasimirAlgebra.KugaCoordinates.IsStarRep
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.CasimirAlgebra.KugaCoordinates.IsStarRep
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.InnerProductSpace.Positive
+import Mathlib.Analysis.Matrix.Hermitian
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Mathlib.Analysis.Matrix.Order
+
+@[expose] public section
 
 open scoped TensorProduct MatrixOrder ComplexOrder
 open Matrix
@@ -23,7 +70,7 @@ lemma ec_lTensor (T : Matrix (Fin d) (Fin d) ℂ) (x : V ⊗[ℂ] (Fin d → ℂ
   | tmul φ v =>
     simp [Matrix.mulVec, dotProduct, Finset.sum_smul, mul_smul]
   | add x y hx hy =>
-    simp only [map_add, Pi.add_apply, hx, hy, smul_add, Finset.sum_add_distrib]
+    simp only [map_add (f := _), Pi.add_apply, hx, hy, smul_add, Finset.sum_add_distrib]
 
 end
 
@@ -34,9 +81,10 @@ private theorem re_sum_posSemidef_mul_H_nonneg {V : Type} [AddCommGroup V] [Modu
   obtain ⟨m, v, rfl⟩ := Matrix.posSemidef_iff_eq_sum_vecMulVec.mp hA
   have e : ∑ k, ∑ j, (∑ i, Matrix.vecMulVec (v i) (star (v i))) k j * H (u k) (u j) =
       ∑ i, H (∑ k, star (v i k) • u k) (∑ k, star (v i k) • u k) := by
+
     simp only [Matrix.sum_apply, Matrix.vecMulVec_apply, map_sum, map_smulₛₗ,
-      LinearMap.sum_apply, LinearMap.smul_apply, smul_eq_mul, Pi.star_apply,
-      starRingEnd_apply, star_star, RingHom.id_apply, Finset.sum_mul, Finset.mul_sum]
+    LinearMap.sum_apply, LinearMap.smul_apply, smul_eq_mul, Pi.star_apply,
+    starRingEnd_apply, star_star, RingHom.id_apply, Finset.sum_mul, Finset.mul_sum]
     calc _ = ∑ k, ∑ i, ∑ j, v i k * star (v i j) * H (u k) (u j) :=
           Finset.sum_congr rfl fun k _ => Finset.sum_comm
       _ = _ := by
@@ -64,6 +112,7 @@ theorem tensForm_holds : TensForm := by
   refine ⟨B, ?_, ?_, ?_, ?_⟩
   · intro x y
     simp only [B, LinearMap.mk₂'ₛₗ_apply]
+
     rw [map_sum]
     refine Finset.sum_congr rfl fun k _ => ?_
     rw [hsym]
@@ -94,6 +143,7 @@ theorem tensForm_holds : TensForm := by
       · have h0 := hH.im_star_dotProduct_mulVec_self v
         simpa using h0.symm
     have key := re_sum_posSemidef_mul_H_nonneg H hnn _ hA (ec (V := V) d x)
+
     simp only [B, LinearMap.mk₂'ₛₗ_apply, ec_lTensor, map_sum, map_smul, smul_eq_mul]
     simp only [Matrix.sub_apply, Matrix.smul_apply, Matrix.one_apply, smul_eq_mul, sub_mul,
       Finset.sum_sub_distrib, mul_ite, mul_one, mul_zero, ite_mul, zero_mul,

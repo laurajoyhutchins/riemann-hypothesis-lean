@@ -1,10 +1,57 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.EqZeroOfForallPowDvd
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PDivGroupFormalChartEvNatMultipleEqConvPower
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PAdicEvaluationSubstCompatibleThickening
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ConstantCoeffNmul
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DividedInOfQuasiLogarithm
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsUniqueHasPAdicPowerSeriesValueOfDiffCoeffs
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.EqZeroOfForallPowDvd
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CoeffSubstRestrictSumVariables
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CoeffsInIdealSolutionOfUnipotentSeriesMatrix
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HasPAdicPowerSeriesValueAddSmulMap
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HasPAdicPowerSeriesValueMapOfContinuousEvaluatio
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PAdicEvaluationSubstCompatibleThickening
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PDivGroupFormalChartEvNatMultipleEqConvPower
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PderivSubstChainRule
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.EpsilonPairingZeta
+import Development.AbelianVarietyTheory.Definitions.Divisors.GhostFrobenius
+
+@[expose] public section
 
 open MvPowerSeries GlobalTheory GlobalTheory.Katz GlobalTheory.QLog GlobalTheory.PDivGroup GlobalTheory.Sandwich GlobalTheory.IndefiniteRowSideFullHecke.EpsilonPairingZeta GlobalTheory.PDivLat
 
@@ -21,7 +68,7 @@ open MvPowerSeries in
 set_option autoImplicit false in
 private theorem pderiv_map_algebraMap {B Q σ : Type} [CommRing B] [CommRing Q] [Algebra B Q]
     (k : σ) (g : MvPowerSeries σ B) :
-    pderiv Q k (map (algebraMap B Q) g) = map (algebraMap B Q) (pderiv B k g) := by
+    pderiv (R := Q) k (map (algebraMap B Q) g) = map (algebraMap B Q) (pderiv (R := B) k g) := by
   ext n
   simp [coeff_pderiv, coeff_map]
 
@@ -97,11 +144,11 @@ private theorem dIn_univ_of_QL_of_isLaw {B Q : Type} [CommRing B] [CommRing Q] [
     · simp [hij]
     · simp [hij, Finsupp.single_left_inj]
   let M : Matrix (Fin d) (Fin d) (MvPowerSeries (Fin d) B) :=
-    fun j i => subst eB (pderiv B (Sum.inr i) (μ j))
+    fun j i => subst eB (pderiv (R := B) (Sum.inr i) (μ j))
   have hM : ∀ i j, constantCoeff (M i j) = if i = j then 1 else 0 := by
     intro i j
     rw [← coeff_zero_eq_constantCoeff_apply]
-    have := (_root_.GlobalTheory.coeff_subst_restrict_sum (pderiv B (Sum.inr j) (μ i))).1 0
+    have := (_root_.GlobalTheory.coeff_subst_restrict_sum (pderiv (R := B) (Sum.inr j) (μ i))).1 0
     simp only [M, eB]
     rw [this, Finsupp.mapDomain_zero, coeff_pderiv, zero_add, hlinμ j i]
     by_cases hij : i = j
@@ -111,16 +158,17 @@ private theorem dIn_univ_of_QL_of_isLaw {B Q : Type} [CommRing B] [CommRing Q] [
       subst e (map (algebraMap B Q) g) = map (algebraMap B Q) (subst eB g) := by
     intro g
     rw [map_subst heB, hmape]
-  have hchain : ∀ i, ∑ j, pderiv Q j f * map (algebraMap B Q) (M j i) =
-      subst e (pderiv Q (Sum.inr i) (subst μQ f)) := by
+  have hchain : ∀ i, ∑ j, pderiv (R := Q) j f * map (algebraMap B Q) (M j i) =
+      subst e (pderiv (R := Q) (Sum.inr i) (subst μQ f)) := by
     intro i
+
     rw [_root_.GlobalTheory.PSChain.pderiv_subst_chain μQ hμQ0 f (Sum.inr i), ← coe_substAlgHom he, map_sum]
     refine Finset.sum_congr rfl fun j _ => ?_
     rw [map_mul, coe_substAlgHom, hρμ]
     simp only [M, μQ]
     rw [pderiv_map_algebraMap, hmapsub]
   have hg : ∀ i, _root_.GlobalTheory.QLog.In (B := B) ⊤
-      (subst e (pderiv Q (Sum.inr i) (subst μQ f))) := by
+      (subst e (pderiv (R := Q) (Sum.inr i) (subst μQ f))) := by
     intro i
     obtain ⟨s₀, hs₀⟩ := _root_.GlobalTheory.QLog.In.top_iff.1 hcob
     have hdec : subst μQ f = map (algebraMap B Q) s₀ + _root_.GlobalTheory.Katz.inL f +
@@ -129,19 +177,19 @@ private theorem dIn_univ_of_QL_of_isLaw {B Q : Type} [CommRing B] [CommRing Q] [
       unfold _root_.GlobalTheory.Katz.cob1
       rw [hμQ]
       ring
-    have hleft : pderiv Q (Sum.inr i) (_root_.GlobalTheory.Katz.inL f) = 0 := by
+    have hleft : pderiv (R := Q) (Sum.inr i) (_root_.GlobalTheory.Katz.inL f) = 0 := by
       unfold _root_.GlobalTheory.Katz.inL
       rw [_root_.GlobalTheory.PSChain.pderiv_subst_chain _ (fun k => by simp) f (Sum.inr i)]
       simp [pderiv_X]
-    have hright : pderiv Q (Sum.inr i) (_root_.GlobalTheory.Katz.inR f) =
-        subst (fun k => (X (Sum.inr k) : MvPowerSeries (Fin d ⊕ Fin d) Q)) (pderiv Q i f) := by
+    have hright : pderiv (R := Q) (Sum.inr i) (_root_.GlobalTheory.Katz.inR f) =
+        subst (fun k => (X (Sum.inr k) : MvPowerSeries (Fin d ⊕ Fin d) Q)) (pderiv (R := Q) i f) := by
       unfold _root_.GlobalTheory.Katz.inR
       rw [_root_.GlobalTheory.PSChain.pderiv_subst_chain _ (fun k => by simp) f (Sum.inr i)]
       simp [pderiv_X, Pi.single_apply]
     obtain ⟨b, -, hb⟩ := hlin i
     have hX : HasSubst (fun k => (X (Sum.inr k) : MvPowerSeries (Fin d ⊕ Fin d) Q)) :=
       hasSubst_of_constantCoeff_zero (fun k => by simp)
-    have hrr : subst e (subst (fun k => (X (Sum.inr k) : MvPowerSeries (Fin d ⊕ Fin d) Q)) (pderiv Q i f)) =
+    have hrr : subst e (subst (fun k => (X (Sum.inr k) : MvPowerSeries (Fin d ⊕ Fin d) Q)) (pderiv (R := Q) i f)) =
         map (algebraMap B Q) (C b) := by
       rw [subst_comp_subst_apply hX he]
       have hz : (fun k : Fin d => subst e (X (Sum.inr k) : MvPowerSeries (Fin d ⊕ Fin d) Q)) =
@@ -153,13 +201,13 @@ private theorem dIn_univ_of_QL_of_isLaw {B Q : Type} [CommRing B] [CommRing Q] [
       unfold _root_.GlobalTheory.Katz.lin at hb
       simp [hb]
     rw [_root_.GlobalTheory.QLog.In.top_iff]
-    refine ⟨subst eB (pderiv B (Sum.inr i) s₀) + C b, ?_⟩
+    refine ⟨subst eB (pderiv (R := B) (Sum.inr i) s₀) + C b, ?_⟩
     rw [hdec]
-    simp only [map_add]
-    rw [hleft, hright, add_zero, ← coe_substAlgHom he, map_add, coe_substAlgHom, hrr,
+    simp only [map_add (f := _)]
+    rw [hleft, hright, add_zero, ← coe_substAlgHom he, map_add (f := _), coe_substAlgHom, hrr,
       pderiv_map_algebraMap, hmapsub]
-  have hsol := _root_.GlobalTheory.InvSolve.solve ⊤ M hM (fun j => pderiv Q j f)
-    (fun i => subst e (pderiv Q (Sum.inr i) (subst μQ f))) hchain hg
+  have hsol := _root_.GlobalTheory.InvSolve.solve ⊤ M hM (fun j => pderiv (R := Q) j f)
+    (fun i => subst e (pderiv (R := Q) (Sum.inr i) (subst μQ f))) hchain hg
   intro α i
   by_cases hα : α i = 0
   · exact ⟨0, Submodule.mem_top, by simp [hα]⟩
@@ -212,9 +260,9 @@ private theorem hasVal_zero_of_constantCoeff_eq_zero {p : ℕ} {B Q : Type} [Com
   rw [h0, MvPolynomial.eval_zero, MvPolynomial.constantCoeff_eq, MvPowerSeries.coeff_trunc']
   simp [hf]
 
+
 open MvPowerSeries in
 set_option autoImplicit false in
-
 theorem _root_.GlobalTheory.QLogPeriod.hasPeriod_hodgeTate : ∀ (p : ℕ) [Fact p.Prime] (C : Type) [Field C] [IsAlgClosed C] [CharZero C] (v : Valuation C NNReal) (O : Type) [CommRing O] [Algebra O C] [Fact ¬IsUnit (p : O)] [IsAdicComplete (Ideal.span {(p : O)}) O] [IsDomain O], v.Integers O → ∀ (G : _root_.GlobalTheory.PDivGroup p O) (d : ℕ) (c : _root_.GlobalTheory.QLog.Chart G d), ∀ (E : Type) [CommRing E] [Algebra O E], _root_.GlobalTheory.QLog.IsFrame p E (RingHom.id O) → ∀ (f : MvPowerSeries (Fin d) E) (l : G.dual.Lie), _root_.GlobalTheory.QLog.QL c.μ ⊤ f → c.IsLie f l → ∀ t : G.Tate, c.HasPeriod (RingHom.id O) t f (l (G.hodgeTate t)) := by
   intro p _ C _ _ _ v O _ _ _ _ _ hv G d c E _ _ hF f l hQL hLie t
   have hF' := hF

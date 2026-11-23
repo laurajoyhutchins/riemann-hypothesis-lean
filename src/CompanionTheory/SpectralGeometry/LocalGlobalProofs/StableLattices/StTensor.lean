@@ -1,13 +1,57 @@
-import Mathlib
-import CompanionTheory.RealGroups.UnitaryAdmissibility.ArchimedeanUnitaryDual.StDefinite
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.StableLattices.ExistsFixedOfFinset
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.UnitaryIrreducibleSmoothAdmissibleStatement
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.EventuallyExistsDoubleCosetAntiInvolutionUnitaryStatement
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.GelfandPairSphericalVectorUniqueStatement
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.AdelicUnitaryClosureLocalComponentsOpen
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.NonarchimedeanGroupOfIsCompactIsOpen
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IsOpenIsCompactLevelOffFinEmpty
+module
+
+public import CompanionTheory.RealGroups.UnitaryAdmissibility.ArchimedeanUnitaryDual.StDefinite
+public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.StableLattices.ExistsFixedOfFinset
+public import Development.AbelianVarietyTheory.Definitions.Divisors.LineOppositeParabolicUnitaryLeviSectionEq
 import Development.AbelianVarietyTheory.Proofs.FoundationProofs.EventuallyAlgebraMapMemIntegers
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IsOpenIsCompactLevelOffFinEmpty
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.NonarchimedeanGroupOfIsCompactIsOpen
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.AdelicUnitaryClosureLocalComponentsOpen
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.EventuallyExistsDoubleCosetAntiInvolutionUnitaryStatement
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.GelfandPairSphericalVectorUniqueStatement
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.UnitaryIrreducibleSmoothAdmissibleStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -48,7 +92,7 @@ theorem commute_embPl {v : Formalism.MainNotions.SchurIrreducible.Pl F} {g : GAd
     simp [h]
   · simp [projPl_embPl_ne σ J e]
 
-theorem exists_levelOff_fixed (hFix : StFixVec) (L : Submodule (𝓞 E) (Fin n → E)) [Submodule.IsLattice E L]
+theorem exists_levelOff_fixed (hFix : StFixVec) (L : Submodule (𝓞 E) (Fin n → E)) [Submodule.IsFullLattice E L]
     {H : Type} [NormedAddCommGroup H] [InnerProductSpace ℂ H] {π : GAd σ J →* (H →L[ℂ] H)} (hπ : IsIrrUnitary π) :
     ∃ (S : Finset (HeightOneSpectrum (𝓞 F))) (w : H), w ≠ 0 ∧ ∀ k ∈ levelOff σ J L S, π k w = w := by
   haveI := hπ.complete
@@ -67,7 +111,7 @@ theorem exists_levelOff_fixed (hFix : StFixVec) (L : Submodule (𝓞 E) (Fin n �
   exact hfix g this
 
 theorem eventually_line (hAdm : GlobalTheory.Published.UnitaryIrreducibleAdmissible) (hc : IsCMExt F E σ) (hJ : IsHermND σ J)
-    (L : Submodule (𝓞 E) (Fin n → E)) [hL : Submodule.IsLattice E L] :
+    (L : Submodule (𝓞 E) (Fin n → E)) [hL : Submodule.IsFullLattice E L] :
     ∀ᶠ v in cofinite, ∀ (X : Type) [NormedAddCommGroup X] [InnerProductSpace ℂ X]
       (δ : GLoc σ J v →* (X →L[ℂ] X)), IsIrrUnitary δ → ∀ x : X, x ≠ 0 → (∀ k ∈ stabLoc σ J L v, δ k x = x) →
         ∀ y, (∀ k ∈ stabLoc σ J L v, δ k y = y) → ∃ c : ℂ, y = c • x := by
@@ -112,7 +156,7 @@ def plK (σ : E →ₐ[F] E) (J : Matrix (Fin n) (Fin n) E) (L : Submodule (𝓞
   | .inl _ => ⊥
   | .inr v => stabLoc σ J L v
 
-theorem exists_finset_projPl_mem (L : Submodule (𝓞 E) (Fin n → E)) [Submodule.IsLattice E L] (g : GAd σ J) :
+theorem exists_finset_projPl_mem (L : Submodule (𝓞 E) (Fin n → E)) [Submodule.IsFullLattice E L] (g : GAd σ J) :
     ∃ t : Finset (Formalism.MainNotions.SchurIrreducible.Pl F), ∀ u ∉ t, projPl σ J u g ∈ plK σ J L u := by
   classical
   have hf := Filter.eventually_cofinite.1 (eventually_proj_mem_stabLoc σ J L g)
@@ -146,7 +190,7 @@ theorem stTensor : StTensor := by
   intro hOp hFix hAdm F E _ _ _ _ _ σ hc n J hJ H _ _ π hπ R hR
   classical
   haveI := hπ.complete
-  haveI hL : Submodule.IsLattice E (stdLattice E n) := isLattice_stdLattice
+  haveI hL : Submodule.IsFullLattice E (stdLattice E n) := isLattice_stdLattice
   set L := stdLattice E n with hLdef
   let ρ : ∀ v, GPl σ J v →* (H →L[ℂ] H) := fun v => π.comp (embPl σ J v)
   have hρ : ∀ v, IsUnitaryRep (ρ v) := fun v => isUnitaryRep_comp hπ.unitary (continuous_embPl σ J v)

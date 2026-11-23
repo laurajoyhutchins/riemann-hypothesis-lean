@@ -1,7 +1,56 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.GL2.GodementSectionFactor
-import GroundTheory.GlobalFields.TateThesis.AdelicCharLocal
-import GroundTheory.GlobalFields.TateThesis.AdeleMeasure
+module
+
+public import GroundTheory.AutomorphicForms.GL2.GodementSectionFactor
+public import GroundTheory.GlobalFields.TateThesis.AdelicCharLocal
+public import GroundTheory.GlobalFields.TateThesis.AdeleMeasure
+public import GroundTheory.AutomorphicForms.GL2.FiniteIdeleDecomp
+import Aesop.Main
+import GroundTheory.GlobalFields.LocalAtPlace
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 namespace GroundTheory.Automorphic.GodementSection
 
@@ -34,16 +83,17 @@ def adeleSingleS : ((v : S) → v.1.adicCompletion K) →+ FiniteAdeleRing (𝓞
   toFun a := ∑ v : S, finiteAdeleSingleAdd v.1 (a v)
   map_zero' := by simp
   map_add' a a' := by
-    simp only [Pi.add_apply, map_add]
+    simp only [Pi.add_apply, map_add (f := _)]
     exact Finset.sum_add_distrib
 
 theorem adeleSingleS_apply_of_mem (a : (v : S) → v.1.adicCompletion K) (w : S) :
     adeleSingleS S a w.1 = a w := by
   classical
   change (∑ v : S, finiteAdeleSingleAdd v.1 (a v)) w.1 = a w
+
   rw [show (∑ v : S, finiteAdeleSingleAdd v.1 (a v)) w.1 =
-      ∑ v : S, (finiteAdeleSingleAdd v.1 (a v)) w.1 from
-    map_sum (RestrictedProduct.evalAddMonoidHom _ w.1) _ _]
+    ∑ v : S, (finiteAdeleSingleAdd v.1 (a v)) w.1 from
+  map_sum (RestrictedProduct.evalAddMonoidHom _ w.1) _ _]
   rw [Finset.sum_eq_single w]
   · exact finiteAdeleSingleAdd_apply_self w.1 (a w)
   · intro u _ hu
@@ -54,16 +104,17 @@ theorem adeleSingleS_apply_of_mem (a : (v : S) → v.1.adicCompletion K) (w : S)
 theorem adeleSingleS_apply_of_notMem (a : (v : S) → v.1.adicCompletion K)
     {w : HeightOneSpectrum (𝓞 K)} (hw : w ∉ S) : adeleSingleS S a w = 0 := by
   change (∑ v : S, finiteAdeleSingleAdd v.1 (a v)) w = 0
+
   rw [show (∑ v : S, finiteAdeleSingleAdd v.1 (a v)) w =
-      ∑ v : S, (finiteAdeleSingleAdd v.1 (a v)) w from
-    map_sum (RestrictedProduct.evalAddMonoidHom _ w) _ _]
+    ∑ v : S, (finiteAdeleSingleAdd v.1 (a v)) w from
+  map_sum (RestrictedProduct.evalAddMonoidHom _ w) _ _]
   exact Finset.sum_eq_zero fun u _ ↦
     finiteAdeleSingleAdd_apply_of_ne (fun h ↦ hw (by rw [h]; exact u.2)) _
 
 theorem adeleAtS_adeleSingleS_add (a : (v : S) → v.1.adicCompletion K)
     (x : FiniteAdeleRing (𝓞 K) K) : adeleAtS S (adeleSingleS S a + x) = a + adeleAtS S x := by
   funext w
-  rw [map_add, Pi.add_apply, Pi.add_apply]
+  rw [map_add (f := _), Pi.add_apply, Pi.add_apply]
   simp only [adeleAtS_apply, adeleSingleS_apply_of_mem]
 
 theorem apply_adeleSingleS_add {E : Type*} {G : FiniteAdeleRing (𝓞 K) K → E}

@@ -1,6 +1,54 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SquareIntegrability.SplitSt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SquareIntegrability.GaussianTailBound
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SquareIntegrability.CardChoiceLe
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SquareIntegrability.IteratedDerivListBound
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Monotonicity.Lemmas
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Presheaf
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SquareIntegrability.CardChoiceLe
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SquareIntegrability.HfEqInner
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SquareIntegrability.L2NormSqNonnegGaussianTorus
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SquareIntegrability.OneAddPowSubOneLe
+
+@[expose] public section
 
 namespace ReciprocityTheory.ChartRestriction.G.I2
 
@@ -29,12 +77,12 @@ theorem norm_sgnT {dim : (E →+* ℂ) → ℕ} {n nb : ℕ} (bs : Fin nb → Bl
     ‖sgnT bs T‖ ≤ 1 := by
   unfold sgnT
   rw [norm_prod]
-  refine Finset.prod_le_one (fun _ _ => norm_nonneg _) fun j _ => ?_
+  refine Finset.prod_le_one₀ (fun _ _ => norm_nonneg _) fun j _ => ?_
   rw [norm_prod]
-  refine Finset.prod_le_one (fun _ _ => norm_nonneg _) fun r _ => ?_
+  refine Finset.prod_le_one₀ (fun _ _ => norm_nonneg _) fun r _ => ?_
   rcases Int.units_eq_one_or (Equiv.Perm.sign (T j r)) with h | h <;> simp [h]
 
-set_option maxHeartbeats 1000000 in
+
 open Classical in
 theorem jof_core (hx : Ext.All) (hs : SplitStatement) (hc : CharStatement) (ht : ColTorusStatement)
     (ha : ColAbelStatement) (he : ColEmptyStatement) [IsCMField E] (X : PT E) {n nb : ℕ}
@@ -87,7 +135,7 @@ theorem jof_core (hx : Ext.All) (hs : SplitStatement) (hc : CharStatement) (ht :
       rw [norm_mul, norm_prod]
       gcongr
       calc ∏ r, ‖Hf (eU bs p.1 (T p.1 r p.2)) (y p)‖ ≤ ∏ _r : Fin (bs p.1).c, (2 : ℝ) :=
-            Finset.prod_le_prod (fun _ _ => norm_nonneg _) fun r _ =>
+            Finset.prod_le_prod₀ (fun _ _ => norm_nonneg _) fun r _ =>
               Hf_norm_le_two _ _ (eU_props bs p.1 _).2 (hyB p.1 p.2)
         _ = 2 ^ (bs p.1).c := by simp
   have hDb : ∀ T k, ‖D T k - A T k‖ ≤ δ k := by
@@ -165,7 +213,7 @@ theorem jof_core (hx : Ext.All) (hs : SplitStatement) (hc : CharStatement) (ht :
     have h1 : A1 ≤ 2 ^ DF bs * (1 + ε) ^ m := by
       rw [hA1def, ← prod_two_pow bs, hmdef, ← Finset.card_univ, ← Finset.prod_const,
         ← Finset.prod_mul_distrib]
-      refine Finset.prod_le_prod (fun _ _ => by positivity) fun p _ => ?_
+      refine Finset.prod_le_prod₀ (fun _ _ => by positivity) fun p _ => ?_
       have : (1 : ℝ) ≤ 2 ^ (bs p.1).c := one_le_pow₀ (by norm_num)
       nlinarith
     have h2 := one_add_pow_sub_one_le ε hε0 m
@@ -209,7 +257,7 @@ theorem jof_core (hx : Ext.All) (hs : SplitStatement) (hc : CharStatement) (ht :
     have hm' : (m : ℝ) ≤ DF bs := by exact_mod_cast hm
     have hA0 : 0 ≤ A1 - 2 ^ DF bs := by
       rw [hA1def, ← prod_two_pow bs, sub_nonneg]
-      exact Finset.prod_le_prod (fun _ _ => by positivity) fun p _ => le_add_of_nonneg_right hε0
+      exact Finset.prod_le_prod₀ (fun _ _ => by positivity) fun p _ => le_add_of_nonneg_right hε0
     have hexp : Real.exp (-((X.r : ℝ) / 2 + 1)) ^ DF bs = Real.exp (-(((X.r : ℝ) / 2 + 1) * DF bs)) := by
       rw [← Real.exp_nat_mul]
       congr 1
@@ -294,7 +342,7 @@ theorem jof_core (hx : Ext.All) (hs : SplitStatement) (hc : CharStatement) (ht :
     have he1 : (∏ k ∈ Finset.univ.filter (fun k => owner bs k = none), w) *
         (∏ k ∈ Finset.univ.filter (fun k => owner bs k = none), X.l2 P.q (sc k)) ≤ Ce ^ 2 := by
       rw [← Finset.prod_mul_distrib, hCedef, ← Finset.prod_pow]
-      refine Finset.prod_le_prod (fun k _ => mul_nonneg (by positivity) (l2NormSq_nonneg_gaussianTorus X P.q _))
+      refine Finset.prod_le_prod₀ (fun k _ => mul_nonneg (by positivity) (l2NormSq_nonneg_gaussianTorus X P.q _))
         fun k hk => ?_
       rw [Finset.mem_filter] at hk
       rw [hsc_none k hk.2, hwdef]
@@ -309,7 +357,7 @@ theorem jof_core (hx : Ext.All) (hs : SplitStatement) (hc : CharStatement) (ht :
       rw [← Finset.prod_mul_distrib]
       calc ∏ p : (Σ j : Fin nb, Fin (bs j).i), (w * X.l2 P.q (sc (colB bs p)))
           ≤ ∏ p : (Σ j : Fin nb, Fin (bs j).i), (4⁻¹ * ‖μ p‖ ^ 2) := by
-            refine Finset.prod_le_prod (fun p _ => mul_nonneg (by positivity) (l2NormSq_nonneg_gaussianTorus X P.q _))
+            refine Finset.prod_le_prod₀ (fun p _ => mul_nonneg (by positivity) (l2NormSq_nonneg_gaussianTorus X P.q _))
               fun p _ => ?_
             rw [hsc_col, hwdef]
             have := hl2 p.1 p.2

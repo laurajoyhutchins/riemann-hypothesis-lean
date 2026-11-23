@@ -1,7 +1,51 @@
-import Formalism.SharpRestriction.LevelLetterCocycles.RepresentationCongruences.Pi0MemADelta
-import Formalism.SharpRestriction.LevelLetterCocycles.RepresentationCongruences.ImportsBis
-import Formalism.SharpRestriction.LevelLetterCocycles.RepresentationCongruences.SaturationFractionModule
-import Formalism.SharpRestriction.LevelLetterCocycles.RepresentationCongruences.GammaPi0EqPi0MulUnit
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.RepresentationCongruences.ArcGamLiftCoreT
+public import Formalism.SharpRestriction.LevelLetterCocycles.RepresentationCongruences.GammaPi0EqPi0MulUnit
+public import Formalism.SharpRestriction.LevelLetterCocycles.RepresentationCongruences.Pi0MemADelta
+public import Formalism.SharpRestriction.LevelLetterCocycles.RepresentationCongruences.SaturationFractionModule
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.Interval.Finset.Box
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -333,9 +377,11 @@ theorem C_typeT_of (hA : A.OK) (hc : c ∈ A.cuts)
           ∑ m', algebraMap O LL (c₁ m') • dv W T₁ (A.len c) b₁ (Pi.single m' 1) := dv_eq_sum W T₁ _ b₁ _
       have h2 : ∀ m', dvO W T₂ (A.len c) b (μ m') =
           ∑ k, algebraMap O LL (μ m' k) • dv W T₂ (A.len c) b (Pi.single k 1) := fun m' => dv_eq_sum W T₂ _ b _
+
       rw [h0, map_sum]
       simp_rw [map_smul, hμ, h2, Finset.smul_sum, smul_smul]
       rw [Finset.sum_comm]
+
       simp_rw [map_sum, map_mul, Finset.sum_smul]
     have e2 : ((PD.p : LL) ^ s₀) • dv W T₂ (A.len c) b (Pi.single k₀ 1) =
         ∑ k, (if k = k₀ then (PD.p : LL) ^ s₀ else 0) • dv W T₂ (A.len c) b (Pi.single k 1) := by
@@ -361,6 +407,7 @@ theorem C_typeT_of (hA : A.OK) (hc : c ∈ A.cuts)
   · refine TypesA.RepVV_congr W hT₂ (sub_zero _).symm fun k => ?_
     have h1 : ∑ m', lE W (A.σ PD.p) * (f * algebraMap O W.EE (c₁ m')) * algebraMap O W.EE (μ m' k) =
         lE W (A.σ PD.p) * f * algebraMap O W.EE (∑ m', c₁ m' * μ m' k) := by
+
       rw [map_sum, Finset.mul_sum]
       exact Finset.sum_congr rfl fun m' _ => by rw [map_mul]; ring
     rw [h1, hcoef k]

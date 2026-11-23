@@ -1,4 +1,61 @@
-import Development.AutomorphicArithmetic.CyclotomicBounds.ClassNumberBounds.InertiaRamification.BridgeDefs
+module
+
+public import Development.AutomorphicArithmetic.CyclotomicBounds.ClassNumberBounds.InertiaRamification.BridgeDefs
+public import Mathlib.RingTheory.Ideal.Norm.AbsNorm
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.LinearAlgebra.Matrix.Charpoly.Minpoly
+public import Mathlib.NumberTheory.NumberField.Norm
+
+@[expose] public section
 
 namespace KStar.Ram
 
@@ -51,11 +108,12 @@ theorem padicValNat_absNorm_one_sub {K : Type*} [Field K] [NumberField K] (l : �
       have hne : p ^ (j + 1) ≠ 1 := fun h => by rw [h] at hm; norm_num at hm
       by_cases hpl : p = l
       · subst hpl
-        rw [padicValNat_self, rootWeight, if_pos ⟨hne, j + 1, rfl⟩]
+        rw [Nat.padicValNat_def, Nat.Prime.multiplicity_self, rootWeight,
+          if_pos ⟨hne, j + 1, rfl⟩]
         have ht : ((p ^ (j + 1)).totient : ℚ) ≠ 0 := by
           exact_mod_cast (Nat.totient_pos.mpr (by positivity)).ne'
         rw [Nat.cast_one, mul_one_div, div_self ht]
-      · rw [padicValNat_primes (Ne.symm hpl), rootWeight, if_neg]
+      · rw [Nat.padicValNat_def, multiplicity_primes (Ne.symm hpl), rootWeight, if_neg]
         · simp
         · rintro ⟨-, s, hs⟩
           apply hpl
@@ -74,15 +132,15 @@ theorem padicValNat_absNorm_one_sub {K : Type*} [Field K] [NumberField K] (l : �
           omega
         · exact hpp ⟨p, j, hp, hj.symm⟩
       rw [h1, rootWeight, if_neg]
-      · simp
+      · simp [_root_.Nat.padicValNat_def (n := 1)]
       · rintro ⟨-, s, hs⟩
         rcases s with _ | s
         · rw [pow_zero] at hs
           omega
         · exact hpp ⟨l, s, Fact.out, hs⟩
-  rw [Ideal.absNorm_span_singleton, hnormZ, Int.natAbs_pow, padicValNat.pow, hk]
-  push_cast
-  rw [hv]
+  rw [Nat.padicValNat_def] at hv
+  rw [Ideal.absNorm_span_singleton, hnormZ, Int.natAbs_pow, Nat.padicValNat_def,
+    Nat.multiplicity_pow, hk, Nat.cast_mul, Nat.cast_mul, hv]
   ring
 
 end KStar.Ram

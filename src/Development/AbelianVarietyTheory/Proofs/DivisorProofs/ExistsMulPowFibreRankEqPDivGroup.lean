@@ -1,6 +1,48 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.ToSpanSingletonConstGenInjective
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
 import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsRetractionMulP
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ConvEqOneOfForallPairing
+
+@[expose] public section
+
 open CategoryTheory Coalgebra GlobalTheory GlobalTheory.PDiv GlobalTheory.PDivGroup GlobalTheory.HTPair
 open scoped TensorProduct
 
@@ -9,25 +51,27 @@ noncomputable section
 namespace GlobalTheory.PDivGroup
 
 theorem exists_mulPow_fibreRank_eq (p : ℕ) [Fact p.Prime] (O : Type) [CommRing O]
-    (G : PDivGroup p O) (k m : ℕ) :
+    (G : _root_.GlobalTheory.PDivGroup p O) (k m : ℕ) :
     ∃ (r : G.A (k + m) →ₐc[O] G.A k) (μ : G.A k →ₐc[O] G.A (k + m)), Function.Surjective r ∧
-      RingHom.ker r = torsionIdeal O (G.A (k + m)) (p ^ k) ∧
-      (∀ a, μ (r a) = mulBy O (G.A (k + m)) (p ^ m) a) ∧
+      RingHom.ker r = torsionIdeal (R := O) (A := G.A (k + m)) (p ^ k) ∧
+      (∀ a, μ (r a) = mulBy (R := O) (A := G.A (k + m)) (p ^ m) a) ∧
       ∀ q, fibreRank (μ : G.A k →ₐ[O] G.A (k + m)).toLinearMap q = fibreDim (G.A k) q := by
   obtain ⟨r, hr, hk⟩ := G.exists_res_le (m := k) (n := k + m) (by omega)
-  have hle : RingHom.ker r ≤ RingHom.ker (mulBy O (G.A (k + m)) (p ^ m)) := by
+  have hle : RingHom.ker r ≤ RingHom.ker (mulBy (R := O) (A := G.A (k + m)) (p ^ m)) := by
     rw [hk]
     refine (kerIdeal_le_ker_iff _
-      (mulBy O (G.A (k + m)) (p ^ m) : G.A (k + m) →ₐ[O] G.A (k + m))).2 fun c => ?_
-    change mulBy O _ (p ^ m) (mulBy O _ (p ^ k) c) = _
+      (mulBy (R := O) (A := G.A (k + m)) (p ^ m) : G.A (k + m) →ₐ[O] G.A (k + m))).2 fun c => ?_
+    change mulBy (R := O) (A := G.A (k + m)) (p ^ m)
+      (mulBy (R := O) (A := G.A (k + m)) (p ^ k) c) = _
     rw [mulBy_mulBy, ← pow_add, add_comm m k, mulBy_pow_self]
-  let μ := liftSurj r hr (mulBy O (G.A (k + m)) (p ^ m)) hle
-  have hμ : ∀ a, μ (r a) = mulBy O (G.A (k + m)) (p ^ m) a := liftSurj_apply r hr _ hle
+  let μ := liftSurj r hr (mulBy (R := O) (A := G.A (k + m)) (p ^ m)) hle
+  have hμ : ∀ a, μ (r a) = mulBy (R := O) (A := G.A (k + m)) (p ^ m) a :=
+    liftSurj_apply r hr _ hle
   refine ⟨r, μ, hr, hk, hμ, fun q => ?_⟩
   obtain ⟨f, hf, hfk⟩ := G.exists_res_le (m := m) (n := k + m) (by omega)
   have hker : kerIdeal μ = RingHom.ker (f : G.A (k + m) →ₐ[O] G.A m) := by
-    rw [← kerIdeal_comp_of_surjective μ hr, show μ.comp r = mulBy O (G.A (k + m)) (p ^ m) from
-      BialgHom.ext hμ]
+    rw [← kerIdeal_comp_of_surjective μ hr, show μ.comp r =
+      mulBy (R := O) (A := G.A (k + m)) (p ^ m) from BialgHom.ext hμ]
     exact hfk.symm
   have h1 := fibreDim_eq_ker_mul_range μ q
   rw [hker, fibreDim_congr (Ideal.quotientKerAlgEquivOfSurjective

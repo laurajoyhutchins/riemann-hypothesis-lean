@@ -1,4 +1,42 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.LinkedUnramifiedChains.TeichmullerParts.UnramifiedTrivialInertialType
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.LinkedUnramifiedChains.TeichmullerParts.UnramifiedTrivialInertialType
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 open UpperTheory.V.Z.J.D
 open scoped TensorProduct
 
@@ -30,7 +68,7 @@ private lemma isot_factor {G H W W' X Y : Type} [Group G] [Group H] [AddCommGrou
     obtain ⟨t, rfl⟩ := f.surjective x
     induction t using TensorProduct.induction_on with
     | zero => simp
-    | add a b ha hb => simp only [map_add, ha, hb]
+    | add a b ha hb => simp only [map_add (f := _), ha, hb]
     | tmul w y =>
       have := hf (1, h) (w ⊗ₜ[ℂ] y)
       simp only [LinearEquiv.coe_coe] at this
@@ -67,7 +105,7 @@ private lemma isot_tensor {G H W W' X Y : Type} [Group G] [Group H] [AddCommGrou
     obtain ⟨a, b⟩ := ab
     induction t using TensorProduct.induction_on with
     | zero => simp
-    | add s t hs ht => simp only [map_add, hs, ht]
+    | add s t hs ht => simp only [map_add (f := _), hs, ht]
     | tmul w v =>
       have := hf (a, b) (w ⊗ₜ[ℂ] g v)
       simp only [LinearEquiv.coe_coe] at this
@@ -89,7 +127,7 @@ private lemma isot_tensor {G H W W' X Y : Type} [Group G] [Group H] [AddCommGrou
   induction t using TensorProduct.induction_on with
   | zero => simp
   | add s t hs ht =>
-    rw [map_add]
+    rw [map_add (f := _)]
     exact T.add_mem (hs (Submodule.mem_top)) (ht (Submodule.mem_top))
   | tmul w y => exact hw w y
 

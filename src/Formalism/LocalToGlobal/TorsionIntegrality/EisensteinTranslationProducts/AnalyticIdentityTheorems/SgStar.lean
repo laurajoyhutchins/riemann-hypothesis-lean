@@ -1,5 +1,61 @@
-import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.ThetaZeroLogDerivative
-import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.AnalyticIdentityTheorems.SigmaConv
+module
+
+public import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.ThetaZeroLogDerivative
+public import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.Legendre
+public import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.AnalyticIdentityTheorems.SigmaConv
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Log.Summable
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Analysis.Calculus.DiffContOnCl
+public import Mathlib.Analysis.Complex.CauchyIntegral
+public import Mathlib.Analysis.Complex.Liouville
+
+@[expose] public section
 
 noncomputable section
 open scoped BigOperators ComplexConjugate
@@ -12,10 +68,6 @@ namespace ModifiedSigmaBounds
 lemma semiChar_sq (L : PeriodPair) (ω : ℂ) : semiChar L ω * semiChar L ω = 1 := by
   unfold semiChar
   split_ifs <;> norm_num
-
-lemma norm_semiChar (L : PeriodPair) (ω : ℂ) : ‖semiChar L ω‖ = 1 := by
-  unfold semiChar
-  split_ifs <;> simp
 
 end ModifiedSigmaBounds
 
@@ -47,23 +99,6 @@ theorem sgStarFixed_of (h : SgStarQuasi) : SgStarFixed := by
     rw [this, Complex.exp_zero]
   linear_combination (semiChar L ω * semiChar L ω * sgStar L z) * key
     + sgStar L z * semiChar_sq L ω
-
-theorem sgStarNormPeriodic_of (h : SgStarQuasi) : SgStarNormPeriodic := by
-  intro L ω z hω
-  rw [h L ω z hω, norm_mul, norm_mul, norm_semiChar, one_mul, mul_pow, Complex.norm_exp,
-    ← Real.exp_nat_mul, mul_right_comm, ← Real.exp_add, mul_comm]
-  congr 2
-  have h1 : ‖z + ω‖ ^ 2 = ‖z‖ ^ 2 + ‖ω‖ ^ 2 + 2 * (z * conj ω).re := by
-    rw [Complex.sq_norm, Complex.sq_norm, Complex.sq_norm, Complex.normSq_add]
-  have h2 : (ω * conj ω).re = ‖ω‖ ^ 2 := by
-    rw [Complex.mul_conj, Complex.ofReal_re, Complex.sq_norm]
-  have h3 : ((Real.pi : ℂ) * herm L z ω + (Real.pi : ℂ) * herm L ω ω / 2).re
-      = Real.pi * ((z * conj ω).re / area L) + Real.pi * (‖ω‖ ^ 2 / area L) / 2 := by
-    rw [← h2, herm, herm, ← Complex.div_ofReal_re, ← Complex.div_ofReal_re]
-    simp
-  rw [h3, h1]
-  push_cast
-  ring
 
 namespace ModifiedSigmaBounds
 

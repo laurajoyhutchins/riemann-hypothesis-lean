@@ -1,5 +1,47 @@
-import Formalism.LocalToGlobal.PairingIndexBounds.OrthogonalChartLevels.PtStep0
-import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.Bridge
+module
+
+public import Formalism.LocalToGlobal.PairingIndexBounds.OrthogonalChartLevels.PtStep0
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.CoassocSimps
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -27,6 +69,7 @@ theorem bc_mulVec (γ : GL (Fin N) E) (x : Fin N → E) :
       Matrix (Fin N) (Fin N) (E ⊗[F] FiniteAdeleRing (𝓞 F) F)) *ᵥ (fun a => inclE (F := F) (FiniteAdeleRing (𝓞 F) F) (x a)) =
       fun a => inclE (F := F) (FiniteAdeleRing (𝓞 F) F) (((γ : Matrix (Fin N) (Fin N) E) *ᵥ x) a) := by
   funext a
+
   simp [bc, Matrix.mulVec, dotProduct, map_sum, map_mul]
 
 theorem latAd_rat (γ : GL (Fin N) E) (y : GL (Fin N) (E ⊗[F] FiniteAdeleRing (𝓞 F) F)) (Lb : Submodule (𝓞 E) (Fin N → E)) :
@@ -72,6 +115,7 @@ private lemma hform_eq_lemma (σ : E →+* E) (J : Matrix (Fin N) (Fin N) E) (x 
 private lemma ringHom_mulVec_eq_map_mulVec (σ : E →+* E) (M : Matrix (Fin N) (Fin N) E) (x : Fin N → E) :
     (fun i => σ ((M *ᵥ x) i)) = (M.map σ) *ᵥ (fun i => σ (x i)) := by
   funext i
+
   simp [Matrix.mulVec, dotProduct, map_sum, map_mul]
 
 private lemma hform_mulVec_eq_of_cT_mul_mul_eq' (σ : E →+* E) (J : Matrix (Fin N) (Fin N) E) (M : Matrix (Fin N) (Fin N) E)
@@ -132,15 +176,6 @@ theorem latK_tr (J : Matrix (Fin N) (Fin N) E) (a : 𝓞 E) (y κ₀ : GL (Fin N
 theorem reE_rfl : reE (E := E) (rfl : N = N) = LinearEquiv.refl E (Fin N → E) := by
   ext x i
   simp [reE]
-
-theorem map_reE_symm {n : ℕ} (h : N = n) (h' : n = N) (Λ : Submodule (𝓞 E) (Fin N → E)) :
-    (Λ.map (((reE (E := E) h : (Fin N → E) ≃ₗ[E] (Fin n → E)) : (Fin N → E) →ₗ[E] (Fin n → E)).restrictScalars (𝓞 E))).map
-      (((reE (E := E) h' : (Fin n → E) ≃ₗ[E] (Fin N → E)) : (Fin n → E) →ₗ[E] (Fin N → E)).restrictScalars (𝓞 E)) = Λ := by
-  subst h
-  have e : ∀ h'' : N = N, reE (E := E) h'' = LinearEquiv.refl E (Fin N → E) := fun _ => reE_rfl
-  rw [e]
-  ext x
-  simp
 
 theorem map_reE_rfl (h : N = N) (Λ : Submodule (𝓞 E) (Fin N → E)) :
     Λ.map (((reE (E := E) h : (Fin N → E) ≃ₗ[E] (Fin N → E)) : (Fin N → E) →ₗ[E] (Fin N → E)).restrictScalars (𝓞 E)) = Λ := by

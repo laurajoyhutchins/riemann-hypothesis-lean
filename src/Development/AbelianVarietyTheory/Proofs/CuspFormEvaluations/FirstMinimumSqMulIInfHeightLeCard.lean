@@ -1,11 +1,64 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SquareIntegrability.TorusAtData
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.FundamentalDomainPointBound
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.ModerateCoefficientPositivity
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SquareIntegrability.TorusAtPf
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SquareIntegrability.TorusAtDataPf
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SquareIntegrability.SplitC
-import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.ExistsThetaRunParametersUniformTorusStatement
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SquareIntegrability.TorusAtData
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.FundamentalDomainPointBound
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.ExistsThetaRunParametersUniformTorusStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.MajPos
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.QuadraticCoefficientForms
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SquareIntegrability.SplitC
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SquareIntegrability.TorusAtDataPf
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SquareIntegrability.TorusAtPf
+
+@[expose] public section
 
 open NumberField ReciprocityTheory.ChartRestriction.G.FD ReciprocityTheory.ChartRestriction.G.I2
 
@@ -154,8 +207,8 @@ theorem prod_eq_sq (T : PT E) (s : (Fin 1 → Vsp T.dim) → ℂ) (a : Fin T.r �
   refine Finset.prod_congr rfl fun j _ => ?_
   rw [div_pow, Real.sq_sqrt (hp _), Real.sq_sqrt hl]
 
-omit [IsCMField E] in
 
+omit [IsCMField E] in
 theorem finsum_le (T : PT E) (S : Set (Fin T.r → Vsp T.dim))
     (hS : ∀ a ∈ S, (∀ j, a j ∈ ZSpan.fundamentalDomain T.b) ∧ ∀ j, ((5 : ℂ) ^ 2) • a j ∈ T.L)
     (f : (Fin T.r → Vsp T.dim) → ℝ) (M : ℝ) (hM : 0 ≤ M) (hf : ∀ a ∈ S, f a ≤ M) :
@@ -246,7 +299,11 @@ theorem growth_decay : TStatement → ∀ (E : Type) [Field E] [NumberField E] [
           field_simp
         have hK' : K = (25 : ℝ) ^ (2 * (Module.finrank ℚ E * A.T.r) * A.T.r) := by rw [hAr]
         rw [hK']
-        refine finsum_le A.T _ (fun a ha => ⟨ha.1, ha.2.1⟩) _ _ (by positivity) fun a ha => ?_
+        refine finsum_le A.T {a | (∀ j, a j ∈ ZSpan.fundamentalDomain A.T.b) ∧
+          (∀ j, ((5 : ℂ) ^ 2) • a j ∈ A.T.L) ∧
+          ∀ x ∈ A.T.L, ∃ c : Fin A.T.r → 𝓞 E, ∃ y ∈ A.T.L,
+            x = ∑ j, act (c j) (((5 : ℂ) ^ 2) • a j) + (5 : ℂ) • y}
+          (fun a ha => ⟨ha.1, ha.2.1⟩) _ _ (by positivity) fun a ha => ?_
         rw [prod_eq_sq]
         refine pow_le_pow_left₀ (Finset.prod_nonneg fun _ _ => by positivity) ?_ 2
         have := (hT E A.T 1 P 5 (by norm_num) a (by exact_mod_cast ha.2.1)
@@ -259,7 +316,11 @@ theorem growth_decay : TStatement → ∀ (E : Type) [Field E] [NumberField E] [
           simp only [Par.ph, PT.ph, hq, hR, hla, if_neg (not_lt.2 h)]
         have hK' : K = (25 : ℝ) ^ (2 * (Module.finrank ℚ E * A.T.r) * A.T.r) := by rw [hAr]
         rw [hK']
-        refine finsum_le A.T _ (fun a ha => ⟨ha.1, ha.2.1⟩) _ _ (by positivity) fun a ha => ?_
+        refine finsum_le A.T {a | (∀ j, a j ∈ ZSpan.fundamentalDomain A.T.b) ∧
+          (∀ j, ((5 : ℂ) ^ 2) • a j ∈ A.T.L) ∧
+          ∀ x ∈ A.T.L, ∃ c : Fin A.T.r → 𝓞 E, ∃ y ∈ A.T.L,
+            x = ∑ j, act (c j) (((5 : ℂ) ^ 2) • a j) + (5 : ℂ) • y}
+          (fun a ha => ⟨ha.1, ha.2.1⟩) _ _ (by positivity) fun a ha => ?_
         rw [prod_eq_sq]
         refine pow_le_pow_left₀ (Finset.prod_nonneg fun _ _ => by positivity) ?_ 2
         have := (hT E A.T 1 P 5 (by norm_num) a (by exact_mod_cast ha.2.1)

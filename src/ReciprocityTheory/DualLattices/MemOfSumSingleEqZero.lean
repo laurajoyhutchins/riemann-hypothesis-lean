@@ -1,4 +1,53 @@
-import ReciprocityTheory.DualLattices.ProdDvdOfIso
+module
+
+public import ReciprocityTheory.DualLattices.CotangentSurjective
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -25,15 +74,6 @@ lemma eq_sum_single {m : ℕ} (c : Fin m → R) (x : (i : Fin m) → R ⧸ Ideal
   rw [Finset.sum_apply, Finset.sum_eq_single k (fun j _ hj => by simp [Pi.single_eq_of_ne' hj]) (by simp)]
   simp [Algebra.smul_def]
 
-lemma mem_of_sum_single_eq_zero {m : ℕ} (c : Fin m → R) (r : Fin m → R)
-    (h : ∑ k, r k • (Pi.single k (1 : R ⧸ Ideal.span {c k}) :
-      (i : Fin m) → R ⧸ Ideal.span {c i}) = 0) : ∀ i, r i ∈ Ideal.span {c i} := by
-  intro i
-  have h1 := congrFun h i
-  rw [Finset.sum_apply, Finset.sum_eq_single i (fun j _ hj => by simp [Pi.single_eq_of_ne' hj]) (by simp)] at h1
-  simp [Algebra.smul_def] at h1
-  exact Ideal.Quotient.eq_zero_iff_mem.mp h1
-
 end
 
 theorem hasLen_ext {C : Type} [Field C] {v : Valuation C NNReal} {R : Type} [CommRing R]
@@ -57,13 +97,16 @@ theorem hasLen_ext {C : Type} [Field C] {v : Valuation C NNReal} {R : Type} [Com
     rw [← map_smul, single_smul_self, map_zero]
   have reprA : ∀ y : A, y = ∑ i, (Quotient.out (eA y i) : R) • gA i := fun y => by
     conv_lhs => rw [← eA.symm_apply_apply y, eq_sum_single α (eA y)]
+
     simp only [hgA, map_sum, map_smul]
   have reprD : ∀ y : D, y = ∑ j, (Quotient.out (eD y j) : R) • gD j := fun y => by
     conv_lhs => rw [← eD.symm_apply_apply y, eq_sum_single δ (eD y)]
+
     simp only [hgD, map_sum, map_smul]
   have memA : ∀ r : Fin m → R, ∑ i, r i • gA i = 0 → ∀ i, r i ∈ Ideal.span {α i} := by
     intro r hr i
     have h1 : eA (∑ i, r i • gA i) = 0 := by rw [hr, map_zero]
+
     simp only [hgA, map_sum, map_smul, LinearEquiv.apply_symm_apply] at h1
     have h3 := congrFun h1 i
     rw [Finset.sum_apply, Finset.sum_eq_single i (fun j _ hj => by simp [Pi.single_eq_of_ne' hj]) (by simp)] at h3
@@ -71,6 +114,7 @@ theorem hasLen_ext {C : Type} [Field C] {v : Valuation C NNReal} {R : Type} [Com
   have memD : ∀ r : Fin m' → R, ∑ j, r j • gD j = 0 → ∀ j, r j ∈ Ideal.span {δ j} := by
     intro r hr i
     have h1 : eD (∑ j, r j • gD j) = 0 := by rw [hr, map_zero]
+
     simp only [hgD, map_sum, map_smul, LinearEquiv.apply_symm_apply] at h1
     have h3 := congrFun h1 i
     rw [Finset.sum_apply, Finset.sum_eq_single i (fun j _ hj => by simp [Pi.single_eq_of_ne' hj]) (by simp)] at h3
@@ -108,6 +152,7 @@ theorem hasLen_ext {C : Type} [Field C] {v : Valuation C NNReal} {R : Type} [Com
     intro w j
     simp [X, Matrix.mulVec, dotProduct, Fintype.sum_sum_type, Matrix.diagonal_apply]
   have hιx : ∀ j, ι (aj j) = ∑ i, x j i • ι (gA i) := fun j => by
+
     rw [hx j, map_sum]
     simp only [map_smul]
   have hΦX : ∀ w, Φ (X.mulVec w) = 0 := by
@@ -133,9 +178,11 @@ theorem hasLen_ext {C : Type} [Field C] {v : Valuation C NNReal} {R : Type} [Com
       rw [LinearMap.mem_ker, hΦ] at hp
       have hπs : ∑ j, p (Sum.inr j) • gD j = 0 := by
         have h1 := congrArg π hp
-        simpa [map_add, map_sum, map_smul, hb, hπι] using h1
+
+        simpa [map_add (f := _), map_sum, map_smul, hb, hπι] using h1
       choose t ht using fun j => Ideal.mem_span_singleton'.1 (memD _ hπs j)
       have hsb : ∑ j, p (Sum.inr j) • b j = ι (∑ i, (∑ j, t j * x j i) • gA i) := by
+
         rw [map_sum]
         simp only [map_smul]
         have e4 : ∀ j, p (Sum.inr j) • b j = t j • ι (aj j) := by
@@ -145,7 +192,8 @@ theorem hasLen_ext {C : Type} [Field C] {v : Valuation C NNReal} {R : Type} [Com
         rw [Finset.sum_comm]
       have hι0 : ι (∑ i, (p (Sum.inl i) + ∑ j, t j * x j i) • gA i) = 0 := by
         rw [← hp, hsb]
-        simp only [add_smul, Finset.sum_add_distrib, map_add, map_sum, map_smul]
+
+        simp only [add_smul, Finset.sum_add_distrib, map_add (f := _), map_sum, map_smul]
       have hA0 : ∑ i, (p (Sum.inl i) + ∑ j, t j * x j i) • gA i = 0 :=
         hι (hι0.trans (map_zero ι).symm)
       choose q hq using fun i => Ideal.mem_span_singleton'.1 (memA _ hA0 i)
@@ -171,6 +219,7 @@ theorem hasLen_ext {C : Type} [Field C] {v : Valuation C NNReal} {R : Type} [Com
     intro y
     set s : Fin m' → R := fun j => (Quotient.out (eD (π y) j) : R) with hs
     have hys : y - ∑ j, s j • b j ∈ LinearMap.range ι := by
+
       rw [hex, LinearMap.mem_ker, map_sub, map_sum]
       simp only [map_smul, hb]
       rw [← reprD (π y), sub_self]
@@ -180,6 +229,7 @@ theorem hasLen_ext {C : Type} [Field C] {v : Valuation C NNReal} {R : Type} [Com
     simp only [Sum.elim_inl, Sum.elim_inr]
     have e5 : ∑ i, (Quotient.out (eA zA i) : R) • ι (gA i) = ι zA := by
       conv_rhs => rw [reprA zA]
+
       rw [map_sum]
       simp only [map_smul]
     rw [e5, hzA, sub_add_cancel]

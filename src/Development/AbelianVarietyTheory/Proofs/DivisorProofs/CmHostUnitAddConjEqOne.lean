@@ -1,6 +1,45 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FiltGraded
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FiltGraded
 import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FormallyUnramifiedEtaleCompletion
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -37,7 +76,7 @@ theorem bar_bar (H : Host E) (a : 𝓞 E) : H.bar (H.bar a) = a := H.starRing.st
 
 theorem ef_swap (D : Datum H) (a b : D.La) : D.EF a b = -D.EF b a := by
   have h := D.alt (a + b)
-  simp only [map_add, LinearMap.add_apply, D.alt] at h
+  simp only [map_add (f := _), LinearMap.add_apply, D.alt] at h
   linear_combination h
 
 theorem mem_perp {D : Datum H} {Z : Submodule (𝓞 E) D.La} {a : D.La} : a ∈ perp D Z ↔ ∀ z ∈ Z, D.EF a z = 0 := Iff.rfl
@@ -118,7 +157,7 @@ theorem isOpp_bot (D : Datum H) : IsOpp D ⊥ ⊥ :=
 
 theorem cmHostUnit_add_conj_eq_one (H : Host E) : H.w0 + H.bar H.w0 = 1 := by
   have h1 := congrArg H.bar H.two_weight_eq_one_add_root
-  rw [map_mul, map_add, map_one, GlobalTheory.CharRank.bar_rt_neg, map_ofNat] at h1
+  rw [map_mul, map_add (f := _), map_one, GlobalTheory.CharRank.bar_rt_neg, map_ofNat] at h1
   have h2 := H.two_weight_eq_one_add_root
   exact mul_left_cancel₀ (two_ne_zero (α := 𝓞 E)) (by linear_combination h1 + h2)
 
@@ -137,7 +176,7 @@ theorem exists_skew_solve (hd : ∀ φ : Z →+ ℤ, ∃! b : Z', ∀ a : Z, D.E
     rw [ef_swap D (c a), hc, hc, ← hβ]
     have h2 := hadj (H.bar H.w0) a b
     rw [bar_bar] at h2
-    rw [← h2, ← LinearMap.add_apply, ← map_add, ← add_smul, cmHostUnit_add_conj_eq_one, one_smul]
+    rw [← h2, ← LinearMap.add_apply, ← map_add (f := _), ← add_smul, cmHostUnit_add_conj_eq_one, one_smul]
 
 theorem IsOpp.exists_rank_one (h : IsOpp D Z Z') {m : D.La} (hm : m ∈ perp D Z ⊓ perp D Z') (θ : 𝓞 E →+ ℤ)
     (hθ : ∀ t, θ t - θ (H.bar t) + D.EF (t • m) m = 0) :
@@ -181,7 +220,7 @@ theorem exists_theta_vec (D : Datum H) (m : D.La) :
   have h1 : D.EF ((H.w0 * H.bar t) • m) m = -D.EF ((H.bar H.w0 * t) • m) m := by
     rw [D.adj, map_mul, bar_bar, ef_swap]
   have h2 : D.EF (t • m) m = D.EF ((H.w0 * t) • m) m + D.EF ((H.bar H.w0 * t) • m) m := by
-    rw [← LinearMap.add_apply, ← map_add, ← add_smul, ← add_mul, cmHostUnit_add_conj_eq_one, one_mul]
+    rw [← LinearMap.add_apply, ← map_add (f := _), ← add_smul, ← add_mul, cmHostUnit_add_conj_eq_one, one_mul]
   simp only [AddMonoidHom.mk'_apply]
   linear_combination h1 + h2
 

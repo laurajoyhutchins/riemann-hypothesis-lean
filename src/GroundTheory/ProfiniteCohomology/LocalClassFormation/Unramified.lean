@@ -1,10 +1,61 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.LocalClassFormation.IntegerUnitsToUnitsHomApply
-import GroundTheory.LocalFields.UnramifiedNorms
-import GroundTheory.LocalFields.UnramifiedGalois
-import GroundTheory.TateCohomology.Herbrand
-import GroundTheory.TateCohomology.TateLow
-import GroundTheory.ProfiniteCohomology.ClassFormations.IsIsoCohomologyMapAlongResSubgroupOfHom
+module
+
+public import GroundTheory.ProfiniteCohomology.LocalClassFormation.IntegerUnitsToUnitsHomApply
+public import GroundTheory.LocalFields.UnramifiedGalois
+public import GroundTheory.LocalFields.UnramifiedDefs
+public import GroundTheory.ProfiniteCohomology.TorsionDualDefs
+public import GroundTheory.TateCohomology.Characters
+public import Mathlib.RepresentationTheory.Homological.TateCohomology.Basic
+public import GroundTheory.LocalFields.UnramifiedNorms
+public import GroundTheory.ProfiniteCohomology.ClassFormations.IsIsoCohomologyMapAlongResSubgroupOfHom
+public import GroundTheory.TateCohomology.Herbrand
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.EffectiveEpi.Comp
+import Mathlib.CategoryTheory.ExtremalEpi
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
@@ -90,10 +141,6 @@ noncomputable def evalCharQZ (σ : G) : (Additive G →+ AddCircle (1 : ℚ)) �
   map_zero' := by simp
   map_add' χ ψ := by simp
 
-theorem evalCharQZ_apply (σ : G) (χ : Additive G →+ AddCircle (1 : ℚ)) :
-    evalCharQZ σ χ = QZ.toAddCircle.symm (χ (Additive.ofMul σ)) :=
-  rfl
-
 theorem evalCharQZ_injective {σ : G} (hσ : ∀ g : G, g ∈ Subgroup.zpowers σ) :
     Function.Injective (evalCharQZ σ) := by
   refine (injective_iff_map_eq_zero _).2 fun χ hχ => ?_
@@ -115,10 +162,6 @@ noncomputable def intMulRes (m : ℤ) : Rep.res ρ (Rep.trivial ℤ G ℤ) ⟶ R
     ext
     rfl⟩
 
-omit [Fintype G] [Fintype G'] in
-@[simp]
-theorem intMulRes_hom_apply (m : ℤ) (x : ℤ) : (intMulRes ρ m).hom x = m * x :=
-  rfl
 
 theorem h2IntAddEquiv_map_intMulRes (m : ℤ) (z : groupCohomology (Rep.trivial ℤ G ℤ) 2) :
     GroundTheory.GroupCoh.h2IntAddEquiv G' ((groupCohomology.map ρ (intMulRes ρ m) 2).hom z) =
@@ -133,7 +176,7 @@ theorem h2IntAddEquiv_map_intMulRes (m : ℤ) (z : groupCohomology (Rep.trivial 
       have e2 := hy h
       have e3 := hy (g * h)
       change (QuotientAddGroup.mk (y g + y h - y (g * h)) : AddCircle (1 : ℚ)) = 0
-      rw [QuotientAddGroup.mk_sub, QuotientAddGroup.mk_add, e1, e2, e3, ofMul_mul, map_add, sub_self]
+      rw [QuotientAddGroup.mk_sub, QuotientAddGroup.mk_add, e1, e2, e3, ofMul_mul, map_add (f := _), sub_self]
     obtain ⟨n, hn⟩ := (AddCircle.coe_eq_zero_iff (p := (1 : ℚ))).1 h0
     exact ⟨n, by simpa using hn⟩
   choose x hxeq using hx
@@ -165,7 +208,13 @@ noncomputable def h2Valuation :
   (groupCohomology.functor ℤ Gal(L/K) 2).map (unitsValuation K L)
 
 instance isIso_h2Valuation [IsUnramified K L] : IsIso (h2Valuation K L) := by
-  have hX := unitsValuationSES_shortExact K L
+  have hX : (unitsValuationSES K L).ShortExact := by
+    refine ShortComplex.ShortExact.mk' ?_ ?_ ?_
+    · exact GroundTheory.GroupCoh.shortComplex_exact_of_forall fun x hx =>
+        (exact_unitsIncl_unitsOrd (L := L) x).mp hx
+    · exact (Rep.mono_iff_injective (integerUnitsToUnits K L)).2 fun _ _ h =>
+        Additive.toMul.injective (unitsIncl_injective (K := L) (congrArg Additive.toMul h))
+    · exact (Rep.epi_iff_surjective (unitsValuation K L)).2 (unitsOrd_surjective (L := L))
   have h2 := isZero_groupCohomology_integerUnits K L (q := 2) (by norm_num)
   have h3 := isZero_groupCohomology_integerUnits K L (q := 3) (by norm_num)
   have hm : Mono ((groupCohomology.mapShortComplex₂ (unitsValuationSES K L) 2).g) :=
@@ -173,13 +222,6 @@ instance isIso_h2Valuation [IsUnramified K L] : IsIso (h2Valuation K L) := by
   have hep : Epi ((groupCohomology.mapShortComplex₃ hX (i := 2) (j := 3) rfl).f) :=
     (groupCohomology.mapShortComplex₃_exact hX (i := 2) (j := 3) rfl).epi_f (h3.eq_of_tgt _ _)
   exact (isIso_iff_mono_and_epi _).2 ⟨hm, hep⟩
-
-noncomputable def h2UnitsIsoInt [IsUnramified K L] :
-    groupCohomology (galUnitsZ K L) 2 ≅ groupCohomology (Rep.trivial ℤ Gal(L/K) ℤ) 2 :=
-  asIso (h2Valuation K L)
-
-theorem h2UnitsIsoInt_hom [IsUnramified K L] : (h2UnitsIsoInt K L).hom = h2Valuation K L :=
-  rfl
 
 theorem h2Valuation_injective [IsUnramified K L] : Function.Injective (h2Valuation K L).hom :=
   (ModuleCat.mono_iff_injective _).1 inferInstance
@@ -226,18 +268,6 @@ theorem mem_range_unramifiedInv_iff (x : QZ) :
     rw [unramifiedInv_apply, hy, AddEquiv.apply_symm_apply, AddMonoidHom.smul_apply, map_nsmul,
       GroundTheory.GroupCoh.cyclicChar_apply_gen, card_algEquiv_of_unramified K L he]
     rfl
-
-theorem range_unramifiedInv :
-    (unramifiedInv K L).range = AddSubgroup.zmultiples (QZ.mk (1 / Module.finrank K L)) := by
-  have hn : 0 < Module.finrank K L := Module.finrank_pos
-  ext x
-  rw [mem_range_unramifiedInv_iff, AddSubgroup.mem_zmultiples_iff]
-  constructor
-  · intro hx
-    obtain ⟨m, rfl⟩ := QZ.exists_eq_nsmul_mk_one_div hn hx
-    exact ⟨m, natCast_zsmul _ _⟩
-  · rintro ⟨k, rfl⟩
-    rw [smul_comm, QZ.nsmul_mk_one_div, smul_zero]
 
 end Invariant
 

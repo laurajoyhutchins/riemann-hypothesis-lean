@@ -1,5 +1,58 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutJAGroupAdjCut
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutEnBetaFrame
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutJAGroupAdjCut
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.BXiAsm
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.BetaCutoffLimit
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutEnBetaFrame
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutEnFibMem
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutEnTrSmooth
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.OrbitalIntegralAeConvergenceContinuity
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.RegularisedPairingViaPhase
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.SquareIntegrableGammaZetabarInv
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.AdjointLeibnizExpansion
+
+@[expose] public section
 
 open Formalism.FourierDecayAlt MeasureTheory
 open Formalism.REAL Formalism.QuantumDeterminants
@@ -73,7 +126,7 @@ theorem group_action_pairing_holds : GAPair := by
     rw [← setIntegral_eq_integral_of_forall_compl_eq_zero hz]
     refine setIntegral_congr_fun hQm fun x hx => ?_
     simp only [MA.ext, hval X hX, hval Y hY]
-    rw [dif_pos (show x ∈ MA.Qset S.G.r (D.parOf S v).TT from hx)]
+    rw [dite_eq_left (show x ∈ MA.Qset S.G.r (D.parOf S v).TT from hx)]
     rw [hW x hx, map_mul, Complex.conj_ofReal]
     have hw := wq_pos (k := S.G.k) hx
     have hs : ((Real.sqrt (MA.wq S.G.k x (D.parOf S v).TT) : ℝ) : ℂ) *

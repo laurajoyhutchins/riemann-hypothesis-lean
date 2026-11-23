@@ -1,5 +1,50 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.WeightedHomogeneous.Statements
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.WeightedHomogeneous.Objects
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -16,71 +61,8 @@ theorem blockIncl_injective (k₀ : ι) : Function.Injective (blockIncl (n := n)
   simp only [blockIncl, Sigma.mk.injEq, heq_eq_eq, true_and] at h
   subst h; rfl
 
-omit [Fintype ι] [DecidableEq ι] in
 
-theorem evalCone_rename_blockIncl {F : Type*} [CommRing F] (k₀ : ι) (z : Cone n F)
-    (f' : MvPolynomial (Coord (fun _ : Unit ↦ n k₀)) ℤ) :
-    evalCone z (rename (blockIncl k₀) f') = evalCone (projBlock k₀ z) f' := by
-  unfold evalCone
-  rw [eval₂_rename]
-  rfl
 
-omit [Fintype ι] in
-
-theorem vars_subset_range_blockIncl (k₀ : ι) (m : ℕ) (f : MvPolynomial (Coord n) ℤ)
-    (hf : IsWeightedHomogeneous (coordDeg n) f (m • Pi.single k₀ 1)) :
-    (f.vars : Set (Coord n)) ⊆ Set.range (blockIncl k₀) := by
-  classical
-  intro v hv
-  obtain ⟨d, hd, hdv⟩ := (mem_vars_iff_mem_support v).mp hv
-  have hle : coordDeg n v ≤ Finsupp.weight (coordDeg n) d :=
-    Finsupp.le_weight_of_ne_zero' (coordDeg n) (Finsupp.mem_support_iff.mp hdv)
-  rw [hf (mem_support_iff.mp hd)] at hle
-  have h1 := hle v.1
-  obtain ⟨k, i⟩ := v
-  by_cases hk : k = k₀
-  · subst hk
-    exact ⟨⟨(), i⟩, rfl⟩
-  · simp [coordDeg, hk] at h1
-
-omit [Fintype ι] in
-
-theorem exists_blockForm (k₀ : ι) (m : ℕ) (f : MvPolynomial (Coord n) ℤ)
-    (hf : IsWeightedHomogeneous (coordDeg n) f (m • Pi.single k₀ 1)) :
-    ∃ f' : MvPolynomial (Coord (fun _ : Unit ↦ n k₀)) ℤ,
-      IsWeightedHomogeneous (coordDeg (fun _ : Unit ↦ n k₀)) f' (fun _ ↦ m) ∧
-        rename (blockIncl k₀) f' = f := by
-  classical
-  obtain ⟨f', rfl⟩ := exists_rename_eq_of_vars_subset_range f (blockIncl k₀)
-    (blockIncl_injective k₀) (vars_subset_range_blockIncl k₀ m f hf)
-  refine ⟨f', fun d hd ↦ ?_, rfl⟩
-  have hmem : Finsupp.mapDomain (blockIncl k₀) d ∈ (rename (blockIncl k₀) f').support := by
-    rw [support_rename_of_injective (blockIncl_injective k₀)]
-    exact Finset.mem_image_of_mem _ (mem_support_iff.mpr hd)
-  have hw := hf (mem_support_iff.mp hmem)
-  have hw' : Finsupp.weight (coordDeg n) (Finsupp.mapDomain (blockIncl k₀) d) =
-      Finsupp.degree d • Pi.single k₀ 1 := by
-    rw [Finsupp.weight_apply, Finsupp.sum_mapDomain_index (h := fun i (c : ℕ) ↦ c • coordDeg n i)
-      (fun _ ↦ zero_smul ℕ _) (fun _ _ _ ↦ add_smul _ _ _)]
-    simp only [Finsupp.sum, coordDeg, blockIncl]
-    rw [show Finsupp.degree d = ∑ i ∈ d.support, d i from rfl, Finset.sum_smul]
-  rw [hw'] at hw
-  have hdeg : Finsupp.degree d = m := by
-    simpa using congrFun hw k₀
-  funext u
-  rw [Finsupp.weight_apply]
-  simp [Finsupp.sum, coordDeg, Finsupp.degree] at hdeg ⊢
-  exact hdeg
-
-theorem SupNormEquality.proof (hOnto : BlockSurjectivity.Statement) : SupNormEquality.Statement := by
-  intro ι _ _ n P k₀ m
-  refine ⟨fun f hf ↦ exists_blockForm k₀ m f hf, fun f' _ B ↦ ⟨fun h z' hz' ↦ ?_, fun h z hz ↦ ?_⟩⟩
-  · rw [← hOnto ι n P k₀] at hz'
-    obtain ⟨z, hz, rfl⟩ := hz'
-    simpa [evalCone_rename_blockIncl, projBlock] using h z hz
-  · have hz' : projBlock k₀ z ∈ conePoints (P.projIdeal k₀) ℂ := by
-      rw [← hOnto ι n P k₀]; exact ⟨z, hz, rfl⟩
-    simpa [evalCone_rename_blockIncl, projBlock] using h _ hz'
 
 end
 

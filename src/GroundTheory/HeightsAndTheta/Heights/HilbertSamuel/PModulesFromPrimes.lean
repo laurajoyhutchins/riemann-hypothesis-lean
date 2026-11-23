@@ -1,8 +1,55 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsHilbert
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsDegLTGrowth
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsFiltrationHilbSum
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.AssemblyCN
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsDegLTGrowth
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsFiltrationHilbSum
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.AssemblyCN
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.BigOperators.Field
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.HilbertSamuel
@@ -171,7 +218,7 @@ theorem ModulesFromPrimes.proof (hF : MultigradedFiltration.Statement.{u, v})
       rw [Finset.coe_image, Finset.coe_univ, Set.image_univ]
       by_contra hnot
       apply hW
-      rw [dif_neg]
+      rw [dite_eq_right]
       rintro ⟨h1, h2, h3⟩
       obtain ⟨-, j, hj⟩ := hmin W h1 h2 h3
       exact hnot ⟨j, hj⟩
@@ -189,13 +236,13 @@ theorem ModulesFromPrimes.proof (hF : MultigradedFiltration.Statement.{u, v})
     · have hc : IsMultiProjPrime (q j₀) ∧ Module.annihilator (MRing ι F) M ≤ q j₀ ∧
           ringKrullDim (MRing ι F ⧸ q j₀) = ((d + Fintype.card K : ℕ) : WithBot ℕ∞) :=
         ⟨⟨hprime, hhom, htop.1⟩, hann j₀, htop.2⟩
-      rw [dif_pos hc, if_pos htop]
+      rw [dite_eq_left hc, if_pos htop]
       have hm := (hmin _ hc.1 hc.2.1 hc.2.2).1
       have hct := hcount (q j₀) hm
       congr 1
       rw [← hct]
       simp
-    · rw [dif_neg (fun h => htop ⟨h.1.relevant, h.2.2⟩), if_neg htop, mul_zero]
+    · rw [dite_eq_right (fun h => htop ⟨h.1.relevant, h.2.2⟩), if_neg htop, mul_zero]
   have hfin : (Module.finrank F (piece fun k => (a k : ℤ)) : ℝ) =
       ∑ j, (hilbFn (q j) ((fun k => (a k : ℤ)) - c j) : ℝ) := by
     have := hsum (fun k => (a k : ℤ))

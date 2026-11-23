@@ -1,4 +1,50 @@
-import Formalism.LocalToGlobal.GlobalTheory.BlockActions.IsUnitBZMap
+module
+
+public import Formalism.LocalToGlobal.GlobalTheory.BlockActions.IsUnitALMap
+public import Formalism.LocalToGlobal.GlobalTheory.BlockActions.NormBoundOfClassesFrames
+import Formalism.LocalToGlobal.Columns.PolyFnLemmas
+public import Formalism.LocalToGlobal.GlobalTheory.BlockActions.BlockActEqBlkRow
+public import Formalism.LocalToGlobal.GlobalTheory.BlockActions.IsUnitBZMap
+import Formalism.LocalToGlobal.GlobalTheory.BlockActions.MapMemCSpanOfRat
+import Formalism.LocalToGlobal.GlobalTheory.BlockActions.NormBoundOfClasses
+public import Formalism.LocalToGlobal.GlobalTheory.BlockActions.NormalFormAgree
+import Formalism.LocalToGlobal.KernelLattices.KernelLocalFactors.InterlaceDifferenceShiftInvariant
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -7,7 +53,7 @@ namespace Formalism.L2.GlobalTheoryTheory.Br
 open MvPolynomial Formalism.BasicNotions Formalism.MainNotions.product_first_zeroth_parts Formalism.L2.Forms Matrix NumberField
 open scoped ComplexOrder
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem normClsAt_of_tors (hT : ChiTors) : NormClsAt := by
   intro D u Ch chOf Tf hL hBe h s x Pc hPc Qc hQc o ho o' ho' c
@@ -71,8 +117,5 @@ theorem normClsAt_of_tors (hT : ChiTors) : NormClsAt := by
             (subP (fun τ => (AL Tf c τ).map s * dOT u (o'.1 τ)) (MvPolynomial.map s (Pc ((D.fm u).til c))))).re))) :=
         mul_le_mul hsa (mul_le_mul_of_nonneg_left hchain hKA) (mul_nonneg hKA (mul_nonneg hK2 hnW)) zero_le_one
     _ = _ := by ring
-
-theorem norm_bound_of_torsion_character (h1 : ClassMapInjective) (h2 : StabiliserMapBijective) (hT : ChiTors) : NormBoundAtInfinity :=
-  norm_bound_of_classes h1 h2 (normClsAt_of_tors hT)
 
 end Formalism.L2.GlobalTheoryTheory.Br

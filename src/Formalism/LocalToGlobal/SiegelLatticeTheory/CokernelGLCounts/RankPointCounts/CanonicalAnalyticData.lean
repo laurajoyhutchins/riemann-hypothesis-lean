@@ -1,7 +1,49 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.NGAnalytic
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.Gam1TieCHolds
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.FiniteLevelVolumeOfMeasure
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.NGAnalytic
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.TypedFinal
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.FiniteLevelVolumeOfMeasure
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.Gam1TieCHolds
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -142,46 +184,6 @@ def OnTied (P : ∀ (D : D7) (X : HidaSetting D), Formalism.L2.SG.AdBridge.AdBri
     Ctx Cg cb Cw cT CT C0 C' Cl D large₂ X Y u u' →
     ∀ (hb : Formalism.L2.SG.AdBridge.AdBridgeIso X.B.I) (X0 : Fin (2 * D.R.rS + 2) → Fin X.B.I.n → X.B.I.E)
       (ψ : AddChar (Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes.AF X.B.I.F) ℂ), MassDataTie X hb X0 ψ → P D X hb Y u u' X0 ψ
-
-theorem stepChoiceDataC_of
-    (hLS : OnTied fun _ X hb Y u u' X0 ψ =>
-      InLevelSAt X hb Y.hK (Y.FN u) (Y.FN u') u u' X0 (locOf X u u' ψ) (canonicalAnalyticData X Y u u' ψ))
-    (hMs : OnTied fun _ X hb Y u u' X0 ψ =>
-      InMassesAt X hb Y.hK (Y.FN u) (Y.FN u') u u' X0 (locOf X u u' ψ) (canonicalAnalyticData X Y u u' ψ))
-    (hCol : OnTied fun _ X hb Y u u' X0 ψ =>
-      InColumnsAt X hb Y.hK (Y.FN u) (Y.FN u') u u' X0 (locOf X u u' ψ) (canonicalAnalyticData X Y u u' ψ))
-    (hInd : OnTied fun _ X hb Y u u' X0 ψ =>
-      InIndicesAt X hb Y.hK (Y.FN u) (Y.FN u') u u' X0 (locOf X u u' ψ) (canonicalAnalyticData X Y u u' ψ))
-    (hVol : OnTied fun _ X hb Y u u' X0 ψ =>
-      InVolumesAt X hb Y.hK (Y.FN u) (Y.FN u') u u' X0 (locOf X u u' ψ) (canonicalAnalyticData X Y u u' ψ))
-    (hKpp : OnTied fun _ X hb Y u u' X0 ψ =>
-      KppVolAt X hb Y.hK (Y.FN u) (Y.FN u') u u' X0 (locOf X u u' ψ) (canonicalAnalyticData X Y u u' ψ))
-    (hTy : OnTied fun D X hb Y u u' X0 ψ =>
-      InTypedC X hb Y.hK (Y.FN u) (Y.FN u') u u' X0 ψ (Y.tO u u') 0 0 1 (F0 := X.Fu u) (what₂ := Y.what₂ u)
-        (fun _ => 0) (pairSys0 u u' (X.Fu u) (Y.what₂ u)) Y.M Y.δ (fun _ => idx0 D) (fun _ => idx0 D) (fun _ => 0))
-    (hPC : OnTied fun _ X _ _ u u' _ ψ => ProdConv X u u' ψ)
-    (hPr : OnTied fun _ X _ _ u u' _ _ => PrimX X u ∧ PrimX X u')
-    (hKap : OnTied fun _ X _ _ u u' _ _ => KapX X u u')
-    (hNu : OnTied fun _ X _ _ u u' _ _ => Formalism.L2.SG.RealObj.InNuX X u u' 1 ∧ Formalism.L2.SG.RealObj.InInfinityX X u u' 1)
-    (hPos : OnTied fun _ X hb Y u u' X0 ψ => (bk0 X hb Y u u' X0 ψ).Pos)
-    (hFV : OnTied fun D X hb Y u u' X0 ψ =>
-      FrameVolAt X hb Y u u' X0 ψ 0 0 1 (F0 := X.Fu u) (what₂ := Y.what₂ u) (fun _ => 0)
-        (pairSys0 u u' (X.Fu u) (Y.what₂ u)) (fun _ => idx0 D) (fun _ => idx0 D) (fun _ => 0)) :
-    StepChoiceConstantsC := by
-  intro Cg cb Cw cT CT C0
-  obtain ⟨Cgs, CTs, _, _, C'₀, Cl₀, hsz⟩ := Formalism.L2.SG.NGCut.sizes_of_hypotheses Cg cb Cw cT CT C0
-  refine ⟨C'₀, Cl₀, fun C' Cl h1 h2 D large₂ X Y u u' hc hb X0 ψ hT => ?_⟩
-  have hS := hsz C' Cl h1 h2 D large₂ X Y u u' hc
-  unfold SizesRec at hS
-  obtain ⟨_, _, hrd, _, hg1, _⟩ := hS
-  have hg : 0 < (X.B.g : ℝ) := lt_of_lt_of_le one_pos hg1
-  refine ⟨0, 0, 1, X.Fu u, Y.what₂ u, fun _ => 0, pairSys0 u u' (X.Fu u) (Y.what₂ u), fun _ => idx0 D,
-    fun _ => idx0 D, fun _ => 0, ?_⟩
-  exact massDataValid_bk_of X hb Y u u' X0 ψ 0 0 1 (F0 := X.Fu u) (what₂ := Y.what₂ u) (fun _ => 0)
-    (pairSys0 u u' (X.Fu u) (Y.what₂ u)) (fun _ => idx0 D) (fun _ => idx0 D) (fun _ => 0) hc hrd hg hT
-    (hLS Cg cb Cw cT CT C0 C' Cl D large₂ X Y u u' hc hb X0 ψ hT) (hMs Cg cb Cw cT CT C0 C' Cl D large₂ X Y u u' hc hb X0 ψ hT) (hCol Cg cb Cw cT CT C0 C' Cl D large₂ X Y u u' hc hb X0 ψ hT) (hInd Cg cb Cw cT CT C0 C' Cl D large₂ X Y u u' hc hb X0 ψ hT) (hVol Cg cb Cw cT CT C0 C' Cl D large₂ X Y u u' hc hb X0 ψ hT) (hKpp Cg cb Cw cT CT C0 C' Cl D large₂ X Y u u' hc hb X0 ψ hT) (hTy Cg cb Cw cT CT C0 C' Cl D large₂ X Y u u' hc hb X0 ψ hT)
-    (hPC Cg cb Cw cT CT C0 C' Cl D large₂ X Y u u' hc hb X0 ψ hT) (hPr Cg cb Cw cT CT C0 C' Cl D large₂ X Y u u' hc hb X0 ψ hT).1 (hPr Cg cb Cw cT CT C0 C' Cl D large₂ X Y u u' hc hb X0 ψ hT).2 (hKap Cg cb Cw cT CT C0 C' Cl D large₂ X Y u u' hc hb X0 ψ hT) (hNu Cg cb Cw cT CT C0 C' Cl D large₂ X Y u u' hc hb X0 ψ hT).1 (hNu Cg cb Cw cT CT C0 C' Cl D large₂ X Y u u' hc hb X0 ψ hT).2
-    (hPos Cg cb Cw cT CT C0 C' Cl D large₂ X Y u u' hc hb X0 ψ hT) (hFV Cg cb Cw cT CT C0 C' Cl D large₂ X Y u u' hc hb X0 ψ hT)
 
 end Closed
 

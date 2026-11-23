@@ -1,6 +1,56 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.GKModules.Garding
-import GroundTheory.AutomorphicForms.AutomorphicFormSpaces.GKStableConv
+module
+
+public import GroundTheory.AutomorphicForms.GKModules.Garding
+public import GroundTheory.AutomorphicForms.AutomorphicFormSpaces.GKStableConv
+import GroundTheory.AutomorphicForms.DixmierMalliavinBasic
+import GroundTheory.AutomorphicForms.GKModules.ParametricIntegral
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Algebra.Group.Units
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GroundTheory.Automorphic
 
@@ -16,8 +66,8 @@ namespace IsExpLieAlgebra
 
 variable (h : IsExpLieAlgebra G 𝔤)
 
-variable {h} in
 
+variable {h} in
 theorem IsTestFunction.convDeriv {γ : G → ℂ} (hγ : h.IsTestFunction γ) (X : 𝔤) :
     h.IsTestFunction (h.convDeriv X γ) := by
   refine ⟨?_, hasCompactSupport_convDeriv hγ.2 X⟩
@@ -27,8 +77,8 @@ theorem IsTestFunction.convDeriv {γ : G → ℂ} (hγ : h.IsTestFunction γ) (X
     h.isSmoothFun_rightDeriv (isSmoothFun_comp_inv hγ.1) X
   exact ContMDiff.comp (I' := 𝓘(ℝ, 𝔤)) h1 (contMDiff_inv 𝓘(ℝ, 𝔤) ∞)
 
-variable {h} in
 
+variable {h} in
 theorem IsTestFunction.const_mul {γ : G → ℂ} (hγ : h.IsTestFunction γ) (c : ℂ) :
     h.IsTestFunction (fun y => c * γ y) := by
   refine ⟨?_, hγ.2.mul_left⟩
@@ -38,8 +88,8 @@ theorem IsTestFunction.const_mul {γ : G → ℂ} (hγ : h.IsTestFunction γ) (c
   rw [e]
   exact L.contDiff.comp_contMDiff hγ.1
 
-variable {h} in
 
+variable {h} in
 theorem IsTestFunction.add {γ₁ γ₂ : G → ℂ} (h₁ : h.IsTestFunction γ₁) (h₂ : h.IsTestFunction γ₂) :
     h.IsTestFunction (fun y => γ₁ y + γ₂ y) := by
   refine ⟨?_, h₁.2.add h₂.2⟩
@@ -131,7 +181,7 @@ theorem rightDeriv_integral_mul {Ψ : G → ℂ} (hΨ : Continuous Ψ) {γ : G �
     rw [← this]
     congr 1
     funext y
-    simp only [mul_inv_rev, mul_assoc, inv_mul_cancel_left, inv_inv]
+    simp [mul_assoc, mul_inv_rev]
 
   have hderiv : ∀ (y : G) (t : ℝ), HasDerivAt (fun s : ℝ => γ (y⁻¹ * h.expG (s • X))⁻¹)
       (h.rightDeriv X (fun w : G => γ w⁻¹) (y⁻¹ * h.expG (t • X))) t := by
@@ -231,9 +281,8 @@ theorem derivOp_integrated_convDeriv {γ : G → ℂ} (hγ : h.IsTestFunction γ
       (fun y => γ (y⁻¹ * h.expG (t • X))⁻¹ • π y w) (h.expG (t • X))
     rw [← this]
     congr 1
-    funext y
-    simp only [map_smul, ← BanachRep.map_mul_apply, mul_inv_rev, mul_assoc, inv_mul_cancel_left,
-      inv_inv]
+    funext x
+    simp [mul_inv_rev, map_mul]
   have hderiv : ∀ (y : G) (t : ℝ), HasDerivAt (fun s : ℝ => γ (y⁻¹ * h.expG (s • X))⁻¹)
       (h.rightDeriv X (fun w : G => γ w⁻¹) (y⁻¹ * h.expG (t • X))) t := by
     intro y t
@@ -341,9 +390,9 @@ theorem exists_uAction_integrated (u : UniversalEnvelopingAlgebra ℝ h.lieSubal
     obtain ⟨γa, hγa, ha1, ha2⟩ := ha hγ
     obtain ⟨γb, hγb, hb1, hb2⟩ := hb hγ
     refine ⟨fun y => γa y + γb y, hγa.add hγb, fun w => ?_, fun Ψ hΨ => ?_⟩
-    · rw [map_add, map_add, LinearMap.add_apply, Submodule.coe_add, ha1 w, hb1 w,
+    · rw [map_add (f := _), map_add (f := _), LinearMap.add_apply, Submodule.coe_add, ha1 w, hb1 w,
         integrated_add_kernel h μ π hγa hγb]
-    · rw [map_add, map_add, LinearMap.add_apply, Submodule.coe_add, ha2 Ψ hΨ, hb2 Ψ hΨ]
+    · rw [map_add (f := _), map_add (f := _), LinearMap.add_apply, Submodule.coe_add, ha2 Ψ hΨ, hb2 Ψ hΨ]
       funext g
       exact (h.integral_mul_add μ hΨ hγa hγb g).symm
 

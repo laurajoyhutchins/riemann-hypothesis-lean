@@ -1,5 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.UnitLemmaGroup
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.UnitLemmaGroup
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RingTheory.QuasiFinite.Basic
+
+@[expose] public section
 
 noncomputable section
 
@@ -125,7 +173,7 @@ def cO (K : UQ) : K.O →+* K.O where
     rw [← Classical.choose_spec (K.c_int 0)]; simp
   map_add' x y := by
     apply IsFractionRing.injective K.O K.E
-    rw [← Classical.choose_spec (K.c_int (x + y)), map_add, map_add, map_add,
+    rw [← Classical.choose_spec (K.c_int (x + y)), map_add (f := _), map_add (f := _), map_add (f := _),
       ← Classical.choose_spec (K.c_int x), ← Classical.choose_spec (K.c_int y)]
 
 theorem algebraMap_cO (K : UQ) (x : K.O) : algebraMap K.O K.E (cO K x) = K.c (algebraMap K.O K.E x) :=
@@ -152,7 +200,7 @@ theorem σ_mem_adjoin {K : UQ} (B : InvAlg K) (hg : B.g * B.σ B.g = 1) (hint : 
     rw [Set.mem_singleton_iff] at hx; subst hx
     exact mem_adjoin_of_mul_eq_one' hg (isIntegral_σ B hint)
   | algebraMap r => rw [σ_algebraMap_O]; exact Subalgebra.algebraMap_mem _ _
-  | add x z _ _ hx hz => rw [map_add]; exact Subalgebra.add_mem _ hx hz
+  | add x z _ _ hx hz => rw [map_add (f := _)]; exact Subalgebra.add_mem _ hx hz
   | mul x z _ _ hx hz => rw [map_mul]; exact Subalgebra.mul_mem _ hx hz
 
 theorem maximal_finite {K : UQ} (B : InvAlg K) (hint : IsIntegral K.O B.g) :
@@ -161,8 +209,11 @@ theorem maximal_finite {K : UQ} (B : InvAlg K) (hint : IsIntegral K.O B.g) :
   refine (Algebra.QuasiFinite.finite_primesOver (IsLocalRing.maximalIdeal K.O)).subset ?_
   intro M hM
   have hM' : M.IsMaximal := hM
+  letI : M.IsMaximal := hM'
   have hc : (M.comap (algebraMap K.O (Algebra.adjoin K.O {B.g}))).IsMaximal :=
-    Ideal.isMaximal_comap_of_isIntegral_of_isMaximal M
+    Ideal.isMaximal_comap_of_isIntegral_of_isMaximal
+      (algebraMap K.O (Algebra.adjoin K.O {B.g}))
+      (RingHom.Finite.to_isIntegral (RingHom.finite_algebraMap.mpr inferInstance)) M
   exact ⟨hM'.isPrime, ⟨(IsLocalRing.eq_maximalIdeal hc).symm⟩⟩
 
 theorem exists_unit_base : ∀ (K : UQ) (B : InvAlg K), B.g * B.σ B.g = 1 → B.P.Separable → IsIntegral K.O B.g →
@@ -206,7 +257,7 @@ theorem exists_unit_base : ∀ (K : UQ) (B : InvAlg K), B.g * B.σ B.g = 1 → B
   refine ⟨Units.map (R.val : R →* B.A) hy.unit, ?_, ?_, ?_⟩
   · have hc : ((Units.map (R.val : R →* B.A) hy.unit : B.Aˣ) : B.A) = (y : B.A) + ε * B.σ B.g * B.σ y := by
       simp [Units.coe_map, IsUnit.unit_spec, hε'c, hτc, h', g', mul_assoc]
-    rw [hc, map_add, map_mul, map_mul, hσε, B.σ_σ, B.σ_σ]
+    rw [hc, map_add (f := _), map_mul, map_mul, hσε, B.σ_σ, B.σ_σ]
     linear_combination (-(B.σ (y : B.A)) * ε * ε) * hg - B.σ (y : B.A) * hεε
   · simp only [Units.coe_map]; exact (hy.unit : R).2
   · rw [← map_inv]; simp only [Units.coe_map]; exact ((hy.unit⁻¹ : Rˣ) : R).2

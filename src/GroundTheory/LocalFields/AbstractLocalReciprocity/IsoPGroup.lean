@@ -1,6 +1,58 @@
-import Mathlib
-import GroundTheory.LocalFields.AbstractLocalReciprocity.IsoCyclic
-import GroundTheory.LocalFields.AbstractLocalReciprocity.FunctorialityTransfer
+module
+
+public import GroundTheory.LocalFields.AbstractLocalReciprocity.Functoriality
+public import Mathlib.GroupTheory.Abelianization.Defs
+public import Mathlib.GroupTheory.PGroup
+public import GroundTheory.LocalFields.AbstractLocalReciprocity.FunctorialityTransfer
+public import GroundTheory.LocalFields.AbstractLocalReciprocity.IsoCyclic
+import GroundTheory.LocalFields.AbstractLocalReciprocity.UniqueQuotientSubgroupOfSelf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.GroupTheory.IndexNormal
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+public import GroundTheory.LocalFields.AbstractLocalReciprocity.FunctorialityNorm
+
+@[expose] public section
 
 namespace GroundTheory.LocalField.Abstract
 
@@ -105,8 +157,8 @@ section Restrict
 
 variable {G : Type*} [Group G] [TopologicalSpace G] [IsTopologicalGroup G] [CompactSpace G]
 
-omit [IsTopologicalGroup G] [CompactSpace G] in
 
+omit [IsTopologicalGroup G] [CompactSpace G] in
 theorem galRestrict_surjective {K L M : OpenSubgroup G} [((L : Subgroup G).subgroupOf K).Normal]
     [((M : Subgroup G).subgroupOf K).Normal] (hLM : L ≤ M) :
     Function.Surjective (galRestrict (K := K) (L := M) (K' := K) (L' := L) le_rfl hLM) := by
@@ -114,8 +166,8 @@ theorem galRestrict_surjective {K L M : OpenSubgroup G} [((L : Subgroup G).subgr
   induction q using QuotientGroup.induction_on with
   | H τ => exact ⟨(τ : (K : Subgroup G) ⧸ (L : Subgroup G).subgroupOf K), rfl⟩
 
-omit [CompactSpace G] in
 
+omit [CompactSpace G] in
 theorem conjOpen_eq_of_normal {K M : OpenSubgroup G} (hMK : M ≤ K)
     [((M : Subgroup G).subgroupOf K).Normal] {g : G} (hg : g ∈ (K : Subgroup G)) :
     conjOpen g M = M := by
@@ -132,7 +184,7 @@ theorem Abelianization.lift_injective_of_ker_le {Γ T : Type*} [Group Γ] [CommG
   induction z using QuotientGroup.induction_on with
   | H q =>
     have hq : Abelianization.lift f (Abelianization.of q) = 1 := hz
-    rw [Abelianization.lift_apply_of] at hq
+    change f q = 1 at hq
     have := h hq
     rw [← Abelianization.ker_of, MonoidHom.mem_ker] at this
     exact this

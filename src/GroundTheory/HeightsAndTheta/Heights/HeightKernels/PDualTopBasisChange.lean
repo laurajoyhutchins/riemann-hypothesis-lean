@@ -1,6 +1,54 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.StatementsDualTopBasisChange
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.StatementsIntCoordChange
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.StatementsDualTopBasisChange
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.StatementsIntCoordChange
+public import Mathlib.RingTheory.SimpleRing.Principal
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.Assembly
+import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PDualLineSemipositive
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -21,20 +69,21 @@ theorem hermLine_ext {ι : Unit → Type} [∀ k, Fintype (ι k)] {A B : Recipro
 
 variable {T T₂ : Type} [Fintype T] [DecidableEq T] [Fintype T₂] [DecidableEq T₂]
 
-omit [DecidableEq T₂] in
 
+omit [DecidableEq T₂] in
 theorem subst_subst {A : Matrix T T₂ ℤ} {B : Matrix T₂ T ℤ} (hAB : A * B = 1) (f : MRing (dualBlocks T)) :
     intCoordSubst A (intCoordSubst B f) = f := by
   induction f using MvPolynomial.induction_on with
   | C a =>
     show intCoordSubst A (intCoordSubst B (algebraMap ℤ _ a)) = algebraMap ℤ _ a
     rw [AlgHom.commutes, AlgHom.commutes]
-  | add f g hf hg => rw [map_add, map_add, hf, hg]
+  | add f g hf hg => rw [map_add (f := _), map_add (f := _), hf, hg]
   | mul_X f p hf =>
     rw [map_mul, map_mul, hf]
     congr 1
     obtain ⟨⟨⟩, t⟩ := p
     have hC : ∀ a : ℤ, (C a : MRing (dualBlocks T)) = (a : MRing (dualBlocks T)) := fun a => map_intCast C a
+
     simp only [intCoordSubst, aeval_X, map_sum, map_mul, eq_intCast, hC, map_intCast, Finset.mul_sum]
     rw [Finset.sum_comm]
     simp_rw [← mul_assoc, ← Int.cast_mul, ← Finset.sum_mul, ← Int.cast_sum]
@@ -46,8 +95,8 @@ theorem subst_subst {A : Matrix T T₂ ℤ} {B : Matrix T₂ T ℤ} (hAB : A * B
 
 variable {K : Type} [Field K] [NumberField K] {i : ℕ} {F : HermLattice K i}
 
-omit [DecidableEq T] [Fintype T₂] [DecidableEq T₂] in
 
+omit [DecidableEq T] [Fintype T₂] [DecidableEq T₂] in
 theorem basis_coe (b : Module.Basis T ℤ (dualLattice F)) (b₂ : Module.Basis T₂ ℤ (dualLattice F))
     (s : T₂) (j : Fin i) :
     (b₂ s : Fin i → K) j = ∑ t, (b.toMatrix b₂ t s : K) * (b t : Fin i → K) j := by
@@ -55,25 +104,27 @@ theorem basis_coe (b : Module.Basis T ℤ (dualLattice F)) (b₂ : Module.Basis 
   simp only [Submodule.coe_sum, Submodule.coe_smul, Finset.sum_apply, zsmul_eq_mul] at h
   exact h.symm
 
-omit [DecidableEq T] [Fintype T₂] [DecidableEq T₂] in
 
+omit [DecidableEq T] [Fintype T₂] [DecidableEq T₂] in
 theorem coord_change {A : Matrix T T₂ ℤ} {b : Module.Basis T ℤ (dualLattice F)}
     {b₂ : Module.Basis T₂ ℤ (dualLattice F)}
     (hA : ∀ s j, (b₂ s : Fin i → K) j = ∑ t, (A t s : K) * (b t : Fin i → K) j) (s : T₂) :
     dualLatticeCoord b₂ ⟨(), s⟩ = ∑ t, (A t s : ProjField K i) * dualLatticeCoord b ⟨(), t⟩ := by
   have h : (∑ j, C ((b₂ s : Fin i → K) j) * X j : MvPolynomial (Fin i) K) =
       ∑ t, (A t s : MvPolynomial (Fin i) K) * ∑ j, C ((b t : Fin i → K) j) * X j := by
+
     simp only [hA, map_sum, map_mul, map_intCast, Finset.sum_mul, Finset.mul_sum]
     rw [Finset.sum_comm]
     refine Finset.sum_congr rfl fun j _ => Finset.sum_congr rfl fun t _ => ?_
     ring
   simp only [dualLatticeCoord]
+
   rw [h, map_sum]
   refine Finset.sum_congr rfl fun t _ => ?_
   rw [map_mul, map_intCast]
 
-omit [DecidableEq T] [Fintype T₂] [DecidableEq T₂] in
 
+omit [DecidableEq T] [Fintype T₂] [DecidableEq T₂] in
 theorem coneMap_subst {A : Matrix T T₂ ℤ} {b : Module.Basis T ℤ (dualLattice F)}
     {b₂ : Module.Basis T₂ ℤ (dualLattice F)}
     (hA : ∀ s j, (b₂ s : Fin i → K) j = ∑ t, (A t s : K) * (b t : Fin i → K) j)
@@ -83,19 +134,20 @@ theorem coneMap_subst {A : Matrix T T₂ ℤ} {b : Module.Basis T ℤ (dualLatti
   | C a =>
     have hC₂ : ∀ a : ℤ, (C a : MRing (dualBlocks T₂)) = (a : MRing (dualBlocks T₂)) := fun a => map_intCast C a
     rw [hC₂, map_intCast, map_intCast, map_intCast]
-  | add f g hf hg => rw [map_add, map_add, map_add, hf, hg]
+  | add f g hf hg => rw [map_add (f := _), map_add (f := _), map_add (f := _), hf, hg]
   | mul_X f p hf =>
     rw [map_mul, map_mul, map_mul, hf]
     congr 1
     obtain ⟨⟨⟩, s⟩ := p
     have hC : ∀ a : ℤ, (C a : MRing (dualBlocks T)) = (a : MRing (dualBlocks T)) := fun a => map_intCast C a
+
     simp only [intCoordSubst, aeval_X, map_sum, map_mul, hC, map_intCast, mConeMap, coord_change hA s,
-      Finset.sum_mul]
+    Finset.sum_mul]
     refine Finset.sum_congr rfl fun t _ => ?_
     rw [mul_assoc]
 
-omit [DecidableEq T₂] in
 
+omit [DecidableEq T₂] in
 theorem ideal_map {A : Matrix T T₂ ℤ} {B : Matrix T₂ T ℤ} (hAB : A * B = 1)
     {b : Module.Basis T ℤ (dualLattice F)} {b₂ : Module.Basis T₂ ℤ (dualLattice F)}
     (hA : ∀ s j, (b₂ s : Fin i → K) j = ∑ t, (A t s : K) * (b t : Fin i → K) j) :
@@ -106,17 +158,18 @@ theorem ideal_map {A : Matrix T T₂ ℤ} {B : Matrix T₂ T ℤ} (hAB : A * B =
     simp only [dualIdeal, mCoordIdeal, Ideal.mem_comap, RingHom.mem_ker, coneMap_subst hA]
   rw [hker, Ideal.map_comap_of_surjective _ hsurj]
 
-omit [DecidableEq T] [Fintype T₂] [DecidableEq T₂] in
 
+omit [DecidableEq T] [Fintype T₂] [DecidableEq T₂] in
 theorem embMatrix_apply {A : Matrix T T₂ ℤ} {b : Module.Basis T ℤ (dualLattice F)}
     {b₂ : Module.Basis T₂ ℤ (dualLattice F)}
     (hA : ∀ s j, (b₂ s : Fin i → K) j = ∑ t, (A t s : K) * (b t : Fin i → K) j)
     (s : T₂) (p : (K →+* ℂ) × Fin i) :
     dualEmbMatrix b₂ s p = ∑ t, (A t s : ℂ) * dualEmbMatrix b t p := by
+
   simp only [dualEmbMatrix, hA, map_sum, map_mul, map_intCast]
 
-omit [DecidableEq T] [Fintype T₂] [DecidableEq T₂] in
 
+omit [DecidableEq T] [Fintype T₂] [DecidableEq T₂] in
 theorem recover_eq {A : Matrix T T₂ ℤ} {b : Module.Basis T ℤ (dualLattice F)}
     (hb : Function.Bijective (Matrix.mulVecLin (dualEmbMatrix b)))
     {b₂ : Module.Basis T₂ ℤ (dualLattice F)}
@@ -141,8 +194,8 @@ theorem recover_eq {A : Matrix T T₂ ℤ} {b : Module.Basis T ℤ (dualLattice 
   refine Finset.sum_congr rfl fun p _ => ?_
   ring
 
-omit [DecidableEq T₂] in
 
+omit [DecidableEq T₂] in
 theorem line_eq {A : Matrix T T₂ ℤ} {b : Module.Basis T ℤ (dualLattice F)}
     (hb : Function.Bijective (Matrix.mulVecLin (dualEmbMatrix b)))
     {b₂ : Module.Basis T₂ ℤ (dualLattice F)}
@@ -157,8 +210,8 @@ theorem line_eq {A : Matrix T T₂ ℤ} {b : Module.Basis T ℤ (dualLattice F)}
 
 end TopDualBasisChange
 
-open TopDualBasisChange in
 
+open TopDualBasisChange in
 theorem DualTopBasisChange.proof (hChange : IntCoordChange.Statement) : DualTopBasisChange.Statement := by
   intro K _ _ i F T T₂ _ _ _ _ b hb b₂ hb₂ II hi hII
   have hAB : b.toMatrix b₂ * b₂.toMatrix b = 1 := Module.Basis.toMatrix_mul_toMatrix_flip b b₂

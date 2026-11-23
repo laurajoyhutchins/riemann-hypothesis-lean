@@ -1,9 +1,60 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutHL2
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.PBGHeadV
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.DerivativeKeepsCharacter
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.AdjointCornerScaledSingleComm
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.RdVOfEq
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.UnipotentCoordinatesMeasurePreserving
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutHL2
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.DerivativeKeepsCharacter
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.PBGHeadV
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.PhiBoundPartsOfRadicalParametrisation
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.RdVOfEq
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.UpperMinorOfLevelPoint
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.UwClosedSubgroup
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.ActualAdjointnessFromHermitian
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.BaseIndexConstantInjective
+
+@[expose] public section
 
 open Matrix Filter Topology
 open scoped ComplexConjugate
@@ -33,18 +84,20 @@ theorem map_qminor' {A B : Type} [Ring A] [Algebra ℂ A] [Ring B] [Algebra ℂ 
     (Eu : Fin n → Fin n → A) (a b : Fin t → Fin n) (u : ℂ) :
     φ (qminor Eu a b u) = qminor (fun p q => φ (Eu p q)) a b u := by
   unfold qminor
+
   rw [map_sum]
   refine Finset.sum_congr rfl fun σ _ => ?_
   rw [map_mul, map_intCast, map_list_prod, List.map_ofFn]
   congr 2
-  congr 1
-  funext i
-  simp only [Function.comp_apply, Tm, map_add, apply_ite φ, AlgHom.commutes, map_zero]
+  apply congrArg List.ofFn
+  funext k
+  by_cases h : a (σ k) = b k <;> simp [Tm, h]
 
 theorem map_AAv {A B : Type} [Ring A] [Algebra ℂ A] [Ring B] [Algebra ℂ B] (φ : A →ₐ[ℂ] B) (k r : ℕ)
     (Eu : Fin (2 * r + k + 1) → Fin (2 * r + k + 1) → A) (y : Fin r → Fin (2 * r + k + 1) → ℂ) (n : ℕ)
     (hn : n ≤ r) (ℓ : ℂ) : φ (C3.AAv k r Eu y n hn ℓ) = C3.AAv k r (fun p q => φ (Eu p q)) y n hn ℓ := by
   unfold C3.AAv
+
   rw [map_sum]
   refine Finset.sum_congr rfl fun B _ => ?_
   split_ifs
@@ -134,7 +187,7 @@ private theorem minus_positive_of_parts_lemma_3 {k r m : ℕ} (hm : m + 2 ≤ r)
     (fun b x => hS b (x : B') x.2) hy1 hy2
   have hmap : ∀ n (hn : n ≤ r), (S.val (C3.AAv k r E' y n hn ℓ)) = C3.AAv k r E0 y n hn ℓ := fun n hn =>
     map_AAv S.val k r E' y n hn ℓ
-  simp only [La', LinearMap.comp_apply, AlgHom.toLinearMap_apply, map_mul, map_add, AlgHom.commutes] at key
+  simp only [La', LinearMap.comp_apply, AlgHom.toLinearMap_apply, map_mul, map_add (f := _), AlgHom.commutes] at key
   rw [hmap, hmap, hmap] at key
   rw [map_add (algebraMap ℂ B')]
   exact key
@@ -293,7 +346,7 @@ theorem _root_.Formalism.FourierDecayAlt.P.minus_positive_of_parts : MinusPosOfP
     rw [Nat.cast_sub (by omega)]
     push_cast
     ring
-  rw [E1, E2, E3, E4, key, mul_add, map_add, ← Algebra.commutes, ← Algebra.smul_def, map_smul, hc]
+  rw [E1, E2, E3, E4, key, mul_add, map_add (f := _), ← Algebra.commutes, ← Algebra.smul_def, map_smul, hc]
   module
 
 end Formalism.FourierDecayAlt.P.CutHL.MPos

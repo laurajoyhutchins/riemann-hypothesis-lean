@@ -1,5 +1,50 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.AwayToAwayRightEqOfComp
+module
+
+public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.ExistsChartOfMemRedKer
+public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.SpanEqTopOfForallMaximal
+public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.AwayToAwayRightEqOfComp
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.UniversalCharts.ChartLawPf
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -42,8 +87,8 @@ theorem isTangent_comp {x : epsR R ⟶ G} (hx : IsTangent x) : IsTangent (x ≫ 
   unfold IsTangent at hx ⊢
   rw [Over.comp_left, ← Category.assoc, hx, ← Over.comp_left, IsMonHom.one_hom]
 
-omit [IsCommMonObj G] in
 
+omit [IsCommMonObj G] in
 theorem existsUnique_lieMatrix (hv : ∀ i, IsTangent (v i)) (hw : IsLieBasis w) :
     ∃! M : Matrix (Fin n) (Fin m) R, ∀ i, IsLieComb (M i) w (v i ≫ f) := by
   have hx : ∀ i, ∃! c, IsLieComb c w (v i ≫ f) := fun i => hw.2 _ (isTangent_comp f (hv i))
@@ -58,7 +103,8 @@ variable [Smooth G.hom]
 
 theorem expHom_bijective (hv : IsLieBasis v) {J : Ideal A} (hJ : J ^ 2 = ⊥) :
     Function.Bijective (expHom hv.1 hJ) := by
-  obtain ⟨hinj, hsurj⟩ := expBij A hv J hJ
+  have hexp : ExpBij A v := expBij A hv
+  obtain ⟨hinj, hsurj⟩ := hexp J hJ
   refine ⟨fun c c' h => ?_, fun y => ?_⟩
   · have h' : ((Additive.toMul (expHom hv.1 hJ c) : redKer (R := R) G J) : sp A ⟶ G) =
         ((Additive.toMul (expHom hv.1 hJ c') : redKer (R := R) G J) : sp A ⟶ G) := by rw [h]
@@ -240,7 +286,7 @@ theorem exists_add_eq_of_isCoprime {T₁ T₂ T₁₂ : Type} [CommRing T₁] [A
   have P1 : a e₁ ^ N * ρ f ^ N = 1 := by rw [← mul_pow, ← ha', ← map_mul, he₁, map_one, one_pow]
   have P2 : b e₂ ^ N * ρ g ^ N = 1 := by rw [← mul_pow, ← hb', ← map_mul, he₂, map_one, one_pow]
   have key := congrArg ρ huw
-  simp only [map_add, map_mul, map_pow, map_one] at key
+  simp only [map_add (f := _), map_mul, map_pow, map_one] at key
   rw [map_mul] at hzx
   simp only [map_mul, map_pow, ha', hb']
   rw [← hzx]
@@ -267,7 +313,8 @@ theorem exists_isLiftAlong_of_isCoprime (hv : IsLieBasis v) (hJ : J ^ 2 = ⊥)
   have hy₂' : IsLiftAlong y₀ ((awayHom R (f * g)).comp φ) (spMap b ≫ y₂) := by
     have := hy₂.map b; rwa [← AlgHom.comp_assoc, hb] at this
   have hmem := hy₁'.mul_inv_mem hy₂'
-  obtain ⟨-, hsurj⟩ := expBij (Localization.Away (f * g)) hv (J.map ((awayHom R (f * g)).comp φ)) hK
+  have hexp : ExpBij (Localization.Away (f * g)) v := expBij _ hv
+  obtain ⟨-, hsurj⟩ := hexp (J.map ((awayHom R (f * g)).comp φ)) hK
   obtain ⟨c, hc, hcJ, hcy⟩ := hsurj _ hmem
   have hcJ' : ∀ i, c i ∈ (J.map φ).map (awayHom R (f * g)) := fun i => by
       have h0 : J.map ((awayHom R (f * g)).comp φ) ≤ (J.map φ).map (awayHom R (f * g)) :=
@@ -355,7 +402,7 @@ theorem reduction_surjective (hv : IsLieBasis v) (hJ : J ^ 2 = ⊥) :
     rintro f g ⟨y₁, hy₁⟩ ⟨y₂, hy₂⟩
     have hu : IsUnit (awayHom R (f + g) (f + g)) := (isAway_awayHom (R := R) (f + g)).unit
     have hcop : IsCoprime (awayHom R (f + g) f) (awayHom R (f + g) g) :=
-      ⟨↑hu.unit⁻¹, ↑hu.unit⁻¹, by rw [← mul_add, ← map_add]; exact hu.val_inv_mul⟩
+      ⟨↑hu.unit⁻¹, ↑hu.unit⁻¹, by rw [← mul_add, ← map_add (f := _)]; exact hu.val_inv_mul⟩
     obtain ⟨ψ₁, hψ₁⟩ := (isAway_awayHom (R := R) f).lift
       ((awayHom R (awayHom R (f + g) f)).comp (awayHom R (f + g))) (isAway_awayHom (R := R) (awayHom R (f + g) f)).unit
     obtain ⟨ψ₂, hψ₂⟩ := (isAway_awayHom (R := R) g).lift

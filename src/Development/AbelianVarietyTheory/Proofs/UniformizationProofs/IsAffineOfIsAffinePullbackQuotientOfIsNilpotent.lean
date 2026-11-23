@@ -1,5 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsUniqueZpowMulAppLE
+module
+
+public import Mathlib.AlgebraicGeometry.Morphisms.ClosedImmersion
+public import Mathlib.Combinatorics.Quiver.ReflQuiver
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsUniqueZpowMulAppLE
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.AlgebraicGeometry.Morphisms.Finite
+import Mathlib.AlgebraicGeometry.Morphisms.Flat
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+
+@[expose] public section
 
 open CategoryTheory Limits AlgebraicGeometry TopologicalSpace Opposite
 
@@ -53,7 +103,7 @@ theorem res (ha : Lifts i U a r) (h : V ≤ U) : Lifts i V (rs h a) r := by
 
 theorem add (ha : Lifts i U a r) (hb : Lifts i U b s) : Lifts i U (a + b) (r + s) := by
   unfold Lifts at *
-  rw [map_add, map_add, ha, hb]
+  rw [map_add (f := _), map_add (f := _), ha, hb]
 
 theorem sub (ha : Lifts i U a r) (hb : Lifts i U b s) : Lifts i U (a - b) (r - s) := by
   unfold Lifts at *
@@ -128,7 +178,6 @@ variable [IsClosedImmersion i] [Surjective i]
   {s : Γ(Z, ⊤)} {σ : ∀ j, Γ(Y, U j)} (hσ : ∀ j, Lifts i (U j) (σ j) s)
 
 variable (i σ) in
-
 def IsCoboundary (r : Γ(Z, ⊤)) : Prop :=
   ∃ ρ t : ∀ j, Γ(Y, U j), (∀ j, Lifts i (U j) (ρ j) r) ∧ (∀ j, Lifts i (U j) (t j) 0) ∧
     ∀ j k, rs (inf_le_left : U j ⊓ U k ≤ U j) (t j) - rs inf_le_right (t k) =
@@ -153,7 +202,7 @@ theorem IsCoboundary.add {r r' : Γ(Z, ⊤)} (h : IsCoboundary i σ r) (h' : IsC
   obtain ⟨ρ', t', hρ', ht', e'⟩ := h'
   refine ⟨fun j ↦ ρ j + ρ' j, fun j ↦ t j + t' j, fun j ↦ (hρ j).add (hρ' j),
     fun j ↦ by simpa using (ht j).add (ht' j), fun j k ↦ ?_⟩
-  simp only [map_add]
+  simp only [map_add (f := _)]
   linear_combination e j k + e' j k
 
 omit [IsClosedImmersion i] [Surjective i] in

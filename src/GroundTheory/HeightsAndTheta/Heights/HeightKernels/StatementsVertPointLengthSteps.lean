@@ -1,5 +1,47 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.StatementsVertRIndexSteps
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.StatementsVertRIndexSteps
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -49,35 +91,6 @@ def SectionQuotLocal.Statement : Prop :=
         (∀ u : T, ∃ a b : curveRing y, b ∉ m ∧ (b : K') * (y ⟨(), u⟩ / y ⟨(), t⟩) = a) →
         ∀ a b : curveRing y, b ∉ m → (b : K') * aeval y s = a * y ⟨(), t⟩ →
           locLen m (sectionQuot y (aeval y s)) = locLen m (curveRing y ⧸ Ideal.span {a})
-
-abbrev twoXPt : MRing (PBlk 1) := C 2 * X ⟨(), 0⟩
-
-abbrev twoIdealPt : Ideal (MRing (PBlk 1)) := Ideal.span {C 2}
-
-theorem exists_int_of_mem_curveRing_yPt (b : curveRing IndefiniteRowSideFullHecke.HeightsSet.yPt) : ∃ n : ℤ, (b : ℚ) = n := by
-  have h := mem_curveRing.mp b.2 (fun _ => 0) (fun _ => by simp [IndefiniteRowSideFullHecke.HeightsSet.yPt])
-  rw [chartRingZ_yPt, Algebra.mem_bot] at h
-  obtain ⟨n, hn⟩ := h
-  exact ⟨n, by rw [← hn]; simp⟩
-
-def evenIdealPt : Ideal (curveRing IndefiniteRowSideFullHecke.HeightsSet.yPt) where
-  carrier := {b | ∃ n : ℤ, (b : ℚ) = 2 * n}
-  add_mem' := by
-    rintro a b ⟨m, hm⟩ ⟨n, hn⟩
-    refine ⟨m + n, ?_⟩
-    show (a : ℚ) + b = _
-    rw [hm, hn]
-    push_cast
-    ring
-  zero_mem' := ⟨0, by simp⟩
-  smul_mem' := by
-    rintro c b ⟨n, hn⟩
-    obtain ⟨k, hk⟩ := exists_int_of_mem_curveRing_yPt c
-    refine ⟨k * n, ?_⟩
-    show (c : ℚ) * b = _
-    rw [hk, hn]
-    push_cast
-    ring
 
 end
 

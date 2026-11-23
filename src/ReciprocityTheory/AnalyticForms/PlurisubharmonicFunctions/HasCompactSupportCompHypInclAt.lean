@@ -1,7 +1,62 @@
-import ReciprocityTheory.AnalyticForms.PlurisubharmonicFunctions.ContDiffOfContDiffOnZeroOff
+module
+
+public import ReciprocityTheory.AnalyticForms.PlurisubharmonicFunctions.ContDiffOfContDiffOnZeroOff
+public import ReciprocityTheory.AnalyticForms.PlurisubharmonicFunctions.PartsSt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.InnerProductSpace.Calculus
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.AnalyticForms.AnalyticCharts.Osgood
+public import ReciprocityTheory.AnalyticForms.PlurisubharmonicFunctions.GreenCoord
+public import ReciprocityTheory.AnalyticForms.PlurisubharmonicFunctions.HessCRestrictThm
+import ReciprocityTheory.AnalyticForms.PlurisubharmonicFunctions.LintegralImageEqLintegralNormSqDetMul
 import ReciprocityTheory.AnalyticForms.PlurisubharmonicFunctions.LogInt
-import ReciprocityTheory.AnalyticForms.PlurisubharmonicFunctions.GreenCoord
-import ReciprocityTheory.AnalyticForms.AnalyticCharts.Osgood
+import ReciprocityTheory.AnalyticForms.PlurisubharmonicFunctions.MdiscSt
+
+@[expose] public section
 
 namespace ReciprocityTheory.AnForm.A
 
@@ -21,7 +76,7 @@ theorem integral_gReg_eq (i : Fin (n + 1)) {U : Set (Fin (n + 1) → ℂ)}
   obtain ⟨hh, hhc⟩ := hDens_props i hp
   obtain ⟨hU, hv, hvc, hvU, hφ⟩ := hp
   have hg : ContDiff ℝ 3 (fun y : Fin (n + 1) → ℂ => gReg ε (y i)) :=
-    (gReg_contDiff hε).comp (contDiff_apply ℝ ℂ i)
+    (gReg_contDiff hε).comp (contDiff_apply ℝ (fun _ => ℂ) i)
   have h1 := (parts_thm n φ v (fun y => gReg ε (y i)) U
     ⟨hU, hv.contDiffOn, hvc, hvU, hg.contDiffOn,
       fun k => by exact_mod_cast contDiffOn_infty.1 (hφ k) 3⟩).2.2.2.2
@@ -139,12 +194,12 @@ theorem integral_log_maDens_psiRef (i : Fin (n + 1)) {h : (Fin (n + 1) → ℂ) 
     simp only [fTerm, Complex.re_ofReal_mul, Complex.re_sum, Finset.mul_sum]
     exact Finset.sum_congr rfl fun j _ => Finset.sum_congr rfl fun k _ => by ring
   have hint : ∀ j, ∫ z, ∑ k, fTerm i h j k z = ∑ k, ∫ z, fTerm i h j k z := fun j =>
-    integral_finset_sum _ fun k _ => (fTerm_props i hh hhc j k).1
+    MeasureTheory.integral_finsetSum _ fun k _ => (fTerm_props i hh hhc j k).1
   have hval : ∀ j k, ∫ z, fTerm i h j k z = if j = i ∧ k = i then
       (Real.pi / 2) * (1 / ((n : ℝ) + 1)) * ∫ w, h (Fin.insertNth i 0 w) else 0 :=
     fun j k => (fTerm_props i hh hhc j k).2
-  rw [hsplit, integral_const_mul, integral_finset_sum _ fun j _ =>
-    integrable_finset_sum _ fun k _ => (fTerm_props i hh hhc j k).1]
+  rw [hsplit, integral_const_mul, MeasureTheory.integral_finsetSum _ fun j _ =>
+    MeasureTheory.integrable_finsetSum _ fun k _ => (fTerm_props i hh hhc j k).1]
   simp only [hint, hval]
   simp [ite_and]
 

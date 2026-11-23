@@ -1,21 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsUniqueSubMemInitSpan
-import Development.AbelianVarietyTheory.Definitions.Foundations.IsProbabilityMeasureMuPart
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.FrMapComp
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.IndepPts
-import Development.AbelianVarietyTheory.Proofs.GenericRegularity.ModelChartLiftCoordsGeneratorIndep
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsChartOfIsLocalRing
+public import Development.AbelianVarietyTheory.Proofs.GenericRegularity.AppLEInjective
+import Development.AbelianVarietyTheory.Proofs.GenericRegularity.ExistsChartLieBasisMatrices
+public import Development.AbelianVarietyTheory.Proofs.GenericRegularity.IsCombAtIffCoordinateCombination
 import Development.AbelianVarietyTheory.Proofs.GenericRegularity.LieBasisCoordinatesBijectiveTangent
-import Development.AbelianVarietyTheory.Proofs.GenericRegularity.IsCombAtIffCoordinateCombination
-import Development.AbelianVarietyTheory.Proofs.GenericRegularity.IsEigenvectorIffLieBasisCoordinates
-import Development.AbelianVarietyTheory.Proofs.GenericRegularity.ExistsFrPtTie
-import Development.AbelianVarietyTheory.Proofs.GenericRegularity.TieBaseChange
-import Development.AbelianVarietyTheory.Proofs.GenericRegularity.AppLEInjective
-import Development.AbelianVarietyTheory.Proofs.GenericRegularity.FrameBorelGroupoidProperties
-import Development.AbelianVarietyTheory.Proofs.GenericRegularity.EvaluationLawsGenericFramesAtlasHold
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.FramedPointBaseChangeUniqueReflIff
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.FrameChangeCommBaseChange
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.LowerTriIsUnitDet
-import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.AbelianSchemeLawsUnconditional
+import Development.AbelianVarietyTheory.Proofs.GenericRegularity.ModelChartLiftCoordsGeneratorIndep
+public import Development.AbelianVarietyTheory.Proofs.GenericRegularity.NonemptyLift
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.LieBridgeG
+
+@[expose] public section
 
 noncomputable section
 
@@ -98,8 +128,8 @@ section ToModel
 
 variable {S S' : Type} [CommRing S] [CommRing S']
 
-variable (Y) in
 
+variable (Y) in
 def liftTan (y : Sp S ⟶ Xo.XF c) {w : Sp (DualNumber S) ⟶ Xo.univ.t.G.left} (hw : IsTanAt (y ≫ pullback.fst _ _) w) :
     Sp (DualNumber S) ⟶ Y.oF.t.G.left :=
   Y.m0.cart.1.lift w (spMap (algebraMap S (DualNumber S)) ≫ y) (by rw [hw.1, Category.assoc])
@@ -127,8 +157,8 @@ theorem isTanAtG_liftTan (y : Sp S ⟶ Xo.XF c) {w : Sp (DualNumber S) ⟶ Xo.un
   · rw [← Category.assoc, h1]
     exact (grpPull_one Y.m.cart (Over.mk y)).symm
 
-variable (Y) in
 
+variable (Y) in
 def toModel (y : Sp S ⟶ Xo.XF c) {x₀ : Sp S ⟶ Xo.X} (h₀ : y ≫ pullback.fst _ _ = x₀) {x : Sp S ⟶ Y.X}
     (hx : y ≫ Y.j = x) {w : Sp (DualNumber S) ⟶ Xo.univ.t.G.left} (hw : IsTanAt x₀ w) : TanM x Y.t.G :=
   mkT (ovT (t := Y.t) (v := liftTan Y y (h₀ ▸ hw) ≫ Y.m.φ) (hx ▸ isTanAtG_liftTan y (h₀ ▸ hw))) (smT_zero_ovT _)
@@ -196,6 +226,7 @@ theorem vec_iff_toModel {M : MChart Y} {x : Sp S ⟶ Y.X} (h : ⊤ ≤ x ⁻¹�
         ((congrArg (· ≫ x) (Spec.map_id _)).trans (Category.id_comp _)).trans (spMap_ev x M.hU h).symm
       have hl : ∀ v : TanM x Y.t.G, (tv (tanPull (RingHom.id S) hid v)).left = (tv v).left := fun v =>
         (congrArg (· ≫ (tv v).left) (GlobalTheory.ModelChart.spMap_dualMapR_id S)).trans (Category.id_comp _)
+
       rw [← hl, vec_apply, map_sum, tv_sum']
       refine congrArg Over.Hom.left (Finset.prod_congr rfl fun j _ => ?_)
       rw [map_smulₛₗ, PullbackSections.tv_smul]
@@ -225,8 +256,8 @@ theorem frX_frMap [Algebra c.F S'] {ψ : S →ₐ[c.F] S'} {P : FrPt Xo c S} {P'
     rw [Category.assoc, frX_snd, spMap_comp']
     exact congrArg spMap ψ.comp_algebraMap)
 
-variable (Y) in
 
+variable (Y) in
 def frVec (P : FrPt Xo c S) {x : Sp S ⟶ Y.X} (hx : frX P ≫ Y.j = x) (σ : E →+* ℂ) (i : Fin (Dw.mult σ)) :
     TanM x Y.t.G := toModel Y (frX P) (frX_fst P) hx (P.tan σ i)
 
@@ -236,12 +267,12 @@ theorem tanPull_frVec [Algebra c.F S'] {ψ : S →ₐ[c.F] S'} {P : FrPt Xo c S}
     tanPull ψ.toRingHom e (frVec Y P hx σ i) = frVec Y P' hx' σ i :=
   tanPull_toModel _ _ _ _ _ (frX_frMap h) _ _ _ _ (h.2.1 σ i)
 
-variable (c) in
 
+variable (c) in
 def eigLie (x : Sp S ⟶ Y.X) (σ : E →+* ℂ) : Submodule S (TanM x Y.t.G) where
   carrier := {v | ∀ a : 𝓞 E, actR Y.t.act a v = algebraMap c.F S (embK c σ a) • v}
   zero_mem' := fun a => by rw [map_zero, smul_zero]
-  add_mem' := fun hu hv a => by rw [map_add, hu a, hv a, smul_add]
+  add_mem' := fun hu hv a => by rw [map_add (f := _), hu a, hv a, smul_add]
   smul_mem' := fun r v hv a => by rw [map_smul, hv a, smul_comm]
 
 theorem vec_mem_eigLie (M : MChart Y) (x : Sp S ⟶ Y.X) (h : ⊤ ≤ x ⁻¹ᵁ M.U) (σ : E →+* ℂ) (cv : Fin M.n → S) :
@@ -392,6 +423,7 @@ theorem frBor_of_frVec {M : MChart Y} {x : Sp S ⟶ Y.X} (h : ⊤ ≤ x ⁻¹ᵁ
       (fun j => (vec M x h).symm (frVec Y P hx σ j)) (P.u σ) _ _ fun j =>
         (vec_iff_toModel h Λ eΛ (frX_fst P) hx _ (P.tan σ j)).2 (LinearEquiv.apply_symm_apply _ _).symm).2 ?_
     refine (vec_iff_toModel h Λ eΛ (frX_fst P) hx _ (e ▸ P'.tan σ i)).2 ?_
+
     rw [map_sum]
     simp only [map_smul, LinearEquiv.apply_symm_apply]
     rw [← hv]
@@ -419,6 +451,7 @@ theorem frVec_of_frBor {M : MChart Y} {x : Sp S ⟶ Y.X} (h : ⊤ ≤ x ⁻¹ᵁ
       (fun j => (vec M x h).symm (frVec Y P hx σ j)) (P.u σ) _ _ fun j =>
         (vec_iff_toModel h Λ eΛ (frX_fst P) hx _ (P.tan σ j)).2 (LinearEquiv.apply_symm_apply _ _).symm).1 (h3 i)
   have h5 := (vec_iff_toModel h Λ eΛ (frX_fst P) hx _ (e ▸ P'.tan σ i)).1 h4
+
   rw [map_sum] at h5
   simp only [map_smul, LinearEquiv.apply_symm_apply] at h5
   rw [← h5]

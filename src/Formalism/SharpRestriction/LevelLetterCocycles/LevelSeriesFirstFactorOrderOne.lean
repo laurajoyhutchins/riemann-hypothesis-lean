@@ -1,5 +1,64 @@
-import Formalism.SharpRestriction.LevelLetterCocycles.LevelOneUniformizerCoeffVanish
-import Formalism.SharpRestriction.LevelLetterCocycles.ArcCoordinatesOfLevelZeroParts
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.LevelOneUniformizerCoeffVanish
+public import Formalism.SharpRestriction.LevelLetterCocycles.ArcCoordinatesOfLevelZeroParts
+public import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.MemCrit
+public import Formalism.SharpRestriction.LevelLetterCocycles.WachFrobeniusLatticeUnramifiedFunctor
+import Formalism.SharpRestriction.LevelLetterCocycles.DvOZeroHigh
+import Formalism.SharpRestriction.LevelLetterCocycles.HorTrExists
+import Formalism.SharpRestriction.LevelLetterCocycles.HorTrUnique
+import Formalism.SharpRestriction.LevelLetterCocycles.LamZero
+import Formalism.SharpRestriction.LevelLetterCocycles.MemOfSecEq
+import Formalism.SharpRestriction.LevelLetterCocycles.ProdPsUnitE
+import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.ExpPowSubOne
+import Formalism.SharpRestriction.LevelLetterCocycles.SaturationPullbackOfRingCondition
+import Formalism.SharpRestriction.LevelLetterCocycles.TmulMemFilV
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PowerSeries.Inverse
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -58,7 +117,7 @@ theorem cc_lev_ps (Ti : Formalism.MainNotions.UnusedSlot80.LevE.Comparison₂ W 
   obtain ⟨s', rfl⟩ : ∃ s', s = s' + 1 := ⟨s - 1, by omega⟩
   rw [pow_succ', pow_mul, hζ.pow_eq_one, one_pow]
   unfold qA
-  rw [map_add, map_add]
+  rw [map_add (f := _), map_add (f := _)]
   have h0 := Formalism.MainNotions.UnusedSlot80.LevE.level_one_uniformizer_coeff_vanish hR (a - ((s' + 1 : ℕ) : ZMod n)) 1 0 (by omega)
   rw [pow_one, PowerSeries.coeff_zero_eq_constantCoeff_apply] at h0
   rw [h0, zero_add]
@@ -185,6 +244,7 @@ theorem dg_core {Fil : ℤ → Submodule LL V} (hF : Antitone Fil) {d I : ℕ} (
       rw [Finset.sum_comm]
       refine Finset.sum_congr rfl fun j _ => ?_
       have := congrArg (PowerSeries.coeff r.toNat) (hid j)
+
       rw [mul_assoc, PowerSeries.coeff_C_mul, map_sum] at this
       simp only [PowerSeries.coeff_C_mul] at this
       rw [← Finset.sum_smul, this]
@@ -293,6 +353,7 @@ theorem lev0Mpr_of [NeZero n] (C : Formalism.MainNotions.UnusedSlot80.LevC.Ctx W
 
   have hYΔ : ∀ δ ∈ W.DelF, W.γD T δ Y = Y := by
     intro δ hδ
+
     rw [hY, map_sum]
     refine Finset.sum_congr rfl fun j _ => ?_
     rw [Formalism.MainNotions.UnusedSlot80.SatW.γD_smulA', haa'Δ j δ hδ, Formalism.MainNotions.UnusedSlot80.PhiPowers.φD_pow_Δ W T (hHΔ j).1.2 (e + 1) δ hδ]
@@ -352,6 +413,7 @@ theorem lev0Mpr_of [NeZero n] (C : Formalism.MainNotions.UnusedSlot80.LevC.Ctx W
       rw [map_mul (algebraMap (LetA O n) W.EE) (DEN * lA W ^ κ) (aa' m), hfw', Formalism.MainNotions.UnusedSlot80.LevC.lE_eq,
         map_mul, map_mul]
       ring
+
     rw [h2, h1, map_mul (algebraMap (LetA O n) W.EE) (ps W 0 ^ H), map_sum, Finset.mul_sum, Finset.mul_sum]
     refine Finset.sum_congr rfl fun i _ => ?_
     have hgi := hgu i
@@ -393,6 +455,7 @@ theorem lev0Mpr_of [NeZero n] (C : Formalism.MainNotions.UnusedSlot80.LevC.Ctx W
           exact hdec)
     have hdecB : levB T a' ζ ⟨W.Q ^ (H + H) • z, hK⟩ j' =
         ∑ j, smulS (W.lev a' ζ (cj j)) (levB T a' ζ ⟨_, hZN j⟩) j' := by
+
       rw [hsub, map_sum, Finset.sum_apply]
       exact Finset.sum_congr rfl fun j _ => by rw [Formalism.MainNotions.UnusedSlot80.LevE.levB_smul W levB Ti.hEq Ti.hsupp]
     rw [hdecB]
@@ -428,6 +491,7 @@ theorem lev0Mpr_of [NeZero n] (C : Formalism.MainNotions.UnusedSlot80.LevC.Ctx W
         intro j
         rw [← huD]
         have h := congrArg (W.lev a' ζ) (hLetA' j)
+
         simp only [map_mul, map_pow, map_sum, hl] at h
         have h' : ∑ i, PowerSeries.C (algebraMap O LL (c₀ i j)) * W.lev a' ζ (W.q ^ (H + H) * Nn i) =
             W.lev a' ζ (W.q ^ (H + H)) * ∑ i, W.lev a' ζ (Nn i * algebraMap O (LetA O n) (c₀ i j)) := by
@@ -437,6 +501,7 @@ theorem lev0Mpr_of [NeZero n] (C : Formalism.MainNotions.UnusedSlot80.LevC.Ctx W
             AlgHom.commutes, PowerSeries.algebraMap_apply]
           ring
         rw [h']
+
         simp only [hcj, map_mul, map_pow, map_sum]
         linear_combination h
       have hdg := dg_core hFa (fun j => W.lev a' ζ (cj j * (W.q ^ H * W.φA (abelian₂ W A a e)))) vv

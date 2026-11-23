@@ -1,8 +1,55 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HeightsOfSets.DenseChart
-import GroundTheory.HeightsAndTheta.Heights.HeightsOfSets.DenseHeight
-import GroundTheory.HeightsAndTheta.Heights.HeightsOfSets.DenseLift
-import GroundTheory.HeightsAndTheta.Heights.HeightsOfSets.DenseIntegral
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HeightsOfSets.Statements
+public import GroundTheory.HeightsAndTheta.Heights.HeightsOfSets.DenseChart
+public import GroundTheory.HeightsAndTheta.Heights.HeightsOfSets.DenseHeight
+public import GroundTheory.HeightsAndTheta.Heights.HeightsOfSets.DenseIntegral
+public import GroundTheory.HeightsAndTheta.Heights.HeightsOfSets.DenseLift
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.NoetherNormalization
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -37,9 +84,9 @@ theorem denseBoundedHeight : DenseBoundedHeight.Statement := by
     rw [← P.evalCone_chartPoint c ψ f]
     exact hvan _ ⟨ψ, hroots, rfl⟩
   · rintro z ⟨ψ, hroots, rfl⟩
-    refine height_standard_le _ (P.chartPoint_mem c hc ψ).1 hΔpos hR0pos (fun k i ↦ ?_)
-      (fun σ k i ↦ ?_)
-    · have h1 := (hbd ⟨k, i⟩ ψ hroots).1
+    refine height_standard_le (P.chartPoint c ψ) (P.chartPoint_mem c hc ψ).1 hΔpos hR0pos ?_ ?_
+    · intro k i
+      have h1 := (hbd ⟨k, i⟩ ψ hroots).1
       have h2 : (Δ : AlgebraicClosure ℚ) * P.chartPoint c ψ k i =
           ((∏ w ∈ Finset.univ.erase ⟨k, i⟩, δ w : ℕ) : AlgebraicClosure ℚ) *
             ((δ ⟨k, i⟩ : AlgebraicClosure ℚ) * ψ (b ⟨k, i⟩)) := by
@@ -51,7 +98,8 @@ theorem denseBoundedHeight : DenseBoundedHeight.Statement := by
           (x := ((∏ w ∈ Finset.univ.erase ⟨k, i⟩, δ w : ℕ) : ℤ))
         simpa using this
       exact h3.mul h1
-    · calc ‖σ (P.chartPoint c ψ k i)‖ ≤ R ⟨k, i⟩ := (hbd ⟨k, i⟩ ψ hroots).2 σ
+    · intro σ k i
+      calc ‖σ (P.chartPoint c ψ k i)‖ ≤ R ⟨k, i⟩ := (hbd ⟨k, i⟩ ψ hroots).2 σ
         _ ≤ ∑ v, R v := Finset.single_le_sum (fun v _ ↦ hRnn v) (Finset.mem_univ _)
         _ ≤ R0 := by linarith
 

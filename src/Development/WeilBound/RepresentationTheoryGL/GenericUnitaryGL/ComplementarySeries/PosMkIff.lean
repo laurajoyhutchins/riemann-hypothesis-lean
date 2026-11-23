@@ -1,4 +1,56 @@
-import Development.WeilBound.RepresentationTheoryGL.GenericUnitaryGL.ComplementarySeries.Complementary
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.GenericUnitaryGL.ComplementarySeries.Complementary
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.Eigenspace.Triangularizable
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -38,12 +90,12 @@ def gram (B : Sq W) : Fin (finrank ℂ W) → Fin (finrank ℂ W) → ℂ :=
 
 def mk (M : Fin (finrank ℂ W) → Fin (finrank ℂ W) → ℂ) : Sq W :=
   LinearMap.mk₂'ₛₗ (RingHom.id ℂ) (starRingEnd ℂ) (fun v w => qf M (ef W v) (ef W w))
-    (fun v v' w => by simp only [qf, map_add, Pi.add_apply, add_mul, Finset.sum_add_distrib])
+    (fun v v' w => by simp only [qf, map_add (f := _), Pi.add_apply, add_mul, Finset.sum_add_distrib])
     (fun c v w => by
       simp only [qf, map_smul, Pi.smul_apply, smul_eq_mul, Finset.mul_sum, RingHom.id_apply]
       exact Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => by ring)
     (fun v w w' => by
-      simp only [qf, map_add, Pi.add_apply, star_add, add_mul, mul_add, Finset.sum_add_distrib])
+      simp only [qf, map_add (f := _), Pi.add_apply, star_add, add_mul, mul_add, Finset.sum_add_distrib])
     (fun c v w => by
       simp only [qf, map_smul, Pi.smul_apply, smul_eq_mul, star_mul', Finset.mul_sum, starRingEnd_apply]
       exact Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => by ring)
@@ -53,8 +105,9 @@ theorem mk_apply (M : Fin (finrank ℂ W) → Fin (finrank ℂ W) → ℂ) (v w 
 
 theorem expand (B : Sq W) (v w : W) : B v w = qf (gram B) (ef W v) (ef W w) := by
   conv_lhs => rw [← (Module.finBasis ℂ W).sum_equivFun v, ← (Module.finBasis ℂ W).sum_equivFun w]
+
   simp only [map_sum, map_smul, LinearMap.sum_apply, LinearMap.smul_apply, LinearMap.map_smulₛₗ, smul_eq_mul,
-    qf, gram, starRingEnd_apply, Finset.mul_sum, ef]
+  qf, gram, starRingEnd_apply, Finset.mul_sum, ef]
   rw [Finset.sum_comm]
   exact Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => by ring
 
@@ -179,7 +232,7 @@ theorem pos_of (B : Sq W) (hh : Herm B) (hk : LinearMap.ker B = ⊥) (hsd : ∀ 
       have := hsd (v + a • w)
       have e0 : B (v + a • w) (v + a • w) =
           starRingEnd ℂ a * B v w + a * starRingEnd ℂ (B v w) + a * starRingEnd ℂ a * B w w := by
-        simp only [map_add, map_smul, LinearMap.add_apply, LinearMap.smul_apply, LinearMap.map_smulₛₗ, smul_eq_mul,
+        simp only [map_add (f := _), map_smul, LinearMap.add_apply, LinearMap.smul_apply, LinearMap.map_smulₛₗ, smul_eq_mul,
           hvv, hwv]
         ring
       have e : (B (v + a • w) (v + a • w)).re =
@@ -280,7 +333,7 @@ theorem normalize (B : Sq W) (hB : B ≠ 0) :
 
 end Real
 
-set_option maxHeartbeats 400000 in
+
 theorem lim_form {I : Type} (ι : I → I) (T : ℝ → I → Module.End ℂ W)
     (hc : ∀ (i : I) (w : W) (l : Module.Dual ℂ W), Continuous fun s => l (T s i w))
     (s : ℕ → ℝ) (p : ℝ) (hs : Tendsto s atTop (𝓝 p)) (B : ℕ → Sq W) (hinv : ∀ k, Inv ι (T (s k)) (B k))
@@ -349,7 +402,7 @@ namespace PositivityTheory.RgGu.NR
 
 open Sig
 
-set_option maxHeartbeats 800000 in
+
 theorem signature : Signature := by
   intro I W _ _ _ ι T hc hsim hex hpos _ s hs B hB hh hinv
   classical

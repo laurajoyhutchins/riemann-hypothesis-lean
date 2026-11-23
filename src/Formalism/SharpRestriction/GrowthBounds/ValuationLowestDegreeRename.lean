@@ -1,11 +1,48 @@
-import Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow
-import Formalism.SharpRestriction.ParConsts
-import Formalism.SharpRestriction.GrowthBounds.ObjPol
-import Formalism.SharpRestriction.GrowthBounds.UnramifiedQuadraticSetting
-import Formalism.SharpRestriction.GrowthBounds.SegRing
-import Formalism.SharpRestriction.GrowthBounds.CovariantDegrees
-import Formalism.SharpRestriction.GrowthBounds.StatementOfDegreeAndBound
-import Formalism.SharpRestriction.GrowthBounds.ConclusionA2
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.SegRing
+public import Formalism.SharpRestriction.GrowthBounds.CovariantDegrees
+public import Formalism.SharpRestriction.GrowthBounds.StatementOfDegreeAndBound
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -92,8 +129,8 @@ def ColumnFamilyLowerSet (_D : Formalism.BasicNotions.D7) : Prop :=
     stCount (m + 1) ν =
       ∑ μ ∈ Fintype.piFinset (fun i : Fin m => Finset.Icc (ν i.succ) (ν i.castSucc)), stCount m μ
 
-open Classical in
 
+open Classical in
 def GenericProjectionCriterion (_D : Formalism.BasicNotions.D7) : Prop :=
   ∀ (m : ℕ) (ν : Fin (m + 1) → ℤ) (b : ℕ), Dominant ν →
     (stCount (m + 1) ν * Nat.choose (b + m) m =
@@ -269,31 +306,8 @@ def AdmB (D : Formalism.BasicNotions.D7) : Prop :=
   PathPairCorrespondence D ∧ admB2 D ∧ admB3 D ∧ ColumnFamilyLowerSet D ∧ GenericProjectionCriterion D ∧ ColumnFamilyClosure D ∧ TensorColumnFamily D ∧ BranchingColumnFamily D ∧ GlobalSectionsSchur D ∧ BracketPolynomialSpan D ∧ GradedLatticeStable D ∧
     NestedTypeBound D ∧ TypeDecompositionsCommute D
 
-def HodgeTateFromSandwich (D : Formalism.BasicNotions.D7) (CLa Ck Crk Cdeg : ℝ) : Prop := AdmB D → Conclusion2 D CLa Ck Crk Cdeg
-
 def SecondPartClosed (D : Formalism.BasicNotions.D7) : Prop :=
   AdmB D → ∃ C₀ : ℝ, 0 < C₀ ∧ ∀ CLa Ck : ℝ, C₀ ≤ CLa → C₀ ≤ Ck →
     ∃ Crk Cdeg : ℝ, 0 < Crk ∧ 0 < Cdeg ∧ Conclusion2 D CLa Ck Crk Cdeg
-
-def Conclusion2Family (CLa Ck Crk Cdeg : ℝ) {eps : ℝ} (Fm : Formalism.MainNotions.FamP eps) : Prop :=
-  ∃ x0 : ℝ, ∀ x, x0 ≤ x → ∀ i : Fm.Ix x, Conclusion2 (Fm.D x i) CLa Ck Crk Cdeg
-
-def AdmBF {eps : ℝ} (Fm : Formalism.MainNotions.FamP eps) : Prop := ∀ x (i : Fm.Ix x), AdmB (Fm.D x i)
-
-def SecondPartFamily (CLa Ck Crk Cdeg : ℝ) {eps : ℝ} (Fm : Formalism.MainNotions.FamP eps) : Prop :=
-  AdmBF Fm → Conclusion2Family CLa Ck Crk Cdeg Fm
-
-def SecondPartFamilyClosed {eps : ℝ} (Fm : Formalism.MainNotions.FamP eps) : Prop :=
-  AdmBF Fm → ∃ C₀ : ℝ, 0 < C₀ ∧ ∀ CLa Ck : ℝ, C₀ ≤ CLa → C₀ ≤ Ck →
-    ∃ Crk Cdeg : ℝ, 0 < Crk ∧ 0 < Cdeg ∧ Conclusion2Family CLa Ck Crk Cdeg Fm
-
-def PlaneCountTheoremDesign (Fm : Formalism.MainNotions.DFamP) : Prop :=
-  ∃ C₀ : ℝ, 0 < C₀ ∧ ∀ CLa Ck : ℝ, C₀ ≤ CLa → C₀ ≤ Ck → ∃ Crk Cdeg : ℝ, 0 < Crk ∧ 0 < Cdeg ∧
-    ∀ (ε : ℝ) (h0 : 0 < ε) (h1 : ε < 1 / 52), Conclusion2Family CLa Ck Crk Cdeg (Fm ε h0 h1)
-
-def AdmBDF (Fm : Formalism.MainNotions.DFamP) : Prop :=
-  ∀ (ε : ℝ) (h0 : 0 < ε) (h1 : ε < 1 / 52), AdmBF (Fm ε h0 h1)
-
-def PlaneCountDesignStatement (Fm : Formalism.MainNotions.DFamP) : Prop := AdmBDF Fm → PlaneCountTheoremDesign Fm
 
 end Formalism.MainNotions.SelectionLemmas

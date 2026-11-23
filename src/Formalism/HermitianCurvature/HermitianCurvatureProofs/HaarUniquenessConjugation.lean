@@ -1,8 +1,51 @@
-import Formalism.HermitianCurvature.WeylElementCommutesLevelOne
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.BetaSesquilinearity
-import Formalism.RealPlaceAnalysis.FinalF
-import Formalism.FormalDegreeBessel.FinalG
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.LiftErrorLocal
+module
+
+public import Formalism.HermitianCurvature.WeylElementCommutesLevelOne
+public import Formalism.RealPlaceAnalysis.RealPlaceTaylor.RightDerivativeZeroOutsideSupport
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Algebra.Group.Units
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Matrix MeasureTheory Filter Topology
 open scoped ComplexConjugate ENNReal NNReal
@@ -159,7 +202,7 @@ theorem haar_unique (hE : UJEmb) (hC : UHConj) (hP : IsUnit P.det) (hH : Pᴴ * 
     have := hν.conc
     rw [← hr] at this
     exact this
-  rw [← Measure.map_smul, ← h1, h2]
+  rw [← Measure.map_smul _ hm.aemeasurable, ← h1, h2]
 
 lemma hs_eq_gN (g : Mat k r) : hs g = gN g ^ 2 := by
   have h0 : 0 ≤ ∑ i, ∑ j, Complex.normSq (g i j) :=
@@ -220,9 +263,6 @@ theorem vol_crude (hE : UJEmb) (hV : VolGrowth) (hC : UHConj) (hP : IsUnit P.det
         rw [e, ← ENNReal.ofReal_coe_nnreal, ← ENNReal.ofReal_mul c.coe_nonneg, mul_pow]
         congr 1; ring
 
-theorem shell_int : ShellInt :=
-  _root_.UpperTheory.Reformulated.B.LiftErrorLocal.shell_int
-
 theorem gN_meas (k r : ℕ) : Measurable fun g : Mt k r => gN (Matrix.of g) := by
   unfold gN
   apply Measurable.sqrt
@@ -233,8 +273,6 @@ theorem gN_meas (k r : ℕ) : Measurable fun g : Mt k r => gN (Matrix.of g) := b
 theorem ae_mem {U : Set (Mat k r)} {μ : Measure (Mt k r)} (h : IsHaarOn U μ) : ∀ᵐ g ∂μ, Matrix.of g ∈ U := by
   rw [ae_iff]
   exact h.conc
-
-theorem gnLower : GNLower := fun _ _ _ hg => Formalism.FourierDecayAlt.P.BetaSesquilinearity.gN_ge_one hg
 
 theorem gFromDiag' (hE : UJEmb) (hU : Unimodular) (hV : VolGrowth) (hF : HpkFacts) (hC : UHConj) :
     HaarGExists ∧ VolCrude := by
@@ -252,30 +290,8 @@ namespace Formalism.FourierDecayAlt.P
 
 open Formalism.REAL Formalism.QuantumDeterminants Formalism.FourierDecayAlt.B Formalism.FourierDecayAlt.B2
 
-theorem sharp_volume_of_exact : Formalism.FourierDecayAlt.B2.VolSharpFromExact := by
-  intro hE k r μG hμ
-  obtain ⟨C, -, hC⟩ := hE k r μG hμ
-  refine ⟨C, fun R hR => ?_⟩
-  have hR0 : 0 ≤ R := by linarith
-  have hsub : {g : Mt k r | gN (Matrix.of g) ≤ R} ⊆
-      {g | gN (Matrix.of g) ^ 2 ≤ ((2 * r + k + 1 : ℕ) : ℝ) + 4 * R ^ 2} := by
-    intro g hg
-    have h0 : 0 ≤ gN (Matrix.of g) := Real.sqrt_nonneg _
-    have h1 : gN (Matrix.of g) ^ 2 ≤ R ^ 2 := pow_le_pow_left₀ h0 hg 2
-    have h2 : (0 : ℝ) ≤ ((2 * r + k + 1 : ℕ) : ℝ) := Nat.cast_nonneg _
-    show gN (Matrix.of g) ^ 2 ≤ _
-    nlinarith [sq_nonneg R]
-  refine (measure_mono hsub).trans ?_
-  rw [hC R hR0]
-  have e : R ^ (2 * ((k : ℝ) + r) * ((r : ℝ) + 1)) = R ^ (2 * (k + r) * (r + 1)) := by
-    rw [← Real.rpow_natCast]; push_cast; rfl
-  rw [e, ENNReal.ofReal_mul C.coe_nonneg, ENNReal.ofReal_coe_nnreal]
-
 theorem group_measure_from_diagonal : Formalism.FourierDecayAlt.B2.GFromDiag :=
   fun hE hU _ hV hF hC _ _ => HaarUniquenessConjugation.gFromDiag' hE hU hV hF hC
-
-theorem norm_ball_volume_crude : Formalism.FourierDecayAlt.B2.VolCrude :=
-  (HaarUniquenessConjugation.gFromDiag' uJEmb unimodular volGrowth hpkFacts uHConj).2
 
 theorem norm_power_integrable_sharp_of_volume : Formalism.FourierDecayAlt.B2.GNIntSharpFromVol := by
   intro hS hL hV k r μG A hμ hA
@@ -284,11 +300,5 @@ theorem norm_power_integrable_sharp_of_volume : Formalism.FourierDecayAlt.B2.GNI
     (by positivity) hC ?_
   · filter_upwards [HaarUniquenessConjugation.ae_mem hμ] with g hg using hL k r _ hg
   · unfold AB at hA; linarith
-
-theorem norm_power_integrable_crude : Formalism.FourierDecayAlt.B2.GNIntCrude := by
-  intro k r μG A hμ hA
-  obtain ⟨C, hC⟩ := norm_ball_volume_crude k r μG hμ
-  refine HaarUniquenessConjugation.shell_int (Mt k r) μG (fun g => gN (Matrix.of g)) C _ A (HaarUniquenessConjugation.gN_meas k r) ?_ (by positivity) hC hA
-  filter_upwards [HaarUniquenessConjugation.ae_mem hμ] with g hg using HaarUniquenessConjugation.gnLower k r _ hg
 
 end Formalism.FourierDecayAlt.P

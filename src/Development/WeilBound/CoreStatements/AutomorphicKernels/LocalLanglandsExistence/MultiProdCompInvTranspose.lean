@@ -1,14 +1,58 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ProductRepresentationReorderEquiv
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MultiProdCompInvTranspose
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsIrreducibleComp
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.CuspLaws
+public import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.IrreducibleAdmissibleGL
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ContragredientEqInvTransposeClass
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CuspidalInvTranspose
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsCosocleComp
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CuspidalInvTranspose
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TwistInvTransposeDetChar
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ContragredientEqInvTransposeClass
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsIrreducibleComp
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SegDualExistsTerms
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PrecedesOfSegDualPrecedes
-import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.BernsteinZelevinskyGL.TopAdm
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MultiProdCompInvTranspose
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PrecedesOfSegDualPrecedes
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ProductRepresentationReorderEquiv
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SegDualExistsTerms
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TwistInvTransposeDetChar
+import Development.AbelianVarietyTheory.Proofs.SatakeParameters.NormalisedParabolicInductionReindexEquiv
+public import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.BernsteinZelevinskyGL.TopAdm
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open GlobalTheory.PRep GlobalTheory.SmGL GlobalTheory.SplitWeil GlobalTheory.LocGL GlobalTheory.LocLanglands GlobalTheory.JHMult GlobalTheory.TypeTame
 
@@ -57,21 +101,21 @@ section Dual
 
 variable {k : Type} [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k]
 
-theorem dual_nu (x : IrrGL k) (s : ℂ) : GlobalTheory.DualityMap.dual (x.nu s) = (GlobalTheory.DualityMap.dual x).nu (-s) := by
+theorem dual_nu (x : IrrGL (k := k)) (s : ℂ) : GlobalTheory.DualityMap.dual (x.nu s) = (GlobalTheory.DualityMap.dual x).nu (-s) := by
   obtain ⟨e⟩ := GlobalTheory.InvTransposeTwist.main k x.1 _ x.rep s
   refine Eq.trans ?_ (IrrGL.tw_of _ _ _ _ _).symm
   exact IrrGL.of_eq_of.2
     ⟨(GlobalTheory.DualityMap.compEquiv (IrrGL.twEquiv x _ (isSmoothChar_absPow s)).symm (invTranspose x.1)).trans e⟩
 
-theorem isCusp_dual (x : IrrGL k) (h : x.IsCusp) : (GlobalTheory.DualityMap.dual x).IsCusp :=
+theorem isCusp_dual (x : IrrGL (k := k)) (h : x.IsCusp) : (GlobalTheory.DualityMap.dual x).IsCusp :=
   ⟨h.1, isCuspidal_of_equiv (IrrGL.equivOf _ _ _)
     (GlobalTheory.InvTransposeCusp.isCuspidal_comp_invTranspose k x.1 _ x.rep h.2)⟩
 
 end Dual
 
 theorem dualMap (k : Type) [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k]
-    (hA : GlobalTheory.Published.IrreducibleAdmissibleGL) : ∃ D : IrrGL k → IrrGL k, (∀ x y, DualCl x y ↔ y = D x) ∧
-      (∀ x, D (D x) = x) ∧ (∀ (x : IrrGL k) (s : ℂ), D (x.nu s) = (D x).nu (-s)) ∧
+    (hA : GlobalTheory.Published.IrreducibleAdmissibleGL) : ∃ D : IrrGL (k := k) → IrrGL (k := k), (∀ x y, DualCl x y ↔ y = D x) ∧
+      (∀ x, D (D x) = x) ∧ (∀ (x : IrrGL (k := k)) (s : ℂ), D (x.nu s) = (D x).nu (-s)) ∧
       (∀ x, x.IsCusp → (D x).IsCusp) ∧ (∀ x, (D x).1 = x.1) :=
   ⟨GlobalTheory.DualityMap.dual, fun x y => (GlobalTheory.DualClassTranspose.dualCl_iff k hA x y).trans
     ⟨fun ⟨_, _, h⟩ => h, fun h => ⟨_, _, h⟩⟩, GlobalTheory.DualityMap.dual_dual, dual_nu, isCusp_dual, fun _ => rfl⟩
@@ -80,23 +124,23 @@ section Seg
 
 variable {k : Type} [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k]
 
-theorem prodIrr_congr {h N : ℕ} {x y : Fin h → IrrGL k} (e : x = y) (hx : ∑ a, (x a).1 = N)
+theorem prodIrr_congr {h N : ℕ} {x y : Fin h → IrrGL (k := k)} (e : x = y) (hx : ∑ a, (x a).1 = N)
     (hy : ∑ a, (y a).1 = N) : Nonempty ((prodIrr x hx).Equiv (prodIrr y hy)) := by
   subst e
   exact ⟨Representation.Equiv.refl _⟩
 
-theorem prodIrr_cast {h h' N : ℕ} (e : h = h') (x : Fin h' → IrrGL k) (hx : ∑ a, (x (Fin.cast e a)).1 = N)
+theorem prodIrr_cast {h h' N : ℕ} (e : h = h') (x : Fin h' → IrrGL (k := k)) (hx : ∑ a, (x (Fin.cast e a)).1 = N)
     (hy : ∑ a, (x a).1 = N) : Nonempty ((prodIrr (fun a => x (Fin.cast e a)) hx).Equiv (prodIrr x hy)) := by
   subst e
   exact ⟨Representation.Equiv.refl _⟩
 
-theorem isLSeg_dual (hA : GlobalTheory.Published.IrreducibleAdmissibleGL) (D : IrrGL k → IrrGL k)
+theorem isLSeg_dual (hA : GlobalTheory.Published.IrreducibleAdmissibleGL) (D : IrrGL (k := k) → IrrGL (k := k))
     (hD : ∀ x y, DualCl x y ↔ y = D x) (hDD : ∀ x, D (D x) = x)
-    (hnu : ∀ (x : IrrGL k) (s : ℂ), D (x.nu s) = (D x).nu (-s)) (hcusp : ∀ x, x.IsCusp → (D x).IsCusp)
-    (hdeg : ∀ x, (D x).1 = x.1) (Δ Δ' : Segment k) (x : IrrGL k) (hx : IsLSeg Δ x.rep) (hΔ : SegDual Δ Δ') :
+    (hnu : ∀ (x : IrrGL (k := k)) (s : ℂ), D (x.nu s) = (D x).nu (-s)) (hcusp : ∀ x, x.IsCusp → (D x).IsCusp)
+    (hdeg : ∀ x, (D x).1 = x.1) (Δ Δ' : Segment k) (x : IrrGL (k := k)) (hx : IsLSeg Δ x.rep) (hΔ : SegDual Δ Δ') :
     IsLSeg Δ' (D x).rep := by
   obtain ⟨hlen, hterm⟩ := (GlobalTheory.SegDualProof.segDual_exists_terms k D hD hDD hnu hcusp hdeg Δ).2 Δ' hΔ
-  have key : ∀ w : IrrGL k, ∃ (h1 : IsSmooth (w.rep.comp (invTranspose w.1)))
+  have key : ∀ w : IrrGL (k := k), ∃ (h1 : IsSmooth (w.rep.comp (invTranspose w.1)))
       (h2 : Representation.IsIrreducible (w.rep.comp (invTranspose w.1))),
       D w = IrrGL.of (w.rep.comp (invTranspose w.1)) h1 h2 :=
     fun w => (GlobalTheory.DualClassTranspose.dualCl_iff k hA w (D w)).1 ((hD w _).2 rfl)
@@ -135,7 +179,7 @@ theorem isLSeg_dual (hA : GlobalTheory.Published.IrreducibleAdmissibleGL) (D : I
 end Seg
 
 theorem isL_dual_of_admissible : ∀ (k : Type) [Field k] [ValuativeRel k] [TopologicalSpace k]
-    [IsNonarchimedeanLocalField k], GlobalTheory.Published.IrreducibleAdmissibleGL → ∀ (l : List (Segment k)) (x y : IrrGL k),
+    [IsNonarchimedeanLocalField k], GlobalTheory.Published.IrreducibleAdmissibleGL → ∀ (l : List (Segment k)) (x y : IrrGL (k := k)),
     IsL (l : Multiset (Segment k)) x.rep → DualCl x y →
     ∃ l' : List (Segment k), List.Forall₂ SegDual l l' ∧ IsL (l' : Multiset (Segment k)) y.rep := by
   intro k _ _ _ _ hA l x y hL hxy
@@ -146,7 +190,7 @@ theorem isL_dual_of_admissible : ∀ (k : Type) [Field k] [ValuativeRel k] [Topo
     exact List.forall₂_same.2 fun Δ _ => hf Δ
   obtain ⟨h, z, hd, ⟨Δ, ⟨hΔ, hord⟩, hz⟩, hcos⟩ := hL
   obtain ⟨h1, h2, rfl⟩ := (GlobalTheory.DualClassTranspose.dualCl_iff k hA x y).1 hxy
-  have key : ∀ w : IrrGL k, ∃ (h1 : IsSmooth (w.rep.comp (invTranspose w.1)))
+  have key : ∀ w : IrrGL (k := k), ∃ (h1 : IsSmooth (w.rep.comp (invTranspose w.1)))
       (h2 : Representation.IsIrreducible (w.rep.comp (invTranspose w.1))),
       D w = IrrGL.of (w.rep.comp (invTranspose w.1)) h1 h2 :=
     fun w => (GlobalTheory.DualClassTranspose.dualCl_iff k hA w (D w)).1 ((hD w _).2 rfl)
@@ -174,7 +218,7 @@ theorem isL_dual_of_admissible : ∀ (k : Type) [Field k] [ValuativeRel k] [Topo
     exact this
 
 theorem langlandsDataDualGL_dual : ∀ (k : Type) [Field k] [ValuativeRel k] [TopologicalSpace k]
-    [IsNonarchimedeanLocalField k] [CharZero k], ∀ (l : List (Segment k)) (x y : IrrGL k),
+    [IsNonarchimedeanLocalField k] [CharZero k], ∀ (l : List (Segment k)) (x y : IrrGL (k := k)),
     IsL (l : Multiset (Segment k)) x.rep → DualCl x y →
     ∃ l' : List (Segment k), List.Forall₂ SegDual l l' ∧ IsL (l' : Multiset (Segment k)) y.rep :=
   fun k _ _ _ _ _ => isL_dual_of_admissible k PositivityTheory.Tls2.BZGL.irreducibleAdmissibleGL_top

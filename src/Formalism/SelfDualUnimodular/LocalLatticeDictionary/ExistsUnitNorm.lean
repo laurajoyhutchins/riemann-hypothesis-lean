@@ -1,5 +1,58 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RootLatticeThresholds.LatDictZAbs
+module
+
+public import Formalism.PeriodIntegrals.HermitianGenusExtension.SemilocalHermitianLattices.AlgebraMapNeZeroOfMemHcompl
+public import Formalism.PeriodIntegrals.HermitianGenusExtension.SemilocalHermitianLattices.ExistsIsomFrame
+import Formalism.HermitianLattices.HermitianLatticesProofs.LocDual
+public import Formalism.PeriodIntegrals.HermitianGenusExtension.SemilocalHermitianLattices.IsHermSemilocalLocRing
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -68,7 +121,7 @@ theorem InJ.add {p : Ideal (𝓞 K)} (hp : p.IsPrime) {a b : K} (ha : InJ p a) (
     (map_ne_zero_iff _ (FaithfulSMul.algebraMap_injective (𝓞 K) K)).2 (hnz s hs)
   have h2 : algebraMap (𝓞 K) K s' ≠ 0 :=
     (map_ne_zero_iff _ (FaithfulSMul.algebraMap_injective (𝓞 K) K)).2 (hnz s' hs')
-  rw [div_add_div _ _ h1 h2, map_add, map_mul, map_mul, map_mul]
+  rw [div_add_div _ _ h1 h2, map_add (f := _), map_mul, map_mul, map_mul]
   ring
 
 theorem InJ.mul {p : Ideal (𝓞 K)} (hp : p.IsPrime) {κ a : K} (hκ : κ ∈ locRing p) (ha : InJ p a) :
@@ -98,7 +151,7 @@ theorem InJ.one_add {p : Ideal (𝓞 K)} (hp : p.IsPrime) {a : K} (ha : InJ p a)
   have hs' := (mem_hcompl_iff hp s).1 hs
   have e : (1 : K) + algebraMap (𝓞 K) K r / algebraMap (𝓞 K) K s =
       algebraMap (𝓞 K) K (s + r) / algebraMap (𝓞 K) K s := by
-    rw [map_add]; field_simp
+    rw [map_add (f := _)]; field_simp
   rw [e, isUnitIn_div_iff hp _ hs, mem_hcompl_iff hp]
   exact ⟨fun h => hs'.1 (by simpa using p.sub_mem h h1),
     fun h => hs'.2 (by simpa using Ideal.sub_mem _ h h1')⟩
@@ -107,7 +160,7 @@ variable {V : Type} [AddCommGroup V] [Module K V]
 
 theorem norm_add_smul (h : V →ₗ⋆[K] V →ₗ[K] K) (x y : V) (κ : K) :
     h (x + κ • y) (x + κ • y) = h x x + κ * h x y + star κ * h y x + star κ * κ * h y y := by
-  simp only [map_add, LinearMap.add_apply, LinearMap.map_smulₛₗ₂, LinearMap.map_smul, smul_eq_mul,
+  simp only [map_add (f := _), LinearMap.add_apply, LinearMap.map_smulₛₗ₂, LinearMap.map_smul, smul_eq_mul,
     starRingEnd_apply]
   ring
 
@@ -115,7 +168,12 @@ theorem exists_unit_norm {p : Ideal (𝓞 K)} (hK : Formalism.HermitianLatticesT
     {h : V →ₗ⋆[K] V →ₗ[K] K} (hs : h.IsSymm) (hnd : ∀ x, (∀ y, h x y = 0) → x = 0)
     {M : AddSubgroup V} (hM : IsSelfDualMod (locRing p) h M) (x₀ : V) (hx₀ : x₀ ≠ 0) :
     ∃ e ∈ M, IsUnitIn (locRing p) (h e e) := by
-  have hS := isHermSemilocal_locRing hK hp
+  have hS : IsHermSemilocal (locRing p) :=
+    { star_mem := fun _ ha => star_mem_locRing hp.isPrime ha
+      frac := frac_locRing p
+      unram := unram_locRing hK hp
+      principal := principal_locRing hK hp
+      unit_or := unit_or_locRing hp.isPrime }
   set S := locRing p with hSdef
   have hsym : ∀ u v, star (h u v) = h v u := fun u v => hs.eq u v
   obtain ⟨m, htM, hm0⟩ : ∃ m ∈ M, m ≠ 0 := by
@@ -171,7 +229,12 @@ theorem exists_norm_eq {p : Ideal (𝓞 K)} (hK : Formalism.HermitianLatticesThe
     {M : AddSubgroup V} (hM : IsSelfDualMod (locRing p) h M) (e : V)
     (he : IsUnitIn (locRing p) (h e e)) :
     ∃ X ∈ M, h X X = h e e := by
-  have hS := isHermSemilocal_locRing hK hp
+  have hS : IsHermSemilocal (locRing p) :=
+    { star_mem := fun _ ha => star_mem_locRing hp.isPrime ha
+      frac := frac_locRing p
+      unram := unram_locRing hK hp
+      principal := principal_locRing hK hp
+      unit_or := unit_or_locRing hp.isPrime }
   set S := locRing p with hSdef
   have hsym : ∀ u v, star (h u v) = h v u := fun u v => hs.eq u v
   set a := h e e with ha

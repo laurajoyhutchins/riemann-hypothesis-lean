@@ -1,6 +1,48 @@
-import Mathlib
-import Formalism.SharpRestriction.GlobalSchurBounds.ThickPlacesCorollaryOfAnyTranslate
-import Development.AbelianVarietyTheory.BlockTheory.GlobalSignature.TrivialColumnStabiliser
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.GlobalSignature.TrivialColumnStabiliser
+public import Formalism.LogVandermondeBounds.LogVandermondeProofs.PrimePowerSubgroupTrivial
+public import Formalism.SharpRestriction.GlobalSchurBounds.ThickPlacesCorollaryOfAnyTranslate
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -21,6 +63,7 @@ theorem eq_one_of_red_eq_one {M : Matrix (Fin n) (Fin n) O}
   have h1 : (∑ i ∈ Finset.range m, M ^ i) * (M - 1) = 0 := by
     rw [geom_sum_mul, hpow, sub_self]
   have h2 : π.mapMatrix (∑ i ∈ Finset.range m, M ^ i) = (m : Matrix (Fin n) (Fin n) _) := by
+
     rw [map_sum]
     simp only [map_pow, hM', one_pow, Finset.sum_const, Finset.card_range, nsmul_eq_mul, mul_one]
   have h3 : IsUnit (π (∑ i ∈ Finset.range m, M ^ i).det) := by
@@ -176,7 +219,7 @@ theorem isOfFinOrder_of_mem (L : ColLevel R F E sp gp C A clsLat)
     (hγ1 : γ ∈ ratPts sp.cm.sig sp.gram0 (FiniteAdeleRing (𝓞 F) F))
     (hγ2 : y⁻¹ * γ * y ∈ L.U) : IsOfFinOrder γ := by
   obtain ⟨c, hc⟩ := L.y_bij.2 (Quotient.mk'' ⟨y, hy⟩)
-  obtain ⟨a, ha, b, hb, hab⟩ := (DoubleCoset.eq _ _ _ _).1 hc
+  obtain ⟨a, ha, b, hb, hab⟩ := (@DoubleCoset.eq _ _ _ _ _ _).1 hc
   have hab' : y = a.1 * (L.y c).1 * b.1 := congrArg Subtype.val hab
   have ha' : a.1 ∈ ratPts sp.cm.sig sp.gram0 (FiniteAdeleRing (𝓞 F) F) := ha
   have hb' : b.1 ∈ L.U := hb
@@ -238,7 +281,10 @@ theorem columnStabilisersTrivial : ColumnStabilisersTrivial := by
   intro D Lv u hbig hs y hy
   let _ := D.host.cmStar
   obtain ⟨i, hi⟩ := hbig
-  have hf : D.R.f ≠ 0 := by unfold Ranks.f Ranks.n; positivity
+  have hf : D.R.f ≠ 0 := by
+    unfold Ranks.f Ranks.n
+    have := D.R.ord_pos
+    omega
   obtain ⟨v, hv⟩ := (Nat.card_ne_zero.1 ((hs i).1.trans_ne hf)).1
   rw [eq_bot_iff]
   intro γ hγ

@@ -1,6 +1,46 @@
-import Formalism.SharpRestriction.LevelLetterCocycles.ArcLiftingSetup
-import Formalism.SharpRestriction.LevelLetterCocycles.RepresentationCongruences.RingDataOfCaseAOfP9
-import Formalism.SharpRestriction.LevelLetterCocycles.RepresentationCongruences.ImportsBis
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.ArcLiftingSetup
+public import Formalism.SharpRestriction.LevelLetterCocycles.RepresentationCongruences.RingDataOfCaseAOfP9
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Formalism.SharpRestriction.LevelLetterCocycles.RepresentationCongruences.GammaPi0EqPi0MulUnit
+
+@[expose] public section
 
 noncomputable section
 
@@ -40,15 +80,6 @@ theorem gamma_fraction_in_ideal (hcase : Formalism.MainNotions.LiftingTheory.Cas
       InFr W a (W.π₀ * ∏ s ∈ Finset.range e, ps W s ^ (α s).toNat)
         (∏ s ∈ Finset.range e, ps W s ^ (-(α s)).toNat) (W.γE W.gam f - f) :=
   GS.gam_frac_core (GS.ringData_of_caseA_of_p9 W hcase hP9) a e α f hf
-
-theorem saturation_fraction_module (hcase : Formalism.MainNotions.LiftingTheory.CaseA W) (hSat : SATcore W) (T : LocLat G Qp LL O) (hT : IsCrys PD T.ρ)
-    (f₁ f₂ f' : LetA O n) (h₁ : f₁ ∈ PiPs W) (h₂ : f₂ ∈ PiPs W) (h' : f' ∈ PiPs W) (x : W.DD T)
-    (hx : f' • x ∈ W.NΔ T) (hk : ∃ k : ℕ, InFN W T f₁ (lA W ^ k • (f₂ • x))) :
-    InFN W T f₁ (f₂ • x) := by
-  have hx' : f' • (f₂ • x) ∈ W.NΔ T := by
-    rw [smul_smul, mul_comm, ← smul_smul]
-    exact GS.smul_mem_NΔ W T (GS.piPs_mem W h₂) hx
-  exact hSat hcase T f₁ f' hT h₁ h' (f₂ • x) hx' hk
 
 theorem saturation_fraction_ring [IsDomain O] [IsDiscreteValuationRing O] (hcase : Formalism.MainNotions.LiftingTheory.CaseA W) (hP9 : Formalism.MainNotions.DeltaInvariantLattices.P9W W)
     (hinj : Function.Injective (algebraMap O LL)) (f₁ f₂ f' : LetA O n) (h₁ : f₁ ∈ PiPs W) (h₂ : f₂ ∈ PiPs W)

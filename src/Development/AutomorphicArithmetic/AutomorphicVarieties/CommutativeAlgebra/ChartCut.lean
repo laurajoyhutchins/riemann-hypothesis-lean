@@ -1,6 +1,59 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.Graded
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.OrbitVanishingLocal
-import Formalism.FormalGroupWitt.FormalGroupWittProofs.SolveV
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.OrbitVanishingLocal
+public import Formalism.FormalGroupWitt.FormalGroupWittProofs.SolveV
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.Matrix.Rank
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.AdicCompletion.Noetherian
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open IsLocalRing MvPowerSeries UpperTheory.V.Alg
 
@@ -15,7 +68,7 @@ private theorem cc_P_mem {w : σ → Y} {w' : τ → Y} {k : σ → MvPowerSerie
   induction e using Finsupp.induction with
   | zero => simpa [P_zero] using one_mem_wtPart E w'
   | single_add i n f _ hn ih =>
-    rw [P_add, P_single, map_add, Finsupp.weight_single]
+    rw [P_add, P_single, map_add (f := _), Finsupp.weight_single]
     refine mul_mem_wtPart E w' ?_ ih
     clear hn
     induction n with
@@ -86,6 +139,7 @@ private theorem cc_expand [Fintype σ] (g : MvPowerSeries σ E) :
     Low 2 (g - (constantCoeff g • 1 + ∑ s, coeff (Finsupp.single s 1) g • X s)) := by
   classical
   refine cc_low_two (by simp [map_sum]) fun i => ?_
+
   simp [map_sum, cc_coeff_X, coeff_one]
 
 private theorem coeff_low_degree_algHom_apply_eq [Fintype σ] (ψ : MvPowerSeries σ E →ₐ[E] MvPowerSeries τ E)
@@ -96,7 +150,8 @@ private theorem coeff_low_degree_algHom_apply_eq [Fintype σ] (ψ : MvPowerSerie
   have hr := h2 _ (cc_expand f) d hd
   simp only [map_sub, sub_eq_zero] at hr
   rw [hr]
-  simp only [map_add, map_sum, map_smul, map_one, coeff_smul, smul_eq_mul]
+
+  simp only [map_add (f := _), map_sum, map_smul, map_one, coeff_smul, smul_eq_mul]
 
 private theorem cc_fix [Fintype σ] {w : σ → Y} {w' : τ → Y} {G : σ → MvPowerSeries τ E}
     {g : σ → MvPowerSeries σ E} (hG : ∀ j, Low 1 (G j)) (hg : ∀ j, Low 2 (g j))
@@ -221,7 +276,8 @@ private theorem cc_ift {κ τ' : Type} [Fintype σ] [Fintype κ] [Fintype τ'] [
     have hzk : z k = h k + X (e (.inl k)) + ∑ i, b k i • X (e (.inr i)) := by
       rw [hh]
       abel
-    rw [hzk, map_add, map_add, map_sum]
+
+    rw [hzk, map_add (f := _), map_add (f := _), map_sum]
     simp only [map_smul, hψr, hψl]
     abel
   · intro f i
@@ -237,7 +293,7 @@ private theorem exists_columns_det_ne_zero_of_rows_linearIndependent {E τ κ : 
   classical
   have hspan : Submodule.span E (Set.range l.col) = ⊤ := by
     apply Submodule.eq_top_of_finrank_eq
-    rw [← Matrix.rank_eq_finrank_span_cols, Matrix.rank_eq_finrank_span_row, finrank_span_eq_card hl,
+    rw [Matrix.finrank_span_range_col, Matrix.rank_eq_finrank_span_row, finrank_span_eq_card hl,
       Module.finrank_fintype_fun_eq_card]
   obtain ⟨ι, a, ha, hsa, hli⟩ := exists_linearIndependent' E l.col
   haveI : Fintype ι := Fintype.ofInjective a ha
@@ -355,6 +411,7 @@ private theorem cc_series {E τ κ Y : Type} [Field E] [Fintype τ] [Fintype κ]
     intro k k'
     have h := congrFun (congrFun hN k) k'
     rw [Matrix.mul_apply, Matrix.one_apply] at h
+
     rw [he1, hz', map_sum]
     simp only [coeff_smul]
     exact h
@@ -373,6 +430,7 @@ private theorem cc_series {E τ κ Y : Type} [Field E] [Fintype τ] [Fintype κ]
       rw [Finset.sum_comm]
       simp only [← Finset.sum_smul, h, ite_smul, one_smul, zero_smul, Finset.sum_ite_eq,
         Finset.mem_univ, if_true]
+
     rw [hzz, map_sum]
     simp [map_smul, hψz]
   · intro f i hf i'
@@ -392,6 +450,7 @@ private theorem cc_series {E τ κ Y : Type} [Field E] [Fintype τ] [Fintype κ]
     have hzi : ∀ k, coeff (Finsupp.single i 1) (z' k) =
         ∑ k', N k k' * coeff (Finsupp.single i 1) (z k') := by
       intro k
+
       rw [hz', map_sum]
       simp only [coeff_smul]
     have step : coeff (Finsupp.single i 1) f =
@@ -446,14 +505,17 @@ theorem UpperTheory.V.Alg.chart_cut :
     choose a ha using fun k => hdint k (Finset.mem_univ k)
     have hmem : ∑ k, a k • g k ∈ satSq x := by
       apply hφ.inj
+
       · simp [map_sum, (hg _).2]
       · intro i
         have hi := congrFun hβ i
         simp only [Finset.sum_apply, Pi.smul_apply, smul_eq_mul, Pi.zero_apply] at hi
+
         rw [map_sum, map_sum]
         simp only [cc_smul, ha]
         simp only [Algebra.smul_def, mul_assoc, ← Finset.mul_sum, hi, mul_zero]
     have hq : (satSq x).mkQ (∑ k, a k • g k) = 0 := (Submodule.Quotient.mk_eq_zero _).mpr hmem
+
     rw [map_sum] at hq
     simp only [map_smul] at hq
     have h0 := Fintype.linearIndependent_iff.mp hli a hq
@@ -513,8 +575,10 @@ theorem UpperTheory.V.Alg.chart_cut :
     choose a ha using fun k => hdint k (Finset.mem_univ k)
     have hF : d • f - ∑ k, a k • g k ∈ satSq x := by
       apply hφ.inj
+
       · simp [map_sum, (hg _).2, hxf]
       · intro i
+
         rw [map_sub, map_sub, map_sum, map_sum, cc_smul, hβ i, Finset.mul_sum, sub_eq_zero]
         refine Finset.sum_congr rfl fun k _ => ?_
         rw [cc_smul, ha, Algebra.smul_def, mul_assoc]
@@ -537,5 +601,6 @@ theorem UpperTheory.V.Alg.chart_cut :
       rw [← Ideal.map_pow]
       exact Ideal.mem_map_of_mem p heF
     have h2 : p (e • (d • f - ∑ k, a k • g k)) = (e * d) • p f := by
+
       simp [map_sub, map_sum, map_smul, hpg, mul_smul]
     rwa [h2] at h1

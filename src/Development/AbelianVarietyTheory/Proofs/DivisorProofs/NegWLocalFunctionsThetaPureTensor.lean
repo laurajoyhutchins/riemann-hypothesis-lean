@@ -1,12 +1,72 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsMixModelB
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsAwayUnitOfPowEqOne
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsGaussianDatumFlippedFiniteTensorBigRoute
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.SchrodingerThetaDatumHeisenbergOriented
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.OrthogonalSumSelfDualExists
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.SplitIdempotentBaseFunctionIdentity
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsAddEquivSymplecticCoordsOrientedModel
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.LocPAAAndPrimesNe
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsMixModelB
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsAddEquivSymplecticCoordsOrientedModel
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AtWAtPlSelf
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LatAtVAtStable
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SquareStanding
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ThetaEqB
+import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.MemRangeOfOneTmulMem
+import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.SelfDualLatticePairingDual
+import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.SmulMemLatO
+import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ThetaAtEqSumHeisOfFourierSum
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BoxGraphGraphHeis
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsGaussianDatumFlippedFiniteTensorBigRoute
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsNatMulIntegralOfIsCompact
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GridLocalTensorPlacesSplitIdempotentSum
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HeisenbergStableRelationOfVacua
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.InfPartAlgebraMapLiftV
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SmulMemScLatOfMem
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ValuationLeOneOfMem
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.WeilRepresentationPreservesSchwartz
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsNsmulIntMemLatO
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.OrthogonalSumSelfDualExists
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.SchrodingerThetaDatumHeisenbergOriented
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.SplitIdempotentBaseFunctionIdentity
+import Formalism.LocalToGlobal.ProjectiveLattices.HostRank
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Definitions.Divisors.FinitePrimesUnder
+import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.ExistsMatchOver
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.NegIdxOfIsStd
+import Development.AbelianVarietyTheory.Statements.PlaceShiftStatements.NormSmall
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.IndefR Formalism.IndefR.Datum Formalism.IndefR.Links Formalism.L2.Theta Formalism.L2.DIV IsDedekindDomain NumberField MeasureTheory Matrix
 open GlobalTheory.ChiGrid GlobalTheory.FunObj GlobalTheory.FunObj.SqNum GlobalTheory.RowTest GlobalTheory.SqTop GlobalTheory.SqTower GlobalTheory.SplitFlip GlobalTheory.SplitWeil GlobalTheory.StdFrames GlobalTheory.ChainFr GlobalTheory.SquareDict GlobalTheory.SquareComm GlobalTheory.BigNZ GlobalTheory.FlipMatch GlobalTheory.AdelicU
 open GlobalTheory.IndefiniteRowSideFullHecke.UnitCharTriangle (Tri)
@@ -67,9 +127,8 @@ theorem smul_add_smul (v : Pl D.host.F) {a : AE D}
   rw [sub_smul, one_smul, sub_eq_zero] at h1
   rw [← add_smul, hsum, algebraMap_smul, ← h1]
 
-set_option maxHeartbeats 1600000 in
-open Classical in
 
+open Classical in
 theorem datum_of_placeModel (M : Model D.sp.cm.sig Y Z) {ψ : AddChar (AF D.host.F) ℂ} (hψ : IsStdChar D ψ (-1))
     (hstd : GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.IsStd ψ) (hG : M.IsGood ψ)
     (hs : ∀ u w, symp (R := AF D.host.F) (GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.cA D.sp.cm.sig) (-1) (GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.incM D.host.F Y.J)
@@ -134,7 +193,7 @@ theorem datum_of_placeModel (M : Model D.sp.cm.sig Y Z) {ψ : AddChar (AF D.host
     ⟨GlobalTheory.HeisSchA.rho_mem_schA M ψ hstd x Φ hD.1, fun u => by
       rw [rho_rho M.co ψ u x Φ, thetaSum_smul, hD.2 (u + x)]
       unfold heisO symplOH
-      rw [hs, map_add, invOf_two]⟩
+      rw [hs, map_add (f := _), invOf_two]⟩
   have hsmul : ∀ (b : ℂ) {Φ g}, GlobalTheory.SquareAgree.IsDatum M ψ p Φ g → GlobalTheory.SquareAgree.IsDatum M ψ p (b • Φ) (b • g) :=
     fun b {Φ g} hD => ⟨Submodule.smul_mem _ b hD.1, fun u => ((congrArg (thetaSum D.host.F) (show M.co.rho ψ u (b • Φ) = b • M.co.rho ψ u Φ from
       funext fun _ => mul_left_comm _ _ _)).trans (thetaSum_smul _ _ _)).trans
@@ -150,7 +209,7 @@ theorem datum_of_placeModel (M : Model D.sp.cm.sig Y Z) {ψ : AddChar (AF D.host
         refine ((congrArg (thetaSum D.host.F) (show M.co.rho ψ u (q.2 + q'.2) = M.co.rho ψ u q.2 + M.co.rho ψ u q'.2 from
             funext fun _ => mul_add _ _ _)).trans
           (thetaSum_add _ (GlobalTheory.HeisSchA.rho_mem_schA M ψ hstd u _ h3.1) (GlobalTheory.HeisSchA.rho_mem_schA M ψ hstd u _ h3'.1))).trans ?_
-        rw [h3.2, h3'.2, map_add]
+        rw [h3.2, h3'.2, map_add (f := _)]
         rfl
       smul_mem' := by
         rintro b q ⟨g, h1, h2, h3⟩
@@ -187,13 +246,14 @@ theorem datum_of_placeModel (M : Model D.sp.cm.sig Y Z) {ψ : AddChar (AF D.host
     (fun w hw u hu => ⟨a w • u, hsm w hw u, cA D (a w) • u, by
       show IsHalf _ (p _)
       rw [map_smul]; exact isHalf_smul_self (hcc w hw) _, smul_add_smul _ (ha w hw).2 hu⟩)
-    (fun w _ x _ u => by rw [map_add, ladd])
-    (fun w hw w' hw' hne x hx u => by rw [map_add, ladd, lne w hw w' hw' hne _ hx, add_zero])
+    (fun w _ x _ u => by rw [map_add (f := _), ladd])
+    (fun w hw w' hw' hne x hx u => by rw [map_add (f := _), ladd, lne w hw w' hw' hne _ hx, add_zero])
     (fun w hw u => ⟨a w • u, hsm w hw u, by rw [map_smul, lsm w hw], fun y hy => by
       rw [hs, hs, map_smul, ← symplO_cA_smul, smul_of_isHalf hy]⟩)
     (by
       rintro w hw x hx q ⟨g, h1, h2, h3⟩
-      refine ⟨fun t => g (t + p x), sb_trans_latO hS.1 hX.1 hinf h1 (hA w hw _ hx), funext fun u => ?_, ?_⟩
+      refine ⟨fun t => g (t + p x), sb_trans_latO (GlobalTheory.PlaceVec.selfDual_isFullLattice S LS hS)
+        (GlobalTheory.PlaceVec.selfDual_isFullLattice X LX hX) hinf h1 (hA w hw _ hx), funext fun u => ?_, ?_⟩
       · rw [h2]; exact congrArg g (map_add p u x)
       · rw [hT.trans g h1 _ (hA w hw _ hx)]; exact hrho h3 x)
     (by
@@ -369,7 +429,7 @@ theorem mem_latAtV {t : T} {i j : ℕ} {e : Num G i j} {Bs : Base D.host.F D.hos
     rw [sub_smul, one_smul, sub_eq_zero] at this
     exact this.symm
   rw [← e1, ← (ptEquiv e).symm_apply_apply u]
-  refine map_mem_of_closure ((DistribMulAction.toAddMonoidHom (Pt G i j) (GlobalTheory.LatVac.liftV (w.under (𝓞 D.host.F)) 1)).comp
+  refine map_mem_of_closure ((DistribSMul.toAddMonoidHom (Pt G i j) (GlobalTheory.LatVac.liftV (w.under (𝓞 D.host.F)) 1)).comp
     (ptEquiv e).symm.toLinearMap.toAddMonoidHom) ?_ hu
   rintro _ ⟨α, hα, -, a, ha, s, hs, y, hy, rfl⟩
   refine (congrArg (fun z => GlobalTheory.LatVac.liftV (w.under (𝓞 D.host.F)) 1 • z ∈ GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.latAtV Γ.V Γ.W _)
@@ -384,11 +444,11 @@ theorem mem_latAtV {t : T} {i j : ℕ} {e : Num G i j} {Bs : Base D.host.F D.hos
 
 end Grid
 
-set_option maxHeartbeats 1600000 in
+
 
 theorem isDatum_linA : ∀ {D : D7} {T : Type} {L : LevCh D T} {sc : GlobalTheory.ChiGrid.Consts} {G : GridData L sc} {μ₀ : T}, L.Is μ₀ → ∀ (W : G.Weil) (B : Frames G) (t : T) (i j : Fin D.R.m) (M : Vol G), SquareStanding G t →
     ∀ (e : Num G i j) (Bs : Base D.host.F D.host.E) (Γ : GlobalTheory.IndefiniteRowSideFullHecke.UnitaryConjugation.Geo G i j) (X : Chars D.host.F D.host.E)
-      (om : Rep D.sp.cm.sig Γ.V Γ.W) (om' : Rep D.sp.cm.sig Γ.V' Γ.W), IsTripleOf W M t i j e Bs Γ X →
+      (om : _root_.GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.Rep D.sp.cm.sig Γ.V Γ.W) (om' : _root_.GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.Rep D.sp.cm.sig Γ.V' Γ.W), IsTripleOf W M t i j e Bs Γ X →
       GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.IsTriple Bs Γ X om om' → IsTied t i j e Bs Γ X → ∀ (ρ : RealMatch W) f₀,
       GlobalTheory.SquareAgree.IsDatum Γ.M W.ψ (ptA e) (GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.pure f₀ Γ.M.vac) (vacA ρ i j) →
       ∀ ι : ∀ w, ToA G t i j w, (∀ w ∈ locPl G t, IsLinModelA W B t e Γ w (ι w)) →

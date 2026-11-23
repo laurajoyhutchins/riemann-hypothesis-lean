@@ -1,11 +1,63 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisCochains.GLinkQuot
-import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisCochains.IsClosedOfClosedFiniteIndex
-import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisCochains.DecZhat
-import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisCochains.LocEuler
-import Development.AutomorphicArithmetic.AutomorphicVarieties.LevelCohomology.HcUrIndex
-import Development.AutomorphicArithmetic.AutomorphicVarieties.LevelCohomology.HcUrAbs
-import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.SelmerTransport.Places
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisCochains.GLinkQuot
+public import Mathlib.RingTheory.AdicCompletion.Noetherian
+public import Mathlib.RingTheory.Coalgebra.IsFrobenius
+public import Mathlib.RingTheory.HopfAlgebra.Basic
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisCochains.DecZhat
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisCochains.IsClosedOfClosedFiniteIndex
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisCochains.LocEuler
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.LevelCohomology.HcUrAbs
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.LevelCohomology.HcUrIndex
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.FieldTheory.Galois.Profinite
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
 import Mathlib.Topology.Algebra.ClopenNhdofOne
+import Mathlib.Topology.Compactness.Paracompact
+import Mathlib.Topology.Connected.Separation
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Formalism.ConjugateSelfDual ReciprocityTheory.Gal Module UpperTheory.V UpperTheory.V.Fr UpperTheory.V.GC
 
@@ -77,7 +129,7 @@ private theorem tameEq_cochain {k Γ M : Type} [CommRing k] [Group Γ] [Topologi
       have h3 : j.1⁻¹ * (i.1⁻¹ * ((r g)⁻¹ * g)) * j.1⁻¹⁻¹ ∈ U := hUn.conj_mem _ hi j.1⁻¹
       simpa [mul_assoc] using h3
     show ρ (r (g * j)) (f' ((r (g * j))⁻¹ * (g * j))) = ρ (r g) (f' ((r g)⁻¹ * g)) + _
-    rw [hrN g j (Subgroup.mem_sup_left j.2), hf' _ _ h2, hf' _ _ hi, hadd, map_add, e]
+    rw [hrN g j (Subgroup.mem_sup_left j.2), hf' _ _ h2, hf' _ _ hi, hadd, map_add (f := _), e]
 
 private theorem tameEq_ext {k Γ M : Type} [CommRing k] [Group Γ] [TopologicalSpace Γ] [IsTopologicalGroup Γ]
     [CompactSpace Γ] [TotallyDisconnectedSpace Γ] [AddCommGroup M] [Module k M] [Finite M] [TopologicalSpace M]
@@ -96,7 +148,7 @@ private theorem tameEq_ext {k Γ M : Type} [CommRing k] [Group Γ] [TopologicalS
       simp [mul_assoc]
     have e2 := heq t ⟨t⁻¹ * j * t, hm⟩ ⟨j, hj⟩ (by simp [mul_assoc])
     rw [e, hcj, hcj s ⟨j, hj⟩, hcj t ⟨j', hj'⟩, hadd, e2]
-    simp only [map_mul, map_add, hJ j hj, mul_one, Module.End.mul_apply]
+    simp only [map_mul, map_add (f := _), hJ j hj, mul_one, Module.End.mul_apply]
     abel)
   have hz : c - b ∈ Z1 ρ := ⟨hc.continuous.sub hb.continuous, fun s t => by
     have e : ρ s (c t) - c (s * t) + c s = _ := hbz s t

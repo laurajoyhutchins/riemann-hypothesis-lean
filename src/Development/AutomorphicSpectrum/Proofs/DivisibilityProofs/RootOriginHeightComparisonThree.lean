@@ -1,19 +1,73 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.TowerOrigin
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsLatFlagPair
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IntegralClosureHeightEqOneOfLiesOver
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.SplitComps
-import Development.AutomorphicSpectrum.Definitions.DivisibilityTowers.LocalAtPlaces
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterSt
-import Development.AutomorphicSpectrum.Proofs.DivisibilityProofs.ArMonoReline
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.RootOriginCompareSecondStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.RootOriginCompareFirstStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.RootOriginPointCompareStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.RootModelFlagCompareStatement
+module
+
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.TowerOrigin
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.ArchBetween
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.ExistsPowSubMemSpanOfIsUnitModOfIsAlgClosed
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.Objects
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.BadExists
+public import Development.AutomorphicSpectrum.Definitions.MetricPeriods.HasMultiplierLine
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ComplexPointsDenseNonvanishingStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.JoinCoordsUnitValues
 import Development.AutomorphicSpectrum.Proofs.GeometryProofs.JoinModelPointsProjectStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ComplexPointsDenseNonvanishingStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.JoinCoordsUnitValues
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.BadExists
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.RootModelFlagCompareStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.RootOriginCompareFirstStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.RootOriginCompareSecondStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.RootOriginPointCompareStatement
+import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.ArithModel
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Algebra.MvPolynomial
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.OneArc
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AutomorphicSpectrum.Definitions.DivisibilityTowers.BundleChernComparison
+import GroundTheory.HeightsAndTheta.Heights.Intersections.IsSmoothHermFubiniStudyO1
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.ProjLineRankTwoPushforwardHypotheses
+
+@[expose] public section
+
+attribute [local simp] MvPolynomial.bind₁
+
 open AlgebraicGeometry CategoryTheory NumberField ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Geo ReciprocityTheory.ChartRestriction.G.Geo.Tor GlobalTheory.CompanionTheory.Ar GlobalTheory.CompanionTheory.Ar.Top
 open MvPolynomial Filter Topology
 open ReciprocityTheory.ChartRestriction.G.AI.I1 (IsBlockMap pullDeg)
@@ -84,8 +138,9 @@ theorem isMultiHomog_rename [DecidableEq K] {κ : K' → K} {u : (Σ k, ι k) �
     IsMultiHomog (rename u G : MRing J) (pushDeg κ d) := by
   classical
   intro m hm k
-  have e : (rename u G : MRing J) = ∑ m' ∈ G.support, monomial (m'.mapDomain u) (coeff m' G) := by
+  have e : (rename u G : MRing J) = ∑ m' ∈ G.support, monomial (m'.mapDomain u) (AddMonoidAlgebra.coeff G m') := by
     conv_lhs => rw [G.as_sum]
+
     rw [map_sum]
     simp only [rename_monomial]
   have hm' : m ∈ (rename u G : MRing J).support := hm
@@ -257,9 +312,9 @@ theorem val_rel {Ω₀ Ω₁ Ω : Type} [Field Ω₀] [Field Ω₁] [Field Ω] {
       (GroundTheory.Heights₂.Heights.HilbertSamuel.ProjLine.mhNeg (hdeg ▸ GroundTheory.Heights₂.Heights.HilbertSamuel.ProjLine.mhMul (GroundTheory.Heights₂.Heights.HilbertSamuel.ProjLine.mhMul hg (isMultiHomog_rename hu₀ hG₀))
         (isMultiHomog_rename hu₁ hH₁)))
   have hmem := hz _ (Small.LineModel.mem_of_aeval y hA (by
-    simp only [map_add, map_neg, map_mul, rn₀, rn₁, e₀, e₁]
+    simp only [map_add (f := _), map_neg, map_mul, rn₀, rn₁, e₀, e₁]
     linear_combination (i₀ (aeval y₀ H₀) * i₁ (aeval y₁ H₁)) * hval))
-  simp only [map_add, map_neg, map_mul, aeval_rename] at hmem
+  simp only [map_add (f := _), map_neg, map_mul, aeval_rename] at hmem
   have c₀ : z ∘ u₀ = fun p => z (u₀ p) := rfl
   have c₁ : z ∘ u₁ = fun p => z (u₁ p) := rfl
   rw [c₀, c₁, v₀, v₁] at hmem

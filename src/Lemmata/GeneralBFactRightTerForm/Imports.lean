@@ -1,234 +1,58 @@
-import Mathlib
+module
+
+public import Mathlib.NumberTheory.NumberField.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace Bl.general_b_fact_right_ter_form
 
-theorem goal1 :
-  ∀ {L : Type} [inst : Field.{0} L] [inst_1 : @NumberField.{0} L inst] (x : L) (c : Int),
-  @Eq.{1} L
-      (@HPow.hPow.{0, 0, 0} L Nat L
-        (@instHPow.{0, 0} L Nat
-          (@NPow.toPow.{0} L
-            (@Monoid.toNPow.{0} L
-              (@Semiring.toMonoid.{0} L
-                (@DivisionSemiring.toSemiring.{0} L
-                  (@Semifield.toDivisionSemiring.{0} L (@Field.toSemifield.{0} L inst)))))))
-        x (@OfNat.ofNat.{0} Nat (nat_lit 2) (instOfNatNat (nat_lit 2))))
-      (@Int.cast.{0} L
-        (@AddGroupWithOne.toIntCast.{0} L
-          (@Ring.toAddGroupWithOne.{0} L (@DivisionRing.toRing.{0} L (@Field.toDivisionRing.{0} L inst))))
-        (@HAdd.hAdd.{0, 0, 0} Int Int Int (@instHAdd.{0} Int Int.instAdd)
-          (@HMul.hMul.{0, 0, 0} Int Int Int (@instHMul.{0} Int Int.instMul)
-            (@OfNat.ofNat.{0} Int (nat_lit 4) (@instOfNat (nat_lit 4)))
-            (@HMul.hMul.{0, 0, 0} Int Int Int (@instHMul.{0} Int Int.instMul)
-              (@OfNat.ofNat.{0} Int (nat_lit 2) (@instOfNat (nat_lit 2))) c))
-          (@OfNat.ofNat.{0} Int (nat_lit 1) (@instOfNat (nat_lit 1))))) →
-    ∀
-      (P :
-        @Ideal.{0} (@NumberField.RingOfIntegers.{0} L inst)
-          (@CommSemiring.toSemiring.{0} (@NumberField.RingOfIntegers.{0} L inst)
-            (@CommRing.toCommSemiring.{0} (@NumberField.RingOfIntegers.{0} L inst)
-              (@NumberField.instCommRingRingOfIntegers.{0} L inst))))
-      [hP :
-        @Ideal.IsPrime.{0} (@NumberField.RingOfIntegers.{0} L inst)
-          (@CommSemiring.toSemiring.{0} (@NumberField.RingOfIntegers.{0} L inst)
-            (@CommRing.toCommSemiring.{0} (@NumberField.RingOfIntegers.{0} L inst)
-              (@NumberField.instCommRingRingOfIntegers.{0} L inst)))
-          P]
-      [@Ideal.LiesOver.{0, 0} Int Int.instCommSemiring (@NumberField.RingOfIntegers.{0} L inst)
-          (@CommSemiring.toSemiring.{0} (@NumberField.RingOfIntegers.{0} L inst)
-            (@CommRing.toCommSemiring.{0} (@NumberField.RingOfIntegers.{0} L inst)
-              (@NumberField.instCommRingRingOfIntegers.{0} L inst)))
-          (@Ring.toIntAlgebra.{0} (@NumberField.RingOfIntegers.{0} L inst)
-            (@CommRing.toRing.{0} (@NumberField.RingOfIntegers.{0} L inst)
-              (@NumberField.instCommRingRingOfIntegers.{0} L inst)))
-          P
-          (@Ideal.span.{0} Int (@CommSemiring.toSemiring.{0} Int Int.instCommSemiring)
-            (@Singleton.singleton.{0, 0} Int (Set.{0} Int) (@Set.instSingletonSet.{0} Int)
-              (@OfNat.ofNat.{0} Int (nat_lit 2) (@instOfNat (nat_lit 2)))))]
-      (σ :
-        @AlgEquiv.{0, 0, 0} Rat L L Rat.commSemiring
-          (@DivisionSemiring.toSemiring.{0} L (@Semifield.toDivisionSemiring.{0} L (@Field.toSemifield.{0} L inst)))
-          (@DivisionSemiring.toSemiring.{0} L (@Semifield.toDivisionSemiring.{0} L (@Field.toSemifield.{0} L inst)))
-          (@DivisionRing.toRatAlgebra.{0} L (@Field.toDivisionRing.{0} L inst) _)
-          (@DivisionRing.toRatAlgebra.{0} L (@Field.toDivisionRing.{0} L inst) _)),
-      @Membership.mem.{0, 0}
-          (@AlgEquiv.{0, 0, 0} Rat L L Rat.commSemiring
-            (@DivisionSemiring.toSemiring.{0} L (@Semifield.toDivisionSemiring.{0} L (@Field.toSemifield.{0} L inst)))
-            (@DivisionSemiring.toSemiring.{0} L (@Semifield.toDivisionSemiring.{0} L (@Field.toSemifield.{0} L inst)))
-            (@DivisionRing.toRatAlgebra.{0} L (@Field.toDivisionRing.{0} L inst) _)
-            (@DivisionRing.toRatAlgebra.{0} L (@Field.toDivisionRing.{0} L inst) _))
-          (@Subgroup.{0}
-            (@AlgEquiv.{0, 0, 0} Rat L L Rat.commSemiring
-              (@DivisionSemiring.toSemiring.{0} L (@Semifield.toDivisionSemiring.{0} L (@Field.toSemifield.{0} L inst)))
-              (@DivisionSemiring.toSemiring.{0} L (@Semifield.toDivisionSemiring.{0} L (@Field.toSemifield.{0} L inst)))
-              (@DivisionRing.toRatAlgebra.{0} L (@Field.toDivisionRing.{0} L inst) _)
-              (@DivisionRing.toRatAlgebra.{0} L (@Field.toDivisionRing.{0} L inst) _))
-            (@AlgEquiv.aut.{0, 0} Rat L Rat.commSemiring
-              (@DivisionSemiring.toSemiring.{0} L (@Semifield.toDivisionSemiring.{0} L (@Field.toSemifield.{0} L inst)))
-              (@DivisionRing.toRatAlgebra.{0} L (@Field.toDivisionRing.{0} L inst) _)))
-          (@SetLike.instMembership.{0, 0}
-            (@Subgroup.{0}
-              (@AlgEquiv.{0, 0, 0} Rat L L Rat.commSemiring
-                (@DivisionSemiring.toSemiring.{0} L
-                  (@Semifield.toDivisionSemiring.{0} L (@Field.toSemifield.{0} L inst)))
-                (@DivisionSemiring.toSemiring.{0} L
-                  (@Semifield.toDivisionSemiring.{0} L (@Field.toSemifield.{0} L inst)))
-                (@DivisionRing.toRatAlgebra.{0} L (@Field.toDivisionRing.{0} L inst) _)
-                (@DivisionRing.toRatAlgebra.{0} L (@Field.toDivisionRing.{0} L inst) _))
-              (@AlgEquiv.aut.{0, 0} Rat L Rat.commSemiring
-                (@DivisionSemiring.toSemiring.{0} L
-                  (@Semifield.toDivisionSemiring.{0} L (@Field.toSemifield.{0} L inst)))
-                (@DivisionRing.toRatAlgebra.{0} L (@Field.toDivisionRing.{0} L inst) _)))
-            (@AlgEquiv.{0, 0, 0} Rat L L Rat.commSemiring
-              (@DivisionSemiring.toSemiring.{0} L (@Semifield.toDivisionSemiring.{0} L (@Field.toSemifield.{0} L inst)))
-              (@DivisionSemiring.toSemiring.{0} L (@Semifield.toDivisionSemiring.{0} L (@Field.toSemifield.{0} L inst)))
-              (@DivisionRing.toRatAlgebra.{0} L (@Field.toDivisionRing.{0} L inst) _)
-              (@DivisionRing.toRatAlgebra.{0} L (@Field.toDivisionRing.{0} L inst) _))
-            (@Subgroup.instSetLike.{0}
-              (@AlgEquiv.{0, 0, 0} Rat L L Rat.commSemiring
-                (@DivisionSemiring.toSemiring.{0} L
-                  (@Semifield.toDivisionSemiring.{0} L (@Field.toSemifield.{0} L inst)))
-                (@DivisionSemiring.toSemiring.{0} L
-                  (@Semifield.toDivisionSemiring.{0} L (@Field.toSemifield.{0} L inst)))
-                (@DivisionRing.toRatAlgebra.{0} L (@Field.toDivisionRing.{0} L inst) _)
-                (@DivisionRing.toRatAlgebra.{0} L (@Field.toDivisionRing.{0} L inst) _))
-              (@AlgEquiv.aut.{0, 0} Rat L Rat.commSemiring
-                (@DivisionSemiring.toSemiring.{0} L
-                  (@Semifield.toDivisionSemiring.{0} L (@Field.toSemifield.{0} L inst)))
-                (@DivisionRing.toRatAlgebra.{0} L (@Field.toDivisionRing.{0} L inst) _))))
-          (@MulAction.stabilizer.{0, 0}
-            (@AlgEquiv.{0, 0, 0} Rat L L Rat.commSemiring
-              (@DivisionSemiring.toSemiring.{0} L (@Semifield.toDivisionSemiring.{0} L (@Field.toSemifield.{0} L inst)))
-              (@DivisionSemiring.toSemiring.{0} L (@Semifield.toDivisionSemiring.{0} L (@Field.toSemifield.{0} L inst)))
-              (@DivisionRing.toRatAlgebra.{0} L (@Field.toDivisionRing.{0} L inst) _)
-              (@DivisionRing.toRatAlgebra.{0} L (@Field.toDivisionRing.{0} L inst) _))
-            (@Ideal.{0} (@NumberField.RingOfIntegers.{0} L inst)
-              (@CommSemiring.toSemiring.{0} (@NumberField.RingOfIntegers.{0} L inst)
-                (@CommRing.toCommSemiring.{0} (@NumberField.RingOfIntegers.{0} L inst)
-                  (@NumberField.instCommRingRingOfIntegers.{0} L inst))))
-            (@AlgEquiv.aut.{0, 0} Rat L Rat.commSemiring
-              (@DivisionSemiring.toSemiring.{0} L (@Semifield.toDivisionSemiring.{0} L (@Field.toSemifield.{0} L inst)))
-              (@DivisionRing.toRatAlgebra.{0} L (@Field.toDivisionRing.{0} L inst) _))
-            (@DistribMulAction.toMulAction.{0, 0}
-              (@AlgEquiv.{0, 0, 0} Rat L L Rat.commSemiring
-                (@DivisionSemiring.toSemiring.{0} L
-                  (@Semifield.toDivisionSemiring.{0} L (@Field.toSemifield.{0} L inst)))
-                (@DivisionSemiring.toSemiring.{0} L
-                  (@Semifield.toDivisionSemiring.{0} L (@Field.toSemifield.{0} L inst)))
-                (@DivisionRing.toRatAlgebra.{0} L (@Field.toDivisionRing.{0} L inst) _)
-                (@DivisionRing.toRatAlgebra.{0} L (@Field.toDivisionRing.{0} L inst) _))
-              (@Ideal.{0} (@NumberField.RingOfIntegers.{0} L inst)
-                (@CommSemiring.toSemiring.{0} (@NumberField.RingOfIntegers.{0} L inst)
-                  (@CommRing.toCommSemiring.{0} (@NumberField.RingOfIntegers.{0} L inst)
-                    (@NumberField.instCommRingRingOfIntegers.{0} L inst))))
-              (@DivInvMonoid.toMonoid.{0}
-                (@AlgEquiv.{0, 0, 0} Rat L L Rat.commSemiring
-                  (@DivisionSemiring.toSemiring.{0} L
-                    (@Semifield.toDivisionSemiring.{0} L (@Field.toSemifield.{0} L inst)))
-                  (@DivisionSemiring.toSemiring.{0} L
-                    (@Semifield.toDivisionSemiring.{0} L (@Field.toSemifield.{0} L inst)))
-                  (@DivisionRing.toRatAlgebra.{0} L (@Field.toDivisionRing.{0} L inst) _)
-                  (@DivisionRing.toRatAlgebra.{0} L (@Field.toDivisionRing.{0} L inst) _))
-                (@Group.toDivInvMonoid.{0}
-                  (@AlgEquiv.{0, 0, 0} Rat L L Rat.commSemiring
-                    (@DivisionSemiring.toSemiring.{0} L
-                      (@Semifield.toDivisionSemiring.{0} L (@Field.toSemifield.{0} L inst)))
-                    (@DivisionSemiring.toSemiring.{0} L
-                      (@Semifield.toDivisionSemiring.{0} L (@Field.toSemifield.{0} L inst)))
-                    (@DivisionRing.toRatAlgebra.{0} L (@Field.toDivisionRing.{0} L inst) _)
-                    (@DivisionRing.toRatAlgebra.{0} L (@Field.toDivisionRing.{0} L inst) _))
-                  (@AlgEquiv.aut.{0, 0} Rat L Rat.commSemiring
-                    (@DivisionSemiring.toSemiring.{0} L
-                      (@Semifield.toDivisionSemiring.{0} L (@Field.toSemifield.{0} L inst)))
-                    (@DivisionRing.toRatAlgebra.{0} L (@Field.toDivisionRing.{0} L inst) _))))
-              (@AddMonoidWithOne.toAddMonoid.{0}
-                (@Ideal.{0} (@NumberField.RingOfIntegers.{0} L inst)
-                  (@CommSemiring.toSemiring.{0} (@NumberField.RingOfIntegers.{0} L inst)
-                    (@CommRing.toCommSemiring.{0} (@NumberField.RingOfIntegers.{0} L inst)
-                      (@NumberField.instCommRingRingOfIntegers.{0} L inst))))
-                (@AddCommMonoidWithOne.toAddMonoidWithOne.{0}
-                  (@Ideal.{0} (@NumberField.RingOfIntegers.{0} L inst)
-                    (@CommSemiring.toSemiring.{0} (@NumberField.RingOfIntegers.{0} L inst)
-                      (@CommRing.toCommSemiring.{0} (@NumberField.RingOfIntegers.{0} L inst)
-                        (@NumberField.instCommRingRingOfIntegers.{0} L inst))))
-                  (@Submodule.instAddCommMonoidWithOne.{0, 0} (@NumberField.RingOfIntegers.{0} L inst)
-                    (@CommSemiring.toSemiring.{0} (@NumberField.RingOfIntegers.{0} L inst)
-                      (@CommRing.toCommSemiring.{0} (@NumberField.RingOfIntegers.{0} L inst)
-                        (@NumberField.instCommRingRingOfIntegers.{0} L inst)))
-                    (@NumberField.RingOfIntegers.{0} L inst)
-                    (@CommSemiring.toSemiring.{0} (@NumberField.RingOfIntegers.{0} L inst)
-                      (@CommRing.toCommSemiring.{0} (@NumberField.RingOfIntegers.{0} L inst)
-                        (@NumberField.instCommRingRingOfIntegers.{0} L inst)))
-                    (@Semiring.toModule.{0} (@NumberField.RingOfIntegers.{0} L inst)
-                      (@CommSemiring.toSemiring.{0} (@NumberField.RingOfIntegers.{0} L inst)
-                        (@CommRing.toCommSemiring.{0} (@NumberField.RingOfIntegers.{0} L inst)
-                          (@NumberField.instCommRingRingOfIntegers.{0} L inst)))))))
-              (@Ideal.pointwiseDistribMulAction.{0, 0}
-                (@AlgEquiv.{0, 0, 0} Rat L L Rat.commSemiring
-                  (@DivisionSemiring.toSemiring.{0} L
-                    (@Semifield.toDivisionSemiring.{0} L (@Field.toSemifield.{0} L inst)))
-                  (@DivisionSemiring.toSemiring.{0} L
-                    (@Semifield.toDivisionSemiring.{0} L (@Field.toSemifield.{0} L inst)))
-                  (@DivisionRing.toRatAlgebra.{0} L (@Field.toDivisionRing.{0} L inst) _)
-                  (@DivisionRing.toRatAlgebra.{0} L (@Field.toDivisionRing.{0} L inst) _))
-                (@NumberField.RingOfIntegers.{0} L inst)
-                (@DivInvMonoid.toMonoid.{0}
-                  (@AlgEquiv.{0, 0, 0} Rat L L Rat.commSemiring
-                    (@DivisionSemiring.toSemiring.{0} L
-                      (@Semifield.toDivisionSemiring.{0} L (@Field.toSemifield.{0} L inst)))
-                    (@DivisionSemiring.toSemiring.{0} L
-                      (@Semifield.toDivisionSemiring.{0} L (@Field.toSemifield.{0} L inst)))
-                    (@DivisionRing.toRatAlgebra.{0} L (@Field.toDivisionRing.{0} L inst) _)
-                    (@DivisionRing.toRatAlgebra.{0} L (@Field.toDivisionRing.{0} L inst) _))
-                  (@Group.toDivInvMonoid.{0}
-                    (@AlgEquiv.{0, 0, 0} Rat L L Rat.commSemiring
-                      (@DivisionSemiring.toSemiring.{0} L
-                        (@Semifield.toDivisionSemiring.{0} L (@Field.toSemifield.{0} L inst)))
-                      (@DivisionSemiring.toSemiring.{0} L
-                        (@Semifield.toDivisionSemiring.{0} L (@Field.toSemifield.{0} L inst)))
-                      (@DivisionRing.toRatAlgebra.{0} L (@Field.toDivisionRing.{0} L inst) _)
-                      (@DivisionRing.toRatAlgebra.{0} L (@Field.toDivisionRing.{0} L inst) _))
-                    (@AlgEquiv.aut.{0, 0} Rat L Rat.commSemiring
-                      (@DivisionSemiring.toSemiring.{0} L
-                        (@Semifield.toDivisionSemiring.{0} L (@Field.toSemifield.{0} L inst)))
-                      (@DivisionRing.toRatAlgebra.{0} L (@Field.toDivisionRing.{0} L inst) _))))
-                (@CommSemiring.toSemiring.{0} (@NumberField.RingOfIntegers.{0} L inst)
-                  (@CommRing.toCommSemiring.{0} (@NumberField.RingOfIntegers.{0} L inst)
-                    (@NumberField.instCommRingRingOfIntegers.{0} L inst)))
-                (@NumberField.RingOfIntegers.instMulSemiringAction.{0, 0} L inst
-                  (@AlgEquiv.{0, 0, 0} Rat L L Rat.commSemiring
-                    (@DivisionSemiring.toSemiring.{0} L
-                      (@Semifield.toDivisionSemiring.{0} L (@Field.toSemifield.{0} L inst)))
-                    (@DivisionSemiring.toSemiring.{0} L
-                      (@Semifield.toDivisionSemiring.{0} L (@Field.toSemifield.{0} L inst)))
-                    (@DivisionRing.toRatAlgebra.{0} L (@Field.toDivisionRing.{0} L inst) _)
-                    (@DivisionRing.toRatAlgebra.{0} L (@Field.toDivisionRing.{0} L inst) _))
-                  (@AlgEquiv.aut.{0, 0} Rat L Rat.commSemiring
-                    (@DivisionSemiring.toSemiring.{0} L
-                      (@Semifield.toDivisionSemiring.{0} L (@Field.toSemifield.{0} L inst)))
-                    (@DivisionRing.toRatAlgebra.{0} L (@Field.toDivisionRing.{0} L inst) _))
-                  (@AlgEquiv.applyMulSemiringAction.{0, 0} Rat L Rat.commSemiring
-                    (@DivisionSemiring.toSemiring.{0} L
-                      (@Semifield.toDivisionSemiring.{0} L (@Field.toSemifield.{0} L inst)))
-                    (@DivisionRing.toRatAlgebra.{0} L (@Field.toDivisionRing.{0} L inst) _)))))
-            P)
-          σ →
-        @Eq.{1} L
-          (@DFunLike.coe.{1, 1, 1}
-            (@AlgEquiv.{0, 0, 0} Rat L L Rat.commSemiring
-              (@DivisionSemiring.toSemiring.{0} L (@Semifield.toDivisionSemiring.{0} L (@Field.toSemifield.{0} L inst)))
-              (@DivisionSemiring.toSemiring.{0} L (@Semifield.toDivisionSemiring.{0} L (@Field.toSemifield.{0} L inst)))
-              (@DivisionRing.toRatAlgebra.{0} L (@Field.toDivisionRing.{0} L inst) _)
-              (@DivisionRing.toRatAlgebra.{0} L (@Field.toDivisionRing.{0} L inst) _))
-            L (fun (x : L) ↦ L)
-            (@AlgEquiv.instFunLike.{0, 0, 0} Rat L L Rat.commSemiring
-              (@DivisionSemiring.toSemiring.{0} L (@Semifield.toDivisionSemiring.{0} L (@Field.toSemifield.{0} L inst)))
-              (@DivisionSemiring.toSemiring.{0} L (@Semifield.toDivisionSemiring.{0} L (@Field.toSemifield.{0} L inst)))
-              (@DivisionRing.toRatAlgebra.{0} L (@Field.toDivisionRing.{0} L inst) _)
-              (@DivisionRing.toRatAlgebra.{0} L (@Field.toDivisionRing.{0} L inst) _))
-            σ x)
-          x := by
-  intro L _ _ x c hx P hP _ σ hσ
+open NumberField
+
+open scoped Pointwise in
+theorem goal1 {L : Type} [Field L] [NumberField L] (x : L) (c : ℤ)
+    (hx : x ^ 2 = ((4 * (2 * c) + 1 : ℤ) : L))
+    (P : Ideal (𝓞 L)) [hP : P.IsPrime] [P.LiesOver (Ideal.span {(2 : ℤ)})]
+    (σ : Gal(L/ℚ)) (hσ : σ ∈ MulAction.stabilizer (Gal(L/ℚ)) P) : σ x = x := by
   have hsq : (σ x) ^ 2 = x ^ 2 := by
     rw [← map_pow, hx, map_intCast]
   rcases sq_eq_sq_iff_eq_or_eq_neg.mp hsq with h | h
@@ -268,7 +92,7 @@ theorem goal1 :
     apply NumberField.RingOfIntegers.ext
     change σ (algebraMap (NumberField.RingOfIntegers L) L y) =
       algebraMap (NumberField.RingOfIntegers L) L (1 - y)
-    rw [map_sub, map_one, hy, map_div₀, map_add, map_one, h, map_ofNat]
+    rw [map_sub, map_one, hy, map_div₀, map_add (f := _), map_one, h, map_ofNat]
     ring
   have h1 : (1 : NumberField.RingOfIntegers L) ∈ P := by
     rcases hP.mem_or_mem hmem with h' | h'

@@ -1,6 +1,50 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.ThetaMetrics.TwistingSheafOneChartEqPreimageStandardChart
+module
+
+public import Development.AbelianVarietyTheory.Definitions.ThetaMetrics.TwistingSheafOneChartEqPreimageStandardChart
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.EffectiveEpi.Comp
+import Mathlib.CategoryTheory.ExtremalEpi
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
 import Development.AbelianVarietyTheory.Definitions.ThetaMetrics.IsRegularFnIffOfIsAffineOpen
+import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.ExistsSmulEqMapOfIsCompactOfIsQuasiSeparated
+
+@[expose] public section
 
 noncomputable section
 
@@ -221,11 +265,13 @@ structure IsCoordFamily (U : Fin (N + 1) → Y.Opens) (r : ∀ i, Fin (N + 1) �
   basicOpen_le : ∀ i j, Y.basicOpen (r i j) ≤ U j
 
 theorem isCoordFamily_pullRatio (φ : Y ⟶ PSpace R N) :
-    IsCoordFamily (fun i => φ ⁻¹ᵁ chart R N i) (fun i => pullRatio φ _ i le_rfl) where
-  cover := by rw [← Scheme.Hom.preimage_iSup, iSup_chart]; rfl
-  self _ := pullRatio_self
-  mul i j k := by rw [resG_pullRatio, resG_pullRatio, resG_pullRatio, pullRatio_mul_pullRatio]
-  basicOpen_le _ _ := basicOpen_pullRatio.le.trans inf_le_right
+    IsCoordFamily (fun i => φ ⁻¹ᵁ chart R N i) (fun i => pullRatio φ _ i le_rfl) := by
+  refine { cover := φ.iSup_preimage_eq_top (iSup_chart R N)
+           self := fun _ => pullRatio_self
+           mul := ?_
+           basicOpen_le := fun _ _ => basicOpen_pullRatio.le.trans inf_le_right }
+  intro i j k
+  rw [resG_pullRatio, resG_pullRatio, resG_pullRatio, pullRatio_mul_pullRatio]
 
 namespace IsCoordFamily
 
@@ -243,14 +289,6 @@ theorem appLE_mul (g : Z ⟶ Y) {T : Z.Opens} {i j : Fin (N + 1)} (hi : T ≤ g 
 theorem isUnit_appLE (g : Z ⟶ Y) {T : Z.Opens} {i j : Fin (N + 1)} (hi : T ≤ g ⁻¹ᵁ U i)
     (hj : T ≤ g ⁻¹ᵁ U j) : IsUnit ((g.appLE _ T hi).hom (r i j)) :=
   .of_mul_eq_one _ ((H.appLE_mul g hi hj i).trans (by rw [H.self, map_one]))
-
-theorem basicOpen_eq (i j : Fin (N + 1)) : Y.basicOpen (r i j) = U i ⊓ U j := by
-  refine le_antisymm (le_inf (Y.basicOpen_le _) (H.basicOpen_le i j)) ?_
-  have hu : IsUnit (resG Y (inf_le_left : U i ⊓ U j ≤ U i) (r i j)) :=
-    .of_mul_eq_one _ ((H.mul i j i).trans (by rw [H.self, map_one]))
-  have := Y.basicOpen_of_isUnit hu
-  rw [Scheme.basicOpen_res] at this
-  exact this.ge.trans inf_le_right
 
 theorem comp_ofCoords_eq (f : Y ⟶ Sp R) (i j : Fin (N + 1)) (a : Z ⟶ (U i).toScheme)
     (b : Z ⟶ (U j).toScheme) (e : a ≫ (U i).ι = b ≫ (U j).ι) :

@@ -1,4 +1,53 @@
-import Development.WeilBound.RepresentationTheoryGL.SiegelWeilProof.HolomorphicContinuation.GaussianPlaneIntegrals.AssemblyT
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.SiegelWeilProof.HolomorphicContinuation.GaussianPlaneIntegrals.AssemblyT
+public import Development.WeilBound.RepresentationTheoryGL.SiegelWeilProof.HolomorphicContinuation.GaussianPlaneIntegrals.AssemblyTB
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.MeasureTheory.Integral.Bochner.ContinuousLinearMap
+
+@[expose] public section
 
 noncomputable section
 
@@ -13,16 +62,16 @@ attribute [local irreducible] Tf
 
 variable {ι A B : Type} [Fintype ι] [DecidableEq ι] [Fintype A] [Fintype B]
 
-variable (ι A B) in
 
+variable (ι A B) in
 def invSub : Submodule ℂ (PV ι A B) where
   carrier := {q | IsInv q}
-  add_mem' := fun {a b} ha hb u hu => by rw [map_add, ha u hu, hb u hu]
+  add_mem' := fun {a b} ha hb u hu => by rw [map_add (f := _), ha u hu, hb u hu]
   zero_mem' := fun u _ => map_zero _
   smul_mem' := fun c q hq u hu => by rw [map_smul, hq u hu]
 
-variable (ι A B) in
 
+variable (ι A B) in
 def Vd (d : ℕ) : Submodule ℂ (PV ι A B) := restrictTotalDegree ((ι × A) ⊕ (ι × B)) ℂ d ⊓ invSub ι A B
 
 instance (d : ℕ) : FiniteDimensional ℂ (Vd ι A B d) := Submodule.finiteDimensional_of_le inf_le_left
@@ -35,9 +84,9 @@ theorem integrable_eval_act_blk_toMK (hA : Avg) (z : (ι × A) ⊕ (ι × B) →
 
 theorem Tf_add (hA : Avg) (q1 q2 : PV ι A B) : Tf hA (q1 + q2) = Tf hA q1 + Tf hA q2 :=
   MvPolynomial.funext fun z => by
-    rw [map_add, eval_Tf, eval_Tf, eval_Tf, ← integral_add (integrable_eval_act_blk_toMK hA z q1) (integrable_eval_act_blk_toMK hA z q2)]
+    rw [map_add (f := _), eval_Tf, eval_Tf, eval_Tf, ← integral_add (integrable_eval_act_blk_toMK hA z q1) (integrable_eval_act_blk_toMK hA z q2)]
     refine integral_congr_ae (Filter.Eventually.of_forall fun k => ?_)
-    simp only [map_add]
+    simp only [map_add (f := _)]
 
 theorem Tf_smul (hA : Avg) (c : ℂ) (q : PV ι A B) : Tf hA (c • q) = c • Tf hA q :=
   MvPolynomial.funext fun z => by
@@ -107,7 +156,8 @@ theorem Tlin_injective (hS : Stable) (hE : Ext) (hA : Avg) (hP : Pos) (d : ℕ) 
       ∑ z ∈ c.support, c z * eval (act 1 (Mk (ι := ι) (A := A) (B := B) k) z) (q : PV ι A B) := by
     intro k
     have h := hc ⟨_, hsubW k⟩
-    simp only [LinearMap.comp_apply, Submodule.subtype_apply, gipL_apply, Finsupp.sum] at h
+    simp only [LinearMap.comp_apply, Submodule.subtype_apply, Finsupp.sum] at h
+    change gip (sub 1 (Mk k) (q : PV ι A B)) (q : PV ι A B) = _ at h
     rw [h]
     simp only [AsmA.eval_sub]
   have hΨc : Continuous fun k => gip (sub 1 (Mk (ι := ι) (A := A) (B := B) k) (q : PV ι A B)) (q : PV ι A B) := by
@@ -121,7 +171,8 @@ theorem Tlin_injective (hS : Stable) (hE : Ext) (hA : Avg) (hP : Pos) (d : ℕ) 
   have hgipT : gip (Tf hA (q : PV ι A B)) (q : PV ι A B) =
       ∫ k, gip (sub 1 (Mk (ι := ι) (A := A) (B := B) k) (q : PV ι A B)) (q : PV ι A B) ∂(Formalism.REAL.muK (fun _ : Fin (NN ι A B) => true)) := by
     have h := hc ⟨_, hTW⟩
-    simp only [LinearMap.comp_apply, Submodule.subtype_apply, gipL_apply, Finsupp.sum] at h
+    simp only [LinearMap.comp_apply, Submodule.subtype_apply, Finsupp.sum] at h
+    change gip (Tf hA (q : PV ι A B)) (q : PV ι A B) = _ at h
     rw [h]
     simp_rw [hΨ]
     rw [integral_finsetSum]

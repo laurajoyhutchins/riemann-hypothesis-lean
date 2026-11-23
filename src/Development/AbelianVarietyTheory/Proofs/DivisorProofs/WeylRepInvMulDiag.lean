@@ -1,5 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.GindikinKarpelevich
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.GindikinKarpelevich
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open GlobalTheory.SplitWeil GlobalTheory.SmGL GlobalTheory.WeylCell
 
@@ -7,44 +54,42 @@ namespace GlobalTheory.GKFactor
 
 variable {k : Type} [Field k] {n : ℕ}
 
-local notation "M" x:max => ((x : GL (Fin n) k) : Matrix (Fin n) (Fin n) k)
-
 theorem weylRep_inv_mul_diag {w : Equiv.Perm (Fin n)} {x : GL (Fin n) k} (hx : IsWeylRep w x) (p : Fin n) :
-    (M x⁻¹) p (w p) * (M x) (w p) p = 1 := by
-  have h : (M (x⁻¹ * x)) p p = (M (1 : GL (Fin n) k)) p p := by rw [inv_mul_cancel]
+    (x⁻¹).val p (w p) * x.val (w p) p = 1 := by
+  have h : (x⁻¹ * x).val p p = (1 : GL (Fin n) k).val p p := by rw [inv_mul_cancel]
   rw [Units.val_mul, Matrix.mul_apply, Units.val_one, Matrix.one_apply_eq] at h
   rwa [Finset.sum_eq_single (w p) (fun b _ hb => by rw [hx b p hb, mul_zero]) (by simp)] at h
 
 theorem weylRep_mul_inv_diag {w : Equiv.Perm (Fin n)} {x : GL (Fin n) k} (hx : IsWeylRep w x) (p : Fin n) :
-    (M x) (w p) p * (M x⁻¹) p (w p) = 1 := by
-  have h : (M (x * x⁻¹)) (w p) (w p) = (M (1 : GL (Fin n) k)) (w p) (w p) := by rw [mul_inv_cancel]
+    x.val (w p) p * (x⁻¹).val p (w p) = 1 := by
+  have h : (x * x⁻¹).val (w p) (w p) = (1 : GL (Fin n) k).val (w p) (w p) := by rw [mul_inv_cancel]
   rw [Units.val_mul, Matrix.mul_apply, Units.val_one, Matrix.one_apply_eq] at h
   rwa [Finset.sum_eq_single p (fun b _ hb => by
       rw [hx (w p) b (fun e => hb (w.injective e).symm), zero_mul]) (by simp)] at h
 
 theorem weylRep_inv {w : Equiv.Perm (Fin n)} {x : GL (Fin n) k} (hx : IsWeylRep w x) : IsWeylRep w⁻¹ x⁻¹ := by
   intro p a hpa
-  have hne : (M x) a (w⁻¹ a) ≠ 0 := by
+  have hne : x.val a (w⁻¹ a) ≠ 0 := by
     intro h0
     have := weylRep_mul_inv_diag hx (w⁻¹ a)
     rw [show w (w⁻¹ a) = a by simp] at this
     rw [h0, zero_mul] at this
     exact zero_ne_one this
-  have h : (M (x⁻¹ * x)) p (w⁻¹ a) = (M (1 : GL (Fin n) k)) p (w⁻¹ a) := by rw [inv_mul_cancel]
+  have h : (x⁻¹ * x).val p (w⁻¹ a) = (1 : GL (Fin n) k).val p (w⁻¹ a) := by rw [inv_mul_cancel]
   rw [Units.val_mul, Matrix.mul_apply, Units.val_one, Matrix.one_apply_ne hpa] at h
   rw [Finset.sum_eq_single a (fun b _ hb => by
       rw [hx b (w⁻¹ a) (by simpa using hb), mul_zero]) (by simp)] at h
   exact (mul_eq_zero.1 h).resolve_right hne
 
 theorem weylRep_conj_apply {w : Equiv.Perm (Fin n)} {x : GL (Fin n) k} (hx : IsWeylRep w x) (u : GL (Fin n) k)
-    (p q : Fin n) : (M (x⁻¹ * u * x)) p q = (M x⁻¹) p (w p) * (M u) (w p) (w q) * (M x) (w q) q := by
+    (p q : Fin n) : (x⁻¹ * u * x).val p q = (x⁻¹).val p (w p) * u.val (w p) (w q) * x.val (w q) q := by
   have hi := weylRep_inv hx
   rw [Units.val_mul, Units.val_mul, Matrix.mul_apply, Finset.sum_eq_single (w q)
     (fun b _ hb => by rw [hx b q hb, mul_zero]) (by simp), Matrix.mul_apply,
     Finset.sum_eq_single (w p) (fun b _ hb => by rw [hi p b (fun e => hb (by rw [e]; simp)), zero_mul]) (by simp)]
 
 theorem mem_cell_iff {w : Equiv.Perm (Fin n)} {x : GL (Fin n) k} (hx : IsWeylRep w x) (u : GL (Fin n) k) :
-    u ∈ cell x ↔ u ∈ unipB k (Fin n) ∧ ∀ a b, a < b → w⁻¹ a < w⁻¹ b → (M u) a b = 0 := by
+    u ∈ cell x ↔ u ∈ unipB k (Fin n) ∧ ∀ a b, a < b → w⁻¹ a < w⁻¹ b → u.val a b = 0 := by
   rw [mem_cell, mem_unipBLower]
   refine and_congr_right fun hu => ?_
   rw [mem_unipB] at hu

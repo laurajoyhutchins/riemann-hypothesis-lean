@@ -1,7 +1,67 @@
-import Formalism.HermitianCurvature.StatementG
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.PhaseFunctionCriticalPoints
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.AdditiveCharacterPsi
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.AffineChangeOfVariables
+module
+
+public import Formalism.HermitianCurvature.StatementG
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.AdditiveCharacterPsi
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.AffineChangeOfVariables
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.PhaseFunctionCriticalPoints
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.Countable
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Complex
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Analysis.SpecialFunctions.JapaneseBracket
+public import Mathlib.RingTheory.Norm.Transitivity
+
+@[expose] public section
 
 open Matrix MeasureTheory Filter Topology
 
@@ -38,6 +98,7 @@ theorem mp_mulVec (β : ℂ) {ι : Type} [Fintype ι] [DecidableEq ι] (M : Matr
     (Continuous.matrix_mulVec continuous_const continuous_id).measurable
   refine ⟨hm, ?_⟩
   rw [muPi_eq, Measure.map_smul, map_mulVec_volume M h]
+  exact hm.aemeasurable
 
 theorem mp_vecMul (β : ℂ) {ι : Type} [Fintype ι] [DecidableEq ι] (M : Matrix ι ι ℂ) (h : ‖M.det‖ = 1) :
     MeasurePreserving (fun x : ι → ℂ => x ᵥ* M) (muPi β ι) (muPi β ι) := by
@@ -251,9 +312,17 @@ def consMap (m : ℕ) (q : RedCoord m) : BlockCoord (m + 1) := (Fin.cons q.1 q.2
 
 theorem mp_consMap (β : ℂ) (m : ℕ) : MeasurePreserving (consMap m) (muRed β m) (muBlock β (m + 1)) := by
   have h1 := (measurePreserving_piFinSuccAbove (fun _ : Fin (m + 1) => mu β) 0).symm
-  have h2 := (measurePreserving_prodAssoc (mu β) (muPi β (Fin m))
-    ((muPi β (UT (m + 1))).prod (muPi β (Fin (m + 1))))).symm
-  have h3 := (h1.prod (MeasurePreserving.id ((muPi β (UT (m + 1))).prod (muPi β (Fin (m + 1)))))).comp h2
+  have h2 := MeasurePreserving.symm (MeasurableEquiv.prodAssoc :
+      ((ℂ × (Fin m → ℂ)) × ((UT (m + 1) → ℂ) × (Fin (m + 1) → ℂ))) ≃ᵐ _)
+    (measurePreserving_prodAssoc (mu β) (muPi β (Fin m))
+      ((muPi β (UT (m + 1))).prod (muPi β (Fin (m + 1)))))
+  have hp : MeasurePreserving
+      (Prod.map (⇑(MeasurableEquiv.piFinSuccAbove (fun _ : Fin (m + 1) => ℂ) 0).symm)
+        (id : ((UT (m + 1) → ℂ) × (Fin (m + 1) → ℂ)) → _))
+      (((mu β).prod (muPi β (Fin m))).prod ((muPi β (UT (m + 1))).prod (muPi β (Fin (m + 1)))))
+      (muBlock β (m + 1)) := by
+    exact MeasurePreserving.prod h1 (MeasurePreserving.id _)
+  have h3 := hp.comp h2
   have e : consMap m = (Prod.map (⇑(MeasurableEquiv.piFinSuccAbove (fun _ : Fin (m + 1) => ℂ) 0).symm) id) ∘
       ⇑(MeasurableEquiv.prodAssoc : ((ℂ × (Fin m → ℂ)) × ((UT (m + 1) → ℂ) × (Fin (m + 1) → ℂ))) ≃ᵐ _).symm := by
     funext q

@@ -1,4 +1,52 @@
-import Formalism.CyclotomicNorms.StatementI
+module
+
+public import Formalism.CyclotomicNorms.StatementI
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Finset Polynomial
 
@@ -13,7 +61,7 @@ variable {K : Type} [Field K]
 lemma coeff_monicOf_lt {N : ℕ} (a : Fin N → K) (i : Fin N) :
     (monicOf a).coeff (i : ℕ) = a i := by
   unfold monicOf
-  rw [coeff_add, coeff_X_pow, if_neg (Nat.ne_of_lt i.2), zero_add, finset_sum_coeff]
+  rw [coeff_add, coeff_X_pow, if_neg (Nat.ne_of_lt i.2), zero_add, Polynomial.finsetSum_coeff]
   simp only [coeff_C_mul_X_pow]
   rw [Finset.sum_eq_single i (fun j _ hj => if_neg (fun h => hj (Fin.ext h).symm)) (by simp)]
   simp
@@ -21,7 +69,7 @@ lemma coeff_monicOf_lt {N : ℕ} (a : Fin N → K) (i : Fin N) :
 lemma coeff_monicOf_ge {N : ℕ} (a : Fin N → K) (k : ℕ) (hk : N ≤ k) :
     (monicOf a).coeff k = if k = N then 1 else 0 := by
   unfold monicOf
-  rw [coeff_add, coeff_X_pow, finset_sum_coeff]
+  rw [coeff_add, coeff_X_pow, Polynomial.finsetSum_coeff]
   simp only [coeff_C_mul_X_pow]
   rw [Finset.sum_eq_zero (fun j _ => if_neg (by have := j.2; omega)), add_zero]
 
@@ -44,50 +92,6 @@ lemma monicOf_coeffs (p : K[X]) (hp : p.Monic) {m : ℕ} (hd : p.natDegree = m) 
       rw [← hd]
       exact hp.coeff_natDegree.symm
     · exact (coeff_eq_zero_of_natDegree_lt (by omega)).symm
-
-lemma decomp (f : K[X]) (hf : f.Monic) (h0 : f.coeff 0 ≠ 0) (hsq : ¬ Squarefree f) :
-    ∃ P h : K[X], P.Monic ∧ h.Monic ∧ 1 ≤ P.natDegree ∧ P.coeff 0 ≠ 0 ∧ f = P * P * h := by
-  unfold Squarefree at hsq
-  push_neg at hsq
-  obtain ⟨x, ⟨g, hg⟩, hx⟩ := hsq
-  have hx0 : x ≠ 0 := by
-    rintro rfl
-    exact hf.ne_zero (by simpa using hg)
-  have hc : x.leadingCoeff ≠ 0 := leadingCoeff_ne_zero.mpr hx0
-  have hP : (x * C x.leadingCoeff⁻¹).Monic := monic_mul_leadingCoeff_inv hx0
-  have hu : C x.leadingCoeff⁻¹ * C x.leadingCoeff = (1 : K[X]) := by
-    rw [← C_mul, inv_mul_cancel₀ hc, C_1]
-  have key : f = (x * C x.leadingCoeff⁻¹) * (x * C x.leadingCoeff⁻¹) *
-      (C x.leadingCoeff * C x.leadingCoeff * g) := by
-    rw [hg]
-    linear_combination (-(x * x * g * (C x.leadingCoeff⁻¹ * C x.leadingCoeff + 1))) * hu
-  refine ⟨x * C x.leadingCoeff⁻¹, C x.leadingCoeff * C x.leadingCoeff * g, hP,
-    Monic.of_mul_monic_left (hP.mul hP) (by rw [← key]; exact hf), ?_, ?_, key⟩
-  · by_contra hlt
-    push_neg at hlt
-    have h1 : x * C x.leadingCoeff⁻¹ = 1 := (Monic.natDegree_eq_zero hP).mp (by omega)
-    exact hx (isUnit_iff_exists_inv.mpr ⟨_, h1⟩)
-  · intro hz
-    apply h0
-    rw [key, mul_coeff_zero, mul_coeff_zero, hz]
-    simp
-
-lemma geo (q : ℕ) (hq : 2 ≤ q) (N : ℕ) :
-    ∀ k, k < N → (∑ d ∈ Icc 1 k, q ^ (N - d)) + 2 * q ^ (N - 1 - k) ≤ 2 * q ^ (N - 1) := by
-  intro k
-  induction k with
-  | zero => intro _; simp
-  | succ k ih =>
-    intro hk
-    have ih' := ih (by omega)
-    rw [Finset.sum_Icc_succ_top (by omega)]
-    have e1 : N - 1 - k = (N - 1 - (k + 1)) + 1 := by omega
-    have e2 : N - (k + 1) = N - 1 - k := by omega
-    rw [e2]
-    rw [e1] at ih' ⊢
-    rw [pow_succ] at ih' ⊢
-    have hm := Nat.mul_le_mul_left (q ^ (N - 1 - (k + 1))) hq
-    linarith
 
 end Sqf
 

@@ -1,14 +1,82 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.ElementarySymmetric.StNbarLeviChartReg
-import GroundTheory.HeightsAndTheta.Heights.ElementarySymmetric.PNbarLeviChartReg
-import GroundTheory.HeightsAndTheta.Heights.ElementarySymmetric.PRefChartDisc
-import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.PProjHoloLocal
-import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.PProjSmoothAlong
-import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.PHermExtend
-import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.PHoloInjDerivInj
-import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.PChartVelLift
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.ElementarySymmetric.StNbarLeviChartReg
+public import GroundTheory.HeightsAndTheta.Heights.ElementarySymmetric.StProjChartHolo
+public import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.StProjHoloLocal
+public import ReciprocityTheory.AnalyticForms.RegularLocalRings.ConeChartB
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterPC
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.ExistsAnalyticLogResolution
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.LocalOrbitChart
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.PCriticalFlatNotInjective
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.PHolomorphicKernelFibre
 import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.PInjectiveHolomorphicInverse
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.LocalOrbitChart
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.PInjectiveHolomorphicJacobianNeZero
+public import GroundTheory.HeightsAndTheta.Heights.ElementarySymmetric.PNbarLeviChartReg
+public import GroundTheory.HeightsAndTheta.Heights.ElementarySymmetric.PRefChartDisc
+public import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.PChartVelLift
+public import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.PHermExtend
+public import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.PHoloInjDerivInj
+import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.PMuRegSmooth
+public import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.PProjHoloLocal
+public import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.PProjSmoothAlong
+import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.PVertFactorPos
+import GroundTheory.HeightsAndTheta.Heights.Intersections.RegularizedCurvature
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Calculus.Deriv.Prod
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Matrix.FiniteDimensional
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import ReciprocityTheory.AnalyticForms.PotentialTheory.HessCEqZeroOfEventuallyEqZero
+import ReciprocityTheory.AnalyticForms.PotentialTheory.PshShiftA
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterAlgRes
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterBridgeB
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterMinor
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 set_option maxSynthPendingDepth 1
 
@@ -45,7 +113,7 @@ def tanIdeal {σ : Type} [Fintype σ] (w v : σ → ℂ) : Ideal (MvPolynomial �
   add_mem' := by
     rintro a b ⟨ha0, ha1⟩ ⟨hb0, hb1⟩
     refine ⟨by simp [ha0, hb0], ?_⟩
-    simp only [map_add, add_mul, Finset.sum_add_distrib, ha1, hb1, add_zero]
+    simp only [map_add (f := _), add_mul, Finset.sum_add_distrib, ha1, hb1, add_zero]
   zero_mem' := by simp
   smul_mem' := by
     rintro g h ⟨h0, h1⟩
@@ -363,8 +431,8 @@ theorem coneTangent_disc {II : IntersectionSystem} {Ψ : Type} [Fintype Ψ] {K :
   · filter_upwards [hev a] with s hs
     exact hΦmem _ hs
 
-open NbarLeviChartReg in
 
+open NbarLeviChartReg in
 theorem nbarLeviChartReg : NbarLeviChartReg.Statement := by
   have hProj : ProjChartHolo.Statement := projChartHolo
   have hRef : RefChartDisc.Statement := RefChartDisc.proof hProj

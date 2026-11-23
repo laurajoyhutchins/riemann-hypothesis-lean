@@ -1,4 +1,54 @@
-import Formalism.LocalToGlobal.CharacterGerms.RowTieCartFB
+module
+
+public import Formalism.LocalToGlobal.CharacterGerms.RowTieAxes
+public import Formalism.LocalToGlobal.CharacterGerms.ConstMemTypeSetOfNonneg
+public import Formalism.LocalToGlobal.CharacterGerms.RowTieCartFB
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -514,47 +564,6 @@ theorem FBChart.bil_ad (Y : FBChart C V O dd) (a : O) (w v : Fin dd → C) :
   rw [hg, bil_expS ((van_ev_left Y.axisAll (Y.B.A.const a)).sub (van_ev_right Y.axisAll (Y.B.A.const (star a)))),
     bil_sub, bil_ev_left Y.axisAll (Y.B.A.const a), bil_ev_right Y.axisAll (Y.B.A.const (star a))]
 
-theorem FBChart.raw_first_pairing_eq (Y : FBChart C V O dd) {d : ℕ} {I : Fin 2 → Type} [∀ g, Fintype (I g)] (p : PairData Y d I)
-    (w v : Fin dd → C) : (Y.raw p).sg1 w v = -bil Y.h w v := by
-  have hs : ∀ x, coeff (Finsupp.single x 1) ((Y.raw p).sg v) =
-      -∑ i, v i * coeff (E2 ((0 : Fin 2), x) ((1 : Fin 2), i)) Y.h := by
-    intro x
-    show -∑ i, v i * coeff ((Finsupp.single x 1).mapDomain (fun x : Fin dd => ((0 : Fin 2), x)) +
-      Finsupp.single ((1 : Fin 2), i) 1) Y.h = _
-    rw [Finsupp.mapDomain_single]
-    rfl
-  unfold RawChart.sg1 bil
-  simp only [hs, mul_neg, Finset.sum_neg_distrib, Finset.mul_sum]
-  congr 1
-  apply Finset.sum_congr rfl
-  intro i _
-  apply Finset.sum_congr rfl
-  intro j _
-  ring
-
 end Final
-
-theorem hStabFB : HStabFBSt := by
-  intro C _ _ V O _ _ dd Y d _ I _ p g c q hty
-  have hconj : ∀ (g : Fin 2) t a, p.em (1 - g) t (star a) = p.em g t a := by
-    intro g t a
-    rcases fin_two_eq_zero_or_eq_one g with rfl | rfl
-    · show p.em 1 t (star a) = p.em 0 t a
-      rw [p.em_conj, star_star]
-    · show p.em 0 t (star a) = p.em 1 t a
-      rw [p.em_conj]
-  obtain ⟨a, ha⟩ := p.em_sep (g, p.ty g c) (g, p.ty (1 - g) q) (fun h => hty (Prod.mk.inj h).2)
-  have ha' : V.v (p.em g (p.ty g c) a - p.em g (p.ty (1 - g) q) a) = 0 := ha
-  have hb := Y.bil_ad a (p.u g c) (p.u (1 - g) q)
-  rw [p.u_eig g c a, p.u_eig (1 - g) q (star a), hconj, bil_smul_left, bil_smul_right, ← sub_mul] at hb
-  have hint : V.Ge 0 (bil (Y.B.ad a) (p.u g c) (p.u (1 - g) q)) :=
-    bil_int (Y.intAd a) (p.u_int g c) (p.u_int (1 - g) q)
-  rw [hb] at hint
-  have hβ : V.Ge 0 (bil Y.h (p.u g c) (p.u (1 - g) q)) := by
-    unfold VF.Ge at hint ⊢
-    rwa [V.v.map_mul, ha', zero_add] at hint
-  show V.Ge 0 ((Y.raw p).sg1 (p.u g c) (p.u (1 - g) q))
-  rw [Y.raw_first_pairing_eq]
-  exact hβ.neg
 
 end Formalism.L2.FormalSeriesBounds

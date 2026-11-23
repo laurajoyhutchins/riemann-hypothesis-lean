@@ -1,5 +1,52 @@
-import Formalism.LocalToGlobal.Columns.RecLevelLocF
+module
+
+public import Formalism.LocalToGlobal.Columns.RecLevelLocT
 import Formalism.LocalToGlobal.Columns.BaseLemmas
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Matrix
 open scoped TensorProduct
@@ -37,7 +84,7 @@ theorem rll_norm_mem (a : 𝓞 E) : ∃ b : 𝓞 F, algebraMap (𝓞 F) (𝓞 E)
   obtain ⟨x, hx⟩ := (hc.fixed _).1 h1
   have hi : IsIntegral ℤ x := by
     have h2 : IsIntegral ℤ (algebraMap F E x) := by rw [hx]; exact RingOfIntegers.isIntegral_coe _
-    exact (isIntegral_algebraMap_iff (algebraMap F E).injective).1 h2
+    exact (isIntegral_algebraMap_iff ).1 h2
   obtain ⟨b, hb⟩ : ∃ b : 𝓞 F, algebraMap (𝓞 F) F b = x := ⟨⟨x, hi⟩, rfl⟩
   refine ⟨b, ?_⟩
   apply RingOfIntegers.ext
@@ -101,22 +148,22 @@ section Host
 
 variable {X : Fields} {Pr : Primes X}
 
-theorem basePi_of_ok (hX : X.Ok) (hPr : Pr.Ok) (u : Pr.Word) : BasePi (Pr.vT u) (Pr.piT u) where
-  dvd r := by
-    have h0 : Pr.piT u ≠ 0 := by
-      intro h0
-      obtain ⟨a, b, hab⟩ := hPr.piT_cop u
-      rw [h0, map_zero, mul_zero, mul_zero, add_zero] at hab
-      exact zero_ne_one hab
-    constructor
-    · intro hr
-      exact piT_dvd_of_mem hX hPr u r fun P => hr P.1 P.2
-    · rintro ⟨q, rfl⟩ P hP
-      exact Ideal.mul_mem_right _ _ ((mem_divs h0 P).1 hP)
-  cop := hPr.piT_cop u
+theorem basePi_of_ok (hX : X.Ok) (hPr : Pr.Ok) (u : Pr.Word) : BasePi (Pr.vT u) (Pr.piT u) := by
+  have hcop := hPr.piT_cop u
+  refine ⟨?_, hcop⟩
+  intro r
+  have h0 : Pr.piT u ≠ 0 := by
+    intro h0
+    rw [h0, map_zero] at hcop
+    exact not_isCoprime_zero_zero hcop
+  constructor
+  · intro hr
+    exact piT_dvd_of_mem hX hPr u r fun P => hr P.1 P.2
+  · rintro ⟨q, rfl⟩ P hP
+    exact Ideal.mul_mem_right _ _ ((mem_divs h0 P).1 hP)
+
 
 open Classical in
-
 theorem plUnder_vGs (hc : Formalism.BasicNotions.CMData X.F X.E) (hPr : Pr.Ok) (v : HeightOneSpectrum (𝓞 X.F)) :
     v ∈ plUnder X.F Pr.vGs ↔ (Pr.g 0 : 𝓞 X.F) ∈ v.asIdeal ∨ (Pr.g 1 : 𝓞 X.F) ∈ v.asIdeal := by
   have key : ∀ i, v ∈ plUnder X.F (Pr.vG i) ↔ (Pr.g i : 𝓞 X.F) ∈ v.asIdeal := fun i => by

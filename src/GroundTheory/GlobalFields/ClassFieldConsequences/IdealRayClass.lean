@@ -1,6 +1,50 @@
-import Mathlib
-import GroundTheory.GlobalFields.ClassFieldConsequences.RayClass
-import GroundTheory.GlobalFields.Adele.WeakApproxUnits
+module
+
+public import GroundTheory.GlobalFields.ClassFieldConsequences.RayClass
+public import GroundTheory.GlobalFields.Adele.WeakApproxUnits
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Topology Filter NumberField IsDedekindDomain IsDedekindDomain.HeightOneSpectrum WithZero
   FractionalIdeal Function
@@ -27,11 +71,6 @@ def coprimeIdeals : Subgroup (FractionalIdeal (𝓞 K)⁰ K)ˣ where
   inv_mem' {I} hI v hv := by
     rw [Units.val_inv_eq_inv_val, count_inv, hI v hv, neg_zero]
 
-theorem mem_coprimeIdeals {I : (FractionalIdeal (𝓞 K)⁰ K)ˣ} :
-    I ∈ 𝔪.coprimeIdeals ↔ ∀ v : HeightOneSpectrum (𝓞 K), v.asIdeal ∣ 𝔪.ideal →
-      count K v (I : FractionalIdeal (𝓞 K)⁰ K) = 0 :=
-  Iff.rfl
-
 theorem ord_eq_zero_of_mem_idelesOneMod {x : IdeleGroup K} (hx : x ∈ 𝔪.idelesOneMod)
     {v : HeightOneSpectrum (𝓞 K)} (hv : v.asIdeal ∣ 𝔪.ideal) : ord v x = 0 := by
   have h := ((𝔪.mem_idelesOneMod.1 hx).1 v hv).1
@@ -41,11 +80,6 @@ theorem ord_eq_zero_of_mem_idelesOneMod {x : IdeleGroup K} (hx : x ∈ 𝔪.idel
 theorem toFractionalIdeal_mem_coprimeIdeals {x : IdeleGroup K} (hx : x ∈ 𝔪.idelesOneMod) :
     toFractionalIdeal x ∈ 𝔪.coprimeIdeals := fun v hv ↦ by
   rw [count_toFractionalIdeal, 𝔪.ord_eq_zero_of_mem_idelesOneMod hx hv]
-
-theorem toPrincipalIdeal_mem_coprimeIdeals {a : Kˣ} (ha : a ∈ 𝔪.rayUnits) :
-    toPrincipalIdeal (𝓞 K) K a ∈ 𝔪.coprimeIdeals := by
-  rw [← toFractionalIdeal_diagonal]
-  exact 𝔪.toFractionalIdeal_mem_coprimeIdeals ha
 
 def principalRay : Subgroup 𝔪.coprimeIdeals :=
   (𝔪.rayUnits.map (toPrincipalIdeal (𝓞 K) K)).subgroupOf 𝔪.coprimeIdeals
@@ -113,12 +147,6 @@ theorem exists_diagonal_mul_mem_idelesOneMod (x : IdeleGroup K) :
 def idelesOneModToCoprimeIdeals : 𝔪.idelesOneMod →* 𝔪.coprimeIdeals :=
   ((toFractionalIdeal (K := K)).comp 𝔪.idelesOneMod.subtype).codRestrict _
     fun x ↦ 𝔪.toFractionalIdeal_mem_coprimeIdeals x.2
-
-@[simp]
-theorem coe_idelesOneModToCoprimeIdeals (x : 𝔪.idelesOneMod) :
-    ((𝔪.idelesOneModToCoprimeIdeals x : 𝔪.coprimeIdeals) : (FractionalIdeal (𝓞 K)⁰ K)ˣ) =
-      toFractionalIdeal (x : IdeleGroup K) :=
-  rfl
 
 def toIdealRayClassGroup : 𝔪.idelesOneMod →* 𝔪.IdealRayClassGroup :=
   (QuotientGroup.mk' _).comp 𝔪.idelesOneModToCoprimeIdeals
@@ -226,24 +254,6 @@ theorem rayClassGroupEquiv_mk {x : IdeleGroup K} (hx : x ∈ 𝔪.idelesOneMod) 
     rfl
   rw [rayClassGroupEquiv, MulEquiv.trans_apply, MulEquiv.trans_apply, h]
   rfl
-
-def quotientEquivIdealRayClassGroup :
-    IdeleClassGroup K ⧸ 𝔪.congruenceSubgroup.map (IdeleClassGroup.mk K) ≃* 𝔪.IdealRayClassGroup :=
-  𝔪.quotientMapCongruenceEquiv.trans 𝔪.rayClassGroupEquiv
-
-theorem quotientEquivIdealRayClassGroup_mk {x : IdeleGroup K} (hx : x ∈ 𝔪.idelesOneMod) :
-    𝔪.quotientEquivIdealRayClassGroup (QuotientGroup.mk (IdeleClassGroup.mk K x)) =
-      QuotientGroup.mk (⟨toFractionalIdeal x, 𝔪.toFractionalIdeal_mem_coprimeIdeals hx⟩ :
-        𝔪.coprimeIdeals) := by
-  rw [quotientEquivIdealRayClassGroup, MulEquiv.trans_apply, quotientMapCongruenceEquiv_mk,
-    rayClassGroupEquiv_mk _ hx]
-
-def idealRayClassGroupEquiv_of_real_eq_univ (h : 𝔪.real = Set.univ) :
-    _root_.GroundTheory.Global.RayClassGroup K 𝔪.ideal ≃* 𝔪.IdealRayClassGroup :=
-  (𝔪.rayClassGroupEquiv_of_real_eq_univ h).symm.trans 𝔪.rayClassGroupEquiv
-
-instance : Finite 𝔪.IdealRayClassGroup :=
-  Finite.of_equiv _ 𝔪.rayClassGroupEquiv.toEquiv
 
 end Modulus
 

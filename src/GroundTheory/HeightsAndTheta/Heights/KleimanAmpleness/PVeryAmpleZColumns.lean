@@ -1,7 +1,56 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.VeryAmpleZColumnsSt
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.TwistAlg
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.ZColumnsCechPartition
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.VeryAmpleZColumnsSt
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.TwistAlg
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.ZColumnsCechPartition
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.Kleiman
@@ -30,8 +79,8 @@ theorem prod_mem_pow {I : Chart x} (Q : Submodule (chartRing S x I) Ω) (h : Fin
     rw [Finset.prod_insert ha, Finset.card_insert_of_notMem ha, pow_succ']
     exact Submodule.mul_mem_mul (hh a) ih
 
-omit [Module S E] [IsScalarTower S Ω E] in
 
+omit [Module S E] [IsScalarTower S Ω E] in
 theorem smul_mem_twist_pow {G : SubSystem S x E} {H : SubSystem S x Ω} {I : Chart x} {n c : ℕ}
     {q : Ω} (hq : q ∈ H.sub I ^ c) {z : E} (hz : z ∈ (G.twist (H.pow n)).sub I) :
     q • z ∈ (G.twist (H.pow (n + c))).sub I := by
@@ -51,8 +100,8 @@ theorem smul_mem_twist_pow {G : SubSystem S x E} {H : SubSystem S x Ω} {I : Cha
     rw [e1]
     exact Submodule.smul_mem _ a hy
 
-omit [Module S E] [IsScalarTower S Ω E] in
 
+omit [Module S E] [IsScalarTower S Ω E] in
 theorem smul_mem_twist_of_inv {G : SubSystem S x E} {H : SubSystem S x Ω} {I : Chart x} {m c : ℕ}
     {w : Ω} (hw : ∀ q ∈ H.sub I ^ m, w * q ∈ chartRing S x I) {z : E}
     (hz : z ∈ (G.twist (H.pow (c + m))).sub I) : w • z ∈ (G.twist (H.pow c)).sub I := by
@@ -79,8 +128,8 @@ theorem smul_mem_twist_of_inv {G : SubSystem S x E} {H : SubSystem S x Ω} {I : 
 
 variable {G : SubSystem S x E} {H : SubSystem S x Ω} {h : Fin (r + 1) → Ω} {I : Chart x}
 
-omit [Module S E] [IsScalarTower S Ω E] in
 
+omit [Module S E] [IsScalarTower S Ω E] in
 theorem pow_mono (hH : ∀ j, h j ∈ H.sub I) {J : Chart h} {e : E} {n : ℕ}
     (he : xProd J ^ n • e ∈ (G.twist (H.pow (J.1.card * n))).sub I) (k : ℕ) :
     xProd J ^ (n + k) • e ∈ (G.twist (H.pow (J.1.card * (n + k)))).sub I := by
@@ -115,8 +164,8 @@ theorem exists_pow_of_mem (hH : ∀ j, h j ∈ H.sub I) {J : Chart h} {e : E}
     rw [smul_comm]
     exact Submodule.smul_of_tower_mem _ s hn
 
-omit [IsScalarTower S Ω E] in
 
+omit [IsScalarTower S Ω E] in
 theorem mono (hH : ∀ j, h j ∈ H.sub I) {J J' : Chart h} (hJJ' : J.1 ⊆ J'.1) :
     secsOnZChart G H h I J ≤ secsOnZChart G H h I J' := by
   classical
@@ -193,8 +242,8 @@ theorem exists_partition {H : LineBundle S x} (hV : IsVeryAmpleBy H.toSubSystem 
 
 end VeryAmpleZColumns
 
-open VeryAmpleZColumns in
 
+open VeryAmpleZColumns in
 theorem VeryAmpleZColumns.proof : VeryAmpleZColumns.Statement.{u, v, w} := by
   intro S _ Ω _ _ N x E _ _ _ _ G H r h hV I
   have hH : ∀ j, h j ∈ H.sub I := fun j => (Submodule.mem_iInf _).mp (hV.mem_secs j) I

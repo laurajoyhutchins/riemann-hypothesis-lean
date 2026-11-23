@@ -1,5 +1,71 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.BigOperators.Finprod
+public import Mathlib.Algebra.Group.AddChar
+public import Mathlib.Basic.Complex.Basic
+public import Mathlib.RingTheory.Ideal.Maximal
+public import Mathlib.RingTheory.Ideal.Quotient.Defs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AbelianVarietyTheory.Definitions.Foundations.NormSumPairRankZeroOfCurveCoordNorm
 import Development.AbelianVarietyTheory.Proofs.FoundationProofs.HESmulRight
+import Formalism.SharpRestriction.CuspSpanNormBounds.Point
+import Formalism.SharpRestriction.GlobalSchurBounds.GeneralLinearActions.IsDiscriminantTwelfthRootOfIdealLattice
+import Formalism.SharpRestriction.GlobalSchurBounds.StandardLatticesGL3
+import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
+public import Mathlib.Algebra.Algebra.Defs
+public import Mathlib.Algebra.Algebra.Equiv
+public import Mathlib.Algebra.Field.Subfield.Basic
+public import Mathlib.Algebra.Group.Subgroup.Finite
+public import Mathlib.Data.ZMod.QuotientGroup
+public import Mathlib.FieldTheory.Finite.GaloisField
+public import Mathlib.NumberTheory.LegendreSymbol.AddCharacter
+
+@[expose] public section
+
 open NumberField Classical Formalism.BasicNotions Formalism.MainNotions Formalism.MainNotions.TaylorLogMetric Formalism.MainNotions.StandardLatticesGL3 GlobalTheory.NormSum GlobalTheory.InertSign
 open scoped BigOperators
 
@@ -75,7 +141,7 @@ theorem sum_norm_neg {k : Type} [Field k] [Fintype k] (s : k →+* k) (hs : ∀ 
     intro h
     have hmem : a + s a ∈ F := by
       show s (a + s a) = a + s a
-      rw [map_add, hs, add_comm]
+      rw [map_add (f := _), hs, add_comm]
     apply ha
     have := congrArg (fun χ : AddChar F ℂ => χ ⟨a + s a, hmem⟩) h
     simpa only [hφ_apply, AddChar.one_apply] using this
@@ -217,13 +283,13 @@ theorem finsum_norm_neg : ∀ (R : Type) [CommRing R] (σ : R →+* R) (P : Idea
         intro q₁ q₂
         rw [← hχ]
         apply hχ_congr
-        rw [← Ideal.Quotient.eq, map_add, Ideal.Quotient.mk_out, Ideal.Quotient.mk_out,
+        rw [← Ideal.Quotient.eq, map_add (f := _), Ideal.Quotient.mk_out, Ideal.Quotient.mk_out,
           Ideal.Quotient.mk_out] }
   have hψ_mk : ∀ a, ψ (Ideal.Quotient.mk P a) = χ a := fun a =>
     hχ_congr _ _ (by rw [← Ideal.Quotient.eq, Ideal.Quotient.mk_out])
   have hψne : ∃ x, ψ (x + s x) ≠ 1 := by
     obtain ⟨a, ha⟩ := hχa
-    exact ⟨Ideal.Quotient.mk P a, by rw [hs_mk, ← map_add, hψ_mk]; exact ha⟩
+    exact ⟨Ideal.Quotient.mk P a, by rw [hs_mk, ← map_add (f := _), hψ_mk]; exact ha⟩
   obtain ⟨m, hm, hsum⟩ := sum_norm_neg s hs hsne ψ hψne
   refine ⟨m, hm, ?_⟩
   rw [finsum_eq_sum_of_fintype, ← hsum]

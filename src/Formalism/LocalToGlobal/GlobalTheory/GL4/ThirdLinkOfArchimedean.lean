@@ -1,8 +1,52 @@
-import Formalism.LocalToGlobal.GlobalTheory.GL4.ThirdPropositionOfClass
-import Formalism.LocalToGlobal.GlobalTheory.GL4.FockNExtCNu
-import Formalism.LocalToGlobal.GlobalTheory.GL4.MuMaxLeMon
-import Formalism.LocalToGlobal.GlobalTheory.GL4.ShortAtMeanLog
-import Formalism.LocalToGlobal.Columns.MaxSlopeSummandOfFock
+module
+
+public import Formalism.LocalToGlobal.GlobalTheory.GL4.ThirdPropositionOfClass
+public import Formalism.LocalToGlobal.Columns.CoefficientMapHeightBound
+public import Formalism.LocalToGlobal.Columns.MaxSlopeSummandOfFock
+public import Formalism.LocalToGlobal.GlobalTheory.GL4.ColumnLatticeExactSlope
+public import Formalism.LocalToGlobal.GlobalTheory.GL4.FockNExtCNu
+public import Formalism.LocalToGlobal.GlobalTheory.GL4.MuMaxLeMon
+public import Formalism.LocalToGlobal.GlobalTheory.GL4.ShortAtMeanLog
+import Formalism.SharpRestriction.GlobalSchurBounds.TotallyPositiveTraceGeOfNormDiscr
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Module NumberField IsDedekindDomain
 
@@ -64,8 +108,6 @@ theorem slopeMaxClass_of_map (D : D7) (h : ClassMap D) : SlopeMaxClass D := by
   show muMaxDef ((D.fm u).lat 0).b ((D.fm u).lat 0).X (NC CV c) ≤ _
   rw [hR]
   linarith
-
-theorem Link6F_of_map (h : ∀ D, ClassMap D) : Link6F := Link6F_of_class fun D => slopeMaxClass_of_map D (h D)
 
 end Formalism.L2.GlobalTheoryTheory.TraceIntegrality
 
@@ -149,10 +191,6 @@ theorem class_map_of_archimedean (D : D7) (h : ClassMapT D) : ClassMap D := by
         ∑ τ, (lamCol D u τ (D.R.k - 1) : ℝ) * Real.log (Tu D u) := Finset.sum_sub_distrib _ _
   rw [e]
   linarith
-
-theorem third_link_of_archimedean (h : ∀ D, ClassMapT D) : Link6F := Link6F_of_map fun D => class_map_of_archimedean D (h D)
-
-theorem packetFamily_of_classMapT (h : ∀ D, ClassMapT D) : KudlaFamilyOfMinkowskiTransference := packet_of_third_proposition (third_link_of_archimedean h)
 
 end Formalism.L2.GlobalTheoryTheory.TraceIntegrality
 

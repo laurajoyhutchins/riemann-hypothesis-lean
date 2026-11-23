@@ -1,20 +1,59 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ExistsZeroGt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.DataRigidSt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.DvrLem
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.UnifUniqSt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ThetaVV
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.PhiGenPf
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Uniformization.TXFrame
+public import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.ExpansionBijectiveOverFields
+public import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.TorsionEqOneOfTranslationKeepsRatios
+public import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.ExistsCommVOfLe
+public import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.ExistsGenOfSection
+public import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.ExistsPhiRelSmul
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExistsThetaActs
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.PowEqOneOfPush
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.PtEqOfProportional
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
 import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.LBLocalC
-import Development.AbelianVarietyTheory.Definitions.Uniformization.TXFrame
-import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.ExpansionBijectiveOverFields
-import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.TorsionEqOneOfTranslationKeepsRatios
-import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.ExistsCommVOfLe
-import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.ExistsGenOfSection
-import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.ExistsPhiRelSmul
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.PowEqOneOfPush
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExistsThetaActs
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.PtEqOfProportional
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.LBPull
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits MonoidalCategory CartesianMonoidalCategory MonObj AlgebraicGeometry IsLocalRing
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Out ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.DVR
@@ -92,8 +131,8 @@ section OneField
 
 variable {A : PolAV (Spec (CommRingCat.of (FractionRing R)))} {F : Type} [Field F] [Algebra (FractionRing R) F] {k : ℕ}
 
-variable (A F k) in
 
+variable (A F k) in
 abbrev AbSec : Type := SecOver (abelianBase A F) (LPow A.A A.L (k : ℤ) (TFK (R := R) F))
 
 theorem actVal_unique {θ : ThetaGrp A.A A.L (k : ℤ) (TFK (R := R) F)} {t u u' : AbSec A F k}
@@ -237,8 +276,8 @@ theorem exists_phiVal_pull (hG : GlobalFnsSt) {D : DegPre R} {k : ℕ} {p : QkPt
 variable {I : Ideal R} {D : DegData R I} {A : PolAV (Spec (CommRingCat.of (FractionRing R)))}
   {G : Over (Spec (CommRingCat.of R))} [GrpObj G] [IsCommMonObj G] (U : UnifPre I D A G)
 
-variable (E F) in
 
+variable (E F) in
 def grpPull (k : ℕ) : GroupSec U E k →ₛₗ[algebraMap E F] GroupSec U F k :=
   pullOver U.LG.L _ (whisker_fst E F ((Over.pullback (jK R)).obj G))
     (fun _ => ((Category.assoc _ _ _).symm.trans (congrArg (· ≫ _) (whisker_snd E F _))).symm)
@@ -247,12 +286,14 @@ theorem expandsG_pull (hG : GlobalFnsSt) {k : ℕ} {v : GroupSec U E k} {s : Fam
     (h : U.ExpandsG E k v s) : U.ExpandsG F k (grpPull E F U k v) (famPull D.toPre E F hG k s) := by
   obtain ⟨n, c, x, hx, e₁, e₂⟩ := (expandsG_iff U E k v s).1 h
   refine (expandsG_iff U F k _ _).2 ⟨n, fun i => algebraMap E F (c i), x, hx, ?_, fun α => ?_⟩
-  · rw [e₁, map_sum]
+  · set_option synthInstance.maxHeartbeats 100000 in
+      rw [e₁, map_sum]
     refine Finset.sum_congr rfl fun i _ => (map_smulₛₗ _ _ _).trans (congrArg _ ?_)
     refine sec_ext' U.LG.isLB fun y J hJ => (sval_pullOver _ _ _ _ hJ).trans ((sval_pullOver _ _ _ _ hJ).trans
       (Eq.trans ?_ (sval_pullOver _ _ _ _ hJ).symm))
     rw [Category.assoc, whisker_snd]
   · refine (congrArg (termPull D.toPre E F k α) (e₂ α)).trans ?_
+
     rw [map_sum]
     refine Finset.sum_congr rfl fun i _ => (map_smulₛₗ _ _ _).trans (congrArg _ ?_)
     refine sec_ext' D.toPre.P.isLB fun y J hJ => (sval_pullOver _ _ _ _ hJ).trans ((sval_pullOver _ _ _ _ hJ).trans

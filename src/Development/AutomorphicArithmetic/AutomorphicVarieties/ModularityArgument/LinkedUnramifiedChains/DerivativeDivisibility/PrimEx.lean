@@ -1,4 +1,63 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.LinkedUnramifiedChains.CmpPrime
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.LinkedUnramifiedChains.CmpPrime
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.LocalProperties.Reduced
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Algebra.CharP.Algebra
+public import Mathlib.FieldTheory.IsAlgClosed.AlgebraicClosure
+public import Mathlib.FieldTheory.PrimitiveElement
+public import Mathlib.RingTheory.Localization.Finiteness
+
+@[expose] public section
 
 open Polynomial
 open scoped Pointwise nonZeroDivisors TensorProduct
@@ -22,10 +81,10 @@ private theorem finite_setOf_nat_polynomial_collision {F : Type*} [Field F] [Cha
   let P : (Fin r → F) → Polynomial F := fun u => ∑ i, Polynomial.C (u i) * Polynomial.X ^ (i : ℕ)
   have hev : ∀ u (y : F), (P u).eval y = ∑ i, u i * y ^ (i : ℕ) := by
     intro u y
-    simp [P, Polynomial.eval_finset_sum]
+    simp [P, Polynomial.eval_finsetSum]
   have hco : ∀ u (j : Fin r), (P u).coeff j = u j := by
     intro u j
-    simp only [P, Polynomial.finset_sum_coeff, Polynomial.coeff_C_mul_X_pow]
+    simp only [P, Polynomial.finsetSum_coeff, Polynomial.coeff_C_mul_X_pow]
     rw [Finset.sum_eq_single j]
     · simp
     · intro i _ hij
@@ -180,7 +239,7 @@ private theorem finite_span_mod_and_integral_of_j_dat {O Λ B : Type} [CommRing 
         refine LinearMap.ext fun m => ?_
         rw [Module.algebraMap_end_apply]
         exact (h.hs c m).symm
-      | add p q hp hq => rw [Polynomial.eval₂_add, map_add, hFa, hp, hq]
+      | add p q hp hq => rw [Polynomial.eval₂_add, map_add (f := _), hFa, hp, hq]
       | monomial n c _ =>
         rw [Polynomial.eval₂_mul, Polynomial.eval₂_C, Polynomial.eval₂_X_pow]
         rw [show (lam : Λ →+* B) c = lam c from rfl, hFl, hFp, map_mul, Polynomial.aeval_C, map_pow,
@@ -227,6 +286,7 @@ private theorem finite_setOf_nat_not_primitive_element {Λ R : Type} [CommRing �
   set t : R := ∑ i : Fin r, (s : R) ^ (i : ℕ) * b i with ht
   have hsum : ∀ χ : A →ₐ[L] Ω, χ (ι t) = ∑ i, χ (ι (b i)) * (s : Ω) ^ (i : ℕ) := by
     intro χ
+
     simp only [ht, map_sum, map_mul, map_pow, map_natCast]
     exact Finset.sum_congr rfl fun i _ => mul_comm _ _
   have hsep : ∀ φ ψ : A →ₐ[L] Ω, φ (ι t) = ψ (ι t) → φ = ψ := by
@@ -237,6 +297,7 @@ private theorem finite_setOf_nat_not_primitive_element {Λ R : Type} [CommRing �
     have hB : ∀ y : R, φ (ι y) = ψ (ι y) := by
       intro y
       obtain ⟨c, rfl⟩ := hgen y
+
       simp only [map_sum, map_mul, hχl]
       exact Finset.sum_congr rfl fun i _ => by rw [congr_fun htup i]
     apply AlgHom.coe_ringHom_injective
@@ -282,6 +343,7 @@ theorem UpperTheory.V.J.primEx :
     obtain ⟨a, rfl⟩ := Ideal.Quotient.mk_surjective y
     obtain ⟨c, hc⟩ := hgen a
     refine ⟨c, ?_⟩
+
     rw [Ideal.Quotient.eq.mpr hc, map_sum]
     simp only [map_mul, hmk]
   haveI : Module.Finite Λ (B ⧸ J) := by
@@ -317,6 +379,7 @@ theorem UpperTheory.V.J.primEx :
     refine ⟨c, hc, P, ?_⟩
     rw [← Ideal.Quotient.eq_zero_iff_mem, map_sub, map_mul, ← hmk, hP, Polynomial.aeval_def,
       Polynomial.hom_eval₂]
+
     simp only [map_sum, map_mul, map_pow, map_natCast]
     rw [sub_eq_zero]
     rfl
@@ -333,6 +396,7 @@ theorem UpperTheory.V.J.primEx :
     have hsum : ∀ χ : B →ₐ[O] K,
         χ (∑ i : Fin r, (s : B) ^ (i : ℕ) * b i) = ∑ i, χ (b i) * (s : K) ^ (i : ℕ) := by
       intro χ
+
       simp only [map_sum, map_mul, map_pow, map_natCast]
       exact Finset.sum_congr rfl fun i _ => mul_comm _ _
     have htup : (fun i => x' (b i)) = (fun i => x (b i)) := by
@@ -345,6 +409,7 @@ theorem UpperTheory.V.J.primEx :
       intro χ hχ
       have := RingHom.mem_ker.mp (hχ hc)
       rw [map_sub, sub_eq_zero] at this
+
       rw [this, map_sum]
       simp only [map_mul]
     rw [e1 x' hx', e1 x hx]

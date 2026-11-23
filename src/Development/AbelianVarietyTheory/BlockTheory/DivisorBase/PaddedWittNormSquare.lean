@@ -1,7 +1,47 @@
-import Mathlib
-import Formalism.LocalToGlobal.KernelLattices.ThDistC
-import Formalism.LocalToGlobal.Divisibility.CoefMod
-import Formalism.LogFactorialIndices.StatementSize
+module
+
+public import Formalism.LocalToGlobal.KernelLattices.ThDistC
+public import Formalism.LogFactorialIndices.StatementSize
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -46,8 +86,6 @@ def BlockBound : Prop :=
     (∀ τ, ‖cD τ * (r τ : ℂ)‖ ^ 2 = 1 / Om τ) →
     OpNormSqLe lam lam' (jetOp lam lam' (jetC cD G) fun τ => lastEntry (ν τ)) (tmax b ν Om S)
 
-example : Formalism.LatticeIndexTer.ph 0 = 0 := by simp [Formalism.LatticeIndexTer.ph]
-
 theorem natW_eq_padZero {a b : ℕ} (hab : a ≤ b) {lam ν : DomWeight a} {lam' : DomWeight b} {s' s : ℤ}
     (h : IsStepWeight lam ν lam' s' s) (hg : a < b ∨ lastEntry ν = 0) (i : Fin b) :
     ((lam'.natW i : ℕ) : ℤ) = padZero b ν i := by
@@ -69,7 +107,7 @@ theorem natW_eq_padZero {a b : ℕ} (hab : a ≤ b) {lam ν : DomWeight a} {lam'
       · have ha : 0 < a := by omega
         have hz : ν.w ⟨a - 1, by omega⟩ ≤ 0 := by
           unfold lastEntry DomWeight.detShift at hg
-          rw [dif_pos ha] at hg
+          rw [dite_eq_left ha] at hg
           exact Int.toNat_eq_zero.mp hg
         have hidx : (⟨j0.1, hlt⟩ : Fin a) = ⟨a - 1, by omega⟩ := Fin.ext (by simp [j0]; omega)
         rw [hidx]
@@ -77,7 +115,7 @@ theorem natW_eq_padZero {a b : ℕ} (hab : a ≤ b) {lam ν : DomWeight a} {lam'
     · rfl
   have hshift : lam'.detShift = -s := by
     unfold DomWeight.detShift
-    rw [dif_pos hb]
+    rw [dite_eq_left hb]
     show lam'.w j0 = -s
     have h30 := h3 j0
     rw [hlast] at h30
@@ -86,20 +124,5 @@ theorem natW_eq_padZero {a b : ℕ} (hab : a ≤ b) {lam ν : DomWeight a} {lam'
   rw [hshift]
   have hw : lam'.w i - -s = padZero b ν i := by linarith [h3 i]
   rw [hw, Int.toNat_of_nonneg (hpad i)]
-
-example : ∃ (lam ν : DomWeight 1) (lam' : DomWeight 2) (s' s : ℤ),
-    IsStepWeight lam ν lam' s' s ∧ lastEntry ν = 3 ∧ wtSize ν = 3 := by
-  refine ⟨⟨fun _ => 0, fun _ _ _ => le_rfl⟩, ⟨fun _ => 3, fun _ _ _ => le_rfl⟩,
-    ⟨![2, -1], by decide⟩, 3, 1, ⟨fun _ => rfl, fun _ => by simp, ?_⟩, rfl, rfl⟩
-  intro i
-  fin_cases i <;> rfl
-
-example (z : VCx Unit 1 2) : ‖z () 0 0‖ ≤ 1 * Real.exp (unitNormSq (fun _ => 1) z / 2) := by
-  have h1 : ‖z () 0 0‖ ^ 2 ≤ unitNormSq (fun _ => 1) z := by
-    simp only [unitNormSq, Finset.univ_unique, Finset.sum_singleton, Fin.sum_univ_two, Complex.ofReal_one, one_mul]
-    have := sq_nonneg ‖z () 1 0‖
-    simpa using this
-  have h2 := Real.add_one_le_exp (unitNormSq (fun _ => (1 : ℝ)) z / 2)
-  nlinarith [sq_nonneg (‖z () 0 0‖ - 1)]
 
 end GlobalTheory.IndefiniteRowSideFullHecke.PaddedWittNormSquare

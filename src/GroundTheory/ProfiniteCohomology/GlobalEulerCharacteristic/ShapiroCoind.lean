@@ -1,7 +1,53 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.GlobalEulerCharacteristic.ShapiroDefs
-import GroundTheory.ProfiniteCohomology.EulerChar
-import GroundTheory.ProfiniteCohomology.RestrictedRamification.BaseChangeModules
+module
+
+public import GroundTheory.ProfiniteCohomology.GlobalEulerCharacteristic.ShapiroDefs
+public import GroundTheory.ProfiniteCohomology.EulerCharDefs
+public import Mathlib.GroupTheory.Index
+public import Mathlib.Topology.Algebra.ContinuousMonoidHom
+public import GroundTheory.ProfiniteCohomology.RestrictedRamification.BaseChangeModules
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
@@ -91,13 +137,6 @@ theorem quotientComapMap_mk (g : G) :
     quotientComapMap π D (QuotientGroup.mk g) = QuotientGroup.mk (π g) :=
   rfl
 
-theorem quotientComapMap_smul (g : G) (x : G ⧸ D.comap π) :
-    quotientComapMap π D (g • x) = π g • quotientComapMap π D x := by
-  induction x using QuotientGroup.induction_on with
-  | H y =>
-    rw [MulAction.Quotient.smul_mk, quotientComapMap_mk, quotientComapMap_mk, MulAction.Quotient.smul_mk,
-      smul_eq_mul, smul_eq_mul, map_mul]
-
 variable {π} (hπ : Function.Surjective π)
 
 include hπ in
@@ -121,24 +160,6 @@ noncomputable def quotientComapEquiv : G ⧸ D.comap π ≃ Γ ⧸ D :=
   Equiv.ofBijective _ (quotientComapMap_bijective D hπ)
 
 variable (X : Rep.{u} k Γ)
-
-noncomputable def resFunDiagEquiv :
-    (Rep.res π (funDiagRep (Γ ⧸ D) X)).ρ.Equiv (funDiagRep (G ⧸ D.comap π) (Rep.res π X)).ρ where
-  toLinearEquiv := LinearEquiv.funCongrLeft k X (quotientComapEquiv D hπ)
-  isIntertwining' g := by
-    refine LinearMap.ext fun F => funext fun y => ?_
-    change X.ρ (π g) (F ((π g)⁻¹ • quotientComapMap π D y)) =
-      X.ρ (π g) (F (quotientComapMap π D (g⁻¹ • y)))
-    rw [quotientComapMap_smul, map_inv]
-
-noncomputable def resFunDiagRepIso :
-    Rep.res π (funDiagRep (Γ ⧸ D) X) ≅ funDiagRep (G ⧸ D.comap π) (Rep.res π X) :=
-  Rep.mkIso (resFunDiagEquiv D hπ X)
-
-noncomputable def resFunDiagRepIsoCoindRes :
-    Rep.res π (funDiagRep (Γ ⧸ D) X) ≅
-      Rep.coind (D.comap π).subtype (Rep.res (D.comap π).subtype (Rep.res π X)) :=
-  resFunDiagRepIso D hπ X ≪≫ (coindResIsoFunDiagRep (D.comap π) (Rep.res π X)).symm
 
 end Inflation
 

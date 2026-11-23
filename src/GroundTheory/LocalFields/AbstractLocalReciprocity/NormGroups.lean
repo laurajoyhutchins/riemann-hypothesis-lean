@@ -1,5 +1,55 @@
-import Mathlib
-import GroundTheory.LocalFields.AbstractLocalReciprocity.Isomorphism
+module
+
+public import GroundTheory.LocalFields.AbstractLocalReciprocity.ReciprocityMap
+public import GroundTheory.LocalFields.AbstractLocalReciprocity.Isomorphism
+import GroundTheory.LocalFields.AbstractLocalReciprocity.UniqueQuotientSubgroupOfSelf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Algebra.ClopenNhdofOne
+import Mathlib.Topology.Compactness.Paracompact
+import Mathlib.Topology.Separation.Connected
+public import GroundTheory.LocalFields.AbstractLocalReciprocity.Functoriality
+public import GroundTheory.LocalFields.AbstractLocalReciprocity.IsoPGroup
+
+@[expose] public section
 
 namespace GroundTheory.LocalField.Abstract
 
@@ -210,15 +260,6 @@ theorem normGroup_le_normGroup_iff (hL : IsAbelianExtension K L) (hL' : IsAbelia
   exact (D.mem_normGroup_iff_of_reciprocity hax hL' h2).1
     (h ((D.mem_normGroup_iff_of_reciprocity hax hL h1).2 hg))
 
-theorem normGroup_eq_normGroup_iff (hL : IsAbelianExtension K L) (hL' : IsAbelianExtension K L') :
-    normGroup A K L = normGroup A K L' ↔ L = L' := by
-  rw [le_antisymm_iff, le_antisymm_iff, D.normGroup_le_normGroup_iff hax hL hL',
-    D.normGroup_le_normGroup_iff hax hL' hL]
-
-theorem normGroup_injective (K : OpenSubgroup G) :
-    Function.Injective fun L : {L : OpenSubgroup G // IsAbelianExtension K L} => normGroup A K L :=
-  fun L L' h => Subtype.ext ((D.normGroup_eq_normGroup_iff hax L.2 L'.2).1 h)
-
 theorem exists_normGroup_eq_of_le_of_isAbelianExtension (hL : IsAbelianExtension K L)
     {B : Subgroup (fixedModule A (K : Subgroup G))} (hB : normGroup A K L ≤ B) :
     ∃ H : OpenSubgroup G, IsAbelianExtension K H ∧ L ≤ H ∧ normGroup A K H = B := by
@@ -258,14 +299,6 @@ theorem exists_normGroup_eq_of_le (hLK : L ≤ K) {B : Subgroup (fixedModule A (
   obtain ⟨H, hH, hMH, e⟩ :=
     D.exists_normGroup_eq_of_le_of_isAbelianExtension hax (isAbelianExtension_maxAbelian hLK) hB
   exact ⟨H, hH, (le_maxAbelian hLK).trans hMH, e⟩
-
-theorem index_normGroup (hL : IsAbelianExtension K L) :
-    (normGroup A K L).index = (L : Subgroup G).relIndex K := by
-  have := hL.normal
-  have := hL.isMulCommutative
-  rw [Subgroup.index_eq_card, ← card_quotient_eq_relIndex]
-  exact (Nat.card_congr
-    (Equiv.ofBijective _ (reciprocity_bijective_of_isMulCommutative (D := D) hL.le hax))).symm
 
 end Correspondence
 

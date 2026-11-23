@@ -1,5 +1,43 @@
-import Formalism.SharpRestriction.Divisibility.WeightAlgebra
-import Formalism.LocalToGlobal.ProjectiveLattices.EmbKCoe
+module
+
+public import Formalism.SharpRestriction.Divisibility.WeightAlgebra
+public import Formalism.LocalToGlobal.ProjectiveLattices.EmbKCoe
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -34,8 +72,6 @@ namespace Par
 
 variable (Q : Par D)
 
-abbrev K : Type := Q.c.F
-
 def PinHost : Prop :=
   Q.H.d = D.host.d ∧ (Q.H.rt : D.host.E) = D.host.sqrtMinusD ∧ Q.H.rt0 = D.host.φ₀ D.host.sqrtMinusD ∧
     ∀ t : D.what₂.Tau, DV.tauEmb D t (Q.H.rt : D.host.E) = Q.H.rt0
@@ -59,11 +95,11 @@ theorem partitionExtendByZero_antitone {p : ℕ} {f : Fin p → ℕ} (hf : Antit
   intro i k hik
   unfold ext0
   by_cases hk : k < p
-  · rw [dif_pos hk, dif_pos (lt_of_le_of_lt hik hk)]; exact hf hik
-  · rw [dif_neg hk]; exact Nat.zero_le _
+  · rw [dite_eq_left hk, dite_eq_left (lt_of_le_of_lt hik hk)]; exact hf hik
+  · rw [dite_eq_right hk]; exact Nat.zero_le _
+
 
 open Classical in
-
 def wtA {j : ℕ} (w : WeightFamilies.Wt D j) (x : (D.host.E →+* ℂ) × ℕ) : ℕ :=
   ∑ t : D.what₂.Tau, ((if x.1 = DV.tauEmb D t then ext0 (w.aP t) x.2 else 0) +
     if x.1 = conjEmb (DV.tauEmb D t) then ext0 (w.aM t) x.2 else 0)

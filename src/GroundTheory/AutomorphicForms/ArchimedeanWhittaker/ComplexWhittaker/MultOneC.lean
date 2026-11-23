@@ -1,5 +1,60 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.ArchimedeanWhittaker.ComplexWhittaker.IsClosedDivisorComponent
+module
+
+public import GroundTheory.AutomorphicForms.ArchimedeanWhittaker.ComplexWhittaker.IsClosedDivisorComponent
+import GroundTheory.AutomorphicForms.RealGroupsIwasawa
+import GroundTheory.AutomorphicForms.RealGroupsKAK
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.CStarAlgebra.Matrix
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Algebra.Star.Unitary
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import GroundTheory.AutomorphicForms.ArchimedeanWhittaker.FiltrationCocycleLiftCriterion
+public import GroundTheory.AutomorphicForms.ArchimedeanWhittaker.MultOne
+
+@[expose] public section
 
 namespace GroundTheory.Automorphic.ArchWhittakerC
 
@@ -34,6 +89,10 @@ def transposeHomeo : U2 ≃ₜ U2 where
 
 theorem map_transpose_μK : Measure.map transposeU μK = μK := by
   have hmeas : Measurable transposeU := continuous_transposeU.measurable
+  haveI : μK.IsMulRightInvariant := by
+    refine ⟨fun g => ?_⟩
+    haveI : (Measure.map (· * g) μK).IsHaarMeasure := Measure.isHaarMeasure_map_mul_right μK g
+    exact Measure.isHaarMeasure_eq_of_isProbabilityMeasure _ _
   haveI : (Measure.map transposeU μK).IsMulLeftInvariant := by
     refine ⟨fun g => ?_⟩
     rw [Measure.map_map (measurable_const_mul g) hmeas]
@@ -47,7 +106,7 @@ theorem map_transpose_μK : Measure.map transposeU μK = μK := by
         exact (hU.preimage continuous_transposeU).measure_ne_zero μK
           (by obtain ⟨u, hu⟩ := hne; exact ⟨transposeU u, by simpa [transposeU_transposeU] using hu⟩)⟩ }
   haveI : IsProbabilityMeasure (Measure.map transposeU μK) :=
-    Measure.isProbabilityMeasure_map hmeas.aemeasurable
+    by infer_instance
   exact Measure.isHaarMeasure_eq_of_isProbabilityMeasure _ _
 
 theorem integral_transpose_K {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] (f : U2 → E) :
@@ -126,6 +185,7 @@ theorem inner_Q_map_dC_eq_zero (n : ℕ) (q : ℤ) {i j : ℕ} (hi : i ≤ n) (h
 theorem inner_sum_smul_sum {ι : Type*} (s : Finset ι) (a b : ι → ℂ) (u v : ι → H) (T : H →L[ℂ] H) :
     ⟪∑ j ∈ s, a j • u j, T (∑ i ∈ s, b i • v i)⟫_ℂ =
       ∑ j ∈ s, ∑ i ∈ s, conj (a j) * b i * ⟪u j, T (v i)⟫_ℂ := by
+
   rw [map_sum, sum_inner]
   refine Finset.sum_congr rfl fun j _ => ?_
   rw [inner_sum]
@@ -164,9 +224,6 @@ theorem inner_map_iotaC {n : ℕ} {q : ℤ} {x y : H} (hx : x ∈ W σ n q) (hy 
     inner_map_kak σ hx hy, transposeU_transposeU]
   refine Finset.sum_congr rfl fun i _ => ?_
   ring
-
-instance completeSpace_alt (n : ℕ) (q : ℤ) : CompleteSpace (W σ n q) :=
-  (isClosed_divisorComponent σ n q).completeSpace_coe
 
 noncomputable def compr (n : ℕ) (q : ℤ) (g : GL2C) : W σ n q →L[ℂ] W σ n q :=
   ((PL σ n q).comp ((σ g).comp (W σ n q).subtypeL)).codRestrict (W σ n q)

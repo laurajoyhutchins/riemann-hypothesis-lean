@@ -1,7 +1,52 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.GlobalClassFormation.SumInvariants
-import GroundTheory.ProfiniteCohomology.GlobalClassFormation.LocalDegreeGen
-import GroundTheory.ProfiniteCohomology.GlobalClassFormation.ClassSplit
+module
+
+public import GroundTheory.ProfiniteCohomology.GlobalClassFormation.SignsCup
+import GroundTheory.ProfiniteCohomology.Colimit
+public import GroundTheory.ProfiniteCohomology.GlobalClassFormation.LocalDegreeGen
+public import GroundTheory.ProfiniteCohomology.GlobalClassFormation.RealPlaces
+public import GroundTheory.ProfiniteCohomology.GlobalClassFormation.SumInvariants
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
@@ -9,8 +54,6 @@ namespace GroundTheory.ProfCoh
 open CategoryTheory NumberField IntermediateField GroundTheory.Global FiniteSubfield IsDedekindDomain
 
 open scoped DirectSum GroundTheory.Global.SemiLocal
-
-local notation "ℚ̄" => AlgebraicClosure ℚ
 
 noncomputable section
 
@@ -27,8 +70,8 @@ theorem idelesSumInv_unitsToIdeles (x : cohomology (unitsLimitRep K) 2) :
     idelesSumInv ι ((unitsToIdeles K 2).hom x) = 0 :=
   brauerSumInv_eq_zero ι x
 
-variable (K) in
 
+variable (K) in
 theorem sumPlaceInv_surjective : Function.Surjective (sumPlaceInv K) := by
   classical
   intro q
@@ -60,7 +103,7 @@ theorem exists_sub_unitsToIdeles_iChar_inl_eq_zero (y : cohomology (limitRep K) 
   change _ - brauerLocal ι (globalCupClass (iChar K) a) (.inl v) = 0
   by_cases hv : v.IsReal
   · apply placeInv_injective (.inl v)
-    rw [map_sub, map_zero, sub_eq_zero, placeInv_brauerLocal_globalCupClass_iChar, dif_pos hv]
+    rw [map_sub, map_zero, sub_eq_zero, placeInv_brauerLocal_globalCupClass_iChar, dite_eq_left hv]
     have hs := ha ⟨v, hv⟩
     simp only [decide_eq_true_eq] at hs
     rcases placeInv_inl_eq_zero_or_eq_half v (idelesLimitCohomologyEquiv ι (by norm_num : 1 ≤ 2) y (.inl v))
@@ -93,9 +136,16 @@ theorem exists_idelesSumInv_eq_one_div :
   choose t ht using ht
   let D : ⨁ u : Place K.1, localGaloisCohomology K 2 u := ∑ u ∈ s, DirectSum.of _ (.inr u) (t u)
   refine ⟨(idelesLimitCohomologyEquiv ι (by norm_num : 1 ≤ 2)).symm D, ?_, fun v => ?_, fun v w => ?_⟩
+
   · rw [idelesSumInv_apply, AddEquiv.apply_symm_apply, map_sum]
-    simp_rw [sumPlaceInv_of, ht]
+    have h : (∑ u ∈ s, sumPlaceInv K (DirectSum.of _ (.inr u) (t u))) =
+        ∑ u ∈ s, QZ.mk (c u / localDegree E u) := by
+      apply Finset.sum_congr rfl
+      intro u hu
+      rw [sumPlaceInv_of, ht]
+    rw [h]
     change ∑ u ∈ s, QZ.mkHom (c u / localDegree E u) = _
+
     rw [← map_sum]
     change QZ.mk _ = _
     congr 1
@@ -114,6 +164,7 @@ theorem exists_idelesSumInv_eq_one_div :
     rw [Finset.sum_congr rfl hdu, ← Finset.sum_div, hsumQ]
   · rw [AddEquiv.apply_symm_apply, DFinsupp.finsetSum_apply]
     exact Finset.sum_eq_zero fun u _ => DirectSum.of_eq_of_ne _ _ _ (by simp)
+
   · rw [AddEquiv.apply_symm_apply, DFinsupp.finsetSum_apply, map_sum, Finset.smul_sum]
     refine Finset.sum_eq_zero fun u hu => ?_
     by_cases huv : u = v

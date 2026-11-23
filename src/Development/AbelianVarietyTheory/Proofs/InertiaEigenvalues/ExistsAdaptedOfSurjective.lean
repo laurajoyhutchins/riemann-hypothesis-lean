@@ -1,18 +1,60 @@
-import Mathlib
-import Development.AbelianVarietyTheory.BlockTheory.NonGaloisCusps.DualExactSequence
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.AcrisTorsionFreeComplete
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.AssociatedPowOfUnits
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.NonGaloisCusps.DualExactSequence
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.AcrisTorsionFreeComplete
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsComponentEquiv
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.AntitoneFiltrationExistsAdaptedLinearIndepSet
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.AssociatedPowOfUnits
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ConcretePeriodDeRhamModuleFinrankLeStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.DeRhamComparisonIsFilteredStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsFinBasisSubsetOfIsField
 import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsFinExt
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsComponentEquiv
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.AntitoneFiltrationExistsAdaptedLinearIndepSet
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IndepOfLinearIndependentDdRE
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.FinrankMulLeFinrankDdROfSpans
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsFinBasisSubsetOfIsField
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.MemSpanDOfFixed
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.DeRhamComparisonIsFilteredStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ConcretePeriodDeRhamModuleFinrankLeStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.InjectiveTensorBcrisToBdR
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.NonemptyThetaOnBdRPlusPeriodData
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.FinrankMulLeFinrankDdROfSpans
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IdemNotMemFilVOne
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IndepOfLinearIndependentDdRE
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.InjectiveTensorBcrisToBdR
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.MemSpanDOfFixed
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.NonemptyThetaOnBdRPlusPeriodData
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -58,7 +100,7 @@ theorem exists_adapted_of_surjective (hF : IsField F) [FiniteDimensional LL V'] 
     have qa : ∀ x y, q x → q y → q (x + y) := by
       rintro x y ⟨r, hr, hx⟩ ⟨s, hs, hy⟩
       exact ⟨r + s, fun p => Submodule.add_mem _ (hr p) (hs p), by
-        simp only [map_add, hx, hy, Pi.add_apply, LinearMap.add_apply, Finset.sum_add_distrib]⟩
+        simp only [map_add (f := _), hx, hy, Pi.add_apply, LinearMap.add_apply, Finset.sum_add_distrib]⟩
     have qs : ∀ (c : LL) x, q x → q (c • x) := by
       rintro c x ⟨r, hr, hx⟩
       exact ⟨c • r, fun p => Submodule.smul_mem _ _ (hr p), by
@@ -68,7 +110,7 @@ theorem exists_adapted_of_surjective (hF : IsField F) [FiniteDimensional LL V'] 
       intro a b hb x hx
       induction hx using Submodule.span_induction with
       | zero => simpa using q0
-      | add x y _ _ hx hy => rw [map_add]; exact qa _ _ hx hy
+      | add x y _ _ hx hy => rw [map_add (f := _)]; exact qa _ _ hx hy
       | smul c x _ hx => rw [map_smul]; exact qs _ _ hx
       | mem x hx =>
         obtain ⟨i, hi, rfl⟩ := hx
@@ -84,6 +126,7 @@ theorem exists_adapted_of_surjective (hF : IsField F) [FiniteDimensional LL V'] 
     obtain ⟨x, hx, rfl⟩ := exists_ext_mem_FilV PD g hs hy
     obtain ⟨m', k', b, e, he, rfl⟩ := h n x hx
     change q _
+
     rw [map_sum, map_sum]
     refine Finset.sum_induction _ q qa q0 fun i _ => ?_
     rw [ext_mulR, ← sm_one_tmul, sm_comm, sm_one_tmul, ← ext_sm]
@@ -199,9 +242,6 @@ theorem ddRSpanAt : DdRSpanAt P K LL := by
   · rintro _ ⟨c, x, hx, rfl⟩
     exact mulR_mem_DdR (P.PD K) L.ρ c (ιV_mem_DdR (P.PD K) L.ρ hx)
 
-theorem ddRInjAt : DdRInjAt P K LL := fun _ _ m c x hc _ h =>
-  (tensInj T K).tensor (LL := ↥LL.1) m c hc x h
-
 theorem componentIsoAt : ComponentIsoAt P K LL := by
   intro L h τ
   have := K.2
@@ -296,8 +336,8 @@ theorem potCrysDeRhamAt : PotCrysDeRhamAt P K LL := fun L K' hK h =>
   isDR_of_spans T K LL L.ρ (GlobalTheory.DRFil.spans_descent l P K K' LL hK L.V L.ρ
     ((filSpans T K' LL _ (crys T K' LL _ h).1).spans _))
 
-omit T in
 
+omit T in
 theorem deRhamComparison (l : ℕ) [Fact l.Prime] (P : LocPrime l) (AI : LocAinf l P)
     (h : GlobalTheory.Per.IsStd P AI) : DeRhamComparison l P := by
   obtain ⟨T⟩ := h

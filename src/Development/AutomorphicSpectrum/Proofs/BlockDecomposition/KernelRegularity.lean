@@ -1,18 +1,61 @@
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FactorRapid
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.RapidFactorizationStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.EigenvalueAdjointFactsStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.KernelRowExistsStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.KernelRowMatrixStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.KernelAdjointSmoothStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LeftTranslateSobolevStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LeftTranslateCommutesStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.KernelRowLeftInvariantStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.KernelActionFormulaStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.WaveRepresentationStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.WaveUniquenessStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.PhiResolventIdentityStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.WaveIntegralIdentityStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.KernelRowSupportStatement
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FactorRapid
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.EigenvalueAdjointFactsStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.KernelActionFormulaStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.KernelAdjointSmoothStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.KernelRowExistsStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.KernelRowLeftInvariantStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.KernelRowMatrixStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.KernelRowSupportStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LeftTranslateCommutesStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LeftTranslateSobolevStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.PhiResolventIdentityStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.RapidFactorizationStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.WaveIntegralIdentityStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.WaveRepresentationStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.WaveUniquenessStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -29,7 +72,7 @@ attribute [local instance] Matrix.normedAddCommGroup Matrix.normedSpace
 theorem coe_toC0 {f : ℝ → ℂ} (h₁ : Continuous f) (h₂ : Tendsto f (cocompact ℝ) (𝓝 0)) (y : ℝ) : toC0 f y = f y := by
   have : Continuous f ∧ Tendsto f (cocompact ℝ) (𝓝 0) := ⟨h₁, h₂⟩
   simp only [toC0]
-  rw [dif_pos this]
+  rw [dite_eq_left this]
   rfl
 
 theorem adj_rho {n : ℕ} (E : KMod n) [CompleteSpace E.V] (k : Matrix.unitaryGroup (Fin n) ℂ) :

@@ -1,4 +1,47 @@
-import Formalism.GaussJetBounds.StatementN
+module
+
+public import Formalism.GaussJetBounds.StatementN
+public import Formalism.GaussJetBounds.StatementI
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 open scoped BigOperators
@@ -9,24 +52,7 @@ namespace Formalism.DworkPowerSeriesWeights
 
 def IntOp : Prop :=
   ∀ (K : Type u) [NormedField K] [IsUltrametricDist K] (ι : Type) (Th : MvPowerSeries ι K),
-    JetsIntegral Th → ∀ P : MvPolynomial ι K, (∀ n, ‖MvPolynomial.coeff n P‖ ≤ 1) →
+    JetsIntegral Th → ∀ P : MvPolynomial ι K, (∀ n, ‖AddMonoidAlgebra.coeff P n‖ ≤ 1) →
       ‖jetPair P Th‖ ≤ 1
-
-def MatchBound : Prop :=
-  ∀ (K : Type u) [NormedField K] [IsUltrametricDist K] [CharZero K] (pi : ℝ), 0 < pi → pi < 1 →
-    ∀ (ι : Type) [Fintype ι] (c : ι → ι → K) (S : K) (sg : MvPowerSeries ι K) (n : ℕ)
-      (L : Fin n → ι → K), (∀ x y, ‖c x y‖ ≤ 1) → ‖S‖ ≤ pi ^ (-(1 / 2 : ℝ)) → JetsIntegral sg →
-      (∀ i x, ‖L i x‖ ≤ 1) → ∀ M : ℕ,
-      (∀ σ : Equiv.Perm (Fin n), σ * σ = 1 → (∀ i, i < σ i → polar c (L i) (L (σ i)) ≠ 0) →
-        (Finset.univ.filter (fun i => i < σ i)).card ≤ M) →
-      ‖jetPair (∏ i, linForm (L i)) (mvExp ((-S) • quadSer c) * sg)‖ ≤ pi ^ (-(1 / 2 : ℝ) * M)
-
-def SizesE : Prop :=
-  ∀ (H : Type) [Fintype H] [DecidableEq H] (TT : Finset H) (c wt wt' : H → ℝ) (f k b b' : ℝ),
-    (Fintype.card H : ℝ) = f / 2 → 1 ≤ k → 0 ≤ b → 0 ≤ b' → (∀ t, 0 ≤ c t) →
-    (∀ t, t ∉ TT → c t ≤ 4 * k * b') → (∀ t, t ∈ TT → c t ≤ 4 * k * b' + 2 * b) →
-    (∀ t, 0 ≤ wt t ∧ wt t ≤ 2 * b') → (∀ t, 0 ≤ wt' t) →
-    |(-((k - 1) / 2) * ∑ t, min (wt t) (wt' t)) + (1 / 2) * ∑ t, c t| ≤
-      (TT.card : ℝ) * b + 2 * f * k * b'
 
 end Formalism.DworkPowerSeriesWeights

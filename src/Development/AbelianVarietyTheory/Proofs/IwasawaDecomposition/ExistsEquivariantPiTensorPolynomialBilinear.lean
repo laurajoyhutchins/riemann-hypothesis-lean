@@ -1,7 +1,54 @@
-import Mathlib
-import Formalism.SharpRestriction.CuspSpanNormBounds.RelevantZeroGramTerms
-import ReciprocityTheory.DualLattices.FischerSelfNeZero
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.TotalDegreeSubstFLe
+module
+
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.TotalDegreeSubstFLe
+public import Mathlib.LinearAlgebra.PiTensorProduct.Basic
+public import Mathlib.RingTheory.MvPolynomial.IrreducibleQuadratic
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Formalism.SharpRestriction.CuspSpanNormBounds.Point
+public import Mathlib.LinearAlgebra.Dual.Lemmas
+public import Mathlib.LinearAlgebra.Multilinear.Basis
+
+@[expose] public section
 
 noncomputable section
 
@@ -15,7 +62,7 @@ open MvPolynomial
 variable {ι σ : Type} [Fintype ι]
 
 def prodRename [DecidableEq ι] :
-    MultilinearMap ℂ (fun _ : ι => MvPolynomial σ ℂ) (MvPolynomial (ι × σ) ℂ) :=
+    (ι → MvPolynomial σ ℂ) →ₘₗ[ℂ] MvPolynomial (ι × σ) ℂ :=
   (MultilinearMap.mkPiAlgebra ℂ ι (MvPolynomial (ι × σ) ℂ)).compLinearMap
     fun i => (rename (Prod.mk i) : MvPolynomial σ ℂ →ₐ[ℂ] _).toLinearMap
 
@@ -26,8 +73,8 @@ theorem prodRename_apply [DecidableEq ι] (P : ι → MvPolynomial σ ℂ) :
 theorem sum_mapDomain_apply (a : ι → σ →₀ ℕ) (j : ι) (s : σ) :
     (∑ i, Finsupp.mapDomain (Prod.mk i) (a i)) (j, s) = a j s := by
   classical
-  rw [Finsupp.finset_sum_apply, Finset.sum_eq_single j]
-  · exact Finsupp.mapDomain_apply (Prod.mk_right_injective j) _ _
+  rw [Finsupp.finsetSum_apply, Finset.sum_eq_single j]
+  · exact Finsupp.mapDomain_apply_of_injective (Prod.mk_right_injective j) _ _
   · intro i _ hi
     refine Finsupp.mapDomain_notin_range _ _ ?_
     rintro ⟨t, ht⟩
@@ -92,6 +139,7 @@ theorem substF_rename {N n : ℕ} (h : ι → Matrix (Fin N) (Fin N) ℂ) (g : �
     substF h g (rename (Prod.mk i) P) = rename (Prod.mk i) (subst2 (h i) (g i) P) := by
   have key : (substF h g).comp (rename (Prod.mk i)) = (rename (Prod.mk i)).comp (subst2 (h i) (g i)) := by
     refine algHom_ext fun p => ?_
+
     simp only [AlgHom.comp_apply, rename_X, substF_X, subst2_X, map_sum, map_mul, rename_C]
   exact congrArg (fun f => f P) key
 
@@ -134,7 +182,7 @@ theorem exists_tensor : ∀ (ι : Type) [Fintype ι] (N n : ℕ) (A B : ι → T
       rw [e, map_smul (substF h g), smul_comm, map_smul (tens I), LinearMap.smul_apply, this, map_smul (tens I),
         LinearMap.smul_apply, map_smul]
     | add p q hp hq =>
-      rw [map_add, smul_add, map_add, LinearMap.add_apply, hp, hq, map_add (tens I),
+      rw [map_add (f := _), smul_add, map_add (f := _), LinearMap.add_apply, hp, hq, map_add (tens I),
         LinearMap.add_apply, map_add]
 
 end GlobalTheory.CompactHowe.PolyTensor

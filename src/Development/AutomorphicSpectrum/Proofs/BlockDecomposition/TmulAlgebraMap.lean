@@ -1,11 +1,52 @@
-import Mathlib
-import Development.WeilBound.RepresentationTheoryGL.SiegelWeilProof.BaseOneSide.PsiSide
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.LocalLatticeCompactOpenUnitVolumeStatement
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.GramFiberMeasuresContinuityStatement
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.SiegelWeilProof.BaseOneSide.PsiSide
 import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.IntegralAlmostAllPlaces
 import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.LocalDensitiesBoundedAlmostAll
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.CompletionIsLocalRing
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.IsSquareMulOfNonsquareUnits
+import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.IsSquareOfValuedSubOneLt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open HeckeCharacterZeroLocus.SiegelWeilU GlobalTheory.CompanionTheory.SW NumberField IsDedekindDomain MeasureTheory Topology Filter
 open PositivityTheory.SiegelWeilFormula.Densx PositivityTheory.Rg.Base1
@@ -19,8 +60,8 @@ section Alg
 
 variable {F E : Type} [Field F] [Field E] [Algebra F E]
 
-variable (F) in
 
+variable (F) in
 def cd (δ : E) {R : Type} [CommRing R] [Algebra F R] (a c : R) : R ⊗[F] E :=
   a ⊗ₜ[F] (1 : E) + c ⊗ₜ[F] δ
 
@@ -35,7 +76,7 @@ theorem exists_basis [CharZero F] (σ : E →ₐ[F] E) (hfr : Module.finrank F E
     rw [LinearIndependent.pair_iff]
     intro s t hst
     have h1 := congrArg σ hst
-    simp only [map_add, map_smul, map_one, hσ, map_zero, smul_neg] at h1
+    simp only [map_add (f := _), map_smul, map_one, hσ, map_zero, smul_neg] at h1
     have h2 : (2 * s) • (1 : E) = 0 := by
       have : (2 * s) • (1 : E) = (s • (1 : E) + t • δ) + (s • (1 : E) + -(t • δ)) := by
         rw [mul_smul, two_smul]; abel_nf
@@ -100,8 +141,8 @@ section Model
 
 variable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E]
 
-open GlobalTheory.CompanionTheory.SW.GoodInt GlobalTheory.CompanionTheory.SW.GoodMass in
 
+open GlobalTheory.CompanionTheory.SW.GoodInt GlobalTheory.CompanionTheory.SW.GoodMass in
 theorem model (σ : E →ₐ[F] E) (hcm : IsCMExt F E σ) (J : Matrix (Fin 1) (Fin 1) E) (hJ : IsHermND σ J)
     {d : ℕ} (b : Module.Basis (Fin d) F E) :
     ∃ (δ : E) (D j₀ : F) (b2 : Module.Basis (Fin 2) F E), b2 0 = 1 ∧ b2 1 = δ ∧ σ δ = -δ ∧
@@ -145,7 +186,8 @@ theorem model (σ : E →ₐ[F] E) (hcm : IsCMExt F E σ) (J : Matrix (Fin 1) (F
         ∑ k, (Algebra.TensorProduct.basis (Fv F v) b).repr y k * algebraMap F (Fv F v) (b2.repr (b k) l) := by
       intro l
       conv_lhs => rw [← (Algebra.TensorProduct.basis (Fv F v) b).sum_repr y]
-      rw [map_sum, Finsupp.finset_sum_apply]
+
+      rw [map_sum, Finsupp.finsetSum_apply]
       refine Finset.sum_congr rfl fun k _ => ?_
       rw [map_smul, Finsupp.smul_apply, smul_eq_mul, Algebra.TensorProduct.basis_apply]
       congr 1
@@ -163,7 +205,7 @@ theorem model (σ : E →ₐ[F] E) (hcm : IsCMExt F E σ) (J : Matrix (Fin 1) (F
   · rintro ⟨a, c, ha, hc, rfl⟩ k
     have e : cd F δ a c = a • inclR (Fv F v) (1 : E) + c • inclR (Fv F v) δ := by
       simp [cd, inclR, TensorProduct.smul_tmul']
-    rw [e, map_add, map_smul, map_smul, Finsupp.add_apply, Finsupp.smul_apply, Finsupp.smul_apply,
+    rw [e, map_add (f := _), map_smul, map_smul, Finsupp.add_apply, Finsupp.smul_apply, Finsupp.smul_apply,
       smul_eq_mul, smul_eq_mul]
     exact add_mem (mul_mem ha (i1 k)) (mul_mem hc (iδ k))
 

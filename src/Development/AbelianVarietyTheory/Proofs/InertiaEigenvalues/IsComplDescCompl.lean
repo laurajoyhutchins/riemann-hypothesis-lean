@@ -1,8 +1,47 @@
-import Mathlib
-import Formalism.LocalRingCardinality.ConjSqrtMinusD
-import Development.AbelianVarietyTheory.BlockTheory.NonGaloisCusps.DeterminantInTorus
-import Development.AbelianVarietyTheory.BlockTheory.NonGaloisCusps.BaseChangeInertUnramified
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.GaloisSideTwistedSelmerAuxiliaryPrimes
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.DataN
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GlobalTheory.RetractionComplement
 
@@ -20,6 +59,7 @@ theorem exists_retraction : ∃ l : k' →ₗ[k] k, ∀ c : k, l (algebraMap k k
 theorem form_mulVec (l : k' →ₗ[k] k) (A : Matrix (Fin n) (Fin n) k) (x : Fin n → k') :
     (fun i => l ((A.map (algebraMap k k')).mulVec x i)) = A.mulVec (fun i => l (x i)) := by
   funext i
+
   simp only [Matrix.mulVec, dotProduct, Matrix.map_apply, map_sum]
   refine Finset.sum_congr rfl fun j _ => ?_
   rw [← Algebra.smul_def, map_smul, smul_eq_mul]
@@ -28,6 +68,7 @@ theorem ext_mulVec (A : Matrix (Fin n) (Fin n) k) (v : Fin n → k) :
     (A.map (algebraMap k k')).mulVec (fun i => algebraMap k k' (v i))
       = fun i => algebraMap k k' (A.mulVec v i) := by
   funext i
+
   simp [Matrix.mulVec, dotProduct, map_sum, map_mul]
 
 def extSub (k' : Type) [Field k'] [Algebra k k'] (W : Submodule k (Fin n → k)) :
@@ -90,12 +131,12 @@ def descCompl (l : k' →ₗ[k] k) (W : Submodule k (Fin n → k)) (U : Submodul
     · funext i
       have a := congrFun h1 i
       have b := congrFun h1' i
-      simp only [Pi.add_apply, map_add] at a b ⊢
+      simp only [Pi.add_apply, map_add (f := _)] at a b ⊢
       rw [← a, ← b]; ring
     · funext i
       have a := congrFun h2 i
       have b := congrFun h2' i
-      simp only [Pi.add_apply, map_add, Pi.zero_apply] at a b ⊢
+      simp only [Pi.add_apply, map_add (f := _), Pi.zero_apply] at a b ⊢
       rw [a, b, add_zero]
   smul_mem' := by
     rintro c v ⟨x, hx, u, hu, h1, h2⟩

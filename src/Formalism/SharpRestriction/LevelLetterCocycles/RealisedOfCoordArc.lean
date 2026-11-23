@@ -1,4 +1,45 @@
-import Formalism.SharpRestriction.LevelLetterCocycles.FinalLevelsOf
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.RingConditionOfDeltaInvariants
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Formalism.DistinguishedUnitIdeals.ExistsConstOfInvariantMod
+
+@[expose] public section
 
 noncomputable section
 
@@ -20,33 +61,5 @@ def CoordSteps (hR : Ring9 W) (e : W.DD W.one) : Prop :=
   ∀ (T₁ T₂ : LocLat G Qp LL O) (F : LatHom T₁.L T₂.L), CrysLat PD T₁ → CrysLat PD T₂ → F.Onto →
     ∃ (C₁ : Coord W (baseIdOf hR) T₁) (C₂ : Coord W (baseIdOf hR) T₂) (C₀ : Coord W (baseIdOf hR) W.one)
       (_h : CoordHom C₁ C₂ F) (e₀ : C₀.V), ∀ i, C₀.t i e₀ = (letE i : LetA O n) • e
-
-def ArcSteps (Lb : LevB W) (hR : Ring9 W) (uZ : ℤ_[PD.p]ˣ) (ιZ : ℤ_[PD.p] →+* O) : Prop :=
-  ∀ (T₁ T₂ : LocLat G Qp LL O) (F : LatHom T₁.L T₂.L),
-    GoodCoeffs (K := K) (Qp := Qp) (LL := LL) (O := O) (V := T₁.V) →
-    CrysLat PD T₁ → CrysLat PD T₂ → F.Onto →
-    ∀ (C₁ : Coord W (baseIdOf hR) T₁) (C₂ : Coord W (baseIdOf hR) T₂) (hC : CoordHom C₁ C₂ F),
-    ∀ (j Gp S η h : ℕ) (ty : ZMod n → LT) (cuts : Finset (ZMod n)) (arcLen : ZMod n → ℕ)
-      (hCu : CutsOK n j ty cuts arcLen),
-      KindJumps PD T₁ W.emb Gp S η ty →
-      (∀ τ : K →ₐ[Qp] LL, JumpsInV PD T₁.ρ τ (Set.Icc (-(h : ℤ)) h)) →
-      gPar Gp S η ≤ h → SizesOK (gPar Gp S η) S h ty → ThickLe2 ty cuts arcLen →
-      ∀ c ∈ (cutsOf hCu).cuts,
-        ∃ (κ₁ κ₂ : PowerSeries O) (r₁ r₂ : ℕ) (e₁ : Fin r₁ → C₁.V) (e₂ : Fin r₂ → C₂.V)
-          (P : (Fin r₁ → O) →ₗ[O] (Fin r₂ → O))
-          (Hy₁ : LvHyp Lb hR uZ ιZ C₁ c ((cutsOf hCu).ell c)
-            (Formalism.ExponentWindows.abelian₂ (baseIdOf hR).Bs.p (E.HArc (gPar Gp S η) Gp S η (kdOf ty) (bbOf ty) c)
-              ((cutsOf hCu).ell c)) κ₁ (lamOf C₁ c ((cutsOf hCu).ell c) e₁))
-          (Hy₂ : LvHyp Lb hR uZ ιZ C₂ c ((cutsOf hCu).ell c)
-            (Formalism.ExponentWindows.abelian₂ (baseIdOf hR).Bs.p (E.HArc (gPar Gp S η) Gp S η (kdOf ty) (bbOf ty) c)
-              ((cutsOf hCu).ell c)) κ₂ (lamOf C₂ c ((cutsOf hCu).ell c) e₂))
-          (Mh : MapHyp hR uZ ιZ F c),
-          (∀ ϖ : O, Irreducible ϖ →
-            LevSteps Hy₁ ϖ j (E.parM (baseIdOf hR).Bs.ℓ h (gPar Gp S η)) (gPar Gp S η) Gp S η
-                (E.kindAt (kdOf ty) c) (E.sizeAt (bbOf ty) c) e₁ ∧
-            LevSteps Hy₂ ϖ j (E.parM (baseIdOf hR).Bs.ℓ h (gPar Gp S η)) (gPar Gp S η) Gp S η
-                (E.kindAt (kdOf ty) c) (E.sizeAt (bbOf ty) c) e₂) ∧
-          MapSteps hC Hy₁ Hy₂ Mh j (E.parM (baseIdOf hR).Bs.ℓ h (gPar Gp S η)) (gPar Gp S η) η
-            (E.kindAt (kdOf ty) c) (E.sizeAt (bbOf ty) c) e₁ e₂ P
 
 end Formalism.MainNotions.N.Ln03

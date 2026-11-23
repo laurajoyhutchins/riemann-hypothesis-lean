@@ -1,5 +1,58 @@
-import Mathlib
-import ReciprocityTheory.ClassFieldTheory.LocalClassField.RecCyclicA
+module
+
+public import ReciprocityTheory.ClassFieldTheory.LocalClassField.RecDefs
+public import ReciprocityTheory.ClassFieldTheory.LocalClassField.RecPairDefs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.ClassFieldTheory.LocalClassField.GalBasic
+public import ReciprocityTheory.ClassFieldTheory.LocalClassField.NormOpen
+public import ReciprocityTheory.ClassFieldTheory.LocalClassField.RecCyclicA
+public import ReciprocityTheory.ClassFieldTheory.LocalClassField.RecPair
+import ReciprocityTheory.ClassFieldTheory.LocalClassField.ValUnitsE
+
+@[expose] public section
 
 namespace ReciprocityTheory.DiscreteGroups.LocalClassField.RecCyc
 
@@ -58,7 +111,7 @@ theorem defect_mem_B_iff {R : Type} [CommRing R] {G : Type} [Group G] [Topologic
       rw [Finset.sum_congr rfl fun g _ => ha g]
       simp
     refine ⟨u • b.1 ![g₀] + v • a, ?_⟩
-    simp only [map_add, map_zsmul]
+    simp only [map_add (f := _), map_zsmul]
     rw [Finset.sum_add_distrib, ← Finset.smul_sum, ← Finset.smul_sum, ← h1, h3, smul_smul, smul_smul, ← add_smul,
       huv, one_smul]
   · rintro ⟨y, rfl⟩
@@ -75,8 +128,8 @@ theorem exists_ofK_eq (x : KbarMult p) (hx : x ∈ multOf p K) : ∃ a : Kˣ, of
     (fun h => (Additive.toMul x : (PadicAlgCl p)ˣ).ne_zero (congrArg Subtype.val h)), ?_⟩
   exact Units.ext rfl
 
-variable (p K L) in
 
+variable (p K L) in
 noncomputable def kToLayer [(subG p K L).Normal] : Additive Kˣ →+ (layer p K L).V where
   toFun a := ⟨ofK p K a, fun g => kbarRep_ofK g.1 a⟩
   map_zero' := Subtype.ext (map_zero _)
@@ -94,7 +147,7 @@ theorem exists_lift_layer [(subG p K L).Normal] (χ : charGrp (GK p K)) (hχ : T
   have key : ∀ g : GK p K, χ.1 (Additive.ofMul (QuotientGroup.mk g : GalLK p K L).out) = χ.1 (Additive.ofMul g) := by
     intro g
     obtain ⟨h, hh⟩ := QuotientGroup.mk_out_eq_mul (subG p K L) g
-    rw [hh, ofMul_mul, map_add, hχ h.1 h.2, add_zero]
+    rw [hh, ofMul_mul, map_add (f := _), hχ h.1 h.2, add_zero]
   refine ⟨fun q => (χ.1 (Additive.ofMul q.out)).out, fun s => ?_, fun g => ?_⟩
   · rw [← QuotientGroup.isOpenQuotientMap_mk.isQuotientMap.isOpen_preimage]
     have h1 : IsLocallyConstant fun g : GK p K => (χ.1 (Additive.ofMul g)).out :=

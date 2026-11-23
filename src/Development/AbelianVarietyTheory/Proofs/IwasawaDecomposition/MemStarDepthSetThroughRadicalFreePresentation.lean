@@ -1,5 +1,45 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.StarDepthToFunNonneg
+module
+
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.StarDepthToFunNonneg
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HomExtNormalSt
+
+@[expose] public section
 
 noncomputable section
 
@@ -13,7 +53,7 @@ theorem bilin_eq_zero_of_self_eq_zero {X : Type} [AddCommGroup X] (β : LinearMa
     (hs : ∀ y z, β y z = β z y) (hn : ∀ y, 0 ≤ β y y) {x : X} (hx : β x x = 0) (y : X) : β x y = 0 := by
   have key : ∀ k : ℤ, 0 ≤ 2 * k * β x y + β y y := fun k => by
     have h := hn (k • x + y)
-    simp only [map_add, map_zsmul, LinearMap.add_apply, LinearMap.smul_apply, smul_eq_mul, hx, hs y x] at h
+    simp only [map_add (f := _), map_zsmul, LinearMap.add_apply, LinearMap.smul_apply, smul_eq_mul, hx, hs y x] at h
     nlinarith
   have hc := hn y
   rcases lt_trichotomy (β x y) 0 with h | h | h
@@ -49,18 +89,18 @@ theorem exists_descent {X X₁ M F' : Type} [AddCommGroup X] [AddCommGroup X₁]
     obtain ⟨a, rfl⟩ := hq x
     obtain ⟨a', rfl⟩ := hq x'
     obtain ⟨b, rfl⟩ := hq y
-    rw [← map_add, hf, hf, hf, map_add, LinearMap.add_apply]
+    rw [← map_add (f := _), hf, hf, hf, map_add (f := _), LinearMap.add_apply]
   · intro c x y
     obtain ⟨a, rfl⟩ := hq x
     obtain ⟨b, rfl⟩ := hq y
     rw [← map_zsmul, hf, hf]
-    let g : X →+ M := AddMonoidHom.mk' (fun a => F a b) fun a a' => by rw [map_add, LinearMap.add_apply]
+    let g : X →+ M := AddMonoidHom.mk' (fun a => F a b) fun a a' => by rw [map_add (f := _), LinearMap.add_apply]
     exact (map_zsmul g c a).trans (int_smul_eq_zsmul iM c (F a b)).symm
   · intro x y y'
     obtain ⟨a, rfl⟩ := hq x
     obtain ⟨b, rfl⟩ := hq y
     obtain ⟨b', rfl⟩ := hq y'
-    rw [← map_add, hf, hf, hf, map_add]
+    rw [← map_add (f := _), hf, hf, hf, map_add (f := _)]
   · intro c x y
     obtain ⟨a, rfl⟩ := hq x
     obtain ⟨b, rfl⟩ := hq y
@@ -238,7 +278,7 @@ theorem mem_depthSet_of_rcone : ∀ (O : Type) [CommRing O] (bar : O → O) (ψ 
   let R : Submodule O X :=
     { carrier := {x | ∀ y, B x y = 0}
       add_mem' := fun {x x'} hx hx' y => by
-        simp only [Set.mem_setOf_eq, map_add, LinearMap.add_apply, hx y, hx' y, add_zero]
+        simp only [Set.mem_setOf_eq, map_add (f := _), LinearMap.add_apply, hx y, hx' y, add_zero]
       zero_mem' := fun y => by simp
       smul_mem' := fun c x hx y => by
         show B (c • x) y = 0

@@ -1,9 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.BlockAnti
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.MajorantFlagLengthsInvarianceTorusPositivity
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.GramSchmidtLengths
-import Formalism.FlagUnipotentLattices.CardSubgroupsOfIndexLe
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.UpperOff
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.GramSchmidtLengths
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.MajorantFlagLengthsInvarianceTorusPositivity
+public import Formalism.FlagUnipotentLattices.CardSubgroupsOfIndexLe
 import Formalism.FormalDegreeBessel.FinalG
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -15,7 +59,7 @@ namespace GlobalTheory.Amp.YBound
 open GlobalTheory.Amp.GramFlag (eucl_eq)
 
 theorem det_upper {r : ℕ} (x : UT r → ℂ) : (upper x).det = 1 := by
-  rw [Matrix.det_of_upperTriangular]
+  rw [Matrix.det_of_isUpperTriangular]
   · simp [upper]
   · intro a b h
     have h' : b < a := h
@@ -29,9 +73,10 @@ theorem det_change {V₁ V₂ : Type} [AddCommGroup V₁] [Module ℂ V₁] [Add
   have e : (Matrix.of fun a b => B (∑ c, U c a • y c) (∑ c, U' c b • y' c)) =
       Uᵀ * (Matrix.of fun a b => B (y a) (y' b)) * (U'ᴴ)ᵀ := by
     ext a b
+
     simp only [Matrix.of_apply, Matrix.mul_apply, map_sum, LinearMap.sum_apply, map_smul, LinearMap.smul_apply,
-      LinearMap.map_smulₛₗ, Matrix.transpose_apply, Matrix.conjTranspose_apply, smul_eq_mul, Finset.sum_mul,
-      Finset.mul_sum]
+    LinearMap.map_smulₛₗ, Matrix.transpose_apply, Matrix.conjTranspose_apply, smul_eq_mul, Finset.sum_mul,
+    Finset.mul_sum]
     first
       | (refine Finset.sum_congr rfl fun c _ => Finset.sum_congr rfl fun d _ => ?_; simp; ring)
       | (rw [Finset.sum_comm]; refine Finset.sum_congr rfl fun c _ => Finset.sum_congr rfl fun d _ => ?_; simp; ring)
@@ -40,7 +85,7 @@ theorem det_change {V₁ V₂ : Type} [AddCommGroup V₁] [Module ℂ V₁] [Add
 
 theorem prod_le_pow' {n : ℕ} (f : Fin n → ℝ) (R : ℝ) (h0 : ∀ i, 0 ≤ f i) (h : ∀ i, f i ≤ R) :
     ∏ i, f i ≤ R ^ n := by
-  calc _ ≤ ∏ _a : Fin n, R := Finset.prod_le_prod (fun i _ => h0 i) fun i _ => h i
+  calc _ ≤ ∏ _a : Fin n, R := Finset.prod_le_prod₀ (fun i _ => h0 i) fun i _ => h i
     _ = _ := by simp
 
 def formE {n : ℕ} (H : Matrix (Fin n) (Fin n) ℂ) :
@@ -59,7 +104,7 @@ theorem formE_le {n : ℕ} (H : Matrix (Fin n) (Fin n) ℂ) (hH : Hᴴ * H = 1) 
       rw [← LinearMap.adjoint_inner_right, ← Matrix.toEuclideanLin_conjTranspose_eq_adjoint]
       congr 1
       ext i
-      simp [Matrix.toEuclideanLin_apply, Matrix.mulVec_mulVec, hH]
+      simp [Matrix.toLpLin_apply, Matrix.mulVec_mulVec, hH]
     rw [norm_eq_sqrt_re_inner (𝕜 := ℂ), this, ← norm_eq_sqrt_re_inner]
   show ‖⟪w, Matrix.toEuclideanLin H v⟫_ℂ‖ ≤ _
   rw [mul_comm, ← h1]
@@ -78,6 +123,7 @@ theorem gramProj_le {n r : ℕ} (P : Submodule ℂ (EuclideanSpace ℂ (Fin n)))
     (fun a => ∑ b, U b a • P.starProjection (WithLp.toLp 2 (v b)))).2 R (fun a => by
       refine le_trans ?_ (hR a)
       rw [eucl_eq, WithLp.toLp_sum]
+
       simp only [← map_smul, ← map_sum, WithLp.toLp_smul]
       exact P.norm_starProjection_apply_le _)
   have e : ∀ w : Fin r → EuclideanSpace ℂ (Fin n), (Matrix.gram ℂ w).det =
@@ -118,7 +164,7 @@ theorem dr_y_le : ∀ (k r : ℕ) (z z' : (Fin (2 * r + k + 1) → ℂ)) (γ : M
       have hb := b.2
       simp only at ha hb
       simp only [Matrix.transpose_apply, Matrix.submatrix_apply, Zhat, fvec, Matrix.of_apply, formE_apply]
-      rw [dif_pos (by simpa using ha), dif_pos (by simpa using hb),
+      rw [dite_eq_left (by simpa using ha), dite_eq_left (by simpa using hb),
         ← herm_mulVec (hG.2.2 _ hgx).2, Matrix.mulVec_mulVec, Matrix.mul_inv_rev,
         Matrix.nonsing_inv_mul_cancel_right _ _ (hG.2.2 _ hg).1]
       rfl

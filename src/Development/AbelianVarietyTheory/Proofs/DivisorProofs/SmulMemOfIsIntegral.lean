@@ -1,6 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.TamagawaSpecialUnitary
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.WeightFunctionOnFrames
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.EmbGLMemRealSU
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -30,7 +73,7 @@ def skewLat (G : Matrix (Fin r) (Fin r) E) (Λ : Submodule (𝓞 E) (Fin r → E
     refine ⟨fun u w => ?_, (endLat Λ).add_mem hY.2 hZ.2⟩
     have h1 := hY.1 u w
     have h2 := hZ.1 u w
-    simp only [herm, cc, add_mulVec, Pi.add_apply, map_add, add_mul, mul_add, Finset.sum_add_distrib] at h1 h2 ⊢
+    simp only [herm, cc, add_mulVec, Pi.add_apply, map_add (f := _), add_mul, mul_add, Finset.sum_add_distrib] at h1 h2 ⊢
     linear_combination h1 + h2
   neg_mem' {Y} hY := by
     refine ⟨fun u w => ?_, (endLat Λ).neg_mem hY.2⟩
@@ -43,7 +86,7 @@ def hAdj (G Y : Matrix (Fin r) (Fin r) E) : Matrix (Fin r) (Fin r) E := (G⁻¹ 
 def imLat (E : Type) [Field E] [NumberField E] [IsCMField E] : AddSubgroup E where
   carrier := {a | IsIntegral ℤ a ∧ cc a = -a}
   zero_mem' := ⟨isIntegral_zero, by simp [cc]⟩
-  add_mem' {a b} ha hb := ⟨ha.1.add hb.1, by simp only [cc, map_add] at ha hb ⊢; rw [ha.2, hb.2, neg_add]⟩
+  add_mem' {a b} ha hb := ⟨ha.1.add hb.1, by simp only [cc, map_add (f := _)] at ha hb ⊢; rw [ha.2, hb.2, neg_add]⟩
   neg_mem' {a} ha := ⟨ha.1.neg, by simp only [cc, map_neg] at ha ⊢; rw [ha.2]⟩
 
 def trProj (Y : Matrix (Fin r) (Fin r) E) : Matrix (Fin r) (Fin r) E :=
@@ -58,7 +101,7 @@ def dualLie (G : Matrix (Fin r) (Fin r) E) (Λ : Submodule (𝓞 E) (Fin r → E
     refine ⟨by rw [trace_add, hY.1, hZ.1, add_zero], fun u w => ?_, fun X hX => ?_⟩
     · have h1 := hY.2.1 u w
       have h2 := hZ.2.1 u w
-      simp only [herm, cc, add_mulVec, Pi.add_apply, map_add, add_mul, mul_add, Finset.sum_add_distrib] at h1 h2 ⊢
+      simp only [herm, cc, add_mulVec, Pi.add_apply, map_add (f := _), add_mul, mul_add, Finset.sum_add_distrib] at h1 h2 ⊢
       linear_combination h1 + h2
     · rw [Matrix.mul_add, trace_add]; exact (hY.2.2 X hX).add (hZ.2.2 X hX)
   neg_mem' {Y} hY := by

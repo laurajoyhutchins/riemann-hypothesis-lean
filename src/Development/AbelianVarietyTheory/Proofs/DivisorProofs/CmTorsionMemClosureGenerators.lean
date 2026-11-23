@@ -1,10 +1,59 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsLinearHomProd
-import Development.AbelianVarietyTheory.Proofs.HeightProofs.IsAbelianSchemeOfIsPrincipal
-import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.ExistsLinearOfIsMonHom
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.EqZeroOfFderivEqZero
-import Development.AutomorphicArithmetic.DivisorFrames.ExistsNsmulMemSumImageLatticeOfSurjectiveMod
-import Development.AutomorphicArithmetic.DivisorFrames.ExistsInjectiveLatticeHomRingOfIntegersOfFinrank
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.EigenvectorLieDegree
+public import Development.AbelianVarietyTheory.Definitions.Divisors.PointShiftSt
+import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.PolBaseChangeOfRelAmpleLocal
+public import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.ExistsLinearOfIsMonHom
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.IsAbelianSchemeOfIsPrincipal
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.EqZeroOfFderivEqZero
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.IsProjBySmoothIsProperGeometricallyIntegral
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ThetaUniformisationComplexAbelianVariety
+public import Development.AutomorphicArithmetic.DivisorFrames.ExistsInjectiveLatticeHomRingOfIntegersOfFinrank
+public import Development.AutomorphicArithmetic.DivisorFrames.ExistsNsmulMemSumImageLatticeOfSurjectiveMod
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicTopology.FundamentalGroupoid.SimplyConnected
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.AmplePt
+
+@[expose] public section
+
 open NumberField
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor GlobalTheory.CM
@@ -52,7 +101,34 @@ private theorem exists_unif (P : Out.PolAV S) : ∃ (L : LB ((Over.pullback f).o
     (_ : HolUnif ((Over.pullback f).obj P.A) L P.g), IsAbelianScheme ((Over.pullback f).obj P.A) ∧
       SmoothOfRelativeDimension P.g ((Over.pullback f).obj P.A).hom := by
   have := P.isAb.comm
-  let Q := TorsionTauCompare.polOfPullback P _ (isGrpPullback_pullback P.A f)
+  let h := isGrpPullback_pullback P.A f
+  have gen_refl {X : Scheme.{0}} {L : LB X} (hL : L.IsLB) :
+      LB.Gen.IsGen (⟨fun p => L.g p.1 p.2⟩ : LB.Iso L L) := by
+    refine fun p q => unit_ext fun y hy => ?_
+    refine (gm_res _ y _ hy _).trans (Eq.symm ((map_mul _ _ _).trans ((congrArg₂ (· * ·)
+      (gm_div L L (𝟙 X) y p q hy) (gm_res _ y _ hy _)).trans ?_)))
+    have a := gm_cocycle hL (𝟙 X) y hy.1.1 hy.2.1 hy.2.2
+    have b := gm_cocycle hL (𝟙 X) y hy.1.1 hy.1.2 hy.2.2
+    show gm (𝟙 X) y _ (L.g p.1 q.1) * (gm (𝟙 X) y _ (L.g p.2 q.2))⁻¹ * gm (𝟙 X) y _ (L.g q.1 q.2) =
+      gm (𝟙 X) y _ (L.g p.1 p.2)
+    rw [mul_right_comm, a, ← b, mul_inv_cancel_right]
+  let Q : Out.PolAV (Sp ℂ) := {
+    A := (Over.pullback f).obj P.A
+    isAb := {
+      comm := inferInstance
+      smooth := MorphismProperty.of_isPullback (P := @Smooth) h.1 P.isAb.smooth
+      proper := MorphismProperty.of_isPullback (P := @IsProper) h.1 P.isAb.proper
+      geomConnected := MorphismProperty.of_isPullback (P := @GeometricallyConnected) h.1 P.isAb.geomConnected }
+    g := P.g
+    smoothDim := (smoothOfRelativeDimension_isStableUnderBaseChange _).of_isPullback h.1 P.smoothDim
+    L := P.L.pull _
+    isLB := pull_isLB P.isLB _
+    rigid := PolBaseChange.rigidified_pull h P.rigid
+    sym := PolBaseChange.sym_pull h P.sym
+    ample := by
+      haveI := P.isAb.proper
+      exact AmpleBaseChange.relAmple_of_isPullback P.isLB P.ample h.1
+    ktriv := kTriv_pull h P.isLB (pull_isLB P.isLB _) ((isGen_iff _).1 (gen_refl (pull_isLB P.isLB _))) P.ktriv }
   obtain ⟨rig, hrig⟩ := Q.rigid
   obtain ⟨v, -⟩ := thetaUnifAV_all Q rig hrig
   exact ⟨_, v, Q.isAb, Q.smoothDim⟩
@@ -138,6 +214,7 @@ private theorem lattice_mem_closure (E : Type) [Field E] [NumberField E] (gA gB 
         exact congrArg Subtype.val h
       have hval : ∀ y' : ΛA, (N : ℂ)⁻¹ • ∑ a, J a (αA (φ ⟨x a, hx a⟩) y') = αB (φ y') l := fun y' => by
         have : ∑ a, J a (αA (φ ⟨x a, hx a⟩) y') = N • αB (φ y') l := by
+
           rw [← map_nsmul, hNl, map_sum]
           exact Finset.sum_congr rfl fun a _ => by rw [hsw, inter]
         rw [this, ← Nat.cast_smul_eq_nsmul ℂ, smul_smul, inv_mul_cancel₀ hN0, one_smul]
@@ -146,7 +223,7 @@ private theorem lattice_mem_closure (E : Type) [Field E] [NumberField E] (gA gB 
       rw [hval ⟨x', hx'⟩]
       exact sB _ _ hl
     · rintro _ _ ⟨u, rfl, hu⟩ ⟨u', rfl, hu'⟩
-      exact ⟨u + u', add_mul _ _ _, by rw [map_add, LinearMap.add_apply]; exact add_mem hu hu'⟩
+      exact ⟨u + u', add_mul _ _ _, by rw [map_add (f := _), LinearMap.add_apply]; exact add_mem hu hu'⟩
   obtain ⟨u, hu, h⟩ := key c (hI' ▸ Ideal.mem_span_singleton_self c)
   obtain rfl : u = 1 := mul_right_cancel₀ hc (hu.trans (_root_.one_mul c).symm)
   simpa using h

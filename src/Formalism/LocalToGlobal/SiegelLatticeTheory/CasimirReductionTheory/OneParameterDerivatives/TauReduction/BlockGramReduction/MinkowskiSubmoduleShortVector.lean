@@ -1,5 +1,51 @@
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CasimirReductionTheory.OneParameterDerivatives.TauReduction.BlockGramReduction.BlockDiagonalMulVecApply
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CasimirReductionTheory.OneParameterDerivatives.TauReduction.BlockGramReduction.T8m
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CasimirReductionTheory.OneParameterDerivatives.TauReduction.BlockGramReduction.BlockDiagonalMulVecApply
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CasimirReductionTheory.OneParameterDerivatives.TauReduction.LatticeVectorsBoundedBelow
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CasimirReductionTheory.OneParameterDerivatives.TauReduction.BlockGramReduction.PacketConditionsClosed
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Formalism.LocalToGlobal.SiegelLatticeTheory.CasimirReductionTheory.OneParameterDerivatives.TauReduction.Imports
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -23,6 +69,7 @@ theorem coord_linear_comb (I : AutInst) (x : I.GA) (v : InfinitePlace I.F) {j : 
   have hw : (fun i => I.φ v ((∑ k, a k • b k) i)) =
       (Matrix.of fun i k => b k i).map (I.φ v) *ᵥ fun k => I.φ v (a k) := by
     funext i
+
     simp [Matrix.mulVec, dotProduct, Finset.sum_apply, map_sum, mul_comm]
   rw [hw, Matrix.mulVec_mulVec]
 
@@ -70,7 +117,7 @@ theorem linearComb_apply {n j : ℕ} {E : Type} [Field E] (b : Fin j → Fin n �
 
 theorem linear_comb_injective {n j : ℕ} {E : Type} [Field E] (b : Fin j → Fin n → E) (hb : LinearIndependent E b) :
     Function.Injective (linearCombinationOfRows b) := by
-  rw [injective_iff_map_eq_zero]
+  set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
   intro a ha
   rw [linearComb_apply] at ha
   funext k
@@ -121,7 +168,7 @@ theorem short_vector_sublattice (I : AutInst) (h1 : LatticeFinitelyGenerated) (h
       rw [hgen]
       exact s.B.smul_mem _ (s.b_mem p.1)
     | zero => simp
-    | add y z _ _ hy hz => rw [map_add]; exact s.B.add_mem hy hz
+    | add y z _ _ hy hz => rw [map_add (f := _)]; exact s.B.add_mem hy hz
     | smul c y _ hy => rw [map_zsmul]; exact s.B.toAddSubgroup.zsmul_mem hy c
   have hmapO : Op.map lin = P.toAddSubgroup := by
     ext y
@@ -134,7 +181,7 @@ theorem short_vector_sublattice (I : AutInst) (h1 : LatticeFinitelyGenerated) (h
         rw [hgen]
         exact P.smul_mem _ (Submodule.subset_span ⟨p.1, rfl⟩)
       | zero => simp
-      | add y z _ _ hy hz => rw [map_add]; exact P.add_mem hy hz
+      | add y z _ _ hy hz => rw [map_add (f := _)]; exact P.add_mem hy hz
       | smul c y _ hy => rw [map_zsmul]; exact P.toAddSubgroup.zsmul_mem hy c
     · intro hy
       obtain ⟨c, hc⟩ := (Submodule.mem_span_range_iff_exists_fun (𝓞 I.E)).1 (show y ∈ P from hy)

@@ -1,6 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.ComparisonMemCechHodgeFiltration
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.VanishingH1InvertingMorphisms
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.VanishingH1InvertingMorphisms
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.Divisors.OneFormMapEqKaehlerDifferentialMap
+import Mathlib.Topology.Sheaves.Presheaf
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsCompletedStrictHens
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.CubicalStructures.CubeSymmetricSwapFirst
+
+@[expose] public section
+
 open CategoryTheory AlgebraicGeometry KaehlerDifferential ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.Semi GlobalTheory.CatCoh GlobalTheory.CechDR
 
 set_option autoImplicit false
@@ -13,7 +59,7 @@ theorem glue_comma_of_basis : ∀ {R : Type} [CommRing R] {C : Type} [Category.{
       (w₁ : G.obj t₁ ⟶ S) (w₂ : G.obj t₂ ⟶ S), mp F w₁ (s t₁ u₁) = mp F w₂ (s t₂ u₂) := by
     intro t₁ t₂ u₁ u₂ S w₁ w₂
     obtain ⟨n, b, hb, hb'⟩ := hdir t₁ t₂ S w₁ w₂
-    refine sub_eq_zero.1 (sep_std H hb _ fun S' u' ⟨i, hi⟩ ↦ ?_)
+    refine sub_eq_zero.1 (GlobalTheory.CatCoh.Desc.sep_std H hb _ fun S' u' ⟨i, hi⟩ ↦ ?_)
     obtain ⟨t₃, ⟨a₁⟩, ⟨a₂⟩, ⟨g⟩⟩ := hb' i S' u' hi
     have e1 : mp F u' (mp F w₁ (s t₁ u₁)) = mp F g (s t₃ (u₁ ≫ G.map a₁)) := by
       rw [hs, ← mp_comp, ← mp_comp, Subsingleton.elim (G.map a₁ ≫ g) (w₁ ≫ u')]
@@ -31,7 +77,7 @@ theorem glue_comma_of_basis : ∀ {R : Type} [CommRing R] {C : Type} [Category.{
       exact ⟨mp F w (s t v), fun _ ↦ ⟨t, v, w, rfl⟩⟩
     · exact ⟨0, fun h' ↦ absurd h' h⟩
   choose σ hσ using hex
-  obtain ⟨x, hx⟩ := glue_std H hb σ fun S S' u ψ hp ↦ by
+  obtain ⟨x, hx⟩ := GlobalTheory.CatCoh.Desc.glue_std H hb σ fun S S' u ψ hp ↦ by
     obtain ⟨t, v, w, e⟩ := hσ S u hp
     obtain ⟨i, hi⟩ := hp
     obtain ⟨t', v', w', e'⟩ := hσ S' (u ≫ ψ) ⟨i, isUnit_comp ψ hi⟩
@@ -41,7 +87,7 @@ theorem glue_comma_of_basis : ∀ {R : Type} [CommRing R] {C : Type} [Category.{
   have hb2 : Ideal.span (Set.range fun i ↦ mp F u (b i)) = ⊤ := by
     have := congrArg (Ideal.map (mp F u)) hb
     rwa [Ideal.map_span, Ideal.map_top, ← Set.range_comp] at this
-  refine sub_eq_zero.1 (sep_std H hb2 _ fun S' ψ ⟨i, hi⟩ ↦ ?_)
+  refine sub_eq_zero.1 (GlobalTheory.CatCoh.Desc.sep_std H hb2 _ fun S' ψ ⟨i, hi⟩ ↦ ?_)
   have hi' : IsUnit (mp F (u ≫ ψ) (b i)) := by rw [mp_comp]; exact hi
   obtain ⟨t', v', w', e'⟩ := hσ S' (u ≫ ψ) ⟨i, hi'⟩
   rw [map_sub, ← mp_comp, hx _ _ ⟨i, hi'⟩, ← e', key t' t v' u S' w' ψ, sub_self]

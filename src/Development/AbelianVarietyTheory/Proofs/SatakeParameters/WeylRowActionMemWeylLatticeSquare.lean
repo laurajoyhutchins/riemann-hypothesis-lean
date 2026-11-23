@@ -1,7 +1,59 @@
-import Mathlib
-import Formalism.GradedWeylDivisibility.DualWeylDominanceOf
-import Formalism.SatakeDualWeyl.KpqSubgroupCompact
-import Formalism.GradedWeylDivisibility.FockSpaceTableaux.LClosedeqLemmas
+module
+
+public import Formalism.GradedWeylDivisibility.StatementA
+public import Mathlib.RingTheory.HahnSeries.Multiplication
+public import Formalism.GradedWeylDivisibility.FockSpaceTableaux.LClosedeqLemmas
+public import Formalism.SatakeDualWeyl.KpqSubgroupCompact
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.HahnSeries.PowerSeries
+import Mathlib.RingTheory.PiTensorProduct
+public import Mathlib.RingTheory.PowerSeries.Inverse
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open MvPolynomial
 
@@ -11,10 +63,10 @@ namespace GlobalTheory.WeylRowAll
 
 def coeffMap {R S σ : Type} [CommRing R] [CommRing S] (c : S →+ R) (F : MvPolynomial σ S) :
     MvPolynomial σ R :=
-  ∑ m ∈ F.support, monomial m (c (coeff m F))
+  ∑ m ∈ F.support, monomial m (c (AddMonoidAlgebra.coeff F m))
 
 theorem coeff_coeffMap {R S σ : Type} [CommRing R] [CommRing S] (c : S →+ R)
-    (F : MvPolynomial σ S) (m : σ →₀ ℕ) : coeff m (coeffMap c F) = c (coeff m F) := by
+    (F : MvPolynomial σ S) (m : σ →₀ ℕ) : AddMonoidAlgebra.coeff (coeffMap c F) m = c (AddMonoidAlgebra.coeff F m) := by
   classical
   simp only [coeffMap, coeff_sum, coeff_monomial, Finset.sum_ite_eq']
   split_ifs with h
@@ -35,7 +87,7 @@ theorem coeffMap_mem_weyl {R S : Type} [CommRing R] [CommRing S] (φ : R →+* S
           c s • Formalism.GradedWeylDivisibility.applyWord R w (Formalism.GradedWeylDivisibility.hw R hn ν) := by
         ext m
         rw [coeff_coeffMap, ← Formalism.GradedWeylDivisibility.lclosedeq_hw_map φ, Formalism.GradedWeylDivisibility.lclosedeq_applyWord_map,
-          coeff_smul, coeff_smul, coeff_map, smul_eq_mul, smul_eq_mul, hc]
+          MvPolynomial.coeff_smul, MvPolynomial.coeff_smul, coeff_map, smul_eq_mul, smul_eq_mul, hc]
       show coeffMap c (s • Formalism.GradedWeylDivisibility.applyWord S w (Formalism.GradedWeylDivisibility.hw S hn ν)) ∈ _
       rw [this]
       exact Submodule.smul_mem _ _ (Submodule.subset_span ⟨w, rfl⟩)
@@ -65,7 +117,7 @@ theorem map_mem_weyl {R S : Type} [CommRing R] [CommRing S] (φ : R →+* S) {r 
     rw [← Formalism.GradedWeylDivisibility.lclosedeq_applyWord_map, Formalism.GradedWeylDivisibility.lclosedeq_hw_map]
     exact Submodule.subset_span ⟨w, rfl⟩
   | zero => simp
-  | add x y _ _ hx hy => rw [map_add]; exact Submodule.add_mem _ hx hy
+  | add x y _ _ hx hy => rw [map_add (f := _)]; exact Submodule.add_mem _ hx hy
   | smul a x _ hx =>
     rw [smul_eq_C_mul, map_mul, map_C, ← smul_eq_C_mul]
     exact Submodule.smul_mem _ _ hx
@@ -75,7 +127,7 @@ theorem map_rowAct {R S : Type} [CommRing R] [CommRing S] (φ : R →+* S) {r n 
     map φ (Formalism.GradedWeylDivisibility.rowAct R g f) = Formalism.GradedWeylDivisibility.rowAct S (g.map φ) (map φ f) := by
   induction f using MvPolynomial.induction_on with
   | C a => simp [Formalism.GradedWeylDivisibility.rowAct]
-  | add p q hp hq => simp only [map_add, hp, hq]
+  | add p q hp hq => simp only [map_add (f := _), hp, hq]
   | mul_X p v hp =>
     simp only [map_mul, hp, map_X]
     congr 1
@@ -117,7 +169,7 @@ theorem isUnit_shift (R : Type) [CommRing R] {r : ℕ} (M : Matrix (Fin r) (Fin 
   have h3 : ((M.map Polynomial.C + (Polynomial.X : Polynomial R) • (1 : Matrix (Fin r) (Fin r) _)).map
       (toInv R)) = (HahnSeries.single (-1 : ℤ) (1 : R)) • A.map (HahnSeries.ofPowerSeries ℤ R) := by
     refine Matrix.ext fun i j => ?_
-    simp only [hA, Matrix.map_apply, Matrix.add_apply, Matrix.smul_apply, smul_eq_mul, map_add,
+    simp only [hA, Matrix.map_apply, Matrix.add_apply, Matrix.smul_apply, smul_eq_mul, map_add (f := _),
       map_mul, HahnSeries.ofPowerSeries_X, HahnSeries.ofPowerSeries_C, mul_add, ← mul_assoc, hT,
       one_mul, toInv, Polynomial.coe_eval₂RingHom, Polynomial.eval₂_C, Polynomial.eval₂_X,
       Matrix.one_apply]

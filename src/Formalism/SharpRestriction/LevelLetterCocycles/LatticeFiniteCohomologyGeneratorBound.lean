@@ -1,6 +1,55 @@
-import Mathlib
-import Formalism.SharpRestriction.LevelLetterCocycles.ExistsPosConstLagrangeCondition
-import Formalism.SharpRestriction.LevelLetterCocycles.LocalTheoryWindows
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.ExistsPosConstLagrangeCondition
+public import Formalism.SharpRestriction.LevelLetterCocycles.LocalTheoryWindows
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -67,6 +116,7 @@ theorem gen_step_of_ker (A B : Submodule O M) (ob : ↥B →ₗ[O] Q)
     obtain ⟨c, -, hc⟩ := hq
     let z : ↥B := ∑ q ∈ t', c q • pre q
     have hz : ob z = ob ⟨y, hyB⟩ := by
+
       rw [← hc, map_sum]
       refine Finset.sum_congr rfl fun q hq => ?_
       rw [map_smul, hpre' q hq]
@@ -158,6 +208,7 @@ theorem cover_of_gen (T : LocLat G Qp LL O) (s : Finset (LatticeCohomology T.L))
   obtain ⟨c, hc⟩ := hz
   refine ⟨c, ?_⟩
   have hcls : cls (Fintype.linearCombination O rep c) = cls z := by
+
     rw [Fintype.linearCombination_apply, map_sum, ← hc]
     refine Finset.sum_congr rfl fun a _ => ?_
     rw [map_smul, hrep]
@@ -197,7 +248,7 @@ def LocalLiftingConditions [NeZero n] (W : LocWach PD LL O v n) : Prop :=
             2 * (m : ℝ) * cD PD.p (hpar n b S + η)) e₀) ∧
         (m = 0 → F.LiftF PD (e₀ + 3 * S))
 
-set_option maxHeartbeats 800000 in
+
 
 private lemma e0_le_eBd_of_ExpC {l h η S e₀ : ℕ} (hl : 11 ≤ l) (hE : ExpC l h η S e₀) :
     (e₀ : ℝ) ≤ eBd 32 4 10 25 l (h + η) S η := by

@@ -1,12 +1,75 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.CuspidalExponentialDecay
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.ModerateCoefficientPositivity
+public import Development.AbelianVarietyTheory.Proofs.TorusHaarMeasure.FirstMinimumInvariantContinuousPosOnFrames
+public import Development.AbelianVarietyTheory.Proofs.TorusHaarMeasure.MahlerCompactness
+import Mathlib.Algebra.Order.Archimedean.Real.Hom
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+public import Mathlib.Analysis.Normed.Group.Tannery
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Dynamics.Ergodic.Action.Regular
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+public import Mathlib.Topology.Algebra.Module.Cardinality
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.EmbeddingHermitianPairs
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.FrequencySumBounds
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.IsotropicThreshold
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.M3bExpHolds
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.MajPos
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.MajorantOperators
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.MinimumGrowthBounds
 import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.ModerateCoefficientPositivityHolds
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.M3bExpHolds
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.CuspidalDecayHolds
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.RealFlowPeriodsSpanEqTop
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.PeriodLatticeCountable
-import Development.AbelianVarietyTheory.Proofs.TorusHaarMeasure.FirstMinimumInvariantContinuousPosOnFrames
-import Development.AbelianVarietyTheory.Proofs.TorusHaarMeasure.MahlerCompactness
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.PeriodLatticeCountable
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open NumberField Complex MeasureTheory Filter Topology ReciprocityTheory.ChartRestriction.G.FD
 open scoped Pointwise
@@ -259,17 +322,6 @@ theorem fj_eq_zero_of_hasSum_ne (X : Data E r) (la : Wt X.Ψ r) (ξ : Fin r → 
       exact h1
   · rfl
   · rfl
-
-theorem fj_zero_of_hasSum (X : Data E r) (la : Wt X.Ψ r) (ξ : Fin r → E) (x : Frame X.Ψ r)
-    (Q : Frame X.Ψ r → ℂ) {ι : Type*} [Countable ι] (A : ι → ℂ) (hA : Summable fun i => ‖A i‖)
-    (ν : ι → X.Ψ → ℝ)
-    (hs : ∀ s : X.Ψ → ℝ,
-      HasSum (fun i => A i * cexp (4 * Real.pi * I * ∑ τ, (ν i τ : ℂ) * s τ))
-        (Q (X.flow ξ (fun τ => (s τ : ℂ)) x)))
-    (hper : ∀ p ∈ X.periods la, ∀ s : X.Ψ → ℝ,
-      Q (X.flow ξ (fun τ => ((s + p) τ : ℂ)) x) = Q (X.flow ξ (fun τ => (s τ : ℂ)) x))
-    (hν : ∀ i, A i ≠ 0 → ν i ≠ 0) : X.fj la ξ 0 Q x = 0 :=
-  fj_eq_zero_of_hasSum_ne X la ξ x Q A hA ν hs hper 0 hν
 
 theorem firstMinimum_eq_zero_of_rank_zero (X : Data E 0) (x : Frame X.Ψ 0) : X.la1 x = 0 := by
   have h : {t | ∃ v ∈ X.Λ, v ≠ 0 ∧ t = ∑ τ, X.c τ * X.maj x τ (Data.emb τ.1 v)} = ∅ := by
@@ -542,35 +594,5 @@ theorem isModerate_of_le_one_add_inv (X : Data E r) (la : Wt X.Ψ r) (Q : Frame 
     exact mul_le_mul_of_nonneg_right (by linarith [hB x hx]) (by positivity)
   rw [mul_assoc]
   exact mul_le_mul (le_abs_self C) h2 (by positivity) (abs_nonneg C)
-
-theorem mem_SS_of_le_one_add_inv (X : Data E r) (la : Wt X.Ψ r) (Q : Frame X.Ψ r → ℂ)
-    (hsec : X.IsSec la Q) (C A : ℝ)
-    (hC : ∀ x ∈ X.dom, X.pnorm la Q x ≤ C * (1 + 1 / X.la1 x) ^ A)
-    (hcusp : ∀ ξ, X.IsIso ξ → ∀ x ∈ X.dom, X.fj la ξ 0 Q x = 0) : Q ∈ X.SS la :=
-  mem_SS_of_isModerate X la Q hsec (isModerate_of_le_one_add_inv X la Q C A hC) hcusp
-
-theorem decay_of_isModerate (X : Data E r) (la : Wt X.Ψ r) (Q : Frame X.Ψ r → ℂ)
-    (hsec : X.IsSec la Q) (hmod : X.IsModerate la Q)
-    (hcusp : ∀ ξ, X.IsIso ξ → ∀ x ∈ X.dom, X.fj la ξ 0 Q x = 0) :
-    ∃ c C : ℝ, 0 < c ∧ Q ∈ X.SSgt la c ∧
-      ∀ x ∈ X.dom, X.pnorm la Q x ^ 2 ≤ C * Real.exp (-2 * Real.pi * c / X.firstMinimumSq x) := by
-  obtain ⟨c, hc, hQ⟩ := spectralGap_holds r X la Q (mem_SS_of_isModerate X la Q hsec hmod hcusp)
-  obtain ⟨C, hC⟩ := cuspidalDecay_holds r X la Q c hc.le hQ
-  exact ⟨c, C, hc, hQ, hC⟩
-
-theorem main (X : Data E r) (la : Wt X.Ψ r) (Q : Frame X.Ψ r → ℂ) :
-    (∀ (ξ : Fin r → E) (x : Frame X.Ψ r) (ι : Type) [Countable ι] (A : ι → ℂ)
-      (ν : ι → X.Ψ → ℝ), (Summable fun i => ‖A i‖) →
-      (∀ s : X.Ψ → ℝ, HasSum (fun i => A i * cexp (4 * Real.pi * I * ∑ τ, (ν i τ : ℂ) * s τ))
-        (Q (X.flow ξ (fun τ => (s τ : ℂ)) x))) →
-      (∀ p ∈ X.periods la, ∀ s : X.Ψ → ℝ,
-        Q (X.flow ξ (fun τ => ((s + p) τ : ℂ)) x) = Q (X.flow ξ (fun τ => (s τ : ℂ)) x)) →
-      (∀ i, A i ≠ 0 → ν i ≠ 0) → X.fj la ξ 0 Q x = 0) ∧
-    (X.IsSec la Q → (∀ ξ, X.IsIso ξ → ∀ x ∈ X.dom, X.fj la ξ 0 Q x = 0) →
-      (X.IsModerate la Q ∨
-        ∃ C A : ℝ, ∀ x ∈ X.dom, X.pnorm la Q x ≤ C * (1 + 1 / X.la1 x) ^ A) → Q ∈ X.SS la) :=
-  ⟨fun ξ x _ _ A ν hA hs hper hν => fj_zero_of_hasSum X la ξ x Q A hA ν hs hper hν,
-    fun hsec hcusp h => h.elim (fun hm => mem_SS_of_isModerate X la Q hsec hm hcusp)
-      fun ⟨C, A, hC⟩ => mem_SS_of_le_one_add_inv X la Q hsec C A hC hcusp⟩
 
 end GlobalTheory.FJZero

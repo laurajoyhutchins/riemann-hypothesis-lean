@@ -1,8 +1,66 @@
-import Mathlib
-import Formalism.UnipotentAdelicQuotients.SiegelWeilUnitaryConvergent
-import Formalism.UnipotentAdelicQuotients.StdAdditiveCharExists
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.FiniteAdeleStrongApproximationModNat
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.IsOpenNsmulAdelicCompletionOfVectorSet
+module
+
+public import Formalism.UnipotentAdelicQuotients.SWXSDefs
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.FiniteAdeleStrongApproximationModNat
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.IsOpenNsmulAdelicCompletionOfVectorSet
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Convex.Contractible
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+public import Mathlib.Analysis.SpecialFunctions.Complex.Circle
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.GroupTheory.ArchimedeanDensely
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.NumberField.ClassNumber
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.DedekindDomain.Different
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import Mathlib.Topology.Homotopy.Lifting
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Analysis.Complex.Circle
+
+@[expose] public section
 
 open NumberField IsDedekindDomain MeasureTheory Topology HeckeCharacterZeroLocus.SiegelWeilU
 open scoped TensorProduct RestrictedProduct nonZeroDivisors
@@ -154,7 +212,7 @@ theorem exists_trace {ψ : AddChar (AF F) ℂ} (hψ : IsCharAF F ψ) :
       Complex.exp (2 * Real.pi * Complex.I * ((q * c : ℚ) : ℂ)) := fun r => by
     obtain ⟨c, hc⟩ := exists_eq_exp (fun t => ψ (pairA F (ρ t * algebraMap F _ (r : F)) 0))
       (hψ.1.comp ((hρ.mul continuous_const).prodMk continuous_const)) (fun t => hψ.2.1 _)
-      (by simp only [map_zero, zero_mul, h0]) (fun s t => by simp only [map_add, add_mul, hadd])
+      (by simp only [map_zero, zero_mul, h0]) (fun s t => by simp only [map_add (f := _), add_mul, hadd])
     have hq : ∀ q : ℚ, ψ (pairA F (algebraMap F _ ((q : F) * (r : F))) 0) =
         Complex.exp (2 * Real.pi * Complex.I * ((c * q : ℝ) : ℂ)) := fun q => by
       rw [← hc, hρq, map_mul]
@@ -179,7 +237,7 @@ theorem exists_trace {ψ : AddChar (AF F) ℂ} (hψ : IsCharAF F ψ) :
   rw [ha', ← b.sum_repr x]
   refine Finset.sum_induction _ (fun y : F => ψ (pairA F (algebraMap F _ y) 0) =
     Complex.exp (2 * Real.pi * Complex.I * ((φ y : ℚ) : ℂ))) (fun y z hy hz => ?_) ?_ fun i _ => ?_
-  · rw [map_add, hadd, hy, hz, map_add, ← Complex.exp_add]
+  · rw [map_add (f := _), hadd, hy, hz, map_add (f := _), ← Complex.exp_add]
     congr 1
     push_cast
     ring
@@ -212,12 +270,14 @@ theorem exists_inf {ψ : AddChar (AF F) ℂ} (hψ : IsCharAF F ψ) (w : Infinite
   have ha0 := trace_mul_ne_zero hψ ha
   let T : Ainf F → ℝ := fun z => ∑ u : InfinitePlace F,
     u.mult * (u.embedding a * InfinitePlace.Completion.extensionEmbedding u (z u)).re
-  have hT : Continuous T := continuous_finset_sum _ fun u _ => continuous_const.mul
+  have hT : Continuous T := continuous_finsetSum _ fun u _ => continuous_const.mul
     (Complex.continuous_re.comp (continuous_const.mul
       ((InfinitePlace.Completion.isometry_extensionEmbedding u).continuous.comp (continuous_apply u))))
   have hemb : ∀ (u : InfinitePlace F) (x : F),
       InfinitePlace.Completion.extensionEmbedding u (algebraMap F u.Completion x) = u.embedding x :=
-    fun u x => InfinitePlace.Completion.extensionEmbedding_coe u _
+    fun u x => by
+      rw [AbsoluteValue.Completion.algebraMap_def]
+      simp [WithAbs.algebraMap_right_apply]
   have h1 : (fun z => ψ (pairA F z 0)) =
       fun z => Complex.exp (2 * Real.pi * Complex.I * ((T z : ℝ) : ℂ)) :=
     (InfiniteAdeleRing.denseRange_algebraMap F).equalizer
@@ -252,8 +312,8 @@ theorem exists_inf {ψ : AddChar (AF F) ℂ} (hψ : IsCharAF F ψ) (w : Infinite
   rw [psiInf, congrFun h1 z, e, e3, Complex.exp_pi_mul_I]
   norm_num
 
-open Classical in
 
+open Classical in
 theorem continuous_singleV (v : HeightOneSpectrum (𝓞 F)) : Continuous (singleV F v) := by
   have hS : Filter.cofinite ≤ Filter.principal ({v}ᶜ : Set (HeightOneSpectrum (𝓞 F))) :=
     Filter.le_principal_iff.2 (Set.finite_singleton v).compl_mem_cofinite

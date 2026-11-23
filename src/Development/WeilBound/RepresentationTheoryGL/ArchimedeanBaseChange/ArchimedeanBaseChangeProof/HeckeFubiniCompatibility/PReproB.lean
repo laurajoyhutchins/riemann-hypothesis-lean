@@ -1,9 +1,59 @@
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.HeckeFubiniCompatibility.PSplit
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.ArchimedeanGelfandKernels.InfinitesimalCharacterGL.BridgeSt
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.HeckeFubiniCompatibility.PSplit
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.ArchimedeanGelfandKernels.InfinitesimalCharacterGL.EopW
+public import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.IntegralConjInnerMulInnerOfIsEmptyEquiv
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.RightDerivativeCalculusHolds
 import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.UnitaryMemGLs
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.L1NormSectionBound
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.WaveSolutionExistence
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.RightDerivativeCalculusHolds
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.WaveSolutionExistence
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Algebra.Star.Unitary
+import Mathlib.Topology.Sheaves.Init
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.DifferentiableAtOfSmooth
+
+@[expose] public section
 
 noncomputable section
 
@@ -35,8 +85,8 @@ instance (N : ℕ) : (nuN N).IsHaarMeasure := by unfold nuN; infer_instance
 
 instance (N : ℕ) : IsFiniteMeasure (nuN N) := CompactSpace.isFiniteMeasure
 
-open Classical in
 
+open Classical in
 def jvMat (v : InfinitePlace E) (u : Matrix (Fin N) (Fin N) ℂ) : Matrix (Fin N) (Fin N) (Cinf E) :=
   Matrix.of fun i j w => if w = v then u i j else (1 : Matrix (Fin N) (Fin N) ℂ) i j
 
@@ -136,7 +186,7 @@ abbrev core (W : Submodule ℂ (Kinf E N → ℂ)) (v : InfinitePlace E) : Inner
     exact integral_nonneg fun u => by positivity
   add_left a b w := by
     show ∫ u, conj (toFun W v (a + b) u) * toFun W v w u ∂nuN N = _
-    simp only [map_add, Pi.add_apply, add_mul]
+    simp only [map_add (f := _), Pi.add_apply, add_mul]
     exact integral_add (integrable_toFun W v a w) (integrable_toFun W v b w)
   smul_left a w c := by
     show ∫ u, conj (toFun W v (c • a) u) * toFun W v w u ∂nuN N = _
@@ -258,10 +308,6 @@ def Mv (W : Submodule ℂ (Kinf E N → ℂ)) (hW : FiniteDimensional ℂ W) (v 
 theorem toFun_rho (W : Submodule ℂ (Kinf E N → ℂ)) (hW : FiniteDimensional ℂ W) (v : InfinitePlace E) (u' : UN N)
     (w : (Mv W hW v).V) (u : UN N) : toFun W v ((Mv W hW v).ρ u' w) u = toFun W v w (u'⁻¹ * u) := rfl
 
-theorem continuous_toFun (W : Submodule ℂ (Kinf E N → ℂ)) (v : InfinitePlace E) (w : V0 W v) :
-    Continuous (toFun W v w) :=
-  w.2.1
-
 def evL (W : Submodule ℂ (Kinf E N → ℂ)) (hW : FiniteDimensional ℂ W) (v : InfinitePlace E) (u : UN N) :
     (Mv W hW v).V →L[ℂ] ℂ :=
   haveI := fd W hW v
@@ -311,7 +357,7 @@ theorem contDiff_atW (v : InfinitePlace E) : ContDiff ℝ ∞ (Bridge.atW (E := 
   unfold Bridge.atW
   refine contDiff_pi.2 fun i => contDiff_pi.2 fun j => contDiff_pi.2 fun w => ?_
   split_ifs
-  · exact (contDiff_apply ℝ ℂ j).comp (contDiff_apply ℝ (Fin N → ℂ) i)
+  · exact (contDiff_apply ℝ (fun _ => ℂ) j).comp (contDiff_apply ℝ (fun _ => (Fin N → ℂ)) i)
   · exact contDiff_const
 
 theorem contDiffOn_along (v : InfinitePlace E) {φ : GA E N → ℂ} (hs : φ ∈ Sm E N) (g : GA E N) :
@@ -350,7 +396,7 @@ theorem Rd_clm (L : V →L[ℂ] V') (X : Mat N) {f : Mat N → V} {y : Mat N} (h
 
 theorem Eu_clm (L : V →L[ℂ] V') (s : Bool) (a b : Fin N) {f : Mat N → V} {y : Mat N}
     (hf : DifferentiableAt ℝ f y) : Eu s a b (fun z => L (f z)) y = L (Eu s a b f y) := by
-  simp only [Eu, Pi.smul_apply, Pi.add_apply, Rd_clm L _ hf, map_add, map_smul]
+  simp only [Eu, Pi.smul_apply, Pi.add_apply, Rd_clm L _ hf, map_add (f := _), map_smul]
 
 theorem Epow_clm (L : V →L[ℂ] V') (s : Bool) {f : Mat N → V} (hf : ContDiffOn ℝ ∞ f (GLs N)) (m : ℕ) :
     ∀ a b : Fin N, Set.EqOn (Epow s m a b (fun z => L (f z))) (fun z => L (Epow s m a b f z)) (GLs N) := by
@@ -360,6 +406,7 @@ theorem Epow_clm (L : V →L[ℂ] V') (s : Bool) {f : Mat N → V} (hf : ContDif
     by_cases hab : a = b <;> simp [Epow, hab]
   | succ m ih =>
     intro a b y hy
+
     simp only [Epow, Finset.sum_apply, map_sum]
     refine Finset.sum_congr rfl fun c _ => ?_
     rw [GlobalTheory.CompanionTheory.WaveAll.Eu_congr GlobalTheory.CompanionTheory.RCalc.isOpen_GLs (ih c b) s a c hy]
@@ -368,6 +415,7 @@ theorem Epow_clm (L : V →L[ℂ] V') (s : Bool) {f : Mat N → V} (hf : ContDif
 
 theorem gel_clm (L : V →L[ℂ] V') (s : Bool) (m : ℕ) {f : Mat N → V} (hf : ContDiffOn ℝ ∞ f (GLs N)) {y : Mat N}
     (hy : y ∈ GLs N) : gel s m (fun z => L (f z)) y = L (gel s m f y) := by
+
   simp only [gel, Finset.sum_apply, map_sum]
   exact Finset.sum_congr rfl fun a _ => Epow_clm L s hf m a a hy
 
@@ -393,7 +441,7 @@ theorem toFun_sec (W : Submodule ℂ (Kinf E N → ℂ)) (hW : FiniteDimensional
     (g : GA E N) {y : Mat N} (hy : y ∈ GLs N) (u : UN N) :
     toFun W v (sec W hW v φ hs hφ g y) u = Bridge.along v g φ (y * u.1) := by
   unfold sec
-  rw [dif_pos hy]
+  rw [dite_eq_left hy]
   rfl
 
 theorem sec_mem_CE (W : Submodule ℂ (Kinf E N → ℂ)) (hW : FiniteDimensional ℂ W) (v : InfinitePlace E)

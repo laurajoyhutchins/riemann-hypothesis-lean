@@ -1,4 +1,47 @@
-import Development.WeilBound.RepresentationTheoryGL.JacquetShalikaBounds.AbsoluteRigidity.NewtonLow
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.JacquetShalikaBounds.AbsoluteRigidity.NewtonLow
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -6,10 +49,12 @@ open PositivityTheory.RgJS
 
 namespace UpperTheory.V.Z.Tf.GOne
 
-open Classical in
 
-def ExtId : Prop := ForSys fun q X _ A => ∀ x y : X, ∃ F : ℂ → ℂ, (∀ σ : ℝ, 0 < σ → AnalyticAt ℂ F σ) ∧
-  ∀ σ : ℝ, 1 < σ → F σ = (if x = y then (σ : ℂ) - 1 else 1) * Complex.exp (∑' p, lterm q (A x) (A y) σ p)
+open Classical in
+def ExtId : Prop := by
+  classical
+  exact ForSys fun q X _ A => ∀ x y : X, ∃ F : ℂ → ℂ, (∀ σ : ℝ, 0 < σ → AnalyticAt ℂ F σ) ∧
+    ∀ σ : ℝ, 1 < σ → F σ = (if x = y then (σ : ℂ) - 1 else 1) * Complex.exp (∑' p, lterm q (A x) (A y) σ p)
 
 def LogTwo : Prop := ForSys fun q X _ A => ∀ x : X, ∃ C : ℝ, ∀ σ : ℝ, 1 < σ → σ ≤ 2 →
   |(∑' p, lterm q (A x) (A x) σ p).re + Real.log (σ - 1)| ≤ C
@@ -20,14 +65,6 @@ def CrossUp : Prop := ForSys fun q X _ A => ∀ x y : X, x ≠ y → ∃ C : ℝ
 def PartCS : Prop := ForSys fun q X _ A => ∀ (x y : X) (I : Set _) (σ : ℝ), 1 < σ →
   ‖∑' p : {p : _ × ℕ // p.1 ∈ I}, lterm q (A x) (A y) σ p.1‖ ^ 2 ≤
     (∑' p : {p : _ × ℕ // p.1 ∈ I}, lterm q (A x) (A x) σ p.1).re * (∑' p, lterm q (A y) (A y) σ p).re
-
-def ThinBd : Prop := ForSys fun q X _ A => ∀ (x : X) (I : Set _), (∀ w a, ‖A x w a‖ = 1) →
-  (Summable fun w : I => (q w : ℝ)⁻¹) → ∃ C : ℝ, ∀ σ : ℝ, 1 < σ →
-    ‖∑' p : {p : _ × ℕ // p.1 ∈ I}, lterm q (A x) (A x) σ p.1‖ ≤ C
-
-def AbsSplit : Prop := ForSys fun q X _ A => ∀ (x : X) (I : Set _), (∀ w a, ‖A x w a‖ = 1) →
-  (Summable fun w : I => (q w : ℝ)⁻¹) → ∀ (J : Type) [Fintype J] (y : J → X),
-    (∀ w ∉ I, ∀ k : ℕ, ∑ a, A x w a ^ k = ∑ j, ∑ b, A (y j) w b ^ k) → ∃ j, y j = x
 
 end UpperTheory.V.Z.Tf.GOne
 

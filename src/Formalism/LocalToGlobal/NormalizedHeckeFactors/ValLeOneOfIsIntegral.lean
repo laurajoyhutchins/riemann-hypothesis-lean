@@ -1,5 +1,50 @@
-import Formalism.LocalToGlobal.NormalizedHeckeFactors.RhoDefs
-import Formalism.SharpRestriction.LevelLetterCocycles.ExistsInertiaCharpolyFactorOfTameType
+module
+
+public import Formalism.LocalToGlobal.NormalizedHeckeFactors.RhoDefs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Formalism.LocalToGlobal.NormalizedHeckeFactors.NormalizedHeckeData
+public import Mathlib.RingTheory.DedekindDomain.Factorization
+
+@[expose] public section
 
 noncomputable section
 
@@ -7,11 +52,6 @@ open Formalism.BasicNotions Formalism.ConjugateSelfDual NumberField IsDedekindDo
 open scoped Pointwise
 
 namespace Formalism.L2.NR
-
-def RowPolLL (D : D7) : Prop :=
-  ∀ (i : D.nd.Loc) (σ : D.what₂.FT) (Sig : List (Part D.naut.CG)), Formalism.MainNotions.N.HasParamW D.nd D.naut i σ Sig →
-    ∀ᶠ w in Filter.cofinite, ∃ p : Polynomial D.what₂.LL, p.map D.what₂.embLL =
-      Formalism.MainNotions.N.galPol D.naut (D.naut.lpTw (Formalism.MainNotions.N.isoLoc D.nd D.naut Sig w) ((1 - (D.R.r : ℝ)) / 2))
 
 structure NRhoTied (D : D7) : Prop where
   rbarSS : ∀ (σ : D.what₂.FT) (lam : D.what₂.places.Pl), (∃ a : D.nd.Loc, D.nd.w a = lam) →
@@ -33,35 +73,6 @@ structure NRhoTied (D : D7) : Prop where
 section transport
 
 variable {E Ω L : Type} [Field E] [NumberField E] [Field Ω] [Algebra E Ω] [Field L] [NumberField L]
-
-theorem val_le_one_of_isIntegral (B : ValuationSubring Ω) {y : Ω} (hy : IsIntegral ℤ y) : B.valuation y ≤ 1 :=
-  (Valuation.valuationSubring.integers B.valuation).isIntegral_iff_v_le_one.mp (IsIntegral.tower_top hy)
-
-theorem val_k_le_one (k : AlgebraicClosure L ≃+* Ω) (B : ValuationSubring Ω) (x : 𝓞 (AlgebraicClosure L)) :
-    B.valuation (k (x : AlgebraicClosure L)) ≤ 1 := by
-  apply val_le_one_of_isIntegral
-  have hx : IsIntegral ℤ (x : AlgebraicClosure L) := x.2
-  exact hx.map (k.toRingHom.toIntAlgHom)
-
-def intoB (k : AlgebraicClosure L ≃+* Ω) (B : ValuationSubring Ω) : 𝓞 (AlgebraicClosure L) →+* B :=
-  (k.toRingHom.comp (algebraMap (𝓞 (AlgebraicClosure L)) (AlgebraicClosure L))).codRestrict B
-    (fun x => (B.valuation_le_one_iff _).mp (val_k_le_one k B x))
-
-def primeOf (k : AlgebraicClosure L ≃+* Ω) (B : ValuationSubring Ω) : Ideal (𝓞 (AlgebraicClosure L)) :=
-  (IsLocalRing.maximalIdeal B).comap (intoB k B)
-
-instance primeOf_isPrime (k : AlgebraicClosure L ≃+* Ω) (B : ValuationSubring Ω) : (primeOf k B).IsPrime :=
-  Ideal.comap_isPrime _ _
-
-theorem normV_eq_absNorm (j : E ≃+* L) (w : HeightOneSpectrum (𝓞 E)) :
-    normV w = Ideal.absNorm (mapPl j w).asIdeal := by
-  rw [Ideal.absNorm_apply, Submodule.cardQuot_apply, normV]
-  refine Nat.card_congr (Ideal.quotientEquiv w.asIdeal (mapPl j w).asIdeal (RingOfIntegers.mapRingEquiv j) ?_).toEquiv
-  ext y
-  rw [Ideal.map_comap_of_equiv, Ideal.mem_comap]
-  obtain ⟨x, rfl⟩ := (RingOfIntegers.mapRingEquiv j).surjective y
-  rw [mem_mapPl]
-  simp
 
 end transport
 
@@ -177,20 +188,7 @@ section gal
 
 variable (D : D7) (T : NormalizedHeckeDataPlaceholder D)
 
-def TempCSD : Prop :=
-  ∀ (a : ℕ) (π : D.naut.CG a), 1 ≤ a → D.naut.csd π → D.naut.ralg π → ∀ w, D.naut.tempered (D.naut.locG π w)
-
-def PurityN : Prop :=
-  ∀ a (π : D.naut.CG a), D.naut.ralg π → ∃ w₀ : ℂ, ∀ τ : D.host.E →+* ℂ,
-    D.naut.infG π (τ.comp (D.host.conj : D.host.E ≃ₐ[ℚ] D.host.E).toRingEquiv.toRingHom) =
-      (D.naut.infG π τ).map (w₀ - ·)
-
 end gal
-
-theorem exists_frame {E Ω L : Type} [Field E] [Field Ω] [Algebra E Ω] [IsAlgClosure E Ω] [Field L] (j : E ≃+* L) :
-    ∃ k : AlgebraicClosure L ≃+* Ω, FrameOver j k :=
-  ⟨IsAlgClosure.equivOfEquiv (AlgebraicClosure L) Ω j.symm, fun x => by
-    rw [IsAlgClosure.equivOfEquiv_algebraMap, RingEquiv.symm_apply_apply]⟩
 
 theorem placesOver_finite (E : Type) [Field E] [NumberField E] (p : ℕ) (hp : p ≠ 0) : (placesOver E p).Finite := by
   have h0 : Ideal.span {((p : ℕ) : 𝓞 E)} ≠ 0 := by

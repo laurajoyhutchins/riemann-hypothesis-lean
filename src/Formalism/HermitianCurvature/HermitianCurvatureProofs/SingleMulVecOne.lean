@@ -1,5 +1,62 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.DifferentialOperatorBracket
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.HighestWeightUniqueness.UnitaryOfBlockWMem
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.HighestWeightUniqueness.UnitaryOfBlockWMem
+public import Formalism.FormalDegreeBessel.FormalDegreeRatio.GBasic
+public import Formalism.HermitianCurvature.FrameExists2
+import Formalism.FormalDegreeBessel.FormalDegreeRatio.UnitaryWeylNormalHolds
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.DifferentialOperatorBracket
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.ExistsFrameTwo
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.FrameCompletion
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.LemmaDDeterminantIdentity
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.RestrictionIrrelevantDoubleLevelOperator
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.Normed.Algebra.MatrixExponential
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Matrix Finset
 
@@ -131,7 +188,7 @@ theorem sum_single (θ : Fin k → ℝ) :
     rw [if_pos rfl]
     unfold dθ
     by_cases hin : r ≤ i.val ∧ i.val < r + k
-    · rw [dif_pos hin, Finset.sum_eq_single ⟨i.val - r, by omega⟩]
+    · rw [dite_eq_left hin, Finset.sum_eq_single ⟨i.val - r, by omega⟩]
       · rw [if_pos]
         constructor <;> (apply Fin.ext; simp only [wI, Fin.val_castSucc]; omega)
       · intro c _ hc
@@ -144,7 +201,7 @@ theorem sum_single (θ : Fin k → ℝ) :
         simp only
         omega
       · intro h; exact absurd (Finset.mem_univ _) h
-    · rw [dif_neg hin]
+    · rw [dite_eq_right hin]
       apply Finset.sum_eq_zero
       intro c _
       rw [if_neg]
@@ -175,7 +232,7 @@ theorem diag_exp_blockW (θ : Fin k → ℝ) :
       · subst hij
         rw [if_pos rfl, if_pos rfl, Pi.coe_exp]
         unfold dθ
-        rw [dif_pos hi, ← Complex.exp_eq_exp_ℂ]
+        rw [dite_eq_left hi, ← Complex.exp_eq_exp_ℂ]
       · rw [if_neg hij, if_neg]
         intro h
         apply hij
@@ -189,7 +246,7 @@ theorem diag_exp_blockW (θ : Fin k → ℝ) :
     · subst hij
       rw [if_pos rfl, if_pos rfl, Pi.coe_exp]
       unfold dθ
-      rw [dif_neg (show ¬ (r ≤ i.val ∧ i.val < r + k) from hi), NormedSpace.exp_zero]
+      rw [dite_eq_right (show ¬ (r ≤ i.val ∧ i.val < r + k) from hi), NormedSpace.exp_zero]
     · rw [if_neg hij, if_neg hij]
 
 theorem torus {g : Mx k r} (hgU : g ∈ UH (Hpk k r)) (θ : Fin k → ℝ) :

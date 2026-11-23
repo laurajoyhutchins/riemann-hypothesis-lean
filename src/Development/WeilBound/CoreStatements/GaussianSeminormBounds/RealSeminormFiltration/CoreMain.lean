@@ -1,4 +1,60 @@
-import Development.WeilBound.CoreStatements.GaussianSeminormBounds.RealSeminormFiltration.CoreCasGl
+module
+
+public import Development.WeilBound.CoreStatements.GaussianSeminormBounds.RealSeminormFiltration.CoreDefs
+public import Development.WeilBound.CoreStatements.GaussianSeminormBounds.RealSeminormFiltration.CoreCasGl
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Eigenspace.Minpoly
+import Mathlib.LinearAlgebra.Matrix.FiniteDimensional
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Analysis.InnerProductSpace.ProdL2
+
+@[expose] public section
 
 noncomputable section
 
@@ -118,6 +174,7 @@ theorem casK_intertw {V : Type} [AddCommGroup V] [Module ℂ V] {ρ : Ix r s →
     {ρ' : Ix r s → Ix r s → Module.End ℂ M} (ι : V →ₗ[ℂ] M)
     (h : ∀ a b, sameBlock a b → ∀ v, ι (ρ a b v) = ρ' a b (ι v)) (v : V) :
     ι (casK ρ v) = casK ρ' (ι v) := by
+
   simp only [casK, LinearMap.sum_apply, map_sum]
   refine Finset.sum_congr rfl fun a _ => Finset.sum_congr rfl fun b _ => ?_
   split_ifs with hab
@@ -231,7 +288,7 @@ theorem local_of (act : Mat r s →ₗ[ℂ] Module.End ℂ M) (hL : IsLie act) (
       have h1 : ρ a b w0 ∈ W := hWK a b hsb w0 hw0
       have h2 : ρ a b v0 ∈ Wᗮ := hWpK a b hsb v0 hv0
       have h3 : ρ a b w0 = - ρ a b v0 := by
-        rw [eq_neg_iff_add_eq_zero, ← map_add, hfwv, hw.2 a b hab]
+        rw [eq_neg_iff_add_eq_zero, ← map_add (f := _), hfwv, hw.2 a b hab]
       have h4 : ρ a b w0 = 0 := by
         have : ρ a b w0 ∈ W ⊓ Wᗮ := ⟨h1, by rw [h3]; exact Wᗮ.neg_mem h2⟩
         rw [Submodule.inf_orthogonal_eq_bot] at this
@@ -481,7 +538,7 @@ theorem local_of (act : Mat r s →ₗ[ℂ] Module.End ℂ M) (hL : IsLie act) (
           rw [mul_comm, map_mul, Module.End.mul_apply, hpx, map_zero]
         have h2 : Polynomial.aeval C (p * q) y = 0 := by
           rw [map_mul, Module.End.mul_apply, hqy, map_zero]
-        rw [map_add, h1, h2, add_zero]
+        rw [map_add (f := _), h1, h2, add_zero]
       zero_mem' := ⟨1, by simp, by simp⟩
       smul_mem' := by
         rintro a x ⟨q, hq, hqx⟩
@@ -504,7 +561,7 @@ theorem local_of (act : Mat r s →ₗ[ℂ] Module.End ℂ M) (hL : IsLie act) (
     induction P using Polynomial.induction_on' with
     | add p q hp hq =>
       intro v
-      simp only [map_add, LinearMap.add_apply, Submodule.coe_add, hp, hq]
+      simp only [map_add (f := _), LinearMap.add_apply, Submodule.coe_add, hp, hq]
     | monomial n a =>
       intro v
       rw [Polynomial.aeval_monomial, Polynomial.aeval_monomial, Module.End.mul_apply,

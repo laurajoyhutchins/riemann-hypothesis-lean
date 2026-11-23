@@ -1,10 +1,48 @@
-import Mathlib
-import Development.AbelianVarietyTheory.CrystallinePeriods.CrystallineLogarithm.MemAcris0OfFactorialMul
-import Development.AbelianVarietyTheory.CrystallinePeriods.CrystallineLogarithm.ExistsPowDivFactorial
-import Development.AbelianVarietyTheory.CrystallinePeriods.CrystallineLogarithm.EvalLogAlgebraMap
-import Development.AbelianVarietyTheory.CrystallinePeriods.CrystallineLogarithm.FactorialMulTruncLog
-import Development.AutomorphicArithmetic.IntegralCasts.CrystallinePeriods.TruncLogEqOfPowEqZero
-import Development.AbelianVarietyTheory.CrystallinePeriods.RingIface
+module
+
+public import Formalism.LocalRingCardinality.AdicCompletionLocal.InstIsAdicCompleteOCSpanSingletonSetCast
+public import Development.AbelianVarietyTheory.CrystallinePeriods.CrystallineLogarithm.MemAcris0OfFactorialMul
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open scoped Formalism.Per
 
@@ -21,42 +59,13 @@ def levMap (I : Ideal R) (J : Ideal S) (f : R →+* S) (hf : I ≤ J.comap f) (n
     R ⧸ I ^ n →+* S ⧸ J ^ n :=
   Ideal.quotientMap (J ^ n) f (Reformulated.AutPerF.pow_le_comap_pow hf n)
 
-theorem levMap_mk (I : Ideal R) (J : Ideal S) (f : R →+* S) (hf : I ≤ J.comap f) (n : ℕ) (r : R) :
-    levMap I J f hf n (Ideal.Quotient.mk _ r) = Ideal.Quotient.mk _ (f r) := by
-  first | exact @AdicLevelMap.Bridge.AdicMaps.levMap_mk | exact AdicLevelMap.Bridge.AdicMaps.levMap_mk .. | (intros; apply AdicLevelMap.Bridge.AdicMaps.levMap_mk <;> assumption)
-
-theorem factorPow_evalₐ (I : Ideal R) {m n : ℕ} (hle : m ≤ n) (x : AdicCompletion I R) :
-    Ideal.Quotient.factorPow I hle (AdicCompletion.evalₐ I n x) = AdicCompletion.evalₐ I m x := by
-  first | exact @FactorPowerEval.Bridge.AdicMaps.factorPow_evalₐ | exact FactorPowerEval.Bridge.AdicMaps.factorPow_evalₐ .. | (intros; apply FactorPowerEval.Bridge.AdicMaps.factorPow_evalₐ <;> assumption)
-
-theorem levMap_compat (I : Ideal R) (J : Ideal S) (f : R →+* S) (hf : I ≤ J.comap f) {m n : ℕ}
-    (hle : m ≤ n) :
-    (Ideal.Quotient.factorPow J hle).comp ((levMap I J f hf n).comp
-      (AdicCompletion.evalₐ I n : AdicCompletion I R →+* R ⧸ I ^ n)) =
-    (levMap I J f hf m).comp (AdicCompletion.evalₐ I m : AdicCompletion I R →+* R ⧸ I ^ m) := by
-  first | exact @AdicLevelCompat.Bridge.AdicMaps.levMap_compat | exact AdicLevelCompat.Bridge.AdicMaps.levMap_compat .. | (intros; apply AdicLevelCompat.Bridge.AdicMaps.levMap_compat <;> assumption)
-
 def adicMap (I : Ideal R) (J : Ideal S) (f : R →+* S) (hf : I ≤ J.comap f) :
     AdicCompletion I R →+* AdicCompletion J S :=
   Reformulated.AutPerF.adicMap I J f hf
 
-theorem evalₐ_adicMap (I : Ideal R) (J : Ideal S) (f : R →+* S) (hf : I ≤ J.comap f) (n : ℕ)
-    (x : AdicCompletion I R) :
-    AdicCompletion.evalₐ J n (adicMap I J f hf x) = levMap I J f hf n (AdicCompletion.evalₐ I n x) := by
-  first | exact @AdicEvaluationMap.Bridge.AdicMaps.evalₐ_adicMap | exact AdicEvaluationMap.Bridge.AdicMaps.evalₐ_adicMap .. | (intros; apply AdicEvaluationMap.Bridge.AdicMaps.evalₐ_adicMap <;> assumption)
-
-theorem evalₐ_adicMap_mk (I : Ideal R) (J : Ideal S) (f : R →+* S) (hf : I ≤ J.comap f) (n : ℕ)
-    (x : AdicCompletion I R) (r : R) (h : AdicCompletion.evalₐ I n x = Ideal.Quotient.mk _ r) :
-    AdicCompletion.evalₐ J n (adicMap I J f hf x) = Ideal.Quotient.mk _ (f r) := by
-  first | exact @AdicEvaluationMk.Bridge.AdicMaps.evalₐ_adicMap_mk | exact AdicEvaluationMk.Bridge.AdicMaps.evalₐ_adicMap_mk .. | (intros; apply AdicEvaluationMk.Bridge.AdicMaps.evalₐ_adicMap_mk <;> assumption)
-
 theorem adicMap_alg (I : Ideal R) (J : Ideal S) (f : R →+* S) (hf : I ≤ J.comap f) (r : R) :
     adicMap I J f hf (algebraMap R (AdicCompletion I R) r) = algebraMap S (AdicCompletion J S) (f r) := by
   first | exact @AdicMapAlgebra.Bridge.AdicMaps.adicMap_alg | exact AdicMapAlgebra.Bridge.AdicMaps.adicMap_alg .. | (intros; apply AdicMapAlgebra.Bridge.AdicMaps.adicMap_alg <;> assumption)
-
-theorem span_le_comap (p : ℕ) (f : R →+* S) :
-    Ideal.span {(p : R)} ≤ (Ideal.span {(p : S)}).comap f := by
-  first | exact @AdicSpanLeComap.Bridge.AdicMaps.span_le_comap | exact AdicSpanLeComap.Bridge.AdicMaps.span_le_comap .. | (intros; apply AdicSpanLeComap.Bridge.AdicMaps.span_le_comap <;> assumption)
 
 abbrev PHat (p : ℕ) (R : Type) [CommRing R] : Type := AdicCompletion (Ideal.span {(p : R)}) R
 

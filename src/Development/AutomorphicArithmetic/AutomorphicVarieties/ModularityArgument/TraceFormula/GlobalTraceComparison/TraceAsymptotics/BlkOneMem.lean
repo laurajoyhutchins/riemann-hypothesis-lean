@@ -1,4 +1,49 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.TraceFormula.GlobalTraceComparison.TraceAsymptotics.HintSph
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.TraceFormula.GlobalTraceComparison.TraceAsymptotics.FinprodSplitAlt
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.TraceFormula.GlobalTraceComparison.TraceAsymptotics.HintSph
+import GroundTheory.GlobalFields.LocalFieldAtPlace
+import GroundTheory.LocalFields.PadicLogSeries
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -30,7 +75,7 @@ private theorem bm_isUnit (h : a + b = n) (w : Pl E) (m : GLw a w × GLw b w)
 private theorem blk_val (h : a + b = n) (w : Pl E) (m : GLw a w × GLw b w)
     (X : Matrix (Fin a) (Fin b) (w.adicCompletion E)) : (GlobalTheory.BCT.blk h w m X).val = bm h w m X := by
   show (if hM : IsUnit (bm h w m X) then hM.unit else 1).val = _
-  rw [dif_pos (bm_isUnit h w m X)]
+  rw [dite_eq_left (bm_isUnit h w m X)]
   rfl
 
 private theorem blk_add (h : a + b = n) (w : Pl E) (m : GLw a w × GLw b w)
@@ -42,7 +87,7 @@ private theorem blk_add (h : a + b = n) (w : Pl E) (m : GLw a w × GLw b w)
   simp [Matrix.reindex_apply, Matrix.submatrix_mul_equiv, Matrix.fromBlocks_multiply, Matrix.mul_add, add_comm]
 
 private theorem blk_one_mem (h : a + b = n) (w : Pl E) (Y : Matrix (Fin a) (Fin b) (w.adicCompletion E))
-    (hY : ∀ i j, Valued.v (Y i j) ≤ 1) : GlobalTheory.BCT.blk h w 1 Y ∈ GlobalTheory.LFun.KGL w n := by
+    (hY : ∀ i j, Valued.v (Y i j) ≤ 1) : GlobalTheory.BCT.blk h w 1 Y ∈ GlobalTheory.LFun.KGL w (n := n) := by
   let Y' : Matrix (Fin a) (Fin b) (Ov E w) := fun i j => ⟨Y i j, hY i j⟩
   let N : Matrix (Fin n) (Fin n) (Ov E w) := Matrix.reindex (eIdx h) (eIdx h) (Matrix.fromBlocks 1 Y' 0 1)
   have hN : IsUnit N := by
@@ -150,9 +195,9 @@ theorem ctSph : CtSph := by
   intro E _ _ _ w n a b h f hf m
   refine ⟨?_, supp_fin h w f hf.1 m⟩
   have hinv := hf.2
-  have havg : ∀ y : GLw n w, (avg fun k : GlobalTheory.LFun.KGL w n => f ((k : GLw n w)⁻¹ * y * k)) = f y := by
+  have havg : ∀ y : GLw n w, (avg fun k : GlobalTheory.LFun.KGL w (n := n) => f ((k : GLw n w)⁻¹ * y * k)) = f y := by
     intro y
-    have : (fun k : GlobalTheory.LFun.KGL w n => f ((k : GLw n w)⁻¹ * y * k)) = fun _ => f y := by
+    have : (fun k : GlobalTheory.LFun.KGL w (n := n) => f ((k : GLw n w)⁻¹ * y * k)) = fun _ => f y := by
       funext k
       rw [(hinv k k.2 _).2, (hinv _ (inv_mem k.2) y).1]
     rw [this, avg_const]

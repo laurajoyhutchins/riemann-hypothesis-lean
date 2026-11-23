@@ -1,5 +1,58 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.KeyFormula.DegProd
+module
+
+public import Development.AbelianVarietyTheory.Definitions.KeyFormula.DegProd
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.Analysis.Calculus.FDeriv.Defs
+public import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Analysis.Calculus.FDeriv.Add
+public import Mathlib.Analysis.Calculus.FDeriv.Mul
+public import Mathlib.Analysis.Calculus.FDeriv.Pow
+
+@[expose] public section
+
 open GlobalTheory.KeyKa
 
 namespace GlobalTheory.TorsionHolomorphic
@@ -24,8 +77,8 @@ theorem _root_.GlobalTheory.TorsionHolomorphic.differentiableOn_finset_sum {ι :
     DifferentiableOn ℂ (fun e => ∑ i ∈ s, f i e) W :=
   DifferentiableOn.fun_sum (fun i _ => hf i)
 
-variable {E : Type} [NormedAddCommGroup E] [NormedSpace ℂ E] in
 
+variable {E : Type} [NormedAddCommGroup E] [NormedSpace ℂ E] in
 theorem _root_.GlobalTheory.TorsionHolomorphic.differentiableOn_det {n : Type} [Fintype n] [DecidableEq n] (A : E → Matrix n n ℂ)
     (W : Set E) (hA : ∀ p q, DifferentiableOn ℂ (fun e => A e p q) W) :
     DifferentiableOn ℂ (fun e => (A e).det) W := by
@@ -47,8 +100,8 @@ theorem _root_.GlobalTheory.TorsionHolomorphic.differentiableOn_matrix_mul {n : 
   simp only [Matrix.mul_apply]
   exact DifferentiableOn.fun_sum (fun r _ => (hA p r).mul (hB r q))
 
-variable {E : Type} [NormedAddCommGroup E] [NormedSpace ℂ E] in
 
+variable {E : Type} [NormedAddCommGroup E] [NormedSpace ℂ E] in
 theorem _root_.GlobalTheory.TorsionHolomorphic.differentiableOn_matrix_inv {n : Type} [Fintype n] [DecidableEq n] (A : E → Matrix n n ℂ)
     (W : Set E) (hA : ∀ p q, DifferentiableOn ℂ (fun e => A e p q) W)
     (hdet : ∀ e ∈ W, (A e).det ≠ 0) (p q : n) :
@@ -125,8 +178,8 @@ private theorem contracting_homotopy_of_det_anticommutator_ne_zero {Ix : Type} [
     _ = A * A⁻¹ := by rw [hA, Matrix.add_mul]
     _ = 1 := Matrix.mul_nonsing_inv A hu
 
-variable {E : Type} [NormedAddCommGroup E] [NormedSpace ℂ E] in
 
+variable {E : Type} [NormedAddCommGroup E] [NormedSpace ℂ E] in
 theorem _root_.GlobalTheory.TorsionHolomorphic.exists_differentiableOn_torsSq :
     ∀ (E Ix : Type) [NormedAddCommGroup E] [NormedSpace ℂ E] [Fintype Ix] [DecidableEq Ix] (deg : Ix → ℕ) (D : E → Matrix Ix Ix ℂ) (W : Set E) (e₀ : E) (t₀ : ℂ), IsOpen W → e₀ ∈ W → (∀ p q, DifferentiableOn ℂ (fun e => D e p q) W) → (∀ e ∈ W, _root_.GlobalTheory.KeyKa.IsCx deg (D e)) → _root_.GlobalTheory.KeyKa.TorsSq deg (D e₀) t₀ → ∃ (W' : Set E) (t : E → ℂ), IsOpen W' ∧ e₀ ∈ W' ∧ W' ⊆ W ∧ DifferentiableOn ℂ t W' ∧ ∀ e ∈ W', _root_.GlobalTheory.KeyKa.TorsSq deg (D e) (t e) := by
   intro E Ix _ _ _ _ deg D W e₀ t₀ hW he₀ hD hcx htor

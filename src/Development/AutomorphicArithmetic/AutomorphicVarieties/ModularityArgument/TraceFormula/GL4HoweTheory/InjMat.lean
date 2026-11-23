@@ -1,4 +1,61 @@
-import Development.AutomorphicArithmetic.Foundations.Convolution.TwistedLocalOrbits.HoweSpace
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.NotIsGenericDetRepTwo
+public import Mathlib.Algebra.Module.Lattice.Full
+import Mathlib.Algebra.GroupWithZero.Submonoid.CancelMulZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open ValuativeRel Matrix
 
@@ -52,8 +109,8 @@ private theorem unit_of (hr : r < 1) (hA : Bd r (A - 1)) : IsUnit A := by
     exact congrFun h i) fun i j => by simp
   exact hx (funext fun i => by simpa using h1 i i)
 
-variable (E n) in
 
+variable (E n) in
 private def Js : Matrix (Fin n) (Fin n) E := Matrix.of fun i j => if (i : ℕ) = j + 1 then 1 else 0
 
 private theorem Js_bd : Bd 1 (Js E n) := fun i j => by
@@ -119,11 +176,12 @@ variable [TopologicalSpace E] [IsNonarchimedeanLocalField E]
 private theorem sep {V : Type} [AddCommGroup V] [Module E V] [Module 𝒪[E] V] [IsScalarTower 𝒪[E] E V] (S : Set V) (hS : S.Finite)
     (ht : Submodule.span E S = ⊤) (D : V) (hD : D ∉ Submodule.span 𝒪[E] S) :
     ∃ φ : V →ₗ[E] E, (∀ x ∈ S, valuation E (φ x) ≤ 1) ∧ 1 < valuation E (φ D) := by
-  haveI : (Submodule.span 𝒪[E] S).IsLattice E := ⟨Submodule.fg_span hS, by rw [Submodule.span_span_of_tower, ht]⟩
-  haveI : Module.Free 𝒪[E] (Submodule.span 𝒪[E] S) := inferInstance
-  haveI : Module.Finite 𝒪[E] (Submodule.span 𝒪[E] S) := inferInstance
+  haveI : (Submodule.span 𝒪[E] S).IsLattice E := Submodule.IsLattice.of_fg E (Submodule.fg_span hS)
+  haveI : (Submodule.span 𝒪[E] S).IsFullLattice E := ⟨by rw [Submodule.span_span_of_tower, ht]⟩
+  haveI : Module.Free 𝒪[E] (Submodule.span 𝒪[E] S) := Submodule.IsLattice.free E _
+  haveI : Module.Finite 𝒪[E] (Submodule.span 𝒪[E] S) := Submodule.IsLattice.finite E _
   let b := Module.Free.chooseBasis 𝒪[E] (Submodule.span 𝒪[E] S)
-  let c := b.extendOfIsLattice E
+  let c := b.extendOfIsFullLattice E
   have hc : ∀ i, c i = b i := fun i => by simp [c]
   by_contra h
   push Not at h
@@ -178,6 +236,7 @@ private theorem dual (u w D : Matrix (Fin n) (Fin n) E) (h : ¬ ∃ Y Z, Bd 1 Y 
   let X : Matrix (Fin n) (Fin n) E := Matrix.of fun j i => φ (Matrix.single i j 1)
   have hX : ∀ M : Matrix (Fin n) (Fin n) E, (M * X).trace = φ M := fun M => by
     conv_rhs => rw [Matrix.matrix_eq_sum_single M]
+
     simp only [map_sum, Matrix.trace, Matrix.diag, Matrix.mul_apply, X, Matrix.of_apply]
     refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
     rw [show Matrix.single i j (M i j) = M i j • Matrix.single i j (1 : E) by simp, map_smul, smul_eq_mul]

@@ -1,9 +1,57 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.EmbWInjective
-import Formalism.SharpRestriction.LevelLetterCocycles.LocalSituation
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.NormEqZpowOfMemMaxUnramifiedSubfield
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IntegersCompleteDVR
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsSumRootsOfUnity
+module
+
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.EmbWInjective
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsSumRootsOfUnity
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IntegersCompleteDVR
+import Mathlib.Algebra.GroupWithZero.Submonoid.CancelMulZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.ExistsOfLayers
+import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.InvertibleSpanSingleton
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.BasicNotions.Loc Formalism.WeaklyAdmissibleFiltrations TensorProduct GlobalTheory.HWL GlobalTheory.Prism GlobalTheory.PrismS
 
 noncomputable section
@@ -21,6 +69,7 @@ theorem isUnit_sub_of_pow_eq_one {O : Type} [CommRing O] [IsDomain O] [IsLocalRi
     rw [← sub_eq_zero, ← map_sub, IsLocalRing.residue_eq_zero_iff]
     exact hn
   have h4 := congrArg (IsLocalRing.residue O) h2
+
   simp only [map_sum, map_mul, map_pow, h3, map_zero] at h4
   rw [geom_sum₂_self] at h4
   have hbu : IsUnit b := IsUnit.of_pow_eq_one hb hm0.ne'
@@ -42,7 +91,7 @@ theorem existsUnique_of_separated {R W O ι : Type} [CommRing R] [Nontrivial R] 
       map_smul' := fun r c => by
         funext k; simp [Finset.smul_sum] }
   let Φ : O ⊗[R] W →ₐ[O] (ι → O) :=
-    Algebra.TensorProduct.lift (Algebra.ofId O (ι → O)) (Pi.algHom R _ φ)
+    Algebra.TensorProduct.lift (Algebra.ofId O (ι → O)) (AlgHom.pi φ)
       (fun _ _ => Commute.all _ _)
   have hΦ : ∀ (a : O) (w : W) (k : ι), Φ (a ⊗ₜ w) k = a * φ k w := by
     intro a w k
@@ -50,7 +99,6 @@ theorem existsUnique_of_separated {R W O ι : Type} [CommRing R] [Nontrivial R] 
   have h1 : ∀ t, Φ t ∈ LinearMap.range F := by
     intro t
     induction t with
-    | zero => simp
     | add s t hs ht => rw [map_add]; exact add_mem hs ht
     | tmul a w =>
       refine ⟨fun i => o.repr a i • w, ?_⟩
@@ -116,9 +164,10 @@ theorem exists_root_ne {l : ℕ} [Fact l.Prime] {K LL : FinExt l}
   have hx' : algebraMap ℚ_[l] ↥(K0 K) a⁻¹ * x =
       ∑ i, algebraMap ℚ_[l] ↥(K0 K) (z i : ℚ_[l]) * (⟨ω i, (hω i).1⟩ : ↥(K0 K)) := by
     apply Subtype.ext
-    rw [AddSubmonoidClass.coe_finset_sum]
+    rw [AddSubmonoidClass.coe_finsetSum]
     exact hx
   have : e (algebraMap ℚ_[l] ↥(K0 K) a⁻¹ * x) = e' (algebraMap ℚ_[l] ↥(K0 K) a⁻¹ * x) := by
+
     rw [hx', map_sum, map_sum]
     refine Finset.sum_congr rfl fun i _ => ?_
     obtain ⟨m, hm, hl, h1⟩ := (hω i).2

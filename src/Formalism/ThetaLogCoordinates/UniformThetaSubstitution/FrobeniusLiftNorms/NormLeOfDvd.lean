@@ -1,7 +1,54 @@
-import Mathlib
-import Formalism.ThetaLogCoordinates.UniformThetaSubstitution.StatementE
-import Formalism.GaussJetBounds.GaussJetProofs.ConstantCoeffAevalLinP
-import Formalism.GaussJetBounds.GaussJetProofs.NormNatCastEqPowPadicValNat
+module
+
+public import Formalism.ThetaLogCoordinates.UniformThetaSubstitution.StatementE
+public import Formalism.GaussJetBounds.StatementJ
+public import Formalism.GaussJetBounds.GaussJetProofs.NormNatCastEqPowPadicValNat
+public import Formalism.GaussJetBounds.GaussJetProofs.ThmAOp
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.Normed.Ring.Ultra
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -17,7 +64,7 @@ namespace StarEntryOperators
 
 theorem lowOp_int {K : Type} [NormedField K] [IsUltrametricDist K] {ν r0 r1 C : ℕ} (l : Fin C → ℕ)
     (sf : Fin C → ZMod (2 * ν)) (T : ∀ c, Fin (l c) → Fin r0 → K) (I : ∀ c, Fin (l c) → Fin r1)
-    (hT : ∀ c i a, ‖T c i a‖ ≤ 1) : ∀ n, ‖MvPolynomial.coeff n (lowOp l sf T I)‖ ≤ 1 := by
+    (hT : ∀ c i a, ‖T c i a‖ ≤ 1) : ∀ n, ‖AddMonoidAlgebra.coeff (lowOp l sf T I) n‖ ≤ 1 := by
   have h : lowOp l sf T I ∈ opInt K (ZV ν r0 r1) := by
     unfold lowOp minorAt
     refine Subring.prod_mem _ fun c _ => ?_
@@ -156,6 +203,7 @@ theorem cc_hhS [NeZero ν] {p : ℕ} (hp : p ≠ 0) (u : ZMod (2 * ν) → K) :
     refine Finset.sum_eq_zero fun l _ => if_neg fun h => ?_
     have := Finsupp.single_eq_zero.1 h.symm
     exact (pow_ne_zero l (pow_ne_zero 2 hp)) this
+
   simp [hhS, map_sum, h]
 
 end Lin
@@ -166,7 +214,7 @@ theorem int_zSub {K : Type} [NormedField K] [IsUltrametricDist K] {ν r0 r1 : �
   intro n
   classical
   unfold zSub
-  rw [map_add]
+  rw [map_add (f := _)]
   refine (IsUltrametricDist.norm_add_le_max _ _).trans (max_le ?_ ?_)
   · rw [MvPowerSeries.coeff_X]
     split_ifs <;> simp
@@ -242,7 +290,7 @@ theorem star_norm {K : Type} [NormedField K] [IsUltrametricDist K] (hS : StarAri
     (by
       intro s e' he'
       simp only [hi]
-      rw [dif_neg (by simpa using he')])
+      rw [dite_eq_right (by simpa using he')])
     hioff
     (by
       intro s e'

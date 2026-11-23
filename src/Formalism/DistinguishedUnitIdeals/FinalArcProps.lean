@@ -1,8 +1,49 @@
-import Mathlib
-import Formalism.DistinguishedUnitIdeals.ExistsConstOfInvariantMod
-import Formalism.DistinguishedUnitIdeals.FrobeniusCoboundedArc
-import Formalism.DistinguishedUnitIdeals.GammaCongruentArcFromStart
-import Formalism.DistinguishedUnitIdeals.PhiFreeOfBasis
+module
+
+public import Formalism.DistinguishedUnitIdeals.GammaCongruentArcFromStart
+public import Formalism.DistinguishedUnitIdeals.PhiFreeOfBasis
+public import Mathlib.Data.Int.Interval
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -41,9 +82,6 @@ def jumpWindows (ell g : ℕ) (kind : ℕ → Kind) (b : ℕ → ℕ) : Finset �
 def wideWindows (ell g G₀ Sz η : ℕ) (kind : ℕ → Kind) (b : ℕ → ℕ) : Finset ℤ :=
   (Finset.range ell).biUnion fun s => win4 (kind s) g G₀ Sz η (b s)
 
-def kapOf (ℓ E g h : ℕ) : ℝ :=
-  (E : ℝ) + 7 * (g : ℝ) * ((E : ℝ) + 1 + 1 / ((ℓ : ℝ) - 1)) + 3 * Real.logb ℓ (2 * (h : ℝ))
-
 def TextWord (ℓ ell a₀ : ℕ) (b : ℕ → ℕ) (kind : ℕ → Kind) : Prop :=
   (∃ t₀ t₁ : ℕ, ∀ s < ell, s ≠ t₀ → s ≠ t₁ → kind s = Kind.thin) ∧
   ∀ s₀ s₁ : ℕ, s₀ < s₁ → s₁ < ell →
@@ -81,16 +119,6 @@ structure FinalNum (ℓ : ℕ) {n : ℕ} (Cu : Cuts n) (kd : ZMod n → Kind) (b
   kapOK : ∀ c ∈ Cu.cuts,
     kapExp ℓ (Cu.ell c - 1) (jumpWindows (Cu.ell c) g (kindAt kd c) (sizeAt bb c)) ≤ kap ∧
     kapExp ℓ (Cu.ell c - 1) (wideWindows (Cu.ell c) g G₀ Sz η (kindAt kd c) (sizeAt bb c)) ≤ kap
-
-def KapOfKAP : Prop :=
-  ∀ (ℓ n : ℕ) (Cu : Cuts n) (kd : ZMod n → Kind) (bb : ZMod n → ℕ) (g G₀ Sz η hh kap ellmax a₀ : ℕ),
-    ℓ.Prime → G₀ ≤ g → Sz ≤ g → η ≤ g → g ≤ hh → (∀ i, kd i ≠ Kind.thin → bb i + Sz ≤ hh) →
-    (∀ c ∈ Cu.cuts, Cu.ell c ≤ ellmax) →
-    (∀ c ∈ Cu.cuts, TextWord ℓ (Cu.ell c) a₀ (sizeAt bb c) (kindAt kd c)) →
-    kapOf ℓ (ellmax - 1) g hh ≤ (kap : ℝ) →
-    ∀ c ∈ Cu.cuts,
-      kapExp ℓ (Cu.ell c - 1) (jumpWindows (Cu.ell c) g (kindAt kd c) (sizeAt bb c)) ≤ kap ∧
-      kapExp ℓ (Cu.ell c - 1) (wideWindows (Cu.ell c) g G₀ Sz η (kindAt kd c) (sizeAt bb c)) ≤ kap
 
 structure FinalBase {O : Type} [CommRing O] (B : Base O) (ϖ : O) (eO : ℕ) (u x : Oˣ)
     (LL : Type) [Field LL] [Algebra O LL] : Prop where

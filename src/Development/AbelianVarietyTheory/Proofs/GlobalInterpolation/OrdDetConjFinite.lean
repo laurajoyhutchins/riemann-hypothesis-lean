@@ -1,8 +1,51 @@
-import Mathlib
-import Formalism.LocalToGlobal.KernelLattices.ThDistC
+module
+
+public import Formalism.LocalToGlobal.KernelLattices.ThDistC
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.StandardRankOneLatticeOfLocal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.BlockTheory.GlobalSignature.IndexExponentDegree
 import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.EmbHInjective
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.StandardRankOneLatticeOfLocal
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Formalism.BasicNotions Formalism.HermitianLatticesTheory Formalism.L2.DIV Formalism.L2.Col Formalism.L2.Ker Formalism.MainNotions Formalism.L2.Th1.H GlobalTheory.ThetaMove GlobalTheory.IndefiniteRowSideFullHecke.IndexExponentDegree
 
@@ -65,15 +108,15 @@ theorem ordE_star (P : HeightOneSpectrum (𝓞 E)) {a : E} (ha : a ≠ 0) : ordE
 
 theorem ordDet_conjP {N : Submodule (𝓞 E) (Sp E n)} (hN : IsSdLat N) (P : HeightOneSpectrum (𝓞 E)) :
     ordDet (conjPrime₂ P) N = -ordDet P N := by
-  obtain ⟨f, hf⟩ := exists_isFr P hN.1
-  obtain ⟨f', hf'⟩ := exists_isFr (conjPrime₂ P) hN.1
+  obtain ⟨f, hf⟩ := exists_isFr P hN
+  obtain ⟨f', hf'⟩ := exists_isFr (conjPrime₂ P) hN
   have h := val_dual hN hf hf'
   have h0 : star (dt f) ≠ 0 := star_ne_zero.2 (dt_ne _)
   rw [← ordE_eq_zero_iff (mul_ne_zero h0 (dt_ne _)), ordE_mul _ h0 (dt_ne _), ordE_star P (dt_ne _)] at h
   rw [ordDet_eq hf, ordDet_eq hf']
   linear_combination h
 
-theorem finite_pos {N : Submodule (𝓞 E) (Sp E n)} (hN : Submodule.IsLattice E N) :
+theorem finite_pos {N : Submodule (𝓞 E) (Sp E n)} (hN : IsSdLat N) :
     {Q : HeightOneSpectrum (𝓞 E) | 0 < ordDet Q N}.Finite := by
   rcases Set.eq_empty_or_nonempty {Q : HeightOneSpectrum (𝓞 E) | 0 < ordDet Q N} with h | ⟨P, -⟩
   · rw [h]; exact Set.finite_empty
@@ -96,7 +139,7 @@ theorem finite_pos {N : Submodule (𝓞 E) (Sp E n)} (hN : Submodule.IsLattice E
 
 theorem ordDet_conj_finite : ∀ (E : Type) [Field E] [NumberField E] [StarRing E] (n : ℕ) (N : Submodule (𝓞 E) (Sp E n)), IsSdLat N → (∀ P : HeightOneSpectrum (𝓞 E), ordDet (conjPrime₂ P) N = -ordDet P N) ∧ {Q : HeightOneSpectrum (𝓞 E) | ordDet Q N ≠ 0}.Finite := by
   intro E _ _ _ n N hN
-  refine ⟨ordDet_conjP hN, ((finite_pos hN.1).union ((finite_pos hN.1).image conjPrime₂)).subset fun Q hQ => ?_⟩
+  refine ⟨ordDet_conjP hN, ((finite_pos hN).union ((finite_pos hN).image conjPrime₂)).subset fun Q hQ => ?_⟩
   rcases lt_or_gt_of_ne hQ with h | h
   · refine Or.inr ⟨conjPrime₂ Q, ?_, conjP_conjP Q⟩
     rw [Set.mem_ofPred_eq, ordDet_conjP hN]

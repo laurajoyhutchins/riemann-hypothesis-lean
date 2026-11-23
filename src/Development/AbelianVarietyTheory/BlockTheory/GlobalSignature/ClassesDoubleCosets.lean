@@ -1,6 +1,45 @@
-import Mathlib
-import Formalism.LocalRingCardinality.DataLevelD
-import Formalism.LocalToGlobal.HermitianColumns.InLocalDiscriminantKernel
+module
+
+public import Formalism.LocalRingCardinality.DataLevelD
+public import Formalism.LocalToGlobal.HermitianColumns.InLocalDiscriminantKernel
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -38,20 +77,6 @@ def DefiniteSpaceClassStatement (D : D7) (_Lv : LevelData D) (_u : D.what₂.Wor
 
 def ClassesAsDoubleCosets : Prop :=
   General ∧ ∀ (D : D7) (Lv : LevelData D) (u : D.what₂.Word), DefiniteSpaceClassStatement D Lv u
-
-theorem CosetMass.unique {G : Type} [Group G] {Γ K : Subgroup G} {m m' : ℝ}
-    (h : CosetMass Γ K m) (h' : CosetMass Γ K m') : m = m' := by
-  haveI := h.1
-  letI := Fintype.ofFinite (ClassSet Γ K)
-  have hs : ∀ c : ClassSet Γ K, DoubleCoset.mk Γ K (Quotient.out c) = c := fun c => Quotient.out_eq' c
-  rw [← h.2.2 _ hs, ← h'.2.2 _ hs]
-
-example {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [StarRing E] [Algebra F E]
-    (hc : CMData F E) (W : HSpace E) (N : Submodule (𝓞 E) W.V) :
-    stabHat hc W N = (levelAfL hc.sig W.gram (crdLat W N)).subgroupOf (UAf hc W) := by
-  ext x
-  simp only [stabHat, Subgroup.mem_subgroupOf, levelAfL, level, Subgroup.mem_inf]
-  exact ⟨fun h => ⟨x.2, h⟩, fun h => h.2⟩
 
 end GlobalTheory.IndefiniteRowSideFullHecke.ClassesDoubleCosets
 

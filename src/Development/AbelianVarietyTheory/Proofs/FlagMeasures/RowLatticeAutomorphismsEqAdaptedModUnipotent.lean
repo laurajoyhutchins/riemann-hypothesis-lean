@@ -1,14 +1,53 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.NGData
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.TermLoc
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.LocClosed
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.UnitriangularLatticeStabiliserSubFrameAutomorphi
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.IntegralOfUnimodular
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.RowLatticesSameInnerDifferByRationalUnipotentStatement
-import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.AutLzFinite
-import Formalism.SharpRestriction.CuspSpanNormBounds.CayleyDegreeNondegeneracy.LiftsConjugateUnderStabilizer
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsLatticeRepresentativeNormalisedStatement
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsIsometryUnitriangularizingFlagStabilizerStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.LocClosed
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.UnitriangularLatticeStabiliserSubFrameAutomorphi
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsIsometryUnitriangularizingFlagStabilizerStatement
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsLatticeRepresentativeNormalisedStatement
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.IntegralOfUnimodular
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.RowLatticesSameInnerDifferByRationalUnipotentStatement
+public import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.AutLzFinite
+public import Formalism.SharpRestriction.CuspSpanNormBounds.CayleyDegreeNondegeneracy.LiftsConjugateUnderStabilizer
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -242,7 +281,7 @@ theorem lift_fix (hΛ : IsRowLat D F0 Λ) {a : GV D} (ha : a ∈ A0 F0 Λ) :
   have hσz' : (hS D).hT σ F0.z = 1 := hσz
   have hnz : n (a F0.z) = F0.z := by
     have e : a F0.z = F0.z + (a F0.z - F0.z) := by abel
-    rw [e, map_add, hnX _ hx0X, hnf F0.z, hσz', hx0z]
+    rw [e, map_add (f := _), hnX _ hx0X, hnf F0.z, hσz', hx0z]
     simp
   have hnA := (mem_NLam_iff F0 Λ n).1 hn
   refine ⟨n * a, ⟨Subgroup.mul_mem _ hnA.1.1.1 ha.1.1, fun j => ?_, by rw [mul_apply', hnz]⟩, ?_, ?_⟩
@@ -355,7 +394,7 @@ theorem NU_subgroupOf : (NU F0 Λ).subgroupOf (A0 F0 Λ) = (indU F0 Λ).ker := b
 theorem NU_conj : ∀ a ∈ A0 F0 Λ, ∀ n ∈ NU F0 Λ, a * n * a⁻¹ ∈ NU F0 Λ := by
   rintro a ha _ ⟨k, hk, rfl⟩
   have hk' : (⟨a, ha⟩ : A0 F0 Λ) * k * (⟨a, ha⟩ : A0 F0 Λ)⁻¹ ∈ (indU F0 Λ).ker :=
-    Subgroup.Normal.conj_mem (MonoidHom.normal_ker _) k hk _
+    Subgroup.Normal.conj_mem k hk _
   exact ⟨_, hk', rfl⟩
 
 def toFun' (u : (Module.End D.host.E (WbQ D F0))ˣ) : WbQ D F0 → WbQ D F0 := ⇑(u : Module.End D.host.E (WbQ D F0))

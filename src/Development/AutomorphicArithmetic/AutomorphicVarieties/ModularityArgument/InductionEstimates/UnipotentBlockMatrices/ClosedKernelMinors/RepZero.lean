@@ -1,11 +1,57 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.UnipotentBlockMatrices.UnipotentBlockPairs
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.UnipotentBlockMatrices.ClosedKernelMinors.SecCrit
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.TwistedFactors.TruncatedCuspIrreducibility.AdelDefs
+public import Mathlib.NumberTheory.NumberField.InfinitePlace.TotallyRealComplex
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.UnipotentBlockMatrices.ClosedKernelMinors.BlkInvVal
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.UnipotentBlockMatrices.ClosedKernelMinors.SecCrit
 import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.UnipotentBlockMatrices.ClosedKernelMinors.SecStr
 import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.UnipotentBlockMatrices.ClosedKernelMinors.TensInterp
 import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.UnipotentBlockMatrices.ClosedKernelMinors.TypeFin
 import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.UnipotentBlockMatrices.ClosedKernelMinors.UnipBlocks
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.UnipotentBlockMatrices.ClosedKernelMinors.BlkInvVal
-import GroundTheory.AutomorphicForms.CuspidalDiscreteness.IsHilbertSchmidtOfAeEqDual
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MeasureTheory NumberField Set Filter Topology
 open GroundTheory.Automorphic GroundTheory.Automorphic.Reduction GroundTheory.Automorphic.RightCosetSpace
@@ -27,7 +73,7 @@ variable {K : Type} [Field K] [NumberField K] {n : ℕ}
 private theorem rep_zero (μ : Measure (G1 K n)) [μ.IsHaarMeasure] (τ : Submodule ℂ (L2 μ)) :
     ∃ v ∈ τ, Reps μ v fun _ => 0 := by
   refine ⟨0, τ.zero_mem, ?_⟩
-  filter_upwards [(quasiMeasurePreserving_mk (Gam K n) μ).ae_eq_comp
+  filter_upwards [MeasureTheory.QuasiMeasurePreserving.ae (quasiMeasurePreserving_mk (Gam K n) μ)
     (Lp.coeFn_zero ℂ 2 (quotientMeasure (Gam K n) μ))] with y hy
   exact hy
 
@@ -36,7 +82,7 @@ private theorem rep_add (μ : Measure (G1 K n)) [μ.IsHaarMeasure] (τ : Submodu
   obtain ⟨v, hv, h₁⟩ := h₁
   obtain ⟨w, hw, h₂⟩ := h₂
   refine ⟨v + w, τ.add_mem hv hw, ?_⟩
-  filter_upwards [(quasiMeasurePreserving_mk (Gam K n) μ).ae_eq_comp (Lp.coeFn_add v w), h₁, h₂] with y hy a b
+  filter_upwards [MeasureTheory.QuasiMeasurePreserving.ae (quasiMeasurePreserving_mk (Gam K n) μ) (Lp.coeFn_add v w), h₁, h₂] with y hy a b
   rw [← a, ← b]
   exact hy
 
@@ -44,7 +90,7 @@ private theorem rep_smul (μ : Measure (G1 K n)) [μ.IsHaarMeasure] (τ : Submod
     (h₁ : ∃ v ∈ τ, Reps μ v φ) : ∃ v ∈ τ, Reps μ v fun y => c * φ y := by
   obtain ⟨v, hv, h₁⟩ := h₁
   refine ⟨c • v, τ.smul_mem c hv, ?_⟩
-  filter_upwards [(quasiMeasurePreserving_mk (Gam K n) μ).ae_eq_comp (Lp.coeFn_smul c v), h₁] with y hy a
+  filter_upwards [MeasureTheory.QuasiMeasurePreserving.ae (quasiMeasurePreserving_mk (Gam K n) μ) (Lp.coeFn_smul c v), h₁] with y hy a
   rw [← a]
   exact hy
 
@@ -76,7 +122,7 @@ private theorem cosets (D : TypeDat K n) :
 end
 
 theorem UpperTheory.V.Z.InvariantSubmoduleMonicPolynomial.secFD :
-    ∀ {K : Type} [Field K] [NumberField K] [IsTotallyComplex K] (μ₂ : Measure (G1 K 2)) [μ₂.IsHaarMeasure] (τ₁ τ₂ : Submodule ℂ (L2 μ₂)) (D : TypeDat K (2 + 2)), CuspIrr μ₂ τ₁ → CuspIrr μ₂ τ₂ →
+    ∀ {K : Type} [Field K] [NumberField K] [_root_.NumberField.IsTotallyComplex K] (μ₂ : Measure (G1 K 2)) [μ₂.IsHaarMeasure] (τ₁ τ₂ : Submodule ℂ (L2 μ₂)) (D : TypeDat K (2 + 2)), CuspIrr μ₂ τ₁ → CuspIrr μ₂ τ₂ →
       ∃ S : Submodule ℂ (G1 K (2 + 2) → ℂ), FiniteDimensional ℂ S ∧ ∀ f, f ∈ S ↔ IsSec τ₁ τ₂ f ∧ D.Fix f := by
   intro K _ _ _ μ₂ _ τ₁ τ₂ D h₁ h₂
   let S : Submodule ℂ (G1 K (2 + 2) → ℂ) :=
@@ -111,7 +157,7 @@ theorem UpperTheory.V.Z.InvariantSubmoduleMonicPolynomial.secFD :
   let pts : (Fin a × Fin a) × (Fin b × Fin b) × s × (Fin c × Fin c) → G1 K (2 + 2) := fun p =>
     lv (x p.1.1 p.1.2) (y p.2.1.1 p.2.1.2) 0 * (p.2.2.1 : G1 K (2 + 2)) * (z p.2.2.2.1 p.2.2.2.2 : G1 K (2 + 2))
   refine FiniteDimensional.of_injective ((LinearMap.funLeft ℂ ℂ pts).comp S.subtype) ?_
-  rw [injective_iff_map_eq_zero]
+  set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
   rintro ⟨f, a1, a2, a3, a4, a5, a6⟩ hf
   have h0 : ∀ p, f (pts p) = 0 := fun p => congrFun hf p
   have h1 : ∀ i p j q, ∀ k ∈ KG K (2 + 2), f (lv (x i p) (y j q) 0 * k) = 0 := by

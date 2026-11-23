@@ -1,5 +1,61 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.LevelTransport
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.HermMulVecMulVec
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.LevTransportHer
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.ConjugationContinuousOnInvertible
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.ContinuousZetaL
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.ExistsPlaceWithVectors
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.HermMulVecMulVec
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.InvariantOperatorUnderJacquet
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.LevelTransport
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.LevelsOfBuiltSetting
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.ModuleFormEqRadialFormOne
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.QNFAsm
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.SiteTransport
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.Tower
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Matrix MeasureTheory
 open scoped ENNReal NNReal
@@ -73,7 +129,7 @@ end wave
 theorem glue_at {r : ℕ} (i : ℕ) (hi : i < r) (c : Fin r → ℂ) (c'' : Fin (r - i) → ℂ) (l : Fin r) (hl : l.val = i) :
     P5.glue (⟨i, by omega⟩ : Fin (r + 1)) c (PTie.shiftCf ⟨i, by omega⟩ c'') l = c'' ⟨0, by omega⟩ := by
   unfold P5.glue PTie.shiftCf
-  rw [dif_pos (by simp [hl])]
+  rw [dite_eq_left (by simp [hl])]
   congr 1
   ext
   simp [hl]
@@ -158,7 +214,7 @@ theorem resG_smul {k r : ℕ} {E : Type*} [NormedAddCommGroup E] [NormedSpace �
   unfold resG
   rw [Pi.smul_apply, smul_comm]
 
-set_option maxHeartbeats 4000000 in
+
 theorem lev_ind_her {Wp Wq : Type} [NormedAddCommGroup Wp] [InnerProductSpace ℂ Wp] [NormedAddCommGroup Wq]
     [InnerProductSpace ℂ Wq] [FiniteDimensional ℂ Wp] [FiniteDimensional ℂ Wq] (P : M.Par)
     (T : D.LevTower P.k P.r Wp Wq) (hT : D.TowerNormalised T) (hP : IsPlace P T.base.z T.base.z' T.base.π T.base.π')
@@ -190,8 +246,11 @@ theorem lev_ind_her {Wp Wq : Type} [NormedAddCommGroup Wp] [InnerProductSpace �
         P5.zeta P.k (P.r - j) (T.bs j).z (T.bs j).z' g) ∧
       ∀ (S : Type) [Fintype S] [DecidableEq S],
         ∀ Φ ∈ herKc S P T.base.z T.base.z' T.base.π T.base.π' L st l0 Bs ⟨j, by omega⟩,
-          Tj Φ ∈ herKc S (JC.parLev P j) (T.bs j).z (T.bs j).z' (T.bs j).π (T.bs j).π' Lj stj l0 (T.bs j) 0
-  | 0, _, _ => by
+          Tj Φ ∈ herKc S (JC.parLev P j) (T.bs j).z (T.bs j).z' (T.bs j).π (T.bs j).π' Lj stj l0 (T.bs j) 0 := by
+  intro j
+  induction j with
+  | zero =>
+    intro hj _
     obtain ⟨μ0, hμ0⟩ := Formalism.FourierDecayAlt.P.exists_zeta_normalized_haar P.k (P.r - 0) Wp Wq (T.bs 0)
     have h1 : B.IsHaarOn (Glev P.k P.r (Fin.last P.r)) μ := hD.2.1
     obtain ⟨a, ha⟩ : ∃ a : ℝ≥0, μ = a • μ0 := by
@@ -245,11 +304,11 @@ theorem lev_ind_her {Wp Wq : Type} [NormedAddCommGroup Wp] [InnerProductSpace �
             rw [hΦ x hx, hκ0 F, resG_smul, smul_smul, inv_mul_cancel₀ hκ, one_smul]
             try rfl
           have e : Φ = κ0 • Φ' := by rw [hΦ'e, smul_smul, mul_inv_cancel₀ hκ, one_smul]
-          have hg := Submodule.subset_span (R := ℂ) (HerGenC.jf (S := S) (P := JC.parLev P 0) (z := (T.bs 0).z)
-            (z' := (T.bs 0).z') (π := (T.bs 0).π) (π' := (T.bs 0).π') (L := L) (st := st) (l0 := l0) (D := T.bs 0)
-            F Φ' hF hΦ')
+          have hmem : Φ' ∈ herKc S (JC.parLev P 0) (T.bs 0).z (T.bs 0).z'
+              (T.bs 0).π (T.bs 0).π' L st l0 (T.bs 0) 0 :=
+            Submodule.subset_span (HerGenC.jf F Φ' hF hΦ')
           rw [e]
-          exact Submodule.smul_mem _ κ0 hg
+          exact Submodule.smul_mem _ κ0 hmem
       | slice l w a b Φ hw hΦ ih =>
         intro he
         simp at he
@@ -259,9 +318,10 @@ theorem lev_ind_her {Wp Wq : Type} [NormedAddCommGroup Wp] [InnerProductSpace �
       | waveZ w s Wv Wv' a b Φ hw hW hW' hΦ ih =>
         intro he
         exact waveZ_closed (by simpa [JC.parLev] using he) (wordOK_tr hD hD0 hw) hW hW' a b Φ (ih he)
-  | j + 1, hj, hc => by
+  | succ j ih =>
+    intro hj hc
     obtain ⟨Xj, μj, Lj, stj, Tj, hDj, hZj, hform, ⟨κ, hκ, hpair⟩, hsite, hqq, hzeta, hher⟩ :=
-      lev_ind_her P T hT hP X μ L st l0 hD hl1 hl2 Bs κ0 hκ0 hS c j (by omega) (fun l hl => hc l (by omega))
+      ih (by omega) (fun l hl => hc l (by omega))
     have hj' : j + 1 ≤ P.r := hj
     have hPl := JCTx5.isPlace_lev P T ⟨j + 1, by omega⟩ hP
     obtain ⟨Xs⟩ := Formalism.FourierDecayAlt.P.actual_operators_exist _ _ _ _ _ _ _ hPl

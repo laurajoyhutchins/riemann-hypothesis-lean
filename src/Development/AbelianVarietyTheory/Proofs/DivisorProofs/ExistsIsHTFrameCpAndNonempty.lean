@@ -1,16 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsLatBasisHtLatIffSpanEq
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsEmbeddingPadicComplexInt
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsPolAVFibre
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HodgeTateInclusionRaynaudExtensionAlgebraicPointStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AlCSurjectiveAndLinearIndependentBLie
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsLieTieOfFrMap
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LinearIndependentEvLieOfLieTie
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsAdaptedBasis
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IsLatBasisHtLatIffSpanEq
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AlCSurjectiveAndLinearIndependentBLie
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsAdaptedBasis
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsEmbeddingPadicComplexInt
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsLieTieOfFrMap
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsPolAVFibre
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HodgeTateInclusionRaynaudExtensionAlgebraicPointStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LinearIndependentEvLieOfLieTie
+import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.AllSixAbelianSchemeLawsHold
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsFramedPointBaseChangeAlgebraMap
 import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsUniqueFrameChangeByMatrices
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.EvLawsGenFrNonemptyComp
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.FrameLawsOfModuli
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsNumberFieldPoint
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.FrameLawsOfModuli
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -79,21 +116,5 @@ theorem exists_isHTFrameCp {T : CDVR} {io : c.F →+* T.Fr} (y₀ : IntFr Xo c T
   obtain ⟨y, h⟩ := exists_isHTFrame (p := p) (v := (Valued.v : Valuation ℂ_[p] ℝ≥0)) (O := 𝓞_ℂ_[p]) (fun _ => rfl)
     (PadicComplexInt.integers p) y₀ hy { k with commutes' := fun _ => rfl } kO hk
   exact ⟨p, hp, _, _, y, h⟩
-
-theorem exists_isHTFrameCp_and_nonempty : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (H : ReciprocityTheory.ChartRestriction.G.Geo.Tor.Host E) (Dw : Datum H) (l : Level H) (Xo : Moduli Dw l) (c : Coeff l), (∀ (T : CDVR) (io : c.F →+* T.Fr) (y₀ : IntFr Xo c T io), y₀.IsAlg → ∃ (p : ℕ) (_ : Fact p.Prime) (_ : Algebra c.F ℂ_[p]) (k : letI := io.toAlgebra; T.Fr →ₐ[c.F] ℂ_[p]) (y : FrPt Xo c ℂ_[p]), IsHTFrameCp p y₀ k y) ∧ (1 ≤ Dw.p + Dw.q → (∀ q : ℕ, q.Prime → l.GoodAt q) → ∀ (B : ℝ) (la : HeightOneSpectrum (𝓞 c.F)), ((htVals Xo c).1 la).Nonempty ∧ ((mixVals Xo c B).1 la).Nonempty) := by
-  intro E _ _ _ H Dw l Xo c
-  refine ⟨fun T io y₀ hy => exists_isHTFrameCp y₀ hy, fun hpq hg B la => ?_⟩
-  obtain ⟨Z⟩ := (GlobalTheory.Reg.evLaws_genFr_nonempty_comp E H Dw l Xo c).2.2.2 hpq
-  have hv : (valSet Xo c (algCls Xo c) la).Nonempty :=
-    (GlobalTheory.FlatLine.valOn_nonempty (((GlobalTheory.Exist.frame_laws_of_moduli E H Dw l Xo c).2 hpq).2.2 hg).1 Z la).mono
-      (GlobalTheory.FlatLine.valOn_subset Z la)
-  have hh : ((htVals Xo c).1 la).Nonempty := by
-    obtain ⟨_, ⟨_, T, io, e, ho, y₀, hy, -⟩, -⟩ := hv
-    obtain ⟨p, hp, inst, k, y, h⟩ := exists_isHTFrameCp y₀ hy
-    exact ⟨_, p, hp, inst, T, io, e, y₀, k, y, ho, hy, h, rfl⟩
-  refine ⟨hh, ?_⟩
-  simp only [mixVals, ValFam.patch]
-  split_ifs
-  exacts [hh, hv]
 
 end GlobalTheory.CompHt

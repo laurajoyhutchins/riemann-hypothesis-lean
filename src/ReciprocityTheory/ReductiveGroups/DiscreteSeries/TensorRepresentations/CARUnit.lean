@@ -1,5 +1,55 @@
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TensorRepresentations.CsqDdPt
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.CasimirAlgebra.CasimirKKhwVec
+module
+
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.CasimirAlgebra.CasimirKKhwVec
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TensorRepresentations.CarSumSqZeroOfAnti
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TensorRepresentations.CsqDdPt
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -133,43 +183,6 @@ theorem nsq_rho_split (ε : Fin n → Bool) : nsq (rho n) = nsq (rhoC ε) + nsq 
 
 section Unitary
 variable {W : Type*} [NormedAddCommGroup W] [InnerProductSpace ℂ W]
-
-theorem inner_dOp_left {ε : Fin n → Bool} {E cp cm : Fin n → Fin n → Module.End ℂ W}
-    (hU : IsInfUnitary ε E) (hEC : CommutesCAR E cp cm)
-    (hadj : ∀ (i a : Fin n) (x y : W), inner ℂ (cp i a x) y = inner ℂ x (cm i a y)) (x y : W) :
-    inner ℂ (dOp ε E cp x) y = inner ℂ x (dOp' ε E cm y) := by
-  unfold dOp dOp'
-  simp only [LinearMap.sum_apply, LinearMap.neg_apply, sum_inner, inner_neg_right, inner_sum,
-    ← sum_neg_distrib]
-  refine sum_congr rfl fun i hi => sum_congr rfl fun a ha => ?_
-  simp only [plusIdx, minusIdx, mem_filter, mem_univ, true_and] at hi ha
-  have hc := LinearMap.congr_fun (hEC i a i a).2 y
-  simp only [Module.End.mul_apply] at hc ⊢
-  rw [hU, hadj, ← hc]
-  simp [adjSign, hi, ha]
-
-theorem inner_dOp'_left {ε : Fin n → Bool} {E cp cm : Fin n → Fin n → Module.End ℂ W}
-    (hU : IsInfUnitary ε E) (hEC : CommutesCAR E cp cm)
-    (hadj : ∀ (i a : Fin n) (x y : W), inner ℂ (cp i a x) y = inner ℂ x (cm i a y)) (x y : W) :
-    inner ℂ (dOp' ε E cm x) y = inner ℂ x (dOp ε E cp y) := by
-  have hadj' : ∀ (i a : Fin n) (u v : W), inner ℂ (cm i a u) v = inner ℂ u (cp i a v) := by
-    intro i a u v
-    rw [← inner_conj_symm, ← hadj i a v u, inner_conj_symm]
-  unfold dOp dOp'
-  simp only [LinearMap.sum_apply, LinearMap.neg_apply, sum_inner, inner_neg_left, inner_sum,
-    ← sum_neg_distrib]
-  refine sum_congr rfl fun i hi => sum_congr rfl fun a ha => ?_
-  simp only [plusIdx, minusIdx, mem_filter, mem_univ, true_and] at hi ha
-  have hc := LinearMap.congr_fun (hEC a i i a).1 y
-  simp only [Module.End.mul_apply] at hc ⊢
-  rw [hU, hadj', hc]
-  simp [adjSign, hi, ha]
-
-theorem D_symm {ε : Fin n → Bool} {E cp cm : Fin n → Fin n → Module.End ℂ W} (hU : IsInfUnitary ε E)
-    (hEC : CommutesCAR E cp cm) (hadj : ∀ (i a : Fin n) (x y : W), inner ℂ (cp i a x) y = inner ℂ x (cm i a y)) (x y : W) :
-    inner ℂ ((dOp ε E cp + dOp' ε E cm) x) y = inner ℂ x ((dOp ε E cp + dOp' ε E cm) y) := by
-  rw [LinearMap.add_apply, LinearMap.add_apply, inner_add_left, inner_add_right,
-    inner_dOp_left hU hEC hadj, inner_dOp'_left hU hEC hadj, add_comm]
 
 end Unitary
 

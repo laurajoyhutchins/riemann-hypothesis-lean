@@ -1,6 +1,55 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.Definitions.ExistenceOfLattices.Hat1
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Definitions.AdelicHermitianForms.IsHermForm
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.AdelicCompletionRationalPointsAndApproximation
+
+@[expose] public section
 
 open NumberField IsDedekindDomain GlobalTheory.AdLat GlobalTheory.UnRep
 open scoped TensorProduct Matrix
@@ -17,10 +66,10 @@ def intAdeles : Subring (FiniteAdeleRing (𝓞 F) F) where
   zero_mem' v := zero_mem (v.adicCompletionIntegers F)
   neg_mem' ha v := neg_mem (ha v)
 
+
 open NumberField IsDedekindDomain in
 open scoped TensorProduct Matrix in
 variable (F : Type) [Field F] [NumberField F] in
-
 theorem _root_.GlobalTheory.UnRep.Nakayama.mem_jacobson (a : _root_.GlobalTheory.UnRep.Nakayama.intAdeles F)
     (ha : ∀ v, Valued.v (a.1 v) < 1) :
     a ∈ Ideal.jacobson (⊥ : Ideal (_root_.GlobalTheory.UnRep.Nakayama.intAdeles F)) := by
@@ -34,7 +83,8 @@ theorem _root_.GlobalTheory.UnRep.Nakayama.mem_jacobson (a : _root_.GlobalTheory
       calc Valued.v (a.1 v) * Valued.v (y.1 v) ≤ Valued.v (a.1 v) * 1 := by gcongr
         _ < 1 := by rw [mul_one]; exact ha v
     have : (a * y + 1).1 v = 1 + a.1 v * y.1 v := by
-      simp [add_comm]
+      change a.1 v * y.1 v + 1 = 1 + a.1 v * y.1 v
+      exact add_comm _ _
     rw [this, Valuation.map_one_add_of_lt _ hlt]
   let w : FiniteAdeleRing (𝓞 F) F := ⟨fun v ↦ ((a * y + 1).1 v)⁻¹, Filter.Eventually.of_forall fun v ↦ by
     show _ ∈ v.adicCompletionIntegers F
@@ -104,10 +154,10 @@ private lemma one_tmul_mem_hat {S : Set (Fin n → E)} {x : Fin n → E} (hx : x
   exact AddSubgroup.subset_closure
     ⟨1, fun v ↦ one_mem (v.adicCompletionIntegers F), x, hx, rfl⟩
 
+
 open NumberField IsDedekindDomain in
 open scoped TensorProduct Matrix in
 open NumberField IsDedekindDomain in
-
 theorem _root_.GlobalTheory.UnRep.exists_inverse_one_add_preserving_hat : ∀ (F E : Type) [Field F] [NumberField F]
     [Field E] [NumberField E] [Algebra F E] (n : ℕ) (L : Submodule (𝓞 E) (Fin n → E)), L.FG →
     Submodule.span E (L : Set (Fin n → E)) = ⊤ → ∀ (N : ℕ) (e : FiniteAdeleRing (𝓞 F) F),

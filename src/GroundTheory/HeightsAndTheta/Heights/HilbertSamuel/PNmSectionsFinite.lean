@@ -1,6 +1,57 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsNmSectionsFinite
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PIntegralClosureFinite
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsNmSectionsFinite
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.KleimanNefness.TargetSt
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.ArithModel
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PIntegralClosureFinite
+import Mathlib.Algebra.AffineMonoid.UniqueSums
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.HilbertSamuel
@@ -21,8 +72,8 @@ theorem mapDomain_fst_apply (μ : (Σ κ, ι κ) →₀ ℕ) (κ : K) :
   rw [Finsupp.mapDomain, Finsupp.sum_apply, Finsupp.sum_fintype _ _ (fun _ => by simp), Fintype.sum_sigma]
   simp [Finsupp.single_apply]
 
-omit [Fintype K] [∀ κ, Fintype (ι κ)] in
 
+omit [Fintype K] [∀ κ, Fintype (ι κ)] in
 theorem mConeMap_monomial (y : (Σ κ, ι κ) → Ω) (μ : (Σ κ, ι κ) →₀ ℕ) (r : ℤ) :
     mConeMap y (monomial μ r) = monomial (μ.mapDomain Sigma.fst) (aeval y (monomial μ r)) := by
   rw [mConeMap, aeval_monomial, aeval_monomial, monomial_eq,
@@ -35,6 +86,7 @@ theorem mConeMap_of_homog (y : (Σ κ, ι κ) → Ω) {g : MRing ι} {d : K → 
     mConeMap y g = monomial (expo d) (aeval y g) := by
   conv_lhs => rw [g.as_sum]
   conv_rhs => rw [g.as_sum]
+
   rw [map_sum, map_sum, map_sum]
   refine Finset.sum_congr rfl fun μ hμ => ?_
   rw [mConeMap_monomial]
@@ -44,7 +96,7 @@ theorem mConeMap_of_homog (y : (Σ κ, ι κ) → Ω) {g : MRing ι} {d : K → 
   rw [hμd]
 
 def formRing (y : (Σ κ, ι κ) → Ω) : Subalgebra ℤ (MvPolynomial K Ω) where
-  carrier := {F | ∀ m : K →₀ ℕ, coeff m F ∈ secM y ⇑m}
+  carrier := {F | ∀ m : K →₀ ℕ, AddMonoidAlgebra.coeff F m ∈ secM y ⇑m}
   mul_mem' := by
     classical
     intro F G hF hG m
@@ -55,7 +107,7 @@ def formRing (y : (Σ κ, ι κ) → Ω) : Subalgebra ℤ (MvPolynomial K Ω) wh
     exact secM_mul_mem y (hF x.1) (hG x.2)
   add_mem' := by
     intro F G hF hG m
-    rw [coeff_add]
+    rw [MvPolynomial.coeff_add]
     exact add_mem (hF m) (hG m)
   algebraMap_mem' := by
     classical
@@ -130,8 +182,7 @@ theorem proof (h : KH.CondStatement) : NmSectionsFinite.Statement := by
     refine Submodule.fg_of_fg_map_injective _ hinj ?_
     have := isNoetherian_of_fg_of_noetherian (Submodule.span R {(1 : MvPolynomial K Ω)})
       (Submodule.fg_span_singleton 1)
-    have := isNoetherian_of_le hmap
-    exact Module.Finite.iff_fg.mp inferInstance
+    exact isNoetherian_submodule.mp inferInstance _ hmap
   obtain ⟨t, htG, hspan⟩ := (Submodule.fg_span_iff_fg_span_finset_subset G).mp hfg
   choose d hd e he hte using fun j : t => htG j.2
   refine ⟨t, inferInstance, d, e, max τ₂ (Finset.univ.sup d), fun j => ⟨hd j,
@@ -148,9 +199,9 @@ theorem proof (h : KH.CondStatement) : NmSectionsFinite.Statement := by
     obtain ⟨g, hg⟩ := (f F).2
     rw [← hg]
     exact mConeMap_mem_formRing y g
-  refine ⟨fun j => coeff (expo fun κ => (τ - d j) * a κ) ((f j : R) : MvPolynomial K Ω), fun j => ?_, ?_⟩
+  refine ⟨fun j => AddMonoidAlgebra.coeff ((f j : R) : MvPolynomial K Ω) (expo fun κ => (τ - d j) * a κ), fun j => ?_, ?_⟩
   · simpa using hR j (expo fun κ => (τ - d j) * a κ)
-  · have hc' := congrArg (coeff (expo fun κ => τ * a κ)) hf
+  · have hc' := congrArg (AddMonoidAlgebra.coeff · (expo fun κ => τ * a κ)) hf
     rw [coeff_monomial, if_pos rfl] at hc'
     rw [← hc', coeff_sum, ← Finset.sum_coe_sort t]
     refine Finset.sum_congr rfl fun j _ => ?_

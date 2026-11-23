@@ -1,7 +1,62 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.DegExp
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.WeightedChartPullback.TorusInj
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.PrecompleteBases.Torus2GammaBijective
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.WeightedChartPullback.TorusInj
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.PrecompleteBases.Torus2GammaBijective
+import Aesop.Frontend.Tactic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.NonzeroLocus
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits MonoidalCategory CartesianMonoidalCategory MonObj AlgebraicGeometry
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Out
@@ -32,11 +87,11 @@ lemma coeff_inl_mul_inr (u v : AddMonoidAlgebra A X) (x y : X) :
   classical
   induction u using AddMonoidAlgebra.induction_linear with
   | zero => simp
-  | add a b ha hb => rw [map_add, add_mul]; simp only [AddMonoidAlgebra.coeff_add, Finsupp.add_apply, ha, hb, add_mul]
+  | add a b ha hb => rw [map_add (f := _), add_mul]; simp only [AddMonoidAlgebra.coeff_add, Finsupp.add_apply, ha, hb, add_mul]
   | single a r =>
     induction v using AddMonoidAlgebra.induction_linear with
     | zero => simp
-    | add c d hc hd => rw [map_add, mul_add]; simp only [AddMonoidAlgebra.coeff_add, Finsupp.add_apply, hc, hd, mul_add]
+    | add c d hc hd => rw [map_add (f := _), mul_add]; simp only [AddMonoidAlgebra.coeff_add, Finsupp.add_apply, hc, hd, mul_add]
     | single b s =>
       simp only [AddMonoidAlgebra.mapDomainRingHom_apply, AddMonoidAlgebra.mapDomain_single,
         AddMonoidAlgebra.single_mul_single, AddMonoidAlgebra.coeff_single, Finsupp.single_apply]
@@ -49,7 +104,7 @@ lemma coeff_diag (u : AddMonoidAlgebra A X) (x y : X) [Decidable (x = y)] :
   induction u using AddMonoidAlgebra.induction_linear with
   | zero => simp
   | add a b ha hb =>
-    rw [map_add]; simp only [AddMonoidAlgebra.coeff_add, Finsupp.add_apply, ha, hb]
+    rw [map_add (f := _)]; simp only [AddMonoidAlgebra.coeff_add, Finsupp.add_apply, ha, hb]
     split_ifs <;> simp
   | single a r =>
     simp only [AddMonoidAlgebra.mapDomainRingHom_apply, AddMonoidAlgebra.mapDomain_single,
@@ -107,8 +162,7 @@ lemma torus_hom_ext {Z : Over S} {g g' : Z ⟶ splitTorus S X}
 lemma pullback_map_fst {A B : Over (Spec ZU.{0})} (f : A ⟶ B) :
     ((Over.pullback (toZ S)).map f).left ≫ pullback.fst B.hom (toZ S) =
       pullback.fst A.hom (toZ S) ≫ f.left := by
-  simp only [Over.pullback_map_left]
-  exact pullback.lift_fst _ _ _
+  simp only [Over.pullback_map_left, pullback.lift_fst]
 
 set_option backward.isDefEq.respectTransparency false in
 lemma torusPoint_mul {R : CommRingCat.{0}} (φ φ' ψ : torusRing ZU X ⟶ R) (s : Spec R ⟶ S)
@@ -240,16 +294,13 @@ lemma IsMulLeft.value_mul {ρ : Γ((splitTorus S X ⊗ Y).left, ⊤)} (hρ : IsM
 attribute [local instance] TorusInj.zuAlg
 
 variable (X) in
-
 abbrev grpAlg (R : CommRingCat.{0}) : CommRingCat.{0} := CommRingCat.of (AddMonoidAlgebra R X)
 
 variable (X) in
-
 def fromInt (R : CommRingCat.{0}) : torusRing ZU X ⟶ grpAlg X R :=
   CommRingCat.ofHom (algebraMap (AddMonoidAlgebra ZU.{0} X) (AddMonoidAlgebra R X))
 
 variable (X) in
-
 def const (R : CommRingCat.{0}) : R ⟶ grpAlg X R :=
   CommRingCat.ofHom (algebraMap R (AddMonoidAlgebra R X))
 
@@ -391,7 +442,6 @@ lemma IsMulLeft.exists_isCharNear {ρ : Γ((splitTorus S X ⊗ Y).left, ⊤)} (h
 end TorusUnit
 
 open TorusUnit in
-
 theorem existsUnique_character_of_mul (S : Scheme.{0}) (X : Type) [AddCommGroup X] (Y : Over S)
     [ConnectedSpace Y.left] (ρ : Γ((splitTorus S X ⊗ Y).left, ⊤)ˣ)
     (hρ : ∀ (Z : Over S) (t t' : Z ⟶ splitTorus S X) (y : Z ⟶ Y),

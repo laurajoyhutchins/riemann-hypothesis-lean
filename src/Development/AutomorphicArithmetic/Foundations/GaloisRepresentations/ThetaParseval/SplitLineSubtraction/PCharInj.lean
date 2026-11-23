@@ -1,36 +1,65 @@
-import Mathlib
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ThetaParseval.SplitLineSubtraction.SubtractOf
-import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.Imports
-import CompanionTheory.EightfoldTheory.VariationTheory.AutomorphicForms.RealStructures.Imports
-import CompanionTheory.EightfoldTheory.VariationTheory.AutomorphicForms.ImportsBis
-import PositivityTheory.AutomorphicForms.PublishedInputs.RealGaloisRepresentations.IwahoriSphericalTransfer.HeckeCharacterEqOfCofinite
+module
 
-open NumberField IsDedekindDomain Neutral.B1 Formalism.L2.Host Formalism.ConjugateSelfDual ReciprocityTheory.Gal Formalism.BasicNotions Formalism.BasicNotions.Loc Formalism.MainNotions.N Polynomial
-open GlobalTheory.CuspRep GlobalTheory.WeilDeligne GlobalTheory.Pst GlobalTheory.HeckeGal GlobalTheory.UnitaryBC
-open Formalism.MainNotions.SumRepresentations.At (sumRep)
-open GlobalTheory.TripleGal (rk1)
-open UpperTheory.V.Af (FrobEig algSat RepIso tw)
-attribute [local instance] GlobalTheory.LocalData.complRel GlobalTheory.LocalData.isLocalField
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ThetaParseval.SplitLineSubtraction.SubtractOf
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.DenseRangeUnits
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
+open NumberField Neutral.B1 GlobalTheory.HeckeGal
 open UpperTheory.Gal.TP.Sub
 
 theorem UpperTheory.Gal.TP.Sub.charInj_holds :
     CharInj := by
   intro E Ω _ _ _ _ _ l _ ι art _ χ χ' n n' μ hχ hχ'
-  apply GlobalTheory.T.hecke_character_eq_of_cofinite E χ χ'
   have hl : Ideal.span {(l : 𝓞 E)} ≠ ⊥ := by
     rw [Ne, Ideal.span_singleton_eq_bot]
     exact_mod_cast (Fact.out : Nat.Prime l).ne_zero
   have hfin := Ideal.finite_factors hl
-  have h1 := (GlobalTheory.Mem.UnrAe.unr_ae_and_level E χ).1
-  have h2 := (GlobalTheory.Mem.UnrAe.unr_ae_and_level E χ').1
-  have hev := ((h1.union h2).union hfin).compl_mem_cofinite
-  filter_upwards [hev] with v hv
-  simp only [Set.mem_compl_iff, Set.mem_union, Set.mem_setOf_eq, not_or, not_not] at hv
-  obtain ⟨⟨hu, hu'⟩, hd⟩ := hv
-  have hl' : (l : 𝓞 E) ∉ v.asIdeal := fun h => hd (Ideal.dvd_span_singleton.mpr h)
-  refine ⟨hu, hu', ?_⟩
-  obtain ⟨σ, hσ⟩ := toAb_surjective (E := E) (Ω := Ω) (art (localIdele E v (atFin v (unif v))))
-  have a := hχ.loc_away (Or.inl hl') (atFin v (unif v)) σ hσ.symm
-  have b := hχ'.loc_away (Or.inl hl') (atFin v (unif v)) σ hσ.symm
-  rw [← HChar.val_eq χ hu _ (unif_spec v), ← HChar.val_eq χ' hu' _ (unif_spec v)]
-  exact Units.ext (ι.symm.injective (a.symm.trans b))
+  have hquot : χ * χ'⁻¹ = 1 := by
+    refine Subtype.ext (GlobalTheory.FrobDense.eq_one_of_away (χ * χ'⁻¹).1
+      (χ * χ'⁻¹).2.1 (χ * χ'⁻¹).2.2 hfin.toFinset fun v hv x => ?_)
+    have hl' : (l : 𝓞 E) ∉ v.asIdeal :=
+      fun h => hv (hfin.mem_toFinset.mpr (Ideal.dvd_span_singleton.mpr h))
+    obtain ⟨σ, hσ⟩ := toAb_surjective (E := E) (Ω := Ω) (art (localIdele E v x))
+    have a := hχ.loc_away (Or.inl hl') x σ hσ.symm
+    have b := hχ'.loc_away (Or.inl hl') x σ hσ.symm
+    have hloc : χ.loc v x = χ'.loc v x :=
+      Units.ext (ι.symm.injective (a.symm.trans b))
+    change χ.loc v x * (χ'.loc v x)⁻¹ = 1
+    rw [hloc, mul_inv_cancel]
+  exact mul_inv_eq_one.mp hquot

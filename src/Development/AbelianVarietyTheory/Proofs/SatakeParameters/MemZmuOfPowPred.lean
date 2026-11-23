@@ -1,7 +1,57 @@
-import Mathlib
-import Formalism.LocalToGlobal.Columns.FiniteSumNonzeroLargeDepth
-import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.RedPEqZeroOfDiv
-import Development.AbelianVarietyTheory.BlockTheory.ThetaLiftGeometry.FourierColumnIndicator
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.ThetaLiftGeometry.FourierColumnIndicator
+public import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.RedPEqZeroOfDiv
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.FreeModule.IdealQuotient
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.CoassocSimps
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain
 open Formalism.BasicNotions Formalism.HermitianLatticesTheory Formalism.L2.DIV Formalism.L2.Col GlobalTheory.TopStep GlobalTheory.IndefiniteRowSideFullHecke.FourierColumnIndicator
@@ -32,9 +82,8 @@ theorem addChar_mem (ψ : AddChar (𝓞 E ⧸ P.asIdeal) K) (c : 𝓞 E ⧸ P.as
 theorem char_pow (χ : (𝓞 E ⧸ P.asIdeal)ˣ →* Kˣ) (u : (𝓞 E ⧸ P.asIdeal)ˣ) : ((χ u : Kˣ) : K) ^ (qOf P - 1) = 1 := by
   have := P.isMaximal
   have h : Nat.card (𝓞 E ⧸ P.asIdeal)ˣ = qOf P - 1 := by
-    letI := Ideal.Quotient.field P.asIdeal
-    rw [Nat.card_units]
-    rfl
+    let _ := Ideal.Quotient.field P.asIdeal
+    rw [Nat.card_units, qOf, Ideal.absNorm_eq_natCard]
   rw [← h, ← Units.val_pow_eq_pow_val, ← map_pow, pow_card_eq_one', map_one, Units.val_one]
 
 theorem unitV_mem (χ : (𝓞 E ⧸ P.asIdeal)ˣ →* Kˣ) (a : E) : LocE.unitV χ a ∈ Zmu K (qOf P) := by
@@ -257,7 +306,7 @@ theorem homS_of_entB {n' c' n c k₀ : ℕ} (hk' : k₀ ≤ n') (hk : k₀ ≤ n
   obtain ⟨h1', h2'⟩ := fIdx_fPos hk' l'.2
   have := h _ _ h1 h1'
   unfold LocE.entB Loc.atN at this
-  rw [h2, h2', dif_pos l.2, eN_eq l'.2] at this
+  rw [h2, h2', dite_eq_left l.2, eN_eq l'.2] at this
   exact this
 
 omit [NumberField E] [StarRing E] in
@@ -481,7 +530,7 @@ theorem joinCol_restr {n' c' n c : ℕ} (hc' : c' = 1) (hc : c = 0) (x : HomE E 
     · simp [Loc.inX, Loc.eN, j.2.ne, LinearMap.funLeft_apply]
       rfl
   rw [joinCol_apply]
-  conv_rhs => rw [e, map_add, map_smul]
+  conv_rhs => rw [e, map_add (f := _), map_smul]
   rfl
 
 omit [NumberField E] [StarRing E] in
@@ -542,6 +591,7 @@ theorem inDual_iff {n : ℕ} (ξ : Sp E n →ₗ[E] E) : InDual P ξ ↔ ∀ i, 
   have e : y = ∑ i, y i • (Pi.single i 1 : Sp E n) := by
     funext j
     simp [Finset.sum_apply, Pi.single_apply]
+
   rw [e, map_sum]
   refine intAt_sum _ fun i _ => ?_
   rw [map_smul, smul_eq_mul]

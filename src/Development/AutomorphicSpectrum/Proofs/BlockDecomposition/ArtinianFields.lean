@@ -1,7 +1,48 @@
-import Mathlib
-import Development.WeilBound.RepresentationTheoryGL.RegularisedSiegelWeil.HermitianCellMeasures.CellDefs
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.RegularisedSiegelWeil.HermitianCellMeasures.CellDefs
+public import Development.AbelianVarietyTheory.Definitions.Foundations.EqPlaceIdemOfIsPrimeIdem
 import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsIsLatticeFrameIsMajorantFrame
-import Development.AbelianVarietyTheory.Definitions.Foundations.EqPlaceIdemOfIsPrimeIdem
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 noncomputable section
 
@@ -49,8 +90,8 @@ theorem exists_adele (S : Finset (HeightOneSpectrum (𝓞 F))) (b : ∀ v : Heig
   · have h := congrArg (fun g : GL (Fin 1) (w.Completion ⊗[F] E) => g.1 0 0) (hc w)
     exact h.trans (sc_apply _)
 
-variable (F E) in
 
+variable (F E) in
 def LocR (S : Finset (HeightOneSpectrum (𝓞 F))) : InfinitePlace F ⊕ S → Type
   | .inl w => w.Completion ⊗[F] E
   | .inr v => Fv F v.1 ⊗[F] E
@@ -59,8 +100,8 @@ instance locRing (S : Finset (HeightOneSpectrum (𝓞 F))) : ∀ c, CommRing (Lo
   | .inl w => inferInstanceAs (CommRing (w.Completion ⊗[F] E))
   | .inr v => inferInstanceAs (CommRing (Fv F v.1 ⊗[F] E))
 
-variable (F E) in
 
+variable (F E) in
 def locC (S : Finset (HeightOneSpectrum (𝓞 F))) : ∀ c, AF F ⊗[F] E →+* LocR F E S c
   | .inl w => compInf F E w
   | .inr v => compFin F E v.1
@@ -71,8 +112,8 @@ instance locArt (S : Finset (HeightOneSpectrum (𝓞 F))) : ∀ c, IsArtinianRin
   · exact IsArtinianRing.of_finite w.Completion (w.Completion ⊗[F] E)
   · exact IsArtinianRing.of_finite (Fv F v.1) (Fv F v.1 ⊗[F] E)
 
-open Classical in
 
+open Classical in
 theorem crit (S : Finset (HeightOneSpectrum (𝓞 F))) (e : AF F ⊗[F] E) (h1 : ∀ w, compInf F E w e = 1)
     (h2 : ∀ v, compFin F E v e = if v ∈ S then 1 else 0) :
     ∃ (m : ℕ) (Ω : Fin m → Type) (_ : ∀ i, Field (Ω i)) (φ : ∀ i, AF F ⊗[F] E →+* Ω i), (∀ i, φ i e = 1) ∧
@@ -84,7 +125,7 @@ theorem crit (S : Finset (HeightOneSpectrum (𝓞 F))) (e : AF F ⊗[F] E) (h1 :
     · exact (h2 v).trans (if_pos hv))
   refine ⟨m, Ω, fld, φ, he, fun z => ⟨fun h k => ?_, fun h => ?_⟩⟩
   · have h' := h.map (φ k)
-    rw [map_add, map_sub, map_mul, map_one, he, sub_self, zero_add, one_mul] at h'
+    rw [map_add (f := _), map_sub, map_mul, map_one, he, sub_self, zero_add, one_mul] at h'
     exact h'.ne_zero
   · have hz := (hu z).1 h
     have hI : ∀ w, IsUnit (compInf F E w z) := fun w => hz (.inl w)
@@ -92,9 +133,9 @@ theorem crit (S : Finset (HeightOneSpectrum (𝓞 F))) (e : AF F ⊗[F] E) (h1 :
     obtain ⟨x, hxf, hxi⟩ := exists_adele (E := E) S
       (fun v => if h : v ∈ S then (hS v h).unit⁻¹ else 1) (fun v hv => dif_neg hv) (fun w => (hI w).unit⁻¹)
     refine isUnit_iff_exists_inv.2 ⟨x, GlobalTheory.AdelicU.Supp.adTens_eq_one' (fun w => ?_) fun v => ?_⟩
-    · rw [map_mul, map_add, map_sub, map_mul, map_one, h1, hxi, sub_self, zero_add, one_mul]
+    · rw [map_mul, map_add (f := _), map_sub, map_mul, map_one, h1, hxi, sub_self, zero_add, one_mul]
       exact (hI w).mul_val_inv
-    · rw [map_mul, map_add, map_sub, map_mul, map_one, h2, hxf]
+    · rw [map_mul, map_add (f := _), map_sub, map_mul, map_one, h2, hxf]
       by_cases hv : v ∈ S
       · simp only [if_pos hv, dif_pos hv, sub_self, zero_add, one_mul]
         exact (hS v hv).mul_val_inv

@@ -1,9 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.GeometricallyConnectedOfIsIsoRestrict
-import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsIsLocModelIsPrimeOf
-import Development.AbelianVarietyTheory.Definitions.Divisors.NotDominatesTopPlace
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.NotDominatesTopPlace
 import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.ExistsBasisKaehlerOfAlgebraicIndependent
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.TrdegPf
+import Mathlib.Algebra.GroupWithZero.Submonoid.CancelMulZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.TrdegPf
+
+@[expose] public section
+
 open CategoryTheory AlgebraicGeometry TopologicalSpace
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor
 open GlobalTheory GlobalTheory.Cartier GlobalTheory.TopForm GlobalTheory.Discrepancy GlobalTheory.FieldPair
@@ -62,7 +104,7 @@ theorem exists_derivation {L P : Type} [Field L] [CommRing P] [Algebra P L] [Alg
     rw [← hp, hφ2, hp']
   let D : Derivation ℂ L L := Derivation.mk'
     { toFun := fun l => (φ l).snd
-      map_add' := fun a c => by simp only [map_add, TrivSqZeroExt.snd_add]
+      map_add' := fun a c => by simp only [map_add (f := _), TrivSqZeroExt.snd_add]
       map_smul' := fun a l => by
         simp only [RingHom.id_apply, Algebra.smul_def a l, map_mul, TrivSqZeroExt.snd_mul,
           hφ1, hφc, smul_zero, add_zero, smul_eq_mul]
@@ -213,7 +255,7 @@ theorem trBasis_append : ∀ {K L : Type} [Field K] [Field L] (cK : ℂ →+* K)
       haveI : IsScalarTower ℂ K L := IsScalarTower.of_algebraMap_eq fun a => (hcst a).symm
       let D' : Derivation ℂ K L := Derivation.mk'
         { toFun := fun a => D (ι' a)
-          map_add' := fun a c => by simp only [map_add]
+          map_add' := fun a c => by simp only [map_add (f := _)]
           map_smul' := fun a c => by
             simp only [RingHom.id_apply]
             rw [Algebra.smul_def, map_mul,
@@ -234,7 +276,7 @@ theorem trBasis_append : ∀ {K L : Type} [Field K] [Field L] (cK : ℂ →+* K)
     refine derivation_eq_zero (P := P) D fun p => ?_
     induction p using MvPolynomial.induction_on with
     | C a => rw [hPC, ← hι']; exact hK _
-    | add p q hp hq => rw [map_add, map_add, hp, hq, add_zero]
+    | add p q hp hq => rw [map_add (f := _), map_add (f := _), hp, hq, add_zero]
     | mul_X p i hp => rw [map_mul, Derivation.leibniz, hp, hPX, h1, smul_zero, smul_zero, add_zero]
   have hspan : Submodule.span L (Set.range fun m => KaehlerDifferential.D ℂ L (y m)) = ⊤ := by
     by_contra hne

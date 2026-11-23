@@ -1,23 +1,61 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Foundations.NormSumPairRankZeroOfCurveCoordNorm
-import Formalism.PairingDivisors.StatementH
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.OddThetaFunctionExistenceUniqueness
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.DifferentiableSqTh
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.Cval
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsBoundMeansPosLogAreaNormalisedTheta
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IntSerOfIsWq
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.SubstMulLogEqNSer
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.EvenThetaTwoTorsionBasicProperties
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.AlgebraicTaylorTorsionTranslateEvenTheta
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.NormThetaTranslateValueAtZeroPadicPeriodic
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.PadicModelEquationTangentAtLatticeParameter
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.EvenThetaEqProdSigmaStarSquareQuotient
+module
+
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.DifferentiableSqTh
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.Cval
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.CmThetaTaylorCoeffAlgebraicAndConjugate
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.DuplicationFormulaMaxNormEqCpUnitDiscriminantStatement
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.EvenThetaEqProdSigmaStarSquareQuotient
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IdealPeriodLatticeOfCurveDatum
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.InducedTypeThetaGenusOnePermutes
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IntSerOfIsWq
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IntegralJAndAlgebraicData
 import Development.AbelianVarietyTheory.Proofs.FoundationProofs.LatticeInvariantsPeriodPairDictionary
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.MkLeContinuumOfDenseRange
-import Development.AbelianVarietyTheory.Proofs.HeightProofs.WeierstrassPTorsionIntegralAndDistinctMod
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.TranslateModifiedSigmaTwoMulAtZeroStatement
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.DuplicationFormulaMaxNormEqCpUnitDiscriminantStatement
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.LatticeTranslateHalfPeriodSigmaStarPowEightMulEqStatement
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.LatticeTranslateHalfPeriodSigmaStarPowEightMulEqStatement
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.NormThetaTranslateValueAtZeroPadicPeriodic
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.OddThetaFunctionExistenceUniqueness
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.PadicModelEquationTangentAtLatticeParameter
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.TranslateModifiedSigmaTwoMulAtZeroStatement
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.WeierstrassPTorsionIntegralAndDistinctMod
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.MkLeContinuumOfDenseRange
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open NumberField Classical Formalism.BasicNotions Formalism.MainNotions Formalism.MainNotions.TaylorLogMetric Formalism.MainNotions.StandardLatticesGL3 GlobalTheory.NormSum GlobalTheory.EvenTheta
 open scoped BigOperators
 
@@ -43,7 +81,7 @@ theorem setup (D : D7) (p : ℕ) [Fact p.Prime] (cc : Ideal (𝓞 D.host.K)) (δ
 
 theorem lamC_eq {p : ℕ} [Fact p.Prime] {lam : Qbar →+* ℂ_[p]} {ι : ℂ ≃+* ℂ_[p]}
     (hι : ∀ x : Qbar, ι (x : ℂ) = lam x) {x : ℂ} (hx : x ∈ Qbar) : lamC lam x = ι x := by
-  rw [lamC, dif_pos hx]; exact (hι ⟨x, hx⟩).symm
+  rw [lamC, dite_eq_left hx]; exact (hι ⟨x, hx⟩).symm
 
 theorem model_polys {p : ℕ} [Fact p.Prime] (g : GL3Theta.G1 p) (A B P : ℂ_[p])
     (hA : lamC g.lam (-(g2 g.abelian₂) / 4) = -A / 4) (hB : lamC g.lam (-(g3 g.abelian₂) / 4) = -B / 4) :
@@ -110,7 +148,7 @@ theorem mu_double (D : D7) (p : ℕ) [Fact p.Prime] (cc : Ideal (𝓞 D.host.K))
     rw [GlobalTheory.ThetaTransl.cval, lamC_eq hι (hU _ hv2), hdup, map_mul, map_neg, map_pow]
   have hsqι := congrArg ι hsq
   have hdblι := congrArg ι hdbl
-  simp only [map_mul, map_pow, map_sub, map_add, map_ofNat, map_div₀] at hsqι hdblι
+  simp only [map_mul, map_pow, map_sub, map_add (f := _), map_ofNat, map_div₀] at hsqι hdblι
   rw [← hx] at hψ hφ
   set P := ι (wpF g.abelian₂ v)
   set P₂ := ι (wpF g.abelian₂ (2 * v))
@@ -165,7 +203,7 @@ theorem mu_two_tors (D : D7) (p : ℕ) [Fact p.Prime] (cc : Ideal (𝓞 D.host.K
     rw [GlobalTheory.ThetaTransl.cval, lamC_eq hι (hU v hv)]
   have hfι := congrArg ι hf
   have h8ι := congrArg ι h8
-  simp only [map_mul, map_pow, map_sub, map_add, map_ofNat, map_div₀, map_zero, map_one] at hfι h8ι
+  simp only [map_mul, map_pow, map_sub, map_add (f := _), map_ofNat, map_div₀, map_zero, map_one] at hfι h8ι
   rw [← hx] at hψ hφ
   rw [hfι, mul_zero] at hψ
   rw [hfι, mul_zero, sub_zero] at hφ

@@ -1,19 +1,65 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.DiagMod
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.SlTwoInvariantHolomorphicMemAdjoinJInvariantStatement
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.QuotientIntegralHolomorphic
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.UpperHalfPlaneGermRingHomAndRestrict
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.UpperHalfPlaneCodiscreteGermIdentityAndUnits
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsEqDiscriminantPowMulEvalJInvariant
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.CmpPropsStatement
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.UpperHalfPlaneGermRingHomAndRestrictStatement
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.UpperHalfPlaneCodiscreteGermIdentityAndUnitsStatement
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.MdifferentiableOfHasSomeLevelOverStatement
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.QuotientIntegralHolomorphicStatement
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.JTLevelOneStatement
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.MemModularFunctionRingOverIffHasSomeLevelOverStatement
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.HasSomeLevelOverOfIntegralInvariantStatement
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ModularDiscriminantPowMulSlashTwelveMulStatement
+module
+
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.DiagMod
+public import Mathlib.RingTheory.Flat.FaithfullyFlat.Basic
+public import Mathlib.RingTheory.Flat.TorsionFree
+public import Mathlib.RingTheory.Henselian
+public import Mathlib.RingTheory.RegularLocalRing.Defs
+public import Mathlib.RingTheory.SimpleRing.Principal
+public import Development.AbelianVarietyTheory.Definitions.Foundations.SiegelNeZeroIff
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.SlTwoInvariantHolomorphicMemAdjoinJInvariant
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.UpperHalfPlaneCodiscreteGermIdentityAndUnits
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.RemovableSingularity
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open scoped MatrixGroups TensorProduct
 open Matrix GlobalTheory.KZ GlobalTheory.KZ.ES
@@ -64,7 +110,7 @@ def levSub (X : Tower Ω ε) (M : ℕ) : Subfield X.K where
     rw [map_one]
   add_mem' := by
     intro a b ha hb γ hγ
-    rw [map_add, ha γ hγ, hb γ hγ]
+    rw [map_add (f := _), ha γ hγ, hb γ hγ]
   zero_mem' := by
     intro γ _
     rw [map_zero]
@@ -93,7 +139,7 @@ def actE (X : Tower Ω ε) (M : ℕ) (g : SL(2, ℤ)) : levSub X M ≃+* levSub 
   map_add' a b := by
     apply Subtype.ext
     show X.sl (ofSL g⁻¹) ((a : X.K) + b) = X.sl (ofSL g⁻¹) a + X.sl (ofSL g⁻¹) b
-    rw [map_add]
+    rw [map_add (f := _)]
 
 theorem actE_apply (X : Tower Ω ε) (M : ℕ) (g : SL(2, ℤ)) (f : levSub X M) :
     ((actE X M g f : levSub X M) : X.K) = X.sl (ofSL g⁻¹) f := rfl
@@ -155,7 +201,7 @@ private lemma exists_differentiableOn_an_aeval_jK
     exact X.an_c a
   · rintro p q ⟨φ, hφ, hφe⟩ ⟨ψ, hψ, hψe⟩
     refine ⟨φ + ψ, hφ.add hψ, ?_⟩
-    rw [map_add, map_add, hφe, hψe]
+    rw [map_add (f := _), map_add (f := _), hφe, hψe]
     rfl
   · rintro n a ⟨φ, hφ, hφe⟩
     obtain ⟨ψ, hψe, hψ⟩ := X.j_hol
@@ -235,7 +281,8 @@ private lemma exists_differentiableOn_eventuallyEq_div_of_monic_root {U : Set �
       fun z hz => hus ⟨hz.1.1.1, hz.2⟩
     set B : ℝ := ∑ i ∈ Finset.range d, (‖c i z₀‖ + 1) with hB
     have hdiff : DifferentiableOn ℂ φ₀ (s \ {z₀}) :=
-      (ha.mono (fun z hz => hsU hz.1)).div (hb.mono (fun z hz => hsU hz.1))
+      (ha.mono (show s \ {z₀} ⊆ U from fun z hz => hsU hz.1)).div
+        (hb.mono (show s \ {z₀} ⊆ U from fun z hz => hsU hz.1))
         (fun z hz => (hP z hz).1)
     have hbdd : BddAbove (norm ∘ φ₀ '' (s \ {z₀})) := by
       refine ⟨max 1 (d * B), ?_⟩
@@ -339,8 +386,9 @@ private lemma mem_adjoin_jK_of_sl_invariant [IsAlgClosure ℚ Ω]
   have hexp : h ^ d + ∑ i ∈ Finset.range d, (p.coeff i : X.K) * h ^ i = 0 := by
     have h0 : Polynomial.aeval h p = 0 := minpoly.aeval F h
     rw [hmon.as_sum] at h0
-    simpa [map_add, map_sum, Polynomial.aeval_C, Polynomial.aeval_X_pow,
-      IntermediateField.algebraMap_apply] using h0
+
+    simpa [map_add (f := _), map_sum, Polynomial.aeval_C, Polynomial.aeval_X_pow,
+    IntermediateField.algebraMap_apply] using h0
   set c : ℕ → X.K := fun i => Polynomial.aeval X.jK (s ^ (d - i - 1) * r i) with hc
   have hrel : (ℓ * h) ^ d + ∑ i ∈ Finset.range d, c i * (ℓ * h) ^ i = 0 := by
     have e : (ℓ * h) ^ d + ∑ i ∈ Finset.range d, c i * (ℓ * h) ^ i =
@@ -362,7 +410,8 @@ private lemma mem_adjoin_jK_of_sl_invariant [IsAlgClosure ℚ Ω]
   have hgerm : X.an (ℓ * h) ^ d + ∑ i ∈ Finset.range d,
       (C i : _root_.GlobalTheory.KZ.Mero) * X.an (ℓ * h) ^ i = 0 := by
     have e := congrArg X.an hrel
-    rw [map_add, map_pow, map_sum, map_zero] at e
+
+    rw [map_add (f := _), map_pow, map_sum, map_zero] at e
     simpa only [map_mul, map_pow, hCe] using e
   obtain ⟨φ, hφ, hφe⟩ := exists_differentiableOn_eq_of_monic_root_Mero
     (X.an_mero (ℓ * h)) hC hgerm
@@ -378,10 +427,10 @@ private lemma mem_adjoin_jK_of_sl_invariant [IsAlgClosure ℚ Ω]
   rw [e]
   exact div_mem hgF hℓF
 
+
 open scoped MatrixGroups TensorProduct in
 open Matrix in
 variable {Ω : Type} [Field Ω] [Algebra ℚ Ω] {ε : Ω →+* ℂ} in
-
 theorem _root_.GlobalTheory.KZ.ES.LevFin.exists_finset_span : ∀ {Ω : Type} [Field Ω]
     [Algebra ℚ Ω] [IsAlgClosure ℚ Ω] (ε : Ω →+* ℂ) (X : _root_.GlobalTheory.KZ.Tower Ω ε),
     (∃ φ : ℂ → ℂ, DifferentiableOn ℂ φ _root_.GlobalTheory.KZ.Hs ∧

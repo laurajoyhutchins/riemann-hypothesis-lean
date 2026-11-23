@@ -1,6 +1,48 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.LocalClassFormation.CupSymbolBridge
-import GroundTheory.ProfiniteCohomology.LocalClassFormationAlt
+module
+
+public import GroundTheory.ProfiniteCohomology.LocalClassFormation.CupSymbolBridge
+public import GroundTheory.ProfiniteCohomology.LocalClassFormationAlt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
@@ -37,6 +79,12 @@ noncomputable def ClassFormation.toInt (F : ClassFormation A) : ClassFormation (
   inv_bijective U := (F.inv_bijective U).comp
     (cohomologyULiftIntAddEquiv (Rep.res (U : Subgroup G).subtype A) 2).symm.bijective
 
+private theorem ClassFormation.toInt_inv (F : ClassFormation A) (U : OpenSubgroup G)
+    (x : H2Open (uliftIntToIntRep A) U) :
+    (ClassFormation.toInt A F).inv U x = F.inv U
+      ((cohomologyULiftIntAddEquiv (Rep.res (U : Subgroup G).subtype A) 2).symm x) :=
+  rfl
+
 end Transfer
 
 section Local
@@ -61,7 +109,7 @@ noncomputable def localClassFormationZ : ClassFormation (galUnitsZ K Ω) :=
 theorem localClassFormationZ_inv (U : OpenSubgroup Gal(Ω/K)) (x : H2Open (galUnitsZ K Ω) U) :
     (localClassFormationZ K Ω).inv U x = localInv K Ω U
       ((cohomologyULiftIntAddEquiv (Rep.res (U : Subgroup Gal(Ω/K)).subtype (galUnits.{0} K Ω)) 2).symm x) :=
-  rfl
+  ClassFormation.toInt_inv (galUnits.{0} K Ω) (localClassFormation K Ω) U x
 
 end Local
 

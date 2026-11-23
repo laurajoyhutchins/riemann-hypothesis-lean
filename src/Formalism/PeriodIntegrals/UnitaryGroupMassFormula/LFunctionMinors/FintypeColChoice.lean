@@ -1,5 +1,47 @@
-import Mathlib
-import Formalism.PeriodIntegrals.WwMain
+module
+
+public import Formalism.PeriodIntegrals.WwMain
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MvPolynomial Finset
 
@@ -32,7 +74,7 @@ def Hpol {Lt : Type} (l : ℕ) [Fact l.Prime] (N0 N1 : ℕ)
     (ph : Module.Dual ℂ_[l] (MvPolynomial (Lt × ℕ × Fin N0) ℂ_[l]))
     (G : MvPolynomial (XZ Lt N0 N1) ℤ) : MvPolynomial (Lt × Fin N0 × Fin N1) ℂ_[l] :=
   ∑ μ ∈ G.support, monomial (Finsupp.sumFinsuppEquivProdFinsupp μ).2
-    (((coeff μ G : ℤ) : ℂ_[l]) * ph (monomial (Finsupp.sumFinsuppEquivProdFinsupp μ).1 1))
+    (((AddMonoidAlgebra.coeff G μ : ℤ) : ℂ_[l]) * ph (monomial (Finsupp.sumFinsuppEquivProdFinsupp μ).1 1))
 
 def wt {Lt : Type} (l : ℕ) [Fact l.Prime] (N0 N1 : ℕ) (Th : MvPowerSeries (Lt × Fin N0 × Fin N1) ℂ_[l])
     (α : (Lt × Fin N0 × Fin N1) →₀ ℕ) : ℂ_[l] :=
@@ -40,7 +82,7 @@ def wt {Lt : Type} (l : ℕ) [Fact l.Prime] (N0 N1 : ℕ) (Th : MvPowerSeries (L
 
 def Lfun {Lt : Type} (l : ℕ) [Fact l.Prime] (N0 N1 : ℕ) (Th : MvPowerSeries (Lt × Fin N0 × Fin N1) ℂ_[l])
     (P : MvPolynomial (Lt × Fin N0 × Fin N1) ℂ_[l]) : ℂ_[l] :=
-  ∑ α ∈ P.support, coeff α P * wt l N0 N1 Th α
+  ∑ α ∈ P.support, AddMonoidAlgebra.coeff P α * wt l N0 N1 Th α
 
 def EvalH : Prop :=
   ∀ (Lt : Type) [Fintype Lt] [DecidableEq Lt] (l : ℕ) [Fact l.Prime] (N0 N1 : ℕ)

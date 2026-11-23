@@ -1,9 +1,55 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.GlobalClassFormation.CupDecompositionGlobal
-import GroundTheory.ProfiniteCohomology.GlobalClassFormation.Splitting
-import GroundTheory.ProfiniteCohomology.GlobalClassFormation.RealPlaces
-import GroundTheory.ProfiniteCohomology.GlobalClassFormation.UnitsLevels
-import GroundTheory.ProfiniteCohomology.GlobalClassFormation.LocalDegrees
+module
+
+public import GroundTheory.ProfiniteCohomology.GlobalClassFormation.EqZeroOfBrauerLocalApplyEqZero
+import GroundTheory.ProfiniteCohomology.Colimit
+public import GroundTheory.ProfiniteCohomology.GlobalClassFormation.CupDecompositionGlobal
+public import GroundTheory.ProfiniteCohomology.GlobalClassFormation.LocalDegrees
+public import GroundTheory.ProfiniteCohomology.GlobalClassFormation.RealPlaces
+public import GroundTheory.ProfiniteCohomology.GlobalClassFormation.Splitting
+import GroundTheory.ProfiniteCohomology.GlobalClassFormation.SymbolBridgeCyclotomic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import GroundTheory.GlobalFields.CyclotomicCharacters.Degree
+public import GroundTheory.ProfiniteCohomology.GlobalClassFormation.LocalSymbol
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
@@ -11,8 +57,6 @@ namespace GroundTheory.ProfCoh
 open CategoryTheory NumberField IntermediateField GroundTheory.Global FiniteSubfield IsDedekindDomain
 
 open scoped DirectSum GroundTheory.Global.SemiLocal
-
-local notation "ℚ̄" => AlgebraicClosure ℚ
 
 noncomputable section
 
@@ -52,7 +96,7 @@ theorem brauerSumInv_eq_zero (x : cohomology (unitsLimitRep K) 2) : brauerSumInv
     exact finsum_char_localSymbolAt_eq_zero E ι (hEle.trans (sup_le_sup_left Cyclotomic.zhatField_le_maxCyclotomic _))
       χ hχ b
   have hx : x = x' + globalCupClass (iChar K) a₀ := by rw [hx', sub_add_cancel]
-  rw [hx, map_add, h', brauerSumInv_globalCupClass_iChar, add_zero]
+  rw [hx, map_add (f := _), h', brauerSumInv_globalCupClass_iChar, add_zero]
 
 end
 

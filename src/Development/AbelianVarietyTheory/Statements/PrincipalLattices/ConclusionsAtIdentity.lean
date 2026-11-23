@@ -1,6 +1,42 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.CMLattices.ExistsIsThetaDegOfIsLocalModel
-import Development.AbelianVarietyTheory.Statements.PrincipalLattices.DimPosOfHasType
+module
+
+public import Development.AbelianVarietyTheory.Definitions.CMLattices.ExistsIsThetaDegOfIsLocalModel
+public import Development.AbelianVarietyTheory.Definitions.CMLattices.CmHostBarHalfIntegerGenerator
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField IsDedekindDomain
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.GeometryOfNumbersTheory
@@ -16,16 +52,6 @@ def DegSt : Prop :=
     ∀ (F : GenFib T.pol) (h : HermFam K (Fin F.P₀.g → K)), F.IsHerm h → ∀ τ : 𝓞 E →+* 𝓞 K, τ H.rt = ρ →
       ((2 * deg h (F.eigLat T.t.act τ) : ℝ) : ℂ) = logOm E χ
 
-def LenSt : Prop :=
-  ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (H : Host E) (K : Type) [Field K] [NumberField K] (ρ : 𝓞 K)
-    (σ₁ : K →+* ℂ) (p q : ℕ) (X : CMObj H K ρ σ₁ p q) (FA : ∀ b, GenFib (X.A b).pol) (FB : GenFib X.B.pol)
-    (hA : ∀ b, HermFam K (Fin (FA b).P₀.g → K)) (hB : HermFam K (Fin FB.P₀.g → K)),
-    (∀ b, (FA b).IsHerm (hA b)) → FB.IsHerm hB →
-    ∀ (j : Fin p ⊕ Fin q) (M : (Fin (FA j.isLeft).P₀.g → K) →ₗ[K] (Fin FB.P₀.g → K)),
-      (FA j.isLeft).IsDiffOf FB (X.φ j) M → ∀ (s : K →+* ℂ) (τ : 𝓞 E →+* 𝓞 K),
-      ∀ c ∈ (FA j.isLeft).eigLat (X.A j.isLeft).t.act τ,
-        hB.nrm s (M c) ^ 2 = (s (τ (X.hh j) : K)).re * (hA j.isLeft).nrm s c ^ 2
-
 def IndSt : Prop :=
   ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (H : Host E) (K : Type) [Field K] [NumberField K] (ρ : 𝓞 K)
     (σ₁ : K →+* ℂ) (p q : ℕ) (X : CMObj H K ρ σ₁ p q) (FA : ∀ b, GenFib (X.A b).pol) (FB : GenFib X.B.pol)
@@ -38,21 +64,6 @@ def IndSt : Prop :=
     (∀ j, Function.Injective (M j)) ∧
     iSupIndep (fun x => Submodule.span K (N x : Set (Fin FB.P₀.g → K))) ∧
     ⨆ x, Submodule.span K (N x : Set (Fin FB.P₀.g → K)) = ⊤
-
-def KeyAtSt : Prop :=
-  ∀ (K : Type) [Field K] [NumberField K] (P : Out.PolAV (Sp (𝓞 K))) (F : GenFib P) (hg rig hr th hth)
-    (h : HermFam K (Fin F.P₀.g → K)) (δ : ℝ), F.IsHerm h → IsThetaDeg (F.key hg rig hr th hth) δ →
-    δ = -(1 / 2) * deg h F.lieLat + (P.g : ℝ) / 4 * Real.log (2 * Real.pi)
-
-def DegBoundSt : Prop :=
-  ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (H : Host E) [NeZero H.d] (χ : DirichletCharacter ℂ H.d),
-    IsKroneckerChar χ → ∀ (K : Type) [Field K] [NumberField K] (ρ : 𝓞 K) (σ₁ : K →+* ℂ) (p q : ℕ)
-    (X : CMObj H K ρ σ₁ p q) (FB : GenFib X.B.pol) (hB : HermFam K (Fin FB.P₀.g → K)) (Λ : ℝ), FB.IsHerm hB → 0 < Λ →
-    (∀ j (τ : E →+* ℂ), ‖τ (X.hh j : E)‖ ≤ Λ ^ 2) →
-    ((Module.finrank ℚ E / 2 * (p + q) : ℕ) : ℝ) * ((logOm E χ).re / 2 - Real.log Λ) ≤ deg hB FB.lieLat ∧
-    ∀ (hg rig hr th hth) (δ : ℝ), IsThetaDeg (FB.key hg rig hr th hth) δ →
-      δ ≤ ((Module.finrank ℚ E / 2 * (p + q) : ℕ) : ℝ) *
-        (-(1 / 2) * ((logOm E χ).re / 2 - Real.log Λ) + Real.log (2 * Real.pi) / 4)
 
 namespace NumInh
 

@@ -1,4 +1,48 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.TraceFormulaEigenvalues.IsGenEig
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.TraceFormulaEigenvalues.IsGenEig
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.Wcount
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -73,11 +117,6 @@ def OrbReps : Prop :=
     (∀ y, f (y⁻¹ * δ * θ y) ≠ 0 → ∃ t, ∃ i ∈ S, ∃ u ∈ U, y = ι t * x i * u) →
     orb ι C θ U f δ = ∑ i ∈ S, (((stabilizer G (x i : G ⧸ U)).comap ι).relIndex C : ℂ) * f ((x i)⁻¹ * δ * θ (x i))
 
-def OrbConj : Prop :=
-  ∀ (T G : Type) [Group T] [Group G] (ι : T →* G) (C : Subgroup T) (θ : G →* G) (U : Subgroup G) (f : G → ℂ) (δ x : G),
-    (∀ u ∈ U, ∀ y, f (u⁻¹ * y * θ u) = f y) → (∀ t, (ι t)⁻¹ * δ * θ (ι t) = δ) → C.Normal →
-    orb ((MulAut.conj x⁻¹).toMonoidHom.comp ι) C θ U f (x⁻¹ * δ * θ x) = orb ι C θ U f δ
-
 def TrTheta : Prop :=
   ∀ (Λ M : Type) [AddCommGroup M] [Module ℂ M] [FiniteDimensional ℂ M] (u : Λ → Module.End ℂ M) (Θ : Module.End ℂ M) (σ : Λ ≃ Λ),
     (∀ a b, Commute (u a) (u b)) → (∀ a, Θ * u a = u (σ a) * Θ) →
@@ -98,8 +137,5 @@ def Extract : Prop :=
     (∀ i ∈ S, ∀ p q, α i (p * q) = α i p * α i q) → (∀ j ∈ S', ∀ p q, β j (p * q) = β j p * β j q) →
     (∀ p, ∑ i ∈ S, a i * α i p = ∑ j ∈ S', b j * β j p) → ∀ χ : P → ℂ, χ ≠ 0 →
     (open Classical in ∑ j ∈ S'.filter (fun j => β j = χ), b j ≠ 0) → ∃ i ∈ S, a i ≠ 0 ∧ α i = χ
-
-def Pigeon : Prop :=
-  ∀ (X I : Type) (A : Set X), A.Finite → ∀ P : X → I → Prop, (∀ S : Finset I, ∃ x ∈ A, ∀ i ∈ S, P x i) → ∃ x ∈ A, ∀ i, P x i
 
 end UpperTheory.V.Z.Sym.Tf

@@ -1,4 +1,56 @@
-import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.SiegelWeilActions.ProjectedBlockUpperSum
+module
+
+public import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.SiegelWeilActions.EllA
+public import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.UnfoldingCompactness.IncMTranspose
+import Development.WeilBound.CoreStatements.AutomorphicKernels.EisensteinSeriesG2.G2HaarMeasure.ContinuousInFrame
+public import Development.WeilBound.CoreStatements.AutomorphicKernels.EisensteinSeriesG2.G2HaarMeasure.CountableRationalPointsDoubled
+public import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.SiegelWeilActions.ContinuousNilpotentFramePart
+public import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.SiegelWeilActions.ProjectedBlockUpperSum
+import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.UnfoldingCompactness.MatrixOfUnipotentFrame
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 set_option linter.unusedSectionVars false
 
@@ -125,6 +177,7 @@ theorem JW {R : RD d} {J K : Mt d} (hKJ : K * J = 1) (hK : Kᵀ * W R * K.map (c
 
 theorem cv_vecMul (x : Fin d.n ⊕ Fin d.n → AE F E) (K : Mt d) : cv σ (x ᵥ* K) = (K.map (cA σ))ᵀ *ᵥ cv σ x := by
   funext s
+
   simp [cv, Matrix.vecMul, Matrix.mulVec, dotProduct, map_sum, map_mul, mul_comm]
 
 def qf (R : RD d) (x : Fin d.n ⊕ Fin d.n → AE F E) : AE F E := x ⬝ᵥ (W R *ᵥ cv σ x)
@@ -155,6 +208,7 @@ theorem D_apply (u : Fin L.n → AE F E) (l k : Fin d.n) :
   rw [Matrix.map_apply, Matrix.transpose_apply, uA_apply]
   by_cases hk : k = L.i₀
   · subst hk
+
     simp [ext0, Matrix.one_apply, eq_comm, map_sum, Finset.sum_neg_distrib]
   · simp [Matrix.one_apply, hk, eq_comm]
 
@@ -164,6 +218,7 @@ theorem sB_apply (R : RD d) (b : Fin L.n → AE F E) (i l : Fin d.n) :
   unfold sB
   simp only [Matrix.sum_apply, Matrix.add_apply, Matrix.single_apply, Finset.sum_add_distrib, jeA_eq]
   rcases idx L i with rfl | ⟨p, rfl⟩ <;> rcases idx L l with rfl | ⟨q, rfl⟩ <;>
+
     simp [ext0, ComplexParameterFamilyContinuity.em_ne, (ComplexParameterFamilyContinuity.em_ne L _).symm, L.inj.eq_iff, map_sum, apply_ite, eq_comm]
 
 theorem aB_apply (δ : E) (a : AF F) (i k : Fin d.n) :
@@ -277,6 +332,7 @@ theorem qf_vV (R : RD d) (u b : Fin L.n → AE F E) :
     qf R (vV L u b) = cA σ (hh L u b) + ((R.ε : ℤ) : AE F E) * hh L u b := by
   simp only [qf, dotProduct, Fintype.sum_sum_type, W_mulVec_inl, W_mulVec_inr, cv, vV, Sum.elim_inl, Sum.elim_inr]
   rw [sum_split L, sum_split L]
+
   simp only [extend_zero_last_column, extend_zero_embedding, map_zero, zero_mul, mul_zero, zero_add, hh, map_sum, map_mul, cc d, Finset.mul_sum]
   rw [← Finset.sum_add_distrib, ← Finset.sum_add_distrib]
   exact Finset.sum_congr rfl fun k _ => by ring

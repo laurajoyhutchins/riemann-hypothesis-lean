@@ -1,9 +1,63 @@
-import Formalism.CharacterColumnKernels.Statement
-import Formalism.CharacterColumnKernels.StatementG
-import Formalism.CharacterColumnKernels.StatementX
-import Formalism.CharacterColumnKernels.IdempotentNormalForms.GenRelMapApply
-import Formalism.CharacterColumnKernels.IdempotentNormalForms.LenCokerOfDetNeZero
-import Formalism.CharacterColumnKernels.IdempotentNormalForms.SingleEqSmul
+module
+
+public import Formalism.CharacterColumnKernels.StatementG
+public import Formalism.CharacterColumnKernels.IdempotentNormalForms.LenCokerOfDetNeZero
+public import Mathlib.Algebra.MvPolynomial.Degrees
+public import Formalism.CharacterColumnKernels.IdempotentNormalForms.GenRelMapApply
+public import Formalism.CharacterColumnKernels.IdempotentNormalForms.SingleEqSmul
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+public import Mathlib.Combinatorics.Nullstellensatz
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.MvPolynomial.CommRing
+public import Mathlib.RingTheory.LocalRing.ResidueField.Basic
+
+@[expose] public section
 
 open Finset
 
@@ -15,9 +69,9 @@ lemma genfin_det_totalDegree {ι K n : Type*} [CommRing K] [Fintype n] [Decidabl
     (A : Matrix n n (MvPolynomial ι K)) (h : ∀ i j, (A i j).totalDegree ≤ 1) :
     A.det.totalDegree ≤ Fintype.card n := by
   rw [Matrix.det_apply]
-  refine (MvPolynomial.totalDegree_finset_sum _ _).trans (Finset.sup_le fun σ _ => ?_)
+  refine (MvPolynomial.totalDegree_finsetSum _ _).trans (Finset.sup_le fun σ _ => ?_)
   have hprod : (∏ i, A (σ i) i).totalDegree ≤ Fintype.card n := by
-    refine (MvPolynomial.totalDegree_finset_prod _ _).trans ?_
+    refine (MvPolynomial.totalDegree_finsetProd _ _).trans ?_
     calc ∑ i, (A (σ i) i).totalDegree ≤ ∑ _i : n, 1 := Finset.sum_le_sum fun i _ => h _ _
       _ = Fintype.card n := by simp
   rcases Int.units_eq_one_or (Equiv.Perm.sign σ) with hs | hs
@@ -49,6 +103,7 @@ theorem genericFin : StatGenericFin := by
     rw [RingHom.map_det, RingHom.map_det]
     congr 1
     ext p q
+
     simp [L, Matrix.mul_apply, bigRect, Matrix.sum_apply, map_sum]
 
   have hsum : ∀ w (φ : g × m × d w × d w → O),
@@ -57,6 +112,7 @@ theorem genericFin : StatGenericFin := by
         fun p q => φ (p.1, q.1, p.2, q.2) := by
     intro w φ
     funext p q
+
     simp only [bigRect, Matrix.sum_apply, Matrix.smul_apply, map_sum, map_smul]
     rw [Fintype.sum_sigma]
     rw [Fintype.sum_eq_single w (fun x hx => by simp [Pi.single_eq_of_ne hx])]

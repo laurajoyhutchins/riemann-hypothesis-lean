@@ -1,5 +1,53 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.TwoWeightEqOneAddRoot
+module
+
+public import Mathlib.Basic.Real.Basic
+public import Mathlib.LinearAlgebra.Trace
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.NumberTheory.NumberField.Basic
+public import Mathlib.NumberTheory.NumberField.CMField
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsCompletedStrictHens
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.TwoWeightEqOneAddRoot
+
+@[expose] public section
 
 noncomputable section
 
@@ -38,44 +86,6 @@ theorem _root_.GlobalTheory.DatumSign.trace_eq :
   conv_lhs => rw [hTP]
   rw [map_sub, map_smul, map_smul, htr, LinearMap.trace_id, smul_eq_mul, smul_eq_mul]
   ring
-
-theorem finrank_le (B : V →ₗ[ℝ] V →ₗ[ℝ] ℝ) (A J K : V →ₗ[ℝ] V) (s : ℝ) (hs : 0 < s)
-    (hA : ∀ x, A (A x) = -((s * s) • x)) (hJ : ∀ x, J (J x) = -x) (hK : ∀ x, K (K x) = -x)
-    (hKA : K ∘ₗ A = A ∘ₗ K) (pJ : ∀ x, x ≠ 0 → 0 < B (J x) x) (pK : ∀ x, x ≠ 0 → 0 < B (K x) x) :
-    finrank ℝ (LinearMap.ker (J ∘ₗ A - s • LinearMap.id)) ≤ finrank ℝ (LinearMap.ker (K ∘ₗ A - s • LinearMap.id)) := by
-  have c : ∀ x, K (A x) = A (K x) := fun x => LinearMap.congr_fun hKA x
-  let W := LinearMap.ker (J ∘ₗ A - s • LinearMap.id)
-  let W' := LinearMap.ker (K ∘ₗ A - s • LinearMap.id)
-  have hm : ∀ x, x ∈ W' ↔ K (A x) = s • x := fun x => by simp [W', sub_eq_zero]
-  let f : W →ₗ[ℝ] W' := LinearMap.codRestrict W' ((K ∘ₗ A + s • LinearMap.id) ∘ₗ W.subtype) (fun x => (hm _).2 (by
-    simp only [LinearMap.comp_apply, LinearMap.add_apply, LinearMap.smul_apply, LinearMap.id_apply, map_add,
-      map_smul, Submodule.subtype_apply]
-    rw [c (K (A x)), hK, map_neg, hA]
-    module))
-  refine LinearMap.finrank_le_finrank_of_injective (f := f) ?_
-  rw [injective_iff_map_eq_zero]
-  intro x hx
-  by_contra h0
-  have hx0 : (x : V) ≠ 0 := fun h => h0 (Subtype.ext h)
-  have h1 : J (A x) = s • (x : V) := by
-    have : J (A x) - s • (x : V) = 0 := LinearMap.mem_ker.1 x.2
-    exact sub_eq_zero.1 this
-  have h2 : K (A x) = -(s • (x : V)) := by
-    have := congrArg Subtype.val hx
-    simpa [f, add_eq_zero_iff_eq_neg] using this
-  have e1 : A x = -(s • J x) := by
-    have := congrArg J h1
-    rw [hJ, map_smul] at this
-    rw [← this, neg_neg]
-  have e2 : A x = s • K x := by
-    have := congrArg K h2
-    rw [hK, map_neg, map_smul] at this
-    exact neg_injective this
-  have b := congrArg (fun v => B v x) (e1.symm.trans e2)
-  simp only [map_neg, map_smul, LinearMap.neg_apply, LinearMap.smul_apply, smul_eq_mul] at b
-  have := mul_pos hs (pJ x hx0)
-  have := mul_pos hs (pK x hx0)
-  linarith
 
 end Lin
 

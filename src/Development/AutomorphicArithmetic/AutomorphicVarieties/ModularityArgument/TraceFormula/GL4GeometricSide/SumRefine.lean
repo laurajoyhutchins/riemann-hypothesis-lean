@@ -1,6 +1,48 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.TraceFormula.GL4GeometricSide.InnerEq
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LieOperatorVectorEq
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.ExistsAverage
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.TraceFormula.GL4GeometricSide.InnerEq
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.ExistsAverage
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LieOperatorVectorEq
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+
+@[expose] public section
 
 noncomputable section
 
@@ -14,9 +56,6 @@ section Avg
 
 variable {K M : Type*} [Group K] [AddCommGroup M] [Module ℂ M]
 
-private def av (ρ : K →* Module.End ℂ M) (S : Subgroup K) (m : M) : M :=
-  ((S.index : ℂ)⁻¹) • ∑ᶠ q : K ⧸ S, ρ q.out m
-
 private theorem exists_avg [TopologicalSpace K] [IsTopologicalGroup K] [CompactSpace K] (ρ : K →* Module.End ℂ M)
     (hs : ∀ m, IsOpen {k | ρ k m = m}) :
     ∃ P : M →ₗ[ℂ] M, (∀ m k, ρ k (P m) = P m) ∧ (∀ m, (∀ k, ρ k m = m) → P m = m) ∧
@@ -27,7 +66,7 @@ end Avg
 
 section Core
 
-variable {E : Type} [Field E] [NumberField E] [IsTotallyComplex E] {n : ℕ}
+variable {E : Type} [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] {n : ℕ}
 
 private theorem fin_op (π : CuspSub E n) (g k : GL (Fin n) (Af E)) (x : π.V) :
     π.finPart g (π.op (.fin k) x) = π.finPart (g * k) x :=
@@ -68,7 +107,7 @@ private theorem core (π : CuspSub E n) (K : Subgroup (GL (Fin n) (Af E))) (hKc 
   let W0 : Submodule ℂ π.V := ⨅ g, LinearMap.ker (P ∘ₗ π.finPart g)
   have mem : ∀ x, x ∈ W0 ↔ ∀ g, P (π.finPart g x) = 0 := fun x => by
     simp [W0, Submodule.mem_iInf]
-  have stable : IsStable (W0.map π.V.subtype) := by
+  have stable : _root_.GlobalTheory.CuspRep.IsStable (W0.map π.V.subtype) := by
     rintro o _ ⟨x, hx, rfl⟩
     refine ⟨π.op o x, ?_, rfl⟩
     have hx' := (mem x).1 hx
@@ -122,7 +161,7 @@ theorem rlLow : HeckeMem → LowType → RlLow := by
     simp only [T, LinearMap.sub_apply, eop_fin, map_sub]
   have hTu : ∀ a b, D.i (kF (D.E1 w) (D.E2 w) a b u) = T a b v := fun a b => Subtype.ext (by
     rw [hTval, ← hu]
-    simp only [kF, LinearMap.add_apply, map_add, Submodule.coe_add, D.hE1, D.hE2]
+    simp only [kF, LinearMap.add_apply, map_add (f := _), Submodule.coe_add, D.hE1, D.hE2]
     abel)
   have hmem : u ∈ hwSp (D.E1 w) (D.E2 w) ν := by
     refine ⟨fun a => D.inj ?_, fun a b hab he => D.inj ?_⟩

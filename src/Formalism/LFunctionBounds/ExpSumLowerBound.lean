@@ -1,4 +1,46 @@
-import Formalism.LFunctionBounds.PositivityBound
+module
+
+public import Formalism.LFunctionBounds.Statement
+public import Formalism.StatementFL
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Complex
 
@@ -15,22 +57,6 @@ def TripleAverageIdentity : Prop :=
           (fun χ => cW l ν χ) x
         - (x * Real.log l / ((l : ℝ) - 1) - Al l x)
 
-def LogOm1Bound : Prop :=
-  ∃ K : ℝ, ∀ l : ℕ, 2 ≤ l → ∀ S ∈ triples l, |logOm1 l S| ≤ K * (1 + Real.log l)
-
-def gaussK (μ κ y : ℝ) : ℝ :=
-  (4 * Real.pi * κ) ^ (-(1 / 2 : ℝ)) * Real.exp (-(y - μ) ^ 2 / (4 * κ))
-
-def GaussLaplace : Prop :=
-  ∀ (f : ℝ → ℂ) (a C : ℝ),
-    MeasureTheory.AEStronglyMeasurable f (MeasureTheory.volume.restrict (Set.Ioi 0)) →
-    (∀ y : ℝ, 0 < y → ‖f y‖ ≤ C * Real.exp (a * y)) →
-    ∀ c : ℝ, a < c → ∀ μ κ : ℝ, 0 < κ →
-      ∫ y in Set.Ioi (0 : ℝ), f y * (gaussK μ κ y : ℂ) =
-        (1 / (2 * Real.pi) : ℂ) * ∫ v : ℝ,
-          (∫ y in Set.Ioi (0 : ℝ), f y * Complex.exp (-((c : ℂ) + v * I) * y)) *
-            Complex.exp (κ * ((c : ℂ) + v * I) ^ 2 + μ * ((c : ℂ) + v * I))
-
 def rectInt (g : ℂ → ℂ) (x0 x1 y0 y1 : ℝ) : ℂ :=
   (∫ x in x0..x1, g (x + y0 * I)) - (∫ x in x0..x1, g (x + y1 * I)) +
     I * (∫ y in y0..y1, g (x1 + y * I)) - I * (∫ y in y0..y1, g (x0 + y * I))
@@ -41,32 +67,5 @@ def RectResidue : Prop :=
     (∃ U : Set ℂ, IsOpen U ∧ (Set.uIcc x0 x1 ×ℂ Set.uIcc y0 y1) ⊆ U ∧ DifferentiableOn ℂ G U) →
     (∀ w : ℂ, w ∉ P → g w = G w + ∑ p ∈ P, b p / (w - p)) →
     rectInt g x0 x1 y0 y1 = 2 * Real.pi * I * ∑ p ∈ P, b p
-
-def LogDerivBound : Prop :=
-  ∀ (f : ℂ → ℂ) (z₀ : ℂ) (R M : ℝ), 0 < R → 1 ≤ M →
-    DifferentiableOn ℂ f (Metric.closedBall z₀ R) → (∀ z ∈ Metric.closedBall z₀ R, f z ≠ 0) →
-    (∀ z ∈ Metric.closedBall z₀ R, ‖f z‖ ≤ M * ‖f z₀‖) →
-    ∀ z ∈ Metric.closedBall z₀ (R / 2), ‖deriv f z / f z‖ ≤ 24 * Real.log M / R
-
-def ExpSumLowerBound : Prop :=
-  ∀ (ι : Type) [Fintype ι] (z b : ι → ℂ) (i₀ : ι), Function.Injective z → (∀ i, b i ≠ 0) →
-    (∀ i, (z i).re ≤ (z i₀).re) →
-    ∃ c L₀ μ₀ : ℝ, 0 < c ∧ 0 < L₀ ∧ ∀ μ : ℝ, μ₀ ≤ μ → ∃ μ' ∈ Set.Icc μ (μ + L₀),
-      c * Real.exp (μ' * (z i₀).re) ≤ ‖∑ i, b i * Complex.exp (μ' * z i)‖
-
-def LocalLandau : Prop :=
-  ∀ θ : ℝ, 1 / 2 ≤ θ → θ < 1 → ∀ ρ₀ : ℂ, θ < ρ₀.re → riemannZeta ρ₀ = 0 →
-    ∃ s₀ T : ℝ, 1 / 2 < s₀ ∧ s₀ < 1 ∧ 1 ≤ T ∧ ∀ A : ℝ, ∃ ε₀ : ℝ, 0 < ε₀ ∧ ∀ ε : ℝ, 0 < ε → ε < ε₀ →
-      ∃ L₀ : ℕ, ∀ (l : ℕ) [NeZero l], l.Prime → L₀ ≤ l →
-        ∀ (ι : Type) [Fintype ι] (χ : ι → DirichletCharacter ℂ l) (c : ι → ℂ),
-          (∀ i, χ i ≠ 1) →
-          (∀ x : ℝ, 1 ≤ x → (∑ i, c i * GchiC (χ i) x).im = 0) →
-          ∑ i, ‖c i‖ ≤ (l : ℝ) ^ A →
-          ‖∑ i, c i * (deriv (DirichletCharacter.LFunction (χ i)) 1 /
-              DirichletCharacter.LFunction (χ i) 1)‖ ≤ (l : ℝ) ^ A →
-          (∀ i, c i ≠ 0 → ∀ s : ℂ, s₀ ≤ s.re → |s.im| ≤ T →
-            DirichletCharacter.LFunction (χ i) s ≠ 0) →
-          ¬ (∀ x : ℝ, (l : ℝ) ^ (1 / ε) ≤ x → x ≤ (l : ℝ) ^ (1300 / ε) →
-              famComb (fun _ : ι => l) χ c x ≤ x ^ (θ + ε) + 2 * Real.log l + Real.log x)
 
 end Formalism.FX

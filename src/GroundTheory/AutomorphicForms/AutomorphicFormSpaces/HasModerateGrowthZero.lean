@@ -1,5 +1,51 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.AutomorphicFormSpaces.ArchSliceUAction
+module
+
+public import GroundTheory.AutomorphicForms.AutomorphicFormSpaces.ArchSliceUAction
+public import GroundTheory.AutomorphicForms.AutomorphicFormSpaces.Height
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Topology Filter Set
 open scoped NumberField.AdeleRing
@@ -113,7 +159,7 @@ theorem IsZFinite.add {φ ψ : archSmooth K n} (hφ : IsZFinite φ) (hψ : IsZFi
         ((isExpLieAlgebra K n).centerU : Set (UEnv K n))) := by
     refine Submodule.span_le.2 ?_
     rintro _ ⟨z, hz, rfl⟩
-    simp only [map_add]
+    simp only [map_add (f := _)]
     exact Submodule.add_mem_sup (Submodule.subset_span ⟨z, hz, rfl⟩)
       (Submodule.subset_span ⟨z, hz, rfl⟩)
   exact Submodule.finiteDimensional_of_le hle
@@ -168,31 +214,25 @@ theorem archSmooth_mk_smul (c : ℂ) (hφ : IsArchSmooth φ) :
   Subtype.ext rfl
 
 theorem IsAutomorphicForm.add (hφ : IsAutomorphicForm φ) (hψ : IsAutomorphicForm ψ) :
-    IsAutomorphicForm (φ + ψ) where
-  isLeftInvariant := hφ.isLeftInvariant.add hψ.isLeftInvariant
-  isSmooth := hφ.isSmooth.add hψ.isSmooth
-  isKFinite := hφ.isKFinite.add hψ.isKFinite
-  isZFinite := by
-    have := hφ.isZFinite.add hψ.isZFinite
-    rwa [← archSmooth_mk_add] at this
-  hasModerateGrowth := hφ.hasModerateGrowth.add hψ.hasModerateGrowth
+    IsAutomorphicForm (φ + ψ) := by
+  refine ⟨hφ.isLeftInvariant.add hψ.isLeftInvariant, hφ.isSmooth.add hψ.isSmooth,
+    hφ.isKFinite.add hψ.isKFinite, ?_, hφ.hasModerateGrowth.add hψ.hasModerateGrowth⟩
+  have h := hφ.isZFinite.add hψ.isZFinite
+  rwa [← archSmooth_mk_add hφ.isSmooth.1 hψ.isSmooth.1] at h
 
-theorem IsAutomorphicForm.smul (c : ℂ) (hφ : IsAutomorphicForm φ) : IsAutomorphicForm (c • φ) where
-  isLeftInvariant := hφ.isLeftInvariant.smul c
-  isSmooth := hφ.isSmooth.smul c
-  isKFinite := hφ.isKFinite.smul c
-  isZFinite := by
-    have := hφ.isZFinite.smul c
-    rwa [← archSmooth_mk_smul] at this
-  hasModerateGrowth := hφ.hasModerateGrowth.smul c
+theorem IsAutomorphicForm.smul (c : ℂ) (hφ : IsAutomorphicForm φ) : IsAutomorphicForm (c • φ) := by
+  refine ⟨hφ.isLeftInvariant.smul c, hφ.isSmooth.smul c, hφ.isKFinite.smul c, ?_,
+    hφ.hasModerateGrowth.smul c⟩
+  have h := hφ.isZFinite.smul c
+  rwa [← archSmooth_mk_smul c hφ.isSmooth.1] at h
 
 theorem isAutomorphicForm_zero : IsAutomorphicForm (0 : AdelicGLn.AdelicGL K n → ℂ) :=
   ⟨isLeftInvariant_zero, isSmooth_zero, isKFinite_zero, isZFinite_zero, hasModerateGrowth_zero⟩
 
 end Closure
 
-variable (K n) in
 
+variable (K n) in
 def automorphicForms : Submodule ℂ (AdelicGLn.AdelicGL K n → ℂ) where
   carrier := {φ | IsAutomorphicForm φ}
   zero_mem' := isAutomorphicForm_zero

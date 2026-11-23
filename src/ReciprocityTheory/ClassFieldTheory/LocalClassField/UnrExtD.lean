@@ -1,4 +1,51 @@
-import ReciprocityTheory.ClassFieldTheory.LocalClassField.UnrExtC
+module
+
+public import ReciprocityTheory.ClassFieldTheory.LocalClassField.UnrDefs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ClassFieldTheory.LocalClassField.PowPowSuccSub
+public import ReciprocityTheory.ClassFieldTheory.LocalClassField.UnrExtC
+public import ReciprocityTheory.ClassFieldTheory.LocalClassField.MemOfPowQKSubOne
+public import ReciprocityTheory.ClassFieldTheory.LocalClassField.UnrExtA
+
+@[expose] public section
 
 namespace ReciprocityTheory.DiscreteGroups.LocalClassField
 
@@ -87,7 +134,10 @@ theorem exists_isFrobOn (hK : FiniteDimensional ℚ_[p] K) {n : ℕ} (hn : 0 < n
   let E : IntermediateField K (PadicAlgCl p) := IntermediateField.extendScalars (le_Kn p K n)
   have hgal : IsGalois K E := isGalois_Kn p K hK hn
   have hfr : Module.finrank K E = n := finrank_extendScalars_Kn p K hK hn
-  have hfd : FiniteDimensional K E := Module.finite_of_finrank_pos (by rw [hfr]; exact hn)
+  have hfd : FiniteDimensional K E := by
+    change FiniteDimensional K (IntermediateField.extendScalars (le_Kn p K n))
+    rw [extendScalars_Kn_eq_adjoin (p := p) (K := K) (n := n) hζ₀ hm0]
+    exact IntermediateField.finiteDimensional_adjoin (fun x _ => Algebra.IsIntegral.isIntegral x)
   have hcard : Nat.card (E ≃ₐ[K] E) = n := by rw [IsGalois.card_aut_eq_finrank, hfr]
   have hsurj := AlgEquiv.restrictNormalHom_surjective (F := K) (K₁ := E) (PadicAlgCl p)
   have hex : ∀ τ : E ≃ₐ[K] E, ∃ i : Fin n, ∃ σ : GK p K,
@@ -117,12 +167,6 @@ theorem exists_isFrobOn (hK : FiniteDimensional ℚ_[p] K) {n : ℕ} (hn : 0 < n
   intro ζ hζ
   obtain ⟨k, -, rfl⟩ := hζ₀.eq_pow_of_pow_eq_one hζ
   rw [map_pow, h0, ← pow_mul, ← pow_mul, mul_comm]
-
-theorem IsFrobOn.eqOn (hK : FiniteDimensional ℚ_[p] K) {n : ℕ} (hn : 0 < n) {φ ψ : GK p K}
-    (hφ : IsFrobOn p K n φ) (hψ : IsFrobOn p K n ψ) {x : PadicAlgCl p} (hx : x ∈ Kn p K n) :
-    φ x = ψ x := by
-  rw [isFrobOn_iff p K hK hn] at hφ hψ
-  exact UnramifiedExtensions.eqOn_Kn K (fun ζ hζ => by rw [hφ ζ hζ, hψ ζ hζ]) hx
 
 theorem IsFrobOn.exists_pow (hK : FiniteDimensional ℚ_[p] K) {n : ℕ} (hn : 0 < n) {φ : GK p K}
     (hφ : IsFrobOn p K n φ) (σ : GK p K) : ∃ i < n, ∀ x ∈ Kn p K n, σ x = (φ ^ i) x := by

@@ -1,7 +1,53 @@
-import Mathlib
-import GroundTheory.ArithmeticGeometry.SchemeCohomology.ProperCohomology.ProjBaseChange
-import GroundTheory.ArithmeticGeometry.SchemeCohomology.ProjectiveCohomology.TwistingSheafCore
-import GroundTheory.ArithmeticGeometry.SchemeCohomology.ProjectiveCohomology.ImmersionPullback
+module
+
+public import GroundTheory.ArithmeticGeometry.SchemeCohomology.ProperCohomology.ProjBaseChange
+public import GroundTheory.ArithmeticGeometry.SchemeCohomology.ProjectiveCohomology.TwistingSheafCore
+public import GroundTheory.ArithmeticGeometry.EtaleCompletion.QcohZariski
+public import GroundTheory.ArithmeticGeometry.SchemeCohomology.ProjectiveCohomology.ImmersionPullback
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import GroundTheory.ArithmeticGeometry.EtaleCompletion.ModulesPullback
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Arith.SchemeCoh
@@ -19,14 +65,14 @@ namespace ProjSpace
 
 variable {A B : Type u} [CommRing A] [CommRing B] [Algebra A B] {n : ℕ}
 
-variable (A) in
 
+variable (A) in
 abbrev cmap :
     C(ProjectiveSpectrum.top (grading B n), ProjectiveSpectrum.top (grading A n)) :=
   ProjectiveSpectrum.comap (gradedMap A B n) (irrelevant_le_map A B n)
 
-variable (A) in
 
+variable (A) in
 abbrev pt (y : ProjectiveSpectrum (grading B n)) : ProjectiveSpectrum (grading A n) :=
   ProjectiveSpectrum.comapFun (gradedMap A B n) (irrelevant_le_map A B n) y
 
@@ -73,7 +119,7 @@ lemma val_app_apply {V : (projectiveSpace A n).Opens} (t : Γ(projectiveSpace A 
 lemma twistPushSec_smul {V : (projectiveSpace A n).Opens} (t : Γ(projectiveSpace A n, V))
     (s : Γ(twistingSheaf (grading A n) k, V)) :
     twistPushSec (B := B) k (t • s) = (baseChangeMap A B n).app V t • twistPushSec (B := B) k s := by
-  apply ProjTwist.ext
+  apply Subtype.ext
   funext y
   show locMap y.1 ((t.1 ⟨pt A y.1, y.2⟩).val * ProjTwist.val s ⟨pt A y.1, y.2⟩) =
     (((baseChangeMap A B n).app V t).1 y).val * locMap y.1 (ProjTwist.val s ⟨pt A y.1, y.2⟩)
@@ -82,7 +128,7 @@ lemma twistPushSec_smul {V : (projectiveSpace A n).Opens} (t : Γ(projectiveSpac
 lemma twistPushSec_add {V : (projectiveSpace A n).Opens}
     (s s' : Γ(twistingSheaf (grading A n) k, V)) :
     twistPushSec (B := B) k (s + s') = twistPushSec k s + twistPushSec k s' := by
-  apply ProjTwist.ext
+  apply Subtype.ext
   funext y
   show locMap y.1 (ProjTwist.val s ⟨pt A y.1, y.2⟩ + ProjTwist.val s' ⟨pt A y.1, y.2⟩) =
     locMap y.1 (ProjTwist.val s ⟨pt A y.1, y.2⟩) + locMap y.1 (ProjTwist.val s' ⟨pt A y.1, y.2⟩)
@@ -99,7 +145,7 @@ def twistToPushforward :
         map_smul' := fun t s => twistPushSec_smul k t s }
      naturality := fun {V V'} i => by
       ext s
-      exact ProjTwist.ext (funext fun y => rfl) }⟩
+      exact Subtype.ext (funext fun y => rfl) }⟩
 
 def pullbackTwistingSheafMap :
     (Scheme.Modules.pullback (baseChangeMap A B n)).obj (twistingSheaf (grading A n) k) ⟶
@@ -122,9 +168,10 @@ lemma pullbackTwistingSheafMap_unit {V : (projectiveSpace A n).Opens}
 lemma twistPushSec_upow {u : MvPolynomial (Fin (n + 1)) A} (hu : u ∈ grading A n 1) :
     twistPushSec (B := B) k (ProjTwist.upow (grading A n) hu k) =
       ProjTwist.upow (grading B n) ((gradedMap A B n).2 hu) k := by
-  apply ProjTwist.ext
+  apply Subtype.ext
   funext y
-  change locMap y.1 (ProjTwist.val (ProjTwist.upow (grading A n) hu k) ⟨pt A y.1, y.2⟩) = _
+  change locMap y.1 (ProjTwist.val (ProjTwist.upow (grading A n) hu k) ⟨pt A y.1, y.2⟩) =
+    ProjTwist.val (ProjTwist.upow (grading B n) ((gradedMap A B n).2 hu) k) ⟨y.1, y.2⟩
   erw [ProjTwist.val_upow, ProjTwist.val_upow]
   unfold ProjTwist.twistFrac
   refine (locMap_mk _ _ _).trans ?_
@@ -149,8 +196,8 @@ instance isIso_pullbackTwistingSheafMap :
   rw [key]
   exact ProjTwist.isBasisOn_upow _ _ k
 
-variable (A B n) in
 
+variable (A B n) in
 def pullbackTwistingSheafIso :
     (Scheme.Modules.pullback (baseChangeMap A B n)).obj (twistingSheaf (grading A n) k) ≅
       twistingSheaf (grading B n) k :=

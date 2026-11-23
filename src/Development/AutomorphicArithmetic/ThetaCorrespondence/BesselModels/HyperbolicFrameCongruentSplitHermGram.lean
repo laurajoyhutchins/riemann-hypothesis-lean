@@ -1,5 +1,47 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.BesselFrameTranslatedPerpOfIsFrame
+module
+
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.BesselFrameTranslatedPerpOfIsFrame
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Matrix GlobalTheory.RealBessel GlobalTheory.BesselMapOne Formalism.L2.Theta GlobalTheory.SmVec
 
@@ -33,7 +75,7 @@ theorem frameMat_w (i) : frameMat e f Fa y i (Formalism.QuantumDeterminants.wI m
 theorem frameMat_of_gt (i j : Fin (2 * r + m + 1)) (h : r + m < j.val) :
     frameMat e f Fa y i j = f i ⟨2 * r + m - j.val, by have := j.isLt; omega⟩ := by
   unfold frameMat
-  rw [dif_neg (by omega), dif_neg (by omega), dif_neg (by omega)]
+  rw [dite_eq_right (by omega), dite_eq_right (by omega), dite_eq_right (by omega)]
 
 theorem frameMat_es (i) (a : Fin r) : frameMat e f Fa y i (Formalism.QuantumDeterminants.esI m r a) = f i a := by
   have := a.isLt
@@ -252,6 +294,6 @@ theorem exists_frame_matrix {m r : ℕ} {J : Matrix (Fin (2 * r + m + 1)) (Fin (
 end UpperTheory.Lit.Bur.BesselFrame
 
 open Matrix GlobalTheory.RealBessel GlobalTheory.BesselMapOne Formalism.L2.Theta GlobalTheory.SmVec
-set_option maxHeartbeats 1000000 in
+
 theorem _root_.UpperTheory.Lit.Bur.hyperbolic_frame_congruent_splitHermGram : ∀ {m r : ℕ} {J : Matrix (Fin (2 * r + m + 1)) (Fin (2 * r + m + 1)) ℂ} (hH : Jᴴ = J) {Fa : Matrix (Fin (2 * r + m + 1)) (Fin m) ℂ} {e f : Matrix (Fin (2 * r + m + 1)) (Fin r) ℂ} {y : Fin (2 * r + m + 1) → ℂ} (h1 : Faᴴ * J * Fa = 1) (h2 : eᴴ * J * e = 0) (h3 : fᴴ * J * f = 0) (h4 : eᴴ * J * f = 1) (h5 : Faᴴ * J * e = 0) (h6 : Faᴴ * J * f = 0) (h7 : (Faᴴ * J) *ᵥ y = 0) (h8 : (eᴴ * J) *ᵥ y = 0) (h9 : (fᴴ * J) *ᵥ y = 0) (h10 : Formalism.QuantumDeterminants.herm J y y = -1), ∃ Q Qi : Matrix (Fin (2 * r + m + 1)) (Fin (2 * r + m + 1)) ℂ, Q * Qi = 1 ∧ Qi * Q = 1 ∧ Qᴴ * J * Q = Formalism.QuantumDeterminants.Hpk m r ∧ Q * colE m r = e ∧ Q * colW m r = Fa ∧ Q *ᵥ Formalism.QuantumDeterminants.bvec (Formalism.QuantumDeterminants.wI m r (Fin.last m)) = y := by
   first | exact @UpperTheory.Lit.Bur.BesselFrame.exists_frame_matrix | exact UpperTheory.Lit.Bur.BesselFrame.exists_frame_matrix | (intros; apply UpperTheory.Lit.Bur.BesselFrame.exists_frame_matrix <;> assumption)

@@ -1,12 +1,57 @@
-import Mathlib
-import ReciprocityTheory.ThetaQuasiPeriods.ThetaQuasiPeriodStatement
-import ReciprocityTheory.ThetaQuasiPeriods.Transl
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ThetaUnifAV
+module
+
+public import Mathlib.Tactic.ENatToNat
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsLieBasis
+public import ReciprocityTheory.ThetaQuasiPeriods.PeriodLattice
+public import Development.AbelianVarietyTheory.Proofs.ToricGeometry.TopLePreimageOfValAtNeZero
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.GeometricallyReducedOfPerfectField
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.IsOpenConnectedComponentOfNoetherianSpace
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
 import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ThetaCore
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.GlobalSectionsRankAlgClosed
-import Development.AbelianVarietyTheory.Proofs.ToricGeometry.TopLePreimageOfValAtNeZero
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.GeometricallyReducedOfPerfectField
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.IsOpenConnectedComponentOfNoetherianSpace
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -36,7 +81,7 @@ private theorem valAt'_resG {Y : Scheme.{0}} (x : Sp ℂ ⟶ Y) {U' V' : Y.Opens
     valAt' x V' (Y.presheaf.map (homOfLE hle).op g) = valAt' x U' g := by
   have hx' : ⊤ ≤ x ⁻¹ᵁ U' := hx.trans (fun p hp => hle hp)
   unfold valAt'
-  rw [dif_pos hx, dif_pos hx']
+  rw [dite_eq_left hx, dite_eq_left hx']
   unfold valAt
   have key : Y.presheaf.map (homOfLE hle).op ≫ x.appLE V' ⊤ hx = x.appLE U' ⊤ hx' := by
     exact Scheme.Hom.map_appLE x _ _
@@ -46,7 +91,7 @@ private theorem valAt'_resG {Y : Scheme.{0}} (x : Sp ℂ ⟶ Y) {U' V' : Y.Opens
 private theorem valAt'_ne_zero_of_isUnit {Y : Scheme.{0}} (x : Sp ℂ ⟶ Y) {W : Y.Opens} (hx : ⊤ ≤ x ⁻¹ᵁ W)
     {g : Γ(Y, W)} (hg : IsUnit g) : valAt' x W g ≠ 0 := by
   unfold valAt'
-  rw [dif_pos hx]
+  rw [dite_eq_left hx]
   unfold valAt
   exact ((hg.map (x.appLE W ⊤ hx).hom).map (Scheme.ΓSpecIso (CommRingCat.of ℂ)).hom.hom).ne_zero
 
@@ -114,7 +159,7 @@ theorem IsHolFamily.der_mul (h : IsHolFamily ex) {U : X.Opens} {z : E} (hz : ⊤
 private theorem valAt'_constFn_of_section {Y : Scheme.{0}} (x : Sp ℂ ⟶ Y) (p : Y ⟶ Sp ℂ) (U : Y.Opens) (a : ℂ)
     (hx : ⊤ ≤ x ⁻¹ᵁ U) (hp : x ≫ p = 𝟙 _) : valAt' x U (constFn p U a) = a := by
   unfold valAt'
-  rw [dif_pos hx]
+  rw [dite_eq_left hx]
   unfold valAt constFn
   have key : p.appLE ⊤ U (fun _ _ => trivial) ≫ x.appLE U ⊤ hx = (x ≫ p).appLE ⊤ ⊤ (by simp) := by
     exact Scheme.Hom.appLE_comp_appLE x p _ _ _ _ _

@@ -1,8 +1,57 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.Proofs.ThetaFamilyOrigin.IsVVGenOfIsThetaFamily
+import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.ExistsUniqueWeilIs
+import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.ThetaGrpActsLinearly
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsNeZeroHalfStandardAltFormConstOfExponentOn
+import Development.AbelianVarietyTheory.Proofs.ThetaFamilyOrigin.IsThetaPtOverOfSubsingleton
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.LBLocalC
 import Development.AbelianVarietyTheory.Definitions.Degenerations.PullChartIsLB
-import Development.AbelianVarietyTheory.Proofs.ThetaFamilyOrigin.IsVVGenOfIsThetaFamily
-import Development.AbelianVarietyTheory.Proofs.ToricGeometry.ExistsIndepSections
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsNeZeroHalfStandardAltFormConstOfExponentOn
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -60,7 +109,7 @@ theorem eq_of_proportional {R : Type} [CommRing R] [IsDomain R] {g n j N' : ℕ}
       rw [hx, hy, map_nsmul, map_nsmul, LinearMap.smul_apply, ← mul_smul, ← sq, nsmul_eq_mul, ZMod.natCast_self,
         zero_mul]
     change ω _ _ = ω _ _ at h
-    simp only [map_add, LinearMap.add_apply] at h
+    simp only [map_add (f := _), LinearMap.add_apply] at h
     rw [sw (S b)]
     linear_combination h - h₀
   let q : (Fin (2 * g) → ZMod (N' ^ 2)) → ZMod (N' ^ 2) := fun a => (((N' ^ 2 + 1) / 2 : ℕ) : ZMod (N' ^ 2)) * ω a (S a)
@@ -122,8 +171,8 @@ end GlobalTheory.TwoLevels
 
 namespace GlobalTheory
 
-open TwoLevels ThetaCoord in
 
+open TwoLevels ThetaCoord in
 theorem levelBasis_eq_of_isThetaPt : Out.Laws → ∀ (g n j N' : ℕ), Odd n → N' = n ^ j → ∀ (K : Type) [Field K] [IsAlgClosed K] (P : Out.PolAV (Sp K)) (hg : P.g = g) (ze : Γ(Sp K, ⊤)ˣ) (lev lev' : Out.Level P (N' ^ 2) ze) (v : (Fin (2 * g) → ZMod (N' ^ 2)) → Γ((Out.baseOver (Sp K)).left, ⊤)), Out.IsThetaPt P N' (levelPoint lev hg) v → Out.IsThetaPt P N' (levelPoint lev' hg) v → (∀ i, levelBasis lev hg i ^ N' = levelBasis lev' hg i ^ N') → (∀ c : Fin (2 * g) → ZMod (N' ^ 2), ∃ d : Fin (2 * g) → ZMod (N' ^ 2), v (c + n • d) ≠ 0) → ∀ i, levelBasis lev hg i = levelBasis lev' hg i := by
   intro hLaw g n j N' hn hN K _ _ P hg ze lev lev' v hv hv' hm hs
   have hG := hLaw.globalFns
@@ -138,7 +187,7 @@ theorem levelBasis_eq_of_isThetaPt : Out.Laws → ∀ (g n j N' : ℕ), Odd n �
   have e : ∀ a, levelPoint lev' hg a = levelPoint lev hg (σ a) := fun a => by
     rw [levelPoint_eq_lab, levelPoint_eq_lab]
     refine char_ext (lab (levelBasis lev' hg)) (fun a => lab (levelBasis lev hg) (σ a)) (lab_add hp')
-      (fun a b => by rw [map_add, lab_add hp]) (fun i => ?_) a
+      (fun a b => by rw [map_add (f := _), lab_add hp]) (fun i => ?_) a
     rw [lab_single hp', ← hs' i, pow_one, levelPoint_eq_lab, Fintype.linearCombination_apply_single, one_smul]
   have hw : ∀ (l : Out.Level P (N' ^ 2) ze) a b, Out.WeilIs P.A P.L (N' ^ 2 : ℕ) (levelPoint l hg a) (levelPoint l hg b)
       (ze ^ (labelSymp a b).val) := fun l a b => by

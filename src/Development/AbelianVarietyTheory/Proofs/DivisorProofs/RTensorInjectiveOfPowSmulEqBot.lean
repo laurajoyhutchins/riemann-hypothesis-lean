@@ -1,4 +1,54 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.Module.Torsion.Basic
+public import Mathlib.RingTheory.Flat.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.LinearAlgebra.TensorProduct.Quotient
+public import Mathlib.RingTheory.Flat.Tensor
+public import Mathlib.RingTheory.LocalRing.Module
+
+@[expose] public section
 
 open TensorProduct LinearMap Function
 
@@ -22,12 +72,10 @@ theorem rTensor_injective_of_flat_baseChange {A C M N' N : Type} [CommRing A] [C
   have key : ∀ z, (ι.restrictScalars A).rTensor M (e' z) = e (ι.rTensor (C ⊗[A] M) z) := by
     intro z
     induction z with
-    | zero => simp
-    | add a b ha hb => simp only [map_add, ha, hb]
+    | add a b ha hb => simp only [map_add (f := _), ha, hb]
     | tmul n t =>
       induction t with
-      | zero => simp
-      | add a b ha hb => simp only [tmul_add, map_add, ha, hb]
+      | add a b ha hb => simp only [tmul_add, map_add (f := _), ha, hb]
       | tmul c b => simp [e, e']
   intro x y h
   obtain ⟨x, rfl⟩ := e'.surjective x
@@ -47,12 +95,10 @@ theorem lTensor_injective_of_flat {A C F N' N : Type} [CommRing A] [CommRing C] 
   have key : ∀ z, ι.lTensor F (e' z) = e ((ι.baseChange C).lTensor F z) := by
     intro z
     induction z with
-    | zero => simp
-    | add a b ha hb => simp only [map_add, ha, hb]
+    | add a b ha hb => simp only [map_add (f := _), ha, hb]
     | tmul n t =>
       induction t with
-      | zero => simp
-      | add a b ha hb => simp only [tmul_add, map_add, ha, hb]
+      | add a b ha hb => simp only [tmul_add, map_add (f := _), ha, hb]
       | tmul c b => simp [e, e']
   intro x y h
   obtain ⟨x, rfl⟩ := e'.surjective x
@@ -69,7 +115,7 @@ theorem rTensor_injective_of_extension {K L : Type} [AddCommGroup K] [Module B K
     (hg : Exact g₁ g₂) (hg₁ : Injective g₁) (hg₂ : Surjective g₂)
     (h₁ : Injective (i.rTensor N₁)) (h₃ : Injective (i.rTensor N₃)) :
     Injective (i.rTensor N₂) := by
-  rw [injective_iff_map_eq_zero]
+  set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
   intro x hx
   have h2 : g₂.lTensor K x = 0 := by
     apply (injective_iff_map_eq_zero _).mp h₃
@@ -121,7 +167,6 @@ theorem rTensor_injective_of_pow_smul_eq_bot (I : Ideal B) {K L : Type} [AddComm
       simpa using hx
     have hz : ∀ z : K ⊗[B] N, z = 0 := fun z => by
       induction z with
-      | zero => rfl
       | tmul k x => rw [h0 x, tmul_zero]
       | add a b ha hb => rw [ha, hb, add_zero]
     intro a b _

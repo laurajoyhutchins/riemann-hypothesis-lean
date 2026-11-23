@@ -1,8 +1,41 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.LevelOfOfSameBut
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.ExistsUniqueHcharOfFiniteOrder
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.ExistsNormLeHeightPow
-import Development.AbelianVarietyTheory.PublishedTheorems.PublishedFoundations.NonemptyAlgHomOfIsRayOfDvd
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.LevelOfOfSameBut
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -15,8 +48,8 @@ open GlobalTheory.BigTop GlobalTheory.BigOn GlobalTheory.BigOn.Exp
 open GlobalTheory.IndefiniteRowSideFullHecke.ToricLatticeDenominators (FmExt eExt incl)
 open scoped TensorProduct
 
-set_option synthInstance.maxHeartbeats 400000
-set_option maxHeartbeats 800000
+
+
 
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
 
@@ -51,7 +84,7 @@ theorem li_one_tmul_of_li {O K' M : Type} [CommRing O] [IsDomain O] [Field K'] [
   rw [this]
   convert (Pi.basisFun K' (Fin n)).linearIndependent using 1
   funext a
-  simp
+  exact (Pi.basisFun_apply K' (Fin n) a).symm
 
 theorem embW_tmul_eq {D : D7} (S : NX.RatDat D.ntw) (c : NChoice D) (hc : NChTie D c) (w : D.what₂.places.Pl) {M : Type}
     [AddCommGroup M] [Module (FractionRing (D.ntw.O (c.twI w))) M] [Module (D.ntw.O (c.twI w)) M]
@@ -133,6 +166,7 @@ theorem canEx_at (p : PtAt ex Csz) (w : D.what₂.places.Pl) (j : Fin D.R.m) :
   have hv : ∀ g, v g = g.1 := fun _ => rfl
   have hsum : ∀ a : Fin n → p.Sx.Ks, (p.nexp.fi j).e (∑ k, a k • f k).1 = ∑ k, (p.nexp.fi j).eK (a k) • b k := by
     intro a
+
     rw [← hv, map_sum, map_sum]
     refine Finset.sum_congr rfl fun k _ => ?_
     rw [map_smul, hv, hEs, hf]
@@ -162,7 +196,7 @@ theorem canEx_at (p : PtAt ex Csz) (w : D.what₂.places.Pl) (j : Fin D.R.m) :
   have hβ : ∀ k, β k = b k := fun k => Module.Basis.mk_apply _ _ _
   let rd : Can p w j :=
     { toFun := fun x => ∑ k, ex.nch.embW w (β.equivFun x k) • t k
-      map_add' := fun x y => by simp only [map_add, Pi.add_apply, add_smul, Finset.sum_add_distrib]
+      map_add' := fun x y => by simp only [map_add (f := _), Pi.add_apply, add_smul, Finset.sum_add_distrib]
       map_smul' := fun c x => by
         simp only [map_smul, Pi.smul_apply, smul_eq_mul, map_mul, mul_smul, Finset.smul_sum] }
   have hrd : ∀ x, rd x = ∑ k, ex.nch.embW w (β.equivFun x k) • t k := fun _ => rfl
@@ -221,8 +255,5 @@ end Point
 end GlobalTheory.BigOn.Exp
 
 namespace GlobalTheory.BigOn.Exp
-
-theorem canEx_holds : CanEx :=
-  ⟨1, one_pos, fun _ _ _ => ⟨⟨0, fun _ => 0, fun _ => 0, fun _ => 0⟩, fun _ _ _ _ => ⟨0, fun _ _ _ _ p _ _ w _ j => canEx_at p w j⟩⟩⟩
 
 end GlobalTheory.BigOn.Exp

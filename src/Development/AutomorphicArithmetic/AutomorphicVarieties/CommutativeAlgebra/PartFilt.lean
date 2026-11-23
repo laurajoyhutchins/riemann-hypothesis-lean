@@ -1,7 +1,52 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.ResMapBijective
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.Gordan
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.PartSpan
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.PartialFiltrationCoeff
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.ResMapBijective
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.Gordan
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.PartSpan
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.PartialFiltrationCoeff
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open IsLocalRing MvPowerSeries UpperTheory.V.Alg
 
@@ -21,7 +66,7 @@ private theorem UpperTheory.V.Alg.part_filt_split {σ X : Type} [Finite σ] [Add
   obtain ⟨m, hm, hmn⟩ := hμ' n hn
   obtain ⟨r, rfl⟩ := exists_add_of_le hmn
   have hr : Finsupp.weight wt r = 0 := by
-    rw [map_add, hμ m hm] at hn
+    rw [map_add (f := _), hμ m hm] at hn
     simpa using hn
   have hr0 : r ≠ 0 := by
     rintro rfl
@@ -72,8 +117,8 @@ theorem UpperTheory.V.Alg.part_filt :
       obtain ⟨N, hN⟩ := ih
       refine ⟨N + D + 1, fun n hn hd => ?_⟩
       obtain ⟨g, n', hg0, hgw, hgd, rfl⟩ := hD n hn (by omega)
-      rw [map_add] at hd
-      rw [map_add, hgw, zero_add] at hn
+      rw [map_add (f := _)] at hd
+      rw [map_add (f := _), hgw, zero_add] at hn
       have h1 := hN n' hn (by omega)
       have h2 : W.π (monomial g 1) ∈ Q := by
         refine ⟨⟨_, UpperTheory.V.Alg.part_filt_monomial W.wt hgw 1, rfl⟩, ?_⟩
@@ -103,7 +148,7 @@ theorem UpperTheory.V.Alg.part_filt :
         · rw [Algebra.algebraMap_eq_smul_one]
           exact Submodule.smul_mem _ _ hone
         · exact fun hu => hb (IsLocalHom.map_nonunit (f := algebraMap O R) b hu)
-      · rw [map_add]
+      · rw [map_add (f := _)]
         exact add_mem ha hb
   obtain ⟨N, hN⟩ := hmono k
   refine ⟨N + k, ?_⟩
@@ -142,6 +187,7 @@ theorem UpperTheory.V.Alg.part_filt :
   set low : MvPowerSeries W.σ O := ∑ n ∈ hfin.toFinset, monomial n (coeff n h) with hlow
   have hlowc : ∀ m, coeff m low = if m.degree < N then coeff m h else 0 := by
     intro m
+
     rw [hlow, map_sum]
     simp only [coeff_monomial]
     rw [Finset.sum_ite_eq]
@@ -155,10 +201,11 @@ theorem UpperTheory.V.Alg.part_filt :
     · exact sub_self _
     · rw [sub_zero]
       exact hhj n fun hw => hn ⟨hw, not_lt.1 hd⟩)
-  have hsum : x = W.π low + W.π (h - low) := by rw [← map_add, add_sub_cancel, hhx]
+  have hsum : x = W.π low + W.π (h - low) := by rw [← map_add (f := _), add_sub_cancel, hhx]
   rw [hsum]
   refine add_mem ?_ ?_
-  · rw [hlow, map_sum]
+  · set_option synthInstance.maxHeartbeats 100000 in
+      rw [hlow, map_sum]
     refine Submodule.sum_mem _ fun n hn => ?_
     by_cases hw : Finsupp.weight W.wt n = j
     · have h1 : W.π (monomial n (coeff n h)) = algebraMap O R (coeff n h) * 1 * W.π (monomial n 1) := by
@@ -169,7 +216,8 @@ theorem UpperTheory.V.Alg.part_filt :
         ⟨_, UpperTheory.V.Alg.part_filt_monomial W.wt hw 1, rfl⟩
     · rw [hhj n hw, map_zero, map_zero]
       exact zero_mem _
-  · rw [hhigh, map_sum]
+  · set_option synthInstance.maxHeartbeats 100000 in
+      rw [hhigh, map_sum]
     refine Submodule.sum_mem _ fun m hm => ?_
     rw [map_mul, mul_comm (Q ^ k), mul_assoc]
     exact Submodule.mul_mem_mul ⟨_, hb m, rfl⟩ (hN m (hμ hm).1 (hμ hm).2)

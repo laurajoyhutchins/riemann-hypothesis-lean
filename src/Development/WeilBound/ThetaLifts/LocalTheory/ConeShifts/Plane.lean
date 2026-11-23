@@ -1,4 +1,48 @@
-import Development.WeilBound.ThetaLifts.LocalTheory.ConeShifts.PureCancel
+module
+
+public import Development.WeilBound.ThetaLifts.LocalTheory.ConeShifts.ArchCone
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.Divisors.MatchingOfParts
+import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.FinTensMemLatO
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ContinuousAtPlace
+
+@[expose] public section
 
 noncomputable section
 
@@ -11,12 +55,12 @@ open GlobalTheory.Doubling (absE)
 
 variable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] {σ : E →ₐ[F] E} {n d n₁ d₁ : ℕ}
 
-variable (F) in
 
+variable (F) in
 def rk (p : Fin n → E) (q : Fin d → E) : Matrix (Fin n) (Fin d) (AE F E) := Matrix.vecMulVec (GlobalTheory.ThK.incV F p) (GlobalTheory.ThK.incV F q)
 
-variable (σ) in
 
+variable (σ) in
 abbrev hh (X : Spc F E n) (W : Spc F E d) (x y : Matrix (Fin n) (Fin d) (AE F E)) : AE F E :=
   hTens (cA σ) (incM F X.J) (incM F W.J) x y
 
@@ -40,6 +84,7 @@ theorem hh_rk (p p' : Fin n → E) (q q' : Fin d → E) :
   have f2 : form σ W.J q q' = ∑ i, ∑ k, q i * (W.J i k * σ (q' k)) := by
     simp only [form, dotProduct, Matrix.mulVec, Finset.mul_sum]
   rw [f1, f2, Finset.sum_mul_sum]
+
   simp only [Finset.sum_mul_sum, map_sum, hh, hTens, rk, Matrix.vecMulVec_apply, GlobalTheory.ThK.incV, incM, Matrix.map_apply, map_mul, hc]
   refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun k _ => Finset.sum_congr rfl fun j _ =>
     Finset.sum_congr rfl fun l _ => ?_

@@ -1,29 +1,73 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.UniformisationConclusion
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.HeckeKer
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsHolPeriods
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.UnifUniqSt
-import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.TateBasisMatrix
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.NormCardQuotientSpan
+module
+
+public import Mathlib.Algebra.Polynomial.AlgebraMap
+public import Mathlib.LinearAlgebra.Matrix.Determinant.Basic
+public import Mathlib.NumberTheory.Padics.RingHoms
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.NormCardQuotientSpan
+public import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.TateBasisMatrix
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.Module.ZMod
+import Mathlib.CategoryTheory.Monoidal.Cartesian.Basic
+import Mathlib.CategoryTheory.Monoidal.Category
+import Mathlib.CategoryTheory.Monoidal.Mon
+public import Mathlib.FieldTheory.Finiteness
+import Mathlib.Topology.Sheaves.Presheaf
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsCompletedStrictHens
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.CubicalStructures.CubeSymmetricSwapFirst
+
+@[expose] public section
 
 namespace GlobalTheory
 namespace TorsionMatrix
 
 section
 open Matrix
-
-theorem norm_card_quot_span (l : ℕ) [Fact l.Prime] {a : ℤ_[l]} (ha : a ≠ 0) :
-    ‖((Nat.card (ℤ_[l] ⧸ Ideal.span {a}) : ℕ) : ℚ_[l])‖ = ‖a‖ := by
-  have h1 : Ideal.span {a} = RingHom.ker (PadicInt.toZModPow (p := l) a.valuation) := by
-    rw [PadicInt.ker_toZModPow]
-    conv_lhs => rw [PadicInt.unitCoeff_spec ha]
-    exact Ideal.span_singleton_mul_left_unit (PadicInt.unitCoeff ha).isUnit _
-  have h2 : Nat.card (ℤ_[l] ⧸ Ideal.span {a}) = l ^ a.valuation := by
-    rw [h1, Nat.card_congr (RingHom.quotientKerEquivOfSurjective
-      (ZMod.ringHom_surjective (PadicInt.toZModPow (p := l) a.valuation))).toEquiv, Nat.card_zmod]
-  rw [h2, PadicInt.norm_eq_zpow_neg_valuation ha]
-  push_cast
-  rw [Padic.norm_p_pow]
 
 theorem norm_index_range (l : ℕ) [Fact l.Prime] {κ : Type} [Fintype κ] [DecidableEq κ]
     (M : Matrix κ κ ℤ_[l]) (hM : M.det ≠ 0) :
@@ -131,7 +175,7 @@ theorem exists_tower (l : ℕ) [hl : Fact l.Prime] (m : ℕ) (Q : Type) [AddComm
   have hs : ∀ t : Fin m → ZMod l,
       ((∑ j, (t j).val • b j : T l) : Q) = ∑ j, (t j).val • τ j 0 := by
     intro t
-    rw [AddSubgroup.val_finset_sum]
+    rw [AddSubgroup.val_finsetSum]
     rfl
   refine ⟨τ, h1, fun i n => hg2 _ _ (h1 i n), fun x hx => ?_⟩
   simpa only [Subtype.ext_iff, hs] using hb ⟨x, hx⟩
@@ -217,6 +261,7 @@ theorem map_ev (g : Q →+ Q) {pt pt' : κ → Q} (h : ∀ i, N • pt i = 0) (h
   have : M *ᵥ t = ∑ j, fun i => M i j * t j := by
     funext i
     simp [mulVec, dotProduct, Finset.sum_apply]
+
   rw [this, map_sum, ev_apply, map_sum]
   refine Finset.sum_congr rfl fun j _ => ?_
   rw [map_nsmul, hM, ev_apply, Finset.smul_sum]
@@ -341,6 +386,7 @@ theorem exists_padic_matrix : ∀ (l : ℕ) [Fact l.Prime] (m : ℕ) (Q : Type) 
     have : Finite (Polynomial.aeval s F).toAddMonoidHom.ker := hfin
     exact norm_det_eq l τ h1 hb (Polynomial.aeval s F).toAddMonoidHom _ (hρ _)
   · obtain ⟨t, ht, -⟩ := hb j x (by rw [pow_succ', mul_smul, hx, smul_zero])
+
     rw [← ht, map_sum]
     refine Finset.sum_eq_zero fun i _ => ?_
     rw [map_nsmul, hρ, ← hF, h0]

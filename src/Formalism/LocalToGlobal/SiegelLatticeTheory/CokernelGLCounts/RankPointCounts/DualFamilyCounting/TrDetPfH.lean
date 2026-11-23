@@ -1,5 +1,50 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.CovolBRb
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.CovolBRb
+import Formalism.LocalRingCardinality.SpanPowerMembership.ExampleLayerExistsGenerators
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -43,12 +88,25 @@ theorem eq_zero_of_trB {x : (VS D).V} (hx : x ∈ X.Lb)
   have h2 : ∀ y ∈ (VS D).L0, (VS D).hT x y = 0 := by
     intro y hy
     obtain ⟨α, β, l, hl, rfl⟩ := decomp X hy
-    simp [map_add, map_sum, map_smul, he, hf, h1 l hl]
+
+    simp [map_add (f := _), map_sum, map_smul, he, hf, h1 l hl]
   have hle : Submodule.span D.host.E ((VS D).L0 : Set (VS D).V) ≤ LinearMap.ker ((VS D).hT x) :=
     Submodule.span_le.2 fun y hy => LinearMap.mem_ker.2 (h2 y hy)
   refine (VS D).nondeg.1 x fun v => ?_
   have hv : v ∈ Submodule.span D.host.E ((VS D).L0 : Set (VS D).V) := by
-    rw [(VS D).standardTuple_isLattice.span_eq_top]; trivial
+    let a : Fin X.B.I.n → X.B.I.E := fun i => X.ιE.symm (X.bas.repr v i)
+    have ha : a ∈ Submodule.span X.B.I.E (X.B.I.L : Set (Fin X.B.I.n → X.B.I.E)) := by
+      rw [X.B.I.L_span]; trivial
+    have hm : ∀ z ∈ Submodule.span X.B.I.E (X.B.I.L : Set (Fin X.B.I.n → X.B.I.E)),
+        (∑ i, X.ιE (z i) • X.bas i) ∈ Submodule.span D.host.E ((VS D).L0 : Set (VS D).V) := by
+      intro z hz
+      induction hz using Submodule.span_induction with
+      | mem z hz => exact Submodule.subset_span ((X.L_eq z).1 hz)
+      | zero => simp
+      | add z w hz hw ihz ihw => simpa [map_add, add_smul, Finset.sum_add_distrib] using Submodule.add_mem _ ihz ihw
+      | smul c z hz ih => simpa [map_mul, mul_smul, Finset.smul_sum] using Submodule.smul_mem _ (X.ιE c) ih
+    have := hm a ha
+    simpa only [a, RingEquiv.apply_symm_apply, X.bas.sum_repr] using this
   exact LinearMap.mem_ker.1 (hle hv)
 
 theorem trB_expand {N : ℕ} (ℓ : Module.Basis (Fin N) ℤ (X.Lb.restrictScalars ℤ)) (x y : (VS D).V) (hy : y ∈ X.Lb) :
@@ -63,8 +121,8 @@ theorem trB_expand {N : ℕ} (ℓ : Module.Basis (Fin N) ℤ (X.Lb.restrictScala
 
 end DetH
 
-open DetH in
 
+open DetH in
 theorem detHOne_holds : DetHOne := by
   intro D X N ℓ ℓs
   have hGi : ∀ m i, ∃ z : ℤ,

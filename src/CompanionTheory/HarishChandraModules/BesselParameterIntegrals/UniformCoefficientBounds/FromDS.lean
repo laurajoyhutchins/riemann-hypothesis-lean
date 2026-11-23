@@ -1,7 +1,50 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.InfinitesimalDecay.DecBoundOfCompact
-import CompanionTheory.HarishChandraModules.KFiniteAnalyticVectors.AdmissibleSmoothVectors.AdmissibleOfIwasawa
-import CompanionTheory.HarishChandraModules.BesselParameterIntegrals.UniformCoefficientBounds.CoefGen
+module
+
+public import Formalism.HermitianCurvature.BesselNonvanishingReduction
+public import Formalism.SharpRestriction.CuspSpanNormBounds.RelevantZeroGramTerms
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TensorRepresentations.Transported
+public import CompanionTheory.HarishChandraModules.KFiniteAnalyticVectors.AdmissibleSmoothVectors.AdmissibleOfIwasawa
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.BetaSesquilinearity
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.InfinitesimalDecay.DecBoundOfCompact
+
+@[expose] public section
 
 open Matrix MeasureTheory Set
 open scoped InnerProductSpace
@@ -10,7 +53,8 @@ noncomputable section
 
 namespace CompanionTheory.D.Upq.Coef
 
-open Formalism.FourierDecayAlt Formalism.FourierDecayAlt.ThreeDimData Formalism.FourierDecayAlt.P.CutBP.Jmu Formalism.FourierDecayAlt.P.CutBP.Jmu.NDG ReciprocityTheory.ChartRestriction.DS
+open Formalism.FourierDecayAlt Formalism.FourierDecayAlt.ThreeDimData
+open ReciprocityTheory.ChartRestriction.DS
 
 theorem thrStar_le {n : ℕ} (hn : 1 ≤ n) (ε : Fin n → Bool) : thrStar ε ≤ 32 * (n : ℝ) ^ 3 := by
   have hp : pOf ε ≤ n := (Finset.card_le_univ _).trans_eq (Fintype.card_fin n)
@@ -73,19 +117,6 @@ theorem decay_infinite_range : DecInf := by
   rw [← neg_sub, Real.rpow_neg (by linarith), ← div_eq_mul_inv,
     le_div_iff₀ (Real.rpow_pos_of_pos (by linarith) _), mul_comm]
   exact h3
-
-theorem capelli_coefficient_continuity : CoefCC := by
-  intro hK k r Wp Wq _ _ _ _ _ _ Bs ε lam h u u' νq νq' A hG
-  have hn : (1 : ℝ) ≤ ((2 * r + k + 1 : ℕ) : ℝ) ^ 3 := one_le_pow₀ (by exact_mod_cast by omega)
-  have hh := hG.1.2.2.2.1.2.1
-  have ht := thrStar_le (n := 2 * r + k + 1) (by omega) ε
-  have hm : thrStar ε + (64 * (2 * r + k + 1) ^ 3 : ℕ) < h := by
-    rw [Nat.cast_mul, Nat.cast_pow, Nat.cast_ofNat]
-    linarith
-  obtain ⟨C, Ws, -, hC⟩ := DecInf.decSm hG.1.1 hG.1.2.2.1 _ hm (σ := A.σ) hG.1.2.1
-  rw [coef_eq_cf]
-  exact inCC_cf_of_dec hK hG.1.1 hG.1.2.1 (lowest_unit_vector_is_K_finite hG) _ (fun a ha b hb => ⟨_, fun g hg =>
-    (congrArg (· * _) (Real.rpow_natCast _ _)).trans_le (hC b hb a ha g hg)⟩) 5
 
 end CompanionTheory.D.Upq.Coef
 

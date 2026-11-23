@@ -1,10 +1,55 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.HodgeTateResidues.FirstChernHodgeTateCompatAlt
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.HodgeTateResidues.OneTmul
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.HodgeTateResidues.TfBaseField
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.HodgeTateResidues.ResMIncl
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.SplittingFieldLattices.BcOnFalse
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.BocksteinBaseChange.AdicTorsionCup.PrimOfOver
+module
+
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.HodgeTateResidues.FirstChernHodgeTateCompatAlt
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.HodgeTateResidues.ResMIncl
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.BocksteinBaseChange.AdicTorsionCup.PrimOfOver
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.HodgeTateResidues.OneTmul
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.HodgeTateResidues.TfBaseField
+import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.ChartGrConst
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.SplittingFieldLattices.BcOnFalse
+import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.SplittingFieldLattices.SplitField
+import GroundTheory.PAdicHodge.NormalizedTraceTower
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+
+@[expose] public section
 
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
@@ -107,10 +152,10 @@ theorem main [CharZero K] (U : Cov q) {t : B} (ht : t ∈ I) (m : ℕ) (hker : R
     exact sub_eq_zero.1 h0
   choose β hβ using h1
   let lam : ∀ i, S.N i →+ E := fun i => AddMonoidHom.mk' (fun n => θ (β i n)) fun n n' => by
-    rw [← map_add]
+    rw [← map_add (f := _)]
     refine hu i _ _ _ (hβ i _) ?_
     have := add_mem (hβ i n) (hβ i n')
-    simp only [R, map_add]
+    simp only [R, map_add (f := _)]
     convert this using 1; ring
   have h3 : ∀ i n b, R i n b → lam i n = θ b := fun i n b hb => hu i n _ _ (hβ i n) hb
   have hl : ∀ i (k : K) n, lam i (k • n) = θ (algebraMap K B k) * lam i n := fun i k n => by
@@ -130,7 +175,7 @@ theorem main [CharZero K] (U : Cov q) {t : B} (ht : t ∈ I) (m : ℕ) (hker : R
       (zero_mem _) (fun _ _ => add_mem) (fun a h b y => Submodule.smul_mem _ _ (Submodule.subset_span ⟨a, h, y, rfl⟩)) w
   · intro b w a φ
     refine ind (fun w => co (b • w) a φ = θ b * co w a φ) (by simp) (fun x y hx hy => ?_) (fun a' h b' y => ?_) w
-    · simp only [smul_add, map_add, Pi.add_apply, AddMonoidHom.add_apply, hx, hy, mul_add]
+    · simp only [smul_add, map_add (f := _), Pi.add_apply, AddMonoidHom.add_apply, hx, hy, mul_add]
     · beta_reduce
       rw [smul_smul]
       by_cases h0 : a = a'
@@ -138,7 +183,7 @@ theorem main [CharZero K] (U : Cov q) {t : B} (ht : t ∈ I) (m : ℕ) (hker : R
       · rw [c2 a' h a h0, c2 a' h a h0]; simp
   · intro w a k φ
     refine ind (fun w => co w a (k • φ) = θ (algebraMap K B k) * co w a φ) (by simp) (fun x y hx hy => ?_) (fun a' h b' y => ?_) w
-    · simp only [map_add, Pi.add_apply, AddMonoidHom.add_apply, hx, hy, mul_add]
+    · simp only [map_add (f := _), Pi.add_apply, AddMonoidHom.add_apply, hx, hy, mul_add]
     · beta_reduce
       by_cases h0 : a = a'
       · subst h0; rw [c1 a h, c1 a h, LinearMap.smul_apply, smul_eq_mul, map_mul, map_mul]; ring

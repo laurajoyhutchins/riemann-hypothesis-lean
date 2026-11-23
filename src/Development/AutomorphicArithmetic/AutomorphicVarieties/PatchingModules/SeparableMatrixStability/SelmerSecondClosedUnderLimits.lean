@@ -1,4 +1,51 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PatchingModules.SeparableMatrixStability.MapEta
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PatchingModules.SeparableMatrixStability.MapEta
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.ProfDefs
+
+@[expose] public section
 
 open IsLocalRing Matrix Filter UpperTheory.V.Alg UpperTheory.V.W UpperTheory.V.AlgebraTools UpperTheory.V.Pa
 
@@ -207,7 +254,7 @@ private theorem map_al (Z : Matrix (Fin n) (Fin n) x.A) :
 
 private theorem map_ρ1 (g : F.G₀) : (x.redD k.g m).mapMatrix (k.ρ1 x.A g) = k.ρ1 (x.Am m) g := by
   unfold Kap.ρ1 NP.ρX
-  rw [map_mul, map_add, map_one, map_ep, map_al]
+  rw [map_mul, map_add (f := _), map_one, map_ep, map_al]
 
 private theorem map_weyl_lift_reduction (v : F.Vl) : (x.redD k.g m).mapMatrix (k.w1 x.A v) = k.w1 (x.Am m) v := by
   unfold Kap.w1 NP.wX
@@ -215,7 +262,7 @@ private theorem map_weyl_lift_reduction (v : F.Vl) : (x.redD k.g m).mapMatrix (k
 
 private theorem map_inverse_weyl_lift_reduction (v : F.Vl) : (x.redD k.g m).mapMatrix (k.wi1 x.A v) = k.wi1 (x.Am m) v := by
   unfold Kap.wi1 NP.wiX
-  rw [map_mul, map_add, map_one, map_ep, map_al]
+  rw [map_mul, map_add (f := _), map_one, map_ep, map_al]
 
 private theorem mat_sep {Y Z : Matrix (Fin n) (Fin n) (DD x.A k.g)}
     (e : ∀ m, (x.redD k.g m).mapMatrix Y = (x.redD k.g m).mapMatrix Z) : Y = Z := by
@@ -256,7 +303,7 @@ theorem UpperTheory.V.Pa.selmer_second_closed_under_limits :
     apply mat_sep k
     intro m
     obtain ⟨-, -, hc, -⟩ := hyp m
-    rw [map_add, map_mul, map_mul, map_ρ1, map_ρ1]
+    rw [map_add (f := _), map_mul, map_mul, map_ρ1, map_ρ1]
     exact hc g g'
   · intro g
     apply mat_sep k

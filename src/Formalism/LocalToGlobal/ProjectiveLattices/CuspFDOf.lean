@@ -1,6 +1,44 @@
-import Formalism.LocalToGlobal.ProjectiveLattices.MulCMemSec
+module
 
-set_option synthInstance.maxHeartbeats 400000
+public import Formalism.LocalToGlobal.ProjectiveLattices.PetersonNormSubspace
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
+
 
 noncomputable section
 
@@ -14,39 +52,5 @@ variable (Xo : Moduli Dw l) (c : Coeff l) {r : ℕ} (U : ∀ σ : c.F →+* ℂ,
 def RdIndep (σ : c.F →+* ℂ) : Prop :=
   ∀ (a : (E →+* ℂ) × ℕ → ℕ) (k : ℕ), Dom a k → ∀ (n : ℕ) (b : Fin n → Rul Xo c), (∀ i, b i ∈ sec Xo c a k) →
     LinearIndependent c.F b → LinearIndependent ℂ (fun i => rdU (U σ) (b i))
-
-def HolFD (σ : c.F →+* ℂ) : Prop :=
-  ∀ (a : (E →+* ℂ) × ℕ → ℕ) (n : ℕ), Dom a n → FiniteDimensional ℂ (holSub (U σ).X (laU (U σ) a n))
-
-theorem goodEmb_val : GoodEmb c c.F.val.toRingHom := rfl
-
-theorem cuspFD_of (σ : c.F →+* ℂ) (hσ : GoodEmb c σ) (hI : RdIndep Xo c U σ) (hF : HolFD Xo c U σ) :
-    CuspFD Xo c U := by
-  intro a n hd
-  haveI := hF a n hd
-  have key : ∀ s : Finset (cusp Xo c U a n),
-      LinearIndependent c.F (fun i : s => (i : cusp Xo c U a n)) →
-        s.card ≤ Module.finrank ℂ (holSub (U σ).X (laU (U σ) a n)) := by
-    intro s hs
-    let e := s.equivFin
-    have h0 : LinearIndependent c.F (fun j : Fin s.card => ((e.symm j : s) : cusp Xo c U a n)) :=
-      hs.comp (fun j => e.symm j) e.symm.injective
-    have hb : LinearIndependent c.F
-        (fun j : Fin s.card => (((e.symm j : s) : cusp Xo c U a n) : Rul Xo c)) :=
-      h0.map' (cusp Xo c U a n).subtype (Submodule.ker_subtype _)
-    have hc := hI a n hd s.card _ (fun j => cusp_le_sec Xo c U a n ((e.symm j : s) : cusp Xo c U a n).2) hb
-    have hmem : ∀ j : Fin s.card,
-        rdU (U σ) (((e.symm j : s) : cusp Xo c U a n) : Rul Xo c) ∈ holSub (U σ).X (laU (U σ) a n) :=
-      fun j => ((mem_cusp Xo c U a n _).1 ((e.symm j : s) : cusp Xo c U a n).2).2 σ hσ
-    let b' : Fin s.card → holSub (U σ).X (laU (U σ) a n) := fun j => ⟨_, hmem j⟩
-    have hc' : LinearIndependent ℂ b' := LinearIndependent.of_comp (holSub (U σ).X (laU (U σ) a n)).subtype hc
-    have := hc'.fintype_card_le_finrank
-    simpa using this
-  haveI : Module.Free c.F ↥(cusp Xo c U a n) := Module.Free.of_divisionRing _ _
-  exact Module.rank_lt_aleph0_iff.mp ((rank_le key).trans_lt (Cardinal.nat_lt_aleph0 _))
-
-theorem cuspFD_of_val (hI : RdIndep Xo c U c.F.val.toRingHom) (hF : HolFD Xo c U c.F.val.toRingHom) :
-    CuspFD Xo c U :=
-  cuspFD_of Xo c U _ (goodEmb_val c) hI hF
 
 end Formalism.L2.Pj

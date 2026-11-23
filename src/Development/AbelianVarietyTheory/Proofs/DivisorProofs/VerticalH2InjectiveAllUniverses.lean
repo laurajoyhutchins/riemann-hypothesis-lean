@@ -1,5 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.PullbackBijectiveDegreesOneTwo
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.PullbackBijectiveDegreesOneTwo
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -40,15 +84,15 @@ theorem cocycle_two_isCoboundary_of_objectwiseQuasiIso {C : Type b} [Category.{0
       f T T' φ = c'.1 T T' φ - (w T' - K.M0.map φ (w T)) := ⟨_, fun _ _ _ ↦ rfl⟩
   have hα1 : ∀ T T' (φ : T ⟶ T'), L.d1 T' (α T T' φ) = 0 := fun T T' φ ↦ by
     have hc := Zc T T' φ
-    simp only [hα, hΩ, map_sub, map_add, L.diffOne_natural, hω₁, hω₂, add_zero, map_zero]
+    simp only [hα, hΩ, map_sub, map_add (f := _), L.diffOne_natural, hω₁, hω₂, add_zero, map_zero]
     rw [hc]; abel
   have hα2 : ∀ T T' (φ : T ⟶ T'), a1 T' (α T T' φ) = K.d0 T' (-f T T' φ) := fun T T' φ ↦ by
-    simp only [hα, hΩ, hf, map_sub, map_add, map_neg, compDegreeOne_natural, hw', ← E1, K.diffZero_natural]
+    simp only [hα, hΩ, hf, map_sub, map_add (f := _), map_neg, compDegreeOne_natural, hw', ← E1, K.diffZero_natural]
     abel
   choose g hg using fun T T' (φ : T ⟶ T') ↦
     (hq T').inj1 (α T T' φ) (-f T T' φ) (hα1 T T' φ) (hα2 T T' φ)
   have h3 : ∀ T T' (φ : T ⟶ T'), K.d0 T' (f T T' φ + a0 T' (g T T' φ)) = 0 := fun T T' φ ↦ by
-    rw [map_add, ← comp_commutes_diffZero, hg, hα2, map_neg, add_neg_cancel]
+    rw [map_add (f := _), ← comp_commutes_diffZero, hg, hα2, map_neg, add_neg_cancel]
   choose f₂ hf₂ hf₂' using fun T T' (φ : T ⟶ T') ↦ (hq T').surj0 _ (h3 T T' φ)
   refine ⟨(fun T T' φ ↦ f₂ T T' φ - g T T' φ, Ω), Prod.ext (funext fun T ↦ funext fun T' ↦
     funext fun T'' ↦ funext fun φ ↦ funext fun ψ ↦ ?_) (Prod.ext (funext fun T ↦ funext fun T' ↦
@@ -60,17 +104,17 @@ theorem cocycle_two_isCoboundary_of_objectwiseQuasiIso {C : Type b} [Category.{0
       rw [Zb T T' T'' φ ψ]; abel
     have hd : L.d0 T'' (z.1 T T' T'' φ ψ - (L.M0.map ψ (f₂ T T' φ - g T T' φ) -
         (f₂ T T'' (φ ≫ ψ) - g T T'' (φ ≫ ψ)) + (f₂ T' T'' ψ - g T' T'' ψ))) = 0 := by
-      simp only [map_sub, map_add, L.diffZero_natural, hf₂, hg, hα, hZb, L.M1.map_comp, map_zero]
+      simp only [map_sub, map_add (f := _), L.diffZero_natural, hf₂, hg, hα, hZb, L.M1.map_comp, map_zero]
       abel
     have ha : a0 T'' (z.1 T T' T'' φ ψ - (L.M0.map ψ (f₂ T T' φ - g T T' φ) -
         (f₂ T T'' (φ ≫ ψ) - g T T'' (φ ≫ ψ)) + (f₂ T' T'' ψ - g T' T'' ψ))) = 0 := by
-      simp only [map_sub, map_add, compDegreeZero_natural, hf₂', ← E0, hf, K.M0.map_comp]
+      simp only [map_sub, map_add (f := _), compDegreeZero_natural, hf₂', ← E0, hf, K.M0.map_comp]
       abel
     exact (sub_eq_zero.mp ((hq T'').inj0 _ hd ha)).symm
   · change Ω T' - L.M1.map φ (Ω T) - L.d0 T' (f₂ T T' φ - g T T' φ) = z.2.1 T T' φ
     rw [map_sub, hf₂, hg, hα]; abel
   · change L.d1 T (Ω T) = z.2.2 T
-    rw [hΩ, map_add, hω₁, hω₂, add_zero]
+    rw [hΩ, map_add (f := _), hω₁, hω₂, add_zero]
 
 theorem vertical_h2_injective : VertHas.{a, b} (fun m ↦ Function.Injective m.h2) := by
   intro C _ C' _ K K' m hq

@@ -1,8 +1,65 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.ExistsExpandsAtOfIntegral
-import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.SecBGeneratesOfIsUnit
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsSecUnitClosedFibre
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ExistsDivOfExpandsAt
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.ThetaGen
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.GlobalSectionsRankAlgClosed
+public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.IsReducedAlgebraOfSmoothOfIsNoetherianRing
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ExistsDivOfExpandsAt
+public import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.DvdOfAppEqZero
+public import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.ExistsGeneratorOfBasis
+public import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.ExpandsAtDvdOfSecIsMul
+public import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.ExpansionIntegralSectionIntegralNoetherianLocal
+public import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.SecBGeneratesOfIsUnit
+import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.SecIsMulOfSval
+public import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.ExistsExpandsAtOfIntegral
+import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.ExistsSmulMemSpanOfExpandsAt
+import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.ExistsUniqueFamOfReps
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.MemNonzeroLocusOfPull
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ThetaCore
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.LBLocalC
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.SectionScalarValuation
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -65,7 +122,7 @@ theorem exists_nonzero_closed (hS : SecBaseChangeSt) {R : Type} [CommRing R] [Is
     · refine Over.OverMorphism.ext ((cancel_mono W.hom).1 ?_)
       rw [Over.w, Over.w]
     · rw [Category.assoc, lift_snd, Category.comp_id]; exact (whiskerRight_snd (homAt t) D.P.A).symm
-  obtain ⟨th, hth⟩ := exists_pull_val D.P.isLB (b hq.default) (lift u (𝟙 D.P.A)).left (φ' := D.famφB 0)
+  obtain ⟨th, hth⟩ := exists_pull_val D.P.isLB (K' := Fin 4) (b hq.default) (lift u (𝟙 D.P.A)).left (φ' := D.famφB 0)
     (ε' := DegPre.famε 1) (fun U _ h => by
       rw [prod_fam_zero]
       have e : (lift u (𝟙 D.P.A)).left ≫ (snd W D.P.A).left = 𝟙 _ := congrArg CommaMorphism.left (lift_snd u (𝟙 D.P.A))
@@ -96,7 +153,7 @@ variable {R : Type} [CommRing R] [IsDomain R] [IsLocalRing R] {I : Ideal R} {D :
 theorem nonzero_and_spans (hG : GlobalFnsSt) (hS : SecBaseChangeSt) [IsNoetherianRing R] (hI : I ≤ maximalIdeal R)
     (U : Unif I D A G) {ϑ : H0 U.LG.L 1} (hϑ : IsTheta U ϑ) :
     (∃ g, G.hom g = closedPoint R ∧ g ∈ nonzeroLocus ϑ) ∧ ∀ σ : H0 U.LG.L 1, ∃ b : R, SecIsMul G.hom b σ ϑ := by
-  obtain ⟨sK, hsK⟩ := exists_pull_val U.LG.isLB ϑ (pullback.fst G.hom (jK R))
+  obtain ⟨sK, hsK⟩ := exists_pull_val U.LG.isLB (K' := Fin 1) ϑ (pullback.fst G.hom (jK R))
     (φ' := fun _ : Fin 1 => pullback.fst G.hom (jK R)) (ε' := fun _ => ((1 : ℕ) : ℤ))
     (fun U _ h => by simp only [Category.comp_id])
   obtain ⟨E, hE, -⟩ := (U.expand 1 le_rfl).1 sK
@@ -134,6 +191,7 @@ theorem nonzero_and_spans (hG : GlobalFnsSt) (hS : SecBaseChangeSt) [IsNoetheria
 theorem unit_mul_iff_nonzero (hG : GlobalFnsSt) (hS : SecBaseChangeSt) [IsNoetherianRing R] (hI : I ≤ maximalIdeal R)
     (U : Unif I D A G) {ϑ : H0 U.LG.L 1} (hϑ : IsTheta U ϑ) (σ : H0 U.LG.L 1) :
     (∃ u : Rˣ, SecIsMul G.hom (u : R) σ ϑ) ↔ NonzeroOnSpecial U σ := by
+  open ReciprocityTheory.ChartRestriction.G.H1 in
   obtain ⟨⟨g, hg, hn⟩, hsp⟩ := nonzero_and_spans hG hS hI U hϑ
   constructor
   · rintro ⟨u, hu⟩
@@ -175,7 +233,7 @@ theorem exists_isTheta_of_dvr (hLaws : Laws) (V : Type) [CommRing V] [IsDomain V
     ∃ ϑ : H0 U.LG.L 1, IsTheta U ϑ ∧ ∀ s : H0 U.LG.L 1, ∃ b : V, SecIsMul G.hom b s ϑ := by
   have hG := hLaws.globalFns
   obtain ⟨th, hth⟩ := exists_nonzero_closed hLaws.secBaseChange D.toPre
-  obtain ⟨Φ, hΦ, -⟩ := FamFree.exists_fam_single (F := FractionRing V) hG D.tau_bimult le_rfl 0
+  obtain ⟨Φ, hΦ, -⟩ : ∃ Φ : Fam D.toPre (FractionRing V) 1, Φ.s 0 = resF D.toPre (FractionRing V) 1 0 th ∧ _ := FamFree.exists_fam_single (F := FractionRing V) hG D.tau_bimult le_rfl 0
     (resF D.toPre (FractionRing V) 1 0 th)
   have h₀ := (secScal_one_iff D.toPre Φ 0 th).2 hΦ.symm
   have ex : ∀ α, ∃ g : D.toPre.SecB 1 α, GeneratorPullback.SecScal D.toPre.P.L (DegPre.famφ D.toPre (FractionRing V) α)

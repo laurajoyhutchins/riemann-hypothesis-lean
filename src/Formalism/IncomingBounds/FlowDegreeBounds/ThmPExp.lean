@@ -1,5 +1,55 @@
-import Formalism.IncomingBounds.DefsThmP
-import Formalism.IncomingBounds.FlowDegreeBounds.ProdRangeEqFactorialMulProdIco
+module
+
+public import Formalism.IncomingBounds.DefsThmP
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+public import Mathlib.RingTheory.MvPowerSeries.Order
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.BigOperators.Field
+
+@[expose] public section
 
 noncomputable section
 open scoped BigOperators
@@ -41,7 +91,7 @@ theorem thmPExp_degree_le_of_mem_antidiagonal [DecidableEq σ] {m : σ →₀ �
     (hpq : pq ∈ antidiagonal m) : pq.1.degree ≤ m.degree ∧ pq.2.degree ≤ m.degree := by
   rw [Finset.HasAntidiagonal.mem_antidiagonal] at hpq
   have := congrArg Finsupp.degree hpq
-  rw [map_add] at this
+  rw [map_add (f := _)] at this
   omega
 
 end ThmPExpLemmas
@@ -82,6 +132,7 @@ theorem expSeriesAdd : ExpAdd := by
     _ = ∑ k ∈ range N, ∑ j ∈ range (k + 1),
           coeff m (a ^ j * b ^ (k - j)) / ((j.factorial : K) * ((k - j).factorial : K)) := by
         refine Finset.sum_congr rfl (fun k _ => ?_)
+
         rw [add_pow, map_sum, Finset.sum_div]
         refine Finset.sum_congr rfl (fun j hj => ?_)
         rw [mem_range] at hj
@@ -120,90 +171,5 @@ theorem expSeriesAdd : ExpAdd := by
               refine Finset.sum_congr rfl (fun pq _ => ?_)
               rw [div_mul_div_comm]
     _ = coeff m (mvExp a * mvExp b) := (coeff_mul _ _ _).symm
-
-theorem thmPExp_wt_le_add_iff (y : WithTop ℝ) (c w : ℝ) :
-    ((c : ℝ) : WithTop ℝ) ≤ y + ((w : ℝ) : WithTop ℝ) ↔ ((c - w : ℝ) : WithTop ℝ) ≤ y := by
-  induction y with
-  | top => simp
-  | coe t =>
-    rw [← WithTop.coe_add, WithTop.coe_le_coe, WithTop.coe_le_coe]
-    constructor <;> intro h <;> linarith
-
-theorem thmPExp_val_coeff_pow {K : Type} [Field K] (v : AddValuation K (WithTop ℝ)) {σ : Type}
-    (w : (σ →₀ ℕ) → ℝ) (hw : ∀ m m', w (m + m') = w m + w m') (c : ℝ)
-    (h : MvPowerSeries σ K) (hh : ∀ m, ((c - w m : ℝ) : WithTop ℝ) ≤ v (coeff m h)) :
-    ∀ (k : ℕ) (m : σ →₀ ℕ), (((k : ℝ) * c - w m : ℝ) : WithTop ℝ) ≤ v (coeff m (h ^ k)) := by
-  classical
-  have hw0 : w 0 = 0 := by have := hw 0 0; simp at this; linarith
-  intro k
-  induction k with
-  | zero =>
-    intro m
-    rw [pow_zero, coeff_one]
-    split_ifs with hm
-    · subst hm; simp [hw0]
-    · simp
-  | succ k ih =>
-    intro m
-    rw [pow_succ, coeff_mul]
-    apply AddValuation.map_le_sum
-    intro pq hpq
-    rw [Finset.HasAntidiagonal.mem_antidiagonal] at hpq
-    rw [AddValuation.map_mul, ← hpq, hw]
-    calc ((((k + 1 : ℕ) : ℝ) * c - (w pq.1 + w pq.2) : ℝ) : WithTop ℝ)
-        = (((k : ℝ) * c - w pq.1 : ℝ) : WithTop ℝ) + ((c - w pq.2 : ℝ) : WithTop ℝ) := by
-          rw [← WithTop.coe_add]; congr 1; push_cast; ring
-      _ ≤ _ := add_le_add (ih pq.1) (hh pq.2)
-
-theorem expWeight_of (hV : ValNat) : ExpWeight := by
-  intro K _ _ v l hl hvl hvp σ w hw h hh hwt m
-  have hl2 : (2:ℝ) ≤ l := by exact_mod_cast hl.two_le
-  have hpos : (0:ℝ) < (l:ℝ) - 1 := by linarith
-  have hc0 : (0:ℝ) < 1 / ((l:ℝ) - 1) := by positivity
-  have hh' : ∀ m, ((1 / ((l:ℝ) - 1) - w m : ℝ) : WithTop ℝ) ≤ v (coeff m h) :=
-    fun m => (thmPExp_wt_le_add_iff _ _ _).1 (hwt m)
-  have hpow := thmPExp_val_coeff_pow v w hw _ h hh'
-  rw [show (0 : WithTop ℝ) = ((0 : ℝ) : WithTop ℝ) from rfl, thmPExp_wt_le_add_iff, zero_sub]
-  change _ ≤ v (∑ k ∈ range (m.degree + 1), coeff m (h ^ k) / (k.factorial : K))
-  apply AddValuation.map_le_sum
-  intro k _
-  have hfk := hV K v l hl hvl hvp k.factorial (Nat.factorial_ne_zero k)
-  have hkne : (k.factorial : K) ≠ 0 := by exact_mod_cast Nat.factorial_ne_zero k
-  have hdiv : v (coeff m (h ^ k) / (k.factorial : K)) + v (k.factorial : K) =
-      v (coeff m (h ^ k)) := by
-    rw [← AddValuation.map_mul, div_mul_cancel₀ _ hkne]
-  rw [hfk] at hdiv
-  have hbound : (padicValNat l k.factorial : ℝ) ≤ (k : ℝ) * (1 / ((l:ℝ) - 1)) := by
-    rcases Nat.eq_zero_or_pos k with rfl | hk
-    · simp
-    · calc (padicValNat l k.factorial : ℝ) ≤ ((k:ℝ) - 1) / ((l:ℝ) - 1) :=
-            (padicValFactorialBounds l hl k hk).2
-        _ ≤ (k : ℝ) * (1 / ((l:ℝ) - 1)) := by
-            rw [mul_one_div]; gcongr; linarith
-  have hlow := hpow k m
-  rw [← hdiv, thmPExp_wt_le_add_iff] at hlow
-  exact le_trans (WithTop.coe_le_coe.2 (by linarith)) hlow
-
-theorem thmPExp_valNat : ValNat := by
-  intro K _ _ v l hl hvl hvp N hN
-  have := Fact.mk hl
-  induction N using Nat.recOnMul with
-  | zero => exact absurd rfl hN
-  | one => simp
-  | prime p hp =>
-    by_cases hpl : p = l
-    · subst hpl; rw [hvl, padicValNat_self]; simp
-    · have := Fact.mk hp
-      rw [hvp p hp hpl, padicValNat_primes (Ne.symm hpl)]; simp
-  | mul a b ha hb =>
-    have ha0 : a ≠ 0 := fun h => hN (by simp [h])
-    have hb0 : b ≠ 0 := fun h => hN (by simp [h])
-    rw [Nat.cast_mul, AddValuation.map_mul, ha ha0, hb hb0, padicValNat.mul ha0 hb0]
-    push_cast
-    rfl
-
-theorem expSeriesWeight : ExpWeight := expWeight_of thmPExp_valNat
-
-theorem valuationNatCast : ValNat := thmPExp_valNat
 
 end Formalism.IncomingBounds

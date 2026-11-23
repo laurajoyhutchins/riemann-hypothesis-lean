@@ -1,9 +1,65 @@
-import Development.AutomorphicArithmetic.Foundations.Convolution.TwistedLocalOrbits.Match
-import Development.AutomorphicArithmetic.Foundations.Convolution.TwistedLocalOrbits.Bridge
-import Development.AutomorphicArithmetic.Foundations.Convolution.HermitianDescent.SeparableOfMap
-import Development.AutomorphicArithmetic.Foundations.Convolution.HermitianDescent.GalField
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.TraceFormula.OrbitalIntegrals.TwistedOrbitalIntegrals.HeckeRepresentationSatake
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.TraceFormula.OrbitalIntegrals.TwistedOrbitalIntegrals.ExtCont
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.TwistedFactors.IntegralUnitBaseChange.InvTransposeGLInvTransposeGL
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.TraceFormula.OrbitalIntegrals.TwistedOrbitalIntegrals.ExtCont
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.TraceFormula.OrbitalIntegrals.TwistedOrbitalIntegrals.HeckeRepresentationSatake
+public import Development.AutomorphicArithmetic.Foundations.Convolution.HermitianDescent.GalField
+public import Development.AutomorphicArithmetic.Foundations.Convolution.HermitianDescent.SeparableOfMap
+import GroundTheory.LocalFields.Integers
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.Matrix.Charpoly.Univ
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import Mathlib.Topology.Algebra.Group.OpenMapping
+import Mathlib.Topology.Algebra.Group.Units
+public import Mathlib.Topology.Algebra.MvPolynomial
+import Mathlib.Topology.Baire.LocallyCompactRegular
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.IwahoriDoubleCosets
+import Development.AbelianVarietyTheory.Definitions.Foundations.MatrixMeasurableSpace
+import Development.AbelianVarietyTheory.Definitions.Foundations.SmoothPartStable
+import Development.AutomorphicArithmetic.Foundations.Convolution.TwistedLocalOrbits.HoweSpace
+
+@[expose] public section
 
 open MeasureTheory ValuativeRel GlobalTheory.PRep GlobalTheory.SplitWeil GlobalTheory.IndefiniteRowSideFullHecke.IwahoriDoubleCosets PositivityTheory.Rg.Tf.Loc UpperTheory.ConvolutionTheory.Loc
 
@@ -56,7 +112,7 @@ private theorem openOrbit {G : Type} [Group G] [TopologicalSpace G] [IsTopologic
     (fun g => ho _ isOpen_interior) fun y _ => by
       obtain ⟨g, rfl⟩ := hx y
       exact Set.mem_iUnion.2 ⟨g, g, mem_interior_iff_mem_nhds.2 (hN' g), rfl⟩
-  refine ⟨(⋃ g ∈ s, N g)⁻¹, (s.isCompact_biUnion fun g _ => hN g).inv, fun x hxC => ?_⟩
+  refine ⟨Inv.inv '' (⋃ g ∈ s, N g), (s.isCompact_biUnion fun g _ => hN g).image continuous_inv, fun x hxC => ?_⟩
   have := hs' (show (x⁻¹ • x₀ : X) ∈ Subtype.val ⁻¹' C by
     rw [Set.mem_preimage, hs, inv_inv]; exact hxC)
   simp only [Set.mem_iUnion] at this
@@ -67,8 +123,7 @@ private theorem openOrbit {G : Type} [Group G] [TopologicalSpace G] [IsTopologic
   refine ⟨x * a, ?_, a⁻¹, ?_, by group⟩
   · change twConj θ (x * a) δ = δ
     rw [hm, ← e', ← hm, inv_mul_cancel, h1]
-  · rw [Set.mem_inv, inv_inv]
-    exact Set.mem_biUnion hg (interior_subset ha)
+  · exact ⟨a, Set.mem_biUnion hg (interior_subset ha), rfl⟩
 
 private theorem contCoeff {K : Type} [CommRing K] [TopologicalSpace K] [IsTopologicalRing K] (n i : ℕ) :
     Continuous fun M : Matrix (Fin n) (Fin n) K => M.charpoly.coeff i := by

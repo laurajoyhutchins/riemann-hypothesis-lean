@@ -1,12 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.MatchingOfParts
-import Development.AbelianVarietyTheory.Definitions.Divisors.DiscreteSeriesHermitianUnique
-import Development.AbelianVarietyTheory.Definitions.Divisors.RankEqCardIffExistsFrameMatrixFirstColumnBlock
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsPairOfIsTriple
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ThetaActionExistsStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GlCharacterFactorsThroughDetOfTwoNeZero
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LocalUnitaryGroupSurjectsGeneralLinearRightStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LocalUnitaryDeterminedBySplitImageStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.DiscreteSeriesHermitianUnique
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IsPairOfIsTriple
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GlCharacterFactorsThroughDetOfTwoNeZero
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LocalUnitaryDeterminedBySplitImageStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LocalUnitaryGroupSurjectsGeneralLinearRightStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ThetaActionExistsStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+
+@[expose] public section
+
 open GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels NumberField IsDedekindDomain Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes GlobalTheory.WeilM GlobalTheory.AdelicU GlobalTheory.LFun
 open scoped Matrix
 attribute [local instance] GlobalTheory.LocalData.complRel GlobalTheory.LocalData.isLocalField
@@ -41,7 +80,7 @@ theorem pres (hT : IsTriple B G X om om') (p : UA σ G.V.J × UA σ G.W.J) {Φ :
     (hΦ : Φ ∈ schA F (Fin a × Fin (a + a'))) : om p Φ ∈ schA F (Fin a × Fin (a + a')) :=
   (IsUWeilPair.isUSplitting hT.weil).pres p Φ hΦ
 
-theorem acts_comp (hT : IsTriple B G X om om') {v : Pl F} {h₁ h₂ : UA σ G.W.J}
+theorem acts_comp (hT : IsTriple B G X om om') {v : Pl (F := F)} {h₁ h₂ : UA σ G.W.J}
     {φ φ₂ φ₃ : (Fin a × Fin (a + a') → Fv F v) → ℂ}
     (h2 : Acts (evFin F v) (om (1, h₂)) φ φ₂) (h1 : Acts (evFin F v) (om (1, h₁)) φ₂ φ₃) :
     Acts (evFin F v) (om (1, h₁ * h₂)) φ φ₃ := by
@@ -50,20 +89,20 @@ theorem acts_comp (hT : IsTriple B G X om om') {v : Pl F} {h₁ h₂ : UA σ G.W
   have e : om (1, h₁ * h₂) = om (1, h₁) * om (1, h₂) := by rw [← map_mul]; simp
   rw [e, Module.End.mul_apply, h2 r hr, h1 r hr2]
 
-theorem acts_one {v : Pl F} (φ : (Fin a × Fin (a + a') → Fv F v) → ℂ) :
+theorem acts_one {v : Pl (F := F)} (φ : (Fin a × Fin (a + a') → Fv F v) → ℂ) :
     Acts (evFin F v) (om (1, 1)) φ φ := by
   intro r _
   rw [show ((1, 1) : UA σ G.V.J × UA σ G.W.J) = 1 from rfl, map_one, Module.End.one_apply]
 
 noncomputable section
 
-def cmpGL {n : ℕ} {Y : Spc F E n} {v : Pl F} (t : E →ₐ[F] Fv F v) (h : UA σ Y.J) : GL (Fin n) (Fv F v) :=
+def cmpGL {n : ℕ} {Y : Spc F E n} {v : Pl (F := F)} (t : E →ₐ[F] Fv F v) (h : UA σ Y.J) : GL (Fin n) (Fv F v) :=
   Units.map (piW t).mapMatrix.toMonoidHom h.1
 
-theorem cmpGL_val {n : ℕ} {Y : Spc F E n} {v : Pl F} (t : E →ₐ[F] Fv F v) (h : UA σ Y.J) :
+theorem cmpGL_val {n : ℕ} {Y : Spc F E n} {v : Pl (F := F)} (t : E →ₐ[F] Fv F v) (h : UA σ Y.J) :
     (cmpGL t h).1 = (mat h).map (piW t) := rfl
 
-def apowHom {v : Pl F} (z : ℂ) : (Fv F v)ˣ →* ℂˣ where
+def apowHom {v : Pl (F := F)} (z : ℂ) : (Fv F v)ˣ →* ℂˣ where
   toFun x := Units.mk0 (GlobalTheory.SplitFlip.apow x z) (GlobalTheory.SplitFlip.apow_ne_zero x z)
   map_one' := Units.ext (by simp)
   map_mul' x y := Units.ext (by simp [GlobalTheory.SplitFlip.apow_mul])
@@ -77,15 +116,15 @@ namespace GlobalTheory.LocalUnitSubgroupClosure
 variable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] {σ : E →ₐ[F] E}
 variable {a a' : ℕ} {B : Base F E} {G : Geo σ a a'} {X : Chars F E} {om : Rep σ G.V G.W} {om' : Rep σ G.V' G.W}
 
-theorem isUnit_det_cmp {n : ℕ} {Y : Spc F E n} {v : Pl F} (t : E →ₐ[F] Fv F v) (h : UA σ Y.J) :
+theorem isUnit_det_cmp {n : ℕ} {Y : Spc F E n} {v : Pl (F := F)} (t : E →ₐ[F] Fv F v) (h : UA σ Y.J) :
     IsUnit ((mat h).map (piW t)).det := by
   rw [← cmpGL_val]; exact (Matrix.isUnit_iff_isUnit_det _).1 (cmpGL t h).isUnit
 
-theorem two_ne_zero_Fv (v : Pl F) : (2 : Fv F v) ≠ 0 := by
+theorem two_ne_zero_Fv (v : Pl (F := F)) : (2 : Fv F v) ≠ 0 := by
   have := (algebraMap F (Fv F v)).injective.ne (two_ne_zero (α := F))
   rwa [map_ofNat, map_zero] at this
 
-theorem core (hT : IsTriple B G X om om') (v : Pl F) (t : E →ₐ[F] Fv F v)
+theorem core (hT : IsTriple B G X om om') (v : Pl (F := F)) (t : E →ₐ[F] Fv F v)
     (ι : ((Fin a × Fin (a + a') → Fv F v) → ℂ) →ₗ[ℂ] (Matrix (Fin a) (Fin (a + a')) (Fv F v) → ℂ))
     (hEx : ∀ h ∈ UAt σ G.W (evFin F v), ∀ φ ∈ SB (Fin a × Fin (a + a') → Fv F v),
       ∃! φ₁, φ₁ ∈ SB (Fin a × Fin (a + a') → Fv F v) ∧ Acts (evFin F v) (om (1, h)) φ φ₁)

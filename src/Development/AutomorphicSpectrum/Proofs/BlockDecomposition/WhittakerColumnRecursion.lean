@@ -1,6 +1,51 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.FiniteTypeHarishChandra.SupportExistsAll
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ColGeR
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ColGeR
+public import Development.WeilBound.CoreStatements.FiniteTypeHarishChandra.FiniteDimensionalHcSpace
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open ReciprocityTheory.Ty.Fin GlobalTheory.CompanionTheory.TyFin.ColStep
 
@@ -22,10 +67,10 @@ theorem sum_dite_col {d j : ℕ} (hj : j < d) (r : Fin j → K) (M : Matrix (Fin
     rw [Finset.sum_eq_single ⟨j, hj⟩]
     · by_cases h : (i : ℕ) < j
       · rw [dif_pos ⟨rfl, h⟩, dif_pos h]
-      · rw [dif_neg (fun h' => h h'.2), dif_neg h, zero_mul]
+      · rw [dite_eq_right (fun h' => h h'.2), dite_eq_right h, zero_mul]
     · intro l _ hl
       have hl' : ¬ ((l : ℕ) = j ∧ (i : ℕ) < j) := fun h => hl (Fin.ext h.1)
-      rw [dif_neg hl', zero_mul]
+      rw [dite_eq_right hl', zero_mul]
     · intro h
       exact absurd (Finset.mem_univ _) h
   simp only [inner]
@@ -44,7 +89,7 @@ theorem sum_dite_col {d j : ℕ} (hj : j < d) (r : Fin j → K) (M : Matrix (Fin
       intro h
       apply hi
       exact Finset.mem_map.mpr ⟨⟨i, h⟩, Finset.mem_univ _, Fin.ext rfl⟩
-    rw [dif_neg hij]
+    rw [dite_eq_right hij]
 
 theorem patChar_colGeR {d j : ℕ} (hj : j < d) (r : Fin j → K) (ψ₀ : AddChar K ℂ) (u : GL (Fin d) K) :
     patChar (colGeR K d j r) ψ₀ u =
@@ -64,7 +109,7 @@ theorem patChar_colGeR {d j : ℕ} (hj : j < d) (r : Fin j → K) (ψ₀ : AddCh
   ring
 
 theorem mem_patSet_succ_iff {d j : ℕ} (hj : j < d) (u : GL (Fin d) K) :
-    u ∈ patSet K (colGe d (j + 1)) ↔ u ∈ patSet K (colGe d j) ∧ colEntries hj u = 0 := by
+    u ∈ patSet (K := K) (colGe d (j + 1)) ↔ u ∈ patSet (K := K) (colGe d j) ∧ colEntries hj u = 0 := by
   simp only [patSet, Set.mem_setOf_eq, colGe]
   constructor
   · intro h
@@ -99,23 +144,23 @@ theorem mem_patSet_succ_iff {d j : ℕ} (hj : j < d) (u : GL (Fin d) K) :
 
 theorem wh_colGe_succ_eq_sum (K : Type) [Field K] [Fintype K] [DecidableEq K] (d j : ℕ)
     (ψ₀ : AddChar K ℂ) (χ : GL (Fin d) K → ℂ) (hj : j < d)
-    (hc : (patSet K (colGe d j)).ncard = Fintype.card K ^ j * (patSet K (colGe d (j + 1))).ncard)
+    (hc : (patSet (K := K) (colGe d j)).ncard = Fintype.card K ^ j * (patSet (K := K) (colGe d (j + 1))).ncard)
     (ho : ∀ x : Fin j → K, (∑ r : Fin j → K, (ψ₀ (∑ i, r i * x i))⁻¹) =
       if x = 0 then (Fintype.card K : ℂ) ^ j else 0) :
     wh (colGe d (j + 1)) (colGeE K d (j + 1)) ψ₀ χ =
       ∑ r : Fin j → K, wh (colGe d j) (colGeR K d j r) ψ₀ χ := by
   classical
   have hq : (Fintype.card K : ℂ) ^ j ≠ 0 := pow_ne_zero _ (Nat.cast_ne_zero.mpr Fintype.card_ne_zero)
-  have hN : ((patSet K (colGe d j)).ncard : ℂ)⁻¹ * (Fintype.card K : ℂ) ^ j =
-      ((patSet K (colGe d (j + 1))).ncard : ℂ)⁻¹ := by
+  have hN : ((patSet (K := K) (colGe d j)).ncard : ℂ)⁻¹ * (Fintype.card K : ℂ) ^ j =
+      ((patSet (K := K) (colGe d (j + 1))).ncard : ℂ)⁻¹ := by
     rw [hc, Nat.cast_mul, Nat.cast_pow, mul_inv, mul_comm (((Fintype.card K : ℂ) ^ j)⁻¹), mul_assoc,
       inv_mul_cancel₀ hq, mul_one]
-  have hu : ∀ u : GL (Fin d) K, (∑ r : Fin j → K, if u ∈ patSet K (colGe d j) then
+  have hu : ∀ u : GL (Fin d) K, (∑ r : Fin j → K, if u ∈ patSet (K := K) (colGe d j) then
       (patChar (colGeR K d j r) ψ₀ u)⁻¹ * χ u else 0) =
-      (Fintype.card K : ℂ) ^ j * (if u ∈ patSet K (colGe d (j + 1)) then
+      (Fintype.card K : ℂ) ^ j * (if u ∈ patSet (K := K) (colGe d (j + 1)) then
         (patChar (colGeE K d (j + 1)) ψ₀ u)⁻¹ * χ u else 0) := by
     intro u
-    by_cases hP : u ∈ patSet K (colGe d j)
+    by_cases hP : u ∈ patSet (K := K) (colGe d j)
     · rw [Finset.sum_congr rfl (fun r _ => if_pos hP)]
       simp only [patChar_colGeR hj, mul_inv]
       rw [show (∑ r : Fin j → K, (patChar (colGeE K d (j + 1)) ψ₀ u)⁻¹ *
@@ -128,13 +173,13 @@ theorem wh_colGe_succ_eq_sum (K : Type) [Field K] [Fintype K] [DecidableEq K] (d
         ring]
       rw [ho (colEntries hj u)]
       by_cases hx : colEntries hj u = 0
-      · have hmem : u ∈ patSet K (colGe d (j + 1)) := (mem_patSet_succ_iff hj u).mpr ⟨hP, hx⟩
+      · have hmem : u ∈ patSet (K := K) (colGe d (j + 1)) := (mem_patSet_succ_iff hj u).mpr ⟨hP, hx⟩
         rw [if_pos hx, if_pos hmem]
         ring
-      · have hmem : u ∉ patSet K (colGe d (j + 1)) := fun h => hx ((mem_patSet_succ_iff hj u).mp h).2
+      · have hmem : u ∉ patSet (K := K) (colGe d (j + 1)) := fun h => hx ((mem_patSet_succ_iff hj u).mp h).2
         rw [if_neg hx, if_neg hmem]
         ring
-    · have hmem : u ∉ patSet K (colGe d (j + 1)) := fun h => hP ((mem_patSet_succ_iff hj u).mp h).1
+    · have hmem : u ∉ patSet (K := K) (colGe d (j + 1)) := fun h => hP ((mem_patSet_succ_iff hj u).mp h).1
       rw [if_neg hmem, mul_zero]
       exact Finset.sum_eq_zero (fun r _ => if_neg hP)
   unfold wh

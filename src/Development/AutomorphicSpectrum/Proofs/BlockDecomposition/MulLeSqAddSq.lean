@@ -1,5 +1,49 @@
-import Mathlib
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.ThetaCellCovers.SFunOf
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.ThetaCellCovers.SFunOf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.IsotropicMahlerBounds.LogAbsoluteWedges.WedgeSub
+
+@[expose] public section
 
 noncomputable section
 
@@ -34,10 +78,10 @@ theorem enorm_inner_le {ι : Type} (D : Dom E a b) (U : Hs (ι := ι) D →L[ℂ
     (u v : Hs (ι := ι) D) (C : ℝ≥0∞) (hu : ‖u‖ₑ ^ 2 ≤ C) (hv : ‖v‖ₑ ^ 2 ≤ C) :
     ‖inner ℂ u (U v)‖ₑ ≤ ‖U‖ₑ * (2 * C) := by
   have h1 : ‖inner ℂ u (U v)‖ₑ ≤ ‖u‖ₑ * ‖U v‖ₑ := by
-    simp only [enorm_eq_nnnorm]
-    exact_mod_cast nnnorm_inner_le_nnnorm (𝕜 := ℂ) u (U v)
+    simp only [eNorm_eq_nnNorm]
+    exact_mod_cast nnNorm_inner_le_nnNorm (𝕜 := ℂ) u (U v)
   calc ‖inner ℂ u (U v)‖ₑ ≤ ‖u‖ₑ * ‖U v‖ₑ := h1
-    _ ≤ ‖u‖ₑ * (‖U‖ₑ * ‖v‖ₑ) := by gcongr; exact U.le_opNorm_enorm v
+    _ ≤ ‖u‖ₑ * (‖U‖ₑ * ‖v‖ₑ) := by gcongr; exact U.le_opENorm v
     _ = ‖U‖ₑ * (‖u‖ₑ * ‖v‖ₑ) := by ring
     _ ≤ ‖U‖ₑ * (‖u‖ₑ ^ 2 + ‖v‖ₑ ^ 2) := by gcongr; exact mul_le_sq_add_sq _ _
     _ ≤ ‖U‖ₑ * (C + C) := by gcongr
@@ -48,10 +92,10 @@ theorem lBound_of : Mahler → CutCount → LBound := by
   obtain ⟨C₁, N, hC₁, hcut⟩ := hC E a b D Ω hΩ
   refine ⟨2 * Fintype.card ι * C₀.toReal * C₁, N, fun τ hτ U => ?_⟩
   set S : Set (H E a b) := cutSet E a τ ×ˢ cutSet E b τ with hS
-  haveI : BorelSpace (H E a b) := ⟨rfl⟩
+  have : BorelSpace (H E a b) := ⟨rfl⟩
   have hSm : MeasurableSet S := ((hM E a τ).1.prod (hM E b τ).1).measurableSet
   have hg : Continuous fun x => ∑ i, inner ℂ (k₁ x i) (U (k₂ x i)) :=
-    continuous_finset_sum _ fun i _ => (hcont i).1.inner (U.continuous.comp (hcont i).2)
+    continuous_finsetSum _ fun i _ => (hcont i).1.inner (U.continuous.comp (hcont i).2)
   have hmeas : AEStronglyMeasurable (lInt D k₁ k₂ τ U) D.ν := by
     rw [lInt_eq]
     exact hg.aestronglyMeasurable.indicator hSm
@@ -66,7 +110,7 @@ theorem lBound_of : Mahler → CutCount → LBound := by
     by_cases hx : x ∈ S
     · rw [Set.indicator_of_mem hx, Set.indicator_of_mem hx]
       calc ‖∑ i, inner ℂ (k₁ x i) (U (k₂ x i))‖ₑ ≤ ∑ i, ‖inner ℂ (k₁ x i) (U (k₂ x i))‖ₑ :=
-            enorm_sum_le _ _
+            eNorm_sum_le _ _
         _ ≤ ∑ _i : ι, ‖U‖ₑ * (2 * (C₀ * cnt (ratH E a b) Ω x)) :=
             Finset.sum_le_sum fun i _ => enorm_inner_le D U _ _ _ (hnorm x i).1 (hnorm x i).2
         _ = c * cnt (ratH E a b) Ω x := by
@@ -86,7 +130,7 @@ theorem lBound_of : Mahler → CutCount → LBound := by
           congr 1
           ring
   refine ⟨⟨hmeas, hle.trans_lt ENNReal.ofReal_lt_top⟩, ?_⟩
-  rw [integral_norm_eq_lintegral_enorm hmeas]
+  rw [integral_norm_eq_lintegral_eNorm hmeas]
   exact ENNReal.toReal_le_of_le_ofReal hA hle
 
 end GlobalTheory.CompanionTheory.LBoundProof

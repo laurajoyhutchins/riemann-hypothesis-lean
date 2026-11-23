@@ -1,12 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.LatAtLattice
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.TrueColumnSpacesStandardInFrameCoords
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ValDetSubOneLt
-import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.Afsplit
-import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.LevelSubgroupFiniteAdelicStandard
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.LatAtLattice
+public import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.AfsplitC
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.TrueColumnSpacesStandardInFrameCoords
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ValDetSubOneLt
+public import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.SplitIntLoc
+public import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.Afsplit
 import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.GlintPrincRelIndexNeZero
-import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.Levelvsplit
-import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.SplitIntLoc
+public import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.LevelSubgroupFiniteAdelicStandard
+public import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.Levelvsplit
+import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.Stabstd
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -386,8 +429,9 @@ theorem isPtOf_mul (hQ : Q = ∅) {g k : GL (Fin n) (AfE F E)} {p : DecoF E n ST
       rw [hpull]
       show _ = _ + (((k⁻¹).1 - 1) *ᵥ pullV g x) i
       rw [Matrix.sub_mulVec, Matrix.one_mulVec, Pi.sub_apply, add_sub_cancel]
-    rw [e, map_add, add_sub_right_comm]
+    rw [e, map_add (f := _), add_sub_right_comm]
     refine Valuation.map_add_lt _ hv ?_
+
     rw [map_sum]
     refine Valuation.map_sum_lt _ one_ne_zero fun j _ => ?_
     rw [map_mul, map_mul]
@@ -412,8 +456,8 @@ theorem emb_comm {v : HeightOneSpectrum (𝓞 F)} (x : GL (Fin n) (E ⊗[F] v.ad
   show afsplitU v x 1 * k = k * afsplitU v x 1
   rw [← e, ← afsplitU_mul, ← afsplitU_mul, one_mul, mul_one, one_mul, mul_one]
 
-omit [StarRing E] in
 
+omit [StarRing E] in
 abbrev StdAt (v : HeightOneSpectrum (𝓞 F)) (Lb : Submodule (𝓞 E) (Fin n → E)) : Prop :=
   latS (F := F) (v.adicCompletion F) (intV E v) Lb = Formalism.UG.stdLat (intV E v)
 
@@ -426,7 +470,7 @@ open Formalism.MainNotions Formalism.L2.Col Formalism.L2.DIV Formalism.L2.Ker Gl
 
 attribute [local instance] GlobalTheory.Mem.Col2.starE Formalism.BasicNotions.Host.cmStar
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem reads_gLevH {B : Base} {X : PreX B.toPre} (I : TC B X) (hPr : (B.primes X).Ok) (u : B.Word)
     (G : GLoc B.host.F B.host.E B.sp.cm.sig B.host.g) (i : ℕ) {Ch : Type} (chOf : (I.stp u I.mu0 i).Cl → Ch)
@@ -473,7 +517,7 @@ theorem reads_gLevH {B : Base} {X : PreX B.toPre} (I : TC B X) (hPr : (B.primes 
   rw [map_one, Units.val_one, map_one] at this
   exact this
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem chart_gLevH {B : Base} {X : PreX B.toPre} (I : TC B X) (hI : I.Ok) (hP : TC.Pins B X) (l : I.Laws) (Z : TC.Later B (I.cols l))
     (u : B.Word) (G : GLoc (I.rec7 l Z).host.F (I.rec7 l Z).host.E (sigD (I.rec7 l Z)) (I.rec7 l Z).host.g) (i : ℕ) (hi : i ≤ B.R.m)

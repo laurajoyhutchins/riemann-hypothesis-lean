@@ -1,5 +1,46 @@
-import PositivityTheory.AutomorphicForms.PublishedInputs.HilbertEisenstein.AbsPInfModuleSection
-import PositivityTheory.AutomorphicForms.PublishedInputs.HilbertEisenstein.PFinInvModuleSectionMul
+module
+
+public import PositivityTheory.AutomorphicForms.PublishedInputs.HilbertEisenstein.AbsPInfModuleSection
+public import PositivityTheory.AutomorphicForms.PublishedInputs.HilbertEisenstein.PFinInvModuleSectionMul
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.ExistsUniqueHcharOfFiniteOrder
+import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.SelmerTransport.RestrictionMemInvariantH1
+import Development.AutomorphicArithmetic.AutomorphicVarieties.IdeleGenerators.ConstSmall
+import Development.AutomorphicArithmetic.AutomorphicVarieties.PublishedTheorems.GelfandKazhdanReal
+
+@[expose] public section
 
 noncomputable section
 
@@ -27,6 +68,7 @@ theorem arch_part (ξ : Fin 2 → F) (z : Ideles F) (M M' : Matrix (Fin 2) (Fin 
     simpa [rowA, Matrix.vecMul, dotProduct, Matrix.smul_apply] using this
   have hj : sig p (ξ j) = ∑ i, UpperTheory.V.TR.pInf F (v i) p *
       (UpperTheory.V.TR.pInf F ((z⁻¹ : Ideles F) : Ad F) p * UpperTheory.V.TR.pInf F (M' i j) p) := by
+
     rw [sig, hj', map_sum, Finset.sum_apply]
     simp only [map_mul, Pi.mul_apply]
   set ρ := max |UpperTheory.V.TR.pInf F (v 0) p| |UpperTheory.V.TR.pInf F (v 1) p|
@@ -110,7 +152,7 @@ theorem term_bound {D' : 𝓞 F} (hD'0 : D' ≠ 0) (m₁ : ℕ) {Ca B : ℝ} (hB
     have e1 : ∏ p : InfinitePlace F, (if p = w0 F then (t : ℝ)⁻¹ else 1) = (t : ℝ)⁻¹ := by simp
     have e2 : ∏ p, ‖((a⁻¹ : Ideles F) : Ad F).1 p‖ ≤ B ^ n := by
       calc _ ≤ ∏ _p : InfinitePlace F, B :=
-            Finset.prod_le_prod (fun _ _ => norm_nonneg _) fun p _ => ha p
+            Finset.prod_le_prod₀ (fun _ _ => norm_nonneg _) fun p _ => ha p
         _ = B ^ n := by rw [Finset.prod_const, Finset.card_univ]
     rw [Finset.prod_congr rfl fun p _ => hzinv p, Finset.prod_mul_distrib, e1]
     exact mul_le_mul_of_nonneg_left e2 (inv_nonneg.2 ht0.le)
@@ -136,7 +178,7 @@ theorem term_bound {D' : 𝓞 F} (hD'0 : D' ≠ 0) (m₁ : ℕ) {Ca B : ℝ} (hB
   have hP0 : 0 ≤ P := Finset.prod_nonneg fun p _ => hρ0 p
   have h2 : ∏ p, |sig p (ξ j)| ≤ P * ((t : ℝ)⁻¹ * B ^ n) * (1 + m') ^ n := by
     calc ∏ p, |sig p (ξ j)| ≤ ∏ p, (ρ p * ζ p * (1 + m')) :=
-          Finset.prod_le_prod (fun p _ => abs_nonneg _) fun p _ => harch p j
+          Finset.prod_le_prod₀ (fun p _ => abs_nonneg _) fun p _ => harch p j
       _ = P * (∏ p, ζ p) * (1 + m') ^ n := by
           rw [Finset.prod_mul_distrib, Finset.prod_mul_distrib, Finset.prod_const, Finset.card_univ]
       _ ≤ P * ((t : ℝ)⁻¹ * B ^ n) * (1 + m') ^ n :=
@@ -160,7 +202,7 @@ theorem term_bound {D' : 𝓞 F} (hD'0 : D' ≠ 0) (m₁ : ℕ) {Ca B : ℝ} (hB
       have h2 : 1 ≤ L ^ 2 := one_le_pow₀ hL1
       nlinarith [sq_nonneg (ρ p)]
     calc _ ≤ ∏ p, ((1 + ρ p ^ 2) * L ^ 2) :=
-          Finset.prod_le_prod (fun p _ => by positivity) fun p _ => hp p
+          Finset.prod_le_prod₀ (fun p _ => by positivity) fun p _ => hp p
       _ = Q * L ^ (2 * n) := by
           rw [Finset.prod_mul_distrib, Finset.prod_const, Finset.card_univ, ← pow_mul]
   have hC := hCa (UpperTheory.V.TR.pInf F (v 0)) (UpperTheory.V.TR.pInf F (v 1))
@@ -259,7 +301,7 @@ theorem core {Ψ : (Fin 2 → Ad F) → ℂ} {e : HeightOneSpectrum (𝓞 F) →
     · rw [mul_zero]
       exact mul_nonneg hc0 (mul_nonneg (hβ0 _) (hβ0 _))
   have hGs : Summable (fun ξ : {ξ : Fin 2 → F // ξ ≠ 0} => β (ξ.1 0) * β (ξ.1 1)) :=
-    hG.subtype {ξ | ξ ≠ 0}
+    by simpa only [Function.comp_def] using hG.subtype (fun ξ : Fin 2 → F => ξ ≠ 0)
   have hsum2 := hGs.mul_left c
   have hs : Summable (fun ξ : {ξ : Fin 2 → F // ξ ≠ 0} =>
       ‖Ψ (rowA ξ.1 ᵥ* (((moduleSection (w0 F) t * a : Ideles F) : Ad F) • M))‖) :=

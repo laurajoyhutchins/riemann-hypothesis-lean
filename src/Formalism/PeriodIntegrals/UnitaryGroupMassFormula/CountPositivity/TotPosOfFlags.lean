@@ -1,6 +1,47 @@
-import Mathlib
-import Formalism.PeriodIntegrals.CntLocalParts
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.CountPositivity.LeadingMinorFullEqProd
+module
+
+public import Formalism.SharpRestriction.CuspSpanNormBounds.LocalGroupInFamilyNontrivial
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.CountPositivity.LeadingMinorFullEqProd
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.CntLocal
+
+@[expose] public section
 
 noncomputable section
 
@@ -20,22 +61,5 @@ theorem totPos_of_flags (D : Formalism.BasicNotions.D7) {T T' : ℕ} (F : FlagG 
     (fun a => NumberField.IsCMField.complexEmbedding_complexConj _ (embS D τ) a) (D.sp.Y_sig 0 (embS D τ)) ?_ hG
   rw [D.sp.baseSpace_signature_eq]
   rfl
-
-theorem notPosAll : PI.CntLocalParts.NotPosAll := by
-  intro D δ M hA L u u' hT F0 what₂ hR Z hZ
-  have hE : ∀ Λ, EZ (Tn u') F0 Λ Z = ∅ := by
-    intro Λ
-    ext F'
-    simp only [EZ, Set.mem_ofPred_eq, Set.mem_empty_iff_false, iff_false]
-    rintro ⟨⟨_, _, hG⟩, _, _, _, hZ'⟩
-    apply hZ
-    have h1 : GZ (Tn u) (Tn u') Z = Gflag F0 F'.fl := by rw [← hZ']; rfl
-    rw [h1]
-    exact totPos_of_flags D F0 F'.fl hG
-  have hc : ∀ Λ, cntE (Tn u') F0 Λ Z = 0 := by
-    intro Λ
-    simp only [cntE, hE Λ, Set.mem_empty_iff_false, false_and, exists_false, Set.ofPred_false,
-      Set.encard_empty]
-  simp [Formalism.L2.SG.CntLocal.nu, hc]
 
 end PI.CntNotPosW

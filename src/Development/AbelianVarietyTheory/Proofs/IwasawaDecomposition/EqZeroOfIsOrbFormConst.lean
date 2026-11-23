@@ -1,7 +1,45 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.MultCellsAmong
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsBaryStageStart
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.PullLinInjective
+module
+
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.PullLinInjective
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.SysExOfPol
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HomExtNormalSt
+
+@[expose] public section
 
 noncomputable section
 
@@ -36,7 +74,7 @@ def conjLin (σ : O ≃+* O) {n m : ℕ} (r : (Fin n → O) →ₗ[O] (Fin m →
   toFun a := twv σ.symm (r (twv σ a))
   map_add' a b := by
     have e : twv σ (a + b) = twv σ a + twv σ b := funext fun _ => map_add σ _ _
-    rw [e, map_add]
+    rw [e, map_add (f := _)]
     exact funext fun _ => map_add σ.symm _ _
   map_smul' c a := by
     rw [twv_smul, map_smul, twv_smul, RingHom.id_apply, σ.symm_apply_apply]
@@ -117,8 +155,8 @@ section Fun
 
 variable (O : Type) [CommRing O] {X₀ : Type} [AddCommGroup X₀] [Module O X₀]
 
-open Classical in
 
+open Classical in
 def orbFun (w0 : O) (v : LinearMap.BilinForm ℤ X₀) : InvFun O where
   toFun n B := if v ≠ 0 ∧ ∃ σ : O ≃+* O, σ w0 = w0 ∧ IsOrbForm v σ n B then 1 else 0
   inv n m r hr B := by
@@ -202,10 +240,6 @@ theorem isTwInv_orbFun (H : Host E) (v : LinearMap.BilinForm ℤ X₀) : IsTwInv
     convert this using 3 <;> ext i <;> simp
 
 end Host
-
-example : (orbFun ℤ 0 mulForm).evalZ mulForm = 1 ∧ (orbFun ℤ 0 mulForm).evalZ (0 : LinearMap.BilinForm ℤ ℤ) = 0 := by
-  refine ⟨orbFun_evalZ_self 0 (fun h => by simpa using LinearMap.congr_fun₂ h 1 1) fun y z => by simp [mul_comm], ?_⟩
-  exact orbFun_evalZ_zero 0 fun h => by simpa using LinearMap.congr_fun₂ h 1 1
 
 end OrbMark
 

@@ -1,13 +1,62 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.PositionOneOfUnique
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.IsSelfDualCLatFrame
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.EqZeroOrEqOfPlaceIdem
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.SchrodingerIntertwinerInjectiveSchwartzBruhat
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.MapFinNeg
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsSplitPlaceHalfHeisenbergInvariantForm
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsNsmulIntMemLatO
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.InfPartOneSubEInfSmul
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ComplexEmbeddingHermitianQuadrupleSum
+module
+
+public import Formalism.LocalToGlobal.IndefiniteReal.LocalNewformFunction
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.AddNsmulResidueAssoc
+import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.MemRangeOfOneTmulMem
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.SelfDualLatticePairingDual
+import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.SmulMemLatO
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ThetaAtEqSumHeisOfFourierSum
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsNsmulIntMemLatO
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.InfPartOneSubEInfSmul
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.FourierJacobiAverage
+import Development.AbelianVarietyTheory.Definitions.Foundations.MatrixMeasurableSpace
+import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.CovolOneIntegralAdd
+import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.MemLevelFunOfIsAutFun
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.StandardOrderExtendedBasisApplyLowBlock
+import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.WittSmallGroupEmbeddingMemPointwiseStabilizerIso
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.IsSelfDualCLatFrame
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.FinPartIdemMulMemIff
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.L2.Theta Formalism.IndefR.Datum MeasureTheory IsDedekindDomain NumberField Matrix
 open GlobalTheory.MixModel GlobalTheory.MixPer GlobalTheory.SplitWeil GlobalTheory.LocFrame
 open GlobalTheory.EmbChart (idem)
@@ -18,8 +67,8 @@ open Classical
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
 
 noncomputable section
-set_option synthInstance.maxHeartbeats 400000
-set_option maxHeartbeats 800000
+
+
 
 namespace GlobalTheory.PlaceThetaVal
 open GlobalTheory.PlaceVec GlobalTheory.PlaceModel GlobalTheory.AdelicLatMove
@@ -35,7 +84,7 @@ theorem isThetaFunO_placeModel_apply : ∀ {D : D7} {ψ : AddChar (AF D.host.F) 
   intro D ψ hψ S T ΛS ΛT hS hT a f₀ Φ Tm ha hinf h₁ hf₀ hΦ
   have hdual := (GlobalTheory.LatVac.latO_selfDual_approx_sign D ψ S T _ _ hψ hS hT).1
   have hfin := GlobalTheory.LatFinMod.latO_finite_mod D S T _ _ hS.1.fg hT.1.fg fun _ => True
-  have hmul := exists_nsmul_mem_latO hS.1 hT.1
+  have hmul := exists_nsmul_mem_latO (selfDual_isFullLattice S ΛS hS) (selfDual_isFullLattice T ΛT hT)
   have hsm : ∀ {b : AE D}, b * b = b → ∀ u ∈ (latO S T ΛS ΛT fun _ => True),
       b • u ∈ (latO S T ΛS ΛT fun _ => True) ⊓ half S T b := fun {b} hb u hu =>
     ⟨GlobalTheory.LatticeStable.smul_mem_latO D S T _ _ _ b
@@ -43,7 +92,16 @@ theorem isThetaFunO_placeModel_apply : ∀ {D : D7} {ψ : AddChar (AF D.host.F) 
       (mem_half S T).2 (by rw [smul_smul, hb])⟩
   generalize (latO S T (ΛS : Set (Fin S.rank → D.host.E)) (ΛT : Set (Fin T.rank → D.host.E)) fun _ => True) = Λ at *
   have ha' : cA D a * cA D a = cA D a := by rw [← RingHom.map_mul, ha]
-  have hb := isBichar_symplO S T ψ
+  have hb : IsBichar (fun x y : WO S T => ψ (symplO S T x y)) := by
+    refine ⟨?_, ?_, ?_, ?_⟩
+    · intro x y z; rw [symplO_add_left, AddChar.map_add_eq_mul]
+    · intro x y z; rw [symplO_add_right, AddChar.map_add_eq_mul]
+    · intro y
+      have hz : symplO S T 0 y = 0 := by simpa using symplO_add_left S T 0 0 y
+      rw [hz, AddChar.map_zero_eq_one]
+    · intro y
+      have hz : symplO S T y 0 = 0 := by simpa using symplO_add_right S T y 0 0
+      rw [hz, AddChar.map_zero_eq_one]
   have tf : ∀ k : ℕ, 0 < k → Function.Injective fun t : WO S T => k • t := fun k hk x y hxy => by
     rw [← inv_smul_nsmul S T hk x, ← inv_smul_nsmul S T hk y]
     exact congrArg _ hxy
@@ -68,13 +126,42 @@ theorem isThetaFunO_placeModel_apply : ∀ {D : D7} {ψ : AddChar (AF D.host.F) 
     { carrier := {g | IsThetaFunO ψ S T (Tm g)}
       add_mem' := fun {g g'} hg hg' => by
         show IsThetaFunO ψ S T (Tm (g + g'))
-        rw [map_add]; exact GlobalTheory.OrientedHeis.theta_add hg hg'
+        rw [map_add (f := _)]
+        exact {
+          quasi γ w := by simp only [Pi.add_apply, hg.quasi, hg'.quasi, mul_add]
+          level := by
+            obtain ⟨U, hU, h1⟩ := hg.level
+            obtain ⟨U', hU', h2⟩ := hg'.level
+            refine ⟨U ⊓ U', hU.inter hU', fun u hu h0 => ?_⟩
+            funext w
+            have e1 := congrFun (h1 u hu.1 h0) w
+            have e2 := congrFun (h2 u hu.2 h0) w
+            unfold heisO at e1 e2 ⊢
+            rw [Pi.add_apply, Pi.add_apply, mul_add, e1, e2]
+          cont := hg.cont.add hg'.cont
+          smooth k L h1 h2 w := (hg.smooth k L h1 h2 w).add (hg'.smooth k L h1 h2 w) }
       zero_mem' := by
         show IsThetaFunO ψ S T (Tm 0)
-        rw [map_zero]; exact GlobalTheory.OrientedHeis.theta_zero
+        rw [map_zero]
+        exact {
+          quasi γ w := by simp only [Pi.zero_apply, mul_zero]
+          level := ⟨⊤, isOpen_univ, fun u _ _ => by funext w; simp only [heisO, Pi.zero_apply, mul_zero]⟩
+          cont := continuous_const
+          smooth k L _ _ w := contDiff_const }
       smul_mem' := fun c g hg => by
         show IsThetaFunO ψ S T (Tm (c • g))
-        rw [map_smul]; exact GlobalTheory.OrientedHeis.theta_smul c hg }
+        rw [map_smul]
+        exact {
+          quasi γ w := by rw [Pi.smul_apply, Pi.smul_apply, hg.quasi, smul_eq_mul, smul_eq_mul, mul_left_comm]
+          level := by
+            obtain ⟨U, hU, h1⟩ := hg.level
+            refine ⟨U, hU, fun u hu h0 => ?_⟩
+            funext w
+            have e1 := congrFun (h1 u hu h0) w
+            unfold heisO at e1 ⊢
+            rw [Pi.smul_apply, Pi.smul_apply, smul_eq_mul, smul_eq_mul, mul_left_comm, e1]
+          cont := hg.cont.const_smul c
+          smooth k L h1 h2 w := contDiff_const.mul (hg.smooth k L h1 h2 w) } }
   have hsub : waveSpan (fun x y => ψ (symplO S T x y)) (half S T a) (half S T (cA D a)) (Λ ⊓ half S T a) ≤ P := by
     refine Submodule.span_le.2 ?_
     rintro _ ⟨x, hx, y, hy, rfl⟩

@@ -1,5 +1,47 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ReframeSt
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ReframeSt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 open CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj AlgebraicGeometry NumberField
 open scoped CategoryTheory.Obj BigOperators
@@ -55,7 +97,7 @@ theorem qkSt_of_ptSt : PtSt → QkSt := by
     obtain ⟨la, hy, hl⟩ := hker _ _ e
     refine ⟨AnArc.La.mk (d.eX.symm p.1.1.toAdd) 0 0 + la, (hrep _ _).2 ⟨?_, ?_⟩⟩
     · rw [AnArc.La.add_y, hy, add_zero, AnArc.La.mk_y, AddEquiv.apply_symm_apply]
-    · rw [map_add, ← hl, hc1, hv']
+    · rw [map_add (f := _), ← hl, hc1, hv']
   · refine ⟨⟨(Multiplicative.ofAdd (d.eX la.y), E ((k : ℂ)⁻¹ • B.P0 la)), ?_⟩, (hrep _ _).2 ⟨rfl, rfl⟩, fun p hp => ?_⟩
     · rw [NumD.mem_QT, ← hpow, hc2, hper]
       rfl
@@ -64,9 +106,9 @@ theorem qkSt_of_ptSt : PtSt → QkSt := by
   · obtain ⟨a, b⟩ := (hrep _ _).1 h
     obtain ⟨a', b'⟩ := (hrep _ _).1 h'
     refine (hrep _ _).2 ⟨?_, ?_⟩
-    · rw [AnArc.La.add_y, map_add, ← a, ← a']
+    · rw [AnArc.La.add_y, map_add (f := _), ← a, ← a']
       rfl
-    · rw [map_add, smul_add, hadd, ← b, ← b']
+    · rw [map_add (f := _), smul_add, hadd, ← b, ← b']
       rfl
   · obtain ⟨a, b⟩ := (hrep _ _).1 h
     obtain ⟨a', b'⟩ := (hrep _ _).1 h'
@@ -79,12 +121,12 @@ theorem qkSt_of_ptSt : PtSt → QkSt := by
       obtain ⟨e₀, hy, hl⟩ := hker _ _ e
       refine ⟨z₀ + e₀, sub_eq_zero.1 (period_constantPart_eq_zero_injective B _ ?_ ?_)⟩
       · apply d.eX.injective
-        rw [AnArc.La.sub_y, AnArc.La.add_y, AnArc.La.nsmul_y, AnArc.La.add_y, hy, add_zero, map_sub, map_add,
+        rw [AnArc.La.sub_y, AnArc.La.add_y, AnArc.La.nsmul_y, AnArc.La.add_y, hy, add_zero, map_sub, map_add (f := _),
           map_nsmul, hz, ← a, ← a', c, sub_self, map_zero]
-      · rw [map_sub, map_add, map_nsmul, map_add, ← hc2 (B.P0 la'), hl, add_assoc, smul_add, hc2, sub_self]
+      · rw [map_sub, map_add (f := _), map_nsmul, map_add (f := _), ← hc2 (B.P0 la'), hl, add_assoc, smul_add, hc2, sub_self]
     · rintro ⟨e, rfl⟩
       refine ⟨d.eX e.y, ?_, ?_⟩
-      · rw [a, a', AnArc.La.add_y, AnArc.La.nsmul_y, map_add, map_nsmul]
-      · rw [b, b', map_add, map_nsmul, smul_add, hc1, hadd, hper]
+      · rw [a, a', AnArc.La.add_y, AnArc.La.nsmul_y, map_add (f := _), map_nsmul]
+      · rw [b, b', map_add (f := _), map_nsmul, smul_add, hc1, hadd, hper]
 
 end GlobalTheory.Ex.Arch

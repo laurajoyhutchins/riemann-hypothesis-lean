@@ -1,9 +1,58 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SubRepApply
-import Development.AbelianVarietyTheory.Proofs.CharacterTheory.CharpolyBlockAndInvariantUnderStabilizerNilradic
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.AbsIrreducibleConstituentRanksUniqueOfCharpoly
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsIsSemisimplificationOf
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CharpolyEqOfSemisimplification
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SubRepApply
+public import Formalism.PadicSubsetSums.StableGradedCounts.ZBrauerNesbittAlg
+public import Mathlib.LinearAlgebra.FreeModule.PID
+public import Mathlib.RingTheory.Coalgebra.IsFrobenius
+public import Mathlib.RingTheory.Flat.TorsionFree
+public import Mathlib.RingTheory.HopfAlgebra.Basic
+public import Mathlib.RingTheory.SimpleRing.Principal
+public import Mathlib.RingTheory.TotallySplit
+public import Development.AbelianVarietyTheory.Proofs.CharacterTheory.CharpolyBlockAndInvariantUnderStabilizerNilradic
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CharpolyEqOfSemisimplification
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsIsSemisimplificationOf
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.AbsIrreducibleConstituentRanksUniqueOfCharpoly
+import Mathlib.Algebra.AffineMonoid.UniqueSums
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Presheaf
+
+@[expose] public section
+
 open Polynomial
 
 noncomputable section
@@ -30,7 +79,7 @@ theorem hasCharFlag_zero (π : Representation k Γ V) (ψ : Fin 0 → Γ →* k�
       simp [hi, hj]
   · intro g j x hx
     by_cases hj : (j : ℕ) = 0
-    · simp only [hj, if_true, Submodule.mem_bot] at hx ⊢; simp [hx]
+    · simp only [hj, ite_true, Submodule.mem_bot] at hx ⊢; simp [hx]
     · simp [hj]
 
 theorem stab_span (π : Representation k Γ V) (x : V) (c : Γ → k) (hx : ∀ g, π g x = c g • x) :
@@ -167,13 +216,18 @@ theorem exists_sum_chars : ∀ (t : ℕ) (ψ : Fin t → Γ →* kˣ),
       IsSemisimpleModule (MonoidAlgebra k Γ) δ.asModule ∧
       (∀ g, LinearMap.charpoly (δ g) = ∏ s, (X - C ((ψ s g : kˣ) : k))) ∧
       ∀ (σ : Representation k Γ V) (f : V →ₗ[k] B), (∀ g x, f (σ g x) = δ g (f x)) →
-        (∀ s (φ : V →ₗ[k] k), (∀ g x, φ (σ g x) = ((ψ s g : kˣ) : k) • φ x) → φ = 0) → f = 0
-  | 0, ψ => ⟨Fin 0 → k, inferInstance, inferInstance, inferInstance, 1,
+        (∀ s (φ : V →ₗ[k] k), (∀ g x, φ (σ g x) = ((ψ s g : kˣ) : k) • φ x) → φ = 0) → f = 0 := by
+  intro t
+  induction t with
+  | zero =>
+    intro ψ
+    exact ⟨Fin 0 → k, inferInstance, inferInstance, inferInstance, 1,
       ss_of_min _ fun W _ => Or.inl (Subsingleton.elim _ _),
       fun g => by rw [GlobalTheory.SSRank.charpoly_fin_zero]; simp,
       fun _ _ _ _ => LinearMap.ext fun _ => Subsingleton.elim _ _⟩
-  | t + 1, ψ => by
-    obtain ⟨B, _, _, _, δ, h1, h2, h3⟩ := exists_sum_chars t fun s => ψ s.succ
+  | succ t ih =>
+    intro ψ
+    obtain ⟨B, _, _, _, δ, h1, h2, h3⟩ := ih fun s => ψ s.succ
     refine ⟨k × B, inferInstance, inferInstance, inferInstance, (charRep (ψ 0)).prod δ,
       ss_prod' _ _ (ss_of_min _ fun W _ => eq_bot_or_eq_top W) h1, fun g => ?_, fun σ f hf hφ => ?_⟩
     · rw [Fin.prod_univ_succ, ← h2, ← charpoly_charRep, ← LinearMap.charpoly_prodMap]

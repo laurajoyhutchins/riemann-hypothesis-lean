@@ -1,9 +1,57 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.RowMinor
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.EncardBiUnionLe
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.IntegralOfUnimodular
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.LinearFormsBoundedRepresentativesStatement
-import Formalism.FlagUnipotentLattices.CardSubgroupsOfIndexLe
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.RowMinor
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.EncardBiUnionLe
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.IntegralOfUnimodular
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.LinearFormsBoundedRepresentativesStatement
+public import Formalism.FlagUnipotentLattices.CardSubgroupsOfIndexLe
+import Mathlib.Algebra.AffineMonoid.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -147,6 +195,7 @@ theorem expand {E : Type} [Field E] [NumberField E] [StarRing E] (S : HSpace E) 
     (hx : x ∈ Submodule.span E (Set.range e)) : x = ∑ a, S.hT (f a) x • e a := by
   obtain ⟨c, rfl⟩ := (Submodule.mem_span_range_iff_exists_fun E).1 hx
   refine Finset.sum_congr rfl fun a _ => ?_
+
   simp [map_sum, h]
 
 theorem orth_span {E : Type} [Field E] [NumberField E] [StarRing E] (S : HSpace E) {s : Set S.V} {y : S.V}
@@ -203,8 +252,9 @@ theorem mem_of_split {u : D.what₂.Word} {F0 : Fb D u} {Λ : LatV D} (hB : IsBa
     have h1 := orth_apply _ hw (Submodule.subset_span (Or.inl ⟨a, rfl⟩))
     have h2 : (hS D).hT (D.sp.hypE a) (x₁ + x) = 0 := by
       rw [expand (hS D) D.sp.hypE D.sp.hypF (hyp_fe D) hx2]
+
       simp [map_sum, D.sp.hyp_ee]
-    rw [map_add, h2, zero_add] at h1
+    rw [map_add (f := _), h2, zero_add] at h1
     rw [h1, zero_smul]
   rw [hy0, add_zero] at hw e'
   have hx0 : x₁ + x = 0 := by
@@ -217,7 +267,7 @@ theorem mem_of_split {u : D.what₂.Word} {F0 : Fb D u} {Λ : LatV D} (hB : IsBa
 
 theorem iXY_injective : Function.Injective (D.sp.iXY 0) := by
   have hm := D.R.two_le_m
-  rw [injective_iff_map_eq_zero]
+  set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
   intro x hx
   refine (D.sp.X 0).nondeg.1 x fun y => ?_
   rw [← D.sp.iXY_isom 0 (by omega), hx, map_zero, LinearMap.zero_apply]
@@ -273,8 +323,8 @@ theorem fun_reps {u u' : D.what₂.Word} {F0 : Fb D u} {Λ : LatV D} (hSt : Stan
     simp only [LinearMap.sub_apply, LinearMap.add_apply, LinearMap.comp_apply, LinearEquiv.coe_coe]
     ring
 
-variable (D) in
 
+variable (D) in
 abbrev coefI (a : Fin D.R.rS) : FractionalIdeal (𝓞 D.host.E)⁰ D.host.E :=
   ddS D ^ (-((D.R.rS : ℤ) - (a : ℕ)))
 
@@ -289,7 +339,7 @@ theorem coef_mem {u : D.what₂.Word} {F0 : Fb D u} (hB : IsBase D u F0) (a : Fi
     · rw [smul_zero]; exact FractionalIdeal.zero_mem _
   | zero => rw [map_zero]; exact FractionalIdeal.zero_mem _
   | add y z _ _ h1 h2 =>
-    rw [map_add]; exact (coefI D a : Submodule (𝓞 D.host.E) D.host.E).add_mem h1 h2
+    rw [map_add (f := _)]; exact (coefI D a : Submodule (𝓞 D.host.E) D.host.E).add_mem h1 h2
   | smul c y _ h =>
     rw [LinearMap.map_smul_of_tower]
     exact (coefI D a : Submodule (𝓞 D.host.E) D.host.E).smul_mem c h
@@ -414,7 +464,7 @@ theorem main : ∀ (D : D7) (u u' : D.what₂.Word) (F0 : Fb D u) (Λ : LatV D),
       rfl
     obtain ⟨-, n, hn, e⟩ := h2
     refine ⟨rep g, Finset.mem_image_of_mem _ (Fintype.mem_piFinset.2 hg), n, hn, fun p => ?_⟩
-    rw [map_add, e, integralUnipotentFixingFrame_fixes_isotropic hn (hφ p).2, LinearMap.sub_apply]
+    rw [map_add (f := _), e, integralUnipotentFixingFrame_fixes_isotropic hn (hφ p).2, LinearMap.sub_apply]
     abel
 
 end Record

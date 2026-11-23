@@ -1,4 +1,51 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.Category.ModuleCat.Basic
+public import Mathlib.CategoryTheory.ComposableArrows.Basic
+public import Mathlib.Combinatorics.Quiver.ReflQuiver
+public import Mathlib.LinearAlgebra.Quotient.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -25,7 +72,7 @@ def d (n : ℕ) : Cn F n →ₗ[R] Cn F (n + 1) where
   toFun f s := ∑ i : Fin (n + 2), (-1 : ℤ) ^ (i : ℕ) • (F.map (toLast i s)).hom (f (face i s))
   map_add' f g := by
     funext s
-    simp only [Pi.add_apply, map_add, smul_add, Finset.sum_add_distrib]
+    simp only [Pi.add_apply, map_add (f := _), smul_add, Finset.sum_add_distrib]
   map_smul' r f := by
     funext s
     simp only [Pi.smul_apply, map_smul, RingHom.id_apply, Finset.smul_sum]
@@ -76,6 +123,7 @@ theorem d_pullC (n : ℕ) (f : Cn F n) : d F' n (m.pullC n f) = m.pullC (n + 1) 
   funext s
   change ∑ i : Fin (n + 2), (-1 : ℤ) ^ (i : ℕ) • (F'.map (toLast i s)).hom (m.τ _ (f (face i s ⋙ m.G))) =
     m.τ _ (∑ i : Fin (n + 2), (-1 : ℤ) ^ (i : ℕ) • (F.map (m.G.map (toLast i s))).hom (f (face i s ⋙ m.G)))
+
   rw [map_sum]
   exact Finset.sum_congr rfl fun i _ => by rw [map_zsmul, m.nat]
 
@@ -99,13 +147,5 @@ def pull (n : ℕ) : H F n →ₛₗ[σ] H F' n :=
       exact ⟨m.pullC n g, by rw [m.d_pullC, hg]⟩)
 
 end Mor
-
-example (n : ℕ) (f : Cn F n) (s : ComposableArrows C n) : (Mor.id F).pullC n f s = f s := rfl
-
-example : Bn F 0 = ⊥ := rfl
-
-example (f : Cn F 0) (s : ComposableArrows C 1) :
-    d F 0 f s = (F.map (toLast 0 s)).hom (f (face 0 s)) - (F.map (toLast 1 s)).hom (f (face 1 s)) := by
-  simp [d, Fin.sum_univ_two, sub_eq_add_neg]
 
 end GlobalTheory.CatH

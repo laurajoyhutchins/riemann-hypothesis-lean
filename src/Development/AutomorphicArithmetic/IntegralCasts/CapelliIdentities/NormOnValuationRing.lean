@@ -1,4 +1,51 @@
-import Mathlib
+module
+
+public import Mathlib.NumberTheory.Padics.Complex
+public import Mathlib.NumberTheory.Padics.PadicIntegers
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+public import Mathlib.RingTheory.Valuation.Integral
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open scoped NNReal
 
@@ -31,7 +78,7 @@ theorem UpperTheory.Reformulated.B.NormOnValuationRing.mem_max_iff :
     { carrier := {t | ‖φ t‖ < 1}
       add_mem' := fun {a b} ha hb => by
         change ‖φ (a + b)‖ < 1
-        rw [map_add]
+        rw [map_add (f := _)]
         exact (IsUltrametricDist.norm_add_le_max _ _).trans_lt (max_lt ha hb)
       zero_mem' := by simp
       smul_mem' := fun c a ha => by
@@ -51,7 +98,9 @@ theorem UpperTheory.Reformulated.B.NormOnValuationRing.mem_max_iff :
     ext a
     rw [Ideal.mem_comap, hP, φ.commutes, UpperTheory.Reformulated.B.NormOnValuationRing.norm_algebraMap,
       IsLocalRing.mem_maximalIdeal, PadicInt.mem_nonunits]
-  have hmax : P.IsMaximal :=
-    Ideal.isMaximal_of_isIntegral_of_isMaximal_comap (R := ℤ_[l]) P
-      (hcomap ▸ IsLocalRing.maximalIdeal.isMaximal ℤ_[l])
+  have hmax : P.IsMaximal := by
+    apply Ideal.isMaximal_of_isIntegral_of_isMaximal_under (R := ℤ_[l]) P
+    change (P.comap (algebraMap ℤ_[l] T)).IsMaximal
+    rw [hcomap]
+    exact IsLocalRing.maximalIdeal.isMaximal ℤ_[l]
   rw [← IsLocalRing.eq_maximalIdeal hmax, hP]

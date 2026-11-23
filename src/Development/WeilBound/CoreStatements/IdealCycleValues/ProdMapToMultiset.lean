@@ -1,4 +1,52 @@
-import Mathlib
+module
+
+public import Mathlib.Basic.Real.Basic
+public import Mathlib.RingTheory.MvPolynomial.IrreducibleQuadratic
+public import Mathlib.Tactic.Continuity
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MvPolynomial
 
@@ -19,6 +67,7 @@ theorem evL_monomial (φ : (σ →₀ ℕ) → ℝ) (μ : σ →₀ ℕ) (c : �
 theorem evL_eq (φ : (σ →₀ ℕ) → ℝ) (H : MvPolynomial σ ℝ) :
     ∑ μ ∈ H.support, H.coeff μ * φ μ = evL φ H := by
   conv_rhs => rw [H.as_sum]
+
   rw [map_sum]
   exact Finset.sum_congr rfl (fun μ _ => (evL_monomial φ μ _).symm)
 
@@ -30,7 +79,7 @@ theorem evL_rename (e : σ → σ') (φ : (σ' →₀ ℕ) → ℝ) (H : MvPolyn
     evL φ (rename e H) = evL (fun μ => φ (μ.mapDomain e)) H := by
   refine MvPolynomial.induction_on' H (fun μ c => ?_) (fun p q hp hq => ?_)
   · rw [rename_monomial, evL_monomial, evL_monomial]
-  · rw [map_add, map_add, map_add, hp, hq]
+  · rw [map_add (f := _), map_add (f := _), map_add (f := _), hp, hq]
 
 theorem classes_mapDomain (e : σ → σ') (cls : σ' → G) (μ : σ →₀ ℕ) :
     ((μ.mapDomain e).toMultiset.map cls).toList = (μ.toMultiset.map (cls ∘ e)).toList := by
@@ -40,7 +89,7 @@ theorem classes_add_perm (cls : σ → G) (ν μ : σ →₀ ℕ) (Q : List G) :
     (((ν + μ).toMultiset.map cls).toList ++ Q).Perm
       ((ν.toMultiset.map cls).toList ++ ((μ.toMultiset.map cls).toList ++ Q)) := by
   rw [← Multiset.coe_eq_coe, ← Multiset.coe_add, ← Multiset.coe_add, ← Multiset.coe_add]
-  simp only [Multiset.coe_toList, map_add, Multiset.map_add, add_assoc]
+  simp only [Multiset.coe_toList, map_add (f := _), Multiset.map_add (f := _), add_assoc]
 
 theorem evL_mul (n : List G → ℝ) (hp : ∀ l l', l.Perm l' → n l = n l') (cls : σ → G)
     (H P : MvPolynomial σ ℝ) (Q : List G) :
@@ -53,9 +102,9 @@ theorem evL_mul (n : List G → ℝ) (hp : ∀ l l', l.Perm l' → n l = n l') (
     · simp only [monomial_mul, evL_monomial]
       rw [hp _ _ (classes_add_perm cls ν μ Q)]
       ring
-    · rw [add_mul, map_add, ih1, ih2, map_add]
+    · rw [add_mul, map_add (f := _), ih1, ih2, map_add (f := _)]
       ring
-  · rw [mul_add, map_add, ih1, ih2, map_add]
+  · rw [mul_add, map_add (f := _), ih1, ih2, map_add (f := _)]
 
 theorem evL_mul_X (n : List G → ℝ) (hp : ∀ l l', l.Perm l' → n l = n l') (cls : σ → G)
     (H : MvPolynomial σ ℝ) (i : σ) (Q : List G) :
@@ -83,6 +132,7 @@ theorem subst_multiset [AddCommGroup G] [Fintype σ] (d : ℕ) (n : List G → �
     intro l hl k
     let f : G →+ ℝ := AddMonoidHom.mk' (fun b => n (b :: l)) (fun b b' => ha b b' l hl)
     have hf : ∀ b, f b = n (b :: l) := fun _ => rfl
+
     rw [← hf, map_sum]
     refine Finset.sum_congr rfl (fun i _ => ?_)
     rw [map_zsmul, zsmul_eq_mul, hf]
@@ -102,6 +152,7 @@ theorem subst_multiset [AddCommGroup G] [Fintype σ] (d : ℕ) (n : List G → �
     have hlen : ((Multiset.map (fun t => ∑ i, M t i • cls i) s).toList ++ Q).length + 1 = d := by
       rw [List.length_append, Multiset.length_toList, Multiset.card_map]
       omega
+
     rw [hp _ _ hperm, hlin _ hlen, Multiset.map_cons, Multiset.prod_cons, Finset.sum_mul, map_sum]
     refine Finset.sum_congr rfl (fun i _ => ?_)
     have hmid : n (cls i :: ((Multiset.map (fun t => ∑ i, M t i • cls i) s).toList ++ Q)) =
@@ -120,6 +171,7 @@ theorem subst_abs [AddCommGroup G] [Fintype σ] (d : ℕ) (n : List G → ℝ)
       evL (fun μ => n ((μ.toMultiset.map cls).toList ++ Q))
         (aeval (fun t => ∑ i, (C (M t i : ℝ) * X i : MvPolynomial σ ℝ)) H) := by
   conv_rhs => rw [H.as_sum]
+
   rw [map_sum, map_sum]
   refine Finset.sum_congr rfl (fun μ hμ => ?_)
   have hdeg : Multiset.card μ.toMultiset = m := by

@@ -1,7 +1,52 @@
-import Mathlib
-import ReciprocityTheory.DualLattices.DetPolyMulCayleyOmegaPow
-import ReciprocityTheory.DualLattices.VEqZeroOfPowEqOne
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.WeightedSumBounds.PeriodValuation
+module
+
+public import ReciprocityTheory.DualLattices.FischerAdjointStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.DualLattices.DetPolyMulCayleyOmegaPow
+
+@[expose] public section
 
 open ReciprocityTheory.PGsh MvPolynomial
 
@@ -12,7 +57,7 @@ section General
 variable {C : Type} [CommRing C] {κ : Type}
 
 noncomputable def pairing (F : MvPolynomial κ C) : MvPolynomial κ C →ₗ[C] C :=
-  ∑ A ∈ F.support, (coeff A F * (A.prod fun _ e => (e.factorial : C))) • lcoeff C A
+  ∑ A ∈ F.support, (AddMonoidAlgebra.coeff F A * (A.prod fun _ e => (e.factorial : C))) • lcoeff C A
 
 end General
 
@@ -22,7 +67,7 @@ open MvPolynomial in
 variable {C : Type} [CommRing C] {κ : Type} in
 private theorem pairing_eq_sum_factorial (F G : MvPolynomial κ C) :
     _root_.GlobalTheory.DetPowPairing.pairing F G =
-      ∑ A ∈ F.support, coeff A F * (A.prod fun _ e => (e.factorial : C)) * coeff A G := by
+      ∑ A ∈ F.support, AddMonoidAlgebra.coeff F A * (A.prod fun _ e => (e.factorial : C)) * AddMonoidAlgebra.coeff G A := by
   rw [_root_.GlobalTheory.DetPowPairing.pairing, LinearMap.sum_apply]
   simp only [LinearMap.smul_apply, lcoeff_apply, smul_eq_mul]
 
@@ -46,10 +91,10 @@ variable {C : Type} [CommRing C] {κ : Type} in
 private theorem pairing_eq_sum_of_support_subset (F G : MvPolynomial κ C)
     (S : Finset (κ →₀ ℕ)) (hS : F.support ⊆ S) :
     _root_.GlobalTheory.DetPowPairing.pairing F G =
-      ∑ A ∈ S, coeff A F * (A.prod fun _ e => (e.factorial : C)) * coeff A G := by
+      ∑ A ∈ S, AddMonoidAlgebra.coeff F A * (A.prod fun _ e => (e.factorial : C)) * AddMonoidAlgebra.coeff G A := by
   rw [pairing_eq_sum_factorial]
   refine Finset.sum_subset hS fun A _ hA => ?_
-  have h : coeff A F = 0 := by simpa using hA
+  have h : AddMonoidAlgebra.coeff F A = 0 := by simpa using hA
   rw [h]; ring
 
 open MvPolynomial in
@@ -67,7 +112,7 @@ open MvPolynomial in
 variable {C : Type} [CommRing C] {κ : Type} in
 private theorem pairing_monomial_eq_coeff_mul_prod_factorial_mul (F : MvPolynomial κ C) (A : κ →₀ ℕ) (b : C) :
     _root_.GlobalTheory.DetPowPairing.pairing F (monomial A b) =
-      coeff A F * (A.prod fun _ e => (e.factorial : C)) * b := by
+      AddMonoidAlgebra.coeff F A * (A.prod fun _ e => (e.factorial : C)) * b := by
   classical
   rw [pairing_eq_sum_of_support_subset F _ (insert A F.support)
       (Finset.subset_insert _ _), Finset.sum_eq_single A]
@@ -129,7 +174,7 @@ private theorem pairing_X_mul_eq_pairing_pderiv (x : κ) (F G : MvPolynomial κ 
         conv_lhs => rw [hA]
         rw [prod_factorial_add_single_one_eq_succ_mul_prod_factorial, hAx]
       rw [hf]; ring
-  | add p q hp hq => rw [map_add, map_add, map_add, hp, hq]
+  | add p q hp hq => rw [map_add (f := _), map_add (f := _), map_add (f := _), hp, hq]
 
 open MvPolynomial in
 variable {C : Type} [CommRing C] {κ : Type} in
@@ -152,8 +197,9 @@ private theorem pairing_cayDet_mul' (n : ℕ) (F G : MvPolynomial (Fin n × Fin 
     _root_.GlobalTheory.DetPowPairing.pairing (_root_.ReciprocityTheory.PGsh.cayDet n C * F) G =
       _root_.GlobalTheory.DetPowPairing.pairing F (_root_.ReciprocityTheory.PGsh.cayOp n C G) := by
   unfold _root_.ReciprocityTheory.PGsh.cayDet _root_.ReciprocityTheory.PGsh.cayOp _root_.ReciprocityTheory.PGsh.cayMono
+
   rw [Matrix.det_apply, Finset.sum_mul, pairing_comm', map_sum,
-    LinearMap.sum_apply, map_sum]
+  LinearMap.sum_apply, map_sum]
   refine Finset.sum_congr rfl fun σ _ => ?_
   rw [Units.smul_def, smul_mul_assoc, map_zsmul, LinearMap.smul_apply, map_zsmul,
     pairing_comm']
@@ -173,12 +219,12 @@ private theorem pairing_cayDet_pow_mul (n k : ℕ) (F G : MvPolynomial (Fin n ×
   | succ k ih =>
     rw [pow_succ, mul_assoc, ih, pairing_cayDet_mul', pow_succ', Module.End.mul_apply]
 
+
 open MvPolynomial in
 variable {C : Type} [CommRing C] {n : ℕ} in
-
 theorem _root_.GlobalTheory.DetPowPairing.pairing_pow_proportional :
   (∀ (C : Type) [Field C] [CharZero C] (n₀ M Y : ℕ) (Q : MvPolynomial (Fin n₀ × Fin n₀) C), M ≤ Y → Q.IsHomogeneous (n₀ * M) →
-    (∑ A ∈ (_root_.ReciprocityTheory.PGsh.cayDet n₀ C ^ Y).support, MvPolynomial.coeff A (_root_.ReciprocityTheory.PGsh.cayDet n₀ C ^ Y) * (A.prod fun _ e => (e.factorial : C)) * MvPolynomial.coeff A (_root_.ReciprocityTheory.PGsh.cayDet n₀ C ^ (Y - M) * Q)) * (∑ A ∈ (_root_.ReciprocityTheory.PGsh.cayDet n₀ C ^ M).support, MvPolynomial.coeff A (_root_.ReciprocityTheory.PGsh.cayDet n₀ C ^ M) * (A.prod fun _ e => (e.factorial : C)) * MvPolynomial.coeff A (_root_.ReciprocityTheory.PGsh.cayDet n₀ C ^ M)) = (∑ A ∈ (_root_.ReciprocityTheory.PGsh.cayDet n₀ C ^ M).support, MvPolynomial.coeff A (_root_.ReciprocityTheory.PGsh.cayDet n₀ C ^ M) * (A.prod fun _ e => (e.factorial : C)) * MvPolynomial.coeff A (Q)) * (∑ A ∈ (_root_.ReciprocityTheory.PGsh.cayDet n₀ C ^ Y).support, MvPolynomial.coeff A (_root_.ReciprocityTheory.PGsh.cayDet n₀ C ^ Y) * (A.prod fun _ e => (e.factorial : C)) * MvPolynomial.coeff A (_root_.ReciprocityTheory.PGsh.cayDet n₀ C ^ Y))) := by
+    (∑ A ∈ (_root_.ReciprocityTheory.PGsh.cayDet n₀ C ^ Y).support, AddMonoidAlgebra.coeff (_root_.ReciprocityTheory.PGsh.cayDet n₀ C ^ Y) A * (A.prod fun _ e => (e.factorial : C)) * AddMonoidAlgebra.coeff (_root_.ReciprocityTheory.PGsh.cayDet n₀ C ^ (Y - M) * Q) A) * (∑ A ∈ (_root_.ReciprocityTheory.PGsh.cayDet n₀ C ^ M).support, AddMonoidAlgebra.coeff (_root_.ReciprocityTheory.PGsh.cayDet n₀ C ^ M) A * (A.prod fun _ e => (e.factorial : C)) * AddMonoidAlgebra.coeff (_root_.ReciprocityTheory.PGsh.cayDet n₀ C ^ M) A) = (∑ A ∈ (_root_.ReciprocityTheory.PGsh.cayDet n₀ C ^ M).support, AddMonoidAlgebra.coeff (_root_.ReciprocityTheory.PGsh.cayDet n₀ C ^ M) A * (A.prod fun _ e => (e.factorial : C)) * AddMonoidAlgebra.coeff (Q) A) * (∑ A ∈ (_root_.ReciprocityTheory.PGsh.cayDet n₀ C ^ Y).support, AddMonoidAlgebra.coeff (_root_.ReciprocityTheory.PGsh.cayDet n₀ C ^ Y) A * (A.prod fun _ e => (e.factorial : C)) * AddMonoidAlgebra.coeff (_root_.ReciprocityTheory.PGsh.cayDet n₀ C ^ Y) A)) := by
   intro C _ _ n₀ M Y Q hMY _
   simp only [← pairing_eq_sum_factorial]
   obtain ⟨c, hc⟩ := exists_cayOp_pow_cayDet_pow (C := C) n₀ (Y - M) Y

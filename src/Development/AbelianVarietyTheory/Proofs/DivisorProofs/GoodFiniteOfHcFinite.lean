@@ -1,6 +1,46 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ISupIInfEigenspaceEqTop
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ThetaIntegrandIntegrable
+module
+
+public import Formalism.LocalToGlobal.IndefiniteReal.SubgroupCharExtensionOneApply
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ThetaIntegrandIntegrable
+import Formalism.LocalToGlobal.GlobalTheory.GL5.FamilyMassVolumeIdentityOfClassDecomp
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.L2.Theta Formalism.L2.DIV Formalism.IndefR.Mult Formalism.IndefR.Lev
   Formalism.IndefR
@@ -45,19 +85,5 @@ theorem exists_open_subgroup (V : HSp D) (β : GL (Fin V.rank) (Lev.EAf D)) (L :
   · exact Kg_le_lev (D := L) (T := L.Pg ∪ L.Q) Finset.subset_union_left Finset.subset_union_right hk
   · unfold levChi
     rw [levFn_eq_one Finset.subset_union_left Finset.subset_union_right hk, Units.val_one]
-
-theorem goodFinite_of_hcFinite' (D : D7)
-    (h : ∀ θ (j : ℕ), 1 ≤ j → j ≤ D.R.m → ∀ (M : GlobalTheory.IndefiniteRowSideFullHecke.GoodReductionModelReading.ModelW D j) J χ, HCFinite θ M J χ) :
-    GlobalTheory.HeckeOrthSum.GoodFinite D := by
-  intro θ hθ pb Pg _ pl _ red ψ _ om _ Sb _ j h1 h2 hj M β _
-  have := h θ j h1 h2 M _ _ hθ (exists_open_subgroup (D.sp.W j) β (GlobalTheory.IndefiniteRowSideFullHecke.GoodReductionModelReading.levelDatumAtBasePrime (D.sp.W j) Pg ψ))
-  exact Submodule.finiteDimensional_of_le (goodPart_le θ M _ _ _)
-
-theorem goodFinite_of_hcFinite : ∀ D : Formalism.BasicNotions.D7,
-    (∀ θ (V : Formalism.BasicNotions.TH.HSp D) S (M : Formalism.IndefR.Mult.DSModel V S) J χ, Formalism.IndefR.Mult.HCFinite θ M J χ) →
-      GlobalTheory.HeckeOrthSum.GoodFinite D := by
-  intro D h θ hθ pb Pg _ pl _ red ψ _ om _ Sb _ j _ _ hj M β _
-  have := h θ _ _ M _ _ hθ (exists_open_subgroup (D.sp.W j) β (GlobalTheory.IndefiniteRowSideFullHecke.GoodReductionModelReading.levelDatumAtBasePrime (D.sp.W j) Pg ψ))
-  exact Submodule.finiteDimensional_of_le (goodPart_le θ M _ _ _)
 
 end GlobalTheory.GoodFiniteDim

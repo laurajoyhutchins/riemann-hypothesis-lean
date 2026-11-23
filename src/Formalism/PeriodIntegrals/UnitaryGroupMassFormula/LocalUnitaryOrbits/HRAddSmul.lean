@@ -1,7 +1,50 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalUnitaryOrbits.OmAtComplZero
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalUnitaryOrbits.MeasureImageCosets
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerOrbitVolume.LocDensHI
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalUnitaryOrbits.ProdEta
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalUnitaryOrbits.MeasureImageCosets
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalUnitaryOrbits.OmAtComplZero
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerOrbitVolume.LocDensHI
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -21,7 +64,7 @@ def lamA (a : ℕ) : AddSubgroup (TupV (E := E) v n a) where
   neg_mem' := fun hx i => (latLoc (E := E) v Λ).neg_mem (hx i)
 
 def lamP (a : ℕ) (ϖ : Fv F v) : AddSubgroup (TupV (E := E) v n a) :=
-  (lamA v Λ a).map (DistribMulAction.toAddMonoidHom (TupV (E := E) v n a) (sc (E := E) v ϖ))
+  (lamA v Λ a).map (DistribSMul.toAddMonoidHom (TupV (E := E) v n a) (sc (E := E) v ϖ))
 
 def clsU (a : ℕ) (ϖ : Fv F v) (T : Matrix (Fin a) (Fin a) (Fv F v ⊗[F] E)) :
     Set (lamA v Λ a ⧸ (lamP v Λ a ϖ).addSubgroupOf (lamA v Λ a)) :=
@@ -44,7 +87,7 @@ def ClsU (a : ℕ) (Y : TupV (E := E) v n a) : Prop :=
 theorem hR_add_smul (s : Fv F v ⊗[F] E) (x z y w : Fin n → Fv F v ⊗[F] E) :
     hR (Fv F v) σ J (x + s • z) (y + s • w) = hR (Fv F v) σ J x y + s * hR (Fv F v) σ J x w +
       sigR (Fv F v) σ s * hR (Fv F v) σ J z y + sigR (Fv F v) σ s * s * hR (Fv F v) σ J z w := by
-  simp only [hR, Formalism.UG.hform, Pi.add_apply, Pi.smul_apply, smul_eq_mul, map_add, map_mul,
+  simp only [hR, Formalism.UG.hform, Pi.add_apply, Pi.smul_apply, smul_eq_mul, map_add (f := _), map_mul,
     Finset.mul_sum, ← Finset.sum_add_distrib]
   refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
   ring
@@ -104,7 +147,7 @@ theorem countU_of (a : ℕ) (Y : TupV (E := E) v n a) (hM : MeasU σ J ψ v Λ a
   have hq := qv_pos v
   set μ := dX σ J ψ v a with hμdef
   have : μ.IsAddHaarMeasure := by
-    rw [hμdef, dX, dif_pos hμ]
+    rw [hμdef, dX, dite_eq_left hμ]
     exact hμ.choose_spec.1
   have hPL : lamP v Λ a ϖ ≤ lamA v Λ a := by
     rintro _ ⟨Z, hZ, rfl⟩ i

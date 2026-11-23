@@ -1,8 +1,53 @@
-import Formalism.SharpRestriction.GrowthBounds.HermitianTensor.CloudIsoDef
-import Formalism.SharpRestriction.GrowthBounds.ColumnSpanDensity.LatRetract
-import Formalism.SharpRestriction.GrowthBounds.ColumnSpanDensity.TensorKP
-import Formalism.SharpRestriction.GrowthBounds.ColumnSpanDensity.OneMemDualWeyl
-import Lemmata.DualWeylPullback.DualWeylPull
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.HermitianTensor.CloudIsoDef
+public import Formalism.SharpRestriction.GrowthBounds.ProjectionLemmaBaseLevel
+public import Formalism.GradedWeylDivisibility.FinalD
+public import Formalism.SharpRestriction.GrowthBounds.ColumnSpanDensity.LatRetract
+public import Formalism.SharpRestriction.GrowthBounds.ColumnSpanDensity.OneMemDualWeyl
+public import Formalism.SharpRestriction.GrowthBounds.ColumnSpanDensity.TensorKP
+import Formalism.SharpRestriction.GrowthBounds.LatticeSystems
+public import Lemmata.DualWeylPullback.DualWeylPull
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Formalism.PolynomialDimension.WeylDim
+
+@[expose] public section
 
 noncomputable section
 
@@ -171,7 +216,7 @@ theorem iso_ten {O K : Type} [CommRing O] [Field K] [Algebra O K] {S : Type} [Fi
       exact Submodule.subset_span ⟨fun s => ρ s (P s), fun s => h1 s _ (hP s), rfl⟩
     · rw [map_zero]; exact Submodule.zero_mem _
     · intro x y _ _ hx hy
-      rw [map_add]; exact Submodule.add_mem _ hx hy
+      rw [map_add (f := _)]; exact Submodule.add_mem _ hx hy
     · intro c x _ hx
       rw [← algebraMap_smul K c x, map_smul, algebraMap_smul]
       exact Submodule.smul_mem _ _ hx
@@ -187,7 +232,7 @@ theorem iso_ten {O K : Type} [CommRing O] [Field K] [Algebra O K] {S : Type} [Fi
       exact Finset.prod_congr rfl fun s _ => by rw [h2 s _ (hP s)]
     · rw [mul_zero, map_zero]
     · intro x y _ _ hx hy
-      rw [mul_add, map_add, hx, hy]
+      rw [mul_add, map_add (f := _), hx, hy]
     · intro c x _ hx
       rw [mul_smul_comm, map_smul, hx]
   rw [← hB F hF]

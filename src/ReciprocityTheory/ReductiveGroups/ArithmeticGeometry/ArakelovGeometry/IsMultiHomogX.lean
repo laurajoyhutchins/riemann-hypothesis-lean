@@ -1,4 +1,55 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.IsMultiHomogIdealChain
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.AbsProdSubProdSubLinLe
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.DoubleBlock
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.IsHomogeneousGrL
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.IsMultiHomogIdealChain
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.SupportSubsetMonoBox
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -64,7 +115,23 @@ theorem lg_chain (a : K → ℕ) {N : ℕ} {F : Fin (N + 1) → Ideal (MRing ι)
       ∀ g, g ∈ q j ↔ g * f j ∈ F j.castSucc)
     (ha : ∀ j k, c j k ≤ a k) {p : ℕ} (hp : 0 < p) (hpq : ∀ j, (p : MRing ι) ∈ q j) :
     lg (F 0) a = ∑ j, lg (q j) (a - c j) := by
-  rw [lg, card_mPiece_chain a N F f c q h0 hlast hj ha, Nat.cast_prod, Real.log_prod]
+  have hcard : Nat.card (mPiece (F 0) a) = ∏ j, Nat.card (mPiece (q j) (a - c j)) := by
+    clear hpq
+    induction N with
+    | zero =>
+      have htop : F 0 = ⊤ := hlast
+      rw [htop, card_mPiece_top, Fin.prod_univ_zero]
+    | succ N ih =>
+      have htail := ih (F := fun j => F j.succ) (f := fun j => f j.succ)
+        (c := fun j => c j.succ) (q := fun j => q j.succ)
+        (isMultiHomogIdeal_chain h0 (fun j => ⟨(hj j).1, (hj j).2.1⟩) 1)
+        (by simpa only [Fin.succ_last] using hlast)
+        (fun j => by simpa only [Fin.succ_castSucc] using hj j.succ)
+        (fun j => ha j.succ)
+      obtain ⟨hf, hF, hq⟩ := hj 0
+      rw [Fin.castSucc_zero] at hF hq
+      rw [card_mPiece_step h0 hf hq (ha 0), ← hF, htail, Fin.prod_univ_succ, mul_comm]
+  rw [lg, hcard, Nat.cast_prod, Real.log_prod]
   · rfl
   · intro j _
     exact_mod_cast (card_mPiece_pos _ _ hp (hpq j)).ne'

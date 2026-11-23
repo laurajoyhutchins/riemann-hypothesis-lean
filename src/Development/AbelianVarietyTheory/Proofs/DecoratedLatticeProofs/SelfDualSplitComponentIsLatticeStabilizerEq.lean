@@ -1,8 +1,50 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.IsSumFrame
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.MemHomLatticeCompletionIffSupportedMaps
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.LatticeLocalEqIntegralAlmostAll
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.PlaceIdempotentActsOnSupportedAndOff
+module
+
+public import Development.AbelianVarietyTheory.Definitions.LatticeFrames.IsSumFrame
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.LatticeLocalEqIntegralAlmostAll
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.MemHomLatticeCompletionIffSupportedMaps
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.PlaceIdempotentActsOnSupportedAndOff
+import Formalism.LocalToGlobal.BesselHermitianTheta.LemmasWeil
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.StandardLattice Formalism.L2.Theta Formalism.IndefR.Datum Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes GlobalTheory.FinPl GlobalTheory.MixPer GlobalTheory.MixModel ValuativeRel Matrix NumberField
 open scoped Pointwise TensorProduct
@@ -32,7 +74,7 @@ theorem mul_mem_intAE {x y : Af D.host.F ⊗[D.host.F] D.host.E} (hx : x ∈ int
 theorem finPart_cA (x : AE D) : finPart D (cA D x) = sigR (Af D.host.F) D.sp.cm.sig (finPart D x) := by
   induction x using TensorProduct.induction_on with
   | zero => simp only [RingHom.map_zero]
-  | add x y hx hy => simp only [RingHom.map_add, hx, hy]
+  | add x y hx hy => simp only [RingHom.map_add (f := _), hx, hy]
   | tmul a x => rfl
 
 theorem sigR_mem_intAE {z : Af D.host.F ⊗[D.host.F] D.host.E} (hz : z ∈ intAE D) :
@@ -43,7 +85,7 @@ theorem sigR_mem_intAE {z : Af D.host.F ⊗[D.host.F] D.host.E} (hz : z ∈ intA
     exact AddSubgroup.subset_closure ⟨a, ha, ⟨D.sp.cm.sig (o : D.host.E),
       (show IsIntegral ℤ (o : D.host.E) from o.2).map (D.sp.cm.sig : D.host.E →+* D.host.E).toIntAlgHom⟩, rfl⟩
   | zero => rw [RingHom.map_zero]; exact zero_mem _
-  | add x y _ _ hx hy => rw [RingHom.map_add]; exact add_mem hx hy
+  | add x y _ _ hx hy => rw [RingHom.map_add (f := _)]; exact add_mem hx hy
   | neg x _ hx => rw [RingHom.map_neg]; exact neg_mem hx
 
 theorem cA_int_iff (a : AE D) : finPart D (cA D a) ∈ intAE D ↔ finPart D a ∈ intAE D := by
@@ -81,7 +123,7 @@ theorem pairing_int (hL : IsSelfDualC S L) {P : Pl D → Prop} {s : Fin S.rank �
   | add x y _ _ hx hy =>
     have h : pairing S s (x + y) = pairing S s x + pairing S s y := by
       simp only [pairing, Pi.add_apply, mul_add, Finset.sum_add_distrib]
-    rw [h, RingHom.map_add]; exact add_mem hx hy
+    rw [h, RingHom.map_add (f := _)]; exact add_mem hx hy
   | neg x _ hx =>
     have h : pairing S s (-x) = -pairing S s x := by
       simp only [pairing, Pi.neg_apply, mul_neg, Finset.sum_neg_distrib]
@@ -111,7 +153,7 @@ theorem int_mul_mem {v : Pl D} {a : AE D} (ha : a ∈ intAt D (· = v)) {x : Fin
       rw [Algebra.TensorProduct.tmul_mul_tmul, mul_one, one_mul]
       rfl
     | zero => simp only [AddMonoidHom.map_zero, zero_mul]; exact zero_mem _
-    | add a b _ _ ha hb => simp only [AddMonoidHom.map_add, add_mul]; exact add_mem ha hb
+    | add a b _ _ ha hb => simp only [AddMonoidHom.map_add (f := _), add_mul]; exact add_mem ha hb
     | neg a _ ha => simp only [AddMonoidHom.map_neg, neg_mul]; exact neg_mem ha
   have h := key _ ha.2
   rwa [GlobalTheory.LatAlmostStd.plc_finPart, GlobalTheory.LatAlmostStd.smul_eq_of_mem_idAt ha.1] at h
@@ -123,6 +165,7 @@ theorem exists_expansion (hL : IsSelfDualC S L) :
   refine ⟨m, s, s', hs, hs', fun y a => ?_⟩
   have h1 : ∀ b, ∑ l, incA D (row S (s' l) b) * y b * incA D (s l a) = if a = b then y b else 0 := fun b => by
     have h2 : ∑ l, incA D (row S (s' l) b) * y b * incA D (s l a) = incA D (∑ l, s l a * row S (s' l) b) * y b := by
+
       rw [map_sum, Finset.sum_mul]
       exact Finset.sum_congr rfl fun l _ => by rw [RingHom.map_mul]; ring
     rw [h2]
@@ -217,6 +260,7 @@ theorem mt_sec (β : Frame p S n) (g : GL n k) (y : Fin S.rank → k) :
     mt S (β.gl g) *ᵥ (fun i => p.sec (y i)) = fun i => p.sec (((β.b * g.val * β.b') *ᵥ y) i) := by
   funext i
   rw [← β.gl_mat g]
+
   simp only [Matrix.mulVec, dotProduct, map_sum, Matrix.map_apply]
   refine Finset.sum_congr rfl fun j _ => ?_
   rw [sec_mul, p.sec_pr, mul_comm p.e, mul_assoc, e_mul_sec]
@@ -225,17 +269,19 @@ theorem mt_csec (h : GA D S) (z : Fin S.rank → k) :
     mt S h *ᵥ (fun i => cA D (p.sec (z i))) =
       fun i => cA D (p.sec ((((mt S h).map (fun a => p.pr (cA D a))) *ᵥ z) i)) := by
   funext i
+
   simp only [Matrix.mulVec, dotProduct, map_sum, Matrix.map_apply]
   refine Finset.sum_congr rfl fun j _ => ?_
   rw [sec_mul, p.sec_pr, mul_comm p.e, mul_assoc, e_mul_sec, map_mul, cA_cA]
 
 theorem csec_mem_idAt (c : k) : cA D (p.sec c) ∈ idAt D (· = p.v) := by
   rw [idem_iff]
-  have h : (p.e + cA D p.e) = cA D (p.e + cA D p.e) := by rw [RingHom.map_add, cA_cA, add_comm]
+  have h : (p.e + cA D p.e) = cA D (p.e + cA D p.e) := by rw [RingHom.map_add (f := _), cA_cA, add_comm]
   rw [h, ← RingHom.map_mul, (idem_iff p _).1 (sec_mem_idAt p c)]
 
 theorem pairing_sec (s : Fin S.rank → D.host.E) (u : Fin S.rank → k) :
     pairing S s (fun i => p.sec (u i)) = p.sec (∑ b, p.pr (incA D (row S s b)) * u b) := by
+
   rw [map_sum]
   refine Finset.sum_congr rfl fun b _ => ?_
   rw [mul_comm, sec_mul_right, mul_comm]
@@ -243,9 +289,11 @@ theorem pairing_sec (s : Fin S.rank → D.host.E) (u : Fin S.rank → k) :
 theorem pairing_csec (s : Fin S.rank → D.host.E) (z : Fin S.rank → k) :
     pairing S s (fun i => cA D (p.sec (z i))) =
       cA D (p.sec (∑ i, ∑ j, p.pr (incA D (s i)) * p.pr (cA D (incA D (S.gram i j))) * z j)) := by
+
   rw [Finset.sum_comm, map_sum, map_sum]
   refine Finset.sum_congr rfl fun b _ => ?_
   have h : ∑ i, p.pr (incA D (s i)) * p.pr (cA D (incA D (S.gram i b))) = p.pr (cA D (incA D (row S s b))) := by
+
     simp only [row, map_sum, RingHom.map_mul, cA_incA (star _), star_star]
   rw [← Finset.sum_mul, h, mul_comm (p.pr _), ← sec_mul_right, RingHom.map_mul, cA_cA, mul_comm]
 
@@ -262,6 +310,7 @@ theorem exists_gen {L : Lat S} (hL : IsSelfDualC S L) :
   refine ⟨m, s, fun l u => ∑ b, p.pr (incA D (row S (s' l) b)) * u b, hs, fun u => ?_, fun u hu l => ?_⟩
   · funext a
     have h := congrArg p.pr (hd (fun i => p.sec (u i)) a)
+
     simp only [pairing_sec, map_sum p.pr, RingHom.map_mul, p.pr_sec] at h
     rw [Finset.sum_apply]
     exact h
@@ -360,13 +409,8 @@ theorem exists_lat : ∀ (D : D7) (k : Type) [Field k] [ValuativeRel k] [Topolog
       rw [hexp x]
       exact Submodule.sum_mem _ fun l _ =>
         Submodule.smul_mem _ (⟨_, hint _ hx l⟩ : 𝒪[k]) (Submodule.subset_span ⟨l, rfl⟩)
-    · rw [eq_top_iff]
-      intro x _
-      rw [hexp x]
-      refine Submodule.sum_mem _ fun l _ => Submodule.smul_mem _ _ (Submodule.subset_span ?_)
-      change (fun i => p.sec ((β.b *ᵥ (β.b' *ᵥ fun a => p.pr (incA D (s l a)))) i)) ∈ latV S L _
-      rw [Matrix.mulVec_mulVec, β.bb', Matrix.one_mulVec]
-      exact sec_inc_mem (hs l)
+    · intro s hs hli
+      exact (LinearIndependent.iff_fractionRing _ _).mp hli
   · intro g
     have key : ∀ x : n → k, mt S (β.gl g) *ᵥ (fun i => p.sec ((β.b *ᵥ x) i)) =
         fun i => p.sec ((β.b *ᵥ (g.val *ᵥ x)) i) := by

@@ -1,4 +1,56 @@
-import Formalism.SharpRestriction.GrowthBounds.MultisetValuation.StmtNumFEx
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.MultisetValuation.StmtNumEOf
+public import Formalism.SharpRestriction.GrowthBounds.MultisetValuation.NcCGNonneg
+public import Formalism.SharpRestriction.GrowthBounds.MultisetValuation.NcIotaInj
+public import Formalism.SharpRestriction.GrowthBounds.MultisetValuation.NcLgpLe
+public import Formalism.SharpRestriction.GrowthBounds.MultisetValuation.NcSummableMin
+import Formalism.SharpRestriction.GrowthBounds.MultisetValuation.NcTsumOdd
+public import Formalism.SharpRestriction.GrowthBounds.MultisetValuation.NdBNonneg
+import Formalism.SharpRestriction.GrowthBounds.MultisetValuation.NdLszLe
+import Formalism.SharpRestriction.GrowthBounds.MultisetValuation.NumericalClosedOfNeed
+public import Formalism.SharpRestriction.GrowthBounds.MultisetValuation.PriceBoundLargePrimes
+public import Formalism.SharpRestriction.GrowthBounds.MultisetValuation.PriceLinearCombinationLe
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Formalism.SharpRestriction.GrowthBounds.MultisetValuation.NcSize
+
+@[expose] public section
 
 noncomputable section
 
@@ -160,7 +212,7 @@ theorem lw_size (X : Formalism.MainNotions.G.Inst D L) (Y : Formalism.MainNotion
       push_cast at h3
       have h4 : (Formalism.MainNotions.G.aL L (t0 + s.val • Formalism.MainNotions.G.hP D (D.what₂.places.resChar w)) : ℝ) ≤ 6 / 5 * L.sc.a := by
         unfold Formalism.MainNotions.G.aL
-        rw [dif_pos (hTT.1 hsT)]
+        rw [dite_eq_left (hTT.1 hsT)]
         exact lw_aT_le _
       linarith
     · unfold al
@@ -202,8 +254,8 @@ theorem lw_size (X : Formalism.MainNotions.G.Inst D L) (Y : Formalism.MainNotion
     have h9 : L.sc.a * (4 * L.sc.a) = (2 * L.sc.a) ^ 2 := by ring
     linarith
 
-open Classical in
 
+open Classical in
 theorem numeric_comparison_of_constants (D : Formalism.BasicNotions.D7) (L : SizeData₂ D) (X : Formalism.MainNotions.G.Inst D L) (Y : Formalism.MainNotions.G.LatInst D)
     (K : Formalism.MainNotions.G.Consts) (h1 : 5 ≤ K.dl1) (h2 : 4 ≤ K.dl2) (h3 : 1 ≤ K.Pr1) (h4 : Formalism.MainNotions.G.rG L.sc < D.R.k)
     (h4' : 2 ≤ L.sc.x) (hS : Formalism.MainNotions.SizesAt L) : Formalism.MainNotions.FormalGroupSystem.SmallResidueCharComparison D L X Y K := by

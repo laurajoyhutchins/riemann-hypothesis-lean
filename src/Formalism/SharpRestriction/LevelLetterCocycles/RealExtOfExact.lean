@@ -1,4 +1,49 @@
-import Formalism.SharpRestriction.LevelLetterCocycles.SecondComparisonInCoordinates
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.SecondComparisonInCoordinates
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -96,13 +141,13 @@ def toY (hB : UnitBasis W e) (X : ExtIn e ι π E) (C : Coord W I T) (C₀ : Coo
   toFun p := ⟨W.map ι (C.t i p.1) + sec hB E (C₀.t i p.2), by
     refine ⟨?_, fun δ hδ => ?_⟩
     · rw [smul_add, ← map_smulA, ← sec_smulA, C.t_letter, C₀.t_letter]
-    · rw [map_add, ← W.map_γ, γ_sec hB δ (X.eΔ δ hδ) (X.EΔ δ hδ), C.t_Δ i _ δ hδ, C₀.t_Δ i _ δ hδ]⟩
+    · rw [map_add (f := _), ← W.map_γ, γ_sec hB δ (X.eΔ δ hδ) (X.EΔ δ hδ), C.t_Δ i _ δ hδ, C₀.t_Δ i _ δ hδ]⟩
   map_zero' := by
     apply Subtype.ext
     simp [C.t_zero, C₀.t_zero]
   map_add' p q := by
     apply Subtype.ext
-    simp only [Prod.fst_add, Prod.snd_add, C.t_add, C₀.t_add, map_add, AddSubgroup.coe_add]
+    simp only [Prod.fst_add, Prod.snd_add, C.t_add, C₀.t_add, map_add (f := _), AddSubgroup.coe_add]
     abel
 
 theorem toY_coe (hB : UnitBasis W e) (X : ExtIn e ι π E) (C : Coord W I T) (C₀ : Coord W I W.one)
@@ -127,7 +172,7 @@ theorem toY_bij (hB : UnitBasis W e) (X : ExtIn e ι π E) (C : Coord W I T) (C�
       (toY_coe hB X C C₀ i (a, b)).symm.trans (congrArg Subtype.val hp)
     have hb : C₀.t i b = 0 := by
       have h2 := congrArg (W.map π) h0
-      rw [map_add, hπι, map_sec hB π X.πE, zero_add, map_zero] at h2
+      rw [map_add (f := _), hπι, map_sec hB π X.πE, zero_add, map_zero] at h2
       exact h2
     have hb0 : b = 0 := coord_eq_zero_of_t_eq_zero C₀ i b hb
     rw [hb, map_zero, add_zero] at h0
@@ -181,7 +226,7 @@ def realExtOf (hB : UnitBasis W e) (X : ExtIn e ι π E) (C : Coord W I T) (C₀
     { f := LinearMap.snd (PowerSeries O) C.V C₀.V
       coord_hom_map_trace := fun i p => by
         change C₀.t i p.2 = W.map π ((coordY hB X C C₀).t i ((p.1, p.2) : C.V × C₀.V))
-        rw [coordY_t_apply_eq_map_add_sec, map_add, map_π_ι X, map_sec hB π X.πE, zero_add]
+        rw [coordY_t_apply_eq_map_add_sec, map_add (f := _), map_π_ι X, map_sec hB π X.πE, zero_add]
       crys := X.crysY
       crys' := X.crys1 }
 
@@ -259,6 +304,7 @@ theorem eΔ_of (C₀ : Coord W I W.one) (e₀ : C₀.V) (he₀ : ∀ i, C₀.t i
     exact C₀.t_Δ i e₀ δ hδ
   calc W.γD W.one δ e = W.γD W.one δ ((∑ i, (letE i : LetA O n)) • e) := by rw [hsum, one_smul]
     _ = (∑ i, (letE i : LetA O n)) • e := by
+
       rw [Finset.sum_smul, map_sum]
       simp only [key]
     _ = e := by rw [hsum, one_smul]
@@ -289,7 +335,7 @@ theorem unitBasis_of (hU : UnitGen W e) (hcr : IsCrys PD W.one.ρ) : UnitBasis W
     exact Submodule.mem_span_singleton_self e
   have hex : ∀ x : W.DD W.one, ∃ ε : W.EE, x = ε • e := by
     intro x
-    refine hb.inductionOn x (fun x => ∃ ε : W.EE, x = ε • e) ⟨0, (zero_smul _ _).symm⟩ ?_ ?_ ?_
+    refine hb.inductionOn x ?_ ?_ ?_
     · intro m
       have hm : (m : W.DD W.one) ∈ Submodule.span (LetA O n) {e} := by
         rw [← hN]

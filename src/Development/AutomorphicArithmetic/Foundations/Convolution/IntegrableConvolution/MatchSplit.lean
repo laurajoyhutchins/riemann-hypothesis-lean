@@ -1,10 +1,53 @@
-import Mathlib
-import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.ClosedProperAlt
-import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.GeoAbs
-import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.GlueBasic
+module
+
+public import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.ClosedProperAlt
+public import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.GeoAbs
+public import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.GlueBasic
 import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.PushTest
 import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.QuotAny
-import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.QuotFin
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MeasureTheory PositivityTheory.Rg.Tf.Loc PositivityTheory.Rg.Tf.Geo
 open scoped ENNReal
@@ -16,12 +59,12 @@ private theorem prod_ofFn_single {G : Type*} [Monoid G] : ∀ (n : ℕ) (f : Fin
   | 0, _, k, _ => k.elim0
   | n + 1, f, k, h => by
     rw [List.ofFn_succ, List.prod_cons]
-    refine Fin.cases (fun h => ?_) (fun k h => ?_) k h
-    · rw [List.prod_eq_one, mul_one]
-      intro x hx
-      obtain ⟨i, rfl⟩ := List.mem_ofFn.1 hx
-      exact h _ (Fin.succ_ne_zero i)
-    · rw [h 0 (Fin.succ_ne_zero k).symm, one_mul,
+    cases k using Fin.cases with
+    | zero =>
+      rw [List.prod_eq_one, mul_one]
+      exact List.forall_mem_ofFn_iff.2 fun i => h _ (Fin.succ_ne_zero i)
+    | succ k =>
+      rw [h 0 (Fin.succ_ne_zero k).symm, one_mul,
         prod_ofFn_single n (fun i => f i.succ) k fun i hi => h _ fun h' => hi (Fin.succ_injective _ h')]
 
 private theorem transport (X Y T : Type) [Group X] [TopologicalSpace X] [IsTopologicalGroup X] [LocallyCompactSpace X]
@@ -38,7 +81,7 @@ private theorem transport (X Y T : Type) [Group X] [TopologicalSpace X] [IsTopol
       refine ⟨hρ.1.comp e.continuous.measurable, fun x => ?_⟩
       have := hρ.2 (e x)
       simpa only [id, he, hj] using this
-    rw [quotAny X T μ ν i hi _ _ hΦ hinv h' (hfin _ h'), quotInt, dif_pos h, integral_smul_measure,
+    rw [quotAny X T μ ν i hi _ _ hΦ hinv h' (hfin _ h'), quotInt, dite_eq_left h, integral_smul_measure,
       e.measurableEmbedding.integral_map, ENNReal.toReal_ofReal hc]
     simp
   · have h' : ¬ ∃ ρ, IsNormAlong id i ν ρ := by
@@ -47,7 +90,7 @@ private theorem transport (X Y T : Type) [Group X] [TopologicalSpace X] [IsTopol
       obtain ⟨x, rfl⟩ := e.surjective y
       have := hρ.2 x
       simpa only [id, hj, ← he, e.symm_apply_apply] using this
-    rw [quotInt, dif_neg h, quotInt, dif_neg h', mul_zero]
+    rw [quotInt, dite_eq_right h, quotInt, dite_eq_right h', mul_zero]
 
 private theorem invInv {T : Type} [Group T] [TopologicalSpace T] [IsTopologicalGroup T] [LocallyCompactSpace T]
     [SecondCountableTopology T] [MeasurableSpace T] [BorelSpace T] (h : ∀ a b : T, a * b = b * a) (ν : Measure T)

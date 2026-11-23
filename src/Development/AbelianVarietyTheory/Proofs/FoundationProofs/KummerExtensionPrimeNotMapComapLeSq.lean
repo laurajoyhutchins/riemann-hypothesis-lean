@@ -1,5 +1,68 @@
-import Mathlib
+module
+
+public import Mathlib.FieldTheory.IntermediateField.Adjoin.Defs
+public import Mathlib.RingTheory.DedekindDomain.Basic
+public import Mathlib.RingTheory.Trace.Defs
+import Mathlib.Algebra.GroupWithZero.Submonoid.CancelMulZero
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+public import Mathlib.RingTheory.DedekindDomain.Different
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Definitions.Foundations.IsFirstChernClassOfLineBundle
+public import Mathlib.Algebra.CharP.Algebra
+public import Mathlib.FieldTheory.IntermediateField.Adjoin.Algebra
+public import Mathlib.FieldTheory.IntermediateField.Adjoin.Basic
+public import Mathlib.FieldTheory.Minpoly.IsIntegrallyClosed
+public import Mathlib.LinearAlgebra.BilinearForm.DualLattice
+
+@[expose] public section
+
 open GlobalTheory.NeedB Polynomial
 
 namespace GlobalTheory
@@ -8,7 +71,7 @@ theorem kummer_aeval_mem_integralClosure {A₀ F E : Type} [CommRing A₀] [Fiel
     [Algebra F E] [Algebra A₀ E] [IsScalarTower A₀ F E] {x : E} (hx : IsIntegral A₀ x)
     (p : (integralClosure A₀ F)[X]) : IsIntegral A₀ (aeval x p) := by
   induction p using Polynomial.induction_on' with
-  | add p q hp hq => rw [map_add]; exact hp.add hq
+  | add p q hp hq => rw [map_add (f := _)]; exact hp.add hq
   | monomial n c =>
     rw [aeval_monomial]
     refine IsIntegral.mul ?_ (hx.pow n)
@@ -70,7 +133,7 @@ theorem kummer_dual_step (A₀ K₀ F E : Type) [CommRing A₀] [IsDomain A₀] 
     simp [hx, ← IsScalarTower.algebraMap_apply]
   obtain ⟨g, hg⟩ := hdvd
   have hder := congrArg (fun p => aeval x (derivative p)) hg
-  simp only [derivative_sub, derivative_X_pow, derivative_C, sub_zero, derivative_mul, map_add, map_mul,
+  simp only [derivative_sub, derivative_X_pow, derivative_C, sub_zero, derivative_mul, map_add (f := _), map_mul,
     minpoly.aeval, zero_mul, add_zero] at hder
   set d := aeval x (derivative (minpoly C x))
   let v : A₀ˣ := hN.unit * u
@@ -202,7 +265,9 @@ theorem kummer_not_map_comap_le_sq :
     Ideal.comap_ne_bot_of_integral_mem hb0 hbP (Algebra.IsIntegral.isIntegral b)
   haveI : (P.comap (algebraMap A₀ (integralClosure A₀ E))).IsMaximal :=
     Ideal.IsPrime.isMaximal inferInstance hp0
-  have h := pow_sub_one_dvd_differentIdeal_aux A₀ K₀ E P two_ne_zero hp0 (Ideal.dvd_iff_le.mpr hle)
+  have h := pow_sub_one_dvd_differentIdeal_aux A₀ K₀ E
+    (p := P.comap (algebraMap A₀ (integralClosure A₀ E))) P (e := 2) hp0
+    (Ideal.dvd_iff_le.mpr hle)
   rw [hdiff, Ideal.dvd_iff_le] at h
   apply hP.ne_top
   simpa using h

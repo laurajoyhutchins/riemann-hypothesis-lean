@@ -1,8 +1,44 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Statements.HeckeThetaIntegrals.FormulaAt
-import Development.AbelianVarietyTheory.Definitions.Divisors.DiscreteSeriesHermitianUnique
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsUniqueIsFunForm
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.TensorMapDescent
+module
+
+public import Development.AbelianVarietyTheory.Statements.HeckeThetaIntegrals.FormulaAt
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsUniqueIsFunForm
+import Formalism.LocalToGlobal.Divisibility.CoefModLemmas
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.L2.Theta Formalism.IndefR Formalism.IndefR.Datum Formalism.IndefR.Links Formalism.L2.DIV
 open IsDedekindDomain NumberField GlobalTheory.ChiGrid GlobalTheory.FunObj GlobalTheory.RowTest Formalism.IndefR.WeilFull GlobalTheory.RowClaim
@@ -25,15 +61,16 @@ theorem projVV_of_mem {K : Type} [Field K] [CharZero K] (sg : ι → DomWeight n
   exact sub_eq_zero.mp h
 
 theorem exists_map_eq {K : Type} [Field K] (φ : K →+* ℂ) {σ : Type} (P : MvPolynomial σ ℂ)
-    (h : ∀ m, coeff m P ∈ Set.range φ) : ∃ P₀ : MvPolynomial σ K, map φ P₀ = P := by
+    (h : ∀ m, AddMonoidAlgebra.coeff P m ∈ Set.range φ) : ∃ P₀ : MvPolynomial σ K, map φ P₀ = P := by
   classical
   choose c hc using h
   refine ⟨∑ m ∈ P.support, monomial m (c m), ?_⟩
   conv_rhs => rw [P.as_sum]
+
   simp [map_sum, map_monomial, hc]
 
 theorem descend {K : Type} [Field K] [CharZero K] (φ : K →+* ℂ) (sg : ι → DomWeight n) (x : VV ℂ sg)
-    (h : ∀ m, coeff m x.1 ∈ Set.range φ) : ∃ y : VV K sg, map φ y.1 = x.1 := by
+    (h : ∀ m, AddMonoidAlgebra.coeff x.1 m ∈ Set.range φ) : ∃ y : VV K sg, map φ y.1 = x.1 := by
   obtain ⟨P₀, hP⟩ := exists_map_eq φ x.1 h
   refine ⟨Br.projVV sg P₀, ?_⟩
   rw [← GlobalTheory.Proof.TensorMapDescent.projVV_map φ sg P₀, hP, projVV_of_mem]
@@ -74,14 +111,14 @@ theorem isFunForm_map {K : Type} [Field K] (φ : K →+* ℂ) (σ : ι → DomWe
 theorem covOf_eq (σ : ι → DomWeight n) (f : VV ℂ fun τ => (σ τ).dual) : covOf σ f = (funEquiv σ).symm f := by
   have hex : ∃ φ : (VV ℂ fun τ => (σ τ).dual) →ₗ[ℂ] VV ℂ σ, ∀ f, IsFunForm σ (φ f) f :=
     ⟨(funEquiv σ).symm.toLinearMap, fun f => (isFunForm_iff_eq σ _ f).2 (by simp)⟩
-  have e : covOf σ f = hex.choose f := by rw [covOf, dif_pos hex]
+  have e : covOf σ f = hex.choose f := by rw [covOf, dite_eq_left hex]
   rw [e]
   apply (funEquiv σ).injective
   rw [LinearEquiv.apply_symm_apply]
   exact ((isFunForm_iff_eq σ _ f).1 (hex.choose_spec f)).symm
 
 theorem covOf_desc {K : Type} [Field K] [CharZero K] (φ : K →+* ℂ) (σ : ι → DomWeight n)
-    (f : VV ℂ fun τ => (σ τ).dual) (hf : ∀ m, coeff m f.1 ∈ Set.range φ) :
+    (f : VV ℂ fun τ => (σ τ).dual) (hf : ∀ m, AddMonoidAlgebra.coeff f.1 m ∈ Set.range φ) :
     ∃ F₀ : VV K σ, map φ F₀.1 = (covOf σ f).1 := by
   obtain ⟨f₀, hf₀⟩ := descend φ _ f hf
   refine ⟨(funEquiv σ).symm f₀, ?_⟩
@@ -96,7 +133,7 @@ theorem covOf_desc {K : Type} [Field K] [CharZero K] (φ : K →+* ℂ) (σ : ι
 
 theorem brPair_mem_range {K : Type} [Field K] [CharZero K] (φ : K →+* ℂ) (σ : ι → DomWeight n) {N : ℕ}
     (hN : N = n + 1) (Λ : ι → DomWeight N) (U : VV ℂ Λ) (V : VV ℂ fun τ => (σ τ).dual)
-    (hU : ∀ m, coeff m U.1 ∈ Set.range φ) (hV : ∀ m, coeff m V.1 ∈ Set.range φ) :
+    (hU : ∀ m, AddMonoidAlgebra.coeff U.1 m ∈ Set.range φ) (hV : ∀ m, AddMonoidAlgebra.coeff V.1 m ∈ Set.range φ) :
     brPair σ hN Λ U V ∈ Set.range φ := by
   obtain ⟨U₀, hU₀⟩ := exists_map_eq φ U.1 hU
   obtain ⟨F₀, hF₀⟩ := covOf_desc φ σ V hV
@@ -115,7 +152,7 @@ end GlobalTheory.BrRat
 
 namespace GlobalTheory.RowClaim
 
-theorem brPair_mem_coefField : ∀ {D : D7} {Γ : Type} [Group Γ] [Fintype Γ] {Pl0 T : Type} {A : FamIn D.what₂.LL Γ Pl0 T D.R.m} {Ks : Type} [Field Ks] [NumberField Ks] [Algebra Ks D.what₂.LL] {R : RealDat D A Ks} (ch : Choice R) (large₂ : SizeData₂ D) (F : Face D A), HidaSetting large₂ R F → ch.Is → ch.FieldOK → ∀ (t : T) (Φ : ch.G.Datum), ch.S.SumOK t Φ → ∀ (U : VV ℂ (wt ch.G (.top D.R.m))) (V : VV ℂ (wt ch.G (.grid D.R.m D.R.m))), (∀ m, MvPolynomial.coeff m U.1 ∈ Set.range D.what₂.embLL) → (∀ m, MvPolynomial.coeff m V.1 ∈ Set.range D.what₂.embLL) → brPair (listedWt ch.G (.grid D.R.m D.R.m)) ch.G.sp.topDec.rank.symm (wt ch.G (.top D.R.m)) U V ∈ Set.range D.what₂.embLL := by
+theorem brPair_mem_coefField : ∀ {D : D7} {Γ : Type} [Group Γ] [Fintype Γ] {Pl0 T : Type} {A : FamIn D.what₂.LL Γ Pl0 T D.R.m} {Ks : Type} [Field Ks] [NumberField Ks] [Algebra Ks D.what₂.LL] {R : RealDat D A Ks} (ch : Choice R) (large₂ : SizeData₂ D) (F : Face D A), HidaSetting large₂ R F → ch.Is → ch.FieldOK → ∀ (t : T) (Φ : ch.G.Datum), ch.S.SumOK t Φ → ∀ (U : VV ℂ (wt ch.G (.top D.R.m))) (V : VV ℂ (wt ch.G (.grid D.R.m D.R.m))), (∀ m, AddMonoidAlgebra.coeff U.1 m ∈ Set.range D.what₂.embLL) → (∀ m, AddMonoidAlgebra.coeff V.1 m ∈ Set.range D.what₂.embLL) → brPair (listedWt ch.G (.grid D.R.m D.R.m)) ch.G.sp.topDec.rank.symm (wt ch.G (.top D.R.m)) U V ∈ Set.range D.what₂.embLL := by
   intro D Γ _ _ Pl0 T A Ks _ _ _ R ch large₂ F _ _ _ t Φ _ U V hU hV
   haveI : CharZero D.what₂.LL := (RingHom.charZero_iff D.what₂.embLL.injective).mpr inferInstance
   exact GlobalTheory.BrRat.brPair_mem_range D.what₂.embLL _ _ _ U V hU hV

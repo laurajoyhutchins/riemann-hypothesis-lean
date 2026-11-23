@@ -1,12 +1,59 @@
-import Mathlib
-import Formalism.LocalToGlobal.GaloisLevelStructure.DefsAut
-import Formalism.LocalToGlobal.Divisibility.CoefMod
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.WeightDualExistence.IncludeInjective
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.WeightDualExistence.AlgDualCore
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.GelfandTsetlinBranching.ExtremalFactsProofA
-import Formalism.LocalToGlobal.Columns.CoefModB
-import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.AlgWtDualUniq
-import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.AlgWtHwUnq
+module
+
+public import Formalism.LocalToGlobal.GaloisLevelStructure.DefsAut
+public import Formalism.LocalToGlobal.Divisibility.CoefMod
+import Formalism.GradedWeylDivisibility.DualWeylDominanceOf
+public import Formalism.LocalToGlobal.Columns.CoefModB
+public import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.AlgWtDualUniq
+public import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.AlgWtHwUnq
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.GelfandTsetlinBranching.ExtremalFactsProofA
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain ReciprocityTheory.Aut Formalism.AUTREP MvPolynomial
 
@@ -25,11 +72,13 @@ abbrev mtwInc : GL (Fin n) L →* GL (Fin n) (AL L) :=
   Matrix.GeneralLinearGroup.map (Algebra.TensorProduct.includeLeftRingHom : L →+* AL L)
 
 theorem mtwInc_injective : Function.Injective (mtwInc (L := L) (n := n)) := by
-  have hf : Function.Injective (Algebra.TensorProduct.includeLeftRingHom : L →+* AL L) := by
-    first
-      | exact RingHom.injective _
-      | exact Algebra.TensorProduct.includeLeft_injective (RingHom.injective _)
-      | exact Algebra.TensorProduct.includeLeft_injective (S := L) (RingHom.injective (algebraMap _ _))
+  obtain ⟨p, hp₀, hp⟩ :=
+    Ring.exists_maximal_of_not_isField (RingOfIntegers.not_isField (maximalRealSubfield L))
+  let v : HeightOneSpectrum (𝓞 (maximalRealSubfield L)) := ⟨p, hp.isPrime, hp₀⟩
+  letI : Nontrivial (AFplus L) := (evalAt L v).toRingHom.domain_nontrivial
+  have hf : Function.Injective (Algebra.TensorProduct.includeLeftRingHom : L →+* AL L) :=
+    Algebra.TensorProduct.includeLeft_injective (S := L)
+      (RingHom.injective (algebraMap (maximalRealSubfield L) (AFplus L)))
   intro a b h
   apply Units.ext
   ext i j
@@ -48,7 +97,8 @@ def mtwRatFun (γ : GQ L n) : GL (Fin n) L := (Subgroup.mem_map.1 (mtw_mem γ)).
 theorem mtwRatFun_mem (γ : GQ L n) : mtwRatFun γ ∈ GQ0 L n :=
   (Subgroup.mem_map.1 (mtw_mem γ)).choose_spec.1
 
-theorem mtwInc_mtwRatFun (γ : GQ L n) : mtwInc (mtwRatFun γ) = ((γ : GAf L n) : GL (Fin n) (AL L)) :=
+theorem mtwInc_mtwRatFun (γ : GQ L n) :
+    mtwInc (L := L) (n := n) (mtwRatFun γ) = ((γ : GAf L n) : GL (Fin n) (AL L)) :=
   (Subgroup.mem_map.1 (mtw_mem γ)).choose_spec.2
 
 def mtwRat : GQ L n →* GL (Fin n) L where
@@ -56,14 +106,15 @@ def mtwRat : GQ L n →* GL (Fin n) L where
   map_one' := mtwInc_injective (by rw [mtwInc_mtwRatFun, map_one]; rfl)
   map_mul' γ δ := mtwInc_injective (by rw [map_mul, mtwInc_mtwRatFun, mtwInc_mtwRatFun, mtwInc_mtwRatFun]; rfl)
 
-theorem mtwRat_mem (γ : GQ L n) : mtwRat γ ∈ GQ0 L n :=
+theorem mtwRat_mem (γ : GQ L n) : mtwRat (L := L) (n := n) γ ∈ GQ0 L n :=
   mtwRatFun_mem γ
 
 theorem mtwRat_eq_of_match (γ : GQ L n) (γ₀ : GL (Fin n) L)
     (h : (((γ : GAf L n) : GL (Fin n) (AL L)) : Matrix (Fin n) (Fin n) (AL L)) =
-      (γ₀ : Matrix (Fin n) (Fin n) L).map (Algebra.TensorProduct.includeLeftRingHom)) : γ₀ = mtwRat γ := by
+      (γ₀ : Matrix (Fin n) (Fin n) L).map (Algebra.TensorProduct.includeLeftRingHom)) :
+    γ₀ = mtwRat (L := L) (n := n) γ := by
   apply mtwInc_injective
-  rw [show mtwRat γ = mtwRatFun γ from rfl, mtwInc_mtwRatFun]
+  rw [show mtwRat (L := L) (n := n) γ = mtwRatFun γ from rfl, mtwInc_mtwRatFun]
   first
     | exact Units.ext h.symm
     | (apply Units.ext; rw [h]; rfl)
@@ -142,7 +193,7 @@ theorem mtwUniv_map (M : ι → Matrix (Fin n) (Fin n) ℂ) (F : Pol ℂ ι n) :
   induction F using MvPolynomial.induction_on
   · simp [mtwUniv, Formalism.GradedWeylDivisibility.blockAct, MvPolynomial.algebraMap_apply]
   · rename_i p q hp hq
-    simp only [map_add, hp, hq]
+    simp only [map_add (f := _), hp, hq]
   · rename_i p v hp
     have hX : MvPolynomial.map (eval fun y : ι × Fin n × Fin n => M y.1 y.2.1 y.2.2) (mtwUniv (X v)) =
         Formalism.GradedWeylDivisibility.blockAct ℂ (fun τ => (M τ)ᵀ) (X v) := by
@@ -151,16 +202,17 @@ theorem mtwUniv_map (M : ι → Matrix (Fin n) (Fin n) ℂ) (F : Pol ℂ ι n) :
 
 def mtwCf (ℓ : Pol ℂ ι n →ₗ[ℂ] ℂ)
     (Q : MvPolynomial (ι × Fin n × Fin n) (MvPolynomial (ι × Fin n × Fin n) ℂ)) : MvPolynomial (ι × Fin n × Fin n) ℂ :=
-  ∑ m ∈ Q.support, coeff m Q * C (ℓ (monomial m 1))
+  ∑ m ∈ Q.support, AddMonoidAlgebra.coeff Q m * C (ℓ (monomial m 1))
 
 theorem mtwCf_eval (ℓ : Pol ℂ ι n →ₗ[ℂ] ℂ) (y : ι × Fin n × Fin n → ℂ)
     (Q : MvPolynomial (ι × Fin n × Fin n) (MvPolynomial (ι × Fin n × Fin n) ℂ)) :
     eval y (mtwCf ℓ Q) = ℓ (MvPolynomial.map (eval y) Q) := by
   conv_rhs => rw [Q.as_sum]
+
   simp only [mtwCf, map_sum, MvPolynomial.map_monomial, map_mul, MvPolynomial.eval_C]
   refine Finset.sum_congr rfl fun m _ => ?_
-  have hm : (monomial m (eval y (coeff m Q)) : MvPolynomial (ι × Fin n × Fin n) ℂ) =
-      eval y (coeff m Q) • monomial m 1 := by
+  have hm : (monomial m (eval y (AddMonoidAlgebra.coeff Q m)) : MvPolynomial (ι × Fin n × Fin n) ℂ) =
+      eval y (AddMonoidAlgebra.coeff Q m) • monomial m 1 := by
     rw [MvPolynomial.smul_monomial, smul_eq_mul, mul_one]
   rw [hm, LinearMap.map_smul, smul_eq_mul]
 
@@ -187,7 +239,7 @@ theorem mtw_eval_aeval {σ ρ : Type} (f : σ → MvPolynomial ρ ℂ) (d : ρ �
   induction P using MvPolynomial.induction_on
   · simp [MvPolynomial.algebraMap_eq]
   · rename_i p q hp hq
-    simp only [map_add, hp, hq]
+    simp only [map_add (f := _), hp, hq]
   · rename_i p v hp
     simp only [map_mul, hp, MvPolynomial.aeval_X, MvPolynomial.eval_X]
 
@@ -270,12 +322,14 @@ theorem tenRep_toMatrix (emb : ι → L →+* ℂ) (lam : ι → DomWeight n) (�
       | simp only [bVV, Module.Basis.map_apply, LinearEquiv.coe_ofEq_apply, Module.Basis.span_apply]
       | simp [bVV]
       | rfl
-  have htw : MvPolynomial.eval (fun p : (L →+* ℂ) × Fin n × Fin n => p.1 (((mtwRat γ : GL (Fin n) L) :
-      Matrix (Fin n) (Fin n) L) p.2.1 p.2.2)) (mtwTwP emb lam) = detTwK lam (mtwEmb emb (mtwRat γ)) :=
+  let γL := mtwRat (L := L) (n := n) γ
+  have htw : eval (fun p : (L →+* ℂ) × Fin n × Fin n =>
+      p.1 ((γL : Matrix (Fin n) (Fin n) L) p.2.1 p.2.2)) (mtwTwP emb lam) =
+        detTwK lam (mtwEmb emb γL) :=
     twistPolynomial_eval emb lam _ (mtwRat_mem γ)
   ext i j
   rw [LinearMap.toMatrix_apply, eval_tensorCoeff, htw, ← mtwCoord_spec]
-  show mtwCoord lam i (actP lam (mtwEmb emb (mtwRat γ)) ((bVV ℂ lam j : VV ℂ lam) : Pol ℂ ι n)) = _
+  show mtwCoord lam i (actP lam (mtwEmb emb γL) ((bVV ℂ lam j : VV ℂ lam) : Pol ℂ ι n)) = _
   rw [hb, actP, LinearMap.smul_apply, LinearMap.map_smul, smul_eq_mul]
   rfl
 
@@ -410,9 +464,10 @@ theorem mtw_sqAct_mul (mu : DomWeight n) (g h : GL (Fin n) ℂ) (f : MvPolynomia
         Formalism.GradedWeylDivisibility.rowAct ℂ (n := n) (B * A) := by
       apply MvPolynomial.algHom_ext
       intro v
+
       simp only [AlgHom.comp_apply, Formalism.GradedWeylDivisibility.rowAct, MvPolynomial.aeval_X, map_sum, map_mul,
-        MvPolynomial.aeval_C, MvPolynomial.algebraMap_eq, Matrix.mul_apply, Finset.mul_sum,
-        Finset.sum_mul]
+      MvPolynomial.aeval_C, MvPolynomial.algebraMap_eq, Matrix.mul_apply, Finset.mul_sum,
+      Finset.sum_mul]
       rw [Finset.sum_comm]
       refine Finset.sum_congr rfl fun b _ => Finset.sum_congr rfl fun c _ => ?_
       ring
@@ -559,6 +614,7 @@ theorem tenWt_hwAt (emb : ι → L →+* ℂ) (hinj : Function.Injective emb)
         (bVVfun ℂ lam j)) * (bVV ℂ lam).repr (mtwHw lam) j =
         c * mtwCoord lam i (Formalism.GradedWeylDivisibility.blockAct ℂ (fun τ => if τ = τ₀ then (B : Matrix (Fin n) (Fin n) ℂ)ᵀ else 1)
           (∑ j, ((bVV ℂ lam).repr (mtwHw lam) j) • bVVfun ℂ lam j)) := by
+
       rw [map_sum, map_sum, Finset.mul_sum]
       refine Finset.sum_congr rfl fun j _ => ?_
       rw [map_smul, map_smul, smul_eq_mul]
@@ -588,8 +644,9 @@ theorem mtWt_isDual (emb : ι → L →+* ℂ) (lam : ι → DomWeight n) (h : T
     apply mtwHw_ne lam
     exact (pairingBNondegenerate_holds ℂ ι n lam).1 (mtwHw lam) fun y => by rw [h0]; rfl
   · show pairBK lam (mtRep emb lam γ x) (tenRep emb lam γ y) = pairBK lam x y
-    exact (pairBK_apply lam _ _).trans ((pairingBInvariantK_holds ℂ ι n lam (mtwEmb emb (mtwRat γ)) (x : VV ℂ lam).1
-      (y : VV ℂ lam).1).trans (pairBK_apply lam x y).symm)
+    exact (pairBK_apply lam _ _).trans
+      ((pairingBInvariantK_holds ℂ ι n lam (mtwEmb emb (mtwRat (L := L) (n := n) γ))
+        (x : VV ℂ lam).1 (y : VV ℂ lam).1).trans (pairBK_apply lam x y).symm)
 
 theorem mtWt_hw_dual (emb : ι → L →+* ℂ) (hinj : Function.Injective emb)
     (hcm : ∀ τ τ', emb τ ≠ ComplexEmbedding.conjugate (emb τ')) (lam : ι → DomWeight n) (h : TenIrr emb lam)

@@ -1,5 +1,46 @@
-import Formalism.SharpRestriction.LevelLetterCocycles.FinalLevelsOf
-import Formalism.SharpRestriction.LevelLetterCocycles.ArcCoordinatesOfMembership
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.MapEvalPsPi
+public import Formalism.SharpRestriction.LevelLetterCocycles.ArcCoordinatesOfMembership
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -82,10 +123,10 @@ theorem mapLocL_cmp_d (hR : Ring9 W) (T : LocLat G Qp LL O) (a : PowerSeries O) 
         algebraMap O (PowerSeries O) (PowerSeries.constantCoeff a) := by
       rw [PowerSeries.algebraMap_apply, Algebra.algebraMap_self, RingHom.id_apply]
     rw [BaseId.d_apply]
-    conv_lhs => rw [ha, hC0, map_add, map_mul, AlgHom.commutes, (baseIdOf hR).ι_X, hπ]
+    conv_lhs => rw [ha, hC0, map_add (f := _), map_mul, AlgHom.commutes, (baseIdOf hR).ι_X, hπ]
     simp only [Pi.add_apply, Pi.mul_apply, BaseId.d_apply, letπ, Pi.algebraMap_apply]
     ring
-  rw [hd, add_smul, map_add, mul_smul, W.cmp_π, zero_add, algebraMap_smul, W.cmp_smul]
+  rw [hd, add_smul, map_add (f := _), mul_smul, W.cmp_π, zero_add, algebraMap_smul, W.cmp_smul]
 
 theorem mapLocL_t_sum {T : LocLat G Qp LL O} (C : Coord W (baseIdOf hR) T) (i : ZMod n) {ι : Type}
     (s : Finset ι) (f : ι → C.V) : C.t i (∑ l ∈ s, f l) = ∑ l ∈ s, C.t i (f l) := by
@@ -100,7 +141,7 @@ theorem mapLocL_map_φVB {T₁ T₂ : LocLat G Qp LL O} (f : T₁.V →ₗ[LL] T
   induction z using TensorProduct.induction_on with
   | zero => simp
   | tmul v b => simp [φVB]
-  | add x y hx hy => simp only [map_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
 
 theorem mapLocL_map_φVB_pow {T₁ T₂ : LocLat G Qp LL O} (f : T₁.V →ₗ[LL] T₂.V) (e : ℕ)
     (z : T₁.V ⊗[Qp] B) :
@@ -129,6 +170,7 @@ theorem mapLocL_cmp_map {T₁ T₂ : LocLat G Qp LL O} {C₁ : Coord W (baseIdOf
     show W.map F (C₁.t i x) = ∑ l, (baseIdOf hR).d (a l) • C₂.t i (e₂ l)
     rw [← hC.coord_hom_map_trace, ha, mapLocL_t_sum]
     simp only [Coord.t_smul]
+
   rw [heq, map_sum]
   simp only [mapLocL_cmp_d]
 
@@ -146,7 +188,7 @@ theorem mapLocL_lamOf_coe {T : LocLat G Qp LL O} (C : Coord W (baseIdOf hR) T) (
     have h2 := Formalism.MainNotions.UnusedSlot80.ArcF.φVB_pow_letter W T (c - (ell : ZMod n)) h1 ell
     rwa [sub_add_cancel] at h2
   unfold lamOf
-  rw [dif_pos hk, dif_pos h']
+  rw [dite_eq_left hk, dite_eq_left h']
 
 end Helpers
 
@@ -168,8 +210,9 @@ theorem mapLocL_dmap_lam (hC : CoordHom C₁ C₂ F) (Mh : MapHyp hR uZ ιZ F c)
   apply Subtype.ext
   rw [Submodule.coe_sum]
   show AlgebraTensorModule.map F.f (LinearMap.id : B →ₗ[Qp] B) ((lamOf C₁ c ell e₁ k : Dc W T₁ c) : T₁.V ⊗[Qp] B) = _
+
   rw [mapLocL_lamOf_coe C₁ c ell e₁ k (he₁ k), mapLocL_map_φVB_pow,
-    mapLocL_cmp_map hC _ (e₁ k) (he₁ k) e₂ he₂ a ha, map_sum]
+  mapLocL_cmp_map hC _ (e₁ k) (he₁ k) e₂ he₂ a ha, map_sum]
   refine Finset.sum_congr rfl fun l _ => ?_
   rw [map_smul, Submodule.coe_smul, mapLocL_lamOf_coe C₂ c ell e₂ l (he₂ l), hPa l]
 
@@ -205,8 +248,10 @@ theorem loclComm_holds (hC : CoordHom C₁ C₂ F)
     intro l
     simp [E.extL, Matrix.toLin'_apply, Matrix.mulVec, dotProduct]
   simp only [locLF]
+
   rw [Mh.smul, map_sum]
   congr 1
+
   simp only [Mh.smul, hk, hext, map_sum, map_mul, Finset.sum_smul, mul_smul, Finset.smul_sum]
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun _ _ => Finset.sum_congr rfl fun _ _ => smul_comm _ _ _

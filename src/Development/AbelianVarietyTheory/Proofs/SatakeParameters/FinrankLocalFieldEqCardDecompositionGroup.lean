@@ -1,6 +1,64 @@
-import Formalism.SharpRestriction.LevelLetterCocycles.QuotientHomNonvanishingBound
-import Formalism.LocalRingCardinality.RankBoundMonotoneInDimension
-import Formalism.FrobeniusOrbits.HostCorollaries
+module
+
+public import Mathlib.NumberTheory.NumberField.Basic
+public import Mathlib.NumberTheory.Padics.Complex
+public import Mathlib.RingTheory.DedekindDomain.Ideal.Lemmas
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Topology.Sheaves.Init
+import Formalism.FrobeniusOrbits.Statement
+import Formalism.SharpRestriction.LevelLetterCocycles.DataN
+import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
+public import Mathlib.Algebra.Algebra.Hom.Rat
+public import Mathlib.RingTheory.DedekindDomain.Dvr
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Formalism.BasicNotions Formalism.FrobeniusOrbits Formalism.MainNotions.N
 open scoped Pointwise
 
@@ -50,8 +108,12 @@ theorem norm_int_le (c : E →+* PadicAlgCl l) (x : 𝓞 E) : ‖c (x : E)‖ �
   have heq : y ^ n = -∑ i ∈ Finset.range n, (P.coeff i : PadicAlgCl l) * y ^ i := by
     have h := hP
     rw [hPm.as_sum] at h
-    simp only [Polynomial.eval₂_add, Polynomial.eval₂_X_pow, Polynomial.eval₂_finset_sum,
-      Polynomial.eval₂_mul, Polynomial.eval₂_C] at h
+    change (Polynomial.eval₂RingHom (algebraMap ℤ (PadicAlgCl l)) y)
+      (X ^ P.natDegree + ∑ i ∈ Finset.range P.natDegree, (P.coeff i : ℤ[X]) * X ^ i) = 0 at h
+    simp only [map_add, map_sum, map_mul, map_pow, Polynomial.coe_eval₂RingHom,
+      Polynomial.eval₂_X] at h
+    simp only [← Polynomial.C_eq_intCast, Polynomial.eval₂_C] at h
+    simp only [map_intCast] at h
     rw [eq_neg_iff_add_eq_zero]
     simpa using h
   have hle : ‖y ^ n‖ ≤ ‖y‖ ^ (n - 1) := by
@@ -139,6 +201,7 @@ theorem approx (β γ : PadicAlgCl l) (f : ℚ_[l][X]) {ε : ℝ} (hε : 0 < ε)
     intro x hx
     have e1 : aeval x G = ∑ i ∈ Finset.range (n + 1),
         algebraMap ℚ_[l] (PadicAlgCl l) (g i : ℚ_[l]) * x ^ i := by
+
       simp only [G, map_sum, map_mul, map_pow, aeval_C, aeval_X, map_ratCast, eq_ratCast]
     have e2 : aeval x f = ∑ i ∈ Finset.range (n + 1),
         algebraMap ℚ_[l] (PadicAlgCl l) (f.coeff i) * x ^ i := by
@@ -259,7 +322,7 @@ theorem adjoin_range_eq (c : E →+* PadicAlgCl l) {α : E}
       rw [e1]
       exact IntermediateField.algebraMap_mem _ _
     | add x y _ _ hx hy =>
-      rw [map_add]
+      rw [map_add (f := _)]
       exact add_mem hx hy
     | mul x y _ _ hx hy =>
       rw [map_mul]

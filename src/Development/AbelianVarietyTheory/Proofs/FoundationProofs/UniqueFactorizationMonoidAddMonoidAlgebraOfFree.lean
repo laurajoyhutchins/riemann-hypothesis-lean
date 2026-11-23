@@ -1,4 +1,57 @@
-import Mathlib
+module
+
+public import Mathlib.RingTheory.PicardGroup
+public import Mathlib.RingTheory.Valuation.Basic
+import Mathlib.Algebra.AffineMonoid.UniqueSums
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.GroupTheory.MonoidLocalization.UniqueFactorization
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+public import Mathlib.RingTheory.Valuation.LocalSubring
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open scoped TensorProduct AlgebraMonoidAlgebra
 open AddMonoidAlgebra CommRing
@@ -163,7 +216,7 @@ theorem uniqueFactorizationMonoid_addMonoidAlgebra_of_sub (f : P →+ X)
         obtain ⟨⟨a, n⟩, ha⟩ := hs
         obtain ⟨⟨c, m⟩, hc⟩ := ht
         refine ⟨⟨a * m + c * n, n * m⟩, ?_⟩
-        simp only [Submonoid.coe_mul, map_add, map_mul] at ha hc ⊢
+        simp only [Submonoid.coe_mul, map_add (f := _), map_mul] at ha hc ⊢
         rw [← ha, ← hc]
         ring
       | single x a =>
@@ -274,46 +327,10 @@ theorem pic_mapAlgebra_groupAlgebra_bijective :
 variable {X} (N : Type*) [AddCommGroup N] [Module (AddMonoidAlgebra A X) N]
   [Module.Invertible (AddMonoidAlgebra A X) N]
 
-theorem exists_pic_linearEquiv_groupAlgebra_tensor :
-    ∃ M : Pic A, Nonempty (N ≃ₗ[AddMonoidAlgebra A X] AddMonoidAlgebra A X ⊗[A] M) := by
-  obtain ⟨M, hM⟩ := (pic_mapAlgebra_groupAlgebra_bijective A X).2 (Pic.mk _ N)
-  exact ⟨M, Pic.mk_eq_mk_iff.mp hM.symm⟩
-
-theorem free_of_mapRingHom_mk_eq_one (ε : AddMonoidAlgebra A X →ₐ[A] A)
-    (h : Pic.mapRingHom (ε : AddMonoidAlgebra A X →+* A) (Pic.mk _ N) = 1) :
-    Module.Free (AddMonoidAlgebra A X) N := by
-  obtain ⟨M, hM⟩ := (pic_mapAlgebra_groupAlgebra_bijective A X).2 (Pic.mk _ N)
-  rw [← hM, ← Pic.mapRingHom_algebraMap, Pic.mapRingHom_mapRingHom, ε.comp_algebraMap,
-    Pic.mapRingHom_algebraMap, Pic.mapAlgebra_self_apply] at h
-  rw [← Pic.mk_eq_one_iff_free, ← hM, h, map_one]
-
 theorem subsingleton_pic_groupAlgebra (X : Type*) [AddCommGroup X] [Module.Free ℤ X]
     [Subsingleton (Pic A)] : Subsingleton (Pic (AddMonoidAlgebra A X)) :=
   (pic_mapAlgebra_groupAlgebra_bijective A X).2.subsingleton
 
 end Picard
-
-theorem pic_groupAlgebra_of_isIntegrallyClosed.{u, v, w} (A : Type u) [CommRing A] [IsDomain A]
-    [IsIntegrallyClosed A] (X : Type v) [AddCommGroup X] [Module.Free ℤ X] :
-    Function.Bijective (Pic.mapAlgebra A (AddMonoidAlgebra A X)) ∧
-    (∀ (N : Type w) [AddCommGroup N] [Module (AddMonoidAlgebra A X) N]
-      [Module.Invertible (AddMonoidAlgebra A X) N],
-      ∃ (M : Type u) (_ : AddCommGroup M) (_ : Module A M), Module.Invertible A M ∧
-        Nonempty (N ≃ₗ[AddMonoidAlgebra A X] AddMonoidAlgebra A X ⊗[A] M)) ∧
-    (∀ (M M' : Type w) [AddCommGroup M] [Module A M] [Module.Invertible A M] [AddCommGroup M']
-      [Module A M'] [Module.Invertible A M'],
-      Nonempty (AddMonoidAlgebra A X ⊗[A] M ≃ₗ[AddMonoidAlgebra A X]
-        AddMonoidAlgebra A X ⊗[A] M') → Nonempty (M ≃ₗ[A] M')) := by
-  refine ⟨pic_mapAlgebra_groupAlgebra_bijective A X, fun N _ _ _ => ?_,
-    fun M M' _ _ _ _ _ _ ⟨e⟩ => ?_⟩
-  · obtain ⟨M, hM⟩ := exists_pic_linearEquiv_groupAlgebra_tensor A (X := X) N
-    exact ⟨M, inferInstance, inferInstance, inferInstance, hM⟩
-  · refine Pic.mk_eq_mk_iff.mp (pic_mapAlgebra_addMonoidAlgebra_injective A X
-      (Pic.mk_eq_mk_iff.mpr ⟨?_⟩))
-    exact TensorProduct.AlgebraTensorModule.congr (.refl _ _) (Pic.mk.linearEquiv A M) ≪≫ₗ e ≪≫ₗ
-      TensorProduct.AlgebraTensorModule.congr (.refl _ _) (Pic.mk.linearEquiv A M').symm
-
-example : Subsingleton (Pic (AddMonoidAlgebra ℤ (Fin 2 → ℤ))) :=
-  subsingleton_pic_groupAlgebra ℤ (Fin 2 → ℤ)
 
 end GlobalTheory

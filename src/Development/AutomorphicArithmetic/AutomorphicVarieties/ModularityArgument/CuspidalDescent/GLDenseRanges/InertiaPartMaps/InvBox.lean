@@ -1,12 +1,49 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.CuspidalDescent.GLDenseRanges.EigBoxE
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.LinkedUnramifiedChains.TeichmullerParts.SubalgebraIntegrality.EigBox
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.CuspidalDescent.GLDenseRanges.EigBoxE
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
 open UpperTheory.V.Hi UpperTheory.V.Z.J.D
 open scoped TensorProduct
 
-set_option synthInstance.maxHeartbeats 200000
+
 
 namespace UpperTheory.V.Z.Desc.V0
 
@@ -36,17 +73,15 @@ end Box
 
 private theorem sl_rTensor_apply {A B : Type} [AddCommGroup A] [Module ℂ A] [AddCommGroup B] [Module ℂ B]
     (l : B →ₗ[ℂ] ℂ) (T : A →ₗ[ℂ] A) (x : A ⊗[ℂ] B) : sl l (LinearMap.rTensor B T x) = T (sl l x) := by
-  induction x using TensorProduct.induction_on with
-  | zero => simp only [map_zero]
+  induction x using TensorProduct.inductionOn with
   | tmul u v => rw [LinearMap.rTensor_tmul, sl_tmul, sl_tmul, map_smul]
-  | add x y hx hy => simp only [map_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
 
 private theorem sr_lTensor_apply {A B : Type} [AddCommGroup A] [Module ℂ A] [AddCommGroup B] [Module ℂ B]
     (l : A →ₗ[ℂ] ℂ) (T : B →ₗ[ℂ] B) (x : A ⊗[ℂ] B) : sr l (LinearMap.lTensor A T x) = T (sr l x) := by
-  induction x using TensorProduct.induction_on with
-  | zero => simp only [map_zero]
+  induction x using TensorProduct.inductionOn with
   | tmul u v => rw [LinearMap.lTensor_tmul, sr_tmul, sr_tmul, map_smul]
-  | add x y hx hy => simp only [map_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
 
 private theorem mem_range_rTensor_subtype_of_forall_sl_coord_mem {A B ι : Type} [AddCommGroup A] [Module ℂ A] [AddCommGroup B] [Module ℂ B]
     (𝒞 : Module.Basis ι ℂ B) (U : Submodule ℂ A) (x : A ⊗[ℂ] B) (h : ∀ i, sl (𝒞.coord i) x ∈ U) :
@@ -119,7 +154,7 @@ private theorem mem_invT_iff_sum_smul_inl_eq_and_inr_fixed {G H W : Type} [Group
     F ∈ invT K₁ K₂ τ₀ ρ ↔ (∀ (k : K₁) (i : Fin m), ∑ j, (τ₀ k : Matrix (Fin m) (Fin m) ℂ) i j • ρ (↑k, 1) (F j) = F i) ∧
       ∀ k ∈ K₂, ∀ i, ρ (1, k) (F i) = F i := Iff.rfl
 
-set_option maxHeartbeats 800000 in
+
 theorem invBox : InvBox := by
   intro G H W W' _ _ _ _ _ _ ρ κ m K₁ K₂ τ₀ a N
   classical
@@ -149,18 +184,16 @@ theorem invBox : InvBox := by
     simp [Ψ]
   have hΨl : ∀ (g : W' →ₗ[ℂ] W') x i, Ψ (LinearMap.lTensor _ g x) i = LinearMap.lTensor W g (Ψ x i) := by
     intro g x i
-    induction x using TensorProduct.induction_on with
-    | zero => simp only [map_zero, Pi.zero_apply]
+    induction x using TensorProduct.inductionOn with
     | tmul F w => rw [LinearMap.lTensor_tmul, hΨt, hΨt, LinearMap.lTensor_tmul]
-    | add x y hx hy => simp only [map_add, Pi.add_apply, hx, hy]
+    | add x y hx hy => simp only [map_add (f := _), Pi.add_apply, hx, hy]
   have hΨr : ∀ k x i, Ψ (LinearMap.rTensor W' (T k) x) i =
       ∑ j, (τ₀ k : Matrix (Fin m) (Fin m) ℂ) i j • LinearMap.rTensor W' (ρ k) (Ψ x j) := by
     intro k x i
-    induction x using TensorProduct.induction_on with
-    | zero => simp only [map_zero, Pi.zero_apply, smul_zero, Finset.sum_const_zero]
+    induction x using TensorProduct.inductionOn with
     | tmul F w =>
       simp only [LinearMap.rTensor_tmul, hΨt, hT, TensorProduct.sum_tmul, TensorProduct.smul_tmul']
-    | add x y hx hy => simp only [map_add, Pi.add_apply, hx, hy, smul_add, Finset.sum_add_distrib]
+    | add x y hx hy => simp only [map_add (f := _), Pi.add_apply, hx, hy, smul_add, Finset.sum_add_distrib]
   let ι : ↥(inv1 K₁ τ₀ ρ) ⊗[ℂ] ↥(fixd κ K₂ ⊓ ePart κ a N : Submodule ℂ W') →ₗ[ℂ] (Fin m → W ⊗[ℂ] W') :=
     Ψ.toLinearMap ∘ₗ TensorProduct.map (inv1 K₁ τ₀ ρ).subtype (fixd κ K₂ ⊓ ePart κ a N).subtype
   have hinj : Function.Injective ι :=
@@ -209,8 +242,7 @@ theorem invBox : InvBox := by
       simp only [ι, LinearMap.comp_apply, LinearEquiv.coe_coe]
       rw [← LinearMap.lTensor_comp_rTensor, LinearMap.comp_apply]
     · rintro _ ⟨t, rfl⟩
-      induction t using TensorProduct.induction_on with
-      | zero => rw [map_zero]; exact zero_mem _
+      induction t using TensorProduct.inductionOn with
       | add s t hs ht => rw [map_add]; exact add_mem hs ht
       | tmul v w =>
         have hv := (hV1 v).1 v.2

@@ -1,5 +1,45 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LiftSemiTmul
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LiftSemiTmul
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -16,7 +56,7 @@ theorem form_mem_of_mem_smul_top {A N : Type} [CommRing A] [AddCommGroup N] [Mod
     rw [map_smul, smul_eq_mul]
     exact J.mul_mem_right _ hr
   · intro x y hx hy
-    rw [map_add]
+    rw [map_add (f := _)]
     exact J.add_mem hx hy
 
 theorem exists_step_of_sup_span {A : Type} [CommRing A] (K I : Ideal A) (S : Finset A)
@@ -53,7 +93,7 @@ theorem eq_zero_of_lift_of_mem_maximalIdeal_smul (A Q N : Type) [CommRing A] [Is
     | zero => intro i; simp
     | add x y _ _ hx hy =>
       intro i
-      rw [map_add, map_add]
+      rw [map_add (f := _), map_add (f := _)]
       exact I.add_mem (hx i) (hy i)
     | smul r x _ hx =>
       intro i
@@ -105,7 +145,7 @@ theorem eq_zero_of_lift_of_mem_maximalIdeal_smul (A Q N : Type) [CommRing A] [Is
           exact Submodule.smul_mono_left hKJ
         exact h2 h1
       · intro x y hx hy
-        rw [map_add]
+        rw [map_add (f := _)]
         exact Submodule.add_mem _ hx hy
     have hzJ : ∀ z, b z ∈ J • (⊤ : Submodule A N) := by
       intro z

@@ -1,5 +1,54 @@
-import Formalism.LocalRingCardinality.DataRows
-import Formalism.LocalRingCardinality.DataArith
+module
+
+public import Formalism.LocalRingCardinality.DataRows
+public import Formalism.LocalRingCardinality.DataArith
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain
 
@@ -36,8 +85,8 @@ theorem vAdd_add (w : HeightOneSpectrum (𝓞 K)) {x y : K} (hx : x ≠ 0) (hy :
     have := (WithZero.log_le_log (valuation_ne_zero' w hxy) (valuation_ne_zero' w hx)).2 h2
     exact (min_le_left _ _).trans (by omega)
 
-open Classical in
 
+open Classical in
 def valFun (w : HeightOneSpectrum (𝓞 K)) (x : K) : WithTop ℤ :=
   if x = 0 then ⊤ else ((vAdd w x : ℤ) : WithTop ℤ)
 
@@ -132,8 +181,8 @@ theorem exists_prime_mem (w : HeightOneSpectrum (𝓞 K)) :
     rw [Ne, Ideal.absNorm_eq_one_iff]; exact w.isPrime.ne_top
   omega
 
-open Classical in
 
+open Classical in
 def resCharW (w : HeightOneSpectrum (𝓞 K)) : ℕ := Nat.find (exists_prime_mem w)
 
 theorem resCharW_prime (w : HeightOneSpectrum (𝓞 K)) : (resCharW w).Prime := by
@@ -177,7 +226,7 @@ instance liesOver_resCharW (w : HeightOneSpectrum (𝓞 K)) :
 
 theorem eWL_pos (w : HeightOneSpectrum (𝓞 K)) : 0 < eWL K w := by
   have := w.isPrime
-  exact Ideal.ramificationIdx_pos w.asIdeal ℤ
+  exact Ideal.ramificationIdx_pos (R := ℤ) w.asIdeal
 
 theorem vAdd_resCharW (w : HeightOneSpectrum (𝓞 K)) :
     vAdd w (((resCharW w : ℕ) : K)) = (eWL K w : ℤ) := by
@@ -228,9 +277,6 @@ theorem starO_symm (x : 𝓞 K) : (starO (K := K)).symm x = starO x := by
 def conjW (w : HeightOneSpectrum (𝓞 K)) : HeightOneSpectrum (𝓞 K) :=
   HeightOneSpectrum.equivOfRingEquiv (starO (K := K)) w
 
-omit [NumberField K] in
-theorem conjW_asIdeal (w : HeightOneSpectrum (𝓞 K)) :
-    (conjW w).asIdeal = w.asIdeal.comap ((starO (K := K)).symm : 𝓞 K →+* 𝓞 K) := rfl
 
 omit [NumberField K] in
 theorem conjW_asIdeal' (w : HeightOneSpectrum (𝓞 K)) :

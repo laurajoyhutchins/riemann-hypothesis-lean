@@ -1,5 +1,56 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.CuspidalSplittingPositivity
+module
+
+public import GroundTheory.AutomorphicForms.CuspidalSplittingCoeff
+public import GroundTheory.AutomorphicForms.SmoothRepContragredient
+public import GroundTheory.AutomorphicForms.CuspidalSplittingPositivity
+public import GroundTheory.AutomorphicForms.JacquetAdmissible
+import GroundTheory.AutomorphicForms.SmoothRepSchur
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -57,8 +108,8 @@ theorem exists_lift_of_isSupercuspidal [π.IsIrreducible] (hπ : IsSmooth π)
 
 section Injective
 
-variable (σ π) in
 
+variable (σ π) in
 def pairingSum (K : Subgroup (GL (Fin n) F)) (ψ : Module.Dual ℂ W) (v : V) (b : W)
     (ũ : smoothVectors (Representation.dual π)) : ℂ :=
   quotSum (centerSup K) fun g => ψ (σ g⁻¹ b) * (ũ : Module.Dual ℂ V) (π g v)
@@ -100,8 +151,8 @@ variable (hπ : IsSmooth π) (hsc : IsSupercuspidal π) (hωπ : HasCentralChar 
 
 include hπ hsc hωπ hωσ hω hKo hψ hv
 
-omit hπ hsc hKo in
 
+omit hπ hsc hKo in
 theorem pairingSum_act (h : GL (Fin n) F) (b : W) (ũ : smoothVectors (Representation.dual π)) :
     pairingSum π σ K ψ v (σ h b) ũ = pairingSum π σ K ψ v b (contragredient π h⁻¹ ũ) := by
   unfold pairingSum
@@ -136,7 +187,7 @@ theorem pairingSum_add_left (b₁ b₂ : W) (ũ : smoothVectors (Representation.
   rw [← finsum_add_distrib (finite_support_pairingSum hπ hsc hKo b₁ ũ)
     (finite_support_pairingSum hπ hsc hKo b₂ ũ)]
   refine finsum_congr fun q => ?_
-  simp only [map_add, add_mul]
+  simp only [map_add (f := _), add_mul]
 
 omit hωπ hωσ hω hψ hv in
 theorem pairingSum_smul_left (c : ℂ) (b : W) (ũ : smoothVectors (Representation.dual π)) :
@@ -147,8 +198,8 @@ theorem pairingSum_smul_left (c : ℂ) (b : W) (ũ : smoothVectors (Representati
   simp only [map_smul, smul_eq_mul]
   ring
 
-omit hωπ hωσ hω hψ hv in
 
+omit hωπ hωσ hω hψ hv in
 def pairingForm (b : W) : Module.Dual ℂ (smoothVectors (Representation.dual π)) where
   toFun := pairingSum π σ K ψ v b
   map_add' := pairingSum_add hπ hsc hKo b
@@ -165,8 +216,8 @@ theorem pairingForm_mem (hσ : IsSmooth σ) (b : W) :
   change pairingSum π σ K ψ v b (contragredient π h⁻¹ ũ) = pairingSum π σ K ψ v b ũ
   rw [← pairingSum_act hωπ hωσ hω hψ hv, hh]
 
-omit hπ hsc hωπ hωσ hω hKo hψ hv in
 
+omit hπ hsc hωπ hωσ hω hKo hψ hv in
 def pairingMap (hπ : IsSmooth π) (hsc : IsSupercuspidal π) (hωπ : HasCentralChar π ω)
     (hωσ : HasCentralChar σ ω) (hω : ∀ z ∈ Subgroup.center (GL (Fin n) F), ω z⁻¹ * ω z = 1)
     (hKo : IsOpen (K : Set (GL (Fin n) F))) (hψ : ∀ k ∈ K, ∀ x, ψ (σ k x) = ψ x)

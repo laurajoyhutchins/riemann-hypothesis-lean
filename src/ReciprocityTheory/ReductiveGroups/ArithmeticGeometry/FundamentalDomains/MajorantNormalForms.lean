@@ -1,5 +1,56 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.MajPos
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.UnipotentCoefficientShift
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.LminorSubmatrixCastSucc
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.Matrix.LDL
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.MajPos
+
+@[expose] public section
 
 namespace ReciprocityTheory.ChartRestriction.G.FD
 
@@ -15,11 +66,6 @@ theorem col_mul_eq (P B : Matrix (Fin r) (Fin r) ℂ) (a : Fin r) :
   funext i
   simp only [col, Matrix.mul_apply, Finset.sum_apply, Pi.smul_apply, smul_eq_mul]
   exact Finset.sum_congr rfl fun k _ => mul_comm _ _
-
-noncomputable def jpL (x : Frame X.Ψ r) (τ : X.Ψ) : (Fin r → ℂ) →ₗ[ℂ] (Fin r → ℂ) where
-  toFun := X.jp x τ
-  map_add' := X.jp_add x τ
-  map_smul' := X.jp_smul x τ
 
 noncomputable def pposL (x : Frame X.Ψ r) (τ : X.Ψ) : (Fin r → ℂ) →ₗ[ℂ] (Fin r → ℂ) where
   toFun := X.ppos x τ
@@ -52,7 +98,7 @@ private lemma hermC_sum_right_lemma_2 {ι : Type} [Fintype ι] (τ : E →+* ℂ
   let g : (Fin r → ℂ) →ₗ⋆[ℂ] ℂ :=
     { toFun := fun y => hermC τ G x y
       map_add' := fun y y' => by
-        simp only [hermC, Pi.add_apply, map_add, mul_add, Finset.sum_add_distrib]
+        simp only [hermC, Pi.add_apply, map_add (f := _), mul_add, Finset.sum_add_distrib]
       map_smul' := fun c y => by
         simp only [hermC, Pi.smul_apply, smul_eq_mul, map_mul, Finset.mul_sum]
         exact Finset.sum_congr rfl fun a _ => Finset.sum_congr rfl fun b _ => by ring }
@@ -113,6 +159,7 @@ private lemma hermC_ppos_lemma_5 (x : Frame X.Ψ r) (τ : X.Ψ) (u w : Fin r →
     exact h
   unfold Data.ppos
   rw [hermC_sum_left_lemma, hermC_sum_right_lemma_2]
+
   simp only [map_sum, map_mul, hM, hermC_conj τ.1 X.Gm_herm, Finset.sum_mul]
   conv_lhs => rw [Finset.sum_comm]
   exact Finset.sum_congr rfl fun a _ => Finset.sum_congr rfl fun b _ => by ring
@@ -220,7 +267,8 @@ theorem exists_normal {x : Frame X.Ψ r} (hx : x ∈ X.dom) (τ : X.Ψ) :
     exact mul_ne_zero hLdet (Finset.prod_ne_zero_iff.mpr fun c _ =>
       Complex.ofReal_ne_zero.mpr (hs0 c))
   · intro a c hca
-    rw [Matrix.mul_diagonal, Matrix.transpose_apply, LDL.lowerInv_triangular hH hca, zero_mul]
+    rw [Matrix.mul_diagonal, Matrix.transpose_apply,
+      LDL.isLowerTriangular_lowerInv hH hca, zero_mul]
   · intro a c
     rw [col_mul_eq, col_mul_eq, Hf_sum_sum]
     have hHkl : ∀ k l, X.Hf x τ (col (mat x τ) k) (col (mat x τ) l) = H k l := fun k l => by

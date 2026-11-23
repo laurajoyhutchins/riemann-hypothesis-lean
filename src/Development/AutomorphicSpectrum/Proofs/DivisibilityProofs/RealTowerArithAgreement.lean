@@ -1,11 +1,60 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.DivisibilityTowers.RefLinked
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterSt
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.ArithmeticIntersectionMultilinearPolarStatement
-import Development.AutomorphicSpectrum.Proofs.DivisibilityProofs.FunctionalProductLinearFormsStatement
-import Development.AutomorphicSpectrum.Proofs.DivisibilityProofs.MonomialLinesPermutationStatement
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.AssemblyBase
-import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.PResAboveCover
+module
+
+public import Development.AutomorphicSpectrum.Definitions.DivisibilityTowers.RefLinked
+public import Development.AutomorphicSpectrum.Definitions.MetricPeriods.Pull1
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterNamed
+public import Development.AutomorphicSpectrum.Proofs.DivisibilityProofs.FunctionalProductLinearFormsStatement
+public import Development.AutomorphicSpectrum.Proofs.DivisibilityProofs.MonomialLinesPermutationStatement
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.ArithmeticIntersectionMultilinearPolarStatement
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.AssemblyBase
+public import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.PResAboveCover
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open MvPolynomial ReciprocityTheory.ChartRestriction.G.Geo Filter Topology GlobalTheory.CompanionTheory.Ar GlobalTheory.CompanionTheory.Ar.Top
 
@@ -189,6 +238,7 @@ end Lines
 
 theorem eval_formPoly {σ : Type} [Fintype σ] (d : ℕ) (a : (Fin d → σ) → ℝ) (c : σ → ℝ) :
     eval c (PB.formPoly d a) = ∑ w, a w * ∏ j, c (w j) := by
+
   simp [PB.formPoly, map_sum, map_prod]
 
 theorem polar_swap {J : Type} [Fintype J] [DecidableEq J] {d : ℕ} (c : J → ℝ) (nn : J → J → ℝ)
@@ -206,6 +256,7 @@ def cS (lam : Wt Ψ N) (s : ℝ) : Option (Ψ × Fin N) → ℝ := fun o => o.el
 
 theorem linA_eq (lam : Wt Ψ N) (s : ℝ) : linA lam s = ∑ j, C (cS lam s j) * X j := by
   rw [Fintype.sum_option]
+
   simp [linA, toA, linRoot, cS, map_sum, add_comm]
 
 variable (M : RootModel Ψ N) (II : IntersectionSystem)
@@ -225,7 +276,7 @@ theorem prod_cS (lam : Wt Ψ N) (s : ℝ) {d : ℕ} (w : Fin d → Option (Ψ ×
     ∏ k, cS lam s (w k) = (∏ k, M.coef lam s (w k)) *
       (M.kA : ℝ) ^ ((∑ k, Finsupp.single (w k) 1 : Option (Ψ × Fin N) →₀ ℕ) none) := by
   have hk : (M.kA : ℝ) ≠ 0 := Nat.cast_ne_zero.2 M.kA_pos.ne'
-  rw [Finsupp.finset_sum_apply, ← Finset.prod_pow_eq_pow_sum, ← Finset.prod_mul_distrib]
+  rw [Finsupp.finsetSum_apply, ← Finset.prod_pow_eq_pow_sum, ← Finset.prod_mul_distrib]
   refine Finset.prod_congr rfl fun k _ => ?_
   cases w k with
   | none => simp [cS, RootModel.coef, hk]
@@ -260,7 +311,7 @@ theorem exists_word {K : Type} [Fintype K] {ι : K → Type} [∀ k, Fintype (ι
     rfl
   refine ⟨fun k => (Finsupp.toMultiset m).toList.get ⟨k, by omega⟩, fun ℓ => funext fun k => ?_⟩
   simp only [monoLines]
-  rw [dif_pos (by omega)]
+  rw [dite_eq_left (by omega)]
 
 section Limits
 
@@ -303,7 +354,7 @@ theorem exists_lim_arMono (hL : ReciprocityTheory.ChartRestriction.G.AI.I2.Metri
           (fun r a => (rootC (w r) a : ℝ)) / ((M.δ : ℝ) * (M.kA : ℝ) ^ m none))) := by
       refine Tendsto.div_const ?_ _
       simp only [PB.polar]
-      exact tendsto_finset_sum _ fun v _ => ((hconv v).const_mul _).const_mul _
+      exact tendsto_finsetSum _ fun v _ => ((hconv v).const_mul _).const_mul _
     refine ⟨_, h1.congr' ?_⟩
     filter_upwards [Ioc_mem_nhdsGT h0] with t ht
     have e : (fun v => (R.Re.deg : ℝ) * R.Re.num II t v) =
@@ -326,7 +377,7 @@ theorem tendsto_arFun (hC : M.Converges II) (F : RPA Ψ N) :
     simp only [e, map_smul, arFun_monomial, PP_monomial, smul_eq_mul]
     rw [hLim.limUnder_eq]
     exact hLim.const_mul a
-  | add p q hp hq => simpa only [map_add] using hp.add hq
+  | add p q hp hq => simpa only [map_add (f := _)] using hp.add hq
 
 end Limits
 
@@ -341,7 +392,7 @@ theorem arith_degrees : PB.Inputs → ∀ II : IntersectionSystem, IsFullInterse
   have h2 : Tendsto (fun t => eval (PB.gapS (fun x => lam x.1 x.2) (s / M.kA)) (R.Re.FT II t)) (𝓝[>] 0)
       (𝓝 (eval (PB.gapS (fun x => lam x.1 x.2) (s / M.kA)) (R.Re.PB II))) := by
     simp only [PB.Realis.FT, PB.Realis.PB, eval_formPoly]
-    exact tendsto_finset_sum _ fun v _ => (hconv v).mul_const _
+    exact tendsto_finsetSum _ fun v _ => (hconv v).mul_const _
   refine tendsto_nhds_unique (h1.congr' ?_) h2
   filter_upwards [Ioc_mem_nhdsGT h0] with t ht
   exact num_eq hL hII R lam s t ht.1 ht.2

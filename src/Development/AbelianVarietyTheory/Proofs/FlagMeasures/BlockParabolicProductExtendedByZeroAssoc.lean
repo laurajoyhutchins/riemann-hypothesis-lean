@@ -1,6 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.IsMirClass
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.BlockParabolicUnitriangularSubgroupsGLnPrimeFielStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.LabelDatum
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.BlockParabolicUnitriangularSubgroupsGLnPrimeFiel
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.BlockParabolicUnitriangularSubgroupsGLnPrimeFielStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -13,12 +60,12 @@ variable {g : ℕ} [Fact g.Prime]
 
 theorem toG_coe {n : ℕ} (x : Gn g n) : toG (x : Mt g n) = x := by
   unfold toG
-  rw [dif_pos (Units.isUnit x)]
+  rw [dite_eq_left (Units.isUnit x)]
   exact Units.ext (IsUnit.unit_spec _)
 
 theorem coe_toG {n : ℕ} {M : Mt g n} (h : IsUnit M) : ((toG M : Gn g n) : Mt g n) = M := by
   unfold toG
-  rw [dif_pos h]
+  rw [dite_eq_left h]
   exact IsUnit.unit_spec h
 
 theorem toG_mul {n : ℕ} {M N : Mt g n} (h : IsUnit M) (h' : IsUnit N) : toG (M * N) = toG M * toG N := by
@@ -178,12 +225,12 @@ theorem stage_right {a m n : ℕ} (hn : n = a + m) (k : ℂ) (φ F : Gn g m → 
 
 theorem entN_tl {m n : ℕ} (M : Mt g n) {i j : ℕ} (hi : i < m) (hj : j < m) :
     entN (tl m M) i j = entN M i j := by
-  rw [entN, dif_pos ⟨hi, hj⟩]
+  rw [entN, dite_eq_left ⟨hi, hj⟩]
   rfl
 
 theorem entN_br {a m n : ℕ} (M : Mt g n) {i j : ℕ} (hi : i < m) (hj : j < m) :
     entN (br a m M) i j = entN M (a + i) (a + j) := by
-  rw [entN, dif_pos ⟨hi, hj⟩]
+  rw [entN, dite_eq_left ⟨hi, hj⟩]
   rfl
 
 theorem inPar_iff {a n : ℕ} (M : Mt g n) :
@@ -193,14 +240,14 @@ theorem inPar_iff {a n : ℕ} (M : Mt g n) :
     have hjn : j < n := by omega
     unfold InPar at h
     unfold entN
-    rw [dif_pos ⟨hi, hjn⟩]
+    rw [dite_eq_left ⟨hi, hjn⟩]
     exact h ⟨i, hi⟩ ⟨j, hjn⟩ hj hai
   · intro h
     unfold InPar
     intro i j hj hai
     have := h i j i.2 hj hai
     unfold entN at this
-    rwa [dif_pos ⟨i.2, j.2⟩] at this
+    rwa [dite_eq_left ⟨i.2, j.2⟩] at this
 
 theorem par_par {a b c n : ℕ} (hn : n = a + b + c) (M : Mt g n) :
     (InPar (a + b) M ∧ InPar a (tl (a + b) M)) ↔ (InPar a M ∧ InPar b (br a (b + c) M)) := by

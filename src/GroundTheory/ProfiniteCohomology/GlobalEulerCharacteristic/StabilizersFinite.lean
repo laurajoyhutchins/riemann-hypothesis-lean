@@ -1,7 +1,50 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.GlobalEulerCharacteristic.StabilizersDefs
-import GroundTheory.ProfiniteCohomology.GlobalEulerCharacteristic.OrbitInvariants
-import GroundTheory.ProfiniteCohomology.RealPlaces.VanishingMackeyPlaces
+module
+
+public import GroundTheory.ProfiniteCohomology.GlobalEulerCharacteristic.StabilizersDefs
+public import GroundTheory.GlobalFields.HerbrandQuotients.SUnitsPerm
+public import GroundTheory.ProfiniteCohomology.GlobalEulerCharacteristic.OrbitInvariants
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
@@ -79,15 +122,15 @@ theorem stabilizer_gsLocalPlace (v : S) :
     MulAction.stabilizer (L ≃ₐ[F] L) (gsLocalPlace hL ιs v 1) = gsDecompGroup hL ιs v :=
   Subgroup.ext fun τ => mem_stabilizer_gsLocalPlace_iff hL ιs v τ
 
-omit [NumberField F] [NumberField L] [IsGalois F L] in
 
+omit [NumberField F] [NumberField L] [IsGalois F L] in
 theorem galSmul_mem_placesOver (τ : L ≃ₐ[F] L) {w : HeightOneSpectrum (𝓞 L)}
     (hw : w ∈ placesOver S) : τ • w ∈ placesOver S := by
   obtain ⟨v, hv, hlies⟩ := hw
   exact ⟨v, hv, (τ • (⟨w, hlies⟩ : PlacesOver L v)).2⟩
 
-variable (S) in
 
+variable (S) in
 abbrev placesOverAction : MulAction (L ≃ₐ[F] L) (placesOver S : Set (HeightOneSpectrum (𝓞 L))) :=
   stableMulAction (placesOver S) fun τ _ hw => galSmul_mem_placesOver τ hw
 
@@ -103,8 +146,8 @@ theorem stabilizer_gsPlaceAbove (v : S) :
   rw [mem_stabilizer_iff, mem_stabilizer_iff, Subtype.ext_iff, Subtype.ext_iff]
   rfl
 
-omit [IsGalois F L] in
 
+omit [IsGalois F L] in
 theorem finite_placesOver [Finite S] :
     Finite (placesOver S : Set (HeightOneSpectrum (𝓞 L))) := by
   refine Finite.of_surjective (fun p : Σ v : S, PlacesOver L (v : HeightOneSpectrum (𝓞 F)) =>

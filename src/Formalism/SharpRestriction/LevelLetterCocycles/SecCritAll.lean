@@ -1,4 +1,55 @@
-import Formalism.SharpRestriction.LevelLetterCocycles.SecCritZero
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.InFNcSmul
+import Formalism.SharpRestriction.LevelLetterCocycles.ArcCoordinatesOfMembership
+import Formalism.SharpRestriction.LevelLetterCocycles.DvOZeroHigh
+import Formalism.SharpRestriction.LevelLetterCocycles.HorTrUnique
+import Formalism.SharpRestriction.LevelLetterCocycles.InNOfPiLam
+public import Formalism.SharpRestriction.LevelLetterCocycles.MemOfSecEq
+public import Formalism.SharpRestriction.LevelLetterCocycles.ProdPsUnitE
+public import Formalism.SharpRestriction.LevelLetterCocycles.SecCritZero
+import Formalism.SharpRestriction.LevelLetterCocycles.SecInTransport
+import Formalism.SharpRestriction.LevelLetterCocycles.SecOfP
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -142,12 +193,13 @@ theorem step_mpr (C : Ctx W) (A : ArcP n) (hA : A.OK) (c' : ZMod n) (hc' : c' �
           have := repVV_smul W T c' (e + 1) _ Λ' b sol _ _ (lA_mem W (Tt - t i)) (hzrep i)
           rwa [← lE_eq] at this)
     convert h1 using 1
-    funext m
-    simp only [lE_mul]
     have : ∀ i, Tt - t i + t i = Tt := fun i => Nat.sub_add_cancel (htle i)
-    simp only [this]
+    funext m
+    simp only [lE, ← mul_assoc, ← pow_add, this]
+    simp only [mul_assoc]
     rw [← Finset.mul_sum, ← Finset.mul_sum, ← hF m]
-    unfold lE; rw [pow_add]; ring
+    simp only [lE, pow_add]
+    ring
   have hZN : InFNc W T a' 1 (∑ i, lA W ^ (Tt - t i) • z i) :=
     inFNc_sum T a' _ _ fun i _ => inFNc_smul C.hR.1 T a' (lA_mem W _) (hzN i)
   have hZP : InFP W T c' (e + 1) 1 (Λ' • ∑ i, lA W ^ (Tt - t i) • z i) := by

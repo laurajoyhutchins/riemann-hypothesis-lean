@@ -1,5 +1,47 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.ParFamIntegrable
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.WeylCellConjTransposeMulApply
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.FrameTransport
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.ParFamIntegrable
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MeasureTheory Filter Topology Formalism.REAL Formalism.QuantumDeterminants Formalism.FourierDecayAlt
 open scoped ContDiff
@@ -12,8 +54,8 @@ section Ops
 
 variable {k ρ : ℕ} {E : Type} [NormedAddCommGroup E] [NormedSpace ℂ E]
 
-variable (k ρ) in
 
+variable (k ρ) in
 def ParOK (T : (Q.Mx k ρ → E) → Q.Mx k ρ → E) : Prop :=
   ∀ (Par : Type) [NormedAddCommGroup Par] [NormedSpace ℝ Par] [FiniteDimensional ℝ Par] [MeasurableSpace Par]
     [BorelSpace Par] (U₀ : Set (Par × Mt k ρ)), IsOpen U₀ →
@@ -28,8 +70,8 @@ def ParOK (T : (Q.Mx k ρ → E) → Q.Mx k ρ → E) : Prop :=
       (∀ y' ∈ V, Matrix.of y' ∈ Q.Glev k ρ (Fin.last ρ) → fi (Matrix.of y') = ∫ Z, f Z (Matrix.of y') ∂ν) →
       T fi (Matrix.of y) = ∫ Z, T (f Z) (Matrix.of y) ∂ν
 
-variable (k ρ) in
 
+variable (k ρ) in
 def SmoothG (a : Q.Mx k ρ → ℂ) : Prop :=
   ∀ y₀ : Mt k ρ, Matrix.of y₀ ∈ Q.Glev k ρ (Fin.last ρ) → ∃ (U : Set (Mt k ρ)) (F : Mt k ρ → ℂ),
     IsOpen U ∧ y₀ ∈ U ∧ ContDiffOn ℝ ∞ F U ∧ ∀ y ∈ U, Matrix.of y ∈ Q.Glev k ρ (Fin.last ρ) → a (Matrix.of y) = F y
@@ -72,7 +114,7 @@ theorem parFam_smulG {Par : Type} [NormedAddCommGroup Par] [NormedSpace ℝ Par]
   obtain ⟨U', A, hU', hqU', hA, haA⟩ := ha q₀.2 hG
   refine ⟨U ∩ Prod.snd ⁻¹' U', fun q => A q.2 • F q, hU.inter (hU'.preimage continuous_snd), ⟨hqU, hqU'⟩, ?_,
     fun q hq' hG' => ?_⟩
-  · exact (hA.comp contDiff_snd.contDiffOn (fun q hq => hq.2)).smul (hF.mono Set.inter_subset_left)
+  · exact (hA.comp contDiff_snd.contDiffOn (fun q (hq : q ∈ U ∩ Prod.snd ⁻¹' U') => hq.2)).smul (hF.mono Set.inter_subset_left)
   · show a (Matrix.of q.2) • f q = A q.2 • F q
     rw [haA q.2 hq'.2 hG', hfF q hq'.1 hG']
 

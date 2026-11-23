@@ -1,4 +1,55 @@
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.CovariantVectorMove.MoveOperatorCovariance
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.CovariantVectorMove.MoveOperatorCovariance
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.CovariantVectorMove.SumPermEqSumFirstColumnSplit
+import Formalism.RealPlaceAnalysis.RealPlaceTaylor.ShiftedGeneratorEqIteSmulAdd
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Finset Formalism.REAL
 
@@ -43,8 +94,8 @@ def Pv (p : ℕ) (τ : Equiv.Perm (Fin (m + 1))) : A :=
 
 def Mv (p : ℕ) : A := ∑ τ, ((Equiv.Perm.sign τ : ℤ) : A) * Pv E y a b w p τ
 
-omit [Algebra ℂ A] in
 
+omit [Algebra ℂ A] in
 def symV (x c d : Fin n) : A := (if x = d then y c else 0) + (if x = c then y d else 0)
 
 omit [Algebra ℂ A] in
@@ -61,7 +112,7 @@ theorem midV (hy : ∀ a b c, E a b * y c - y c * E a b = if a = c then -y b els
   simp only [Tm, symV]
   split_ifs at h ⊢
   all_goals
-    simp only [map_add, map_one, mul_add, add_mul, mul_one, zero_add, add_zero, h, c2]
+    simp only [map_add (f := _), map_one, mul_add, add_mul, mul_one, zero_add, add_zero, h, c2]
     try noncomm_ring
 
 theorem stepV (hy : ∀ a b c, E a b * y c - y c * E a b = if a = c then -y b else 0)

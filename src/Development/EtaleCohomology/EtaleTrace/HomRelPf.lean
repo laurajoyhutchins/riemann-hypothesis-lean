@@ -1,4 +1,52 @@
-import Development.EtaleCohomology.EtaleTrace.LCoverCut
+module
+
+public import Development.EtaleCohomology.EtaleTrace.LCoverCut
+import Mathlib.Algebra.AffineMonoid.UniqueSums
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+
+@[expose] public section
 
 noncomputable section
 open MvPolynomial
@@ -9,6 +57,7 @@ theorem homRel_aeval_scale (k K : Type) [Field k] [Field K] [Algebra k K] {n : �
     (H : MvPolynomial (Fin n) k) (m : ℕ) (hH : H.IsHomogeneous m) :
     aeval (fun j => Polynomial.C (v j) * Polynomial.X) H = Polynomial.C (aeval v H) * Polynomial.X ^ m := by
   classical
+
   rw [aeval_def, eval₂_eq, aeval_def, eval₂_eq, map_sum, Finset.sum_mul]
   refine Finset.sum_congr rfl fun d hd => ?_
   have hdeg : (∑ i ∈ d.support, d i) = m := by
@@ -44,6 +93,7 @@ theorem HomRel_of : HomRel := by
   have hsum : aeval x G = ∑ i ∈ Finset.range (G.totalDegree + 1),
       Polynomial.C (aeval v (homogeneousComponent i G)) * Polynomial.X ^ i := by
     conv_lhs => rw [← sum_homogeneousComponent G]
+
     rw [map_sum]
     exact Finset.sum_congr rfl fun i _ =>
       homRel_aeval_scale k K v _ i (homogeneousComponent_isHomogeneous i G)
@@ -51,7 +101,7 @@ theorem HomRel_of : HomRel := by
     rw [Finset.mem_range]
     by_contra h
     exact hm (homogeneousComponent_eq_zero m G (by omega))
-  have hc := congrArg (fun p => Polynomial.coeff p m) (hsum.symm.trans hGx)
+  have hc := congrArg (fun p => _root_.AddMonoidAlgebra.coeff (M := ℕ) p m) (hsum.symm.trans hGx)
   simp only [Polynomial.finsetSum_coeff, Polynomial.coeff_C_mul_X_pow, Polynomial.coeff_zero] at hc
   rwa [Finset.sum_ite_eq, if_pos hmem] at hc
 

@@ -1,6 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SmoothReal
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GramSchmidtFlagDomainOrthonormalFramesStatement
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SmoothReal
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GramSchmidtFlagDomainOrthonormalFramesStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -40,7 +85,7 @@ theorem differentiableAt_of_chart (Φ : V → V) (G F : V → ℂ) (M : V →L[�
         have h : c • v = c.re • v + c.im • (Complex.I • v) := by
           conv_lhs => rw [← Complex.re_add_im c]
           rw [add_smul, mul_smul]; simp
-        rw [h, map_add, map_smul, map_smul, hM]
+        rw [h, map_add (f := _), map_smul, map_smul, hM]
         simp only [Complex.real_smul, RingHom.id_apply, smul_eq_mul]
         conv_rhs => rw [← Complex.re_add_im c]
         ring
@@ -108,7 +153,7 @@ def projU (Ψ : Finset (E →+* ℂ)) (r p : ℕ) : Frame Ψ r →L[ℝ] Frame �
         if a < b then -((sgn p a : ℝ) : ℂ) * ((sgn p b : ℝ) : ℂ) * (starRingEnd ℂ) (W τ b a) else 0
       map_add' := fun W W' => by
         funext τ a b
-        simp only [Pi.add_apply, map_add]
+        simp only [Pi.add_apply, map_add (f := _)]
         split_ifs <;> ring
       map_smul' := fun t W => by
         funext τ a b
@@ -215,11 +260,12 @@ theorem ell_projU_I [NumberField E] [IsCMField E] (X : Data E r) (ℓ : Frame X.
       conv_lhs => rw [← Complex.re_add_im z]
       rw [add_smul, mul_smul]; simp
     rw [h]
-    simp only [map_add, map_smul, key, Complex.real_smul]
+    simp only [map_add (f := _), map_smul, key, Complex.real_smul]
     conv_rhs => rw [← Complex.re_add_im z]
     ring
   conv_lhs => rw [frame_eq_sum W]
   conv_rhs => rw [frame_eq_sum W]
+
   simp only [Finset.smul_sum, smul_smul, map_sum, key2, Finset.mul_sum, mul_assoc]
 
 theorem differentiableAt_bchar (la : Wt Ψ r) :
@@ -227,7 +273,7 @@ theorem differentiableAt_bchar (la : Wt Ψ r) :
   unfold bchar
   have hp : ∀ {ι : Type} (u : Finset ι) (f : ι → Frame Ψ r → ℂ), (∀ i ∈ u, DifferentiableAt ℂ (f i) 0) →
       DifferentiableAt ℂ (fun W => ∏ i ∈ u, f i W) 0 := fun u f hf =>
-    (HasFDerivAt.finset_prod fun i hi => (hf i hi).hasFDerivAt).differentiableAt
+    (HasFDerivAt.finsetProd fun i hi => (hf i hi).hasFDerivAt).differentiableAt
   refine hp _ _ fun τ _ => hp _ _ fun i _ => ?_
   refine DifferentiableAt.zpow ?_ (Or.inl ?_)
   · simp only [Pi.add_apply]

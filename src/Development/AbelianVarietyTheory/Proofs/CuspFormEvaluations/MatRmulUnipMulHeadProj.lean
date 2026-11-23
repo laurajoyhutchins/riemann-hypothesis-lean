@@ -1,9 +1,62 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.FourierCoefficientDomain
-import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.PolyDerivVanishesOfTranslationInvariance
-import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.BetaEqZeroOfCharacter
-import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.HasSumPolyDerivMulProdAddMatrix
-import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.DifferentiableOnDetHMat
+module
+
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.BetaEqZeroOfCharacter
+public import Development.AbelianVarietyTheory.Definitions.ThetaValues.PolyDerivSmulLetter
+public import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.DifferentiableOnOfTendstoLocallyUniformlyOn
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.DifferentiableOnDetHMat
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.HasSumPolyDerivMulProdAddMatrix
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.PolyDerivVanishesOfTranslationInvariance
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.DifferentiableOnLeftInverse
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.FourierCoefficientDomain
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.LminorSubmatrixCastSucc
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open NumberField Matrix Complex
 open scoped ComplexConjugate
@@ -64,11 +117,11 @@ theorem hermC_eq_sum_col (τ : E →+* ℂ) (G : Matrix (Fin r) (Fin r) E) {A : 
   exact Finset.sum_congr rfl fun _ _ => Finset.sum_congr rfl fun _ _ =>
     Finset.sum_congr rfl fun _ _ => by ring
 
-variable {X} in
 
+variable {X} in
 theorem EF_eq_coper {y : Frame X.Ψ r} (hy : ∀ τ, (mat y τ).det ≠ 0) (u v : Fin r → E) :
     ((EF X u v : ℚ) : ℂ) = I / 2 * (coper X y u ⬝ᵥ per X y v - per X y u ⬝ᵥ coper X y v) := by
-  have h := congrArg (fun t : ℝ => (t : ℂ)) (EF_eq_sum X u v)
+  have h := congrArg (fun t : ℝ => (t : ℂ)) (EF_eq_sum (X := X) u v)
   simp only [ofReal_ratCast, ofReal_sum] at h
   rw [h, dotProduct, dotProduct, ← Finset.sum_sub_distrib, Fintype.sum_prod_type, Finset.mul_sum]
   refine Finset.sum_congr rfl fun τ _ => ?_
@@ -100,7 +153,8 @@ theorem cxMat_mulVec_int (f : (Fin r → E) →+ (X.Ψ × Fin r → ℂ)) (m : F
   have hm : m = ∑ j, m j • Pi.single j (1 : ℤ) := by
     funext j; simp [Pi.single_apply]
   funext i
-  conv_rhs => rw [hm, map_sum, AddSubmonoidClass.coe_finset_sum, map_sum]
+
+  conv_rhs => rw [hm, map_sum, AddSubmonoidClass.coe_finsetSum, map_sum]
   simp only [map_zsmul, AddSubgroupClass.coe_zsmul]
   simp [cxMat, mulVec, dotProduct, mul_comm]
 
@@ -157,9 +211,6 @@ theorem coperCx_actMat (y : Frame X.Ψ r) (α : 𝓞 E) (u : Fin g ⊕ Fin g →
   simp only [coperCx, mulVecLin_apply, mulVec_mulVec]
   exact congrArg (· *ᵥ u) (cxMat_mul_actMat X bas idx (coperHom X y) α
     (fun p => conj (rowType X p α)) (coper_smul X y α))
-
-def secN (y : Frame X.Ψ r) : (Fin g → ℂ) →ₗ[ℂ] (Fin g ⊕ Fin g → ℂ) :=
-  (I / 2) • (fromRows (coMat X bas idx Sum.inr y)ᵀ (-(coMat X bas idx Sum.inl y)ᵀ)).mulVecLin
 
 def secLin (y : Frame X.Ψ r) : (Fin g → ℂ) →ₗ[ℂ] (Fin g ⊕ Fin g → ℂ) :=
   secL g ∘ₗ (hMat X bas idx y).mulVecLin
@@ -424,7 +475,7 @@ include hs
 
 theorem differentiableOn_splitMat (i j : Fin g) :
     DifferentiableOn ℂ (fun x => splitMat X bas idx x i j) X.dom := by
-  simp only [splitMat, mul_apply]
+  change DifferentiableOn ℂ (fun x => ∑ l, coper X x (bas (Pi.single (Sum.inl l) 1)) (idx i) * hMat X bas idx x l j) X.dom
   exact DifferentiableOn.fun_sum fun l _ =>
     ((differentiableOn_coper X _ _).mono fun x hx τ => (hx τ).1).mul (differentiableOn_hMat idx hs l j)
 
@@ -457,12 +508,6 @@ end Holo
 
 section Compl
 
-def headSpan (x : Frame X.Ψ r) (τ : X.Ψ) : Submodule ℂ (Fin r → ℂ) :=
-  Submodule.span ℂ (FD.col (mat x τ) '' {a | (a : ℕ) < X.p0})
-
-def tailSpan (y : Frame X.Ψ r) (τ : X.Ψ) : Submodule ℂ (Fin r → ℂ) :=
-  Submodule.span ℂ (FD.col (mat y τ) '' {a | X.p0 ≤ (a : ℕ)})
-
 def headProj : Matrix (Fin r) (Fin r) ℂ := diagonal fun a => if (a : ℕ) < X.p0 then 1 else 0
 
 def mix (x y : Frame X.Ψ r) : Frame X.Ψ r := fun τ i a =>
@@ -470,18 +515,6 @@ def mix (x y : Frame X.Ψ r) : Frame X.Ψ r := fun τ i a =>
 
 def unip (K : Frame X.Ψ r) : Frame X.Ψ r := fun τ a c =>
   if (a : ℕ) < X.p0 ∧ X.p0 ≤ (c : ℕ) then K τ a c else if a = c then 1 else 0
-
-def shear (x y : Frame X.Ψ r) : Frame X.Ψ r := fun τ a c =>
-  -((mat (mix X x y) τ)⁻¹ * mat x τ) a c
-
-def adapt (x y : Frame X.Ψ r) : Frame X.Ψ r := rmul x (unip X (shear X x y))
-
-def betaMat (bas : (Fin g ⊕ Fin g → ℤ) ≃ₗ[ℤ] X.Λ) (idx : Fin g ≃ X.Ψ × Fin r)
-    (x y : Frame X.Ψ r) : Matrix (Fin g) (Fin g) ℂ := splitMat X bas idx (adapt X x y)
-
-def embCx (bas : (Fin g ⊕ Fin g → ℤ) ≃ₗ[ℤ] X.Λ) (τ : E →+* ℂ) :
-    (Fin g ⊕ Fin g → ℂ) →ₗ[ℂ] (Fin r → ℂ) :=
-  (Matrix.of fun a s => Data.emb τ (bas (Pi.single s 1) : Fin r → E) a).mulVecLin
 
 theorem headProj_mul_self : headProj X * headProj X = headProj X := by
   rw [headProj, diagonal_mul_diagonal]
@@ -491,11 +524,8 @@ theorem mat_unip (K : Frame X.Ψ r) (τ : X.Ψ) :
     mat (unip X K) τ = 1 + headProj X * mat K τ * (1 - headProj X) := by
   ext a c
   simp only [headProj, Matrix.mul_sub, Matrix.mul_one, Matrix.add_apply, Matrix.sub_apply, mul_diagonal,
-    diagonal_mul, mat, of_apply, unip, one_apply, Fin.ext_iff]
+    diagonal_mul, mat, of_apply, unip, Matrix.one_apply, Fin.ext_iff]
   split_ifs <;> first | omega | simp
-
-@[simp] theorem mix_self (x : Frame X.Ψ r) : mix X x x = x := by
-  funext τ i a; simp [mix]
 
 theorem mat_unip_neg_mul (K : Frame X.Ψ r) (τ : X.Ψ) :
     mat (unip X (-K)) τ * mat (unip X K) τ = 1 := by
@@ -517,16 +547,18 @@ theorem unip_mem_Bor (K : Frame X.Ψ r) : unip X K ∈ Bor X.Ψ r := fun τ =>
 theorem per_rmul_unip (x K : Frame X.Ψ r) : per X (rmul x (unip X K)) = per X x := by
   classical
   have h : borMat X (unip X K) = 1 := by
-    ext ⟨τ, a⟩ ⟨σ, c⟩
+    apply Matrix.ext
+    rintro ⟨τ, a⟩ ⟨σ, c⟩
+    change borMat X (unip X K) (τ, a) (σ, c) = (if (τ, a) = (σ, c) then 1 else 0)
     by_cases hτ : σ = τ
     · subst hτ
       rcases lt_or_ge (a : ℕ) X.p0 with ha | ha
       · rw [borMat_of_lt X _ _ ha, unip, if_neg (by omega)]
-        simp [one_apply, eq_comm]
+        simp [eq_comm]
       · rw [borMat_of_le X _ _ ha, inv_eq_left_inv (mat_unip_neg_mul X K σ), mat, of_apply, unip,
           if_neg (by omega)]
-        simp [one_apply]
-    · rw [borMat_of_ne X _ hτ, one_apply_ne fun h => hτ (congrArg Prod.fst h).symm]
+        simp
+    · rw [borMat_of_ne X _ hτ, if_neg (fun h => hτ (congrArg Prod.fst h).symm)]
   funext v
   rw [per_rmul x (unip_mem_Bor X K), h, one_mulVec]
 
@@ -555,13 +587,6 @@ variable {bas} (hs : IsSympl X bas)
 include hs
 
 end Compl
-
-example (n : ℕ) :
-    DifferentiableOn ℂ (thFr HyperbolicCusp.flagData Gauss.hr Gauss.bas Gauss.idx n 0 0 1)
-      HyperbolicCusp.flagData.dom ∧
-    thFr HyperbolicCusp.flagData Gauss.hr Gauss.bas Gauss.idx n 0 0 1 Gauss.one ≠ 0 :=
-  ⟨differentiableOn_thFr _ Gauss.isSympl_bas _ n 0 0 (Harm.isHarmonic_C 1),
-    Gauss.thFr_one_ne_zero n⟩
 
 end
 

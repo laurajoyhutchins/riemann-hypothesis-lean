@@ -1,8 +1,57 @@
-import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.NotIsCompactUnivFv
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.MemClosureUnitary
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ContinuousLocAdele
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ClosureDivMem
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.NotIsCompactUnivFv
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.UnitaryGroupWeakApproximationAtPrimes
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ClosureDivMem
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ContinuousLocAdele
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.UnitaryTranspose
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.MemClosureUnitary
+import GroundTheory.GlobalFields.Adele.WeakApprox
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -62,10 +111,12 @@ theorem exists_proj {K : Type} [Field K] (c : K →+* K) (hc : ∀ x, c (c x) = 
   have hyx : y ⬝ᵥ x = d := by rw [hd, dotProduct_mulVec]
   have hcy : c ∘ y = J *ᵥ x := by
     funext i
+
     simp [hy, vecMul, mulVec, dotProduct, map_sum, hc, hJ', mul_comm]
   have hcd : c d = d := by
     conv_lhs => rw [← hyx]
     rw [hd, ← hcy]
+
     simp [dotProduct, map_sum, mul_comm]
   refine ⟨d⁻¹ • vecMulVec x y, ?_, ?_, fun a => ?_⟩
   · rw [smul_mul_assoc, mul_smul_comm, vecMulVec_mul_vecMulVec, hyx, vecMulVec_smul, smul_smul d⁻¹ d,
@@ -111,6 +162,7 @@ theorem mem_closure_su {K R : Type} [Field K] [CharZero K] [CommRing R] [Topolog
   · have e : cT c (1 + (c γ.det - 1) • P) = 1 + (γ.det - 1) • cT c P := by
       ext i j
       simp [cT, hc, one_apply, eq_comm]
+      by_cases h : i = j <;> simp [Matrix.one_apply, h, eq_comm]
     rw [cT_mul, e, Matrix.mul_assoc _ _ J, Matrix.mul_assoc, ← Matrix.mul_assoc _ γ, hγ', ← Matrix.mul_assoc]
     simp only [Matrix.add_mul, Matrix.mul_add, Matrix.one_mul, Matrix.mul_one, Matrix.smul_mul, Matrix.mul_smul, hPJ,
       Matrix.mul_assoc, hPP, smul_add, smul_smul]
@@ -140,7 +192,7 @@ theorem sigR_sigR (R : Type) [CommRing R] [Algebra F R] (σ : E →ₐ[F] E) (hc
   induction x using TensorProduct.induction_on with
   | zero => simp
   | tmul a y => simp [sigR, hc]
-  | add x y hx hy => rw [map_add, map_add, hx, hy]
+  | add x y hx hy => rw [map_add (f := _), map_add (f := _), hx, hy]
 
 theorem continuous_sigR (R : Type) [CommRing R] [Algebra F R] [TopologicalSpace R] [IsTopologicalRing R]
     (σ : E →ₐ[F] E) : Continuous (sigR R σ) := by
@@ -202,13 +254,13 @@ theorem mem_closure_trunc [CharZero E] [FiniteDimensional F E] (A B : Type) [Com
     induction y using TensorProduct.induction_on with
     | zero => simp
     | tmul a y => rfl
-    | add x y hx hy => simp only [map_add, hx, hy]
+    | add x y hx hy => simp only [map_add (f := _), hx, hy]
   have hrepr : ∀ y i, bB.repr (p y) i = π (bA.repr y i) := by
     intro y i
     induction y using TensorProduct.induction_on with
     | zero => simp
     | tmul a y => simp [hp, bA, bB, Algebra.TensorProduct.basis_repr_tmul]
-    | add x y hx hy => simp only [map_add, Finsupp.add_apply, hx, hy]
+    | add x y hx hy => simp only [map_add (f := _), Finsupp.add_apply, hx, hy]
   let S : B ⊗[F] E → A ⊗[F] E := fun y => ∑ i, s (bB.repr y i) • bA i
   have hS : Continuous S := continuous_finsetSum _ fun i _ =>
     (hs.comp (IsModuleTopology.continuous_of_linearMap (bB.coord i))).smul continuous_const
@@ -277,6 +329,7 @@ theorem unitary_trunc {R : Type} [CommRing R] (σ : R →+* R) {n : ℕ} (J u : 
   have e1 : cT σ (1 + e • (u - 1)) = 1 + e • (cT σ u - 1) := by
     ext i j
     simp [cT, hσ, one_apply, eq_comm]
+    by_cases h : i = j <;> simp [Matrix.one_apply, h, eq_comm]
   rw [e1]
   simp only [Matrix.add_mul, Matrix.mul_add, Matrix.sub_mul, Matrix.mul_sub, Matrix.one_mul, Matrix.mul_one,
     Matrix.smul_mul, Matrix.mul_smul, smul_add, smul_sub, smul_smul, he, hu]

@@ -1,4 +1,52 @@
-import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.CompactOrbits.NilpotentOrbits.OrbitIntegrals.CentralizerRepresentatives.IsChain
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.CompactOrbits.NilpotentOrbits.OrbitIntegrals.CentralizerRepresentatives.IsChain
+public import Mathlib.LinearAlgebra.Matrix.GeneralLinearGroup.Defs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.CoassocSimps
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -110,6 +158,7 @@ theorem conj_of_frames [∀ m, Nonempty (L m)] {N₁ N₂ : Matrix (Fin n) (Fin 
     have h1 := F₂.hZ ⟨a, ha⟩ m p (ψ m j)
     have h2 := F₁.hZ ⟨a, ha⟩ m p j
     simp only at h1 h2
+
     rw [h1, h2, hGv, map_sum]
     refine Finset.sum_congr rfl fun q _ => ?_
     rw [map_smul, hg, hΦ]
@@ -121,23 +170,26 @@ theorem conj_of_frames [∀ m, Nonempty (L m)] {N₁ N₂ : Matrix (Fin n) (Fin 
     simp only [Fin.val_cast]
     by_cases hi : (i : ℕ) + 1 < F₁.l m a
     · have hi2 : (i : ℕ) + 1 < F₂.l m (σ m a) := by rw [(hσ m a).1]; exact hi
-      rw [dif_pos hi, dif_pos hi2, hg, hΦ, hψ]
+      rw [dite_eq_left hi, dite_eq_left hi2, hg, hΦ, hψ]
       rfl
     · have hi2 : ¬ (i : ℕ) + 1 < F₂.l m (σ m a) := by rw [(hσ m a).1]; exact hi
-      rw [dif_neg hi, dif_neg hi2, map_zero]
-  · rw [hGv, F₁.hv, F₂.hv, map_sum]
+      rw [dite_eq_right hi, dite_eq_right hi2, map_zero]
+  · set_option synthInstance.maxHeartbeats 100000 in
+      rw [hGv, F₁.hv, F₂.hv, map_sum]
     refine Finset.sum_congr rfl fun m _ => ?_
+
     rw [map_sum]
     refine Finset.sum_congr rfl fun p _ => ?_
+
     rw [map_sum, ← Equiv.sum_comp (σ m)]
     refine Finset.sum_congr rfl fun a _ => ?_
     by_cases ha : F₁.s m a < F₁.l m a
     · have ha2 : F₂.s m (σ m a) < F₂.l m (σ m a) := by rw [(hσ m a).1, (hσ m a).2]; exact ha
-      rw [dif_pos ha, dif_pos ha2, map_smul, hg, hΦ, hψ]
+      rw [dite_eq_left ha, dite_eq_left ha2, map_smul, hg, hΦ, hψ]
       have hc : (Fin.cast (hσ m a).1.symm ⟨F₁.s m a, ha⟩ : Fin (F₂.l m (σ m a))) = ⟨F₂.s m (σ m a), ha2⟩ :=
         Fin.ext (by simp [(hσ m a).2])
       rw [hc]
     · have ha2 : ¬ F₂.s m (σ m a) < F₂.l m (σ m a) := by rw [(hσ m a).1, (hσ m a).2]; exact ha
-      rw [dif_neg ha, dif_neg ha2, map_zero]
+      rw [dite_eq_right ha, dite_eq_right ha2, map_zero]
 
 end PositivityTheory.RgUd.T.Nil.Orb.BReps

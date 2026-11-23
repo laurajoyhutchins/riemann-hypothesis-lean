@@ -1,8 +1,55 @@
-import Mathlib
-import Development.AutomorphicArithmetic.CyclotomicBounds.SmallFacts
-import Development.AutomorphicArithmetic.PrimeDiscriminants.CycImage
-import Development.AutomorphicArithmetic.PrimeDiscriminants.SmallRam
-import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
+public import Formalism.LocalRingCardinality.DataHost
+public import Development.AutomorphicArithmetic.CyclotomicBounds.SmallFacts
+public import Development.AutomorphicArithmetic.PrimeDiscriminants.CycImage
+public import Development.AutomorphicArithmetic.PrimeDiscriminants.SmallRam
+import Formalism.SharpRestriction.RamificationFrobenius.TotientGaloisClasses.HostFacts
+import Mathlib.Algebra.AffineMonoid.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Presheaf
+
+@[expose] public section
 
 namespace UpperTheory.Small
 
@@ -95,37 +142,5 @@ theorem not_mem_of_ramIdx_one {l : ℕ} (hl : l.Prime) (P : HeightOneSpectrum (�
   refine (Ideal.ramificationIdx'_ne_one_iff hle).2 ?_ he'
   rw [hmap, Ideal.span_le]
   simpa using h2
-
-theorem zmod_two_quadratic_ne_zero : ∀ v : ZMod 2, v ^ 2 - v + 1 ≠ 0 := by decide
-
-theorem card_quot_ne_two (P : HeightOneSpectrum (𝓞 H.E)) : Nat.card (𝓞 H.E ⧸ P.asIdeal) ≠ 2 := by
-  intro hc
-  have h8 := H.hyp.2.2.1
-  obtain ⟨k, hk⟩ : ∃ k, H.q = 8 * k + 3 := ⟨H.q / 8, by omega⟩
-  have hx : ((1 + H.sqq) / 2) ^ 2 - (1 + H.sqq) / 2 + ((2 * k + 1 : ℕ) : H.E) = 0 := by
-    have h := H.sqq_sq
-    rw [hk] at h
-    push_cast at h ⊢
-    linear_combination (1 / 4 : H.E) * h
-  have hi : IsIntegral ℤ ((1 + H.sqq) / 2) := by
-    refine ⟨Polynomial.X ^ 2 - Polynomial.X + Polynomial.C ((2 * k + 1 : ℕ) : ℤ), by monicity!, ?_⟩
-    simpa using hx
-  let z : 𝓞 H.E := ⟨_, hi⟩
-  have hz : z ^ 2 - z + ((2 * k + 1 : ℕ) : 𝓞 H.E) = 0 := by
-    apply RingOfIntegers.ext
-    simp only [map_add, map_sub, map_pow, map_natCast, map_zero]
-    exact hx
-  haveI := P.isPrime
-  haveI : Finite (𝓞 H.E ⧸ P.asIdeal) := Nat.finite_of_card_ne_zero (by omega)
-  letI := Fintype.ofFinite (𝓞 H.E ⧸ P.asIdeal)
-  haveI : Fact (Nat.Prime 2) := ⟨Nat.prime_two⟩
-  let e := ZMod.ringEquivOfPrime (𝓞 H.E ⧸ P.asIdeal) Nat.prime_two (Nat.card_eq_fintype_card.symm.trans hc)
-  have h := congrArg (fun t => e.symm (Ideal.Quotient.mk P.asIdeal t)) hz
-  simp only [map_add, map_sub, map_pow, map_natCast, map_zero] at h
-  generalize e.symm (Ideal.Quotient.mk P.asIdeal z) = u at h
-  push_cast at h
-  have h2 : (2 : ZMod 2) = 0 := rfl
-  rw [h2, zero_mul, zero_add] at h
-  exact zmod_two_quadratic_ne_zero u h
 
 end UpperTheory.Small

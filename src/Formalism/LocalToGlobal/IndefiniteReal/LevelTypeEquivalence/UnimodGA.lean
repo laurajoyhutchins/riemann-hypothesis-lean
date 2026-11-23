@@ -1,9 +1,49 @@
-import Formalism.LocalToGlobal.IndefiniteReal.LevelTypeEquivalence.UnimodInst
-import Formalism.LocalToGlobal.IndefiniteReal.LevelTypeEquivalence.PeterssonNormOfUpLift
-import Formalism.LocalToGlobal.IndefiniteReal.LevelTypeEquivalence.GinfCSecondCountable
-import Formalism.LocalToGlobal.IndefiniteReal.HaarTransfer.UnimodP
-import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.UJUnimod
-import Formalism.PeriodIntegrals.ExplicitFormulaCounts.AdUnimod
+module
+
+public import Formalism.LocalToGlobal.IndefiniteReal.LevelTypeEquivalence.UnimodInst
+public import Formalism.LocalToGlobal.IndefiniteReal.LevelTypeEquivalence.PeterssonNormOfUpLift
+public import Formalism.LocalToGlobal.IndefiniteReal.HaarTransfer.UnimodP
+public import Formalism.LocalToGlobal.IndefiniteReal.LevelTypeEquivalence.NumFieldHosCountable
+public import Formalism.PeriodIntegrals.ExplicitFormulaCounts.AdUnimod
+public import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.UJUnimod
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -45,7 +85,8 @@ theorem jf_isClosedEmbedding : Topology.IsClosedEmbedding (jf fr) := by
 
 theorem gf_facts : T2Space (UI.instV fr).Gf ∧ LocallyCompactSpace (UI.instV fr).Gf ∧
     SecondCountableTopology (UI.instV fr).Gf := by
-  obtain ⟨h1, h2, h3, h4, h5⟩ := ga_facts D V
+  obtain ⟨h1, h2, h3⟩ := G5.af_facts D.host.F
+  obtain ⟨h1, h2, h3, h4, h5⟩ := G5.ha_facts (AF D.host.F) D.sp.cm.deg2 D.sp.cm.sig V.gram
   have he := jf_isClosedEmbedding fr
   exact ⟨he.isEmbedding.t2Space, he.locallyCompactSpace, he.isInducing.secondCountableTopology⟩
 
@@ -55,10 +96,12 @@ theorem uJ_rightInv {n : ℕ} (ε : Fin n → Bool) (μ : Measure (Formalism.REA
     μ.IsMulRightInvariant := by
   have hR : (Formalism.REAL.muG ε).IsMulRightInvariant := unitary_unimodular_right_inv n ε
   rw [Measure.isMulLeftInvariant_eq_smul μ (Formalism.REAL.muG ε)]
-  exact ⟨fun g => by rw [Measure.map_smul, hR.map_mul_right_eq_self]⟩
+  exact ⟨fun g => by rw [Measure.map_smul _ (continuous_mul_const g).aemeasurable,
+    hR.map_mul_right_eq_self]⟩
 
 theorem unimodGA_of_frames {D : D7} {V : HSp D} (fr : UI.Frames D V) : UnimodGA V := by
-  obtain ⟨h1, h2, h3, h4, h5⟩ := ga_facts D V
+  obtain ⟨h1, h2, h3⟩ := G5.af_facts D.host.F
+  obtain ⟨h1, h2, h3, h4, h5⟩ := G5.ha_facts (AF D.host.F) D.sp.cm.deg2 D.sp.cm.sig V.gram
   obtain ⟨g1, g2, g3⟩ := gf_facts fr
   have hinf : ∀ μ : Measure (UI.instV fr).Ginf, μ.IsHaarMeasure → μ.IsMulRightInvariant :=
     Leaf.Proofs.piStatement_holds (InfinitePlace D.host.F) (fun v => Formalism.REAL.UJ (fr.ε v))

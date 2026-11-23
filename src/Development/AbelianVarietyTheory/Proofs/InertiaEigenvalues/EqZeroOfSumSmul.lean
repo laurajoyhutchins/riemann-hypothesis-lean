@@ -1,6 +1,50 @@
-import Mathlib
-import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
-import Development.AbelianVarietyTheory.BlockTheory.NonGaloisCusps.GradedSeries
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.NonGaloisCusps.GradedSeries
+public import Mathlib.RingTheory.HahnSeries.PowerSeries
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.Interval.Finset.Box
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -35,8 +79,6 @@ def mk (u : ℤ → M) (hu : IsLaurent u) : Laur L M :=
   HahnModule.of L (HahnSeries.ofSuppBddBelow u (by
     obtain ⟨m, hm⟩ := hu
     exact ⟨m, fun k hk => not_lt.1 fun h => hk (hm k h)⟩))
-
-@[simp] theorem co_mk (u : ℤ → M) (hu : IsLaurent u) : co (mk u hu : Laur L M) = u := rfl
 
 private theorem coeff_ofPowerSeries_smul_eq_serMul (f : L⟦X⟧) (y : HahnModule ℤ L M) (k : ℤ) :
     ((HahnModule.of L).symm (HahnSeries.ofPowerSeries ℤ L f • y)).coeff k =
@@ -118,17 +160,18 @@ theorem co_smul_low (f : L⟦X⟧) (x : Laur L M) (m : ℤ) (hx : ∀ k < m, co 
   · have e := co_smul_add_eq_coeff_smul_co f x m 0 (fun j hj => absurd hj (Nat.not_lt_zero j)) hx
     simpa using e
 
-def single (k : ℤ) (d : M) : Laur L M :=
-  mk (Pi.single k d) ⟨k, fun _ h => Pi.single_eq_of_ne h.ne _⟩
-
-@[simp] theorem co_single (k : ℤ) (d : M) : co (single k d : Laur L M) = Pi.single k d := rfl
-
 def tw (c : L) (g : M →ₗ[L] M') : Laur L M →+ Laur L M' where
   toFun x := mk (fun k => c ^ k • g (co x k)) (by
     obtain ⟨m, hm⟩ := isLaurent_co x
     exact ⟨m, fun k hk => by simp [hm k hk]⟩)
-  map_zero' := co_injective (by funext k; simp)
-  map_add' x y := co_injective (by funext k; simp)
+  map_zero' := co_injective (by
+    funext k
+    simp
+    rfl)
+  map_add' x y := co_injective (by
+    funext k
+    simp
+    rfl)
 
 @[simp] theorem co_tw (c : L) (g : M →ₗ[L] M') (x : Laur L M) (k : ℤ) :
     co (tw c g x) k = c ^ k • g (co x k) := rfl

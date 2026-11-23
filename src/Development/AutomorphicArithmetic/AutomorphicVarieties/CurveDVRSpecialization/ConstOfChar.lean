@@ -1,8 +1,66 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CurveDVRSpecialization.IsUnitOrIsUnitOfAddOne
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CurveDVRSpecialization.ConstOfAlg
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CurveDVRSpecialization.NotIrrOfChar
-import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeGroups.ExistsCoordOfNotMatIrr
-import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeGroups.ZetaReducibleRepEqSubInvAndIsUnit
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CurveDVRSpecialization.IsUnitOrIsUnitOfAddOne
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CurveDVRSpecialization.ConstOfAlg
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CurveDVRSpecialization.NotIrrOfChar
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeGroups.ExistsCoordOfNotMatIrr
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeGroups.ZetaReducibleRepEqSubInvAndIsUnit
+import Mathlib.Algebra.AffineMonoid.UniqueSums
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.AdicCompletion.Noetherian
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+public import Mathlib.RingTheory.Polynomial.IsIntegral
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Compactification.OnePoint.ProjectiveLine
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Matrix Polynomial IsLocalRing UpperTheory.V.U3 UpperTheory.V.Pr
 
@@ -63,11 +121,11 @@ private theorem diag_const {k A : Type} [Field k] [CommRing A] [IsDomain A] [IsL
   · simpa using h a a
 
 private theorem zmat_map {G R S : Type} [Group G] [CommRing R] [CommRing S] (f : R →+* S) (c g₁ : G)
-    (r : G →* GG 3 R) (i j : Fin 3) : zmat c g₁ ((GG.map f).comp r) i j = f (zmat c g₁ r i j) := by
+    (r : G →* GG (m := 3) (R := R)) (i j : Fin 3) : zmat c g₁ ((GG.map f).comp r) i j = f (zmat c g₁ r i j) := by
   simp only [zmat, Matrix.sub_apply, MonoidHom.comp_apply, GG.map_mat, Matrix.map_apply, map_sub]
 
 private theorem normalised_map {G R S : Type} [Group G] [CommRing R] [CommRing S] (f : R →+* S) {c g₁ : G}
-    {r : G →* GG 3 R} (h : Normalised c g₁ r) : Normalised c g₁ ((GG.map f).comp r) := by
+    {r : G →* GG (m := 3) (R := R)} (h : Normalised c g₁ r) : Normalised c g₁ ((GG.map f).comp r) := by
   refine ⟨?_, ?_, ?_⟩
   · simp [GG.map_mat, h.atc]
   · rw [zmat_map, h.z12, map_zero]
@@ -95,7 +153,7 @@ private theorem corner_mul {κ : Type} [CommRing κ] (M N : Matrix (Fin 3) (Fin 
   ext i j
   fin_cases i <;> fin_cases j <;> simp [Matrix.mul_apply, Fin.sum_univ_three, h1, h4]
 
-private theorem not_typeI {G κ : Type} [Group G] [Field κ] (η : G →* ℤˣ) (Φ : G →* κˣ) (r : G →* GG 3 κ)
+private theorem not_typeI {G κ : Type} [Group G] [Field κ] (η : G →* ℤˣ) (Φ : G →* κˣ) (r : G →* GG (m := 3) (R := κ))
     (hm : HasMult η r)
     (hp : ∀ g ∈ η.ker, (r g).mat.charpoly = (X - C (Φ g : κ)) * (X - C 1) * (X - C ((Φ g)⁻¹ : κˣ).1)) :
     ¬ TypeI η r := by
@@ -105,7 +163,7 @@ private theorem not_typeI {G κ : Type} [Group G] [Field κ] (η : G →* ℤˣ)
   rw [chPoly, Fin.prod_univ_three]
   exact hp g g.2
 
-private theorem exists_corner_rep_of_block {G κ : Type} [Group G] [Field κ] (η : G →* ℤˣ) (r : G →* GG 3 κ)
+private theorem exists_corner_rep_of_block {G κ : Type} [Group G] [Field κ] (η : G →* ℤˣ) (r : G →* GG (m := 3) (R := κ))
     (hm : HasMult η r) (hB : Block η r) :
     ∃ ρ : η.ker →* GL (Fin 2) κ, ∀ g, (ρ g : Matrix (Fin 2) (Fin 2) κ) = corner (r g).mat := by
   have hmul : ∀ g h : η.ker, (r (g * h : η.ker)).mat = (r g).mat * (r h).mat := by
@@ -127,7 +185,7 @@ private theorem exists_corner_rep_of_block {G κ : Type} [Group G] [Field κ] (�
         exact corner_mul _ _ (hB g g.2 0 1 ⟨0, by simp [wt, wt1]⟩) (hB g g.2 2 1 ⟨-1, by simp [wt, wt1]⟩) }
   exact ⟨μ.toHomUnits, fun g => rfl⟩
 
-private theorem not_typeII {G κ : Type} [Group G] [Field κ] (η : G →* ℤˣ) (Φ : G →* κˣ) (r : G →* GG 3 κ)
+private theorem not_typeII {G κ : Type} [Group G] [Field κ] (η : G →* ℤˣ) (Φ : G →* κˣ) (r : G →* GG (m := 3) (R := κ))
     (hm : HasMult η r)
     (hp : ∀ g ∈ η.ker, (r g).mat.charpoly = (X - C (Φ g : κ)) * (X - C 1) * (X - C ((Φ g)⁻¹ : κˣ).1))
     (hB : Block η r) (h11 : ∀ g ∈ η.ker, (r g).mat 1 1 = 1) : ¬ TypeII η r := by
@@ -149,13 +207,13 @@ private theorem not_typeII {G κ : Type} [Group G] [Field κ] (η : G →* ℤˣ
   · intro W hW
     exact hirr W (fun g hg v hv => by simpa [hρ] using hW ⟨g, hg⟩ trivial v hv)
 
-private theorem mat_mul_eq_of_mat_eq_one {G R : Type} [Group G] [CommRing R] (r : G →* GG 3 R) (c g : G)
+private theorem mat_mul_eq_of_mat_eq_one {G R : Type} [Group G] [CommRing R] (r : G →* GG (m := 3) (R := R)) (c g : G)
     (h : (r c).mat = 1) : (r (g * c)).mat = (r g).mat := by
   have hc : (r c).left = 1 := Units.ext h
   rw [map_mul]
   simp [GG.mat, SemidirectProduct.mul_left, hc]
 
-private theorem mat_pow_of_mult_one {G R : Type} [Group G] [CommRing R] (η : G →* ℤˣ) (r : G →* GG 3 R)
+private theorem mat_pow_of_mult_one {G R : Type} [Group G] [CommRing R] (η : G →* ℤˣ) (r : G →* GG (m := 3) (R := R))
     (hm : HasMult η r) (g : G) (hg : η g = 1) (n : ℕ) : (r (g ^ n)).mat = (r g).mat ^ n := by
   induction n with
   | zero => simp [GG.mat]
@@ -212,7 +270,7 @@ theorem UpperTheory.V.Pr.constOfChar :
     exact (IsLocalRing.mem_maximalIdeal _).1 hm1 hu
   let f : A →+* FractionRing A := algebraMap A (FractionRing A)
   have hf : Function.Injective f := IsFractionRing.injective A (FractionRing A)
-  let r' : G →* GG 3 (FractionRing A) := (GG.map f).comp r
+  let r' : G →* GG (m := 3) (R := FractionRing A) := (GG.map f).comp r
   have hm' : HasMult η r' := fun g => hm g
   have hN' : Normalised c g₁ r' := normalised_map f hN
   have hmat' : ∀ g, (r' g).mat = (r g).mat.map f := fun g => GG.map_mat f (r g)

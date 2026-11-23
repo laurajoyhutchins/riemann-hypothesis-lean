@@ -1,4 +1,50 @@
-import Formalism.SharpRestriction.GrowthBounds.ColumnSpanDensity.FinrankTensor
+module
+
+public import Formalism.PolynomialDimension.WeylDim
+public import Formalism.SharpRestriction.GrowthBounds.ColumnSpanDensity.MeanDefs
+public import Formalism.PolynomialDimension.MultinomialDepth.WeylDimPosOfAntitone
+public import Formalism.SharpRestriction.GrowthBounds.ColumnSpanDensity.FinrankTensor
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.Interval.Finset.Box
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -60,7 +106,7 @@ theorem prod_tops {n' : ℕ} (TT : Finset (Fin n')) (f : TT → ℚ) :
     symm
     apply Finset.prod_subset (Finset.subset_univ _)
     intro s _ hs
-    rw [dif_neg hs]
+    rw [dite_eq_right hs]
   rw [h1, ← Finset.prod_attach, Finset.univ_eq_attach]
   refine Finset.prod_congr rfl fun s _ => ?_
   rw [dif_pos s.2]
@@ -111,7 +157,7 @@ theorem lamAt_flat {n' : ℕ} (m : ℕ) {TT : Finset (Fin n')} (A B : TT → ℕ
               rw [← Fin.rev_rev i, h, Fin.rev_last]
             rw [if_neg h1, if_neg h2, if_neg h0, if_neg hl, neg_zero]
       rw [this, weylDim_hwt_eq, dimHar_comm]
-  · rw [dif_neg hs]
+  · rw [dite_eq_right hs]
     have : lamAt (flatW (m + 1) A B) s = fun _ => (0 : ℤ) := by
       unfold lamAt
       split_ifs <;> funext i <;> simp [flatW, hs]

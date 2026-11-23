@@ -1,4 +1,45 @@
-import Development.EtaleCohomology.EtaleSheaves.LeafGeomPf
+module
+
+public import Development.EtaleCohomology.EtaleSheaves.LeafGeomPf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 open CategoryTheory Limits AlgebraicGeometry Opposite GlobalTheory.EtC LateralTheory.E.D2 LateralTheory.E.LeafGeomPf
@@ -65,7 +106,8 @@ theorem allSec_of {n : ℕ} {X : Scheme.{0}} (x : Sx (PB (bsumOf V W)) n X) (h :
 theorem pv_res {n : ℕ} {X Y : Scheme.{0}} (k : Y ⟶ X) (x : Sx (PB (bsumOf V W)) n X) (i : Fin (n + 1)) :
     ((pv V W (((PB (bsumOf V W)).obj (op (SimplexCategory.mk n))).map k.op x)).obj i).1 =
       Scheme.Γ.map k.op ∘ ((pv V W x).obj i).1 := by
-  have h := ConcreteCategory.congr_hom (((pullback.snd (bsumOf V W) (PGL.pr (a + b))).app (op (SimplexCategory.mk n))).naturality k.op) x
+  have h := NatTrans.naturality_apply
+    ((pullback.snd (bsumOf V W) (PGL.pr (a + b))).app (op (SimplexCategory.mk n))) k.op x
   unfold pv
   erw [h]
   rfl
@@ -95,8 +137,10 @@ theorem allSec_simp {n m : ℕ} {X : Scheme.{0}} (θ : SimplexCategory.mk m ⟶ 
 def U2obj (n : SimplexCategoryᵒᵖ) : PSh where
   obj X := {x : ((PB (bsumOf V W)).obj n).obj X // AllSec V W (n := n.unop.len) (X := X.unop) x}
   map k := TypeCat.ofHom fun x => ⟨((PB (bsumOf V W)).obj n).map k x.1, allSec_res V W k.unop x.1 x.2⟩
-  map_id X := by ext x; exact FunctorToTypes.map_id_apply _ _
-  map_comp f g := by ext x; exact FunctorToTypes.map_comp_apply _ _ _ _
+  map_id X := by
+    ext x
+    exact ConcreteCategory.congr_hom (((PB (bsumOf V W)).obj n).map_id X) x.1
+  map_comp f g := by ext x; exact Functor.map_comp_apply _ _ _ _
 
 def U2 : Spc where
   obj := U2obj V W
@@ -106,7 +150,7 @@ def U2 : Spc where
         ext x
         apply Subtype.ext
         dsimp [U2obj]
-        exact FunctorToTypes.naturality ((PB (bsumOf V W)).map θ) k x.1 }
+        exact NatTrans.naturality_apply ((PB (bsumOf V W)).map θ) k x.1 }
   map_id n := by
     ext X x
     apply Subtype.ext

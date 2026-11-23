@@ -1,22 +1,59 @@
-import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.TwistPlacesOffPrimeQZero
-import Development.AbelianVarietyTheory.Definitions.Divisors.DiscreteSeriesHermitianUnique
-import Development.AbelianVarietyTheory.Statements.PlaceShiftStatements.NormSmall
-import Development.AbelianVarietyTheory.Statements.PlaceShiftStatements.DictAt
-import Development.AbelianVarietyTheory.Statements.HeckeThetaIntegrals.ThetaIntegralsAgree
-import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.WeilTensorModels
-import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.CuspAlongSmoothRows
-import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.ToricSymbols
-import Development.AbelianVarietyTheory.Definitions.Foundations.NormSumPairRankZeroOfCurveCoordNorm
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsIsThetaAtOfVac
+module
+
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.MemHalfCosetSelf
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.OmVacuumEqSplitFacSmulSum
 import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.SelfDualLatticePairingDual
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsCosetExpansionExpDepth
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.SmulEqZeroOfInf
 import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ThetaAtEqSumHeisOfFourierSum
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.PlacewiseToAdelicDecompositionForall
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsIsThetaAtOfVac
 import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IdempotentMulEqZeroOfOrthogonal
-import Development.AbelianVarietyTheory.Definitions.Divisors.CmHostImaginaryGeneratorNeZero
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.SmulEqZeroOfInf
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.MemGridPairWeilLatticeIffStandardOfHalfStatement
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsHalfCosetRepresentativesCardDvdStatement
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.HalfLatticeCharSumDetectsNsmulMultipleStatement
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsCosetExpansionExpDepth
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsHalfCosetRepresentativesCardDvdStatement
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.HalfLatticeCharSumDetectsNsmulMultipleStatement
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.MemGridPairWeilLatticeIffStandardOfHalfStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.TwistPlacesOffPrimeQZero
+import Development.AbelianVarietyTheory.Statements.HeckeThetaIntegrals.FormulaAt
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.L2.Theta Formalism.IndefR Formalism.IndefR.Datum Formalism.IndefR.Links Formalism.L2.DIV
 open IsDedekindDomain NumberField GlobalTheory.ChiGrid GlobalTheory.FunObj GlobalTheory.RowTest GlobalTheory.RowClaim
 open Formalism.L2.Host (HChar)
@@ -52,7 +89,7 @@ theorem pow_psi_eq_one {D : D7} (ψ : AddChar (AF D.host.F) ℂ) (S T : HSp D) (
     | succ m ih => rw [succ_nsmul, GlobalTheory.FinTranslate.symplOH_add_right, ih, succ_nsmul]
   have h2 : ∀ a b : WO S T, symplOH S T a b + symplOH S T a b = symplO S T a b := fun a b => by
     unfold symplOH
-    rw [← add_mul, ← map_add]
+    rw [← add_mul, ← map_add (f := _)]
     norm_num
   have e1 : (2 * k * k) • symplOH S T x y = symplO S T (k • x) (k • y) := by
     rw [← h2, hl, hr, ← two_nsmul, ← mul_nsmul, ← mul_nsmul]
@@ -64,9 +101,9 @@ theorem mem_qbar_of_pow {z : ℂ} {N : ℕ} (hN : 0 < N) (h : z ^ N = 1) : z ∈
   have hi : IsIntegral ℚ z := IsIntegral.of_pow hN (by rw [h]; exact isIntegral_one)
   exact mem_algebraicClosure_iff.2 hi.isAlgebraic
 
-set_option maxHeartbeats 1600000 in
-open Classical in
 
+
+open Classical in
 theorem model_coset {D : D7} (ψ : AddChar (AF D.host.F) ℂ) (S T : HSp D)
     (ΛS : Submodule (𝓞 D.host.E) (Fin S.rank → D.host.E)) (ΛT : Submodule (𝓞 D.host.E) (Fin T.rank → D.host.E))
     (hψ : IsStdChar D ψ (-1)) (hS : IsSelfDualC S ΛS) (hT : IsSelfDualC T ΛT) (e : AE D) (P : Finset (Pl D.host.E))
@@ -140,6 +177,7 @@ theorem model_coset {D : D7} (ψ : AddChar (AF D.host.F) ℂ) (S T : HSp D)
     have := hTm.vac
     rwa [one_smul] at this
   have hTΨ : Tm Ψ = (R.card : ℂ)⁻¹ • ∑ r ∈ R, heisO ψ S T r f₀ := by
+
     rw [hΨ, map_smul, map_sum]
     congr 1
     refine Finset.sum_congr rfl fun r hr => ?_
@@ -188,7 +226,7 @@ theorem model_coset {D : D7} (ψ : AddChar (AF D.host.F) ℂ) (S T : HSp D)
       rwa [Matrix.map_apply, Matrix.zero_apply] at this
     rw [Matrix.map_apply]
     dsimp only
-    rw [Matrix.add_apply, RingHom.map_add, e1, e2, add_zero, Matrix.zero_apply]
+    rw [Matrix.add_apply, RingHom.map_add (f := _), e1, e2, add_zero, Matrix.zero_apply]
   · have hc0 : ((R.card : ℕ) : Formalism.MainNotions.TaylorLogMetric.Qbar) ≠ 0 := Nat.cast_ne_zero.2 hcard
     have e1 : (k : Formalism.MainNotions.TaylorLogMetric.Qbar) ^ (D.R.f * S.rank * T.rank) * cc (R.equivFin.symm i) =
         (m : Formalism.MainNotions.TaylorLogMetric.Qbar) * ζ (R.equivFin.symm i) := by
@@ -212,8 +250,8 @@ theorem model_coset {D : D7} (ψ : AddChar (AF D.host.F) ℂ) (S T : HSp D)
 
 end GlobalTheory.RowEx.FourierSelfDualModel
 
-open GlobalTheory.RowEx.FourierSelfDualModel in
 
+open GlobalTheory.RowEx.FourierSelfDualModel in
 theorem GlobalTheory.RowEx.fourierVec : ∀ {D : D7} {T : Type} {L : LevCh D T} {sc : GlobalTheory.ChiGrid.Consts} {G : GridData L sc} {W : G.Weil} (S : GridChoice W Set.univ) (t : T) (p : Pair T), DefPair D.R.m p → ∀ (k : ℕ) (d : FinDatum G t p), 0 < k → IsCosetDatum k d → d.z = 1 → d.P = locPl G t → ∃ (n : ℕ) (c : Fin n → Formalism.MainNotions.TaylorLogMetric.Qbar) (w : Fin n → WO (G.pS p) (G.pT p)), (∀ i, k • w i ∈ latO (G.pS p) (G.pT p) (S.N.latS p : Set _) (S.N.latT p : Set _) fun _ => True) ∧ (∀ i, (w i).map (infPart D) = 0) ∧ (∀ i, IsIntegral ℤ ((k : Formalism.MainNotions.TaylorLogMetric.Qbar) ^ (D.R.f * (G.pS p).rank * (G.pT p).rank) * c i)) ∧ (∀ ρ : Formalism.MainNotions.TaylorLogMetric.Qbar →+* ℂ, ∑ i, ‖ρ (c i)‖ ≤ 1) ∧ S.Z.vec d = ∑ i, (c i : ℂ) • heisO W.ψ (G.pS p) (G.pT p) (w i) (S.Z.vac p) := by
   intro D T L sc G W S t p hp k d hk hc hz hP
   obtain ⟨x₀, hx₀, hkx, hfn⟩ := hc
@@ -232,7 +270,14 @@ theorem GlobalTheory.RowEx.fourierVec : ∀ {D : D7} {T : Type} {L : LevCh D T} 
   obtain ⟨hSd, hTd⟩ := stdSelfDual S.N hp
   have hv := S.Z.vac_is p hp
   obtain ⟨f, hf⟩ : ∃ f, d.IsTheta W (S.N.latS p) (S.N.latT p) (S.Z.vac p) f :=
-    VecEx.exists_isThetaAt_of_vac hSd.1 hTd.1 hSd hTd d.e_is hv hsb
+    VecEx.exists_isThetaAt_of_vac
+      (by
+        letI := GlobalTheory.FinPl.PlacesAdeles.selfDual_isFull _ _ hSd
+        infer_instance)
+      (by
+        letI := GlobalTheory.FinPl.PlacesAdeles.selfDual_isFull _ _ hTd
+        infer_instance)
+      hSd hTd d.e_is hv hsb
   obtain ⟨⟨Tm, hTm⟩, hall⟩ := id hf
   have hfT : f = Tm d.fn := hall Tm hTm
   have hvec : S.Z.vec d = f := by

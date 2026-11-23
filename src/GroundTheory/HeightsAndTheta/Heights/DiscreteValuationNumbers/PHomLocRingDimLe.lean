@@ -1,7 +1,53 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.StatementsHomLocRingLocal
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PHomLocRingLocal
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PMultiHomogPrimeCriterion
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.StatementsHomLocRingLocal
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PHomLocRingLocal
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PMultiHomogPrimeCriterion
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.NumbersDVR
@@ -27,7 +73,8 @@ theorem frac_one (P : Ideal (MRing ι R)) [P.IsPrime] : frac P 1 = 1 := by
 
 theorem frac_add (P : Ideal (MRing ι R)) [P.IsPrime] (x y : MRing ι R) :
     frac P (x + y) = frac P x + frac P y := by
-  simp [frac]
+  set_option synthInstance.maxHeartbeats 100000 in
+    simp [frac]
 
 theorem frac_mul (P : Ideal (MRing ι R)) [P.IsPrime] (x y : MRing ι R) :
     frac P (x * y) = frac P x * frac P y := by
@@ -86,8 +133,9 @@ theorem comp_mul_add [Fintype K] {c d : K → ℕ} {s : MRing ι R} (hs : IsMult
 
 theorem comp_mul_of_ne [Fintype K] {c b : K → ℕ} {s : MRing ι R} (hs : IsMultiHomog s c) (h : MRing ι R)
     (hb : ∀ d, b ≠ c + d) : weightedHomogeneousComponent (blockWeight ι) b (s * h) = 0 := by
+
   rw [← sum_weightedHomogeneousComponent (blockWeight ι) h,
-    finsum_eq_sum _ (weightedHomogeneousComponent_finsupp h), Finset.mul_sum, map_sum]
+  finsum_eq_sum _ (weightedHomogeneousComponent_finsupp h), Finset.mul_sum, map_sum]
   exact Finset.sum_eq_zero fun d _ => IsWeightedHomogeneous.weightedHomogeneousComponent_ne b
     (IsWeightedHomogeneous.mul hs (weightedHomogeneousComponent_isWeightedHomogeneous d h)) (hb d)
 
@@ -99,7 +147,7 @@ theorem zero_mem_primeSet (q : Ideal (homLocRing P W)) : (0 : MRing ι R) ∈ pr
 theorem add_mem_primeSet {q : Ideal (homLocRing P W)} {x y : MRing ι R} (hx : x ∈ primeSet P W q)
     (hy : y ∈ primeSet P W q) : x + y ∈ primeSet P W q := by
   intro b g hg hgW
-  rw [map_add, frac_add, add_div]
+  rw [map_add (f := _), frac_add, add_div]
   exact valIn_add (hx b g hg hgW) (hy b g hg hgW)
 
 theorem form_mul_mem_primeSet [Fintype K] (hPW : P ≤ W) (hW : W.IsPrime) (hrel : IsRelevant W)
@@ -246,8 +294,8 @@ theorem primeAbove_strictMono [Fintype K] (hmem : HomLocRingMem.Statement.{u}) (
 
 end HomLocRingDimLe
 
-open HomLocRingDimLe in
 
+open HomLocRingDimLe in
 theorem HomLocRingDimLe.proof (h₁ : HomLocRingMem.Statement.{u})
     (h₂ : HomLocRingIsLocal.Statement.{u}) : HomLocRingDimLe.Statement.{u} := by
   intro R _ K _ _ ι _ P W _ hP hW hrel hPW

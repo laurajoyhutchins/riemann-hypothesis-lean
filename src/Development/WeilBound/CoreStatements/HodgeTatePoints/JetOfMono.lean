@@ -1,10 +1,60 @@
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.ToFirst
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.UniformisationConclusion
-import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.ExistsPowEqFractionRingOfPderivEqZero
-import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.IsLocalRingOfAug
-import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.TjEqZeroIff
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsUnitCharts
-import Formalism.SharpRestriction.Divisibility.GeneratorPowers.FBIdJet
+module
+
+public import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.TjEqZeroIff
+public import Formalism.LocalToGlobal.ProjectiveLattices.IsCombAt
+public import Formalism.LocalToGlobal.ProjectiveLattices.SubConstMemOrig
+public import Mathlib.RingTheory.Henselian
+public import Mathlib.RingTheory.MvPowerSeries.Derivative
+public import Mathlib.RingTheory.RegularLocalRing.Defs
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsUnitCharts
+public import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.ExistsPowEqFractionRingOfPderivEqZero
+public import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.IsLocalRingOfAug
+public import Formalism.LocalToGlobal.ProjectiveLattices.ThGerm
+public import Formalism.SharpRestriction.Divisibility.GeneratorPowers.FBIdJet
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.UniversalCharts.SpanXLeKerAevalZero
+import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.GermComp1ZeroPointLeft
+import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.IsSplitGaussChars
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor Formalism.L2.Pj Formalism.MainNotions.ModuliIntegralCharts.H1 GlobalTheory.CompanionTheory.Ar.Crv GlobalTheory.CompanionTheory.Ar.Conj
 open scoped CategoryTheory.Obj
@@ -132,7 +182,7 @@ theorem taylor [PerfectField k] (p : ℕ) [Fact p.Prime] [CharP k p] [IsIntegral
     (ht : ∀ m, spMap ((jetTrunc : Jet k κ (m + 1) →ₐ[k] Jet k κ m) : Jet k κ (m + 1) →+* Jet k κ m) ≫ x (m + 1) = x m)
     (U : Z.Opens) (hU : ∀ m, ⊤ ≤ x m ⁻¹ᵁ U) [Nonempty U] (f : Γ(Z, U)) :
     ∃ F : MvPowerSeries κ k, (∀ m, ((x m).appLE U ⊤ (hU m)).hom f = toΓ _ (psJet m F)) ∧ (F = 0 → f = 0) ∧
-      ((∀ q, MvPowerSeries.pderiv k q F = 0) → ∃ r : Z.functionField, r ^ p = (Z.germToFunctionField U).hom f) := by
+      ((∀ q, MvPowerSeries.pderiv (R := k) q F = 0) → ∃ r : Z.functionField, r ^ p = (Z.germToFunctionField U).hom f) := by
   obtain ⟨b, hbdef⟩ : ∃ b, e (closedPoint k) = b := ⟨_, rfl⟩
   have hb : b ∈ U := by
     rw [← hbdef, ← hxa 0]
@@ -165,7 +215,7 @@ theorem taylor [PerfectField k] (p : ℕ) [Fact p.Prime] [CharP k p] [IsIntegral
       map_one' := GlobalTheory.JetExpansion.tj_ext fun m => by rw [hF', map_one, map_one]
       map_mul' := fun a b => GlobalTheory.JetExpansion.tj_ext fun m => by rw [map_mul, hF', hF', hF', map_mul]
       map_zero' := GlobalTheory.JetExpansion.tj_ext fun m => by rw [hF', map_zero, map_zero]
-      map_add' := fun a b => GlobalTheory.JetExpansion.tj_ext fun m => by rw [map_add, hF', hF', hF', map_add]
+      map_add' := fun a b => GlobalTheory.JetExpansion.tj_ext fun m => by rw [map_add (f := _), hF', hF', hF', map_add (f := _)]
       commutes' := fun r => GlobalTheory.JetExpansion.tj_ext fun m => by rw [hF', AlgHom.commutes, AlgHom.commutes] }
   have hj : ∀ m a, GlobalTheory.JetExpansion.tj m (j a) = σ m a := fun m a => hF a m
   have j1 : ∀ (m : ℕ) a, j a ∈ Ideal.span (Set.range (MvPowerSeries.X : κ → MvPowerSeries κ k)) ^ m ↔

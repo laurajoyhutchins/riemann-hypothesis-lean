@@ -1,7 +1,60 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.GL2.GJStandardLDefs
-import GroundTheory.AutomorphicForms.GL2.GJStandardLTensor
-import GroundTheory.AutomorphicForms.GL2.GJStandardLBump
+module
+
+public import GroundTheory.AutomorphicForms.GL2.GJStandardLDefs
+public import GroundTheory.AutomorphicForms.GL2.GJGlobalDefs
+public import GroundTheory.AutomorphicForms.GL2.GJUnramified
+public import GroundTheory.AutomorphicForms.GL2.GodementSectionFactor
+public import GroundTheory.GlobalFields.Adele.Topology
+import GroundTheory.AutomorphicForms.GL2.ExistsEqPowMulOfValuationLe
+import GroundTheory.AutomorphicForms.GL2.GJFEInducedLevi
+public import GroundTheory.AutomorphicForms.GL2.GJStandardLBump
+public import GroundTheory.AutomorphicForms.GL2.GJStandardLTensor
+public import GroundTheory.AutomorphicForms.RestrictedHaarProduct
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MeasureTheory Filter Set Topology IsDedekindDomain NumberField NumberField.mixedEmbedding
 open scoped NumberField.AdeleRing RestrictedProduct SchwartzMap Classical ENNReal NNReal
@@ -139,7 +192,9 @@ theorem map_prodEquiv_eq (ν : Measure (AdelicGLn.AdelicGL K n)) [ν.IsHaarMeasu
     (μi : Measure (AdelicGLn.InfiniteAdelicGL K n)) [μi.IsHaarMeasure] :
     ν.map (AdelicGLn.prodEquiv K n) =
       prodConst ν μi • μi.prod (Measure.haar : Measure (AdelicGLn.FiniteAdelicGL K n)) :=
-  Measure.isMulLeftInvariant_eq_smul _ _
+  by
+    set_option synthInstance.maxHeartbeats 200000 in
+      exact Measure.isMulLeftInvariant_eq_smul _ _
 
 theorem integral_eq_mul (ν : Measure (AdelicGLn.AdelicGL K n)) [ν.IsHaarMeasure]
     (μi : Measure (AdelicGLn.InfiniteAdelicGL K n)) [μi.IsHaarMeasure]
@@ -151,8 +206,9 @@ theorem integral_eq_mul (ν : Measure (AdelicGLn.AdelicGL K n)) [ν.IsHaarMeasur
     rw [integral_map_equiv me (fun p ↦ A p.1 * B p.2)]
     rfl
   have hme : ν.map me = ν.map (AdelicGLn.prodEquiv K n) := rfl
-  rw [h1, hme, map_prodEquiv_eq ν μi, integral_smul_nnreal_measure, integral_prod_mul, NNReal.smul_def,
-    Complex.real_smul]
+  set_option synthInstance.maxHeartbeats 200000 in
+    rw [h1, hme, map_prodEquiv_eq ν μi, integral_smul_nnreal_measure, integral_prod_mul, NNReal.smul_def,
+      Complex.real_smul]
 
 theorem lintegral_eq_mul (ν : Measure (AdelicGLn.AdelicGL K n)) [ν.IsHaarMeasure]
     (μi : Measure (AdelicGLn.InfiniteAdelicGL K n)) [μi.IsHaarMeasure]
@@ -189,8 +245,8 @@ instance borelSpace_finRes : BorelSpace (Πʳ v : HeightOneSpectrum (𝓞 K),
     [GL (Fin n) (v.adicCompletion K), (integralGL (v.adicCompletion K) n : Set (GL (Fin n) (v.adicCompletion K)))]) :=
   ⟨rfl⟩
 
-variable (K n) in
 
+variable (K n) in
 def finHaar : Measure (Πʳ v : HeightOneSpectrum (𝓞 K),
     [GL (Fin n) (v.adicCompletion K), (integralGL (v.adicCompletion K) n : Set (GL (Fin n) (v.adicCompletion K)))]) :=
   (Measure.haar : Measure (AdelicGLn.FiniteAdelicGL K n)).map (AdelicGLn.finiteRestrictedEquiv K n)
@@ -199,8 +255,8 @@ instance isHaarMeasure_finHaar : (finHaar K n).IsHaarMeasure := by
   unfold finHaar
   infer_instance
 
-variable (K n) in
 
+variable (K n) in
 def finConst : ℝ :=
   (finHaar K n).real {x | ∀ v, x v ∈ integralGL (v.adicCompletion K) n}
 

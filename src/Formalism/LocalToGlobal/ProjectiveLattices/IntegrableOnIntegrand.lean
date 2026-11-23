@@ -1,5 +1,51 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.Signature
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.Signature
+public import Mathlib.Algebra.Module.Lattice.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -54,11 +100,13 @@ def OrbInt (act : (Fin N → ℝ) → Ω → Ω) (S : Set Ω) : Submodule ℂ (�
     rw [integrand_smul]
     exact (hP ph x hx).const_mul a
 
-open Classical in
 
+open Classical in
 def coefL (act : (Fin N → ℝ) → Ω → Ω) (S : Set Ω) (ph : Fin N → ℝ) :
     OrbInt act S →ₗ[ℂ] (Ω → ℂ) where
-  toFun P := fun x => if x ∈ S then coefFn act ph P x else 0
+  toFun P := by
+    classical
+    exact fun x => if x ∈ S then coefFn act ph P x else 0
   map_add' P Q := by
     funext x
     by_cases hx : x ∈ S
@@ -73,10 +121,6 @@ def coefL (act : (Fin N → ℝ) → Ω → Ω) (S : Set Ω) (ph : Fin N → ℝ
       rw [integrand_smul]
       exact integral_const_mul a _
     · simp [hx]
-
-theorem coefL_apply (act : (Fin N → ℝ) → Ω → Ω) (S : Set Ω) (ph : Fin N → ℝ) (P : OrbInt act S)
-    {x : Ω} (hx : x ∈ S) : coefL act S ph P x = coefFn act ph P x := by
-  simp [coefL, hx]
 
 theorem integrableOn_integrand [TopologicalSpace Ω] {act : (Fin N → ℝ) → Ω → Ω} {ph : Fin N → ℝ}
     {P : Ω → ℂ} {x : Ω} {T : Set Ω} (hP : ContinuousOn P T) (hact : Continuous fun t => act t x)
@@ -103,9 +147,6 @@ instance : Module K (FnVia σ Ω) := Module.compHom (Ω → ℂ) σ
 
 variable {σ Ω}
 
-theorem FnVia.smul_apply (a : K) (f : FnVia σ Ω) (x : Ω) :
-    (show Ω → ℂ from a • f) x = σ a * (show Ω → ℂ from f) x := rfl
-
 def coefVia {N : ℕ} {C : Type} [AddCommGroup C] [Module K C] (act : (Fin N → ℝ) → Ω → Ω)
     (S : Set Ω) (ph : Fin N → ℝ) (rd : C →ₛₗ[σ] (Ω → ℂ)) (hrd : ∀ F, rd F ∈ OrbInt act S) :
     C →ₗ[K] FnVia σ Ω where
@@ -113,19 +154,13 @@ def coefVia {N : ℕ} {C : Type} [AddCommGroup C] [Module K C] (act : (Fin N →
   map_add' F G := by
     have h : (⟨rd (F + G), hrd (F + G)⟩ : OrbInt act S) = ⟨rd F, hrd F⟩ + ⟨rd G, hrd G⟩ :=
       Subtype.ext (by simp)
-    rw [h, map_add]
+    rw [h, map_add (f := _)]
     rfl
   map_smul' a F := by
     have h : (⟨rd (a • F), hrd (a • F)⟩ : OrbInt act S) = σ a • ⟨rd F, hrd F⟩ :=
       Subtype.ext (by simp)
     rw [h, map_smul]
     rfl
-
-theorem coefVia_apply {N : ℕ} {C : Type} [AddCommGroup C] [Module K C]
-    (act : (Fin N → ℝ) → Ω → Ω) (S : Set Ω) (ph : Fin N → ℝ) (rd : C →ₛₗ[σ] (Ω → ℂ))
-    (hrd : ∀ F, rd F ∈ OrbInt act S) (F : C) {x : Ω} (hx : x ∈ S) :
-    (coefVia act S ph rd hrd F : Ω → ℂ) x = coefFn act ph (rd F) x :=
-  coefL_apply act S ph _ hx
 
 end Via
 
@@ -212,13 +247,6 @@ def sgF (X : Comp → Data E r) (rd : C →ₛₗ[σ] (∀ c, Frame (X c).Ψ r �
     (cu : CuF X ρ) (χ : Matrix (Fin ρ) (Fin ρ) E) : C →ₗ[K] FJtF σ X cu :=
   coefVia (zAct (X cu.1) cu.2) (X cu.1).dom (phZ (X cu.1) cu.2 χ)
     ((LinearMap.proj (φ := fun c => Frame (X c).Ψ r → ℂ) cu.1).comp rd) (fun f => h f cu)
-
-theorem sgF_apply (X : Comp → Data E r) (rd : C →ₛₗ[σ] (∀ c, Frame (X c).Ψ r → ℂ))
-    (h : RdOrbInt σ X ρ rd) (cu : CuF X ρ) (χ : Matrix (Fin ρ) (Fin ρ) E) (f : C)
-    {x : Frame (X cu.1).Ψ r} (hx : x ∈ (X cu.1).dom) :
-    (sgF σ X rd h cu χ f : Frame (X cu.1).Ψ r → ℂ) x =
-      coefFn (zAct (X cu.1) cu.2) (phZ (X cu.1) cu.2 χ) (rd f cu.1) x :=
-  coefVia_apply _ _ _ _ _ f hx
 
 def OrbDom (X : Comp → Data E r) (ρ : ℕ) : Prop :=
   ∀ (cu : CuF X ρ) t, ∀ x ∈ (X cu.1).dom, zAct (X cu.1) cu.2 t x ∈ (X cu.1).dom

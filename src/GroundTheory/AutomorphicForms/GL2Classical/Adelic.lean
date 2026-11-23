@@ -1,6 +1,54 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.GL2Classical.ExistsIntOfMemIntegralFiniteAdeles
-import GroundTheory.AutomorphicForms.AutomorphicFormSpaces.Archimedean
+module
+
+public import GroundTheory.AutomorphicForms.GL2Classical.ExistsIntOfMemIntegralFiniteAdeles
+public import GroundTheory.AutomorphicForms.AutomorphicFormSpaces.Archimedean
+public import GroundTheory.GlobalFields.IdeleGroups.Rational
+public import Mathlib.NumberTheory.ModularForms.CongruenceSubgroups
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Matrix CongruenceSubgroup
 open GroundTheory.Global
@@ -15,8 +63,6 @@ namespace GL2Classical
 open AdelicGLn AutomorphicForm
 
 set_option linter.unusedSectionVars false
-
-local notation "𝔸f" => FiniteAdeleRing (𝓞 ℚ) ℚ
 
 def toReal : GL (Fin 2) ℚ →* GL (Fin 2) ℝ :=
   Matrix.GeneralLinearGroup.map (Rat.castHom ℝ)
@@ -44,11 +90,6 @@ theorem realInf_injective : Function.Injective realInf := fun x y hxy => by
   have := congrArg (fun g : InfiniteAdelicGL ℚ 2 =>
     (g : Matrix (Fin 2) (Fin 2) (InfiniteAdeleRing ℚ)) a b) hxy
   exact RationalIdeles.realEquiv.symm.injective this
-
-theorem realEmb_injective : Function.Injective realEmb := fun x y hxy => by
-  have := congrArg (fun g => (prodEquiv ℚ 2 g).1) hxy
-  simp only [prodEquiv_realEmb] at this
-  exact realInf_injective this
 
 theorem realEmb_mul_finEmb_comm (h : GL (Fin 2) ℝ) (y : FiniteAdelicGL ℚ 2) :
     realEmb h * finEmb ℚ 2 y = finEmb ℚ 2 y * realEmb h := by
@@ -100,8 +141,8 @@ theorem finiteDiagonal_mem_Gamma0Level_of_int {γ : GL (Fin 2) ℚ} (A B : Matri
   · rw [← map_inv, finiteDiagonal_apply, ← hB, map_intCast]
     exact intCast_mem_integralFiniteAdeles _
   · obtain ⟨m, hm⟩ := hN
-    refine ⟨(m : 𝔸f), intCast_mem_integralFiniteAdeles m, ?_⟩
-    change algebraMap ℚ 𝔸f (γ 1 0) = _
+    refine ⟨(m : FiniteAdeleRing (𝓞 ℚ) ℚ), intCast_mem_integralFiniteAdeles m, ?_⟩
+    change algebraMap ℚ (FiniteAdeleRing (𝓞 ℚ) ℚ) (γ 1 0) = _
     rw [← hA, hm, Int.cast_mul, map_mul, map_intCast, map_intCast, Int.cast_natCast]
 
 @[simp]
@@ -115,15 +156,6 @@ theorem toReal_mapGL (σ : SL(2, ℤ)) :
   refine Units.ext (Matrix.ext fun i j => ?_)
   change (((σ : Matrix (Fin 2) (Fin 2) ℤ) i j : ℚ) : ℝ) = ((σ : Matrix (Fin 2) (Fin 2) ℤ) i j : ℝ)
   exact Rat.cast_intCast _
-
-theorem finiteDiagonal_mapGL_mem_Gamma0Level {σ : SL(2, ℤ)} (hσ : σ ∈ Gamma0 N) :
-    finiteDiagonal ℚ 2 (Matrix.SpecialLinearGroup.mapGL ℚ σ) ∈ Gamma0Level N := by
-  refine finiteDiagonal_mem_Gamma0Level_of_int N (σ : Matrix (Fin 2) (Fin 2) ℤ)
-    ((σ⁻¹ : SL(2, ℤ)) : Matrix (Fin 2) (Fin 2) ℤ) (fun i j => rfl) (fun i j => ?_) ?_
-  · rw [← map_inv]
-    rfl
-  · rw [Gamma0_mem] at hσ
-    exact (ZMod.intCast_zmod_eq_zero_iff_dvd _ N).1 hσ
 
 theorem exists_mem_Gamma0_of_mem {γ : GL (Fin 2) ℚ} (hγ : finiteDiagonal ℚ 2 γ ∈ Gamma0Level N)
     (hdet : 0 < (γ.det.val : ℚ)) :

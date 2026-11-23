@@ -1,5 +1,48 @@
-import Formalism.AdmissibleDesigns.BlockTwistedCyclotomic
-import Formalism.AdmissibleDesigns.SmulEval
+module
+
+public import Formalism.AdmissibleDesigns.BlockTwistedCyclotomic
+public import Formalism.AdmissibleDesigns.SmulEval
+public import Formalism.AdmissibleDesigns.HigherColumnInvariantsBound
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 variable [hT2Core : Fact ReciprocityTheory.ChartRestriction.T2.Core]
 
@@ -22,7 +65,7 @@ variable {R G M M' : Type} [CommRing R] [Group G] [AddCommGroup M] [Module R M] 
 def continuousCocycleMap : coZ1s ρ →ₗ[R] coZ1s ρ' where
   toFun c := ⟨fun g => φ ((c : G → M) g), fun g h => by
     show φ ((c : G → M) (g * h)) = φ ((c : G → M) g) + ρ' g (φ ((c : G → M) h))
-    rw [c.2 g h, map_add, hφ]⟩
+    rw [c.2 g h, map_add (f := _), hφ]⟩
   map_add' a b := Subtype.ext <| funext fun g => map_add φ ((a : G → M) g) ((b : G → M) g)
   map_smul' r a := Subtype.ext <| funext fun g => map_smul φ r ((a : G → M) g)
 
@@ -129,8 +172,8 @@ variable {D : D7} {i : D.nd.Loc} {r : D.nd.X i → (GE D.nd →* GL (Fin D.R.nV)
 def k0 (c' : Fin D.R.t) : {a : Fin D.R.nV // RepresentationBoundsCohomology.blk D.R a = c'.succ} :=
   ⟨Fin.natAdd D.R.r c', RepresentationBoundsCohomology.blkG_natAdd D.R.r D.R.t c'⟩
 
-variable (Dd) in
 
+variable (Dd) in
 def blkEquiv (c' : Fin D.R.t) : blockRestrictedRepresentationType (RepresentationBoundsCohomology.blk D.R) Dd.ρk c'.succ ≃ₗ[D.nd.O i] KO (D.nd.O i) where
   toFun m := m (k0 c')
   invFun x := fun _ => x
@@ -139,8 +182,8 @@ def blkEquiv (c' : Fin D.R.t) : blockRestrictedRepresentationType (Representatio
   left_inv m := funext fun k => congrArg m (Subtype.ext (blkS_eq k.1 k.2)).symm
   right_inv _ := rfl
 
-omit [∀ k, IsScalarTower Dd.T' Dd.R' (blockRestrictedRepresentationType (RepresentationBoundsCohomology.blk D.R) Dd.ρk k)] in
 
+omit [∀ k, IsScalarTower Dd.T' Dd.R' (blockRestrictedRepresentationType (RepresentationBoundsCohomology.blk D.R) Dd.ρk k)] in
 theorem chi_ratio (c' : Fin D.R.t) (g : GE D.nd) :
     (((D.nd.chi i 1 g)⁻¹ : (D.nd.O i)ˣ) : D.nd.O i) * ((D.nd.chi i ((c' : ℕ) + 1) g : (D.nd.O i)ˣ) : D.nd.O i) =
       ((((Units.map (algebraMap ℤ_[D.nd.l i] (D.nd.O i)).toMonoidHom).comp

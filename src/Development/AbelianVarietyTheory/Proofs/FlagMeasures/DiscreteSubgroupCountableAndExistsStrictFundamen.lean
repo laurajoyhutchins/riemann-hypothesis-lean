@@ -1,4 +1,51 @@
-import Mathlib
+module
+
+public import Mathlib.MeasureTheory.Constructions.BorelSpace.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MeasureTheory Set TopologicalSpace
 
@@ -26,15 +73,16 @@ theorem discreteSubgroup_countable_and_exists_strict_fundamentalDomain : ∀ {G 
   let S : Set (Set G) := {W | W ∈ countableBasis G ∧ P W}
   have hcover : ∀ g : G, ∃ W ∈ S, g ∈ W := by
     intro g
-    let N : Set G := (fun x => x * g⁻¹) ⁻¹' (V ∩ V⁻¹)
-    have hNo : IsOpen N := (hVo.inter hVo.inv).preimage (continuous_mul_right _)
+    let N : Set G := (fun x => x * g⁻¹) ⁻¹' (V ∩ (fun x => x⁻¹) ⁻¹' V)
+    have hNo : IsOpen N :=
+      (hVo.inter (hVo.preimage continuous_inv)).preimage (continuous_mul_const g⁻¹)
     have hgN : g ∈ N := by simp [N, hV1]
     obtain ⟨W, hWb, hgW, hWN⟩ := (isBasis_countableBasis G).exists_subset_of_mem_open hgN hNo
     refine ⟨W, ⟨hWb, ?_⟩, hgW⟩
     intro x hx y hy hxy
     have hx' := hWN hx
     have hy' := hWN hy
-    simp only [N, mem_preimage, mem_inter_iff, Set.mem_inv] at hx' hy'
+    simp only [N, mem_preimage, mem_inter_iff] at hx' hy'
     have h1 : (x * g⁻¹) * (y * g⁻¹)⁻¹ ∈ U := hVU _ hx'.1 _ hy'.2
     have h2 : (x * g⁻¹) * (y * g⁻¹)⁻¹ = x * y⁻¹ := by group
     rw [h2] at h1
@@ -54,7 +102,7 @@ theorem discreteSubgroup_countable_and_exists_strict_fundamentalDomain : ∀ {G 
       ext x; simp [Sat]
     rw [this]
     exact isOpen_iUnion fun γ => ((isBasis_countableBasis G).isOpen (hfS m).1).preimage
-      (continuous_mul_left _)
+      (continuous_const_mul _)
   let D : Set G := ⋃ n, (f n ∩ ⋂ m ∈ Finset.range n, (Sat m)ᶜ)
   refine ⟨D, ?_, ?_⟩
   · refine MeasurableSet.iUnion fun n => ?_

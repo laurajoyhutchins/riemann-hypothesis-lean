@@ -1,5 +1,46 @@
-import Formalism.SharpRestriction.GrowthBounds.CoarseMultiplicity.CoarseMultiplicityAtIdentity
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.SymmetricFamilySpan
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.CoarseMultiplicity.CoarseMultiplicityAtIdentity
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.SymmetricFamilySpan
+public import Formalism.SharpRestriction.GrowthBounds.BinomialRatio.SymInt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -17,12 +58,12 @@ def wjSub (w : O) (j : ℕ) : Submodule O (MvPolynomial σ (KK O)) where
     intro P Q hP hQ m
     obtain ⟨a, ha⟩ := hP m
     obtain ⟨b, hb⟩ := hQ m
-    exact ⟨a + b, by rw [coeff_add, ha, hb, ← map_add, mul_add]⟩
+    exact ⟨a + b, by rw [MvPolynomial.coeff_add, ha, hb, ← map_add (f := _), mul_add]⟩
   zero_mem' := fun m => ⟨0, by simp⟩
   smul_mem' := by
     intro c P hP m
     obtain ⟨a, ha⟩ := hP m
-    exact ⟨c * a, by rw [coeff_smul, ha, Algebra.smul_def, ← map_mul]; congr 1; ring⟩
+    exact ⟨c * a, by rw [MvPolynomial.coeff_smul, ha, Algebra.smul_def, ← map_mul]; congr 1; ring⟩
 
 theorem inA_iff_wj (w : O) {P : MvPolynomial σ (KK O)} : InA (O := O) P ↔ InWj w P 0 := by
   unfold InA InWj
@@ -32,7 +73,7 @@ theorem wj_smul_pow {w : O} {j : ℕ} {P : MvPolynomial σ (KK O)} (h : InWj w P
     InWj w ((w ^ e) • P) (j + e) := by
   intro m
   obtain ⟨a, ha⟩ := h m
-  exact ⟨a, by rw [coeff_smul, ha, Algebra.smul_def, ← map_mul]; congr 1; ring⟩
+  exact ⟨a, by rw [MvPolynomial.coeff_smul, ha, Algebra.smul_def, ← map_mul]; congr 1; ring⟩
 
 theorem wj_mono {w : O} {j j' : ℕ} (hj : j' ≤ j) {P : MvPolynomial σ (KK O)} (h : InWj w P j) : InWj w P j' := by
   intro m
@@ -58,7 +99,7 @@ def cleanSub (o : ℕ) : Submodule O (MvPolynomial ((X.TT × Bool) × Fin (X.m +
     · rw [mul_add, inA_iff_wj w]
       exact (wjSub w 0).add_mem ((inA_iff_wj w).1 h2) ((inA_iff_wj w).1 k2)
     · unfold InWjRg
-      rw [map_add]
+      rw [map_add (f := _)]
       exact (wjSub w X.c).add_mem (h3 g' hg' hne) (k3 g' hg' hne)
   zero_mem' := by
     refine ⟨Submodule.zero_mem _, ?_, fun g' _ _ => ?_⟩
@@ -112,7 +153,7 @@ theorem ioBlock_add (j : Fin (numSeg X.TT)) (b : SegBlock (segS X.TT j) X.m)
     ioBlock (KK O) X.p C0 CE1 CE2 X j b (u + v) =
       ioBlock (KK O) X.p C0 CE1 CE2 X j b u + ioBlock (KK O) X.p C0 CE1 CE2 X j b v := by
   unfold ioBlock
-  rw [map_add, mul_add]
+  rw [map_add (f := _), mul_add]
 
 theorem symFam_span (β : GlobalTheory X)
     (G : ∀ j : Fin (numSeg X.TT), Set (MvPolynomial (BVar (2 * segS X.TT j + 1) X.m (X.seg C0 CE1 CE2 j).t) (KK O)))
@@ -155,7 +196,7 @@ theorem t44 {C0 Cde CE1 CE2 : ℝ}
           add_mem' := by
             rintro σ σ' ⟨F, hF, hFσ⟩ ⟨F', hF', hFσ'⟩
             refine ⟨F + F', (cleanSub X O S.w g o).add_mem hF hF', ?_⟩
-            rw [map_add, add_sub_add_comm]
+            rw [map_add (f := _), add_sub_add_comm]
             exact (wjSub S.w n).add_mem hFσ hFσ'
           zero_mem' := by
             refine ⟨0, (cleanSub X O S.w g o).zero_mem, ?_⟩
@@ -185,6 +226,7 @@ theorem t44 {C0 Cde CE1 CE2 : ℝ}
               (liftSubst X.p X.n' O S.w 1 (hhLetters X.TT) g raw - symFam (KK O) X.p C0 CE1 CE2 X β s -
                 ∑ ε ∈ Finset.Ico 1 n, (S.w ^ ε) • τ ε) -
               ∑ ε ∈ Finset.Ico 1 n, (S.w ^ ε) • (liftSubst X.p X.n' O S.w 1 (hhLetters X.TT) g (Fe ε) - τ ε) := by
+
             rw [map_sub, map_sum]
             simp only [AlgHom.map_smul_of_tower, smul_sub, Finset.sum_sub_distrib]
             ring
@@ -216,19 +258,10 @@ theorem lemma44_at_body {C0 CYb Cde Ck CD Cb CE1 CE2 Cc : ℝ} (hK : KeptBLAt C0
     exact hK X hD hH hc j (β j) (hβ j)
   exact t44 X O S mm g hRT X.c le_rfl _ _ hσ
 
-theorem lemma44_at_of_raw_tail {C0 CYb Cde Ck CD Cb CE1 CE2 Cc : ℝ} (hRT : RawTailAt C0 CYb Cde Ck CD Cb CE1 CE2 Cc)
-    (hK : KeptBLAt C0 CYb Cde Ck CD Cb CE1 CE2 Cc) : Lemma44At C0 CYb Cde Ck CD Cb CE1 CE2 Cc := by
-  intro X _ _ O _ _ _ _ S hSq hD hH hc mm hmm g hg β hβ s hs
-  obtain ⟨F, hF, hcong⟩ := lemma44_at_body hK X O S hD hH hc mm g (hRT X O S hSq hD hH hc mm hmm g hg) β hβ s hs
-  exact ⟨F, hF.1, hF.2.1, hcong, hF.2.2⟩
-
 theorem lemma44_identity_of_raw_tail {C0 CYb Cde Ck CD Cb CE1 CE2 Cc : ℝ} (hRT : RawTailAt1 C0 CYb Cde Ck CD Cb CE1 CE2 Cc)
     (hK : KeptBLAt C0 CYb Cde Ck CD Cb CE1 CE2 Cc) : CoarseMultiplicityAtIdentity C0 CYb Cde Ck CD Cb CE1 CE2 Cc := by
   intro X _ _ O _ _ _ _ S hSq hD hH hc mm hmm β hβ s hs
   obtain ⟨F, hF, hcong⟩ := lemma44_at_body hK X O S hD hH hc mm 1 (hRT X O S hSq hD hH hc mm hmm) β hβ s hs
   exact ⟨F, hF.1, hF.2.1, hcong, hF.2.2⟩
-
-theorem lemma44_of_raw_tail_kept (hRT : RestRawTail) (hK : RestKeptBL) : BinomialRatioBeyondThreshold :=
-  TransportedAlt.mono (fun _ _ _ _ _ _ _ _ _ _ h => lemma44_at_of_raw_tail h.1 h.2) (hRT.and hK)
 
 end Formalism.MainNotions.ColumnSystems.Pf

@@ -1,6 +1,47 @@
-import Formalism.LocalToGlobal.TorsionIntegrality.QuadraticSemicharacters.ProductThetaMem
-import Formalism.LocalToGlobal.TorsionIntegrality.QuadraticSemicharacters.TaylorMvLinear
-import Formalism.LocalToGlobal.TorsionIntegrality.TorsionTranslationPowers.StatementN
+module
+
+public import Formalism.LocalToGlobal.TorsionIntegrality.QuadraticSemicharacters.ProductThetaMem
+public import Formalism.LocalToGlobal.TorsionIntegrality.QuadraticSemicharacters.TaylorMvLinear
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 open scoped BigOperators ComplexConjugate
@@ -51,27 +92,5 @@ def quadraticSemicharacterIdentity : Prop :=
         ∑ j, B' i j * τ (γ (a, j) w) = ι (g.symm (Pi.single w 1) (a, i))) →
       Formalism.L2.Th1.E.ThetaFourthTensorPowerProductShape lg linv ph τ
         (thetaU (ι : ℂ →+* ℂ_[l]) lg B' (opU (matH h) t θ)) γ
-
-def ThetaIntegral : Prop :=
-  ∀ (l : ℕ) [Fact l.Prime] (L : PeriodPair) (ι : ℂ ≃+* ℂ_[l]) (ω₀ : ℂ) (lg linv ph : PowerSeries ℂ_[l])
-    (R : Subring ℂ_[l]), (∀ a, a ∈ R ↔ ‖a‖ ≤ 1) → Formalism.L2.Th1.C.Frame R lg linv ph →
-    TransInt l L ι ω₀ lg ph →
-    ∀ (O : Type) [CommRing O] [StarRing O] (τ : O →+* ℂ_[l]),
-    (∀ a, Formalism.L2.Th1.C.EndInt R lg linv (τ a)) →
-    (∀ z : O, star z = z → Formalism.L2.Th1.C.IsBinomScalar R (τ z)) →
-    Formalism.L2.Th1.C.F1 R lg linv ph →
-    (∀ a : O, Formalism.L2.Th1.C.PhNormAt R lg linv ph (τ a) (τ (star a))) →
-    (∀ a : O, Formalism.L2.Th1.C.AdjAt R lg linv ph (τ a) (τ (star a))) →
-    ∀ (n : Type) [Fintype n] [DecidableEq n] (h : Matrix n n ℂ)
-      (Λ : AddSubgroup (n → ℂ)) (α : (n → ℂ) → ℂ) (β : (Fin 4 × n → ℂ) → ℂ)
-      (g : (Fin 4 × n → ℂ) ≃ₗ[ℂ] (Fin 4 × n → ℂ)), StdData L ω₀ h Λ α β g →
-    ¬ l ∣ relIdx (stdLat L (Fin 4 × n)) (imgLat (g : (Fin 4 × n → ℂ) →ₗ[ℂ] (Fin 4 × n → ℂ)) (pow4 Λ)) →
-    ∀ ε : ℂ, ‖ι ε‖ ≤ 1 → ∀ θ ∈ Th (matH h) α Λ, tens4 θ = ε • kernel4 L ω₀ Λ β g →
-    ∀ (t : n → ℂ) (N : ℕ), 0 < N → ¬ l ∣ N → (N : ℂ) • t ∈ Λ →
-    ∀ (γ : Matrix (Fin 4 × n) (Fin 4 × n) O) (B' : Matrix n n ℂ_[l]), γ.conjTranspose * γ = 1 →
-      (∀ (a : Fin 4) (i : n) (w : Fin 4 × n),
-        ∑ j, B' i j * τ (γ (a, j) w) = ι (g.symm (Pi.single w 1) (a, i))) →
-      Integral (mvExp (Formalism.L2.Th1.E.phSum ph : MvPowerSeries n ℂ_[l]) *
-        thetaU (ι : ℂ →+* ℂ_[l]) lg B' (opU (matH h) t θ))
 
 end Formalism.L2.Th1.H

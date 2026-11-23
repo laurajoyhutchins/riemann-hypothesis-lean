@@ -1,5 +1,51 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.MvPolynomial.Eval
+public import Mathlib.LinearAlgebra.DFinsupp
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.MvPolynomial.IrreducibleQuadratic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Definitions.AdelicHermitianForms.AdelicPair
+
+@[expose] public section
+
 open Matrix GlobalTheory.ClassFin
 open scoped Kronecker ComplexOrder TensorProduct
 
@@ -14,6 +60,7 @@ theorem repr_algebraMap_of_basis_eq {F β : Type} [Field F] [Algebra ℚ F] [Fin
       ((algebraMap R A).comp (algebraMap ℚ R))) q
   have hsum : algebraMap F A a = ∑ i, algebraMap ℚ R (ω.repr a i) • b i := by
     conv_lhs => rw [← ω.sum_repr a]
+
     rw [map_sum]
     refine Finset.sum_congr rfl fun i _ => ?_
     rw [Algebra.smul_def (ω.repr a i) (ω i), map_mul, hq, hb,
@@ -31,6 +78,7 @@ private theorem basis_repr_mul_of_basis_eq_algebraMap {F β : Type} [Field F] [A
     rw [smul_mul_smul_comm, map_smul, Finsupp.smul_apply, smul_eq_mul, hb i, hb j, ← map_mul,
       repr_algebraMap_of_basis_eq ω b hb]
   conv_lhs => rw [← b.sum_repr u, ← b.sum_repr v]
+
   simp only [Finset.sum_mul, Finset.mul_sum, map_sum, Finsupp.coe_finsetSum, Finset.sum_apply, e]
   exact Finset.sum_comm
 
@@ -46,13 +94,14 @@ theorem exists_coord_polynomial : ∀ (F β : Type) [Field F] [Algebra ℚ F] [F
     obtain ⟨Q2, h2⟩ := hq
     refine ⟨fun k => Q1 k + Q2 k, ?_⟩
     intro R A _ _ _ _ _ b hb x k
-    rw [map_add, map_add, Finsupp.add_apply, map_add, h1 R A b hb x k, h2 R A b hb x k]
+    rw [map_add (f := _), map_add (f := _), Finsupp.add_apply, map_add (f := _), h1 R A b hb x k, h2 R A b hb x k]
   | mul_X p n hp =>
     obtain ⟨Q1, h1⟩ := hp
     refine ⟨fun k => ∑ i, ∑ j, Q1 i * MvPolynomial.X (n, j) *
       MvPolynomial.C (ω.repr (ω i * ω j) k), ?_⟩
     intro R A _ _ _ _ _ b hb x k
     rw [map_mul, MvPolynomial.aeval_X, basis_repr_mul_of_basis_eq_algebraMap ω b hb]
+
     simp only [map_sum, map_mul, MvPolynomial.aeval_X, MvPolynomial.aeval_C, h1 R A b hb x]
 
 end GlobalTheory.ClassFin

@@ -1,8 +1,49 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.ChartChg
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.WickOperatorVanishing
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.GEWick
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.GaugeTrans
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.GaugeTrans
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -122,7 +163,7 @@ theorem expR_add {n : ℕ} (f g : PS k n d) : expR (f + g) = expR f * expR g := 
   unfold expR
   rw [← gt_expS_add _ _ (by simp) (by simp)]
   congr 1
-  simp only [map_add]
+  simp only [map_add (f := _)]
   ring
 
 theorem expR_zero {n : ℕ} : expR (0 : PS k n d) = 1 := by
@@ -207,7 +248,7 @@ section Main
 
 variable {k : Type} [CommRing k] [Algebra ℚ k] {d : ℕ} {O : Type} [CommRing O] [StarRing O]
 
-set_option maxHeartbeats 2000000 in
+
 
 def regauge (B : FB k d O) (h : PS k 2 d) (h0 : ev (n := 1) ![0, pt k d 0] h = 0)
     (h1 : ev (n := 1) ![pt k d 0, 0] h = 0) : FB k d O where
@@ -348,9 +389,9 @@ theorem exists_regauge : ∀ (k : Type) [CommRing k] [Algebra ℚ k] (d : ℕ) (
     fun ha hb => gt_const_ev _ (pair_points_zero_constant ha hb) h hc
   refine ⟨regauge B h h0 h1, rfl, rfl, ?_, ?_, ?_, fun a => ?_⟩
   · refine eq_mul_expS _ _ _ ?_ (by ring)
-    simp (maxDischargeDepth := 4) only [map_sub, map_add, hcc, gp_pt, gp_add, add_zero, sub_zero]
+    simp (maxDischargeDepth := 4) only [map_sub, map_add (f := _), hcc, gp_pt, gp_add, add_zero, sub_zero]
   · refine eq_mul_expS _ _ _ ?_ (by ring)
-    simp (maxDischargeDepth := 4) only [map_sub, map_add, hcc, gp_pt, gp_add, add_zero, sub_zero]
+    simp (maxDischargeDepth := 4) only [map_sub, map_add (f := _), hcc, gp_pt, gp_add, add_zero, sub_zero]
   · refine eq_mul_expS _ _ _ ?_ (by rw [ev_pt_two]; ring)
     simp (maxDischargeDepth := 4) only [map_sub, hcc, hc, gp_pt, sub_zero]
   · refine eq_mul_expS _ _ _ ?_ (by ring)

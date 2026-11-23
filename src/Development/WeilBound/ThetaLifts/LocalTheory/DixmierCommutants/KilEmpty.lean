@@ -1,6 +1,57 @@
-import Development.WeilBound.ThetaLifts.LocalTheory.DixmierCommutants.ExistsInvar
-import Development.WeilBound.ThetaLifts.LocalTheory.DixmierCommutants.SlopeTestRemainingChoices
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.WeilObjectsInhabited
+module
+
+public import Development.WeilBound.ThetaLifts.LocalTheory.DixmierCommutants.ExistsInvar
+public import Development.AbelianVarietyTheory.Definitions.Divisors.RankEqCardIffExistsFrameMatrixFirstColumnBlock
+public import Mathlib.Analysis.CStarAlgebra.CStarMatrix
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -20,7 +71,7 @@ theorem ri_iff {m : ℕ} {Y : Matrix (Fin n) (Fin m) k} : RI Y ↔ Y.rank = n :=
     have := rank_mul_le_left Y R
     rwa [h, rank_one, Fintype.card_fin] at this
   · intro h
-    have hs : LinearMap.range Y.mulVecLin = ⊤ := Submodule.eq_top_of_finrank_eq (by rw [Module.finrank_fin_fun]; exact h)
+    have hs : LinearMap.range Y.mulVecLin = ⊤ := Submodule.eq_top_of_finrank_eq (by rw [Module.finrank_fin_fun]; exact (Matrix.finrank_range_mulVecLin Y).trans h)
     choose u hu using fun j : Fin n => LinearMap.range_eq_top.1 hs (Pi.single j 1)
     refine ⟨Matrix.of fun i j => u j i, Matrix.ext fun i j => ?_⟩
     have := congrFun (hu j) i
@@ -94,7 +145,7 @@ theorem fix_col (hL : Inv e ν L) {l : kˣ} (hl : valuation k (l : k) = 1) (hν 
     exact (continuous_id.matrix_elem i _).continuousAt.mul (continuousAt_pi.1 cc j)
   · refine continuousAt_pi.2 fun i => continuousAt_pi.2 fun j => continuousAt_const.mul ?_
     change ContinuousAt (fun y : Matrix (Fin n) (Fin d) k => ∑ r, c y r * y r j) X₀
-    exact tendsto_finset_sum Finset.univ fun r _ => (continuousAt_pi.1 cc r).mul (continuous_id.matrix_elem r j).continuousAt
+    exact tendsto_finsetSum Finset.univ fun r _ => (continuousAt_pi.1 cc r).mul (continuous_id.matrix_elem r j).continuousAt
   · rw [vecMulVec_mul, mul_vecMulVec, mulVec_single_one]
     rfl
 
@@ -155,7 +206,7 @@ theorem kil_full (hL : Inv e ν L) {l : kˣ} (hl : valuation k (l : k) = 1) (hν
     rw [← smul_vecMul, ← e1, r, ← Pi.single_smul, smul_eq_mul, mul_one]
   by_cases h0 : cl e false X₀ ≠ 0 ∨ RI (mid e X₀)
   · obtain ⟨B, hB, hk⟩ : ∃ B ∈ 𝓝 X₀, B ⊆ {Y | cl e false Y ≠ 0 ∨ RI (mid e Y)} := by
-      refine h0.elim (fun h => ⟨_, ?_, fun _ => Or.inl⟩) fun ⟨R, h⟩ => ⟨_, ?_, fun _ => Or.inr⟩
+      refine h0.elim (fun h => ⟨{Y | cl e false Y ≠ 0}, ?_, fun _ => Or.inl⟩) fun ⟨R, h⟩ => ⟨{Y | RI (mid e Y)}, ?_, fun _ => Or.inr⟩
       · exact (isOpen_ne_fun (continuous_pi fun i => continuous_id.matrix_elem i _) continuous_const).mem_nhds h
       · have cm : Continuous (mid e : Matrix (Fin n) (Fin d) k → _) := continuous_id.matrix_submatrix _ _
         exact mem_of_superset (cm.continuousAt.preimage_mem_nhds (det_nhds h)) fun Y hY => ri_of_det hY

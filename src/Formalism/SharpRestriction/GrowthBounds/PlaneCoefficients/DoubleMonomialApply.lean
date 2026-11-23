@@ -1,4 +1,49 @@
-import Formalism.SharpRestriction.GrowthBounds.PlaneCoefficients.NoOpStep
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.PlaneCoefficients.NoOpStep
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -555,7 +600,7 @@ theorem der_A_pl (a : Fin r) (rho : TL J nL r × Fin (r + K) → ℕ) (dPl dNo :
     · obtain ⟨mo', rfl⟩ := exists_add_single _ mo h0
       rw [pderiv_mon_succ, lev_A Fr p hk nL hx0 _ rho dPl dNo h, nsmul_eq_mul, levImg_monomial, levImg_monomial]
       by_cases hc : InLow Fr p hk nL rho mo' ∧ InBlock Fr p hk nL dPl dNo mo'
-      · rw [if_pos hc, if_pos hc, pl_euler, ← map_smul, ← map_smul, ← map_add]
+      · rw [if_pos hc, if_pos hc, pl_euler, ← map_smul, ← map_smul, ← map_add (f := _)]
         congr 1
         have e1 : mo' (aVar Fr hk nL x0 (Fin.castAdd K a)) + 1 =
             (rho (x0, Fin.castAdd K a) + 1) + lowP Fr p x0 * plMon Fr p hk nL mo' (x0, a) := by
@@ -570,7 +615,7 @@ theorem der_A_pl (a : Fin r) (rho : TL J nL r × Fin (r + K) → ℕ) (dPl dNo :
       · rw [if_neg hc, if_neg hc]
         simp
   | add F G hF hG =>
-    simp only [map_add, levImg_add, mul_add, smul_add, hF, hG]
+    simp only [map_add (f := _), levImg_add, mul_add, smul_add, hF, hG]
     abel
 
 include hx0 in
@@ -590,7 +635,7 @@ theorem der_A_no (b : Fin K) (rho : TL J nL r × Fin (r + K) → ℕ) (dPl dNo :
     · obtain ⟨mo', rfl⟩ := exists_add_single _ mo h0
       rw [pderiv_mon_succ, lev_A Fr p hk nL hx0 _ rho dPl dNo h, nsmul_eq_mul, levImg_monomial, levImg_monomial]
       by_cases hc : InLow Fr p hk nL rho mo' ∧ InBlock Fr p hk nL dPl dNo mo'
-      · rw [if_pos hc, if_pos hc, no_euler, ← map_smul, ← map_smul, ← map_add]
+      · rw [if_pos hc, if_pos hc, no_euler, ← map_smul, ← map_smul, ← map_add (f := _)]
         congr 1
         have e1 : mo' (aVar Fr hk nL x0 (Fin.natAdd r b)) + 1 =
             (rho (x0, Fin.natAdd r b) + 1) + lowP Fr p x0 * noMon Fr p hk nL mo' (x0, b) := by
@@ -605,7 +650,7 @@ theorem der_A_no (b : Fin K) (rho : TL J nL r × Fin (r + K) → ℕ) (dPl dNo :
       · rw [if_neg hc, if_neg hc, oneT_zero]
         simp
   | add F G hF hG =>
-    simp only [map_add, levImg_add, oneT_add, smul_add, hF, hG]
+    simp only [map_add (f := _), levImg_add, oneT_add, smul_add, hF, hG]
     abel
 
 include hx0 in
@@ -637,7 +682,7 @@ theorem der_B_pl (a : Fin r) (rho : TL J nL r × Fin (r + K) → ℕ) (dPl dNo :
       · rw [if_neg hc, if_neg hc]
         simp
   | add F G hF hG =>
-    simp only [map_add, levImg_add, smul_add, hF, hG]
+    simp only [map_add (f := _), levImg_add, smul_add, hF, hG]
 
 include hx0 in
 theorem der_B_no (b : Fin K) (rho : TL J nL r × Fin (r + K) → ℕ) (dPl dNo : TL J nL r → ℕ)
@@ -667,7 +712,7 @@ theorem der_B_no (b : Fin K) (rho : TL J nL r × Fin (r + K) → ℕ) (dPl dNo :
         ring
       · rw [if_neg hc, if_neg hc, oneT_zero, oneT_zero, smul_zero]
   | add F G hF hG =>
-    simp only [map_add, levImg_add, oneT_add, smul_add, hF, hG]
+    simp only [map_add (f := _), levImg_add, oneT_add, smul_add, hF, hG]
 
 end Der
 

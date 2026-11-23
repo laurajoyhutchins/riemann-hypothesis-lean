@@ -1,5 +1,48 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CharacterLevelBounds.ShaFamMono
-import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.SelmerTransport.ExistsO
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CharacterLevelBounds.ShaFamMono
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PrimeSetBoundDataOfPrimitiveChar
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.SelmerTransport.ExistsO
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+public import Mathlib.NumberTheory.MulChar.Duality
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -91,8 +134,8 @@ def kapB (l : ℕ) (ψ : DirichletCharacter O N) : DirichletCharacter O N := kap
 
 def c2 (ψ : DirichletCharacter O N) : ℕ := (psi2 ψ).conductor.factorization 2
 
-open Classical in
 
+open Classical in
 def Sb (l : ℕ) (ψ : DirichletCharacter O N) : Finset ℕ := N.primeFactors.filter fun p => p ≠ l ∧ comp p (kap l ψ) ≠ 1
 
 def Tb (l : ℕ) (ψ : DirichletCharacter O N) : Finset ℕ := insert l (Sb l ψ)
@@ -118,13 +161,6 @@ def Vlen (e : ℕ) (ψ : DirichletCharacter c.O N) : ℕ∞ := Chr.V' l N e (Chr
 def Vn (e : ℕ) (ψ : DirichletCharacter c.O N) : ℝ := Chr.nrm l c.O (Vlen Ω c e ψ)
 
 def VLe (e : ℕ) (ψ : DirichletCharacter c.O N) (B : ℝ) : Prop := Vlen Ω c e ψ ≠ ⊤ ∧ Vn Ω c e ψ * Real.log l ≤ B
-
-def kerFam {O : Type} [CommRing O] (l : ℕ) (θ : G ℚ Ω →* Oˣ) : Set (Subgroup (G ℚ Ω)) :=
-  {D | (∃ A : ValuationSubring Ω, A.valuation (l : Ω) < 1 ∧ D = Dec (F := ℚ) A) ∨
-    ∃ A : ValuationSubring Ω, ¬ A.valuation (l : Ω) < 1 ∧ D = Ine (F := ℚ) A ⊓ θ.ker}
-
-def VkerLen (e : ℕ) (ψ : DirichletCharacter c.O N) : ℕ∞ :=
-  Module.length c.O (LocSel (Chr.rho l e (Chr.dirG ℚ Ω ψ)) ⊤ (kerFam Ω l (Chr.dirG ℚ Ω ψ)))
 
 def hLen (e : ℕ) (ψ : DirichletCharacter c.O N) : ℕ∞ :=
   ∑ᶠ (v : HeightOneSpectrum (𝓞 ℚ)) (_ : ((l * N : ℕ) : 𝓞 ℚ) ∈ v.asIdeal),
@@ -191,16 +227,6 @@ def X {l : ℕ} [Fact l.Prime] (c : Coef l) (e : ℕ) : Finset (DirichletCharact
 theorem mem_X {l : ℕ} [Fact l.Prime] {c : Coef l} {e : ℕ} {ψ : DirichletCharacter c.O h.N} :
     ψ ∈ h.X c e ↔ h.IsChar ψ ∧ PsiEven e ψ := Set.Finite.mem_toFinset _
 
-theorem host_q1_mod_four_eq_three : h.q1 % 4 = 3 := by
-  obtain ⟨-, h8, -⟩ := h.pair
-  omega
-theorem d_mod : h.d % 4 = 3 := by
-  obtain ⟨-, -, -, h16, -⟩ := h.pair
-  omega
-theorem firstPrime_ne_secondPrime : h.q1 ≠ h.d := by
-  obtain ⟨-, h8, -, h16, -⟩ := h.pair
-  omega
-
 variable {O : Type} [CommRing O]
 
 def R1 (l : ℕ) (ψ : DirichletCharacter O h.N) : ℕ := 16 * h.o * (l * h.q) ^ 2 * 4 ^ n0 l ψ
@@ -229,8 +255,6 @@ end Host
 theorem exists_coef (l : ℕ) [Fact l.Prime] (n : ℕ) [NeZero n] : ∃ c : Coef l, HasEnoughRootsOfUnity c.O n := by
   obtain ⟨O, a, b, c⟩ := existsO l n
   exact ⟨⟨O, a, b⟩, c⟩
-
-example (χ : PChar) (h : (3 * 7).Coprime χ.N) : Host := ⟨χ, 2, 3, 7, le_rfl, by norm_num, by norm_num, by norm_num, by norm_num, h⟩
 
 end UpperTheory.V.HV
 

@@ -1,6 +1,48 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IsBump
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsCIndValue
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IsBump
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsCIndValue
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Matrix GlobalTheory.PRep GlobalTheory.SmGL GlobalTheory.BZMir GlobalTheory.BZMir.Leib GlobalTheory.RgGu.Leib GlobalTheory.CompanionTheory.BZPhiPG GlobalTheory.CompanionTheory.BZPhiPG.OntoO Topology
 open scoped TensorProduct
@@ -37,8 +79,8 @@ theorem mem_of_bumps {G W : Type} [Group G] [TopologicalSpace G] [IsTopologicalG
     apply hf0
     rintro ⟨a, ha, x, hx, e⟩
     apply hne
-    rw [← DoubleCoset.out_eq' H K d]
-    exact ((DoubleCoset.eq H K _ _).2 ⟨a, ha, x, hx, e⟩).symm
+    rw [← DoubleCoset.out_eq' d]
+    exact ((@DoubleCoset.eq _ _ H K _ _).2 ⟨a, ha, x, hx, e⟩).symm
   have hmem : ∑ d ∈ T, f d ∈ S := S.sum_mem fun d _ => hS _ _ (hbump d)
   have hval : ∀ g, y.1.1.1 g = (∑ d ∈ T, f d).1.1.1 g := by
     intro g
@@ -48,7 +90,7 @@ theorem mem_of_bumps {G W : Type} [Group G] [TopologicalSpace G] [IsTopologicalG
     rw [hsum]
     by_cases hg : DoubleCoset.mk H K g ∈ T
     · rw [Finset.sum_eq_single_of_mem _ hg (fun d _ hd => hoff d g (Ne.symm hd))]
-      obtain ⟨a, ha, x, hx, e⟩ := (DoubleCoset.eq H K _ _).1 (DoubleCoset.out_eq' H K (DoubleCoset.mk H K g))
+      obtain ⟨a, ha, x, hx, e⟩ := (@DoubleCoset.eq _ _ H K _ _).1 (DoubleCoset.out_eq' (DoubleCoset.mk H K g))
       exact (hf1 _ g ⟨a, ha, x, hx, e⟩).symm
     · rw [Finset.sum_eq_zero (fun d hd => hoff d g (fun h => hg (h ▸ hd)))]
       by_contra hne
@@ -57,7 +99,7 @@ theorem mem_of_bumps {G W : Type} [Group G] [TopologicalSpace G] [IsTopologicalG
       obtain ⟨x, hx, rfl⟩ := hcc
       apply hg
       have : DoubleCoset.mk H K c = DoubleCoset.mk H K g :=
-        (DoubleCoset.eq H K _ _).2 ⟨a, ha, x, hx, by rw [e]; group⟩
+        (@DoubleCoset.eq _ _ H K _ _).2 ⟨a, ha, x, hx, by rw [e]; group⟩
       rw [← this]
       exact Finset.mem_image_of_mem _ hc
   have e : y = ∑ d ∈ T, f d := by

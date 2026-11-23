@@ -1,5 +1,59 @@
-import Formalism.WachLatticeTwists.RamifiedBlockRings.RamifiedBlockProofs.KerEqOfFactor
-import Formalism.WachLatticeTwists.RamifiedBlockRings.RamifiedBlockProofs.ExistsSigma
+module
+
+public import Formalism.CharacterColumnKernels.IdempotentNormalForms.GlobalConcreteOf
+public import Formalism.WachLatticeTwists.RamifiedBlockRings.LemmaFiveThreeAnyResidueField
+public import Formalism.CharacterColumnKernels.IdempotentNormalForms.CupKillAdm
+import Formalism.CharacterColumnKernels.IdempotentNormalForms.GenFin
+import Formalism.CharacterColumnKernels.IdempotentNormalForms.SingleEqSmul
+public import Formalism.WachLatticeTwists.RamifiedBlockRings.RamifiedBlockProofs.ExistsSigma
+public import Formalism.WachLatticeTwists.RamifiedBlockRings.RamifiedBlockProofs.KerEqOfFactor
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.WachLatticeTwists.CoprimeLiftBounds.Statement
+
+@[expose] public section
 
 open Finset Classical
 
@@ -27,11 +81,6 @@ def bcHom (D : RingData O X d G t bl) (D' : RingData O' X d G t bl) (σ : D'.X' 
     (Pi.evalRingHom (fun _ : D.X' => Matrix d d (FractionRing O)) (σ y'))).comp D.R'.val.toRingHom) D'.R'
     (fun a => h a.1 a.2)
 
-theorem bcHom_apply (D : RingData O X d G t bl) (D' : RingData O' X d G t bl) (σ : D'.X' → D.X')
-    (κ : FractionRing O →+* FractionRing O')
-    (h : ∀ a ∈ D.R', (fun y' => (a (σ y')).map κ) ∈ D'.R') (a : D.R') (y' : D'.X') :
-    (bcHom D D' σ κ h a).1 y' = (a.1 (σ y')).map κ := rfl
-
 end
 
 theorem relMap_ev {O : Type} [CommRing O] [IsDomain O] [IsDiscreteValuationRing O] {X' d : Type} [Fintype d]
@@ -42,6 +91,7 @@ theorem relMap_ev {O : Type} [CommRing O] [IsDomain O] [IsDiscreteValuationRing 
   let evA : EvalSp O d R' x' →+ FractionRing O :=
     { toFun := fun w => w a, map_zero' := rfl, map_add' := fun _ _ => rfl }
   show evA (∑ q, P i q • v q) = _
+
   rw [map_sum]
   rfl
 
@@ -53,12 +103,13 @@ theorem span_single {R : Type*} [Ring R] {m g : Type} [Fintype m] [Fintype g] [D
   have h : w = ∑ j, w j • (Pi.single j (1 : R) : g → R) := by
     ext k
     simp [Finset.sum_apply, Pi.single_apply]
+
   rw [h, map_sum]
   refine Submodule.sum_mem _ fun j _ => ?_
   rw [map_smul]
   exact Submodule.smul_mem _ _ (Submodule.subset_span ⟨j, rfl⟩)
 
-set_option maxHeartbeats 1000000 in
+
 theorem moduleBc : StatModuleBc := by
   intro O O' _ _ _ _ _ _ _ _ _ e he X _ d G _ _ _ t bl T r π χ₁ ε g₀ eB e₁ s hX D D' hD hD' _ _ _
     NN _ _ g n hn
@@ -116,9 +167,11 @@ theorem moduleBc : StatModuleBc := by
       rw [relMap_ev]
       show _ = (0 : FractionRing O')
       have h3 := congrArg κ h2
+
       rw [map_zero, map_sum] at h3
       rw [← h3]
       refine Finset.sum_congr rfl fun q _ => ?_
+
       rw [map_sum]
       refine Finset.sum_congr rfl fun b _ => ?_
       rw [map_mul]

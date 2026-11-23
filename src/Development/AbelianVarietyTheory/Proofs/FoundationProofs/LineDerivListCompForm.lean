@@ -1,8 +1,62 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Foundations.NormSumPairRankZeroOfCurveCoordNorm
-import Formalism.PairingDivisors.StatementH
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.TaylorCoeffConjugateSeries
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.MonomialDerivCauchyBoundGaussianGrowth
+module
+
+public import Development.AbelianVarietyTheory.Definitions.ThetaValues.MemAnalyticAtZeroOfEventuallyDifferentiableAt
+public import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.NormPderivIterLeOfAnalyticAt
+public import Formalism.SharpRestriction.GlobalSchurBounds.StandardLatticesGL3
+public import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.DifferentiableOnOfTendstoLocallyUniformlyOn
+public import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.PderivIterEqPderivListOfDifferentiableOn
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.MonomialDerivCauchyBoundGaussianGrowth
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.TaylorCoeffConjugateSeries
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicTopology.FundamentalGroupoid.SimplyConnected
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+public import Mathlib.FieldTheory.IsAlgClosed.Classification
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Monotonicity.Lemmas
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Presheaf
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Filter Topology
 
@@ -54,7 +108,7 @@ theorem summable_prod_half_pow : Summable fun α : σ →₀ ℕ => ∏ j, (1 / 
         (Finset.le_sup (f := fun α => Finset.univ.sup α) hα)
     refine (Finset.sum_le_sum_of_subset_of_nonneg hsub fun _ _ _ => by positivity).trans ?_
     rw [← Finset.prod_univ_sum (fun _ : σ => Finset.range (n + 1)) (fun _ k => (1 / 2 : ℝ) ^ k)]
-    exact Finset.prod_le_prod (fun _ _ => by positivity) fun _ _ => sum_geometric_two_le _
+    exact Finset.prod_le_prod₀ (fun _ _ => by positivity) fun _ _ => sum_geometric_two_le _
   exact h.comp_injective (i := fun α : σ →₀ ℕ => (α : σ → ℕ)) DFunLike.coe_injective
 
 theorem tsum_of_entire {f : (σ → ℂ) → ℂ} (hf : Differentiable ℂ f) (c : (σ →₀ ℕ) → ℂ)
@@ -79,7 +133,7 @@ theorem tsum_of_entire {f : (σ → ℂ) → ℂ} (hf : Differentiable ℂ f) (c
       exact_mod_cast Nat.factorial_pos _)
     rw [norm_mul, norm_prod]
     calc ‖c α‖ * ∏ j, ‖w j ^ α j‖ ≤ (C / ∏ k, (2 * R) ^ α k) * ∏ j, R ^ α j := by
-          refine mul_le_mul h2 (Finset.prod_le_prod (fun _ _ => norm_nonneg _) fun j _ => ?_)
+          refine mul_le_mul h2 (Finset.prod_le_prod₀ (fun _ _ => norm_nonneg _) fun j _ => ?_)
             (by positivity) (by positivity)
           rw [norm_pow]
           exact pow_le_pow_left₀ (norm_nonneg _)
@@ -188,6 +242,7 @@ theorem ConjPair.sum {κ : Type*} [Fintype κ] {F F' : κ → VC D N N' → ℂ}
     (h : ∀ i, ConjPair D s (F i) (F' i)) :
     ConjPair D s (fun z => ∑ i, F i z) (fun z => ∑ i, F' i z) := by
   refine ⟨Differentiable.fun_sum fun i _ => (h i).1, Differentiable.fun_sum fun i _ => (h i).2.1, ?_⟩
+
   rw [taylorDir_sum _ _ fun i _ => an0 (h i).1, taylorDir_sum _ _ fun i _ => an0 (h i).2.1, map_sum]
   exact Finset.sum_congr rfl fun i _ => (h i).2.2
 

@@ -1,7 +1,60 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutGCoreGTSSTr
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutGCoreGTConnGauge
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutGCoreGenTransferFn
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutGCoreGTSSCut
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutGCRadSpSmooth
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutGCoreGTConnGauge
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutGCoreGTConnGaugeB
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutGCoreGTSSTr
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutGCoreGenTransferFn
 import Formalism.HermitianCurvature.HermitianCurvatureProofs.EulerZetaGammaInvIdentity
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Formalism.REAL Formalism.QuantumDeterminants Formalism.FourierDecayAlt
 
@@ -52,7 +105,7 @@ theorem const_of_wirt (P : M.Par) (hTT : 0 < P.TT) {f : ℂ → ℂ}
     refine ContinuousLinearMap.ext fun w => ?_
     have hw : w = w.re • (1 : ℂ) + w.im • Complex.I := by
       apply Complex.ext <;> simp
-    rw [ContinuousLinearMap.zero_apply, hw, map_add, map_smul, map_smul, e1, e2]
+    rw [ContinuousLinearMap.zero_apply, hw, map_add (f := _), map_smul, map_smul, e1, e2]
     simp
   refine ⟨f (((Real.sqrt P.TT + 1 : ℝ)) : ℂ), fun ζ hζ => ?_⟩
   exact hopen.is_const_of_fderiv_eq_zero (ann_preconn P hTT) hdiff hzero hζ (ann_pt P hTT)
@@ -157,10 +210,10 @@ theorem vl_SS (P : M.Par) (Bs : B.RealPlaceData P.k P.r Wp Wq)
     vl P Bs e ((star (d.SS l)).1 Φ) ρ' q = ∑ σ, t l ρ' σ q.1.2 * vl P Bs e Φ σ q := by
   obtain ⟨h1, h2⟩ := hSL l hl Φ ρ'
   constructor
-  · simp only [vl, h1, AddSubmonoidClass.coe_finset_sum, Finset.sum_apply, Subalgebra.coe_mul, Pi.mul_apply]
+  · simp only [vl, h1, AddSubmonoidClass.coe_finsetSum, Finset.sum_apply, Subalgebra.coe_mul, Pi.mul_apply]
     refine Finset.sum_congr rfl fun σ _ => ?_
     rw [fnZ_eq_mk P (hst l ρ' σ).1]
-  · simp only [vl, h2, AddSubmonoidClass.coe_finset_sum, Finset.sum_apply, Subalgebra.coe_mul, Pi.mul_apply]
+  · simp only [vl, h2, AddSubmonoidClass.coe_finsetSum, Finset.sum_apply, Subalgebra.coe_mul, Pi.mul_apply]
     refine Finset.sum_congr rfl fun σ _ => ?_
     rw [fnZ_eq_mk P (hst l ρ' σ).2]
 
@@ -176,7 +229,7 @@ theorem sum_delta {ι : Type} [Fintype ι] [DecidableEq ι] (f : ι → ℂ) (a 
     ∑ σ, f σ * (if σ = a then c else 0) = f a * c := by
   simp [mul_ite, Finset.sum_ite_eq']
 
-set_option maxHeartbeats 1000000 in
+
 theorem second_shift_constant : GTSSConst := by
   intro Wp Wq _ _ _ _ _ _ P Bs X d hH e he hk hn s t hst hSL l hl ρ' ρ0
   classical

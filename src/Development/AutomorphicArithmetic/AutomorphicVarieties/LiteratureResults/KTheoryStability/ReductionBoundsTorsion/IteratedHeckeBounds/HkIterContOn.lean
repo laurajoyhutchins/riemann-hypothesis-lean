@@ -1,5 +1,57 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.LiteratureResults.KTheoryStability.ReductionBoundsTorsion.SBridgeAlt
-import Development.AutomorphicArithmetic.AutomorphicVarieties.LiteratureResults.KTheoryStability.ReductionBoundsTorsion.IteratedHeckeBounds.NormSqLeSum
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.LiteratureResults.KTheoryStability.ReductionBoundsTorsion.IteratedHeckeBounds.NormSqLeSum
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.LiteratureResults.KTheoryStability.ReductionBoundsTorsion.ActLPos
+import Mathlib.Algebra.Order.Archimedean.Real.Hom
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AutomorphicArithmetic.AutomorphicVarieties.TensorHomCubes.StabDirectedSystem
+
+@[expose] public section
 
 noncomputable section
 
@@ -36,6 +88,7 @@ theorem mn_map (S : Subgroup G) {E E' : Type} [AddCommGroup E] [Module ℝ E] [A
   · rw [mn_zero h, mn_zero h, map_zero]
   · haveI := fin_of_ne h
     letI := Fintype.ofFinite (Quotient (QuotientGroup.rightRel S))
+
     rw [mn_fin, mn_fin, map_smul, map_sum]
 
 theorem mn_integral (S : Subgroup G) {X E : Type} [MeasurableSpace X] {μ : Measure X} [NormedAddCommGroup E]
@@ -46,7 +99,7 @@ theorem mn_integral (S : Subgroup G) {X E : Type} [MeasurableSpace X] {μ : Meas
   · haveI := fin_of_ne h
     letI := Fintype.ofFinite (Quotient (QuotientGroup.rightRel S))
     simp only [mn_fin]
-    rw [integral_smul, integral_finset_sum _ fun c _ => he c]
+    rw [integral_smul, integral_finsetSum _ fun c _ => he c]
 
 theorem mn_contOn (S : Subgroup G) {X E : Type} [TopologicalSpace X] [NormedAddCommGroup E] [NormedSpace ℝ E]
     (e : Quotient (QuotientGroup.rightRel S) → X → E) {s : Set X} (he : ∀ c, ContinuousOn (e c) s) :
@@ -57,7 +110,7 @@ theorem mn_contOn (S : Subgroup G) {X E : Type} [TopologicalSpace X] [NormedAddC
   · haveI := fin_of_ne h
     letI := Fintype.ofFinite (Quotient (QuotientGroup.rightRel S))
     simp only [mn_fin]
-    exact (continuousOn_finset_sum _ fun c _ => he c).const_smul _
+    exact (continuousOn_finsetSum _ fun c _ => he c).const_smul _
 
 theorem dC_mn (S : Subgroup G) {Y : Type} {m : ℕ} (F : Quotient (QuotientGroup.rightRel S) → (Fin (m + 1) → Y) → ℝ) :
     dC (fun y => mn S fun c => F c y) = fun y => mn S fun c => dC (F c) y := by
@@ -111,8 +164,9 @@ theorem intS_eq {q : ℕ} (ω : Form (HS L N) q) (y : Fin (q + 1) → HS L N) :
 
 theorem intS_pb {q : ℕ} (g : Gp L N) (ω : Form (HS L N) q) (y : Fin (q + 1) → HS L N) :
     intS (pb g ω) y = intS ω fun j => actL g (y j) := by
-  simp only [intS, pb, ContinuousAlternatingMap.compContinuousLinearMap_apply, Function.comp_def, map_add, map_sum,
-    map_smul, map_sub]
+
+  simp only [intS, pb, ContinuousAlternatingMap.compContinuousLinearMap_apply, Function.comp_def, map_add (f := _), map_sum,
+  map_smul, map_sub]
 
 theorem intP_pb {q : ℕ} (g : Gp L N) (ω : Form (HS L N) q) (y : Fin (q + 1) → Pos L N) :
     intP (pb g ω) y = intP ω fun j => g • y j :=
@@ -123,7 +177,7 @@ private theorem isClosed_sx (q : ℕ) : IsClosed (sx q) := by
   refine IsClosed.inter ?_ ?_
   · simp only [Set.setOf_forall]
     exact isClosed_iInter fun j => isClosed_le continuous_const (continuous_apply j)
-  · exact isClosed_le (continuous_finset_sum _ fun j _ => continuous_apply j) continuous_const
+  · exact isClosed_le (continuous_finsetSum _ fun j _ => continuous_apply j) continuous_const
 
 private theorem isCompact_sx (q : ℕ) : IsCompact (sx q) := by
   refine (isCompact_Icc (a := (0 : Fin q → ℝ)) (b := 1)).of_isClosed_subset (isClosed_sx q) ?_
@@ -147,7 +201,7 @@ private theorem pt_mem_Pos_of_mem_sx {q : ℕ} (y : Fin (q + 1) → Pos L N) {t 
     ← Finset.sum_smul, sub_smul, one_smul]
   abel
 
-set_option maxHeartbeats 1000000 in
+
 theorem intP_integ {q : ℕ} {ω : Form (HS L N) q} (hω : ContinuousOn ω (Pos L N)) (y : Fin (q + 1) → Pos L N) :
     IntegrableOn (fun t => ω (pt (fun j => (y j).1) t) fun j => (y j.succ).1 - (y 0).1) (sx q) := by
   refine ContinuousOn.integrableOn_compact (isCompact_sx q) ?_
@@ -164,7 +218,7 @@ theorem intP_sub {q : ℕ} {ω ω' : Form (HS L N) q} (hω : ContinuousOn ω (Po
   simp only [intP, intS_eq, Pi.sub_apply, ContinuousAlternatingMap.sub_apply]
   exact integral_sub (intP_integ hω y) (intP_integ hω' y)
 
-set_option maxHeartbeats 1000000 in
+
 theorem intP_inv {q : ℕ} {ω : Form (HS L N) q} {g : Gp L N} (hω : FInv ω g) (y : Fin (q + 1) → Pos L N) :
     intP ω (fun j => g • y j) = intP ω y := by
   rw [← intP_pb]
@@ -211,7 +265,7 @@ theorem Hk_contOn {k : ℕ} (q : GK L N) {ω : Form (HS L N) k} (hω : Continuou
     ContinuousOn (Hk q ω) (Pos L N) :=
   mn_contOn (Sg q) _ fun c => pb_contOn _ hω
 
-set_option maxHeartbeats 1000000 in
+
 theorem intP_Hk {k : ℕ} (q : GK L N) {ω : Form (HS L N) k} (hω : ContinuousOn ω (Pos L N))
     (y : Fin (k + 1) → Pos L N) :
     intP (Hk q ω) y = mn (Sg q) fun c => intP (pb (toP L N (q * toK L N (Quotient.out c))) ω) y := by
@@ -224,7 +278,7 @@ theorem intP_Hk {k : ℕ} (q : GK L N) {ω : Form (HS L N) k} (hω : ContinuousO
   simp only [intP, intS_eq, key]
   exact mn_integral (Sg q) _ fun c => intP_integ (pb_contOn _ hω) y
 
-set_option maxHeartbeats 1000000 in
+
 theorem Hk_good {k : ℕ} (q : GK L N) {ω : Form (HS L N) (k + 1)} (hω : Good ω) : Good (Hk q ω) := by
   refine ⟨Hk_contOn q hω.1, ?_⟩
   have h1 : intP (Hk q ω) = fun y => mn (Sg q) fun c => intP (pb (toP L N (q * toK L N (Quotient.out c))) ω) y :=

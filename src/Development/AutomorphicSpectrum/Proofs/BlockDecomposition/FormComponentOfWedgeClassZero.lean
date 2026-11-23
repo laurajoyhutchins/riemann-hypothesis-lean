@@ -1,5 +1,50 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.HodgeWedgeFields.H1CommutesBaseChange
+module
+
+public import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.HodgeWedgeFields.H1CommutesBaseChange
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -46,8 +91,8 @@ theorem grpScheme_square_hom_ext_fst_snd {f g : ⋀[R]^2 M →ₗ[R] N}
   rw [hv]
   exact h _ _
 
-variable (R M) in
 
+variable (R M) in
 def wB : M →ₗ[R] M →ₗ[R] ⋀[R]^2 M :=
   LinearMap.mk₂ R (fun a b ↦ exteriorPower.ιMulti R 2 ![a, b])
     (fun _ _ _ ↦ Subtype.ext (by simp [ExteriorAlgebra.ιMulti_apply, add_mul]))
@@ -62,7 +107,7 @@ theorem wB_self (a : M) : wB R M a a = 0 :=
 
 theorem wB_swap (a b : M) : wB R M a b = -wB R M b a := by
   have h := wB_self (R := R) (a + b)
-  simp only [map_add, LinearMap.add_apply, wB_self, zero_add, add_zero] at h
+  simp only [map_add (f := _), LinearMap.add_apply, wB_self, zero_add, add_zero] at h
   exact eq_neg_of_add_eq_zero_left ((add_comm _ _).trans h)
 
 theorem exterior_square_map_apply (f : V →ₗ[R] M) (a b : V) :
@@ -94,7 +139,7 @@ theorem decomp (σ : V →ₗ[R] M) (k : W →ₗ[R] M) (hs : ∀ a, ∃ v w, a 
         exteriorPower.map 2 σ (exteriorPower.ιMulti R 2 ![v, v']) +
           mix σ k (v ⊗ₜ w' - v' ⊗ₜ w) + exteriorPower.map 2 k (exteriorPower.ιMulti R 2 ![w, w']) := by
       rw [exterior_square_map_apply, exterior_square_map_apply, map_sub, mix_tmul, mix_tmul, wB_swap (σ v') (k w)]
-      simp only [map_add, LinearMap.add_apply]
+      simp only [map_add (f := _), LinearMap.add_apply]
       abel
     rw [e]
     exact S.add_mem (S.add_mem (Submodule.mem_sup_left (Submodule.mem_sup_left ⟨_, rfl⟩))
@@ -111,15 +156,15 @@ section Coh
 
 variable {R : Type} [CommRing R] {C : Type} [Category.{0} C] {F : C ⥤ CommAlgCat.{0} R}
 
-variable (F) in
 
+variable (F) in
 def fn2 : cechDeRhamTotalCocyclesTwo F →ₗ[R] Z2 F where
   toFun c := ⟨c.1.1, (mem_cechDeRhamTotalCocyclesTwo_iff.1 c.2).1⟩
   map_add' _ _ := rfl
   map_smul' _ _ := rfl
 
-variable (F) in
 
+variable (F) in
 def rho : Hyp2 F →ₗ[R] H2 F :=
   Submodule.mapQ _ _ (fn2 F) (by rintro _ ⟨g, rfl⟩; exact ⟨g.1, rfl⟩)
 
@@ -198,10 +243,10 @@ theorem Lc_spec (hcl : Closed1 F = ⊤) (τ : H1 F →ₗ[R] cechDeRhamTotalCocy
   | zero => simp
   | add a b ha hb =>
     constructor
-    · rw [map_add]
+    · rw [map_add (f := _)]
       change (Lc hcl τ a).1.1 + (Lc hcl τ b).1.1 = 0
       rw [ha.1, hb.1, add_zero]
-    · rw [map_add, map_add, map_add]
+    · rw [map_add (f := _), map_add (f := _), map_add (f := _)]
       change (Lc hcl τ a).1.2.1 + (Lc hcl τ b).1.2.1 = _
       rw [ha.2, hb.2]
   | tmul v w =>
@@ -229,7 +274,7 @@ theorem beta_of (τ : H1 F →ₗ[R] cechDeRhamTotalCocyclesOne F) (hτ : ∀ v,
     refine ⟨x + y, fun T T' φ ↦ ?_⟩
     have h1 := hx T T' φ
     have h2 := hy T T' φ
-    simp only [map_add, Pi.add_apply]
+    simp only [map_add (f := _), Pi.add_apply]
     rw [add_sub_add_comm, h1, h2]
     abel
   | tmul f w =>
@@ -309,7 +354,7 @@ theorem inj_N (hs : Function.Surjective (toO F)) (hcl : Closed1 F = ⊤) (c : To
   rw [map_sub, hβc, sub_zero, h] at h2
   exact h2
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem surj_step (hcl : Closed1 F = ⊤) (τ : H1 F →ₗ[R] cechDeRhamTotalCocyclesOne F)
     (hτ : ∀ v, H1.mk F (cechDeRhamTotalCocyclesOne.fn F (τ v)) = v) (mu : Z1 F ⊗[R] Glob1 F →ₗ[R] A1 F)
@@ -362,9 +407,9 @@ theorem surj_step (hcl : Closed1 F = ⊤) (τ : H1 F →ₗ[R] cechDeRhamTotalCo
   have e3 : c = Nc hcl x + Lc hcl τ u + b1 + b2 := by
     rw [← e]
     exact add_rearr c b1 _ b2
-  rw [e3, map_add, map_add, map_add, e1, e2, add_zero, add_zero, add_comm]
+  rw [e3, map_add (f := _), map_add (f := _), map_add (f := _), e1, e2, add_zero, add_zero, add_comm]
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem wedgeHyp_of (hproj : Module.Projective R (H1 F)) (hcl : Closed1 F = ⊤)
     (hs : Function.Surjective (toO F)) (hW : Wedge F) (halt : ∀ c, cupHyp F c c = 0)
@@ -414,18 +459,18 @@ theorem wedgeHyp_of (hproj : Module.Projective R (H1 F)) (hcl : Closed1 F = ⊤)
     rw [hk, hc]
     abel
   have hinj : Function.Injective e := by
-    rw [injective_iff_map_eq_zero]
+    set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
     intro x hx
     obtain ⟨y, u, z, rfl⟩ := decomp σ k hspan x
-    rw [map_add, map_add, hs1, hs0] at hx
+    rw [map_add (f := _), map_add (f := _), hs1, hs0] at hx
     have hy : y = 0 := by
       have h : rho F (e (exteriorPower.map 2 σ y) + Hyp2.mk F (Lc hcl τ u) + Hyp2.mk F (Nc hcl z)) = 0 := by
         rw [hx, map_zero]
-      rw [map_add, map_add, hs2, rho_mk, rho_mk, form_component_of_cup_class_zero hcl τ mu hmu, form_component_of_wedge_class_zero hcl nu hnu, map_zero,
+      rw [map_add (f := _), map_add (f := _), hs2, rho_mk, rho_mk, form_component_of_cup_class_zero hcl τ mu hmu, form_component_of_wedge_class_zero hcl nu hnu, map_zero,
         add_zero, add_zero] at h
       exact E.map_eq_zero_iff.1 h
     subst hy
-    rw [map_zero, map_zero, zero_add, ← map_add, Hyp2.mk_eq_zero] at hx
+    rw [map_zero, map_zero, zero_add, ← map_add (f := _), Hyp2.mk_eq_zero] at hx
     obtain ⟨c, hc⟩ := hx
     have hu := inj_L hs hcl τ hτ mu hmu hmu3 nu hnu u z c hc
     subst hu
@@ -443,7 +488,7 @@ theorem wedgeHyp_of (hproj : Module.Projective R (H1 F)) (hcl : Closed1 F = ⊤)
       rw [← rho_mk, hc', map_sub, hs2, hy, sub_self]
     obtain ⟨u, x, hux⟩ := surj_step hcl τ hτ mu hmu hmu2 nu hnu hnus c' h0
     refine ⟨exteriorPower.map 2 σ y + mix σ k u + exteriorPower.map 2 k x, ?_⟩
-    rw [map_add, map_add, hs1, hs0, add_assoc, ← hux, hc']
+    rw [map_add (f := _), map_add (f := _), hs1, hs0, add_assoc, ← hux, hc']
     exact add_sub_cancel _ _
   exact ⟨LinearEquiv.ofBijective e ⟨hinj, hsurj⟩, he⟩
 

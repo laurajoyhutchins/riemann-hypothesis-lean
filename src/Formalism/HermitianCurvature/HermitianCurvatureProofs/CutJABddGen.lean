@@ -1,10 +1,53 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutJABddSSn
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutJABddSSn
+public import Formalism.FormalDegreeBessel.FormalDegreeRatio.UnitaryWeylNormalHolds
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.BigCellInversePair
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.BigCellZetaMinors
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutEnBetaFrame
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutEnFibMem
 import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutEnTrSmooth
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutEnBetaFrame
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.BigCellInversePair
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.BigCellZetaMinors
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.IsOpenAdelicUnipotentTimesIntegralOutsideSet
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.NFRadRedS
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Formalism.FourierDecayAlt
 
@@ -65,8 +108,8 @@ theorem eqv_left {c : Coef S v} (he : EqvC S T v c) {g : B.Mat S.G.k S.G.r} (hg 
     {n : B.Mat S.G.k S.G.r} (hn : n ∈ Nset S.G.k S.G.r) (X : Wq (S.pl v) →L[ℂ] Wp (S.pl v)) :
     c (n * g) X = c g X := by
   have hp : (T v).base.inSS ((Matrix.of.symm 1, Matrix.of.symm n⁻¹), (Matrix.of.symm 1, Matrix.of.symm 1)) :=
-    ⟨by simpa using P.BigCellZetaMinors.one_uw (T v).base.z, by simpa using WeylGroupFacts.mem_n_inv hn,
-      by simpa using P.BigCellZetaMinors.one_uw (T v).base.z', by simpa using WeylGroupFacts.mem_n_one⟩
+    ⟨by simpa only [Equiv.apply_symm_apply] using P.BigCellZetaMinors.one_uw (T v).base.z, by simpa only [Equiv.apply_symm_apply] using WeylGroupFacts.mem_n_inv hn,
+      by simpa only [Equiv.apply_symm_apply] using P.BigCellZetaMinors.one_uw (T v).base.z', by simpa only [Equiv.apply_symm_apply] using WeylGroupFacts.mem_n_one⟩
   have h := he _ hp g hg X
   have hu : IsUnit n.det := WeylGroupFacts.isUnit_of_uh hn.1
   simp only [Equiv.apply_symm_apply, inv_one, (T v).base.π_rep.1, (T v).base.π'_rep.1, B.sgs,
@@ -77,8 +120,8 @@ theorem eqv_right {c : Coef S v} (he : EqvC S T v c) {g : B.Mat S.G.k S.G.r} (hg
     {n : B.Mat S.G.k S.G.r} (hn : n ∈ Nset S.G.k S.G.r) (X : Wq (S.pl v) →L[ℂ] Wp (S.pl v)) :
     c (g * n) X = c g X := by
   have hp : (T v).base.inSS ((Matrix.of.symm 1, Matrix.of.symm 1), (Matrix.of.symm 1, Matrix.of.symm n)) :=
-    ⟨by simpa using P.BigCellZetaMinors.one_uw (T v).base.z, by simpa using WeylGroupFacts.mem_n_one,
-      by simpa using P.BigCellZetaMinors.one_uw (T v).base.z', by simpa using hn⟩
+    ⟨by simpa only [Equiv.apply_symm_apply] using P.BigCellZetaMinors.one_uw (T v).base.z, by simpa only [Equiv.apply_symm_apply] using WeylGroupFacts.mem_n_one,
+      by simpa only [Equiv.apply_symm_apply] using P.BigCellZetaMinors.one_uw (T v).base.z', by simpa only [Equiv.apply_symm_apply] using hn⟩
   have h := he _ hp g hg X
   simp only [Equiv.apply_symm_apply, inv_one, (T v).base.π_rep.1, (T v).base.π'_rep.1, B.sgs,
     Matrix.one_mul, Matrix.mul_one] at h
@@ -90,8 +133,8 @@ theorem eqv_uw {c : Coef S v} (he : EqvC S T v c) {g : B.Mat S.G.k S.G.r} (hg : 
     c (h * g * h') (((T v).base.π h).comp (X.comp ((T v).base.π' h'))) =
       ((T v).base.π h).comp ((c g X).comp ((T v).base.π' h')) := by
   have hp : (T v).base.inSS ((Matrix.of.symm h, Matrix.of.symm 1), (Matrix.of.symm h'⁻¹, Matrix.of.symm 1)) :=
-    ⟨by simpa using hh, by simpa using WeylGroupFacts.mem_n_one,
-      by simpa using P.BigCellInversePair.uw_inv hh', by simpa using WeylGroupFacts.mem_n_one⟩
+    ⟨by simpa only [Equiv.apply_symm_apply] using hh, by simpa only [Equiv.apply_symm_apply] using WeylGroupFacts.mem_n_one,
+      by simpa only [Equiv.apply_symm_apply] using P.BigCellInversePair.uw_inv hh', by simpa only [Equiv.apply_symm_apply] using WeylGroupFacts.mem_n_one⟩
   have hg' : h * g * h' ∈ B.GV S.G.k S.G.r := WeylGroupFacts.uh_mul (WeylGroupFacts.uh_mul hh.1 hg) hh'.1
   have e := he _ hp (h * g * h') hg' X
   have hu' : IsUnit h'.det := WeylGroupFacts.isUnit_of_uh hh'.1
@@ -170,6 +213,7 @@ theorem trJ_of_fibMat (S : C.HidaSetting E Wp Wq) (T : ∀ v : Fin S.f, D.LevTow
         ∑ π, inner ℂ (B.hsVec (e π q.1.2)) (B.hsVec (J (B.gq (T v).base q.1))) •
           c (B.gq (T v).base q.1) (e π q.1.2) := by
       conv_lhs => rw [hspan]
+
       rw [map_sum]
       simp only [ContinuousLinearMap.map_smul]
     rw [hcJ, En.hsVec_sum_smul, inner_sum, Finset.mul_sum]
@@ -180,7 +224,7 @@ theorem trJ_of_fibMat (S : C.HidaSetting E Wp Wq) (T : ∀ v : Fin S.f, D.LevTow
   beta_reduce
   rw [hw]
   unfold MA.toSm
-  rw [dif_pos X.2]
+  rw [dite_eq_left X.2]
 
 theorem real_to_bounded_holds : RealToBdd := by
   intro E _ _ _ Wp Wq _ _ _ _ _ _ S T v hPl e Cb c ca V b hFr hR hb

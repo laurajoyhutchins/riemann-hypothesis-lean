@@ -1,5 +1,72 @@
-import Formalism.HermitianCurvature.WeylElementCommutesLevelOne
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.BetaSesquilinearity
+module
+
+public import Formalism.HermitianCurvature.WeylElementCommutesLevelOne
+public import Mathlib.CategoryTheory.Category.Basic
+public import Formalism.FormalDegreeBessel.FinalG
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.BetaSesquilinearity
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Archimedean.Real.Hom
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.Matrix.Order
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+public import Mathlib.Analysis.SpecialFunctions.PolarCoord
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.Complex
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Analysis.Calculus.Deriv.Pow
+public import Mathlib.MeasureTheory.Function.JacobianOneDim
+public import Mathlib.MeasureTheory.Measure.Haar.Unique
+public import Mathlib.RingTheory.Norm.Transitivity
+
+@[expose] public section
 
 open Matrix MeasureTheory Filter Topology
 open scoped ComplexConjugate ENNReal NNReal ComplexOrder
@@ -349,22 +416,18 @@ theorem card_sub (F : Frame H Ep Em) : (Fintype.card P : ℂ) - Fintype.card Q =
 
 theorem reindex {P' Q' : Type} [Fintype P'] [DecidableEq P'] [Fintype Q'] [DecidableEq Q']
     (F : Frame H Ep Em) (eP : P' ≃ P) (eQ : Q' ≃ Q) :
-    Frame H (Ep.submatrix id eP) (Em.submatrix id eQ) where
-  pp := by
-    rw [Matrix.conjTranspose_submatrix, ← Matrix.submatrix_mul _ _ _ id _ Function.bijective_id, F.pp]
+    Frame H (Ep.submatrix id eP) (Em.submatrix id eQ) := by
+  constructor
+  · rw [Matrix.conjTranspose_submatrix, ← Matrix.submatrix_mul _ _ _ id _ Function.bijective_id, F.pp]
     exact Matrix.submatrix_one_equiv eP
-  mm := by
-    rw [Matrix.conjTranspose_submatrix, ← Matrix.submatrix_mul _ _ _ id _ Function.bijective_id, F.mm]
+  · rw [Matrix.conjTranspose_submatrix, ← Matrix.submatrix_mul _ _ _ id _ Function.bijective_id, F.mm]
     exact Matrix.submatrix_one_equiv eQ
-  pm := by
-    rw [Matrix.conjTranspose_submatrix, ← Matrix.submatrix_mul _ _ _ id _ Function.bijective_id, F.pm]
+  · rw [Matrix.conjTranspose_submatrix, ← Matrix.submatrix_mul _ _ _ id _ Function.bijective_id, F.pm]
     rfl
-  sum := by
-    rw [Matrix.conjTranspose_submatrix, Matrix.conjTranspose_submatrix, Matrix.submatrix_mul_equiv,
+  · rw [Matrix.conjTranspose_submatrix, Matrix.conjTranspose_submatrix, Matrix.submatrix_mul_equiv,
       Matrix.submatrix_mul_equiv]
     exact F.sum
-  diff := by
-    rw [Matrix.conjTranspose_submatrix, Matrix.conjTranspose_submatrix, Matrix.submatrix_mul_equiv,
+  · rw [Matrix.conjTranspose_submatrix, Matrix.conjTranspose_submatrix, Matrix.submatrix_mul_equiv,
       Matrix.submatrix_mul_equiv]
     exact F.diff
 
@@ -723,14 +786,14 @@ variable {Q : Type} [Fintype Q] [DecidableEq Q]
 lemma meas_gram_sub (G₀ : (Q → Q → ℂ) → ℝ≥0∞) (hG : Measurable G₀) (C : Matrix Q Q ℂ) :
     Measurable fun X : Q → Q → ℂ => G₀ (gram X - C) := by
   have h : Measurable (fun X : Q → Q → ℂ => fun i j => gram X i j - C i j) :=
-    measurable_pi_lambda _ fun i => measurable_pi_lambda _ fun j =>
+    Measurable.of_eval fun i => Measurable.of_eval fun j =>
       (gram_cont.matrix_elem i j).measurable.sub_const (C i j)
   exact hG.comp h
 
 lemma meas_gram (G₀ : (Q → Q → ℂ) → ℝ≥0∞) (hG : Measurable G₀) :
     Measurable fun X : Q → Q → ℂ => G₀ (gram X) := by
   have h : Measurable (fun X : Q → Q → ℂ => fun i j => gram X i j) :=
-    measurable_pi_lambda _ fun i => measurable_pi_lambda _ fun j => (gram_cont.matrix_elem i j).measurable
+    Measurable.of_eval fun i => Measurable.of_eval fun j => (gram_cont.matrix_elem i j).measurable
   exact hG.comp h
 
 def colL (n : Q → ℂ) (c : ℂ) (i₀ : Q) : (Q → ℂ) →ₗ[ℝ] (Q → ℂ) where
@@ -1075,8 +1138,6 @@ theorem act_cont : Continuous (fun p : (m → m → ℂ) × (Q → m → ℂ) =>
   exact continuous_pi fun j =>
     (of_cont.comp continuous_fst).matrix_mulVec ((continuous_apply j).comp continuous_snd)
 
-def adjF (g : m → m → ℂ) : m → m → ℂ := (Matrix.of g).adjugate
-
 def invF (g : m → m → ℂ) : m → m → ℂ := ((Matrix.of g)⁻¹ : Matrix m m ℂ)
 
 theorem invF_meas : Measurable (invF : (m → m → ℂ) → m → m → ℂ) := by
@@ -1086,7 +1147,7 @@ theorem invF_meas : Measurable (invF : (m → m → ℂ) → m → m → ℂ) :=
     simp only [invF, Matrix.inv_def, Ring.inverse_eq_inv']
     rfl
   rw [h]
-  refine measurable_pi_lambda _ fun i => measurable_pi_lambda _ fun j => ?_
+  refine Measurable.of_eval fun i => Measurable.of_eval fun j => ?_
   exact det_cont.measurable.inv.mul (adj_cont.matrix_elem i j).measurable
 
 theorem bet_cont : Continuous (fun g : m → m → ℂ => bet Ep Em (Matrix.of g)) := by
@@ -1411,7 +1472,7 @@ theorem Mv_scale {ρ : ℝ} (hρ : 0 ≤ ρ) :
     Mv P Q ρ = ENNReal.ofReal (ρ ^ (2 * Fintype.card P * Fintype.card Q)) * Mv P Q 1 := by
   have hK : Measurable (fun p : (Q → Q → ℂ) × (Q → P → ℂ) => Kf P Q 1 (gramF p.1, p.2)) := by
     have hg : Measurable (fun X : Q → Q → ℂ => fun i j => gram X i j) :=
-      measurable_pi_lambda _ fun i => measurable_pi_lambda _ fun j => (gram_cont.matrix_elem i j).measurable
+      Measurable.of_eval fun i => Measurable.of_eval fun j => (gram_cont.matrix_elem i j).measurable
     have h : Measurable (fun p : (Q → Q → ℂ) × (Q → P → ℂ) => (gramF p.1, p.2)) :=
       Measurable.prod (f := fun p : (Q → Q → ℂ) × (Q → P → ℂ) => (gramF p.1, p.2)) (hg.comp measurable_fst) measurable_snd
     exact (Kf_meas 1).comp h
@@ -1670,7 +1731,6 @@ theorem volExact : VolExact := by
     filter_upwards [conc] with g hg
     have e1 := hsblock k r (Matrix.of g) hg
     have e2 := bet_eq F (Matrix.of g)
-    refine propext ?_
     show gN (Matrix.of g) ^ 2 ≤ _ ↔ bet Ep Em (Matrix.of g) ≤ ρ ^ 2
     rw [e1, e2]
     constructor <;> intro h <;> linarith
@@ -1750,12 +1810,6 @@ theorem matrix_norm_ge_one : Formalism.FourierDecayAlt.B2.GNLower := by
     have : 1 ≤ 2 * r + k + 1 := Nat.le_add_left 1 _
     exact_mod_cast this
   nlinarith [sq_nonneg (B.gN (B2.Ppos k r * g * B2.Pneg k r))]
-
-theorem hilbert_schmidt_block : Formalism.FourierDecayAlt.B2.HSBlock := by
-  exact HermitianFormFactor.hsblock
-
-theorem norm_ball_volume_exact : Formalism.FourierDecayAlt.B2.VolExact := by
-  exact HermitianFormFactor.volExact
 
 theorem norm_ball_volume_sharp : Formalism.FourierDecayAlt.B2.VolSharp := by
   exact HermitianFormFactor.volSharp

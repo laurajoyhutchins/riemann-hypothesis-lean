@@ -1,12 +1,58 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.IsFrameIff
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsMinOn
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsIsoSection
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.SectionPowerCalculusGeometricFibre
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.MemMaximalIdeal
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.NormsOfAdapted
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExpBijFAndExpandsFLin
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsFramesOnUniformisedModelFibre
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.IsFrameIff
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.PeriodicValuation
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.VRatioGtStatement
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsIsoSection
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsMinOn
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.MemMaximalIdeal
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.NormsOfAdapted
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.SectionPowerCalculusGeometricFibre
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExpBijFAndExpandsFLin
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.ExistsRosatiGen
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.SectionScalarValuation
+import Development.AbelianVarietyTheory.Definitions.Degenerations.SepticCharacterInjective
+
+@[expose] public section
 
 open CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj AlgebraicGeometry NumberField IsLocalRing
 open scoped CategoryTheory.Obj BigOperators
@@ -45,10 +91,15 @@ theorem liftFun_one (W) : liftFun A.A (T := TFK (R := R) F) W ((Scheme.ΓSpecIso
 theorem eq_of_cmb_one {b t : SecA A F k} (h : Cmb (fun _ : Fin 1 => b) (fun _ => 1) t) : t = b :=
   SecOps.sec_ext fun j => by rw [h j, Fin.sum_univ_one, liftFun_one, _root_.one_mul]
 
-theorem exists_cmb : ∀ {n : ℕ} (b : Fin n → SecA A F k) (a : Fin n → F), ∃ t, Cmb b a t
-  | 0, _, _ => ⟨SecOps.secZero, fun j => by rw [Fin.sum_univ_zero]; rfl⟩
-  | n + 1, b, a => by
-    obtain ⟨t, ht⟩ := exists_cmb (fun i => b i.succ) (fun i => a i.succ)
+theorem exists_cmb : ∀ {n : ℕ} (b : Fin n → SecA A F k) (a : Fin n → F), ∃ t, Cmb b a t := by
+  intro n
+  induction n with
+  | zero =>
+    intro b a
+    exact ⟨SecOps.secZero, fun j => by rw [Fin.sum_univ_zero]; rfl⟩
+  | succ n ih =>
+    intro b a
+    obtain ⟨t, ht⟩ := ih (fun i => b i.succ) (fun i => a i.succ)
     refine ⟨SecOps.secAdd (SecOps.secScale ((fst (TFK (R := R) F) A.A).left.appTop.hom
       ((Scheme.ΓSpecIso (CommRingCat.of F)).inv.hom (a 0))) (b 0)) t, fun j => ?_⟩
     rw [Fin.sum_univ_succ, ← ht j]; rfl
@@ -60,17 +111,22 @@ theorem cmb_rel (hex : ∀ t, ∃ s, E t s)
       (∀ j, t''.f j = liftFun A.A _ ((Scheme.ΓSpecIso (CommRingCat.of F)).inv.hom c) * t.f j + t'.f j) →
       E t'' (c • s + s')) :
     ∀ {n : ℕ} (b : Fin n → SecA A F k) (s : Fin n → M) (a : Fin n → F) (t : SecA A F k), (∀ i, E (b i) (s i)) →
-      Cmb b a t → E t (∑ i, a i • s i)
-  | 0, _, _, _, t, _, h => by
-    obtain ⟨s, hs⟩ := hex t
-    have := hl t t t s s (-1) hs hs (fun j => by rw [h j, Fin.sum_univ_zero, mul_zero, add_zero])
+      Cmb b a t → E t (∑ i, a i • s i) := by
+  intro n
+  induction n with
+  | zero =>
+    intro b s a t hb h
+    obtain ⟨u, hu⟩ := hex t
+    have := hl t t t u u (-1) hu hu (fun j => by rw [h j, Fin.sum_univ_zero, mul_zero, add_zero])
     rw [neg_one_smul, neg_add_cancel] at this
     rwa [Fin.sum_univ_zero]
-  | n + 1, b, s, a, t, hb, h => by
+  | succ n ih =>
+    intro b s a t hb h
     obtain ⟨t', ht'⟩ := exists_cmb (fun i => b i.succ) (fun i => a i.succ)
-    have ih := cmb_rel hex hl _ (fun i => s i.succ) _ t' (fun i => hb i.succ) ht'
     rw [Fin.sum_univ_succ]
-    exact hl (b 0) t' t _ _ (a 0) (hb 0) ih fun j => by rw [h j, Fin.sum_univ_succ, ht' j]
+    exact hl (b 0) t' t _ _ (a 0) (hb 0)
+      (ih _ (fun i => s i.succ) _ t' (fun i => hb i.succ) ht') fun j => by
+      rw [h j, Fin.sum_univ_succ, ht' j]
 
 end Av
 

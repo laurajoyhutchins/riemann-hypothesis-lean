@@ -1,6 +1,59 @@
-import Mathlib
-import Formalism.LocalToGlobal.TorsionIntegrality.FrobeniusFibreCurves.FinalB
-import Formalism.LocalToGlobal.TorsionIntegrality.FrobeniusFibreCurves.StatementD
+module
+
+public import Formalism.LocalToGlobal.TorsionIntegrality.FrobeniusFibreCurves.StatementD
+public import Formalism.FormalGroupLog.FormalGroupLogProofs.ConstantCoeffSubstOfZero
+public import Formalism.LocalToGlobal.TorsionIntegrality.FrobeniusFibreCurves.FinalB
+import Formalism.LocalToGlobal.TorsionIntegrality.FrobeniusFibreCurves.LogarithmicSubstitution.ConstantCoeffEqZeroOfParallelogram
+import Formalism.LocalToGlobal.TorsionIntegrality.FrobeniusFibreCurves.LogarithmicSubstitution.ConstantCoeffSeriesAtVariable
+import Formalism.LocalToGlobal.TorsionIntegrality.FrobeniusFibreCurves.LogarithmicSubstitution.InVarAddInVarNeZero
+import Formalism.LocalToGlobal.TorsionIntegrality.FrobeniusFibreCurves.LogarithmicSubstitution.OneAddMulDerivLogSubst
+import Formalism.LocalToGlobal.TorsionIntegrality.FrobeniusFibreCurves.LogarithmicSubstitution.WeierstrassSeriesIntegral
+import Formalism.ThetaLogCoordinates.UniformThetaSubstitution.FrobeniusLiftNorms.LogarithmEquivalence
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -17,7 +70,7 @@ variable {K : Type} [NormedField K] [IsUltrametricDist K] [CharZero K]
 theorem integral_add {ι : Type} {f g : MvPowerSeries ι K} (hf : Integral f) (hg : Integral g) :
     Integral (f + g) := by
   intro n
-  rw [map_add]
+  rw [map_add (f := _)]
   exact (IsUltrametricDist.norm_add_le_max _ _).trans (max_le (hf n) (hg n))
 
 theorem integral_neg {ι : Type} {f : MvPowerSeries ι K} (hf : Integral f) : Integral (-f) := by
@@ -128,7 +181,7 @@ variable {K : Type} [Field K] [CharZero K]
 
 theorem fExp_three {ι : Type} {f : MvPowerSeries ι K} (hf : MvPowerSeries.constantCoeff f = 0) :
     fExp (3 * f) = fExp f ^ 3 := by
-  have h2 : MvPowerSeries.constantCoeff (f + f) = 0 := by rw [map_add, hf, add_zero]
+  have h2 : MvPowerSeries.constantCoeff (f + f) = 0 := by rw [map_add (f := _), hf, add_zero]
   have e : (3 : MvPowerSeries ι K) * f = f + f + f := by ring
   rw [e, fExp_add h2 hf, fExp_add hf hf]
   ring
@@ -142,7 +195,7 @@ private theorem at1_C_eq_C {ι : Type} (x : ι) (c : K) :
 
 theorem curve3_at {ι : Type} {l P ep : PowerSeries K} {a1 a3 : K}
     (hl : PowerSeries.constantCoeff l = 0)
-    (h : PowerSeries.X ^ 3 * (-2 + l ^ 3 * PowerSeries.subst l (PowerSeries.derivative K P)) =
+    (h : PowerSeries.X ^ 3 * (-2 + l ^ 3 * PowerSeries.subst l (PowerSeries.derivative (R := K) P)) =
       l ^ 3 * (-2 * ep + PowerSeries.C a1 * PowerSeries.X * ep +
         PowerSeries.C a3 * PowerSeries.X ^ 3)) (x : ι) :
     MvPowerSeries.X x ^ 3 * (-2 + at1 x l ^ 3 * PowerSeries.subst (at1 x l) (dz P)) =
@@ -150,7 +203,7 @@ theorem curve3_at {ι : Type} {l P ep : PowerSeries K} {a1 a3 : K}
         MvPowerSeries.C a3 * MvPowerSeries.X x ^ 3) := by
   have hx : PowerSeries.HasSubst (MvPowerSeries.X x : MvPowerSeries ι K) := PowerSeries.HasSubst.X x
   have e := congrArg (PowerSeries.substAlgHom hx) h
-  simp only [map_mul, map_add, map_pow, map_neg, map_ofNat, PowerSeries.coe_substAlgHom,
+  simp only [map_mul, map_add (f := _), map_pow, map_neg, map_ofNat, PowerSeries.coe_substAlgHom,
     PowerSeries.subst_X hx] at e
   have e1 : ∀ f : PowerSeries K,
       PowerSeries.subst (MvPowerSeries.X x : MvPowerSeries ι K) f = at1 x f := fun f => rfl
@@ -169,7 +222,7 @@ theorem subst_det_three_points {ι : Type} (P : PowerSeries K) {b : Fin 3 → Mv
   fin_cases c <;> simp [-MvPowerSeries.coe_substAlgHom]
   all_goals
     rw [← MvPowerSeries.coe_substAlgHom hb]
-    simp only [map_mul, map_pow, map_add, map_neg, map_one, map_ofNat]
+    simp only [map_mul, map_pow, map_add (f := _), map_neg, map_one, map_ofNat]
     simp only [MvPowerSeries.coe_substAlgHom, MvPowerSeries.subst_X hb, ParO.subst_inVar _ _ hb]
 
 theorem subst_series_at_sum_three {ι : Type} (g : PowerSeries K) {b : Fin 3 → MvPowerSeries ι K}
@@ -179,7 +232,7 @@ theorem subst_series_at_sum_three {ι : Type} (g : PowerSeries K) {b : Fin 3 →
   rw [psubst_subst g (u := (MvPowerSeries.X 0 + MvPowerSeries.X 1 + MvPowerSeries.X 2 :
     MvPowerSeries (Fin 3) K)) (by simp) hb]
   congr 1
-  rw [← MvPowerSeries.coe_substAlgHom hb, map_add, map_add, MvPowerSeries.coe_substAlgHom,
+  rw [← MvPowerSeries.coe_substAlgHom hb, map_add (f := _), map_add (f := _), MvPowerSeries.coe_substAlgHom,
     MvPowerSeries.subst_X hb, MvPowerSeries.subst_X hb, MvPowerSeries.subst_X hb]
 
 theorem subst_series_at_difference_three {ι : Type} (j k : Fin 3) (g : PowerSeries K) {b : Fin 3 → MvPowerSeries ι K}
@@ -246,7 +299,7 @@ theorem sum_log_three_variables_ne_zero {l : PowerSeries K} (hl1 : PowerSeries.c
     at1 (0 : Fin 3) l + at1 1 l + at1 2 l ≠ 0 := by
   intro h0
   have e := congrArg (MvPowerSeries.coeff (Finsupp.single (0 : Fin 3) 1)) h0
-  rw [map_add, map_add, map_zero, coeff_single_one_at1_eq_ite, coeff_single_one_at1_eq_ite, coeff_single_one_at1_eq_ite] at e
+  rw [map_add (f := _), map_add (f := _), map_zero, coeff_single_one_at1_eq_ite, coeff_single_one_at1_eq_ite, coeff_single_one_at1_eq_ite] at e
   simp [hl1] at e
 
 end Alg
@@ -343,7 +396,7 @@ theorem parallelogram_three_weierstrass_key (hA : FrobStickStar) {g2 g3 s2 c0 a1
     (hF : LawLog F l) (hi : IsInv l i)
     (h2 : PowerSeries.X ^ 2 * (1 + l ^ 2 * PowerSeries.subst l P) =
       l ^ 2 * (ep + PowerSeries.C c0 * PowerSeries.X ^ 2))
-    (h3 : PowerSeries.X ^ 3 * (-2 + l ^ 3 * PowerSeries.subst l (PowerSeries.derivative K P)) =
+    (h3 : PowerSeries.X ^ 3 * (-2 + l ^ 3 * PowerSeries.subst l (PowerSeries.derivative (R := K) P)) =
       l ^ 3 * (-2 * ep + PowerSeries.C a1 * PowerSeries.X * ep +
         PowerSeries.C a3 * PowerSeries.X ^ 3))
     (he : Matrix.det (Matrix.of fun j : Fin 3 =>

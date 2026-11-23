@@ -1,5 +1,58 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MaximalIdealEqJointEigen
+module
+
+public import Mathlib.NumberTheory.Padics.Complex
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MaximalIdealEqJointEigen
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.LinearAlgebra.FreeModule.PID
+
+@[expose] public section
 
 set_option autoImplicit false
 noncomputable section
@@ -72,9 +125,9 @@ private lemma coeffs_eq_zero_of_linearIndependent_of_injective {O K X : Type} [C
     · exact hc0
     · exact htail' k
 
+
 set_option autoImplicit false in
 open MvPolynomial in
-
 theorem _root_.GlobalTheory.ExpCover.values_mem_of_local {l : ℕ} [Fact l.Prime] {O I G V W : Type} [CommRing O]
     [IsDomain O] [IsPrincipalIdealRing O] [Mul G]
     [AddCommGroup V] [Module O V] [Module.Finite O V] [AddCommGroup W] [Module (PadicAlgCl l) W]
@@ -178,6 +231,7 @@ theorem _root_.GlobalTheory.ExpCover.values_mem_of_local {l : ℕ} [Fact l.Prime
               (fun g => b (((p • x : M) : G → V) g)) := by
           funext g
           rw [mul_comm, mul_smul, hX]
+
           simp [_root_.GlobalTheory.ExpCover.transOp, map_sum, map_smulₛₗ]
         rw [e]; exact hS i _ hp
     have hZS : ∀ z ∈ Z, (fun g => b ((z : G → V) g)) ∈ S := by
@@ -206,6 +260,7 @@ theorem _root_.GlobalTheory.ExpCover.values_mem_of_local {l : ℕ} [Fact l.Prime
       have hfk : ∀ j g, f j g = ∑ k, emb ((L ∘ B) j (g, k)) • b (w k) := by
         intro j g
         have e := congrArg b (w.sum_repr ((((B j : Z) : M) : G → V) g))
+
         rw [map_sum] at e
         simp only [map_smulₛₗ] at e
         show b ((((B j : Z) : M) : G → V) g) = _
@@ -233,10 +288,12 @@ theorem _root_.GlobalTheory.ExpCover.values_mem_of_local {l : ℕ} [Fact l.Prime
           simp [ρ, φ, LinearMap.toMatrixAlgEquiv_apply]
         calc emb (cst i) • ∑ s ∈ tr i, f j (g * s)
             = b ((((X i : MvPolynomial I O) • ((B j : Z) : M) : M) : G → V) g) := by
+
               rw [hX]; simp [f, map_sum, map_smulₛₗ]
           _ = b (((((X i : MvPolynomial I O) • B j : Z) : M) : G → V) g) := rfl
           _ = b ((((∑ k, ρ (X i) k j • B k : Z) : M) : G → V) g) := by rw [e1]
           _ = ∑ k, emb (ρ (X i) k j) • f k g := by
+
               simp [f, map_sum, map_smulₛₗ, Submodule.coe_sum, Finset.sum_apply]
       calc emb (cst i) • ∑ s ∈ tr i, v (g * s)
           = ∑ j, c j • (emb (cst i) • ∑ s ∈ tr i, f j (g * s)) := by

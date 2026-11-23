@@ -1,16 +1,58 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ReindexDblIncM
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LagrInt
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AdelicStoneVonNeumannLagrangianUniqueness
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsDiagLagrangian
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LagrIntRhoInv
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.NormAdelicThetaSumSchroedingerRationalPairInvari
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HTensDiagEqZero
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MatrixMemSpanIncM
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IntegralNeZeroOfCocompact
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsThetaReNonneg
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsAdmittedEqDiagonalLagrangianThetaIntegral
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ReindexDblIncM
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LagrInt
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AdelicStoneVonNeumannLagrangianUniqueness
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsAdmittedEqDiagonalLagrangianThetaIntegral
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsDiagLagrangian
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsThetaReNonneg
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HTensDiagEqZero
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IntegralNeZeroOfCocompact
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LagrIntRhoInv
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MatrixMemSpanIncM
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.NormAdelicThetaSumSchroedingerRationalPairInvari
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.WeilRepresentationPreservesSchwartz
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open scoped TensorProduct Matrix
 open NumberField IsDedekindDomain Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes MeasureTheory
 open GlobalTheory.WeilM GlobalTheory.LFun GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels
@@ -83,7 +125,7 @@ theorem exists_lagrInt_ne_zero : ∀ (F E : Type) [Field F] [NumberField F] [Fie
   · rintro _ ⟨γ₀, rfl⟩ u
     obtain ⟨y, z, h⟩ := hrat γ₀
     have e1 : Lm (((incAF F E).toAddMonoidHom.mapMatrix (m := Fin nT) (n := Fin nS)) γ₀ + u) = Lm (incM F γ₀) + Lm u := by
-      rw [map_add]; rfl
+      rw [map_add (f := _)]; rfl
     have hr : Lm (incM F γ₀) ∈ S := ⟨incM F γ₀, rfl⟩
     have hw : Lm u ∈ S := ⟨u, rfl⟩
     have hi := hiso _ hw _ hr
@@ -134,6 +176,6 @@ theorem lagr_invariant_unique : ∀ (F E : Type) [Field F] [NumberField F] [Fiel
       rw [he _ (hmem _ φ hφ), he φ hφ]
       exact GlobalTheory.LagrThetaInv.lagrInt_rho_inv F E σ B hB nS nT JT JB ξ κ co hco ν 𝓕 hν h𝓕 u φ hφ))
     ⟨φ₀, hφ₀, by rw [he φ₀ hφ₀]; exact hne⟩
-  exact ⟨c, fun Φ hΦ => by rw [hc Φ hΦ, he Φ hΦ]⟩
+  exact ⟨c, fun Φ hΦ => by rw [hc Φ hΦ, he Φ hΦ]; rfl⟩
 
 end GlobalTheory.LagrUniq

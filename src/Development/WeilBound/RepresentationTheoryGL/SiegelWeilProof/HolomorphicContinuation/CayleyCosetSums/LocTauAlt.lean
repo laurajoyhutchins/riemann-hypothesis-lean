@@ -1,8 +1,48 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Foundations.EventuallyEqOfIsPreconnected
-import Development.AbelianVarietyTheory.Definitions.Foundations.AnalyticOnNhdTsumNpow
-import Development.WeilBound.RepresentationTheoryGL.SiegelWeilProof.HolomorphicContinuation.GlobData
-import Development.WeilBound.RepresentationTheoryGL.SiegelWeilProof.HolomorphicContinuation.AnalyticDeterminants.SingToDiffAlt
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.SiegelWeilProof.HolomorphicContinuation.AnalyticDeterminants.SingToDiffAlt
+public import Mathlib.Analysis.Normed.Algebra.Exponential
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -39,28 +79,5 @@ def LocTau : Prop :=
       Differentiable ℂ D ∧ D 0 ≠ 0 ∧ (∀ l, Differentiable ℂ (M l)) ∧
       ∀ (z : ℂ) (x : M2 n), InG x →
         D z * rC (lowQ Q) (fz m e z) x = ∑ l, M l z * tOp μ ι (ρ l) (ψ l) (a l) (b l) (fz m e z) x
-
-def spt (y : M2 n) : Matrix (Fin n) (Fin n) ℂ := (Complex.I • y.toBlocks₁₁ + y.toBlocks₁₂) * (u1 y)⁻¹
-
-def SH (n : ℕ) : Set (Matrix (Fin n) (Fin n) ℂ) :=
-  {Z | ∀ v : Fin n → ℂ, v ≠ 0 → 0 < (star v ⬝ᵥ ((1 / (2 * Complex.I)) • (Z - Zᴴ)) *ᵥ v).re}
-
-def HTop : Prop :=
-  ∀ (n m : ℕ) (e : ℤ), m < n →
-  ∀ (G : Type) [Group G] [TopologicalSpace G] [IsTopologicalGroup G] [LocallyCompactSpace G] [T2Space G]
-    [SecondCountableTopology G] (Pp Γ : Subgroup G) (ι : GR n →* G) (Ht : G → ℝ≥0) (s₀ : ℂ) (sec : G → ℂ),
-    Continuous ι →
-    (∀ g, ∃ (x : G) (y : GR n) (S : ℂ) (r : ℝ), 0 < r ∧ g = x * ι y ∧
-      ∀ y' : GR n, (Ht (x * ι y') : ℝ) = r * hLoc y' ∧ sec (x * ι y') = S * F0 m 0 e y') →
-    ∀ (U : Set ℂ) (κ : ℕ) (Ê : ℂ → G → ℂ) (σ : ℝ), IsOpen U → GlobalTheory.Cont.IsRightDomain U → s₀ ∈ U →
-    (∀ g, DifferentiableOn ℂ (Ê · g) U) → ContinuousOn (fun y : ℂ × G => Ê y.1 y.2) (U ×ˢ univ) →
-    (∀ z ∈ U, ∀ γ ∈ Γ, ∀ g, Ê z (γ * g) = Ê z g) →
-    (∀ z : ℂ, σ < z.re → (∀ C : Set G, IsCompact C → ∃ u : GlobalTheory.Eis.Cosets Pp Γ → ℝ, Summable u ∧ ∀ g ∈ C, ∀ q,
-        ‖GlobalTheory.Eis.term Pp Γ (fun x => ((Ht x : ℝ) : ℂ) ^ (z - s₀) * sec x) g q‖ ≤ u q) ∧
-      ∀ g, Ê z g = (z - s₀) ^ κ * GlobalTheory.Eis.cosetSum Pp Γ (fun x => ((Ht x : ℝ) : ℂ) ^ (z - s₀) * sec x) g) →
-    (∀ ψ, IsSingTest ψ → ∀ (nb : (Fin n → Fin n → ℝ) → GR n), (∀ t, mR (nb t) = nU (herm t)) →
-      ∀ (g : G) (a b : GR n), ∫ t, Ê s₀ (g * ι (a * nb t * b)) * ψ t = 0) →
-    ∀ g, ∃ h : Matrix (Fin n) (Fin n) ℂ → ℂ, DifferentiableOn ℂ h (SH n) ∧
-      ∀ y : GR n, Ê s₀ (g * ι y) = F0 m 0 e y * h (spt (mR y))
 
 end PositivityTheory.Rg.Sw.HSt

@@ -1,7 +1,58 @@
-import Mathlib
+module
+
+public import Formalism.LocalToGlobal.KernelLattices.ThDistC
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MapMemSpanField
+import Formalism.HermitianLattices.HermitianLatticesProofs.DualBasic
+public import Formalism.LocalRingCardinality.RankBoundMonotoneInDimension
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.TopPlaceLogTheta
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CosetRefinement
-import Formalism.LocalRingCardinality.RankBoundMonotoneInDimension
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MapMemSpanField
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Formalism.BasicNotions Formalism.MainNotions Formalism.L2.DIV Formalism.L2.Col Formalism.L2.Ker GlobalTheory.IndefiniteRowSideFullHecke.PlaceLogThetaBounds GlobalTheory.ColNorms
 open scoped ComplexOrder
@@ -85,7 +136,44 @@ end Transport
 theorem isSDLat_of_isSdLat {E : Type} [Field E] [NumberField E] [StarRing E] {n : ℕ}
     (L : Submodule (𝓞 E) (Sp E n)) (hL : IsSdLat L) : IsSDLat E n L := by
   obtain ⟨h1, h2⟩ := hL
-  refine ⟨h1.fg, h1.span_eq_top, fun y => ?_⟩
+  have hspan : Submodule.span E (L : Set (Sp E n)) = ⊤ := by
+    open Formalism.HermitianLatticesTheory in
+    apply Submodule.dualAnnihilator_eq_bot_iff.mp
+    apply le_antisymm ?_ bot_le
+    intro f hf
+    let v : Sp E n := fun i => star (f (Pi.single i 1))
+    have hpair : hStd E n v = f := by
+      apply (Pi.basisFun E (Fin n)).ext
+      intro i
+      rw [Pi.basisFun_apply, hStd_apply, Finset.sum_eq_single i]
+      · simp [v]
+      · intro j _ hj
+        simp [hj]
+      · simp
+    have hline (r : E) : r • v ∈ L := by
+      rw [← show dual (hStd E n) L = L from h2, dualBasic_mem_dual]
+      intro y hy
+      have hy0 : hStd E n v y = 0 := by
+        rw [hpair]
+        exact (Submodule.mem_dualAnnihilator f).mp hf y (Submodule.subset_span hy)
+      have hz : hStd E n y v = 0 := by
+        simpa [hy0] using ((hStd_isSymm (E := E) (n := n)).eq v y).symm
+      simp [hz]
+    have hv : v = 0 := by
+      funext i
+      change v i = 0
+      by_contra hi
+      let coord := (LinearMap.proj i : Sp E n →ₗ[E] E).restrictScalars (𝓞 E)
+      have htop : L.map coord = ⊤ := by
+        rw [eq_top_iff]
+        intro x _
+        exact ⟨(x / v i) • v, hline _, div_mul_cancel₀ _ hi⟩
+      have : Module.Finite (𝓞 E) E := Module.finite_def.mpr (htop ▸ h1.fg.map coord)
+      exact RingOfIntegers.not_isField E
+        (isField_of_isIntegral_of_isField (IsFractionRing.injective (𝓞 E) E) (Field.toIsField E))
+    rw [Submodule.mem_bot]
+    simpa [hv] using hpair.symm
+  refine ⟨h1.fg, hspan, fun y => ?_⟩
   have h3 : y ∈ L ↔ y ∈ Formalism.HermitianLatticesTheory.dual (hStd E n) L := by
     rw [show Formalism.HermitianLatticesTheory.dual (hStd E n) L = L from h2]
   rw [h3]

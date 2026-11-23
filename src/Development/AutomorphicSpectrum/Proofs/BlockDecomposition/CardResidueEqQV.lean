@@ -1,14 +1,59 @@
-import Mathlib
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.SatakeExponents.UniformizerValuations.FrameReading.PExpbSt
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.MkFiberStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.UnramifiedCharacterBlockValue
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.LocalLanglandsGL
-import Development.AbelianVarietyTheory.Definitions.Divisors.EqOfHasValueAtInfinite
+module
+
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.IsSubquotientDetRepParInd
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsContinuousPadic
+public import Formalism.SatakeDualWeyl.StatementE
+public import Development.AbelianVarietyTheory.Definitions.Divisors.EqOfHasValueAtInfinite
+public import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.LocalLanglandsGL
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AbelianVarietyTheory.Definitions.Divisors.SimpleTwistedTraceFormulaStable
+import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.BaseChangeDefiniteUnitary
+
+@[expose] public section
 
 noncomputable section
 open NumberField IsDedekindDomain Matrix
 open GlobalTheory.CuspRep GlobalTheory.PRep Formalism.UG Formalism.BasicNotions GlobalTheory.UnitaryBC Formalism.L2.Host GlobalTheory.SmGL GlobalTheory.BCT ValuativeRel
-open PositivityTheory.Rg.BcB.F.Tail.BS
 open scoped Classical TensorProduct
 attribute [local instance] GlobalTheory.LocalData.complRel GlobalTheory.LocalData.isLocalField
 
@@ -20,7 +65,7 @@ theorem qV_pos {E : Type} [Field E] [NumberField E] (w : HeightOneSpectrum (𝓞
 
 theorem card_residue_eq_qV {E : Type} [Field E] [NumberField E] (w : HeightOneSpectrum (𝓞 E)) :
     Nat.card 𝓀[w.adicCompletion E] = qV E w := by
-  have h := GlobalTheory.LocLanglands.resCard_eq_normV w
+  have h := GlobalTheory.LocLanglands.resCard_eq_normV (w := w)
   simpa [GlobalTheory.SplitWeil.resCard, Formalism.ConjugateSelfDual.normV, qV, Ideal.absNorm_apply, Submodule.cardQuot_apply] using h
 
 theorem modExp_points (n : ℕ) (a : Fin n) :
@@ -80,39 +125,5 @@ theorem deltaHalf_inv {E : Type} [Field E] [NumberField E] (n : ℕ) (w : Height
 
 end GlobalTheory.CompanionTheory.JacEigAt
 
-open GlobalTheory.CompanionTheory.JacEigAt in
-theorem GlobalTheory.CompanionTheory.JacEigAt.jacEig : JacEig := by
-  intro E _ _ _ n w V _ _ π hπ ϖ hϖ ξ c x hx u hu heig
-  have hord : ord (w.adicCompletion E) ϖ = 1 := (GlobalTheory.CompanionTheory.CtS.NuVal.ord_eq_ordL_unit w ϖ).trans hϖ
-  have h := GlobalTheory.T.jacquet_hecke_jacHk (w.adicCompletion E) n V π hπ ϖ hord x hx u hu
-  have hq : (0 : ℝ) < qV E w := by exact_mod_cast qV_pos w
-  have hqh : qh w ≠ 0 := by
-    unfold qh
-    exact_mod_cast (Real.sqrt_pos.2 hq).ne'
-  have hcard : ((Nat.card 𝓀[w.adicCompletion E] : ℕ) : ℂ) = qh w ^ (2 : ℤ) := by
-    rw [card_residue_eq_qV, qh, zpow_ofNat, ← Complex.ofReal_pow, Real.sq_sqrt hq.le]
-    simp
-  set S : ℤ := ∑ i : Fin n, ((n : ℤ) - 1 - 2 * (i : ℕ)) * x i with hS
-  have h' : (Submodule.Quotient.mk (hkS π (iwGL n w) (dcos n w (tdiag ϖ x)) u) :
-      Jacquet π (unipB (w.adicCompletion E) (Fin n))) =
-      ((Nat.card 𝓀[w.adicCompletion E] : ℂ) ^ S) •
-        jacBU π (fun i => ϖ ^ x i) (Submodule.Quotient.mk u) := h
-  rw [heig, Submodule.Quotient.mk_smul, hcard, ← _root_.zpow_mul] at h'
-  have hj : jacB π (fun i => ϖ ^ x i) (Submodule.Quotient.mk u) =
-      (qh w ^ S) • jacBU π (fun i => ϖ ^ x i) (Submodule.Quotient.mk u) := by
-    have := jac_mk (points (Fin n)) π (leviTorus (w.adicCompletion E) (Fin n) fun i => ϖ ^ x i) u
-    rw [deltaHalf_inv n w ϖ hord x] at this
-    exact this
-  have e2 : qh w ^ (2 * S) = qh w ^ S * qh w ^ S := by
-    rw [two_mul, zpow_add₀ hqh]
-  have hS0 : qh w ^ S ≠ 0 := zpow_ne_zero _ hqh
-  rw [e2] at h'
-  rw [hj]
-  have h3 : (qh w ^ S) • ((qh w ^ S) • jacBU π (fun i => ϖ ^ x i) (Submodule.Quotient.mk u)) =
-      (qh w ^ S) • ((c * pw ξ x) • (Submodule.Quotient.mk u : Jacquet π (unipB (w.adicCompletion E) (Fin n)))) := by
-    rw [smul_smul, ← h', smul_smul]
-    congr 1
-    ring
-  exact smul_right_injective _ hS0 h3
 
 end

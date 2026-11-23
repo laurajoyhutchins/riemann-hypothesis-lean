@@ -1,5 +1,54 @@
-import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.LetterShift
-import Formalism.GL3MeanSquares.HookFormulaTorsion.BimultiplicativeDivisibleTorsion
+module
+
+public import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.LetterShift
+public import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.StatementA
+public import Formalism.GL3MeanSquares.HookFormulaTorsion.BimultiplicativeDivisibleTorsion
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 open scoped BigOperators
@@ -33,6 +82,7 @@ theorem hasSubst_scale {τ : Type} [Finite τ] (a : τ → K) :
 theorem subst_sum {σ' τ α : Type} {a : σ' → MvPowerSeries τ K} (ha : MvPowerSeries.HasSubst a)
     (S : Finset α) (F : α → MvPowerSeries σ' K) :
     MvPowerSeries.subst a (∑ i ∈ S, F i) = ∑ i ∈ S, MvPowerSeries.subst a (F i) := by
+
   rw [← MvPowerSeries.coe_substAlgHom ha, map_sum]
 
 theorem subst_C_mul {σ' τ : Type} {a : σ' → MvPowerSeries τ K} (ha : MvPowerSeries.HasSubst a)
@@ -157,6 +207,7 @@ variable {d : ℕ} [NeZero d]
 theorem constantCoeff_linE (σ : K →+* K) (c : K) :
     MvPowerSeries.constantCoeff (linE (d := d) σ c) = 0 := by
   unfold linE
+
   rw [map_sum]
   refine Finset.sum_eq_zero fun s _ => ?_
   split_ifs <;> simp
@@ -164,6 +215,7 @@ theorem constantCoeff_linE (σ : K →+* K) (c : K) :
 theorem constantCoeff_linO (σ : K →+* K) (c : K) :
     MvPowerSeries.constantCoeff (linO (d := d) σ c) = 0 := by
   unfold linO
+
   rw [map_sum]
   refine Finset.sum_eq_zero fun s _ => ?_
   split_ifs <;> simp
@@ -251,6 +303,7 @@ theorem coeff_beMean {ι : Type} [Fintype ι] (l : ℕ) (σ : K →+* K) (be0 : 
       (((l ^ d - 1 : ℕ) : K)⁻¹) * ((∑ k ∈ Finset.range (l ^ d - 1), wt l ζ n ^ k) *
         MvPowerSeries.coeff n (beTil l σ be0 om oms)) := by
   unfold beMean
+
   rw [MvPowerSeries.coeff_C_mul, map_sum, Finset.sum_mul]
   congr 1
   refine Finset.sum_congr rfl fun k _ => ?_
@@ -435,10 +488,12 @@ theorem third_mean_condition : MeanNoLowBidegreeTerms := by
   refine ⟨?_, ?_, ?_⟩
   · refine Nat.pos_of_ne_zero fun h => hT ?_
     unfold beTil
+
     rw [map_sum]
     exact Finset.sum_eq_zero fun r _ => coeff_pair_degE hG σ _ _ h
   · refine Nat.pos_of_ne_zero fun h => hT ?_
     unfold beTil
+
     rw [map_sum]
     exact Finset.sum_eq_zero fun r _ => coeff_pair_degO hG σ _ _ h
   · rintro ⟨hE, hO⟩

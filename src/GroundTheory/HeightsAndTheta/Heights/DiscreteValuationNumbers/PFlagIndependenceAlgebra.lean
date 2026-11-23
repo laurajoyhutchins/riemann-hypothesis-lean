@@ -1,5 +1,57 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.StatementsFlagIndependence
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.BundleObjects
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Algebra.GroupWithZero.Indicator
+public import Mathlib.RingTheory.Ideal.MinimalPrime.Noetherian
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.NumbersDVR
@@ -20,7 +72,7 @@ theorem divCycle_finite_support (P : Ideal (MRing ι R)) (f : MRing ι R) :
   by_contra h
   rw [Function.mem_support] at hW
   unfold divCycle at hW
-  rw [dif_neg (fun h' => h h'.1)] at hW
+  rw [dite_eq_right (fun h' => h h'.1)] at hW
   exact hW rfl
 
 theorem ratDiv_finite_support (P : Ideal (MRing ι R)) (f g : MRing ι R) :
@@ -64,7 +116,7 @@ theorem classNum_add_poly {σ : Type*} [DecidableEq σ] (cls : σ → K → ℤ)
   rw [classNum_eq_sum cls (H₁ + H₂) Q W support_add,
     classNum_eq_sum cls H₁ Q W (S := H₁.support ∪ H₂.support) Finset.subset_union_left,
     classNum_eq_sum cls H₂ Q W (S := H₁.support ∪ H₂.support) Finset.subset_union_right]
-  simp only [coeff_add, add_mul, Finset.sum_add_distrib]
+  simp only [MvPolynomial.coeff_add, add_mul, Finset.sum_add_distrib]
 
 def classNumAddHom {σ : Type*} [DecidableEq σ] (cls : σ → K → ℤ) (Q : List (K → ℤ)) (W : Ideal (MRing ι O)) :
     MvPolynomial σ ℤ →+ ℤ where
@@ -91,7 +143,7 @@ theorem classNum_rename_vars {σ τ : Type*} [DecidableEq σ] [DecidableEq τ] (
     classNum cls (rename φ H) Q W = classNum (cls ∘ φ) H Q W := by
   induction H using MvPolynomial.induction_on' with
   | monomial μ c => rw [rename_monomial, classNum_monomial_eq, classNum_monomial_eq, classList_mapDomain]
-  | add p q hp hq => rw [map_add, classNum_add_poly, classNum_add_poly, hp, hq]
+  | add p q hp hq => rw [map_add (f := _), classNum_add_poly, classNum_add_poly, hp, hq]
 
 end ClassNum
 
@@ -169,7 +221,7 @@ theorem isPairExpansion_add {n m : ℕ} {A B : MvPolynomial (Fin n) ℤ}
     {As Bs : Fin n → MvPolynomial (Fin n ⊕ Fin n) ℤ} (hA : IsPairExpansion m A As)
     (hB : IsPairExpansion m B Bs) : IsPairExpansion m (A + B) (As + Bs) := by
   refine ⟨?_, fun i => (hA.homogeneous i).add (hB.homogeneous i)⟩
-  simp only [map_add, Pi.add_apply, mul_add, Finset.sum_add_distrib, ← hA.expansion,
+  simp only [map_add (f := _), Pi.add_apply, mul_add, Finset.sum_add_distrib, ← hA.expansion,
     ← hB.expansion]
   ring
 
@@ -183,6 +235,7 @@ theorem isPairExpansion_push {n n' m : ℕ} (σ : Fin n → Fin n') {A : MvPolyn
   have e2 : rename Sum.inr (rename σ A) = rename (Sum.map σ σ) (rename Sum.inr A) := by
     rw [rename_rename, rename_rename]
     rfl
+
   rw [e1, e2, ← map_sub, h.expansion, map_sum]
   simp only [map_mul, map_sub, rename_X, Sum.map_inl, Sum.map_inr, pushExpansion, Finset.mul_sum]
   refine (Finset.sum_fiberwise Finset.univ σ _).symm.trans ?_
@@ -198,7 +251,7 @@ theorem exists_expansion {n : ℕ} (A : MvPolynomial (Fin n) ℤ) :
     obtain ⟨Ps, hP⟩ := hp
     obtain ⟨Qs, hQ⟩ := hq
     refine ⟨Ps + Qs, ?_⟩
-    simp only [map_add, Pi.add_apply, mul_add, Finset.sum_add_distrib, ← hP, ← hQ]
+    simp only [map_add (f := _), Pi.add_apply, mul_add, Finset.sum_add_distrib, ← hP, ← hQ]
     ring
   | mul_X p j hp =>
     obtain ⟨Ps, hP⟩ := hp
@@ -217,6 +270,7 @@ theorem exists_expansion {n : ℕ} (A : MvPolynomial (Fin n) ℤ) :
 theorem homogeneousComponent_linear_mul {σ : Type*} {L : MvPolynomial σ ℤ} (hL : L.IsHomogeneous 1)
     (P : MvPolynomial σ ℤ) (t : ℕ) :
     homogeneousComponent t (L * P) = if t = 0 then 0 else L * homogeneousComponent (t - 1) P := by
+
   conv_lhs => rw [← sum_homogeneousComponent P, Finset.mul_sum, map_sum]
   have h : ∀ j, homogeneousComponent t (L * homogeneousComponent j P) =
       if j = t - 1 ∧ t ≠ 0 then L * homogeneousComponent j P else 0 := by
@@ -245,8 +299,9 @@ theorem exists_isPairExpansion {n m : ℕ} {A : MvPolynomial (Fin n) ℤ} (hA : 
   have hD : (rename Sum.inl A - rename Sum.inr A).IsHomogeneous m :=
     hA.rename_isHomogeneous.sub hA.rename_isHomogeneous
   have key := congrArg (homogeneousComponent m) hG
+
   rw [homogeneousComponent_of_mem ((mem_homogeneousSubmodule _ _).mpr hD), if_pos rfl, map_sum]
-    at key
+  at key
   simp only [homogeneousComponent_linear_mul (hL _)] at key
   rcases Nat.eq_zero_or_pos m with rfl | hm
   · refine ⟨0, ?_, fun i => isHomogeneous_zero _ _ _⟩

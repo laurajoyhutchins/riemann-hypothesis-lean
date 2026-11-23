@@ -1,75 +1,52 @@
-import Mathlib
-import Formalism.HermitianLattices.StatementMass
-import Formalism.LogVandermondeBounds.LogRatioLowerBound
-import Formalism.LogVandermondeBounds.LogRatioUpperBound
+module
+
+public import Formalism.HermitianLattices.StatementMass
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField Finset
 
 namespace Formalism.HermitianLattices.SiegelMassBounds
 
 def SiegelMassRatioThm : Prop := Formalism.HermitianLatticesTheory.SiegelMassRatio
-
-def MassLowerBoundClosed : Prop :=
-  ∀ (ε C₀ : ℝ), 0 < ε → ε < 1 / 52 → 0 ≤ C₀ → ∃ C : ℝ, ∀ (x : ℝ), 1 ≤ x →
-    let L := x ^ ε
-    let B := Real.exp L
-    let a := x * B
-    ∀ (K : Type) [Field K] [NumberField K] [StarRing K], Formalism.HermitianLatticesTheory.IsCMUnram K →
-    ∀ (V V' : Type) [AddCommGroup V] [Module K V] [Module (RingOfIntegers K) V]
-      [IsScalarTower (RingOfIntegers K) K V] [AddCommGroup V'] [Module K V']
-      [Module (RingOfIntegers K) V'] [IsScalarTower (RingOfIntegers K) K V']
-      (h : V →ₗ⋆[K] V →ₗ[K] K) (h' : V' →ₗ⋆[K] V' →ₗ[K] K)
-      (Lk : Submodule (RingOfIntegers K) V) (Lr : Submodule (RingOfIntegers K) V')
-      (m k : ℕ) (Δ g₁ g₂ : ℝ) (u v b w : ℕ → ℕ → ℝ) (Dstar dstar Isig Ipi : ℝ),
-    h.IsSymm → h'.IsSymm → Formalism.HermitianLatticesTheory.IsOrthoLattice h Lk k →
-    Formalism.HermitianLatticesTheory.IsOrthoLattice h' Lr (k - 1 + m) →
-    1 ≤ Formalism.HermitianLatticesTheory.fDeg K → 1 ≤ m → 2 ≤ k → (k : ℝ) ≤ x ^ C₀ →
-    Real.pi ≤ Formalism.HermitianLatticesTheory.vInv K → Real.log (Formalism.HermitianLatticesTheory.vInv K) ≤ L → 1 ≤ Δ → 1 ≤ g₁ → 1 ≤ g₂ →
-    (∀ ρ, ρ < Formalism.HermitianLatticesTheory.fDeg K → Formalism.LogVandermondeBounds.StandardLattice.PlaceData x Δ a B k m (u ρ) (v ρ) (b ρ) (w ρ)) →
-    0 < Formalism.HermitianLatticesTheory.mass h Lk → 0 < Formalism.HermitianLatticesTheory.mass h' Lr → 0 < Isig → 0 < Ipi →
-    (∀ M ∈ Ico (k + 1) (k - 1 + m + 1), 0 < Formalism.HermitianLatticesTheory.lValEta K M ∧
-      |Real.log (Formalism.HermitianLatticesTheory.lValEta K M)| ≤ Formalism.HermitianLatticesTheory.fDeg K * Real.log (Formalism.LogVandermondeBounds.StandardLattice.zetaR M)) →
-    (hidx : ((2 : ℝ) ^ (2 * Formalism.HermitianLatticesTheory.fDeg K))⁻¹ *
-      (g₁ * g₂) ^ ((Formalism.HermitianLatticesTheory.fDeg K : ℝ) * m * (2 * k + m - 1) / 2) ≤ Isig / Ipi) →
-    (hD : (2 / 3 : ℝ) ^ Formalism.HermitianLatticesTheory.fDeg K * Formalism.HermitianLatticesTheory.mass h' Lr * Isig *
-      ∏ ρ ∈ range (Formalism.HermitianLatticesTheory.fDeg K), Formalism.LogVandermondeBounds.StandardLattice.dimVN (Formalism.LogVandermondeBounds.StandardLattice.rowPar k (v ρ) (b ρ)) (k - 1 + m)
-        ≤ Dstar) →
-    (hd : dstar = Formalism.HermitianLatticesTheory.mass h Lk * Ipi * ∏ ρ ∈ range (Formalism.HermitianLatticesTheory.fDeg K), Formalism.LogVandermondeBounds.StandardLattice.dimVN (u ρ) k) →
-    (∑ j ∈ range m, (1 / (Formalism.HermitianLatticesTheory.fDeg K : ℝ)) * ∑ ρ ∈ range (Formalism.HermitianLatticesTheory.fDeg K),
-        Real.log (w ρ j * Formalism.HermitianLatticesTheory.vInv K / Real.pi))
-        + m * (Real.log g₁ + Real.log g₂) - C * (L + (m : ℝ) ^ 2 * L / k)
-      ≤ (1 / ((Formalism.HermitianLatticesTheory.fDeg K : ℝ) * k)) * Real.log (Dstar / dstar)
-
-def MassUpperBoundClosed : Prop :=
-  ∀ (ε C₀ C₃ : ℝ), 0 < ε → ε < 1 / 52 → 0 ≤ C₀ → 1 ≤ C₃ → ∃ C : ℝ, ∀ (x : ℝ), 1 ≤ x →
-    let L := x ^ ε
-    let B := Real.exp L
-    let a := x * B
-    ∀ (K : Type) [Field K] [NumberField K] [StarRing K], Formalism.HermitianLatticesTheory.IsCMUnram K →
-    ∀ (V V' : Type) [AddCommGroup V] [Module K V] [Module (RingOfIntegers K) V]
-      [IsScalarTower (RingOfIntegers K) K V] [AddCommGroup V'] [Module K V']
-      [Module (RingOfIntegers K) V'] [IsScalarTower (RingOfIntegers K) K V']
-      (h : V →ₗ⋆[K] V →ₗ[K] K) (h' : V' →ₗ⋆[K] V' →ₗ[K] K)
-      (Lk : Submodule (RingOfIntegers K) V) (Lr : Submodule (RingOfIntegers K) V')
-      (m k : ℕ) (Δ g₁ g₂ : ℝ) (u v b w : ℕ → ℕ → ℝ) (Dstar dstar Isig Ipi : ℝ) (dsig : ℕ → ℝ),
-    h.IsSymm → h'.IsSymm → Formalism.HermitianLatticesTheory.IsOrthoLattice h Lk k →
-    Formalism.HermitianLatticesTheory.IsOrthoLattice h' Lr (k - 1 + m) →
-    1 ≤ Formalism.HermitianLatticesTheory.fDeg K → 2 ≤ m → Even m → 2 ≤ k → (m : ℝ) ^ 2 * L ≤ k → (k : ℝ) ≤ x ^ C₀ →
-    Real.pi ≤ Formalism.HermitianLatticesTheory.vInv K → Real.log (Formalism.HermitianLatticesTheory.vInv K) ≤ L → 1 ≤ Δ → 1 ≤ g₁ → 1 ≤ g₂ →
-    Real.log g₁ ≤ C₀ * L → Real.log g₂ ≤ C₀ * L →
-    (∀ ρ, ρ < Formalism.HermitianLatticesTheory.fDeg K → Formalism.LogVandermondeBounds.StandardLattice.PlaceData x Δ a B k m (u ρ) (v ρ) (b ρ) (w ρ) ∧
-      (∀ i j, i < j → j < k → 1 ≤ u ρ i - u ρ j)) →
-    0 < Formalism.HermitianLatticesTheory.mass h Lk → 0 < Formalism.HermitianLatticesTheory.mass h' Lr → 0 < Isig → 0 < Ipi →
-    (∀ M ∈ Ico (k + 1) (k - 1 + m + 1), 0 < Formalism.HermitianLatticesTheory.lValEta K M ∧
-      |Real.log (Formalism.HermitianLatticesTheory.lValEta K M)| ≤ Formalism.HermitianLatticesTheory.fDeg K * Real.log (Formalism.LogVandermondeBounds.StandardLattice.zetaR M)) →
-    (hidx : Isig / Ipi ≤ (2 : ℝ) ^ (2 * Formalism.HermitianLatticesTheory.fDeg K) *
-      (g₁ * g₂) ^ ((Formalism.HermitianLatticesTheory.fDeg K : ℝ) * m * (2 * k + m - 1) / 2)) →
-    (hD : Dstar = Formalism.HermitianLatticesTheory.mass h' Lr * Isig * ∏ ρ ∈ range (Formalism.HermitianLatticesTheory.fDeg K), dsig ρ) →
-    (h3 : ∀ ρ, ρ < Formalism.HermitianLatticesTheory.fDeg K → 0 < dsig ρ ∧
-      dsig ρ ≤ 4 * Formalism.LogVandermondeBounds.StandardLattice.dTau k m (Formalism.LogVandermondeBounds.StandardLattice.rowPar k (v ρ) (b ρ)) *
-      (C₃ * ((k - 1 + m / 2 : ℕ) : ℝ) * ((m / 2 : ℕ) : ℝ) * ((k - 1 + m : ℕ) : ℝ) *
-        (v ρ 0 + b ρ (m - 1))) ^ ((k - 1 + m / 2) * (m / 2))) →
-    (hd : dstar = Formalism.HermitianLatticesTheory.mass h Lk * Ipi * ∏ ρ ∈ range (Formalism.HermitianLatticesTheory.fDeg K), Formalism.LogVandermondeBounds.StandardLattice.dimVN (u ρ) k) →
-    (1 / ((Formalism.HermitianLatticesTheory.fDeg K : ℝ) * k)) * Real.log (Dstar / dstar) ≤ C * m * L
 
 end Formalism.HermitianLattices.SiegelMassBounds

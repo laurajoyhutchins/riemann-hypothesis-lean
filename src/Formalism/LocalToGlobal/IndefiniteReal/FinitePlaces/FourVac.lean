@@ -1,4 +1,63 @@
-import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.FourUniq
+module
+
+public import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.SmulSubMulLe
+public import Mathlib.Algebra.Module.LinearMap.End
+public import Mathlib.LinearAlgebra.Span.Defs
+public import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.FourModel
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.BigOperators.GroupWithZero.Action
+public import Mathlib.Algebra.Module.BigOperators
+public import Mathlib.Algebra.Order.BigOperators.GroupWithZero.Finset
+public import Mathlib.LinearAlgebra.Finsupp.LinearCombination
+
+@[expose] public section
 
 set_option linter.style.haveILetI false
 
@@ -67,7 +126,7 @@ theorem piK_add {k : ℕ} [Finite (Qt k (L ⊓ X))] [Finite (Ik L Y k)] (G H : V
     piK ρ L X Y k (G + H) = piK ρ L X Y k G + piK ρ L X Y k H := by
   haveI := Fintype.ofFinite (Qt k (L ⊓ X))
   haveI := Fintype.ofFinite (Ik L Y k)
-  simp only [piK, finsum_eq_sum_of_fintype, map_add, Finset.sum_add_distrib]
+  simp only [piK, finsum_eq_sum_of_fintype, map_add (f := _), Finset.sum_add_distrib]
 
 theorem piK_smul {k : ℕ} [Finite (Qt k (L ⊓ X))] [Finite (Ik L Y k)] (c : ℂ) (G : V) :
     piK ρ L X Y k (c • G) = c • piK ρ L X Y k G := by
@@ -130,7 +189,6 @@ variable {ρ : W → Module.End ℂ V} {χ : W → W → ℂ} {L X Y : AddSubgro
 
 include hχl hχr hχ0 hLL hdY in
 open Classical in
-
 theorem chi_sum_X {k : ℕ} [Fintype (Qt k (L ⊓ X))] {y : W} (hy : y ∈ Yk L Y k) :
     ∑ b : Qt k (L ⊓ X), χ ((b.out : ↥(L ⊓ X)) : W) y =
       if y ∈ L then (Fintype.card (Qt k (L ⊓ X)) : ℂ) else 0 := by
@@ -168,7 +226,6 @@ theorem chi_sum_X {k : ℕ} [Fintype (Qt k (L ⊓ X))] {y : W} (hy : y ∈ Yk L 
     · exact h
 
 include hXY hχl hχr hχ0 hLL hdY in
-
 theorem piK_vac {k : ℕ} [Finite (Qt k (L ⊓ X))] [Finite (Ik L Y k)] {w : V} (hwX : ∀ u ∈ L ⊓ X, ρ u w = w)
     (hwY : ∀ u ∈ L ⊓ Y, ρ u w = w) : ∃ c : ℂ, c ≠ 0 ∧ piK ρ L X Y k w = c • w := by
   classical
@@ -187,6 +244,7 @@ theorem piK_vac {k : ℕ} [Finite (Qt k (L ⊓ X))] [Finite (Ik L Y k)] {w : V} 
         ρ ((y.out : ↥(Yk L Y k)) : W) w := by
     unfold piK
     rw [finsum_eq_sum_of_fintype, finsum_eq_sum_of_fintype]
+
     simp only [map_sum, hterm, Finset.sum_smul]
     exact Finset.sum_comm
   rw [e1]
@@ -212,51 +270,8 @@ theorem piK_vac {k : ℕ} [Finite (Qt k (L ⊓ X))] [Finite (Ik L Y k)] {w : V} 
     exact L.nsmul_mem (AddSubgroup.mem_inf.1 hv).1 k
   exact_mod_cast (Finset.card_pos.2 ⟨_, h0⟩).ne'
 
-include hY hXY hχl hχr hχ0 hLL in
-
-theorem IsLev.Heisenberg₂ {k m : ℕ} {G : V} (hG : IsLev ρ L X Y k G) {u : W} (hu : u ∈ Y) (hmu : m • u ∈ L) :
-    IsLev ρ L X Y (k * m) (ρ u G) := by
-  have c0 : ∀ y, χ 0 y = 1 := fun y => by
-    have h := hχl 0 0 y
-    rw [add_zero] at h
-    exact mul_right_cancel₀ (hχ0 0 y) (by rw [one_mul]; exact h.symm)
-  have c0' : ∀ t, χ t 0 = 1 := fun t => by
-    have h := hχr t 0 0
-    rw [add_zero] at h
-    exact mul_right_cancel₀ (hχ0 t 0) (by rw [one_mul]; exact h.symm)
-  have cl : ∀ (n : ℕ) t y, χ (n • t) y = χ t y ^ n := by
-    intro n t y
-    induction n with
-    | zero => simp [c0]
-    | succ n ih => rw [succ_nsmul, hχl, ih, pow_succ]
-  have cr : ∀ (n : ℕ) t y, χ t (n • y) = χ t y ^ n := by
-    intro n t y
-    induction n with
-    | zero => simp [c0']
-    | succ n ih => rw [succ_nsmul, hχr, ih, pow_succ]
-  refine ⟨fun v hv => ?_, fun v hv => ?_⟩
-  · have hx : ρ ((k * m) • v) G = G := by
-      rw [← smul_smul]
-      exact hG.1 _ (AddSubgroup.nsmul_mem _ hv m)
-    have hmuY : m • u ∈ L ⊓ Y := AddSubgroup.mem_inf.2 ⟨hmu, AddSubgroup.nsmul_mem _ hu m⟩
-    have hchi : χ ((k * m) • v) u = 1 := by
-      rw [cl, mul_comm, pow_mul, ← cr, hLL v hv _ hmuY, one_pow]
-    have hc := hXY ((k * m) • v) (AddSubgroup.nsmul_mem _ (AddSubgroup.mem_inf.1 hv).2 _) u hu
-    calc ρ ((k * m) • v) (ρ u G) = (ρ ((k * m) • v) * ρ u) G := rfl
-      _ = (χ ((k * m) • v) u • (ρ u * ρ ((k * m) • v))) G := by rw [hc]
-      _ = ρ u G := by rw [hchi, one_smul, Module.End.mul_apply, hx]
-  · have hx : ρ ((k * m) • v) G = G := by
-      rw [← smul_smul]
-      exact hG.2 _ (AddSubgroup.nsmul_mem _ hv m)
-    have hy : (k * m) • v ∈ Y := AddSubgroup.nsmul_mem _ (AddSubgroup.mem_inf.1 hv).2 _
-    have comm : ρ ((k * m) • v) * ρ u = ρ u * ρ ((k * m) • v) := by
-      rw [← hY _ hy _ hu, ← hY _ hu _ hy, add_comm]
-    calc ρ ((k * m) • v) (ρ u G) = (ρ ((k * m) • v) * ρ u) G := rfl
-      _ = (ρ u * ρ ((k * m) • v)) G := by rw [comm]
-      _ = ρ u G := by rw [Module.End.mul_apply, hx]
 
 include hY hXY hχl hχr hχ0 hLL hdY hfinX hfinY htf in
-
 theorem vac_eq_zero_of_mem_span (hoY : ∀ y ∈ Y, ∃ k : ℕ, 0 < k ∧ k • y ∈ L) (Θ : Set V)
     (hlev : ∀ G ∈ Θ, ∃ k : ℕ, 0 < k ∧ IsLev ρ L X Y k G) {w : V}
     (hwX : ∀ u ∈ L ⊓ X, ρ u w = w) (hwY : ∀ u ∈ L ⊓ Y, ρ u w = w)

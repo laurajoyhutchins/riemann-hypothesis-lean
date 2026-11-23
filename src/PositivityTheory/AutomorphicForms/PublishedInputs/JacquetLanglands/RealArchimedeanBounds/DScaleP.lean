@@ -1,5 +1,48 @@
-import PositivityTheory.AutomorphicForms.PublishedInputs.JacquetLanglands.RealArchimedeanBounds.ATrans
-import Development.AutomorphicArithmetic.AutomorphicVarieties.IdeleGenerators.ScalarStabilizers.FinSupp
+module
+
+public import PositivityTheory.AutomorphicForms.PublishedInputs.JacquetLanglands.RealArchimedeanBounds.ATrans
+import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ExistsUniqueIdeleOfLinearEquivQuotientLocal
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.IdeleGenerators.ScalarStabilizers.FinSupp
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Development.AutomorphicArithmetic.AutomorphicVarieties.IdeleGenerators.ConstSmall
+
+@[expose] public section
 
 noncomputable section
 
@@ -21,13 +64,13 @@ theorem bal {ι : Type} [Fintype ι] [Nonempty ι] (a : ι → ℝ) {K P1 P2 : �
   have hKn : 0 < K ^ Fintype.card ι := pow_pos hK _
   have hup : a v ^ Fintype.card ι ≤ K ^ Fintype.card ι * P2 := by
     calc a v ^ Fintype.card ι = ∏ _v' : ι, a v := by rw [Finset.prod_const, Finset.card_univ]
-      _ ≤ ∏ v' : ι, K * a v' := Finset.prod_le_prod (fun _ _ => (ha v).le) fun v' _ => hb v v'
+      _ ≤ ∏ v' : ι, K * a v' := Finset.prod_le_prod₀ (fun _ _ => (ha v).le) fun v' _ => hb v v'
       _ = K ^ Fintype.card ι * ∏ v', a v' := by rw [Finset.prod_mul_distrib, Finset.prod_const, Finset.card_univ]
       _ ≤ K ^ Fintype.card ι * P2 := mul_le_mul_of_nonneg_left h2 hKn.le
   have hlo : P1 / K ^ Fintype.card ι ≤ a v ^ Fintype.card ι := by
     rw [div_le_iff₀ hKn]
     calc P1 ≤ ∏ v', a v' := h1
-      _ ≤ ∏ _v' : ι, K * a v := Finset.prod_le_prod (fun v' _ => (ha v').le) fun v' _ => hb v' v
+      _ ≤ ∏ _v' : ι, K * a v := Finset.prod_le_prod₀ (fun v' _ => (ha v').le) fun v' _ => hb v' v
       _ = a v ^ Fintype.card ι * K ^ Fintype.card ι := by
         rw [Finset.prod_mul_distrib, Finset.prod_const, Finset.prod_const, Finset.card_univ, mul_comm]
   have hm : 0 < min 1 (P1 / K ^ Fintype.card ι) := lt_min one_pos (div_pos hP1 hKn)
@@ -112,7 +155,6 @@ theorem dScale : AMem → ACls → AUnit → DScale := by
     have e : ((jF F γ₀ * x : GF F) : GF F ⧸ Hc c) = (x : GF F ⧸ Hc c) := hγ
     have := inv_mem (QuotientGroup.eq.1 e)
     convert this using 1
-    group
   obtain ⟨k, hk, z, hkz⟩ := (hHc c _).1 h1
   obtain ⟨y, u, r, hr, hu, hz⟩ := hT z
   set d : F := γ₀.val.det * ((y⁻¹ : Fˣ) : F) ^ 2 with hd

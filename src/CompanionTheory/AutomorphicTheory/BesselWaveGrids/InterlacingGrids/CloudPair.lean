@@ -1,5 +1,51 @@
-import Mathlib
-import CompanionTheory.AutomorphicTheory.BesselWaveGrids.InterlacingGrids.PairOKOfInterlace
+module
+
+public import CompanionTheory.AutomorphicTheory.BesselWaveGrids.InterlacingGrids.PairOKOfInterlace
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.BigOperators.Group.Finset.Basic
+public import Mathlib.Algebra.Order.BigOperators.GroupWithZero.Finset
+
+@[expose] public section
 
 namespace GroundTheory.BlockD.FourierDecayAlt.WaveGridLiftGrid
 
@@ -90,7 +136,7 @@ theorem cloud_pair_le (k : ℕ) (lam v : ℕ → ℝ) (e : ℕ) (c g b Y ε : �
       (∏ s ∈ ((Icc 1 (k - 1)).erase e), (1 + (1 + c) / max |Y + lam s| 1)) * ∏ i ∈ Icc 1 k, |Y + 1 / 2 + v i| := by
     calc ∏ s ∈ ((Icc 1 (k - 1)).erase e), (|Y + ε + lam s| + c)
         ≤ ∏ s ∈ ((Icc 1 (k - 1)).erase e), ((1 + (1 + c) / max |Y + lam s| 1) * |Y + 1 / 2 + v (φ s)|) :=
-          Finset.prod_le_prod (fun s _ => hA0 s) hkey
+          Finset.prod_le_prod₀ (fun s _ => hA0 s) hkey
       _ = (∏ s ∈ ((Icc 1 (k - 1)).erase e), (1 + (1 + c) / max |Y + lam s| 1)) * ∏ s ∈ ((Icc 1 (k - 1)).erase e), |Y + 1 / 2 + v (φ s)| :=
           Finset.prod_mul_distrib
       _ = (∏ s ∈ ((Icc 1 (k - 1)).erase e), (1 + (1 + c) / max |Y + lam s| 1)) * ∏ i ∈ ((Icc 1 (k - 1)).erase e).image φ, |Y + 1 / 2 + v i| := by
@@ -102,7 +148,7 @@ theorem cloud_pair_le (k : ℕ) (lam v : ℕ → ℝ) (e : ℕ) (c g b Y ε : �
             exact hmaps s hs
           rw [← Finset.prod_sdiff hsub]
           have h1 : 1 ≤ ∏ i ∈ Icc 1 k \ ((Icc 1 (k - 1)).erase e).image φ, |Y + 1 / 2 + v i| := by
-            have h5 := Finset.prod_le_prod (s := Icc 1 k \ ((Icc 1 (k - 1)).erase e).image φ) (f := fun _ => (1 : ℝ))
+            have h5 := Finset.prod_le_prod₀ (s := Icc 1 k \ ((Icc 1 (k - 1)).erase e).image φ) (f := fun _ => (1 : ℝ))
               (g := fun i => |Y + 1 / 2 + v i|) (fun _ _ => zero_le_one) (fun i hi => by
                 have hi' := (Finset.mem_Icc.1 (Finset.mem_sdiff.1 hi).1)
                 exact hden i hi'.1 hi'.2)

@@ -1,7 +1,59 @@
-import Mathlib
-import ReciprocityTheory.AnalyticForms.PotentialTheory.ProjectiveLineFubiniStudyFacts
-import GroundTheory.HeightsAndTheta.Heights.AnalyticLimit.StTailLogOfMass
-import GroundTheory.HeightsAndTheta.Heights.AnalyticLimit.PTailLogOfMassCharts
+module
+
+public import ReciprocityTheory.AnalyticForms.PotentialTheory.Partition
+public import GroundTheory.HeightsAndTheta.Heights.AnalyticLimit.StTailLogOfMass
+public import GroundTheory.HeightsAndTheta.Heights.AnalyticLimit.PTailLogOfMassCharts
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+public import Mathlib.Analysis.Complex.ExponentialBounds
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.AnalyticForms.PotentialTheory.PotentialContDiffAt
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.AnalyticLimit
@@ -116,7 +168,7 @@ theorem sum_lintegral_logTail_le [CompactSpace X] [T2Space X] (hYo : IsOpen Yo)
       (tail Yo r (2 ^ k * R)).indicator 1 ((A.chart i).symm z) * locDens A (fun i => potForm th (u i)) i z) =
       ENNReal.ofReal (mInt A (fun i => potForm th (u i)) ((tail Yo r (2 ^ k * R)).indicator 1)) := fun k =>
     sum_lintegral_eq_mInt hYo hth hu hnn _ (fun x => Set.indicator_nonneg (fun _ _ => zero_le_one) x)
-      (fun x hx => indicator_of_notMem (fun h => hx h.1) _) (hT _ (hk2 k)).1
+      (fun x hx => indicator_of_notMem (fun (h : x ∈ tail Yo r (2 ^ k * R)) => hx h.1) _) (hT _ (hk2 k)).1
   have hW : ∀ (k : ℕ) (i : Fin A.n), IntegrableOn (fun z => (ReciprocityTheory.AnForm.M.existsPartition A).some.χ i ((A.chart i).symm z) *
       (tail Yo r (2 ^ k * R)).indicator 1 ((A.chart i).symm z) * locDens A (fun i => potForm th (u i)) i z)
       (A.chart i).target := fun k i =>
@@ -215,18 +267,18 @@ theorem sum_lintegral_logTail_le [CompactSpace X] [T2Space X] (hYo : IsOpen Yo)
 
 end TailLogOfMass
 
-open TailLogOfMass in
 
+open TailLogOfMass in
 theorem TailLogOfMass.proof : TailLogOfMass.Statement := by
   intro X _ _ _ D A Yo r th u hYo hr hre hth hu hnn CE hT
   have he := Real.exp_pos 1
   have hoffT : ∀ R : ℝ, ∀ x, x ∉ Yo → (tail Yo r R).indicator (fun x => Real.log (r x)) x = 0 :=
-    fun R x hx => indicator_of_notMem (fun h => hx h.1) _
+    fun R x hx => indicator_of_notMem (fun (h : x ∈ tail Yo r R) => hx h.1) _
   have hCE : 0 ≤ CE := by
     have h1 := (hT _ le_rfl).2
     have h0 := mInt_nonneg_of hYo hth hu hnn ((tail Yo r (Real.exp 1)).indicator 1)
       (fun x => Set.indicator_nonneg (fun _ _ => zero_le_one) x)
-      (fun x hx => indicator_of_notMem (fun h => hx h.1) _)
+      (fun x hx => indicator_of_notMem (fun (h : x ∈ tail Yo r (Real.exp 1)) => hx h.1) _)
     rw [Real.log_exp, one_pow, mul_one] at h1
     by_contra hneg
     have : CE / Real.exp 1 < 0 := div_neg_of_neg_of_pos (lt_of_not_ge hneg) he

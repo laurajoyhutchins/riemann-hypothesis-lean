@@ -1,4 +1,46 @@
-import Formalism.HalfLinks.Statement
+module
+
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.NumberTheory.LSeries.DirichletContinuation
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Finset ArithmeticFunction
 
@@ -6,16 +48,7 @@ noncomputable section
 
 namespace Formalism.WT
 
-open Formalism Formalism.CMTypeGaloisData
-
-def chiJ (d n : ℕ) : ℝ := (jacobiSym (n : ℤ) d : ℝ)
-
-def DD (D z : ℝ) (M r : ℕ) : Finset ℕ :=
-  (Icc ⌈D⌉₊ ⌊2 * D⌋₊).filter
-    (fun d => d ≡ r [MOD 8 * M] ∧ Squarefree d ∧ ∀ p ∈ d.primeFactors, z < (p : ℝ))
-
-def IsJacFamily (S : Finset ℕ) (χ : (d : ℕ) → DirichletCharacter ℂ d) : Prop :=
-  ∀ d ∈ S, ∀ n : ℕ, χ d (n : ZMod d) = ((jacobiSym (n : ℤ) d : ℤ) : ℂ)
+open Formalism
 
 def L1 {N : ℕ} (χ : DirichletCharacter ℂ N) : ℝ :=
   if h : N = 0 then 0 else
@@ -25,49 +58,5 @@ def ell {N : ℕ} (χ : DirichletCharacter ℂ N) : ℝ :=
   if h : N = 0 then 0 else
     haveI : NeZero N := ⟨h⟩;
     (deriv (DirichletCharacter.LFunction χ) 1 / DirichletCharacter.LFunction χ 1).re
-
-def GJ (d : ℕ) (χ : DirichletCharacter ℂ d) (y : ℝ) : ℝ := Gch (chiJ d) (ell χ) y
-
-def WParams (D : ℝ) (M r : ℕ) : Prop :=
-  Odd M ∧ Squarefree M ∧ (M : ℝ) ≤ D ^ ((1 : ℝ) / 10) ∧ r % 4 = 3 ∧ Nat.Coprime r M ∧
-    ∀ p : ℕ, p.Prime → p ∣ M → jacobiSym (p : ℤ) r = 1
-
-def JacFamilyExists : Prop :=
-  ∀ S : Finset ℕ, (∀ d ∈ S, Odd d) → ∃ χ : (d : ℕ) → DirichletCharacter ℂ d, IsJacFamily S χ
-
-def WeightThm : Prop :=
-  ∃ Cs : ℝ, ∀ C0 : ℝ, Cs ≤ C0 → ∃ C x₀ : ℝ, ∀ x : ℝ, x₀ ≤ x → ∀ (z : ℝ) (M r : ℕ),
-    x ≤ z → z ≤ x ^ 4 → WParams (Real.exp (C0 * Real.log x ^ 2)) M r →
-    ∀ χ : (d : ℕ) → DirichletCharacter ℂ d, IsJacFamily (DD (Real.exp (C0 * Real.log x ^ 2)) z M r) χ →
-      0 < (∑ d ∈ DD (Real.exp (C0 * Real.log x ^ 2)) z M r, L1 (χ d)) ∧
-      ∀ y : ℝ, 1 ≤ y → y ≤ (Real.exp (C0 * Real.log x ^ 2)) ^ ((1 : ℝ) / 10) →
-        (∑ d ∈ DD (Real.exp (C0 * Real.log x ^ 2)) z M r, L1 (χ d) * GJ d (χ d) y)
-          ≤ C * (Real.log y + y * (C0 * Real.log x ^ 2) ^ 2 *
-              (Real.exp (-(C0 * Real.log x ^ 2 / (10 * Real.log z))) + C0 * Real.log x ^ 2 / z))
-            * (∑ d ∈ DD (Real.exp (C0 * Real.log x ^ 2)) z M r, L1 (χ d))
-
-def WeightCor : Prop :=
-  ∃ Cs : ℝ, ∀ C0 : ℝ, Cs ≤ C0 → ∃ C x₀ : ℝ, ∀ x : ℝ, x₀ ≤ x → ∀ m : ℕ, 0 < m → (m : ℝ) ≤ x →
-    ∀ (z : ℝ) (M r : ℕ),
-    x ^ 3 ≤ z → z ≤ x ^ 4 → WParams (Real.exp (C0 * Real.log x ^ 2)) M r →
-    ∀ χ : (d : ℕ) → DirichletCharacter ℂ d, IsJacFamily (DD (Real.exp (C0 * Real.log x ^ 2)) z M r) χ →
-    ∀ E : ℝ, (∀ d ∈ DD (Real.exp (C0 * Real.log x ^ 2)) z M r, chebyshevWeightedAverage m x Gz - chebyshevWeightedAverage m x (GJ d (χ d)) ≤ E) →
-      chebyshevWeightedAverage m x Gz ≤ E + C * Real.log x
-
-def WeightedSieveImpliesRH : Prop :=
-  ∃ Cs : ℝ, ∀ C0 : ℝ, Cs ≤ C0 →
-  (∀ ε : ℝ, 0 < ε → ∃ C K x₀ : ℝ, 1 ≤ C ∧ ∀ x : ℝ, x₀ ≤ x →
-    ∃ (m k f : ℕ) (B D' z : ℝ) (M r : ℕ) (χ : (d : ℕ) → DirichletCharacter ℂ d),
-      HalfSize (1 / 2) ε K x B D' m k f ∧
-      x ^ 3 ≤ z ∧ z ≤ x ^ 4 ∧
-      WParams (Real.exp (C0 * Real.log x ^ 2)) M r ∧
-      IsJacFamily (DD (Real.exp (C0 * Real.log x ^ 2)) z M r) χ ∧
-      ∀ d ∈ DD (Real.exp (C0 * Real.log x ^ 2)) z M r,
-        ∃ (G : Type) (_ : CommGroup G) (_ : Fintype G) (_ : DecidableEq G)
-          (H : HalfLinksCore G C ε (1 / 2) x B D' m k f),
-          2 * x * (∑ p ∈ H.host.Bad.filter Nat.Prime, Real.log p / p) ≤ K * x ^ ((1 : ℝ) / 2 + ε) ∧
-          (∑ ψ ∈ H.host.chars, H.host.coef ψ * chebyshevWeightedAverage m x (Gch (H.host.chi ψ) (H.ell ψ)))
-            ≤ chebyshevWeightedAverage m x (GJ d (χ d))) →
-  RiemannHypothesis
 
 end Formalism.WT

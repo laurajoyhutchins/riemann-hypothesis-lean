@@ -1,8 +1,53 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.LocalClassFormation.CupSymbolDefs
-import GroundTheory.ProfiniteCohomology.CyclicCupBrauer
-import GroundTheory.ProfiniteCohomology.CyclicCup
+module
+
+public import GroundTheory.ProfiniteCohomology.LocalClassFormation.CupSymbolDefs
+public import GroundTheory.LocalFields.MaximalUnramified
+public import GroundTheory.ProfiniteCohomology.CyclicCupProf
 import GroundTheory.LocalFields.AbstractLocalReciprocity.ExistsEqNsmulOfProjEqZero
+public import GroundTheory.ProfiniteCohomology.CyclicCupBrauer
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.FieldTheory.Galois.Profinite
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
@@ -73,9 +118,9 @@ noncomputable def charRestrict (E : IntermediateField F Ω) [Normal F E]
       rw [AlgEquiv.restrict_liftNormal, AlgEquiv.restrict_liftNormal, AlgEquiv.restrict_liftNormal]
       simp
     have e := hE _ h
-    rw [ofMul_mul, map_add, ofMul_inv, map_neg, ofMul_mul, map_add] at e
+    rw [ofMul_mul, map_add (f := _), ofMul_inv, map_neg, ofMul_mul, map_add (f := _)] at e
     change QZ.toAddCircle (ψ _) = QZ.toAddCircle (ψ _) + QZ.toAddCircle (ψ _)
-    rw [← map_add]
+    rw [← map_add (f := _)]
     exact congrArg QZ.toAddCircle (neg_add_eq_zero.1 e).symm
 
 theorem charRestrict_apply (E : IntermediateField F Ω) [Normal F E]
@@ -88,7 +133,7 @@ theorem charRestrict_apply (E : IntermediateField F Ω) [Normal F E]
       ((AlgEquiv.restrictNormalHom E g).liftNormal Ω).restrictNormal E = 1
     rw [AlgEquiv.restrict_liftNormal, inv_mul_cancel]
   have e := hE _ h
-  rw [ofMul_mul, map_add, ofMul_inv, map_neg, neg_add_eq_zero] at e
+  rw [ofMul_mul, map_add (f := _), ofMul_inv, map_neg, neg_add_eq_zero] at e
   change QZ.toAddCircle (ψ (Additive.ofMul ((AlgEquiv.restrictNormalHom E g).liftNormal Ω))) = _
   rw [← e]
   rfl
@@ -136,8 +181,8 @@ noncomputable def charIndex : ℕ+ :=
   ⟨(charKer (charAdd ψ)).index, Nat.pos_of_ne_zero
     (Subgroup.FiniteIndex.index_ne_zero (H := ((charKerOpen ψ).toOpenSubgroup : Subgroup Gal(Ω/F))))⟩
 
-omit [ValuativeRel Ω] [TopologicalSpace Ω] [IsValuativeTopology Ω] [ValuativeExtension F Ω] in
 
+omit [ValuativeRel Ω] [TopologicalSpace Ω] [IsValuativeTopology Ω] [ValuativeExtension F Ω] in
 theorem charAdd_eq_zero_of_mem_fixingSubgroup
     (hψ : ∀ g ∈ (unramifiedDegree F Ω).ker, ψ (Additive.ofMul g) = 0) :
     ∀ g ∈ (unramifiedLevel F Ω (charIndex ψ)).fixingSubgroup, ψ (Additive.ofMul g) = 0 := by
@@ -162,7 +207,7 @@ theorem charAdd_eq_zero_of_mem_fixingSubgroup
     have := mem_charKer.1 hn
     exact QZ.toAddCircle.injective (this.trans (map_zero _).symm)
   have : g = h ^ (n : ℕ) * ((h ^ (n : ℕ))⁻¹ * g) := by group
-  rw [this, ofMul_mul, map_add, e1, e2, add_zero]
+  rw [this, ofMul_mul, map_add (f := _), e1, e2, add_zero]
 
 end Field
 
@@ -172,9 +217,9 @@ variable {F Ω : Type} [Field F] [ValuativeRel F] [TopologicalSpace F] [IsNonarc
   [Field Ω] [Algebra F Ω] [IsSepClosure F Ω]
   [ValuativeRel Ω] [TopologicalSpace Ω] [IsValuativeTopology Ω] [ValuativeExtension F Ω]
 
+
 omit [ValuativeRel F] [TopologicalSpace F] [IsNonarchimedeanLocalField F] [ValuativeRel Ω]
   [TopologicalSpace Ω] [IsValuativeTopology Ω] [ValuativeExtension F Ω] in
-
 theorem exists_cocycle_brauerInflation (E : IntermediateField F Ω) [FiniteDimensional F E] [Normal F E]
     (c : cocycles₂ (galUnits.{0} F E)) :
     ∃ z : cocycles (galUnits.{0} F Ω) 2,

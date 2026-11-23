@@ -1,23 +1,70 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.EntryMem
-import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.AGraded
-import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.WeightAlgebraGeneratedDegreeTwo
-import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.ASmooth
-import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.QuotientSaturatedSquareTorsionFree
-import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.FgMapMk
-import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.TorusConjugateCornerEntryEq
-import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.ExistsLiftOfDerivationOnIdeal
-import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.MPrime
-import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.ShaCoc
-import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.AVal
-import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.Nval
-import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.TwoIrr
-import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.PtLift
-import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.PtScale
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.EntryMem
+import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.SelmerTransport.DvrFacts
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.AGraded
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.ASmooth
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.AVal
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.ConjTorus
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.ExistsLiftOfDerivationOnIdeal
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.FgMapMk
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.MPrime
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.Nval
 import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.PtActInternal
 import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.PtExt
-import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.ConjTorus
-import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.WcompMulHomog
+import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.PtLift
+import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.PtScale
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.QuotientSaturatedSquareTorsionFree
 import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.SgnMulSelf
+import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.ShaCoc
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.TorusConjugateCornerEntryEq
+import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.TwoIrr
+import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.WcompMulHomog
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.WeightAlgebraGeneratedDegreeTwo
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Formalism.ConjugateSelfDual ReciprocityTheory.Gal IsLocalRing UpperTheory.V UpperTheory.V.Base UpperTheory.V.Alg UpperTheory.V.HV UpperTheory.V.GradeZeroInterpolatingElement
 
 section Gen
@@ -30,7 +77,7 @@ private theorem algHom_ext_graded {ξ ξ' : A →ₐ[O] K} (h : ∀ j, ∀ f ∈
   induction f using DirectSum.Decomposition.inductionOn 𝒜 with
   | zero => simp
   | homogeneous f => exact h _ _ f.2
-  | add a b ha hb => rw [map_add, map_add, ha, hb]
+  | add a b ha hb => rw [map_add (f := _), map_add (f := _), ha, hb]
 
 private theorem same_orbit_trans {ξ ξ' ξ'' : A →ₐ[O] K} (h : SameOrbit 𝒜 ξ ξ') (h' : SameOrbit 𝒜 ξ' ξ'') :
     SameOrbit 𝒜 ξ ξ'' := by
@@ -125,7 +172,8 @@ private theorem exists_rep_family_from_points (hD : D.Good) (M : Model D) [Grade
         (t : (PadicAlgCl l)ˣ × (PadicAlgCl l)ˣ), ξ.comp M.toSS = x ∧ ∀ g, r g = tconj t (M.rep ξ g) := by
     intro x
     by_cases hx : OnS M.eqns.ideal x
-    · obtain ⟨ξ, hξ⟩ := ptLift D hD M x hx
+    · set_option synthInstance.maxHeartbeats 200000 in
+      obtain ⟨ξ, hξ⟩ := ptLift D hD M x hx
       obtain ⟨t, r, hr, hrt⟩ := ptScale D hD M h0 ξ
       refine ⟨r, fun h2 => ⟨⟨⟨hr, irreducible_torus_conjugate t _ _ hrt (twoIrr D hD M hL hV h0 hNE ξ (by rw [hξ]; exact h2.2))⟩, ?_⟩,
         ξ, t, hξ, hrt⟩⟩
@@ -154,6 +202,7 @@ theorem UpperTheory.V.GradeZeroInterpolatingElement.galoisRep_ineq_of_allIrreduc
   intro Ω _ _ _ l hl c D hD M hM hM' hL hV hF h0 hNE hR g hA
   classical
   obtain ⟨inst⟩ := aGraded D hD M
+  set_option synthInstance.maxHeartbeats 200000 in
   obtain ⟨a, ha0, hax, ha⟩ := aElt D hD M g
   obtain ⟨ρ, hρ, horb⟩ := exists_rep_family_from_points hD M hL hV h0 hNE g a ha
   obtain ⟨hT, hfin, hle⟩ := covers_and_cotangent_length_bounds hD M hM hL hV h0 hNE hR a

@@ -1,19 +1,57 @@
-import Mathlib
-import Development.AutomorphicArithmetic.Foundations.Convolution.TraceSplitting.NormCharSplit
-import Development.AutomorphicArithmetic.Foundations.Convolution.TraceSplitting.Places
-import Development.AutomorphicArithmetic.Foundations.Convolution.CentreSplitting.SSatIff
-import Development.AutomorphicArithmetic.Foundations.Convolution.CentreSplitting.SInfIff
-import Development.AutomorphicArithmetic.Foundations.Convolution.CentreSplitting.SInfEx
+module
+
+public import Development.AutomorphicArithmetic.Foundations.Convolution.TraceSplitting.NormCharSplit
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.TemperedLocalComponents.FormsFiniteGL
+public import Development.AutomorphicArithmetic.Foundations.Convolution.CentreSplitting.ConjIff
 import Development.AutomorphicArithmetic.Foundations.Convolution.CentreSplitting.ExCusp
-import Development.AutomorphicArithmetic.Foundations.Convolution.CentreSplitting.ConjIff
 import Development.AutomorphicArithmetic.Foundations.Convolution.CentreSplitting.IsoEq
-import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.GalAdEq
-import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.GalTwistExAlt
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.TemperedLocalComponents.FormsFiniteGL
-import Development.WeilBound.CoreStatements.PublishedTheorems.JacquetShalikaRigidity.JacquetShalikaRigidity
-import PositivityTheory.AutomorphicForms.PublishedInputs.CyclicBaseChange.P_SSatEx
-import PositivityTheory.AutomorphicForms.PublishedInputs.CyclicBaseChange.PBasic
-import PositivityTheory.AutomorphicForms.PublishedInputs.CyclicBaseChange.PSGalAdEx
+public import Development.AutomorphicArithmetic.Foundations.Convolution.CentreSplitting.SInfEx
+import Development.AutomorphicArithmetic.Foundations.Convolution.CentreSplitting.SInfIff
+public import Development.AutomorphicArithmetic.Foundations.Convolution.CentreSplitting.SSatIff
+public import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.AdBasic
+import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.AdUnique
+public import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.GalAdEq
+public import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.GalTwistExAlt
+public import Development.AutomorphicArithmetic.Foundations.Convolution.TraceSplitting.Places
+public import Development.WeilBound.CoreStatements.PublishedTheorems.JacquetShalikaRigidity.JacquetShalikaRigidity
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import PositivityTheory.AutomorphicForms.PublishedInputs.CyclicBaseChange.PSGalAdEx
+public import PositivityTheory.AutomorphicForms.PublishedInputs.CyclicBaseChange.P_SSatEx
+
+@[expose] public section
 
 open MeasureTheory NumberField IsDedekindDomain Filter
 open GroundTheory.Automorphic GroundTheory.Automorphic.Reduction PositivityTheory.Rg.Tf.Core PositivityTheory.Rg.Tf.Geo UpperTheory.ConvolutionTheory UpperTheory.ConvolutionTheory.C UpperTheory.ConvolutionTheory.T UpperTheory.ConvolutionTheory.Dp
@@ -21,7 +59,7 @@ open GlobalTheory.CuspRep Formalism.ConjugateSelfDual Formalism.L2.Host UpperThe
 
 section SlopeTestRemainingChoices
 
-variable {K : Type} [Field K] [NumberField K] [IsTotallyComplex K] {n : ℕ} {μ : Measure (normOneGL K n)} [μ.IsHaarMeasure]
+variable {K : Type} [Field K] [NumberField K] [_root_.NumberField.IsTotallyComplex K] {n : ℕ} {μ : Measure (normOneGL (K := K) (n := n))} [μ.IsHaarMeasure]
 
 private theorem atEx (V : Submodule ℂ (LL μ)) (hV : IsSummand μ V) : ∃ Λ t, AtAE μ V Λ t := by
   classical
@@ -66,13 +104,13 @@ private theorem conj_iff (P : CuspSub K n) (g : K ≃+* K) :
     rw [hs s h1]
     exact h
 
-omit [IsTotallyComplex K] in
+omit [_root_.NumberField.IsTotallyComplex K] in
 private theorem pull_refl : pull n (RingEquiv.refl K) = id := by
   funext f x
   refine congrArg f (Matrix.GeneralLinearGroup.ext fun i j => ?_)
   exact (UpperTheory.ConvolutionTheory.K.adBasic K).2.1 _
 
-omit [IsTotallyComplex K] in
+omit [_root_.NumberField.IsTotallyComplex K] in
 private theorem pull_trans (g g' : K ≃+* K) : pull n (g.trans g') = pull n g ∘ pull n g' := by
   funext f x
   refine congrArg f (Matrix.GeneralLinearGroup.ext fun i j => ?_)

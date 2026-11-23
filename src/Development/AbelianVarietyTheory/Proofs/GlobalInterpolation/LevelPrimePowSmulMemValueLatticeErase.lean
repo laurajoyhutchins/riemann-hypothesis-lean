@@ -1,8 +1,57 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.FormsStable
-import Formalism.LocalRingCardinality.RankBoundMonotoneInDimension
-import Formalism.GradedWeylDivisibility.FockSpaceTableaux.LClosedeqLemmas
-import Formalism.GradedWeylDivisibility.FockSpaceTableaux.NablaLTwist
+module
+
+public import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.FormsStable
+public import Formalism.GradedWeylDivisibility.DualWeylDominanceOf
+public import Formalism.GradedWeylDivisibility.FinalC
+public import Formalism.GradedWeylDivisibility.FinalD
+public import Formalism.GradedWeylDivisibility.FockSpaceTableaux.LClosedeqLemmas
+public import Formalism.GradedWeylDivisibility.FockSpaceTableaux.NablaLTwist
+public import Formalism.LocalRingCardinality.RankBoundMonotoneInDimension
+import Formalism.SatakeDualWeyl.KpqSubgroupCompact
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -105,10 +154,11 @@ theorem rowDiv_shift (R : Type) [CommRing R] {r n : ℕ} (H : Fin r → ℤ) (a 
     (f : MvPolynomial (Fin r × Fin n) R) (hf : IsWeightedHomogeneous (rowZ r n) f H) :
     IsWeightedHomogeneous (rowZ r n) (rowDiv R a b k f) (H + k • (Pi.single a 1 - Pi.single b 1)) := by
   unfold rowDiv
-  conv => enter [2, 1, 2]; rw [f.as_sum]
+  nth_rw 1 [f.as_sum]
+
   rw [map_sum, Polynomial.finsetSum_coeff]
   refine IsWeightedHomogeneous.sum _ _ _ fun d hd => ?_
-  have := shift_rowGen_monomial R a b d (coeff d f) k
+  have := shift_rowGen_monomial R a b d (AddMonoidAlgebra.coeff f d) k
   rwa [hf (mem_support_iff.mp hd)] at this
 
 theorem weight_rowZ {r n : ℕ} (d : Fin r × Fin n →₀ ℕ) (a : Fin r) :
@@ -116,7 +166,7 @@ theorem weight_rowZ {r n : ℕ} (d : Fin r × Fin n →₀ ℕ) (a : Fin r) :
   classical
   induction d using Finsupp.induction_linear with
   | zero => simp
-  | add f g hf hg => simp only [map_add, Pi.add_apply, Nat.cast_add, hf, hg]
+  | add f g hf hg => simp only [map_add (f := _), Pi.add_apply, Nat.cast_add, hf, hg]
   | single v c =>
     simp [Finsupp.weight_apply, rowZ, rowW, Pi.single_apply, Finsupp.sum_single_index]
 
@@ -125,7 +175,7 @@ theorem weight_rowW {r n : ℕ} (d : Fin r × Fin n →₀ ℕ) (a : Fin r) :
   classical
   induction d using Finsupp.induction_linear with
   | zero => simp [rowDeg]
-  | add f g hf hg => simp only [map_add, Pi.add_apply, hf, hg, rowDeg, Finsupp.add_apply, Finset.sum_add_distrib]
+  | add f g hf hg => simp only [map_add (f := _), Pi.add_apply, hf, hg, rowDeg, Finsupp.add_apply, Finset.sum_add_distrib]
   | single v c =>
     obtain ⟨b, s⟩ := v
     by_cases h : a = b
@@ -246,7 +296,7 @@ theorem diag_step {R : Type} [CommRing R] (φ : R →+* ℂ) {n : ℕ} (hn : 0 <
     obtain ⟨y', hy', ey⟩ := hy
     obtain ⟨z', hz', ez⟩ := hz
     refine ⟨y' + z', add_mem hy' hz', ?_⟩
-    rw [map_add, map_add, ← ey, ← ez, ← roundL_coe]
+    rw [map_add (f := _), map_add (f := _), ← ey, ← ez, ← roundL_coe]
     simp
   | smul a y _ hy =>
     obtain ⟨y', hy', ey⟩ := hy
@@ -381,11 +431,12 @@ theorem exists_frame_adapted (hn : 0 < n) (p : LocF.PP Lc n) : ∃ (h : GL (Fin 
     simp [N, Matrix.mulVec, dotProduct]
   rw [e, f_expand p hh]
   show ∑ a, Lc.res (x a + N₀.mulVec x a) * c a = _
-  simp only [map_add, add_mul, Finset.sum_add_distrib]
+  simp only [map_add (f := _), add_mul, Finset.sum_add_distrib]
   have h0' : c ⟨0, hn⟩ ≠ 0 := h0
   have e2 : ∑ a, Lc.res (N₀.mulVec x a) * c a = ∑ d ∈ Finset.univ.erase ⟨0, hn⟩, -(Lc.res (x d) * c d) := by
     rw [Finset.sum_eq_single ⟨0, hn⟩]
-    · rw [Matrix.mulVec, dotProduct, map_sum, Finset.sum_mul, ← Finset.sum_erase (a := ⟨0, hn⟩) _ (by simp [N₀])]
+    · set_option synthInstance.maxHeartbeats 100000 in
+        rw [Matrix.mulVec, dotProduct, map_sum, Finset.sum_mul, ← Finset.sum_erase (a := ⟨0, hn⟩) _ (by simp [N₀])]
       refine Finset.sum_congr rfl fun d hd => ?_
       have hd' := Finset.ne_of_mem_erase hd
       simp only [N₀, Matrix.of_apply, true_and, ne_eq, hd', not_false_eq_true, if_true, map_mul, hb]
@@ -501,13 +552,13 @@ theorem ten_update_mem (D : D7) (w : D.what₂.places.Pl) {n : ℕ} (lam : D.wha
     exact zero_mem _
   | add y z _ _ hy hz =>
     intro r hr
-    rw [map_add, ← tenM_apply, MultilinearMap.map_update_add, smul_add, tenM_apply, tenM_apply]
+    rw [map_add (f := _), ← tenM_apply, MultilinearMap.map_update_add, smul_add, tenM_apply, tenM_apply]
     exact add_mem (hy r hr) (hz r hr)
   | smul a y _ hy =>
     intro r hr
     obtain ⟨s, hs, e⟩ := hφ a
     rw [smul_eq_C_mul (a := a), map_mul, map_C, ← smul_eq_C_mul, ← tenM_apply, MultilinearMap.map_update_smul,
-      smul_smul, e, ← map_mul, tenM_apply]
+      smul_smul, e, RingHom.id_apply, ← map_mul, tenM_apply]
     exact hy _ (mul_mem hr hs)
 
 theorem map_int_mem (R : Type) [CommRing R] {n : ℕ} (lam : DomWeight n)
@@ -519,7 +570,7 @@ theorem map_int_mem (R : Type) [CommRing R] {n : ℕ} (lam : DomWeight n)
     simp only
     rw [← lclosedeq_applyWord_map, lclosedeq_hw_map]
   | zero => rw [map_zero]; exact zero_mem _
-  | add y z _ _ hy hz => rw [map_add]; exact add_mem hy hz
+  | add y z _ _ hy hz => rw [map_add (f := _)]; exact add_mem hy hz
   | smul a y _ hy =>
     rw [smul_eq_C_mul, map_mul, map_C, ← smul_eq_C_mul]
     exact Submodule.smul_mem _ _ hy
@@ -589,7 +640,14 @@ theorem pow_smul_mem_valB_erase : ∀ (D : D7) (u : D.what₂.Word) (X : Ch D u)
       congr 1
       rw [← tenM_apply, ← tenM_apply, ← Function.update_eq_self (X.fm.tauOf w v)
         (fun τ => roundAct ℂ _ (PtModel.lamT X i τ) (Co.mv w h τ) (map (Int.castRingHom ℂ) (f τ))),
-        ← MultilinearMap.map_update_smul]
+        ]
+      have hsm := (tenM (D.R.N i)).map_update_smul
+        (fun τ => roundAct ℂ _ (PtModel.lamT X i τ) (Co.mv w h τ) (map (Int.castRingHom ℂ) (f τ)))
+        (X.fm.tauOf w v) ((X.A.T : ℂ) ^ (PtModel.lamT X i (X.fm.tauOf w v)).w ⟨0, D.R.N_pos i⟩)
+        (roundAct ℂ _ (PtModel.lamT X i (X.fm.tauOf w v)) (Co.mv w h (X.fm.tauOf w v))
+          (map (Int.castRingHom ℂ) (f (X.fm.tauOf w v))))
+      simp only [RingHom.id_apply] at hsm
+      rw [← hsm]
       congr 1
       funext τ
       by_cases hτ : τ = X.fm.tauOf w v
@@ -606,7 +664,7 @@ theorem pow_smul_mem_valB_erase : ∀ (D : D7) (u : D.what₂.Word) (X : Ch D u)
     | add a b _ _ ha hb =>
       obtain ⟨a', ha', ea⟩ := ha
       obtain ⟨b', hb', eb⟩ := hb
-      exact ⟨a' + b', add_mem ha' hb', by rw [map_add, map_add, smul_add, ea, eb]⟩
+      exact ⟨a' + b', add_mem ha' hb', by rw [map_add (f := _), map_add (f := _), smul_add, ea, eb]⟩
     | neg a _ ha =>
       obtain ⟨a', ha', ea⟩ := ha
       exact ⟨-a', neg_mem ha', by rw [map_neg, map_neg, smul_neg, ea]⟩

@@ -1,9 +1,53 @@
-import Mathlib
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.RealDescent.RealLeviDescent.ThetaFixedGlobalOfTraceInputs
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.RealDescent.RealLeviDescent.ConeWeightsNotSecondType
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.EigenvalueSeparation.StableEigenspaces.FiniteTypes.FintypeHolds
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.InvF
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.ArchimedeanGelfandKernels.LeftEquivariantFunctions.ComplexMatrixCalculus.ExtraTop
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.ExpoConjOfIsCsd
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.ArchimedeanGelfandKernels.InfinitesimalCharacterGL.EopW
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.DiscreteSeriesTopClasses.IsInvOne
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.BaseChangeDefiniteUnitary
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.ArchimedeanGelfandKernels.IsMultZero
+import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.EigenvalueSeparation.LeftInv
+import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.RealDescent.PowerBoundFastDecay
+
+@[expose] public section
 
 noncomputable section
 
@@ -15,8 +59,8 @@ variable {E : Type} [Field E] [NumberField E] [IsCMField E] {n : ℕ}
 
 abbrev UU (n : ℕ) : Type := Matrix.unitaryGroup (Fin n) ℂ
 
-open Classical in
 
+open Classical in
 def singleN (w : InfinitePlace E) : ℂ →ₙ+* Cinf E where
   toFun x := fun v => if v = w then x else 0
   map_mul' x y := by
@@ -106,55 +150,11 @@ theorem eopW_mem_stabAlg (π : CuspSub E n) (w : InfinitePlace E) (s : Bool) (i 
   · exact Eop_mem_stabAlg π _ i j
   · exact Eop_mem_stabAlg π _ i j
 
-theorem kG_mem_stabAlg (π : CuspSub E n) (w : InfinitePlace E) (a b : Fin n) : kG w a b ∈ stabAlg π :=
-  (stabAlg π).add_mem (eopW_mem_stabAlg π w true a b)
-    ((stabAlg π).neg_mem (eopW_mem_stabAlg π w false b a))
-
-def kV (π : CuspSub E n) (w : InfinitePlace E) (a b : Fin n) : Module.End ℂ π.V :=
-  (kG w a b).restrict (kG_mem_stabAlg π w a b)
-
-def fV (π : CuspSub E n) (k : GL (Fin n) (Af E)) : Module.End ℂ π.V :=
-  (finRep E n k).restrict fun ψ hψ => π.stable (.fin k) ψ hψ
-
 section Avg
 
 variable [MeasurableSpace (UU n)] (κ : Measure (UU n)) (Em : PositivityTheory.RgBcC.KMod n) (T : Em.V →L[ℂ] Em.V)
 
-def qFun (w : InfinitePlace E) (φ : GA E n → ℂ) : GA E n → ℂ :=
-  fun x => ∫ c, GlobalTheory.CompanionTheory.TrPassage.chiT Em T c * φ (x * kAt w c) ∂κ
-
-def IsQ (w : InfinitePlace E) (π : CuspSub E n) (Q : Module.End ℂ π.V) : Prop :=
-  ∀ (ψ : π.V) (x : GA E n), ((Q ψ : π.V) : Sm E n).1 x = qFun κ Em T w (ψ : Sm E n).1 x
-
 end Avg
-
-def coefW (Em : PositivityTheory.RgBcC.KMod n) : Submodule ℂ (UU n → ℂ) :=
-  Submodule.span ℂ (Set.range fun p : (Em.V →L[ℂ] ℂ) × Em.V => fun c : UU n => p.1 (Em.ρ c⁻¹ p.2))
-
-def tlS (Em : PositivityTheory.RgBcC.KMod n) (w : InfinitePlace E) : Submodule ℂ (Sm E n) where
-  carrier := {φ | ∀ x, (fun c : UU n => φ.1 (x * kAt w c)) ∈ coefW Em}
-  add_mem' {a b} ha hb x := (coefW Em).add_mem (ha x) (hb x)
-  zero_mem' x := (coefW Em).zero_mem
-  smul_mem' r a ha x := (coefW Em).smul_mem r (ha x)
-
-abbrev tl (lam : InfinitePlace E → Fin n → ℤ) (w : InfinitePlace E) : Submodule ℂ (Sm E n) :=
-  tlS (PositivityTheory.RgBcC.lefE n (lam w)) w
-
-def vMod (π : CuspSub E n) (K : Subgroup (GL (Fin n) (Af E))) (lam : InfinitePlace E → Fin n → ℤ)
-    (μ : InfinitePlace E → Fin n → ℝ) (S : Finset (InfinitePlace E)) (w : InfinitePlace E) : Submodule ℂ (Sm E n) :=
-  fixK π K ⊓ (⨅ v ∈ S, hwG v (μ v)) ⊓ ⨅ (v : InfinitePlace E) (_ : v ∉ S) (_ : v ≠ w), tl lam v
-
-def wMod (π : CuspSub E n) (K : Subgroup (GL (Fin n) (Af E))) (lam : InfinitePlace E → Fin n → ℤ)
-    (μ : InfinitePlace E → Fin n → ℝ) (S : Finset (InfinitePlace E)) : Submodule ℂ (Sm E n) :=
-  fixK π K ⊓ (⨅ v ∈ S, hwG v (μ v)) ⊓ ⨅ (v : InfinitePlace E) (_ : v ∉ S), tl lam v
-
-abbrev wV (π : CuspSub E n) (K : Subgroup (GL (Fin n) (Af E))) (lam : InfinitePlace E → Fin n → ℤ)
-    (μ : InfinitePlace E → Fin n → ℝ) (S : Finset (InfinitePlace E)) : Submodule ℂ π.V :=
-  (wMod π K lam μ S).comap π.V.subtype
-
-def itF [MeasurableSpace (PositivityTheory.RgTw.G n)] (μC : Measure (PositivityTheory.RgTw.G n))
-    (f : InfinitePlace E → PositivityTheory.RgTw.G n → ℂ) (l : List (InfinitePlace E)) (Φ : GA E n → ℂ) : GA E n → ℂ :=
-  l.foldr (fun w Ψ x => ∫ y, f w y * Ψ (x * gAt w y) ∂μC) Φ
 
 end GlobalTheory.CompanionTheory.TwY
 end

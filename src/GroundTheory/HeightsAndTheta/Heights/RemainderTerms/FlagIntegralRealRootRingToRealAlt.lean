@@ -1,6 +1,51 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.RemainderTerms.IsPowerSumDecompositionHomogeneousComponent
-import GroundTheory.HeightsAndTheta.Heights.RemainderTerms.FlagIntegralRealEqMulDdConst
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.RemainderTerms.IsPowerSumDecompositionHomogeneousComponent
+public import GroundTheory.HeightsAndTheta.Heights.RemainderTerms.FlagIntegralRealEqMulDdConst
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.RestTerms
@@ -22,12 +67,12 @@ theorem flagIntegralReal_rootRingToReal (f N j k : ℕ) (h : N = j + k) (P : Roo
   rw [this, flagIntegralReal_map]
 
 def coeffMap {σ : Type*} (φ : Module.Dual ℚ ℝ) (P : MvPolynomial σ ℝ) : MvPolynomial σ ℚ :=
-  ∑ d ∈ P.support, monomial d (φ (coeff d P))
+  ∑ d ∈ P.support, monomial d (φ (AddMonoidAlgebra.coeff P d))
 
 variable {σ : Type*} (φ : Module.Dual ℚ ℝ)
 
 theorem coeff_coeffMap (P : MvPolynomial σ ℝ) (d : σ →₀ ℕ) :
-    coeff d (coeffMap φ P) = φ (coeff d P) := by
+    AddMonoidAlgebra.coeff (coeffMap φ P) d = φ (AddMonoidAlgebra.coeff P d) := by
   classical
   rw [coeffMap, coeff_sum]
   simp only [coeff_monomial]
@@ -39,12 +84,14 @@ theorem coeff_coeffMap (P : MvPolynomial σ ℝ) (d : σ →₀ ℕ) :
 theorem coeffMap_sum {ι : Type*} (s : Finset ι) (P : ι → MvPolynomial σ ℝ) :
     coeffMap φ (∑ i ∈ s, P i) = ∑ i ∈ s, coeffMap φ (P i) := by
   ext d
+
   simp only [coeff_coeffMap, coeff_sum, map_sum]
 
 theorem coeffMap_map_mul (R : MvPolynomial σ ℚ) (P : MvPolynomial σ ℝ) :
     coeffMap φ (map (algebraMap ℚ ℝ) R * P) = R * coeffMap φ P := by
   classical
   ext d
+
   rw [coeff_coeffMap, coeff_mul, coeff_mul, map_sum]
   refine sum_congr rfl fun x _ => ?_
   rw [coeff_map, coeff_coeffMap, ← Algebra.smul_def, map_smul, smul_eq_mul]
@@ -52,20 +99,21 @@ theorem coeffMap_map_mul (R : MvPolynomial σ ℚ) (P : MvPolynomial σ ℝ) :
 theorem coeffMap_map (R : MvPolynomial σ ℚ) :
     coeffMap φ (map (algebraMap ℚ ℝ) R) = φ 1 • R := by
   ext d
-  rw [coeff_coeffMap, coeff_map, coeff_smul, smul_eq_mul, ← mul_one (algebraMap ℚ ℝ _),
+  rw [coeff_coeffMap, coeff_map, MvPolynomial.coeff_smul, smul_eq_mul, ← mul_one (algebraMap ℚ ℝ _),
     ← Algebra.smul_def, map_smul, smul_eq_mul, mul_comm]
 
 theorem dual_flagIntegralReal (f N : ℕ) (P : MvPolynomial (Fin f × Fin N) ℝ) :
     φ (flagIntegralReal f N P) = flagIntegral f N (coeffMap φ P) := by
   have hterm : ∀ α : Fin f × Fin N →₀ ℕ,
-      coeff α P * ((coeff α (blockVandermonde f N) : ℚ) : ℝ) *
+      AddMonoidAlgebra.coeff P α * ((AddMonoidAlgebra.coeff (blockVandermonde f N) α : ℚ) : ℝ) *
           α.prod (fun _ e => (e.factorial : ℝ)) =
-        (coeff α (blockVandermonde f N) * α.prod (fun _ e => (e.factorial : ℚ))) • coeff α P := by
+        (AddMonoidAlgebra.coeff (blockVandermonde f N) α * α.prod (fun _ e => (e.factorial : ℚ))) • AddMonoidAlgebra.coeff P α := by
     intro α
     rw [Rat.smul_def]
     simp only [Finsupp.prod, Rat.cast_mul, Rat.cast_prod, Rat.cast_natCast]
     ring
   show φ (∑ α ∈ _, _) = _
+
   simp only [hterm, map_sum, map_smul, smul_eq_mul, flagIntegral, coeff_coeffMap]
   exact sum_congr rfl fun α _ => by ring
 
@@ -73,7 +121,7 @@ theorem flagIntegral_sub_smul (f N : ℕ) (A B : RootRing f N) (s : ℚ) :
     flagIntegral f N (A - s • B) = flagIntegral f N A - s * flagIntegral f N B := by
   rw [flagIntegral, flagIntegral, flagIntegral, mul_sum, ← sum_sub_distrib]
   refine sum_congr rfl fun α _ => ?_
-  rw [coeff_sub, coeff_smul, smul_eq_mul]
+  rw [MvPolynomial.coeff_sub, MvPolynomial.coeff_smul, smul_eq_mul]
   ring
 
 end TermBoundEq

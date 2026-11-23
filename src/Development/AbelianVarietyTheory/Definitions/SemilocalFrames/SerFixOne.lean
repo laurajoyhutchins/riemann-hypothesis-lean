@@ -1,10 +1,44 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RowDict
-import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RowLevelMatch
-import Formalism.SharpRestriction.LevelLetterCocycles.ArithmeticCylinders
-import Formalism.LocalToGlobal.GaloisLevelStructure.DefsFinTyp
-import Formalism.LocalToGlobal.GaloisLevelStructure.DefsAutLoc
-import Formalism.LocalToGlobal.IndefiniteReal.TensCastR
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RowLevelMatch
+public import Formalism.SharpRestriction.LevelLetterCocycles.ArithmeticCylinders
+public import Formalism.LocalToGlobal.IndefiniteReal.PrincipalLevelFrame
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -16,8 +50,8 @@ section Events
 
 variable {D : D7} (X : HidaSetting D)
 
-open Classical in
 
+open Classical in
 def egA (a : MonoidAlgebra ℂ (G0g D.nd)) (x : X.B.I.Gf) : ℂ :=
   if h : x ∈ X.B.I.Kset ∧ ∃ γ : G0g D.nd, GoodAt X x γ then
     a.coeff (Classical.choose h.2) / ((X.B.μf (X.B.I.Kg X.B.g)).toReal : ℂ)
@@ -38,8 +72,8 @@ def ES (S : Set (Tup2 D)) : MonoidAlgebra ℂ (G0g D.nd) :=
 def eT (S : Set (Tup2 D)) : X.B.I.Gf → ℂ :=
   X.B.I.convF X.B.μf X.B.e (egA X (ES S))
 
-open Classical in
 
+open Classical in
 def ReT (S : Set (Tup2 D)) : X.B.I.L2 X.B.μf X.B.fund →L[ℂ] X.B.I.L2 X.B.μf X.B.fund :=
   if h : ∃ T, X.B.I.IsRConvF X.B.μf X.B.fund X.B.R (eT X S) T then Classical.choose h else 0
 
@@ -76,15 +110,6 @@ def IsLift (s : SplitPlace L) {g : ℕ} (x : GAf L n) (γ : GL (Fin n) (ZMod g))
 def SerFix (π : Formalism.L2.NG.FinTyp L n) (s : SplitPlace L) {g : ℕ} (a : MonoidAlgebra ℂ (GL (Fin n) (ZMod g))) : Prop :=
   ∀ ℓ : GL (Fin n) (ZMod g) → GAf L n, (∀ γ, IsLift s (ℓ γ) γ) → ∀ φ ∈ π.S,
     (∀ x, IsLift s x (1 : GL (Fin n) (ZMod g)) → Formalism.L2.NG.rt L n x φ = φ) → ∑ᶠ γ, a.coeff γ • Formalism.L2.NG.rt L n (ℓ γ) φ = φ
-
-theorem serFix_one (π : Formalism.L2.NG.FinTyp L n) (s : SplitPlace L) {g : ℕ} :
-    SerFix π s (1 : MonoidAlgebra ℂ (GL (Fin n) (ZMod g))) := by
-  classical
-  intro ℓ hℓ φ _ h
-  rw [finsum_eq_single _ 1]
-  · simpa using h _ (hℓ 1)
-  · intro γ hγ
-    simp [MonoidAlgebra.one_def, Finsupp.single_apply, Ne.symm hγ]
 
 end Types
 

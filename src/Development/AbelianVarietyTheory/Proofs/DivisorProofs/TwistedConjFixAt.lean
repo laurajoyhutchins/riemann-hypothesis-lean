@@ -1,9 +1,47 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsAlgebraicOfRoot
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.FixesUntwistedTupleDataOfFixesSmallFieldStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RingAutFixingSmallFieldFixesDeltaValuesStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LowWeightStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BadPrimeMemExceptionalSet
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.GoodSetupCountEqZeroOffBadPlaces
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.FieldTheory.Galois.Profinite
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Definitions.Divisors.LevelOfOfSameBut
+import Development.AbelianVarietyTheory.Definitions.Divisors.TupleReadBaseTupleEqFamily
+import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.ConjTupRefl
+
+@[expose] public section
 
 set_option autoImplicit false
 noncomputable section
@@ -11,8 +49,8 @@ open NumberField IsDedekindDomain
 open Formalism.BasicNotions Formalism.MainNotions Formalism.MainNotions.DIV.Cons Formalism.L2.Pj Formalism.L2.DIV Formalism.L2.Indef Formalism.L2.Indef.Tree Formalism.IndefR Formalism.IndefR.Links Formalism.IndefR.Cx
 open Formalism.IndefR.FWT GlobalTheory.BigTop GlobalTheory.OntoChain GlobalTheory.RealIndexBound GlobalTheory.OnTies GlobalTheory.SeriesTie
 open GlobalTheory.BigOn GlobalTheory.BigOn.Exp Formalism.L2.Theta GlobalTheory.ExportSeries
-set_option synthInstance.maxHeartbeats 400000
-set_option maxHeartbeats 800000
+
+
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
 
 namespace GlobalTheory.BigOn.Exp.TwConj
@@ -35,35 +73,5 @@ theorem de_chi_eq {D : D7} {ρ : Setup D.ntw} (hρ : ρ.Good) (i : D.ntw.Tw) (j 
   refine ⟨σ, ?_⟩
   rw [hρ.delta i j b]
   exact charOf_eq _ _ hopen hσ Subgroup.FiniteIndex.index_ne_zero (hpow σ)
-
-theorem fixAt_holds : GlobalTheory.Published.RayClassFieldSt → TwAdm → FixAt := by
-  intro hRF hA
-  refine AtTw.imp (AtTw.and hA lowAt_holds) fun Fm x hx k p hr hm w _ j H => ?_
-  intro ρ hρ hp hL τ hτ
-  have hR := ratHyp0_at_point Fm x hx k p hr hm _ H.1.2.2 H.2 j
-  have hτ' : ∀ z ∈ (Formalism.L2.Host.embLL0 (Fm.D x k)).fieldRange, τ z = z := by
-    rintro _ ⟨y, rfl⟩
-    exact hτ y
-  have hFB : FixBase p.T p.R.toRealDat j τ :=
-    GlobalTheory.T.fixes_untwistedTupleData_of_fixes_smallField _ _ _ _ _ _ hRF p.T p.R p.cG p.Sx p.nexp (F2 p) p.κ p.v₀ hR.laws hR.core hR.fw hR.tieIn hR.galois
-      hR.small.val hR.small.ray hR.small.roots j τ hτ'
-  refine ⟨hFB, ?_, ?_, ?_⟩
-  · intro y
-    obtain ⟨σ, hσ⟩ := de_chi_eq hρ ((Fm.ex x hx k).nch.twI w) j ((Fm.ex x hx k).nch.sd w) y
-    change τ (((ρ.B _ j _).de.chi y : Circle) : ℂ) = _
-    rw [hσ]
-    refine GlobalTheory.T.ringAut_fixing_smallField_fixes_delta_values ρ hρ _ j _ (p.R.C.delAt ((Fm.D x k).ntw.l ((Fm.ex x hx k).nch.twI w))) (hp.delta _ j _) ?_ τ hτ σ
-    unfold Formalism.L2.Host.CharFrame.delAt
-    split_ifs
-    exacts [hR.small.val.del', hR.small.val.del]
-  · rintro ⟨q, hq⟩
-    obtain ⟨y, rfl⟩ := (ρ.eG ((Fm.ex x hx k).nch.twI w) j ((Fm.ex x hx k).nch.sd w)).surjective q
-    obtain ⟨g, rfl⟩ := (p.R.eG.trans p.cG).surjective y
-    have hg := (mem_level_iff hm.2.2 hL _ j _ g).1 hq
-    obtain ⟨z, hz⟩ := (level_chi hm.2.2 hρ hL _ j _ ⟨g, hg⟩ hq).2
-    change τ ((((ρ.B _ j _).G.P.chi ⟨_, hq⟩ : ℂˣ) : ℂ)) = _
-    rw [← hz]
-    exact hτ z
-  · exact (baseOf_of_realPin hR.core.lev hρ hp _ j _).fix_mu hR.core.lev (hρ.base _ j _) hFB.chi
 
 end GlobalTheory.BigOn.Exp.TwConj

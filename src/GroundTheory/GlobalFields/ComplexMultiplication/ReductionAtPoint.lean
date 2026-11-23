@@ -1,8 +1,51 @@
-import Mathlib
-import GroundTheory.GlobalFields.ComplexMultiplication.ReductionIsogenyMap
-import GroundTheory.GlobalFields.ComplexMultiplication.BaseChangeField
-import GroundTheory.GlobalFields.ComplexMultiplication.RespectsAddUniversal
-import GroundTheory.GlobalFields.ComplexMultiplication.TorsionReduction
+module
+
+public import GroundTheory.GlobalFields.ComplexMultiplication.ReductionIsogenyMap
+public import GroundTheory.GlobalFields.ComplexMultiplication.BaseChangeField
+import GroundTheory.GlobalFields.ComplexMultiplication.ReductionComp
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Global
@@ -31,8 +74,8 @@ section OverF
 variable {F : Type u} [Field F] [DecidableEq F] {E E' : WeierstrassCurve F} [E.IsElliptic]
   [E'.IsElliptic] (Ω : Type u) [Field Ω] [Algebra F Ω] [DecidableEq Ω]
 
-omit [DecidableEq F] in
 
+omit [DecidableEq F] in
 theorem isogBaseChange_app (φ : Isogeny E E')
     (X : ((E.baseChange Ω).baseChange (E.baseChange Ω).toAffine.FunctionField).toAffine.Point)
     (hX : IsGenPt (E.baseChange Ω) X)
@@ -57,8 +100,8 @@ theorem isogBaseChange_app (φ : Isogeny E E')
   generalize Point.map (W' := E') (bcEmb (F' := Ω) E) φ.1 = Y
   cases Y <;> rfl
 
-omit [DecidableEq F] [E.IsElliptic] [DecidableEq Ω] in
 
+omit [DecidableEq F] [E.IsElliptic] [DecidableEq Ω] in
 theorem isGenPt_of_isGenPt_baseChange
     (X : ((E.baseChange Ω).baseChange (E.baseChange Ω).toAffine.FunctionField).toAffine.Point)
     (h : IsGenPt (E.baseChange Ω) X) :
@@ -67,8 +110,8 @@ theorem isGenPt_of_isGenPt_baseChange
   | zero => exact h.elim
   | some x y _ => exact Transcendental.restrictScalars (algebraMap F Ω).injective h
 
-omit [E.IsElliptic] in
 
+omit [E.IsElliptic] in
 theorem constMap_constMap_baseChange (V : WeierstrassCurve F) (R : V.toAffine.Point) :
     (constMap (V.baseChange Ω) (E.baseChange Ω).toAffine.FunctionField (constMap V Ω R) :
       (V.baseChange (E.baseChange Ω).toAffine.FunctionField).toAffine.Point) =
@@ -95,13 +138,13 @@ theorem app_genericPoint_add_constMap [PerfectField F] [IsAlgClosed Ω] (φ : Is
   have e1 : Point.map ι (genericPoint E + constMap E E.toAffine.FunctionField R) =
       ((genericPoint (E.baseChange Ω) + constMap (E.baseChange Ω) K' Rω :
         ((E.baseChange Ω).baseChange K').toAffine.Point) : (E.baseChange K').toAffine.Point) := by
-    rw [map_add, map_bcEmb_genericPoint, map_constMap, ← constMap_constMap_baseChange Ω E R]
+    rw [map_add (f := _), map_bcEmb_genericPoint, map_constMap, ← constMap_constMap_baseChange Ω E R]
     rfl
   have hX' := isGenPt_of_isGenPt_baseChange Ω _ hX
   apply Point.map_injective (W' := E') ι
   rw [Isogeny.map_app]
   refine (app_eq e1 _ hX').trans ?_
-  rw [← isogBaseChange_app Ω φ _ hX hX', h1, map_add, map_constMap,
+  rw [← isogBaseChange_app Ω φ _ hX hX', h1, map_add (f := _), map_constMap,
     ← constMap_constMap_baseChange Ω (E := E) E' (pointHomOver Ω φ R)]
   rfl
 
@@ -138,7 +181,9 @@ theorem reduceFF_constMap (V : WeierstrassCurve 𝒪) [V.IsElliptic]
       obtain ⟨h₂, e₂⟩ := exists_some_eq h₁ hx hy
       obtain ⟨h₃, e₃⟩ := reduceFF_some K W V h₂
       rw [e₁, e₂, e₃]
-      have e₄ := reducePoint_some_integral K V h (nonsingular_residue_of_isElliptic K V h.1)
+      have e₄ := reducePoint_some_integral K V h
+        (WeierstrassCurve.Affine.equation_iff_nonsingular.mp
+          (equation_residue V (equation_of_map K V h.1)))
       refine Eq.trans ?_ (congrArg (constMap (V.map (residue 𝒪))
         (W.map (residue 𝒪)).toAffine.FunctionField) e₄).symm
       show _ = Point.some _ _ _
@@ -165,9 +210,9 @@ theorem reduceFF_genericPoint_add_constMap (R : (W.baseChange K).toAffine.Point)
       genericPoint (W.map (residue 𝒪)) +
         constMap (W.map (residue 𝒪)) (W.map (residue 𝒪)).toAffine.FunctionField
           (reducePoint K W R) := by
-  rw [map_add, reduceFF_genericPoint, reduceFF_constMap]
+  rw [map_add (f := _), reduceFF_genericPoint, reduceFF_constMap]
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem reduceIsogeny_app_add_constMap (φ : Isogeny (W.baseChange K) (W'.baseChange K))
     (R : (W.baseChange K).toAffine.Point) (S : (W'.baseChange K).toAffine.Point)
@@ -186,7 +231,7 @@ theorem reduceIsogeny_app_add_constMap (φ : Isogeny (W.baseChange K) (W'.baseCh
     exact isGenPt_genericPoint_add_constMap _ _
   have key := reduceFF_map_genEval K W W W' (isGenPt_genericPoint_add_constMap _ R) hR' φ.1
   have h2 := congrArg (reduceFF K W W') h
-  rw [map_add, reduceFF_constMap] at h2
+  rw [map_add (f := _), reduceFF_constMap] at h2
   rw [reduceIsogeny_val, ← h2]
   unfold Isogeny.app at key ⊢
   rw [key, reduceIsogeny_val, genEval_congr _ (reduceFF_genericPoint_add_constMap K W R) hR']

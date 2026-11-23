@@ -1,7 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.LiftBlochKatoCocycleIffOrthogonalLatticeStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CobOfGen
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ContinuousAlgebraMapPadicInt
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.IsDualDualRep
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsFCocIff
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CobOfGen
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ContinuousAlgebraMapPadicInt
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.LiftBlochKatoCocycleIffOrthogonalLatticeStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.ContinuousCycMod
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Formalism.ConjugateSelfDual ReciprocityTheory.Gal Formalism.BasicNotions Formalism.MainNotions.BlochKatoReduction Formalism.MainNotions.BlochKatoReduction.Gen GlobalTheory.TwSys GlobalTheory.SelFun GlobalTheory.Published GlobalTheory.ResSel GlobalTheory.ResDual
 
 namespace GlobalTheory.ResOrth
@@ -27,7 +74,7 @@ def leftPerp (y : Γ → M') : Submodule k (Γ → M) where
   add_mem' := by
     rintro x x' ⟨f, hf, e⟩ ⟨f', hf', e'⟩
     refine ⟨f + f', hf.add hf', fun g h => ?_⟩
-    simp only [Pi.add_apply, map_add, LinearMap.add_apply, e, e']
+    simp only [Pi.add_apply, map_add (f := _), LinearMap.add_apply, e, e']
     ring
   smul_mem' := by
     rintro c x ⟨f, hf, e⟩
@@ -41,7 +88,7 @@ def rightPerp (x : Γ → M) : Submodule k (Γ → M') where
   add_mem' := by
     rintro y y' ⟨f, hf, e⟩ ⟨f', hf', e'⟩
     refine ⟨f + f', hf.add hf', fun g h => ?_⟩
-    simp only [Pi.add_apply, map_add, e, e']
+    simp only [Pi.add_apply, map_add (f := _), e, e']
     ring
   smul_mem' := by
     rintro c y ⟨f, hf, e⟩
@@ -58,7 +105,7 @@ theorem cupCob_of_left_coboundary (hP : ∀ g x y, P (ρ g x) (ρ' g y) = χ g *
     {y : Γ → M'} (hy : y ∈ Z1 ρ') : CupCob χ ρ' P x y := by
   obtain ⟨m, hm⟩ := (mem_coboundaries1 _ _).1 hx
   refine ⟨fun g => P m (y g), ((IsLocallyConstant.iff_continuous _).2 hy.1).comp _, fun g h => ?_⟩
-  simp only [hm, hy.2, map_sub, map_add, LinearMap.sub_apply, hP]
+  simp only [hm, hy.2, map_sub, map_add (f := _), LinearMap.sub_apply, hP]
   ring
 
 theorem cupCob_of_right_coboundary (hP : ∀ g x y, P (ρ g x) (ρ' g y) = χ g * P x y) (hρ' : ContAction ρ')
@@ -67,7 +114,7 @@ theorem cupCob_of_right_coboundary (hP : ∀ g x y, P (ρ g x) (ρ' g y) = χ g 
   have h1 : Continuous fun g => ρ' g m := hρ'.comp (f := fun g : Γ => (g, m)) (by fun_prop)
   refine ⟨fun g => -P (x g) (ρ' g m), (((IsLocallyConstant.iff_continuous _).2 hx.1).prodMk
     ((IsLocallyConstant.iff_continuous _).2 h1)).comp fun p => -P p.1 p.2, fun g h => ?_⟩
-  simp only [hm, hx.2, map_sub, map_add, map_mul, LinearMap.add_apply, Module.End.mul_apply, hP]
+  simp only [hm, hx.2, map_sub, map_add (f := _), map_mul, LinearMap.add_apply, Module.End.mul_apply, hP]
   ring
 
 theorem cupCob_of_span (hP : ∀ g x y, P (ρ g x) (ρ' g y) = χ g * P x y) (hρ' : ContAction ρ')
@@ -163,7 +210,7 @@ theorem bkOn_orthogonal : LocalTateDuality → ∀ (D : Formalism.BasicNotions.D
     · simp_rw [hρ _]; exact GlobalTheory.PrimeToInertia.continuous_Tdual i s
     · rw [pow_one, IsLocalRing.maximalIdeal_eq_bot, Ideal.mem_bot] at hx
       rw [hx, zero_smul]
-  rw [bkOn, dif_pos hv] at hx hy
+  rw [bkOn, dite_eq_left hv] at hx hy
   refine cupCob_of_span (ρ := (red i K (Tgl i s)).comp (DecV N v).subtype)
     (ρ' := (red i K ρ).comp (DecV N v).subtype) (P := dotProductBilin K K) (fun g a b => red_dot s hρ g.1 a b)
     (hc.comp (f := fun p : DecV N v × (Fin D.R.r → K) => ((p.1 : GE N), p.2)) (by fun_prop))
@@ -195,7 +242,7 @@ theorem bkOn_orthogonal : LocalTateDuality → ∀ (D : Formalism.BasicNotions.D
   have hπ : ∀ a, π (IsLocalRing.residue (X.O0 i) a) = algebraMap (X.O0 i) K a := fun a => rfl
   refine ⟨fun g => b * b' * π (c g), hc.comp fun t => b * b' * π t, fun g h => ?_⟩
   have e1 := congrArg π (ec g h)
-  rw [hπ, map_add, map_sub, Algebra.smul_def, map_mul] at e1
+  rw [hπ, map_add (f := _), map_sub, Algebra.smul_def, map_mul] at e1
   have e2 : π (algebraMap (X.O0 i) _ (algebraMap ℤ_[X.l i] (X.O0 i)
       ((cycZ D.host.E N.Om (X.l i) g.1 : ℤ_[X.l i]ˣ) : ℤ_[X.l i]))) =
       algebraMap (X.O0 i) K ((eps0 X i g.1 : (X.O0 i)ˣ) : X.O0 i) := rfl
@@ -203,6 +250,7 @@ theorem bkOn_orthogonal : LocalTateDuality → ∀ (D : Formalism.BasicNotions.D
   have e3 : z.1 g ⬝ᵥ red i K ρ g.1 (z'.1 h) =
       b * b' * algebraMap (X.O0 i) K (d g ⬝ᵥ (Tdual i s g.1).mulVec (d' h)) := by
     rw [red_apply, hρ]
+
     simp only [dotProduct, Matrix.mulVec, e, e', map_sum, map_mul, Matrix.map_apply, smul_eq_mul, Finset.mul_sum]
     refine Finset.sum_congr rfl fun _ _ => Finset.sum_congr rfl fun _ _ => by ring
   refine e3.trans ?_

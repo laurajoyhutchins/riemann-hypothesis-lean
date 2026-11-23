@@ -1,8 +1,50 @@
-import Formalism.LocalToGlobal.PairingIndexBounds.HalvesRecursion.Statement
-import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.EllipticOnePole
-import Formalism.LocalRingCardinality.SpanPowerMembership.ExampleLayerExistsGenerators
-import Formalism.FrobeniusOrbits.FrobeniusOrbitsProofs.Principal
-import Formalism.FrobeniusOrbits.FrobeniusOrbitsProofs.SplitK
+module
+
+public import Formalism.LocalToGlobal.PairingIndexBounds.HalvesRecursion.Statement
+public import Formalism.FrobeniusOrbits.FrobeniusOrbitsProofs.SplitK
+public import Formalism.LocalRingCardinality.SpanPowerMembership.ExampleLayerExistsGenerators
+public import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.EllipticOnePole
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -92,7 +134,7 @@ theorem exists_pp (cc : Ideal (𝓞 D.host.K)) (hcc : cc ≠ ⊥) :
     refine ⟨e.repr ⟨c, hc⟩ 0, e.repr ⟨c, hc⟩ 1, ?_⟩
     rw [Fin.sum_univ_two] at hx
     have hx' := congrArg (fun y : cc => psi D (y : 𝓞 D.host.K)) hx
-    simp only [Submodule.coe_add, map_add] at hx'
+    simp only [Submodule.coe_add, map_add (f := _)] at hx'
     rw [← hx']
     rw [Submodule.coe_smul_of_tower, Submodule.coe_smul_of_tower, map_zsmul, map_zsmul, zsmul_eq_mul,
       zsmul_eq_mul]
@@ -100,7 +142,7 @@ theorem exists_pp (cc : Ideal (𝓞 D.host.K)) (hcc : cc ≠ ⊥) :
     intro m n
     refine ⟨m • (e 0 : 𝓞 D.host.K) + n • (e 1 : 𝓞 D.host.K),
       cc.add_mem (Submodule.smul_of_tower_mem _ m (e 0).2) (Submodule.smul_of_tower_mem _ n (e 1).2), ?_⟩
-    rw [map_add, map_zsmul, map_zsmul, zsmul_eq_mul, zsmul_eq_mul]
+    rw [map_add (f := _), map_zsmul, map_zsmul, zsmul_eq_mul, zsmul_eq_mul]
 
   obtain ⟨c, hc, hc0⟩ := Submodule.exists_mem_ne_zero_of_ne_bot hcc
   obtain ⟨β, hβ⟩ := exists_sqrt D
@@ -110,7 +152,9 @@ theorem exists_pp (cc : Ideal (𝓞 D.host.K)) (hcc : cc ≠ ⊥) :
     have h' : D.host.φ₀ (((c : D.host.K) : D.host.E)) = 0 := h
     rw [map_eq_zero_iff _ D.host.φ₀.injective] at h'
     have : ((c : D.host.K) : D.host.E) = 0 := h'
-    exact_mod_cast this
+    apply RingOfIntegers.ext
+    apply Subtype.ext
+    exact this
   have hψcβ : psi D (c * β) = psi D c * (Complex.I * (Real.sqrt D.host.d : ℂ)) := by
     show D.host.φ₀ _ = D.host.φ₀ _ * _
     rw [← hβ, ← map_mul]

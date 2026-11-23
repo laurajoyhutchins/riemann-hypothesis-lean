@@ -1,7 +1,53 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.CechPairings.CechAugRow
+module
+
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.CechPairings.CechAugRow
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.CechPairings.DcColSurj
 import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.CechPairings.MapHComp
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.CechPairings.DcColSurj
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option backward.isDefEq.respectTransparency false
 open CategoryTheory Opposite CrystallineSemistableComparison CrystallineSemistableComparison.CH
 universe w w' w'' t t' v u v' u' v'' u''
@@ -11,10 +57,10 @@ variable {R : Type} [CommRing R] {C : Type u} [Category.{v} C]
 
 def mk {Y : C ⥤ Type t} {q : ℕ} (c : ComposableArrows C q) (y : ∀ k, Y.obj (c.obj k))
     (h : ∀ {a b : Fin (q + 1)} (φ : a ⟶ b), Y.map (c.map φ) (y a) = y b) : ComposableArrows Y.Elements q where
-  obj k := ⟨c.obj k, y k⟩
-  map φ := ⟨c.map φ, h φ⟩
-  map_id k := Subtype.ext (c.map_id k)
-  map_comp φ ψ := Subtype.ext (c.map_comp φ ψ)
+  obj k := Y.elementsMk (c.obj k) (y k)
+  map φ := Functor.Elements.homMk (c.map φ) (h φ)
+  map_id k := Functor.Elements.hom_ext (c.map_id k)
+  map_comp φ ψ := Functor.Elements.hom_ext (c.map_comp φ ψ)
 
 theorem mk_congr {Y : C ⥤ Type t} (F : C ⥤ ModuleCat.{w} R) {q : ℕ} (f : Cn (elF Y F) q) (c : ComposableArrows C q)
     {y y' : ∀ k, Y.obj (c.obj k)} h h' (e : y = y') :
@@ -37,62 +83,62 @@ theorem p_lft {q : ℕ} (c : ComposableArrows C q) (e : E.obj (c.obj 0)) (k : Fi
   rw [NatTrans.naturality_apply, (hp _ e).choose_spec]
 
 theorem p_el {q n : ℕ} (s : ComposableArrows (cech p n).Elements q) (k : Fin (q + 1)) (i : Fin (n + 1)) :
-    E.map (s.map (homOfLE (Fin.zero_le k))).1 (p.app _ ((s.obj 0).2.1 0)) = p.app _ ((s.obj k).2.1 i) := by
-  rw [← NatTrans.naturality_apply, ← (s.obj k).2.2 0 i]
-  exact congrArg (fun z => p.app _ (z.1 0)) (s.map (homOfLE (Fin.zero_le k))).2
+    E.map (s.map (homOfLE (Fin.zero_le k))).hom (p.app _ ((s.obj 0).val.1 0)) = p.app _ ((s.obj k).val.1 i) := by
+  rw [← NatTrans.naturality_apply, ← (s.obj k).val.2 0 i]
+  exact congrArg (fun z => p.app _ (z.1 0)) (s.map (homOfLE (Fin.zero_le k))).map_val
 
 noncomputable def extY {q n : ℕ} (s : ComposableArrows (cech p n).Elements q) (k : Fin (q + 1)) :
-    (cech p (n + 1)).obj (s.obj k).1 :=
-  ⟨Fin.cons (lft p hp (s ⋙ CategoryOfElements.π _) (p.app _ ((s.obj 0).2.1 0)) k) (s.obj k).2.1, by
-    have h : ∀ i : Fin (n + 2), p.app _ ((Fin.cons (lft p hp (s ⋙ CategoryOfElements.π _) (p.app _ ((s.obj 0).2.1 0)) k)
-        (s.obj k).2.1 : Fin (n + 2) → E'.obj (s.obj k).1) i) = p.app _ ((s.obj k).2.1 0) := by
+    (cech p (n + 1)).obj (s.obj k).obj :=
+  ⟨Fin.cons (lft p hp (s ⋙ Functor.Elements.π _) (p.app _ ((s.obj 0).val.1 0)) k) (s.obj k).val.1, by
+    have h : ∀ i : Fin (n + 2), p.app _ ((Fin.cons (lft p hp (s ⋙ Functor.Elements.π _) (p.app _ ((s.obj 0).val.1 0)) k)
+        (s.obj k).val.1 : Fin (n + 2) → E'.obj (s.obj k).obj) i) = p.app _ ((s.obj k).val.1 0) := by
       intro i
       refine Fin.cases ?_ (fun i => ?_) i
-      · exact (p_lft p hp (s ⋙ CategoryOfElements.π _) _ k).trans (p_el p s k 0)
-      · exact (s.obj k).2.2 i 0
+      · exact (p_lft p hp (s ⋙ Functor.Elements.π _) _ k).trans (p_el p s k 0)
+      · exact (s.obj k).val.2 i 0
     intro i j
     rw [h i, h j]⟩
 
 theorem extY_map {q n : ℕ} (s : ComposableArrows (cech p n).Elements q) {a b : Fin (q + 1)} (φ : a ⟶ b) :
-    (cech p (n + 1)).map (s.map φ).1 (extY p hp s a) = extY p hp s b := by
+    (cech p (n + 1)).map (s.map φ).hom (extY p hp s a) = extY p hp s b := by
   refine Subtype.ext (funext fun i => ?_)
   refine Fin.cases ?_ (fun i => ?_) i
-  · exact lft_map p hp (s ⋙ CategoryOfElements.π _) _ φ
-  · exact congrArg (fun z => z.1 i) (s.map φ).2
+  · exact lft_map p hp (s ⋙ Functor.Elements.π _) _ φ
+  · exact congrArg (fun z => z.1 i) (s.map φ).map_val
 
 noncomputable def ext {q n : ℕ} (s : ComposableArrows (cech p n).Elements q) : ComposableArrows (cech p (n + 1)).Elements q :=
-  mk (s ⋙ CategoryOfElements.π _) (extY p hp s) (extY_map p hp s)
+  mk (s ⋙ Functor.Elements.π _) (extY p hp s) (extY_map p hp s)
 
 variable (F : C ⥤ ModuleCat.{w} R)
 
 theorem dh_apply {q n : ℕ} (f : Cn (elF (cech p n) F) q) (s : ComposableArrows (cech p (n + 1)).Elements q) :
-    @Eq (F.obj (s.obj (Fin.last q)).1) ((cechCos p F).dcx.dh n q f s)
-      (∑ i : Fin (n + 2), (-1 : ℤ) ^ (i : ℕ) • f (s ⋙ CategoryOfElements.map (cechMap p i.succAbove))) := by
+    @Eq (F.obj (s.obj (Fin.last q)).obj) ((cechCos p F).dcx.dh n q f s)
+      (∑ i : Fin (n + 2), (-1 : ℤ) ^ (i : ℕ) • f (s ⋙ NatTrans.mapElements (cechMap p i.succAbove))) := by
   have := congrFun (Cos.d_apply ((cechCos p F).cos q) n f) s
   rw [Finset.sum_apply] at this
   exact this
 
 theorem ext_zero {q n : ℕ} (f : Cn (elF (cech p n) F) q) (s : ComposableArrows (cech p n).Elements q) :
-    @Eq (F.obj (s.obj (Fin.last q)).1) (f (ext p hp s ⋙ CategoryOfElements.map (cechMap p (0 : Fin (n + 2)).succAbove))) (f s) :=
+    @Eq (F.obj (s.obj (Fin.last q)).obj) (f (ext p hp s ⋙ NatTrans.mapElements (cechMap p (0 : Fin (n + 2)).succAbove))) (f s) :=
   rfl
 
 theorem ext_succ {q n : ℕ} (f : Cn (elF (cech p (n + 1)) F) q) (s : ComposableArrows (cech p (n + 1)).Elements q) (i : Fin (n + 2)) :
-    @Eq (F.obj (s.obj (Fin.last q)).1) (f (ext p hp s ⋙ CategoryOfElements.map (cechMap p i.succ.succAbove)))
-      (f (ext p hp (s ⋙ CategoryOfElements.map (cechMap p i.succAbove)))) := by
-  refine mk_congr F f (s ⋙ CategoryOfElements.π _)
+    @Eq (F.obj (s.obj (Fin.last q)).obj) (f (ext p hp s ⋙ NatTrans.mapElements (cechMap p i.succ.succAbove)))
+      (f (ext p hp (s ⋙ NatTrans.mapElements (cechMap p i.succAbove)))) := by
+  refine mk_congr F f (s ⋙ Functor.Elements.π _)
     (y := fun k => (cechMap p i.succ.succAbove).app _ (extY p hp s k))
-    (y' := fun k => extY p hp (s ⋙ CategoryOfElements.map (cechMap p i.succAbove)) k) _ _ (funext fun k => Subtype.ext (funext fun j => ?_))
+    (y' := fun k => extY p hp (s ⋙ NatTrans.mapElements (cechMap p i.succAbove)) k) _ _ (funext fun k => Subtype.ext (funext fun j => ?_))
   refine Fin.cases ?_ (fun j => ?_) j
   · change (extY p hp s k).1 (i.succ.succAbove 0) = _
     rw [Fin.succ_succAbove_zero]
-    exact congrArg (fun e => lft p hp (s ⋙ CategoryOfElements.π _) e k) ((s.obj 0).2.2 _ _)
+    exact congrArg (fun e => lft p hp (s ⋙ Functor.Elements.π _) e k) ((s.obj 0).val.2 _ _)
   · change (extY p hp s k).1 (i.succ.succAbove j.succ) = _
     rw [Fin.succ_succAbove_succ]
     rfl
 
 noncomputable def ext0 {q : ℕ} (s : ComposableArrows E.Elements q) : ComposableArrows (cech p 0).Elements q :=
-  mk (s ⋙ CategoryOfElements.π _) (fun k => ⟨fun _ => lft p hp (s ⋙ CategoryOfElements.π _) (s.obj 0).2 k, fun _ _ => rfl⟩)
-    fun φ => Subtype.ext (funext fun _ => lft_map p hp (s ⋙ CategoryOfElements.π _) _ φ)
+  mk (s ⋙ Functor.Elements.π _) (fun k => ⟨fun _ => lft p hp (s ⋙ Functor.Elements.π _) (s.obj 0).val k, fun _ _ => rfl⟩)
+    fun φ => Subtype.ext (funext fun _ => lft_map p hp (s ⋙ Functor.Elements.π _) _ φ)
 
 end CrystallineSemistableComparison.ExtensionDiagram
 
@@ -104,23 +150,23 @@ theorem CrystallineSemistableComparison.P.cech_row : ∀ {R : Type} [CommRing R]
     funext s
     have h1 := congrFun hg (ext0 p hp s)
     refine Eq.trans ?_ h1
-    refine mk_congr F g (s ⋙ CategoryOfElements.π _) (y := fun k => (s.obj k).2)
-      (y' := fun k => p.app _ (lft p hp (s ⋙ CategoryOfElements.π _) (s.obj 0).2 k)) (fun φ => (s.map φ).2) _ (funext fun k => ?_)
+    refine mk_congr F g (s ⋙ Functor.Elements.π _) (y := fun k => (s.obj k).val)
+      (y' := fun k => p.app _ (lft p hp (s ⋙ Functor.Elements.π _) (s.obj 0).val k)) (fun φ => (s.map φ).map_val) _ (funext fun k => ?_)
     rw [p_lft]
-    exact (s.map (homOfLE (Fin.zero_le k))).2.symm
+    exact (s.map (homOfLE (Fin.zero_le k))).map_val.symm
   · refine ⟨fun s => f (ext0 p hp s), ?_⟩
     rw [one_smul]
     funext s
     have h1 := (dh_apply p F f (ext p hp s)).symm.trans (congrFun hf (ext p hp s))
     rw [Fin.sum_univ_two] at h1
-    have h2 : @Eq (F.obj (s.obj (Fin.last q)).1) (f (ext p hp s ⋙ CategoryOfElements.map (cechMap p (1 : Fin 2).succAbove)))
-        (f (ext0 p hp (s ⋙ CategoryOfElements.map (cechAug p 0)))) := by
-      refine mk_congr F f (s ⋙ CategoryOfElements.π _)
+    have h2 : @Eq (F.obj (s.obj (Fin.last q)).obj) (f (ext p hp s ⋙ NatTrans.mapElements (cechMap p (1 : Fin 2).succAbove)))
+        (f (ext0 p hp (s ⋙ NatTrans.mapElements (cechAug p 0)))) := by
+      refine mk_congr F f (s ⋙ Functor.Elements.π _)
         (y := fun k => (cechMap p (1 : Fin 2).succAbove).app _ (extY p hp s k)) _ _ (funext fun k => Subtype.ext (funext fun j => ?_))
       obtain rfl : j = 0 := Subsingleton.elim (α := Fin 1) _ _
       rfl
     erw [ext_zero p hp F f s, h2] at h1
-    change f (ext0 p hp (s ⋙ CategoryOfElements.map (cechAug p 0))) = f s
+    change f (ext0 p hp (s ⋙ NatTrans.mapElements (cechAug p 0))) = f s
     simp only [Fin.val_zero, pow_zero, one_smul, Fin.val_one, pow_one, neg_smul] at h1
     exact (add_neg_eq_zero.1 h1).symm
   · refine ⟨fun s => f (ext p hp s), ?_⟩

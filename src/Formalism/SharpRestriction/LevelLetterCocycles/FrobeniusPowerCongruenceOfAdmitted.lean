@@ -1,8 +1,55 @@
-import Mathlib
-import Formalism.SharpRestriction.LevelLetterCocycles.LocalClauseOfFrobeniusHyps
-import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.ExistsXPowMul
-import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.SmulSDivMem
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.CrystallineLiftingInputs
+public import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.SmulSAddLeft
+public import Formalism.SharpRestriction.LevelLetterCocycles.SecondComparisonInCoordinates
+public import Formalism.SharpRestriction.LevelLetterCocycles.LocalClauseOfFrobeniusHyps
 import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.RkMulVBFilCris
+public import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.SmulSDivMem
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PowerSeries.NoZeroDivisors
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Formalism.SharpRestriction.LevelLetterCocycles.LevelClauseOfOpenTool
+public import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.ExistsXPowMul
+
+@[expose] public section
 
 noncomputable section
 
@@ -39,6 +86,7 @@ theorem PhiSeq_smulS (hp : (PD.p : LL) ≠ 0) {T : LocLat G Qp LL O} {m : ℤ} {
     ⟨Int.toNat (k - m) + 1, by have := Int.self_le_toNat (k - m); push_cast; omega⟩
   rw [smulS_eq_sum (LB_PhiSeq hd) _ k N hN]
   simp only [PhiSeq]
+
   rw [smulS_eq_sum hd g k N hN, map_sum, Finset.smul_sum]
   refine Finset.sum_congr rfl fun j _ => ?_
   rw [map_smul, smul_smul, PowerSeries.coeff_rescale, smul_smul]
@@ -69,7 +117,7 @@ theorem laurentBounded_zero_of_trivial_twist (hs : W.s = 1) {Pt : ZMod n → LL 
   have hcc : PowerSeries.constantCoeff (W.lev i 1 W.X) = 0 := by
     rw [hX]
     have := congrArg PowerSeries.constantCoeff hF
-    rw [map_add, map_one, map_mul, PowerSeries.constantCoeff_C, hF0, one_mul] at this
+    rw [map_add (f := _), map_one, map_mul, PowerSeries.constantCoeff_C, hF0, one_mul] at this
     linear_combination this
   have h0 := ((h4.1 i 1 ⟨0, by simp⟩ hcc).1 x k).2 hk
   refine rk_ιV_inj PD (LL := LL) (V := T.V) ?_
@@ -118,7 +166,7 @@ theorem rescale_ne_zero (hp : (PD.p : LL) ≠ 0) {f : PowerSeries LL} (hf : f �
 theorem cc_levπ1 (i : ZMod n) : PowerSeries.constantCoeff (W.lev i 1 letπ) = 0 := by
   obtain ⟨F, hF0, -, hF⟩ := W.lev_π i 1 ⟨0, by simpa using IsPrimitiveRoot.one⟩
   have := congrArg PowerSeries.constantCoeff hF
-  rw [map_add, map_one, map_mul, PowerSeries.constantCoeff_C, hF0, one_mul] at this
+  rw [map_add (f := _), map_one, map_mul, PowerSeries.constantCoeff_C, hF0, one_mul] at this
   linear_combination this
 
 theorem cc_levπ₀1 (hR : RingA W) (h2 : 2 ≤ PD.p) (i : ZMod n) :
@@ -139,7 +187,7 @@ theorem levQ_ne (hA : Formalism.MainNotions.LiftingTheory.CaseA W) (hR : RingA W
   · intro h0
     have := congrArg PowerSeries.constantCoeff h0
     have e : Formalism.MainNotions.LiftingTheory.qp W = W.π₀ + ((PD.p : ℕ) : LetA O n) := rfl
-    rw [e, map_add, map_natCast, map_add, cc_levπ₀1 hR PD.hp.two_le, map_natCast, map_zero, zero_add] at this
+    rw [e, map_add (f := _), map_natCast, map_add (f := _), cc_levπ₀1 hR PD.hp.two_le, map_natCast, map_zero, zero_add] at this
     exact hp this
   · obtain ⟨⟨u, hu, he⟩, -, -⟩ := expRing_of W hR hA i ζ hζ
     rw [he]
@@ -348,9 +396,10 @@ theorem key_idJ {T : LocLat G Qp LL O} (Φ : W.DD T →ₗ[O] W.DD T) (ψ : LetA
         L ^ (σ + (J - e y)) • (r y • Φ (cc y)) := by
     intro y _
     rw [sub_smul, smul_sub, smul_smul (L ^ σ), ← pow_add]
+
   rw [lO_smul, map_sub, map_sum, hΦL, Finset.sum_congr rfl fun y _ => hφ y, smul_sub, smul_sub,
-    Finset.smul_sum, Finset.smul_sum, Finset.sum_congr rfl ht, Finset.sum_congr rfl hs,
-    Finset.sum_sub_distrib, smul_smul, smul_smul, mul_comm (L ^ J)]
+  Finset.smul_sum, Finset.smul_sum, Finset.sum_congr rfl ht, Finset.sum_congr rfl hs,
+  Finset.sum_sub_distrib, smul_smul, smul_smul, mul_comm (L ^ J)]
   abel
 
 theorem φpow_smulA {T : LocLat G Qp LL O} (j : ℕ) (a : LetA O n) (x : W.DD T) :
@@ -412,8 +461,9 @@ theorem expH (hA : Formalism.MainNotions.LiftingTheory.CaseA W) (hR : RingA W) (
           (⟨cc y, hcc y⟩ : ↥(W.N T)) := by
       apply Subtype.ext
       simp only [hh, Submodule.coe_sub, Submodule.coe_smul, Submodule.coe_sum, smul_smul]
+
     rw [hhsub, levB_sub, map_sum, Pi.sub_apply, Finset.sum_apply, levB_smul,
-      smulSeries_apply_zero (laurentBounded_zero_of_trivial_twist C hs h4 i _)]
+    smulSeries_apply_zero (laurentBounded_zero_of_trivial_twist C hs h4 i _)]
     have h0 : ∀ y ∈ Finset.range K, C.levB T i 1 ((((PD.p : ℕ) : LetA O n) ^ (J - e y) * W.π₀ ^ y) •
         (⟨cc y, hcc y⟩ : ↥(W.N T))) 0 = 0 := by
       intro y _
@@ -602,8 +652,9 @@ theorem tHor_of (Ct : CmpTie W E ιdR p1 tS zS) (hinj : Function.Injective (alge
       smulS (W.lev (i + ((j' + 1 : ℕ) : ZMod n)) ζ Bb)
         (smulS (W.lev (i + ((j' + 1 : ℕ) : ZMod n)) ζ (Formalism.MainNotions.LiftingTheory.qp W ^ k * a)) Stuff) := by
     simp only [U]
+
     rw [levB_smul, levB_add, map_sum, levB_smul, hEBh,
-      Finset.sum_congr rfl fun y hy => by rw [levB_smul, hLxc y hy]]
+    Finset.sum_congr rfl fun y hy => by rw [levB_smul, hLxc y hy]]
     rw [smulS_comm hΦh, Finset.sum_congr rfl fun y _ => smulS_comm (hΦc y) _ _,
       ← smulS_sum _ _ (fun y _ => LB_smulS (hΦc y) _),
       ← smulS_add (LB_smulS hΦh _) hSumLB, ← hStuff, smulS_comm hStuffLB]

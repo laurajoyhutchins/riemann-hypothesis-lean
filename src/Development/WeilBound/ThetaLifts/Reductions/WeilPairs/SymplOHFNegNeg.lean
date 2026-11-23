@@ -1,8 +1,49 @@
-import Mathlib
-import Development.WeilBound.ThetaLifts.Reductions.WeilPairs.WeilPairData.ImportsAlt
-import Development.WeilBound.ThetaLifts.Reductions.WeilPairs.WeilPairData.DoubledTargetWeilTransportRestrictFirstFactorImp
-import Development.WeilBound.ThetaLifts.Reductions.WeilPairs.WeilPairData.ThetaFunctionHeisenbergInvariant
-import Development.WeilBound.ThetaLifts.Reductions.WeilPairs.WeilPairData.StandardTraceAddCharIsStandardCharOfAdmissibleCM
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DeltaTApply
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ReindexDblIncM
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ThetaFunctionHeisenbergInvariant
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open scoped TensorProduct Matrix ComplexConjugate
 open NumberField IsDedekindDomain Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes
 open GlobalTheory.WeilM GlobalTheory.LFun GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels
@@ -18,10 +59,6 @@ variable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algeb
 
 theorem topR_add (x y : WOF F E nS (nT + nT)) : topR (x + y) = topR x + topR y := rfl
 theorem botR_add (x y : WOF F E nS (nT + nT)) : botR (x + y) = botR x + botR y := rfl
-theorem topR_neg (x : WOF F E nS (nT + nT)) : topR (-x) = -topR x := rfl
-theorem botR_neg (x : WOF F E nS (nT + nT)) : botR (-x) = -botR x := rfl
-theorem topR_zero : topR (0 : WOF F E nS (nT + nT)) = 0 := rfl
-theorem botR_zero : botR (0 : WOF F E nS (nT + nT)) = 0 := rfl
 
 theorem continuous_topR : Continuous (topR : WOF F E nS (nT + nT) → WOF F E nS nT) :=
   continuous_id.matrix_submatrix _ _
@@ -104,8 +141,5 @@ theorem theta_delta {ψ : AddChar (AF F) ℂ} (hψ : ∀ a, ‖ψ a‖ = 1) {f�
     refine (show (fun t => deltaT f₁ f₂ (w + L t)) = _ from funext fun t => ?_) ▸ a3
     simp only [deltaT_apply, topR_add, botR_add, neg_add]
     rfl
-
-theorem psi_norm {B : Base F E} (hB : B.IsGood σ) : ∀ a, ‖B.ψ a‖ = 1 :=
-  (GlobalTheory.StdCharWeilDatum.isStdCharF_of_isGood F E σ B hB).1.2.1
 
 end PositivityTheory.ThKW.Dbl

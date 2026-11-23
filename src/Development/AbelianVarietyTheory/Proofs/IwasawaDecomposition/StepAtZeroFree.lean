@@ -1,6 +1,47 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.PredMemGamRanks
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsSmulOfDecoEq
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.PredMemGamRanks
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsSmulOfDecoEq
+import Formalism.LocalToGlobal.Columns.ColFormsLemmas
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Formalism.BasicNotions Formalism.L2.Col Formalism.L2.DIV Formalism.L2.Forms GlobalTheory.Mem.Col2
 
@@ -23,12 +64,12 @@ theorem frm_free_zero {X : Fields} {Pr : Primes X} {R : Ranks} (Ch : Chars X Pr 
     exact Finset.mem_union_left _ hw
   have hN : R.N 0 = R.k := by simp [Ranks.N]
   have hm : 0 < R.m := lt_of_lt_of_le (by norm_num) R.two_le_m
-  have hmem : (g.2.1 : GLG X.E (R.N 0) Pr.vGs) ⟨w, hw'⟩ ∈ (colLev Ch 0 ⟨w, hw'⟩).H :=
+  have hmem : (g.2.1 : GLG (E := X.E) (n := R.N 0) (SG := Pr.vGs)) ⟨w, hw'⟩ ∈ (colLev Ch 0 ⟨w, hw'⟩).H :=
     (Subgroup.mem_pi _).mp g.2.1.2 ⟨w, hw'⟩ (Set.mem_univ _)
   rw [colLev_of_lt Ch hm] at hmem
-  have ha : ((g.1, (g.2.1 : GLG X.E (R.N 0) Pr.vGs)) : UF X.E (R.N 0) × GLG X.E (R.N 0) Pr.vGs) • p.deco = p.deco :=
+  have ha : ((g.1, (g.2.1 : GLG (E := X.E) (n := R.N 0) (SG := Pr.vGs))) : UF X.E (R.N 0) × GLG (E := X.E) (n := R.N 0) (SG := Pr.vGs)) • p.deco = p.deco :=
     congrArg DecoF.deco hp
-  have h1 : ((g.1, (g.2.1 : GLG X.E (R.N 0) Pr.vGs)) : UF X.E (R.N 0) × GLG X.E (R.N 0) Pr.vGs) = 1 :=
+  have h1 : ((g.1, (g.2.1 : GLG (E := X.E) (n := R.N 0) (SG := Pr.vGs))) : UF X.E (R.N 0) × GLG (E := X.E) (n := R.N 0) (SG := Pr.vGs)) = 1 :=
     DecoSet.decoration_stabilizer_trivial_unipotent hX hPr p.deco ha 0 ⟨w, hw'⟩ hw (by rw [hN]; exact hbig)
       (isNilpotent_of_mem_HX_zero hN.le hmem)
   apply GlobalTheory.FramedForms.incl_injective

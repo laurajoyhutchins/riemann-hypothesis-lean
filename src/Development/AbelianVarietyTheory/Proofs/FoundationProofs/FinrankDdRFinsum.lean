@@ -1,6 +1,56 @@
-import Mathlib
-import Formalism.SharpRestriction.LevelLetterCocycles.BlochKatoPhases
-import Development.AbelianVarietyTheory.BlockTheory.TorsionBlocks.SelmerRankVanishing
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
+public import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -65,16 +115,17 @@ theorem finrank_eq_sum [FiniteDimensional F K]
     induction z using TensorProduct.induction_on with
     | zero => simp
     | tmul a c => rw [hΨ]; exact W.smul_mem _ (hW c x hx)
-    | add y z hy hz => rw [map_add]; exact W.add_mem hy hz
+    | add y z hy hz => rw [map_add (f := _)]; exact W.add_mem hy hz
   have hΨE : ∀ σ, ∀ x ∈ E σ, ∀ z, Ψ z x = evalEmb F K L z σ • x := by
     intro σ x hx z
     induction z using TensorProduct.induction_on with
     | zero => simp
     | tmul a c => rw [hΨ, evalEmb_tmul, (hE σ x).1 hx, mul_smul]
-    | add y z hy hz => simp [map_add, hy, hz, add_smul]
+    | add y z hy hz => simp [map_add (f := _), hy, hz, add_smul]
   have hsum : ∑ τ, e τ = 1 := by
     apply (evalEmb_bijective hcard).1
-    rw [map_sum, map_one]
+    set_option synthInstance.maxHeartbeats 100000 in
+      rw [map_sum, map_one]
     simp only [he]
     exact Finset.univ_sum_single (fun _ => (1 : L))
   have hmul : ∀ τ c, (1 ⊗ₜ c) * e τ = τ c • e τ := by
@@ -99,7 +150,8 @@ theorem finrank_eq_sum [FiniteDimensional F K]
     · rw [injective_iff_map_eq_zero]
       intro x hx
       have h1 : (x : M) = ∑ τ, Ψ (e τ) x := by
-        rw [← LinearMap.sum_apply, ← map_sum, hsum, map_one]; rfl
+        set_option synthInstance.maxHeartbeats 100000 in
+          rw [← LinearMap.sum_apply, ← map_sum, hsum, map_one]; rfl
       apply Subtype.ext
       rw [h1]
       simp [← hf, hx]
@@ -107,7 +159,8 @@ theorem finrank_eq_sum [FiniteDimensional F K]
       refine ⟨⟨∑ σ, (y σ : M), W.sum_mem fun σ _ => (y σ).2.1⟩, ?_⟩
       funext τ
       apply Subtype.ext
-      rw [hf, map_sum, Finset.sum_eq_single τ]
+      set_option synthInstance.maxHeartbeats 100000 in
+        rw [hf, map_sum, Finset.sum_eq_single τ]
       · rw [hΨE τ _ (y τ).2.2, he]; simp
       · intro σ _ h
         rw [hΨE σ _ (y σ).2.2, he]; simp [Pi.single_eq_of_ne h]
@@ -169,7 +222,7 @@ theorem act_mul (g : G) (c : K) (x : V ⊗[Qp] BdR) :
   induction x using TensorProduct.induction_on with
   | zero => simp
   | tmul v b => simp [actVdR, mulVdR_tmul]
-  | add y z hy hz => simp [map_add, hy, hz]
+  | add y z hy hz => simp [map_add (f := _), hy, hz]
 
 theorem mul_mem_DdR (c : K) (x : V ⊗[Qp] BdR) (hx : x ∈ DdR PD ρ) :
     mulVdR (K := K) (LL := LL) c x ∈ DdR PD ρ := by
@@ -186,7 +239,7 @@ theorem mul_mem_FilV (a : ℤ) (c : K) (x : V ⊗[Qp] BdR) (hx : x ∈ FilV PD (
   | tmul v b =>
     refine ⟨v ⊗ₜ ⟨c • b.1, (PD.Fil a).smul_mem c b.2⟩, ?_⟩
     simp [mulVdR_tmul, Algebra.smul_def]
-  | add y z hy hz => rw [map_add, map_add]; exact Submodule.add_mem _ hy hz
+  | add y z hy hz => rw [map_add (f := _), map_add (f := _)]; exact Submodule.add_mem _ hy hz
 
 theorem finrank_DdR [FiniteDimensional Qp K] (hcard : Fintype.card (K →ₐ[Qp] LL) = finrank Qp K)
     [FiniteDimensional LL ↥(DdR PD ρ)] (a : ℤ) :
@@ -226,6 +279,8 @@ theorem card_emb {l : ℕ} [Fact l.Prime] (K LL : Loc.FinExt l)
   · intro τ
     exact ⟨τ.codRestrict LL.1.toSubalgebra (h τ), by ext x; rfl⟩
 
+-- The concrete local period data makes `Module` synthesis for `DdR` exceed the default budget.
+set_option synthInstance.maxHeartbeats 100000 in
 open Formalism.BasicNotions Formalism.WeaklyAdmissibleFiltrations in
 theorem finrank_DdR_local {l : ℕ} [Fact l.Prime] (P : LocPrime l) (K LL : Loc.FinExt l)
     (h : ∀ (τ : ↥K.1 →ₐ[ℚ_[l]] Loc.Om l) (x : ↥K.1), τ x ∈ LL.1) {m : ℕ} (hm : 0 < m)

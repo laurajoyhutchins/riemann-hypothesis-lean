@@ -1,15 +1,65 @@
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsSncModel
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.BlowupProjections.BlowupProjStatement
-import Development.AutomorphicSpectrum.Definitions.DivisibilityTowers.Proportional
-import Development.WeilBound.CoreStatements.HomogeneousNonvanishing.ContinuousAtOfClosedRel
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PNonvanishingDense
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PRatPrimeDense
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PFiniteSeparatingModel
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PRootsNear
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PNoetherProjection
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PRootsLiftToZeros
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PRootsBounded
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PPolyNonvanishDense
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsNonvanishingDense
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterRes
+public import Development.WeilBound.CoreStatements.HomogeneousNonvanishing.ContinuousAtOfClosedRel
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PFiniteSeparatingModel
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PNoetherProjection
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PNonvanishingDense
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PPolyNonvanishDense
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PRatPrimeDense
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PRootsBounded
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PRootsNear
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.ConjugateHermitianLineIsometries
+import Development.AutomorphicSpectrum.Definitions.MetricPeriods.PairRelationOfScaledRatio
+import ReciprocityTheory.AnalyticForms.LeviForms.IsRegFamilyInhabitStatement
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.MixedFieldContraction.GenericFibreKerTarget
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.MultihomogeneousIdeals.IsFieldIntersection
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.RationalSections.IsRatSectionOn
+
+@[expose] public section
 
 open MvPolynomial ReciprocityTheory.ChartRestriction.G.Geo ReciprocityTheory.ChartRestriction.G.AI.I2 ReciprocityTheory.ChartRestriction.G.AI.I4 ReciprocityTheory.AnForm.M ReciprocityTheory.AnForm.P GlobalTheory.CompanionTheory.Ar.Cmp GlobalTheory.CompanionTheory.Ar.PB Filter Topology
 open ReciprocityTheory.ChartRestriction.G.AI.I1 (IsBlockMap pullDeg)
@@ -49,7 +99,10 @@ private theorem rootsLiftToZeros_statement : GroundTheory.Heights₂.Heights.Hil
     exact hG)
   letI : Algebra (Polynomial (MvPolynomial (Fin e) ℚ) ⧸
       Q.comap (algebraMap (Polynomial (MvPolynomial (Fin e) ℚ)) (MvPolynomial σ ℚ ⧸ P))) ℂ :=
-    (Ideal.Quotient.lift _ φ (fun a ha => by rw [hQc] at ha; exact ha)).toAlgebra
+    (Ideal.Quotient.lift _ φ (fun a ha => by
+      change a ∈ Ideal.under _ Q at ha
+      rw [hQc] at ha
+      exact ha)).toAlgebra
   haveI : IsDomain ((MvPolynomial σ ℚ ⧸ P) ⧸ Q) := Ideal.Quotient.isDomain Q
   haveI : Module.IsTorsionFree (Polynomial (MvPolynomial (Fin e) ℚ) ⧸
       Q.comap (algebraMap (Polynomial (MvPolynomial (Fin e) ℚ)) (MvPolynomial σ ℚ ⧸ P))) ((MvPolynomial σ ℚ ⧸ P) ⧸ Q) :=
@@ -60,7 +113,9 @@ private theorem rootsLiftToZeros_statement : GroundTheory.Heights₂.Heights.Hil
     intro x hx
     obtain ⟨a, rfl⟩ := Ideal.Quotient.mk_surjective x
     rw [RingHom.mem_ker] at hx
-    rw [Ideal.mem_bot, Ideal.Quotient.eq_zero_iff_mem, hQc]
+    rw [Ideal.mem_bot, Ideal.Quotient.eq_zero_iff_mem]
+    change a ∈ Ideal.under _ Q
+    rw [hQc]
     exact hx
   haveI : Algebra.IsIntegral (Polynomial (MvPolynomial (Fin e) ℚ) ⧸
       Q.comap (algebraMap (Polynomial (MvPolynomial (Fin e) ℚ)) (MvPolynomial σ ℚ ⧸ P))) ((MvPolynomial σ ℚ ⧸ P) ⧸ Q) :=
@@ -117,7 +172,7 @@ theorem nonvanishing_dense : NonvanishingDense.Statement := by
     rw [hhor, Ideal.mem_bot] at this
     exact nonZeroDivisors.ne_zero hn this
   have hP'prime := IsLocalization.isPrime_of_isPrime_disjoint (Submonoid.map (C (σ := Σ k, ι k)) (nonZeroDivisors ℤ)) (MvPolynomial (Σ k, ι k) ℚ) P hprime hdisj
-  have hcomap := IsLocalization.comap_map_of_isPrime_disjoint (Submonoid.map (C (σ := Σ k, ι k)) (nonZeroDivisors ℤ)) (MvPolynomial (Σ k, ι k) ℚ) hprime hdisj
+  have hcomap := IsLocalization.under_map_of_isPrime_disjoint (Submonoid.map (C (σ := Σ k, ι k)) (nonZeroDivisors ℤ)) (MvPolynomial (Σ k, ι k) ℚ) hprime hdisj
   rw [halg] at hP'prime hcomap
   set P' := Ideal.map (MvPolynomial.map (Int.castRingHom ℚ)) P with hP'
   have hf' : MvPolynomial.map (Int.castRingHom ℚ) f ∉ P' := by

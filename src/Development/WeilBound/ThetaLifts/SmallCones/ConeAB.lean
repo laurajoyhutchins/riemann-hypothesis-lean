@@ -1,6 +1,51 @@
-import Development.WeilBound.ThetaLifts.SmallCones.ThetaUniq
-import Development.WeilBound.ThetaLifts.SmallCones.ConeCore
-import Development.WeilBound.ThetaLifts.SmallCones.ConeLawAB
+module
+
+public import Development.WeilBound.ThetaLifts.SmallCones.HodgeTateFromSandwich
+public import Development.WeilBound.ThetaLifts.SmallCones.ConeBasic
+public import Development.WeilBound.ThetaLifts.SmallCones.ConeCore
+public import Development.WeilBound.ThetaLifts.SmallCones.ConeLawAB
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.Divisors.MatchingOfParts
+import Development.WeilBound.ThetaLifts.CTKernel
+import Development.WeilBound.ThetaLifts.TowerModels.PlaneHerm
+
+@[expose] public section
 
 set_option linter.unusedSectionVars false
 
@@ -34,6 +79,7 @@ theorem hTens_vec {n d : ℕ} (J : Matrix (Fin n) (Fin n) E) (J' : Matrix (Fin d
     hTens (cA σ) (incM F J) (incM F J') (incM F (Matrix.vecMulVec x y)) (incM F (Matrix.vecMulVec x' y')) =
       inclR (F := F) (AF F) (form σ J x x' * form σ J' y y') := by
   have hc : ∀ a : E, cA σ (inclR (F := F) (AF F) a) = inclR (F := F) (AF F) (σ a) := fun a => by simp [cA, inclR]
+
   simp only [hTens, incM, Matrix.map_apply, Matrix.vecMulVec_apply, hc, ← map_mul, ← map_sum, form, dotProduct, Matrix.mulVec]
   congr 1
   rw [Finset.sum_mul]
@@ -47,6 +93,7 @@ theorem hTens_vec {n d : ℕ} (J : Matrix (Fin n) (Fin n) E) (J' : Matrix (Fin d
 
 theorem form_swap (hσ : IsCMExt F E σ) {n : ℕ} {J : Matrix (Fin n) (Fin n) E} {ε : E} (h : ∀ i j, σ (J j i) = ε * J i j)
     (x y : Fin n → E) : σ (form σ J x y) = ε * form σ J y x := by
+
   simp only [form, dotProduct, Matrix.mulVec, map_sum, map_mul, cm_conj_conj hσ, Finset.mul_sum, h]
   rw [Finset.sum_comm]
   exact Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => by ring

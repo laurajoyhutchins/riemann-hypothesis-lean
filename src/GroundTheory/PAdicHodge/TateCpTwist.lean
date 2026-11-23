@@ -1,5 +1,57 @@
-import Mathlib
-import GroundTheory.PAdicHodge.GaloisOnCp
+module
+
+public import Mathlib.Analysis.Normed.Field.Instances
+public import Mathlib.NumberTheory.Cyclotomic.CyclotomicCharacter
+public import Mathlib.NumberTheory.Padics.Complex
+public import Mathlib.RepresentationTheory.Continuous.Basic
+public import Mathlib.Topology.Algebra.Nonarchimedean.Completion
+public import GroundTheory.PAdicHodge.GaloisOnCp
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RootsOfUnity.AlgebraicallyClosed
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.PAdicHodge
@@ -8,30 +60,10 @@ open UniformSpace
 
 variable {p : ℕ} [Fact p.Prime]
 
-instance uniformContinuousConstSMul_intermediateField
-    (K : IntermediateField ℚ_[p] (PadicAlgCl p)) : UniformContinuousConstSMul K (PadicAlgCl p) :=
-  ⟨fun k => by
-    have h : (fun y : PadicAlgCl p => k • y) = fun y => (k : PadicAlgCl p) * y := funext fun _ => rfl
-    rw [h]
-    exact uniformContinuous_addMonoidHom_of_continuous (f := AddMonoidHom.mulLeft (k : PadicAlgCl p))
-      (continuous_const.mul continuous_id)⟩
-
 variable (K : IntermediateField ℚ_[p] (PadicAlgCl p))
 
 theorem algebraMap_intermediateField_cp (k : K) :
     algebraMap K ℂ_[p] k = ((k : PadicAlgCl p) : ℂ_[p]) := rfl
-
-instance : IsScalarTower K (PadicAlgCl p) ℂ_[p] := IsScalarTower.of_algebraMap_eq fun _ => rfl
-
-theorem continuous_algebraMap_intermediateField_cp : Continuous (algebraMap K ℂ_[p]) :=
-  (Completion.continuous_coe _).comp continuous_subtype_val
-
-instance : ContinuousSMul K ℂ_[p] :=
-  ⟨by
-    have h : (fun q : K × ℂ_[p] => q.1 • q.2) = fun q => algebraMap K ℂ_[p] q.1 * q.2 :=
-      funext fun q => Algebra.smul_def _ _
-    rw [h]
-    exact ((continuous_algebraMap_intermediateField_cp K).comp continuous_fst).mul continuous_snd⟩
 
 theorem gal_smul_algebraMap_intermediateField (σ : Gal(PadicAlgCl p/K)) (k : K) :
     σ • algebraMap K ℂ_[p] k = algebraMap K ℂ_[p] k :=
@@ -91,12 +123,7 @@ noncomputable def cpTwistRep (j : ℤ) : ContRepresentation K Gal(PadicAlgCl p/K
         simp only [cpTwistMap_apply, twistScalar_mul, smul_mul', gal_smul_twistScalar, mul_smul]
         ring }
 
-noncomputable abbrev cpTwist (j : ℤ) : TopRep K Gal(PadicAlgCl p/K) := TopRep.of (cpTwistRep K j)
-
 theorem cpTwistRep_apply (j : ℤ) (σ : Gal(PadicAlgCl p/K)) (x : ℂ_[p]) :
     cpTwistRep K j σ x = twistScalar K j σ * (σ • x) := rfl
-
-theorem cpTwist_ρ_apply (j : ℤ) (σ : Gal(PadicAlgCl p/K)) (x : ℂ_[p]) :
-    (cpTwist K j).ρ σ x = twistScalar K j σ * (σ • x) := rfl
 
 end GroundTheory.PAdicHodge

@@ -1,4 +1,52 @@
-import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.HermitianForms.UnitaryLattices.PositiveShells.ExistsMemBall
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.HermitianForms.UnitaryLattices.PositiveShells.ExistsMemBall
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.NormalizedAbsCharacterization
+import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.HermitianForms.UnitaryLattices.PositiveShells.ContinuousColElVal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -76,7 +124,7 @@ theorem uShell : UShell k := by
       obtain ⟨n, H₀, hH₀, hx⟩ := hx
       obtain ⟨n', H₀', hH₀', hy⟩ := hy
       refine ⟨max n n', H₀ ⊓ H₀', by rw [AddSubgroup.coe_inf]; exact hH₀.inter hH₀', fun t ht H T hT hH => ?_⟩
-      simp only [map_add, Finset.sum_add_distrib]
+      simp only [map_add (f := _), Finset.sum_add_distrib]
       rw [hx t (le_of_max_le_left ht) H T hT (hH.trans inf_le_left),
         hy t (le_of_max_le_right ht) H T hT (hH.trans inf_le_right), add_zero]
     | smul a x _ hx =>
@@ -106,9 +154,9 @@ theorem uShell : UShell k := by
     have fv : FixH h π H v := fun b hb => (hH hb).1.1.1
     have fw1 : FixH h π H w1 := fun b hb => (hH hb).1.1.2
     have fw2 : FixH h π H w2 := fun b hb => (hH hb).1.2
-    have fw : FixH h π H (w1 + w2) := fun b hb => by rw [map_add, fw1 b hb, fw2 b hb]
+    have fw : FixH h π H (w1 + w2) := fun b hb => by rw [map_add (f := _), fw1 b hb, fw2 b hb]
     have fgv : FixH h π H (π (scalAt k (m + 1) N (by omega) z) v) := fun b hb => by
-      rw [hgv, map_add, map_smul, fv b hb, fw b hb]
+      rw [hgv, map_add (f := _), map_smul, fv b hb, fw b hb]
     have h2 : avgL h π T w2 = 0 := by
       rw [avgL_apply, hw2P (t + n₂) (by omega) H T hT (fun b hb => (hH hb).2), smul_zero]
     have h1 : avgL h π T w1 ∈ twKer π (derUnip k N (m + 2)) (lvlChar k ψ N (m + 2)) := by
@@ -116,11 +164,11 @@ theorem uShell : UShell k := by
       exact Submodule.smul_mem _ _ (Submodule.sum_mem _ fun b _ => colEl_twKer ψ h π b hw1)
     have hB1 : ∀ y, B (avgL h π T w1) y = 0 := fun y => hkill _ h1 y
     have hB2 : B (avgL h π T v) (w1 + w2) = 0 := by
-      rw [B_avgL hmir hT fw, map_add, h2, add_zero, hpsd.1 (avgL h π T w1) v, hB1, map_zero]
+      rw [B_avgL hmir hT fw, map_add (f := _), h2, add_zero, hpsd.1 (avgL h π T w1) v, hB1, map_zero]
     have hQ : avgL h π T (π (scalAt k (m + 1) N (by omega) z) v) = c • avgL h π T v + avgL h π T w1 := by
-      rw [hgv, map_add, map_smul, map_add, h2, add_zero]
+      rw [hgv, map_add (f := _), map_smul, map_add (f := _), h2, add_zero]
     have hBs : B (c • avgL h π T v + avgL h π T w1) = c • B (avgL h π T v) + B (avgL h π T w1) := by
-      rw [map_add, map_smul]
+      rw [map_add (f := _), map_smul]
     rw [avg_eq hT fgv, avg_eq hT fv, hQ, hgv, hBs, LinearMap.add_apply, hB1, add_zero,
       LinearMap.smul_apply, map_add, hB2, add_zero, map_smulₛₗ, smul_eq_mul, smul_eq_mul, ← mul_assoc,
       Complex.mul_conj, Complex.normSq_eq_norm_sq]

@@ -1,6 +1,48 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsUSplittingInl
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TwoMulInvOf
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TwoMulInvOf
+public import Formalism.LocalToGlobal.BesselHermitianTheta.DefsReal
+public import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.WeilTensorModels
+import Development.AbelianVarietyTheory.Proofs.HeightProofs.IsTopologicalRingAE
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.L2.Theta
 open IsDedekindDomain NumberField
@@ -48,15 +90,15 @@ theorem pairA_mul_eq_zero_iff_fst (a : AF F) : pairA F 1 0 * a = 0 ↔ fstA F a 
 
 def incF : Af F →ₗ[F] AF F where
   toFun y := pairA F 0 y
-  map_add' y y' := af_ext (by rw [map_add, fstA_pairA, fstA_pairA, fstA_pairA, add_zero])
-    (by rw [map_add, sndA_pairA, sndA_pairA, sndA_pairA])
+  map_add' y y' := af_ext (by rw [map_add (f := _), fstA_pairA, fstA_pairA, fstA_pairA, add_zero])
+    (by rw [map_add (f := _), sndA_pairA, sndA_pairA, sndA_pairA])
   map_smul' c y := af_ext (by rw [map_smul, fstA_pairA, fstA_pairA, RingHom.id_apply, smul_zero])
     (by rw [map_smul, sndA_pairA, sndA_pairA, RingHom.id_apply])
 
 def incI : Ainf F →ₗ[F] AF F where
   toFun y := pairA F y 0
-  map_add' y y' := af_ext (by rw [map_add, fstA_pairA, fstA_pairA, fstA_pairA])
-    (by rw [map_add, sndA_pairA, sndA_pairA, sndA_pairA, add_zero])
+  map_add' y y' := af_ext (by rw [map_add (f := _), fstA_pairA, fstA_pairA, fstA_pairA])
+    (by rw [map_add (f := _), sndA_pairA, sndA_pairA, sndA_pairA, add_zero])
   map_smul' c y := af_ext (by rw [map_smul, fstA_pairA, fstA_pairA, RingHom.id_apply])
     (by rw [map_smul, sndA_pairA, sndA_pairA, RingHom.id_apply, smul_zero])
 
@@ -80,7 +122,7 @@ theorem secF_finPart (z : AE D) : secF D (finPart D z) = pairA D.host.F 0 1 • 
   | tmul a b =>
     have h1 : finPart D (a ⊗ₜ b) = sndA D.host.F a ⊗ₜ b := rfl
     rw [h1, secF, TensorProduct.map_tmul, LinearMap.id_apply, incF_sndA, TensorProduct.smul_tmul', smul_eq_mul]
-  | add x y hx hy => rw [(finPart D).map_add, (secF D).map_add, hx, hy, smul_add]
+  | add x y hx hy => rw [map_add (finPart D), map_add (secF D), hx, hy, smul_add]
 
 theorem secI_infPart (z : AE D) : secI D (infPart D z) = pairA D.host.F 1 0 • z := by
   induction z using TensorProduct.induction_on with
@@ -88,7 +130,7 @@ theorem secI_infPart (z : AE D) : secI D (infPart D z) = pairA D.host.F 1 0 • 
   | tmul a b =>
     have h1 : infPart D (a ⊗ₜ b) = fstA D.host.F a ⊗ₜ b := rfl
     rw [h1, secI, TensorProduct.map_tmul, LinearMap.id_apply, incI_fstA, TensorProduct.smul_tmul', smul_eq_mul]
-  | add x y hx hy => rw [(infPart D).map_add, (secI D).map_add, hx, hy, smul_add]
+  | add x y hx hy => rw [map_add (infPart D), map_add (secI D), hx, hy, smul_add]
 
 theorem finPart_smul (z : AE D) : finPart D (pairA D.host.F 0 1 • z) = finPart D z := by
   rw [Algebra.smul_def, (finPart D).map_mul]

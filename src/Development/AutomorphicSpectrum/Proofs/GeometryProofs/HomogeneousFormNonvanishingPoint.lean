@@ -1,6 +1,57 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.SncChartPoint
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsSncModel
+module
+
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.SncChartPoint
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsSncModel
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open MvPolynomial ReciprocityTheory.ChartRestriction.G.Geo ReciprocityTheory.ChartRestriction.G.AI.I2 ReciprocityTheory.ChartRestriction.G.AI.I4 ReciprocityTheory.AnForm.M ReciprocityTheory.AnForm.P GlobalTheory.CompanionTheory.Ar.Cmp GlobalTheory.CompanionTheory.Ar.PB GlobalTheory.CompanionTheory.Ar.SncRes
 
 noncomputable section
@@ -48,7 +99,7 @@ theorem segForm_weighted {N : ℕ} (E : Fin (N + 1) ≃ ((k : K) → ι k)) {Gz 
     IsWeightedHomogeneous.prod _ _ _ fun j _ => (hseg j).pow _
   have h2 : (∑ j, m j • 1) = n := by simpa using hdeg
   rw [h2] at h1
-  have h3 := (isWeightedHomogeneous_C w (coeff m Gz)).mul h1
+  have h3 := (isWeightedHomogeneous_C w (AddMonoidAlgebra.coeff Gz m)).mul h1
   rw [zero_add] at h3
   convert h3 using 2
   exact RingHom.congr_fun (RingHom.ext_int _ _) _
@@ -97,14 +148,14 @@ theorem multiHomog_rename_inl {g : MRing ι} {d : K → ℕ} (hg : IsMultiHomog 
   cases k with
   | inl k =>
     rw [Sum.elim_inl, ← hg m' hm' k]
-    exact Finset.sum_congr rfl fun i _ => Finsupp.mapDomain_apply joinInl_inj m' ⟨k, i⟩
+    exact Finset.sum_congr rfl fun i _ => Finsupp.mapDomain_apply_of_injective joinInl_inj m' ⟨k, i⟩
   | inr k =>
     refine Finset.sum_eq_zero fun i _ => Finsupp.mapDomain_notin_range _ _ ?_
     rintro ⟨q, hq⟩
     exact Sum.inl_ne_inr (congrArg Sigma.fst hq)
 
-omit [Fintype K] [∀ k, Fintype (ι k)] [Fintype K₂] [∀ k, Fintype (ι₂ k)] in
 
+omit [Fintype K] [∀ k, Fintype (ι k)] [Fintype K₂] [∀ k, Fintype (ι₂ k)] in
 theorem rename_inl_mem {Ω : Type} [Field Ω] (y₁ : (Σ k, ι k) → Ω) (y₂ : (Σ k, ι₂ k) → Ω) {f : MRing ι}
     (hf : f ∈ mCoordIdeal y₁) : rename (joinInl ι ι₂) f ∈ mCoordIdeal (joinVec y₁ y₂) := by
   have key : ∀ g : MRing ι, mConeMap (joinVec y₁ y₂) (rename (joinInl ι ι₂) g) =
@@ -112,7 +163,7 @@ theorem rename_inl_mem {Ω : Type} [Field Ω] (y₁ : (Σ k, ι k) → Ω) (y₂
     intro g
     induction g using MvPolynomial.induction_on with
     | C a => simp
-    | add p q hp hq => simp only [map_add, hp, hq]
+    | add p q hp hq => simp only [map_add (f := _), hp, hq]
     | mul_X p n hp =>
       simp only [map_mul, hp, rename_X]
       congr 1
@@ -137,8 +188,8 @@ theorem aeval_mem_int {Ω : Type} [Field Ω] [Algebra ℚ Ω] {σ : Type} (A : S
   | add p q hp hq => rw [map_add]; exact add_mem hp hq
   | mul_X p i hp => rw [map_mul, aeval_X]; exact mul_mem hp (hv i)
 
-omit [∀ k, Fintype (ι k)] in
 
+omit [∀ k, Fintype (ι k)] in
 theorem seg_ratio_update [DecidableEq K] {Ω : Type} [Field Ω] (y : (Σ k, ι k) → Ω) (c₀ : (k : K) → ι k)
     (hc : ∀ k, y ⟨k, c₀ k⟩ ≠ 0) (k : K) (i : ι k) :
     (∏ k', y ⟨k', Function.update c₀ k i k'⟩) / ∏ k', y ⟨k', c₀ k'⟩ = y ⟨k, i⟩ / y ⟨k, c₀ k⟩ := by
@@ -177,8 +228,8 @@ theorem blockFnField_joinPt (y : (Σ k, ι k) → Ω) (x' : Fin (r + 1) → Ω)
     exact IntermediateField.subset_adjoin _ _
       ⟨joinInl _ _ p, joinInl _ _ q, by simp [joinInl, hpq], rfl⟩
 
-omit [∀ k, Fintype (ι k)] in
 
+omit [∀ k, Fintype (ι k)] in
 theorem adjoin_ratios_eq (y : (Σ k, ι k) → Ω) (x' : Fin (r + 1) → Ω) {N : ℕ}
     (E : Fin (N + 1) ≃ ((k : K) → ι k)) (c : (k : K ⊕ Unit) → joinIdx ι (fun _ : Unit => Fin (r + 1)) k)
     (a : Fin (N + 1)) (hEa : ∀ k, E a k = c (Sum.inl k)) (hc : ∀ k, y ⟨k, c (Sum.inl k)⟩ ≠ 0) :
@@ -216,8 +267,7 @@ theorem aeval_ratios_segForm (y : (Σ k, ι k) → Ω) (x' : Fin (r + 1) → Ω)
   rw [aeval_rename, aeval_segForm, aeval_map_algebraMap]
   congr 2
   funext j
-  simp only [← Finset.prod_div_distrib, hEa]
-  rfl
+  simp [joinInl, joinPt, joinVec, hEa, Finset.prod_div_distrib]
 
 theorem isSncModel_joinPt (y : (Σ k, ι k) → Ω) (x' : Fin (r + 1) → Ω) (e : ℕ) {N : ℕ}
     (E : Fin (N + 1) ≃ ((k : K) → ι k)) (Gz : MvPolynomial (Fin (N + 1)) ℤ)

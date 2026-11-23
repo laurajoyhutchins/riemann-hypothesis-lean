@@ -1,7 +1,44 @@
-import Formalism.LocalToGlobal.ClassS
-import Formalism.LocalToGlobal.RatioJoints.IsRatioAt
-import Formalism.LocalToGlobal.UnitaryNorms.CharDiv
-import Formalism.LocalToGlobal.JointCharacters.SameChr
+module
+
+public import Formalism.LocalToGlobal.ClassS
+public import Formalism.LocalToGlobal.RatioJoints.IsRatioAt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.NeutralLocalFields.LocalFieldComparison.HCFFromRecipA
+
+@[expose] public section
 
 noncomputable section
 
@@ -46,25 +83,11 @@ namespace JointsS
 
 variable {ex : Extra D L hT Gi Gl K Y cX} {T : LinkedFamilyData ex}
 
-theorem idem (_ : JointsS T) (P : HeightOneSpectrum (𝓞 D.host.E)) : ∃ e, Formalism.L2.JoinChr.IsPlIdem D e P :=
-  T.sameChr.idem P
-
 end JointsS
 
 section
 
-def TiedSJ (ex : Extra D L hT Gi Gl K Y cX) : Prop := ∃ T : LinkedFamilyData ex, JointsS T
-
-theorem TiedSJ.tiedS {ex : Extra D L hT Gi Gl K Y cX} (h : TiedSJ ex) : LinkedFamilyCondition ex :=
-  let ⟨T, _⟩ := h; ⟨T⟩
-
 end
-
-def EventuallyCompatibleFamilyClass : FamClass := fun {_} Fm =>
-  ∃ x0 : ℝ, ∀ x (hx : Fm.x1 < x), x0 ≤ x → ∀ i : Fm.Ix x, TiedSJ (Fm.ex x hx i)
-
-theorem EventuallyCompatibleFamilyClass.c2s {eps : ℝ} {Fm : FamP eps} (h : EventuallyCompatibleFamilyClass Fm) : LinkedFamiliesLevelClass Fm :=
-  let ⟨x0, hx0⟩ := h; ⟨x0, fun x hx h0 i => (hx0 x hx h0 i).tiedS⟩
 
 end Formalism.L2
 

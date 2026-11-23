@@ -1,5 +1,64 @@
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.HighestWeights.OpEqExp
-import Formalism.RealPlaceAnalysis.StatementKT
+module
+
+public import Formalism.RealPlaceAnalysis.StatementKT
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.CasimirCoefficients.PsiExistsStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Matrix.FiniteDimensional
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.HighestWeights.OneParam
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Analysis.Calculus.Deriv.Comp
+public import Mathlib.Analysis.Calculus.Deriv.Linear
+public import Mathlib.Analysis.Calculus.Deriv.Mul
+public import Mathlib.Analysis.Normed.Algebra.MatrixExponential
+public import Mathlib.Analysis.SpecialFunctions.Exponential
+
+@[expose] public section
 
 noncomputable section
 
@@ -239,7 +298,7 @@ theorem KType.dτ_bracket_single {ε : Fin n → Bool} {Λ : Fin n → ℝ} (T :
     T.dτ (Matrix.single a b 1) * T.dτ (Matrix.single c d 1) -
         T.dτ (Matrix.single c d 1) * T.dτ (Matrix.single a b 1) =
       T.dτ (Matrix.single a b 1 * Matrix.single c d 1 - Matrix.single c d 1 * Matrix.single a b 1) := by
-  rw [single_eq_kp a b, single_eq_kp c d, brk_expand, map_add, map_add, map_smul, map_smul,
+  rw [single_eq_kp a b, single_eq_kp c d, brk_expand, map_add (f := _), map_add (f := _), map_smul, map_smul,
     brk_expand, map_add, map_add, map_add, map_smul, map_smul, map_smul,
     KType.dτ_bracket T (inK_hermitian_unit hab) (inK_hermitian_unit hcd), KType.dτ_bracket T (inK_hermitian_unit hab) (inK_skew_hermitian_unit hcd),
     KType.dτ_bracket T (inK_skew_hermitian_unit hab) (inK_hermitian_unit hcd), KType.dτ_bracket T (inK_skew_hermitian_unit hab) (inK_skew_hermitian_unit hcd)]
@@ -247,7 +306,7 @@ theorem KType.dτ_bracket_single {ε : Fin n → Bool} {Λ : Fin n → ℝ} (T :
 theorem KType.star_dτ_single {ε : Fin n → Bool} {Λ : Fin n → ℝ} (T : KType ε Λ)
     {a b : Fin n} (hab : ε a = ε b) :
     star (T.dτ (Matrix.single a b 1)) = T.dτ (Matrix.single b a 1) := by
-  rw [single_eq_kp a b, single_eq_kp' a b, map_add, map_smul, map_add, map_smul, map_neg, star_add,
+  rw [single_eq_kp a b, single_eq_kp' a b, map_add (f := _), map_smul, map_add (f := _), map_smul, map_neg, star_add,
     star_smul, KType.star_dτ T (inK_hermitian_unit hab), KType.star_dτ T (inK_skew_hermitian_unit hab)]
   simp [Complex.conj_I]
 

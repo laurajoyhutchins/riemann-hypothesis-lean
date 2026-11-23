@@ -1,4 +1,55 @@
-import Development.WeilBound.RepresentationTheoryGL.SiegelWeilProof.HolomorphicContinuation.PolynomialDerivatives.NullStableAlt
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.SiegelWeilProof.HolomorphicContinuation.PolynomialDerivatives.NullStableAlt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.Derivation.Lie
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Bool
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -40,13 +91,13 @@ theorem hop_pderiv_cr (c : ℝ) (j k : Fin m × Fin n × Bool) (Q : PX m n) :
   obtain ⟨a, i, e⟩ := j
   cases e
   · rw [cr_false, cr_false]
-    simp only [map_add, map_neg, map_smul, Derivation.leibniz, pderiv_X, smul_eq_mul, smul_eq_C_mul,
+    simp only [map_add (f := _), map_neg, map_smul, Derivation.leibniz, pderiv_X, smul_eq_mul, smul_eq_C_mul,
       hop_pderiv_comm' k (a, i, false)]
     by_cases h : k = (a, i, true)
     · subst h; simp [Pi.single_apply]; ring
     · simp [Pi.single_apply, h, Ne.symm h]
   · rw [cr_true, cr_true]
-    simp only [map_add, map_neg, map_smul, Derivation.leibniz, pderiv_X, smul_eq_mul, smul_eq_C_mul,
+    simp only [map_add (f := _), map_neg, map_smul, Derivation.leibniz, pderiv_X, smul_eq_mul, smul_eq_C_mul,
       hop_pderiv_comm' k (a, i, true)]
     by_cases h : k = (a, i, false)
     · subst h; simp [Pi.single_apply]; ring
@@ -88,7 +139,7 @@ theorem hop_deriv_fock {c : ℝ} (hc : 0 < c) (k : Fin m × Fin n × Bool) (p : 
   induction p using MvPolynomial.induction_on with
   | C r => rw [hop_fock_C, pderiv_C, pderiv_C, fock_zero' hB hc, mul_zero]
   | add p q hp hq =>
-    rw [fock_add'' hB hc, map_add, hp, hq, map_add, fock_add'' hB hc, mul_add]
+    rw [fock_add'' hB hc, map_add (f := _), hp, hq, map_add (f := _), fock_add'' hB hc, mul_add]
   | mul_X p j ih =>
     have hsplit : pderiv k (X j * p) = X j * pderiv k p + (if k = j then p else 0) := by
       rw [Derivation.leibniz, pderiv_X, smul_eq_mul, smul_eq_mul]
@@ -129,6 +180,7 @@ theorem fockHOp_of : FockHOp := by
   unfold hOp Dop
   rw [← fL_apply hB hc]
   by_cases h : ε a = ε b
+
   · rw [if_pos h, map_sum, sgn_mul_same ε h]
     refine Finset.sum_congr rfl fun i _ => ?_
     rw [map_sub, fL_apply, fL_apply, d1, d2]
@@ -137,6 +189,7 @@ theorem fockHOp_of : FockHOp := by
     rw [hop_pderiv_comm' (b, i, false) (a, i, true)] at e1
     simp only [sub_self, mul_zero, map_zero, zero_mul, sub_zero, map_one, one_mul]
     linear_combination e1 - e2
+
   · rw [if_neg h, map_sum, sgn_mul_diff ε h]
     have hab : a ≠ b := fun e => h (e ▸ rfl)
     refine Finset.sum_congr rfl fun i _ => ?_

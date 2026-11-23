@@ -1,4 +1,53 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.Module.ZLattice.Covolume
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.NumberTheory.NumberField.CanonicalEmbedding.Basic
+public import Mathlib.NumberTheory.NumberField.Discriminant.Defs
+public import Mathlib.NumberTheory.NumberField.InfinitePlace.TotallyRealComplex
+public import Mathlib.RingTheory.DedekindDomain.Different
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+public import Mathlib.NumberTheory.NumberField.Discriminant.Basic
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -36,9 +85,9 @@ def Lipschitz : Prop :=
       Summable (fun ν : dualCone M z => rhsTerm k z ν) ∧
       ∑' a : (M : Set F), lhsTerm k z a = lipConst k M * ∑' ν : dualCone M z, rhsTerm k z ν
 
+
 open NumberField nonZeroDivisors in
 variable {F : Type} [Field F] [NumberField F] in
-
 theorem _root_.GlobalTheory.IndefiniteRowSideFullHecke.TraceDualDifferent.mem_traceDual_iff {M : FractionalIdeal (𝓞 F)⁰ F} (hM : M ≠ 0) (y : F) :
     y ∈ _root_.GlobalTheory.IndefiniteRowSideFullHecke.TraceDualDifferent.traceDual M ↔ y ∈ FractionalIdeal.dual ℤ ℚ M := by
   change (∀ a ∈ M, ∃ n : ℤ, Algebra.trace ℚ F (y * a) = n) ↔ _
@@ -46,34 +95,32 @@ theorem _root_.GlobalTheory.IndefiniteRowSideFullHecke.TraceDualDifferent.mem_tr
   refine forall₂_congr fun a _ => ?_
   simp [Algebra.traceForm_apply, eq_comm]
 
-theorem mem_traceDual_iff_different {M : FractionalIdeal (𝓞 F)⁰ F} (hM : M ≠ 0) (y : F) :
-    y ∈ traceDual M ↔ y ∈ ((differentIdeal ℤ (𝓞 F) : FractionalIdeal (𝓞 F)⁰ F))⁻¹ * M⁻¹ := by
-  rw [mem_traceDual_iff hM, FractionalIdeal.dual_eq_mul_inv, coeIdeal_differentIdeal ℤ ℚ F (𝓞 F), inv_inv]
 
 open NumberField nonZeroDivisors in
 variable {F : Type} [Field F] [NumberField F] in
-
 theorem _root_.GlobalTheory.IndefiniteRowSideFullHecke.TraceDualDifferent.covol_pos {M : FractionalIdeal (𝓞 F)⁰ F} (hM : M ≠ 0) :
     0 < _root_.GlobalTheory.IndefiniteRowSideFullHecke.TraceDualDifferent.covol M := by
   refine mul_pos (Real.sqrt_pos.2 (abs_pos.2 (Int.cast_ne_zero.2 (discr_ne_zero F)))) ?_
   exact_mod_cast lt_of_le_of_ne (FractionalIdeal.absNorm_nonneg M)
     (Ne.symm (FractionalIdeal.absNorm_eq_zero_iff.not.2 hM))
 
+
+open scoped Classical in
 open NumberField nonZeroDivisors in
 variable {F : Type} [Field F] [NumberField F] in
 open Classical in
-
 theorem _root_.GlobalTheory.IndefiniteRowSideFullHecke.TraceDualDifferent.covol_eq_covolume [IsTotallyReal F]
     (M : (FractionalIdeal (𝓞 F)⁰ F)ˣ) :
     _root_.GlobalTheory.IndefiniteRowSideFullHecke.TraceDualDifferent.covol (M : FractionalIdeal (𝓞 F)⁰ F) =
-      ZLattice.covolume (mixedEmbedding.idealLattice F M) := by
+      ZLattice.covolume (E := mixedEmbedding.mixedSpace F)
+        (mixedEmbedding.idealLattice F M) MeasureTheory.volume := by
   rw [mixedEmbedding.covolume_idealLattice, IsTotallyReal.nrComplexPlaces_eq_zero, pow_zero,
     mul_one, mul_comm]
   rfl
 
+
 open NumberField nonZeroDivisors in
 variable {F : Type} [Field F] [NumberField F] in
-
 theorem _root_.GlobalTheory.IndefiniteRowSideFullHecke.TraceDualDifferent.card_realEmb [IsTotallyReal F] :
     Fintype.card (F →+* ℝ) = Module.finrank ℚ F := by
   classical
@@ -87,13 +134,5 @@ theorem _root_.GlobalTheory.IndefiniteRowSideFullHecke.TraceDualDifferent.card_r
   · intro φ; ext x
     simpa using ComplexEmbedding.IsReal.coe_embedding_apply (φ := Complex.ofRealHom.comp φ) _ x
   · intro φ; ext x; simp [ComplexEmbedding.IsReal.coe_embedding_apply]
-
-theorem norm_add_ne_zero {z : (F →+* ℝ) → ℂ} (hz : ∀ τ, (z τ).im ≠ 0) (a : F) :
-    ∏ τ : F →+* ℝ, (z τ + ((τ a : ℝ) : ℂ)) ≠ 0 :=
-  Finset.prod_ne_zero_iff.2 fun τ _ h => hz τ (by simpa using congrArg Complex.im h)
-
-example (M : FractionalIdeal (𝓞 F)⁰ F) (z : (F →+* ℝ) → ℂ) (hz : ∀ τ, 0 < (z τ).im) (ν : F) :
-    ν ∈ dualCone M z ↔ ν ∈ traceDual M ∧ ∀ τ : F →+* ℝ, 0 < τ ν := by
-  simp [dualCone, hz]
 
 end GlobalTheory.IndefiniteRowSideFullHecke.TraceDualDifferent

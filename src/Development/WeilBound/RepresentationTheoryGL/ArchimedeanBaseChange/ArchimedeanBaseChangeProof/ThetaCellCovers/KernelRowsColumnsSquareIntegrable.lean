@@ -1,29 +1,72 @@
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FiniteOfCompact
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.KerLinOfKerBasic
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CntBasicOfKerBasic
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.RowIntOfKerBasic
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ColSqOfKerBasic
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.KernelRowsColumnsSquareIntegrable
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LintegralWeightedSqLe
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LintegralEnormRpowTwoNeTop
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SchurOpOfSchurL
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IntegrableReflect
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.KerMulOfKerBasicOfCvTest
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CoeFnSumAe
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.InnerEqIntegralConjMul
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CompKey
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ColOp
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CellSumOfCntBasic
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.TwoUnif
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.ThetaCellCovers.VecClose
 import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.BumpEx
+import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CellSumOfCntBasic
+import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CntBasicOfKerBasic
+import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CoeFnSumAe
+import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ColOp
+import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ColSqOfKerBasic
+import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CompKey
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ContinuousAtOfSqBound
 import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CvAdjEqAvg
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.EqZeroOfLeSmall
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FiniteOfCompact
+import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.InnerEqIntegralConjMul
+import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IntegrableReflect
 import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.KerClose
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.KerLinOfKerBasic
+import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.KerMulOfKerBasicOfCvTest
+import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.KernelRowsColumnsSquareIntegrable
+import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LintegralEnormRpowTwoNeTop
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LintegralWeightedSqLe
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.RowIntOfKerBasic
+import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SchurOpOfSchurL
+import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.TwoUnif
 import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.VecCloseOfKerBasicColSq
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.VecNormOfVecClose
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ContinuousAtOfSqBound
 import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.VecInnerOfKerBasic
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.VecLimOf
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.EqZeroOfLeSmall
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.VecLimOf
+import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.VecNormOfVecClose
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace PositivityTheory.Rg.BcB.E1
 

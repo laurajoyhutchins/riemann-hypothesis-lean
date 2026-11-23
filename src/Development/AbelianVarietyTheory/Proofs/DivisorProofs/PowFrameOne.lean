@@ -1,11 +1,57 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Statements.SemistableTorsion.ImmersedBy
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsMulOfValLe
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsRootStalk
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ValueAtOrigin
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExistsPrimGenerator
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.UniformisationTorsionIdentificationWithPairing
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Degenerations.RigGen
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.ValuationMultiplicationInvariance
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsRootStalk
+import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ThetaPtEqUnitMulTh
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsMulOfValLe
 import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.RelationsAreFunctions
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExistsPrimGenerator
+import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.UniformisationTorsionIdentificationWithPairing
+import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ValueAtOrigin
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.ExistsRosatiGen
+public import Development.AbelianVarietyTheory.Definitions.Uniformization.TXFrame
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Out ReciprocityTheory.ChartRestriction.G.Geo.Tor
 open GlobalTheory.ZH
@@ -30,8 +76,8 @@ theorem powFrame_one' {B : Scheme.{0}} {A T : Over B} {L : LB A.left} (x : T ⟶
     powFrame A L x τ 1 = τ :=
   congrArg LB.Gen.mk (funext fun j => zpow_one (τ.s j))
 
-attribute [local instance] gtGroup in
 
+attribute [local instance] gtGroup in
 theorem exists_scale : Laws → Laws2 → ∀ (o Ω : Type) [CommRing o] [Field Ω] [Algebra o Ω] [ArithBase o Ω] (S : ThetaSys o Ω) (ρ : S.Real) (V : Type) [CommRing V] [IsDomain V] [IsDiscreteValuationRing V] [CharZero V], IsAdicComplete (IsLocalRing.maximalIdeal V) V → ∀ (yK : S.R →+* FractionRing V) (A : PolAV (Sp (FractionRing V))) (φ : A.A.left ⟶ ρ.P.A.left), IsGrpPullback A.A ρ.P.A (spMap yK) φ → LBIso A.L (ρ.P.L.pull φ) → ∀ (G : Over (Sp V)) [GrpObj G] [IsCommMonObj G] (D : DegData V (IsLocalRing.maximalIdeal V)) (U : Unif (IsLocalRing.maximalIdeal V) D A G), IsSemiAbelian G → (∀ a : o, yK (algebraMap o S.R a) ∈ (algebraMap V (FractionRing V)).range) → ∀ yy : S.Gam →+ D.toPre.X ⧸ (nsmulAddMonoidHom (S.r * S.N) : D.toPre.X →+ D.toPre.X).range, Function.Surjective yy → (∀ (a : S.Gam) (pk : QkPt D.toPre (AlgebraicClosure (FractionRing V)) (S.r * S.N)) (x : TFK (R := V) (AlgebraicClosure (FractionRing V)) ⟶ A.A), QkToAkU U.toUnifPre (AlgebraicClosure (FractionRing V)) (S.r * S.N) pk x → x.left ≫ φ = spMap ((algebraMap (FractionRing V) (AlgebraicClosure (FractionRing V))).comp yK) ≫ (ρ.pt a).left → yy a = QuotientAddGroup.mk pk.y) → ∀ (ϖ : V), Irreducible ϖ → ∀ (v : AddValuation (AlgebraicClosure (FractionRing V)) (WithTop ℚ)), ReciprocityTheory.ChartRestriction.G.DVR.ValOver ϖ (AlgebraicClosure (FractionRing V)) v → ∃ s : WithTop ℚ, (∀ b : S.Gam, s ≤ v (algebraMap (FractionRing V) (AlgebraicClosure (FractionRing V)) (yK ⟨S.th b, S.th_mem b⟩)) ∧ (yy b ≠ 0 → yK ⟨S.th b, S.th_mem b⟩ ≠ 0 → s < v (algebraMap (FractionRing V) (AlgebraicClosure (FractionRing V)) (yK ⟨S.th b, S.th_mem b⟩)))) ∧ ∀ n : ℕ, 2 ≤ n → n ∣ S.r * S.N → ∀ a : S.Gam, yy a = 0 → ∃ a' : S.Gam, yy a' = 0 ∧ n • (a' - a) = 0 ∧ v (algebraMap (FractionRing V) (AlgebraicClosure (FractionRing V)) (yK ⟨S.th a', S.th_mem a'⟩)) = s := by
   intro hL hL₂ o Ω _ _ _ _ S ρ V _ _ _ _ hc yK A φ cart lb G _ _ D U semi hy yy _hyy_onto hyy ϖ hϖ v hv
   obtain ⟨H, h₁, h₂, h₃, h₄⟩ := hyps hL hL₂
@@ -122,11 +168,11 @@ theorem exists_scale : Laws → Laws2 → ∀ (o Ω : Type) [CommRing o] [Field 
     obtain ⟨z, hz⟩ := (QuotientAddGroup.eq_zero_iff _).1 (hq₂.symm.trans ha)
     have hz' : (S.r * S.N) • z = q.y := hz
     let q₀ : QkPt D.toPre F (S.r * S.N) := qkMk hB 0 (q.g + iota hB _ (-z)) (by
-      rw [smul_add, qk_nsmul hB, ← map_nsmul, ← map_add, smul_neg, hz', add_neg_cancel])
+      rw [smul_add, qk_nsmul hB, ← map_nsmul, ← map_add (f := _), smul_neg, hz', add_neg_cancel])
     have e₀ : f q = f q₀ := (f₃ _ _).2 ((equiv_iff hB _ _).2 ⟨-z, by
       rw [smul_neg, hz', add_neg_cancel]; rfl, rfl⟩)
     obtain ⟨q', x', hy', hx', hpow, hval⟩ :=
-      (key q₀ (x a) ((f₁ _ _).2 (((f₁ _ _).1 hq₁).trans e₀))).2 n hn hnm rfl
+      (key q₀ (x a) ((f₁ _ _).2 (((f₁ _ _).1 hq₁).trans e₀))).2 n hn hnm (by simp only [q₀, qkMk_y])
     obtain ⟨a', rfl⟩ := xonto x' (hx' w₀ hw₀.1).1
     have := A.isAb.comm
     let X : Multiplicative S.Gam →* (TFK (R := V) F ⟶ A.A) :=

@@ -1,7 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.ExistsUnitarySupportedAtPlaceOfMulEqIdem
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.PlacesToAdeles
-import Development.AbelianVarietyTheory.Definitions.Divisors.CmHostImaginaryGeneratorNeZero
+module
+
+public import Development.AbelianVarietyTheory.Definitions.LatticeFrames.ExistsUnitarySupportedAtPlaceOfMulEqIdem
+public import Development.AbelianVarietyTheory.Definitions.LatticeFrames.PlacesToAdeles
+import Development.AbelianVarietyTheory.Counterexamples.HeightSurvey.StarPurelyImaginaryEqNeg
+public import Development.AbelianVarietyTheory.Definitions.Divisors.CmHostImaginaryGeneratorNeZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.L2.Theta Formalism.IndefR.Datum MeasureTheory Matrix ValuativeRel
@@ -32,6 +76,7 @@ theorem xLast_eq_rat {T T₀ : HSp D} {σ : ℕ} (d : HypDec T T₀ σ) (z : Fin
     xLast d z = rat (lastMat d z) := by
   ext row i
   refine Fin.lastCases ?_ (fun i => ?_) i
+
   · simp [xLast, lastMat, rat, HypDec.j0, ratV, Matrix.mulVec, dotProduct, map_sum]
   · simp [xLast, lastMat, rat, HypDec.jX]
 
@@ -47,16 +92,6 @@ theorem ι_mul_incA (x : k) (b : D.host.E) : p.ι x * incA D b = p.ι (x * p.pr 
 
 theorem incA_mul_ι (x : k) (b : D.host.E) : incA D b * p.ι x = p.ι (p.pr b * x) := by
   rw [mul_comm, ι_mul_incA, mul_comm]
-
-theorem map_ι_mul_rat {a b c : Type} [Fintype b] (M : Matrix a b k) (N : Matrix b c D.host.E) :
-    M.map p.ι * N.map (incA D) = (M * N.map p.pr).map p.ι := by
-  ext i j
-  simp [Matrix.mul_apply, ι_mul_incA, map_sum]
-
-theorem rat_mul_map_ι {a b c : Type} [Fintype b] (N : Matrix a b D.host.E) (M : Matrix b c k) :
-    N.map (incA D) * M.map p.ι = (N.map p.pr * M).map p.ι := by
-  ext i j
-  simp [Matrix.mul_apply, incA_mul_ι, map_sum]
 
 theorem infPart_e : infPart D p.e = 0 := by
   obtain ⟨h1, h2, v, ε, ⟨α, hα, -⟩, h3⟩ := p.split
@@ -118,6 +153,7 @@ theorem extY_colMx {S S₀ T : HSp D} {ρ : ℕ} (d : HypDec S S₀ ρ) {Y : Typ
 theorem wittExtZero_inclusionX_adelicSingleRowMatrix {S S₀ T T₀ : HSp D} {ρ σ : ℕ} (d : HypDec S S₀ ρ) (d' : HypDec T T₀ σ) (l : Fin σ)
     (v : Fin S₀.rank → k) (row : Fin T.rank) (col : Fin S.rank) :
     d.ext0 T (d'.incX S₀ (rowMx p l v)) row col = p.ι (∑ m, p.pr (d'.e row l) * v m * p.pr (d.q0 m col)) := by
+
   rw [HypDec.matrixExtendByZero_apply, HypDec.incX_apply, Matrix.mul_apply, map_sum]
   refine Finset.sum_congr rfl fun m _ => ?_
   rw [Matrix.mul_apply, Finset.sum_eq_single l (fun m' _ hm => by rw [show rowMx p l v m' m = 0 from if_neg hm, mul_zero]) (fun h => absurd (Finset.mem_univ _) h), ← ι_mul_incA, ← incA_mul_ι]
@@ -243,6 +279,7 @@ theorem gram_colMx (m m' : Fin ρ) : (adj (colMx p FT r i b) ⬝ (gA T ⬝ rat X
   rw [gA, ← rat_mul, Matrix.mul_apply]
   split_ifs with hm
   · subst hm
+
     rw [pairVal, Finset.mul_sum, map_sum, map_sum]
     refine Finset.sum_congr rfl fun c _ => ?_
     have h1 : (Xᴴ * T.gram) m' c = star ((T.gram * X) c m') := by

@@ -1,4 +1,54 @@
-import Formalism.SharpRestriction.CuspSpanNormBounds.StarVecMulDM
+module
+
+public import Formalism.SharpRestriction.CuspSpanNormBounds.TrD
+public import Formalism.SharpRestriction.CuspSpanNormBounds.DMiMulVecApply
+import Mathlib.Algebra.Order.Archimedean.Real.Hom
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.Normed.Algebra.MatrixExponential
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.SharpRestriction.CuspSpanNormBounds.OnePlaceEstimates
+
+@[expose] public section
 
 open MeasureTheory Matrix Finset
 
@@ -194,8 +244,8 @@ theorem scEI_mem (hκ : 0 < κ) (hτ : 0 < τ) :
   refine ⟨cjI k r κ τ X, ?_, (scEI_realify X).symm⟩
   rw [← cj_mem_lieOf_iff hκ hτ, cj_cjI hκ hτ]; exact hX
 
-open Classical in
 
+open Classical in
 def deltaN (k r : ℕ) (κ τ : ℝ) : ℝ :=
   if h : ∀ x ∈ lieE (Nset k r), scE k r κ τ x ∈ lieE (Nset k r) then
     |(LinearMap.det ((scE k r κ τ).restrict h))⁻¹|
@@ -213,7 +263,7 @@ theorem det_scE_ne (hκ : 0 < κ) (hτ : 0 < τ) :
   exact left_ne_zero_of_mul_eq_one this
 
 theorem deltaN_pos (hκ : 0 < κ) (hτ : 0 < τ) : 0 < deltaN k r κ τ := by
-  rw [deltaN, dif_pos (scE_mem hκ hτ)]
+  rw [deltaN, dite_eq_left (scE_mem hκ hτ)]
   exact abs_pos.mpr (inv_ne_zero (det_scE_ne hκ hτ))
 
 theorem unrealify_add' (x y : EuclideanSpace ℝ (IxE k r)) : unrealify (x + y) = unrealify x + unrealify y := by
@@ -266,7 +316,8 @@ theorem map_haarLie_N (hκ : 0 < κ) (hτ : 0 < τ) (κN : ENNReal) :
     ← Measure.map_map (continuous_expL _).measurable
       ((scE k r κ τ).restrict (scE_mem hκ hτ)).continuous_of_finiteDimensional.measurable,
     Measure.map_linearMap_addHaar_eq_smul_addHaar volume hA, Measure.map_smul, smul_smul, deltaN,
-    dif_pos (scE_mem hκ hτ)]
+    dite_eq_left (scE_mem hκ hτ)]
+  all_goals first | exact (continuous_expL _).measurable.aemeasurable | exact measurable_cjT.aemeasurable
 
 theorem pairMeas_trD (hκ : 0 < κ) (hτ : 0 < τ) (L : LocBessel k r)
     (hz : inWb k r ((τ : ℂ) • L.z) ∧ 0 < Tz k r ((τ : ℂ) • L.z))

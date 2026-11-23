@@ -1,4 +1,49 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.Algebra.Basic
+public import Mathlib.LinearAlgebra.TensorProduct.Defs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace ReciprocityTheory.ChartRestriction.G.FreeQuotientRank
 
@@ -14,50 +59,6 @@ def baseSpan (F : Type*) [Field F] [Algebra K F] (U : Submodule K V) :
 
 variable {Ω : Type*} [Field Ω] [Algebra K Ω]
 
-noncomputable def inclT (K₁ : IntermediateField K Ω) (V : Type*) [AddCommGroup V] [Module K V] :
-    K₁ ⊗[K] V →ₗ[K₁] Ω ⊗[K] V :=
-  TensorProduct.AlgebraTensorModule.map (Algebra.linearMap K₁ Ω) (LinearMap.id : V →ₗ[K] V)
-
-def DefinedOver (c : Module.Dual Ω (Ω ⊗[K] V)) (K' : IntermediateField K Ω) : Prop :=
-  ∀ x : K' ⊗[K] V, c (inclT K' V x) ∈ Set.range (algebraMap K' Ω)
-
-noncomputable def descend (K₁ : IntermediateField K Ω) (W : Submodule Ω (Ω ⊗[K] V)) :
-    Submodule K₁ (K₁ ⊗[K] V) :=
-  (W.restrictScalars K₁).comap (inclT K₁ V)
-
 end Defs
-
-def FiniteDetectStatement : Prop :=
-  ∀ (L E : Type) [Field L] [AddCommGroup E] [Module L E] [FiniteDimensional L E]
-    (W : Submodule L E) (FF : Set (Module.Dual L E)),
-    (∀ c ∈ FF, W ≤ LinearMap.ker c) →
-    (∀ x : E, x ∉ W → ∃ c ∈ FF, c x ≠ 0) →
-    ∃ s : Finset (Module.Dual L E), (↑s ⊆ FF) ∧ (⨅ c ∈ s, LinearMap.ker c) = W
-
-def RationalityStatement : Prop :=
-  ∀ (K Ω V : Type) [Field K] [Field Ω] [Algebra K Ω] [AddCommGroup V] [Module K V]
-    (U : Submodule K V) [FiniteDimensional K U]
-    (W : Submodule Ω (Ω ⊗[K] V)) (FF : Set (Module.Dual Ω (Ω ⊗[K] V))),
-    W ≤ baseSpan Ω U →
-    (∀ c ∈ FF, ∃ K' : IntermediateField K Ω, FiniteDimensional K K' ∧ DefinedOver c K') →
-    (∀ c ∈ FF, W ≤ LinearMap.ker c) →
-    (∀ x ∈ baseSpan Ω U, x ∉ W → ∃ c ∈ FF, c x ≠ 0) →
-    ∃ K₁ : IntermediateField K Ω, FiniteDimensional K K₁ ∧
-      ∃ (ρ : ℕ) (c : Fin ρ → Module.Dual Ω (Ω ⊗[K] V)),
-        (∀ i, c i ∈ FF ∧ DefinedOver (c i) K₁) ∧
-        descend K₁ W = baseSpan K₁ U ⊓
-          ⨅ i, LinearMap.ker ((c i).restrictScalars K₁ ∘ₗ inclT K₁ V) ∧
-        Submodule.span Ω (inclT K₁ V '' (descend K₁ W : Set (K₁ ⊗[K] V))) = W ∧
-        Module.finrank K₁ (descend K₁ W) = Module.finrank Ω W ∧
-        Module.finrank K₁ (descend K₁ W) + ρ = Module.finrank K U
-
-def SelectStatement : Prop :=
-  ∀ (L E ι : Type) [Field L] [AddCommGroup E] [Module L E] [FiniteDimensional L E]
-    (ρ : ℕ) (c : Fin ρ → Module.Dual L E) (MD : Submodule L E),
-    (⨅ i, LinearMap.ker (c i)) = MD →
-    Module.finrank L MD + ρ = Module.finrank L E →
-    ∀ th : ι → E, Submodule.span L (Set.range th) = ⊤ →
-      ∃ sel : Fin ρ → ι, Function.Injective sel ∧
-        (Matrix.of fun i j => c i (th (sel j))).det ≠ 0
 
 end ReciprocityTheory.ChartRestriction.G.FreeQuotientRank

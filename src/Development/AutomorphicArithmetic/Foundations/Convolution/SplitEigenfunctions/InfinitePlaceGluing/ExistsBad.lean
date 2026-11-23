@@ -1,9 +1,45 @@
-import Development.AutomorphicArithmetic.Foundations.Convolution.SplitEigenfunctions.Entire
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.Imports
-import CompanionTheory.EightfoldTheory.VariationTheory.AutomorphicForms.RealStructures.Imports
-import CompanionTheory.EightfoldTheory.VariationTheory.AutomorphicForms.ImportsBis
-import PositivityTheory.AutomorphicForms.PublishedInputs.RealGaloisRepresentations.IwahoriSphericalTransfer.HeckeCharacterEqOfCofinite
+module
+
+public import Development.AutomorphicArithmetic.Foundations.Convolution.SplitEigenfunctions.Entire
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import PositivityTheory.AutomorphicForms.PublishedInputs.RealGaloisRepresentations.IwahoriSphericalTransfer.HeckeCharacterEqOfCofinite
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Filter
 open Neutral.B1 Formalism.L2.Host Formalism.ConjugateSelfDual GlobalTheory.CuspRep GlobalTheory.GalOfCusp UpperTheory.V UpperTheory.V.Af UpperTheory.V.Published GroundTheory.Global
@@ -41,7 +77,9 @@ private theorem quad_sq {E : Type} [Field E] [NumberField E] {η : HChar ℚ} (h
   filter_upwards [hc] with v hv
   obtain ⟨w, -, hu, hval⟩ := hv
   refine ⟨fun x hx => ?_, fun x _ => rfl, ?_⟩
-  · rw [pow_two, HChar.loc_mul, hu x hx, one_mul]
+  · rw [pow_two]
+    change η.loc v x * η.loc v x = 1
+    rw [hu x hx, one_mul]
   · have e1 : (1 : HChar ℚ).val v = 1 := rfl
     rw [pow_two, HChar.val_mul, e1, hval]
     split_ifs <;> simp
@@ -76,7 +114,7 @@ theorem UpperTheory.ConvolutionTheory.RankTwoDescent.asai_of :
     by_contra hcon
     refine hw (bad_of_dvd ((Dvd.intro_left _ rfl : m ∣ n₁ * n₂ * m).trans (hL.trans hLN)) (hbad _ ⟨w, ?_, rfl⟩))
     by_contra hn
-    rw [Set.mem_union, not_or, Set.mem_setOf_eq, Set.mem_setOf_eq, not_not, not_not] at hn
+    rw [Set.mem_union, not_or, Set.mem_ofPred_eq, Set.mem_ofPred_eq, not_not, not_not] at hn
     exact hcon hn
   have e₁ : ChOk ω⁻¹ L := hc₁ L ((Dvd.intro _ rfl : n₁ ∣ n₁ * n₂).trans ((Dvd.intro _ rfl : n₁ * n₂ ∣ n₁ * n₂ * m).trans hL))
   have e₂ : ChOk (ω * η)⁻¹ L := hc₂ L ((Dvd.intro_left _ rfl : n₂ ∣ n₁ * n₂).trans ((Dvd.intro _ rfl : n₁ * n₂ ∣ n₁ * n₂ * m).trans hL))

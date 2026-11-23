@@ -1,5 +1,47 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.Cup1CoboundaryMemBoundaries
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.Cup1CoboundaryMemBoundaries
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -83,8 +125,8 @@ theorem val_pa {n : ℕ} (i : Fin (n + 1)) (t : Fin (n + 1 + 1)) :
   show ((Fin.predAbove i t : Fin (n + 1)) : ℕ) = _
   rw [Fin.predAbove]
   by_cases h : i.1 < t.1
-  · rw [dif_pos (show i.castSucc < t from h), if_pos h]; simp
-  · rw [dif_neg (show ¬ i.castSucc < t from h), if_neg h]; simp
+  · rw [dite_eq_left (show i.castSucc < t from h), if_pos h]; simp
+  · rw [dite_eq_right (show ¬ i.castSucc < t from h), if_neg h]; simp
 
 def aT {n : ℕ} (w : Cn (box F) (n + 1)) (i j : ℕ) : Bi F 1 (n + 1) :=
   if h : i < n + 2 ∧ j < n + 3 then
@@ -102,7 +144,7 @@ variable {F}
 
 theorem prism_term_lower_index {n : ℕ} (w : Cn (box F) (n + 1)) (k j : ℕ) (hk : k < n + 1) (hj : j ≤ k) :
     aT F w (k + 1) j = bT F w k j := by
-  rw [aT, bT, dif_pos (by omega), dif_pos (by omega)]
+  rw [aT, bT, dite_eq_left (by omega), dite_eq_left (by omega)]
   refine bv_congr (fun t ↦ ?_) (fun t ↦ ?_) w
   · apply Fin.ext
     simp only [OrderHom.comp_coe, Function.comp_apply, val_sI, val_dl]
@@ -113,7 +155,7 @@ theorem prism_term_lower_index {n : ℕ} (w : Cn (box F) (n + 1)) (k j : ℕ) (h
 
 theorem prism_term_upper_index {n : ℕ} (w : Cn (box F) (n + 1)) (k j : ℕ) (hk : k < n + 1) (hkj : k < j) (hj : j < n + 2) :
     aT F w k (j + 1) = bT F w k j := by
-  rw [aT, bT, dif_pos (by omega), dif_pos (by omega)]
+  rw [aT, bT, dite_eq_left (by omega), dite_eq_left (by omega)]
   refine bv_congr (fun t ↦ ?_) (fun t ↦ ?_) w
   · apply Fin.ext
     simp only [OrderHom.comp_coe, Function.comp_apply, val_sI, val_dl]
@@ -124,7 +166,7 @@ theorem prism_term_upper_index {n : ℕ} (w : Cn (box F) (n + 1)) (k j : ℕ) (h
 
 theorem prism_term_diagonal_equality {n : ℕ} (w : Cn (box F) (n + 1)) (k : ℕ) (hk : k < n + 1) :
     aT F w k (k + 1) = aT F w (k + 1) (k + 1) := by
-  rw [aT, aT, dif_pos (by omega), dif_pos (by omega)]
+  rw [aT, aT, dite_eq_left (by omega), dite_eq_left (by omega)]
   refine bv_congr (fun t ↦ ?_) (fun t ↦ ?_) w
   · apply Fin.ext
     simp only [OrderHom.comp_coe, Function.comp_apply, val_sI, val_dl]
@@ -134,7 +176,7 @@ theorem prism_term_diagonal_equality {n : ℕ} (w : Cn (box F) (n + 1)) (k : ℕ
     grind
 
 theorem aT_first {n : ℕ} (w : Cn (box F) (n + 1)) : aT F w 0 0 = prA F (dl 0) (S0 F (n + 1) w) := by
-  rw [aT, dif_pos (by omega), S0, prA_bv]
+  rw [aT, dite_eq_left (by omega), S0, prA_bv]
   refine bv_congr (fun t ↦ ?_) (fun t ↦ ?_) w
   · apply Fin.ext
     simp only [OrderHom.comp_coe, Function.comp_apply, val_sI, val_dl, cst_apply, Fin.val_zero]
@@ -145,7 +187,7 @@ theorem aT_first {n : ℕ} (w : Cn (box F) (n + 1)) : aT F w 0 0 = prA F (dl 0) 
 
 theorem aT_last {n : ℕ} (w : Cn (box F) (n + 1)) :
     aT F w (n + 1) (n + 2) = prA F (dl 1) (S0 F (n + 1) w) := by
-  rw [aT, dif_pos (by omega), S0, prA_bv]
+  rw [aT, dite_eq_left (by omega), S0, prA_bv]
   refine bv_congr (fun t ↦ ?_) (fun t ↦ ?_) w
   · apply Fin.ext
     simp only [OrderHom.comp_coe, Function.comp_apply, val_sI, val_dl, cst_apply, Fin.val_zero, Fin.val_one]
@@ -158,14 +200,15 @@ theorem Sh_dn_expand {n : ℕ} (w : Cn (box F) (n + 1)) :
     Sh F (n + 1) (dn (box F) (n + 1) w) =
       ∑ i ∈ Finset.range (n + 1 + 1), ∑ j ∈ Finset.range (n + 1 + 2), ((-1 : R) ^ (i + j)) • aT F w i j := by
   rw [dn_eq (n + 1)]
+
   simp only [Finset.sum_range, Sh, LinearMap.sum_apply, LinearMap.smul_apply, AlgHom.toLinearMap_apply, map_sum,
-    map_smul, bv_pr, Finset.smul_sum, smul_smul]
+  map_smul, bv_pr, Finset.smul_sum, smul_smul]
   rw [Finset.sum_comm]
   apply Finset.sum_congr rfl
   intro i _
   apply Finset.sum_congr rfl
   intro j _
-  rw [aT, dif_pos ⟨i.2, j.2⟩, pow_add, mul_comm]
+  rw [aT, dite_eq_left ⟨i.2, j.2⟩, pow_add, mul_comm]
 
 theorem prB_Sh_expand {n : ℕ} (w : Cn (box F) (n + 1)) :
     ∑ j : Fin (n + 1 + 1), ((-1 : R) ^ (j : ℕ)) • prB F (dl j) (Sh F n w) =
@@ -173,10 +216,11 @@ theorem prB_Sh_expand {n : ℕ} (w : Cn (box F) (n + 1)) :
   simp only [Finset.sum_range]
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun j _ ↦ ?_
+
   simp only [Sh, LinearMap.sum_apply, LinearMap.smul_apply, AlgHom.toLinearMap_apply, map_sum, map_smul, prB_bv]
   rw [Finset.smul_sum]
   refine Finset.sum_congr rfl fun k _ ↦ ?_
-  rw [bT, dif_pos ⟨k.2, j.2⟩, smul_smul, pow_add, mul_comm]
+  rw [bT, dite_eq_left ⟨k.2, j.2⟩, smul_smul, pow_add, mul_comm]
 
 theorem shuffle_coboundary_prism_identity {n : ℕ} (w : Cn (box F) (n + 1)) :
     Sh F (n + 1) (dn (box F) (n + 1) w) = prA F (dl 0) (S0 F (n + 1) w) - prA F (dl 1) (S0 F (n + 1) w) -

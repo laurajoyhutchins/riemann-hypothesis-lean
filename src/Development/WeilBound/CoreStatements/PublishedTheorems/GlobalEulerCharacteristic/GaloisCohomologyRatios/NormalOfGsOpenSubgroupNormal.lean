@@ -1,10 +1,46 @@
-import GroundTheory.ProfiniteCohomology.GlobalEulerCharacteristic.MemShaSubmoduleCohomologyAddEquivOfEquivIff
-import GroundTheory.ProfiniteCohomology.GlobalEulerCharacteristic.Kummer
-import GroundTheory.ProfiniteCohomology.GlobalEulerCharacteristic.GlobalEulerFormulaInf
-import GroundTheory.ProfiniteCohomology.LocalEulerCharacteristic.CoprimeTwist
-import GroundTheory.ProfiniteCohomology.RestrictedRamification.Finite
-import GroundTheory.ProfiniteCohomology.RestrictedRamification.BaseFixed
-import GroundTheory.GlobalFields.IdeleClassGroup.InvariantsGalois
+module
+
+public import GroundTheory.ProfiniteCohomology.GlobalEulerCharacteristic.MemShaSubmoduleCohomologyAddEquivOfEquivIff
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 open NumberField IsDedekindDomain CategoryTheory GroundTheory.ProfCoh GroundTheory.Global
 
@@ -51,7 +87,8 @@ theorem normal_of_gsOpenSubgroup_normal
       fun y => g'.restrictNormal_commutes _ y
     have hxS : x ∈ maxUnramifiedOutside K.1 ℚ̄ S := hL ⟨x, hx⟩
     have he : gsEmbedding hL ⟨x, hx⟩ = ⟨x, hxS⟩ := Subtype.ext rfl
-    have key := mem_of_forall_gsOpenSubgroup_fixes S hL (gS ⟨x, hxS⟩) (fun σ hσ => by
+    have hfixed : ∀ σ ∈ gsOpenSubgroup S hL, σ (gS ⟨x, hxS⟩) = gS ⟨x, hxS⟩ := by
+      intro σ hσ
       have hc : gS⁻¹ * σ * gS ∈ gsOpenSubgroup S hL := by
         have := h.conj_mem σ hσ gS⁻¹
         simpa [mul_assoc] using this
@@ -61,7 +98,17 @@ theorem normal_of_gsOpenSubgroup_normal
       calc σ (gS ⟨x, hxS⟩) = gS ((gS⁻¹ * σ * gS) ⟨x, hxS⟩) := by
             simp only [AlgEquiv.mul_apply]
             rw [← AlgEquiv.mul_apply gS, mul_inv_cancel, AlgEquiv.one_apply]
-        _ = gS ⟨x, hxS⟩ := by rw [hfx])
+        _ = gS ⟨x, hxS⟩ := by rw [hfx]
+    have hmem : gS ⟨x, hxS⟩ ∈
+        IntermediateField.fixedField (gsEmbedding (S := S) hL).fieldRange.fixingSubgroup := by
+      intro σ
+      refine hfixed σ ((mem_gsOpenSubgroup_iff S hL σ).2 fun y => ?_)
+      exact σ.2 ⟨_, ⟨y, rfl⟩⟩
+    rw [InfiniteGalois.fixedField_fixingSubgroup] at hmem
+    obtain ⟨y, hy⟩ := hmem
+    have key : (gS ⟨x, hxS⟩ : ℚ̄) ∈ L.1 := by
+      rw [← hy]
+      exact y.2
     rwa [hgS] at key
   have : (L.1.fixingSubgroup.subgroupOf K.1.fixingSubgroup).Normal := ⟨fun n hn g => by
     rw [Subgroup.mem_subgroupOf, IntermediateField.mem_fixingSubgroup_iff] at hn ⊢
@@ -73,8 +120,8 @@ theorem normal_of_gsOpenSubgroup_normal
   have := FiniteSubfield.isGalois_of_normal (F := K) (E := L)
   infer_instance
 
-open scoped Classical in
 
+open scoped Classical in
 theorem card_infinitePlace_eq (K : FiniteSubfield) : Fintype.card (InfinitePlace K.1) =
     Fintype.card {v : InfinitePlace K.1 // v.IsReal} + Fintype.card {v : InfinitePlace K.1 // v.IsComplex} := by
   have h2 : Fintype.card {v : InfinitePlace K.1 // v.IsComplex} =

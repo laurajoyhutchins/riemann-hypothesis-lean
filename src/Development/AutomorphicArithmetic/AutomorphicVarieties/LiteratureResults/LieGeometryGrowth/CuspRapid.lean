@@ -1,5 +1,46 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.LiteratureResults.LieGeometryGrowth.FNonneg
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.L2Cusps.BrCusp
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.LiteratureResults.LieGeometryGrowth.PairFactsAlt
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.L2Cusps.BrCusp
+import GroundTheory.AutomorphicForms.CuspidalDiscreteness.CuspFormsSiegel
+import GroundTheory.AutomorphicForms.CuspidalDiscreteness.SummandsAreCuspForms
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 open UpperTheory.V.Lit.Geo
 
 section
@@ -7,7 +48,7 @@ open NumberField Matrix GlobalTheory.CuspRep GlobalTheory.GKCoh UpperTheory.V.Af
 open GroundTheory.Automorphic GroundTheory.Automorphic.AutomorphicForm GroundTheory.Automorphic.CuspidalSpectrum
 open scoped TensorProduct
 
-variable {E : Type} [Field E] [NumberField E] [IsTotallyComplex E] {a : ℕ}
+variable {E : Type} [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] {a : ℕ}
 
 private theorem qht_bdd (g : GA E a) :
     BddBelow (Set.range fun γ : GL (Fin a) E => height (K := E) (ratGL E a γ * (retractOne g : KernelIndexFullLattice.G1 E a).1)) :=
@@ -23,7 +64,7 @@ private theorem decay {φ : Sm E a} (hφ : IsCuspForm φ) (N : ℕ) :
   obtain ⟨C, hC⟩ := exists_norm_le_height_pow_neg_siegel h0 hω hωB ht N
   refine ⟨C, fun g => ?_⟩
   obtain ⟨γ, b, hb, _, ⟨ρ, hρ, hs, rfl⟩, kk, hkk, hxe⟩ := hsieg g.1
-  have hγx : AdelicGLn.diagonal E a γ * g.1 ∈ Reduction.normOneGL E a :=
+  have hγx : AdelicGLn.diagonal E a γ * g.1 ∈ Reduction.normOneGL (K := E) (n := a) :=
     mul_mem (Reduction.rationalGL_le_normOneGL ⟨γ, rfl⟩) g.2
   have h := hC b hb ρ hρ hs kk hkk _ hγx hxe
   rw [h0.1.isLeftInvariant γ g.1] at h
@@ -41,14 +82,14 @@ private theorem ev_cmp {d : ℕ} (m : Sm E a ⊗[ℂ] (Fin d → ℂ)) (g : GA E
     ev m g i = (cmp i m).1 g := by
   induction m using TensorProduct.induction_on with
   | zero => simp
-  | add x y hx hy => simp only [map_add, Pi.add_apply, hx, hy, Submodule.coe_add]
+  | add x y hx hy => simp only [map_add (f := _), Pi.add_apply, hx, hy, Submodule.coe_add]
   | tmul φ v => simp [ev, mul_comm]
 
 private theorem cmp_rTensor {d : ℕ} (T : Module.End ℂ (Sm E a)) (m : Sm E a ⊗[ℂ] (Fin d → ℂ)) (i : Fin d) :
     cmp i (T.rTensor _ m) = T (cmp i m) := by
   induction m using TensorProduct.induction_on with
   | zero => simp
-  | add x y hx hy => simp only [map_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
   | tmul φ v => simp
 
 private theorem prodA_mem (π : CuspSub E a) (Ξ : AlgRep E a) (l : List (Lie E a)) (m : Sm E a ⊗[ℂ] (Fin Ξ.d → ℂ))

@@ -1,4 +1,53 @@
-import Formalism.LocalToGlobal.CharacterGerms.RowTieMainS
+module
+
+public import Formalism.LocalToGlobal.CharacterGerms.ContentZeroAt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Formalism.LocalToGlobal.ProjectiveLattices.OneLtAbsNormReal
+import Formalism.LocalToGlobal.ProjectiveLattices.SubConstMemOrig
+public import Formalism.LocalToGlobal.ProjectiveLattices.VAtVNeBot
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.CocycleRightZeroThd
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -52,25 +101,5 @@ variable {E : Type} [Field E] [NumberField E] [IsCMField E] {H : Host E} {Dw : D
 variable {Xo : Moduli Dw l} {c : Coeff l} [StarRing (𝓞 E)]
 variable {C : Type} [Field C] [CharZero C] {V : VF C}
 variable {T : CDVR} {io : c.F →+* T.Fr} {y : IntFr Xo c T io} {Orb : Type} [Fintype Orb]
-
-theorem rowTieSelf_std (G : GeoInS Xo c) (hstar : ∀ a : 𝓞 E, star a = H.bar a)
-    {C3 : IntChart T io y} {ι : T.Fr →+* C} (hι : EmbOK T V ι)
-    (hd : ¬ ((V.l : ℤ) ∣ Algebra.discr ℤ (Module.Free.chooseBasis ℤ (𝓞 E)))) {k : ℕ}
-    {Y : FBChart C V (𝓞 E) (chD C3.ch)} (hY : IsBC C3 ι k Y) {lab : LabS E C Orb 2}
-    (ha : LabSArith V io ι lab) (hr : lab.RankOK Dw) :
-    ∃ (X : ∀ o, RowData C V 2 (fun _ => lab.II Dw o) (JJ fun _ => lab.II Dw o)) (F : ∀ o, Flag (X o)),
-      (∀ o, (X o).n = lab.n ∧ (X o).m = lab.j + lab.j' ∧ (X o).rh = 0 ∧ (∀ g b, (X o).big g b ↔ lab.big o g b) ∧
-        ∀ g t, (X o).rkF g t = Dw.mult (lab.tau o (idxS lab.hd g t))) ∧
-      ∀ (a : (E →+* ℂ) × ℕ → ℕ) (n : ℕ) (ν : ℝ), (ν : EReal) ≤ nuLocC C3 (eOf T V) k a n →
-        ∀ (N : ℕ) (_ : Fin N × Fin 2 ↪ Fin n) (nW : ℕ), nW ≤ 2 * N + 1 →
-        ∀ gaC : Orb → ZMod 2 → ℕ → ℕ,
-        (∀ o, (X o).Alt) → lab.j' < lab.n → (∀ o s q, gaC o s q ≠ 0 → 1 ≤ q ∧ q ≤ (X o).rkF 0 s) →
-        WtTieC Dw.mult lab.tau gaC (fun τ i => a (τ, i)) →
-        ValBlocksC X F nW gaC ν := by
-  obtain ⟨X, hX, hV⟩ := rowTieSelf_main G hstar hι hd hY ha hr
-  refine ⟨X, fun o => stdFlagS lab.hd (X o) (hX o).2.2.2.2, fun o => ⟨(hX o).1, (hX o).2.1, (hX o).2.2.1, (hX o).2.2.2.1,
-    fun g t => rkF_sigmaS lab.hd (X o) (hX o).2.2.2.2 g t⟩, ?_⟩
-  intro a n ν hν N pl nW hn gaC hA hj supp tie
-  exact hV a n ν hν N pl _ nW hn gaC (fun _ _ _ _ => rfl) hA hj supp tie
 
 end Formalism.L2.FormalSeriesBounds

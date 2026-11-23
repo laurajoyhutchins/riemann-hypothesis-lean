@@ -1,5 +1,51 @@
-import Mathlib
-import GroundTheory.TateCohomology.HerbrandTate
+module
+
+public import GroundTheory.TateCohomology.TateLow
+public import Mathlib.RepresentationTheory.Homological.GroupCohomology.FiniteCyclic
+public import Mathlib.RepresentationTheory.Homological.GroupHomology.FiniteCyclic
+public import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.GroupCoh
@@ -13,8 +59,8 @@ section CommGroup
 variable {R G : Type u} [CommRing R] [CommGroup G] [Fintype G] (A : Rep.{u} R G) {σ : G}
   (hσ : ∀ x, x ∈ Subgroup.zpowers σ)
 
-include hσ in
 
+include hσ in
 theorem invariants_eq_ker_normHomCompSub_g :
     A.ρ.invariants = LinearMap.ker (normHomCompSub A σ).g.hom := by
   ext x
@@ -45,7 +91,7 @@ theorem normRangeInvariants_map :
 
 noncomputable def tateCohomologyZeroIsoHomology :
     tateCohomology A 0 ≅ (normHomCompSub A σ).homology :=
-  (tateCohomologyZeroIso R G).app A ≪≫
+  (tateCohomologyZeroIso (R := R) (G := G)).app A ≪≫
     (Submodule.Quotient.equiv _ _ (LinearEquiv.ofEq _ _ (invariants_eq_ker_normHomCompSub_g A hσ))
       (normRangeInvariants_map A hσ)).toModuleIso ≪≫
     (normHomCompSub A σ).moduleCatHomologyIso.symm
@@ -82,7 +128,7 @@ theorem augmentationKerNorm_map :
 
 noncomputable def tateCohomologyNegOneIsoHomology :
     tateCohomology A (-1) ≅ (subCompNormHom A σ).homology :=
-  (tateCohomologyNegOneIso R G).app A ≪≫
+  (tateCohomologyNegOneIso (R := R) (G := G)).app A ≪≫
     (Submodule.Quotient.equiv _ _ (LinearEquiv.ofEq _ _ (ker_norm_eq_ker_subCompNormHom_g A))
       (augmentationKerNorm_map A hσ)).toModuleIso ≪≫
     (subCompNormHom A σ).moduleCatHomologyIso.symm

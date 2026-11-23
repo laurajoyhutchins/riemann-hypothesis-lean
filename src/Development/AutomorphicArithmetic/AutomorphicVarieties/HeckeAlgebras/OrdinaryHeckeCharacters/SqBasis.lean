@@ -1,6 +1,59 @@
-import Development.AbelianVarietyTheory.PublishedTheorems.PublishedFoundations.FiniteIntertwining
-import Development.AutomorphicArithmetic.AutomorphicVarieties.BuildingsResidueChars.BideterminantRowWeightDominance
-import Development.AutomorphicArithmetic.AutomorphicVarieties.BuildingsResidueChars.BideterminantAntidiagEvalWeightUnitSupport
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.PublishedFoundations.FiniteIntertwining
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.BuildingsResidueChars.BideterminantAntidiagEvalWeightUnitSupport
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.BuildingsResidueChars.BideterminantRowWeightDominance
+import Formalism.GradedWeylDivisibility.DualWeylDominanceOf
+import Formalism.GradedWeylDivisibility.FinalC
+import Formalism.GradedWeylDivisibility.FinalD
+import Formalism.GradedWeylDivisibility.FockSpaceTableaux.LDlatLemmas
+public import Formalism.GradedWeylDivisibility.FockSpaceTableaux.NablaLKBasis
+public import Formalism.GradedWeylDivisibility.FockSpaceTableaux.NablaLTwist
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open MvPolynomial Formalism.GradedWeylDivisibility Formalism.BasicNotions GlobalTheory.Branching Matrix
 
 namespace UpperTheory.V.Hi
@@ -34,7 +87,7 @@ private theorem cong {O : Type} [CommRing O] [IsDomain O] {n : ℕ} (lam : DomWe
   obtain ⟨h, hh⟩ : C c ∣ sqAct O n lam g f - f.1 := by
     rw [C_dvd_iff_dvd_coeff]
     intro m
-    rw [← Ideal.Quotient.eq_zero_iff_dvd, ← coeff_map, h2, coeff_zero]
+    rw [← Ideal.Quotient.eq_zero_iff_dvd, ← coeff_map, h2, AddMonoidAlgebra.coeff_zero, Finsupp.zero_apply]
   rw [← smul_eq_C_mul] at hh
   refine ⟨h, dualWeylSat O n n _ c h hc ?_, by rw [← hh]; abel⟩
   rw [← hh]
@@ -132,7 +185,7 @@ theorem sqBasis (O K : Type) [CommRing O] [IsDomain O] [Field K] [Algebra O K] (
       apply Subtype.ext
       rw [sqRep_coe, hbc, ← map_sqAct, e]
       simp [hbc, smul_eq_C_mul, Finset.mul_sum, mul_assoc]
-    rw [this, map_add, b.repr_self, Finsupp.add_apply, congrFun (b.repr_sum_self _) i, Finsupp.single_apply]
+    rw [this, map_add (f := _), b.repr_self, Finsupp.add_apply, congrFun (b.repr_sum_self _) i, Finsupp.single_apply]
     simp only [eq_comm]
   · intro g hg j
     have : ℓ (sqRep K n lam g (b j)) = (∏ i, g.val i i ^ ((rowWt k0.1 i : ℤ) + lam.detShift)) * ℓ (b j) := by

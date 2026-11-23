@@ -1,20 +1,66 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.LengthPosOfPosDef
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.AdjFormula
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.ParamsEx
-import Formalism.LocalToGlobal.IndefiniteReal.LinksStage
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.ExistsNormLeHeightPow
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisGeometry₂.HoweUnram
-import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.GaussianBinomialClosedForm
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ThetaVacuumHeckeIdentitySplitPlace
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ThetaVacuaMatchingConjugatePrime
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ThetaLiftGoodProjectorIntertwinesMatchedHecke
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ThetaLiftTransferHeckePolySplitPrime
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.SplittingCharactersUnramifiedOffLevels
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.SplitPlaceUniformiserIdeleValueUnramifiedChar
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.ParamsEx
+public import Formalism.LocalToGlobal.IndefiniteReal.LinksStage
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.RealLowestKTypeCoeffSquareIntegrable
+public import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.IdemSum
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.SplitPlaceUniformiserIdeleValueUnramifiedChar
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MultiplicitySpaceEqZeroOfLowestKTypes
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsFinitePlaceIdempotentBaseChangeAdeles
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.RamificationIdxEqOneOfIsSquare
 import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsUnramifiedHeckeCharHalfExponentRestrictQua
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MultiplicitySpaceEqZeroOfLowestKTypes
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsSmoothVecLowKSub
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.LevelOperatorsAtPrimeOffLevelDatum
+import Development.AbelianVarietyTheory.Proofs.SatakeParameters.SphericalLabelOperatorsOnHyperspecialFixedVector
+import Development.AbelianVarietyTheory.Proofs.SatakeParameters.SplittingCharactersUnramifiedOffLevels
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ThetaLiftGoodProjectorIntertwinesMatchedHecke
+import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ThetaLiftLevelsGoodPrimesProperties
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ThetaLiftTransferHeckePolySplitPrime
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ThetaVacuaMatchingConjugatePrime
+import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ThetaVacuumHeckeIdentitySplitPlace
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.WeilDatumAtPlaceEqLatticeIntertwinerMulDetChar
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsSmoothVecLowKSub
+
+@[expose] public section
 
 noncomputable section
 
@@ -34,7 +80,7 @@ open Polynomial Formalism.L2.Col
 theorem prod_one_add (M : Multiset ℂ) :
     (M.map fun b => 1 + b).prod = ∑ j ∈ Finset.range (M.card + 1), M.esymm j := by
   have h := congrArg (Polynomial.eval (1 : ℂ)) (Multiset.prod_X_add_C_eq_sum_esymm M)
-  simpa [Polynomial.eval_multiset_prod, Polynomial.eval_finset_sum, Multiset.map_map] using h
+  simpa [Polynomial.eval_multiset_prod, Polynomial.eval_finsetSum, Multiset.map_map] using h
 
 theorem eq_of_prod_eq {M M' : Multiset ℂ} (hc : M.card = M'.card) {c : ℂ} (h0 : c ≠ 0)
     (h : ∀ Y : ℂ, (M.map fun b => 1 - c * b * Y).prod = (M'.map fun b => 1 - c * b * Y).prod) : M = M' := by
@@ -74,7 +120,7 @@ theorem eval_heckePolyOf {q n : ℕ} (hq : q ≠ 0) {B : Multiset ℂˣ} (hB : B
     fun b => (-((Real.sqrt q : ℂ) ^ n * (Real.sqrt q : ℂ)⁻¹ * Y)) • b)
   rw [Multiset.map_map, Multiset.card_map, Multiset.card_map, hB] at h
   refine Eq.trans ?_ (h.symm.trans (congrArg Multiset.prod (Multiset.map_congr rfl fun b _ => ?_)))
-  · rw [heckePolyOf, Polynomial.eval_finset_sum]
+  · rw [heckePolyOf, Polynomial.eval_finsetSum]
     refine Finset.sum_congr rfl fun j hj => ?_
     obtain ⟨m, rfl⟩ : ∃ m, n = j + m := Nat.exists_eq_add_of_le (Nat.lt_succ_iff.1 (Finset.mem_range.1 hj))
     rw [← Multiset.pow_smul_esymm, GlobalTheory.LFun.satEig, eval_mul, eval_C, eval_pow, eval_X,
@@ -108,7 +154,7 @@ theorem params_eq {q r t : ℕ} (hq : q ≠ 0) {B B' : Multiset ℂˣ} (hB : B.c
     unfold heckePolyOf
     exact Finset.sum_congr rfl fun k hk => by
       rw [h k (Nat.lt_succ_iff.1 (Finset.mem_range.1 hk))]) e
-  rw [← eval_heckePolyOf hq hB, e1, eval_mul, eval_comp, eval_heckePolyOf hq hB', Multiset.map_add, Multiset.prod_add]
+  rw [← eval_heckePolyOf hq hB, e1, eval_mul, eval_comp, eval_heckePolyOf hq hB', Multiset.map_add (f := _), Multiset.prod_add]
   congr 1
   · rw [Multiset.map_map, Multiset.map_map]
     refine congrArg Multiset.prod (Multiset.map_congr rfl fun b _ => ?_)
@@ -212,7 +258,7 @@ theorem match_pos {ψ : AddChar (AF D.host.F) ℂ} {S T : HSp D} {χS χT : (AE 
   have hx' : ((Units.map (cA D).toMonoidHom x : (AE D)ˣ) : AE D) =
       cA D e * incA D ((Formalism.DivisionValues.cO D.host.E ϖ : 𝓞 D.host.E) : D.host.E) + (1 - cA D e) := by
     show cA D (x : AE D) = _
-    rw [hx, RingHom.map_add, RingHom.map_mul, RingHom.map_sub, RingHom.map_one]
+    rw [hx, RingHom.map_add (f := _), RingHom.map_mul, RingHom.map_sub, RingHom.map_one]
     rfl
   have hM := ((GlobalTheory.Hk3.SplitMatch.match_split ψ S T χS χT om _ hW (by rw [hcc]; exact hc.symm) hS' hT').2
     _ _ _ t he' h1' h2' hx').2 hr k hk
@@ -334,7 +380,7 @@ theorem unrCorr_at (hC : Core R F) (i : Fin D.R.m) (t : T)
 
 end Real
 
-theorem unrCorr_split : ∀ (D : D7) (G : Type) [Group G] [Fintype G] (Pl0 T : Type) (A : FamIn D.what₂.LL G Pl0 T D.R.m) (Ks : Type) [Field Ks] [NumberField Ks] [Algebra Ks D.what₂.LL] (R : RealDat D A Ks) (F : Face D A), GlobalTheory.LiftRows.Given R F → R.FullP → ∀ i t, UnrCorr R i t (fun w => ¬ IsConjPl w w) := by
+theorem unrCorr_split : ∀ (D : D7) (G : Type) [Group G] [Fintype G] (Pl0 T : Type) (A : FamIn D.what₂.LL G Pl0 T D.R.m) (Ks : Type) [Field Ks] [NumberField Ks] [Algebra Ks D.what₂.LL] (R : RealDat D A Ks) (F : Face D A), GlobalTheory.LiftRows.Given R F → R.FullP → ∀ i t, UnrCorr R i t (fun w => ¬ Formalism.IndefR.Lev.IsConjPl w w) := by
   intro D G _ _ Pl0 T A Ks _ _ _ R F hG _ i t h hh s c y hy h0 hc B B' hB hB' w hw hok
   refine unrCorr_at hG.core i t h hh s c y hy h0 hc B B' hB hB' w hw fun e => hok ?_
   exact GlobalTheory.GoodPrimes.isConjPl_iff.2 e.symm

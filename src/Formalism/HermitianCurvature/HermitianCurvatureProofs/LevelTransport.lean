@@ -1,8 +1,49 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.ExistsPlaceWithVectors
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.SiteTransport
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.ModuleFormEqRadialFormOne
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.InvariantOperatorUnderJacquet
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.QNFAsm
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.LevTransportHer
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.ContinuousZetaL
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.LevelsOfBuiltSetting
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.MeasurableEmbeddingLevM
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.SiteTransport
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Matrix MeasureTheory
 open scoped ENNReal NNReal
@@ -45,19 +86,19 @@ theorem glue_step {r : ℕ} (j : ℕ) (hj : j + 1 ≤ r) (c : Fin r → ℂ) (c'
   funext l
   unfold P5.glue PTie.shiftCf consC
   by_cases h1 : j + 1 ≤ l.val
-  · rw [dif_pos (show j ≤ l.val by omega), dif_pos h1]
+  · rw [dite_eq_left (show j ≤ l.val by omega), dite_eq_left h1]
     simp only [Fin.val_cast]
-    rw [dif_neg (by omega)]
+    rw [dite_eq_right (by omega)]
     congr 1
   · by_cases h2 : j ≤ l.val
-    · rw [dif_pos h2, dif_neg h1]
+    · rw [dite_eq_left h2, dite_eq_right h1]
       simp only [Fin.val_cast]
-      rw [dif_pos (by omega)]
+      rw [dite_eq_left (by omega)]
       congr 1
       ext
       simp only
       omega
-    · rw [dif_neg h2, dif_neg h1]
+    · rw [dite_eq_right h2, dite_eq_right h1]
 
 theorem castM_iota0 {k r : ℕ} (h : 0 + (r - 0) = r) (g : B.Mat k (r - 0)) :
     D.castM h (ιLev k 0 (r - 0) g) = g := by

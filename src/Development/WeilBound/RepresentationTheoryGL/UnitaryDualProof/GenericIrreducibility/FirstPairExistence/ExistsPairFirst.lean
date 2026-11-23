@@ -1,8 +1,58 @@
-import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.GenericIrreducibility.CentralProd2
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.GenericIrreducibility.CentralProd2
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsEquivProdIrrTw
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ProductIrreducibleAppendEquiv
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ReverseOrderedProductPermEquiv
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.UnlinkedCommuteOfIrreducible
+public import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.BernsteinZelevinskyGL.TopAdm
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
-set_option synthInstance.maxHeartbeats 400000
+
 
 open Matrix GlobalTheory.PRep GlobalTheory.SmGL GlobalTheory.SplitWeil GlobalTheory.LocGL
 
@@ -23,12 +73,12 @@ theorem factor_of_equiv (hF : FactorIrr k) {r t : ℕ} {V W U : Type} [AddCommGr
   exact hF r t V W A B hA hB (GlobalTheory.Parabolic.isIrreducible_of_equiv e.symm hπ)
 
 private theorem sum_fst_fin_append {k : Type} [Field k] [TopologicalSpace k] {m n : ℕ}
-    (f : Fin m → IrrGL k) (g : Fin n → IrrGL k) :
+    (f : Fin m → IrrGL (k := k)) (g : Fin n → IrrGL (k := k)) :
     ∑ a, (Fin.append f g a).1 = (∑ a, (f a).1) + ∑ a, (g a).1 := by
   rw [Fin.sum_univ_add]
   simp only [Fin.append_left, Fin.append_right]
 
-private theorem nonempty_prodIrr_equiv_of_eq_comp_cast {m n N : ℕ} (e : m = n) (f : Fin m → IrrGL k) (g : Fin n → IrrGL k)
+private theorem nonempty_prodIrr_equiv_of_eq_comp_cast {m n N : ℕ} (e : m = n) (f : Fin m → IrrGL (k := k)) (g : Fin n → IrrGL (k := k))
     (hfg : f = g ∘ Fin.cast e) (hf : ∑ a, (f a).1 = N) (hg : ∑ a, (g a).1 = N) :
     Nonempty ((prodIrr f hf).Equiv (prodIrr g hg)) := by
   subst e
@@ -39,17 +89,17 @@ private theorem nonempty_prodIrr_equiv_of_eq_comp_cast {m n N : ℕ} (e : m = n)
   subst hfg'
   exact ⟨Representation.Equiv.refl _⟩
 
-set_option maxHeartbeats 1600000 in
-set_option maxHeartbeats 1600000 in
 
-theorem pair_irr (hF : FactorIrr k) {h N : ℕ} (y : Fin h → IrrGL k) (i j : Fin h) (hij : (j : ℕ) = i + 1)
+
+
+theorem pair_irr (hF : FactorIrr k) {h N : ℕ} (y : Fin h → IrrGL (k := k)) (i j : Fin h) (hij : (j : ℕ) = i + 1)
     (hd : ∑ a, (y a).1 = N) (hirr : (prodIrr y hd).IsIrreducible) (q : ℕ) (hq : ∑ t, (![y i, y j] t).1 = q) :
     (prodIrr ![y i, y j] hq).IsIrreducible := by
   subst hq
   obtain ⟨s, hs⟩ : ∃ s, (i : ℕ) + (2 + s) = h := ⟨h - i - 2, by have := j.2; omega⟩
-  obtain ⟨P, hP⟩ : ∃ P : Fin i → IrrGL k, ∀ a, P a = y ⟨a, by have := a.2; have := i.2; omega⟩ :=
+  obtain ⟨P, hP⟩ : ∃ P : Fin i → IrrGL (k := k), ∀ a, P a = y ⟨a, by have := a.2; have := i.2; omega⟩ :=
     ⟨_, fun _ => rfl⟩
-  obtain ⟨S, hS⟩ : ∃ S : Fin s → IrrGL k, ∀ b, S b = y ⟨i + 2 + b, by have := b.2; omega⟩ :=
+  obtain ⟨S, hS⟩ : ∃ S : Fin s → IrrGL (k := k), ∀ b, S b = y ⟨i + 2 + b, by have := b.2; omega⟩ :=
     ⟨_, fun _ => rfl⟩
   have hcomp : Fin.append P (Fin.append ![y i, y j] S) = y ∘ Fin.cast hs := by
     funext a
@@ -88,14 +138,14 @@ theorem pair_irr (hF : FactorIrr k) {h N : ℕ} (y : Fin h → IrrGL k) (i j : F
   obtain ⟨e3⟩ := GlobalTheory.CompanionTheory.ProdStage.prod₂_prodIrr_append k 2 s _ _ ![y i, y j] S rfl rfl hQS
   exact (factor_of_equiv hF ⟨e3⟩ irrQS (isSmooth_prodIrr _ _) (isSmooth_prodIrr _ _)).1
 
-def PR {h : ℕ} (f g : Fin h → IrrGL k) : Prop :=
+def PR {h : ℕ} (f g : Fin h → IrrGL (k := k)) : Prop :=
   ∑ a, (f a).1 = ∑ a, (g a).1 ∧
     ∀ (N : ℕ) (hf : ∑ a, (f a).1 = N) (hg : ∑ a, (g a).1 = N),
       (prodIrr f hf).IsIrreducible → Nonempty ((prodIrr f hf).Equiv (prodIrr g hg))
 
-set_option maxHeartbeats 1600000 in
 
-theorem pr_swap (hF : FactorIrr k) (hC : Comm2Irr k) {h : ℕ} (f : Fin h → IrrGL k) (i j : Fin h)
+
+theorem pr_swap (hF : FactorIrr k) (hC : Comm2Irr k) {h : ℕ} (f : Fin h → IrrGL (k := k)) (i j : Fin h)
     (hij : (j : ℕ) = i + 1) : PR f (f ∘ Equiv.swap i j) := by
   refine ⟨(Equiv.sum_comp (Equiv.swap i j) (fun a => (f a).1)).symm, ?_⟩
   intro N hf hg hirr
@@ -106,11 +156,11 @@ theorem pr_swap (hF : FactorIrr k) (hC : Comm2Irr k) {h : ℕ} (f : Fin h → Ir
   exact GlobalTheory.CompanionTheory.BZSegComm.prodIrr_swap_of_isIrreducible PositivityTheory.Tls2.BZGL.irreducibleAdmissibleGL_top
     ![f i, f j] ![f j, f i] rfl rfl hq hq' hp hp'
 
-private theorem PR_refl {h : ℕ} (f : Fin h → IrrGL k) : PR f f :=
+private theorem PR_refl {h : ℕ} (f : Fin h → IrrGL (k := k)) : PR f f :=
   ⟨rfl, fun _ _ _ _ => ⟨Representation.Equiv.refl _⟩⟩
 
-private theorem PR_trans {h : ℕ} {f g g' : Fin h → IrrGL k} (h1 : PR f g) (h2 : PR g g') : PR f g' := by
-  set_option maxHeartbeats 1600000 in
+private theorem PR_trans {h : ℕ} {f g g' : Fin h → IrrGL (k := k)} (h1 : PR f g) (h2 : PR g g') : PR f g' := by
+
   refine ⟨h1.1.trans h2.1, fun N hf hg' hirr => ?_⟩
   have hg : ∑ a, (g a).1 = N := h1.1.symm.trans hf
   obtain ⟨e1⟩ := h1.2 N hf hg hirr
@@ -118,9 +168,9 @@ private theorem PR_trans {h : ℕ} {f g g' : Fin h → IrrGL k} (h1 : PR f g) (h
   obtain ⟨e2⟩ := h2.2 N hg hg' hirr2
   exact ⟨e1.trans e2⟩
 
-set_option maxHeartbeats 1600000 in
 
-theorem pr_perm (hF : FactorIrr k) (hC : Comm2Irr k) {h : ℕ} (f : Fin h → IrrGL k) (σ : Equiv.Perm (Fin h)) :
+
+theorem pr_perm (hF : FactorIrr k) (hC : Comm2Irr k) {h : ℕ} (f : Fin h → IrrGL (k := k)) (σ : Equiv.Perm (Fin h)) :
     PR f (f ∘ σ) := by
   cases h with
   | zero =>
@@ -142,7 +192,7 @@ theorem pr_perm (hF : FactorIrr k) (hC : Comm2Irr k) {h : ℕ} (f : Fin h → Ir
       rw [Equiv.Perm.coe_mul]
       exact PR_trans (ihx f) (ihy (f ∘ x))
 
-theorem prodIrr_cast {m n N : ℕ} (e : m = n) (f : Fin m → IrrGL k) (g : Fin n → IrrGL k)
+theorem prodIrr_cast {m n N : ℕ} (e : m = n) (f : Fin m → IrrGL (k := k)) (g : Fin n → IrrGL (k := k))
     (hfg : f = g ∘ Fin.cast e) (hf : ∑ a, (f a).1 = N) (hg : ∑ a, (g a).1 = N) :
     Nonempty ((prodIrr f hf).Equiv (prodIrr g hg)) := by
   subst e
@@ -179,14 +229,14 @@ theorem comp_firstPerm {r : ℕ} {α : Type*} (x : Fin (r + 1) → α) (j : Fin 
   · simp [firstPerm]
   · simp [firstPerm]
 
-set_option maxHeartbeats 1600000 in
 
-theorem exists_pair_last (x₀ : IrrGL k) {M : ℕ} {V W U : Type} [AddCommGroup V] [Module ℂ V]
+
+theorem exists_pair_last (x₀ : IrrGL (k := k)) {M : ℕ} {V W U : Type} [AddCommGroup V] [Module ℂ V]
     [AddCommGroup W] [Module ℂ W] [AddCommGroup U] [Module ℂ U] (A : Representation ℂ (GL (Fin M) k) V)
     (B : Representation ℂ (GL (Fin x₀.1) k) W) (π : Representation ℂ (GL (Fin (M + x₀.1)) k) U)
     (hAs : IsSmooth A) (hAi : A.IsIrreducible) (E : Nonempty ((prod₂ A B).Equiv π))
     (EB : Nonempty (x₀.rep.Equiv B)) :
-    ∃ (y : IrrGL k) (hd2 : ∑ a, (![y, x₀] a).1 = M + x₀.1), Nonempty (π.Equiv (prodIrr ![y, x₀] hd2)) := by
+    ∃ (y : IrrGL (k := k)) (hd2 : ∑ a, (![y, x₀] a).1 = M + x₀.1), Nonempty (π.Equiv (prodIrr ![y, x₀] hd2)) := by
   obtain ⟨e⟩ := E
   obtain ⟨eB⟩ := EB
   have hp : ∑ a, (![IrrGL.of A hAs hAi, x₀] a).1 = (IrrGL.of A hAs hAi).1 + x₀.1 := by
@@ -194,14 +244,14 @@ theorem exists_pair_last (x₀ : IrrGL k) {M : ℕ} {V W U : Type} [AddCommGroup
   obtain ⟨e3⟩ := nonempty_prod₂_equiv_prodIrr_pair (IrrGL.of A hAs hAi) x₀ hp
   exact ⟨IrrGL.of A hAs hAi, hp, ⟨e.symm.trans ((prod₂Equiv (IrrGL.equivOf A hAs hAi) eB.symm).trans e3)⟩⟩
 
-set_option maxHeartbeats 1600000 in
 
-theorem exists_pair_first (x₀ : IrrGL k) {M : ℕ} {V W U : Type} [AddCommGroup V] [Module ℂ V]
+
+theorem exists_pair_first (x₀ : IrrGL (k := k)) {M : ℕ} {V W U : Type} [AddCommGroup V] [Module ℂ V]
     [AddCommGroup W] [Module ℂ W] [AddCommGroup U] [Module ℂ U] (A : Representation ℂ (GL (Fin x₀.1) k) V)
     (B : Representation ℂ (GL (Fin M) k) W) (π : Representation ℂ (GL (Fin (x₀.1 + M)) k) U)
     (hBs : IsSmooth B) (hBi : B.IsIrreducible) (E : Nonempty ((prod₂ A B).Equiv π))
     (EA : Nonempty (x₀.rep.Equiv A)) :
-    ∃ (y : IrrGL k) (hd2 : ∑ a, (![x₀, y] a).1 = x₀.1 + M), Nonempty (π.Equiv (prodIrr ![x₀, y] hd2)) := by
+    ∃ (y : IrrGL (k := k)) (hd2 : ∑ a, (![x₀, y] a).1 = x₀.1 + M), Nonempty (π.Equiv (prodIrr ![x₀, y] hd2)) := by
   obtain ⟨e⟩ := E
   obtain ⟨eA⟩ := EA
   have hp : ∑ a, (![x₀, IrrGL.of B hBs hBi] a).1 = x₀.1 + (IrrGL.of B hBs hBi).1 := by
@@ -213,7 +263,7 @@ end Lemmas
 
 variable (k : Type) [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k]
 
-set_option maxHeartbeats 1600000 in
+
 theorem moveLast : FactorIrr k → Comm2Irr k → MoveLast k := by
   intro hF hC h N x hd hirr j
   cases h with
@@ -240,7 +290,7 @@ theorem moveLast : FactorIrr k → Comm2Irr k → MoveLast k := by
     have hAi := (factor_of_equiv hF ⟨E⟩ hirr (isSmooth_prodIrr _ _) (isSmooth_prodIrr _ _)).1
     exact exists_pair_last (x j) _ _ _ (isSmooth_prodIrr _ _) hAi ⟨E⟩ ⟨eB⟩
 
-set_option maxHeartbeats 1600000 in
+
 theorem moveFirst : FactorIrr k → Comm2Irr k → MoveFirst k := by
   intro hF hC h N x hd hirr j
   cases h with

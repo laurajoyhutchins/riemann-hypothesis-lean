@@ -1,4 +1,53 @@
-import Formalism.LocalToGlobal.CharacterGerms.IntSProd
+module
+
+public import Formalism.LocalToGlobal.CharacterGerms.RowTieFB
+public import Formalism.DropLevelBounds.ConstantCoeffVanishing.UbintConstantCoeffEqZero
+public import Formalism.LocalToGlobal.CharacterGerms.IntSProd
+public import Formalism.LocalToGlobal.CharacterGerms.LemmaMLin
+public import Formalism.LocalToGlobal.CharacterGerms.RowTieJet
+public import Formalism.LocalToGlobal.CharacterGerms.SubstSubst
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Formalism.LocalToGlobal.ProjectiveLattices.SubConstMemOrig
+
+@[expose] public section
 
 noncomputable section
 
@@ -30,8 +79,9 @@ theorem expS_copies (Y : FBChart C V O dd) (n : ℕ) :
   have hs : ∀ b : Fin n, ev (n := n) ![pt C dd b] ((Y.k : C) • Y.B.hL C Y.h Y.w0) =
       (Y.k : C) • ev (n := n) ![pt C dd b] (Y.B.hL C Y.h Y.w0) := fun b =>
     MvPowerSeries.subst_smul (hasSubst_of_ordGE (VP.og (a := fun s : Fin 1 × Fin dd => ![pt C dd b] s.1 s.2) (ha b))) _ _
+
   rw [VP.expS_eq _ (cc_smul _ (by rw [map_sum]; exact Finset.sum_eq_zero fun b _ => hc b)), Finset.smul_sum,
-    Formalism.UnitaryBoundIntegral.ubint_mvExp_sum _ _ (fun b _ => cc_smul _ (hc b))]
+  Formalism.UnitaryBoundIntegral.ubint_mvExp_sum _ _ (fun b _ => cc_smul _ (hc b))]
   refine Finset.prod_congr rfl fun b _ => ?_
   rw [VP.expS_eq _ (cc_smul _ (VP.cc_hL Y))]
   show _ = MvPowerSeries.subst (fun s : Fin 1 × Fin dd => ![pt C dd b] s.1 s.2) (mvExp _)
@@ -56,48 +106,5 @@ theorem rowCopy_mul_exp {J : Fin 2 → Type} {n : ℕ} (b : Fin n) (F L : MvPowe
   rw [hdeg]
 
 end VP
-
-theorem valuation_eq_pair_of_cuts : ValEqPFromCutsSt := by
-  intro C _ _ V O _ _ dd d _ Orb _ I _ Y p H Ls n h1 h2 h3 h4 hs P hP Po hQ kind hk S t ht gr hg
-  obtain ⟨U, hUi, hU0, hUeq⟩ := h2 hs
-  obtain ⟨U', hU'i, hU'U⟩ := VP.intInv hUi hU0
-  choose G hGi hGe using fun o ρ => h3 hs o (S o) (t o) (ht o) (gr o ρ) (hg o ρ)
-  have hpt : ∀ b : Fin n, ∀ s : Fin 1 × Fin dd, MvPowerSeries.constantCoeff (![pt C dd b] s.1 s.2) = 0 := by
-    intro b s
-    simp [pt]
-  have hpti : ∀ b : Fin n, ∀ s : Fin 1 × Fin dd, IntS V (![pt C dd b] s.1 s.2) := by
-    intro b s
-    simp only [Matrix.cons_val_fin_one, pt]
-    exact VP.IntS_X _
-  have hb : ∀ b : Fin n, pull1 Y p (U' * ∏ o, G o b) * pull1 Y p (FB.expS C ((Y.k : C) • Y.B.hL C Y.h Y.w0)) =
-      ∏ o, toAllS o (gr o b * mvExp (Y.raw (p o)).hRow) := by
-    intro b
-    have e1 : pull1 Y p U' * pull1 Y p U = 1 := by rw [← VP.pullback_one_var_mul, hU'U, VP.pullback_one_var_one]
-    rw [hUeq, VP.pullback_one_var_mul, VP.pullback_one_var_prod]
-    simp only [hGe, VP.toAllS_mul]
-    rw [Finset.prod_mul_distrib]
-    calc pull1 Y p U' * (∏ o, toAllS o (gr o b)) * (pull1 Y p U * ∏ o, toAllS o (mvExp (Y.raw (p o)).hRow))
-        = (pull1 Y p U' * pull1 Y p U) * ((∏ o, toAllS o (gr o b)) * ∏ o, toAllS o (mvExp (Y.raw (p o)).hRow)) := by
-          ring
-      _ = _ := by rw [e1, one_mul]
-  have hpull : pullN Y p ((∏ b : Fin n, ev (n := n) ![pt C dd b] (U' * ∏ o, G o b)) *
-      ∏ b : Fin n, ev (n := n) ![pt C dd b] (FB.expS C ((Y.k : C) • Y.B.hL C Y.h Y.w0))) =
-      ∏ o, MvPowerSeries.rename (VP.eAll n o)
-        (∏ ρ : Fin n, (rowCopy ρ (gr o ρ) * mvExp (rowCopy ρ (Y.raw (p o)).hRow))) := by
-    rw [VP.pullN_mul, VP.pullN_prod, VP.pullN_prod, ← Finset.prod_mul_distrib]
-    simp only [VP.pullN_ev, ← VP.rowOf_mul, hb, VP.rowOf_prod, VP.rowOf_toAllS, VP.rowCopy_mul_exp, map_prod]
-    exact Finset.prod_comm
-  refine ⟨∏ b : Fin n, ev (n := n) ![pt C dd b] (U' * ∏ o, G o b), ?_, ?_⟩
-  · exact VP.IntS_prod _ fun b _ =>
-      IntS.subst (hpt b) (hpti b) (IntS.mul hU'i (VP.IntS_prod _ fun o _ => hGi o b))
-  · unfold FBChart.nab nabValN
-    rw [h1 n (Ls.ι n) (Ls.cp n) (Ls.uv n) P _ hQ, VP.expS_copies Y n, hpull, VP.jet_orb]
-    exact Finset.prod_congr rfl fun o _ =>
-      h4 C V d (I o) (Fin dd) (Y.raw (p o)) (H o) n (Po o) (kind o) (hk o) (gr o)
-
-theorem valuation_eq_pair_of_log_unit_germ {C : Type} [Field C] [CharZero C] {V : VF C} {O : Type} [CommRing O] [StarRing O] {dd : ℕ} {d : ℕ}
-    [NeZero d] {Orb : Type} [Fintype Orb] {I : Orb → Fin 2 → Type} [∀ o g, Fintype (I o g)]
-    (Y : FBChart C V O dd) (p : ∀ o, PairData Y d (I o)) (H : ∀ o, (Y.raw (p o)).Hyps V) (Ls : LetSys C dd) (n : ℕ)
-    (h1 : LogCoordSt Y p) (h2 : UnitSt Y p) (h3 : GermLiftSt Y p H) : ValEqPSt Y p H Ls n := valuation_eq_pair_of_cuts C V O dd d Orb I Y p H Ls n h1 h2 h3 leaf_holds
 
 end Formalism.L2.FormalSeriesBounds

@@ -1,12 +1,55 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.WeilSiegelTheta.BigCellDefs
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ContinuousHermPart
-import Development.AutomorphicSpectrum.Proofs.GlobalProofs.IntegralEqTsumFd
-import Development.AutomorphicSpectrum.Proofs.GlobalProofs.EqZeroOfFourierCoefficientsVanish
-import Formalism.LocalToGlobal.IndefiniteReal.SobolevIteration.FdSetIntegralCharEqZero
-import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.IntegrableOnOfPeriodic
-import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.CharLem
-import Formalism.LocalToGlobal.IndefiniteReal.DatumLemmas
+module
+
+public import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.WeilSiegelTheta.BigCellDefs
+import Development.AbelianVarietyTheory.Counterexamples.HeightSurvey.StarPurelyImaginaryEqNeg
+import Development.AbelianVarietyTheory.Proofs.HeightProofs.IsTopologicalRingAE
+public import Development.AutomorphicSpectrum.Proofs.GlobalProofs.AdelicCharacterOrthogonalIsRationalStatement
+import Formalism.LocalToGlobal.BesselHermitianTheta.LemmasWeil
+public import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.IntegrableOnOfPeriodic
+import Formalism.LocalToGlobal.ProjectiveLattices.HalfOneAddSqrtNegIsIntegral
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import Formalism.LocalToGlobal.IndefiniteReal.DatumLemmas
+public import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.CharLem
+
+@[expose] public section
 
 noncomputable section
 open scoped Matrix NNReal ENNReal ComplexConjugate TensorProduct
@@ -43,6 +86,7 @@ theorem ann_gen (P : A → Prop) (hP : ∀ x : A, (∀ t : F, P (algebraMap F A 
       ∑ k, B.repr z k * algebraMap F A (Algebra.trace F E (e * b k)) := by
     intro e
     conv_lhs => rw [← hz]
+
     rw [Finset.mul_sum, map_sum]
     refine Finset.sum_congr rfl fun k _ => ?_
     rw [mul_smul_comm, Algebra.TensorProduct.tmul_mul_tmul, mul_one, map_smul, trace_one_tmul', smul_eq_mul]
@@ -70,7 +114,7 @@ theorem ann_gen (P : A → Prop) (hP : ∀ x : A, (∀ t : F, P (algebraMap F A 
 end Gen
 
 theorem halfTr_add' (a b : AE D) : halfTr (a + b) = halfTr a + halfTr b := by
-  simp only [halfTr, trA, map_add, mul_add]
+  simp only [halfTr, trA, map_add (f := _), mul_add]
 
 theorem halfTr_zero' : halfTr (0 : AE D) = 0 := by
   simp [halfTr]
@@ -80,8 +124,8 @@ theorem halfTr_neg' (a : AE D) : halfTr (-a) = -halfTr a := by
 
 theorem halfTr_add_cA (w : AE D) : halfTr (w + cA D w) = Algebra.trace (AF D.host.F) (AE D) w := by
   have h2 : algebraMap D.host.F (AF D.host.F) (1 / 2) + algebraMap D.host.F (AF D.host.F) (1 / 2) = 1 := by
-    rw [← map_add, add_halves, map_one]
-  simp only [halfTr, trA, map_add, Formalism.IndefR.Datum.Brg.trace_cA, mul_add]
+    rw [← map_add (f := _), add_halves, map_one]
+  simp only [halfTr, trA, map_add (f := _), Formalism.IndefR.Datum.Brg.trace_cA, mul_add]
   rw [← add_mul, h2, one_mul]
 
 theorem halfTr_incA' (e : D.host.E) :
@@ -166,6 +210,7 @@ theorem chi_rat {ψ : AddChar (AF D.host.F) ℂ} (hψ : IsCharAF D.host.F ψ) {m
   have hδ' : rat δ = c.1.1 := hδ
   have h1 : (HMul.hMul (rat γ) c.1.1 : Mx D r r) = rat (γ * δ) := by rw [← hδ', rat_mul]
   have h2 : Matrix.trace (rat (γ * δ) : Mx D r r) = incA D (Matrix.trace (γ * δ)) := by
+
     simp only [rat, Matrix.trace, Matrix.diag, Matrix.map_apply, map_sum]
   show ψ (halfTr (Matrix.trace (HMul.hMul (rat γ) c.1.1 : Mx D r r))) = 1
   rw [h1, h2, halfTr_incA']

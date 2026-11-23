@@ -1,7 +1,56 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.IsBergDensity
-import Mathlib.RingTheory.Nullstellensatz
-import Mathlib.RingTheory.Unramified.Field
-import Mathlib.RingTheory.Jacobson.Ring
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.IsBergDensity
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+public import Mathlib.RingTheory.Nullstellensatz
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -26,6 +75,7 @@ theorem eq_zero_of_sum_tmul {Ω E : Type*} [Field Ω] [CharZero Ω] [Field E] [A
     Module.Flat.lTensor_preserves_injective_linearMap W.subtype Subtype.val_injective
   have h0 : (∑ k, e k ⊗ₜ[ℚ] 𝒞 k : E ⊗[ℚ] W) = 0 := by
     apply hinj
+
     rw [map_sum, map_zero]
     have hc : ∀ k, ((𝒞 k : W) : Ω) = s k := fun k => by
       show ((Module.Basis.span hs k : W) : Ω) = s k
@@ -58,11 +108,12 @@ theorem nilp_coeff_eq_zero {Ω : Type} [Field Ω] [CharZero Ω] {r : ℕ} {s : F
       induction x using TensorProduct.induction_on with
       | zero => simp
       | tmul a b => simp [ι, Algebra.TensorProduct.map_tmul]
-      | add x y hx hy => rw [map_add, map_add, hx, hy]
+      | add x y hx hy => rw [map_add (f := _), map_add (f := _), hx, hy]
     intro x y hxy
     apply hinj
     rw [← heq, ← heq, hxy]
   have hιt : ι tA = ∑ k, c k ⊗ₜ[ℚ] s k := by
+
     simp [tA, ι, map_sum, Algebra.TensorProduct.map_tmul, cA]
   have hnA : IsNilpotent tA := by
     obtain ⟨m, hm⟩ := h
@@ -76,6 +127,7 @@ theorem nilp_coeff_eq_zero {Ω : Type} [Field Ω] [CharZero Ω] {r : ℕ} {s : F
     have h0 : π tA = 0 := (hnA.map π).eq_zero
     have h1 : ∑ k, φ (cA k) ⊗ₜ[ℚ] s k = 0 := by
       rw [← h0]
+
       simp [tA, π, map_sum, Algebra.TensorProduct.map_tmul]
     exact congrFun (eq_zero_of_sum_tmul hs h1)
   have hmax : ∀ M : Ideal A, M.IsMaximal → ∀ k, cA k ∈ M := by
@@ -85,7 +137,7 @@ theorem nilp_coeff_eq_zero {Ω : Type} [Field Ω] [CharZero Ω] {r : ℕ} {s : F
       Algebra.FiniteType.of_surjective (Ideal.Quotient.mkₐ ℚ M) Ideal.Quotient.mk_surjective
     haveI : Module.Finite ℚ (A ⧸ M) := finite_of_finite_type_of_isJacobsonRing ℚ (A ⧸ M)
     exact Ideal.Quotient.eq_zero_iff_mem.1 (key (A ⧸ M) (Ideal.Quotient.mkₐ ℚ M) k)
-  have hjac : (⊥ : Ideal A).jacobson = ⊥ := IsJacobsonRing.out inferInstance Ideal.bot_prime.isRadical
+  have hjac : (⊥ : Ideal A).jacobson = ⊥ := IsJacobsonRing.out inferInstance Ideal.isPrime_bot.isRadical
   funext k
   have hk : cA k ∈ (⊥ : Ideal A).jacobson := Ideal.mem_sInf.2 (fun J hJ => hmax J hJ.2 k)
   rw [hjac] at hk
@@ -140,6 +192,7 @@ theorem coeff_eq_zero_of_vanish {x : J → Ω} {r : ℕ} {b : Fin r → MvPolyno
       exact hf'
     have hsum := h z hz'
     change eval z P = 0
+
     rw [hP, map_sum]
     simpa [secFun] using hsum
   rw [MvPolynomial.vanishingIdeal_zeroLocus_eq_radical] at hPmem
@@ -154,6 +207,7 @@ theorem coeff_eq_zero_of_vanish {x : J → Ω} {r : ℕ} {b : Fin r → MvPolyno
     rw [← map_pow]
     exact hker hn⟩
   have hev : evalT x P = ∑ k, c k ⊗ₜ[ℚ] aeval x (b k) := by
+
     rw [hP, map_sum]
     refine Finset.sum_congr rfl fun k _ => ?_
     rw [map_mul, evalT_map_rat, ← MvPolynomial.algebraMap_eq, AlgHom.commutes,

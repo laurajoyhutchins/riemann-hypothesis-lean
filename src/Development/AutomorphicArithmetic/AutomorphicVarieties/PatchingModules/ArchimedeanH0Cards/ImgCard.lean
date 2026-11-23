@@ -1,11 +1,56 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PatchingModules.ArchimedeanH0Cards.ObstructionBoundFromDuality
-import Development.AutomorphicArithmetic.AutomorphicVarieties.SelmerModuleFiniteness.CardSelmerMulCardBoundaryLeCardSelmerMatrix
-import Development.AutomorphicArithmetic.AutomorphicVarieties.SelmerModuleFiniteness.FiniteSelmerModuleOfFiniteCohomology
-import Development.AutomorphicArithmetic.AutomorphicVarieties.SelmerModuleFiniteness.FiniteTruncatedLocallyConstantMatrixSolutions
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PatchingModules.SeparableMatrixStability.SelLin
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PatchingModules.SeparableMatrixStability.SelMap
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PatchingModules.SeparableMatrixStability.AmFin
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PatchingModules.DegreeCountCohomology.AdicLC
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PatchingModules.ArchimedeanH0Cards.ObstructionBoundFromDuality
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PatchingModules.DegreeCountCohomology.AdicLC
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PatchingModules.SeparableMatrixStability.AmFin
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PatchingModules.SeparableMatrixStability.SelLin
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.SelmerModuleFiniteness.CardSelmerMulCardBoundaryLeCardSelmerMatrix
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.SelmerModuleFiniteness.FiniteSelmerModuleOfFiniteCohomology
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.SelmerModuleFiniteness.FiniteTruncatedLocallyConstantMatrixSolutions
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Matrix Filter ReciprocityTheory.Gal UpperTheory.V.W UpperTheory.V.Pa UpperTheory.V.Pa.B2
 
@@ -67,12 +112,12 @@ private theorem eqn_map (p : R →+* R') (f : F.G₀ ⊕ F.Vl → Matrix (Fin n)
   | ine u g hg i j => rfl
   | coc g h i j =>
     simp only [eqn]
-    rw [← Matrix.map_mul, ← Matrix.map_mul, ← Matrix.map_add, ← Matrix.map_sub, Matrix.map_apply]
+    rw [← Matrix.map_mul, ← Matrix.map_mul, ← Matrix.map_add (f := _), ← Matrix.map_sub, Matrix.map_apply]
     all_goals intro a₁ a₂
     all_goals first | exact map_sub p a₁ a₂ | exact map_add p a₁ a₂
   | pol g i j =>
     simp only [eqn]
-    rw [← Matrix.transpose_map, ← Matrix.map_add, Matrix.map_apply]
+    rw [← Matrix.transpose_map, ← Matrix.map_add (f := _), Matrix.map_apply]
     intro a₁ a₂
     exact map_add p a₁ a₂
   | loc v g i j _ =>
@@ -179,6 +224,7 @@ private theorem img_card {l : ℕ} [Fact l.Prime] {F : GFrame l} {n : ℕ} (x : 
     refine ⟨(fun j => π (c j), fun g => (b g).map π), ⟨Set.mem_univ _, hred b hb⟩, ?_⟩
     funext g
     ext i j
+
     simp [Φ, Matrix.sum_apply, map_sum, Finset.sum_apply, Matrix.map_apply]
   have hfinB : Bm.Finite := by
     refine (Set.finite_range (fun Y : Matrix (Fin n) (Fin n) (x.Am m) => dY F (x.ρX (x.Am m)) Y)).subset ?_

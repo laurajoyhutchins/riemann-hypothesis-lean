@@ -1,9 +1,58 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.SendsB
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.PartialIsometryExtension
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.FStarBwdBetaS
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.PartialIsometryExtension
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.FStarBetaIC
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.FStarBetaID
+import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.SaturatedPf
+import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.EmbeddingIntegerAlgebraMap
+import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.FStarBetaIA
+import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.FStarBwdNC
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.FStarGlob
 import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.FStarMinors
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DetZhatSwapUnit
+import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.FStarNMove
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.FStarOmLocPf
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.BetaUniqueness.Lemmas
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.FStarFrameLA
+
+@[expose] public section
 
 noncomputable section
 
@@ -32,7 +81,7 @@ theorem sub_smul_eq {R W : Type*} [Ring R] [AddCommGroup W] [Module R W] {P : Su
 
 section Place
 
-variable (p : PlF D) (γ : TermDef.Term D u u' F0 what₂) (F'₂ : LFlag (VS D) D.R.rS ((Tu D u' : ℕ) : D.host.E))
+variable (p : PlF D) (γ : TermDef.Term D u u' F0 what₂) (F'₂ : LFlag (D.sp.Y 0) D.R.rS (((D.mem u').A.T : ℕ) : D.host.E))
   (ψ : (locH Zd p).Wb (tLoc Zd p γ).f' ≃ₗ[(D.s.atP p).Ep] (locH Zd p).Wb (locF' Zd p F'₂))
   (β₀ : (VS D).V ≃ₗ[D.host.E] (VS D).V)
 
@@ -48,7 +97,7 @@ theorem sendsB_add {m₁ m₂ : (VS D).V}
     sub_add_eq h₁ h₂ hm ((baseChange₂ D p).map_add m₁ m₂)
   have e2 : (⟨baseChange₂ D p (β₀ (m₁ + m₂)), hm₂⟩ : ↥((locH Zd p).perp ((locH Zd p).X (locF' Zd p F'₂)))) =
       ⟨baseChange₂ D p (β₀ m₁), k₁⟩ + ⟨baseChange₂ D p (β₀ m₂), k₂⟩ :=
-    sub_add_eq k₁ k₂ hm₂ (by rw [LinearEquiv.map_add, (baseChange₂ D p).map_add])
+    sub_add_eq k₁ k₂ hm₂ (by rw [β₀.map_add, (baseChange₂ D p).map_add])
   have f1 : (locH Zd p).mkW (tLoc Zd p γ).f' ⟨baseChange₂ D p (m₁ + m₂), hm⟩ =
       (locH Zd p).mkW (tLoc Zd p γ).f' ⟨baseChange₂ D p m₁, h₁⟩ + (locH Zd p).mkW (tLoc Zd p γ).f' ⟨baseChange₂ D p m₂, h₂⟩ :=
     (congrArg _ e1).trans (LinearMap.map_add _ _ _)
@@ -107,6 +156,7 @@ theorem bcP_X_f' {x : (VS D).V} (hx : x ∈ Xsp (repF γ)) : baseChange₂ D p x
   induction hx using Submodule.span_induction with
   | mem x hx =>
     obtain ⟨j, rfl⟩ := hx
+
     rw [← frame_csG, ← key, map_sum, Fin.sum_univ_castSucc]
     have hl : ξ (Fin.last D.R.rS) j.castSucc = 0 := h1 _ _ (Fin.castSucc_lt_last j)
     rw [hl]
@@ -121,25 +171,25 @@ theorem bcP_X_f' {x : (VS D).V} (hx : x ∈ Xsp (repF γ)) : baseChange₂ D p x
     rw [e]
     exact Submodule.smul_mem _ _ (Submodule.subset_span ⟨i, rfl⟩)
   | zero => rw [map_zero]; exact zero_mem _
-  | add a b _ _ ha hb => rw [map_add]; exact add_mem ha hb
+  | add a b _ _ ha hb => rw [(baseChange₂ D p).map_add]; exact add_mem ha hb
   | smul c x _ hx => rw [Formalism.L2.SG.Pf.LocalDenominators.baseChange_smul₂]; exact Submodule.smul_mem _ _ hx
 
 end Place
 
 section Place2
 
-variable (p : PlF D) (γ : TermDef.Term D u u' F0 what₂) (F'₂ : LFlag (VS D) D.R.rS ((Tu D u' : ℕ) : D.host.E))
+variable (p : PlF D) (γ : TermDef.Term D u u' F0 what₂) (F'₂ : LFlag (D.sp.Y 0) D.R.rS (((D.mem u').A.T : ℕ) : D.host.E))
   (ψ : (locH Zd p).Wb (tLoc Zd p γ).f' ≃ₗ[(D.s.atP p).Ep] (locH Zd p).Wb (locF' Zd p F'₂))
   (β₀ : (VS D).V ≃ₗ[D.host.E] (VS D).V)
 
-theorem z_orthG {T' : D.host.E} (G : LFlag (VS D) D.R.rS T') : G.fl.z ∈ orth (VS D) (Xsp G) :=
+theorem z_orthG {T' : D.host.E} (G : LFlag (D.sp.Y 0) D.R.rS T') : G.fl.z ∈ orth (VS D) (Xsp G) :=
   (PI.UnitaryGroupMassFormula.BetaLUniq.mem_orth (VS D)).2 fun x hx => by
     rw [BwdNA.hsw (VS D) G.fl.z x]
     have h := NMoveP.hT_f_X G.fl (Fin.last D.R.rS) hx
     rw [NMoveP.fvecL] at h
     rw [h, star_zero]
 
-theorem X_le_orthG {T' : D.host.E} (G : LFlag (VS D) D.R.rS T') : Xsp G ≤ orth (VS D) (Xsp G) :=
+theorem X_le_orthG {T' : D.host.E} (G : LFlag (D.sp.Y 0) D.R.rS T') : Xsp G ≤ orth (VS D) (Xsp G) :=
   BwdNA.X_le_orth (VS D) (Xsp G) fun _ hx _ hy => NMoveP.hT_X_X G.fl hx hy
 
 theorem starLast_sub_mem :

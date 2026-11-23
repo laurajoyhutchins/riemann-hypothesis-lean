@@ -1,13 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.TrivIsCr
-import Formalism.SharpRestriction.LevelLetterCocycles.LocCoh
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.TwistStep
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.AcrisTorsionFreeComplete
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.DeRhamPotSemistable
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.LinearIndepOnOfInvariant
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.TrivIsCr
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.EqOfPowEqOneOfNormSubLt
+public import Formalism.LocalRingCardinality.AdicCompletionLocal.LocTied
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.EventuallyClosedOfDictClosed
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.LinearIndepOnOfInvariant
 import Development.AbelianVarietyTheory.Proofs.SatakeParameters.SecondTwistSmallIffExactlyAtAndFinClause
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.EventuallyClosedOfDictClosed
-import Formalism.SharpRestriction.LevelLetterCocycles.JsetEmb
+public import Formalism.SharpRestriction.LevelLetterCocycles.JsetEmb
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.PolyApproxZeroPadic
+
+@[expose] public section
+
 open Formalism Formalism.BasicNotions Formalism.BasicNotions.Loc Formalism.WeaklyAdmissibleFiltrations Formalism.MainNotions.N TensorProduct PowerSeries GlobalTheory.Prism GlobalTheory.BKReal GlobalTheory.Per GlobalTheory.BSP GlobalTheory.MemLoc GlobalTheory.Pst GlobalTheory.BKLim GlobalTheory.Cong Matrix
 open scoped Formalism.Per NNReal
 
@@ -23,7 +65,7 @@ theorem stab_of_steps {L M : Type} [Field L] [AddCommGroup M] [Module L M] (F : 
     (∀ a ≤ -(N : ℤ), F a = F (-(N : ℤ))) ∧ ∀ b, (N : ℤ) + 1 ≤ b → F b = F ((N : ℤ) + 1) := by
   constructor
   · intro a ha
-    induction a, ha using Int.le_induction_down with
+    induction a, ha using Int.leInductionDown with
     | base => rfl
     | pred a ha ih =>
       rw [← ih]
@@ -31,7 +73,7 @@ theorem stab_of_steps {L M : Type} [Field L] [AddCommGroup M] [Module L M] (F : 
       rw [sub_add_cancel] at h1
       exact (Submodule.eq_of_le_of_finrank_eq (by simpa using anti (a - 1)) h1).symm
   · intro b hb
-    induction b, hb using Int.le_induction with
+    induction b, hb using Int.leInduction with
     | base => rfl
     | succ b hb ih =>
       rw [← ih]
@@ -57,7 +99,7 @@ theorem rTensor_mem_filV {LL LL' V W : Type} [Field LL] [Algebra Qp LL] [Field L
   induction y using TensorProduct.induction_on with
   | zero => simp
   | tmul v c => simp
-  | add x y hx hy => simp only [map_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
 
 theorem rTensor_mem_DdR {LL LL' V W : Type} [Field LL] [Algebra Qp LL] [Field LL'] [Algebra Qp LL']
     [AddCommGroup V] [Module LL V] [Module Qp V] [IsScalarTower Qp LL V]
@@ -70,7 +112,7 @@ theorem rTensor_mem_DdR {LL LL' V W : Type} [Field LL] [Algebra Qp LL] [Field LL
     induction y using TensorProduct.induction_on with
     | zero => simp
     | tmul v c => simp [actVdR, hf]
-    | add x y hx hy => simp only [map_add, hx, hy]
+    | add x y hx hy => simp only [map_add (f := _), hx, hy]
   simp only [DdR, Submodule.mem_iInf, LinearMap.mem_ker, LinearMap.sub_apply, LinearMap.id_apply,
     sub_eq_zero] at hx ⊢
   intro g
@@ -91,6 +133,7 @@ theorem exists_sum_comp {Qp V ι : Type} [Field Qp] [AddCommGroup V] [Module Qp 
   have h1 := LinearMap.congr_fun hG v
   simp only [LinearMap.comp_apply, LinearMap.id_apply] at h1
   simp only [LinearMap.comp_apply, LinearMap.coe_single]
+
   rw [← map_sum, Finset.univ_sum_single]
   exact h1
 
@@ -102,7 +145,7 @@ theorem sum_rTensor {Qp V ι BdR : Type} [Field Qp] [AddCommGroup V] [Module Qp 
   induction x using TensorProduct.induction_on with
   | zero => simp
   | tmul v c => simp only [LinearMap.rTensor_tmul]; rw [← TensorProduct.sum_tmul, h]
-  | add x y hx hy => simp only [map_add, Finset.sum_add_distrib, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), Finset.sum_add_distrib, hx, hy]
 
 end GlobalTheory.LayerJumps
 
@@ -227,8 +270,9 @@ theorem colMap_coe {Γ : Type} [Group Γ] {a d : ℕ} {L₀ : FinExt l} {Cl : Se
     {ρ : Γ →* GL (Fin d) ℤ_[l]} (Ly : Layer L₀ Cl ρ) (k : Fin Ly.m) (c : Fin a) (v : Fin d → ℚ_[l])
     (i : Fin a) :
     algebraMap ↥(Ly.L k).1 (Om l) (colMap Ly k c v i) = ∑ j, algebraMap ℚ_[l] (Om l) (v j) * Ly.b j k i c := by
+
   simp only [colMap, LinearMap.sum_apply, Finset.sum_apply, LinearMap.smulRight_apply,
-    LinearMap.proj_apply, Pi.smul_apply, map_sum]
+  LinearMap.proj_apply, Pi.smul_apply, map_sum]
   refine Finset.sum_congr rfl fun j _ => ?_
   rw [Algebra.smul_def, map_mul, ← IsScalarTower.algebraMap_apply]
   rfl
@@ -249,6 +293,7 @@ theorem colMap_equi {Γ : Type} [Group Γ] {a d : ℕ} {L₀ : FinExt l} {Cl : S
     simpa [Matrix.mul_apply, Matrix.sum_apply, smul_eq_mul] using this
   have hL : algebraMap ↥(Ly.L k).1 (Om l) (((repL (Ly.L k) (Ly.rep k) (Ly.rep_mem k) g).val *ᵥ colMap Ly k c v) i₀) =
       ∑ i', (Ly.rep k g).val i₀ i' * ∑ j, algebraMap ℚ_[l] (Om l) (v j) * Ly.b j k i' c := by
+
     simp only [Matrix.mulVec, dotProduct, map_sum, map_mul, colMap_coe]
     rfl
   rw [hL]
@@ -264,8 +309,9 @@ theorem colMap_equi {Γ : Type} [Group Γ] {a d : ℕ} {L₀ : FinExt l} {Cl : S
   refine Finset.sum_congr rfl fun i _ => ?_
   simp only [qRep, MonoidHom.coe_comp, Function.comp_apply]
   show algebraMap ℚ_[l] (Om l) ((((ρ g).val.map (algebraMap ℤ_[l] ℚ_[l])) *ᵥ v) i) * _ = _
+
   simp only [Matrix.mulVec, dotProduct, map_sum, Finset.sum_mul,
-    RingHom.mapMatrix_apply, Matrix.map_apply, Units.coeHom_apply, map_mul, zOm, RingHom.comp_apply]
+  RingHom.mapMatrix_apply, Matrix.map_apply, Units.coeHom_apply, map_mul, zOm, RingHom.comp_apply]
   refine Finset.sum_congr rfl fun x _ => by ring
 
 end GlobalTheory.LayerJumps

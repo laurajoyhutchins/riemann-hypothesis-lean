@@ -1,8 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.BlockSplitAll
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.IsobaricDiscreteSelfDualStrongMultiplicityOne
-import Formalism.SharpRestriction.LevelLetterCocycles.SumRepresentations
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ContinuousIotaOQOfData
+module
+
+public import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.BlockSplitAll
+public import Formalism.SharpRestriction.LevelLetterCocycles.SumRepresentations
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ContinuousIotaOQOfData
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.MetricSpace.Ultra.TotallySeparated
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.MainNotions Formalism.MainNotions.N Formalism.ConjugateSelfDual ReciprocityTheory.Gal Polynomial NumberField IsDedekindDomain GlobalTheory.PRep GlobalTheory.SmGL GlobalTheory.SplitWeil GlobalTheory.RowTie GlobalTheory.SplitRead
 
 noncomputable section
@@ -82,29 +125,5 @@ theorem blockChar_eq (h5 : JacquetShalikaStrongMultOne N A) (i : N.Loc) (ρ : G 
     Polynomial.map_C] at e
   have e2 := C_injective (sub_right_injective e)
   exact (A.iotaQC i).injective e2
-
-theorem chiIne_of_data (hLP : TieLP N A) (hAut : TieAut N A) (h2 : exists_galois_rep_local_global_compatible N A) (h5 : JacquetShalikaStrongMultOne N A)
-    (hMu : MuInt N A) : ChiIne N A := by
-  intro i w hw σ hσ
-  obtain ⟨ρ, hρ, hwd, -⟩ := (h2 i).2.2 (A.tw (A.muC i) A.etaTinv) (blockShift R)
-    (fun τ z hz => blockChar_integral N A hAut hMu i τ z hz)
-  have hρσ := blockChar_eq N A h5 i ρ hρ hwd σ
-  have e := A.wdOf_ine i ρ w hw hρ σ hσ
-  rw [hwd w hw, A.inePol_tw _ _ _ hσ, A.locG_tw, charpoly_fin_one, hρσ] at e
-  have hdim : A.lpDim (A.locG A.etaTinv w) = 1 := A.locG_dim _ _
-  have hine : A.inePol (A.locG A.etaTinv w) σ = X - C 1 := by
-    have := ((A.unr_iff_ine _).1 (A.etaTinv_def w).1).2 σ hσ
-    rw [hdim, pow_one] at this
-    simpa using this
-  have hs := ((hLP w (A.locG (A.muC i) w) (A.locG (A.muC i) w) (A.locG A.etaTinv w) (A.locG A.etaTinv w) 0
-    hdim hdim).2.2.2.2.2 σ hσ).2 1 hine
-  rw [hs, Polynomial.scaleRoots_one] at e
-  rw [← e]
-  simp only [Polynomial.map_sub, Polynomial.map_X, Polynomial.map_C]
-  rfl
-
-theorem chiIne_main : ∀ D : D7, Formalism.MainNotions.SumRepresentations.tie0 D → Formalism.MainNotions.SumRepresentations.adm2 D → Formalism.MainNotions.SumRepresentations.adm5 D → MuInt D.nd D.naut →
-    ChiIne D.nd D.naut :=
-  fun D h0 h2 h5 hMu => chiIne_of_data D.nd D.naut h0.1 h0.2.1 h2 h5 hMu
 
 end GlobalTheory.SplitRead

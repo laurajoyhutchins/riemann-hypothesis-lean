@@ -1,6 +1,49 @@
-import Mathlib
-import Formalism.LocalToGlobal.IndefiniteReal.EquivFunOM
-import Formalism.LocalToGlobal.IndefiniteReal.PrimitiveStatementsWithPassage
+module
+
+public import Formalism.LocalToGlobal.IndefiniteReal.EquivFunOM
+public import Formalism.LocalToGlobal.IndefiniteReal.PrimitiveStatementsWithPassage
+public import Formalism.LocalToGlobal.Divisibility.InertPartitionLePartF
+import Formalism.LocalToGlobal.Divisibility.LiftLatLemmas
+import Formalism.LocalToGlobal.Divisibility.RowLatLemmas
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Module NumberField IsDedekindDomain Polynomial
 open scoped Matrix ComplexOrder InnerProductSpace
@@ -16,20 +59,19 @@ section Inst3
 variable {K : Type} [Field K] [NumberField K] [StarRing K] {G : Type} [Group G] [Fintype G] {Pl0 I0 Ty : Type}
 
 theorem okOp_opAll {B : BlockDat K G Pl0} {D : InertDat3 B I0 Ty} {s : ℕ} (h : B.Ok s) (hD : D.Ok3) (hH : B.OkH)
-    (hH3 : D.InertRationalAdjoint) : OkOp B D.opAll where
-  rat i a b := by
+    (hH3 : D.InertRationalAdjoint) : OkOp B D.opAll := by
+  refine ⟨?_, ?_, hD.comm, InertDat3.splitOver_opAll D h hD, ?_⟩
+  · intro i a b
     rcases i with p | k
     · exact hH.rat p a b
     · exact hH3.rat k a b
-  adj i := by
+  · intro i
     rcases i with p | k
     · obtain ⟨p', hp'⟩ := hH.adj p
       exact ⟨Sum.inl p', hp'⟩
     · obtain ⟨k', hk'⟩ := hH3.adj k
       exact ⟨Sum.inr k', hk'⟩
-  comm := hD.comm
-  split := InertDat3.splitOver_opAll D h hD
-  opG i g := by
+  · intro i g
     rcases i with p | k
     · exact h.opG p g
     · exact hD.opG k g

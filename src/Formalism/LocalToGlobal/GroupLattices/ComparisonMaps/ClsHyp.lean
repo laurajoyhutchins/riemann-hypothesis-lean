@@ -1,5 +1,49 @@
-import Formalism.LocalToGlobal.GroupLattices.ComparisonMaps.CastGLSymmApply
-import Formalism.LocalToGlobal.GroupLattices.ComparisonMaps.ClsHypA
+module
+
+public import Formalism.LocalToGlobal.GroupLattices.ComparisonMaps.CastGLSymmApply
+public import Formalism.LocalToGlobal.GroupLattices.ComparisonMaps.ClsHypA
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -36,6 +80,7 @@ theorem fst_mulVec (I : LocId L p nV W Qq) (v : Fin nV) (x : GL (Fin R.k) (E ⊗
     (y : Fin R.k → E ⊗[F] (I.plc v).adicCompletion F) (a : Fin R.k) :
     (splV I v (((x : Matrix (Fin R.k) (Fin R.k) _) *ᵥ y) a)).1 =
       (((bc (fstV I v) x : GL (Fin R.k) _) : Matrix (Fin R.k) (Fin R.k) _) *ᵥ fun b => (splV I v (y b)).1) a := by
+
   simp only [Matrix.mulVec, dotProduct, map_sum, map_mul, Prod.fst_sum, Prod.fst_mul]
   rfl
 
@@ -73,7 +118,9 @@ theorem isHyperbolicAt_of_integralSplit (I : LocId L p nV W Qq) (hb : NotBad I) 
     exact ⟨fun y hy => ⟨_, (h y).1 hy, fun _ => rfl⟩,
       fun y hy => ⟨_, (((stabGL (Formalism.L2.Herm.locL (I.plc v) L.Lb)).inv_mem h) y).1 hy, fun _ => rfl⟩⟩
   · rintro ⟨ha, hb'⟩
-    exact stab_of_first (splV I v) (sigR sp.cm.sig ((I.plc v).adicCompletion F)) (I.spl_sig (I.plc v) (I.pl v).2)
-      ((I.plc v).adicCompletionIntegers F).toSubring (intV E (I.plc v)) (h1 v) _ _ (h2 v) x hx ha hb'
+    exact stab_of_first (splV I v) (sigR sp.cm.sig ((I.plc v).adicCompletion F))
+      (I.spl_sig (I.plc v) (I.pl v).2) ((I.plc v).adicCompletionIntegers F).toSubring
+      (intV E (I.plc v)) (h1 v) (sp.gram0.map (inclE (F := F) ((I.plc v).adicCompletion F)))
+      (Formalism.L2.Herm.locL (I.plc v) L.Lb) (h2 v) x hx ha hb'
 
 end Formalism.L2.G.Cmp

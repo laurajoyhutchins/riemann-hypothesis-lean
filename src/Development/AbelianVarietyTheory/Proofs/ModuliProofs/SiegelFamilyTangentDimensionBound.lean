@@ -1,20 +1,71 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.ModuliSpaces.IsGaloisCover
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.UniformisationConclusion
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.HeckeKer
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsHolPeriods
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.UnifUniqSt
+module
+
+public import Development.AbelianVarietyTheory.Definitions.ModuliSpaces.IsGaloisCover
+public import Development.AbelianVarietyTheory.Definitions.ModuliSpaces.ExistsArBaseAway
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ClsLinCombSingle
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.SecBaseChangeAnySt
+public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.HomLieEquivScalarTmul
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.BiadditiveOfTrivAxes
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsKsMatrixStatement
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsThetaLevelAbelianSchemePullback
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.FinrankSymmCommutantKroneckerLeStatement
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.LineBundleIsoLinCombSymmBiadditiveSubstitution
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.SharpRelations
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ThetaLevelAbelianSchemeConstOverDualNumbersStatement
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ThetaLevelPullbackIdCompCancelStatement
+public import Development.AbelianVarietyTheory.Statements.FundamentalDomains.ExistsIsAddFundamentalDomain
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
 import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.OneArc
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.LineBundleIsoLinCombSymmBiadditiveSubstitution
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.SharpRelations
-import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.HomLieEquivScalarTmul
-import Development.AbelianVarietyTheory.Statements.FundamentalDomains.ExistsIsAddFundamentalDomain
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.BiadditiveOfTrivAxes
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsKsMatrixStatement
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.FinrankSymmCommutantKroneckerLeStatement
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ThetaLevelAbelianSchemeConstOverDualNumbersStatement
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ThetaLevelPullbackIdCompCancelStatement
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsThetaLevelAbelianSchemePullback
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Development.AbelianVarietyTheory.Definitions.ShimuraVarieties.PowObjGeometricallyConnected
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor
@@ -110,6 +161,7 @@ theorem adjoint_and_diag (hG : Out.GlobalFnsSt) {S : Scheme.{0}} {o : Type} [Com
     rw [← k, pull_comp, ← e]
   have hQ : ∀ {T : Over S} (x : T ⟶ A),
       pull x.left (cls L hL) = ∑ uv : Fin 8 × Fin 8, W uv.1 uv.2 • B (x ≫ pr uv.1) (x ≫ pr uv.2) := fun x => by
+
     rw [(cls_eq_iff hL (LB.isLB_linComb c.isLB _ _)).2 iso, cls_linComb c.isLB, map_sum]
     refine Finset.sum_congr rfl fun uv _ => ?_
     rw [map_zsmul, ← pull_comp, ← Over.comp_left, comp_lift]
@@ -156,6 +208,7 @@ theorem exists_basis_matrixRep [Module.Finite K V] {h : ℕ} (ρ : Matrix (Fin (
     · subst hv; simp [e]
     · simp [hv]
   have hs : ∀ y, ∑ u, e u u y = y := fun y => by
+
     rw [← LinearMap.sum_apply, ← map_sum, Matrix.sum_single_one, map_one, Module.End.one_apply]
   let V₀ := LinearMap.range (e 0 0)
   have h₀ : ∀ z : V₀, e 0 0 z = z := by
@@ -185,6 +238,7 @@ theorem exists_basis_matrixRep [Module.Finite K V] {h : ℕ} (ρ : Matrix (Fin (
     ext p q
     simp [Matrix.sum_apply, Matrix.mul_apply, Matrix.single_apply, ite_and]
   simp only [hb, e]
+
   rw [← Module.End.mul_apply, ← map_mul, hM, map_sum, LinearMap.sum_apply]
   simp only [map_zsmul, LinearMap.smul_apply, Int.cast_smul_eq_zsmul]
 
@@ -240,8 +294,8 @@ theorem exists_isLieBasis_kronecker {K : Type} [Field K] {S : Scheme.{0}} {A C :
 
 end Lie
 
-open GlobalTheory.CechPic in
 
+open GlobalTheory.CechPic in
 theorem cls_cube_push {S S' : Scheme.{0}} {G : Over S} {G' : Over S'} [GrpObj G] [GrpObj G'] [IsCommMonObj G]
     [IsCommMonObj G'] {f : S' ⟶ S} {φ : G'.left ⟶ G.left} (h : IsGrpPullback G' G f φ) {L : LB G.left} {L' : LB G'.left}
     (hL : L.IsLB) (hL' : L'.IsLB) (H : LBIso L' (L.pull φ)) {T : Over S} {T' : Over S'}
@@ -250,6 +304,7 @@ theorem cls_cube_push {S S' : Scheme.{0}} {G : Over S} {G' : Over S'} [GrpObj G]
     cls (cubeLB G' ![a', b'] L') (LB.isLB_linComb hL' _ _) =
       pull U.left (cls (cubeLB G ![a, b] L) (LB.isLB_linComb hL _ _)) := by
   refine (cls_linComb hL' _ _ _).trans (Eq.trans ?_ (congrArg _ (cls_linComb hL _ _ _)).symm)
+
   rw [map_sum]
   refine Finset.sum_congr rfl fun I _ => ?_
   rw [map_zsmul, (cls_eq_iff hL' (pull_isLB hL _)).2 H, cls_pull hL, ← pull_comp, ← pull_comp,
@@ -257,8 +312,8 @@ theorem cls_cube_push {S S' : Scheme.{0}} {G : Over S} {G' : Over S'} [GrpObj G]
       fin_cases i
       exacts [Over.OverMorphism.ext ha, Over.OverMorphism.ext hb]) I.down]
 
-open GlobalTheory.CechPic GlobalTheory.SharpRel in
 
+open GlobalTheory.CechPic GlobalTheory.SharpRel in
 theorem prim_pull {o : Type} [CommRing o] {g k : ℕ} {J : Type} {b : TBase o k} {w w' : J} {S S' : Scheme.{0}}
     {s : S ⟶ Sp o} {s' : S' ⟶ Sp o} {f : S' ⟶ S} {t : TObj g k J b s} {t' : TObj g k J b s'} (m : TMap t' t f)
     (H : t.Prim w w') : t'.Prim w w' := by

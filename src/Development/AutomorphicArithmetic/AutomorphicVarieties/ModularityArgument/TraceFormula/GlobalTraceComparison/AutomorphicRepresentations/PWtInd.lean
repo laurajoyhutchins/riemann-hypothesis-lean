@@ -1,11 +1,55 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.TraceFormula.GlobalTraceComparison.AutomorphicRepresentations.EvalBasis
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.TraceFormula.GlobalTraceComparison.AutomorphicRepresentations.OrthZero
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.ThetaCellCovers.KernelDiagonalIntegrableHolds
-import Development.DiscreteGroups.PiInvariants.CompactSupportTwists.PiInvTop
-import Development.DiscreteGroups.PiInvariants.CompactSupportTwists.PiVecExHolds
-import Development.DiscreteGroups.PiInvariants.CompactSupportTwists.TwtrContOfMem
-import Development.DiscreteGroups.PiInvariants.CompactSupportTwists.IntegrableShift
-import Development.DiscreteGroups.PiInvariants.CompactSupportTwists.SplitCentreMulTor
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.TraceFormula.GlobalTraceComparison.AutomorphicRepresentations.EvalBasis
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.TraceFormula.GlobalTraceComparison.AutomorphicRepresentations.OrthZero
+public import Development.DiscreteGroups.PiInvariants.CompactSupportTwists.IntegrableShift
+import Development.DiscreteGroups.PiInvariants.CompactSupportTwists.LogAbsEqLogIdeleNorm
+import Development.DiscreteGroups.PiInvariants.CompactSupportTwists.PiClosT
+public import Development.DiscreteGroups.PiInvariants.CompactSupportTwists.SplitCentreMulTor
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.UniformSpace.Uniformizable
+import Development.AutomorphicArithmetic.Foundations.Convolution.EndomorphismSlices.TwTrSum
+public import Development.DiscreteGroups.PiInvariants.CompactSupportTwists.ExistsBumpOne
+
+@[expose] public section
 
 noncomputable section
 
@@ -90,7 +134,7 @@ private theorem ldet_shift {g : GA E n} (hg : logAbs g.val.det = 0) (x : H E n 0
 
 private theorem slab_rt (D : Dom E n 0) {a : GA E n → ℂ} (ha : Slab D a) {g : GA E n} (hg : logAbs g.val.det = 0) :
     Slab D fun x => a (x * g) := by
-  have hc : Continuous fun x => a (x * g) := ha.1.comp (continuous_mul_right g)
+  have hc : Continuous fun x => a (x * g) := ha.1.comp (continuous_mul_const g)
   refine ⟨hc, fun γ x => ?_, fun t x => ?_, fun u hu hs => ?_⟩
   · show a (_ * x * g) = a (x * g)
     rw [mul_assoc]
@@ -101,14 +145,15 @@ private theorem slab_rt (D : Dom E n 0) {a : GA E n → ℂ} (ha : Slab D a) {g 
   · have hm := ha.2.2.2 u hu hs
     have hcm : Continuous fun x : H E n 0 => a (x.1 * g) * u (ldet x) :=
       (hc.comp continuous_fst).mul (hu.comp continuous_ldet)
-    refine ⟨hcm.aestronglyMeasurable, ?_⟩
     have hsh := lintegral_shift D (fun x : H E n 0 => ‖a x.1 * u (ldet x)‖ₑ ^ (2 : ENNReal).toReal) (fun γ x => by
       show ‖a ((γ : H E n 0).1 * x.1) * u (ldet ((γ : H E n 0) * x))‖ₑ ^ _ = _
       rw [slab_rat ha, ldet_rat]) ((g, 1) : H E n 0)
     simp only [ldet_shift hg] at hsh
-    rw [eLpNorm_eq_lintegral_rpow_enorm two_ne_zero ENNReal.ofNat_ne_top]
-    have h2 := hm.2
-    rw [eLpNorm_eq_lintegral_rpow_enorm two_ne_zero ENNReal.ofNat_ne_top, ← hsh] at h2
+    change eLpNorm (fun x : H E n 0 => a (x.1 * g) * u (ldet x)) 2 D.ν < ⊤
+    rw [eLpNorm_eq_lintegral_rpow_eNorm_toReal two_ne_zero ENNReal.ofNat_ne_top hcm.aestronglyMeasurable]
+    have h2 := hm
+    change eLpNorm (fun x : H E n 0 => a x.1 * u (ldet x)) 2 D.ν < ⊤ at h2
+    rw [eLpNorm_eq_lintegral_rpow_eNorm_toReal two_ne_zero ENNReal.ofNat_ne_top hm.aestronglyMeasurable, ← hsh] at h2
     exact h2
 
 private theorem pair_rt (D : Dom E n 0) {a b : GA E n → ℂ} (ha : Slab D a) (hb : Slab D b) (u : ℝ → ℂ) {g : GA E n}

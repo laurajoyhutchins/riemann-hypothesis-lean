@@ -1,9 +1,50 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StatementsCurrent
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.EqZeroOfMemZeroLocusLineOriginIdeal
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.ImportsBis
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.GraphChartEventuallyEqSheet
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StatementsSheetMeasurable
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.Statements
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RingTheory.IntegralClosure.Algebra.Basic
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.IndefiniteRowSideFullHecke.ComplexSets
@@ -39,61 +80,6 @@ theorem fibre_finite {J : Ideal (MvPolynomial (Fin n) ℂ)} {A : Matrix (Fin d) 
   have h := congrArg (Ideal.Quotient.lift J (MvPolynomial.eval x) fun q hq => hx q hq) (hp j)
   rw [Polynomial.hom_eval₂, lift_eval_comp_projHom J A hx, hxy, map_zero] at h
   simpa [Polynomial.IsRoot, Polynomial.eval_map] using h
-
-theorem chartAbsDens_indicator_le {J : Ideal (MvPolynomial (Fin n) ℂ)}
-    {A : Matrix (Fin d) (Fin n) ℂ} (hA : GroundTheory.Heights₂.Heights.ComplexSets.IsFiniteProjection J A)
-    (φ : Fin d → (Fin n → ℂ) → ℝ) (l : (Fin n → ℂ) → ℝ) {B C : Set (Fin n → ℂ)} (hBC : B ⊆ C)
-    (y : Fin d → ℂ) :
-    0 ≤ GroundTheory.Heights₂.Heights.chartAbsDens J A (B.indicator l) φ y ∧
-      GroundTheory.Heights₂.Heights.chartAbsDens J A (B.indicator l) φ y ≤
-        GroundTheory.Heights₂.Heights.chartAbsDens J A (C.indicator l) φ y := by
-  unfold GroundTheory.Heights₂.Heights.chartAbsDens GroundTheory.Heights₂.Heights.sheetSum
-  rw [finsum_mem_eq_finite_toFinset_sum _ (fibre_finite hA y),
-    finsum_mem_eq_finite_toFinset_sum _ (fibre_finite hA y)]
-  refine ⟨Finset.sum_nonneg fun x _ => ?_, Finset.sum_le_sum fun x _ => ?_⟩
-  · split_ifs
-    · exact abs_nonneg _
-    · exact le_rfl
-  · split_ifs
-    · dsimp only
-      rw [abs_mul, abs_mul]
-      refine mul_le_mul_of_nonneg_right ?_ (abs_nonneg _)
-      by_cases hx : x ∈ B
-      · rw [Set.indicator_of_mem hx, Set.indicator_of_mem (hBC hx)]
-      · rw [Set.indicator_of_notMem hx, abs_zero]
-        exact abs_nonneg _
-    · exact le_rfl
-
-theorem LogIntegrableOn.to_current (h : LogIntegrableOn.Statement) :
-    GroundTheory.Heights₂.Heights.LogIntegrable.Statement := by
-  intro n d J A u φ R hJ hdim hA hu hφ
-  have hJ' : IsAffVariety J d := ⟨hJ, hdim⟩
-  exact (projIntegrable_iff _ _ _ _).mp
-    (h n d J A φ u (Metric.closedBall 0 R) hJ' ((isFiniteProj_iff hJ').mpr hA) hφ hu
-      measurableSet_closedBall Metric.isBounded_closedBall)
-
-theorem LogIntegrable.logIntegrableOn_of_logIntegrable (hM : GroundTheory.Heights₂.Heights.SheetSumMeasurable.Statement)
-    (h : GroundTheory.Heights₂.Heights.LogIntegrable.Statement) : LogIntegrableOn.Statement := by
-  intro n d J A φ u B hJ hA hφ hu hB hBb
-  have hA' := (isFiniteProj_iff hJ).mp hA
-  obtain ⟨R, hR⟩ := hBb.subset_closedBall 0
-  have hI := h n d J A u φ R hJ.isPrime hJ.dim hA' hu hφ
-  have hcont : Continuous fun x : Fin n → ℂ => GroundTheory.Heights₂.Heights.linEval u x := by
-    unfold GroundTheory.Heights₂.Heights.linEval
-    fun_prop
-  have hmeas : Measurable (B.indicator fun x => Real.log ‖GroundTheory.Heights₂.Heights.linEval u x‖) :=
-    (Real.measurable_log.comp (continuous_norm.comp hcont).measurable).indicator hB
-  rw [projIntegrable_iff]
-  refine hI.mono' (hM n d J A _ φ hJ.isPrime hJ.dim hA' hmeas hφ).2.aestronglyMeasurable
-    (Eventually.of_forall fun y => ?_)
-  obtain ⟨h0, h1⟩ := chartAbsDens_indicator_le hA' φ
-    (fun x => Real.log ‖GroundTheory.Heights₂.Heights.linEval u x‖) hR y
-  rw [Real.norm_eq_abs]
-  exact (abs_of_nonneg h0).le.trans h1
-
-theorem LogIntegrable.equiv (hM : GroundTheory.Heights₂.Heights.SheetSumMeasurable.Statement) :
-    GroundTheory.Heights₂.Heights.LogIntegrable.Statement ↔ LogIntegrableOn.Statement :=
-  ⟨LogIntegrable.logIntegrableOn_of_logIntegrable hM, LogIntegrableOn.to_current⟩
 
 end
 

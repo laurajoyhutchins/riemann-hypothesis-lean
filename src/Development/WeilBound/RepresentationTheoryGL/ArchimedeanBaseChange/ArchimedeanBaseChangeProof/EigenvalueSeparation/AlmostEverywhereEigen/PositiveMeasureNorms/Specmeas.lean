@@ -1,4 +1,56 @@
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.EigenvalueSeparation.AlmostEverywhereEigen.OneStepOf
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.EigenvalueSeparation.AlmostEverywhereEigen.OneStepOf
+import Mathlib.Algebra.Order.Archimedean.Real.Hom
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.CStarAlgebra.CompletelyPositiveMap
+import Mathlib.Analysis.CStarAlgebra.ContinuousLinearMap
+import Mathlib.Analysis.CStarAlgebra.PositiveLinearMap
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.InnerProductSpace.StarOrder
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.MeasureTheory.Integral.RieszMarkovKakutani.Real
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.Order.Module.PositiveLinearMap
+
+@[expose] public section
 
 noncomputable section
 
@@ -70,7 +122,7 @@ theorem exists_measure_of_positive (Λ : C(X, ℂ) →ₗ[ℂ] ℂ)
   { toFun g := (Λ (ofR g.toContinuousMap)).re
     map_add' g g' := by
       have : (g + g').toContinuousMap = g.toContinuousMap + g'.toContinuousMap := rfl
-      rw [this, ofR_add, map_add, Complex.add_re]
+      rw [this, ofR_add, map_add (f := _), Complex.add_re]
     map_smul' c g := by
       have : (c • g).toContinuousMap = c • g.toContinuousMap := rfl
       rw [this, ofR_smul, map_smul]; simp
@@ -91,7 +143,7 @@ theorem exists_measure_of_positive (Λ : C(X, ℂ) →ₗ[ℂ] ℂ)
   have hint : Integrable (fun x => f x) (RealRMK.rieszMeasure Λr) :=
     f.continuous.integrable_of_hasCompactSupport (HasCompactSupport.of_compactSpace _)
   conv_lhs => rw [eq_ofR_re_add_im f]
-  rw [map_add, map_smul, key, key, ← integral_re_add_im hint, smul_eq_mul, mul_comm]
+  rw [map_add (f := _), map_smul, key, key, ← integral_re_add_im hint, smul_eq_mul, mul_comm]
   rfl
 
 end PositivityTheory.Rg.BcB.E2.P.Specmeas
@@ -102,7 +154,7 @@ theorem specmeas : SpecMeas := by
   intro K _ _ _ S _ _ _ _ _ π v
   let Λ : C(S, ℂ) →ₗ[ℂ] ℂ :=
   { toFun f := inner ℂ v (π f v)
-    map_add' f g := by simp [map_add]
+    map_add' f g := by simp [map_add (f := _)]
     map_smul' c f := by simp }
   have hΛ : ∀ f : C(S, ℂ), 0 ≤ Λ (star f * f) := by
     intro f

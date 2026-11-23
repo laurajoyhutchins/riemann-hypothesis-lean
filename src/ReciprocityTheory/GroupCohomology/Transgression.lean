@@ -1,9 +1,54 @@
-import ReciprocityTheory.GroupCohomology.TransgressionStatement
-import ReciprocityTheory.GroupCohomology.DEqZeroOfMemB
-import ReciprocityTheory.GroupCohomology.LowHolds
-import ReciprocityTheory.GroupCohomology.Section
-import ReciprocityTheory.GroupCohomology.InfRes
-import ReciprocityTheory.GroupCohomology.TransgressionB
+module
+
+public import ReciprocityTheory.GroupCohomology.TransgressionStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.GroupCohomology.DEqZeroOfMemB
+public import ReciprocityTheory.GroupCohomology.TransgressionB
+public import ReciprocityTheory.GroupCohomology.InfRes
+public import ReciprocityTheory.GroupCohomology.TransgressionA
+
+@[expose] public section
 
 namespace ReciprocityTheory.Coh
 
@@ -36,9 +81,9 @@ theorem transgression_holds : TransgressionStatement.{u} := by
   have hadd : ∀ x x' : I, T (x + x') = T x + T x' := fun x x' => by
     have hy : (M.resSub N).coch.d 1
         ((Pair.res M N.subtype continuous_subtype_val).hom.f 1 (yf x + yf x')) = 0 := by
-      rw [map_add]; exact d_add_eq_zero (hyf x) (hyf x')
+      rw [map_add (f := _)]; exact d_add_eq_zero (hyf x) (hyf x')
     refine (key (yf x + yf x') (zf x + zf x') (d_add_eq_zero (hzf x) (hzf x')) hy (x + x')
-      (by rw [map_add, map_add, hdf, hdf]) ?_).trans rfl
+      (by rw [map_add (f := _), map_add (f := _), hdf, hdf]) ?_).trans rfl
     rw [Submodule.coe_add, hxf x, hxf x', cls_add]
     exact cls_congr _ _ (map_add _ _ _).symm
   have hsmul : ∀ (r : R) (x : I), T (r • x) = r • T x := fun r x => by

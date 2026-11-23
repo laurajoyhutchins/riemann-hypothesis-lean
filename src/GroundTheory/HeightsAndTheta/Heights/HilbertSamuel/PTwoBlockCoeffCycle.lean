@@ -1,9 +1,65 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsTwoBlockCoeffCycle
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsTwoBlockHorizDiv
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PTwoBlockTop
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PMetricTransportSmooth
-import GroundTheory.HeightsAndTheta.Heights.Intersections.PRFormula
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsTwoBlockCoeffCycle
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsTwoBlockHorizDiv
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsCoordArithOfFnField
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsTwoBlockFnField
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PChangeOfLattice
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PMetricTransportSmooth
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.PRFormula
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.StepTStA
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.HilbertSamuel
@@ -21,7 +77,7 @@ variable {κ : Type} [Fintype κ]
 theorem isSmoothHerm_blockLine {m : ConeMetric ℂ (Ix κ)} (hm : IsSmoothMetric m) (b : Fin 2) :
     IsSmoothHerm (blockLine m b) := by
   have hL : ContDiff ℝ ((⊤ : ℕ∞) : WithTop ℕ∞) (fun z : (Σ k, FinTwoTypeFamily κ k) → ℂ => fun p : Ix κ => z ⟨b, p.2⟩) :=
-    contDiff_pi.2 fun p => contDiff_apply ℝ ℂ (⟨b, p.2⟩ : Σ k, FinTwoTypeFamily κ k)
+    contDiff_pi.2 fun p => contDiff_apply ℝ (fun _ => ℂ) (⟨b, p.2⟩ : Σ k, FinTwoTypeFamily κ k)
   exact hm.comp hL.contDiffOn fun z hz h0 => by
     obtain ⟨i, hi⟩ := hz b
     exact hi (congrFun h0 ⟨(), i⟩)
@@ -50,6 +106,7 @@ variable {Ω : Type} [Field Ω] [CharZero Ω]
 theorem mConeMap_lin (x x' : Ix κ → Ω) (b : Fin 2) (a : Ix κ → ℤ) :
     mConeMap (pair x x') (∑ k : Ix κ, C (a k) * X (⟨b, k.2⟩ : Σ k, FinTwoTypeFamily κ k)) =
       C (∑ k, (a k : Ω) * pair x x' ⟨b, k.2⟩) * X b := by
+
   simp only [mConeMap, map_sum, map_mul, aeval_X, eq_intCast, map_intCast]
   rw [Finset.sum_mul]
   refine Finset.sum_congr rfl fun k _ => ?_
@@ -118,6 +175,7 @@ theorem logNorm_eq {x : Ix κ → Ω} {B : Matrix (Ix κ) (Ix κ) ℚ} {m m' : C
   have key : ∀ j, z ⟨0, c⟩ * w j = L * matActC B u j := fun j => by
     have h0 := hz.2 _ (rel_mem hl (d : ℤ) (N j) j (hNΩ j))
     have h0' : (d : ℂ) * z ⟨0, c⟩ * w j - L * ∑ k, ((N j k : ℤ) : ℂ) * u k = 0 := by
+
       simpa [twoBlockNum, hL, hw, hu, map_sum] using h0
     rw [hNC j] at h0'
     have hd' : (d : ℂ) ≠ 0 := by exact_mod_cast hd
@@ -135,6 +193,7 @@ theorem logNorm_eq {x : Ix κ → Ω} {B : Matrix (Ix κ) (Ix κ) ℚ} {m m' : C
   have hmu := m.pos u hu0
   have hmw := m'.pos w hw0
   have hnum : eval z (map (Int.castRingHom ℂ) (twoBlockNum l)) = L := by
+
     simp [twoBlockNum, hL, hw, map_sum]
   have hden : eval z (map (Int.castRingHom ℂ) (twoBlockDen c)) = z ⟨0, c⟩ := by
     simp [twoBlockDen]
@@ -155,8 +214,8 @@ theorem logNorm_eq {x : Ix κ → Ω} {B : Matrix (Ix κ) (Ix κ) ℚ} {m m' : C
     rw [div_eq_div_iff hmw.ne' hmu.ne']
     linarith [hnorm]
 
-open Classical in
 
+open Classical in
 theorem cycR_split {K : Type} [Fintype K] {ι : K → Type} [∀ k, Fintype (ι k)]
     (I : Ideal (MRing ι) → (n : ℕ) → (Fin n → HermLine ι) → ℝ) (P : Ideal (MRing ι)) {n : ℕ}
     (L : Fin n → HermLine ι) (s : MRing ι) :
@@ -168,8 +227,8 @@ theorem cycR_split {K : Type} [Fintype K] {ι : K → Type} [∀ k, Fintype (ι 
   refine finsum_mem_congr rfl fun W _ => ?_
   split_ifs <;> ring
 
-open Classical in
 
+open Classical in
 theorem horiz_eq (hH : TwoBlockHorizDiv.Statement) {x : Ix κ → Ω} {B : Matrix (Ix κ) (Ix κ) ℚ} {c : κ}
     {l : Ix κ → ℤ} (hsp : Submodule.span ℤ (Set.range x) ≤ Submodule.span ℤ (Set.range (matAct B x)))
     (hl : x ⟨(), c⟩ = ∑ j, (l j : Ω) * matAct B x j) (f : Ideal (MRing (FinTwoTypeFamily κ)) → ℝ) :
@@ -192,8 +251,8 @@ theorem horiz_eq (hH : TwoBlockHorizDiv.Statement) {x : Ix κ → Ω} {B : Matri
 
 end TwoBlockCoeffCycle
 
-open TwoBlockCoeffCycle in
 
+open TwoBlockCoeffCycle in
 theorem TwoBlockCoeffCycle.proof (hA : CoordArithOfFnField.Statement) (hF : TwoBlockFnField.Statement)
     (hH : TwoBlockHorizDiv.Statement) : TwoBlockCoeffCycle.Statement := by
   classical

@@ -1,8 +1,54 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsFibreNormDehomIntegral
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsFibreNormBadPrimesFinite
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsFibreNormGoodPrimeIntegral
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsFibreNormPrimeBound
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsFibreNormDehomIntegral
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsFibreNormGoodPrimeIntegral
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsFibreNormPrimeBound
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.ProjDefs
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.HilbertSamuel
@@ -22,13 +68,13 @@ theorem den_eq_one_of_padicValRat_nonneg {a : ℚ} (h : ∀ p : ℕ, p.Prime →
     exact hp.one_lt.ne' (Nat.dvd_one.mp h1)
   have h0 := h p hp
   rw [padicValRat, padicValInt.eq_zero_of_not_dvd hnum] at h0
-  have h2 : 1 ≤ padicValNat p a.den := one_le_padicValNat_of_dvd a.den_ne_zero hpd
+  have h2 : 1 ≤ multiplicity p a.den := one_le_multiplicity_of_dvd a.den_ne_zero hpd
   omega
 
 end FibreNormDehomIntegral
 
-open FibreNormDehomIntegral in
 
+open FibreNormDehomIntegral in
 theorem FibreNormDehomIntegral.proof (hF : FibreNormBadPrimesFinite.Statement)
     (hG : FibreNormGoodPrimeIntegral.Statement) (hB : FibreNormPrimeBound.Statement) :
     FibreNormDehomIntegral.Statement := by
@@ -52,10 +98,10 @@ theorem FibreNormDehomIntegral.proof (hF : FibreNormBadPrimesFinite.Statement)
     have hMq : ((M₀ : ℚ) ^ τ) ≠ 0 := pow_ne_zero _ (by exact_mod_cast hM0)
     rw [padicValRat.mul hMq ha, padicValRat.pow, padicValRat.of_nat]
     by_cases hpT : p ∈ T
-    · have hle : C p ≤ padicValNat p M₀ :=
-        (padicValNat_dvd_iff_le hM0).mp (Finset.dvd_prod_of_mem (fun p => p ^ C p) hpT)
+    · have hle : C p ≤ multiplicity p M₀ :=
+        (multiplicity_dvd_iff_le hM0).mp (Finset.dvd_prod_of_mem (fun p => p ^ C p) hpT)
       have hb := hC p hp τ s hs j c hc m
-      have hle' : ((C p * τ : ℕ) : ℤ) ≤ (τ : ℤ) * (padicValNat p M₀ : ℤ) := by
+      have hle' : ((C p * τ : ℕ) : ℤ) ≤ (τ : ℤ) * (multiplicity p M₀ : ℤ) := by
         push_cast
         rw [mul_comm]
         exact mul_le_mul_of_nonneg_left (by exact_mod_cast hle) (by positivity)
@@ -63,7 +109,7 @@ theorem FibreNormDehomIntegral.proof (hF : FibreNormBadPrimesFinite.Statement)
     · have hgood : ¬ HasCommonZeroModP y L p hp := fun h =>
         hpT ((Set.Finite.mem_toFinset hSf).mpr ⟨hp, h⟩)
       have hg := hG K ι Ω y D e L q hV hBir he hL hz p hp hgood τ s hs j c hc m
-      have : (0 : ℤ) ≤ (τ : ℤ) * (padicValNat p M₀ : ℤ) := by positivity
+      have : (0 : ℤ) ≤ (τ : ℤ) * (multiplicity p M₀ : ℤ) := by positivity
       linarith
 
   have hmem : ((M₀ : ℚ) ^ τ) • c (Module.finrank (pullField y L) Ω) ∈
@@ -72,7 +118,7 @@ theorem FibreNormDehomIntegral.proof (hF : FibreNormBadPrimesFinite.Statement)
     intro a ha
     obtain ⟨m, -, rfl⟩ := mem_coeffs_iff.mp ha
     refine ⟨(((M₀ : ℚ) ^ τ) * (c (Module.finrank (pullField y L) Ω)).coeff m).num, ?_⟩
-    rw [coeff_smul, smul_eq_mul, eq_intCast]
+    rw [MvPolynomial.coeff_smul, smul_eq_mul, eq_intCast]
     exact Rat.coe_int_num_of_den_eq_one (hcoef m)
   obtain ⟨F, hF'⟩ := hmem
   exact ⟨F, hF'⟩

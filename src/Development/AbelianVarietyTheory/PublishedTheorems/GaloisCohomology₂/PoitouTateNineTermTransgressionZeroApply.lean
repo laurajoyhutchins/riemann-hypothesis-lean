@@ -1,5 +1,49 @@
-import Mathlib
-import ReciprocityTheory.Hypotheses.GalCoh
+module
+
+public import ReciprocityTheory.Hypotheses.GalCoh
+public import Mathlib.NumberTheory.NumberField.InfinitePlace.TotallyRealComplex
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -18,8 +62,8 @@ abbrev muLoc (A : ValuationSubring Ω) :
     Representation (ZMod (l ^ r)) (Dec (F := F) A) (ZMod (l ^ r)) :=
   charRep ((cycMod F Ω l r).comp (Dec (F := F) A).subtype)
 
-variable (Ω) in
 
+variable (Ω) in
 abbrev InvFam : Type :=
   ∀ A : ValuationSubring Ω, H2 (muLoc F l r A) →ₗ[ZMod (l ^ r)] ZMod (l ^ r)
 
@@ -196,7 +240,7 @@ theorem NineTermExact.mem_range_localization_H2_iff {hρ : ContAction ρ} (h : N
 def idInv (μ : GS Ω (S : Set (HeightOneSpectrum (𝓞 F))) →* (ZMod (l ^ r))ˣ) :
     H0 (twDual μ (charRep μ)) :=
   ⟨TDual.mk LinearMap.id, fun g => by
-    ext m
+    refine DFunLike.ext _ _ fun m => ?_
     simp only [twDual_apply, TDual.mk_apply, LinearMap.id_apply, charRep_apply, map_inv]
     rw [← mul_assoc, Units.mul_inv, one_mul]⟩
 
@@ -284,9 +328,8 @@ end Global
 end PoitouTate
 
 open PoitouTate in
-
 def PoitouTateTotallyComplex : Prop :=
-  ∀ (F Ω : Type) [Field F] [NumberField F] [IsTotallyComplex F] [Field Ω] [Algebra F Ω]
+  ∀ (F Ω : Type) [Field F] [NumberField F] [_root_.NumberField.IsTotallyComplex F] [Field Ω] [Algebra F Ω]
     [IsAlgClosure F Ω] (l : ℕ) [Fact l.Prime] (r : ℕ), 0 < r →
   ∀ ζ : Ω, IsPrimitiveRoot ζ (l ^ r) →
   ∃ inv : InvFam F Ω l r, IsLocalInvariants ζ inv ∧
@@ -301,9 +344,8 @@ def PoitouTateTotallyComplex : Prop :=
       NineTermExact S Av μ (invAt S Av μ hμ inv) ρ hρ ∧ ShaDual S Av μ ρ
 
 open PoitouTate in
-
 theorem PoitouTateTotallyComplex.annihilators (h : PoitouTateTotallyComplex)
-    (F Ω : Type) [Field F] [NumberField F] [IsTotallyComplex F] [Field Ω] [Algebra F Ω]
+    (F Ω : Type) [Field F] [NumberField F] [_root_.NumberField.IsTotallyComplex F] [Field Ω] [Algebra F Ω]
     [IsAlgClosure F Ω] (l : ℕ) [Fact l.Prime] (r : ℕ) (hr : 0 < r) (ζ : Ω)
     (hζ : IsPrimitiveRoot ζ (l ^ r)) :
     ∃ inv : InvFam F Ω l r, IsLocalInvariants ζ inv ∧

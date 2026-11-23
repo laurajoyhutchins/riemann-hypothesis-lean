@@ -1,4 +1,12 @@
-import Development.WeilBound.RepresentationTheoryGL.RegularisedSiegelWeil.SingularNullSets.LPosExtC
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.RegularisedSiegelWeil.SingularNullSets.LPosExtC
+public import Mathlib.Geometry.Convex.Cone.Pointed
+public import Mathlib.Analysis.Convex.Cone.Extension
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.MeasureTheory.Integral.Bochner.Basic
+
+@[expose] public section
 
 noncomputable section
 

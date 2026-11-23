@@ -1,8 +1,54 @@
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.UltraDefs
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PatchingModules.PatchedSupportCompletions
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.QRegPS
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PatchingModules.AnnihilatorBaseChange.KjMap
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
 import Development.AutomorphicArithmetic.AutomorphicVarieties.PatchingModules.AnnihilatorBaseChange.SpecializationMapCompUniversalSection
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PatchingModules.AnnihilatorBaseChange.KjMap
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.QRegPS
-import Mathlib
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.QRegScal
+
+@[expose] public section
+
 open IsLocalRing Matrix Filter UpperTheory.V.Alg UpperTheory.V.W UpperTheory.V.AlgebraTools UpperTheory.V.Pa UpperTheory.V.Pa.Core
 open scoped TensorProduct
 
@@ -17,6 +63,7 @@ theorem UpperTheory.V.Pa.Core.quotientRegularAt_of_quotient_free_over_powerSerie
       s (GlobalTheory.monoVal MvPowerSeries.X β) := fun β => by
     simp only [GlobalTheory.monoVal, Finsupp.prod, map_prod, map_pow]
   have h0 := congrArg e ((Submodule.Quotient.mk_eq_zero _).2 hc)
+
   rw [map_zero, ← Submodule.mkQ_apply, map_sum, map_sum] at h0
   simp only [map_smul, hmono, he, Submodule.mkQ_apply] at h0
   have hL : ∀ i, t α i ∈ kjIdeal Λ σ 1 j := by
@@ -25,6 +72,7 @@ theorem UpperTheory.V.Pa.Core.quotientRegularAt_of_quotient_free_over_powerSerie
     rw [Finset.sum_apply] at h1
     simp only [Pi.smul_apply, ← ht, Pi.zero_apply] at h1
     have h2 : (∑ β : GlobalTheory.MonoDeg σ a, GlobalTheory.monoVal (MvPowerSeries.X : σ → MvPowerSeries σ Λ) β.1 * t β i) ∈ kjIdeal Λ σ (a + 1) j := by
+
       rw [← Ideal.Quotient.eq_zero_iff_mem, map_sum, ← h1]
       rfl
     have h3 := qRegAt_mvPowerSeries Λ σ (maximalIdeal Λ ^ j) a (fun β => t β i)
@@ -35,6 +83,7 @@ theorem UpperTheory.V.Pa.Core.quotientRegularAt_of_quotient_free_over_powerSerie
   have h4 : c α - ∑ i, s (t α i) • m i ∈ ((kjIdeal Λ σ (a + 1) j).map s • ⊤ : Submodule R M) := by
     rw [← Submodule.Quotient.eq]
     apply e.injective
+
     rw [← Submodule.mkQ_apply _ (∑ i, _), map_sum, map_sum]
     simp only [map_smul, he, Submodule.mkQ_apply, hm, AddEquiv.apply_symm_apply]
     funext k

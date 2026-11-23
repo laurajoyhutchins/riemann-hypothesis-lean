@@ -1,30 +1,51 @@
-import Formalism.SharpRestriction.LevelLetterCocycles.JointConditionsZpowers.WachRestrictionOfLiftingPackage
-import Formalism.SharpRestriction.LevelLetterCocycles.LocalSituation
-import Formalism.SharpRestriction.LevelLetterCocycles.ElementDenominator
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.ElementDenominator
+public import Formalism.SharpRestriction.LevelLetterCocycles.JointConditionsZpowers.WachRestrictionOfLiftingPackage
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
 namespace Formalism.MainNotions.N
 
 open Formalism.BasicNotions
-
-theorem delta_input_one_of_local (D : D7) (HW : HWOf D.loc) (F : FonOf D.loc D.locA HW) (Cm : CmpOf D.loc D.locA HW F)
-    (h56 : Formalism.MainNotions.DeltaInvariantLattices.aux₃ D HW F Cm) :
-    Formalism.MainNotions.ElementDenominator.adm1 D HW F Cm := by
-  unfold Formalism.MainNotions.ElementDenominator.adm1
-  exact Formalism.MainNotions.DeltaInvariantLattices.thm1used_of (theorem_one_of_local_package D HW F Cm h56)
-
-theorem delta_input_two_of_local (D : D7) (HW : HWOf D.loc) (F : FonOf D.loc D.locA HW) (Cm : CmpOf D.loc D.locA HW F)
-    (h56 : Formalism.MainNotions.DeltaInvariantLattices.aux₃ D HW F Cm) :
-    Formalism.MainNotions.ElementDenominator.adm2 D HW F := by
-  unfold Formalism.MainNotions.ElementDenominator.adm2
-  exact proposition_two_of_local_package D HW F Cm h56
-
-theorem delta_input_three_of_local (D : D7) (HW : HWOf D.loc) (F : FonOf D.loc D.locA HW) (Cm : CmpOf D.loc D.locA HW F)
-    (h56 : Formalism.MainNotions.DeltaInvariantLattices.aux₃ D HW F Cm) :
-    Formalism.MainNotions.ElementDenominator.adm3 D HW F := by
-  unfold Formalism.MainNotions.ElementDenominator.adm3
-  exact lemma_three_of_local_package D HW F Cm h56
 
 theorem archimedean_signature_matching_of_liftingTheory (D : D7) (HW : HWOf D.loc) (F : FonOf D.loc D.locA HW) (CA : ℝ) (CB : ℝ) (CK : ℝ) (C : ℝ)
     (h54 : Formalism.MainNotions.LiftingTheory.aux₃ D HW F C CA CB CK) :
@@ -43,11 +64,5 @@ theorem lifting_input_six_of_lifting (D : D7) (HW : HWOf D.loc) (F : FonOf D.loc
     Formalism.MainNotions.ElementDenominator.adm6 D HW F := by
   unfold Formalism.MainNotions.ElementDenominator.adm6
   exact lifting_local_of_package D HW F C CA CB CK h54
-
-theorem bloch_kato_input_of_dropping (D : D7)
-    (hconds5 : Formalism.MainNotions.LocalSituation.Conclusion5 D) :
-    Formalism.MainNotions.ElementDenominator.adm13 D := by
-  unfold Formalism.MainNotions.ElementDenominator.adm13
-  exact hconds5
 
 end Formalism.MainNotions.N

@@ -1,5 +1,53 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.InterpStatementPfO
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.ExtFStatementPfB
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.ArakelovInstances.PnormInvStatement
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.FundSetMeasStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace ReciprocityTheory.ChartRestriction.G.AR.Up.IW
 
@@ -201,7 +249,7 @@ private theorem dmin_ne_zero' {x : Frame X.Ψ r} (hx : x ∈ X.dom) (τ : X.Ψ) 
 
 private theorem continuousOn_nfac (la : Wt X.Ψ r) : ContinuousOn (X.nfac la) X.dom := by
   unfold Data.nfac
-  refine continuousOn_finset_prod _ (fun τ _ => continuousOn_finset_prod _ (fun i _ => ?_))
+  refine continuousOn_finsetProd _ (fun τ _ => continuousOn_finsetProd _ (fun i _ => ?_))
   refine ContinuousOn.rpow_const ?_ (fun x hx => Or.inl ?_)
   · exact ((dmin_continuous X τ _).continuousOn.div (dmin_continuous X τ _).continuousOn
       (fun x hx => dmin_ne_zero' X hx τ _)).norm
@@ -220,7 +268,7 @@ theorem phla_contOn (la : Wt X.Ψ r) : ContinuousOn (phla X la) X.dom := by
 theorem pnormS_contOn (L : Wt X.Ψ r) (s : Fin (nd X) → Frame X.Ψ r → ℂ)
     (hs : ∀ k, ContinuousOn (s k) X.dom) :
     ContinuousOn (fun x => ∑ k, X.pnorm L (s k) x ^ 2) X.dom := by
-  refine continuousOn_finset_sum _ (fun k _ => ?_)
+  refine continuousOn_finsetSum _ (fun k _ => ?_)
   exact ((hs k).norm.mul (continuousOn_nfac X L)).pow 2
 
 def gφ (P : Frame X.Ψ r → ℂ) (Fp L : Wt X.Ψ r) (s : Fin (nd X) → Frame X.Ψ r → ℂ) (x : Frame X.Ψ r) :

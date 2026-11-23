@@ -1,16 +1,60 @@
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.SatakeExponents.UniformizerValuations.FrameReading.JoinType
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.HeckeIntegralFiniteSumStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IwahoriHeckeSumAdditiveStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FiniteSupportConvolutionTripleStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FiniteSupportProductQuotientStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FinsumCosetSmulLinear
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.HeckeSumInvariantStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IwahoriDoubleCosetFiniteStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.AdmissibleParabolicInductionStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FiniteDimensionalFixedTensorStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsJointEigenvectorNonzeroStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.MultiplicativeCharacterOnConeStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ProdRelIndexNeZeroStatement
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.SatakeExponents.UniformizerValuations.FrameReading.JoinType
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.AdmissibleParabolicInductionStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsJointEigenvectorNonzeroStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FiniteDimensionalFixedTensorStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FiniteSupportConvolutionTripleStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FiniteSupportProductQuotientStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FinsumCosetSmulLinear
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.HeckeIntegralFiniteSumStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.HeckeSumInvariantStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IwahoriDoubleCosetFiniteStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IwahoriHeckeSumAdditiveStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.MultiplicativeCharacterOnConeStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ProdRelIndexNeZeroStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.SatakeExponents.FiniteDiscreteFamilies.PeakCone
+
+@[expose] public section
 
 noncomputable section
 
@@ -20,7 +64,7 @@ open PositivityTheory.Rg.BcB.E PositivityTheory.Rg.BcB.SpectralAccumulation Posi
 open scoped Classical TensorProduct
 
 attribute [local instance] GlobalTheory.LocalData.complRel GlobalTheory.LocalData.isLocalField
-set_option synthInstance.maxHeartbeats 200000
+
 
 namespace PositivityTheory.Rg.BcB.F.Tail
 
@@ -94,10 +138,11 @@ theorem iter_push {X : Type} [AddCommGroup X] [Module ℂ X]
       exact S.sum_mem fun q _ => S.smul_mem _ (hS _ _ h1)
     · intro k hk
       rw [map_smul, hfix k hk]
-    · rw [map_smul, hsum_eq R I f hfin.coe_toFinset.ge, hsum_eq ρ I f hfin.coe_toFinset.ge, map_sum]
-      congr 1
-      refine Finset.sum_congr rfl fun q _ => ?_
-      rw [map_smul, hL _ _ h1 hsm]
+    · set_option synthInstance.maxHeartbeats 100000 in
+        rw [map_smul, hsum_eq R I f hfin.coe_toFinset.ge, hsum_eq ρ I f hfin.coe_toFinset.ge, map_sum]
+        congr 1
+        refine Finset.sum_congr rfl fun q _ => ?_
+        rw [map_smul, hL _ _ h1 hsm]
 
 end Gen
 
@@ -248,20 +293,20 @@ theorem core (w : Pl E) (ϖ : (w.adicCompletion E)ˣ) (hϖ : ordL (ϖ : w.adicCo
       smul_smul] at e
     have e2 := smul_left_injective ℂ hv₀ e
     simp only [hχ']
-    rw [dif_pos ⟨gap_add hx hx', gap_add hy hy'⟩, dif_pos ⟨hx, hy⟩, dif_pos ⟨hx', hy'⟩]
+    rw [dite_eq_left ⟨gap_add hx hx', gap_add hy hy'⟩, dite_eq_left ⟨hx, hy⟩, dite_eq_left ⟨hx', hy'⟩]
     rw [e2, mul_comm]
   obtain ⟨j0, -, hj0⟩ := Finset.exists_ne_zero_of_sum_ne_zero hsum
   have hex : ∃ x y, Gap x ∧ Gap y ∧ χ' x y ≠ 0 := by
     refine ⟨x j0, y j0, (hgap j0).1, (hgap j0).2, ?_⟩
     simp only [hχ']
-    rw [dif_pos (hgap j0)]
+    rw [dite_eq_left (hgap j0)]
     exact right_ne_zero_of_mul hj0
   obtain ⟨ξa, ξb, hξ⟩ := GlobalTheory.T.multiplicative_character_on_cone a b (qh w) (qh_ne w) χ' hχ'mul hex
   have hev : ∀ x y (h : Gap x ∧ Gap y), ev2 w ξa ξb x y = χ ⟨(x, y), h⟩ := by
     intro x y h
     have := hξ x y h.1 h.2
     simp only [hχ'] at this
-    rw [dif_pos h] at this
+    rw [dite_eq_left h] at this
     exact this.symm
   refine ⟨ξa, ξb, ⟨(v₀ : V), v₀.2, by simpa using hv₀, fun x y hx hy => ?_⟩, ?_⟩
   · have e1 : hkG ρ (I2 a b w) (dc2 w ϖ x y) (v₀ : V) =
@@ -274,7 +319,7 @@ theorem core (w : Pl E) (ϖ : (w.adicCompletion E)ˣ) (hϖ : ordL (ϖ : w.adicCo
 
 end Place
 
-set_option maxHeartbeats 1600000 in
+
 theorem rReadT : RReadT := by
   intro hRM E _ _ _ n a b μ s₁ s₂ Pa Pb D hC w ϖ J _ c x y m G hϖ hgap hm hGS hGI hne
   obtain ⟨hinv, J', L, hLeq, hLsep⟩ := hRM E a b s₁ s₂ Pa Pb w hC.g₁ hC.g₂ hC.u₁ hC.u₂ hC.t₁ hC.t₂

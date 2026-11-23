@@ -1,5 +1,50 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.ContinuousCochains.Functoriality
+module
+
+public import GroundTheory.ProfiniteCohomology.ContinuousCochains.Functoriality
+public import Mathlib.Algebra.Homology.HomologicalComplexAbelian
+import Mathlib.Algebra.Homology.ShortComplex.ModuleCat
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
@@ -62,11 +107,9 @@ variable (hS : S.ShortExact)
 noncomputable def δ (i j : ℕ) (hij : i + 1 = j) : cohomology S.X₃ i ⟶ cohomology S.X₁ j :=
   (cochainsShortComplex_shortExact hS).δ i j hij
 
-@[reassoc (attr := simp)]
 theorem δ_comp (i j : ℕ) (hij : i + 1 = j) : δ hS i j hij ≫ cohomologyMap S.f j = 0 :=
   (cochainsShortComplex_shortExact hS).δ_comp i j hij
 
-@[reassoc (attr := simp)]
 theorem comp_δ (i j : ℕ) (hij : i + 1 = j) : cohomologyMap S.g i ≫ δ hS i j hij = 0 :=
   (cochainsShortComplex_shortExact hS).comp_δ i j hij
 
@@ -77,8 +120,8 @@ theorem cohomology_exact₁ (i j : ℕ) (hij : i + 1 = j) :
     (ShortComplex.mk (δ hS i j hij) (cohomologyMap S.f j) (δ_comp hS i j hij)).Exact :=
   (cochainsShortComplex_shortExact hS).homology_exact₁ i j hij
 
-include hS in
 
+include hS in
 theorem cohomology_exact₂ (i : ℕ) :
     (ShortComplex.mk (cohomologyMap S.f i) (cohomologyMap S.g i)
       (cohomologyMap_f_comp_g i)).Exact :=
@@ -94,24 +137,6 @@ section Naturality
 
 variable {S₁ S₂ : ShortComplex (Rep.{u} k G)} [IsDiscreteRep S₁.X₁] [IsDiscreteRep S₁.X₂]
   [IsDiscreteRep S₁.X₃] [IsDiscreteRep S₂.X₁] [IsDiscreteRep S₂.X₂] [IsDiscreteRep S₂.X₃]
-
-noncomputable def cochainsShortComplexMap (φ : S₁ ⟶ S₂) :
-    cochainsShortComplex S₁ ⟶ cochainsShortComplex S₂ where
-  τ₁ := cochainsMap φ.τ₁
-  τ₂ := cochainsMap φ.τ₂
-  τ₃ := cochainsMap φ.τ₃
-  comm₁₂ := by
-    change cochainsMap φ.τ₁ ≫ cochainsMap S₂.f = cochainsMap S₁.f ≫ cochainsMap φ.τ₂
-    rw [← cochainsMap_comp, ← cochainsMap_comp, φ.comm₁₂]
-  comm₂₃ := by
-    change cochainsMap φ.τ₂ ≫ cochainsMap S₂.g = cochainsMap S₁.g ≫ cochainsMap φ.τ₃
-    rw [← cochainsMap_comp, ← cochainsMap_comp, φ.comm₂₃]
-
-theorem δ_naturality (hS₁ : S₁.ShortExact) (hS₂ : S₂.ShortExact) (φ : S₁ ⟶ S₂) (i j : ℕ)
-    (hij : i + 1 = j) :
-    δ hS₁ i j hij ≫ cohomologyMap φ.τ₁ j = cohomologyMap φ.τ₃ i ≫ δ hS₂ i j hij :=
-  HomologicalComplex.HomologySequence.δ_naturality (cochainsShortComplexMap φ)
-    (cochainsShortComplex_shortExact hS₁) (cochainsShortComplex_shortExact hS₂) i j hij
 
 end Naturality
 

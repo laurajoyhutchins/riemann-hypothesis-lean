@@ -1,8 +1,51 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.ClassFormations
-import GroundTheory.ProfiniteCohomology.Colimit
-import GroundTheory.ProfiniteCohomology.ShapiroDefs
-import GroundTheory.ProfiniteCohomology.LocalClassFormation.FiniteVanishing.TateThree
+module
+
+public import GroundTheory.ProfiniteCohomology.ClassFormationDefs
+public import GroundTheory.ProfiniteCohomology.ClassFormations
+public import GroundTheory.ProfiniteCohomology.Colimit
+public import GroundTheory.ProfiniteCohomology.LocalClassFormation.FiniteVanishing.TateThree
+public import GroundTheory.ProfiniteCohomology.ShapiroDefs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -14,8 +57,8 @@ open CategoryTheory Limits
 variable {G : Type} [Group G] [TopologicalSpace G] [IsTopologicalGroup G] [CompactSpace G]
   [TotallyDisconnectedSpace G]
 
-omit [IsTopologicalGroup G] [CompactSpace G] [TotallyDisconnectedSpace G] in
 
+omit [IsTopologicalGroup G] [CompactSpace G] [TotallyDisconnectedSpace G] in
 theorem exists_openSubgroup_subgroupOf_eq (U : OpenSubgroup G) (N : Subgroup (U : Subgroup G))
     (hN : IsOpen (N : Set (U : Subgroup G))) :
     ∃ V : OpenSubgroup G, V ≤ U ∧ (V : Subgroup G).subgroupOf U = N := by
@@ -25,8 +68,8 @@ theorem exists_openSubgroup_subgroupOf_eq (U : OpenSubgroup G) (N : Subgroup (U 
 
 variable {C : Rep.{0} (ULift.{0} ℤ) G} [IsDiscreteRep C] (F : ClassFormation C)
 
-include F in
 
+include F in
 theorem ClassFormation.subsingleton_groupCohomology_three_quot (U : OpenSubgroup G)
     (N : Subgroup (U : Subgroup G)) [N.Normal] (hN : IsOpen (N : Set (U : Subgroup G))) :
     Subsingleton (groupCohomology
@@ -38,11 +81,11 @@ theorem ClassFormation.subsingleton_groupCohomology_three_quot (U : OpenSubgroup
     Subgroup.finite_quotient_of_finiteIndex
   let : Fintype ((U : Subgroup G) ⧸ (V : Subgroup G).subgroupOf U) := Fintype.ofFinite _
   exact subsingleton_groupCohomology_three_of_tate _ (F.groupFundamentalClass U V)
-    (fun S => (F.tate_hypotheses hVU S).1) (fun S => (F.tate_hypotheses hVU S).2.1)
-    (fun S => (F.tate_hypotheses hVU S).2.2)
+    (fun S => (F.tate_hypotheses (U := U) (V := V) hVU S).1) (fun S => (F.tate_hypotheses (U := U) (V := V) hVU S).2.1)
+    (fun S => (F.tate_hypotheses (U := U) (V := V) hVU S).2.2)
+
 
 include F in
-
 theorem ClassFormation.subsingleton_cohomology_three (U : OpenSubgroup G) :
     Subsingleton (cohomology (Rep.res (U : Subgroup G).subtype C) 3) := by
   have h0 : ∀ z : cohomology (Rep.res (U : Subgroup G).subtype C) 3, z = 0 := fun z => by

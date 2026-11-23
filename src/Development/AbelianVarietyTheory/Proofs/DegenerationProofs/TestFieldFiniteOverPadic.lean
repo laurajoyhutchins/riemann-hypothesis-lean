@@ -1,8 +1,60 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Degenerations.BaseFacts
-import Development.AbelianVarietyTheory.Definitions.Degenerations.IsAffineSplitTorusLeft
-import Development.AbelianVarietyTheory.Definitions.Degenerations.CompanionTheory
-import Development.AbelianVarietyTheory.Statements.SemistableTorsion.UTorsSt
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Degenerations.IsBasisB
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.Padics.ProperSpace
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.MetricSpace.Ultra.TotallySeparated
+import Mathlib.Topology.Separation.CompletelyRegular
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.NumberTheory.Padics.PadicIntegers
+
+@[expose] public section
+
 open CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj AlgebraicGeometry
 open scoped CategoryTheory.Obj
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor
@@ -59,10 +111,10 @@ private lemma dvd_of_norm_le_pow
   refine ⟨z, IsFractionRing.injective V (FractionRing V) ?_⟩
   rw [map_mul, map_pow, hz, mul_div_cancel₀ _ (pow_ne_zero _ h0)]
 
+
 open CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj AlgebraicGeometry in
 open scoped CategoryTheory.Obj in
 open IntermediateField in
-
 theorem _root_.GlobalTheory.ZH.FieldOfTest.isComplete_range_fractionRing (V F : Type) [CommRing V] [IsDomain V]
     [IsDiscreteValuationRing V]
     [IsAdicComplete (IsLocalRing.maximalIdeal V) V] [NormedField F] [Algebra (FractionRing V) F]
@@ -192,10 +244,10 @@ private lemma finiteDimensional_of_finrank_adjoin_le {K E : Type} [Field K] [Fie
   obtain rfl : F = E' := le_antisymm hFE hE'F
   exact hfin
 
+
 open CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj AlgebraicGeometry in
 open scoped CategoryTheory.Obj in
 open IntermediateField in
-
 theorem _root_.GlobalTheory.ZH.FieldOfTest.exists_finiteDimensional_of_isComplete (p : ℕ) [Fact p.Prime]
     (L : Subfield (PadicAlgCl p)) (hL : IsComplete (L : Set (PadicAlgCl p))) :
     ∃ K : IntermediateField ℚ_[p] (PadicAlgCl p), FiniteDimensional ℚ_[p] K ∧
@@ -224,6 +276,10 @@ theorem _root_.GlobalTheory.ZH.FieldOfTest.exists_finiteDimensional_of_isComplet
       simp [A]
     rw [hA]
     apply isClosedMap_snd_of_compactSpace
+    change IsClosed ({q : (Fin (n + 1) → ℤ_[p]) × L | ∃ i, ‖q.1 i‖ = 1} ∩
+      {q : (Fin (n + 1) → ℤ_[p]) × L |
+        ∑ i, algebraMap ℚ_[p] (PadicAlgCl p) (q.1 i : ℚ_[p]) *
+          (q.2 : PadicAlgCl p) ^ (i : ℕ) = 0})
     apply IsClosed.inter
     · have hset : {q : (Fin (n + 1) → ℤ_[p]) × L | ∃ i, ‖q.1 i‖ = 1} =
           ⋃ i, {q : (Fin (n + 1) → ℤ_[p]) × L | ‖q.1 i‖ = 1} := by
@@ -235,7 +291,7 @@ theorem _root_.GlobalTheory.ZH.FieldOfTest.exists_finiteDimensional_of_isComplet
           isClosed_eq (continuous_norm.comp ((continuous_apply i).comp continuous_fst))
             continuous_const
       exact hcl
-    · exact isClosed_eq (continuous_finset_sum _ fun i _ =>
+    · exact isClosed_eq (continuous_finsetSum _ fun i _ =>
         (hc.comp ((continuous_apply i).comp continuous_fst)).mul
           ((continuous_subtype_val.comp continuous_snd).pow _)) continuous_const
   have hcover : ⋃ n, A n = Set.univ := by
@@ -251,6 +307,7 @@ theorem _root_.GlobalTheory.ZH.FieldOfTest.exists_finiteDimensional_of_isComplet
       rw [h0, norm_zero] at this
       exact Polynomial.leadingCoeff_eq_zero.1 (norm_le_zero_iff.1 this)
     let c : Fin (f.natDegree + 1) → ℤ_[p] := fun i => ⟨f.coeff i / f.coeff i₀, by
+      rw [PadicInt.mem_subring_iff]
       rw [norm_div]
       exact div_le_one_of_le₀ (hmax i (Finset.mem_range.2 i.2)) (norm_nonneg _)⟩
     refine ⟨f.natDegree, c, ⟨⟨i₀, Finset.mem_range.1 hi₀⟩, ?_⟩, ?_⟩
@@ -274,7 +331,7 @@ theorem _root_.GlobalTheory.ZH.FieldOfTest.exists_finiteDimensional_of_isComplet
     let g : Polynomial ℚ_[p] :=
       ∑ j : Fin (n + 1), Polynomial.C (c j : ℚ_[p]) * Polynomial.X ^ (j : ℕ)
     have hgi : g.coeff i = c i := by
-      simp [g, Polynomial.finset_sum_coeff, Polynomial.coeff_C_mul_X_pow, Fin.val_inj]
+      simp [g, Polynomial.finsetSum_coeff, Polynomial.coeff_C_mul_X_pow, Fin.val_inj]
     have hg0 : g ≠ 0 := by
       intro h0
       rw [h0, Polynomial.coeff_zero] at hgi
@@ -284,7 +341,8 @@ theorem _root_.GlobalTheory.ZH.FieldOfTest.exists_finiteDimensional_of_isComplet
       rw [hi] at this
       exact one_ne_zero this
     have hgy : Polynomial.aeval (y : PadicAlgCl p) g = 0 := by
-      simpa [g, map_sum] using hsum
+      set_option synthInstance.maxHeartbeats 100000 in
+        simpa [g, map_sum] using hsum
     have hgdeg : g.natDegree ≤ n :=
       Polynomial.natDegree_sum_le_of_forall_le _ _ fun j _ =>
         (Polynomial.natDegree_C_mul_X_pow_le _ _).trans (Nat.lt_succ_iff.1 j.2)
@@ -337,11 +395,11 @@ theorem _root_.GlobalTheory.ZH.FieldOfTest.exists_finiteDimensional_of_isComplet
         IntermediateField.finrank_sup_le _ _
     _ ≤ n * n := Nat.mul_le_mul (hfr a ha') (hfr b hb)
 
+
 open CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj AlgebraicGeometry in
 open scoped CategoryTheory.Obj in
 open IntermediateField in
 attribute [local instance] Over.cartesianMonoidalCategory in
-
 theorem _root_.GlobalTheory.ZH.FieldOfTest.fractionRing_finite_over_padic : ∀ (o Ω : Type) [CommRing o] [Field Ω] [Algebra o Ω]
     [_root_.GlobalTheory.ZH.ArithBase o Ω] (S : _root_.GlobalTheory.ZH.ThetaSys o Ω) (ρ : S.Real)
     (p : ℕ) [Fact p.Prime] (y₀ : S.R →+* PadicAlgCl p)

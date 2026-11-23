@@ -1,6 +1,51 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.StatementsGrassHeight
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.StatementsGrassHeightNE
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.StatementsGrassHeight
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.StatementsGrassHeightNE
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -38,8 +83,8 @@ theorem isIntegral_rootCoord {f j m : ℕ} {ζ : Fin f → Matrix (Fin j) (Fin m
 
 end RootDivisorSupportEmpty
 
-open RootDivisorSupportEmpty in
 
+open RootDivisorSupportEmpty in
 theorem RootDivSuppEmpty.proof : RootDivSuppEmpty.Statement := by
   intro f j m ζ hζ
   ext Q
@@ -58,8 +103,9 @@ theorem RootDivSuppEmpty.proof : RootDivSuppEmpty.Statement := by
   have hy0 : rootCoord ζ ⟨τ, plAnchor j m⟩ = 1 := anchor_minor _ _ _
   have hG : G ∈ rootPointIdeal ζ := by
     rw [rootPointIdeal, mCoordIdeal, RingHom.mem_ker]
+
     simp only [hGdef, mConeMap, map_sum, map_mul, map_pow, MvPolynomial.aeval_C, MvPolynomial.aeval_X,
-      hy0, MvPolynomial.C_1, one_mul]
+    hy0, MvPolynomial.C_1, one_mul]
     have hterm : ∀ k ∈ Finset.range (n + 1),
         algebraMap ℤ (MvPolynomial (Fin f) ℂ) (p.coeff k) * (C (rootCoord ζ ⟨τ, I⟩) * X τ) ^ k *
           (X τ : MvPolynomial (Fin f) ℂ) ^ (n - k) =
@@ -69,6 +115,7 @@ theorem RootDivSuppEmpty.proof : RootDivSuppEmpty.Statement := by
       rw [eq_intCast, ← map_intCast (C : ℂ →+* MvPolynomial (Fin f) ℂ), mul_pow, C_mul, C_pow,
         ← Nat.add_sub_cancel' hkn, pow_add, Nat.add_sub_cancel_left]
       ring
+
     rw [Finset.sum_congr rfl hterm, ← Finset.sum_mul, ← map_sum]
     have hsum : ∑ k ∈ Finset.range (n + 1), (p.coeff k : ℂ) * rootCoord ζ ⟨τ, I⟩ ^ k = 0 := by
       rw [← hp, Polynomial.eval₂_eq_sum_range]
@@ -78,6 +125,7 @@ theorem RootDivSuppEmpty.proof : RootDivSuppEmpty.Statement := by
   have h0 : Ideal.Quotient.mk Q (X ⟨τ, plAnchor j m⟩) = 0 := Ideal.Quotient.eq_zero_iff_mem.2 hτ
   have hpow : Ideal.Quotient.mk Q (X ⟨τ, I⟩) ^ n = 0 := by
     have h1 := Ideal.Quotient.eq_zero_iff_mem.2 hGQ
+
     simp only [hGdef, map_sum, map_mul, map_pow, h0] at h1
     rw [Finset.sum_range_succ, Finset.sum_eq_zero, zero_add, Nat.sub_self, pow_zero, mul_one,
       hpm.coeff_natDegree, map_one, map_one, one_mul] at h1

@@ -1,11 +1,54 @@
-import Development.AutomorphicArithmetic.Foundations.LocalLanglands.RecTTransport
-import Development.AutomorphicArithmetic.Foundations.LocalLanglands.Multi
-import Development.AutomorphicArithmetic.Foundations.LocalLanglands.LocalCentralUnits.ClBasic
-import Development.AutomorphicArithmetic.Foundations.LocalLanglands.LocalCentralUnits.WDBasic
-import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.GenericIrreducibility.NormEqOneOfIsUnitarisableU
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.LocalFieldTwoVocabulariesDictionary
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.EpsilonFactorsAtOneHalf
-import GroundTheory.LocalFields.LocalZetaChar
+module
+
+public import Development.AutomorphicArithmetic.Foundations.LocalLanglands.RecTTransport
+import Development.AbelianVarietyTheory.Definitions.Divisors.EqOfHasValueAtInfinite
+public import Development.AutomorphicArithmetic.Foundations.LocalLanglands.LocalCentralUnits.ClBasic
+public import Development.AutomorphicArithmetic.Foundations.LocalLanglands.LocalCentralUnits.WDBasic
+public import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.GenericIrreducibility.NormEqOneOfIsUnitarisableU
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LatticeIndices.CharZeroAdicCompletion
+public import GroundTheory.LocalFields.LocalZetaChar
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -27,7 +70,16 @@ private theorem nabs_eq_residue (z : kˣ) :
 
 private theorem norm_smooth_char {χ : kˣ →* ℂˣ} (hχ : IsSmoothChar χ) (z : kˣ) :
     ‖(χ z : ℂ)‖ = nabs k z ^ GroundTheory.LocalField.quasiCharExponent χ := by
-  rw [GroundTheory.LocalField.norm_quasiChar_apply (GlobalTheory.DelEps.GaussBridge.continuous_of_isSmoothChar hχ) z,
+  have hc : Continuous χ := by
+    refine continuous_def.2 fun U _ => isOpen_iff_forall_mem_open.2 fun x hx => ?_
+    refine ⟨(fun y => x⁻¹ * y) ⁻¹' (χ.ker : Set kˣ), fun y hy => ?_,
+      hχ.preimage (continuous_const_mul _), by simp⟩
+    have h : χ (x⁻¹ * y) = 1 := hy
+    rw [map_mul, map_inv, inv_mul_eq_one] at h
+    show χ y ∈ U
+    rw [← h]
+    exact hx
+  rw [GroundTheory.LocalField.norm_quasiChar_apply hc z,
     GroundTheory.LocalField.modulus_of_ne_zero z.ne_zero, nabs_eq_residue]
   simp
 
@@ -62,7 +114,7 @@ end Abs
 
 theorem expo : Expo := by
   intro E Ω _ _ _ _ _ A w h a ha
-  let ω₀ : IrrGL (HeightOneSpectrum.adicCompletion E w) → ((HeightOneSpectrum.adicCompletion E w)ˣ →* ℂˣ) :=
+  let ω₀ : IrrGL (k := HeightOneSpectrum.adicCompletion E w) → ((HeightOneSpectrum.adicCompletion E w)ˣ →* ℂˣ) :=
     fun y => Classical.choose (clBasic (HeightOneSpectrum.adicCompletion E w) y).1
   have hω₀ : ∀ y, IsSmoothChar (ω₀ y) ∧ HasCentralChar y.rep (ω₀ y) ∧
       ∀ ω', HasCentralChar y.rep ω' → ω' = ω₀ y :=

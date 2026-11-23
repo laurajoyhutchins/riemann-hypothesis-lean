@@ -1,8 +1,53 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.IsFrameVec
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExistsSandwichOfHodgeTateFreeStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.SandwichPointOverFieldExtStatement
-import GroundTheory.HeightsAndTheta.Heights.LatticeLemmas.PRootsOfUnityValuation
+module
+
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.IsFrameVec
+public import Development.AutomorphicSpectrum.Definitions.DivisibilityTowers.GoodOrigin
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IntegralClosureHeightEqOneOfLiesOver
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LabelSigBijective
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExistsSandwichOfHodgeTateFreeStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.SandwichPointOverFieldExtStatement
+import Formalism.LocalToGlobal.ProjectiveLattices.CrudeVal
+public import GroundTheory.HeightsAndTheta.Heights.LatticeLemmas.PRootsOfUnityValuation
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.DefiniteFormStabilizerFiniteAwayFromP
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.ArakelovInstances.IsStrictDom
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.PolyGrowthStatementPfB
+
+@[expose] public section
+
 open NumberField IsDedekindDomain MeasureTheory Filter Topology
 open Formalism.L2.Pj ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Geo ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.FD ReciprocityTheory.ChartRestriction.G.AR.Up ReciprocityTheory.ChartRestriction.G.AR.Inst Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.L2.Theta
 open GlobalTheory.CompanionTheory.Ar GlobalTheory.CompanionTheory.Ar.Rec
@@ -62,11 +107,12 @@ theorem vV_sub_one {p : ℕ} (hp : p.Prime) {ζ : V} (hζ : IsPrimitiveRoot ζ p
       (GroundTheory.Heights₂.Heights.RootsOfUnityValuation.one_sub_pow_associated hp hζ)
   rw [← vV_associated hass (pow_ne_zero _ h0), map_pow, vV_pow ((map_ne_zero_iff _ inj).2 h0)]
 
-variable (V K) in
 
+variable (V K) in
 def realVal : Valuation K NNReal :=
-  (valV V).map (WithZeroMulInt.toNNReal (e := 2) two_ne_zero)
-    (WithZeroMulInt.toNNReal_strictMono (by norm_num)).monotone
+  (valV V).map
+    { toMonoidWithZeroHom := WithZeroMulInt.toNNReal (e := 2) two_ne_zero
+      monotone' := (WithZeroMulInt.toNNReal_strictMono (by norm_num)).monotone }
 
 theorem realVal_le_one_iff {x : K} : realVal V K x ≤ 1 ↔ valV V x ≤ 1 := by
   have := (WithZeroMulInt.toNNReal_strictMono (e := 2) (by norm_num)).le_iff_le (a := valV V x) (b := 1)
@@ -76,10 +122,12 @@ theorem realVal_lt_one_iff {x : K} : realVal V K x < 1 ↔ valV V x < 1 := by
   have := (WithZeroMulInt.toNNReal_strictMono (e := 2) (by norm_num)).lt_iff_lt (a := valV V x) (b := 1)
   simpa [realVal] using this
 
-theorem realVal_integers : (realVal V K).Integers V where
-  hom_inj := IsFractionRing.injective V K
-  map_le_one x := realVal_le_one_iff.2 (valV_algebraMap_le_one x)
-  exists_of_le_one _ h := IsDiscreteValuationRing.exists_lift_of_le_one (realVal_le_one_iff.1 h)
+theorem realVal_integers : (realVal V K).Integers V := by
+  refine ⟨IsFractionRing.injective V K, ?_, ?_⟩
+  · intro x
+    exact (realVal_le_one_iff (V := V)).2 (valV_algebraMap_le_one x)
+  · intro x hx
+    exact IsDiscreteValuationRing.exists_lift_of_le_one ((realVal_le_one_iff (V := V)).1 hx)
 
 end Dvr
 
@@ -239,11 +287,11 @@ theorem lieEig_htDual : Top.Given → ∀ (E : Type) [Field E] [NumberField E] [
     have hp0 : NeZero (p : T.V) := ⟨Nat.cast_ne_zero.2 (Fact.out : p.Prime).ne_zero⟩
     have h3 := value_aeval hgen hκz ((Polynomial.cyclotomic p ℤ).comp (Polynomial.X + 1)) (by
       rw [Polynomial.aeval_comp]
-      simp only [map_add, Polynomial.aeval_X, map_one, sub_add_cancel]
+      simp only [map_add (f := _), Polynomial.aeval_X, map_one, sub_add_cancel]
       rw [aeval_cyclotomic]
       exact hζ.isRoot_cyclotomic (Fact.out : p.Prime).pos)
     rw [Polynomial.aeval_comp] at h3
-    simp only [map_add, Polynomial.aeval_X, map_one] at h3
+    simp only [map_add (f := _), Polynomial.aeval_X, map_one] at h3
     rw [aeval_cyclotomic] at h3
     exact Polynomial.isRoot_cyclotomic_iff.1 h3
 

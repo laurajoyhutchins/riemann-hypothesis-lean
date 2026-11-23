@@ -1,8 +1,57 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.ChartChg
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.DofDApply
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.GaugeBilinearTermEqNegDoubleSum
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.DerivationMemPowOfMemPowSucc
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.CocycleRightZeroThd
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.DerivationMemPowOfMemPowSucc
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.DofDApply
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.GaugeBilinearTermEqNegDoubleSum
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.RingTheory.Ideal.BigOperators
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -38,7 +87,7 @@ theorem word_add (D : ι → Derivation k A A) (w : List ι) (x y : A) :
     w.foldl (fun g l => D l g) (x + y) = w.foldl (fun g l => D l g) x + w.foldl (fun g l => D l g) y := by
   induction w generalizing x y with
   | nil => rfl
-  | cons l w ih => simp only [List.foldl_cons, map_add, ih]
+  | cons l w ih => simp only [List.foldl_cons, map_add (f := _), ih]
 
 theorem word_smul (D : ι → Derivation k A A) (w : List ι) (r : k) (x : A) :
     w.foldl (fun g l => D l g) (r • x) = r • w.foldl (fun g l => D l g) x := by
@@ -221,12 +270,13 @@ theorem constantCoeff_dof_X {R k : Type} [CommRing R] [CommRing k] (φ : R →+*
     (G : FGLaw R d) (v : Fin d → k) (j : Fin d) :
     constantCoeff (Dof (G.mapF φ) v (X ((0 : Fin 1), j))) = v j := by
   have h : ∀ i j : Fin d, constantCoeff (ev (n := 1) ![pt k d 0, 0]
-      (pderiv k ((1 : Fin 2), i) (G.mapF φ j))) = if j = i then 1 else 0 := by
+      (pderiv ((1 : Fin 2), i) (G.mapF φ j))) = if j = i then 1 else 0 := by
     intro i j
     rw [← coeff_zero_eq_constantCoeff_apply, WickVanishing.coeff_ev_zero_right, Finsupp.embDomain_zero,
       coeff_pderiv, FGLaw.mapF, coeff_map, zero_add, coeff_law]
     split_ifs <;> simp
   unfold Dof
+
   simp only [map_sum, map_mul, h, constantCoeff_C]
   rw [Finset.sum_eq_single j]
   · simp
@@ -240,8 +290,8 @@ end GlobalTheory.SymbolOne
 
 namespace GlobalTheory
 
-open SymbolOne in
 
+open SymbolOne in
 theorem constantCoeff_dmonOf_prod_linear :
     ∀ (R k : Type) [CommRing R] [CommRing k] (φ : R →+* k) (d : ℕ) (G : FGLaw R d) (ι : Type) [Fintype ι] [DecidableEq ι] (u lam : ι → Fin d → k) (α : ι → k) (al m : ι →₀ ℕ) (E : PS k 1 d), (∀ l l', al l ≠ 0 → m l' ≠ 0 → ∑ i, lam l i * u l' i = if l = l' then α l else 0) → m.degree ≤ al.degree → constantCoeff (DmonOf (G.mapF φ) u m ((∏ l, (∑ i, C (lam l i) * (X ((0 : Fin 1), i) : PS k 1 d)) ^ al l) * E)) = if m = al then (∏ l, ((al l).factorial : k) * α l ^ al l) * constantCoeff E else 0 := by
   intro R k _ _ φ d G ι _ _ u lam α al m E hpair hdeg
@@ -258,6 +308,7 @@ theorem constantCoeff_dmonOf_prod_linear :
   have key := word_value π (fun l => GE.dofD (G.mapF φ) (u l))
     (fun l => ∑ i, C (lam l i) * (X ((0 : Fin 1), i) : PS k 1 d)) (fun l => by simp [hπ]) α w al E
     (fun l l' hl hl' => by
+
       rw [hπ, GE.dofD_apply, GE.dof_sum, map_sum]
       simp only [GE.dof_C_mul, map_mul, constantCoeff_C, constantCoeff_dof_X]
       exact hpair l l' hl (by rw [← hc]; exact (List.count_pos_iff.2 hl').ne'))

@@ -1,16 +1,57 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.RigidSys
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.CubeVal
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.UnifUniqSt
+public import Development.AbelianVarietyTheory.Definitions.Degenerations.AdmissiblePadicIntMaximalIdeal
+public import Mathlib.RingTheory.Henselian
+public import Mathlib.RingTheory.MvPowerSeries.Inverse
+public import Mathlib.RingTheory.PowerSeries.NoZeroDivisors
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.SecBaseChangeAnySt
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ModelPointsEqOfSameDegenerationDataStatement
+public import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.ExistsUniqueFactorOfIsAlgClosed
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExistsCompleteDvrFiniteSubalgebra
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ValuationExtension
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.AdicCompletion.Completeness
+import Mathlib.RingTheory.PowerSeries.Inverse
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.OneArc
 import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.RigIsoCongr
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsMonHomOfMul
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.UnifUniqSt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.IsNsmul
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.QkToAkU
-import Development.AbelianVarietyTheory.Definitions.Degenerations.AdmissiblePadicIntMaximalIdeal
-import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.ExistsUniqueFactorOfIsAlgClosed
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ValuationExtension
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExistsCompleteDvrFiniteSubalgebra
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ModelPointsEqOfSameDegenerationDataStatement
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits MonoidalCategory CartesianMonoidalCategory MonObj AlgebraicGeometry NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Out ReciprocityTheory.ChartRestriction.G.Geo.Tor
@@ -28,10 +69,15 @@ theorem exists_embedding {A₀ A F : Type} [CommRing A₀] [IsDomain A₀] [Comm
   have : Module.Finite A₀ A := hf
   have : FaithfulSMul A₀ A := (faithfulSMul_iff_algebraMap_injective _ _).2 hα
   have : FaithfulSMul A₀ F := (faithfulSMul_iff_algebraMap_injective _ _).2 hω
-  let ψ : A →ₐ[A₀] F := IsAlgClosed.lift
+  let ψ : A →ₐ[A₀] F := (by
+    refine @_root_.IsAlgClosed.lift _ _ _ _ _ _ _ _ _ _ _ ?_ ?_ ?_
+    solve_by_elim* (maxDepth := 2) only [*,
+      @_root_.DivisionSemiring.to_moduleIsTorsionFree,
+      @_root_.Algebra.IsIntegral.isAlgebraic, @_root_.inferInstance])
   refine ⟨ψ.toRingHom, ?_, fun r => ψ.commutes r⟩
   rw [RingHom.injective_iff_ker_eq_bot]
   refine Ideal.eq_bot_of_comap_eq_bot (R := A₀) ?_
+  change Ideal.comap (algebraMap A₀ A) (RingHom.ker ψ.toRingHom) = ⊥
   rw [RingHom.comap_ker, ← RingHom.injective_iff_ker_eq_bot]
   intro x y h
   exact hω ((ψ.commutes x).symm.trans (h.trans (ψ.commutes y)))
@@ -50,7 +96,7 @@ theorem exists_finset {V F R A : Type} [CommRing V] [CommRing F] [Algebra V F] [
     induction ha using Submodule.span_induction with
     | mem x hx => exact hW _ (Finset.mem_image_of_mem _ hx)
     | zero => rw [map_zero]; exact W.zero_mem
-    | add x y _ _ hx hy => rw [map_add]; exact W.add_mem hx hy
+    | add x y _ _ hx hy => rw [map_add (f := _)]; exact W.add_mem hx hy
     | smul r x _ hx =>
       rw [Algebra.smul_def, map_mul]
       exact W.mul_mem (by rw [show algebraMap R A r = g r from rfl, h]; exact W.algebraMap_mem _) hx
@@ -120,7 +166,7 @@ theorem hasArcData_pull (h1 : Laws) (h3 : Laws3) (h4 : Laws4) (h5 : Laws5) {O : 
     (h : Y.HasArcData a (IsLocalRing.maximalIdeal V) f u χ) :
     Y.HasArcData a (IsLocalRing.maximalIdeal W) (e.comp f) (e u) (spMap e ≫ χ) := by
   obtain ⟨w⟩ := (Y.hasArcData_iff a _ f u χ).1 h
-  obtain ⟨w', -⟩ := ArcWit.baseChange h3.cubePull h1.polBaseChange h4.unifBaseChange h5 (qkPullExists h1.globalFns)
+  obtain ⟨w', -⟩ := ArcWit.baseChange (I' := IsLocalRing.maximalIdeal W) h3.cubePull h1.polBaseChange h4.unifBaseChange h5 (qkPullExists h1.globalFns)
     polOActPull (admissibleBase_maximalIdeal_completeDVR hV) (admissibleBase_maximalIdeal_completeDVR hW) w e he
     (Ideal.map_le_iff_le_comap.2 fun x hx => map_nonunit e x hx)
   exact (Y.hasArcData_iff a _ _ _ _).2 ⟨w'⟩

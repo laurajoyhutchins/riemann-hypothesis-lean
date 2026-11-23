@@ -1,20 +1,52 @@
-import Development.AutomorphicArithmetic.BlowupCategories.SpanScale
-import Development.AutomorphicArithmetic.BlowupCategories.AffC
-import Development.AutomorphicArithmetic.CommutativeAlgebra.IsIsoOfBijectiveOnSimplices
-import Development.AutomorphicArithmetic.CommutativeAlgebra.MonoOfInjectiveOnSimplices
-import Development.AutomorphicArithmetic.CommutativeAlgebra.IsPullbackOfUniqueSimplicesPullback
-import Development.AutomorphicArithmetic.CommutativeAlgebra.SimplicesPullbackExistsUniqueOfMapEq
-import Development.AutomorphicArithmetic.CommutativeAlgebra.MayerVietorisCoverOfMonoOfZariskiLocal
-import Development.AutomorphicArithmetic.CommutativeAlgebra.LocallyExistsIsUnitOfSpanRangeEqTop
-import Development.AutomorphicArithmetic.CommutativeAlgebra.IsIsoStackProductMapOfBijective
-import Development.AutomorphicArithmetic.CommutativeAlgebra.IsIsoStackProductPairOfBijective
-import Development.AutomorphicArithmetic.CommutativeAlgebra.StackProductIsPullbackOfActionPullback
-import Development.AutomorphicArithmetic.CommutativeAlgebra.LerayHirschOfIsoSquare
-import Development.AutomorphicArithmetic.CommutativeAlgebra.LerayHirschOneIffTwistEquiv
-import Development.AutomorphicArithmetic.CommutativeAlgebra.AffineLineActionFstTwistEquiv
-import Development.AutomorphicArithmetic.CommutativeAlgebra.MayerVietorisStackProductOfInjectiveOfLocallyCov
-import Development.AutomorphicArithmetic.CommutativeAlgebra.PullCupPowEqCupPowPull
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FirstChernClassTateTwistCocycleUniqueNaturalAddiStatement
+module
+
+public import Development.AutomorphicArithmetic.BlowupCategories.SpanScale
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FirstChernClassTateTwistCocycleUniqueNaturalAddiStatement
+public import Development.AutomorphicArithmetic.CommutativeAlgebra.IsIsoOfBijectiveOnSimplices
+public import Development.AutomorphicArithmetic.CommutativeAlgebra.LerayHirschOfIsoSquare
+public import Development.AutomorphicArithmetic.CommutativeAlgebra.PullCupPowEqCupPowPull
+public import Development.AutomorphicArithmetic.CommutativeAlgebra.SimplicesPullbackExistsUniqueOfMapEq
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 open CategoryTheory Limits AlgebraicGeometry Opposite CochainComplex CochainComplex.HomComplex GlobalTheory.EtC UpperTheory.Pbf UpperTheory.Blow
 
 noncomputable section
@@ -132,7 +164,7 @@ private instance isIso_u (S : Spc) (M : ℕ) : IsIso (uMap S M) := by
 private theorem tau_line (M : ℕ) : tauS M ≫ PGL.line M = lineOf (chiX M) := rfl
 
 private theorem u_line (S : Spc) (M : ℕ) :
-    uMap S M ≫ pullback.snd _ _ ≫ PGL.line M = Sp.line S (chiX M) := by
+    uMap S M ≫ pullback.snd (triv S M) (PGL.pr M) ≫ PGL.line M = Sp.line S (chiX M) := by
   rw [← Category.assoc, uMap, pullback.lift_snd, Category.assoc, tau_line]
 
 end UpperTheory.PullPf
@@ -141,7 +173,8 @@ open UpperTheory.PullPf in
 theorem UpperTheory.projBundleFormula_iff_pglForm :
     ∀ (q : ℕ) [NeZero q] (S : Spc) (M : ℕ), Inv q S → (PBF q S M ↔ Pbf q S M) := by
   intro q _ S M hS
-  have hP : Inv q (pullback (triv S M) (PGL.pr M)) := fun U ⟨x⟩ => hS U ⟨Sx.map (pullback.fst _ _) x⟩
+  have hP : Inv q (pullback (triv S M) (PGL.pr M)) :=
+    fun U ⟨x⟩ => hS U ⟨Sx.map (pullback.fst (triv S M) (PGL.pr M)) x⟩
   have hX : Inv q (Sp S (XC M)) := fun U ⟨x⟩ => hS U ⟨x.1⟩
   have hf : uMap S M ≫ pullback.fst _ _ = Sp.fst S (XC M) := pullback.lift_fst _ _ _
   constructor

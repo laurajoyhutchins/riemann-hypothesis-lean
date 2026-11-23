@@ -1,5 +1,54 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.HarishChandraRegularity.CartanBasis
+module
+
+public import GroundTheory.AutomorphicForms.HarishChandraRegularity.CartanBasis
+public import Mathlib.MeasureTheory.Measure.Haar.MulEquivHaarChar
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Algebra.Group.Units
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GroundTheory.Automorphic
 
@@ -17,15 +66,14 @@ def conjCME (k : G) : G ≃ₜ* G :=
     continuous_toFun := (continuous_const.mul continuous_id).mul continuous_const
     continuous_invFun := (continuous_const.mul continuous_id).mul continuous_const }
 
-@[simp] theorem conjCME_apply (k x : G) : conjCME k x = k * x * k⁻¹ := rfl
-
 theorem conjCME_mul (a b : G) : conjCME (a * b) = (conjCME b).trans (conjCME a) := by
   ext x
+  change (a * b) * x * (a * b)⁻¹ = a * (b * x * b⁻¹) * a⁻¹
   simp [mul_assoc]
 
 theorem conjCME_one : conjCME (1 : G) = ContinuousMulEquiv.refl G := by
   ext x
-  simp
+  simp [conjCME]
 
 variable [LocallyCompactSpace G] [MeasurableSpace G] [BorelSpace G]
 
@@ -87,19 +135,6 @@ theorem mulEquivHaarChar_conjCME_eq_one {K : Subgroup G} (hK : IsCompact (K : Se
       _ < 1 := by rwa [one_mul]
   rw [h3] at this
   exact lt_irrefl _ this
-
-theorem map_conj_eq_self_of_mem (μ : Measure G) [μ.IsHaarMeasure] [μ.Regular] {K : Subgroup G}
-    (hK : IsCompact (K : Set G)) {k : G} (hk : k ∈ K) : μ.map (conjCME k) = μ := by
-  have e := mulEquivHaarChar_smul_map μ (conjCME k)
-  rwa [mulEquivHaarChar_conjCME_eq_one hK hk, one_smul] at e
-
-theorem integral_conj_eq_self_of_mem (μ : Measure G) [μ.IsHaarMeasure] [μ.Regular]
-    {K : Subgroup G} (hK : IsCompact (K : Set G)) {k : G} (hk : k ∈ K) {E : Type*}
-    [NormedAddCommGroup E] [NormedSpace ℝ E] (F : G → E) :
-    ∫ y, F (k * y * k⁻¹) ∂μ = ∫ y, F y ∂μ := by
-  have e := integral_map_equiv (conjCME k).toHomeomorph.toMeasurableEquiv (μ := μ) F
-  conv_rhs => rw [← map_conj_eq_self_of_mem μ hK hk]
-  exact e.symm
 
 end Conj
 
@@ -193,16 +228,6 @@ theorem isCompact_maxCompact_of_isClosed {G : Subgroup (Matrix ι ι 𝕜)ˣ}
     exact ⟨g, g.2, rfl⟩
   have huG : u ∈ G := hG.closure_subset hu
   exact ⟨haS, ⟨u, huG⟩, rfl⟩
-
-theorem IsExpLieAlgebra.isCompact_maxCompact_real {G : Subgroup (Matrix ι ι ℝ)ˣ}
-    {𝔤 : Submodule ℝ (Matrix ι ι ℝ)} (h : IsExpLieAlgebra G 𝔤) :
-    IsCompact ((maxCompact G : Subgroup G) : Set G) :=
-  isCompact_maxCompact_of_isClosed h.isClosed
-
-theorem IsExpLieAlgebra.isCompact_maxCompact_complex {G : Subgroup (Matrix ι ι ℂ)ˣ}
-    {𝔤 : Submodule ℝ (Matrix ι ι ℂ)} (h : IsExpLieAlgebra G 𝔤) :
-    IsCompact ((maxCompact G : Subgroup G) : Set G) :=
-  isCompact_maxCompact_of_isClosed h.isClosed
 
 end MaxCompact
 

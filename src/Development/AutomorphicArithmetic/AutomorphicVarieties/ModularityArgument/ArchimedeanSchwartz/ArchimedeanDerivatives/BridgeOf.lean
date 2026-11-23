@@ -1,4 +1,51 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ArchimedeanSchwartz.HodgeTateFromSandwich
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ArchimedeanSchwartz.HodgeTateFromSandwich
+import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.MkMemAdmissibleAtIffCocycle
+import Formalism.DoubleCosetMeasures.Statement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.BaseChangeUnits.CycCOfCyclic
+
+@[expose] public section
 
 attribute [-instance] Formalism.DoubleCosetMeasures.instMeasGL
 
@@ -13,7 +60,7 @@ namespace UpperTheory.V.Z.Inf.Bridge
 
 open NumberField.mixedEmbedding GroundTheory.Automorphic.GJMatrix GroundTheory.Global
 
-variable (K : Type) [Field K] [NumberField K] [IsTotallyComplex K] (n : ℕ)
+variable (K : Type) [Field K] [NumberField K] [_root_.NumberField.IsTotallyComplex K] (n : ℕ)
 
 private theorem hms_infEq (x : Cinf K) : homeomorphMixedSpace K (infEq K x) = Cm.mixEq K x :=
   homeomorphMixedSpace_apply K _
@@ -86,6 +133,7 @@ private theorem trace_mixEq (x : Cinf K) : mixedTrace K (Cm.mixEq K x) = 2 * ∑
 
 private theorem pairing (x y : Lie K n) :
     mixedPairingPi K (linC K n x) (swapCLE K n (linC K n y)) = 2 * ∑ w, ((Matrix.of x * Matrix.of y).trace w).re := by
+
   rw [← trace_mixEq, trace_mul_eq_sum, map_sum, map_sum, mixedPairingPi]
   refine Finset.sum_congr rfl fun p _ => ?_
   rw [mixedTraceForm_apply, map_mul (Cm.mixEq K)]
@@ -126,7 +174,7 @@ private theorem nrm_pos {x : Lie K n} (hx : x ∈ invSet K n) : 0 < nrm x := by
 
 private theorem continuous_nrm : Continuous (nrm : Lie K n → ℝ) := by
   have h : Continuous fun x : Lie K n => (Matrix.of x).det := Continuous.matrix_det continuous_id
-  exact continuous_finset_prod _ fun w _ => (((continuous_apply w).comp h).norm).pow 2
+  exact continuous_finsetProd _ fun w _ => (((continuous_apply w).comp h).norm).pow 2
 
 private theorem haar_eq (hH : HaarL) (μ : Measure (AdelicGLn.InfiniteAdelicGL K n)) [μ.IsHaarMeasure] :
     ∃ c : ℂ, c ≠ 0 ∧ ∀ (F : AdelicGLn.InfiniteAdelicGL K n → ℂ) (H : Lie K n → ℂ), ContinuousOn H (invSet K n) →
@@ -135,6 +183,12 @@ private theorem haar_eq (hH : HaarL) (μ : Measure (AdelicGLn.InfiniteAdelicGL K
   haveI : BorelSpace (GL (Fin n) (Cinf K)) := ⟨rfl⟩
   obtain ⟨m, hm, hmap⟩ := hH K n
   haveI : (Measure.map (grpC K n) m).IsHaarMeasure := (grpC K n).isHaarMeasure_map _
+  haveI : LocallyCompactSpace (AdelicGLn.InfiniteAdelicGL K n) := by
+    set_option synthInstance.maxHeartbeats 200000 in
+      infer_instance
+  haveI : SecondCountableTopology (AdelicGLn.InfiniteAdelicGL K n) := by
+    set_option synthInstance.maxHeartbeats 200000 in
+      infer_instance
   have h := Measure.isMulLeftInvariant_eq_smul μ (Measure.map (grpC K n) m)
   have hpos := Measure.haarScalarFactor_pos_of_isHaarMeasure μ (Measure.map (grpC K n) m)
   generalize Measure.haarScalarFactor μ (Measure.map (grpC K n) m) = c at h hpos

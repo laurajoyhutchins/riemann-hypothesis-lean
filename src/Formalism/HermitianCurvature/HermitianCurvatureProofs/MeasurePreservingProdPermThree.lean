@@ -1,4 +1,52 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.UTransEMp
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.UTransEMp
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.MulVecBvecApply
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.SubMulRight
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.HermitianFormRankZeroApply
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Matrix MeasureTheory Formalism.REAL Formalism.QuantumDeterminants Formalism.FourierDecayAlt Formalism.FourierDecayAlt.U
 
@@ -127,7 +175,7 @@ theorem rnAct_meas (a : B.Mat k 0) : Measurable (rnAct (j := r) a) := by
     rfl
   rw [h]
   refine Measurable.prodMk ?_ measurable_snd
-  refine measurable_pi_lambda _ (fun i => measurable_pi_lambda _ (fun l => ?_))
+  refine Measurable.of_eval (fun i => Measurable.of_eval (fun l => ?_))
   change Measurable fun x : U.RC k r 0 => ∑ m, a i m * x.1 m l
   exact Finset.measurable_sum _ (fun m _ => measurable_const.mul
     ((measurable_pi_apply l).comp ((measurable_pi_apply m).comp measurable_fst)))
@@ -175,13 +223,13 @@ theorem phiC_emb (hy1 : IsUnit y1.det) (hy1' : IsUnit y1'.det) : MeasurableEmbed
       (rnAct_meas y1).comp measurable_snd.fst.fst
     have h2 : Measurable fun p : (C2.Lstidx σ.symm → ℂ) × U.Xi k r 0 0 σ =>
         StabilizerDisintegration.UC.fSp σ.symm (p.1, fun q => p.2.2.2.1 (StabilizerDisintegration.UC.iota σ q)) :=
-      (StabilizerDisintegration.UC.eSp σ.symm).measurable.comp (measurable_fst.prodMk (measurable_pi_lambda _ fun q =>
+      (StabilizerDisintegration.UC.eSp σ.symm).measurable.comp (measurable_fst.prodMk (Measurable.of_eval fun q =>
         (measurable_pi_apply _).comp measurable_snd.snd.snd.fst))
     have h3 : Measurable fun p : (C2.Lstidx σ.symm → ℂ) × U.Xi k r 0 0 σ => rnAct y1' p.2.1.2 :=
       (rnAct_meas y1').comp measurable_snd.fst.snd
     have h4 : Measurable fun p : (C2.Lstidx σ.symm → ℂ) × U.Xi k r 0 0 σ =>
         StabilizerDisintegration.utc ((A p.1)⁻¹ * G.upper p.2.2.2.2) := by
-      refine measurable_pi_lambda _ fun q => ?_
+      refine Measurable.of_eval fun q => ?_
       change Measurable fun p : (C2.Lstidx σ.symm → ℂ) × U.Xi k r 0 0 σ =>
         ∑ m, (A p.1)⁻¹ q.1.1 m * G.upper p.2.2.2.2 m q.1.2
       exact Finset.measurable_sum _ fun m _ => ((hAi _ _).comp measurable_fst).mul
@@ -198,10 +246,10 @@ theorem phiC_emb (hy1 : IsUnit y1.det) (hy1' : IsUnit y1'.det) : MeasurableEmbed
         rnAct y1'⁻¹ q.2.1 := (rnAct_meas y1'⁻¹).comp measurable_snd.fst
     have g5 : Measurable fun q : (U.RC k r 0 × (G.UT r → ℂ)) × (U.RC k r 0 × (G.UT r → ℂ)) =>
         fun l => ((StabilizerDisintegration.UC.eSp σ.symm).symm q.1.2).2 ((StabilizerDisintegration.UC.iota σ).symm l) :=
-      measurable_pi_lambda _ fun l => (measurable_pi_apply _).comp hes.snd
+      Measurable.of_eval fun l => (measurable_pi_apply _).comp hes.snd
     have g6 : Measurable fun q : (U.RC k r 0 × (G.UT r → ℂ)) × (U.RC k r 0 × (G.UT r → ℂ)) =>
         StabilizerDisintegration.utc (A ((StabilizerDisintegration.UC.eSp σ.symm).symm q.1.2).1 * G.upper q.2.2) := by
-      refine measurable_pi_lambda _ fun q' => ?_
+      refine Measurable.of_eval fun q' => ?_
       change Measurable fun q : (U.RC k r 0 × (G.UT r → ℂ)) × (U.RC k r 0 × (G.UT r → ℂ)) =>
         ∑ m, A ((StabilizerDisintegration.UC.eSp σ.symm).symm q.1.2).1 q'.1.1 m * G.upper q.2.2 m q'.1.2
       exact Finset.measurable_sum _ fun m _ => ((hAc _ _).comp g1).mul

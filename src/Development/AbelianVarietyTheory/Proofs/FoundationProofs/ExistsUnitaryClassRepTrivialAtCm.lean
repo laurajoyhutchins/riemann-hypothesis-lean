@@ -1,12 +1,57 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Foundations.NormSumPairRankZeroOfCurveCoordNorm
-import Formalism.PairingDivisors.StatementH
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.RationalPointsIntegralPointsMembership
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.UnitaryGroupWeakApproximationAtPrimes
-import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.Afsplit
-import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.CsGlob
-import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.CsScale
-import Formalism.SharpRestriction.Divisibility.GeneratorPowers.ConjugateMinimaInstance
+module
+
+public import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.AfsplitB
+public import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.Levelaf
+public import Formalism.SharpRestriction.GlobalSchurBounds.StandardLatticesGL3
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.UnitaryGroupWeakApproximationAtPrimes
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.RationalPointsIntegralPointsMembership
+public import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.Afsplit
+public import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.CsGlob
+import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.CsGlobApprox
+public import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.CsScale
+public import Formalism.SharpRestriction.Divisibility.GeneratorPowers.ConjugateMinimaInstance
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -90,7 +135,7 @@ theorem normOne_infinite {K : Type} [Field K] [CharZero K] (c : K →+* K) (hc :
     exact_mod_cast sub_eq_zero.1 h2
   · obtain ⟨a, b⟩ := h1 t
     refine ⟨?_, ?_⟩
-    · rw [map_div₀, map_add, map_sub, map_one, map_mul, map_natCast, hcd, mul_neg, sub_neg_eq_add,
+    · rw [map_div₀, map_add (f := _), map_sub, map_one, map_mul, map_natCast, hcd, mul_neg, sub_neg_eq_add,
         ← sub_eq_add_neg]
       field_simp
     · have : 1 + (1 + (t : K) * d) / (1 - (t : K) * d) = 2 / (1 - (t : K) * d) := by
@@ -125,9 +170,9 @@ section Ad
 variable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E]
 
 local notation "𝔸" => FiniteAdeleRing (𝓞 F) F
-local notation "𝒜" => E ⊗[F] FiniteAdeleRing (𝓞 F) F
-local notation "𝒮" => tensInt (F := F) (FiniteAdeleRing (𝓞 F) F) (intOE E) (intAd F)
-local notation "ιA" => inclE (F := F) (E := E) (FiniteAdeleRing (𝓞 F) F)
+local notation "𝒜" => E ⊗[F] 𝔸
+local notation "𝒮" => tensInt (F := F) 𝔸 (intOE E) (intAd F)
+local notation "ιA" => inclE (F := F) (E := E) 𝔸
 
 theorem levelafC_nat (m : ℕ) : levelafC (F := F) E (m : 𝓞 F) = (m : 𝒜) := by
   rw [levelafC, map_natCast]
@@ -255,7 +300,7 @@ theorem exists_rat (c : E →ₐ[F] E) (hc : ∀ x, c (c x) = x) (hne : ∃ z, c
     induction x using TensorProduct.induction_on with
     | zero => simp
     | tmul a y => simp [sigR, hc]
-    | add x y hx hy => rw [map_add, map_add, hx, hy]
+    | add x y hx hy => rw [map_add (f := _), map_add (f := _), hx, hy]
   have h1 : (1 : Matrix (Fin n) (Fin n) E).map ιA = 1 := Matrix.map_one _ (map_zero _) (map_one _)
   haveI : Nontrivial (E ⊗[F] v.adicCompletion F) :=
     (Algebra.TensorProduct.includeRight_injective (R := F) (A := E) (B := v.adicCompletion F)
@@ -276,7 +321,7 @@ theorem exists_rat (c : E →ₐ[F] E) (hc : ∀ x, c (c x) = x) (hne : ∃ z, c
         rw [Matrix.map_add _ (map_add _), Matrix.map_one _ (map_zero _) (map_one _),
           GlobalTheory.UnRep.WeakApprox.map_smul'', afsplit_prV_inclE]
       ext i j
-      rw [e1, afsplitC_apply, Matrix.map_apply, afsplit_decomp, map_add, map_one]
+      rw [e1, afsplitC_apply, Matrix.map_apply, afsplit_decomp, map_add (f := _), map_one]
       simp only [Matrix.add_apply, Matrix.smul_apply, smul_eq_mul]
       ring
     rw [e]
@@ -315,7 +360,7 @@ theorem exists_rat (c : E →ₐ[F] E) (hc : ∀ x, c (c x) = x) (hne : ∃ z, c
       ext i j
       simp only [Matrix.sub_apply, Matrix.transpose_apply, Matrix.map_apply, Matrix.of_apply,
         Matrix.smul_apply, nsmul_eq_mul]
-      rw [hyo i j, hyo j i, map_add, map_mul, map_natCast]
+      rw [hyo i j, hyo j i, map_add (f := _), map_mul, map_natCast]
       ring)
     g h hg
     (by
@@ -380,8 +425,8 @@ end GlobalTheory.NormSum.RepAt
 open NumberField Classical Formalism.BasicNotions Formalism.MainNotions Formalism.MainNotions.TaylorLogMetric Formalism.MainNotions.StandardLatticesGL3 GlobalTheory.NormSum
 open scoped BigOperators
 
-open GlobalTheory.NormSum.RepAt GlobalTheory.NormSum.PtsMem in
 
+open GlobalTheory.NormSum.RepAt GlobalTheory.NormSum.PtsMem in
 theorem GlobalTheory.NormSum.exists_rep_trivial_at : ∀ D : D7, oddRep D := by
   intro D N p hp g
   obtain ⟨v, hv, hw⟩ := exists_place p hp

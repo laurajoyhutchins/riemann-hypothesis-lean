@@ -1,6 +1,52 @@
-import Mathlib
-import ReciprocityTheory.DualLattices.WFrobStatement
-import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.ZmodPrimeSqLocal
+module
+
+public import ReciprocityTheory.DualLattices.WFrobStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -32,7 +78,7 @@ private lemma T_zero (wd : WData Tw K) : wd.T 0 = 0 := by
   rw [Finset.univ_eq_empty, Finset.sum_empty, Finset.sum_empty] at h
   apply wd.T_kill
   have h2 := congrArg wd.πW.1 h
-  rw [map_zero, map_add, π_pmul, add_zero] at h2
+  rw [map_zero, map_add (f := _), π_pmul, add_zero] at h2
   exact h2.symm
 
 private lemma πT_add (wd : WData Tw K) (a b : wd.Rb) :
@@ -40,7 +86,7 @@ private lemma πT_add (wd : WData Tw K) (a b : wd.Rb) :
   have h := wd.witt_add 2 ![a, b]
   rw [Fin.sum_univ_two, Fin.sum_univ_two] at h
   have h2 := congrArg wd.πW.1 h
-  rw [map_add, map_add, π_pmul, add_zero] at h2
+  rw [map_add (f := _), map_add (f := _), π_pmul, add_zero] at h2
   simpa using h2.symm
 
 private def φW (wd : WData Tw K) : wd.Rb →+* (Tw.R 0 : Type) where
@@ -76,13 +122,13 @@ private lemma pow_p_teich (wd : WData Tw K) (u s : (wd.W : Type)) :
 
 private lemma coeff_decomp (wd : WData Tw K) {g : ℕ} (G : MvPolynomial (Fin g) (wd.W : Type))
     (hG : ∀ m, (∃ i, ¬ p ∣ m i) →
-      MvPolynomial.coeff m G ∈ Ideal.span {(p : (wd.W : Type))}) (m : Fin g →₀ ℕ) :
-    ∃ d : wd.Rb, ∃ e : (wd.W : Type), MvPolynomial.coeff m G = wd.T d + p * e ∧
+      AddMonoidAlgebra.coeff G m ∈ Ideal.span {(p : (wd.W : Type))}) (m : Fin g →₀ ℕ) :
+    ∃ d : wd.Rb, ∃ e : (wd.W : Type), AddMonoidAlgebra.coeff G m = wd.T d + p * e ∧
       (d = 0 ∨ ∀ i, p ∣ m i) := by
   by_cases h : ∃ i, ¬ p ∣ m i
   · obtain ⟨e, he⟩ := Ideal.mem_span_singleton'.1 (hG m h)
     exact ⟨0, e, by rw [T_zero, zero_add, ← he, mul_comm], Or.inl rfl⟩
-  · obtain ⟨d, e, he⟩ := wd.decomp (MvPolynomial.coeff m G)
+  · obtain ⟨d, e, he⟩ := wd.decomp (AddMonoidAlgebra.coeff G m)
     refine ⟨d, e, he, Or.inr fun i => ?_⟩
     by_contra hi
     exact h ⟨i, hi⟩
@@ -129,7 +175,7 @@ theorem wFrob :
   intro y hy a ha
   choose η s hy' using fun i => wd.decomp (y i)
   have hπy : ∀ i, wd.πW.1 (y i) = φW wd (η i) := fun i => by
-    rw [hy' i, map_add, π_pmul, add_zero, φW_apply]
+    rw [hy' i, map_add (f := _), π_pmul, add_zero, φW_apply]
   have hw := wd.witt_add n (fun j => d (μ j) * ∏ i, η i ^ μ j i)
   have hev : MvPolynomial.eval y G = ∑ j, wd.T (d (μ j) * ∏ i, η i ^ μ j i) +
       p * ∑ j, e (μ j) * ∏ i, y i ^ μ j i := by
@@ -143,11 +189,11 @@ theorem wFrob :
     have h1 : wd.πW.1 (MvPolynomial.eval y G) = 0 := by
       rw [← wd.ker_πW] at hy
       exact hy
-    rw [hev, map_add, π_pmul, add_zero] at h1
+    rw [hev, map_add (f := _), π_pmul, add_zero] at h1
     exact h1
   rw [hev, h0, zero_add]
   apply pmul_congr
-  rw [ha, map_add, map_add, ← φW_apply, MvPolynomial.eval₂_comp_left,
+  rw [ha, map_add (f := _), map_add (f := _), ← φW_apply, MvPolynomial.eval₂_comp_left,
     MvPolynomial.eval₂_comp_left]
   congr 1
   · congr 1
@@ -155,8 +201,7 @@ theorem wFrob :
     · funext j
       rw [Function.comp_apply, Function.comp_apply, root_term wd (μ j) (d (μ j)) (hd _) η]
       simp only [map_mul, map_prod, map_pow, MvPolynomial.eval_C, MvPolynomial.eval_X, hπy]
-  · simp only [map_sum, map_mul, map_prod, map_pow, MvPolynomial.eval_C, MvPolynomial.eval_X]
 
-example (p : ℕ) [Fact p.Prime] : WFrobStatement (GlobalTheory.WModel.wModel p) 1 := wFrob _ _
+  · simp only [map_sum, map_mul, map_prod, map_pow, MvPolynomial.eval_C, MvPolynomial.eval_X]
 
 end GlobalTheory.WFrob

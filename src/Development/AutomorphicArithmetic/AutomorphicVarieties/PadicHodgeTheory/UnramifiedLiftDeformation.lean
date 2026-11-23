@@ -1,7 +1,63 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.IsInertiaInfiniteCyclotomic
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PublishedTheorems.KisinCrTrivial
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.CoFinite
-open Formalism.BasicNotions Formalism.BasicNotions.Loc ReciprocityTheory.Gal Module UpperTheory.V.Loc UpperTheory.V.U3 UpperTheory.V.Alg UpperTheory.V.Published IsLocalRing Polynomial
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.IsInertiaInfiniteCyclotomic
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.CoFinite
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.FieldTheory.Galois.Profinite
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.Padics.LocalField
+import Mathlib.NumberTheory.Padics.ProperSpace
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.AdicCompletion.Functoriality
+import Mathlib.RingTheory.AdicCompletion.Noetherian
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Algebra.Ring.Compact
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.MetricSpace.Ultra.TotallySeparated
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
+open Formalism.BasicNotions Formalism.BasicNotions.Loc ReciprocityTheory.Gal Module UpperTheory.V.Loc UpperTheory.V.U3 UpperTheory.V.Alg IsLocalRing Polynomial
 
 private theorem mem_smul_top_pi {R : Type} [CommRing R] (J : Ideal R) {r : ℕ} (x : Fin r → R) :
     x ∈ J • (⊤ : Submodule R (Fin r → R)) ↔ ∀ i, x i ∈ J := by
@@ -113,6 +169,7 @@ private theorem evCongr {l : ℕ} [Fact l.Prime] {V M X : Type} [AddCommGroup V]
     intro m
     have : i m = Fintype.linearCombination ℚ_[l] (i ∘ e) fun j => (e.equivFun m j : ℚ_[l]) := by
       conv_lhs => rw [← e.sum_equivFun m]
+
       rw [Fintype.linearCombination_apply, map_sum]
       refine Finset.sum_congr rfl fun j _ => ?_
       rw [map_smul, ← algebraMap_smul ℚ_[l]]
@@ -147,7 +204,7 @@ variable {l : ℕ} [Fact l.Prime] {O : Type} [CommRing O] [IsLocalRing O] [IsNoe
 private theorem maxZ_le (l : ℕ) [Fact l.Prime] (O : Type) [CommRing O] [IsLocalRing O] [Algebra ℤ_[l] O]
     [Module.Finite ℤ_[l] O] {c : ℤ_[l]} (hc : c ∈ maximalIdeal ℤ_[l]) : algebraMap ℤ_[l] O c ∈ maximalIdeal O := by
   have h : (maximalIdeal O).comap (algebraMap ℤ_[l] O) = maximalIdeal ℤ_[l] :=
-    eq_maximalIdeal (Ideal.isMaximal_comap_of_isIntegral_of_isMaximal (maximalIdeal O))
+    eq_maximalIdeal (Ideal.isMaximal_comap_of_isIntegral_of_isMaximal (algebraMap _ _) (RingHom.Finite.to_isIntegral (RingHom.finite_algebraMap.mpr inferInstance)) (maximalIdeal O))
   rw [← h] at hc
   exact hc
 
@@ -190,7 +247,10 @@ private theorem mem_rad {C : Type} [CommRing C] [Algebra O C] [Module.Finite O C
     ((maximalIdeal.isMaximal O).eq_of_le (Ideal.comap_ne_top _ (Ideal.IsPrime.ne_top this))
       fun o ho => (hQ _).2 (h1 (Ideal.mem_map_of_mem _ ho))).symm
   haveI h4 : Q.IsMaximal :=
-    Ideal.isMaximal_of_isIntegral_of_isMaximal_comap (R := O) _ (h3 ▸ maximalIdeal.isMaximal O)
+    Ideal.isMaximal_of_isIntegral_of_isMaximal_under (R := O) Q (by
+      change (Q.comap (algebraMap O f.range)).IsMaximal
+      rw [h3]
+      exact maximalIdeal.isMaximal O)
   have h5 := Ideal.comap_isMaximal_of_surjective f.rangeRestrict f.rangeRestrict_surjective (K := Q)
   rw [← eq_maximalIdeal h5] at ha
   exact (hQ _).1 ha
@@ -202,7 +262,7 @@ private theorem coOfRad [IsAdicComplete (maximalIdeal O) O] {C : Type} [CommRing
   have h1 : ∀ P : Ideal C, P.IsMaximal → P = J := by
     intro P hP
     have h2 : P.comap (algebraMap O C) = maximalIdeal O :=
-      eq_maximalIdeal (Ideal.isMaximal_comap_of_isIntegral_of_isMaximal P)
+      eq_maximalIdeal (Ideal.isMaximal_under_of_isIntegral_of_isMaximal (R := O) P)
     have h3 : J ≤ P := hP.isPrime.radical_le_iff.2 (Ideal.map_le_iff_le_comap.2 h2.ge)
     refine le_antisymm (fun c hc => ?_) h3
     obtain ⟨o, ho⟩ := h c
@@ -265,9 +325,9 @@ private theorem ggmap_inj {C B : Type} [CommRing C] [CommRing B] (ι : C →+* B
   exact hι (congrFun (congrFun (congrArg GG.mat h) a) b)
 
 private theorem descend {C B G : Type} [CommRing C] [CommRing B] [Group G] (ι : C →+* B) (hι : Function.Injective ι)
-    (r : G →* GG 3 B) (A : G → Matrix (Fin 3) (Fin 3) C) (hA : ∀ g, (A g).map ι = (r g).mat)
-    (hu : ∀ g, IsUnit (A g).det) : ∃ r' : G →* GG 3 C, (GG.map ι).comp r' = r ∧ ∀ g, (r' g).mat = A g := by
-  let u : G → GG 3 C := fun g => ⟨((Matrix.isUnit_iff_isUnit_det _).2 (hu g)).unit, (r g).right⟩
+    (r : G →* GG (m := 3) (R := B)) (A : G → Matrix (Fin 3) (Fin 3) C) (hA : ∀ g, (A g).map ι = (r g).mat)
+    (hu : ∀ g, IsUnit (A g).det) : ∃ r' : G →* GG (m := 3) (R := C), (GG.map ι).comp r' = r ∧ ∀ g, (r' g).mat = A g := by
+  let u : G → GG (m := 3) (R := C) := fun g => ⟨((Matrix.isUnit_iff_isUnit_det _).2 (hu g)).unit, (r g).right⟩
   have h : ∀ g, GG.map ι (u g) = r g := fun g => SemidirectProduct.ext (Units.ext (hA g)) rfl
   exact ⟨MonoidHom.mk' u fun g g' => ggmap_inj ι hι (by rw [map_mul, h, h, h, map_mul]), MonoidHom.ext h, fun g => rfl⟩
 
@@ -276,12 +336,12 @@ section Main
 variable {O : Type} [CommRing O] [IsLocalRing O] {Γ : Type} [Group Γ] [TopologicalSpace Γ] {η : Γ →* ℤˣ} {Ψ : Γ →* Oˣ}
 
 private theorem push_val {R B : Type} [CommRing R] [Algebra O R] [CommRing B] [Algebra O B] (C : Subalgebra O B)
-    (f : R →ₐ[O] C) (r : Γ →* GG 3 R) : push (C.val.comp f) r = (GG.map (C.val : C →+* B)).comp (push f r) := rfl
+    (f : R →ₐ[O] C) (r : Γ →* GG (m := 3) (R := R)) : push (C.val.comp f) r = (GG.map (C.val : C →+* B)).comp (push f r) := rfl
 
 end Main
 
 theorem UpperTheory.V.Loc.unramified_lift_deformation :
-    ∀ {l : ℕ} [Fact l.Prime] {O : Type} [CommRing O] [IsDomain O] [IsDiscreteValuationRing O] [CharZero O] [Algebra ℤ_[l] O] [Module.Finite ℤ_[l] O] [IsAdicComplete (maximalIdeal O) O] (D : Dat3 l O) (U : D.Univ) (E : Type) [Field E] [Algebra ℚ_[l] E] [Module.Finite ℚ_[l] E] [Algebra O E] [Algebra ℤ_[l] E] [IsScalarTower ℤ_[l] O E] [IsScalarTower ℤ_[l] ℚ_[l] E] (B : Type) [CommRing B] [Algebra ℚ_[l] B] [Module.Finite ℚ_[l] B] [Algebra O B] [Algebra ℤ_[l] B] [IsScalarTower ℤ_[l] O B] [IsScalarTower ℤ_[l] ℚ_[l] B] [Algebra E B] [IsScalarTower O E B] [IsScalarTower ℚ_[l] E B] (π : B →ₐ[E] E) (hπ : ∀ a, π a = 0 → IsNilpotent a) (x : U.R →ₐ[O] E) (r : GQ l →* GG 3 B), HasMult D.η r → (GG.map (π : B →+* E)).comp r = push x U.r.hom → (∀ a b, QCont l fun g => (r g).mat a b) → ∃! f : U.R →ₐ[O] B, push f U.r.hom = r := by
+    ∀ {l : ℕ} [Fact l.Prime] {O : Type} [CommRing O] [IsDomain O] [IsDiscreteValuationRing O] [CharZero O] [Algebra ℤ_[l] O] [Module.Finite ℤ_[l] O] [IsAdicComplete (maximalIdeal O) O] (D : Dat3 l O) (U : _root_.UpperTheory.V.U3.Univ (_root_.UpperTheory.V.U3.GCond.noCondition O D.η D.Ψ)) (E : Type) [Field E] [Algebra ℚ_[l] E] [Module.Finite ℚ_[l] E] [Algebra O E] [Algebra ℤ_[l] E] [IsScalarTower ℤ_[l] O E] [IsScalarTower ℤ_[l] ℚ_[l] E] (B : Type) [CommRing B] [Algebra ℚ_[l] B] [Module.Finite ℚ_[l] B] [Algebra O B] [Algebra ℤ_[l] B] [IsScalarTower ℤ_[l] O B] [IsScalarTower ℤ_[l] ℚ_[l] B] [Algebra E B] [IsScalarTower O E B] [IsScalarTower ℚ_[l] E B] (π : B →ₐ[E] E) (hπ : ∀ a, π a = 0 → IsNilpotent a) (x : U.R →ₐ[O] E) (r : GQ l →* GG (m := 3) (R := B)), HasMult D.η r → (GG.map (π : B →+* E)).comp r = push x U.r.hom → (∀ a b, QCont l fun g => (r g).mat a b) → ∃! f : U.R →ₐ[O] B, push f U.r.hom = r := by
   intro l _ O _ _ _ _ _ _ _ D U E _ _ _ _ _ _ _ B _ _ _ _ _ _ _ _ _ _ π hπ x r hm hred hc
   classical
   haveI : Nontrivial B := (π : B →+* E).domain_nontrivial
@@ -322,7 +382,7 @@ theorem UpperTheory.V.Loc.unramified_lift_deformation :
         obtain ⟨n, h⟩ := hπ _ (hν0 ((r g).mat a b))
         refine IsNilpotent.eq_zero (IsNilpotent.map ⟨n, Subtype.ext ?_⟩ (res O C))
         simpa using h
-      rw [Matrix.map_apply, h1, map_add, h2, zero_add, res_map, ← U.r.red g]
+      rw [Matrix.map_apply, h1, map_add (f := _), h2, zero_add, res_map, ← U.r.red g]
       rfl
     have hu : ∀ g, IsUnit (A g).det := fun g => by
       by_contra hn

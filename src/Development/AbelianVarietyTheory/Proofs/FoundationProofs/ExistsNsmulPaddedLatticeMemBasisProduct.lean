@@ -1,8 +1,46 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.DifferentiableComb
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IdealPeriodLatticeOfCurveDatum
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Definitions.Foundations.NormSumPairRankZeroOfCurveCoordNorm
-import Formalism.PairingDivisors.StatementH
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.DifferentiableComb
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IdealPeriodLatticeOfCurveDatum
+
+@[expose] public section
+
 open NumberField Classical Formalism.BasicNotions Formalism.MainNotions Formalism.MainNotions.TaylorLogMetric Formalism.MainNotions.StandardLatticesGL3 GlobalTheory.NormSum GlobalTheory.GalTheta
 open scoped BigOperators
 
@@ -16,7 +54,7 @@ def sat {V V' : Type*} [AddCommGroup V] [AddCommGroup V'] (f : V →+ V') (B : A
   add_mem' := by
     rintro x y ⟨n, hn, hx⟩ ⟨k, hk, hy⟩
     refine ⟨n * k, Nat.mul_pos hn hk, ?_⟩
-    rw [map_add, smul_add]
+    rw [map_add (f := _), smul_add]
     refine B.add_mem ?_ ?_
     · rw [mul_comm, mul_smul]; exact B.nsmul_mem hx _
     · rw [mul_smul]; exact B.nsmul_mem hy _
@@ -26,18 +64,26 @@ def sat {V V' : Type*} [AddCommGroup V] [AddCommGroup V'] (f : V →+ V') (B : A
 
 theorem uniform_of_fg {V V' : Type*} [AddCommGroup V] [AddCommGroup V'] (f : V →+ V') (A : AddSubgroup V)
     (B : AddSubgroup V') (hA : A.FG) (h : A ≤ sat f B) : ∃ R : ℕ, 0 < R ∧ ∀ y ∈ A, R • f y ∈ B := by
-  obtain ⟨S, rfl⟩ := hA
-  have h' : ∀ y : S, ∃ n : ℕ, 0 < n ∧ n • f y ∈ B := fun y => h (AddSubgroup.subset_closure y.2)
+  obtain ⟨S, hS⟩ := hA
+  have h' : ∀ y : S, ∃ n : ℕ, 0 < n ∧ n • f y.1.1 ∈ B :=
+    fun y => h y.1.2
   choose n hn hy using h'
   refine ⟨∏ y, n y, Finset.prod_pos fun y _ => hn y, fun y hy' => ?_⟩
-  induction hy' using AddSubgroup.closure_induction with
-  | mem x hx =>
-    obtain ⟨c, hc⟩ : n ⟨x, hx⟩ ∣ ∏ y, n y := Finset.dvd_prod_of_mem _ (Finset.mem_univ _)
-    rw [hc, mul_comm, mul_smul]
-    exact B.nsmul_mem (hy ⟨x, hx⟩) _
-  | zero => simp
-  | add x y _ _ hx hy => rw [map_add, smul_add]; exact B.add_mem hx hy
-  | neg x _ hx => rw [map_neg, smul_neg]; exact B.neg_mem hx
+  have hall : ∀ x : A, x ∈ AddSubsemigroup.closure (S : Set A) →
+      (∏ y, n y) • f x.1 ∈ B := by
+    intro x hx
+    induction hx using AddSubsemigroup.closure_induction with
+    | mem x hx =>
+      obtain ⟨c, hc⟩ : n ⟨x, hx⟩ ∣ ∏ y, n y := Finset.dvd_prod_of_mem _ (Finset.mem_univ _)
+      rw [hc, mul_comm, mul_smul]
+      exact B.nsmul_mem (hy ⟨x, hx⟩) _
+    | add x y _ _ hx hy =>
+      change (∏ y, n y) • f (x.1 + y.1) ∈ B
+      rw [map_add, smul_add]
+      exact B.add_mem hx hy
+  apply hall ⟨y, hy'⟩
+  rw [hS]
+  trivial
 
 theorem exists_nat_mul_int {K : Type*} [Field K] [NumberField K] (κ : K) :
     ∃ (n : ℕ) (a : 𝓞 K), 0 < n ∧ (a : K) = n * κ := by
@@ -68,8 +114,9 @@ theorem exists_nsmul_mem (D : D7) (hD : admG1 D) (cc : Ideal (𝓞 D.host.K)) (�
     funext τ s t
     have h1 : ∀ i, (κ i • b i) s t = (κ i : D.host.E) * b i s t := fun i => rfl
     have h2 := hD.1 τ
+
     simp only [embV, tor0, Pi.smul_apply, Finset.sum_apply, Matrix.sum_apply, h1, map_sum, map_mul, h2,
-      smul_eq_mul, Finset.mul_sum]
+    smul_eq_mul, Finset.mul_sum]
     exact Finset.sum_congr rfl fun i _ => by ring
   rw [e]
   refine AddSubgroup.sum_mem _ fun i _ => ?_

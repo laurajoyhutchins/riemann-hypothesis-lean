@@ -1,9 +1,50 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FrobPullHomExtAffine
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FrobTwistBaseChangeHomApp
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.ExistsUniquePairsToTower
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.CubeTheorem
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsPdivGroupForPoint
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.CrystallinePull2SumCup
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsChernExistsUniqueAndIso
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Definitions.Divisors.KerIdealCompOfSurjective
+import Development.AbelianVarietyTheory.Definitions.Divisors.ToSpanSingletonConstGenInjective
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IntEmbCoe
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsDeRhamSheafIffAlt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PlaceDivisors.AlWellDefSt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -11,7 +52,7 @@ noncomputable section
 
 open CategoryTheory AlgebraicGeometry Limits MonoidalCategory CartesianMonoidalCategory MonObj IsLocalRing
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Pdiv ReciprocityTheory.ChartRestriction.G.Geo.Tor
-open GlobalTheory GlobalTheory.PDiv GlobalTheory.PDivGroup GlobalTheory.DeRham GlobalTheory.AbDual GlobalTheory.Cris GlobalTheory.CurveRootGeometry GlobalTheory.AbDatum GlobalTheory.ConjSeq
+open GlobalTheory GlobalTheory.PDiv GlobalTheory.PDivGroup GlobalTheory.DeRham GlobalTheory.AbDual GlobalTheory.Cris GlobalTheory.CurveRootGeometry GlobalTheory.ConjSeq
 
 attribute [local instance] Over.cartesianMonoidalCategory
 
@@ -23,32 +64,6 @@ section Linear
 
 variable {K : Type} [Field K] {V : Type u} [AddCommGroup V] [Module K V]
   {ψ : Module.Dual K V →ₗ[K] Module.Dual K V →ₗ[K] K} {β : V →ₗ[K] Module.Dual K V}
-
-theorem bijective_of_eval [Module.Finite K V] (h : ∀ s y, ψ (β s) y = y s) : Function.Bijective β := by
-  have inj : Function.Injective β := (injective_iff_map_eq_zero _).2 fun s hs ↦
-    (Module.forall_dual_apply_eq_zero_iff K s).1 fun y ↦ by rw [← h, hs, map_zero, LinearMap.zero_apply]
-  exact ⟨inj, (LinearMap.injective_iff_surjective_of_finrank_eq_finrank
-    (Subspace.dual_finrank_eq (K := K) (V := V)).symm).1 inj⟩
-
-theorem mem_iff_of_isotropic [Module.Finite K V] (h : ∀ s y, ψ (β s) y = y s) (F : Submodule K V)
-    (hF : Module.finrank K V = 2 * Module.finrank K F)
-    (iso : ∀ x ∈ F.dualAnnihilator, ∀ y ∈ F.dualAnnihilator, ψ x y = 0) (s : V) :
-    s ∈ F ↔ ∀ w ∈ F, β s w = 0 := by
-  let e := LinearEquiv.ofBijective β (bijective_of_eval h)
-  have le : F.dualAnnihilator.map e.symm.toLinearMap ≤ F := by
-    rintro _ ⟨x, hx, rfl⟩
-    refine (Subspace.forall_mem_dualAnnihilator_apply_eq_zero_iff F _).1 fun y hy ↦ ?_
-    rw [← h]
-    exact (congrArg (fun z ↦ ψ z y) (e.apply_symm_apply x)).trans (iso x hx y hy)
-  have eq : F.dualAnnihilator.map e.symm.toLinearMap = F := by
-    refine Submodule.eq_of_le_of_finrank_eq le ?_
-    rw [LinearEquiv.finrank_map_eq]
-    have := Subspace.finrank_add_finrank_dualAnnihilator_eq F
-    omega
-  rw [← Submodule.mem_dualAnnihilator]
-  conv_lhs => rw [← eq]
-  rw [Submodule.mem_map_equiv]
-  rfl
 
 end Linear
 
@@ -81,40 +96,6 @@ theorem skew_of_symm (C : CupSquare κ t (A ⊗ A)) {P : LB (A ⊗ A).left} (hP 
     φ x y = -φ y x :=
   LinearMap.congr_fun₂ (H.unique C hP (isCorrForm_of_iso (isCorrForm_swap H) (pull_isLB hP _) hP hs)) x y
 
-theorem isPerfect_of_symm {P : LB (A ⊗ A).left} (hd : IsDual A A P) (hs : LBIso (swap P) P) :
-    IsPerfect A A P := by
-  have hP := hd.isLB
-  have hs' : (swap P).IsLB := pull_isLB hP _
-  have sym {Y : Over S} (x y : Y ⟶ A) : evc hP x y = evc hP y x := by
-    rw [← evc_swap hP hs', evc, (CechPic.cls_eq_iff hs' hP).2 hs, evc]
-  refine ⟨hP, (triv_ev_iff hP _ _).2 (hd.additive.evc_one hP _), hd.zero, fun Y x hx ↦ hd.eq_one x ?_,
-    fun _ ↦ hd.eq_one⟩
-  have k := congrArg (CechPic.pull (lift (snd A Y) (fst A Y)).left) ((triv_ev_iff hP _ _).1 hx)
-  rw [pull_evc, map_zero, lift_fst_assoc, lift_snd] at k
-  rw [triv_ev_iff hP, sym, k]
-
 end Swap
-
-theorem finrank_eq_of_rankAtStalk {K : Type} [Field K] {V : Type u} [AddCommGroup V] [Module K V] {n : ℕ}
-    (h : ∀ q : PrimeSpectrum K, Module.rankAtStalk V q = n) : Module.finrank K V = n := by
-  have e := h ⊥
-  rwa [Module.rankAtStalk_eq_finrank_of_free] at e
-
-theorem skew_lagrangian : GlobalTheory.Published.AbelianDeRham → GlobalTheory.Published.ConjugateFiltration → ∀ (p : ℕ) [Fact p.Prime] (K : Type) [Field K] (hK : (p : K) = 0) (A : Over (Sp K)) [GrpObj A] (g : ℕ) (hA : IsAbelianScheme A), SmoothOfRelativeDimension g A.hom → ∀ P : LB (A ⊗ A).left, IsDual A A P → LBIso (swap P) P → ∀ (ψ : HdR A →ₗ[K] HdR A →ₗ[K] K) (β : primDR A →ₗ[K] HdR A), IsCorrForm (dp0 K) (𝟙 _) A A P ψ → (∀ s y, ψ (β s) y = y s) → Module.Finite K (primDR A) ∧ Function.Bijective β ∧ (∀ s w, β s w = - β w s) ∧ (∀ s, s ∈ PrimitiveSubmodule A ↔ ∀ w ∈ PrimitiveSubmodule A, β s w = 0) ∧ ∀ s, s ∈ conjDR p K hK A ↔ ∀ w ∈ conjDR p K hK A, β s w = 0 := by
-  intro hD hC p _ K _ hK A _ g hA hg P hd hs ψ β hψ hβ
-  obtain ⟨hfin, -, hrk⟩ := GlobalTheory.Published.AbelianDeRham.Free.prim hD.1 hA hg
-  have hV := finrank_eq_of_rankAtStalk hrk
-  have sk := skew_of_symm (cupSquare_of_free hD.1 (AbelianSchemeGerms.isAbelianScheme_tensor A A hA hA) (smooth_prod hg hg))
-    hd.isLB hs hψ
-  obtain ⟨-, h₁, -⟩ := hψ.perfect hD hA hg hA hg (isPerfect_of_symm hd hs)
-  obtain ⟨-, -, -, -, hF⟩ := hD.2.1 K A g hA hg
-  obtain ⟨-, -, hG, h₂⟩ := hC p K hK A g hA hg (cast_left p K hK A) (frobMor p K hK A (cast_left p K hK A))
-  refine ⟨hfin, bijective_of_eval hβ, fun s w ↦ by rw [← hβ w, sk, hβ],
-    mem_iff_of_isotropic hβ _ (by rw [hV, finrank_eq_of_rankAtStalk hF]) fun x hx ↦ (h₁ x).1 hx,
-    mem_iff_of_isotropic hβ _ (hV.trans (congrArg (2 * ·) (finrank_eq_of_rankAtStalk hG).symm))
-      fun x hx y hy ↦ ?_⟩
-  exact h₂ A hA hg _ (frobMor p K hK A (cast_left p K hK A)) P hd ψ hψ x y
-    (fun c ↦ (Submodule.mem_dualAnnihilator x).1 hx _ (Submodule.subset_span ⟨c, rfl⟩))
-    fun c ↦ (Submodule.mem_dualAnnihilator y).1 hy _ (Submodule.subset_span ⟨c, rfl⟩)
 
 end GlobalTheory.SymmPoincare

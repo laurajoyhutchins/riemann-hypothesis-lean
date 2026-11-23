@@ -1,10 +1,44 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.FieldValuesMemFixedField
-import Formalism.LocalToGlobal.Divisibility.ColumnFamilyPlaceCharacterComap
-import Formalism.LocalToGlobal.Divisibility.TiedLemmas
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.FieldValuesMemFixedField
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.RestrictedCharacterDataValid
+public import Formalism.LocalToGlobal.Divisibility.TiedLemmas
 import Formalism.QuotientMetricDivisors.HermitianTwistDivisors.ValBasic
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.InGeoIff
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.VolumeLeOfTrivialFirstPair
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -77,13 +111,13 @@ theorem mu_mem (h : Wt' ⊆ Wt) {v : HeightOneSpectrum (𝓞 X.toD7.what₂.LL)}
   have hm := (tup_mem_tuOf I).2 hu
   rwa [tup_ixOf] at hm
 
-open Classical in
 
+open Classical in
 def resMu (h : Wt' ⊆ Wt) (v : HeightOneSpectrum (𝓞 X.toD7.what₂.LL)) : TupU I (usedOf I T Wt') :=
   if hv : (plB X).symm v ∈ Wt' then ⟨(z.R.mu v).1, Or.inr (z.mu_mem h hv)⟩ else mu0F (X := X.B.fields) (tuOf I (usedOf I T Wt'))
 
-open Classical in
 
+open Classical in
 def resTw (Wt' : Set X.B.places.Pl) : Finset (HeightOneSpectrum (𝓞 X.toD7.what₂.LL)) :=
   z.R.twPl.filter fun v => (plB X).symm v ∈ Wt'
 
@@ -158,24 +192,33 @@ theorem muOf_res (h : Wt' ⊆ Wt) : MuOf X I T Wt' (z.resMu h) (z.resTw Wt') := 
       rw [z.lev.xiH, ixOf_mu0F] at hb
       exact hb
 
-set_option maxHeartbeats 1000000 in
+
 
 def resR (h : Wt' ⊆ Wt) : RealDat3 X.toD7 (famR X I hX (usedOf I T Wt') z.Xg z.tr) z.core.Q.c.F :=
   Res.dat3 (A3 := famR X I hX (usedOf I T Wt) z.Xg z.tr) (inclU I (usedOf_mono I T h))
     (mu0F (X := X.B.fields) (tuOf I (usedOf I T Wt'))) z.R (z.resMu h) (z.resTw Wt')
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem newTup (h : Wt' ⊆ Wt) (hc : ConjStable X Wt') :
     Res.NewTup (A3 := famR X I hX (usedOf I T Wt) z.Xg z.tr) (f := inclU I (usedOf_mono I T h))
-      (μ := mu0F (X := X.B.fields) (tuOf I (usedOf I T Wt'))) z.R (z.resMu h) (z.resTw Wt') where
-  sub v hv := (z.mem_twPl v).2 (h ((z.mem_resTw h v).1 hv))
-  conj v := by
+      (μ := mu0F (X := X.B.fields) (tuOf I (usedOf I T Wt'))) z.R (z.resMu h) (z.resTw Wt') := by
+  constructor
+  case sub =>
+    intro v hv
+    exact (z.mem_twPl v).2 (h ((z.mem_resTw h v).1 hv))
+  case conj =>
+    intro v
     rw [z.mem_resTw h, z.mem_resTw h]
     exact hc.symm_mem_iff v
-  on v hv := z.inclU_resMu h ((z.mem_resTw h v).1 hv)
-  off v hv := z.resMu_off h fun hv' => hv ((z.mem_resTw h v).2 hv')
-  used t := z.resMu_used h t
+  case on =>
+    intro v hv
+    exact z.inclU_resMu h ((z.mem_resTw h v).1 hv)
+  case off =>
+    intro v hv
+    exact z.resMu_off h fun hv' => hv ((z.mem_resTw h v).2 hv')
+  case used =>
+    exact z.resMu_used h
 
 end Dat
 

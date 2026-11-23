@@ -1,8 +1,51 @@
-import Mathlib
-import Formalism.LocalToGlobal.IndefiniteReal.ConcretePkgSpec
-import Formalism.LocalToGlobal.IndefiniteReal.CutTuples2
-import Formalism.LocalToGlobal.Divisibility.LiftLatLemmas
+module
+
+public import Formalism.LocalToGlobal.IndefiniteReal.SubgroupCharExtensionOneApply
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FinRepApply
+import Formalism.LocalToGlobal.IndefiniteForms.IndefSide
+import Formalism.LocalToGlobal.IndefiniteReal.LinksDefs
+
+@[expose] public section
 
 noncomputable section
 
@@ -197,7 +240,7 @@ theorem prod_decomp (x : (A × B) ⊗[F] E) :
   | zero => simp
   | tmul a b => simp [← TensorProduct.add_tmul]
   | add x y hx hy =>
-    simp only [map_add]
+    simp only [map_add (f := _)]
     rw [add_add_add_comm, hx, hy]
 
 theorem prod_surj (y : B ⊗[F] E) : ∃ x : (A × B) ⊗[F] E,
@@ -209,7 +252,7 @@ theorem prod_surj (y : B ⊗[F] E) : ∃ x : (A × B) ⊗[F] E,
   | add x y hx hy =>
     obtain ⟨x', h1, h2⟩ := hx
     obtain ⟨y', h3, h4⟩ := hy
-    exact ⟨x' + y', by rw [map_add, h1, h3, add_zero], by rw [map_add, h2, h4]⟩
+    exact ⟨x' + y', by rw [map_add (f := _), h1, h3, add_zero], by rw [map_add (f := _), h2, h4]⟩
 
 theorem map_sig (f : A →ₐ[F] B) (σ : E →ₐ[F] E) (x : A ⊗[F] E) :
     Algebra.TensorProduct.map f (AlgHom.id F E) (Algebra.TensorProduct.map (AlgHom.id F A) σ x) =
@@ -217,7 +260,7 @@ theorem map_sig (f : A →ₐ[F] B) (σ : E →ₐ[F] E) (x : A ⊗[F] E) :
   induction x using TensorProduct.induction_on with
   | zero => simp
   | tmul a b => simp
-  | add x y hx hy => simp only [map_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
 
 theorem comm_sig (σ : E →ₐ[F] E) (x : A ⊗[F] E) :
     Algebra.TensorProduct.comm F A E (Algebra.TensorProduct.map (AlgHom.id F A) σ x) =
@@ -225,7 +268,7 @@ theorem comm_sig (σ : E →ₐ[F] E) (x : A ⊗[F] E) :
   induction x using TensorProduct.induction_on with
   | zero => simp
   | tmul a b => simp
-  | add x y hx hy => simp only [map_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
 
 end Prod
 

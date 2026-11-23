@@ -1,20 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.ExistenceOfLattices.CoeSelfDualLatticeInFrameCoordinatesEq
-import Formalism.LocalToGlobal.ProjectiveLattices.ParCanon
-import Formalism.LocalToGlobal.ProjectiveLattices.ExistsParameterConditions
-import Formalism.LocalToGlobal.ProjectiveLattices.ValSetAlgSubset
-import Formalism.LocalToGlobal.ProjectiveLattices.IntAll
-import Formalism.LocalToGlobal.ProjectiveLattices.AllTest
-import Formalism.LocalToGlobal.ProjectiveLattices.VolProofs
+module
+
+public import Development.AbelianVarietyTheory.Definitions.ExistenceOfLattices.CoeSelfDualLatticeInFrameCoordinatesEq
+public import Development.AbelianVarietyTheory.Definitions.ExistenceOfLattices.Hat1
+public import Formalism.LocalToGlobal.ProjectiveLattices.HalfOneAddSqrtNegIsIntegral
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.AdelicCompletionFractionalIdealDivisibleEqZero
 import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.AdelicCompletionRationalPointsAndApproximation
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.AdelicCompletionFractionalIdealDivisibleEqZero
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsFramePeriods
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsInverseUnitTower
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsMemberDictionaryContextGoodEmbeddingStatement
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.AdelicElementLatticeFullAndCompletionStatement
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.AdelicUnitaryEqRealMulFiniteSplitStatement
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.AdelicUnitaryLatticeSelfDualTraceFormStatement
 import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.CompletedLatticeEqAdelicCompletionAndGramStatement
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.AdelicElementLatticeFullAndCompletionStatement
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.AdelicUnitaryLatticeSelfDualTraceFormStatement
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.AdelicUnitaryEqRealMulFiniteSplitStatement
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsFramePeriods
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsInverseUnitTower
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsMemberDictionaryContextGoodEmbeddingStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 open NumberField IsDedekindDomain ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.FD Formalism.BasicNotions Formalism.MainNotions Formalism.BasicNotions.TH Formalism.L2.Theta Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.L2.Pj
 open scoped TensorProduct Matrix Topology
@@ -74,7 +107,7 @@ theorem onto_adelic_of_tower (F E : Type) [Field F] [NumberField F] [Field E] [N
     (fun N m hN hm a => by
       obtain ⟨a, rfl⟩ := ι.surjective a
       obtain ⟨e, he⟩ := h1 N m hN hm a
-      exact ⟨φ e, by rw [hf', hf', he, map_add, map_nsmul]⟩)
+      exact ⟨φ e, by rw [hf', hf', he, map_add (f := _), map_nsmul]⟩)
     (fun N hN => ⟨fun a => by
       obtain ⟨a, rfl⟩ := ι.surjective a
       rw [hf']
@@ -87,7 +120,7 @@ theorem onto_adelic_of_tower (F E : Type) [Field F] [NumberField F] [Field E] [N
         exact ⟨φ e, by rw [he, map_nsmul]⟩, fun a' => by
       obtain ⟨a', rfl⟩ := φ.surjective a'
       obtain ⟨a, e, he⟩ := (h2 N hN).2 a'
-      exact ⟨ι a, φ e, by rw [hf', he, map_add, map_nsmul]⟩⟩)
+      exact ⟨ι a, φ e, by rw [hf', he, map_add (f := _), map_nsmul]⟩⟩)
   refine ⟨g, hg1, fun N hN a => by rw [← hf']; exact hg2 N hN (ι a), hg3 c G J ?_ ?_⟩
   · intro x hx y hy
     obtain ⟨x', hx'⟩ := φ.surjective ⟨x, hx⟩
@@ -154,7 +187,7 @@ theorem exists_finite_mark : ∀ (D : D7) (H : ReciprocityTheory.ChartRestrictio
     (fun x y => by
       have halt : Dw.EF y x = -Dw.EF x y := by
         have := Dw.alt (x + y)
-        simp only [map_add, LinearMap.add_apply, Dw.alt] at this
+        simp only [map_add (f := _), LinearMap.add_apply, Dw.alt] at this
         linear_combination this
       rw [hherm, hι, hι, ← hT, ← hC.iota.isom, halt, Int.cast_neg])
     (fun x y => by

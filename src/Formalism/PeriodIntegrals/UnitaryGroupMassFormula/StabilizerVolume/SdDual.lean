@@ -1,7 +1,58 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerVolume.SdUniq
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerVolume.PosNear
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerVolume.TensAll
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerVolume.SdUniq
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerVolume.PosNear
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicLocalCompactness.T2SpaceTensorProductFiniteExtension
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerVolume.DensFibV
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerVolume.TensAll
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerVolume.TensTop
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.MetricSpace.Ultra.TotallySeparated
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.GeneralLinearIntegers.AlgebraMapIntMemOint
+
+@[expose] public section
 
 noncomputable section
 
@@ -15,15 +66,6 @@ open NumberField IsDedekindDomain MeasureTheory Topology Formalism.MainNotions.G
 
 variable {F : Type} [Field F] [NumberField F] (v : HeightOneSpectrum (𝓞 F))
 
-theorem exists_notMem_int : ∃ c : Fv F v, c ∉ v.adicCompletionIntegers F := by
-  obtain ⟨π, hπ⟩ := v.valuation_exists_uniformizer F
-  refine ⟨((π⁻¹ : F) : Fv F v), ?_⟩
-  rw [HeightOneSpectrum.notMem_adicCompletionIntegers,
-    HeightOneSpectrum.valuedAdicCompletion_eq_valuation', map_inv₀, hπ]
-  simp only [← WithZero.exp_neg, neg_neg]
-  rw [← WithZero.exp_zero]
-  exact WithZero.exp_lt_exp.2 one_pos
-
 variable {E : Type} [Field E] [Algebra F E] {d : ℕ} (b : Module.Basis (Fin d) F E)
 
 def latSub (a M : ℕ) : AddSubgroup (Fin a → Fin M → Fv F v ⊗[F] E) where
@@ -36,7 +78,7 @@ def latSub (a M : ℕ) : AddSubgroup (Fin a → Fin M → Fv F v ⊗[F] E) where
     intro X Y hX hY
     simp only [latV, Set.mem_ofPred_eq] at hX hY ⊢
     intro p i k
-    simpa [Pi.add_apply, map_add] using add_mem (hX p i k) (hY p i k)
+    simpa [Pi.add_apply, map_add (f := _)] using add_mem (hX p i k) (hY p i k)
   neg_mem' := by
     intro X hX
     simp only [latV, Set.mem_ofPred_eq] at hX ⊢
@@ -62,7 +104,7 @@ theorem BR_smul_left (σ : E →ₐ[F] E) {M n : ℕ} (J : Matrix (Fin M) (Fin M
 theorem BR_add_right (σ : E →ₐ[F] E) {M n : ℕ} (J : Matrix (Fin M) (Fin M) E)
     (X Y Y' : Fin n → Fin M → Fv F v ⊗[F] E) :
     BR (Fv F v) σ J X (Y + Y') = BR (Fv F v) σ J X Y + BR (Fv F v) σ J X Y' := by
-  simp only [BR, hR, Formalism.UG.hform, Pi.add_apply, mul_add, Finset.sum_add_distrib, map_add]
+  simp only [BR, hR, Formalism.UG.hform, Pi.add_apply, mul_add, Finset.sum_add_distrib, map_add (f := _)]
 
 theorem BR_smul_right (σ : E →ₐ[F] E) {M n : ℕ} (J : Matrix (Fin M) (Fin M) E) (s : Fv F v)
     (X Y : Fin n → Fin M → Fv F v ⊗[F] E) :
@@ -83,10 +125,10 @@ theorem trace_one_tmul (e : E) :
   induction x using TensorProduct.induction_on with
   | zero => simp
   | tmul k y => simp [Algebra.TensorProduct.tmul_mul_tmul]
-  | add x y hx hy => rw [map_add, map_add, hx, hy]
+  | add x y hx hy => rw [map_add (f := _), map_add (f := _), hx, hy]
+
 
 include b in
-
 theorem trace_nondeg [Algebra.IsSeparable F E] (z : Fv F v ⊗[F] E)
     (h : ∀ w, Algebra.trace (Fv F v) (Fv F v ⊗[F] E) (w * z) = 0) : z = 0 := by
   classical
@@ -98,6 +140,7 @@ theorem trace_nondeg [Algebra.IsSeparable F E] (z : Fv F v ⊗[F] E)
   have hc : G.mulVec c = 0 := by
     funext l
     have hz := h (B l)
+
     rw [← B.sum_repr z, Finset.mul_sum, map_sum] at hz
     simp only [Matrix.mulVec, dotProduct, Pi.zero_apply]
     rw [← hz]
@@ -168,6 +211,7 @@ theorem BR_expand (X Y : Fin a → Fin M → Fv F v ⊗[F] E) :
     BR (Fv F v) σ J X Y =
       ∑ q : Fin a × Fin M × Fin d, crd b (Fv F v) (X q.1 q.2.1) q.2.2 * BR (Fv F v) σ J (eT v b q) Y := by
   have h := congrArg (brL v σ J Y) (sum_eT v b X)
+
   simp only [map_sum, map_smul, smul_eq_mul] at h
   exact h
 
@@ -284,7 +328,7 @@ def latA : AddSubgroup (Fv F v ⊗[F] E) where
   zero_mem' := by intro k; simp [crd]
   add_mem' := by
     intro x y hx hy k
-    simpa [crd, map_add] using add_mem (hx k) (hy k)
+    simpa [crd, map_add (f := _)] using add_mem (hx k) (hy k)
   neg_mem' := by
     intro x hx k
     simpa [crd, map_neg] using neg_mem (hx k)
@@ -365,6 +409,7 @@ theorem trace_sigR (σ : E →ₐ[F] E) (hσ : ∀ x, σ (σ x) = x) (w : Fv F v
     Algebra.trace_eq_of_algEquiv eσ e
   conv_lhs => rw [← B.sum_repr w]
   conv_rhs => rw [← B.sum_repr w]
+
   rw [map_sum, map_sum, map_sum]
   refine Finset.sum_congr rfl fun k _ => ?_
   rw [sigR_smul, map_smul, map_smul, hB]
@@ -396,7 +441,7 @@ def iota (σ : E →ₐ[F] E) {a : ℕ} (X : Fin a → Fin a → Fv F v ⊗[F] E
 theorem iota_mem (σ : E →ₐ[F] E) (hσ : ∀ x, σ (σ x) = x) {a : ℕ}
     (X : Fin a → Fin a → Fv F v ⊗[F] E) : iota v σ X ∈ HermR (Fv F v) σ a := by
   intro p q
-  simp only [iota, map_add, sigR_invol (Fv F v) σ hσ]
+  simp only [iota, map_add (f := _), sigR_invol (Fv F v) σ hσ]
   exact add_comm _ _
 
 theorem pairHerm_iota (σ : E →ₐ[F] E) (hσ : ∀ x, σ (σ x) = x) {a : ℕ}
@@ -408,17 +453,19 @@ theorem pairHerm_iota (σ : E →ₐ[F] E) (hσ : ∀ x, σ (σ x) = x) {a : ℕ
   have hT : ∀ p q, Tm q p = sigR (Fv F v) σ (Tm p q) := fun p q => (T.2 q p).symm
   have h2 : Algebra.trace (Fv F v) (Fv F v ⊗[F] E) (∑ p, ∑ q, X q p * Tm q p) =
       Algebra.trace (Fv F v) (Fv F v ⊗[F] E) (∑ p, ∑ q, sigR (Fv F v) σ (X p q) * Tm q p) := by
+
     simp only [map_sum]
     rw [Finset.sum_comm]
     refine Finset.sum_congr rfl fun p _ => Finset.sum_congr rfl fun q _ => ?_
     rw [hT q p, ← trace_sigR v σ hσ, map_mul, sigR_invol (Fv F v) σ hσ]
   have hBR : BR (Fv F v) σ (1 : Matrix (Fin a) (Fin a) E) X (fun p i => Tm i p) =
       Algebra.trace (Fv F v) (Fv F v ⊗[F] E) (∑ p, ∑ q, sigR (Fv F v) σ (X p q) * Tm q p) := by
+
     simp only [BR, hR, Formalism.UG.hform, JR, Matrix.map_apply, Matrix.one_apply, apply_ite,
-      map_one, map_zero, mul_ite, mul_one, mul_zero, ite_mul, zero_mul, Finset.sum_ite_eq,
-      Finset.mem_univ, if_true, map_sum]
+    map_one, map_zero, mul_ite, mul_one, mul_zero, ite_mul, zero_mul, Finset.sum_ite_eq,
+    Finset.mem_univ, if_true, map_sum]
   rw [hBR]
-  simp only [pairHerm, iota, add_mul, Finset.sum_add_distrib, map_add]
+  simp only [pairHerm, iota, add_mul, Finset.sum_add_distrib, map_add (f := _)]
   simp only [← hTm]
   rw [h2]
   have h12 : algebraMap F (Fv F v) (1 / 2) * 2 = 1 := by
@@ -503,8 +550,5 @@ theorem dualHV_holds : DualHV := by
 theorem dualLatV_holds : DualLatV := dualLatV_of dualHV_holds
 
 theorem sdUniq_of_inf (hI : SdTestInf) : SdUniq := sdUniq_of_dual hI dualLatV_holds
-
-theorem sdUniq_of_H (hI : SdTestInf) (hH : DualHV) : SdUniq :=
-  sdUniq_of_dual hI (dualLatV_of hH)
 
 end PI.VolStabS

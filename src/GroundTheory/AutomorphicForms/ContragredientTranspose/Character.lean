@@ -1,8 +1,56 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.HeckeIrreducible
-import GroundTheory.AutomorphicForms.WhittakerCriterion
-import GroundTheory.AutomorphicForms.SmoothRepContragredient
+module
+
+public import GroundTheory.AutomorphicForms.WhittakerCriterion
+public import GroundTheory.AutomorphicForms.HeckeAlgebraLevel
+public import Mathlib.LinearAlgebra.Trace
+public import GroundTheory.AutomorphicForms.HeckeIrreducible
 import GroundTheory.AutomorphicForms.SmoothRepSchur
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -73,8 +121,8 @@ variable {G : Type*} [Group G] [TopologicalSpace G] [IsTopologicalGroup G] [Loca
   (μ : Measure G) [μ.IsHaarMeasure]
   {V : Type*} [AddCommGroup V] [Module ℂ V] {ρ : Representation ℂ G V}
 
-omit [LocallyCompactSpace G] [T2Space G] [TotallyDisconnectedSpace G] in
 
+omit [LocallyCompactSpace G] [T2Space G] [TotallyDisconnectedSpace G] in
 theorem range_heckeLin_le (hρ : IsSmooth ρ) (f : locallyConstantCompactSupport G ℂ ℂ)
     {K : Subgroup G} (hK : ∀ k ∈ K, ∀ x, (f : G → ℂ) (k * x) = (f : G → ℂ) x) :
     LinearMap.range (heckeLin μ hρ f) ≤ fixedVectors ρ K := by
@@ -88,20 +136,20 @@ theorem finiteDimensional_range_heckeLin (hρ : IsAdmissible ρ)
   have := hρ.2 K hKc K.isOpen
   exact Submodule.finiteDimensional_of_le (range_heckeLin_le μ hρ.1 f (K := K) hK)
 
-omit [LocallyCompactSpace G] [T2Space G] [TotallyDisconnectedSpace G] in
 
+omit [LocallyCompactSpace G] [T2Space G] [TotallyDisconnectedSpace G] in
 theorem heckeLin_add (hρ : IsSmooth ρ) (f g : locallyConstantCompactSupport G ℂ ℂ) :
     heckeLin μ hρ (f + g) = heckeLin μ hρ f + heckeLin μ hρ g :=
   LinearMap.ext fun v => heckeAct_add_left f.2 g.2 (hρ v)
 
-omit [LocallyCompactSpace G] [T2Space G] [TotallyDisconnectedSpace G] in
 
+omit [LocallyCompactSpace G] [T2Space G] [TotallyDisconnectedSpace G] in
 theorem heckeLin_smul (hρ : IsSmooth ρ) (c : ℂ) (f : locallyConstantCompactSupport G ℂ ℂ) :
     heckeLin μ hρ (c • f) = c • heckeLin μ hρ f :=
   LinearMap.ext fun v => heckeAct_smul_left c f.2 (hρ v)
 
-variable (ρ) in
 
+variable (ρ) in
 def distChar (hρ : IsAdmissible ρ) : Module.Dual ℂ (locallyConstantCompactSupport G ℂ ℂ) where
   toFun f := finTrace (heckeLin μ hρ.1 f)
   map_add' f g := by
@@ -125,8 +173,8 @@ theorem distChar_eq_trace (hρ : IsAdmissible ρ) (f : locallyConstantCompactSup
   have := hρ.2 K hKc hKo
   rw [distChar_apply, finTrace_eq_trace _ _ (range_heckeLin_le μ hρ.1 f hK)]
 
-variable (ρ) in
 
+variable (ρ) in
 def repEquiv (g : G) : V ≃ₗ[ℂ] V where
   toLinearMap := ρ g
   invFun := ρ g⁻¹
@@ -137,8 +185,8 @@ def repEquiv (g : G) : V ≃ₗ[ℂ] V where
     change (ρ g * ρ g⁻¹) v = v
     rw [← map_mul, mul_inv_cancel, map_one, Module.End.one_apply]
 
-omit [LocallyCompactSpace G] [T2Space G] [TotallyDisconnectedSpace G] in
 
+omit [LocallyCompactSpace G] [T2Space G] [TotallyDisconnectedSpace G] in
 theorem heckeAct_biTranslL [μ.IsMulRightInvariant] (hρ : IsSmooth ρ) (g : G)
     (f : locallyConstantCompactSupport G ℂ ℂ) (v : V) :
     heckeAct μ ρ ((biTranslL g g f : locallyConstantCompactSupport G ℂ ℂ) : G → ℂ) v =
@@ -169,21 +217,21 @@ variable {G : Type*} [Group G] [TopologicalSpace G] [IsTopologicalGroup G] [Loca
   (μ : Measure G) [μ.IsHaarMeasure]
   {V : Type*} [AddCommGroup V] [Module ℂ V] {ρ : Representation ℂ G V}
 
-omit [LocallyCompactSpace G] [T2Space G] [TotallyDisconnectedSpace G] in
 
+omit [LocallyCompactSpace G] [T2Space G] [TotallyDisconnectedSpace G] in
 theorem heckeAct_contragredient_apply [μ.IsInvInvariant] (hρ : IsSmooth ρ)
     (f : locallyConstantCompactSupport G ℂ ℂ) (ξ : smoothVectors (Representation.dual ρ)) (v : V) :
     ((heckeAct μ (contragredient ρ) (f : G → ℂ) ξ : smoothVectors (Representation.dual ρ)) :
       Module.Dual ℂ V) v =
       (ξ : Module.Dual ℂ V) (heckeAct μ ρ
         ((compHomeoL (Homeomorph.inv G) f : locallyConstantCompactSupport G ℂ ℂ) : G → ℂ) v) := by
-  have h1 := dual_heckeAct μ f.2 (isSmooth_contragredient ρ ξ) (evalSmooth ρ v)
+  have h1 := dual_heckeAct (μ := μ) f.2 (isSmooth_contragredient ρ ξ) (evalSmooth ρ v)
   have key := integral_inv_eq_self (fun g =>
     ((compHomeoL (Homeomorph.inv G) f : locallyConstantCompactSupport G ℂ ℂ) : G → ℂ) g *
       (ξ : Module.Dual ℂ V) (ρ g v)) μ
   beta_reduce at key
   rw [evalSmooth_apply] at h1
-  rw [h1, dual_heckeAct μ (compHomeoL (Homeomorph.inv G) f).2 (hρ v), ← key]
+  rw [h1, dual_heckeAct (μ := μ) (compHomeoL (Homeomorph.inv G) f).2 (hρ v), ← key]
   congr 1
   funext g
   simp [evalSmooth_apply, contragredient_apply_apply]
@@ -227,23 +275,11 @@ def mulEquivHomeo (α : G ≃* G) (hα : Continuous α) (hα' : Continuous α.sy
   continuous_toFun := hα
   continuous_invFun := hα'
 
-omit [IsTopologicalGroup G] [LocallyCompactSpace G] [T2Space G] [TotallyDisconnectedSpace G]
-  [MeasurableSpace G] [BorelSpace G] in
 
-@[simp]
-theorem mulEquivHomeo_apply (α : G ≃* G) (hα : Continuous α) (hα' : Continuous α.symm) (x : G) :
-    mulEquivHomeo α hα hα' x = α x := rfl
+
 
 omit [IsTopologicalGroup G] [LocallyCompactSpace G] [T2Space G] [TotallyDisconnectedSpace G]
   [MeasurableSpace G] [BorelSpace G] in
-
-@[simp]
-theorem mulEquivHomeo_symm_apply (α : G ≃* G) (hα : Continuous α) (hα' : Continuous α.symm)
-    (x : G) : (mulEquivHomeo α hα hα').symm x = α.symm x := rfl
-
-omit [IsTopologicalGroup G] [LocallyCompactSpace G] [T2Space G] [TotallyDisconnectedSpace G]
-  [MeasurableSpace G] [BorelSpace G] in
-
 theorem isAdmissible_comp (α : G ≃* G) (hα : Continuous α) (hα' : Continuous α.symm)
     (hρ : IsAdmissible ρ) : IsAdmissible (ρ.comp α.toMonoidHom) := by
   refine ⟨fun v => (hρ.1 v).preimage hα, fun K hKc hKo => ?_⟩
@@ -262,8 +298,8 @@ theorem isAdmissible_comp (α : G ≃* G) (hα : Continuous α) (hα' : Continuo
   · rw [Subgroup.coe_map]
     exact (mulEquivHomeo α hα hα').isOpenMap _ hKo
 
-omit [LocallyCompactSpace G] [T2Space G] [TotallyDisconnectedSpace G] in
 
+omit [LocallyCompactSpace G] [T2Space G] [TotallyDisconnectedSpace G] in
 theorem heckeAct_comp (α : G ≃* G) (hα : Continuous α) (hα' : Continuous α.symm)
     (hμ : μ.map α = μ) (f : locallyConstantCompactSupport G ℂ ℂ) {v : V}
     (hv : v ∈ smoothVectors ρ) (hv' : v ∈ smoothVectors (ρ.comp α.toMonoidHom)) :
@@ -271,7 +307,7 @@ theorem heckeAct_comp (α : G ≃* G) (hα : Continuous α) (hα' : Continuous �
       heckeAct μ ρ ((compHomeoL (mulEquivHomeo α hα hα').symm f :
         locallyConstantCompactSupport G ℂ ℂ) : G → ℂ) v := by
   refine eq_of_forall_dual fun φ => ?_
-  rw [dual_heckeAct μ f.2 hv', dual_heckeAct μ (compHomeoL _ f).2 hv]
+  rw [dual_heckeAct (μ := μ) f.2 hv' φ, dual_heckeAct (μ := μ) (compHomeoL _ f).2 hv φ]
   have hmp : MeasurePreserving (mulEquivHomeo α hα hα').toMeasurableEquiv μ μ :=
     ⟨hα.measurable, hμ⟩
   have key := hmp.integral_comp' (fun g =>
@@ -281,7 +317,9 @@ theorem heckeAct_comp (α : G ≃* G) (hα : Continuous α) (hα' : Continuous �
   rw [← key]
   congr 1
   funext g
-  simp
+  change (f : G → ℂ) g * φ (ρ (α g) v) =
+    (f : G → ℂ) ((mulEquivHomeo α hα hα').symm (mulEquivHomeo α hα hα' g)) * φ (ρ (α g) v)
+  rw [Homeomorph.symm_apply_apply]
 
 theorem distChar_comp (α : G ≃* G) (hα : Continuous α) (hα' : Continuous α.symm)
     (hμ : μ.map α = μ) (hρ : IsAdmissible ρ) (f : locallyConstantCompactSupport G ℂ ℂ) :
@@ -315,17 +353,14 @@ variable {G : Type*} [Group G] [TopologicalSpace G] [IsTopologicalGroup G] [Loca
   {V : Type*} [AddCommGroup V] [Module ℂ V]
   {K : Subgroup G} (hKc : IsCompact (K : Set G)) (hKo : IsOpen (K : Set G))
 
-variable (ρ : Representation ℂ G V) in
 
+variable (ρ : Representation ℂ G V) in
 def levelLin (h : HeckeAlgebraLevel μ K hKc hKo) : fixedVectors ρ K →ₗ[ℂ] fixedVectors ρ K where
   toFun v := h • v
   map_add' v w := smul_add h v w
   map_smul' c v := Subtype.ext (by
     simp only [RingHom.id_apply, HeckeAlgebraLevel.coe_smul_fixedVectors, Submodule.coe_smul]
     exact heckeAct_smul_right (h : HeckeAlgebra μ).mem c (smooth_of_mem_fixedVectors hKo v.2))
-
-theorem levelLin_apply {ρ : Representation ℂ G V} (h : HeckeAlgebraLevel μ K hKc hKo)
-    (v : fixedVectors ρ K) : levelLin hKc hKo ρ h v = h • v := rfl
 
 theorem levelLin_one (ρ : Representation ℂ G V) :
     levelLin hKc hKo ρ (1 : HeckeAlgebraLevel μ K hKc hKo) = LinearMap.id :=
@@ -390,7 +425,7 @@ theorem nonempty_equiv_of_distChar_eq {W : Type*} [AddCommGroup W] [Module ℂ W
         have hm : m = (m.1, 0) + (0, m.2) := by simp
         refine Prod.ext ?_ hC.symm
         conv_lhs => rw [hm]
-        rw [map_add, Prod.fst_add, hB, add_zero] }
+        rw [map_add (f := _), Prod.fst_add, hB, add_zero] }
   let b := Module.finBasis ℂ (fixedVectors ρ K × fixedVectors σ K)
   obtain ⟨r, hr⟩ := jacobson_density fE (Finset.univ.image b)
 

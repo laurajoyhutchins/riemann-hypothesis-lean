@@ -1,15 +1,59 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.TranslateMemIndOrder
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.ExistsUnitFormLocalizationEtaleNbhd
-import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.Models
-import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.DualOrder
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.BtOrderEqOfHopfEmbeddingStatement
+module
+
+public import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.TranslateMemIndOrder
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.ExistsUnitFormLocalizationEtaleNbhd
+public import Mathlib.RingTheory.IntegralClosure.IntegrallyClosed
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.HopfOrderScalarExtensionStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.BtOrderEmbeddingOpenImmersionStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.BtOrderEqOfHopfEmbeddingStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.BtOrderIsHopfOrderNoetherianStatement
 import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExistsUniqueBtOrderEmbeddingStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.BtOrderEmbeddingOpenImmersionStatement
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.HopfOrderScalarExtensionStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.BtOrderIsHopfOrderNoetherianStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 open CategoryTheory Limits AlgebraicGeometry MonoidalCategory CartesianMonoidalCategory MonObj TensorProduct
-open GlobalTheory.CompanionTheory.Ar.BT GroundTheory.PAdicHodge
+open GlobalTheory.CompanionTheory.Ar.BT
 
 noncomputable section
 
@@ -71,9 +115,6 @@ def transl {A : Subalgebra R (T → R)} (hA : IsHopfOrder A) (s : T) : A →+* A
   map_mul' _ _ := rfl
   map_zero' := rfl
   map_add' _ _ := rfl
-
-@[simp] theorem transl_apply {A : Subalgebra R (T → R)} (hA : IsHopfOrder A) (s : T) (f : A) (h : T) :
-    (transl hA s f : T → R) h = (f : T → R) (s * h) := rfl
 
 variable [IsDomain R] {R' : Type} [CommRing R'] [IsDomain R'] [Algebra R R']
 
@@ -194,12 +235,16 @@ theorem exists_emb {Γ : QFGroup R T} {Γ' : QFGroup R' T} {F : Γ'.G.left ⟶ �
   have hcomm : ∀ a : A, transl hA' t⁻¹ (ψ a) = ψ (transl hA t⁻¹ a) := by
     intro a
     ext h
-    simp [hψt]
+    rw [hψt]
+    change (ψ a : T → R') (t⁻¹ * h) = algebraMap R R' ((a : T → R) (t⁻¹ * h))
+    exact hψt a (t⁻¹ * h)
   let P' : PrimeSpectrum A' := PrimeSpectrum.comap (transl hA' t⁻¹) P
   have hP' : j g₀ = Spec.map (CommRingCat.ofHom ψ) P' := by
     apply PrimeSpectrum.ext
     ext a
-    have h1 := hg₀ (transl hA t⁻¹ a) a (fun h => by simp)
+    have h1 := hg₀ (transl hA t⁻¹ a) a (fun h => by
+      change (a : T → R) h = (a : T → R) (t⁻¹ * (t * h))
+      rw [inv_mul_cancel_left])
     change a ∈ (j g₀).asIdeal ↔ transl hA' t⁻¹ (ψ a) ∈ P.asIdeal
     rw [← h1, hcomm]
     rfl
@@ -212,7 +257,8 @@ theorem exists_emb {Γ : QFGroup R T} {Γ' : QFGroup R' T} {F : Γ'.G.left ⟶ �
   change _ ↔ transl hA' t⁻¹ f' ∈ P.asIdeal
   have : transl hA' t⁻¹ f' = f := by
     ext h
-    simp [hf]
+    change (f' : T → R') (t⁻¹ * h) = (f : T → R') h
+    rw [hf, mul_inv_cancel_left]
   rw [this]
 
 end GlobalTheory.CompanionTheory.Ar.BT.BaseChangeOrder

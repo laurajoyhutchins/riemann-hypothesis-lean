@@ -1,5 +1,42 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.LinkedUnramifiedChains.TeichmullerParts.UnramifiedTrivialInertialType
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.CuspidalDescent.GLDenseRanges.KirCusp
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.CuspidalDescent.GLDenseRanges.KirCusp
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.LinkedUnramifiedChains.TeichmullerParts.AbsIrr
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -11,7 +48,7 @@ open scoped Matrix TensorProduct
 
 attribute [local instance] GlobalTheory.LocalData.complRel GlobalTheory.LocalData.isLocalField
 
-set_option synthInstance.maxHeartbeats 200000
+
 
 open UpperTheory.V.Z.J.D
 
@@ -39,43 +76,6 @@ end Lin
 section Rep
 
 variable {G Y X : Type} [Group G] [AddCommGroup Y] [Module ℂ Y] [AddCommGroup X] [Module ℂ X]
-
-private theorem fs_intw {Q : Type} (c : Q → G) (τ : Representation ℂ G Y) (τ' : Representation ℂ G X)
-    (f : Y →ₗ[ℂ] X) (hf : Function.Injective f) (h : ∀ g y, f (τ g y) = τ' g (f y)) (y : Y) :
-    f ((∑ᶠ q, τ (c q)) y) = (∑ᶠ q, τ' (c q)) (f y) := by
-  classical
-  rcases subsingleton_or_nontrivial Y with hY | hY
-  · rw [Subsingleton.elim y 0]
-    simp
-  · have hX : Nontrivial X := hf.nontrivial
-    have ne1 : ∀ g, τ g ≠ 0 := by
-      intro g hg
-      obtain ⟨v, hv⟩ := exists_ne (0 : Y)
-      have e : τ g (τ g⁻¹ v) = v := by
-        rw [← Module.End.mul_apply, ← map_mul, mul_inv_cancel, map_one, Module.End.one_apply]
-      rw [hg] at e
-      exact hv (by simpa using e.symm)
-    have ne2 : ∀ g, τ' g ≠ 0 := by
-      intro g hg
-      obtain ⟨v, hv⟩ := exists_ne (0 : X)
-      have e : τ' g (τ' g⁻¹ v) = v := by
-        rw [← Module.End.mul_apply, ← map_mul, mul_inv_cancel, map_one, Module.End.one_apply]
-      rw [hg] at e
-      exact hv (by simpa using e.symm)
-    by_cases hQ : Finite Q
-    · haveI := Fintype.ofFinite Q
-      rw [finsum_eq_sum_of_fintype, finsum_eq_sum_of_fintype]
-      simp [LinearMap.sum_apply, map_sum, h]
-    · haveI : Infinite Q := not_finite_iff_infinite.mp hQ
-      rw [finsum_of_infinite_support, finsum_of_infinite_support]
-      · simp
-      · exact Set.infinite_univ.mono fun q _ => ne2 (c q)
-      · exact Set.infinite_univ.mono fun q _ => ne1 (c q)
-
-private theorem uOp_intw (I : Iwa G) (τ : Representation ℂ G Y) (τ' : Representation ℂ G X)
-    (f : Y →ₗ[ℂ] X) (hf : Function.Injective f) (h : ∀ g y, f (τ g y) = τ' g (f y)) (a : G) (y : Y) :
-    f (I.uOp τ a y) = I.uOp τ' a (f y) :=
-  fs_intw _ τ τ' f hf h y
 
 end Rep
 
@@ -112,10 +112,6 @@ section InvE
 
 variable {G H : Type} [Group G] [Group H] {m : ℕ} (K₁ : Subgroup G) (K₂ : Subgroup H) (τ₀ : K₁ →* GL (Fin m) ℂ)
 
-private abbrev iE {W : Type} [AddCommGroup W] [Module ℂ W] (ρ : Representation ℂ (G × H) W) (a : H →₀ ℤ) (N : ℕ) :
-    Submodule ℂ (Fin m → W) :=
-  invT K₁ K₂ τ₀ ρ ⊓ Submodule.pi Set.univ fun _ => ePart (ρ.comp (MonoidHom.inr G H)) a N
-
 end InvE
 
 private theorem eigBoxL_lemma {G Q Y X : Type} [Group G] [AddCommGroup Y] [Module ℂ Y] [AddCommGroup X] [Module ℂ X]
@@ -145,6 +141,7 @@ private theorem eigBoxL_lemma {G Q Y X : Type} [Group G] [AddCommGroup Y] [Modul
   by_cases hQ : Finite Q
   · haveI := Fintype.ofFinite Q
     rw [finsum_eq_sum_of_fintype, finsum_eq_sum_of_fintype]
+
     simp [LinearMap.sum_apply, map_sum, h]
   · haveI : Infinite Q := not_finite_iff_infinite.mp hQ
     rw [finsum_of_infinite_support, finsum_of_infinite_support]
@@ -213,11 +210,13 @@ private theorem eigBoxL_lemma_5 {G H Y X : Type} [Group G] [Group H] [AddCommGro
     (fun i => g (F i)) ∈ invT K₁ K₂ τ₀ σ₂ ⊓ Submodule.pi Set.univ fun _ => ePart (σ₂.comp (MonoidHom.inr G H)) a N := by
   have hE : ∀ y, g (opE (σ₁.comp (MonoidHom.inr G H)) a y) = opE (σ₂.comp (MonoidHom.inr G H)) a (g y) := by
     intro y
+
     simp [opE, Finsupp.sum, map_sum, hg]
   rw [Submodule.mem_inf, mem_invT, Submodule.mem_pi] at hF ⊢
   obtain ⟨⟨h1, h2⟩, h3⟩ := hF
   refine ⟨⟨fun k i => ?_, fun k hk i => ?_⟩, fun i _ => ?_⟩
   · conv_rhs => rw [← h1 k i]
+
     simp [map_sum, hg]
   · rw [← hg, h2 k hk i]
   · have := h3 i (Set.mem_univ _)
@@ -233,11 +232,13 @@ private theorem eigBoxL_lemma_6 {G H Y X : Type} [Group G] [Group H] [AddCommGro
     F ∈ invT K₁ K₂ τ₀ σ₁ ⊓ Submodule.pi Set.univ fun _ => ePart (σ₁.comp (MonoidHom.inr G H)) a N := by
   have hE : ∀ y, g (opE (σ₁.comp (MonoidHom.inr G H)) a y) = opE (σ₂.comp (MonoidHom.inr G H)) a (g y) := by
     intro y
+
     simp [opE, Finsupp.sum, map_sum, hg]
   rw [Submodule.mem_inf, mem_invT, Submodule.mem_pi] at hF ⊢
   obtain ⟨⟨h1, h2⟩, h3⟩ := hF
   refine ⟨⟨fun k i => hgi ?_, fun k hk i => hgi ?_⟩, fun i _ => ?_⟩
   · rw [← h1 k i]
+
     simp [map_sum, hg]
   · rw [hg, h2 k hk i]
   · have := h3 i (Set.mem_univ _)
@@ -354,7 +355,7 @@ theorem eigBoxL {L : Type} [Field L] [NumberField L] {n : ℕ} {V : Type} [Finty
     induction t using TensorProduct.induction_on with
     | zero => simp
     | tmul w F => simp
-    | add x y hx hy => simp only [map_add, Pi.add_apply, hx, hy]
+    | add x y hx hy => simp only [map_add (f := _), Pi.add_apply, hx, hy]
   have hΦi : Function.Injective Φ := by
     intro t t' h
     apply (TensorProduct.piRight ℂ ℂ W (fun _ : Fin m => W')).injective
@@ -398,8 +399,9 @@ theorem eigBoxL {L : Type} [Field L] [NumberField L] {n : ℕ} {V : Type} [Finty
           | tmul w F =>
             simp only [sl_tmul, LinearMap.lTensor_tmul, LinearMap.coe_comp, Function.comp_apply,
               LinearMap.coe_proj, Function.eval, LinearMap.coe_single]
+
             rw [← Finset.sum_smul, ← map_sum, Finset.univ_sum_single]
-          | add x y hx hy => simp only [map_add, hx, hy, Finset.sum_add_distrib]
+          | add x y hx hy => simp only [map_add (f := _), hx, hy, Finset.sum_add_distrib]
         rw [key]
         refine Submodule.sum_mem _ fun i _ => ?_
         rw [hts]
@@ -411,7 +413,7 @@ theorem eigBoxL {L : Type} [Field L] [NumberField L] {n : ℕ} {V : Type} [Finty
           induction t' using TensorProduct.induction_on with
           | zero => simp
           | tmul w F => simp [sr_tmul]
-          | add x y hx hy => simp only [map_add, Pi.add_apply, hx, hy]
+          | add x y hx hy => simp only [map_add (f := _), Pi.add_apply, hx, hy]
         have e : sr l t = fun i => sr l (s i) := funext fun i => by rw [key, hts]
         rw [e]
         exact eigBoxL_lemma_5 K₁ K₂ τ₀ _ κ (sr l) (eigBoxL_lemma_11 ρ κ l) a N s hsB
@@ -425,7 +427,7 @@ theorem eigBoxL {L : Type} [Field L] [NumberField L] {n : ℕ} {V : Type} [Finty
         simp only [map_zero]
         exact zero_mem _
       | add x y hx hy =>
-        rw [map_add]
+        rw [map_add (f := _)]
         exact add_mem hx hy
       | tmul p F =>
         have e : (Φ ∘ₗ M) (p ⊗ₜ F) = fun i => f ((p : W) ⊗ₜ ((F : Fin m → W') i)) := by

@@ -1,10 +1,64 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IsHeatZero
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SquareIntegrability.GCauchyStatement
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SquareIntegrability.PolyDerivMonomialOne
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.ExhaustStatementPfA
-import Development.AbelianVarietyTheory.Definitions.ThetaValues.MemAnalyticAtZeroOfEventuallyDifferentiableAt
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.IsHeatThH
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IsHeatZero
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SquareIntegrability.GCauchyStatement
+public import Development.AbelianVarietyTheory.Definitions.ThetaValues.MemAnalyticAtZeroOfEventuallyDifferentiableAt
+public import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.DifferentiableOnOfTendstoLocallyUniformlyOn
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.IsHeatThH
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Matrix.Hermitian
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.MvPolynomial.IrreducibleQuadratic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SquareIntegrability.PolyDerivMonomialOne
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open Matrix Complex NumberField GlobalTheory.SW Filter Topology
 open ReciprocityTheory.ChartRestriction.G.FD (cc herm)
 open scoped ComplexConjugate ComplexOrder Real Classical
@@ -12,20 +66,6 @@ open scoped ComplexConjugate ComplexOrder Real Classical
 namespace GlobalTheory.SW.HeatJet
 
 variable {E : Type} [Field E] [NumberField E] [IsCMField E] (Ψ : Finset (E →+* ℂ)) {n N : ℕ}
-
-theorem isOpen_dom : IsOpen {p : CF Ψ N N × CF Ψ n N × CF Ψ n N | (p.1 : CM Ψ N N) ∈ Hn Ψ N} := by
-  refine isOpen_iff_mem_nhds.2 fun x0 hx0 => Filter.eventually_all.2 fun τ =>
-    ReciprocityTheory.ChartRestriction.G.AR.Up.ExhB.posDef_eventually
-      (fun p : CF Ψ N N × CF Ψ n N × CF Ψ n N => imH ((p.1 : CM Ψ N N) τ)) (fun i j => ?_)
-      (fun p => ?_) x0 (hx0 τ)
-  · change Continuous fun p : CF Ψ N N × CF Ψ n N × CF Ψ n N =>
-      (2 * I)⁻¹ * (p.1 τ i j - star (p.1 τ j i))
-    fun_prop
-  · ext i j
-    change star ((2 * I)⁻¹ * (p.1 τ j i - star (p.1 τ i j))) =
-      (2 * I)⁻¹ * (p.1 τ i j - star (p.1 τ j i))
-    simp
-    ring
 
 def emb : (Ψ × Bool × Fin n × Fin N → ℂ) →ₗ[ℂ] CF Ψ N N × CF Ψ n N × CF Ψ n N where
   toFun w := (0, fun τ k a => w (τ, false, k, a), fun τ k a => w (τ, true, k, a))
@@ -84,7 +124,7 @@ private lemma polyDeriv_mul_sum_pairs_eq_sum_lineDerivList {σ ι W : Type*} [Fi
     (A : MvPolynomial σ ℂ) (i j : ι → σ) (u : σ → W) {F : W → ℂ} {x : W}
     (hF : ∀ᶠ y in 𝓝 x, AnalyticAt ℂ F y) :
     _root_.ReciprocityTheory.ChartRestriction.G.I2.polyDeriv (A * ∑ k, MvPolynomial.X (i k) * MvPolynomial.X (j k)) u F x =
-      ∑ m ∈ A.support, MvPolynomial.coeff m A * _root_.GlobalTheory.lineDerivList ℂ ((Finsupp.toMultiset m).toList.map u)
+      ∑ m ∈ A.support, AddMonoidAlgebra.coeff A m * _root_.GlobalTheory.lineDerivList ℂ ((Finsupp.toMultiset m).toList.map u)
         (fun y => ∑ k, _root_.GlobalTheory.lineDerivList ℂ [u (i k), u (j k)] F y) x := by
   have hFx : AnalyticAt ℂ F x := hF.self_of_nhds
   conv_lhs => rw [MvPolynomial.as_sum A, Finset.sum_mul]
@@ -95,8 +135,8 @@ private lemma polyDeriv_mul_sum_pairs_eq_sum_lineDerivList {σ ι W : Type*} [Fi
     _root_.GlobalTheory.analyticAt_lineDerivList hFx _
   rw [_root_.GlobalTheory.lineDerivList_sum Finset.univ (fun k _ => hG k), Finset.mul_sum]
   refine Finset.sum_congr rfl fun k _ => ?_
-  have hmon : MvPolynomial.monomial m (MvPolynomial.coeff m A) * (MvPolynomial.X (i k) * MvPolynomial.X (j k)) =
-      MvPolynomial.coeff m A • MvPolynomial.monomial (m + Finsupp.single (i k) 1 + Finsupp.single (j k) 1) 1 := by
+  have hmon : MvPolynomial.monomial m (AddMonoidAlgebra.coeff A m) * (MvPolynomial.X (i k) * MvPolynomial.X (j k)) =
+      AddMonoidAlgebra.coeff A m • MvPolynomial.monomial (m + Finsupp.single (i k) 1 + Finsupp.single (j k) 1) 1 := by
     simp only [MvPolynomial.X, MvPolynomial.monomial_mul, MvPolynomial.smul_monomial, smul_eq_mul, mul_one, add_assoc]
   rw [hmon, _root_.ReciprocityTheory.ChartRestriction.G.I2.polyDeriv_smul]
   congr 1
@@ -113,7 +153,7 @@ open scoped ComplexConjugate ComplexOrder Real Classical in
 private lemma polyDeriv_eq_sum_coeff_lineDerivList_of_analyticAt {σ W : Type*} [NormedAddCommGroup W] [NormedSpace ℂ W]
     (P : MvPolynomial σ ℂ) (u : σ → W) {F : W → ℂ} {x : W} (hF : AnalyticAt ℂ F x) :
     _root_.ReciprocityTheory.ChartRestriction.G.I2.polyDeriv P u F x = ∑ m ∈ P.support,
-      MvPolynomial.coeff m P * _root_.GlobalTheory.lineDerivList ℂ ((Finsupp.toMultiset m).toList.map u) F x := by
+      AddMonoidAlgebra.coeff P m * _root_.GlobalTheory.lineDerivList ℂ ((Finsupp.toMultiset m).toList.map u) F x := by
   rw [_root_.GlobalTheory.dirPolyDeriv_eq_sum]
   refine Finset.sum_congr rfl fun m _ => ?_
   rw [_root_.GlobalTheory.dirPolyDeriv_monomial_eq_lineDerivList (Multiset.coe_toList _) u hF]
@@ -123,18 +163,18 @@ open scoped ComplexConjugate ComplexOrder Real Classical in
 private lemma sum_coeff_lineDerivList_eq_lineDeriv_polyDeriv {σ W : Type*} [NormedAddCommGroup W] [NormedSpace ℂ W]
     (A : MvPolynomial σ ℂ) (u : σ → W) {F : W → ℂ} {x : W} (z : W)
     (hF : ∀ᶠ y in 𝓝 x, AnalyticAt ℂ F y) :
-    ∑ m ∈ A.support, MvPolynomial.coeff m A * _root_.GlobalTheory.lineDerivList ℂ ((Finsupp.toMultiset m).toList.map u)
+    ∑ m ∈ A.support, AddMonoidAlgebra.coeff A m * _root_.GlobalTheory.lineDerivList ℂ ((Finsupp.toMultiset m).toList.map u)
         (_root_.GlobalTheory.lineDerivList ℂ [z] F) x = lineDeriv ℂ (fun y => _root_.ReciprocityTheory.ChartRestriction.G.I2.polyDeriv A u F y) x z := by
   have hFx : AnalyticAt ℂ F x := hF.self_of_nhds
   have heq : (fun y => _root_.ReciprocityTheory.ChartRestriction.G.I2.polyDeriv A u F y) =ᶠ[𝓝 x] fun y => ∑ m ∈ A.support,
-      MvPolynomial.coeff m A * _root_.GlobalTheory.lineDerivList ℂ ((Finsupp.toMultiset m).toList.map u) F y :=
+      AddMonoidAlgebra.coeff A m * _root_.GlobalTheory.lineDerivList ℂ ((Finsupp.toMultiset m).toList.map u) F y :=
     hF.mono fun y hy => polyDeriv_eq_sum_coeff_lineDerivList_of_analyticAt A u hy
   have h1 := (_root_.GlobalTheory.lineDerivList_congr (𝕜 := ℂ) heq [z]).self_of_nhds
   have hl : lineDeriv ℂ (fun y => _root_.ReciprocityTheory.ChartRestriction.G.I2.polyDeriv A u F y) x z = _root_.GlobalTheory.lineDerivList ℂ [z] (fun y => _root_.ReciprocityTheory.ChartRestriction.G.I2.polyDeriv A u F y) x := by
-    simp [_root_.GlobalTheory.lineDerivList_cons, _root_.GlobalTheory.lineDerivList_nil]
-  rw [hl, h1, _root_.GlobalTheory.lineDerivList_sum A.support (F := fun m y => MvPolynomial.coeff m A * _root_.GlobalTheory.lineDerivList ℂ ((Finsupp.toMultiset m).toList.map u) F y) (fun m _ => analyticAt_const.mul (_root_.GlobalTheory.analyticAt_lineDerivList hFx _))]
+    simp [_root_.GlobalTheory.lineDerivList_cons, _root_.GlobalTheory.lineDerivList]
+  rw [hl, h1, _root_.GlobalTheory.lineDerivList_sum A.support (F := fun m y => AddMonoidAlgebra.coeff A m * _root_.GlobalTheory.lineDerivList ℂ ((Finsupp.toMultiset m).toList.map u) F y) (fun m _ => analyticAt_const.mul (_root_.GlobalTheory.analyticAt_lineDerivList hFx _))]
   refine Finset.sum_congr rfl fun m _ => ?_
-  have hc := congrFun (_root_.GlobalTheory.lineDerivList_const_smul (𝕜 := ℂ) [z] (MvPolynomial.coeff m A)
+  have hc := congrFun (_root_.GlobalTheory.lineDerivList_const_smul (𝕜 := ℂ) [z] (AddMonoidAlgebra.coeff A m)
     (_root_.GlobalTheory.lineDerivList ℂ ((Finsupp.toMultiset m).toList.map u) F)) x
   simp only [smul_eq_mul] at hc
   rw [hc]
@@ -161,9 +201,9 @@ private lemma polyDeriv_comp_linearMap_add_of_analyticAt {σ W W' : Type*} [Norm
   rw [map_zero, zero_add, List.map_map]
   rfl
 
+
 open Matrix Complex NumberField Filter Topology in
 open scoped ComplexConjugate ComplexOrder Real Classical in
-
 theorem _root_.GlobalTheory.SW.polyDeriv_pairing_eq_zero_of_isHeat : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (Ψ : Finset (E →+* ℂ)) (n N : ℕ) (D : _root_.GlobalTheory.SW.CM Ψ N N → _root_.GlobalTheory.SW.CM Ψ n N → _root_.GlobalTheory.SW.CM Ψ n N → ℂ), _root_.GlobalTheory.SW.IsHeat Ψ D → (∀ Z ∈ _root_.GlobalTheory.SW.Hn Ψ N, D Z 0 0 = 0) → ∀ Z ∈ _root_.GlobalTheory.SW.Hn Ψ N, ∀ s : MvPolynomial (Ψ × Fin N × Fin N) ℂ, _root_.ReciprocityTheory.ChartRestriction.G.I2.polyDeriv (MvPolynomial.aeval (fun v : Ψ × Fin N × Fin N => ∑ k, (MvPolynomial.X (v.1, false, k, v.2.1) * MvPolynomial.X (v.1, true, k, v.2.2) : MvPolynomial (Ψ × Bool × Fin n × Fin N) ℂ)) s) (fun v => (Pi.single v 1 : Ψ × Bool × Fin n × Fin N → ℂ)) (fun w : Ψ × Bool × Fin n × Fin N → ℂ => D Z (fun τ => Matrix.of fun k a => w (τ, false, k, a)) (fun τ => Matrix.of fun k a => w (τ, true, k, a))) 0 = 0 := by
   intro E _ _ _ Ψ n N D hD h0 Z hZ s
   obtain ⟨hdiff, hheat⟩ := hD
@@ -226,13 +266,13 @@ theorem _root_.GlobalTheory.SW.polyDeriv_pairing_eq_zero_of_isHeat : ∀ (E : Ty
         · rw [if_neg hσ]
           simp [Pi.single_apply, hσ]
     have l1 : _root_.GlobalTheory.lineDerivList ℂ [ez v] (fun p : ((Ψ → Fin N → Fin N → ℂ) × (Ψ → Fin n → Fin N → ℂ) × (Ψ → Fin n → Fin N → ℂ)) => D p.1 p.2.1 p.2.2) p = deriv (fun s : ℂ => D (fun σ => (show Ψ → Matrix (Fin N) (Fin N) ℂ from p.1) σ + if σ = v.1 then single v.2.1 v.2.2 s else 0) p.2.1 p.2.2) 0 := by
-      simp only [_root_.GlobalTheory.lineDerivList_cons, _root_.GlobalTheory.lineDerivList_nil, lineDeriv]
+      simp only [_root_.GlobalTheory.lineDerivList_cons, _root_.GlobalTheory.lineDerivList, lineDeriv]
       congr 1
       funext s
       rw [e1 s]
     have l2 : ∀ k : Fin n, _root_.GlobalTheory.lineDerivList ℂ [ew (v.1, false, k, v.2.1), ew (v.1, true, k, v.2.2)] (fun p : ((Ψ → Fin N → Fin N → ℂ) × (Ψ → Fin n → Fin N → ℂ) × (Ψ → Fin n → Fin N → ℂ)) => D p.1 p.2.1 p.2.2) p = deriv (fun s : ℂ => deriv (fun t : ℂ => D p.1 (fun σ => (show Ψ → Matrix (Fin n) (Fin N) ℂ from p.2.1) σ + if σ = v.1 then single k v.2.1 s else 0) fun σ => (show Ψ → Matrix (Fin n) (Fin N) ℂ from p.2.2) σ + if σ = v.1 then single k v.2.2 t else 0) 0) 0 := by
       intro k
-      simp only [_root_.GlobalTheory.lineDerivList_cons, _root_.GlobalTheory.lineDerivList_nil, lineDeriv]
+      simp only [_root_.GlobalTheory.lineDerivList_cons, _root_.GlobalTheory.lineDerivList, lineDeriv]
       congr 1
       funext s
       congr 1
@@ -254,7 +294,7 @@ theorem _root_.GlobalTheory.SW.polyDeriv_pairing_eq_zero_of_isHeat : ∀ (E : Ty
       exact mul_eq_zero_of_right a (h0 p1 hp)
     | add A B hA hB =>
       intro p hp hp0
-      rw [map_add, _root_.ReciprocityTheory.ChartRestriction.G.I2.polyDeriv_add, hA p hp hp0, hB p hp hp0, add_zero]
+      rw [map_add (f := _), _root_.ReciprocityTheory.ChartRestriction.G.I2.polyDeriv_add, hA p hp hp0, hB p hp hp0, add_zero]
     | mul_X A v ih =>
       intro p hp hp0
       rw [map_mul, MvPolynomial.aeval_X]

@@ -1,4 +1,62 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.GroupWithZero.Units.Fintype
+public import Mathlib.Basic.Complex.Basic
+public import Mathlib.RepresentationTheory.Basic
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -76,6 +134,7 @@ theorem S_conj {H K : Subgroup G} {w : G} (h1 : ∀ u ∈ H, w * u * w⁻¹ ∈ 
     (v : V) : π w (S π H v) = S π K (π w v) := by
   haveI := Fintype.ofFinite H
   haveI := Fintype.ofFinite K
+
   rw [S_apply, S_apply, map_sum]
   refine Fintype.sum_equiv ⟨fun u => ⟨_, h1 u u.2⟩, fun u => ⟨_, h2 u u.2⟩, fun u => Subtype.ext (by simp [mul_assoc]),
     fun u => Subtype.ext (by simp [mul_assoc])⟩ _ _ fun u => ?_
@@ -98,6 +157,7 @@ theorem S_comm {H : Subgroup G} {h : G} (hh : ∀ u ∈ H, h * u = u * h) (v : V
 
 theorem S_S {H K : Subgroup G} (hle : H ≤ K) {v : V} (hv : S π K v = 0) : S π K (S π H v) = 0 := by
   haveI := Fintype.ofFinite H
+
   rw [S_apply π H, map_sum]
   exact Finset.sum_eq_zero fun u _ => by rw [S_right (hle u.2), hv]
 
@@ -114,8 +174,8 @@ theorem S_U {p q p' q' : R} {w : Rˣ} (hp : w.val * p' = p * w.val) (hq : w.val 
     π w (S π (U p' q') v) = S π (U p q) (π w v) :=
   S_conj (fun _ => conj_mem hp hq) (fun _ => conj_mem (inv_rel hp) (inv_rel hq)) v
 
-variable (π) in
 
+variable (π) in
 def OppInj (p q : R) : Prop := ∀ v : V, (∀ u ∈ U p q, π u v = v) → S π (U q p) v = 0 → v = 0
 
 theorem step {a b c d : R} (aa : a * a = a) (bb : b * b = b) (cc : c * c = c) (dd : d * d = d)
@@ -148,6 +208,7 @@ theorem step {a b c d : R} (aa : a * a = a) (bb : b * b = b) (cc : c * c = c) (d
       simp [mem_U, mul_add, add_mul, mul_assoc, H] <;> abel
   have k3 : S π (U (c + d) (a + b)) z = 0 := by
     haveI := Fintype.ofFinite (U (a + c) (b + d))
+
     rw [hz, S_apply π (U (a + c) (b + d)), map_sum]
     refine Finset.sum_eq_zero fun u _ => ?_
     obtain ⟨x, hx⟩ := dec u.2
@@ -167,6 +228,7 @@ theorem step {a b c d : R} (aa : a * a = a) (bb : b * b = b) (cc : c * c = c) (d
     simp [mem_U, hx, mul_add, add_mul, mul_assoc, H]
   refine h1 z k1 (h2 _ (fun u hu => ?_) (eq_zero_of_S (fun u hu => ?_) (S_S l2 (S_S l1 k3))))
   · haveI := Fintype.ofFinite (U c a)
+
     rw [S_apply, map_sum]
     refine Finset.sum_congr rfl fun k _ => ?_
     obtain ⟨x, hx⟩ := dec hu
@@ -196,6 +258,7 @@ theorem oppInj (hreg : ∀ x : R, ∃ y, x * y * x = x) {p q : R} (pp : p * p = 
   intro v hv h0
   haveI := Fintype.ofFinite (U q p)
   have h1 : S π (U p q) (S π (U q p) v) = 0 := by rw [h0, map_zero]
+
   rw [S_apply π (U q p), map_sum, Finset.sum_eq_single 1 (fun u _ hu => ?_) (by simp)] at h1
   · exact eq_zero_of_S hv (by simpa using h1)
   obtain ⟨X, hX⟩ : ∃ X, u.1.val = 1 + X := ⟨u.1.val - 1, by simp⟩

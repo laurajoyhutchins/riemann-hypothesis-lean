@@ -1,8 +1,54 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.StepsR
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.CountingFormula.GoodRDet
-import Formalism.SharpRestriction.CuspSpanNormBounds.LatticeGluingRadicals
-import Formalism.SharpRestriction.CuspSpanNormBounds.CayleyDegreeNondegeneracy.ExtendByIdentitySymmFixOrth
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.StepsR
+public import Formalism.LocalRingCardinality.RankBoundMonotoneInDimension
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.CountingFormula.GoodRDet
+public import Formalism.SharpRestriction.CuspSpanNormBounds.LatticeGluingRadicals
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open NumberField Module Formalism.MainNotions.S Formalism.MainNotions.S.Lat Formalism.MainNotions.S.LocalSplitGroups Formalism.L2.SG.CntLocal
 open Classical
@@ -19,18 +65,19 @@ variable {D : Formalism.BasicNotions.D7}
 
 theorem totPos_ne_zero {x : D.host.E} (hx : TotPos x) : x ≠ 0 := by
   have : Nonempty D.what₂.Tau := Fintype.card_pos_iff.1 (by
-    rw [D.what₂.card_Tau]; unfold Formalism.BasicNotions.Ranks.f Formalism.BasicNotions.Ranks.n; positivity)
+    rw [D.what₂.card_Tau]; have := D.R.two_le_m; have := D.R.m_le_f
+    unfold Formalism.BasicNotions.Ranks.f Formalism.BasicNotions.Ranks.n; omega)
   obtain ⟨τ⟩ := this
   intro h
   have := hx τ
   rw [h, map_zero, Complex.zero_re] at this
   exact lt_irrefl _ this
 
-def fam {T T' : D.host.E} (F0 : FlagG (VS D) D.R.rS T) (F' : LFlag (VS D) D.R.rS T') :
+def fam {T T' : D.host.E} (F0 : FlagG (VS D) D.R.rS T) (F' : LFlag (D.sp.Y 0) D.R.rS T') :
     Fin (D.R.rS + 1) ⊕ Fin (D.R.rS + 1) → (VS D).V :=
   Sum.elim F0.fvec F'.fl.fvec
 
-variable {T T' : D.host.E} (F0 : FlagG (VS D) D.R.rS T) (F' : LFlag (VS D) D.R.rS T')
+variable {T T' : D.host.E} (F0 : FlagG (VS D) D.R.rS T) (F' : LFlag (D.sp.Y 0) D.R.rS T')
 
 theorem upair_eq : UPair D F0 F' = Submodule.span D.host.E (Set.range (fam F0 F')) := by
   unfold UPair fam
@@ -70,6 +117,7 @@ theorem eq_zero_of_orth (hG : GZ T T' (ZhatL (lf D F0) F') ≠ 0)
   apply Matrix.eq_zero_of_mulVec_eq_zero hdet
   funext a
   have ha := h a
+
   simp only [map_sum, map_smul, smul_eq_mul, hT_fam] at ha
   simp only [Matrix.mulVec, dotProduct, Pi.zero_apply]
   rw [← ha]
@@ -136,7 +184,7 @@ theorem isCompl (hG : GZ T T' (ZhatL (lf D F0) F') ≠ 0) :
         simp only [Φ, LinearMap.coe_mk, AddHom.coe_mk] at h1
         rw [map_sub, h1, sub_self]
       | zero => simp
-      | add x y _ _ hx hy => rw [map_add, LinearMap.add_apply, hx, hy, add_zero]
+      | add x y _ _ hx hy => rw [map_add (f := _), LinearMap.add_apply, hx, hy, add_zero]
       | smul s x _ hx => rw [LinearMap.map_smulₛₗ, LinearMap.smul_apply, hx, smul_zero]
     have hv : v = ∑ i, c i • fam F0 F' i + (v - ∑ i, c i • fam F0 F' i) := by abel
     rw [hv]
@@ -171,8 +219,8 @@ theorem Xplus_le_upair : F0.Xplus ≤ UPair D F0 F' := by
 
 end PairSpanDimension
 
-open PairSpanDimension in
 
+open PairSpanDimension in
 theorem perpendicular_definition_holds : PerpDef := by
   intro D u u' _ F0 what₂ _ Z F' _ hZ hP
   have hG : GZ (Tn u) (Tn u') (ZhatL (lf D F0) F') ≠ 0 := by rw [hZ]; exact totPos_ne_zero hP

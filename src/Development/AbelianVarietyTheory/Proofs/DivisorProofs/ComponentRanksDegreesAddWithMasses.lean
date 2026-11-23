@@ -1,11 +1,54 @@
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.ComponentMassSum
+public import Formalism.LocalToGlobal.ProjectiveLattices.HalfOneAddSqrtNegIsIntegral
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BlockDiagonalMulVecApply
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DegScale
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsSmulMemOfMemSpan
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HasGramComp
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.InnerRealizeEqZero
+import Formalism.LocalToGlobal.ProjectiveLattices.CompFin
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IsHomogeneousCompIdeal
 import Development.AbelianVarietyTheory.Definitions.Divisors.MulSmulIdemMem
-import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.ComponentMassSum
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsHomogeneousCompIdeal
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsSmulMemOfMemSpan
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.InnerRealizeEqZero
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HasGramComp
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DegScale
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BlockDiagonalMulVecApply
+
+@[expose] public section
+
 open NumberField IsDedekindDomain MeasureTheory ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.FD Formalism.L2.Pj Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.L2.Theta GlobalTheory.AllWt GlobalTheory.FlatLine GlobalTheory.FlatTw GlobalTheory.IndefiniteRowSideFullHecke.ComponentMassSum
 
 set_option synthInstance.maxHeartbeats 400000
@@ -186,7 +229,7 @@ theorem degOn_zero (Z : Comp Xo c) (hr : rankOn U Z G = 0) : degOn U (xiR D) V d
   unfold rankOn at hr
   rw [hr, Nat.cast_zero, zero_mul]
 
-theorem degRes_eq [IsTotallyComplex c.F] (hO : Orthogonal U V dict G) (Z : Comp Xo c)
+theorem degRes_eq [_root_.NumberField.IsTotallyComplex c.F] (hO : Orthogonal U V dict G) (Z : Comp Xo c)
     (hR : HasGram (normRes U V dict Z G)) (hfg : (latOn U Z G).FG) :
     degRes U V dict Z G = degOn U (xiR D) V dict Z G - (rankOn U Z G : ℝ) / 2 *
       ((∑ σ : c.F →+* ℂ, Real.log (mass U V dict Z σ)) / (Module.finrank ℚ c.F : ℝ)) := by
@@ -205,7 +248,7 @@ theorem degRes_eq [IsTotallyComplex c.F] (hO : Orthogonal U V dict G) (Z : Comp 
     rw [hsc]
     ring
 
-theorem sums [IsTotallyComplex c.F] (hS : Splits U G) (hO : Orthogonal U V dict G) (hW : GoodW U (xiR D) V dict G)
+theorem sums [_root_.NumberField.IsTotallyComplex c.F] (hS : Splits U G) (hO : Orthogonal U V dict G) (hW : GoodW U (xiR D) V dict G)
     (hOn : ∀ Z, GoodOn U (xiR D) V dict Z G) :
     rankW U G = ∑ᶠ Z : Comp Xo c, rankOn U Z G ∧ degW U (xiR D) V dict G = ∑ᶠ Z : Comp Xo c, degRes U V dict Z G := by
   haveI : Finite (Comp Xo c) := CompFin.finite_comp Xo c

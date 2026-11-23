@@ -1,4 +1,68 @@
-import Mathlib
+module
+
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.Analysis.InnerProductSpace.Basic
+public import Mathlib.LinearAlgebra.UnitaryGroup
+public import Mathlib.MeasureTheory.Integral.Bochner.Basic
+public import Mathlib.MeasureTheory.Measure.Haar.Basic
+public import Mathlib.Topology.Instances.Matrix
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.CStarAlgebra.ContinuousMap
+public import Mathlib.Analysis.CStarAlgebra.Matrix
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.MeasureTheory.Function.L2Space
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+public import Mathlib.Topology.Algebra.Star.Unitary
+public import Mathlib.Topology.ContinuousMap.StoneWeierstrass
+import Mathlib.Topology.Sheaves.Init
+import Mathlib.Topology.UniformSpace.Uniformizable
+public import Mathlib.Analysis.Calculus.Deriv.Add
+public import Mathlib.Analysis.Calculus.Deriv.Comp
+public import Mathlib.Analysis.Calculus.Deriv.Mul
+public import Mathlib.Analysis.Calculus.Deriv.Pow
+
+@[expose] public section
 
 @[reducible] noncomputable def UpperTheory.Reformulated.B.Gwa7.U2 :
     Type :=
@@ -411,9 +475,7 @@ theorem UpperTheory.Reformulated.B.Gwa7.aux6 :
     Nonempty UpperTheory.Reformulated.B.Gwa7.U2 := by
   exact ⟨1⟩
 
-noncomputable def UpperTheory.Reformulated.B.Gwa7.μK :
-    @MeasureTheory.Measure UpperTheory.Reformulated.B.Gwa7.U2 UpperTheory.Reformulated.B.Gwa7.instMeasurableSpaceU2 :=
-    @MeasureTheory.Measure.haarMeasure UpperTheory.Reformulated.B.Gwa7.U2
+noncomputable def UpperTheory.Reformulated.B.Gwa7.μK : MeasureTheory.Measure UpperTheory.Reformulated.B.Gwa7.U2 := @MeasureTheory.Measure.haarMeasure UpperTheory.Reformulated.B.Gwa7.U2
       (@Unitary.instGroupSubtypeMemSubmonoidUnitary
         (Matrix (Fin (@OfNat.ofNat Nat (nat_lit 2) (instOfNatNat (nat_lit 2))))
           (Fin (@OfNat.ofNat Nat (nat_lit 2) (instOfNatNat (nat_lit 2)))) Complex)
@@ -712,7 +774,7 @@ private theorem UpperTheory.Reformulated.B.Gwa7.mul_lin (φ : A →L[ℂ] ℂ) (
       refine UpperTheory.Reformulated.B.Gwa7.step_one φ _ _ _ _ fun u => ?_
       rw [← h (n + 1 + 1) m (a + u * a') (b + u * b') (c + t * c') (d + t * d'), ← mul_assoc]
       congr 4
-      simp only [UpperTheory.Reformulated.B.Gwa7.lin, Algebra.smul_def, map_mul, map_add]
+      simp only [UpperTheory.Reformulated.B.Gwa7.lin, Algebra.smul_def, map_mul, map_add (f := _)]
       ring
     · rw [← h n (m + 1) a b c d, hD]
       congr 1
@@ -815,6 +877,7 @@ private theorem UpperTheory.Reformulated.B.Gwa7.functional_zero [CompactSpace U2
     (h : ∀ (n : ℕ) (m : ℤ) (a b c d : ℂ),
       φ (lin (entry 0 0) (entry 0 1) (entry 1 0) (entry 1 1) a b c d ^ n * detPow m * 1) = 0)
     (f : C(U2, ℂ)) : φ f = 0 := by
+  open scoped Pointwise in
   let P : C(U2, ℂ) → Prop := fun z => ∀ (n : ℕ) (m : ℤ) (a b c d : ℂ),
     φ (lin (entry 0 0) (entry 0 1) (entry 1 0) (entry 1 1) a b c d ^ n * detPow m * z) = 0
   have hD : ∀ m, detPow (m + 1) = (entry 0 0 * entry 1 1 - entry 0 1 * entry 1 0) * detPow m := by
@@ -853,7 +916,7 @@ private theorem UpperTheory.Reformulated.B.Gwa7.functional_zero [CompactSpace U2
       rw [← Algebra.smul_def, mul_smul_comm, map_smul, hz, smul_zero]
     | add x y _ _ hx hy =>
       intro z hz n m a b c d
-      rw [add_mul, mul_add, map_add, hx z hz, hy z hz, add_zero]
+      rw [add_mul, mul_add, map_add (f := _), hx z hz, hy z hz, add_zero]
     | mul x y _ _ hx hy =>
       intro z hz
       rw [mul_assoc]

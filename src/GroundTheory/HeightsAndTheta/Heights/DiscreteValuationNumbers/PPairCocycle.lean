@@ -1,15 +1,69 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.StatementsBundles
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.IsMultiHomogIdealSpanSingleton
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.StatementsCN
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PDivCycleMul
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PMinimalPrimeMultiHomog
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PSupSpanMultiHomog
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PSpecialQuotDim
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PSpecialIdealCorresp
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PSpecialIdealMultiHomog
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PDimStrictDrop
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PVerticalDivisorsCommute
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.StatementsBundles
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.IsMultiHomogIdealSpanSingleton
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.Statements
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PDimStrictDrop
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PDivCycleMul
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PMinimalPrimeMultiHomog
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PSpecialIdealCorresp
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PSpecialIdealMultiHomog
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PSpecialQuotDim
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PSupSpanMultiHomog
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PVerticalDivisorsCommute
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.IsSemipositiveOn
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.NumbersDVR
@@ -36,7 +90,7 @@ theorem polyVal_add (A : List (K → ℤ) → ℤ) (cls : σ → K → ℤ) (H�
   rw [polyVal_eq_sum_of_subset A cls (S := H₁.support ∪ H₂.support) support_add,
     polyVal_eq_sum_of_subset A cls (S := H₁.support ∪ H₂.support) Finset.subset_union_left,
     polyVal_eq_sum_of_subset A cls (S := H₁.support ∪ H₂.support) Finset.subset_union_right]
-  simp only [coeff_add, add_mul, Finset.sum_add_distrib]
+  simp only [MvPolynomial.coeff_add, add_mul, Finset.sum_add_distrib]
 
 def polyValHom (A : List (K → ℤ) → ℤ) (cls : σ → K → ℤ) : MvPolynomial σ ℤ →+ ℤ where
   toFun := polyVal A cls
@@ -99,7 +153,7 @@ theorem polyVal_rename (A : List (K → ℤ) → ℤ) (cls : τ → K → ℤ) (
     rw [rename_monomial, polyVal_monomial, polyVal_monomial]
     unfold classList
     rw [← Finsupp.toMultiset_map, Multiset.map_map]
-  | add p q hp hq => rw [map_add, polyVal_add, polyVal_add, hp, hq]
+  | add p q hp hq => rw [map_add (f := _), polyVal_add, polyVal_add, hp, hq]
 
 end PolyValues
 
@@ -154,6 +208,7 @@ def geoVal (A : List (K → ℤ) → ℤ) (k : ℕ) (u v : K → ℤ) : ℤ :=
 
 theorem geoSum_rename {σ τ : Type*} (ρ : σ → τ) (k : ℕ) (s t : σ) :
     rename ρ (geoSum k (X s) (X t) : MvPolynomial σ ℤ) = geoSum k (X (ρ s)) (X (ρ t)) := by
+
   simp [geoSum, map_sum, rename_X]
 
 theorem polyVal_geoSum_three (A : List (K → ℤ) → ℤ) (k : ℕ) (a b c : K → ℤ) (i j : Fin 3) :
@@ -405,8 +460,8 @@ theorem listNum_commute (hC2 : VerticalDivisorsCommute.Statement.{0}) {ϖ : O} (
     exact hC2 O ϖ hϖ K ι P (l ++ Q).length hP b b' f g f' g' hD hD' (l ++ Q).get
   · simp [if_neg h, cycEval]
 
-omit [DecidableEq K] in
 
+omit [DecidableEq K] in
 theorem ratDiv_mul {P : Ideal (MRing ι O)} [P.IsPrime] {f g f' g' : MRing ι O} (hf : f ∉ P)
     (hg : g ∉ P) (hf' : f' ∉ P) (hg' : g' ∉ P) :
     ratDiv P (f * f') (g * g') = ratDiv P f g + ratDiv P f' g' := by
@@ -419,36 +474,37 @@ theorem ratDiv_mul {P : Ideal (MRing ι O)} [P.IsPrime] {f g f' g' : MRing ι O}
 theorem isVerticalDivisor_mul {P : Ideal (MRing ι O)} [P.IsPrime] {ϖ : O} {b b' : K → ℤ}
     {f g f' g' : MRing ι O} (hD : IsVerticalDivisor P ϖ b f g)
     (hD' : IsVerticalDivisor P ϖ b' f' g') :
-    IsVerticalDivisor P ϖ (b + b') (f * f') (g * g') where
-  degrees := by
-    obtain ⟨bf, bg, hf, hg, hb⟩ := hD.degrees
-    obtain ⟨bf', bg', hf', hg', hb'⟩ := hD'.degrees
-    refine ⟨bf + bf', bg + bg', IsWeightedHomogeneous.mul hf hf',
-      IsWeightedHomogeneous.mul hg hg', ?_⟩
-    rw [← hb, ← hb']
-    funext k
-    simp only [Pi.add_apply, Nat.cast_add]
-    ring
-  num_not_mem := fun h => (Ideal.IsPrime.mem_or_mem ‹_› h).elim hD.num_not_mem hD'.num_not_mem
-  den_not_mem := fun h => (Ideal.IsPrime.mem_or_mem ‹_› h).elim hD.den_not_mem hD'.den_not_mem
-  vertical := by
-    intro W hW
-    rw [ratDiv_mul hD.num_not_mem hD.den_not_mem hD'.num_not_mem hD'.den_not_mem,
-      Pi.add_apply] at hW
-    by_cases h1 : ratDiv P f g W = 0
-    · rw [h1, zero_add] at hW
-      exact hD'.vertical W hW
-    · exact hD.vertical W h1
-  unit_off_special := by
-    intro W hW hPW hrel hϖ
-    obtain ⟨u, v, hu, hv, h⟩ := hD.unit_off_special W hW hPW hrel hϖ
-    obtain ⟨u', v', hu', hv', h'⟩ := hD'.unit_off_special W hW hPW hrel hϖ
-    refine ⟨u * u', v * v', fun hm => (hW.mem_or_mem hm).elim hu hu',
-      fun hm => (hW.mem_or_mem hm).elim hv hv', ?_⟩
-    have e : u * u' * (f * f') - v * v' * (g * g') =
-        (u' * f') * (u * f - v * g) + (v * g) * (u' * f' - v' * g') := by ring
-    rw [e]
-    exact P.add_mem (P.mul_mem_left _ h) (P.mul_mem_left _ h')
+    IsVerticalDivisor P ϖ (b + b') (f * f') (g * g') := by
+  exact {
+    degrees := by
+      obtain ⟨bf, bg, hf, hg, hb⟩ := hD.degrees
+      obtain ⟨bf', bg', hf', hg', hb'⟩ := hD'.degrees
+      refine ⟨bf + bf', bg + bg', IsWeightedHomogeneous.mul hf hf',
+        IsWeightedHomogeneous.mul hg hg', ?_⟩
+      rw [← hb, ← hb']
+      funext k
+      simp only [Pi.add_apply, Nat.cast_add]
+      ring
+    num_not_mem := fun h => (Ideal.IsPrime.mem_or_mem ‹_› h).elim hD.num_not_mem hD'.num_not_mem
+    den_not_mem := fun h => (Ideal.IsPrime.mem_or_mem ‹_› h).elim hD.den_not_mem hD'.den_not_mem
+    vertical := by
+      intro W hW
+      rw [ratDiv_mul hD.num_not_mem hD.den_not_mem hD'.num_not_mem hD'.den_not_mem,
+        Pi.add_apply] at hW
+      by_cases h1 : ratDiv P f g W = 0
+      · rw [h1, zero_add] at hW
+        exact hD'.vertical W hW
+      · exact hD.vertical W h1
+    unit_off_special := by
+      intro W hW hPW hrel hϖ
+      obtain ⟨u, v, hu, hv, h⟩ := hD.unit_off_special W hW hPW hrel hϖ
+      obtain ⟨u', v', hu', hv', h'⟩ := hD'.unit_off_special W hW hPW hrel hϖ
+      refine ⟨u * u', v * v', fun hm => (hW.mem_or_mem hm).elim hu hu',
+        fun hm => (hW.mem_or_mem hm).elim hv hv', ?_⟩
+      have e : u * u' * (f * f') - v * v' * (g * g') =
+          (u' * f') * (u * f - v * g) + (v * g) * (u' * f' - v' * g') := by ring
+      rw [e]
+      exact P.add_mem (P.mul_mem_left _ h) (P.mul_mem_left _ h') }
 
 end Models
 
@@ -475,58 +531,73 @@ theorem sameGenericFibre_symm {τ : Type*} {x : τ → Ω} {ϖ : O} {B B' : Char
     (h : SameGenericFibre ϖ B B') : SameGenericFibre ϖ B' B :=
   fun c hc => (h c hc).symm
 
+
 omit [Fintype K] [DecidableEq K] [∀ k, Fintype (ι k)] [IsDomain O] [IsDiscreteValuationRing O]
   [Algebra O Ω] in
-
 theorem repr_chain (w w' : Module.Basis (Fin N) Ω E) (v : E) (j : Fin N) :
     w.repr v j = ∑ m, w'.repr v m * w.repr (w' m) j := by
   have e := congrArg (fun z => w.repr z j) (w'.sum_repr v)
+
   simp only [map_sum, map_smul, Finsupp.coe_finsetSum, Finset.sum_apply, Finsupp.coe_smul,
-    Pi.smul_apply, smul_eq_mul] at e
+  Pi.smul_apply, smul_eq_mul] at e
   exact e.symm
 
 theorem isFlagPair_comp {ϖ : O} {y : (Σ k, ι k) → Ω} [(pointIdeal O y).IsPrime]
     {B B' B'' : ChartBundle O (segreVec y) N E} {w w' w'' : Module.Basis (Fin N) Ω E}
     {x x' x'' : Fin N → K → ℤ} {f g f' g' : Fin N → MRing ι O}
     (hp₁ : IsFlagPair ϖ y B B' w w' x x' f g) (hp₂ : IsFlagPair ϖ y B' B'' w' w'' x' x'' f' g') :
-    IsFlagPair ϖ y B B'' w w'' x x'' (fun i => f i * f' i) (fun i => g i * g' i) where
-  flag := hp₁.flag
-  flag' := hp₂.flag'
-  sameFlag := by
-    intro i j hij
-    rw [repr_chain w w' (w'' i) j]
-    refine Finset.sum_eq_zero fun m _ => ?_
-    rcases lt_or_ge i m with h | h
-    · rw [hp₂.sameFlag i m h, zero_mul]
-    · rw [hp₁.sameFlag m j (lt_of_le_of_lt h hij), mul_zero]
-  vertical := fun i => by
-    have h := isVerticalDivisor_mul (hp₁.vertical i) (hp₂.vertical i)
-    rwa [sub_add_sub_cancel] at h
-  generic := fun i => by
-    simp only [map_mul]
-    rw [hp₁.generic i, hp₂.generic i, repr_chain w w' (w'' i) i, Finset.sum_eq_single i]
-    · ring
-    · intro m _ hmi
-      rcases lt_or_gt_of_ne hmi with h | h
-      · rw [hp₁.sameFlag m i h, mul_zero]
+    IsFlagPair ϖ y B B'' w w'' x x'' (fun i => f i * f' i) (fun i => g i * g' i) := by
+  exact {
+    flag := hp₁.flag
+    flag' := hp₂.flag'
+    sameFlag := by
+      intro i j hij
+      rw [repr_chain w w' (w'' i) j]
+      refine Finset.sum_eq_zero fun m _ => ?_
+      rcases lt_or_ge i m with h | h
       · rw [hp₂.sameFlag i m h, zero_mul]
-    · simp
+      · rw [hp₁.sameFlag m j (lt_of_le_of_lt h hij), mul_zero]
+    vertical := fun i => by
+      have h := isVerticalDivisor_mul (hp₁.vertical i) (hp₂.vertical i)
+      rwa [sub_add_sub_cancel] at h
+    generic := fun i => by
+      simp only [map_mul]
+      rw [hp₁.generic i, hp₂.generic i, repr_chain w w' (w'' i) i, Finset.sum_eq_single i]
+      · ring
+      · intro m _ hmi
+        rcases lt_or_gt_of_ne hmi with h | h
+        · rw [hp₁.sameFlag m i h, mul_zero]
+        · rw [hp₂.sameFlag i m h, zero_mul]
+      · simp }
+
 
 omit [∀ k, Fintype (ι k)] in
-
 theorem isFlagPair_refl {ϖ : O} {y : (Σ k, ι k) → Ω} [(pointIdeal O y).IsPrime]
     {B : ChartBundle O (segreVec y) N E} {w : Module.Basis (Fin N) Ω E} {x : Fin N → K → ℤ}
     (hf : IsFlagFrame y B w x) :
-    IsFlagPair ϖ y B B w w x x (fun _ => 1) (fun _ => 1) where
-  flag := hf
-  flag' := hf
-  sameFlag := by
-    intro i j hij
-    simp [Module.Basis.repr_self, hij.ne]
-  vertical := fun i => by
-    rw [sub_self]
-    exact isVerticalDivisor_one ϖ _
-  generic := fun i => by simp [Module.Basis.repr_self]
+    IsFlagPair ϖ y B B w w x x (fun _ => 1) (fun _ => 1) := by
+  exact {
+    flag := hf
+    flag' := hf
+    sameFlag := by
+      intro i j hij
+      simp [Module.Basis.repr_self, hij.ne]
+    vertical := fun i => by
+      rw [sub_self]
+      have hHom : IsMultiHomog (1 : MRing ι O) 0 :=
+        isWeightedHomogeneous_one O (blockWeight ι)
+      have hOne : (1 : MRing ι O) ∉ pointIdeal O y :=
+        (Ideal.ne_top_iff_one _).mp (Ideal.IsPrime.ne_top' : pointIdeal O y ≠ ⊤)
+      exact {
+        degrees := ⟨0, 0, hHom, hHom, by funext k; simp⟩
+        num_not_mem := hOne
+        den_not_mem := hOne
+        vertical := by simp [ratDiv]
+        unit_off_special := by
+          intro W hW _ _ _
+          have hOneW : 1 ∉ W := (Ideal.ne_top_iff_one W).mp hW.ne_top
+          exact ⟨1, 1, hOneW, hOneW, by simp⟩ }
+    generic := fun i => by simp [Module.Basis.repr_self] }
 
 omit [Fintype K] [∀ k, Fintype (ι k)] in
 theorem pairNum_one (P : Ideal (MRing ι O)) (x : Fin N → K → ℤ)
@@ -534,8 +605,8 @@ theorem pairNum_one (P : Ideal (MRing ι O)) (x : Fin N → K → ℤ)
     pairNum P x x (fun _ => 1) (fun _ => 1) Gs Q = 0 := by
   simp [pairNum, cycEval, ratDiv, divCycle_one]
 
-omit [Fintype K] [∀ k, Fintype (ι k)] in
 
+omit [Fintype K] [∀ k, Fintype (ι k)] in
 theorem classNum_eq_polyVal {σ : Type*} (cls : σ → K → ℤ) {H : MvPolynomial σ ℤ} {n : ℕ}
     (hH : H.IsHomogeneous n) {Q : List (K → ℤ)} {d : ℕ} (hn : n + Q.length = d)
     (W : Ideal (MRing ι O)) : classNum cls H Q W = polyVal (listNum W Q d) cls H := by

@@ -1,5 +1,48 @@
-import ReciprocityTheory.GroupCohomology.CupConnRightStatement
-import ReciprocityTheory.GroupCohomology.SectionA
+module
+
+public import ReciprocityTheory.GroupCohomology.CupConnRightStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.GroupCohomology.SectionA
+
+@[expose] public section
 
 namespace ReciprocityTheory.Coh
 
@@ -17,48 +60,5 @@ theorem groupSection_holds : GroupSectionStatement.{u} := by
   have h : t (x * g) = t g := hc _ _ (by rw [mul_inv_cancel_right]; exact x.2)
   apply Subtype.ext
   simp only [r0, Subgroup.coe_mul, Subgroup.coe_inv, h, mul_assoc]
-
-theorem section_holds : SectionStatement.{u} := by
-  intro B C _ _ _ _ _ _ p hp hsurj hcase
-  rcases hcase with hd | ⟨hcB, hT2, hTD, hT2C⟩
-  · exact ⟨surjInv hsurj, continuous_of_discreteTopology, surjInv_eq hsurj⟩
-  · have : CompactSpace (Multiplicative B) := hcB
-    have : T2Space (Multiplicative B) := hT2
-    have : TotallyDisconnectedSpace (Multiplicative B) := hTD
-    let U : Subgroup (Multiplicative B) :=
-      { carrier := {x | p x.toAdd = 0}
-        mul_mem' := fun {a b} ha hb => by
-          simp only [Set.mem_ofPred_eq, toAdd_mul, map_add] at ha hb ⊢; rw [ha, hb, add_zero]
-        one_mem' := by simp
-        inv_mem' := fun {a} ha => by
-          simp only [Set.mem_ofPred_eq, toAdd_inv, map_neg] at ha ⊢; rw [ha, neg_zero] }
-    have hU : IsClosed (U : Set (Multiplicative B)) :=
-      isClosed_singleton.preimage (hp.comp continuous_toAdd)
-    obtain ⟨t, ht, htU, hc⟩ := ContinuousSections.core U hU
-    let f : B → B := fun b => Multiplicative.toAdd (t (Multiplicative.ofAdd b))
-    have hf : Continuous f := continuous_toAdd.comp (ht.comp continuous_ofAdd)
-    have hpf : ∀ b, p (f b) = p b := by
-      intro b
-      have h := htU (Multiplicative.ofAdd b)
-      change p (Multiplicative.toAdd (t (Multiplicative.ofAdd b) * (Multiplicative.ofAdd b)⁻¹)) = 0 at h
-      rw [toAdd_mul, toAdd_inv, toAdd_ofAdd, map_add, map_neg, add_neg_eq_zero] at h
-      exact h
-    have hfc : ∀ b b', p b = p b' → f b = f b' := by
-      intro b b' hbb
-      refine congrArg Multiplicative.toAdd (hc _ _ ?_)
-      change p (Multiplicative.toAdd (Multiplicative.ofAdd b * (Multiplicative.ofAdd b')⁻¹)) = 0
-      rw [toAdd_mul, toAdd_inv, toAdd_ofAdd, toAdd_ofAdd, map_add, map_neg, hbb, add_neg_cancel]
-    refine ⟨fun c => f (surjInv hsurj c), continuous_iff_isClosed.2 fun F hF => ?_,
-      fun c => by rw [hpf, surjInv_eq hsurj]⟩
-    have e : (fun c => f (surjInv hsurj c)) ⁻¹' F = p '' (f ⁻¹' F) := by
-      ext c
-      constructor
-      · intro hc'
-        exact ⟨surjInv hsurj c, hc', surjInv_eq hsurj c⟩
-      · rintro ⟨b, hb, rfl⟩
-        show f (surjInv hsurj (p b)) ∈ F
-        rw [hfc _ b (surjInv_eq hsurj _)]; exact hb
-    rw [e]
-    exact hp.isClosedMap _ (hF.preimage hf)
 
 end ReciprocityTheory.Coh

@@ -1,18 +1,53 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.BocksteinBaseChange.ResCoeff
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.InclStd
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.GlobalSerreRelations.GlobSerreSt
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SubMemOfMk
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.StCocycle
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.GradedFormCocycle
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.GradedFormAdd
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.GradedFormAction
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.GradedFormLocalOfFrame
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.StCocycle
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.GradedFormAdd
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.GradedFormCocycle
 import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SheafFiltrationProperty
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ChartIsGood
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ChartDividedPowersGradedConstant
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsChartFromCoordinates
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsChart
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.GradedFormLocalOfFrame
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SubMemOfMk
+
+@[expose] public section
+
 set_option backward.isDefEq.respectTransparency false
 open CategoryTheory Limits AlgebraicGeometry TensorProduct GlobalTheory.LogCris DividedPowers CrystallineSemistableComparison CrystallineSemistableComparison.Pb
 
@@ -68,8 +103,8 @@ theorem pt_nat {T T' : Thick (nlFun γ p X q κ)} (φ : T ⟶ T') :
   rw [← this]
   rfl
 
-variable (γ p q κ) in
 
+variable (γ p q κ) in
 def fib : Pts (nlFun γ p X q κ) (qF hI q κ) where
   pt T := pullback.lift (pt T) (Spec.map (CommRingCat.ofHom ((Ideal.Quotient.mk T.J).comp T.i))) (pt_comp hI T)
   nat {T T'} φ := by
@@ -115,21 +150,21 @@ theorem ev_str {W : Y.Opens} (T : Thick L) (h : InY 𝔭 W T) (a : b.R) :
     ev 𝔭 T h (strV qY W a) = Ideal.Quotient.mk T.J (T.i a) :=
   evalAt_base qY (RingHom.id b.R) ((Ideal.Quotient.mk T.J).comp T.i) (𝔭.pt T) (by rw [RingHom.comp_id]; exact 𝔭.str T) h a
 
-open Classical in
 
+open Classical in
 def lft (W : Y.Opens) (T : Thick L) (f : Γ(Y, W)) : T.B :=
   if h : InY 𝔭 W T then Function.surjInv Ideal.Quotient.mk_surjective (ev 𝔭 T h f) else 0
 
 theorem lft_spec {W : Y.Opens} (T : Thick L) (h : InY 𝔭 W T) (f : Γ(Y, W)) :
     Ideal.Quotient.mk T.J (lft 𝔭 W T f) = ev 𝔭 T h f := by
-  rw [lft, dif_pos h]
+  rw [lft, dite_eq_left h]
   exact Function.surjInv_eq _ _
 
 def IsLift (W : Y.Opens) {d : ℕ} (t : Fin d → Γ(Y, W)) (u : Fin d → ∀ T : Thick L, T.B) : Prop :=
   ∀ i (T : Thick L) (h : InY 𝔭 W T), Ideal.Quotient.mk T.J (u i T) = ev 𝔭 T h (t i)
 
-variable (L) in
 
+variable (L) in
 abbrev GF (r : ℕ) : Thick L ⥤ ModuleCat.{0} b.R := sq (thFil L r) (thFil L ((r : ℤ) + 1))
 
 def Rp {W : Y.Opens} (P : ObjectProperty (Thick L)) {d r : ℕ} (u : Fin d → ∀ T : Thick L, T.B)
@@ -163,18 +198,20 @@ theorem exists_rp (W : Y.Opens) {d : ℕ} (t : Fin d → Γ(Y, W)) (u : Fin d �
     GlobalTheory.CompanionTheory.GrForm.stCocycle hF (fun i (T : P.FullSubcategory) => (show (sP P).A.obj T from u i T.obj)) hu'
       (fun T : P.FullSubcategory => (show (sP P).A.obj T from lft 𝔭 W T.obj (x I))) (hy I) I.1
   have hd : CH.d (sq (sFil P r) (sFil P ((r : ℤ) + 1))) r (∑ I, f I) = 0 := by
+
     rw [map_sum]
     exact Finset.sum_eq_zero fun I _ => hf I
   refine ⟨(CH.cx (sq (sFil P r) (sFil P ((r : ℤ) + 1)))).cls (∑ I, f I) hd, ∑ I, f I, hd, rfl, ?_⟩
   intro s
   have e : (show sqM (sFil P r) (sFil P ((r : ℤ) + 1)) _ from (∑ I, f I) s) =
       ∑ I, (show sqM (sFil P r) (sFil P ((r : ℤ) + 1)) _ from f I s) := Finset.sum_apply _ _ _
-  rw [e, AddSubmonoidClass.coe_finset_sum, map_sum]
+
+  rw [e, AddSubmonoidClass.coe_finsetSum, map_sum]
   exact Finset.sum_congr rfl fun I _ => hz I s
 
 theorem lft_add_sub {W : Y.Opens} (T : Thick L) (h : InY 𝔭 W T) (f g : Γ(Y, W)) :
     lft 𝔭 W T (f + g) - (lft 𝔭 W T f + lft 𝔭 W T g) ∈ T.J := by
-  rw [← Ideal.Quotient.eq_zero_iff_mem, map_sub, map_add, lft_spec 𝔭 T h, lft_spec 𝔭 T h, lft_spec 𝔭 T h, map_add, sub_self]
+  rw [← Ideal.Quotient.eq_zero_iff_mem, map_sub, map_add (f := _), lft_spec 𝔭 T h, lft_spec 𝔭 T h, lft_spec 𝔭 T h, map_add (f := _), sub_self]
 
 theorem lft_neg_sub {W : Y.Opens} (T : Thick L) (h : InY 𝔭 W T) (f : Γ(Y, W)) :
     lft 𝔭 W T (-f) - (-lft 𝔭 W T f) ∈ T.J := by

@@ -1,4 +1,54 @@
-import Formalism.LocalToGlobal.ProjectiveLattices.CrudeBase
+module
+
+public import Formalism.LocalToGlobal.ProjectiveLattices.CrudeBase
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.MvPolynomial.IrreducibleQuadratic
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -12,7 +62,7 @@ variable {k : Type} [CommRing k] {d n : ℕ}
 
 theorem div_Lin_add (b : Fin n) (v : Fin d → k) (f g : PS k n d) :
     Lin b v (f + g) = Lin b v f + Lin b v g := by
-  simp only [Lin, map_add, mul_add, Finset.sum_add_distrib]
+  simp only [Lin, map_add (f := _), mul_add, Finset.sum_add_distrib]
 
 theorem div_Lin_mul (b : Fin n) (v : Fin d → k) (f g : PS k n d) :
     Lin b v (f * g) = Lin b v f * g + f * Lin b v g := by
@@ -30,48 +80,11 @@ theorem Lin_linForm (b b' : Fin n) (v w : Fin d → k) :
   unfold Lin
   by_cases h : b = b'
   · subst h
+
     simp [MvPowerSeries.pderiv_X, MvPowerSeries.pderiv_C, Derivation.leibniz, Finset.mul_sum,
-      map_sum, Pi.single_apply, Prod.ext_iff]
+    map_sum, Pi.single_apply, Prod.ext_iff]
   · simp [MvPowerSeries.pderiv_X, MvPowerSeries.pderiv_C, Derivation.leibniz, Pi.single_apply,
       Prod.ext_iff, h]
-
-theorem div_ordGe_mul {a b : ℕ} {f g : PS k n d} (hf : OrdGe a f) (hg : OrdGe b g) : OrdGe (a + b) (f * g) := by
-  intro m hm
-  rw [MvPowerSeries.coeff_mul]
-  refine Finset.sum_eq_zero fun pq hpq => ?_
-  have hpq' : pq.1 + pq.2 = m := Finset.HasAntidiagonal.mem_antidiagonal.mp hpq
-  have hdeg : pq.1.degree + pq.2.degree = m.degree := by
-    rw [← hpq']
-    first
-      | exact (map_add Finsupp.degree pq.1 pq.2).symm
-      | exact (Finsupp.degree_add pq.1 pq.2).symm
-  by_cases h1 : pq.1.degree < a
-  · rw [hf _ h1, zero_mul]
-  · rw [hg _ (by omega), mul_zero]
-
-theorem div_ordGe_one : OrdGe 0 (1 : PS k n d) := fun _ hm => absurd hm (Nat.not_lt_zero _)
-
-theorem div_ordGe_pow {a : ℕ} {f : PS k n d} (hf : OrdGe a f) (e : ℕ) : OrdGe (a * e) (f ^ e) := by
-  induction e with
-  | zero => simpa using div_ordGe_one
-  | succ e ih =>
-    rw [pow_succ, Nat.mul_succ]
-    exact div_ordGe_mul ih hf
-
-theorem ordGe_aeval_monomial {ι : Type} (φ : ι → PS k n d) (hφ : ∀ i, OrdGe 1 (φ i)) (α : ι →₀ ℕ) :
-    OrdGe α.degree (MvPolynomial.aeval φ (MvPolynomial.monomial α (1 : k))) := by
-  classical
-  have key : ∀ s : Finset ι, OrdGe (∑ i ∈ s, α i) (∏ i ∈ s, φ i ^ α i) := by
-    intro s
-    induction s using Finset.induction_on with
-    | empty => simpa using div_ordGe_one
-    | insert i s hi ih =>
-      rw [Finset.sum_insert hi, Finset.prod_insert hi]
-      have h := div_ordGe_pow (hφ i) (α i)
-      rw [one_mul] at h
-      exact div_ordGe_mul h ih
-  rw [MvPolynomial.aeval_monomial, map_one, one_mul]
-  exact key α.support
 
 theorem div_Lin_aeval {ι : Type} [DecidableEq ι] (cp : ι → Fin n) (u : ι → Fin d → k) (φ : ι → PS k n d)
     (l : ι) (hl : ∀ l', Lin (cp l) (u l) (φ l') = C (if l = l' then 1 else 0)) (Q : MvPolynomial ι k) :
@@ -80,7 +93,7 @@ theorem div_Lin_aeval {ι : Type} [DecidableEq ι] (cp : ι → Fin n) (u : ι �
   | C a =>
     rw [MvPolynomial.aeval_C, MvPolynomial.pderiv_C, map_zero, MvPowerSeries.algebraMap_apply]
     simpa using div_Lin_C (cp l) (u l) a
-  | add p q hp hq => rw [map_add, div_Lin_add, hp, hq, map_add, map_add]
+  | add p q hp hq => rw [map_add (f := _), div_Lin_add, hp, hq, map_add (f := _), map_add (f := _)]
   | mul_X p i hp =>
     rw [map_mul, div_Lin_mul, hp, MvPolynomial.aeval_X, hl, Derivation.leibniz, MvPolynomial.pderiv_X]
     by_cases h : l = i
@@ -120,7 +133,7 @@ theorem div_constCoeff_aeval {ι : Type} (φ : ι → PS k n d) (hφ0 : ∀ i, c
     (Q : MvPolynomial ι k) : constantCoeff (MvPolynomial.aeval φ Q) = MvPolynomial.constantCoeff Q := by
   induction Q using MvPolynomial.induction_on with
   | C a => simp [MvPowerSeries.algebraMap_apply]
-  | add p q hp hq => simp only [map_add, hp, hq]
+  | add p q hp hq => simp only [map_add (f := _), hp, hq]
   | mul_X p i hp => simp [hp, hφ0]
 
 theorem div_iter_pderiv_monomial {ι : Type} [DecidableEq ι] (i : ι) (t : ℕ) (s : ι →₀ ℕ) (c : k) :
@@ -190,7 +203,7 @@ theorem linMon_aeval_monomial {ι : Type} [Fintype ι] [DecidableEq ι] (cp : ι
   have hS : ((Finset.univ : Finset ι).toList.map fun l => Finsupp.single l (a l)).sum = a := by
     rw [hLs]
     ext j
-    simp [Finsupp.finset_sum_apply, Finsupp.single_apply]
+    simp [Finsupp.finsetSum_apply, Finsupp.single_apply]
   have hP : ((Finset.univ : Finset ι).toList.map fun l => ((α l).descFactorial (a l) : k)).prod =
       ∏ l, ((α l).descFactorial (a l) : k) := hLp k _
   rw [hS, hP, one_mul]

@@ -1,4 +1,47 @@
-import Development.EtaleCohomology.TateTwists.ExistsEtaleMonoMuTwistIntoTorsorSheafOfMuQuotien
+module
+
+public import Development.EtaleCohomology.TateTwists.ExistsEtaleMonoMuTwistIntoTorsorSheafOfMuQuotien
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 open CategoryTheory Limits AlgebraicGeometry Opposite CochainComplex CochainComplex.HomComplex GlobalTheory.EtC
 namespace LateralTheory.EtaleFoundations
@@ -13,7 +56,7 @@ theorem kt_mono_sh (q : ℕ) (T G : CommRingCat.{0} ⥤ ModuleCat.{1} (ULift.{1}
 
 theorem kt_res_sec (q : ℕ) (G : CommRingCat.{0} ⥤ ModuleCat.{1} (ULift.{1} (ZMod q))) (V U : Scheme.{0}) (g : V ⟶ U)
     (x : G.obj Γ(U, ⊤)) :
-    Sec.res g (ofRings.sec G U x) = ofRings.sec G V ((G.map g.appTop).hom x) := by
+    Sec.res g (ofRings.sec (R := ZMod q) G U x) = ofRings.sec (R := ZMod q) G V ((G.map g.appTop).hom x) := by
   unfold Sec.res ofRings.sec ofRings
   have := congrArg (fun f => (ModuleCat.Hom.hom f) x)
     ((toSheafify Scheme.etaleTopology (Scheme.Γ ⋙ G)).naturality g.op)
@@ -21,8 +64,8 @@ theorem kt_res_sec (q : ℕ) (G : CommRingCat.{0} ⥤ ModuleCat.{1} (ULift.{1} (
 
 theorem kt_map_sec (q : ℕ) (T G : CommRingCat.{0} ⥤ ModuleCat.{1} (ULift.{1} (ZMod q))) (ι : T ⟶ G) (U : Scheme.{0})
     (x : T.obj Γ(U, ⊤)) :
-    Sec.map ((presheafToSheaf Scheme.etaleTopology _).map (Functor.whiskerLeft Scheme.Γ ι)) (ofRings.sec T U x) =
-      ofRings.sec G U ((ι.app _).hom x) := by
+    Sec.map ((presheafToSheaf Scheme.etaleTopology _).map (Functor.whiskerLeft Scheme.Γ ι))
+      (ofRings.sec (R := ZMod q) T U x) = ofRings.sec (R := ZMod q) G U ((ι.app _).hom x) := by
   unfold Sec.map ofRings.sec
   have := congrArg (fun f => (ModuleCat.Hom.hom (NatTrans.app f (op U))) x)
     (toSheafify_naturality Scheme.etaleTopology (Functor.whiskerLeft Scheme.Γ ι))
@@ -45,15 +88,17 @@ theorem etale_mu_twist_mono_extends_of_presheaf_torsor_embedding (hpre : MuTwist
   have hmι := kt_mono_sh q T G ι hι
   refine ⟨ofRings (ZMod q) G, (presheafToSheaf Scheme.etaleTopology _).map (Functor.whiskerLeft Scheme.Γ τ) ≫
     (presheafToSheaf Scheme.etaleTopology _).map (Functor.whiskerLeft Scheme.Γ ι), @mono_comp _ _ _ _ _ _ hm _ hmι,
-    fun U v => ofRings.sec G U (s _ v), ?_, ?_⟩
+    fun U v => ofRings.sec (R := ZMod q) G U (s _ v), ?_, ?_⟩
   · intro V U g v _
     rw [kt_res_sec]
     exact congrArg _ (hs _ _ g.appTop v)
   · intro U ζ v w h
     beta_reduce
     rw [hr _ ζ v w h]
-    rw [show ofRings.sec G U (s _ v + (ι.app _).hom ((τ.app _).hom (twGenR _ ζ))) =
-      ofRings.sec G U (s _ v) + ofRings.sec G U ((ι.app _).hom ((τ.app _).hom (twGenR _ ζ))) from map_add _ _ _]
+    rw [show ofRings.sec (R := ZMod q) G U (s _ v + (ι.app _).hom ((τ.app _).hom (twGenR _ ζ))) =
+      ofRings.sec (R := ZMod q) G U (s _ v) + ofRings.sec (R := ZMod q) G U ((ι.app _).hom ((τ.app _).hom (twGenR _ ζ))) by
+        unfold ofRings.sec
+        exact map_add _ _ _]
     congr 1
     exact ((kt_map_sec q T G ι U _).symm.trans (congrArg _ (kt_map_sec q (twF q 1) T τ U (twGenR _ ζ)).symm))
 

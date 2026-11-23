@@ -1,5 +1,57 @@
-import Mathlib
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.RightCosetSpaceCompact
+module
+
+public import Mathlib.Analysis.InnerProductSpace.Basic
+public import Mathlib.MeasureTheory.Group.FundamentalDomain
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.RightCosetSpaceCompact
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Algebra.ProperAction.Torsor
+import Mathlib.Topology.Compactness.Paracompact
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.MeasureTheory.Integral.DominatedConvergence
+
+@[expose] public section
 
 open MeasureTheory Topology Filter Set TopologicalSpace
 open scoped ENNReal Pointwise Uniformity
@@ -13,7 +65,7 @@ theorem polishSpace_of_locallyCompact {G : Type*} [Group G] [TopologicalSpace G]
     PolishSpace G := by
   let _ := IsTopologicalGroup.rightUniformSpace G
   have : IsRightUniformGroup G := ⟨rfl⟩
-  have : CompleteSpace G := IsRightUniformGroup.completeSpace_of_weaklyLocallyCompactSpace
+  have : CompleteSpace G := IsRightUniformGroup.completeSpace_of_weaklyLocallyCompactSpace G
   have : (𝓤 G).IsCountablyGenerated := by
     rw [uniformity_eq_comap_nhds_one']
     infer_instance
@@ -316,11 +368,6 @@ def fundamentalDomainEquiv : fundamentalDomain Γ ≃ᵐ RightCosetSpace Γ wher
     rw [Set.image_smul]
     exact hS.const_smul γ
 
-@[simp]
-theorem fundamentalDomainEquiv_apply (x : fundamentalDomain Γ) :
-    fundamentalDomainEquiv Γ x = mk Γ x :=
-  rfl
-
 variable (μ : Measure G)
 
 theorem quotientMeasure_eq_map_fundamentalDomainEquiv :
@@ -344,15 +391,11 @@ theorem lintegral_quotientMeasure (h : RightCosetSpace Γ → ℝ≥0∞) :
 
 variable {Γ} [μ.IsMulLeftInvariant]
 
-omit [LocallyCompactSpace G] [T2Space G] in
 
+omit [LocallyCompactSpace G] [T2Space G] in
 theorem map_restrict_eq_quotientMeasure {F : Set G} (hF : IsFundamentalDomain Γ F μ) :
     Measure.map (mk Γ) (μ.restrict F) = quotientMeasure Γ μ :=
   hF.quotientMeasure_eq μ (isFundamentalDomain_fundamentalDomain Γ μ)
-
-instance quotientMeasureEqMeasurePreimage :
-    QuotientMeasureEqMeasurePreimage μ (quotientMeasure Γ μ) :=
-  (isFundamentalDomain_fundamentalDomain Γ μ).quotientMeasureEqMeasurePreimage_quotientMeasure
 
 theorem quotientMeasure_apply {F : Set G} (hF : IsFundamentalDomain Γ F μ)
     {A : Set (RightCosetSpace Γ)} (hA : MeasurableSet A) :

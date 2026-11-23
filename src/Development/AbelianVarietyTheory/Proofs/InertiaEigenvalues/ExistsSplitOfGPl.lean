@@ -1,12 +1,48 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.RingSpecNormalisedCharacterEq
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.IsWildInertiaCyclotomicElement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HeckeDoubleCosetOperatorsStandardFacts
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.RingSpecNormalisedCharacterEq
+public import Formalism.SharpRestriction.CuspSpanNormBounds.BesselShellMomentBounds
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DimPartsAtIffBadAndOff
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RankLeAleph0SmoothIrreducibleUnitaryAdelic
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsSplitPlaceEqFixedTypePrimePlace
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HeckeDoubleCosetOperatorsStandardFacts
 import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.MemMaxCompactOfTrivOutsideLocalIntegral
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RankLeAleph0SmoothIrreducibleUnitaryAdelic
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DimPartsAtIffBadAndOff
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsSplitPlaceEqFixedTypePrimePlace
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.EqOrIsConjPlaceOfOverSplitPlace
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.EqOrIsConjPlaceOfOverSplitPlace
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.MainNotions Formalism.MainNotions.N Formalism.ConjugateSelfDual ReciprocityTheory.Gal ReciprocityTheory.Aut Formalism.AUTREP Formalism.L2 Formalism.L2.Host NumberField IsDedekindDomain GlobalTheory.HeightCounting
 open scoped TensorProduct
 
@@ -20,8 +56,8 @@ variable {L : Type} [Field L] [NumberField L] [IsCMField L] {n : ℕ}
 
 open GlobalTheory.InertUmax
 
-omit [IsCMField L] in
 
+omit [IsCMField L] in
 theorem exists_trunc (b : AFplus L) : ∃ c : AFplus L, (∀ w, c w ∈ w.adicCompletionIntegers (maximalRealSubfield L)) ∧
     ∀ w, b w ∈ w.adicCompletionIntegers (maximalRealSubfield L) → c w = b w := by
   have h : ∀ w : HeightOneSpectrum (𝓞 (maximalRealSubfield L)), ∃ z : w.adicCompletion (maximalRealSubfield L),
@@ -43,7 +79,7 @@ theorem exists_int_off (z : AL L) : ∃ S : Finset (HeightOneSpectrum (𝓞 (max
     obtain ⟨S', Y', hY', h'⟩ := hy
     refine ⟨S ∪ S', Y + Y', add_mem hY hY', fun w hw => ?_⟩
     rw [Finset.mem_union, not_or] at hw
-    rw [map_add, map_add, h w hw.1, h' w hw.2]
+    rw [map_add (f := _), map_add (f := _), h w hw.1, h' w hw.2]
   | tmul x a =>
     obtain ⟨m, hm, o, ho⟩ := GlobalTheory.FinTypCount.exists_nat_smul_int x
     have hm' : (m : maximalRealSubfield L) ≠ 0 := Nat.cast_ne_zero.2 hm.ne'
@@ -63,7 +99,8 @@ theorem mem_ALint_of_comp (z : AL L) (h : ∀ w, ∃ Y ∈ ALint L, ReciprocityT
   have key : z - (Y + ∑ v ∈ S, (Z v - Y) * ((1 : L) ⊗ₜ[maximalRealSubfield L] sgl L v 1)) = 0 := by
     apply eq_zero_of_compAt
     intro w
-    rw [map_sub, map_add, map_sum]
+
+    rw [map_sub, map_add (f := _), map_sum]
     simp only [map_mul, compAt_tmul]
     by_cases hw : w ∈ S
     · rw [Finset.sum_eq_single w (fun v _ hv => by rw [sgl_ne L v 1 (Ne.symm hv), TensorProduct.tmul_zero, mul_zero])
@@ -85,9 +122,9 @@ theorem le_Umax_of_prod {J : Subgroup (GAf L n)} (hJ : NG.IsProdLevel J)
 theorem mem_Umax_of_para (s : SplitPlace L) {r : ℕ} {κ : GAf L n} (h1 : TrivOutside {s.v} κ) (h2 : NG.ParaRT s r (s.loc n κ)) :
     κ ∈ Umax L n := by
   have h := GlobalTheory.HeckeStdFacts.mem_GLint_iff.1 h2.1
-  refine GlobalTheory.HeckeStdFacts.mem_Umax_of_loc s κ h1 h.1 fun i j => ?_
-  rw [map_inv]
-  exact h.2 i j
+  exact GlobalTheory.HeckeStdFacts.mem_Umax_of_loc s κ h1 h.1 (fun i j => by
+    rw [map_inv]
+    exact (HeightOneSpectrum.mem_adicCompletionIntegers _ _ _).1 (h.2 i j))
 
 end Plain
 

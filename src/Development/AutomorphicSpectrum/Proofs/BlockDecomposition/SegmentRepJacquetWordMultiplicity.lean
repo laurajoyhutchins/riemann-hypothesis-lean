@@ -1,8 +1,52 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.ZelevinskyJacquet.ZelevinskyCosocles.LUnlinkedComm
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.IrreducibleAdmissibleGL
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ContragredientProductIrreducibleStatement
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.CuspidalJacquetSubquotientAtMostOneNonemptyBlock
+module
+
+public import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.ZelevinskyJacquet.ZelevinskyCosocles.LUnlinkedComm
+public import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.IrreducibleAdmissibleGL
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.CuspidalJacquetSubquotientAtMostOneNonemptyBlock
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.JhMultSubAddQuot
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -39,7 +83,7 @@ theorem below_of_len_one {s : ℕ} (Γ : Fin s → Segment k) (h : ∀ a, (Γ a)
 theorem jmL_decWord (hJ : LSegJacquet k) (Γ : Segment k) {N : ℕ} {V : Type} [AddCommGroup V] [Module ℂ V]
     {π : Representation ℂ (GL (Fin N) k) V} (hΓ : IsLSeg Γ π) : jmL (decWord Γ) π = 1 := by
   have hd : ∑ a, ((decWord Γ).get a).1 = N := (sum_decWord Γ).trans hΓ.deg_eq
-  rw [jmL, dif_pos hd]
+  rw [jmL, dite_eq_left hd]
   refine (hJ Γ π hΓ _ (decWord Γ).get hd fun a => (isCusp_decWord_get Γ a).1).1
     ⟨fun a => Segment.single _ (isCusp_decWord_get Γ a), ⟨?_, fun a => ?_⟩,
       fun a => (single_spec (isCusp_decWord_get Γ a)).2.1⟩
@@ -51,11 +95,11 @@ theorem jmL_decWord (hJ : LSegJacquet k) (Γ : Segment k) {N : ℕ} {V : Type} [
       omega
     rw [below_of_len_one _ (fun _ => rfl), e]
 
-theorem len_eq_one (hJ : LSegJacquet k) {Δ : Segment k} {x : IrrGL k} (hx : x.IsCusp) (h : IsLSeg Δ x.rep) :
+theorem len_eq_one (hJ : LSegJacquet k) {Δ : Segment k} {x : IrrGL (k := k)} (hx : x.IsCusp) (h : IsLSeg Δ x.rep) :
     Δ.len = 1 := by
   have hd : ∑ a, ((decWord Δ).get a).1 = x.1 := (sum_decWord Δ).trans h.deg_eq
   have h1 := jmL_decWord hJ Δ h
-  rw [jmL, dif_pos hd, jm] at h1
+  rw [jmL, dite_eq_left hd, jm] at h1
   have hsub : IsSubquotient (piTensor fun a => ((decWord Δ).get a).rep)
       (jac (stdBlocks (fun a => ((decWord Δ).get a).1) hd) x.rep) :=
     jhMult_ne_zero_iff.1 (by rw [h1]; exact one_ne_zero)
@@ -69,7 +113,7 @@ theorem len_eq_one (hJ : LSegJacquet k) {Δ : Segment k} {x : IrrGL k} (hx : x.I
   have := hu ⟨0, by omega⟩ ⟨1, by omega⟩ (isCusp_decWord_get Δ _).1 (isCusp_decWord_get Δ _).1
   simp at this
 
-theorem eq_of_isLSeg_single {ρ : IrrGL k} (hρ : ρ.IsCusp) {x : IrrGL k} (h : IsLSeg (.single ρ hρ) x.rep) : x = ρ := by
+theorem eq_of_isLSeg_single {ρ : IrrGL (k := k)} (hρ : ρ.IsCusp) {x : IrrGL (k := k)} (h : IsLSeg (.single ρ hρ) x.rep) : x = ρ := by
   have hdeg : ρ.1 = x.1 := by
     have := h.deg_eq
     simpa [Segment.deg, Segment.single, Segment.ofFirst] using this
@@ -79,18 +123,18 @@ theorem eq_of_isLSeg_single {ρ : IrrGL k} (hρ : ρ.IsCusp) {x : IrrGL k} (h : 
   obtain ⟨φ⟩ := (single_spec hρ).2.1.unique h
   exact (IrrGL.of_rep _).symm.trans ((IrrGL.of_eq_of.2 ⟨φ⟩).trans (IrrGL.of_rep _))
 
-theorem eq_first_of_len_one {Δ : Segment k} (hl : Δ.len = 1) {x : IrrGL k} (h : IsLSeg Δ x.rep) : x = Δ.first := by
+theorem eq_first_of_len_one {Δ : Segment k} (hl : Δ.len = 1) {x : IrrGL (k := k)} (h : IsLSeg Δ x.rep) : x = Δ.first := by
   have e : Δ = .single Δ.first Δ.isCusp_first := Segment.ext_first rfl hl
   exact eq_of_isLSeg_single Δ.isCusp_first (e ▸ h)
 
 theorem jmL_cusp_word : ∀ {k : Type} [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k],
     GlobalTheory.Published.IrreducibleAdmissibleGL → LSegJacquet k → ∀ (Γ : Segment k) {N : ℕ} {V : Type} [AddCommGroup V]
-    [Module ℂ V] (π : Representation ℂ (GL (Fin N) k) V), IsLSeg Γ π → ∀ W : List (IrrGL k), (∀ w ∈ W, w.IsCusp) →
+    [Module ℂ V] (π : Representation ℂ (GL (Fin N) k) V), IsLSeg Γ π → ∀ W : List (IrrGL (k := k)), (∀ w ∈ W, w.IsCusp) →
     (W = decWord Γ → jmL W π = 1) ∧ (W ≠ decWord Γ → jmL W π = 0) := by
   intro k _ _ _ _ _ hJ Γ N V _ _ π hΓ W hW
   refine ⟨fun e => e ▸ jmL_decWord hJ Γ hΓ, fun hne => ?_⟩
   by_cases hd : ∑ a, (W.get a).1 = N
-  · rw [jmL, dif_pos hd]
+  · rw [jmL, dite_eq_left hd]
     refine (hJ Γ π hΓ _ W.get hd fun a => (hW _ (List.get_mem W a)).1).2 ?_
     rintro ⟨Γ', ⟨hs, hf⟩, hL⟩
     have hl : ∀ a, (Γ' a).len = 1 := fun a => len_eq_one hJ (hW _ (List.get_mem W a)) (hL a)
@@ -102,7 +146,7 @@ theorem jmL_cusp_word : ∀ {k : Type} [Field k] [ValuativeRel k] [TopologicalSp
       rw [hf, below_of_len_one Γ' hl] at h4
       exact h4
     rw [h3, decWord_get, hlen]
-  · rw [jmL, dif_neg hd]
+  · rw [jmL, dite_eq_right hd]
 
 end GlobalTheory.CompanionTheory.FineL
 

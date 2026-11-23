@@ -1,10 +1,56 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsIsLiftOfMemKO
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.GoodIdempotentFixesOfOnlySeriesOfLabelActs
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.DepthZeroInertia
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.HarishChandraInductionCharacterRestrictionDecomp
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.HarishChandraFrobeniusReciprocity
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.DetCharacterIrreducibleLabel
+module
+
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsIsLiftOfMemKO
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.LabelDatum
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.DetCharacterIrreducibleLabel
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.HarishChandraFrobeniusReciprocity
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.HarishChandraInductionCharacterRestrictionDecomp
+import Mathlib.Algebra.Category.ModuleCat.Algebra
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.Quiver.ReflQuiver
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -25,24 +71,24 @@ theorem stdBlock_iff (a c : ℕ) (x : Gn p (a + 1 + c)) :
       intro e; subst e; omega
     · ext i j
       simp only [br, entN]
-      rw [dif_pos (by omega), h _ _ (by simp; omega)]
+      rw [dite_eq_left (by omega), h _ _ (by simp; omega)]
       simp [Matrix.one_apply, Fin.ext_iff]
     · simp only [tl, entN]
-      rw [dif_pos (by omega), h _ _ (by simp; omega)]
+      rw [dite_eq_left (by omega), h _ _ (by simp; omega)]
       simp [Fin.ext_iff]
   · rintro ⟨h1, h2, h3⟩ i j hij
     by_cases hi : (i : ℕ) ≤ a
     · have hj : (j : ℕ) < a := by omega
       have := h3 ⟨i, by omega⟩ ⟨j, by omega⟩ hj
       simp only [tl, entN] at this
-      rw [dif_pos (by omega)] at this
+      rw [dite_eq_left (by omega)] at this
       simpa [Fin.ext_iff] using this
     · by_cases hj : (j : ℕ) < a + 1
       · rw [h1 i j hj (by omega), if_neg]
         intro e; subst e; omega
       · have := congrFun (congrFun h2 ⟨(i : ℕ) - (a + 1), by omega⟩) ⟨(j : ℕ) - (a + 1), by omega⟩
         simp only [br, entN] at this
-        rw [dif_pos (by omega)] at this
+        rw [dite_eq_left (by omega)] at this
         have ei : (⟨a + 1 + ((i : ℕ) - (a + 1)), by omega⟩ : Fin (a + 1 + c)) = i := Fin.ext (by simp; omega)
         have ej : (⟨a + 1 + ((j : ℕ) - (a + 1)), by omega⟩ : Fin (a + 1 + c)) = j := Fin.ext (by simp; omega)
         rw [ei, ej, Matrix.one_apply] at this
@@ -60,7 +106,7 @@ theorem isUnit_tl (a c : ℕ) (x : Gn p (a + 1 + c)) (h1 : InPar (a + 1) (x : Mt
 
 theorem val_toG {n : ℕ} (M : Mt p n) (h : IsUnit M) : ((toG M : Gn p n) : Mt p n) = M := by
   unfold toG
-  rw [dif_pos h]
+  rw [dite_eq_left h]
   rfl
 
 end GlobalTheory.GLq.StdRes

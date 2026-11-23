@@ -1,4 +1,60 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.TheoremA
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.TheoremA
+public import Mathlib.RingTheory.DedekindDomain.AdicValuation.Valuation
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.Valuation.LocalSubring
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Presheaf
+
+@[expose] public section
 
 namespace ReciprocityTheory.ChartRestriction.G.T0
 
@@ -24,9 +80,9 @@ section
 variable {S L : Type*} [CommRing S] [IsDedekindDomain S] [Field L] [Algebra S L]
   [IsFractionRing S L] (v : HeightOneSpectrum S)
 
+
 variable (L) in
 open Classical in
-
 noncomputable def addv : AddValuation L (WithTop ℤ) :=
   AddValuation.of (fun x => if x = 0 then ⊤ else (((-log (v.valuation L x) : ℤ)) : WithTop ℤ))
     (by simp) (by simp)
@@ -38,7 +94,7 @@ noncomputable def addv : AddValuation L (WithTop ℤ) :=
       · subst hy; simp
       by_cases hxy : x + y = 0
       · simp [hxy]
-      simp only [hx, hy, hxy, if_false]
+      simp only [hx, hy, hxy, ite_false]
       rw [← WithTop.coe_min, WithTop.coe_le_coe]
       have hx' : v.valuation L x ≠ 0 := by simpa using hx
       have hy' : v.valuation L y ≠ 0 := by simpa using hy
@@ -62,9 +118,7 @@ noncomputable def addv : AddValuation L (WithTop ℤ) :=
 
 theorem addv_apply {x : L} (hx : x ≠ 0) :
     addv L v x = (((-log (v.valuation L x) : ℤ)) : WithTop ℤ) := by
-  first
-  | (unfold addv; rw [AddValuation.of_apply, if_neg hx])
-  | simp [addv, AddValuation.of_apply, hx]
+  simp [addv, hx]
 
 theorem addv_nonneg (s : S) : 0 ≤ addv L v (algebraMap S L s) := by
   by_cases hs : s = 0
@@ -225,9 +279,9 @@ theorem algebraMap_OL_injective : Function.Injective (algebraMap O L) := by
   | exact (algebraMap F L).injective.comp (IsFractionRing.injective O F)
   | (rw [RingHom.coe_comp]; exact (algebraMap F L).injective.comp (IsFractionRing.injective O F))
 
+
 variable (O F L) in
 include F in
-
 theorem exists_heightOne (Q : Ideal (integralClosure O L)) (hQ : Q.IsMaximal) :
     ∃ v : HeightOneSpectrum (integralClosure O L), v.asIdeal = Q := by
   have hinj : Function.Injective (algebraMap O (integralClosure O L)) := by
@@ -271,9 +325,9 @@ theorem addv_mem_placesOver (v : HeightOneSpectrum (integralClosure O L)) :
     rw [IsScalarTower.algebraMap_apply O (integralClosure O L) L x, ← hcomap, Ideal.mem_comap]
     exact ⟨addv_nonneg v _, addv_pos_iff v _⟩
 
+
 variable (O F L) in
 include F in
-
 theorem placesOver_bij : ∃ e : HeightOneSpectrum (integralClosure O L) ≃ PlacesOver O L,
     ∀ v, (e v : AddValuation L (WithTop ℤ)) = addv L v := by
   classical
@@ -299,7 +353,7 @@ theorem placesOver_bij : ∃ e : HeightOneSpectrum (integralClosure O L) ≃ Pla
     let Qw : Ideal (integralClosure O L) :=
       { carrier := {b | 0 < w (algebraMap (integralClosure O L) L b)}
         add_mem' := fun {a b} ha hb => by
-          simp only [Set.mem_setOf_eq, map_add] at ha hb ⊢
+          simp only [Set.mem_setOf_eq, map_add (f := _)] at ha hb ⊢
           exact lt_of_lt_of_le (lt_min ha hb) (w.map_add _ _)
         zero_mem' := by simp
         smul_mem' := fun c b hb => by
@@ -361,73 +415,6 @@ theorem addv_count (v : HeightOneSpectrum (integralClosure O L)) (b : integralCl
   | (push_cast; convert rfl; done)
   | (congr 1; convert rfl)
 
-include F in
-
-theorem addv_uniformizer (v : HeightOneSpectrum (integralClosure O L)) {ϖ : O}
-    (hϖ : Irreducible ϖ) :
-    addv L v (algebraMap O L ϖ) = ((v.asIdeal.ramificationIdx O : ℕ) : WithTop ℤ) := by
-  have hϖ0 : ϖ ≠ 0 := hϖ.ne_zero
-  have hinj : Function.Injective (algebraMap O (integralClosure O L)) := by
-    intro a b hab
-    first
-    | exact algebraMap_OL_injective (F := F) (congrArg Subtype.val hab)
-    | (apply algebraMap_OL_injective (F := F)
-       rw [IsScalarTower.algebraMap_apply O (integralClosure O L) L a,
-         IsScalarTower.algebraMap_apply O (integralClosure O L) L b, hab])
-  have hb : algebraMap O (integralClosure O L) ϖ ≠ 0 := by
-    intro h
-    apply hϖ0
-    apply hinj
-    rw [h, map_zero]
-  rw [IsScalarTower.algebraMap_apply O (integralClosure O L) L ϖ, addv_count v _ hb]
-  have hmax : maximalIdeal O = Ideal.span {ϖ} := by
-    first
-    | exact hϖ.maximalIdeal_eq
-    | exact IsDiscreteValuationRing.Irreducible.maximalIdeal_eq hϖ
-    | exact (IsDiscreteValuationRing.irreducible_iff_uniformizer ϖ).mp hϖ
-  have hspan : Ideal.span {algebraMap O (integralClosure O L) ϖ} =
-      (maximalIdeal O).map (algebraMap O (integralClosure O L)) := by
-    rw [hmax, Ideal.map_span, Set.image_singleton]
-  have hund : v.asIdeal.under O = maximalIdeal O := by
-    haveI := v.isMaximal
-    apply IsLocalRing.eq_maximalIdeal
-    first
-    | exact Ideal.isMaximal_comap_of_isIntegral_of_isMaximal v.asIdeal
-    | exact Ideal.IsMaximal.under O v.asIdeal
-    | infer_instance
-  have hmap : Ideal.map (algebraMap O (integralClosure O L)) (v.asIdeal.under O) ≠ ⊥ := by
-    rw [hund, ← hspan, Ne, Ideal.span_singleton_eq_bot]
-    exact hb
-  rw [hspan]
-  norm_cast
-  rw [← hund]
-  first
-  | (rw [Ideal.IsDedekindDomain.ramificationIdx_eq_normalizedFactors_count] <;> first | exact hmap | exact v.isPrime | exact v.ne_bot | exact v.isMaximal | infer_instance | rfl) <;> done
-  | (rw [← Ideal.IsDedekindDomain.ramificationIdx_eq_normalizedFactors_count] <;> first | exact hmap | exact v.isPrime | exact v.ne_bot | exact v.isMaximal | infer_instance | rfl) <;> done
-  | (simp [Ideal.IsDedekindDomain.ramificationIdx_eq_normalizedFactors_count, hmap, v.ne_bot]; done)
-  | (rw [Ideal.ramificationIdx_eq_normalizedFactors_count] <;> first | exact hmap | exact v.isPrime | exact v.ne_bot | exact v.isMaximal | infer_instance | rfl) <;> done
-  | (rw [← Ideal.ramificationIdx_eq_normalizedFactors_count] <;> first | exact hmap | exact v.isPrime | exact v.ne_bot | exact v.isMaximal | infer_instance | rfl) <;> done
-  | (simp [Ideal.ramificationIdx_eq_normalizedFactors_count, hmap, v.ne_bot]; done)
-  | (rw [Ideal.ramificationIdx_eq_count_normalizedFactors] <;> first | exact hmap | exact v.isPrime | exact v.ne_bot | exact v.isMaximal | infer_instance | rfl) <;> done
-  | (rw [← Ideal.ramificationIdx_eq_count_normalizedFactors] <;> first | exact hmap | exact v.isPrime | exact v.ne_bot | exact v.isMaximal | infer_instance | rfl) <;> done
-  | (simp [Ideal.ramificationIdx_eq_count_normalizedFactors, hmap, v.ne_bot]; done)
-  | (rw [Ideal.IsDedekindDomain.ramificationIdx_eq_count_normalizedFactors] <;> first | exact hmap | exact v.isPrime | exact v.ne_bot | exact v.isMaximal | infer_instance | rfl) <;> done
-  | (rw [← Ideal.IsDedekindDomain.ramificationIdx_eq_count_normalizedFactors] <;> first | exact hmap | exact v.isPrime | exact v.ne_bot | exact v.isMaximal | infer_instance | rfl) <;> done
-  | (simp [Ideal.IsDedekindDomain.ramificationIdx_eq_count_normalizedFactors, hmap, v.ne_bot]; done)
-  | (rw [Ideal.count_normalizedFactors_eq_ramificationIdx] <;> first | exact hmap | exact v.isPrime | exact v.ne_bot | exact v.isMaximal | infer_instance | rfl) <;> done
-  | (rw [← Ideal.count_normalizedFactors_eq_ramificationIdx] <;> first | exact hmap | exact v.isPrime | exact v.ne_bot | exact v.isMaximal | infer_instance | rfl) <;> done
-  | (simp [Ideal.count_normalizedFactors_eq_ramificationIdx, hmap, v.ne_bot]; done)
-  | (rw [Ideal.IsDedekindDomain.count_normalizedFactors_eq_ramificationIdx] <;> first | exact hmap | exact v.isPrime | exact v.ne_bot | exact v.isMaximal | infer_instance | rfl) <;> done
-  | (rw [← Ideal.IsDedekindDomain.count_normalizedFactors_eq_ramificationIdx] <;> first | exact hmap | exact v.isPrime | exact v.ne_bot | exact v.isMaximal | infer_instance | rfl) <;> done
-  | (simp [Ideal.IsDedekindDomain.count_normalizedFactors_eq_ramificationIdx, hmap, v.ne_bot]; done)
-  | (rw [Ideal.ramificationIdx_eq_factors_count] <;> first | exact hmap | exact v.isPrime | exact v.ne_bot | exact v.isMaximal | infer_instance | rfl) <;> done
-  | (rw [← Ideal.ramificationIdx_eq_factors_count] <;> first | exact hmap | exact v.isPrime | exact v.ne_bot | exact v.isMaximal | infer_instance | rfl) <;> done
-  | (simp [Ideal.ramificationIdx_eq_factors_count, hmap, v.ne_bot]; done)
-  | (rw [Ideal.IsDedekindDomain.ramificationIdx_eq_factors_count] <;> first | exact hmap | exact v.isPrime | exact v.ne_bot | exact v.isMaximal | infer_instance | rfl) <;> done
-  | (rw [← Ideal.IsDedekindDomain.ramificationIdx_eq_factors_count] <;> first | exact hmap | exact v.isPrime | exact v.ne_bot | exact v.isMaximal | infer_instance | rfl) <;> done
-  | (simp [Ideal.IsDedekindDomain.ramificationIdx_eq_factors_count, hmap, v.ne_bot]; done)
-  | skip
-  done
 
 end DVR
 

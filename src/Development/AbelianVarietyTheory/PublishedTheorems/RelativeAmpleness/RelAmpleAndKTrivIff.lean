@@ -1,7 +1,55 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.AmplePt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ValCalc
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsLiftOfSchemeTheoreticallyDominant
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.SabComp
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsLiftOfSchemeTheoreticallyDominant
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.AlgebraicGeometry.Morphisms.WeaklyEtale
+import Mathlib.AlgebraicGeometry.Sites.Fpqc
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.ExtremalEpi
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.AmplePt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsMonHomOfMul
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.LBPull
+
+@[expose] public section
 
 noncomputable section
 
@@ -17,10 +65,6 @@ variable {S : Scheme.{0}} (A : Over S) [GrpObj A]
 def MemKL (L : LB A.left) {T : Over S} (x : T ⟶ A) : Prop :=
   ∀ p : T.left, ∃ V : T.left.Opens, p ∈ V ∧
     ∃ c : LB.Gen ((Out.translDiff A L x).pull ((fst T A).left ⁻¹ᵁ V).ι), c.IsGen
-
-theorem kTriv_iff_memKL (L : LB A.left) : Out.KTriv A L ↔
-    ∀ (R : Type) [CommRing R] (t : Sp R ⟶ S) (x : Over.mk t ⟶ A), MemKL A L x → x = toUnit _ ≫ η[A] :=
-  Iff.rfl
 
 end
 
@@ -205,21 +249,7 @@ namespace PolExtSt
 
 variable {V K : Type} [CommRing V] [IsDomain V] [IsDiscreteValuationRing V] [Field K] [Algebra V K] [IsFractionRing V K]
 
-theorem relAmple_and_kTriv (hP : PolExtSt) {A : Over (Sp V)} [GrpObj A] (hA : IsAbelianScheme A) {L : LB A.left}
-    (hL : L.IsLB) (hr : Out.Rigidified A L) (hs : Out.Sym A L) {A' : Over (Sp K)} [GrpObj A'] {φ : A'.left ⟶ A.left}
-    (h : IsGrpPullback A' A (spMap (algebraMap V K)) φ) {L' : LB A'.left} (hL' : L'.IsLB) (hw : LBIso L' (L.pull φ))
-    (ha : Out.RelAmple A' L') (hk : Out.KTriv A' L') : Out.RelAmple A L ∧ Out.KTriv A L :=
-  have a := hP.1 V K A hA L hL hr hs A' φ h.1 L' hL' hw ha
-  ⟨a, hP.2.kTriv_of_generic hA hL a h hL' hw hk⟩
-
 variable {E : Type} [Field E] [NumberField E] [IsCMField E] {H : Host E}
-
-theorem sab (hP : PolExtSt) (t : SAB H (Sp V)) (hA : IsAbelianScheme t.G) {A' : Over (Sp K)} [GrpObj A']
-    {φ : A'.left ⟶ t.G.left} (h : IsGrpPullback A' t.G (spMap (algebraMap V K)) φ) {L' : LB A'.left} (hL' : L'.IsLB)
-    (hw : LBIso L' (t.PP.L.pull φ)) (ha : Out.RelAmple A' L') (hk : Out.KTriv A' L') :
-    Out.RelAmple t.G t.PP.L ∧ Out.KTriv t.G t.PP.L := by
-  obtain ⟨_, w, hs, -⟩ := t.sym
-  exact hP.relAmple_and_kTriv hA t.PP.isLB ⟨t.PP.rig, t.PP.rigGen⟩ (sym_of_lbIso_neg ⟨w, hs⟩) h hL' hw ha hk
 
 end PolExtSt
 

@@ -1,6 +1,60 @@
-import Formalism.SubspaceCounting.StatementB
-import Formalism.SubspaceCounting.SubspaceCountingProofs.QVandermonde
-import Formalism.SubspaceCounting.SubspaceCountingProofs.SubspaceCount
+module
+
+public import Formalism.SubspaceCounting.StatementB
+public import Mathlib.LinearAlgebra.Quotient.Defs
+public import Formalism.SubspaceCounting.SubspaceCountingProofs.QVandermonde
+public import Formalism.SubspaceCounting.SubspaceCountingProofs.SubspaceCount
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Presheaf
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 namespace Formalism.G0
 
@@ -13,11 +67,6 @@ theorem gb_self (q : ℕ) : ∀ n : ℕ, gaussBinom q n n = 1
   | n + 1 => by
     rw [gb_succ_succ, gb_self q n, gb_eq_zero q n (n + 1) (by omega)]
     simp
-
-theorem gb_one_succ_succ (q i : ℕ) : gaussBinom q 1 (i + 2) = 0 :=
-  Formalism.G0.QVandermondeP.gb_eq_zero q 1 (i + 2) (by omega)
-
-theorem gb_one_one (q : ℕ) : gaussBinom q 1 1 = 1 := gb_self q 1
 
 theorem pascal2 (q M n : ℕ) :
     gaussBinom q (M + 1) (n + 1) = gaussBinom q M (n + 1) + q ^ (M - n) * gaussBinom q M n := by
@@ -79,30 +128,6 @@ theorem pascal2 (q M n : ℕ) :
               q ^ (M - k) * (gaussBinom q M k + q ^ (k + 1) * gaussBinom q M (k + 1)) := by ring
         _ = gaussBinom q (M + 1) (k + 1 + 1) + q ^ (M - k) * gaussBinom q (M + 1) (k + 1) := by
           rw [s2, s3]
-
-private theorem gaussBinom_symm_of_add_eq (q : ℕ) :
-    ∀ n a b : ℕ, a + b = n → gaussBinom q n a = gaussBinom q n b := by
-  intro n
-  induction n with
-  | zero =>
-    intro a b h
-    have ha : a = 0 := by omega
-    have hb : b = 0 := by omega
-    subst ha; subst hb; rfl
-  | succ n ih =>
-    intro a b h
-    rcases a with _ | a
-    · have hb : b = n + 1 := by omega
-      subst hb
-      rw [Formalism.G0.QVandermondeP.gb_zero_right, gb_self]
-    · rcases b with _ | b
-      · have ha : a = n := by omega
-        subst ha
-        rw [Formalism.G0.QVandermondeP.gb_zero_right, gb_self]
-      · have e1 : gaussBinom q n a = gaussBinom q n (b + 1) := ih a (b + 1) (by omega)
-        have e2 : gaussBinom q n (a + 1) = gaussBinom q n b := ih (a + 1) b (by omega)
-        have hn : n - b = a + 1 := by omega
-        rw [Formalism.G0.QVandermondeP.gb_succ_succ q n a, pascal2 q n b, e1, e2, hn]
 
 theorem gb_symm (q : ℕ) : ∀ a b : ℕ, gaussBinom q (a + b) a = gaussBinom q (a + b) b
   | 0, b => by rw [Nat.zero_add, gb_zero_right, gb_self]

@@ -1,21 +1,68 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Foundations.NormSumPairRankZeroOfCurveCoordNorm
-import Formalism.PairingDivisors.StatementH
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IdealPeriodLatticeOfCurveDatum
+module
+
+public import Formalism.SharpRestriction.GlobalSchurBounds.GL3Theta
+public import Mathlib.Algebra.DualNumber
+public import Mathlib.Analysis.SpecialFunctions.Elliptic.Weierstrass
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsMemWpNormSubLtOne
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsMulSqrtNegOddPolynomialIdentity
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsRelationGradient
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.FirstOrderRigid
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IdealPeriodLatticeOfCurveDatum
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.InducedTypeThetaGenusOnePermutes
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IntegralJAndAlgebraicData
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IsogenyNumeratorCoeffNormLeOne
 import Development.AbelianVarietyTheory.Proofs.FoundationProofs.LatticeInvariantsPeriodPairDictionary
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.InducedTypeThetaGenusOnePermutes
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IntegralJAndAlgebraicData
-import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.ExistsFieldCmCurvesUnitDiscriminant
-import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.AddMonoidHomEqZeroOfEventually
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsMemWpNormSubLtOne
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsRelationGradient
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.FirstOrderRigid
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IsogenyNumeratorCoeffNormLeOne
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.NormXLeOneOfNsmulEqZero
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.TorsionPointsDistinctModMaximalIdeal
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.RelIndexMapMulLeftLatticeOfSqEqNeg
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsMulSqrtNegOddPolynomialIdentity
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.TorsionPointTransportEmbedding
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.NormXLeOneOfNsmulEqZero
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.RelIndexMapMulLeftLatticeOfSqEqNeg
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.TorsionPointTransportEmbedding
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.TorsionPointsDistinctModMaximalIdeal
+import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.WeierstrassCurvePointOfLatticeAddOfGeneric
+import Formalism.FrobeniusOrbits.FrobeniusOrbitsProofs.SplitK
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.EllipticCurve.IsomOfJ
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.Valuation.Integral
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AbelianVarietyTheory.Definitions.Foundations.NormSumPairRankZeroOfCurveCoordNorm
+public import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.ExistsFieldCmCurvesUnitDiscriminant
+
+@[expose] public section
 
 open NumberField Classical Formalism.BasicNotions Formalism.MainNotions Formalism.MainNotions.TaylorLogMetric Formalism.MainNotions.StandardLatticesGL3 GlobalTheory.NormSum Polynomial
 open scoped BigOperators
@@ -119,7 +166,7 @@ theorem rigid_dual (m : ℕ) (A B a : DualNumber k) (n h : (DualNumber k)[X]) (h
     TrivSqZeroExt.fst_mul, TrivSqZeroExt.fst_pow] at e2
   have f1 := congrArg (TrivSqZeroExt.fstHom k k k) hΔ
   have f2 := congrArg (TrivSqZeroExt.fstHom k k k) hsq
-  simp only [map_mul, map_add, map_pow, map_neg, map_ofNat, map_one, map_natCast, TrivSqZeroExt.fstHom_apply] at f1 f2
+  simp only [map_mul, map_add (f := _), map_pow, map_neg, map_ofNat, map_one, map_natCast, TrivSqZeroExt.fstHom_apply] at f1 f2
   have f3 : -16 * (12 * A.fst ^ 2 * A.snd + 54 * B.fst * B.snd) = 0 := by
     have t : ∀ j : ℕ, ((j : DualNumber k)).snd = 0 ∧ ((j : DualNumber k)).fst = j := fun j => by simp
     have g := congrArg TrivSqZeroExt.snd hΔ
@@ -242,7 +289,7 @@ theorem rigid (W : Subring K) (hW : IsClosed (W : Set K)) (hW1 : ∀ w ∈ W, �
   have e₀ : (X ^ 3 + C A₀ * X + C B₀) * (derivative n₀ * h₀ - 2 * n₀ * derivative h₀) ^ 2 =
       n₀ ^ 3 + C (a₀ ^ 4 * A₀) * n₀ * h₀ ^ 4 + C (a₀ ^ 6 * B₀) * h₀ ^ 6 := by
     apply map_injective S.subtype Subtype.val_injective
-    simp only [Polynomial.map_add, Polynomial.map_mul, Polynomial.map_pow, Polynomial.map_sub, map_C, map_X,
+    simp only [Polynomial.map_add (f := _), Polynomial.map_mul, Polynomial.map_pow, Polynomial.map_sub, map_C, map_X,
       Polynomial.map_ofNat, ← derivative_map, hT, hn₀]
     exact e
   have hev : ∀ (f : S[X]) (r : S), (fstP (f.map φ)).eval (φ r).fst = (φ (f.eval r)).fst := fun f r => by
@@ -253,7 +300,7 @@ theorem rigid (W : Subring K) (hW : IsClosed (W : Set K)) (hW1 : ∀ w ∈ W, �
   have k3 : (3 : k) ≠ 0 := by have := hu 3 h3; rwa [map_ofNat] at this
   have hsq₀ : φ a₀ ^ 2 = -(2 * (m : DualNumber k) + 1) := by
     have : a₀ ^ 2 = -(2 * (m : S) + 1) := S.subtype_injective (by
-      simp only [map_pow, map_neg, map_add, map_mul, map_ofNat, map_one, map_natCast]; exact hsq)
+      simp only [map_pow, map_neg, map_add (f := _), map_mul, map_ofNat, map_one, map_natCast]; exact hsq)
     simpa [map_ofNat] using congrArg φ this
   have ha₀ : (φ a₀).snd = 0 := by
     have g := congrArg TrivSqZeroExt.snd hsq₀
@@ -283,10 +330,10 @@ theorem rigid (W : Subring K) (hW : IsClosed (W : Set K)) (hW1 : ∀ w ∈ W, �
   obtain ⟨r1, r2, r3, r4⟩ := rigid_dual m (φ A₀) (φ B₀) (φ a₀) (n₀.map φ) (h₀.map φ) k2 k3 ha₀ (hu a₀ ha) hsq₀
     (by
       have : -16 * (4 * A₀ ^ 3 + 27 * B₀ ^ 2) = 1 := S.subtype_injective (by
-      simp only [map_pow, map_neg, map_add, map_mul, map_ofNat, map_one, map_natCast]; exact hΔ)
+      simp only [map_pow, map_neg, map_add (f := _), map_mul, map_ofNat, map_one, map_natCast]; exact hΔ)
       simpa [map_ofNat] using congrArg φ this)
     (mn₀.map _) (mh₀.map _) (by rw [mn₀.natDegree_map, dn₀, dn]) (by rw [mh₀.natDegree_map, dh₀]) hco
-    (by simpa only [Polynomial.map_add, Polynomial.map_mul, Polynomial.map_pow, Polynomial.map_sub, map_C, map_X,
+    (by simpa only [Polynomial.map_add (f := _), Polynomial.map_mul, Polynomial.map_pow, Polynomial.map_sub, map_C, map_X,
       Polynomial.map_ofNat, ← derivative_map, map_mul, map_pow] using congrArg (Polynomial.map φ) e₀)
   rintro x (((hx | hx | hx) | hx) | ⟨i, hx⟩)
   · rwa [show x = A₀ from Subtype.ext hx]
@@ -352,7 +399,7 @@ theorem exists_integral_model (lam : Qbar →+* ℂ_[p]) (A B : Qbar) (hΔ : -16
   have d₁ : (E₀.map lam).Δ = 1 := by rw [WeierstrassCurve.map_Δ, d₀, map_one]
   have d₂ : V.Δ = 1 := by
     have := congrArg lam hΔ
-    simp only [map_mul, map_add, map_pow, map_neg, map_ofNat, map_one] at this
+    simp only [map_mul, map_add (f := _), map_pow, map_neg, map_ofNat, map_one] at this
     simp only [hV, WeierstrassCurve.Δ, WeierstrassCurve.b₂, WeierstrassCurve.b₄, WeierstrassCurve.b₆,
       WeierstrassCurve.b₈]
     linear_combination this
@@ -376,7 +423,7 @@ theorem invariants_mem (hp : 5 ≤ p) (lam : Qbar →+* ℂ_[p]) (L : PeriodPair
   have hi : ∀ x : Qbar, i x = x := fun _ => rfl
   have hα' : (α : ℂ) ^ 2 = -(2 * (m : ℂ) + 1) := by
     have := congrArg i hα
-    simp only [map_pow, map_neg, map_add, map_mul, map_ofNat, map_one, map_natCast] at this
+    simp only [map_pow, map_neg, map_add (f := _), map_mul, map_ofNat, map_one, map_natCast] at this
     exact this
   have tor : ∀ t, (α : ℂ) * t ∈ L.lattice → ((2 * m + 1 : ℕ) : ℂ) * t ∈ L.lattice := fun t h => by
     have := L.lattice.neg_mem (hL _ h)
@@ -404,7 +451,7 @@ theorem invariants_mem (hp : 5 ≤ p) (lam : Qbar →+* ℂ_[p]) (L : PeriodPair
   have e₀ : (X ^ 3 + C A * X + C B) * (derivative n₀ * h₀ - 2 * n₀ * derivative h₀) ^ 2 =
       n₀ ^ 3 + C (α ^ 4 * A) * n₀ * h₀ ^ 4 + C (α ^ 6 * B) * h₀ ^ 6 := by
     apply map_injective i i.injective
-    simp only [Polynomial.map_add, Polynomial.map_mul, Polynomial.map_pow, Polynomial.map_sub, map_C, map_X,
+    simp only [Polynomial.map_add (f := _), Polynomial.map_mul, Polynomial.map_pow, Polynomial.map_sub, map_C, map_X,
       Polynomial.map_ofNat, ← derivative_map, hh₀, hn₀, map_mul, map_pow, hi, eA, eB]
     simpa only [map_mul, map_pow] using e
   have pts : ∀ x, (h₀.map lam).IsRoot x → ∃ (y : ℂ_[p])
@@ -431,9 +478,9 @@ theorem invariants_mem (hp : 5 ≤ p) (lam : Qbar →+* ℂ_[p]) (L : PeriodPair
   have n3 : ‖(3 : ℂ_[p])‖ = 1 := norm_natCast_eq_one (N := 3) fun h => by have := Nat.le_of_dvd three_pos h; omega
   have nN := norm_natCast_eq_one hm
   have hΔ' : -16 * (4 * lam A ^ 3 + 27 * lam B ^ 2) = 1 := by
-    simpa only [map_mul, map_add, map_pow, map_neg, map_ofNat, map_one] using congrArg lam hΔ
+    simpa only [map_mul, map_add (f := _), map_pow, map_neg, map_ofNat, map_one] using congrArg lam hΔ
   have hsq : lam α ^ 2 = -(2 * (m : ℂ_[p]) + 1) := by
-    simpa only [map_pow, map_neg, map_add, map_mul, map_ofNat, map_one, map_natCast] using congrArg lam hα
+    simpa only [map_pow, map_neg, map_add (f := _), map_mul, map_ofNat, map_one, map_natCast] using congrArg lam hα
   have na : ‖lam α‖ = 1 := by
     have := congrArg norm hsq
     push_cast at nN
@@ -450,7 +497,7 @@ theorem invariants_mem (hp : 5 ≤ p) (lam : Qbar →+* ℂ_[p]) (L : PeriodPair
     (IsAlgClosed.splits _) ?_ ?_ ?_ ?_ ?_
   · rw [isCoprime_map, ← isCoprime_map i, hn₀, hh₀]
     exact hc
-  · simpa only [Polynomial.map_add, Polynomial.map_mul, Polynomial.map_pow, Polynomial.map_sub, map_C, map_X,
+  · simpa only [Polynomial.map_add (f := _), Polynomial.map_mul, Polynomial.map_pow, Polynomial.map_sub, map_C, map_X,
       Polynomial.map_ofNat, ← derivative_map, map_mul, map_pow] using congrArg (Polynomial.map lam) e₀
   · intro x hx
     obtain ⟨y, hxy, z⟩ := pts x hx
@@ -478,16 +525,16 @@ theorem modelEx_holds : ∀ D : D7, GL3Theta.modelEx D := by
   have eA : (A : ℂ) = -L.g₂ / 4 := by rw [← e2]
   have eB : (B : ℂ) = -L.g₃ / 4 := by rw [← e3]
   have hV : wModel lam (lamOf D cc δ) = ⟨0, 0, 0, lam A, lam B⟩ := by
-    rw [wModel, lamC, lamC, dif_pos a2, dif_pos a3]
+    rw [wModel, lamC, lamC, dite_eq_left a2, dite_eq_left a3]
   have hΔ' : -16 * (4 * A ^ 3 + 27 * B ^ 2) = 1 := Qbar.val.toRingHom.injective (by
-    simp only [map_pow, map_neg, map_add, map_mul, map_ofNat, map_one]
+    simp only [map_pow, map_neg, map_add (f := _), map_mul, map_ofNat, map_one]
     change -16 * (4 * (A : ℂ) ^ 3 + 27 * (B : ℂ) ^ 2) = 1
     rw [eA, eB]
     linear_combination hΔ)
   have hj' : IsIntegral ℤ ((-48 * (A : ℂ)) ^ 3) := by
     rwa [eA, show (-48 * (-L.g₂ / 4)) ^ 3 = 1728 * L.g₂ ^ 3 by ring]
   have hΔp : -16 * (4 * lam A ^ 3 + 27 * lam B ^ 2) = 1 := by
-    simpa only [map_mul, map_add, map_pow, map_neg, map_ofNat, map_one] using congrArg lam hΔ'
+    simpa only [map_mul, map_add (f := _), map_pow, map_neg, map_ofNat, map_one] using congrArg lam hΔ'
   have d₂ : (wModel lam (lamOf D cc δ)).Δ = 1 := by
     simp only [hV, WeierstrassCurve.Δ, WeierstrassCurve.b₂, WeierstrassCurve.b₄, WeierstrassCurve.b₆,
       WeierstrassCurve.b₈]
@@ -535,7 +582,7 @@ theorem modelEx_holds : ∀ D : D7, GL3Theta.modelEx D := by
     obtain ⟨-, -, -, -, hcm⟩ := GlobalTheory.CurveLattice.lattice_of_curve D hD cc δ ⟨h1, h2⟩
     obtain ⟨wA, wB⟩ := invariants_mem hp lam L A B ⟨_, hbq⟩ m eA eB hΔ' hA hB hpm
       (Qbar.val.toRingHom.injective (by
-        simp only [map_pow, map_neg, map_add, map_mul, map_ofNat, map_one, map_natCast]
+        simp only [map_pow, map_neg, map_add (f := _), map_mul, map_ofNat, map_one, map_natCast]
         exact hbc))
       (fun l hl => (hL _).1 (hcm ⟨b, hbi⟩ l ((hL _).2 hl)))
       (fun t h3 h4 => by

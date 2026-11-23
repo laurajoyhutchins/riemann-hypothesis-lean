@@ -1,8 +1,61 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.StatementsBlowUpFibreSemilocalCut
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PBlowUpModel
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.StatementsBlowUpFibreSemilocalCut
+public import Mathlib.RingTheory.Valuation.ValuationSubring
 import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.LiftFormNotMemBlowUpOf
-import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.ContractRelevant
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PBlowUpModel
+public import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.ContractRelevant
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.LocalProperties.Reduced
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.NumbersDVR
@@ -54,8 +107,8 @@ theorem eval₂_blockVar_component (g : R →+* κ) (c : (Σ k, ι k) → κ) (F
     eval₂ ((C : κ →+* MvPolynomial K κ).comp g) (fun s => X s.1 * C (c s))
         (weightedHomogeneousComponent (blockWeight ι) b F) =
       monomial (Finsupp.equivFunOnFinite.symm b)
-        (coeff (Finsupp.equivFunOnFinite.symm b)
-          (eval₂ ((C : κ →+* MvPolynomial K κ).comp g) (fun s => X s.1 * C (c s)) F)) := by
+        (AddMonoidAlgebra.coeff (eval₂ ((C : κ →+* MvPolynomial K κ).comp g) (fun s => X s.1 * C (c s)) F)
+          (Finsupp.equivFunOnFinite.symm b)) := by
   induction F using MvPolynomial.induction_on' with
   | monomial d r =>
     have hd : IsMultiHomog (monomial d r : MRing ι R) (Finsupp.weight (blockWeight ι) d) :=
@@ -69,17 +122,18 @@ theorem eval₂_blockVar_component (g : R →+* κ) (c : (Σ k, ι k) → κ) (F
           (n := Finsupp.weight (blockWeight ι) d) hd, if_neg (Ne.symm h)]
       rw [h0, if_neg (fun h' => h (Finsupp.equivFunOnFinite.symm.injective h')), eval₂_zero, map_zero]
   | add p q hp hq =>
-    rw [map_add, eval₂_add, hp, hq, eval₂_add, coeff_add, map_add]
+    rw [map_add (f := _), eval₂_add, hp, hq, eval₂_add, MvPolynomial.coeff_add, map_add (f := _)]
 
 theorem eval₂_blockVar_eq_zero_iff (g : R →+* κ) (c : (Σ k, ι k) → κ) (F : MRing ι R) :
     eval₂ ((C : κ →+* MvPolynomial K κ).comp g) (fun s => X s.1 * C (c s)) F = 0 ↔
       ∀ b, eval₂ ((C : κ →+* MvPolynomial K κ).comp g) (fun s => X s.1 * C (c s))
         (weightedHomogeneousComponent (blockWeight ι) b F) = 0 := by
-  refine ⟨fun h b => by rw [eval₂_blockVar_component, h, coeff_zero, map_zero], fun h => ?_⟩
+  refine ⟨fun h b => by simp [eval₂_blockVar_component, h], fun h => ?_⟩
   ext d
   have := h (Finsupp.equivFunOnFinite d)
   rw [eval₂_blockVar_component, Equiv.symm_apply_apply, monomial_eq_zero] at this
-  rw [this, coeff_zero]
+  rw [this]
+  simp
 
 end Scale
 
@@ -220,8 +274,8 @@ theorem exists_blowUp_centre (P W : Ideal (MRing ι O)) [P.IsPrime] (hPh : IsMul
         liftForm fc := by
       have h := FieldNumbers.ContractRelevant.rename_weightedHomogeneousComponent
         (ι := ι) (ι' := extIdx ι J) (j := some) (g := fun v => (⟨some v.1, v.2⟩ : Σ o, extIdx ι J o))
-        (fun _ => rfl) (Option.some_injective K)
-        (fun v w h => Sigma.ext (Option.some_injective _ (congrArg Sigma.fst h))
+        (fun _ => rfl) (fun _ _ h => Option.some.inj h)
+        (fun v w h => Sigma.ext (Option.some.inj (congrArg Sigma.fst h))
           (Sigma.mk.inj_iff.mp h).2) (R := O) c f
       have hext : Function.extend some c 0 = liftMDeg c := by
         funext o

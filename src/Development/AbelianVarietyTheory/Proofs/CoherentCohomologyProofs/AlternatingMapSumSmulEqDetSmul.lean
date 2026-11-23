@@ -1,4 +1,56 @@
-import Mathlib
+module
+
+public import Mathlib.LinearAlgebra.Alternating.Uncurry.Fin
+public import Mathlib.LinearAlgebra.ExteriorPower.Basic
+public import Mathlib.RingTheory.Kaehler.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.PiTensorProduct.Generators
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GlobalTheory
 
@@ -63,7 +115,7 @@ theorem jetWedge_shear (ω : M [⋀^Fin D]→ₗ[A] N) (h : A) (u : M) (v : Fin 
         congr 1
         simp
         ring
-  exact congrArg (fun F : MultilinearMap A (fun _ : Fin (D + 1) => A × M) N => F v) key
+  exact congrArg (fun F => F v) key
 
 theorem alternating_map_sum_smul_eq_det_smul {n : ℕ} (ω : M [⋀^Fin n]→ₗ[A] N)
     (a : Matrix (Fin n) (Fin n) A) (w : Fin n → M) :
@@ -157,15 +209,6 @@ theorem form_d_mul_sub_mem (I : Ideal A) (h : A) (g : Fin D → A) (hg : ∀ k, 
 
 variable [Module R N] [IsScalarTower R A N] [IsScalarTower R A M]
 
-noncomputable def jacobianMultilinearTo : A [⋀^Fin (D + 1)]→ₗ[R] N where
-  toMultilinearMap := ((jetWedge ω).toMultilinearMap.restrictScalars R).compLinearMap
-    (fun _ => (LinearMap.id : A →ₗ[R] A).prod (d : A →ₗ[R] M))
-  map_eq_zero_of_eq' v i j hv hij :=
-    (jetWedge ω).map_eq_zero_of_eq (fun i => (v i, d (v i))) (by simp only [hv]) hij
-
-theorem jacFormAlt_apply (f : Fin (D + 1) → A) : jacobianMultilinearTo d ω f = jacForm d ω f :=
-  (jacForm_eq_jetWedge d ω f).symm
-
 end JacForm
 
 section RestrictScalars
@@ -178,13 +221,9 @@ def altRestrictScalars (ω : M [⋀^Fin D]→ₗ[B] N) : M [⋀^Fin D]→ₗ[A] 
   toMultilinearMap := ω.toMultilinearMap.restrictScalars A
   map_eq_zero_of_eq' v _ _ hv hij := ω.map_eq_zero_of_eq v hv hij
 
-@[simp] theorem altRestrictScalars_apply (ω : M [⋀^Fin D]→ₗ[B] N) (v : Fin D → M) :
-    altRestrictScalars A ω v = ω v := rfl
-
 variable {A} {L : Type*} [AddCommGroup L] [Module A L]
 
 variable (B D) in
-
 noncomputable def exteriorPowerMapOver (φ : L →ₗ[A] M) : (⋀[A]^D L) →ₗ[A] (⋀[B]^D M) :=
   exteriorPower.alternatingMapLinearEquiv
     ((altRestrictScalars A (exteriorPower.ιMulti B D (M := M))).compLinearMap φ)
@@ -192,16 +231,9 @@ noncomputable def exteriorPowerMapOver (φ : L →ₗ[A] M) : (⋀[A]^D L) →�
 @[simp] theorem exteriorPowerMapOver_ιMulti (φ : L →ₗ[A] M) (v : Fin D → L) :
     exteriorPowerMapOver B D φ (exteriorPower.ιMulti A D v)
       = exteriorPower.ιMulti B D (fun k => φ (v k)) := by
-  simp [exteriorPowerMapOver]
-
-noncomputable def wedgeContract (φ : Fin D → L →ₗ[A] B) : (⋀[A]^D L) →ₗ[A] B :=
-  exteriorPower.alternatingMapLinearEquiv
-    ((altRestrictScalars A (Matrix.detRowAlternating : (Fin D → B) [⋀^Fin D]→ₗ[B] B)).compLinearMap
-      (LinearMap.pi φ))
-
-@[simp] theorem wedgeContract_ιMulti (φ : Fin D → L →ₗ[A] B) (v : Fin D → L) :
-    wedgeContract φ (exteriorPower.ιMulti A D v) = (Matrix.of fun j k => φ k (v j)).det := by
-  simp only [wedgeContract, exteriorPower.alternatingMapLinearEquiv_apply_ιMulti]
+  simp only [exteriorPowerMapOver,
+    exteriorPower.alternatingMapLinearEquiv_apply_ιMulti,
+    AlternatingMap.compLinearMap_apply]
   rfl
 
 end RestrictScalars
@@ -226,13 +258,6 @@ theorem dWedge_mul_sub_mem (I : Ideal A) (h : A) (g : Fin D → A) (hg : ∀ k, 
     dWedge R (fun k => h * g k) - h ^ D • dWedge R g ∈ I • (⊤ : Submodule A (⋀[A]^D Ω[A⁄R])) :=
   form_d_mul_sub_mem _ _ I h g hg
 
-variable (A D) in
-
-noncomputable def jacobianMultilinear : A [⋀^Fin (D + 1)]→ₗ[R] (⋀[A]^D Ω[A⁄R]) :=
-  jacobianMultilinearTo (KaehlerDifferential.D R A) (exteriorPower.ιMulti A D)
-
-@[simp] theorem jacAlt_apply (f : Fin (D + 1) → A) : jacobianMultilinear R A D f = jac R f :=
-  jacFormAlt_apply _ _ f
 
 variable {R}
 
@@ -241,12 +266,11 @@ theorem map_jac (S B : Type*) [CommRing S] [CommRing B] [Algebra R S] [Algebra S
     (f : Fin (D + 1) → A) :
     exteriorPowerMapOver B D (KaehlerDifferential.map R S A B) (jac R f)
       = jac S (fun i => algebraMap A B (f i)) := by
+
   rw [jac, jac, map_sum]
   refine Finset.sum_congr rfl fun i _ => ?_
   rw [map_smul, dWedge, exteriorPowerMapOver_ιMulti, ← algebraMap_smul B]
   simp [dWedge]
-
-variable (R A D)
 
 end Jac
 

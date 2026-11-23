@@ -1,6 +1,61 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.CupPair
-import Development.AbelianVarietyTheory.Definitions.Divisors.OneFormMapEqKaehlerDifferentialMap
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.CupPair
+public import Development.AbelianVarietyTheory.Definitions.Divisors.OneFormMapEqKaehlerDifferentialMap
+public import Mathlib.FieldTheory.IntermediateField.Adjoin.Defs
+public import Mathlib.FieldTheory.Separable
+public import Mathlib.LinearAlgebra.ExteriorAlgebra.Grading
+public import Mathlib.RingTheory.AlgebraicIndependent.Defs
+public import Mathlib.RingTheory.Smooth.Basic
+public import Mathlib.RingTheory.Trace.Defs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.ExteriorAlgebra.Basis
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.Etale.Field
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.LinearAlgebra.Determinant
+public import Mathlib.RingTheory.Etale.Basic
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -37,13 +92,7 @@ structure IsBundle (L : Finset (Fin (d + 1)) → Submodule k W) : Prop where
   proj : ∀ i, Module.Projective (rA k x {i}) (Submodule.span (rA k x {i}) (L {i} : Set W))
   loc : ∀ I, ∀ i ∈ I, L I = (Submodule.span (rA k x I) (L {i} : Set W)).restrictScalars k
 
-def dualFam (β : W →ₗ[F] W' →ₗ[F] F) (L : Finset (Fin (d + 1)) → Submodule k W) (I : Finset (Fin (d + 1))) : Submodule k W' :=
-  ⨅ w ∈ L I, (omA k x I).comap ((β w).restrictScalars k)
-
 def kpair (ρ : F →ₗ[k] k) (β : W →ₗ[F] W' →ₗ[F] F) : W →ₗ[k] W' →ₗ[k] k := (β.restrictScalars₁₂ k k).compr₂ ρ
-
-def SD (ρ : F →ₗ[k] k) (β : W →ₗ[F] W' →ₗ[F] F) (L : Finset (Fin (d + 1)) → Submodule k W) : Prop :=
-  Perf (cech L) (cech (dualFam k x β L)) (cupPair (kpair k ρ β)) d
 
 end Proj
 
@@ -64,11 +113,6 @@ variable {K} {ι : Type} [LinearOrder ι]
 def tot (B : Finset ι → Subalgebra k K) (a b : ℕ) : Cx k (Finset ι → DR k K) :=
   ⟨totC (fun q s => omB k K (B s) q) a b, totD (trunc k K b ∘ₗ dDR k K)⟩
 
-def formPair [Fintype ι] (t : DR k K →ₗ[k] k) : (Finset ι → DR k K) →ₗ[k] (Finset ι → DR k K) →ₗ[k] k :=
-  ∑ j : ι, ((LinearMap.mul k (DR k K)).compr₂ t).compl₁₂
-    ((sg k K ^ ((Finset.univ.filter (j ≤ ·)).card - 1)).toLinearMap ∘ₗ LinearMap.proj (Finset.univ.filter (· ≤ j)))
-    (LinearMap.proj (Finset.univ.filter (j ≤ ·)))
-
 variable (K) {F : Type} [Field F] [Algebra k F] [Algebra F K] [IsScalarTower k F K] {d : ℕ} (x : Fin (d + 1) → F)
 
 def rB (I : Finset (Fin (d + 1))) : Subalgebra k K := (integralClosure (rA k x I) K).restrictScalars k
@@ -85,8 +129,8 @@ def vol0 : DR k K :=
 
 def IsTop (τ : DR k K →ₗ[K] K) : Prop := τ (vol0 k K x) = 1 ∧ ∀ q, q ≠ d → ∀ y ∈ ⋀[K]^q Ω[K⁄k], τ y = 0
 
-variable {K} in
 
+variable {K} in
 def trF (τ : DR k K →ₗ[K] K) (ρ : F →ₗ[k] k) : DR k K →ₗ[k] k :=
   ρ ∘ₗ (Algebra.trace F K).restrictScalars k ∘ₗ τ.restrictScalars k
 
@@ -106,8 +150,8 @@ theorem IsFinCover.of_charZero [CharZero F] (pd : IsPd k x) (fin : FiniteDimensi
   have : Algebra.IsSeparable F K := inferInstance
   exact ⟨pd, fin, smooth⟩
 
-open scoped IntermediateField.algebraAdjoinAdjoin in
 
+open scoped IntermediateField.algebraAdjoinAdjoin in
 theorem IsFinCover.exists_basis (h : IsFinCover k K x) :
     ∃ b : Module.Basis (Fin d) K Ω[K⁄k], ∀ j, b j = D k K (algebraMap F K (x j.succ / x 0)) := by
   have := h.fin
@@ -183,8 +227,6 @@ theorem IsFinCover.dlogRatioVolumeForm_ne_zero (h : IsFinCover k K x) : vol0 k K
   have h1 := hτ.1
   rw [h0, map_zero] at h1
   exact zero_ne_one h1
-
-example (h : IsFinCover k K x) : Algebra.IsSeparable F K ∧ vol0 k K x ≠ 0 := ⟨h.sep, h.dlogRatioVolumeForm_ne_zero⟩
 
 end API
 

@@ -1,4 +1,54 @@
-import Formalism.PadicSubsetSums.CentralIdempotents.EigenbasisOfDistinctRoots
+module
+
+public import Formalism.PadicSubsetSums.CentralIdempotents.EigenbasisOfDistinctRoots
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.NumberTheory.Padics.PadicVal.Basic
+
+@[expose] public section
 
 namespace Formalism.IrreducibleCountingLemmas.GaloisIrreducibility
 
@@ -50,12 +100,13 @@ theorem prime_power_order_share : PrimePowerOrderShare := by
   have hge : ∀ l, l.Prime → l ∣ n → l ≤ l ^ padicValNat l n := by
     intro l hl hln
     haveI := Fact.mk hl
-    have hv : 1 ≤ padicValNat l n := one_le_padicValNat_of_dvd hn0 hln
+    have hv : 1 ≤ padicValNat l n := by
+      simpa only [Nat.padicValNat_def] using one_le_multiplicity_of_dvd hn0 hln
     calc l = l ^ 1 := (pow_one l).symm
       _ ≤ l ^ padicValNat l n := Nat.pow_le_pow_right hl.pos hv
   have hf2 : 16 ≤ 2 ^ padicValNat 2 n := by
     haveI := Fact.mk Nat.prime_two
-    have hv : 4 ≤ padicValNat 2 n := (padicValNat_dvd_iff_le hn0).mp (by norm_num; exact h16)
+    have hv : 4 ≤ padicValNat 2 n := ((by simpa only [_root_.Nat.padicValNat_def] using @_root_.multiplicity_dvd_iff_le : ∀ {p : _root_.Nat} [hp : _root_.Fact (_root_.Nat.Prime p)] {a n : _root_.Nat} (ha : a ≠ 0), p ^ n ∣ a ↔ n ≤ _root_.padicValNat p a) hn0).mp (by norm_num; exact h16)
     calc 16 = 2 ^ 4 := by norm_num
       _ ≤ 2 ^ padicValNat 2 n := Nat.pow_le_pow_right (by norm_num) hv
   have h2m := hmem 2 Nat.prime_two h2n
@@ -69,10 +120,10 @@ theorem prime_power_order_share : PrimePowerOrderShare := by
   have hprod : n = 2 ^ padicValNat 2 n * (q₁ ^ padicValNat q₁ n * (d ^ padicValNat d n *
         ∏ l ∈ ((n.primeFactors.erase 2).erase q₁).erase d, l ^ padicValNat l n)) := by
     have h1 : ∏ l ∈ n.primeFactors, l ^ padicValNat l n = n := by
-      conv_rhs => rw [← Nat.factorization_prod_pow_eq_self hn0]
+      conv_rhs => rw [← Nat.prod_factorization_pow_eq_self hn0]
       rw [Finsupp.prod, Nat.support_factorization]
       refine Finset.prod_congr rfl fun l hl => ?_
-      rw [Nat.factorization_def n (Nat.prime_of_mem_primeFactors hl)]
+      rw [Nat.factorization_def n (Nat.prime_of_mem_primeFactors hl), Nat.padicValNat_def]
     rw [← Finset.mul_prod_erase _ _ h2m, ← Finset.mul_prod_erase _ _ hqm,
       ← Finset.mul_prod_erase _ _ hdm] at h1
     exact h1.symm

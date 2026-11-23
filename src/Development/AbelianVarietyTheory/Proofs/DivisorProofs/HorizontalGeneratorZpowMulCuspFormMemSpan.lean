@@ -1,7 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.HtValOnSubset
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HorizGenZpowMulMemSS
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CuspFormsComponentFiniteDimensionalAndSpanned
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.HtValOnSubset
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsCuspOnRestrict
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HorizGenZpowMulMemSS
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsNumberFieldPoint
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Development.AbelianVarietyTheory.Definitions.Divisors.AevalEqZeroOfMemConeIdeal
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -20,8 +62,8 @@ theorem zero_mem_SS' (X : Data E r) (la : Wt X.Ψ r) : (0 : Frame X.Ψ r → ℂ
   unfold Data.fj
   split_ifs <;> simp
 
-open Classical in
 
+open Classical in
 def mulAt {Comp : Type} (X : Comp → Data E r) (k0 : Comp) (h : Frame (X k0).Ψ r → ℂ) : FDSec X →ₗ[ℂ] FDSec X :=
   (LinearMap.single ℂ (fun k => Frame (X k).Ψ r → ℂ) k0) ∘ₗ (LinearMap.mulLeft ℂ h) ∘ₗ
     (LinearMap.proj (R := ℂ) (φ := fun k => Frame (X k).Ψ r → ℂ) k0)
@@ -72,7 +114,40 @@ theorem horizGen_zpow_mul_rdU_mem_span : ∀ (E : Type) [Field E] [NumberField E
       simp only [h0, mul_zero]
     · rw [mulAt_ne _ _ _ _ hkk]
       rfl
-  have hsp := (cuspOn_fd_and_span_rdU E H Dw l Xo c r U x hL Z σ hσ b' n hb' hpos hn).2 _ hLP hoff
+  have hsp : mulAt (U σ).X k0 (fun y => horizGen τ' y ^ m) (rdU (U σ) f) ∈
+      Submodule.span ℂ (rdU (U σ) '' (cuspOn U Z (wtZ b' n) : Set (Rul Xo c))) := by
+    let P := mulAt (U σ).X k0 (fun y => horizGen τ' y ^ m) (rdU (U σ) f)
+    have hpts : HasPts U Z := GlobalTheory.FlatLine.hasPts U hL.pos hL.good hL.unf Z
+    have e : goodOf c σ = σ := if_pos hσ
+    have htest := (hpts.1 σ).2
+    rw [e] at htest
+    have hoff' : P ∈ offZero (U σ).X := fun k y hy => hoff k y fun hz => hy hz.1
+    have hP0 : P ∈ holSub0 (U σ).X (laU (U σ) b' n) := ⟨by rwa [← modelWt_wtZ], hoff'⟩
+    have hsp' := hL.onto σ hσ b' n hb' hpos hn hP0
+    have hfix : rdU (U σ) (idem Z) * P = P := by
+      funext k y
+      show rdU (U σ) (idem Z) k y * P k y = P k y
+      by_cases hz : (⟨k, y⟩ : Σ k, Frame ((U σ).X k).Ψ r) ∈ framesOn (U σ) Z
+      · obtain ⟨hd, hl⟩ := hz
+        have h1 : rdU (U σ) (idem Z) k y = 1 := by
+          simp only [rdU, LinearMap.coe_mk, AddHom.coe_mk, hd, dif_pos]
+          rw [evR_idem hl (htest _ ⟨hd, hl⟩ hd)]
+          rfl
+        rw [h1, one_mul]
+      · have hzero : P k y = 0 := hoff k y hz
+        rw [hzero, mul_zero]
+    let g : FDSec (U σ).X →ₗ[ℂ] FDSec (U σ).X := LinearMap.mulLeft ℂ (rdU (U σ) (idem Z))
+    have hmap := Submodule.mem_map_of_mem (f := g) hsp'
+    rw [Submodule.map_span] at hmap
+    have hg : g P = P := hfix
+    rw [hg] at hmap
+    refine Submodule.span_mono ?_ hmap
+    rintro _ ⟨_, ⟨f, hf, rfl⟩, rfl⟩
+    refine ⟨idem Z * f, ⟨?_, ?_⟩, ?_⟩
+    · rw [← cuspW_wtZ] at hf
+      exact GlobalTheory.CompRestr.idem_mul_mem_cuspW hL.unf Z hf
+    · rw [mul_comm]; exact mul_mem_suppOn _ (idem_mem_suppOn Z)
+    · exact AllWt.rdU_mul (U σ) _ _
   let R : FDSec (U σ).X →ₗ[ℂ] (↥((U σ).X k0).dom → ℂ) :=
     { toFun := fun Q y => Q k0 y.1
       map_add' := fun _ _ => rfl

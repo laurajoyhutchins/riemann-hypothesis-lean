@@ -1,5 +1,58 @@
-import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.Stabfin
-import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.Levelaf
+module
+
+public import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.Levelaf
+public import Mathlib.RingTheory.Henselian
+public import Mathlib.RingTheory.RegularLocalRing.Defs
+public import Mathlib.RingTheory.SimpleRing.Principal
+public import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.Stabfin
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -9,15 +62,14 @@ namespace Formalism.UG.P
 
 open Formalism.UG
 
-section Trace
-
 variable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E]
 
 local notation "𝒜" => E ⊗[F] FiniteAdeleRing (𝓞 F) F
 local notation "𝒮" => tensInt (F := F) (FiniteAdeleRing (𝓞 F) F) (intOE E) (intAd F)
 
-variable (F E) in
+section Trace
 
+variable (F E) in
 def adelstabT : E ⊗[F] FiniteAdeleRing (𝓞 F) F →ₗ[F] FiniteAdeleRing (𝓞 F) F :=
   (TensorProduct.lid F _).toLinearMap ∘ₗ (Algebra.trace F E).rTensor _
 
@@ -33,6 +85,7 @@ theorem adelstab_trace_int (b : 𝓞 E) :
 theorem adelstabT_mem {s : 𝒜} (hs : s ∈ 𝒮) : adelstabT F E s ∈ intAd F := by
   obtain ⟨r, hr, rfl⟩ := levelaf_decomp (fun j => Module.finBasis ℤ (𝓞 E) j)
     (Module.Basis.span_eq _) hs
+
   rw [map_sum]
   refine sum_mem fun j _ => ?_
   rw [adelstabT_tmul]
@@ -75,14 +128,11 @@ theorem adelstab_dual {ι : Type} [Fintype ι] [DecidableEq ι] (β : Module.Bas
 
 end Trace
 
-section Lattice
+variable {n : Type} [Fintype n] [DecidableEq n]
 
-variable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E]
-  {n : Type} [Fintype n] [DecidableEq n]
-
-local notation "𝒜" => E ⊗[F] FiniteAdeleRing (𝓞 F) F
-local notation "𝒮" => tensInt (F := F) (FiniteAdeleRing (𝓞 F) F) (intOE E) (intAd F)
 local notation "ι" => inclE (F := F) (E := E) (FiniteAdeleRing (𝓞 F) F)
+
+section Lattice
 
 theorem adelstab_incl_C (d : 𝓞 F) : ι (algebraMap (𝓞 F) E d) = levelafC E d := by
   simp only [levelafC, inclE]
@@ -103,14 +153,14 @@ theorem adelstab_algebraMap_ne_zero (d : 𝓞 F) (hd : d ≠ 0) : algebraMap (�
      exact IsFractionRing.injective (𝓞 F) F (h.trans (map_zero _).symm))
   | simpa using h
 
-variable (F E) in
 
+variable (F E) in
 def adelstabLam (G : GL n (E ⊗[F] FiniteAdeleRing (𝓞 F) F)) (L : Submodule 𝒮 (n → 𝒜)) :
     Submodule (𝓞 E) (n → E) where
   carrier := {x | ((G⁻¹ : GL n 𝒜) : Matrix n n 𝒜) *ᵥ (fun i => ι (x i)) ∈ L}
   add_mem' := by
     intro x y hx hy
-    simp only [Set.mem_ofPred_eq, Pi.add_apply, map_add] at *
+    simp only [Set.mem_ofPred_eq, Pi.add_apply, map_add (f := _)] at *
     rw [show (fun i => ι (x i) + ι (y i)) = (fun i => ι (x i)) + (fun i => ι (y i)) from rfl,
       mulVec_add]
     exact add_mem hx hy
@@ -170,13 +220,6 @@ end Lattice
 
 section Fin
 
-variable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E]
-  {n : Type} [Fintype n] [DecidableEq n]
-
-local notation "𝒜" => E ⊗[F] FiniteAdeleRing (𝓞 F) F
-local notation "𝒮" => tensInt (F := F) (FiniteAdeleRing (𝓞 F) F) (intOE E) (intAd F)
-local notation "ι" => inclE (F := F) (E := E) (FiniteAdeleRing (𝓞 F) F)
-
 theorem adelstab_finite (G : GL n 𝒜) (L : Submodule 𝒮 (n → 𝒜)) (c₂ d : 𝓞 F) (hc₂ : c₂ ≠ 0)
     (hd : d ≠ 0) (hL : ∀ v ∈ L, ∀ i, levelafC E c₂ * v i ∈ 𝒮)
     (hG : ∀ i j, levelafC E d * (G : Matrix n n 𝒜) i j ∈ 𝒮) :
@@ -233,13 +276,6 @@ theorem adelstab_finite (G : GL n 𝒜) (L : Submodule 𝒮 (n → 𝒜)) (c₂ 
 end Fin
 
 section Main
-
-variable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E]
-  {n : Type} [Fintype n] [DecidableEq n]
-
-local notation "𝒜" => E ⊗[F] FiniteAdeleRing (𝓞 F) F
-local notation "𝒮" => tensInt (F := F) (FiniteAdeleRing (𝓞 F) F) (intOE E) (intAd F)
-local notation "ι" => inclE (F := F) (E := E) (FiniteAdeleRing (𝓞 F) F)
 
 theorem adelstab_entries (G : GL n 𝒜) (d : 𝓞 F) (c : 𝒮) (hc : (c : 𝒜) = levelafC E d)
     (h : (c : 𝒜) • (G : Matrix n n 𝒜) ∈ (RingHom.mapMatrix (m := n) (𝒮).subtype).range) :

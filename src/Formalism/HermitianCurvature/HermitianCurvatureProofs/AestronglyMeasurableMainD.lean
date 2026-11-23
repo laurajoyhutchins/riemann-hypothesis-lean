@@ -1,4 +1,58 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.TendstoSmulCocompact
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.TendstoSmulCocompact
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.RootPushforwardDensity
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.LastBlockDecay
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.NormOfMemRootSetOne
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.MeasureTheory.Function.L2Space
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.Order.Chebyshev
+
+@[expose] public section
 
 namespace Formalism.FourierDecayAlt.P.PBK
 
@@ -64,9 +118,7 @@ theorem aestronglyMeasurable_mainD {s : ℕ} (hs : s ≠ 0) (β : ℂ) {ε : ℂ
       (continuous_psi_lemma_2 β).measurable.comp ((measurable_const.mul hR).mul measurable_const)
     exact hp.stronglyMeasurable.smul (hbt.comp_measurable hR)
   have := Finset.stronglyMeasurable_sum (Finset.range s) hk
-  convert this using 1
-  funext D
-  simp only [Finset.sum_apply]
+  convert this using 1 <;> ext D <;> simp
 
 theorem aestronglyMeasurable_abar {s : ℕ} (hs : s ≠ 0) {ε : ℂ} (hε : ε ≠ 0) {bt : ℂ → H}
     (hbt : StronglyMeasurable bt) : AEStronglyMeasurable (abar s ε bt) volume := by
@@ -78,9 +130,7 @@ theorem aestronglyMeasurable_abar {s : ℕ} (hs : s ≠ 0) {ε : ℂ} (hε : ε 
       (measurable_R_lemma s k).comp (measurable_const.mul measurable_id)
     exact (hbt.comp_measurable hR).norm
   have := Finset.stronglyMeasurable_sum (Finset.range s) hk
-  convert this using 1
-  funext D
-  simp only [Finset.sum_apply]
+  convert this using 1 <;> ext D <;> simp
 
 theorem card_rootSet_le (s : ℕ) (a : ℂ) : (G.rootSet s a).card ≤ s := by
   unfold G.rootSet
@@ -97,7 +147,7 @@ theorem memLp_abar {s : ℕ} (hs : s ≠ 0) {ε : ℂ} (hε : ‖ε‖ = 1) {bt 
     (hb : MemLp (bz s bt) 2 volume) :
     MemLp (abar s ε bt) 2 volume ∧ ∫ D, abar s ε bt D ^ 2 ≤ s * ∫ z, ‖bz s bt z‖ ^ 2 := by
   have hε0 : ε ≠ 0 := by rintro rfl; simp at hε
-  have hb2 : Integrable (fun z => ‖bz s bt z‖ ^ 2) := (memLp_two_iff_integrable_sq_norm hb.1).1 hb
+  have hb2 : Integrable (fun z => ‖bz s bt z‖ ^ 2) := (memLp_two_iff_integrable_sq_norm hb.aestronglyMeasurable).1 hb
   have hF : Integrable (fun z => ‖ε⁻¹ * ((s : ℂ) * z ^ (s - 1))‖ ^ 2 • ‖bt z‖ ^ 2) := by
     simp_rw [jac_norm_bz hε bt]; exact hb2
   obtain ⟨hGi, hGeq⟩ := integral_sum_rootSet s hs ε hε0 (fun z => ‖bt z‖ ^ 2) hF

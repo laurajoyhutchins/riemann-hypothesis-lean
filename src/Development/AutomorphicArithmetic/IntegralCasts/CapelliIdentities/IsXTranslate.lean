@@ -1,23 +1,49 @@
-import Mathlib
-import Development.WeilBound.RepresentationTheoryGL.TwistedFactors.TruncatedCuspIrreducibility.AdelDefs
-import GroundTheory.AutomorphicForms.ReductionMahler
-import GroundTheory.AutomorphicForms.AutomorphicFormSpaces.Archimedean
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.MkMemAdmissibleAtIffCocycle
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.IwahoriHeckeInjectivity.HeckeInj
-import GroundTheory.AutomorphicForms.CuspidalDiscreteness.Smoothing
-import GroundTheory.AutomorphicForms.ReductionMeasure
-import GroundTheory.AutomorphicForms.Reduction
-import Development.WeilBound.RepresentationTheoryGL.TwistedFactors.CuspDecayHeights.HeightLe
-import Development.AutomorphicArithmetic.Foundations.Convolution.PowerSumTraces.SummandFactor
-import GroundTheory.AutomorphicForms.AdelicGLn
-import Development.AutomorphicArithmetic.Foundations.Convolution.TensFun
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.IwahoriBlocks.SimpleIn
-import Development.AutomorphicArithmetic.Foundations.Convolution.GeneralizedMeasures.HeckeFinAlt
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.IwahoriBlocks.IwahoriCentralBorel.LevLaws
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.IwahoriBlocks.SimpleIn
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.IwahoriBlocks.IwahoriCentralBorel.LevLaws
 import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.IwahoriBlocks.IwahoriCentralBorel.PiHomExt
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.MeanValueUniqueness
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.IsOpenRightInvariance
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.AeTranslateEq
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.AeTranslateEq
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.IsOpenRightInvariance
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.MeanValueUniqueness
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.WeilStabilizerVolume.UnfoldAbs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import PositivityTheory.AutomorphicForms.PublishedInputs.CyclicBaseChange.PSConjSpaceR
+
+@[expose] public section
 
 section
 open MeasureTheory GroundTheory.Automorphic GroundTheory.Automorphic.AutomorphicForm PositivityTheory.Rg.Tf.Core PositivityTheory.Rg.Tf.Adel
@@ -40,14 +66,14 @@ private theorem UpperTheory.Reformulated.B.Gul4.mem_iff (μ : Measure (G1 K n)) 
   | mem x hx => exact hx
   | zero =>
     refine ⟨continuous_const, ⟨0, τ.zero_mem, ?_⟩, fun g => by simp, _, UpperTheory.Reformulated.B.Gul4.lev_top, fun u _ g => rfl⟩
-    exact hq.ae (Lp.coeFn_zero ℂ 2 _)
+    exact MeasureTheory.QuasiMeasurePreserving.ae hq (Lp.coeFn_zero ℂ 2 _)
   | add x y _ _ hx hy =>
     obtain ⟨cx, ⟨v, hv, rv⟩, ax, U, hU, fx⟩ := hx
     obtain ⟨cy, ⟨v', hv', rv'⟩, ay, U', hU', fy⟩ := hy
     obtain ⟨hL, hE⟩ := hinf U U' hU hU'
     refine ⟨cx.add cy, ⟨v + v', τ.add_mem hv hv', ?_⟩, UpperTheory.mean_value_uniqueness κ arc1 p harc hp.cont x y cx cy ax ay,
       _, hL, fun u hu g => ?_⟩
-    · filter_upwards [hq.ae (Lp.coeFn_add v v'), rv, rv'] with z h1 h2 h3
+    · filter_upwards [MeasureTheory.QuasiMeasurePreserving.ae hq (Lp.coeFn_add v v'), rv, rv'] with z h1 h2 h3
       rw [Pi.add_apply, ← h2, ← h3]
       exact h1
     · rw [hE] at hu
@@ -55,7 +81,7 @@ private theorem UpperTheory.Reformulated.B.Gul4.mem_iff (μ : Measure (G1 K n)) 
   | smul c x _ hx =>
     obtain ⟨cx, ⟨v, hv, rv⟩, ax, U, hU, fx⟩ := hx
     refine ⟨cx.const_smul c, ⟨c • v, τ.smul_mem c hv, ?_⟩, fun g => ?_, U, hU, fun u hu g => ?_⟩
-    · filter_upwards [hq.ae (Lp.coeFn_smul c v), rv] with z h1 h2
+    · filter_upwards [MeasureTheory.QuasiMeasurePreserving.ae hq (Lp.coeFn_smul c v), rv] with z h1 h2
       rw [Pi.smul_apply, ← h2]
       exact h1
     · rw [Pi.smul_apply, ← ax g, smul_eq_mul, ← integral_const_mul]

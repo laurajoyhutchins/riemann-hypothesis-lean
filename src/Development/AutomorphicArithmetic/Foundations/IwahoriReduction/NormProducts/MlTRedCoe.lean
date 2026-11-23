@@ -1,7 +1,55 @@
-import Development.AutomorphicArithmetic.Foundations.IwahoriReduction.NormProducts.PushLoc
-import Development.AutomorphicArithmetic.Foundations.IwahoriReduction.NormProducts.TraceHeckeCongruenceVanish
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.KatoQuadraticCharacters.EulerFactorBounds.KatoTwistedClassNormCompatibleCyclotomic
-import Development.AbelianVarietyTheory.Definitions.Foundations.AdmissibleNewformZetaData
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.KatoQuadraticCharacters.EulerFactorBounds.KatoTwistedClassNormCompatibleCyclotomic
+public import Development.AbelianVarietyTheory.Definitions.Foundations.AdmissibleNewformZetaData
+public import Development.AbelianVarietyTheory.Definitions.Foundations.IsZetaSystemFixedExponent
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.ResMapBijective
+public import Mathlib.RingTheory.AdicCompletion.Noetherian
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.TowerUnitClassModPrimePowProperties
+public import Development.AutomorphicArithmetic.Foundations.IwahoriReduction.NormProducts.PushLoc
+public import Development.AutomorphicArithmetic.Foundations.IwahoriReduction.NormProducts.TraceHeckeCongruenceVanish
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.Finset.Functor
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.Padics.ProperSpace
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import Mathlib.Topology.Algebra.Module.Compact
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Formalism.ConjugateSelfDual ReciprocityTheory.Gal Formalism.MainNotions.N GlobalTheory.GalOfCusp UpperTheory.V UpperTheory.V.Af UpperTheory.V.HV GlobalTheory.Ord2 GlobalTheory.KZ GlobalTheory.K4 GlobalTheory.KA UpperTheory.Kd.K4 UpperTheory.V.Z.Kato.Sym UpperTheory.V.Z.Kato.Nb
 open scoped Matrix MatrixGroups Topology
 
@@ -38,6 +86,7 @@ private theorem UpperTheory.Kd.K4.mlT_topSum (hA : SApi) (hI : SInvApi) {Ω : Ty
   refine ⟨fun σ hσ => ?_, fun σ hσ τ hτ => ?_, ?_⟩
   · exact (hI Ω ε X l N w n).2.2.2.2.1 ι S _ fun i hi => (h i hi).inv σ hσ
   · have e : (∑ i ∈ S, z i σ) + X.galB l σ (∑ i ∈ S, z i τ) = ∑ i ∈ S, (z i σ + X.galB l σ (z i τ)) := by
+
       rw [map_sum, Finset.sum_add_distrib]
     rw [e]
     exact hsum ι S _ _ fun i hi => (h i hi).coc σ hσ τ hτ
@@ -61,6 +110,7 @@ private theorem UpperTheory.Kd.K4.mlT_shSum {Ω : Type} [Field Ω] [Algebra ℚ 
     (M : ℕ) {ι : Type} (S : Finset ι) (z : ι → (Ω ≃ₐ[ℚ] Ω) → X.Fn l) :
     shB X l M (fun σ => ∑ i ∈ S, z i σ) = ∑ i ∈ S, shB X l M (z i) := by
   funext s y
+
   simp [shB, Finset.sum_apply, map_sum]
 
 private theorem UpperTheory.Kd.K4.mlT_pushSum {Γ : Type} [Group Γ] {B A M ι : Type} [Fintype B] [DecidableEq A] [AddCommMonoid M]
@@ -76,7 +126,7 @@ private theorem UpperTheory.Kd.K4.mlT_lsq (l p : ℕ) (hp : p.Prime) (h : Nat.Co
   have hu : IsUnit (l : ZMod p) := (ZMod.isUnit_iff_coprime l p).2 h.symm
   have hu2 : IsUnit ((l : ZMod p) ^ (2 * k)) := hu.pow _
   unfold lsqInv inv1
-  rw [dif_pos hu2, dif_pos hu, inv_pow]
+  rw [dite_eq_left hu2, dite_eq_left hu, inv_pow]
   congr 1
   ext
   simp

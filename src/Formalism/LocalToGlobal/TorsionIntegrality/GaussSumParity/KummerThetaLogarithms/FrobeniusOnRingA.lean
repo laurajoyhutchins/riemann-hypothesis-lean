@@ -1,4 +1,54 @@
-import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.RingAFacts
+module
+
+public import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.RingAFacts
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RootsOfUnity.AlgebraicallyClosed
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.FieldTheory.Finite.Basic
+public import Mathlib.FieldTheory.Minpoly.IsIntegrallyClosed
+public import Mathlib.RingTheory.RootsOfUnity.EnoughRootsOfUnity
+public import Mathlib.RingTheory.RootsOfUnity.Minpoly
+
+@[expose] public section
 
 noncomputable section
 open scoped BigOperators
@@ -30,7 +80,7 @@ lemma evK_mem (k : ℕ) (r : MonoidAlgebra ℤ (muSub l)) : evK l k r ∈ ringA 
     rw [evK_of]
     exact Subring.pow_mem _ (Subring.subset_closure g.2) k
   | add x y hx hy =>
-    rw [map_add]
+    rw [map_add (f := _)]
     exact Subring.add_mem _ hx hy
   | smul a x hx =>
     rw [zsmul_eq_mul, map_mul, map_intCast]
@@ -72,7 +122,7 @@ lemma exists_poly (r : MonoidAlgebra ℤ (muSub l)) :
       exacts [hln h, hln' h]
     · obtain ⟨P, hP⟩ := hP m (dvd_trans (dvd_mul_right _ _) hnm) hm ζ hζ
       obtain ⟨P', hP'⟩ := hP' m (dvd_trans (dvd_mul_left _ _) hnm) hm ζ hζ
-      exact ⟨P + P', fun k => by rw [Polynomial.eval₂_add, map_add, hP, hP']⟩
+      exact ⟨P + P', fun k => by rw [Polynomial.eval₂_add, map_add (f := _), hP, hP']⟩
   | smul a x hx =>
     obtain ⟨n, hn, hln, hP⟩ := hx
     refine ⟨n, hn, hln, fun m hnm hm ζ hζ => ?_⟩
@@ -139,7 +189,7 @@ lemma evA_congr (r : MonoidAlgebra ℤ (muSub l)) :
     obtain ⟨v, hv⟩ := hy
     obtain ⟨w, hw⟩ := exists_add_pow_prime_eq (Fact.out : l.Prime) (evA l 1 x) (evA l 1 y)
     refine ⟨u + v - evA l 1 x * evA l 1 y * w, ?_⟩
-    rw [map_add, map_add, hw]
+    rw [map_add (f := _), map_add (f := _), hw]
     linear_combination hu + hv
   | smul a x hx =>
     obtain ⟨u, hu⟩ := hx

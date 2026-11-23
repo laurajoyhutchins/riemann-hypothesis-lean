@@ -1,10 +1,59 @@
-import Mathlib
-import ReciprocityTheory.DualLattices.CotangentSurjective
-import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.IsTight
-import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.StepOrderRes
-import ReciprocityTheory.DualLattices.MemDualLat
-import ReciprocityTheory.DualLattices.MemSupOfRestrictToSubgroupMemSq
-import Development.WeilBound.CoreStatements.HodgeTatePoints.EqOfProdEq
+module
+
+public import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.IsTight
+public import Mathlib.FieldTheory.IsAlgClosed.Basic
+public import Development.WeilBound.CoreStatements.HodgeTatePoints.EqOfProdEq
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.DualLattices.ExistsSmulMemOfMemSpan
+public import ReciprocityTheory.DualLattices.MemDualLat
+public import ReciprocityTheory.DualLattices.MemMapAugmentationIdealComapPullbackQuotient
+public import ReciprocityTheory.DualLattices.MemSupOfRestrictToSubgroupMemSq
+
+@[expose] public section
 
 open ReciprocityTheory.PGsh.L2 ReciprocityTheory.PGsh.Up GlobalTheory.CompanionTheory.Ar.GR
 open scoped Matrix
@@ -183,7 +232,7 @@ theorem sub_closed : ∀ (p : ℕ) [Fact p.Prime] (C : Type) [Field C] [IsAlgClo
   · rintro _ ⟨g, hg, rfl⟩
     refine ⟨h1 g hg, fun x k hk => ?_⟩
     change g (j (x + k)) = g (j x)
-    rw [map_add, AddMonoidHom.mem_ker.1 hk, add_zero]
+    rw [map_add (f := _), AddMonoidHom.mem_ker.1 hk, add_zero]
   have : Fintype (N ⧸ j.ker) := Fintype.ofFinite _
   obtain ⟨-, ⟨AQ, hAQ⟩, -⟩ := h2 C R v hv N j.ker AA
   obtain ⟨f, hf, hfree⟩ := exists_coset_basis hv AA j.ker
@@ -213,7 +262,7 @@ theorem sub_closed : ∀ (p : ℕ) [Fact p.Prime] (C : Type) [Field C] [IsAlgClo
       rfl
     · rintro _ _ ⟨a, ha, rfl⟩ ⟨b, hb, rfl⟩
       refine ⟨a + b, fun k => J.add_mem (ha k) (hb k), ?_⟩
-      simp only [Pi.add_apply, map_add, add_mul, Finset.sum_add_distrib]
+      simp only [Pi.add_apply, map_add (f := _), add_mul, Finset.sum_add_distrib]
   have hmain := pull_eq hv.hom_inj AQ A' (QuotientAddGroup.kerLift j) hi1 (by
     intro g hg hg0
     have hg' : pullQ (R := R) j.ker g ∈ AA.carrier := by rw [hAQ] at hg; exact hg

@@ -1,12 +1,58 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.ModuliSpaces.FiniteHomogeneousInf
-import Development.AbelianVarietyTheory.Definitions.ModuliSpaces.ExistsTwoPoints
-import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.IsProjOverCompOfIsClosedImmersion
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.IsHomogeneousXPowMulAddXPowMul
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.UniformisationConclusion
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.HeckeKer
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsHolPeriods
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.UnifUniqSt
+module
+
+public import Development.AbelianVarietyTheory.Definitions.ModuliSpaces.FiniteHomogeneousInf
+public import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.IsProjOverCompOfIsClosedImmersion
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.IsHomogeneousXPowMulAddXPowMul
+public import Development.AbelianVarietyTheory.Definitions.ModuliSpaces.ExistsTwoPoints
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.AlgebraicGeometry.Morphisms.WeaklyEtale
+import Mathlib.AlgebraicGeometry.ProjectiveSpectrum.Proper
+import Mathlib.AlgebraicGeometry.QuasiAffine
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.AbProj
+import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.ExistsSmulEqMapOfIsCompactOfIsQuasiSeparated
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor
@@ -27,6 +73,7 @@ variable {R A σ : Type} [CommRing R] [CommRing A] [Algebra R A] {r : σ → A} 
 theorem map_eq_zero_of_forms {B : Type} [CommRing B] (θ : MvPolynomial σ R →+* B)
     (hI : ∀ F ∈ I, ∀ e, homogeneousComponent e F ∈ I)
     (H : ∀ t F, F.IsHomogeneous t → F ∈ I → θ F = 0) {F : MvPolynomial σ R} (hF : F ∈ I) : θ F = 0 := by
+
   rw [← sum_homogeneousComponent F, map_sum]
   exact Finset.sum_eq_zero fun t _ => H t _ (homogeneousComponent_isHomogeneous t F) (hI F hF t)
 
@@ -87,13 +134,15 @@ theorem flat_chart (hi : r i = 1) (hr : Function.Surjective (aeval (R := R) r))
   let y : Fin l → homogeneousSubmodule σ R (d + k + m) := fun a =>
     ⟨X i ^ (d + k) * (X i ^ (m - n a) * G a), (isHomogeneous_X_pow i _).mul (hG' a)⟩
   have hy : ∑ a, f a • N.mkQ (y a) = 0 := by
+
     simp only [← map_smul, ← map_sum]
     refine (Submodule.Quotient.mk_eq_zero _).2 ?_
     change (homogeneousSubmodule σ R (d + k + m)).subtype _ ∈ I
     have e : (homogeneousSubmodule σ R (d + k + m)).subtype (∑ a, f a • y a) =
         X i ^ d * (X i ^ k * ∑ a, f a • (X i ^ (m - n a) * G a)) := by
+
       simp only [map_sum, map_smul, Finset.mul_sum, mul_smul_comm, y, Submodule.subtype_apply, pow_add,
-        _root_.mul_assoc]
+      _root_.mul_assoc]
     rw [e]
     exact I.mul_mem_left _ hk
   let θ : (homogeneousSubmodule σ R (d + k + m) ⧸ N) →ₗ[R] A :=
@@ -104,6 +153,7 @@ theorem flat_chart (hi : r i = 1) (hr : Function.Surjective (aeval (R := R) r))
     rw [aeval_X_pow_mul hi, aeval_X_pow_mul hi, eG]
   obtain ⟨s, c, z, hz, hc⟩ := Module.Flat.isTrivialRelation_of_sum_smul_eq_zero hy
   refine ⟨s, c, fun j => θ (z j), fun a => ?_, hc⟩
+
   rw [← hθ, show N.mkQ (y a) = _ from hz a, map_sum]
   simp only [map_smul]
 
@@ -125,23 +175,23 @@ theorem appLE_pt_aeval (c : R →+* A) (v : Fin (n + 1) → A) (hv : Ideal.span 
     {W : (Sp A).Opens} (h : W ≤ pt c v hv ⁻¹ᵁ chart R n i) {t : ℕ} {G : MvPolynomial (Fin (n + 1)) R}
     (hG : G.IsHomogeneous t) :
     ((pt c v hv).appLE _ W h).hom (aeval (ratio R n i) G) * fnOn W (v i) ^ t = fnOn W (eval₂ c v G) := by
-  have e := congrArg (fun θ => θ G) (appLE_comp_aeval_ratio (φ := pt c v hv) (hi := h))
-  rw [pt_str, baseRingHom_spMap] at e
-  refine (congrArg (· * _) e).trans ?_
-  rw [eval₂_comp_left, coe_eval₂Hom, ← ReciprocityTheory.AnForm.R.eval₂_mul_const_of_isHomogeneous _ _ _ hG]
-  exact congrArg (eval₂ _ · G) (funext fun j => pullRatio_pt_mul c v hv i j h)
+  simpa only [formOn_eq_aeval] using appLE_pt_formOn_mul c v hv i h hG
 
 theorem formIdeal_le_ker_pt_iff (J : Ideal (MvPolynomial (Fin (n + 1)) R)) (c : R →+* A) (v : Fin (n + 1) → A)
     (hv : Ideal.span (Set.range v) = ⊤) :
     formIdeal J ≤ (pt c v hv).ker ↔ ∀ t G, G.IsHomogeneous t → G ∈ J → eval₂ c v G = 0 := by
+  have hchart (i : Fin (n + 1)) : pt c v hv ⁻¹ᵁ chart R n i = spOpen (v i) := by
+    rw [pt, chart, ProjPoint.ofHom_preimage_basicOpen _ _ _ one_pos (X_mem R n i),
+      MvPolynomial.eval₂Hom_X']
+    rfl
   constructor
   · intro h t G hG jG
     refine eq_zero_of_fnOn_eq_zero hv fun i => ?_
     have h1 := (pt c v hv).ideal_ker_le _
       (h _ ((aeval_mem_formIdeal_iff J i hG).2 ⟨0, by rwa [pow_zero, _root_.one_mul]⟩))
-    rw [← appLE_pt_aeval c v hv i (pt_preimage_chart c v hv i).ge hG]
-    have h2 : ((pt c v hv).appLE _ _ (pt_preimage_chart c v hv i).ge).hom (aeval (ratio R n i) G) = 0 :=
-      (congrArg (resG _ (pt_preimage_chart c v hv i).ge) h1).trans (map_zero _)
+    rw [← appLE_pt_aeval c v hv i (hchart i).ge hG]
+    have h2 : ((pt c v hv).appLE _ _ (hchart i).ge).hom (aeval (ratio R n i) G) = 0 :=
+      (congrArg (resG _ (hchart i).ge) h1).trans (map_zero _)
     rw [h2, zero_mul]
   · intro h
     have := isProper_str R n
@@ -154,7 +204,7 @@ theorem formIdeal_le_ker_pt_iff (J : Ideal (MvPolynomial (Fin (n + 1)) R)) (c : 
     have e := appLE_pt_aeval c v hv i le_rfl p.2.1
     rw [h _ _ p.2.1 p.2.2, map_zero] at e
     have hu : IsUnit (fnOn (pt c v hv ⁻¹ᵁ chart R n i) (v i)) := isUnit_of_basicOpen_eq _ (by
-      rw [basicOpen_fnOn, pt_preimage_chart, inf_idem])
+      rw [basicOpen_fnOn, hchart, inf_idem])
     exact (hu.pow _).mul_left_eq_zero.1 e
 
 theorem of_baseRingHom {P : MorphismProperty Scheme.{0}}
@@ -216,7 +266,10 @@ theorem projRep_emb (hI : ∀ F ∈ I, ∀ t, homogeneousComponent t F ∈ I) :
       ((formIdeal_le_ker_pt_iff _ β _ hv').2 ((vanish_iff e I hI β v).2 h))
     have hl := IsClosedImmersion.lift_fac (emb e I) _ hle
     have hs : (IsClosedImmersion.lift (emb e I) _ hle ≫ emb e I) ≫ PSpace.str R n = spMap β := by
-      rw [hl, pt_str]
+      rw [hl, pt, PSpace.str, ProjPoint.ofHom_toSpecZero_assoc, ← Spec.map_comp]
+      congr 1
+      ext1
+      exact RingHom.ext fun r => eval₂Hom_C β _ r
     refine ⟨_, ⟨(Category.assoc _ _ _).symm.trans hs, (ProjCoord.secCoord_iff e _ β _ hs v).2 ⟨hv', hl⟩⟩,
       fun x hx => ?_⟩
     obtain ⟨_, hp⟩ := (ProjCoord.secCoord_iff e _ β x ((Category.assoc _ _ _).trans hx.1) v).1 hx.2

@@ -1,10 +1,59 @@
-import Mathlib
-import Formalism.PeriodIntegrals.RhsWLim
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.WeightedLimitGauge.VolumeLieE
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.WeightedLimitGauge.MBaseMem
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.WeightedLimitGauge.TBallMeas
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.WeightedLimitGauge.HaarUniq
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.WeightedLimitGauge.ChartLim
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.WeightedLimitGauge.VolumeLieE
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.WeightedLimitGauge.ChartLim
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.WeightedLimitGauge.HaarUniq
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.WeightedLimitGauge.TBallMeas
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+public import Mathlib.Analysis.Normed.Algebra.MatrixExponential
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Analysis.SpecialFunctions.Exponential
+
+@[expose] public section
 
 noncomputable section
 
@@ -95,10 +144,10 @@ theorem exp_dV (t : ℝ) : NormedSpace.exp ((t : ℂ) • diagonal (dV k r)) = d
   rw [← Matrix.diagonal_smul, Matrix.exp_diagonal, Pi.exp_def]
   congr 1
   funext i
-  simp only [Pi.smul_apply, dV, smul_eq_mul]
+  simp only [Pi.smul_apply, dV]
   split_ifs
-  · rw [Complex.exp_eq_exp_ℂ]
-  · rw [mul_zero, NormedSpace.exp_zero]
+  · rw [Complex.exp_eq_exp_ℂ, smul_eq_mul]
+  · simp
 
 theorem unit_exp (t : ℝ) : star (Complex.exp (t * Complex.I)) * Complex.exp (t * Complex.I) = 1 := by
   rw [Complex.star_def, ← Complex.exp_conj, ← Complex.exp_add]
@@ -127,6 +176,7 @@ theorem haarOn_smul (S : Set (Mat k r)) (ν : Measure (Mt k r)) (c : ℝ≥0) (h
     simpa [hc] using h1
   · rw [Measure.smul_apply, h.2.2.1, smul_zero]
   · rw [Measure.map_smul, h.2.2.2 s hs]
+    exact (HU.lmulM_cont s).measurable.aemeasurable
 
 theorem tBall_mass (ν : Measure (Mt k r)) (h : IsHaarOn (UWb k r) ν) (m : Mat k r) (hm : m ∈ UWb k r) (ρ : ℝ) :
     ν (tBall k r m ρ) = ν (bBall k r ρ) := by
@@ -138,8 +188,8 @@ theorem tBall_mass (ν : Measure (Mt k r)) (h : IsHaarOn (UWb k r) ν) (m : Mat 
 
 end GE
 
-open GE in
 
+open GE in
 theorem gaugeExists_of (hH : HaarDens) (hL : ChartLim) : GaugeExists := by
   intro k r hk
   obtain ⟨νh, hνh, δ, hδc, hδ0, hδt, ε, hε, hball⟩ := hH k r hk

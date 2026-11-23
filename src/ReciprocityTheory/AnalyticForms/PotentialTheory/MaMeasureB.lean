@@ -1,7 +1,61 @@
-import ReciprocityTheory.AnalyticForms.PotentialTheory.MaMeasureA
-import ReciprocityTheory.AnalyticForms.PotentialTheory.IntegrableOnTargetOfTsupport
-import ReciprocityTheory.AnalyticForms.PotentialTheory.LocDens
-import ReciprocityTheory.AnalyticForms.PotentialTheory.Partition
+module
+
+public import ReciprocityTheory.AnalyticForms.PotentialTheory.IsPotentialOfFun
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.Complex
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.AnalyticForms.PotentialTheory.LocDens
+public import ReciprocityTheory.AnalyticForms.PotentialTheory.MaMeasureA
+public import ReciprocityTheory.AnalyticForms.PotentialTheory.Partition
+public import Mathlib.Analysis.Calculus.FDeriv.RestrictScalars
+public import Mathlib.MeasureTheory.Function.Jacobian
+public import Mathlib.RingTheory.Norm.Transitivity
+
+@[expose] public section
 
 namespace ReciprocityTheory.AnForm.M
 
@@ -20,14 +74,14 @@ theorem maMeasure_eq_sum {e : ℕ} {X : Type} [TopologicalSpace X] [MeasurableSp
     (A : FinHolAtlas e X) (Φ : Fin e → LocPot X) (hne : Nonempty (ChartPartition A)) :
     maMeasure A Φ = ∑ j, chartMeasure A hne.some Φ j := by
   unfold maMeasure
-  rw [dif_pos hne]
+  rw [dite_eq_left hne]
   rfl
 
 theorem mInt_eq_integralWith {e : ℕ} {X : Type} [TopologicalSpace X]
     (A : FinHolAtlas e X) (Φ : Fin e → LocPot X) (hne : Nonempty (ChartPartition A))
     (g : X → ℝ) : mInt A Φ g = integralWith A hne.some Φ g := by
   unfold mInt
-  rw [dif_pos hne]
+  rw [dite_eq_left hne]
 
 theorem map_withDensity_integrable_integral {e : ℕ} {X : Type} [TopologicalSpace X]
     [MeasurableSpace X] [BorelSpace X] {T : Set (Fin e → ℂ)} (hT : IsOpen T)
@@ -87,7 +141,7 @@ theorem maMeasure_mono_of_psh {e : ℕ} {X : Type} [TopologicalSpace X] [Measura
   split_ifs with h
   · rw [Measure.le_iff]
     intro s hs
-    simp only [Measure.coe_finset_sum, Finset.sum_apply]
+    simp only [MeasureTheory.Measure.coe_finsetSum, Finset.sum_apply]
     refine Finset.sum_le_sum fun j _ => ?_
     have hT := (A.chart j).open_target.measurableSet
     have hsm : AEMeasurable (A.chart j).symm (volume.restrict (A.chart j).target) :=
@@ -164,8 +218,8 @@ theorem maMeasure_forward (A : FinHolAtlas e X) (Φ : Fin e → LocPot X)
   by_cases hne : Nonempty (ChartPartition A)
   · rw [maMeasure_eq_sum A Φ hne, mInt_eq_integralWith A Φ hne]
     have hc := fun j => chartMeasure_integrable_integral A hne.some Φ hΦ hPsh j hg hgi
-    refine ⟨integrable_finset_sum_measure.2 fun j _ => (hc j).1, ?_⟩
-    rw [integral_finset_sum_measure fun j _ => (hc j).1]
+    refine ⟨MeasureTheory.integrable_finsetSum_measure.2 fun j _ => (hc j).1, ?_⟩
+    rw [MeasureTheory.integral_finsetSum_measure fun j _ => (hc j).1]
     unfold integralWith
     refine Finset.sum_congr rfl fun j _ => ?_
     rw [(hc j).2]
@@ -174,10 +228,10 @@ theorem maMeasure_forward (A : FinHolAtlas e X) (Φ : Fin e → LocPot X)
     ring
   · have h0 : maMeasure A Φ = 0 := by
       unfold maMeasure
-      rw [dif_neg hne]
+      rw [dite_eq_right hne]
     have h0' : mInt A Φ g = 0 := by
       unfold mInt
-      rw [dif_neg hne]
+      rw [dite_eq_right hne]
     rw [h0, h0']
     simp
 
@@ -199,7 +253,7 @@ theorem maMeasure_converse (A : FinHolAtlas e X) (Φ : Fin e → LocPot X)
     intro k
     rw [maMeasure_eq_sum A Φ hne, Measure.le_iff']
     intro s
-    simp only [Measure.coe_finset_sum, Finset.sum_apply]
+    simp only [MeasureTheory.Measure.coe_finsetSum, Finset.sum_apply]
     exact Finset.single_le_sum (f := fun i => chartMeasure A hne.some Φ i s)
       (fun _ _ => by simp) (Finset.mem_univ k)
   have hF : ∀ k, IntegrableOn (fun z => g ((A.chart k).symm z) *
@@ -261,7 +315,7 @@ theorem maMeasure_converse (A : FinHolAtlas e X) (Φ : Fin e → LocPot X)
     rw [h0, zero_mul]
   have hsum : IntegrableOn (fun y => ∑ k, hne.some.χ k ((A.chart j).symm y) *
       (g ((A.chart j).symm y) * locDens A Φ j y)) K :=
-    integrable_finset_sum Finset.univ (fun k _ => hterm k)
+    MeasureTheory.integrable_finsetSum Finset.univ (fun k _ => hterm k)
   refine hsum.congr_fun (fun y _ => ?_) hKm
   simp only
   rw [← Finset.sum_mul, hne.some.sum_eq_one, one_mul]

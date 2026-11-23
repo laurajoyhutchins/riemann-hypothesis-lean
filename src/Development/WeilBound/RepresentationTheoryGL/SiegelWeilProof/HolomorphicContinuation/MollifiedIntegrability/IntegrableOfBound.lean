@@ -1,5 +1,58 @@
-import Mathlib
-import Development.WeilBound.RepresentationTheoryGL.SiegelWeilProof.HolomorphicContinuation.MollifiedIntegrability.ClsBoundAlt
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.SiegelWeilProof.HolomorphicContinuation.MollifiedIntegrability.ClsBoundAlt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+public import Mathlib.Analysis.Calculus.LineDeriv.IntegrationByParts
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Analysis.Calculus.ContDiff.Basic
+public import Mathlib.Analysis.Calculus.ContDiff.Comp
+public import Mathlib.Analysis.Calculus.ContDiff.Operations
+
+@[expose] public section
 
 noncomputable section
 
@@ -87,21 +140,14 @@ theorem sum_vkl (β : E n) (k l : Fin n) : ∑ a, ∑ b, (β a b : ℂ) * vkl k 
   push_cast
   ring
 
-theorem dkl_chr (t : ℝ) (β : E n) (k l : Fin n) (y : E n) :
-    Dkl k l (chr t β) y = (-(Complex.I * t) * herm β k l) * chr t β y := by
-  have h := lf_re_im t β (vkl k l)
-  rw [sum_vkl] at h
-  simp only [Dkl, dirC, fderiv_chr]
-  linear_combination (chr t β y) * h
-
 theorem conj_half_add : starRingEnd ℂ ((1 + Complex.I) / 2) = (1 - Complex.I) / 2 := by
-  rw [map_div₀, map_add, map_one, Complex.conj_I, map_ofNat]; ring
+  rw [map_div₀, map_add (f := _), map_one, Complex.conj_I, map_ofNat]; ring
 
 theorem conj_half_sub : starRingEnd ℂ ((1 - Complex.I) / 2) = (1 + Complex.I) / 2 := by
   rw [map_div₀, map_sub, map_one, Complex.conj_I, map_ofNat]; ring
 
 theorem vkl_swap (k l a b : Fin n) : vkl l k a b = starRingEnd ℂ (vkl k l a b) := by
-  simp only [vkl, map_add, apply_ite (starRingEnd ℂ), map_zero, conj_half_add, conj_half_sub]
+  simp only [vkl, map_add (f := _), apply_ite (starRingEnd ℂ), map_zero, conj_half_add, conj_half_sub]
   rw [add_comm]
 
 theorem dkl_swap (g : E n → ℂ) (k l : Fin n) (y : E n) :
@@ -217,7 +263,7 @@ theorem ibp : IBP := by
       simp only [Delta, Finset.sum_apply, Pi.smul_apply, smul_eq_mul, Finset.sum_mul, hfold]
       refine Finset.sum_congr rfl fun σ _ => ?_
       ring
-    rw [e, integral_finset_sum]
+    rw [e, MeasureTheory.integral_finsetSum]
     swap
     · intro σ _
       exact (integrable_mul_chr (hI _) (contDiff_foldr hf _).continuous t β).const_mul _

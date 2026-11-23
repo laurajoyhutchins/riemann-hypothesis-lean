@@ -1,7 +1,59 @@
-import ReciprocityTheory.GroupCohomology.CupConnRightStatement
-import ReciprocityTheory.GroupCohomology.DEqZeroOfMemB
-import ReciprocityTheory.GroupCohomology.ConnNatHolds
-import ReciprocityTheory.GroupCohomology.IsSuccSubset
+module
+
+public import ReciprocityTheory.GroupCohomology.CupConnRightStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.AdicCompletion.Functoriality
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.GroupCohomology.ConnNatHolds
+public import ReciprocityTheory.GroupCohomology.IsSuccSubset
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 namespace ReciprocityTheory.Coh
 
@@ -128,13 +180,13 @@ variable (hT : IsTowerLim A τ L π) (htf : ∀ n (x : L.X n), t • x = 0 → x
 
 include hT htf hk
 
-theorem ses_smul : SES (smulHom L t) (π 0) where
-  inj n := (injective_iff_map_eq_zero _).2 fun x hx => htf n x hx
-  exact n y := by
-    rw [hk 0 n y]
-    simp only [zero_add, pow_one, Set.mem_range, smulHom_f]
-    exact ⟨fun ⟨z, hz⟩ => ⟨z, hz.symm⟩, fun ⟨z, hz⟩ => ⟨z, hz.symm⟩⟩
-  surj n := tower_pi_surj hT 0 n
+theorem ses_smul : SES (smulHom L t) (π 0) := by
+  refine ⟨fun n => (injective_iff_map_eq_zero _).2 fun x hx => htf n x hx,
+    ?_, tower_pi_surj hT 0⟩
+  intro n y
+  rw [hk 0 n y]
+  simp only [zero_add, pow_one, Set.mem_range, smulHom_f]
+  exact ⟨fun ⟨z, hz⟩ => ⟨z, hz.symm⟩, fun ⟨z, hz⟩ => ⟨z, hz.symm⟩⟩
 
 theorem ker_le_ker_smul (m n : ℕ) : LinearMap.ker ((π 0).f n) ≤
     LinearMap.ker ((π (m + 1)).f n ∘ₗ (t ^ (m + 1) • LinearMap.id)) := by
@@ -158,8 +210,9 @@ noncomputable def jHom (m : ℕ) : Hom (A 0) (A (m + 1)) where
     rw [← (π 0).comm, jf_apply, jf_apply, ← (π (m + 1)).comm]
     simp only [map_smul]
 
-theorem ses_j (m : ℕ) : SES (jHom t hT htf hk m) (τ m) where
-  inj n := by
+theorem ses_j (m : ℕ) : SES (jHom t hT htf hk m) (τ m) := by
+  refine ⟨?_, ?_, hT.surj m⟩
+  · intro n
     refine (injective_iff_map_eq_zero _).2 fun a ha => ?_
     obtain ⟨x, rfl⟩ := tower_pi_surj hT 0 n a
     change jf t hT htf hk m n _ = 0 at ha
@@ -170,7 +223,7 @@ theorem ses_j (m : ℕ) : SES (jHom t hT htf hk m) (τ m) where
       rw [smul_sub, hy, smul_smul, ← pow_succ, sub_self]
     rw [hk 0 n]
     exact ⟨y, by simpa using this⟩
-  exact n z := by
+  · intro n z
     obtain ⟨x, rfl⟩ := tower_pi_surj hT (m + 1) n z
     rw [hT.compat, hk]
     constructor
@@ -185,7 +238,6 @@ theorem ses_j (m : ℕ) : SES (jHom t hT htf hk m) (τ m) where
       refine ⟨y + t • w, ?_⟩
       rw [smul_add, smul_smul, ← pow_succ, ← hw]
       abel
-  surj n := hT.surj m n
 
 end Tower
 

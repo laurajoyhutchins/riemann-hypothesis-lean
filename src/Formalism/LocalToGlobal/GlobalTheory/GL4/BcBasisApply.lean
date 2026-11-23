@@ -1,4 +1,43 @@
-import Formalism.LocalToGlobal.GlobalTheory.GL4.LowerSlopeInequalityFamily
+module
+
+public import Formalism.SharpRestriction.GlobalSchurBounds.FlipTwoThree
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Module NumberField
 
@@ -17,6 +56,7 @@ variable {D : D7} {u : D.what₂.Word} (CV : ColVal D u)
 theorem bc_sum_repr (c : (D.mem u).C.cls 0) (τ : D.what₂.Tau) (z : (D.sp.X 0).V) :
     CV.bc c τ z = ∑ i, CV.rho τ ((D.sp.X 0).frame.repr z i) • CV.bc c τ ((D.sp.X 0).frame i) := by
   conv_lhs => rw [← (D.sp.X 0).frame.sum_repr z]
+
   rw [map_sum]
   exact Finset.sum_congr rfl fun i _ => CV.bc_smul c τ _ _
 
@@ -50,15 +90,18 @@ def bcFun (c : (D.mem u).C.cls 0) (τ : D.what₂.Tau) (y : (D.sp.X 0).V) : (CV.
 
 theorem bcFun_bc (c : (D.mem u).C.cls 0) (τ : D.what₂.Tau) (y z : (D.sp.X 0).V) :
     bcFun CV c τ y (CV.bc c τ z) = CV.rho τ ((D.sp.X 0).hT y z) := by
+
   rw [bc_sum_repr CV c τ z, map_sum]
   simp_rw [map_smul]
   have h1 : ∀ i, bcFun CV c τ y (CV.bc c τ ((D.sp.X 0).frame i)) = CV.rho τ ((D.sp.X 0).hT y ((D.sp.X 0).frame i)) := fun i => by
     unfold bcFun
     rw [← bcBasis_apply CV c τ i, Basis.constr_basis]
   simp_rw [h1, smul_eq_mul, ← map_mul]
+
   rw [← map_sum]
   congr 1
   conv_rhs => rw [← (D.sp.X 0).frame.sum_repr z]
+
   rw [map_sum]
   exact Finset.sum_congr rfl fun i _ => by rw [map_smul, smul_eq_mul]
 
@@ -75,7 +118,7 @@ theorem bcFun_int (c : (D.mem u).C.cls 0) (τ : D.what₂.Tau) {y : (D.sp.X 0).V
     rw [e, ← ho]
     exact ((o.isIntegral_coe.map (starRingEnd D.host.E).toIntAlgHom).map (CV.rho τ).toIntAlgHom)
   | zero => rw [map_zero]; exact isIntegral_zero
-  | add x y _ _ hx hy => rw [map_add]; exact hx.add hy
+  | add x y _ _ hx hy => rw [map_add (f := _)]; exact hx.add hy
   | smul a x _ hx =>
     rw [← algebraMap_smul D.what₂.LL a x, map_smul, smul_eq_mul]
     exact a.isIntegral_coe.mul hx

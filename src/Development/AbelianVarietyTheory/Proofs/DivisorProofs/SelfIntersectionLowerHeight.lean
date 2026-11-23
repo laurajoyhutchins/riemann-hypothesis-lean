@@ -1,7 +1,47 @@
-import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.VolHomog
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.VolGe
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.EqOfIsometricTrivShift
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.NefFibOfIsNef
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Morphisms.QuasiFinite
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.AbProj
+
+@[expose] public section
 
 noncomputable section
 
@@ -145,30 +185,15 @@ theorem isAlgPt_genericPoint (i : Z ⟶ X) [IsClosedImmersion i] [IsIntegral Z] 
   exact (IsHomeomorph.topologicalKrullDim_eq _
     i.isClosedEmbedding.isEmbedding.toHomeomorph.isHomeomorph).symm
 
-theorem arVol_nonneg (L : HermLB p) (D : ℕ) : 0 ≤ arVol L D := by
-  refine le_limsup_of_frequently_le (Frequently.of_forall fun m => mul_nonneg ?_ ?_)
-  · rw [ENNReal.zero_le_log_iff]
-    exact_mod_cast Set.one_le_encard_iff_nonempty.2 ⟨_, (L.pow m).zero_mem_smallSec⟩
-  · exact EReal.coe_nonneg.2 (by positivity)
-
 theorem isNef_shift (hX : IsArithVar p D) {L : HermLB p} {e : ℝ} (hs : L.SemiPos D) (hf : NefFib L)
     (hh : ∀ x, IsAlgPt x → ∃ b, IsPtHt L x b ∧ e ≤ b) :
-    (L.shift (fun _ => -e) fun _ => rfl).IsNef D where
-  semiPos := hs.shift _ _
-  vertical := hf
-  horizontal Z i _ _ _ hc hd := by
-    obtain ⟨r, hr⟩ := exists_isRatSec (L.restr i).isLB
-    obtain ⟨b, ⟨h, H, hb⟩, hle⟩ := hh _ (isAlgPt_genericPoint i hc hd)
-    refine ⟨r, hr, ?_⟩
-    rw [curveDeg_shift hX L (-e) i hc hd hr, ← H.point Z i hc hd r hr, hb, ← add_mul]
-    exact mul_nonneg (by linarith) (Nat.cast_nonneg _)
-
-theorem selfInter_ge_of_height_ge : GlobalTheory.Published.VolNef → GlobalTheory.Published.ArCalc → ∀ (k : Type) [CommRing k] (X : Scheme.{0})
-    [IsIntegral X] (p : X ⟶ Sp k) (D : ℕ), IsArithVar p D → ∀ (L : HermLB p) (a e : ℝ), L.SemiPos D → NefFib L →
-    L.IsSelfInter a → (∀ x, IsAlgPt x → ∃ b, IsPtHt L x b ∧ e ≤ b) → ((D : ℝ) + 1) * e * gdeg L D ≤ a := by
-  intro hV hA k _ X _ p D hX L a e hs hf ha hh
-  have h₁ := hV k X p D hX _ _ (isNef_shift hX hs hf hh) (hA.arShift k X p D hX L a (-e) ha)
-  have h₂ := EReal.coe_nonneg.1 ((arVol_nonneg _ D).trans_eq h₁)
-  linarith
+    (L.shift (fun _ => -e) fun _ => rfl).IsNef D := by
+  refine ⟨hs.shift _ _, fun Z i _ _ κ _ _ _ hd => hf Z i κ hd, ?_⟩
+  intro Z i _ _ _ hc hd
+  obtain ⟨r, hr⟩ := exists_isRatSec (L.restr i).isLB
+  obtain ⟨b, ⟨h, H, hb⟩, hle⟩ := hh _ (isAlgPt_genericPoint i hc hd)
+  refine ⟨r, hr, ?_⟩
+  rw [curveDeg_shift hX L (-e) i hc hd hr, ← H.point Z i hc hd r hr, hb, ← add_mul]
+  exact mul_nonneg (by linarith) (Nat.cast_nonneg _)
 
 end GlobalTheory.HtSelfInter

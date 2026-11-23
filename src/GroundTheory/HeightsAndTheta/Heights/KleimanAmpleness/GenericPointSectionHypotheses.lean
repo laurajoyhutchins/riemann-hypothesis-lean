@@ -1,6 +1,48 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.AlgebraMapMemChartRingLine
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.Bundle
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.AlgebraMapMemChartRingLine
+public import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.Statements
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.Kleiman
@@ -21,38 +63,6 @@ def FiniteSections.Statement : Prop :=
         (f : Poly S N) (e : ℕ), f.IsHomogeneous e ∧ (e : ℤ) + deg j = c ∧ z = aeval x f * gen j}) ∧
     ∀ (F : Type u) [Field F] [Algebra S F] [Algebra F Ω] [IsScalarTower S F Ω] [IsFractionRing S F],
       Submodule.span F (Q.secs : Set Ω) = (Q.toSubSystem.extend F).secs
-
-def FiniteTwists.Statement : Prop := TwistFinite.Statement.{u, w}
-
-def Domination.Generic.Statement : Prop :=
-  ∀ (S : Type u) [CommRing S] [IsNoetherianRing S] [IsDomain S] (Ω : Type w) [Field Ω] [Algebra S Ω]
-    (N N' : ℕ) (x : Fin (N + 1) → Ω) (x' : Fin (N' + 1) → Ω), x' ≠ 0 → IsDomination S x x' →
-    (∀ (i : Fin (N + 1)) (hi : x i ≠ 0), ∀ b ∈ domRing S x x' i, ∃ s : S,
-      algebraMap S Ω s ≠ 0 ∧ algebraMap S Ω s * b ∈ chartRing S x (singleChart hi)) →
-    ∃ m : S, algebraMap S Ω m ≠ 0 ∧
-      (∀ (i : Fin (N + 1)) (hi : x i ≠ 0), ∀ b ∈ domRing S x x' i,
-        algebraMap S Ω m * b ∈ chartRing S x (singleChart hi)) ∧
-      ∀ (L : LineBundle S x) (n : ℕ), ∀ z ∈ pullSecs x' (L.pow n),
-        algebraMap S Ω m * z ∈ (L.pow n).secs
-
-def Domination.Normal.Statement : Prop :=
-  ∀ (S : Type u) [CommRing S] [IsNoetherianRing S] (Ω : Type w) [Field Ω] [Algebra S Ω]
-    (N N' : ℕ) (x : Fin (N + 1) → Ω) (x' : Fin (N' + 1) → Ω), IsDomination S x x' →
-    IsBirationalPt S x → IsBirationalPt S x' → IsNormalPt S x →
-    (∀ (i : Fin (N + 1)) (hi : x i ≠ 0), domRing S x x' i = (chartRing S x (singleChart hi) : Set Ω)) ∧
-      ∀ (L : LineBundle S x) (n : ℕ), pullSecs x' (L.pow n) ≤ (L.pow n).secs
-
-def Domination.Conductor.Statement : Prop :=
-  ∀ (S : Type u) [CommRing S] [IsNoetherianRing S] (Ω : Type w) [Field Ω] [Algebra S Ω]
-    (N N' : ℕ) (x : Fin (N + 1) → Ω) (x' : Fin (N' + 1) → Ω), IsDomination S x x' →
-    IsBirationalPt S x → IsBirationalPt S x' →
-    ∃ (c : ℕ) (κ : Ω), κ ∈ (twistSys S x (c : ℤ)).secs ∧ κ ≠ 0 ∧
-      ∀ (L : LineBundle S x) (n : ℕ), ∀ z ∈ pullSecs x' (L.pow n),
-        κ * z ∈ ((L.pow n).twist (twistSys S x (c : ℤ))).secs
-
-def Domination.Statement : Prop :=
-  Domination.Generic.Statement.{u, w} ∧ Domination.Normal.Statement.{u, w} ∧
-    Domination.Conductor.Statement.{u, w}
 
 def SurjectiveClosed.Statement : Prop :=
   ∀ (S : Type u) [CommRing S] [IsNoetherianRing S] (Ω : Type w) [Field Ω] [Algebra S Ω] (N : ℕ)
@@ -91,13 +101,6 @@ def PrimeFiltration.RestrictQuot.Statement : Prop :=
         ∀ (c : ℤ) (i : ℕ), Nonempty (SubSystem.quotH (Q.twist (twistSys S x c))
           ((Q.twist (twistSys S x c)).twist (idealSys x pp)) i ≃ₗ[S]
             (Q'.twist (twistSys S (fun l => ψ (ratio hj l)) c)).H i)
-
-def ChartBundleLine.Statement : Prop :=
-  ∀ (S : Type u) [CommRing S] [IsNoetherianRing S] (Ω : Type w) [Field Ω] [Algebra S Ω] (N : ℕ)
-    (x : Fin (N + 1) → Ω) (B : ReciprocityTheory.ChartRestriction.G.Geo.ChartBundle S x 1 Ω),
-    ∃ Q : LineBundle S x,
-      (∀ (i : Fin (N + 1)) (hi : x i ≠ 0), (Q.sub (singleChart hi) : Set Ω) = (B.lat i : Set Ω)) ∧
-      (Q.secs : Set Ω) = (ReciprocityTheory.ChartRestriction.G.Geo.globalSec B : Set Ω)
 
 def DimTie.Statement : Prop :=
   ∀ (k : Type u) [Field k] (Ω : Type w) [Field Ω] [Algebra k Ω] (N : ℕ) (y : Fin (N + 1) → Ω),
@@ -181,24 +184,13 @@ def StepThree.Statement : Prop :=
     (T : StepData k x), (∀ e ≤ T.d, VeryAmpleNefPlusAmple.InDim.{u, w} k e) →
     ∃ c₂ : ℤ, ∀ b : ℕ, 1 ≤ b → ((T.L.pow b).twist (twistSys k x c₂)).Generated
 
-def NefPlusAmple.Statement : Prop :=
-  ∀ (k : Type u) [Field k] (Ω : Type w) [Field Ω] [Algebra k Ω] (N : ℕ) (x : Fin (N + 1) → Ω)
-    (M H : LineBundle k x), AmpleData k x H → Nef M.toSubSystem → ∀ ε : ℚ, 0 < ε →
-    ∃ (p m : ℕ), 1 ≤ p ∧ (m : ℚ) = p * ε ∧ IsVeryAmple ((M.pow p).twist (H.pow m))
-
 def NefProductNonneg.Statement : Prop :=
   ∀ (k : Type u) [Field k] (Ω : Type w) [Field Ω] [Algebra k Ω] (N : ℕ) (x : Fin (N + 1) → Ω)
     (e : ℕ) (pp : Ideal (Poly k N)) (Ms : Fin e → LineBundle k x), IsSubvar x pp e →
     (∀ i, Nef (Ms i).toSubSystem) → 0 ≤ interNum pp (fun i => (Ms i).toSubSystem)
 
-def NefGeneric.Statement : Prop :=
-  ∀ (S : Type u) [CommRing S] [IsDedekindDomain S] (F : Type u) [Field F] [Algebra S F]
-    [IsFractionRing S F] (Ω : Type w) [Field Ω] [Algebra S Ω] [Algebra F Ω] [IsScalarTower S F Ω]
-    (N : ℕ) (x : Fin (N + 1) → Ω) (M : LineBundle S x) (𝔪 : Ideal S), 𝔪.IsMaximal →
-    NefAbove M.toSubSystem (𝔪.map (C : S →+* Poly S N)) → Nef (M.toSubSystem.extend F)
 
 open Classical in
-
 def GenericPointSectionInput.Statement : Prop :=
   ∀ (k : Type u) [Field k] (Ω : Type w) [Field Ω] [Algebra k Ω] (N : ℕ) (x : Fin (N + 1) → Ω),
     (∀ (n : ℕ) (pp : Ideal (Poly k N)) (L : Fin n → LineBundle k x), IsSubvar x pp n →
@@ -235,10 +227,6 @@ def InterNumTie.Statement : Prop :=
 section Hypotheses
 
 variable (k : Type u) [Field k]
-
-def lineChart0' : Chart (genericPt k 1) :=
-  singleChart ((map_ne_zero_iff _ (IsFractionRing.injective (Poly k 1) (FractionRing (Poly k 1)))).mpr
-    (X_ne_zero 0) : genericPt k 1 0 ≠ 0)
 
 end Hypotheses
 

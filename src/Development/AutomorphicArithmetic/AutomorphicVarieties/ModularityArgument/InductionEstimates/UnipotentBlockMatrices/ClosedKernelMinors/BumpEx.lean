@@ -1,7 +1,64 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.UnipotentBlockMatrices.UnipotentBlockPairs
-import GroundTheory.AutomorphicForms.L2LocalComponents.ArchBump
-import GroundTheory.AutomorphicForms.GKModules.KernelCalculus
+module
+
+public import Development.AutomorphicArithmetic.Foundations.Convolution.PowerSumTraces.CuspidalMultiplicityOneTotallyComplex
+public import Development.WeilBound.RepresentationTheoryGL.TwistedFactors.CuspDecayHeights.HeightLe
+public import GroundTheory.AutomorphicForms.CuspidalProjection.Global
 import GroundTheory.AutomorphicForms.CuspidalDiscreteness.SmoothingFinite
+public import GroundTheory.AutomorphicForms.GKModules.KernelCalculus
+public import GroundTheory.AutomorphicForms.L2LocalComponents.ArchBump
+import GroundTheory.GlobalFields.Adele.Topology
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Algebra.ClopenNhdofOne
+import Mathlib.Topology.Compactness.Paracompact
+import Mathlib.Topology.InductiveDimension.Functions
+import Mathlib.Topology.Sheaves.Init
+import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.UnipotentBlockMatrices.UnipotentBlockPairs
+import Development.WeilBound.RepresentationTheoryGL.TwistedFactors.TruncatedCuspIrreducibility.AdelDefs
+import Development.WeilBound.RepresentationTheoryGL.TwistedFactors.TruncatedCuspIrreducibility.ScatteringLimits
+public import GroundTheory.AutomorphicForms.GKModules.Garding
+
+@[expose] public section
 
 open MeasureTheory NumberField Set Filter Topology
 open GroundTheory.Automorphic GroundTheory.Automorphic.Reduction GroundTheory.Automorphic.RightCosetSpace
@@ -93,6 +150,12 @@ theorem UpperTheory.V.Z.InvariantSubmoduleMonicPolynomial.bumpEx :
     ∀ {K : Type} [Field K] [NumberField K] {n : ℕ} (μ : Measure (G1 K n)) [μ.IsHaarMeasure] (O : Set (G1 K n)), O ∈ 𝓝 (1 : G1 K n) →
       ∃ a : CC K n, tsupport a ⊆ O ∧ (∀ g, 0 ≤ (a g).re ∧ (a g).im = 0) ∧ ∫ g, a g ∂μ = 1 ∧ CuspidalProjection.ccStar a = a ∧ UpperTheory.ConvolutionTheory.C.IsLeftSmooth a := by
   intro K _ _ n μ _ O hO
+  letI : FirstCountableTopology (G1 K n) := by
+    set_option synthInstance.maxHeartbeats 200000 in exact inferInstance
+  letI : RegularSpace (G1 K n) := by
+    set_option synthInstance.maxHeartbeats 200000 in exact inferInstance
+  letI : R1Space (G1 K n) := by
+    set_option synthInstance.maxHeartbeats 200000 in exact inferInstance
   obtain ⟨O', hO', hO'O, hO'c⟩ := local_compact_nhds hO
   obtain ⟨V₂, hV₂, e₂⟩ := bump_split hO'
   obtain ⟨V₁, hV₁, e₁⟩ := bump_split hV₂
@@ -112,7 +175,8 @@ theorem UpperTheory.V.Z.InvariantSubmoduleMonicPolynomial.bumpEx :
   have hU : IsOpen (U : Set (AdelicGLn.integralFiniteGL K n)) := N.toOpenSubgroup.isOpen
   have hUV : ∀ u : U, finOne K n u ∈ V₁ := fun u => interior_subset (hN u.2)
   have := compactSpace_of_isOpen U hU
-  obtain ⟨F₁, h, -, hF₁, -, hc, h0, h1, hs, hV⟩ := bump_step (haarProb U) ((finOne K n).comp U.subtype)
+  set_option synthInstance.maxHeartbeats 200000 in
+   obtain ⟨F₁, h, -, hF₁, -, hc, h0, h1, hs, hV⟩ := bump_step (haarProb U) ((finOne K n).comp U.subtype)
     (continuous_finOne.comp continuous_subtype_val) (ρ := fun _ => 1) continuous_const
     (HasCompactSupport.of_compactSpace _) (fun _ => zero_le_one) (p₀ := 1) one_ne_zero (h := fun x => f x * f x⁻¹)
     (f.continuous.mul (f.continuous.comp continuous_inv)) (fun x => mul_nonneg (hf _).1 (hf _).1)

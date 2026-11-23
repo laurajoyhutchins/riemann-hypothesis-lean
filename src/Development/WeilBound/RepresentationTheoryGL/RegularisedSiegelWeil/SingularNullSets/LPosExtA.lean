@@ -1,6 +1,13 @@
-import Mathlib.Topology.ContinuousMap.StoneWeierstrass
-import Mathlib.MeasureTheory.Integral.RieszMarkovKakutani.Real
-import Mathlib.Topology.Metrizable.Urysohn
+module
+
+public import Mathlib.Analysis.Complex.Basic
+public import Mathlib.Topology.ContinuousMap.Star
+import Mathlib.MeasureTheory.Integral.Bochner.Basic
+public import Mathlib.Topology.ContinuousMap.StoneWeierstrass
+public import Mathlib.Topology.Algebra.StarSubalgebra
+public import Mathlib.Topology.ContinuousMap.Compact
+
+@[expose] public section
 
 noncomputable section
 

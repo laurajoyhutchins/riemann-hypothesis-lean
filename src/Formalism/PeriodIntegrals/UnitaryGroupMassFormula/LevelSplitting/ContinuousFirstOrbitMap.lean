@@ -1,5 +1,50 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LevelSplitting.MapFstConjTranspose
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LevelSplitting.MapFstConjTranspose
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicLocalCompactness.T2SpaceTensorProductFiniteExtension
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerOrbitVolume.TensTop
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -53,7 +98,7 @@ theorem continuous_first_orbit_map : Continuous (p1 (F := F) (E := E) R1 R2) := 
     | zero => simp
     | tmul a m =>
       simp [crd, p1, Algebra.TensorProduct.basis_repr_tmul]
-    | add x y hx hy => simp only [map_add, Pi.add_apply, Prod.fst_add, hx, hy]
+    | add x y hx hy => simp only [map_add (f := _), Pi.add_apply, Prod.fst_add, hx, hy]
   rw [show p1 (F := F) (E := E) R1 R2 = fun x =>
       (crd (F := F) (E := E) R1).symm (fun i => (crd (F := F) (E := E) (R1 × R2) x i).1) from funext key]
   exact (continuous_crd_symm R1).comp
@@ -70,7 +115,7 @@ theorem continuous_p2 : Continuous (p2 (F := F) (E := E) R1 R2) := by
     | zero => simp
     | tmul a m =>
       simp [crd, p2, Algebra.TensorProduct.basis_repr_tmul]
-    | add x y hx hy => simp only [map_add, Pi.add_apply, Prod.snd_add, hx, hy]
+    | add x y hx hy => simp only [map_add (f := _), Pi.add_apply, Prod.snd_add, hx, hy]
   rw [show p2 (F := F) (E := E) R1 R2 = fun x =>
       (crd (F := F) (E := E) R2).symm (fun i => (crd (F := F) (E := E) (R1 × R2) x i).2) from funext key]
   exact (continuous_crd_symm R2).comp
@@ -91,7 +136,7 @@ theorem continuous_psiE : Continuous (psiE (F := F) (E := E) (M := M) R1 R2) := 
   exact (continuous_pi fun i => (continuous_first_orbit_map R1 R2).comp (continuous_apply i)).prodMk
     (continuous_pi fun i => (continuous_p2 R1 R2).comp (continuous_apply i))
 
-set_option maxHeartbeats 800000 in
+
 
 theorem continuous_qqv :
     Continuous (fun y : (Fin M → R1 ⊗[F] E) × (Fin M → R2 ⊗[F] E) => fun i => qq R1 R2 (y.1 i) (y.2 i)) := by
@@ -101,7 +146,7 @@ theorem continuous_qqv :
   have h2 := (continuous_qq R1 R2).comp h1
   simpa only [Function.comp_def] using h2
 
-set_option maxHeartbeats 1000000 in
+
 theorem continuous_psiE_symm : Continuous (psiE (F := F) (E := E) (M := M) R1 R2).symm := by
   show Continuous (fun y : (Fin M → R1 ⊗[F] E) × (Fin M → R2 ⊗[F] E) =>
     fun i => qq R1 R2 (y.1 i) (y.2 i))

@@ -1,5 +1,53 @@
-import Mathlib
-import Formalism.ThetaLogCoordinates.UniformThetaSubstitution.StatementE
+module
+
+public import Formalism.ThetaLogCoordinates.UniformThetaSubstitution.StatementE
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -24,7 +72,7 @@ lemma val_mod_two {ν : ℕ} [NeZero ν] (x : ZMod (2 * ν)) : x.val % 2 = (par 
   rw [par_eq, ZMod.val_natCast]
 
 lemma par_odd {ν : ℕ} (y : ZMod (2 * ν)) : par ν (1 + 2 * y) = 1 := by
-  rw [map_add, map_one, map_mul]
+  rw [map_add (f := _), map_one, map_mul]
   have h2 : par ν 2 = 0 := by
     rw [map_ofNat]
     rfl
@@ -38,7 +86,7 @@ lemma parity_ne {ν : ℕ} [NeZero ν] {s s' y : ZMod (2 * ν)} (h : s' - s = 1 
     s'.val % 2 ≠ s.val % 2 := by
   rw [val_mod_two, val_mod_two]
   have hs : par ν s' = par ν s + 1 := by
-    rw [show s' = s + (1 + 2 * y) by rw [← h]; ring, map_add, par_odd]
+    rw [show s' = s + (1 + 2 * y) by rw [← h]; ring, map_add (f := _), par_odd]
   rw [hs]
   generalize par ν s = a
   revert a
@@ -172,8 +220,8 @@ lemma level_le {ν r0 r1 E : ℕ} [NeZero ν] (p : ℕ) (e : TpV ν r1 → ℕ) 
 
 end ValuationParity
 
-open ValuationParity in
 
+open ValuationParity in
 theorem entryExcessBound_of (hS : EntryStar) (hC : HitsCapPos) (hA : ExcessGainBound) (hL : ChargeLemma) : EntryExcessBound := by
   intro K _ _ p ν r0 r1 C _ u F TT ξ e l sf T I hyp
   rcases hS K p ν r0 r1 C u F TT ξ e l sf T I hyp with h0 | ⟨E, α, β, hαTT, hβTT, hτ, hhasse, hbound⟩
@@ -182,7 +230,12 @@ theorem entryExcessBound_of (hS : EntryStar) (hC : HitsCapPos) (hA : ExcessGainB
   classical
   have hp : 2 < p := hyp.2.1
   have hp1 : (1 : ℝ) < p := by exact_mod_cast (by omega : 1 < p)
-  choose sφ s'φ hor hodd hpar hle using fun φ : PhiI ν r0 r1 E => charge_exists hL p (by omega) φ
+  have hcharge : ∀ φ : PhiI ν r0 r1 E, ∃ s s' : ZMod (2 * ν),
+      ((s = pairFirst φ ∧ s' = pairSecond φ) ∨ (s = pairSecond φ ∧ s' = pairFirst φ)) ∧
+      (s' - s).val % 2 = 1 ∧ s'.val % 2 ≠ s.val % 2 ∧
+      p ^ (s' - s).val ≤ dAof p φ (s, φ.2.2.2.2) :=
+    fun φ => ValuationParity.charge_exists hL p (by omega) φ
+  choose sφ s'φ hor hodd hpar hle using hcharge
   obtain ⟨c, hcdef⟩ : ∃ c : PhiI ν r0 r1 E → ZMod (2 * ν) × ℕ,
       ∀ φ, c φ = (sφ φ, ((s'φ φ - sφ φ).val - 1) / 2) := ⟨_, fun _ => rfl⟩
   have hc2 : ∀ φ, 2 * (c φ).2 + 1 = (s'φ φ - sφ φ).val := by
@@ -209,7 +262,7 @@ theorem entryExcessBound_of (hS : EntryStar) (hC : HitsCapPos) (hA : ExcessGainB
     ⟨_, fun _ _ => rfl⟩
   have hlev : ∀ s e', p ^ (2 * e' + 1) * (chN s e' + iN s e') ≤ alN e s := fun s e' => by
     rw [hchN, hiN]
-    exact level_le p e α β hτ c hc s e'
+    exact ValuationParity.level_le p e α β hτ c hc s e'
   have hcapN : ∀ s e', iN s e' ≤ capN sf (s + ((2 * e' + 1 : ℕ) : ZMod (2 * ν))) := by
     intro s e'
     by_contra hlt
@@ -276,12 +329,12 @@ theorem entryExcessBound_of (hS : EntryStar) (hC : HitsCapPos) (hA : ExcessGainB
     · rfl
   case hmain =>
     have hsumch : ∑ s ∈ TT, ∑ e' ∈ Ee, (chN s e' : ℝ) = ∑ φ, (α φ : ℝ) := by
-      have h := sum_charge TT Ee c (fun φ => α φ) (fun φ hα => ⟨by rw [hc1]; exact (hsTT φ hα).1,
+      have h := ValuationParity.sum_charge TT Ee c (fun φ => α φ) (fun φ hα => ⟨by rw [hc1]; exact (hsTT φ hα).1,
         by rw [hEe]; exact Finset.mem_union_left _ (Finset.mem_image_of_mem _ (Finset.mem_univ _))⟩)
       simp only [← hchN] at h
       exact_mod_cast h
     have hsumi : ∑ s ∈ TT, ∑ e' ∈ Ee, (iN s e' : ℝ) = ∑ k, (β k : ℝ) := by
-      have h := sum_charge TT Ee (fun k : KapI ν r1 E => (k.1, k.2.1.val)) (fun k => β k)
+      have h := ValuationParity.sum_charge TT Ee (fun k : KapI ν r1 E => (k.1, k.2.1.val)) (fun k => β k)
         (fun k hk => ⟨hβTT k hk, by
           rw [hEe]; exact Finset.mem_union_right _ (Finset.mem_image_of_mem _ (Finset.mem_univ _))⟩)
       simp only [← hiN] at h

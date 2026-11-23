@@ -1,11 +1,56 @@
-import Mathlib
-import Development.ResolutionOfSingularities.EmbeddedResolution.EtaleCoordinates.CoordinatePolynomialRing
-import Development.ResolutionOfSingularities.EmbeddedResolution.EtaleCoordinates.CoordinateSubscheme
-import Development.ResolutionOfSingularities.EmbeddedResolution.EtaleCoordinates.EtaleCoordinates
+module
+
+public import Development.ResolutionOfSingularities.EmbeddedResolution.EtaleCoordinates.CoordinatePolynomialRing
+public import Development.ResolutionOfSingularities.EmbeddedResolution.EtaleCoordinates.CoordinateSubscheme
 import Development.ResolutionOfSingularities.EmbeddedResolution.AlgebraicPreliminaries.DerivationLocalization
 import Development.ResolutionOfSingularities.EmbeddedResolution.AlgebraicPreliminaries.RegularLocalRing
-import Development.ResolutionOfSingularities.Foundations.BlowupUniversalProperty
-import Development.ResolutionOfSingularities.EmbeddedResolution.ResolutionOfSingularities
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
+
 universe u
 
 namespace FunctorialResolution.EmbeddedResolution
@@ -92,6 +137,26 @@ theorem isRegularLocalRing_quotient_map_etaleChartCoordIdeal (k : Type u) [Field
     (Ideal.map (Ideal.Quotient.mk (etaleChartCoordIdeal k m S J)) q)
     (A ⧸ Ideal.map (algebraMap S A) (etaleChartCoordIdeal k m S J))
 
+private noncomputable def coordinateBasis (k : Type u) [Field k] (m : ℕ)
+    (S : Type u) [CommRing S] [Algebra (CoordPolynomialRing k m) S]
+    [Algebra k S] [IsScalarTower k (CoordPolynomialRing k m) S]
+    [Algebra.Etale (CoordPolynomialRing k m) S] :
+    Module.Basis (ULift.{u} (Fin m)) S (KaehlerDifferential k S) :=
+  (Algebra.TensorProduct.basis S
+    (KaehlerDifferential.mvPolynomialBasis k (ULift.{u} (Fin m)))).map
+      (KaehlerDifferential.isBaseChange_of_formallyEtale k (CoordPolynomialRing k m) S).equiv
+
+private theorem coordinateBasis_apply (k : Type u) [Field k] (m : ℕ)
+    (S : Type u) [CommRing S] [Algebra (CoordPolynomialRing k m) S]
+    [Algebra k S] [IsScalarTower k (CoordPolynomialRing k m) S]
+    [Algebra.Etale (CoordPolynomialRing k m) S] (i : Fin m) :
+    coordinateBasis k m S (ULift.up i) =
+      KaehlerDifferential.D k S (etaleChartCoord k m S i) := by
+  simp only [coordinateBasis, Module.Basis.map_apply, Algebra.TensorProduct.basis_apply,
+    KaehlerDifferential.mvPolynomialBasis_apply, IsBaseChange.equiv_tmul, one_smul,
+    KaehlerDifferential.map_D]
+  rfl
+
 private theorem algebraMap_etaleChartCoord_notMem_maximalIdeal_sq_sup (k : Type u) [Field k] (m : ℕ) (S : Type u) [CommRing S]
     [Algebra (CoordPolynomialRing k m) S] [Algebra.Etale (CoordPolynomialRing k m) S]
     (q : Ideal S) [q.IsPrime] (A : Type u) [CommRing A] [Algebra S A]
@@ -106,17 +171,22 @@ private theorem algebraMap_etaleChartCoord_notMem_maximalIdeal_sq_sup (k : Type 
   let algebraKA : Algebra k A := ((algebraMap S A).comp (algebraMap k S)).toAlgebra
   have : IsScalarTower k S A := IsScalarTower.of_algebraMap_eq' rfl
   let D : Derivation k S S :=
-    EtaleCoordinates.partialDeriv k (ULift.{u} (Fin m)) S (ULift.up.{u} j)
+    ((coordinateBasis k m S).coord (ULift.up.{u} j)).compDer (KaehlerDifferential.D k S)
   let DA : Derivation k A A := D.mapToLocalization q.primeCompl
   have hderivAlgebraMap : ∀ s : S, DA (algebraMap S A s) = algebraMap S A (D s) :=
     Derivation.mapToLocalization_algebraMap D q.primeCompl
   have hDx : D (etaleChartCoord k m S j) = 1 :=
-    EtaleCoordinates.partialDeriv_coord_self k (ULift.{u} (Fin m)) S (ULift.up.{u} j)
+    by
+      change (coordinateBasis k m S).repr (KaehlerDifferential.D k S
+        (etaleChartCoord k m S j)) (ULift.up j) = 1
+      rw [← coordinateBasis_apply k m S j, Module.Basis.repr_self, Finsupp.single_eq_same]
   have hDne : ∀ i : Fin m, i ≠ j → D (etaleChartCoord k m S i) = 0 := by
     intro i hne
     have hup : (ULift.up.{u} j) ≠ ULift.up.{u} i := fun h => hne (congrArg ULift.down h).symm
-    exact EtaleCoordinates.partialDeriv_coord_of_ne k (ULift.{u} (Fin m)) S
-      (ULift.up.{u} j) (ULift.up.{u} i) hup
+    change (coordinateBasis k m S).repr (KaehlerDifferential.D k S
+      (etaleChartCoord k m S i)) (ULift.up j) = 0
+    rw [← coordinateBasis_apply k m S i, Module.Basis.repr_self, Finsupp.single_apply]
+    simp [Ne.symm hup]
   have hmapeq : Ideal.map (algebraMap S A) (etaleChartCoordIdeal k m S J')
       = Ideal.span ((fun i : Fin m => algebraMap S A (etaleChartCoord k m S i)) ''
         (J' : Set (Fin m))) := by
@@ -138,7 +208,7 @@ private theorem algebraMap_etaleChartCoord_notMem_maximalIdeal_sq_sup (k : Type 
       rw [DA.leibniz, smul_eq_mul, smul_eq_mul]
       exact add_mem (Ideal.mul_mem_right _ _ hp) (Ideal.mul_mem_right _ _ hr)
     · intro x y hx hy
-      rw [map_add]
+      rw [map_add (f := _)]
       exact add_mem hx hy
   rw [hmapeq] at hb
   have hDb : DA b ∈ IsLocalRing.maximalIdeal A := by
@@ -149,7 +219,7 @@ private theorem algebraMap_etaleChartCoord_notMem_maximalIdeal_sq_sup (k : Type 
     · rw [map_zero]
       exact zero_mem _
     · intro x y hx hy px py
-      rw [map_add]
+      rw [map_add (f := _)]
       exact add_mem px py
     · intro c x hx px
       have hxm : x ∈ IsLocalRing.maximalIdeal A := hspan_le hx
@@ -157,7 +227,7 @@ private theorem algebraMap_etaleChartCoord_notMem_maximalIdeal_sq_sup (k : Type 
       exact add_mem (Ideal.mul_mem_left _ _ px) (Ideal.mul_mem_right _ _ hxm)
   have hone : DA (algebraMap S A (etaleChartCoord k m S j)) = 1 := by
     rw [hderivAlgebraMap, hDx, map_one]
-  rw [← hab, map_add] at hone
+  rw [← hab, map_add (f := _)] at hone
   have h1 : (1 : A) ∈ IsLocalRing.maximalIdeal A := by
     rw [← hone]
     exact add_mem hDa hDb

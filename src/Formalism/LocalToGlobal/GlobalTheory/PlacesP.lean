@@ -1,9 +1,61 @@
-import Formalism.LocalToGlobal.GlobalTheory.Places
-import Formalism.SharpRestriction.AdmissibleParameterJoins.DIVfromGLo
-import Formalism.SharpRestriction.GrowthBounds.TopChoiceBounds
-import Formalism.LogFactorialBounds.LogFactorialProofs.PrimeSum
-import Formalism.SizeWindowBrackets.ChainSlopeWindows.ExistsNsmulMem
+module
+
+public import Formalism.LocalToGlobal.GlobalTheory.Places
+public import Formalism.SharpRestriction.AdmissibleParameterJoins.DIVfromGLm
+public import Formalism.SharpRestriction.GrowthBounds.CornerGLContinuity
+public import Formalism.SizeWindowBrackets.SlopesHypothesisFinitePlaces
+import Formalism.LocalRingCardinality.Lemmas
+public import Formalism.LogFactorialBounds.LogFactorialProofs.PrimeSum
+public import Formalism.SharpRestriction.AdmissibleParameterJoins.DIVfromGLo
+public import Formalism.SharpRestriction.GlobalSchurBounds.FrameCodeOfAdditive
+import Formalism.SharpRestriction.GlobalSchurBounds.GlobalRankLatticeProofs.SevenLogLeLOfPowerBound
+public import Formalism.SharpRestriction.GlobalSchurBounds.JointsL
+public import Formalism.SharpRestriction.GlobalSchurBounds.LinkPk
+public import Formalism.SharpRestriction.GrowthBounds.TopChoiceBounds
+public import Formalism.SizeWindowBrackets.ChainSlopeWindows.ExistsNsmulMem
 import Formalism.SizeWindowBrackets.ChainSlopeWindows.WeightedSlopeExcessDecomposition
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Module NumberField IsDedekindDomain
 
@@ -50,13 +102,10 @@ end General
 
 section Slopes
 
-variable {K V ι : Type} [Field K] [NumberField K] [StarRing K] [IsTotallyComplex K]
+variable {K V ι : Type} [Field K] [NumberField K] [StarRing K] [_root_.NumberField.IsTotallyComplex K]
   [AddCommGroup V] [Module K V] [Module (𝓞 K) V] [IsScalarTower (𝓞 K) K V] [Fintype ι] [DecidableEq ι]
 
 def toFinPl (v : HeightOneSpectrum (𝓞 K)) : slopeLatticeData.FinPl K := ⟨v.asIdeal, v.isMaximal⟩
-
-theorem lenLoc_eq_lenAt (v : HeightOneSpectrum (𝓞 K)) (M N : Submodule (𝓞 K) V) :
-    DV.lenLoc v N M = slopeLatticeData.lenAt (toFinPl v) M N := rfl
 
 theorem mu_index_sum (b : Basis ι K V) (X : InfinitePlace K → Matrix ι ι ℂ) (hX : ∀ v, IsUnit (X v).det)
     {M N : Submodule (𝓞 K) V} (hM : M.FG) (hNM : N ≤ M) (hN0 : N ≠ ⊥) (hrk : rkK N = rkK M) :
@@ -271,7 +320,8 @@ theorem lenLoc_atT_zero (hAtT : NuAtTDef D L) {X : ErrX D} {K : G.Consts} {c : E
     unfold EatT at h1
     rw [if_pos ht] at h1
     have hf : (0 : ℝ) < (D.R.f : ℝ) := by
-      have : 0 < D.R.f := by unfold Ranks.f Ranks.n; positivity
+      have : 0 < D.R.f := by
+        exact lt_of_lt_of_le (by have := D.R.two_le_m; omega) D.R.m_le_f
       exact_mod_cast this
     have hN : (0 : ℝ) < G.Nm D := by
       unfold G.Nm
@@ -292,8 +342,8 @@ variable {D : D7} {L : SizeData₂ D}
 theorem lE_nonneg (w : D.what₂.places.Pl) : 0 ≤ Lnk.lE w :=
   mul_nonneg (J.logWeight_nonneg w) (Nat.cast_nonneg _)
 
-open Classical in
 
+open Classical in
 theorem places_at_of (C26 CMu C : ℝ) (hC26 : C26 ≤ C) (hCMu : CMu ≤ C)
     (hN' : DV.NprimeDef D L) (hNu : DV.NuDef D L) (hc : Lnk.NuCommens D L)
     (hrank : ∀ u, 0 < (D.div.Nu u).rank)
@@ -786,11 +836,3 @@ end Link
 end Formalism.L2.GlobalTheoryTheory.Places
 
 end
-
-example {eps : ℝ} (Fm : Formalism.MainNotions.FamP eps) (crystallineComparison : ℝ) (a : Formalism.MainNotions.product_first_zeroth_parts.ConclusionOnFamily Fm crystallineComparison) (b : Formalism.MainNotions.GlobalTheoryTheory.SettingEventually Fm) (c : Formalism.MainNotions.TuSize Fm)
-    (d : Formalism.MainNotions.J.MuRank Fm) : Formalism.MainNotions.LinkG Fm → Formalism.MainNotions.LinkMu Fm → Formalism.MainNotions.Lnk.PlacesF Fm :=
-  Formalism.L2.GlobalTheoryTheory.Places.placesF_of Fm crystallineComparison a b c d
-
-example {eps : ℝ} (Fm : Formalism.MainNotions.FamP eps) (Cabs CH C0 crystallineComparison : ℝ) (h : 0 < C0) (a : Formalism.MainNotions.product_first_zeroth_parts.ConclusionOnFamily Fm crystallineComparison) (c : Formalism.MainNotions.TuSize Fm) :
-    Formalism.MainNotions.ChosenE Fm C0 CH → Formalism.MainNotions.GlobalTheoremInputs Fm Cabs CH C0 → Formalism.MainNotions.LocalQuadraticParts.SlopeLemmaFamily Fm :=
-  Formalism.L2.GlobalTheoryTheory.Places.slope_lemma_link_form Fm Cabs CH C0 crystallineComparison h a c

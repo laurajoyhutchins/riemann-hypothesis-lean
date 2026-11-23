@@ -1,5 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.RankEqCardIffExistsFrameMatrixFirstColumnBlock
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.RankEqCardIffExistsFrameMatrixFirstColumnBlock
+public import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MeasureTheory ValuativeRel Matrix
 open scoped Pointwise
@@ -15,19 +61,15 @@ def scaledInt (ϖ : kˣ) (a : ℕ) (m : ℤ) : Set (Matrix (Fin a) (Fin a) k) :=
   {Z | ∀ i j, valuation k (Z i j) ≤ valuation k ((ϖ ^ m : kˣ) : k)}
 
 theorem mem_scaledInt_iff (ϖ : kˣ) (a : ℕ) (m : ℤ) (Z : Matrix (Fin a) (Fin a) k) :
-    Z ∈ scaledInt ϖ a m ↔ Z ∈ matLat (Fin a) (ϖ ^ m • stdLat k (Fin a)) := by
-  rw [stdLat, smul_diagLat, mem_matLat]
+    Z ∈ scaledInt ϖ a m ↔ Z ∈ matLat (A := Fin a) (ϖ ^ m • stdLat (k := k) (D := Fin a)) := by
+  have hmem {Λ : Submodule 𝒪[k] (Fin a → k)} :
+      Z ∈ matLat (A := Fin a) Λ ↔ ∀ i, Z.row i ∈ Λ := Iff.rfl
+  rw [stdLat, smul_diagLat, hmem]
   simp only [mem_diagLat, Pi.one_apply, mul_one]
   rfl
 
 def IsPeriodic (ϖ : kˣ) {a : ℕ} (M : ℤ) (φ : Matrix (Fin a) (Fin a) k → ℂ) : Prop :=
   ∀ X, ∀ Z ∈ scaledInt ϖ a M, φ (X + Z) = φ X
-
-example (ϖ : kˣ) (hϖ : IsUnif ϖ) (a : ℕ) :
-    IsPeriodic ϖ 0 ((matLat (Fin a) (stdLat k (Fin a)) : Set (Matrix (Fin a) (Fin a) k)).indicator 1) := by
-  intro X Z hZ
-  refine (hasDepth_indicator hϖ 0 (stdLat k (Fin a))).2 X Z ?_
-  simpa using (mem_scaledInt_iff ϖ a 0 Z).1 hZ
 
 end Defs
 
@@ -43,11 +85,5 @@ def ShellLemma : Prop :=
       (∀ M' : ℕ, Function.support φ ⊆ scaledInt ϖ a (-(M' : ℤ)) →
         ∀ n : Fin a → ℤ, ¬ (∀ i, -(M' : ℤ) ≤ n i) → ∀ z : ℂ, shell μ ϖ ν z φ n = 0) ∧
       {n : {n : Fin a → ℤ // Antitone n} | ∃ z : ℂ, shell μ ϖ ν z φ n.1 ≠ 0}.Finite
-
-example (k : Type) [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] :
-    ∃ (ϖ : kˣ) (ν : kˣ →* ℂˣ) (e : ℕ), IsUnif ϖ ∧ ¬ IsUnram ν ∧ CondLE ϖ e ν := by
-  obtain ⟨ϖ, hϖ⟩ := exists_isUnif (k := k)
-  obtain ⟨ν, h1, h2, -⟩ := exists_ramified hϖ
-  exact ⟨ϖ, ν, 2, hϖ, h1, h2⟩
 
 end GlobalTheory.IndefiniteRowSideFullHecke.ScaledIntegerPeriodic

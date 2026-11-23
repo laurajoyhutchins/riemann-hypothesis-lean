@@ -1,7 +1,45 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.IsLatMeasurableConst
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.CovolEqOfAedisjoint
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.TranslatedLatticeAtInfinityFullCovolumeDual
+module
+
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.CovolEqOfAedisjoint
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.TranslatedLatticeAtInfinityFullCovolumeDual
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MeasureTheory NumberField Matrix Finset Formalism.MainNotions.S GlobalTheory.Count GlobalTheory.FlagMeas GlobalTheory.FlagBase GlobalTheory.OrbitTerm Module
 open scoped nonZeroDivisors
@@ -33,25 +71,12 @@ theorem lat_eq_map (I : FractionalIdeal (𝓞 E)⁰ E) :
   · rintro ⟨x, hx, rfl⟩
     simpa using hx
 
-theorem isLattice_lat (I : FractionalIdeal (𝓞 E)⁰ E) (hI : I ≠ 0) : Submodule.IsLattice E (lat E I) where
-  fg := by
-    rw [lat_eq_map]
-    exact (FractionalIdeal.fg_of_isNoetherianRing le_rfl I).map _
-  span_eq_top := by
-    have hbot : (I : Submodule (𝓞 E) E) ≠ ⊥ := fun h => hI (FractionalIdeal.coeToSubmodule_eq_bot.1 h)
-    obtain ⟨c, hcI, hc0⟩ := Submodule.exists_mem_ne_zero_of_ne_bot hbot
-    rw [eq_top_iff]
-    intro v _
-    have hv : v = (v 0 / c) • (Pi.single 0 c : Fin 1 → E) := by
-      funext a
-      fin_cases a
-      simp [hc0]
-    rw [hv]
-    refine Submodule.smul_mem _ _ (Submodule.subset_span ?_)
-    rw [SetLike.mem_coe, mem_lat]
-    simpa using hcI
+theorem isLattice_lat (I : FractionalIdeal (𝓞 E)⁰ E) (hI : I ≠ 0) : Submodule.IsLattice E (lat E I) := by
+  apply Submodule.IsLattice.of_fg
+  rw [lat_eq_map]
+  exact (FractionalIdeal.fg_of_isNoetherianRing le_rfl I).map _
 
-theorem latAt_lat [IsTotallyComplex E] (I : (FractionalIdeal (𝓞 E)⁰ E)ˣ) :
+theorem latAt_lat [_root_.NumberField.IsTotallyComplex E] (I : (FractionalIdeal (𝓞 E)⁰ E)ˣ) :
     latAt E 1 (lat E I.1) (oneInf E 1) = Submodule.span ℤ (Set.range
       ((Pi.basis fun _ : Fin 1 => mixedEmbedding.fractionalIdealLatticeBasis E I).map (mix E 1))) := by
   set B := mixedEmbedding.fractionalIdealLatticeBasis E I
@@ -93,7 +118,7 @@ theorem latAt_lat [IsTotallyComplex E] (I : (FractionalIdeal (𝓞 E)⁰ E)ˣ) :
   · rintro ⟨t, ht, rfl⟩
     exact ⟨fun _ => t, (mem_lat E _ _).2 ht, funext fun w => key _ w⟩
 
-theorem covAt_lat [IsTotallyComplex E] (I : (FractionalIdeal (𝓞 E)⁰ E)ˣ) :
+theorem covAt_lat [_root_.NumberField.IsTotallyComplex E] (I : (FractionalIdeal (𝓞 E)⁰ E)ˣ) :
     covAt E 1 (latAt E 1 (lat E I.1) (oneInf E 1)) =
       (FractionalIdeal.absNorm I.1 : ℝ) * Formalism.HermitianLatticesTheory.vInv E ^ Formalism.HermitianLatticesTheory.fDeg E := by
 

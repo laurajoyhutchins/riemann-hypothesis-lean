@@ -1,4 +1,51 @@
-import Formalism.SharpRestriction.GrowthBounds.ScaleEdges.LeviInductionForms
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.PathWeight.GeneratorImageIsSymbol
+public import Formalism.SharpRestriction.GrowthBounds.ScaleEdges.SymbolRealisableBound
+public import Formalism.SharpRestriction.GrowthBounds.PathWeight.FixedSymbolFactorIntegral
+public import Formalism.SharpRestriction.GrowthBounds.PathWeight.LeadingDepthOneMemClosure
+public import Formalism.SharpRestriction.GrowthBounds.PathWeight.Lemma4OfRemainingStatements
+public import Formalism.SharpRestriction.GrowthBounds.PathWeight.MdWeightMapDomain
+public import Formalism.SharpRestriction.GrowthBounds.ScaleEdges.LeviInductionForms
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -49,7 +96,7 @@ theorem xx_span_MGen0 (th o : ℤ → ℝ) {xi : SegRing O r K} (hxi : xi ∈ XX
         · rw [support_rename_of_injective (md_f_inj F j K)]
           exact Finset.mem_image_of_mem _ hm0
         · rw [Finsupp.mem_support_iff]
-          have := Finsupp.mapDomain_apply (md_f_inj F j K) m0 v
+          have := Finsupp.mapDomain_apply_of_injective (md_f_inj F j K) m0 v
           rw [this]
           exact Finsupp.mem_support_iff.1 hvm
       exact ((mem_supported.1 hG) h3).2
@@ -69,6 +116,7 @@ theorem xx_span_MGen0 (th o : ℤ → ℝ) {xi : SegRing O r K} (hxi : xi ∈ XX
       rw [map_mul, rename_rename, rename_rename, rename_rename, rename_rename]
       rfl
   obtain ⟨ξ0, hξ0, rfl⟩ := h2
+
   rw [← sum_comp_image letterWeight ξ0, map_sum]
   refine Submodule.sum_mem _ fun D _ => ?_
   have h5 := md_comp_gen F j 0 th D hξ0
@@ -176,7 +224,7 @@ theorem exists_pol_family_of_mem_gen_of_vsDeg_le (D : Formalism.BasicNotions.D7)
     rw [hTt, sb_SPtrue] at hm
     have hm' := MvPolynomial.support_mul _ _ hm
     obtain ⟨m1, h1, m2, h2, rfl⟩ := Finset.mem_add.1 hm'
-    rw [map_add, IT_hom hH0 (mem_support_iff.1 h2), add_zero, weight_eq_normal_degree, normDeg_eq_vsDeg]
+    rw [map_add (f := _), IT_hom hH0 (mem_support_iff.1 h2), add_zero, weight_eq_normal_degree, normDeg_eq_vsDeg]
     exact hT m1 (support_map_subset _ _ h1)
 
   have hreal : ∀ o, Realisable p n' X.S.w n' r X.g c' o (weightedHomogeneousComponent (normalVariableWeight n' (r + K) r) o Tt) := by

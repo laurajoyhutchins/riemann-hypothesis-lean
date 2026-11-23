@@ -1,5 +1,47 @@
-import Formalism.SharpRestriction.Divisibility.GeneratorPowers.FBIdJet
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.CalcExp
+module
+
+public import Formalism.SharpRestriction.Divisibility.GeneratorPowers.FBIdJet
+public import Mathlib.RingTheory.PowerSeries.Exp
+import Formalism.SharpRestriction.Divisibility.GeneratorPowers.GermFunPf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.CalcExp
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -38,24 +80,11 @@ theorem psJet_prod_congr {ι κ : Type} [Fintype ι] [DecidableEq ι] [Fintype �
   rw [map_prod, map_prod]
   exact Finset.prod_congr rfl fun b _ => h b
 
-theorem cc_subst0 {σ τ : Type} [Finite σ] {a : σ → MvPowerSeries τ R}
-    (ha : ∀ i, MvPowerSeries.constantCoeff (a i) = 0) {g : MvPowerSeries σ R}
-    (hg : MvPowerSeries.constantCoeff g = 0) : MvPowerSeries.constantCoeff (MvPowerSeries.subst a g) = 0 := MvPowerSeries.constantCoeff_subst_eq_zero (MvPowerSeries.hasSubst_of_constantCoeff_zero ha) ha hg
-
 theorem subst_exp {σ τ : Type} [Finite σ] [Algebra ℚ R] (a : σ → MvPowerSeries τ R)
     (ha : ∀ i, MvPowerSeries.constantCoeff (a i) = 0) (g : MvPowerSeries σ R)
     (hg : MvPowerSeries.constantCoeff g = 0) :
     MvPowerSeries.subst a (PowerSeries.subst g (PowerSeries.exp R)) =
       PowerSeries.subst (MvPowerSeries.subst a g) (PowerSeries.exp R) := by
   exact ReciprocityTheory.ChartRestriction.G.TB.WickVanishing.subst_exp a ha hg
-
-theorem prod_exp {τ : Type} [Algebra ℚ R] : ∀ (n : ℕ) (q : Fin n → MvPowerSeries τ R),
-    (∀ b, MvPowerSeries.constantCoeff (q b) = 0) →
-    ∏ b, PowerSeries.subst (q b) (PowerSeries.exp R) = PowerSeries.subst (∑ b, q b) (PowerSeries.exp R)
-  | 0, q, _ => by rw [Fin.prod_univ_zero, Fin.sum_univ_zero, ReciprocityTheory.ChartRestriction.G.TB.WickVanishing.exp_zero]
-  | n + 1, q, hq => by
-    rw [Fin.prod_univ_succ, Fin.sum_univ_succ, prod_exp n (fun b => q b.succ) (fun b => hq _),
-      ReciprocityTheory.ChartRestriction.G.TB.WickVanishing.exp_add (ha := hq 0)
-        (hb := by rw [map_sum]; exact Finset.sum_eq_zero fun b _ => hq _)]
 
 end Formalism.MainNotions.ModuliIntegralCharts.H1.HarmInvA

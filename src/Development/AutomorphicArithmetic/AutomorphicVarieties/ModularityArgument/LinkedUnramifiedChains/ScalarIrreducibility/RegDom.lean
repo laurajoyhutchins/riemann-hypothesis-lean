@@ -1,5 +1,62 @@
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.ResMapBijective
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.HeightAndVanishing.DirichletPrimeToLPartMulLPowerPart
+public import Mathlib.RingTheory.Ideal.Height
+public import GroundTheory.ArithmeticGeometry.SchemeCohomology.RegularLocalDomain
+import Mathlib.Algebra.Module.SpanRankOperations
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.AdicCompletion.Noetherian
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+public import Mathlib.RingTheory.Etale.Field
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.TrivialOnInertiaOfUnr
+import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.Newform
+import Development.AutomorphicArithmetic.AutomorphicVarieties.CurveDVRSpecialization.FlipTwoThree
 import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.LinkedUnramifiedChains.RedDefs
-import GroundTheory.ArithmeticGeometry.SchemeCohomology.RegularUFD
+import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeGroups.UnitaryThreeReflectionRight
+public import Lean.Meta.ExprDefEq
+
+@[expose] public section
 
 open NumberField Formalism.ConjugateSelfDual ReciprocityTheory.Gal GlobalTheory.GalOfCusp IsLocalRing UpperTheory.V UpperTheory.V.HV UpperTheory.V.U3 UpperTheory.V.Base UpperTheory.V.Af UpperTheory.V.Pr UpperTheory.V.Alg UpperTheory.V.J
 
@@ -56,8 +113,8 @@ private theorem exists_der (O T : Type) [CommRing O] [CommRing T] [IsLocalRing T
     show f t - Ideal.Quotient.mk (m ^ 2) t = _
     rw [hf, zero_sub]
     rfl
-  show m.cotangentEquivIdeal.symm (d t) = _
-  rw [hd, map_neg]
+  change m.cotangentEquivIdeal.symm.toLinearMap (d t) = _
+  rw [hd, m.cotangentEquivIdeal.symm.toLinearMap.map_neg]
   congr 1
   exact m.cotangentEquivIdeal_symm_apply t ht
 
@@ -140,7 +197,7 @@ private theorem rank_ge [Algebra O T] [IsScalarTower O A T] [IsNoetherianRing T]
     rw [hι]
   let Dl : (CotangentSpace T →ₗ[ResidueField T] K) → (A →ₗ[O] K) := fun φ =>
     { toFun := fun x => φ (r (algebraMap A T x))
-      map_add' := fun x y => by simp only [map_add]
+      map_add' := fun x y => by simp only [map_add (f := _)]
       map_smul' := fun a x => by
         have h1 : algebraMap A T (a • x) = a • algebraMap A T x :=
           map_smul (IsScalarTower.toAlgHom O A T) a x
@@ -149,14 +206,14 @@ private theorem rank_ge [Algebra O T] [IsScalarTower O A T] [IsNoetherianRing T]
         rw [h1, r.map_smul, h2, hact, AlgHom.commutes, Algebra.smul_def, RingHom.id_apply] }
   have hDl : ∀ φ, Dl φ ∈ PtDer ξ K := fun φ f g => by
     show φ (r (algebraMap A T (f * g))) = ξ f • φ (r (algebraMap A T g)) + ξ g • φ (r (algebraMap A T f))
-    rw [map_mul, r.leibniz, map_add, hact, hact]
+    rw [map_mul, r.leibniz, map_add (f := _), hact, hact]
     rfl
   let Ψ : (CotangentSpace T →ₗ[ResidueField T] K) →ₗ[K] PtDer ξ K :=
     { toFun := fun φ => ⟨Dl φ, hDl φ⟩
       map_add' := fun _ _ => rfl
       map_smul' := fun _ _ => rfl }
   have hinj : Function.Injective Ψ := by
-    rw [injective_iff_map_eq_zero]
+    set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
     intro φ h0
     have h1 : ∀ x, φ (r (algebraMap A T x)) = 0 := fun x =>
       congrArg (fun D : PtDer ξ K => (D : A →ₗ[O] K) x) h0

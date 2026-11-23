@@ -1,45 +1,90 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.MetricPeriods.PairRelationOfScaledRatio
+module
+
+public import Development.AutomorphicSpectrum.Definitions.MetricPeriods.PairRelationOfScaledRatio
+public import Mathlib.RingTheory.MvPolynomial.Homogeneous
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
 import GroundTheory.HeightsAndTheta.Heights.Antisymmetric.Statements
+
+@[expose] public section
+
 open MvPolynomial GlobalTheory.CompanionTheory.Ar.PB GroundTheory.Heights₂.Heights
 
 namespace PositivityTheory.Xgp.poly_towt_bound
 
 theorem abs_coeff_le {σ : Type} (P : MvPolynomial σ ℝ) (m : σ →₀ ℕ) :
-    |coeff m P| ≤ ∑ d ∈ P.support, |coeff d P| := by
+    |P.coeff m| ≤ ∑ d ∈ P.support, |P.coeff d| := by
   by_cases h : m ∈ P.support
-  · exact Finset.single_le_sum (f := fun d => |coeff d P|) (fun _ _ => abs_nonneg _) h
+  · exact Finset.single_le_sum (f := fun d => |P.coeff d|) (fun _ _ => abs_nonneg _) h
   · rw [notMem_support_iff.mp h, abs_zero]
     exact Finset.sum_nonneg fun _ _ => abs_nonneg _
 
 theorem gen {σ : Type} [Fintype σ] (f : σ → MvPolynomial σ ℝ) (hf : ∀ i, (f i).IsHomogeneous 1) (n : ℕ) :
     ∃ Cst : ℝ, 0 ≤ Cst ∧ ∀ (Q : MvPolynomial σ ℝ) (M : ℝ), Q.IsHomogeneous n →
-      (aeval f Q).IsHomogeneous n ∧ ((∀ m, |coeff m Q| ≤ M) → ∀ m, |coeff m (aeval f Q)| ≤ Cst * M) := by
+      (aeval f Q).IsHomogeneous n ∧ ((∀ m, |Q.coeff m| ≤ M) →
+        ∀ m, |(aeval f Q).coeff m| ≤ Cst * M) := by
   classical
   let S : Finset (σ →₀ ℕ) := (Finsupp.finite_of_degree_le (σ := σ) n).toFinset
-  let B : (σ →₀ ℕ) → ℝ := fun d =>
-    ∑ e ∈ (aeval f (monomial d (1 : ℝ))).support, |coeff e (aeval f (monomial d (1 : ℝ)))|
+  let image (d : σ →₀ ℕ) := aeval f (monomial d (1 : ℝ))
+  let B (d : σ →₀ ℕ) : ℝ := ∑ e ∈ (image d).support, |(image d).coeff e|
   have hB : ∀ d, 0 ≤ B d := fun d => Finset.sum_nonneg fun _ _ => abs_nonneg _
   refine ⟨∑ d ∈ S, B d, Finset.sum_nonneg fun d _ => hB d, fun Q M hQ => ⟨?_, fun hM m => ?_⟩⟩
-  · simpa using hQ.aeval f hf
+  · simpa only [one_mul] using hQ.aeval f hf
   · have hM0 : 0 ≤ M := (abs_nonneg _).trans (hM 0)
     have hsub : Q.support ⊆ S := by
       intro d hd
-      simp only [S, Set.Finite.mem_toFinset, Set.mem_setOf_eq]
+      simp only [S, Set.Finite.mem_toFinset, Set.mem_ofPred_eq]
       by_contra hne
       exact (mem_support_iff.mp hd) (hQ.coeff_eq_zero (by omega))
-    have e : coeff m (aeval f Q) = ∑ d ∈ Q.support, coeff d Q * coeff m (aeval f (monomial d (1 : ℝ))) := by
+    have e : (aeval f Q).coeff m = ∑ d ∈ Q.support, Q.coeff d * (image d).coeff m := by
       conv_lhs => rw [Q.as_sum]
+
       rw [map_sum, coeff_sum]
       refine Finset.sum_congr rfl fun d _ => ?_
-      rw [← coeff_C_mul]
-      congr 1
-      have : monomial d (coeff d Q) = C (coeff d Q) * monomial d (1 : ℝ) := by
+      have hmonomial : monomial d (Q.coeff d) = C (Q.coeff d) * monomial d (1 : ℝ) := by
         rw [C_mul_monomial, mul_one]
-      rw [this, map_mul, aeval_C]
-      rfl
+      rw [hmonomial, map_mul, aeval_C, algebraMap_eq, coeff_C_mul]
     rw [e]
-    calc _ ≤ ∑ d ∈ Q.support, |coeff d Q * coeff m (aeval f (monomial d (1 : ℝ)))| :=
+    calc _ ≤ ∑ d ∈ Q.support, |Q.coeff d * (image d).coeff m| :=
           Finset.abs_sum_le_sum_abs _ _
       _ ≤ ∑ d ∈ Q.support, B d * M := by
           refine Finset.sum_le_sum fun d _ => ?_
@@ -58,7 +103,14 @@ theorem gapX_hom {Ψ : Type} {N : ℕ} (p : Ψ × Fin N) : (gapX p).IsHomogeneou
 
 end PositivityTheory.Xgp.poly_towt_bound
 
-theorem PositivityTheory.Xgp.t_poly_towt_bound : ∀ (Ψ : Type) [Fintype Ψ] (N n : ℕ), ∃ Cst : ℝ, (∀ (Q : MvPolynomial (Ψ × Fin N) ℝ) (M : ℝ), Q.IsHomogeneous n → (toWt Q).IsHomogeneous n ∧ ((∀ m, |coeff m Q| ≤ M) → ∀ m, |coeff m (toWt Q)| ≤ Cst * M)) ∧ ∀ (Q : MvPolynomial (Option (Ψ × Fin N)) ℝ) (M : ℝ), Q.IsHomogeneous n → (toWtS Q).IsHomogeneous n ∧ ((∀ m, |coeff m Q| ≤ M) → ∀ m, |coeff m (toWtS Q)| ≤ Cst * M) := by
+theorem PositivityTheory.Xgp.t_poly_towt_bound :
+    ∀ (Ψ : Type) [Fintype Ψ] (N n : ℕ), ∃ Cst : ℝ,
+      (∀ (Q : MvPolynomial (Ψ × Fin N) ℝ) (M : ℝ), Q.IsHomogeneous n →
+        (toWt Q).IsHomogeneous n ∧ ((∀ m, |Q.coeff m| ≤ M) →
+          ∀ m, |(toWt Q).coeff m| ≤ Cst * M)) ∧
+      ∀ (Q : MvPolynomial (Option (Ψ × Fin N)) ℝ) (M : ℝ), Q.IsHomogeneous n →
+        (toWtS Q).IsHomogeneous n ∧ ((∀ m, |Q.coeff m| ≤ M) →
+          ∀ m, |(toWtS Q).coeff m| ≤ Cst * M) := by
   intro Ψ _ N n
   obtain ⟨C1, h1, H1⟩ := PositivityTheory.Xgp.poly_towt_bound.gen (gapX (Ψ := Ψ) (N := N))
     PositivityTheory.Xgp.poly_towt_bound.gapX_hom n

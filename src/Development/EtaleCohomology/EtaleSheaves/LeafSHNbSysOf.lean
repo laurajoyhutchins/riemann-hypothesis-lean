@@ -1,4 +1,51 @@
-import Development.EtaleCohomology.EtaleSheaves.LeafSHNbSys
+module
+
+public import Development.EtaleCohomology.EtaleSheaves.LeafSHNbSys
+import Aesop.Main
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Sites.EtalePoint
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 open CategoryTheory Limits AlgebraicGeometry Opposite GlobalTheory.EtC
@@ -13,7 +60,8 @@ abbrev Fb : S.Etale ⥤ Type := Scheme.Etale.forget S ⋙ coyoneda.obj (op (Over
 
 lemma exists_affine (i : (Fb s).Elements) :
     ∃ j : (Fb s).Elements, IsAffine j.1.left ∧ Nonempty (j ⟶ i) := by
-  rcases i with ⟨X, x⟩
+  rcases i with ⟨x⟩
+  rename_i X
   cases X with | _ Y f
   obtain ⟨y, hy, rfl⟩ := Over.homMk_surjective x
   dsimp at y hy
@@ -24,7 +72,7 @@ lemma exists_affine (i : (Fb s).Elements) :
     refine ⟨R, j, inferInstance, _, IsOpenImmersion.lift_fac j y ?_⟩
     rintro _ ⟨a, rfl⟩
     rwa [Subsingleton.elim a default]
-  refine ⟨⟨(Scheme.AffineEtale.Spec S).obj (Scheme.AffineEtale.mk (j ≫ f)), Over.homMk y'⟩, ?_,
+  refine ⟨Functor.elementsMk (Fb s) ((Scheme.AffineEtale.Spec S).obj (Scheme.AffineEtale.mk (j ≫ f))) (Over.homMk y'), ?_,
     ⟨⟨MorphismProperty.Over.homMk j rfl trivial, by cat_disch⟩⟩⟩
   change IsAffine (Spec R)
   infer_instance
@@ -159,7 +207,7 @@ lemma main (x : U.left) (hx : s default = x) (hwi : ∀ i, ∃ j ∈ Q, Nonempty
     rw [nat, reassoc_of% (l_e s Q haff k), l_e, pt_map]
   · intro U' b l' hl'
     let X' : U.left.Etale := MorphismProperty.Over.mk ⊤ b.left inferInstance
-    obtain ⟨c, ⟨hc⟩⟩ := exists_of_wi s Q hwi ⟨X', Over.homMk l' hl'⟩
+    obtain ⟨c, ⟨hc⟩⟩ := exists_of_wi s Q hwi (Functor.elementsMk (Fb s) X' (Over.homMk l' hl'))
     refine ⟨op c, hc.1.left, MorphismProperty.Over.w hc.1, ?_⟩
     erw [reassoc_of% (l_e s Q haff (op c))]
     exact congrArg CommaMorphism.left hc.2
@@ -168,7 +216,7 @@ lemma main (x : U.left) (hx : s default = x) (hwi : ∀ i, ∃ j ∈ Q, Nonempty
     let X' : U.left.Etale := MorphismProperty.Over.mk ⊤ b.left inferInstance
     have hy : (pt s Q j.unop ≫ g) ≫ b.left = s := by
       exact (Category.assoc _ _ _).trans ((congrArg (pt s Q j.unop ≫ ·) hg).trans (pt_w s Q j.unop))
-    let y : (Fb s).Elements := ⟨X', Over.homMk (pt s Q j.unop ≫ g) hy⟩
+    let y : (Fb s).Elements := Functor.elementsMk (Fb s) X' (Over.homMk (pt s Q j.unop ≫ g) hy)
     let u : ι s Q j.unop ⟶ y := ⟨MorphismProperty.Over.homMk (B := X') g hg trivial,
       by apply Over.OverMorphism.ext; rfl⟩
     let u' : ι s Q j.unop ⟶ y := ⟨MorphismProperty.Over.homMk (B := X') g' hg' trivial,

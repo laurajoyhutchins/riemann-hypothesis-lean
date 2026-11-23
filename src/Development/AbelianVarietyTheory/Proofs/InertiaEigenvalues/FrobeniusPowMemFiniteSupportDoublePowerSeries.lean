@@ -1,5 +1,47 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CoeffOfW
+module
+
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CoeffOfW
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.IsPotential
+
+@[expose] public section
 
 noncomputable section
 open Formalism Formalism.BasicNotions Formalism.BasicNotions.Loc Formalism.WeaklyAdmissibleFiltrations TensorProduct PowerSeries GlobalTheory.Prism GlobalTheory.BK GlobalTheory.BKReal GlobalTheory.BKGal GlobalTheory.Per Filter GlobalTheory.CrysPrism
@@ -17,6 +59,7 @@ theorem Bd.mono {M M' : ℕ} {F : K⟦X⟧⟦X⟧} (h : Bd M F) (hM : M ≤ M') 
 
 theorem Bd.mul {M M' : ℕ} {F G : K⟦X⟧⟦X⟧} (h : Bd M F) (h' : Bd M' G) : Bd (M + M') (F * G) := by
   intro i n hin
+
   rw [coeff_mul, map_sum]
   refine Finset.sum_eq_zero fun p hp => ?_
   rw [coeff_mul]
@@ -47,8 +90,8 @@ theorem bd_X : Bd 1 (X : K⟦X⟧⟦X⟧) := by
   · rw [coeff_one, if_neg (by omega)]
   · simp
 
-variable (K) in
 
+variable (K) in
 def fin : Subring K⟦X⟧⟦X⟧ where
   carrier := {F | ∃ M, Bd M F}
   mul_mem' := by
@@ -58,7 +101,7 @@ def fin : Subring K⟦X⟧⟦X⟧ where
   add_mem' := by
     rintro F G ⟨M, h⟩ ⟨M', h'⟩
     exact ⟨M + M', fun i n hin => by
-      rw [map_add, map_add, h i n (by omega), h' i n (by omega), add_zero]⟩
+      rw [map_add (f := _), map_add (f := _), h i n (by omega), h' i n (by omega), add_zero]⟩
   zero_mem' := ⟨0, fun i n _ => by simp⟩
   neg_mem' := by
     rintro F ⟨M, h⟩
@@ -68,18 +111,23 @@ theorem Bd.eq_sum {M : ℕ} {F : K⟦X⟧⟦X⟧} (h : Bd M F) :
     F = ∑ i ∈ Finset.range (M + 1), C (∑ n ∈ Finset.range (M + 1),
       C (coeff n (coeff i F)) * X ^ n) * X ^ i := by
   ext i n
+
   simp only [map_sum (coeff i), coeff_C_mul_X_pow, Finset.sum_ite_eq, Finset.mem_range]
-  split_ifs with hi
-  · simp only [map_sum (coeff n), coeff_C_mul_X_pow, Finset.sum_ite_eq, Finset.mem_range]
+  by_cases hi : i < M + 1
+  · simp only [if_pos hi]
+
+    simp only [map_sum (coeff n), coeff_C_mul_X_pow, Finset.sum_ite_eq, Finset.mem_range]
     split_ifs with hn
     · rfl
     · exact h i n (by omega)
-  · rw [h i n (by omega), map_zero]
+  · simp only [if_neg hi, map_zero]
+    exact h i n (by omega)
 
 theorem map_mem (φ : K⟦X⟧⟦X⟧ →+* K⟦X⟧⟦X⟧) (h1 : ∀ c : K, φ (C (C c)) ∈ fin K)
     (h2 : φ (C X) ∈ fin K) (h3 : φ X ∈ fin K) {F : K⟦X⟧⟦X⟧} (hF : F ∈ fin K) : φ F ∈ fin K := by
   obtain ⟨M, h⟩ := hF
   rw [h.eq_sum]
+
   simp only [map_sum, map_mul, map_pow]
   refine sum_mem fun i _ => mul_mem (sum_mem fun n _ => mul_mem (h1 _) (pow_mem h2 _)) (pow_mem h3 _)
 

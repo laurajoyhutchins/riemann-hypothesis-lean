@@ -1,9 +1,57 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.OfRoots
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExponentialUnipotentStabilizerStatement
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.GramUnipotentStabilizerBruhatCellConjRootStatement
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.GramUnipotentLieLatticeDomainVolumeBoundStatement
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsCoveringSetExpLieLatticeRootGroupStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.OfRoots
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsCoveringSetExpLieLatticeRootGroup
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsCoveringSetExpLieLatticeRootGroupStatement
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExponentialUnipotentStabilizerStatement
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.GramUnipotentLieLatticeDomainVolumeBound
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.GramUnipotentLieLatticeDomainVolumeBoundStatement
+import Development.AbelianVarietyTheory.Proofs.FlagMeasures.GramUnipotentStabilizerBruhatCellConjRoot
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.GramUnipotentStabilizerBruhatCellConjRootStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField Module Matrix Formalism.MainNotions.S GlobalTheory.LoopV
 open scoped ENNReal Classical
@@ -96,8 +144,9 @@ theorem expT_map {K F : Type} [Field K] [Field F] {N : ℕ} (φ : K →+* F)
     (x : Matrix (Fin N) (Fin N) K) : expT (x.map φ) = (expT x).map φ := by
   have hp : ∀ i : ℕ, (x.map φ) ^ i = (x ^ i).map φ := fun i => (map_pow φ.mapMatrix x i).symm
   ext a b
+
   simp only [expT, hp, Matrix.sum_apply, Matrix.smul_apply, Matrix.map_apply, smul_eq_mul,
-    map_sum, map_mul, map_inv₀, map_natCast]
+  map_sum, map_mul, map_inv₀, map_natCast]
 
 theorem expT_conj {K : Type} [Field K] {N : ℕ} (U x : Matrix (Fin N) (Fin N) K)
     (hU : IsUnit U.det) : expT (U * x * U⁻¹) = U * expT x * U⁻¹ := by
@@ -239,7 +288,7 @@ theorem discrete_lattice {K : Type} [Field K] [NumberField K] {ι : Type} [Finty
     ∑ q : R, τ v (U⁻¹ i q.1.1) * τ v (U q.1.2 j) * c v q
   have hΦ : Continuous Φ := by
     refine continuous_pi fun v => continuous_pi fun i => continuous_pi fun j => ?_
-    refine continuous_finset_sum _ fun q _ => ?_
+    refine continuous_finsetSum _ fun q _ => ?_
     exact continuous_const.mul ((continuous_apply q).comp (continuous_apply v))
   have hΦ0 : Φ 0 = 0 := by
     funext v i j
@@ -257,6 +306,7 @@ theorem discrete_lattice {K : Type} [Field K] [NumberField K] {ι : Type} [Finty
           simp only [Matrix.mul_assoc, Matrix.nonsing_inv_mul _ hU, Matrix.mul_one,
             Matrix.nonsing_inv_mul_cancel_left _ _ hU]
         conv_lhs => rw [hx]
+
         rw [GlobalTheory.LieCovol.mul_mul_apply _ _ _ R hxR, map_sum, ← Finset.sum_coe_sort R]
         refine Finset.sum_congr rfl fun q _ => ?_
         rw [map_mul, map_mul, hxc v q]

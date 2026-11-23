@@ -1,29 +1,49 @@
-import Formalism.LocalToGlobal.CharacterGerms.NormOneIntegral
-import Formalism.LocalToGlobal.CharacterGerms.FinTwoNeOneSub
-import Formalism.LocalToGlobal.CharacterGerms.NormOneRowInvariant
-import Formalism.LocalToGlobal.CharacterGerms.NormOneRowDegrees
-import Formalism.LocalToGlobal.CharacterGerms.RowTieGermI
-import Formalism.LocalToGlobal.CharacterGerms.RowTiePHStab
-import Formalism.LocalToGlobal.CharacterGerms.CoeffSingleSubstOfLowDegree
-import Formalism.LocalToGlobal.CharacterGerms.RowTiePCEq2
-import Formalism.LocalToGlobal.CharacterGerms.IndependenceBoundRaw
-import Formalism.LocalToGlobal.CharacterGerms.RowTieAxes
-import Formalism.LocalToGlobal.CharacterGerms.RankMaximalOfNondegenerate
-import Formalism.LocalToGlobal.CharacterGerms.RowTieCH
-import Formalism.LocalToGlobal.CharacterGerms.RowTieChar
-import Formalism.LocalToGlobal.CharacterGerms.RowTieLab
-import Formalism.LocalToGlobal.CharacterGerms.RowTieDesc
-import Formalism.LocalToGlobal.CharacterGerms.RowTiePNabMapSt
-import Formalism.LocalToGlobal.CharacterGerms.RowTiePNvalEqSt
-import Formalism.LocalToGlobal.CharacterGerms.RowTiePDescSpanFinal
-import Formalism.LocalToGlobal.CharacterGerms.RowTieValK
-import Formalism.LocalToGlobal.CharacterGerms.RowTiePPTDone
-import Formalism.LocalToGlobal.CharacterGerms.EndomorphismLimitIntegral
-import Formalism.LocalToGlobal.CharacterGerms.RowTieP_TCoord
-import Formalism.LocalToGlobal.CharacterGerms.CharacterHypothesisUnramified
-import Formalism.LocalToGlobal.CharacterGerms.ConstantZeroMultiplicationEval
-import Formalism.LocalToGlobal.CharacterGerms.CoeffSliceMultiplication
-import Formalism.LocalToGlobal.CharacterGerms.RankMaximalSelfUnconditional
+module
+
+public import Formalism.LocalToGlobal.CharacterGerms.HostTraceIdentity
+public import Formalism.LocalToGlobal.CharacterGerms.RowTiePDescSpanFinal
+public import Formalism.LocalToGlobal.CharacterGerms.RowTiePNabMapSt
+public import Formalism.LocalToGlobal.CharacterGerms.RowTiePNvalEqSt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Formalism.LocalToGlobal.CharacterGerms.ContentZeroAt
+public import Formalism.LocalToGlobal.CharacterGerms.RowTieDesc
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -37,18 +57,8 @@ namespace Formalism.L2.FormalSeriesBounds
 open Formalism.IncomingBounds Formalism.L2.Pj NumberField Formalism.L2.FormalSeriesBounds.RF
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.Geo.Tor.Germ
 
-def TCoordFBSt : Prop := AllFB fun _ _ V _ _ _ _ X => ∀ Hc : ∀ g, X.CartHyp V g, RawChart.TCoordSt Hc
-
 variable {E : Type} [Field E] [NumberField E] [IsCMField E] {H : Host E} {Dw : Datum H} {l : Level H}
 variable (Xo : Moduli Dw l) (c : Coeff l) [StarRing (𝓞 E)]
-
-structure GeoIn : Prop where
-
-  lab : LabGeoCoreSt Xo c
-
-  ndg : NondegenerateCharts Xo c
-
-  ch : UpFBr.CharacterHypothesisUnramified Xo c
 
 theorem descent_holds : DescentSt Xo c := descent_of (nabMapSt_holds Xo c) descent_span nvalEqSt_holds
 

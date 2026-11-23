@@ -1,19 +1,61 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.L2Cusps.AbsCompactAlt
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.L2Cusps.AbsApprox
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.L2Cusps.StabFin
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.L2Cusps.PvFinHolds
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.L2Cusps.AbsCompactAlt
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.L2Cusps.AbsApprox
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.L2Cusps.PvFinHolds
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.L2Cusps.StabFin
+import GroundTheory.AutomorphicForms.CuspidalDiscreteness.SummandsAreCuspForms
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField MeasureTheory
 open GroundTheory.Automorphic GroundTheory.Automorphic.AutomorphicForm GroundTheory.Automorphic.CuspidalSpectrum
 
-theorem UpperTheory.V.KernelIndexFullLattice.kFinMem_holds :
-    UpperTheory.V.KernelIndexFullLattice.KFinMem := by
+namespace UpperTheory.V.KernelIndexFullLattice
+
+theorem kFinMem_holds : KFinMem := by
   intro K _ _ n μ₁ _ π v hv hop hfin
-  have h1 : retractOne (1 : AdelicGLn.AdelicGL K n) = 1 := retractOne_coe (1 : Reduction.normOneGL K n)
-  let r : AdelicGLn.FiniteAdelicGL K n →* Reduction.normOneGL K n :=
+  have h1 : retractOne (1 : AdelicGLn.AdelicGL K n) = 1 := retractOne_coe (1 : G1 K n)
+  let r : AdelicGLn.FiniteAdelicGL K n →* G1 K n :=
     { toFun := fun h => retractOne (finEmb K n h)
-      map_one' := by rw [map_one, h1]
-      map_mul' := fun a b => by rw [map_mul, retractOne_mul] }
+      map_one' := by rw [map_one (finEmb K n), h1]
+      map_mul' := fun a b => by rw [map_mul (finEmb K n), retractOne_mul] }
   let S : Subgroup (AdelicGLn.FiniteAdelicGL K n) :=
     { carrier := {h | cuspRepT μ₁ (r h) v = v}
       one_mem' := by
@@ -37,10 +79,10 @@ theorem UpperTheory.V.KernelIndexFullLattice.kFinMem_holds :
   have hUo : IsOpen (U : Set (AdelicGLn.FiniteAdelicGL K n)) := hSo.inter (AdelicGLn.isOpen_integralFiniteGL K n)
   have hUc : IsCompact (U : Set (AdelicGLn.FiniteAdelicGL K n)) :=
     (AdelicGLn.isCompact_integralFiniteGL K n).of_isClosed_subset (U.isClosed_of_isOpen hUo) fun _ h => h.2
-  obtain ⟨N, hN, hN'⟩ := UpperTheory.V.KernelIndexFullLattice.pvFin_holds K n μ₁ π U hUc hUo v (fun u hu => hu.1) hfin
+  obtain ⟨N, hN, hN'⟩ := pvFin_holds K n μ₁ π U hUc hUo v (fun u hu => hu.1) hfin
   let A : archCompact K n ⊕ U → CuspL2 μ₁ →L[ℂ] CuspL2 μ₁ :=
     Sum.elim (fun k => cuspRepT μ₁ (archP K n k)) fun u => cuspRepT μ₁ (r u)
-  refine UpperTheory.V.KernelIndexFullLattice.absApprox_holds (archCompact K n ⊕ U) (CuspL2 μ₁) A ?_ _ N hN ?_ v hv
+  refine absApprox_holds (archCompact K n ⊕ U) (CuspL2 μ₁) A ?_ _ N hN ?_ v hv
     fun P hP hPW => hN' P (fun k x => hP (.inl k) x) (fun u hu x => hP (.inr ⟨u, hu⟩) x) hPW
   · rintro (k | u)
     · refine ⟨.inl k⁻¹, ?_⟩
@@ -52,7 +94,7 @@ theorem UpperTheory.V.KernelIndexFullLattice.kFinMem_holds :
       rw [UnitaryRep.adjoint_map, map_inv r]
   · rintro _ ⟨φ, hφ, rfl⟩
     obtain ⟨Y, hY, hφY, hk, hu⟩ :=
-      UpperTheory.V.KernelIndexFullLattice.stabFin_holds K n π.carrier π.toModule π.isAdmissible.1 U hUc ⟨φ, hφ⟩
+      stabFin_holds K n π.carrier π.toModule π.isAdmissible.1 U hUc ⟨φ, hφ⟩
     let j : π.carrier →ₗ[ℂ] CuspL2 μ₁ := cuspVecL μ₁ ∘ₗ π.carrier.subtype
     refine ⟨Y.map j, ?_, inferInstance, ⟨_, hφY, rfl⟩, ?_⟩
     · rintro _ ⟨y, -, rfl⟩
@@ -60,3 +102,5 @@ theorem UpperTheory.V.KernelIndexFullLattice.kFinMem_holds :
     · rintro (k | u) _ ⟨y, hy, rfl⟩
       · exact ⟨_, hk k y hy, cuspToL2_sigma μ₁ k (π.le_central y.2)⟩
       · exact ⟨_, hu u u.2 y hy, cuspToL2_finRepCusp μ₁ u (π.le_central y.2)⟩
+
+end UpperTheory.V.KernelIndexFullLattice

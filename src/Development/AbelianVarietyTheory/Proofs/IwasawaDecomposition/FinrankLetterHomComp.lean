@@ -1,7 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.FiniteDimensionalWdSpace
-import Formalism.LocalRingCardinality.AdicCompletionLocal.LocTied
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ResEqIff
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.FiniteDimensionalWdSpace
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ResEqIff
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Eigenspace.Minpoly
+import Mathlib.LinearAlgebra.Eigenspace.Semisimple
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -28,7 +75,7 @@ theorem finrank_dual_letter [Algebra L F] (τ : U →+* F) :
     finrank F (Dual F (Letter m F τ)) = finrank F ↥(letterHom m (algebraMap L F) τ) := by
   let e : Dual F (Letter m F τ) →ₗ[F] ↥(letterHom m (algebraMap L F) τ) :=
     { toFun := fun φ => ⟨AddMonoidHom.mk' (fun x => φ (letterMk m F τ x))
-          (fun x y => by rw [letterMk_add, map_add]),
+          (fun x y => by rw [letterMk_add, map_add (f := _)]),
         fun a x => by simp [letterMk_smul], fun c x => by simp [letterMk_mul]⟩
       map_add' := fun _ _ => rfl
       map_smul' := fun _ _ => rfl }
@@ -58,8 +105,12 @@ theorem finrank_letterHom_comp {F' : Type} [Field F'] (g : F ≃+* F') (s : L �
       left_inv := fun f => Subtype.ext (AddMonoidHom.ext fun x => by simp)
       right_inv := fun f => Subtype.ext (AddMonoidHom.ext fun x => by simp)
       map_add' := fun f f' => Subtype.ext (AddMonoidHom.ext fun x => by simp) }
-  rw [finrank, finrank, rank_eq_of_equiv_equiv g j g.bijective fun c f =>
-    Subtype.ext (AddMonoidHom.ext fun x => by simp [j])]
+  have h : Module.rank F ↥(letterHom m s τ) = Module.rank F' ↥(letterHom m s' τ') :=
+    rank_eq_of_equiv_equiv g j g.bijective fun c f =>
+      Subtype.ext (AddMonoidHom.ext fun x => by
+        change g (c * f.1 x) = g c * g (f.1 x)
+        exact g.map_mul _ _)
+  rw [finrank, finrank, h]
 
 theorem finrank_letterHom_frob (φ : End L D) (hφ : Function.Bijective φ) (σ : U → U)
     (hσ : ∀ c, φ * m c = m (σ c) * φ) (hσ' : Function.Surjective σ) (s : L →+* F) (τ τ' : U →+* F)

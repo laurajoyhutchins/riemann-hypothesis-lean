@@ -1,5 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.SplitPrimePlaceCmTypeConjugate
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.NonGaloisCusps.SplitPlaceTypes
+public import Development.AbelianVarietyTheory.Counterexamples.NonGaloisSurvey.SplitRowIffOfIsEmpty
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.SplitPrimePlaceCmTypeConjugate
+import Formalism.FrobeniusOrbits.FrobeniusOrbitsProofs.OrderOfSignGroupDvdTwo
+import Mathlib.Algebra.Algebra.Field
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -80,7 +126,7 @@ theorem root_ne (h2 : D.nd.l i = 2) (w w' : HeightOneSpectrum (𝓞 D.host.E)) (
   have hβ : (β : D.host.E) = ω := rfl
   have hy : ((1 - β : 𝓞 D.host.E) : D.host.E) = 1 - ω := by simp [← hβ]
   have hconj : D.host.conj ω = 1 - ω := by
-    rw [hω, map_div₀, map_add, map_one, conj_sqrtE, map_ofNat]; ring
+    rw [hω, map_div₀, map_add (f := _), map_one, conj_sqrtE, map_ofNat]; ring
   have huQ : (u : ℚ_[D.nd.l i]) = (1 + (t : ℚ_[D.nd.l i])) / 2 := by
     have := congrArg (fun z : ℤ_[D.nd.l i] => (z : ℚ_[D.nd.l i])) hu
     push_cast at this
@@ -88,9 +134,9 @@ theorem root_ne (h2 : D.nd.l i = 2) (w w' : HeightOneSpectrum (𝓞 D.host.E)) (
     rw [← this, e]
     field_simp
   have a1 : β ∈ w.asIdeal ↔ ‖u‖ < 1 := mem_iff_norm D i w hw β u (by
-    rw [hβ, hω, huQ]; simp only [map_div₀, map_add, map_one, map_ofNat, ht])
+    rw [hβ, hω, huQ]; simp only [map_div₀, map_add (f := _), map_one, map_ofNat, ht])
   have a2 : 1 - β ∈ w'.asIdeal ↔ ‖1 - u‖ < 1 := mem_iff_norm D i w' hw' (1 - β) (1 - u) (by
-    rw [hy, hω]; push_cast; rw [huQ]; simp only [map_sub, map_div₀, map_add, map_one, map_ofNat, ht'])
+    rw [hy, hω]; push_cast; rw [huQ]; simp only [map_sub, map_div₀, map_add (f := _), map_one, map_ofNat, ht'])
   have a3 : β ∈ w.asIdeal ↔ 1 - β ∈ w'.asIdeal := hc β (1 - β) (by rw [hy, hβ, hconj])
   have hiff : ‖u‖ < 1 ↔ ‖1 - u‖ < 1 := a1.symm.trans (a3.trans a2)
   have hprod : ‖u‖ * ‖1 - u‖ < 1 := by

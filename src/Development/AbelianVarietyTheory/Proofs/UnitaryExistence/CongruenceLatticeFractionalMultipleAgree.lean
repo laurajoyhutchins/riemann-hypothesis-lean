@@ -1,11 +1,44 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.ExistenceOfLattices.CoeSelfDualLatticeInFrameCoordinatesEq
-import Formalism.LocalToGlobal.ProjectiveLattices.ParCanon
-import Formalism.LocalToGlobal.ProjectiveLattices.ExistsParameterConditions
-import Formalism.LocalToGlobal.ProjectiveLattices.ValSetAlgSubset
-import Formalism.LocalToGlobal.ProjectiveLattices.IntAll
-import Formalism.LocalToGlobal.ProjectiveLattices.AllTest
-import Formalism.LocalToGlobal.ProjectiveLattices.VolProofs
+module
+
+public import Development.AbelianVarietyTheory.Definitions.ExistenceOfLattices.CoeSelfDualLatticeInFrameCoordinatesEq
+public import Development.AbelianVarietyTheory.Definitions.ExistenceOfLattices.Hat1
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 open NumberField IsDedekindDomain ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.FD Formalism.BasicNotions Formalism.MainNotions Formalism.BasicNotions.TH Formalism.L2.Theta Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.L2.Pj
 open scoped TensorProduct Matrix Topology
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
@@ -139,7 +172,7 @@ theorem stab_iff (L : Submodule (𝓞 E) (Fin n → E)) {A : FractionalIdeal (�
       rw [map_smul, e]
       exact AddSubgroup.subset_closure ⟨a, ha, _, add_mem hy hz, rfl⟩
     | zero => rw [map_zero]; exact zero_mem _
-    | add x y _ _ hx hy => rw [map_add]; exact add_mem hx hy
+    | add x y _ _ hx hy => rw [map_add (f := k)]; exact add_mem hx hy
     | neg x _ hx => rw [map_neg]; exact neg_mem hx
 
 theorem cong_iff (L : Submodule (𝓞 E) (Fin n → E)) {A : FractionalIdeal (𝓞 E)⁰ E} (hA : A ≠ 0)
@@ -176,13 +209,13 @@ theorem cong_iff (L : Submodule (𝓞 E) (Fin n → E)) {A : FractionalIdeal (�
       | add x y _ _ hx hy =>
         obtain ⟨x', hx', e⟩ := hx
         obtain ⟨y', hy', e'⟩ := hy
-        exact ⟨x' + y', add_mem hx' hy', by rw [smul_add, map_add, e, e', smul_add]⟩
+        exact ⟨x' + y', add_mem hx' hy', by rw [smul_add, map_add (f := _), e, e', smul_add]⟩
       | neg x _ hx =>
         obtain ⟨x', hx', e⟩ := hx
         exact ⟨-x', neg_mem hx', by rw [smul_neg, map_neg, e, smul_neg]⟩
     · obtain ⟨x', hx', e⟩ := hx
       obtain ⟨y', hy', e'⟩ := hy
-      exact ⟨x' + y', add_mem hx' hy', by rw [fv_add, map_add, e, e', smul_add]⟩
+      exact ⟨x' + y', add_mem hx' hy', by rw [fv_add, map_add (f := _), e, e', smul_add]⟩
   · intro h b hb z hz
     induction hz using AddSubgroup.closure_induction with
     | mem z hz =>
@@ -208,7 +241,7 @@ theorem cong_iff (L : Submodule (𝓞 E) (Fin n → E)) {A : FractionalIdeal (�
     | add x y _ _ hx hy =>
       obtain ⟨x', hx', e⟩ := hx
       obtain ⟨y', hy', e'⟩ := hy
-      exact ⟨x' + y', add_mem hx' hy', by rw [smul_add, map_add, e, e', smul_add]⟩
+      exact ⟨x' + y', add_mem hx' hy', by rw [smul_add, map_add (f := _), e, e', smul_add]⟩
     | neg x _ hx =>
       obtain ⟨x', hx', e⟩ := hx
       exact ⟨-x', neg_mem hx', by rw [smul_neg, map_neg, e, smul_neg]⟩

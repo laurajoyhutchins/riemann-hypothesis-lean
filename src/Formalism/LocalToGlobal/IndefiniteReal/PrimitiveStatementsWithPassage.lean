@@ -1,12 +1,50 @@
-import Mathlib
-import Formalism.LocalToGlobal.IndefiniteReal.FaceOf3
-import Formalism.LocalToGlobal.IndefiniteReal.CxCoreRG
-import Formalism.LocalToGlobal.IndefiniteReal.LiftCoordinatesInGoodPartOfDefinite
-import Formalism.LocalToGlobal.IndefiniteReal.EigSumLeComapSemi
-import Formalism.LocalToGlobal.IndefiniteReal.CxHecke
-import Formalism.LocalToGlobal.IndefiniteReal.IsometricPeriodsOfHypotheses
-import Formalism.LocalToGlobal.IndefiniteReal.RationalAdjoints.RatZOfTests
-import Formalism.LocalToGlobal.IndefiniteReal.IsometricPeriodsOfUnitHypotheses
+module
+
+public import Formalism.LocalToGlobal.IndefiniteReal.FaceOf3
+public import Formalism.LocalToGlobal.IndefiniteReal.LiftCoordinatesInGoodPartOfDefinite
+public import Formalism.LocalToGlobal.IndefiniteReal.EigSumLeComapSemi
+public import Formalism.LocalToGlobal.IndefiniteReal.CxHecke
+public import Formalism.LocalToGlobal.IndefiniteReal.RationalAdjoints.RatZOfTests
+public import Formalism.LocalToGlobal.IndefiniteReal.IsometricPeriodsOfUnitHypotheses
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Module NumberField IsDedekindDomain
 open scoped Matrix ComplexOrder InnerProductSpace
@@ -72,8 +110,8 @@ def LiftsEig3 (P : Subgroup G) (ψ : P →* Kˣ) (C : ∀ j : Fin m, ((A3.liftI 
   ∀ j, (A3.A.fam.L j A3.A.fam.μ0).Z0 (A3.A.fam.lvlA P ψ) (X.Zl j A3.A.fam.μ0) =
     (A3.A.fam.L j A3.A.fam.μ0).inV0 (A3.A.fam.lvlA P ψ) (eigSum (A3.liftI j A3.A.fam.μ0).opAll (C j))
 
-variable {A3} in
 
+variable {A3} in
 def LiftsTyp3 (A3 : FamIn3 K G Pl0 I0 Ty T m) (C : ∀ j : Fin m, ((A3.liftI j A3.A.fam.μ0).OpIx → K) → Prop) : Prop :=
   ∀ j x, C j x → A3.fam3.IsType3 (A3.fam3.LI j A3.A.fam.μ0) (A3.fam3.tr3 j) x
 
@@ -240,17 +278,5 @@ structure PrimitiveStatementsWithPassage (A3 : FamIn3 K G Pl0 I0 Ty T m) (P0 : S
 
   passage : Passage ((faceOf3 A3 P0 ψ0 P1 ψ1 Dc Sp Zsc X.zs).Z.num C CH)
     (X.data (crdOf3 A3 P0 ψ0 P1 ψ1 Dc Sp Zsc) false) (X.data (crdOf3 A3 P0 ψ0 P1 ψ1 Dc Sp Zsc) true)
-
-def PackageFromComplexDataConditions : Prop :=
-  ∀ (A3 : FamIn3 K G Pl0 I0 Ty T m) (P0 : Subgroup G) (ψ0 : P0 →* Kˣ) (P1 : Subgroup G) (ψ1 : P1 →* Kˣ)
-    (Dc : ∀ Zs : DefSub A3.fam3.amb3, DefCols (A3.side3 P1 ψ1 Zs)) (Sp : ∀ Zs : DefSub A3.fam3.amb3, SPer (Dc Zs))
-    (Zsc : DefSub A3.fam3.amb3 → IndefScale A3.fam3.base3) (X : CxData A3.fam3.amb3) (s : ℕ)
-    (C0 : ∀ j : Fin m, ((A3.liftI j A3.A.fam.μ0).OpIx → K) → Prop)
-    (eV : ∀ t, (Fin ((faceOf3 A3 P0 ψ0 P1 ψ1 Dc Sp Zsc X.zs).Df1.nV t) → K) →ₗ[K] A3.fam3.amb3.FR t)
-    (sEE : X.EE →ₗ⋆[ℂ] (faceOf3 A3 P0 ψ0 P1 ψ1 Dc Sp Zsc X.zs).Sp.HH) (C CH : ℝ)
-    (hE : ∀ t, (A3.rowI t).OpIx → Module.End ℂ X.EE) (hW : ∀ j t, (A3.liftI j t).OpIx → Module.End ℂ (X.W j))
-    (gE : Representation ℂ G X.EE) (gW : ∀ j, Representation ℂ G (X.W j)) (cf : ConvFace A3.fam3.base3),
-    PrimitiveStatementsWithPassage A3 P0 ψ0 P1 ψ1 Dc Sp Zsc X s C0 eV sEE C CH hE hW gE gW cf →
-      Nonempty (IndefPkgR A3.fam3.amb3 (faceOf3 A3 P0 ψ0 P1 ψ1 Dc Sp Zsc) cf C CH)
 
 end Formalism.IndefR.Cx

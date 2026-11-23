@@ -1,5 +1,47 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.ProdFam
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.CupPair
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -12,8 +54,8 @@ section Bi
 variable {k : Type} [Field k] {ι κ : Type} [LinearOrder ι] [LinearOrder κ]
   {E E' E'' : Type} [AddCommGroup E] [Module k E] [AddCommGroup E'] [Module k E'] [AddCommGroup E''] [Module k E'']
 
-variable (k ι κ E'') in
 
+variable (k ι κ E'') in
 def biD : (Finset ι × Finset κ → E'') →ₗ[k] (Finset ι × Finset κ → E'') :=
   LinearMap.pi fun x =>
     (∑ i ∈ x.1, GlobalTheory.cubeSign x.1 i • LinearMap.proj (R := k) (φ := fun _ : Finset ι × Finset κ => E'') (x.1.erase i, x.2)) +
@@ -32,21 +74,7 @@ def bicech (μ : E →ₗ[k] E' →ₗ[k] E'') (A : Finset ι → Submodule k E)
 def boxC (μ : E →ₗ[k] E' →ₗ[k] E'') (a : Finset ι → E) (b : Finset κ → E') : Finset ι × Finset κ → E'' :=
   fun x => μ (a x.1) (b x.2)
 
-variable (k ι κ E'') in
-open Classical in
-
-def crossL : (Finset ι × Finset κ → E'') →ₗ[k] (Finset (ι ×ₗ κ) → E'') :=
-  LinearMap.pi fun u => ∑ j ∈ u,
-    if Set.InjOn fstL (↑(u.filter (· ≤ j)) : Set (ι ×ₗ κ)) ∧ Set.InjOn sndL (↑(u.filter (j ≤ ·)) : Set (ι ×ₗ κ)) then
-      (idxSign fstL (u.filter (· ≤ j)) * idxSign sndL (u.filter (j ≤ ·))) •
-        LinearMap.proj (R := k) (φ := fun _ : Finset ι × Finset κ => E'') ((u.filter (· ≤ j)).image fstL, (u.filter (j ≤ ·)).image sndL)
-    else 0
 
 end Bi
-
-example : bicech (k := ℚ) (ι := Unit) (κ := Unit) (LinearMap.mul ℚ ℚ) (fun _ => ⊤) (fun _ => ⊤) =
-    ⟨bicechC (LinearMap.mul ℚ ℚ) (fun _ => ⊤) (fun _ => ⊤), biD ℚ Unit Unit ℚ⟩ := rfl
-
-example (a : Finset Unit → ℚ) (b : Finset Unit → ℚ) : boxC (LinearMap.mul ℚ ℚ) a b ({()}, {()}) = a {()} * b {()} := rfl
 
 end GlobalTheory.PD

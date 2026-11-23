@@ -1,7 +1,60 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.QuasicoherentCohomology.ExistsAwayFracOfMemHomLoc
-import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.ExistsWitnessesOfFormallySmoothQuotient
-import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.FlatQuotSMulTopCokerOfMatrixWitnesses
+module
+
+public import Development.AbelianVarietyTheory.Definitions.QuasicoherentCohomology.IsGradedMapLinearCombination
+public import Mathlib.RingTheory.QuotSMulTop
+public import Mathlib.RingTheory.Smooth.Basic
+public import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.ExistsWitnessesOfFormallySmoothQuotient
+public import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.FlatQuotSMulTopCokerOfMatrixWitnesses
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.MvPolynomial.Monad
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits DirectSum MvPolynomial TensorProduct GlobalTheory
 
@@ -23,6 +76,7 @@ private theorem exists_generalized_inverse_mod_ideal {R S B P : Type} [CommRing 
     intro y
     conv_lhs => rw [show y = ∑ m, y m • Pi.single m 1 from by
       funext j; simp [Finset.sum_apply, Pi.single_apply]]
+
     simp [map_sum, p]
   let F : (Fin a → B) →ₗ[B] P := Fintype.linearCombination B p
   have hF : ∀ β, F β = ∑ m, β m • p m := fun β => Fintype.linearCombination_apply B p β
@@ -73,9 +127,11 @@ private theorem exists_generalized_inverse_mod_ideal {R S B P : Type} [CommRing 
     have hsum : ∑ m, π (Φ m j) • s (p m) = 0 := by
       have h1 := hεsum (fun l => Φ l j)
       rw [hcolε j] at h1
+
       simp_rw [← LinearMap.map_smul, ← map_sum, ← h1, map_zero]
     have hsuml := congr_fun hsum l
     simp only [Finset.sum_apply, Pi.smul_apply, smul_eq_mul, Pi.zero_apply] at hsuml
+
     rw [Matrix.sub_apply, map_sub, Matrix.mul_apply, map_sum]
     simp only [AlgHom.coe_toRingHom, map_mul, hcomp, Pi.sub_apply, sub_mul, Finset.sum_sub_distrib, Pi.single_apply,
       ite_mul, one_mul, zero_mul, Finset.sum_ite_eq, Finset.mem_univ, if_true]
@@ -181,8 +237,8 @@ private theorem formallySmooth_quotient_of_aeval_shift_mem_sq {ι R : Type} [Com
   rw [AlgHom.kerSquareLift_mk]
   simp [f, x, Ideal.Quotient.eq_zero_iff_mem.2 (hgI _)]
 
-open CategoryTheory CategoryTheory.Limits DirectSum MvPolynomial TensorProduct in
 
+open CategoryTheory CategoryTheory.Limits DirectSum MvPolynomial TensorProduct in
 theorem _root_.GlobalTheory.exists_noetherian_subring_homogeneous_matrix_flat_charts :
     ∀ (ι : Type) [LinearOrder ι] [Fintype ι] (R : Type) [CommRing R] (a b : ℕ) (d : Fin a → ℤ) (e : Fin b → ℤ) (Φ : Matrix (Fin a) (Fin b) (MvPolynomial ι R)), (∀ l j, Φ l j ∈ _root_.GlobalTheory.polyGrading ι R (e j - d l)) → (∀ i : ι, ∃ (B : Type) (_ : CommRing B) (_ : Algebra R B) (π : MvPolynomial ι R →ₐ[R] B) (P : Type) (_ : AddCommGroup P) (_ : Module B P) (ε : (Fin a → MvPolynomial ι R) →ₛₗ[(π : MvPolynomial ι R →+* B)] P), Algebra.Smooth R B ∧ Module.Projective B P ∧ Function.Surjective π ∧ π (X i) = 1 ∧ Function.Surjective ε ∧ ∀ y, ε y = 0 ↔ ∃ w w', y = Φ.mulVec w + (X i - 1 : MvPolynomial ι R) • w') → ∃ (R₀ : Subring R) (Φ₀ : Matrix (Fin a) (Fin b) (MvPolynomial ι R₀)), IsNoetherianRing R₀ ∧ Φ₀.map (MvPolynomial.map R₀.subtype) = Φ ∧ (∀ l j, Φ₀ l j ∈ _root_.GlobalTheory.polyGrading ι R₀ (e j - d l)) ∧ ∀ i : ι, Module.Flat R₀ (QuotSMulTop (X i - 1 : MvPolynomial ι R₀) ((Fin a → MvPolynomial ι R₀) ⧸ LinearMap.range Φ₀.mulVecLin)) := by
   intro ι _ _ R _ a b d e Φ hΦ H
@@ -256,7 +312,8 @@ theorem _root_.GlobalTheory.exists_noetherian_subring_homogeneous_matrix_flat_ch
       apply hφinj
       rw [aeval_eq_bind₁, MvPolynomial.map_bind₁]
       simp only [φ] at hg₀ hwa₀ hwb₀ hφX ⊢
-      simp only [map_add, map_sum, map_mul, hg₀, hwa₀, hwb₀, hφX]
+
+      simp only [map_add (f := _), map_sum, map_mul, hg₀, hwa₀, hwb₀, hφX]
       rw [← aeval_eq_bind₁]
       exact hwit i j
     haveI : Algebra.FormallySmooth R₀ (MvPolynomial ι R₀ ⧸ Ideal.span (Set.range (g₀ i))) :=
@@ -268,6 +325,7 @@ theorem _root_.GlobalTheory.exists_noetherian_subring_homogeneous_matrix_flat_ch
     refine _root_.GlobalTheory.flat_quotSMulTop_coker_of_matrix_witnesses R₀ (MvPolynomial ι R₀) (r i) a b (g₀ i)
       (X i - 1) Φ₀ inferInstance ⟨c₀ i, ?_⟩ (fun k => ⟨C₀ i k, C'₀ i k, ?_⟩) ⟨Ψ₀ i, E₀ i, ?_⟩
     · apply hφinj
+
       simp only [map_sub, map_one, map_sum, map_mul, hc₀, hg₀, hφX]
       exact hc' i
     · refine Matrix.ext fun l m => ?_
@@ -275,15 +333,17 @@ theorem _root_.GlobalTheory.exists_noetherian_subring_homogeneous_matrix_flat_ch
       have h1 := congr_fun (congr_fun (hCC i k) l) m
       simp only [Matrix.smul_apply, Matrix.add_apply, Matrix.mul_apply, Matrix.one_apply,
         smul_eq_mul] at h1 ⊢
-      simp only [map_add, map_mul, map_sum, map_sub, map_one, hg₀, hφX, hΦ₀, hC₀, hC'₀,
-        apply_ite φ, map_zero, map_one]
+
+      simp only [map_add (f := _), map_mul, map_sum, map_sub, map_one, hg₀, hφX, hΦ₀, hC₀, hC'₀,
+      apply_ite φ, map_zero, map_one]
       simpa [Φ₀, C₀, C'₀] using h1
     · refine Matrix.ext fun l j => ?_
       apply hφinj
       have h1 := congr_fun (congr_fun (hΨE i) l) j
       simp only [Matrix.add_apply, Matrix.mul_apply, Matrix.sum_apply, Matrix.smul_apply,
         smul_eq_mul] at h1 ⊢
-      simp only [map_add, map_mul, map_sum, hΦ₀, hΨ₀, hE₀, hg₀]
+
+      simp only [map_add (f := _), map_mul, map_sum, hΦ₀, hΨ₀, hE₀, hg₀]
       exact h1
 
 end GlobalTheory

@@ -1,5 +1,45 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.OnesRepresent
+module
+
+public import Development.AbelianVarietyTheory.Definitions.LatticeFrames.OnesRepresent
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MeasureTheory ValuativeRel Matrix
 
@@ -43,30 +83,16 @@ def SupportAt : Prop :=
 
 variable [MeasurableSpace k] [BorelSpace k] (ν : Measure k)
 
-def ClassAt : Prop :=
-  ∀ j c (H : j + 1 + c = s) (p : ℕ), 1 ≤ p → p ≤ c + 1 → ∀ h : GL (XIx (Fin κ) t (j + 1) ⊕ Fin (c + 1)) k,
-    opE S.ψ ν p (om (S.μ (j + 1)) 1 h ((S.T t).Phi j (c + 1) (by omega))) ≠ 0 →
-      ∃ r ∈ R k (XIx (Fin κ) t (j + 1)) (c + 1) p, ∃ u ∈ stabLat ((S.T t).bas (j + 1) (c + 1) (by omega)), h = r * u
-
-def CosetAt : Prop :=
-  ∀ j c (H : j + 1 + c = s) (p : ℕ), 1 ≤ p → p ≤ c + 1 → ∀ h : GL (XIx (Fin κ) t (j + 1) ⊕ Fin (c + 1)) k,
-    opE S.ψ ν p (om (S.μ (j + 1)) 1 h ((S.T t).Phi j (c + 1) (by omega))) ≠ 0 →
-      ∃ r ∈ R k (XIx (Fin κ) t (j + 1)) (c + 1) p, ∃ u ∈ ((S.T t).lev (j + 1) (c + 1) (by omega)).J, h = r * u
-
-def SamePos : Prop :=
-  ∀ j c (H : j + 1 + c = s) (p : ℕ), 1 ≤ p → p ≤ c → p ≤ S.ρ → ∃ C : ℝ, 0 < C ∧
-    opE S.ψ ν (p + 1) ((S.T t).Phi j (c + 1) (by omega)) = (C : ℂ) • opE S.ψ ν p ((S.T t).Phi j (c + 1) (by omega))
 
 open Classical in
-
 def PureCol : Prop :=
   ∀ j c (H : j + 1 + c = s) (r : ℕ), c + 1 = 2 * r → ∃ C : ℝ, 0 < C ∧ ∀ x,
     flCol S.ψ ν (r + 1) ((S.T t).Phi j (c + 1) (by omega)) x =
       (C : ℂ) * (S.T t).entry S.ψ ν j c H 1 1 x.toCols₁ *
         (if (fun a => x a (Sum.inr ())) ∈ box (XIx (Fin κ) t (j + 1)) (S.ϖ ^ r)⁻¹ then 1 else 0)
 
-open Classical in
 
+open Classical in
 def PureRow : Prop :=
   ∀ j c (H : j + 1 + c = s) (r : ℕ), c = 2 * r → ∃ C : ℝ, 0 < C ∧ ∀ x,
     flRow S.ψ ν (r + 1) ((S.T t).Phi j (c + 1) (by omega)) x =

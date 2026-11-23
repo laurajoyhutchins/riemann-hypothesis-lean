@@ -1,5 +1,61 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.SumSmulMemOfSumZpowSmulMem
+module
+
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.SumSmulMemOfSumZpowSmulMem
+public import Mathlib.Basic.Complex.Basic
+public import Mathlib.CategoryTheory.Category.Basic
+public import Mathlib.LinearAlgebra.UnitaryGroup
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open scoped ComplexConjugate
 open MvPolynomial Matrix
 
@@ -35,29 +91,34 @@ theorem yForm_eq_sum (t : T) (b : Fin q) (φ : κ → R) :
 theorem colDerM_xForm (t t' : T) (X : Matrix κ κ R) (a : Fin p) (ε : κ → R) :
     colDerM (q := q) t X (xForm t' a ε) = if t' = t then xForm t a (ε ᵥ* X) else 0 := by
   have hv : ε ᵥ* X = ∑ k, ε k • X k := by ext l; simp [vecMul, dotProduct]
+
   rw [xForm_eq_sum, map_sum]
   simp only [Derivation.map_smul, colDerM_X_xVar]
   split_ifs with h
+
   · rw [hv, map_sum]; simp [map_smul]
   · simp
 
 theorem colDerM_yForm (t t' : T) (X : Matrix κ κ R) (b : Fin q) (φ : κ → R) :
     colDerM (p := p) t X (yForm t' b φ) = if t' = t then -yForm t b (X *ᵥ φ) else 0 := by
   have hv : X *ᵥ φ = ∑ k, φ k • fun r => X r k := by ext l; simp [mulVec, dotProduct, mul_comm]
+
   rw [yForm_eq_sum, map_sum]
   simp only [Derivation.map_smul, colDerM_X_yVar]
   split_ifs with h
+
   · rw [hv, map_sum]; simp [map_smul, Finset.sum_neg_distrib]
   · simp
 
-variable [DecidableEq κ] in
 
-theorem colActHom_colDerM (g : T → GL κ R) (t : T) (X : Matrix κ κ R) (P : Poly R T p q κ) :
+variable [DecidableEq κ] in
+theorem colActHom_colDerM [DecidableEq κ] (g : T → GL κ R) (t : T) (X : Matrix κ κ R)
+    (P : Poly R T p q κ) :
     colActHom g (colDerM t X P) =
       colDerM t ((g t : Matrix κ κ R) * X * (((g t)⁻¹ : GL κ R) : Matrix κ κ R)) (colActHom g P) := by
   induction P using MvPolynomial.induction_on with
   | C r => simp [colActHom, algHom_C]
-  | add P Q hP hQ => simp only [map_add, hP, hQ]
+  | add P Q hP hQ => simp only [map_add (f := _), hP, hQ]
   | mul_X P v hP =>
     have hgen : colActHom g (colDerM t X (MvPolynomial.X v)) =
         colDerM t ((g t : Matrix κ κ R) * X * (((g t)⁻¹ : GL κ R) : Matrix κ κ R))
@@ -70,7 +131,7 @@ theorem colActHom_colDerM (g : T → GL κ R) (t : T) (X : Matrix κ κ R) (P : 
           rw [colSubst_xForm]
           congr 1
           have key : ∀ (M N : Matrix κ κ R) (j : κ), M j ᵥ* N = (M * N) j := fun M N j => by
-            ext i; simp [vecMul, dotProduct, mul_apply]
+            ext i; simp [vecMul, dotProduct, Matrix.mul_apply]
           rw [key, key, ← Matrix.mul_assoc, ← Matrix.mul_assoc, Units.inv_mul, Matrix.one_mul]
         · simp
       · rw [colDerM_X_yVar]
@@ -80,10 +141,10 @@ theorem colActHom_colDerM (g : T → GL κ R) (t : T) (X : Matrix κ κ R) (P : 
           rw [map_neg, colSubst_yForm]
           congr 2
           have key : ∀ (M N : Matrix κ κ R) (j : κ), (M *ᵥ fun r => N r j) = fun r => (M * N) r j :=
-            fun M N j => by ext i; simp [mulVec, dotProduct, mul_apply]
+            fun M N j => by ext i; simp [mulVec, dotProduct, Matrix.mul_apply]
           rw [key, key, Matrix.mul_assoc, Units.inv_mul, Matrix.mul_one]
         · simp
-    rw [Derivation.leibniz, smul_eq_mul, smul_eq_mul, map_add, map_mul, map_mul, map_mul,
+    rw [Derivation.leibniz, smul_eq_mul, smul_eq_mul, map_add (f := _), map_mul, map_mul, map_mul,
       Derivation.leibniz, smul_eq_mul, smul_eq_mul, hP, hgen]
 
 end ColDerM
@@ -101,12 +162,12 @@ theorem colDerM_add (t : T) (X Y : Matrix κ κ R) :
   rcases r with a | b
   · rw [Derivation.add_apply, colDerM_X_xVar, colDerM_X_xVar, colDerM_X_xVar]
     split_ifs
-    · rw [show (X + Y) j = X j + Y j from rfl, map_add]
+    · rw [show (X + Y) j = X j + Y j from rfl, map_add (f := _)]
     · simp
   · rw [Derivation.add_apply, colDerM_X_yVar, colDerM_X_yVar, colDerM_X_yVar]
     split_ifs
     · have : (fun r => (X + Y) r j) = (fun r => X r j) + (fun r => Y r j) := rfl
-      rw [this, map_add, neg_add]
+      rw [this, map_add (f := _), neg_add]
     · simp
 
 theorem colDerM_smul (t : T) (c : R) (X : Matrix κ κ R) :
@@ -155,7 +216,7 @@ variable {κ : Type*} [Fintype κ] [DecidableEq κ]
 def blockMat (k l : κ) (c s s' : ℂ) : Matrix κ κ ℂ :=
   1 + single k k (c - 1) + single l l (c - 1) + single l k s + single k l s'
 
-set_option maxHeartbeats 2000000 in
+
 theorem blockMat_mul_star_eq {k l : κ} (hkl : k ≠ l) (c s s' : ℂ) :
     blockMat k l c s s' * star (blockMat k l c s s') =
       1 + single k k (c * star c + s' * star s' - 1) + single l l (s * star s + c * star c - 1) +
@@ -211,9 +272,11 @@ theorem sum_smul_mem_of_sum_pow_smul_mem_on (W : Submodule K V) {U : Set K} (hU 
     refine Set.Infinite.mono ?_ hU
     intro u hu
     have := hφ _ (h u hu)
+
     simp only [map_sum, map_smul, smul_eq_mul] at this
-    simpa [Polynomial.eval_finset_sum, mul_comm] using this
+    simpa [Polynomial.eval_finsetSum, mul_comm] using this
   have := congrArg (Polynomial.lsum (R := K) (fun n => f n • (LinearMap.id : K →ₗ[K] K))) hP
+
   simpa [map_sum, Polynomial.lsum_apply, Polynomial.sum_monomial_index] using this
 
 theorem sum_smul_mem_of_sum_zpow_smul_mem_on (W : Submodule K V) {U : Set K} (hU : U.Infinite)
@@ -253,7 +316,7 @@ theorem infinite_unit_circle : {u : ℂ | u * star u = 1}.Infinite := by
     exact_mod_cast (by linarith : (a : ℝ) = b)
   · intro n
     rw [Set.mem_setOf_eq, Complex.star_def, map_div₀]
-    simp only [map_add, map_sub, map_one, map_mul, Complex.conj_ofReal, Complex.conj_I]
+    simp only [map_add (f := _), map_sub, map_one, map_mul, Complex.conj_ofReal, Complex.conj_I]
     rw [div_mul_div_comm, div_eq_one_iff_eq (mul_ne_zero (hne n) (by simpa using hne' n))]
     ring
 
@@ -357,14 +420,16 @@ theorem colLie_diag_mem_of_unitary (W : Submodule ℂ (Poly ℂ T p q κ))
     colLie ℂ p q t k k w ∈ W := by
   have := sum_smul_mem_of_sum_zpow_smul_mem_on W infinite_unit_circle
     (fun u (hu : u * star u = 1) h0 => by rw [h0, zero_mul] at hu; exact zero_ne_one hu)
-    w.support (fun m => colWeight m t k) (fun m => monomial m (coeff m w)) (fun u hu => by
+    w.support (fun m => colWeight m t k) (fun m => monomial m (AddMonoidAlgebra.coeff w m)) (fun u hu => by
       have hu0 : u ≠ 0 := fun h0 => by
         rw [Set.mem_setOf_eq, h0, zero_mul] at hu; exact zero_ne_one hu
       have := hW (Pi.mulSingle t (diagInvAt k (Units.mk0 u hu0)))
         (mulSingle_mem_unitaryGroup t _ (diagInvAt_mem_unitaryGroup k _ hu)) w hw
+
       rw [w.as_sum, map_sum] at this
       simpa only [colActHom_diagInvAt_monomial, Units.val_zpow_eq_zpow_val, Units.val_mk0] using this)
     Int.cast
+
   rw [w.as_sum, map_sum]
   simpa only [colLie_monomial] using this
 

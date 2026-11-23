@@ -1,6 +1,53 @@
-import Mathlib
-import GroundTheory.ArithmeticGeometry.EtaleCompletion.QcohZariski
-import GroundTheory.ArithmeticGeometry.SchemeCohomology.InvertibleDual
+module
+
+public import GroundTheory.ArithmeticGeometry.EtaleCompletion.QcohZariski
+public import GroundTheory.ArithmeticGeometry.SchemeCohomology.InvertibleSheaf
+public import Mathlib.Algebra.Category.ModuleCat.Sheaf.PullbackFree
+public import GroundTheory.ArithmeticGeometry.SchemeCohomology.InvertibleDual
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.Sites.LocalSite
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import GroundTheory.ArithmeticGeometry.EtaleCompletion.ModulesPullback
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Arith.SchemeCoh
@@ -23,11 +70,13 @@ instance final_opensMap (f : Y ⟶ Z) : (Opens.map f.base).Final :=
   Functor.final_of_exists_of_isFiltered _ (fun _ => ⟨⊤, ⟨homOfLE le_top⟩⟩)
     (fun _ _ => ⟨_, 𝟙 _, rfl⟩)
 
-set_option backward.isDefEq.respectTransparency.types false in
 
+set_option backward.isDefEq.respectTransparency.types false in
 def pullbackUnitIso (f : Y ⟶ Z) :
     (Scheme.Modules.pullback f).obj (SheafOfModules.unit Z.ringCatSheaf) ≅
       SheafOfModules.unit Y.ringCatSheaf :=
+  letI : (SheafOfModules.pushforward.{u} f.toRingCatSheafHom).IsRightAdjoint :=
+    (inferInstance : (Scheme.Modules.pushforward f).IsRightAdjoint)
   let e := asIso (C := SheafOfModules Y.ringCatSheaf)
     (SheafOfModules.pullbackObjUnitToUnit f.toRingCatSheafHom)
   ⟨e.hom, e.inv, e.hom_inv_id, e.inv_hom_id⟩
@@ -45,11 +94,13 @@ lemma pullbackUnitApp_naturality (f : Y ⟶ Z) {N N' : Z.Modules} (φ : N ⟶ N'
     AddCommGrpCat.hom_comp, AddMonoidHom.coe_comp, Function.comp_apply] at h
   exact h.symm
 
-set_option backward.isDefEq.respectTransparency.types false in
 
+set_option backward.isDefEq.respectTransparency.types false in
 lemma pullbackUnitIso_hom_one (f : Y ⟶ Z) :
     (pullbackUnitIso f).hom.app ⊤
       (pullbackUnitApp f (SheafOfModules.unit Z.ringCatSheaf) ⊤ (unitOne Z ⊤)) = unitOne Y ⊤ := by
+  let : (SheafOfModules.pushforward.{u} f.toRingCatSheafHom).IsRightAdjoint :=
+    (inferInstance : (Scheme.Modules.pushforward f).IsRightAdjoint)
   have h := SheafOfModules.pullbackPushforwardAdjunction_homEquiv_pullbackObjUnitToUnit
     f.toRingCatSheafHom
   rw [Adjunction.homEquiv_unit] at h
@@ -102,9 +153,8 @@ lemma isBasisOn_pullbackUnitApp_of_top (f : Y ⟶ Z) {N : Z.Modules} {O : Z.Open
   have hx : ((preMod Y).map (asIso ((Scheme.Modules.pullback f).map f₀)).hom).app (op ⊤)
       (pullbackUnitApp f (SheafOfModules.unit Z.ringCatSheaf) ⊤ (unitOne Z ⊤)) =
       pullbackUnitApp f N ⊤ t := by
-    change Scheme.Modules.Hom.app ((Scheme.Modules.pullback f).map f₀) (f ⁻¹ᵁ ⊤)
-      (pullbackUnitApp f (𝟙_ Z.Modules) ⊤ (unitOne Z ⊤)) = _
-    rw [pullbackUnitApp_naturality, hf₀t]
+    exact (pullbackUnitApp_naturality f f₀ ⊤ (unitOne Z ⊤)).trans
+      (congrArg (pullbackUnitApp f N ⊤) hf₀t)
   rw [hx] at h2
   exact h2
 

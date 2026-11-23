@@ -1,6 +1,53 @@
-import Mathlib
-import Formalism.FrobeniusOrbits.HostThickExists
-import Formalism.FrobeniusOrbits.FrobeniusOrbitsProofs.Orbits
+module
+
+public import Formalism.FrobeniusOrbits.HostThickExists
+public import Formalism.FrobeniusOrbits.FrobeniusOrbitsProofs.Galois
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.Charpoly.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -10,42 +57,7 @@ open Formalism.TwoAdicCyclotomicDecomposition
 
 namespace Stab
 
-theorem exists_open_normal_orderOf {G : Type*} [Group G] [TopologicalSpace G]
-    [IsTopologicalGroup G] [CompactSpace G] [TotallyDisconnectedSpace G]
-    (x : G) (hx : IsOfFinOrder x) :
-    ∃ N : OpenNormalSubgroup G,
-      orderOf (QuotientGroup.mk x : G ⧸ (N.toSubgroup)) = orderOf x := by
-  classical
-  have hn : 0 < orderOf x := hx.orderOf_pos
-  set S : Set G := (fun i : ℕ => x ^ i) '' Set.Ioo 0 (orderOf x) with hSdef
-  have hS : IsClosed S := ((Set.finite_Ioo 0 (orderOf x)).image _).isClosed
-  have h1 : (1 : G) ∈ Sᶜ := by
-    rintro ⟨i, ⟨hi0, hin⟩, hi⟩
-    exact pow_ne_one_of_lt_orderOf hi0.ne' hin hi
-  obtain ⟨N, hN⟩ := ProfiniteGrp.exist_openNormalSubgroup_sub_open_nhds_of_one hS.isOpen_compl h1
-  refine ⟨N, le_antisymm ?_ ?_⟩
-  · exact Nat.le_of_dvd hn (orderOf_map_dvd (QuotientGroup.mk' N.toSubgroup) x)
-  · by_contra hlt
-    push_neg at hlt
-    have hfo : IsOfFinOrder (QuotientGroup.mk x : G ⧸ N.toSubgroup) := by
-      rw [isOfFinOrder_iff_pow_eq_one]
-      exact ⟨orderOf x, hn, by rw [← QuotientGroup.mk_pow, pow_orderOf_eq_one]; rfl⟩
-    have hj := hfo.orderOf_pos
-    have hmem : x ^ orderOf (QuotientGroup.mk x : G ⧸ N.toSubgroup) ∈ N.toSubgroup := by
-      rw [← QuotientGroup.eq_one_iff, QuotientGroup.mk_pow, pow_orderOf_eq_one]
-    exact hN hmem ⟨_, ⟨hj, hlt⟩, rfl⟩
-
 end Stab
-
-theorem hostProG : HostProG := by
-  intro g hg G _ _ _ _ _ hN x hx
-  obtain ⟨N, hNx⟩ := Stab.exists_open_normal_orderOf x hx
-  obtain ⟨m, hm⟩ := hN N.toSubgroup N.toOpenSubgroup.isOpen inferInstance
-  have hdvd : orderOf x ∣ g ^ m := by
-    rw [← hNx, ← hm]
-    exact orderOf_dvd_natCard _
-  obtain ⟨j, -, hj⟩ := (Nat.dvd_prime_pow hg).1 hdvd
-  exact ⟨j, hj⟩
 
 theorem hostStab : HostStab := by
   classical

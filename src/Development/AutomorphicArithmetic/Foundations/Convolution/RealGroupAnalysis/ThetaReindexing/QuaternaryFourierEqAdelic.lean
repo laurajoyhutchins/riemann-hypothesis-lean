@@ -1,6 +1,50 @@
-import Development.AutomorphicArithmetic.Foundations.Convolution.RealGroupAnalysis.Smooth
-import GroundTheory.HeightsAndTheta.Theta.Weil.PartialFourierAdelicPi
-import GroundTheory.HeightsAndTheta.Theta.AdelicFourierCoord
+module
+
+public import Development.AutomorphicArithmetic.Foundations.Convolution.RealGroupAnalysis.ThetaLiftTrivialOrbitTermsVanish
+import GroundTheory.AutomorphicForms.ReductionMeasure
+public import GroundTheory.HeightsAndTheta.Theta.AdelicFourierCoord
+public import GroundTheory.HeightsAndTheta.Theta.Weil.PartialFourierAdelicPi
+import GroundTheory.HeightsAndTheta.Theta.Weil.PartialFourierCoordinates
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Compactness.Paracompact
+
+@[expose] public section
 
 open NumberField IsDedekindDomain MeasureTheory Matrix Topology Filter
 open Neutral.B1 Formalism.L2.Host Formalism.ConjugateSelfDual GlobalTheory.CuspRep GlobalTheory.GalOfCusp UpperTheory.V UpperTheory.V.Af UpperTheory.V.Published GroundTheory.Global GroundTheory.Automorphic.GJMatrix
@@ -44,8 +88,8 @@ private theorem one_int (h : (Fin 1 → A F) → ℂ) :
   ((measurePreserving_funUnique (adeleMeasure F) (Fin 1)).symm.integral_comp' h).symm
 
 private theorem reindex_mem {ι κ : Type} [Fintype ι] [Fintype κ] (e : κ ≃ ι)
-    {f : (κ → A F) → ℂ} (hf : f ∈ schwartzBruhatPi F κ) :
-    (fun x : ι → A F => f (x ∘ e)) ∈ schwartzBruhatPi F ι := by
+    {f : (κ → A F) → ℂ} (hf : f ∈ schwartzBruhatPi (K := F) (ι := κ)) :
+    (fun x : ι → A F => f (x ∘ e)) ∈ schwartzBruhatPi (K := F) (ι := ι) := by
   have h := GroundTheory.Heights₂.Theta.comp_mulVec_mem_schwartzBruhatPi
     ((1 : Matrix ι ι F).submatrix e id) ((1 : Matrix ι ι F).submatrix id e)
     (by rw [Matrix.submatrix_mul_equiv]; simp) (by
@@ -62,12 +106,12 @@ private theorem elim_cons (a : Fin 1 → A F) (y : Fin 3 → A F) :
   ext i
   fin_cases i <;> rfl
 
-private theorem g_mem {φ : (Fin 4 → A F) → ℂ} (hφ : φ ∈ schwartzBruhatPi F (Fin 4))
+private theorem g_mem {φ : (Fin 4 → A F) → ℂ} (hφ : φ ∈ schwartzBruhatPi (K := F) (ι := Fin 4))
     (η : Fin 3 → A F) :
     (fun a : Fin 1 → A F => adelicFourierPi F (fun y : Fin 3 → A F => φ (Fin.cons (a 0) y)) η)
-      ∈ schwartzBruhatPi F (Fin 1) := by
+      ∈ schwartzBruhatPi (K := F) (ι := Fin 1) := by
   have h1 : (fun x : (Fin 1 ⊕ Fin 3) → A F => φ (x ∘ (finSumFinEquiv (m := 1) (n := 3)).symm))
-      ∈ schwartzBruhatPi F (Fin 1 ⊕ Fin 3) :=
+      ∈ schwartzBruhatPi (K := F) (ι := Fin 1 ⊕ Fin 3) :=
     reindex_mem (finSumFinEquiv (m := 1) (n := 3)).symm hφ
   have h2 := GroundTheory.Heights₂.Theta.partialFourierPi_mem h1
   have h3 := reindex_mem (Equiv.sumComm (Fin 1) (Fin 3)) h2
@@ -80,18 +124,18 @@ private theorem g_mem {φ : (Fin 4 → A F) → ℂ} (hφ : φ ∈ schwartzBruha
   rw [e, GroundTheory.Heights₂.Theta.partialFourierPi_sumElim]
   simp only [elim_cons]
 
-private theorem slice_mem {φ : (Fin 4 → A F) → ℂ} (hφ : φ ∈ schwartzBruhatPi F (Fin 4))
+private theorem slice_mem {φ : (Fin 4 → A F) → ℂ} (hφ : φ ∈ schwartzBruhatPi (K := F) (ι := Fin 4))
     (b : A F) :
-    (fun y : Fin 3 → A F => φ (Fin.cons b y)) ∈ schwartzBruhatPi F (Fin 3) := by
+    (fun y : Fin 3 → A F => φ (Fin.cons b y)) ∈ schwartzBruhatPi (K := F) (ι := Fin 3) := by
   have h1 : (fun x : (Fin 1 ⊕ Fin 3) → A F => φ (x ∘ (finSumFinEquiv (m := 1) (n := 3)).symm))
-      ∈ schwartzBruhatPi F (Fin 1 ⊕ Fin 3) :=
+      ∈ schwartzBruhatPi (K := F) (ι := Fin 1 ⊕ Fin 3) :=
     reindex_mem (finSumFinEquiv (m := 1) (n := 3)).symm hφ
   have h4 := GroundTheory.Heights₂.Theta.schwartzBruhatPi_sumElim_mem h1 (fun _ => b)
   convert h4 using 2
   rename_i y
   rw [elim_cons]
 
-private theorem ft_split {φ : (Fin 4 → A F) → ℂ} (hφ : φ ∈ schwartzBruhatPi F (Fin 4))
+private theorem ft_split {φ : (Fin 4 → A F) → ℂ} (hφ : φ ∈ schwartzBruhatPi (K := F) (ι := Fin 4))
     (ξ : Fin 4 → A F) :
     adelicFourierPi F φ ξ = ∫ a : A F,
       adelicFourierPi F (fun y : Fin 3 → A F => φ (Fin.cons a y)) (Fin.tail ξ) * ψ (a * ξ 0)

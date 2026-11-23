@@ -1,5 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.ContractionTensorModels
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.ContractionTensorModels
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.InnerProductSpace.Adjoint
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -16,8 +63,8 @@ variable {H₁ H₂ FF : Type}
   [NormedAddCommGroup H₂] [InnerProductSpace ℂ H₂]
   [NormedAddCommGroup FF] [InnerProductSpace ℂ FF] [CompleteSpace FF]
 
-omit [CompleteSpace H₁] [CompleteSpace FF] in
 
+omit [CompleteSpace H₁] [CompleteSpace FF] in
 theorem norm_isoBilin {Tm : H₁ →ₗ[ℂ] H₂ →ₗ[ℂ] FF} (hI : IsIsoBilin Tm) (x : H₁) (y : H₂) :
     ‖Tm x y‖ = ‖x‖ * ‖y‖ := by
   have h := hI x x y y
@@ -39,12 +86,12 @@ theorem exists_isContr {Tm : H₁ →ₗ[ℂ] H₂ →ₗ[ℂ] FF} (hI : IsIsoBi
   · intro c a y
     exact ext_inner_left ℂ fun x => by simp only [inner_smul_right, hf, RingHom.id_apply]
   · intro a y z
-    exact ext_inner_left ℂ fun x => by simp only [inner_add_right, hf, map_add, inner_add_left]
+    exact ext_inner_left ℂ fun x => by simp only [inner_add_right, hf, map_add (f := _), inner_add_left]
   · intro c a y
     exact ext_inner_left ℂ fun x => by simp only [inner_smul_right, hf, map_smul, inner_smul_left]
 
-omit [CompleteSpace H₁] [CompleteSpace FF] in
 
+omit [CompleteSpace H₁] [CompleteSpace FF] in
 theorem isContr_unique {Tm : H₁ →ₗ[ℂ] H₂ →ₗ[ℂ] FF} {It It' : FF →ₗ[ℂ] H₂ →ₛₗ[starRingEnd ℂ] H₁}
     (h : IsContr Tm It) (h' : IsContr Tm It') : It = It' := by
   ext φ y
@@ -82,9 +129,9 @@ theorem contrTensor : ContrTensor := by
     intro m
     funext τ
     ext s
-    simp only [r, Finsupp.comapDomain_apply, Finsupp.finset_sum_apply]
+    simp only [r, Finsupp.comapDomain_apply, Finsupp.finsetSum_apply]
     rw [Finset.sum_eq_single τ]
-    · exact Finsupp.mapDomain_apply (hinj τ) _ _
+    · exact Finsupp.mapDomain_apply_of_injective (hinj τ) _ _
     · intro τ' _ hne
       apply Finsupp.mapDomain_notin_range
       rintro ⟨s', hs'⟩
@@ -119,8 +166,6 @@ theorem contrTensor : ContrTensor := by
   rfl
 
 theorem contraction : Contraction := ⟨contrHilbert, contrTensor⟩
-
-theorem contrTensorModels : ContrTensorModels := contrTensorModels_of contrTensor
 
 end GlobalTheory.Contr
 

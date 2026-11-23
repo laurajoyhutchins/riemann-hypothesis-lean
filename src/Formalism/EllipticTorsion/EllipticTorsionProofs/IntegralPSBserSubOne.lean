@@ -1,4 +1,53 @@
-import Formalism.EllipticTorsion.Statement
+module
+
+public import Formalism.EllipticTorsion.Statement
+public import Mathlib.NumberTheory.Padics.MahlerBasis
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open PowerSeries
 
@@ -59,17 +108,17 @@ def geometricSignedSeries (K : Type*) [Field K] [CharZero K] : PowerSeries K :=
 
 theorem geomAlt_mul : geometricSignedSeries K * (1 + X) = 1 := by
   ext n
-  rw [mul_add, mul_one, map_add, mul_comm]
+  rw [mul_add, mul_one, map_add (f := _), mul_comm]
   rcases n with _ | m
   · simp [geometricSignedSeries]
   · rw [coeff_succ_X_mul]
     simp only [geometricSignedSeries, coeff_mk, coeff_one]
-    rw [← map_add]
+    rw [← map_add (f := _)]
     have : ((-1 : ℚ) ^ (m + 1) + (-1) ^ m) = 0 := by ring
     simp [this]
 
 theorem log_subst_eq_smul (c : K) (B : PowerSeries K) (hB0 : constantCoeff B = 1)
-    (hBd : (1 + X) * derivative K B = c • B) :
+    (hBd : (1 + X) * derivative B = c • B) :
     (log K).subst (B - 1) = c • log K := by
   have h0 : constantCoeff (B - 1) = 0 := by simp [hB0]
   have hS : HasSubst (B - 1) := HasSubst.of_constantCoeff_zero' h0
@@ -79,16 +128,18 @@ theorem log_subst_eq_smul (c : K) (B : PowerSeries K) (hB0 : constantCoeff B = 1
     have hm := subst_mul hS (geometricSignedSeries K) (1 + X)
     rw [geomAlt_mul, hone, ← coe_substAlgHom hS, map_one] at hm
     rw [← coe_substAlgHom hS, ← hm]
-  have hD : derivative K ((log K).subst (B - 1)) = derivative K (c • log K) := by
+  have hlog : derivative (log K) = geometricSignedSeries K := by
+    rw [derivative_log]
+    ext n
+    simp [geometricSignedSeries]
+  have hD : derivative ((log K).subst (B - 1)) = derivative (c • log K) := by
     have hX : (1 + X : PowerSeries K) ≠ 0 := by
       intro h
       have := congrArg constantCoeff h
       simp at this
     refine mul_right_cancel₀ hX ?_
-    rw [derivative_subst hS, deriv_log, Derivation.map_smul, deriv_log]
-    change (geometricSignedSeries K).subst (B - 1) * derivative K (B - 1) * (1 + X) =
-      c • geometricSignedSeries K * (1 + X)
-    rw [map_sub, derivative_one, sub_zero, mul_assoc, mul_comm (derivative K B), hBd,
+    rw [derivative_subst hS, Derivation.map_smul, hlog]
+    rw [map_sub, derivative_one, sub_zero, mul_assoc, mul_comm (derivative B), hBd,
       mul_smul_comm, hGB, smul_mul_assoc, geomAlt_mul]
   refine derivative.ext hD ?_
   rw [show constantCoeff (c • log K) = 0 by simp]
@@ -116,11 +167,11 @@ theorem bser_constantCoeff (b : ℤ_[p]) : constantCoeff (bser p K b) = 1 := by
   rw [← coeff_zero_eq_constantCoeff_apply, bser, coeff_mk, Ring.choose_zero_right, map_one]
 
 theorem bser_deriv (b : ℤ_[p]) :
-    (1 + X) * derivative K (bser p K b) = phi p K b • bser p K b := by
+    (1 + X) * derivative (bser p K b) = phi p K b • bser p K b := by
   ext n
   have hr := congrArg (phi p K) (choose_rec p b n)
   simp only [map_mul, map_sub, map_natCast] at hr
-  rw [add_mul, one_mul, map_add, coeff_derivative, coeff_smul]
+  rw [add_mul, one_mul, map_add (f := _), coeff_derivative, coeff_smul]
   rcases n with _ | m
   · simp only [bser, coeff_mk, coeff_zero_X_mul, smul_eq_mul] at hr ⊢
     push_cast at hr ⊢

@@ -1,5 +1,43 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.AdLawAtOfSteps
+module
+
+public import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.ExistsMidLevIff
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -54,34 +92,6 @@ def mvG (i : ℕ) (hi : i ≤ D.R.m) (β : (St i hi).Ch)
     (if hz : InDom A i hi β x P w then
       iotaSel A i hi β P (vUnder (t := t) P.1) h (((St i hi).K β).lev.fT (vUnder (t := t) P.1) h ⟨_, hz⟩) else 0)
     else 0
-
-def mvF (i : ℕ) (hi : i ≤ D.R.m) (β : (St i hi).Ch)
-    (x : UPts (sigD D) (gramN D i hi) (FiniteAdeleRing (𝓞 D.host.F) D.host.F)) (P : t.Pr.vT (t.word u)) (w : Sp t.X.E (D.R.N i)) :
-    𝓞 t.X.E ⧸ P.1.asIdeal :=
-  let s : 𝓞 t.X.E := Classical.epsilon fun s : 𝓞 t.X.E => s ∉ P.1.asIdeal ∧ InDom A i hi β x P (s • w)
-  Ring.inverse (Ideal.Quotient.mk P.1.asIdeal s) * mvG A i hi β x P (s • w)
-
-def mvDeco (i : ℕ) (hi : i ≤ D.R.m) (β : (St i hi).Ch)
-    (x : UPts (sigD D) (gramN D i hi) (FiniteAdeleRing (𝓞 D.host.F) D.host.F)) : Deco t.X.E (D.R.N i) (t.Pr.vT (t.word u)) t.Pr.vGs where
-  N := mvN A a i hi β x
-  f P w := mvF A i hi β x P w
-  be _ _ := 0
-
-def gAt (i : ℕ) (hi : i ≤ D.R.m) (β : (St i hi).Ch)
-    (x : UPts (sigD D) (gramN D i hi) (FiniteAdeleRing (𝓞 D.host.F) D.host.F)) (P : SB t μ) : Sp t.X.E (D.R.N i) ≃ₗ[t.X.E] Sp t.X.E (D.R.N i) :=
-  Classical.epsilon fun g : Sp t.X.E (D.R.N i) ≃ₗ[t.X.E] Sp t.X.E (D.R.N i) =>
-    NearAt (seamP t.seam P.1) ((t.cst μ).D P) (ratA D.host.F (A.crd i hi) * x.1 * ratA D.host.F (A.fb i hi β P)) (seamGL t.seam g)
-
-def wOf (i : ℕ) (hi : i + 1 ≤ D.R.m) (z : HomE D.host.E (D.R.N i) (D.R.N (i + 1))) : HomE t.X.E (D.R.N i) (D.R.N (i + 1)) :=
-  seamHom t.seam (inFr
-    (toStdCo (D.sp.cm.sig : D.host.E →+* D.host.E) (gramN D i (Nat.le_of_succ_le hi)) (A.crd i (Nat.le_of_succ_le hi)))
-    (toStdCo (D.sp.cm.sig : D.host.E →+* D.host.E) (gramN D (i + 1) hi) (A.crd (i + 1) hi)) z)
-
-def XiMid (i : ℕ) (hi : i + 1 < D.R.m) : StepDatum St i hi.le := fun β β' x x' z =>
-  t.seam.σ₀ (phiT t.X.K (mvDeco A a i (Nat.le_of_succ_le hi.le) β x) (mvDeco A a (i + 1) hi.le β' x') (wOf A i hi.le z) *
-    ∏ P : SB t μ, XiAt t.Ch t.sel (t.tup μ) (t.cst μ) i P ((t.idx μ).h i (A.ib i (Nat.lt_of_succ_lt hi) β) P)
-      ((t.idx μ).h (i + 1) (A.ib (i + 1) hi β') P)
-      (inFr (gAt A i (Nat.le_of_succ_le hi.le) β x P) (gAt A (i + 1) hi.le β' x' P) (wOf A i hi.le z)))
 
 end MidDatum
 

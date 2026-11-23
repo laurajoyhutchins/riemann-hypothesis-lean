@@ -1,5 +1,45 @@
-import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.ResidualSpectrumHilbertSum
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.IsNormalisedOfIsDiscrete
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.T2SpaceAdelicGeneralLinearGroupNumberField
+
+@[expose] public section
 
 noncomputable section
 
@@ -10,33 +50,7 @@ attribute [local instance] GlobalTheory.LocalData.complRel GlobalTheory.LocalDat
 
 namespace PositivityTheory.RSHS
 
-variable (E : Type) [Field E] [NumberField E] [IsTotallyComplex E] (N : ℕ)
-
-def Clause1 : Prop :=
-  ∃ J : (a : ℕ) → CuspSub E a → ℕ → Submodule ℂ (Sm E N),
-    (∀ (a d : ℕ) (π : CuspSub E a), d * a = N → π.IsUnitary → IsNormalised π →
-      IsDiscrete (J a π d) ∧ IsSpehOf (J a π d) π d) ∧
-    ∀ (μ : Measure (GA E N)) [μ.IsHaarMeasure] (V : Submodule ℂ (Sm E N)), IsDiscrete V →
-      classes V μ ≤ (classes (⨆ (a : ℕ) (d : ℕ) (π : CuspSub E a)
-        (_ : d * a = N ∧ π.IsUnitary ∧ IsNormalised π), J a π d) μ).topologicalClosure
-
-def Clause2 : Prop :=
-  ∀ V V' : Submodule ℂ (Sm E N), IsDiscrete V → IsDiscrete V' → ∀ (a d : ℕ) (π : CuspSub E a),
-    π.IsUnitary → IsNormalised π → IsSpehOf V π d → IsSpehOf V' π d → IsIsoGL V V'
-
-def Clause3 : Prop :=
-  ∀ V : Submodule ℂ (Sm E N), IsDiscrete V → ∀ (a d : ℕ) (π : CuspSub E a),
-    π.IsUnitary → IsNormalised π → IsSpehOf V π d → ∀ w σ σ', π.IsLocComp w σ → IsLocCompGL V w σ' →
-      GlobalTheory.LocGL.IsSpeh (GlobalTheory.LocGL.IrrGL.of σ.ρ σ.smooth σ.irred) d σ'.ρ
-
-def Core : Prop :=
-  ∃ J : (a : ℕ) → CuspSub E a → ℕ → Submodule ℂ (Sm E N),
-    (∀ (a d : ℕ) (π : CuspSub E a), d * a = N → 2 ≤ d → π.IsUnitary → IsNormalised π →
-      IsDiscrete (J a π d) ∧ IsSpehOf (J a π d) π d) ∧
-    ∀ (μ : Measure (GA E N)) [μ.IsHaarMeasure] (V : Submodule ℂ (Sm E N)), IsDiscrete V →
-      classes V μ ≤ (classes ((⨆ (π : CuspSub E N) (_ : π.IsUnitary ∧ IsNormalised π), π.V) ⊔
-        ⨆ (a : ℕ) (d : ℕ) (π : CuspSub E a)
-          (_ : d * a = N ∧ 2 ≤ d ∧ π.IsUnitary ∧ IsNormalised π), J a π d) μ).topologicalClosure
+variable (E : Type) [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] (N : ℕ)
 
 def CuspDiscrete : Prop :=
   ∀ π : CuspSub E N, π.IsUnitary → IsNormalised π → IsDiscrete π.V

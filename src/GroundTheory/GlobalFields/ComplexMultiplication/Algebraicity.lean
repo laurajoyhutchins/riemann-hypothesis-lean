@@ -1,6 +1,51 @@
-import Mathlib
-import GroundTheory.GlobalFields.ComplexMultiplication.AlgebraicityHom
-import GroundTheory.GlobalFields.ComplexMultiplication.AutCFixed
+module
+
+public import GroundTheory.GlobalFields.ComplexMultiplication.ClassGroupAction
+public import GroundTheory.GlobalFields.ComplexMultiplication.AlgebraicityHom
+public import GroundTheory.GlobalFields.ComplexMultiplication.AutCFixed
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.EllipticCurve.IsomOfJ
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField Module WeierstrassCurve GroundTheory.Arith.Abelian IntermediateField
 open scoped nonZeroDivisors
@@ -79,7 +124,7 @@ theorem ELL.j_map (σ : ℂ ≃+* ℂ) (x : ELL K) : ELL.j (ELL.map σ x) = σ (
 
 section Quadratic
 
-variable (hK : finrank ℚ K = 2) [IsTotallyComplex K]
+variable (hK : finrank ℚ K = 2) [_root_.NumberField.IsTotallyComplex K]
 include hK
 
 theorem ELL.finite_range_conj (x : ELL K) :
@@ -94,19 +139,6 @@ theorem ELL.isAlgebraic_j (x : ELL K) : IsAlgebraic ℚ (ELL.j x) :=
 
 end Quadratic
 
-omit [NumberField K] in
-
-theorem CMCurve.exists_model (E : CMCurve K) :
-    ∃ (W : WeierstrassCurve ℚ⟮E.curve.j⟯) (_ : W.IsElliptic) (C : VariableChange ℂ),
-      C • W.baseChange ℂ = E.curve := by
-  classical
-  set W := WeierstrassCurve.ofJ (⟨E.curve.j, mem_adjoin_simple_self ℚ _⟩ : ℚ⟮E.curve.j⟯)
-  refine ⟨W, inferInstance, ?_⟩
-  have hj : (W.baseChange ℂ).j = E.curve.j := by
-    show (W.map (algebraMap ℚ⟮E.curve.j⟯ ℂ)).j = _
-    rw [map_j, ofJ_j]
-    rfl
-  exact exists_variableChange_of_j_eq _ _ hj
 
 end Elliptic
 end GroundTheory.Global

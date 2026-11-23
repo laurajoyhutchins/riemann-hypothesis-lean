@@ -1,4 +1,50 @@
-import Formalism.SharpRestriction.LevelLetterCocycles.DvrLatticeRank.FramePfPt
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.LamPS
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.PowerSeries.Inverse
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -6,7 +52,7 @@ namespace Formalism.MainNotions.N.Ln34.MLK
 
 open Formalism.WeaklyAdmissibleFiltrations Formalism.BasicNotions Formalism.BasicNotions.Loc Module
 
-set_option maxHeartbeats 800000 in
+
 
 theorem lev_Eat_simple (D : D7) (HW : HWOf D.loc) (l : ℕ) [Fact l.Prime] (hl : l ≠ 2) (K LL : FinExt l)
     (hG : Good K 1 LL) (π' : LetA ↥(OL LL) (finrank ℚ_[l] ↥(K0 K)))
@@ -51,7 +97,7 @@ theorem lev_Eat_simple (D : D7) (HW : HWOf D.loc) (l : ℕ) [Fact l.Prime] (hl :
   obtain ⟨F1, hF1⟩ : PowerSeries.X ∣ F - 1 := by
     rw [PowerSeries.X_dvd_iff, map_sub, hF0, map_one, sub_self]
   have hF1c : PowerSeries.constantCoeff F1 = 1 := by
-    have hd := congrArg (fun f => PowerSeries.constantCoeff (PowerSeries.derivative ↥LL.1 f)) hF1
+    have hd := congrArg (fun f : PowerSeries ↥LL.1 => PowerSeries.constantCoeff (PowerSeries.derivative f)) hF1
     simp only [map_sub, Derivation.map_one_eq_zero, sub_zero, hFd, hF0, Derivation.leibniz,
       PowerSeries.derivative_X, smul_eq_mul, map_add, map_mul, map_one, PowerSeries.constantCoeff_X,
       zero_mul, zero_add, mul_one] at hd
@@ -64,14 +110,13 @@ theorem lev_Eat_simple (D : D7) (HW : HWOf D.loc) (l : ℕ) [Fact l.Prime] (hl :
   have hl1 : W.lev c ζ 1 = 1 := map_one (W.lev c ζ)
   have hadd : W.lev c ζ (1 + letπ) = 1 + W.lev c ζ letπ := by
     rw [← hl1]
-    exact map_add (M := LetA ↥(OL LL) (finrank ℚ_[l] ↥(K0 K))) (N := PowerSeries ↥LL.1)
-      (W.lev c ζ) 1 letπ
+    exact (W.lev c ζ).map_add 1 letπ
   have hlq := congrArg (W.lev c ζ) hq
   rw [map_mul (W.lev c ζ), map_sub (W.lev c ζ), map_pow (W.lev c ζ), hadd, hl1, hFπ, (D.loc l).PD_p K, mul_pow, ← map_pow PowerSeries.C ζ l, hζl,
     map_one PowerSeries.C, one_mul, ← mul_geom_sum, hF1, hw, map_mul (W.lev c ζ)] at hlq
   have hy0 : PowerSeries.constantCoeff (W.lev c ζ letπ) ≠ 0 := by
     have h := congrArg PowerSeries.constantCoeff hFπ
-    rw [map_add, map_one, map_mul, PowerSeries.constantCoeff_C, hF0, mul_one] at h
+    rw [map_add (f := _), map_one, map_mul, PowerSeries.constantCoeff_C, hF0, mul_one] at h
     have h' : PowerSeries.constantCoeff (W.lev c ζ letπ) = ζ - 1 := by linear_combination h
     rw [h']
     exact sub_ne_zero.mpr hne
@@ -85,6 +130,7 @@ theorem lev_Eat_simple (D : D7) (HW : HWOf D.loc) (l : ℕ) [Fact l.Prime] (hl :
       _ = _ := by rw [hlq]; ring
   · rw [map_mul]
     refine mul_ne_zero ((u⁻¹).isUnit.map PowerSeries.constantCoeff).ne_zero ?_
+
     rw [map_mul, hF1c, one_mul, map_sum]
     simpa [hF0] using hl0
 

@@ -1,12 +1,66 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.MetricPeriods.MetricsProjectionFormulaNef
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.AnalyticSystemRegularityProperties
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.MongeAmpereIntegralCongrPotentials
-import ReciprocityTheory.AnalyticForms.PotentialTheory.DegreeInt
-import ReciprocityTheory.AnalyticForms.PotentialTheory.LogInt
-import ReciprocityTheory.AnalyticForms.PotentialTheory.Pullback
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterBridge
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterRedF
+module
+
+public import Development.AutomorphicSpectrum.Definitions.MetricPeriods.MetricsProjectionFormulaNef
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.AnalyticSystemRegularityProperties
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.MongeAmpereIntegralCongrPotentials
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.AnalyticForms.LeviForms.TailCut
+import ReciprocityTheory.AnalyticForms.LeviForms.TailCutA
+import ReciprocityTheory.AnalyticForms.PotentialTheory.AnalyticSubsetChartLocal
+import ReciprocityTheory.AnalyticForms.PotentialTheory.ContDiffAtOfIsPotential
+public import ReciprocityTheory.AnalyticForms.PotentialTheory.DegreeInt
+public import ReciprocityTheory.AnalyticForms.PotentialTheory.DegreeSheets
+import ReciprocityTheory.AnalyticForms.PotentialTheory.IntegrableOnTargetOfTsupport
+import ReciprocityTheory.AnalyticForms.PotentialTheory.LocDens
+public import ReciprocityTheory.AnalyticForms.PotentialTheory.LogInt
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterBridge
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterRedA
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterRedE
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterRedF
+
+@[expose] public section
+
 open MvPolynomial Filter Topology ReciprocityTheory.ChartRestriction.G.Geo GlobalTheory.CompanionTheory.Ar.PB
 
 namespace PositivityTheory.Xgn.SmallPotentialLimit
@@ -82,7 +136,7 @@ theorem defect_integrable (a : σ) {t : ℝ} (h0 : 0 < t) (h1 : t ≤ S.t₀) (�
   have hnull := (anSys_open_basics e σ S).2.1 j
   have hae : (Kc : Set (Fin e → ℂ)) =ᵐ[volume] (Kc ∩ O : Set (Fin e → ℂ)) := by
     filter_upwards [measure_eq_zero_iff_ae_notMem.1 hnull] with y hy
-    refine propext ⟨fun h => ⟨h, hK h, ?_⟩, fun h => h.1⟩
+    refine ⟨fun h => ⟨h, hK h, ?_⟩, fun h => h.1⟩
     by_contra hcon
     exact hy ⟨hK h, hcon⟩
   refine IntegrableOn.congr_set_ae ?_ hae
@@ -282,7 +336,7 @@ theorem pts_eq (hE : ResExistsStatement) (a₀ : σ) (A : HermLine ι) (w : Fin 
     ptsIntegral_eq_mInt' hE resBridge Re.R Re.arith (fun j => Re.line_smooth (w j) t h0 h1)
       (isSmoothHerm_inv (isSmoothHerm_tensor hA (isSmoothHerm_inv (Re.line_smooth a₀ t h0 h1))))
       (isSectionOn_inv_one Re.arith.2.1.1 hdeg),
-    ← (degreeFormulaInt S.A Re.R.A Re.π Re.holo Re.deg Re.br Re.degree _ hΦ _
+    ← (degreeFormulaInt S.A Re.R.A Re.π Re.holo Re.deg Re.br Re.degree (fun i => S.potT (w i) t) hΦ (fun y => S.ph a₀ y - S.phT a₀ t y)
       (defect_integrable S a₀ h0 h1 _ hΦ)).2]
   refine (mInt_congr_samePot D Re.R.X Re.R.A (Re.π ⁻¹' S.open') _ _ _ _ (preimage_null Re)
     (fun i x _ => line_samePot Re (w i) h0 h1 x (Set.mem_univ x))

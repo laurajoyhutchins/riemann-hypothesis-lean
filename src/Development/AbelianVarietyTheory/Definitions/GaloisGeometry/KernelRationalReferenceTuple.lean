@@ -1,8 +1,58 @@
-import Mathlib
-import Formalism.LocalToGlobal.KernelLattices.KernelLocalFactors.JetsRationalOfKernelRationality
-import Formalism.SharpRestriction.Divisibility.OrbitPlaces
-import Formalism.LocalToGlobal.KernelLattices.ColumnData.KerEntHyp
+module
+
+public import Formalism.LocalToGlobal.KernelLattices.ColumnData.KerEntHyp
+public import Formalism.LocalToGlobal.KernelLattices.JetFieldLeKR
 import Formalism.GradedWeylDivisibility.FinalC
+public import Formalism.LocalToGlobal.KernelLattices.KernelLocalFactors.JetsRationalOfKernelRationality
+import Formalism.LocalToGlobal.KernelLattices.KernelLocalFactors.PeriodLatticeFinitelyGenerated
+import Mathlib.Algebra.AffineMonoid.UniqueSums
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.Interval.Finset.Box
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -219,10 +269,6 @@ theorem antitone_kernelChain_nuT (D : D7) : ∀ u i τ, i < D.R.m → Antitone (
   unfold nuT
   exact Nat.floor_mono (nuRow_anti_le D u i hi τ r.1 s.1 hrs s.2)
 
-theorem wtTie_exists {D : D7} {L : SizeData₂ D} {hT : GatTies D} {Gi : Formalism.MainNotions.G.Inst D L} {Gl : Formalism.MainNotions.G.LatInst D} {K : Formalism.MainNotions.G.Consts} {Y : DivX D} {cX : ExtraC}
-    {ex : Extra D L hT Gi Gl K Y cX} (t : KerEntTied ex) : ∃ lam sh n, t.WtTie lam sh n :=
-  ⟨_, _, _, wtTie_meet (antitone_kernelChain_nuT D) t⟩
-
 end Wt
 
 section Rat
@@ -239,8 +285,8 @@ theorem vqTieU_of (t : KerEntTied ex) {lam : ∀ (_ : D.what₂.Word) (i : ℕ),
     {sh : D.what₂.Word → ℕ → D.what₂.Tau → ℤ} (h : t.VQTie lam sh) : VQTieU t lam sh :=
   fun u μ _ i hi c => h u μ i hi c
 
-open Classical in
 
+open Classical in
 theorem kmapRat_of_vqU (t : KerEntTied ex) (lam : ∀ (_ : D.what₂.Word) (i : ℕ), D.what₂.Tau → DomWeight (D.R.N i))
     (sh : D.what₂.Word → ℕ → D.what₂.Tau → ℤ) (n : D.what₂.Word → ℕ → D.what₂.Tau → ℕ)
     (hVQ : VQTieU t lam sh) (hW : t.WtTie lam sh n) (hRK : t.RK) : OrbitPlaces.KmapRat t.ent := by
@@ -277,11 +323,6 @@ theorem kmapRat_of_vqU (t : KerEntTied ex) (lam : ∀ (_ : D.what₂.Word) (i : 
   obtain ⟨v', hv'⟩ := hmem
   exact ⟨v', by rw [hv', hv, key2]⟩
 
-theorem kmapRat_of_ex (t : KerEntTied ex) (h : ∃ lam sh n, VQTieU t lam sh ∧ t.WtTie lam sh n) (hRK : t.RK) :
-    OrbitPlaces.KmapRat t.ent := by
-  obtain ⟨lam, sh, n, hV, hW⟩ := h
-  exact kmapRat_of_vqU t lam sh n hV hW hRK
-
 theorem kmapRat_of_vq (t : KerEntTied ex) (hVQ : VQTieU t (lam (antitone_kernelChain_nuT D)) (shh D)) (hRK : t.RK) : OrbitPlaces.KmapRat t.ent :=
   kmapRat_of_vqU t _ _ (nn D) hVQ (wtTie_meet (antitone_kernelChain_nuT D) t) hRK
 
@@ -296,48 +337,7 @@ variable {R : Ranks} {LL : Type} [Field LL] [NumberField LL] [StarRing LL] {embL
   {Pl : Rows.Places LL} {Tau : Type} [Fintype Tau] {hc : Tau → HCParam R}
   {C : ColumnChain R Tau hc} {A : ColumnsAtT R C} {P : PeriodMap R C}
 
-theorem emb_mem_Fi (M : MemberForms LL embLL Pl Tau hc C A P) (i : ℕ) (x : (M.lat i).V) : M.emb i x ∈ M.Fi i := by
-  rw [← (M.emb_basis i).2, ← (M.lat i).b.sum_repr x, map_sum]
-  exact Submodule.sum_mem _ (fun a _ => by
-    rw [LinearMap.map_smulₛₗ]; exact Submodule.smul_mem _ _ (Submodule.subset_span ⟨a, rfl⟩))
-
-theorem fi_of_kRat (M : MemberForms LL embLL Pl Tau hc C A P) (i : ℕ) (h : M.KRat i) :
-    ∀ φ ∈ M.Fi i, C.K i φ ∈ M.Fi (i + 1) := by
-  have key : ∀ φ ∈ M.Fi i, C.Klin i φ ∈ M.Fi (i + 1) := by
-    intro φ hφ
-    rw [← (M.emb_basis i).2] at hφ
-    induction hφ using Submodule.span_induction with
-    | mem x hx =>
-      obtain ⟨a, rfl⟩ := hx
-      obtain ⟨y, hy⟩ := h ((M.lat i).b a)
-      have e : C.Klin i (M.emb i ((M.lat i).b a)) = C.K i (M.emb i ((M.lat i).b a)) := rfl
-      rw [e, ← hy]; exact emb_mem_Fi M (i + 1) y
-    | zero => rw [map_zero]; exact Submodule.zero_mem _
-    | add x y _ _ hx hy => rw [map_add]; exact Submodule.add_mem _ hx hy
-    | smul r x _ hx => rw [map_smul]; exact Submodule.smul_mem _ _ hx
-  exact key
-
 end Fi
-
-theorem K_heq {R : Ranks} {ι : Type} [Fintype ι] {hc : ι → HCParam R} {C1 C2 : ColumnChain R ι hc} (h : C1 = C2) (i : ℕ)
-    {f1 : C1.cls i → C1.Y i → ℂ} {f2 : C2.cls i → C2.Y i → ℂ} (hf : HEq f1 f2) : HEq (C1.K i f1) (C2.K i f2) := by
-  subst h
-  cases eq_of_heq hf
-  exact HEq.rfl
-
-theorem kernelRational_referenceTuple (D : D7) (T : TwForms D) (u : D.what₂.Word) (i : ℕ) (hi : i < D.R.m) (h : (D.fm u).KRat i) :
-    (T.fm u D.what₂.mu0).KRat i := by
-  intro x
-  obtain ⟨y, hy⟩ := h ((T.eMu0 u i hi.le).symm x)
-  refine ⟨T.eMu0 u (i + 1) hi y, ?_⟩
-  have e1 := T.eMu0_emb u (i + 1) hi y
-  have e2 := T.eMu0_emb u i hi.le ((T.eMu0 u i hi.le).symm x)
-  rw [LinearEquiv.apply_symm_apply] at e2
-  exact eq_of_heq (e1.trans ((heq_of_eq hy).trans (K_heq (D.memberColumns_twistedChain_base u) i e2).symm))
-
-theorem kFi_of_kRat (D : D7) (T : TwForms D) (h0 : ∀ u, ∀ i < D.R.m, (D.fm u).KRat i)
-    (h1 : ∀ u μ, DV.Used D μ → ∀ i < D.R.m, (T.fm u μ).KRat i) : OrbitPlaces.KFi D T :=
-  ⟨fun u i hi => fi_of_kRat (D.fm u) i (h0 u i hi), fun u μ hU i hi => fi_of_kRat (T.fm u μ) i (h1 u μ hU i hi)⟩
 
 section VQ
 
@@ -677,10 +677,6 @@ section VQK2
 
 variable {D : D7} {L : SizeData₂ D} {hT : GatTies D} {Gi : G.Inst D L} {Gl : G.LatInst D} {K : G.Consts} {Y : DivX D} {cX : ExtraC}
   {ex : Extra D L hT Gi Gl K Y cX}
-
-theorem vqTie_kerEntC' (t : KerEntTied ex) (P : Examples₂.EntPl D) (B : PlaceMatrixFamily D) (hK : KerEntHyp P t.O B Y ex.tw)
-    (he : t.ent = kerEntC P t.O B hK) : t.VQTie (lam (antitone_kernelChain_nuT D)) (shh D) :=
-  vqTie_kerEntC frameWeightPolyDivByDet_proof t P B hK he
 
 theorem kmapRat_kerEntC' (t : KerEntTied ex) (P : Examples₂.EntPl D) (B : PlaceMatrixFamily D) (hK : KerEntHyp P t.O B Y ex.tw)
     (he : t.ent = kerEntC P t.O B hK) (hRK : t.RK) : OrbitPlaces.KmapRat t.ent :=

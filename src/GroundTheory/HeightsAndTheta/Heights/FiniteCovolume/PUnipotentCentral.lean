@@ -1,11 +1,60 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.FiniteCovolume.StUnipotentCentral
-import GroundTheory.HeightsAndTheta.Heights.FiniteCovolume.StRationalUnipotent
-import GroundTheory.HeightsAndTheta.Heights.FiniteCovolume.StUnipRadicalOfRational
-import GroundTheory.HeightsAndTheta.Heights.FiniteCovolume.StImaginaryLatticeCocompact
-import GroundTheory.HeightsAndTheta.Heights.FiniteCovolume.PScalingLaw
-import GroundTheory.HeightsAndTheta.Heights.FiniteCovolume.PHermAtPlace
-import GroundTheory.HeightsAndTheta.Heights.FiniteCovolume.PGramAtData
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.FiniteCovolume.StUnipotentCentral
+public import GroundTheory.HeightsAndTheta.Heights.FiniteCovolume.StRationalUnipotent
+public import GroundTheory.HeightsAndTheta.Heights.FiniteCovolume.StUnipRadicalOfRational
+public import GroundTheory.HeightsAndTheta.Heights.FiniteCovolume.StImaginaryLatticeCocompact
+public import GroundTheory.HeightsAndTheta.Heights.FiniteCovolume.PGramAtData
+public import GroundTheory.HeightsAndTheta.Heights.FiniteCovolume.PHermAtPlace
+public import GroundTheory.HeightsAndTheta.Heights.FiniteCovolume.PScalingLaw
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 namespace GroundTheory.Heights₂.Heights.FiniteCovolume
 
@@ -14,15 +63,15 @@ open NumberField GroundTheory.Automorphic Module Matrix Topology
 noncomputable section
 
 variable {F E : Type*} [Field F] [Field E] [NumberField F] [NumberField E] [Algebra F E]
-  [Algebra.IsQuadraticExtension F E] [IsTotallyReal F] [IsTotallyComplex E]
+  [Algebra.IsQuadraticExtension F E] [IsTotallyReal F] [_root_.NumberField.IsTotallyComplex E]
 variable {W : Type*} [AddCommGroup W] [Module E W] {ι : Type*} [Fintype ι] [DecidableEq ι]
 
 attribute [local instance] archMulAction
 
 namespace UnipotentCentral
 
-omit [DecidableEq ι] in
 
+omit [DecidableEq ι] in
 theorem pair_map {G g : Matrix ι ι ℂ} (hg : (g.map (starRingEnd ℂ))ᵀ * G * g = G)
     (a b : ι → ℂ) : star (g *ᵥ a) ⬝ᵥ (G *ᵥ (g *ᵥ b)) = star a ⬝ᵥ (G *ᵥ b) := by
   have hg' : gᴴ * G * g = G := by
@@ -30,8 +79,8 @@ theorem pair_map {G g : Matrix ι ι ℂ} (hg : (g.map (starRingEnd ℂ))ᵀ * G
   rw [star_mulVec, mulVec_mulVec, dotProduct_mulVec, vecMul_vecMul, ← Matrix.mul_assoc, hg',
     ← dotProduct_mulVec]
 
-omit [DecidableEq ι] in
 
+omit [DecidableEq ι] in
 theorem pair_swap {G : Matrix ι ι ℂ} (hG : G.IsHermitian) (a b : ι → ℂ) :
     star b ⬝ᵥ (G *ᵥ a) = star (star a ⬝ᵥ (G *ᵥ b)) := by
   rw [← star_dotProduct, star_mulVec, hG.eq, dotProduct_mulVec, dotProduct_comm]
@@ -117,7 +166,7 @@ theorem proof (h : HermitianForm F E W) (v : Basis ι E W) (h0 : RationalUnipote
   have hcre : ∀ w : InfinitePlace E, (w.embedding ((m : E) * a)).re = 0 := by
     intro w
     have e := congrArg w.embedding ha
-    rw [map_add, embedding_conj (F := F) w.embedding, map_zero, Complex.add_conj] at e
+    rw [map_add (f := _), embedding_conj (F := F) w.embedding, map_zero, Complex.add_conj] at e
     have e2 := congrArg Complex.re e
     simp only [Complex.ofReal_re, Complex.zero_re, mul_eq_zero, two_ne_zero, false_or] at e2
     exact e2
@@ -139,7 +188,7 @@ theorem proof (h : HermitianForm F E W) (v : Basis ι E W) (h0 : RationalUnipote
     have hdec : z = h.toSesq w₀ z • x₀ + (z - h.toSesq w₀ z • x₀) := by abel
     show (γ : W ≃ₗ[E] W) z = z + (0 : E) • x₀
     conv_lhs => rw [hdec]
-    rw [map_add, map_smul, hγx', e, zero_smul, add_zero]
+    rw [map_add (f := _), map_smul, hγx', e, zero_smul, add_zero]
     abel
   have hδN : archEmbed h v γ ∈ unipRadical h v x₀ := h4 x₀ γ hγx hγN
   refine ⟨⟨archEmbed h v γ, hδN⟩, ⟨⟨γ, hγLa⟩, hγx, rfl⟩, ?_⟩

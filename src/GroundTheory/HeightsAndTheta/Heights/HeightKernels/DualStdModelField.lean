@@ -1,6 +1,50 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.ImportsFurther
-import GroundTheory.HeightsAndTheta.Heights.Intersections.IsPrimeSpanXb
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.SingleMemDualLatticeStandard
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -72,27 +116,6 @@ def DualStdModelTransc.Statement : Prop :=
         dualStdModelPt b (⟨Sum.inl (), t⟩ : Σ k, Sum.elim (dualBlocks T) (PBlk i) k) /
           dualStdModelPt b (⟨Sum.inl (), c⟩ : Σ k, Sum.elim (dualBlocks T) (PBlk i) k)))
         (dualStdModelPt b (⟨Sum.inl (), c⟩ : Σ k, Sum.elim (dualBlocks T) (PBlk i) k))
-
-example : ∃ (b : Module.Basis Unit ℤ (dualLattice (HermLattice.standard ℚ 1)))
-    (Φ₀ : Subfield (dualStdModelField ℚ 1)),
-    (algebraMap Φ₀ (dualStdModelField ℚ 1)).fieldRange =
-      Subfield.closure (Set.range (dualStdModelPt b ∘ inrV (ι := dualBlocks Unit) (ι₂ := PBlk 1))) ∧ 1 ≤ 1 :=
-  ⟨dualBasisStandard, _, Subfield.fieldRange_subtype _, le_rfl⟩
-
-example : ∃ (_ : GenFibre (ι := PBlk 1) (ι' := PBlk 1) id ⊥) (z : (Σ _ : Unit, Fin 1) → FractionRing (MRing (PBlk 1)))
-    (Φ₀ : Subfield (FractionRing (MRing (PBlk 1)))),
-    RingHom.ker (eval₂Hom (Int.castRingHom _) z : MRing (PBlk 1) →+* FractionRing (MRing (PBlk 1))) = ⊥ ∧
-      (algebraMap Φ₀ (FractionRing (MRing (PBlk 1)))).fieldRange = Subfield.closure (Set.range (z ∘ id)) := by
-  have : (⊥ : Ideal (MRing (PBlk 1))).IsPrime := Ideal.isPrime_bot
-  refine ⟨Inter.genFibreIdOf ⊥, fun q => algebraMap (MRing (PBlk 1)) _ (X q), _, ?_, Subfield.fieldRange_subtype _⟩
-  refine (RingHom.injective_iff_ker_eq_bot _).mp ?_
-  have h : (eval₂Hom (Int.castRingHom _) fun q => algebraMap (MRing (PBlk 1)) (FractionRing (MRing (PBlk 1))) (X q) :
-      MRing (PBlk 1) →+* _) = algebraMap (MRing (PBlk 1)) (FractionRing (MRing (PBlk 1))) := by
-    ext q
-    · simp
-    · simp
-  rw [h]
-  exact IsFractionRing.injective _ _
 
 end
 

@@ -1,4 +1,54 @@
-import Formalism.LocalToGlobal.GlobalTheory.GL4.NfAllSelfEq
+module
+
+public import Formalism.LocalToGlobal.Columns.SummandSlopeOfThreeLemmas
+public import Formalism.LocalToGlobal.GlobalTheory.GL4.CoeffMemOfIntSpanAt
+public import Formalism.LocalToGlobal.GlobalTheory.GL4.ThirdLinkOfArchimedean
+public import Formalism.LocalToGlobal.Columns.TwistedLocalisationComparable
+public import Formalism.LocalToGlobal.GlobalTheory.GL4.CfMemTwId
+import Formalism.LocalToGlobal.GlobalTheory.GL4.ColumnLatticeExactSlope
+public import Formalism.LocalToGlobal.GlobalTheory.GL4.NfAllSelfEq
+import Formalism.SharpRestriction.GlobalSchurBounds.TotallyPositiveTraceGeOfNormDiscr
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Module NumberField IsDedekindDomain MvPolynomial
 open scoped Matrix
@@ -22,7 +72,11 @@ section T
 variable {D : D7} {u : D.what₂.Word} (CV : ColVal D u)
 
 theorem MQ_lattice (c : (D.mem u).C.cls 0) (τ : D.what₂.Tau) : Submodule.IsLattice D.what₂.LL (MQ CV c τ) := by
-  refine ⟨(CV.Q_good c τ).2.1.map _, ?_⟩
+  exact Submodule.IsLattice.of_fg _ ((CV.Q_good c τ).2.1.map _)
+
+theorem MQ_fullLattice (c : (D.mem u).C.cls 0) (τ : D.what₂.Tau) :
+    Submodule.IsFullLattice D.what₂.LL (MQ CV c τ) := by
+  refine { toIsLattice := MQ_lattice CV c τ, span_eq_top := ?_ }
   unfold MQ
   rw [Submodule.map_coe, LinearMap.coe_restrictScalars]
   rw [show ⇑(crdQ CV c τ : (CV.Q c τ).V →ₗ[D.what₂.LL] (Fin (D.R.N 0) → D.what₂.LL)) = ⇑(crdQ CV c τ) from rfl]
@@ -63,7 +117,7 @@ theorem detShift_eq (τ : D.what₂.Tau) :
   have hn := rank_zero_pos D
   have hk := columnCount_pos D
   unfold DomWeight.detShift
-  rw [dif_pos hn]
+  rw [dite_eq_left hn]
   have := weight_eq_lamCol D u τ ⟨D.R.N 0 - 1, by omega⟩
   rw [this]
   congr 3
@@ -74,7 +128,7 @@ theorem classMapT_of (h : QFrameDeg D) : ClassMapT D := by
   obtain ⟨hyd, hli, -⟩ := hy
   have := (columnHypotheses D u).tc
   have hn : 0 < D.R.N 0 := rank_zero_pos D
-  have hM : ∀ τ, Submodule.IsLattice D.what₂.LL (MQ CV c τ) := MQ_lattice CV c
+  have hM : ∀ τ, Submodule.IsFullLattice D.what₂.LL (MQ CV c τ) := MQ_fullLattice CV c
   refine ⟨cfMap ((D.fm u).lam 0) (gG CV c y hli) ∘ₗ (LinearMap.proj c ∘ₗ (coE CV (hTV0 D u) : ((D.fm u).lat 0).V →ₗ[D.what₂.LL]
       ((D.mem u).C.cls 0 → VV D.what₂.LL ((D.fm u).lam 0)))), twIdeal ((D.fm u).lam 0) (MQ CV c) hM,
     fun v => ‖detTwK ((D.fm u).lam 0) (invFr CV v c)⁻¹‖ ^ 2, ?_, twIdeal_ne_zero _ _ hM, ?_, ?_, ?_, ?_⟩
@@ -104,12 +158,6 @@ theorem classMapT_of (h : QFrameDeg D) : ClassMapT D := by
     field_simp
 
 end T
-
-theorem Link6F_of_frameDeg (h : ∀ D, QFrameDeg D) : Link6F := by
-  exact third_link_of_archimedean fun D => classMapT_of (h D)
-
-theorem packet_of_frame_degree (h : ∀ D, QFrameDeg D) : KudlaFamilyOfMinkowskiTransference := by
-  exact packetFamily_of_classMapT fun D => classMapT_of (h D)
 
 end Formalism.L2.GlobalTheoryTheory.TraceIntegrality
 

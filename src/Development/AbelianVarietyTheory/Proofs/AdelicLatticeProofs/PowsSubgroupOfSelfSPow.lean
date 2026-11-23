@@ -1,48 +1,64 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AdelicHermitianForms.MemPowSub
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.SubgroupPowRelIndexTopOfGroupFg
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AdelicHermitianForms.MemPowSub
+public import Mathlib.NumberTheory.NumberField.InfinitePlace.Basic
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.FinrankSUnitsNumberFieldAddOne
 import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.SUnitsNumberFieldFg
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.FinrankSUnitsNumberFieldAddOne
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.SubgroupPowRelIndexTopOfGroupFg
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Polynomial GlobalTheory.QNorm GlobalTheory.CNorm
 open scoped WithZero TensorProduct
 
 namespace GlobalTheory.CNorm
 
-theorem pows_subgroupOf_self_sPow (p : ℕ) {G : Type} [CommGroup G] (U : Subgroup G) :
-    (pows p U).subgroupOf U = pows p (⊤ : Subgroup U) := by
-  ext x
-  rw [Subgroup.mem_subgroupOf]
-  constructor
-  · rintro ⟨y, hy, h⟩
-    exact ⟨⟨y, hy⟩, Subgroup.mem_top _, Subtype.ext h⟩
-  · rintro ⟨y, -, h⟩
-    exact ⟨y.1, y.2, congrArg Subtype.val h⟩
-
-theorem pTor_sUnits (p : ℕ) (F : Type) [Field F] [NumberField F] (ζ : F)
-    (S : Finset (HeightOneSpectrum (𝓞 F))) (hp : p.Prime) (hζ : IsPrimitiveRoot ζ p) :
-    pTor p (sUnits F S) = p := by
-  haveI : NeZero p := ⟨hp.ne_zero⟩
-  have hmem : ∀ x : Fˣ, x ^ p = 1 → x ∈ sUnits F S := by
-    intro x hx
-    rw [mem_sUnits]
-    intro v _
-    have h1 : (v.valuation F (x : F)) ^ p = 1 := by
-      rw [← map_pow, ← Units.val_pow_eq_pow_val, hx]; simp
-    first
-      | exact (pow_eq_one_iff hp.ne_zero).mp h1
-      | exact (pow_eq_one_iff_left hp.ne_zero).mp h1
-      | exact (pow_eq_one_iff_of_nonneg zero_le' hp.ne_zero).mp h1
-  have e : {x : Fˣ // x ∈ sUnits F S ∧ x ^ p = 1} ≃ rootsOfUnity p F :=
-    Equiv.subtypeEquivRight (fun x => by
-      rw [mem_rootsOfUnity]; exact ⟨fun h => h.2, fun h => ⟨hmem x h, h⟩⟩)
-  rw [pTor, Nat.card_congr e]
-  first
-    | exact hζ.card_rootsOfUnity
-    | (rw [Nat.card_eq_fintype_card]; exact hζ.card_rootsOfUnity)
 
 open NumberField IsDedekindDomain Polynomial in
 open scoped WithZero TensorProduct in
-
 theorem _root_.GlobalTheory.CNorm.pTor_pIdx_sUnits : ∀ (p : ℕ) (F : Type) [Field F] [NumberField F]
     (ζ : F) (S : Finset (HeightOneSpectrum (𝓞 F))), p.Prime → IsPrimitiveRoot ζ p →
     _root_.GlobalTheory.CNorm.pTor p (_root_.GlobalTheory.QNorm.sUnits F S) = p ∧

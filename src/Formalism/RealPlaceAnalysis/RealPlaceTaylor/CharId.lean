@@ -1,5 +1,51 @@
-import Formalism.RealPlaceAnalysis.StatementC
-import Formalism.RealPlaceAnalysis.RealPlaceTaylor.GeneratorPowUpperVanishHolds
+module
+
+public import Formalism.RealPlaceAnalysis.StatementC
+public import Formalism.RealPlaceAnalysis.RealPlaceTaylor.GeneratorPowUpperVanishHolds
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Finset Polynomial
 
@@ -35,6 +81,7 @@ theorem CharId_comm {V : Type} [AddCommGroup V] [Module ℂ V] {n : ℕ}
   apply LinearMap.ext
   intro y
   funext x
+
   simp only [Module.End.mul_apply, CharId_T_apply, CharId_M_apply, map_sum, map_sub]
   have key : ∀ b, E c d (E x b (y b)) = E x b (E c d (y b)) +
       ((if d = x then E c b (y b) else 0) - (if b = c then E x d (y b) else 0)) := by
@@ -66,8 +113,9 @@ theorem CharId_Mpow {V : Type} [AddCommGroup V] [Module ℂ V] {n : ℕ}
     simp [h0]
   | succ k ih =>
     rw [pow_succ, Module.End.mul_apply, ih]
+
     simp only [epow, CharId_M_apply, map_sum, LinearMap.sum_apply,
-      Module.End.mul_apply]
+    Module.End.mul_apply]
     exact Finset.sum_comm
 
 def CharId_F {V : Type} [AddCommGroup V] [Module ℂ V] {n : ℕ}
@@ -195,7 +243,7 @@ theorem CharId_on_v {V : Type} [AddCommGroup V] [Module ℂ V] {n : ℕ}
   have hy : (Pi.single b v : Fin n → V) ∈ CharId_F E v 0 := CharId_F_gen E v 0 b (Nat.zero_le _)
   have hk := CharId_kill E hE ν v hv n 0 (by omega) (∏ s : Fin n, (X - C (lsh ν s))) (by simp) _ hy
   have hdeg : (∏ s : Fin n, (X - C (lsh ν s))).natDegree < n + 1 := by
-    rw [natDegree_finset_prod_X_sub_C_eq_card]
+    rw [Polynomial.natDegree_finsetProd_X_sub_C_eq_card]
     simp
   rw [aeval_eq_sum_range' hdeg] at hk
   have h := congrFun hk a

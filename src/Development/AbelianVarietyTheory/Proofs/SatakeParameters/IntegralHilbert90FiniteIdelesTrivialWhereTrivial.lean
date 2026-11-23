@@ -1,11 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.TrueColumnChoicesHeckeCharReferenceEqOne
-import Formalism.LocalToGlobal.Divisibility.DivisibilityProofs.TuplesP
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ContinuousOfCongSet
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsFiniteAdeleBaseChangeEquiv
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.TrueColumnChoicesHeckeCharReferenceEqOne
+public import Formalism.LocalToGlobal.Divisibility.TuplesLemmas
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FiniteAdeleFieldIdentificationEqBaseChangeRingEq
 import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.H90RangeEqNormOneOfIsQuad
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FiniteAdeleFieldIdentificationEqBaseChangeRingEq
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsIntegralHilbert90DetHostField
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsIntegralHilbert90DetHostField
+import Formalism.LocalRingCardinality.SpanPowerMembership.LocAtA
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.ExistsMidLevIff
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Formalism.L2.DIV Formalism.UG
 open scoped TensorProduct
 
@@ -103,10 +147,13 @@ theorem exists_glue_of_int {F E : Type} [Field F] [NumberField F] [Field E] [Num
   refine ⟨∑ i, Module.finBasis F E i ⊗ₜ[F] c i, fun g ι hι P => ?_⟩
   have e1 : ι (sigR g (FiniteAdeleRing (𝓞 F) F) (∑ i, Module.finBasis F E i ⊗ₜ[F] c i)) =
       ∑ i, algebraMap E _ (g (Module.finBasis F E i)) * adMap F E (c i) := by
+
     rw [map_sum, map_sum]
     exact Finset.sum_congr rfl fun i _ => hι _ _
+
   rw [e1, ← localComponent_apply₂, map_sum]
   conv_rhs => rw [← (Module.finBasis F E).sum_repr (algebraMap (𝓞 E) E (f (P.under (𝓞 F))))]
+
   rw [map_sum, map_sum]
   refine Finset.sum_congr rfl fun i _ => ?_
   rw [map_mul, localComponent_algebraMap, localComponent_apply₂, adMap_apply, hc', locMap_algebraMap, Algebra.smul_def, map_mul,
@@ -180,7 +227,7 @@ theorem exists_integral_h90_preimage_of_mem_intU_unramified (σ : E →ₐ[F] E)
   let S : HeightOneSpectrum (𝓞 F) → Prop := fun v => ∀ P' : HeightOneSpectrum (𝓞 E), P'.under (𝓞 F) = v → ι d P' = 1
   have hσσ : ∀ x, σ (σ x) = x := hσ.2.1
   have htr : ∀ x, ∃ t : F, x + σ x = algebraMap F E t := fun x => by
-    obtain ⟨t, ht⟩ := hσ.2.2 (x + σ x) (by rw [map_add, hσσ, add_comm])
+    obtain ⟨t, ht⟩ := hσ.2.2 (x + σ x) (by rw [map_add (f := _), hσσ, add_comm])
     exact ⟨t, ht.symm⟩
   set sR := sigR σ (FiniteAdeleRing (𝓞 F) F) with hsR
   have hss : ∀ z, sR (sR z) = z := GlobalTheory.Mem.DetClass.sigR_sigR hσσ
@@ -257,7 +304,7 @@ theorem exists_integral_h90_preimage_of_mem_intU_unramified (σ : E →ₐ[F] E)
   have ιx : ∀ P, ι x0 P = (if S (P.under (𝓞 F)) then 1 else 0) + algebraMap E _ (algebraMap (𝓞 E) E (f (P.under (𝓞 F)))) +
       ι d P * algebraMap E _ (σ (algebraMap (𝓞 E) E (f (P.under (𝓞 F))))) := by
     intro P
-    rw [hx0, map_add, map_add, map_mul]
+    rw [hx0, map_add (f := _), map_add (f := _), map_mul]
     show ι T P + ι a P + ι d P * ι (sR a) P = _
     rw [hιT, haι, haσ]
   have hxS : ∀ P : HeightOneSpectrum (𝓞 E), S (P.under (𝓞 F)) → ι x0 P = 1 := by
@@ -282,7 +329,7 @@ theorem exists_integral_h90_preimage_of_mem_intU_unramified (σ : E →ₐ[F] E)
     show σ 1 ⊗ₜ[F] ε = _
     rw [map_one]
   have hsx : sR x0 = T + sR a + sR d * a := by
-    rw [hx0, map_add, map_add, map_mul, hsT, hss]
+    rw [hx0, map_add (f := _), map_add (f := _), map_mul, hsT, hss]
   have hrel : x0 = d * sR x0 := by
     rw [hsx, hx0]
     linear_combination (-1 : AfE F E) * hde - a * hdd

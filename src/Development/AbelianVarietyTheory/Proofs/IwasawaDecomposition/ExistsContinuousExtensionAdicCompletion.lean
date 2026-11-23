@@ -1,26 +1,68 @@
-import Mathlib
+module
+
+public import Formalism.ConjugateSelfDual.Statement
+public import Mathlib.RingTheory.DedekindDomain.AdicValuation.Completion
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.MetricSpace.Ultra.TotallySeparated
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.ExistsUniqueHcharOfFiniteOrder
+import Formalism.LocalToGlobal.UnitaryNorms.IsUnitaryNormOf
+import ReciprocityTheory.GaloisValuations.GlobalA
+import ReciprocityTheory.NeutralLocalFields.LocalFieldComparison.HCFFromRecipA
+import ReciprocityTheory.NeutralLocalFields.Reciprocity
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Neutral.B1 ReciprocityTheory.Neutral.Bridge.HCFR Formalism.ConjugateSelfDual ReciprocityTheory.Gal Formalism.L2.Host GlobalTheory.HeckeGal
 
 namespace GlobalTheory
 
-theorem exists_finite_intermediateField_range_le (E : Type) [Field E] [NumberField E] (l : ℕ)
-    [Fact l.Prime] (τ : E →+* PadicAlgCl l) :
-    ∃ K : IntermediateField ℚ_[l] (PadicAlgCl l), FiniteDimensional ℚ_[l] K ∧ ∀ x, τ x ∈ K := by
-  let b := Module.finBasis ℚ E
-  refine ⟨IntermediateField.adjoin ℚ_[l] (Set.range (fun i => τ (b i))), ?_, ?_⟩
-  · apply IntermediateField.finiteDimensional_adjoin
-    intro x _
-    exact (Algebra.IsAlgebraic.isAlgebraic x).isIntegral
-  · intro x
-    rw [← b.sum_repr x, map_sum]
-    refine sum_mem fun i _ => ?_
-    rw [Rat.smul_def, map_mul, map_ratCast]
-    exact mul_mem (SubfieldClass.ratCast_mem _ _)
-      (IntermediateField.subset_adjoin _ _ ⟨i, rfl⟩)
 
 open NumberField IsDedekindDomain in
-
 theorem _root_.GlobalTheory.exists_continuous_extension_adicCompletion (E : Type) [Field E] [NumberField E] (l : ℕ)
     [Fact l.Prime] (τ : E →+* _root_.Formalism.ConjugateSelfDual.Qbar l) (v : HeightOneSpectrum (𝓞 E))
     (h : ∀ x : E, v.valuation E x < 1 ↔ ‖τ x‖ < 1) :
@@ -36,6 +78,7 @@ theorem _root_.GlobalTheory.exists_continuous_extension_adicCompletion (E : Type
   haveI : CompleteSpace K := FiniteDimensional.complete ℚ_[l] K
   have hmem : ∀ x, τ x ∈ K := by
     intro x
+
     rw [← b.sum_repr x, map_sum]
     refine sum_mem fun i _ => ?_
     rw [Rat.smul_def, map_mul, map_ratCast]

@@ -1,5 +1,54 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnipVal
+module
+
+public import Formalism.PeriodIntegrals.UnipVal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.FreeModule.IdealQuotient
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.NumberTheory.Padics.PadicVal.Basic
+
+@[expose] public section
 
 open NumberField IsDedekindDomain
 
@@ -49,13 +98,13 @@ theorem part1 (w : HeightOneSpectrum (𝓞 K)) (n : ℕ) (hn : n ≠ 0) :
     vw w ((n : ℕ) : K) = ramw w * (padicValNat (plc w) n : ℤ) := by
   have hp := plc_prime w
   haveI : Fact (plc w).Prime := ⟨hp⟩
-  obtain ⟨m, hm⟩ := pow_padicValNat_dvd (p := plc w) (n := n)
+  obtain ⟨m, hm⟩ := (fun {p n : ℕ} => _root_.Dvd.intro_left _ (_root_.Nat.divMaxPow_mul_pow_padicValNat p n)) (p := plc w) (n := n)
   have hm0 : m ≠ 0 := by
     rintro rfl
     exact hn (by simpa using hm)
   have hpm : ¬ plc w ∣ m := by
     rintro ⟨c, rfl⟩
-    exact pow_succ_padicValNat_not_dvd hn ⟨c, hm.trans (by ring)⟩
+    exact pow_succ_multiplicity_not_dvd hn ⟨c, hm.trans (by rw [← Nat.padicValNat_def]; ring)⟩
   have hmw : ((m : 𝓞 K)) ∉ w.asIdeal := by
     rw [natCast_mem_iff]
     exact hpm
@@ -74,11 +123,11 @@ theorem part1 (w : HeightOneSpectrum (𝓞 K)) (n : ℕ) (hn : n ≠ 0) :
 
 lemma pv_prime (l g : ℕ) (hl : l.Prime) (hg : g.Prime) :
     padicValNat l g = if l = g then 1 else 0 := by
-  haveI : Fact l.Prime := ⟨hl⟩
+  rw [Nat.padicValNat_def]
   split_ifs with h
   · rw [h]
-    exact padicValNat.self hg.one_lt
-  · exact padicValNat.eq_zero_of_not_dvd fun hd => h ((Nat.prime_dvd_prime_iff_eq hl hg).mp hd)
+    exact Nat.multiplicity_self hg.one_lt
+  · exact multiplicity_eq_zero_of_not_dvd fun hd => h ((Nat.prime_dvd_prime_iff_eq hl hg).mp hd)
 
 theorem part2 (w : HeightOneSpectrum (𝓞 K)) (g₁ g₂ a : ℕ) (h1 : g₁.Prime) (h2 : g₂.Prime)
     (h12 : g₁ ≠ g₂) :
@@ -88,8 +137,9 @@ theorem part2 (w : HeightOneSpectrum (𝓞 K)) (g₁ g₂ a : ℕ) (h1 : g₁.Pr
   haveI : Fact (plc w).Prime := ⟨hp⟩
   have ha1 : g₁ ^ a ≠ 0 := pow_ne_zero _ h1.ne_zero
   have ha2 : g₂ ^ a ≠ 0 := pow_ne_zero _ h2.ne_zero
-  rw [part1 w _ (mul_ne_zero ha1 ha2), padicValNat.mul ha1 ha2, padicValNat.pow g₁ a,
-    padicValNat.pow g₂ a, pv_prime _ _ hp h1, pv_prime _ _ hp h2]
+  rw [part1 w _ (mul_ne_zero ha1 ha2), Nat.padicValNat_def, Nat.multiplicity_mul ha1 ha2,
+    Nat.multiplicity_pow g₁ a, Nat.multiplicity_pow g₂ a]
+  simp only [← Nat.padicValNat_def, pv_prime _ _ hp h1, pv_prime _ _ hp h2]
   by_cases e1 : plc w = g₁
   · have e2 : plc w ≠ g₂ := fun e => h12 (e1.symm.trans e)
     rw [if_pos e1, if_neg e2, if_pos (Or.inl e1)]

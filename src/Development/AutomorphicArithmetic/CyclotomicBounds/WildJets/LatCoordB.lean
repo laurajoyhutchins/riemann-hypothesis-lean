@@ -1,16 +1,59 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Statements.PlaceShiftStatements.InfClassAt
-import Development.AbelianVarietyTheory.Statements.PlaceShiftStatements.DictAt
-import Development.AbelianVarietyTheory.Definitions.Divisors.DiscreteSeriesHermitianUnique
-import Development.AbelianVarietyTheory.Definitions.Foundations.NormSumPairRankZeroOfCurveCoordNorm
-import Development.AbelianVarietyTheory.Statements.CuspidalUnitaryTwists.ExistsSmallSpherical
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.PadicValuationThetaKernelJetBound
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HighestWeightBelow
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.VwNatCastNonneg
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.JetKapIff
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsMulAddEqOneOfNotMem
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.TensorMapDescent
-import Formalism.MirabolicMackeyTheory.MirabolicMackeyProofs.ThreeForms
+module
+
+public import Development.AbelianVarietyTheory.Statements.PlaceShiftStatements.InfClassAt
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.DualLatticeIsLatticeAndHermitianDual
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.LatticeExtensionAlongFieldEmbeddingDuals
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.TransportedLatticeLocalizationFreeLeCoefficientS
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsMulAddEqOneOfNotMem
+import Formalism.GradedWeylDivisibility.DualWeylDominanceOf
+import Formalism.GradedWeylDivisibility.FinalD
+import Formalism.LocalToGlobal.Columns.CoefficientsModP.FkMapInitMinor
+public import Formalism.MirabolicMackeyTheory.MirabolicMackeyProofs.ThreeForms
+import Formalism.QuotientMetricDivisors.HermitianTwistDivisors.IdxChange
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.L2.Theta Formalism.IndefR Formalism.IndefR.Datum Formalism.IndefR.Links Formalism.L2.DIV
 open IsDedekindDomain NumberField Matrix GlobalTheory.ChiGrid GlobalTheory.FunObj GlobalTheory.RowTest GlobalTheory.RowClaim GlobalTheory.TestLat GlobalTheory.SumSize
 open Formalism.DivisionValues (vw lw)
@@ -92,10 +135,11 @@ private theorem lcb_basisAt (emb : ι → E →+* K) (τ : ι) (Λ : Submodule (
 
 private theorem lcb_isLattice (Λ : Submodule (𝓞 E) (Fin n → E)) (s : ℕ) (hs : s ≠ 0)
     (h1 : ∀ x ∈ Λ, ∀ a, (s • x) a ∈ (1 : Submodule (𝓞 E) E))
-    (h2 : ∀ j, s • (Pi.single j 1 : Fin n → E) ∈ Λ) : Submodule.IsLattice E Λ := by
+    (h2 : ∀ j, s • (Pi.single j 1 : Fin n → E) ∈ Λ) : Submodule.IsFullLattice E Λ := by
   have hs' : (s : E) ≠ 0 := Nat.cast_ne_zero.2 hs
-  constructor
-  · let f : (Fin n → E) →ₗ[𝓞 E] (Fin n → E) := s • LinearMap.id
+  have hlat : Submodule.IsLattice E Λ := by
+    apply Submodule.IsLattice.of_fg
+    let f : (Fin n → E) →ₗ[𝓞 E] (Fin n → E) := s • LinearMap.id
     have hf : Function.Injective f := by
       intro x y h
       have h' : (s : E) • x = (s : E) • y := by
@@ -105,12 +149,18 @@ private theorem lcb_isLattice (Λ : Submodule (𝓞 E) (Fin n → E)) (s : ℕ) 
     refine Submodule.FG.of_le (M := Fin n → E) (T := colLat (1 : GL (Fin n) E)) (Submodule.fg_span (Set.finite_range _)) ?_
     rintro _ ⟨x, hx, rfl⟩
     exact (lcb_mem_colLat_one _).2 (h1 x hx)
-  · rw [eq_top_iff, ← (Pi.basisFun E (Fin n)).span_eq, Submodule.span_le]
-    rintro _ ⟨j, rfl⟩
-    have : (Pi.basisFun E (Fin n)) j = (s : E)⁻¹ • (s • (Pi.single j 1 : Fin n → E)) := by
-      rw [← Nat.cast_smul_eq_nsmul E, inv_smul_smul₀ hs', Pi.basisFun_apply]
-    rw [this]
-    exact Submodule.smul_mem _ _ (Submodule.subset_span (h2 j))
+  refine { toIsLattice := hlat, span_eq_top := ?_ }
+  apply top_unique
+  intro x _
+  have hsingle : ∀ j : Fin n, (Pi.single j 1 : Fin n → E) ∈ Submodule.span E (Λ : Set (Fin n → E)) := by
+    intro j
+    have h := Submodule.smul_mem (Submodule.span E (Λ : Set (Fin n → E))) (s : E)⁻¹
+      (Submodule.subset_span (h2 j))
+    simpa [← Nat.cast_smul_eq_nsmul E, smul_smul, hs'] using h
+  have hx : x = ∑ j, x j • (Pi.single j 1 : Fin n → E) := by
+    simpa [← Pi.single_smul] using (Finset.univ_sum_single x).symm
+  rw [hx]
+  exact Submodule.sum_mem _ fun j _ => Submodule.smul_mem _ _ (hsingle j)
 
 private theorem lcb_desc (φ : K →+* ℂ) (lam : ι → DomWeight n) (i : VVIdx lam) :
     ∃ F : VV K lam, (F : Pol K ι n) ∈ nabStd K lam ∧ GlobalTheory.CoefModel.mapVV φ lam F = bVV ℂ lam i := by
@@ -217,6 +267,7 @@ theorem UpperTheory.WildA.latCoordB :
     have : c = 0 := by simpa using h
     exact hc (this ▸ w.asIdeal.zero_mem)
   refine ⟨∑ i, y i • F i, algebraMap _ D.what₂.LL c * s₀, ?_, mul_ne_zero hc0 hs₀, ?_, ?_⟩
+
   · rw [map_sum]
     simp only [LinearMap.map_smulₛₗ, hy, hF']
     exact (bVV ℂ lam).sum_repr v

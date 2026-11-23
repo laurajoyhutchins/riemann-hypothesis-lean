@@ -1,5 +1,47 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.HasDivPlace
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.HasDivPlace
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+public import Mathlib.NumberTheory.Padics.HeightOneSpectrum
+import Mathlib.NumberTheory.Padics.ProperSpace
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.MetricSpace.Ultra.TotallySeparated
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -67,7 +109,7 @@ theorem exists_limit_adele (c : ℕ → ℤ)
   refine ⟨ofInt a, fun n hn hp => ?_⟩
   choose b hb using fun v => ha v n hn hp
   refine ⟨ofInt b, isInt_ofInt b, afp_ext fun v => ?_⟩
-  rw [map_add, map_mul, map_intCast, map_natCast, eval_ofInt, eval_ofInt, hb v]
+  rw [map_add (f := _), map_mul, map_intCast, map_natCast, eval_ofInt, eval_ofInt, hb v]
   push_cast
   rfl
 
@@ -122,6 +164,7 @@ theorem exists_adelic_limit (g : ℕ → D.La →+ D.La)
       obtain ⟨i, rfl⟩ := hy
       choose e he he' using fun j => ha i j n hn hp
       refine ⟨∑ j, e j • inAf D (b j), sum_mem fun j _ => smul_inAf_mem D (he j) _, ?_⟩
+
       conv_rhs => rw [← b.sum_repr (g n (b i)), map_sum]
       rw [Finset.smul_sum, ← Finset.sum_add_distrib]
       refine (h₀b i).trans (Finset.sum_congr rfl fun j _ => ?_)
@@ -132,7 +175,7 @@ theorem exists_adelic_limit (g : ℕ → D.La →+ D.La)
       obtain ⟨w, hw, e⟩ := hx
       obtain ⟨w', hw', e'⟩ := hy
       refine ⟨w + w', add_mem hw hw', ?_⟩
-      rw [map_add, map_add, e, e', map_add, map_add, nsmul_add]
+      rw [map_add (f := _), map_add (f := _), e, e', map_add (f := _), map_add (f := _), nsmul_add]
       abel
     | smul k x _ hx =>
       obtain ⟨w, hw, e⟩ := hx

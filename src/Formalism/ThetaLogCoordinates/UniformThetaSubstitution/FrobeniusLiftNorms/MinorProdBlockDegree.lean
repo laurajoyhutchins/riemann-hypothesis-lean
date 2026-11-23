@@ -1,5 +1,55 @@
-import Mathlib
-import Formalism.ThetaLogCoordinates.UniformThetaSubstitution.StatementE
+module
+
+public import Formalism.ThetaLogCoordinates.UniformThetaSubstitution.StatementE
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -110,7 +160,7 @@ section BiLe
 variable {K ι κ : Type} [Field K]
 
 def BiLe (n0 : ι →₀ ℕ) (W : MvPolynomial κ (MvPolynomial ι K)) : Prop :=
-  ∀ β : κ →₀ ℕ, ∀ n ∈ (MvPolynomial.coeff β W).support, n ≤ n0 ∧ n.degree + β.degree = n0.degree
+  ∀ β : κ →₀ ℕ, ∀ n ∈ (AddMonoidAlgebra.coeff W β).support, n ≤ n0 ∧ n.degree + β.degree = n0.degree
 
 lemma biLe_zero (n0 : ι →₀ ℕ) : BiLe n0 (0 : MvPolynomial κ (MvPolynomial ι K)) := by
   intro β n hn
@@ -145,9 +195,9 @@ lemma biLe_mul {n0 n0' : ι →₀ ℕ} {W W' : MvPolynomial κ (MvPolynomial ι
   rw [MvPolynomial.coeff_mul] at hq0
   obtain ⟨r, hr, hr0⟩ := Finset.exists_ne_zero_of_sum_ne_zero hq0
   rw [Finset.HasAntidiagonal.mem_antidiagonal] at hq hr
-  have hA : r.1 ∈ (MvPolynomial.coeff q.1 W).support :=
+  have hA : r.1 ∈ (AddMonoidAlgebra.coeff W q.1).support :=
     MvPolynomial.mem_support_iff.mpr (left_ne_zero_of_mul hr0)
-  have hB : r.2 ∈ (MvPolynomial.coeff q.2 W').support :=
+  have hB : r.2 ∈ (AddMonoidAlgebra.coeff W' q.2).support :=
     MvPolynomial.mem_support_iff.mpr (right_ne_zero_of_mul hr0)
   obtain ⟨hA1, hA2⟩ := h q.1 r.1 hA
   obtain ⟨hB1, hB2⟩ := h' q.2 r.2 hB
@@ -155,7 +205,7 @@ lemma biLe_mul {n0 n0' : ι →₀ ℕ} {W W' : MvPolynomial κ (MvPolynomial ι
   · rw [← hr]
     exact add_le_add hA1 hB1
   · rw [← hr, ← hq]
-    simp only [map_add]
+    simp only [map_add (f := _)]
     omega
 
 private theorem eq_zero_of_mem_support_one {R σ : Type*} [CommSemiring R] {n : σ →₀ ℕ}
@@ -167,7 +217,7 @@ private theorem eq_zero_of_mem_support_one {R σ : Type*} [CommSemiring R] {n : 
 
 private theorem eq_zero_and_mem_support_of_mem_support_coeff_C {R σ κ' : Type*} [CommSemiring R] {P : MvPolynomial σ R}
     {β : κ' →₀ ℕ} {n : σ →₀ ℕ}
-    (hn : n ∈ (MvPolynomial.coeff β (MvPolynomial.C P : MvPolynomial κ' (MvPolynomial σ R))).support) :
+    (hn : n ∈ (AddMonoidAlgebra.coeff (MvPolynomial.C P : MvPolynomial κ' (MvPolynomial σ R)) β).support) :
     β = 0 ∧ n ∈ P.support := by
   classical
   rw [MvPolynomial.coeff_C] at hn
@@ -262,7 +312,7 @@ lemma biLe_prod {α : Type*} (s : Finset α) (N : α → ι →₀ ℕ)
       (ih (fun b hb => h b (Finset.mem_insert_of_mem hb)))
 
 lemma shiftPoly_eq_sum [Fintype κ] (b : κ → ι → K) (Q : MvPolynomial ι K) :
-    shiftPoly b Q = ∑ n0 ∈ Q.support, MvPolynomial.C (MvPolynomial.C (MvPolynomial.coeff n0 Q)) *
+    shiftPoly b Q = ∑ n0 ∈ Q.support, MvPolynomial.C (MvPolynomial.C (AddMonoidAlgebra.coeff Q n0)) *
       ∏ x ∈ n0.support, (MvPolynomial.C (MvPolynomial.X x) +
         ∑ k, MvPolynomial.C (MvPolynomial.C (b k x)) * MvPolynomial.X k :
           MvPolynomial κ (MvPolynomial ι K)) ^ n0 x := by
@@ -275,12 +325,12 @@ end BiLe
 theorem hasseDerivSupport : HasseDegree := by
   intro K ι κ _ _ b β Q n hn
   classical
-  change n ∈ (MvPolynomial.coeff β (shiftPoly b Q)).support at hn
+  change n ∈ (AddMonoidAlgebra.coeff (shiftPoly b Q) β).support at hn
   rw [shiftPoly_eq_sum, MvPolynomial.coeff_sum, MvPolynomial.mem_support_iff,
     MvPolynomial.coeff_sum] at hn
   obtain ⟨n0, hn0, hne⟩ := Finset.exists_ne_zero_of_sum_ne_zero hn
   have hs : ∑ x ∈ n0.support, Finsupp.single x (n0 x) = n0 := Finsupp.sum_single n0
-  have h := biLe_mul (biLe_CC (ι := ι) (κ := κ) (MvPolynomial.coeff n0 Q))
+  have h := biLe_mul (biLe_CC (ι := ι) (κ := κ) (AddMonoidAlgebra.coeff Q n0))
     (biLe_prod n0.support (fun x => Finsupp.single x (n0 x)) _
       (fun x _ => biLe_pow_single (biLe_gen b x) (n0 x)))
   simp only [zero_add, hs] at h

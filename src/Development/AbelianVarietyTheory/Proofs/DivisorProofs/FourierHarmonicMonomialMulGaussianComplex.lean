@@ -1,5 +1,66 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EmbAApply
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GaussZero
+public import Mathlib.Analysis.Fourier.FourierTransform
+public import Mathlib.LinearAlgebra.Complex.FiniteDimensional
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.Fourier.FourierTransformDeriv
+public import Mathlib.Analysis.InnerProductSpace.Calculus
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+public import Mathlib.Analysis.Real.Pi.Bounds
+public import Mathlib.Analysis.SpecialFunctions.Gaussian.FourierTransform
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Analysis.Calculus.FDeriv.Basic
+public import Mathlib.Analysis.Calculus.FDeriv.Comp
+public import Mathlib.Analysis.Calculus.FDeriv.Congr
+public import Mathlib.Analysis.Calculus.FDeriv.Linear
+public import Mathlib.Analysis.Calculus.FDeriv.Mul
+public import Mathlib.Analysis.Calculus.FDeriv.Pow
+
+@[expose] public section
 
 noncomputable section
 
@@ -7,12 +68,6 @@ open NumberField MeasureTheory
 open scoped RealInnerProductSpace FourierTransform
 
 namespace GlobalTheory.HeckeLemma
-
-def lin (a b w : ℂ) : ℂ := a * (w.re : ℂ) + b * (w.im : ℂ)
-
-def ker (l w : ℂ) : ℂ :=
-  Complex.exp (-2 * Real.pi * ((w.re : ℂ) ^ 2 + (w.im : ℂ) ^ 2)
-    - 2 * Real.pi * Complex.I * ((w.re : ℂ) * l.re + (w.im : ℂ) * l.im))
 
 open NumberField MeasureTheory in
 open scoped RealInnerProductSpace FourierTransform in
@@ -152,8 +207,8 @@ private theorem fourier_fourierSMulRight_sub_I_mul_eq_fourier_conj_mul (g : ℂ 
     ← integral_const_mul]
   congr 1
   funext v
-  simp only [ContinuousLinearMap.smul_apply, VectorFourier.fourierSMulRight_apply,
-    Complex.inner, smul_eq_mul, Circle.smul_def]
+  simp only [Circle.smul_def, smul_apply, VectorFourier.fourierSMulRight_apply,
+    ContinuousLinearMap.smulRight_apply, smul_eq_mul]
   have hc : (starRingEnd ℂ) v = (v.re : ℂ) - (v.im : ℂ) * Complex.I := by
     apply Complex.ext <;> simp
   have h1 : ((innerSL ℝ) v : ℂ →L[ℝ] ℝ) 1 = v.re := by
@@ -215,21 +270,19 @@ private theorem fourier_pow_mul_gaussian (m : ℕ) (l : ℂ) :
         Complex.exp ((-2 * Real.pi * ‖v‖ ^ 2 : ℝ) : ℂ)) (-l)) := by
     rw [Real.fourier_eq, Real.fourier_eq, ← integral_conj]
     congr 1
-    funext v
-    simp only [Circle.smul_def, Real.fourierChar_apply, smul_eq_mul, map_mul, map_pow,
-      Complex.conj_conj, ← Complex.exp_conj, Complex.conj_ofReal, inner_neg_right, Complex.conj_I]
-    congr 2
-    push_cast
-    ring
+    funext x
+    simp only [Circle.smul_def, inner_neg_right]
+    simp only [smul_eq_mul, neg_neg, map_mul, map_pow, Complex.conj_conj,
+      ← Complex.exp_conj, Complex.conj_ofReal, ← Circle.coe_inv_eq_conj, AddChar.map_neg_eq_inv]
   rw [hconj, fourier_conj_pow_mul_gaussian m (-l)]
   simp only [map_mul, map_pow, map_neg, Complex.conj_conj, Complex.conj_I, ← Complex.exp_conj,
     Complex.conj_ofReal, neg_div, norm_neg, map_div₀, map_one, map_ofNat]
   rw [neg_pow (l / 2), neg_pow Complex.I]
   ring
 
+
 open NumberField MeasureTheory in
 open scoped RealInnerProductSpace FourierTransform in
-
 theorem _root_.GlobalTheory.HeckeLemma.fourier_hmon_mul_gaussian : ∀ (k : ℤ) (l : ℂ),
     𝓕 (fun w : ℂ => _root_.GlobalTheory.HeckeTheta.hmon k w *
         Complex.exp ((-2 * Real.pi * ‖w‖ ^ 2 : ℝ) : ℂ)) l =

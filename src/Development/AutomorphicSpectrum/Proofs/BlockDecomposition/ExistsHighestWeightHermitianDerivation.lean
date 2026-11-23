@@ -1,15 +1,66 @@
-import Mathlib
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.RealDescent.RealLeviDescent.HighestVectorsRegularLine
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.HasDerivAtMulVec
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IsCliff
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.RealDescent.RealLeviDescent.IsCoreMod
+public import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+public import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.IntegralConjInnerMulInnerOfIsEmptyEquiv
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FiniteDimTranslationRepUnitaryModel
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ContinuousCoeffRowAct
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.DifferentiableCoeffRowAct
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.GelfandInfinitesimalCharacter
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LineInverse
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SecondCountableUnitary
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SumMemOfStable
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.WeylCharEqGtChar
+public import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.HwIrred
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+public import Mathlib.Analysis.Calculus.Deriv.Prod
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.InnerProductSpace.Calculus
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Algebra.Star.Unitary
+import Mathlib.Topology.Sheaves.Init
 import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.WtRInjective
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.DifferentiableCoeffRowAct
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.HasDerivAtMulVec
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LineInverse
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.WeylCharEqGtChar
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SecondCountableUnitary
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.GelfandInfinitesimalCharacter
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SumMemOfStable
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FiniteDimTranslationRepUnitaryModel
-import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.HwIrred
+
+@[expose] public section
 
 noncomputable section
 
@@ -24,6 +75,19 @@ attribute [local instance] Matrix.normedAddCommGroup Matrix.normedSpace
 
 variable {n : ℕ}
 
+private theorem rm_unitary_apply (ν : Fin n → ℤ) (k : Matrix.unitaryGroup (Fin n) ℂ) :
+    Rm ν k.1 = LinearMap.toMatrix (wb ν) (wb ν)
+      (GlobalTheory.Branching.sqRep ℂ n (dw ν) (GlobalTheory.Branching.unitaryIncl n k)) := by
+  have h : IsUnit k.1.det :=
+    (Matrix.isUnit_iff_isUnit_det _).1 (GlobalTheory.Branching.unitaryIncl n k).isUnit
+  have e : Matrix.nonsingInvUnit k.1 h = GlobalTheory.Branching.unitaryIncl n k := Units.ext rfl
+  rw [Rm, dite_eq_left h, e]
+
+private theorem rm_unitary_mul (ν : Fin n → ℤ) (a b : Matrix.unitaryGroup (Fin n) ℂ) :
+    Rm ν (a * b).1 = Rm ν a.1 * Rm ν b.1 := by
+  rw [rm_unitary_apply, rm_unitary_apply, rm_unitary_apply, map_mul, map_mul, Module.End.mul_eq_comp]
+  exact LinearMap.toMatrix_comp _ _ _ _ _
+
 theorem exists_frame (ν : Fin n → ℤ) :
     ∃ (d : ℕ) (e : (Jd n ν → ℂ) ≃ₗ[ℂ] EuclideanSpace ℂ (Fin d)),
       ∀ (k : Matrix.unitaryGroup (Fin n) ℂ) (x y : Jd n ν → ℂ),
@@ -31,15 +95,21 @@ theorem exists_frame (ν : Fin n → ℤ) :
   let ρ : Representation ℂ (Matrix.unitaryGroup (Fin n) ℂ) (Jd n ν → ℂ) :=
     { toFun := fun k => Matrix.mulVecLin (Rm ν k.1)
       map_one' := by
-        show Matrix.mulVecLin (Rm ν (1 : Matrix.unitaryGroup (Fin n) ℂ).1) = 1
-        rw [GlobalTheory.CompanionTheory.CxAvg.Rm_one, Matrix.mulVecLin_one]
+        show Matrix.mulVecLin (Rm ν (1 : Mat n)) = 1
+        rw [GlobalTheory.CompanionTheory.RmHol.Rm_one, Matrix.mulVecLin_one]
         rfl
       map_mul' := fun a b => by
         show Matrix.mulVecLin (Rm ν (a * b).1) = _
-        rw [GlobalTheory.CompanionTheory.CxAvg.Rm_mul, Matrix.mulVecLin_mul]
+        rw [rm_unitary_mul, Matrix.mulVecLin_mul]
         rfl }
+  have hcont : Continuous fun k : Matrix.unitaryGroup (Fin n) ℂ => Rm ν k.1 := by
+    simp only [rm_unitary_apply]
+    refine continuous_matrix fun i j => ?_
+    simp only [LinearMap.toMatrix_apply]
+    exact (GlobalTheory.CompanionTheory.WInfCont.continuous_sqRep_coeff (dw ν) (wb ν j) ((wb ν).coord i)).comp
+      GlobalTheory.CompanionTheory.CxAvg.continuous_unitaryIncl
   have hρc : ∀ v, Continuous fun k => ρ k v := fun v =>
-    (GlobalTheory.CompanionTheory.CxAvg.continuous_Rm ν).matrix_mulVec continuous_const
+    hcont.matrix_mulVec continuous_const
   obtain ⟨c, hc⟩ := GlobalTheory.exists_invariant_core ρ hρc
   obtain ⟨d, τ, e, hτ, he⟩ := GlobalTheory.ThetaCplV.UnitaryTrick.exists_isURep_of_core ρ
     (fun φ v => (LinearMap.continuous_of_finiteDimensional φ).comp (hρc v)) c hc
@@ -78,6 +148,7 @@ theorem strict_kill (ν : Fin n → ℤ) (c : Jd n ν → ℂ) (hc : ∀ a b, a 
     (hB : ∀ i j, j ≤ i → B i j = 0) : XA ν B *ᵥ c = 0 := by
   rw [XA_eq_sum]
   have h : (∑ a, ∑ b, B a b • Xu ν a b) *ᵥ c = ∑ a, ∑ b, B a b • (Xu ν a b *ᵥ c) := by
+
     simp only [← Matrix.toLin'_apply, map_sum, LinearMap.sum_apply, map_smul, LinearMap.smul_apply]
   rw [h]
   refine Finset.sum_eq_zero fun a _ => Finset.sum_eq_zero fun b _ => ?_
@@ -100,7 +171,7 @@ theorem fix_of_killed (ν : Fin n → ℤ) (c : Jd n ν → ℂ) (hc : ∀ a b, 
     simp [G, Matrix.one_apply_ne hij'.ne', hNs i j hij'.le]
   have hGd : ∀ t, (G t).det = 1 := by
     intro t
-    rw [Matrix.det_of_upperTriangular (hGt t)]
+    rw [Matrix.det_of_isUpperTriangular (hGt t)]
     simp [G, hNs _ _ le_rfl]
   have hGu : ∀ t, IsUnit (G t).det := fun t => by rw [hGd]; exact isUnit_one
   have hGm : ∀ t, G t ∈ GLs n := fun t => mem_GLs_of_isUnit (hGu t)
@@ -188,11 +259,12 @@ theorem frameL_one : frameL e 1 = 1 := by
 theorem frameL_mul (A B : Matrix (Jd n ν) (Jd n ν) ℂ) : frameL e (A * B) = frameL e A * frameL e B := by
   refine LinearMap.ext fun w => ?_
   obtain ⟨x, rfl⟩ := e.surjective w
-  simp [frameL_apply, Module.End.mul_apply]
+  simp [frameL_apply]
 
 theorem frameL_XA (X : Mat n) (w : L) :
     ∑ a, ∑ b, X a b • frameL e (Xu ν a b) w = frameL e (XA ν X) w := by
   rw [XA_eq_sum]
+
   simp only [map_sum, map_smul, LinearMap.sum_apply, LinearMap.smul_apply]
 
 theorem glRel_frame : Formalism.REAL.GlRel fun a b => frameL e (Xu ν a b) := by
@@ -211,8 +283,8 @@ theorem deriv_frame (X : Mat n) (γ : ℝ → Matrix.unitaryGroup (Fin n) ℂ)
 variable (he : ∀ (k : Matrix.unitaryGroup (Fin n) ℂ) (x y : Jd n ν → ℂ),
   ⟪e (Rm ν k.1 *ᵥ x), e (Rm ν k.1 *ᵥ y)⟫_ℂ = ⟪e x, e y⟫_ℂ)
 
-include he in
 
+include he in
 theorem skew_frame (X : Mat n) (hX : Xᴴ = -X) (x y : Jd n ν → ℂ) :
     ⟪e (XA ν X *ᵥ x), e y⟫_ℂ + ⟪e x, e (XA ν X *ᵥ y)⟫_ℂ = 0 := by
   let γ : ℝ → Matrix.unitaryGroup (Fin n) ℂ := GlobalTheory.CompanionTheory.RealCount.InjHw.expU X hX
@@ -241,7 +313,7 @@ theorem herm_frame (a b : Fin n) (x y : Jd n ν → ℂ) :
   have h1 := skew_frame e he _ s1 x y
   have h2 := skew_frame e he _ s2 x y
   unfold Xu
-  simp only [XA_add, XA_smul, Matrix.add_mulVec, Matrix.smul_mulVec, map_add, map_smul,
+  simp only [XA_add, XA_smul, Matrix.add_mulVec, Matrix.smul_mulVec, map_add (f := _), map_smul,
     inner_add_left, inner_add_right, inner_smul_left, inner_smul_right] at h1 h2
   simp only [map_neg, map_one, Complex.conj_I] at h1 h2
   generalize ⟪e (XA ν (Matrix.single a b 1) *ᵥ x), e y⟫_ℂ = p at h1 h2 ⊢
@@ -250,8 +322,8 @@ theorem herm_frame (a b : Fin n) (x y : Jd n ν → ℂ) :
   generalize ⟪e x, e (XA ν (Matrix.single b a 1) *ᵥ y)⟫_ℂ = s at h1 h2 ⊢
   linear_combination (1 / 2 : ℂ) * h1 + (Complex.I / 2) * h2 + (1 / 2 : ℂ) * (p + q - r - s) * Complex.I_sq
 
-include he in
 
+include he in
 theorem frame_model (hν : Antitone ν) :
     ∃ (σ : Matrix.unitaryGroup (Fin n) ℂ →* (L →ₗ[ℂ] L)) (K : Fin n → Fin n → Module.End ℂ L) (v : L),
       Formalism.REAL.GlRel K ∧ (∀ a b (x y : L), ⟪K a b x, y⟫_ℂ = ⟪x, K b a y⟫_ℂ) ∧ IsDerivK σ K ∧ v ≠ 0 ∧
@@ -265,11 +337,11 @@ theorem frame_model (hν : Antitone ν) :
   let σ : Matrix.unitaryGroup (Fin n) ℂ →* (L →ₗ[ℂ] L) :=
     { toFun := fun k => frameL e (Rm ν k.1)
       map_one' := by
-        show frameL e (Rm ν (1 : Matrix.unitaryGroup (Fin n) ℂ).1) = 1
-        rw [GlobalTheory.CompanionTheory.CxAvg.Rm_one, frameL_one]
+        show frameL e (Rm ν (1 : Mat n)) = 1
+        rw [GlobalTheory.CompanionTheory.RmHol.Rm_one, frameL_one]
       map_mul' := fun a b => by
         show frameL e (Rm ν (a * b).1) = _
-        rw [GlobalTheory.CompanionTheory.CxAvg.Rm_mul, frameL_mul] }
+        rw [rm_unitary_mul, frameL_mul] }
   have hσ : ∀ k x, σ k (e x) = e (Rm ν k.1 *ᵥ x) := fun k x => frameL_apply e _ x
   refine ⟨σ, fun a b => frameL e (Xu ν a b), e c0, glRel_frame e, ?_, ?_, ?_, ?_, ?_, ?_⟩
   · intro a b x y

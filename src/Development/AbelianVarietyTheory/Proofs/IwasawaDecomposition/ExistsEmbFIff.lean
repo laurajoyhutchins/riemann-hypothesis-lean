@@ -1,19 +1,65 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.LatAtLattice
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.MemPrinCongOfSm
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.LatAtLattice
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.InvSmulMemOfRedL
+public import Formalism.LocalToGlobal.Columns.TiedVal
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.MemClosureIff
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.PlacesOverConjPrimes
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.BaseFieldsPrimesOk
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.EmbFColZeroMemMram
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HermitianLatticeChartFamilyLawBasis
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsBasisAtOfIsLocBasis
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ProdAbsNormDivsDvd
 import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.TrueColumnSpacesStandardInFrameCoords
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.UnitaryOfIsON
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsBasisAtOfIsLocBasis
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.EmbFColZeroMemMram
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.BaseFieldsPrimesOk
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ValuedLtOfMem
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.PlacesOverConjPrimes
-import Formalism.LocalToGlobal.Columns.RecLevelStep
-import Formalism.LocalToGlobal.Columns.ChainInst
-import Formalism.LocalToGlobal.Columns.TiedValRat
-import Formalism.LocalToGlobal.HermitianForms.FramesLemmas
-import Formalism.LocalToGlobal.GlobalTheory.GL6.FrobeniusNoKernelOfFrobeniusSimilitude
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.UfGLRatHom
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.UfGLRatHom
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.UnitaryOfIsON
+import Formalism.LocalRingCardinality.Lemmas
+import Formalism.LocalToGlobal.Columns.BaseLemmas
+public import Formalism.LocalToGlobal.Columns.ChainInst
+import Formalism.LocalToGlobal.Columns.CoefficientsModP.LatticeBasisExistsHolds
+import Formalism.LocalToGlobal.Columns.RecLevelLocP
+public import Formalism.LocalToGlobal.Columns.TiedValRat
+import Formalism.LocalToGlobal.GlobalTheory.GL6.PBwLocGen
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Formalism.BasicNotions Formalism.MainNotions Formalism.L2.Col Formalism.L2.DIV Formalism.L2.Ker Formalism.UG Formalism.L2.Forms GlobalTheory.Mem GlobalTheory.Mem.Chr GlobalTheory.Mem.Col2 GlobalTheory.Mem.Col2.TC Matrix
 attribute [local instance] GlobalTheory.Mem.Col2.starE Formalism.BasicNotions.Host.cmStar
 
@@ -54,8 +100,8 @@ section Gen2
 variable {F E K ι : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] [StarRing E] [Field K] [NumberField K]
   [StarRing K] [Fintype ι] {n : ℕ} (S : GStep E K n) (emb : ι → E →+* K) (σ : K →+* ℂ) (lam : ι → DomWeight n)
 
-omit [StarRing E] [NumberField K] [StarRing K] in
 
+omit [StarRing E] [NumberField K] [StarRing K] in
 theorem mem_Fi_iff {σ' : E →ₐ[F] E} {J : Matrix (Fin n) (Fin n) E} {T f : ℕ} {bad : Set (HeightOneSpectrum (𝓞 F))}
     (L : StepLevel F E σ' J T f bad) {e : ι → E →+* ℂ} (he : e = embAt σ emb) {lam' : ι → DomWeight n} (hl : lam = lam')
     (y : S.Cl → UPts σ' J (FiniteAdeleRing (𝓞 F) F)) (hy : Function.Bijective fun c => (Quotient.mk'' (y c) : Cls L))
@@ -68,7 +114,9 @@ theorem mem_Fi_iff {σ' : E →ₐ[F] E} {J : Matrix (Fin n) (Fin n) E} {T f : �
     (z : S.Cl → Fr emb σ n → ℂ) :
     z ∈ S.Fi emb σ lam ↔ (show S.Cl → Frames (gramC J e) → ℂ from z) ∈ FiC L e lam' y := by
   subst he hl
-  refine Iff.trans ?_ (mem_FiC_iff L _ _ y hy _).symm
+  let zC : S.Cl → Frames (gramC J (embAt σ emb)) → ℂ := z
+  change z ∈ S.Fi emb σ lam ↔ zC ∈ FiC L (embAt σ emb) lam y
+  rw [RowTie.mem_FiC_iff L (embAt σ emb) lam y hy zC]
   refine forall_congr' fun c => and_congr Iff.rfl ⟨fun h γ hγ κ e zz zz' hz => ?_, fun H g => ?_⟩
   · obtain ⟨s, hs⟩ := (hr c ⟨γ, hγ⟩).2 ⟨κ.1⁻¹, inv_mem κ.2, by
       show (y c).1 * κ.1⁻¹ * (y c).1⁻¹ = bc (inclE (F := F) (FiniteAdeleRing (𝓞 F) F)) γ
@@ -115,7 +163,8 @@ theorem lat_iff (hS : S.Ok) {G : ι → Matrix (Fin n) (Fin n) ℂ} {sh : ι →
     (he : e = embAt σ emb) {P : Type} (pl : P ≃ HeightOneSpectrum (𝓞 K)) (rc : P → ℕ) (hrc : ∀ w, (rc w).Prime)
     (hm : ∀ w, ((rc w : ℕ) : 𝓞 K) ∈ (pl w).asIdeal) (Sp : P → AddSubgroup (MvPolynomial (ι × Fin n × Fin n) ℂ))
     (hSp : ∀ w Q, Q ∈ Sp w ↔ ∃ z₀ ∈ Formalism.HermitianLatticesTheory.localization₂ (pl w).asIdeal (delStd K lam), Q = MvPolynomial.map σ z₀)
-    (lat : S.Cl → Submodule (𝓞 E) (Fin n → E)) (hlat : ∀ c, S.Lsh c.1 (S.rep c) = lat c) (x : (S.hlat emb lam h).V) :
+    (lat : S.Cl → Submodule (𝓞 E) (Fin n → E)) (hlat : ∀ c, S.Lsh c.1 (S.rep c) = lat c)
+    (hfull : ∀ c, Submodule.IsFullLattice E (lat c)) (x : (S.hlat emb lam h).V) :
     x ∈ (S.hlat emb lam h).L ↔ ∀ (w : P) (c : S.Cl) (B : GL (Fin n) E), IsLocBasis (rc w) (lat c : Set _) B →
       ∃ Q ∈ Sp w, (show Frames G → ℂ from S.embF emb σ lam h x c) =
         fnOf G sh (Formalism.L2.Forms.atInf e (B⁻¹ : GL (Fin n) E).1) Q := by
@@ -126,7 +175,7 @@ theorem lat_iff (hS : S.Ok) {G : ι → Matrix (Fin n) (Fin n) ℂ} {sh : ι →
       ∃ Q ∈ Sp w, (show Frames G → ℂ from S.embF emb σ lam h x c) =
         fnOf G (shiftOf lam) (Formalism.L2.Forms.atInf (embAt σ emb) (B⁻¹ : GL (Fin n) E).1) Q) := by
     intro w c B hB
-    refine (BwLat.mem_localization_delAtr_fn emb σ lam (pl w) (hL c) (fun _ => B) (fun τ => BwLat.isBasisAt_of_isLocBasis (hrc w) _
+    refine (BwLat.mem_localization_delAtr_fn emb σ lam (pl w) (by first | exact hfull c | exact (hfull c).toIsLattice) (fun _ => B) (fun τ => BwLat.isBasisAt_of_isLocBasis (hrc w) _
       ((bc_mem_below _ _ _).2 (by rw [map_natCast]; exact hm w)) hB) (x.1 c)).trans ⟨?_, ?_⟩
     · rintro ⟨z, hz, e⟩
       exact ⟨_, (hSp w _).2 ⟨z, hz, rfl⟩, e⟩
@@ -138,7 +187,7 @@ theorem lat_iff (hS : S.Ok) {G : ι → Matrix (Fin n) (Fin n) ℂ} {sh : ι →
   refine ⟨fun H w c B hB => (key w c B hB).1 (H c _), fun H c w => ?_⟩
   obtain ⟨w, rfl⟩ := pl.surjective w
   haveI : Fact (rc w).Prime := ⟨hrc w⟩
-  obtain ⟨B, hB⟩ := Formalism.L2.GlobalTheoryTheory.LocalLatticeBases.LocB.exists_isLocBasis (rc w) E _ (hL c).fg (hL c).span_eq_top
+  obtain ⟨B, hB⟩ := Formalism.L2.GlobalTheoryTheory.LocalLatticeBases.LocB.exists_isLocBasis (rc w) E _ (hL c).fg (by letI := hfull c; exact Submodule.IsFullLattice.span_eq_top)
   exact (key w c B hB).2 (H w c B hB)
 
 end Gen2
@@ -184,7 +233,7 @@ theorem sgHC_eq {R : Ranks} (P : HCParam R) (i : Fin (R.N R.m - 1)) :
   by_cases h1 : (i : ℕ) < R.k - 1
   · rw [dif_pos h1, dif_pos h1]
     rfl
-  · rw [dif_neg h1, dif_neg h1]
+  · rw [dite_eq_right h1, dite_eq_right h1]
     have h2 : ((i : ℕ) - (R.k - 1)) / (R.t + 1) < R.m := by
       rw [Nat.div_lt_iff_lt_mul (Nat.succ_pos _)]
       have := R.two_le_m
@@ -204,7 +253,7 @@ namespace GlobalTheory.Mem.Col2.TC
 
 open GlobalTheory.Mem.Col2.RowTie
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem clsP_tie : ∀ {B : Base} {X : PreX B.toPre} (I : TC B X), I.Ok → TC.Pins B X → ∀ (l : I.Laws) (Z : TC.Later B (I.cols l)),
     ∀ u : B.Word, ∃ (KP : ClsPTied (D := (I.rec7 l Z)) u) (W : ValPTied u KP),
@@ -219,9 +268,10 @@ theorem clsP_tie : ∀ {B : Base} {X : PreX B.toPre} (I : TC B X), I.Ok → TC.P
   have hbad : badG (I.rec7 l Z) = plUnder B.host.F (B.primes X).vGs := by
     ext v
     exact (plUnder_vGs B.sp.cm (BasePrimes.primes_ok B X).1 v).symm
-  obtain ⟨L, R, hLb, hpt, hlev, hchr, hst, hstc⟩ := exists_cls (X := B.fields) B.sp.cm (rowTyG I.Ch I.Ps)
+  have hcls := RowTie.exists_cls (X := B.fields) (n := B.R.N B.R.m - 1) B.sp.cm (rowTyG I.Ch I.Ps)
     (levQX B.R I.sel (I.tup I.mu0)) (fun _ => True) B.embLL hQ (levOk_base B X).split B.R.f (gramP (I.rec7 l Z)) hgP
     (badG (I.rec7 l Z)) hbad
+  obtain ⟨L, R, hLb, hpt, hlev, hchr, hst, hstc⟩ := hcls
   let KP : ClsPTied (D := I.rec7 l Z) u :=
     { lev := L
       y := R.y
@@ -282,7 +332,10 @@ theorem clsP_tie : ∀ {B : Base} {X : PreX B.toPre} (I : TC B X), I.Ok → TC.P
             ((I.rec7 l Z).val_nonneg_iff w) B.wts.sgW Q
           rw [← delStd_shW B.wts.sgW (-((B.R.m : ℤ) * (((B.R.t + 1) / 2 : ℕ) : ℤ)))] at h
           exact h)
-        _ (fun c => RowTie.Lsh_empty _) x }
+        _ (fun c => RowTie.Lsh_empty _) (fun c => by
+          let d := ((I.stX I.mu0).rep c).1.1.deco
+          exact { toIsLattice := d.2.lat
+                  span_eq_top := GlobalTheory.LvT.Pts.span_eq_top_of_unimodular d.1.N d.2.lat d.2.uni }) x }
   refine ⟨KP, W, ⟨fun x => (hLb x).trans (mem_baseL_one B _ x).symm, fun _ => rfl, hpt, hlev, hchr, hst⟩, ?_, ?_⟩
   · intro s x Pc hPc o ho
     refine (MetricTie.norm_step B.fields.emb B.embLL (I.perIn u I.mu0).sgT (I.stX I.mu0) hF hS (l.fmL u I.mu0).famP hnf hsh (hG _)

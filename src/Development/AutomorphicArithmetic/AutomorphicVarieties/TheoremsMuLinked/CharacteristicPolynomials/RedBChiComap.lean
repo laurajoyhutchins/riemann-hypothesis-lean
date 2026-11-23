@@ -1,7 +1,45 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.TheoremsMuLinked.OrdZero
-import Development.AutomorphicArithmetic.AutomorphicVarieties.WeilGroupCharacters.ArithmeticPointClassicality
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CurveDVRSpecialization.IsUnitOrIsUnitOfAddOne
-import Development.AutomorphicArithmetic.AutomorphicVarieties.WeakShimuraTheory.EigenbasisLifts.Factor
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CurveDVRSpecialization.EveryPointSatisfiesFrameCondition
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.DeterminantRepresentations.RepApi
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebraHeight.DGext
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Formalism.ConjugateSelfDual ReciprocityTheory.Gal IsLocalRing Polynomial Matrix UpperTheory.V UpperTheory.V.HV UpperTheory.V.Alg GlobalTheory.GalOfCusp
 
@@ -35,11 +73,11 @@ private theorem redB_abs {n : ℕ} {O R K G : Type} [CommRing O] [IsLocalRing O]
     fun b => ⟨Ideal.Quotient.mk _ b, rfl, rfl⟩⟩
   · rw [Polynomial.map_map]
     refine (redB_chi_map D x g).symm.trans ?_
-    rw [hx, (AlgebraTools.Det.repApi _).2.1]
+    rw [hx, (AlgebraTools.Det.repApi (W.mat ρ)).2.1]
     rfl
   · rw [Polynomial.map_map]
     refine (redB_chi_map D (res O R : R →+* ResidueField O) g).symm.trans ?_
-    rw [hr, (AlgebraTools.Det.repApi _).2.1]
+    rw [hr, (AlgebraTools.Det.repApi (W.diagRep χ)).2.1]
     exact Matrix.charpoly_diagonal _
 
 theorem UpperTheory.V.Th.Det.redB :
@@ -55,8 +93,8 @@ theorem UpperTheory.V.Th.Det.redB :
     have e : x.D.comap V.pr = W.GDet.ofRep (W.mat (ρ.comp V.pr)) := hx
     unfold W.GDet.lam
     congr 2
-    exact (redB_chi_comap x.D V.pr h).symm.trans ((congrArg (fun D => W.GDet.chi D (MonoidAlgebra.single h 1)) e).trans
-      (((AlgebraTools.Det.repApi _).2.1 h).trans ((AlgebraTools.Det.repApi (W.mat ρ)).2.1 (V.pr h)).symm))
+    exact congrArg (fun p => p.coeff) ((redB_chi_comap x.D V.pr h).symm.trans ((congrArg (fun D => W.GDet.chi D (MonoidAlgebra.single h 1)) e).trans
+      (((AlgebraTools.Det.repApi _).2.1 h).trans ((AlgebraTools.Det.repApi (W.mat ρ)).2.1 (V.pr h)).symm)))
   refine ⟨hD, ?_⟩
   obtain ⟨A, _, j, φ, h1, h2, h3⟩ := redB_abs (O := c.O) B.u.D (x : B.B →+* Qbar l) ρ r.chib hD B.u.red
   refine ⟨A, inferInstance, j, φ, h1, h2, fun v i g => ?_⟩

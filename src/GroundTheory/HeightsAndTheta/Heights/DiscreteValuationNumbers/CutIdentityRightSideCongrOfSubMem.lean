@@ -1,6 +1,50 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.SpanTwoIsPrimeRelevant
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.BundleObjects
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.SpanTwoIsPrimeRelevant
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.BundleObjects
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.NumbersDVR
@@ -78,8 +122,9 @@ variable {O : Type*} [CommRing O] [IsDomain O] [IsDiscreteValuationRing O]
 def cutIdentityLeftSide (P : Ideal (MRing ι O)) (f g : MRing ι O) (c : K → ℕ) {d : ℕ} (L : Fin d → K → ℤ) : ℤ :=
   cycEval (fun G => vNum G (Matrix.vecCons (fun k => (c k : ℤ)) L)) (ratDiv P f g)
 
-open Classical in
 
+open scoped Classical in
+open Classical in
 def cutIdentityRightSide (ϖ : O) (P : Ideal (MRing ι O)) (b : K → ℤ) (f g : MRing ι O) (s : MRing ι O) {d : ℕ}
     (L : Fin d → K → ℤ) : ℤ :=
   cycEval (fun W => if (C ϖ : MRing ι O) ∈ W then vNum W (Matrix.vecCons b L)
@@ -272,9 +317,9 @@ theorem divCycle_congr_of_sub_mem {K : Type*} {ι : K → Type*} {R : Type*} [Co
   unfold divCycle
   by_cases hc : W ∈ (P ⊔ Ideal.span {s}).minimalPrimes ∧ IsRelevant W
   · have hc' : W ∈ (P ⊔ Ideal.span {s'}).minimalPrimes ∧ IsRelevant W := e ▸ hc
-    rw [dif_pos hc, dif_pos hc', e]
+    rw [dite_eq_left hc, dite_eq_left hc', e]
   · have hc' : ¬ (W ∈ (P ⊔ Ideal.span {s'}).minimalPrimes ∧ IsRelevant W) := e ▸ hc
-    rw [dif_neg hc, dif_neg hc']
+    rw [dite_eq_right hc, dite_eq_right hc']
 
 theorem cutIdentityRightSide_congr_of_sub_mem {K : Type*} [DecidableEq K] {ι : K → Type*} {O : Type*} [CommRing O]
     [IsDomain O] [IsDiscreteValuationRing O] (ϖ : O) (P : Ideal (MRing ι O)) (b : K → ℤ)
@@ -304,14 +349,6 @@ theorem blowUp_relation {K : Type} [Fintype K] {ι : K → Type} {R : Type*} [Co
 end Helpers
 
 section Examples
-
-theorem blowUpModel_hypotheses_example :
-    let S := MRing (fun _ : Unit => Fin 2) ℤ_[2]
-    IsModelOver (⊥ : Ideal S) 1 ∧ (∀ j : Fin 2, IsMultiHomog (X ⟨(), j⟩ : S) (Pi.single () 1)) ∧
-      ∃ j : Fin 2, (X ⟨(), j⟩ : S) ∉ (⊥ : Ideal S) := by
-  intro S
-  obtain ⟨hmodel, hX0, -⟩ := lemmas_hypotheses_example
-  exact ⟨hmodel, fun j => isWeightedHomogeneous_X _ _ _, 0, hX0⟩
 
 end Examples
 

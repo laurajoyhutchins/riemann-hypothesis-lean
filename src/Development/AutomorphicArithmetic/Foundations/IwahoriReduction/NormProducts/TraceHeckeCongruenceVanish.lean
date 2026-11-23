@@ -1,11 +1,58 @@
-import Development.AutomorphicArithmetic.Foundations.IwahoriReduction.NormProducts.LUnH
-import Development.AutomorphicArithmetic.Foundations.IwahoriReduction.NormProducts.GamMono
-import Development.AutomorphicArithmetic.Foundations.IwahoriReduction.NormProducts.EvalSmulCong
-import Development.AutomorphicArithmetic.Foundations.IwahoriReduction.NormProducts.SlFixPoly
-import Development.AutomorphicArithmetic.Foundations.IwahoriReduction.NormProducts.NegOneNot
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ModularFunctionTowerIntegrality
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.SlMulToRingEquiv
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.TowerUnitClassModPrimePowProperties
+module
+
+public import Development.AutomorphicArithmetic.Foundations.IwahoriReduction.NormProducts.LUnH
+public import Development.AbelianVarietyTheory.Definitions.Foundations.IsZetaTW
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.ResMapBijective
+public import Development.AutomorphicArithmetic.Foundations.IwahoriReduction.NormProducts.InvMod
+public import Mathlib.RingTheory.AdicCompletion.Noetherian
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ModularFunctionTowerIntegrality
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.SlMulToRingEquiv
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.TowerUnitClassModPrimePowProperties
+public import Development.AutomorphicArithmetic.Foundations.IwahoriReduction.NormProducts.EvalSmulCong
+public import Development.AutomorphicArithmetic.Foundations.IwahoriReduction.NormProducts.GamMono
+public import Development.AutomorphicArithmetic.Foundations.IwahoriReduction.NormProducts.NegOneNot
+public import Development.AutomorphicArithmetic.Foundations.IwahoriReduction.NormProducts.SlFixPoly
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
+
 open GlobalTheory.KZ GlobalTheory.K4 UpperTheory.Kd.K4 Polynomial
 open scoped Matrix MatrixGroups
 
@@ -16,7 +63,7 @@ variable {Ω : Type} [Field Ω] [Algebra ℚ Ω] {ε : Ω →+* ℂ}
 private theorem toGQ_sl (γ : SL(2, ℤ)) : toGQ (γ : Matrix (Fin 2) (Fin 2) ℤ) = ofSL γ := by
   have h : 0 < (γ : Matrix (Fin 2) (Fin 2) ℤ).det := by simp
   unfold toGQ
-  rw [dif_pos h]
+  rw [dite_eq_left h]
   ext i j
   simp [ofSL]
 
@@ -46,6 +93,7 @@ private theorem tr_z_eq_transfer (X : Tower Ω ε) (l : ℕ) [Fact l.Prime] (w n
     AdicCompletion.eval (idl l) (X.Kl l) n (trH X l w (fun i => z * γ i) lam x u +
       trH X l w γ lam (X.kmap l (X.sl (ofSL z)).toRingEquiv x) u) = 0 := by
   unfold trH
+
   rw [Finset.sum_apply, Finset.sum_apply, ← Finset.sum_add_distrib, map_sum]
   refine Finset.sum_eq_zero fun i _ => ?_
   simp only [Tower.act, LinearMap.coe_mk, AddHom.coe_mk, sec, map_smul]
@@ -61,10 +109,10 @@ private theorem tr_z_eq_transfer (X : Tower Ω ε) (l : ℕ) [Fact l.Prime] (w n
   have e : PadicInt.toZModPow n ((lam 0 : ℤ_[l]) * (mZl l (z : Matrix (Fin 2) (Fin 2) ℤ) *ᵥ v) 0 +
       (lam 1 : ℤ_[l]) * (mZl l (z : Matrix (Fin 2) (Fin 2) ℤ) *ᵥ v) 1) =
       - PadicInt.toZModPow n ((lam 0 : ℤ_[l]) * v 0 + (lam 1 : ℤ_[l]) * v 1) := by
-    simp only [Matrix.mulVec, dotProduct, Fin.sum_univ_two, mZl, Matrix.map_apply, map_add, map_mul, map_intCast,
+    simp only [Matrix.mulVec, dotProduct, Fin.sum_univ_two, mZl, Matrix.map_apply, map_add (f := _), map_mul, map_intCast,
       eq_intCast]
     rw [g00, g11, h01, h10]; ring
-  rw [map_add, map_pow, map_pow, e, hw.neg_pow, neg_add_cancel]
+  rw [map_add (f := _), map_pow, map_pow, e, hw.neg_pow, neg_add_cancel]
 
 private theorem isTransversal_left_mul (H Γ : Subgroup SL(2, ℤ)) {ι : Type} (γ : ι → SL(2, ℤ)) (h : IsTr H Γ γ) (z : SL(2, ℤ)) (hz : z ∈ Γ)
     (hc : ∀ g : SL(2, ℤ), g * z * g⁻¹ * z⁻¹ ∈ H) : IsTr H Γ fun i => z * γ i := by

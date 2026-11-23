@@ -1,5 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.StandardOrderExtendedBasisApplyLowBlock
+module
+
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.StandardOrderExtendedBasisApplyLowBlock
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MeasureTheory ValuativeRel Matrix
 
@@ -48,19 +94,6 @@ def NormalFormModN : Prop :=
 
 variable [MeasurableSpace k] [BorelSpace k]
 
-def LatticeBounds : Prop :=
-  ∀ ϖ : kˣ, valuation k (ϖ : k) = uniformizer k →
-  ∀ ψ : AddChar k Circle, HasConductor ψ 1 → ∀ ν : Measure k, ν.IsAddHaarMeasure →
-  ∀ (n n' : Type) [Fintype n] [DecidableEq n] [Fintype n'] [DecidableEq n'] (c : ℕ)
-    (g' : GL n' k) (e' : Fin (c + 1 + 1) → ℤ) (z' : n' → k) (h : GL (n ⊕ Fin (c + 1)) k)
-    (Ψ : Matrix (n ⊕ Fin (c + 1)) (n' ⊕ Fin (c + 1 + 1)) k → ℂ),
-    (∀ x, Ψ x ≠ 0 → MapsLat x (latOf (nfBasis ϖ g' e' z')) (latOf h)) →
-    (∀ x y, MapsLat y (latOf (nfBasis ϖ g' e' z')) (latOf h) → Ψ (x + (ϖ : k) • y) = Ψ x) →
-    ∀ x₀ : Matrix n n' k, opE ψ ν 1 Ψ x₀ ≠ 0 →
-      (∃ e : Fin (c + 1) → ℤ, ∀ i, topCoord (latOf h) i = powInt ϖ (e i) ∧
-        e' i.succ - 1 ≤ e i ∧ e i ≤ e' i.castSucc) ∧
-      ((ϖ ^ e' 0 : kˣ) : k) • (Sum.elim (x₀ *ᵥ z') (Pi.single 0 1) : n ⊕ Fin (c + 1) → k) ∈ latOf h
-
 variable {k}
 variable {s : ℕ} {X : ℕ → Type*} [∀ j, Fintype (X j)] [∀ j, DecidableEq (X j)] {Z : Type*} [Fintype Z] [DecidableEq Z]
   (T : Chain k s X Z) (ϖ : kˣ) (ψ : AddChar k Circle) (ν : Measure k)
@@ -104,8 +137,8 @@ def LastSteps : Prop :=
       ∀ η, hat ψ ν ε (cosetInd _ yb) η ≠ 0 →
         ∀ y, Submodule.Quotient.mk y = yb → ε * (η ⬝ᵥ y) ∈ powInt ϖ (-((s : ℤ) + 1))
 
-variable (k) in
 
+variable (k) in
 def ChainSizes : Prop :=
   ∀ ϖ : kˣ, valuation k (ϖ : k) = uniformizer k →
   ∀ ψ : AddChar k Circle, HasConductor ψ 1 → ∀ ν : Measure k, ν.IsAddHaarMeasure →
@@ -117,27 +150,5 @@ def ChainSizes : Prop :=
       NormalReps (Chain.ofTwist δ hδ μ₀ F Ftop) ϖ ψ ν ∧ DepthOne (Chain.ofTwist δ hδ μ₀ F Ftop) ϖ ψ ν ∧
         LastSteps (Chain.ofTwist δ hδ μ₀ F Ftop) ϖ ψ ν
 
-variable (k) in
-
-def LatticeClasses : Prop := NormalFormModN k ∧ LatticeBounds k ∧ ChainSizes k
-
-example (H : ChainSizes k) (hϖ : valuation k (ϖ : k) = uniformizer k) (hψ : HasConductor ψ 1)
-    [hν : ν.IsAddHaarMeasure] (κ t : Type) [Fintype κ] [DecidableEq κ] [Fintype t] [DecidableEq t]
-    (δ : kˣ →* ℂˣ) (hδ : IsTame δ) (μ₀ : ℕ → kˣ →* ℂˣ) (h₀ : ∀ j, IsUnram (μ₀ j)) :
-    ∃ A, (twistChain s t κ δ hδ μ₀).IsRepSystem A ψ ν ∧ (twistChain s t κ δ hδ μ₀).RepsNormal A ϖ :=
-  (H ϖ hϖ ψ hψ ν hν s (κ ⊕ Fin (s + 1)) t (Ix (κ ⊕ Fin (s + 1)) t (s + 2)) (XIx κ t) δ hδ μ₀ h₀
-    (fun j c h => plainFrame (stdOrd κ t j c h)) (LatFrame.refl k _) fun _ _ _ => rfl).1.2.1
-
-example {n : Type*} [Fintype n] [DecidableEq n] {c : ℕ} (i : Fin c) :
-    topCoord (latOf (1 : GL (n ⊕ Fin c) k)) i = powInt ϖ 0 := by
-  ext a
-  simp only [topCoord, powInt, mem_latOf_one, Set.mem_setOf_eq, zpow_zero, Units.val_one, map_one]
-  constructor
-  · rintro ⟨y, hy, -, rfl⟩; exact hy _
-  · intro ha
-    refine ⟨Pi.single (Sum.inr i) a, fun l => ?_, fun l hl => ?_, by simp⟩
-    · rw [Pi.single_apply]; split_ifs
-      exacts [ha, zero_mem _]
-    · rw [Pi.single_apply, if_neg]; simpa using hl.ne'
 
 end GlobalTheory.IndefiniteRowSideFullHecke.NormalRepresentationLattice

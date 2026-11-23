@@ -1,4 +1,67 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.Category.Ring.Colimits
+public import Mathlib.CategoryTheory.Limits.Filtered
+public import Mathlib.CategoryTheory.Limits.Final
+public import Mathlib.Combinatorics.Quiver.ReflQuiver
+public import Mathlib.RingTheory.Etale.StandardEtale
+public import Mathlib.RingTheory.Henselian
+import Mathlib.Algebra.Category.Ring.FilteredColimits
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+public import Mathlib.CategoryTheory.Filtered.Final
+import Mathlib.CategoryTheory.Monoidal.Mon
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+public import Mathlib.RingTheory.Unramified.LocalStructure
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.CategoryTheory.Limits.ConcreteCategory.Basic
+public import Mathlib.RingTheory.Localization.AtPrime.Basic
+
+@[expose] public section
 
 namespace PositivityTheory.HtPt.Htat.Hens
 
@@ -99,13 +162,13 @@ structure PointedEtale where
 
   pt : carrier →ₐ[R] K
 
+instance : CoeSort (PointedEtale R K) (Type u) := ⟨PointedEtale.carrier⟩
+
 namespace PointedEtale
 
 attribute [instance] commRing algebra etale
 
 variable {R K}
-
-instance : CoeSort (PointedEtale R K) (Type u) := ⟨carrier⟩
 
 @[ext]
 structure Hom (X Y : PointedEtale R K) where
@@ -118,16 +181,8 @@ instance : Category (PointedEtale R K) where
   id X := ⟨AlgHom.id R X, by ext; rfl⟩
   comp f g := ⟨g.alg.comp f.alg, by rw [← AlgHom.comp_assoc, g.comm, f.comm]⟩
 
-@[ext]
 theorem hom_ext {X Y : PointedEtale R K} {f g : X ⟶ Y} (h : f.alg = g.alg) : f = g :=
   Hom.ext h
-
-@[simp]
-theorem id_alg (X : PointedEtale R K) : (𝟙 X : X ⟶ X).alg = AlgHom.id R X := rfl
-
-@[simp]
-theorem comp_alg {X Y Z : PointedEtale R K} (f : X ⟶ Y) (g : Y ⟶ Z) :
-    (f ≫ g).alg = g.alg.comp f.alg := rfl
 
 theorem pt_alg {X Y : PointedEtale R K} (f : X ⟶ Y) (x : X) : Y.pt (f.alg x) = X.pt x :=
   congr($(f.comm) x)
@@ -163,9 +218,6 @@ noncomputable def toAway (X : PointedEtale R K) (s : X) (hs : IsUnit (X.pt s)) :
   ⟨(IsScalarTower.toAlgHom R X (Localization.Away s) : X →ₐ[R] Localization.Away s), by
     ext x; exact IsLocalization.Away.lift_eq s hs x⟩
 
-theorem toAway_alg_apply (X : PointedEtale R K) (s : X) (hs : IsUnit (X.pt s)) (x : X) :
-    (X.toAway s hs).alg x = algebraMap X (Localization.Away s) x := rfl
-
 theorem isUnit_toAway (X : PointedEtale R K) (s : X) (hs : IsUnit (X.pt s)) :
     IsUnit ((X.toAway s hs).alg s) :=
   IsLocalization.Away.algebraMap_isUnit s
@@ -189,16 +241,18 @@ abbrev StdIndex (R K : Type u) [CommRing R] [Field K] [Algebra R K] := Σ P : St
 
 noncomputable abbrev stdObj (i : StdIndex R K) : PointedEtale R K := ⟨i.1.Ring, i.2⟩
 
-variable (R K) in
-
-abbrev Std := InducedCategory (PointedEtale R K) (stdObj (R := R) (K := K))
 
 variable (R K) in
+abbrev Std (R K : Type u) [CommRing R] [Field K] [Algebra R K] :=
+  InducedCategory (PointedEtale R K) (stdObj (R := R) (K := K))
 
-noncomputable abbrev incl : Std R K ⥤ PointedEtale R K := inducedFunctor _
+
+variable (R K) in
+noncomputable abbrev incl (R K : Type u) [CommRing R] [Field K] [Algebra R K] :
+    PointedEtale.Std R K ⥤ PointedEtale R K := inducedFunctor _
 
 theorem exists_hom_incl (X : PointedEtale R K) :
-    ∃ j : Std R K, Nonempty (X ⟶ (incl R K).obj j) := by
+    ∃ j : PointedEtale.Std R K, Nonempty (X ⟶ (incl R K).obj j) := by
   let q := RingHom.ker X.pt
   have : q.IsPrime := RingHom.ker_isPrime _
   obtain ⟨s, hs, hstd⟩ := Algebra.IsEtaleAt.exists_isStandardEtale (R := R) q
@@ -206,7 +260,7 @@ theorem exists_hom_incl (X : PointedEtale R K) :
   let P : StandardEtalePresentation R (Localization.Away s) :=
     hstd.nonempty_standardEtalePresentation.some
   let Y := X.away s hu
-  let j : Std R K := ⟨P.P, Y.pt.comp P.equivRing.symm.toAlgHom⟩
+  let j : PointedEtale.Std R K := ⟨P.P, Y.pt.comp P.equivRing.symm.toAlgHom⟩
   have hc : (Y.pt.comp P.equivRing.symm.toAlgHom).comp P.equivRing.toAlgHom = Y.pt := by
     ext y
     simp
@@ -230,7 +284,7 @@ theorem exists_hom_root (X : PointedEtale R K) (q : X[X]) (hq : q.Monic) (a₀ :
   · exact Q.hasMap_X.1
   · exact Q.lift_X a₀ hmap
 
-instance isFiltered_std : IsFiltered (Std R K) :=
+instance isFiltered_std : IsFiltered (PointedEtale.Std R K) :=
   IsFiltered.of_exists_of_isFiltered_of_fullyFaithful (incl R K) exists_hom_incl
 
 instance final_incl : (incl R K).Final :=
@@ -244,15 +298,12 @@ namespace PointedEtale
 
 variable {R : Type u} [CommRing R] {K : Type u} [CommRing K] [Algebra R K]
 
-variable (R K) in
 
-noncomputable def diagram : PointedEtale R K ⥤ CommRingCat.{u} where
+variable (R K) in
+noncomputable def diagram (R : Type u) [CommRing R] (K : Type u) [CommRing K]
+    [Algebra R K] : PointedEtale R K ⥤ CommRingCat.{u} where
   obj X := CommRingCat.of X
   map f := CommRingCat.ofHom f.alg.toRingHom
-
-@[simp]
-theorem diagram_map_apply {X Y : PointedEtale R K} (f : X ⟶ Y) (x : X) :
-    (diagram R K).map f x = f.alg x := rfl
 
 end PointedEtale
 
@@ -263,10 +314,10 @@ variable (R : Type u) [CommRing R] (K : Type u) [Field K] [Algebra R K]
 open PointedEtale
 
 noncomputable def etaleColimit : CommRingCat.{u} :=
-  colimit (incl R K ⋙ diagram R K)
+  colimit (incl R K ⋙ diagram (R := R) (K := K))
 
-noncomputable def etaleCocone : Cocone (diagram R K) :=
-  Functor.Final.extendCocone.obj (colimit.cocone (incl R K ⋙ diagram R K))
+noncomputable def etaleCocone : Cocone (diagram (R := R) (K := K)) :=
+  Functor.Final.extendCocone.obj (colimit.cocone (incl R K ⋙ diagram (R := R) (K := K)))
 
 noncomputable def etaleCoconeIsColimit : IsColimit (etaleCocone R K) :=
   (Functor.Final.isColimitExtendCoconeEquiv _ _).symm (colimit.isColimit _)
@@ -282,10 +333,10 @@ theorem of_map {X Y : PointedEtale R K} (f : X ⟶ Y) (x : X) : of Y (f.alg x) =
   congr($((etaleCocone R K).w f) x)
 
 theorem exists_of (y : etaleColimit R K) : ∃ (X : PointedEtale R K) (x : X), of X x = y := by
-  obtain ⟨j, x, hx⟩ := Concrete.colimit_exists_rep (incl R K ⋙ diagram R K) y
+  obtain ⟨j, x, hx⟩ := Concrete.colimit_exists_rep (incl R K ⋙ diagram (R := R) (K := K)) y
   refine ⟨(incl R K).obj j, x, ?_⟩
-  have := Functor.Final.extendCocone_obj_ι_app' (G := diagram R K)
-    (colimit.cocone (incl R K ⋙ diagram R K)) (𝟙 ((incl R K).obj j))
+  have := Functor.Final.extendCocone_obj_ι_app' (G := diagram (R := R) (K := K))
+    (colimit.cocone (incl R K ⋙ diagram (R := R) (K := K))) (𝟙 ((incl R K).obj j))
   rw [← hx]
   change ((etaleCocone R K).ι.app ((incl R K).obj j)).hom x = _
   simp only [etaleCocone, this, CategoryTheory.Functor.map_id, Category.id_comp]
@@ -305,7 +356,7 @@ theorem exists_of_finset (s : Finset (etaleColimit R K)) :
     · obtain ⟨x, rfl⟩ := hX z hz
       exact ⟨(IsFiltered.leftToMax X Y).alg x, of_map _ _⟩
 
-noncomputable def ptCocone : Cocone (diagram R K) where
+noncomputable def ptCocone : Cocone (diagram (R := R) (K := K)) where
   pt := CommRingCat.of K
   ι := { app X := CommRingCat.ofHom X.pt.toRingHom
          naturality X Y f := by ext x; exact pt_alg f x }
@@ -318,8 +369,6 @@ theorem toK_of (X : PointedEtale R K) (x : X) : toK (of X x) = X.pt x :=
   congr($((etaleCoconeIsColimit R K).fac ptCocone X) x)
 
 noncomputable instance : Algebra R (etaleColimit R K) := (of (base : PointedEtale R K)).toAlgebra
-
-theorem algebraMap_eq_of_base : algebraMap R (etaleColimit R K) = of base := rfl
 
 @[simp]
 theorem toK_algebraMap (r : R) : toK (algebraMap R (etaleColimit R K) r) = algebraMap R K r :=
@@ -334,12 +383,6 @@ noncomputable def ofAlgHom (X : PointedEtale R K) : X →ₐ[R] etaleColimit R K
 
 @[simp]
 theorem ofAlgHom_apply (X : PointedEtale R K) (x : X) : ofAlgHom X x = of X x := rfl
-
-noncomputable def toKAlgHom : etaleColimit R K →ₐ[R] K :=
-  { toK with commutes' := fun r ↦ (toK_of base r).trans rfl }
-
-@[simp]
-theorem toKAlgHom_apply (y : etaleColimit R K) : toKAlgHom y = toK y := rfl
 
 theorem isUnit_of_toK_ne_zero {y : etaleColimit R K} (hy : toK y ≠ 0) : IsUnit y := by
   obtain ⟨X, x, rfl⟩ := exists_of y
@@ -358,14 +401,11 @@ instance : Nontrivial (etaleColimit R K) :=
 instance isLocalRing : IsLocalRing (etaleColimit R K) :=
   .of_nonunits_add fun a b ha hb ↦ by
     simp only [mem_nonunits_iff, isUnit_iff_toK_ne_zero, not_not] at ha hb ⊢
-    rw [map_add, ha, hb, add_zero]
+    rw [map_add (f := _), ha, hb, add_zero]
 
 theorem maximalIdeal_eq : maximalIdeal (etaleColimit R K) = RingHom.ker toK := by
   ext y
   rw [mem_maximalIdeal, mem_nonunits_iff, isUnit_iff_toK_ne_zero, not_not, RingHom.mem_ker]
-
-theorem residue_eq_zero_iff_toK_eq_zero (y : etaleColimit R K) : residue _ y = 0 ↔ toK y = 0 := by
-  rw [IsLocalRing.residue_eq_zero_iff, maximalIdeal_eq, RingHom.mem_ker]
 
 theorem exists_monic_lift (F : (etaleColimit R K)[X]) (hF : F.Monic) :
     ∃ (X : PointedEtale R K) (q : X[X]), q.Monic ∧ q.map (of X) = F := by
@@ -383,7 +423,7 @@ theorem exists_monic_lift (F : (etaleColimit R K)[X]) (hF : F.Monic) :
 
 theorem henselianLocalRing (hK : Function.Surjective (toK : etaleColimit R K →+* K)) :
     HenselianLocalRing (etaleColimit R K) := by
-  refine ((HenselianLocalRing.TFAE (etaleColimit R K)).out 0 2).2 ?_
+  refine ((HenselianLocalRing.TFAE (etaleColimit R K)).out 1 3).2 ?_
   intro K' _ φ hφ F hF a₀ h₁ h₂
 
   have hker : RingHom.ker φ = RingHom.ker toK := by
@@ -410,11 +450,11 @@ theorem henselianLocalRing (hK : Function.Surjective (toK : etaleColimit R K →
   · apply e.injective
     rw [he, toK_of, hbY]
 
-theorem of_incl_eq (j : Std R K) (a : (incl R K).obj j) :
-    of ((incl R K).obj j) a = (colimit.ι (incl R K ⋙ diagram R K) j).hom a := by
-  have h := Functor.Final.extendCocone_obj_ι_app' (colimit.cocone (incl R K ⋙ diagram R K))
+theorem of_incl_eq (j : PointedEtale.Std R K) (a : (incl R K).obj j) :
+    of ((incl R K).obj j) a = (colimit.ι (incl R K ⋙ diagram (R := R) (K := K)) j).hom a := by
+  have h := Functor.Final.extendCocone_obj_ι_app' (colimit.cocone (incl R K ⋙ diagram (R := R) (K := K)))
     (𝟙 ((incl R K).obj j))
-  change ((Functor.Final.extendCocone.obj (colimit.cocone (incl R K ⋙ diagram R K))).ι.app
+  change ((Functor.Final.extendCocone.obj (colimit.cocone (incl R K ⋙ diagram (R := R) (K := K)))).ι.app
     ((incl R K).obj j)).hom a = _
   rw [h]
   rfl
@@ -424,7 +464,7 @@ theorem exists_hom_eq_of_of_eq {X : PointedEtale R K} {x y : X} (h : of X x = of
   obtain ⟨j, ⟨e⟩⟩ := exists_hom_incl X
   rw [← of_map e x, ← of_map e y, of_incl_eq, of_incl_eq] at h
   obtain ⟨k, f, g, hfg⟩ :=
-    Concrete.colimit_exists_of_rep_eq (incl R K ⋙ diagram R K) (e.alg x) (e.alg y) h
+    Concrete.colimit_exists_of_rep_eq (incl R K ⋙ diagram (R := R) (K := K)) (e.alg x) (e.alg y) h
   refine ⟨(incl R K).obj (IsFiltered.coeq f g), e ≫ (incl R K).map (f ≫ IsFiltered.coeqHom f g), ?_⟩
   have h2 : ((incl R K).map (IsFiltered.coeqHom f g)).alg (((incl R K).map f).alg (e.alg x)) =
       ((incl R K).map (IsFiltered.coeqHom f g)).alg (((incl R K).map g).alg (e.alg y)) :=

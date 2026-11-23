@@ -1,7 +1,52 @@
-import Development.AutomorphicArithmetic.Foundations.Convolution.LocalGroupAnalysis.SplitEquiv
-import Development.AutomorphicArithmetic.Foundations.Convolution.LocalGroupAnalysis.NormEx
-import Development.AutomorphicArithmetic.Foundations.Convolution.LocalGroupAnalysis.QuotEq
-import Development.AutomorphicArithmetic.Foundations.Convolution.LocalGroupAnalysis.QuotOpen
+module
+
+public import Development.AutomorphicArithmetic.Foundations.Convolution.LocalGroupAnalysis.SplitEquiv
+public import Development.AutomorphicArithmetic.Foundations.Convolution.LocalGroupAnalysis.NormEx
+public import Development.AutomorphicArithmetic.Foundations.Convolution.LocalGroupAnalysis.QuotEq
+public import Development.AutomorphicArithmetic.Foundations.Convolution.LocalGroupAnalysis.QuotOpen
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open UpperTheory.ConvolutionTheory.G UpperTheory.ConvolutionTheory.T4
 open MeasureTheory
 open scoped ENNReal
@@ -17,8 +62,8 @@ theorem UpperTheory.quotient_haar_measure_pushforward :
   haveI : SecondCountableTopology U := TopologicalSpace.Subtype.secondCountableTopology (U : Set G)
   haveI : SecondCountableTopology (U.comap j) :=
     TopologicalSpace.Subtype.secondCountableTopology ((U.comap j : Subgroup T) : Set T)
-  haveI : BorelSpace U := Subtype.borelSpace (U : Set G)
-  haveI : BorelSpace (U.comap j) := Subtype.borelSpace ((U.comap j : Subgroup T) : Set T)
+  haveI : BorelSpace U := Subtype.borelSpace (fun x => x ∈ (U : Set G))
+  haveI : BorelSpace (U.comap j) := Subtype.borelSpace (fun x => x ∈ ((U.comap j : Subgroup T) : Set T))
   let i : U.comap j →* U := (j.comp (U.comap j).subtype).codRestrict U (fun t => t.2)
   have hi : ∀ t : U.comap j, (i t : G) = j t := fun _ => rfl
   obtain ⟨hPU, hO⟩ := quotOpen_of normEx quotEq G T μ j ν hP U hU i hi

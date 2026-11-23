@@ -1,6 +1,46 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EqSpMapEv
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.PluckerVectorBlockTriangularFrameChange
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FlagCellFrameChangeTriangular
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EqSpMapEv
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.PluckerVectorBlockTriangularFrameChange
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory TopologicalSpace Limits NumberField ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor Formalism.L2.Pj GlobalTheory.Reg GlobalTheory.FlagEmb GlobalTheory.ProjSpace GlobalTheory.FlagMod GlobalTheory.FlagMod.FieldFlag
 open GlobalTheory.FlagMod.LowRank (ECh Proj str)
 
@@ -51,7 +91,20 @@ theorem g_cellPt (hZ : Cells A π g κ) (ht : FlagCellFrameChangeTriangular hZ) 
     rintro f _ v _ hv rfl rfl
     exact ⟨hv, rfl⟩
   conv => enter [1, hu']; lhs; rw [← eq_spMap_ev k z hz]
-  rw [Category.assoc, e, spMap_pt]
+  rw [Category.assoc, e]
+  have hspan : Ideal.span (Set.range (φ ∘ plk (uvec (A.cv k.1) k.2) en.2.1)) = ⊤ := by
+    rw [Set.range_comp, ← Ideal.map_span, hu, Ideal.map_top]
+  letI : GradedAlgebra (MvPolynomial.homogeneousSubmodule (Fin (plN A.N en.1 + 1)) c.F) := MvPolynomial.gradedAlgebra
+  have hmap : spMap φ ≫ pt (MvPolynomial.C.comp ((A.alpha k.1).comp (RingHom.id c.F)))
+      (plk (uvec (A.cv k.1) k.2) en.2.1) hu =
+      pt (φ.comp (MvPolynomial.C.comp ((A.alpha k.1).comp (RingHom.id c.F))))
+        (φ ∘ plk (uvec (A.cv k.1) k.2) en.2.1)
+        hspan := by
+    refine (ProjPoint.SpecMap_ofHom _ _ _ φ).trans ?_
+    unfold pt
+    congr 1
+    exact MvPolynomial.ringHom_ext (fun r => by simp) (fun i => by simp)
+  rw [hmap]
   refine key _ _ _ _ _ (by rw [hstr]; rfl) ?_
   rw [map_plk]
   congr 1

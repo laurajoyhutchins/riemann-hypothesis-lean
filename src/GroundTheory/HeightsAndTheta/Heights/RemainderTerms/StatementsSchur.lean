@@ -1,8 +1,51 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.RemainderTerms.Statements
-import GroundTheory.HeightsAndTheta.Heights.RemainderTerms.JacobiTrudi
-import GroundTheory.HeightsAndTheta.Heights.RemainderTerms.AltCoeff
-import GroundTheory.HeightsAndTheta.Heights.KernelsRest
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.RemainderTerms.JacobiTrudi
+public import GroundTheory.HeightsAndTheta.Heights.RemainderTerms.AltCoeff
+public import GroundTheory.HeightsAndTheta.Heights.KernelsRest
+public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.RestTerms
@@ -20,7 +63,7 @@ def SchAltPartitionExpansion.Statement : Prop :=
   ∀ (r n : ℕ) (P : MvPolynomial (Fin r) ℚ), Comb.IsAlt P →
     P.IsHomogeneous (r * (r - 1) / 2 + n) →
     P = ∑ lam ∈ partitionsOf r n,
-      C (coeff (Finsupp.equivFunOnFinite.symm fun i : Fin r => lam i + (r - 1 - (i : ℕ))) P) *
+      C (AddMonoidAlgebra.coeff P (Finsupp.equivFunOnFinite.symm fun i : Fin r => lam i + (r - 1 - (i : ℕ)))) *
         (vandermondeOf (fun i : Fin r => (X i : MvPolynomial (Fin r) ℚ)) * schur (Fin r) lam)
 
 def rootOfUnity (k : ℕ) : ℂ := Complex.exp (2 * Real.pi * Complex.I / k)
@@ -63,7 +106,7 @@ def SchEvalPowerSumHom.Statement : Prop :=
   ∀ (N k : ℕ) (hk1 : 1 ≤ k) (hkN : k ≤ N) (S : MvPolynomial (Fin N) ℚ),
     S.IsWeightedHomogeneous (fun i : Fin N => (i : ℕ) + 1) k →
       aeval (rootOfUnityPoint N k) (powerSumHom N S) =
-        (k : ℂ) * ((coeff (Finsupp.single (⟨k - 1, by omega⟩ : Fin N) 1) S : ℚ) : ℂ)
+        (k : ℂ) * ((AddMonoidAlgebra.coeff S (Finsupp.single (⟨k - 1, by omega⟩ : Fin N) 1) : ℚ) : ℂ)
 
 def SchSchurHomogeneous.Statement : Prop :=
   ∀ (σ : Type) [Fintype σ] [DecidableEq σ] (r : ℕ) (lam : Fin r → ℕ),

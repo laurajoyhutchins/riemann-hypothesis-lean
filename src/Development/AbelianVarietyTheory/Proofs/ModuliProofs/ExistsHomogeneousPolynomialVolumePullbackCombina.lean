@@ -1,16 +1,62 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.ModuliSpaces.SectionsHaveFiniteDimension
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.UniformisationConclusion
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.HeckeKer
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsHolPeriods
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.UnifUniqSt
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.EventuallySectionAndRelAmplePowDivStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.ModuliSpaces.SectionsHaveFiniteDimension
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ClsLinCombSingle
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.SecBaseChangeAnySt
+public import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.ExistsKerIffMinors
+public import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.IsProjOverIffIsProperAndExistsIsAmpleLB
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.EventuallySectionAndRelAmplePowDivStatement
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsHomogeneousVolumeVeryAmpleProductsStatement
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.PolarizedAbelianAmpleExistsPositiveVolumeStatement
 import Development.AbelianVarietyTheory.Proofs.ModuliProofs.SectionsGrowthBasicPropertiesAbelianVarietyStatement
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.PolarizedAbelianAmpleExistsPositiveVolumeStatement
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsHomogeneousVolumeVeryAmpleProductsStatement
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ClsLinCombSingle
-import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.IsProjOverIffIsProperAndExistsIsAmpleLB
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExistsFinAffineCover
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExistsFinAffineCover
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Algebra.MvPolynomial
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 namespace GlobalTheory.VolPoly
 section Algebra
@@ -89,8 +135,8 @@ theorem squeeze {Φ : MvPolynomial κ ℝ} {g : ℕ} (hΦ : Φ.IsHomogeneous g) 
 
 variable {g : ℕ} {V : (I → ℤ) → ℝ → Prop} {Am VA Eff : (I → ℤ) → Prop}
 
-omit [Fintype I] in
 
+omit [Fintype I] in
 theorem eval_eq_of_ample
     (dom : ∀ x y, Am x → ∀ᶠ t : ℕ in atTop, Eff (t • x - y) ∧ Am (t • x - y))
     (va : ∀ x, Am x → ∃ d : ℕ, 1 ≤ d ∧ VA (d • x))
@@ -213,7 +259,8 @@ theorem exists_poly
     have n₀ : (d₀ : ℚ) ≠ 0 := by exact_mod_cast (by omega : d₀ ≠ 0)
     funext o
     rcases o with _ | i
-    · simp only [m, y, Option.elim, map_sum, map_mul, eval_C, eval_X]
+    · set_option synthInstance.maxHeartbeats 100000 in
+        simp only [m, y, Option.elim, map_sum, map_mul, eval_C, eval_X]
       push_cast
       rw [Finset.mul_sum, Finset.mul_sum, ← Finset.sum_neg_distrib]
       exact Finset.sum_congr rfl fun i _ => by field_simp
@@ -235,27 +282,66 @@ open GlobalTheory.ZV GlobalTheory.CechPic
 
 variable {X : Scheme.{0}} {L : LB X} {I : Type} [Fintype I]
 
+set_option backward.isDefEq.respectTransparency false in
 theorem lbIso_pow (hL : L.IsLB) (φ : I → (X ⟶ X)) (x : I → ℤ) (a : ℕ) :
     LBIso (lbPow (LB.LinComb L φ x) a) (LB.LinComb L φ (a • x)) := by
   have h := LB.isLB_linComb hL φ
-  refine (cls_eq_iff (LB.isLB_linComb (h x) _ _) (h _)).1 ?_
-  rw [cls_lbPow (h x), cls_linComb hL, cls_linComb hL, Finset.smul_sum]
-  exact Finset.sum_congr rfl fun i _ => by rw [Pi.smul_apply, smul_assoc]
+  apply LBIso.symm
+  refine iso_of_chart (LB.isLB_linComb (h x) _ _) ⟨fun j _ => j, fun _ _ hj => ?_, ?_⟩
+  · change _ ∈ L.wchart φ _ at hj
+    exact Set.mem_iInter.2 fun _ => by simpa [LB.LinComb] using hj
+  · intro z p q hp hq
+    change I → L.ι at p q
+    change z ∈ L.wchart φ p at hp
+    change z ∈ L.wchart φ q at hq
+    refine (gm_linComb L φ (a • x) (𝟙 X) z p q hp hq).trans ?_
+    refine Eq.symm ((gm_linComb (LB.LinComb L φ x) (fun _ : PUnit => 𝟙 X) (fun _ => (a : ℤ)) (𝟙 X) z _ _ (Set.mem_iInter.2 fun _ => by simpa [LB.LinComb] using hp) (Set.mem_iInter.2 fun _ => by simpa [LB.LinComb] using hq)).trans ?_)
+    simp only [Fintype.prod_unique]
+    rw [Category.id_comp]
+    change gm (𝟙 X) z (L.wchart φ p ⊓ L.wchart φ q) ((LB.LinComb L φ x).g p q) ^ (a : ℤ) = _
+    rw [gm_linComb L φ x (𝟙 X) z p q hp hq]
+    simp only [Pi.smul_apply, nsmul_eq_mul, zpow_mul]
+    rw [← Finset.prod_zpow]
+    apply Finset.prod_congr rfl
+    intro k hk
+    rw [← zpow_mul, ← zpow_mul, mul_comm]
 
+set_option backward.isDefEq.respectTransparency false in
 theorem lbIso_div (hL : L.IsLB) (φ : I → (X ⟶ X)) (x y : I → ℤ) :
     LBIso (LB.div (LB.LinComb L φ x) (LB.LinComb L φ y)) (LB.LinComb L φ (x - y)) := by
   have h := LB.isLB_linComb hL φ
-  refine (cls_eq_iff (LB.isLB_div (h x) (h y)) (h _)).1 ?_
-  rw [cls_div (h x) (h y), cls_linComb hL, cls_linComb hL, cls_linComb hL, ← Finset.sum_sub_distrib]
-  exact Finset.sum_congr rfl fun i _ => by rw [Pi.sub_apply, sub_smul]
+  apply LBIso.symm
+  refine iso_of_chart (LB.isLB_div (h x) (h y)) ⟨fun j => (j, j), fun _ _ hj => ⟨hj, hj⟩, ?_⟩
+  intro z p q hp hq
+  change I → L.ι at p q
+  change z ∈ L.wchart φ p at hp
+  change z ∈ L.wchart φ q at hq
+  refine (gm_linComb L φ (x - y) (𝟙 X) z p q hp hq).trans (Eq.symm ?_)
+  refine (gm_div' (LB.LinComb L φ x) (LB.LinComb L φ y) (𝟙 X) z (p, p) (q, q) ⟨hp, hp⟩ ⟨hq, hq⟩).trans ?_
+  dsimp only [Prod.fst, Prod.snd]
+  change gm (𝟙 X) z (L.wchart φ p ⊓ L.wchart φ q) ((LB.LinComb L φ x).g p q) *
+    (gm (𝟙 X) z (L.wchart φ p ⊓ L.wchart φ q) ((LB.LinComb L φ y).g p q))⁻¹ = _
+  rw [gm_linComb L φ x (𝟙 X) z p q hp hq, gm_linComb L φ y (𝟙 X) z p q hp hq]
+  simp only [Pi.sub_apply, zpow_sub, Finset.prod_mul_distrib, Finset.prod_inv_distrib]
 
+set_option backward.isDefEq.respectTransparency false in
 theorem lbIso_div_pow (hL : L.IsLB) (φ : I → (X ⟶ X)) (x y : I → ℤ) (a : ℕ) :
     LBIso (LB.div (lbPow (LB.LinComb L φ x) a) (LB.LinComb L φ y)) (LB.LinComb L φ (a • x - y)) := by
   have h := LB.isLB_linComb hL φ
   have hp : (lbPow (LB.LinComb L φ x) a).IsLB := LB.isLB_linComb (h x) _ _
-  refine (cls_eq_iff (LB.isLB_div hp (h y)) (h _)).1 ?_
-  rw [cls_div hp (h y), (cls_eq_iff hp (h _)).2 (lbIso_pow hL φ x a), ← cls_div (h _) (h y) (LB.isLB_div (h _) (h y))]
-  exact (cls_eq_iff _ _).2 (lbIso_div hL φ _ _)
+  have hc : LBIso (LB.div (lbPow (LB.LinComb L φ x) a) (LB.LinComb L φ y))
+      (LB.div (LB.LinComb L φ (a • x)) (LB.LinComb L φ y)) := by
+    have hd : (dual (LB.LinComb L φ y)).IsLB := {
+      cover := (h y).cover
+      g_self := fun i => by
+        have e := congrArg (·⁻¹) ((h y).g_self i)
+        simpa only [dual, inv_one, ← map_inv] using e
+      cocycle := fun i j k => by
+        have e := congrArg (·⁻¹) ((h y).cocycle i j k)
+        simpa only [dual, mul_inv, ← map_inv] using e }
+    have ht := tens_congr_left hd (lbIso_pow hL φ x a)
+    simpa only [tens_eq_div, dual, inv_inv, map_inv] using ht
+  exact LBIso.trans (LB.isLB_div hp (h y)) (LB.isLB_div (h _) (h y)) (h _) hc (lbIso_div hL φ _ _)
 
 theorem vAmp_of_veryAmpleBy {K : Type} [Field K] {p : X ⟶ Sp K} {m : ℕ} {s : Fin (m + 1) → L.Sec}
     (h : AbLaw.VeryAmpleBy p L s) : VAmp p L s := by

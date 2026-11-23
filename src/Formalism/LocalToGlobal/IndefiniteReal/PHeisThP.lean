@@ -1,5 +1,43 @@
-import Formalism.LocalToGlobal.IndefiniteReal.PHeisFC
-import Formalism.LocalToGlobal.IndefiniteReal.InjectiveDecompositionAction
+module
+
+public import Formalism.LocalToGlobal.IndefiniteReal.PHeisFC
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -18,26 +56,7 @@ def Co {D : D7} (V W : HSp D) (x : WA V W) (a : Ix V W) : AF D.host.F := Phi V W
 def CoordFinP : Prop :=
   ∀ (D : D7) (V W : HSp D) (x : WA V W), x.map (finPart D) = 0 → ∀ a, (Co V W x a).2 = 0
 
-def CoordInfP : Prop :=
-  ∀ (D : D7) (V W : HSp D) (x : WA V W), x.map (infPart D) = 0 → ∀ a, (Co V W x a).1 = 0
 
-def SymplCoordP : Prop :=
-  ∀ (D : D7) (V W : HSp D), ∃ c : Ix V W → Ix V W → D.host.F, ∀ x y : WA V W,
-    symplH V W x y = ∑ a, ∑ b, algebraMap D.host.F (AF D.host.F) (c a b) * Co V W x a * Co V W y b
-
-open scoped Classical in
-
-def SelP : Prop :=
-  ∀ (F : Type) [Field F] [NumberField F], ∃ r : ℝ, 0 < r ∧ ∀ (q q' : F) (x x' : AF F),
-    ‖eM F (algebraMap F (AF F) q + x).1‖ ≤ r → (algebraMap F (AF F) q + x).2 ∈ Ohat F →
-    ‖eM F (algebraMap F (AF F) q' + x').1‖ ≤ r → (algebraMap F (AF F) q' + x').2 ∈ Ohat F →
-    ‖eM F (x' - x).1‖ < r → (x' - x).2 ∈ Ohat F → q = q'
-
-open scoped Classical in
-
-def BumpP : Prop :=
-  ∀ (F : Type) [Field F] [NumberField F] (r : ℝ), 0 < r → ∃ b : mixedEmbedding.mixedSpace F → ℝ,
-    ContDiff ℝ ∞ b ∧ b 0 ≠ 0 ∧ ∀ y, b y ≠ 0 → ‖y‖ ≤ r
 
 def PsiOpenP : Prop :=
   ∀ (F : Type) [Field F] [NumberField F] (ψ : AddChar (AF F) ℂ), IsCharAF F ψ →
@@ -48,9 +67,6 @@ def PsiSmoothP : Prop :=
   ∀ (D : D7) (ψ : AddChar (AF D.host.F) ℂ), IsStdChar D ψ (-1) →
     ∀ (k : ℕ) (s : (Fin k → ℝ) →+ Ainf D.host.F), Continuous s →
       ContDiff ℝ ∞ fun t => ψ (pairA D.host.F (s t) 0)
-
-def ThetaNZStd : Prop :=
-  ∀ (D : D7) (ψ : AddChar (AF D.host.F) ℂ) (V W : HSp D), IsStdChar D ψ (-1) → Formalism.IndefR.InjectiveDecompositionAction.ThetaNZ ψ V W
 
 end Formalism.IndefR.PHeisTh
 

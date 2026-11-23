@@ -1,5 +1,51 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.OmegaFactorization
+public import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.IsHolFormConst
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
 import Development.AbelianVarietyTheory.Definitions.Divisors.JetAnalytic
+import Development.AbelianVarietyTheory.Definitions.Divisors.TorsTransport
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -89,63 +135,5 @@ theorem pairPt_ne_zero (𝔞 𝔟 : Frac F) (c : Quotient (qRel 𝔞 𝔟)) : pa
   have := c.out.2.2.2 hr.embedding
   rw [h', map_zero] at this
   exact lt_irrefl _ this
-
-theorem eisFourier : EisFourier := by
-  classical
-  intro F _ _ _ 𝔞 𝔟 k _ G hG
-  obtain ⟨Z, hZ, hE⟩ := hG
-  set C : ℂ := (2 : ℂ)⁻¹ ^ Module.finrank ℚ F * Z (1 - (k : ℂ)) with hC
-  set a' : GlobalTheory.RealMult.FracId.elt (𝔞 * 𝔟) → ℂ :=
-    fun ξ ↦ ∑' c : pairPt 𝔞 𝔟 ⁻¹' {ξ}, (pairCoef 𝔞 𝔟 k c : ℂ) with ha'
-  have hfib : ∀ (z : Emb F → ℂ) (ξ : GlobalTheory.RealMult.FracId.elt (𝔞 * 𝔟)) (c : pairPt 𝔞 𝔟 ⁻¹' {ξ}),
-      qClass 𝔞 𝔟 k z c = (pairCoef 𝔞 𝔟 k c : ℂ) * GlobalTheory.RealMult.qPower (ξ : F) z := by
-    rintro z ξ ⟨c, hc⟩
-    rw [Set.mem_preimage, Set.mem_singleton_iff] at hc
-    rw [qClass_eq, hc]
-  refine ⟨Z, fun ξ ↦ a' ξ + if ξ = 0 then C else 0, hZ, ?_, ?_, ?_⟩
-  · intro z hz
-    obtain ⟨hs, heq⟩ := hE z hz
-    have h1 := hs.hasSum.tsum_fiberwise (pairPt 𝔞 𝔟)
-    have h2 : (fun ξ ↦ ∑' c : pairPt 𝔞 𝔟 ⁻¹' {ξ}, qClass 𝔞 𝔟 k z c) =
-        fun ξ ↦ a' ξ * GlobalTheory.RealMult.qPower (ξ : F) z := by
-      funext ξ
-      rw [ha', ← tsum_mul_right]
-      exact tsum_congr (hfib z ξ)
-    rw [h2] at h1
-    have h3 : HasSum (fun ξ : GlobalTheory.RealMult.FracId.elt (𝔞 * 𝔟) ↦
-        (if ξ = 0 then C else 0) * GlobalTheory.RealMult.qPower (ξ : F) z) C := by
-      convert hasSum_ite_eq (0 : GlobalTheory.RealMult.FracId.elt (𝔞 * 𝔟)) C using 1
-      funext ξ
-      split_ifs with h
-      · subst h; simp [GlobalTheory.RealMult.qPower]
-      · simp
-    have hv : (cK F k : ℂ) * G z / (omegaFactor 𝔞 : ℂ) ^ k =
-        (∑' c, qClass 𝔞 𝔟 k z c) + C := by rw [heq]; ring
-    show HasSum (fun ξ : GlobalTheory.RealMult.FracId.elt (𝔞 * 𝔟) ↦
-      (a' ξ + if ξ = 0 then C else 0) * GlobalTheory.RealMult.qPower (ξ : F) z) ((cK F k : ℂ) * G z / (omegaFactor 𝔞 : ℂ) ^ k)
-    rw [hv]
-    simp only [add_mul]
-    exact h1.add h3
-  · show a' 0 + (if (0 : GlobalTheory.RealMult.FracId.elt (𝔞 * 𝔟)) = 0 then C else 0) = C
-    rw [if_pos rfl]
-    have : IsEmpty (pairPt 𝔞 𝔟 ⁻¹' {0}) :=
-      ⟨fun ⟨c, hc⟩ ↦ pairPt_ne_zero 𝔞 𝔟 c (Set.mem_singleton_iff.1 (Set.mem_preimage.1 hc))⟩
-    rw [ha']
-    simp only [tsum_empty, zero_add]
-  · intro ξ hξ
-    set z₀ : Emb F → ℂ := fun _ ↦ Complex.I
-    have hz₀ : z₀ ∈ upperHalf F := fun _ ↦ by simp [z₀]
-    have hq : GlobalTheory.RealMult.qPower (ξ : F) z₀ ≠ 0 := Complex.exp_ne_zero _
-    have hsum : Summable (fun c : pairPt 𝔞 𝔟 ⁻¹' {ξ} ↦ (pairCoef 𝔞 𝔟 k c : ℂ)) := by
-      have := ((hE z₀ hz₀).1.subtype (pairPt 𝔞 𝔟 ⁻¹' {ξ})).mul_right (GlobalTheory.RealMult.qPower (ξ : F) z₀)⁻¹
-      refine this.congr fun c ↦ ?_
-      simp only [Function.comp_apply]
-      rw [hfib z₀ ξ c, mul_assoc, mul_inv_cancel₀ hq, mul_one]
-    obtain ⟨m, hm⟩ := tsum_natCast_eq _ hsum
-    refine ⟨m, ?_⟩
-    show a' ξ + (if ξ = 0 then C else 0) = _
-    rw [if_neg hξ, add_zero, ha']
-    simp only [hm]
-    simp
 
 end GlobalTheory.PairFourier

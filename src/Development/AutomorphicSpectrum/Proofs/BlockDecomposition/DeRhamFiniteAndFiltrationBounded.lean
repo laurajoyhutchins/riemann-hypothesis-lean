@@ -1,22 +1,55 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.GlobalSerreRelations.GlobSerreSt
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsChartFromCoordinatesStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FilteredCohomologyRestrictionBijectiveStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CechRefinementCohomologyBijectiveStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CohomologyVanishingAlongIdealFiltrationStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FiniteModulesSerreClassStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SerreClassOfCechSpectralSequenceStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.AffineCoverCohomologyFiniteStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.AffineCoverHigherCohomologyVanishesStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CechVanishingFromCoverStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsSmoothCoordinateCoverStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CoordinatesRestrictAffineOpenStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ChartIsGoodStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ChartDividedPowersGradedConstantStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SheafFiltrationPropertyStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FlatBaseChangeCohomologyStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.InOpenOfThickeningMorphismStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.InOpenFiniteInfIffStatement
+module
+
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.GlobalSerreRelations.GlobSerreSt
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsSmoothCoordinateCoverStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FiniteModulesSerreClassStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.InOpenFiniteInfIffStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SheafFiltrationPropertyStatement
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.CechPairings.MapHComp
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.CechPairings.MemBoundariesZeroIff
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 set_option backward.isDefEq.respectTransparency false
 open CategoryTheory AlgebraicGeometry TensorProduct GlobalTheory.LogCris DividedPowers CrystallineSemistableComparison CrystallineSemistableComparison.Pb
 
@@ -149,13 +182,13 @@ theorem toSq_comp (a b c : IdF A) (ha : ∀ T, a.S T = ⊤) (hcb : ∀ T, c.S T 
 
 end Gen
 
-theorem tfBase (K : Type) [Field K] [CharZero K] (s : ℕ) (hs : 0 < s) : TFBase (dividedPowersBot K) 1 s where
-  nil := by
-    refine Ideal.span_eq_bot.2 ?_
+theorem tfBase (K : Type) [Field K] [CharZero K] (s : ℕ) (hs : 0 < s) : TFBase (dividedPowersBot K) 1 s := by
+  refine ⟨?_, ?_, ?_⟩
+  · refine Ideal.span_eq_bot.2 ?_
     rintro _ ⟨l, hl, hr, rfl⟩
     have : ∃ q ∈ l, q.1 ≠ 0 := by
       by_contra hc
-      push_neg at hc
+      push Not at hc
       have : (l.map Prod.fst).sum = 0 := by
         refine List.sum_eq_zero ?_
         intro x hx
@@ -167,8 +200,10 @@ theorem tfBase (K : Type) [Field K] [CharZero K] (s : ℕ) (hs : 0 < s) : TFBase
     have e : q.2 = 0 := (Ideal.mem_bot).1 (hl q hq)
     rw [e]
     exact DividedPowers.dpow_eval_zero _ h0
-  tf r x h := by simpa using h
-  dv n hn := ⟨0, (n : K)⁻¹, by simp [Nat.cast_ne_zero.2 hn]⟩
+  · intro r x h
+    simpa using h
+  · intro n hn
+    exact ⟨0, (n : K)⁻¹, by simp [Nat.cast_ne_zero.2 hn]⟩
 
 end GlobalTheory.CompanionTheory.KFin
 
@@ -203,7 +238,7 @@ theorem gr_van (hVan : KH.GlobVanSt) (hAff : KH.GrAff) [Smooth q] (U : Cov q) (s
   (hVan (sq (thFil (smFun X q) r) (thFil (smFun X q) ((r : ℤ) + 1))) (TF 1 s) U.U r).1
     (fun S hS j' hj' => hAff q _ (U.inter S hS) s r j' hr (by omega)) j hj
 
-set_option maxHeartbeats 2000000 in
+
 theorem gr_fin (hSerre : KH.GlobSerreSt) (hAff : KH.GrAff) (hCech : KH.GrCechFin) [IsProper q] [Smooth q] (U : Cov q)
     (s : ℕ) (hs : 0 < s) (𝒮 : Serre.{1} K) (h𝒮 : ∀ (M : Type 1) [AddCommGroup M] [Module K M], 𝒮.P M ↔ Module.Finite K M)
     (r : ℕ) (hr : r < s) (n : ℕ) : 𝒮.P (HQ (KS q s (Set.range U.U)) r ((r : ℤ) + 1) n) := by

@@ -1,4 +1,49 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.TraceFormula.GL4GeometricSide.InnerEq
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.TraceFormula.GL4GeometricSide.InnerEq
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.CoassocSimps
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open UpperTheory.V.Z.GSp4Splitting PositivityTheory.RgBcC PositivityTheory.RgBcC.RealD PositivityTheory.Rg.BcB.Desc
 open scoped InnerProductSpace
@@ -16,7 +61,7 @@ private theorem capp {a b : Module.End ℂ U} (h : Commute a b) (x : U) : a (b x
 
 private def fixS (e : ι → Module.End ℂ U) (s : Finset ι) : Submodule ℂ U where
   carrier := {x | ∀ i ∈ s, e i x = x}
-  add_mem' {x y} hx hy i hi := by rw [map_add, hx i hi, hy i hi]
+  add_mem' {x y} hx hy i hi := by rw [map_add (f := _), hx i hi, hy i hi]
   zero_mem' i _ := map_zero _
   smul_mem' c x hx i hi := by rw [map_smul, hx i hi]
 
@@ -36,7 +81,7 @@ private theorem compress [Nontrivial U] (A : ι → Subalgebra ℂ (Module.End �
     intro i y hy
     let K : Submodule ℂ U :=
       { carrier := {z | ∀ a ∈ A i, e i (a z) = 0}
-        add_mem' := fun {x z} hx hz a ha => by rw [map_add, map_add, hx a ha, hz a ha, add_zero]
+        add_mem' := fun {x z} hx hz a ha => by rw [map_add (f := _), map_add (f := _), hx a ha, hz a ha, add_zero]
         zero_mem' := fun a _ => by rw [map_zero, map_zero]
         smul_mem' := fun c x hx a ha => by rw [map_smul, map_smul, hx a ha, smul_zero] }
     have hKs := hs K (fun j b hb x hx a ha => by
@@ -117,7 +162,7 @@ private theorem trOn_map (S : Submodule ℂ F) {f : Module.End ℂ U} {g : Modul
       exact ⟨g x, H x hx, h x⟩
   unfold trOn
   by_cases H : ∀ x ∈ S, g x ∈ S
-  · rw [dif_pos H, dif_pos (hiff.2 H),
+  · rw [dite_eq_left H, dite_eq_left (hiff.2 H),
       ← LinearMap.trace_conj' _ (Submodule.equivMapOfInjective F.subtype F.injective_subtype S).symm]
     congr 1
     ext x
@@ -125,19 +170,19 @@ private theorem trOn_map (S : Submodule ℂ F) {f : Module.End ℂ U} {g : Modul
     have : (f.restrict (hiff.2 H)) (Submodule.equivMapOfInjective F.subtype F.injective_subtype S x) =
         Submodule.equivMapOfInjective F.subtype F.injective_subtype S (g.restrict H x) := Subtype.ext (h x).symm
     rw [this, LinearEquiv.symm_apply_apply]
-  · rw [dif_neg H, dif_neg fun H' => H (hiff.1 H')]
+  · rw [dite_eq_right H, dite_eq_right fun H' => H (hiff.1 H')]
 
 private theorem trOn_self {f : Module.End ℂ U} {g : Module.End ℂ F}
     (h : ∀ x, (g x : U) = f x) : trOn F f = LinearMap.trace ℂ F g := by
   have H : ∀ x ∈ F, f x ∈ F := fun x hx => h ⟨x, hx⟩ ▸ (g ⟨x, hx⟩).2
   unfold trOn
-  rw [dif_pos H]
+  rw [dite_eq_left H]
   congr 1
   ext x
   exact (h x).symm
 
-variable (F) in
 
+variable (F) in
 private def resAlg (B : Subalgebra ℂ (Module.End ℂ U)) : Subalgebra ℂ (Module.End ℂ F) where
   carrier := {g | ∃ b ∈ B, ∀ x, (g x : U) = b x}
   mul_mem' := by

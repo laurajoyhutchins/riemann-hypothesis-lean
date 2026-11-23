@@ -1,5 +1,54 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.DiscreteModules.IsDiscreteRepIffForallExistsOpenNormalSubgroup
+module
+
+public import GroundTheory.ProfiniteCohomology.DiscreteModules.IsDiscreteRepIffForallExistsOpenNormalSubgroup
+public import Mathlib.Topology.LocallyConstant.Algebra
+public import Mathlib.Algebra.Homology.ShortComplex.ModuleCat
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
@@ -60,33 +109,6 @@ noncomputable def coindEval : LocallyConstant G X →ₗ[k] X where
   map_add' _ _ := rfl
   map_smul' _ _ := rfl
 
-omit [IsTopologicalGroup G] in
-@[simp]
-theorem coindEval_apply (f : LocallyConstant G X) : coindEval k G X f = f 1 :=
-  rfl
-
-noncomputable def invariantsDiscreteCoindEquiv :
-    (discreteCoindRep k G X).invariants ≃ₗ[k] X where
-  toFun f := (f : LocallyConstant G X) 1
-  invFun x := ⟨LocallyConstant.const G x, fun _ => rfl⟩
-  map_add' _ _ := rfl
-  map_smul' _ _ := rfl
-  left_inv f := Subtype.ext <| LocallyConstant.ext fun x => by
-    have h := congrArg (fun φ : LocallyConstant G X => φ 1) (f.2 x)
-    simp only [discreteCoindRep_apply, one_mul] at h
-    simp [h]
-  right_inv _ := rfl
-
-@[simp]
-theorem invariantsDiscreteCoindEquiv_apply (f : (discreteCoindRep k G X).invariants) :
-    invariantsDiscreteCoindEquiv k G X f = (f : LocallyConstant G X) 1 :=
-  rfl
-
-@[simp]
-theorem invariantsDiscreteCoindEquiv_symm_apply (x : X) :
-    ((invariantsDiscreteCoindEquiv k G X).symm x : LocallyConstant G X) =
-      LocallyConstant.const G x :=
-  rfl
 
 section Embedding
 
@@ -99,18 +121,13 @@ noncomputable def coindEmbedding (A : Rep.{u} k G) [IsDiscreteRep A] : A ⟶ dis
       map_smul' := fun r a => LocallyConstant.ext fun g => map_smul (A.ρ g) r a
       isIntertwining' := fun h => LinearMap.ext fun a => LocallyConstant.ext fun x => by
         change A.ρ x (A.ρ h a) = A.ρ (x * h) a
-        rw [map_mul, Module.End.mul_apply] }
-
-@[simp]
-theorem coindEmbedding_hom_apply (A : Rep.{u} k G) [IsDiscreteRep A] (a : A) (g : G) :
-    ((coindEmbedding A).hom a : LocallyConstant G A) g = A.ρ g a :=
-  rfl
+        rw [map_mul, mul_apply_eq_comp] }
 
 @[simp]
 theorem coindEval_coindEmbedding (A : Rep.{u} k G) [IsDiscreteRep A] (a : A) :
     coindEval k G A ((coindEmbedding A).hom a) = a := by
   change A.ρ 1 a = a
-  rw [map_one, Module.End.one_apply]
+  rw [map_one, one_apply_eq_self]
 
 theorem coindEmbedding_injective (A : Rep.{u} k G) [IsDiscreteRep A] :
     Function.Injective (coindEmbedding A).hom :=
@@ -122,10 +139,6 @@ instance (A : Rep.{u} k G) [IsDiscreteRep A] : Mono (coindEmbedding A) :=
 noncomputable def coindEmbeddingRange (A : Rep.{u} k G) [IsDiscreteRep A] :
     Submodule k (LocallyConstant G A) :=
   LinearMap.range (coindEmbedding A).hom.toLinearMap
-
-theorem mem_coindEmbeddingRange (A : Rep.{u} k G) [IsDiscreteRep A] (f : LocallyConstant G A) :
-    f ∈ coindEmbeddingRange A ↔ ∃ a : A, (coindEmbedding A).hom a = f :=
-  Iff.rfl
 
 theorem coindEmbeddingRange_le_comap (A : Rep.{u} k G) [IsDiscreteRep A] (g : G) :
     coindEmbeddingRange A ≤ (coindEmbeddingRange A).comap ((discreteCoind k G A).ρ g) := by
@@ -153,44 +166,17 @@ noncomputable def coindShortComplex (A : Rep.{u} k G) [IsDiscreteRep A] :
   ShortComplex.mk (coindEmbedding A) (coindCokernelπ A) (coindEmbedding_comp_coindCokernelπ A)
 
 theorem coindShortComplex_shortExact (A : Rep.{u} k G) [IsDiscreteRep A] :
-    (coindShortComplex A).ShortExact where
-  exact := by
-    rw [← ShortComplex.exact_map_iff_of_faithful _ (forget₂ (Rep.{u} k G) (ModuleCat.{u} k)),
+    (coindShortComplex A).ShortExact := by
+  apply ShortComplex.ShortExact.mk'
+  · rw [← ShortComplex.exact_map_iff_of_faithful _ (forget₂ (Rep.{u} k G) (ModuleCat.{u} k)),
       ShortComplex.moduleCat_exact_iff]
     intro f hf
     change Submodule.Quotient.mk (p := coindEmbeddingRange A) f = 0 at hf
     obtain ⟨a, ha⟩ := (Submodule.Quotient.mk_eq_zero _).1 hf
     exact ⟨a, ha⟩
-  mono_f := by
-    change Mono (coindEmbedding A)
+  · change Mono (coindEmbedding A)
     infer_instance
-  epi_g := (Rep.epi_iff_surjective _).2 (Submodule.mkQ_surjective _)
-
-noncomputable def coindCokernelSection (A : Rep.{u} k G) [IsDiscreteRep A] :
-    (LocallyConstant G A ⧸ coindEmbeddingRange A) →ₗ[k] LocallyConstant G A :=
-  (coindEmbeddingRange A).liftQ
-    (LinearMap.id - (coindEmbedding A).hom.toLinearMap ∘ₗ coindEval k G A) <| by
-      rintro _ ⟨a, rfl⟩
-      rw [LinearMap.mem_ker]
-      change (coindEmbedding A).hom a -
-        (coindEmbedding A).hom (coindEval k G A ((coindEmbedding A).hom a)) = 0
-      rw [coindEval_coindEmbedding, sub_self]
-
-theorem coindCokernelSection_mk (A : Rep.{u} k G) [IsDiscreteRep A] (f : LocallyConstant G A) :
-    coindCokernelSection A (Submodule.Quotient.mk f) =
-      f - (coindEmbedding A).hom (coindEval k G A f) :=
-  rfl
-
-theorem coindCokernelπ_coindCokernelSection (A : Rep.{u} k G) [IsDiscreteRep A]
-    (c : LocallyConstant G A ⧸ coindEmbeddingRange A) :
-    (coindCokernelπ A).hom (coindCokernelSection A c) = c := by
-  induction c using Submodule.Quotient.induction_on with
-  | H f =>
-    rw [coindCokernelSection_mk]
-    change Submodule.Quotient.mk _ = Submodule.Quotient.mk _
-    rw [Submodule.Quotient.mk_sub,
-      (Submodule.Quotient.mk_eq_zero _).2
-        ((mem_coindEmbeddingRange A _).2 ⟨coindEval k G A f, rfl⟩), sub_zero]
+  · exact (Rep.epi_iff_surjective _).2 (Submodule.mkQ_surjective _)
 
 end Embedding
 

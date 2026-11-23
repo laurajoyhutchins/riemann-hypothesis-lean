@@ -1,21 +1,60 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.IwahoriHeckeInjectivity.HeckeInj
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.IwahoriHeckeInjectivity.IdempotentTraces.NormOfSplit
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.IwahoriHeckeInjectivity.IdempotentTraces.SwapAt
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.IwahoriHeckeInjectivity.IdempotentTraces.GalLoc
-import Development.AutomorphicArithmetic.Foundations.Convolution.TraceSplitting.CarryLift
-import Development.AutomorphicArithmetic.Foundations.Convolution.TraceSplitting.Places
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.IwahoriHeckeInjectivity.HeckeInj
+import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.ResMapBijective
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.IwahoriHeckeInjectivity.IdempotentTraces.GalLoc
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.IwahoriHeckeInjectivity.IdempotentTraces.NormOfSplit
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.IwahoriHeckeInjectivity.IdempotentTraces.SwapAt
+public import Development.AutomorphicArithmetic.Foundations.Convolution.CentreSplitting.CuspidalMultiplicityOneTotallyComplex
 import Development.AutomorphicArithmetic.Foundations.Convolution.CentreSplitting.ExCusp
 import Development.AutomorphicArithmetic.Foundations.Convolution.CentreSplitting.ExSummand
-import Development.AutomorphicArithmetic.Foundations.Convolution.CentreSplitting.NormIff
-import Development.AutomorphicArithmetic.Foundations.Convolution.CentreSplitting.ConjIff
-import Development.AutomorphicArithmetic.Foundations.Convolution.CentreSplitting.TwSummand
-import Development.AutomorphicArithmetic.Foundations.Convolution.CentreSplitting.CuspidalMultiplicityOneTotallyComplex
-import Development.AutomorphicArithmetic.Foundations.Convolution.CentreSplitting.SSatIff
+public import Development.AutomorphicArithmetic.Foundations.Convolution.CentreSplitting.NormIff
+public import Development.AutomorphicArithmetic.Foundations.Convolution.CentreSplitting.ParEx
 import Development.AutomorphicArithmetic.Foundations.Convolution.CentreSplitting.SInfIff
-import Development.AutomorphicArithmetic.Foundations.Convolution.CentreSplitting.ParEx
-import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.GalTwistExAlt
+import Development.AutomorphicArithmetic.Foundations.Convolution.CentreSplitting.SSatIff
+public import Development.AutomorphicArithmetic.Foundations.Convolution.CentreSplitting.TwSummand
 import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.QmapPres
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.EmbTwo
+public import Development.AutomorphicArithmetic.Foundations.Convolution.TraceSplitting.CarryLift
+import Development.AutomorphicArithmetic.Foundations.Convolution.TraceSplitting.Places
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.EmbTwo
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.AdicCompletion.Noetherian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import PositivityTheory.AutomorphicForms.PublishedInputs.CyclicBaseChange.PSConjSpaceR
+
+@[expose] public section
 
 open MeasureTheory NumberField IsDedekindDomain Filter Topology
 open GroundTheory.Automorphic GroundTheory.Automorphic.Reduction GroundTheory.Automorphic.RightCosetSpace
@@ -63,7 +102,7 @@ private theorem unr_of_split {K M : Type} [Field K] [NumberField K] [Field M] [N
     rw [← (LinearEquiv.ofBijective _ hb).finrank_eq, Module.finrank_self]
   exact Algebra.isUnramifiedAt_iff_of_isDedekindDomain.2 (Nat.eq_one_of_mul_eq_one_right h1)
 
-private theorem sat_iff {M : Type} [Field M] [NumberField M] [IsTotallyComplex M] {n : ℕ} {μ : Measure (G1 M n)} [μ.IsHaarMeasure]
+private theorem sat_iff {M : Type} [Field M] [NumberField M] [_root_.NumberField.IsTotallyComplex M] {n : ℕ} {μ : Measure (G1 M n)} [μ.IsHaarMeasure]
     {π : CuspSub M n} {V : Submodule ℂ (L2 μ)} (h : Dp.Carries μ π V) (w : Pl M) (B : Multiset ℂˣ) :
     (CG.mk π).HasSat w B ↔ SSat μ V w (B.map fun b : ℂˣ => (b : ℂ)) := by
   rw [Dp.sSatIff M n μ π V h w]
@@ -73,7 +112,7 @@ private theorem sat_iff {M : Type} [Field M] [NumberField M] [IsTotallyComplex M
     rw [Multiset.map_injective Units.val_injective e]
     exact hB
 
-private theorem exAt {E : Type} [Field E] [NumberField E] [IsTotallyComplex E] {n : ℕ} (hn : 0 < n) {μ : Measure (G1 E n)}
+private theorem exAt {E : Type} [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] {n : ℕ} (hn : 0 < n) {μ : Measure (G1 E n)}
     [μ.IsHaarMeasure] {V : Submodule ℂ (L2 μ)} (hV : IsSummand μ V) (S : Set (Pl E)) (h : ∀ w ∉ S, ∃ B, SSat μ V w B) :
     ∃ m B, At μ S V m B := by
   choose m hm using fun τ => ((Dp.parEx E n hn μ V hV).1 τ).exists
@@ -169,10 +208,18 @@ theorem UpperTheory.V.Z.InvariantSubmoduleMonicPolynomial.E.indNorm :
       obtain ⟨C₁, e₁, c₁⟩ := (Dp.sSatIff M 2 _ π τ₁ hτ₁ w _).1 (hA₁.2 w hwS)
       obtain ⟨C₂, e₂, c₂⟩ := (Dp.sSatIff M 2 _ π' τ₂ hτ₂ w _).1 (hA₂.2 w hwS)
       obtain ⟨C₃, e₃, c₃⟩ := (Dp.sSatIff K (2 + 2) _ P V hP _ _).1 (hA₃.2 _ hw₃)
-      have hq : 1 < Formalism.ConjugateSelfDual.normV (w.under (𝓞 K)) := NumberField.HeightOneSpectrum.one_lt_absNorm _
+      have hnorm : ∀ {F : Type} [Field F] [NumberField F] (v : HeightOneSpectrum (𝓞 F)),
+          Formalism.ConjugateSelfDual.normV v = Ideal.absNorm v.asIdeal := by
+        intro F _ _ v
+        rw [Formalism.ConjugateSelfDual.normV, Ideal.absNorm_apply, Submodule.cardQuot_apply]
+      have hq : 1 < Formalism.ConjugateSelfDual.normV (w.under (𝓞 K)) := by
+        rw [hnorm]
+        exact NumberField.HeightOneSpectrum.one_lt_absNorm _
       have hfr : f = resDeg K w := by
         have hpl : Formalism.ConjugateSelfDual.normV w = Formalism.ConjugateSelfDual.normV (w.under (𝓞 K)) ^ resDeg K w :=
-          (UpperTheory.ConvolutionTheory.T.places K M hp).2.2.2.2.1 w
+          by
+            rw [hnorm, hnorm]
+            exact (UpperTheory.ConvolutionTheory.T.places K M hp).2.2.2.2.1 w
         exact Nat.pow_right_injective hq (hf.symm.trans hpl)
       refine ⟨C₃, c₃, ![C₁, C₂], ?_, ?_⟩
       · intro i
@@ -182,7 +229,7 @@ theorem UpperTheory.V.Z.InvariantSubmoduleMonicPolynomial.E.indNorm :
       · apply Multiset.map_injective Units.val_injective
         rw [Fin.sum_univ_two]
         simp only [Matrix.cons_val_zero, Matrix.cons_val_one]
-        rw [Multiset.map_add, ← e₁, ← e₂, hw₁, bcSat, e₃, hfr]
+        rw [Multiset.map_add (f := _), ← e₁, ← e₂, hw₁, bcSat, e₃, hfr]
         simp [Multiset.map_map, Function.comp_def]
   · intro τ τ' m m' hne' hk hm hm'
     have e1 : m₁ τ = m := ((Dp.parEx M 2 two_pos _ τ₁ hs₁).1 τ).unique (hA₁.1 τ) ((Dp.sInfIff M 2 _ π τ₁ hτ₁ τ m).2 hm)

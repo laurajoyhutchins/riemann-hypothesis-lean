@@ -1,15 +1,61 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.LamRange
-import ReciprocityTheory.AnalyticForms.RegularLocalRings.FinalTheorems
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DiagonalEndOfEighthPowerOfPolAVPullback
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LineBundleSymmetryHypothesisOfPolAVPullback
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsNormalisationModelFiniteExtension
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsArithBaseFiniteContainingRootOfUnity
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.E8ThetaSetupGenericPointExists
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SharpPolarizationPullbackStable
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.IsFractionRingOfForallDiv
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsThetaSystemOfPolarisedLevel
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsSymplecticLevelGenericFibreGaloisExtension
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.TwoWeightEqOneAddRoot
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.BaseOver
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ThickTransComp
+public import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.AbelianSchemeLawsWithoutCohomology
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.IsFractionRingOfForallDiv
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsSymplecticLevelGenericFibreGaloisExtension
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Sites.Fpqc
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.ExtremalEpi
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.BCTools
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.IsNatDiagIffIsDiag
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.SumMulEqZeroOfSumToReal
+import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsUnifOfIsMumfordOf
+import Development.AbelianVarietyTheory.Definitions.Divisors.FromBase
+import Development.AbelianVarietyTheory.Definitions.Divisors.IsProperToroidalModelStructureMap
+import Development.AbelianVarietyTheory.Definitions.Divisors.IsUnimodMod
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HomExtNormalSt
+import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.SiegelToroidalIntegral
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj IsLocalRing
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Out ReciprocityTheory.ChartRestriction.G.Geo.Tor
@@ -158,11 +204,11 @@ theorem exists_level_primePower : ∀ {Ω₁ : Type} [Field Ω₁] [CharZero Ω�
       let k : Over.mk (spMap τ ≫ spMap ((algebraMap F L).comp emb)) ⟶ Over.mk (spMap ((algebraMap F L).comp emb)) :=
         Over.homMk (spMap τ) rfl
       obtain ⟨y, hy⟩ := hsec _ _ (k ≫ z) (by rw [← MonObj.comp_pow, pow_mul, hz, one_pow, MonObj.comp_one])
-      refine ⟨spMap emb ≫ y.left, spec_map_field_cancel τ _ _ ?_⟩
-      have hy' : (spMap τ ≫ spMap ((algebraMap F L).comp emb)) ≫ y.left = spMap τ ≫ z.left :=
-        congrArg CommaMorphism.left hy
-      rw [← hy', hs]
-      simp only [Category.assoc])
+      exact ⟨spMap emb ≫ y.left, (cancel_epi (spMap τ)).1 (by
+        have hy' : (spMap τ ≫ spMap ((algebraMap F L).comp emb)) ≫ y.left = spMap τ ≫ z.left :=
+          congrArg CommaMorphism.left hy
+        rw [← hy', hs]
+        simp only [Category.assoc])⟩)
   rw [← hK] at hroot hpts
   haveI : CharZero M := (algebraMap F M).charZero_iff (algebraMap F M).injective |>.1 inferInstance
   have hB := GlobalTheory.laws_without_cohomology.2.2.1
@@ -175,60 +221,64 @@ theorem exists_level_primePower : ∀ {Ω₁ : Type} [Field Ω₁] [CharZero Ω�
   obtain ⟨Q, φ, hQ⟩ := exists_isPolFibre hB ((algebraMap F M).comp emb) P₁
   obtain ⟨Q', ψ, hQ'⟩ := exists_isPolFibre hB (algebraMap M (AlgebraicClosure M)) Q
   refine ⟨M, inferInstance, inferInstance, Q, φ, ζ, inferInstance, hMgal, hdeg, hζ, hQ.1, hQ.2.1, hQ.2.2.symm,
-    LevelGalois.nonempty_level_of_rational Q K hK0 ζ hζ Q' ψ hQ' fun y hy => ?_⟩
-  let σ := algebraMap M (AlgebraicClosure M)
-  let τ' : L →ₐ[M] AlgebraicClosure M := IsAlgClosed.lift
-  let τ : L →+* AlgebraicClosure M := τ'.toRingHom
-  have hτ : spMap τ ≫ spMap (algebraMap M L) = spMap σ := by
-    rw [GlobalTheory.spMap_comp_spMap]
-    exact congrArg spMap (RingHom.ext τ'.commutes)
-  have hML : spMap (algebraMap M L) ≫ spMap ((algebraMap F M).comp emb) = spMap ((algebraMap F L).comp emb) := by
-    rw [GlobalTheory.spMap_comp_spMap]
-    rfl
-  have hPg : IsGrpPullback Q.A P₁.A (spMap ((algebraMap F M).comp emb)) φ := hQ.2.1
-  have hQg : IsGrpPullback Q'.A Q.A (spMap σ) ψ := hQ'.2.1
-  let y₀ := ObjPull.pushEquiv hPg _ (ObjPull.pushEquiv hQg (𝟙_ _) y)
-  have hy₀ : y₀ ^ K = 1 := by simp only [y₀, ← map_pow, hy, map_one]
-  let j : Over.mk ((Over.mk (spMap τ)).hom ≫ spMap ((algebraMap F L).comp emb)) ⟶
-      Over.mk (((𝟙_ (Over (Sp (AlgebraicClosure M)))).hom ≫ spMap σ) ≫ spMap ((algebraMap F M).comp emb)) :=
-    Over.homMk (𝟙 _) (by
-      show 𝟙 _ ≫ (𝟙 _ ≫ spMap σ) ≫ _ = spMap τ ≫ _
-      rw [Category.id_comp, Category.id_comp, ← hML, ← hτ, Category.assoc])
-  let y₁ := j ≫ y₀
-  have hy₁ : y₁ ^ K = 1 := by rw [← MonObj.comp_pow, hy₀, MonObj.comp_one]
-  have hy₁l : y₁.left = (y.left ≫ ψ) ≫ φ := Category.id_comp _
-  let y₂ := (ObjPull.pushEquiv h₃ (Over.mk (spMap τ))).symm y₁
-  obtain ⟨a, ha⟩ := lev.span _ (spMap τ) y₂ (by rw [← map_pow, hy₁, map_one])
-  rw [← GenSpread.comp_linComb] at ha
-  set v := linComb lev.pt (fun i => (a i : ℕ)) with hv
-  have hvl : spMap τ ≫ v.left = y₂.left := congrArg CommaMorphism.left ha
-  let z : Over.mk (spMap ((algebraMap F L).comp emb)) ⟶ P₁.A := Over.homMk (v.left ≫ φ₃) (by
-    rw [Category.assoc, h₃.1.w, ← Category.assoc, Over.w v]
-    exact Category.id_comp _)
-  let k : Over.mk ((Over.mk (spMap τ)).hom ≫ spMap ((algebraMap F L).comp emb)) ⟶
-      Over.mk (spMap ((algebraMap F L).comp emb)) := Over.homMk (spMap τ) rfl
-  have hzl : spMap τ ≫ z.left = y₁.left := by
-    rw [← ObjPull.pushEquiv_symm_left h₃ _ y₁]
-    exact (Category.assoc _ _ _).symm.trans (congrArg (· ≫ φ₃) hvl)
-  have hkz : k ≫ z = y₁ := Over.OverMorphism.ext hzl
-  have hz : z ^ K = 1 := by
-    have h : k ≫ z ^ K = k ≫ 1 := by rw [MonObj.comp_pow, hkz, hy₁, MonObj.comp_one]
-    exact Over.OverMorphism.ext (spec_map_field_cancel τ _ _ (congrArg CommaMorphism.left h))
-  obtain ⟨w, hw⟩ := hpts z hz
-  have hw2 : w ≫ P₁.A.hom = 𝟙 _ ≫ spMap ((algebraMap F M).comp emb) := by
-    refine spec_map_field_cancel (algebraMap M L) _ _ ?_
-    rw [← Category.assoc, hw, Over.w z, Category.id_comp, hML]
-    rfl
-  let x : 𝟙_ (Over (Sp M)) ⟶ Q.A := Over.homMk (hPg.1.lift w (𝟙 _) hw2) (hPg.1.lift_snd _ _ _)
-  have hxl : x.left ≫ φ = w := hPg.1.lift_fst _ _ _
-  refine ⟨x, ?_⟩
-  apply Over.OverMorphism.ext
-  refine hQg.1.hom_ext ?_ ?_
-  · rw [ObjPull.secPull_left]
-    refine hPg.1.hom_ext ?_ ?_
-    · rw [Category.assoc, hxl, ← hy₁l, ← hzl, ← hw, ← Category.assoc, hτ]
-    · rw [Category.assoc, Over.w x, Category.assoc, hQg.1.w, ← Category.assoc, Over.w y]
-      exact (Category.comp_id _).trans (Category.id_comp _).symm
-  · rw [Over.w, Over.w]
+    LevelGalois.nonempty_level_of_rational Q K hK0 ζ hζ Q' ψ hQ' fun y hy => by
+    let σ := algebraMap M (AlgebraicClosure M)
+    let τ' : L →ₐ[M] AlgebraicClosure M := (by
+      refine @_root_.IsAlgClosed.lift _ _ _ _ _ _ _ _ _ _ _ ?_ ?_ ?_
+      solve_by_elim* (maxDepth := 2) only [*,
+        @_root_.DivisionSemiring.to_moduleIsTorsionFree,
+        @_root_.Algebra.IsIntegral.isAlgebraic, @_root_.inferInstance])
+    let τ : L →+* AlgebraicClosure M := τ'.toRingHom
+    have hτ : spMap τ ≫ spMap (algebraMap M L) = spMap σ := by
+      rw [GlobalTheory.spMap_comp_spMap]
+      exact congrArg spMap (RingHom.ext τ'.commutes)
+    have hML : spMap (algebraMap M L) ≫ spMap ((algebraMap F M).comp emb) = spMap ((algebraMap F L).comp emb) := by
+      rw [GlobalTheory.spMap_comp_spMap]
+      rfl
+    have hPg : IsGrpPullback Q.A P₁.A (spMap ((algebraMap F M).comp emb)) φ := hQ.2.1
+    have hQg : IsGrpPullback Q'.A Q.A (spMap σ) ψ := hQ'.2.1
+    let y₀ := ObjPull.pushEquiv hPg _ (ObjPull.pushEquiv hQg (𝟙_ _) y)
+    have hy₀ : y₀ ^ K = 1 := by simp only [y₀, ← map_pow, hy, map_one]
+    let j : Over.mk ((Over.mk (spMap τ)).hom ≫ spMap ((algebraMap F L).comp emb)) ⟶
+        Over.mk (((𝟙_ (Over (Sp (AlgebraicClosure M)))).hom ≫ spMap σ) ≫ spMap ((algebraMap F M).comp emb)) :=
+      Over.homMk (𝟙 _) (by
+        show 𝟙 _ ≫ (𝟙 _ ≫ spMap σ) ≫ _ = spMap τ ≫ _
+        rw [Category.id_comp, Category.id_comp, ← hML, ← hτ, Category.assoc])
+    let y₁ := j ≫ y₀
+    have hy₁ : y₁ ^ K = 1 := by rw [← MonObj.comp_pow, hy₀, MonObj.comp_one]
+    have hy₁l : y₁.left = (y.left ≫ ψ) ≫ φ := Category.id_comp _
+    let y₂ := (ObjPull.pushEquiv h₃ (Over.mk (spMap τ))).symm y₁
+    obtain ⟨a, ha⟩ := lev.span _ (spMap τ) y₂ (by rw [← map_pow, hy₁, map_one])
+    rw [← GenSpread.comp_linComb] at ha
+    set v := linComb lev.pt (fun i => (a i : ℕ)) with hv
+    have hvl : spMap τ ≫ v.left = y₂.left := congrArg CommaMorphism.left ha
+    let z : Over.mk (spMap ((algebraMap F L).comp emb)) ⟶ P₁.A := Over.homMk (v.left ≫ φ₃) (by
+      rw [Category.assoc, h₃.1.w, ← Category.assoc, Over.w v]
+      exact Category.id_comp _)
+    let k : Over.mk ((Over.mk (spMap τ)).hom ≫ spMap ((algebraMap F L).comp emb)) ⟶
+        Over.mk (spMap ((algebraMap F L).comp emb)) := Over.homMk (spMap τ) rfl
+    have hzl : spMap τ ≫ z.left = y₁.left := by
+      rw [← ObjPull.pushEquiv_symm_left h₃ _ y₁]
+      exact (Category.assoc _ _ _).symm.trans (congrArg (· ≫ φ₃) hvl)
+    have hkz : k ≫ z = y₁ := Over.OverMorphism.ext hzl
+    have hz : z ^ K = 1 := by
+      have h : k ≫ z ^ K = k ≫ 1 := by rw [MonObj.comp_pow, hkz, hy₁, MonObj.comp_one]
+      exact Over.OverMorphism.ext ((cancel_epi (spMap τ)).1 (congrArg CommaMorphism.left h))
+    obtain ⟨w, hw⟩ := hpts z hz
+    have hw2 : w ≫ P₁.A.hom = 𝟙 _ ≫ spMap ((algebraMap F M).comp emb) := by
+      refine (cancel_epi (spMap (algebraMap M L))).1 ?_
+      rw [← Category.assoc, hw, Over.w z, Category.id_comp, hML]
+      rfl
+    let x : 𝟙_ (Over (Sp M)) ⟶ Q.A := Over.homMk (hPg.1.lift w (𝟙 _) hw2) (hPg.1.lift_snd _ _ _)
+    have hxl : x.left ≫ φ = w := hPg.1.lift_fst _ _ _
+    refine ⟨x, ?_⟩
+    apply Over.OverMorphism.ext
+    refine hQg.1.hom_ext ?_ ?_
+    · rw [ObjPull.secPull_left]
+      refine hPg.1.hom_ext ?_ ?_
+      · rw [Category.assoc, hxl, ← hy₁l, ← hzl, ← hw, ← Category.assoc, hτ]
+      · rw [Category.assoc, Over.w x, Category.assoc, hQg.1.w, ← Category.assoc, Over.w y]
+        exact (Category.comp_id _).trans (Category.id_comp _).symm
+    · rw [Over.w, Over.w]⟩
 
 end GlobalTheory.LevelPrimePower

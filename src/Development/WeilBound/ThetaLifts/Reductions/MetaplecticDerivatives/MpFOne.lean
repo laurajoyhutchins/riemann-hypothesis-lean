@@ -1,4 +1,52 @@
-import Development.WeilBound.ThetaLifts.Reductions.MetaplecticDerivatives.ContinuousPair
+module
+
+public import Development.WeilBound.ThetaLifts.Reductions.MetaplecticDerivatives.ContinuousPair
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Convex.Contractible
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.Normed.Algebra.MatrixExponential
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import Mathlib.Topology.Homotopy.Lifting
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -23,7 +71,7 @@ theorem mq_smul' (c : ℝ) (S : Eu l →L[ℝ] Eu l) (g : Sch l) : mq (c • S) 
 
 theorem vf_add' (H K : Eu l →L[ℝ] Eu l) (g : Sch l) : vf (H + K) g = vf H g + vf K g := by
   ext x
-  simp only [vf_apply, SchwartzMap.add_apply, ContinuousLinearMap.add_apply, map_add]
+  simp only [vf_apply, SchwartzMap.add_apply, ContinuousLinearMap.add_apply, map_add (f := _)]
 
 theorem vf_smul' (c : ℝ) (H : Eu l →L[ℝ] Eu l) (g : Sch l) : vf (c • H) g = c • vf H g := by
   ext x
@@ -33,7 +81,7 @@ def qdLin (f : Sch l) : Mat l →ₗ[ℝ] Sch l where
   toFun X := Qd X f
   map_add' X Y := by
     have ht : (X + Y).toBlocks₁₁ = X.toBlocks₁₁ + Y.toBlocks₁₁ := Matrix.ext fun _ _ => rfl
-    simp only [Qd, map_add, neg_add, mq_add', vf_add', ht, trace_add, add_div, ofReal_add, add_smul]
+    simp only [Qd, map_add (f := _), neg_add, mq_add', vf_add', ht, trace_add, add_div, ofReal_add, add_smul]
     abel
   map_smul' c X := by
     have ht : (c • X).toBlocks₁₁ = c • X.toBlocks₁₁ := Matrix.ext fun _ _ => rfl
@@ -45,6 +93,7 @@ def qdLin (f : Sch l) : Mat l →ₗ[ℝ] Sch l where
 theorem qd_sum (X : Mat l) (f : Sch l) : ∑ a, ∑ b, X a b • Qd (Matrix.single a b 1) f = Qd X f := by
   show _ = qdLin f X
   conv_rhs => rw [Matrix.matrix_eq_sum_single X]
+
   simp only [map_sum]
   refine Finset.sum_congr rfl fun a _ => Finset.sum_congr rfl fun b _ => ?_
   rw [show Matrix.single a b (X a b) = X a b • Matrix.single a b (1 : ℝ) by
@@ -106,6 +155,7 @@ theorem onePar_of (h1 : TopG l) (h2 : Cover l) (h3 : NearOne l) (h4 : SecDer l) 
         ContinuousLinearMap.one_apply, one_smul]
       rw [show quad X f = Qd X f from quad_eq hX f, ← qd_sum X f]
       show _ = schwartzToL2 l _
+
       simp only [map_sum, ContinuousLinearMap.map_smul_of_tower]
     rw [hval] at hS
     refine hS.congr_of_eventuallyEq ?_

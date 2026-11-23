@@ -1,5 +1,57 @@
-import Mathlib
-import Development.WeilBound.RepresentationTheoryGL.SiegelWeilProof.HolomorphicContinuation.AnalyticDeterminants.ScalarSectionCompactBlockInvariant
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.SiegelWeilProof.HolomorphicContinuation.AnalyticDeterminants.ScalarSectionCompactBlockInvariant
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Matrix.FiniteDimensional
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Analysis.Calculus.ContDiff.Basic
+public import Mathlib.Analysis.Calculus.ContDiff.Comp
+public import Mathlib.Analysis.Calculus.ContDiff.Operations
+
+@[expose] public section
 
 noncomputable section
 
@@ -106,7 +158,7 @@ theorem contDiffOn_inverse_first_block (s : Set (M2 n)) (hs : ∀ x ∈ s, IsUni
 
 theorem contDiffOn_scalar_section_of_units (p q : ℤ) : ContDiffOn ℂ ∞ (f0 (n := n) p q) {x | (u1 x).det ≠ 0 ∧ (u2 x).det ≠ 0} := by
   unfold f0
-  exact (cdo_zpow (cdo_det (contDiffOn_first_cayley_block_entries _)) (fun x hx => hx.1) _).mul (cdo_zpow (cdo_det (contDiffOn_second_cayley_block_entries _)) (fun x hx => hx.2) _)
+  exact (cdo_zpow (cdo_det (contDiffOn_first_cayley_block_entries _)) (by exact fun x hx => hx.1) _).mul (cdo_zpow (cdo_det (contDiffOn_second_cayley_block_entries _)) (by exact fun x hx => hx.2) _)
 
 theorem dom_sub (x : M2 n) (hx : x ∈ Dom n) : (u1 x).det ≠ 0 ∧ (u2 x).det ≠ 0 := ⟨hx.2.1, hx.2.2.1⟩
 
@@ -117,9 +169,9 @@ theorem contDiffOn_hF' (j : ℕ) (p q : ℤ) : ContDiffOn ℂ ∞ (hF (n := n) j
 
 theorem contDiffOn_fV' (p q : ℤ) : ContDiffOn ℂ ∞ (fV (n := n) p q) (Dom n) := by
   unfold fV
-  exact ((cdo_zpow (cdo_det (contDiffOn_first_cayley_block_entries _)) (fun x hx => hx.2.1) _).mul
-    (cdo_zpow (cdo_det (contDiffOn_second_cayley_block_entries _)) (fun x hx => hx.2.2.1) _)).mul
-    (cdo_zpow (cdo_det (contDiffOn_inverse_first_block _ fun x hx => hx.1)) (fun x hx => hx.2.2.2) _)
+  exact ((cdo_zpow (cdo_det (contDiffOn_first_cayley_block_entries _)) (by exact fun x hx => hx.2.1) _).mul
+    (cdo_zpow (cdo_det (contDiffOn_second_cayley_block_entries _)) (by exact fun x hx => hx.2.2.1) _)).mul
+    (cdo_zpow (cdo_det (contDiffOn_inverse_first_block _ (by exact fun x hx => hx.1))) (by exact fun x hx => hx.2.2.2) _)
 
 def Cinv (n : ℕ) : M2 n := ((2 * Complex.I)⁻¹ : ℂ) • fromBlocks 1 (Complex.I • 1) (-1) (Complex.I • 1)
 
@@ -157,8 +209,8 @@ theorem embOn_mul_embOn_disj {s t : Finset (Fin n)} (hst : ∀ c, c ∈ s → c 
   by_cases h1 : a ∈ s ∧ c ∈ s
   · by_cases h2 : c ∈ t ∧ b ∈ t
     · exact absurd h2.1 (hst c h1.2)
-    · rw [dif_neg h2, mul_zero]
-  · rw [dif_neg h1, zero_mul]
+    · rw [dite_eq_right h2, mul_zero]
+  · rw [dite_eq_right h1, zero_mul]
 
 theorem WD_prod (Q R Q' R' : Matrix (Fin n) (Fin n) ℂ) :
     (Cm n * fromBlocks 0 Q R 0 * (Cm n)⁻¹) * (Cm n * fromBlocks 0 Q' R' 0 * (Cm n)⁻¹) =

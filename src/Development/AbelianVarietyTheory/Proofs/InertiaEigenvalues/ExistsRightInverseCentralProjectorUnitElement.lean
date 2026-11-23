@@ -1,8 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.UupEqOneOfLeOne
-import Formalism.LocalToGlobal.NormalizedHeckeFactors.TypesDefs
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IrreducibleCharacterGoodIdempotentCuspidalProduc
+module
+
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.UupEqOneOfLeOne
+public import Formalism.LocalToGlobal.NormalizedHeckeFactors.TypesDefs
+public import Mathlib.RepresentationTheory.Character
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IrreducibleCharacterGoodIdempotentCuspidalProduc
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.CharacterIdempotents.Scalar
 import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.GreenLabelSurjective.Simple
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open GlobalTheory.MeetsGen CategoryTheory
 
@@ -37,12 +83,15 @@ theorem trace_cU (V : FDRep ℂ G) (U : Subgroup G) [Fintype U] (f : U → ℂ) 
     LinearMap.trace ℂ V (Representation.asAlgebraHom V.ρ (cU U f)) =
       (Fintype.card G : ℂ) * ∑ u : U, ((Fintype.card U : ℂ)⁻¹ * f u) * V.character u := by
   have hp : Representation.asAlgebraHom V.ρ (pU U f) = ∑ u : U, ((Fintype.card U : ℂ)⁻¹ * f u) • V.ρ u := by
+
     simp only [pU, map_sum, Representation.asAlgebraHom_single]
   unfold cU
+
   rw [map_sum, map_sum]
   rw [Finset.sum_congr rfl (fun g _ => by
     rw [map_mul (Representation.asAlgebraHom V.ρ), map_mul (Representation.asAlgebraHom V.ρ), Representation.asAlgebraHom_single, Representation.asAlgebraHom_single, one_smul,
       one_smul, LinearMap.trace_mul_comm ℂ, ← mul_assoc, ← map_mul, inv_mul_cancel, map_one, one_mul])]
+
   rw [Finset.sum_const, Finset.card_univ, nsmul_eq_mul, hp, map_sum]
   simp only [map_smul, smul_eq_mul, FDRep.character]
 
@@ -82,6 +131,7 @@ theorem exists_rightInv_uElt : ∀ {G : Type} [Group G] [Fintype G] (U : Subgrou
     obtain ⟨ν, hν⟩ := PI.CharIdemW.schur_scalar τ _ (hcomm e (fun k => hC _ |>.symm))
     have hφw : ∀ x, φ (Representation.asAlgebraHom τ.ρ w x) = 0 := by
       intro x
+
       rw [GlobalTheory.GoodFactor.asAlg_eq τ.ρ w, LinearMap.sum_apply, map_sum]
       simp only [LinearMap.smul_apply, map_smul]
       have h1 : ∀ g, φ (τ.ρ g x) = A.toRepresentation g (φ x) := fun g => LinearMap.congr_fun (hφ g) x
@@ -111,7 +161,7 @@ theorem exists_rightInv_uElt : ∀ {G : Type} [Group G] [Fintype G] (U : Subgrou
     have hTw : Representation.asAlgebraHom τ.ρ w =
         Representation.asAlgebraHom τ.ρ (cU U f) * Representation.asAlgebraHom τ.ρ e + 1 -
           Representation.asAlgebraHom τ.ρ e := by
-      rw [hw, uElt, map_add, map_mul, map_sub, map_one, add_sub_assoc]
+      rw [hw, uElt, map_add (f := _), map_mul, map_sub, map_one, add_sub_assoc]
     rw [hμ, hμ0, zero_smul, hν] at hTw
     have hν01 : ν * (ν - 1) = 0 := by linear_combination hνν
     rcases mul_eq_zero.mp hν01 with h0 | h0
@@ -124,6 +174,7 @@ theorem exists_rightInv_uElt : ∀ {G : Type} [Group G] [Fintype G] (U : Subgrou
       have hirr := GlobalTheory.GoodFactor.isIrrChar_character τ hτs
       have hfix : ∑ g, e.coeff g * τ.character g = τ.character 1 := by
         have h5 : LinearMap.trace ℂ τ (Representation.asAlgebraHom τ.ρ e) = ∑ g, e.coeff g * τ.character g := by
+
           rw [GlobalTheory.GoodFactor.asAlg_eq τ.ρ e, map_sum]
           simp only [map_smul, smul_eq_mul, FDRep.character]
         rw [← h5, hν, hν1, one_smul, FDRep.character, map_one τ.ρ]

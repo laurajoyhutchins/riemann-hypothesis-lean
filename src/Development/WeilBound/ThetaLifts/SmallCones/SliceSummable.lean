@@ -1,5 +1,51 @@
-import Development.WeilBound.ThetaLifts.SmallCones.ExpAlg
-import Development.WeilBound.ThetaLifts.SmallCones.ExpSum
+module
+
+public import Development.WeilBound.ThetaLifts.SmallCones.ThetaUniq
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsNatMulIntegralOfIsCompact
+public import Development.AutomorphicSpectrum.Proofs.MembershipProofs.ThetaSumAdmissibility
+public import Development.WeilBound.ThetaLifts.SmallCones.ExpAlg
+public import Development.WeilBound.ThetaLifts.SmallCones.ExpSum
+import Development.WeilBound.ThetaLifts.SmallCones.FourierUniq
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.Divisors.MatchingOfParts
+
+@[expose] public section
 
 noncomputable section
 
@@ -28,7 +74,7 @@ theorem slice_summable (hS : Slice) (hB : B.IsGood σ) (hM : M.IsGood B.ψ) (hM�
     obtain ⟨wt, P, h1, -, -, h2⟩ := slice_bound hS hB hM hM₁ he hD hl hg
     exact Summable.of_norm_bounded (h1.mul_left (P f)) fun y => h2 y f
   | zero => simpa using summable_zero
-  | add Φ Ψ _ _ h1 h2 => simpa only [map_add] using h1.add h2
+  | add Φ Ψ _ _ h1 h2 => simpa only [map_add (f := _)] using h1.add h2
   | smul c Φ _ h => simpa only [map_smul, smul_eq_mul] using h.mul_left c
 
 theorem slice_adm (hS : Slice) (hB : B.IsGood σ) (hM : M.IsGood B.ψ) (hM₁ : M₁.IsGood B.ψ) (he : IsEv B M M₁ ι ι' I e)
@@ -38,7 +84,7 @@ theorem slice_adm (hS : Slice) (hB : B.IsGood σ) (hM : M.IsGood B.ψ) (hM₁ : 
   let L₀ : schA F (Fin n × Fin d) →ₗ[ℂ] ℂ :=
     { toFun := fun Φ => ∑' y : Fin m → F, l (e (rhoL B M (lin u fun j => algebraMap F (AF F) (y j)) Φ.1))
       map_add' := fun Φ Ψ => by
-        simp only [Submodule.coe_add, map_add]
+        simp only [Submodule.coe_add, map_add (f := _)]
         exact (slice_summable hS hB hM hM₁ he hD hl Φ.2).tsum_add (slice_summable hS hB hM hM₁ he hD hl Ψ.2)
       map_smul' := fun c Φ => by
         simp only [Submodule.coe_smul, map_smul, smul_eq_mul, RingHom.id_apply]
@@ -53,7 +99,7 @@ theorem slice_adm (hS : Slice) (hB : B.IsGood σ) (hM : M.IsGood B.ψ) (hM₁ : 
   let T : SInf F (Fin n × Fin d) →ₗ[ℂ] ℂ :=
     { toFun := fun f => L (pureA F f g)
       map_add' := fun f₁ f₂ => by
-        rw [← map_add]; congr 1; funext x; simp [pureA, add_mul]
+        rw [← map_add (f := _)]; congr 1; funext x; simp [pureA, add_mul]
       map_smul' := fun c f => by
         rw [RingHom.id_apply, ← map_smul]; congr 1; funext x; simp [pureA, mul_assoc] }
   refine ⟨⟨T, continuous_of_continuousAt_zero T ?_⟩, fun f => rfl⟩
@@ -84,7 +130,7 @@ theorem thetaExp_of (hS : Slice) : ThetaExp := by
     have := (Equiv.addRight a).hasSum_iff.2 (hs' Φ hΦ)
     convert this using 2 with y
     rw [rho_rho_of _ _ _ _ (sy_lin_uu M hP _ _), ← lin_add]
-    simp only [Function.comp_apply, Equiv.coe_addRight, Pi.add_apply, map_add]
+    simp only [Function.comp_apply, Equiv.coe_addRight, Pi.add_apply, map_add (f := _)]
     rfl
   have hz : ∀ b : Fin m → F, ∀ Φ ∈ schA F (Fin n × Fin d),
       L (M.co.rho B.ψ (lin z fun j => algebraMap F (AF F) (b j)) Φ) = L Φ := fun b Φ hΦ => by

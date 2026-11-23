@@ -1,8 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.DivisorSupportCondition
-import Development.AbelianVarietyTheory.Definitions.Divisors.SecClass
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PrimitiveRootPowUnitSubProdPropertiesStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EtaleLocallyIffAffineEtalePointCoverStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.SecClass
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EtaleLocallyIffAffineEtalePointCoverStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PrimitiveRootPowUnitSubProdPropertiesStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.AlgebraicGeometry.Morphisms.SchemeTheoreticallyDominant
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.EffectiveEpi.Comp
+import Mathlib.CategoryTheory.ExtremalEpi
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.Etale.StandardEtale
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 open CategoryTheory Limits AlgebraicGeometry Opposite CochainComplex CochainComplex.HomComplex GlobalTheory.EtC
 
@@ -153,7 +200,7 @@ private theorem unit_deriv_cyclotomic {A : Type} [CommRing A] (q : ℕ) [NeZero 
     IsUnit (AdjoinRoot.mk (cyclotomic q A) (derivative (cyclotomic q A))) := by
   obtain ⟨g, hg⟩ := cyclotomic.dvd_X_pow_sub_one q A
   have hm := congrArg (AdjoinRoot.mk (cyclotomic q A)) (congrArg derivative hg)
-  rw [derivative_mul, map_add, map_mul, map_mul, AdjoinRoot.mk_self, zero_mul, add_zero] at hm
+  rw [derivative_mul, map_add (f := _), map_mul, map_mul, AdjoinRoot.mk_self, zero_mul, add_zero] at hm
   have hX : IsUnit (AdjoinRoot.mk (cyclotomic q A) (X : A[X])) := by
     have h1 := congrArg (AdjoinRoot.mk (cyclotomic q A)) hg
     rw [map_mul, AdjoinRoot.mk_self, zero_mul, map_sub, map_pow, map_one, sub_eq_zero] at h1
@@ -211,7 +258,7 @@ private theorem part_kummer (q : ℕ) [NeZero q] (U : Scheme.{0}) (hq : IsUnit (
   have hu₀ : IsUnit (j.appTop.hom (u : Γ(U, ⊤))) := u.isUnit.map _
   obtain ⟨V, g, θ, hVa, hg, hs, hθ⟩ := exists_cover V₀ (X ^ q - C (j.appTop.hom (u : Γ(U, ⊤))))
     (monic_X_pow_sub_C _ (NeZero.ne q))
-    (by rw [natDegree_X_pow_sub_C]; exact NeZero.pos q)
+    (by rw [natDegree_X_pow_sub_C _]; exact NeZero.pos q)
     (unit_deriv_kummer q hq₀ _ hu₀)
   obtain ⟨z, hz⟩ := hs y
   have h1 : θ ^ q = g.appTop.hom (j.appTop.hom (u : Γ(U, ⊤))) := by

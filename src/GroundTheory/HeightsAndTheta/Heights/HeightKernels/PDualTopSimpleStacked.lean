@@ -1,17 +1,68 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.StatementsDualTopSimpleStacked
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.StatementsDualStackedGraph
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.StatementsGrassFibreDegree
-import GroundTheory.HeightsAndTheta.Heights.Intersections.StatementsArith
-import GroundTheory.HeightsAndTheta.Heights.Intersections.TableDegreeThreeBase
-import GroundTheory.HeightsAndTheta.Heights.Intersections.PConsequences
-import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.ChangeOfModel
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PDualLineSemipositive
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PDualArithVar
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PCoordConeArithVar
-import GroundTheory.HeightsAndTheta.Heights.WeightedHomogeneous.PIntDomainDim
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PGrassArithVar
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PFsLineSmooth
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.StatementsDualTopSimpleStacked
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.StatementsDualStackedGraph
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.StatementsGrassFibreDegree
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.StatementsArith
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.ProjLineRankTwoPushforwardHypotheses
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PCoordConeArithVar
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PDualArithVar
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PDualLineSemipositive
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PFsLineSmooth
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PGrassArithVar
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.PConsequences
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.TableDegreeThreeBase
+public import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.ChangeOfModel
+public import GroundTheory.HeightsAndTheta.Heights.WeightedHomogeneous.PIntDomainDim
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -159,8 +210,8 @@ theorem degSecond_eq (k : Unit ⊕ Unit) :
   · simp [degSecond_inl]
   · simp [degSecond_inr]
 
-open IndefiniteRowSideFullHecke.Inter in
 
+open IndefiniteRowSideFullHecke.Inter in
 theorem logNorm_eq {F F' : HermLattice K i} {b : Module.Basis T ℤ (dualLattice F)}
     (hb : Function.Bijective (Matrix.mulVecLin (dualEmbMatrix b)))
     {b' : Module.Basis T ℤ (dualLattice F')} (hb' : Function.Bijective (Matrix.mulVecLin (dualEmbMatrix b')))
@@ -186,8 +237,8 @@ theorem logNorm_eq {F F' : HermLattice K i} {b : Module.Basis T ℤ (dualLattice
   simp only [graphSecond, graphFirst, map_X, map_mul, map_C, map_intCast, eval_X, eval_mul, eval_C, eq_intCast]
   rw [hcz t, norm_mul, mul_div_mul_left _ _ (norm_ne_zero_iff.mpr hc)]
 
-open IndefiniteRowSideFullHecke.Inter in
 
+open IndefiniteRowSideFullHecke.Inter in
 theorem step (hHor : DualStackedGraphHorizontal.Statement) {F F' : HermLattice K i}
     {b : Module.Basis T ℤ (dualLattice F)} (hb : Function.Bijective (Matrix.mulVecLin (dualEmbMatrix b)))
     {b' : Module.Basis T ℤ (dualLattice F')} (hb' : Function.Bijective (Matrix.mulVecLin (dualEmbMatrix b')))
@@ -349,8 +400,8 @@ theorem geomDeg_proj_eq_one (hGF : GrassFibreDegree.Statement) {II : Intersectio
 
 end TopDualSimpleStacked
 
-open TopDualSimpleStacked IndefiniteRowSideFullHecke.Inter in
 
+open TopDualSimpleStacked IndefiniteRowSideFullHecke.Inter in
 theorem DualTopSimpleStacked.proof (hAI3 : Inter.PushforwardArithIntersection.Statement) (hGr : GraphStatement)
     (hImg : DualStackedGraphImage.Statement) (hHor : DualStackedGraphHorizontal.Statement)
     (hFib : DualStackedGraphFibre.Statement) (hGF : GrassFibreDegree.Statement) :

@@ -1,5 +1,52 @@
+module
+
+public import Development.AbelianVarietyTheory.Statements.PlaceShiftStatements.DefiniteBound
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GaloisAutMemAdelicCompletionIntegral
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SmulMemOfIsIntegral
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GaloisAutMemAdelicCompletionIntegral
+import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.EmbGLMemRealSU
+
+@[expose] public section
 
 open NumberField Matrix GlobalTheory.UCls GlobalTheory.SUVol ReciprocityTheory.ChartRestriction.G.FD GlobalTheory.LieDisc
 
@@ -16,7 +63,7 @@ theorem exists_integral_add_cc_eq_one : ∀ (E : Type) [Field E] [NumberField E]
     { carrier := {a | ∃ t : 𝓞 E, algebraMap _ (𝓞 E) a = t + σ t}
       add_mem' := by
         rintro a b ⟨s, hs⟩ ⟨t, ht⟩
-        exact ⟨s + t, by rw [map_add, hs, ht, map_add]; ring⟩
+        exact ⟨s + t, by rw [map_add (f := _), hs, ht, map_add (f := _)]; ring⟩
       zero_mem' := ⟨0, by simp⟩
       smul_mem' := by
         rintro c a ⟨t, ht⟩
@@ -35,17 +82,20 @@ theorem exists_integral_add_cc_eq_one : ∀ (E : Type) [Field E] [NumberField E]
         rw [← IsCMField.coe_ringOfIntegersComplexConj]
         rfl
       have hfix := (IsCMField.complexConj_eq_self_iff E ((t : E) + IsCMField.complexConj E t)).1 (by
-        rw [map_add, IsCMField.complexConj_apply_apply, add_comm])
+        rw [map_add (f := _), IsCMField.complexConj_apply_apply, add_comm])
       have hi : IsIntegral ℤ (⟨_, hfix⟩ : maximalRealSubfield E) := by
         have h0 : IsIntegral ℤ ((t + σ t : 𝓞 E) : E) := (t + σ t).isIntegral_coe
         rw [hco] at h0
-        exact (isIntegral_algebraMap_iff (algebraMap (maximalRealSubfield E) E).injective).1 h0
+        exact (isIntegral_algebraMap_iff ).1 h0
       let a : 𝓞 (maximalRealSubfield E) := ⟨_, hi⟩
       have hA : algebraMap _ (𝓞 E) a = t + σ t := by
         apply RingOfIntegers.ext
         rw [hco]
         rfl
-      have h1 : a ∈ Ideal.comap (algebraMap (𝓞 (maximalRealSubfield E)) (𝓞 E)) P := hPm ▸ hIm ⟨t, hA⟩
+      have h1 : a ∈ Ideal.comap (algebraMap (𝓞 (maximalRealSubfield E)) (𝓞 E)) P := by
+        change a ∈ Ideal.under (𝓞 (maximalRealSubfield E)) P
+        rw [hPm]
+        exact hIm ⟨t, hA⟩
       exact hA ▸ Ideal.mem_comap.1 h1
     have hσ : ∃ s, σ.toAlgHom s ≠ s := by
       by_contra hc

@@ -1,5 +1,44 @@
-import Mathlib
-import Formalism.LocalToGlobal.BesselHermitianTheta.TiedWeil
+module
+
+public import Formalism.LocalToGlobal.BesselHermitianTheta.TiedWeil
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.L2.Theta Matrix
@@ -14,7 +53,7 @@ variable {D : D7}
 theorem cA_cA (x : Formalism.L2.Theta.AE D) : cA D (cA D x) = x := by
   induction x using TensorProduct.induction_on with
   | zero => simp
-  | add a b ha hb => simp only [map_add, ha, hb]
+  | add a b ha hb => simp only [map_add (f := _), ha, hb]
   | tmul a e =>
     simp only [cA, sigR]
     simp
@@ -80,6 +119,7 @@ theorem herm_small (σ : A →+* A) (hσ : ∀ a, σ (σ a) = a) (P : Fin m → 
     (hP : ∀ i k, σ (P i k) = P k i) (hQ : ∀ i k, σ (Q i k) = Q k i) (x y : Matrix (Fin m) (Fin n) A) :
     σ (∑ i, ∑ j, ∑ k, ∑ l, σ (x i j) * P k i * Q j l * y k l) =
       ∑ i, ∑ j, ∑ k, ∑ l, σ (y i j) * P k i * Q j l * x k l := by
+
   simp only [map_sum, map_mul, hσ, hP, hQ]
   have a : ∀ f : Fin m → Fin n → Fin m → Fin n → A, ∑ i, ∑ j, ∑ k, ∑ l, f i j k l =
       ∑ p : Fin m × Fin n, ∑ q : Fin m × Fin n, f p.1 p.2 q.1 q.2 := by
@@ -142,12 +182,12 @@ theorem sympl_skew (V W : HSp D) (x y : WA V W) :
 theorem symplH_add_left (V W : HSp D) (x x' y : WA V W) :
     symplH V W (x + x') y = symplH V W x y + symplH V W x' y := by
   unfold symplH sympl hHom
-  split_ifs <;> simp only [Matrix.add_apply, mul_add, Finset.sum_add_distrib, map_add]
+  split_ifs <;> simp only [Matrix.add_apply, mul_add, Finset.sum_add_distrib, map_add (f := _)]
 
 theorem symplH_add_right (V W : HSp D) (x y y' : WA V W) :
     symplH V W x (y + y') = symplH V W x y + symplH V W x y' := by
   unfold symplH sympl hHom
-  split_ifs <;> simp only [Matrix.add_apply, mul_add, add_mul, Finset.sum_add_distrib, map_add]
+  split_ifs <;> simp only [Matrix.add_apply, mul_add, add_mul, Finset.sum_add_distrib, map_add (f := _)]
 
 theorem heis_heis (ψ : AddChar (AF D.host.F) ℂ) (V W : HSp D) (w w' : WA V W) (f : WA V W → ℂ) :
     Heisenberg₂ ψ V W w (Heisenberg₂ ψ V W w' f) = ψ (symplH V W w w') • Heisenberg₂ ψ V W (w + w') f := by

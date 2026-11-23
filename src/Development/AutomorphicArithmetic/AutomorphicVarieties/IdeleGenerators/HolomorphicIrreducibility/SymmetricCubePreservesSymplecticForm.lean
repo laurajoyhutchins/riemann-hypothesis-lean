@@ -1,13 +1,56 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.IdeleGenerators.ShapeFacts
+module
+
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.Newform
+public import Mathlib.Algebra.Group.Defs
+public import Mathlib.Algebra.Order.GroupWithZero.Basic
+public import Mathlib.Analysis.Normed.Field.Basic
+public import Mathlib.Analysis.Normed.Group.Ultra
+
+@[expose] public section
 
 open Polynomial UpperTheory.V.Af Formalism.ConjugateSelfDual
 open scoped Matrix
 
 namespace UpperTheory.V.Sd
-
-private noncomputable def s3F {S : Type} [CommRing S] (t d : S) : S[X] :=
-  X ^ 4 + C (-(t ^ 3 - 2 * t * d)) * X ^ 3 + C (2 * d ^ 3 + (t ^ 3 - 3 * t * d) * d * t) * X ^ 2 +
-    C (-(d ^ 3 * (t ^ 3 - 2 * t * d))) * X ^ 1 + C (d ^ 6) * X ^ 0
 
 section Rel
 
@@ -20,19 +63,6 @@ private theorem Rl.left {x y : K} (h : Rl x y) : ‖x‖ ≤ 1 := by
   rw [sub_add_cancel] at this
   exact this.trans (max_le h.2.le h.1)
 
-private theorem Rl.add {x y z w : K} (h : Rl x y) (h' : Rl z w) : Rl (x + z) (y + w) := by
-  refine ⟨(IsUltrametricDist.norm_add_le_max _ _).trans (max_le h.1 h'.1), ?_⟩
-  rw [add_sub_add_comm]
-  exact (IsUltrametricDist.norm_add_le_max _ _).trans_lt (max_lt h.2 h'.2)
-
-omit [IsUltrametricDist K] in
-private theorem Rl.neg {x y : K} (h : Rl x y) : Rl (-x) (-y) := by
-  refine ⟨by simpa using h.1, ?_⟩
-  rw [show -x - -y = -(x - y) by ring, norm_neg]
-  exact h.2
-
-private theorem Rl.sub {x y z w : K} (h : Rl x y) (h' : Rl z w) : Rl (x - z) (y - w) := by
-  simpa only [sub_eq_add_neg] using h.add h'.neg
 
 private theorem Rl.mul {x y z w : K} (h : Rl x y) (h' : Rl z w) : Rl (x * z) (y * w) := by
   refine ⟨by rw [norm_mul]; exact mul_le_one₀ h.1 (norm_nonneg _) h'.1, ?_⟩
@@ -42,13 +72,6 @@ private theorem Rl.mul {x y z w : K} (h : Rl x y) (h' : Rl z w) : Rl (x * z) (y 
     exact mul_lt_one_of_nonneg_of_lt_one_right h.left (norm_nonneg _) h'.2
   · rw [norm_mul]
     exact mul_lt_one_of_nonneg_of_lt_one_left (norm_nonneg _) h.2 h'.1
-
-private theorem Rl.pow {x y : K} (h : Rl x y) (n : ℕ) : Rl (x ^ n) (y ^ n) := by
-  induction n with
-  | zero => simp [Rl]
-  | succ n ih => rw [pow_succ, pow_succ]; exact ih.mul h
-
-private theorem Rl.nat (n : ℕ) : Rl (n : K) n := ⟨IsUltrametricDist.norm_natCast_le_one K n, by simp⟩
 
 end Rel
 

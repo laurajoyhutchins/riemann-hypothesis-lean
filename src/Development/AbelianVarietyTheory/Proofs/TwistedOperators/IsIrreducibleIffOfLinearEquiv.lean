@@ -1,8 +1,62 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.IsSubquotientDetRepParInd
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.BernsteinUnitaryProductIrreducible
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IsLocallyConstantModulus
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.LowerEquivUpperSwap
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.BernsteinUnitaryProductIrreducible
+public import Development.AbelianVarietyTheory.Definitions.Divisors.T2SpaceGeneralLinearGroup
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IsLocallyConstantModulus
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.LowerEquivUpperSwap
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Algebra.Group.Units
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -92,15 +146,14 @@ def ev {P : Subgroup H} (ρ : Representation F P W) (x : H) : smoothPart (ind P 
   map_add' _ _ := rfl
   map_smul' _ _ := rfl
 
-omit [TopologicalSpace G] [IsTopologicalGroup G] [TopologicalSpace H] [IsTopologicalGroup H] in
 
+omit [TopologicalSpace G] [IsTopologicalGroup G] [TopologicalSpace H] [IsTopologicalGroup H] in
 def coord (l : V →ₗ[F] F) (W : Type) [AddCommGroup W] [Module F W] : V ⊗[F] W →ₗ[F] W :=
   (TensorProduct.lid F W).toLinearMap ∘ₗ l.rTensor W
 
 theorem coord_lTensor (l : V →ₗ[F] F) (A : W →ₗ[F] U) (x : V ⊗[F] W) :
     coord l U (A.lTensor V x) = A (coord l W x) := by
   induction x with
-  | zero => simp
   | add x y hx hy => simp [hx, hy]
   | tmul v w => simp [coord]
 
@@ -109,14 +162,13 @@ theorem exists_sum_coord {ι : Type} (b : Module.Basis ι F V) (x : V ⊗[F] W) 
       ∀ t : Finset ι, s ⊆ t → x = ∑ i ∈ t, b i ⊗ₜ coord (b.coord i) W x := by
   classical
   induction x with
-  | zero => exact ⟨∅, by simp, by simp⟩
   | add x y hx hy =>
     obtain ⟨s, h1, h2⟩ := hx
     obtain ⟨s', h1', h2'⟩ := hy
     refine ⟨s ∪ s', fun i hi => ?_, fun t ht => ?_⟩
     · rw [Finset.mem_union, not_or] at hi
-      rw [map_add, h1 i hi.1, h1' i hi.2, add_zero]
-    · simp only [map_add, TensorProduct.tmul_add, Finset.sum_add_distrib]
+      rw [map_add (f := _), h1 i hi.1, h1' i hi.2, add_zero]
+    · simp only [map_add (f := _), TensorProduct.tmul_add, Finset.sum_add_distrib]
       rw [← h2 t (Finset.union_subset_left ht), ← h2' t (Finset.union_subset_right ht)]
   | tmul v w =>
     refine ⟨(b.repr v).support, fun i hi => ?_, fun t ht => ?_⟩
@@ -127,8 +179,8 @@ theorem exists_sum_coord {ι : Type} (b : Module.Basis ι F V) (x : V ⊗[F] W) 
       conv_lhs => rw [this, TensorProduct.sum_tmul]
       simp [coord, TensorProduct.smul_tmul]
 
-omit [TopologicalSpace G] [IsTopologicalGroup G] in
 
+omit [TopologicalSpace G] [IsTopologicalGroup G] in
 theorem eq_zero_of_ev {P : Subgroup H} (ρ : Representation F P W) (t : V ⊗[F] smoothPart (ind P ρ))
     (h : ∀ x, (ev ρ x).lTensor V t = 0) : t = 0 := by
   obtain ⟨s, -, h2⟩ := exists_sum_coord (Module.Basis.ofVectorSpace F V) t
@@ -141,8 +193,8 @@ theorem eq_zero_of_ev {P : Subgroup H} (ρ : Representation F P W) (t : V ⊗[F]
       exact this.symm))
   rw [this, TensorProduct.tmul_zero]
 
-omit [TopologicalSpace G] [IsTopologicalGroup G] in
 
+omit [TopologicalSpace G] [IsTopologicalGroup G] in
 theorem exists_tensor {P : Subgroup H} (ρ : Representation F P W) {K : Set H} (hK : IsCompact K)
     (hPK : ∀ x, ∃ p : P, ∃ w ∈ K, x = p * w) (f : H → V ⊗[F] W)
     (hf : ∀ (p : P) x, f (p * x) = (ρ p).lTensor V (f x))
@@ -169,6 +221,7 @@ theorem exists_tensor {P : Subgroup H} (ρ : Representation F P W) {K : Set H} (
       rw [hu])⟩
   refine ⟨∑ i ∈ S, b i ⊗ₜ c i, fun x => ?_⟩
   obtain ⟨p, w, hw, rfl⟩ := hPK x
+
   rw [hf, h2 (f w) S (Finset.subset_biUnion_of_mem s (hfin.mem_toFinset.2 ⟨w, hw, rfl⟩)), map_sum, map_sum]
   refine Finset.sum_congr rfl fun i _ => ?_
   rw [LinearMap.lTensor_tmul, LinearMap.lTensor_tmul]
@@ -193,8 +246,7 @@ theorem smInd_stages {P Q : Subgroup G} (hPQ : P ≤ Q) {P' : Subgroup H} (π : 
     rw [hσ q h1 ((hP q).1 h1), hτ, map_smul, map_smul]
     congr 2
     induction t with
-    | zero => simp
-    | add x y hx hy => simp only [map_add, hx, hy]
+    | add x y hx hy => simp only [map_add (f := _), hx, hy]
     | tmul v f =>
       simp only [LinearMap.lTensor_tmul, TensorProduct.map_tmul]
       congr 1
@@ -206,8 +258,7 @@ theorem smInd_stages {P Q : Subgroup G} (hPQ : P ≤ Q) {P' : Subgroup H} (π : 
     rw [hτ, hπj, map_smul, map_smul]
     congr 2
     induction t with
-    | zero => simp
-    | add x y hx hy => simp only [map_add, hx, hy]
+    | add x y hx hy => simp only [map_add (f := _), hx, hy]
     | tmul v f =>
       simp only [LinearMap.lTensor_tmul, TensorProduct.map_tmul, map_one, Module.End.one_apply]
       congr 1
@@ -349,8 +400,7 @@ theorem isIrreducible_ind₂Lower (H : GlobalTheory.Published.BernsteinUnitaryPr
       (isIrreducible_ind₂ H ((Equiv.sumComm b a).trans e) s₂ i₂ u₂ s₁ i₁ u₁))
   show _ = extTensor π₁ π₂ (g.2, g.1) _
   induction x with
-  | zero => simp
-  | add x y hx hy => simp only [map_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
   | tmul v w => simp
 
 theorem exists_parab_mul {α : Type} {m : α → Type} [Fintype α] [LinearOrder α] [∀ i, Fintype (m i)]
@@ -374,13 +424,13 @@ def headTail (m : Fin (s + 1) → Type) : m 0 ⊕ (Σ i : Fin s, m i.succ) ≃ �
     | zero => exact ⟨.inl x, rfl⟩
     | succ i => exact ⟨.inr ⟨i, x⟩, rfl⟩⟩
 
-omit [∀ i, DecidableEq (m i)] in
 
+omit [∀ i, DecidableEq (m i)] in
 theorem modExp_zero : modExp m 0 = Fintype.card (Σ i : Fin s, m i.succ) := by
   simp [modExp, Finset.sum_filter, Fin.sum_univ_succ]
 
-omit [∀ i, DecidableEq (m i)] in
 
+omit [∀ i, DecidableEq (m i)] in
 theorem modExp_succ (i : Fin s) :
     modExp m i.succ = -Fintype.card (m 0) + modExp (fun i : Fin s => m i.succ) i := by
   simp [modExp, Finset.sum_filter, Fin.sum_univ_succ]
@@ -456,11 +506,10 @@ theorem multiProd_succ_equiv (e : (Σ i, m i) ≃ n) {X : Fin (s + 1) → Type} 
       (extTensor (σ 0) (multiProd (Equiv.refl _) fun i : Fin s => σ i.succ))).Equiv (multiProd e σ)) := by
   refine ind₂_parInd_equiv e (σ 0) _ _ (tensorCons X) fun g x => ?_
   induction x with
-  | zero => simp
-  | add x y hx hy => simp only [map_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
   | tmul v w =>
     induction w using PiTensorProduct.induction_on with
-    | add x y hx hy => simp only [TensorProduct.tmul_add, map_add, hx, hy]
+    | add x y hx hy => simp only [TensorProduct.tmul_add, map_add (f := _), hx, hy]
     | smul_tprod c y =>
       simp only [TensorProduct.tmul_smul, map_smul, TensorProduct.map_tmul, piTensor_tprod, tensorCons_tmul]
       congr 2

@@ -1,4 +1,49 @@
-import ReciprocityTheory.Hypotheses.GalCohDefs
+module
+
+public import ReciprocityTheory.Hypotheses.GalCohDefs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -76,8 +121,6 @@ def equivH2OfIso : H2 rho ≃ₗ[R] H2 rho' :=
       show f.1 (e (e.symm g.1), e (e.symm g.2)) = f.1 g
       simp))
 
-@[simp] theorem equivH0OfIso_apply (m : H0 rho) : (equivH0OfIso e rho rho' hc m).1 = m.1 := rfl
-
 theorem equivH2OfIso_mk (f : Z2 rho) : equivH2OfIso e rho rho' hc (Submodule.Quotient.mk f) =
     Submodule.Quotient.mk (compatiblePairCocycles2 rho rho' (e : H →* G) (continuous_coe_iso e) LinearMap.id
       continuous_id hc f) := rfl
@@ -112,8 +155,8 @@ theorem dn_comp (n : ℕ) (f : (Fin n → G) → M) (g : Fin (n + 1) → H) :
   refine Finset.sum_congr rfl fun j _ => ?_
   rw [hc' j]
 
-include hphi hc in
 
+include hphi hc in
 def pairZn (n : ℕ) : Zn rho n →ₗ[R] Zn rho' n where
   toFun f := ⟨fun x => f.1 (phi ∘ x), by
     have hf : Continuous f.1 := (Submodule.mem_inf.1 f.2).1

@@ -1,6 +1,60 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.FourierMatch
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.TotalDegreeCMulXMulX
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.FourierMatch
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.TotalDegreeCMulXMulX
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open GlobalTheory.JR Matrix MeasureTheory Filter Topology
 
 noncomputable section
@@ -59,7 +113,7 @@ theorem exists_far_unit (F E : Type) [NontriviallyNormedField F] [NontriviallyNo
   · rw [norm_div, hnx, div_self (norm_ne_zero_iff.2 hz0)]
   · have e : (y - algebraMap F E b₀) / algebraMap F E x - algebraMap F E b =
         (y - algebraMap F E (b₀ + x * b)) / algebraMap F E x := by
-      rw [map_add, map_mul]; field_simp; ring
+      rw [map_add (f := _), map_mul]; field_simp; ring
     rw [e, norm_div, hnx, le_div_iff₀ (norm_pos_iff.2 hz0), one_mul]
     exact hmin' (b₀ + x * b)
 
@@ -190,7 +244,7 @@ theorem norm_onto_units : ∀ (F E : Type) [NontriviallyNormedField F] [Nontrivi
     have hsw : star (algebraMap F E a + algebraMap F E b * ζ) = algebraMap F E a + algebraMap F E b * star ζ := by
       rw [star_add, star_mul, hU.star_fix, hU.star_fix, mul_comm]
     rw [hsw]
-    simp only [map_add, map_mul, map_pow, hs, ht]
+    simp only [map_add (f := _), map_mul, map_pow, hs, ht]
     ring
   have hwb : ‖b‖ ≤ ‖algebraMap F E a + algebraMap F E b * ζ‖ := by
     by_cases hb0 : b = 0
@@ -228,7 +282,7 @@ theorem norm_onto_units : ∀ (F E : Type) [NontriviallyNormedField F] [Nontrivi
         star ((algebraMap F E a + algebraMap F E b * ζ) / algebraMap F E z) - algebraMap F E u =
         algebraMap F E ((a ^ 2 + s * a * b + t * b ^ 2 - u * z ^ 2) / z ^ 2) := by
       rw [star_div₀, hU.star_fix, div_mul_div_comm, hw]
-      simp only [map_div₀, map_sub, map_mul, map_pow, map_add]
+      simp only [map_div₀, map_sub, map_mul, map_pow, map_add (f := _)]
       field_simp
     rw [e1, norm_algebraMap', norm_div, norm_pow, hz1, one_pow, div_one]
     exact hQ

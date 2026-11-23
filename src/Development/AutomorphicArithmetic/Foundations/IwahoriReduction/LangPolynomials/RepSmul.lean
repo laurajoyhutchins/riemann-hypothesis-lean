@@ -1,5 +1,48 @@
-import Development.AutomorphicArithmetic.Foundations.IwahoriReduction.LangPolynomials.FixedIntegersIsUnitOfNotMemPrimeSpan
-import Development.AutomorphicArithmetic.Foundations.IwahoriReduction.LangPolynomials.WdVal
+module
+
+public import Development.AutomorphicArithmetic.Foundations.IwahoriReduction.LangPolynomials.FixedIntegersIsUnitOfNotMemPrimeSpan
+public import Development.AutomorphicArithmetic.Foundations.IwahoriReduction.LangPolynomials.WdVal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Formalism.ConjugateSelfDual ReciprocityTheory.Gal Formalism.MainNotions.N GlobalTheory.GalOfCusp UpperTheory.V UpperTheory.V.Af UpperTheory.V.HV GlobalTheory.Ord2 GlobalTheory.KZ GlobalTheory.Col UpperTheory.Kd.C7
 
@@ -12,8 +55,8 @@ private theorem rs_dl_mul {R : Type} [CommRing R] {f g : PowerSeries R} (hf : Is
   have hinv : Ring.inverse ((u : PowerSeries R) * v) = ↑v⁻¹ * ↑u⁻¹ := by
     rw [← Units.val_mul, Ring.inverse_unit, mul_inv_rev, Units.val_mul]
   simp only [dl, dd, Ring.inverse_unit, Derivation.leibniz, smul_eq_mul, hinv]
-  linear_combination ((1 + PowerSeries.X) * PowerSeries.derivative R v * ↑v⁻¹) * hu +
-    ((1 + PowerSeries.X) * PowerSeries.derivative R u * ↑u⁻¹) * hv
+  linear_combination ((1 + PowerSeries.X) * PowerSeries.derivative (R := R) v * ↑v⁻¹) * hu +
+    ((1 + PowerSeries.X) * PowerSeries.derivative (R := R) u * ↑u⁻¹) * hv
 
 private theorem rs_dl_one {R : Type} [CommRing R] : dl (1 : PowerSeries R) = 0 := by
   simp [dl, dd]
@@ -80,12 +123,13 @@ private theorem rs_cg {l : ℕ} [Fact l.Prime] {c : Coef l} (β : Bas c) (he : �
       _ = ∑ i, β.val i * algebraMap ℤ_[l] (PadicAlgCl l) (∑ k, β.mat b i k * (x k : ℤ_[l])) := by
           rw [Finset.sum_comm]
           refine Finset.sum_congr rfl fun i _ => ?_
+
           rw [map_sum, Finset.mul_sum]
           refine Finset.sum_congr rfl fun k _ => ?_
           rw [map_mul, map_natCast]
           ring
       _ = _ := by
-          simp only [hw, map_add, map_mul, map_pow, map_natCast, mul_add, Finset.sum_add_distrib, Finset.mul_sum]
+          simp only [hw, map_add (f := _), map_mul, map_pow, map_natCast, mul_add, Finset.sum_add_distrib, Finset.mul_sum]
           congr 1
           refine Finset.sum_congr rfl fun i _ => ?_
           ring
@@ -159,7 +203,7 @@ theorem UpperTheory.Kd.C7.pRepSmul :
   obtain ⟨hprim, hnm, hunits, hval, hK⟩ := hB
   have hpv : ∀ i, pv (P' i) (ζ m) = ∏ k, pv (P k) (ζ m) ^ a i k := by
     intro i
-    simp only [P', pv, Polynomial.eval₂_finset_prod, Polynomial.eval₂_pow]
+    simp only [P', pv, Polynomial.eval₂_finsetProd, Polynomial.eval₂_pow]
   refine ⟨P', ⟨hprim, hnm, fun i => ?_, hval, fun s hs hcyc hfix => ?_⟩, fun i => ?_⟩
   · beta_reduce
     rw [hpv i]
@@ -198,17 +242,19 @@ theorem UpperTheory.Kd.C7.pRepSmul :
       fun f z => RingHom.congr_fun (padicHom_ext l (f.comp (algebraMap ℤ_[l] Φ.R)) (algebraMap ℤ_[l] Φ.R)) z
     have htw : Φ.tw m (Φ.act (β.mat b) D i)
         = ∑ k, PowerSeries.C (algebraMap ℤ_[l] Φ.R (β.mat b i k)) * Φ.tw m (D k) := by
+
       simp only [Fr.tw, Fr.act, map_sum, map_mul, PowerSeries.map_C, hfixR]
     unfold LC at hLC ⊢
+
     rw [htw, hser, (rs_dl_prod Finset.univ (fun k => Φ.ser (P k)) hunit (a i)).2, map_sum, map_sum,
-      ← Finset.sum_sub_distrib]
+    ← Finset.sum_sub_distrib]
     refine Ideal.sum_mem _ fun k _ => ?_
     have hdiff : ev Φ.R l m (PowerSeries.C (algebraMap ℤ_[l] Φ.R (β.mat b i k)))
         - ev Φ.R l m ((a i k : ℕ) : PowerSeries Φ.R) ∈ Ideal.span {(l : lev Φ.R l m) ^ n} := by
       have e : PowerSeries.C (algebraMap ℤ_[l] Φ.R (β.mat b i k)) - ((a i k : ℕ) : PowerSeries Φ.R)
           = (l : PowerSeries Φ.R) ^ n * PowerSeries.C (algebraMap ℤ_[l] Φ.R (t i k)) := by
         rw [ht i k]
-        simp only [map_add, map_mul, map_pow, map_natCast]
+        simp only [map_add (f := _), map_mul, map_pow, map_natCast]
         ring
       rw [← map_sub, e, map_mul, map_pow, map_natCast]
       exact Ideal.mul_mem_right _ _ (Ideal.mem_span_singleton_self _)

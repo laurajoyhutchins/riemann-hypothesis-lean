@@ -1,5 +1,50 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.CompactSupportCohomology.ConeMap
+module
+
+public import GroundTheory.ProfiniteCohomology.CompactSupportCohomology.ConeMap
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
@@ -64,19 +109,17 @@ theorem mapOfHomotopyF_comm (h : Homotopy (f ≫ β) (α ≫ f')) (n : ℕ) :
       (shiftNegOneMapF β (n + 1)).hom (shiftNegOneSucc L n ((f.f n).hom p.1) +
         (shiftNegOneD L n).hom p.2) -
           shiftNegOneSucc L' n ((h.hom (n + 1) n).hom ((K.d n (n + 1)).hom p.1))
-    rw [map_add, shiftNegOneMapF_succ_apply, hβ, map_sub, hcomm p.1]
+    rw [map_add (f := _), shiftNegOneMapF_succ_apply, hβ, map_sub, hcomm p.1]
     abel
 
 noncomputable def mapOfHomotopy (h : Homotopy (f ≫ β) (α ≫ f')) :
     mappingCoconeNat f ⟶ mappingCoconeNat f' :=
   CochainComplex.ofHom (mapOfHomotopyF h) (mapOfHomotopyF_comm h)
 
-@[reassoc (attr := simp)]
 theorem mapOfHomotopy_fst (h : Homotopy (f ≫ β) (α ≫ f')) :
     mapOfHomotopy h ≫ fst f' = fst f ≫ α :=
   HomologicalComplex.hom_ext _ _ fun _ => ModuleCat.hom_ext (LinearMap.ext fun _ => rfl)
 
-@[reassoc (attr := simp)]
 theorem inr_mapOfHomotopy (h : Homotopy (f ≫ β) (α ≫ f')) :
     inr f ≫ mapOfHomotopy h = shiftNegOneMap β ≫ inr f' := by
   ext n : 1
@@ -177,7 +220,7 @@ theorem isIso_homologyMap_of_comm (Φ : mappingCoconeNat f ⟶ mappingCoconeNat 
       obtain ⟨u', hu'⟩ := e2' m _ h2
       obtain ⟨u, rfl⟩ := (bβ m).2 u'
       refine ⟨x + (homologyδ f m).hom u, ?_⟩
-      rw [map_add, sδ]
+      rw [map_add (f := _), sδ]
       rw [show (homologyδ f' m).hom ((homologyMap β m).hom u) =
         y' - (homologyMap Φ (m + 1)).hom x from hu']
       abel

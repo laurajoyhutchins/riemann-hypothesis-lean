@@ -1,4 +1,51 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.TraceFormula.GL4GeometricSide.InnerEq
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.TraceFormula.GL4GeometricSide.InnerEq
+import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.ArchimedeanGelfandKernels.LeftEquivariantFunctions.ComplexMatrixCalculus.HaarGramPositivity.IntegralMulRightHaar
+import GroundTheory.AutomorphicForms.RealIwasawaIntegration
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.CStarAlgebra.ContinuousLinearMap
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.InnerProductSpace.Trace
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Compactness.Paracompact
+
+@[expose] public section
 
 noncomputable section
 
@@ -77,7 +124,7 @@ private theorem exists_in (hσ : IsK σ) {c : Un n → ℂ} (hc : Continuous c) 
       have := b.sum_repr' (G κ)
       simpa [G, Submodule.coe_inner] using this.symm
     rw [e]
-    exact continuous_finset_sum _ fun i _ => (hσ.cont v _).smul continuous_const
+    exact continuous_finsetSum _ fun i _ => (hσ.cont v _).smul continuous_const
   have hF : Integrable (fun κ => c κ • G κ) ν :=
     (hc.smul hG).integrable_of_hasCompactSupport (HasCompactSupport.of_compactSpace _)
   refine ⟨((∫ κ, c κ • G κ ∂ν : S) : V), Subtype.coe_prop _, fun w => ?_⟩
@@ -102,7 +149,7 @@ private theorem exists_op (hσ : IsK σ) {c : Un n → ℂ} (hc : Continuous c) 
   · refine ext_inner_left ℂ fun w => ?_
     rw [inner_add_right, hp, hp, hp, ← integral_add (intg ν hσ hc x w) (intg ν hσ hc y w)]
     refine integral_congr_ae (Filter.Eventually.of_forall fun κ => ?_)
-    simp only [map_add, inner_add_right, mul_add]
+    simp only [map_add (f := _), inner_add_right, mul_add]
   · refine ext_inner_left ℂ fun w => ?_
     rw [RingHom.id_apply, inner_smul_right, hp, hp, ← integral_const_mul]
     refine integral_congr_ae (Filter.Eventually.of_forall fun κ => ?_)
@@ -203,7 +250,7 @@ private theorem mem_iso [ν.IsMulLeftInvariant] (hσ : IsK σ) (E : KMod n) (T :
     refine ext_inner_left ℂ fun w => ?_
     rw [hP x w, inner_sum]
     simp_rw [fun i => hw i (innerSL ℂ (b i)) w]
-    rw [← integral_finset_sum]
+    rw [← integral_finsetSum]
     · refine integral_congr_ae (Filter.Eventually.of_forall fun κ => ?_)
       simp only []
       rw [tr_eq, Finset.sum_mul]

@@ -1,4 +1,53 @@
-import Development.WeilBound.ThetaLifts.Reductions.MetaDef
+module
+
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IteratedLineDerivMemWeylAlg
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Calculus.Deriv.Prod
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Monotonicity.Lemmas
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Presheaf
+import Development.WeilBound.ThetaLifts.CartanFactorisation.EqOfInner
+
+@[expose] public section
 
 noncomputable section
 
@@ -91,7 +140,7 @@ theorem LD.mul {U W : ℝ → Sch l →L[ℂ] Sch l} {P Q : Sch l → Sch l} {t�
   have h2 : HasDerivAt (fun t : ℝ => (t - t₀) • schwartzToL2 l (U t (Q f))) (schwartzToL2 l (U t₀ (Q f))) t₀ := by
     simpa using ((hasDerivAt_id t₀).sub_const t₀).fun_smul (hU (Q f))
   have h3 := (h1.fun_add h2).fun_add (hU (W t₀ f))
-  rw [zero_add, ← map_add, add_comm (U t₀ (Q f))] at h3
+  rw [zero_add, ← map_add (f := _), add_comm (U t₀ (Q f))] at h3
   refine h3.congr_of_eventuallyEq (.of_forall fun t => ?_)
   simp only [ContinuousLinearMap.mul_apply, map_sub, map_smul]
   simp only [csmul]
@@ -103,6 +152,7 @@ theorem weyl_step {V : Sch l →L[ℂ] Sch l} {w v : l ⊕ l → ℝ} (h : ∀ f
     (A : Sch l →L[ℂ] Sch l) (f : Sch l) :
     schwartzToL2 l ((A * dRho w) (V f)) = ∑ a, v a • schwartzToL2 l (A (V (dRho (Pi.single a 1) f))) := by
   rw [ContinuousLinearMap.mul_apply, h, dRho_eq_sum v]
+
   simp only [ContinuousLinearMap.sum_apply, ContinuousLinearMap.smul_apply, map_sum, map_smul]
   simp only [csmul]
 
@@ -119,7 +169,7 @@ theorem LD.differentiableAt {V : ℝ → Sch l →L[ℂ] Sch l} {Q : Sch l → S
       filter_upwards [h] with t ht
       exact weyl_step (ht w) A f
     · intro A B hA hB f
-      simp only [ContinuousLinearMap.add_apply, map_add]
+      simp only [ContinuousLinearMap.add_apply, map_add (f := _)]
       exact (hA f).add (hB f)
     · intro c A hA f
       simp only [ContinuousLinearMap.smul_apply, map_smul]
@@ -142,14 +192,15 @@ theorem LD.hasDerivAt {V : ℝ → Sch l →L[ℂ] Sch l} {Q : Sch l →L[ℂ] S
       · have e : dRho w * Q = Q * dRho w - dRho (v' w) := by rw [← hQ, sub_sub_cancel]
         rw [ContinuousLinearMap.mul_apply, ← ContinuousLinearMap.mul_apply (dRho w), e, dRho_eq_sum w,
           dRho_eq_sum (v' w)]
+
         simp only [ContinuousLinearMap.sum_apply, ContinuousLinearMap.smul_apply, map_sum, map_smul, hv0, h0,
-          ContinuousLinearMap.sub_apply, ContinuousLinearMap.mul_apply, map_sub, neg_smul, ← sub_eq_add_neg,
-          Finset.sum_sub_distrib]
+        ContinuousLinearMap.sub_apply, ContinuousLinearMap.mul_apply, map_sub, neg_smul, ← sub_eq_add_neg,
+        Finset.sum_sub_distrib]
         simp only [csmul]
       · filter_upwards [h] with t ht
         exact weyl_step (ht w) A f
     · intro A B hA hB f
-      simp only [ContinuousLinearMap.add_apply, map_add]
+      simp only [ContinuousLinearMap.add_apply, map_add (f := _)]
       exact (hA f).add (hB f)
     · intro c A hA f
       simp only [ContinuousLinearMap.smul_apply, map_smul]

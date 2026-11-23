@@ -1,8 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.IdTower
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.OmegaPullOmegaTraceOfSecTraceOne
-import Development.AbelianVarietyTheory.Definitions.Divisors.NotCompactOfMEqOne
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.AnnihilatorModels.GenericMulOfProd
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IdTower
+public import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.OmegaPullOmegaTraceOfSecTraceOne
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.AnnihilatorModels.GenericMulOfProd
+public import Mathlib.RingTheory.Ideal.Norm.AbsNorm
+public import Mathlib.RingTheory.Valuation.AlgebraInstances
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -54,9 +95,6 @@ variable (l : ℕ) [Fact l.Prime] (H : HTower k) (Ω : Type) [Field Ω] [Algebra
 def piece (θ : H.Γ → L) : Submodule L (L ⊗[ℚ_[l]] Htot l (sch.obj (H.geomZ Ω))) :=
   ⨅ g, Module.End.eigenspace ((hop l H Ω g).baseChange L) (θ g)
 
-theorem piece_le (θ : H.Γ → L) : piece l H Ω L θ ≤ GlobalTheory.GalV.V l H Ω L id θ :=
-  iInf_mono fun _ => Module.End.eigenspace_le_maxGenEigenspace
-
 def IsMat (θ : H.Γ → L) {d : ℕ} (ρ : (Ω ≃ₐ[k] Ω) →* GL (Fin d) L) : Prop :=
   ∃ b : Module.Basis (Fin d) L (piece l H Ω L θ), ∀ σ j,
     galV l H Ω L σ (b j).1 = ∑ i, (ρ σ : Matrix (Fin d) (Fin d) L) i j • (b i).1
@@ -66,9 +104,6 @@ end Tower
 def IsGr {Γ L : Type} [Group Γ] [Field L] {d : ℕ} (ρ₀ ρ : Γ →* GL (Fin d) L) : Prop :=
   ∃ c : Fin d → ℕ, ∀ g, (ρ₀ g : Matrix (Fin d) (Fin d) L).BlockTriangular c ∧
     ∀ i j, (ρ g : Matrix (Fin d) (Fin d) L) i j = if c i = c j then (ρ₀ g : Matrix (Fin d) (Fin d) L) i j else 0
-
-theorem isGr_refl {Γ L : Type} [Group Γ] [Field L] {d : ℕ} (ρ : Γ →* GL (Fin d) L) : IsGr ρ ρ :=
-  ⟨fun _ => 0, fun _ => ⟨fun _ _ h => absurd h (lt_irrefl _), fun _ _ => by simp⟩⟩
 
 section Cover
 

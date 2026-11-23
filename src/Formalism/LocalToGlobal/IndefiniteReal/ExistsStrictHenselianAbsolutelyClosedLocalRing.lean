@@ -1,6 +1,53 @@
-import Mathlib
-import Formalism.LocalToGlobal.IndefiniteReal.AllPartsTransfer
-import Lemmata.RankOneOrbitForms.RankOneForm
+module
+
+public import Formalism.LocalToGlobal.IndefiniteReal.AllPartsTransfer
+public import Lemmata.RankOneOrbitForms.RankOneForm
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.CoassocSimps
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Module NumberField
 
@@ -35,16 +82,17 @@ section Char
 variable {K : Type} [Field K] {G : Type} [Group G] [Fintype G]
   {T : Type} [AddCommGroup T] [Module K T] [FiniteDimensional K T]
 
-open Classical in
 
+open Classical in
 theorem trace_formula (τ : Representation K G T) (H₀ H : Subgroup G) (χ₀ : H₀ →* (𝓞 K)ˣ)
     (χ : H →* (𝓞 K)ˣ) (a b : G) :
     LinearMap.trace K T (epP H₀ χ₀ τ ∘ₗ τ a ∘ₗ epP H χ τ ∘ₗ τ b) =
       ((Nat.card H₀ : K)⁻¹ * (Nat.card H : K)⁻¹) *
         ∑ h₀ : H₀, ∑ h : H, ((((χ₀ h₀⁻¹ : (𝓞 K)ˣ) : 𝓞 K) : K) *
           (((χ h⁻¹ : (𝓞 K)ˣ) : 𝓞 K) : K)) * charOf τ ((h₀ : G) * a * h * b) := by
+
   simp only [← Module.End.mul_eq_comp, epP, Finset.sum_mul, Finset.mul_sum, smul_mul_assoc,
-    mul_smul_comm, map_smul, map_sum, smul_eq_mul, ← map_mul, charOf, mul_assoc]
+  mul_smul_comm, map_smul, map_sum, smul_eq_mul, ← map_mul, charOf, mul_assoc]
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun h₀ _ => Finset.sum_congr rfl fun h _ => ?_
   rw [map_mul (algebraMap (𝓞 K) K)]
@@ -74,8 +122,10 @@ theorem norm_trace_le (hC : CharFacts) (τ : Representation K G T) (H₀ H : Sub
   have hB : ‖σ (∑ h₀ : H₀, ∑ h : H, ((((χ₀ h₀⁻¹ : (𝓞 K)ˣ) : 𝓞 K) : K) *
           (((χ h⁻¹ : (𝓞 K)ˣ) : 𝓞 K) : K)) * charOf τ ((h₀ : G) * a * h * b))‖ ≤
       ∑ _h₀ : H₀, ∑ _h : H, (finrank K T : ℝ) := by
+
     rw [map_sum]
     refine norm_sum_le_of_le _ fun h₀ _ => ?_
+
     rw [map_sum]
     refine norm_sum_le_of_le _ fun h _ => ?_
     rw [map_mul, map_mul, norm_mul, norm_mul, norm_chi, norm_chi, one_mul, one_mul]
@@ -122,14 +172,15 @@ section Alg
 
 variable {K : Type} [Field K] {G : Type} [Group G] [Fintype G]
 
-open Classical in
 
+open Classical in
 def epA (H : Subgroup G) (χ : H →* (𝓞 K)ˣ) : MonoidAlgebra K G :=
   ((Nat.card H : ℕ) : K)⁻¹ •
     ∑ h : H, MonoidAlgebra.single (h : G) ((((χ h⁻¹ : (𝓞 K)ˣ) : 𝓞 K) : K))
 
 theorem asAlg_epA (H : Subgroup G) (χ : H →* (𝓞 K)ˣ) {V : Type} [AddCommGroup V] [Module K V]
     (ρ : Representation K G V) : ρ.asAlgebraHom (epA H χ) = epP H χ ρ := by
+
   simp only [epA, epP, map_smul, map_sum, Representation.asAlgebraHom_single]
 
 def eA {T : Type} [AddCommGroup T] [Module K T] (τ : Representation K G T) : MonoidAlgebra K G :=
@@ -138,14 +189,15 @@ def eA {T : Type} [AddCommGroup T] [Module K T] (τ : Representation K G T) : Mo
 theorem asAlg_eA {T : Type} [AddCommGroup T] [Module K T] (τ : Representation K G T)
     {V : Type} [AddCommGroup V] [Module K V] (ρ : Representation K G V) :
     ρ.asAlgebraHom (eA τ) = eS τ ρ := by
+
   simp only [eA, eS, map_smul, map_sum, Representation.asAlgebraHom_single]
 
 end Alg
 
 end NormTraceLemmas
 
-open NormTraceLemmas in
 
+open NormTraceLemmas in
 theorem core_of (hC : CharFacts) (hK : KeyZero) (hS : Schur) (hP : IdemP) : Core := by
   intro K _ _ G _ _ S T _ _ _ τ H₀ χ₀ H χ hgood hM1 s
   obtain ⟨γ, δ, c, hdet, htr, he1, he2⟩ :=
@@ -208,14 +260,16 @@ theorem core_of (hC : CharFacts) (hK : KeyZero) (hS : Schur) (hP : IdemP) : Core
           _ = a := by rw [ii, ha]
       have hy : (τ s).asAlgebraHom (∑ j, ∑ i, c⁻¹ j i • (epA H χ * MonoidAlgebra.of K G (γ j) *
           epA H₀ χ₀ * MonoidAlgebra.of K G (δ i) * epA H χ) - epA H χ) = 0 := by
+
         simp only [map_sub, map_sum, map_mul, map_smul, asAlg_epA, Representation.asAlgebraHom_of,
-          Module.End.mul_eq_comp, LinearMap.comp_assoc]
+        Module.End.mul_eq_comp, LinearMap.comp_assoc]
         rw [he2, sub_self]
       have := LinearMap.congr_fun (hK K G (T s) (τ s) V ρ _ hy) a
+
       simp only [LinearMap.comp_apply, map_sub, map_sum, map_mul, map_smul, asAlg_epA,
-        Representation.asAlgebraHom_of, LinearMap.sub_apply, LinearMap.sum_apply,
-        Module.End.mul_apply, LinearMap.smul_apply, LinearMap.zero_apply, ce₀, ce_g, ce, ea, Ea,
-        sub_eq_zero] at this
+      Representation.asAlgebraHom_of, LinearMap.sub_apply, LinearMap.sum_apply,
+      Module.End.mul_apply, LinearMap.smul_apply, LinearMap.zero_apply, ce₀, ce_g, ce, ea, Ea,
+      sub_eq_zero] at this
       exact this
 
 end Formalism.IndefR.LatticeTransfer

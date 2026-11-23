@@ -1,12 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.MatrixOfBesselTwoSidedAction
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.BesselOrbitOpNormIntegralFiniteOnCompactRegularStatement
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.BesselSubgroupsClosedUnitaryWCompactStatement
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.BesselOpNormPowerIntegralLtTopClosedSubgroupStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.MatrixOfBesselTwoSidedAction
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.BesselConstantBoundsOfGeTwoNPowFiveStatement
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.BesselFormConvergesEquivariantHermitianStatement
 import Development.AbelianVarietyTheory.Proofs.FlagMeasures.BesselModelUnitaryGroupOpNormPropertiesStatement
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.BesselConstantBoundsOfGeTwoNPowFiveStatement
+import Development.AbelianVarietyTheory.Proofs.FlagMeasures.BesselOpNormPowerIntegralLtTopClosedSubgroupStatement
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.BesselOrbitOpNormIntegralFiniteOnCompactRegularStatement
 import Development.AbelianVarietyTheory.Proofs.FlagMeasures.BesselSubgroupRepTwistedIsUnitaryRepStatement
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.BesselFormConvergesEquivariantHermitianStatement
+import Development.AbelianVarietyTheory.Proofs.FlagMeasures.BesselSubgroupsClosedUnitaryWCompactStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+set_option backward.isDefEq.respectTransparency false
+
+@[expose] public section
 
 noncomputable section
 
@@ -45,7 +88,7 @@ theorem aesm_of_continuousOn {X E : Type*} [TopologicalSpace X] [MeasurableSpace
   rwa [Measure.restrict_eq_self_of_ae_mem hμ] at this
 
 theorem continuous_rankOneOperator : Continuous fun p : Wp × Wq => rk1 p.1 p.2 :=
-  (ContinuousLinearMap.smulRightL ℂ Wq Wp).continuous₂.comp
+  (StrongDual.smulRightL ℂ Wq Wp).continuous₂.comp
     (((innerSL ℂ (E := Wq)).continuous.comp continuous_snd).prodMk continuous_fst)
 
 theorem rankOneInnerOperator_smul_smul (c c' : ℂ) (a : Wp) (b : Wq) : rk1 (c • a) (c' • b) = (c * star c') • rk1 a b := by
@@ -57,7 +100,7 @@ theorem integral_prod_rankOneInnerOperator [CompleteSpace Wp] [CompleteSpace Wq]
     {g : β → Wq} (hf : Integrable f μ) (hg : Integrable g ν) :
     ∫ z, rk1 (f z.1) (g z.2) ∂μ.prod ν = rk1 (∫ x, f x ∂μ) (∫ y, g y ∂ν) := by
   have hg' : Integrable (fun y => innerSL ℂ (g y)) ν := (innerSL ℂ (E := Wq)).integrable_comp hg
-  have h := integral_prod_bilin (ContinuousLinearMap.smulRightL ℂ Wq Wp).flip hf hg'
+  have h := integral_prod_bilin (StrongDual.smulRightL ℂ Wq Wp).flip hf hg'
   have h2 : ∫ y, innerSL ℂ (g y) ∂ν = innerSL ℂ (∫ y, g y ∂ν) :=
     ContinuousLinearMap.integral_comp_commSL RCLike.conj_smul (innerSL ℂ (E := Wq)) hg
   rw [h2] at h
@@ -137,7 +180,7 @@ theorem DD_stable {σ : Mat k r → (H →L[ℂ] H)} (hG : IsClosedSub k r (GG k
     rw [hσ.1.2 g hg h hh] at this
     exact this
   | zero => simp
-  | add x y _ _ hx hy => rw [map_add]; exact (DD σ w).add_mem hx hy
+  | add x y _ _ hx hy => rw [map_add (f := _)]; exact (DD σ w).add_mem hx hy
   | smul c x _ hx => rw [map_smul]; exact (DD σ w).smul_mem c hx
 
 theorem integral_coef_translate {σ : Mat k r → (H →L[ℂ] H)} [CompleteSpace H]
@@ -230,13 +273,16 @@ theorem integrable_triple {σ : Mat k r → (H →L[ℂ] H)} {w : H} {a : ℝ} {
       ((Matrix.of q.1.1 : Mat k r) ∈ Sset k r z ∧ (Matrix.of q.1.2 : Mat k r) ∈ Sset k r z') ∧
         (Matrix.of q.2 : Mat k r) ∈ GG k r} :=
     ((hSc.2.1.preimage c1).inter (hSc'.2.1.preimage c2)).inter (hG.2.1.preimage c3)
+  let K : Set ((Mt k r × Mt k r) × Mt k r) := {q |
+    ((Matrix.of q.1.1 : Mat k r) ∈ Sset k r z ∧ (Matrix.of q.1.2 : Mat k r) ∈ Sset k r z') ∧
+      (Matrix.of q.2 : Mat k r) ∈ GG k r}
   refine hmaj.mono' (aesm_of_continuousOn hcl hK ?_) ?_
-  · exact (((continuousOn_coef hσ w w₀).comp (c1.matrix_mul c3).continuousOn
-        fun q hq => hG.2.2.2.1 _ (hSc.1 hq.1.1) _ hq.2).mul ((continuousOn_coef hσ w w₀').comp
+  · exact (((continuousOn_coef hσ w w₀).comp (s := K) (c1.matrix_mul c3).continuousOn
+        fun q hq => hG.2.2.2.1 _ (hSc.1 hq.1.1) _ hq.2).mul ((continuousOn_coef hσ w w₀').comp (s := K)
         ((c2.matrix_mul continuous_const).matrix_mul c3).continuousOn
         fun q hq => hG.2.2.2.1 _ (hG.2.2.2.1 _ (hSc'.1 hq.1.2) _ hγi) _ hq.2).star).smul
-      (continuous_rankOneOperator.comp_continuousOn ((hf.comp c1.continuousOn fun q hq => hq.1.1).prodMk
-        (hf'.comp c2.continuousOn fun q hq => hq.1.2)))
+      (continuous_rankOneOperator.comp_continuousOn ((hf.comp (s := K) c1.continuousOn fun q hq => hq.1.1).prodMk
+        (hf'.comp (s := K) c2.continuousOn fun q hq => hq.1.2)))
   · filter_upwards [hK] with q hq
     obtain ⟨⟨hs, hs'⟩, hx⟩ := hq
     have hb1 := hΦb γ rfl q.1 hs hs'
@@ -274,8 +320,8 @@ theorem integrable_triple {σ : Mat k r → (H →L[ℂ] H)} {w : H} {a : ℝ} {
 
 end GlobalTheory.SgInf.OrbSchur
 
-open GlobalTheory.SgInf.OrbSchur in
 
+open GlobalTheory.SgInf.OrbSchur in
 theorem GlobalTheory.SgInf.OO_eq_inv_deg_smul_Iint : ∀ (k r : ℕ) {H : Type} [NormedAddCommGroup H] [InnerProductSpace ℂ H] [CompleteSpace H] {Wp : Type} [NormedAddCommGroup Wp] [InnerProductSpace ℂ Wp] [FiniteDimensional ℂ Wp] [CompleteSpace Wp] {Wq : Type} [NormedAddCommGroup Wq] [InnerProductSpace ℂ Wq] [FiniteDimensional ℂ Wq] [CompleteSpace Wq] (σ : Mat k r → (H →L[ℂ] H)) (w : H) (a : ℝ) (μG : Measure (Mt k r)) (d : ℝ) (z : Fin (2 * r + k + 1) → ℂ) (c : Fin r → ℂ) (π : Mat k r → (Wp →L[ℂ] Wp)) (μS : Measure (Mt k r)) (z' : Fin (2 * r + k + 1) → ℂ) (c' : Fin r → ℂ) (π' : Mat k r → (Wq →L[ℂ] Wq)) (μS' : Measure (Mt k r)) , Std σ w a μG d → Side z π μS → Side z' π' μS' → ∀ w₀ ∈ DD σ w, ∀ w₀' ∈ DD σ w, ∀ (ξ : Wp) (ξ' : Wq), ∀ γ ∈ Greg k r z z', Integrable (fun p : Mt k r × Mt k r => coef σ w₀' w₀ (Matrix.of (act2 γ p)) • rk1 (PiS (psiGen k r z c) π (Matrix.of p.1)⁻¹ ξ) (PiS (psiGen k r z' c') π' (Matrix.of p.2)⁻¹ ξ')) (μS.prod μS') ∧ Integrable (fun x : Mt k r => rk1 ((Afun (psiGen k r z c) π μS σ w w₀ ξ) (Matrix.of x)) ((Afun (psiGen k r z' c') π' μS' σ w w₀' ξ') (γ⁻¹ * Matrix.of x))) μG ∧ OO μG (Afun (psiGen k r z c) π μS σ w w₀ ξ) (Afun (psiGen k r z' c') π' μS' σ w w₀' ξ') γ = (d : ℂ)⁻¹ • Iint (psiGen k r z c) (psiGen k r z' c') π π' μS μS' σ w₀' w₀ ξ ξ' γ := by
   intro k r H _ _ _ Wp _ _ _ _ Wq _ _ _ _ σ w a μG d z c π μS z' c' π' μS' hstd hsd hsd' w₀ hw₀ w₀' hw₀'
     ξ ξ' γ hγ

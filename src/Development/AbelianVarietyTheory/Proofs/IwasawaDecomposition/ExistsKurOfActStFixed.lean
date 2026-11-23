@@ -1,6 +1,48 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.FiniteDimensionalWdSpace
-import Formalism.LocalRingCardinality.AdicCompletionLocal.LocTied
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.LocalPrimeGaloisActionPeriodT
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -39,7 +81,7 @@ theorem exists_kur_of_actSt_fixed (K : FinExt l)
       have hfa : ∀ g ∈ GK K, P.actQ g a = a := fun g hg =>
         C_injective (by rw [← actSt_C, hc]; exact hN g hg)
       obtain ⟨b, hb⟩ := (monSt_eq_zero_iff P (p + C a * X)).mp (by
-        rw [map_add, ← hc]; simp)
+        rw [map_add (f := _), ← hc]; simp)
       have hpb : p = C b - C a * X := by rw [← hb]; ring
       by_cases hc0 : c = 0
       · have : p = C b := by rw [hpb, ha, hc0]; simp
@@ -60,31 +102,5 @@ theorem exists_kur_of_actSt_fixed (K : FinExt l)
           linear_combination a' * h3 - P.actQ g a' * haa
         rw [map_mul, h4]
         linear_combination a' * h2 + ((kummer P g : ℚ_[l]) • P.tB) * haa
-
-theorem isPst_one_of_kummer (l : ℕ) [Fact l.Prime] (P : LocPrime l)
-    (h : ∀ (K : FinExt l) (b : P.R.B), ¬ ∀ g ∈ GK K, P.actQ g b - b = (kummer P g : ℚ_[l]) • P.tB)
-    (K : FinExt l) : IsPst P (1 : Representation ℚ_[l] ↥(GK K) ℚ_[l]) := by
-  have := nontrivial_B P
-  rw [IsPst, rank_self, rank_eq_one_iff]
-  have hmem : ((1 : ℚ_[l]) ⊗ₜ[ℚ_[l]] (1 : Bst P)) ∈ Dpst P (1 : Representation ℚ_[l] ↥(GK K) ℚ_[l]) :=
-    (mem_Dpst P _).mpr ⟨K, fun g _ => by simp⟩
-  refine ⟨toUr P _ ⟨_, hmem⟩, fun h0 => ?_, fun x => ?_⟩
-  · have h1 : ((1 : ℚ_[l]) ⊗ₜ[ℚ_[l]] (1 : Bst P)) = 0 := congrArg Subtype.val h0
-    have h2 := congrArg (TensorProduct.lid ℚ_[l] (Bst P)) h1
-    simp at h2
-  · obtain ⟨⟨x, hx⟩, rfl⟩ := (toUr P _).surjective x
-    obtain ⟨p, rfl⟩ := (TensorProduct.lid ℚ_[l] (Bst P)).symm.surjective x
-    obtain ⟨K', hK'⟩ := (mem_Dpst P _).mp hx
-    obtain ⟨c, hc⟩ := exists_kur_of_actSt_fixed P (supExt K K') (h _) p fun g hg => by
-      have h1 := hK' ⟨g, GK_le (K' := supExt K K') le_sup_left hg⟩
-        (GK_le (K' := supExt K K') le_sup_right hg)
-      rw [lid_symm_apply, stRep_tmul] at h1
-      simpa using congrArg (TensorProduct.lid ℚ_[l] (Bst P)) h1
-    refine ⟨c, ?_⟩
-    rw [smul_toUr]
-    congr 1
-    apply Subtype.ext
-    rw [coe_mulD]
-    simp [hc]
 
 end GlobalTheory.Pst

@@ -1,4 +1,57 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.FourierCoefficientMatrices
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.FourierCoefficientMatrices
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.EmbeddingHermitianPairs
+
+@[expose] public section
 
 namespace ReciprocityTheory.ChartRestriction.G.FD.FourierCoefficientLattice
 
@@ -25,30 +78,6 @@ lemma sum_position (y : ι → Fin 2 → Fin 2 → ℝ) :
   funext τ i k
   simp only [Finset.sum_apply, Fin.sum_univ_two]
   fin_cases i <;> fin_cases k <;> simp [position_apply]
-
-lemma norm_th_lt {y : ι → Fin 2 → Fin 2 → ℝ} (hy : ‖y‖ < 1) (τ : ι) (i k : Fin 2) :
-    ‖th y τ i k‖ < 2 := by
-  have h1 : ∀ a b : Fin 2, |y τ a b| < 1 := fun a b => by
-    have h := (norm_le_pi_norm (y τ a) b).trans ((norm_le_pi_norm (y τ) a).trans (norm_le_pi_norm y τ))
-    rw [Real.norm_eq_abs] at h
-    linarith
-  have hadd : ∀ a b : ℝ, |a| < 1 → |b| < 1 → ‖(a : ℂ) + I * b‖ < 2 := fun a b ha hb => by
-    have e1 : ‖(a : ℂ)‖ = |a| := by simp
-    have e2 : ‖I * (b : ℂ)‖ = |b| := by simp
-    have := norm_add_le (a : ℂ) (I * b)
-    linarith
-  have hsub : ∀ a b : ℝ, |a| < 1 → |b| < 1 → ‖(a : ℂ) - I * b‖ < 2 := fun a b ha hb => by
-    have e1 : ‖(a : ℂ)‖ = |a| := by simp
-    have e2 : ‖I * (b : ℂ)‖ = |b| := by simp
-    have := norm_sub_le (a : ℂ) (I * b)
-    linarith
-  simp only [th]
-  split_ifs
-  · have e1 : ‖(y τ i k : ℂ)‖ = |y τ i k| := by simp
-    have := h1 i k
-    linarith
-  · exact hadd _ _ (h1 i k) (h1 k i)
-  · exact hsub _ _ (h1 k i) (h1 i k)
 
 end Slot
 
@@ -282,7 +311,7 @@ lemma span_fixed_integral_real_parts : Submodule.span ℝ {p : X.Ψ → ℝ | �
     rw [LinearMap.mem_ker, hlam] at h
     have e : ∀ τ : X.Ψ, (τ.1 ((x : E) + cc (x : E))).re = 2 * (τ.1 (x : E)).re := by
       intro τ
-      rw [map_add, show τ.1 (cc (x : E)) = conj (τ.1 (x : E)) from
+      rw [map_add (f := _), show τ.1 (cc (x : E)) = conj (τ.1 (x : E)) from
         NumberField.IsCMField.complexEmbedding_complexConj E τ.1 (x : E), Complex.add_re, Complex.conj_re]
       ring
     simp only [e] at h

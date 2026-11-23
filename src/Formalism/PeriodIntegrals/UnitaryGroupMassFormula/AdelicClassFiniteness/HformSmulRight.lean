@@ -1,6 +1,55 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicClassFiniteness.HformSelfStar
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicClassFiniteness.IdealMulPrincipal
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicClassFiniteness.HformSelfStar
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicClassFiniteness.IdealMulPrincipal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.FreeModule.IdealQuotient
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -15,7 +64,7 @@ variable {E : Type} [Field E] [StarRing E] {m : ℕ} (J : Matrix (Fin m) (Fin m)
 
 theorem hform_add_left' (x x' y : Fin m → E) :
     hform (starRingEnd E) J (x + x') y = hform (starRingEnd E) J x y + hform (starRingEnd E) J x' y := by
-  simp [hform, map_add, add_mul, Finset.sum_add_distrib]
+  simp [hform, map_add (f := _), add_mul, Finset.sum_add_distrib]
 
 theorem hform_add_right' (x y y' : Fin m → E) :
     hform (starRingEnd E) J x (y + y') = hform (starRingEnd E) J x y + hform (starRingEnd E) J x y' := by
@@ -157,7 +206,7 @@ theorem partIso_of (hIB : IdealBoundAll) : PartIso := by
       ⟨{ carrier := {g | ∃ y ∈ p.2, algebraMap (𝓞 E) E g = hform (starRingEnd E) p.1 x y}
          add_mem' := by
            rintro g g' ⟨y, hy, hg⟩ ⟨y', hy', hg'⟩
-           exact ⟨y + y', p.2.add_mem hy hy', by rw [map_add, hg, hg', hform_add_right']⟩
+           exact ⟨y + y', p.2.add_mem hy hy', by rw [map_add (f := _), hg, hg', hform_add_right']⟩
          zero_mem' := ⟨0, p.2.zero_mem, by simp [hform]⟩
          smul_mem' := by
            rintro r g ⟨y, hy, hg⟩
@@ -243,13 +292,13 @@ theorem partIso_of (hIB : IdealBoundAll) : PartIso := by
       ring
     have hfg' : f = algebraMap (𝓞 F) F r + ((2 * d * (k + 1) : ℕ) : F) * algebraMap (𝓞 F) F g := by
       have h := congrArg (algebraMap (𝓞 F) F) hfg
-      rw [map_add, map_mul, map_natCast] at h
+      rw [map_add (f := _), map_mul, map_natCast] at h
       exact h
     have h11 : hform (starRingEnd E) p.1 (y0 + sE • v0) (y0 + sE • v0) =
         algebraMap F E (algebraMap (𝓞 F) F r) := by
       rw [hsm]
       simp only [hform_add_left', hform_add_right', hform_smul_left', hform_smul_right']
-      rw [hyv0, hv0y, hv00, hsstar, ← hf, hfg', hsE, map_add, map_mul, map_natCast]
+      rw [hyv0, hv0y, hv00, hsstar, ← hf, hfg', hsE, map_add (f := _), map_mul, map_natCast]
       push_cast
       ring
     refine ⟨![v0, y0 + sE • v0], ?_, ?_⟩

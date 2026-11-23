@@ -1,17 +1,50 @@
-import Mathlib
-import Formalism.SharpRestriction.InertJacobiLevels.AsmIface
-import Formalism.LocalToGlobal.GlobalTheory.IsResidueClassZero
-import Formalism.SharpRestriction.GrowthBounds.SmallOrderPrimes
-import Formalism.LocalRingCardinality.Lemmas
-import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.PairRowIffQdRows
-import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.DisjointExceptional
-import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.ThinScalesIffHostBound
-import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.LogCondLeThree
-import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.AuxiliaryPrimeMemAvoidedPrimes
-import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.SetUnipotentTranslate
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ExistsRefill
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.MemLocSub
-import Development.AutomorphicArithmetic.OrbitLabellings.EvenAddOrderOfHPOfPowLe
+module
+
+public import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.SetUnipotentTranslate
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ExistsRefill
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.MemLocSub
+public import Development.AutomorphicArithmetic.OrbitLabellings.EvenAddOrderOfHPOfPowLe
+public import Formalism.LocalRingCardinality.Lemmas
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -25,7 +58,11 @@ theorem X'_le_X'' (s : Scale) (R : Ranks) : s.X' ≤ s.X'' R.n := by
   have hx := s.one_lt_alt
   have hx0 : 0 < s.x := by linarith
   have hn : (1 : ℝ) ≤ R.n := by
-    have : 1 ≤ R.n := by unfold Ranks.n; exact Nat.succ_le_of_lt (by positivity)
+    have : 1 ≤ R.n := by
+      unfold Ranks.n
+      have := R.two_le_m
+      have := R.m_le_f
+      omega
     exact_mod_cast this
   have hX : 0 < s.X' := Real.exp_pos _
   have ha : 0 < s.a := by unfold Scale.a Scale.b; positivity
@@ -95,7 +132,7 @@ theorem exists_served {L : SizeData₂ D} (X : Inst D L) (Y : LatInst D) (K : Co
   refine exists_sub (D.plEq w) (fun x => c.cmp u w hg (D.nuIn u x) ∈ NP X Y K u w hg) ?_ ?_ ?_
   · simp
   · intro x y hx hy
-    simp only [map_add]
+    simp only [map_add (f := _)]
     exact Submodule.add_mem _ hx hy
   · intro a x ha hx
     obtain ⟨o, ho⟩ := (c.embW_val u w hg a).1 ha
@@ -109,7 +146,7 @@ theorem exists_atT (u : D.what₂.Word) (w : D.what₂.places.Pl) :
   refine exists_sub (D.plEq w) (fun x => D.nuIn u x ∈ LT.Nlam D u w) ?_ ?_ ?_
   · simp
   · intro x y hx hy
-    simp only [map_add]
+    simp only [map_add (f := _)]
     exact Submodule.add_mem _ hx hy
   · intro a x ha hx
     show D.nuIn u (a • x) ∈ _

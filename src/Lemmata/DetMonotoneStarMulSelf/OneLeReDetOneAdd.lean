@@ -1,5 +1,48 @@
-import Mathlib
-import ReciprocityTheory.L2DbarEstimates.LeviForms.BergmanExistsStatement
+module
+
+public import ReciprocityTheory.L2DbarEstimates.JacobianInterpolationStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.Matrix.Order
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace Bl.DetMonotoneStarMulSelf
 
@@ -18,14 +61,14 @@ private lemma one_le_re_det_one_add {n : ℕ} (D : Matrix (Fin n) (Fin n) ℂ) (
     have h2 := hD.dotProduct_mulVec_nonneg (⇑(hH.eigenvectorBasis i))
     have h3 : 0 ≤ RCLike.re (star ⇑(hH.eigenvectorBasis i) ⬝ᵥ D *ᵥ ⇑(hH.eigenvectorBasis i)) :=
       (Complex.nonneg_iff.mp h2).1
-    rw [add_mulVec, one_mulVec, dotProduct_add, map_add, h1]
+    rw [add_mulVec, one_mulVec, dotProduct_add, map_add (f := _), h1]
     linarith
   rw [hH.det_eq_prod_eigenvalues]
   have hp : (∏ i, ((hH.eigenvalues i : ℝ) : ℂ)).re = ∏ i, hH.eigenvalues i := by
     rw [← Complex.ofReal_prod, Complex.ofReal_re]
   refine le_of_le_of_eq ?_ hp.symm
   calc (1 : ℝ) = ∏ _i : Fin n, (1 : ℝ) := by simp
-    _ ≤ ∏ i, hH.eigenvalues i := Finset.prod_le_prod (fun _ _ => zero_le_one) (fun i _ => key i)
+    _ ≤ ∏ i, hH.eigenvalues i := Finset.prod_le_prod₀ (fun _ _ => zero_le_one) (fun i _ => key i)
 
 open Matrix in
 open scoped ComplexOrder in

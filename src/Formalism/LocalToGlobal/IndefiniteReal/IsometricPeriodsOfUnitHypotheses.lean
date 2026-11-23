@@ -1,5 +1,54 @@
-import Mathlib
-import Formalism.LocalToGlobal.IndefiniteReal.IsometricPeriodsOfHypotheses
+module
+
+public import Formalism.LocalToGlobal.IndefiniteReal.IsometricPeriodsOfHypotheses
+public import Formalism.LocalToGlobal.Divisibility.RowLatLemmas
+import Formalism.LocalToGlobal.IndefiniteReal.CutPassage
+import Formalism.LocalToGlobal.IndefiniteReal.CxLemmas
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Module NumberField IsDedekindDomain
 open scoped Matrix ComplexOrder InnerProductSpace
@@ -144,7 +193,7 @@ theorem isometric_periods_of_unit_hypotheses (hW : (fc X.zs).Df1.WF) (hpos : X.H
   choose w hw using hex
   let W : (Fin ((lv (fc X.zs) true).dQ Bs.μ0) → ℂ) →ₗ[ℂ] (Fin ((lv (fc X.zs) true).dQ Bs.μ0) → ℂ) :=
     { toFun := w
-      map_add' := fun x y => h2.1 (by simp only [hw, map_add])
+      map_add' := fun x y => h2.1 (by simp only [hw, map_add (f := _)])
       map_smul' := fun c y => h2.1 (by simp only [hw, map_smul, RingHom.id_apply]) }
   have hWy : ∀ y, (LinearMap.toMatrix' W).mulVec y = w y := fun y => LinearMap.toMatrix'_mulVec W y
   refine ⟨fun (y : Fin ((lv (fc X.zs) true).dQ Bs.μ0) → ℂ) => ?_, fun y => ?_, ?_, LinearMap.toMatrix' W,
@@ -165,9 +214,9 @@ theorem isometric_periods_of_unit_hypotheses (hW : (fc X.zs).Df1.WF) (hpos : X.H
     let Φ : (Fin ((fc X.zs).Dc.a u) → ℂ) →ₗ[ℂ] (Fin ((lv (fc X.zs) true).dQ Bs.μ0) → ℂ) →ₗ[ℂ] ℂ :=
       LinearMap.mk₂ ℂ
         (fun x y => d.a u * ⟪sEE (d.V (X.iC cr true Bs.μ0 y)), (fc X.zs).Sp.Pu u ((d.U u).mulVec x)⟫_ℂ)
-        (fun x x' y => by simp only [Matrix.mulVec_add, map_add, inner_add_right, mul_add])
+        (fun x x' y => by simp only [Matrix.mulVec_add, map_add (f := _), inner_add_right, mul_add])
         (fun c x y => by simp only [Matrix.mulVec_smul, map_smul, inner_smul_right, smul_eq_mul]; ring)
-        (fun x y y' => by simp only [map_add, inner_add_left, mul_add])
+        (fun x y y' => by simp only [map_add (f := _), inner_add_left, mul_add])
         (fun c x y => by
           simp only [map_smul, LinearMap.map_smulₛₗ, inner_smul_left, smul_eq_mul, starRingEnd_self_apply]; ring)
     have hΦ : d.a u * ⟪sEE (d.V (X.iC cr true Bs.μ0 y)), (fc X.zs).Sp.Pu u ((d.U u).mulVec x)⟫_ℂ = Φ x y := rfl

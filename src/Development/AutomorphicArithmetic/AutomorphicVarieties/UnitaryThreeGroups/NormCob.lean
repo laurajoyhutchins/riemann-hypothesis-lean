@@ -1,8 +1,58 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeGroups.BaseRepGL3NormalisedOfPsiEqOne
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeGroups.BaseRepGL3NormalisedOfPsiEqOne
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Matrix UpperTheory.V.U3
 
-private theorem gstar_right_and_mat_of_right_neg_one_mat_one {G R : Type} [Group G] [CommRing R] (r : G →* GG 3 R) (c g₁ : G)
+private theorem gstar_right_and_mat_of_right_neg_one_mat_one {G R : Type} [Group G] [CommRing R] (r : G →* GG (m := 3) (R := R)) (c g₁ : G)
     (hc : (r c).right = -1) (h1 : (r g₁).right = 1) (hN : (r c).mat = 1) :
     (r (gstar c g₁)).right = 1 ∧ (r (gstar c g₁)).mat = Jmat R 3 * ((r g₁).mat)ᵀ * Jmat R 3 := by
   have hcl : (r c).left = 1 := Units.ext hN
@@ -18,17 +68,17 @@ private theorem gstar_right_and_mat_of_right_neg_one_mat_one {G R : Type} [Group
   rw [hL, theta_val, inv_inv]
   rfl
 
-private theorem cob_mul_mat_eq_commutator_of_right_eq_one {G R : Type} [Group G] [CommRing R] (r : G →* GG 3 R)
+private theorem cob_mul_mat_eq_commutator_of_right_eq_one {G R : Type} [Group G] [CommRing R] (r : G →* GG (m := 3) (R := R))
     (X : Matrix (Fin 3) (Fin 3) R) (g : G) (hg : (r g).right = 1) :
     cob r X g * (r g).mat = X * (r g).mat - (r g).mat * X := by
   show (X - (r g).adFun X) * (r g).mat = _
-  simp only [GG.adFun, hg, if_true]
+  simp only [GG.adFun, hg, ite_true]
   show (X - (r g).mat * X * ((r g).left⁻¹ : GL (Fin 3) R)) * ((r g).left : Matrix (Fin 3) (Fin 3) R) = _
   rw [sub_mul, mul_assoc, Units.inv_mul, mul_one]
   rfl
 
 theorem UpperTheory.V.U3.normCoc_cob_iff :
-    ∀ {G R : Type} [Group G] [CommRing R] (r : G →* GG 3 R) (c g₁ : G) (X : Matrix (Fin 3) (Fin 3) R), IsUnit (2 : R) → (r c).right = -1 → (r g₁).right = 1 →
+    ∀ {G R : Type} [Group G] [CommRing R] (r : G →* GG (m := 3) (R := R)) (c g₁ : G) (X : Matrix (Fin 3) (Fin 3) R), IsUnit (2 : R) → (r c).right = -1 → (r g₁).right = 1 →
       Normalised c g₁ r → IsUnit (zeta c g₁ r) → (NormCoc c g₁ r (cob r X) ↔ X ∈ unitaryThreeTorusLieAlgebra R) := by
   intro G R _ _ r c g₁ X h2 hc h1 hn hz
   obtain ⟨hsr, hsm⟩ := gstar_right_and_mat_of_right_neg_one_mat_one r c g₁ hc h1 hn.atc
@@ -36,7 +86,7 @@ theorem UpperTheory.V.U3.normCoc_cob_iff :
   have hA : cob r X c = X - thetaLie X := by
     show X - (r c).adFun X = _
     have hne : (r c).right ≠ 1 := by rw [hc]; decide
-    simp only [GG.adFun, if_neg hne, hn.atc, one_mul]
+    simp only [GG.adFun, ite_eq_right hne, hn.atc, one_mul]
     rw [hcl, inv_one, Units.val_one, mul_one]
   have hW : zvar c g₁ r (cob r X) = X * ((r g₁).mat - Jmat R 3 * ((r g₁).mat)ᵀ * Jmat R 3)
       - ((r g₁).mat - Jmat R 3 * ((r g₁).mat)ᵀ * Jmat R 3) * X := by
@@ -94,7 +144,8 @@ theorem UpperTheory.V.U3.normCoc_cob_iff :
     · rw [hA]
       ext i j
       fin_cases i <;> fin_cases j <;>
-        simp [thetaLie, Jmat, wt1, Matrix.mul_apply, Fin.sum_univ_three, Fin.rev, Matrix.diagonal] <;> ring
+        simp [thetaLie, Jmat, wt1, Matrix.mul_apply, Fin.sum_univ_three, Fin.rev,
+          Matrix.smul_apply, Matrix.diagonal_apply] <;> ring
     · rw [hW]
       simp [Jmat, wt1, Matrix.mul_apply, Fin.sum_univ_three, Fin.rev, Matrix.diagonal]
       linear_combination a * z12

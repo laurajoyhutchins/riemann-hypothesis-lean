@@ -1,4 +1,55 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.LevAInv
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.PointStep
+public import Formalism.HermitianCurvature.StatementJF
+public import Formalism.FormalDegreeBessel.FormalDegreeRatio.UnitaryWeylNormalHolds
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.HeisConjInt
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.HermitianFormFactor
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.LevAInv
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.RhsInt
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.SymmetricScalarBlockMatrixMul
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.ConjugationInvarianceEverySetting
+
+@[expose] public section
 
 open Matrix MeasureTheory
 open scoped ComplexConjugate
@@ -110,23 +161,23 @@ theorem jfStep_of (hO : MCOm) : JFStep := by
 
   have w1 : ∀ᵐ x ∂B0.μW, Matrix.of x ∈ UWset k ρ B0.z := ae_mem_of_haar B0.haarW
   have w1' : ∀ᵐ x ∂B0.μW', Matrix.of x ∈ UWset k ρ B0.z' := ae_mem_of_haar B0.haarW'
-  have w2 : ∀ᵐ x ∂(D.muN k ρ), Matrix.of x ∈ Nset k ρ := ae_mem_of_haar (Dx2.MN.haar ρ)
-  have wH : ∀ᵐ x ∂(B2.μHeis k ρ), Matrix.of x ∈ Nset k (1 + ρ) := by
+  have w2 : ∀ᵐ x ∂(D.muN k ρ), Matrix.of x ∈ QuantumDeterminants.Nset k ρ := ae_mem_of_haar (Dx2.MN.haar ρ)
+  have wH : ∀ᵐ x ∂(B2.μHeis k ρ), Matrix.of x ∈ QuantumDeterminants.Nset k (1 + ρ) := by
     filter_upwards [ae_mem_of_haar (Formalism.FourierDecayAlt.P.heisenberg_haar_measure k ρ)] with x hx
     obtain ⟨p, hp⟩ := hx
     rw [← hp]; exact Formalism.FourierDecayAlt.P.heisenberg_mem_unipotent k ρ p
   set μO := (B0.μW.prod (D.muN k ρ)).prod (B0.μW'.prod (D.muN k ρ)) with hμO
   have o1 : ∀ᵐ o ∂μO, Matrix.of o.1.1 ∈ UWset k ρ B0.z :=
     Measure.quasiMeasurePreserving_fst.ae (Measure.quasiMeasurePreserving_fst.ae w1)
-  have o2 : ∀ᵐ o ∂μO, Matrix.of o.1.2 ∈ Nset k ρ :=
+  have o2 : ∀ᵐ o ∂μO, Matrix.of o.1.2 ∈ QuantumDeterminants.Nset k ρ :=
     Measure.quasiMeasurePreserving_fst.ae (Measure.quasiMeasurePreserving_snd.ae w2)
   have o3 : ∀ᵐ o ∂μO, Matrix.of o.2.1 ∈ UWset k ρ B0.z' :=
     Measure.quasiMeasurePreserving_snd.ae (Measure.quasiMeasurePreserving_fst.ae w1')
-  have o4 : ∀ᵐ o ∂μO, Matrix.of o.2.2 ∈ Nset k ρ :=
+  have o4 : ∀ᵐ o ∂μO, Matrix.of o.2.2 ∈ QuantumDeterminants.Nset k ρ :=
     Measure.quasiMeasurePreserving_snd.ae (Measure.quasiMeasurePreserving_snd.ae w2)
-  have i1 : ∀ᵐ i ∂((B2.μHeis k ρ).prod (B2.μHeis k ρ)), Matrix.of i.1 ∈ Nset k (1 + ρ) :=
+  have i1 : ∀ᵐ i ∂((B2.μHeis k ρ).prod (B2.μHeis k ρ)), Matrix.of i.1 ∈ QuantumDeterminants.Nset k (1 + ρ) :=
     Measure.quasiMeasurePreserving_fst.ae wH
-  have i2 : ∀ᵐ i ∂((B2.μHeis k ρ).prod (B2.μHeis k ρ)), Matrix.of i.2 ∈ Nset k (1 + ρ) :=
+  have i2 : ∀ᵐ i ∂((B2.μHeis k ρ).prod (B2.μHeis k ρ)), Matrix.of i.2 ∈ QuantumDeterminants.Nset k (1 + ρ) :=
     Measure.quasiMeasurePreserving_snd.ae wH
   apply integral_congr_ae
   filter_upwards [o1, o2, o3, o4] with o ho1 ho2 ho3 ho4

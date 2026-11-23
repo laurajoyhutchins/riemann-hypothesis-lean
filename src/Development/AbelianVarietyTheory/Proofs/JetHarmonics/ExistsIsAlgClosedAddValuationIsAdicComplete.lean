@@ -1,7 +1,52 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.ExistsWeightBasisFiltration
-import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.ExistsAbsoluteValueOfIsDiscreteValuationRing
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ExistsNnrealValuationOfAddValuation
+module
+
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ExistsNnrealValuationOfAddValuation
+public import Mathlib.Analysis.Normed.Field.Basic
+public import Mathlib.Analysis.Normed.Group.Completion
+public import Mathlib.Topology.MetricSpace.Ultra.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+public import Mathlib.Analysis.Normed.Algebra.Ultra
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+
+@[expose] public section
 
 namespace GlobalTheory
 
@@ -60,51 +105,5 @@ theorem exists_addValuation_expNegTop_eq_nnnorm {C : Type} [NormedField C] [IsUl
   · intro x y
     apply expNegTop_inj_of_eq
     rw [expNegTop_add, hf, hf, hf, nnnorm_mul]
-
-theorem exists_isAlgClosed_addValuation_isAdicComplete :
-    ∀ (F₀ : Type) [Field F₀] [IsAlgClosed F₀] [CharZero F₀] (v₀ : AddValuation F₀ (WithTop ℚ))
-      (p : ℕ), p.Prime → 0 < v₀ (p : F₀) →
-      ∃ (F : Type) (_ : Field F) (_ : IsAlgClosed F) (_ : CharZero F) (e : F₀ →+* F)
-        (v : AddValuation F (WithTop ℚ)), (∀ x, v (e x) = v₀ x) ∧
-        IsAdicComplete (Ideal.span {(p : ReciprocityTheory.ChartRestriction.G.DVR.TWO.Ov v)})
-          (ReciprocityTheory.ChartRestriction.G.DVR.TWO.Ov v) := by
-  intro F₀ _ _ _ v₀ p hp hv
-  let w := expNegAbsoluteValue v₀
-  have hw : ∀ x, w x = (expNegTop (v₀ x) : ℝ) := fun _ => rfl
-  have hp1 : w (p : F₀) < 1 := by
-    rw [hw, ← NNReal.coe_one, NNReal.coe_lt_coe, ← expNegTop_zero, ← not_le, expNegTop_le_iff]
-    exact not_le.2 hv
-  have hp0 : 0 < w (p : F₀) := w.pos (Nat.cast_ne_zero.2 hp.ne_zero)
-  letI : NontriviallyNormedField (WithAbs w) :=
-    { (inferInstance : NormedField (WithAbs w)) with
-      non_trivial := ⟨(WithAbs.toAbs w (p : F₀))⁻¹, by
-        rw [norm_inv]
-        change 1 < (w (p : F₀))⁻¹
-        exact (one_lt_inv₀ hp0).2 hp1⟩ }
-  haveI : IsUltrametricDist (WithAbs w) :=
-    IsUltrametricDist.isUltrametricDist_of_forall_norm_add_le_max_norm fun x y =>
-      isNonarchimedean_expNegAbsoluteValue v₀ x.ofAbs y.ofAbs
-  haveI : IsAlgClosed (WithAbs w) := IsAlgClosed.of_ringEquiv F₀ _ (WithAbs.equiv w).symm
-  let C := UniformSpace.Completion (WithAbs w)
-  letI : NontriviallyNormedField C := completionNontriviallyNormedField (WithAbs w)
-  haveI : IsUltrametricDist C := IsUltrametricDist.of_normedAlgebra (WithAbs w)
-  haveI : IsAlgClosed C :=
-    isAlgClosed_of_denseRange (K := WithAbs w) UniformSpace.Completion.denseRange_coe
-  let e : F₀ →+* C := (algebraMap (WithAbs w) C).comp (WithAbs.equiv w).symm.toRingHom
-  have he : ∀ x, ‖e x‖₊ = expNegTop (v₀ x) := fun x =>
-    NNReal.coe_injective (UniformSpace.Completion.norm_coe (WithAbs.toAbs w x))
-  haveI : CharZero C := charZero_of_injective_ringHom e.injective
-  obtain ⟨v, hvC⟩ := exists_addValuation_expNegTop_eq_nnnorm (C := C) fun x => by
-    obtain ⟨y, hy⟩ := exists_norm_eq_of_completion x
-    exact ⟨v₀ y.ofAbs, NNReal.coe_injective hy.symm⟩
-  have hmem : ∀ x : C, NormedField.valuation x ≤ 1 ↔ 0 ≤ v x := fun x => by
-    rw [NormedField.valuation_apply, ← hvC, ← expNegTop_zero, expNegTop_le_iff]
-  have hO : (NormedField.valuation (K := C)).Integers (ReciprocityTheory.ChartRestriction.G.DVR.TWO.Ov v) :=
-    ⟨Subtype.val_injective, fun x => (hmem _).2 x.2, fun r hr => ⟨⟨r, (hmem r).1 hr⟩, rfl⟩⟩
-  refine ⟨C, inferInstance, inferInstance, inferInstance, e, v,
-    fun x => expNegTop_inj_of_eq (by rw [hvC, he]),
-    NormIntegers.isAdicComplete_span_singleton hO ?_⟩
-  rw [map_natCast, ← map_natCast e, ← coe_nnnorm, he, ← hw]
-  exact hp1
 
 end GlobalTheory

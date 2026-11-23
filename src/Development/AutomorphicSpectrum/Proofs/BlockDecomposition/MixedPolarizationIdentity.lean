@@ -1,5 +1,48 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IsSmoothHermCombLine
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IsSmoothHermCombLine
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -10,7 +53,7 @@ open MvPolynomial ReciprocityTheory.ChartRestriction.G.Geo GlobalTheory.ArInt
 namespace GlobalTheory.CompanionTheory.MixZ.PolarProof
 
 theorem multilinear_eq_zero {V : Type} [AddCommGroup V] {N : ℕ}
-    (M : MultilinearMap ℤ (fun _ : Fin N => V) ℝ)
+    (M : (Fin N → V) →ₘₗ[ℤ] ℝ)
     (hs : ∀ (a : Fin N → V) (σ : Equiv.Perm (Fin N)), M (a ∘ σ) = M a)
     (hd : ∀ x : V, M (fun _ => x) = 0) (a : Fin N → V) : M a = 0 := by
   classical
@@ -19,6 +62,7 @@ theorem multilinear_eq_zero {V : Type} [AddCommGroup V] {N : ℕ}
   have expand : ∀ T : Finset (Fin N), M (fun _ => ∑ i, if i ∈ T then 0 else a i) =
       ∑ f : Fin N → Fin N, if T ⊆ (Finset.univ.image f)ᶜ then M (a ∘ f) else 0 := by
     intro T
+
     rw [M.map_sum (fun _ i => if i ∈ T then 0 else a i)]
     refine Finset.sum_congr rfl fun f _ => ?_
     split_ifs with h
@@ -84,7 +128,7 @@ theorem eq_of_diag {V : Type} [AddCommGroup V] {N : ℕ} (S T : (Fin N → V) �
     intro a j b c
     simp only [Pi.sub_apply, aS, aT]
     ring
-  let M : MultilinearMap ℤ (fun _ : Fin N => V) ℝ :=
+  let M : (Fin N → V) →ₘₗ[ℤ] ℝ :=
     { toFun := S - T
       map_update_add' := by
         intro inst m j b c
@@ -151,10 +195,11 @@ section Lin
 variable {κ : Type} [Fintype κ]
 
 theorem lin_add (a b : κ → ℤ) : lin (fun o => ((a + b) o : ℝ)) = lin (fun o => (a o : ℝ)) + lin (fun o => (b o : ℝ)) := by
-  simp only [lin, Pi.add_apply, Int.cast_add, map_add, add_mul, Finset.sum_add_distrib]
+  simp only [lin, Pi.add_apply, Int.cast_add, map_add (f := _), add_mul, Finset.sum_add_distrib]
 
 theorem lin_elim_zero (n : κ → ℤ) :
     lin (fun o : Option κ => (((o.elim 0 n : ℤ)) : ℝ)) = rename some (lin fun i => (n i : ℝ)) := by
+
   simp [lin, Fintype.sum_option, map_sum, rename_X]
 
 theorem lin_elim_one :
@@ -193,7 +238,7 @@ theorem polar : Polar := by
         by_cases h : i = j
         · subst h; simp
         · simp [Function.update_of_ne h]
-      rw [e, e, e, ← map_add, ← add_mul]
+      rw [e, e, e, ← map_add (f := _), ← add_mul]
       congr 2
       exact lin_add b c
     · intro a j b c

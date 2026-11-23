@@ -1,5 +1,51 @@
+module
+
+public import Formalism.HermitianCurvature.FiniteOrderIntersectionInSmooth
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
 import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerPairs.ConverseStep
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerPairs.ConvAlg
+
+@[expose] public section
 
 open Matrix
 
@@ -27,13 +73,6 @@ theorem ut_sub_one_last {r : ℕ} {u : Matrix (Fin (r + 1)) (Fin (r + 1)) ℂ} (
   by_cases h : j = Fin.last r
   · subst h; simp
   · simp [h, Ne.symm h]
-
-theorem ut_sub_one_col {r : ℕ} {u : Matrix (Fin (r + 1)) (Fin (r + 1)) ℂ} (hu : u ∈ UTset (r + 1))
-    (c d : Fin (r + 1)) (h : c.val ≤ d.val) : (u - 1) d c = 0 := by
-  rcases lt_or_eq_of_le h with h | h
-  · rw [Matrix.sub_apply, hu.1 d c h, Matrix.one_apply_ne (by intro e; subst e; omega), sub_self]
-  · have : c = d := Fin.ext h
-    subst this; rw [Matrix.sub_apply, hu.2, Matrix.one_apply_eq, sub_self]
 
 theorem ut_conj_fix {r : ℕ} {u : Matrix (Fin (r + 1)) (Fin (r + 1)) ℂ} (hu : u ∈ UTset (r + 1))
     (v : Fin (r + 1) → ℂ) (hv : ∀ a : Fin (r + 1), a.val < r → v a = 0) : uᴴ *ᵥ v = v := by
@@ -75,17 +114,5 @@ theorem ut_adiag (k r : ℕ) (z : Fin (2 * r + k + 1) → ℂ) {u : Matrix (Fin 
     · simp [ha, hb]
   · intro c _ hc; simp [hc]
   · simp
-
-theorem lowSupp (k r : ℕ) (z : Fin (2 * r + k + 1) → ℂ) (a : ℕ) (ha : a ≤ r) (x : Fin (r + 1) → ℂ)
-    (hx : ∀ c : Fin (r + 1), a ≤ c.val → x c = 0) (i : Fin (2 * r + k + 1)) (hi : a ≤ i.val) :
-    (∑ c, x c • fvec k r z c) i = 0 := by
-  rw [Finset.sum_apply]
-  refine Finset.sum_eq_zero fun c _ => ?_
-  by_cases hc : a ≤ c.val
-  · simp [hx c hc]
-  · have hcr : c.val < r := by omega
-    have hne : i ≠ eI k r ⟨c.val, hcr⟩ := by
-      intro e; rw [Fin.ext_iff] at e; simp [eI] at e; omega
-    simp [fvec, hcr, bvec, Pi.single_apply, hne]
 
 end PI.StabPairs.Conv

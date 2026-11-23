@@ -1,6 +1,45 @@
-import Mathlib
-import Formalism.LocalToGlobal.Divisibility.LiftLatLemmas
-import Formalism.QuotientMetricDivisors.SixthReductionExplicit
+module
+
+public import Formalism.LocalToGlobal.Divisibility.LiftLat
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -48,27 +87,8 @@ variable (R : NRec)
 
 def lifts : Finset ℕ := Finset.Icc 1 R.m
 
-open Classical in
-
-def etaSum (j : ℕ) : ℝ :=
-  ∑ w ∈ R.supp.filter R.tw, R.lwP w * (R.ramIdx w : ℝ) * (R.etaJ j w : ℝ)
-
-def fmbL : ℝ := (R.f : ℝ) * R.m * R.b * R.L
 
 end NRec
-
-def K0 (Cc Ce : ℝ) : ℝ := 4 * Cc * Ce + 48 * Cc + 1
-
-def NonnegativeDivisorCountBoundAt (R : NRec) (K : ℝ) : Prop :=
-  Summable R.vvTerm → ∀ j ∈ R.lifts, R.etaSum j ≤ (R.dZ0 j : ℝ) * (K * R.fmbL + ∑' l, R.vvTerm l)
-
-def ExportAt (R : NRec) (SF : Prop) (C : ℝ) : Prop :=
-  SF → Summable R.vvTerm → ∀ j ∈ R.lifts,
-    R.etaSum j ≤ (R.dZ0 j : ℝ) *
-      (C * ((R.f : ℝ) * R.m * R.b * R.L ^ 2 + (Real.log R.x) ^ 2 * R.Nc) + ∑' l, R.vvTerm l)
-
-def NonnegativeDivisorCountBoundFamily {Ix : ℝ → Type} (Rf : ∀ x, Ix x → NRec) (K : ℝ) : Prop :=
-  ∃ x0 : ℝ, ∀ x ≥ x0, ∀ i : Ix x, NonnegativeDivisorCountBoundAt (Rf x i) K
 
 section Ties
 
@@ -102,58 +122,5 @@ structure Ties : Prop where
   rank : TieRank F P ψ Zs R lift
 
 end Ties
-
-def StatJoint : Prop :=
-  ∀ {K : Type} [Field K] [NumberField K] [StarRing K] {G : Type} [Group G] [Fintype G]
-    {Pl0 T J : Type} [Fintype J] (F : DefFam K G Pl0 T J) (P : Subgroup G) (ψ : P →* Kˣ) (Zs : DefSub F.amb)
-    (μ : HeightOneSpectrum (𝓞 K) → T) (Tw : Finset (HeightOneSpectrum (𝓞 K))) (R : NRec)
-    (ι : HeightOneSpectrum (𝓞 K) → R.Pl) (lift : J → ℕ) (Kc : ℝ),
-    Ties F P ψ Zs μ Tw R ι lift → NonnegativeDivisorCountBoundAt R Kc → Summable R.vvTerm →
-      InEta F P ψ Zs μ Tw (fun _ => Kc * R.fmbL + ∑' l, R.vvTerm l)
-
-def StatJointExport : Prop :=
-  ∀ {K : Type} [Field K] [NumberField K] [StarRing K] {G : Type} [Group G] [Fintype G]
-    {Pl0 T J : Type} [Fintype J] (F : DefFam K G Pl0 T J) (P : Subgroup G) (ψ : P →* Kˣ) (Zs : DefSub F.amb)
-    (μ : HeightOneSpectrum (𝓞 K) → T) (Tw : Finset (HeightOneSpectrum (𝓞 K))) (R : NRec)
-    (ι : HeightOneSpectrum (𝓞 K) → R.Pl) (lift : J → ℕ) (SF : Prop) (C : ℝ),
-    Ties F P ψ Zs μ Tw R ι lift → ExportAt R SF C → SF → Summable R.vvTerm →
-      InEta F P ψ Zs μ Tw
-        (fun _ => C * ((R.f : ℝ) * R.m * R.b * R.L ^ 2 + (Real.log R.x) ^ 2 * R.Nc) + ∑' l, R.vvTerm l)
-
-def NonnegativeDivisorCountBound : Prop :=
-  ∀ (R : NRec) (SF : Prop) (Kc : ℝ), 0 ≤ Kc → 1 ≤ R.L → 0 ≤ R.b → 0 ≤ R.Nc → NonnegativeDivisorCountBoundAt R Kc → ExportAt R SF Kc
-
-def StatComposite : Prop :=
-  ∀ {K : Type} [Field K] [NumberField K] [StarRing K] {G : Type} [Group G] [Fintype G]
-    {Pl0 T J : Type} [Fintype J] (F : DefFam K G Pl0 T J) (P : Subgroup G) (ψ : P →* Kˣ) (Zs : DefSub F.amb)
-    (μ : HeightOneSpectrum (𝓞 K) → T) (Tw : Finset (HeightOneSpectrum (𝓞 K))) (R : NRec)
-    (ι : HeightOneSpectrum (𝓞 K) → R.Pl) (lift : J → ℕ) (Kc eps : ℝ),
-    Ties F P ψ Zs μ Tw R ι lift → NonnegativeDivisorCountBoundAt R Kc → Summable R.vvTerm → 0 ≤ Kc →
-    1 ≤ R.x → 0 < eps → R.L = R.x ^ eps → R.b = Real.exp R.L → 0 ≤ R.Nc → 1 ≤ (R.f : ℝ) → 1 ≤ (R.m : ℝ) →
-    (Real.log R.x) ^ 2 ≤ R.x ^ eps →
-    (hV : ∑' l, R.vvTerm l ≤ Real.sqrt R.b) →
-      InEta F P ψ Zs μ Tw
-        (fun _ => (Kc + 1) * R.x ^ eps * ((R.f : ℝ) * R.m * R.b * R.x ^ eps + R.Nc))
-
-def StatCompositeExport : Prop :=
-  ∀ {K : Type} [Field K] [NumberField K] [StarRing K] {G : Type} [Group G] [Fintype G]
-    {Pl0 T J : Type} [Fintype J] (F : DefFam K G Pl0 T J) (P : Subgroup G) (ψ : P →* Kˣ) (Zs : DefSub F.amb)
-    (μ : HeightOneSpectrum (𝓞 K) → T) (Tw : Finset (HeightOneSpectrum (𝓞 K))) (R : NRec)
-    (ι : HeightOneSpectrum (𝓞 K) → R.Pl) (lift : J → ℕ) (SF : Prop) (C eps : ℝ),
-    Ties F P ψ Zs μ Tw R ι lift → ExportAt R SF C → SF → Summable R.vvTerm → 0 ≤ C →
-    1 ≤ R.x → 0 < eps → R.L = R.x ^ eps → R.b = Real.exp R.L → 0 ≤ R.Nc → 1 ≤ (R.f : ℝ) → 1 ≤ (R.m : ℝ) →
-    (Real.log R.x) ^ 2 ≤ R.x ^ eps →
-    (hV : ∑' l, R.vvTerm l ≤ Real.sqrt R.b) →
-      InEta F P ψ Zs μ Tw
-        (fun _ => (C + 1) * R.x ^ eps * ((R.f : ℝ) * R.m * R.b * R.x ^ eps + R.Nc))
-
-def StatJointF : Prop :=
-  ∀ {K : Type} [Field K] [NumberField K] [StarRing K] {G : Type} [Group G] [Fintype G]
-    {Pl0 T J : Type} [Fintype J] (F : DefFam K G Pl0 T J) (P : Subgroup G) (ψ : P →* Kˣ) (Zs : DefSub F.amb)
-    (μ : HeightOneSpectrum (𝓞 K) → T) (Tw : Finset (HeightOneSpectrum (𝓞 K)))
-    {Ix : ℝ → Type} (Rf : ∀ x, Ix x → NRec) (Kc : ℝ), NonnegativeDivisorCountBoundFamily Rf Kc →
-    ∃ x0 : ℝ, ∀ x ≥ x0, ∀ (i : Ix x) (ι : HeightOneSpectrum (𝓞 K) → (Rf x i).Pl) (lift : J → ℕ),
-      Ties F P ψ Zs μ Tw (Rf x i) ι lift → Summable (Rf x i).vvTerm →
-        InEta F P ψ Zs μ Tw (fun _ => Kc * (Rf x i).fmbL + ∑' l, (Rf x i).vvTerm l)
 
 end Formalism.AdicCompletionExports.NonnegativeDivisors

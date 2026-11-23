@@ -1,4 +1,45 @@
-import Development.WeilBound.RepresentationTheoryGL.HolomorphicDiscreteSeries.WordSpans.RrCompCastSucc
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.HolomorphicDiscreteSeries.WordSpans.WordSpan
+public import Development.WeilBound.RepresentationTheoryGL.HolomorphicDiscreteSeries.WordSpans.RrCompCastSucc
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -26,6 +67,7 @@ theorem qminor_int {V V' : Type} [AddCommGroup V] [Module ℂ V] [AddCommGroup V
       simp only [List.ofFn_succ, List.prod_cons, Module.End.mul_apply]
       rw [h, ih (fun k => g k.succ) (fun k => g' k.succ) (fun k y => h k.succ y)]
   unfold qminor
+
   simp only [LinearMap.sum_apply, map_sum, Module.End.mul_apply]
   refine Finset.sum_congr rfl fun σ _ => ?_
   rw [Module.End.intCast_apply, Module.End.intCast_apply, map_zsmul,
@@ -34,8 +76,9 @@ theorem qminor_int {V V' : Type} [AddCommGroup V] [Module ℂ V] [AddCommGroup V
 theorem thMap : ThMap := by
   intro V V' _ _ _ _ N E E' f hf u X x
   refine ⟨?_, qminor_int f hf _ _ _ _⟩
+
   simp only [Th, LinearMap.pi_apply, LinearMap.sum_apply, map_sum,
-    LinearMap.smul_apply, LinearMap.comp_apply, LinearMap.proj_apply]
+  LinearMap.smul_apply, LinearMap.comp_apply, LinearMap.proj_apply]
   refine Finset.sum_congr rfl fun a _ => ?_
   rw [map_smul, qminor_int f hf]
 
@@ -50,6 +93,7 @@ theorem keyId : KeyId := by
     intro y
     rw [(hT (fun _ => y) 0).2]
     exact h0 _
+
   rw [← LinearMap.map_smul, h, map_sub, map_sum, hq, zero_sub]
   congr 1
   refine Finset.sum_congr rfl fun c _ => ?_

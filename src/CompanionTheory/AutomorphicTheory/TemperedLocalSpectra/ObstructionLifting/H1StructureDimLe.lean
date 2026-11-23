@@ -1,6 +1,46 @@
-import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.ExistsCrystalPairing
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.AbelianHodgeDeRham
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.ComparisonMemCechHodgeFiltration
+public import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.IsAdditiveOfUniversal
+public import Mathlib.AlgebraicGeometry.Morphisms.QuasiFinite
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -46,9 +86,6 @@ def LeftFinite {S : Scheme.{0}} (A B : Over S) (P : LB (A ⊗ B).left) : Prop :=
   ∀ (k : Type) [Field k] [IsAlgClosed k] (t : Sp k ⟶ S),
     Set.Finite {x : Over.mk t ⟶ A | Triv (ev P (fst (Over.mk t) B ≫ x) (snd (Over.mk t) B))}
 
-def LeftZero {S : Scheme.{0}} (A B : Over S) [GrpObj A] (P : LB (A ⊗ B).left) : Prop :=
-  ∀ (T : Over S) (x : T ⟶ A), Triv (ev P (fst T B ≫ x) (snd T B)) → x = 1
-
 def RightZero {S : Scheme.{0}} (A B : Over S) [GrpObj B] (P : LB (A ⊗ B).left) : Prop :=
   ∀ (T : Over S) (y : T ⟶ B), Triv (ev P (fst A T) (snd A T ≫ y)) → y = 1
 
@@ -75,10 +112,6 @@ def FinDual : Prop :=
     IsAbelianScheme A → IsAbelianScheme B → SmoothOfRelativeDimension g A.hom → SmoothOfRelativeDimension g B.hom →
     ∀ P : LB (A ⊗ B).left, PreDual A B P → IsDual A B P
 
-def KFinite : Prop :=
-  ∀ (S : Scheme.{0}) (A : Over S) [GrpObj A], IsAbelianScheme A → ∀ L : LB A.left, L.IsLB → Out.RelAmple A L →
-    LeftFinite A A (abelian₂ A L)
-
 def H90 : Prop :=
   ∀ (X Y : Scheme.{0}) (f : X ⟶ Y), Flat f → LocallyOfFinitePresentation f → Surjective f →
     ∀ u : Γ(pullback f f, ⊤), IsUnit u →
@@ -98,48 +131,12 @@ def RigDescent : Prop :=
         LBIso (ev M (fst A T) (snd A T ≫ x)) (ev M (fst A T) (snd A T ≫ x'))) →
       ∃ N : LB (A ⊗ Y).left, N.IsLB ∧ Triv (ev N (1 : Y ⟶ A) (𝟙 Y)) ∧ LBIso M (ev N (fst A X) (snd A X ≫ q))
 
-def KerOfPullInj : Prop :=
-  ∀ (k : Type) [Field k] (A A' : Over (Sp k)) [GrpObj A] [GrpObj A'], IsAbelianScheme A → IsAbelianScheme A' →
-    ∀ q : A ⟶ A', IsMonHom q → IsFinite q.left → Flat q.left → Surjective q.left →
-    (∀ (T : Over (Sp k)) (N : LB (A' ⊗ T).left), N.IsLB → IsAdditive N →
-      Triv (ev N (fst A T ≫ q) (snd A T)) → Triv N) →
-    ∀ (T : Over (Sp k)) (x : T ⟶ A), x ≫ q = 1 → x = 1
-
-def Construct : Prop :=
-  ∀ (R : Type) [CommRing R] [IsNoetherianRing R] (A : Over (Sp R)) [GrpObj A] (g : ℕ), IsAbelianScheme A →
-    SmoothOfRelativeDimension g A.hom → ∀ L : LB A.left, L.IsLB → Out.RelAmple A L →
-    ∃ (B : Over (Sp R)) (_ : GrpObj B) (P : LB (A ⊗ B).left), IsAbelianScheme B ∧
-      SmoothOfRelativeDimension g B.hom ∧ PreDual A B P
-
-def LeftZeroField : Prop :=
-  ∀ (k : Type) [Field k] [IsAlgClosed k] (A B : Over (Sp k)) [GrpObj A] [GrpObj B] (g : ℕ), IsAbelianScheme A →
-    IsAbelianScheme B → SmoothOfRelativeDimension g A.hom → SmoothOfRelativeDimension g B.hom →
-    ∀ P : LB (A ⊗ B).left, PreDual A B P → LeftZero A B P
-
-def LeftZeroNoeth : Prop :=
-  ∀ (R : Type) [CommRing R] [IsNoetherianRing R] (A B : Over (Sp R)) [GrpObj A] [GrpObj B] (g : ℕ),
-    IsAbelianScheme A → IsAbelianScheme B → SmoothOfRelativeDimension g A.hom → SmoothOfRelativeDimension g B.hom →
-    ∀ P : LB (A ⊗ B).left, PreDual A B P → LeftZero A B P
-
-def PolModel : Prop :=
-  ∀ (R : Type) [CommRing R] (A : Over (Sp R)) [GrpObj A] (g : ℕ), IsAbelianScheme A →
-    SmoothOfRelativeDimension g A.hom → ∀ L : LB A.left, L.IsLB → Out.RelAmple A L →
-    ∃ (R₀ : Type) (_ : CommRing R₀) (σ : R₀ →+* R) (A₀ : Over (Sp R₀)) (_ : GrpObj A₀) (φ : A.left ⟶ A₀.left)
-      (L₀ : LB A₀.left), IsNoetherianRing R₀ ∧ IsAbelianScheme A₀ ∧ SmoothOfRelativeDimension g A₀.hom ∧
-      IsGrpPullback A A₀ (spMap σ) φ ∧ L₀.IsLB ∧ Out.RelAmple A₀ L₀
-
 def KTrivModel : Prop :=
   ∀ (R : Type) [CommRing R] (A : Over (Sp R)) [GrpObj A] (g : ℕ), IsAbelianScheme A →
     SmoothOfRelativeDimension g A.hom → ∀ L : LB A.left, L.IsLB → Out.KTriv A L →
     ∃ (R₀ : Type) (_ : CommRing R₀) (σ : R₀ →+* R) (A₀ : Over (Sp R₀)) (_ : GrpObj A₀) (φ : A.left ⟶ A₀.left)
       (L₀ : LB A₀.left), IsNoetherianRing R₀ ∧ IsAbelianScheme A₀ ∧ SmoothOfRelativeDimension g A₀.hom ∧
       IsGrpPullback A A₀ (spMap σ) φ ∧ L₀.IsLB ∧ Out.KTriv A₀ L₀ ∧ LBIso L (L₀.pull φ)
-
-def DualPol : Prop :=
-  ∀ (R : Type) [CommRing R] (A : Over (Sp R)) [GrpObj A] (g : ℕ), IsAbelianScheme A →
-    SmoothOfRelativeDimension g A.hom → ∀ L : LB A.left, L.IsLB → Out.RelAmple A L →
-    ∃ (B : Over (Sp R)) (_ : GrpObj B) (P : LB (A ⊗ B).left), IsAbelianScheme B ∧
-      SmoothOfRelativeDimension g B.hom ∧ IsDual A B P ∧ IsDual B A (swap P)
 
 def KTrivDual : Prop :=
   ∀ (R : Type) [CommRing R] (A : Over (Sp R)) [GrpObj A] (g : ℕ), IsAbelianScheme A →

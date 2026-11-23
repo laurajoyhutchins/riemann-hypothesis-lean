@@ -1,6 +1,51 @@
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.InfinitesimalCharacterLimits.LieSumDecompositions.GrowPHolds
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LieDerivativeL2InnerProduct
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EqZeroOfMemWeakIn
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.InfinitesimalCharacterLimits.LieSumDecompositions.GrowPHolds
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LieDerivativeL2InnerProduct
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EqZeroOfMemWeakIn
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsFiniteMeasureQuotMeasure
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+public import Mathlib.Analysis.Calculus.Deriv.Star
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -11,7 +56,7 @@ namespace PositivityTheory.Rg.BcB.SpectralAccumulation.Cz.Leaf2Aux
 
 namespace Pair
 
-variable {E : Type} [Field E] [NumberField E] [IsTotallyComplex E] {N : ℕ}
+variable {E : Type} [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] {N : ℕ}
 
 def rmulEquiv (x : GA E N) : Quot (latticeGL E N) ≃ᵐ Quot (latticeGL E N) where
   toFun := rmul (latticeGL E N) x
@@ -47,19 +92,19 @@ theorem exists_eps (a : ℕ → ℝ) (N : ℕ) (h : ∀ r, 0 < r → r < N → 0
 def supP (K : Set (GA E N)) (f g : GA E N → ℂ) (y : GA E N) : ℝ :=
   sSup ((fun k => ‖f (y * k)‖ * ‖g (y * k)‖) '' K)
 
-omit [IsTotallyComplex E] in
+omit [_root_.NumberField.IsTotallyComplex E] in
 theorem continuous_supP {K : Set (GA E N)} (hK : IsCompact K) {f g : GA E N → ℂ} (hf : Continuous f)
     (hg : Continuous g) : Continuous (supP K f g) :=
   hK.continuous_sSup (f := fun y k => ‖f (y * k)‖ * ‖g (y * k)‖)
     ((hf.comp continuous_mul).norm.mul (hg.comp continuous_mul).norm)
 
-omit [IsTotallyComplex E] in
+omit [_root_.NumberField.IsTotallyComplex E] in
 theorem le_supP {K : Set (GA E N)} (hK : IsCompact K) {f g : GA E N → ℂ} (hf : Continuous f) (hg : Continuous g)
     (y : GA E N) {k : GA E N} (hk : k ∈ K) : ‖f (y * k)‖ * ‖g (y * k)‖ ≤ supP K f g y :=
   le_csSup (hK.image ((hf.comp (continuous_const.mul continuous_id)).norm.mul
     (hg.comp (continuous_const.mul continuous_id)).norm)).bddAbove ⟨k, hk, rfl⟩
 
-omit [IsTotallyComplex E] in
+omit [_root_.NumberField.IsTotallyComplex E] in
 theorem supP_nonneg (K : Set (GA E N)) (f g : GA E N → ℂ) (y : GA E N) : 0 ≤ supP K f g y :=
   Real.sSup_nonneg (by rintro _ ⟨k, -, rfl⟩; positivity)
 
@@ -69,7 +114,7 @@ theorem supP_left {K : Set (GA E N)} {f g : GA E N → ℂ} (hf : LeftInv (latti
   unfold supP
   simp only [mul_assoc, hf γ hγ, hg γ hγ]
 
-omit [IsTotallyComplex E] in
+omit [_root_.NumberField.IsTotallyComplex E] in
 theorem bnd_supP {K : Set (GA E N)} (hK : IsCompact K) (hK0 : K.Nonempty) {f g : GA E N → ℂ}
     {m₁ m₂ : ℕ → ℝ} (hf : An.Bnd f m₁) (hg : An.Bnd g m₂) :
     An.Bnd (fun y => (supP K f g y : ℂ)) (m₁ + m₂) := by
@@ -202,7 +247,7 @@ theorem pairLin_of (hI : IntBnd) : PairLin := by
   · unfold pr pet
     rw [← integral_add (integrable_pet hI hf h₁) (integrable_pet hI hf h₂)]
     refine integral_congr_ae (Eventually.of_forall fun q => ?_)
-    simp only [descend, Pi.add_apply, map_add, mul_add]
+    simp only [descend, Pi.add_apply, map_add (f := _), mul_add]
   · unfold pr pet
     rw [← integral_const_mul]
     refine integral_congr_ae (Eventually.of_forall fun q => ?_)

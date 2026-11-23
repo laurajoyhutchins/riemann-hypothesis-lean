@@ -1,4 +1,49 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.LiteratureResults.KTheoryStability.ReductionBoundsTorsion.SBridgeAlt
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.LiteratureResults.KTheoryStability.ReductionBoundsTorsion.ActLPos
+public import Mathlib.NumberTheory.NumberField.InfinitePlace.TotallyRealComplex
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AutomorphicArithmetic.AutomorphicVarieties.TensorHomCubes.StabDirectedSystem
+
+@[expose] public section
 
 noncomputable section
 
@@ -25,13 +70,7 @@ instance instSCSL (N : ℕ) : SecondCountableTopology (SpecialLinearGroup (Fin N
 
 variable (L : Type) [Field L] [NumberField L] (N : ℕ)
 
-example : LocallyCompactSpace (Sp L N) := inferInstance
-example : SecondCountableTopology (Sp L N) := inferInstance
-example : IsTopologicalGroup (Sp L N) := inferInstance
-example : T2Space (Sp L N) := inferInstance
-
 variable {L N} in
-
 abbrev mt (x : Sp L N) (w : InfinitePlace L) : Matrix (Fin N) (Fin N) ℂ :=
   ((x w : SpecialLinearGroup (Fin N) ℂ) : Matrix (Fin N) (Fin N) ℂ)
 
@@ -46,7 +85,6 @@ def dg (s : Fin N → ℝ) (hs : ∑ i, s i = 0) : Sp L N := fun _ =>
     rw [det_diagonal, ← Complex.ofReal_prod, ← Real.exp_sum, hs, Real.exp_zero, Complex.ofReal_one]⟩
 
 variable {N} in
-
 def W (s : Fin N → ℝ) : ℝ := ∑ i : Fin N, ∑ j : Fin N, if (j : ℕ) = i + 1 then |s i - s j| else 0
 
 def Sieg (M T : ℝ) : Set (Sp L N) :=
@@ -54,7 +92,6 @@ def Sieg (M T : ℝ) : Set (Sp L N) :=
     ∃ k ∈ KS L N, x = p * dg L N s hs * k}
 
 variable {L N} in
-
 def IsRatS (c : Sp L N) : Prop :=
   ∃ (g : GL (Fin N) L) (z : InfinitePlace L → ℂ), ∀ w, mt c w = z w • (g : Matrix (Fin N) (Fin N) L).map w.embedding
 

@@ -1,6 +1,55 @@
-import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.ExistsPrimitiveNorm
-import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.LinearIndependentOfGramDetNeZero
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.SpanSInduction
+module
+
+public import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.ExistsNormRepresentation
+public import Mathlib.LinearAlgebra.Matrix.Determinant.Basic
+public import Mathlib.Tactic.Continuity
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.SpanSInduction
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -34,11 +83,11 @@ theorem int_spanS (hS : IsHermSemilocal S) {n : ℕ} {x : Fin n → V}
     (hx : ∀ i j, h (x i) (x j) ∈ S) : ∀ a ∈ spanS S x, ∀ b ∈ spanS S x, h a b ∈ S := by
   intro a ha
   refine spanS_induction (by simp [S.zero_mem]) (fun b c hb hc => by
-    rw [map_add]; exact S.add_mem hb hc) (fun c hc b hb => by
+    rw [map_add (f := _)]; exact S.add_mem hb hc) (fun c hc b hb => by
     rw [map_smul]; exact S.mul_mem hc hb) (fun j => ?_)
   revert a
   refine spanS_induction (by simp [S.zero_mem]) (fun b c hb hc => by
-    rw [map_add, LinearMap.add_apply]; exact S.add_mem hb hc) (fun c hc b hb => by
+    rw [map_add (f := _), LinearMap.add_apply]; exact S.add_mem hb hc) (fun c hc b hb => by
     rw [map_smulₛₗ, LinearMap.smul_apply]; exact S.mul_mem (hS.star_mem _ hc) hb)
     (fun i => hx i j)
 
@@ -56,8 +105,9 @@ theorem gram_det_of_le (hS : IsHermSemilocal S) {n : ℕ} {x y : Fin n → V}
     simp only [gram, Matrix.of_apply, Matrix.mul_apply, Matrix.map_apply, Matrix.transpose_apply,
       RingHom.mapMatrix_apply, Subring.subtype_apply]
     conv_lhs => rw [hT i, hT l]
+
     simp only [map_sum, LinearMap.sum_apply, map_smulₛₗ, LinearMap.smul_apply, smul_eq_mul,
-      starRingEnd_apply, RingHom.id_apply, Finset.sum_mul, Finset.mul_sum]
+    starRingEnd_apply, RingHom.id_apply, Finset.sum_mul, Finset.mul_sum]
     refine Finset.sum_congr rfl fun j _ => Finset.sum_congr rfl fun k _ => ?_
     ring
   have e2 : ((S.subtype.mapMatrix (Matrix.of T)).map star).det =
@@ -132,7 +182,7 @@ theorem exists_pivot (hS : IsHermSemilocal S) (hπ : IsUnif S π) (hs : h.IsSymm
   have hji : h (x j) (x i) = star (h (x i) (x j)) := (hs.eq _ _).symm
   have e : h (x i + s • x j) (x i + s • x j) =
       1 + (star s * s * h (x j) (x j) + h (x i) (x i)) := by
-    simp only [map_add, LinearMap.add_apply, map_smulₛₗ, LinearMap.smul_apply, smul_eq_mul, hji,
+    simp only [map_add (f := _), LinearMap.add_apply, map_smulₛₗ, LinearMap.smul_apply, smul_eq_mul, hji,
       starRingEnd_apply, RingHom.id_apply]
     simp only [star_mul'] at hs1
     linear_combination hs1
@@ -216,7 +266,7 @@ theorem exists_orth_tuple (hS : IsHermSemilocal S) (hπ : IsUnif S π) (hs : h.I
         intro k
         have h1 : y' k ∈ spanS S x' := by rw [← hspan']; exact mem_spanS y' k
         exact spanS_induction (p := fun v => h f v = 0) (by simp)
-          (fun a b ha hb => by rw [map_add, ha, hb, add_zero])
+          (fun a b ha hb => by rw [map_add (f := _), ha, hb, add_zero])
           (fun c _ a ha => by rw [map_smul, ha, smul_zero]) hfx' _ h1
       refine ⟨Fin.cons f y', ?_, ?_⟩
       · intro i j

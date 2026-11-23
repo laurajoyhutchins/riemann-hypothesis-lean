@@ -1,17 +1,62 @@
-import Mathlib
-import Formalism.SharpRestriction.LevelLetterCocycles.LemmasUnramifiedOfRingCondition
-import Formalism.SharpRestriction.LevelLetterCocycles.CrystallineLiftingInputs
-import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.ExistsXPowMul
-import Formalism.SharpRestriction.LevelLetterCocycles.LatticeBoundsOfThreeParts
-import Formalism.SharpRestriction.LevelLetterCocycles.ExpRules
-import Formalism.SharpRestriction.LevelLetterCocycles.DeltaInvariantLattices
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.ExistsXPowMul
+public import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.H2Bound
+import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.ConstantCoeffQZeroEqP
+public import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.ExpPowSubOne
+public import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.GammaLevelsExpansion
+public import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.JumpsLetExists
+public import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.QpEqUnit
+public import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.RkFilLevEq
 import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.RkMultVNonneg
-import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.RkFilLevEq
-import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.JumpsLetExists
-import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.SmulSDivMem
-import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.GammaLevelsExpansion
-import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.QpEqUnit
-import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.H2Bound
+public import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.SmulSDivMem
+import Formalism.SharpRestriction.LevelLetterCocycles.SaturationUnramifiedOfRingCondition
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.PowerSeries.WeierstrassPreparation
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 set_option linter.unusedVariables false
 
@@ -101,11 +146,11 @@ theorem weierstrass_division_qP (hR : Formalism.MainNotions.UnusedSlot80.ToolsR.
     Ideal.Quotient.eq_zero_iff_mem.mpr (Ideal.mem_span_singleton_self _)
   set D : PowerSeries O := X + C ((PD.p : ℕ) : O) with hD
   have hmap : D.map (Ideal.Quotient.mk I) = X := by
-    rw [hD, map_add, map_X, map_C, hpI, map_zero, add_zero]
+    rw [hD, map_add (f := _), map_X, map_C, hpI, map_zero, add_zero]
   have hord : (D.map (Ideal.Quotient.mk I)).order.toNat = 1 := by rw [hmap, order_X]; rfl
   have hdiv : D.IsWeierstrassDivisorAt I := by
     unfold IsWeierstrassDivisorAt
-    rw [hord, hD, map_add, coeff_C, if_neg one_ne_zero, add_zero]
+    rw [hord, hD, map_add (f := _), coeff_C, if_neg one_ne_zero, add_zero]
     simp [coeff_X]
   have HD := hdiv.isWeierstrassDivisionAt_div_mod (f := f a)
   set H := hdiv.div (f a)
@@ -127,7 +172,7 @@ theorem weierstrass_division_qP (hR : Formalism.MainNotions.UnusedSlot80.ToolsR.
       r.coeff 0 • (1 : PowerSeries O) := by
     rw [hf a]
     change subst W.π₀₁ (f a) = _
-    rw [heq, hr, hDn, ← coe_substAlgHom hs0, map_add, map_mul, map_add, substAlgHom_X, map_natCast,
+    rw [heq, hr, hDn, ← coe_substAlgHom hs0, map_add (f := _), map_mul, map_add (f := _), substAlgHom_X, map_natCast,
       map_smul, map_one]
   set h : LetA O n := Pi.single a (subst W.π₀₁ H) with hh
   have key : (letE a : LetA O n) * g = qP W * h + r.coeff 0 • (letE a : LetA O n) := by
@@ -159,7 +204,7 @@ theorem q_pow_dvd_of_level_vanishing (hR : Formalism.MainNotions.UnusedSlot80.To
     obtain ⟨S, hSu, hS⟩ := level_qParameter_eq_X_mul_unit hR hA a ζ hζ
     obtain ⟨r, h1, h1m, e1⟩ := weierstrass_division_qP hR hpu a g hg
     have hL0 := congrArg (fun x => coeff 0 (W.lev a ζ x)) e1
-    simp only [map_add, map_smul, map_mul, level_idempotent_one, one_mul, hS] at hL0
+    simp only [map_add (f := _), map_smul, map_mul, level_idempotent_one, one_mul, hS] at hL0
     rw [hv 0 (Nat.succ_pos _), mul_assoc, coeff_zero_X_mul, zero_add, coeff_smul,
       coeff_zero_eq_constantCoeff, map_one, Algebra.smul_def, mul_one] at hL0
     have hr : r = 0 := hinj (by rw [← hL0, map_zero])
@@ -188,7 +233,7 @@ def QExpansionAlt (W : LocWach PD LL O v n) (a : ZMod n) (g : LetA O n) (F : Pow
 
 theorem trunc_add_alt (F G : PowerSeries O) (N : ℕ) : trunc N (F + G) = trunc N F + trunc N G := by
   ext m
-  simp only [PowerSeries.coeff_trunc, Polynomial.coeff_add, map_add]
+  simp only [PowerSeries.coeff_trunc, Polynomial.coeff_add, map_add (f := _)]
   all_goals split_ifs <;> simp
 
 theorem trunc_sub_alt (F G : PowerSeries O) (N : ℕ) : trunc N (F - G) = trunc N F - trunc N G := by
@@ -204,7 +249,7 @@ theorem trunc_smul_alt (o : O) (F : PowerSeries O) (N : ℕ) : trunc N (o • F)
 theorem aeval_mem_invariants (hR : Formalism.MainNotions.UnusedSlot80.ToolsR.RingP W) (p : Polynomial O) :
     Polynomial.aeval (qP W) p ∈ W.AΔ := by
   induction p using Polynomial.induction_on' with
-  | add p q hp hq => rw [map_add]; exact W.AΔ.add_mem hp hq
+  | add p q hp hq => rw [map_add (f := _)]; exact W.AΔ.add_mem hp hq
   | monomial k c =>
     rw [Polynomial.aeval_monomial]
     exact W.AΔ.mul_mem (W.AΔ.algebraMap_mem c) (W.AΔ.pow_mem (Formalism.MainNotions.UnusedSlot80.ToolsR.qP_AΔ hR) k)
@@ -215,7 +260,7 @@ theorem qExpansion_add_alt {a : ZMod n} {g g' : LetA O n} {F F' : PowerSeries O}
   obtain ⟨h, hh, e1⟩ := hF N
   obtain ⟨h', hh', e2⟩ := hF' N
   refine ⟨h + h', add_mem hh hh', ?_⟩
-  rw [mul_add, e1, e2, trunc_add_alt, map_add]
+  rw [mul_add, e1, e2, trunc_add_alt, map_add (f := _)]
   ring
 
 theorem qExpansion_sub_alt {a : ZMod n} {g g' : LetA O n} {F F' : PowerSeries O} (hF : QExpansionAlt W a g F)
@@ -334,7 +379,7 @@ theorem exists_qExpansion (hR : Formalism.MainNotions.UnusedSlot80.ToolsR.RingP 
             rw [← mul_assoc, idempotent_mul_self_letter]
         _ = _ := by
             rw [e, mul_add, mul_left_comm, mul_smul_comm, idempotent_mul_self_letter]
-    rw [ih, trunc_succ, map_add, Polynomial.aeval_monomial, coeff_mk, e2, hrem]
+    rw [ih, trunc_succ, map_add (f := _), Polynomial.aeval_monomial, coeff_mk, e2, hrem]
     simp only [Algebra.smul_def]
     ring
 
@@ -348,7 +393,7 @@ theorem qExpansion_unique (hR : Formalism.MainNotions.UnusedSlot80.ToolsR.RingP 
   obtain ⟨h', hm', e'⟩ := hG (k + 1)
   have htr : trunc (k + 1) F - trunc (k + 1) G = Polynomial.monomial k (coeff k F - coeff k G) := by
     ext j
-    rw [Polynomial.coeff_sub, coeff_trunc, coeff_trunc, Polynomial.coeff_monomial]
+    rw [Polynomial.coeff_sub, coeff_trunc, coeff_trunc, Polynomial.coeff_monomial_apply]
     by_cases hj : j < k + 1
     · rw [if_pos hj, if_pos hj]
       rcases Nat.lt_succ_iff_lt_or_eq.mp hj with hjk | hjk
@@ -676,6 +721,7 @@ def h2avD (κ : O) (x : W.DD T) : W.DD T := κ • ∑ h ∈ W.DelF, W.γD T h x
 
 theorem averageRing_mem_invariants (κ : O) (a : LetA O n) : h2avA W κ a ∈ W.AΔ := by
   intro g hg
+
   simp only [h2avA, map_smul, map_sum]
   congr 1
   rw [← sum_finiteDelta_translate W (fun h => W.γA h a) hg]
@@ -691,14 +737,12 @@ theorem average_smul_invariant (κ : O) (a : LetA O n) {z : W.DD T} (hz : ∀ h 
   simp only [h2avD, h2avA]
   rw [Finset.sum_congr rfl fun h hh => by rw [gamma_smul_series, hz h hh], ← Finset.sum_smul, smul_assoc]
 
-theorem average_add (κ : O) (x y : W.DD T) : h2avD W T κ (x + y) = h2avD W T κ x + h2avD W T κ y := by
-  simp only [h2avD, map_add, Finset.sum_add_distrib, smul_add]
-
 theorem average_sub (κ : O) (x y : W.DD T) : h2avD W T κ (x - y) = h2avD W T κ x - h2avD W T κ y := by
   simp only [h2avD, map_sub, Finset.sum_sub_distrib, smul_sub]
 
 theorem average_finset_sum (κ : O) {ι : Type} (s : Finset ι) (x : ι → W.DD T) :
     h2avD W T κ (∑ i ∈ s, x i) = ∑ i ∈ s, h2avD W T κ (x i) := by
+
   simp only [h2avD, map_sum]
   rw [Finset.sum_comm, Finset.smul_sum]
 
@@ -719,7 +763,7 @@ theorem pullback_gamma_stable (i : ZMod n) (j : ℕ) {g : W.Gam} (hg : g ∈ W.D
     rw [← frobenius_pow_gamma_comm, hzD.2 g hg]
     exact Submodule.subset_span ⟨z, ⟨hzN, hzD⟩, rfl⟩
   | zero => rw [map_zero]; exact Submodule.zero_mem _
-  | add y z _ _ hy hz => rw [map_add]; exact Submodule.add_mem _ hy hz
+  | add y z _ _ hy hz => rw [map_add (f := _)]; exact Submodule.add_mem _ hy hz
   | smul a y _ hy => rw [gamma_smul_series]; exact Submodule.smul_mem _ _ hy
 
 theorem average_mem_pullback (κ : O) (i : ZMod n) (j : ℕ) {x : W.DD T}
@@ -773,6 +817,7 @@ theorem truncation_delta_invariant (hR : Formalism.MainNotions.UnusedSlot80.Tool
     have e2 := congrArg (W.γA g) e1
     rw [map_mul, map_mul, map_pow, map_pow, map_natCast, hr g hg] at e2
     rw [e2, e1]
+
   rw [map_sub, map_smul, map_sum, ← frobenius_pow_gamma_comm, hwD.2 g hg]
   congr 1
   refine Finset.sum_congr rfl fun y _ => ?_
@@ -802,6 +847,7 @@ theorem frobenius_sq_mem_pullback (hmod : Formalism.MainNotions.DeltaInvariantLa
     rw [Finset.smul_sum]
     refine Finset.sum_congr rfl fun k _ => ?_
     rw [smul_smul, smul_smul, mul_comm]
+
   rw [e1, map_sum]
   refine Submodule.sum_mem _ fun k _ => ?_
   rw [frobenius_pow_smul_series]
@@ -841,7 +887,7 @@ theorem pullback_mem_of_level_bound (hR : Formalism.MainNotions.UnusedSlot80.Too
       have := frobenius_sq_mem_pullback W T hmod (c - 1 - 1) hm
       rwa [pow_two, Module.End.mul_apply] at this
     | zero => rw [map_zero]; exact Submodule.zero_mem _
-    | add y y' _ _ h h' => rw [map_add]; exact Submodule.add_mem _ h h'
+    | add y y' _ _ h h' => rw [map_add (f := _)]; exact Submodule.add_mem _ h h'
     | smul a y _ h => rw [frobenius_smul_series]; exact Submodule.smul_mem _ _ h
   | zero => rw [smul_zero]; exact Submodule.zero_mem _
   | add y y' _ _ h h' => rw [smul_add]; exact Submodule.add_mem _ h h'
@@ -1085,7 +1131,8 @@ theorem kernel_rank_bound [NeZero n] (hT2 : Formalism.MainNotions.CrystallineLif
   refine ⟨N, ak, wk, fun k => averageRing_mem_invariants W κ (a k), fun k => ⟨hwkN k, (hwkI k).1⟩, ?_⟩
   intro R hR
   have hER := congrArg (fun f => π (f R)) hEq
-  simp only [Finset.sum_apply, Pi.add_apply, map_sum, map_add, map_smul] at hER
+
+  simp only [Finset.sum_apply, Pi.add_apply, map_sum, map_add (f := _), map_smul] at hER
 
   have hl1 : ∀ k, π (Formalism.MainNotions.RamifiedCoefficientChains.Sh.conv (W.lev c ζ (ak k)) (dz k) R) =
       coeff R (W.lev c ζ (ak k)) • π ((PD.p : LL) ^ σ • μ k) := by
@@ -1121,6 +1168,7 @@ theorem kernel_rank_bound [NeZero n] (hT2 : Formalism.MainNotions.CrystallineLif
   simp only [map_smul, map_pow, map_natCast] at hER
   rw [← Submodule.Quotient.mk_eq_zero, ← Submodule.mkQ_apply, ← hπ]
   refine (smul_eq_zero.mp ?_).resolve_left hσ0
+
   rw [map_sub, map_sum, smul_sub, Finset.smul_sum]
   have e3 : ∑ k, (PD.p : LL) ^ σ • π (coeff R (W.lev c ζ (ak k)) • μ k) =
       ∑ k, coeff R (W.lev c ζ (ak k)) • ((PD.p : LL) ^ σ • π (μ k)) :=
@@ -1316,6 +1364,7 @@ theorem comparison_linear_sum (W : LocWach PD LL O v n) (T : LocLat G Qp LL O) {
     exact (W.N T).smul_mem _ (hw k)
   have e : (⟨∑ k, o k • wk k, hmem⟩ : ↥(W.N T)) = ∑ k, o k • (⟨wk k, hw k⟩ : ↥(W.N T)) :=
     Subtype.ext (by simp)
+
   simp only [Formalism.MainNotions.ArcLiftingSetup.cmpD, dif_pos hmem, dif_pos (hw _), e, map_sum, W.cmp_smul]
 
 end Formalism.MainNotions.N.Pv.LocalLengthBound
@@ -1453,6 +1502,7 @@ theorem h2Bound_of_hypotheses [NeZero n] (W : LocWach PD LL O v n)
         ∑ k, coeff R (W.lev c ζ (ak k)) • μ k) = 0 := by
       rw [hπ, Submodule.mkQ_apply, Submodule.Quotient.mk_eq_zero]
       exact hKR R hR
+
     rw [map_sub, map_sum, sub_eq_zero, map_smul] at h0
     rw [h0]
     exact Finset.sum_congr rfl fun k _ => map_smul _ _ _
@@ -1471,6 +1521,7 @@ theorem h2Bound_of_hypotheses [NeZero n] (W : LocWach PD LL O v n)
     have hα : ∑ k, mm k • ak k ∈ W.AΔ := Subalgebra.sum_mem _ fun k _ => W.AΔ.smul_mem (hakm k) _
     obtain ⟨o, ho⟩ := scalar_integrality_relation hC2 hR hCA' hpu hinj c ζ hζ (boxH d b S η (c - 1)) (b c) η (hb1 c)
       (by rw [hboxH]; exact hby) _ hα ((PD.p : LL) ^ σ * θ) (fun R hR => by
+
         rw [map_sum, map_sum]
         simp only [map_smul, coeff_smul]
         simp only [Algebra.smul_def]
@@ -1483,5 +1534,6 @@ theorem h2Bound_of_hypotheses [NeZero n] (W : LocWach PD LL O v n)
   refine ⟨∑ k, o k • wk k, Submodule.sum_mem _ fun k _ => Submodule.smul_mem _ _ (hwk k), ?_⟩
   rw [comparison_linear_sum W T₂ o wk (fun k => (hwk k).1)]
   rw [← Submodule.Quotient.mk_eq_zero, ← Submodule.mkQ_apply, ← hπ]
+
   simp only [map_sum, map_smul, map_sub]
   rw [ho, sub_eq_zero]

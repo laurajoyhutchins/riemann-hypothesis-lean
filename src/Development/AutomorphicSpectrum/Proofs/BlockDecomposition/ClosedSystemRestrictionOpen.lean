@@ -1,14 +1,56 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.UniformVanishing
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ClosedSystemRestrictionSubobject
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SubobjectLeOfAffineCover
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.QuasicoherentSupSections
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.PowSubSuccLe
+public import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.RestrictPullbackIsoHomAppPullbackSections
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ArtinReesClosedSystem
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ClosedSystemRestrictionSubobject
 import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IdealPowerSubobjectSections
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ArtinReesClosedSystem
-import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.RestrictPullbackIsoHomAppPullbackSections
-import GroundTheory.ArithmeticGeometry.SchemeCohomology.ProjectiveCohomology.QcohLocal
-import GroundTheory.ArithmeticGeometry.SchemeCohomology.ProperCohomology.QcqsPushforward
-import GroundTheory.ArithmeticGeometry.SchemeCohomology.ProperCohomology.HasFiniteBiproductsModules
+import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.QuasicoherentSupSections
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SubobjectLeOfAffineCover
+import GroundTheory.ArithmeticGeometry.SchemeCohomology.ProperCohomology.CokernelCoherent
+public import GroundTheory.ArithmeticGeometry.SchemeCohomology.ProperCohomology.QcqsPushforward
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.QuasiAffine
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -179,7 +221,7 @@ lemma exists_powSub_lift {A : Type} [CommRing A] [IsNoetherianRing A] (I : Ideal
     { carrier := {y | ∃ t ∈ JP, f.app W ((P.restrictAppIso O.ι W).inv t) = y}
       add_mem' := by
         rintro _ _ ⟨t, ht, rfl⟩ ⟨t', ht', rfl⟩
-        exact ⟨t + t', JP.add_mem ht ht', by rw [map_add, map_add]⟩
+        exact ⟨t + t', JP.add_mem ht ht', by rw [map_add (f := _), map_add (f := _)]⟩
       zero_mem' := ⟨0, JP.zero_mem, by rw [map_zero, map_zero]⟩
       smul_mem' := by
         rintro r _ ⟨t, ht, rfl⟩

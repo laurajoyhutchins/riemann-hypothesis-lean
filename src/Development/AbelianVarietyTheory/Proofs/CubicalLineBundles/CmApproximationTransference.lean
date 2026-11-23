@@ -1,8 +1,64 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.CoveringRadiusStatement
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.CoveringRadiusStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.BabaiCovering
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.ConjugateConjugate
 import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.Transference
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.BabaiCovering
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.ConjugateConjugate
+
+@[expose] public section
 
 namespace GlobalTheory.CMTransference
 
@@ -32,6 +88,7 @@ theorem exists_short_family {V : Type*} [NormedAddCommGroup V] [InnerProductSpac
     intro x hx hx0
     obtain ⟨c, rfl⟩ := (mem_span_range_iff_exists_fun ℤ).1 hx
     have hw : (∑ i, c i • B' i) = φ (∑ i, c i • bd (e.symm i)) := by
+
       simp [hB', map_sum, map_zsmul]
     have hwmem : (∑ i, c i • bd (e.symm i)) ∈ span ℤ (Set.range bd) :=
       sum_mem fun i _ => zsmul_mem (subset_span (Set.mem_range_self _)) _
@@ -73,8 +130,8 @@ section CMType
 
 variable {K : Type} [Field K] [NumberField K] {ι : Type} [Fintype ι] {σ : ι → K →+* ℂ}
 
-omit [NumberField K] [Fintype ι] in
 
+omit [NumberField K] [Fintype ι] in
 theorem sumElim_bijective (hσ : Function.Injective σ)
     (hcm : ∀ τ : K →+* ℂ, (∃ i, σ i = τ) ↔ ¬ ∃ i, σ i = ComplexEmbedding.conjugate τ) :
     Function.Bijective (Sum.elim σ fun i => ComplexEmbedding.conjugate (σ i)) := by
@@ -193,10 +250,10 @@ theorem h_smul_right (S : HermForm K r) (a : K) (x y : Fin r → K) :
 
 noncomputable def traceForm (S : HermForm K r) : LinearMap.BilinForm ℚ (Fin r → K) :=
   LinearMap.mk₂ ℚ (fun x y => Algebra.trace ℚ K (S.h x y))
-    (fun x x' y => by rw [h_add_left, map_add])
+    (fun x x' y => by rw [h_add_left, map_add (f := _)])
     (fun q x y => by
       rw [← algebraMap_smul K q x, h_smul_left, ← map_smul, Algebra.smul_def]; simp)
-    (fun x y y' => by rw [h_add_right, map_add])
+    (fun x y y' => by rw [h_add_right, map_add (f := _)])
     (fun q x y => by
       rw [← algebraMap_smul K q y, h_smul_right, ← map_smul, Algebra.smul_def])
 
@@ -347,6 +404,7 @@ theorem cmApproximation_transference : ReciprocityTheory.ChartRestriction.G.FD.C
     obtain ⟨c, rfl⟩ := (mem_span_range_iff_exists_fun ℤ).1 hx
     refine ⟨∑ i, c i • b i, (hb _).2
       (sum_mem fun i _ => zsmul_mem (subset_span (Set.mem_range_self i)) _), ?_⟩
+
     simp only [map_sum, map_zsmul, hB]
   have hlam : 0 < 2 * la / d := by positivity
   have hmin' : ∀ x ∈ span ℤ (Set.range fun j => embDual p σ Q (b' j)), x ≠ 0 →
@@ -354,6 +412,7 @@ theorem cmApproximation_transference : ReciprocityTheory.ChartRestriction.G.FD.C
     intro x hx hx0
     obtain ⟨c, rfl⟩ := (mem_span_range_iff_exists_fun ℤ).1 hx
     have hw : ∑ i, c i • embDual p σ Q (b' i) = embDual p σ Q (∑ i, c i • b' i) := by
+
       simp only [map_sum, map_zsmul]
     rw [hw] at hx0 ⊢
     have h1 := hdual (∑ i, c i • b' i) (fun h => hx0 (by rw [h, map_zero])) (by
@@ -362,6 +421,7 @@ theorem cmApproximation_transference : ReciprocityTheory.ChartRestriction.G.FD.C
       refine ⟨∑ i, c i * e i, ?_⟩
       have hbb : ∀ i j, traceForm S (b' i) (b j) = if j = i then 1 else 0 :=
         LinearMap.BilinForm.apply_dualBasis_left hnd b
+
       simp only [map_sum, map_zsmul, LinearMap.sum_apply, LinearMap.smul_apply, hbb]
       simp [mul_comm])
     refine (pow_le_pow_iff_left₀ hlam.le (norm_nonneg _) two_ne_zero).1 ?_

@@ -1,5 +1,57 @@
-import Formalism.HermitianCurvature.StatementFr
-import Formalism.YangianSpanCharacter.YangianRelationFirst
+module
+
+public import Formalism.HermitianCurvature.StatementFr
+public import Mathlib.CategoryTheory.Category.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Matrix Formalism.YangianSpanCharacter.T Formalism.YangianSpanCharacter.Y Formalism.FourierDecayAlt.R Formalism.FourierDecayAlt.Wd Formalism.FourierDecayAlt.Fr
 
@@ -357,7 +409,7 @@ theorem start_is_frame : StartFrame := by
   · intro Y hY _
     simp only [lift0, Matrix.map_apply, one_mul, mul_one, Formalism.FourierDecayAlt.Fr.FrameData.l, Formalism.FourierDecayAlt.Fr.kapL]
     rw [hst.low Y hY]
-    simp only [io, map_mul, map_add]
+    simp only [io, map_mul, map_add (f := _)]
 
 theorem frame_module_of_word : WordJoint := by
   intro A S _ _ _ _ _ _ r L st w
@@ -382,18 +434,5 @@ theorem frame_module_of_word : WordJoint := by
       · funext Y; simp [ofWord, hl, FrameData.minus, qw, h3]
       · simp [ofWord, hl, FrameData.minus, h4]
       · ext Y; simp [ofWord, hl, FrameData.minus, h5, Reg, RegL, and_comm]
-
-theorem residue_partial_fractions : ResidueStep := by
-  intro B _ _ Z γ Ya Y h1 h2 h3
-  have e1 : Y - γ ≠ 0 := sub_ne_zero.mpr h1
-  have e2 : Ya - γ ≠ 0 := sub_ne_zero.mpr h2
-  have e3 : Y - Ya ≠ 0 := sub_ne_zero.mpr h3
-  constructor
-  · simp only [← sub_smul, smul_smul]
-    congr 1
-    first | (field_simp; ring) | field_simp | ring
-  · simp only [← sub_smul, ← add_smul, smul_smul]
-    congr 1
-    first | (field_simp; ring) | field_simp | ring
 
 end Formalism.FourierDecayAlt.P

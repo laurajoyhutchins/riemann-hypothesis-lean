@@ -1,8 +1,58 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.MinorCellOfParts
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.LemmaDDeterminantIdentity
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.OperatorPreservesFusionForms
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.ChainRecursionFromSingleDescent
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.RightDerivativeRulePsi
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.MinorCellOfParts
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.WeylCellConjTransposeMulApply
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.ChainRecursionFromSingleDescent
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.LemmaDDeterminantIdentity
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.OperatorPreservesFusionForms
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.RightDerivativeRulePsi
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Matrix
 open scoped ContDiff
@@ -66,18 +116,22 @@ theorem weyl_cell_mulVec_basis (l : Fin r) (c : ℂ) (q : Fin (2 * r + k + 1)) :
     Finset.sum_ite_eq', Finset.mem_univ, if_true, Pi.smul_apply, smul_eq_mul, w1_apply]
 
 theorem head_comm (c : Fin r → ℂ) (hc : ∀ a, c a ≠ 0) : ∀ n : ℕ, ∀ i : Fin (r + 1), i.val = n →
-    wCell k r i c ∈ Glev k r 0 ∧ ∀ j : Fin (r + 1), i ≤ j → ∀ x ∈ Glev k r j, wCell k r i c * x = x * wCell k r i c
-  | 0, i, hi => by
+    wCell k r i c ∈ Glev k r 0 ∧ ∀ j : Fin (r + 1), i ≤ j → ∀ x ∈ Glev k r j, wCell k r i c * x = x * wCell k r i c := by
+  intro n
+  induction n with
+  | zero =>
+    intro i hi
     have : i = 0 := Fin.ext (by simp [hi])
     subst this
     rw [Formalism.FourierDecayAlt.P.Qx6.wCell_zero]
     exact ⟨glev_one _, fun _ _ x _ => by simp⟩
-  | n + 1, i, hi => by
+  | succ n ih =>
+    intro i hi
     have hl : n < r := by have := i.isLt; omega
     set l : Fin r := ⟨n, hl⟩ with hldef
     have hil : i = l.succ := Fin.ext (by simp [l, hi])
     subst hil
-    obtain ⟨ih0, ihc⟩ := head_comm c hc n l.castSucc (by simp [l])
+    obtain ⟨ih0, ihc⟩ := ih l.castSucc (by simp [l])
     have hw := Formalism.FourierDecayAlt.P.weyl_level_element_properties k r l (c l) (hc l)
     rw [Formalism.FourierDecayAlt.P.Qx6.wCell_succ]
     refine ⟨glev_mul ih0 (glev_mono (zero_le' _) hw.1), fun j hj x hx => ?_⟩
@@ -91,19 +145,23 @@ theorem tail (c : Fin r → ℂ) (hc : ∀ a, c a ≠ 0) (b : Fin r) : ∀ n : �
       (∀ a : Fin r, b.val < a.val →
         T *ᵥ bvec (eI k r a) = if a.val < i.val then c a • bvec (esI k r a) else bvec (eI k r a)) ∧
       (∀ a : Fin r, i.val ≤ a.val → T *ᵥ bvec (esI k r a) = bvec (esI k r a)) ∧
-      (∀ c' : Fin r → ℂ, (∀ a : Fin r, b.val < a.val → c' a = c a) → wCell k r i c' = wCell k r b.succ c' * T)
-  | 0, i, hi => by
+      (∀ c' : Fin r → ℂ, (∀ a : Fin r, b.val < a.val → c' a = c a) → wCell k r i c' = wCell k r b.succ c' * T) := by
+  intro n
+  induction n with
+  | zero =>
+    intro i hi
     have : i = b.succ := Fin.ext (by simp [hi])
     subst this
     refine ⟨1, by simp, glev_one _, fun a ha => ?_, fun a _ => by simp, fun c' _ => by simp⟩
     rw [if_neg (by simp; omega)]
     simp
-  | n + 1, i, hi => by
+  | succ n ih =>
+    intro i hi
     have hl : b.val + 1 + n < r := by have := i.isLt; omega
     set l : Fin r := ⟨b.val + 1 + n, hl⟩ with hldef
     have hil : i = l.succ := Fin.ext (by simp [l, hi]; omega)
     subst hil
-    obtain ⟨T, hT, hTG, hTe, hTs, hTc⟩ := tail c hc b n l.castSucc (by simp [l])
+    obtain ⟨T, hT, hTG, hTe, hTs, hTc⟩ := ih l.castSucc (by simp [l])
     have hw := (Formalism.FourierDecayAlt.P.weyl_level_element_properties k r l (c l) (hc l)).1
     refine ⟨T * w1 k r l (c l), ?_, ?_, ?_, ?_, ?_⟩
     · rw [Formalism.FourierDecayAlt.P.Qx6.wCell_succ, hT, Matrix.mul_assoc]

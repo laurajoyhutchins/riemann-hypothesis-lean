@@ -1,7 +1,51 @@
-import Mathlib
-import Formalism.UnipotentAdelicQuotients.ClassNumberFinite
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FormGroupToPadicPointsDegreeOneEqUnitaryPoints
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TC
+module
+
+public import Formalism.UnipotentAdelicQuotients.ClassNumberFinite
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TC
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -40,7 +84,7 @@ def blk : (R ⊗[ℚ] D) × R →+* Matrix (Fin (Module.finrank ℚ D + 1)) (Fin
     congr 1
     simp [blk0]
   map_add' z w := by
-    rw [← map_add]
+    rw [← map_add (f := _)]
     congr 1
     simp [blk0, Matrix.fromBlocks_add]
 
@@ -92,7 +136,7 @@ theorem repr_map (f : R →ₐ[ℚ] R') (x : R ⊗[ℚ] D) (k : Fin (Module.finr
   | tmul r m =>
     simp only [Algebra.TensorProduct.map_tmul, AlgHom.id_apply, Algebra.TensorProduct.basis_repr_tmul,
       Finsupp.smul_apply, Finsupp.mapRange_apply, smul_eq_mul, map_mul, AlgHom.commutes]
-  | add x y hx hy => simp only [map_add, Finsupp.add_apply, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), Finsupp.add_apply, hx, hy]
 
 theorem lreg_map (f : R →ₐ[ℚ] R') (a : R ⊗[ℚ] D) :
     lreg D R' (Algebra.TensorProduct.map f (AlgHom.id ℚ D) a) = f.toRingHom.mapMatrix (lreg D R a) := by
@@ -123,6 +167,7 @@ theorem coordA_map (f : R →ₐ[ℚ] R') (X : Matrix (Fin (Module.finrank ℚ D
     coordA D R' (f.toRingHom.mapMatrix X) = Algebra.TensorProduct.map f (AlgHom.id ℚ D) (coordA D R X) := by
   apply (basR D R').repr.injective
   ext k
+
   rw [repr_map, repr_coordA, repr_coordA, map_sum]
   refine Finset.sum_congr rfl fun j _ => ?_
   rw [map_mul, ← repr_map f]
@@ -149,15 +194,15 @@ theorem starT_tmap (f : R →ₐ[ℚ] R') (x : R ⊗[ℚ] D) :
   induction x using TensorProduct.induction_on with
   | zero => simp
   | tmul r m => simp only [Algebra.TensorProduct.map_tmul, AlgHom.id_apply, starT_tmul]
-  | add x y hx hy => simp only [map_add, MulOpposite.unop_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), MulOpposite.unop_add, hx, hy]
+
 
 variable (R) in
-
 def formE (a : R ⊗[ℚ] D) (c : R) : R ⊗[ℚ] D :=
   a * ((1 : R) ⊗ₜ β) * (starT σ R a).unop - algebraMap R (R ⊗[ℚ] D) c * ((1 : R) ⊗ₜ β)
 
-variable (R) in
 
+variable (R) in
 def commE (a : R ⊗[ℚ] D) : R ⊗[ℚ] D := a * ((1 : R) ⊗ₜ y) - ((1 : R) ⊗ₜ y) * a
 
 theorem formE_map (f : R →ₐ[ℚ] R') (a : R ⊗[ℚ] D) (c : R) :
@@ -171,8 +216,8 @@ theorem commE_map (f : R →ₐ[ℚ] R') (a : R ⊗[ℚ] D) :
       commE y R' (Algebra.TensorProduct.map f (AlgHom.id ℚ D) a) := by
   simp only [commE, map_sub, map_mul, Algebra.TensorProduct.map_tmul, map_one, AlgHom.id_apply]
 
-variable (R) in
 
+variable (R) in
 def cond (X : Matrix (Fin (Module.finrank ℚ D + 1)) (Fin (Module.finrank ℚ D + 1)) R) :
     (Fin (Module.finrank ℚ D + 1) × Fin (Module.finrank ℚ D + 1)) ⊕
       (Fin (Module.finrank ℚ D) ⊕ Fin (Module.finrank ℚ D)) → R
@@ -328,8 +373,8 @@ theorem mem_zeroLocus_iff {R : Type} [CommRing R] [Algebra ℚ R] (g : GL (Fin (
     g ∈ HeckeCharacterZeroLocus.zeroLocusGL (locusSet D σ β y) R ↔ ∀ ω, cond σ β y R (g : Matrix _ _ R) ω = 0 := by
   simp only [HeckeCharacterZeroLocus.zeroLocusGL, locusSet, Set.mem_setOf_eq, Set.forall_mem_range, aeval_cond]
 
-variable (D) in
 
+variable (D) in
 def blkU (R : Type) [CommRing R] [Algebra ℚ R] :
     (R ⊗[ℚ] D)ˣ × Rˣ →* GL (Fin (Module.finrank ℚ D + 1)) R :=
   (Units.map (blk D R).toMonoidHom).comp (MulEquiv.prodUnits.symm.toMonoidHom)
@@ -369,8 +414,8 @@ theorem isGroupLocus : HeckeCharacterZeroLocus.IsGroupLocus (locusSet D σ β y)
     obtain ⟨z, hz, rfl⟩ := (mem_locus_iff σ β y _).1 hg
     exact (mem_locus_iff σ β y _).2 ⟨z⁻¹, tc_inv σ β y z hz, map_inv _ _⟩
 
-variable (D) in
 
+variable (D) in
 def tcSub (R : Type) [CommRing R] [Algebra ℚ R] : Subgroup ((R ⊗[ℚ] D)ˣ × Rˣ) where
   carrier := {z | GlobalTheory.TorCls.TC D σ β y R z}
   mul_mem' {z w} hz hw := tc_mul σ β y z w hz hw
@@ -437,10 +482,10 @@ theorem continuous_coordA {R : Type} [CommRing R] [Algebra ℚ R] [TopologicalSp
   have : coordA D R = fun X => ∑ i, (∑ j, X (finSumFinEquiv (Sum.inl i)) (finSumFinEquiv (Sum.inl j)) *
       (basR D R).repr 1 j) • basR D R i := funext coordA_eq_sum
   rw [this]
-  refine continuous_finset_sum _ fun i _ => ?_
+  refine continuous_finsetSum _ fun i _ => ?_
   refine Continuous.smul (f := fun X : Matrix (Fin (Module.finrank ℚ D + 1)) (Fin (Module.finrank ℚ D + 1)) R =>
       ∑ j, X (finSumFinEquiv (Sum.inl i)) (finSumFinEquiv (Sum.inl j)) * (basR D R).repr 1 j)
-    (g := fun _ => basR D R i) (continuous_finset_sum _ fun j _ => ?_) continuous_const
+    (g := fun _ => basR D R i) (continuous_finsetSum _ fun j _ => ?_) continuous_const
   exact (continuous_apply_apply _ _).mul continuous_const
 
 theorem continuous_coordC {R : Type} [CommRing R] [Algebra ℚ R] [TopologicalSpace R] :

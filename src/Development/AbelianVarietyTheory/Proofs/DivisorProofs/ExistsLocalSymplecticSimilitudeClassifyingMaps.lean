@@ -1,13 +1,59 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HarrisTaylorSymplecticLevelFamilyUniversalProper
-import Development.AbelianVarietyTheory.Definitions.ModuliSpaces.IsGaloisCover
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsLocalSimilitudeOfLevel
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HarrisTaylorObjectPullbackCompDiagonalBundle
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LocallyOfFinitePresentationOfIsQProjOver
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsHarrisTaylorObjectPullbackBis
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsCycAwayHomComplex
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsInclusionCyclotomicAwayRingFiniteEtale
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HarrisTaylorSymplecticLevelFamilyUniversalProper
+import Development.AbelianVarietyTheory.Definitions.ThetaMetrics.MemNonzeroLocusIffPowFn
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsCycAwayHomComplex
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsHarrisTaylorObjectPullbackBis
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsInclusionCyclotomicAwayRingFiniteEtale
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsLocalSimilitudeOfLevel
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FiniteTypeCycAway
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HarrisTaylorObjectPullbackCompDiagonalBundle
+import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.BijectiveRestrictPointsOfEtaleOfHenselian
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.PushEquivSymmLeft
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.WeilIsGrpPullbackOfCommute
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.UnitOnInjectiveOfCommRing
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Morphisms.SchemeTheoreticallyDominant
+import Mathlib.AlgebraicGeometry.Morphisms.WeaklyEtale
+import Mathlib.AlgebraicGeometry.Sites.Fpqc
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor GlobalTheory.UPel.HT GlobalTheory.SiegelTor
 
@@ -304,10 +350,24 @@ theorem exists_local_similitude : ∀ (p : ℕ) [Fact p.Prime] (D : Datum p) (R 
   obtain ⟨oV, ⟨mV⟩⟩ := GlobalTheory.HTPull.exists_objMap_pull p D R b N T V t V.ι o
   obtain ⟨lV, hlV, hlVp⟩ := exists_sympLev_pull mV hl'
   obtain ⟨f, -, huniq⟩ := hU V (V.ι ≫ t) (V.ι ≫ x' ≫ s₁) oV lV hlV
+  let compMap {S₁ S₂ S₃ : Scheme.{0}} {s₁ : S₁ ⟶ Sp R} {s₂ : S₂ ⟶ Sp R} {s₃ : S₃ ⟶ Sp R}
+      {o₁ : Obj b N s₁} {o₂ : Obj b N s₂} {o₃ : Obj b N s₃} {f : S₁ ⟶ S₂} {g : S₂ ⟶ S₃}
+      (m₁ : ObjMap o₁ o₂ f) (m₂ : ObjMap o₂ o₃ g) : ObjMap o₁ o₃ (f ≫ g) :=
+    { φ := m₁.φ ≫ m₂.φ
+      φ₂ := m₁.φ₂ ≫ m₂.φ₂
+      cart := IsGrpPullback.comp m₁.cart m₂.cart
+      sq := ⟨by rw [Category.assoc, m₂.sq.1, ← Category.assoc, m₁.sq.1, Category.assoc],
+        by rw [Category.assoc, m₂.sq.2, ← Category.assoc, m₁.sq.2, Category.assoc]⟩
+      act := fun c => by rw [← Category.assoc, m₁.act, Category.assoc, m₂.act, Category.assoc]
+      pol := LBIso.trans o₁.isLB (pull_isLB o₂.isLB m₁.φ₂) (pull_isLB o₃.isLB _) m₁.pol
+        (LBIso.chartPull (chartPullPull o₂.P m₁.φ₂)
+          (chartPullSame o₃.P (fun _ : PUnit => m₁.φ₂ ≫ m₂.φ₂) (fun _ => m₂.φ₂) (fun _ => 1) m₁.φ₂ (fun _ => rfl))
+          m₂.pol)
+      eta := fun y => by rw [← Category.assoc, m₁.eta, Category.assoc, m₂.eta, Category.assoc] }
   have P1 : (V.ι ≫ x ≫ ρ a) ≫ s = V.ι ≫ t ∧ (V.ι ≫ x ≫ ρ a) ≫ s₁ = V.ι ≫ x' ≫ s₁ ∧
       ∃ m : ObjMap oV u (V.ι ≫ x ≫ ρ a), ∀ c, (lV c).left ≫ m.φ = (V.ι ≫ x ≫ ρ a) ≫ (lev c).left := by
     refine ⟨by simp only [Category.assoc, hρs, hx], by simpa only [Category.assoc] using hVs,
-      mV.comp (m.comp ma), fun c => ?_⟩
+      compMap mV (compMap m ma), fun c => ?_⟩
     show (lV c).left ≫ (mV.φ ≫ (m.φ ≫ ma.φ)) = (V.ι ≫ x ≫ ρ a) ≫ (lev c).left
     calc (lV c).left ≫ (mV.φ ≫ (m.φ ≫ ma.φ)) = ((lV c).left ≫ mV.φ) ≫ m.φ ≫ ma.φ := by
           simp only [Category.assoc]
@@ -321,7 +381,7 @@ theorem exists_local_similitude : ∀ (p : ℕ) [Fact p.Prime] (D : Datum p) (R 
       _ = (V.ι ≫ x ≫ ρ a) ≫ (lev c).left := by simp only [Category.assoc]
   have P2 : (V.ι ≫ x') ≫ s = V.ι ≫ t ∧ (V.ι ≫ x') ≫ s₁ = V.ι ≫ x' ≫ s₁ ∧
       ∃ m : ObjMap oV u (V.ι ≫ x'), ∀ c, (lV c).left ≫ m.φ = (V.ι ≫ x') ≫ (lev c).left := by
-    refine ⟨by simp only [Category.assoc, hx'], Category.assoc _ _ _, mV.comp m', fun c => ?_⟩
+    refine ⟨by simp only [Category.assoc, hx'], Category.assoc _ _ _, compMap mV m', fun c => ?_⟩
     show (lV c).left ≫ (mV.φ ≫ m'.φ) = (V.ι ≫ x') ≫ (lev c).left
     rw [← Category.assoc, hlVp c, Category.assoc, hlp' c, Category.assoc]
   exact ⟨V, a, hqV, (huniq _ P1).trans (huniq _ P2).symm⟩

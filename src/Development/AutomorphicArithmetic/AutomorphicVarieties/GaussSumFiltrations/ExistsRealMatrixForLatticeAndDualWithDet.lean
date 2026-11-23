@@ -1,5 +1,50 @@
-import Mathlib
-import Development.AutomorphicArithmetic.AutomorphicVarieties.GaussSumFiltrations.EvenPos
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.GaussSumFiltrations.EvenPos
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Matrix.PosDef
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Development.AutomorphicArithmetic.AutomorphicVarieties.IdeleGenerators.ConstSmall
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Neutral.B1 Formalism.L2.Host Formalism.ConjugateSelfDual GlobalTheory.CuspRep UpperTheory.V UpperTheory.V.Af UpperTheory.V.Sd GlobalTheory.HilbertThetaSeries
 open scoped Matrix
@@ -87,7 +132,6 @@ theorem exists_root {κ : Type} [Fintype κ] [DecidableEq κ] (G : Matrix κ κ 
   rw [Matrix.transpose_mul, hst, Matrix.diagonal_transpose, Matrix.mul_assoc, ← Matrix.mul_assoc (Matrix.diagonal _) (Matrix.diagonal _), Matrix.diagonal_mul_diagonal, Matrix.mul_assoc]
   congr 3
   funext i
-  simp only [Function.comp_apply, RCLike.ofReal_real_eq_id, id]
   exact Real.mul_self_sqrt (h.posSemidef.eigenvalues_nonneg i)
 
 section Main
@@ -109,8 +153,9 @@ theorem eM_pair (G : Matrix κ κ ℤ) (R : Matrix κ κ ℝ) (hR : Rᵀ * R = G
     intro i j
     have := congrFun (congrFun hR i) j
     simpa [Matrix.mul_apply] using this.symm
+
   simp only [eM, AddMonoidHom.coe_mk, ZeroHom.coe_mk, BF, dotProduct, Matrix.mulVec, map_sum, map_mul,
-    Matrix.map_apply, map_intCast, hG, Finset.sum_mul, Finset.mul_sum]
+  Matrix.map_apply, map_intCast, hG, Finset.sum_mul, Finset.mul_sum]
   conv_lhs => rw [Finset.sum_comm]
   conv_lhs => enter [2, a]; rw [Finset.sum_comm]
   conv_lhs => rw [Finset.sum_comm]
@@ -171,9 +216,10 @@ noncomputable def bM (ω : Module.Basis (InfinitePlace F) ℚ F) (a : F) (R : Ma
 theorem bM_mulVec (ω : Module.Basis (InfinitePlace F) ℚ F) (a : F) (R : Matrix κ κ ℝ) (m : InfinitePlace F × κ → ℤ) :
     eM R (a • fun j => ∑ w, (m (w, j) : F) * ω w) = bM ω a R *ᵥ fun i => (m i : ℝ) := by
   funext p
+
   simp only [eM, bM, aM, AddMonoidHom.coe_mk, ZeroHom.coe_mk, Matrix.mulVec, dotProduct,
-    Matrix.kroneckerMap_apply, Matrix.of_apply, Pi.smul_apply, smul_eq_mul, map_mul, map_sum,
-    map_intCast, Finset.mul_sum, Fintype.sum_prod_type]
+  Matrix.kroneckerMap_apply, Matrix.of_apply, Pi.smul_apply, smul_eq_mul, map_mul, map_sum,
+  map_intCast, Finset.mul_sum, Fintype.sum_prod_type]
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun j _ => Finset.sum_congr rfl fun w _ => ?_
   ring
@@ -194,9 +240,10 @@ theorem bM_transpose (G : Matrix κ κ ℤ) (R : Matrix κ κ ℝ) (hR : Rᵀ * 
       mul_ite, mul_zero, Finset.sum_ite_eq', Finset.mem_univ, if_true]
     exact Finset.sum_congr rfl fun i _ => by ring
   rw [hB, ← sum_reAt]
+
   simp only [reAt_eq, map_sum, map_mul, map_intCast, Matrix.mulVec, dotProduct, Matrix.transpose_apply,
-    bM, aM, eM, Matrix.kroneckerMap_apply, Matrix.of_apply, AddMonoidHom.coe_mk, ZeroHom.coe_mk,
-    Fintype.sum_prod_type]
+  bM, aM, eM, Matrix.kroneckerMap_apply, Matrix.of_apply, AddMonoidHom.coe_mk, ZeroHom.coe_mk,
+  Fintype.sum_prod_type]
   refine Finset.sum_congr rfl fun v _ => ?_
   simp_rw [hsym _ q.2, hG, Finset.mul_sum, Finset.sum_mul]
   conv_lhs => rw [Finset.sum_comm]
@@ -237,7 +284,7 @@ theorem exists_alpha (ω : Module.Basis (InfinitePlace F) ℚ F)
     choose n hn using fun j => (hω (l j)).1 (hl j)
     refine ⟨fun p => n p.2 p.1, ?_⟩
     funext j
-    simp only [g, Pi.smul_apply, smul_eq_mul, DistribMulAction.toAddMonoidHom_apply]
+    simp only [g, Pi.smul_apply, smul_eq_mul, DistribSMul.toAddMonoidHom_apply]
     rw [hn j]
   refine ⟨Equiv.ofBijective _ ⟨hinj, fun y => ?_⟩, fun m => rfl⟩
   obtain ⟨m, hm⟩ := hsurj y
@@ -282,9 +329,11 @@ theorem mem_dualL (G : Matrix κ κ ℤ) (ω : Module.Basis (InfinitePlace F) �
     have htr : ∀ (c : ℤ) (z : F), Algebra.trace ℚ F ((c : F) * z) = c * Algebra.trace ℚ F z := by
       intro c z
       rw [← zsmul_eq_mul, map_zsmul, zsmul_eq_mul]
+
     rw [hl', map_sum]
     push_cast
     refine Finset.sum_congr rfl fun k _ => ?_
+
     rw [map_sum]
     refine Finset.sum_congr rfl fun w _ => ?_
     rw [htr, hN (w, k)]
@@ -294,7 +343,7 @@ noncomputable def pairL (G : Matrix κ κ ℤ) (ω : Module.Basis (InfinitePlace
   toFun y q := Algebra.trace ℚ F (BF G (a • y) (Pi.single q.2 (ω q.1)))
   map_add' x y := by
     funext q
-    simp only [BF, smul_add, add_dotProduct, map_add, Pi.add_apply]
+    simp only [BF, smul_add, add_dotProduct, map_add (f := _), Pi.add_apply]
   map_smul' c x := by
     funext q
     simp only [BF, smul_comm a c, smul_dotProduct, map_smul, Pi.smul_apply, RingHom.id_apply]
@@ -420,6 +469,6 @@ end GlobalTheory.HilbertThetaSeries.LatBasis
 
 open NumberField IsDedekindDomain Neutral.B1 Formalism.L2.Host Formalism.ConjugateSelfDual GlobalTheory.CuspRep UpperTheory.V UpperTheory.V.Af UpperTheory.V.Sd GlobalTheory.HilbertThetaSeries
 open scoped Matrix
-set_option maxHeartbeats 1000000 in
+
 theorem _root_.GlobalTheory.T.exists_realMatrix_for_lattice_and_dual_with_det : ∀ (F : Type) [Field F] [NumberField F] [IsTotallyReal F] [DecidableEq (InfinitePlace F)] (κ : Type) [Fintype κ] [DecidableEq κ] (G : Matrix κ κ ℤ), EvenPos G → ∀ t : ℕ, G.det = (t : ℤ) ^ 2 → ∀ k : ℕ, Fintype.card κ = 2 * k → ∀ a : F, a ≠ 0 → ∃ (e : (κ → F) →+ (InfinitePlace F × κ → ℝ)) (B : Matrix (InfinitePlace F × κ) (InfinitePlace F × κ) ℝ) (α : (InfinitePlace F × κ → ℤ) ≃ aL κ a) (β : (InfinitePlace F × κ → ℤ) ≃ {y : κ → F // a • y ∈ dualL F G}), (∀ x y v, ∑ i, e x (v, i) * e y (v, i) = reAt v (BF G x y)) ∧ (∀ m, e (α m) = B *ᵥ fun i => (m i : ℝ)) ∧ (∀ m, e (β m) = B⁻¹ᵀ *ᵥ fun i => (m i : ℝ)) ∧ B.det ≠ 0 ∧ |B.det| = ((Algebra.norm ℚ a : ℚ) : ℝ) ^ (2 * k) * ((discr F).natAbs : ℝ) ^ k * (t : ℝ) ^ Module.finrank ℚ F := by
   first | exact @GlobalTheory.HilbertThetaSeries.LatBasis.lattice_matrix | exact GlobalTheory.HilbertThetaSeries.LatBasis.lattice_matrix | (intros; apply GlobalTheory.HilbertThetaSeries.LatBasis.lattice_matrix <;> assumption)

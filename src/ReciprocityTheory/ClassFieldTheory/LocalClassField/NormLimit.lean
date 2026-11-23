@@ -1,7 +1,58 @@
-import Mathlib
-import ReciprocityTheory.ClassFieldTheory.LocalClassField.RecPairDefs
-import ReciprocityTheory.ClassFieldTheory.LocalClassField.PairKEqZeroOfMemNormGrp
-import ReciprocityTheory.ClassFieldTheory.LocalClassField.RestrictedMultiplicativeH1Subsingleton
+module
+
+public import ReciprocityTheory.ClassFieldTheory.LocalClassField.RecDefs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ClassFieldTheory.LocalClassField.GabLim
+import ReciprocityTheory.ClassFieldTheory.LocalClassField.GalBasic
+public import ReciprocityTheory.ClassFieldTheory.LocalClassField.NormOpen
+import ReciprocityTheory.ClassFieldTheory.LocalClassField.NormOpenA
+public import ReciprocityTheory.ClassFieldTheory.LocalClassField.PairKEqZeroOfMemNormGrp
+import ReciprocityTheory.ClassFieldTheory.LocalClassField.ValUnitsA
+
+@[expose] public section
 
 namespace ReciprocityTheory.DiscreteGroups.LocalClassField
 
@@ -25,10 +76,10 @@ section grp
 
 variable {G : Type*} [Group G] (H : Subgroup G) [H.Normal] (hH : ∀ a ∈ H, ∀ b ∈ H, a * b = b * a) (s : G)
 
-include hH in
 
+include hH in
 theorem exists_twist_subgroup_nl : ∃ I : Subgroup G, ∀ x, x ∈ I ↔ ∃ h ∈ H, x = s * h * s⁻¹ * h⁻¹ := by
-  have hc : ∀ a ∈ H, s * a * s⁻¹ ∈ H := fun a ha => Subgroup.Normal.conj_mem inferInstance a ha s
+  have hc : ∀ a ∈ H, s * a * s⁻¹ ∈ H := fun a ha => (inferInstance : H.Normal).conj_mem a ha s
   refine ⟨{ carrier := {x | ∃ h ∈ H, x = s * h * s⁻¹ * h⁻¹}
             one_mem' := ⟨1, H.one_mem, by group⟩
             mul_mem' := ?_
@@ -52,7 +103,7 @@ theorem exists_of_mem_commutator {G : Type*} [Group G] (H : Subgroup G) [H.Norma
     ∃ h ∈ H, x = s * h * s⁻¹ * h⁻¹ := by
   obtain ⟨I, hI⟩ := exists_twist_subgroup_nl H hH s
   rw [← hI]
-  have hc : ∀ (g : G), ∀ a ∈ H, g * a * g⁻¹ ∈ H := fun g a ha => Subgroup.Normal.conj_mem inferInstance a ha g
+  have hc : ∀ (g : G), ∀ a ∈ H, g * a * g⁻¹ ∈ H := fun g a ha => (inferInstance : H.Normal).conj_mem a ha g
   have key : ∀ (i : ℤ), ∀ h ∈ H, s ^ i * h * (s ^ i)⁻¹ * h⁻¹ ∈ I := by
     intro i
     induction i using Int.induction_on with
@@ -210,7 +261,7 @@ theorem normGrp_eq_of_cyclic_of_ab (hK : FiniteDimensional ℚ_[p] K) {M E : Int
   obtain ⟨g', hg'⟩ : ∃ g' : GK p M, resGK hKM g' = σ * resGK hKM h' * σ⁻¹ := by
     have : σ * resGK hKM h' * σ⁻¹ ∈ (resGK hKM).range := by
       rw [range_resGK]
-      exact Subgroup.Normal.conj_mem inferInstance _ (by rw [← range_resGK hKM]; exact ⟨_, rfl⟩) σ
+      exact (inferInstance : (subG p K M).Normal).conj_mem _ (by rw [← range_resGK hKM]; exact ⟨_, rfl⟩) σ
     exact this
   have hc'' : IsRecip p M L c' g' := IsRecip.conj hK hM hKM σ (stM σ) (stL σ) (stL σ⁻¹) (b := c) (b' := c')
     (congrArg (fun z : KbarMult p => ((Additive.toMul z : (PadicAlgCl p)ˣ) : PadicAlgCl p)) hc') hg' hc
@@ -221,7 +272,7 @@ theorem normGrp_eq_of_cyclic_of_ab (hK : FiniteDimensional ℚ_[p] K) {M E : Int
     exact hh'
   obtain ⟨l, hl, hld⟩ := (mem_normGrp_iff p M L _).1 ((hd.mem_subG_iff hM hL).1 hdm)
   refine (mem_normGrp_iff p K L a).2 ⟨-l, neg_mem hl, ?_⟩
-  rw [map_neg, ← normHom_trans hLf hKM hML l hl, hld, ofMul_mul, ofMul_mul, ofMul_inv, ofMul_inv, map_add, map_add,
+  rw [map_neg, ← normHom_trans hLf hKM hML l hl, hld, ofMul_mul, ofMul_mul, ofMul_inv, ofMul_inv, map_add (f := _), map_add (f := _),
     map_neg, map_neg, map_add, map_add, map_neg, map_neg, hc', normHom_kbarRep_nl hM σ _ (ofK_mem p M _), hba]
   abel
 

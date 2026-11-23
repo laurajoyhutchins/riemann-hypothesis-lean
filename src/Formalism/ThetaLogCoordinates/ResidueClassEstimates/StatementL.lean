@@ -1,4 +1,49 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.BigOperators.Group.Finset.Defs
+public import Mathlib.Basic.Real.Basic
+public import Mathlib.Data.Fintype.Pi
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -7,93 +52,10 @@ open Finset
 
 namespace Formalism.InvariantFactorPaths.BranchingDimensions
 
-def SaturatedBasisExtension : Prop :=
-  ∀ {O M1 M2 : Type} [CommRing O] [IsDomain O] [IsDiscreteValuationRing O]
-    [AddCommGroup M1] [Module O M1] [Module.Free O M1] [Module.Finite O M1]
-    [AddCommGroup M2] [Module O M2] [Module.Free O M2] [Module.Finite O M2] (ϖ : O), Irreducible ϖ →
-    ∀ (Sp : Set M2) (abelian₂ : Submodule O M1) (Δ : M1 →ₗ[O] M2),
-      (∀ x, ϖ • x ∈ abelian₂ → x ∈ abelian₂) →
-      (∀ x, (∃ y, Δ x = ϖ • y) → ∃ x', x = ϖ • x') →
-      (∀ u ∈ abelian₂, Δ u ∈ Submodule.span O Sp ⊔ (Ideal.span {ϖ}) • (⊤ : Submodule O M2)) →
-      ∃ (R : ℕ) (g : Fin R → M2), (∀ i, g i ∈ Sp) ∧ LinearIndependent O g ∧
-        (∃ T : Submodule O M2, IsCompl (Submodule.span O (Set.range g)) T) ∧
-        Submodule.span O Sp ≤ Submodule.span O (Set.range g) ⊔ (Ideal.span {ϖ}) • (⊤ : Submodule O M2) ∧
-        Module.finrank O abelian₂ ≤ R
-
-def IsSat {O M : Type} [CommRing O] [AddCommGroup M] [Module O M] (N : Submodule O M) : Prop :=
-  ∀ (a : O) (x : M), a ≠ 0 → a • x ∈ N → x ∈ N
-
-def SaturatedSubmoduleProperties : Prop :=
-  ∀ {O : Type} [CommRing O] [IsDomain O] [IsDiscreteValuationRing O],
-    (∀ {M : Type} [AddCommGroup M] [Module O M] (N N' : Submodule O M), IsSat N → IsSat N' → IsSat (N ⊓ N')) ∧
-    (∀ {M ι : Type} [AddCommGroup M] [Module O M] (b : Module.Basis ι O M) (s : Set ι),
-      IsSat (Submodule.span O (b '' s))) ∧
-    (∀ {M : Type} [AddCommGroup M] [Module O M] [Module.Free O M] [Module.Finite O M] (N : Submodule O M),
-      IsSat N ↔ ∃ T : Submodule O M, IsCompl N T) ∧
-    (∀ {M M' : Type} [AddCommGroup M] [Module O M] [Module.Free O M] [Module.Finite O M]
-      [AddCommGroup M'] [Module O M'] [Module.Free O M'] [Module.Finite O M']
-      (N : Submodule O M) (N' : Submodule O M'), IsSat N → IsSat N' →
-      IsSat (LinearMap.range (TensorProduct.map N.subtype N'.subtype)) ∧
-      Module.finrank O (LinearMap.range (TensorProduct.map N.subtype N'.subtype)) =
-        Module.finrank O N * Module.finrank O N')
-
-abbrev CoarseVar (I1 I2 : Type) : Type := I1 ⊕ (I2 ⊕ I2)
-
-def phC (O : Type) [CommRing O] {I1 I2 : Type} (P : I1 ⊕ I2 → ℕ) (Q : I2 → ℕ) :
-    MvPolynomial (CoarseVar I1 I2) O →ₐ[O] MvPolynomial (I1 ⊕ I2) O :=
-  MvPolynomial.aeval fun x => match x with
-    | Sum.inl i => MvPolynomial.X (Sum.inl i) ^ P (Sum.inl i)
-    | Sum.inr (Sum.inl i) => MvPolynomial.X (Sum.inr i) ^ P (Sum.inr i)
-    | Sum.inr (Sum.inr i) => MvPolynomial.X (Sum.inr i) ^ (P (Sum.inr i) * Q i)
-
-def MonomialDigitExpansion : Prop :=
-  ∀ (O : Type) [CommRing O] [Nontrivial O] (I1 I2 : Type) (P : I1 ⊕ I2 → ℕ) (Q : I2 → ℕ),
-    (∀ i, 1 ≤ P i) → (∀ i, 1 ≤ Q i) →
-    ∀ e : (I1 ⊕ I2) →₀ ℕ, ∃! ml : ((CoarseVar I1 I2) →₀ ℕ) × ((I1 ⊕ I2) →₀ ℕ),
-      (∀ i, ml.1 (Sum.inr (Sum.inl i)) < Q i) ∧ (∀ i, ml.2 i < P i) ∧
-      phC O P Q (MvPolynomial.monomial ml.1 1) * MvPolynomial.monomial ml.2 1 = MvPolynomial.monomial e 1
-
-def CountL : Prop :=
-  ∀ (k P n : ℕ), 1 ≤ k → 1 ≤ P →
-    ∑ la ∈ (Finset.univ : Finset (Fin k → Fin P)).filter
-        (fun la => (∑ c, (la c : ℕ)) ≤ n ∧ P ∣ n - ∑ c, (la c : ℕ)),
-      ((n - ∑ c, (la c : ℕ)) / P + k - 1).choose (k - 1) = (n + k - 1).choose (k - 1)
-
-def CountLa : Prop :=
-  ∀ (k P n : ℕ), 1 ≤ k → 1 ≤ P →
-    ((Finset.univ : Finset (Fin k → Fin P)).filter
-      (fun la => (∑ c, (la c : ℕ)) % P = n % P)).card = P ^ (k - 1)
-
 def ResidueClassLowerBound : Prop :=
   ∀ (r Q be c : ℕ), 2 ≤ r → 2 * be < Q →
     (Q : ℝ) ^ (r - 1) * (1 - 2 * r * be / Q) ≤
       (((Finset.univ : Finset (Fin r → Fin (Q - 2 * be))).filter
         (fun u => (∑ l, (u l : ℕ)) % Q = c % Q)).card : ℝ)
-
-def FrobStep : Prop :=
-  ∀ (p R : ℕ) (σ : Type) (f : MvPolynomial σ ℤ), p.Prime →
-    ∃ h : MvPolynomial σ ℤ, MvPolynomial.expand (p ^ R) f = f ^ (p ^ R) + MvPolynomial.C (p : ℤ) * h
-
-def DetPowNonzero : Prop :=
-  ∀ (F : Type) [CommRing F] [Nontrivial F] (r : ℕ) (e : Fin r → ℕ), (∀ l, 1 ≤ e l) →
-    (Matrix.of fun l c : Fin r => (MvPolynomial.X (l, c) : MvPolynomial (Fin r × Fin r) F) ^ e l).det ≠ 0
-
-def CompareW : Prop :=
-  ∀ (k Ns P n B : ℕ) (Y : ℝ), 1 ≤ k → 1 ≤ P → 1 ≤ Y →
-    (n : ℝ) / P - 2 * k * Ns ≤ B → 7.2 * Y * (k : ℝ) ^ 2 * Ns ≤ (n : ℝ) / P →
-    ((n + k - 1).choose (k - 1) : ℝ) * (1 - 2 / (7.2 * Y)) ≤
-      (P : ℝ) ^ (k - 1) * ((B + k - 1).choose (k - 1) : ℝ)
-
-def CompareA : Prop :=
-  ∀ (k a a' : ℕ), 1 ≤ k → 1 ≤ a → a' ≤ a →
-    ((a + k - 1).choose (k - 1) : ℝ) * (1 - k * ((a : ℝ) - a') / a) ≤ ((a' + k - 1).choose (k - 1) : ℝ)
-
-def TotalLoss : Prop :=
-  ∀ (J r N : ℕ) (Y : ℝ), 2 ≤ r → 3 * J * r ≤ N → 0 < Y →
-    (J : ℝ) / (32 * Y) + J * r * (0.28 + r / 2) / Y + N / (32 * Y) + N / Y ≤ N * r / Y
-
-def PlanesLower : Prop :=
-  ∀ (q r K : ℕ), 2 ≤ q →
-    (q : ℝ) ^ (r * K) ≤ ∏ i ∈ range r, (((q : ℝ) ^ (r + K - i) - 1) / ((q : ℝ) ^ (r - i) - 1))
 
 end Formalism.InvariantFactorPaths.BranchingDimensions

@@ -1,8 +1,47 @@
-import Mathlib
-import Formalism.LocalToGlobal.ProjectiveLattices.ThClass
-import Development.AbelianVarietyTheory.BlockTheory.ExistenceTori.DeterminantCharacterIdentity
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsIndexIdeal
-import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.HarmAMemSpanShort
+module
+
+public import Formalism.LocalToGlobal.ProjectiveLattices.ThClass
+public import Development.AbelianVarietyTheory.BlockTheory.ExistenceTori.DeterminantCharacterIdentity
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.HarmAMemSpanShort
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -18,17 +57,6 @@ variable {E : Type} [Field E] [NumberField E] [IsCMField E] {H : Host E} {Dw : D
 section Poly
 
 variable (c : Coeff l) {n : ℕ}
-
-theorem mult_le (hn : Dw.p + Dw.q ≤ n) (σ : E →+* ℂ) : Dw.mult σ ≤ n := by
-  unfold Datum.mult
-  split_ifs <;> omega
-
-def endCols (hn : Dw.p + Dw.q ≤ n) (σ : E →+* ℂ) (i : Fin (Dw.mult σ)) : Fin n :=
-  if InPsi H σ then Fin.castLE (mult_le hn σ) i else (Fin.castLE (mult_le hn σ) i).rev
-
-def revSign (Dw : Datum H) (a : (E →+* ℂ) × ℕ → ℕ) : ℤˣ :=
-  ∏ σ : E →+* ℂ, ∏ i : Fin (Dw.mult σ),
-    (if InPsi H σ then 1 else Equiv.Perm.sign (Fin.revPerm (n := i.val + 1))) ^ aStep Dw a σ i.val
 
 end Poly
 
@@ -69,7 +97,8 @@ def conjMod (M : Submodule (𝓞 E) E) : Submodule (𝓞 E) E where
   zero_mem' := by simp
   add_mem' := fun {a b} ha hb => by
     show IsCMField.complexConj E (a + b) ∈ M
-    rw [map_add]; exact add_mem ha hb
+    rw [map_add (IsCMField.complexConj E)]
+    exact M.add_mem ha hb
   smul_mem' := fun o x hx => by
     show IsCMField.complexConj E (o • x) ∈ M
     rw [conj_smul]; exact M.smul_mem _ hx
@@ -111,7 +140,7 @@ def conjLat (L : Submodule (𝓞 E) (Fin n → E)) : GenLat E n where
       rw [map_zero]; exact L.zero_mem
     add_mem' := fun {a b} ha hb => by
       show (fun j => IsCMField.complexConj E (a j + b j)) ∈ L
-      simp only [map_add]; exact add_mem ha hb
+      simp only [map_add (f := _)]; exact add_mem ha hb
     smul_mem' := fun o x hx => by
       show (fun j => IsCMField.complexConj E (o • x j)) ∈ L
       simp only [conj_smul]; exact L.smul_mem _ hx }
@@ -181,8 +210,6 @@ section Twist
 
 variable (c : Coeff l) {n : ℕ} {T : Type} [AddCommGroup T] [Module c.F T] [Module (𝓞 c.F) T]
   [IsScalarTower (𝓞 c.F) c.F T]
-
-def unitQuot (H : Host E) (y : ℕ) : E := (1 + y * (H.rt : E)) / (1 - y * (H.rt : E))
 
 end Twist
 

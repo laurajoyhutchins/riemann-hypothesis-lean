@@ -1,4 +1,64 @@
-import Mathlib
+module
+
+public import Mathlib.FieldTheory.IsAlgClosed.Basic
+public import Mathlib.LinearAlgebra.Charpoly.Basic
+public import Mathlib.LinearAlgebra.FreeModule.PID
+public import Mathlib.RingTheory.Flat.TorsionFree
+public import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Algebra.Module.StablyFree.Basic
+public import Mathlib.Algebra.MvPolynomial.Funext
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.Eigenspace.Charpoly
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.FieldTheory.IsAlgClosed.AlgebraicClosure
+public import Mathlib.LinearAlgebra.Charpoly.ToMatrix
+public import Mathlib.LinearAlgebra.Eigenspace.Basic
+public import Mathlib.LinearAlgebra.Vandermonde
+
+@[expose] public section
 
 namespace GroundTheory.Automorphic
 
@@ -41,6 +101,7 @@ theorem exists_linearIndependent_pow_apply_of_isAlgClosed (f : Module.End K W)
   have hsum : ∀ j, ∑ k : Fin n, c k * μ j ^ (k : ℕ) = 0 := by
     have h2 : ∑ j, (∑ k : Fin n, c k * μ j ^ (k : ℕ)) • w j = 0 := by
       rw [← hc]
+
       simp only [map_sum, hpow, Finset.smul_sum, smul_smul, Finset.sum_smul]
       exact Finset.sum_comm
     exact fun j => (Fintype.linearIndependent_iff.1 hli) _ h2 j
@@ -189,6 +250,7 @@ theorem IsCyclicVector.exists_aeval_apply_eq (hv : IsCyclicVector f v) (x : V) :
     ∃ p : E[X], aeval f p v = x := by
   refine ⟨∑ k : Fin (finrank E V), C ((cyclicBasis hv).repr x k) * X ^ (k : ℕ), ?_⟩
   conv_rhs => rw [← (cyclicBasis hv).sum_repr x]
+
   rw [map_sum, LinearMap.sum_apply]
   refine Finset.sum_congr rfl fun k _ => ?_
   rw [aeval_C_mul_X_pow_apply, cyclicBasis_apply]
@@ -211,7 +273,7 @@ theorem aeval_apply_eq_sum_modByMonic (f : Module.End E V) (v : V) (p : E[X]) :
     aeval f p v = ∑ k : Fin (finrank E V), (p %ₘ f.charpoly).coeff k • (f ^ (k : ℕ)) v := by
   have hmon := LinearMap.charpoly_monic f
   conv_lhs => rw [← modByMonic_add_div p f.charpoly]
-  rw [map_add, map_mul, LinearMap.aeval_self_charpoly, zero_mul, add_zero]
+  rw [map_add (f := _), map_mul, LinearMap.aeval_self_charpoly, zero_mul, add_zero]
   by_cases h0 : p %ₘ f.charpoly = 0
   · simp [h0]
   have hdeg : (p %ₘ f.charpoly).natDegree < finrank E V := by
@@ -234,6 +296,7 @@ theorem IsCyclicVector.exists_conj {f' : Module.End E V'} {v' : V'} (hv : IsCycl
     rfl
   have hp : ∀ p : E[X], e (aeval f p v) = aeval f' p v' := by
     intro p
+
     rw [aeval_apply_eq_sum_modByMonic, aeval_apply_eq_sum_modByMonic, map_sum, ← hch]
     rw [← (finCongr hdim).sum_comp]
     refine Finset.sum_congr rfl fun k _ => ?_

@@ -1,6 +1,47 @@
-import Mathlib
-import Formalism.SharpRestriction.AdmissibleParameterJoins.SfromGLa
-import Formalism.SharpRestriction.GlobalSchurBounds.StandardLattice
+module
+
+public import Formalism.SharpRestriction.GlobalSchurBounds.GeneralLinearActions.GapAtLeast
+public import Mathlib.NumberTheory.LSeries.RiemannZeta
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -24,23 +65,6 @@ theorem std_ortho (K : Type) [Field K] [NumberField K] [StarRing K] (M : ℕ) :
     · subst hij; simp [stdForm_apply, Pi.single_apply]
     · simp [stdForm_apply, Pi.single_apply, hij, Ne.symm hij]
 
-theorem massRatio_host_of (D : D7) (h : StandardLattice.MassRatio₂ D) : ∀ (j : ℕ), 3 ≤ j →
-    ∀ (V V' : Type) [AddCommGroup V] [Module D.host.E V] [Module (𝓞 D.host.E) V]
-      [IsScalarTower (𝓞 D.host.E) D.host.E V] [AddCommGroup V'] [Module D.host.E V']
-      [Module (𝓞 D.host.E) V'] [IsScalarTower (𝓞 D.host.E) D.host.E V']
-      (h : V →ₗ⋆[D.host.E] V →ₗ[D.host.E] D.host.E) (h' : V' →ₗ⋆[D.host.E] V' →ₗ[D.host.E] D.host.E)
-      (L : Submodule (𝓞 D.host.E) V) (L' : Submodule (𝓞 D.host.E) V'),
-      h.IsSymm → h'.IsSymm → IsOrthoLattice h L j → IsOrthoLattice h' L' (j - 1) →
-      mass h L / mass h' L' = massRatioRightSide D.host.E j := by
-  intro j hj V V' _ _ _ _ _ _ _ _ hV hV' L L' _ _ hL hL'
-  rw [mass_ortho_eq hL (std_ortho D.host.E j), mass_ortho_eq hL' (std_ortho D.host.E (j - 1))]
-  exact h j hj
-
-theorem massRatio_all_of (h : StandardLattice.SiegelMassRatioCM) : SiegelMassRatio := by
-  intro K _ _ _ hK M hM V V' _ _ _ _ _ _ _ _ hV hV' L L' _ _ hL hL'
-  rw [mass_ortho_eq hL (std_ortho K M), mass_ortho_eq hL' (std_ortho K (M - 1))]
-  exact h K hK M hM
-
 theorem zetaR_eq (M : ℕ) (hM : 2 ≤ M) : (riemannZeta (M : ℂ)).re = StandardLattice.zetaR M := by
   have h1 : (1 : ℝ) < ((M : ℂ)).re := by
     simp only [Complex.natCast_re]; exact_mod_cast hM
@@ -53,12 +77,6 @@ theorem zetaR_eq (M : ℕ) (hM : 2 ≤ M) : (riemannZeta (M : ℂ)).re = Standar
     push_cast
     rfl
   rw [h2, Complex.ofReal_re]
-
-theorem lBound_host_of (D : D7) (h : StandardLattice.gram_det_kernel_dual_lattice D) : ∀ i : ℕ, 2 ≤ i →
-    |Real.log (lValEta D.host.E i)| ≤ (D.R.f : ℝ) * Real.log (riemannZeta (i : ℂ)).re := by
-  intro i hi
-  rw [zetaR_eq i hi]
-  exact h i hi
 
 end Formalism.MainNotions.J
 

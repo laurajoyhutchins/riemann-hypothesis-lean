@@ -1,8 +1,51 @@
-import Mathlib
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.SatakeExponents.UniformizerValuations.MatchT
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.UnitaryIwahoriFactorization
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.UnitaryIwahoriFacts
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.VLtOneOfOrdLEqOne
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.SatakeExponents.UniformizerValuations.MatchT
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PlaceConjugationPropertiesCmFieldStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IwahoriAndMaximalCompactCriteria
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.TwistedIwahoriContractionHolds
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.UnitaryIwahoriFactorization
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.UnitaryIwahoriFacts
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.VLtOneOfOrdLEqOne
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 noncomputable section
 
@@ -387,14 +430,14 @@ theorem wexp_rev (l : Fin (n / 2) → ℤ) (i : Fin n) : wexp n l i.rev = - wexp
   have hv2 : n - 1 - i.rev.val = i.val := by omega
   unfold wexp
   by_cases h1 : i.val < n / 2
-  · rw [dif_pos h1, dif_neg (show ¬ i.rev.val < n / 2 by omega), dif_pos (show n - 1 - i.rev.val < n / 2 by omega)]
+  · rw [dite_eq_left h1, dite_eq_right (show ¬ i.rev.val < n / 2 by omega), dite_eq_left (show n - 1 - i.rev.val < n / 2 by omega)]
     exact congrArg (fun x => - l x) (Fin.ext hv2)
-  · rw [dif_neg h1]
+  · rw [dite_eq_right h1]
     by_cases h2 : n - 1 - i.val < n / 2
-    · rw [dif_pos h2, dif_pos (show i.rev.val < n / 2 by omega), neg_neg]
+    · rw [dite_eq_left h2, dite_eq_left (show i.rev.val < n / 2 by omega), neg_neg]
       exact congrArg l (Fin.ext hv)
-    · rw [dif_neg h2, dif_neg (show ¬ i.rev.val < n / 2 by omega),
-        dif_neg (show ¬ n - 1 - i.rev.val < n / 2 by omega), neg_zero]
+    · rw [dite_eq_right h2, dite_eq_right (show ¬ i.rev.val < n / 2 by omega),
+        dite_eq_right (show ¬ n - 1 - i.rev.val < n / 2 by omega), neg_zero]
 
 theorem wexp_anti {l : Fin (n / 2) → ℤ} (hl : Cone l) : Antitone (wexp n l) := by
   have ha := cone_anti hl
@@ -403,24 +446,24 @@ theorem wexp_anti {l : Fin (n / 2) → ℤ} (hl : Cone l) : Antitone (wexp n l) 
   have hij' : i.val ≤ j.val := hij
   unfold wexp
   by_cases h1 : i.val < n / 2
-  · rw [dif_pos h1]
+  · rw [dite_eq_left h1]
     by_cases h2 : j.val < n / 2
-    · rw [dif_pos h2]
+    · rw [dite_eq_left h2]
       exact ha (show (⟨i.val, h1⟩ : Fin (n / 2)) ≤ ⟨j.val, h2⟩ from hij')
-    · rw [dif_neg h2]
+    · rw [dite_eq_right h2]
       have h5 := hp ⟨i.val, h1⟩
       split_ifs with h3
       · have := hp ⟨_, h3⟩
         omega
       · omega
-  · rw [dif_neg h1, dif_neg (show ¬ j.val < n / 2 by omega)]
+  · rw [dite_eq_right h1, dite_eq_right (show ¬ j.val < n / 2 by omega)]
     by_cases h3 : n - 1 - i.val < n / 2
     · have h4 : n - 1 - j.val < n / 2 := by omega
-      rw [dif_pos h3, dif_pos h4]
+      rw [dite_eq_left h3, dite_eq_left h4]
       have := ha (show (⟨n - 1 - j.val, h4⟩ : Fin (n / 2)) ≤ ⟨n - 1 - i.val, h3⟩ from
         show n - 1 - j.val ≤ n - 1 - i.val by omega)
       omega
-    · rw [dif_neg h3]
+    · rw [dite_eq_right h3]
       split_ifs with h4
       · have := hp ⟨_, h4⟩
         omega
@@ -515,10 +558,10 @@ theorem fuMul : FUMul := by
     intro x hx
     refine Subgroup.mem_subgroupOf.2 ?_
     have h1 := (GlobalTheory.CompanionTheory.IwEntries.iwGL_KGL_entries E w n _).1.1 ((hiw x).1 hx)
-    have h2 : b⁻¹ * x.1 * b ∈ GlobalTheory.LFun.KGL w n :=
+    have h2 : b⁻¹ * x.1 * b ∈ GlobalTheory.LFun.KGL w (n := n) :=
       (GlobalTheory.CompanionTheory.IwEntries.iwGL_KGL_entries E w n _).2.2 ⟨h1.1, h1.2.1⟩
     have h3 : (x.1 : GLw n w) = b * (b⁻¹ * x.1 * b) * b⁻¹ := by group
-    show (x.1 : GLw n w) ∈ GlobalTheory.LFun.KGL w n
+    show (x.1 : GLw n w) ∈ GlobalTheory.LFun.KGL w (n := n)
     rw [h3]
     exact mul_mem (mul_mem hb.1 h2) (inv_mem hb.1)
   have hf : ∀ (l : Fin (n / 2) → ℤ) (s : UL n w), s.1 = b * tdiag ϖ (wexp n l) * b⁻¹ →

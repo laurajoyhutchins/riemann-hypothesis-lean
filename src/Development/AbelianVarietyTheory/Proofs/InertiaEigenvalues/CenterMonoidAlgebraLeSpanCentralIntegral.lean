@@ -1,4 +1,54 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.Algebra.Subalgebra.Basic
+public import Mathlib.Algebra.MonoidAlgebra.Basic
+import Mathlib.Algebra.Group.ConjFinite
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GlobalTheory.GroupAlg.ClassSum
 
@@ -12,7 +62,7 @@ noncomputable def classSum [DecidableEq (ConjClasses G)] (C : ConjClasses G) : M
 theorem coeff_classSum [DecidableEq (ConjClasses G)] (C : ConjClasses G) (y : G) :
     (classSum C).coeff y = if ConjClasses.mk y = C then 1 else 0 := by
   classical
-  simp [classSum, coeff_sum, coeff_single, Finsupp.finset_sum_apply, Finsupp.single_apply]
+  simp [classSum, coeff_sum, coeff_single, Finsupp.finsetSum_apply, Finsupp.single_apply]
 
 theorem classSum_comm [DecidableEq (ConjClasses G)] (C : ConjClasses G) (a : MonoidAlgebra ℤ G) :
     classSum C * a = a * classSum C := by
@@ -51,12 +101,13 @@ theorem mem_span (R G : Type) [CommRing R] [Group G] [Finite G] (z : MonoidAlgeb
       (MonoidAlgebra.mapRingHom G (Int.castRingHom R) (classSum C)).coeff x =
         if ConjClasses.mk x = C then 1 else 0 := by
     intro C x
-    simp [classSum, map_sum, MonoidAlgebra.mapRangeRingHom_single, coeff_sum, coeff_single,
-      Finsupp.finset_sum_apply, Finsupp.single_apply, apply_ite (Int.cast : ℤ → R)]
+
+    simp [classSum, map_sum, coeff_sum, coeff_single,
+    Finsupp.finsetSum_apply, Finsupp.single_apply, apply_ite (Int.cast : ℤ → R)]
   have hz' : z = ∑ C, z.coeff (rep C) • MonoidAlgebra.mapRingHom G (Int.castRingHom R) (classSum C) := by
     apply MonoidAlgebra.ext
     ext x
-    rw [coeff_sum, Finsupp.finset_sum_apply]
+    rw [coeff_sum, Finsupp.finsetSum_apply]
     simp only [coeff_smul, Finsupp.smul_apply, hmap, smul_eq_mul, mul_ite, mul_one, mul_zero,
       Finset.sum_ite_eq, Finset.mem_univ, if_true]
     refine coeff_conj_eq z hz ?_

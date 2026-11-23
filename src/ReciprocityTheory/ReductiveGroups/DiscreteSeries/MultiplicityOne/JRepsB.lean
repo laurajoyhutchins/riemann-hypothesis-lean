@@ -1,4 +1,50 @@
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.MultiplicityOne.JRepsA
+module
+
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.MultiplicityOne.JRepsA
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.MultiplicityOne.StDefs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -133,7 +179,7 @@ theorem mud_conj_mul (hk : 1 ≤ k) (d : ℂ) (hd : 1 < ‖d‖) : (mud k d).map
   have hsc : conj (sgd d) = sgd d := hss
   ext i j
   rcases eq_or_ne j 0 with rfl | hj0
-  · rw [mul_mud_blk hk d _ _ _ (Or.inl rfl), hc, hc, one_apply]
+  · rw [mul_mud_blk hk d _ _ _ (Or.inl rfl), hc, hc, Matrix.one_apply]
     rcases eq_or_ne i 0 with rfl | hi0
     · simp only [character_first_entry hk, mud0L hk, character_last_entry hk, if_true, map_neg, hsc, Complex.conj_conj]
       linear_combination -hs
@@ -143,7 +189,7 @@ theorem mud_conj_mul (hk : 1 ≤ k) (d : ℂ) (hd : 1 < ‖d‖) : (mud k d).map
     · simp only [mud_row hk d hi0 hiL, if_neg hi0, if_neg hiL]
       simp
   rcases eq_or_ne j (Fin.last k) with rfl | hjL
-  · rw [mul_mud_blk hk d _ _ _ (Or.inr rfl), hc, hc, one_apply]
+  · rw [mul_mud_blk hk d _ _ _ (Or.inr rfl), hc, hc, Matrix.one_apply]
     rcases eq_or_ne i 0 with rfl | hi0
     · simp only [character_first_entry hk, mud0L hk, mudLL hk, if_neg h0L, if_neg h0L.symm, map_neg, hsc, Complex.conj_conj]
       ring
@@ -152,7 +198,7 @@ theorem mud_conj_mul (hk : 1 ≤ k) (d : ℂ) (hd : 1 < ‖d‖) : (mud k d).map
       linear_combination -hs
     · simp only [mud_row hk d hi0 hiL, if_neg hi0, if_neg hiL]
       simp
-  · rw [mul_mud_col hk d _ hj0 hjL, hc, mud_col hk d hj0 hjL, one_apply]
+  · rw [mul_mud_col hk d _ hj0 hjL, hc, mud_col hk d hj0 hjL, Matrix.one_apply]
     split_ifs <;> simp
 
 theorem herm_mulVec {n : ℕ} (H A : Matrix (Fin n) (Fin n) ℂ) (u v : Fin n → ℂ) :

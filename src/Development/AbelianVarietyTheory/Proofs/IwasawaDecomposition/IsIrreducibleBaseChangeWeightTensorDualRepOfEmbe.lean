@@ -1,9 +1,58 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IncludeLInjective
-import Formalism.LocalToGlobal.IndefiniteReal.DoubleCosetOperators.TwistedCharacterValue
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IsotypicFactorOfIsIrreduciblePiFiniteGroups
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ContragredientIsIrreducibleFiniteDimensionalStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.WeightTensorRepOfEmbeddingsIsIrreducibleStatement
+module
+
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IncludeLInjective
+public import Formalism.LocalToGlobal.IndefiniteReal.DoubleCosetOperators.TwistedCharacterValue
+public import Mathlib.LinearAlgebra.Dual.BaseChange
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ContragredientIsIrreducibleFiniteDimensionalStatement
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.WeightTensorRepOfEmbeddingsIsIrreducibleStatement
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IsotypicFactorOfIsIrreduciblePiFiniteGroups
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.NStageTrivialCharacterCoeffEqAlt
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExponentAndTwistData
+import Formalism.LocalToGlobal.IndefiniteReal.DoubleCosetOperators.Objects
+import Formalism.LocalToGlobal.NormalizedHeckeFactors.TypesDefs
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.MainNotions Formalism.MainNotions.N Formalism.ConjugateSelfDual ReciprocityTheory.Gal ReciprocityTheory.Aut Formalism.AUTREP Formalism.L2 Formalism.L2.Host Formalism.L2.NT Formalism.IndefR.NX GlobalTheory.HeightCounting GlobalTheory.HeightCounting.FormsStep NumberField IsDedekindDomain Polynomial
 open scoped TensorProduct
 
@@ -27,7 +76,7 @@ theorem dualBC_natural (f : V →ₗ[K] V) (x : K' ⊗[K] Module.Dual K V) :
     dualBC (f.dualMap.baseChange K' x) = (f.baseChange K').dualMap (dualBC x) := by
   induction x using TensorProduct.induction_on with
   | zero => simp
-  | add x y hx hy => simp only [map_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
   | tmul a g =>
     apply (TensorProduct.isBaseChange K V K').algHom_ext
     intro v
@@ -61,7 +110,7 @@ theorem map_colAddGen {r m : ℕ} (l j : Fin m) (f : MvPolynomial (Fin r × Fin 
       Formalism.GradedWeylDivisibility.colAddGen K' l j (MvPolynomial.map (algebraMap K K') f) := by
   induction f using MvPolynomial.induction_on with
   | C a => simp
-  | add p q hp hq => simp only [map_add, hp, hq]
+  | add p q hp hq => simp only [map_add (f := _), hp, hq]
   | mul_X p v hp =>
     simp only [map_mul, hp, MvPolynomial.map_X]
     congr 1
@@ -108,10 +157,11 @@ theorem map_trAct (g : ι → GL (Fin n) K) (F : Pol K ι n) :
       trAct (fun τ => Matrix.GeneralLinearGroup.map (algebraMap K K') (g τ)) (MvPolynomial.map (algebraMap K K') F) := by
   induction F using MvPolynomial.induction_on with
   | C a => simp
-  | add p q hp hq => simp only [map_add, hp, hq]
+  | add p q hp hq => simp only [map_add (f := _), hp, hq]
   | mul_X p v hp =>
     simp only [map_mul, hp, MvPolynomial.map_X]
     congr 1
+
     simp [trAct, Formalism.GradedWeylDivisibility.blockAct, map_sum]
 
 theorem map_actP (lam : ι → DomWeight n) (g : ι → GL (Fin n) K) (F : Pol K ι n) :
@@ -178,10 +228,10 @@ theorem isIrreducible_bcRep_tenRepF (emb : ι → L →+* K) (lam : ι → DomWe
   rw [bcVV_val]
   induction y using TensorProduct.induction_on with
   | zero => simp
-  | add x y hx hy => simp only [map_add, Submodule.coe_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), Submodule.coe_add, hx, hy]
   | tmul a F =>
     show bcPol lam (a ⊗ₜ[K] (GlobalTheory.AlgWtF.tenRepF emb lam γ F)) =
-      actP lam (GlobalTheory.AlgWtF.embGLF _ (GlobalTheory.AlgWtF.ratHom γ)) (bcVV lam (a ⊗ₜ[K] F) : Pol K' ι n)
+      actP lam (GlobalTheory.AlgWtF.embGLF _ (GlobalTheory.AlgWtF.ratHom (L := L) (n := n) γ)) (bcVV lam (a ⊗ₜ[K] F) : Pol K' ι n)
     rw [bcVV_val, bcPol_tmul, bcPol_tmul, map_smul, embGLF_comp]
     congr 1
     exact map_actP lam _ _

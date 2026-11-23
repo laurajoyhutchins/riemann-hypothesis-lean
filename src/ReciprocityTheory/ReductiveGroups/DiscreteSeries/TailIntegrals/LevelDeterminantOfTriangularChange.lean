@@ -1,4 +1,54 @@
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TailIntegrals.InvSqrtTwoMulSelf
+module
+
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TailIntegrals.InductiveHeisenbergInputs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TailIntegrals.InvSqrtTwoMulSelf
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TailIntegrals.MatExtBvec
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 open Matrix MeasureTheory
@@ -53,6 +103,7 @@ theorem lv_sum {ι : Type} (s : Finset ι) (f : ι → Fin (2 * r' + k + 1) → 
     liftVec k 1 r' (∑ i ∈ s, f i) = ∑ i ∈ s, liftVec k 1 r' (f i) := by
   have e : liftVec k 1 r' (∑ i ∈ s, f i) =
       (AddMonoidHom.mk' (liftVec k 1 r') fun v w => lv_add v w) (∑ i ∈ s, f i) := rfl
+
   rw [e, map_sum]
   rfl
 
@@ -60,13 +111,13 @@ theorem phi_lift (a : Fin (r' + 1)) : liftVec k 1 r' (phiV k r' a) = phiV k (1 +
   unfold phiV
   by_cases h : a.val < r'
   · have h' : (su a).val < 1 + r' := by rw [su_val]; omega
-    rw [dif_pos h, dif_pos h', ← bvec_lv]
+    rw [dite_eq_left h, dite_eq_left h', ← bvec_lv]
     congr 1
     ext
     simp only [sh, esI, su_val, Fin.val_mk]
     omega
   · have h' : ¬ (su a).val < 1 + r' := by rw [su_val]; omega
-    rw [dif_neg h, dif_neg h']
+    rw [dite_eq_right h, dite_eq_right h']
     unfold epsV
     have e0 : sh (wI k r' 0) = wI k (1 + r') 0 := by
       ext
@@ -80,7 +131,7 @@ theorem phi_lift (a : Fin (r' + 1)) : liftVec k 1 r' (phiV k r' a) = phiV k (1 +
 
 theorem besselPhi_eq_reindexConj_rootCoords : phiV k (1 + r') 0 = bvec ⟨2 * (1 + r') + k, by omega⟩ := by
   unfold phiV
-  rw [dif_pos (by simp only [Fin.val_zero]; omega)]
+  rw [dite_eq_left (by simp only [Fin.val_zero]; omega)]
   congr 1
 
 theorem levelEmbedding_fixes_firstVector (g : Mat k r') : ιLev k 1 r' g *ᵥ phiV k (1 + r') 0 = phiV k (1 + r') 0 := by
@@ -99,7 +150,7 @@ variable (τ : Matrix (Fin (r' + 1)) (Fin (r' + 1)) ℂ)
 
 theorem tt_su (a b : Fin (r' + 1)) : tt τ (su b) (su a) = τ b a := by
   unfold tt
-  rw [if_neg (by simp [su]), dif_neg (by simp [su])]
+  rw [if_neg (by simp [su]), dite_eq_right (by simp [su])]
   congr 1 <;> ext <;> simp [su]
 
 theorem tt_00 : tt τ 0 0 = 1 := by
@@ -120,8 +171,8 @@ theorem tt_tri (hτ : τ.BlockTriangular id) : (tt τ).BlockTriangular id := by
   · omega
   · rw [if_neg hi]
     by_cases hj : j.val = 0
-    · rw [dif_pos hj]
-    · rw [dif_neg hj]
+    · rw [dite_eq_left hj]
+    · rw [dite_eq_right hj]
       apply hτ
       simp only [id, Fin.mk_lt_mk]
       omega

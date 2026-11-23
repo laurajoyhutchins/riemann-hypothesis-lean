@@ -1,4 +1,47 @@
-import Formalism.LocalToGlobal.GroupLattices.ComparisonMaps.ClsStab
+module
+
+public import Formalism.LocalToGlobal.GroupLattices.ComparisonMaps.ClsStab
+public import Formalism.LocalToGlobal.GroupLattices.ComparisonMaps.ClsMain
+public import Formalism.LocalToGlobal.GroupLattices.LevelGatherings.RepTie
+public import Formalism.LocalToGlobal.GroupLattices.ComparisonMaps.ClsGat
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -43,9 +86,9 @@ theorem trivStab1 (hT : TrivStabU L) (i : compL L p) (y : GL (Fin R.k) (E ⊗[F]
   have h1 := (fix_iff hk I hdet hH i (gOf Lt) γ.1).2 ⟨hy ▸ γ.2, by rw [← gOf_spec Lt h]; exact hfix⟩
   exact Subtype.ext (hT _ _ h1)
 
-set_option maxHeartbeats 2000000 in
-include hH in
 
+
+include hH in
 theorem clsR_iff (i i' : (gatOfLevelP L hS nV r lam0 dom hk I ψ e).comp)
     (Lt Lt' : (gatOfLevelP L hS nV r lam0 dom hk I ψ e).P.Tup)
     (h : (gatOfLevelP L hS nV r lam0 dom hk I ψ e).P.IsLatTup Lt)
@@ -55,8 +98,8 @@ theorem clsR_iff (i i' : (gatOfLevelP L hS nV r lam0 dom hk I ψ e).comp)
         Lt' = ((gatOfLevelP L hS nV r lam0 dom hk I ψ e).lev i).smul γ Lt :=
   clsOf_inj.eq_iff.trans (clsC_iff hS r lam0 dom hk I ψ e hdet hH i i' Lt Lt' h h')
 
-include hH in
 
+include hH in
 theorem clsR_surj (c : C.cls 0) :
     ∃ (i : (gatOfLevelP L hS nV r lam0 dom hk I ψ e).comp) (Lt : (gatOfLevelP L hS nV r lam0 dom hk I ψ e).P.Tup),
       (gatOfLevelP L hS nV r lam0 dom hk I ψ e).P.IsLatTup Lt ∧ clsR hk I hdet i Lt = c := by
@@ -64,9 +107,9 @@ theorem clsR_surj (c : C.cls 0) :
   obtain ⟨i, Lt, h1, h2⟩ := clsC_surj hS r lam0 dom hk I ψ e hdet hH c'
   exact ⟨i, Lt, h1, congrArg (clsOf L) h2⟩
 
-set_option maxHeartbeats 2000000 in
-include hH in
 
+
+include hH in
 theorem stab_card (i : (gatOfLevelP L hS nV r lam0 dom hk I ψ e).comp)
     (Lt : (gatOfLevelP L hS nV r lam0 dom hk I ψ e).P.Tup)
     (h : (gatOfLevelP L hS nV r lam0 dom hk I ψ e).P.IsLatTup Lt) :
@@ -74,9 +117,9 @@ theorem stab_card (i : (gatOfLevelP L hS nV r lam0 dom hk I ψ e).comp)
       ((gatOfLevelP L hS nV r lam0 dom hk I ψ e).lev i).smul γ Lt = Lt} = Nat.card (C.stab 0 (clsR hk I hdet i Lt)) :=
   stab_card1 hS r lam0 dom hk I ψ hdet hH i _ rfl Lt h
 
-set_option maxHeartbeats 2000000 in
-include hH hdet in
 
+
+include hH hdet in
 theorem trivStab (hT : TrivStabU L) : (gatOfLevelP L hS nV r lam0 dom hk I ψ e).TrivStab :=
   fun i γ Lt h hfix => trivStab1 hS r lam0 dom hk I ψ hdet hH hT i _ rfl γ Lt h hfix
 

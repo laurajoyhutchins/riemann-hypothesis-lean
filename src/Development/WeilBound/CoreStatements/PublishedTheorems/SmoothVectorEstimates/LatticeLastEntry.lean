@@ -1,5 +1,59 @@
-import Development.WeilBound.CoreStatements.PublishedTheorems.SmoothVectorEstimates.MirabolicColumnBlock
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.IsOpenKerFinIdele
+module
+
+public import Development.WeilBound.CoreStatements.PublishedTheorems.SmoothVectorEstimates.MirabolicColumnBlock
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.IsOpenKerFinIdele
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -128,11 +182,11 @@ theorem det_sMat (hk : m + 1 < a) (ξ : UnipotentBlockColumnIndex a (m + 1) (m +
       simp [sMat, extR, hj]
     · simp [sMat, Matrix.updateRow_ne hi, Matrix.one_apply_ne (ne_of_lt hij')]
 
-open Classical in
 
+open Classical in
 def sM (hk : m + 1 < a) (ξ : UnipotentBlockColumnIndex a (m + 1) (m + 1) → F) : GL (Fin a) F :=
   if hξ : ξ (t0 hk) ≠ 0 then
-    ((Matrix.isUnit_iff_isUnit_det _).2 (by rw [det_sMat]; exact isUnit_iff_ne_zero.2 hξ)).unit
+    ((Matrix.isUnit_iff_isUnit_det (sMat hk ξ)).2 (by rw [det_sMat]; exact isUnit_iff_ne_zero.2 hξ)).unit
   else 1
 
 theorem sM_val (hk : m + 1 < a) (ξ : UnipotentBlockColumnIndex a (m + 1) (m + 1) → F) (hξ : ξ (t0 hk) ≠ 0) :
@@ -147,11 +201,11 @@ theorem sM_e (hk : m + 1 < a) : sM hk (Pi.single (t0 hk) (1 : F)) = 1 := by
     funext j
     simp only [extR, Matrix.one_apply]
     by_cases hj : (j : ℕ) < m + 1
-    · rw [dif_pos hj, Pi.single_apply]
+    · rw [dite_eq_left hj, Pi.single_apply]
       congr 1
       simp only [t0, Subtype.ext_iff, Prod.ext_iff, Fin.ext_iff, and_true, eq_iff_iff]
       omega
-    · rw [dif_neg hj, if_neg]
+    · rw [dite_eq_right hj, if_neg]
       intro e
       rw [← e] at hj
       simp at hj
@@ -170,7 +224,7 @@ theorem blk_sM (hk : m + 1 < a) (ξ : UnipotentBlockColumnIndex a (m + 1) (m + 1
         intro e
         rw [← e] at hj
         simp at hj
-      rw [hi, Matrix.updateRow_self, extR, dif_neg hj, Matrix.one_apply_ne hmj]
+      rw [hi, Matrix.updateRow_self, extR, dite_eq_right hj, Matrix.one_apply_ne hmj]
     · rw [Matrix.updateRow_ne hi]
   · simp [sM, hξ]
 
@@ -186,9 +240,9 @@ theorem mir_mul (hk : m + 1 < a) (h : GL (Fin a) F) (hh : GlobalTheory (m + 1) h
       · have hi' : i = ⟨m, by omega⟩ := Fin.ext him
         rw [hM, sM_val hk _ hξ, sMat, hi', Matrix.updateRow_self, extR]
         by_cases hl : (l : ℕ) < m + 1
-        · rw [dif_pos hl]
+        · rw [dite_eq_left hl]
           rfl
-        · rw [dif_neg hl]
+        · rw [dite_eq_right hl]
           rw [hh _ _ (Or.inr (by omega)), Matrix.one_apply_ne]
           intro e
           rw [← e] at hl
@@ -389,6 +443,8 @@ theorem lattice_open_last_entry : MirabolicColumnBlock → S9 := by
   have he0 : e (t0 hk) ≠ 0 := by simp [he]
   have hW0 : {y : UnipotentBlockColumnIndex a (m + 1) (m + 1) → F | blkU y ∈ U ∧ ‖χ (y (t0 hk)) - 1‖ < 1 / 2} ∈
       𝓝 (0 : UnipotentBlockColumnIndex a (m + 1) (m + 1) → F) := by
+    change blkU ⁻¹' U ∩ {y | ‖χ (y (t0 hk)) - 1‖ < 1 / 2} ∈
+      𝓝 (0 : UnipotentBlockColumnIndex a (m + 1) (m + 1) → F)
     refine Filter.inter_mem ?_ ?_
     · have hc : Continuous (blkU : (UnipotentBlockColumnIndex a (m + 1) (m + 1) → F) → GL (Fin a) F) := continuous_posU (isNil_blk a (m + 1) (m + 1))
       refine hc.continuousAt.preimage_mem_nhds ?_
@@ -481,7 +537,8 @@ theorem lattice_open_last_entry : MirabolicColumnBlock → S9 := by
         (∑ q : L ⧸ L0.addSubgroupOf L,
           χ (dotp (rowOf hk h - e) ((Quotient.out q : L) : UnipotentBlockColumnIndex a (m + 1) (m + 1) → F))) * Λ (ρ h v) := by
       rw [Finset.sum_image]
-      · rw [map_sum, map_sum, Finset.sum_mul]
+      · set_option synthInstance.maxHeartbeats 100000 in
+          rw [map_sum, map_sum, Finset.sum_mul]
         refine Finset.sum_congr rfl fun q _ => ?_
         rw [map_smul, map_smul, smul_eq_mul, key hS hk χ ρ Y hY Λ hΛ h hh v hvY, hc1, dotp_sub_left, hdot,
           sub_eq_neg_add, AddChar.map_add_eq_mul, mul_assoc]

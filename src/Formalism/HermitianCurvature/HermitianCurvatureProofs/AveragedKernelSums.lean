@@ -1,7 +1,55 @@
-import Formalism.HermitianCurvature.ThetaExistenceInductiveFromPieces
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.FirstKernelPropertiesOfHypotheses
+module
 
-set_option maxHeartbeats 400000
+public import Formalism.HermitianCurvature.ThetaExistenceInductiveFromPieces
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.FirstKernelPropertiesOfHypotheses
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
+
 
 noncomputable section
 
@@ -444,26 +492,5 @@ theorem finite_family_truncation_module : Formalism.FourierDecayAlt.A6.SupportMo
 
 theorem head_size_one_in_GL : Formalism.FourierDecayAlt.A6.CSizeOne :=
   fun _ _ _ _ R _ _ h hh => A5x6.cSize_glr R h hh
-
-theorem induction_from_assembled_pieces : Formalism.FourierDecayAlt.A6.ThetaExistenceInductiveFromPieces := by
-  intro aAvg aGH aSt aGP aG aGK aGI aTO aStep
-  intro hMS hPO hON hPG hGR hEB hPC hBS hLF hILR hIKR hVS hPL hCM hPD hLC hMLC hSU hSM' hRF hRS hEx
-  intro hHD hGM hGIn hGAS
-  intro hNS hML hOR hOI hHR hKB hKH hShU hShS hCS hRC hSN hPhD hLoc hCV hXV hCA hUG hUN hCP hUB hAD
-    hCN hTL
-  intro hTB hTS hSM hC1 hMM hIF hKG hKBD hNSup
-  have hAB : AvgBound := aAvg hMS hPO hON
-  have hGH : GaussHess := aGH hGM hGIn hHD hMM hVS
-  have hSP : StationaryPhase :=
-    aSt hNS hML hIKR hMM hRF hLC hPL hMLC hOI hVS hRS hSM' hGAS hLF
-  have hGP : GermPhi := aGP hOR hSP hOI hMM
-  have hG : Germ := aG hHR hGP
-  have hGK : GermKernel := aGK hG hKB hIF hRF
-  intro hA2 hN1
-  have hGI : GermIdentity :=
-    aGI hGH hGK hKH hA2.2 hMM hRF hShU hShS hCS hRC hSN hPhD hLoc hMLC hILR hCV hXV
-  have hTO : ThOm := aTO hGI hAD hLoc hKH hMLC hLC hLF hShU hSU hUG hUN hCP hUB hCA hMM hKG hKBD
-    hGR hAB hPG hPD hPL hCM hCN hTL hTB hTS
-  exact aStep hTO hSM hNSup hC1 hEx hLF hEB hPC hBS hA2 hN1
 
 end Formalism.FourierDecayAlt.P

@@ -1,4 +1,49 @@
-import Development.WeilBound.RepresentationTheoryGL.EisensteinSeries.SiegelEisensteinHalfPlane.SiegelOneDescent.Descend2
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.EisensteinSeries.SiegelEisensteinHalfPlane.SiegelOneDescent.Descend2
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -28,18 +73,15 @@ theorem ext2 {i : ι} (hi : ∀ x, x = i) {M N : Matrix (ι ⊕ ι) (ι ⊕ ι) 
   ext r c
   rcases r with r | r <;> rcases c with c | c <;> rw [hi r, hi c] <;> assumption
 
-@[simp] theorem tri_inl_inl (a b : K) (i j : ι) : (tri a b : Matrix (ι ⊕ ι) (ι ⊕ ι) K) (.inl i) (.inl j) = a := rfl
-@[simp] theorem cechTripleProjFirstSecond (a b : K) (i j : ι) : (tri a b : Matrix (ι ⊕ ι) (ι ⊕ ι) K) (.inl i) (.inr j) = b := rfl
-@[simp] theorem triangular_lower_left (a b : K) (i j : ι) : (tri a b : Matrix (ι ⊕ ι) (ι ⊕ ι) K) (.inr i) (.inl j) = 0 := rfl
 @[simp] theorem triangular_lower_right_diag (a b : K) (i : ι) : (tri a b : Matrix (ι ⊕ ι) (ι ⊕ ι) K) (.inr i) (.inr i) = 1 := by
   simp [tri]
 
 theorem tri_mul {i : ι} (hi : ∀ x, x = i) (a b c d : K) :
     (tri a b * tri c d : Matrix (ι ⊕ ι) (ι ⊕ ι) K) = tri (a * c) (a * d + b) :=
-  ext2 hi (by simp [mul2 hi]) (by simp [mul2 hi]) (by simp [mul2 hi]) (by simp [mul2 hi])
+  ext2 hi (by simp [mul2 hi, tri]) (by simp [mul2 hi, tri]) (by simp [mul2 hi, tri]) (by simp [mul2 hi, tri])
 
 theorem tri_one {i : ι} (hi : ∀ x, x = i) : (tri 1 0 : Matrix (ι ⊕ ι) (ι ⊕ ι) K) = 1 :=
-  ext2 hi (by simp) (by simp) (by simp) (by simp)
+  ext2 hi (by simp [tri]) (by simp [tri]) (by simp [tri]) (by simp [tri])
 
 theorem tri_det {i : ι} (hi : ∀ x, x = i) (a b : K) : (tri a b : Matrix (ι ⊕ ι) (ι ⊕ ι) K).det = a := by
   haveI : Unique ι := ⟨⟨i⟩, fun x => hi x⟩
@@ -56,7 +98,7 @@ def triU {i : ι} (hi : ∀ x, x = i) (a b a' b' : K) (h1 : a * a' = 1) (h2 : a 
 
 theorem tri_map {K' : Type} [CommRing K'] {i : ι} (hi : ∀ x, x = i) (f : K →+* K') (a b : K) :
     (tri a b : Matrix (ι ⊕ ι) (ι ⊕ ι) K).map f = tri (f a) (f b) :=
-  ext2 hi (by simp) (by simp) (by simp) (by simp)
+  ext2 hi (by simp [tri]) (by simp [tri]) (by simp [tri]) (by simp [tri])
 
 theorem tri_cont {T : Type} [TopologicalSpace T] [TopologicalSpace K] {f g : T → K} (hf : Continuous f)
     (hg : Continuous g) : Continuous fun p => (tri (f p) (g p) : Matrix (ι ⊕ ι) (ι ⊕ ι) K) := by
@@ -80,7 +122,7 @@ theorem dg_conj (v : Kˣ) (g : GL (ι ⊕ ι) K) (a b : ι ⊕ ι) :
 theorem dg_tri {i : ι} (hi : ∀ x, x = i) (v : Kˣ) (g : GL (ι ⊕ ι) K) (a b : K)
     (h : (g : Matrix (ι ⊕ ι) (ι ⊕ ι) K) = tri a b) :
     (((dg ι v)⁻¹ * g * dg ι v : GL (ι ⊕ ι) K) : Matrix (ι ⊕ ι) (ι ⊕ ι) K) = tri a (b * v) :=
-  ext2 hi (by simp [dg_conj, h]) (by simp [dg_conj, h]) (by simp [dg_conj, h]) (by simp [dg_conj, h])
+  ext2 hi (by simp [dg_conj, h, tri]) (by simp [dg_conj, h, tri]) (by simp [dg_conj, h, tri]) (by simp [dg_conj, h, tri])
 
 theorem scal {σ : K →+* K} (hσ : ∀ x, σ (σ x) = x) {e t b t' q q' d d' : K} (he : e * e = 1) (h1 : t * q = 1)
     (h2 : t' * q' = 1) (h3 : t * σ t' = 1) (h4 : e * t' * σ b + b * σ t' = 0) (h5 : d * d' = 1)
@@ -130,7 +172,7 @@ theorem unit_tri {i : ι} (hi : ∀ x, x = i) (M : Matrix (ι ⊕ ι) (ι ⊕ ι
 theorem tri_unitary {i : ι} (hi : ∀ x, x = i) (c : ℂ) (hc : star c * c = 1) :
     (tri c 0 : Matrix (ι ⊕ ι) (ι ⊕ ι) ℂ) ∈ Matrix.unitaryGroup (ι ⊕ ι) ℂ := by
   have hc' : (starRingEnd ℂ) c * c = 1 := hc
-  refine Matrix.mem_unitaryGroup_iff'.2 (ext2 hi ?_ ?_ ?_ ?_) <;> simp [mul2 hi, Matrix.star_apply, hc']
+  refine Matrix.mem_unitaryGroup_iff'.2 (ext2 hi ?_ ?_ ?_ ?_) <;> simp [mul2 hi, Matrix.star_apply, hc', tri]
 
 end Unitary
 
@@ -205,7 +247,7 @@ theorem exists_cov (hg : A.Good) (hb : Base A ε ν r δ α ω) {i : ι} (hi : �
   have h1 : r (xs p i) * r (xs' p i) = 1 := hb.inj (by rw [map_mul, n1, n2, hxx, map_one])
   have h2 : r (xs p i) * r (ys' p i δ) + r (ys p i δ) = 0 :=
     hb.inj (by
-      rw [map_add, map_mul, n1, n3, n4, map_zero]
+      rw [map_add (f := _), map_mul, n1, n3, n4, map_zero]
       simp only [ys']
       linear_combination (-(ys p i δ)) * hxx)
   let a : Rˣ := ⟨pm p (.inr i) (.inr i), qm p (.inr i) (.inr i), d2, by rw [mul_comm]; exact d2⟩
@@ -234,9 +276,9 @@ theorem j_eq {j : cover A ν ι →* A.U ε ι} (hj : IsJ δ j) {i : ι} (hi : �
   have hdi : (((dU A δ)⁻¹ : Rˣ) : R) * A.i δ = 1 := Units.inv_mul (dU A δ)
   rw [hj c]
   refine ext2 hi ?_ ?_ ?_ ?_ <;> rw [Matrix.smul_apply, dg_conj, hm, hc]
-  · simpa using h11
-  · simpa using h12
-  · simpa using h21.symm
+  · simpa [tri] using h11
+  · simpa [tri] using h12
+  · simpa [tri] using h21.symm
   · have hdi' : A.i ((δ : E)⁻¹) * A.i δ = 1 := by
       rw [← map_mul, inv_mul_cancel₀ δ.ne_zero, map_one]
     simp [hdi']

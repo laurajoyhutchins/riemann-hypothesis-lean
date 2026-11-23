@@ -1,4 +1,45 @@
-import Formalism.LocalToGlobal.ProjectiveLattices.HeckeFr
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.PushInvertible
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -10,11 +51,9 @@ open ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestrictio
 variable {E : Type} [Field E] [NumberField E] [IsCMField E] {H : Host E} {Dw : Datum H} {l : Level H}
 
 variable (Dw) in
-
 abbrev LaMod (l : Level H) : Type := Dw.La ⧸ (l.Mb • (⊤ : Submodule (𝓞 E) Dw.La))
 
 variable (Dw) in
-
 def G0 (l₁ l : Level H) : Subgroup (LaMod Dw l ≃ₗ[𝓞 E] LaMod Dw l) where
   carrier := {γ | ∀ q : LaMod Dw l, γ q - q ∈
     (l₁.Mb • (⊤ : Submodule (𝓞 E) Dw.La)).map (l.Mb • (⊤ : Submodule (𝓞 E) Dw.La)).mkQ}
@@ -46,28 +85,7 @@ def levG {l₁ : Level H} (γ : G0 Dw l₁ l) : (Dw.La →ₗ[𝓞 E] Dw.La) × 
 
 variable (Xo : Moduli Dw l) (c : Coeff l)
 
-def LevLaws (l₁ : Level H) : Prop :=
-  ActLaws (K := c.F) (G := G0 Dw l₁ l) (fun S _ _ => FrPt Xo c S) (fun φ y z => FrMap φ y z)
-    (fun t y y' => FrBor t y y') (fun g y y' => levActR (Xo := Xo) (c := c) levG g y y')
-
-def rhoSec {l₁ : Level H} (h : LevLaws Xo c l₁) (a : (E →+* ℂ) × ℕ → ℕ) (n : ℕ) :
-    G0 Dw l₁ l →* Module.End c.F (sec Xo c a n) :=
-  rhoW h (ex Dw a n)
-
 def hkScal (cq : c.F) (𝔓 : Ideal (𝓞 E)) (i n : ℕ) : c.F :=
   cq * ((Ideal.absNorm 𝔓 : c.F)⁻¹) ^ (i * n / 2)
-
-def hkSec (𝔓 : Ideal (𝓞 E)) (p i : ℕ)
-    (sTr : ∀ (Ω : Type) [Field Ω] [IsAlgClosed Ω] [Algebra c.F Ω] (y z : FrPt Xo c Ω),
-      (pullback Xo.univ.t.G.hom y.x ⟶ pullback Xo.univ.t.G.hom z.x) → Prop)
-    (cq : c.F) (a : (E →+* ℂ) × ℕ → ℕ) (n : ℕ)
-    (hE : HkEx (K := c.F) (fun S _ _ => FrPt Xo c S) (fun φ y z => FrMap φ y z) (fun t y y' => FrBor t y y')
-      (fun Ω _ _ _ y => hkKer (Xo := Xo) 𝔓 p i Ω y) (fun Ω _ _ _ y C z => hkRelFr 𝔓 p i sTr Ω y C z)
-      (ex Dw a n) (hkScal c cq 𝔓 i n))
-    (hD : PtsDetect (K := c.F) (fun S _ _ => FrPt Xo c S) (fun φ y z => FrMap φ y z) (fun t y y' => FrBor t y y')
-      (ex Dw a n))
-    (hF : HkFin (K := c.F) (fun S _ _ => FrPt Xo c S) (fun Ω _ _ _ y => hkKer (Xo := Xo) 𝔓 p i Ω y)) :
-    sec Xo c a n →ₗ[c.F] sec Xo c a n :=
-  hkOp hE hD hF
 
 end Formalism.L2.Pj

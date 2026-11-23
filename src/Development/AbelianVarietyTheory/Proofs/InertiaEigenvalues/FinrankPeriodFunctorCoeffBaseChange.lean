@@ -1,8 +1,59 @@
-import Mathlib
-import Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow
-import Formalism.LocalRingCardinality.AdicCompletionLocal.LocTied
-import Formalism.SharpRestriction.LevelLetterCocycles.LocalSituation
+module
+
+public import Formalism.WeaklyAdmissibleFiltrations.Statement
+public import Mathlib.RingTheory.IsTensorProduct
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
 import Formalism.SharpRestriction.LevelLetterCocycles.LocCoh
+
+@[expose] public section
+
 open Formalism Formalism.BasicNotions Formalism.BasicNotions.Loc Formalism.WeaklyAdmissibleFiltrations Formalism.MainNotions.N TensorProduct Module
 
 namespace GlobalTheory.CoeffBC
@@ -41,7 +92,7 @@ theorem exists_isCoord [IsScalarTower L L' M'] (u : Basis ι L L') (J : M →ₗ
       refine Finset.sum_congr rfl fun k _ => ?_
       rw [smul_assoc, smul_comm]
     | add a b ha hb =>
-      simp only [map_add, smul_add, Finset.sum_add_distrib, ha, hb]
+      simp only [map_add (f := _), smul_add, Finset.sum_add_distrib, ha, hb]
   · rw [hπ, u.repr_self, Finsupp.single_apply]
     by_cases hk : k = l
     · simp [hk]
@@ -52,12 +103,14 @@ variable {u : ι → L'} {J : M →ₗ[L] M'} {π : ι → M' →ₗ[L] M}
 
 theorem IsCoord.sum (h : IsCoord u J π) (m : ι → M) (k : ι) :
     π k (∑ l, u l • J (m l)) = m k := by
+
   simp [map_sum, h.2]
 
 theorem IsCoord.comm (h : IsCoord u J π) (hN : IsCoord u JN πN) (f : N →ₗ[L] M)
     (f' : N' →ₗ[L'] M') (hf : ∀ y, f' (JN y) = J (f y)) (k : ι) (x : N') :
     π k (f' x) = f (πN k x) := by
   conv_lhs => rw [← hN.1 x]
+
   simp only [map_sum f', map_smul, hf]
   exact h.sum _ k
 
@@ -80,6 +133,7 @@ theorem IsCoord.rel_range (h : IsCoord u J π) (hN : IsCoord u JN πN) (f : N �
   · intro hx
     choose y hy using hx
     refine ⟨∑ k, u k • JN (y k), ?_⟩
+
     simp only [map_sum, map_smul, hf, hy]
     exact h.1 x
 
@@ -154,7 +208,7 @@ theorem IsCoord.tensor {Q : Type} [Field Q] [Algebra Q L] [Algebra Q L'] [Module
     | tmul m c =>
       simp only [AlgebraTensorModule.map_tmul, LinearMap.id_apply, TensorProduct.smul_tmul']
       rw [← TensorProduct.sum_tmul, h.1]
-    | add a b ha hb => simp only [map_add, smul_add, Finset.sum_add_distrib, ha, hb]
+    | add a b ha hb => simp only [map_add (f := _), smul_add, Finset.sum_add_distrib, ha, hb]
   · intro k l x
     induction x using TensorProduct.induction_on with
     | zero => simp
@@ -162,7 +216,7 @@ theorem IsCoord.tensor {Q : Type} [Field Q] [Algebra Q L] [Algebra Q L'] [Module
       simp only [AlgebraTensorModule.map_tmul, LinearMap.id_apply, TensorProduct.smul_tmul', h.2]
       split_ifs <;> simp
     | add a b ha hb =>
-      simp only [map_add, smul_add, ha, hb]
+      simp only [map_add (f := _), smul_add, ha, hb]
       split_ifs <;> simp
 
 theorem map_comm {Q : Type} [Field Q] [Algebra Q L] [Algebra Q L'] [Module Q M] [Module Q M']
@@ -175,7 +229,7 @@ theorem map_comm {Q : Type} [Field Q] [Algebra Q L] [Algebra Q L'] [Module Q M] 
   induction y using TensorProduct.induction_on with
   | zero => simp
   | tmul m c => simp [hf]
-  | add a b ha hb => simp only [map_add, ha, hb]
+  | add a b ha hb => simp only [map_add (f := _), ha, hb]
 
 end General
 

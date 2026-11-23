@@ -1,8 +1,62 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.IsSubquotientDetRepParInd
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.BlockTriangularOneAddMat
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IwasawaBlockTriangular
-import Development.AbelianVarietyTheory.Definitions.Divisors.T2SpaceGeneralLinearGroup
+module
+
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.BlockTriangularOneAddMat
+public import Development.AbelianVarietyTheory.Definitions.Divisors.T2SpaceGeneralLinearGroup
+import Development.AbelianVarietyTheory.Definitions.Foundations.SecondCountableAndT2LocalField
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsLocallyConstantAddChar
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IwasawaBlockTriangular
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.InnerProductSpace.TensorProduct
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.Countable
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Algebra.Group.Units
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -49,12 +103,10 @@ theorem isUnitarisable_extTensor {ρ : Representation ℂ G V} {σ : Representat
   · exact (re_inner_self_pos (𝕜 := ℂ)).2 hv
   · show inner ℂ (extTensor ρ σ g w) (extTensor ρ σ g v) = inner ℂ w v
     induction v with
-    | zero => simp
-    | add x y hx hy => simp only [map_add, inner_add_right, hx, hy]
+    | add x y hx hy => simp only [map_add (f := _), inner_add_right, hx, hy]
     | tmul v v' =>
       induction w with
-      | zero => simp
-      | add x y hx hy => simp only [map_add, inner_add_left, hx, hy]
+      | add x y hx hy => simp only [map_add (f := _), inner_add_left, hx, hy]
       | tmul w w' =>
         rw [extTensor_tmul, extTensor_tmul, TensorProduct.inner_tmul, TensorProduct.inner_tmul]
         exact congrArg₂ _ (b3 _ _ _) (c3 _ _ _)
@@ -126,6 +178,7 @@ theorem isUnitarisable_piTensor {Γ : α → Type} [∀ a, Group (Γ a)] {ρ : �
     have hmem : v ∈ Submodule.span ℂ (Set.range E) := by
       rw [← hx]
       refine Submodule.sum_mem _ fun i _ => Submodule.smul_mem _ _ ?_
+
       rw [← hy, show y i = fun a => ∑ j, c i a j • b a j from funext (hc i), MultilinearMap.map_sum]
       refine Submodule.sum_mem _ fun I _ => ?_
       rw [MultilinearMap.map_smul_univ]
@@ -252,8 +305,8 @@ theorem exists_iwasawa (x : GL n k) :
   simp only [conj, inv_mul_cancel_right]
   rw [← h]
 
-omit [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] in
 
+omit [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] in
 theorem det_rmat_unip (u : unipRad k e) : (rmat e ((u : GL n k) : Matrix n n k)).det = 1 := by
   rw [← det_transpose, det_of_blocks _ (fun p : Idx e => blk e p.1.2) ?_ (fun a => {j : n // blk e j < a})
     (fun _ => 1) (colEquiv e) ?_]
@@ -407,7 +460,7 @@ theorem form_eq_of_diag {V : Type} [AddCommGroup V] [Module ℂ V] (B C : V →�
     (h : ∀ v, B v v = C v v) (v w : V) : B v w = C v w := by
   have h1 := h (v + w)
   have h2 := h (v + Complex.I • w)
-  simp only [map_add, LinearMap.add_apply, map_smul, LinearMap.smul_apply, LinearMap.map_smulₛₗ, h v, h w,
+  simp only [map_add (f := _), LinearMap.add_apply, map_smul, LinearMap.smul_apply, LinearMap.map_smulₛₗ, h v, h w,
     Complex.conj_I, smul_eq_mul, RingHom.id_apply] at h1 h2
   linear_combination (1 / 2 : ℂ) * h1 + (Complex.I / 2) * h2 +
     ((1 / 2 : ℂ) * (B v w - C v w - B w v + C w v)) * Complex.I_mul_I

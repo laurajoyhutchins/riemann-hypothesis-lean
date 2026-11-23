@@ -1,11 +1,47 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsSquareIntegrableIffMemL2
-import Development.AbelianVarietyTheory.Proofs.HeightProofs.ExistsSigmaList
-import Development.AbelianVarietyTheory.PublishedTheorems.SiegelWeil₂.AutomorphicFormsFiniteIdeal
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.CenterEnvelopingAlgebraDirectSum
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EnvRepAllEnvIncl
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EnvelopingRepresentationInjectiveStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EnvelopingActionCommutesTranslationStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IsSquareIntegrableIffMemL2
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EnvRepAllEnvIncl
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.CenterEnvelopingAlgebraDirectSum
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EnvelopingActionCommutesTranslationStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EnvelopingRepresentationInjectiveStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.AdelicDataRowMeasureScaleTrivialTuple
+
+@[expose] public section
 
 noncomputable section
 
@@ -44,6 +80,7 @@ theorem exists_env (hθ : IsInfFam θ) (R : RealPoints θ V) (z : List (ℝ → 
   classical
   choose! w hw using fun l (hl : l ∈ z.support) => exists_word hθ R l (hz l hl)
   refine ⟨∑ l ∈ z.support, z l • w l, fun f => ?_⟩
+
   rw [map_sum, LinearMap.sum_apply, Submodule.coe_sum]
   funext g
   simp only [dop, Finsupp.sum, Finset.sum_apply]
@@ -63,7 +100,7 @@ theorem mem_center_of_comm (u : GlobalTheory.AutFinLit.Env V)
   | algebraMap r => rw [AlgHom.commutes]; exact Algebra.commutes r u
   | ι x => exact h x
   | mul a b ha hb => rw [map_mul, mul_assoc, hb, ← mul_assoc, ha, mul_assoc]
-  | add a b ha hb => rw [map_add, add_mul, mul_add, ha, hb]
+  | add a b ha hb => rw [map_add (f := _), add_mul, mul_add, ha, hb]
 
 theorem mem_of_mem_center (R : RealPoints θ V) {W : Submodule ℂ (GA D V → ℂ)}
     (hs : ∀ τ k, ∀ f ∈ W, gelf θ V τ k f ∈ W) {u : GlobalTheory.AutFinLit.Env V}
@@ -76,7 +113,7 @@ theorem mem_of_mem_center (R : RealPoints θ V) {W : Submodule ℂ (GA D V → �
     induction hz using Algebra.adjoin_induction with
     | mem x hx => obtain ⟨k, rfl⟩ := hx; intro f hf; rw [← hg]; exact hs τ k _ hf
     | algebraMap r => intro f hf; rw [AlgHom.commutes]; exact W.smul_mem r hf
-    | add x y _ _ hx hy => intro f hf; rw [map_add]; exact add_mem (hx f hf) (hy f hf)
+    | add x y _ _ hx hy => intro f hf; simpa only [map_add, LinearMap.add_apply, Submodule.coe_add] using add_mem (hx f hf) (hy f hf)
     | mul x y _ _ hx hy => intro f hf; rw [map_mul]; exact hx _ (hy f hf)
   rw [GlobalTheory.EnvCentre.center_directSum D.what₂.Tau (fun τ => ℂ ⊗[ℝ] LieAt V τ) (fun τ => envIncl V τ)
     (fun τ x => envIncl_ι τ x)] at hu
@@ -85,7 +122,7 @@ theorem mem_of_mem_center (R : RealPoints θ V) {W : Submodule ℂ (GA D V → �
     obtain ⟨τ, z, hz, rfl⟩ := Set.mem_iUnion.1 hx |>.imp fun τ h => h
     intro f hf; rw [envRepAll_envIncl]; exact hloc τ z hz f hf
   | algebraMap r => intro f hf; rw [AlgHom.commutes]; exact W.smul_mem r hf
-  | add x y _ _ hx hy => intro f hf; rw [map_add]; exact add_mem (hx f hf) (hy f hf)
+  | add x y _ _ hx hy => intro f hf; simpa only [map_add, LinearMap.add_apply, Submodule.coe_add] using add_mem (hx f hf) (hy f hf)
   | mul x y _ _ hx hy => intro f hf; rw [map_mul]; exact hx _ (hy f hf)
 
 theorem exists_center (hθ : IsInfFam θ) (R : RealPoints θ V) {z : List (ℝ → GA D V) →₀ ℂ}

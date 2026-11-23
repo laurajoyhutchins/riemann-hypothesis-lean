@@ -1,7 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.ReadPk
-import Formalism.LocalToGlobal.IndefiniteReal.LinksStage
-import Formalism.LocalToGlobal.Divisibility.DivisionHeightBoundColumns
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.ReadPk
+import Formalism.LocalRingCardinality.SpanPowerMembership.ExampleWeightMiddleEntries
+import Formalism.LocalToGlobal.Columns.RowFormsGood
+import Formalism.LocalToGlobal.Columns.RowFormsRat
+import Formalism.LocalToGlobal.Columns.ToHLatLemmas
+import Formalism.LocalToGlobal.Divisibility.ClassSumLemmas
+import Formalism.LocalToGlobal.Divisibility.ProjLemmas
+import Formalism.QuotientMetricDivisors.HermitianTwistDivisors.AuxStatement14
+import Formalism.QuotientMetricDivisors.HermitianTwistDivisors.ClassSumDualGeOfFamily
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -17,8 +59,8 @@ section Gen
 
 variable {K : Type} [Field K] [NumberField K] [StarRing K] {G : Type} [Group G] [Fintype G]
 
-omit [NumberField K] in
 
+omit [NumberField K] in
 theorem isConjAt_mk {σ : K →+* ℂ} (hσ : ∀ a, σ (star a) = starRingEnd ℂ (σ a)) :
     Formalism.DivisionValues.IsConjAt (InfinitePlace.mk σ) := fun a => by
   rcases InfinitePlace.embedding_mk_eq σ with e | e
@@ -26,8 +68,8 @@ theorem isConjAt_mk {σ : K →+* ℂ} (hσ : ∀ a, σ (star a) = starRingEnd �
     exact hσ a
   · rw [e, ComplexEmbedding.conjugate_coe_eq, ComplexEmbedding.conjugate_coe_eq, hσ a]
 
-omit [NumberField K] [StarRing K] in
 
+omit [NumberField K] [StarRing K] in
 theorem posDef_of_mk {n : ℕ} {σ : K →+* ℂ} {H : Matrix (Fin n) (Fin n) K}
     (h : (H.map (InfinitePlace.mk σ).embedding).PosDef) : (H.map σ).PosDef := by
   rcases InfinitePlace.embedding_mk_eq σ with e | e
@@ -43,8 +85,8 @@ theorem posDef_of_mk {n : ℕ} {σ : K →+* ℂ} {H : Matrix (Fin n) (Fin n) K}
     rw [e2]
     exact h.transpose
 
-omit [NumberField K] in
 
+omit [NumberField K] in
 theorem hform_eq_dot {n : ℕ} (H : Matrix (Fin n) (Fin n) K) (x y : Fin n → K) :
     Formalism.DivisionValues.hform H x y = star x ⬝ᵥ H.mulVec y := by
   unfold Formalism.DivisionValues.hform
@@ -52,33 +94,35 @@ theorem hform_eq_dot {n : ℕ} (H : Matrix (Fin n) (Fin n) K) (x y : Fin n → K
   simp only [dotProduct, Matrix.mulVec, Finset.mul_sum, Pi.star_apply, starRingEnd_apply, RingHom.id_apply, smul_eq_mul]
   refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => by ring
 
-omit [NumberField K] in
 
+omit [NumberField K] in
 theorem hform_sa {n : ℕ} {H A : Matrix (Fin n) (Fin n) K} (h : Aᴴ * H = H * A) (x y : Fin n → K) :
     Formalism.DivisionValues.hform H (A.mulVec x) y = Formalism.DivisionValues.hform H x (A.mulVec y) := by
   rw [hform_eq_dot, hform_eq_dot, Matrix.star_mulVec, ← Matrix.dotProduct_mulVec, Matrix.mulVec_mulVec, Matrix.mulVec_mulVec, h]
 
-omit [NumberField K] [StarRing K] [Fintype G] in
 
+omit [NumberField K] [StarRing K] [Fintype G] in
 theorem zero_laws [NumberField K] [StarRing K] (σ : K →+* ℂ) {e : MonoidAlgebra K G}
-    (hc : e ∈ Subalgebra.center K (MonoidAlgebra K G)) (hi : IsIdempotentElem e) : (Mat1.zero K G).Laws σ e where
-  pos := by
-    show ((0 : Matrix (Fin 0) (Fin 0) K).map σ).PosDef
+    (hc : e ∈ Subalgebra.center K (MonoidAlgebra K G)) (hi : IsIdempotentElem e) : (Mat1.zero K G).Laws σ e := by
+  refine
+    { pos := ?_
+      lat := ?_
+      add := fun _ _ => Subsingleton.elim (α := Matrix (Fin 0) (Fin 0) K) _ _
+      smul := fun _ _ => Subsingleton.elim (α := Matrix (Fin 0) (Fin 0) K) _ _
+      one := Subsingleton.elim (α := Matrix (Fin 0) (Fin 0) K) _ _
+      mul := fun _ _ _ _ => Subsingleton.elim (α := Matrix (Fin 0) (Fin 0) K) _ _
+      E_eq := rfl
+      cen := hc
+      idem := hi
+      sa := ?_ }
+  · show ((0 : Matrix (Fin 0) (Fin 0) K).map σ).PosDef
     rw [Subsingleton.elim ((0 : Matrix (Fin 0) (Fin 0) K).map σ) 1]
     exact Matrix.PosDef.one
-  lat := by
-    show Submodule.IsLattice K (⊤ : Submodule (𝓞 K) (Fin 0 → K))
-    refine ⟨?_, Subsingleton.elim _ _⟩
+  · change Submodule.IsFullLattice K (⊤ : Submodule (𝓞 K) (Fin 0 → K))
+    refine { toIsLattice := Submodule.IsLattice.of_fg K ?_, span_eq_top := Subsingleton.elim _ _ }
     rw [Subsingleton.elim (⊤ : Submodule (𝓞 K) (Fin 0 → K)) ⊥]
     exact Submodule.fg_bot
-  add _ _ := Subsingleton.elim (α := Matrix (Fin 0) (Fin 0) K) _ _
-  smul _ _ := Subsingleton.elim (α := Matrix (Fin 0) (Fin 0) K) _ _
-  one := Subsingleton.elim (α := Matrix (Fin 0) (Fin 0) K) _ _
-  mul _ _ _ _ := Subsingleton.elim (α := Matrix (Fin 0) (Fin 0) K) _ _
-  E_eq := rfl
-  cen := hc
-  idem := hi
-  sa x y := by
+  · intro x y
     rw [hform_eq_dot, hform_eq_dot]
     rfl
 
@@ -98,12 +142,14 @@ theorem lvlMat_laws {σ : K →+* ℂ} (hσ : ∀ a, σ (star a) = starRingEnd �
   have hproj := (orthogonal_projection_spec K _ h0 S (hpos _) G r hr _ hP.idem hP.selfAdj).1.1
   have hop := level_operator_spec K _ h0 S (hpos _) G r hr P ψ
   refine ⟨posDef_of_mk (cut_posDef S.H (S.lvlE r P ψ) hinj hE (Nat.card P) Nat.card_pos _ (hpos _)),
-    Formalism.DivisionValues.exponent_index_lattice.cut_isLattice _ (fun _ _ hxy => hinj hxy) _ (S.lf_nabLat_isLattice hS), fun a b => ?_, fun c a => ?_, ?_,
+    (Formalism.DivisionValues.exponent_index_lattice.cut_isFullLattice (S.lvlE r P ψ) hinj _
+      (Formalism.DivisionValues.ValuationLatticeField.valLatF_isFullLattice S.I S.I_injective S.Nab hS.nab_isFullLattice)),
+    fun a b => ?_, fun c a => ?_, ?_,
     fun a _ b hb => (hop b (Subalgebra.mem_center_iff.1 hb _).symm).2 a, rfl, Subalgebra.mem_center_iff.2 hI.2, hI.1.idem,
     hform_sa ?_⟩
   · show S.lvlOp r P ψ (a + b) = S.lvlOp r P ψ a + S.lvlOp r P ψ b
     unfold CSD.lvlOp
-    rw [CSD.gaMat_eq_lift, CSD.gaMat_eq_lift, CSD.gaMat_eq_lift, map_add, Matrix.mul_add, Matrix.add_mul]
+    rw [CSD.gaMat_eq_lift, CSD.gaMat_eq_lift, CSD.gaMat_eq_lift, map_add (f := _), Matrix.mul_add, Matrix.add_mul]
   · show S.lvlOp r P ψ (c • a) = c • S.lvlOp r P ψ a
     unfold CSD.lvlOp
     rw [CSD.gaMat_eq_lift, CSD.gaMat_eq_lift, map_smul, Matrix.mul_smul, Matrix.smul_mul]

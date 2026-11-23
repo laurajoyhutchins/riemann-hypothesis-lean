@@ -1,14 +1,66 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.MetricPeriods.SimilitudeFactorFormGroupBoundedOfTestSupport
-import Development.AutomorphicSpectrum.Definitions.MetricPeriods.MetricsProjectionFormulaNef
-import Development.AutomorphicSpectrum.Definitions.DivisibilityTowers.Proportional
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.MongeAmpereIntegralMultilinearExpansionStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.MongeAmpereIntegralCongrPotentialsStatement
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterBridge
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterRedF
-import ReciprocityTheory.AnalyticForms.PotentialTheory.ProjectiveLineFubiniStudyFacts
-import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.PHFlProdLinear
-open MvPolynomial MeasureTheory Filter Topology Matrix ReciprocityTheory.AnForm ReciprocityTheory.AnForm.M ReciprocityTheory.AnForm.P ReciprocityTheory.ChartRestriction.G.Geo GlobalTheory.CompanionTheory.Ar.PB GlobalTheory.CompanionTheory.Ar.Cmp
+module
+
+public import Development.AutomorphicSpectrum.Definitions.MetricPeriods.MetricsProjectionFormulaNef
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.MongeAmpereIntegralCongrPotentialsStatement
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.MongeAmpereIntegralMultilinearExpansionStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.AnalyticForms.PotentialTheory.ContDiffAtOfIsPotential
+public import ReciprocityTheory.AnalyticForms.PotentialTheory.DegreeInt
+import ReciprocityTheory.AnalyticForms.PotentialTheory.IntegrableOnTargetOfTsupport
+public import ReciprocityTheory.AnalyticForms.PotentialTheory.Stokes
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterRedA
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterRedB
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterRedF
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
+open MvPolynomial MeasureTheory Filter Topology Matrix ReciprocityTheory.AnForm
+  ReciprocityTheory.AnForm.M ReciprocityTheory.AnForm.P ReciprocityTheory.ChartRestriction.G.Geo
+  GlobalTheory.CompanionTheory.Ar.PB
 
 noncomputable section
 
@@ -37,11 +89,11 @@ theorem isSmoothHerm_combLine {σ : Type} [Fintype σ] {A : σ → HermLine ι} 
 theorem isC2At_of_isPotential {e : ℕ} {X : Type} [TopologicalSpace X] (A : FinHolAtlas e X) {P : LocPot X}
     (hP : IsPotential A P) (x : X) : IsTwiceDifferentiableAt A P x := by
   intro j hj
-  have hopen := (A.chart j).isOpen_inter_preimage_symm (P.isOpen_U x)
   have hm : A.chart j x ∈ (A.chart j).target ∩ (A.chart j).symm ⁻¹' P.U x :=
     ⟨(A.chart j).map_source hj, by
       rw [Set.mem_preimage, (A.chart j).left_inv hj]; exact P.mem_U x⟩
-  exact ((hP.1 x j).contDiffAt (hopen.mem_nhds hm)).of_le (by first | exact ENat.LEInfty.out | exact (WithTop.coe_le_coe.2 (le_top : (2 : ℕ∞) ≤ ⊤)) | simp)
+  exact (contDiffAt_of_isPotential A P hP x j hm).of_le (by
+    exact WithTop.coe_le_coe.mpr (le_top : (2 : ℕ∞) ≤ ⊤))
 
 theorem mInt_potOf_eq_of_deg {P J : Ideal (MRing ι)} {e : ℕ} (R : AnLogRes P J e) {L L' : Fin e → HermLine ι}
     (hL : ∀ j, IsSmoothHerm (L j)) (hL' : ∀ j, IsSmoothHerm (L' j)) (ha : ∀ j, (L j).a = (L' j).a) :
@@ -174,45 +226,6 @@ end Real
 section Main
 
 variable {Ψ : Type} [Fintype Ψ] [DecidableEq Ψ] {N : ℕ}
-
-theorem geoMono_word (hE : ResExistsStatement) (M : GlobalTheory.CompanionTheory.Ar.Top.RootModel Ψ N) {J : Ideal (MRing M.ι)}
-    (R : AnLogRes M.P J (GlobalTheory.CompanionTheory.Ar.Top.dimFl Ψ N)) (w : Fin (GlobalTheory.CompanionTheory.Ar.Top.dimFl Ψ N) → Ψ × Fin N) :
-    M.geoMono (Finsupp.mapDomain some (∑ j, Finsupp.single (w j) 1)) =
-      mInt R.A (fun j => potOf R (M.x 1 (w j))) (fun _ => 1) / (M.δ : ℝ) := by
-  classical
-  have hmap : Finsupp.mapDomain some (∑ j, Finsupp.single (w j) 1) =
-      ∑ j, Finsupp.single (some (w j)) (1 : ℕ) := by
-    rw [Finsupp.mapDomain_finset_sum]
-    simp [Finsupp.mapDomain_single]
-  rw [hmap]
-  have hdeg : (∑ j, Finsupp.single (some (w j)) (1 : ℕ)).degree = GlobalTheory.CompanionTheory.Ar.Top.dimFl Ψ N := by
-    rw [map_sum]
-    simp [Finsupp.degree_single]
-  have hnone : (∑ j, Finsupp.single (some (w j)) (1 : ℕ)) none = 0 := by
-    simp [Finsupp.finset_sum_apply]
-  have hms : Finsupp.toMultiset (∑ j, Finsupp.single (some (w j)) (1 : ℕ)) =
-      Multiset.map (fun j => some (w j)) Finset.univ.val := by
-    rw [Finsupp.toMultiset_sum]
-    simp only [Finsupp.toMultiset_single, one_smul]
-    rw [Finset.sum_eq_multiset_sum]
-    have e : (fun i => ({some (w i)} : Multiset (Option (Ψ × Fin N)))) = (fun p => {p}) ∘ fun j => some (w j) := rfl
-    rw [e, ← Multiset.map_map, Multiset.sum_map_singleton]
-  obtain ⟨ρ, hρ⟩ := GroundTheory.Heights₂.Heights.LowerBoundFree.FlagHeightMultilinear.exists_perm_toList fun j => some (w j)
-  have hML : GlobalTheory.CompanionTheory.Ar.Top.monoLines (M.line 1) (∑ j, Finsupp.single (some (w j)) (1 : ℕ))
-      (GlobalTheory.CompanionTheory.Ar.Top.dimFl Ψ N) = (fun i => M.x 1 (w i)) ∘ ρ := by
-    funext k
-    have hk : (k : ℕ) < (Multiset.map (fun j => some (w j)) Finset.univ.val).toList.length := by
-      have := k.2
-      simp [Multiset.length_toList]
-    unfold GlobalTheory.CompanionTheory.Ar.Top.monoLines
-    rw [hms, dif_pos hk, hρ k hk]
-    rfl
-  unfold GlobalTheory.CompanionTheory.Ar.Top.RootModel.geoMono
-  rw [if_pos hdeg, hnone, pow_zero, mul_one, hML]
-  congr 1
-  refine (ptsIntegral_one_eq_mInt hE resBridge R M.arith (L := (fun i => M.x 1 (w i)) ∘ ρ)
-    (fun j => M.x_smooth 1 _)).trans ?_
-  exact mIntSymm R.A (fun j => potOf R (M.x 1 (w j))) ρ _
 
 end Main
 

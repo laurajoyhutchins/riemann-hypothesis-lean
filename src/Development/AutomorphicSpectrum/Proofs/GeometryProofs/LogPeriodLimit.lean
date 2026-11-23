@@ -1,21 +1,72 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.SlopeBoundSt
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.ArchBetween
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.BdryChart
-import Development.AutomorphicSpectrum.Definitions.MetricPeriods.ClopenCondOnto
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.UniformisationConclusion
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.HeckeKer
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.BlowupProjections.BlowupProjStatement
-import Development.AbelianVarietyTheory.PublishedTheorems.SemiabelianTori.GeometricallyConnectedSplitTorusAff
+module
+
+public import Development.AutomorphicSpectrum.Definitions.MetricPeriods.ClopenCondOnto
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.ExistsAdaptedUnimodular
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.RiemannFormHermitianLatticeStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.SiegelLimitImagBoundStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.SymplecticPolydiscPeriodBasisStatement
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.ImLowerOnKernel
 import GroundTheory.HeightsAndTheta.Heights.Regularisation.Assembly
-import GroundTheory.HeightsAndTheta.Heights.Regularisation.PRiemannExtensionSlices
-import GroundTheory.HeightsAndTheta.Heights.Regularisation.PPuncturedExpOrder
 import GroundTheory.HeightsAndTheta.Heights.Regularisation.PLogCoverDescent
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.ImLowerOnKernel
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.ExistsAdaptedUnimodular
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.SymplecticPolydiscPeriodBasisStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.SiegelLimitImagBoundStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.RiemannFormHermitianLatticeStatement
+import GroundTheory.HeightsAndTheta.Heights.Regularisation.PPuncturedExpOrder
+import GroundTheory.HeightsAndTheta.Heights.Regularisation.PRiemannExtensionSlices
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Algebra.Order.Chebyshev
+import Mathlib.CategoryTheory.Monoidal.Cartesian.Basic
+import Mathlib.CategoryTheory.Monoidal.Category
+public import Mathlib.CategoryTheory.Monoidal.Mon
+import Mathlib.Topology.Sheaves.Presheaf
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsCompletedStrictHens
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.CubicalStructures.CubeSymmetricSwapFirst
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField TensorProduct Filter Topology Matrix
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Geo ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.Semi GlobalTheory.CompanionTheory.Ar
@@ -69,6 +120,7 @@ theorem per_coords (P : Λ →+ (Fin g → ℂ)) (τ A : Matrix (Fin g) (Fin g) 
     P x = Aᵀ *ᵥ (cst (uCo bas x) + τ *ᵥ cst (vCo bas x)) := by
   have hx : P x = ∑ i, uCo bas x i • P (bas (.inl i)) + ∑ j, vCo bas x j • P (bas (.inr j)) := by
     conv_lhs => rw [← sum_coords bas x]
+
     simp [mk, map_sum, map_zsmul]
   rw [hx]
   funext k
@@ -91,7 +143,7 @@ theorem form_coords (E : LinearMap.BilinForm ℤ Λ)
   have hskew : ∀ x y, E x y = - E y x := by
     intro x y
     have h := halt (x + y)
-    simp only [map_add, LinearMap.add_apply, halt] at h
+    simp only [map_add (f := _), LinearMap.add_apply, halt] at h
     linarith
   have hba : ∀ i j, E (bas (.inr i)) (bas (.inl j)) = if i = j then 1 else 0 := by
     intro i j
@@ -100,10 +152,11 @@ theorem form_coords (E : LinearMap.BilinForm ℤ Λ)
     · simp [h]
     · simp [h, Ne.symm h]
   conv_lhs => rw [← sum_coords bas x, ← sum_coords bas y]
-  simp only [mk, map_add, map_sum, map_zsmul, LinearMap.add_apply, LinearMap.sum_apply,
-    LinearMap.smul_apply, smul_eq_mul, (hE _ _).1, (hE _ _).2.1, (hE _ _).2.2, hba,
-    mul_zero, Finset.sum_const_zero, add_zero, zero_add, mul_ite, mul_one, mul_neg,
-    Finset.sum_ite_eq, Finset.mem_univ, if_true, Finset.sum_neg_distrib, dotProduct]
+
+  simp only [mk, map_add (f := _), map_sum, map_zsmul, LinearMap.add_apply, LinearMap.sum_apply,
+  LinearMap.smul_apply, smul_eq_mul, (hE _ _).1, (hE _ _).2.1, (hE _ _).2.2, hba,
+  mul_zero, Finset.sum_const_zero, add_zero, zero_add, mul_ite, mul_one, mul_neg,
+  Finset.sum_ite_eq, Finset.mem_univ, if_true, Finset.sum_neg_distrib, dotProduct]
   simp only [Finset.sum_ite_eq', Finset.mem_univ, if_true, mul_one, mul_neg, Finset.sum_neg_distrib]
   rw [sub_eq_add_neg]
   congr 1
@@ -136,6 +189,7 @@ end
 theorem functional_rep {g : ℕ} (φ : (Fin g → ℤ) →+ ℤ) : ∃ p : Fin g → ℤ, ∀ u, φ u = u ⬝ᵥ p := by
   refine ⟨fun i => φ (Pi.single i 1), fun u => ?_⟩
   conv_lhs => rw [← Finset.univ_sum_single u]
+
   rw [map_sum]
   refine Finset.sum_congr rfl fun i _ => ?_
   have : (Pi.single i (u i) : Fin g → ℤ) = u i • Pi.single i 1 := by
@@ -346,7 +400,7 @@ theorem at_point {n a g : ℕ} {Λ : Type} [AddCommGroup Λ] (L : Flat.LogPeriod
       · simp
     have h1 := (Finset.sum_eq_zero_iff_of_nonneg hnn).1 h0 j (Finset.mem_univ j)
     rw [if_pos hj] at h1
-    exact ((hB j).dotProduct_mulVec_zero_iff v).1 (by simpa using h1)
+    exact ((hB j).dotProduct_mulVec_zero_iff).1 (by simpa using h1)
   have htm : ∀ m, (-(r m : ℂ)) / (2 * Real.pi * Complex.I) = t m := by
     intro m
     rw [div_eq_iff h2pi]
@@ -405,7 +459,7 @@ theorem at_point {n a g : ℕ} {Λ : Type} [AddCommGroup Λ] (L : Flat.LogPeriod
   set perF : Λ → Fin g → ℂ := fun x => (A z)ᵀ *ᵥ (cst (uCo bas x) + σf z *ᵥ cst (vCo bas x)) with hperF
   have hperF_add : ∀ x y, perF (x + y) = perF x + perF y := by
     intro x y
-    simp only [hperF, map_add, cst_add, mulVec_add]
+    simp only [hperF, map_add (f := _), cst_add, mulVec_add]
     abel_nf
   set per : W →+ (Fin g → ℂ) := AddMonoidHom.mk' (fun x => perF x) (fun x y => hperF_add x y) with hper
   have hper_apply : ∀ x : W, per x = perF x := fun x => rfl
@@ -497,7 +551,7 @@ theorem at_point {n a g : ℕ} {Λ : Type} [AddCommGroup Λ] (L : Flat.LogPeriod
     have e2 := h2 ⟨vCo bas x, by simpa using (hWmem _).1 x.2⟩
     simp only [AddMonoidHom.comp_apply] at e1 e2
     conv_lhs => rw [hxs]
-    rw [map_add, e1, e2, hform, vCo_mk, uCo_mk, dotProduct_comm (uCo bas x) p]
+    rw [map_add (f := _), e1, e2, hform, vCo_mk, uCo_mk, dotProduct_comm (uCo bas x) p]
     simp
   ·
     intro Hb hHb hIm hKill v
@@ -528,6 +582,7 @@ theorem at_point {n a g : ℕ} {Λ : Type} [AddCommGroup Λ] (L : Flat.LogPeriod
       simp only [hperF, uCo_mk, vCo_mk, cst_zero, mulVec_zero, add_zero] at h1
       have h2 : star ((A z)ᵀ *ᵥ cst u) = (A z)ᴴ *ᵥ cst u := by
         funext i
+
         simp [cst, mulVec, dotProduct, Matrix.conjTranspose_apply, map_sum]
       rw [h2] at h1
       rw [hG, ← Matrix.mulVec_mulVec, ← Matrix.mulVec_mulVec]

@@ -1,10 +1,50 @@
-import Formalism.SharpRestriction.GrowthBounds.DualFockLinear.TestSideExplicitIdentification
-import Formalism.SharpRestriction.GrowthBounds.DualFockLinear.OneSidedLemma4OfAdmittedTheoremII
-import Formalism.SharpRestriction.GrowthBounds.PathWeight
-import Formalism.SharpRestriction.GrowthBounds.MonomialOrderSegments
-import Formalism.SharpRestriction.GrowthBounds.Joints
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.ScaleEdges.SourcePrimitiveIntegrality
+public import Formalism.SharpRestriction.GrowthBounds.DualFockLinear.PrimStep
+public import Formalism.SharpRestriction.GrowthBounds.Joints
+public import Formalism.SharpRestriction.GrowthBounds.MonomialOrderSegments
+public import Formalism.SharpRestriction.GrowthBounds.PathWeight
 import Formalism.SharpRestriction.GrowthBounds.ProjectionOfIsotypicDecomposition
-import Formalism.SharpRestriction.GrowthBounds.GLWeightTheory
+import Formalism.SharpRestriction.GrowthBounds.RootWeights.WeightConditionFromIntegralForm
+public import Formalism.SharpRestriction.GrowthBounds.ScaleEdges
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -45,20 +85,5 @@ theorem theorem_II_closed_of_test_bound : ∃ C : ℝ, 1 ≤ C ∧ ∀ (D : Form
   refine ⟨C, hC, fun D CLa Ck Crk Cdeg hA h6b => ?_⟩
   exact theorem_II_of_split_cloud_bounds D CLa Ck Crk Cdeg C (C + 1) C 26 2 24 60 hA (H D CLa Ck Crk Cdeg hA)
     (plane_gram_of_admitted D CLa Ck Crk Cdeg hA le_rfl) (rest6a D CLa Ck Crk Cdeg) h6b
-
-theorem stmtE_of_rests (D : Formalism.BasicNotions.D7)
-    (h : ∀ CLa Ck Crk Cdeg CLa' CD Csz CH CE C6 C18 : ℝ,
-      RestCloudB D CLa Ck Crk Cdeg ∧ RestFlat D CLa Ck Crk Cdeg CLa' CD Csz CH CE C6 C18) : tableLineDegreeFive.ClosedFormOfAdmitted D := by
-  obtain ⟨C, _, H⟩ := theorem_II_closed_of_test_bound
-  intro CLa Ck Crk Cdeg hA
-  obtain ⟨h1, h2⟩ := h CLa Ck Crk Cdeg C (C + 1) C 26 2 24 60
-  exact H D CLa Ck Crk Cdeg hA (test_bound_of_two_halves D CLa Ck Crk Cdeg C (C + 1) C 26 2 24 60 h1 h2)
-
-theorem stmtE_of_rest6b (D : Formalism.BasicNotions.D7)
-    (h : ∀ CLa Ck Crk Cdeg CLa' CD Csz CH CE C6 C18 : ℝ, RemainingInputsAfter D CLa Ck Crk Cdeg CLa' CD Csz CH CE C6 C18) :
-    tableLineDegreeFive.ClosedFormOfAdmitted D := by
-  obtain ⟨C, _, H⟩ := theorem_II_closed_of_test_bound
-  intro CLa Ck Crk Cdeg hA
-  exact H D CLa Ck Crk Cdeg hA (h CLa Ck Crk Cdeg C (C + 1) C 26 2 24 60)
 
 end Formalism.MainNotions.TestSideCounting

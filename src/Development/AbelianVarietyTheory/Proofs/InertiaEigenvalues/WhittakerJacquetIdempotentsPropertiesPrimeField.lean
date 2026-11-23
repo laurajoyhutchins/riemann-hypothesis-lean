@@ -1,6 +1,50 @@
-import Mathlib
-import Formalism.SharpRestriction.LevelLetterCocycles.ArithmeticCylinders
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.LabelDatum
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.LabelDatum
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 section
 open GlobalTheory.GLq Formalism.MainNotions.ArithmeticCylinders Polynomial
@@ -151,7 +195,7 @@ theorem card_uni {N : ℕ} (Q : Fin N × Fin N → Prop) (P : Mt g N → Prop)
     · intro hba
       have hab : a ≠ b := ne_of_gt hba
       simp only [mk, if_neg hab]
-      rw [dif_neg]
+      rw [dite_eq_right]
       intro h
       exact absurd (lt_trans h.1 hba) (lt_irrefl _)
     · intro hab
@@ -169,7 +213,7 @@ theorem card_uni {N : ℕ} (Q : Fin N × Fin N → Prop) (P : Mt g N → Prop)
     refine ⟨hmk_up f, fun p hp hq => ?_⟩
     have hne : p.1 ≠ p.2 := ne_of_lt hp
     simp only [mk, if_neg hne]
-    rw [dif_neg]
+    rw [dite_eq_right]
     exact fun h => h.2 hq
   let e : {u : Gn g N // P (u : Mt g N)} ≃ (S → ZMod g) :=
     { toFun := fun u p => (u.1 : Mt g N) p.1.1 p.1.2
@@ -187,8 +231,8 @@ theorem card_uni {N : ℕ} (Q : Fin N × Fin N → Prop) (P : Mt g N → Prop)
           exact ((hu.1 i i).2 rfl).symm
         · rw [if_neg hij]
           by_cases h : i < j ∧ ¬ Q (i, j)
-          · rw [dif_pos h]
-          · rw [dif_neg h]
+          · rw [dite_eq_left h]
+          · rw [dite_eq_right h]
             rcases lt_or_gt_of_ne hij with hlt | hgt
             · exact (hu.2 (i, j) hlt (not_not.mp fun hq => h ⟨hlt, hq⟩)).symm
             · exact ((hu.1 i j).1 hgt).symm
@@ -197,7 +241,7 @@ theorem card_uni {N : ℕ} (Q : Fin N × Fin N → Prop) (P : Mt g N → Prop)
         funext p
         show mk f p.1.1 p.1.2 = f p
         simp only [mk]
-        rw [if_neg (ne_of_lt p.2.1), dif_pos (show p.1.1 < p.1.2 ∧ ¬ Q (p.1.1, p.1.2) from p.2)] }
+        rw [if_neg (ne_of_lt p.2.1), dite_eq_left (show p.1.1 < p.1.2 ∧ ¬ Q (p.1.1, p.1.2) from p.2)] }
   have hL : (Finset.univ.filter fun u : Gn g N => P (u : Mt g N)).card =
       Fintype.card {u : Gn g N // P (u : Mt g N)} := (Fintype.card_subtype _).symm
   have hS : Fintype.card S = (Finset.univ.filter fun p : Fin N × Fin N => p.1 < p.2 ∧ ¬ Q p).card :=

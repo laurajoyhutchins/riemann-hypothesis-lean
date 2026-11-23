@@ -1,14 +1,55 @@
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ThetaParseval.HalfIndexLattices.SplitStab
-import Development.WeilBound.ThetaLifts.Reductions.WeilPairs.AutEtaB
+module
+
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ThetaParseval.HalfIndexLattices.SplitStab
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.MemRangeOfOneTmulMem
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LatticeIntertwinerRepSplitPlacePositiveScalar
+public import Development.AutomorphicArithmetic.IdeleLatticeFacts.EqZeroOfSplitIdempotentEvalPlaceEqZero
+public import Development.AutomorphicArithmetic.IdeleLatticeFacts.ExistsLatticeIndexOfInjectiveEndomorphism
+public import Development.AutomorphicArithmetic.IdeleLatticeFacts.ExistsLinearMapDetMulMulEqPow
+public import Development.AutomorphicArithmetic.IdeleLatticeFacts.ExistsLocalLatticeOfGlobalLattice
+public import Development.AutomorphicArithmetic.IdeleLatticeFacts.ExistsPlaceOfSplitIdempotentCmExt
+public import Development.AutomorphicArithmetic.IdeleLatticeFacts.ExistsSignHeckeCharAtNonfixedPlace
+public import Development.AutomorphicArithmetic.IdeleLatticeFacts.LatticeDeterminantComparisonAtSplitPlace
 import Development.WeilBound.ThetaLifts.Reductions.WeilPairs.LatRepBI
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LatticeIntertwinerRepSplitPlacePositiveScalar
-import Development.AutomorphicArithmetic.IdeleLatticeFacts.ExistsPlaceOfSplitIdempotentCmExt
-import Development.AutomorphicArithmetic.IdeleLatticeFacts.EqZeroOfSplitIdempotentEvalPlaceEqZero
-import Development.AutomorphicArithmetic.IdeleLatticeFacts.ExistsLocalLatticeOfGlobalLattice
-import Development.AutomorphicArithmetic.IdeleLatticeFacts.ExistsLatticeIndexOfInjectiveEndomorphism
-import Development.AutomorphicArithmetic.IdeleLatticeFacts.ExistsLinearMapDetMulMulEqPow
-import Development.AutomorphicArithmetic.IdeleLatticeFacts.ExistsSignHeckeCharAtNonfixedPlace
-import Development.AutomorphicArithmetic.IdeleLatticeFacts.LatticeDeterminantComparisonAtSplitPlace
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open scoped TensorProduct Matrix Topology Kronecker ComplexOrder Classical
 open NumberField IsDedekindDomain Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Matrix
@@ -109,10 +150,10 @@ theorem UpperTheory.TP.W.idxSign :
   rw [e1, e2, hi, hj, ← pow_add] at hidx
   have hoff : ∀ (z : (AEF F E)ˣ) (d : AEF F E), (z : AEF F E) = e * d + (1 - e) → ∀ Q, Q ≠ P → wv F E Q z = 1 := by
     intro z d hz Q hQ
-    rw [wv_apply, hz, map_add, map_mul, map_sub, map_one, h0 Q hQ, zero_mul, zero_add, sub_zero, map_one]
+    rw [wv_apply, hz, map_add (f := _), map_mul, map_sub, map_one, h0 Q hQ, zero_mul, zero_add, sub_zero, map_one]
   have hat : ∀ (z : (AEF F E)ˣ) (d : AEF F E), (z : AEF F E) = e * d + (1 - e) → wv F E P z = Valued.v (ev F E P d) := by
     intro z d hz
-    rw [wv_apply, hz, map_add, map_mul, map_sub, map_one, h1, one_mul, sub_self, add_zero]
+    rw [wv_apply, hz, map_add (f := _), map_mul, map_sub, map_one, h1, one_mul, sub_self, add_zero]
   have hdet : ∀ {n : ℕ} (J : Matrix (Fin n) (Fin n) E) (a : GAF σ J),
       ev F E P (mtF σ J a).det = ((mtF σ J a).map (ev F E P)).det := by
     intro n J a

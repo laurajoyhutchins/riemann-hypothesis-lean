@@ -1,5 +1,46 @@
-import Formalism.SharpRestriction.GlobalSchurBounds.GlobalRankLatticeProofs.UnitTraceSumBounds.BeConjOfNorm
-import Formalism.SharpRestriction.GlobalSchurBounds.GlobalRankLatticeProofs.UnitTraceSumBounds.PhIsotropicOf
+module
+
+public import Formalism.SharpRestriction.GlobalSchurBounds.GlobalRankLatticeProofs.UnitTraceSumBounds.BeConjOfNorm
+public import Formalism.SharpRestriction.GlobalSchurBounds.GlobalRankLatticeProofs.UnitTraceSumBounds.PhIsotropicOf
+public import Formalism.SharpRestriction.GlobalSchurBounds.GlobalRankLatticeProofs.UnitTraceSumBounds.TestVectorMemSchwartzBruhat
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace Formalism.MainNotions.Ext.CutA
 
@@ -15,21 +56,6 @@ def OkpNorm (D : D7) : Prop :=
 def OkpTwoUnits (D : D7) : Prop :=
   ∀ (p : ℕ) [Fact p.Prime] (lam : Qbar →+* ℂ_[p]), p ≠ 2 →
     ∀ α ∈ OKp D lam, ∃ β ∈ OKp D lam, ∃ γ ∈ OKp D lam, ‖β.1‖ = 1 ∧ ‖γ.1‖ = 1 ∧ α = β + γ
-
-theorem sDiff_of (H : SDiffOfGram) (D : D7) : GL3r7.StatementSymmetricDifference D := by
-  intro hPG hbc p _ cc δ g hAt hp
-  exact H p g (OKp D g.lam) hAt.2.2.2.2 (okp_zero D g.lam) (fun β hβ => okp_swap D g.lam β hβ)
-    (fun β hβ γ hγ => okp_add D g.lam β γ hβ hγ) (fun β hβ γ hγ => okp_mul D g.lam β γ hβ hγ)
-    (hPG p cc δ g hAt hp) (hbc p cc δ g hAt hp)
-
-theorem splitZero_of (H : SplitZeroG) (D : D7) (hsp : OkpSplit D) (he : endInt D) (ha : addInt D) (hn : phNorm D)
-    (hb : beConj D) (hB : beBiadd D) : splitZero D := by
-  intro p _ cc δ g hAt hp hspl
-  refine H p g (OKp D g.lam) hAt.2.2.2.2 hp (fun α hα => okpSwap_holds D p g.lam α hα)
-    (fun α hα => he p cc δ g hAt α hα) (ha p cc δ g hAt).1 (fun α hα => hb p cc δ g hAt hp α hα)
-    (hB p cc δ g hAt).1 ?_ (hsp p g.lam hp hspl)
-  have h := hn p cc δ g hAt hp _ (okpNeg_holds D p g.lam)
-  simpa using h
 
 theorem beConj_of (H : BeConjOfNorm) (D : D7) (hN : OkpNorm D) (hU : OkpTwoUnits D) (he : endInt D) (ha : addInt D)
     (hn : phNorm D) (hB : beBiadd D) : beConj D := by

@@ -1,5 +1,54 @@
-import Mathlib
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.DataN
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+public import Mathlib.Analysis.Normed.Field.Approximation
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.FieldTheory.Galois.Profinite
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.MetricSpace.Ultra.TotallySeparated
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.GoodChi
+import Development.AbelianVarietyTheory.Definitions.Foundations.RootOfUnityEightQMemCoeffGaloisSubfield
+
+@[expose] public section
+
 open Formalism.BasicNotions GlobalTheory.Mem GlobalTheory.MemN NumberField IsDedekindDomain Formalism.ConjugateSelfDual ReciprocityTheory.Gal Polynomial
 
 noncomputable section
@@ -40,7 +89,11 @@ theorem exists_embedding (E Ω : Type) [Field E] [NumberField E] [Field Ω] [Alg
   have : IsAlgClosed Ω := IsAlgClosure.isAlgClosed E
   have : Algebra.IsAlgebraic ℚ Ω := Algebra.IsAlgebraic.trans ℚ E Ω
   have : IsAlgClosure ℚ Ω := ⟨inferInstance, inferInstance⟩
-  let j0 : Ω →ₐ[ℚ] PadicAlgCl l := IsAlgClosed.lift
+  let j0 : Ω →ₐ[ℚ] PadicAlgCl l := (by
+    refine @_root_.IsAlgClosed.lift _ _ _ _ _ _ _ _ _ _ _ ?_ ?_ ?_
+    solve_by_elim* (maxDepth := 2) only [*,
+      @_root_.DivisionSemiring.to_moduleIsTorsionFree,
+      @_root_.Algebra.IsIntegral.isAlgebraic, @_root_.inferInstance])
   let A0 : ValuationSubring Ω := (Valued.v (R := PadicAlgCl l)).valuationSubring.comap j0.toRingHom
   have hA0 : ∀ x, x ∈ A0 ↔ ‖j0 x‖ ≤ 1 := fun x => by
     change Valued.v (j0 x) ≤ 1 ↔ _
@@ -176,6 +229,7 @@ theorem finiteDimensional_adjoin_range :
     apply le_antisymm
     · rw [IntermediateField.adjoin_le_iff]
       rintro _ ⟨x, rfl⟩
+
       rw [← b.sum_repr x, map_sum]
       refine sum_mem fun i _ => ?_
       rw [Rat.smul_def, map_mul, map_ratCast]
@@ -221,7 +275,7 @@ theorem mem_GK_iff (K : Loc.FinExt l)
     induction hy using IntermediateField.adjoin_induction with
     | mem y hy => obtain ⟨x, rfl⟩ := hy; exact h x
     | algebraMap y => exact τ.commutes y
-    | add a b _ _ ha hb => rw [map_add, ha, hb]
+    | add a b _ _ ha hb => rw [map_add (f := _), ha, hb]
     | inv a _ ha => rw [map_inv₀, ha]
     | mul a b _ _ ha hb => rw [map_mul, ha, hb]
 

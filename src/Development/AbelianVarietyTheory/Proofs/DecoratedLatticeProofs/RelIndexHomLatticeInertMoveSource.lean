@@ -1,17 +1,71 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.TransferOn
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsPairingSingleNe
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.ExistsNormLeHeightPow
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ConstMemBddAut
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsIsFinWeil
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsGoodIndexNormalizationNegativeInert
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.IsSelfDualCLatFrame
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IndexNormalizationInertNormEqNeg
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.RamificationIdxEqOneOfIsSquare
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.InertPlaceHomLatticeIndexEqLocalComponentIndex
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.InertPlaceHomLatticeComponentsScaledIntegral
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.RelIndexIntegralMatricesUnitaryDiagonalTranslate
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.MemIntMat
+module
+
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ConstMemBddAut
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.MemIntMat
+public import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.IdemSum
+import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ExistsIntegralSplitIdempotentOverTwo
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsIsHeckeOpFullDualLab
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RelIndexNeZeroOfFinite
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsFinitePlaceIdempotentBaseChangeAdeles
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsUniqueIsConjAt
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IdempotentMulEqZeroOfOrthogonal
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.InertPlaceHomLatticeComponentsScaledIntegral
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.InertPlaceHomLatticeIndexEqLocalComponentIndex
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.InertPlaceStabilizersFixWeilLatticeVacuum
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.RelIndexIntegralMatricesUnitaryDiagonalTranslate
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.WeilDatumAtPlaceEqLatticeIntertwinerMulDetChar
+import Formalism.HermitianLattices.HermitianLatticesProofs.DualBasic
+import Formalism.LocalRingCardinality.SpanPowerMembership.LocAtA
+import Formalism.LocalToGlobal.ProjectiveLattices.HalfOneAddSqrtNegIsIntegral
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Matrix.FiniteDimensional
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IsUnitaryOnTheta
+import Development.AbelianVarietyTheory.Definitions.LatticeFrames.ChainParSucc
+import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.RealLowestKTypeCoeffSquareIntegrable
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.IsSelfDualCLatFrame
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.InnerProductFormula
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.MemHomLatticeIffIntegralMatrixSplitChart
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsPairingSingleNe
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.MainNotions.S MeasureTheory IsDedekindDomain NumberField Matrix
 open Formalism.L2.Theta Formalism.L2.DIV Formalism.IndefR Formalism.IndefR.Links Formalism.IndefR.Mult Formalism.IndefR.Datum
 open scoped TensorProduct InnerProductSpace ComplexConjugate
@@ -39,8 +93,8 @@ theorem rmul_apply {L : Type} [Ring L] {m n : ℕ} (g : Matrix (Fin n) (Fin n) L
 
 end GlobalTheory.InertHomIdx
 
-open GlobalTheory.FinWeilO in
 
+open GlobalTheory.FinWeilO in
 theorem GlobalTheory.InertHomIdx.heisenbergRelativeIndex_inert_move_source (D : D7) (S T : HSp D) (v : HeightOneSpectrum (𝓞 D.host.F)) (w : HeightOneSpectrum (𝓞 D.host.E)) (h : w.under (𝓞 D.host.F) = v) (hi : IsInertAt D.host.F D.host.E v w) (g : Gv S v) : GlobalTheory.FinWeil.idx (GlobalTheory.FinWeilO.latF S T (frameLat S) (frameLat T)) ((GlobalTheory.FinWeilO.latF S T (frameLat S) (frameLat T)).map (GlobalTheory.FinWeilO.rhoF S T (embV S v g, 1))) = ((GlobalTheory.FinWeilO.latF S T (frameLat S) (frameLat T)).toAddSubgroup.map (GlobalTheory.InertHomIdx.matW S T w)).relIndex (((GlobalTheory.FinWeilO.latF S T (frameLat S) (frameLat T)).toAddSubgroup.map (GlobalTheory.InertHomIdx.matW S T w)).map (GlobalTheory.InertHomIdx.rmul (locMat D.sp.cm.sig S.gram h g)⁻¹.1)) := by
   obtain ⟨ε, hns, hp⟩ := GlobalTheory.WeilAtPlace.exists_nonSplit_of_inert hi h
   have hε : IsPlaceIdem D v ε := hns.1
@@ -119,6 +173,7 @@ theorem mem_map_latF_iff_frames (D : D7) (S T : HSp D) (v : HeightOneSpectrum (�
           lam * π (a1 * t i * ∑ k, star (s k) * S.gram k j) := compAt_tmul w α _
       rw [Matrix.map_apply, Matrix.of_apply, e1, Matrix.smul_apply, smul_eq_mul, Matrix.vecMulVec_apply]
       have hconj : ∀ y, c (π y) = π (star y) := fun y => InertChart.conj_algebraMap hc y
+
       simp only [map_mul, map_sum, Matrix.vecMul, dotProduct, hG, Matrix.map_apply, hconj]
       ring_nf
     have hy : ∀ p, ((a⁻¹ : GL (Fin T.rank) (w.adicCompletion D.host.E)).1 *ᵥ fun i => π (t i)) p ∈ Formalism.UG.Ov D.host.E w := by
@@ -222,8 +277,9 @@ theorem relIndex_intMat_rmul_cT {L : Type} [Field L] [Valued L (WithZero (Multip
   have hcomm : ψ.comp (rmul (Formalism.UG.cT c k)) = (lmul k).comp ψ := by
     refine AddMonoidHom.ext fun X => ?_
     ext i j
+
     simp only [ψ, AddMonoidHom.coe_comp, AddMonoidHom.coe_mk, ZeroHom.coe_mk, Function.comp_apply, rmul_apply, lmul_apply,
-      Formalism.UG.cT, Matrix.transpose_apply, Matrix.map_apply, Matrix.mul_apply, map_sum, map_mul, hcc]
+    Formalism.UG.cT, Matrix.transpose_apply, Matrix.map_apply, Matrix.mul_apply, map_sum, map_mul, hcc]
     exact Finset.sum_congr rfl fun l _ => mul_comm _ _
   rw [← AddSubgroup.relIndex_map_map_of_injective _ _ hψ, AddSubgroup.map_map, hcomm, ← AddSubgroup.map_map]
   exact congrArg₂ _ (h1) (congrArg _ h1)
@@ -234,7 +290,42 @@ theorem GlobalTheory.InertHomIdx.idx_latF_map_rhoF_eq_qV_pow : ∀ (D : D7) (S T
   intro D S T v w h hw c ϖ e hU he d t ht k₁ hk₁ k₂ hk₂
   obtain ⟨hc, ⟨a, ha, haJ, hea⟩, -⟩ := he
   have hlat := GlobalTheory.HeckeDual.isLattice_frameLat T
-  obtain ⟨aT, haT⟩ := InertChart.exists_isFrameAt (L := frameLat T) hw hlat.fg hlat.span_eq_top
+  have hspan : Submodule.span D.host.E (frameLat T : Set (Fin T.rank → D.host.E)) = ⊤ := by
+    have hfull : Submodule.span D.host.E (T.L0 : Set T.V) = ⊤ := by
+      let W := Submodule.span D.host.E (T.L0 : Set T.V)
+      change W = ⊤
+      by_contra h
+      let e : T.V ≃ₗ⋆[D.host.E] T.V :=
+        (T.frame.equivFun.trans (starLinearEquiv D.host.E)).trans T.frame.equivFun.symm
+      let g : T.V →ₗ[D.host.E] Module.Dual D.host.E W :=
+        (LinearMap.domRestrict' W).comp (T.hT.comp e.toLinearMap)
+      have hdim : Module.finrank D.host.E (Module.Dual D.host.E W) < Module.finrank D.host.E T.V := by
+        rw [Subspace.dual_finrank_eq]
+        exact Submodule.finrank_lt h
+      obtain ⟨x, hx, hx₀⟩ :=
+        Submodule.exists_mem_ne_zero_of_ne_bot (LinearMap.ker_ne_bot_of_finrank_lt (f := g) hdim)
+      have hsmul (a : D.host.E) : a • e x ∈ T.L0 := by
+        rw [← T.baseLattice_isUnimodular]
+        rw [Formalism.HermitianLatticesTheory.dualBasic_mem_dual]
+        intro y hy
+        have hxy : T.hT (e x) y = 0 :=
+          congrArg (fun f : Module.Dual D.host.E W => f ⟨y, Submodule.subset_span hy⟩) (LinearMap.mem_ker.mp hx)
+        have hyx : T.hT y (e x) = 0 := by
+          rw [(T.herm.eq (e x) y).symm, hxy, map_zero]
+        simp [hyx]
+      let i : D.host.E →ₗ[𝓞 D.host.E] T.L0 :=
+        ((LinearMap.toSpanSingleton D.host.E _ (e x)).restrictScalars (𝓞 D.host.E)).codRestrict T.L0 hsmul
+      let : Module.Finite (𝓞 D.host.E) T.L0 := Module.Finite.iff_fg.mpr T.standardTuple_isLattice.fg
+      let : Module.Finite (𝓞 D.host.E) D.host.E := Module.Finite.of_injective i fun a b hab =>
+        smul_left_injective D.host.E (fun hzero => hx₀ (e.map_eq_zero_iff.mp hzero)) (congrArg Subtype.val hab)
+      exact RingOfIntegers.not_isField D.host.E
+        (isField_of_isIntegral_of_isField (R := 𝓞 D.host.E) (S := D.host.E)
+          (FaithfulSMul.algebraMap_injective _ _) (Field.toIsField _))
+    have heq : (frameLat T : Set (Fin T.rank → D.host.E)) =
+        T.frame.equivFun.toLinearMap '' (T.L0 : Set T.V) :=
+      (T.frame.equivFun.toEquiv.image_eq_preimage_symm _).symm
+    rw [heq, ← Submodule.map_span, hfull, Submodule.map_top, LinearEquiv.range]
+  obtain ⟨aT, haT⟩ := InertChart.exists_isFrameAt (L := frameLat T) hw hlat.fg hspan
   obtain ⟨c₀, b, hc₀, hb, hX⟩ := GlobalTheory.InertHomLattice.mem_map_latF_iff_frames D S T v w h hw c hc aT haT a ha
   rw [GlobalTheory.InertHomIdx.heisenbergRelativeIndex_inert_move_source D S T v w h hw]
   set k : GU c S.rank := k₁ * t * k₂ with hk

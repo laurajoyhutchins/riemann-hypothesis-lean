@@ -1,7 +1,60 @@
-import Formalism.LocalToGlobal.Columns.RecLevelStep
-import Formalism.LocalToGlobal.Columns.RecLevelTop
-import Formalism.LocalToGlobal.Columns.TwQDefs
-import Formalism.LocalToGlobal.Columns.TwQThetaOpen
+module
+
+public import Formalism.LocalToGlobal.Columns.RecLevelTop
+public import Formalism.LocalToGlobal.Columns.TwQDefs
+public import Formalism.LocalToGlobal.Columns.RecLevelCls
+public import Formalism.LocalToGlobal.Columns.RecLevelLocF
+public import Formalism.LocalToGlobal.HermitianForms.IsLocBasis
+import Formalism.LocalToGlobal.Columns.RecLevelLocK
+public import Formalism.LocalToGlobal.Columns.RecLevelLocP
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Algebra.Group.Units
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Matrix
 open scoped TensorProduct
@@ -32,7 +85,7 @@ structure QOpen (q : QLoc hc n Q Θ) : Prop where
     (∀ i j, (u : Matrix (Fin n) (Fin n) 𝒜) i j = (1 : Matrix (Fin n) (Fin n) 𝒜) i j + iA F E (algebraMap (𝓞 E) E a) * s i j) →
     ∀ P : Q, q.at P u ∈ q.U P
 
-variable (q : QLoc hc n Q Θ) (H : Subgroup (GLG E n SG))
+variable (q : QLoc hc n Q Θ) (H : Subgroup (GLG (E := E) (n := n) (SG := SG)))
 
 theorem mem_levUQ {x : GL (Fin n) 𝒜} :
     x ∈ levUQ hc n ST SG Q H q ↔ x ∈ levU hc n ST SG H ∧ ∀ P : Q, q.at P x ∈ q.U P := by
@@ -57,8 +110,8 @@ def lqRes (P : Q) : levUQ hc n ST SG Q H q →* q.U P where
 def chiQ (σ₀ : K →+* ℂ) : levUQ hc n ST SG Q H q →* ℂˣ :=
   ∏ P : Q, (Units.map σ₀.toMonoidHom).comp ((q.chr P).comp (lqRes q H P))
 
-variable (ST) in
 
+variable (ST) in
 def qUloc (v : HeightOneSpectrum (𝓞 F)) : Subgroup (GL (Fin n) (E ⊗[F] v.adicCompletion F)) :=
   levLoc hc n ST SG H v ⊓ ⨅ (P : Q) (h : qv F P.1 = v), h ▸ (q.U P).comap (qFst q P)
 
@@ -175,7 +228,7 @@ def stepOfQ (hB : BasePi ST π) (hTπ : π * cO E π = (T : 𝓞 E)) (hST : ∀ 
     (hcard : ∀ P ∈ ST, Nat.card (𝓞 E ⧸ P.asIdeal) = T) (hSG : ∀ v : HeightOneSpectrum (𝓞 F), (T : 𝓞 F) ∈ v.asIdeal → v ∉ plUnder F SG)
     (hidx : (baseLb E n ST).toAddSubgroup.relIndex
       (Submodule.span (𝓞 E) (Formalism.BasicNotions.dualSet (hc.sig : E →+* E) (1 : Matrix (Fin n) (Fin n) E) (baseLb E n ST))).toAddSubgroup = T ^ (2 * f))
-    (lam : (Subgroup.pi Set.univ Hw : Subgroup (GLG E n SG)) →* ℂˣ)
+    (lam : (Subgroup.pi Set.univ Hw : Subgroup (GLG (E := E) (n := n) (SG := SG))) →* ℂˣ)
     (hQ : QOpen q) (hQT : ∀ P : Q, (T : 𝓞 F) ∉ (qv F P.1).asIdeal) (σ₀ : K →+* ℂ) :
     Formalism.L2.Forms.StepLevel F E hc.sig (1 : Matrix (Fin n) (Fin n) E) T f (badQ' SG Q) where
   Lb := baseLb E n ST
@@ -231,23 +284,11 @@ theorem chiQ_pow_eq_one (σ₀ : K →+* ℂ) (x : levUQ hc n ST SG Q (Subgroup.
   obtain ⟨M', hM'⟩ := hM P
   rw [hM', pow_mul, MonoidHom.comp_apply, MonoidHom.comp_apply, ← map_pow, h2, map_one, one_pow]
 
-theorem chiQ_eq_one_of (σ₀ : K →+* ℂ) (x : levUQ hc n ST SG Q (Subgroup.pi Set.univ Hw) q)
-    (h1 : ∀ P : Q, bc (prV (E := E) (qv F P.1)) x.1 = 1) : chiQ q _ σ₀ x = 1 := by
-  unfold chiQ
-  rw [MonoidHom.finsetProd_apply]
-  refine Finset.prod_eq_one fun P _ => ?_
-  have hx : lqRes q (Subgroup.pi Set.univ Hw) P x = 1 := by
-    ext1
-    show q.at P x.1 = 1
-    simp only [QLoc.at]
-    rw [h1 P, map_one]
-  simp only [MonoidHom.comp_apply, hx, map_one]
-
 theorem stepOfQ_chi_fin (hB : BasePi ST π) (hTπ : π * cO E π = (T : 𝓞 E)) (hST : ∀ P : Pl E, P ∈ ST ↔ π ∈ P.asIdeal)
     (hcard : ∀ P ∈ ST, Nat.card (𝓞 E ⧸ P.asIdeal) = T) (hSG : ∀ v : HeightOneSpectrum (𝓞 F), (T : 𝓞 F) ∈ v.asIdeal → v ∉ plUnder F SG)
     (hidx : (baseLb E n ST).toAddSubgroup.relIndex
       (Submodule.span (𝓞 E) (Formalism.BasicNotions.dualSet (hc.sig : E →+* E) (1 : Matrix (Fin n) (Fin n) E) (baseLb E n ST))).toAddSubgroup = T ^ (2 * f))
-    (lam : (Subgroup.pi Set.univ Hw : Subgroup (GLG E n SG)) →* ℂˣ)
+    (lam : (Subgroup.pi Set.univ Hw : Subgroup (GLG (E := E) (n := n) (SG := SG))) →* ℂˣ)
     (hQ : QOpen q) (hQT : ∀ P : Q, (T : 𝓞 F) ∉ (qv F P.1).asIdeal) (σ₀ : K →+* ℂ)
     (hlam : ∃ m : ℕ, 0 < m ∧ ∀ h, lam h ^ m = 1) (hchr : ∀ P : Q, ∃ m : ℕ, 0 < m ∧ ∀ k, q.chr P k ^ m = 1) :
     ∃ m : ℕ, 0 < m ∧ ∀ κ, (stepOfQ hc n Hw q hB hTπ hST hcard hSG hidx lam hQ hQT σ₀).chi κ ^ m = 1 := by
@@ -264,21 +305,6 @@ theorem stepOfQ_chi_fin (hB : BasePi ST π) (hTπ : π * cO E π = (T : 𝓞 E))
     chiQ_pow_eq_one hc n Hw q σ₀ (κ : levUQ hc n ST SG Q (Subgroup.pi Set.univ Hw) q) m2 h2 _
       (fun P => Dvd.dvd.mul_left (Finset.dvd_prod_of_mem m2 (Finset.mem_univ P)) _)
   rw [ha, hb, inv_one, one_mul]
-
-theorem stepOfQ_chi_off (hB : BasePi ST π) (hTπ : π * cO E π = (T : 𝓞 E)) (hST : ∀ P : Pl E, P ∈ ST ↔ π ∈ P.asIdeal)
-    (hcard : ∀ P ∈ ST, Nat.card (𝓞 E ⧸ P.asIdeal) = T) (hSG : ∀ v : HeightOneSpectrum (𝓞 F), (T : 𝓞 F) ∈ v.asIdeal → v ∉ plUnder F SG)
-    (hidx : (baseLb E n ST).toAddSubgroup.relIndex
-      (Submodule.span (𝓞 E) (Formalism.BasicNotions.dualSet (hc.sig : E →+* E) (1 : Matrix (Fin n) (Fin n) E) (baseLb E n ST))).toAddSubgroup = T ^ (2 * f))
-    (lam : (Subgroup.pi Set.univ Hw : Subgroup (GLG E n SG)) →* ℂˣ)
-    (hQ : QOpen q) (hQT : ∀ P : Q, (T : 𝓞 F) ∉ (qv F P.1).asIdeal) (σ₀ : K →+* ℂ)
-    (κ : (stepOfQ hc n Hw q hB hTπ hST hcard hSG hidx lam hQ hQT σ₀).U) (κ' : (stepOf hc n Hw hB hTπ hST hcard hSG hidx lam).U)
-    (he : κ.1 = κ'.1) (h1 : ∀ P : Q, bc (prV (E := E) (qv F P.1)) κ.1 = 1) :
-    (stepOfQ hc n Hw q hB hTπ hST hcard hSG hidx lam hQ hQT σ₀).chi κ = (stepOf hc n Hw hB hTπ hST hcard hSG hidx lam).chi κ' := by
-  have h2 : chiQ q _ σ₀ κ = 1 := chiQ_eq_one_of hc n Hw q σ₀ (κ : levUQ hc n ST SG Q (Subgroup.pi Set.univ Hw) q) h1
-  show levTyp lam (Subgroup.inclusion (levUQ_le q _) κ) * (chiQ q _ σ₀ κ)⁻¹ = levTyp lam κ'
-  rw [h2, inv_one, mul_one]
-  congr 1
-  exact Subtype.ext he
 
 end Step
 

@@ -1,5 +1,59 @@
-import Mathlib
-import ReciprocityTheory.DualLattices.CyclicRecursionStatement
+module
+
+public import ReciprocityTheory.DualLattices.CyclicRecursionStatement
+import Mathlib.Algebra.AffineMonoid.UniqueSums
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+public import Mathlib.RingTheory.WittVector.DiscreteValuationRing
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RingTheory.Polynomial.Cyclotomic.Basic
+public import Mathlib.RingTheory.Polynomial.Cyclotomic.Eval
+
+@[expose] public section
 
 noncomputable section
 
@@ -42,7 +96,7 @@ private lemma sub_one_pow_pred {p : ℕ} [hp : Fact p.Prime] {R : Type*} [CommRi
     rw [← pow_succ', Nat.sub_add_cancel hp.out.one_lt.le, sub_pow_char, one_pow, mul_comm,
       geom_sum_mul]
   have h := congrArg (Polynomial.eval₂ (ZMod.castHom (dvd_refl p) R) x) hX
-  simpa [Polynomial.eval₂_finset_sum, Polynomial.eval₂_pow, Polynomial.eval₂_sub,
+  simpa [Polynomial.eval₂_finsetSum, Polynomial.eval₂_pow, Polynomial.eval₂_sub,
     Polynomial.eval₂_X, Polynomial.eval₂_one] using h
 
 private lemma val_sub_one_le {C : Type*} [Field C] (v : Valuation C NNReal) {p : ℕ}
@@ -97,7 +151,7 @@ private lemma val_untilt_sub_one (hv : v.Integers O) (x : PreTilt O p)
     (hlt : v (p : C) < v (algebraMap O C x.untilt - 1)) :
     v (algebraMap O C (x - 1).untilt) = v (algebraMap O C x.untilt - 1) := by
   obtain ⟨t, ht⟩ := untilt_sub_one x
-  rw [ht, map_add, map_sub, map_one]
+  rw [ht, map_add (f := _), map_sub, map_one]
   have hpt : v (algebraMap O C ((p : O) * t)) ≤ v (p : C) := by
     rw [map_mul, map_natCast, map_mul]
     calc v (p : C) * v (algebraMap O C t) ≤ v (p : C) * 1 := mul_le_mul_of_nonneg_left (hv.map_le_one t) (by positivity)
@@ -237,6 +291,7 @@ theorem xiNu (p : ℕ) [hp : Fact p.Prime] (C : Type) [Field C] (v : Valuation C
     rw [← h3, h2]
     exact pow_ne_zero _ ((Valuation.ne_zero_iff v).mpr hne)
   have hxi : (∑ i ∈ Finset.range p, teichmuller p e ^ i) ∈ RingHom.ker (fontaineTheta O p) := by
+
     rw [RingHom.mem_ker, map_sum]
     simp only [map_pow, hT]
     exact hζ.geom_sum_eq_zero hp.out.one_lt
@@ -260,6 +315,7 @@ theorem xiNu (p : ℕ) [hp : Fact p.Prime] (C : Type) [Field C] (v : Valuation C
   have hct : ∀ x : PreTilt O p, WittVector.constantCoeff (teichmuller p x) = x := fun x =>
     WittVector.teichmuller_coeff_zero p x
   have hc := congrArg WittVector.constantCoeff ha
+
   rw [map_mul, map_sub, map_natCast, CharP.cast_eq_zero, zero_sub, hct, map_sum] at hc
   simp only [map_pow, hct] at hc
   have hc2 : WittVector.constantCoeff a * ((-1) * pflat) = (e - 1) ^ (p - 1) := by

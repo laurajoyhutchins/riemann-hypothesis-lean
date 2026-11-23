@@ -1,4 +1,43 @@
-import Development.AbelianVarietyTheory.Definitions.Foundations.NotZeroChi
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.HTLawAt
+public import Development.AbelianVarietyTheory.Definitions.Foundations.CyclotomicDvdExpandOfCoprime
+public import Development.AbelianVarietyTheory.Definitions.Foundations.IsLocallyConstantCycMod
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -12,7 +51,7 @@ def R0 (A : ValuationSubring Ω) : Subring Ω where
   carrier := {x | x ∈ A ∧ ∀ s ∈ Ine (F := ℚ) A, s x = x}
   mul_mem' ha hb := ⟨A.mul_mem _ _ ha.1 hb.1, fun s hs => by rw [map_mul, ha.2 s hs, hb.2 s hs]⟩
   one_mem' := ⟨A.one_mem, fun s _ => map_one s⟩
-  add_mem' ha hb := ⟨A.add_mem _ _ ha.1 hb.1, fun s hs => by rw [map_add, ha.2 s hs, hb.2 s hs]⟩
+  add_mem' ha hb := ⟨A.add_mem _ _ ha.1 hb.1, fun s hs => by rw [map_add (f := _), ha.2 s hs, hb.2 s hs]⟩
   zero_mem' := ⟨A.zero_mem, fun s _ => map_zero s⟩
   neg_mem' ha := ⟨A.neg_mem _ ha.1, fun s hs => by rw [map_neg, ha.2 s hs]⟩
 
@@ -121,8 +160,5 @@ abbrev intg (φ : DirichletCharacter (Qbar l) l) (k : ℕ) (L : PowerSeries (Qba
 
 def IntZero (φ : DirichletCharacter (Qbar l) l) (k : ℕ) (L : PowerSeries (Qbar l)) : Prop :=
   ∀ n : ℕ, ∃ r₁, ∀ r, r₁ ≤ r → ∀ ξ : Qbar l, IsPrimitiveRoot ξ (l ^ r) → Cg (n + r) (intg φ k L r ξ) 0
-
-theorem iwI_zero (c : Coef l) (A : ValuationSubring Ω) : IwI c A (fun _ _ _ => 0) :=
-  ⟨fun _ _ _ _ => zero_mem _, by simp, by simp⟩
 
 end UpperTheory.Kd.C7

@@ -1,6 +1,42 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Foundations.ChiK
-import Development.AbelianVarietyTheory.Statements.CuspidalUnitaryTwists.ZetaUr
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.FinalTheorems
+public import Development.AbelianVarietyTheory.Definitions.Foundations.Letter
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -38,16 +74,5 @@ def AdmT {l : ℕ} [Fact l.Prime] (ι : Qbar l ≃+* ℂ) (e : ℕ) (gN : Newfor
 
 def unTw {l : ℕ} [Fact l.Prime] (W : R2 Ω l) (e : ℕ) (χ : G ℚ Ω →* (Qbar l)ˣ) : R2 Ω l :=
   tw W (cycBar ℚ Ω l ^ e * χ⁻¹)
-
-example {l : ℕ} [Fact l.Prime] (s : Ω ≃ₐ[ℚ] Ω) : psiCyc (fun _ : ZMod l => (1 : Qbar l)) s = 1 := rfl
-
-example {l : ℕ} [Fact l.Prime] (e : ℕ) (ψ : ZMod l → Qbar l) (h1 : ψ 1 = 1) :
-    (cycBar ℚ Ω l 1 : Qbar l) ^ e * (psiCyc (Ω := Ω) ψ 1)⁻¹ = 1 := by
-  have : Fact (1 < l ^ 1) := ⟨by simpa using (Fact.out : l.Prime).one_lt⟩
-  simp [psiCyc, ZMod.val_one, h1]
-
-example {l : ℕ} [Fact l.Prime] (ι : Qbar l ≃+* ℂ) (gN : Newform (2 * 0 + 1)) (W : R2 Ω l) (X : Tower Ω ε)
-    (pr : X.Fn l → Fin 2 → Qbar l) (N : ℕ) [NeZero N] (x : ZMod N) (c d : ℕ) (gm : (ZMod l)ˣ → SL(2, ℤ))
-    (ψ : ZMod l → Qbar l) : ¬ AdmT ι 0 gN W X pr N x c d gm ψ := fun h => absurd h.1 (by omega)
 
 end GlobalTheory.K4

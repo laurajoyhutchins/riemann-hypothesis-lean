@@ -1,9 +1,51 @@
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.SatakeExponents.UniformizerValuations.GlobalTheory
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.ThetaCellCovers.KernelRowsColumnsSquareIntegrable
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.ThetaCellCovers.AdmissibleLeHolds
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.ThetaCellCovers.ProperRatH
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.ThetaNormCommutation.LocalComparisonSplitting.TopoThetaRCont
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.HeckeFubiniCompatibility.EntryLeOfLg
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.SatakeExponents.UniformizerValuations.GlobalTheory
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.HeckeFubiniCompatibility.EntryLeOfLg
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.ThetaCellCovers.AdmissibleLeHolds
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.ThetaCellCovers.KernelRowsColumnsSquareIntegrable
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.ThetaCellCovers.ProperRatH
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.ThetaNormCommutation.LocalComparisonSplitting.TopoThetaRCont
+import GroundTheory.GlobalFields.Adele.Topology
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Separation.Connected
+
+@[expose] public section
 
 noncomputable section
 
@@ -137,6 +179,7 @@ theorem levRight (ψ : Matrix κ κ (Hf E a b → ℂ)) {ψ' : Matrix κ κ (Hf 
 
 theorem adjMul (ψ ψ' : Matrix κ κ (Hf E a b → ℂ)) : adjF (mulF ν ψ ψ') = mulF ν (adjF ψ') (adjF ψ) := by
   funext x y g
+
   simp only [adjF, mulF, map_sum]
   refine Finset.sum_congr rfl fun z _ => ?_
   rw [← integral_conj]
@@ -178,8 +221,10 @@ theorem assoc1 {A B' C : Hf E a b → ℂ} (hA : Continuous A ∧ HasCompactSupp
       (hC.1.comp (continuous_fst.inv.mul continuous_const))
   have hK : IsCompact ((tsupport A * tsupport B') ×ˢ tsupport A) :=
     (hA.2.isCompact.mul hB.2.isCompact).prod hA.2.isCompact
-  refine integral_integral_swap (f := fun h k => A k * B' (k⁻¹ * h) * C (h⁻¹ * g)) ?_
-  refine hcont.integrable_of_hasCompactSupport (HasCompactSupport.intro hK fun p hp => ?_)
+  set_option synthInstance.maxHeartbeats 100000 in
+    refine integral_integral_swap (f := fun h k => A k * B' (k⁻¹ * h) * C (h⁻¹ * g)) ?_
+  set_option synthInstance.maxHeartbeats 100000 in
+    refine hcont.integrable_of_hasCompactSupport (HasCompactSupport.intro hK fun p hp => ?_)
   by_contra hne
   have h1 : A p.2 ≠ 0 := left_ne_zero_of_mul (left_ne_zero_of_mul hne)
   have h2 : B' (p.2⁻¹ * p.1) ≠ 0 := right_ne_zero_of_mul (left_ne_zero_of_mul hne)
@@ -194,14 +239,14 @@ theorem assoc {ψ ψ' ψ'' : Matrix κ κ (Hf E a b → ℂ)} (h1 : IsFinM ψ) (
       ∑ z, ∫ h, (∫ k, ψ x z k * ψ' z w (k⁻¹ * h) ∂ν) * ψ'' w y (h⁻¹ * g) ∂ν := by
     intro w
     simp_rw [Finset.sum_mul]
-    refine integral_finset_sum _ fun z _ => ?_
+    refine integral_finsetSum _ fun z _ => ?_
     obtain ⟨c1, c2⟩ := convTest ν (h1 x z) (h2 z w)
     exact (c1.mul ((h3 w y).1.comp (continuous_inv.mul continuous_const))).integrable_of_hasCompactSupport c2.mul_right
   have R : ∀ z, ∫ k, ψ x z k * (∑ w, ∫ h, ψ' z w h * ψ'' w y (h⁻¹ * (k⁻¹ * g)) ∂ν) ∂ν =
       ∑ w, ∫ k, ψ x z k * ∫ h, ψ' z w h * ψ'' w y (h⁻¹ * (k⁻¹ * g)) ∂ν ∂ν := by
     intro z
     simp_rw [Finset.mul_sum]
-    refine integral_finset_sum _ fun w _ => ?_
+    refine integral_finsetSum _ fun w _ => ?_
     obtain ⟨c1, -⟩ := convTest ν (h2 z w) (h3 w y)
     have c3 : Continuous fun k : Hf E a b => ∫ h, ψ' z w h * ψ'' w y (h⁻¹ * (k⁻¹ * g)) ∂ν :=
       c1.comp (continuous_inv.mul continuous_const)

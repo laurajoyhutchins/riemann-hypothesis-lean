@@ -1,7 +1,54 @@
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.HaarVolumes.LeftMulMapEqTransposeConj
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.HaarVolumes.TriUniq
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.HaarVolumes.QrMapMeasurableSetImage
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.HaarVolumes.DetNull
+module
+
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.HaarVolumes.TriDens
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.Countable
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.HaarVolumes.LeftMulMapEqTransposeConj
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.HaarVolumes.QrMapMeasurableSetImage
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.HaarVolumes.TriHaar
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.HaarVolumes.TriUniq
+public import Mathlib.MeasureTheory.Measure.Haar.Unique
+
+@[expose] public section
 
 noncomputable section
 
@@ -43,13 +90,11 @@ theorem range_qrW : Set.range (qrW (N := N)) = glSet N := by
     · rintro ⟨p, hp, rfl⟩; exact ⟨⟨p, hp⟩, rfl⟩]
   exact qrMap_image
 
-theorem measurableEmbedding_qrW : MeasurableEmbedding (qrW (N := N)) where
-  injective := by
-    intro p q h
+theorem measurableEmbedding_qrW : MeasurableEmbedding (qrW (N := N)) := by
+  refine ⟨?_, measurable_qrMap.comp measurable_subtype_coe, ?_⟩
+  · intro p q h
     exact Subtype.ext (qrMap_injOn p.2 q.2 h)
-  measurable := measurable_qrMap.comp measurable_subtype_coe
-  measurableSet_image' := by
-    intro s hs
+  · intro s hs
     have h1 : MeasurableSet (Subtype.val '' s : Set (UNgrp N × TriCo N)) :=
       (MeasurableEmbedding.subtype_coe measurableSet_qrDom).measurableSet_image' hs
     have h2 : qrW '' s = qrMap '' (Subtype.val '' s) := by
@@ -235,10 +280,10 @@ theorem nuQR_rect (μ : Measure (UNgrp N)) [μ.IsHaarMeasure] [IsProbabilityMeas
   have hsm := Measure.isMulInvariant_eq_smul_of_compactSpace ρ μ
   have hc : ρ.haarScalarFactor μ = kap N t := by
     have := congrArg (fun m : Measure (UNgrp N) => m Set.univ) hsm
-    simp only [Measure.smul_apply, measure_univ] at this
+    simp only [smul_apply, measure_univ] at this
     rw [← hρu, this]
     simp
-  rw [← hρA s hs, hsm, Measure.smul_apply, ENNReal.smul_def, smul_eq_mul, hc, mul_comm]
+  rw [← hρA s hs, hsm, smul_apply, ENNReal.smul_def, smul_eq_mul, hc, mul_comm]
 
 theorem nuQR_eq_prod (μ : Measure (UNgrp N)) [μ.IsHaarMeasure] [IsProbabilityMeasure μ]
     [CompactSpace (UNgrp N)] [SigmaFinite (kap N)] : μ.prod (kap N) = nuQR N := by
@@ -255,15 +300,6 @@ theorem nuQR_eq_prod (μ : Measure (UNgrp N)) [μ.IsHaarMeasure] [IsProbabilityM
     exact ⟨hs.1.inter ht.1, lt_of_le_of_lt (measure_mono Set.inter_subset_left) hs.2⟩
   · intro s hs t ht
     exact nuQR_rect μ s hs t ht.1 ht.2
-
-theorem measurable_gmDens : Measurable (gmDens N) := by
-  unfold gmDens
-  exact (by fun_prop : Measurable fun x : ℂ => ENNReal.ofReal (‖x‖ ^ (-(2 * (N:ℤ))))).comp
-    continuous_det_of.measurable
-
-theorem measurable_triDens : Measurable (triDens (N := N)) := by
-  unfold triDens
-  fun_prop
 
 theorem norm_det_toM (k : UNgrp N) : ‖(toM k).det‖ = 1 := by
   have hk : inUJ (fun _ : Fin N => true) (toM k) := k.2
@@ -305,7 +341,7 @@ theorem d_qrMap (k : UNgrp N) (t : TriCo N) (ht : t ∈ triPos N) :
       ENNReal.ofReal ((∏ j, t.1 j) ^ (2 * N)) := by
   congr 2
   have : Matrix.of (qrMap (k, t)) = toM k * upMat t := by
-    simp [qrMap]
+    exact Matrix.of.apply_symm_apply _
   rw [this, Matrix.det_mul, norm_mul, norm_det_toM, one_mul, det_upMat, norm_prod]
   refine Finset.prod_congr rfl fun j _ => ?_
   rw [Complex.norm_real, Real.norm_of_nonneg (ht j).le]

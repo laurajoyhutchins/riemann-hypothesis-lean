@@ -1,6 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.SubClosed
-import Development.AutomorphicArithmetic.AutomorphicVarieties.LiteratureResults.KTheoryStability.HomologicalStability.LinkExactnessStability.SeqChainBoundaryPrefixChain
+module
+
+public import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.SubClosed
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.LiteratureResults.KTheoryStability.HomologicalStability.LinkExactnessStability.SeqChainBoundaryPrefixChain
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open GlobalTheory.SeqCx Matrix
 open Classical
@@ -15,7 +61,7 @@ theorem mapDomain_prepend_apply' {V : Type} (τ : List V) (y : List V →₀ ℤ
   · obtain ⟨u, rfl⟩ := h
     rw [if_pos (List.prefix_append τ u)]
     have hinj : Function.Injective (fun w : List V => τ ++ w) := fun a b hab => List.append_cancel_left hab
-    rw [Finsupp.mapDomain_apply hinj y u]
+    rw [Finsupp.mapDomain_apply_of_injective hinj y u]
     simp
   · rw [if_neg h, Finsupp.mapDomain_notin_range]
     rintro ⟨u, rfl⟩
@@ -33,7 +79,7 @@ theorem bd_mem_supported_of_eraseIdx {V : Type} {A B : Set (List V)}
     exact Finsupp.single_mem_supported ℤ _ (h l hl i (Finset.mem_range.1 hi))
   | zero => simp
   | add a b _ _ ha hb =>
-    rw [map_add]
+    rw [map_add (f := _)]
     exact Submodule.add_mem _ ha hb
   | smul r a _ ha =>
     rw [LinearMap.map_smul]
@@ -129,7 +175,7 @@ theorem retract_step : ∀ (V : Type) (F : Set (List V)) (S : Set V), SubClosed 
   have happly : ∀ l, (∑ τ ∈ P, Finsupp.mapDomain (fun w => τ ++ w) (ys τ)) l =
       ∑ τ ∈ P, if τ <+: l then c l else 0 := by
     intro l
-    rw [Finsupp.finset_sum_apply]
+    rw [Finsupp.finsetSum_apply]
     refine Finset.sum_congr rfl fun τ _ => ?_
     rw [mapDomain_prepend_apply']
     split_ifs with h
@@ -184,7 +230,8 @@ theorem retract_step : ∀ (V : Type) (F : Set (List V)) (S : Set V), SubClosed 
         rw [hCg]
         abel
       conv_lhs => rw [hc2]
-      rw [map_add, map_sum, add_assoc, ← Finset.sum_add_distrib]
+
+      rw [map_add (f := _), map_sum, add_assoc, ← Finset.sum_add_distrib]
       congr 1
       exact Finset.sum_congr rfl fun τ _ => GlobalTheory.T.seqChain_boundary_prefix_chain V τ (ys τ)
     set g := bd V Cg + ∑ τ ∈ P, ((ys τ).sum fun w a =>
@@ -207,7 +254,7 @@ theorem retract_step : ∀ (V : Type) (F : Set (List V)) (S : Set V), SubClosed 
     ext w
     have h0 := congrArg (fun f => f (τ0 ++ w)) hdec
     simp only [hbd, Finsupp.zero_apply] at h0
-    rw [Finsupp.add_apply, Finsupp.finset_sum_apply] at h0
+    rw [Finsupp.add_apply, Finsupp.finsetSum_apply] at h0
     have hg0 : g (τ0 ++ w) = 0 := by
       by_contra hne
       exact hpre τ0 hτ0 (τ0 ++ w) (List.prefix_append _ _)
@@ -245,6 +292,7 @@ theorem retract_step : ∀ (V : Type) (F : Set (List V)) (S : Set V), SubClosed 
         ∑ τ ∈ P, ((-1 : ℤ) ^ τ.length • ((zf τ).sum fun w a =>
           a • Finsupp.mapDomain (fun σ => σ ++ w) (bd V (Finsupp.single τ 1))) +
           Finsupp.mapDomain (fun w => τ ++ w) (ys τ)) := by
+
       rw [map_sum]
       refine Finset.sum_congr rfl fun τ hτ => ?_
       rw [LinearMap.map_smul, GlobalTheory.T.seqChain_boundary_prefix_chain, hzb τ hτ, smul_add, smul_smul, ← mul_pow]

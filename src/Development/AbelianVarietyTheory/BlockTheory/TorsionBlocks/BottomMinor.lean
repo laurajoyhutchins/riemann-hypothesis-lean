@@ -1,5 +1,51 @@
-import Mathlib
-import Formalism.FockGram.StatementFock
+module
+
+public import Formalism.FockGram.StatementFock
+public import Mathlib.Basic.Complex.Basic
+public import Mathlib.LinearAlgebra.Matrix.Determinant.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.Order.BigOperators.GroupWithZero.Finset
+
+@[expose] public section
 
 open MvPolynomial
 
@@ -59,31 +105,5 @@ theorem _root_.GlobalTheory.IndefiniteRowSideFullHecke.CornerMinors.hookDen_pos 
   have h1 : ((a j : ℕ) : ℚ) ≤ (a i : ℚ) := by exact_mod_cast hle
   have h2 : ((i : ℕ) : ℚ) < ((j : ℕ) : ℚ) := by exact_mod_cast hij
   linarith
-
-example : hookProd ![2, 1] = 3 := by
-  have e : Finset.Ioi (1 : Fin 2) = ∅ := by decide
-  simp [hookProd, hookDen, Fin.prod_univ_two, Nat.factorial, e]
-  norm_num
-
-example : hookProd ![1, 1] = 2 ∧ hookProd ![1, 1, 0] = 2 := by
-  have e : Finset.Ioi (1 : Fin 2) = ∅ := by decide
-  constructor
-  · simp [hookProd, hookDen, Fin.prod_univ_two, Nat.factorial, e]
-  · simp [hookProd, hookDen, Fin.prod_univ_succ, Nat.factorial]
-    norm_num
-
-example (k : ℕ) : delTop (n := 2) (l := 1) (by norm_num) ![k] = X (0, 0) ^ k ∧
-    delBottom (n := 2) (l := 1) (by norm_num) ![k] = X (1, 0) ^ k := by
-  constructor
-  · simp [delTop, topMinor, nextPart]
-  · simp [delBottom, bottomMinor, nextPart]
-
-example (k : ℕ) : Formalism.E.fock (delTop (n := 2) (l := 1) (by norm_num) ![k])
-    (delTop (n := 2) (l := 1) (by norm_num) ![k]) = ((hookProd ![k] : ℚ) : ℂ) := by
-  have e : delTop (n := 2) (l := 1) (by norm_num) ![k] = monomial (Finsupp.single (0, 0) k) 1 := by
-    simp [delTop, topMinor, nextPart, X_pow_eq_monomial]
-  have e' : Finset.Ioi (0 : Fin 1) = ∅ := by decide
-  rw [e]
-  simp [Formalism.E.fock, support_monomial, Formalism.A.mfact, hookProd, hookDen, e']
 
 end GlobalTheory.IndefiniteRowSideFullHecke.CornerMinors

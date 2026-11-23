@@ -1,12 +1,62 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Foundations.ApplyEqOfMemAdjoin
-import Development.AbelianVarietyTheory.Definitions.Foundations.IsTopWTopWOfExists
-import Development.AbelianVarietyTheory.Definitions.Foundations.Integral
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.DifferentiableAtGP
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.SmoothedSiegelUnitQExpansionCoeffsIntegral
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.SiegelUnitQExpansionCoefficients
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.SiegelUnitInTowerAnEqSiegelUnitOnComplex
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.GaloisActionSiegelUnitInTower
+module
+
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.DifferentiableAtGP
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.SmoothedSiegelUnitQExpansionCoeffsIntegral
+public import Development.AbelianVarietyTheory.Definitions.Foundations.ExpUpper
+public import Mathlib.Analysis.Complex.UpperHalfPlane.Topology
+import Development.AbelianVarietyTheory.Definitions.Foundations.MultipliableAndSgNeZero
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HasQExpansionOfLevelCoeffAndFunctionUnique
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HasQExpansionOfLevelLinearOperations
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.SiegelUnitQExpansionCoefficients
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.LocallyUniformLimit
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -247,7 +297,7 @@ theorem IsU.ep (hM : 0 < M) (hv : ‖v‖ = 1) {j : ℤ} {e : ℕ} (he : 0 < e) 
       (𝓝 (dc (SiegQ.ep M w e) (fun z => -j * lam M w e z) n)) := by
     refine (t1 n).prodMk_nhds ?_
     simp only [tc_mul d1 (d2.const_mul _), fun N => tc_mul (hg N).dU (hg N).dL, conv, cm d2, fun N => cm (hGd N)]
-    exact tendsto_finset_sum _ fun p _ => (t1 _).mul ((t2 _).const_mul _)
+    exact tendsto_finsetSum _ fun p _ => (t1 _).mul ((t2 _).const_mul _)
   have hs : ∀ N, n ≤ N → dc (F N) (fun z => -j * G N z) n = dc (F n) (fun z => -j * G n z) n := by
     intro N hN
     induction N, hN using Nat.le_induction with
@@ -509,8 +559,8 @@ theorem sg_jets {c : ℕ} {b : ℤ} (hM : 0 < M) (hadm : admitted c ![(A : ℚ) 
     exact dm_mem hv0 g (s3.mem n)
   · rcases s1 with rfl | rfl <;> simp [tc_zero, s3.U0]
 
-open GlobalTheory.KZ in
 
+open GlobalTheory.KZ in
 theorem exp_of_hasQ {Ω : Type} [Field Ω] [Algebra ℚ Ω] {ε : Ω →+* ℂ} (T : Tower Ω ε) (f : T.K) (g : ℍ → ℂ) {M : ℕ}
     (hM : 0 < M) (k : ℤ) (A' : ℕ → ℂ)
     (hmem : T.an f = ((fun z => g (UpperHalfPlane.ofComplex z) : ℂ → ℂ) : Mero))
@@ -536,7 +586,7 @@ theorem exp_of_hasQ {Ω : Type} [Field Ω] [Algebra ℚ Ω] {ε : Ω →+* ℂ} 
   have hB0 : ∀ r, r ∉ Set.range ι → B r = 0 := by
     intro r hr
     simp only [B]
-    rw [dif_neg]
+    rw [dite_eq_right]
     exact hr
   have hBsum : ∀ z : ℂ, 0 < z.im →
       HasSum (fun r : ℚ => B r * Complex.exp (2 * Real.pi * Complex.I * (r : ℂ) * z)) (g (UpperHalfPlane.ofComplex z)) := by

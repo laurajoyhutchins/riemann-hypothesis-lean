@@ -1,5 +1,50 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Jets.SumIoPr
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Jets.SumIoPr
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Finset BranchingSupport Formalism.REAL Formalism.QuantumDeterminants
 open scoped InnerProductSpace
@@ -30,21 +75,20 @@ theorem algTens_wtNear : ∀ (M : Type) [NormedAddCommGroup M] [InnerProductSpac
         l1_shift_single_le ω Λ t (-1) (by simp) c hω, fun a => ?_⟩
       rw [← hT.pr_comm, ← map_smul]
       congr 1
-      funext i
-      simp only [dualTens, Pi.smul_apply]
+      ext i
       by_cases hi : i = c
       · subst hi
         by_cases ha : a = i
         · subst ha
-          simp [hx a, add_smul, sub_eq_add_neg]
+          simp [dualTens, hx a, add_smul, sub_eq_add_neg]
         · have : ¬ i = a := fun h => ha h.symm
-          simp [hx a, ha, this]
+          simp [dualTens, hx a, ha, this]
       · by_cases ha : i = a
         · subst ha
-          simp [hi]
-        · simp [hi, ha]
+          simp [dualTens, hi]
+        · simp [dualTens, hi, ha]
     | zero => simp
-    | add x y _ _ hx hy => rw [Pi.single_add, map_add]; exact add_mem hx hy
+    | add x y _ _ hx hy => rw [Pi.single_add, map_add (f := _)]; exact add_mem hx hy
     | smul r x _ hx => rw [Pi.single_smul, map_smul]; exact Submodule.smul_mem _ _ hx
   · induction hy using Submodule.span_induction with
     | mem x hx =>
@@ -62,7 +106,7 @@ theorem algTens_wtNear : ∀ (M : Type) [NormedAddCommGroup M] [InnerProductSpac
       · have : ¬ d = a := fun h => ha h.symm
         simp [ha, this]
     | zero => simp
-    | add x y _ _ hx hy => rw [map_add, Pi.add_apply]; exact add_mem hx hy
+    | add x y _ _ hx hy => rw [map_add (f := _), Pi.add_apply]; exact add_mem hx hy
     | smul r x _ hx => rw [map_smul, Pi.smul_apply]; exact Submodule.smul_mem _ _ hx
 
 end GlobalTheory

@@ -1,14 +1,50 @@
-import Mathlib
-import Formalism.LocalRingCardinality.AdicCompletionLocal.LocTied
-import Formalism.SharpRestriction.LevelLetterCocycles.LocalSituation
-import Formalism.SharpRestriction.LevelLetterCocycles.LocCoh
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.NormSubLtOneOfFix
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsBasisOfSubmodule
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.Hilbert90MatrixCoboundaryCharPFiniteLevelStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsWittVectorTraceOneFiniteLevelStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsInvariantMatrixLiftOfAdicCompleteStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsCrysOfSplitStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.PeriodDataComparisonStatement
+module
+
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.NormSubLtOneOfFix
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsBasisOfSubmodule
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsInvariantMatrixLiftOfAdicCompleteStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsWittVectorTraceOneFiniteLevelStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.Hilbert90MatrixCoboundaryCharPFiniteLevelStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsCrysOfSplitStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.PeriodDataComparisonStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Formalism Formalism.BasicNotions Formalism.BasicNotions.Loc Formalism.WeaklyAdmissibleFiltrations Formalism.MainNotions.N TensorProduct GlobalTheory.UnramifiedCrys GlobalTheory.Cyc
 open scoped Topology
@@ -26,8 +62,8 @@ theorem normal_fixer (p m : ℕ) : (fixer ρ p m).Normal := ⟨fun a ha g y hy =
 
 variable [TopologicalSpace G] [IsTopologicalGroup G] [CompactSpace G] [IsDomain R] [CharP R p]
 
-omit [CharP R p] in
 
+omit [CharP R p] in
 theorem exists_fixer_subset
     (hopen : ∀ (y : R) (m : ℕ), 0 < m → y ^ p ^ m = y → ∀ᶠ g in 𝓝 (1 : G), ρ g y = y)
     (U : Set G) (hU : IsOpen U) (hJU : ∀ g, (∀ m, 0 < m → g ∈ fixer ρ p m) → g ∈ U) :
@@ -36,7 +72,7 @@ theorem exists_fixer_subset
     (fun m : {m : ℕ // 0 < m} => (fixer ρ p m.1 : Set G))
     (fun m => Subgroup.isClosed_of_isOpen _ (isOpen_fixer ρ hopen m.2))
     (by
-      rw [← Set.disjoint_iff_inter_eq_empty, Set.disjoint_left]
+      rw [Set.disjoint_left]
       intro g hg hg'
       exact hg (hJU g fun m hm => Set.mem_iInter.1 hg' ⟨m, hm⟩))
     (by
@@ -47,10 +83,10 @@ theorem exists_fixer_subset
       rwa [mul_comm] at this)
   refine ⟨m, hm, fun g hg => ?_⟩
   by_contra hc
-  exact Set.disjoint_left.1 (Set.disjoint_iff_inter_eq_empty.2 hmU) hc hg
+  exact Set.disjoint_left.1 hmU hc hg
+
 
 omit [CharP R p] in
-
 theorem exists_fixer_dvd
     (hopen : ∀ (y : R) (m : ℕ), 0 < m → y ^ p ^ m = y → ∀ᶠ g in 𝓝 (1 : G), ρ g y = y)
     {r : ℕ} (M : G → Matrix (Fin r) (Fin r) ℤ_[p]) (hM : Continuous M)
@@ -79,8 +115,8 @@ theorem dvd_iff_constantCoeff (x : WittVector p R) :
   rw [← Ideal.mem_span_singleton, WittVector.mem_span_p_iff_coeff_zero_eq_zero]
   rfl
 
-omit [IsDomain R] in
 
+omit [IsDomain R] in
 theorem isUnit_of_constantCoeff (x : WittVector p R) (hx : IsUnit (WittVector.constantCoeff x)) :
     IsUnit x := by
   obtain ⟨y, hy⟩ := hx.exists_right_inv
@@ -149,6 +185,7 @@ theorem exists_witt_matrix
     (fun g i j => by
       rw [dvd_iff_constantCoeff]
       have := congrFun (congrFun (hW₁g g) i) j
+
       rw [Matrix.sub_apply, map_sub, sub_eq_zero, Matrix.mul_apply, map_sum]
       rw [Matrix.mul_apply] at this
       simp only [map_mul]
@@ -173,22 +210,21 @@ theorem exists_matrixHom {l : ℕ} [Fact l.Prime] {G : Type} [Group G] {L V : Ty
             map_one' := ?_
             map_mul' := fun g h => ?_ }, fun _ _ _ => rfl⟩
   · ext i j
-    apply PadicInt.ext
     change e.repr (ρ 1 (e j)) i = _
     rw [map_one, Module.End.one_apply, e.repr_self, Finsupp.single_apply, Matrix.one_apply]
     by_cases h : i = j
     · rw [if_pos h, if_pos h.symm, PadicInt.coe_one]
     · rw [if_neg h, if_neg (Ne.symm h), PadicInt.coe_zero]
   · ext i j
-    apply PadicInt.ext
     rw [Matrix.mul_apply, PadicInt.coe_sum]
     simp only [PadicInt.coe_mul]
     change e.repr (ρ (g * h) (e j)) i = ∑ k, e.repr (ρ g (e k)) i * e.repr (ρ h (e j)) k
     rw [map_mul, Module.End.mul_apply]
     conv_lhs => rw [← e.sum_repr (ρ h (e j))]
     have : ∀ (a : ℚ_[l]) v, ρ g (a • v) = a • ρ g v := fun a v => (ρ g).map_smul_of_tower _ _
+
     simp only [map_sum, this, map_smul, Finsupp.coe_finsetSum, Finset.sum_apply, Finsupp.smul_apply,
-      smul_eq_mul, mul_comm]
+    smul_eq_mul, mul_comm]
 
 theorem map_mul_map_eq {A A' : Type} [CommRing A] [CommRing A'] (f : A →+* A') {n : ℕ}
     {M W : Matrix (Fin n) (Fin n) A} {M' : Matrix (Fin n) (Fin n) A'} {s : A → A} {s' : A' → A'}
@@ -196,6 +232,7 @@ theorem map_mul_map_eq {A A' : Type} [CommRing A] [CommRing A'] (f : A →+* A')
     M' * (W.map f).map s' = W.map f := by
   ext i j
   have := congrArg f (congrFun (congrFun h i) j)
+
   rw [Matrix.mul_apply, map_sum] at this
   simp only [map_mul, hM, Matrix.map_apply, hs] at this
   exact this
@@ -221,7 +258,6 @@ theorem isCrys_and_jump_eq_zero : ∀ (l : ℕ) [Fact l.Prime] (P : LocPrime l) 
         norm_sub_lt_one_of_fix AI g (fun m hm y hy => hg m hm y hy) x hx)
       rw [← map_one M]
       ext i j
-      apply PadicInt.ext
       rw [hM, hM, h, map_one, Module.End.one_apply])
   have hB : ∀ g, (Matrix.of fun i j => algebraMap ℚ_[l] P.R.B (e.repr (T.ρ g (e j)) i)) *
       (AI.ιA.mapMatrix W).map ((P.PD K).actB g) = AI.ιA.mapMatrix W := fun g => by

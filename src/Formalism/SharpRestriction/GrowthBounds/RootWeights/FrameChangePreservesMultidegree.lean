@@ -1,4 +1,51 @@
-import Formalism.SharpRestriction.GrowthBounds.RootWeights.EBeta
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.RootWeights.EBeta
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -36,8 +83,8 @@ theorem frame_matrix_mul_inverse {k : Type} [CommRing k] {r : ℕ} [NeZero r] (c
       linear_combination (-(cc b)) * hu
   · simp [h1]
 
-open Classical in
 
+open Classical in
 def frameCoordinateEvaluation {R : Type} [CommRing R] {ι : Type} {r : ℕ} (LL : Letters ι) (S : Set ι) {k1 : Type} [CommRing k1]
     (ph : MvPolynomial (ι × Fin r) R →+* k1) (g0 g0inv : Matrix (Fin r) (Fin r) k1) :
     MvPolynomial (ι × Fin r) k1 →+* k1 :=
@@ -61,6 +108,7 @@ theorem frame_evaluation_comp_change {R : Type} [CommRing R] {ι : Type} {r : �
   · rintro ⟨i, c⟩
     by_cases hS : i ∈ S
     · by_cases hv : LL.vec i = true
+
       · simp only [RingHom.comp_apply, eBeta, frameCoordinateEvaluation, eval₂Hom_X', hS, hv, if_true, map_sum, map_mul,
           eval₂Hom_C, RingHom.id_apply]
         calc ∑ a, g0inv a c * ∑ b, ph (X (i, b)) * g0 b a
@@ -69,6 +117,7 @@ theorem frame_evaluation_comp_change {R : Type} [CommRing R] {ι : Type} {r : �
               rw [Finset.sum_comm]
               refine Finset.sum_congr rfl fun b _ => Finset.sum_congr rfl fun a _ => by ring
           _ = ph (X (i, c)) := by simp [hh]
+
       · simp only [RingHom.comp_apply, eBeta, frameCoordinateEvaluation, eval₂Hom_X', hS, hv, if_true, map_sum, map_mul,
           eval₂Hom_C, RingHom.id_apply, if_false, Bool.false_eq_true]
         calc ∑ a, g0 c a * ∑ b, g0inv a b * ph (X (i, b))
@@ -79,8 +128,8 @@ theorem frame_evaluation_comp_change {R : Type} [CommRing R] {ι : Type} {r : �
           _ = ph (X (i, c)) := by simp [hh]
     · simp [frameCoordinateEvaluation, eBeta, hS]
 
-open Classical in
 
+open Classical in
 def letterDegreeWeight {ι : Type} {r : ℕ} (i : ι) : ι × Fin r → ℕ := fun v => if v.1 = i then 1 else 0
 
 theorem letter_weight_eq_multidegree {ι : Type} [Fintype ι] {r : ℕ} (i : ι) (m : ι × Fin r →₀ ℕ) :
@@ -94,6 +143,7 @@ theorem frame_change_weighted_homogeneous {R : Type} [CommRing R] {ι : Type} [F
     (G : MvPolynomial (ι × Fin r) R) (hG : ∀ m ∈ G.support, multideg m i = n) :
     IsWeightedHomogeneous (letterDegreeWeight i) (eBeta LL S j g0 g0inv G) n := by
   classical
+
   rw [G.as_sum, map_sum]
   apply IsWeightedHomogeneous.sum
   intro m hm
@@ -174,8 +224,9 @@ theorem frame_evaluation_monomial_sum {R : Type} [CommRing R] {ι : Type} [Finty
     {k1 : Type} [CommRing k1] (ph : MvPolynomial (ι × Fin r) R →+* k1) (g0 g0inv : Matrix (Fin r) (Fin r) k1)
     (P : MvPolynomial (ι × Fin r) k1) :
     frameCoordinateEvaluation LL S ph g0 g0inv P =
-      ∑ m ∈ P.support, coeff m P * ∏ v, (frameCoordinateEvaluation LL S ph g0 g0inv (X v)) ^ (m v) := by
+      ∑ m ∈ P.support, AddMonoidAlgebra.coeff P m * ∏ v, (frameCoordinateEvaluation LL S ph g0 g0inv (X v)) ^ (m v) := by
   conv_lhs => rw [P.as_sum]
+
   rw [map_sum]
   refine Finset.sum_congr rfl fun m _ => ?_
   rw [monomial_eq, map_mul, Finsupp.prod_fintype _ _ (by simp), map_prod]
@@ -205,6 +256,7 @@ theorem height_bound_of_weights (hS : HSupp) (hC : HCop) : E1 := by
     have h2 := congrFun (congrFun (Matrix.mul_adjugate (matA R A)) l) (lastIdx r)
     rw [Matrix.mul_apply] at h2
     have h3 := congrArg ph h2
+
     rw [map_sum] at h3
     simp only [map_mul] at h3
     refine h3.trans ?_

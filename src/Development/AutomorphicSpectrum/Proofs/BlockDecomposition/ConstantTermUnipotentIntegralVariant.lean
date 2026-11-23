@@ -1,8 +1,54 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ChartUnipotentFderivContinuousOn
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsNormalisedThetaSub
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsCuspidalLieActionOfIsCuspForm
+import Formalism.LocalToGlobal.IndefiniteReal.LevelTypeEquivalence.AdlEqZeroOfMemNbhd
+import Mathlib.Algebra.Order.Archimedean.Real.Hom
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
 import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.OneMemGoodCT
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsCuspidalLieActionOfIsCuspForm
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ChartUnipotentFderivContinuousOn
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsNormalisedThetaSub
+import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.AffineGLForms.GenSpace
+
+set_option backward.isDefEq.respectTransparency false
+
+@[expose] public section
 
 noncomputable section
 
@@ -13,7 +59,7 @@ open scoped ContDiff
 
 namespace GlobalTheory.CompanionTheory.CTSmooth
 
-variable {E : Type} [Field E] [NumberField E] [IsTotallyComplex E] {a r : ℕ}
+variable {E : Type} [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] {a r : ℕ}
 
 def LO (φ : Sm E a) : Prop :=
   (∀ (γ : GL (Fin a) E) (g : GA E a), φ.1 (ratGL E a γ * g) = φ.1 g) ∧ IsOpen {k | finRep E a k φ = φ}
@@ -110,7 +156,7 @@ def coordL (i : Ix E a) : Lie E a →L[ℝ] (Lie E a →L[ℝ] ℝ) :=
 
 theorem fderiv_chart_eq (φ : Sm E a) (h : GA E a) {y : Lie E a} (hy : y ∈ invSet E a) :
     fderiv ℝ (chart φ.1 h) y = ∑ i : Ix E a,
-      ContinuousLinearMap.smulRightL ℝ (Lie E a) ℂ (coordL i (invL y)) (chart (lie E a (bs E a i) φ).1 h y) := by
+      StrongDual.smulRightL ℝ (Lie E a) ℂ (coordL i (invL y)) (chart (lie E a (bs E a i) φ).1 h y) := by
   ext Z
   obtain ⟨u, hu⟩ := id hy
   have e : y = toL u.val := hu.symm
@@ -127,6 +173,7 @@ theorem fderiv_chart_eq (φ : Sm E a) (h : GA E a) {y : Lie E a} (hy : y ∈ inv
       fderiv ℝ (chart φ.1 (h * infGL E a u)) (oneL E a) (bs E a i) := fun i => chart_val _ _ _
   simp only [h2]
   rw [lieD]
+
   conv_lhs => rw [← (bs E a).sum_repr X, map_sum]
   simp only [map_smul, hX]
   exact Finset.sum_congr rfl fun i _ => rfl
@@ -147,20 +194,20 @@ theorem integrable_chart {φ : Sm E a} (hφ : LO φ) (g : GA E a) {y : Lie E a} 
 omit [MeasurableSpace (BlockIx a r → Ad E)] [BorelSpace (BlockIx a r → Ad E)] in
 theorem fderiv_fun (φ : Sm E a) (g : GA E a) {y : Lie E a} (hy : y ∈ invSet E a) :
     (fun x : BlockIx a r → Ad E => fderiv ℝ (chart φ.1 (unip x * g)) y) = fun x => ∑ i : Ix E a,
-      ContinuousLinearMap.smulRightL ℝ (Lie E a) ℂ (coordL i (invL y))
+      StrongDual.smulRightL ℝ (Lie E a) ℂ (coordL i (invL y))
         (chart (lie E a (bs E a i) φ).1 (unip x * g) y) :=
   funext fun x => fderiv_chart_eq φ _ hy
 
 theorem integrable_fderiv {φ : Sm E a} (hφ : LO φ) (g : GA E a) {y : Lie E a} (hy : y ∈ invSet E a) :
     Integrable (fun x : BlockIx a r → Ad E => fderiv ℝ (chart φ.1 (unip x * g)) y) ν := by
   rw [fderiv_fun φ g hy]
-  exact integrable_finset_sum _ fun i _ =>
+  exact integrable_finsetSum _ fun i _ =>
     ContinuousLinearMap.integrable_comp _ (integrable_chart ν (lo_lie hφ _) g hy)
 
 theorem integral_fderiv {φ : Sm E a} (hφ : LO φ) (g : GA E a) {y : Lie E a} (hy : y ∈ invSet E a) :
     ∫ x : BlockIx a r → Ad E, fderiv ℝ (chart φ.1 (unip x * g)) y ∂ν = ∑ i : Ix E a,
-      ContinuousLinearMap.smulRightL ℝ (Lie E a) ℂ (coordL i (invL y)) (ct ν (lie E a (bs E a i) φ) g y) := by
-  rw [fderiv_fun φ g hy, integral_finset_sum _ fun i _ =>
+      StrongDual.smulRightL ℝ (Lie E a) ℂ (coordL i (invL y)) (ct ν (lie E a (bs E a i) φ) g y) := by
+  rw [fderiv_fun φ g hy, integral_finsetSum _ fun i _ =>
     ContinuousLinearMap.integrable_comp _ (integrable_chart ν (lo_lie hφ _) g hy)]
   exact Finset.sum_congr rfl fun i _ =>
     ContinuousLinearMap.integral_comp_comm _ (integrable_chart ν (lo_lie hφ _) g hy)
@@ -217,9 +264,9 @@ theorem contDiffOn_ct (n : ℕ) : ∀ φ : Sm E a, LO φ → ∀ g : GA E a,
       ((hasFDerivAt_ct ν hφ g hy).fderiv.trans (integral_fderiv ν hφ g hy))
     have h1 : ContDiffOn ℝ n (invL (E := E) (a := a)) (invSet E a) := fun z hz =>
       (((invL_smooth (E := E) (a := a)).1 z hz).of_le (mod_cast le_top)).contDiffWithinAt
-    have h2 : ContDiffOn ℝ n (fun z => ContinuousLinearMap.smulRightL ℝ (Lie E a) ℂ (coordL i (invL z)))
+    have h2 : ContDiffOn ℝ n (fun z => StrongDual.smulRightL ℝ (Lie E a) ℂ (coordL i (invL z)))
         (invSet E a) :=
-      (ContinuousLinearMap.smulRightL ℝ (Lie E a) ℂ).contDiff.comp_contDiffOn
+      (StrongDual.smulRightL ℝ (Lie E a) ℂ).contDiff.comp_contDiffOn
         ((coordL i).contDiff.comp_contDiffOn h1)
     exact h2.clm_apply (ih _ (lo_lie hφ _) g)
 
@@ -232,7 +279,7 @@ theorem chart_ctFun (φ : Sm E a) (g : GA E a) :
 
 end Integral
 
-theorem ct_smooth : ∀ (E : Type) [Field E] [NumberField E] [IsTotallyComplex E] (a r : ℕ) (φ : Sm E a), (∀ (γ : GL (Fin a) E) (g : GA E a), φ.1 (ratGL E a γ * g) = φ.1 g) → IsOpen {k | finRep E a k φ = φ} → ∀ [MeasurableSpace (BlockIx a r → Ad E)] [BorelSpace (BlockIx a r → Ad E)] (μ : Measure (BlockIx a r → Ad E)) (𝓕 : Set (BlockIx a r → Ad E)), μ.IsAddHaarMeasure → IsAddFundamentalDomain (ratN E a r) 𝓕 μ → ∃ F : Sm E a, (∀ g, F.1 g = ∫ x in 𝓕, φ.1 (unip x * g) ∂μ) ∧ ∀ (X : Lie E a) (g : GA E a), (lie E a X F).1 g = ∫ x in 𝓕, (lie E a X φ).1 (unip x * g) ∂μ := by
+theorem ct_smooth : ∀ (E : Type) [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] (a r : ℕ) (φ : Sm E a), (∀ (γ : GL (Fin a) E) (g : GA E a), φ.1 (ratGL E a γ * g) = φ.1 g) → IsOpen {k | finRep E a k φ = φ} → ∀ [MeasurableSpace (BlockIx a r → Ad E)] [BorelSpace (BlockIx a r → Ad E)] (μ : Measure (BlockIx a r → Ad E)) (𝓕 : Set (BlockIx a r → Ad E)), μ.IsAddHaarMeasure → IsAddFundamentalDomain (ratN E a r) 𝓕 μ → ∃ F : Sm E a, (∀ g, F.1 g = ∫ x in 𝓕, φ.1 (unip x * g) ∂μ) ∧ ∀ (X : Lie E a) (g : GA E a), (lie E a X F).1 g = ∫ x in 𝓕, (lie E a X φ).1 (unip x * g) ∂μ := by
   intro E _ _ _ a r φ hl ho _ _ μ 𝓕 hμ hF
   haveI := hμ
   have hfin := GlobalTheory.CuspRep.covol_lt_top μ 𝓕 hF

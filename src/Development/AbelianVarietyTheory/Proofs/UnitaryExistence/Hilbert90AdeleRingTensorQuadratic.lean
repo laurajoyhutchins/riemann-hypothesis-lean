@@ -1,6 +1,57 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.ExistenceOfLattices.Hat1
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsIdempotentIsUnitOneAddOrSubAdeleStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.ExistenceOfLattices.Hat1
+public import Mathlib.NumberTheory.NumberField.AdeleRing
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsIdempotentIsUnitOneAddOrSubAdeleStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain GlobalTheory.AdLat
 open scoped TensorProduct Matrix nonZeroDivisors
@@ -18,7 +69,7 @@ theorem hilbert90_involution_of_idempotent_unit {R : Type} [CommRing R] (σ : R 
     have h : d ^ 2 * d' ^ 2 = 1 := by rw [← mul_pow, hd', one_pow]
     linear_combination (1 + d ^ 2 + d' ^ 2 + d ^ 2 * d' ^ 2) * he + (1 - e) * h
   have hx : σ (e * (1 + u) + (1 - e) * d * (1 - u)) = e * (1 + σ u) - (1 - e) * d * (1 - σ u) := by
-    simp only [map_add, map_mul, map_sub, map_one, hσe, hd]; ring
+    simp only [map_add (f := _), map_mul, map_sub, map_one, hσe, hd]; ring
   have hN : (e * (1 + u) + (1 - e) * d * (1 - u)) * (e * (1 + σ u) - (1 - e) * d * (1 - σ u)) =
       2 * (e * (1 + s) + (1 - e) * (1 - s)) * (e - (1 - e) * d ^ 2) := by
     have hv : σ u = 2 * s - u := by linear_combination hs
@@ -59,7 +110,7 @@ theorem hilbert90_adeleRing_tensor_quadratic : ∀ (F E : Type) [Field F] [Numbe
       intro g
       rcases aut_eq_one_or_of_finrank_two c h2 hc g with rfl | rfl
       · rfl
-      · rw [map_add, hcc, add_comm]
+      · rw [map_add (f := _), hcc, add_comm]
     obtain ⟨t, ht⟩ := this
     exact ⟨t, ht.symm⟩
   have hsg : ∀ (a : AdeleRing (𝓞 F) F) (x : E), sg (AdeleRing (𝓞 F) F) c (a ⊗ₜ x) = a ⊗ₜ c x := by
@@ -69,7 +120,7 @@ theorem hilbert90_adeleRing_tensor_quadratic : ∀ (F E : Type) [Field F] [Numbe
     induction z using TensorProduct.induction_on with
     | zero => simp
     | tmul a x => rw [hsg, hsg, hcc]
-    | add x y hx hy => rw [map_add, map_add, hx, hy]
+    | add x y hx hy => rw [map_add (f := _), map_add (f := _), hx, hy]
   have hT : ∀ z, ∃ t : AdeleRing (𝓞 F) F, z + sg (AdeleRing (𝓞 F) F) c z = t ⊗ₜ 1 := by
     intro z
     induction z using TensorProduct.induction_on with
@@ -82,7 +133,7 @@ theorem hilbert90_adeleRing_tensor_quadratic : ∀ (F E : Type) [Field F] [Numbe
       obtain ⟨t, ht⟩ := hx
       obtain ⟨t', ht'⟩ := hy
       refine ⟨t + t', ?_⟩
-      rw [map_add, TensorProduct.add_tmul, ← ht, ← ht']; ring
+      rw [map_add (f := _), TensorProduct.add_tmul, ← ht, ← ht']; ring
   obtain ⟨y, hy⟩ : ∃ y, c y ≠ y := by
     by_contra h
     push Not at h
@@ -104,9 +155,9 @@ theorem hilbert90_adeleRing_tensor_quadratic : ∀ (F E : Type) [Field F] [Numbe
   · change sg _ c _ = _
     rw [hι, hsg, map_one]
   · change u + sg _ c u = _
-    rw [ht, two_mul, ← map_add, ← add_smul, hι]
+    rw [ht, two_mul, ← map_add (f := _), ← add_smul, hι]
     norm_num
   · have := hun.map ι
-    simpa only [map_add, map_mul, map_sub, map_one] using this
+    simpa only [map_add (f := _), map_mul, map_sub, map_one] using this
 
 end GlobalTheory.AdLat

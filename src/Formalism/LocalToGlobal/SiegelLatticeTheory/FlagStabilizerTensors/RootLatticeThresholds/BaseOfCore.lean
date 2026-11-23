@@ -1,6 +1,54 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RootLatticeThresholds.Choice
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.SettingConstruction
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.RealObj
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CompactGroupHaarExists
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.ConjugationInvarianceEverySetting
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.SettingConstruction
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RootLatticeThresholds.Choice
+import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.QuotSetU
+import Formalism.RealPlaceAnalysis.RealPlaceTaylor.KoszulLowersPower
+import Formalism.SharpRestriction.CuspSpanNormBounds.NonemptyParameterModels.TopsChoicePartA
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Algebra.Group.Units
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -67,15 +115,15 @@ theorem muS_swap {z : Fin (2 * r + k + 1) → ℂ} (hz : inWb k r z) (hT : 0 < T
   have hco2 : ∀ i j, Measurable fun p : Mt k r × Mt k r => p.2 i j :=
     fun i j => (measurable_pi_apply j).comp ((measurable_pi_apply i).comp measurable_snd)
   have hmul12 : Measurable fun p : Mt k r × Mt k r => (Matrix.of.symm (Matrix.of p.1 * Matrix.of p.2) : Mt k r) := by
-    refine measurable_pi_lambda _ fun i => measurable_pi_lambda _ fun j => ?_
+    refine Measurable.of_eval fun i => Measurable.of_eval fun j => ?_
     simp only [Matrix.mul_apply, Matrix.of_apply, Matrix.of_symm_apply]
     exact Finset.measurable_sum _ fun l _ => (hco i l).mul (hco2 l j)
   have hmul21 : Measurable fun p : Mt k r × Mt k r => (Matrix.of.symm (Matrix.of p.2 * Matrix.of p.1) : Mt k r) := by
-    refine measurable_pi_lambda _ fun i => measurable_pi_lambda _ fun j => ?_
+    refine Measurable.of_eval fun i => Measurable.of_eval fun j => ?_
     simp only [Matrix.mul_apply, Matrix.of_apply, Matrix.of_symm_apply]
     exact Finset.measurable_sum _ fun l _ => (hco2 i l).mul (hco l j)
   have hcm : Measurable (Function.uncurry fun (h n : Mt k r) => conjM (Matrix.of h) n) := by
-    refine measurable_pi_lambda _ fun i => measurable_pi_lambda _ fun j => ?_
+    refine Measurable.of_eval fun i => Measurable.of_eval fun j => ?_
     simp only [Function.uncurry, conjM, Matrix.mul_apply, Matrix.of_apply]
     exact Finset.measurable_sum _ fun l _ =>
       (Finset.measurable_sum _ fun m _ => (hco i m).mul (hco2 m l)).mul ((measurable_inv_apply l j).comp measurable_fst)
@@ -203,7 +251,7 @@ theorem muS_loc {n : ℕ} (hn : n = 2 * r + k + 1) (ε : Fin n → Bool) {Q : Ma
     exact hγ
   · intro s hs
     have hLm : Measurable (lmulM (Formalism.L2.SG.RealObj.trG Q Qi s) : Mt k r → Mt k r) := by
-      refine measurable_pi_lambda _ fun i => measurable_pi_lambda _ fun j => ?_
+      refine Measurable.of_eval fun i => Measurable.of_eval fun j => ?_
       simp only [lmulM, Matrix.mul_apply, Matrix.of_apply]
       exact Finset.measurable_sum _ fun l _ => measurable_const.mul ((measurable_pi_apply j).comp (measurable_pi_apply l))
     have hsm : Measurable fun x : Formalism.REAL.UJ ε => s * x := measurable_const_mul s

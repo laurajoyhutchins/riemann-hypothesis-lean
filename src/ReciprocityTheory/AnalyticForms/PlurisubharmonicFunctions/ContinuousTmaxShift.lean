@@ -1,4 +1,59 @@
-import ReciprocityTheory.AnalyticForms.PlurisubharmonicFunctions.IsPshLocallyIntegrableStatement
+module
+
+public import ReciprocityTheory.AnalyticForms.PlurisubharmonicFunctions.IsPshLocallyIntegrableStatement
+public import Mathlib.Analysis.Convolution
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Calculus.BumpFunction.FiniteDimension
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.MeasureTheory.Integral.Pi
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Mathlib.Topology.UniformSpace.Uniformizable
+public import Mathlib.Analysis.Calculus.ContDiff.Convolution
+public import Mathlib.MeasureTheory.Group.Integral
+
+@[expose] public section
 
 namespace ReciprocityTheory.AnForm.A
 
@@ -111,7 +166,7 @@ lemma kK_neg (h : ι → ℝ) : kK (-h) = kK h := by
   simp only [kK, Pi.neg_apply, kθ_neg]
 lemma kK_contDiff : ContDiff ℝ ∞ (kK : (ι → ℝ) → ℝ) := by
   show ContDiff ℝ ∞ (fun h : ι → ℝ => ∏ j, kθ (h j))
-  exact contDiff_prod fun j _ => kθ_contDiff.comp (contDiff_apply ℝ ℝ j)
+  exact contDiff_prod fun j _ => kθ_contDiff.comp (contDiff_apply ℝ (fun _ => ℝ) j)
 lemma norm_le_of_kK_ne {h : ι → ℝ} (hh : kK h ≠ 0) : ‖h‖ ≤ 1 / 2 := by
   have hh' : ∏ j, kθ (h j) ≠ 0 := hh
   have hj : ∀ j, kθ (h j) ≠ 0 := fun j => (Finset.prod_ne_zero_iff.1 hh') j (Finset.mem_univ j)
@@ -317,9 +372,9 @@ lemma tmax_scale {η : ℝ} (hη : 0 < η) (t h : ι → ℝ) :
   rw [← tmax_smul _ hη.le]
   congr 1
   funext j
-  simp only [Pi.smul_apply, smul_eq_mul]
+  simp only [Pi.smul_apply, smul_eq_mul, one_mul]
   rw [mul_add, ← mul_assoc η η⁻¹, mul_inv_cancel₀ hη.ne']
-  ring
+  rw [one_mul]
 
 lemma regMax_scale {η : ℝ} (hη : 0 < η) (t : ι → ℝ) : regMax η t = η * regMax 1 (η⁻¹ • t) := by
   rw [regMax_eq_kK, regMax_eq_kK]
@@ -346,8 +401,7 @@ lemma regMax_one_eq_conv :
   rw [kK_neg, mul_comm (tmax (fun j => x j + 1 * (-h) j)) (kK h)]
   congr 2
   funext j
-  simp only [Pi.sub_apply, Pi.neg_apply]
-  ring
+  simp only [one_mul, Pi.neg_apply, Pi.sub_apply, sub_eq_add_neg]
 
 lemma regMax_one_contDiff : ContDiff ℝ ∞ (regMax (ι := ι) 1) := by
   rw [regMax_one_eq_conv]

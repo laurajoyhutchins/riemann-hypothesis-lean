@@ -1,4 +1,49 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.IsSemipositiveOn
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.IsSemipositiveOn
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -38,8 +83,9 @@ def IsArithVar (P : Ideal (MRing ι)) (d : ℕ) : Prop :=
 def divSupp (P : Ideal (MRingOver R ι)) (s : MRingOver R ι) : Set (Ideal (MRingOver R ι)) :=
   {W | W ∈ (P ⊔ Ideal.span {s}).minimalPrimes ∧ IsRelevant W}
 
-open Classical in
 
+open scoped Classical in
+open Classical in
 def multAt (J W : Ideal (MRingOver R ι)) : ℕ :=
   if h : W.IsPrime then
     haveI := h
@@ -56,13 +102,14 @@ def divCycle [IsNoetherianRing R] (P : Ideal (MRingOver R ι)) (s : MRingOver R 
     (fun W => if W ∈ divSupp P s then multAt (P ⊔ Ideal.span {s}) W else 0)
     ((divSupp_finite P s).subset fun W hW => by
       by_contra h
-      exact hW (if_neg h))
+      exact hW (ite_eq_right h))
 
 def charOf (W : Ideal (MRing ι)) : ℕ :=
   (Submodule.IsPrincipal.generator (W.comap (C : ℤ →+* MRing ι))).natAbs
 
-open Classical in
 
+open scoped Classical in
+open Classical in
 def geoNum : (n : ℕ) → Ideal (MRing ι) → (Fin n → K → ℤ) → ℤ
   | 0, V, _ =>
     if h : IsRelevant V then
@@ -83,9 +130,9 @@ section Complex
 def mcPts (P : Ideal (MRing ι)) : Set ((Σ k, ι k) → ℂ) :=
   {z | (∀ k, ∃ i, z ⟨k, i⟩ ≠ 0) ∧ ∀ f ∈ P, eval z (map (Int.castRingHom ℂ) f) = 0}
 
-variable (ι) in
 
-structure HermLine where
+variable (ι) in
+structure HermLine (ι : K → Type*) where
 
   a : K → ℤ
 
@@ -154,7 +201,7 @@ end Complex
 
 section Constructors
 
-def HermLine.ofMetrics (m : ∀ k, ConeMetric ℂ (ι k)) (a : K → ℤ) : HermLine ι where
+def HermLine.ofMetrics (m : ∀ k, ConeMetric (C := ℂ) (ι := ι k)) (a : K → ℤ) : HermLine ι where
   a := a
   h z := ∏ k, (m k).ρ (fun i => z ⟨k, i⟩) ^ a k
   pos z hz := Finset.prod_pos fun k _ => by

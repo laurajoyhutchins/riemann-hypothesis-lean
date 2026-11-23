@@ -1,8 +1,57 @@
-import Mathlib
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.LetterLiftOfParts
-import Development.AbelianVarietyTheory.Definitions.Jets.SameFns
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.HatLettersPassDiGIBoundedFactorsStatement
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.FrameStartConstantsNormalFormEmptyWordStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Jets.SameFns
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.FrameStartConstantsNormalFormEmptyWord
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.HatLettersPassDiGIBoundedFactors
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.LetterLiftOfParts
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.RuleGD
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.StarStartConjugationIdentity
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Formalism.FourierDecayAlt Formalism.FourierDecayAlt.R Formalism.FourierDecayAlt.Wd Formalism.FourierDecayAlt.Fr Formalism.REAL Formalism.QuantumDeterminants MeasureTheory GlobalTheory.HatNF
 
@@ -22,20 +71,6 @@ def bAlg (d : Q.NFData P A) : Subalgebra ℂ A :=
     exact (bmon d).mul_mem ha hb)
 
 variable {S : Type} [Fintype S] [DecidableEq S]
-
-def EM (B : Subalgebra ℂ A) (E : SlopeTestRemainingChoices S A) : Prop := ∀ e e', E e e' ∈ B
-
-theorem EM.add {B : Subalgebra ℂ A} {E F : SlopeTestRemainingChoices S A} (hE : EM B E) (hF : EM B F) : EM B (E + F) := fun i j =>
-  B.add_mem (hE i j) (hF i j)
-
-theorem EM.smul {B : Subalgebra ℂ A} {E : SlopeTestRemainingChoices S A} (z : ℂ) (hE : EM B E) : EM B (z • E) := fun i j =>
-  B.smul_mem (hE i j) z
-
-theorem EM.io {B : Subalgebra ℂ A} {a : A} (ha : a ∈ B) : EM B (io a : SlopeTestRemainingChoices S A) := fun i j => by
-  simp only [Wd.io, Matrix.scalar_apply, Matrix.diagonal_apply]
-  split_ifs
-  · exact ha
-  · exact B.zero_mem
 
 variable [StarModule ℂ A]
 
@@ -84,11 +119,11 @@ private lemma star_l0_sub_one_add_eq_m0_add {P : _root_.Formalism.FourierDecayAl
   · rw [← mul_assoc d.L.GGi, hperm]
     exact hcE.eq
 
+
 open MeasureTheory in
 variable {P : _root_.Formalism.FourierDecayAlt.M.Par} {A : Type} [Ring A] [StarRing A] [Algebra ℂ A] in
 variable {S : Type} [Fintype S] [DecidableEq S] in
 variable [StarModule ℂ A] in
-
 theorem _root_.GlobalTheory.HatNF.MShapeNF.mshape : ∀ (P : _root_.Formalism.FourierDecayAlt.M.Par) (A : Type) [Ring A] [StarRing A]
     [Algebra ℂ A] [StarModule ℂ A] (d : _root_.Formalism.FourierDecayAlt.Q.NFData P A), _root_.GlobalTheory.HatNF.HatHyp d →
     ∀ (L : _root_.Formalism.FourierDecayAlt.R.LevelData A P.r) (st : _root_.Formalism.FourierDecayAlt.Fr.Start A) (s : ℂ), _root_.GlobalTheory.HatNF.Comparison₂ d L st s →

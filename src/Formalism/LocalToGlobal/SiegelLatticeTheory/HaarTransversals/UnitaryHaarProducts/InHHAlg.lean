@@ -1,6 +1,52 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.InHHCut
-import Formalism.LocalRingCardinality.RankBoundMonotoneInDimension
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.InHHCut
+public import Formalism.LocalRingCardinality.RankBoundMonotoneInDimension
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -151,29 +197,6 @@ theorem kset_of_conj (h : X.B.I.Gf) (hh : (X.xu u)⁻¹ * h * X.xu u ∈ X.K2) :
   rw [e]
   exact mul_mem (mul_mem hx hk) (inv_mem hx)
 
-theorem Ku_le_K0 (hK : X.LevelSubgroupCharacter) : Ku X u hK ≤ K0 X u := by
-  intro h hh
-  apply Subgroup.subset_closure
-  have hh' : (X.xu u)⁻¹ * (h : X.B.I.Gf) * X.xu u ∈ X.K2 := hh
-  have hKs : (h : X.B.I.Gf) ∈ X.B.I.Kset := kset_of_conj X u _ hh'
-  have hKs' : (h : X.B.I.Gf)⁻¹ ∈ X.B.I.Kset := by
-    show ((((h : X.B.I.Gf)⁻¹ : X.B.I.Gf)) : GL (Fin X.B.I.n) (X.B.I.E ⊗[X.B.I.F] Af X.B.I.F)) ∈
-      Formalism.UG.stabGL X.B.I.Lf
-    push_cast
-    exact inv_mem hKs
-  refine ⟨fun y hy => ⟨⟨(hKs y).1 hy.1, fun a => ⟨?_, ?_, ?_⟩⟩, ⟨(hKs' y).1 hy.1, fun a => ⟨?_, ?_, ?_⟩⟩⟩, ?_⟩
-  · rw [← hfin_fix X u h _ (eR_mem_fix X u a), hA_fmat]; exact (hy.2 a).1
-  · rw [← hfin_fix X u h _ (fR_mem_fix X u a), hA_fmat]; exact (hy.2 a).2.1
-  · rw [← hfin_fix X u h _ (zR_mem_fix X u), hA_fmat]; exact (hy.2 a).2.2
-  · rw [← hfin_fix_inv X u h _ (eR_mem_fix X u a), hA_fmat]; exact (hy.2 a).1
-  · rw [← hfin_fix_inv X u h _ (fR_mem_fix X u a), hA_fmat]; exact (hy.2 a).2.1
-  · rw [← hfin_fix_inv X u h _ (zR_mem_fix X u), hA_fmat]; exact (hy.2 a).2.2
-  · refine ⟨fun a => ⟨1, Nat.coprime_one_left _, ?_⟩, ⟨1, Nat.coprime_one_left _, ?_⟩,
-      fun i => ⟨1, Nat.coprime_one_left _, ?_⟩⟩
-    · simpa using hh'.2.1 a
-    · simpa using hh'.2.2.1
-    · simpa using hh'.2.2.2 i
-
 end KuK0
 
 section NGroup
@@ -190,14 +213,16 @@ theorem sigA_inclE (e : X.B.I.E) :
 theorem hA_incl (x y : Fin X.B.I.n → X.B.I.E) :
     hA X.B.I (incl X.B.I x) (incl X.B.I y) =
       Formalism.UG.inclE (F := X.B.I.F) (Af X.B.I.F) (Formalism.UG.hform (starRingEnd X.B.I.E) X.B.I.J x y) := by
+
   simp only [hA, Formalism.UG.hform, incl, Matrix.map_apply, map_sum, map_mul, sigA_inclE]
 
 theorem hform_crd (v w : (VS D).V) :
     X.ιE (Formalism.UG.hform (starRingEnd X.B.I.E) X.B.I.J (X.crd v) (X.crd w)) = (VS D).hT v w := by
   conv_rhs => rw [← X.bas.sum_repr v, ← X.bas.sum_repr w]
+
   simp only [map_sum, LinearMap.map_smulₛₗ, LinearMap.sum_apply, LinearMap.smul_apply, smul_eq_mul,
-    Formalism.UG.hform, map_mul, HidaSetting.crd, crdOf, starRingEnd_apply, X.ιE_conj, RingEquiv.apply_symm_apply,
-    X.J_eq, Finset.mul_sum]
+  Formalism.UG.hform, map_mul, HidaSetting.crd, crdOf, starRingEnd_apply, X.ιE_conj, RingEquiv.apply_symm_apply,
+  X.J_eq, Finset.mul_sum]
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
   simp only [← Formalism.BasicNotions.bridge_star_holds D.R D.host, RingHom.id_apply]
@@ -843,47 +868,13 @@ theorem foldOK_of_steps (hK : X.LevelSubgroupCharacter) (hKL : X.LevelSubgroupNo
   exact foldOK_of X u hK (phProps_of_steps X u hK hKL hR hS hN hL hP) (iFinite_of X u hK hF hM hW hWD hU)
     (phReprod_of X u hK hKL hWD (phMeas_of X u hK hKL hWD hR) hR (hW u).1)
 
-theorem inHH_of_steps (hK : X.LevelSubgroupCharacter) (hKL : X.LevelSubgroupNormalized) (hR : FoldReadyX X)
-    (ha : @PoincareSeriesSquareIntegrable.PoincareSeriesFinite X.B.I.GA _ _ _ hR.1 hR.2.1 hR.2.2.1 _ hR.2.2.2.1 (X.B.I.muA X.B.μf)
-      (@muA_isHaar' X.B.I X.B.μf X.B.sf X.B.haar))
-    (hb : @PoincareSeriesSquareIntegrable.PoincareSeriesMemLp X.B.I.GA _ _ _ hR.1 hR.2.1 hR.2.2.1 _ hR.2.2.2.1 (X.B.I.muA X.B.μf)
-      (@muA_isHaar' X.B.I X.B.μf X.B.sf X.B.haar))
-    (hS : KsetSplit X u) (hN : UnipotentConjugateInLevel X u) (hL : RatLevi X u) (hP : PsiProd X u) (hW : WuDecay.WuDecay X)
-    (hF : SratFund X u) (hM : MultPoly X) (hU : IUnfold X u hK) (hFB : FundBridge X) (hPM : PserMeas X u hK)
-    (hRph : PserRph X u hK) (hPI : PhInt X) (hRF : ArchimedeanConvolutionFixesInvariantL2 X) (hEF : IdempotentFixesInvariantL2 X) : InHH X u hK :=
-  inHH_of X u hK hR ha hb hFB (foldOK_of_steps X u hK hKL hR hS hN hL hP hW hF hM hU)
-    (phProps_of_steps X u hK hKL hR hS hN hL hP) (phWellDef_of_steps X u hK hS hN) hPM hRph hPI hRF hEF hKL
-    (level_subgroup_measurable X hK hKL)
-
 end Final
 
 section Cols
 
 variable {D : D7} (X : HidaSetting D) (u : D.what₂.Word)
 
-def BaseLevelSetClosed : Prop := ∀ h ∈ K0 X u, h ∈ HaarTransversal X u
-
-def GamFinOrd : Prop :=
-  ∀ (r : Hfin X u) (γ : Gam X u),
-    (∀ y ∈ frameOrthogonalLattice X u, X.B.I.fmat ((r : X.B.I.Gf)⁻¹ * (iotaF X u γ : X.B.I.Gf) * r) *ᵥ y ∈ frameOrthogonalLattice X u) →
-      IsOfFinOrder γ
-
-def GamUnip : Prop :=
-  ∀ (r : Hfin X u) (γ : Gam X u), (r⁻¹ * iotaF X u γ * r) ∈ HaarTransversal X u → IsOfFinOrder γ → γ = 1
-
 def ClassFin (hK : X.LevelSubgroupCharacter) : Prop := Finite (Formalism.L2.SG.ColsDim.Classes (iotaF X u) (Ku X u hK))
-
-theorem stabTriv_of (hC : BaseLevelSetClosed X u) (hF : GamFinOrd X u) (hU : GamUnip X u) :
-    Formalism.L2.SG.ColsDim.StabTriv (iotaF X u) (K0 X u) := by
-  intro r γ hγ
-  have hs := hC _ hγ
-  refine hU r γ hs (hF r γ fun y hy => ?_)
-  have := (hs.1 y hy).1
-  simpa using this
-
-theorem colsLink_of (hK : X.LevelSubgroupCharacter) (hC : BaseLevelSetClosed X u) (hF : GamFinOrd X u) (hU : GamUnip X u)
-    (hCF : ClassFin X u hK) : ColsLink X u hK :=
-  ⟨Ku_le_K0 X u hK, stabTriv_of X u hC hF hU, hCF⟩
 
 end Cols
 

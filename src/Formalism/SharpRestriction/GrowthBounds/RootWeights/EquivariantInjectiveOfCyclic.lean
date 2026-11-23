@@ -1,4 +1,47 @@
-import Formalism.SharpRestriction.GrowthBounds.RootWeights.EquivariantKillsCyclicOfZero
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.CovariantDegrees
+public import Formalism.SharpRestriction.GrowthBounds.RootWeights.OperatorsKillInvariantProjection
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -188,6 +231,7 @@ theorem equivariant_injective_of_cyclic (D : Formalism.BasicNotions.D7) (h2 : ad
       H (EG a b y) = (t + (((a : ℕ) : K) - ((b : ℕ) : K))) • EG a b y := by
     intro a b y t hy
     have e1 : ∑ c : Fin n, ((c : ℕ) : K) • EG a b (EG c c y) = EG a b (H y) := by
+
       rw [hHapp, map_sum]
       simp only [map_smul]
     have e2 : ∑ c : Fin n, ((c : ℕ) : K) • (if c = a then EG c b y else 0) =
@@ -239,7 +283,7 @@ theorem equivariant_injective_of_cyclic (D : Formalism.BasicNotions.D7) (h2 : ad
     obtain ⟨r, rfl⟩ := Submodule.mem_span_singleton.mp hx
     have hz0 : z ∈ Module.End.eigenspace H h0 := by
       rw [Module.End.mem_eigenspace_iff]
-      rw [map_add, map_smul, Hg0, smul_add, smul_comm h0 r g0] at hw
+      rw [map_add (f := _), map_smul, Hg0, smul_add, smul_comm h0 r g0] at hw
       exact add_left_cancel hw
     have hz' : z = 0 := (Submodule.mem_bot K).mp
       ((Module.End.eigenspaces_iSupIndep H h0).le_bot (Submodule.mem_inf.mpr ⟨hz0, hz⟩))
@@ -258,7 +302,7 @@ theorem equivariant_injective_of_cyclic (D : Formalism.BasicNotions.D7) (h2 : ad
   have hHw : H w = h0 • w := by
     have e : H w - h0 • w = h0 • w' - H w' := by
       have h := congrArg H hsum
-      rw [map_add, Hg0, ← hsum, smul_add] at h
+      rw [map_add (f := _), Hg0, ← hsum, smul_add] at h
       rw [sub_eq_sub_iff_add_eq_add, h, add_comm]
     have h1 : H w - h0 • w ∈ LinearMap.ker F := sub_mem (Hmem _ hWs w hw) (Submodule.smul_mem _ _ hw)
     have h2' : H w - h0 • w ∈ W' := by

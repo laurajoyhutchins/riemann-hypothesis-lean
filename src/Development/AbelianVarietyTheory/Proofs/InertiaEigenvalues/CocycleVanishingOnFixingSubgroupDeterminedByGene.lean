@@ -1,11 +1,65 @@
-import Mathlib
-import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
-import Development.AbelianVarietyTheory.Definitions.Foundations.HTBasis
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CyclotomicCharacterPadicBasicProperties
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ContinuousOrbitPadicComplex
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.HTBasis
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ContinuousOrbitPadicComplex
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CyclotomicCharacterPadicBasicProperties
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsCyclotomicTowerLevelGeneratorProperties
 import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.PadicNormZpowSubOnePadicValInt
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsCyclotomicTowerLevelGeneratorProperties
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.TraceAlmostOntoOfLevels
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.TraceAlmostOntoOfLevels
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.Padics.LocalField
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Algebra.Nonarchimedean.Completion
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.MetricSpace.Ultra.Pi
+import Mathlib.Topology.MetricSpace.Ultra.TotallySeparated
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -34,7 +88,7 @@ theorem psum_add (hg : g ∈ G) (hone : ∀ y, A 1 y = y)
   induction a with
   | zero => simp [psum_zero, hone]
   | succ a ih =>
-    rw [Nat.add_right_comm, psum_succ, psum_succ, ih, map_add, pow_succ', hmul _ hg _ (pow_mem hg a),
+    rw [Nat.add_right_comm, psum_succ, psum_succ, ih, map_add (f := _), pow_succ', hmul _ hg _ (pow_mem hg a),
       add_assoc]
 
 omit [Group Γ] in
@@ -62,7 +116,7 @@ theorem norm_move_psum_le (hg : g ∈ G)
   | succ n ih =>
     have h : A (g ^ q) (psum A g w (n + 1)) - psum A g w (n + 1)
         = (A (g ^ q) w - w) + A g (A (g ^ q) (psum A g w n) - psum A g w n) := by
-      rw [psum_succ, map_add, map_sub, ← hmul _ (pow_mem hg q) _ hg, ← hmul _ hg _ (pow_mem hg q),
+      rw [psum_succ, map_add (f := _), map_sub, ← hmul _ (pow_mem hg q) _ hg, ← hmul _ hg _ (pow_mem hg q),
         ← pow_succ, ← pow_succ']
       abel
     rw [h]
@@ -117,8 +171,8 @@ theorem eqOn_of_dense {H : Subgroup Γ} (hg : g ∈ G) (hHG : H ≤ G)
   · rintro _ ⟨x, hx, a, rfl⟩
     exact G.mul_mem (hHG hx) (pow_mem hg a)
 
-omit [IsUltrametricDist X] [TopologicalSpace Γ] in
 
+omit [IsUltrametricDist X] [TopologicalSpace Γ] in
 theorem exists_extension [CompleteSpace X] (Gn : ℕ → Subgroup Γ) (hanti : Antitone Gn)
     (hcos : ∀ σ ∈ G, ∀ n, ∃ a : ℕ, σ * (g ^ a)⁻¹ ∈ Gn n) (S : ℕ → X)
     (hS : ∀ ε > 0, ∃ N, ∀ a b : ℕ, g ^ a * (g ^ b)⁻¹ ∈ Gn N → ‖S a - S b‖ ≤ ε) :
@@ -334,8 +388,9 @@ theorem twHom_mul (hact : IsActC act) (hχ : IsCyc χ) (hF : Frame χ K m U g) (
     act_eq_of_mem_intC hact hσ (chiC_mem_intC hχ (Ks K m) i τ)
   have h3 : ∀ a b, act σ (U τ a b) = U τ a b := fun a b =>
     act_eq_of_mem_intC hact hσ (hF.2.2.1 τ hτ a b)
+
   simp only [twHom_apply, h1, hF.2.2.2.1 σ hσ τ hτ, Matrix.mul_apply, map_mul, map_sum, h2, h3,
-    RingAut.mul_apply, Finset.mul_sum, Finset.sum_mul]
+  RingAut.mul_apply, Finset.mul_sum, Finset.sum_mul]
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun b _ => Finset.sum_congr rfl fun c _ => ?_
   ring
@@ -425,7 +480,8 @@ theorem procyclic : ∀ (l : ℕ) [Fact l.Prime] (act : GQ l →* (PadicComplex 
       have e2 := LiftExp.norm_zpow_sub_one l m hm _ hF.1.2 (d : ℤ) (by exact_mod_cast hd0)
       rw [zpow_natCast, padicValInt.of_nat] at e2
       rw [map_pow, Units.val_pow_eq_pow_val, e2, zpow_le_zpow_iff_right₀ hl1] at e1
-      refine (padicValNat_dvd_iff_le hd0).2 ?_
+      refine ((by simpa only [_root_.Nat.padicValNat_def] using @_root_.multiplicity_dvd_iff_le : ∀ {p : _root_.Nat} [hp : _root_.Fact (_root_.Nat.Prime p)] {a n : _root_.Nat} (ha : a ≠ 0), p ^ n ∣ a ↔ n ≤ _root_.padicValNat p a) hd0).2 ?_
+      rw [_root_.Nat.padicValNat_def]
       omega
     · intro ε hε
       have hc := (continuousOn_twHom hact hχ hF i w).sub (continuousOn_const (c := w))

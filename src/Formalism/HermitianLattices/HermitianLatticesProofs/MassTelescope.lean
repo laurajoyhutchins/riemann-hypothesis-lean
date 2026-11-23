@@ -1,6 +1,61 @@
-import Mathlib
-import Formalism.HermitianLattices.StatementMass
-import Formalism.HermitianLattices.HermitianLatticesProofs.MassBasic
+module
+
+public import Formalism.HermitianLattices.StatementMass
+public import Formalism.HermitianLattices.HermitianLatticesProofs.MassBasic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField
 
@@ -37,6 +92,7 @@ lemma massTelescope_symm (n : ℕ) : (massTelescope_form K n).IsSymm := by
   have key : ∀ x y : Fin n → K,
       starRingEnd K (massTelescope_form K n x y) = massTelescope_form K n y x := by
     intro x y
+
     simp only [massTelescope_form_apply, map_sum, starRingEnd_apply, star_mul, star_star]
   first
   | exact key
@@ -60,11 +116,12 @@ lemma massTelescope_ortho (n : ℕ) :
   · intro hi
     exact absurd (Finset.mem_univ i) hi
 
-lemma massTelescope_isLattice (n : ℕ) : Submodule.IsLattice K (massTelescope_lat K n) where
-  fg := Submodule.fg_span (Set.finite_range _)
-  span_eq_top := by
-    rw [massTelescope_lat, Submodule.span_span_of_tower]
-    exact (Pi.basisFun K (Fin n)).span_eq
+lemma massTelescope_isLattice (n : ℕ) : Submodule.IsFullLattice K (massTelescope_lat K n) := by
+  letI : Submodule.IsLattice K (massTelescope_lat K n) :=
+    Submodule.IsLattice.of_fg K (Submodule.fg_span (Set.finite_range _))
+  refine { span_eq_top := ?_ }
+  unfold massTelescope_lat
+  rw [Submodule.span_span_of_tower (RingOfIntegers K), (Pi.basisFun K (Fin n)).span_eq]
 
 lemma massTelescope_trace_pos (hCM : IsCMUnram K) (a : K) (ha : a ≠ 0) :
     0 < Algebra.trace ℚ K (star a * a) := by
@@ -99,6 +156,7 @@ lemma massTelescope_trace_nonneg (hCM : IsCMUnram K) (a : K) :
 
 lemma massTelescope_def (hCM : IsCMUnram K) (n : ℕ) (x : Fin n → K) (hx : x ≠ 0) :
     0 < Algebra.trace ℚ K (massTelescope_form K n x x) := by
+
   rw [massTelescope_form_apply, map_sum]
   obtain ⟨i, hi⟩ : ∃ i, x i ≠ 0 := by
     by_contra hc

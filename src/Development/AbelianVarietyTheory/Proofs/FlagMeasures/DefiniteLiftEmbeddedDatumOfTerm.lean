@@ -1,13 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.FlagPairDefinitePartLattice
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.ChartGen
-import Development.AbelianVarietyTheory.PublishedTheorems.DiscreteSeriesUnitary₂.MaxMass
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.NormalFormDualOrthogonalLast
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.LeOfLatMod
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.NormalFormDualOrthogonalLast
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.FlagPairDefinitePartLatticeDiscriminantEqQuotienStatement
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.FlagPairDefiniteThetaLatticeLeFixedIndexBoundStatement
 import Development.AbelianVarietyTheory.Proofs.FlagMeasures.HermFramePairNormalFormGeometrySummaryStatement
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.FlagPairDefinitePartLatticeDiscriminantEqQuotienStatement
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.IsHermIsometryGraphModScalarFlagPairIotaStatement
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.FlagPairDefiniteThetaLatticeLeFixedIndexBoundStatement
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.IsHermIsometryGraphModScalarFlagPairIotaStatement
+import Development.AbelianVarietyTheory.Proofs.FlagMeasures.LeOfLatMod
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField Formalism.HermitianLatticeCounting.S6 GlobalTheory.HermLat GlobalTheory.DegCnt
 open scoped Pointwise ENNReal Classical
@@ -47,7 +88,7 @@ theorem exists_proj (hS : S = C ⊔ I) (hd : C ⊓ I = ⊥) : ∃ p : V →ₗ[K
   intro x hx
   rw [hS] at hx
   obtain ⟨c, hc', i, hi, rfl⟩ := Submodule.mem_sup.1 hx
-  rw [map_add, hC1 c hc', hI0 i hi, add_zero]
+  rw [map_add (f := _), hC1 c hc', hI0 i hi, add_zero]
   exact hc'
 
 theorem genBy_latIn (hS : S = C ⊔ I) (hd : C ⊓ I = ⊥) {A B : Submodule (𝓞 K) V} {e : ℕ}
@@ -88,7 +129,7 @@ theorem genBy_latIn (hS : S = C ⊔ I) (hd : C ⊓ I = ⊥) {A B : Submodule (�
       apply Subtype.ext
       rw [Submodule.coe_add]
       show (y : V) = p b + (C.subtype.restrictScalars (𝓞 K)) z
-      rw [hzs, ← map_add, hbs, hpC1 y y.2]
+      rw [hzs, ← map_add (f := _), hbs, hpC1 y y.2]
     rw [hy']
     exact Submodule.add_mem_sup hpb hz
   · rw [sup_le_iff]
@@ -216,7 +257,7 @@ theorem dual_latIn (hS : S = C ⊔ I) (H : HermSpace K V) (H' : HermSpace K C)
       have hcM : c ∈ M := by simpa using M.sub_mem hx (hIM hi)
       have h1 := hy ⟨c, hc⟩ hcM
       rw [hH] at h1
-      rw [map_add, ho _ (hCS y.2) i hi, add_zero]
+      rw [map_add (f := _), ho _ (hCS y.2) i hi, add_zero]
       exact h1
 
 theorem intLat_latIn (hS : S = C ⊔ I) (hd : C ⊓ I = ⊥) (H : HermSpace K V) (H' : HermSpace K C)
@@ -233,7 +274,7 @@ theorem intLat_latIn (hS : S = C ⊔ I) (hd : C ⊓ I = ⊥) (H : HermSpace K V)
     exact ⟨hM.2 ▸ Submodule.subset_span hx, fun y hy => hi x hx y hy⟩
   refine ⟨?_, ?_⟩
   · unfold GlobalTheory.Mass.IsIntLat
-    refine ⟨latIn_isLattice p hCS hpC hpI hpI0 hpC1 hM, ?_⟩
+    refine ⟨latIn_isFullLattice p hCS hpC hpI hpI0 hpC1 hM, ?_⟩
     intro x hx y hy
     rw [LinearMap.flip_apply, hH]
     exact hi _ hy _ hx

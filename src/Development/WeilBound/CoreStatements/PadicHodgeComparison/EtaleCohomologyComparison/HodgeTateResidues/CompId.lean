@@ -1,9 +1,50 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.HodgeTateResidues.FirstChernHodgeTateCompatAlt
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.HodgeTateResidues.RedPullPd
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.CechPairings.Imports
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.HodgeTateResidues.Same
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.BocksteinBaseChange.GammaIndependence.PullRId
+module
+
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.HodgeTateResidues.FirstChernHodgeTateCompatAlt
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.HodgeTateResidues.Same
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.HodgeTateResidues.KProps
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.BocksteinBaseChange.GammaIndependence.PullRId
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.CechPairings.TotPairing
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.HodgeTateResidues.RedPullPd
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
@@ -18,14 +59,14 @@ open Pb
 
 variable {l : ℕ} [Fact l.Prime] {K : IntermediateField ℚ_[l] (PadicAlgCl l)} {Y : CB l K}
 
-open Classical in
 
+open Classical in
 def coL {m : ℕ} (L : Lv Y m) (M : Model l K) (r j : ℕ) : HG (L.QB M) r j →+ ∀ a, Module.Dual K (Hdg M.q a j) →+ ℂ_[l] :=
   if h : ∃ co, IsCo L.γB M.q (L.QB M) L.θ L.tB_mem r j co then h.choose else 0
 
 theorem isCo (hC : CoEx l K) {m : ℕ} (L : Lv Y m) {M : Model l K} (hM : M.Sm) {r : ℕ} (j : ℕ) (h : r < m) :
     IsCo L.γB M.q (L.QB M) L.θ L.tB_mem r j (coL L M r j) := by
-  rw [coL, dif_pos (hC L M hM r j h).2]
+  rw [coL, dite_eq_left (hC L M hM r j h).2]
   exact (hC L M hM r j h).2.choose_spec
 
 theorem aCo (hC : CoEx l K) {m : ℕ} (L : Lv Y m) {M : Model l K} (hM : M.Sm) {r : ℕ} (j : ℕ) (h : r < m) :
@@ -81,8 +122,8 @@ theorem down (hC : CoEx l K) (hR : HomRho l K) (hμ : HomMu l K) (hF : KForm) {m
 
 variable (S : ∀ m, Lv Y (m + 1))
 
-open Classical in
 
+open Classical in
 def gam {M : Model l K} {r j : ℕ} (x : Y.Fam M r j) : ∀ a, Module.Dual K (Hdg M.q a j) →+ ℂ_[l] :=
   if h : ∃ w, (S r).Rho x w then coL (S r) M r j h.choose else 0
 
@@ -106,7 +147,7 @@ theorem gam_eq {r j m : ℕ} (hm : r ≤ m) {x : Y.Fam M r j} (hx : CB.Comp x) {
     gam S x = coL (S m) M r j w := by
   induction m, hm using Nat.le_induction with
   | base =>
-    rw [gam, dif_pos ⟨w, hw⟩]
+    rw [gam, dite_eq_left ⟨w, hw⟩]
     exact congrArg _ ((H.ex.ex (S r) M hM r j r.lt_succ_self x hx).unique (Exists.choose_spec ⟨w, hw⟩) hw)
   | succ m hm ih =>
     obtain ⟨w', h1, h2⟩ := down H.co H.hom H.mu H.form (H.dn m).some hM (Nat.lt_succ_of_le hm) x w hw
@@ -119,7 +160,7 @@ theorem add {r j : ℕ} {x y : Y.Fam M r j} (hx : CB.Comp x) (hy : CB.Comp y) (h
     gam S (x + y) a = gam S x a + gam S y a := by
   obtain ⟨w, hw⟩ := H.rho hM le_rfl hx
   obtain ⟨w', hw'⟩ := H.rho hM le_rfl hy
-  rw [H.gam_eq hM le_rfl hxy (H.ex.add _ _ _ _ _ _ _ _ hw hw'), H.gam_eq hM le_rfl hx hw, H.gam_eq hM le_rfl hy hw', map_add]
+  rw [H.gam_eq hM le_rfl hxy (H.ex.add _ _ _ _ _ _ _ _ hw hw'), H.gam_eq hM le_rfl hx hw, H.gam_eq hM le_rfl hy hw', map_add (f := _)]
   rfl
 
 theorem lin {r j : ℕ} (c : Y.Λ) {x : Y.Fam M r j} (hx : CB.Comp x) (hc : CB.Comp (c • x)) (a : ℕ) (φ : Module.Dual K (Hdg M.q a j)) :
@@ -139,7 +180,7 @@ theorem big {r j : ℕ} {x : Y.Fam M r j} (hx : CB.Comp x) (a : ℕ) (ha : r < a
   rw [H.gam_eq hM le_rfl hx hw]
   exact (isCo H.co (S r) hM j r.lt_succ_self).big a ha w
 
-set_option maxHeartbeats 1600000 in
+
 theorem sh {r r' j : ℕ} (k : ℕ) (h : r + k = r') {x : Y.Fam M r j} (hx : CB.Comp x) (hs : CB.Comp (CB.shS k h x)) (a : ℕ) :
     gam S (CB.shS k h x) a = gam S x a := by
   have hr : r ≤ r' := by omega

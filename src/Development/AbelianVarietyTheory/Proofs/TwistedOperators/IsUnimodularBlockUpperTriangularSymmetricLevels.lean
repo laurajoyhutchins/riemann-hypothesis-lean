@@ -1,7 +1,65 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.MatrixMeasurableSpace
+public import Mathlib.MeasureTheory.Group.ModularCharacter
+import Development.AbelianVarietyTheory.Definitions.Divisors.T2SpaceGeneralLinearGroup
+public import Development.AbelianVarietyTheory.Definitions.Foundations.SimpleSum
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.PadicIsNonarchimedeanLocalField
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.GlCharacterEqOneOfTransposeInv
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IsMulLeftInvariantVolGL
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Algebra.Group.Units
+import Mathlib.Topology.Separation.Connected
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
 import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.FourierJacobiAverage
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IsMulLeftInvariantVolGL
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.GlCharacterEqOneOfTransposeInv
+
+@[expose] public section
 
 open MeasureTheory ValuativeRel Matrix GlobalTheory.SplitWeil GlobalTheory.RootEx GlobalTheory.IndefiniteRowSideFullHecke.FourierJacobiAverage
 open scoped Topology
@@ -27,8 +85,8 @@ theorem map_mul_right_eq (μ : Measure G) [μ.IsHaarMeasure] (g : G) :
     μ.map (fun x => x * g) = Measure.modularCharacter g • μ :=
   Measure.map_right_mul_eq_modularCharacterFun_smul μ g
 
-omit [T2Space G] in
 
+omit [T2Space G] in
 theorem modular_aut (e : G ≃* G) (hc : Continuous e) (hc' : Continuous e.symm) (g : G) :
     Measure.modularCharacter (e g) = Measure.modularCharacter g := by
   let μ : Measure G := Measure.haar
@@ -36,9 +94,10 @@ theorem modular_aut (e : G ≃* G) (hc : Continuous e) (hc' : Continuous e.symm)
   refine smul_inj (μ := μ.map e) ?_
   rw [← map_mul_right_eq, ← Measure.map_smul, ← map_mul_right_eq,
     Measure.map_map (measurable_mul_const _) hc.measurable, Measure.map_map hc.measurable (measurable_mul_const _)]
-  congr 1
-  funext x
-  simp
+  · congr 1
+    funext x
+    exact (map_mul e x g).symm
+  · exact hc.aemeasurable
 
 theorem modular_bdd : ∃ K ∈ nhds (1 : G), ∃ C : ℝ≥0, ∀ g ∈ K, Measure.modularCharacter g ≤ C := by
   let μ : Measure G := Measure.haar
@@ -181,7 +240,7 @@ theorem tendsto_conj (l : ℕ) (L : Fin c → ℕ) (g : GL (n ⊕ Fin c) k)
     rw [mul_right_comm, ← mul_pow, Units.inv_mul, one_pow, one_mul]
   by_cases hR : r.isRight ∨ s.isRight
   · have hlim : fromBlocks g.val.toBlocks₁₁ 0 0 1 r s = (1 : Matrix (n ⊕ Fin c) (n ⊕ Fin c) k) r s := by
-      rcases r with r | r <;> rcases s with s | s <;> simp_all [one_apply]
+      rcases r with r | r <;> rcases s with s | s <;> simp_all [Matrix.one_apply, Sum.inr.injEq]
     rw [hlim]
     by_cases hle : lev s ≤ lev r
     · rw [hg r s hR hle]
@@ -228,7 +287,7 @@ theorem unimodular : ∀ (k : Type) [Field k] [ValuativeRel k] [TopologicalSpace
     rw [hS]
     intro r s hR _
     change fromBlocks x.val 0 0 1 r s = _
-    rcases r with r | r <;> rcases s with s | s <;> simp_all [one_apply]
+    rcases r with r | r <;> rcases s with s | s <;> simp_all [Matrix.one_apply, Sum.inr.injEq]
 
   let σ : n ⊕ Fin c ≃ n ⊕ Fin c := Equiv.sumCongr (Equiv.refl n) Fin.revPerm
   have hσ : ∀ r, σ (σ r) = r := fun r => by rcases r with r | r <;> simp [σ]
@@ -243,7 +302,7 @@ theorem unimodular : ∀ (k : Type) [Field k] [ValuativeRel k] [TopologicalSpace
     change (g⁻¹ : GL (n ⊕ Fin c) k).val (σ s) (σ r) = _
     rw [(hS _).1 (S.inv_mem hg) (σ s) (σ r) (by rw [hσR, hσR]; exact hR.symm)
       (by have := hσl r; have := hσl s; omega)]
-    simp only [one_apply, σ.apply_eq_iff_eq, eq_comm]
+    simp only [Matrix.one_apply, σ.apply_eq_iff_eq, eq_comm]
   have hchar : ∀ x : GL n k, Measure.modularCharacter (⟨embX c x, hX x⟩ : S) = 1 := by
     refine GlobalTheory.gl_character_eq_one_of_transpose_inv k n (Measure.modularCharacter.comp ((embX c).codRestrict S hX)) fun g g' h => ?_
     refine modular_restrict S (flipAut σ hσ) (continuous_flipInv σ) (continuous_flipInv σ) hflip hflip _ _ ?_
@@ -251,7 +310,7 @@ theorem unimodular : ∀ (k : Type) [Field k] [ValuativeRel k] [TopologicalSpace
     change fromBlocks g'.val 0 0 1 r s = ((embX c g)⁻¹ : GL (n ⊕ Fin c) k).val (σ s) (σ r)
     rw [← map_inv, h]
     change _ = fromBlocks (g⁻¹ : GL n k).val 0 0 1 (σ s) (σ r)
-    rcases r with r | r <;> rcases s with s | s <;> simp [σ, one_apply, eq_comm]
+    rcases r with r | r <;> rcases s with s | s <;> simp [σ, Matrix.one_apply, eq_comm, Sum.inr.injEq]
 
   have hconj : ∀ (t : kˣ), ∀ g ∈ S, (levDiag lev t)⁻¹ * g * levDiag lev t ∈ S := fun t g hg => by
     rw [hS]

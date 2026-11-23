@@ -1,16 +1,53 @@
-import Formalism.LocalToGlobal.ThetaChr
-import Formalism.LocalToGlobal.HermitianForms.BothSym
-import Formalism.LocalToGlobal.HermitianForms.ExtraSym
-import Formalism.LocalToGlobal.HermitianForms.TiedTwSymAll
-import Formalism.LocalToGlobal.HilbertRowConditions.TiedEMt
-import Formalism.LocalToGlobal.HilbertRowConditions.CenterIdempotentAction
-import Formalism.LocalToGlobal.GroupLattices.StdSubAtOfRing
-import Formalism.LocalToGlobal.GroupLattices.Joint0
-import Formalism.LocalToGlobal.LatticeGeometry.GeoTied
-import Formalism.LocalToGlobal.LatticeGeometry.GeoTiedP
-import Formalism.SharpRestriction.PageFix
-import Formalism.SharpRestriction.Divisibility.SmallFirstModulusBelowScale
-import Formalism.SharpRestriction.LevelLetterCocycles.AlignN
+module
+
+public import Formalism.LocalToGlobal.HermitianForms.ExtraSym
+public import Formalism.LocalToGlobal.HilbertRowConditions.TiedEMt
+public import Formalism.LocalToGlobal.GroupLattices.StdSubAtOfRing
+public import Formalism.LocalToGlobal.GroupLattices.Joint0
+public import Formalism.LocalToGlobal.LatticeGeometry.GeoTiedP
+public import Formalism.LocalToGlobal.BesselHermitianTheta.AllTied
+public import Formalism.LocalToGlobal.HilbertRowConditions.KaTiedIffKapDef
+public import Formalism.LocalToGlobal.JointCharacters.SameChr
+public import Formalism.LocalToGlobal.NormalizedHeckeFactors.EMtLevel
+public import Formalism.LocalToGlobal.UnitaryNorms.CharGal
+public import Formalism.LocalToGlobal.UnitaryNorms.JointCut
+public import Formalism.LocalToGlobal.UnitaryNorms.LeastSplitAuxiliaryPrimeThetaChainSpec
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -58,29 +95,6 @@ structure LinkedFamilyData (ex : Extra D L hT Gi Gl K Y cX) where
   herm_eq : g.herm = full.1.to0
   forms_eq : g.forms = fun u => (cols.forms u).to0
 
-def LinkedFamilyCondition (ex : Extra D L hT Gi Gl K Y cX) : Prop := Nonempty (LinkedFamilyData ex)
-
-def LinkedDataOneLevel (ex : Extra D L hT Gi Gl K Y cX) : Prop :=
-  ∃ T : LinkedFamilyData ex, ∃ C : Forms.OneLevelSymmetricColumns D, C.toColsTiedSym = T.cols
-
 end
-
-def LinkedFamiliesLevelClass : FamClass := fun {_} Fm =>
-  ∃ x0 : ℝ, ∀ x (hx : Fm.x1 < x), x0 ≤ x → ∀ i : Fm.Ix x, LinkedFamilyCondition (Fm.ex x hx i)
-
-def LinkedFamiliesOneLevel : FamClass := fun {_} Fm =>
-  ∃ x0 : ℝ, ∀ x (hx : Fm.x1 < x), x0 ≤ x → ∀ i : Fm.Ix x, LinkedDataOneLevel (Fm.ex x hx i)
-
-def LinkedFamiliesFixedValues : FamClass := Formalism.MainNotions.WithPage LinkedFamiliesLevelClass
-
-def LinkedFamiliesAligned : FamClass := fun {_} Fm =>
-  LinkedFamiliesFixedValues Fm ∧ Formalism.MainNotions.DIV.Align.SmallFirstModulusBelowScale Fm ∧
-    Formalism.MainNotions.TameDistinctF Fm
-
-theorem LinkedFamiliesAligned.c2s {eps : ℝ} {Fm : FamP eps} (h : LinkedFamiliesAligned Fm) : LinkedFamiliesLevelClass Fm := h.1.1
-
-theorem LinkedFamiliesOneLevel.c2s {eps : ℝ} {Fm : FamP eps} (h : LinkedFamiliesOneLevel Fm) : LinkedFamiliesLevelClass Fm := by
-  obtain ⟨x0, h⟩ := h
-  exact ⟨x0, fun x hx hx0 i => let ⟨T, _⟩ := h x hx hx0 i; ⟨T⟩⟩
 
 end Formalism.L2

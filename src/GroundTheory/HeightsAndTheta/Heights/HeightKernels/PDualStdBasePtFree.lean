@@ -1,6 +1,56 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.SingleMemDualLatticeStandard
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PDualPtsOnPlane
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.SingleMemDualLatticeStandard
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PDualPtsOnPlane
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -15,18 +65,19 @@ open DualPointsOnPlane
 
 variable {K : Type} [Field K] [NumberField K] {i : ℕ} {T : Type} [Fintype T] [DecidableEq T]
 
-omit [Fintype T] [DecidableEq T] in
 
+omit [Fintype T] [DecidableEq T] in
 theorem coord_integral (b : Module.Basis T ℤ (dualLattice (HermLattice.standard K i))) (c : T) (j : Fin i) :
     ∃ α : 𝓞 K, (α : K) = (b c : Fin i → K) j := by
   obtain ⟨α, hα⟩ := (b c).2 (Pi.single j 1) (Submodule.subset_span ⟨j, rfl⟩)
   exact ⟨α, hα.trans (dotProduct_single_one _ _)⟩
 
-omit [DecidableEq T] in
 
+omit [DecidableEq T] in
 theorem mConeMap_lin {Ω : Type} [Field Ω] (y : (Σ _ : Unit, T) → Ω) (a : T → ℤ) :
     mConeMap y (∑ t, C (a t) * X ⟨(), t⟩ : MRing (dualBlocks T)) =
       MvPolynomial.C (∑ t, (a t : Ω) * y ⟨(), t⟩) * MvPolynomial.X () := by
+
   rw [map_sum, map_sum, Finset.sum_mul]
   refine Finset.sum_congr rfl fun t _ => ?_
   simp only [mConeMap, aeval_X, map_mul, map_intCast, eq_intCast]
@@ -34,8 +85,8 @@ theorem mConeMap_lin {Ω : Type} [Field Ω] (y : (Σ _ : Unit, T) → Ω) (a : T
 
 end StandardDualBasePointFree
 
-open StandardDualBasePointFree DualPointsOnPlane in
 
+open StandardDualBasePointFree DualPointsOnPlane in
 theorem DualStdBasePtFree.proof : DualStdBasePtFree.Statement := by
   intro K _ _ i T _ _ b k₂ c
   cases k₂
@@ -60,6 +111,7 @@ theorem DualStdBasePtFree.proof : DualStdBasePtFree.Statement := by
       have hc' : ∀ l, ∑ t, (dualStdCoordMat b () j t : MvPolynomial (Fin i) K) * (C ((b t : Fin i → K) l) * X l) =
           C ((Pi.single j (1 : K) : Fin i → K) l) * X l := by
         intro l
+
         rw [← hc l, map_sum, Finset.sum_mul]
         refine Finset.sum_congr rfl fun t _ => ?_
         simp only [map_mul, map_intCast]
@@ -68,6 +120,7 @@ theorem DualStdBasePtFree.proof : DualStdBasePtFree.Statement := by
       rw [Finset.sum_eq_single j (fun l _ hl => by simp [hl]) (by simp)]
       simp
     have h := congrArg am hpoly
+
     simpa only [am, y, dualLatticeCoord, map_sum, map_mul, map_intCast] using h
 
   have hS : ∀ j, ∑ s, (mulMat b (α j) (c ()) s : ProjField K i) * y ⟨(), s⟩ =
@@ -79,17 +132,21 @@ theorem DualStdBasePtFree.proof : DualStdBasePtFree.Statement := by
       rw [Finset.sum_comm]
       refine Finset.sum_congr rfl fun l _ => ?_
       have h := congrArg (C : K → MvPolynomial (Fin i) K) (mulMat_sum b (α j) (c ()) l)
+
       simp only [map_sum, map_mul, map_intCast] at h
       rw [← mul_assoc, ← h, Finset.sum_mul]
       refine Finset.sum_congr rfl fun t _ => ?_
       ring
     have h := congrArg am hlin
+
     simpa only [am, y, dualLatticeCoord, map_sum, map_mul, map_intCast] using h
 
   have hy : y ⟨(), c ()⟩ = ∑ j, am (C (α j : K)) * am (X j) := by
+
     simp only [y, am, dualLatticeCoord, map_sum, map_mul, hα]
   have key : X ⟨(), c ()⟩ ^ 2 - ∑ j, linForm (ι₂ := PBlk i) (dualStdCoordMat b) ⟨(), j⟩ * L j ∈ dualIdeal b := by
     show _ ∈ RingHom.ker (mConeMap (dualLatticeCoord b))
+
     rw [RingHom.mem_ker, map_sub, sub_eq_zero, map_sum]
     have hl : ∀ j, mConeMap (dualLatticeCoord b) (linForm (ι₂ := PBlk i) (dualStdCoordMat b) ⟨(), j⟩) =
         MvPolynomial.C (am (X j)) * MvPolynomial.X () := by
@@ -109,6 +166,7 @@ theorem DualStdBasePtFree.proof : DualStdBasePtFree.Statement := by
     calc ∑ j, MvPolynomial.C (am (X j)) * MvPolynomial.X () *
           (MvPolynomial.C (am (C (α j : K))) * MvPolynomial.C (y ⟨(), c ()⟩) * MvPolynomial.X ())
         = MvPolynomial.C ((∑ j, am (C (α j : K)) * am (X j)) * y ⟨(), c ()⟩) * MvPolynomial.X () ^ 2 := by
+
           rw [Finset.sum_mul, map_sum, Finset.sum_mul]
           refine Finset.sum_congr rfl fun j _ => ?_
           simp only [map_mul]

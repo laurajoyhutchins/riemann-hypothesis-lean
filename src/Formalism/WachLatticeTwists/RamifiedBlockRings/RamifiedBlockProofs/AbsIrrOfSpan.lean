@@ -1,11 +1,68 @@
-import Formalism.WachLatticeTwists.RamifiedBlockRings.ChainFromPrimitiveData
-import Formalism.WachLatticeTwists.RamifiedBlockRings.RamifiedBlockProofs.RingObjectsExist
-import Formalism.WachLatticeTwists.RamifiedBlockRings.RamifiedBlockProofs.DeltaRing
-import Formalism.WachLatticeTwists.RamifiedBlockRings.RamifiedBlockProofs.DensityPointOfCornerSimple
-import Formalism.WachLatticeTwists.RamifiedBlockRings.RamifiedBlockProofs.Density
-import Formalism.WachLatticeTwists.RamifiedBlockRings.RamifiedBlockProofs.CornerSimple
-import Formalism.CharacterColumnKernels.IdempotentNormalForms.MemCcIdealIffForall
-import Formalism.CharacterColumnKernels.IdempotentNormalForms.LengthKerOfDetEqZero
+module
+
+public import Formalism.WachLatticeTwists.RamifiedBlockRings.ChainFromPrimitiveData
+public import Formalism.CharacterColumnKernels.IdempotentNormalForms.MemCcIdealIffForall
+public import Formalism.WachLatticeTwists.RamifiedBlockRings.RamifiedBlockProofs.BurnsideMat
+public import Formalism.WachLatticeTwists.RamifiedBlockRings.RamifiedBlockProofs.CharpolyRevMap
+public import Formalism.WachLatticeTwists.RamifiedBlockRings.RamifiedBlockProofs.DensityPointOfCornerSimple
+public import Formalism.WachLatticeTwists.RamifiedBlockRings.RamifiedBlockProofs.FinrankRangeEq
+public import Formalism.WachLatticeTwists.RamifiedBlockRings.RamifiedBlockProofs.IdemFactor
+public import Formalism.WachLatticeTwists.RamifiedBlockRings.RamifiedBlockProofs.IdempotentImageSurjective
+import Formalism.WachLatticeTwists.RamifiedBlockRings.RamifiedBlockProofs.Normal
+public import Formalism.WachLatticeTwists.RamifiedBlockRings.RamifiedBlockProofs.RankDiagIte
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Formalism.WachLatticeTwists.CoprimeLiftBounds.Statement
+
+@[expose] public section
 
 open Finset Classical
 
@@ -14,28 +71,6 @@ noncomputable section
 namespace Formalism.RepresentationBoundsCohomology.ringDataObjects
 
 open Formalism.NG Formalism.TruncatedSeriesCounting.TruncatedSeriesCountingIdentities Formalism.RepresentationBoundsCohomology.BR
-
-theorem x0 : DensityPointExists := density_point_of_corner_simple density cornerSimple
-
-theorem bridge : StatBridge := by
-  intro O _ _ X T d _ _ G _ r π eB heB hid m jj a h c
-  have hx : ∀ x, eB x * eB x = eB x := fun x => congrFun hid x
-  refine ⟨?_, ?_, ?_, ?_⟩
-  · have h1 : (fun x => c • ∑ i, jj i x • (eB x * a i x * eB x)) =
-        c • ∑ i, (fun x => jj i x • (eB * a i * eB) x) := by
-      funext x; simp [Finset.sum_apply]
-    rw [h1]
-    refine (spanSub T r).smul_mem ((spanSub T r).sum_mem fun i _ => ?_) c
-    have h2 : (fun x => jj i x • (eB * a i * eB) x) = term r (jj i) 1 * (eB * a i * eB) := by
-      funext x; simp [term]
-    rw [h2]
-    exact mul_mem_tSpan T r (term_mem T r (h i).1 1)
-      (mul_mem_tSpan T r (mul_mem_tSpan T r heB (h i).2.2) heB)
-  · funext x
-    simp only [Pi.mul_apply, Matrix.mul_smul, Finset.mul_sum, ← mul_assoc, hx]
-  · funext x
-    simp only [Pi.mul_apply, Matrix.smul_mul, Finset.sum_mul, mul_assoc, hx]
-  · simp [(h _).2.1]
 
 theorem bcSpan : StatBcSpan := by
   intro O O' _ _ _ X T
@@ -65,7 +100,7 @@ theorem bcLocal : StatBcLocal := by
       have h2 := congrArg (IsLocalRing.ResidueField.map (algebraMap O O')) h
       exact h2
     | algebraMap c => rfl
-    | add f g _ _ hf hg => simp only [Pi.add_apply, map_add, hf, hg]
+    | add f g _ _ hf hg => simp only [Pi.add_apply, map_add (f := _), hf, hg]
     | mul f g _ _ hf hg => simp only [Pi.mul_apply, map_mul, hf, hg]
   have : Algebra.IsIntegral O' (X → O') := inferInstance
   have : Algebra.IsIntegral (bcT O' T) (X → O') := Algebra.IsIntegral.tower_top O'
@@ -218,7 +253,7 @@ theorem sep_ext {O : Type} [CommRing O] [IsDomain O] {F : Type} [Field F] (f : O
   rw [← hκ, ← Polynomial.map_map, Polynomial.separable_map]
   exact h
 
-set_option maxHeartbeats 1000000 in
+
 theorem stageC : StatStageC := by
   intro O O' _ _ _ _ _ _ _ _ _ e he X _ T d _ _ G _ r π t bl χ₁ ε hP hA eB e₁ hI g₀ s hsm hes hse hsπ
     hsep hspl
@@ -344,17 +379,5 @@ theorem deltaO_eq {O : Type} [CommRing O] [IsDomain O] [IsDiscreteValuationRing 
   rw [Finset.mem_Ioo] at hi
   rw [hrr 0 (by omega), hrr i hi.2]
   simp
-
-theorem deltaBc : StatDeltaBc := by
-  intro O O' _ _ _ _ _ _ _ e he
-  refine ⟨?_, fun ℓ => ?_⟩
-  · intro X d G _ _ _ t bl T r π χ₁ ε g₀ eB e₁ s D' hD'
-    have h1 : D'.δO = algebraMap O O'
-        (∏ i ∈ Finset.Ioo 0 t, ((χ₁ g₀ : O) - (χ₁ g₀ : O) * (((ε g₀)⁻¹ ^ i : Oˣ) : O))) := by
-      rw [deltaO_eq hD', map_prod]
-      refine Finset.prod_congr rfl fun i _ => ?_
-      simp [bcChar]
-    exact ⟨h1, by rw [h1, he]⟩
-  · rw [Formalism.NG.IdempotentNormalFormsLenFacts.length_quot_span, Formalism.NG.IdempotentNormalFormsLenFacts.length_quot_span, ← he, map_natCast (algebraMap O O')]
 
 end Formalism.RepresentationBoundsCohomology.ringDataObjects

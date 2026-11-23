@@ -1,4 +1,50 @@
-import Formalism.HermitianCurvature.RealInputsClosedAdmissibleSettings
+module
+
+public import Formalism.HermitianCurvature.RealInputsClosedAdmissibleSettings
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 namespace Formalism.FourierDecayAlt.P.PBD
 
@@ -83,14 +129,19 @@ theorem pick_many (lo hi : ℝ) (B : Finset ℝ) : ∀ (m : ℕ) (Q : Finset ℝ
     9 * ((Q.card : ℝ) + m + B.card) + 1 ≤ hi - lo →
     ∃ ys : List ℝ, ys.length = m ∧
       (∀ y ∈ ys, lo ≤ y ∧ y + 1 ≤ hi ∧ y ∉ B ∧ y + 1 ∉ B ∧ ∀ q ∈ Q, 4 < |y - q|) ∧
-      ys.Pairwise (fun y y' => 4 < |y - y'|)
-  | 0, Q, _ => ⟨[], rfl, by simp, List.Pairwise.nil⟩
-  | m + 1, Q, h => by
+      ys.Pairwise (fun y y' => 4 < |y - y'|) := by
+  intro m
+  induction m with
+  | zero => exact fun _ _ => ⟨[], rfl, by simp, List.Pairwise.nil⟩
+  | succ m ih =>
+    intro Q h
     classical
     push_cast at h
-    obtain ⟨y, h1, h2, h3, h4, h5⟩ := pick_one lo hi Q B (by linarith)
+    have hm : 0 ≤ (m : ℝ) := Nat.cast_nonneg m
+    have hpick : 9 * ((Q.card : ℝ) + B.card) + 1 ≤ hi - lo := by linarith
+    obtain ⟨y, h1, h2, h3, h4, h5⟩ := pick_one lo hi Q B hpick
     have hc : ((insert y Q).card : ℝ) ≤ Q.card + 1 := by exact_mod_cast Finset.card_insert_le y Q
-    obtain ⟨ys, hl, hys, hp⟩ := pick_many lo hi B m (insert y Q) (by linarith)
+    obtain ⟨ys, hl, hys, hp⟩ := ih (insert y Q) (by linarith)
     refine ⟨y :: ys, by simp [hl], ?_, ?_⟩
     · intro z hz
       rcases List.mem_cons.1 hz with rfl | hz
@@ -159,35 +210,6 @@ theorem roomOffGrid : RoomOffGrid := by
         obtain ⟨y, hy, rfl⟩ := List.mem_map.1 ha
         exact two_lt_of_four_lt (hfar y hy b hb)
 
-def RoomOffGridS : Prop :=
-  ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (Wp Wq : InfinitePlace E → Type)
-    [∀ x, NormedAddCommGroup (Wp x)] [∀ x, InnerProductSpace ℂ (Wp x)]
-    [∀ x, NormedAddCommGroup (Wq x)] [∀ x, InnerProductSpace ℂ (Wq x)] (S : C.HidaSetting E Wp Wq),
-    C.GridsOK S → KB.CutInside S → ∀ (v : Fin S.f) (w : List C.Letter) (m : ℕ) (B : Finset ℝ),
-      KB.CutWord (D.parOf S v) (S.l + 1) w → w.length + m + B.card ≤ 2 * S.Ntop →
-      ∃ ys : List ℝ, ys.length = m ∧ (∀ y ∈ ys, S.cutLo v ≤ y ∧ y + 1 ≤ S.cutHi v ∧ y ∉ B ∧ y + 1 ∉ B) ∧
-        ys.Pairwise (fun y y' => 4 < |y - y'|) ∧ KB.CutWord (D.parOf S v) (S.l + 1) (KB.plusW ys w) ∧
-        KB.CutWord (D.parOf S v) (S.l + 1) (KB.minusW ys w)
-
-theorem roomOffGridS : RoomOffGridS := by
-  intro E _ _ _ Wp Wq _ _ _ _ S hG hC v w m B hw hlen
-  have hN : 20 ≤ S.Ntop := by
-    unfold C.HidaSetting.Ntop C.Kst
-    omega
-  have hN' : (20 : ℝ) ≤ S.Ntop := by exact_mod_cast hN
-  have hlen' : (w.length : ℝ) + m + B.card ≤ 2 * S.Ntop := by exact_mod_cast hlen
-  have hgap := (hG v).1
-  have h2 : (400 : ℝ) ≤ (S.Ntop : ℝ) ^ 2 := by nlinarith
-  have h3 : (400 : ℝ) * S.Ntop ≤ (S.Ntop : ℝ) ^ 3 := by
-    calc (400 : ℝ) * S.Ntop ≤ (S.Ntop : ℝ) ^ 2 * S.Ntop := mul_le_mul_of_nonneg_right h2 (by positivity)
-      _ = (S.Ntop : ℝ) ^ 3 := by ring
-  have key : 10 * ((w.length : ℝ) + m + B.card + 1) ≤ S.cutHi v - S.cutLo v := by
-    clear hw hC
-    linarith
-  exact roomOffGrid (D.parOf S v) (S.l + 1) (S.cutLo v) (S.cutHi v) (fun Y h1 h2 => hC v Y ⟨h1, h2⟩) w m B hw key
-
 end Formalism.FourierDecayAlt.P.PBD
 
 theorem Formalism.FourierDecayAlt.P.room_off_grid : Formalism.FourierDecayAlt.P.PBD.RoomOffGrid := Formalism.FourierDecayAlt.P.PBD.roomOffGrid
-
-theorem Formalism.FourierDecayAlt.P.room_off_grid_symmetric : Formalism.FourierDecayAlt.P.PBD.RoomOffGridS := Formalism.FourierDecayAlt.P.PBD.roomOffGridS

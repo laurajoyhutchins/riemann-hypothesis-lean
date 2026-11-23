@@ -1,5 +1,59 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.CayleyIrreducibility.DivClosedOf
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.CayleyIrreducibility.DivClosedOf
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Formalism.LocalRingCardinality.Params
+public import Mathlib.LinearAlgebra.Matrix.SchurComplement
+
+@[expose] public section
 
 noncomputable section
 
@@ -21,8 +75,9 @@ lemma map_genAct_X (τ : ι) (g : Matrix (Fin n) (Fin n) ℂ) (v : ι × Fin n �
   obtain ⟨τ', r, s⟩ := v
   by_cases hv : τ' = τ
   · subst hv
+
     simp only [genAct, famAct, aeval_X, if_true, Function.update_self, map_sum, map_mul, map_C, map_X,
-      eval_X]
+    eval_X]
   · simp only [genAct, famAct, aeval_X, if_neg hv, Function.update_of_ne hv, map_X]
     rw [Finset.sum_eq_single r (fun c _ hc => by rw [Matrix.one_apply_ne (Ne.symm hc), map_zero, zero_mul])
       (by simp), Matrix.one_apply_eq, map_one, one_mul]
@@ -31,7 +86,7 @@ lemma map_genAct (τ : ι) (g : Matrix (Fin n) (Fin n) ℂ) (P : MvPolynomial (�
     map (eval fun x => g x.1 x.2) (genAct τ P) = famAct (Function.update (fun _ => 1) τ g) P := by
   induction P using MvPolynomial.induction_on with
   | C a => simp [genAct, famAct]
-  | add p q hp hq => rw [map_add, map_add, hp, hq, map_add]
+  | add p q hp hq => rw [map_add (f := _), map_add (f := _), hp, hq, map_add (f := _)]
   | mul_X p v hp => rw [map_mul, map_mul, hp, map_mul, map_genAct_X]
 
 def pushφ (φ : Module.Dual ℂ (MvPolynomial (ι × Fin n × Fin n) ℂ))
@@ -43,6 +98,7 @@ lemma eval_pushφ (φ : Module.Dual ℂ (MvPolynomial (ι × Fin n × Fin n) ℂ
     (Q : MvPolynomial (ι × Fin n × Fin n) (MvPolynomial (Fin n × Fin n) ℂ)) :
     eval x (pushφ φ Q) = φ (map (eval x) Q) := by
   conv_rhs => rw [Q.as_sum]
+
   rw [pushφ, map_sum, map_sum, map_sum]
   refine Finset.sum_congr rfl fun m _ => ?_
   rw [map_monomial, smul_eval]
@@ -64,7 +120,7 @@ lemma famAct_elem_X (τ : ι) (a b : Fin n) (t : ℂ) (v : ι × Fin n × Fin n)
   obtain ⟨τ', r, s⟩ := v
   by_cases hv : τ' = τ
   · subst hv
-    simp only [famAct, aeval_X, Function.update_self, elem_apply, map_add, add_mul, Finset.sum_add_distrib]
+    simp only [famAct, aeval_X, Function.update_self, elem_apply, map_add (f := _), add_mul, Finset.sum_add_distrib]
     rw [Finset.sum_eq_single r (fun c _ hc => by rw [if_neg (Ne.symm hc), map_zero, zero_mul]) (by simp),
       if_pos rfl, map_one, one_mul]
     simp only [bigGen, aeval_X, true_and, Polynomial.eval_add, Polynomial.eval_C]
@@ -83,7 +139,7 @@ lemma famAct_elem (τ : ι) (a b : Fin n) (t : ℂ) (P : MvPolynomial (ι × Fin
     famAct (Function.update (fun _ => 1) τ (elem a b t)) P = (bigGen τ a b P).eval (C t) := by
   induction P using MvPolynomial.induction_on with
   | C c => simp [famAct, bigGen]
-  | add p q hp hq => rw [map_add, hp, hq, map_add, Polynomial.eval_add]
+  | add p q hp hq => rw [map_add (f := _), hp, hq, map_add (f := _), Polynomial.eval_add]
   | mul_X p v hp => rw [map_mul, hp, map_mul, Polynomial.eval_mul, famAct_elem_X]
 
 lemma isUnit_one_add_elem (a b : Fin n) (m : ℕ) : IsUnit (1 + elem a b (m : ℂ)).det := by
@@ -145,8 +201,9 @@ theorem divisor_closed_holds : DivClosedOf := by
   set r : Polynomial ℂ := q.sum fun j c => Polynomial.monomial j (φ c) with hr
   have hr_eval : ∀ t : ℂ, r.eval t = φ (q.eval (C t)) := by
     intro t
-    rw [hr, Polynomial.sum_def, Polynomial.eval_finset_sum, Polynomial.eval_eq_sum (p := q), Polynomial.sum_def,
-      map_sum]
+
+    rw [hr, Polynomial.sum_def, Polynomial.eval_finsetSum, Polynomial.eval_eq_sum (p := q), Polynomial.sum_def,
+    map_sum]
     refine Finset.sum_congr rfl fun j _ => ?_
     rw [Polynomial.eval_monomial, ← map_pow, mul_comm (q.coeff j), MvPolynomial.C_mul', map_smul, smul_eq_mul,
       mul_comm]
@@ -159,7 +216,7 @@ theorem divisor_closed_holds : DivClosedOf := by
     exact hall _ (isUnit_one_add_elem a b m)
   have hcoeff : r.coeff k = φ (bigDiv τ a b k P) := by
     rw [hr, Polynomial.sum_def, Polynomial.finsetSum_coeff]
-    simp only [Polynomial.coeff_monomial]
+    simp only [Polynomial.coeff_monomial, Finsupp.single_apply]
     rw [Finset.sum_eq_single k (fun j _ hj => if_neg hj) (fun hk => by
       rw [if_pos rfl, Polynomial.notMem_support_iff.mp hk, map_zero])]
     rw [if_pos rfl]

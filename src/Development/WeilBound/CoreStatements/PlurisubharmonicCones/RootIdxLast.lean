@@ -1,5 +1,64 @@
-import Development.WeilBound.CoreStatements.PlurisubharmonicCones.ProdSqrtLead
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.DetLatticeFlagTensorStatement
+module
+
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.ConjugateHermitianLineIsometries
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.GlueApplyOfNotInFibre
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsHodgeLine
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.PotentialsBoundedRegSettingEqReference
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.MixedFieldContraction.GenericFibreKerTarget
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.DegreeLatticeQuotientFormsStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.DetLatticeFlagTensorStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.DetLatticeFrameGenStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.GenMapStalkMap
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.GrGenOfIsFlagVBOn
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HodgeCptFiniteExtension
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HodgeCptInteriorFlag
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HodgeCptIsoCompare
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.StalkSpecializesBijective
+import Development.AutomorphicSpectrum.Proofs.MetricProofs.SectionNormIsomorphicLinesStatement
+public import Development.WeilBound.CoreStatements.PlurisubharmonicCones.GenOfUnit
+public import Development.WeilBound.CoreStatements.PlurisubharmonicCones.ProdSqrtLead
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits NumberField Matrix
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Geo ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.Semi
@@ -19,6 +78,7 @@ variable {X X' : Scheme.{0}} {Ω Ω' : Type} [Field Ω] [Field Ω'] {ξ : Sp Ω 
 theorem map_comb (hj : IsExtOver i j) {r : ℕ} {s c : Fin r → V} {b₀ : Fin r → V'} {T : Matrix (Fin r) (Fin r) Ω}
     {T₁ : Matrix (Fin r) (Fin r) Ω'} (hT : ∀ k, c k = ∑ l, T l k • s l) (hT₁ : ∀ k, j (s k) = ∑ l, T₁ l k • b₀ l) (k : Fin r) :
     j (c k) = ∑ l, (T₁ * i.mapMatrix T) l k • b₀ l := by
+
   rw [hT k, map_sum]
   simp only [hj.1, hT₁, Finset.smul_sum, smul_smul, Matrix.mul_apply, Finset.sum_smul, RingHom.mapMatrix_apply,
     Matrix.map_apply]
@@ -56,6 +116,7 @@ theorem det_pull' {L : Lat ξ V} {r : ℕ} {s : Fin r → V} {U : Submodule Ω V
   have hjs : ∀ k, j (s k) ∈ Submodule.span Ω' (Set.range b₀) := by
     intro k
     obtain ⟨T, hT⟩ := exists_mat (Ω := Ω) (b := s) (s := b) fun k => by rw [hb]; exact hsU k
+
     rw [hT k, map_sum]
     exact Submodule.sum_mem _ fun k' _ => by rw [hj.1]; exact Submodule.smul_mem _ _ (hjb k')
   obtain ⟨T₁, hT₁⟩ := exists_mat hjs
@@ -108,7 +169,7 @@ def lastRoot (D : Datum H) (a : CMType H × Fin D.q) : CMType H × Fin (D.p + D.
 
 theorem rootIdx_last (a : CMType H × Fin D.q) : HodgeCpt.rootIdx D (lastRoot D a) = ⟨.inr a.1, a.2⟩ := by
   unfold HodgeCpt.rootIdx lastRoot
-  rw [dif_neg (by simp)]
+  rw [dite_eq_right (by simp)]
   congr 1
   apply Fin.ext
   have := a.2.2

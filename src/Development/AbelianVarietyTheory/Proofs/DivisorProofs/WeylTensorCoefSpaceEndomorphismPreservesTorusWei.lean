@@ -1,7 +1,55 @@
-import Mathlib
-import Formalism.LocalToGlobal.Divisibility.CoefMod
-import Formalism.GradedWeylDivisibility.DualWeylDominanceOf
-import Formalism.GradedWeylDivisibility.FinalD
+module
+
+public import Formalism.LocalToGlobal.Divisibility.CoefMod
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Formalism.LocalRingCardinality.Params
+
+@[expose] public section
+
 set_option autoImplicit false
 noncomputable section
 open MvPolynomial Formalism.BasicNotions Formalism.L2.DIV
@@ -11,7 +59,7 @@ namespace GlobalTheory.CoefTorusWeight
 
 theorem coeff_aeval_scale {K σ : Type} [Field K] [Fintype σ] (c : σ → K) (F : MvPolynomial σ K)
     (m : σ →₀ ℕ) :
-    coeff m (aeval (fun v => (C (c v) * X v : MvPolynomial σ K)) F) = (∏ v, c v ^ m v) * coeff m F := by
+    AddMonoidAlgebra.coeff (aeval (fun v => (C (c v) * X v : MvPolynomial σ K)) F) m = (∏ v, c v ^ m v) * AddMonoidAlgebra.coeff F m := by
   classical
   induction F using MvPolynomial.induction_on' with
   | monomial u a =>
@@ -25,13 +73,13 @@ theorem coeff_aeval_scale {K σ : Type} [Field K] [Fintype σ] (c : σ → K) (F
     split_ifs with hu
     · rw [hu]
     · simp
-  | add p q hp hq => rw [map_add, coeff_add, coeff_add, hp, hq, mul_add]
+  | add p q hp hq => rw [map_add (f := _), MvPolynomial.coeff_add, MvPolynomial.coeff_add, hp, hq, mul_add]
 
 theorem coeff_actP_diag {K ι : Type} [Field K] [Fintype ι] {n : ℕ} (lam : ι → DomWeight n)
     (t : ι → Fin n → Kˣ) (F : Pol K ι n) (m : (ι × Fin n × Fin n) →₀ ℕ) :
-    coeff m (actP lam (fun τ => diagGL K n (t τ)) F)
+    AddMonoidAlgebra.coeff (actP lam (fun τ => diagGL K n (t τ)) F) m
       = detTwK lam (fun τ => diagGL K n (t τ)) *
-        ((∏ v : ι × Fin n × Fin n, (t v.1 v.2.1 : K) ^ m v) * coeff m F) := by
+        ((∏ v : ι × Fin n × Fin n, (t v.1 v.2.1 : K) ^ m v) * AddMonoidAlgebra.coeff F m) := by
   classical
   have h : trAct (fun τ => diagGL K n (t τ))
       = aeval (fun v : ι × Fin n × Fin n => (C (t v.1 v.2.1 : K) * X v : Pol K ι n)) := by
@@ -43,7 +91,7 @@ theorem coeff_actP_diag {K ι : Type} [Field K] [Fintype ι] {n : ℕ} (lam : ι
     · intro b _ hb
       simp [Matrix.diagonal_apply_ne _ (Ne.symm hb)]
     · simp
-  rw [actP, LinearMap.smul_apply, AlgHom.toLinearMap_apply, coeff_smul, smul_eq_mul, h,
+  rw [actP, LinearMap.smul_apply, AlgHom.toLinearMap_apply, MvPolynomial.coeff_smul, smul_eq_mul, h,
     coeff_aeval_scale]
 
 theorem detTwK_ne_zero {K ι : Type} [Field K] [Fintype ι] {n : ℕ} (lam : ι → DomWeight n)
@@ -74,23 +122,23 @@ theorem weight_preserved (K : Type) [Field K] [CharZero K] {ι : Type} [Fintype 
     · simp
   set h : ι → GL (Fin n) K := fun τ => diagGL K n (t τ) with hh
   have hco : ∀ (w : VV K lam) (m : (ι × Fin n × Fin n) →₀ ℕ),
-      coeff m ((rhoK lam h w : VV K lam) : Pol K ι n)
-        = detTwK lam h * (2 ^ (∑ s : Fin n, m (τ0, a0, s)) * coeff m (w : Pol K ι n)) := by
+      AddMonoidAlgebra.coeff ((rhoK lam h w : VV K lam) : Pol K ι n) m
+        = detTwK lam h * (2 ^ (∑ s : Fin n, m (τ0, a0, s)) * AddMonoidAlgebra.coeff (w : Pol K ι n) m) := by
     intro w m
     rw [← hprod]
     exact coeff_actP_diag lam t w m
   have h1 : rhoK lam h v = (detTwK lam h * 2 ^ (lam τ0).natW a0) • v := by
     apply Subtype.ext
     ext m'
-    rw [hco, Submodule.coe_smul, coeff_smul, smul_eq_mul, mul_assoc]
+    rw [hco, Submodule.coe_smul, MvPolynomial.coeff_smul, smul_eq_mul, mul_assoc]
     by_cases hm' : m' ∈ (v : Pol K ι n).support
     · rw [hv m' hm']
     · rw [notMem_support_iff.mp hm']
       simp
   have h2 := hg h v
   rw [h1, map_smul] at h2
-  have h3 := congrArg (fun w : VV K lam => coeff m (w : Pol K ι n)) h2
-  simp only [hco, Submodule.coe_smul, coeff_smul, smul_eq_mul, mul_assoc] at h3
+  have h3 := congrArg (fun w : VV K lam => AddMonoidAlgebra.coeff (w : Pol K ι n) m) h2
+  simp only [hco, Submodule.coe_smul, MvPolynomial.coeff_smul, smul_eq_mul, mul_assoc] at h3
   have h4 := mul_right_cancel₀ (mem_support_iff.mp hm) (mul_left_cancel₀ (detTwK_ne_zero lam h) h3)
   have h5 : (2 : ℕ) ^ (lam τ0).natW a0 = 2 ^ (∑ s : Fin n, m (τ0, a0, s)) := by
     exact_mod_cast h4

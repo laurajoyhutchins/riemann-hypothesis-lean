@@ -1,6 +1,50 @@
-import Development.WeilBound.ThetaLifts.LocalTheory.ConeShifts.PureIte
-import Development.WeilBound.ThetaLifts.ConeHypotheses.PureEqPureA
-import Development.WeilBound.ThetaLifts.EigenvalueEndgame.EigenKilling.ConeIntegralFactorisation
+module
+
+public import Development.WeilBound.ThetaLifts.LocalTheory.ConeShifts.PureIte
+public import Development.WeilBound.ThetaLifts.EigenvalueEndgame.EigenKilling.ConeIntegralFactorisation
+public import Development.WeilBound.ThetaLifts.LocalTheory.UnramifiedDeterminedBySpherical
+public import Development.WeilBound.ThetaLifts.ConeHypotheses.PureEqPureA
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.Divisors.MatchingOfParts
+
+@[expose] public section
 
 noncomputable section
 
@@ -48,7 +92,12 @@ theorem coneIntegralFactorisation_of (hA : ActsEx) (hI : IdeleFub) (hKF : KFub) 
     omega
   obtain ⟨κ, hκ, HG⟩ := gen hA hI hKF hV hS hAr hF hP hSp hC hE hK h1 h2 hm h0 hlat hz
   refine ⟨κ, hκ, fun X om om' om₁ om₁' t _ => ?_⟩
-  have := HG _ _ _ _ _ _ _ (pairV t) X.ν X.S₀ X.T (nu_cont t) (by classical exact Finset.subset_union_left)
+  have := HG _ _ _ _ _ _ _ (by
+    refine ⟨t.base, t.geo.hV, t.geo.hW, t.geo.hM, t.chars.heckeβ, ?_, t.chars.resβ, ?_, t.weil⟩
+    · exact ⟨t.chars.heckeβ.1.div' t.chars.heckeα.1, fun x => by rw [MonoidHom.div_apply, t.chars.heckeβ.2, t.chars.heckeα.2, div_one]⟩
+    · intro x
+      rw [MonoidHom.div_apply, Circle.coe_div, t.chars.resβ, t.chars.resα]
+      split_ifs <;> simp [pow_add, div_eq_mul_inv, ← inv_pow, mul_comm]) X.ν X.S₀ X.T (nu_cont t) (by classical exact Finset.subset_union_left)
     (unr_div t.chars.unrα t.chars.unrβ) t.chars.unrβ (unr_div t.chars.unrβ t.chars.unrα)
     fun w hw => ⟨t.chars.ram w hw, hcnt w (t.chars.sub hw)⟩
   rw [hval X.ν (nu_cont t) (nu_res t) fun w hw => unr_div t.chars.unrα t.chars.unrβ w fun h => hw (t.chars.sub h)] at this
@@ -73,7 +122,12 @@ theorem coneFacB_of (hA : ActsEx) (hI : IdeleFub) (hKF : KFub) (hV : VacFixX) (h
     omega
   obtain ⟨κ, hκ, HG⟩ := gen hA hI hKF hV hS hAr hF hP hSp hC hE hK h1 h2 hm h0 hlat hz
   refine ⟨κ, hκ, fun X om om' om₁ om₁' t _ => ?_⟩
-  have := HG _ _ _ _ _ _ _ (pairV' t) X.ν X.S₀ X.T (nu_cont t) (by classical exact Finset.subset_union_left)
+  have := HG _ _ _ _ _ _ _ (by
+    refine ⟨t.base, t.geo.hV', t.geo.hW, t.geo.hM', t.chars.heckeα, ?_, t.chars.resα, ?_, t.weil'⟩
+    · exact ⟨t.chars.heckeα.1.div' t.chars.heckeβ.1, fun x => by rw [MonoidHom.div_apply, t.chars.heckeα.2, t.chars.heckeβ.2, div_one]⟩
+    · intro x
+      rw [MonoidHom.div_apply, Circle.coe_div, t.chars.resα, t.chars.resβ]
+      split_ifs <;> simp [pow_add, div_eq_mul_inv, ← inv_pow, mul_comm]) X.ν X.S₀ X.T (nu_cont t) (by classical exact Finset.subset_union_left)
     (unr_div t.chars.unrα t.chars.unrβ) t.chars.unrα (unr_div t.chars.unrα t.chars.unrβ)
     fun w hw => ⟨t.chars.ram w hw, hcnt w (t.chars.sub hw)⟩
   rw [hval X.ν (nu_cont t) (nu_res t) fun w hw => unr_div t.chars.unrα t.chars.unrβ w fun h => hw (t.chars.sub h)] at this

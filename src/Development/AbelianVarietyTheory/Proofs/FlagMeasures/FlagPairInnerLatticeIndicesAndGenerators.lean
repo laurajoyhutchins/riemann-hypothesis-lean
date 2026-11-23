@@ -1,13 +1,61 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.FlagPairDefinitePartLattice
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.ChartGen
-import Development.AbelianVarietyTheory.PublishedTheorems.DiscreteSeriesUnitary₂.MaxMass
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.NormalFormDualOrthogonalLast
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.LatticeQuotientGensAndIntermediateCount
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.NormalFormDualOrthogonalLast
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.HermFramePairIdealKillsDiscriminantModules
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.IdxSupRight
 import Development.AbelianVarietyTheory.Proofs.FlagMeasures.IsLocalizedModuleSubtype
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.LatticeQuotientGensAndIntermediateCount
 import Development.AbelianVarietyTheory.Proofs.FlagMeasures.LeOfLatMod
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.IdxSupRight
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.HermFramePairIdealKillsDiscriminantModules
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.HermFlagPairingCramerOfLeadingCoeffs
+
+@[expose] public section
 
 open NumberField Formalism.HermitianLatticeCounting.S6 GlobalTheory.HermLat GlobalTheory.DegCnt
 open scoped Pointwise ENNReal Classical
@@ -83,8 +131,8 @@ theorem latMod_sup {M M' : Submodule (𝓞 K) V} {S S' I : Submodule K V} (hM : 
     · rintro x (hx | hx)
       exacts [Submodule.mem_sup_left hx, Submodule.mem_sup_right hx]
 
-omit [StarRing K] in
 
+omit [StarRing K] in
 theorem gens_of_torsion {A D : Submodule (𝓞 K) V} {Y I : Submodule K V} (hA : IsLatMod A (Y ⊔ I) I)
     (hAD : A ≤ D) {n : ℕ} (hn : n ≠ 0) (hD : ∀ x ∈ D, (n : 𝓞 K) • x ∈ A) :
     ∃ t : Finset V, t.card ≤ Module.finrank K Y ∧ D = A ⊔ Submodule.span (𝓞 K) (t : Set V) := by
@@ -137,9 +185,9 @@ omit [NumberField K] [FiniteDimensional K V] [Module (𝓞 K) V] [IsScalarTower 
 theorem perp_anti {S T : Submodule K V} (h : S ≤ T) : perp H T ≤ perp H S := fun y hy =>
   (mem_perp_iff H S y).2 fun x hx => (mem_perp_iff H T y).1 hy x (h hx)
 
+
 omit [FiniteDimensional K V] [Module (𝓞 K) V] [IsScalarTower (𝓞 K) K V] in
 include hX hX' hr hr' in
-
 theorem rad_sup : ∀ x ∈ X ⊔ X', (∀ y ∈ X ⊔ X', H.B x y = 0) ↔ x ∈ X ⊓ X' := by
   intro x hx
   constructor
@@ -152,10 +200,10 @@ theorem rad_sup : ∀ x ∈ X ⊔ X', (∀ y ∈ X ⊔ X', H.B x y = 0) ↔ x �
     exact ⟨add_mem ha h2, add_mem h1 hb⟩
   · rintro ⟨h1, h2⟩ y hy
     obtain ⟨a, ha, b, hb, rfl⟩ := Submodule.mem_sup.1 hy
-    rw [map_add, hX x h1 a ha, hX' x h2 b hb, add_zero]
+    rw [map_add (f := _), hX x h1 a ha, hX' x h2 b hb, add_zero]
+
 
 omit [Module (𝓞 K) V] [IsScalarTower (𝓞 K) K V] in
-
 theorem rad_perp {U I : Submodule K V} (hIU : I ≤ U) (h : ∀ x ∈ U, (∀ y ∈ U, H.B x y = 0) ↔ x ∈ I) :
     ∀ x ∈ perp H U, (∀ y ∈ perp H U, H.B x y = 0) ↔ x ∈ I := by
   intro x hx
@@ -177,8 +225,8 @@ theorem perp_le_sup : perp H X ≤ perp H (X ⊔ X') ⊔ X := by
     simpa [hX a ha y hy] using hw y (Submodule.mem_sup_right hy)
   exact swap0 (hv _ (add_mem ha h2))
 
-omit [NumberField K] [FiniteDimensional K V] in
 
+omit [NumberField K] [FiniteDimensional K V] in
 theorem inf_sup_eq {U I : Submodule K V} (hIX : I ≤ X) (hIU : I ≤ U) (hI : ∀ x ∈ X, ∀ y ∈ I, H.B x y = 0) :
     rs (𝓞 K) (perp H U) ⊓ (Λ ⊔ rs (𝓞 K) X) =
       rs (𝓞 K) (perp H U) ⊓ (((Λ ⊓ rs (𝓞 K) (perp H I)) ⊔ rs (𝓞 K) I) ⊔ rs (𝓞 K) X) := by
@@ -190,8 +238,8 @@ theorem inf_sup_eq {U I : Submodule K V} (hIX : I ≤ X) (hIU : I ≤ U) (hI : �
   refine Submodule.add_mem_sup (Submodule.mem_sup_left ⟨ha, (mem_perp_iff H I a).2 fun i hi => ?_⟩) hb
   simpa [hI b hb i hi] using (mem_perp_iff H U _).1 hy i (hIU hi)
 
-include hX hX' hr hr' in
 
+include hX hX' hr hr' in
 theorem inner_unimod (hU : IsUnimod H Λ) :
     IsUnimodMod H (rs (𝓞 K) (perp H (X ⊔ X')) ⊓ (Λ ⊔ rs (𝓞 K) X)) (perp H (X ⊔ X')) (X ⊓ X') := by
   have hM := isUnimodMod_quot H hU hX
@@ -227,23 +275,23 @@ theorem inner_unimod (hU : IsUnimod H Λ) :
       rw [← hM.2, SetLike.mem_coe, mem_dual_iff, hM.1.2]
       refine ⟨perp_anti H le_sup_left h1, fun m hm => ?_⟩
       obtain ⟨a, ha, b, hb, rfl⟩ := Submodule.mem_sup.1 (hdec hm)
-      rw [map_add, (mem_perp_iff H _ y).1 h1 b (Submodule.mem_sup_left hb), add_zero]
+      rw [map_add (f := _), (mem_perp_iff H _ y).1 h1 b (Submodule.mem_sup_left hb), add_zero]
       exact h2 a ⟨ha, by simpa using sub_mem hm (hle.1 hb)⟩
     · rintro ⟨h1, h2⟩
       refine ⟨h1, fun x hx => ?_⟩
       rw [← hM.2, SetLike.mem_coe, mem_dual_iff] at h2
       exact h2.2 x hx.2
 
-omit [NumberField K] [FiniteDimensional K V] in
 
+omit [NumberField K] [FiniteDimensional K V] in
 theorem quot_inf {I : Submodule K V} (hIX : I ≤ X) (hI : ∀ x ∈ X, ∀ y ∈ I, H.B x y = 0) :
     ((Λ ⊓ rs (𝓞 K) (perp H I)) ⊔ rs (𝓞 K) I) ⊓ rs (𝓞 K) X = (Λ ⊓ rs (𝓞 K) X) ⊔ rs (𝓞 K) I := by
   have h1 : rs (𝓞 K) I ≤ rs (𝓞 K) X := hIX
   have h2 : rs (𝓞 K) X ≤ rs (𝓞 K) (perp H I) := fun x hx => (mem_perp_iff H I x).2 (hI x hx)
   rw [sup_comm, sup_inf_assoc_of_le _ h1, sup_comm, inf_assoc, inf_eq_right.2 h2]
 
-include hX hX' hr hr' in
 
+include hX hX' hr hr' in
 theorem idx_eq_del (hK : Formalism.HermitianLatticesTheory.IsCMUnram K) (hU : IsUnimod H Λ) {U I : Submodule K V}
     (eU : U = X ⊔ X') (eI : I = X ⊓ X') {M : Submodule (𝓞 K) V}
     (eM : M = (Λ ⊓ rs (𝓞 K) (perp H I)) ⊔ rs (𝓞 K) I) :
@@ -271,8 +319,8 @@ theorem idx_eq_del (hK : Formalism.HermitianLatticesTheory.IsCMUnram K) (hU : Is
     simp [del, gidx, idx, hL.2]
   refine ⟨e, by exact_mod_cast h2.ne', by rw [h3, h4, mul_one]⟩
 
-include hX hX' hr hr' in
 
+include hX hX' hr hr' in
 theorem core (hK : Formalism.HermitianLatticesTheory.IsCMUnram K) (hU : IsUnimod H Λ) {Y : Submodule K V} (hY : X = Y ⊔ X ⊓ X')
     {M L L' Λ₁ A A' : Submodule (𝓞 K) V}
     (eM : M = (Λ ⊓ rs (𝓞 K) (perp H (X ⊓ X'))) ⊔ rs (𝓞 K) (X ⊓ X'))
@@ -369,8 +417,8 @@ open GlobalTheory.DegCnt.Kill GlobalTheory.DegCnt.FrameCramer
 
 variable {H : HermSpace K V} {r : ℕ}
 
-omit [FiniteDimensional K V] [Module (𝓞 K) V] [IsScalarTower (𝓞 K) K V] in
 
+omit [FiniteDimensional K V] [Module (𝓞 K) V] [IsScalarTower (𝓞 K) K V] in
 theorem flag_rad (F F' : FlagD H r) {j : ℕ} (hj : j ≤ r) (hD : Dl F F' j (hj.trans (Nat.le_succ r)) ≠ 0)
     (h : ∀ a : Fin r, j ≤ a.val → ∃ c : K, F.e a.castSucc = c • F'.e a.castSucc) :
     ∀ x ∈ F.X, (∀ y ∈ F'.X, H.B x y = 0) → x ∈ F'.X := by
@@ -381,7 +429,7 @@ theorem flag_rad (F F' : FlagD H r) {j : ℕ} (hj : j ≤ r) (hD : Dl F F' j (hj
     refine Matrix.eq_zero_of_vecMul_eq_zero hD (funext fun b => ?_)
     have hb := Xa_le F' j (e_mem F' hj b)
     have := h0 _ hb
-    rw [map_add, LinearMap.add_apply, iso_Xa F' hi hb, add_zero] at this
+    rw [map_add (f := _), LinearMap.add_apply, iso_Xa F' hi hb, add_zero] at this
     simpa [Matrix.vecMul, dotProduct, Zhat] using this
   simpa [this] using hi
 

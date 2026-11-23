@@ -1,5 +1,51 @@
-import Mathlib
-import GroundTheory.ArithmeticGeometry.AbelianVarieties.Divisors
+module
+
+public import GroundTheory.ArithmeticGeometry.AbelianVarieties.Divisors
+public import GroundTheory.ArithmeticGeometry.AbelianVarieties.FunctionFieldPoint
+public import Mathlib.Algebra.AffineMonoid.UniqueSums
+public import Mathlib.RingTheory.Ideal.Norm.RelNorm
+public import Mathlib.RingTheory.Polynomial.IsIntegral
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GroundTheory.Arith.Abelian
 
@@ -30,6 +76,12 @@ theorem span_X_sub_C_le_comap_XYIdeal (x : F) (y : F[X]) :
   exact Ideal.subset_span (Set.mem_insert _ _)
 
 variable [IsAlgClosed F] [W.IsElliptic]
+
+local instance : IsDedekindDomain W.toAffine.CoordinateRing := by
+  refine isDedekindDomain_iff_isDiscreteValuationRing_atPrime.mpr ⟨inferInstance, ?_⟩
+  intro P hP0 hP
+  obtain ⟨x, y, h, rfl⟩ := exists_eq_XYIdeal W hP0
+  exact isDiscreteValuationRing_localization_XYIdeal W h
 
 theorem relNorm_XYIdeal {x y : F} (h : W.toAffine.Nonsingular x y) :
     Ideal.relNorm F[X] (XYIdeal W.toAffine x (C y)) = Ideal.span {X - C x} := by
@@ -79,7 +131,7 @@ theorem finsum_count_XYIdeal {x y : F} (h : W.toAffine.Nonsingular x y) :
     (heightOneOfNonsingular h)
   simp only [heightOneOfNonsingular_asIdeal] at hc
   rw [finsum_eq_single _ (heightOneOfNonsingular h) (fun v hv => by
-    rw [hc v, if_neg (fun e => hv e.symm)]), hc, if_pos rfl]
+    rw [hc v, ite_eq_right (fun e => hv e.symm)]), hc, ite_eq_left rfl]
 
 theorem natDegree_eq_finsum_count_of_relNorm_eq {I : Ideal W.toAffine.CoordinateRing} (hI : I ≠ 0)
     {p : F[X]} (hp : Ideal.relNorm F[X] I = Ideal.span {p}) :

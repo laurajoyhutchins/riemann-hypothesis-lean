@@ -1,5 +1,60 @@
-import Formalism.HermitianCurvature.CapelliDeterminantAndBranching
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.QuantumMinorCommutation
+module
+
+public import Formalism.HermitianCurvature.CapelliDeterminantAndBranching
+public import Mathlib.LinearAlgebra.Lagrange
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.QuantumMinorCommutation
+import Formalism.RealPlaceAnalysis.RealPlaceTaylor.GeneratorCommutatorQuantumDet
+import Formalism.RealPlaceAnalysis.RealPlaceTaylor.QuantumDetHighestWeightHolds
+import Formalism.RealPlaceAnalysis.RealPlaceTaylor.ShiftedGeneratorEqIteSmulAdd
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Finset Polynomial
 
@@ -71,7 +126,8 @@ theorem prod_isPol {A : Type} [Ring A] [Algebra ℂ A] (t : ℕ) (α β : Fin t 
     have h4 := h2.add h3
     convert h4 using 1
     funext u
-    simp only [List.ofFn_succ, List.prod_cons, LinearMap.mulLeft_apply, add_mul, smul_mul_assoc]
+    rw [List.ofFn_succ, List.prod_cons, add_mul, smul_mul_assoc]
+    simp only [LinearMap.mulLeft_apply]
 
 theorem Tm_lin {A : Type} [Ring A] [Algebra ℂ A] {n : ℕ} (E : Fin n → Fin n → A) (u k : ℂ) (a b : Fin n) :
     Tm E (u - k) a b = u • (if a = b then (1 : A) else 0) + ((if a = b then algebraMap ℂ A (-k) else 0) + E a b) := by
@@ -100,8 +156,9 @@ theorem polyVanish {X : Type} [AddCommGroup X] [Module ℂ X] (d : ℕ) (c : ℕ
   have hroot : ∀ u : ℂ, u ∉ F → p.eval u = 0 := by
     intro u hu
     have h1 := congrArg φ (h u hu)
+
     simp only [map_sum, map_smul, smul_eq_mul, map_zero] at h1
-    rw [hp, Polynomial.eval_finset_sum]
+    rw [hp, Polynomial.eval_finsetSum]
     simp only [Polynomial.eval_mul, Polynomial.eval_C, Polynomial.eval_pow, Polynomial.eval_X]
     calc _ = ∑ j ∈ Finset.range d, u ^ j * φ (c j) := Finset.sum_congr rfl (fun j _ => mul_comm _ _)
       _ = 0 := h1
@@ -111,7 +168,7 @@ theorem polyVanish {X : Type} [AddCommGroup X] [Module ℂ X] (d : ℕ) (c : ℕ
     intro u hu
     exact hroot u hu
   have hc : p.coeff s = 0 := by rw [hp0, Polynomial.coeff_zero]
-  rw [hp, Polynomial.finset_sum_coeff] at hc
+  rw [hp, Polynomial.finsetSum_coeff] at hc
   simpa [Polynomial.coeff_C_mul_X_pow, Finset.mem_range.mp hs] using hc
 
 theorem pow_mem {W : Type} [AddCommGroup W] [Module ℂ W] (G : Submodule ℂ W) (K : Module.End ℂ W)
@@ -277,6 +334,7 @@ theorem comat (hE : GlRel E) (u : ℂ) (X : Fin (N + 1) → V) (i : Fin (N + 1))
   have h2 : ∑ l, (if i = l then qdet E u (X l) else 0) = qdet E u (X i) := by simp
   rw [← h2, ← Finset.sum_congr rfl (fun l _ => h l), Finset.sum_comm, Th_apply]
   refine Finset.sum_congr rfl (fun j _ => ?_)
+
   rw [← Finset.smul_sum, ← map_sum]
   congr 2
   simp only [Tm_apply, Finset.sum_add_distrib, Finset.sum_ite_eq, Finset.mem_univ, if_true, Pi.add_apply,
@@ -343,7 +401,7 @@ theorem star (hE : GlRel E) {m : Fin (N + 1) → ℂ} {v : V} (hv : v ∈ CapSp 
   have h2 := detCov E hE hv hX u x
   have lin : (u • Th E u X - Th E u (KK E X)) x = Th E u ((u - (N : ℂ)) • X + EE E X) x - Th E u X x := by
     rw [KK_apply]
-    simp only [map_add, map_sub, map_smul, Pi.add_apply, Pi.sub_apply, Pi.smul_apply]
+    simp only [map_add (f := _), map_sub, map_smul, Pi.add_apply, Pi.sub_apply, Pi.smul_apply]
     first
       | module
       | (simp only [sub_smul, add_smul, one_smul]; abel)
@@ -438,7 +496,7 @@ theorem covUp_succ (η : Fin (N + 1) → Module.End ℂ V) (hE : GlRel E) (hη :
     first
       | rw [Module.End.mul_apply] at h1
       | rw [LinearMap.mul_apply] at h1
-    rw [map_add, Polynomial.aeval_X, Polynomial.aeval_C, LinearMap.add_apply,
+    rw [map_add (f := _), Polynomial.aeval_X, Polynomial.aeval_C, LinearMap.add_apply,
       Module.algebraMap_end_apply] at h1
     rw [hYdef, neg_smul]
     exact eq_neg_of_add_eq_zero_left h1
@@ -446,6 +504,7 @@ theorem covUp_succ (η : Fin (N + 1) → Module.End ℂ V) (hE : GlRel E) (hη :
   · have hs : ∑ i, Lagrange.basis Finset.univ (fun j => -m j) i = 1 :=
       Lagrange.sum_basis (fun a _ b _ h => hm (neg_injective h)) Finset.univ_nonempty
     have hsum : ∑ i, Y i = Z := by
+
       rw [hYdef, ← LinearMap.sum_apply, ← map_sum, hs, map_one]
       rfl
     have h1 := congrFun hsum x

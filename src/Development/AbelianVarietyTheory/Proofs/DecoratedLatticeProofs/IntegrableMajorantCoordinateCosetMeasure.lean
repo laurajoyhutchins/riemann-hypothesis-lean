@@ -1,12 +1,50 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.IsQuasiFam
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.RealSizeNonneg
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.UnifModGrowthOfIsUnifModerate
-import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.ThetaAbsoluteSum
-import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.TransvectionAction
-import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.WeilDatumExistence
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.AdelicMatrixSchwartzMajorantMeasurableRationalShStatement
-import Formalism.LocalToGlobal.IndefiniteReal.LevelTypeEquivalence.InfFam
+module
+
+public import Development.AbelianVarietyTheory.Definitions.LatticeFrames.RealSizeNonneg
+public import Formalism.LocalToGlobal.IndefiniteReal.LevelTypeEquivalence.InfFam
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.AdelicMatrixSchwartzMajorantMeasurableRationalShStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Development.AbelianVarietyTheory.Definitions.LatticeFrames.IsThetaFam
+import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.WittSmallGroupEmbeddingMemPointwiseStabilizerIso
+
+@[expose] public section
 
 noncomputable section
 
@@ -17,7 +55,7 @@ attribute [local instance] Formalism.BasicNotions.Host.cmStar
 open GlobalTheory.Unf
 open scoped ComplexOrder ENNReal NNReal ContDiff
 
-set_option synthInstance.maxHeartbeats 160000
+
 
 namespace GlobalTheory.Unf.MajInt
 
@@ -33,14 +71,14 @@ theorem finPart_incInf (y : Ainf D.host.F ⊗[D.host.F] D.host.E) :
   | tmul a e =>
     show (0 : Af D.host.F) ⊗ₜ[D.host.F] e = 0
     exact TensorProduct.zero_tmul _ _
-  | add x y hx hy => rw [map_add, map_add, hx, hy, add_zero]
+  | add x y hx hy => rw [map_add (f := _), map_add (f := _), hx, hy, add_zero]
 
 theorem infPart_incInf (y : Ainf D.host.F ⊗[D.host.F] D.host.E) :
     infPart D (incInf D y) = y := by
   induction y using TensorProduct.induction_on with
   | zero => rw [map_zero, map_zero]
   | tmul a e => rfl
-  | add x y hx hy => rw [map_add, map_add, hx, hy]
+  | add x y hx hy => rw [map_add (f := _), map_add (f := _), hx, hy]
 
 def realPt (D : D7) (w : D.what₂.Tau → ℂ) : AE D :=
   incInf D (Formalism.IndefR.Eqv.splitInv D w)
@@ -49,8 +87,8 @@ theorem theta_realPt {θ : InfFam D} (hθ : IsInfFam θ) (w : D.what₂.Tau → 
     θ τ (infPart D (realPt D w)) = w τ := by
   rw [realPt, infPart_incInf, Formalism.IndefR.Eqv.eq_thetaC D hθ, Formalism.IndefR.Eqv.thetaC_splitInv]
 
-open Classical in
 
+open Classical in
 def shift {m n : ℕ} (P : Fin m → Fin n → Prop) (z : D.what₂.Tau × Fin m × Fin n → ℤ × ℤ) : Mx D m n :=
   Matrix.of fun i j => if P i j then
     realPt D (fun τ => ((z (τ, i, j)).1 : ℂ) + ((z (τ, i, j)).2 : ℂ) * Complex.I) else 0
@@ -147,7 +185,7 @@ theorem maj_integrable : ∀ (D : D7) (θ : InfFam D), IsInfFam θ → ∀ (m n 
     intro z
     have hoff : ∀ i j, ¬ P i j → (-shift (D := D) P z) i j = 0 := by
       intro i j h; rw [Matrix.neg_apply, shift_off P z i j h, neg_zero]
-    have hm : Measurable (fun x : Mx D m n => x + -shift P z) := (continuous_add_right _).measurable
+    have hm : Measurable (fun x : Mx D m n => x + -shift P z) := (continuous_id.add continuous_const).measurable
     calc μ ((fun x => x - shift P z) ⁻¹' Q) = μ ((fun x => x + -shift P z) ⁻¹' Q) := by
           simp only [sub_eq_add_neg]
       _ ≤ μ.map (fun x => x + -shift P z) Q := Measure.le_map_apply hm.aemeasurable Q

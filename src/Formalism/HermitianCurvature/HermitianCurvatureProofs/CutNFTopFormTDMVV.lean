@@ -1,4 +1,50 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutNFTopFormTDM
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutNFTopFormTDM
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.BigCellZetaMinors
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.ComponentFamilySettingOfSetting
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.PositiveOrbitOpen
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.RegularisedPairingViaPhase
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace Formalism.FourierDecayAlt.P.CutBP.TDM
 
@@ -38,12 +84,12 @@ theorem orbJ_congr_gpos (Bs : B.RealPlaceData k r Wp Wq) {γ : B.Mat k r} (hγ :
   unfold D.orbJ
   by_cases h : ∃ θ, D.IsNormCut Bs γ μR θ ∧ Integrable (fun q => θ q • D.orbIntegrand Bs γ Y q) Bs.μSS
   · have h2 : ∃ θ, D.IsNormCut Bs γ μR θ ∧ Integrable (fun q => θ q • D.orbIntegrand Bs γ Y' q) Bs.μSS := hP ▸ h
-    rw [dif_pos h, dif_pos h2, vv_choose_congr hP h h2]
+    rw [dite_eq_left h, dite_eq_left h2, vv_choose_congr hP h h2]
     apply integral_congr_ae
     filter_upwards [hae] with q hq
     rw [hq]
   · have h2 : ¬∃ θ, D.IsNormCut Bs γ μR θ ∧ Integrable (fun q => θ q • D.orbIntegrand Bs γ Y' q) Bs.μSS := hP ▸ h
-    rw [dif_neg h, dif_neg h2]
+    rw [dite_eq_right h, dite_eq_right h2]
 
 end orb
 
@@ -52,16 +98,16 @@ theorem vector_positive_cone : VecVGPos := by
   unfold KB.Pl.V D.vecV
   by_cases h : D.IsLocPt a (P.r + 1) ∧
       0 < D.ptG (Tz P.k P.r p.T.base.z * Tz P.k P.r p.T.base.z') P.r a
-  · rw [dif_pos h, dif_pos h]
+  · rw [dite_eq_left h, dite_eq_left h]
     by_cases h' : ∃ γ ∈ B.GV P.k P.r, Zhat P.k P.r p.T.base.z p.T.base.z' γ = D.ptMatN a (P.r + 1) ∧
         D.IsDFrame p.T.base p.ν' p.m₀ γ
-    · rw [dif_pos h', dif_pos h']
+    · rw [dite_eq_left h', dite_eq_left h']
       obtain ⟨hγ, hZ, -⟩ := h'.choose_spec
       have hpos : 0 < Gf P.k P.r p.T.base.z p.T.base.z' h'.choose := by
         rw [← Formalism.FourierDecayAlt.P.ptG_spec P.k P.r _ _ a _ h.1 hZ]; exact h.2
       exact orbJ_congr_gpos p.T.base hγ hpos _ Y Y' hYY
-    · rw [dif_neg h', dif_neg h']
-  · rw [dif_neg h, dif_neg h]
+    · rw [dite_eq_right h', dite_eq_right h']
+  · rw [dite_eq_right h, dite_eq_right h]
 
 end
 

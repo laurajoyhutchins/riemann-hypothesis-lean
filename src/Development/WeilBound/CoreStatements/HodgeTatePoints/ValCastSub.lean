@@ -1,8 +1,53 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.TorusUniformisation.ChowMahlerFamilies.ValLeOfMem
-import Development.WeilBound.CoreStatements.HodgeTatePoints.ExistsDualOf
-import Development.WeilBound.CoreStatements.HodgeTatePoints.CompMemAddFun
-import ReciprocityTheory.DualLattices.HasLenLeOfSurj
+module
+
+public import Development.WeilBound.CoreStatements.HodgeTatePoints.ExistsDualOf
+public import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.IsFinFlatSub
+public import ReciprocityTheory.DualLattices.PrimeHopfOrderOfAddEquiv
+public import Development.WeilBound.CoreStatements.TorusUniformisation.ChowMahlerFamilies.ValLeOfMem
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import ReciprocityTheory.DualLattices.HasLenCokerDet
+public import ReciprocityTheory.DualLattices.HasLenLeOfSurj
+
+@[expose] public section
 
 open NumberField ReciprocityTheory.PGsh.L2 ReciprocityTheory.PGsh.Up GlobalTheory.CompanionTheory.Ar GlobalTheory.CompanionTheory.Ar.GR GlobalTheory.CompanionTheory.Ar.Num.FamEx
 open PositivityTheory.Xgn.TestGroupPoint
@@ -115,8 +160,9 @@ theorem cast_pair {p m : ℕ} (h : p ∣ m) (e : (Fin n → 𝓞 E) →+ (Fin n 
     co p x ⬝ᵥ (Matrix.of fun a b => ZMod.castHom h (ZMod p) (e (dl a) (dl b))) *ᵥ co p x' =
       ZMod.castHom h (ZMod p) (e x x') := by
   conv_rhs => rw [← sum_cz x, ← sum_cz x']
-  simp only [map_sum, map_zsmul, AddMonoidHom.finset_sum_apply, AddMonoidHom.smul_apply,
-    dotProduct, Matrix.mulVec, Matrix.of_apply, co_apply, Finset.mul_sum]
+
+  simp only [map_sum, map_zsmul, AddMonoidHom.finsetSum_apply, AddMonoidHom.smul_apply,
+  dotProduct, Matrix.mulVec, Matrix.of_apply, co_apply, Finset.mul_sum]
   simp only [Finset.smul_sum, zsmul_eq_mul]
   conv_rhs => rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun a _ => Finset.sum_congr rfl fun b _ => ?_
@@ -145,11 +191,11 @@ private theorem hasLen_AFQuot_map_pbE_of_addEquiv {X Y : Type} [AddCommGroup X] 
       (∀ a b : X, y (φ (a + b)) - y (φ a) - y (φ b) ∈ pInt R p)
     constructor
     · intro hy a b
-      rw [map_add]
+      rw [map_add (f := _)]
       exact hy _ _
     · intro hy a b
       have hab := hy (φ.symm a) (φ.symm b)
-      simp only [map_add, AddEquiv.apply_symm_apply] at hab
+      simp only [map_add (f := _), AddEquiv.apply_symm_apply] at hab
       exact hab
   have hpf : ∀ y : Y → C, y ∈ pFun R p Y ↔ P y ∈ pFun R p X := by
     intro y
@@ -249,7 +295,7 @@ theorem core_pull {p : ℕ} [Fact p.Prime] [IsAlgClosed C] [CharZero C] (hv : v.
     have ha' : algebraMap R C a = (T.symm f).1 0 := by rw [hT, map_zero, ha]
     have hb' : algebraMap R C b = (T.symm f2).1 0 := by rw [hT, map_zero, hb]
     show qq p R g (Dv (T.symm h)) = a • qq p R g (Dv (T.symm f2)) + b • qq p R g (Dv (T.symm f))
-    rw [hD _ _ _ a b hh' ha' hb', map_add, map_smul, map_smul]
+    rw [hD _ _ _ a b hh' ha' hb', map_add (f := _), map_smul, map_smul]
   have hsurj : Function.Surjective Dv' := by
     intro w
     obtain ⟨a, ha⟩ := surj_aug Dv S hS hs w
@@ -293,6 +339,7 @@ theorem core_pull {p : ℕ} [Fact p.Prime] [IsAlgClosed C] [CharZero C] (hv : v.
     rw [Ideal.Quotient.eq]
     have hih : ih x0 k = ∑ m, ih (dl m) k * (cz x0 m : R) := by
       conv_lhs => rw [← sum_cz x0]
+
       simp only [map_sum, map_zsmul, Finset.sum_apply, Pi.smul_apply]
       simp only [zsmul_eq_mul]
       exact Finset.sum_congr rfl fun m _ => mul_comm _ _

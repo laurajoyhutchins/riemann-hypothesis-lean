@@ -1,8 +1,43 @@
-import Mathlib
-import Formalism.LocalToGlobal.IndefiniteReal.OneMapT
-import Formalism.LocalToGlobal.IndefiniteReal.FWExist
-import Formalism.LocalToGlobal.IndefiniteReal.LinksChar
-import Formalism.LocalToGlobal.ProjectiveLattices.CompHt
+module
+
+public import Formalism.LocalToGlobal.IndefiniteReal.OneMapT
+public import Formalism.LocalToGlobal.ProjectiveLattices.CompHt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -29,7 +64,7 @@ variable (T : CoreJ D) [Algebra T.Q.c.F D.what₂.LL] (R : RealDat D A T.Q.c.F)
 def CoverField : Prop :=
   ∀ (i : Fin D.R.m) (t : T0) (l₂ : ReciprocityTheory.ChartRestriction.G.Geo.Tor.Level T.Q.H), T.Q.l.Dvd l₂ → l₂.M = T.Q.l.M * tupPrime R t → l₂.A = 1 →
     ∀ (Xo₂ : ReciprocityTheory.ChartRestriction.G.Geo.Tor.Moduli (T.Q.Dw ((i : ℕ) + 1)) l₂) (c₂ : ReciprocityTheory.ChartRestriction.G.Geo.Tor.Coeff l₂),
-      c₂.F = D.what₂.embLL.toRatAlgHom.fieldRange → FnAlgClosed Xo₂ c₂
+      c₂.F = D.what₂.embLL.toRatAlgHom.fieldRange → FnAlgClosed (Xo := Xo₂) (c := c₂)
 
 variable (κ : ∀ i : Fin D.R.m, WeightFamilies.Wt D ((i : ℕ) + 1)) (v₀ : ∀ (i : Fin D.R.m) (σ : D.what₂.LL →+* ℂ), (R.MW i σ).Vec)
 
@@ -41,8 +76,5 @@ def OneMapOverL (ph : ℂ) (i : Fin D.R.m) : Prop :=
   ∃ O' : OMDat T.toCore R i T0 id, O'.c'.F = D.what₂.embLL.toRatAlgHom.fieldRange ∧
     O'.Pins (κ i) (v₀ i (sg0 D A)) (iotaW T i) (T.x₀ ((i : ℕ) + 1) O'.s0) ∧
       O'.OneMapOf (κ i) (v₀ i (sg0 D A)) (T.cE ((i : ℕ) + 1) O'.s0) ph
-
-theorem OneMapOverL.pins {ph : ℂ} {i : Fin D.R.m} (h : OneMapOverL T R κ v₀ ph i) : PinsOverL T R κ v₀ i :=
-  h.imp fun _ h => ⟨h.1, h.2.1⟩
 
 end GlobalTheory.TwistField

@@ -1,5 +1,46 @@
-import Development.WeilBound.CoreStatements.LocallyConstantCoinvariants.KdMulRight
-import Development.AutomorphicSpectrum.Proofs.MembershipProofs.ExistsEqMulApplyZero
+module
+
+public import Development.WeilBound.CoreStatements.LocallyConstantCoinvariants.PfDictDef
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsLocallyConstantAddChar
+public import Development.WeilBound.CoreStatements.LocallyConstantCoinvariants.KdMulRight
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 set_option linter.unusedSectionVars false
 
@@ -26,7 +67,7 @@ omit [Field k] [Fintype α] [Fintype β] in
 @[simp] theorem ofM_toM (y : α × β → k) : ofM (toM y) = y := rfl
 
 theorem dot_ofM (Y Z : Matrix α β k) : ofM Y ⬝ᵥ ofM Z = trace (Yᵀ * Z) := by
-  simp only [dotProduct, ofM, Fintype.sum_prod_type, trace, diag, mul_apply, transpose_apply]
+  simp only [dotProduct, ofM, Fintype.sum_prod_type, trace, diag, Matrix.mul_apply, transpose_apply]
   exact Finset.sum_comm
 
 theorem schr_schr {R : Type} [CommRing R] [Invertible (2 : R)] (ψ : AddChar R ℂ) {κ : Type} [Fintype κ] (a b : (κ → R) × (κ → R))
@@ -54,8 +95,8 @@ def rm (g : GL β k) : (α × β → k) ≃ₜ (α × β → k) where
   invFun y := ofM (toM y * (g⁻¹).1)
   left_inv y := by simp only [toM_ofM, Matrix.mul_assoc, Units.mul_inv, Matrix.mul_one, ofM_toM]
   right_inv y := by simp only [toM_ofM, Matrix.mul_assoc, Units.inv_mul, Matrix.mul_one, ofM_toM]
-  continuous_toFun := continuous_pi fun p => by simp only [ofM, toM, mul_apply, of_apply]; fun_prop
-  continuous_invFun := continuous_pi fun p => by simp only [ofM, toM, mul_apply, of_apply]; fun_prop
+  continuous_toFun := continuous_pi fun p => by simp only [ofM, toM, Matrix.mul_apply, of_apply]; fun_prop
+  continuous_invFun := continuous_pi fun p => by simp only [ofM, toM, Matrix.mul_apply, of_apply]; fun_prop
 
 def rmL (g : GL β k) : Module.End ℂ ((α × β → k) → ℂ) := LinearMap.funLeft ℂ ℂ (rm g)
 
@@ -103,16 +144,16 @@ variable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algeb
   {t : E →ₐ[F] Fv F v} {sec : Fv F v × Fv F v → AE F E} {α β κ : Type} [Fintype α] [DecidableEq α] [Fintype β] [DecidableEq β]
   [Fintype κ] {JA : Matrix α α (AE F E)} {JB : Matrix β β (AE F E)}
 
-variable (σ t JA JB) in
 
+variable (σ t JA JB) in
 structure Grams : Prop where
   uA : IsUnit (JA.map (piW t))
   uB : IsUnit (JB.map (piW t))
   sym : ∃ ε : Fv F v, ε * ε = 1 ∧ JA.map (piW (t.comp σ)) = ε • (JA.map (piW t))ᵀ ∧
     JB.map (piW (t.comp σ)) = (-ε) • (JB.map (piW t))ᵀ
 
-variable (σ t JA JB) in
 
+variable (σ t JA JB) in
 def coord (u : Matrix α β (AE F E)) : (α × β → Fv F v) × (α × β → Fv F v) :=
   (ofM (-(JA.map (piW t) * u.map (piW (t.comp σ)) * (JB.map (piW t))ᵀ)), ofM (-u.map (piW t)))
 
@@ -121,7 +162,7 @@ theorem symp_eq (h : IsSec σ t sec) (hG : Grams σ t JA JB) {u : Matrix α β (
       ((coord σ t JA JB u).1 ⬝ᵥ (coord σ t JA JB u').2 - (coord σ t JA JB u').1 ⬝ᵥ (coord σ t JA JB u).2) := by
   obtain ⟨ε, hε, hA, hB⟩ := hG.sym
   have e : hTens (cA σ) JA JB u u' = trace (JAᵀ * u * JB * (u'.map (cA σ))ᵀ) := by
-    simp only [hTens, trace, diag, mul_apply, transpose_apply, map_apply, Finset.sum_mul]
+    simp only [hTens, trace, diag, Matrix.mul_apply, dotProduct, transpose_apply, map_apply, Finset.sum_mul]
     calc _ = ∑ i, ∑ k, ∑ j, ∑ l, u i j * JA i k * JB j l * cA σ (u' k l) := Finset.sum_congr rfl fun i _ => Finset.sum_comm
       _ = ∑ k, ∑ i, ∑ j, ∑ l, u i j * JA i k * JB j l * cA σ (u' k l) := Finset.sum_comm
       _ = ∑ k, ∑ l, ∑ j, ∑ i, u i j * JA i k * JB j l * cA σ (u' k l) := Finset.sum_congr rfl fun k _ => by

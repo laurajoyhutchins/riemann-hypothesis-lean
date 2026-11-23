@@ -1,4 +1,49 @@
-import Formalism.LocalToGlobal.CharacterGerms.PderivSubGOff
+module
+
+public import Formalism.LocalToGlobal.CharacterGerms.GramMatrixMulRight
+public import Formalism.LocalToGlobal.CharacterGerms.FinTwoNeOneSub
+public import Formalism.LocalToGlobal.CharacterGerms.PderivSubGOff
+import Formalism.LocalToGlobal.CharacterGerms.RowTieAdm
+public import Formalism.LocalToGlobal.CharacterGerms.RowTieMemCDeg
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -46,6 +91,7 @@ theorem lap_plane (inj : Function.Injective fun x : Orb × ZMod 2 => tau x.1 x.2
     intro col
     have e2 := pderiv_subG_lam (gm := gm) plc inj ((ρ, ⟨o, ⟨t + 1, a2⟩⟩) : AA r tau N) col Q
     have e2' : pderiv (⟨tau o (t + 1), a2, plc (ρ, col)⟩ : Letter T r n) (subG r tau gm plc Q) = _ := e2
+
     rw [e2', map_sum, Finset.sum_comm]
     refine Finset.sum_congr rfl fun g2 _ => ?_
     rw [Derivation.leibniz, pderiv_C, smul_zero, add_zero, smul_eq_mul]
@@ -63,6 +109,7 @@ theorem lap_plane (inj : Function.Injective fun x : Orb × ZMod 2 => tau x.1 x.2
   refine Finset.sum_eq_zero fun g1 _ => ?_
   rw [Finset.sum_comm]
   refine Finset.sum_eq_zero fun g2 _ => ?_
+
   rw [← Finset.sum_mul, ← map_sum]
   by_cases hg : g1 = g2
   · have hK : ∑ col, gm o t col g1 * gm o (t + 1) col g2 = 0 := by

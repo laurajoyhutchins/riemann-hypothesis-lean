@@ -1,4 +1,55 @@
-import Mathlib
+module
+
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.Analysis.Calculus.ContDiff.Defs
+public import Mathlib.Analysis.InnerProductSpace.Basic
+public import Mathlib.Analysis.Normed.Field.Instances
+public import Mathlib.FieldTheory.AlgebraicClosure
+public import Mathlib.LinearAlgebra.Matrix.PosDef
+public import Mathlib.NumberTheory.Padics.Complex
+public import Mathlib.NumberTheory.Padics.RingHoms
+public import Mathlib.Topology.ContinuousMap.Algebra
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -13,10 +64,6 @@ def rtd (d : ℕ) : ℂ := Complex.I * ((Real.sqrt d : ℝ) : ℂ)
 def w0 (d : ℕ) : ℂ := (1 + rtd d) / 2
 
 def OK (d : ℕ) : Set ℂ := {z | ∃ u v : ℤ, z = (u : ℂ) + (v : ℂ) * w0 d}
-
-def eisOK (d k : ℕ) : ℂ := ∑' w : {w : ℂ // w ∈ OK d ∧ w ≠ 0}, 1 / (w : ℂ) ^ (2 * k)
-
-def discrOK (d : ℕ) : ℂ := (60 * eisOK d 2) ^ 3 - 27 * (140 * eisOK d 3) ^ 2
 
 variable {g : ℕ}
 
@@ -68,13 +115,12 @@ def Setup.AlgJets (S : Setup g) (δ : ℂ) (e : (Fin g → ℂ) → ℂ) : Prop 
 
 variable {q : ℕ} [Fact q.Prime]
 
+
 open Classical in
-
 def lamA (lam : Qbar →+* ℂ_[q]) (x : ℂ) : ℂ_[q] :=
-  if h : x ∈ Qbar then lam ⟨x, h⟩ else 0
-
-def SplitK (d q : ℕ) : Prop :=
-  (q = 2 ∧ d % 8 = 7) ∨ (q ≠ 2 ∧ jacobiSym (-(d : ℤ)) q = 1)
+  by
+    classical
+    exact if h : x ∈ Qbar then lam ⟨x, h⟩ else 0
 
 def Setup.NNBasis (S : Setup g) (q : ℕ) {r : ℕ} (b : Fin r → Fin g → ℂ) : Prop :=
   (∀ i, b i ∈ S.La) ∧
@@ -88,9 +134,6 @@ def IsIdem (lam : Qbar →+* ℂ_[q]) (d m : ℕ) (eps : ℂ) : Prop :=
 def liftY (q n : ℕ) (eps : ℂ) {r : ℕ} (b : Fin r → Fin g → ℂ) (y : Fin r → Fin (q ^ n)) : Fin g → ℂ :=
   (eps / (q : ℂ) ^ n) • ∑ i, (((y i : ℕ) : ℂ)) • b i
 
-def vecN {r : ℕ} (n : ℕ) (b : Fin r → Fin g → ℂ) (a : Fin r → Fin (q ^ n)) : Fin g → ℂ :=
-  ∑ i, (((a i : ℕ) : ℂ)) • b i
-
 def vecA {r : ℕ} (n : ℕ) (b : Fin r → Fin g → ℂ) (a : Fin r → ℤ_[q]) : Fin g → ℂ :=
   ∑ i, (((PadicInt.toZModPow n (a i)).val : ℕ) : ℂ) • b i
 
@@ -99,18 +142,6 @@ def zc (a : ℤ_[q]) : ℂ_[q] := algebraMap ℚ_[q] ℂ_[q] (a : ℚ_[q])
 def pairD (lam : Qbar →+* ℂ_[q]) (Ω : ℂ_[q]) (d : ℕ) (Hm : Matrix (Fin g) (Fin g) ℂ) {r : ℕ} (b : Fin r → Fin g → ℂ)
     (y : Fin g → ℂ) (a : Fin r → ℤ_[q]) : ℂ_[q] :=
   Ω⁻¹ * ∑ i, zc (a i) * lamA lam (beta d Hm y (b i))
-
-def FactorsMod {r : ℕ} (n : ℕ) (Φ : (Fin r → ℤ_[q]) → ℂ) : Prop :=
-  ∀ a a' : Fin r → ℤ_[q], (∀ i, ‖a i - a' i‖ ≤ (q : ℝ) ^ (-(n : ℤ))) → Φ a = Φ a'
-
-def xiF (d : ℕ) (Hm : Matrix (Fin g) (Fin g) ℂ) (n : ℕ) (eps : ℂ) {r : ℕ} (b : Fin r → Fin g → ℂ)
-    (Φ : (Fin r → ℤ_[q]) → ℂ) (G : (Fin g → ℂ) → ℂ) : (Fin g → ℂ) → ℂ :=
-  fun z => ((q : ℂ) ^ (n * r))⁻¹ * ∑ a : Fin r → Fin (q ^ n), Φ (fun i => (((a i : ℕ) : ℤ_[q]))) *
-    ∑ y : Fin r → Fin (q ^ n), (kap Hm (vecN (q := q) n b a) (liftY q n eps b y))⁻¹ *
-      opW d Hm (liftY q n eps b y) G z
-
-def EqAtQ (q : ℕ) (La La' : Submodule ℤ (Fin g → ℂ)) : Prop :=
-  ∃ s : ℕ, 0 < s ∧ Nat.Coprime s q ∧ (∀ x ∈ La, (s : ℂ) • x ∈ La') ∧ ∀ x ∈ La', (s : ℂ) • x ∈ La
 
 def MomentProperty (lam : Qbar →+* ℂ_[q]) (Ω : ℂ_[q]) (δ : ℂ) (S : Setup g) {r M : ℕ} (b : Fin r → Fin g → ℂ)
     (ts : Fin M → Fin g → ℂ) (μ : C(Fin r → ℤ_[q], ℂ_[q]) →L[ℂ_[q]] ℂ_[q]) (G : (Fin g → ℂ) → ℂ) : Prop :=
@@ -121,45 +152,5 @@ def MomentProperty (lam : Qbar →+* ℂ_[q]) (Ω : ℂ_[q]) (δ : ℂ) (S : Set
       (∀ a, f a = lamA lam (kap S.Hm (vecA n b a) (liftY q n eps b y)) * ∏ j, pairD lam Ω S.d S.Hm b (ys j) a) →
       jetV (opW S.d S.Hm (liftY q n eps b y) G) (fun j => δ⁻¹ • ys j) ∈ Qbar ∧
         lamA lam (jetV (opW S.d S.Hm (liftY q n eps b y) G) (fun j => δ⁻¹ • ys j)) = μ f
-
-def AveragedMomentProperty (lam : Qbar →+* ℂ_[q]) (Ω : ℂ_[q]) (δ : ℂ) (S : Setup g) {r M : ℕ} (b : Fin r → Fin g → ℂ)
-    (ts : Fin M → Fin g → ℂ) (μ : C(Fin r → ℤ_[q], ℂ_[q]) →L[ℂ_[q]] ℂ_[q]) (G : (Fin g → ℂ) → ℂ) : Prop :=
-  ∀ (n m : ℕ) (eps : ℂ), IsIdem lam S.d m eps → 2 * n ≤ m →
-    (∀ (l : Fin M) (i : Fin r), ∃ z : ℤ, (hf S.Hm (eps • b i) (ts l)).im = z) →
-    ∀ Φ : (Fin r → ℤ_[q]) → ℂ, FactorsMod n Φ → (∀ a, Φ a ∈ Qbar) →
-    ∀ (k : ℕ) (ys : Fin k → Fin g → ℂ), (∀ j, S.AlgDir (ys j)) →
-    ∀ f : C(Fin r → ℤ_[q], ℂ_[q]),
-      (∀ a, f a = lamA lam (Φ a) * ∏ j, pairD lam Ω S.d S.Hm b (ys j) a) →
-      jetV (xiF S.d S.Hm n eps b Φ G) (fun j => δ⁻¹ • ys j) ∈ Qbar ∧
-        lamA lam (jetV (xiF S.d S.Hm n eps b Φ G) (fun j => δ⁻¹ • ys j)) = μ f
-
-def JetMomB : Prop :=
-  ∀ (d q : ℕ) [Fact q.Prime] (lam : Qbar →+* ℂ_[q]) (δ : ℂ), d.Prime → d % 16 = 7 → SplitK d q → δ ^ 12 = discrOK d →
-  ∃ Ω : ℂ_[q], ‖Ω‖ = 1 ∧
-  ∀ (g : ℕ) (S : Setup g), S.d = d → S.Ok →
-  ∀ (r : ℕ) (b : Fin r → Fin g → ℂ), S.NNBasis q b →
-  ∀ e : (Fin g → ℂ) → ℂ, S.IsTheta e → S.AlgJets δ e →
-  ∃ ν : C(Fin r → ℤ_[q], ℂ_[q]) →L[ℂ_[q]] ℂ_[q],
-    MomentProperty lam Ω δ S b (fun _ : Fin 0 => 0) ν e ∧ AveragedMomentProperty lam Ω δ S b (fun _ : Fin 0 => 0) ν e ∧
-    ∀ t : Fin g → ℂ, S.PrimeTo q t →
-    ∃ μ : C(Fin r → ℤ_[q], ℂ_[q]) →L[ℂ_[q]] ℂ_[q], ‖μ‖ = ‖ν‖ ∧
-      MomentProperty lam Ω δ S b (fun _ : Fin 1 => t) μ (opU S.Hm t e) ∧
-        AveragedMomentProperty lam Ω δ S b (fun _ : Fin 1 => t) μ (opU S.Hm t e)
-
-def JetMomBC : Prop :=
-  ∀ (d q : ℕ) [Fact q.Prime] (lam : Qbar →+* ℂ_[q]) (δ : ℂ), d.Prime → d % 16 = 7 → SplitK d q → δ ^ 12 = discrOK d →
-  ∃ Ω : ℂ_[q], ‖Ω‖ = 1 ∧
-  ∀ (g : ℕ) (S : Setup g), S.d = d → S.Ok →
-  ∀ (r : ℕ) (b : Fin r → Fin g → ℂ), S.NNBasis q b →
-  ∀ (M : ℕ) (Sk : Fin M → Setup g) (e : Fin M → (Fin g → ℂ) → ℂ) (t : Fin M → Fin g → ℂ) (c : Fin M → ℂ),
-    (∀ k, (Sk k).d = d ∧ (Sk k).Hm = S.Hm ∧ (Sk k).Ok ∧ EqAtQ q S.La (Sk k).La) →
-    (∀ k, (Sk k).IsTheta (e k) ∧ (Sk k).AlgJets δ (e k) ∧ (Sk k).PrimeTo q (t k)) →
-    (∀ k, c k ∈ Qbar) → (∀ i k, b i ∈ (Sk k).La) →
-  ∃ (ν : Fin M → C(Fin r → ℤ_[q], ℂ_[q]) →L[ℂ_[q]] ℂ_[q]) (μ : C(Fin r → ℤ_[q], ℂ_[q]) →L[ℂ_[q]] ℂ_[q]),
-    (∀ k, MomentProperty lam Ω δ (Sk k) b (fun _ : Fin 0 => 0) (ν k) (e k) ∧
-      AveragedMomentProperty lam Ω δ (Sk k) b (fun _ : Fin 0 => 0) (ν k) (e k)) ∧
-    (∀ C : ℝ, 0 ≤ C → (∀ k, ‖lamA lam (c k)‖ * ‖ν k‖ ≤ C) → ‖μ‖ ≤ C) ∧
-    MomentProperty lam Ω δ S b t μ (fun z => ∑ k, c k * opU S.Hm (t k) (e k) z) ∧
-      AveragedMomentProperty lam Ω δ S b t μ (fun z => ∑ k, c k * opU S.Hm (t k) (e k) z)
 
 end Formalism.L2.Ker.JMB

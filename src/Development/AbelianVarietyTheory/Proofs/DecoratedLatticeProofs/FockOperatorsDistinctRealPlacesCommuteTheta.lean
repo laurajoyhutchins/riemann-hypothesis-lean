@@ -1,12 +1,52 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.ThetaSourceAction
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.EqZeroOfLintegralEqZero
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ContinuousOnAtTau
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.EqZeroOfPderivStable
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.IsStepWeil
+import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.IsVacFOfIsVacVec
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ComplexEmbeddingHermitianQuadrupleSum
 import Development.AbelianVarietyTheory.Proofs.TwistedOperators.CartFrSgn
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.EqZeroOfPderivStable
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.EqZeroOfLintegralEqZero
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ContinuousOnAtTau
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.ChainParSucc
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.AdmissibleDiscreteSeriesOfHasParam
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.HarishChandraModulesOn
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.HasDRepIffHasDerivAt
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.S Formalism.L2.Theta Formalism.IndefR Formalism.IndefR.Links Formalism.IndefR.Mult Formalism.IndefR.Datum MeasureTheory NumberField Matrix
 open GlobalTheory.Chain GlobalTheory.ChainFr GlobalTheory.PairLift GlobalTheory.Chain.RealIt
 open scoped TensorProduct InnerProductSpace ComplexConjugate
@@ -42,7 +82,7 @@ theorem pure_comm {B : (X → ℂ) → (X → ℂ)} (hadd : ∀ f f', P f → P 
     unfold opPow
     rw [Bsm _ _ (GlobalTheory.FockIndep.foldr_mem hA hf _), foldr_comm hA hBA hf]
   | add p q hp hq =>
-    rw [map_add, map_add, Badd _ _ (GlobalTheory.FockIndep.pure_mem hadd hsm hA hf _) (GlobalTheory.FockIndep.pure_mem hadd hsm hA hf _),
+    rw [map_add (f := _), map_add (f := _), Badd _ _ (GlobalTheory.FockIndep.pure_mem hadd hsm hA hf _) (GlobalTheory.FockIndep.pure_mem hadd hsm hA hf _),
       hp, hq]
 
 theorem pure_fun_add (hA : ∀ i f, P f → P (A i f)) (hadd : ∀ f f', P f → P f' → P (f + f'))
@@ -62,7 +102,7 @@ theorem pure_fun_add (hA : ∀ i f, P f → P (A i f)) (hadd : ∀ f f', P f →
     unfold opPow
     rw [hl, smul_add]
   | add p q hp hq =>
-    rw [map_add, map_add, map_add, hp, hq]
+    rw [map_add (f := _), map_add (f := _), map_add (f := _), hp, hq]
     abel
 
 theorem pure_fun_smul (hA : ∀ i f, P f → P (A i f))
@@ -80,7 +120,7 @@ theorem pure_fun_smul (hA : ∀ i f, P f → P (A i f))
     unfold opPow
     rw [hl, smul_comm]
   | add p q hp hq =>
-    rw [map_add, map_add, hp, hq, smul_add]
+    rw [map_add (f := _), map_add (f := _), hp, hq, smul_add]
 
 end Generic
 
@@ -152,13 +192,13 @@ theorem om_dRho_fix (z : Matrix (Fin W.rank) (Fin V.rank) ℂ) {f : WO V W → �
 theorem om_aPlus_fix (J : Matrix (Fin W.rank) (Fin V.rank) ℂ → Matrix (Fin W.rank) (Fin V.rank) ℂ)
     (u : Matrix (Fin W.rank) (Fin V.rank) ℂ) {f : WO V W → ℂ} (hf : IsThetaFunO ψ V W f) :
     ω (atTau θ V τ' g, 1) (aPlus (heisO ψ V W) θ τ J u f) = aPlus (heisO ψ V W) θ τ J u (ω (atTau θ V τ' g, 1) f) := by
-  rw [GlobalTheory.FockIndep.aPlus_eq, GlobalTheory.FockIndep.aPlus_eq, map_smul, map_add, map_smul, om_dRho_fix hW hθ hne hg _ hf,
+  rw [GlobalTheory.FockIndep.aPlus_eq, GlobalTheory.FockIndep.aPlus_eq, map_smul, map_add (f := _), map_smul, om_dRho_fix hW hθ hne hg _ hf,
     om_dRho_fix hW hθ hne hg _ hf]
 
 theorem om_annih_fix (J : Matrix (Fin W.rank) (Fin V.rank) ℂ → Matrix (Fin W.rank) (Fin V.rank) ℂ)
     (u : Matrix (Fin W.rank) (Fin V.rank) ℂ) {f : WO V W → ℂ} (hf : IsThetaFunO ψ V W f) :
     ω (atTau θ V τ' g, 1) (annih (heisO ψ V W) θ τ J u f) = annih (heisO ψ V W) θ τ J u (ω (atTau θ V τ' g, 1) f) := by
-  rw [annih, annih, map_add, map_smul, om_dRho_fix hW hθ hne hg _ hf, om_dRho_fix hW hθ hne hg _ hf]
+  rw [annih, annih, map_add (f := _), map_smul, om_dRho_fix hW hθ hne hg _ hf, om_dRho_fix hW hθ hne hg _ hf]
 
 end Weil
 

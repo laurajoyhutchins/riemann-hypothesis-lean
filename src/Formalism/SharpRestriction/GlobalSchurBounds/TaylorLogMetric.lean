@@ -1,7 +1,46 @@
-import Mathlib
-import Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow
-import Formalism.SharpRestriction.ParConsts
-import Formalism.SharpRestriction.GlobalSchurBounds.GeneralLinearActions.IsDiscriminantTwelfthRootOfIdealLattice
+module
+
+public import Mathlib
+public import Formalism.SharpRestriction.GlobalSchurBounds.GeneralLinearActions.IsDiscriminantTwelfthRootOfIdealLattice
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.Padics.ProperSpace
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -62,26 +101,11 @@ def RelDetPinned (D : D7) (idl : D.Dt ⧸ D.UO → IdE D) : Prop :=
 def chiRec (D : D7) (idl : D.Dt ⧸ D.UO → IdE D) : IdE D → ℂ :=
   fun 𝔞 => if h : ∃ x, idl x = 𝔞 then ((chiQ D h.choose : ℂˣ) : ℂ) else 0
 
-def RelativeDeterminantEquation (D : D7) (T : Tor D) (e : FamE D) : Prop :=
-  letI := D.host.cmStar
-  (∀ N N' (L : SDLat D.host.E N) (L' : SDLat D.host.E N'), Even N → Even N' →
-    ∀ (γ : Matrix.unitaryGroup (Fin N) D.host.E) (γ' : Matrix.unitaryGroup (Fin N') D.host.E),
-      pull D T (γ : Matrix (Fin N) (Fin N) D.host.E) (γ' : Matrix (Fin N') (Fin N') D.host.E)
-          (e N N' L.1 L'.1) =
-        e N N' (SDLat.smulLat (γ : Matrix (Fin N) (Fin N) D.host.E) L.1)
-          (SDLat.smulLat (γ' : Matrix (Fin N') (Fin N') D.host.E) L'.1)) ∧
-  (∀ N N' (L : SDLat D.host.E N) (L' L'' : SDLat D.host.E N'), Even N → Even N' →
-    e N N' L.1 L''.1 = fun z => ((chiQ D (D.relDet N' L' L'') ^ (-((N / 2 : ℕ) : ℤ)) : ℂˣ) : ℂ) *
-      Iop D T (La D T L.1 L'.1) (La D T L.1 L''.1) (e N N' L.1 L'.1) z) ∧
-  (∀ N N' (L L₁ : SDLat D.host.E N) (L' : SDLat D.host.E N'), Even N → Even N' →
-    e N N' L₁.1 L'.1 = fun z => ((chiQ D (D.relDet N L L₁) ^ (((N' / 2 : ℕ) : ℤ)) : ℂˣ) : ℂ) *
-      Iop D T (La D T L.1 L'.1) (La D T L₁.1 L'.1) (e N N' L.1 L'.1) z)
-
 theorem chiRec_idl (D : D7) (idl : D.Dt ⧸ D.UO → IdE D) (h : Function.Injective idl) (x : D.Dt ⧸ D.UO) :
     chiRec D idl (idl x) = ((chiQ D x : ℂˣ) : ℂ) := by
   have hx : ∃ y, idl y = idl x := ⟨x, rfl⟩
   unfold chiRec
-  rw [dif_pos hx, h hx.choose_spec]
+  rw [dite_eq_left hx, h hx.choose_spec]
 
 def DualB (D : D7) {N : ℕ} (P : D.what₂.Tau → Matrix (Fin N) (Fin N) D.host.E) : Prop :=
   ∀ τ, ((P (tauSg D τ)).map D.host.conj).transpose * P τ = 1
@@ -242,22 +266,5 @@ def aux₃ (D : D7) (C : ℝ) : Prop :=
       int22 D (tor0 D cc δ) e ∧ mom22 D cc δ e ∧ LargerSupportMomentCondition D cc δ e ∧ str22 D (tor0 D cc δ) e
 
 def Stmt (D : D7) (C : ℝ) : Prop := AdmittedStatements D → aux₃ D C
-
-def CurveIdealTorusProperties (D : D7) (C : ℝ) : Prop :=
-  ∀ cc : Ideal (𝓞 D.host.K), IsCurveIdeal D cc → ∀ δ : ℂ, IsDiscriminantTwelfthRootOfIdealLattice D cc δ →
-    per22 D (tor0 D cc δ) ∧
-    ∃ e : FamE D, vec22 D (tor0 D cc δ) e ∧ th22 D (tor0 D cc δ) C e ∧ RelativeDeterminantEquation D (tor0 D cc δ) e ∧
-      int22 D (tor0 D cc δ) e ∧ mom22 D cc δ e ∧ LargerSupportMomentCondition D cc δ e ∧ str22 D (tor0 D cc δ) e
-
-def AdmF {eps : ℝ} (Fm : Formalism.MainNotions.FamP eps) : Prop := ∀ x (i : Fm.Ix x), AdmittedStatements (Fm.D x i)
-
-def ConclusionOnFamily {eps : ℝ} (Fm : Formalism.MainNotions.FamP eps) (C : ℝ) : Prop :=
-  ∀ x (i : Fm.Ix x), aux₃ (Fm.D x i) C
-
-def StatementFamilyConstant {eps : ℝ} (Fm : Formalism.MainNotions.FamP eps) (C : ℝ) : Prop :=
-  AdmF Fm → ConclusionOnFamily Fm C
-
-def KudlaFamilyStatement {eps : ℝ} (Fm : Formalism.MainNotions.FamP eps) : Prop :=
-  AdmF Fm → ∃ C : ℝ, ConclusionOnFamily Fm C
 
 end Formalism.MainNotions.TaylorLogMetric

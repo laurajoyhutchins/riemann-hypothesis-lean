@@ -1,12 +1,55 @@
-import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.FIwasawaB
+module
+
+public import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.FIwasawaB
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Formalism.UG Matrix
 
 namespace Formalism.UG.P
-
-macro "fIwasawa_omega" : tactic =>
-  `(tactic| ((try simp only [Fin.lt_def, Fin.le_def, Fin.val_rev, Fin.ext_iff,
-    ne_eq, not_true_eq_false] at *) <;> omega))
 
 section FIwasawaRed
 
@@ -36,22 +79,6 @@ private theorem mul_antiJ_apply' (N : Matrix (Fin n) (Fin n) L) (i j : Fin n) :
   · intro h
     exact absurd (Finset.mem_univ _) h
 
-private theorem antiJ_mul_apply' (N : Matrix (Fin n) (Fin n) L) (i j : Fin n) :
-    (antiJ L n * N) i j = N (Fin.rev i) j := by
-  have hi := i.isLt
-  rw [Matrix.mul_apply, Finset.sum_eq_single (Fin.rev i)]
-  · rw [antiJ_apply_adelic_iwasawa_hecke, if_pos (by rw [Fin.val_rev]; omega), one_mul]
-  · intro k _ hk
-    have hk' := k.isLt
-    rw [antiJ_apply_adelic_iwasawa_hecke, if_neg, zero_mul]
-    intro h
-    apply hk
-    ext
-    rw [Fin.val_rev]
-    omega
-  · intro h
-    exact absurd (Finset.mem_univ _) h
-
 private theorem cT_apply_eq_sigma_transpose (N : Matrix (Fin n) (Fin n) L) (i j : Fin n) :
     cT σ N i j = σ (N j i) := rfl
 
@@ -67,20 +94,6 @@ private theorem cT_one_eq_one : cT σ (1 : Matrix (Fin n) (Fin n) L) = 1 := by
   · subst h
     simp
   · rw [Matrix.one_apply_ne h, Matrix.one_apply_ne (Ne.symm h), map_zero]
-
-private theorem antiJ_mul_antiJ : antiJ L n * antiJ L n = 1 := by
-  ext i j
-  rw [antiJ_mul_apply', antiJ_apply_adelic_iwasawa_hecke, Matrix.one_apply]
-  have hi := i.isLt
-  have hj := j.isLt
-  by_cases h : i = j
-  · rw [if_pos h, if_pos (by rw [Fin.val_rev, ← h]; omega)]
-  · rw [if_neg h, if_neg]
-    intro h'
-    apply h
-    ext
-    rw [Fin.val_rev] at h'
-    omega
 
 theorem fIwasawa_Km_mul {A B : Matrix (Fin n) (Fin n) L} (hA : fIwasawaKm σ A) (hB : fIwasawaKm σ B) :
     fIwasawaKm σ (A * B) := by
@@ -106,32 +119,6 @@ theorem fIwasawa_Km_one : fIwasawaKm σ (1 : Matrix (Fin n) (Fin n) L) := by
     simp
   · rw [Matrix.one_apply_ne h, map_zero]
     exact zero_le'
-
-theorem fIwasawa_Km_inv (hσv : ∀ x, Valued.v (σ x) = Valued.v x) {A : Matrix (Fin n) (Fin n) L}
-    (hA : fIwasawaKm σ A) : fIwasawaKm σ (fIwasawaInv σ A) := by
-  unfold fIwasawaKm at hA ⊢
-  obtain ⟨hAu, hAi⟩ := hA
-  have hu := hAu
-  unfold fIwasawaUn at hu
-  have hBA : fIwasawaInv σ A * A = 1 := by
-    unfold fIwasawaInv
-    calc antiJ L n * cT σ A * antiJ L n * A = antiJ L n * (cT σ A * antiJ L n * A) := by
-          simp only [Matrix.mul_assoc]
-      _ = 1 := by rw [hu, antiJ_mul_antiJ]
-  have hAB : A * fIwasawaInv σ A = 1 := mul_eq_one_comm.mp hBA
-  refine ⟨?_, ?_⟩
-  · unfold fIwasawaUn
-    calc cT σ (fIwasawaInv σ A) * antiJ L n * fIwasawaInv σ A
-        = cT σ (fIwasawaInv σ A) * (cT σ A * antiJ L n * A) * fIwasawaInv σ A := by rw [hu]
-      _ = cT σ (A * fIwasawaInv σ A) * antiJ L n * (A * fIwasawaInv σ A) := by
-          rw [cT_mul_reverse]
-          simp only [Matrix.mul_assoc]
-      _ = antiJ L n := by rw [hAB, cT_one_eq_one, Matrix.one_mul, Matrix.mul_one]
-  · unfold fIwasawaInt at hAi ⊢
-    intro i j
-    unfold fIwasawaInv
-    rw [mul_antiJ_apply', antiJ_mul_apply', cT_apply_eq_sigma_transpose, hσv]
-    exact hAi _ _
 
 theorem fIwasawa_gram_un (M : Matrix (Fin n) (Fin n) L) (hM : fIwasawaUn σ M) (a b : Fin n) :
     ∑ j, σ (M (Fin.rev j) a) * M j b = if b = Fin.rev a then 1 else 0 := by
@@ -223,24 +210,27 @@ theorem fIwasawa_perm (ρ a : Fin n) (hρ : ρ < Fin.rev ρ) (ha1 : ρ ≤ a) (h
       (∀ i, (i < ρ ∨ Fin.rev ρ < i) → π i = i) := by
   have hρn := ρ.isLt
   have han := a.isLt
+  have haa' : a.val ≠ (Fin.rev a).val := fun h => haa (Fin.ext h)
+  clear haa
+  have harn := (Fin.rev a).isLt
   by_cases haρ : a = Fin.rev ρ
   · subst haρ
     refine ⟨Equiv.swap ρ (Fin.rev ρ), Equiv.swap_apply_left _ _, fun i => ?_, fun i hi => ?_⟩
     · have hin := i.isLt
       simp only [Equiv.swap_apply_def]
-      split_ifs <;> fIwasawa_omega
+      split_ifs <;> (simp only [Fin.rev_rev, Fin.ext_iff, Fin.val_rev, Fin.lt_def, Fin.le_def] at * <;> omega)
     · have hin := i.isLt
       simp only [Equiv.swap_apply_def]
-      split_ifs <;> fIwasawa_omega
+      split_ifs <;> (simp only [Fin.rev_rev, Fin.ext_iff, Fin.val_rev, Fin.lt_def, Fin.le_def] at * <;> omega)
   · refine ⟨Equiv.swap ρ a * Equiv.swap (Fin.rev ρ) (Fin.rev a), ?_, fun i => ?_, fun i hi => ?_⟩
     · simp only [Equiv.Perm.mul_apply, Equiv.swap_apply_def]
-      split_ifs <;> fIwasawa_omega
+      split_ifs <;> (simp only [Fin.rev_rev, Fin.ext_iff, Fin.val_rev, Fin.lt_def, Fin.le_def] at * <;> (try simp only [not_true_eq_false] at *) <;> omega)
     · have hin := i.isLt
       simp only [Equiv.Perm.mul_apply, Equiv.swap_apply_def]
-      split_ifs <;> fIwasawa_omega
+      split_ifs <;> (simp only [Fin.rev_rev, Fin.ext_iff, Fin.val_rev, Fin.lt_def, Fin.le_def] at * <;> omega)
     · have hin := i.isLt
       simp only [Equiv.Perm.mul_apply, Equiv.swap_apply_def]
-      split_ifs <;> fIwasawa_omega
+      split_ifs <;> (simp only [Fin.rev_rev, Fin.ext_iff, Fin.val_rev, Fin.lt_def, Fin.le_def] at * <;> omega)
 
 end FIwasawaRed
 

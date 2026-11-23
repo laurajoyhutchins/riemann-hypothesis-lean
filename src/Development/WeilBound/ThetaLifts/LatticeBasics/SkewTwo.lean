@@ -1,5 +1,57 @@
-import Mathlib
-import Development.WeilBound.ThetaLifts.LocalTheory.ConeShifts.ExistsPowIdem
+module
+
+public import Development.WeilBound.ThetaLifts.LocalTheory.ConeShifts.ExistsPowIdem
+public import Mathlib.LinearAlgebra.Matrix.Rank
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -18,6 +70,10 @@ theorem rank_lt {M : Matrix β β K} {y w φ : β → K} (hy : M *ᵥ y = 0) (hw
     rw [add_mulVec, vecMulVec_mulVec, op_smul_eq_smul]
   have h1 : w ∈ LinearMap.range (M + vecMulVec w φ).mulVecLin := ⟨(φ ⬝ᵥ y)⁻¹ • y, by
     rw [mulVecLin_apply, mulVec_smul, e, hy, zero_add, smul_smul, inv_mul_cancel₀ hφ, one_smul]⟩
+  have hR : ∀ N : Matrix β β K, N.rank = Module.finrank K (LinearMap.range N.mulVecLin) := fun N => by
+    classical
+    exact (Matrix.finrank_range_mulVecLin N).symm
+  rw [hR, hR]
   refine Submodule.finrank_lt_finrank_of_lt (lt_of_le_of_ne ?_ fun h => hw (h ▸ h1))
   rintro _ ⟨x, rfl⟩
   rw [mulVecLin_apply, eq_sub_of_add_eq (e x).symm]
@@ -31,8 +87,10 @@ theorem skew_two (hc : ∀ z, c (c z) = z) (hG : ∀ i j, c (G j i) = G i j) (u 
       G * (vecMulVec u (G *ᵥ c ∘ w) - vecMulVec w (G *ᵥ c ∘ u)).map c = 0 := by
   have k : ∀ u w : β → A, (vecMulVec u (G *ᵥ c ∘ w))ᵀ * G = G * (vecMulVec w (G *ᵥ c ∘ u)).map c := fun u w => by
     ext i j
-    simp only [mul_apply, transpose_apply, vecMulVec_apply, map_apply, map_mul, mulVec, dotProduct, map_sum, hc, hG,
-      Function.comp_apply, Finset.mul_sum, Finset.sum_mul]
+    change (∑ k : β, (u k * (G *ᵥ c ∘ w) i) * G k j) =
+      ∑ k : β, G i k * c (w k * (G *ᵥ c ∘ u) j)
+    simp only [mulVec, dotProduct, Function.comp_apply, Finset.mul_sum, Finset.sum_mul,
+      map_sum, map_mul, hc, hG]
     rw [Finset.sum_comm]
     exact Finset.sum_congr rfl fun _ _ => Finset.sum_congr rfl fun _ _ => by ring
   rw [transpose_sub, Matrix.sub_mul, Matrix.map_sub _ (map_sub c), Matrix.mul_sub, k, k]

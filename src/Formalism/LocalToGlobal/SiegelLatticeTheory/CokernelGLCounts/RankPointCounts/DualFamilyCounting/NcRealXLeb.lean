@@ -1,9 +1,62 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.NcRealXPS
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.MMatEntryMeasurable
-import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.LocalWeightCharts.NChartP
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.KapEqParts
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.NcRealXHU
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.MMatEntryMeasurable
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.NinfGClosed
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.NcRealPf
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.LocalWeightCharts.NilpotentChartRightInverse
+import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.PiMapMulRight
+import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.ProductExactness
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.KapEqParts
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.NcRealXHU
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.NcRealXMeas
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.NcRealXN
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.NcRealXPS
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.LocalWeightCharts.NShear
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.Countable
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -166,7 +219,7 @@ theorem Kc_cont (T : ℝ) : Continuous (Kc (k := k) (r := r) T) := by
   have hM : ∀ a b, Continuous fun m : Mt k r => WlocSk.NB.mof m a b := by
     intro a b
     simp only [WlocSk.NB.mof, WlocSk.NB.bF, WlocSk.NB.bC, Matrix.mul_apply, Matrix.conjTranspose_apply]
-    exact continuous_finset_sum _ fun c _ => ((hE _ _).star).mul (hE _ _)
+    exact continuous_finsetSum _ fun c _ => ((hE _ _).star).mul (hE _ _)
   rcases i with ((⟨p, u⟩ | ⟨a, u⟩) | (⟨a, j, u⟩ | (⟨p, u⟩ | a)))
   · exact (reim_cont u).comp (hE _ _)
   · exact (reim_cont u).comp (continuous_const.mul (hE _ _))
@@ -257,7 +310,7 @@ theorem kapL_eq {z : Fin (2 * r + k + 1) → ℂ} {T : ℝ} (hF : IsFrameJ ε e 
     have ha := a.isLt
     have hv : (esI k r a).val = 2 * r + k - a.val := rfl
     unfold colQ
-    rw [dif_neg (by omega), dif_neg (by omega), dif_neg (by omega)]
+    rw [dite_eq_right (by omega), dite_eq_right (by omega), dite_eq_right (by omega)]
     congr 1
     all_goals (apply Fin.ext; show 2 * r + k - (esI k r a).val = a.val; omega)
   have cW : ∀ j : Fin k, colQ e f w (z0v T z) (wI k r (Fin.castSucc j)) = w j := by
@@ -265,13 +318,13 @@ theorem kapL_eq {z : Fin (2 * r + k + 1) → ℂ} {T : ℝ} (hF : IsFrameJ ε e 
     have hj := j.isLt
     have hv : (wI k r (Fin.castSucc j)).val = r + j.val := rfl
     unfold colQ
-    rw [dif_neg (by omega), dif_pos (by omega)]
+    rw [dite_eq_right (by omega), dif_pos (by omega)]
     congr 1
     all_goals (apply Fin.ext; show (wI k r (Fin.castSucc j)).val - r = j.val; omega)
   have cZ : colQ e f w (z0v T z) (wI k r (Fin.last k)) = z0v T z := by
     have hv : (wI k r (Fin.last k)).val = r + k := rfl
     unfold colQ
-    rw [dif_neg (by omega), dif_neg (by omega), dif_pos hv]
+    rw [dite_eq_right (by omega), dite_eq_right (by omega), dif_pos hv]
   have hX : xL ε e f g = WlocSk.NB.bA M := by
     funext b a
     show hJ ε (f b) (uMat g *ᵥ e a) = M (eI k r b) (eI k r a)
@@ -439,12 +492,13 @@ theorem lebLoc {n r k : ℕ} (hn : n = 2 * r + k + 1) (ε : Fin n → Bool) (e f
     ← Measure.map_map (LyM (k := k) (r := r) T).continuous_of_finiteDimensional.measurable Rc_cont.measurable,
     map_Rc, Measure.map_linearMap_addHaar_eq_smul_addHaar _ hdet, ← hc, smul_smul, ENNReal.inv_mul_cancel hc0 hcT,
     one_smul]
+  exact hmeasK
 
 theorem map_uncurry_volume {ι κ : Type*} [Fintype ι] [Fintype κ] :
     (Measure.pi fun _ : ι => (volume : Measure (κ → ℝ))).map
       (fun F : ι → κ → ℝ => fun p : ι × κ => F p.1 p.2) = volume := by
   have hm : Measurable (fun F : ι → κ → ℝ => fun p : ι × κ => F p.1 p.2) :=
-    measurable_pi_lambda _ fun p => (measurable_pi_apply p.2).comp (measurable_pi_apply p.1)
+    Measurable.of_eval fun p => (measurable_pi_apply p.2).comp (measurable_pi_apply p.1)
   show _ = Measure.pi fun _ : ι × κ => (volume : Measure ℝ)
   refine (Measure.pi_eq fun s hs => ?_).symm
   have hpre : (fun F : ι → κ → ℝ => fun p : ι × κ => F p.1 p.2) ⁻¹' Set.univ.pi s =
@@ -496,7 +550,7 @@ theorem lebHaar_holds : LsNc5.LebHaar := by
       exact congrFun (kapV_eq X u p.1 s) p.2
     have hunc : Measurable (fun F : InfinitePlace X.B.I.F → LsNc5.CIdx D.R.rS D.R.k → ℝ =>
         fun p : InfinitePlace X.B.I.F × LsNc5.CIdx D.R.rS D.R.k => F p.1 p.2) :=
-      measurable_pi_lambda _ fun p : InfinitePlace X.B.I.F × LsNc5.CIdx D.R.rS D.R.k =>
+      Measurable.of_eval fun p : InfinitePlace X.B.I.F × LsNc5.CIdx D.R.rS D.R.k =>
         (measurable_pi_apply p.2).comp (measurable_pi_apply p.1)
     haveI : ∀ v, SigmaFinite ((lam v).map
         (kapL (X.B.I.ε v) (eV X v) (ProductExactness.pV X v) (X.wfr u v) (ProductExactness.zV X u v))) := fun v => by

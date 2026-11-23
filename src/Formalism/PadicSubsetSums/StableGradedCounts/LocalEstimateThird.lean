@@ -1,6 +1,61 @@
-import Formalism.PadicSubsetSums.StableGradedCounts.LocalEstimateIVOfTypeSetWeight
-import Formalism.PadicSubsetSums.StableGradedCounts.ProdPowFactorizationLe
-import Formalism.PadicSubsetSums.StableGradedCounts.FourMulSumLeProduct
+module
+
+public import Formalism.PadicSubsetSums.StableGradedCounts.LocalEstimateIVOfTypeSetWeight
+public import Mathlib.RingTheory.SimpleRing.Principal
+public import Formalism.PadicSubsetSums.StableGradedCounts.FourMulSumLeProduct
+import Formalism.PadicSubsetSums.StableGradedCounts.IRRIrredCountUpper
+public import Formalism.PadicSubsetSums.StableGradedCounts.ProdPowFactorizationLe
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Polynomial
 
@@ -131,7 +186,7 @@ theorem exists_prime_pow_eq {M : Type} [Monoid M] (n : ℕ) (hn : 2 ≤ n) (u : 
     rw [← orderOf_dvd_iff_pow_eq_one, hk']
     apply pow_dvd_pow
     haveI := Fact.mk hl
-    exact (padicValNat_dvd_iff_le (by omega)).mp hln
+    exact ((by simpa only [_root_.Nat.padicValNat_def] using @_root_.multiplicity_dvd_iff_le : ∀ {p : _root_.Nat} [hp : _root_.Fact (_root_.Nat.Prime p)] {a n : _root_.Nat} (ha : a ≠ 0), p ^ n ∣ a ↔ n ≤ _root_.padicValNat p a) (by omega)).mp hln
 
 variable {K L : Type} [Field K] [Fintype K] [Field L] [Algebra K L]
 
@@ -211,10 +266,11 @@ theorem key (P : K[X]) (hP : Irreducible P) (hm : P.Monic) (x : L) (hx : aeval x
     rw [div_pow, div_eq_one_iff_eq (pow_ne_zero _ hcL)] at hyl'
     exact hyl'
 
-open Classical in
 
-noncomputable def Bset (K : Type) [Field K] [Fintype K] (δ : ℕ) (c₀ : Kˣ) : Finset (Fin δ → K) :=
-  Finset.univ.filter (fun c => Irreducible (monicOf c) ∧
+open Classical in
+noncomputable def Bset (K : Type) [Field K] [Fintype K] (δ : ℕ) (c₀ : Kˣ) : Finset (Fin δ → K) := by
+  classical
+  exact Finset.univ.filter (fun c => Irreducible (monicOf c) ∧
     ∃ l' ∈ (Fintype.card K ^ δ - 1).primeFactors,
       monicOf c ∣ X ^ (l' ^ padicValNat l' (Fintype.card K ^ δ - 1)) -
         C ((c₀ : K) ^ (l' ^ padicValNat l' (Fintype.card K ^ δ - 1))))
@@ -234,7 +290,7 @@ theorem count (δ : ℕ) (c₀ : Kˣ) :
   have hcoeff : ∀ (c : Fin δ → K) (j : Fin δ), (Formalism.IrreducibleCountingLemmas.GaloisIrreducibility.monicOf c).coeff j = c j := by
     intro c j
     rw [Formalism.IrreducibleCountingLemmas.GaloisIrreducibility.monicOf.eq_1, Polynomial.coeff_add, Polynomial.coeff_X_pow,
-      Polynomial.finset_sum_coeff]
+      Polynomial.finsetSum_coeff]
     simp [Polynomial.coeff_C_mul_X_pow, Fin.val_inj, j.isLt.ne]
   have hinj : Function.Injective (Formalism.IrreducibleCountingLemmas.GaloisIrreducibility.monicOf : (Fin δ → K) → K[X]) :=
     fun c c' h => funext fun j => by rw [← hcoeff c j, ← hcoeff c' j, h]
@@ -259,7 +315,7 @@ theorem count (δ : ℕ) (c₀ : Kˣ) :
         exact (Finset.mem_filter.mp hc).2.2
     have hdeg := Polynomial.natDegree_le_of_dvd hprod hF0
     rw [Polynomial.natDegree_prod_of_monic _ _ (fun c _ => hmon c),
-      Polynomial.natDegree_X_pow_sub_C] at hdeg
+      Polynomial.natDegree_X_pow_sub_C _] at hdeg
     simp only [hdegc, Finset.sum_const, smul_eq_mul] at hdeg
     rw [mul_comm]
     exact hdeg

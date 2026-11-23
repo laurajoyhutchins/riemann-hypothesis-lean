@@ -1,4 +1,52 @@
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.MassComputations.TensLiftSelf
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.MassComputations.TensLiftSelf
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicLocalCompactness.AdeleLC
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicLocalCompactness.T2SpaceTensorProductFiniteExtension
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Algebra.Group.Units
+import Mathlib.Topology.Sheaves.Init
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LevelStructures.GlobLevelS
+
+@[expose] public section
 
 noncomputable section
 
@@ -121,20 +169,5 @@ end MassDataMassesW.KCptW
 namespace MassDataMassesW
 
 open Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.L2.SG.Sub KCptW
-
-theorem kCompactOpen_of (hO : LatHatOpen) (hC : LatHatCompact) : KCompactOpen := by
-  intro D X
-  have : FiniteDimensional X.B.I.F X.B.I.E := Module.Finite.of_restrictScalars_finite ℚ _ _
-  have hMo := hO (F := X.B.I.F) X.B.I.L X.B.I.L_span X.B.I.L_fg
-  have hMc := hC (F := X.B.I.F) X.B.I.L X.B.I.L_span X.B.I.L_fg
-  have eK : (KX X : Set (HA (Af X.B.I.F) X.B.I.cm.sig X.B.I.J)) =
-      incAf X.B.I.cm.sig X.B.I.J ⁻¹' stabGLHat (F := X.B.I.F) (X.B.I.L : Set (Fin X.B.I.n → X.B.I.E)) := by
-    ext g
-    exact kf_iff X.B.I.cm.sig X.B.I.J _ g
-  have hinc : Continuous (incAf X.B.I.cm.sig X.B.I.J) := continuous_subtype_val
-  rw [eK]
-  refine ⟨?_, (isOpen_stabGLHat X.B.I.L hMc hMo).preimage hinc⟩
-  exact (PI.AdicCompletionValuation.isClosed_HR (Af X.B.I.F) X.B.I.cm.sig X.B.I.J).isClosedEmbedding_subtypeVal.isCompact_preimage
-    (isCompact_stabGLHat X.B.I.L X.B.I.L_span hMc)
 
 end MassDataMassesW

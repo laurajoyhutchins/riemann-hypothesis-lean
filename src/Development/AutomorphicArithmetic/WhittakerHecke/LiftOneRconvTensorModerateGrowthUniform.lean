@@ -1,9 +1,57 @@
-import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.KernelTransforms.RconvSlice
-import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.KernelTransforms.HtProj
-import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.KernelTransforms.HtCompact
-import Development.AutomorphicArithmetic.Foundations.Convolution.PowerSumTraces.PolyBdAll
+module
+
+public import Development.AutomorphicArithmetic.Foundations.Convolution.TensFun
+public import GroundTheory.AutomorphicForms.CuspidalDiscreteness.SummandsAreCuspForms
+public import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.KernelTransforms.HtCompact
+public import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.KernelTransforms.HtProj
+public import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.KernelTransforms.LactConv
+import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.KernelTransforms.LactSpec
+public import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.KernelTransforms.RconvSlice
 import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.KernelTransforms.TensApply
-import GroundTheory.AutomorphicForms.DixmierMalliavin
+public import Development.AutomorphicArithmetic.Foundations.Convolution.PowerSumTraces.PolyBdAll
+public import GroundTheory.AutomorphicForms.DixmierMalliavin
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MeasureTheory NumberField IsDedekindDomain
 open GroundTheory.Automorphic GroundTheory.Automorphic.Reduction GroundTheory.Automorphic.RightCosetSpace
@@ -40,9 +88,9 @@ private theorem dm_induction {K : Type} [Field K] [NumberField K] {n : ℕ}
   exact (key Finset.univ).2.1
 
 private theorem lift_add {K : Type} [Field K] [NumberField K] {n : ℕ} (hn : 0 < n)
-    (μ : Measure (normOneGL K n)) [μ.IsHaarMeasure] (β β' : TI K n) (e : TF K n) (φ : LL μ) :
-    liftOne (rconv (rationalGLOne K n) μ (tens (β + β') e) φ) =
-      liftOne (rconv (rationalGLOne K n) μ (tens β e) φ) + liftOne (rconv (rationalGLOne K n) μ (tens β' e) φ) := by
+    (μ : Measure (normOneGL (K := K) (n := n))) [μ.IsHaarMeasure] (β β' : TI K n) (e : TF K n) (φ : LL μ) :
+    liftOne (rconv (rationalGLOne (K := K) (n := n)) μ (tens (β + β') e) φ) =
+      liftOne (rconv (rationalGLOne (K := K) (n := n)) μ (tens β e) φ) + liftOne (rconv (rationalGLOne (K := K) (n := n)) μ (tens β' e) φ) := by
   funext g
   rw [(UpperTheory.ConvolutionTheory.Tf.tensApply K n hn β e).2.2.1 β']
   simp only [liftOne, Pi.add_apply, rconv]
@@ -50,19 +98,19 @@ private theorem lift_add {K : Type} [Field K] [NumberField K] {n : ℕ} (hn : 0 
   simp only [CompactlySupportedContinuousMap.add_apply, add_mul]
 
 private theorem lift_zero {K : Type} [Field K] [NumberField K] {n : ℕ} (hn : 0 < n)
-    (μ : Measure (normOneGL K n)) [μ.IsHaarMeasure] (e : TF K n) (φ : LL μ) :
-    liftOne (rconv (rationalGLOne K n) μ (tens (0 : TI K n) e) φ) = 0 := by
+    (μ : Measure (normOneGL (K := K) (n := n))) [μ.IsHaarMeasure] (e : TF K n) (φ : LL μ) :
+    liftOne (rconv (rationalGLOne (K := K) (n := n)) μ (tens (0 : TI K n) e) φ) = 0 := by
   have := lift_add hn μ 0 0 e φ
   rw [add_zero] at this
   exact left_eq_add.1 this
 
 theorem UpperTheory.liftOne_rconv_tensor_moderateGrowth_uniform :
-    ∀ (K : Type) [Field K] [NumberField K] (n : ℕ), 0 < n → ∀ (μ : Measure (normOneGL K n)) [μ.IsHaarMeasure] (ν : Measure (archGroup K n)) [ν.IsHaarMeasure] (m : Measure (AdelicGLn.FiniteAdelicGL K n)) [m.IsHaarMeasure], Compat μ ν m →
+    ∀ (K : Type) [Field K] [NumberField K] (n : ℕ), 0 < n → ∀ (μ : Measure (normOneGL (K := K) (n := n))) [μ.IsHaarMeasure] (ν : Measure (archGroup K n)) [ν.IsHaarMeasure] (m : Measure (AdelicGLn.FiniteAdelicGL K n)) [m.IsHaarMeasure], Compat μ ν m →
           ∀ (β : TI K n) (e : TF K n), SmoothT β → ∃ N : ℕ, ∀ u : UC K n, ∃ B : ℝ, ∀ (φ : LL μ) (g : AdelicGLn.AdelicGL K n),
-            ‖liftOne (rconv (rationalGLOne K n) μ (tens (lact u β) e) φ) g‖ ≤ B * ‖φ‖ * AutomorphicForm.height g ^ N := by
+            ‖liftOne (rconv (rationalGLOne (K := K) (n := n)) μ (tens (lact u β) e) φ) g‖ ≤ B * ‖φ‖ * AutomorphicForm.height g ^ N := by
   intro K _ _ n hn μ _ ν _ m _ hC β e hβ
   refine dm_induction ν (fun γ => ∃ N : ℕ, ∀ u : UC K n, ∃ B : ℝ, ∀ (φ : LL μ) (g : AdelicGLn.AdelicGL K n),
-    ‖liftOne (rconv (rationalGLOne K n) μ (tens (lact u γ) e) φ) g‖ ≤ B * ‖φ‖ * AutomorphicForm.height g ^ N) ?_ ?_ ?_ β hβ
+    ‖liftOne (rconv (rationalGLOne (K := K) (n := n)) μ (tens (lact u γ) e) φ) g‖ ≤ B * ‖φ‖ * AutomorphicForm.height g ^ N) ?_ ?_ ?_ β hβ
   · refine ⟨0, fun u => ⟨0, fun φ g => ?_⟩⟩
     have h0s : SmoothT (0 : TI K n) :=
       (isExpLieAlgebra K n).mem_smoothFuns.1 (Submodule.zero_mem _)
@@ -93,7 +141,7 @@ theorem UpperTheory.liftOne_rconv_tensor_moderateGrowth_uniform :
     by_cases ha : lact u β₁ a = 0
     · simp [ha]
     refine mul_le_mul_of_nonneg_left ?_ (norm_nonneg _)
-    set x : normOneGL K n := retractOne g * archP K n a with hx
+    set x : normOneGL (K := K) (n := n) := retractOne g * archP K n a with hx
     have hq0 : 0 ≤ PositivityTheory.Rg.Tf.Core.qht x := le_ciInf fun γ => (height_pos _).le
     have hq1 : PositivityTheory.Rg.Tf.Core.qht x ≤ AutomorphicForm.height (x : AdelicGLn.AdelicGL K n) := by
       refine (ciInf_le ⟨0, ?_⟩ 1).trans (le_of_eq (by simp))

@@ -1,8 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.EmbWInjective
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.UnramifiedIntegersTensorEqLetterwiseProductAinf
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IntegersCompleteDVR
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.TiltWittEqZeroOfPrimeMulEqZero
+module
+
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.EmbWInjective
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.ExistsOfLayers
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.NormLeOneOfMemOL
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsSumRootsOfUnity
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IntegersCompleteDVR
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.TiltWittEqZeroOfPrimeMulEqZero
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.UnramifiedIntegersTensorEqLetterwiseProductAinf
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.RootOfUnityPrimeToTeichmullerLift
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Formalism.BasicNotions Formalism.BasicNotions.Loc Formalism.WeaklyAdmissibleFiltrations TensorProduct GlobalTheory.HWL GlobalTheory.Prism GlobalTheory.PrismS
 open scoped Formalism.Per
@@ -47,12 +93,12 @@ theorem exists_factor {W : Type} [CommRing W] (r : O →ₗ[Z] Z) (hr : r 1 = 1)
     induction y using TensorProduct.induction_on with
     | zero => simp
     | tmul o b => rw [hj, Algebra.TensorProduct.tmul_mul_tmul, one_mul, hp, hp, mul_smul_comm]
-    | add y z hy hz => rw [mul_add, map_add, map_add, hy, hz, mul_add]
+    | add y z hy hz => rw [mul_add, map_add (f := _), map_add (f := _), hy, hz, mul_add]
   have hinj : Function.Injective j := fun a b h => by
     rw [← hp1 a, ← hp1 b, ← hj, ← hj, h]
   have hpoly : ∀ q : Polynomial W, f (q : PowerSeries W) ∈ j.range := fun q => by
     induction q using Polynomial.induction_on' with
-    | add q q' h h' => rw [Polynomial.coe_add, map_add]; exact add_mem h h'
+    | add q q' h h' => rw [Polynomial.coe_add, map_add (f := _)]; exact add_mem h h'
     | monomial n w =>
       rw [← Polynomial.C_mul_X_pow_eq_monomial, Polynomial.coe_mul, Polynomial.coe_pow, Polynomial.coe_C,
         Polynomial.coe_X, map_mul, map_pow]
@@ -68,9 +114,9 @@ theorem exists_factor {W : Type} [CommRing W] (r : O →ₗ[Z] Z) (hr : r 1 = 1)
     obtain ⟨a, ha⟩ := hpoly (PowerSeries.trunc m x)
     have e : f x = j a + j (π ^ m) * f x' := by
       conv_lhs => rw [hx']
-      rw [map_add, map_mul, map_pow, hX, ha, map_pow, hj]
+      rw [map_add (f := _), map_mul, map_pow, hX, ha, map_pow, hj]
     refine ⟨j (p (f x')) - f x', ?_⟩
-    rw [e, map_add, hpm, hj a, hp1, map_add, map_mul, ← hj a, ← hj π, map_pow]
+    rw [e, map_add (f := _), hpm, hj a, hp1, map_add (f := _), map_mul, ← hj a, ← hj π, map_pow]
     ring
   refine ⟨fun a b h => hinj h, ?_⟩
   let e : A ≃+* j.range := RingEquiv.ofBijective j.rangeRestrict
@@ -91,9 +137,11 @@ theorem exists_sum {W C : Type} [CommRing W] [CommRing C] (F : W →+* O ⊗[Z] 
   choose a a1 a2 using hz
   choose b b1 b2 using hu
   refine ⟨∑ i, a i * b i, ?_, ?_⟩
+
   · rw [map_sum, tmul_sum]
     refine Finset.sum_congr rfl fun i _ => ?_
     rw [map_mul, a1, b1, Algebra.TensorProduct.tmul_mul_tmul, one_mul]
+
   · rw [map_sum, map_sum]
     refine Finset.sum_congr rfl fun i _ => ?_
     rw [map_mul, map_mul, a2, b2]
@@ -140,7 +188,9 @@ theorem map_scalar {K LL : FinExt l} {n : ℕ} (emb : ZMod n → (↥(K0 K) →�
     (φ : LetA ↥(OL LL) n →ₐ[↥(OL LL)] RA LL) (c : ℤ_[l]) :
     φ (letEmb emb (PowerSeries.C (algebraMap ℤ_[l] (WK K) c))) =
       (1 : ↥(OL LL)) ⊗ₜ[ℤ_[l]] algebraMap ℤ_[l] (Ainf l) c := by
-  rw [letEmb_scalar, AlgHom.commutes, tmul_algebraMap]
+  exact (congrArg (fun x => φ x) (letEmb_scalar (K := K) (LL := LL) emb c)).trans
+    ((φ.commutes (algebraMap ℤ_[l] ↥(OL LL) c)).trans
+      (tmul_algebraMap (O := ↥(OL LL)) (A := Ainf l) c))
 
 theorem theta_scalar (K : FinExt l) (c : ℤ_[l]) :
     Formalism.Per.θ l (algebraMap ℤ_[l] (Ainf l) c) = intToOC K (algebraMap ℤ_[l] ↥(OL K) c) :=
@@ -194,18 +244,25 @@ theorem exists_io {K LL : FinExt l} {n : ℕ} (emb : ZMod n → (↥(K0 K) →�
   obtain ⟨_, -, -, hu, hfree, -⟩ := GlobalTheory.Per.integers_completeDVR l LL
   obtain ⟨r, hr⟩ := exists_retraction (Z := ℤ_[l]) (O := ↥(OL LL)) (l : ℤ_[l])
     PadicInt.maximalIdeal_eq_span_p (by rwa [map_natCast])
-  have hX : φ (letEmb emb PowerSeries.X) =
-      (1 : ↥(OL LL)) ⊗ₜ[ℤ_[l]] (WittVector.teichmuller l e - 1) := by
-    rw [letEmb_X, hπ]
-  obtain ⟨hinj, io, hio⟩ := exists_factor r hr (φ.toRingHom.comp (letEmb emb)) _ hX
+  -- Supply the indices of `letEmb` before composition compares the power series instances.
+  let f : PowerSeries (WK K) →+* RA LL := φ.1.comp (letEmb (K := K) (LL := LL) emb)
+  have hX : f PowerSeries.X =
+      (1 : ↥(OL LL)) ⊗ₜ[ℤ_[l]] (WittVector.teichmuller l e - 1) :=
+    (congrArg (fun x => φ x) (letEmb_X (K := K) (LL := LL) emb)).trans hπ
+  obtain ⟨hinj, io, hio⟩ := exists_factor (Z := ℤ_[l]) (O := ↥(OL LL)) (A := Ainf l)
+    (W := WK K) r hr f (WittVector.teichmuller l e - 1) hX
     (fun w => (hC w).imp fun a h => h.1)
     ((GlobalTheory.HWL.TensorWitt.main l LL).2.2.2.2 e he).toIsHausdorff
   refine ⟨io, hio, hinj _ _ ((hio _).symm.trans hX), fun w => ?_⟩
   obtain ⟨a, h1, h2⟩ := hC w
-  rw [hinj _ _ ((hio _).symm.trans h1), h2]
+  exact (congrArg (Formalism.Per.θ l) (hinj _ _ ((hio _).symm.trans h1))).trans h2
 
 theorem main : ∀ (l : ℕ) [Fact l.Prime] (P : LocPrime l) (AI : LocAinf l P) (K : FinExt l) (s : ℕ) (LL : FinExt l) (Γ : GamS P K s LL) (R : WSer Γ) (I : IoS AI R), IoW I → ∃ io : PowerSeries (WK K) →+* Ainf l, (∀ x, I.io (letEmb Γ.emb x) = (1 : ↥(OL LL)) ⊗ₜ[ℤ_[l]] io x) ∧ io PowerSeries.X = WittVector.teichmuller l (AI.εroot s) - 1 ∧ ∀ w : WK K, Formalism.Per.θ l (io (PowerSeries.C w)) = intToOC (unr K) w :=
-  fun _ _ _ AI _ s _ Γ _ I hI =>
-    exists_io Γ.emb I.io _ (εroot_sub_not_unit AI s) I.io_π (exists_const Γ.emb I.io hI)
+  fun _ _ P AI K s LL Γ _ I hI =>
+    -- Use the structure instances already fixed by Γ and I for these projections.
+    let emb := Γ.1
+    let φ := I.1
+    exists_io (K := K) (LL := LL) emb φ (AI.εroot s)
+      (εroot_sub_not_unit (P := P) AI s) I.2 (exists_const (K := K) (LL := LL) emb φ hI)
 
 end GlobalTheory.PrismS.IoDescent

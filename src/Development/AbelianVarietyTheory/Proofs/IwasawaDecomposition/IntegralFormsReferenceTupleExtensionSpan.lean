@@ -1,22 +1,57 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.IsBaseEnlargementFixedCoefFieldOfCoeffEnlargemen
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.CoefAEqOfHeq
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.Forms
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.AdmissibleDiscreteSeriesOfHasParam
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.HarishChandraModulesOn
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.HasDRepIffHasDerivAt
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.GreenCuspidalIff
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.ExistsIsBIffCoreB
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.WeilRepresentationUnitaryPair
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.DsExistsOfDiscreteSeriesExists
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.HarishChandraFinite
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.ExistsNormLeHeightPow
-import Formalism.LocalToGlobal.IndefiniteReal.LinksStage
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.BlockBaseChange
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.IsBaseEnlargementFixedCoefFieldOfCoeffEnlargemen
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.Forms
+public import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.AdmissibleDiscreteSeriesOfHasParam
+public import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.HarishChandraModulesOn
+public import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.HasDRepIffHasDerivAt
+public import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.WeilRepresentationUnitaryPair
+public import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.DsExistsOfDiscreteSeriesExists
+public import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.HarishChandraFinite
+public import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.ExistsNormLeHeightPow
+public import Formalism.LocalToGlobal.Columns.CoefModX
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.BlockDataLevelFormsTransportFieldMap
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LiftFormsReferenceTupleBasisExtendedStatement
 import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ReferenceTupleLiftFormsPassToCoeffEnlargement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.BlockDataLevelFormsTransportFieldMap
 import Formalism.LocalToGlobal.Columns.CoefficientsModP.BaseCh
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LiftFormsReferenceTupleBasisExtendedStatement
+import Formalism.LocalToGlobal.Columns.HeckeSpCount
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.MainNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.MainNotions.S MeasureTheory IsDedekindDomain NumberField
 open Formalism.L2.Theta Formalism.L2.DIV Formalism.L2.Indef Formalism.L2.Rows Formalism.IndefR Formalism.IndefR.Links Formalism.IndefR.Lev Formalism.IndefR.Cx Formalism.IndefR.RecTie
 open scoped TensorProduct InnerProductSpace ComplexOrder
@@ -52,7 +87,7 @@ theorem exists_coord_of_mem_bcPol (φ : K →+* K') {σ : Type} (F : K' →+ K) 
     obtain ⟨q, hq, e⟩ := hx a
     obtain ⟨q', hq', e'⟩ := hy a
     exact ⟨q + q', N.add_mem hq hq', fun m => by
-      rw [MvPolynomial.coeff_add, MvPolynomial.coeff_add, mul_add, map_add, e, e']⟩
+      rw [MvPolynomial.coeff_add, MvPolynomial.coeff_add, mul_add, map_add (f := _), e, e']⟩
   | smul r x _ hx =>
     intro a
     obtain ⟨q, hq, e⟩ := hx (a * r)
@@ -75,6 +110,7 @@ theorem integral_span_of_values (φ : K →+* K') {σ C M M' : Type} [AddCommGro
       exact Finset.sum_congr rfl fun k _ => by rw [hu]
     have h1 : f' = ∑ i, b i • L (∑ k, F i (a k) • u k) := by
       rw [hf]
+
       simp only [map_sum, hL, Finset.smul_sum]
       rw [Finset.sum_comm]
       refine Finset.sum_congr rfl fun k _ => ?_
@@ -87,8 +123,9 @@ theorem integral_span_of_values (φ : K →+* K') {σ C M M' : Type} [AddCommGro
     have h2 : ev c (∑ k, F i (a k) • u k) = q := by
       ext μ
       rw [e, hf, map_one, one_mul]
+
       simp only [map_sum, map_smul, hev, MvPolynomial.coeff_sum, MvPolynomial.coeff_smul, MvPolynomial.coeff_map,
-        smul_eq_mul]
+      smul_eq_mul]
       refine Finset.sum_congr rfl fun k _ => ?_
       rw [mul_comm (a k), hF, mul_comm]
     rw [h2]
@@ -100,7 +137,7 @@ theorem integral_span_of_values (φ : K →+* K') {σ C M M' : Type} [AddCommGro
       rw [hev]
       exact bc_map_mem φ (hy c)
     | zero => rw [map_zero]; exact Submodule.zero_mem _
-    | add x y _ _ hx hy => rw [map_add]; exact Submodule.add_mem _ hx hy
+    | add x y _ _ hx hy => rw [map_add (f := _)]; exact Submodule.add_mem _ hx hy
     | smul r x _ hx =>
       rw [← algebraMap_smul K' r x, map_smul, algebraMap_smul]
       exact Submodule.smul_mem _ _ hx
@@ -155,10 +192,10 @@ theorem nab_round_bc (X : Formalism.L2.Col.Fields) {L : Type} [Field L] [NumberF
     (Λ₁ : Formalism.L2.Col.LevFam X.E X.K n SG₁) (Λ₂ : Formalism.L2.Col.LevFam X.E L n SG₂)
     (hH : ∀ (w : ↥SG₁) (hw : w.1 ∈ SG₂), (Λ₂ ⟨w.1, hw⟩).H = (Λ₁ w).H)
     (c₁ : X.K →+* ℂ) (c₂ : L →+* ℂ) (hc : ∀ x, c₂ (ι x) = c₁ x)
-    (h₁ : (Formalism.L2.Col.formGSD (Formalism.L2.Col.roundPk X lam fun d : Formalism.L2.Col.DecoSet X.E n ∅ SG₁ => d.1.N) Λ₁).Ok)
+    (h₁ : (Formalism.L2.Col.formGSD (Formalism.L2.Col.roundPk X lam fun d : Formalism.L2.Col.DecoSet (E := X.E) (n := n) (ST := ∅) (SG := SG₁) => d.1.N) Λ₁).Ok)
     (h₂ : (Formalism.L2.Col.formGSD (X := ({F := X.F, E := X.E, K := L, Tau := X.Tau, emb := e} : Formalism.L2.Col.Fields))
       (Formalism.L2.Col.roundPk ({F := X.F, E := X.E, K := L, Tau := X.Tau, emb := e} : Formalism.L2.Col.Fields) lam
-        fun d : Formalism.L2.Col.DecoSet X.E n ∅ SG₂ => d.1.N) Λ₂).Ok)
+        fun d : Formalism.L2.Col.DecoSet (E := X.E) (n := n) (ST := ∅) (SG := SG₂) => d.1.N) Λ₂).Ok)
     (T : (Formalism.L2.Col.GSD.toCSD _ h₁).Forms → (Formalism.L2.Col.GSD.toCSD _ h₂).Forms)
     (hT : SemiSpan ι (Formalism.L2.Col.GSD.toCSD _ h₁) (Formalism.L2.Col.GSD.toCSD _ h₂) T)
     (hf : ∀ f d₁ d₂, HEq d₂ d₁ → HEq (MvPolynomial.map c₂ (((Formalism.L2.Col.GSD.res _ h₂).symm (T f)).1 d₂).1)
@@ -183,10 +220,12 @@ theorem nab_round_bc (X : Formalism.L2.Col.Fields) {L : Type} [Field L] [NumberF
     have b3 := nab_res_symm _ h₂ (T f) c
     exact (congrArg Subtype.val b3).symm.trans (a1.trans (congrArg (fun v => MvPolynomial.map ι (Subtype.val v)) b1))
   refine nabSpan_of_values ι T hT (fun c => c) (fun c => ⟨c, rfl⟩) (VV X.K lam).subtype (VV L lam).subtype hev
-    (fun c => polOfVV lam (nabAtr X.emb lam (Quotient.out c : Formalism.L2.Col.DecoSet X.E n ∅ SG₂).1.N))
+    (fun c => polOfVV lam (nabAtr X.emb lam (Quotient.out c : Formalism.L2.Col.DecoSet (E := X.E) (n := n) (ST := ∅) (SG := SG₂)).1.N))
     (fun c x => (mem_polOfVV_iff lam _ x).symm) fun c x => ?_
   rw [← (nablaDeltaBaseChangeAt_holds X.E X.K L ι X.Tau n X.emb lam _
-    (Quotient.out c : Formalism.L2.Col.DecoSet X.E n ∅ SG₂).2.lat).2.2.1]
+    (Formalism.L2.Col.hcnt_isFullLattice_of_unimodular
+      (Quotient.out c : Formalism.L2.Col.DecoSet (E := X.E) (n := n) (ST := ∅) (SG := SG₂)).2.lat
+      (Quotient.out c : Formalism.L2.Col.DecoSet (E := X.E) (n := n) (ST := ∅) (SG := SG₂)).2.uni)).2.2.1]
   exact (mem_polOfVV_iff lam _ x).symm
 
 theorem nab_glue_inv_H {E K L : Type} [Field E] [NumberField E] [Field K] [Field L] {n : ℕ}
@@ -209,7 +248,7 @@ theorem nab_glue_inv_H {E K L : Type} [Field E] [NumberField E] [Field K] [Field
   rw [Formalism.L2.Col.LevFam.glue_of_mem _ _ _ h2, Formalism.L2.Col.LevFam.glue_of_mem _ _ _ h1]
   exact hA ⟨w.1, h1⟩ h2
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem nab_refTuple {B₁ B₂ : Base} {f₁ : Fr B₁.toPre} {f₂ : Fr B₂.toPre} {T₁ : TwDat B₁} {T₂ : TwDat B₂}
     (w₁ : ColW B₁ f₁ T₁) (w₂ : ColW B₂ f₂ T₂) (W₁ : Set B₁.places.Pl) (W₂ : Set B₂.places.Pl)
@@ -245,7 +284,7 @@ theorem nab_refTuple {B₁ B₂ : Base} {f₁ : Fr B₁.toPre} {f₂ : Fr B₂.t
     rfl
   · exact nab_glue_inv_H (twistRamifiedPrimes_empty_colTuples w₁ W₁) (twistRamifiedPrimes_empty_colTuples w₂ W₂) _ _ _ _ fun w hw => rfl
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem nab_ext : GlobalTheory.Published.DiscreteSeriesCover → GlobalTheory.Published.HarishChandraModules → GlobalTheory.Published.CuspRapidDecay → GlobalTheory.Published.CasselmanWallach → GlobalTheory.Published.WeilRepresentationUnitaryPair → GlobalTheory.Published.DiscreteSeriesExists → GlobalTheory.Published.HarishChandraFinite → (StepW Pinned fun K B' f' T' w' => ∀ (B : Base) (f : Fr B.toPre) (T : TwDat B) (w : ColW B f T), Enl0 B B' →
   HEq f' f → Pinned K B f T w → HEq w'.px w.px → ∀ (Z : w.Lt) (hX : B.fields.Ok) (Wt : Set B.places.Pl)

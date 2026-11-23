@@ -1,8 +1,53 @@
-import Mathlib
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.SatakeExponents.UniformizerValuations.ReadMod
-import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.SliceTensors.PSatTw
-import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.SliceTensors.PIndMap
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.MemRangeOfKer
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.MemRangeOfKer
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DeltaHalfMulUnrTorus
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CommuteRtOfMemZalg
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ConstantTermAuxiliaryStatementA
+import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsUnipLevIntegral
+public import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.SliceTensors.PIndMapB
+public import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.SliceTensors.PIndMapD
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Matrix
 open scoped TensorProduct
@@ -18,7 +63,7 @@ namespace GlobalTheory.CompanionTheory.NodeSep
 
 section Geo
 
-variable {E : Type} [Field E] [NumberField E] [IsTotallyComplex E] {r s : ℕ}
+variable {E : Type} [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] {r s : ℕ}
 
 theorem af_ext {a : ℕ} {g h : GL (Fin a) (Af E)}
     (H : ∀ v, GeneralLinearGroup.map (pLoc E v) g = GeneralLinearGroup.map (pLoc E v) h) : g = h := by
@@ -184,7 +229,7 @@ def smSub (ρ : Representation ℂ G V) : Submodule ℂ V where
   add_mem' := by
     rintro a b ⟨U, hU, ha⟩ ⟨U', hU', hb⟩
     refine ⟨U ⊓ U', hU.inter hU', GlobalTheory.LGrp.mem_fixed.2 fun u hu => ?_⟩
-    rw [map_add, GlobalTheory.LGrp.mem_fixed.1 ha u hu.1, GlobalTheory.LGrp.mem_fixed.1 hb u hu.2]
+    rw [map_add (f := _), GlobalTheory.LGrp.mem_fixed.1 ha u hu.1, GlobalTheory.LGrp.mem_fixed.1 hb u hu.2]
   zero_mem' := ⟨⊤, isOpen_univ, GlobalTheory.LGrp.mem_fixed.2 fun u _ => map_zero _⟩
   smul_mem' := by
     rintro c a ⟨U, hU, ha⟩
@@ -265,7 +310,7 @@ theorem tw_tens {V₁ : Submodule ℂ (Sm E r)} {V₂ : Submodule ℂ (Sm E s)} 
   | smul c a _ ha =>
     convert Submodule.smul_mem _ c ha using 1
     funext m
-    simp
+    simp only [Pi.smul_apply, smul_eq_mul]
     ring
 
 theorem node_tens {φ : Sm E (r + s)} (hφ : φ ∈ (Tr.node t₁ t₂).space) (k : Kinf E (r + s)) (y : GL (Fin (r + s)) (Af E)) :
@@ -425,7 +470,7 @@ theorem exists_ind (h₁ : ∀ g, ∀ x ∈ t₁.space, ((finRep E r).comp (locG
     { toFun := fun φ => ⟨⟨F φ, hlaw φ⟩, hop φ⟩
       map_add' := fun a b => Subtype.ext (Subtype.ext (funext fun g => by
         change T _ = T _ + T _
-        simp only [Submodule.coe_add, map_add]))
+        simp only [Submodule.coe_add, map_add (f := _)]))
       map_smul' := fun c a => Subtype.ext (Subtype.ext (funext fun g => by
         change T _ = c • T _
         simp only [Submodule.coe_smul, map_smul])) }
@@ -440,8 +485,8 @@ end Final
 
 end GlobalTheory.CompanionTheory.NodeSep
 
-open GlobalTheory.CompanionTheory.NodeSep in
 
+open GlobalTheory.CompanionTheory.NodeSep in
 theorem GlobalTheory.CompanionTheory.NodeSep.nodeMod : PositivityTheory.Rg.BcB.F.RS.NodeMod := by
   intro E _ _ _ r s t₁ t₂ w X Y _ _ _ _ τ₁ τ₂ H₁ H₂
   obtain ⟨h₁, J₁, L₁, e₁, p₁⟩ := H₁

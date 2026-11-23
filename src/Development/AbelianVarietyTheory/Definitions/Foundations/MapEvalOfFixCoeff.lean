@@ -1,5 +1,48 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Foundations.HTLawAt
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.HTLawAt
+import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.ResMapBijective
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.AdicCompletion.Noetherian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -8,20 +51,6 @@ open NumberField IsDedekindDomain Formalism.ConjugateSelfDual ReciprocityTheory.
 namespace GlobalTheory.KZ
 
 variable {Ω : Type} [Field Ω] [Algebra ℚ Ω] {l : ℕ} [Fact l.Prime]
-
-theorem HTPres.eval_ne_zero {A : ValuationSubring Ω} {c : Coef l} {m : ℕ} {Z : ∀ r : ℕ, G ℚ Ω → (ZMod (l ^ r))ˣ → Qbar l} {ζ : Ω}
-    {ι : Type} [Fintype ι] {P : ι → Polynomial Ω} {o : ι → Qbar l} (h : HTPres A c m Z ζ P o) (i : ι) : (P i).eval ζ ≠ 0 :=
-  (h.2.2.2.2.2.1 i).2.1
-
-theorem HTPres.ne_zero {A : ValuationSubring Ω} {c : Coef l} {m : ℕ} {Z : ∀ r : ℕ, G ℚ Ω → (ZMod (l ^ r))ˣ → Qbar l} {ζ : Ω}
-    {ι : Type} [Fintype ι] {P : ι → Polynomial Ω} {o : ι → Qbar l} (h : HTPres A c m Z ζ P o) (i : ι) : P i ≠ 0 := by
-  intro h0
-  exact h.eval_ne_zero i (by rw [h0, Polynomial.eval_zero])
-
-theorem HTLawAt.mono {A : ValuationSubring Ω} {c : Coef l} {Z : ∀ r : ℕ, G ℚ Ω → (ZMod (l ^ r))ˣ → Qbar l} {j : Ω →+* Qbar l}
-    {m₀ m₁ c₀ : ℕ} {Rhs : ∀ m : ℕ, DirichletCharacter (Qbar l) (l ^ m) → Qbar l → Qbar l} (h : HTLawAt A c Z j m₀ c₀ Rhs)
-    (hm : m₀ ≤ m₁) : HTLawAt A c Z j m₁ c₀ Rhs :=
-  fun m hm' => h m (hm.trans hm')
 
 theorem tval_coe (Q : Polynomial (Qbar l)) {N : ℕ} (hN : Q.natDegree < N) (z : Qbar l) :
     tval (Q : PowerSeries (Qbar l)) N z = Q.eval (z - 1) := by
@@ -55,13 +84,5 @@ theorem mass_dirac {r : ℕ} {ξ : Qbar l} (hξ : IsPrimitiveRoot ξ (l ^ r)) {x
     rw [div_pow, ← pow_mul, ← pow_mul, mul_comm x, mul_comm y, pow_mul, pow_mul, hξ.pow_eq_one, one_pow, one_pow, div_one,
       sub_self] at this
     exact (mul_eq_zero.mp this).resolve_left (sub_ne_zero.mpr hne)
-
-example (j : Ω →+* Qbar l) (ζ : Ω) (hζ : ζ ≠ 0) (b : ℕ) :
-    htv j ζ (fun _ : Unit => Polynomial.X) (fun _ => 1) b = 1 := by
-  simp [htv, hζ]
-
-example (j : Ω →+* Qbar l) (ζ : Ω) (b : ℕ) :
-    htv j ζ (fun _ : Unit => 1 + Polynomial.X) (fun _ => 1) b = j (ζ ^ b / (1 + ζ ^ b)) := by
-  simp [htv]
 
 end GlobalTheory.KZ

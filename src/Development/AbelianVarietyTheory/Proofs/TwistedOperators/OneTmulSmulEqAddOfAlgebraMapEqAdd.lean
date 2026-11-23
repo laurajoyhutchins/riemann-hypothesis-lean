@@ -1,8 +1,53 @@
-import Mathlib
-import Formalism.LocalToGlobal.IndefiniteReal.LinksDefs
-import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.ChainMatrices
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsDecompChainSpaceDefiniteAddNormalFrame
-import Formalism.LocalRingCardinality.SpanPowerMembership.Adelic
+module
+
+public import Formalism.LocalRingCardinality.SpanPowerMembership.Adelic
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.LatSelfDualOfUnimod
+import Development.AbelianVarietyTheory.BlockTheory.HeightDefect.AdelicUnitaryGroups
+import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.HeightOneSpectrumPlacesOverFiniteSet
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsDecompChainSpaceDefiniteAddNormalFrame
+import Formalism.HermitianLattices.HermitianLatticesProofs.UnimodUnramUnique
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.FreeModule.IdealQuotient
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -53,11 +98,11 @@ theorem local_norm (v : HeightOneSpectrum (𝓞 H.F)) (u : v.adicCompletionInteg
       (t : v.adicCompletion H.F) * β, fun h => absurd hd h, ?_⟩
     have h1 : 2 * α + β = 1 := by
       have := congrArg (algebraMap H.F (v.adicCompletion H.F)) (adelic_alpha_beta_linear H)
-      simpa [α, β, map_add, map_mul, map_ofNat] using this
+      simpa [α, β, map_add (f := _), map_mul, map_ofNat] using this
     have h2 : α ^ 2 + α * β + ((adelNd H : ℤ) : v.adicCompletion H.F) * β ^ 2 =
         ((adelNq H : ℤ) : v.adicCompletion H.F) := by
       have := congrArg (algebraMap H.F (v.adicCompletion H.F)) (adelic_alpha_beta_norm H)
-      simpa [α, β, map_add, map_mul, map_pow, map_intCast] using this
+      simpa [α, β, map_add (f := _), map_mul, map_pow, map_intCast] using this
     linear_combination h3 + ((s : v.adicCompletion H.F) * t) * h1 + (t : v.adicCompletion H.F) ^ 2 * h2
   · have hdisc : (((1 : ℤ) ^ 2 - 4 * adelNd H : ℤ) : 𝓞 H.F) ∉ v.asIdeal := by
       have e : ((1 : ℤ) ^ 2 - 4 * adelNd H : ℤ) = -(H.d : ℤ) := by
@@ -136,7 +181,7 @@ theorem trace_mem (z : Ef D) : z + sg D z ∈ (iR D).range := by
     obtain ⟨c, hc⟩ := (D.sp.cm.fixed (x + star x)).1 (by rw [star_add, star_star, add_comm])
     exact ⟨_, one_tmul_smul_eq_add_of_algebraMap_eq_add c x (star x) a hc⟩
   | add a b ha hb =>
-    rw [RingHom.map_add, add_add_add_comm]
+    rw [RingHom.map_add (f := _), add_add_add_comm]
     exact add_mem ha hb
 
 theorem sg_theta : sg D (eToEAf D (adelTheta D.host)) = 1 - eToEAf D (adelTheta D.host) := by
@@ -166,8 +211,8 @@ theorem unit_norm {d d' : Ef D} (hd : d ∈ OA D) (hd' : d' ∈ OA D) (h : d' * 
   refine ⟨iR D S + eToEAf D (adelTheta D.host) * iR D T, ?_⟩
   have h1 := congrArg (iR D) hST
   have h2 := congrArg (eToEAf D) (adelic_theta_mul_one_sub D.host)
-  simp only [RingHom.map_add, RingHom.map_mul, map_intCast, RingHom.map_sub, RingHom.map_one] at h1 h2
-  rw [RingHom.map_add, RingHom.map_mul, sg_iR, sg_iR, sg_theta]
+  simp only [RingHom.map_add (f := _), RingHom.map_mul, map_intCast, RingHom.map_sub, RingHom.map_one] at h1 h2
+  rw [RingHom.map_add (f := _), RingHom.map_mul, sg_iR, sg_iR, sg_theta]
   linear_combination (iR D T * iR D T) * h2 + h1
 
 def IsN (D : D7) (x : D.host.E) : Prop := ∃ y : Ef D, sg D y * y = eToEAf D x
@@ -240,8 +285,9 @@ theorem det_family {E : Type} [Field E] [NumberField E] [StarRing E] (V : HSpace
     ext a b
     simp only [Matrix.submatrix_apply, Matrix.of_apply, Matrix.mul_apply, Matrix.conjTranspose_apply, P, HSpace.gram]
     conv_lhs => rw [← V.frame.sum_repr (v (e a)), ← V.frame.sum_repr (v (e b))]
+
     simp only [map_sum, map_smul, LinearMap.map_smulₛₗ₂, LinearMap.sum_apply, LinearMap.smul_apply, smul_eq_mul,
-      starRingEnd_apply, Finset.sum_mul, Finset.mul_sum]
+    starRingEnd_apply, Finset.sum_mul, Finset.mul_sum]
     refine Finset.sum_congr rfl fun _ _ => Finset.sum_congr rfl fun _ _ => ?_
     ring
   rw [← Matrix.det_submatrix_equiv_self e, this, Matrix.det_mul, Matrix.det_mul, Matrix.det_conjTranspose]

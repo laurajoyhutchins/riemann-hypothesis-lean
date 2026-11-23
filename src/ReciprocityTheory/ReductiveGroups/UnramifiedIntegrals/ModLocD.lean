@@ -1,6 +1,56 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.ModGDefs
-import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.ModGBasic
+module
+
+public import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.ModGDefs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.ModGBasic
+import Formalism.LocalToGlobal.TorsionIntegrality.CMGoodModels.Statement
+public import Mathlib.Algebra.Algebra.Hom.Rat
+import ReciprocityTheory.NeutralLocalFields.HilbertClassField
+
+@[expose] public section
 
 noncomputable section
 open scoped BigOperators Classical UpperHalfPlane Pointwise
@@ -26,7 +76,8 @@ theorem exists_of_ratRoot {Ω M : Type*} [Field Ω] [IsAlgClosed Ω] [Field M] (
 theorem exists_e_eq {d l : ℕ} [Fact l.Prime] (e : Om d →+* PadicAlgCl l)
     (r : PadicAlgCl l →+* PadicAlgCl l) (x : Om d) : ∃ y : Om d, e y = r (e x) := by
   obtain ⟨p, hp, hpx⟩ := Om_isAlgebraic d x
-  have : IsAlgClosed (Om d) := (inferInstance : IsAlgClosure (KQ d) (Om d)).isAlgClosed
+  have : IsAlgClosed (Om d) :=
+    (IsAlgClosed.algebraicClosure_eq_bot_iff (Om d) ℂ).mp (algebraicClosure.algebraicClosure_eq_bot (KQ d) ℂ)
   let f₀ : ℚ →+* Om d := algebraMap ℚ (Om d)
   have h0 : p.eval₂ f₀ x = 0 := by
     apply (algebraMap (Om d) ℂ).injective
@@ -102,7 +153,7 @@ theorem locLift {d l : ℕ} [Fact l.Prime] (ι : ℂ ≃+* ℂ_[l]) (e : Om d �
       left_inv := fun x => hinj (by rw [hg2, hg1, AlgEquiv.symm_apply_apply])
       right_inv := fun x => hinj (by rw [hg1, hg2, AlgEquiv.apply_symm_apply])
       map_mul' := fun x y => hinj (by rw [hg1, map_mul, map_mul, map_mul, hg1, hg1])
-      map_add' := fun x y => hinj (by rw [hg1, map_add, map_add, map_add, hg1, hg1])
+      map_add' := fun x y => hinj (by rw [hg1, map_add (f := _), map_add (f := _), map_add (f := _), hg1, hg1])
       commutes' := fun k => hinj (by rw [hg1, fix_KQ]) }
   have hσ : ∀ x, e (σ x) = ρ (e x) := hg1
   have hn : ∀ x : Om d, ‖ι (x : ℂ)‖ = ‖e x‖ := fun x => by

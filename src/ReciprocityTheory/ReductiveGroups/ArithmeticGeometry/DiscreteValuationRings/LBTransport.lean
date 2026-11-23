@@ -1,4 +1,54 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.LBLocal
+module
+
+public import Mathlib.Tactic.Bound
+public import Mathlib.Tactic.Monotonicity.Lemmas
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.CubicalStructures.CubeSymmetricSwapFirst
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.LBLocal
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -100,13 +150,6 @@ lemma tr_def {V : Y.Opens} {ψ : Y ⟶ X} {a b : L.ι} (h : V ≤ ψ ⁻¹ᵁ (L
 lemma tr_res {V V' : Y.Opens} (hV : V' ≤ V) {ψ : Y ⟶ X} {a b : L.ι} (h : V ≤ ψ ⁻¹ᵁ (L.U a ⊓ L.U b)) :
     res hV (tr L V ψ a b) = tr L V' ψ a b := by
   rw [tr_def L h, tr_def L (hV.trans h), res_res']
-
-lemma tr_self (hL : L.IsLB) {V : Y.Opens} {ψ : Y ⟶ X} {a : L.ι} (h : V ≤ ψ ⁻¹ᵁ L.U a) :
-    tr L V ψ a a = 1 := by
-  have h' : V ≤ ψ ⁻¹ᵁ (L.U a ⊓ L.U a) := fun y hy => ⟨h hy, h hy⟩
-  rw [tr_def L h']
-  have e := res_pullU_eq ψ (le_inf le_rfl le_rfl : L.U a ≤ L.U a ⊓ L.U a) h' h (L.g a a)
-  rw [e, hL.g_self, map_one, map_one]
 
 lemma tr_cocycle (hL : L.IsLB) {V : Y.Opens} {ψ : Y ⟶ X} {a b c : L.ι}
     (h : V ≤ ψ ⁻¹ᵁ (L.U a ⊓ L.U b ⊓ L.U c)) :
@@ -290,7 +333,7 @@ theorem gen_transport (hL : L.IsLB) (hs : LB.SameSum φ ε φ' ε') (t : LB.Gen 
     have hσ' : ∀ k', σ (φ' k') = j' k' := by
       intro k'
       simp only [σ]
-      rw [dif_pos ⟨k', rfl⟩]
+      rw [dite_eq_left ⟨k', rfl⟩]
       exact hj' _ _ (⟨k', rfl⟩ : ∃ k₀, φ' k₀ = φ' k').choose_spec
     have hsum : ∏ k, tr L O (φ k) ((ρ ∘ φ) k) (j k) ^ ε k = ∏ k', tr L O (φ' k') (ρ (φ' k')) (j' k') ^ ε' k' := by
       have := prod_zpow_of_sameSum φ ε φ' ε' hs (fun ψ => tr L O ψ (ρ ψ) (σ ψ))
@@ -450,7 +493,7 @@ theorem sec_transport (hL : L.IsLB) (hs : LB.SameSum φ ε φ' ε') (s : LB.Sec 
     have hσ' : ∀ k', σ (φ' k') = j' k' := by
       intro k'
       simp only [σ]
-      rw [dif_pos ⟨k', rfl⟩]
+      rw [dite_eq_left ⟨k', rfl⟩]
       exact hj' _ _ (⟨k', rfl⟩ : ∃ k₀, φ' k₀ = φ' k').choose_spec
     have hsum : ∏ k, tr L O (φ k) ((ρ ∘ φ) k) (j k) ^ ε k = ∏ k', tr L O (φ' k') (ρ (φ' k')) (j' k') ^ ε' k' := by
       have := prod_zpow_of_sameSum φ ε φ' ε' hs (fun ψ => tr L O ψ (ρ ψ) (σ ψ))
@@ -470,7 +513,7 @@ def fsum (φ : K → (Y ⟶ X)) (ε : K → ℤ) : (Y ⟶ X) →₀ ℤ := ∑ k
 
 lemma fsum_apply (φ : K → (Y ⟶ X)) (ε : K → ℤ) (ψ : Y ⟶ X) :
     fsum φ ε ψ = ∑ k, if φ k = ψ then ε k else 0 := by
-  simp only [fsum, Finsupp.coe_finset_sum, Finset.sum_apply, Finsupp.single_apply]
+  simp only [fsum, Finsupp.coe_finsetSum, Finset.sum_apply, Finsupp.single_apply]
 
 lemma sameSum_iff_fsum (φ : K → (Y ⟶ X)) (ε : K → ℤ) (φ' : K' → (Y ⟶ X)) (ε' : K' → ℤ) :
     LB.SameSum φ ε φ' ε' ↔ fsum φ ε = fsum φ' ε' := by
@@ -491,12 +534,9 @@ lemma fsum_sumElim {K₂ : Type} [Fintype K₂] (φ : K → (Y ⟶ X)) (ε : K �
 lemma fsum_neg (φ : K → (Y ⟶ X)) (ε : K → ℤ) : fsum φ (fun k => - ε k) = - fsum φ ε := by
   simp [fsum, Finsupp.single_neg]
 
-lemma fsum_smul (φ : K → (Y ⟶ X)) (ε : K → ℤ) (n : ℤ) : fsum φ (fun k => n * ε k) = n • fsum φ ε := by
-  simp [fsum, Finset.smul_sum, Finsupp.smul_single]
-
 lemma fsum_comp (φ : K → (Y ⟶ X)) (ε : K → ℤ) {Z : Scheme.{0}} (h : Z ⟶ Y) :
     fsum (fun k => h ≫ φ k) ε = Finsupp.mapDomain (fun ψ => h ≫ ψ) (fsum φ ε) := by
-  simp [fsum, Finsupp.mapDomain_finset_sum, Finsupp.mapDomain_single]
+  simp [fsum, Finsupp.mapDomain_finsetSum, Finsupp.mapDomain_single]
 
 lemma fsum_empty : fsum (Y := Y) (X := X) (K := PEmpty) PEmpty.elim PEmpty.elim = 0 := by
   simp [fsum]

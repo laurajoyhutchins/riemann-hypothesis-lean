@@ -1,7 +1,45 @@
-import Formalism.SharpRestriction.ParConsts
-import Formalism.SharpRestriction.GlobalSchurBounds.Chosen
-import Formalism.SizeWindowBrackets.SChain
-import Formalism.SizeWindowBrackets.GaloisToProductIsIso
+module
+
+public import Formalism.SharpRestriction.GlobalSchurBounds.Chosen
+public import Formalism.SizeWindowBrackets.SChain
+public import Formalism.SizeWindowBrackets.GaloisToProductIsIso
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -112,15 +150,6 @@ def ChainTied {eps : ℝ} (Fm : FamP eps) (eD eL K cHH eK CL x : ℝ) : Prop :=
     GrowthInequalityRemainingHyps (arithOf (Fm.D x i0).host.toHostRaw) ell N TT T2 a w x eps Dd.b Dd.b' η X' θ CL ∧
     CostWindows x (fPl (Fm.D x i0).R.A) Dd.b η θ ∧
     RestSize eps x (Fintype.card (Fm.D x i0).R.A) TT.card T2.card m Dd.b Dd.k Dd.a
-
-theorem ChainTied.core_of {eps : ℝ} {Fm : FamP eps} {eD eL K cHH eK CL x : ℝ}
-    (hF : ∀ i : Fm.Ix x, HostFacts (arithOf (Fm.D x i).host.toHostRaw))
-    (h : ChainTied Fm eD eL K cHH eK CL x) : ChainCore eD eL K cHH eK CL eps x := by
-  obtain ⟨i0, m, f, pt, av, bv, Top, iT, Dd, C, Xpp, ell, N, TT, T2, a, w, eT, eP, η, X', θ,
-    -, -, -, -, h1, h2, h3, h4, h5, h7, h8, h9, h10, h11, h12, h13⟩ := h
-  exact ⟨(Fm.D x i0).R.A, inferInstance, inferInstance, inferInstance, fun u0 => (Fm.D x (pt u0)).what₂.Word,
-    fun _ => inferInstance, fun _ => inferInstance, Top, iT, m, f, Dd, C, Xpp, _, ell, N, TT, T2, a, w,
-    eT, eP, η, X', θ, h1, h2, h3, h4, h5, hF i0, h7, h8, h9, h10, h11, h12, h13⟩
 
 end Formalism.MainNotions
 

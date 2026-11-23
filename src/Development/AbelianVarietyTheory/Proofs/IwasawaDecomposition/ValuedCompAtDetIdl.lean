@@ -1,5 +1,50 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.ReferenceCharactersFactorTame
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.ReferenceCharactersFactorTame
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.NeutralLocalFields.LocalFieldComparison.HCFFromRecipA
+
+@[expose] public section
 
 noncomputable section
 
@@ -22,23 +67,59 @@ variable [StarRing E] {n : ℕ} {ST SG Q : Finset (HeightOneSpectrum (𝓞 E))}
 
 theorem ordSub_conjP (p : DecoF E n ST SG Q) (w : HeightOneSpectrum (𝓞 E)) :
     ordSub (conjPrime₂ w) (detSub p.deco.1.N) = -ordSub w (detSub p.deco.1.N) := by
+  have hfull : Submodule.IsFullLattice E p.deco.1.N := by
+    letI : Submodule.IsLattice E p.deco.1.N := p.deco.2.lat
+    refine ⟨?_⟩
+    apply top_unique
+    rw [← ((Pi.basisFun E (Fin n)).map (ptFr p w)).span_eq]
+    refine Submodule.span_le.2 ?_
+    rintro _ ⟨i, rfl⟩
+    obtain ⟨s, hs, hx⟩ := (mem_locP _ _ _).1 ((isFr_ptFr p w _).2 (CharValCompare.single_mem_stdAt w i))
+    have hs0 : (algebraMap (𝓞 E) E s) ≠ 0 := by
+      intro h
+      have : s = 0 := (FaithfulSMul.algebraMap_injective (𝓞 E) E) (by simpa using h)
+      exact hs (this ▸ w.asIdeal.zero_mem)
+    have hx' : (algebraMap (𝓞 E) E s) • ptFr p w (Pi.single i 1) ∈ p.deco.1.N := by
+      rwa [IsScalarTower.algebraMap_smul]
+    have hm := Submodule.smul_mem (Submodule.span E (p.deco.1.N : Set (Sp E n)))
+      (algebraMap (𝓞 E) E s)⁻¹ (Submodule.subset_span hx')
+    rw [← mul_smul, inv_mul_cancel₀ hs0, one_smul] at hm
+    simpa only [Module.Basis.map_apply, Pi.basisFun_apply, SetLike.mem_coe] using hm
   have h := CharValCompare.val_dual (P := w) ⟨p.deco.2.lat, p.deco.2.uni⟩ (isFr_ptFr p w) (isFr_ptFr p (conjPrime₂ w))
   rw [map_mul, valuation_star, CharValCompare.conjP_conjP] at h
-  rw [ordSub_detSub_eq p.deco.2.lat (isFr_ptFr p w), ordSub_detSub_eq p.deco.2.lat (isFr_ptFr p (conjPrime₂ w))]
+  rw [ordSub_detSub_eq hfull (isFr_ptFr p w), ordSub_detSub_eq hfull (isFr_ptFr p (conjPrime₂ w))]
   have h' : w.valuation E ((LinearEquiv.det (ptFr p w) : Eˣ) : E) *
       (conjPrime₂ w).valuation E ((LinearEquiv.det (ptFr p (conjPrime₂ w)) : Eˣ) : E) = 1 := h
   rw [valuation_eq_exp, valuation_eq_exp, ← WithZero.exp_add, ← WithZero.exp_zero, WithZero.exp_inj] at h'
   omega
 
-open Classical in
 
+open Classical in
 theorem valued_compAt_detIdl (SB : Finset (HeightOneSpectrum (𝓞 E))) (p : DecoF E n ST SG Q)
     (w : HeightOneSpectrum (𝓞 E)) :
     Valued.v (compAt w (detIdl SB p.deco.1.N (ptFr p))) = WithZero.exp (-(if w ∈ SB then ordSub w (detSub p.deco.1.N)
       else if conjPrime₂ w ∈ SB then 0 else ((ordSub w (detSub p.deco.1.N)).toNat : ℤ))) := by
+  have hfull : Submodule.IsFullLattice E p.deco.1.N := by
+    letI : Submodule.IsLattice E p.deco.1.N := p.deco.2.lat
+    refine ⟨?_⟩
+    apply top_unique
+    rw [← ((Pi.basisFun E (Fin n)).map (ptFr p w)).span_eq]
+    refine Submodule.span_le.2 ?_
+    rintro _ ⟨i, rfl⟩
+    obtain ⟨s, hs, hx⟩ := (mem_locP _ _ _).1 ((isFr_ptFr p w _).2 (CharValCompare.single_mem_stdAt w i))
+    have hs0 : (algebraMap (𝓞 E) E s) ≠ 0 := by
+      intro h
+      have : s = 0 := (FaithfulSMul.algebraMap_injective (𝓞 E) E) (by simpa using h)
+      exact hs (this ▸ w.asIdeal.zero_mem)
+    have hx' : (algebraMap (𝓞 E) E s) • ptFr p w (Pi.single i 1) ∈ p.deco.1.N := by
+      rwa [IsScalarTower.algebraMap_smul]
+    have hm := Submodule.smul_mem (Submodule.span E (p.deco.1.N : Set (Sp E n)))
+      (algebraMap (𝓞 E) E s)⁻¹ (Submodule.subset_span hx')
+    rw [← mul_smul, inv_mul_cancel₀ hs0, one_smul] at hm
+    simpa only [Module.Basis.map_apply, Pi.basisFun_apply, SetLike.mem_coe] using hm
   rw [compAt_detIdl SB p.deco.2.lat]
   split_ifs
-  · rw [valued_algebraMap, valuation_eq_exp, ordSub_detSub_eq p.deco.2.lat (isFr_ptFr p w)]
+  · rw [valued_algebraMap, valuation_eq_exp, ordSub_detSub_eq hfull (isFr_ptFr p w)]
   · simp
   · rw [map_pow, valued_algebraMap, valuation_eq_exp, ordF_unif_self, ← WithZero.exp_nsmul]
     simp

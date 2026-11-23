@@ -1,5 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Foundations.HermitianSpaceBaseLatticeEqFrameLattice
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.HermitianSpaceBaseLatticeEqFrameLattice
+public import Formalism.HermitianLattices.HermitianLatticesProofs.DualLattice
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -10,9 +54,11 @@ open NumberField IsDedekindDomain Formalism.MainNotions.GlobalTheoryTheory.Genus
 
 theorem exists_dualFamily_of_isLattice {O K V : Type} [CommRing O] [IsDedekindDomain O] [Field K] [Algebra O K]
     [IsFractionRing O K] [AddCommGroup V] [Module K V] [Module O V] [IsScalarTower O K V]
-    (L : Submodule O V) (hL : Submodule.IsLattice K L) :
+    (L : Submodule O V) (hL : Submodule.IsFullLattice K L) :
     ∃ (k : ℕ) (s : Fin k → V) (φ : Fin k → V →ₗ[K] K), (∀ j, s j ∈ L) ∧
       (∀ x ∈ L, ∀ j, φ j x ∈ (algebraMap O K).range) ∧ ∀ x, ∑ j, φ j x • s j = x := by
+  let := hL
+  have := Submodule.IsLattice.finite K L
   have := Module.IsTorsionFree.trans_faithfulSMul O K V
   have : Module.FinitePresentation O L := Module.finitePresentation_of_finite _ _
   have : Module.Projective O L := Module.Flat.projective_of_finitePresentation
@@ -42,6 +88,7 @@ theorem exists_dualFamily_of_isLattice {O K V : Type} [CommRing O] [IsDedekindDo
     have h1 : π (s ⟨y, hy⟩) = ⟨y, hy⟩ := LinearMap.congr_fun hs ⟨y, hy⟩
     have h2 : (π (s ⟨y, hy⟩) : V) = y := by rw [h1]
     rw [pi_eq_sum_univ' (s ⟨y, hy⟩)] at h2
+
     simp only [map_sum, map_smul, Submodule.coe_sum, Submodule.coe_smul] at h2
     simp only [LinearMap.sum_apply, LinearMap.smulRight_apply, LinearMap.id_apply]
     refine Eq.trans (Finset.sum_congr rfl fun i _ => ?_) h2
@@ -62,8 +109,8 @@ theorem exists_dualFamily_integers :
     ∃ (k : ℕ) (s : Fin k → 𝓞 E) (φ : Fin k → E →ₗ[F] F),
       (∀ (x : 𝓞 E) j, φ j x ∈ (algebraMap (𝓞 F) F).range) ∧ ∀ x, ∑ j, φ j x • (s j : E) = x := by
   let M : Submodule (𝓞 F) E := LinearMap.range (IsScalarTower.toAlgHom (𝓞 F) (𝓞 E) E).toLinearMap
-  have hM : Submodule.IsLattice F M := by
-    refine ⟨Submodule.fg_range _, eq_top_iff.2 fun y _ => ?_⟩
+  have hM : Submodule.IsFullLattice F M := by
+    refine { toIsLattice := Submodule.IsLattice.of_fg F (Submodule.fg_range _), span_eq_top := eq_top_iff.2 fun y _ => ?_ }
     obtain ⟨N, x, -, rfl⟩ := exists_den (F := F) y
     exact Submodule.smul_mem _ _ (Submodule.subset_span ⟨x, rfl⟩)
   obtain ⟨k, s, φ, hs, hφ, hsum⟩ := exists_dualFamily_of_isLattice M hM
@@ -117,7 +164,7 @@ theorem eventually_mem_intLoc (e : E) :
 
 variable {n : ℕ}
 
-theorem exists_frame (L : Submodule (𝓞 E) (Fin n → E)) (hL : Submodule.IsLattice E L) :
+theorem exists_frame (L : Submodule (𝓞 E) (Fin n → E)) (hL : Submodule.IsFullLattice E L) :
     ∃ (k : ℕ) (S : Matrix (Fin n) (Fin k) E) (Φ : Matrix (Fin k) (Fin n) E), S * Φ = 1 ∧ (∀ j, (fun i => S i j) ∈ L) ∧
       ∀ x ∈ L, ∀ j, (Φ *ᵥ x) j ∈ (algebraMap (𝓞 E) E).range := by
   obtain ⟨k, s, φ, hs, hφ, hsum⟩ := exists_dualFamily_of_isLattice L hL
@@ -180,8 +227,9 @@ theorem hform_eq_sum {A : Type} [CommRing A] (σ : A →+* A) (J : Matrix (Fin n
     hform σ J x y = ∑ j, σ ((Φ *ᵥ x) j) * (((S.map σ)ᵀ * J) *ᵥ y) j := by
   conv_lhs => rw [← Matrix.one_mulVec x, ← h1, ← Matrix.mulVec_mulVec]
   generalize Φ *ᵥ x = u
+
   simp only [hform, Matrix.mulVec, dotProduct, Matrix.mul_apply, Matrix.transpose_apply, Matrix.map_apply, map_sum,
-    map_mul, Finset.sum_mul, Finset.mul_sum]
+  map_mul, Finset.sum_mul, Finset.mul_sum]
   rw [Finset.sum_comm]
   conv_rhs => rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun b _ => ?_
@@ -274,16 +322,15 @@ end DualFrame
 
 variable {σ J} {L L' : Submodule (𝓞 E) (Fin n → E)}
 
-omit [NumberField F] in
 
-theorem isLattice_dualGlob (hJ : J.det ≠ 0) (hL : Submodule.IsLattice E L) :
-    Submodule.IsLattice E (dualGlob σ J L) := by
+omit [NumberField F] in
+theorem isLattice_dualGlob (hJ : J.det ≠ 0) (hL : Submodule.IsFullLattice E L) :
+    Submodule.IsFullLattice E (dualGlob σ J L) := by
   classical
   obtain ⟨k, S, Φ, h1, hS, hΦ⟩ := exists_frame L hL
   have h2 := dual_mul_eq_one (σ := σ) hJ h1
   have h3 := dual_col_mem (σ := σ) hJ hΦ
-  refine ⟨⟨Finset.univ.image fun j i => (J⁻¹ * (Φ.map (σ : E →+* E))ᵀ) i j, le_antisymm ?_ fun y hy => ?_⟩,
-    eq_top_iff.2 fun y _ => ?_⟩
+  refine { toIsLattice := Submodule.IsLattice.of_fg E ⟨Finset.univ.image fun j i => (J⁻¹ * (Φ.map (σ : E →+* E))ᵀ) i j, le_antisymm ?_ fun y hy => ?_⟩, span_eq_top := eq_top_iff.2 fun y _ => ?_ }
   · rw [Submodule.span_le]
     intro y hy
     obtain ⟨j, -, rfl⟩ := Finset.mem_image.1 hy
@@ -296,7 +343,7 @@ theorem isLattice_dualGlob (hJ : J.det ≠ 0) (hL : Submodule.IsLattice E L) :
   · rw [eq_sum_col h2 y]
     exact sum_mem fun j _ => Submodule.smul_mem _ _ (Submodule.subset_span (h3 j))
 
-theorem latLoc_dualGlob (hJ : J.det ≠ 0) (hL : Submodule.IsLattice E L) (v : HeightOneSpectrum (𝓞 F)) :
+theorem latLoc_dualGlob (hJ : J.det ≠ 0) (hL : Submodule.IsFullLattice E L) (v : HeightOneSpectrum (𝓞 F)) :
     latLoc F (dualGlob σ J L) v = dualLoc σ J L v := by
   obtain ⟨k, S, Φ, h1, hS, hΦ⟩ := exists_frame L hL
   ext y
@@ -308,7 +355,7 @@ theorem map_mulVec_inclR (R : Type) [CommRing R] [Algebra F R] {k : ℕ} (Φ : M
     (j : Fin k) : (Φ.map (inclR (F := F) R) *ᵥ fun i => inclR R (y i)) j = inclR R ((Φ *ᵥ y) j) :=
   (RingHom.map_mulVec (inclR (F := F) R) Φ y j).symm
 
-theorem mem_iff_forall_latLoc (hL : Submodule.IsLattice E L) (y : Fin n → E) :
+theorem mem_iff_forall_latLoc (hL : Submodule.IsFullLattice E L) (y : Fin n → E) :
     y ∈ L ↔ ∀ v : HeightOneSpectrum (𝓞 F), (fun i => inclR (Fv F v) (y i)) ∈ latLoc F L v := by
   refine ⟨fun hy v => tmul_mem_latLoc (one_mem _) hy, fun h => ?_⟩
   obtain ⟨k, S, Φ, h1, hS, hΦ⟩ := exists_frame L hL
@@ -316,7 +363,7 @@ theorem mem_iff_forall_latLoc (hL : Submodule.IsLattice E L) (y : Fin n → E) :
   rw [← map_mulVec_inclR]
   exact (mem_latLoc_iff_of_frame h1 hS hΦ v _).1 (h v) j
 
-theorem eventually_mem_latLoc (hL : Submodule.IsLattice E L) (y : Fin n → E) :
+theorem eventually_mem_latLoc (hL : Submodule.IsFullLattice E L) (y : Fin n → E) :
     ∀ᶠ v : HeightOneSpectrum (𝓞 F) in Filter.cofinite, (fun i => inclR (Fv F v) (y i)) ∈ latLoc F L v := by
   obtain ⟨k, S, Φ, h1, hS, hΦ⟩ := exists_frame L hL
   filter_upwards [Filter.eventually_all.2 fun j => eventually_mem_intLoc (F := F) ((Φ *ᵥ y) j)] with v hv
@@ -324,30 +371,30 @@ theorem eventually_mem_latLoc (hL : Submodule.IsLattice E L) (y : Fin n → E) :
   rw [map_mulVec_inclR]
   exact hv j
 
-theorem eventually_latLoc_le (hL : Submodule.IsLattice E L) (hL' : Submodule.IsLattice E L') :
+theorem eventually_latLoc_le (hL : Submodule.IsFullLattice E L) (hL' : Submodule.IsFullLattice E L') :
     ∀ᶠ v : HeightOneSpectrum (𝓞 F) in Filter.cofinite, latLoc F L v ≤ latLoc F L' v := by
   obtain ⟨k, S, Φ, h1, hS, hΦ⟩ := exists_frame L hL
   filter_upwards [Filter.eventually_all.2 fun j => eventually_mem_latLoc (F := F) hL' fun i => S i j] with v hv y hy
   rw [eq_sum_col (map_mul_eq_one (F := F) (Fv F v) h1) y]
   exact sum_mem fun j _ => (latLoc F L' v).smul_mem ⟨_, (mem_latLoc_iff_of_frame h1 hS hΦ v y).1 hy j⟩ (hv j)
 
-theorem eventually_latLoc_eq (hL : Submodule.IsLattice E L) (hL' : Submodule.IsLattice E L') :
+theorem eventually_latLoc_eq (hL : Submodule.IsFullLattice E L) (hL' : Submodule.IsFullLattice E L') :
     ∀ᶠ v : HeightOneSpectrum (𝓞 F) in Filter.cofinite, latLoc F L v = latLoc F L' v := by
   filter_upwards [eventually_latLoc_le (F := F) hL hL', eventually_latLoc_le (F := F) hL' hL] with v h h'
   exact le_antisymm h h'
 
-theorem eq_iff_forall_latLoc_eq (hL : Submodule.IsLattice E L) (hL' : Submodule.IsLattice E L') :
+theorem eq_iff_forall_latLoc_eq (hL : Submodule.IsFullLattice E L) (hL' : Submodule.IsFullLattice E L') :
     L = L' ↔ ∀ v : HeightOneSpectrum (𝓞 F), latLoc F L v = latLoc F L' v := by
   refine ⟨fun h v => by rw [h], fun h => Submodule.ext fun y => ?_⟩
   rw [mem_iff_forall_latLoc (F := F) hL, mem_iff_forall_latLoc (F := F) hL']
   simp only [h]
 
-theorem eventually_isSelfDualAt (hJ : J.det ≠ 0) (hL : Submodule.IsLattice E L) :
+theorem eventually_isSelfDualAt (hJ : J.det ≠ 0) (hL : Submodule.IsFullLattice E L) :
     ∀ᶠ v in Filter.cofinite, IsSelfDualAt σ J L v := by
   filter_upwards [eventually_latLoc_eq (F := F) hL (isLattice_dualGlob (σ := σ) hJ hL)] with v hv
   exact hv.trans (latLoc_dualGlob hJ hL v)
 
-theorem forall_isSelfDualAt_iff (hJ : J.det ≠ 0) (hL : Submodule.IsLattice E L) :
+theorem forall_isSelfDualAt_iff (hJ : J.det ≠ 0) (hL : Submodule.IsFullLattice E L) :
     (∀ v, IsSelfDualAt σ J L v) ↔ ∀ y : Fin n → E, (y ∈ L ↔ ∀ x ∈ L, hE σ J x y ∈ (algebraMap (𝓞 E) E).range) := by
   simp only [IsSelfDualAt, ← latLoc_dualGlob hJ hL]
   rw [← eq_iff_forall_latLoc_eq hL (isLattice_dualGlob hJ hL)]
@@ -357,12 +404,76 @@ section Record
 
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.L2.Theta
 
+private theorem frame_span_eq_top_of_unimodular {E : Type} [Field E] [NumberField E] [StarRing E] (S : HSpace E) :
+    Submodule.span E (S.L0 : Set S.V) = ⊤ := by
+  let N := S.L0
+  have hN : N.FG := S.standardTuple_isLattice.fg
+  have hU : Formalism.HermitianLatticesTheory.IsUnimodular S.hT N := S.baseLattice_isUnimodular
+  change Submodule.span E (N : Set S.V) = ⊤
+  classical
+  by_contra hspan
+  obtain ⟨φ, hφ₀, hφ⟩ := Submodule.exists_le_ker_of_lt_top _ (lt_top_iff_ne_top.mpr hspan)
+  obtain ⟨bs, hbs⟩ := Formalism.HermitianLatticesTheory.dualLattice_dualBasis S.hT S.nondeg S.frame
+  let μ := ∑ j, star (φ (S.frame j)) • bs j
+  have hμ : ∀ v, S.hT μ v = φ v := by
+    have key : S.hT μ = φ := by
+      apply S.frame.ext
+      intro i
+      dsimp only [μ]
+
+      rw [map_sum, LinearMap.sum_apply]
+      have hs : ∀ j, S.hT (star (φ (S.frame j)) • bs j) (S.frame i) =
+          φ (S.frame j) * (if i = j then 1 else 0) := by
+        intro j
+        rw [LinearMap.map_smulₛₗ, LinearMap.smul_apply, smul_eq_mul, starRingEnd_apply, star_star]
+        congr 1
+        rw [← S.herm.eq (S.frame i) (bs j), hbs]
+        split_ifs <;> simp
+      simp only [hs, mul_ite, mul_one, mul_zero, Finset.sum_ite_eq, Finset.mem_univ, if_true]
+    intro v
+    rw [key]
+  have hμ₀ : μ ≠ 0 := by
+    intro h
+    apply hφ₀
+    ext y
+    simpa [h] using (hμ y).symm
+  have hline (a : E) : a • μ ∈ N := by
+    rw [← hU]
+    change a • μ ∈ Formalism.E.hdual S.hT N
+    simp only [Formalism.E.hdual, Submodule.mem_iInf, Submodule.mem_comap, LinearMap.restrictScalars_apply]
+    intro y hy
+    have hy₀ := LinearMap.mem_ker.mp (hφ (Submodule.subset_span hy))
+    simp [← S.herm.eq (a • μ) y, LinearMap.map_smulₛₗ, hμ, hy₀]
+  obtain ⟨ψ, hψ, -⟩ := Submodule.exists_le_ker_of_notMem
+    (show μ ∉ (⊥ : Submodule E S.V) by simpa using hμ₀)
+  let f := ψ.restrictScalars (𝓞 E)
+  have hmap (x : E) : x ∈ N.map f := by
+    refine ⟨(x / ψ μ) • μ, hline _, ?_⟩
+    change ψ ((x / ψ μ) • μ) = x
+    rw [map_smul, smul_eq_mul, div_mul_cancel₀ _ hψ]
+  obtain ⟨d, hd₀, hd⟩ := FractionalIdeal.isFractional_of_fg
+    (S := nonZeroDivisors (𝓞 E)) (hN.map f)
+  have hinj := IsFractionRing.injective (𝓞 E) E
+  have hne {a : 𝓞 E} (ha : a ≠ 0) : algebraMap (𝓞 E) E a ≠ 0 :=
+    fun h => ha (hinj (h.trans (map_zero _).symm))
+  have hinteger (x : E) : IsLocalization.IsInteger (𝓞 E) x := by
+    have hx := hd _ (hmap ((algebraMap (𝓞 E) E d)⁻¹ * x))
+    rwa [Algebra.smul_def, ← mul_assoc, mul_inv_cancel₀ (hne (nonZeroDivisors.ne_zero hd₀)),
+      one_mul] at hx
+  apply RingOfIntegers.not_isField E
+  refine ⟨⟨0, 1, zero_ne_one⟩, mul_comm, ?_⟩
+  intro a ha
+  obtain ⟨b, hb⟩ := hinteger ((algebraMap (𝓞 E) E a)⁻¹)
+  refine ⟨b, hinj ?_⟩
+  rw [map_mul, hb, map_one, mul_inv_cancel₀ (hne ha)]
+
+
 theorem isLattice_frameLat {E : Type} [Field E] [NumberField E] [StarRing E] (V : HSpace E) :
-    Submodule.IsLattice E (frameLat V) := by
-  refine ⟨frameLat_fg V, ?_⟩
+    Submodule.IsFullLattice E (frameLat V) := by
+  refine { toIsLattice := Submodule.IsLattice.of_fg E (frameLat_fg V), span_eq_top := ?_ }
   have : (frameLat V : Set (Fin V.rank → E)) = V.frame.equivFun.toLinearMap '' (V.L0 : Set V.V) :=
     (V.frame.equivFun.toEquiv.image_eq_preimage_symm _).symm
-  rw [this, ← Submodule.map_span, V.standardTuple_isLattice.span_eq_top, Submodule.map_top, LinearEquiv.range]
+  rw [this, ← Submodule.map_span, frame_span_eq_top_of_unimodular V, Submodule.map_top, LinearEquiv.range]
 
 theorem isSelfDualAt_frameLat_of_cm {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [StarRing E]
     [Algebra F E] (hc : CMData F E) (V : HSpace E) (v : HeightOneSpectrum (𝓞 F)) :

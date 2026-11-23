@@ -1,4 +1,58 @@
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.FockJointMultiplicity.JointMultOfSteps
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.FockJointMultiplicity.JointMultOfSteps
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.Derivation.Lie
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -307,7 +361,7 @@ theorem hc_pderiv (l : σ) (e : ℕ) (P : MvPolynomial σ ℂ) :
     homogeneousComponent e (pderiv l P) = pderiv l (homogeneousComponent (e + 1) P) := by
   induction P using MvPolynomial.induction_on' with
   | monomial u c => exact homogeneousComponent_pderiv_monomial_eq_pderiv_succ l e u c
-  | add P Q hP hQ => simp only [map_add, hP, hQ]
+  | add P Q hP hQ => simp only [map_add (f := _), hP, hQ]
 
 theorem pderiv_comm (i j : σ) (P : MvPolynomial σ ℂ) :
     pderiv i (pderiv j P) = pderiv j (pderiv i P) := by
@@ -338,24 +392,6 @@ theorem eq_zero_of_hc (x : MvPolynomial σ ℂ) (h : ∀ e, homogeneousComponent
   rw [hx]
   exact Finset.sum_eq_zero fun i _ => h i
 
-theorem sum_hc_of_le (P : MvPolynomial σ ℂ) (n : ℕ) (hn : P.totalDegree < n) :
-    ∑ i ∈ Finset.range n, homogeneousComponent i P = P := by
-  have hx : ∑ i ∈ Finset.range (P.totalDegree + 1), homogeneousComponent i P = P := by
-    first
-    | exact sum_homogeneousComponent P
-    | exact sum_homogeneousComponent
-  calc ∑ i ∈ Finset.range n, homogeneousComponent i P
-      = ∑ i ∈ Finset.range (P.totalDegree + 1), homogeneousComponent i P := by
-        symm
-        apply Finset.sum_subset
-        · intro i hi
-          simp only [Finset.mem_range] at hi ⊢
-          omega
-        · intro i _ hi
-          simp only [Finset.mem_range, not_lt] at hi
-          exact homogeneousComponent_eq_zero i P (by omega)
-    _ = P := hx
-
 theorem minusPart_eq_sum (A : Module.End ℂ (MvPolynomial σ ℂ)) (P : MvPolynomial σ ℂ) :
     minusPart A P = ∑ d ∈ Finset.range (P.totalDegree + 1),
       homogeneousComponent d (A (homogeneousComponent (d + 2) P)) := by
@@ -369,16 +405,13 @@ theorem minusPart_eq_sum (A : Module.End ℂ (MvPolynomial σ ℂ)) (P : MvPolyn
   show homogeneousComponent d (A (homogeneousComponent (d + 2) P)) = 0
   rw [homogeneousComponent_eq_zero (d + 2) P (by omega), map_zero, map_zero]
 
-theorem minusPart_add (A B : Module.End ℂ (MvPolynomial σ ℂ)) (P : MvPolynomial σ ℂ) :
-    minusPart (A + B) P = minusPart A P + minusPart B P := by
-  simp only [minusPart_eq_sum, LinearMap.add_apply, map_add, Finset.sum_add_distrib]
-
 theorem minusPart_smul (c : ℂ) (A : Module.End ℂ (MvPolynomial σ ℂ)) (P : MvPolynomial σ ℂ) :
     minusPart (c • A) P = c • minusPart A P := by
   simp only [minusPart_eq_sum, LinearMap.smul_apply, map_smul, Finset.smul_sum]
 
 theorem minusPart_sum {ι : Type*} (t : Finset ι) (A : ι → Module.End ℂ (MvPolynomial σ ℂ))
     (P : MvPolynomial σ ℂ) : minusPart (∑ i ∈ t, A i) P = ∑ i ∈ t, minusPart (A i) P := by
+
   simp only [minusPart_eq_sum, LinearMap.sum_apply, map_sum]
   exact Finset.sum_comm
 
@@ -394,6 +427,7 @@ private theorem homogeneousComponent_minusPart (A : Module.End ℂ (MvPolynomial
     (P : MvPolynomial σ ℂ) (e : ℕ) :
     homogeneousComponent e (FockH1Action.minusPart A P) =
       homogeneousComponent e (A (homogeneousComponent (e + 2) P)) := by
+
   rw [minusPart_eq_sum, map_sum]
   simp only [hc_hc]
   first
@@ -597,26 +631,26 @@ variable {p q r s : ℕ}
 open MvPolynomial
 
 theorem coeff_fockAct1_diag (a : Ix p q) (P : Pol p q r s) (m : Ln p q r s →₀ ℕ) :
-    coeff m (fockAct1 p q r s (Eab a a) P) =
-      (((wt1 m a : ℚ) + sh1 p q r s a : ℚ) : ℂ) * coeff m P := by
+    AddMonoidAlgebra.coeff (fockAct1 p q r s (Eab a a) P) m =
+      (((wt1 m a : ℚ) + sh1 p q r s a : ℚ) : ℂ) * AddMonoidAlgebra.coeff P m := by
   induction P using MvPolynomial.induction_on' with
   | monomial u c =>
-    rw [fockAct1_Eab_diag_monomial, coeff_smul, smul_eq_mul, coeff_monomial]
+    rw [fockAct1_Eab_diag_monomial, MvPolynomial.coeff_smul, smul_eq_mul, coeff_monomial]
     split_ifs with h
     · rw [h]
     · simp
-  | add P Q hP hQ => simp only [map_add, coeff_add, hP, hQ, mul_add]
+  | add P Q hP hQ => simp only [map_add (f := _), MvPolynomial.coeff_add, hP, hQ, mul_add]
 
 theorem coeff_fockAct2_diag (c : Ix r s) (P : Pol p q r s) (m : Ln p q r s →₀ ℕ) :
-    coeff m (fockAct2 p q r s (Eab c c) P) =
-      (((wt2 m c : ℚ) + sh2 p q r s c : ℚ) : ℂ) * coeff m P := by
+    AddMonoidAlgebra.coeff (fockAct2 p q r s (Eab c c) P) m =
+      (((wt2 m c : ℚ) + sh2 p q r s c : ℚ) : ℂ) * AddMonoidAlgebra.coeff P m := by
   induction P using MvPolynomial.induction_on' with
   | monomial u b =>
-    rw [fockAct2_Eab_diag_monomial, coeff_smul, smul_eq_mul, coeff_monomial]
+    rw [fockAct2_Eab_diag_monomial, MvPolynomial.coeff_smul, smul_eq_mul, coeff_monomial]
     split_ifs with h
     · rw [h]
     · simp
-  | add P Q hP hQ => simp only [map_add, coeff_add, hP, hQ, mul_add]
+  | add P Q hP hQ => simp only [map_add (f := _), MvPolynomial.coeff_add, hP, hQ, mul_add]
 
 theorem mem_wtSub1 (μ : Ix p q → ℚ) (P : Pol p q r s) :
     P ∈ wtSub (fockAct1 p q r s) μ ↔ ∀ m ∈ P.support, ∀ a, (wt1 m a : ℚ) + sh1 p q r s a = μ a := by
@@ -624,15 +658,15 @@ theorem mem_wtSub1 (μ : Ix p q → ℚ) (P : Pol p q r s) :
     LinearMap.smul_apply, LinearMap.id_apply, sub_eq_zero]
   constructor
   · intro h m hm a
-    have hc := congrArg (coeff m) (h a)
-    rw [coeff_fockAct1_diag, coeff_smul, smul_eq_mul] at hc
+    have hc := congrArg (AddMonoidAlgebra.coeff · m) (h a)
+    rw [coeff_fockAct1_diag, MvPolynomial.coeff_smul, smul_eq_mul] at hc
     exact_mod_cast mul_right_cancel₀ (MvPolynomial.mem_support_iff.mp hm) hc
   · intro h a
     ext m
-    rw [coeff_fockAct1_diag, coeff_smul, smul_eq_mul]
+    rw [coeff_fockAct1_diag, MvPolynomial.coeff_smul, smul_eq_mul]
     by_cases hm : m ∈ P.support
     · rw [h m hm a]
-    · have h0 : coeff m P = 0 := by simpa [MvPolynomial.mem_support_iff] using hm
+    · have h0 : AddMonoidAlgebra.coeff P m = 0 := by simpa [MvPolynomial.mem_support_iff] using hm
       rw [h0, mul_zero, mul_zero]
 
 theorem mem_wtSub2 (μ : Ix r s → ℚ) (P : Pol p q r s) :
@@ -641,15 +675,15 @@ theorem mem_wtSub2 (μ : Ix r s → ℚ) (P : Pol p q r s) :
     LinearMap.smul_apply, LinearMap.id_apply, sub_eq_zero]
   constructor
   · intro h m hm c
-    have hc := congrArg (coeff m) (h c)
-    rw [coeff_fockAct2_diag, coeff_smul, smul_eq_mul] at hc
+    have hc := congrArg (AddMonoidAlgebra.coeff · m) (h c)
+    rw [coeff_fockAct2_diag, MvPolynomial.coeff_smul, smul_eq_mul] at hc
     exact_mod_cast mul_right_cancel₀ (MvPolynomial.mem_support_iff.mp hm) hc
   · intro h c
     ext m
-    rw [coeff_fockAct2_diag, coeff_smul, smul_eq_mul]
+    rw [coeff_fockAct2_diag, MvPolynomial.coeff_smul, smul_eq_mul]
     by_cases hm : m ∈ P.support
     · rw [h m hm c]
-    · have h0 : coeff m P = 0 := by simpa [MvPolynomial.mem_support_iff] using hm
+    · have h0 : AddMonoidAlgebra.coeff P m = 0 := by simpa [MvPolynomial.mem_support_iff] using hm
       rw [h0, mul_zero, mul_zero]
 
 theorem ne_of_posC {n k : ℕ} {a b : Ix n k} (h : posC a b) : a ≠ b := by

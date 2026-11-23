@@ -1,4 +1,55 @@
-import Formalism.LocalToGlobal.CharacterGerms.ValuationEqPairOfUnitGerm
+module
+
+public import Formalism.LocalToGlobal.CharacterGerms.ValuationEqPairOfUnitGerm
+public import Formalism.LocalToGlobal.CharacterGerms.LemmaMLin
+public import Formalism.LocalToGlobal.ProjectiveLattices.PlaceBelow
+public import Formalism.IncomingBounds.FlowDegreeBounds.ThmPJet
+import Formalism.LocalToGlobal.CharacterGerms.LemmaMJet
+public import Formalism.LocalToGlobal.CharacterGerms.LogCoordOfDpull
+import Formalism.LocalToGlobal.CharacterGerms.SubstSubst
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -50,22 +101,22 @@ theorem linear_pullback_eval_point_zero (b : Fin n) (G : PS C 2 dd) :
   · simp [exZero, VP.subst_zero' (cc_linPt Y M), VP.subst_zero' hL]
 
 def RR (b : Fin n) (i j : Fin dd) : MvPowerSeries Var C :=
-  linPull Y M (ev (n := n) ![pt C dd b, 0] (MvPowerSeries.pderiv C ((1 : Fin 2), i) (Y.B.FK C j)))
+  linPull Y M (ev (n := n) ![pt C dd b, 0] (MvPowerSeries.pderiv (R := C) ((1 : Fin 2), i) (Y.B.FK C j)))
 
 theorem linPull_DofN (b : Fin n) (u : Fin dd → C) (F : PS C n dd) :
     linPull Y M (DofN (Y.B.FK C) b u F) =
-      ∑ j, (∑ i, MvPowerSeries.C (u i) * RR Y M b i j) * linPull Y M (MvPowerSeries.pderiv C (b, j) F) := by
+      ∑ j, (∑ i, MvPowerSeries.C (u i) * RR Y M b i j) * linPull Y M (MvPowerSeries.pderiv (R := C) (b, j) F) := by
   unfold DofN
   simp only [← MvPowerSeries.smul_eq_C_mul]
   simp only [linPull, RR, VP.subst_sum (cc_linPt Y M), VP.subst_mul (cc_linPt Y M), VP.subst_smul (cc_linPt Y M)]
 
 theorem pderiv_linPull (x : Var) (F : PS C n dd) :
-    MvPowerSeries.pderiv C x (linPull Y M F) =
+    MvPowerSeries.pderiv (R := C) x (linPull Y M F) =
       ∑ b, ∑ j, (∑ i, MvPowerSeries.C (M x (b, i)) * RR Y M b i j) *
-        linPull Y M (MvPowerSeries.pderiv C (b, j) F) := by
+        linPull Y M (MvPowerSeries.pderiv (R := C) (b, j) F) := by
   have hE := expODE Y
   unfold ExpODESt at hE
-  have hJ : ∀ b j, MvPowerSeries.pderiv C x (linPt Y M (b, j)) =
+  have hJ : ∀ b j, MvPowerSeries.pderiv (R := C) x (linPt Y M (b, j)) =
       ∑ i, MvPowerSeries.C (M x (b, i)) * RR Y M b i j := by
     intro b j
     simp only [linPt, e, hE, pderiv_subst_linS, colLin, RR, linear_pullback_eval_point_zero, MvPowerSeries.smul_eq_C_mul]
@@ -76,13 +127,14 @@ theorem pderiv_linPull (x : Var) (F : PS C n dd) :
 
 theorem dpullG (b0 : Fin n) (u : Fin dd → C) (c : Var → C)
     (hc : ∀ b i, ∑ x, c x * M x (b, i) = if b = b0 then u i else 0) (F : PS C n dd) :
-    linPull Y M (DofN (Y.B.FK C) b0 u F) = ∑ x, c x • MvPowerSeries.pderiv C x (linPull Y M F) := by
+    linPull Y M (DofN (Y.B.FK C) b0 u F) = ∑ x, c x • MvPowerSeries.pderiv (R := C) x (linPull Y M F) := by
   have key : ∀ b j, ∑ x, c x • ((∑ i, MvPowerSeries.C (M x (b, i)) * RR Y M b i j) *
-      linPull Y M (MvPowerSeries.pderiv C (b, j) F)) =
+      linPull Y M (MvPowerSeries.pderiv (R := C) (b, j) F)) =
       (∑ i, MvPowerSeries.C (if b = b0 then u i else 0) * RR Y M b i j) *
-        linPull Y M (MvPowerSeries.pderiv C (b, j) F) := by
+        linPull Y M (MvPowerSeries.pderiv (R := C) (b, j) F) := by
     intro b j
     simp_rw [← hc b]
+
     simp only [map_sum, map_mul, Finset.sum_mul, Finset.mul_sum, MvPowerSeries.smul_eq_C_mul, mul_assoc]
     exact Finset.sum_comm
   rw [linPull_DofN]
@@ -140,16 +192,17 @@ theorem logCoordG {ι : Type} [Fintype ι] (cp : ι → Fin n) (uv : ι → Fin 
       jetAt0 (∏ ℓ, (∑ x, MvPolynomial.C (co ℓ x) * MvPolynomial.X x) ^ m ℓ) (linPull Y M F) := by
     intro m hm
     have h1 := jet_listG Y M cp uv co m F (Finset.univ : Finset ι).toList
-      (fun ℓ _ hmℓ => hco ℓ ((MvPolynomial.mem_vars ℓ).2 ⟨m, hm, Finsupp.mem_support_iff.2 hmℓ⟩)) 1
+      (fun ℓ _ hmℓ => hco ℓ ((MvPolynomial.mem_vars_iff_mem_support ℓ).2 ⟨m, hm, Finsupp.mem_support_iff.2 hmℓ⟩)) 1
     rw [one_mul, Finset.prod_map_toList, hj1, linPull, VP.cc_subst_eq (cc_linPt Y M)] at h1
     exact h1
   unfold DpolyN
   conv_rhs => rw [MvPolynomial.as_sum P]
+
   simp only [map_sum]
   rw [tpjet_jetAt0_sum]
   refine Finset.sum_congr rfl (fun m hm => ?_)
   rw [MvPolynomial.aeval_monomial, map_mul, MvPowerSeries.constantCoeff_C, hD m hm, MvPolynomial.algebraMap_eq,
-    mul_comm (MvPolynomial.C (MvPolynomial.coeff m P)), jet_mul_C, Finsupp.prod_fintype _ _ (fun ℓ => pow_zero _)]
+    mul_comm (MvPolynomial.C (AddMonoidAlgebra.coeff P m)), jet_mul_C, Finsupp.prod_fintype _ _ (fun ℓ => pow_zero _)]
 
 end VP
 

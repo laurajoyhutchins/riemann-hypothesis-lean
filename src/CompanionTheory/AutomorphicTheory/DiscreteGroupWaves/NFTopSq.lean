@@ -1,11 +1,64 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutLimENF
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutLemB
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.TopFirstOfParts
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.ThetaCompactSupport
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.PBTAsm
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.SliceContOn
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutLimENF
+public import CompanionTheory.AutomorphicTheory.DiscreteGroupWaves.IntegralEqOfSqrtCauchy
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.ChiLIntegrable
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutLemB
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.OpApplyContinuousOn
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.PBTAsm
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.RegularisedPairingViaPhase
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.SliceContOn
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.TheoremPIntegralOfPlaces
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.ThetaCompactSupport
 import Formalism.HermitianCurvature.HermitianCurvatureProofs.TopCellsOfParts
-import CompanionTheory.AutomorphicTheory.DiscreteGroupWaves.IntegralEqOfSqrtCauchy
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.TopFirstOfParts
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.VectorVanishesBigCell
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.Countable
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace CompanionTheory.NFCpt
 
@@ -40,7 +93,7 @@ theorem hsInner_self_re (A : Wq →L[ℂ] Wp) : (B.hsInner A A).re = ‖B.hsVec 
 theorem V_of_not (p : KB.Pl P Wp Wq) (H : B.Mat P.k P.r → (Wq →L[ℂ] Wp)) {γ : C.LPt}
     (hγ : ¬ D.IsLocPt γ (P.r + 1)) : p.V H γ = 0 := by
   unfold KB.Pl.V D.vecV
-  rw [dif_neg fun h => hγ h.1]
+  rw [dite_eq_right fun h => hγ h.1]
 
 theorem ew_top_eq (p : KB.Pl P Wp Wq) (H : B.Mat P.k P.r → (Wq →L[ℂ] Wp)) (w : List C.Letter) (γ : C.LPt) :
     TBB.Ew p (fun _ => 1) H (P.r + 1) w γ = ∑ i : SqIx P w, sqW p w γ i ^ 2 * ‖B.hsVec (sqX p H w γ i)‖ ^ 2 := by
@@ -49,7 +102,7 @@ theorem ew_top_eq (p : KB.Pl P Wp Wq) (H : B.Mat P.k P.r → (Wq →L[ℂ] Wp)) 
   rw [Complex.re_ofReal_mul, hn, div_one, Fintype.sum_option]
   by_cases hγ : D.IsLocPt γ (P.r + 1)
   · unfold KB.Pl.RR D.RRplace
-    rw [dif_pos ⟨hγ, hγ⟩, dif_neg (by omega), if_pos rfl]
+    rw [dite_eq_left ⟨hγ, hγ⟩, dite_eq_right (by omega), if_pos rfl]
     by_cases hw : w = []
     · rw [if_pos hw, hsInner_self_re]
       simp only [sqW, sqX, if_pos hw, KB.Pl.V]
@@ -63,7 +116,7 @@ theorem ew_top_eq (p : KB.Pl P Wp Wq) (H : B.Mat P.k P.r → (Wq →L[ℂ] Wp)) 
       ring
   · have h0 : p.RR H (P.r + 1) w γ γ = 0 := by
       unfold KB.Pl.RR D.RRplace
-      rw [dif_neg fun h => hγ h.1]
+      rw [dite_eq_right fun h => hγ h.1]
     rw [h0]
     simp [sqX, V_of_not p _ hγ, JCx1.needs.hsVec_zero]
 

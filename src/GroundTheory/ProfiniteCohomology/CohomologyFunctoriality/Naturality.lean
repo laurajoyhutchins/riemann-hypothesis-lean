@@ -1,6 +1,49 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.CohomologyFunctoriality
-import GroundTheory.ProfiniteCohomology.ContinuousCochains.Functoriality
+module
+
+public import GroundTheory.ProfiniteCohomology.CohomologyFunctoriality
+public import GroundTheory.ProfiniteCohomology.ContinuousCochains.Functoriality
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
@@ -38,7 +81,6 @@ section Restriction
 
 variable (A : Rep.{u} k G) [IsDiscreteRep A]
 
-@[reassoc]
 theorem cohomologyMap_comp_cohomologyRes {A' : Rep.{u} k G} [IsDiscreteRep A'] (g : A ⟶ A')
     (S : Subgroup G) (n : ℕ) :
     cohomologyMap g n ≫ cohomologyRes A' S n =
@@ -46,7 +88,6 @@ theorem cohomologyMap_comp_cohomologyRes {A' : Rep.{u} k G} [IsDiscreteRep A'] (
   rw [← cohomologyMapAlong_id_eq_cohomologyMap, ← cohomologyMapAlong_id_eq_cohomologyMap]
   exact cohomologyRes_naturality A g S n
 
-@[reassoc]
 theorem cohomologyRes_comp_cohomologyToGroupCohomology (S : Subgroup G) (n : ℕ) :
     cohomologyRes A S n ≫ cohomologyToGroupCohomology (Rep.res S.subtype A) n =
       cohomologyToGroupCohomology A n ≫ groupCohomology.map S.subtype (𝟙 _) n :=
@@ -58,11 +99,6 @@ section Inflation
 
 variable (A : Rep.{u} k G) [IsDiscreteRep A] (N : Subgroup G) [N.Normal]
 
-instance isDiscreteRep_quotientToInvariantsFunctor_obj :
-    IsDiscreteRep ((Rep.quotientToInvariantsFunctor k N).obj A) :=
-  isDiscreteRep_quotientToInvariants_of_normal A N
-
-@[reassoc]
 theorem cohomologyInfl_comp_cohomologyToGroupCohomology (n : ℕ) :
     cohomologyInfl A N n ≫ cohomologyToGroupCohomology A n =
       cohomologyToGroupCohomology (A.quotientToInvariants N) n ≫

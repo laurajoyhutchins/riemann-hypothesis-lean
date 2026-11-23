@@ -1,4 +1,60 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.Category.Grp.Basic
+public import Mathlib.Algebra.DirectSum.Basic
+public import Mathlib.CategoryTheory.Preadditive.Injective.Preserves
+public import Mathlib.CategoryTheory.Sites.Over
+public import Mathlib.Combinatorics.Quiver.ReflQuiver
+import Mathlib.Algebra.Category.Grp.Abelian
+public import Mathlib.Algebra.Category.Grp.EpiMono
+import Mathlib.Algebra.Category.Grp.Zero
+import Mathlib.Algebra.Homology.ShortComplex.Exact
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.Limits.Shapes.Countable
+import Mathlib.CategoryTheory.Monoidal.Mon
+import Mathlib.CategoryTheory.Sites.Abelian
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Arith.SchemeCoh
@@ -36,7 +92,6 @@ lemma shriek_of_eq_of {Y : C} {V : Over U} {t t' : Y ⟶ U} (h : t = t') (a : Ov
   subst h
   rw [Over.OverMorphism.ext ha]
 
-@[simps]
 noncomputable def shriekPresheaf : Cᵒᵖ ⥤ AddCommGrpCat.{v} where
   obj X := AddCommGrpCat.of (⨁ s : X.unop ⟶ U, shriekSummand P X.unop s)
   map g := AddCommGrpCat.ofHom (shriekMap P g.unop)
@@ -58,10 +113,9 @@ noncomputable def shriekPresheaf : Cᵒᵖ ⥤ AddCommGrpCat.{v} where
       ← op_comp]
     exact shriek_of_eq_of P (by simp) _ _ (by simp) x
 
-variable {P} in
 
-@[simps]
-noncomputable def shriekPresheafMap {Q : (Over U)ᵒᵖ ⥤ AddCommGrpCat.{v}} (φ : P ⟶ Q) :
+variable {P} in
+noncomputable def shriekPresheafMap {P Q : (Over U)ᵒᵖ ⥤ AddCommGrpCat.{v}} (φ : P ⟶ Q) :
     shriekPresheaf P ⟶ shriekPresheaf Q where
   app X := AddCommGrpCat.ofHom (DirectSum.toAddMonoid fun s =>
     (DirectSum.of (shriekSummand Q X.unop) s).comp (φ.app (op (Over.mk s))).hom)
@@ -87,10 +141,10 @@ lemma shriekPresheafMap_app_of {P Q : (Over U)ᵒᵖ ⥤ AddCommGrpCat.{v}} (φ 
 
 end Presheaf
 
-variable (U) in
 
-@[simps]
-noncomputable def shriekFunctor : ((Over U)ᵒᵖ ⥤ AddCommGrpCat.{v}) ⥤ (Cᵒᵖ ⥤ AddCommGrpCat.{v}) where
+variable (U) in
+noncomputable def shriekFunctor (U : C) :
+    ((Over U)ᵒᵖ ⥤ AddCommGrpCat.{v}) ⥤ (Cᵒᵖ ⥤ AddCommGrpCat.{v}) where
   obj P := shriekPresheaf P
   map φ := shriekPresheafMap φ
   map_id P := by
@@ -119,7 +173,6 @@ section Adjunction
 
 variable {P : (Over U)ᵒᵖ ⥤ AddCommGrpCat.{v}} {Q : Cᵒᵖ ⥤ AddCommGrpCat.{v}}
 
-@[simps]
 noncomputable def shriekHomToRestrict (α : shriekPresheaf P ⟶ Q) :
     P ⟶ (Over.forget U).op ⋙ Q where
   app V := AddCommGrpCat.ofHom ((α.app (op V.unop.left)).hom.comp
@@ -145,7 +198,6 @@ lemma shriekHomOfRestrictApp_of (β : P ⟶ (Over.forget U).op ⋙ Q) (X : Cᵒ�
       β.app (op (Over.mk s)) x :=
   DirectSum.toAddMonoid_of _ _ _
 
-@[simps]
 noncomputable def shriekHomOfRestrict (β : P ⟶ (Over.forget U).op ⋙ Q) :
     shriekPresheaf P ⟶ Q where
   app X := AddCommGrpCat.ofHom (shriekHomOfRestrictApp β X)
@@ -158,9 +210,9 @@ noncomputable def shriekHomOfRestrict (β : P ⟶ (Over.forget U).op ⋙ Q) :
     refine Eq.trans ?_ (congrArg (Q.map g) (shriekHomOfRestrictApp_of β X s x).symm)
     exact NatTrans.naturality_apply β _ x
 
-variable (U) in
 
-noncomputable def shriekAdjunction :
+variable (U) in
+noncomputable def shriekAdjunction (U : C) :
     shriekFunctor U ⊣ (Functor.whiskeringLeft _ _ AddCommGrpCat.{v}).obj (Over.forget U).op :=
   Adjunction.mkOfHomEquiv
     { homEquiv := fun P Q =>

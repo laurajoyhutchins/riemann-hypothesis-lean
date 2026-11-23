@@ -1,7 +1,52 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.BisimplicialActionSecondFactor
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CechNerveFaceOneZero
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.PullbackZeroCochainsAlgebraMap
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.BisimplicialActionSecondFactor
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CechNerveFaceOneZero
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.PullbackZeroCochainsAlgebraMap
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -18,8 +63,8 @@ section Slant
 variable {ι : Type} [Fintype ι] {M : ι → Type} [∀ i, CommRing (M i)] [∀ i, Algebra R (M i)]
   {V : Type} [CommRing V] [Algebra R V]
 
-open Classical in
 
+open Classical in
 def slv (Λ : (∀ i, M i) →ₗ[R] R) : (∀ i, M i ⊗[R] V) →ₗ[R] V :=
   ∑ i, (TensorProduct.lid R V).toLinearMap ∘ₗ LinearMap.rTensor V (Λ ∘ₗ LinearMap.single R M i) ∘ₗ
     LinearMap.proj (φ := fun i ↦ M i ⊗[R] V) i
@@ -29,6 +74,7 @@ theorem slv_pure (Λ : (∀ i, M i) →ₗ[R] R) (f : ∀ i, M i) (v : V) :
   classical
   simp only [slv, LinearMap.sum_apply, LinearMap.comp_apply, LinearMap.proj_apply, LinearMap.rTensor_tmul,
     LinearEquiv.coe_coe, TensorProduct.lid_tmul]
+
   rw [← Finset.sum_smul, ← map_sum]
   congr 2
   ext j
@@ -247,6 +293,7 @@ theorem S_cup_R (q : ℕ) (x : Cn F 1) (hx : dn F 1 x = 0) (w : Cn (box F) (q + 
     simp
   have hS : a2 F (back q) (S F q w) =
       ∑ i : Fin (q + 1), ((-1 : R) ^ (i : ℕ)) • bi F (th q i) ((back q).comp (sg q i)) w := by
+
     simp only [S_apply, map_sum, map_smul, bisimplicial_action_second_factor]
   rw [h0, zero_mul, smul_zero, zero_add, hS, Finset.sum_apply, Finset.sum_apply, Finset.sum_apply,
     Finset.sum_apply, Finset.mul_sum]
@@ -306,7 +353,7 @@ theorem T_base [Fintype (Fin 2 ⥤ C)] (Λ : Cn F 1 →ₗ[R] R) (x : Cn F 1) (h
   have h : ∀ c : Fin 2 ⥤ C, S F 0 (pulln (boxL F) 1 x + pulln (boxR F) 1 x) c b =
       x c ⊗ₜ[R] (1 : F.obj (b.obj (Fin.last 0))) := fun c ↦ by
     rw [S_apply, Fin.sum_univ_one]
-    simp only [Fin.val_zero, pow_zero, one_smul, map_add, Pi.add_apply, bi_boxL, bi_boxR, e1, act_id]
+    simp only [Fin.val_zero, pow_zero, one_smul, map_add (f := _), Pi.add_apply, bi_boxL, bi_boxR, e1, act_id]
     rw [act_const F x hx (sg 0 0) (Subsingleton.elim (α := Fin 1) _ _)]
     simp
   simp only [h]
@@ -363,8 +410,7 @@ theorem tau_L (T₀ : C) (ε : F.obj T₀ →ₐ[R] R) (x : Cn F 1) (hx : dn F 1
 theorem lid_evL (T₀ T : C) (ε : F.obj T₀ →ₐ[R] R) (t : F.obj T₀ ⊗[R] F.obj T) :
     TensorProduct.lid R (F.obj T) (LinearMap.rTensor (F.obj T) ε.toLinearMap t) = evL F T₀ T ε t := by
   induction t with
-  | zero => simp
-  | add a b ha hb => simp only [map_add, ha, hb]
+  | add a b ha hb => simp only [map_add (f := _), ha, hb]
   | tmul a b => simp [evL, Algebra.ofId_apply, Algebra.smul_def]
 
 theorem U_evz [Fintype (Fin 1 ⥤ C)] (T₀ : C) (ε : F.obj T₀ →ₐ[R] R) (q : ℕ) (w : Cn (box F) q) :

@@ -1,5 +1,54 @@
-import Mathlib
-import Formalism.LocalToGlobal.CharacterGerms.LatticeInclusionFormsInjective
+module
+
+public import Formalism.LocalToGlobal.CharacterGerms.LatticeInclusionFormsInjective
+public import Mathlib.RingTheory.MvPowerSeries.Rename
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Presheaf
+
+@[expose] public section
+
 open Formalism.L2.FormalSeriesBounds
 
 noncomputable section
@@ -55,7 +104,8 @@ theorem kill_hPullW {I : Fin 2 → Type} [∀ g, Fintype (I g)] {n0 n : ℕ} (hn
   rw [killCompl_subst _ _ (fun k => by simp)]
   congr 1
   funext w
-  rw [map_add, map_sum, map_sum, sum_castLE hn (fun b => killCompl (eps hn) (e' b w • X (Sum.inr b)))]
+
+  rw [map_add (f := _), map_sum, map_sum, sum_castLE hn (fun b => killCompl (eps hn) (e' b w • X (Sum.inr b)))]
   · simp only [map_smul, kill_inl, kill_inr]
   · intro b hb
     rw [map_smul, kill_inr_zero hn b hb, smul_zero]
@@ -63,11 +113,14 @@ theorem kill_hPullW {I : Fin 2 → Type} [∀ g, Fintype (I g)] {n0 n : ℕ} (hn
 theorem kill_mainM (V : VF C) (i : ℕ) {n0 n : ℕ} (hn : n0 ≤ n) (Φ : Fin n → Fin n0 → C) :
     killCompl (eps hn) (mainM V i Φ) = mainM V i (fun b c => Φ (Fin.castLE hn b) c) := by
   unfold mainM
+
   rw [map_smul, map_sum, sum_castLE hn]
+
   · simp only [map_sum, map_smul, map_mul, map_pow, kill_inl, kill_inr]
   · intro b hb
+
     simp only [map_sum, map_smul, map_mul, kill_inr_zero hn b hb, mul_zero, smul_zero,
-      Finset.sum_const_zero]
+    Finset.sum_const_zero]
 
 theorem sum_inl_eps {n0 n : ℕ} (hn : n0 ≤ n) (μ : Fin n0 ⊕ Fin n0 →₀ ℕ) :
     ∑ c, (Finsupp.embDomain (eps hn) μ) (Sum.inl c) = ∑ c, μ (Sum.inl c) :=
@@ -134,14 +187,15 @@ theorem rows_main (V : VF C) (i n0 : ℕ) :
         (X (Sum.inl (b, c)) ^ (V.l ^ i) * X (Sum.inr (b, c)) : MvPowerSeries (PVar n0) C)) := by
   unfold mainM
   refine Eq.trans (Finset.sum_congr rfl fun ρ _ => ?_) (Finset.smul_sum).symm
+
   simp only [ite_smul, zero_smul, Finset.sum_ite_eq, Finset.mem_univ, if_true, map_smul, map_sum,
-    map_mul, map_pow, rename_X, neg_smul, one_smul, map_neg, Finset.sum_neg_distrib, smul_neg]
+  map_mul, map_pow, rename_X, neg_smul, one_smul, map_neg, Finset.sum_neg_distrib, smul_neg]
   rfl
 
 end GlobalTheory.MainToRows
 
-open GlobalTheory.MainToRows in
 
+open GlobalTheory.MainToRows in
 theorem GlobalTheory.mainTerm_to_rowHypothesis :
     ∀ (C : Type) [Field C] (V : VF C) (d : ℕ) [NeZero d] (I J : Fin 2 → Type) [∀ g, Fintype (I g)]
       [∀ g, Fintype (J g)] (X : RowData C V d I J), X.MtoHM := by
@@ -163,8 +217,9 @@ theorem GlobalTheory.mainTerm_to_rowHypothesis :
   refine ⟨?_, ?_, ?_, ?_⟩
   · rw [h1, hRows_eq, hP, ← rows_main, ← Finset.sum_add_distrib]
     refine Finset.sum_congr rfl fun ρ _ => ?_
-    rw [← map_add, hH, add_sub_cancel]
+    rw [← map_add (f := _), hH, add_sub_cancel]
   · intro m
+
     rw [h1, le_add_iff, map_sum]
     refine V.v.map_le_sum fun ρ _ => ?_
     rcases coeff_row ρ H m with h | ⟨μ, h, hL, hR, -⟩
@@ -172,6 +227,7 @@ theorem GlobalTheory.mainTerm_to_rowHypothesis :
     · rw [h, hco, ← le_add_iff, hL, hR, ← sum_inl_eps hn, ← sum_inr_eps hn]
       exact hwt _
   · intro m hm
+
     rw [h1, map_sum] at hm
     obtain ⟨ρ, -, hρ⟩ := Finset.exists_ne_zero_of_sum_ne_zero hm
     rcases coeff_row ρ H m with h | ⟨μ, h, -, hR, -⟩

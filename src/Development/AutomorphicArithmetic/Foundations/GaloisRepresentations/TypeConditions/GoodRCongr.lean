@@ -1,8 +1,53 @@
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.TypeConditions.TrivialLocalCondition
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsGaloisRepBaseChange
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsGaloisRepTwist
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.GaloisRepWeilJumps
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.GaloisRepMultisetJumps
+module
+
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.TypeConditions.TrivialLocalCondition
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsGaloisRepBaseChange
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsGaloisRepTwist
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.GaloisRepWeilJumps
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.WeightLocalisationRegularAlgebraicStatement
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.AwayRepIsoLoc
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Formalism Formalism.BasicNotions Formalism.BasicNotions.Loc Formalism.MainNotions Formalism.MainNotions.N Formalism.WeaklyAdmissibleFiltrations Formalism.ConjugateSelfDual ReciprocityTheory.Gal
 open GlobalTheory.GalIsoBC GlobalTheory.HalfTwist
 
@@ -42,7 +87,7 @@ theorem goodR_sum {D : D7} (h0 : SumRepresentations.tie0 D) {i : D.nd.Loc} {a b 
     obtain ⟨d, r, j⟩ := u w hw n1
     obtain ⟨d', r', j'⟩ := u' w hw n2
     refine ⟨(k1 w hw).2 ⟨d, d'⟩, by rw [k2 w (Or.inr d) (Or.inr d')]; exact r.sum h0.1 r', fun τ hτ => ?_⟩
-    rw [k3 τ (fun w' h' => by rw [ind_unique hτ h']; exact ⟨d, d'⟩), Multiset.map_add, j τ hτ, j' τ hτ]
+    rw [k3 τ (fun w' h' => by rw [ind_unique hτ h']; exact ⟨d, d'⟩), Multiset.map_add (f := _), j τ hτ, j' τ hτ]
 
 theorem goodR_char {D : D7} (h0 : SumRepresentations.tie0 D) {i : D.nd.Loc} {a : ℕ} {p q : ∀ w, D.naut.LP w}
     {m : (D.host.E →+* ℂ) → Multiset ℂ} {c : (D.host.E →+* ℂ) → ℂ} (ha : GoodR' D i a p m)
@@ -251,8 +296,8 @@ theorem goodR_part (D : D7) (h0 : SumRepresentations.tie0 D) (h2 : AutomorphicGa
     refine List.map_congr_left fun k _ => ?_
     simp only [Function.comp_apply, Multiset.map_map]
     congr 1
-    funext z
-    simp only [Function.comp_apply, he]
+    funext x
+    rw [he]
     push_cast; ring
 
 theorem goodR_iso : ∀ D : D7, SumRepresentations.tie0 D → AutomorphicGaloisAdmissible D.nd D.naut → ∀ (i : D.nd.Loc) (P : D.naut.AV i)

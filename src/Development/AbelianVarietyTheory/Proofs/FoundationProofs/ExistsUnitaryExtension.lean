@@ -1,12 +1,50 @@
-import Mathlib
+module
+
+public import Formalism.SharpRestriction.GlobalSchurBounds.StandardLatticesGL3
+public import Development.AutomorphicArithmetic.WeightCongruences.IsRootOfIntegral
+public import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.CsDual
+public import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.CsGlob
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Definitions.Foundations.NormSumPairRankZeroOfCurveCoordNorm
-import Formalism.PairingDivisors.StatementH
-import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.CsGlob
-import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.CsDual
-import Formalism.FrobeniusOrbits.FrobeniusOrbitsProofs.MuCardLeTwo
-import Formalism.FrobeniusOrbits.FrobeniusOrbitsProofs.CardTrivialFirstComponent
-import Formalism.SharpRestriction.RamificationFrobenius.TotientGaloisClasses.FrameFacts
-import Development.AutomorphicArithmetic.WeightCongruences.IsRootOfIntegral
+
+@[expose] public section
 
 open NumberField Classical Formalism.BasicNotions Formalism.MainNotions Formalism.MainNotions.TaylorLogMetric Formalism.MainNotions.StandardLatticesGL3 GlobalTheory.NormSum
 open scoped BigOperators
@@ -62,7 +100,7 @@ theorem conj_conj (z : D.host.E) : D.host.conj (D.host.conj z) = z := by
 theorem sgA_sgA (x : AE D) : sgA D (sgA D x) = x := by
   induction x using TensorProduct.induction_on with
   | zero => simp
-  | add a b ha hb => rw [map_add, map_add, ha, hb]
+  | add a b ha hb => rw [map_add (f := _), map_add (f := _), ha, hb]
   | tmul a b => simp [sgA, Formalism.UG.sigR, conj_conj]
 
 theorem sgU_sgU (x : (AE D)ˣ) : sgU D (sgU D x) = x := Units.ext (sgA_sgA D x)
@@ -129,39 +167,3 @@ theorem infChar_eq_one (c : ℤ) (a : D.host.Eˣ) (h : ratio D (incU D a) ∈ in
 
 end GlobalTheory.NormSum.UnramHecke
 
-open GlobalTheory.NormSum.UnramHecke in
-
-theorem GlobalTheory.NormSum.exists_unramified_heckeU : ∀ (D : D7) (N : ℕ) (c : ℤ), Even N → ∃ χ : HeckeU D N, (∀ τ, χ.n τ = 2 * c) ∧ ∀ u, IntU D u → χ.f u = 1 := by
-  intro D N c hN
-  obtain ⟨κ, hκ, hnorm⟩ := exists_unitary_extension
-    (((ratio D).comp (incU D)).coprod (intUnits D).subtype)
-    ((infChar D c)⁻¹.comp (MonoidHom.fst _ _))
-    (by
-      rintro ⟨a, u⟩ h
-      have h' : ratio D (incU D a) * (u : (AE D)ˣ) = 1 := h
-      have hm : ratio D (incU D a) ∈ intUnits D := by
-        rw [eq_inv_of_mul_eq_one_left h']; exact inv_mem u.2
-      show (infChar D c a)⁻¹ = 1
-      rw [infChar_eq_one D c a hm, inv_one])
-    (by
-      rintro ⟨a, u⟩
-      show ‖(((infChar D c a)⁻¹ : ℂˣ) : ℂ)‖ = 1
-      rw [Units.val_inv_eq_inv_val, norm_inv, norm_infChar, inv_one])
-  have hint : ∀ u, IntU D u → (κ.comp (ratio D)) u = 1 := by
-    intro u hu
-    have hm : ratio D u ∈ intUnits D := div_mem hu (sgU_mem D hu)
-    have := hκ (1, ⟨_, hm⟩)
-    simpa using this
-  refine ⟨{ f := κ.comp (ratio D)
-            n := fun _ => 2 * c
-            unitary := fun x => hnorm _
-            cont := ⟨1, one_pos, fun u hu _ => hint u hu⟩
-            aut := fun a => ?_
-            norm := fun x => ?_
-            par := fun _ => (even_two_mul c).sub ((Int.even_coe_nat N).2 hN)
-            unr := fun u hu _ => hint u hu }, fun _ => rfl, hint⟩
-  · have h1 : κ (ratio D (incU D a)) = (infChar D c a)⁻¹ := by
-      have := hκ (a, 1)
-      simpa using this
-    rw [← infChar_val, MonoidHom.comp_apply, h1, Units.inv_mul]
-  · rw [MonoidHom.comp_apply, ratio_apply, map_mul (sgU D), sgU_sgU, mul_comm (sgU D x), div_self', map_one]

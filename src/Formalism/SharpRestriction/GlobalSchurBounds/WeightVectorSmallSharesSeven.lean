@@ -1,4 +1,43 @@
-import Formalism.SharpRestriction.GlobalSchurBounds.Chosen
+module
+
+public import Formalism.SharpRestriction.GlobalSchurBounds.Chosen
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -19,14 +58,14 @@ def ChBadp_at (X : G.Inst D L) : Prop :=
 
 variable (L)
 
-open Classical in
 
+open Classical in
 def cands (K : G.Consts) : Finset ℕ := (Finset.range ⌈L.sc.X'⌉₊).filter (fun p => G.Cand D L K p)
 
 variable {L}
 
-open Classical in
 
+open Classical in
 def ChW_at (X : G.Inst D L) (K : G.Consts) : Prop :=
   ∑ p ∈ cands L K, Real.log p / p *
       ((if L.sc.x ^ (-L.sc.eps) < G.Sig X K (G.aL L) (G.bL L) p then 2 else 0) +
@@ -40,13 +79,6 @@ variable {eps : ℝ} (Fm : FamP eps)
 
 def ThickSetDensityEventually : Prop := ∃ x0 : ℝ, ∀ x ≥ x0, ∀ i : Fm.Ix x, ThickSetDensity (Fm.L x i)
 def ChosenBadp : Prop := ∃ x0 : ℝ, ∀ x ≥ x0, ∀ i : Fm.Ix x, ChBadp_at (Fm.Gx x i)
-
-def ChosenW : Prop :=
-  ∃ x0 : ℝ, ∀ x ≥ x0, x ∈ Fm.Win → ∃ (i0 : Fm.Ix x) (av bv : ℕ → ℤ),
-    (∀ t ∈ Fm.TTn x, aWin (Fm.L x i0) (av t) ∧ (Fm.L x i0).sc.b' ≤ (bv t : ℝ) ∧ (bv t : ℝ) ≤ Fm.bTop x) ∧
-    ∀ i : Fm.Ix x, (∀ t : (Fm.D x i).host.TT,
-        (Fm.L x i).aT t = av (t : (Fm.D x i).R.A).val ∧
-        (Fm.L x i).bT t = bv (t : (Fm.D x i).R.A).val) → ChW_at (Fm.Gx x i) Fm.GK
 
 def ChosenWS : Prop :=
   ∃ x0 : ℝ, ∀ x ≥ x0, x ∈ Fm.Win → ∃ (i0 : Fm.Ix x) (av bv : ℕ → ℤ),
@@ -63,21 +95,6 @@ def Chosen7 (CH C0 C5 c6 : ℝ) : Prop :=
     ChosenProviso Fm C0 ∧ ChosenCode Fm C0 CH
 
 def WeightVectorSmallSharesSeven (C0 CH : ℝ) : Prop := ∃ C5 c6 : ℝ, 0 < C5 ∧ 0 < c6 ∧ Chosen7 Fm CH C0 C5 c6
-
-theorem chosenWS_of_cover (hW : ChosenW Fm) (hc : Fm.CoverAll) : ChosenWS Fm := by
-  obtain ⟨x0, hx0⟩ := hW
-  refine ⟨max x0 (Fm.x1 + 1), fun x hx hxW => ?_⟩
-  have hxa : x0 ≤ x := le_trans (le_max_left _ _) hx
-  have hx1 : Fm.x1 < x := by
-    have := le_max_right x0 (Fm.x1 + 1)
-    linarith
-  obtain ⟨i0, av, bv, hwin, hall⟩ := hx0 x hxa hxW
-  have hu : (Fm.D x i0).host.u0.val < (Fm.D x i0).R.n := by
-    first
-      | exact (Fm.D x i0).host.u0.isLt
-      | exact ZMod.val_lt _
-  obtain ⟨i1, -, hi1⟩ := hc x hx1 i0 _ av bv hu hwin
-  exact ⟨i0, av, bv, hwin, ⟨i1, hi1⟩, hall⟩
 
 end Family
 

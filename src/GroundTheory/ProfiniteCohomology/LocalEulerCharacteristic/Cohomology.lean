@@ -1,9 +1,51 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.LocalEulerCharacteristic.SubsingletonCohomologyOneGalUnitsSubgroupOf
-import GroundTheory.ProfiniteCohomology.LocalEulerCharacteristic.CohomologyKummer
-import GroundTheory.ProfiniteCohomology.LocalEulerCharacteristic.CohomologyGal
-import GroundTheory.ProfiniteCohomology.LocalClassFormation.FiniteVanishing.KummerOpen
-import GroundTheory.ProfiniteCohomology.PoincareDuality.Torsion
+module
+
+public import GroundTheory.ProfiniteCohomology.LocalEulerCharacteristic.SubsingletonCohomologyOneGalUnitsSubgroupOf
+public import GroundTheory.ProfiniteCohomology.LocalClassFormation.FiniteVanishing.KummerOpen
+public import GroundTheory.ProfiniteCohomology.PoincareDuality.Torsion
+public import GroundTheory.ProfiniteCohomology.ClassFormations.IsIsoCohomologyMapAlongResSubgroupOfHom
+import GroundTheory.ProfiniteCohomology.GaloisCohomology.Kummer
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
@@ -26,8 +68,8 @@ theorem rootsOfUnityTwoInv_apply (V : OpenSubgroup Gal(Ksep/K))
       ((cohomologyMap (kummerSequenceRes (K := K) (Ksep := Ksep) l (V : Subgroup Gal(Ksep/K))).f 2).hom x) :=
   AddMonoidHom.comp_apply _ _ x
 
-include hl in
 
+include hl in
 theorem rootsOfUnityTwoInv_injective (V : OpenSubgroup Gal(Ksep/K)) :
     Function.Injective (rootsOfUnityTwoInv (K := K) (Ksep := Ksep) l V) :=
   ((localClassFormationOfIsSepClosure K Ksep).inv_bijective V).1.comp
@@ -35,8 +77,8 @@ theorem rootsOfUnityTwoInv_injective (V : OpenSubgroup Gal(Ksep/K)) :
       (kummerSequenceRes_shortExact (Ksep := Ksep) l (V : Subgroup Gal(Ksep/K)) hl) 1
       (subsingleton_cohomology_one_galUnits_open K Ksep V))
 
-include hl in
 
+include hl in
 theorem range_rootsOfUnityTwoInv (V : OpenSubgroup Gal(Ksep/K)) :
     (rootsOfUnityTwoInv (K := K) (Ksep := Ksep) l V).range = (zmodToQZ l).range := by
   have : NeZero l := ⟨by rintro rfl; exact hl Nat.cast_zero⟩

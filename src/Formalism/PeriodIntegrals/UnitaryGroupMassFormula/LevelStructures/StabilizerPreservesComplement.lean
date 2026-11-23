@@ -1,5 +1,50 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LevelStructures.LeviInt
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LevelStructures.LeviInt
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LevelStructures.LocLevi
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LevelStructures.CMInst
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LevelStructures.FrameStd
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LevelStructures.LatAdapted
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -17,6 +62,7 @@ variable {F E : Type} [Field F] [Field E] [Algebra F E] {R : Type} [CommRing R] 
 theorem hermForm_base_conj_symm (hσ : ∀ x, σ (σ x) = x) (hJ : ∀ i j, σ (J j i) = J i j) (x y : Fin n → E) :
     σ (hE σ J x y) = hE σ J y x := by
   unfold hE Formalism.UG.hform
+
   simp only [map_sum, map_mul, AlgHom.coe_toRingHom, hσ]
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun a _ => Finset.sum_congr rfl fun b _ => ?_
@@ -78,7 +124,7 @@ theorem stabilizer_fixes_span {r : ℕ} (P : Frame E n r) {h : HA R σ J} (hh : 
     obtain ⟨a, _, rfl⟩ := hu
     exact hY a
   | zero => exact map_zero _
-  | add u w _ _ hu hw => rw [map_add, hu, hw]
+  | add u w _ _ hu hw => rw [map_add (f := _), hu, hw]
   | smul c u _ hu => rw [map_smul, hu]
 
 theorem stabilizer_preserves_complement {r : ℕ} (P : Frame E n r) {h : HA R σ J} (hh : h ∈ Hsub R σ J P) {w : Fin n → R ⊗[F] E}
@@ -142,7 +188,7 @@ theorem lin_mem_localLattice (g : HA (Fv F v) σ J) (A : Set (Fin n → E))
     obtain ⟨y, hy, rfl⟩ := hu
     exact hg y hy
   | zero => rw [map_zero]; exact Submodule.zero_mem _
-  | add u w _ _ hu hw => rw [map_add]; exact Submodule.add_mem _ hu hw
+  | add u w _ _ hu hw => rw [map_add (f := _)]; exact Submodule.add_mem _ hu hw
   | smul c u _ hu =>
     rw [LinearMap.map_smul_of_tower]
     exact Submodule.smul_mem _ _ hu
@@ -215,7 +261,7 @@ theorem leviIntH : LeviIntH := by
       have := (hKi' _).1 (hWgen y hy)
       rw [mul_inv_rev, lin_mul] at this
       have e : lin _ X.B.I.cm.sig X.B.I.J n⁻¹ y' = y' + x' := by simp [x']
-      rw [e, map_add, hfix, add_comm] at this
+      rw [e, map_add (f := _), hfix, add_comm] at this
       exact this
     exact hLWM _ (hdec hm hx' (stabilizer_preserves_complement (frameOf X w) hh' hy') rfl)
   have hall : ∀ g ∈ Hsub (Fv X.B.I.F p.1) X.B.I.cm.sig X.B.I.J (frameOf X w),

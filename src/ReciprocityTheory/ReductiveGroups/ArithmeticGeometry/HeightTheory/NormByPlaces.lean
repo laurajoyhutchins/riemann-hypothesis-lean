@@ -1,6 +1,62 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.HtDefs
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.KTFiniteDimensional
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.HNormB
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.HtDefs
+public import Mathlib.RingTheory.Henselian
+public import Mathlib.RingTheory.RegularLocalRing.Defs
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.HeightIntegralEstimates
+import Mathlib.Algebra.AffineMonoid.UniqueSums
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.LocalProperties.Reduced
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.HNormB
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.KTFiniteDimensional
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Algebra.MvPolynomial.Nilpotent
+
+@[expose] public section
 
 namespace ReciprocityTheory.ChartRestriction.G.T0
 
@@ -38,13 +94,13 @@ theorem gen_span {p : Ideal (KTp K d.D d.N)} (hp : p ∈ d.HtOne) : p = Ideal.sp
     have h2 : ¬ (Ideal.span {q}).height ≤ ((0 : ℕ) : ℕ∞) := by
       rw [Ideal.height_le_iff]
       push_neg
-      exact ⟨⊥, Ideal.bot_prime, hqb, by simp⟩
+      exact ⟨⊥, Ideal.isPrime_bot, hqb, by simp⟩
     apply h2
     have h1' : (Ideal.span {q}).height < 1 := by simpa using h1
     simpa using ENat.lt_one_iff_eq_zero.mp h1'
   have hpr : p.IsPrincipal := ⟨⟨q, heq.symm⟩⟩
   unfold Data.gen
-  rw [dif_pos hpr]
+  rw [dite_eq_left hpr]
   exact (Ideal.span_singleton_generator p).symm
 
 private lemma span_singleton_mem_htOne_of_prime {π : KTp K d.D d.N} (hπ : Prime π) : Ideal.span {π} ∈ d.HtOne := by
@@ -80,7 +136,7 @@ private lemma span_singleton_mem_htOne_of_prime {π : KTp K d.D d.N} (hπ : Prim
     have h0 : (Ideal.span {π}).height ≤ ((0 : ℕ) : ℕ∞) := by
       simpa using ENat.lt_one_iff_eq_zero.mp hlt
     rw [Ideal.height_le_iff] at h0
-    have h2 := h0 ⊥ Ideal.bot_prime (by
+    have h2 := h0 ⊥ Ideal.isPrime_bot (by
       rw [bot_lt_iff_ne_bot, Ne, Ideal.span_singleton_eq_bot]
       exact hπ.ne_zero)
     simp at h2
@@ -208,7 +264,7 @@ private lemma overP_finite (hd : d.AxH 𝒜) (h : d.S1) (c : ι) (p : Ideal (KTp
       (algebraMap (KTp K d.D d.N) (KTf K d.D d.N) x) = d.sH c x := by
     intro x
     exact IsFractionRing.lift_algebraMap (h c) x
-  have hOver : d.OverP c p = HNm.OverR (KTp K d.D d.N) (KTf K d.D d.N) (OmS (Ω c) d.D d.N) p := by
+  have hOver : d.OverP c p = HNm.OverR (R := KTp K d.D d.N) (F := KTf K d.D d.N) (L := OmS (Ω c) d.D d.N) p := by
     ext w
     simp only [Data.OverP, HNm.OverR, Set.mem_setOf_eq, hmap]
   obtain ⟨hprime, hh⟩ := hp
@@ -236,14 +292,14 @@ theorem norm_by_places (hd : d.AxH 𝒜) (h : d.S1) (c : ι) :
     intro x
     exact IsFractionRing.lift_algebraMap (h c) x
   have hOver : ∀ p, d.OverP c p =
-      HNm.OverR (KTp K d.D d.N) (KTf K d.D d.N) (OmS (Ω c) d.D d.N) p := by
+      HNm.OverR (R := KTp K d.D d.N) (F := KTf K d.D d.N) (L := OmS (Ω c) d.D d.N) p := by
     intro p
     ext w
     simp only [Data.OverP, HNm.OverR, Set.mem_setOf_eq, hmap]
   refine ⟨fun p hp => overP_finite d hd h c p hp, fun y hy => ?_⟩
   have hset : {p | p ∈ d.HtOne ∧ ∃ w ∈ d.OverP c p, w y ≠ 0} =
       {p : Ideal (KTp K d.D d.N) | p.IsPrime ∧ p.height = 1 ∧
-        ∃ w ∈ HNm.OverR (KTp K d.D d.N) (KTf K d.D d.N) (OmS (Ω c) d.D d.N) p, w y ≠ 0} := by
+        ∃ w ∈ HNm.OverR (R := KTp K d.D d.N) (F := KTf K d.D d.N) (L := OmS (Ω c) d.D d.N) p, w y ≠ 0} := by
     ext p
     simp only [Set.mem_setOf_eq, Data.HtOne, hOver, and_assoc]
   have hfin : {p | p ∈ d.HtOne ∧ ∃ w ∈ d.OverP c p, w y ≠ 0}.Finite := by

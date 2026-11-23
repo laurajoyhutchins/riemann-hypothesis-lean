@@ -1,8 +1,57 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsSeparatedSmallCount
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsSectionLatticeFinite
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PLocalRep
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PPacking
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsSeparatedSmallCount
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsSectionLatticeFinite
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PLocalRep
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PPacking
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+public import Mathlib.Analysis.Normed.Lp.lpSpace
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.HilbertSamuel
@@ -16,8 +65,8 @@ namespace SeparatedSmallCount
 
 variable {K : Type} [Fintype K] {ι : K → Type} [∀ k, Fintype (ι k)] {Ω : Type} [Field Ω]
 
-omit [Fintype K] in
 
+omit [Fintype K] in
 theorem isMultiHomog_sub {f g : MRing ι} {a : K → ℕ} (hf : IsMultiHomog f a) (hg : IsMultiHomog g a) :
     IsMultiHomog (f - g) a := by
   classical
@@ -57,8 +106,8 @@ def IsSectionValue (y : (Σ k, ι k) → Ω) (a : K → ℤ) (τ : ℕ) (s : Ω)
     eval z (map (Int.castRingHom ℂ) h) ≠ 0 ∧
     v = eval z (map (Int.castRingHom ℂ) g) / eval z (map (Int.castRingHom ℂ) h)
 
-open Classical in
 
+open Classical in
 def sectionValue (y : (Σ k, ι k) → Ω) (a : K → ℤ) (τ : ℕ) (s : Ω) (z : (Σ k, ι k) → ℂ) : ℂ :=
   if h : ∃ v, IsSectionValue y a τ s z v then h.choose else 0
 
@@ -82,8 +131,8 @@ theorem exists_isSectionValue {y : (Σ k, ι k) → Ω} {a : K → ℤ} {τ : �
   obtain ⟨dg, dh, g, h, hg, hh, hd, he, hz0⟩ := LocalRep.proof K ι Ω y a τ s z hs hz
   exact ⟨_, dg, dh, g, h, hg, hh, hd, he, hz0, rfl⟩
 
-omit [Fintype K] in
 
+omit [Fintype K] in
 theorem isSectionValue_add {y : (Σ k, ι k) → Ω} {a : K → ℤ} {τ : ℕ} {s t : Ω} {z : (Σ k, ι k) → ℂ} {v w : ℂ}
     (hv : IsSectionValue y a τ s z v) (hw : IsSectionValue y a τ t z w) :
     IsSectionValue y a τ (s + t) z (v + w) := by
@@ -100,11 +149,11 @@ theorem isSectionValue_add {y : (Σ k, ι k) → Ω} {a : K → ℤ} {τ : ℕ} 
     LocalRep.isMultiHomog_mul hh hh', fun k => ?_, ?_, ?_, ?_⟩
   · simp only [Pi.add_apply, Nat.cast_add]
     linarith [hd k]
-  · rw [map_add, map_mul, map_mul, map_mul, he, he']
+  · rw [map_add (f := _), map_mul, map_mul, map_mul, he, he']
     ring
   · rw [map_mul, map_mul]
     exact mul_ne_zero hz0 hz0'
-  · simp only [map_add, map_mul]
+  · simp only [map_add (f := _), map_mul]
     rw [div_add_div _ _ hz0 hz0']
     ring
 
@@ -144,8 +193,8 @@ theorem isBoundedH_of_sectionValue {y : (Σ k, ι k) → Ω} {A : HermLine ι} {
 
 end SeparatedSmallCount
 
-open SeparatedSmallCount in
 
+open SeparatedSmallCount in
 theorem SeparatedSmallCount.proof (hfin : SectionLatticeFinite.Statement) : SeparatedSmallCount.Statement := by
   classical
   intro K _ ι _ Ω _ y D A τ b hV _hB hb hsep
@@ -189,7 +238,7 @@ theorem SeparatedSmallCount.proof (hfin : SectionLatticeFinite.Statement) : Sepa
         exact zero_memℓp
       add_mem' := fun {s t} hs ht => by
         show Memℓp (ψ (s + t)) ∞
-        rw [map_add]
+        rw [map_add (f := _)]
         exact Memℓp.add hs ht
       neg_mem' := fun {s} hs => by
         show Memℓp (ψ (-s)) ∞
@@ -200,7 +249,7 @@ theorem SeparatedSmallCount.proof (hfin : SectionLatticeFinite.Statement) : Sepa
   let φ : W →+ lp (fun _ : mcPts (mCoordIdeal y) => ℂ) ∞ :=
     AddMonoidHom.mk' (fun w => ⟨ψ w, w.2⟩) (fun v w => lp.ext (by
       show ψ ((v + w : W) : chartLat y A.a τ) = ψ v + ψ w
-      rw [AddSubgroup.coe_add, map_add]))
+      rw [AddSubgroup.coe_add, map_add (f := _)]))
   let F : chartLat y A.a τ → lp (fun _ : mcPts (mCoordIdeal y) => ℂ) ∞ := fun s =>
     if h : s ∈ W then φ ⟨s, h⟩ else 0
   have hF : ∀ s (h : s ∈ W), F s = φ ⟨s, h⟩ := fun s h => dif_pos h

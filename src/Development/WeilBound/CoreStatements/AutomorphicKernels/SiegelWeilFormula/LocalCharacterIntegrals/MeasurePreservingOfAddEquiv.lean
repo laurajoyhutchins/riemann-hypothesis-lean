@@ -1,9 +1,56 @@
-import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.LocalCharacterIntegrals.ShellP
+module
+
+public import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.LocalCharacterIntegrals.ShellP
+public import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.LocalInvariantNeighborhoods.MeasurePreservingOfAddEquiv
+public import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.LocalInvariantNeighborhoods.SmallSub
+public import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.NontrivialLocalCharacter.ExistsPsiVNeOne
 import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.GlintPrincRelIndexNeZero
-import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.NontrivialLocalCharacter.ExistsPsiVNeOne
-import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.LocalInvariantNeighborhoods.MeasurePreservingOfAddEquiv
-import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.LocalInvariantNeighborhoods.NhdsInv
-import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.LocalInvariantNeighborhoods.SmallSub
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.MetricSpace.Ultra.Pi
+import Mathlib.Topology.MetricSpace.Ultra.TotallySeparated
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -209,12 +256,13 @@ theorem sigR_smul (σ : E →ₐ[F] E) (t : Fv F v) (a : Fv F v ⊗[F] E) :
   | tmul x e =>
     simp only [sigR, TensorProduct.smul_tmul', AlgHom.toRingHom_eq_coe, RingHom.coe_coe,
       Algebra.TensorProduct.map_tmul, AlgHom.coe_id, id_eq]
-  | add x y hx hy => simp only [smul_add, map_add, hx, hy]
+  | add x y hx hy => simp only [smul_add, map_add (f := _), hx, hy]
 
 theorem exists_nA_sig (σ : E →ₐ[F] E) : ∃ C, 0 ≤ C ∧ ∀ a : Fv F v ⊗[F] E, nA v (sigR (Fv F v) σ a) ≤ C * nA v a := by
   refine ⟨∑ i, nA v (sigR (Fv F v) σ (bA E v i)), Finset.sum_nonneg fun i _ => nA_nonneg _, fun a => ?_⟩
   have : sigR (Fv F v) σ a = ∑ i, crd v a i • sigR (Fv F v) σ (bA E v i) := by
     conv_lhs => rw [← sum_crd v a]
+
     rw [map_sum]; simp only [sigR_smul]
   rw [this]; unfold nA; rw [crd_sum]; simp only [crd_smul]
   exact norm_comb_le v a _
@@ -224,6 +272,7 @@ theorem exists_trace_le : ∃ C, 0 ≤ C ∧ ∀ a : Fv F v ⊗[F] E,
   refine ⟨∑ i, ‖Algebra.trace (Fv F v) (Fv F v ⊗[F] E) (bA E v i)‖, Finset.sum_nonneg fun i _ => norm_nonneg _,
     fun a => ?_⟩
   conv_lhs => rw [← sum_crd v a]
+
   rw [map_sum]; simp only [map_smul]
   exact norm_comb_le v a _
 
@@ -236,7 +285,7 @@ theorem trace_one_tmul (e : E) : Algebra.trace (Fv F v) (Fv F v ⊗[F] E) (1 ⊗
   | zero => simp
   | tmul x y =>
     simp [Algebra.coe_lmul_eq_mul, LinearMap.baseChange_tmul, Algebra.TensorProduct.tmul_mul_tmul]
-  | add x y hx hy => simp only [map_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
 
 theorem crd_basis (i : Fin (Module.finrank F E)) : crd v (bA E v i) = Pi.single i 1 := by
   funext j
@@ -278,6 +327,7 @@ theorem exists_trace_ge : ∃ c, 0 < c ∧ ∀ a : Fv F v ⊗[F] E, ∃ a', nA v
   have htr : ∀ i, Algebra.trace (Fv F v) (Fv F v ⊗[F] E) (bA E v i * a) = (G.mulVec (crd v a)) i := by
     intro i
     conv_lhs => rw [← sum_crd v a]
+
     rw [Finset.mul_sum, map_sum]
     simp only [mul_smul_comm, map_smul, Matrix.mulVec, dotProduct, hG, Matrix.of_apply, smul_eq_mul]
     exact Finset.sum_congr rfl fun k _ => mul_comm _ _
@@ -410,8 +460,5 @@ theorem measurePreserving_of_addEquiv {G : Type*} [AddCommGroup G] [TopologicalS
     (μ : Measure G) [μ.IsAddHaarMeasure] (e : G ≃+ G) (he : Continuous e) (he' : Continuous e.symm)
     (B : Set G) (hB : IsCompact B) (hB' : (interior B).Nonempty) (heB : e ⁻¹' B = B) :
     MeasurePreserving e μ μ := OswLocFin.measurePreserving_of_addEquiv μ e he he' B hB hB' heB
-
-theorem exists_nhds_invariant {G : Type} [AddCommGroup G] [TopologicalSpace G] [IsTopologicalAddGroup G]
-    {Φ : G → ℂ} (hΦ : IsSB Φ) : ∃ U ∈ 𝓝 (0 : G), ∀ Y, ∀ Z ∈ U, Φ (Y + Z) = Φ Y := OswLocFin.exists_nhds_invariant hΦ
 
 end PositivityTheory.SiegelWeilFormula.SwLocFin

@@ -1,24 +1,61 @@
-import Mathlib
-import Development.ResolutionOfSingularities.Foundations.Blowup.AffineBlowup
-import Development.ResolutionOfSingularities.Foundations.Blowup.BlowupProperties
-import Development.ResolutionOfSingularities.EmbeddedResolution.IteratedBlowups.ClopenRestriction
-import Development.ResolutionOfSingularities.EmbeddedResolution.StrictTransformCharts.CoordinateBlowupChart
-import Development.ResolutionOfSingularities.EmbeddedResolution.EtaleCoordinates.CoordinateDivisorSmoothness
-import Development.ResolutionOfSingularities.EmbeddedResolution.EtaleCoordinates.ChartRing
+module
+
+public import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MonomialCase.MonomialPrincipalization
+public import Development.ResolutionOfSingularities.EmbeddedResolution.DerivativeIdeal.OrderAtGenericPoint
 import Development.ResolutionOfSingularities.EmbeddedResolution.EtaleCoordinates.CoordinateSubscheme
-import Development.ResolutionOfSingularities.EmbeddedResolution.EtaleCoordinates.StrictNormalCrossings
-import Development.ResolutionOfSingularities.EmbeddedResolution.DerivativeIdeal.OrderAtGenericPoint
-import Development.ResolutionOfSingularities.EmbeddedResolution.DerivativeIdeal.IdealSheafOrder
-import Development.ResolutionOfSingularities.EmbeddedResolution.AlgebraicPreliminaries.GenericPointImage
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.OrderReductionProperties
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MonomialCase.MonomialPrincipalization
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MonomialCase.CoordinateSubspaceIdeal
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MonomialCase.MonomialGeometryHypotheses
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MonomialCase.CenterInvariant
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MarkedBlowupSequence.IdealBlowupSequence
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MarkedBlowupSequence.MarkedSequenceOfBlowups
-import Development.ResolutionOfSingularities.Foundations.BlowupUniversalProperty
-import Development.ResolutionOfSingularities.EmbeddedResolution.ResolutionOfSingularities
+public import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MonomialCase.CoordinateSubspaceIdeal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 universe u
 
 open CategoryTheory AlgebraicGeometry
@@ -246,9 +283,24 @@ private theorem not_subset_boundary_support_of_notMem (T : MarkedIdealWithBounda
   obtain ⟨V, hVaff, hxiV, hVU⟩ :=
     TopologicalSpace.Opens.isBasis_iff_nbhd.mp T.scheme.isBasis_affineOpens hxiU
   have hV : IsAffineOpen V := hVaff
+  let cV : EtaleChart T.structMap V m := {
+    map := T.scheme.homOfLE hVU ≫ c.map
+    comp_struct := by simp [Category.assoc, c.comp_struct]
+    isEtale := by
+      letI := c.isEtale
+      infer_instance }
+  have hrestrict (Z : T.scheme.IdealSheafData) (S : Finset (Fin m))
+      (h : restrictIdeal Z U = c.coordIdeal S) :
+      restrictIdeal Z V = cV.coordIdeal S := by
+    have h' : Z.comap U.ι = (coordSubspaceIdeal T.base m S).comap c.map := by
+      rw [← restrictIdeal_eq_comap_ι, h, EtaleChart.coordIdeal_eq_comap_coordSubspaceIdeal]
+    rw [restrictIdeal_eq_comap_ι, EtaleChart.coordIdeal_eq_comap_coordSubspaceIdeal]
+    change Z.comap ((show T.scheme.Opens from V).ι) = (coordSubspaceIdeal _ m S).comap (T.scheme.homOfLE hVU ≫ c.map)
+    rw [Scheme.IdealSheafData.comap_comp, ← h', ← Scheme.IdealSheafData.comap_comp,
+      Scheme.homOfLE_ι]
   have key : ∀ j : Fin T.boundary.length, hirr'.genericPoint ∈ (T.boundary.get j).support →
       ∃ t : Fin m, a (j : ℕ) = some t ∧
-        restrictIdeal (T.boundary.get j) V = (c.restrict hVU).coordIdeal {t} := by
+        restrictIdeal (T.boundary.get j) V = cV.coordIdeal {t} := by
     intro j hj
     cases hA : a (j : ℕ) with
     | none =>
@@ -266,7 +318,7 @@ private theorem not_subset_boundary_support_of_notMem (T : MarkedIdealWithBounda
         have h2 : restrictIdeal (T.boundary.get j) U = c.coordIdeal {t} := by
           rw [List.get_eq_getElem]
           exact h1
-        exact restrictIdeal_eq_restrict_coordIdeal_of_le hVU c (T.boundary.get j) {t} h2
+        exact hrestrict (T.boundary.get j) {t} h2
   have hmemJ : ∀ j ∈ J, hirr'.genericPoint ∈ (T.boundary.get j).support := by
     intro j hj
     refine Scheme.IdealSheafData.support_antitone ?_ hxiZ
@@ -284,25 +336,25 @@ private theorem not_subset_boundary_support_of_notMem (T : MarkedIdealWithBounda
     have hval : (i : ℕ) = (j : ℕ) := hinj (i : ℕ) i.isLt (j : ℕ) j.isLt si hsi haj
     have hij : i = j := Fin.eq_of_val_eq hval
     exact hi (by rw [hij]; exact hj)
-  have hZV : restrictIdeal (intersectionIdeal T.boundary J) V = (c.restrict hVU).coordIdeal S := by
+  have hZV : restrictIdeal (intersectionIdeal T.boundary J) V = cV.coordIdeal S := by
     have hbi : restrictIdeal (intersectionIdeal T.boundary J) V
         = ⨆ j ∈ J, restrictIdeal (T.boundary.get j) V := by
       rw [intersectionIdeal_eq_iSup]
       exact MonomialChart.restrictIdeal_biSup_finset V T.boundary.get J
-    have hcb : (c.restrict hVU).coordIdeal S = ⨆ t ∈ S, (c.restrict hVU).coordIdeal {t} :=
-      MonomialChart.coordIdeal_eq_biSup_singleton T.structMap V m (c.restrict hVU) S
+    have hcb : cV.coordIdeal S = ⨆ t ∈ S, cV.coordIdeal {t} :=
+      MonomialChart.coordIdeal_eq_biSup_singleton T.structMap V m cV S
     rw [hbi, hcb]
     refine le_antisymm (iSup₂_le fun j hj => ?_) (iSup₂_le fun t ht => ?_)
     · obtain ⟨t, hat, hres⟩ := key j (hmemJ j hj)
       rw [hres]
-      exact le_biSup (fun t : Fin m => (c.restrict hVU).coordIdeal {t})
+      exact le_biSup (fun t : Fin m => cV.coordIdeal {t})
         ((hmemS t).mpr ⟨j, hj, hat⟩)
     · obtain ⟨j, hj, hat⟩ := (hmemS t).mp ht
       obtain ⟨t', hat', hres⟩ := key j (hmemJ j hj)
       have htt : t = t' := Option.some.inj (hat.symm.trans hat')
       rw [htt, ← hres]
       exact le_biSup (fun j : Fin T.boundary.length => restrictIdeal (T.boundary.get j) V) hj
-  refine false_of_restrictIdeal_eq_coordIdeal hV (c.restrict hVU) (intersectionIdeal T.boundary J) (T.boundary.get i)
+  refine false_of_restrictIdeal_eq_coordIdeal hV cV (intersectionIdeal T.boundary J) (T.boundary.get i)
     S si hsiS hZV hDi hirr'.genericPoint hxiV hxiZ hxiD ?_
   intro η hηZ hηxi
   have hirr2 : IsIrreducible (closure ({η} : Set ↥T.scheme)) := isIrreducible_singleton.closure

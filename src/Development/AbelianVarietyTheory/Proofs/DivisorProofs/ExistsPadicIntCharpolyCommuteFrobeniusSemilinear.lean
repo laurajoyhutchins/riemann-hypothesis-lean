@@ -1,7 +1,69 @@
-import Mathlib
+module
+
+public import Mathlib.LinearAlgebra.Charpoly.Basic
+public import Mathlib.NumberTheory.Padics.PadicIntegers
+public import Mathlib.RingTheory.WittVector.Frobenius
+import Mathlib.Algebra.AffineMonoid.UniqueSums
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.Charpoly.ToMatrix
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+public import Mathlib.RingTheory.WittVector.Compare
+public import Mathlib.RingTheory.WittVector.DiscreteValuationRing
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AbelianVarietyTheory.Definitions.Divisors.KerIdealCompOfSurjective
 import Development.AbelianVarietyTheory.Definitions.Divisors.RedSurjective
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.KerEqRangeOfRangeEqKer
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FrobKerIdealLeAugIdeal
+import Development.AbelianVarietyTheory.Definitions.Divisors.ToSpanSingletonConstGenInjective
+import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.ExistsAddEquivOfSurjectiveOfKerIff
+import Mathlib.CategoryTheory.Preadditive.EndoFunctor
+public import Mathlib.NumberTheory.Padics.RingHoms
+import Mathlib.RingTheory.Bialgebra.Basic
+public import Mathlib.RingTheory.Filtration
+
+@[expose] public section
+
 open CategoryTheory TensorProduct Coalgebra Bialgebra GlobalTheory GlobalTheory.PDiv GlobalTheory.PDivGroup GlobalTheory.Dieu
 
 namespace GlobalTheory.DieuCharpoly
@@ -13,7 +75,7 @@ theorem mem_range_zmod_of_pow_eq_self (p : ℕ) [Fact p.Prime] {k : Type} [Field
   have hp : 1 < p := (Fact.out : p.Prime).one_lt
   have hroots := FiniteField.roots_X_pow_card_sub_X (ZMod p)
   rw [ZMod.card p] at hroots
-  have hdeg : (X ^ p - X : (ZMod p)[X]).natDegree = p := FiniteField.X_pow_card_sub_X_natDegree_eq _ hp
+  have hdeg : (X ^ p - X : (ZMod p)[X]).natDegree = p := Polynomial.natDegree_X_pow_sub_X hp
   have hcard : Multiset.card (X ^ p - X : (ZMod p)[X]).roots = (X ^ p - X : (ZMod p)[X]).natDegree := by
     rw [hroots, hdeg, Finset.card_val, Finset.card_univ, ZMod.card]
   have hmap := Polynomial.roots_map_of_injective_of_card_eq_natDegree
@@ -21,7 +83,7 @@ theorem mem_range_zmod_of_pow_eq_self (p : ℕ) [Fact p.Prime] {k : Type} [Field
   have hmem : c ∈ ((X ^ p - X : (ZMod p)[X]).map ((ZMod.castHom (dvd_refl p) k))).roots := by
     rw [Polynomial.mem_roots]
     · simp [hc]
-    · simpa using FiniteField.X_pow_card_sub_X_ne_zero k hp
+    · simpa using (Polynomial.X_pow_sub_X_ne_zero hp : (X ^ p - X : k[X]) ≠ 0)
   rw [← hmap, hroots, Multiset.mem_map] at hmem
   obtain ⟨a, -, ha⟩ := hmem
   exact ⟨a, ha⟩
@@ -53,7 +115,7 @@ theorem padicInt_ringHom_ext (p : ℕ) [Fact p.Prime] {k : Type} [Field k] [Char
   refine ⟨f y - g y, ?_⟩
   have h1 : x = ((x.appr m : ℕ) : ℤ_[p]) + y * (p : ℤ_[p]) ^ m := by rw [hy]; ring
   rw [h1]
-  simp only [map_add, map_mul, map_pow, map_natCast]
+  simp only [map_add (f := _), map_mul, map_pow, map_natCast]
   ring
 
 end GlobalTheory.DieuCharpoly
@@ -74,8 +136,9 @@ theorem charpoly_map_eq_of_commute_semilinear {R : Type} [CommRing R] [IsDomain 
   have hFrepr : ∀ x i, b.repr (F x) i = ∑ j, Φ i j * σ (b.repr x j) := by
     intro x i
     conv_lhs => rw [← b.sum_repr x]
-    simp only [map_sum, LinearMap.map_smulₛₗ, Finsupp.coe_finset_sum, Finset.sum_apply,
-      map_smul, Finsupp.coe_smul, Pi.smul_apply, smul_eq_mul]
+
+    simp only [map_sum, LinearMap.map_smulₛₗ, Finset.sum_apply',
+    map_smul, Finsupp.smul_apply, smul_eq_mul]
     exact Finset.sum_congr rfl fun j _ => mul_comm _ _
   have hurepr : ∀ y i, b.repr (u y) i = ∑ l, U i l * b.repr y l := by
     intro y i

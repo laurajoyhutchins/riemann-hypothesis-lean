@@ -1,6 +1,58 @@
-import Formalism.ThetaLogCoordinates.FockResolutionOnto.StatementB
-import Formalism.ThetaLogCoordinates.FockResolutionOnto.FockMonomialProofs.MulEarlyLettersHolds
-import Formalism.ThetaLogCoordinates.FockResolutionOnto.FockMonomialProofs.InitPartZeroXMul
+module
+
+public import Formalism.ThetaLogCoordinates.FockResolutionOnto.StatementB
+public import Formalism.MahlerMeasure.MahlerMeasureProofs.MeanGam
+public import Formalism.ThetaLogCoordinates.FockResolutionOnto.FockMonomialProofs.InitPartZeroXMul
+public import Formalism.ThetaLogCoordinates.FockResolutionOnto.FockMonomialProofs.MulEarlyLettersHolds
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 namespace Formalism.InvariantFactorPaths.L4
 
@@ -13,18 +65,18 @@ variable {p : ℕ} [Fact p.Prime] {σ : Type}
 theorem pow_mul_mem (v : σ) (e : ℕ) (Q : Set (σ →₀ ℕ)) (g : MvPolynomial σ ℚ_[p]) :
     X v ^ e * g ∈ restrictSupport ℚ_[p] Q ↔ g ∈ restrictSupport ℚ_[p] {m | Finsupp.single v e + m ∈ Q} := by
   classical
-  have c1 : ∀ (m : σ →₀ ℕ) (g' : MvPolynomial σ ℚ_[p]), coeff m (X v ^ e * g') =
-      if e ≤ m v then coeff (m - Finsupp.single v e) g' else 0 := by
+  have c1 : ∀ (m : σ →₀ ℕ) (g' : MvPolynomial σ ℚ_[p]), AddMonoidAlgebra.coeff (X v ^ e * g') m =
+      if e ≤ m v then AddMonoidAlgebra.coeff g' (m - Finsupp.single v e) else 0 := by
     intro m g'
     rw [X_pow_eq_monomial, coeff_monomial_mul']
     simp only [Finsupp.single_le_iff, one_mul]
-  have c2 : ∀ (m : σ →₀ ℕ) (g' : MvPolynomial σ ℚ_[p]), coeff (m + Finsupp.single v e) (X v ^ e * g') = coeff m g' := by
+  have c2 : ∀ (m : σ →₀ ℕ) (g' : MvPolynomial σ ℚ_[p]), AddMonoidAlgebra.coeff (X v ^ e * g') (m + Finsupp.single v e) = AddMonoidAlgebra.coeff g' m := by
     intro m g'
     rw [c1, if_pos (by simp), add_tsub_cancel_right]
   rw [mem_restrictSupport_iff, mem_restrictSupport_iff]
   constructor
   · intro h m hm
-    have h1 : coeff (m + Finsupp.single v e) (X v ^ e * g) ≠ 0 := by
+    have h1 : AddMonoidAlgebra.coeff (X v ^ e * g) (m + Finsupp.single v e) ≠ 0 := by
       rwa [c2, ← mem_support_iff]
     have h2 := h (mem_support_iff.mpr h1)
     show Finsupp.single v e + m ∈ Q
@@ -46,8 +98,8 @@ theorem pow_mul_int_iff (v : σ) (e : ℕ) (a : MvPolynomial σ ℚ_[p]) :
 theorem pow_mul_order (v : σ) (e : ℕ) (h : MvPolynomial σ ℚ_[p]) :
     X v ^ e * h ∈ restrictSupport ℚ_[p] {m : σ →₀ ℕ | e ≤ m v} := by
   classical
-  have c1 : ∀ (m : σ →₀ ℕ) (g' : MvPolynomial σ ℚ_[p]), coeff m (X v ^ e * g') =
-      if e ≤ m v then coeff (m - Finsupp.single v e) g' else 0 := by
+  have c1 : ∀ (m : σ →₀ ℕ) (g' : MvPolynomial σ ℚ_[p]), AddMonoidAlgebra.coeff (X v ^ e * g') m =
+      if e ≤ m v then AddMonoidAlgebra.coeff g' (m - Finsupp.single v e) else 0 := by
     intro m g'
     rw [X_pow_eq_monomial, coeff_monomial_mul']
     simp only [Finsupp.single_le_iff, one_mul]
@@ -66,7 +118,7 @@ theorem exists_pow_div (v : σ) (e : ℕ) (f : MvPolynomial σ ℚ_[p])
   refine ⟨MvPolynomial.divMonomial f (Finsupp.single v e), ?_⟩
   have hmod : MvPolynomial.modMonomial f (Finsupp.single v e) = 0 := by
     ext m
-    rw [coeff_zero]
+    simp only [AddMonoidAlgebra.coeff_zero, Finsupp.zero_apply]
     by_cases hle : Finsupp.single v e ≤ m
     · rw [MvPolynomial.coeff_modMonomial_of_le _ hle]
     · rw [MvPolynomial.coeff_modMonomial_of_not_le _ hle]
@@ -79,8 +131,8 @@ theorem exists_pow_div (v : σ) (e : ℕ) (f : MvPolynomial σ ℚ_[p])
 theorem initPart_pow_mul (v : σ) (e : ℕ) (h : MvPolynomial σ ℚ_[p]) :
     initPart v e (X v ^ e * h) = X v ^ e * initPart v 0 h := by
   classical
-  have c1 : ∀ (m : σ →₀ ℕ) (g' : MvPolynomial σ ℚ_[p]), coeff m (X v ^ e * g') =
-      if e ≤ m v then coeff (m - Finsupp.single v e) g' else 0 := by
+  have c1 : ∀ (m : σ →₀ ℕ) (g' : MvPolynomial σ ℚ_[p]), AddMonoidAlgebra.coeff (X v ^ e * g') m =
+      if e ≤ m v then AddMonoidAlgebra.coeff g' (m - Finsupp.single v e) else 0 := by
     intro m g'
     rw [X_pow_eq_monomial, coeff_monomial_mul']
     simp only [Finsupp.single_le_iff, one_mul]
@@ -113,14 +165,8 @@ theorem glAct_setLast (o j : ℕ) (c d : Fin r) : glAct p (setLast LL o) j c d =
 theorem yCond_setLast [NeZero r] (o j : ℕ) (M : WithTop ℤ) :
     YCond p (r := r) (setLast LL o) j M = YCond p LL j M := rfl
 
-theorem wtSpC_setLast (o j : ℕ) (Cs : Finset (Fin r)) (la : Fin r → ℤ) :
-    WtSpC p (setLast LL o) j Cs la = WtSpC p LL j Cs la := rfl
-
 theorem hWC_setLast (o j : ℕ) (Cs : Finset (Fin r)) (la : Fin r → ℤ) :
     HWC p (setLast LL o) j Cs la = HWC p LL j Cs la := rfl
-
-theorem isoC_setLast (o j : ℕ) (Cs : Finset (Fin r)) (la : Fin r → ℤ) :
-    IsoC p (setLast LL o) j Cs la = IsoC p LL j Cs la := rfl
 
 theorem wt_pow (hv : LL.vec (Fin.last K) = true) (ρ c : Fin r) (e : ℕ) (m : Fin (K + 1) × Fin r →₀ ℕ) :
     wt LL (K + 1) c (Finsupp.single (Fin.last K, ρ) e + m) = wt LL (K + 1) c m + (if ρ = c then (e : ℤ) else 0) := by
@@ -294,7 +340,7 @@ theorem filtration_bot_holds : FilBot := by
   rw [Pol, mem_restrictSupport_iff] at hPol
   rw [mem_restrictSupport_iff] at hS
   ext m
-  rw [coeff_zero]
+  simp only [AddMonoidAlgebra.coeff_zero, Finsupp.zero_apply]
   by_contra hne
   have h1 : MultiDeg LLw m := hPol (mem_support_iff.mpr hne)
   have h2 : e ≤ m (Fin.last K, ρ) := hS (mem_support_iff.mpr hne)

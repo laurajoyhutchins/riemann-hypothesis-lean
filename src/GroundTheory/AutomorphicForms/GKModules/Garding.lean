@@ -1,7 +1,55 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.GKModules.SmoothVectors
-import GroundTheory.AutomorphicForms.GKModules.ParametricIntegral
-import GroundTheory.AutomorphicForms.DixmierMalliavinBasic
+module
+
+public import GroundTheory.AutomorphicForms.GKModules.SmoothVectors
+public import Mathlib.MeasureTheory.Integral.Bochner.Basic
+public import GroundTheory.AutomorphicForms.GKModules.ParametricIntegral
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Algebra.Group.Units
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.MeasureTheory.Group.Integral
+
+@[expose] public section
 
 namespace GroundTheory.Automorphic
 
@@ -105,9 +153,8 @@ theorem isSmoothVector_integrated {f : G → ℂ} (hf : h.IsTestFunction f) (v :
       ← (π (h.expG Y)).integral_comp_comm (h.integrable_smul_orbit π μ hf v)]
     rw [← integral_mul_left_eq_self (F Y) (h.expG Y)]
     congr 1
-    funext g
-    simp only [hFdef, ContinuousLinearMap.coe_restrictScalars', map_smul,
-      ← BanachRep.map_mul_apply, expG_neg, inv_mul_cancel_left]
+    funext x
+    simp [hFdef, BanachRep.map_mul_apply, expG_neg]
   rw [hexp]
 
   set ψ : 𝔤 → G → ℂ := fun Y g => f (h.expG (-Y) * g) with hψdef
@@ -150,62 +197,6 @@ theorem isSmoothVector_integrated {f : G → ℂ} (hf : h.IsTestFunction f) (v :
       refine ⟨(Y, h.expG (-Y) * g), ⟨hY, subset_tsupport f ?_⟩, ?_⟩
       · intro h0; apply hne; simp [h0]
       · simp [expG_neg]
-
-omit [MeasurableSpace G] [BorelSpace G] in
-
-theorem dense_smoothVectors : Dense (h.smoothVectors π : Set E) := by
-  letI : MeasurableSpace G := borel G
-  haveI : BorelSpace G := ⟨rfl⟩
-  haveI := h.locallyCompactSpace
-  haveI := secondCountableTopology_subgroup_units G
-  set μ : Measure G := Measure.haar
-  rw [Metric.dense_iff]
-  intro v r hr
-  have hU : (fun g => π g v) ⁻¹' ball v (r / 2) ∈ 𝓝 (1 : G) :=
-    (π.continuous_orbit v).continuousAt.preimage_mem_nhds (by simpa using ball_mem_nhds v (half_pos hr))
-  letI := h.chartedSpace
-  haveI := h.isManifold ∞
-  obtain ⟨b, -, hbU⟩ := (SmoothBumpFunction.nhds_basis_tsupport (I := 𝓘(ℝ, 𝔤)) (1 : G)).mem_iff.1 hU
-  set c : ℝ := ∫ g, b g ∂μ with hcdef
-  have hc : 0 < c := b.continuous.integral_pos_of_hasCompactSupport_nonneg_nonzero
-    b.hasCompactSupport (fun x => b.nonneg) (x := 1) (by rw [b.eq_one]; exact one_ne_zero)
-  set f : G → ℂ := fun g => ((c⁻¹ * b g : ℝ) : ℂ) with hfdef
-  have hsupp : Function.support f ⊆ Function.support b := by
-    intro g hg hb
-    apply hg
-    simp [hfdef, hb]
-  have hf : h.IsTestFunction f := by
-    refine ⟨?_, b.hasCompactSupport.mono hsupp⟩
-    set L : ℝ →L[ℝ] ℂ := c⁻¹ • Complex.ofRealCLM
-    have e : f = L ∘ b := by funext g; simp [L, hfdef]
-    rw [e]
-    exact L.contDiff.comp_contMDiff b.contMDiff
-  have hfint : Integrable f μ := hf.continuous.integrable_of_hasCompactSupport hf.2
-  have hint1 : ∫ g, f g ∂μ = 1 := by
-    show ∫ g, ((c⁻¹ * b g : ℝ) : ℂ) ∂μ = 1
-    rw [integral_complex_ofReal, integral_const_mul, ← hcdef, inv_mul_cancel₀ hc.ne', Complex.ofReal_one]
-  refine ⟨π.integrated μ f v, ?_, h.isSmoothVector_integrated π μ hf v⟩
-  rw [mem_ball, dist_eq_norm]
-  have e : π.integrated μ f v - v = ∫ g, f g • (π g v - v) ∂μ := by
-    simp_rw [smul_sub]
-    rw [integral_sub (h.integrable_smul_orbit π μ hf v) (hfint.smul_const v), integral_smul_const,
-      hint1, one_smul]
-    rfl
-  rw [e]
-  have hbound : ∀ g, ‖f g • (π g v - v)‖ ≤ (c⁻¹ * b g) * (r / 2) := by
-    intro g
-    rw [norm_smul, hfdef, Complex.norm_real, Real.norm_of_nonneg (mul_nonneg (inv_nonneg.2 hc.le) b.nonneg)]
-    by_cases hb : b g = 0
-    · simp [hb]
-    · refine mul_le_mul_of_nonneg_left ?_ (mul_nonneg (inv_nonneg.2 hc.le) b.nonneg)
-      have h2 := hbU (subset_tsupport _ hb)
-      rw [mem_preimage, mem_ball, dist_eq_norm] at h2
-      exact h2.le
-  calc ‖∫ g, f g • (π g v - v) ∂μ‖ ≤ ∫ g, (c⁻¹ * b g) * (r / 2) ∂μ :=
-        norm_integral_le_of_norm_le ((b.continuous.integrable_of_hasCompactSupport
-          b.hasCompactSupport).const_mul c⁻¹ |>.mul_const _) (Eventually.of_forall hbound)
-    _ = r / 2 := by rw [integral_mul_const, integral_const_mul, ← hcdef, inv_mul_cancel₀ hc.ne', one_mul]
-    _ < r := half_lt_self hr
 
 end IsExpLieAlgebra
 

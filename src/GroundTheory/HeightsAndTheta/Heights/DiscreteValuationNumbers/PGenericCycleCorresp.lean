@@ -1,5 +1,54 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.IsMultiHomogIdealSpanSingleton
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.IsMultiHomogIdealSpanSingleton
+public import Mathlib.Order.CompletePartialOrder
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.NumbersDVR
@@ -60,7 +109,7 @@ theorem length_eq (J W : Ideal S) [W.IsPrime] (hW : Disjoint (M : Set S) W)
   let g : (S ⧸ J) →ₗ[S] N :=
     { toFun := fun x => LocalizedModule.mk (q x) 1
       map_add' := fun x y => by
-        rw [map_add, LocalizedModule.mk_add_mk, one_smul, one_smul, mul_one]
+        rw [map_add (f := _), LocalizedModule.mk_add_mk, one_smul, one_smul, mul_one]
       map_smul' := fun s x => by
         simp only [RingHom.id_apply]
         rw [LocalizedModule.smul'_mk, map_smul] }
@@ -81,8 +130,7 @@ theorem length_eq (J W : Ideal S) [W.IsPrime] (hW : Disjoint (M : Set S) W)
       rw [Module.End.isUnit_iff] at hu
       convert hu using 1
       funext n
-      simp only [Module.algebraMap_end_apply]
-      exact (algebraMap_smul T (s : S) n).symm
+      simpa only [Module.algebraMap_end_apply] using (algebraMap_smul T (s : S) n).symm
     · intro n
       induction n using LocalizedModule.induction_on with
       | h y t =>
@@ -155,8 +203,8 @@ end DVR
 
 end GenericCycleCorresp
 
-attribute [local instance] MvPolynomial.algebraMvPolynomial in
 
+attribute [local instance] MvPolynomial.algebraMvPolynomial in
 theorem GenericCycleCorresp.proof : GenericCycleCorresp.Statement.{u} := by
   intro O _ _ _ ϖ hϖ K _ _ ι _ P s _ _ _ n
   classical
@@ -204,8 +252,8 @@ theorem GenericCycleCorresp.proof : GenericCycleCorresp.Statement.{u} := by
         (GenericCycleCorresp.disjoint_nonZeroDivisors hϖ W hWϖ)
     unfold divCycle
     by_cases hr : IsRelevant W
-    · rw [dif_pos ⟨hWm, hr⟩, dif_pos ⟨hmin W hWm hWϖ, hrel.mpr hr⟩, hl]
-    · rw [dif_neg (fun h => hr h.2), dif_neg (fun h => hr (hrel.mp h.2))]
+    · rw [dite_eq_left ⟨hWm, hr⟩, dite_eq_left ⟨hmin W hWm hWϖ, hrel.mpr hr⟩, hl]
+    · rw [dite_eq_right (fun h => hr h.2), dite_eq_right (fun h => hr (hrel.mp h.2))]
   have hsupp : ∀ (Q : Ideal (MRing ι (FractionRing O))) (x) (W : Ideal (MRing ι (FractionRing O))),
       divCycle Q x W ≠ 0 → W ∈ (Q ⊔ Ideal.span {x}).minimalPrimes := by
     intro Q x W h

@@ -1,8 +1,47 @@
-import Mathlib
-import Formalism.LocalToGlobal.IndefiniteReal.OneMapT
-import Formalism.LocalToGlobal.IndefiniteReal.FWExist
-import Development.AbelianVarietyTheory.Definitions.Divisors.MarkAd
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsWeilDatumOfSplittingCharactersStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.MarkAd
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Development.AbelianVarietyTheory.Definitions.Divisors.PerCEmb
+
+@[expose] public section
 
 open NumberField Matrix IsDedekindDomain
 open ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.FD
@@ -25,44 +64,6 @@ theorem unr_of {D : D7} {χ : (AE D)ˣ →* Circle} (h : UnramEverywhere D χ) {
   rw [map_mul, h4, zero_mul, map_sub, map_one] at h3
   exact (sub_eq_zero.1 h3.symm)
 
-theorem isPair_pow (D : D7) (ψ : AddChar (AF D.host.F) ℂ) (hψ : IsStdChar D ψ (-1)) (θ : InfFam D) (hθ : IsInfFam θ)
-    (V W : HSp D) (h1 : V.gram = 1) (h2 : Even V.rank) (h3 : V.SigOK) (h4 : W.SigOK) (η) (hη : IsEtaTilde D η) :
-    ∃ om, IsPair ψ θ V W (η ^ V.rank) (η ^ W.rank) om := by
-  have hH : ∀ n : ℕ, IsHeckeChar D (η ^ n) := fun n =>
-    ⟨by
-      have : ((η ^ n : (AE D)ˣ →* Circle) : (AE D)ˣ → Circle) = fun x => η x ^ n := by funext x; simp
-      rw [this]; exact hη.1.1.pow n, fun x => by rw [MonoidHom.pow_apply, hη.1.2 x, one_pow]⟩
-  have hR : ∀ n : ℕ, ResEta D (η ^ n) n := fun n =>
-    ⟨hη.2.2.1.1, fun e he a => by rw [MonoidHom.pow_apply, hη.2.2.1.2 e he a, pow_one]⟩
-  have hE : ∀ (n : ℕ) τ, HasInfExp D (η ^ n) τ ((n : ℚ) / 2) := fun n τ => by
-    obtain ⟨m, hm, ha, hb⟩ := hη.2.2.2 τ
-    have hm1 : m = 1 := by
-      have : (m : ℚ) = 1 := by rw [hm]; norm_num
-      exact_mod_cast this
-    subst hm1
-    refine ⟨n, by push_cast; ring, ha, fun θ' hθ' x hx hx' => ?_⟩
-    rw [MonoidHom.pow_apply, Circle.coe_pow, hb θ' hθ' x hx hx', zpow_one, zpow_natCast]
-  have hU : ∀ n : ℕ, UnramEverywhere D (η ^ n) := fun n x a b c => by
-    rw [MonoidHom.pow_apply, hη.2.1 x a b c, one_pow]
-  obtain ⟨om, hom⟩ := GlobalTheory.T.exists_weilDatum_of_splittingCharacters D ψ hψ V W _ _ ⟨η, hη⟩ (hH _) (hH _) (hR _) (hR _)
-  refine ⟨om, hom, hθ, h1, h2, h3, h4, fun τ => ?_, fun τ => ⟨0, by simpa using hE W.rank τ⟩,
-    fun v ε h => ⟨unr_of (hU _) h.1, unr_of (hU _) h.1⟩, ⟨η, hη⟩⟩
-  obtain ⟨a, ha⟩ := h2
-  refine ⟨a, ?_⟩
-  have := hE V.rank τ
-  rwa [show ((V.rank : ℚ) / 2) = ((a : ℤ) : ℚ) by rw [ha]; push_cast; ring] at this
-
-theorem isPair_rec (D : D7) (i : Fin D.R.m) (hV : VStd D i) (ψ : AddChar (AF D.host.F) ℂ) (hψ : IsStdChar D ψ (-1)) (η) (hη : IsEtaTilde D η) :
-    0 < (Vc D i).rank ∧ 0 < (Wc D i).rank ∧ ∃ θ χV χW om, IsPair ψ θ (Vc D i) (Wc D i) χV χW om := by
-  have hr : 0 < D.R.r := by
-    have := D.R.m_add_three_le_k
-    simp only [Ranks.r]; omega
-  obtain ⟨θ, hθ⟩ := hψ.2.1
-  refine ⟨hr.trans_le (r_le_V i), hr.trans_le (r_le_rank_Wc i), θ, _, _,
-    isPair_pow D ψ hψ θ hθ _ _ hV.1 ?_ (D.sp.V_sig _) (D.sp.W_sig _) η hη⟩
-  rw [D.sp.V_rank _ (Nat.le_add_left _ _) i.2]
-  exact (kapDom D).2
-
 theorem hatC_phiHat {E : Type} [Field E] [NumberField E] [IsCMField E] {H : ReciprocityTheory.ChartRestriction.G.Geo.Tor.Host E} {Dw : Datum H} {l : Level H}
     (c : Coeff l) {n : ℕ} (φ : (Fin n → LevQc Dw l) → c.F) (hf : Finite (Fin n → LevQc Dw l)) (q : Fin n → LevQ Dw l) :
     hatC l (fun x => (φ x : ℂ)) q = ((phiHat c φ q : c.F) : ℂ) := by
@@ -78,16 +79,10 @@ theorem hatC_phiHat {E : Type} [Field E] [NumberField E] [IsCMField E] {H : Reci
   unfold hatC phiHat
   rw [finsum_eq_sum_of_fintype, finsum_eq_sum_of_fintype, ← hz]
   show _ = c.F.val _
+
   rw [map_sum]
   refine Finset.sum_congr rfl fun x _ => ?_
   rw [map_mul, map_zpow₀]
   rfl
-
-theorem markAd_one {D : D7} {H : ReciprocityTheory.ChartRestriction.G.Geo.Tor.Host D.host.E} {Dw : Datum H} (l : Level H) (W : HSp D)
-    (ι : Dw.La →ₗ[𝓞 D.host.E] (Fin W.rank → D.host.E)) : MarkAd l W rfl ι 1 ι := by
-  intro a _
-  refine ⟨0, zero_mem _, ?_⟩
-  rw [map_one, nsmul_zero, Units.val_one, Matrix.one_mulVec]
-  exact sub_self _
 
 end GlobalTheory.AdTh

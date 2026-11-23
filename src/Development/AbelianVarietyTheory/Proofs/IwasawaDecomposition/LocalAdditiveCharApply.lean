@@ -1,8 +1,59 @@
-import Mathlib
-import Formalism.LocalToGlobal.Columns.FiniteSumNonzeroLargeDepth
+module
+
+public import Formalism.LocalToGlobal.Columns.FiniteSumNonzeroLargeDepth
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsCharactersPrescribedValues
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsNatCongrOfAbsNormPrime
 import Formalism.LocalToGlobal.Columns.BaseLemmas
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsNatCongrOfAbsNormPrime
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsCharactersPrescribedValues
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.Automorphisms.PlaceA
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Formalism.L2.Col
 open Formalism.L2.Host (HChar atFin IsUnitAt)
@@ -20,8 +71,8 @@ def liftHom {K : Type} [Field K] (σ : K →+* ℂ) {G : Type} [Monoid G] (f : G
 theorem liftHom_spec {K : Type} [Field K] (σ : K →+* ℂ) {G : Type} [Monoid G] (f : G →* ℂ) (h : ∀ g, ∃ y, σ y = f g)
     (g : G) : σ (liftHom σ f h g) = f g := (h g).choose_spec
 
-open Classical in
 
+open Classical in
 def pullUnit {K : Type} [Field K] (σ : K →+* ℂ) (z : ℂ) : Kˣ := if h : ∃ y : Kˣ, σ y = z then h.choose else 1
 
 theorem pullUnit_spec {K : Type} [Field K] (σ : K →+* ℂ) {z : ℂ} (hz : z ≠ 0) (h : ∃ y, σ y = z) :
@@ -32,7 +83,7 @@ theorem pullUnit_spec {K : Type} [Field K] (σ : K →+* ℂ) {z : ℂ} (hz : z 
     exact hz (by rw [← hy, map_zero])
   have h' : ∃ y : Kˣ, σ y = z := ⟨Units.mk0 y hy0, hy⟩
   unfold pullUnit
-  rw [dif_pos h']
+  rw [dite_eq_left h']
   exact h'.choose_spec
 
 theorem roots_of_isPrimitiveRoot {K : Type} [Field K] (σ : K →+* ℂ) {n : ℕ} (hn : n ≠ 0) {y : K}
@@ -248,8 +299,8 @@ theorem unit_of_valuation {E : Type} [Field E] [NumberField E] (w : HeightOneSpe
     rw [← h', map_mul, hx, (HeightOneSpectrum.valuation_eq_one_iff_notMem w).2 hd', one_mul]
   exact (HeightOneSpectrum.valuation_eq_one_iff_notMem w).1 h2 (Ideal.Quotient.eq_zero_iff_mem.1 h1.symm)
 
-open Classical in
 
+open Classical in
 def idx (w : {w // w ∈ Pr.vGs}) : Fin 2 := if w.1 ∈ Pr.vG 0 then 0 else 1
 
 theorem idx_mem (w : {w // w ∈ Pr.vGs}) : w.1 ∈ Pr.vG (idx w) := by

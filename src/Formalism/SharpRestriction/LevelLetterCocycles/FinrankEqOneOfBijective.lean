@@ -1,7 +1,47 @@
-import Formalism.SharpRestriction.LevelLetterCocycles.CoordHomMapTrace
-import Formalism.SharpRestriction.LevelLetterCocycles.LiftFOf
-import Formalism.SharpRestriction.LevelLetterCocycles.ExponentWindowSubsetShort
-import Formalism.SharpRestriction.LevelLetterCocycles.LiftingTheory
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.CoordHomMapTrace
+public import Formalism.SharpRestriction.LevelLetterCocycles.ExponentWindowSubsetShort
+public import Formalism.SharpRestriction.LevelLetterCocycles.LiftFOf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -105,6 +145,7 @@ def trΔ (W : LocWach PD LL O v n) (T : LocLat G Qp LL O) (x : W.DD T) : W.DD T 
 theorem trΔ_inv (T : LocLat G Qp LL O) (x : W.DD T) (δ' : W.Gam) (h' : δ' ∈ W.DelF) :
     W.γD T δ' (trΔ W T x) = trΔ W T x := by
   unfold trΔ
+
   rw [map_sum]
   refine Finset.sum_bij' (fun δ _ => δ' * δ) (fun δ _ => δ'⁻¹ * δ) ?_ ?_ ?_ ?_ ?_
   · intro δ hδ; exact DelF_mul h' hδ
@@ -126,6 +167,7 @@ theorem trΔ_letter (T : LocLat G Qp LL O) (i : ZMod n) (x : W.DD T)
 theorem trΔ_map (F : LatHom T₁.L T₂.L) (x : W.DD T₁) :
     W.map F (trΔ W T₁ x) = trΔ W T₂ (W.map F x) := by
   unfold trΔ
+
   rw [map_sum]
   exact Finset.sum_congr rfl fun δ _ => W.map_γ F δ x
 
@@ -200,13 +242,6 @@ theorem lift_of {Cc : ℝ} (hA : Formalism.MainNotions.LiftingTheory.CaseA W) (h
       (le_trans (le_max_right _ _)
         (Finset.le_sup (f := fun c => max (rF PD.p n H₁ c) (rF PD.p n (Mi + hi) c)) hc))
   exact hw e₀ he
-
-theorem finrank_eq_one_of_bijective_algebraMap (hK : Function.Bijective (algebraMap K₀ K)) : Module.finrank K₀ K = 1 := by
-  rw [← (AlgEquiv.ofBijective (Algebra.ofId K₀ K) hK).toLinearEquiv.finrank_eq, Module.finrank_self]
-
-theorem DelF_card_eq_p_sub_one (hK : Function.Bijective (algebraMap K₀ K)) (hs : W.s = 1) (hp : PD.p ≠ 2)
-    {T : LocLat G Qp LL O} (h9 : Formalism.MainNotions.DeltaInvariantLattices.p9 W T) : W.DelF.card = PD.p - 1 := by
-  rw [(h9 hs hp).1, finrank_eq_one_of_bijective_algebraMap hK, Nat.div_one]
 
 theorem jumpsLet_ext (hH : HodgeExact PD LL O) {T Y : LocLat G Qp LL O} (ι : LatHom T.L Y.L)
     (π : LatHom Y.L W.one.L) (hses : IsSESLat (Qp := Qp) ι π) (hY : CrysLat PD Y)

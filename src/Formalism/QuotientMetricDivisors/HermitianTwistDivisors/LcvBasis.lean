@@ -1,8 +1,63 @@
-import Mathlib
-import Formalism.QuotientMetricDivisors.ProdFormula
-import Formalism.HarderNarasimhan.HarderNarasimhanProofs.HtGram
-import Formalism.HarderNarasimhan.HarderNarasimhanProofs.DiscreteSpanOfLinIndep
-import Formalism.HermitianLattices.HermitianLatticesProofs.IndexBasic
+module
+
+public import Formalism.QuotientMetricDivisors.Statement
+public import Formalism.HarderNarasimhan.HarderNarasimhanProofs.DiscreteSpanOfLinIndep
+public import Formalism.HarderNarasimhan.HarderNarasimhanProofs.HtGram
+public import Formalism.HermitianLattices.HermitianLatticesProofs.IndexBasic
+import Formalism.HermitianLattices.HermitianLatticesProofs.LocBasic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Module NumberField IsDedekindDomain Formalism.HermitianLatticesTheory
 
@@ -319,14 +374,24 @@ end Formalism.DivisionValues.LocalCovolumeBasis
 
 namespace Formalism.DivisionValues
 
-open LocalCovolumeBasis in
 
-theorem covolume_via_basis : LcvBasis := by
+open LocalCovolumeBasis in
+theorem covolume_via_basis :
+    ∀ (K : Type) [Field K] [NumberField K] [StarRing K] [_root_.NumberField.IsTotallyComplex K] (d : ℕ)
+      (X : InfinitePlace K → Matrix (Fin d) (Fin d) ℂ), (∀ v, IsUnit (X v).det) →
+      ∀ L : Submodule (𝓞 K) (Fin d → K), Submodule.IsFullLattice K L →
+      ∀ e : Fin d → Fin d → K, LinearIndependent K e →
+        (Function.support fun w : HeightOneSpectrum (𝓞 K) =>
+          lw w * (idx w (Submodule.span (𝓞 K) (Set.range e)) L : ℝ)).Finite ∧
+        lcv X L = (2 / (finrank ℚ K : ℝ)) * ∑ v, Real.log (gram X v e).det.re +
+          2 * ∑ᶠ w : HeightOneSpectrum (𝓞 K),
+            lw w * (idx w (Submodule.span (𝓞 K) (Set.range e)) L : ℝ) := by
   intro K _ _ _ _ d X hX L hL e he
   classical
   set E := Submodule.span (𝓞 K) (Set.range e) with hEdef
   have hLfg : L.FG := hL.fg
-  have hLsp : Submodule.span K (L : Set (Fin d → K)) = ⊤ := hL.span_eq_top
+  have hLsp : Submodule.span K (L : Set (Fin d → K)) = ⊤ :=
+    Submodule.IsFullLattice.span_eq_top (self := hL)
   obtain ⟨y, hy0, hyL⟩ := exists_int_mul L hLsp e
   have hyK : (y : K) ≠ 0 := Int.cast_ne_zero.mpr hy0
   set e' : Fin d → Fin d → K := fun i => (y : K) • e i with he'def

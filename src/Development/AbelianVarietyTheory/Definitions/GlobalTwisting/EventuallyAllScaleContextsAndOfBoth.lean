@@ -1,5 +1,42 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.ValidForConstructedPointClassesEventuallyWorking
+module
+
+public import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.ValidForConstructedPointClassesEventuallyWorking
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -49,25 +86,12 @@ theorem LargeBaseCondition.and (h : LargeBaseCondition KP Q R) (h' : LargeBaseCo
   eventuallyAllScaleContexts_mono_of_imp (fun _ H => (H.1.inter H.2).imp fun _ _ _ _ t k C W V S N G c q => ⟨t.1 k C W V S N G c q, t.2 k C W V S N G c q⟩)
     (eventuallyAllScaleContexts_and_of_both h h')
 
-theorem LargeBaseCondition.passes (h : LargeBaseCondition KP Q R) (h1 : V4.ExTrue KP Q) (h2 : V4.Export Q) (h3 : V4.Retwist Q Q') :
-    V4.ExTrue KP (sAnd Q R) ∧ V4.Export (sAnd Q R) ∧ V4.Retwist (sAnd Q R) (sAnd Q' R) := by
-  refine ⟨eventuallyAllScaleContexts_mono_of_imp ?_ (eventuallyAllScaleContexts_and_of_both h h1), eventuallyAllScaleContexts_mono_of_imp (fun _ H X f T c q => H X f T c q.1) h2, eventuallyAllScaleContexts_mono_of_imp ?_ h3⟩
-  · intro K H
-    refine (H.1.inter H.2).imp ?_
-    intro B f T _ t k
-    obtain ⟨C, W, V, S, N, G, c, q⟩ := t.2 k
-    exact ⟨C, W, V, S, N, G, c, q, t.1 k C W V S N G c q⟩
-  · intro K H X f T c q e A S₂ a
-    obtain ⟨B', f', T', a1, a2, a3, a4, a5, a6⟩ := H X f T c q.1 e A S₂ a
-    exact ⟨B', f', T', a1, a2, a3, a4, a5, fun C W V S N G c' q' =>
-      ⟨(a6 C W V S N G c' q'.1).1, (a6 C W V S N G c' q'.1).2, q'.2⟩⟩
 
 variable (KP Q Q' Lk) in
-
 def RowL (H : ∀ 𝒜 : FamClass, RawSel Bd 𝒜 → Prop) : Prop := ∃ R : V4.Slot, LargeBaseCondition KP Q R ∧ Row (sAnd Q' R) Lk H
 
-variable (KP Q Q' Lk) in
 
+variable (KP Q Q' Lk) in
 def ExBL : Prop := ∃ R : V4.Slot, LargeBaseCondition KP Q R ∧ ExB (sAnd Q' R) Lk
 
 theorem Row.strengthen {H : ∀ 𝒜 : FamClass, RawSel Bd 𝒜 → Prop} (hQ : ∀ K X f T c, Q K X f T c → Q' K X f T c) (h : Row Q' Lk H) :

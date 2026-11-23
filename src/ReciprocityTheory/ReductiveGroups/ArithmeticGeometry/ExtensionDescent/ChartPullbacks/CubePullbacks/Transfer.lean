@@ -1,8 +1,52 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.GtBaseChangeSt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.DegProd
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.GeneratorPullback.PullAlong
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.UniformBaseChange.Transport
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.TangentLinearity.ConstPullback
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.DegProd
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PlaceDivisors.SiegelPullbackTransfer.ExistsGenTransfer
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.GeneratorPullback.PullAlong
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.TangentLinearity.ConstPullback
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.UniformBaseChange.Transport
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PlaceDivisors.SiegelPullbackTransfer.AdelicGL2ExtOfLocalComponents
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -49,8 +93,8 @@ theorem prod_sameSum {M : Type} [CommGroup M] {Y X : Scheme.{0}} {K K' : Type} [
   | exact hS φ
   | convert hS φ
 
-open ReciprocityTheory.ChartRestriction.G.Pdiv.PullbackComparison (gU unit_ext gU_res gU_pullU gU_pullU_congr base_eq) in
 
+open ReciprocityTheory.ChartRestriction.G.Pdiv.PullbackComparison (gU unit_ext gU_res gU_pullU gU_pullU_congr base_eq) in
 theorem gU_pullAlong_idx {X X' Y Y' : Scheme.{0}} (L : LB X) {K : Type} [Fintype K]
     (F : X' ⟶ X) (h : Y' ⟶ Y) (φ : K → (Y ⟶ X)) (ε : K → ℤ) (ψ : K → (Y' ⟶ X'))
     (hψ : ∀ k, ψ k ≫ F = h ≫ φ k) (t : LB.Gen (LB.LinComb L φ ε)) (ht : t.IsGen)
@@ -79,8 +123,8 @@ theorem gU_pullAlong_idx {X X' Y Y' : Scheme.{0}} (L : LB X) {K : Type} [Fintype
   rw [map_zpow]
   exact congrArg (· ^ ε k) (step k _)
 
-open ReciprocityTheory.ChartRestriction.G.Pdiv.PullbackComparison (gU unit_ext gU_res) in
 
+open ReciprocityTheory.ChartRestriction.G.Pdiv.PullbackComparison (gU unit_ext gU_res) in
 theorem corr_pullAlong_sameSum {X X' Y Y' : Scheme.{0}} (L : LB X) (hL : L.IsLB) {K K' : Type}
     [Fintype K] [Fintype K'] (F : X' ⟶ X) (h : Y' ⟶ Y) (φ : K → (Y ⟶ X)) (ε : K → ℤ)
     (φ' : K' → (Y ⟶ X)) (ε' : K' → ℤ) (ψ : K → (Y' ⟶ X')) (ψ' : K' → (Y' ⟶ X'))
@@ -129,16 +173,16 @@ theorem corr_pullAlong_sameSum {X X' Y Y' : Scheme.{0}} (L : LB X) (hL : L.IsLB)
     intro k
     have hz : ∃ k', ψ k' = ψ k := ⟨k, rfl⟩
     show (if hz : ∃ k', ψ k' = ψ k then j hz.choose ⟨⟩ else _) = _
-    rw [dif_pos hz]
+    rw [dite_eq_left hz]
     exact congrFun (cj _ _ hz.choose_spec) ⟨⟩
   have hJ' : ∀ k', Jf (ψ' k') = j' k' ⟨⟩ := by
     intro k'
     show (if hz : ∃ k, ψ k = ψ' k' then j hz.choose ⟨⟩
       else if hz' : ∃ k'', ψ' k'' = ψ' k' then j' hz'.choose ⟨⟩ else idx (ψ' k' ≫ F)) = _
     by_cases hz : ∃ k, ψ k = ψ' k'
-    · rw [dif_pos hz]; exact congrFun (cjj _ _ hz.choose_spec) ⟨⟩
+    · rw [dite_eq_left hz]; exact congrFun (cjj _ _ hz.choose_spec) ⟨⟩
     · have hz' : ∃ k'', ψ' k'' = ψ' k' := ⟨k', rfl⟩
-      rw [dif_neg hz, dif_pos hz']; exact congrFun (cj' _ _ hz'.choose_spec) ⟨⟩
+      rw [dite_eq_right hz, dite_eq_left hz']; exact congrFun (cj' _ _ hz'.choose_spec) ⟨⟩
   let B : (Y' ⟶ X') → (Y'.presheaf.stalk y)ˣ := fun ζ =>
     if hm : y ∈ (ζ ≫ F) ⁻¹ᵁ (L.U (Jf ζ) ⊓ L.U (idx (ζ ≫ F))) then
       gU y hm (pullU (ζ ≫ F) _ (L.g (Jf ζ) (idx (ζ ≫ F)))) else 1
@@ -151,14 +195,14 @@ theorem corr_pullAlong_sameSum {X X' Y Y' : Scheme.{0}} (L : LB X) (hL : L.IsLB)
     have hm : y ∈ (ψ k ≫ F) ⁻¹ᵁ (L.U (Jf (ψ k)) ⊓ L.U (idx (ψ k ≫ F))) := by
       rw [hJ k]; exact mk k
     show _ = (if hm : _ then _ else _)
-    rw [dif_pos hm]
+    rw [dite_eq_left hm]
     exact hgc _ _ _ _ (hJ k).symm _ _
   have hB' : ∀ k, gU y (mk' k) (pullU (ψ' k ≫ F) _ (L.g (j' k ⟨⟩) (idx (ψ' k ≫ F)))) = B (ψ' k) := by
     intro k
     have hm : y ∈ (ψ' k ≫ F) ⁻¹ᵁ (L.U (Jf (ψ' k)) ⊓ L.U (idx (ψ' k ≫ F))) := by
       rw [hJ' k]; exact mk' k
     show _ = (if hm : _ then _ else _)
-    rw [dif_pos hm]
+    rw [dite_eq_left hm]
     exact hgc _ _ _ _ (hJ' k).symm _ _
   refine congrArg₂ (· * ·) ?_ (congrArg _ hmid)
   exact ((Finset.prod_congr rfl fun k _ => congrArg (· ^ ε k) (hB k)).trans

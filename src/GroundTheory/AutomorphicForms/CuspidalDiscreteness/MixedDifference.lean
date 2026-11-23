@@ -1,5 +1,57 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.CuspidalDiscreteness.AltSum
+module
+
+public import GroundTheory.AutomorphicForms.CuspidalDiscreteness.AltSum
+public import Mathlib.Analysis.Calculus.ContDiff.Defs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Analysis.Calculus.ContDiff.Basic
+public import Mathlib.Analysis.Calculus.ContDiff.Comp
+public import Mathlib.Analysis.Calculus.ContDiff.Operations
+public import Mathlib.Analysis.Calculus.MeanValue
+
+@[expose] public section
 
 namespace GroundTheory.Automorphic
 
@@ -27,16 +79,20 @@ theorem norm_iteratedFDeriv_sub_translate_le {k : ℕ} {ρ : E → F} (hρ : Con
 
 theorem norm_altSum_le : ∀ (k : ℕ) {ρ : E → F}, ContDiff ℝ k ρ → ∀ {B : ℝ},
     (∀ w, ‖iteratedFDeriv ℝ k ρ w‖ ≤ B) → ∀ (v : Fin k → E) (z : E),
-      ‖altSum k ρ v z‖ ≤ B * ∏ i, ‖v i‖
-  | 0, ρ, _, B, hB, v, z => by
+      ‖altSum k ρ v z‖ ≤ B * ∏ i, ‖v i‖ := by
+  intro k
+  induction k with
+  | zero =>
+    intro ρ _ B hB v z
     simpa [norm_iteratedFDeriv_zero] using hB z
-  | k + 1, ρ, hρ, B, hB, v, z => by
+  | succ k ih =>
+    intro ρ hρ B hB v z
     rw [altSum_succ, Fin.prod_univ_succ, ← mul_assoc]
     have hg : ContDiff ℝ k (fun t => ρ (t + v 0) - ρ t) :=
       ((hρ.of_le (by exact_mod_cast Nat.le_succ k)).comp (contDiff_id.add contDiff_const)).sub
         (hρ.of_le (by exact_mod_cast Nat.le_succ k))
-    exact norm_altSum_le k hg (fun w => norm_iteratedFDeriv_sub_translate_le hρ hB (v 0) w)
-      (Fin.tail v) z
+    exact ih hg (B := B * ‖v 0‖)
+      (norm_iteratedFDeriv_sub_translate_le hρ hB (v 0)) (Fin.tail v) z
 
 theorem exists_norm_altSum_le {ρ : E → F} (hρ : ContDiff ℝ (⊤ : ℕ∞) ρ)
     (hc : HasCompactSupport ρ) (k : ℕ) :

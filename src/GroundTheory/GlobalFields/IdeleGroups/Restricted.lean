@@ -1,5 +1,49 @@
-import Mathlib
-import GroundTheory.GlobalFields.IdeleGroups.InfiniteProjInfiniteEmbeddingOfNe
+module
+
+public import Mathlib.NumberTheory.NumberField.AdeleRing
+public import Mathlib.Topology.Algebra.Group.Units
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GroundTheory.Global
 
@@ -64,12 +108,6 @@ def continuousUnitsEquiv (hBopen : ∀ i, IsOpen (B i : Set (R i))) :
   continuous_toFun := continuous_unitsEquiv hBopen
   continuous_invFun := continuous_unitsEquiv_symm
 
-@[simp]
-theorem continuousUnitsEquiv_apply (hBopen : ∀ i, IsOpen (B i : Set (R i)))
-    (x : (Πʳ i, [R i, B i])ˣ) (i : ι) :
-    ((continuousUnitsEquiv hBopen x i : (R i)ˣ) : R i) = (x : Πʳ i, [R i, B i]) i :=
-  rfl
-
 end RestrictedProduct
 
 namespace IdeleGroup
@@ -88,16 +126,10 @@ def finiteUnitsEquiv :
     (B := fun v ↦ v.adicCompletionIntegers K)
     (fun v ↦ Valued.isOpen_valuationSubring (v.adicCompletion K))
 
-@[simp]
-theorem finiteUnitsEquiv_apply (x : (FiniteAdeleRing (𝓞 K) K)ˣ) (v : HeightOneSpectrum (𝓞 K)) :
-    ((finiteUnitsEquiv K x v : (v.adicCompletion K)ˣ) : v.adicCompletion K) =
-      (x : FiniteAdeleRing (𝓞 K) K) v :=
-  rfl
-
 def prodRestrictedEquiv :
-    IdeleGroup K ≃ₜ* (InfiniteAdeleRing K)ˣ × Πʳ v : HeightOneSpectrum (𝓞 K),
+    𝔸[K]ˣ ≃ₜ* (InfiniteAdeleRing K)ˣ × Πʳ v : HeightOneSpectrum (𝓞 K),
       [(v.adicCompletion K)ˣ, (Submonoid.ofClass (v.adicCompletionIntegers K)).units] :=
-  (prodEquiv K).trans
+  (ContinuousMulEquiv.prodUnits (InfiniteAdeleRing K) (FiniteAdeleRing (𝓞 K) K)).trans
     { toMulEquiv := MulEquiv.prodCongr (MulEquiv.refl _) (finiteUnitsEquiv K).toMulEquiv
       continuous_toFun :=
         continuous_fst.prodMk ((finiteUnitsEquiv K).continuous.comp continuous_snd)
@@ -105,12 +137,12 @@ def prodRestrictedEquiv :
         continuous_fst.prodMk ((finiteUnitsEquiv K).symm.continuous.comp continuous_snd) }
 
 @[simp]
-theorem prodRestrictedEquiv_apply_fst (x : IdeleGroup K) :
+theorem prodRestrictedEquiv_apply_fst (x : 𝔸[K]ˣ) :
     ((prodRestrictedEquiv K x).1 : InfiniteAdeleRing K) = (x : 𝔸[K]).1 :=
   rfl
 
 @[simp]
-theorem prodRestrictedEquiv_apply_snd (x : IdeleGroup K) (v : HeightOneSpectrum (𝓞 K)) :
+theorem prodRestrictedEquiv_apply_snd (x : 𝔸[K]ˣ) (v : HeightOneSpectrum (𝓞 K)) :
     (((prodRestrictedEquiv K x).2 v : (v.adicCompletion K)ˣ) : v.adicCompletion K) =
       (x : 𝔸[K]).2 v :=
   rfl

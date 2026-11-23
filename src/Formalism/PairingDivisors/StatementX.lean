@@ -1,5 +1,46 @@
-import Mathlib
-import Formalism.PairingDivisors.StatementH
+module
+
+public import Formalism.PairingDivisors.StatementH
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Module NumberField IsDedekindDomain Finset
 open Formalism.DivisionValues (vw lw conjPl)
@@ -11,53 +52,5 @@ namespace Formalism.PairingDivisionLocalBalance
 def HtLe {K : Type} [Field K] [NumberField K] [StarRing K] (g : Pl K → ℤ) (z : K) (B : ℝ) : Prop :=
   (Function.support fun w : Pl K => lw w * |((vw w z + g w : ℤ) : ℝ)|).Finite ∧
   ∑ᶠ w : Pl K, lw w * |((vw w z + g w : ℤ) : ℝ)| ≤ B
-
-def cmFactor {K : Type} [Field K] {I : Type} [Fintype I] (al : I → Bool) (x u y : I → K) : K :=
-  ∏ i, (if al i then u i * y i / x i else (u i * y i / x i)⁻¹)
-
-def CMFactorBound : Prop :=
-  ∀ (K : Type) [Field K] [NumberField K] [StarRing K] [IsTotallyComplex K]
-    (I : Type) [Fintype I] (al : I → Bool) (T : Finset (Pl K)) (g : I → Pl K → ℤ)
-    (x x1 x2 : I → K) (y u : Pl K → I → K) (ch : Pl K → Bool)
-    (S Se : Finset ℕ) (N0 : I → ℕ → ℝ) (ep : ℕ → ℝ) (B : I → ℝ),
-    (∀ i, x i ≠ 0 ∧ x1 i ≠ 0 ∧ x2 i ≠ 0) → (∀ w i, y w i ≠ 0 ∧ u w i ≠ 0) →
-
-    (∀ i, HtLe (g i) (x i) (B i) ∧ HtLe (g i) (x1 i) (B i) ∧ HtLe (g i) (x2 i) (B i)) →
-
-    (∀ i, ∀ l ∈ S, 0 ≤ N0 i l) → (∀ l ∈ Se, 0 ≤ ep l) →
-
-    (∀ w ∈ T, ∀ i, vw w (u w i) = 0) →
-
-    (∀ w ∈ T, ∀ i, - wt S (N0 i) w ≤ ((vw w (y w i) + g i w : ℤ) : ℝ) ∧
-      ((vw w (y w i) + g i w : ℤ) : ℝ) ≤
-        ((vw w (if ch w then x1 i else x2 i) + g i w : ℤ) : ℝ) + wt Se ep w) →
-    (∀ w ∈ T, (vw w (cmFactor al x (u w) (y w)) : ℝ) ≤
-      ∑ i, (|((vw w (x i) + g i w : ℤ) : ℝ)| + |((vw w (x1 i) + g i w : ℤ) : ℝ)|
-          + |((vw w (x2 i) + g i w : ℤ) : ℝ)|)
-        + ∑ i, (wt S (N0 i) w + wt Se ep w)) ∧
-    ∑ w ∈ T, lw w * (vw w (cmFactor al x (u w) (y w)) : ℝ) ≤
-      ∑ i, (3 * B i + ∑ l ∈ S, N0 i l * Real.log l)
-        + (Fintype.card I : ℝ) * ∑ l ∈ Se, ep l * Real.log l
-
-def Export : Prop :=
-  ∀ (K : Type) [Field K] [NumberField K] [StarRing K] [IsTotallyComplex K]
-    (I : Type) [Fintype I] (al : I → Bool) (T : Finset (Pl K)) (g : I → Pl K → ℤ)
-    (x x1 x2 : I → K) (y u : Pl K → I → K) (ch : Pl K → Bool)
-    (S Se : Finset ℕ) (N0 : I → ℕ → ℝ) (B : I → ℝ) (nI f b L xx CB CN : ℝ),
-    (∀ i, x i ≠ 0 ∧ x1 i ≠ 0 ∧ x2 i ≠ 0) → (∀ w i, y w i ≠ 0 ∧ u w i ≠ 0) →
-    (∀ i, HtLe (g i) (x i) (B i) ∧ HtLe (g i) (x1 i) (B i) ∧ HtLe (g i) (x2 i) (B i)) →
-    (∀ i, ∀ l ∈ S, 0 ≤ N0 i l) → (∀ l ∈ Se, l.Prime) →
-    (∀ w ∈ T, ∀ i, vw w (u w i) = 0) →
-    (∀ w ∈ T, ∀ i, - wt S (N0 i) w ≤ ((vw w (y w i) + g i w : ℤ) : ℝ) ∧
-      ((vw w (y w i) + g i w : ℤ) : ℝ) ≤
-        ((vw w (if ch w then x1 i else x2 i) + g i w : ℤ) : ℝ)
-          + wt Se (fun l => 1 / (l : ℝ) ^ 2) w) →
-
-    0 ≤ f → 0 ≤ b → 0 ≤ L → 1 ≤ xx → 0 ≤ CB → 0 ≤ CN →
-    (Fintype.card I : ℝ) ≤ nI →
-    (∀ i, B i ≤ CB * f * b * (L + Real.log xx)) →
-    (∀ i, ∑ l ∈ S, N0 i l * Real.log l ≤ CN * f * b * (L + Real.log xx)) →
-    ∑ w ∈ T, lw w * (vw w (cmFactor al x (u w) (y w)) : ℝ) ≤
-      nI * ((3 * CB + CN) * f * b * (L + Real.log xx) + 1)
 
 end Formalism.PairingDivisionLocalBalance

@@ -1,5 +1,56 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalOrderProjection.LocOProjOf
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalOrderProjection.LocOProjOf
+import Formalism.PeriodIntegrals.AlgebraMapMemO
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -36,7 +87,7 @@ theorem proj_of_free_idem [Module A Q] [IsScalarTower A R Q] [Module.Free A Q] (
   let s : Q →ₗ[R] (Module.Free.ChooseBasisIndex A Q →₀ R) :=
     { toFun := fun q => Finsupp.mapRange f hf0 (b.repr q)
       map_add' := fun q q' => by
-        rw [map_add]; exact Finsupp.mapRange_add hfa _ _
+        rw [map_add (f := _)]; exact Finsupp.mapRange_add hfa _ _
       map_smul' := fun x q => by
         obtain ⟨a, h1, h2⟩ := hact x q
         ext i
@@ -55,8 +106,8 @@ theorem proj_of_free_idem [Module A Q] [IsScalarTower A R Q] [Module.Free A Q] (
   rw [← Finsupp.linearCombination_apply]
   exact b.linearCombination_repr q
 
-variable (A) in
 
+variable (A) in
 theorem proj_of_idem [IsDomain A] [IsPrincipalIdealRing A] [Module.Finite R Q] (e : R)
     (he : ∀ x : R, ∃ a : A, x * e = algebraMap A R a * e) (hQ : ∀ q : Q, e • q = q)
     (htf : ∀ (a : A) (q : Q), a ≠ 0 → algebraMap A R a • q = 0 → q = 0) :
@@ -86,8 +137,8 @@ theorem proj_of_idem [IsDomain A] [IsPrincipalIdealRing A] [Module.Finite R Q] (
   have : Module.Free A Q := Module.free_of_finite_type_torsion_free'
   exact proj_of_free_idem e he hQ
 
-variable (A) in
 
+variable (A) in
 theorem proj_of_two_idem [IsDomain A] [IsPrincipalIdealRing A] [Module.Finite R Q] (e : R)
     (hee : e * e = e)
     (he : ∀ x : R, ∃ a : A, x * e = algebraMap A R a * e)
@@ -157,7 +208,7 @@ theorem exists_idem [CharZero F] (L : LocE F E) (θ : E) (hc : L.cj θ = -θ) (D
       + algebraMap F E c ^ 2 * ht + (1 + algebraMap F E t * θ) * algebraMap F E c * hc2
   · linear_combination algebraMap F E c ^ 2 * algebraMap F E t ^ 2 * hD
       + algebraMap F E c ^ 2 * ht + (1 + algebraMap F E t * θ) * algebraMap F E c * hc2
-  · rw [map_mul, map_add, map_one, map_mul, AlgEquiv.commutes, AlgEquiv.commutes, hc]
+  · rw [map_mul, map_add (f := _), map_one, map_mul, AlgEquiv.commutes, AlgEquiv.commutes, hc]
     linear_combination hc2
 
 theorem sqCase : SqCase := by

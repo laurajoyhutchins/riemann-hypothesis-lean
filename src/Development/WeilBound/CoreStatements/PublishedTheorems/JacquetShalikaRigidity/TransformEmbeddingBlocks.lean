@@ -1,5 +1,49 @@
-import Development.WeilBound.CoreStatements.PublishedTheorems.JacquetShalikaRigidity.ColumnConjugationMeasure
+module
+
+public import Development.WeilBound.CoreStatements.PublishedTheorems.JacquetShalikaRigidity.ColumnConjugationMeasure
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsGenericOfIsLocComp
 import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.QuotientAverageMapLatticeEquiv
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.Countable
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -174,7 +218,7 @@ theorem mir_emb {m n : ℕ} (hkm : n + 1 ≤ m) (ι : GA E (n + 1) →* GA E m) 
   obtain ⟨q, rfl⟩ := hs x fun i c h => hx i c (by omega)
   refine ⟨q, fun i c h => ?_, rfl⟩
   have h1 := hx (Fin.castLE hkm i) (Fin.castLE hkm c) (by simpa using h)
-  rw [hι, embM, Matrix.of_apply, dif_pos ⟨i.2, c.2⟩] at h1
+  rw [hι, embM, Matrix.of_apply, dite_eq_left ⟨i.2, c.2⟩] at h1
   convert h1 using 1 <;> first | rfl | (rw [Matrix.one_apply, Matrix.one_apply]; simp only [Fin.ext_iff, Fin.val_castLE])
 
 theorem blkU_zero' {a j : ℕ} : (blkU (0 : UnipotentBlockColumnIndex a j j → Ad E) : GA E a) = 1 := posU_zero _
@@ -184,12 +228,6 @@ def sig {k m j : ℕ} (hkm : k ≤ m) (hj : j < k) : UnipotentBlockColumnIndex k
   invFun t := ⟨(⟨t.1.1, by have := t.2; omega⟩, ⟨t.1.2, by have := t.2; omega⟩), t.2⟩
   left_inv _ := rfl
   right_inv _ := rfl
-
-@[simp] theorem sig_fst {k m j : ℕ} (hkm : k ≤ m) (hj : j < k) (t : UnipotentBlockColumnIndex k j j) :
-    ((sig hkm hj t).1.1 : ℕ) = t.1.1 := rfl
-
-@[simp] theorem sig_snd {k m j : ℕ} (hkm : k ≤ m) (hj : j < k) (t : UnipotentBlockColumnIndex k j j) :
-    ((sig hkm hj t).1.2 : ℕ) = t.1.2 := rfl
 
 def eqv {k m j : ℕ} (hkm : k ≤ m) (hj : j < k) : (UnipotentBlockColumnIndex k j j → Ad E) ≃ₜ+ (UnipotentBlockColumnIndex m j j → Ad E) where
   toFun x t := x ((sig hkm hj).symm t)
@@ -224,7 +262,7 @@ theorem emb_blkU {k m j : ℕ} (hkm : k ≤ m) (hj : j < k) (ι : GA E k →* GA
     congr 1
     · simp [Matrix.one_apply, Fin.ext_iff]
     · refine Fintype.sum_equiv (sig hkm hj) _ _ fun t => ?_
-      simp [Fin.ext_iff]
+      simp [sig, Fin.ext_iff]
   · symm
     apply blkU_apply_of
     rintro t ⟨e1, e2⟩

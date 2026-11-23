@@ -1,11 +1,70 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.HeckePointLawsOfTransport
-import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.IsThetaTraceMulTIff
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsSubgroupOfFinite
+module
+
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.HeckePointLawsOfTransport
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsHeckeQuotientTriple
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.IsThetaTraceMulTIff
+import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.AbelianSchemeLawsUnconditional
+import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.CubicalOfNormalised
+import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.ForallGeometricallyIntegralOfSmoothOfGeometrical
+import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.IsLocallyNoetherian
+import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.FormallyUnramifiedOfTangentMapInjective
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.EmbeddingSectionsSpanGeometricFibre
 import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsGenOfInvariant
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.IsFiniteSurjectiveOfPoints
-import Formalism.LocalToGlobal.ProjectiveLattices.LocFrLoc
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsIsRigIsoOfBaseChange
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsSubgroupOfFinite
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.HeckePointsOfParts
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.IsFiniteSurjectiveOfPoints
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.LambdaBundleIsoOfPrimeToPWeilPairings
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ObjPull
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsIsRigIsoOfBaseChange
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IsHkIsogEtaleUnique
+public import Formalism.LocalToGlobal.ProjectiveLattices.LocFrLoc
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.AlgClosed.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.Limits.Shapes.Connected
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.AmplePt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.VtUniq
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.LBPull
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.PhiGenPf
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -457,8 +516,8 @@ theorem descends_ker (h : IsLinHom Ψ) [Etale Ψ] [QuasiCompact Ψ] [Surjective 
   · have e₅ : toPt x (𝟙 _) ≫ j = 𝟙 _ := Over.OverMorphism.ext (Category.comp_id _)
     rw [toFib_transl, reassoc_of% e₅, inv_mul_cancel_right]
 
-omit [IsAlgClosed Ω] in
 
+omit [IsAlgClosed Ω] in
 theorem mulT_props (x : Sp Ω ⟶ Xo.X) (hp : 1 ≤ p) : Etale (mulT Xo.univ.t.G (Over.mk x) p).left ∧
     QuasiCompact (mulT Xo.univ.t.G (Over.mk x) p).left ∧ Surjective (mulT Xo.univ.t.G (Over.mk x) p).left := by
   have := Xo.univ.t.semi.smooth
@@ -486,8 +545,8 @@ theorem mulT_props (x : Sp Ω ⟶ Xo.X) (hp : 1 ≤ p) : Etale (mulT Xo.univ.t.G
     QuasiCompact.of_comp _ (fst (Over.mk x) Xo.univ.t.G).left,
     (EmbSpan.pt_pow_and_surjective abelianSchemeLaws_all.1 (GlobalTheory.UnivPol.pol Xo) x p hp).2⟩
 
-omit [IsAlgClosed Ω] in
 
+omit [IsAlgClosed Ω] in
 theorem isIntegral_gx (x : Sp Ω ⟶ Xo.X) : IsIntegral (Gx x) := by
   have hA := isAbelianScheme_of_proper Xo.univ.t Xo.univ.proper
   have := forall_geometricallyIntegral_of_smooth_of_geometricallyConnected _ _ _ hA.smooth hA.geomConnected
@@ -556,8 +615,8 @@ theorem transl_quot (hp : 1 ≤ p)
 variable {β : LB.Gen (isoLB Xo.univ.t.G Xo.univ.t.PP Ψ ((p : ℤ) ^ 2))} {s : LB.Sec (PPx x)}
   {s₁ : LB.Sec (LPow Xo.univ.t.G Xo.univ.t.PP.L ((p : ℤ) ^ 2) (Over.mk x))}
 
-omit [IsAlgClosed Ω] in
 
+omit [IsAlgClosed Ω] in
 theorem term_transl (h : IsLinHom Ψ) (hβ : β.IsGen) (hs : IsMulPull _ Xo.univ.t.PP p s s₁)
     (hst : ∀ a ∈ transKer _ Ψ, a ≫ Xo.univ.t.act.act H.w0 ∈ transKer _ Ψ) {Z : Scheme.{0}} (r : Z ⟶ Gx x) (z : Z)
     {J} (hJ : Good Xo.univ.t.PP.L z J) (a : Over.mk x ⟶ Xo.univ.t.G) (ha : a ∈ transKer _ Ψ) (hp : a ^ p = 1)
@@ -703,8 +762,8 @@ theorem existsUnique_trace (h : IsSplitOff l P p) (hC : Xo.univ.t.HeckeKer (Over
       (hJ.mem (fun _ : Fin 1 => (snd (Over.mk x') Xo.univ.t.G).left) _) _).trans
         ((congrArg _ (map_zero _)).trans (map_zero _)))
 
-omit [IsAlgClosed Ω] in
 
+omit [IsAlgClosed Ω] in
 theorem isThGen_iff [Algebra c.F Ω] (hx : x ≫ Xo.s = sOf c Ω) (s : LB.Sec (PPx x)) :
     IsThGen x s ↔ ¬ ∀ j, s.f j = 0 := by
   have mul : ∀ (a b : Ω) j, scal x (a * b) j = scal x a j * scal x b j := fun a b j => by

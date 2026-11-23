@@ -1,10 +1,54 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IsBlockNFZeroOne
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IntegrableOfMulUnimodular
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsWeilFormulas
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ContinuousHermPart
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ThetaSumInvariantUnipotentTranslate
-import Formalism.LocalToGlobal.IndefiniteReal.LevelTypeEquivalence.GinfCSecondCountable
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IsWeilFormulas
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ContinuousHermPart
+import Development.AbelianVarietyTheory.Proofs.HeightProofs.EmbeddingXiZeroNeZero
+import Development.AbelianVarietyTheory.Proofs.HeightProofs.IsTopologicalRingAE
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ThetaSumInvariantUnipotentTranslate
+public import Formalism.LocalToGlobal.IndefiniteReal.LevelTypeEquivalence.NumFieldHosCountable
+import Formalism.LocalToGlobal.ProjectiveLattices.HalfOneAddSqrtNegIsIntegral
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 noncomputable section
 open scoped Matrix NNReal ENNReal ComplexConjugate TensorProduct
@@ -31,7 +75,7 @@ def hermF (σ : E →ₐ[F] E) (r : ℕ) : Submodule F (Matrix (Fin r) (Fin r) E
     have h1 := congrFun (congrFun ha i) j
     have h2 := congrFun (congrFun hb i) j
     simp only [ct, Matrix.transpose_apply, Matrix.map_apply] at h1 h2 ⊢
-    rw [Matrix.add_apply, map_add, h1, h2, Matrix.add_apply]
+    rw [Matrix.add_apply, map_add (f := _), h1, h2, Matrix.add_apply]
   zero_mem' := by
     refine Matrix.ext fun i j => ?_
     simp [ct]
@@ -52,12 +96,12 @@ theorem tF_comm (a b : Matrix (Fin r) (Fin r) E) : (tF a b : F) = tF b a := by
 def tB (σ : E →ₐ[F] E) : LinearMap.BilinForm F (hermF σ r) :=
   LinearMap.mk₂ F (fun a b => tF a.1 b.1)
     (fun a b c => by
-      simp only [tF, Submodule.coe_add, Matrix.add_mul, Matrix.trace_add, map_add, mul_add])
+      simp only [tF, Submodule.coe_add, Matrix.add_mul, Matrix.trace_add, map_add (f := _), mul_add])
     (fun c a b => by
       simp only [tF, Submodule.coe_smul, Matrix.smul_mul, Matrix.trace_smul, map_smul, smul_eq_mul]
       ring)
     (fun a b c => by
-      simp only [tF, Submodule.coe_add, Matrix.mul_add, Matrix.trace_add, map_add, mul_add])
+      simp only [tF, Submodule.coe_add, Matrix.mul_add, Matrix.trace_add, map_add (f := _), mul_add])
     (fun c a b => by
       simp only [tF, Submodule.coe_smul, Matrix.mul_smul, Matrix.trace_smul, map_smul, smul_eq_mul]
       ring)
@@ -93,13 +137,14 @@ theorem exists_tF_ne (σ : E →ₐ[F] E) (hσ : ∀ x, σ (σ x) = x) {h : Matr
     rw [hm, Matrix.trace_mul_single, op_smul_eq_mul, mul_comm z, ← mul_assoc, mul_inv_cancel₀ hij, one_mul]
   have h2 : Matrix.trace (h * ct σ m) = σ z := by
     have ht : ∀ X : Matrix (Fin r) (Fin r) E, Matrix.trace (ct σ X) = σ (Matrix.trace X) := fun X => by
+
       simp [ct, Matrix.trace, map_sum]
     have hmul : ct σ (m * h) = ct σ h * ct σ m := by
       simp only [ct]
       rw [Matrix.map_mul, Matrix.transpose_mul]
     have h3 : h * ct σ m = ct σ (m * h) := by rw [hmul, hh]
     rw [h3, ht, Matrix.trace_mul_comm, h1]
-  rw [tF, Matrix.mul_add, Matrix.trace_add, h1, h2, map_add, hs, hz]
+  rw [tF, Matrix.mul_add, Matrix.trace_add, h1, h2, map_add (f := _), hs, hz]
   norm_num
 
 theorem tB_sep (σ : E →ₐ[F] E) (hσ : ∀ x, σ (σ x) = x) (a : hermF σ r)
@@ -129,6 +174,7 @@ theorem exists_dual (σ : E →ₐ[F] E) (hσ : ∀ x, σ (σ x) = x) (r : ℕ) 
     conv_rhs => rw [← b.sum_repr x]
     have : (tF (b' i).1 (∑ j, b.repr x j • b j : hermF σ r).1 : F) =
         tB σ (b' i) (∑ j, b.repr x j • b j) := rfl
+
     rw [this, map_sum]
     simp only [map_smul, smul_eq_mul]
     rw [Finset.sum_eq_single i]
@@ -166,7 +212,7 @@ theorem sigR_smul_gen (σ : E →ₐ[F] E) (c : R) (x : R ⊗[F] E) : sigR R σ 
   induction x using TensorProduct.induction_on with
   | zero => simp
   | tmul a e => simp [sigR, TensorProduct.smul_tmul']
-  | add x y h1 h2 => rw [smul_add, map_add, h1, h2, map_add, smul_add]
+  | add x y h1 h2 => rw [smul_add, map_add (f := _), h1, h2, map_add (f := _), smul_add]
 
 theorem alg_smul_tmul (c : F) (e : E) :
     algebraMap F R c • ((1 : R) ⊗ₜ[F] e) = (1 : R) ⊗ₜ[F] (c • e) := by
@@ -191,8 +237,6 @@ variable {D : D7} {r : ℕ}
 def halfTrL (D : D7) : AE D →ₗ[AF D.host.F] AF D.host.F :=
   (algebraMap D.host.F (AF D.host.F) (1 / 2)) • Algebra.trace (AF D.host.F) (AE D)
 
-theorem halfTrL_apply (z : AE D) : halfTrL D z = halfTr z := rfl
-
 def uL (m : Matrix (Fin r) (Fin r) D.host.E) : Mx D r r →ₗ[AF D.host.F] AF D.host.F :=
   (halfTrL D) ∘ₗ (Matrix.traceLinearMap (Fin r) (AF D.host.F) (AE D)) ∘ₗ
     (LinearMap.mulLeft (AF D.host.F) (rat m : Mx D r r))
@@ -202,11 +246,13 @@ theorem uL_apply (m : Matrix (Fin r) (Fin r) D.host.E) (x : Mx D r r) :
 
 theorem trace_rat (M : Matrix (Fin r) (Fin r) D.host.E) :
     Matrix.trace (rat M : Mx D r r) = incA D (Matrix.trace M) := by
+
   simp only [rat, Matrix.trace, Matrix.diag, Matrix.map_apply, map_sum]
 
 theorem uL_rat (m h : Matrix (Fin r) (Fin r) D.host.E) :
     uL m (rat h) = algebraMap D.host.F (AF D.host.F) (tF m h) := by
-  rw [uL_apply, ← rat_mul, trace_rat, GlobalTheory.CompanionTheory.ThetaInv.halfTr_incA, tF]
+  rw [uL_apply]
+  rw [← rat_mul, trace_rat, GlobalTheory.CompanionTheory.ThetaInv.halfTr_incA, tF]
 
 theorem algebraMap_smul_rat (c : D.host.F) (M : Matrix (Fin r) (Fin r) D.host.E) :
     algebraMap D.host.F (AF D.host.F) c • (rat M : Mx D r r) = rat (c • M) :=
@@ -219,7 +265,7 @@ theorem rat_sum {ι : Type} (s : Finset ι) (f : ι → Matrix (Fin r) (Fin r) D
 theorem adj_rsmul (a : AF D.host.F) (x : Mx D r r) : adj (a • x) = a • adj x :=
   Matrix.ext fun i j => sigR_smul_gen (R := AF D.host.F) D.sp.cm.sig a (x j i)
 
-set_option synthInstance.maxHeartbeats 400000 in
+
 theorem hermPart_smul (a : AF D.host.F) (x : Mx D r r) :
     GlobalTheory.CompanionTheory.HermVol.hermPart D r (a • x) = a • GlobalTheory.CompanionTheory.HermVol.hermPart D r x := by
   rw [GlobalTheory.CompanionTheory.HermVol.hermPart, GlobalTheory.CompanionTheory.HermVol.hermPart, adj_rsmul, ← smul_add]
@@ -267,7 +313,7 @@ theorem sum_uL_smul {n : ℕ} (m m' : Fin n → Matrix (Fin r) (Fin r) D.host.E)
       simp [h0]
     · intro x y hx hy
       rw [GlobalTheory.CompanionTheory.HermVol.hermPart_add]
-      simp only [map_add, add_smul, Finset.sum_add_distrib, hx, hy]
+      simp only [map_add (f := _), add_smul, Finset.sum_add_distrib, hx, hy]
     · intro a g
       rw [hermPart_smul, hermPart_ratm]
       simp only [map_smul, smul_eq_mul, mul_smul, ← Finset.smul_sum]
@@ -317,7 +363,7 @@ theorem pairing_comb {n : ℕ} (m : Fin n → Matrix (Fin r) (Fin r) D.host.E) (
 theorem continuous_comb {n : ℕ} (m : Fin n → Matrix (Fin r) (Fin r) D.host.E) :
     Continuous fun v : Fin n → AF D.host.F => ∑ i, v i • (rat (m i) : Mx D r r) := by
   haveI : IsTopologicalAddGroup (Mx D r r) := (lattice_Mx D r r).1
-  exact continuous_finset_sum _ fun i _ => (continuous_smul_rat (m i)).comp (continuous_apply i)
+  exact continuous_finsetSum _ fun i _ => (continuous_smul_rat (m i)).comp (continuous_apply i)
 
 theorem comb_mem {n : ℕ} (m : Fin n → Matrix (Fin r) (Fin r) D.host.E)
     (hm : ∀ i, ct D.sp.cm.sig (m i) = m i) (v : Fin n → AF D.host.F) :
@@ -337,6 +383,7 @@ def cEquiv {n : ℕ} (e e' : Fin n → Matrix (Fin r) (Fin r) D.host.E)
   invFun b i := uL (e i) b.1
   left_inv v := by
     funext j
+
     simp only [map_sum, map_smul, uL_rat, hd, smul_eq_mul]
     simp
   right_inv b := Subtype.ext (sum_uL_smul e' e hrec b.2)
@@ -378,7 +425,7 @@ theorem isTamagawa_map {lam : Measure (hermA D r)} {𝓖 : Set (hermA D r)} (h :
     rw [e1, show me ⁻¹' (c.symm '' 𝓖) = 𝓖 from Set.preimage_image_eq _ c.symm.injective, hm]
   · let f : hermA D r ≃ (Fin n → AF D.host.F) := c.symm.toEquiv
     have hq : Measure.QuasiMeasurePreserving f.symm (lam.map c.symm) lam := by
-      refine ⟨hc, ?_⟩
+      refine ⟨hc.aemeasurable, ?_⟩
       have : (lam.map c.symm).map f.symm = lam := by
         show (lam.map c.symm).map c = lam
         rw [Measure.map_map hc hcs]

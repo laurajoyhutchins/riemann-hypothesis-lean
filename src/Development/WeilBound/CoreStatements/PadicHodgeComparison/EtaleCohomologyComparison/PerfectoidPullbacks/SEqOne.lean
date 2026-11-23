@@ -1,6 +1,51 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.HarishChandraFormulaStatement
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.DpZeroRight
+module
+
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.DpZeroRight
+public import Aesop.BuiltinRules
+public import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.IsStrictlySemistable
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
@@ -46,8 +91,6 @@ def thA : Thick L ⥤ CommAlgCat.{0} b.R where
     CommAlgCat.ofHom { f.φ with commutes' := f.comm }
   map_id _ := rfl
   map_comp _ _ := rfl
-
-theorem modF_thA : CH.modF (thA L) = O L := rfl
 
 def thP : PDF b.R (Thick L) where
   A := thA L
@@ -112,9 +155,6 @@ def nlFun (γ : DividedPowers I) (p : ℕ) (X : Scheme.{0}) (q : X ⟶ Spec (Com
   g_comp i := i.elim
   prod_f {_ _ y} _ := by simp
   prod_g _ _ := by simp
-
-theorem smFun_eq {K : Type} [CommRing K] (X : Scheme.{0}) (q : X ⟶ Spec (CommRingCat.of K)) :
-    smFun X q = nlFun (dividedPowersBot K) 0 X q (Ideal.Quotient.mk ⊥) := rfl
 
 variable {γ : DividedPowers I} {p : ℕ} {X : Scheme.{0}} {q : X ⟶ Spec (CommRingCat.of O)} {κ : O →+* R ⧸ I}
 
@@ -198,7 +238,7 @@ def Good : Prop :=
     ∃! σ' : c.D ⟶ T, ∀ i, σ'.φ (c.t i) - σ.φ (c.t i) = y i
 
 def frame (h : c.Good) (Q : ObjectProperty (Thick (nlFun γ p X q κ))) (hQ : ∀ T, Q T → InU V T) (hD : Q c.D) :
-    Frame (sP Q) d where
+    CrystallineSemistableComparison.Pb.Frame (sP Q) d where
   D := ⟨c.D, hD⟩
   ne T := (h.1 T.obj (hQ _ T.property)).map fun σ => ObjectProperty.homMk σ
   τ i {T} σ σ' := (σ'.hom.φ (c.t i) - σ.hom.φ (c.t i) : T.obj.B)

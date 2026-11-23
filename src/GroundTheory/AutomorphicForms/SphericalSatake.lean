@@ -1,6 +1,57 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.SphericalPrincipal
-import GroundTheory.AutomorphicForms.SphericalLaurent
+module
+
+public import GroundTheory.AutomorphicForms.SphericalPrincipal
+public import GroundTheory.AutomorphicForms.SphericalLaurent
+import GroundTheory.AutomorphicForms.HaarCosets
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -147,8 +198,8 @@ theorem sphericalFun_unramifiedChar (w : Fin n → ℂˣ) (g : GL (Fin n) F) :
   rw [sphericalFun_mul (isUnramified_unramifiedChar w) b hk, borelChar_unramifiedChar,
     iwasawaExponent_mul_of_mem_integralGL F n _ hk]
 
-variable (F n) in
 
+variable (F n) in
 def integralOpen : OpenSubgroup (GL (Fin n) F) := ⟨integralGL F n, isOpen_integralGL F n⟩
 
 variable [MeasurableSpace (GL (Fin n) F)] [BorelSpace (GL (Fin n) F)]
@@ -187,8 +238,8 @@ theorem sphericalEigen_unramifiedChar (w : Fin n → ℂˣ) (h : SphericalHecke 
     by_contra hxs
     exact hx (by simp [apply_out_eq_zero hxs])
 
-variable (μ) in
 
+variable (μ) in
 def satake (h : SphericalHecke μ (F := F) (n := n)) : LaurentRing n :=
   (μ.real (integralGL F n : Set (GL (Fin n) F)) : ℂ) •
     ∑ x ∈ cosetSupport h, single (iwasawaExponent F n x.out) ((h : HeckeAlgebra μ) x.out)
@@ -207,20 +258,21 @@ theorem satake_eq_sum (h : SphericalHecke μ (F := F) (n := n))
 
 theorem evalAt_satake (w : Fin n → ℂˣ) (h : SphericalHecke μ (F := F) (n := n)) :
     evalAt w (satake μ h) = sphericalCharacter μ (isUnramified_unramifiedChar w) h := by
+
   rw [sphericalCharacter_apply, satake, map_smul, map_sum, sphericalEigen_unramifiedChar,
-    smul_eq_mul]
+  smul_eq_mul]
   congr 1
   refine Finset.sum_congr rfl fun x _ => ?_
   rw [evalAt_single]
 
-variable (μ) in
 
+variable (μ) in
 def satakeHom : SphericalHecke μ (F := F) (n := n) →ₐ[ℂ] LaurentRing n where
   toFun := satake μ
   map_one' := eq_of_forall_evalAt fun w => by simp only [evalAt_satake, map_one]
   map_mul' a b := eq_of_forall_evalAt fun w => by simp only [evalAt_satake, map_mul]
   map_zero' := eq_of_forall_evalAt fun w => by simp only [evalAt_satake, map_zero]
-  map_add' a b := eq_of_forall_evalAt fun w => by simp only [evalAt_satake, map_add]
+  map_add' a b := eq_of_forall_evalAt fun w => by simp only [evalAt_satake, map_add (f := _)]
   commutes' c := eq_of_forall_evalAt fun w => by simp only [evalAt_satake, AlgHom.commutes]
 
 theorem satakeHom_apply (h : SphericalHecke μ (F := F) (n := n)) : satakeHom μ h = satake μ h := rfl

@@ -1,11 +1,47 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.ExistsSplittingCharacterSelf
-import Formalism.LocalToGlobal.IndefiniteReal.DatumVec
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsCmAdeleUnitCharacterReadingHeckeChar
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsUnramifiedHeckeCharHalfExponentRestrictQua
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsWeilRepresentationVacuumCosetVectorsGrid
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.HasInfExpOfOrder
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.TendstoInfMulProd
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.AdelicDataRowMeasureScaleTrivialTuple
+public import Formalism.LocalToGlobal.IndefiniteReal.LinksDefs
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsBaseChangeFiniteAdeleRingEquiv
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsFinitePlaceIdempotentBaseChangeAdeles
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsUnramifiedHeckeCharHalfExponentRestrictQua
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.L2.Theta GlobalTheory.Mem.Th MeasureTheory IsDedekindDomain NumberField Matrix
 open Formalism.IndefR.Links
@@ -35,38 +71,5 @@ theorem unramEverywhere {D : D7} {c : IdC D} {χ : Formalism.L2.Host.HChar D.hos
     rw [← e']
     exact mul_le_of_le_one_right' ((h2 _).1 h5 P)
   rw [e1, WithZero.log_one, neg_zero, zpow_zero]
-
-theorem exists_tupChars : ∀ (D : D7) (C : Formalism.L2.Host.CharFrame D) (xi : D.what₂.Tup → Formalism.L2.Host.HChar D.host.E), (∀ μ, ∃ n : ℕ, 0 < n ∧ (xi μ).OrderDvd n) → (∀ μ, (xi μ).TrivOn D.host.F) → ∃ (chr : D.what₂.Tup → ℕ → IdC D) (eta : IdC D), (∀ μ j, IsHC D (chr μ j)) ∧ (∀ μ (j : Fin D.R.m) τ, HasInfExp D (chr μ (j.1 + 1)) τ (-(D.hc τ).e j)) ∧ (∀ μ j, 1 ≤ j → j ≤ D.R.m → ResEta D (chr μ j) 0) ∧ IsHeckeChar D eta ∧ (∀ τ, HasInfExp D eta τ (1 / 2)) ∧ ResEta D eta 1 ∧ UnramEverywhere D eta ∧ (∀ μ (j : Fin D.R.m), Formalism.IndefR.Links.ChrEq (chr μ (j.1 + 1)) (C.mu0 j * xi μ)) ∧ Formalism.IndefR.Links.ChrEq eta C.eta := by
-  intro D C xi hfin htriv
-  classical
-  choose n hn ho using hfin
-  choose m hm using fun j => GlobalTheory.CharTransport.exists_chrEq D (C.mu0 j) (C.isMu0 j).unitary
-  choose x hx using fun μ => GlobalTheory.CharTransport.exists_chrEq D (xi μ) (Formalism.L2.Host.HChar.isUnitary_of_order (hn μ) (ho μ))
-  obtain ⟨η, hη⟩ := GlobalTheory.CharTransport.exists_chrEq D C.eta C.isEta.unitary
-  obtain ⟨θ, hθ⟩ := GlobalTheory.Member.exists_isInfFam_family D
-  have hres := GlobalTheory.Mem.EtaTilde.isEta_res D η C.eta hη C.isEta
-  have hexp : ∀ μ (j : Fin D.R.m) τ, HasInfExp D (m j * x μ) τ (-(D.hc τ).e j) := fun μ j τ => by
-    have := GlobalTheory.Chain.StepVac.hasInfExp_mul (GlobalTheory.HeckeInfExp.hasInfExp_of_chrEq D _ _ _ (hm j)
-      (GlobalTheory.Chain.StepVac.hasInfQ_tau (C.isMu0 j).inf) τ)
-      (GlobalTheory.Chain.StepVac.hasInfExp_of_order hθ (hx μ) (hn μ) (ho μ) τ)
-    rwa [add_zero, Formalism.L2.Host.eExp, Equiv.symm_apply_apply] at this
-  let chr : D.what₂.Tup → ℕ → IdC D := fun μ j =>
-    if h : 1 ≤ j ∧ j ≤ D.R.m then m ⟨j - 1, by omega⟩ * x μ else 1
-  have hchr : ∀ μ (j : Fin D.R.m), chr μ (j.1 + 1) = m j * x μ := fun μ j =>
-    dif_pos (⟨Nat.le_add_left _ _, j.2⟩ : 1 ≤ j.1 + 1 ∧ j.1 + 1 ≤ D.R.m)
-  refine ⟨chr, η, fun μ j => ?_, fun μ j τ => hchr μ j ▸ hexp μ j τ, fun μ j h1 h2 => ?_, hη.1, fun τ => ?_,
-    ⟨⟨_, hres⟩, fun η' h' a => ?_⟩, unramEverywhere hη C.isEta.unr, fun μ j => hchr μ j ▸ chrEq_mul (hm j) (hx μ), hη⟩
-  · by_cases h : 1 ≤ j ∧ j ≤ D.R.m
-    · rw [show chr μ j = _ from dif_pos h]
-      exact ⟨(chrEq_mul (hm _) (hx μ)).1, fun τ => ⟨_, hexp μ _ τ⟩⟩
-    · rw [show chr μ j = _ from dif_neg h]
-      exact isHC_one D
-  · rw [show chr μ j = _ from dif_pos ⟨h1, h2⟩]
-    refine ⟨⟨_, hres⟩, fun η' _ a => ?_⟩
-    rw [pow_zero, MonoidHom.mul_apply, GlobalTheory.GridWeil.triv_base (hm _) (C.isMu0 _).triv a,
-      GlobalTheory.GridWeil.triv_base (hx μ) (htriv μ) a, mul_one]
-  · exact GlobalTheory.HeckeInfExp.hasInfExp_of_chrEq D _ _ _ hη
-      (GlobalTheory.Chain.StepVac.hasInfQ_tau (a := fun _ => 1 / 2) ⟨_, fun _ => by norm_num, C.isEta.inf⟩) τ
-  · rw [(GlobalTheory.IdeleNormChar.existsUnique_isEta D).unique h' hres, pow_one, MonoidHom.comp_apply]
 
 end GlobalTheory.Mem.TupChar

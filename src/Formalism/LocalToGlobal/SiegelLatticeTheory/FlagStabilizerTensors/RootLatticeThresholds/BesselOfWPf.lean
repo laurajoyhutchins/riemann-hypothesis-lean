@@ -1,13 +1,64 @@
-import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.LocWSOf
-import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RootLatticeThresholds.DoubleCosetBesselBoundOfBesselUniq
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.BesselNonvanishingFromL2
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.LocWSOf
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.ContinuousMulMt
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.BesselFunctionalOfSigmaContinuity
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.BesselNeZeroOfCyclicOrbit
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.ReproducingFormulaReduction
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.SigmaContOn
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.UhMeasurableSet
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RootLatticeThresholds.DoubleCosetBesselBoundOfBesselUniq
+import Formalism.SharpRestriction.CuspSpanNormBounds.FamilyDoubleCosetBesselBoundOfGap
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.CStarAlgebra.ContinuousLinearMap
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MeasureTheory Matrix
 open scoped InnerProductSpace ENNReal ComplexConjugate
 
 noncomputable section
 
-set_option maxHeartbeats 1600000
+
 
 namespace Formalism.MainNotions.BridgeCS3dBOW
 
@@ -72,7 +123,7 @@ theorem orbit_data {ε : Fin (2 * r + k + 1) → Bool} {lam : Fin (2 * r + k + 1
     filter_upwards [hGae] with g hg
     have hxg : x0 * Matrix.of g ∈ Formalism.QuantumDeterminants.UH (Formalism.QuantumDeterminants.Hpk k r) := DDSmoothness.uh_mul hx0 hg
     have hmem : Formalism.QuantumDeterminants.lmulM x0 g ∈ U := hxg
-    simp only [Function.comp, Φ', Set.piecewise, hmem, if_true, Φ]
+    simp only [Function.comp, Φ', Set.piecewise, hmem, ite_true, Φ]
     show _ = ⟪η, PI.BesselPeriodGGP.eFun μG σ w0 (x0⁻¹ * (x0 * Matrix.of g)) • W (x0 * Matrix.of g)⟫_ℂ
     rw [← Matrix.mul_assoc, hxx', Matrix.one_mul]
   have hmapEq : μG.map (Formalism.QuantumDeterminants.lmulM x0) = μG := hGh.2.2.2 x0 hx0
@@ -99,7 +150,7 @@ theorem orbit_data {ε : Fin (2 * r + k + 1) → Bool} {lam : Fin (2 * r + k + 1
     have hsx : Matrix.of p.1 * Matrix.of p.2 * Matrix.of x ∈ Formalism.QuantumDeterminants.UH (Formalism.QuantumDeterminants.Hpk k r) :=
       DDSmoothness.uh_mul hs hx
     have hmem : mulMt (fun i j => (Matrix.of p.1 * Matrix.of p.2) i j) x ∈ U := hsx
-    simp only [Φ', Set.piecewise, hmem, if_true, Φ]
+    simp only [Φ', Set.piecewise, hmem, ite_true, Φ]
     show ⟪η, PI.BesselPeriodGGP.eFun μG σ w0 (x0⁻¹ * (Matrix.of p.1 * Matrix.of p.2 * Matrix.of x)) •
         W (Matrix.of p.1 * Matrix.of p.2 * Matrix.of x)⟫_ℂ = _
     rw [hWeq _ hp.1 _ hp.2 _ hx]
@@ -111,7 +162,7 @@ theorem orbit_data {ε : Fin (2 * r + k + 1) → Bool} {lam : Fin (2 * r + k + 1
         ⟪v', σ (Matrix.of p.1 * Matrix.of p.2) u'⟫_ℂ := by
       rw [eσ, sigma_inner hσ hxi, Matrix.nonsing_inv_nonsing_inv x0 hdet]
     unfold PI.BesselPeriodGGP.eFun beInt
-    rw [eA, inner_smul_right, inner_smul_right, piW_inner hT hπ hp.1, ContinuousLinearMap.smul_apply,
+    rw [eA, inner_smul_right, inner_smul_right, piW_inner hT hπ hp.1, smul_apply,
       inner_smul_left]
     simp only [map_mul, Complex.star_def, Complex.conj_conj]
     ring
@@ -208,7 +259,7 @@ theorem bow_core [FiniteDimensional ℂ Wp] {ε : Fin (2 * r + k + 1) → Bool} 
     rw [inner_zero_right]
     have := comb x0 hx0 x0 hx0 η 0 1 0 (by rw [hzero x0 hx0]; simp)
     simpa using this
-  · push_neg at hzero
+  · push Not at hzero
     obtain ⟨x1, hx1, hl1⟩ := hzero
     have hy : ⟪l (σ x1 w0), l (σ x1 w0)⟫_ℂ ≠ 0 := inner_self_ne_zero.mpr hl1
     refine ⟨⟪l (σ x1 w0), W x1⟫_ℂ / ⟪l (σ x1 w0), l (σ x1 w0)⟫_ℂ, fun x0 hx0 => ?_⟩
@@ -220,22 +271,18 @@ theorem bow_core [FiniteDimensional ℂ Wp] {ε : Fin (2 * r + k + 1) → Bool} 
     rw [div_mul_eq_mul_div, eq_div_iff hy]
     linear_combination hc
 
-variable [Fact Formalism.FourierDecayAlt.ThreeDimData.DecLow] in
 
+variable [Fact Formalism.FourierDecayAlt.ThreeDimData.DecLow] in
 theorem besselOfW_of_local_decomposition (hDI : Formalism.FourierDecayAlt.ThreeDimData.DecInf) (hJ : PI.BesselMapUniq.BesselMapUniq) :
     Formalism.L2.SG.LocWSOf.BesselOfW := by
   intro k r z c u lam ε h H _ _ _ σ hlam hσ hgap hok hz hT hc Vp _ _ _ π hπ w hw μG μW μN ν hG hW hN hq W hWc hWeq
     hRe hne hfin
-  have : CompleteSpace Vp := FiniteDimensional.complete ℂ Vp
+  have : CompleteSpace Vp := FiniteDimensional.completeSpace ℂ Vp
   have hS : Side k r ε lam h σ w z c u π μW μN μG ν := ⟨hlam, hσ, hgap, hok, hw, hz, hT, hc, hπ, hW, hN, hG, hq⟩
   obtain ⟨l, hlB, hla, -⟩ := Formalism.FourierDecayAlt.P.discrete_series_form_one (Formalism.MainNotions.BridgeCS3dClosed.inputs_of hDI hJ)
     k r ε lam h H σ w Vp z c u π μW μN μG ν hS
   obtain ⟨κ, hκ⟩ := bow_core hS l hla hWc hWeq hRe
   exact ⟨fun v => κ • l v, (Formalism.MainNotions.BridgeCS3d.isBesselMapSm_iff _ _ _ _ _).mpr (DDSmoothness.bessel_smul hlB κ), hκ⟩
 
-variable [Fact Formalism.FourierDecayAlt.ThreeDimData.DecLow] in
-
-theorem besselOfW_of_jsz (hJ : PI.BesselMapUniq.BesselMapUniq) : Formalism.L2.SG.LocWSOf.BesselOfW :=
-  besselOfW_of_local_decomposition Formalism.L2.SG.BesselDiscreteSeries.decInf hJ
 
 end Formalism.MainNotions.BridgeCS3dBOW

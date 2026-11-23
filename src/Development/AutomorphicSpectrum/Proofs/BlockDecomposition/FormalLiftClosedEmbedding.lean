@@ -1,9 +1,55 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SubPairRight
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ThickeningAffinePreimageStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ThickeningCechCoverCompatible
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ThickeningCechRestrictionCommutesStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ThickeningTwistedSectionTransition
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SubPairRight
+public import Development.AbelianVarietyTheory.Definitions.QuasicoherentCohomology.IsGradedMapLinearCombination
+public import Mathlib.RingTheory.WittVector.IsPoly
+public import Mathlib.Tactic.ReduceModChar
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ThickeningAffinePreimageStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ThickeningCechCoverCompatible
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ThickeningCechRestrictionCommutesStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ThickeningTwistedSectionTransition
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Definitions.ThetaMetrics.TwistingSheafOneChartEqPreimageStandardChart
+import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.FormalAlgebraisation.GEClosedProj
+
+@[expose] public section
+
 open CategoryTheory CategoryTheory.Limits AlgebraicGeometry ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Out ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor GlobalTheory GlobalTheory.AbLaw PositivityTheory.FormalThickening
 open GlobalTheory.ProjSpace GlobalTheory.QCoh.Qcqs GlobalTheory.Cartier GlobalTheory.CompanionTheory.FormalAlg GlobalTheory.CompanionTheory.FormalAlg.Lift
 
@@ -34,7 +80,7 @@ theorem exists_form_of_eval {ι R B G : Type} [CommRing R] [CommRing B] [AddComm
     obtain ⟨Q₁, a₁, b₁⟩ := h₁ n (le_trans (le_max_left _ _) hn)
     obtain ⟨Q₂, a₂, b₂⟩ := h₂ n (le_trans (le_max_right _ _) hn)
     refine ⟨Q₁ + Q₂, a₁.add a₂, ?_⟩
-    rw [map_add, map_add, smul_add, b₁, b₂, add_smul]
+    rw [map_add (f := _), map_add (f := _), smul_add, b₁, b₂, add_smul]
   | mul_X p j hp =>
     obtain ⟨n₀, h⟩ := hp
     refine ⟨n₀ + 1, fun n hn => ?_⟩
@@ -126,7 +172,7 @@ theorem exists_form_chart (hN : N.IsLB) (σ : ι → SecOn (pw N d) V)
         Q • GrSum.of hx 0 (SecOnR.of f _ V (oneOn N (mul_zero d) V)) := by
   set one : SecOnR f (pw N (d * 0)) V := SecOnR.of f _ V (oneOn N (mul_zero d) V) with hone
   let μ : Γ(X, V) →+ GrSum hx := AddMonoidHom.mk' (fun c => GrSum.of hx 0 (c • one))
-    (fun a b => by rw [add_smul, map_add])
+    (fun a b => by rw [add_smul, map_add (f := _)])
   have hμ : ∀ c, μ c = GrSum.of hx 0 (c • one) := fun _ => rfl
   have hC : ∀ (a : R) (c : Γ(X, V)), μ (cst f V a * c) =
       (MvPolynomial.C a : MvPolynomial ι R) • μ c := by
@@ -174,8 +220,8 @@ variable (R : Type) [CommRing R] (I : Ideal R) (Y : ∀ e : ℕ, Over (Spec (Com
   (hc : ∀ e, OperatorsCommute (ι := ι) (R := R) (A := fun t => Tm I Y N D d e t S)
     fun j t => mulT I Y N D d e t S (sh e j))
 
-include hshp hDa in
 
+include hshp hDa in
 theorem form_step (i : ι) (e : ℕ)
     (ih : ∀ (t : ℤ) (a : Tm I Y N D d e t S), ∃ (k n : ℕ) (Q : MvPolynomial ι R)
       (w : Tm I Y N D d e (n : ℤ) S), Q.IsHomogeneous n ∧ (k : ℤ) + t = n ∧
@@ -245,7 +291,7 @@ theorem form_step (i : ι) (e : ℕ)
     rw [(hred n).2] at h3
     exact Submodule.smul_mono_left (Ideal.pow_le_self (by omega)) h3
   refine ⟨k, n, Q, w' + z, hQ, hk, add_mem hw' hzI, ?_⟩
-  rw [map_add, hz]
+  rw [map_add (f := _), hz]
   abel
 
 end Step

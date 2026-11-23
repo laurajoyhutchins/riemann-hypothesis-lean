@@ -1,5 +1,47 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.CoordinateIdeals.Example
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.CoordinateIdeals
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -32,31 +74,6 @@ structure ComponentDataHodge (II : IntersectionSystem) (Ψ : Type) [Fintype Ψ] 
   hodge : ∀ τ, IsSubbundle y (W τ) (F τ) j
 
 namespace Line
-
-def lineDataHodge (II : IntersectionSystem)
-    (hII : ∀ W : Ideal (MRing (PBlk 2)), IsArithVar W 1 → 0 ≤ II Unit (PBlk 2) W 1 ![fsLine 2]) :
-    ComponentDataHodge II Unit Unit (PBlk 2) Ω (fun _ => Fin 2 → Ω) where
-  toComponentData := lineData II hII
-  F _ := Submodule.span Ω ((Pi.basisFun Ω (Fin 2)) '' {i | (i : ℕ) < 1})
-  hodge _ c hc := ⟨1, fun _ => 1, fun _ => 1, fun _ => one_mem _, fun _ => one_mem _, by simp,
-    fun _ _ => ⟨Pi.basisFun Ω (Fin 2), ⟨hc, one_mem _, one_ne_zero,
-      (Pi.basisFun Ω (Fin 2)).linearIndependent, trivial_frame_iff _ 2 c⟩, rfl⟩⟩
-
-def lineDataHodgeZero : ComponentDataHodge zeroSystem Unit Unit (PBlk 2) Ω (fun _ => Fin 2 → Ω) :=
-  lineDataHodge zeroSystem fun _ _ => le_rfl
-
-theorem finrank_lineDataHodge_F (II : IntersectionSystem) (hII) :
-    Module.finrank Ω ((lineDataHodge II hII).F ()) = 1 := by
-  show Module.finrank Ω (Submodule.span Ω ((Pi.basisFun Ω (Fin 2)) '' {i | (i : ℕ) < 1})) = 1
-  have : (Pi.basisFun Ω (Fin 2)) '' {i | (i : ℕ) < 1} = {Pi.basisFun Ω (Fin 2) 0} := by
-    ext v
-    simp only [Set.mem_image, Set.mem_setOf_eq, Set.mem_singleton_iff]
-    constructor
-    · rintro ⟨i, hi, rfl⟩
-      rw [show i = 0 from Fin.ext (Nat.lt_one_iff.mp hi)]
-    · rintro rfl
-      exact ⟨0, by simp, rfl⟩
-  rw [this, finrank_span_singleton ((Pi.basisFun Ω (Fin 2)).ne_zero 0)]
 
 end Line
 

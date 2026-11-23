@@ -1,11 +1,69 @@
-import Mathlib
-import Lemmata.GeneralBFactLeftLast.Pz
+module
+
+public import Mathlib.LinearAlgebra.Eigenspace.Basic
+public import Mathlib.Order.CompletePartialOrder
+public import Mathlib.RingTheory.LocalRing.ResidueField.Defs
+public import Lemmata.GeneralBFactLeftLast.Pz
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.Eigenspace.Pi
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Algebra.Polynomial.Inductions
+public import Mathlib.RingTheory.LocalRing.ResidueField.Basic
+
+@[expose] public section
 
 noncomputable section
 
 namespace Formalism.L2.NCov
 
 open Module Module.End
+open scoped IsMulCommutative
 
 section Ops
 
@@ -174,7 +232,7 @@ theorem exists_pt (hS : ∀ a ∈ S, ∀ b ∈ S, Commute a b)
   have h1 : f 1 = 1 := hinj (by rw [hf, map_one]; simpa using chi_alg hW (1 : O))
   have hm : ∀ s t, f (s * t) = f s * f t := fun s t => hinj (by rw [hf, map_mul, hf, hf, chi_mul hS hW])
   have h0 : f 0 = 0 := hinj (by rw [hf, map_zero]; simpa using chi_alg hW (0 : O))
-  have ha : ∀ s t, f (s + t) = f s + f t := fun s t => hinj (by rw [hf, map_add, hf, hf, chi_add hS hW])
+  have ha : ∀ s t, f (s + t) = f s + f t := fun s t => hinj (by rw [hf, map_add (f := _), hf, hf, chi_add hS hW])
   have hc : ∀ c, f (algebraMap O (Algebra.adjoin O S) c) = c := fun c => hinj (by rw [hf, chi_alg hW])
   exact ⟨{ toFun := f, map_one' := h1, map_mul' := hm, map_zero' := h0, map_add' := ha, commutes' := hc },
     funext fun t => hf t⟩
@@ -258,6 +316,9 @@ theorem eq_zero_of_forall_mem_off [FiniteDimensional K V] (hinj : Function.Injec
     (hMs : ∀ 𝔪 : Ideal (Algebra.adjoin O S), 𝔪.IsMaximal → 𝔪 ∈ Ms)
     {y : V} (hy : ∀ 𝔪 ∈ Ms, y ∈ off (Algebra.adjoin O S) 𝔪) : y = 0 := by
   classical
+  letI : IsMulCommutative (Algebra.adjoin O S) :=
+    Algebra.isMulCommutative_adjoin O fun a ha b hb _ => hS a ha b hb
+  letI : CommRing (Algebra.adjoin O S) := inferInstance
   obtain ⟨F, hF, htop⟩ := exists_finset_pts hinj hS hsplit hint
   set Wp : (Algebra.adjoin O S →ₐ[O] O) → Submodule K V := fun ψ => W _ (pt ψ) with hWp
   have hind : iSupIndep Wp := (iSupIndep_alt hS).comp (pt_injective hinj)
@@ -329,8 +390,8 @@ theorem pow_sub_apply_eq_zero [FiniteDimensional K V] (ψ : Algebra.adjoin O S �
   rw [algebraMap_end_eq]
   exact h1
 
-set_option linter.deprecated false in
 
+set_option linter.deprecated false in
 theorem exists_pt_of_isMaximal [FiniteDimensional K V] (hinj : Function.Injective (algebraMap O K))
     (hS : ∀ a ∈ S, ∀ b ∈ S, Commute a b) (hsplit : ∀ a ∈ S, ⨆ μ, a.maxGenEigenspace μ = ⊤)
     (hint : ∀ a ∈ S, ∀ μ, a.maxGenEigenspace μ ≠ ⊥ → μ ∈ (algebraMap O K).range)
@@ -340,7 +401,10 @@ theorem exists_pt_of_isMaximal [FiniteDimensional K V] (hinj : Function.Injectiv
   obtain ⟨F, hF, htop⟩ := exists_finset_pts hinj hS hsplit hint
   by_contra hne
   push Not at hne
-  letI : CommRing (Algebra.adjoin O S) := Algebra.adjoinCommRingOfComm O fun a ha b hb => (hS a ha b hb).eq
+  letI : IsMulCommutative (Algebra.adjoin O S) :=
+    Algebra.isMulCommutative_adjoin O fun a ha b hb _ => hS a ha b hb
+  letI : CommRing (Algebra.adjoin O S) := by
+    infer_instance
   set F' := F.filter (fun ψ => W _ (pt ψ) ≠ ⊥) with hF'
   have ht : ∃ t ∈ 𝔪, ∀ ψ ∈ F', IsUnit (ψ t) := by
     rcases F'.eq_empty_or_nonempty with h0 | ⟨a, ha⟩
@@ -349,7 +413,9 @@ theorem exists_pt_of_isMaximal [FiniteDimensional K V] (hinj : Function.Injectiv
           ((cls ψ : Ideal (Algebra.adjoin O S)) : Set (Algebra.adjoin O S))) := by
         intro hsub
         obtain ⟨ψ, hψ, hle⟩ :=
-          (Ideal.subset_union_prime a a (fun ψ _ _ _ => (cls_isMaximal ψ).isPrime)).1 hsub
+          (Ideal.subset_union_prime (R := Algebra.adjoin O S) (s := F')
+            (f := fun ψ => cls ψ) (I := 𝔪) a a
+            (fun ψ _ _ _ => (cls_isMaximal ψ).isPrime)).1 hsub
         exact hne ψ (Finset.mem_filter.1 hψ).2 (h𝔪.eq_of_le (cls_isMaximal ψ).ne_top hle).symm
       simp only [Set.not_subset, Set.mem_iUnion, not_exists] at hcov
       obtain ⟨t, htm, ht⟩ := hcov
@@ -393,12 +459,14 @@ theorem exists_pt_of_isMaximal [FiniteDimensional K V] (hinj : Function.Injectiv
     exact ((ht ψ hψ).neg).pow _
   obtain ⟨u, hu'⟩ := hu
   have key := congrArg (aeval t) (X_mul_divX_add P)
-  rw [hPT, map_add, map_mul, aeval_X, aeval_C, ← hu'] at key
+  rw [hPT, map_add (f := _), map_mul, aeval_X, aeval_C, ← hu'] at key
   have e : t * aeval t P.divX = - algebraMap O _ (u : O) := eq_neg_of_add_eq_zero_left key
   have hunitT : IsUnit t := by
     have h : t * (aeval t P.divX * algebraMap O _ (-↑u⁻¹)) = 1 := by
       rw [← mul_assoc, e, ← map_neg, ← map_mul, neg_mul_neg, Units.mul_inv, map_one]
-    exact ⟨⟨t, _, h, (mul_comm _ t).trans h⟩, rfl⟩
+    exact ⟨⟨t, _, h, calc
+      _ = t * (aeval t P.divX * algebraMap O _ (-↑u⁻¹)) := mul_comm _ _
+      _ = 1 := h⟩, rfl⟩
   exact h𝔪.ne_top (Ideal.eq_top_of_isUnit_mem 𝔪 htm hunitT)
 
 theorem isCompl_part_off [FiniteDimensional K V] (hinj : Function.Injective (algebraMap O K))
@@ -407,6 +475,9 @@ theorem isCompl_part_off [FiniteDimensional K V] (hinj : Function.Injective (alg
     (𝔪 : Ideal (Algebra.adjoin O S)) :
     IsCompl (part (Algebra.adjoin O S) 𝔪) (off (Algebra.adjoin O S) 𝔪) := by
   classical
+  letI : IsMulCommutative (Algebra.adjoin O S) :=
+    Algebra.isMulCommutative_adjoin O fun a ha b hb _ => hS a ha b hb
+  letI : CommRing (Algebra.adjoin O S) := inferInstance
   obtain ⟨F, hF, htop⟩ := exists_finset_pts hinj hS hsplit hint
   set Wp : (Algebra.adjoin O S →ₐ[O] O) → Submodule K V := fun ψ => W _ (pt ψ) with hWp
   have hind : iSupIndep Wp := (iSupIndep_alt hS).comp (pt_injective hinj)

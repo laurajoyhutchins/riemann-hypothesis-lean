@@ -1,5 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.IsAdicCompleteComapConstantCoeff
+module
+
+public import Mathlib.RingTheory.DiscreteValuationRing.Basic
+public import Mathlib.RingTheory.PowerSeries.NoZeroDivisors
+public import Mathlib.RingTheory.Spectrum.Prime.Topology
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Mathlib.Topology.Sheaves.Presheaf
+
+@[expose] public section
 
 open PowerSeries
 
@@ -11,7 +58,8 @@ section PrimeX
 
 variable {O : Type*} [CommRing O] [IsDomain O]
 
-instance isPrime_span_X : (Ideal.span {X} : Ideal O⟦X⟧).IsPrime := span_X_isPrime
+instance isPrime_span_X : (Ideal.span {X} : Ideal O⟦X⟧).IsPrime :=
+  Ideal.isPrime_span_singleton_of_prime prime_X
 
 omit [IsDomain O] in
 theorem mem_span_X_iff {f : O⟦X⟧} : f ∈ (Ideal.span {X} : Ideal O⟦X⟧) ↔ constantCoeff f = 0 := by
@@ -31,10 +79,10 @@ theorem algebraMap_X_pow_dvd_iff (M : Submonoid O⟦X⟧) (hM : ∀ m ∈ M, con
   obtain ⟨c, hc⟩ := (IsLocalization.eq_iff_exists M S).1 h1
   have h2 : X ^ a ∣ ((c * s : M) : O⟦X⟧) * f := ⟨c * g, by
     rw [Submonoid.coe_mul]; linear_combination hc⟩
-  exact X_prime.pow_dvd_of_dvd_mul_left a (X_dvd_iff.not.2 (hM _ (c * s).2)) h2
+  exact prime_X.pow_dvd_of_dvd_mul_left a (X_dvd_iff.not.2 (hM _ (c * s).2)) h2
 
 variable (S : Type*) [CommRing S] [Algebra O⟦X⟧ S]
-  [IsLocalization.AtPrime S (Ideal.span {X} : Ideal O⟦X⟧)]
+  [hS : IsLocalization.AtPrime S (Ideal.span {X} : Ideal O⟦X⟧)]
 
 theorem algebraMap_X_pow_dvd_iff_atPrime (a : ℕ) (f : O⟦X⟧) :
     algebraMap O⟦X⟧ S X ^ a ∣ algebraMap O⟦X⟧ S f ↔ X ^ a ∣ f :=
@@ -46,9 +94,6 @@ theorem comap_span_X_pow_atPrime (a : ℕ) :
   rw [Ideal.mem_comap, Ideal.mem_span_singleton, Ideal.mem_span_singleton,
     algebraMap_X_pow_dvd_iff_atPrime]
 
-include O in
-theorem isDomain_atPrime_X : IsDomain S :=
-  IsLocalization.isDomain_of_atPrime S (Ideal.span {X} : Ideal O⟦X⟧)
 
 theorem algebraMap_injective_atPrime_X : Function.Injective (algebraMap O⟦X⟧ S) :=
   IsLocalization.injective S (Ideal.span {X} : Ideal O⟦X⟧).primeCompl_le_nonZeroDivisors
@@ -82,8 +127,9 @@ theorem exists_associated_X_pow_atPrime {z : S} (hz : z ≠ 0) :
   rw [← hfs]
   exact associated_mul_unit_left _ _ hs
 
-include O in
 
+include hS in
+include O in
 theorem isDiscreteValuationRing_atPrime_X [IsDomain S] : IsDiscreteValuationRing S :=
   IsDiscreteValuationRing.ofHasUnitMulPowIrreducibleFactorization
     ⟨_, (prime_algebraMap_X_atPrime (O := O) S).irreducible,
@@ -107,8 +153,8 @@ section FractionField
 variable {O : Type*} [CommRing O] [IsDomain O] (K : Type*) [Field K] [Algebra O K]
   [IsFractionRing O K]
 
-omit [IsDomain O] in
 
+omit [IsDomain O] in
 theorem order_map_of_injective {A : Type*} [CommRing A] {φ : O →+* A}
     (hφ : Function.Injective φ) (f : O⟦X⟧) : (f.map φ).order = f.order :=
   le_antisymm (le_order _ _ fun i hi => hφ (by simpa using coeff_of_lt_order i hi))
@@ -123,20 +169,12 @@ omit [IsDomain O] in
 theorem order_map_algebraMap (f : O⟦X⟧) : (f.map (algebraMap O K)).order = f.order :=
   order_map_of_injective (IsFractionRing.injective O K) f
 
-theorem addVal_eq_order (f : K⟦X⟧) : IsDiscreteValuationRing.addVal K⟦X⟧ f = f.order := by
-  rcases eq_or_ne f 0 with rfl | hf
-  · simp
-  have hu : IsUnit (divXPowOrder f) := isUnit_iff_constantCoeff.2
-    (isUnit_iff_ne_zero.2 (constantCoeff_divXPowOrder_eq_zero_iff.not.2 hf))
-  rw [IsDiscreteValuationRing.addVal_def f hu.unit X_irreducible f.order.toNat
-    (by rw [IsUnit.unit_spec, mul_comm, X_pow_order_mul_divXPowOrder]), coe_toNat_order hf]
-
 theorem algebraMap_residueField_span_X (f : O⟦X⟧) :
     algebraMap O⟦X⟧ (Ideal.span {X} : Ideal O⟦X⟧).ResidueField f =
       algebraMap O (Ideal.span {X} : Ideal O⟦X⟧).ResidueField (constantCoeff f) := by
   rw [IsScalarTower.algebraMap_apply O O⟦X⟧, ← sub_eq_zero, ← map_sub,
     Ideal.algebraMap_residueField_eq_zero, mem_span_X_iff]
-  simp [PowerSeries.algebraMap_apply]
+  simp
 
 instance isFractionRing_residueField_span_X :
     IsFractionRing O (Ideal.span {X} : Ideal O⟦X⟧).ResidueField := by
@@ -155,8 +193,8 @@ instance isFractionRing_residueField_span_X :
     rw [Ideal.algebraMap_quotient_residueField_mk, Ideal.algebraMap_quotient_residueField_mk,
       algebraMap_residueField_span_X, algebraMap_residueField_span_X]⟩
 
-variable (O) in
 
+variable (O) in
 def residueFieldSpanXEquiv : (Ideal.span {X} : Ideal O⟦X⟧).ResidueField ≃ₐ[O] K :=
   IsLocalization.algEquiv (nonZeroDivisors O) _ _
 
@@ -167,37 +205,6 @@ def residueFieldSpanXEquiv : (Ideal.span {X} : Ideal O⟦X⟧).ResidueField ≃�
 variable (S : Type*) [CommRing S] [Algebra O⟦X⟧ S]
   [IsLocalization.AtPrime S (Ideal.span {X} : Ideal O⟦X⟧)]
 
-variable (O) in
-
-def atPrimeXToPowerSeries : S →+* K⟦X⟧ :=
-  IsLocalization.lift (M := (Ideal.span {X} : Ideal O⟦X⟧).primeCompl)
-    (g := PowerSeries.map (algebraMap O K)) fun y =>
-      isUnit_iff_constantCoeff.2 <| isUnit_iff_ne_zero.2 <| by
-        have := mem_primeCompl_span_X_iff.1 y.2
-        rw [← coeff_zero_eq_constantCoeff_apply, coeff_map, coeff_zero_eq_constantCoeff_apply]
-        exact (map_ne_zero_iff _ (IsFractionRing.injective O K)).2 this
-
-@[simp] theorem atPrimeXToPowerSeries_algebraMap (f : O⟦X⟧) :
-    atPrimeXToPowerSeries O K S (algebraMap O⟦X⟧ S f) = f.map (algebraMap O K) :=
-  IsLocalization.lift_eq _ _
-
-theorem order_atPrimeXToPowerSeries [IsDomain S] [IsDiscreteValuationRing S] (z : S) :
-    (atPrimeXToPowerSeries O K S z).order = IsDiscreteValuationRing.addVal S z := by
-  rcases eq_or_ne z 0 with rfl | hz
-  · simp
-  obtain ⟨n, u, rfl⟩ := exists_associated_X_pow_atPrime (O := O) S hz
-  rw [mul_comm, IsDiscreteValuationRing.addVal_def' u
-    (prime_algebraMap_X_atPrime (O := O) S).irreducible, ← addVal_eq_order, map_mul, map_pow,
-    atPrimeXToPowerSeries_algebraMap, map_X]
-  exact IsDiscreteValuationRing.addVal_def' (Units.map (atPrimeXToPowerSeries O K S).toMonoidHom u)
-    X_irreducible n
-
-instance isLocalHom_atPrimeXToPowerSeries : IsLocalHom (atPrimeXToPowerSeries O K S) where
-  map_nonunit z hz := by
-    have := isDomain_atPrime_X (O := O) S
-    have := isDiscreteValuationRing_atPrime_X (O := O) S
-    rwa [← IsDiscreteValuationRing.addVal_eq_zero_iff, ← order_atPrimeXToPowerSeries (O := O) K,
-      ← addVal_eq_order, IsDiscreteValuationRing.addVal_eq_zero_iff]
 
 end FractionField
 

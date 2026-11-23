@@ -1,5 +1,49 @@
-import Mathlib
-import Formalism.SharpRestriction.CuspSpanNormBounds.BlockEnds
+module
+
+public import Formalism.SharpRestriction.CuspSpanNormBounds.BlockEnds
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -23,7 +67,8 @@ theorem brS_smul_left (c : E) (x y : S.V) : brS S (c • x) y = c * brS S x y :=
 
 theorem brS_sum_left {ι : Type*} (s : Finset ι) (c : ι → E) (x : ι → S.V) (y : S.V) :
     brS S (∑ i ∈ s, c i • x i) y = ∑ i ∈ s, c i * brS S (x i) y := by
-  simp [brS, map_sum]
+  set_option synthInstance.maxHeartbeats 100000 in
+    simp [brS, map_sum]
 
 theorem brS_add_right (x y y' : S.V) : brS S x (y + y') = brS S x y + brS S x y' := by
   simp [brS]
@@ -33,7 +78,8 @@ theorem brS_smul_right (c : E) (x y : S.V) : brS S x (c • y) = star c * brS S 
 
 theorem brS_sum_right {ι : Type*} (s : Finset ι) (c : ι → E) (x : S.V) (y : ι → S.V) :
     brS S x (∑ i ∈ s, c i • y i) = ∑ i ∈ s, star (c i) * brS S x (y i) := by
-  simp [brS, map_sum, starRingEnd_apply]
+  set_option synthInstance.maxHeartbeats 100000 in
+    simp [brS, map_sum, starRingEnd_apply]
 
 theorem brS_swap (x y : S.V) : brS S y x = star (brS S x y) := by
   exact hT_swap y x
@@ -74,7 +120,7 @@ theorem brS_omp_e (a : Fin r) : brS S (omp F F') (F.e a) = 0 := by
 
 theorem det_eq_Dl : (Zhat F F').det = Dl F F' (r + 1) := by
   unfold Dl leadMinorE
-  rw [dif_pos le_rfl]
+  rw [dite_eq_left le_rfl]
   congr 1
 
 theorem pairing_omegaPrime_z : brS S (omp F F') F.z = Dl F F' (r + 1) := by
@@ -84,7 +130,7 @@ theorem pairing_omegaPrime_z : brS S (omp F F') F.z = Dl F F' (r + 1) := by
 theorem adj_last_eq_Dl : (Zhat F F').adjugate (Fin.last r) (Fin.last r) = Dl F F' r := by
   rw [Matrix.adjugate_fin_succ_eq_det_submatrix]
   unfold Dl leadMinorE
-  rw [dif_pos (Nat.le_succ r), Fin.succAbove_last]
+  rw [dite_eq_left (Nat.le_succ r), Fin.succAbove_last]
   have hp : ((-1 : E) ^ ((Fin.last r : ℕ) + (Fin.last r : ℕ))) = 1 := by
     rw [← two_mul, pow_mul]; simp
   rw [hp, one_mul]

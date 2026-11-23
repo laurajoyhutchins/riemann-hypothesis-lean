@@ -1,7 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.TwConj
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.FourierMatch
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.MemCentIffTwConj
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.TwConj
+public import Mathlib.Algebra.DualNumber
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.MemCentIffTwConj
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open GlobalTheory.Tw Matrix Polynomial
 
@@ -64,7 +111,7 @@ theorem snd_aeval (N g : Matrix (Fin n) (Fin n) R) (hc : g * N = N * g) (P : (Du
     obtain ⟨Q1, h1⟩ := hp
     obtain ⟨Q2, h2⟩ := hq
     refine ⟨Q1 + Q2, ?_⟩
-    rw [map_add, Matrix.map_add _ TrivSqZeroExt.snd_add, h1, h2, Polynomial.map_add, derivative_add,
+    rw [map_add (f := _), Matrix.map_add _ TrivSqZeroExt.snd_add, h1, h2, Polynomial.map_add (f := _), derivative_add,
       map_add, map_add, Matrix.add_mul]
     abel
   | monomial k a =>
@@ -109,7 +156,7 @@ theorem inv_mem_adjoin_of_isUnit {N : Matrix (Fin n) (Fin n) R} (hN : IsUnit N) 
     rw [Matrix.det_eq_sign_charpoly_coeff] at hd
     exact isUnit_of_mul_isUnit_right hd
   have key := congrArg (aeval N) (Polynomial.X_mul_divX_add N.charpoly)
-  rw [Matrix.aeval_self_charpoly, map_add, map_mul, aeval_X, aeval_C] at key
+  rw [Matrix.aeval_self_charpoly, map_add (f := _), map_mul, aeval_X, aeval_C] at key
   have hinv : N⁻¹ = -((hc.unit⁻¹ : Rˣ) : R) • aeval N (divX N.charpoly) := by
     apply Matrix.inv_eq_right_inv
     rw [Matrix.mul_smul, eq_neg_iff_add_eq_zero.mpr key, smul_neg, neg_smul, neg_neg,
@@ -234,8 +281,8 @@ theorem cent_eq {δ : Matrix (Fin n) (Fin n) R} (hδ : Reg δ) :
 end Cent
 end GlobalTheory.Tw.CentralizerAdjoin
 
-open GlobalTheory.Tw.CentralizerAdjoin in
 
+open GlobalTheory.Tw.CentralizerAdjoin in
 theorem GlobalTheory.Tw.twisted_centraliser :
     ∀ (n : ℕ) (R : Type) [CommRing R] [StarRing R] [IsArtinianRing R] [IsReduced R] (δ : Matrix (Fin n) (Fin n) R),
       Reg δ → (∀ g h, adj δ (g * h) = adj δ h * adj δ g) ∧ (∀ (c : R) g h, adj δ (c • g + h) = star c • adj δ g + adj δ h) ∧

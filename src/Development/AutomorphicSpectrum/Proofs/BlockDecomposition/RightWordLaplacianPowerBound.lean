@@ -1,10 +1,51 @@
-import Mathlib
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.ArchimedeanGelfandKernels.FriedrichsKernels.CalcSteps
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.Lap
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FunctionalCalculusJointCurve
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SobolevOperatorFacts
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.Lap
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SobolevOperatorFacts
+import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.DifferentiableAtOfSmooth
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FunctionalCalculusJointCurve
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SectionNormBound
 import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SobolevIntegrationByParts
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SectionNormBound
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -178,11 +219,6 @@ theorem lap_apply (hu : Uniq μ V) {f : Mat n → V} (hf : Sob μ f) :
   congr 1
   refine Finset.sum_congr rfl fun p _ => ?_
   rw [Module.End.mul_apply, X_cls hu p hf, X_cls hu p (sob_bs p hf)]
-
-theorem sob_Lap_iter (j : ℕ) {f : Mat n → V} (hf : Sob μ f) : Sob μ (Lap^[j] f) := by
-  induction j generalizing f with
-  | zero => exact hf
-  | succ j ih => exact ih (sob_Lap hf)
 
 theorem pow_apply (hu : Uniq μ V) (j : ℕ) {f : Mat n → V} (hf : Sob μ f) :
     (((-∑ i, X hu i * X hu i) ^ j) ⟨cls μ f, cls_mem hf⟩ : Msob μ V).1 = cls μ (Lap^[j] f) := by

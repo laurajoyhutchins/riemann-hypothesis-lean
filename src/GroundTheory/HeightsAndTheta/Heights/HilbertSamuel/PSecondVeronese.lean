@@ -1,6 +1,55 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsSecondVeronese
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsSecondVeroneseParts
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsSecondVeronese
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsSecondVeroneseParts
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.ArithModel
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.HilbertSamuel
@@ -17,7 +66,7 @@ theorem pair_eq {D : ℕ} {i j k l : Fin (D + 1)} (hij : i ≤ j) (hkl : k ≤ l
     i = k ∧ j = l := by
   have hm : ({i} + {j} : Multiset (Fin (D + 1))) = {k} + {l} := by
     have := congrArg Finsupp.toMultiset h
-    simpa only [map_add, Finsupp.toMultiset_single, one_nsmul] using this
+    simpa only [map_add (f := _), Finsupp.toMultiset_single, one_nsmul] using this
   have h1 : i = k ∨ i = l := by
     have : i ∈ ({k} + {l} : Multiset (Fin (D + 1))) := hm ▸ Multiset.mem_add.2 (Or.inl (Multiset.mem_singleton_self i))
     simpa using this
@@ -74,7 +123,7 @@ theorem x_linearIndependent (D : ℕ) : LinearIndependent ℤ (x D) := by
 
 theorem isSmoothMetric_metric (D : ℕ) : IsSmoothMetric (metric D) := by
   have hs : ContDiff ℝ ((⊤ : ℕ∞) : WithTop ℕ∞) (scale D) :=
-    contDiff_pi.2 fun q => contDiff_const.mul (contDiff_apply ℝ ℂ q)
+    contDiff_pi.2 fun q => contDiff_const.mul (contDiff_apply ℝ (fun _ => ℂ) q)
   exact (ProjLine.isSmoothMetric_fs (J := Ix (Idx D))).comp hs.contDiffOn fun z hz => scale_ne_zero hz
 
 theorem isConjInvariant_metric (D : ℕ) : IsConjInvariant (metric D) := by
@@ -82,7 +131,7 @@ theorem isConjInvariant_metric (D : ℕ) : IsConjInvariant (metric D) := by
   have h : scale D (fun q => conj (z q)) = fun q => conj (scale D z q) := by
     funext q
     simp [scale, map_mul, Complex.conj_ofReal]
-  show (fsMetric (Ix (Idx D))).ρ (scale D _) = (fsMetric (Ix (Idx D))).ρ (scale D z)
+  show (fsMetric (ι := Ix (Idx D))).ρ (scale D _) = (fsMetric (ι := Ix (Idx D))).ρ (scale D z)
   rw [h]
   exact ProjLine.isConjInvariant_fs (scale D z)
 

@@ -1,8 +1,67 @@
-import Formalism.HermitianCurvature.StatementB
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.IntegralZeroFrequencyInvariant
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.AdjointnessPolynomiallyBounded
-import Formalism.FormalDegreeBessel.FinalG
-import Formalism.FormalDegreeBessel.FinalBF
+module
+
+public import Formalism.HermitianCurvature.StatementB
+public import Formalism.FormalDegreeBessel.FormalDegreeRatio.BesselUnitaryEquivHolds
+public import Mathlib.Analysis.InnerProductSpace.Adjoint
+public import Mathlib.LinearAlgebra.Trace
+public import Formalism.FormalDegreeBessel.FormalDegreeRatio.BFCell
+import Formalism.FormalDegreeBessel.FormalDegreeRatio.UnitaryWeylNormalHolds
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.AdjointnessPolynomiallyBounded
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.IntegralZeroFrequencyInvariant
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.InnerProductSpace.Trace
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.MeasureTheory.Function.L2Space
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.Monotonicity.Lemmas
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Presheaf
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Matrix MeasureTheory Filter Topology
 open scoped ComplexConjugate ENNReal
@@ -34,7 +93,7 @@ theorem measurable_invM : Measurable (invM (k := k) (r := r)) := by
   have hdet : Measurable fun x : Mt k r => (Matrix.of x : Mat k r).det := hc.matrix_det.measurable
   have hadj : ∀ i j, Measurable fun x : Mt k r => (Matrix.of x : Mat k r).adjugate i j := fun i j =>
     ((continuous_apply j).comp ((continuous_apply i).comp hc.matrix_adjugate)).measurable
-  refine measurable_pi_lambda _ fun i => measurable_pi_lambda _ fun j => ?_
+  refine Measurable.of_eval fun i => Measurable.of_eval fun j => ?_
   simp only [invM, Matrix.inv_def, Matrix.smul_apply, Ring.inverse_eq_inv', smul_eq_mul]
   exact (measurable_inv.comp hdet).mul (hadj i j)
 
@@ -88,7 +147,7 @@ theorem sm_ind {X Y : Type*} [TopologicalSpace X] [MeasurableSpace X] [BorelSpac
 
 theorem continuous_ell (z : Fin (2 * r + k + 1) → ℂ) : Continuous fun x : Mt k r => ell k r z (Matrix.of x) := by
   unfold ell
-  refine continuous_finset_sum _ fun a _ => ?_
+  refine continuous_finsetSum _ fun a _ => ?_
   first
     | (split_ifs <;> fun_prop)
     | (by_cases h : a.val + 1 < r <;> simp [h] <;> fun_prop)
@@ -368,7 +427,7 @@ theorem measurable_xi (D : RealPlaceData k r Wp Wq) : Measurable fun a : (ℝ ×
 def JM (D : RealPlaceData k r Wp Wq) (F : Mat k r → (Wq →L[ℂ] Wp)) (τ : ℝ × ℝ) (q : (Fin r → ℂ) × ℂ) :
     Wq →L[ℂ] Wp := ∫ p, xiTau D τ p • RM D F p (gqM D q) ∂D.μSS
 
-set_option maxHeartbeats 800000 in
+
 
 theorem sm_A (D : RealPlaceData k r Wp Wq) {F : Mat k r → (Wq →L[ℂ] Wp)} (hF : ContinuousOn F (GV k r)) :
     StronglyMeasurable fun b : ((ℝ × ℝ) × ((Fin r → ℂ) × ℂ)) × SS k r => RM D F b.2 (gqM D b.1.2) := by
@@ -494,7 +553,7 @@ theorem d_ell (z : Fin (2 * r + k + 1) → ℂ) (hz : inWb k r z) (t : ℝ) (ht 
   refine Finset.sum_congr rfl fun a _ => ?_
   have ha := a.isLt
   by_cases h : a.val + 1 < r
-  · rw [dif_pos h, dif_pos h, d_conj_apply t ht]
+  · rw [dite_eq_left h, dite_eq_left h, d_conj_apply t ht]
     have e1 : d_dg k r t (eI k r a) = ((t ^ (r - a.val) : ℝ) : ℂ) := by
       unfold d_dg; rw [if_pos (by simp only [eI]; omega)]; rfl
     have e2 : d_dg k r t⁻¹ (eI k r ⟨a.val + 1, h⟩) = (((t⁻¹) ^ (r - (a.val + 1)) : ℝ) : ℂ) := by
@@ -507,7 +566,7 @@ theorem d_ell (z : Fin (2 * r + k + 1) → ℂ) (hz : inWb k r z) (t : ℝ) (ht 
     calc _ = (((t ^ (r - a.val) : ℝ) : ℂ) * (((t⁻¹) ^ (r - (a.val + 1)) : ℝ) : ℂ)) *
           n (eI k r a) (eI k r ⟨a.val + 1, h⟩) := by ring
       _ = _ := by rw [e4]
-  · rw [dif_neg h, dif_neg h]
+  · rw [dite_eq_right h, dite_eq_right h]
     simp only [Matrix.mulVec, dotProduct]
     rw [Finset.mul_sum]
     refine Finset.sum_congr rfl fun j _ => ?_
@@ -664,7 +723,7 @@ theorem d_pi_smul {ι : Type*} [Fintype ι] {α : ι → Type*} [∀ i, Measurab
     Measure.pi (fun i => c i • μ i) = (∏ i, c i) • Measure.pi μ := by
   refine Measure.pi_eq fun s _ => ?_
   first
-    | simp only [Measure.smul_apply, Measure.pi_pi, ENNReal.smul_def, smul_eq_mul, ENNReal.coe_finset_prod,
+    | simp only [Measure.smul_apply, Measure.pi_pi, ENNReal.smul_def, smul_eq_mul, ENNReal.ofNNReal_finsetProd,
         Finset.prod_mul_distrib]
     | simp [Finset.prod_mul_distrib]
 
@@ -1074,7 +1133,7 @@ theorem measurable_PhiM (D : RealPlaceData k r Wp Wq) : Measurable (PhiM D) := b
     (measurable_invM.comp measurable_snd.fst.snd)) ((measurable_gqM D).comp measurable_fst))
     measurable_snd.snd.snd) measurable_snd.snd.fst
 
-set_option maxHeartbeats 800000 in
+
 
 theorem sfNu (D : RealPlaceData k r Wp Wq) : SigmaFinite (nuQ D) := by
   unfold nuQ

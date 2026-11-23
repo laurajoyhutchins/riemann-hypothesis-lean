@@ -1,6 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.FramePositiveSum
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.UnipotentRadicalBasic
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.FramePositiveSum
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.PadicIsNonarchimedeanLocalField
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.UnipotentRadicalBasic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MeasureTheory ValuativeRel Matrix Topology GlobalTheory.SplitWeil GlobalTheory.RootEx GlobalTheory.StepData GlobalTheory.IndefiniteRowSideFullHecke.FramePositiveSum
 
@@ -79,7 +128,7 @@ theorem exists_residue_char {ψ : AddChar k Circle} (hψ : HasConductor ψ 1) {�
     have h3 : ψ ((ϖ⁻¹ : kˣ) * ((y : k) - z)) = 1 := by
       refine hψ.eq_one ?_
       have h0 : 0 < valuation k (ϖ : k) := by simp [zero_lt_iff]
-      simp only [cball, Set.mem_setOf_eq, Units.val_one, map_one, map_mul, Units.val_inv_eq_inv_val, map_inv₀]
+      simp only [cball, Set.mem_ofPred_eq, Units.val_one, map_one, map_mul, Units.val_inv_eq_inv_val, map_inv₀]
       rwa [inv_mul_le_one₀ h0]
     rw [show ((ϖ⁻¹ : kˣ) : k) * (y : k) = (ϖ⁻¹ : kˣ) * ((y : k) - z) + (ϖ⁻¹ : kˣ) * (z : k) by ring,
       AddChar.map_add_eq_mul, h3, one_mul]
@@ -89,7 +138,7 @@ theorem exists_residue_char {ψ : AddChar k Circle} (hψ : HasConductor ψ 1) {�
   obtain ⟨y, rfl⟩ := hs y
   obtain ⟨z, rfl⟩ := hs z
   beta_reduce
-  rw [← map_add, h2, h2, h2, ← AddChar.map_add_eq_mul, ← mul_add]
+  rw [← map_add (f := _), h2, h2, h2, ← AddChar.map_add_eq_mul, ← mul_add]
   rfl
 
 def symSumInt {κ l : ℕ} (g : GL (Fin κ ⊕ Fin l) 𝒪[k]) : 𝒪[k] :=
@@ -99,12 +148,17 @@ def symSumInt {κ l : ℕ} (g : GL (Fin κ ⊕ Fin l) 𝒪[k]) : 𝒪[k] :=
 omit [TopologicalSpace k] [IsNonarchimedeanLocalField k] in
 theorem map_symSumInt {F : Type} [Field F] (f : 𝒪[k] →+* F) {κ l : ℕ} (g : GL (Fin κ ⊕ Fin l) 𝒪[k]) :
     f (symSumInt g) = symSum (Matrix.GeneralLinearGroup.map f g) := by
-  simp only [symSumInt, symSum, simpleSum, superSum, map_add, map_sum, apply_ite f, map_zero]
+
+  simp only [symSumInt, symSum, simpleSum, superSum, map_add (f := _), map_sum, apply_ite f, map_zero]
   rfl
 
 end Local
 
-theorem exists_isSymLevel : ∀ (k : Type) [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] (ψ : AddChar k Circle), HasConductor ψ 1 → ∀ ϖ : kˣ, IsUnif ϖ → ∀ ρ κ l : ℕ, ∃ P : TypeDatum k (Fin κ ⊕ Fin l), IsSymLevel ψ ϖ ρ P := by
+theorem exists_isSymLevel :
+    ∀ (k : Type) [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k]
+      (ψ : AddChar k Circle), HasConductor ψ 1 → ∀ ϖ : kˣ, IsUnif ϖ →
+      ∀ ρ κ l : ℕ, ∃ P : GlobalTheory.StepData.TypeDatum k (Fin κ ⊕ Fin l),
+        GlobalTheory.IndefiniteRowSideFullHecke.FramePositiveSum.IsSymLevel ψ ϖ ρ P := by
   intro k _ _ _ _ ψ hψ ϖ hϖ ρ κ l
   obtain ⟨χ, hadd, hres⟩ := exists_residue_char hψ hϖ
   let χ' : symGroup 𝓀[k] κ l (ρ + 1) →* ℂˣ :=

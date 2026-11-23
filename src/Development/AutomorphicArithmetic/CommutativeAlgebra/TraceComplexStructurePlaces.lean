@@ -1,9 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Statements.PlaceShiftStatements.ComplexUniformizationSigOne
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FinrankJointEigenspaceAddConjEqMul
-import Development.AutomorphicArithmetic.RealSpanData.RealData
-import Development.AutomorphicArithmetic.RealSpanData.JSpan
-import Development.AutomorphicArithmetic.CommutativeAlgebra.TraceActionEqSumPlaces
+module
+
+public import Development.AutomorphicArithmetic.RealSpanData.RealData
+public import Development.AbelianVarietyTheory.Definitions.Divisors.HasDivPlace
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FinrankJointEigenspaceAddConjEqMul
+public import Development.AutomorphicArithmetic.CommutativeAlgebra.TraceActionEqSumPlaces
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsDimEqOne
+import Development.AbelianVarietyTheory.Definitions.Divisors.PointsNonemptyUnitaryRankOne
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -120,6 +163,7 @@ private theorem jt_S {p : ℕ} [Fact p.Prime] (D : Datum p) (c : 𝓞 D.F) :
   have hc : (starRingEnd ℂ) (∑ τ ∈ Finset.univ.filter (fun τ : D.F →+* ℂ => τ (D.ω : D.F) ≠ D.ρc),
         (D.n : ℂ) * τ (c : D.F)) =
       ∑ τ ∈ Finset.univ.filter (fun τ : D.F →+* ℂ => ¬ τ (D.ω : D.F) ≠ D.ρc), (D.n : ℂ) * τ (c : D.F) := by
+
     rw [map_sum]
     refine Finset.sum_nbij' (fun σ => (starRingEnd ℂ).comp σ) (fun σ => (starRingEnd ℂ).comp σ) ?_ ?_ ?_ ?_ ?_
     · intro σ hσ
@@ -171,7 +215,7 @@ private theorem jt_lhs {p : ℕ} [Fact p.Prime] (D : Datum p) (τ₁ : D.F →+*
     refine Finset.sum_congr rfl fun σ _ => ?_
     ring
   rw [e0, e1, e2, ← hS]
-  simp only [map_mul, map_add, map_sub, Complex.conj_I, Complex.conj_natCast, Complex.conj_conj]
+  simp only [map_mul, map_add (f := _), map_sub, Complex.conj_I, Complex.conj_natCast, Complex.conj_conj]
   ring
 
 private theorem jt_actOn {C V : Type} [Ring C] [Algebra ℚ C] [AddCommGroup V] [Module ℚ V]

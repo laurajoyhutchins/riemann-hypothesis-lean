@@ -1,4 +1,47 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CurveDVRSpecialization.EveryPointSatisfiesFrameCondition
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CurveDVRSpecialization.EveryPointSatisfiesFrameCondition
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.PowerSeries.NoZeroDivisors
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 open IsLocalRing Matrix Polynomial UpperTheory.V.W
 
@@ -21,7 +64,7 @@ private theorem aeval_mapM {n : ℕ} {A K : Type} [CommRing A] [CommRing K] (f :
     (M : Matrix (Fin n) (Fin n) A) (q : A[X]) :
     f.mapMatrix (aeval M q) = aeval (f.mapMatrix M) (q.map f) := by
   induction q using Polynomial.induction_on' with
-  | add p q hp hq => simp only [map_add, Polynomial.map_add, hp, hq]
+  | add p q hp hq => simp only [map_add (f := _), Polynomial.map_add (f := _), hp, hq]
   | monomial k a =>
     simp only [Polynomial.aeval_monomial, Polynomial.map_monomial, map_mul, map_pow]
     congr 1
@@ -31,7 +74,7 @@ private theorem aeval_mapM {n : ℕ} {A K : Type} [CommRing A] [CommRing K] (f :
 private theorem aeval_inter {n : ℕ} {K : Type} [CommRing K] (M N Y : Matrix (Fin n) (Fin n) K)
     (h : N * Y = Y * M) (q : K[X]) : aeval N q * Y = Y * aeval M q := by
   induction q using Polynomial.induction_on' with
-  | add p q hp hq => simp only [map_add, add_mul, mul_add, hp, hq]
+  | add p q hp hq => simp only [map_add (f := _), add_mul, mul_add, hp, hq]
   | monomial k a =>
     simp only [Polynomial.aeval_monomial]
     have hpow : N ^ k * Y = Y * M ^ k := by

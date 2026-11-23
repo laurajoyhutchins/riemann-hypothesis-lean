@@ -1,5 +1,59 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.IntegralModels.FiniteIntegralClosureLocal
+module
+
+public import Mathlib.RingTheory.Jacobson.Ring
+public import GroundTheory.HeightsAndTheta.Heights.IntegralModels.FiniteIntegralClosureLocal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+public import Mathlib.RingTheory.NoetherNormalization
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.Algebra.ZMod
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 open scoped nonZeroDivisors
@@ -38,11 +92,12 @@ theorem exists_prime_mem_of_isMaximal (A : Type*) [CommRing A] [Algebra.FiniteTy
     exact CharP.cast_eq_zero _ p
   · exfalso
     have : CharZero (A ⧸ 𝔪) := CharP.charP_to_charZero (A ⧸ 𝔪)
-    have hmax := Ideal.isMaximal_comap_of_isIntegral_of_isMaximal (R := ℤ) (⊥ : Ideal (A ⧸ 𝔪))
+    have hmax := Ideal.isMaximal_under_of_isIntegral_of_isMaximal (R := ℤ) (⊥ : Ideal (A ⧸ 𝔪))
     have hbot : (⊥ : Ideal (A ⧸ 𝔪)).comap (algebraMap ℤ (A ⧸ 𝔪)) = ⊥ := by
       rw [← RingHom.ker_eq_comap_bot, RingHom.ker_eq_bot_iff_eq_zero]
       intro n hn
       exact_mod_cast (show ((n : ℤ) : A ⧸ 𝔪) = 0 by simpa using hn)
+    change ((⊥ : Ideal (A ⧸ 𝔪)).comap (algebraMap ℤ (A ⧸ 𝔪))).IsMaximal at hmax
     rw [hbot] at hmax
     exact Int.not_isField (Ring.isField_iff_maximal_bot.mpr hmax)
 
@@ -100,15 +155,16 @@ theorem exists_pow_smul_mem_of_isMaximal
       obtain ⟨H, rfl⟩ := ih G hG
       exact ⟨H, by rw [pow_succ, map_mul, mul_assoc, mul_left_comm]⟩
   have hφinj : Function.Injective φ := by
-    rw [injective_iff_map_eq_zero]
+    set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
     intro F hF
     ext m
     rw [MvPolynomial.coeff_zero]
     by_contra hc
-    obtain ⟨G, hG⟩ := hpow (MvPolynomial.coeff m F).natAbs F hF
-    have hdvd : (p : ℤ) ^ (MvPolynomial.coeff m F).natAbs ∣ MvPolynomial.coeff m F :=
-      ⟨MvPolynomial.coeff m G, by conv_lhs => rw [hG]
-                                  rw [MvPolynomial.coeff_C_mul]⟩
+    obtain ⟨G, hG⟩ := hpow (AddMonoidAlgebra.coeff F m).natAbs F hF
+    have hdvd : (p : ℤ) ^ (AddMonoidAlgebra.coeff F m).natAbs ∣ AddMonoidAlgebra.coeff F m :=
+      ⟨AddMonoidAlgebra.coeff G m, by
+        conv_lhs => rw [hG]
+        rw [MvPolynomial.coeff_C_mul]⟩
     have h1 := Int.natAbs_dvd_natAbs.mpr hdvd
     rw [Int.natAbs_pow, Int.natAbs_natCast] at h1
     have h2 := Nat.le_of_dvd (Int.natAbs_pos.mpr hc) h1

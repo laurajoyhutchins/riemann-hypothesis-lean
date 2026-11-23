@@ -1,7 +1,65 @@
-import Mathlib
-import GroundTheory.ArithmeticGeometry.AbelianVarieties.IsogenyValuation
-import GroundTheory.ArithmeticGeometry.AbelianVarieties.DualIsogenyExists
-import GroundTheory.ArithmeticGeometry.AbelianVarieties.WeilPairing
+module
+
+public import GroundTheory.ArithmeticGeometry.AbelianVarieties.IsogenyValuation
+public import GroundTheory.ArithmeticGeometry.AbelianVarieties.IsogenySeparable
+import GroundTheory.ArithmeticGeometry.AbelianVarieties.DivisorsPullback
+import GroundTheory.ArithmeticGeometry.AbelianVarieties.DivisorsValuation
+public import GroundTheory.ArithmeticGeometry.AbelianVarieties.DualIsogenyExists
+import GroundTheory.ArithmeticGeometry.AbelianVarieties.KernelCard
+public import GroundTheory.ArithmeticGeometry.AbelianVarieties.WeilPairing
+import GroundTheory.ArithmeticGeometry.AbelianVarieties.WeilTranslate
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Degree
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.LocalProperties.Reduced
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 namespace GroundTheory.Arith.Abelian
 
@@ -14,11 +72,6 @@ variable {F : Type u} [Field F] [IsAlgClosed F] [DecidableEq F] {E E' E'' : Weie
   [E.IsElliptic] [E'.IsElliptic] [E''.IsElliptic]
 
 namespace Isogeny
-
-theorem divisorOf_comap (φ : Isogeny E E') {f : E'.toAffine.FunctionField} (hf : f ≠ 0)
-    (R : E.toAffine.Point) :
-    divisorOf E (φ.comap f) R = (φ.ramIdx : ℤ) * divisorOf E' f (φ.pointMap R) := by
-  rw [divisorOf_apply, divisorOf_apply, φ.ordPoint_comap R hf]
 
 end Isogeny
 
@@ -143,7 +196,7 @@ theorem ramIdx_mulIsogeny_mul_card_ker (n : ℤ) (hn : n ≠ 0) :
   have hD : divisorOf E a = D := by
     ext P
     rw [divisorOf_apply]
-    simp only [D, Finsupp.add_apply, Finsupp.finset_sum_apply, Finsupp.single_apply]
+    simp only [D, Finsupp.add_apply, Finsupp.finsetSum_apply, Finsupp.single_apply]
     by_cases hP : P = 0
     · subst hP
       rw [Finset.sum_eq_zero (fun T hT => if_neg (Finset.ne_of_mem_erase hT)), if_pos rfl, zero_add,
@@ -156,7 +209,8 @@ theorem ramIdx_mulIsogeny_mul_card_ker (n : ℤ) (hn : n ≠ 0) :
       · rw [if_pos hT, if_pos (hmem.mpr hT)]
       · rw [if_neg hT, if_neg (fun h' => hT (hmem.mp h'))]
   have hdeg := divisorDegree_divisorOf E ha
-  rw [hD, map_add, map_sum, divisorDegree_single] at hdeg
+
+  rw [hD, map_add (f := _), map_sum, divisorDegree_single] at hdeg
   simp only [divisorDegree_single, Finset.sum_const, Finset.card_erase_of_mem h0S, smul_eq_mul] at hdeg
   have hS : 1 ≤ S.card := Finset.card_pos.mpr ⟨0, h0S⟩
   rw [hcard]
@@ -193,9 +247,9 @@ theorem exists_ordPoint_eq_ite (S : Finset E.toAffine.Point) :
   set D : CurveDivisor E := Finsupp.single 0 1 + Finsupp.single (B + C) 1 - Finsupp.single B 1 -
     Finsupp.single C 1
   have hdeg : divisorDegree E D = 0 := by
-    simp only [D, map_sub, map_add, divisorDegree_single]; norm_num
+    simp only [D, map_sub, map_add (f := _), divisorDegree_single]; norm_num
   have hsum : divisorSum E D = 0 := by
-    simp only [D, map_sub, map_add, divisorSum_single, one_smul]; abel
+    simp only [D, map_sub, map_add (f := _), divisorSum_single, one_smul]; abel
   obtain ⟨t, ht, htD⟩ := exists_divisorOf_eq E hdeg hsum
   refine ⟨t, ht, fun T hT => ?_⟩
   rw [← divisorOf_apply, htD]
@@ -223,7 +277,7 @@ theorem ramIdx_dvd_insepDeg (φ : Isogeny E E') : φ.ramIdx ∣ φ.insepDeg := b
     exact Fintype.prod_equiv (Equiv.addLeft (⟨R, hR⟩ : φ.pointHom.ker)) _ _ (fun T => rfl)
   have hu : ordPoint E 0 u = 1 := by
     rw [← divisorOf_apply, divisorOf_prod E _ _ (fun T _ => translate_ne_zero E _ ht),
-      Finsupp.finset_sum_apply]
+      Finsupp.finsetSum_apply]
     have : ∀ T : φ.pointHom.ker, divisorOf E (translate E T t) 0 =
         if (T : E.toAffine.Point) = 0 then 1 else 0 := by
       intro T

@@ -1,6 +1,60 @@
-import ReciprocityTheory.L2DbarEstimates.Localization.UnweightBackStatement
-import ReciprocityTheory.L2DbarEstimates.ChartDerivatives.Imports
-import ReciprocityTheory.L2DbarEstimates.MinimalSolutions.HilbertLemmas
+module
+
+public import ReciprocityTheory.L2DbarEstimates.Localization.UnweightBackStatement
+public import Mathlib.MeasureTheory.Function.L2Space
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.L2DbarEstimates.ChartDerivatives.ChartSymmEventuallyEq
+public import ReciprocityTheory.L2DbarEstimates.ChartDerivatives.MeasurableSetImageOfIsLocalHomeomorph
+public import ReciprocityTheory.L2DbarEstimates.ChartDerivatives.TsupportDbSubset
+public import Mathlib.Analysis.Calculus.ContDiff.Basic
+public import Mathlib.Analysis.Calculus.ContDiff.Comp
+public import Mathlib.Analysis.SpecialFunctions.ExpDeriv
+
+@[expose] public section
 
 namespace ReciprocityTheory.L2DbarEstimates.F
 
@@ -81,8 +135,7 @@ theorem splitT_inner {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℂ E
   rw [integral_withDensity_eq_integral_smul hd]
   congr 1
   funext x
-  simp only [NNReal.smul_def, Real.coe_toNNReal _ (Real.exp_nonneg _), Complex.real_smul]
-  ring
+  rw [NNReal.smul_def, Real.coe_toNNReal _ (Real.exp_nonneg _), Complex.real_smul, mul_comm]
 
 theorem splitT_inner2 {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℂ E]
     (ph : M → ℝ) (hph : Continuous ph) (F G : M → E) (hF : MemLp F 2 (wvol n z ph))
@@ -115,14 +168,6 @@ theorem splitT_weakS (F G : M → V n) (hFG : F =ᵐ[vol n z] G) (σ : M → Fin
   rw [hx]
 
 end SplitHelpers
-
-def splitTestSub {M : Type*} [TopologicalSpace M] (n : ℕ) (z : M → V n) :
-    Submodule ℂ (M → ℂ) where
-  carrier := {g | IsTest n z g}
-  add_mem' := fun {a b} ha hb => ⟨Smooth.add n z a b ha.1 hb.1, ha.2.add hb.2⟩
-  zero_mem' := ⟨Smooth.const n z 0, HasCompactSupport.zero⟩
-  smul_mem' := fun c g hg => ⟨Smooth.mul n z (fun _ => c) g (Smooth.const n z c) hg.1,
-    hg.2.mul_left (f := fun _ => c)⟩
 
 private theorem d_db_eq_zero_of_not_mem_compact_support {M : Type*} [TopologicalSpace M] [T2Space M] (n : ℕ) (z : M → V n)
     (K0 : Set M) (hK0 : IsCompact K0) (u : M → ℂ) (hu : ∀ x, x ∉ K0 → u x = 0) (x : M)
@@ -209,7 +254,7 @@ theorem splitTest (n : ℕ) (M : Type*) [TopologicalSpace M] [T2Space M]
     Ck.continuous n z hz 1 _ (Ck.d n z 1 j _ (hprod j))
   have htc : Continuous (tstar n z ph₁ ph₂ f) := by
     unfold tstar
-    exact ((Smooth.continuous n z hz _ hE1).mul (continuous_finset_sum _ fun j _ => hdj j)).neg
+    exact ((Smooth.continuous n z hz _ hE1).mul (continuous_finsetSum _ fun j _ => hdj j)).neg
   have hoff : ∀ j x, x ∉ tsupport (fun y => (Real.exp (-ph₂ y) : ℂ) * f y j) →
       d n z j (fun y => (Real.exp (-ph₂ y) : ℂ) * f y j) x = 0 := fun j x hx =>
     (d_db_eq_zero_of_not_mem_compact_support n z (tsupport fun y => (Real.exp (-ph₂ y) : ℂ) * f y j)
@@ -271,6 +316,7 @@ theorem splitTest (n : ℕ) (M : Type*) [TopologicalSpace M] [T2Space M]
       _ = ∫ x, conj ((∑ j, db n z j g x * conj (f x j)) * (Real.exp (-ph₂ x) : ℂ)) ∂vol n z := by
           congr 1
           funext x
+
           rw [map_mul, Complex.conj_ofReal, map_sum, PiLp.inner_apply]
           congr 1
           refine Finset.sum_congr rfl fun j _ => ?_

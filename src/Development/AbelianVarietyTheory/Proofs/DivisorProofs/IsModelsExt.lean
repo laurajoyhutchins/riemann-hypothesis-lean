@@ -1,8 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.OneMapOfExt
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsMeasY
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ModelsWith
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.NormalFam
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.OneMapOfExt
+public import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.NormalFam
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.IsStepWeil
+public import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.ExistsNormLeHeightPow
+public import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.HasDRepIffHasDerivAt
+public import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.AdmissibleDiscreteSeriesOfHasParam
+public import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.HarishChandraModulesOn
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsMeasY
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ModelsWith
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.MainNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.MainNotions.S MeasureTheory IsDedekindDomain NumberField Matrix Formalism.L2.Theta Formalism.L2.DIV Formalism.L2.Indef Formalism.IndefR Formalism.IndefR.Links Formalism.IndefR.Mult Formalism.IndefR.Datum Formalism.IndefR.FWT Formalism.L2.Pj
 open scoped TensorProduct InnerProductSpace
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
@@ -30,7 +73,7 @@ def FamC (Y : NewReal R V X) : Prop :=
   (extR R Y).grp_red_R ∧ (extR R Y).grp_red_L ∧ TieExt R Y ∧ (extR R Y).fam_roots ∧ RealDat.fam_degR (A := extA A X) ∧
     RealDat.fam_degL (A := extA A X) ∧ (extR R Y).fam_muVal
 
-set_option maxHeartbeats 2000000 in
+
 
 def updM (Y : NewReal R V X) (HX : type_of% Y.HX) (HV : type_of% Y.HV)
     (jX : ∀ n, (extA A X).fam.amb.FR (.inr n) →ₛₗ[D.what₂.embLL] (HX n).H)
@@ -41,13 +84,13 @@ def updM (Y : NewReal R V X) (HX : type_of% Y.HX) (HV : type_of% Y.HV)
     HX := HX, HV := HV, jX := jX, jV := jV, νY := νY, fdY := fdY, νX := νX, fdX := fdX, νV := νV, fdV := fdV,
     ioX := fun _ => 0, Th := fun _ => 0, thF := fun _ _ => 0, thG := fun _ _ => 0 }
 
-set_option maxHeartbeats 2000000 in
+
 
 def updK (Y : NewReal R V X) (ωY : type_of% Y.ωY) (ωX : type_of% Y.ωX) (ωP : type_of% Y.ωP) (vY : type_of% Y.vY)
     (vX : type_of% Y.vX) (vP : type_of% Y.vP) : NewReal R V X :=
   { Y with ωY := ωY, ωX := ωX, ωP := ωP, vY := vY, vX := vX, vP := vP }
 
-set_option maxHeartbeats 2000000 in
+
 
 def updL (Y : NewReal R V X) (ioY : type_of% (extR R Y).ioY) (ioX : type_of% (extR R Y).ioX) (Th : type_of% (extR R Y).Th)
     (thF : type_of% (extR R Y).thF) (thG : type_of% (extR R Y).thG) : NewReal R V X :=
@@ -55,7 +98,7 @@ def updL (Y : NewReal R V X) (ioY : type_of% (extR R Y).ioY) (ioX : type_of% (ex
     ioY := fun n => ioY (.inr n), ioX := fun n => ioX (.inr n), Th := fun n => Th (.inr n),
     thF := fun i n => thF i (.inr n), thG := fun i n => thG i (.inr n) }
 
-set_option maxHeartbeats 2000000 in
+
 theorem isModels_ext (hM : R.IsModels) (Y : NewReal R V X) (h : ModC (extR R Y)) : (extR R Y).IsModels := by
   refine ⟨?_, hM.vpos, ?_, ?_, ?_, h.1, h.2.1, ?_, ?_, ?_, ?_, h.2.2.1, h.2.2.2.1, h.2.2.2.2.1, h.2.2.2.2.2.1, ?_, h.2.2.2.2.2.2.1,
     h.2.2.2.2.2.2.2, ?_, ?_, ?_⟩
@@ -72,10 +115,10 @@ theorem isModels_ext (hM : R.IsModels) (Y : NewReal R V X) (h : ModC (extR R Y))
   · exact (by with_unfolding_all exact (hM.BV :))
   · exact (by with_unfolding_all exact (hM.order :))
 
-set_option maxHeartbeats 2000000 in
+
 theorem isFam_ext (hF : R.IsFam) (Y : NewReal R V X) (h : FamC Y) : (extR R Y).IsFam := by
   refine ⟨?_, ?_, h.2.2.2.1, ?_, h.2.2.2.2.1, h.2.2.2.2.2.1, h.2.2.2.2.2.2, ?_⟩
-  · obt ⟨g, c, c', ht⟩ := hF.tie
+  · obtain ⟨g, c, c', ht⟩ := hF.tie
     have h1 := h.2.2.1 g c c' ht
     refine ⟨g, ?_, ?_, ?_⟩
     · exact (by with_unfolding_all exact (c :))
@@ -85,14 +128,14 @@ theorem isFam_ext (hF : R.IsFam) (Y : NewReal R V X) (h : FamC Y) : (extR R Y).I
   · exact (by with_unfolding_all exact (hF.pl_onto :))
   · exact (by with_unfolding_all exact (hF.etaVal :))
 
-set_option maxHeartbeats 2000000 in
+
 theorem isGrp_ext {F : Face D A} (hG : R.IsGrp F) (Y : NewReal R V X) (h : FamC Y) : (extR R Y).IsGrp (extF F X) := by
   refine ⟨h.1, h.2.1, ?_, ?_, ?_⟩
   · exact (by with_unfolding_all exact (hG.levels :))
   · exact (by with_unfolding_all exact (hG.record :))
   · exact (by with_unfolding_all exact (hG.chiW :))
 
-set_option maxHeartbeats 2000000 in
+
 
 theorem models_stage (hM : R.IsModels) (Y : NewReal R V X) (h : FamC Y) : ∃ Y' : NewReal R V X, FamC Y' ∧ ModC (extR R Y') := by
   choose HX jX h1 h2 using fun n => exists_modX (extR R Y) (.inr n)
@@ -101,7 +144,7 @@ theorem models_stage (hM : R.IsModels) (Y : NewReal R V X) (h : FamC Y) : ∃ Y'
   choose νX fdX h7 using fun n => exists_measX (extR R Y) (.inr n)
   choose νV fdV h8 using fun i n => exists_measV (extR R Y) hM.vpos i (.inr n)
   refine ⟨updM Y HX HV jX jV νY fdY νX fdX νV fdV, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
-  · kexactB h
+  · exact (by with_unfolding_all exact (h :))
   · rintro (t | n)
     · exact (by with_unfolding_all exact (hM.HX t :))
     · exact (by with_unfolding_all exact (h1 n :))
@@ -127,7 +170,7 @@ theorem models_stage (hM : R.IsModels) (Y : NewReal R V X) (h : FamC Y) : ∃ Y'
     · exact (by with_unfolding_all exact (hM.νV i t :))
     · exact (by with_unfolding_all exact (h8 i n :))
 
-set_option maxHeartbeats 2000000 in
+
 
 theorem ker_stage (hc : R.IsChain) (hp : R.IsThP) (hL : (extL R.toLevCh V).Is (.inl A.μ0)) (Y : NewReal R V X) (h : FamC Y)
     (hm : ModC (extR R Y)) : ∃ Y' : NewReal R V X, FamC Y' ∧ ModC (extR R Y') ∧ KerC (extR R Y') := by
@@ -157,12 +200,12 @@ theorem ker_stage (hc : R.IsChain) (hp : R.IsThP) (hL : (extL R.toLevCh V).Is (.
     · exact (by with_unfolding_all exact (hp.vP i t :))
     · exact (by with_unfolding_all exact (h5 i n :))
 
-set_option maxHeartbeats 2000000 in
+
 theorem isChain_updL (hc : R.IsChain) (Y : NewReal R V X) (ioY ioX Th thF thG)
     (h : ({ extR R Y with ioY := ioY, ioX := ioX, Th := Th } : RealDat D (extA A X) Ks).IsChain) :
     (extR R (updL Y ioY ioX Th thF thG)).IsChain := by
   refine ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
-  · kexactB h.ωY
+  · exact (by with_unfolding_all exact (h.ωY :))
   · exact (by with_unfolding_all exact (h.ωX :))
   · exact (by with_unfolding_all exact (h.vY :))
   · exact (by with_unfolding_all exact (h.vX :))
@@ -180,7 +223,7 @@ theorem isChain_updL (hc : R.IsChain) (Y : NewReal R V X) (ioY ioX Th thF thG)
     · exact (by with_unfolding_all exact (hc.Th t :))
     · exact (by with_unfolding_all exact (h.Th (.inr n) :))
 
-set_option maxHeartbeats 2000000 in
+
 theorem isThP_updL (hp : R.IsThP) (Y : NewReal R V X) (ioY ioX Th thF thG)
     (h : ({ extR R Y with thF := thF, thG := thG } : RealDat D (extA A X) Ks).IsThP) :
     (extR R (updL Y ioY ioX Th thF thG)).IsThP := by
@@ -199,22 +242,22 @@ theorem isThP_updL (hp : R.IsThP) (Y : NewReal R V X) (ioY ioX Th thF thG)
     · exact (by with_unfolding_all exact (hp.thG i t :))
     · exact (by with_unfolding_all exact (h.thG i (.inr n) :))
 
-set_option maxHeartbeats 2000000 in
+
 
 theorem core_ext (h₁ : GlobalTheory.Published.DiscreteSeriesCover) (h₂ : GlobalTheory.Published.HarishChandraModules) (h₃ : GlobalTheory.Published.CuspRapidDecay)
     (h₄ : GlobalTheory.Published.CasselmanWallach) (hP : ∀ k, GlobalTheory.Chain.ChainPar D k) {F : Face D A} (hC : GlobalTheory.Hk3.Core R F)
     (hL : (extL R.toLevCh V).Is (.inl A.μ0)) (Y : NewReal R V X) (h : FamC Y) :
     ∃ Y' : NewReal R V X, GlobalTheory.Hk3.Core (extR R Y') (extF F X) ∧ TieExt R Y' := by
-  obt ⟨Y1, f1, m1⟩ := models_stage hC.models Y h
-  obt ⟨Y2, f2, m2, k2⟩ := ker_stage hC.chain hC.thP hL Y1 f1 m1
+  obtain ⟨Y1, f1, m1⟩ := models_stage hC.models Y h
+  obtain ⟨Y2, f2, m2, k2⟩ := ker_stage hC.chain hC.thP hL Y1 f1 m1
   have hF := isFam_ext hC.fam Y2 f2
   have hM := isModels_ext hC.models Y2 m2
   have e1 := GlobalTheory.ConjExt.exists_chain (R := extR R Y2) h₁ h₂ h₃ h₄ hP hL (isGrp_ext hC.grp Y2 f2).record hF hM k2.1 k2.2.1 k2.2.2.1
     k2.2.2.2.1 (.inl A.μ0) ((by with_unfolding_all exact (hC.chain.ItY A.μ0 :))) ((by with_unfolding_all exact (hC.chain.ItX A.μ0 :)))
   have e2 := GlobalTheory.ConjExt.exists_thP (R := extR R Y2) h₃ hL hF hM k2.2.2.2.2.1 k2.2.2.2.2.2 (.inl A.μ0)
     ((by with_unfolding_all exact (fun i => hC.thP.ioP i A.μ0 :)))
-  obt ⟨ioY, ioX, Th, c3⟩ := e1
-  obt ⟨thF, thG, p3⟩ := e2
+  obtain ⟨ioY, ioX, Th, c3⟩ := e1
+  obtain ⟨thF, thG, p3⟩ := e2
   have f3 : FamC (updL Y2 ioY ioX Th thF thG) := (by with_unfolding_all exact (f2 :))
   have m3 : ModC (extR R (updL Y2 ioY ioX Th thF thG)) := (by with_unfolding_all exact (m2 :))
   exact ⟨updL Y2 ioY ioX Th thF thG, ⟨hL, isGrp_ext hC.grp _ f3, isFam_ext hC.fam _ f3, isModels_ext hC.models _ m3,

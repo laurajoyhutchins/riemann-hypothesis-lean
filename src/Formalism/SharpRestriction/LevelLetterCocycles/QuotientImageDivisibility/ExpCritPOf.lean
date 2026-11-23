@@ -1,6 +1,56 @@
-import Mathlib
-import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.IndepPhiCmp
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.IsExpSmulA
+import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.CmpOfMemX
+public import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.DvdOfDvdImage
+public import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.HasSubstPi0Series
 import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.IndepOfSpan
+public import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.IndepPhiCmp
+import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.JumpsLetExists
+import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.PhiExp
+import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.Pi0PowSmulInjective
+import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.SmulSDivMem
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 open Classical
@@ -54,7 +104,7 @@ theorem expCritP_of [NeZero n] (hA : Formalism.MainNotions.LiftingTheory.CaseA W
     have hi1 : i - 1 + ((1 : ℕ) : ZMod n) = i := by push_cast; ring
     have hqΔ : ∀ δ ∈ W.DelF, W.γA δ (Formalism.MainNotions.LiftingTheory.qp W) = Formalism.MainNotions.LiftingTheory.qp W := by
       intro δ hδ
-      simp only [Formalism.MainNotions.LiftingTheory.qp, map_add, map_natCast, hring.1 δ hδ]
+      simp only [Formalism.MainNotions.LiftingTheory.qp, map_add (f := _), map_natCast, hring.1 δ hδ]
     have hDLy : Formalism.MainNotions.CrystallineLiftingInputs.DL W T (i - 1 + ((1 : ℕ) : ZMod n)) (Formalism.MainNotions.LiftingTheory.qp W ^ k • x) := by
       rw [hi1]
       refine ⟨by rw [smul_comm, hDL.1], fun δ hδ => ?_⟩
@@ -138,7 +188,7 @@ theorem expCritP_of [NeZero n] (hA : Formalism.MainNotions.LiftingTheory.CaseA W
     have hqpe : W.π₀ + algebraMap O (LetA O n) ((PD.p : ℕ) : O) = Formalism.MainNotions.LiftingTheory.qp W := by
       rw [map_natCast]; rfl
     have hψ : ψ (PowerSeries.X + PowerSeries.C ((PD.p : ℕ) : O)) = PowerSeries.X * u := by
-      rw [hψa, ← at0Hom_apply W hring, map_add, at0Hom_apply, at0Hom_apply, evalZero_X_eq_pi0 W hring, evalZero_C,
+      rw [hψa, ← at0Hom_apply W hring, map_add (f := _), at0Hom_apply, at0Hom_apply, evalZero_X_eq_pi0 W hring, evalZero_C,
         hqpe, hlq, mul_comm]
     have hdiv : ∀ m, (PowerSeries.X + PowerSeries.C ((PD.p : ℕ) : O)) ^ k ∣ a m := fun m =>
       Wd.dvd_of_dvd_image hinj ((PD.p : ℕ) : O) ψ hψC u hu hψ hlm k (a m)

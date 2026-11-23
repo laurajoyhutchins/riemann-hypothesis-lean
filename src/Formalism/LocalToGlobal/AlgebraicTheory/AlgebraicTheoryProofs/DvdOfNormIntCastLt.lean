@@ -1,7 +1,62 @@
-import Formalism.LocalToGlobal.AlgebraicTheory.StatementD
-import Formalism.LocalToGlobal.AlgebraicTheory.AlgebraicTheoryProofs.TensZEt
-import Formalism.LocalToGlobal.AlgebraicTheory.AlgebraicTheoryProofs.TensorFourthPowerScaling
+module
+
+public import Formalism.LocalToGlobal.AlgebraicTheory.StatementD
+public import Formalism.LocalToGlobal.AlgebraicTheory.StatementC
+public import Formalism.LocalToGlobal.AlgebraicTheory.AlgebraicTheoryProofs.TensZEt
+public import Formalism.LocalToGlobal.AlgebraicTheory.AlgebraicTheoryProofs.TensorFourthPowerScaling
+import Formalism.LocalToGlobal.TorsionIntegrality.QuadraticSemicharacters.CayleyGaussianIntegrals.NormLtOne
 import Formalism.LocalToGlobal.TorsionIntegrality.QuadraticSemicharacters.QuadraticSemicharacterIdentityReformulated2
+import Formalism.LocalToGlobal.TorsionIntegrality.RamifiedCurveKernels.PairedSquareJets.Several
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 open scoped BigOperators ComplexConjugate
@@ -71,10 +126,10 @@ end General
 theorem qint_conj (dK : ℕ) (π : ℂ) (h : IsQInt dK π) : IsQInt dK (conj π) := by
   obtain ⟨m, n, rfl⟩ := h
   have hc : conj (omegaK dK) = 1 - omegaK dK := by
-    rw [omegaK, map_div₀, map_add, map_one, map_mul, Complex.conj_I, Complex.conj_ofReal, map_ofNat]
+    rw [omegaK, map_div₀, map_add (f := _), map_one, map_mul, Complex.conj_I, Complex.conj_ofReal, map_ofNat]
     ring
   refine ⟨m + n, -n, ?_⟩
-  simp only [map_add, map_mul, map_intCast, hc]
+  simp only [map_add (f := _), map_mul, map_intCast, hc]
   push_cast
   ring
 
@@ -157,7 +212,7 @@ private theorem norm_int_add_int_mul_omegaK_le_one (dK : ℕ) (hp2 : p ≠ 2) (h
     ‖ι ((a : ℂ) + b * omegaK dK)‖ ≤ 1 := by
   haveI := PadicComplex.isUltrametricDist p
   have hw := (norm_two_omegaK_sub_one_and_norm_omegaK_le dK hp2 hpd ι).2
-  rw [map_add, map_mul, map_intCast, map_intCast]
+  rw [map_add (f := _), map_mul, map_intCast, map_intCast]
   refine (IsUltrametricDist.norm_add_le_max _ _).trans (max_le (norm_intCast_le a) ?_)
   rw [norm_mul]
   exact mul_le_one₀ (norm_intCast_le b) (norm_nonneg _) hw
@@ -169,11 +224,11 @@ theorem norm_pi_one (dK : ℕ) (hp2 : p ≠ 2) (hpd : ¬ p ∣ dK) (ι : ℂ ≃
   obtain ⟨hn, -⟩ := norm_two_omegaK_sub_one_and_norm_omegaK_le dK hp2 hpd ι
   obtain ⟨m, n, hπ⟩ := hq
   have hc : conj (omegaK dK) = 1 - omegaK dK := by
-    rw [omegaK, map_div₀, map_add, map_one, map_mul, Complex.conj_I, Complex.conj_ofReal, map_ofNat]
+    rw [omegaK, map_div₀, map_add (f := _), map_one, map_mul, Complex.conj_I, Complex.conj_ofReal, map_ofNat]
     ring
   have hconj : conj π = ((m + n : ℤ) : ℂ) + ((-n : ℤ) : ℂ) * omegaK dK := by
     rw [hπ]
-    simp only [map_add, map_mul, map_intCast, hc]
+    simp only [map_add (f := _), map_mul, map_intCast, hc]
     push_cast
     ring
   have hsub : ∀ x y : ℂ_[p], ‖x - y‖ ≤ max ‖x‖ ‖y‖ := fun x y => by
@@ -183,7 +238,7 @@ theorem norm_pi_one (dK : ℕ) (hp2 : p ≠ 2) (hpd : ¬ p ∣ dK) (ι : ℂ ≃
   rcases hle.lt_or_eq with hlt' | heq
   · exfalso
     have hsum : ι π + ι (conj π) = ((2 * m + n : ℤ) : ℂ_[p]) := by
-      rw [← map_add, hconj, hπ, show (m : ℂ) + n * omegaK dK + (((m + n : ℤ) : ℂ) + ((-n : ℤ) : ℂ) * omegaK dK) =
+      rw [← map_add (f := _), hconj, hπ, show (m : ℂ) + n * omegaK dK + (((m + n : ℤ) : ℂ) + ((-n : ℤ) : ℂ) * omegaK dK) =
         ((2 * m + n : ℤ) : ℂ) by push_cast; ring, map_intCast]
     have hd1 : (p : ℤ) ∣ 2 * m + n := dvd_of_norm_intCast_lt _ (by
       rw [← hsum]
@@ -207,7 +262,7 @@ theorem norm_pi_one (dK : ℕ) (hp2 : p ≠ 2) (hpd : ¬ p ∣ dK) (ι : ℂ ≃
     have e1 : π = (p : ℂ) * ((m' : ℂ) + n' * omegaK dK) := by rw [hπ]; push_cast; ring
     have e2 : conj π = (p : ℂ) * (((m' + n' : ℤ) : ℂ) + ((-n' : ℤ) : ℂ) * omegaK dK) := by
       rw [e1, map_mul, map_natCast]
-      simp only [map_add, map_mul, map_intCast, hc]
+      simp only [map_add (f := _), map_mul, map_intCast, hc]
       push_cast
       ring
     have hA : ‖ι π‖ ≤ ‖(p : ℂ_[p])‖ := by
@@ -262,8 +317,8 @@ theorem xi_swap : XiSwap := by
     simp only [opU, Finset.mul_sum, Finset.sum_mul]
     refine Finset.sum_congr rfl fun a _ => ?_
     rw [show z + b + a = (z + a) + b by abel, hinv (z + a)]
-    have l1 : matH h (z + a) b = matH h z b + matH h a b := by rw [map_add, LinearMap.add_apply]
-    have l2 : matH h (z + b) a = matH h z a + matH h b a := by rw [map_add, LinearMap.add_apply]
+    have l1 : matH h (z + a) b = matH h z b + matH h a b := by rw [map_add (f := _), LinearMap.add_apply]
+    have l2 : matH h (z + b) a = matH h z a + matH h b a := by rw [map_add (f := _), LinearMap.add_apply]
     have hE0 : matH h a b - matH h b a = -(2 * Complex.I * (altE (matH h) b a : ℂ)) := by
       rw [hH b a]
       unfold altE
@@ -355,6 +410,7 @@ theorem xiEt_of (hE : EtLoc) : XiEt := by
         (frameM (ι : ℂ →+* ℂ_[p]) v A) =
       thetaLin (ι : ℂ →+* ℂ_[p]) h θ r' t' (frameM (ι : ℂ →+* ℂ_[p]) v A) := by
     unfold serLin thetaLin
+
     rw [hfun, hT, map_sum, ← Formalism.L2.Th1.G.linSubHom_apply, map_sum, Finset.mul_sum]
     refine Finset.sum_congr rfl fun x _ => ?_
     rw [map_mul, MvPowerSeries.map_C, map_mul, Formalism.L2.Th1.G.linSubHom_apply, Formalism.L2.Th1.G.linSubHom_apply,
@@ -368,6 +424,7 @@ theorem xiEt_of (hE : EtLoc) : XiEt := by
         ∑ b ∈ Sb, Ψ b * Complex.exp (-(2 * (Real.pi : ℂ)) * Complex.I * (altE (matH h) b a : ℂ)) := by
       unfold xiHat; push_cast
       rw [← mul_assoc, mul_inv_cancel₀ (pow_ne_zero _ hp0), one_mul]
+
     rw [e, map_sum]
     refine IsUltrametricDist.norm_sum_le_of_forall_le_of_nonneg zero_le_one fun b hb => ?_
     obtain ⟨m, hm⟩ := XiTorsion.altE_int hsd (hSb.1 b hb) (hpa a ha)

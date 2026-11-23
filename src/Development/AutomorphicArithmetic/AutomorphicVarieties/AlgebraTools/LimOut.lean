@@ -1,5 +1,54 @@
-import Mathlib
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.ProfDefs
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.ProfDefs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import Mathlib.Topology.Algebra.ClopenNhdofOne
+import Mathlib.Topology.Compactness.Paracompact
+import Mathlib.Topology.Separation.Connected
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Filter UpperTheory.V.AlgebraTools
 open scoped TensorProduct
@@ -60,12 +109,12 @@ theorem UpperTheory.V.AlgebraTools.exists_lim_hom_out :
     have hs : ∀ᶠ i in (U : Filter ι), ∀ x ∈ s, (F x)⁻¹ * f i x ∈ V.toSubgroup := by
       refine (Filter.eventually_all_finite hsfin).2 (fun x _ => ?_)
       have hopen : IsOpen {z : Z | (F x)⁻¹ * z ∈ V.toSubgroup} :=
-        V.toOpenSubgroup.isOpen.preimage (continuous_mul_left _)
+        V.toOpenSubgroup.isOpen.preimage (continuous_const_mul _)
       exact (hF x).eventually (hopen.mem_nhds (by simp))
     obtain ⟨j, hj⟩ := hs.exists
     filter_upwards [hs] with i hi g
     have hC : IsClosed {z : Z | (f j g)⁻¹ * z ∈ V.toSubgroup} :=
-      V.toOpenSubgroup.isClosed.preimage (continuous_mul_left _)
+      V.toOpenSubgroup.isClosed.preimage (continuous_const_mul _)
     have h1 : (f j g)⁻¹ * F g ∈ V.toSubgroup :=
       hC.mem_of_tendsto (hF g) (hs.mono fun k hk => agree V k j hk hj g)
     have h2 := agree V i j hi hj g
@@ -127,7 +176,7 @@ theorem UpperTheory.V.AlgebraTools.exists_lim_hom_out :
       rw [mem_closure_iff_nhds]
       intro t ht
       have hW : (fun y => z * y) ⁻¹' t ∈ nhds (1 : Z) :=
-        (continuous_mul_left z).continuousAt.preimage_mem_nhds (by rwa [mul_one])
+        (continuous_const_mul z).continuousAt.preimage_mem_nhds (by rwa [mul_one])
       obtain ⟨u, huW, huo, h1u⟩ := mem_nhds_iff.1 hW
       obtain ⟨V, hV⟩ := ProfiniteGrp.exist_openNormalSubgroup_sub_open_nhds_of_one huo h1u
       obtain ⟨i, hi⟩ := (key V).exists

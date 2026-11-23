@@ -1,215 +1,61 @@
-import Mathlib
-import Formalism.SharpRestriction.GrowthBounds.ObjPol
-import Formalism.LocalRingCardinality.Params
-import Formalism.LocalRingCardinality.DataSpaces
-import Formalism.LocalRingCardinality.DataCoeff
-import Formalism.LocalRingCardinality.DataArith
-import Formalism.LocalRingCardinality.DataKernels
-import Formalism.LocalRingCardinality.DataRows
-import Formalism.SharpRestriction.CuspSpanNormBounds.DataS
-import Formalism.SharpRestriction.GrowthBounds.DataG
-import Formalism.LocalRingCardinality.DataCD
-import Formalism.FrobeniusOrbits.DiscrMaximalRealCyclotomic
-import Formalism.FrobeniusOrbits.HostOrbitsPlaces
-import Formalism.FrobeniusOrbits.HostDiffSupport
-import Formalism.FrobeniusOrbits.HostThickExists
-import Formalism.FrobeniusOrbits.HostOrbitCountSg
-import Formalism.SharpRestriction.RamificationFrobenius.TotientGaloisClasses.ConjEMemHostFIff
-import Formalism.CoboundaryTransfers.Statement
-import Formalism.DegreeFormula.FlagDegFormula
-import Formalism.SharpRestriction.GlobalSchurBounds.GeneralLinearActions.FrameTransport
-import Formalism.SharpRestriction.GrowthBounds.UnramifiedQuadraticSetting
-import Formalism.SharpRestriction.GrowthBounds.DataGChain
-import Formalism.FrobeniusOrbits.FrobeniusOrbitsProofs.RealCyclotomicSubfield
-import Formalism.LocalRingCardinality.DataLevel
-import Formalism.SatakeDualWeyl.Statement
-import Formalism.FormalDegreeBessel.StatementG
-import Formalism.FrobeniusOrbits.Statement
-import Formalism.FormalDegreeBessel.StatementDS
-import Formalism.SharpRestriction.CuspSpanNormBounds.Point
-import Formalism.TameInertiaTowers.FinalGroup
-import Formalism.TameInertiaTowers.CentralOrderTwo.Galois
-import Formalism.TameInertiaTowers.CentralOrderTwo.ConjEqInvOfPowEqOne
-import Formalism.FormalDegreeBessel.StatementBF
-import Formalism.FormalDegreeBessel.StatementWR
-import Formalism.RealPlaceAnalysis.StatementE
-import Formalism.RealPlaceAnalysis.RealPlaceTaylor.CompactCasimirHighestWeight
-import Formalism.RealPlaceAnalysis.RealPlaceTaylor.IsCompactInvariantCompactSpan
-import Formalism.RealPlaceAnalysis.RealPlaceTaylor.IsCompactInvariantOrthogonalInf
-import Formalism.RealPlaceAnalysis.RealPlaceTaylor.FirstSlotSliceSlotMixedCasimirZero
-import Formalism.RealPlaceAnalysis.RealPlaceTaylor.IndefiniteUnitaryPreservesForm
-import Formalism.RealPlaceAnalysis.RealPlaceTaylor.CartanInvolutionConjTransposeMul
-import Formalism.RealPlaceAnalysis.RealPlaceTaylor.ComplexifiedDerivativeCommutator
-import Formalism.RealPlaceAnalysis.StatementU
-import Formalism.RealPlaceAnalysis.RealPlaceTaylor.MemUnitaryGroupIffMulConjTranspose
-import Formalism.RealPlaceAnalysis.StatementD
-import Formalism.RealPlaceAnalysis.RealPlaceTaylor.QuadraticInequalityBoundHolds
-import Formalism.RealPlaceAnalysis.RealPlaceTaylor.SumOfSquaresIdentityHolds
-import Formalism.RealPlaceAnalysis.RealPlaceTaylor.CasKHW
-import Formalism.RealPlaceAnalysis.RealPlaceTaylor.HWDiag
-import Formalism.RealPlaceAnalysis.RealPlaceTaylor.TrPowSumFilterZero
-import Formalism.RealPlaceAnalysis.RealPlaceTaylor.QuantumDetHighestWeightHolds
-import Formalism.RealPlaceAnalysis.RealPlaceTaylor.ShiftedGeneratorEqIteSmulAdd
-import Formalism.RealPlaceAnalysis.RealPlaceTaylor.GeneratorCommutatorQuantumDet
-import Formalism.RealPlaceAnalysis.SmoothOnG
-import Formalism.RealPlaceAnalysis.StatementA
-import Formalism.RealPlaceAnalysis.StatementC
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.ObjPol
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace Bl.general_b_fact_left_version
 
-theorem goal1 :
-  ∀ {O : Type} [inst : CommRing.{0} O]
-  [inst_1 : @IsDomain.{0} O (@CommSemiring.toSemiring.{0} O (@CommRing.toCommSemiring.{0} O inst))] {V : Type}
-  [inst_2 : AddCommGroup.{0} V]
-  [inst_3 :
-    @Module.{0, 0} (@Formalism.MainNotions.G.KK.{0} O inst inst_1) V
-      (@OreLocalization.instSemiring.{0} O (@CommSemiring.toSemiring.{0} O (@CommRing.toCommSemiring.{0} O inst))
-        (@nonZeroDivisors.{0} O
-          (@Semiring.toMonoidWithZero.{0} O (@CommSemiring.toSemiring.{0} O (@CommRing.toCommSemiring.{0} O inst))))
-        (@OreLocalization.oreSetComm.{0} O (@CommRing.toCommMonoid.{0} O inst)
-          (@nonZeroDivisors.{0} O
-            (@Semiring.toMonoidWithZero.{0} O (@CommSemiring.toSemiring.{0} O (@CommRing.toCommSemiring.{0} O inst))))))
-      (@AddCommGroup.toAddCommMonoid.{0} V inst_2)]
-  [inst_4 :
-    @Module.{0, 0} O V (@CommSemiring.toSemiring.{0} O (@CommRing.toCommSemiring.{0} O inst))
-      (@AddCommGroup.toAddCommMonoid.{0} V inst_2)]
-  [inst_5 :
-    @IsScalarTower.{0, 0, 0} O (@Formalism.MainNotions.G.KK.{0} O inst inst_1) V
-      (@OreLocalization.instSMulOfIsScalarTower.{0, 0, 0} O O O
-        (@CommMonoid.toMonoid.{0} O (@CommRing.toCommMonoid.{0} O inst))
-        (@nonZeroDivisors.{0} O
-          (@Semiring.toMonoidWithZero.{0} O (@CommSemiring.toSemiring.{0} O (@CommRing.toCommSemiring.{0} O inst))))
-        (@OreLocalization.oreSetComm.{0} O (@CommRing.toCommMonoid.{0} O inst)
-          (@nonZeroDivisors.{0} O
-            (@Semiring.toMonoidWithZero.{0} O (@CommSemiring.toSemiring.{0} O (@CommRing.toCommSemiring.{0} O inst)))))
-        (@Monoid.toMulAction.{0} O (@CommMonoid.toMonoid.{0} O (@CommRing.toCommMonoid.{0} O inst)))
-        (@instSMulOfMul.{0} O
-          (@Distrib.toMul.{0} O
-            (@instDistribOfSemiring.{0} O (@CommSemiring.toSemiring.{0} O (@CommRing.toCommSemiring.{0} O inst)))))
-        (@instSMulOfMul.{0} O
-          (@Distrib.toMul.{0} O
-            (@instDistribOfSemiring.{0} O (@CommSemiring.toSemiring.{0} O (@CommRing.toCommSemiring.{0} O inst)))))
-        _ _)
-      (@SMulZeroClass.toSMul.{0, 0} (@Formalism.MainNotions.G.KK.{0} O inst inst_1) V
-        (@AddZero.toZero.{0} V
-          (@AddZeroClass.toAddZero.{0} V
-            (@AddMonoid.toAddZeroClass.{0} V
-              (@SubNegMonoid.toAddMonoid.{0} V
-                (@AddGroup.toSubNegMonoid.{0} V (@AddCommGroup.toAddGroup.{0} V inst_2))))))
-        (@DistribSMul.toSMulZeroClass.{0, 0} (@Formalism.MainNotions.G.KK.{0} O inst inst_1) V
-          (@AddMonoid.toAddZeroClass.{0} V
-            (@SubNegMonoid.toAddMonoid.{0} V (@AddGroup.toSubNegMonoid.{0} V (@AddCommGroup.toAddGroup.{0} V inst_2))))
-          (@DistribMulAction.toDistribSMul.{0, 0} (@Formalism.MainNotions.G.KK.{0} O inst inst_1) V
-            (@OreLocalization.instMonoid.{0} O (@CommMonoid.toMonoid.{0} O (@CommRing.toCommMonoid.{0} O inst))
-              (@nonZeroDivisors.{0} O
-                (@Semiring.toMonoidWithZero.{0} O
-                  (@CommSemiring.toSemiring.{0} O (@CommRing.toCommSemiring.{0} O inst))))
-              (@OreLocalization.oreSetComm.{0} O (@CommRing.toCommMonoid.{0} O inst)
-                (@nonZeroDivisors.{0} O
-                  (@Semiring.toMonoidWithZero.{0} O
-                    (@CommSemiring.toSemiring.{0} O (@CommRing.toCommSemiring.{0} O inst))))))
-            (@SubNegMonoid.toAddMonoid.{0} V (@AddGroup.toSubNegMonoid.{0} V (@AddCommGroup.toAddGroup.{0} V inst_2)))
-            (@Module.toDistribMulAction.{0, 0} (@Formalism.MainNotions.G.KK.{0} O inst inst_1) V
-              (@OreLocalization.instSemiring.{0} O
-                (@CommSemiring.toSemiring.{0} O (@CommRing.toCommSemiring.{0} O inst))
-                (@nonZeroDivisors.{0} O
-                  (@Semiring.toMonoidWithZero.{0} O
-                    (@CommSemiring.toSemiring.{0} O (@CommRing.toCommSemiring.{0} O inst))))
-                (@OreLocalization.oreSetComm.{0} O (@CommRing.toCommMonoid.{0} O inst)
-                  (@nonZeroDivisors.{0} O
-                    (@Semiring.toMonoidWithZero.{0} O
-                      (@CommSemiring.toSemiring.{0} O (@CommRing.toCommSemiring.{0} O inst))))))
-              (@AddCommGroup.toAddCommMonoid.{0} V inst_2) inst_3))))
-      (@SMulZeroClass.toSMul.{0, 0} O V
-        (@AddZero.toZero.{0} V
-          (@AddZeroClass.toAddZero.{0} V
-            (@AddMonoid.toAddZeroClass.{0} V
-              (@SubNegMonoid.toAddMonoid.{0} V
-                (@AddGroup.toSubNegMonoid.{0} V (@AddCommGroup.toAddGroup.{0} V inst_2))))))
-        (@DistribSMul.toSMulZeroClass.{0, 0} O V
-          (@AddMonoid.toAddZeroClass.{0} V
-            (@SubNegMonoid.toAddMonoid.{0} V (@AddGroup.toSubNegMonoid.{0} V (@AddCommGroup.toAddGroup.{0} V inst_2))))
-          (@DistribMulAction.toDistribSMul.{0, 0} O V
-            (@Semiring.toMonoid.{0} O (@CommSemiring.toSemiring.{0} O (@CommRing.toCommSemiring.{0} O inst)))
-            (@SubNegMonoid.toAddMonoid.{0} V (@AddGroup.toSubNegMonoid.{0} V (@AddCommGroup.toAddGroup.{0} V inst_2)))
-            (@Module.toDistribMulAction.{0, 0} O V
-              (@CommSemiring.toSemiring.{0} O (@CommRing.toCommSemiring.{0} O inst))
-              (@AddCommGroup.toAddCommMonoid.{0} V inst_2) inst_4))))]
-  (M :
-    @Submodule.{0, 0} O V (@CommSemiring.toSemiring.{0} O (@CommRing.toCommSemiring.{0} O inst))
-      (@AddCommGroup.toAddCommMonoid.{0} V inst_2) inst_4),
-  @Eq.{1}
-      (@Submodule.{0, 0} (@Formalism.MainNotions.G.KK.{0} O inst inst_1) V
-        (@DivisionSemiring.toSemiring.{0} (@Formalism.MainNotions.G.KK.{0} O inst inst_1)
-          (@Semifield.toDivisionSemiring.{0} (@Formalism.MainNotions.G.KK.{0} O inst inst_1)
-            (@Field.toSemifield.{0} (@Formalism.MainNotions.G.KK.{0} O inst inst_1) (@FractionRing.field.{0} O inst inst_1))))
-        (@AddCommGroup.toAddCommMonoid.{0} V inst_2) inst_3)
-      (@Formalism.MainNotions.G.MQ.{0, 0, 0} (@Formalism.MainNotions.G.KK.{0} O inst inst_1) V (@FractionRing.field.{0} O inst inst_1) inst_2 inst_3 O
-        inst inst_4
-        (@OreLocalization.instAlgebra.{0, 0} O (@CommSemiring.toSemiring.{0} O (@CommRing.toCommSemiring.{0} O inst))
-          (@nonZeroDivisors.{0} O
-            (@Semiring.toMonoidWithZero.{0} O (@CommSemiring.toSemiring.{0} O (@CommRing.toCommSemiring.{0} O inst))))
-          (@OreLocalization.oreSetComm.{0} O (@CommRing.toCommMonoid.{0} O inst)
-            (@nonZeroDivisors.{0} O
-              (@Semiring.toMonoidWithZero.{0} O
-                (@CommSemiring.toSemiring.{0} O (@CommRing.toCommSemiring.{0} O inst)))))
-          O (@CommRing.toCommSemiring.{0} O inst) (@Algebra.id.{0} O (@CommRing.toCommSemiring.{0} O inst)))
-        inst_5 M)
-      (@Top.top.{0}
-        (@Submodule.{0, 0} (@Formalism.MainNotions.G.KK.{0} O inst inst_1) V
-          (@DivisionSemiring.toSemiring.{0} (@Formalism.MainNotions.G.KK.{0} O inst inst_1)
-            (@Semifield.toDivisionSemiring.{0} (@Formalism.MainNotions.G.KK.{0} O inst inst_1)
-              (@Field.toSemifield.{0} (@Formalism.MainNotions.G.KK.{0} O inst inst_1) (@FractionRing.field.{0} O inst inst_1))))
-          (@AddCommGroup.toAddCommMonoid.{0} V inst_2) inst_3)
-        (@Submodule.instTop.{0, 0} (@Formalism.MainNotions.G.KK.{0} O inst inst_1) V
-          (@DivisionSemiring.toSemiring.{0} (@Formalism.MainNotions.G.KK.{0} O inst inst_1)
-            (@Semifield.toDivisionSemiring.{0} (@Formalism.MainNotions.G.KK.{0} O inst inst_1)
-              (@Field.toSemifield.{0} (@Formalism.MainNotions.G.KK.{0} O inst inst_1) (@FractionRing.field.{0} O inst inst_1))))
-          (@AddCommGroup.toAddCommMonoid.{0} V inst_2) inst_3)) →
-    ∀ (x : V),
-      @Exists.{1} O fun (a : O) ↦
-        And
-          (@Ne.{1} O a
-            (@OfNat.ofNat.{0} O (nat_lit 0)
-              (@Zero.toOfNat0.{0} O
-                (@MulZeroClass.toZero.{0} O
-                  (@instMulZeroClassOfSemiring.{0} O
-                    (@CommSemiring.toSemiring.{0} O (@CommRing.toCommSemiring.{0} O inst)))))))
-          (@Membership.mem.{0, 0} V
-            (@Submodule.{0, 0} O V (@CommSemiring.toSemiring.{0} O (@CommRing.toCommSemiring.{0} O inst))
-              (@AddCommGroup.toAddCommMonoid.{0} V inst_2) inst_4)
-            (@SetLike.instMembership.{0, 0}
-              (@Submodule.{0, 0} O V (@CommSemiring.toSemiring.{0} O (@CommRing.toCommSemiring.{0} O inst))
-                (@AddCommGroup.toAddCommMonoid.{0} V inst_2) inst_4)
-              V
-              (@Submodule.setLike.{0, 0} O V (@CommSemiring.toSemiring.{0} O (@CommRing.toCommSemiring.{0} O inst))
-                (@AddCommGroup.toAddCommMonoid.{0} V inst_2) inst_4))
-            M
-            (@HSMul.hSMul.{0, 0, 0} O V V
-              (@instHSMul.{0, 0} O V
-                (@SMulZeroClass.toSMul.{0, 0} O V
-                  (@AddZero.toZero.{0} V
-                    (@AddZeroClass.toAddZero.{0} V
-                      (@AddMonoid.toAddZeroClass.{0} V
-                        (@SubNegMonoid.toAddMonoid.{0} V
-                          (@AddGroup.toSubNegMonoid.{0} V (@AddCommGroup.toAddGroup.{0} V inst_2))))))
-                  (@DistribSMul.toSMulZeroClass.{0, 0} O V
-                    (@AddMonoid.toAddZeroClass.{0} V
-                      (@SubNegMonoid.toAddMonoid.{0} V
-                        (@AddGroup.toSubNegMonoid.{0} V (@AddCommGroup.toAddGroup.{0} V inst_2))))
-                    (@DistribMulAction.toDistribSMul.{0, 0} O V
-                      (@Semiring.toMonoid.{0} O (@CommSemiring.toSemiring.{0} O (@CommRing.toCommSemiring.{0} O inst)))
-                      (@SubNegMonoid.toAddMonoid.{0} V
-                        (@AddGroup.toSubNegMonoid.{0} V (@AddCommGroup.toAddGroup.{0} V inst_2)))
-                      (@Module.toDistribMulAction.{0, 0} O V
-                        (@CommSemiring.toSemiring.{0} O (@CommRing.toCommSemiring.{0} O inst))
-                        (@AddCommGroup.toAddCommMonoid.{0} V inst_2) inst_4)))))
-              a x)) := by
-  intro O _ _ V _ _ _ _ M hM x
-  have hx : x ∈ Submodule.span (Formalism.MainNotions.G.KK O) (M : Set V) := by
-    have h : x ∈ (⊤ : Submodule (Formalism.MainNotions.G.KK O) V) := Submodule.mem_top
-    rw [← hM] at h
-    exact h
+open Formalism.MainNotions.G in
+theorem goal1
+    {O : Type} [inst : CommRing O] [inst_1 : IsDomain O] {V : Type}
+    [inst_2 : AddCommGroup V] [inst_3 : Module (KK O) V] [inst_4 : Module O V]
+    [inst_5 : IsScalarTower O (KK O) V] (M : Submodule O V) :
+    MQ (K := KK O) M = ⊤ → ∀ x : V, ∃ a : O, a ≠ 0 ∧ a • x ∈ M := by
+  intro hM x
+  have hx : x ∈ Submodule.span (KK O) (M : Set V) := by
+    change x ∈ MQ (K := KK O) M
+    rw [hM]
+    exact Submodule.mem_top
   induction hx using Submodule.span_induction with
   | mem y hy => exact ⟨1, one_ne_zero, by rw [one_smul]; exact hy⟩
   | zero => exact ⟨1, one_ne_zero, by rw [smul_zero]; exact M.zero_mem⟩

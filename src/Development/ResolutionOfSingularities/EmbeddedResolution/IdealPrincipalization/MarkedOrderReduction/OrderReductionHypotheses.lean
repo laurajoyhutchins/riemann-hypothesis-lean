@@ -1,40 +1,60 @@
-import Mathlib
-import Development.ResolutionOfSingularities.Foundations.Blowup.BlowupProperties
-import Development.ResolutionOfSingularities.EmbeddedResolution.IteratedBlowups.ClopenRestriction
-import Development.ResolutionOfSingularities.EmbeddedResolution.IteratedBlowups.NoetherianBlowup
-import Development.ResolutionOfSingularities.Foundations.Blowup.StrictTransform
-import Development.ResolutionOfSingularities.EmbeddedResolution.StrictTransformCharts.BlowupClosedSubscheme
-import Development.ResolutionOfSingularities.EmbeddedResolution.StrictTransformCharts.ExceptionalMonomialOrder
-import Development.ResolutionOfSingularities.EmbeddedResolution.EtaleCoordinates.StrictNormalCrossings
-import Development.ResolutionOfSingularities.EmbeddedResolution.DerivativeIdeal.DerivativeIdealSheafFieldBaseChange
-import Development.ResolutionOfSingularities.EmbeddedResolution.DerivativeIdeal.IdealSheafOrder
-import Development.ResolutionOfSingularities.EmbeddedResolution.MaximalContactHypersurfaces.TunedSheaf
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.OrderReductionProperties
+module
+
+public import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MarkedOrderReduction.GeometryHypotheses
+public import Development.ResolutionOfSingularities.EmbeddedResolution.DerivativeIdeal.DerivativeIdealSheafFieldBaseChange
 import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.ComapSubschemeIso
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.DimensionRecursion
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.CanonicalPrincipalization
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MarkedOrderReduction.GeometryHypotheses
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MarkedOrderReduction.MaxOrderReduction
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MonomialCase.MonomialPrincipalization
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MonomialCase.CoordinateSubspaceIdeal
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MonomialCase.IntersectionComponents
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MonomialCase.IntersectionComponentsFlatBaseChange
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MonomialCase.MonomialGeometryHypotheses
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MonomialCase.MonomialPartAlongDivisor
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MonomialCase.BoundaryRelabeling
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MonomialCase.MonomialSplittingFlatPullback
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MonomialCase.MonomialSplittingUniqueness
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MonomialCase.LocallyBoundedOrder
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.OrderReduction.MaxContactReduction
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.FunctorialPrincipalization
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MarkedBlowupSequence.IrreducibleComponentsAlongSequence
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MarkedBlowupSequence.IdealBlowupSequence
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MarkedBlowupSequence.MarkedSequenceOfBlowups
+public import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MarkedBlowupSequence.DimensionNonincreasing
 import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MarkedBlowupSequence.SupportsAlongSequence
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MarkedBlowupSequence.DimensionNonincreasing
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MarkedBlowupSequence.MarkedSequenceTransforms
-import Development.ResolutionOfSingularities.Foundations.BlowupUniversalProperty
-import Development.ResolutionOfSingularities.EmbeddedResolution.ResolutionOfSingularities
+public import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MonomialCase.IntersectionComponents
+public import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MonomialCase.IntersectionComponentsFlatBaseChange
+public import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MonomialCase.LocallyBoundedOrder
+public import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MonomialCase.MonomialSplittingFlatPullback
+public import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MonomialCase.MonomialSplittingUniqueness
+import Development.ResolutionOfSingularities.EmbeddedResolution.StrictTransformCharts.BlowupClosedSubscheme
+public import Development.ResolutionOfSingularities.EmbeddedResolution.StrictTransformCharts.ExceptionalMonomialOrder
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.SetTheory.ZFC.PSet
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MonomialCase.MonomialPartAlongDivisor
+
+@[expose] public section
+
 universe u
 
 open CategoryTheory AlgebraicGeometry
@@ -118,80 +138,82 @@ structure MonomialCaseHypotheses : Prop where
       ∀ D ∈ T.boundary, ∀ x ∈ D.support, orderAt D x = 1
 
 theorem monomialGeometryHypotheses_of_monomialCaseHypotheses (hR : MonomialCaseHypotheses.{u}) :
-    MonomialGeometryHypotheses.{u} where
-  card_lt_dim := hR.card_lt_dim
-  flat_comap_center := by
-    intro T hT Y k' hk q g hg hT' J 𝒞 h𝒞 hop
-    exact FunctorialResolution.EmbeddedResolution.comap_componentUnionIdeal_of_flat T hT Y k' q g hT' J 𝒞 h𝒞 hop
-  center_smooth := hR.center_smooth
-  center_snc := hR.center_snc
-  center_support := by
-    intro T hT J 𝒞 h𝒞 hop
-    exact FunctorialResolution.EmbeddedResolution.componentUnionIdeal_support_eq_sUnion T hT J 𝒞 h𝒞 hop
-  blowup_total_transform := hR.blowup_total_transform
-  flat_components_down := by
-    intro T hT Y k' hk q g hg hT' J C' hC'
-    exact FunctorialResolution.EmbeddedResolution.exists_intersectionComponents_mapsTo_of_flat T hT Y k' q g hT' J C' hC'
-  flat_components_up := by
-    intro T hT Y k' hk q g hg hT' J C hC y hy
-    exact FunctorialResolution.EmbeddedResolution.exists_mem_intersectionComponents_pullbackOverField_of_flat T hT Y k' q g hT' J C hC y hy
-  smooth_components_down := by
-    intro T hT Y q h hsm hq hV J C' hC'
-    have : AlgebraicGeometry.Flat h := inferInstance
-    have hV' : (T.pullbackOverField Y T.base q h).IsAdmissible := by
-      rw [MarkedIdealWithBoundary.pullbackOverField_eq_pullbackAlong]
-      exact hV
-    have e : pullbackOverFieldIndex T Y T.base q h = pullbackAlongIndex T Y q h := by
-      funext j
-      apply Fin.ext
-      rw [pullbackOverFieldIndex_val, pullbackAlongIndex_val]
-    have hC'' : C' ∈ intersectionComponents (T.pullbackOverField Y T.base q h).boundary
-        (Finset.image (pullbackOverFieldIndex T Y T.base q h) J) := by
-      rw [e]
-      exact hC'
-    exact FunctorialResolution.EmbeddedResolution.exists_intersectionComponents_mapsTo_of_flat T hT Y T.base q h hV' J C' hC''
-  smooth_components_up := by
-    intro T hT Y q h hsm hq hV J C hC y hy
-    have : AlgebraicGeometry.Flat h := inferInstance
-    have hV' : (T.pullbackOverField Y T.base q h).IsAdmissible := by
-      rw [MarkedIdealWithBoundary.pullbackOverField_eq_pullbackAlong]
-      exact hV
-    have e : pullbackOverFieldIndex T Y T.base q h = pullbackAlongIndex T Y q h := by
-      funext j
-      apply Fin.ext
-      rw [pullbackOverFieldIndex_val, pullbackAlongIndex_val]
-    obtain ⟨C', hC'mem, hyC', hgen⟩ :=
-      FunctorialResolution.EmbeddedResolution.exists_mem_intersectionComponents_pullbackOverField_of_flat T hT Y T.base q h hV' J C hC y hy
-    refine ⟨C', ?_, hyC', hgen⟩
-    rw [← e]
-    exact hC'mem
-  components_disjoint := by
-    intro T hT J C hC C' hC' hne
-    exact FunctorialResolution.EmbeddedResolution.intersectionComponents_disjoint_of_smooth T J (hR.stratum_smooth T hT J) C C' hC hC' hne
-  components_finite := by
-    intro T hT J
-    exact FunctorialResolution.EmbeddedResolution.intersectionComponents_finite T hT J
-  components_subset_divisor_iff := hR.components_subset_divisor_iff
-  transformed_components := hR.transformed_components
-  level_schemeDim_le := by
-    intro T hT s i hi
-    have h := MarkedIdealWithBoundary.transformAt_dim_le FunctorialResolution.EmbeddedResolution.dimensionNonincreasingAlongBlowups hT s i hi
-    rwa [MarkedIdealWithBoundary.transformAt_dim] at h
-  stratum_smooth := hR.stratum_smooth
-  level_valid := by
-    intro T hT s i hi
-    exact MarkedIdealWithBoundary.IsAdmissible.transformAt FunctorialResolution.EmbeddedResolution.effectiveCartierSupportContainsNoComponent hT s i hi
-  orderAt_bounded := by
-    intro T hT I hI
-    exact FunctorialResolution.EmbeddedResolution.exists_orderAt_le T hT I hI
-  orderAt_comap_off_exceptional := hR.orderAt_comap_off_exceptional
-  orderAt_boundary_eq_one := hR.orderAt_boundary_eq_one
-  sUnion_isOpen := by
-    intro T hT J 𝒞 h𝒞
-    exact FunctorialResolution.EmbeddedResolution.isOpen_preimage_sUnion_intersectionComponents T hT J (hR.stratum_smooth T hT J) 𝒞 h𝒞
-  withBoundary_valid := by
-    intro T hT E' hE
-    apply MarkedIdealWithBoundary.validOfSameNontrivialBoundary <;> assumption
+    MonomialGeometryHypotheses.{u} := by
+  exact {
+    card_lt_dim := hR.card_lt_dim
+    flat_comap_center := by
+      intro T hT Y k' hk q g hg hT' J 𝒞 h𝒞 hop
+      exact FunctorialResolution.EmbeddedResolution.comap_componentUnionIdeal_of_flat T hT Y k' q g hT' J 𝒞 h𝒞 hop
+    center_smooth := hR.center_smooth
+    center_snc := hR.center_snc
+    center_support := by
+      intro T hT J 𝒞 h𝒞 hop
+      exact FunctorialResolution.EmbeddedResolution.componentUnionIdeal_support_eq_sUnion T hT J 𝒞 h𝒞 hop
+    blowup_total_transform := hR.blowup_total_transform
+    flat_components_down := by
+      intro T hT Y k' hk q g hg hT' J C' hC'
+      exact FunctorialResolution.EmbeddedResolution.exists_intersectionComponents_mapsTo_of_flat T hT Y k' q g hT' J C' hC'
+    flat_components_up := by
+      intro T hT Y k' hk q g hg hT' J C hC y hy
+      exact FunctorialResolution.EmbeddedResolution.exists_mem_intersectionComponents_pullbackOverField_of_flat T hT Y k' q g hT' J C hC y hy
+    smooth_components_down := by
+      intro T hT Y q h hsm hq hV J C' hC'
+      have : AlgebraicGeometry.Flat h := inferInstance
+      have hV' : (T.pullbackOverField Y T.base q h).IsAdmissible := by
+        rw [MarkedIdealWithBoundary.pullbackOverField_eq_pullbackAlong]
+        exact hV
+      have e : pullbackOverFieldIndex T Y T.base q h = pullbackAlongIndex T Y q h := by
+        funext j
+        apply Fin.ext
+        rw [pullbackOverFieldIndex_val, pullbackAlongIndex_val]
+      have hC'' : C' ∈ intersectionComponents (T.pullbackOverField Y T.base q h).boundary
+          (Finset.image (pullbackOverFieldIndex T Y T.base q h) J) := by
+        rw [e]
+        exact hC'
+      exact FunctorialResolution.EmbeddedResolution.exists_intersectionComponents_mapsTo_of_flat T hT Y T.base q h hV' J C' hC''
+    smooth_components_up := by
+      intro T hT Y q h hsm hq hV J C hC y hy
+      have : AlgebraicGeometry.Flat h := inferInstance
+      have hV' : (T.pullbackOverField Y T.base q h).IsAdmissible := by
+        rw [MarkedIdealWithBoundary.pullbackOverField_eq_pullbackAlong]
+        exact hV
+      have e : pullbackOverFieldIndex T Y T.base q h = pullbackAlongIndex T Y q h := by
+        funext j
+        apply Fin.ext
+        rw [pullbackOverFieldIndex_val, pullbackAlongIndex_val]
+      obtain ⟨C', hC'mem, hyC', hgen⟩ :=
+        FunctorialResolution.EmbeddedResolution.exists_mem_intersectionComponents_pullbackOverField_of_flat T hT Y T.base q h hV' J C hC y hy
+      refine ⟨C', ?_, hyC', hgen⟩
+      rw [← e]
+      exact hC'mem
+    components_disjoint := by
+      intro T hT J C hC C' hC' hne
+      exact FunctorialResolution.EmbeddedResolution.intersectionComponents_disjoint_of_smooth T J (hR.stratum_smooth T hT J) C C' hC hC' hne
+    components_finite := by
+      intro T hT J
+      exact FunctorialResolution.EmbeddedResolution.intersectionComponents_finite T hT J
+    components_subset_divisor_iff := hR.components_subset_divisor_iff
+    transformed_components := hR.transformed_components
+    level_schemeDim_le := by
+      intro T hT s i hi
+      have h := MarkedIdealWithBoundary.transformAt_dim_le FunctorialResolution.EmbeddedResolution.dimensionNonincreasingAlongBlowups hT s i hi
+      rwa [MarkedIdealWithBoundary.transformAt_dim] at h
+    stratum_smooth := hR.stratum_smooth
+    level_valid := by
+      intro T hT s i hi
+      exact MarkedIdealWithBoundary.IsAdmissible.transformAt FunctorialResolution.EmbeddedResolution.effectiveCartierSupportContainsNoComponent hT s i hi
+    orderAt_bounded := by
+      intro T hT I hI
+      exact FunctorialResolution.EmbeddedResolution.exists_orderAt_le T hT I hI
+    orderAt_comap_off_exceptional := hR.orderAt_comap_off_exceptional
+    orderAt_boundary_eq_one := hR.orderAt_boundary_eq_one
+    sUnion_isOpen := by
+      intro T hT J 𝒞 h𝒞
+      exact FunctorialResolution.EmbeddedResolution.isOpen_preimage_sUnion_intersectionComponents T hT J (hR.stratum_smooth T hT J) 𝒞 h𝒞
+    withBoundary_valid := by
+      intro T hT E' hE
+      apply MarkedIdealWithBoundary.validOfSameNontrivialBoundary <;> assumption
+  }
 
 structure OrderReductionHypotheses : Prop where
   controlledTransform_orderAt_le :
@@ -222,51 +244,54 @@ structure OrderReductionHypotheses : Prop where
                               C = closure ({π ξ'} : Set ↥T.scheme)
   monomial : MonomialCaseHypotheses.{u}
 
-theorem geometricHypotheses_of_orderReductionHypotheses (hR : OrderReductionHypotheses.{u}) : PrincipalizationGeometryHypotheses.{u} where
-  maxContactTransport := FunctorialResolution.EmbeddedResolution.isoInvariantOrderCertificateDescend
-  exceptional_components_not_subset := by
-    intro T hT Z hZsm hZsnc X' π hπ J c hord J' htr C' hC'
-    have := hT.charZero
-    have := hT.smooth
-    have := hT.isNoetherian
-    have := FunctorialResolution.EmbeddedResolution.isLocallyNoetherian_of_isBlowupAlongIdealSheaf π Z hπ
-    refine FunctorialResolution.EmbeddedResolution.controlledTransform_not_subset_support T.structMap Z T.boundary hZsnc π hπ
-      J c hord J' htr C' hC'.1 hC'.2.1 ?_
-    intro S hirr hsub hsup
-    exact hC'.2.2 S hirr hsup hsub
-  orderAt_baseChange := by
-    intro T hT L hL hLz f I y
-    have := hT.charZero
-    have := hT.smooth
-    exact FunctorialResolution.EmbeddedResolution.orderAt_comap_fieldBaseChange T.structMap (CommRingCat.ofHom f) I y
-  controlledTransform_orderAt_le := hR.controlledTransform_orderAt_le
-  splitting_baseChange := by
-    intro T hT L hL hLz f hV M N hs
-    exact FunctorialResolution.EmbeddedResolution.isMonomialSplitting_comap_of_flat
-      (CategoryTheory.Limits.pullback.fst T.structMap (specMapOfFieldHom T.base L f)) hs
-  splitting_smooth_pullback := by
-    intro T hT Y q h hsm hq hV M N hs
-    exact FunctorialResolution.EmbeddedResolution.isMonomialSplitting_comap_of_smooth h hs
-  splitting_exists := by
-    intro T hT
-    have := hT.charZero
-    have := hT.smooth
-    have := hT.locallyOfFiniteType
-    have := hT.quasiCompact
-    have := hT.isNoetherian
-    exact FunctorialResolution.EmbeddedResolution.exists_isMonomialSplitting T.structMap T.boundary hT.snc T.ideal
-      hT.nonzeroOnComponents
-  splitting_unique := by
-    intro T hT M N M' N' hs hs'
-    have := hT.charZero
-    have := hT.smooth
-    have := hT.locallyOfFiniteType
-    have := hT.quasiCompact
-    have := hT.isNoetherian
-    exact FunctorialResolution.EmbeddedResolution.isMonomialSplitting_unique T.structMap T.boundary hT.snc
-      hT.nonzeroOnComponents hs hs'
-  strictTransform_components := hR.strictTransform_components
-  monomialInputs := monomialGeometryHypotheses_of_monomialCaseHypotheses hR.monomial
+theorem geometricHypotheses_of_orderReductionHypotheses (hR : OrderReductionHypotheses.{u}) :
+    PrincipalizationGeometryHypotheses.{u} := by
+  exact {
+    maxContactTransport := FunctorialResolution.EmbeddedResolution.isoInvariantOrderCertificateDescend
+    exceptional_components_not_subset := by
+      intro T hT Z hZsm hZsnc X' π hπ J c hord J' htr C' hC'
+      have := hT.charZero
+      have := hT.smooth
+      have := hT.isNoetherian
+      have := FunctorialResolution.EmbeddedResolution.isLocallyNoetherian_of_isBlowupAlongIdealSheaf π Z hπ
+      refine FunctorialResolution.EmbeddedResolution.controlledTransform_not_subset_support T.structMap Z T.boundary hZsnc π hπ
+        J c hord J' htr C' hC'.1 hC'.2.1 ?_
+      intro S hirr hsub hsup
+      exact hC'.2.2 S hirr hsup hsub
+    orderAt_baseChange := by
+      intro T hT L hL hLz f I y
+      have := hT.charZero
+      have := hT.smooth
+      exact FunctorialResolution.EmbeddedResolution.orderAt_comap_fieldBaseChange T.structMap (CommRingCat.ofHom f) I y
+    controlledTransform_orderAt_le := hR.controlledTransform_orderAt_le
+    splitting_baseChange := by
+      intro T hT L hL hLz f hV M N hs
+      exact FunctorialResolution.EmbeddedResolution.isMonomialSplitting_comap_of_flat
+        (CategoryTheory.Limits.pullback.fst T.structMap (specMapOfFieldHom T.base L f)) hs
+    splitting_smooth_pullback := by
+      intro T hT Y q h hsm hq hV M N hs
+      exact FunctorialResolution.EmbeddedResolution.isMonomialSplitting_comap_of_smooth h hs
+    splitting_exists := by
+      intro T hT
+      have := hT.charZero
+      have := hT.smooth
+      have := hT.locallyOfFiniteType
+      have := hT.quasiCompact
+      have := hT.isNoetherian
+      exact FunctorialResolution.EmbeddedResolution.exists_isMonomialSplitting T.structMap T.boundary hT.snc T.ideal
+        hT.nonzeroOnComponents
+    splitting_unique := by
+      intro T hT M N M' N' hs hs'
+      have := hT.charZero
+      have := hT.smooth
+      have := hT.locallyOfFiniteType
+      have := hT.quasiCompact
+      have := hT.isNoetherian
+      exact FunctorialResolution.EmbeddedResolution.isMonomialSplitting_unique T.structMap T.boundary hT.snc
+        hT.nonzeroOnComponents hs hs'
+    strictTransform_components := hR.strictTransform_components
+    monomialInputs := monomialGeometryHypotheses_of_monomialCaseHypotheses hR.monomial
+  }
 
 end FunctorialResolution.EmbeddedResolution
 

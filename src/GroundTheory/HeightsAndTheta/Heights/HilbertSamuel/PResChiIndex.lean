@@ -1,7 +1,61 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsResChiIndex
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.ResSymGram
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.ResChiIndexLattice
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsResChiIndex
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.IsBergDensity
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PChangeOfLattice
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.ResChiIndexLattice
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.ResSymGram
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.ABridgeSt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.ABridgeStA
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.LemCone
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.HilbertSamuel
@@ -27,7 +81,7 @@ theorem exists_int_mul (f : MvPolynomial J ℚ) :
   · obtain ⟨N₁, g₁, h₁, e₁⟩ := hp
     obtain ⟨N₂, g₂, h₂, e₂⟩ := hq
     refine ⟨N₁ * N₂, C (N₂ : ℤ) * g₁ + C (N₁ : ℤ) * g₂, mul_ne_zero h₁ h₂, ?_⟩
-    rw [map_add, map_mul, map_mul, map_C, map_C, e₁, e₂]
+    rw [map_add (f := _), map_mul, map_mul, map_C, map_C, e₁, e₂]
     simp only [eq_intCast, Int.cast_natCast, Nat.cast_mul, C_mul]
     ring
 
@@ -37,7 +91,7 @@ theorem isHomogeneous_of_map {f : MvPolynomial J ℚ} {n : ℕ} (hf : f.IsHomoge
   apply hf
   intro h0
   apply hs
-  have h := congrArg (coeff s) hg
+  have h := congrArg (AddMonoidAlgebra.coeff · s) hg
   rw [coeff_map, coeff_C_mul, h0, mul_zero] at h
   simpa using h
 
@@ -112,8 +166,9 @@ theorem resGram_change (d : HSMDatum D Ω κ) {n r : ℕ} {b : Fin r → MvPolyn
     intro z hz k l
     have e1 : ∀ p q : MvPolynomial (Ix κ) ℚ, pairVal d.m n p q z =
         secFun p z * starRingEnd ℂ (secFun q z) / ((d.m.ρ z ^ (2 * n) : ℝ) : ℂ) := fun p q => rfl
+
     simp only [e1, hc k z hz, hc l z hz, map_sum, map_mul, map_ratCast, Finset.sum_mul, Finset.mul_sum,
-      Finset.sum_div]
+    Finset.sum_div]
     conv_lhs => rw [Finset.sum_comm]
     refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
     push_cast
@@ -237,8 +292,9 @@ theorem resChi_sub_of_bases (d d' : HSMDatum D Ω κ) (B : Matrix (Ix κ) (Ix κ
       rw [map_sub, aeval_matSubst, ← hx, hTΩ k]
       simp
     have h0 := secFun_eq_zero hh hx0 hz
+
     simp only [secFun, map_sub, map_sum, map_mul, map_C, eval_C, eq_ratCast]
-      at h0 ⊢
+    at h0 ⊢
     exact sub_eq_zero.1 h0
   have hchange : resGram d' n b' =
       (Matrix.of T).map (Rat.cast : ℚ → ℝ) * resGram d n b * ((Matrix.of T).map (Rat.cast : ℚ → ℝ)).transpose := by
@@ -247,7 +303,8 @@ theorem resChi_sub_of_bases (d d' : HSMDatum D Ω κ) (B : Matrix (Ix κ) (Ix κ
 
   have hGpos : 0 < (resGram d n b).det := by
     rw [ResSym.det_resGram d hb.1]
-    exact (Complex.pos_iff.1 (ResSym.posDef_gram d hb).det_pos).1
+    open scoped ComplexOrder in
+      exact (Complex.pos_iff.1 (ResSym.posDef_gram d hb).det_pos).1
   have hTd : ((Matrix.of T).map (Rat.cast : ℚ → ℝ)).det = ((Matrix.of T).det : ℝ) :=
     (RingHom.map_det (Rat.castHom ℝ) (Matrix.of T)).symm
   have hTr : ((Matrix.of T).det : ℝ) ≠ 0 := by exact_mod_cast hdet
@@ -267,7 +324,7 @@ theorem proof : ResChiIndex.Statement := by
   have h' : ∃ p : (Σ r : ℕ, Fin r → MvPolynomial (Ix κ) ℚ), IsSecBasis d'.x n p.2 :=
     ⟨⟨_, _⟩, (exists_isSecBasis d'.x n).choose_spec⟩
   unfold resChi
-  rw [dif_pos h, dif_pos h']
+  rw [dite_eq_left h, dite_eq_left h']
   exact resChi_sub_of_bases d d' B hB hx hG n h.choose_spec h'.choose_spec
 
 end

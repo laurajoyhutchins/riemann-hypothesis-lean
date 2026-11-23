@@ -1,9 +1,64 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ConvUAbsU
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MemShellUIffDepth
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SwapLtSwapIffOfAddTwo
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ConvUAbsU
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MemShellUIffDepth
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsIdealWeight
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SwapLtSwapIffOfAddTwo
 import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IsOpenIsCompactUnitaryIntegralPoints
+import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.Cartan
 import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.FIwasawa
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.HasBoundedSumsOne
+
+@[expose] public section
 
 noncomputable section
 
@@ -51,7 +106,7 @@ theorem map_heisM_rev (σ : L →+* L) {n : ℕ} {i j k : Fin n} (hr : i.rev = k
   have e3 : ∀ x : Fin n, j = x.rev ↔ j = x := fun x => by
     conv_lhs => rw [← hj]
     exact Fin.rev_inj
-  simp only [heisM_apply, e1, e2, e3, Fin.rev_inj, map_add, apply_ite σ, map_one, map_zero, eq_comm (a := t) (b := s),
+  simp only [heisM_apply, e1, e2, e3, Fin.rev_inj, map_add (f := _), apply_ite σ, map_one, map_zero, eq_comm (a := t) (b := s),
     and_comm (a := k = t), and_comm (a := j = t)]
   ring
 
@@ -310,7 +365,7 @@ theorem value_point : ∀ (L : Type) [Field L] [Valued L (WithZero (Multiplicati
     exact Int.eq_ofNat_of_zero_le hv.le
   unfold chiDeltaU
   rw [Finset.prod_eq_single k]
-  · rw [dif_pos (by omega)]
+  · rw [dite_eq_left (by omega)]
     show α k ^ ordL ((((Pb : GU σ n) : GL (Fin n) L) : Matrix (Fin n) (Fin n) L) a a) *
         (q : ℂ) ^ (-(ordL ((((Pb : GU σ n) : GL (Fin n) L) : Matrix (Fin n) (Fin n) L) a a)) *
           ((n : ℤ) - 1 - 2 * (k.val : ℤ))) = _
@@ -321,7 +376,7 @@ theorem value_point : ∀ (L : Type) [Field L] [Valued L (WithZero (Multiplicati
     have hi : i.val < k.val := by
       have : i.val ≠ k.val := fun h => hik (Fin.ext h)
       omega
-    rw [dif_pos (by omega), hdiag _ hi]
+    rw [dite_eq_left (by omega), hdiag _ hi]
     simp
   · simp
 

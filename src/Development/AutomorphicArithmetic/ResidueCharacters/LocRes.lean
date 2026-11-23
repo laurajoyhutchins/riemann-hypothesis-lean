@@ -1,9 +1,50 @@
-import Mathlib
-import Formalism.SharpRestriction.LevelLetterCocycles.ElementDenominator
-import Formalism.SharpRestriction.LevelLetterCocycles.JsetEmb
-import Formalism.SharpRestriction.LevelLetterCocycles.JointConditionsZpowers.BaseFont
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsCrystallineCyclotomicLevelOfFinrankInvariants
-import Development.AutomorphicArithmetic.ResidueCharacters.FiniteRoots
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.ElementDenominator
+public import Formalism.SharpRestriction.LevelLetterCocycles.DecompositionData
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.FinrankCyclotomicExtAndCyclotomicCharSurjective
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsCrystallineCyclotomicLevelOfFinrankInvariants
+public import Formalism.SharpRestriction.LevelLetterCocycles.JointConditionsZpowers.BaseFont
+public import Formalism.SharpRestriction.LevelLetterCocycles.JsetEmb
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -59,8 +100,8 @@ theorem vdeg_le (K : FinExt l) {s m : ℕ} (hs : 1 ≤ s) (hm : 1 ≤ m) :
   have key : ∀ j, 1 ≤ j → padicValNat l (Module.finrank ℚ_[l] ↥(Ks K j)) =
       padicValNat l (Module.finrank ℚ_[l] ↥(K0 K)) + (padicValNat l (l - 1) + (j - 1)) := by
     intro j hj
-    rw [GlobalTheory.Cyc.finrank_Ks K j hj, padicValNat.mul h0 (mul_ne_zero h1 (pow_ne_zero _ hp.ne_zero)),
-      padicValNat.mul h1 (pow_ne_zero _ hp.ne_zero), padicValNat.prime_pow]
+    rw [GlobalTheory.Cyc.finrank_Ks K j hj, (show ∀ {p a b : ℕ} [_root_.Fact (_root_.Nat.Prime p)], a ≠ 0 → b ≠ 0 → _root_.padicValNat p (a * b) = _root_.padicValNat p a + _root_.padicValNat p b from by simpa only [← _root_.Nat.padicValNat_def] using @_root_.Nat.multiplicity_mul) h0 (mul_ne_zero h1 (pow_ne_zero _ hp.ne_zero)),
+      (show ∀ {p a b : ℕ} [_root_.Fact (_root_.Nat.Prime p)], a ≠ 0 → b ≠ 0 → _root_.padicValNat p (a * b) = _root_.padicValNat p a + _root_.padicValNat p b from by simpa only [← _root_.Nat.padicValNat_def] using @_root_.Nat.multiplicity_mul) h1 (pow_ne_zero _ hp.ne_zero), (show padicValNat l (l ^ (j - 1)) = j - 1 from by rw [Nat.padicValNat_def, Nat.multiplicity_prime_pow])]
   rw [key m hm, key s hs]
   omega
 
@@ -85,7 +126,7 @@ theorem pow_val_smul_mem (LL : FinExt l) {M : Type} [AddCommGroup M] [Module ↥
     simpa using h1.map (algebraMap ℤ_[l] ↥(OL LL))
   obtain ⟨u, hu⟩ := hu
   have e : (d : ↥(OL LL)) = u * (l : ↥(OL LL)) ^ padicValNat l d := by
-    rw [hu, ← Nat.factorization_def d hp]
+    rw [hu, Nat.padicValNat_def, ← Nat.factorization_def d hp]
     conv_lhs => rw [← Nat.ordProj_mul_ordCompl_eq_self d l]
     push_cast; ring
   have := S.smul_mem ((u⁻¹ : (↥(OL LL))ˣ) : ↥(OL LL)) hc

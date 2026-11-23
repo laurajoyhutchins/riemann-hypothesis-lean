@@ -1,17 +1,56 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IdemAtEqOneIff
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsNumberFieldPoint
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IsOpenImmersionOfSection
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.SubmatrixMulVec
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.NvalDetFrChgConst
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsFinsetIntegralOfDefinite
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsIsUnf
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsLevelGoodAtAllPrimesAndIdx
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.LevelOfSplitAndLevelCoeffExist
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.PtOfFrameEqOfPointEq
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.HasseNormTheoremQuadraticExtension
-import Development.AbelianVarietyTheory.Proofs.GenericRegularity.MemRangeOfIsAlgebraicRatFun
-import Development.AbelianVarietyTheory.Definitions.CMLattices.IsCyclotomicExtensionCyclotomicField28
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.ExistsFlatSecRankZero
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsFinsetIntegralOfDefinite
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsNumberFieldPoint
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IdemAtEqOneIff
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IsOpenImmersionOfSection
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.NvalDetFrChgConst
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.SubmatrixMulVec
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.PtOfFrameEqOfPointEq
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.FrameChangeByMatricesReflAndComp
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.FrameChangeExistsUniqueOfSamePoint
+import Formalism.LocalToGlobal.ProjectiveLattices.FreeBridge
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+public import Development.AbelianVarietyTheory.Definitions.ExistenceOfLattices.UnivFrame
+
+@[expose] public section
 
 noncomputable section
 
@@ -29,7 +68,7 @@ theorem comp_eq {σ : c.F →+* ℂ} {r : ℕ} {U : Unf Xo c σ r} (hσ : GoodEm
   exact congrArg Sigma.fst e
 
 theorem nonempty_flatSec {r : ℕ} (U : ∀ σ : c.F →+* ℂ, Unf Xo c σ r) (x : ℝ) (hq : Dw.q = 0) (hp : 1 ≤ Dw.p)
-    (hg : ∀ p : ℕ, p.Prime → l.GoodAt p) (hU : ∀ σ, GoodEmb c σ → IsUnf (U σ)) (hF : FnAlgClosed Xo c)
+    (hg : ∀ p : ℕ, p.Prime → l.GoodAt p) (hU : ∀ σ, GoodEmb c σ → IsUnf (U σ)) (hF : FnAlgClosed (Xo := Xo) (c := c))
     (Z : Comp Xo c) (τ : Psi H) : Nonempty (FlatSec U x Z τ) := by
   have hpq : 1 ≤ Dw.p + Dw.q := by omega
   have hP := hasPts U hpq hg hU Z
@@ -100,30 +139,5 @@ theorem nonempty_flatSec {r : ℕ} (U : ∀ σ : c.F →+* ℂ, Unf Xo c σ r) (
     have h1 := hρ w T io e ho z z _ _ hi hz (frChg_refl_and_comp E H Dw l Xo c _ z z z).1
     rw [Matrix.det_one, nval_of_ne one_ne_zero, EReal.coe_eq_coe_iff] at h1
     exact hw (h1.symm.trans (by simp [vV]))
-
-theorem exists_flatSec (x : ℝ) : ∃ (E : Type) (_ : Field E) (_ : NumberField E) (_ : IsCMField E)
-    (H : ReciprocityTheory.ChartRestriction.G.Geo.Tor.Host E) (Dw : Datum H) (l : Level H) (Xo : Moduli Dw l) (c : Coeff l)
-    (U : ∀ σ : c.F →+* ℂ, Unf Xo c σ (Dw.p + Dw.q)) (Z : Comp Xo c) (τ : Psi H),
-    1 ≤ Dw.p ∧ (∀ σ, GoodEmb c σ → IsUnf (U σ)) ∧ Nonempty (FlatSec U x Z τ) := by
-  obtain ⟨D, hp, hq⟩ := GlobalTheory.CM.CyclotomicTwentyEight.exists_datum
-  have hpq : 1 ≤ D.p + D.q := by omega
-  obtain ⟨l, -, hg, -⟩ := GlobalTheory.exists_level_goodAt_all_primes_and_idx _ GlobalTheory.CM.CyclotomicTwentyEight.host 1 one_pos
-  obtain ⟨Xo⟩ := GlobalTheory.Moduli.moduli_scheme_exists _ _ D l hpq
-  obtain ⟨c₀⟩ : Nonempty (Coeff l) := inferInstance
-  obtain ⟨-, c, -, hc⟩ := GlobalTheory.GeomIrr.compNe_and_exists_fnAlgClosed _ _ D l Xo c₀ hpq
-  obtain ⟨⟨Z⟩, -⟩ := GlobalTheory.GeomIrr.compNe_and_exists_fnAlgClosed _ _ D l Xo c hpq
-  have hU : ∀ σ : c.F →+* ℂ, ∃ U : Unf Xo c σ (D.p + D.q), GoodEmb c σ → IsUnf U := fun σ => by
-    by_cases hσ : GoodEmb c σ
-    · obtain ⟨U, hU⟩ := GlobalTheory.IsUnfEx.exists_isUnf GlobalTheory.closing_of_abelianSchemeLaws GlobalTheory.QNorm.hasseNormSt
-        GlobalTheory.abelianSchemeLaws_all.1.secBaseChange GlobalTheory.abelianSchemeLaws_all.2.secTwist _ _ D l Xo c σ hpq hσ
-      exact ⟨U.toPj, fun _ => hU⟩
-    · exact ⟨{ Comp := PEmpty, X := fun k => k.elim, un := fun k => k.elim }, fun h => absurd h hσ⟩
-  choose U hU using hU
-  obtain ⟨τ⟩ : Nonempty (Psi GlobalTheory.CM.CyclotomicTwentyEight.host) := by
-    obtain ⟨ρ⟩ : Nonempty (GlobalTheory.CM.CyclotomicTwentyEight.CyclotomicFieldTwentyEight →+* ℂ) := inferInstance
-    by_cases h : ρ (GlobalTheory.CM.CyclotomicTwentyEight.host.rt : GlobalTheory.CM.CyclotomicTwentyEight.CyclotomicFieldTwentyEight) = GlobalTheory.CM.CyclotomicTwentyEight.host.rt0
-    exacts [⟨⟨ρ, h⟩⟩, ⟨⟨_, conj_mem h⟩⟩]
-  exact ⟨_, _, _, _, _, D, l, Xo, c, U, Z, τ, hp.ge, hU,
-    nonempty_flatSec U x hq hp.ge hg hU (hc c le_rfl) Z τ⟩
 
 end GlobalTheory.FlatLine.Definite

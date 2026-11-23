@@ -1,11 +1,45 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RootLatticeThresholds.LoopRowSB
-import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RootLatticeThresholds.LoopLocPf
-import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RootLatticeThresholds.FinXClosed
-import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RootLatticeThresholds.WuDecayAll
-import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RootLatticeThresholds.WuDecayClosed
-import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RootLatticeThresholds.LoopBPin
-import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RootLatticeThresholds.LoopBCovN
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.LoopTerm
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RootLatticeThresholds.LoopRowSOf
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RootLatticeThresholds.Choice
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -44,15 +78,6 @@ def CX {D : D7} (X : HidaSetting D) (u : D.what₂.Word) : Formalism.L2.SG.LocWS
   haveI : Nonempty D.what₂.Word := ⟨u⟩
   Classical.choice (Formalism.L2.SG.Pf.choiceExists X 1 one_pos)
 
-variable [Fact Formalism.L2.SG.SplitPrimeNormLemmas.CoefWeightedLoc] [Fact Formalism.FourierDecayAlt.ThreeDimData.DecLow] in
-
-def BG (hJ : PI.BesselMapUniq.BesselMapUniq) (C1f : List ℝ → ℝ) (hC1 : ∀ l, 0 ≤ C1f l) :
-    ∀ {eps : ℝ} (Fm : FamP eps) (hc : CG 𝒞 Fm) x (_ : (Fm.raise (yR (selG sel) yFG Fm hc)).x1 < x) (i : Fm.Ix x)
-      (u u' : (Fm.D x i).what₂.Word), LoopLocDat (Fm.D x i) (Fm.L x i) u u' (C1f Fm.cOut) :=
-  fun Fm hc x hx i u u' => Formalism.L2.SG.Pf.LoopLoc.loopLocDatOf
-    (gap_of hc (hyR (selG sel) yFG hx) i) (Fm.ties x i).dsig_tie hJ
-    (CX ((selG sel Fm hc).2 x (raise_lt hx) (h0R (selG sel) yFG hx) i).X u)
-    (Formalism.L2.SG.Pf.LoopBTheta.normWin_one (Fm.L x i) (hC1 _)) u u'
 
 theorem closed_sub {𝒞' : FamClass} (hs : ∀ {eps : ℝ} (Fm : FamP eps), 𝒞' Fm → 𝒞 Fm)
     {P : ∀ {eps : ℝ}, FamP eps → ℝ → Prop} (h : Closed 𝒞 P) : Closed 𝒞' P := by
@@ -93,31 +118,6 @@ def JFactNAll : Prop :=
     (C : Formalism.L2.SG.LocWSOf.Choice X 1) (hB : Formalism.L2.SG.LocWSOf.WuBessel C) (u u' : D.what₂.Word),
     Formalism.L2.SG.ConcreteSettingExists.GapHyp D → LoopTerm.JFactN hI C hB u u'
 
-variable [Fact Formalism.FourierDecayAlt.ThreeDimData.DecLow] [Fact Formalism.L2.SG.SplitPrimeNormLemmas.CoefWeightedLoc] in
-
-def MG (hFX : Formalism.L2.SG.PoincareAmplitudeLowerBounds.FinXC) (hWu : Formalism.L2.SG.Pf.WuDecayOfGap) (hJ : PI.BesselMapUniq.BesselMapUniq)
-    (hRM : RMeasExAll) (hJF : JFactNAll) (hCF : Formalism.L2.SG.Pf.LoopBCovN.CovNFormula) :
-    ∀ {eps : ℝ} (Fm : FamP eps) (hc : CG 𝒞 Fm) x (hx : (Fm.raise (yR (selG sel) yFG Fm hc)).x1 < x) (i : Fm.Ix x)
-      (u u' : (Fm.D x i).what₂.Word),
-      LoopTermDat (Fm.D x i) (Fm.L x i) (AtR (selG sel) yFG (hyFG sel hFX hWu) Fm hc x hx i) u u' ((fun _ => 1) Fm.cOut)
-        (BG sel hJ (fun _ => 1) (fun _ => zero_le_one) Fm hc x hx i u u') :=
-  fun Fm hc x hx i u u' =>
-    LoopTerm.loopTermOfN (wOf ((selG sel Fm hc).2 x (raise_lt hx) (h0R (selG sel) yFG hx) i).X)
-      (((selG sel Fm hc).2 x (raise_lt hx) (h0R (selG sel) yFG hx) i).hI
-        (hyFG sel hFX hWu Fm hc x (raise_lt hx) (h0R (selG sel) yFG hx) (hyR (selG sel) yFG hx) i).1)
-      (hOf _ _ _ _) (aOfW _ _ _ _ (hyFG sel hFX hWu Fm hc x (raise_lt hx) (h0R (selG sel) yFG hx) (hyR (selG sel) yFG hx) i).2)
-      (hvOfW _ _ _ _ (hyFG sel hFX hWu Fm hc x (raise_lt hx) (h0R (selG sel) yFG hx) (hyR (selG sel) yFG hx) i).2)
-      (Fm.L x i) 1 (CX ((selG sel Fm hc).2 x (raise_lt hx) (h0R (selG sel) yFG hx) i).X u)
-      (Formalism.L2.SG.Pf.LoopLoc.wuBessel_of (gap_of hc (hyR (selG sel) yFG hx) i) hJ _) u u'
-      (Formalism.L2.SG.Pf.LoopBTheta.normWin_one (Fm.L x i) zero_le_one)
-      (BG sel hJ (fun _ => 1) (fun _ => zero_le_one) Fm hc x hx i u u').goodW
-      (BG sel hJ (fun _ => 1) (fun _ => zero_le_one) Fm hc x hx i u u').goodS
-      (hRM _ _ _ _ _ _ u u' (BG sel hJ (fun _ => 1) (fun _ => zero_le_one) Fm hc x hx i u u').goodW)
-      (Formalism.L2.SG.Pf.LoopBPin.pinAll_holds u u') (Formalism.L2.SG.Pf.LoopBPin.covolPos_holds u u')
-      (hJF _ _ _ _ _ _ _ u u' (gap_of hc (hyR (selG sel) yFG hx) i))
-      (Formalism.L2.SG.Pf.LoopBCovN.covN_pos hCF one_pos _ u u')
-      (Formalism.L2.SG.Pf.LoopBCovN.covWinN_sizes hCF _ (Fm.L x i) (Fm.sizes x (raise_lt hx) i) (by norm_num) u u')
-      (Formalism.L2.SG.Pf.LoopBTheta.normWin_one (Fm.L x i) zero_le_one)
 
 variable (C0 : ℝ)
 

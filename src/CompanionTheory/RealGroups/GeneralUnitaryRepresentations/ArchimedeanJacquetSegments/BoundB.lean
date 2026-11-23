@@ -1,10 +1,63 @@
-import CompanionTheory.RealGroups.GeneralUnitaryRepresentations.ArchimedeanJacquetSegments.Complementary
-import GroundTheory.AutomorphicForms.IwahoriFactorization
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsIrreducibleSecondFactorOfIrreducibleProduct
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.MemSpanOfFixedMemSpanTranslates
-import Development.AbelianVarietyTheory.Definitions.Divisors.EqOfHasValueAtInfinite
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.EigenvectorLiftOfSurjectionStatement
+module
+
+public import CompanionTheory.RealGroups.GeneralUnitaryRepresentations.ArchimedeanJacquetSegments.Complementary
+public import GroundTheory.AutomorphicForms.InductionParabolicGroups
+public import Development.AbelianVarietyTheory.Definitions.Divisors.EqOfHasValueAtInfinite
+public import Development.AbelianVarietyTheory.Definitions.Divisors.LineOppositeParabolicUnitaryLeviSectionEq
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsIrreducibleSecondFactorOfIrreducibleProduct
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.MemSpanOfFixedMemSpanTranslates
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.NormalizedAbsCharacterization
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.EigenvectorLiftOfSurjectionStatement
+public import GroundTheory.AutomorphicForms.IwahoriFactorization
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -131,6 +184,7 @@ theorem avL_apply (π : Representation ℂ G V) (K : Subgroup G) (H : Subgroup K
 theorem avL_fixed (π : Representation ℂ G V) (K : Subgroup G) (H : Subgroup K) [Fintype (K ⧸ H)] {x : V}
     (hx : ∀ h ∈ H, π ((h : K) : G) x = x) (κ : G) (hκ : κ ∈ K) : π κ (avL π K H x) = avL π K H x := by
   classical
+
   rw [avL_apply, map_sum]
   let κ' : K := ⟨κ, hκ⟩
   have key : ∀ q : K ⧸ H, π κ (π ((q.out : K) : G) x) = π (((κ' • q).out : K) : G) x := by
@@ -177,6 +231,7 @@ theorem ineq (π : Representation ℂ G X) (B : X →ₗ[ℂ] X →ₗ⋆[ℂ] �
     rw [map_sub, LinearMap.sub_apply]
   have hsub2 : ∀ x y z : X, B x (y - z) = B x y - B x z := fun x y z => map_sub _ _ _
   have hpair : B (avL π K H (π Z v)) (lam • v) = (Fintype.card (K ⧸ H) : ℂ) * B (π Z v) (lam • v) := by
+
     rw [avL_apply, map_sum, LinearMap.sum_apply]
     have : ∀ q : K ⧸ H, B (π ((q.out : K) : G) (π Z v)) (lam • v) = B (π Z v) (lam • v) := by
       intro q
@@ -270,7 +325,7 @@ theorem modulus_scalar_block (d : ℕ) (t : kˣ) :
   simp only [Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons, map_one, h1, _root_.one_zpow, mul_one,
     Matrix.GeneralLinearGroup.det_scalar, Fintype.card_fin, hn, h0, zpow_natCast, ← pow_mul]
 
-set_option maxHeartbeats 1000000 in
+
 theorem bound_main : Bound k := by
   intro d W _ _ _ τ hτ hadm hunit t c ht hc
   classical
@@ -336,6 +391,7 @@ theorem bound_main : Bound k := by
       show (Fintype.card (K ⧸ H) : ℂ)⁻¹ • avL (parInd (blk2 d) τ) K H
         (parInd (blk2 d) τ (Zt d t) (v : IndSp (blk2 d) τ)) = _
       rw [avL_apply]
+
     rw [h1, map_smul, map_sum]
     have hterm : ∀ q : K ⧸ H, ev (parInd (blk2 d) τ ((q.out : K) : GL (Fin (d + d)) k)
         (parInd (blk2 d) τ (Zt d t) (v : IndSp (blk2 d) τ))) = lam • ev v := by

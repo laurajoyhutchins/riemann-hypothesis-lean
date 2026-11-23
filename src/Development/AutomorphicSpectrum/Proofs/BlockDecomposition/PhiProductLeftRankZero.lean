@@ -1,6 +1,53 @@
-import Mathlib
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.GenericUnitaryGL.LeibnizOrders.ProdGPn
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.PhiPreservesIsomorphism
 import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SubsingletonOfGiso
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.PhiPreservesIsomorphism
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -21,12 +68,9 @@ def trT (ρ : Representation ℂ G V) (W : Type) [AddCommGroup W] [Module ℂ W]
     rw [map_mul]
     exact LinearMap.rTensor_mul _ _ _
 
-@[simp] theorem trT_tmul (ρ : Representation ℂ G V) (g : G) (v : V) (w : W) :
-    trT ρ W g (v ⊗ₜ[ℂ] w) = ρ g v ⊗ₜ[ℂ] w := rfl
-
 theorem twist_trT (ρ : Representation ℂ G V) (χ : G →* ℂˣ) : twist (trT ρ W) χ = trT (twist ρ χ) W := by
   ext g v w
-  simp [TensorProduct.smul_tmul']
+  simp [trT, LinearMap.rTensor_tmul, TensorProduct.smul_tmul']
 
 theorem twKer_trT (ρ : Representation ℂ G V) (N : Subgroup G) (θ : N →* ℂˣ) :
     twKer (trT ρ W) N θ = LinearMap.range (TensorProduct.map (twKer ρ N θ).subtype (LinearMap.id : W →ₗ[ℂ] W)) := by
@@ -35,19 +79,17 @@ theorem twKer_trT (ρ : Representation ℂ G V) (N : Subgroup G) (θ : N →* �
     rintro _ ⟨n, x, rfl⟩
     show _ ∈ LinearMap.range _
     induction x with
-    | zero => simp
     | add x y hx hy =>
       have : trT ρ W (n : G) (x + y) - ((θ n : ℂˣ) : ℂ) • (x + y) =
           (trT ρ W (n : G) x - ((θ n : ℂˣ) : ℂ) • x) + (trT ρ W (n : G) y - ((θ n : ℂˣ) : ℂ) • y) := by
-        rw [map_add, smul_add]; abel
+        rw [map_add (f := _), smul_add]; abel
       rw [this]
       exact add_mem hx hy
     | tmul v w =>
       refine ⟨(⟨ρ (n : G) v - ((θ n : ℂˣ) : ℂ) • v, Submodule.subset_span ⟨n, v, rfl⟩⟩ : twKer ρ N θ) ⊗ₜ[ℂ] w, ?_⟩
-      simp [TensorProduct.sub_tmul, TensorProduct.smul_tmul']
+      simp [trT, LinearMap.rTensor_tmul, TensorProduct.sub_tmul, TensorProduct.smul_tmul']
   · rintro _ ⟨y, rfl⟩
     induction y with
-    | zero => simp
     | add x y hx hy => rw [map_add]; exact add_mem hx hy
     | tmul a w =>
       obtain ⟨a, ha⟩ := a
@@ -55,7 +97,7 @@ theorem twKer_trT (ρ : Representation ℂ G V) (N : Subgroup G) (θ : N →* �
       induction ha using Submodule.span_induction with
       | mem x hx =>
         obtain ⟨n, v, rfl⟩ := hx
-        exact Submodule.subset_span ⟨n, v ⊗ₜ[ℂ] w, by simp [TensorProduct.sub_tmul, TensorProduct.smul_tmul']⟩
+        exact Submodule.subset_span ⟨n, v ⊗ₜ[ℂ] w, by simp [trT, LinearMap.rTensor_tmul, TensorProduct.sub_tmul, TensorProduct.smul_tmul']⟩
       | zero => simp
       | add x y _ _ hx hy => rw [TensorProduct.add_tmul]; exact add_mem hx hy
       | smul c x _ hx => rw [← TensorProduct.smul_tmul']; exact Submodule.smul_mem _ _ hx
@@ -71,9 +113,8 @@ theorem nonempty_twAct_trT (ρ : Representation ℂ G V) (N : Subgroup G) (θ : 
   induction x using Submodule.Quotient.induction_on with
   | H x =>
     induction x with
-    | zero => simp
     | add x y hx hy =>
-      rw [Submodule.Quotient.mk_add, map_add, map_add, hx, hy]
+      rw [Submodule.Quotient.mk_add, map_add (f := _), map_add (f := _), hx, hy]
     | tmul v w =>
       show E (Submodule.Quotient.mk (ρ (s m) v ⊗ₜ[ℂ] w)) = trT (twAct ρ N θ s hs') W m (E (Submodule.Quotient.mk (v ⊗ₜ[ℂ] w)))
       rw [hE, hE]
@@ -91,7 +132,7 @@ theorem nonempty_cInd_of_top [TopologicalSpace G] [IsTopologicalGroup G] (H : Su
     rw [hR]
     exact this
   have hinj : Function.Injective ev := by
-    rw [injective_iff_map_eq_zero]
+    set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
     intro f hf
     apply Subtype.ext; apply Subtype.ext; apply Subtype.ext
     funext g
@@ -135,12 +176,11 @@ theorem isSmooth_trT [TopologicalSpace G] [IsTopologicalGroup G] {ρ : Represent
   intro x
   show x ∈ smoothPart (trT ρ W)
   induction x with
-  | zero => exact zero_mem _
   | add x y hx hy => exact add_mem hx hy
   | tmul v w =>
     refine mem_smoothPart_of_nhds (Filter.mem_of_superset ((hρ v).mem_nhds (by simp)) fun g hg => ?_)
     have h1 : ρ g v = v := hg
-    simp [h1]
+    simp [trT, LinearMap.rTensor_tmul, h1]
 
 end general
 

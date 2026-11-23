@@ -1,5 +1,45 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.UniformVanishing
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.UniformVanishing
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -27,7 +67,7 @@ theorem shiftOp_succ (T : ∀ e, M e →ₗ[R] M (e + 1)) (y : ⨁ e, M e) (e : 
     by_cases h : i = e
     · subst h; simp [DirectSum.of_eq_same]
     · rw [DirectSum.of_eq_of_ne _ _ _ (by omega), DirectSum.of_eq_of_ne _ _ _ (by omega), map_zero]
-  | add a b ha hb => simp only [map_add, DirectSum.add_apply, ha, hb]
+  | add a b ha hb => simp only [map_add (f := _), DirectSum.add_apply, ha, hb]
 
 theorem shiftOp_zero (T : ∀ e, M e →ₗ[R] M (e + 1)) (y : ⨁ e, M e) :
     shiftOp T y 0 = 0 := by
@@ -36,7 +76,7 @@ theorem shiftOp_zero (T : ∀ e, M e →ₗ[R] M (e + 1)) (y : ⨁ e, M e) :
   | of i x =>
     rw [← DirectSum.lof_eq_of R, shiftOp_lof, DirectSum.lof_eq_of]
     exact DirectSum.of_eq_of_ne _ _ _ (by omega)
-  | add a b ha hb => simp only [map_add, DirectSum.add_apply, ha, hb, add_zero]
+  | add a b ha hb => simp only [map_add (f := _), DirectSum.add_apply, ha, hb, add_zero]
 
 theorem eventually_zero (f : ⨁ e, M e) : ∃ n : ℕ, ∀ e, n ≤ e → f e = 0 := by
   induction f using DirectSum.induction_on with
@@ -78,7 +118,10 @@ theorem gradedNoeth : GradedNoeth := by
     obtain ⟨j, rfl⟩ := hSset b hb
     exact hEc i j
   let S := Algebra.adjoin R (Sset : Set (Module.End R (⨁ e, M e)))
-  letI : CommRing S := Algebra.adjoinCommRingOfComm R hcomm
+  letI : IsMulCommutative S := Algebra.isMulCommutative_adjoin R (by
+    intro a ha b hb _
+    exact hcomm a ha b hb)
+  letI : CommRing S := { (inferInstance : Ring S) with mul_comm := mul_comm' }
   haveI : Algebra.FiniteType R S :=
     (Subalgebra.fg_iff_finiteType S).1 (Subalgebra.fg_adjoin_finset _)
   haveI : IsNoetherianRing S := Algebra.FiniteType.isNoetherianRing R S
@@ -98,7 +141,7 @@ theorem gradedNoeth : GradedNoeth := by
     | mem x hx =>
       exact Submodule.subset_span (Set.mem_biUnion (Finset.mem_range.2 (by omega)) ⟨x, hx, rfl⟩)
     | zero => simp
-    | add x y _ _ hx hy => rw [map_add]; exact P.add_mem hx hy
+    | add x y _ _ hx hy => rw [map_add (f := _)]; exact P.add_mem hx hy
     | smul c x _ hx => rw [map_smul]; exact Submodule.smul_of_tower_mem P c hx
   have hall : ∀ e (m : M e), DirectSum.lof R ℕ M e m ∈ P := by
     intro e
@@ -120,7 +163,7 @@ theorem gradedNoeth : GradedNoeth := by
           exact P.smul_mem _ (ih y)
         · simp
         · intro x y hx hy
-          rw [map_add]
+          rw [map_add (f := _)]
           exact P.add_mem hx hy
   have hP : ∀ y : ⨁ e, M e, y ∈ P := by
     intro y

@@ -1,5 +1,49 @@
-import Formalism.SharpRestriction.LevelLetterCocycles.LevelKernelDetection.BasisCombinationMemInvariants
-import Formalism.SharpRestriction.LevelLetterCocycles.DeltaInvariantLattices
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.WachCoordinates
+public import Formalism.SharpRestriction.LevelLetterCocycles.LevelKernelDetection.BasisCombinationMemInvariants
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.DistinguishedUnitIdeals.ExistsConstOfInvariantMod
+public import Formalism.SharpRestriction.LevelLetterCocycles.CoordHomMapTrace
+
+@[expose] public section
 
 noncomputable section
 
@@ -88,6 +132,7 @@ theorem exists_lift_of_onto (hs : W.s = 1) (hLem3 : Formalism.MainNotions.DeltaI
     rw [map_smul, hz', smul_smul, hunit.val_inv_mul, one_smul]
   choose v hv using hi
   refine ⟨∑ i, v i, ?_⟩
+
   rw [map_sum]
   simp only [hv]
   rw [← Finset.sum_smul, sum_letE, one_smul]
@@ -108,13 +153,15 @@ theorem exists_invariant_lift_average (hcu : IsUnit ((W.DelF.card : ℕ) : W.EE)
       calc W.γE δ' (↑hcu.unit⁻¹ : W.EE)
           = W.γE δ' (↑hcu.unit⁻¹ : W.EE) * (↑hcu.unit * ↑hcu.unit⁻¹) := by rw [Units.mul_inv, mul_one]
         _ = ↑hcu.unit⁻¹ := by rw [← mul_assoc, h1, one_mul]
+
     rw [W.γD_smul, hinv, map_sum]
     congr 1
     simp only [← W.γD_mul]
     exact Finset.sum_nbij' (fun δ => δ' * δ) (fun δ => δ'⁻¹ * δ)
       (fun δ hδ => finiteDelta_mul_mem hδ' hδ) (fun δ hδ => finiteDelta_mul_mem (finiteDelta_inv_mem hδ') hδ)
       (fun δ _ => by group) (fun δ _ => by group) (fun δ _ => rfl)
-  · rw [map_smul, map_sum]
+  · set_option synthInstance.maxHeartbeats 100000 in
+      rw [map_smul, map_sum]
     rw [Finset.sum_congr rfl fun δ hδ => by rw [W.map_γ, hw, hy δ hδ]]
     rw [Finset.sum_const, ← Nat.cast_smul_eq_nsmul W.EE, smul_smul, hcu.val_inv_mul, one_smul]
 

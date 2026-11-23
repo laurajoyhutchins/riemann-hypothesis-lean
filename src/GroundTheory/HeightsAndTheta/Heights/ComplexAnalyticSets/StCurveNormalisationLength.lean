@@ -1,5 +1,52 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StSliceObjects
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StSliceObjects
+public import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.Statements
+public import Mathlib.RingTheory.OrderOfVanishing.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -62,31 +109,6 @@ theorem algebraMap_curveNormalisation_injective (I : Ideal (MvPolynomial (Fin n)
   intro a b h
   exact IsLocalization.injective (FractionRing (curveLocalRing I q)) le_rfl (congrArg Subtype.val h)
 
-theorem height_ker_eval_line : (RingHom.ker (eval (0 : Fin 1 → ℂ))).height = 1 := by
-  apply le_antisymm
-  · have h := Ideal.height_le_ringKrullDim_of_ne_top
-      (I := RingHom.ker (eval (0 : Fin 1 → ℂ))) (RingHom.ker_ne_top _)
-    rw [MvPolynomial.ringKrullDim_of_isNoetherianRing, ringKrullDim_eq_zero_of_field, zero_add,
-      Nat.card_eq_fintype_card, Fintype.card_fin] at h
-    exact_mod_cast h
-  · rw [Order.one_le_iff_ne_zero, Ne, Ideal.height_eq_zero_iff_eq_bot]
-    intro h
-    have hX : (X 0 : MvPolynomial (Fin 1) ℂ) ∈ RingHom.ker (eval (0 : Fin 1 → ℂ)) := by simp
-    rw [h, Ideal.mem_bot] at hX
-    exact X_ne_zero _ hX
-
-def curveLocalRingLineEquiv :
-    curveLocalRing (⊥ : Ideal (MvPolynomial (Fin 1) ℂ)) 0 ≃+*
-      Localization.AtPrime (RingHom.ker (eval (0 : Fin 1 → ℂ))) :=
-  (Ideal.quotEquivOfEq (Ideal.map_bot)).trans (RingEquiv.quotientBot _)
-
-theorem ringKrullDim_curveLocalRing_line :
-    ringKrullDim (curveLocalRing (⊥ : Ideal (MvPolynomial (Fin 1) ℂ)) 0) = 1 := by
-  rw [ringKrullDim_eq_of_ringEquiv curveLocalRingLineEquiv,
-    IsLocalization.AtPrime.ringKrullDim_eq_height (RingHom.ker (eval (0 : Fin 1 → ℂ))),
-    height_ker_eval_line]
-  rfl
-
 def CurveNormalisationLength.Statement : Prop :=
   ∀ (n : ℕ) (I : Ideal (MvPolynomial (Fin n) ℂ)) (q : Fin n → ℂ) (f : MvPolynomial (Fin n) ℂ),
     IsRadicalAt I q → ringKrullDim (curveLocalRing I q) = 1 →
@@ -98,25 +120,6 @@ def CurveNormalisationLength.Statement : Prop :=
                 (algebraMap (curveLocalRing I q) (curveNormalisation I q)
                   (algebraMap (MvPolynomial (Fin n) ℂ) (curveLocalRing I q) f))) *
             Module.length (curveLocalRing I q) (curveNormalisation I q ⧸ P.asIdeal)
-
-theorem CurveNormalisationLength.hypotheses_inhabited :
-    IsRadicalAt (⊥ : Ideal (MvPolynomial (Fin 1) ℂ)) 0 ∧
-      ringKrullDim (curveLocalRing (⊥ : Ideal (MvPolynomial (Fin 1) ℂ)) 0) = 1 ∧
-      algebraMap (MvPolynomial (Fin 1) ℂ) (curveLocalRing (⊥ : Ideal (MvPolynomial (Fin 1) ℂ)) 0) (X 0) ∈
-        nonZeroDivisors (curveLocalRing (⊥ : Ideal (MvPolynomial (Fin 1) ℂ)) 0) := by
-  refine ⟨isRadicalAt_of_isRadical Ideal.isPrime_bot.isRadical 0, ringKrullDim_curveLocalRing_line, ?_⟩
-  have : IsDomain (curveLocalRing (⊥ : Ideal (MvPolynomial (Fin 1) ℂ)) 0) :=
-    curveLocalRingLineEquiv.toMulEquiv.isDomain
-  refine mem_nonZeroDivisors_of_ne_zero fun h ↦ ?_
-  have h' := congrArg curveLocalRingLineEquiv h
-  rw [map_zero] at h'
-  have hinj := IsLocalization.injective (Localization.AtPrime (RingHom.ker (eval (0 : Fin 1 → ℂ))))
-    (M := (RingHom.ker (eval (0 : Fin 1 → ℂ))).primeCompl)
-    (Ideal.primeCompl_le_nonZeroDivisors _)
-  apply X_ne_zero (R := ℂ) (0 : Fin 1)
-  apply hinj
-  rw [map_zero]
-  exact h'
 
 end
 

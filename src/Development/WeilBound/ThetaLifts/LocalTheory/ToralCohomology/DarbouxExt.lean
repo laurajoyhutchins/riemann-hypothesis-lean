@@ -1,10 +1,59 @@
-import Development.WeilBound.ThetaLifts.LocalTheory.UnramifiedDeterminedBySpherical
-import Development.WeilBound.ThetaLifts.LocalTheory.ToralCohomology.ExistsTorus
-import Development.WeilBound.ThetaLifts.LeviDeterminants.EqZeroOfTheta
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsDiagonalLagrangianInvariantForm
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsUnitaryDoubledBlockDiagOne
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ProductFunctionOnSumCoordsMemAdelicSchwartzSpace
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsAdelicSchwartzNeZeroAtOrigin
+module
+
+public import Development.WeilBound.ThetaLifts.LocalTheory.UnramifiedDeterminedBySpherical
+public import Development.WeilBound.ThetaLifts.LocalTheory.ToralCohomology.ExistsTorus
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsAdelicSchwartzNeZeroAtOrigin
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsDiagonalLagrangianInvariantForm
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsUnitaryDoubledBlockDiagOne
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ProductFunctionOnSumCoordsMemAdelicSchwartzSpace
+public import Development.WeilBound.ThetaLifts.LeviDeterminants.EqZeroOfTheta
+import Mathlib.Algebra.AffineMonoid.UniqueSums
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.Divisors.MatchingOfParts
+
+@[expose] public section
 
 noncomputable section
 
@@ -166,7 +215,7 @@ theorem good_unit (hc : IsCMExt F E σ) (τ : ∀ w : InfinitePlace F, EmbOver E
   have h1 : (a • (g + 1)).det - 1 ∈ atI F E := by
     rw [← Ideal.Quotient.eq, RingHom.map_det, map_one]
     have : (Ideal.Quotient.mk (atI F E)).mapMatrix (a • (g + 1)) = 1 := by
-      rw [e, map_add, map_one, add_eq_left]
+      rw [e, map_add (f := _), map_one, add_eq_left]
       ext i j
       exact Ideal.Quotient.eq_zero_iff_mem.2 (Ideal.mul_mem_left _ a (hg i j))
     rw [this, det_one]
@@ -174,7 +223,7 @@ theorem good_unit (hc : IsCMExt F E σ) (τ : ∀ w : InfinitePlace F, EmbOver E
     have a0 : piInf (τ w) a ≠ 0 := fun z => by
       have := congrArg (piInf (τ w)) a2
       simp [z] at this
-    rw [det_smul, map_mul, map_pow, RingHom.map_det, map_add, map_one]
+    rw [det_smul, map_mul, map_pow, RingHom.map_det, map_add (f := _), map_one]
     exact mul_ne_zero (pow_ne_zero _ a0) (h0 w)
   have : (a • (g + 1)).det = u := eq_of_inf hc τ (by simpa using sub_mem h1 hu) fun w => (hu' w).symm
   obtain ⟨t, ht⟩ := (isUnit_iff_isUnit_det _).2 (this ▸ u.isUnit)
@@ -217,7 +266,7 @@ theorem realUniq : Loc.RealUniq := by
   obtain ⟨-, ⟨d₂, e₂, h₂⟩, -⟩ := hP'.weil
   obtain rfl : d₁ = d₂ := darboux_ext fun w => by rw [← transpose_transpose w, e₁, e₂]
   let a : AE F E := algebraMap (AF F) _ ⅟2
-  have a2 : a + a = 1 := by rw [← map_add, invOf_two_add_invOf_two, map_one]
+  have a2 : a + a = 1 := by rw [← map_add (f := _), invOf_two_add_invOf_two, map_one]
   have good : ∀ x : UA σ X.J, (∀ i j, (mat x - 1) i j ∈ atI F E) → (∀ w, ((mat x).map (piInf (B.emb w)) + 1).det ≠ 0) →
       ∀ Φ ∈ schA F (Fin n × Fin d), om (x, 1) Φ = om' (x, 1) Φ := fun x hx h0 => by
     obtain ⟨t, ht, ht'⟩ := good_unit hc B.emb a a2 (mat x) hx h0

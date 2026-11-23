@@ -1,19 +1,55 @@
-import Formalism.SharpRestriction.LevelLetterCocycles.DecompositionData
-import Formalism.CharacterColumnKernels.Assemble
-import Formalism.CharacterColumnKernels.IdempotentNormalForms.CongMem
-import Formalism.CharacterColumnKernels.IdempotentNormalForms.CharacterColumnKernelsOfBlockChiCOfBlockChiOne
-import Formalism.TruncatedSeriesCounting.TruncatedSeriesProofs.LemmaDetPoly
-import Formalism.TruncatedSeriesCounting.TruncatedSeriesProofs.BridgeDet
-import Formalism.CharacterColumnKernels.IdempotentNormalForms.IsUnitDetOfConst
-import Formalism.CharacterColumnKernels.StatLowestInZ
-import Formalism.CharacterColumnKernels.IdempotentNormalForms.CharacterColumnKernelLengthBound
-import Formalism.CharacterColumnKernels.IdempotentNormalForms.MemCcIdealIffForall
-import Formalism.CharacterColumnKernels.IdempotentNormalForms.SumIteLe
-import Formalism.CharacterColumnKernels.IdempotentNormalForms.SplitFibre
-import Formalism.CharacterColumnKernels.IdempotentNormalForms.SpacedProductLowerBound
-import Formalism.CharacterColumnKernels.IdempotentNormalForms.IdemNormalForm
-import Mathlib
-import Formalism.CharacterColumnKernels.IdempotentNormalForms.SmulEqZeroIffCrit
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.DecompositionData
+public import Formalism.CharacterColumnKernels.StatementN
+public import Formalism.CharacterColumnKernels.IdempotentNormalForms.CharacterColumnKernelLengthBound
+public import Formalism.CharacterColumnKernels.IdempotentNormalForms.LengthKerOfDetEqZero
+public import Formalism.CharacterColumnKernels.IdempotentNormalForms.LengthQuotSmulRangeFree
+public import Formalism.CharacterColumnKernels.IdempotentNormalForms.SumIteLe
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -48,7 +84,7 @@ theorem quot_le (L A B : Submodule O V) (P : V →ₗ[O] V) (hA : ∀ v ∈ A, P
       Submodule.Quotient.mk_eq_zero, Submodule.mem_comap]
     show P v ∈ L ⊓ A
     have hv' : (v : V) = a + b := hab.symm
-    rw [hv', map_add, hA a (Submodule.mem_inf.mp ha).1, hB b (Submodule.mem_inf.mp hb).1, add_zero]
+    rw [hv', map_add (f := _), hA a (Submodule.mem_inf.mp ha).1, hB b (Submodule.mem_inf.mp hb).1, add_zero]
     exact Submodule.mem_inf.mpr ⟨(Submodule.mem_inf.mp ha).2, (Submodule.mem_inf.mp ha).1⟩
   have hq : Function.Surjective q := by
     intro y
@@ -61,7 +97,7 @@ theorem quot_le (L A B : Submodule O V) (P : V →ₗ[O] V) (hA : ∀ v ∈ A, P
     apply Subtype.ext
     show P l = (w : V)
     have hPw : P (w : V) = w := hA w hwA
-    rw [← hPw, ← hlb, map_add, hB b hb, add_zero]
+    rw [← hPw, ← hlb, map_add (f := _), hB b hb, add_zero]
   refine Module.length_le_of_surjective (Submodule.liftQ _ q hK) ?_
   intro y
   obtain ⟨v, rfl⟩ := hq y
@@ -83,7 +119,7 @@ theorem coe_prod' {ι : Type*} (s : Finset ι) (h : ι → T) (z : X) :
 theorem coe_sum' {ι : Type*} (s : Finset ι) (h : ι → T) (z : X) :
     ((∑ y ∈ s, h y : T) : X → O) z = ∑ y ∈ s, ((h y : T) : X → O) z := by
   first
-  | rw [AddSubmonoidClass.coe_finset_sum, Finset.sum_apply]
+  | rw [AddSubmonoidClass.coe_finsetSum, Finset.sum_apply]
   | simp [Finset.sum_apply]
 
 theorem exists_bump (hsep : ∀ x y : X, x ≠ y → ∃ f ∈ T, f x ≠ f y) (x : X) :
@@ -182,8 +218,9 @@ theorem eigSpan (hsep : ∀ x y : X, x ≠ y → ∃ f ∈ T, f x ≠ f y) :
   have hCK : algebraMap O (FractionRing O) C ≠ 0 :=
     (map_ne_zero_iff _ (IsFractionRing.injective O (FractionRing O))).mpr hC
   have hv : algebraMap O (FractionRing O) C • v = ∑ x, actK T act (e x) v := by
+
     rw [← LinearMap.sum_apply, ← map_sum, hsum, AlgHom.commutes, Module.algebraMap_end_apply,
-      algebraMap_smul]
+    algebraMap_smul]
   have h1 : algebraMap O (FractionRing O) C • v ∈ ⨆ x, Vx T (actK T act).toRingHom x := by
     rw [hv]
     exact Submodule.sum_mem _ fun x _ => Submodule.mem_iSup_of_mem x (hmemV x v)
@@ -250,6 +287,7 @@ theorem len_le (hsep : ∀ x y : X, x ≠ y → ∃ f ∈ T, f x ≠ f y)
     simp
   have hPA' : ∀ v, actK T act (∑ x ∈ S, e x) v ∈ VS T (actK T act).toRingHom (S : Set X) := by
     intro v
+
     rw [map_sum, LinearMap.sum_apply]
     refine Submodule.sum_mem _ fun x hx => ?_
     unfold Formalism.NG.VS
@@ -257,6 +295,7 @@ theorem len_le (hsep : ∀ x y : X, x ≠ y → ∃ f ∈ T, f x ≠ f y)
   have hrest : ∀ v, actK T act (∑ x ∈ Finset.univ \ S, e x) v ∈
       VS T (actK T act).toRingHom ((S : Set X)ᶜ) := by
     intro v
+
     rw [map_sum, LinearMap.sum_apply]
     refine Submodule.sum_mem _ fun x hx => ?_
     have hx' : x ∈ ((S : Set X)ᶜ) := fun h => (Finset.mem_sdiff.mp hx).2 (Finset.mem_coe.mp h)
@@ -265,7 +304,7 @@ theorem len_le (hsep : ∀ x y : X, x ≠ y → ∃ f ∈ T, f x ≠ f y)
   have hcv : ∀ v, algebraMap O (FractionRing O) C • v =
       actK T act (∑ x ∈ Finset.univ \ S, e x) v + actK T act (∑ x ∈ S, e x) v := by
     intro v
-    rw [← LinearMap.add_apply, ← map_add, Finset.sum_sdiff (Finset.subset_univ S), hsumAll,
+    rw [← LinearMap.add_apply, ← map_add (f := _), Finset.sum_sdiff (Finset.subset_univ S), hsumAll,
       AlgHom.commutes, Module.algebraMap_end_apply, algebraMap_smul]
   have hPB' : ∀ v, v - (algebraMap O (FractionRing O) C)⁻¹ • actK T act (∑ x ∈ S, e x) v ∈
       VS T (actK T act).toRingHom ((S : Set X)ᶜ) := by
@@ -589,7 +628,7 @@ theorem addVal_pow_sub_one (l : ℕ) [Fact l.Prime] [Algebra ℤ_[l] O] (hl0 : (
   obtain ⟨q, hq⟩ : (algebraMap ℤ_[l] O y - (x : O)) ∣ (algebraMap ℤ_[l] O y) ^ k - (x : O) ^ k :=
     sub_dvd_pow_sub_pow _ _ _
   have hyO : algebraMap ℤ_[l] O y - (x : O) = (l : O) ^ (m + 1) * algebraMap ℤ_[l] O z := by
-    rw [hyx, map_add, map_mul, map_pow, map_natCast, map_intCast]
+    rw [hyx, map_add (f := _), map_mul, map_pow, map_natCast, map_intCast]
     ring
   have hsplit : (algebraMap ℤ_[l] O y) ^ k - 1 =
       ((x ^ k - 1 : ℤ) : O) + (l : O) ^ (m + 1) * (algebraMap ℤ_[l] O z * q) := by

@@ -1,6 +1,47 @@
-import Mathlib
-import Formalism.SubspaceCounting.Statement
-import Formalism.PolynomialDimension.WeylDim
+module
+
+public import Mathlib.Analysis.Complex.Exponential
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -19,35 +60,8 @@ def hwt (m : ℕ) (A B : ℕ) : Fin (m + 2) → ℤ := Fin.cons (A : ℤ) (Fin.s
 def cwt (m : ℕ) (A c B : ℕ) (cl : Fin m → ℤ) : Fin (m + 2) → ℤ :=
   Fin.cons ((A : ℤ) + c) (Fin.snoc cl (-(B : ℤ)))
 
-def LemmaS : Prop :=
-  ∀ (O : Type) [CommRing O] [IsDomain O] [IsDiscreteValuationRing O] (π : O), Irreducible π →
-    ∀ (C Cp R R'' : Type) [AddCommGroup C] [Module O C] [Module.Free O C] [Module.Finite O C]
-      [AddCommGroup Cp] [Module O Cp] [Module.Free O Cp] [Module.Finite O Cp]
-      [AddCommGroup R] [Module O R] [Module.Free O R] [Module.Finite O R]
-      [AddCommGroup R''] [Module O R''] [Module.Free O R''] [Module.Finite O R'']
-      (io : C →ₗ[O] Cp) (ph : Cp →ₗ[O] R) (ps : R →ₗ[O] R'') (D ρp σ np : ℕ),
-      Formalism.G0.GoodRank π (ps ∘ₗ ph) ρp D →
-      Formalism.G0.GoodRank π (ph ∘ₗ io) σ D →
-      (∀ n, Formalism.G0.GoodRank π ph n (2 * D) → n ≤ np) →
-      Formalism.G0.GoodRank π (ps ∘ₗ ph ∘ₗ io) (σ + ρp - np) (2 * D)
-
-def CountB : Prop :=
-  ∀ (O K V : Type) [CommRing O] [IsDomain O] [IsDiscreteValuationRing O] [Field K] [Algebra O K]
-    [IsFractionRing O K] [AddCommGroup V] [Module K V] [Module O V] [IsScalarTower O K V]
-    [FiniteDimensional K V] (π : O), Irreducible π →
-    ∀ (M : ℕ) (Rl CC : Fin M → Submodule O V) (n E c : ℕ), E < c →
-      (∀ e e', e ≠ e' → ∀ x ∈ CC e, ∃ y ∈ Rl e', x = π ^ c • y) →
-      (∀ e, ∃ h : CC e ≤ Rl e, Formalism.G0.GoodRank π (Submodule.inclusion h) n E) →
-      M * n ≤ Module.finrank K V
-
 def LevelCount : Prop :=
   ∀ k' A B : ℕ, ∑ j ∈ range (min A B + 1), dimHar k' (A - j) (B - j) = dimPol k' A * dimPol k' B
-
-def LevelTail : Prop :=
-  ∀ k' A B J : ℕ, J ≤ min A B →
-    (∑ j ∈ Icc J (min A B), dimHar k' (A - j) (B - j) = dimPol k' (A - J) * dimPol k' (B - J)) ∧
-    ((dimPol k' (A - J) * dimPol k' (B - J) : ℕ) : ℝ) ≤
-      (1 - (J : ℝ) / (B + k' + 1)) ^ k' * ((dimPol k' A * dimPol k' B : ℕ) : ℝ)
 
 def LevelTailExp : Prop :=
   ∀ (k' A B J : ℕ) (La b' : ℝ), 2 ≤ k' → 0 < b' → 0 ≤ La → La * b' / (k' + 1) ≤ J →
@@ -55,15 +69,8 @@ def LevelTailExp : Prop :=
     ((∑ j ∈ Icc J (min A B), dimHar k' (A - j) (B - j) : ℕ) : ℝ) ≤
       Real.exp (-La / 3) * ((dimPol k' A * dimPol k' B : ℕ) : ℝ)
 
-def HarLower : Prop :=
-  ∀ k' al be : ℕ, ((dimPol k' al * dimPol k' be : ℕ) : ℝ) * k' / (be + k') ≤ (dimHar k' al be : ℝ)
-
 def BinomRatio : Prop :=
   ∀ k' al j : ℕ, 0 < al → 1 - (k' : ℝ) * j / al ≤ (dimPol k' al : ℝ) / dimPol k' (al + j)
-
-def BinomSeries : Prop :=
-  ∀ k' be : ℕ, 2 ≤ k' →
-    HasSum (fun j : ℕ => (dimPol k' be : ℝ) / dimPol k' (be + j)) (((be : ℝ) + k') / ((k' : ℝ) - 1))
 
 def BinomTail : Prop :=
   ∀ (k' be J : ℕ) (La b' : ℝ), 5 ≤ k' → 0 < b' → 0 ≤ La → La * b' / (k' + 1) ≤ J →
@@ -77,32 +84,5 @@ def DensityLower : Prop :=
     (1 - (k' : ℝ) * (La * b' / (k' + 1)) / al) * (1 - Real.exp (-La / 3)) ≤
       ∑ j ∈ range (⌊La * b' / (k' + 1)⌋₊ + 1),
         (dimHar k' al be : ℝ) / ((dimPol k' (al + j) : ℝ) * dimPol k' (be + j))
-
-def CloudDims : Prop :=
-  ∃ C : ℝ, 0 < C ∧ ∀ (N m c : ℕ) (A B : Fin N → ℕ) (cl : Fin N → Fin m → ℤ) (b' : ℝ),
-    (∀ s, Antitone (cl s)) → (∀ s i, 0 ≤ cl s i ∧ cl s i ≤ c) → 0 < b' →
-    (∀ s, b' ≤ 4 * A s ∧ b' ≤ 4 * B s) → (N : ℝ) * (m + 2) * c ≤ b' →
-    (1 - C * N * (m + 2) * c / b') * ((∏ s, weylDim (m + 2) (cwt m (A s) c (B s) (cl s)) : ℚ) : ℝ) ≤
-        (((∏ s, weylDim m (cl s)) * ∏ s, weylDim (m + 2) (hwt m (A s) (B s)) : ℚ) : ℝ) ∧
-      ((∏ s, weylDim (m + 2) (hwt m (A s + c) (B s + c)) : ℚ) : ℝ) ≤
-        (1 + C * N * (m + 2) * c / b') * ((∏ s, weylDim (m + 2) (hwt m (A s) (B s)) : ℚ) : ℝ)
-
-def CloudShare : Prop :=
-  ∀ (ρ dcl dH dHp dlam κH κHp x : ℝ), 0 < dlam → 0 ≤ dH → 0 ≤ dHp → 0 ≤ dcl →
-    0 ≤ κH → κH ≤ 1 → 0 ≤ κHp → 0 ≤ x → x ≤ 1 →
-    dcl * ((1 - κH) * dH - κHp * dHp) ≤ ρ →
-    (1 - x) * dlam ≤ dcl * dH → dHp ≤ (1 + x) * dH → dcl * dH ≤ dlam →
-    1 - ρ / dlam ≤ κH + 2 * κHp + x
-
-def HockeyStick : Prop :=
-  ∀ m B : ℕ, ∑ j ∈ range (B + 1), dimPol m (B - j) = dimPol (m + 1) B
-
-def DigitClassCount : Prop :=
-  ∀ m P g : ℕ, 0 < P →
-    ((univ : Finset (Fin (m + 1) → Fin P)).filter (fun ρ => (∑ i, (ρ i : ℕ)) % P = g % P)).card = P ^ m
-
-def DigitClassSize : Prop :=
-  ∀ m P g e : ℕ, 0 < P → 0 < g → (g : ℝ) / P - (m + 1) ≤ e →
-    (1 - ((m : ℝ) + 1) ^ 2 * P / g) * dimPol m g ≤ (P : ℝ) ^ m * dimPol m e
 
 end Formalism.CountingSumsFrames

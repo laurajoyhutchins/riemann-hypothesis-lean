@@ -1,5 +1,57 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RootLatticeThresholds.DFrameAtPfA
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.StepPtRepPfB
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.StepPtRepPfA
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.StepPtRepPfC
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.StepPtRepPfD
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RootLatticeThresholds.DFrameAtPfA
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -35,7 +87,7 @@ theorem zhat_famSc (sc : ℝ) (e : Fin r → Fin n → ℂ) (z z' : Fin n → �
 theorem dl_scale (lam : Fin (r + 1) → ℂ) (Z : Matrix (Fin (r + 1)) (Fin (r + 1)) ℂ) (l : ℕ) (hl : l ≤ r + 1) :
     Formalism.L2.SG.RealObj.Dl (diagonal lam * Z * diagonal lam) l = (∏ i : Fin l, lam (Fin.castLE hl i)) ^ 2 * Formalism.L2.SG.RealObj.Dl Z l := by
   unfold Formalism.L2.SG.RealObj.Dl
-  rw [dif_pos hl, dif_pos hl]
+  rw [dite_eq_left hl, dite_eq_left hl]
   have h1 : (diagonal lam * Z * diagonal lam).submatrix (Fin.castLE hl) (Fin.castLE hl) =
       diagonal (fun i => lam (Fin.castLE hl i)) * Z.submatrix (Fin.castLE hl) (Fin.castLE hl) *
         diagonal (fun i => lam (Fin.castLE hl i)) := by
@@ -187,7 +239,7 @@ theorem dframe_loc (A B : Fr ε r k) (he : B.e = A.e) (i0 : Fin k) (g : Formalis
     rw [hx', xPr, hJ_sum_right]
     simp only [hJ_smul_right]
     have h := congrFun (congrFun (mul_adjugate Zs) a) (Fin.last r)
-    rw [Matrix.mul_apply, Matrix.smul_apply, one_apply, smul_eq_mul] at h
+    rw [Matrix.mul_apply, Matrix.smul_apply, Matrix.one_apply, smul_eq_mul] at h
     have h2 : ∑ b, adjugate Zs b (Fin.last r) * hJ ε (f a) (Gm *ᵥ f' b) =
         ∑ b, Zs a b * adjugate Zs b (Fin.last r) := Finset.sum_congr rfl fun b _ => mul_comm _ _
     rw [h2, h]
@@ -206,7 +258,7 @@ theorem dframe_loc (A B : Fr ε r k) (he : B.e = A.e) (i0 : Fin k) (g : Formalis
     rw [hx, xUn, hJ_sum_left]
     simp only [hJ_smul_left, star_star]
     have h := congrFun (congrFun (adjugate_mul Zs) (Fin.last r)) b
-    rw [Matrix.mul_apply, Matrix.smul_apply, one_apply, smul_eq_mul] at h
+    rw [Matrix.mul_apply, Matrix.smul_apply, Matrix.one_apply, smul_eq_mul] at h
     rw [show ∑ a, adjugate Zs (Fin.last r) a * hJ ε (f a) (Gm *ᵥ f' b) =
       ∑ a, adjugate Zs (Fin.last r) a * Zs a b from rfl, h]
     by_cases hb : b = Fin.last r

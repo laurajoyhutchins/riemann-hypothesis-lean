@@ -1,5 +1,44 @@
-import Mathlib
-import Formalism.LocalToGlobal.KernelLattices.ThDistC
+module
+
+public import Formalism.LocalToGlobal.KernelLattices.ThDistC
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain MvPolynomial
 
@@ -26,10 +65,6 @@ def ThHyp : Prop :=
       (colValF W sel mu u i).rho (colValF W sel mu u (i + 1)).rho) ∧
   ThEquivP (chThT W Ch sel mu cst A u m2).top (Sall sel mu u) (cAof sel mu cst * cBof sel mu cst u)
       (colValF W sel mu u (m2 + 1)).rho (colVal W u R.m (Pr.vT u) (rowSG Pr sel mu)).rho
-
-def KerHypOn (b : L.β (m2 + 1)) (hY : YbHyp (R := R) sel mu cst L u m2 b) (P : LevFam X.E X.K R.r Pr.vGs) : Prop :=
-  MatEquiv W Ch sel mu cst L (chTh W Ch sel mu cst A u m2) ∧ Cp1EquivOn W Ch sel mu cst L (chTh W Ch sel mu cst A u m2) b hY ∧
-    Cp2EquivOn W Ch sel mu cst L (chTh W Ch sel mu cst A u m2) b hY P
 
 end Inst
 
@@ -75,9 +110,6 @@ def Amb.thDat (Sall : Finset (HeightOneSpectrum (𝓞 X.E))) (cA cB : ℕ) (N : 
     (Ξ : HomE X.E a b → X.K) : VCx X.Tau a b → ℂ := fun z =>
   latSum (divLat cA (homAt Sall N N')) (mulLat cB (homAt Sall N N')) fun x => A.σ₀ (Ξ x) * A.thInd Sall N N' cB x z
 
-def TabNe {K : Type} [Field K] {ι : Type} [Fintype ι] {a b : ℕ} (lam : ι → DomWeight a) (n : ι → ℕ) (J : (DVar ι a b →₀ ℕ) → K) : Prop :=
-  ∃ P ∈ DIV.VV K lam, jetMap J n P ≠ 0
-
 end Tab
 
 section Ne
@@ -91,12 +123,6 @@ def scalK (i : ℕ) {a b : ℕ} (N : Submodule (𝓞 X.E) (Sp X.E a)) (fr : Frs 
     (fr' : Frs X.E b (rowSG Pr sel mu)) : X.K :=
   muInvDet sel (rowSG Pr sel mu) (mUof Ch mu i) (muAt Ch sel mu cst i) N fr *
     (muInvDet sel (rowSG Pr sel mu) (mUof Ch mu i) (muAt Ch sel mu cst i) N' fr')⁻¹
-
-def FirstCharacterPointNonvanishing (al : L.β m2) (p₀ : ChPt (R := R) sel mu u m2) (p : ChPt (R := R) sel mu u (m2 + 1)) (Y : Set (Sp X.E (R.N (m2 + 1)))) : Prop :=
-  Y ∈ ybSet sel mu cst p.deco.1.N ∧ cp1K W Ch sel mu cst L (chTh W Ch sel mu cst A u m2) al p₀ p Y ≠ 0
-
-def SecondCharacterPointNonvanishing (p : ChPt (R := R) sel mu u (m2 + 1)) (Y : Set (Sp X.E (R.N (m2 + 1)))) (d : RowPt Pr R sel mu) : Prop :=
-  Y ∈ ybSet sel mu cst p.deco.1.N ∧ cp2K W Ch sel mu cst (chTh W Ch sel mu cst A u m2) p Y d ≠ 0
 
 end Ne
 

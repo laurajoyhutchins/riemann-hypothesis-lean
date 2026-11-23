@@ -1,4 +1,53 @@
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.T2SpaceFiniteAdeleRing
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.DifferentiableAtChart
+public import Mathlib.NumberTheory.NumberField.CMField
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsContinuousPadic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.Divisors.SimpleTwistedTraceFormulaStable
+import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.BaseChangeDefiniteUnitary
+import Development.AutomorphicArithmetic.IntegralCasts.IsOpenStabOfMemNhds
+import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Matrix Polynomial Filter GlobalTheory.CuspRep GlobalTheory.PRep Formalism.UG Formalism.BasicNotions GlobalTheory.UnitaryBC Formalism.L2.Host GlobalTheory.BCT
 open scoped Classical TensorProduct
 attribute [local instance] GlobalTheory.LocalData.complRel GlobalTheory.LocalData.isLocalField
@@ -9,15 +58,6 @@ namespace GlobalTheory.EulerTw
 
 variable (E : Type) [Field E] [NumberField E] [IsCMField E] (n : ℕ)
 
-def glueM (T : Finset (Pl E)) (f : ∀ v : Pl E, Matrix (Fin n) (Fin n) (v.adicCompletion E)) :
-    Matrix (Fin n) (Fin n) (FiniteAdeleRing (𝓞 E) E) :=
-  fun i j => ⟨fun v => if v ∈ T then f v i j else (1 : Matrix (Fin n) (Fin n) (v.adicCompletion E)) i j, by
-    filter_upwards [T.finite_toSet.compl_mem_cofinite] with v hv
-    rw [if_neg (by simpa using hv), Matrix.one_apply]
-    split_ifs
-    · exact one_mem _
-    · exact zero_mem _⟩
-
 theorem pLoc_ext {a b : FiniteAdeleRing (𝓞 E) E} (h : ∀ v, pLoc E v a = pLoc E v b) : a = b :=
   Subtype.ext (funext h)
 
@@ -25,25 +65,5 @@ theorem matrix_ext_pLoc {A B : Matrix (Fin n) (Fin n) (FiniteAdeleRing (𝓞 E) 
     (h : ∀ v, A.map (pLoc E v) = B.map (pLoc E v)) : A = B := by
   refine Matrix.ext fun i j => ?_
   exact pLoc_ext E fun v => congrFun (congrFun (h v) i) j
-
-theorem map_glueM (T : Finset (Pl E)) (f : ∀ v : Pl E, Matrix (Fin n) (Fin n) (v.adicCompletion E)) (v : Pl E) :
-    (glueM E n T f).map (pLoc E v) = if v ∈ T then f v else 1 := by
-  refine Matrix.ext fun i j => ?_
-  change (if v ∈ T then f v i j else (1 : Matrix (Fin n) (Fin n) (v.adicCompletion E)) i j) =
-    (if v ∈ T then f v else 1) i j
-  split_ifs <;> rfl
-
-theorem glueM_mul (T : Finset (Pl E)) (f f' : ∀ v : Pl E, Matrix (Fin n) (Fin n) (v.adicCompletion E))
-    (hf : ∀ v, f v * f' v = 1) : glueM E n T f * glueM E n T f' = 1 := by
-  refine matrix_ext_pLoc E n fun v => ?_
-  rw [Matrix.map_mul, map_glueM, map_glueM, Matrix.map_one _ (map_zero _) (map_one _)]
-  split_ifs
-  · exact hf v
-  · exact one_mul 1
-
-def glueG (T : Finset (Pl E)) (g : ∀ v : Pl E, GLw n v) : GL (Fin n) (FiniteAdeleRing (𝓞 E) E) :=
-  ⟨glueM E n T (fun v => (g v : Matrix (Fin n) (Fin n) (v.adicCompletion E))),
-    glueM E n T (fun v => (((g v)⁻¹ : GLw n v) : Matrix (Fin n) (Fin n) (v.adicCompletion E))),
-    glueM_mul E n T _ _ fun v => (g v).mul_inv, glueM_mul E n T _ _ fun v => (g v).inv_mul⟩
 
 end GlobalTheory.EulerTw

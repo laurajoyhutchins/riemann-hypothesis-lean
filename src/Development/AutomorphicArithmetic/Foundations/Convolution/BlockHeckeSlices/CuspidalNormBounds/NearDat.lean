@@ -1,13 +1,52 @@
-import Development.AutomorphicArithmetic.Foundations.Convolution.BlockHeckeSlices.SliceShift
-import Development.AutomorphicArithmetic.Foundations.Convolution.BlockHeckeSlices.CuspidalNormBounds.NearBlo
-import Development.AutomorphicArithmetic.Foundations.Convolution.BlockHeckeSlices.CuspidalNormBounds.ResTyp
+module
+
+public import Development.AutomorphicArithmetic.Foundations.Convolution.BlockHeckeSlices.SliceShift
+public import Development.AutomorphicArithmetic.Foundations.Convolution.BlockHeckeSlices.CuspidalNormBounds.NearBlo
+public import Development.AutomorphicArithmetic.Foundations.Convolution.BlockHeckeSlices.CuspidalNormBounds.ResTyp
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField UpperTheory.ConvolutionTheory.BW
 
 noncomputable section
 
 section
-variable {E : Type} [Field E] [NumberField E] [IsTotallyComplex E] {S : Set (Pl E)}
+variable {E : Type} [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] {S : Set (Pl E)}
 
 private abbrev Pt (E : Type) [Field E] [NumberField E] (n : ℕ) : Type :=
   ((E →+* ℂ) × Fin n → ℂ) × (Pl E → Multiset ℂ)
@@ -33,15 +72,11 @@ private theorem pt_cons {r s : ℕ} (b : Blo S r) (d : Dat S s) (z₀ : ℂ) (z 
     | left i =>
       have e : (Dat.cons b d).idx (Fin.castAdd s i) = (0 : Fin (d.len + 1)) :=
         Fin.addCases_left (motive := fun _ => Fin (d.len + 1)) (left := fun _ => 0) (right := fun i => (d.idx i).succ) i
-      simp only [Dat.ptL, Dat.lam, Fin.addCases_left]
-      rw [e]
-      rfl
+      simp only [Dat.ptL, Dat.lam, Fin.addCases_left, e, Fin.cons_zero]
     | right i =>
       have e : (Dat.cons b d).idx (Fin.natAdd r i) = ((d.idx i).succ : Fin (d.len + 1)) :=
         Fin.addCases_right (motive := fun _ => Fin (d.len + 1)) (left := fun _ => 0) (right := fun i => (d.idx i).succ) i
-      simp only [Dat.ptL, Dat.lam, Fin.addCases_right]
-      rw [e]
-      rfl
+      simp only [Dat.ptL, Dat.lam, Fin.addCases_right, e, Fin.cons_succ]
   · dsimp only
     split_ifs
     · simp
@@ -103,7 +138,7 @@ private theorem finite_inv (S : Set (Pl E)) (B : ℝ) (n : ℕ) : ∀ ρ : Typ E
 end
 
 theorem UpperTheory.ConvolutionTheory.BW.nearDat :
-    ∀ (E : Type) [Field E] [NumberField E] [IsTotallyComplex E], UpperTheory.ConvolutionTheory.BW.NearDat E := by
+    ∀ (E : Type) [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E], UpperTheory.ConvolutionTheory.BW.NearDat E := by
   intro E _ _ _ S n ρ B
   obtain ⟨D, -, hD⟩ := Set.exists_subset_bijOn {d : Dat S n | d.HasTyp ρ.ρ ∧ ∀ τ i, ‖d.lam τ i‖ ≤ B} inv
   refine ⟨D, Set.Finite.of_finite_image (by rw [hD.image_eq]; exact finite_inv S B n ρ) hD.injOn, fun d hd hB => ?_⟩
@@ -115,5 +150,5 @@ theorem UpperTheory.ConvolutionTheory.BW.nearDat :
   rw [e₁]
   refine MvPolynomial.eval₂Hom_congr' rfl (fun x hx _ => ?_) rfl
   have e₂ := congrFun (congrArg Prod.snd hz) x.1
-  simp only [if_neg (hF x hx)] at e₂
+  simp only [ite_eq_right (hF x hx)] at e₂
   rw [Dat.ptH, Dat.ptH, e₂]

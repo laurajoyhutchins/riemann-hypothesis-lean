@@ -1,11 +1,61 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.CovolBRa
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.CovolIdxK
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.BaseLatticeLe
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.EmbVHomInjective
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.LeadingMinorIntegrality
-import Formalism.SharpRestriction.CuspSpanNormBounds.NonemptyParameterModels.TermTiesEmptyOfLargeIndex
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.FinrankSpanLb
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.CovolBRa
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.CovolIdxK
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.LeadingMinorIntegrality
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.FinrankSpanLb
+public import Mathlib.Algebra.AffineMonoid.Basic
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.BaseLatticeLe
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.EmbVHomInjective
+import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.InWLeft
+import Formalism.SharpRestriction.CuspSpanNormBounds.LatticeGluingRadicals
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.NumberField.Discriminant.Different
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -79,7 +129,7 @@ def Ldual : Submodule (𝓞 D.host.E) (VS D).V where
     refine ⟨(Wb X).add_mem ha.1 hb.1, fun y hy => ?_⟩
     obtain ⟨za, hza⟩ := ha.2 y hy
     obtain ⟨zb, hzb⟩ := hb.2 y hy
-    exact ⟨za + zb, by rw [map_add, LinearMap.add_apply, map_add, hza, hzb]; push_cast; ring⟩
+    exact ⟨za + zb, by rw [map_add (f := _), LinearMap.add_apply, map_add (f := _), hza, hzb]; push_cast; ring⟩
   zero_mem' := ⟨(Wb X).zero_mem, fun y _ => ⟨0, by simp⟩⟩
   smul_mem' c x hx := by
     refine ⟨?_, fun y hy => ?_⟩
@@ -130,7 +180,8 @@ theorem Lsharp {z : (VS D).V} (hz : z ∈ Wb X) (hd : ∀ y ∈ X.Lb, ∃ o : �
     obtain ⟨α, β, l, hl, rfl⟩ := decomp X hy
     obtain ⟨o, ho⟩ := hd l hl
     have e : (VS D).hT (∑ c, α c • X.eX c + l + ∑ c, β c • X.fY c) z = (VS D).hT l z := by
-      simp [map_add, map_sum, LinearMap.map_smulₛₗ₂, (hzW _).1, (hzW _).2]
+
+      simp [map_add (f := _), map_sum, LinearMap.map_smulₛₗ₂, (hzW _).1, (hzW _).2]
     rw [Submodule.mem_one]
     exact ⟨o, by rw [e]; exact ho⟩
   obtain ⟨α, β, l, hl, hzeq⟩ := decomp X hzL
@@ -139,13 +190,15 @@ theorem Lsharp {z : (VS D).V} (hz : z ∈ Wb X) (hd : ∀ y ∈ X.Lb, ∃ o : �
     intro c
     have := (hzW c).2
     rw [hzeq] at this
-    simp [map_add, map_sum, map_smul, Formalism.L2.SG.Pf.NcReal.JX.NOf.Ex.h_fe, X.ff, (hlW c).2, Finset.sum_ite_eq] at this
+
+    simp [map_add (f := _), map_sum, map_smul, Formalism.L2.SG.Pf.NcReal.JX.NOf.Ex.h_fe, X.ff, (hlW c).2, Finset.sum_ite_eq] at this
     exact this
   have hβ : ∀ c, β c = 0 := by
     intro c
     have := (hzW c).1
     rw [hzeq] at this
-    simp [map_add, map_sum, map_smul, X.ef, X.ee, (hlW c).1, Finset.sum_ite_eq] at this
+
+    simp [map_add (f := _), map_sum, map_smul, X.ef, X.ee, (hlW c).1, Finset.sum_ite_eq] at this
     exact this
   rw [hzeq]
   simp only [hα, hβ, zero_smul, Finset.sum_const_zero, zero_add, add_zero]
@@ -272,7 +325,7 @@ theorem free_sub : ∃ (ι : (Fin (D.R.k + 1) → 𝓞 D.host.E) →ₗ[𝓞 D.h
     have h2 := h1.units_smul (fun i => Units.mk0 ((n i : ℕ) : D.host.E) (by exact_mod_cast (hn i).ne'))
     convert h2 using 1
     funext i
-    simp only [l, Pi.smul_apply', Units.smul_def, Units.val_mk0]
+    change n i • ((w i : Wb X) : (VS D).V) = ((n i : ℕ) : D.host.E) • ((w i : Wb X) : (VS D).V)
     rw [Nat.cast_smul_eq_nsmul]
   have hinj : Function.Injective ι := by
     rw [← LinearMap.ker_eq_bot, Submodule.eq_bot_iff]
@@ -471,12 +524,14 @@ theorem trB_zsmul_right (z : ℤ) (x y : (VS D).V) :
 theorem trB_sum_left {N : ℕ} (c : Fin N → ℤ) (w : Fin N → (VS D).V) (y : (VS D).V) :
     Algebra.trace ℚ D.host.E ((VS D).hT (∑ i, c i • w i) y) =
       ∑ i, (c i : ℚ) * Algebra.trace ℚ D.host.E ((VS D).hT (w i) y) := by
+
   rw [map_sum, LinearMap.sum_apply, map_sum]
   exact Finset.sum_congr rfl fun i _ => trB_zsmul_left (c i) (w i) y
 
 theorem trB_sum_right {N : ℕ} (c : Fin N → ℤ) (w : Fin N → (VS D).V) (x : (VS D).V) :
     Algebra.trace ℚ D.host.E ((VS D).hT x (∑ i, c i • w i)) =
       ∑ i, (c i : ℚ) * Algebra.trace ℚ D.host.E ((VS D).hT x (w i)) := by
+
   rw [map_sum, map_sum]
   exact Finset.sum_congr rfl fun i _ => trB_zsmul_right (c i) x (w i)
 

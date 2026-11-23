@@ -1,27 +1,59 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ImportsRestFurther
-import Formalism.LocalRingCardinality.RankBoundMonotoneInDimension
-import Formalism.LocalToGlobal.BesselHermitianTheta.LemmasSign
+module
+
+public import Formalism.LocalRingCardinality.DataTheta
+public import Formalism.LocalRingCardinality.RankBoundMonotoneInDimension
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.Divisors.P22
+import Formalism.LocalToGlobal.Divisibility.CoefMod
+import Formalism.LocalToGlobal.IndefiniteReal.ExistsChosenExtremalVector
+import Formalism.LocalToGlobal.IndefiniteReal.LinksDefs
+import Formalism.LocalToGlobal.PairingIndexBounds.ModelLatticeMoves.IsBichar
+
+@[expose] public section
+
 open NumberField Formalism.BasicNotions Formalism.MainNotions Formalism.L2 Formalism.L2.DIV Formalism.IndefR.Links Formalism.IndefR.FWT GlobalTheory.CovTop
 open scoped TensorProduct
 
 namespace GlobalTheory.MassLink
 
-theorem sqrt_d_pos' (D : D7) : 0 < Real.sqrt D.host.d :=
-  Real.sqrt_pos.2 (Nat.cast_pos.2 (Nat.pos_of_ne_zero D.host.hyp.2.1.ne_zero))
-
 theorem tauE_injective' (D : D7) : Function.Injective (TH.tauE D) := fun _ _ h =>
   D.eTau.injective (Subtype.ext ((Formalism.BasicNotions.factEmb D.R D.host).1.1 h))
-
-theorem conj_tauE_ne' (D : D7) (ρ ρ' : D.what₂.Tau) :
-    ComplexEmbedding.conjugate (TH.tauE D ρ) ≠ TH.tauE D ρ' := by
-  intro h
-  have e := DFunLike.congr_fun h D.host.sqrtMinusD
-  rw [ComplexEmbedding.conjugate_coe_eq, Formalism.L2.Theta.tauE_sqrtMinusD, Formalism.L2.Theta.tauE_sqrtMinusD] at e
-  have e2 := congrArg Complex.im e
-  simp at e2
-  have := sqrt_d_pos' D
-  linarith
 
 theorem tauE_surj' (D : D7) (φ : D.host.E →+* ℂ)
     (h : φ D.host.sqrtMinusD = Complex.I * (Real.sqrt D.host.d : ℂ)) : ∃ ρ, TH.tauE D ρ = φ := by
@@ -46,25 +78,5 @@ theorem tauE_or' (D : D7) (φ : D.host.E →+* ℂ) :
       rw [ComplexEmbedding.conjugate_coe_eq, h, map_neg, map_mul, Complex.conj_I, Complex.conj_ofReal]; ring)
     exact ⟨ρ, Or.inr e⟩
 
-open Classical in
-
-theorem psi_cmType_equiv : ∀ D : D7, letI : IsCMField D.host.E := D.host.isCMField_hostE;
-    (∀ τ : D.host.E →+* ℂ, τ ∈ GlobalTheory.MassLink.psi D ↔ ComplexEmbedding.conjugate τ ∉ GlobalTheory.MassLink.psi D) ∧
-    ∃ eΨ : D.what₂.Tau ≃ GlobalTheory.MassLink.psi D, ∀ ρ, ((eΨ ρ : GlobalTheory.MassLink.psi D) : D.host.E →+* ℂ) = TH.tauE D ρ := by
-  intro D
-  have mem : ∀ φ : D.host.E →+* ℂ, φ ∈ psi D ↔ ∃ ρ, TH.tauE D ρ = φ := fun φ => by
-    simp [psi]
-  refine ⟨fun τ => ?_, ?_⟩
-  · rw [mem, mem]
-    constructor
-    · rintro ⟨ρ, rfl⟩ ⟨ρ', h⟩
-      exact conj_tauE_ne' D ρ ρ' h.symm
-    · intro h
-      obtain ⟨ρ, h1 | h1⟩ := tauE_or' D τ
-      · exact ⟨ρ, h1⟩
-      · exact absurd ⟨ρ, h1⟩ h
-  · refine ⟨(Equiv.ofInjective _ (tauE_injective' D)).trans (Equiv.setCongr ?_), fun ρ => rfl⟩
-    ext φ
-    simp [psi]
 
 end GlobalTheory.MassLink

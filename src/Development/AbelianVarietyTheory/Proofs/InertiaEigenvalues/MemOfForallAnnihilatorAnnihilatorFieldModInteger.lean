@@ -1,10 +1,58 @@
-import Mathlib
-import Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow
-import Formalism.LocalRingCardinality.AdicCompletionLocal.LocTied
-import Formalism.SharpRestriction.LevelLetterCocycles.LocalSituation
-import Formalism.SharpRestriction.LevelLetterCocycles.LocCoh
-import Formalism.GaloisCohomology.LocalTateDualityK
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CoefficientRingIntegersCompactAdicPropertiesStatement
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.LocCoh
+public import Mathlib.Algebra.Module.Injective
+public import Mathlib.NumberTheory.Padics.PadicNumbers
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CoefficientRingIntegersCompactAdicPropertiesStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
+
+@[expose] public section
+
 open Formalism Formalism.BasicNotions Formalism.BasicNotions.Loc Formalism.WeaklyAdmissibleFiltrations Formalism.MainNotions.N TensorProduct Module
 
 namespace GlobalTheory.DoubleAnnihilator
@@ -16,8 +64,7 @@ local notation "QE" => LL ⧸ LinearMap.range (Algebra.linearMap O LL)
 
 theorem mk_eq_zero_iff (z : LL) :
     (Submodule.Quotient.mk z : QE) = 0 ↔ ∃ b : O, algebraMap O LL b = z := by
-  rw [Submodule.Quotient.mk_eq_zero, LinearMap.mem_range]
-  simp [Algebra.linearMap_apply]
+  simp only [Submodule.Quotient.mk_eq_zero, LinearMap.mem_range, Algebra.linearMap_apply]
 
 theorem baer [IsDomain O] [IsPrincipalIdealRing O] (hinj : Function.Injective (algebraMap O LL)) :
     Module.Baer O QE := by
@@ -40,8 +87,7 @@ theorem baer [IsDomain O] [IsPrincipalIdealRing O] (hinj : Function.Injective (a
     rw [this, map_smul, ← hz, LinearMap.toSpanSingleton_apply, ← Submodule.Quotient.mk_smul,
       ← Submodule.Quotient.mk_smul]
     congr 1
-    rw [Algebra.smul_def, Algebra.smul_def, map_mul]
-    field_simp
+    simp only [Algebra.smul_def, map_mul, mul_assoc, mul_inv_cancel_left₀ haL]
 
 theorem endo_on_torsion (ℓ : O) (hℓ : algebraMap O LL ℓ ≠ 0) (h : QE →ₗ[O] QE) (n : ℕ) :
     ∃ c : O, ∀ e : QE, ℓ ^ n • e = 0 → h e = c • e := by
@@ -104,8 +150,8 @@ end GlobalTheory.DoubleAnnihilator
 
 namespace GlobalTheory
 
-open GlobalTheory.DoubleAnnihilator in
 
+open GlobalTheory.DoubleAnnihilator in
 theorem mem_of_forall_annihilator_annihilator :
     ∀ (l : ℕ) [Fact l.Prime] (LL : Type) [Field LL] [Algebra ℚ_[l] LL] [TopologicalSpace LL]
       (O : Type) [CommRing O] [Algebra O LL], GoodO (Qp := ℚ_[l]) LL O →
@@ -143,6 +189,7 @@ theorem mem_of_forall_annihilator_annihilator :
   have hexp : ∀ (a : Fin r → O) (s : N), β (∑ i, a i • v i) s =
       Submodule.Quotient.mk (∑ i, algebraMap O LL (a i) * y s i) := by
     intro a s
+
     rw [← Submodule.mkQ_apply, map_sum, map_sum, LinearMap.sum_apply]
     refine Finset.sum_congr rfl fun i _ => ?_
     rw [map_smul, LinearMap.smul_apply, ← hy, Submodule.mkQ_apply, ← Submodule.Quotient.mk_smul,
@@ -170,7 +217,8 @@ theorem mem_of_forall_annihilator_annihilator :
       rw [hexp, mk_eq_zero_iff]; exact hT ⟨s, hs⟩)
     rw [hexp, mk_eq_zero_iff] at h1
     exact h1
-  obtain ⟨F, hF⟩ := (hKc.diff hUo).elim_finite_subfamily_closed T hTcl hempty
+  obtain ⟨F, hF⟩ := (hKc.diff hUo).elim_finite_subfamily_closed T hTcl
+    (Set.disjoint_iff_inter_eq_empty.mpr hempty)
   have hfin : ∀ d : M, (∀ s ∈ F, β d s.1 = 0) → β d c = 0 := by
     intro d hd
     obtain ⟨a, rfl⟩ := hspan d
@@ -183,7 +231,7 @@ theorem mem_of_forall_annihilator_annihilator :
         have h2 := hd s hs
         rw [hexp, mk_eq_zero_iff] at h2
         exact h2
-    rw [hF] at hx
+    rw [Set.disjoint_iff_inter_eq_empty.mp hF] at hx
     exact hx
 
   let τ : M →ₗ[O] (F → LL ⧸ LinearMap.range (Algebra.linearMap O LL)) :=
@@ -219,6 +267,7 @@ theorem mem_of_forall_annihilator_annihilator :
     choose k hk using h5
     refine ⟨Finset.univ.sup k, fun d => ?_⟩
     obtain ⟨a, rfl⟩ := hspan d
+
     rw [map_sum, LinearMap.sum_apply, Finset.smul_sum]
     refine Finset.sum_eq_zero fun i _ => ?_
     rw [map_smul, LinearMap.smul_apply, smul_comm, hk i _ (Finset.le_sup (Finset.mem_univ i)),
@@ -233,6 +282,7 @@ theorem mem_of_forall_annihilator_annihilator :
   choose cs hcs using hcoef
   have hkey : ∀ d, β d c = β d (∑ s : F, cs s • s.1.1) := by
     intro d
+
     rw [hφG d, ← Finset.univ_sum_single (τ d), map_sum, map_sum]
     refine Finset.sum_congr rfl fun s _ => ?_
     rw [hτ, hcs s _ (hn _ d), map_smul]

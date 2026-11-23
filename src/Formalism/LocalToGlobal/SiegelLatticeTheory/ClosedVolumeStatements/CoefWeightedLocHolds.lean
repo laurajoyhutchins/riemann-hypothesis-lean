@@ -1,33 +1,67 @@
-import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.ScPsiExists
-import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.SettingBlocks
-import Formalism.PeriodIntegrals.ScPsiExists
-import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.ScGapBig
-import Formalism.PeriodIntegrals.ScGapBig
-import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.ScMuExists
-import Formalism.LocalRingCardinality.RankBoundMonotoneInDimension
-import Formalism.LocalRingCardinality.IntCastDvdOfDvdIntegers
-import Formalism.PeriodIntegrals.ScMuExists
-import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.ScRefExists
-import Formalism.PeriodIntegrals.ScRefExists
-import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.ScXuExists
-import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.ScPiFrame
-import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.ScPiBuild
-import Formalism.SharpRestriction.CuspSpanNormBounds.DiscreteSeriesWeylDimension
-import Formalism.PeriodIntegrals.ScPiExists
-import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.InstExists
-import Formalism.SharpRestriction.CuspSpanNormBounds.BridgeHW
-import Formalism.SharpRestriction.CuspSpanNormBounds.HCFiniteKMultiplicityGapped
-import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.BunExists
-import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.LatExists
-import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.MultiplicityGExists
-import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.MExistsCut
-import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.MeasWCore
-import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.MeasInfXfer
-import Formalism.LocalToGlobal.SiegelLatticeTheory.BesselDiscreteSeries.BesselNVGapPf
-import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.LocalWeightCharts.ScWlocExists
-import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.HCReprodM
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.SettingBlocks
+public import Formalism.PeriodIntegrals.ScPsiExists
+public import Formalism.PeriodIntegrals.ScMuExists
+public import Formalism.SharpRestriction.CuspSpanNormBounds.DiscreteSeriesWeylDimension
+public import Formalism.PeriodIntegrals.ScPiExists
+public import Formalism.PeriodIntegrals.ScXuExists
+public import Formalism.SharpRestriction.CuspSpanNormBounds.BridgeLitG
+public import Formalism.LocalRingCardinality.IntCastDvdOfDvdIntegers
+public import Formalism.LocalRingCardinality.RankBoundMonotoneInDimension
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.BesselDiscreteSeries.BesselNVGapPf
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.BunExists
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.LocalWeightCharts.ScWlocExists
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.SplitPrimeCounts.LsSetresInt
 import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.SplitPrimeCounts.LsSetresSplit
-import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.SplitPrimeCounts.LsSetresInt
+public import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.ScMuExists
+public import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.ScPiBuild
+public import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.ScPiFrame
+public import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.ScPsiExists
+public import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.ScRefExists
+public import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.ScXuExists
+public import Formalism.SharpRestriction.CuspSpanNormBounds.BridgeHW
+public import Formalism.SharpRestriction.CuspSpanNormBounds.HCFiniteKMultiplicityGapped
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.HCReprodM
+
+@[expose] public section
 
 namespace Formalism.L2.SG.Closed.ScPsi
 
@@ -40,28 +74,6 @@ theorem chkScPsiExists (h : PI.ScPsiExists.Target) (D : Formalism.BasicNotions.D
 end Formalism.L2.SG.Closed.ScPsi
 
 namespace Formalism.L2.SG.Closed.ScGap
-
-theorem chkScGapBig (h : PI.ScGapBig.ScGapBig) (D : Formalism.BasicNotions.D7) :
-    Formalism.L2.SG.SplitPrimeNormLemmas.GapBigOfGapHyp D := by
-  intro hm hG τ
-  obtain ⟨hn, hgap⟩ := hG
-  have h2 := D.R.two_le_m
-  have hr : D.R.r = 2 * D.R.rS + D.R.k + 1 := by
-    simp only [Formalism.BasicNotions.Ranks.r, Formalism.BasicNotions.Ranks.rS]; omega
-  show PI.ScGapBig.GapBig D.R.k D.R.rS (fun j => ((D.hc τ).b (Fin.cast hm.symm j) : ℝ))
-  refine h D.R.k D.R.rS _ (by show 1801 ≤ 2 * D.R.rS + D.R.k + 1; omega) ?_
-  intro j hj
-  have hg := hgap τ (Fin.cast hm.symm j) (by simp; omega)
-  have hr' : ((PI.ScGapBig.rk48 D.R.k D.R.rS : ℕ) : ℝ) = ((D.R.r : ℕ) : ℝ) := by
-    rw [hr]; rfl
-  rw [hr']
-  have e1 : (⟨(Fin.cast hm.symm j).1 + 1, by simp; omega⟩ : Fin D.R.m) = Fin.cast hm.symm ⟨j.1 + 1, hj⟩ := rfl
-  rw [e1] at hg
-  have : ((16 * (D.R.r : ℚ) ^ 19 : ℚ) : ℝ) ≤
-      (((D.hc τ).b (Fin.cast hm.symm ⟨j.1 + 1, hj⟩) - (D.hc τ).b (Fin.cast hm.symm j) : ℚ) : ℝ) := by
-    exact_mod_cast hg
-  push_cast at this
-  simpa using this
 
 end Formalism.L2.SG.Closed.ScGap
 
@@ -81,9 +93,10 @@ theorem hform_crdA {D : D7} (A : UnitaryGroupInstance D) (v w : (VS D).V) :
     A.ιE (Formalism.UG.hform (starRingEnd A.I.E) A.I.J (crdOf A.I A.ιE A.bas v) (crdOf A.I A.ιE A.bas w)) =
       (VS D).hT v w := by
   conv_rhs => rw [← A.bas.sum_repr v, ← A.bas.sum_repr w]
+
   simp only [map_sum, LinearMap.map_smulₛₗ, LinearMap.sum_apply, LinearMap.smul_apply, smul_eq_mul,
-    Formalism.UG.hform, map_mul, crdOf, starRingEnd_apply, A.ιE_conj, RingEquiv.apply_symm_apply,
-    A.J_eq, Finset.mul_sum]
+  Formalism.UG.hform, map_mul, crdOf, starRingEnd_apply, A.ιE_conj, RingEquiv.apply_symm_apply,
+  A.J_eq, Finset.mul_sum]
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
   simp only [← Formalism.BasicNotions.bridge_star_holds D.R D.host, RingHom.id_apply]
@@ -137,9 +150,10 @@ theorem hform_crdA {D : D7} (A : UnitaryGroupInstance D) (v w : (VS D).V) :
     A.ιE (Formalism.UG.hform (starRingEnd A.I.E) A.I.J (crdOf A.I A.ιE A.bas v) (crdOf A.I A.ιE A.bas w)) =
       (VS D).hT v w := by
   conv_rhs => rw [← A.bas.sum_repr v, ← A.bas.sum_repr w]
+
   simp only [map_sum, LinearMap.map_smulₛₗ, LinearMap.sum_apply, LinearMap.smul_apply, smul_eq_mul,
-    Formalism.UG.hform, map_mul, crdOf, starRingEnd_apply, A.ιE_conj, RingEquiv.apply_symm_apply,
-    A.J_eq, Finset.mul_sum]
+  Formalism.UG.hform, map_mul, crdOf, starRingEnd_apply, A.ιE_conj, RingEquiv.apply_symm_apply,
+  A.J_eq, Finset.mul_sum]
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
   simp only [← Formalism.BasicNotions.bridge_star_holds D.R D.host, RingHom.id_apply]
@@ -210,9 +224,10 @@ theorem hform_crdA {D : D7} (A : UnitaryGroupInstance D) (v w : (VS D).V) :
     A.ιE (Formalism.UG.hform (starRingEnd A.I.E) A.I.J (crdOf A.I A.ιE A.bas v) (crdOf A.I A.ιE A.bas w)) =
       (VS D).hT v w := by
   conv_rhs => rw [← A.bas.sum_repr v, ← A.bas.sum_repr w]
+
   simp only [map_sum, LinearMap.map_smulₛₗ, LinearMap.sum_apply, LinearMap.smul_apply, smul_eq_mul,
-    Formalism.UG.hform, map_mul, crdOf, starRingEnd_apply, A.ιE_conj, RingEquiv.apply_symm_apply,
-    A.J_eq, Finset.mul_sum]
+  Formalism.UG.hform, map_mul, crdOf, starRingEnd_apply, A.ιE_conj, RingEquiv.apply_symm_apply,
+  A.J_eq, Finset.mul_sum]
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
   simp only [← Formalism.BasicNotions.bridge_star_holds D.R D.host, RingHom.id_apply]
@@ -300,9 +315,10 @@ theorem hform_crdA {D : D7} (A : UnitaryGroupInstance D) (v w : (VS D).V) :
     A.ιE (Formalism.UG.hform (starRingEnd A.I.E) A.I.J (crdOf A.I A.ιE A.bas v) (crdOf A.I A.ιE A.bas w)) =
       (VS D).hT v w := by
   conv_rhs => rw [← A.bas.sum_repr v, ← A.bas.sum_repr w]
+
   simp only [map_sum, LinearMap.map_smulₛₗ, LinearMap.sum_apply, LinearMap.smul_apply, smul_eq_mul,
-    Formalism.UG.hform, map_mul, crdOf, starRingEnd_apply, A.ιE_conj, RingEquiv.apply_symm_apply,
-    A.J_eq, Finset.mul_sum]
+  Formalism.UG.hform, map_mul, crdOf, starRingEnd_apply, A.ιE_conj, RingEquiv.apply_symm_apply,
+  A.J_eq, Finset.mul_sum]
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
   simp only [← Formalism.BasicNotions.bridge_star_holds D.R D.host, RingHom.id_apply]
@@ -420,8 +436,6 @@ open Formalism.BasicNotions Formalism.MainNotions.S Formalism.L2.SG.SplitPrimeNo
 
 theorem PsiExists_holds (D : D7) : PsiExists D := ScPsi.chkScPsiExists sc_psi_exists D
 
-theorem GapBigOfGapHyp_holds (D : D7) : GapBigOfGapHyp D := ScGap.chkScGapBig scGapBig D
-
 theorem MuExists_holds (D : D7) : MuExists D := ScMu.ChkScMu.chkScMuExists PI.sc_mu_exists D
 
 theorem RefExists_holds (D : D7) : RefExists D :=
@@ -440,16 +454,8 @@ variable [Fact Formalism.MainNotions.DiscreteSeriesWeylDimension.DiscreteSeriesE
 theorem BunExists_holds (D : D7) : BunExists D :=
   Formalism.L2.SG.Pf.automorphic_bundle_exists Formalism.MainNotions.BridgeDS3.discrete_series_exists_gapped D
 
-theorem InstExists_holds (D : D7) : InstExists D := Formalism.L2.SG.InstExistsPf.instExists D
-
 theorem CoefWeightedLoc_holds [Fact Formalism.L2.SG.SplitPrimeNormLemmas.CoefWeightedLoc] : CoefWeightedLoc := Fact.out
 
-variable [Fact Formalism.HermitianLattices.Ext.L3.HermRepUnram] in
-theorem LatExists_of_primesInClasses (hPC : Formalism.L2.SG.Pf.LatEx.PrimesInClasses) (D : D7) : LatExists D :=
-  Formalism.L2.SG.Pf.latExists_of hPC D
-
-theorem MExists_holds (D : D7) : MExists D :=
-  Formalism.L2.SG.Pf.mExists_of_cuts D weil_measure_compat infinite_measure_transfer
 
 variable [Fact Formalism.L2.SG.SplitPrimeNormLemmas.BesselNVGap] in
 theorem BesselNVGap_holds : BesselNVGap := Formalism.L2.SG.BesselDiscreteSeries.besselNVGap

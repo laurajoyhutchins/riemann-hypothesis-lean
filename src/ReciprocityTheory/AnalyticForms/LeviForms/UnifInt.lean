@@ -1,10 +1,47 @@
-import ReciprocityTheory.AnalyticForms.LeviForms.ConvExpandStatement
-import ReciprocityTheory.AnalyticForms.LeviForms.PullDominateStatement
-import ReciprocityTheory.AnalyticForms.PotentialTheory.PLLocalStatement
-import ReciprocityTheory.AnalyticForms.PotentialTheory.SNCAtlas
-import ReciprocityTheory.AnalyticForms.PotentialTheory.PotentialContDiffAt
-import ReciprocityTheory.AnalyticForms.PotentialTheory.IntegrableOnTargetOfTsupport
-import ReciprocityTheory.AnalyticForms.PotentialTheory.LogInt
+module
+
+public import ReciprocityTheory.AnalyticForms.PotentialTheory.IsPotentialOfFun
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace ReciprocityTheory.AnForm.P
 
@@ -23,17 +60,6 @@ def UnifRestrictStatement : Prop :=
         (W' : Fin n' → Set Dg),
         IsPotential B (Θ.pullback Subtype.val hB.1) ∧ IsPosPot B (Θ.pullback Subtype.val hB.1) ∧
           IsSNC B (L.pullback Subtype.val hB.1) (fun x y => s x.1 y.1) m' W'
-
-def UnifExpandStatement : Prop :=
-  ∀ {e : ℕ} {X : Type} [TopologicalSpace X] [CompactSpace X] [T2Space X]
-    (A : FinHolAtlas (e + 1) X) (L' : LocPot X) (v : X → X → ℂ) (Dg : Set X)
-    (B : FinHolAtlas e Dg), IsPotential A L' → IsSection A L' v → IsSNC A L' v ![1] ![Dg] →
-    HoloMap B A Subtype.val → ∀ (P : LocPot X) (u : X → ℝ) (Φ : Fin e → LocPot X),
-      IsPotential A P → A.Smooth u → (∀ i, IsPotential A (Φ i)) →
-        mInt A (Fin.cons (P + LocPot.ofFun u) Φ) (fun y => -logNormSec L' v y) =
-          mInt A (Fin.cons P Φ) (fun y => -logNormSec L' v y) -
-            mInt B (fun i => (Φ i).pullback Subtype.val continuous_subtype_val) (u ∘ Subtype.val) +
-            mInt A (Fin.cons L' Φ) u
 
 theorem mInt_neg_integrand {e : ℕ} {X : Type} [TopologicalSpace X] (A : FinHolAtlas e X)
     (Φ : Fin e → LocPot X) (g : X → ℝ) : mInt A Φ (fun y => -g y) = -mInt A Φ g := by

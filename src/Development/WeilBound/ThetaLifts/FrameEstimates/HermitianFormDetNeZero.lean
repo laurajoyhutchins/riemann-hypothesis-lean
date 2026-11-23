@@ -1,6 +1,52 @@
-import Mathlib
-import Development.WeilBound.ThetaLifts.FrameEstimates.ContinuousMixedSymm
-import Development.WeilBound.ThetaLifts.FrameEstimates.RankIffRight
+module
+
+public import Development.WeilBound.ThetaLifts.FrameEstimates.ContinuousMixedSymm
+public import Development.WeilBound.ThetaLifts.FrameEstimates.SquareIntegrableWeilRange
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsLocallyConstantAddChar
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.PadicIsNonarchimedeanLocalField
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LocalComponentsNontrivialAdelicCharacter
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.LcscAdelicUnitaryGroup
+public import Development.WeilBound.ThetaLifts.FrameEstimates.RankIffRight
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.Divisors.MatchingOfParts
+
+@[expose] public section
 
 open NumberField IsDedekindDomain MeasureTheory Matrix Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes GlobalTheory.WeilM GlobalTheory.AdelicU Filter Topology
 open GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels GlobalTheory.ThK
@@ -47,7 +93,7 @@ theorem coef_eigen {ψ : AddChar (AF F) ℂ} (hn : ∀ x, ‖ψ x‖ = 1) (μ : 
   simp only [add_dotProduct, neg_dotProduct]
   linear_combination (-(u.1 ⬝ᵥ u.2)) * h2
 
-variable {v : Pl F}
+variable {v : Pl (F := F)}
 
 theorem indep_of_rest {φ : (κ → Fv F v) → ℂ} {r : (κ → AF F) → ℂ} (h : Rest (evFin F v) φ r) : Indep v r :=
   fun x t => h.1 x _ ((at_iff _).2 (funext fun i => (ep_mul _).trans (by rw [evFin_atPlace])))
@@ -111,7 +157,7 @@ theorem soCut_of : SoCut := by
     exact this.symm
   have e1 : ∀ u : Matrix (Fin n) (Fin d) (AE F E), -((1 : GL (Fin n) (Fv F v)).1ᵀ * X.J.map t * u.map (piW (t.comp σ)) *
       (W.J.map t)ᵀ * (1 : GL (Fin d) (Fv F v)).1) = coB σ X W t u := fun u => by simp [coB]
-  have sy : ∀ (U : Matrix (Fin n) (Fin d) (Fv F v)) z, symp (R := AF F) (cA σ) (-1) (incM F X.J) (incM F W.J) z
+  have sy : ∀ (U : Matrix (Fin n) (Fin d) (Fv F v)) z, symp (cA σ) (-1) (incM F X.J) (incM F W.J) z
       (spM h t (-U) 0) = atPlace v (trace (coB σ X W t z * Uᵀ)) := fun U z => by
     have := ev_symp h t hP.herm.herm hP.skew.skew z (spM h t (-U) 0)
     rw [spM_fst, neg_neg, hco (spM h t (-U) 0), spM_snd] at this
@@ -120,6 +166,7 @@ theorem soCut_of : SoCut := by
     conv_lhs => rw [← epU, map_smul]
     simp only [Prod.smul_fst, Prod.smul_snd, smul_dotProduct, dotProduct_smul, smul_eq_mul, mul_sub]
   refine ⟨m, χ, hι.bij.injOn hφ (Submodule.sum_mem _ fun i _ => hχ i) ?_, fun i => ⟨⟨hχ i, ι, hι, fun Y hY => ?_⟩, ?_⟩⟩
+
   · rw [map_sum, hsum]
     exact Finset.sum_congr rfl fun i _ => (hχg i).symm
   · rw [hχg]
@@ -144,7 +191,7 @@ theorem soCut_of : SoCut := by
   rw [eig] at hΦ
   have := coef_eigen hψ.2.1 μ (tens (evFin F v) (χ i) r) _ (M.co.e z) (atPlace v (trace (Y₀ * Uᵀ)))
     (hΦ.trans (funext fun x => mul_assoc _ _ _))
-  rw [← neg_sub, ← M.co.form, sy, ← map_add, ← map_neg, ← map_add, ← psv_apply] at this
+  rw [← neg_sub, ← M.co.form, sy, ← map_add (f := _), ← map_neg, ← map_add (f := _), ← psv_apply] at this
   by_contra h0
   apply hU'
   have h1 := (mul_eq_right₀ h0).1 this.symm

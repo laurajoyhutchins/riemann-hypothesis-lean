@@ -1,6 +1,48 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.SmallPointsSubstitutionAlgHomSinglePoint
-import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.ExistsThetaGrpPullback
+module
+
+public import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.SmallPointsSubstitutionAlgHomSinglePoint
+public import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.WeilIsAlternatingSkewNatural
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.ExistsThetaGrpPullback
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.VtUniq
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.LBPull
+
+@[expose] public section
 
 set_option autoImplicit false
 noncomputable section
@@ -121,13 +163,13 @@ end Alg
 section Pairs
 variable {X Y Z : Scheme.{0}} {L : LB X} {z : Z} {J : (Z ⟶ X) → L.ι} {I : Type}
 
-def fs (ψ : Y ⟶ X) : Multiplicative (FreeAbelianGroup (Y ⟶ X)) := Multiplicative.ofAdd (FreeAbelianGroup.of ψ)
+def fs (ψ : Y ⟶ X) : Multiplicative (FreeAddCommGroup (Y ⟶ X)) := Multiplicative.ofAdd (FreeAddCommGroup.of ψ)
 
 theorem oneGen_isGen : (LB.oneGen L (Y := Y)).IsGen := fun _ _ =>
   (map_one _).trans ((congrArg₂ (· * ·) (Fintype.prod_empty _) (map_one _)).trans (_root_.mul_one _)).symm
 
 def pairs (hJ : Good L z J) (r : I → (Z ⟶ Y)) :
-    Subgroup (Multiplicative (FreeAbelianGroup (Y ⟶ X)) × (I → (Z.presheaf.stalk z)ˣ)) where
+    Subgroup (Multiplicative (FreeAddCommGroup (Y ⟶ X)) × (I → (Z.presheaf.stalk z)ˣ)) where
   carrier := {q | ∃ (K : Type) (_ : Fintype K) (φ : K → (Y ⟶ X)) (ε : K → ℤ) (u : LB.Gen (LB.LinComb L φ ε)),
     u.IsGen ∧ ∏ k, fs (φ k) ^ ε k = q.1 ∧ ∀ i, val u (r i) z J = q.2 i}
   one_mem' := ⟨_, _, _, _, LB.oneGen L, oneGen_isGen, Fintype.prod_empty _, fun _ => val_one _⟩
@@ -147,8 +189,8 @@ theorem pairs_const (hL : L.IsLB) (hJ : Good L z J) (r : I → (Z ⟶ Y)) {S₀ 
     ∀ q ∈ pairs hJ r, q.1 = 1 → ∀ i j, q.2 i = q.2 j := by
   rintro q ⟨K, _, φ, ε, u, hu, f, v⟩ h1 i j
   obtain ⟨t, ht, hv⟩ := exists_gen hL (K' := PEmpty) (φ' := PEmpty.elim) (ε' := PEmpty.elim) (fun U _ h => by
-    let g : Multiplicative (FreeAbelianGroup (Y ⟶ X)) →* U :=
-      (FreeAbelianGroup.lift fun ψ => Additive.ofMul (h ψ)).toMultiplicativeLeft
+    let g : Multiplicative (FreeAddCommGroup (Y ⟶ X)) →* U :=
+      (FreeAddCommGroup.lift fun ψ => Additive.ofMul (h ψ)).toMultiplicativeLeft
     have hg : ∀ ψ, g (fs ψ) = h ψ := fun ψ => by simp [g, fs]
     have e := congrArg g (f.trans h1)
     simp only [map_prod, map_zpow, map_one, hg] at e
@@ -185,7 +227,39 @@ theorem liftLaws_of_symLift : ∀ (E : Type) [Field E] [NumberField E] [IsCMFiel
   let w₀ : (T₀ ⟶ t.G) →* (T₀ ⟶ t.G) := MonoidHom.mk' (· ≫ t.act.act H.w0) fun x y => MonObj.mul_comp x y _
   have hw₀ : ∀ i x, P i x ≫ t.act.act H.w0 = P i (w₀ x) := fun i x => Category.assoc _ _ _
   have hM := pairs_const hL hJ r T₀.hom hp fun i j => (Over.w i).trans (Over.w j).symm
-  have C := isCub_cubV t.cub hJ
+  have C : IsCub (cubV t.cub z J) := by
+    constructor
+    case face =>
+      intro x y
+      have := val_corr hJ (t.cub.face 0) (lift x y).left
+      rw [val_one] at this
+      refine Eq.trans ?_ this
+      refine Eq.trans ?_ (val_cub t.cub (lift x y) hJ (pzero t.G _) (x2 t.G 0) (x2 t.G 1)).symm
+      congr 1 <;> simp [x2, pzero, Hom.one_def]
+    case s01 =>
+      intro x y w
+      have := (val_corr hJ t.cub.cubeSymmetric_swap_first (lift x (lift y w)).left).trans (val_cub t.cub (lift x (lift y w)) hJ _ _ _)
+      refine Eq.trans this ?_
+      congr 1 <;> simp [x3]
+    case s12 =>
+      intro x y w
+      have := (val_corr hJ t.cub.cubeSymmetric_swap_last (lift x (lift y w)).left).trans (val_cub t.cub (lift x (lift y w)) hJ _ _ _)
+      refine Eq.trans this ?_
+      congr 1 <;> simp [x3]
+    case coc =>
+      intro x x' x'' y
+      have := val_corr hJ t.cub.cocycle (lift x (lift x' (lift x'' y))).left
+      have e := ((val_mul hJ _ _ _).trans (congrArg₂ (· * ·) (val_cub t.cub _ hJ _ _ _) (val_cub t.cub _ hJ _ _ _))).symm.trans
+        (this.trans ((val_mul hJ _ _ _).trans (congrArg₂ (· * ·) (val_cub t.cub _ hJ _ _ _) (val_cub t.cub _ hJ _ _ _))))
+      have a₀ : lift x (lift x' (lift x'' y)) ≫ x4 t.G 0 = x := by simp [x4]
+      have a₁ : lift x (lift x' (lift x'' y)) ≫ x4 t.G 1 = x' := by simp [x4]
+      have a₂ : lift x (lift x' (lift x'' y)) ≫ x4 t.G 2 = x'' := by simp [x4]
+      have a₃ : lift x (lift x' (lift x'' y)) ≫ x4 t.G 3 = y := by simp [x4]
+      have b₀ : lift x (lift x' (lift x'' y)) ≫ padd t.G (x4 t.G 0) (x4 t.G 1) = x * x' :=
+        (MonObj.comp_mul _ _ _).trans (by rw [a₀, a₁])
+      have b₁ : lift x (lift x' (lift x'' y)) ≫ padd t.G (x4 t.G 1) (x4 t.G 2) = x' * x'' :=
+        (MonObj.comp_mul _ _ _).trans (by rw [a₁, a₂])
+      rwa [b₀, b₁, a₀, a₁, a₂, a₃] at e
   have hl : ∀ (i : T ⟶ T₀) (x : T₀ ⟶ t.G), r i ≫ (lift σ₀ x).left = (lift σ (P i x)).left := fun i x => by
     rw [← hσ i]; exact congrArg (fun q => q.left) (comp_lift i σ₀ x)
   have hθ : ∀ x y z', (cube b x y z', fun i => cubV t.cub z J (P i x) (P i y) (P i z')) ∈ pairs hJ r := fun x y z' =>

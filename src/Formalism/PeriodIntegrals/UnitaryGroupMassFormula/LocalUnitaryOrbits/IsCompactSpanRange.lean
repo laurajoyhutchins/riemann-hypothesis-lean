@@ -1,6 +1,56 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalUnitaryOrbits.MemUniformizerHermitianIdeal
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.FirstStatementA
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalUnitaryOrbits.UnifExHolds
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.FirstStatementA
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicLocalCompactness.T2SpaceTensorProductFiniteExtension
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerOrbitVolume.DensFibV
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerOrbitVolume.PosNear
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.MetricSpace.Ultra.TotallySeparated
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.GeneralLinearIntegers.AlgebraMapIntMemOint
+
+@[expose] public section
 
 noncomputable section
 
@@ -40,9 +90,11 @@ theorem oEv_eq_span : OEv (E := E) v = ((Submodule.span (v.adicCompletionInteger
   · rw [Submodule.span_le]
     rintro _ ⟨x, -, rfl⟩
     have hx := congrArg (algebraMap (𝓞 E) E) ((RingOfIntegers.basis E).sum_repr x)
+
     rw [map_sum] at hx
     simp only [map_zsmul] at hx
     show inclR (F := F) (Fv F v) (algebraMap (𝓞 E) E x) ∈ _
+
     rw [← hx, map_sum]
     refine Submodule.sum_mem _ fun i _ => ?_
     rw [map_zsmul]
@@ -121,7 +173,7 @@ variable {n : ℕ} (Λ : Set (Fin n → E))
 theorem ratV_add (x y : Fin n → E) :
     ratV (F := F) (Fv F v) (x + y) = ratV (F := F) (Fv F v) x + ratV (F := F) (Fv F v) y := by
   funext i
-  simp [ratV, map_add]
+  simp [ratV, map_add (f := _)]
 
 theorem ratV_zsmul (c : ℤ) (x : Fin n → E) :
     ratV (F := F) (Fv F v) (c • x) = c • ratV (F := F) (Fv F v) x := by
@@ -175,11 +227,12 @@ theorem exists_int_smul_mem (L : Submodule (𝓞 E) (Fin n → E)) (x : Fin n �
   _root_.UpperTheory.Reformulated.B.FirstStatementA.main L x hx
 
 theorem isOpen_latLoc
-    (hL : ∃ L : Submodule (𝓞 E) (Fin n → E), Submodule.IsLattice E L ∧ (L : Set (Fin n → E)) = Λ) :
+    (hL : ∃ L : Submodule (𝓞 E) (Fin n → E), Submodule.IsFullLattice E L ∧ (L : Set (Fin n → E)) = Λ) :
     IsOpen (latLoc (E := E) v Λ : Set (Fin n → Fv F v ⊗[F] E)) := by
   classical
   obtain ⟨L, hLat, rfl⟩ := hL
-  have hsp := hLat.span_eq_top
+  letI : Submodule.IsFullLattice E L := hLat
+  have hsp := Submodule.IsFullLattice.span_eq_top (A := E) (M := L)
   have hm : ∀ i : Fin n, ∃ m : ℤ, m ≠ 0 ∧ m • (Pi.single i (1 : E) : Fin n → E) ∈ L := fun i =>
     exists_int_smul_mem L _ (by rw [hsp]; exact Submodule.mem_top)
   choose m hm0 hmL using hm
@@ -249,13 +302,15 @@ theorem isOpen_latLoc
   exact AddSubgroup.isOpen_of_mem_nhds (latLoc (E := E) v (L : Set (Fin n → E))).toAddSubgroup
     (Filter.mem_of_superset (hWo.mem_nhds hW0) hWsub)
 
-theorem lamOC_holds (a : ℕ) : LamOC v Λ a := by
+theorem lamOC_holds (a : ℕ)
+    (hFull : ∃ L : Submodule (𝓞 E) (Fin n → E),
+      Submodule.IsFullLattice E L ∧ (L : Set (Fin n → E)) = Λ) : LamOC v Λ a := by
   intro hL
   have e : LamT v Λ a = Set.pi Set.univ fun _ => (latLoc (E := E) v Λ : Set (Fin n → Fv F v ⊗[F] E)) := by
     ext X
     exact ⟨fun h i _ => h i, fun h i => h i trivial⟩
   rw [e]
-  exact ⟨isOpen_set_pi Set.finite_univ fun _ _ => isOpen_latLoc v Λ hL,
+  exact ⟨isOpen_set_pi Set.finite_univ fun _ _ => isOpen_latLoc v Λ hFull,
     isCompact_univ_pi fun _ => isCompact_latLoc v Λ hL⟩
 
 end PI.OmLocU

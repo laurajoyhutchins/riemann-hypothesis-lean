@@ -1,11 +1,74 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PatchingModules.NilpotentLevelLowering.ActUVariableEqPow
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.MSpBasis
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.LocFactor
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.TnAlgMapSmulMem
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.CoEvLow
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.CoQuot
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.CoMvps
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PatchingModules.AnnihilatorBaseChange.SpRoots
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.MSplitDefs
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PatchingModules.ThetaCoefficientMapEq
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsContinuousPadic
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.FiniteMaximalSpectrumOfFiniteOfIsLocalRing
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.LocFactor
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.MSpBasis
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.TnAlgMapSmulMem
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.CoEvLow
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.CoMvps
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.CoQuot
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PatchingModules.AnnihilatorBaseChange.SpRoots
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.ExistsNotCongPow
+import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.NonemptyEquivOfRangeEq
+import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.HasExponentZeroIff
+import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.TrivialOnInertiaOfUnr
+import Development.AutomorphicArithmetic.AutomorphicVarieties.HeckeAlgebras.ContinuousTorusCharacter
+import Development.AutomorphicArithmetic.AutomorphicVarieties.PatchingModules.NilpotentLevelLowering.LevelModule
+import Development.AutomorphicArithmetic.IntegralCasts.IsOpenStabOfMemNhds
+import Formalism.ConjugateSelfDual.Statement
+import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
+import Formalism.SharpRestriction.LevelLetterCocycles.LocCoh
+import ReciprocityTheory.GaloisValuations.GlobalA
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Formalism.ConjugateSelfDual ReciprocityTheory.Gal Formalism.BasicNotions Formalism.MainNotions.N ValuativeRel IsLocalRing
 open GlobalTheory.CuspRep GlobalTheory.WeilDeligne GlobalTheory.LocLanglands GlobalTheory.LocGL GlobalTheory.GalOfCusp GlobalTheory.SmGL GlobalTheory.SplitWeil
@@ -50,7 +113,7 @@ private theorem spLoc_pow {Λ B M : Type} [CommRing Λ] [IsLocalRing Λ] [CommRi
       rw [← (IsLocalRing.maximalIdeal.isMaximal Λ).eq_of_le hne hle]
       exact IsLocalRing.maximalIdeal.isMaximal Λ
     have hbot : (⊥ : Ideal (B ⧸ p)).IsMaximal :=
-      Ideal.isMaximal_of_isIntegral_of_isMaximal_comap _ hcomap
+      Ideal.isMaximal_of_isIntegral_of_isMaximal_under (⊥ : Ideal (B ⧸ p)) hcomap
     have hK := Ideal.comap_isMaximal_of_surjective (Ideal.Quotient.mk p)
       Ideal.Quotient.mk_surjective (K := ⊥)
     rwa [← RingHom.ker_eq_comap_bot, Ideal.mk_ker] at hK
@@ -208,6 +271,7 @@ private theorem spLoc_alg (R : Type) [CommRing R] [IsLocalRing R] [IsNoetherianR
     intro p
     simp only [t, map_sub, AlgHom.commutes, hψ]
     exact (Core.spRoots R q n P ut p.1).2 p.2
+  set_option synthInstance.maxHeartbeats 200000 in
   have key : ∀ (N : Ideal (MSplitAlg P n)) [N.IsMaximal], (∀ p, t p ∈ N) →
       ∃ F' : Sp P ut →ₐ[R] Localization.AtPrime N,
         ∀ x, F' (ψ x) = algebraMap (MSplitAlg P n) (Localization.AtPrime N) x := by
@@ -216,7 +280,7 @@ private theorem spLoc_alg (R : Type) [CommRing R] [IsLocalRing R] [IsNoetherianR
     have hmemL : ∀ y ∈ N, algebraMap (MSplitAlg P n) (Localization.AtPrime N) y ∈
         maximalIdeal (Localization.AtPrime N) := by
       intro y hy
-      have h := Localization.AtPrime.comap_maximalIdeal (I := N)
+      have h := Localization.AtPrime.under_maximalIdeal (I := N)
       rw [← h] at hy
       exact hy
     haveI : IsNoetherian (Localization.AtPrime N) (Localization.AtPrime N) :=
@@ -244,7 +308,7 @@ private theorem spLoc_alg (R : Type) [CommRing R] [IsLocalRing R] [IsNoetherianR
         have hu : Sp.u P ut j i = algebraMap R _ (ut j i) + Sp.mk P ut (MvPowerSeries.X (j, i)) := by
           rw [← (Core.spRoots R q n P ut j).2 i]
           ring
-        rw [AlgHom.comp_apply, hψ, hu, map_add, AlgHom.commutes, hF', hFX]
+        rw [AlgHom.comp_apply, hψ, hu, map_add (f := _), AlgHom.commutes, hF', hFX]
         simp only [t, map_sub, IsScalarTower.toAlgHom_apply]
         rw [← IsScalarTower.algebraMap_apply]
         ring)
@@ -266,8 +330,11 @@ private theorem spLoc_alg (R : Type) [CommRing R] [IsLocalRing R] [IsNoetherianR
       rw [Ideal.mem_comap, Ideal.mem_comap, AlgHom.commutes, ← Ideal.mem_comap,
         IsLocalRing.maximalIdeal_comap]
     haveI hNmax : N.IsMaximal :=
-      Ideal.isMaximal_of_isIntegral_of_isMaximal_comap N
-        (by rw [hNR]; exact IsLocalRing.maximalIdeal.isMaximal R)
+      Ideal.isMaximal_of_isIntegral_of_isMaximal_under (R := R) N
+        (by
+          change (N.comap (algebraMap R (MSplitAlg P n))).IsMaximal
+          rw [hNR]
+          exact IsLocalRing.maximalIdeal.isMaximal R)
     have htN : ∀ p, t p ∈ N := fun p => by
       rw [Ideal.mem_comap, hψt]
       exact hXmax p

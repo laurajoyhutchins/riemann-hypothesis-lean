@@ -1,5 +1,51 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.HodgeWedgeFields.H1CommutesBaseChange
+module
+
+public import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.HodgeWedgeFields.H1CommutesBaseChange
+public import Mathlib.LinearAlgebra.ExteriorPower.Pairing
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -63,8 +109,9 @@ theorem wb_expand (e : Fin n → M) (L : Fin n → Module.Dual A M) (h : ∀ x, 
     wb (A := A) a b = ∑ i, ∑ j ∈ Finset.Ioi i, (L i a * L j b - L j a * L i b) • wb (A := A) (e i) (e j) := by
   have h1 : wb (A := A) a b = ∑ i, ∑ j, (L i a * L j b) • wb (A := A) (e i) (e j) := by
     conv_lhs => rw [h a, h b]
+
     simp only [map_sum, LinearMap.sum_apply, map_smul, LinearMap.smul_apply, smul_smul,
-      Finset.smul_sum]
+    Finset.smul_sum]
     rw [Finset.sum_comm]
     refine Finset.sum_congr rfl fun i _ ↦ Finset.sum_congr rfl fun j _ ↦ ?_
     rw [mul_comm]
@@ -88,7 +135,7 @@ theorem expand (e : Fin n → M) (L : Fin n → Module.Dual A M) (h : ∀ x, x =
   | zero => simp
   | add x y _ _ hx hy =>
     conv_lhs => rw [hx, hy]
-    simp only [map_add, add_smul, Finset.sum_add_distrib]
+    simp only [map_add (f := _), add_smul, Finset.sum_add_distrib]
   | smul c x _ hx =>
     conv_lhs => rw [hx]
     simp only [map_smul, smul_eq_mul, mul_smul, Finset.smul_sum]
@@ -132,21 +179,22 @@ theorem form_pullback_evaluation {T T' : C} (φ : T ⟶ T') (x : Glob1 F) : p1 F
 
 theorem linear_form_extension_naturality (hP : Par F) (l : Module.Dual R (Glob1 F)) {T T' : C} (φ : T ⟶ T')
     (α : Ω[F.obj T⁄R]) : Lf hP l T' (p1 F φ α) = mp F φ (Lf hP l T α) := by
-  refine (hP T).inductionOn α _ (by simp) (fun x ↦ ?_) (fun b y hy ↦ ?_) (fun y z hy hz ↦ ?_)
+  refine (hP T).inductionOn α (fun x ↦ ?_) (fun b y hy ↦ ?_) (fun y z hy hz ↦ ?_)
   · rw [form_pullback_evaluation, Lf_ev, Lf_ev, AlgHom.commutes]
   · rw [oneFormsMapOfFunctorMorphism_smul, map_smul, hy, map_smul, smul_eq_mul, smul_eq_mul, map_mul]
-  · simp only [map_add, hy, hz]
+  · simp only [map_add (f := _), hy, hz]
 
 theorem Lf_expand (hP : Par F) {n : ℕ} (w : Fin n → Glob1 F) (l : Fin n → Module.Dual R (Glob1 F))
     (h : ∀ x, x = ∑ i, l i x • w i) (T : C) (α : Ω[F.obj T⁄R]) :
     α = ∑ i, Lf hP (l i) T α • evForm F T (w i) := by
-  refine (hP T).inductionOn α _ (by simp) (fun x ↦ ?_) (fun b y hy ↦ ?_) (fun y z hy hz ↦ ?_)
+  refine (hP T).inductionOn α (fun x ↦ ?_) (fun b y hy ↦ ?_) (fun y z hy hz ↦ ?_)
   · conv_lhs => rw [h x]
+
     simp only [map_sum, map_smul, Lf_ev, algebraMap_smul]
   · conv_lhs => rw [hy]
     simp only [map_smul, smul_eq_mul, mul_smul, Finset.smul_sum]
   · conv_lhs => rw [hy, hz]
-    simp only [map_add, add_smul, Finset.sum_add_distrib]
+    simp only [map_add (f := _), add_smul, Finset.sum_add_distrib]
 
 theorem wedge_functional_two_form_naturality (hP : Par F) {n : ℕ} (l : Fin n → Module.Dual R (Glob1 F)) (i j : Fin n) {T T' : C}
     (φ : T ⟶ T') (z : Om R (F.obj T) 2) :
@@ -159,7 +207,7 @@ theorem wedge_functional_two_form_naturality (hP : Par F) {n : ℕ} (l : Fin n �
     rw [eq_two v, ← wedge_eq_ιMulti, pOm_wedge, wedge_eq_ιMulti, wedge_eq_ιMulti, wedge_functional_iota_multi, wedge_functional_iota_multi]
     simp only [linear_form_extension_naturality, map_sub, map_mul]
   | zero => simp
-  | add x y _ _ hx hy => simp only [map_add, hx, hy]
+  | add x y _ _ hx hy => simp only [map_add (f := _), hx, hy]
   | smul c x _ hx => simp only [pOm_smul, map_smul, hx, smul_eq_mul, map_mul]
 
 theorem wedge_functional_constant_on_image (hP : Par F) {n : ℕ} (l : Fin n → Module.Dual R (Glob1 F)) (i j : Fin n) (T : C)
@@ -176,7 +224,7 @@ theorem wedge_functional_constant_on_image (hP : Par F) {n : ℕ} (l : Fin n →
     simp only [Lf_ev, map_sub, map_mul]
   | zero => simp
   | add x y _ _ hx hy =>
-    simp only [map_add, Pi.add_apply, hx, hy]
+    simp only [map_add (f := _), Pi.add_apply, hx, hy]
   | smul c x _ hx =>
     simp only [map_smul, Pi.smul_apply, hx, smul_eq_mul, map_mul]
     rw [← algebraMap_smul (F.obj T) c, map_smul, hx, smul_eq_mul]
@@ -193,6 +241,7 @@ theorem twoFormCohSt : TwoFormCohSt := by
     intro x
     have h1 : f (s x) = x := LinearMap.congr_fun hs x
     conv_lhs => rw [← h1, pi_eq_sum_univ' (s x)]
+
     simp [w, l, map_sum, map_smul]
   have hexp : ∀ (T : C) (z : Om R (F.obj T) 2), z = ∑ i, ∑ j ∈ Finset.Ioi i,
       L2 (fun i ↦ Lf hP (l i) T) i j z • wedge R _ (evForm F T (w i)) (evForm F T (w j)) := by
@@ -226,6 +275,7 @@ theorem twoFormCohSt : TwoFormCohSt := by
     refine ⟨∑ i, ∑ j ∈ Finset.Ioi i, r i j • wb (A := R) (w i) (w j), ?_⟩
     funext T
     conv_rhs => rw [hexp T (u T)]
+
     simp only [map_sum, map_smul, Finset.sum_apply, Pi.smul_apply, wb_apply, nu_ιMulti]
     refine Finset.sum_congr rfl fun i _ ↦ Finset.sum_congr rfl fun j _ ↦ ?_
     rw [← hr, algebraMap_smul]

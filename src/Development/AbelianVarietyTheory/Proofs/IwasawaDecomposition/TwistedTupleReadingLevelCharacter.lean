@@ -1,7 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.RdLevOn
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.RepresentativeImagePointOfLift
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsIsPtOfOfRat
+module
+
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.RdLevOn
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.LatAtLattice
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsIsPtOfOfRat
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsPtOfOfDecoRaw
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.RepresentativeImagePointOfLift
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ValuedLtOfMem
+import Formalism.LocalRingCardinality.SpanPowerMembership.LocAtA
+import Formalism.LocalToGlobal.Columns.AdelicLemmas
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 open scoped TensorProduct
 open NumberField IsDedekindDomain Formalism.BasicNotions Formalism.L2.Col Formalism.L2.DIV Formalism.UG GlobalTheory.Mem GlobalTheory.Mem.Col2 GlobalTheory.Mem.Col2.TypeLev Matrix Formalism.L2.Forms GlobalTheory.SeeSaw.TwLev
@@ -61,7 +105,7 @@ theorem exists_glint_of_rat [NeZero n] (P : HeightOneSpectrum (𝓞 E)) {z : GL 
 theorem isPtOf_mul_rat [NeZero n] {hcm : CMData F E} {SG Q : Finset (HeightOneSpectrum (𝓞 E))} {g z : GL (Fin n) (AfE F E)}
     {p : DecoF E n ∅ SG Q} (hg : IsPtOf hcm g p) (hzU : z ∈ UAd hcm n) (hz : z ∈ St (1 : GL (Fin n) (AfE F E))) (c : GLQ E n Q)
     (hcz : ∀ (P : Q) i j, adAt F P.1 ((z : Matrix (Fin n) (Fin n) (AfE F E)) i j) = algebraMap E _ ((c P).1 (Pi.single j 1) i)) :
-    IsPtOf hcm (g * z) (((1, (fun w : SG => redAt 1 w.1 ⟨z, hz⟩)⁻¹, c⁻¹) : UF E n × GLG E n SG × GLQ E n Q) • p) := by
+    IsPtOf hcm (g * z) (((1, (fun w : SG => redAt 1 w.1 ⟨z, hz⟩)⁻¹, c⁻¹) : UF E n × GLG (E := E) (n := n) (SG := SG) × GLQ E n Q) • p) := by
   have hInt : ∀ {x : GL (Fin n) (AfE F E)} (hx : x ∈ St (1 : GL (Fin n) (AfE F E))) (i j : Fin n),
       (x : Matrix (Fin n) (Fin n) (AfE F E)) i j ∈ RInt F E ∧ ∀ w : HeightOneSpectrum (𝓞 E),
         HasRes w (adAt F w ((x : Matrix (Fin n) (Fin n) (AfE F E)) i j))
@@ -82,17 +126,19 @@ theorem isPtOf_mul_rat [NeZero n] {hcm : CMData F E} {SG Q : Finset (HeightOneSp
       rfl
     rw [e]
     exact (hInt hzi i j).2 w.1
-  · rw [inv_inv, Pi.inv_apply, inv_inv, Units.val_mul, Matrix.mul_apply, map_sum]
+  · set_option synthInstance.maxHeartbeats 100000 in
+      rw [inv_inv, Pi.inv_apply, inv_inv, Units.val_mul, Matrix.mul_apply, map_sum]
     have e : ∀ x, adAt F P.1 ((g : Matrix (Fin n) (Fin n) (AfE F E)) i x * (z : Matrix (Fin n) (Fin n) (AfE F E)) x j) =
         algebraMap E (P.1.adicCompletion E) (p.fr P (Pi.single x 1) i * (c P).1 (Pi.single j 1) x) := fun x => by
       rw [map_mul, map_mul, hg.fr P, hcz P]
+
     rw [Finset.sum_congr rfl fun x _ => e x, ← map_sum]
     refine congrArg (algebraMap E (P.1.adicCompletion E)) ?_
     show _ = (p.fr P) ((c P).1 (Pi.single j 1)) i
     exact (Finset.sum_congr rfl fun k _ => mul_comm _ _).trans (GlobalTheory.TopStep.apply_eq_sum (p.fr P).toLinearMap _ i).symm
 
-theorem glq_free {ST SG Q : Finset (HeightOneSpectrum (𝓞 E))} {p : DecoF E n ST SG Q} {a b : GLG E n SG} {c d : GLQ E n Q}
-    (h : ((1, a, c) : UF E n × GLG E n SG × GLQ E n Q) • p = ((1, b, d) : UF E n × GLG E n SG × GLQ E n Q) • p) : c = d := by
+theorem glq_free {ST SG Q : Finset (HeightOneSpectrum (𝓞 E))} {p : DecoF E n ST SG Q} {a b : GLG (E := E) (n := n) (SG := SG)} {c d : GLQ E n Q}
+    (h : ((1, a, c) : UF E n × GLG (E := E) (n := n) (SG := SG) × GLQ E n Q) • p = ((1, b, d) : UF E n × GLG (E := E) (n := n) (SG := SG) × GLQ E n Q) • p) : c = d := by
   funext P
   have e := congrArg (fun q : DecoF E n ST SG Q => q.fr P) h
   change (1 : UF E n).1 * p.1.2 P * ((c P)⁻¹).1 = (1 : UF E n).1 * p.1.2 P * ((d P)⁻¹).1 at e
@@ -158,7 +204,7 @@ theorem levQX_lam_inv (emb : X.K →+* ℂ) (hn : R.N R.m - 1 = R.r + R.m * R.t)
 
 end Chr
 
-set_option maxHeartbeats 2000000 in
+
 theorem rdLevOn_reads_tw : ∀ {B : Base} {X : PreX B.toPre} (I : TC B X), I.Ok → TC.Pins B X → ∀ (l : I.Laws) (Z : TC.Later B (I.cols l))
     (a : I.ι) {bad : Set (HeightOneSpectrum (𝓞 (I.rec7 l Z).host.F))}
     (S : StepLevel (I.rec7 l Z).host.F (I.rec7 l Z).host.E (sigD (I.rec7 l Z)) (gramP (I.rec7 l Z)) 1 (I.rec7 l Z).R.f bad)
@@ -173,7 +219,7 @@ theorem rdLevOn_reads_tw : ∀ {B : Base} {X : PreX B.toPre} (I : TC B X), I.Ok 
     have := Formalism.L2.Col.rank_X'_eq B.R; have := B.R.m_add_three_le_k; unfold Ranks.r at *; omega⟩
   choose cc hcc hred using fun P : I.Q a => exists_glint_of_rat (F := B.host.F) P.1 hz (hzA P)
   have hpt := isPtOf_mul_rat (h.pt c) hzU hz (cc : GLQ B.fields.E (B.R.N B.R.m - 1) (I.Q a)) hcc
-  set hv : GLG B.fields.E (B.R.N B.R.m - 1) (B.primes X).vGs := fun w => redAt 1 w.1 ⟨z, hz⟩ with hhv
+  set hv : GLG (E := B.fields.E) (n := B.R.N B.R.m - 1) (SG := (B.primes X).vGs) := fun w => redAt 1 w.1 ⟨z, hz⟩ with hhv
   have hΘ : ∀ P : I.Q a, cc P ∈ (levQX B.R I.sel (I.tup a) P).H ↔ redAt 1 P.1 ⟨z, hz⟩ ∈ blockTri (blk2 B.R.r) := fun P => by
     show GlobalTheory.TopStep.redGL _ P.1 (cc P) ∈ HQ _ _ B.R.r (B.R.m * B.R.t) ↔ _
     rw [hred P]

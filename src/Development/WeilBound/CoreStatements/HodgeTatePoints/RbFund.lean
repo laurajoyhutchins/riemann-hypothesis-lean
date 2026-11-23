@@ -1,5 +1,61 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.TeichmullerCharacterOrderGenerates
+module
+
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.TeichmullerCharacterOrderGenerates
+public import Mathlib.Algebra.Field.ZMod
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+public import Mathlib.NumberTheory.MulChar.Lemmas
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+public import Mathlib.RingTheory.Valuation.Integral
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.CharP.Quotient
+
+@[expose] public section
 
 open scoped Matrix TensorProduct
 open Matrix
@@ -177,6 +233,7 @@ theorem fund_pow_inj (p : ℕ) [Fact p.Prime] {C : Type} [Field C]
 theorem addHom_eq_zero (p : ℕ) [Fact p.Prime] {F : Type} [Field F] [Algebra (ZMod p) F]
     {ι : Type} [Fintype ι] (b : Module.Basis ι (ZMod p) F) {A : Type} [AddCommGroup A]
     (ψ : F →+ A) (h : ∀ i, ψ (b i) = 0) (a : F) : ψ a = 0 := by
+
   rw [← b.sum_repr a, map_sum]
   refine Finset.sum_eq_zero fun i _ => ?_
   rw [← ZMod.natCast_zmod_val (b.repr a i), Nat.cast_smul_eq_nsmul, map_nsmul, h, nsmul_zero]
@@ -226,7 +283,7 @@ theorem moore : ∀ (p : ℕ) [Fact p.Prime] (C : Type) [Field C] [IsAlgClosed C
     intro β h a
     let ψ : F →+ R ⧸ Ideal.span {(p : R)} := AddMonoidHom.mk'
       (fun a => Ideal.Quotient.mk _ (l a - ∑ n, β n * (σ ^ p ^ (n : ℕ)) a)) (fun a b => by
-        rw [← map_add, Ideal.Quotient.eq]
+        rw [← map_add (f := _), Ideal.Quotient.eq]
         have h2 : ∑ n, β n * ((σ ^ p ^ (n : ℕ)) (a + b) - (σ ^ p ^ (n : ℕ)) a -
             (σ ^ p ^ (n : ℕ)) b) ∈ Ideal.span {(p : R)} :=
           Ideal.sum_mem _ fun n _ => Ideal.mul_mem_left _ _ (hadd n a b)

@@ -1,6 +1,50 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.PoitouTate.RealEvenHyp
-import GroundTheory.ProfiniteCohomology.PoitouTate.RealOddMain
+module
+
+public import GroundTheory.ProfiniteCohomology.PoitouTate.RealTraceMap
+public import GroundTheory.ProfiniteCohomology.PoitouTate.RealEvenHyp
+import GroundTheory.ProfiniteCohomology.RealPlaces.Vanishing
+import GroundTheory.ProfiniteCohomology.RealPlaces.VanishingPrimes
+import GroundTheory.ProfiniteCohomology.RestrictedRamification.BaseInputs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -9,9 +53,9 @@ namespace GroundTheory.ProfCoh
 
 open IsDedekindDomain NumberField CategoryTheory GroundTheory.Global
 
-local notation "ℚ̄" => AlgebraicClosure ℚ
-
 attribute [local instance 2000] Rep.hV2
+
+local notation "ℚ̄" => AlgebraicClosure ℚ
 
 section Nonempty
 
@@ -34,9 +78,9 @@ variable {K : FiniteSubfield} (S : Set (HeightOneSpectrum (𝓞 K.1))) [Fintype 
 
 section Hypotheses
 
-set_option maxHeartbeats 1000000 in
-include hS in
 
+
+include hS in
 theorem gsTrace_eq_gsOddTrace (hodd : Odd N) : gsTrace S ιr ιs N = gsOddTrace S ιr ιs hS hodd := by
   have : Finite (gsRoots S N) :=
     (nonempty_addEquiv_gsRoots_of_mem S hS).elim fun e => Finite.of_equiv _ e.toEquiv.symm
@@ -52,8 +96,8 @@ theorem gsTrace_eq_gsOddTrace (hodd : Odd N) : gsTrace S ιr ιs N = gsOddTrace 
           (gsOddTrace_localToCompact S ιr ιs hS hodd ξ).symm)
     _ = gsOddTrace S ιr ιs hS hodd z := congrArg _ hξ
 
-include hS in
 
+include hS in
 theorem gsTatePoitouTateHypotheses :
     TatePoitouTateHypotheses (gsFinFamily S ιs) (gsRealFamily S ιr) (gsRoots S N)
       (gsTrace S ιr ιs N) (gsLocalInvRootsQZ S ιs N) (gsRealInvRootsQZ S ιr N) := by
@@ -66,68 +110,12 @@ end Hypotheses
 variable (M : Rep.{0} (ULift.{0} ℤ) (galUnramifiedOutside K.1 ℚ̄ S)) [IsDiscreteRep M] [Finite M]
   (hM : ∀ m : M, N • m = 0)
 
-include hS hM in
 
-theorem poitouTateReal_duality {r s : ℕ} (h : r + s = 3) (hs : 1 ≤ s) :
-    Function.Bijective (tateCompactDualityMap (gsFinFamily S ιs) (gsRealFamily S ιr) (gsRoots S N) h
-      (gsTrace S ιr ιs N) M) :=
-  (gsTatePoitouTateHypotheses S ιr ιs hS).duality M hM h hs
 
-include hS hM in
 
-theorem poitouTateReal_compactDual {r s : ℕ} (h : r + s = 3) (hr : 1 ≤ r) :
-    Function.Bijective (ptTCompactDualMap (gsFinFamily S ιs) (gsRealFamily S ιr) (gsRoots S N) M
-      (gsTrace S ιr ιs N) h) :=
-  (gsTatePoitouTateHypotheses S ιr ιs hS).bijective_ptTCompactDualMap M hM h hr
 
-include hS hM in
-
-theorem poitouTateReal_nineTerm :
-    Function.Injective (ptTGlobalToLocalHat (gsFinFamily S ιs) (gsRealFamily S ιr) M) ∧
-    Function.Exact (ptTGlobalToLocalHat (gsFinFamily S ιs) (gsRealFamily S ιr) M)
-      (ptTLocalHatDualMap (gsFinFamily S ιs) (gsRealFamily S ιr) (gsRoots S N) M
-        (gsLocalInvRootsQZ S ιs N) (gsRealInvRootsQZ S ιr N)) ∧
-    Function.Exact (ptTLocalHatDualMap (gsFinFamily S ιs) (gsRealFamily S ιr) (gsRoots S N) M
-        (gsLocalInvRootsQZ S ιs N) (gsRealInvRootsQZ S ιr N))
-      (ptTDualToGlobal (gsFinFamily S ιs) (gsRealFamily S ιr) (gsRoots S N) (gsTrace S ιr ιs N) M
-        (show 1 + 2 = 3 from rfl)
-        ((gsTatePoitouTateHypotheses S ιr ιs hS).bijective_ptTCompactDualMap M hM _ le_rfl)) ∧
-    Function.Exact (ptTDualToGlobal (gsFinFamily S ιs) (gsRealFamily S ιr) (gsRoots S N)
-        (gsTrace S ιr ιs N) M (show 1 + 2 = 3 from rfl)
-        ((gsTatePoitouTateHypotheses S ιr ιs hS).bijective_ptTCompactDualMap M hM _ le_rfl))
-      (ptTGlobalToLocal (gsFinFamily S ιs) (gsRealFamily S ιr) M 1).hom ∧
-    Function.Exact (ptTGlobalToLocal (gsFinFamily S ιs) (gsRealFamily S ιr) M 1).hom
-      (ptTLocalDualMap (gsFinFamily S ιs) (gsRealFamily S ιr) (gsRoots S N) M
-        (gsLocalInvRootsQZ S ιs N) (gsRealInvRootsQZ S ιr N) (show 1 + 1 = 2 from rfl)) ∧
-    Function.Exact (ptTLocalDualMap (gsFinFamily S ιs) (gsRealFamily S ιr) (gsRoots S N) M
-        (gsLocalInvRootsQZ S ιs N) (gsRealInvRootsQZ S ιr N) (show 1 + 1 = 2 from rfl))
-      (ptTDualToGlobal (gsFinFamily S ιs) (gsRealFamily S ιr) (gsRoots S N) (gsTrace S ιr ιs N) M
-        (show 2 + 1 = 3 from rfl)
-        ((gsTatePoitouTateHypotheses S ιr ιs hS).bijective_ptTCompactDualMap M hM _ (by norm_num))) ∧
-    Function.Exact (ptTDualToGlobal (gsFinFamily S ιs) (gsRealFamily S ιr) (gsRoots S N)
-        (gsTrace S ιr ιs N) M (show 2 + 1 = 3 from rfl)
-        ((gsTatePoitouTateHypotheses S ιr ιs hS).bijective_ptTCompactDualMap M hM _ (by norm_num)))
-      (ptTGlobalToLocal (gsFinFamily S ιs) (gsRealFamily S ιr) M 2).hom ∧
-    Function.Exact (ptTGlobalToLocal (gsFinFamily S ιs) (gsRealFamily S ιr) M 2).hom
-      (ptTLocalDualMap (gsFinFamily S ιs) (gsRealFamily S ιr) (gsRoots S N) M
-        (gsLocalInvRootsQZ S ιs N) (gsRealInvRootsQZ S ιr N) (show 2 + 0 = 2 from rfl)) ∧
-    Function.Surjective (ptTLocalDualMap (gsFinFamily S ιs) (gsRealFamily S ιr) (gsRoots S N) M
-      (gsLocalInvRootsQZ S ιs N) (gsRealInvRootsQZ S ιr N) (show 2 + 0 = 2 from rfl)) :=
-  (gsTatePoitouTateHypotheses S ιr ιs hS).nineTerm M hM
-
-include hS hM in
-
-theorem poitouTateReal_sha :
-    Finite (ptTSha (gsFinFamily S ιs) (gsRealFamily S ιr) M 1) ∧
-      Finite (ptTSha (gsFinFamily S ιs) (gsRealFamily S ιr) (dualRep (gsRoots S N) M) 2) ∧
-      Function.Bijective (ptTShaPairing (gsFinFamily S ιs) (gsRealFamily S ιr) (gsRoots S N) M
-        (gsTrace S ιr ιs N)) ∧
-      Function.Bijective (ptTShaPairing (gsFinFamily S ιs) (gsRealFamily S ιr) (gsRoots S N) M
-        (gsTrace S ιr ιs N)).flip :=
-  (gsTatePoitouTateHypotheses S ιr ιs hS).sha M hM
 
 include ιs hS hM in
-
 theorem injective_gsRealRes_three : Function.Injective (gsRealRes S ιr M 3).hom := by
   refine (injective_iff_map_eq_zero _).2 fun x hx => ?_
   have h0 : (ptTGlobalToLocal (gsFinFamily S ιs) (gsRealFamily S ιr) M 3).hom x = 0 := by
@@ -137,8 +125,8 @@ theorem injective_gsRealRes_three : Function.Injective (gsRealRes S ιr M 3).hom
   exact (gsTatePoitouTateHypotheses S ιr ιs hS).injective_ptTGlobalToLocal_three M hM
     (h0.trans (map_zero _).symm)
 
-include ιs hS hM in
 
+include ιs hS hM in
 theorem bijective_gsRealRes {r : ℕ} (hr : 3 ≤ r) : Function.Bijective (gsRealRes S ιr M r).hom := by
   refine ⟨?_, surjective_gsRealRes_of_three_le S ιr (NeZero.ne N) hS M hM hr⟩
   rcases r with _ | _ | _ | _ | r

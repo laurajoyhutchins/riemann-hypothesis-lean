@@ -1,12 +1,65 @@
-import Formalism.LocalToGlobal.AlgebraicTheory.StatementD
-import Formalism.LocalToGlobal.AlgebraicTheory.AlgebraicTheoryProofs.TensZEt
-import Formalism.LocalToGlobal.AlgebraicTheory.AlgebraicTheoryProofs.TensorFourthPowerScaling
-import Formalism.LocalToGlobal.TorsionIntegrality.QuadraticSemicharacters.QuadraticSemicharacterIdentityReformulated2
-import Formalism.LocalToGlobal.TorsionIntegrality.QuadraticSemicharacters.QuadraticSemicharactersFactTer
+module
+
+public import Formalism.LocalToGlobal.AlgebraicTheory.StatementD
+public import Formalism.LocalToGlobal.AlgebraicTheory.StatementC
+public import Formalism.LocalToGlobal.AlgebraicTheory.AlgebraicTheoryProofs.TensZEt
+public import Formalism.LocalToGlobal.AlgebraicTheory.AlgebraicTheoryProofs.TensorFourthPowerScaling
+public import Formalism.LocalToGlobal.TorsionIntegrality.GaussianEigenFrames.GramFrameComposition.GramFrameCompositionMvExpFact
+import Formalism.LocalToGlobal.TorsionIntegrality.GaussianEigenFrames.GramFrameComposition.IntOpTwoFreeOf
 import Formalism.LocalToGlobal.TorsionIntegrality.QuadraticSemicharacters.CayleyGaussianIntegrals.NormLtOne
 import Formalism.LocalToGlobal.TorsionIntegrality.QuadraticSemicharacters.CayleyGaussianIntegrals.SubstSingleVar
-import Formalism.LocalToGlobal.TorsionIntegrality.GaussianEigenFrames.GramFrameComposition.GramFrameCompositionMvExpFact
-import Formalism.LocalToGlobal.TorsionIntegrality.GaussianEigenFrames.GramFrameComposition.IntOpTwoFreeOf
+import Formalism.LocalToGlobal.TorsionIntegrality.QuadraticSemicharacters.QuadraticSemicharacterIdentityReformulated2
+import Formalism.LocalToGlobal.TorsionIntegrality.QuadraticSemicharacters.QuadraticSemicharactersFactTer
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 open scoped BigOperators ComplexConjugate
@@ -55,13 +108,13 @@ theorem sqrt_sq (d : ℕ) : ((Real.sqrt d : ℝ) : ℂ) ^ 2 = d := by
 
 theorem trace_eq (d : ℕ) (m k : ℤ) :
     ((m : ℂ) + k * omegaK d) + conj ((m : ℂ) + k * omegaK d) = ((2 * m + k : ℤ) : ℂ) := by
-  rw [map_add, map_mul, map_intCast, map_intCast, conj_omega]
+  rw [map_add (f := _), map_mul, map_intCast, map_intCast, conj_omega]
   push_cast
   ring
 
 theorem diff_sq (d : ℕ) (m k : ℤ) :
     (((m : ℂ) + k * omegaK d) - conj ((m : ℂ) + k * omegaK d)) ^ 2 = -((d * k ^ 2 : ℤ) : ℂ) := by
-  rw [map_add, map_mul, map_intCast, map_intCast, conj_omega]
+  rw [map_add (f := _), map_mul, map_intCast, map_intCast, conj_omega]
   have hs := sqrt_sq d
   unfold omegaK
   push_cast
@@ -70,7 +123,7 @@ theorem diff_sq (d : ℕ) (m k : ℤ) :
 theorem isQInt_conj {d : ℕ} {x : ℂ} (h : IsQInt d x) : IsQInt d (conj x) := by
   obtain ⟨m, k, rfl⟩ := h
   refine ⟨m + k, -k, ?_⟩
-  rw [map_add, map_mul, map_intCast, map_intCast, conj_omega]
+  rw [map_add (f := _), map_mul, map_intCast, map_intCast, conj_omega]
   push_cast
   ring
 
@@ -181,7 +234,7 @@ theorem norm_omega_le (ι : ℂ ≃+* ℂ_[p]) {d : ℕ} (hd : d % 8 = 7) : ‖�
 
 theorem norm_qint_le (ι : ℂ ≃+* ℂ_[p]) {d : ℕ} (hd : d % 8 = 7) {x : ℂ} (hx : IsQInt d x) : ‖ι x‖ ≤ 1 := by
   obtain ⟨m, k, rfl⟩ := hx
-  rw [map_add, map_mul, map_intCast, map_intCast]
+  rw [map_add (f := _), map_mul, map_intCast, map_intCast]
   refine (IsUltrametricDist.norm_add_le_max _ _).trans (max_le (IsUltrametricDist.norm_intCast_le_one _ m) ?_)
   rw [norm_mul]
   exact mul_le_one₀ (IsUltrametricDist.norm_intCast_le_one _ k) (norm_nonneg _) (norm_omega_le ι hd)
@@ -230,6 +283,7 @@ theorem linSubst_eq {K : Type} [Field K] {m n : Type} [Fintype n] (M : Matrix m 
 theorem linSub_sumC {K : Type} [Field K] {n m ι : Type} [Finite n] [Fintype m] [Fintype ι] (Fm : n → m → K)
     (cc : ι → K) (T : ι → MvPowerSeries n K) :
     linSub Fm (∑ i, MvPowerSeries.C (cc i) * T i) = ∑ i, MvPowerSeries.C (cc i) * linSub Fm (T i) := by
+
   rw [← Formalism.L2.Th1.G.linSubHom_apply, map_sum]
   refine Finset.sum_congr rfl fun i _ => ?_
   rw [map_mul, Formalism.L2.Th1.G.linSubHom_apply, Formalism.L2.Th1.G.linSubHom_apply, Formalism.L2.Th1.G.linSub_C]
@@ -306,8 +360,9 @@ theorem XiConnection.ser_eq {p : ℕ} [Fact p.Prime] (ι : ℂ ≃+* ℂ_[p]) {n
       rw [if_neg (Ne.symm hw), map_zero, zero_mul]
     · intro hi; exact absurd (Finset.mem_univ i) hi
   unfold serLin
+
   rw [hfun, hfun2, hcomp, Formalism.L2.Th1.H.FormalGroupLawNegation.map_linSubst, linSubst_eq, Formalism.L2.Th1.GD.GramFrameCompositionLinFacts.linSub_linSub,
-    hmat, hGtay, map_sum]
+  hmat, hGtay, map_sum]
   simp only [map_mul, MvPowerSeries.map_C]
   rw [linSub_sumC]
   rfl
@@ -479,7 +534,7 @@ theorem split_bound_of_xi_lemmas (h1 : XiEt) (h2 : XiConn) : SelfDualLatticeThet
         have htr := trace_eq dK m k
         rw [← hmk] at htr
         have h3 : ‖((2 * m + k : ℤ) : ℂ_[p])‖ < 1 := by
-          rw [← map_intCast ι, ← htr, map_add]
+          rw [← map_intCast ι, ← htr, map_add (f := _)]
           exact (IsUltrametricDist.norm_add_le_max _ _).trans_lt (max_lt hlt' hlt)
         exact hT (dvd_of_norm_lt _ h3)
       · exact h'

@@ -1,7 +1,57 @@
-import Mathlib
+module
+
+public import Mathlib.RingTheory.DiscreteValuationRing.Basic
+public import Mathlib.RingTheory.LocalRing.ResidueField.Defs
+public import Mathlib.RingTheory.MvPowerSeries.Derivative
+public import Mathlib.RingTheory.MvPowerSeries.Substitution
+public import Mathlib.RingTheory.Trace.Defs
+public import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.MvPowerSeriesEvalOfPowMem
+public import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.ExistsTraceEqFormMulDiagonal
+public import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.MvPowerSeriesSubstConstTermsLocalAlgHomSpec
+import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.CoeffEqZeroOfMemSpanPow
 import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.IsUnitDetOfProductMapNeZero
-import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.MvPowerSeriesSubstConstTermsLocalAlgHomSpec
-import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.ExistsTraceEqFormMulDiagonal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.AdicCompletion.Noetherian
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.MvPowerSeries.Equiv
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 open IsLocalRing MvPowerSeries
 open scoped TensorProduct
@@ -20,6 +70,7 @@ theorem det_notMem_span (k : Type) [Field k] (σ : Type) [Fintype σ] [Decidable
       ρ s ∈ Ideal.span (Set.range fun i => ρ (f (e.symm i))) := by
     intro s hs
     obtain ⟨u, rfl⟩ := Ideal.mem_span_range_iff_exists_fun.1 hs
+
     rw [map_sum]
     refine Ideal.sum_mem _ fun j _ => ?_
     rw [map_mul]
@@ -27,6 +78,7 @@ theorem det_notMem_span (k : Type) [Field k] (σ : Type) [Fintype σ] [Decidable
   intro hdet
   refine SocleDet.det_notMem_span k _ N (fun i => ρ (f (e.symm i)))
     ((ρ.toAlgHom.mapMatrix a).submatrix e.symm e.symm) (fun i => ?_) (fun i => ?_) ?_
+
   · rw [hf, map_sum, ← e.symm.sum_comp]
     simp [hX]
   · have := hmap _ (hN (e.symm i))
@@ -51,8 +103,8 @@ theorem exists_ringHom_eval {A B σ : Type} [CommRing A] [CommRing B] [Finite σ
   obtain ⟨ψ, hψ⟩ := (mvPowerSeries_eval_of_pow_mem B K σ a fun j => ⟨1, by simpa using ha j⟩).1 h A
   exact ⟨ψ, fun c => ψ.commutes c, hψ⟩
 
-open DiscrJacobian in
 
+open DiscrJacobian in
 theorem exists_trace_eq {A B σ : Type} [CommRing A] [IsLocalRing A] [IsNoetherianRing A]
     [CommRing B] [Fintype σ] [DecidableEq σ] [Algebra A B] [Algebra (MvPowerSeries σ A) B]
     [IsScalarTower A (MvPowerSeries σ A) B] [Module.Free A B] [Module.Finite A B]
@@ -64,7 +116,7 @@ theorem exists_trace_eq {A B σ : Type} [CommRing A] [IsLocalRing A] [IsNoetheri
         ∑ j, a i j * -algebraMap (MvPowerSeries σ A) B (X j)) →
       a.det ∉ (maximalIdeal A).map (algebraMap A B)) :
     ∃ lam : B →ₗ[A] A, ∀ x : B, Algebra.trace A B x =
-      lam (x * algebraMap _ B (Matrix.of fun i j => pderiv A j (f i)).det) := by
+      lam (x * algebraMap _ B (Matrix.of fun i j => pderiv (R := A) j (f i)).det) := by
   let S := MvPowerSeries σ A
   have : Module.Finite S B := Module.Finite.of_restrictScalars_finite A S B
   have : Module.FinitePresentation S B := Module.finitePresentation_of_finite S B
@@ -76,9 +128,10 @@ theorem exists_trace_eq {A B σ : Type} [CommRing A] [IsLocalRing A] [IsNoetheri
     (hker (f i ⊗ₜ 1) (by simp [S, hf0]))
   let P : Matrix σ σ (S ⊗[A] B) := Matrix.of a
   have hmt : ∀ j, mu A S B (t j) = 0 := fun j => by simp [t]
-  have hmu : ∀ i j, mu A S B (a i j) = algebraMap S B (pderiv A j (f i)) := by
+  have hmu : ∀ i j, mu A S B (a i j) = algebraMap S B (pderiv (R := A) j (f i)) := by
     intro i j
-    have := congrArg (der (S := S) (B := B) (pderiv A j)) (ha i)
+    have := congrArg (der (S := S) (B := B) (pderiv (R := A) j)) (ha i)
+
     simp only [map_sum, der_mul, hmt, zero_mul, add_zero, der_tmul, mul_one] at this
     rw [← this, Finset.sum_eq_single j]
     · simp [t, S]
@@ -91,6 +144,7 @@ theorem exists_trace_eq {A B σ : Type} [CommRing A] [IsLocalRing A] [IsNoetheri
   have hDt : ∀ z ∈ Ideal.span (Set.range t), π z * π P.det = 0 := by
     intro z hz
     obtain ⟨c, rfl⟩ := Ideal.mem_span_range_iff_exists_fun.1 hz
+
     rw [map_sum, Finset.sum_mul]
     refine Finset.sum_eq_zero fun j _ => ?_
     have := SocleDet.det_mul_mem (RingHom.ker π) P t j fun r => by
@@ -104,12 +158,12 @@ theorem exists_trace_eq {A B σ : Type} [CommRing A] [IsLocalRing A] [IsNoetheri
     have := hDt _ (hker (s ⊗ₜ 1 - 1 ⊗ₜ algebraMap S B s) (by simp))
     rwa [map_sub, hπ, hπ, map_one] at this
   have hJ : Algebra.TensorProduct.lmul' (S := B) A (π P.det)
-      = algebraMap S B (Matrix.of fun i j => pderiv A j (f i)).det := by
+      = algebraMap S B (Matrix.of fun i j => pderiv (R := A) j (f i)).det := by
     have e : ∀ z, Algebra.TensorProduct.lmul' (S := B) A (π z) = mu A S B z := by
       intro z
       induction z using TensorProduct.induction_on with
       | zero => simp
-      | add a b ha hb => simp only [map_add, ha, hb]
+      | add a b ha hb => simp only [map_add (f := _), ha, hb]
       | tmul s w => simp [hπ]
     rw [e, AlgHom.map_det, RingHom.map_det]
     congr 1
@@ -125,7 +179,8 @@ theorem exists_trace_eq {A B σ : Type} [CommRing A] [IsLocalRing A] [IsNoetheri
     obtain ⟨u, hu⟩ := exists_eq_C_add_sum s
     rw [hε, residue_eq_zero_iff] at hx
     change _ ∈ m.radical
-    rw [hu, map_add, map_sum]
+
+    rw [hu, map_add (f := _), map_sum]
     refine add_mem (Ideal.le_radical ?_) (Ideal.sum_mem _ fun j _ => ?_)
     · have : algebraMap S B (C (constantCoeff s)) = algebraMap A B (constantCoeff s) :=
         (IsScalarTower.algebraMap_apply A S B _).symm
@@ -152,17 +207,20 @@ theorem exists_trace_eq {A B σ : Type} [CommRing A] [IsLocalRing A] [IsNoetheri
       intro z
       induction z using TensorProduct.induction_on with
       | zero => simp
-      | add a b ha hb => simp only [map_add, ha, hb]
+      | add a b ha hb => simp only [map_add (f := _), ha, hb]
       | tmul s w =>
         rw [hπ, hη, map_mul, ← hκ, ← hε]; rfl
     have h1 := e P.det
+
     rw [hs, map_sum, AlgHom.map_det] at h1
     refine hW (η.mapMatrix P) (fun i => ?_) ?_
     · have := congrArg η (ha i)
+
       simp only [map_sum, map_mul, hη, mul_one] at this
       rw [← this]
       refine Finset.sum_congr rfl fun j _ => ?_
       simp [t, hη, P, S]
+
     · rw [← Ideal.Quotient.eq_zero_iff_mem, ← h1, ← Ideal.Quotient.eq_zero_iff_mem.2 hmem, map_sum]
       refine Finset.sum_congr rfl fun p _ => ?_
       rw [Algebra.smul_def, map_mul, ← hκ, hlift]
@@ -175,7 +233,7 @@ theorem dvd_trace_of_ringHom {A B σ : Type} [CommRing A] [IsLocalRing A] [IsNoe
     (ε : B →+* ResidueField A) (hε : ∀ s, ε (θ s) = residue A (constantCoeff s))
     (hW : ∀ a : Matrix σ σ B, (∀ i, ι (constantCoeff (f i)) = ∑ j, a i j * -θ (X j)) →
       a.det ∉ (maximalIdeal A).map ι)
-    (δ : A) (U : B) (hJ : θ (Matrix.of fun i j => pderiv A j (f i)).det = ι δ * U)
+    (δ : A) (U : B) (hJ : θ (Matrix.of fun i j => pderiv (R := A) j (f i)).det = ι δ * U)
     {r : ℕ} (b : Fin r → B) (hb : ∀ g, ∃! c : Fin r → A, g = ∑ i, ι (c i) * b i)
     (g : B) (M : Matrix (Fin r) (Fin r) A) (hM : ∀ j, g * b j = ∑ i, ι (M i j) * b i) :
     δ ∣ M.trace := by
@@ -208,7 +266,7 @@ end GlobalTheory.TraceJacobian
 
 namespace GlobalTheory
 
-theorem C_dvd_trace_of_jacobian : ∀ (V : Type) [CommRing V] [IsDomain V] [IsDiscreteValuationRing V] [IsAdicComplete (maximalIdeal V) V] [CharZero V] (σ : Type) [Fintype σ] [DecidableEq σ] (φ : σ → MvPowerSeries σ V), (∀ j, MvPowerSeries.constantCoeff (φ j) = 0) → (∃ M : ℕ, Ideal.span (Set.range (MvPowerSeries.X : σ → MvPowerSeries σ (ResidueField V))) ^ M ≤ Ideal.span (Set.range fun j => MvPowerSeries.map (residue V) (φ j))) → ∀ (δ : V) (U : (MvPowerSeries σ V)ˣ), δ ≠ 0 → Matrix.det (Matrix.of fun i j : σ => MvPowerSeries.pderiv V j (φ i)) = MvPowerSeries.C δ * (U : MvPowerSeries σ V) → ∀ (r : ℕ) (b : Fin r → MvPowerSeries σ V), (∀ f, ∃! cf : Fin r → MvPowerSeries σ V, f = ∑ i, MvPowerSeries.subst φ (cf i) * b i) → ∀ (f : MvPowerSeries σ V) (M : Matrix (Fin r) (Fin r) (MvPowerSeries σ V)), (∀ j, f * b j = ∑ i, MvPowerSeries.subst φ (M i j) * b i) → MvPowerSeries.C δ ∣ M.trace := by
+theorem C_dvd_trace_of_jacobian : ∀ (V : Type) [CommRing V] [IsDomain V] [IsDiscreteValuationRing V] [IsAdicComplete (maximalIdeal V) V] [CharZero V] (σ : Type) [Fintype σ] [DecidableEq σ] (φ : σ → MvPowerSeries σ V), (∀ j, MvPowerSeries.constantCoeff (φ j) = 0) → (∃ M : ℕ, Ideal.span (Set.range (MvPowerSeries.X : σ → MvPowerSeries σ (ResidueField V))) ^ M ≤ Ideal.span (Set.range fun j => MvPowerSeries.map (residue V) (φ j))) → ∀ (δ : V) (U : (MvPowerSeries σ V)ˣ), δ ≠ 0 → Matrix.det (Matrix.of fun i j : σ => MvPowerSeries.pderiv (R := V) j (φ i)) = MvPowerSeries.C δ * (U : MvPowerSeries σ V) → ∀ (r : ℕ) (b : Fin r → MvPowerSeries σ V), (∀ f, ∃! cf : Fin r → MvPowerSeries σ V, f = ∑ i, MvPowerSeries.subst φ (cf i) * b i) → ∀ (f : MvPowerSeries σ V) (M : Matrix (Fin r) (Fin r) (MvPowerSeries σ V)), (∀ j, f * b j = ∑ i, MvPowerSeries.subst φ (M i j) * b i) → MvPowerSeries.C δ ∣ M.trace := by
   intro V _ _ _ _ _ σ _ _ φ h0 hM δ U _ hJ r b hb g M hg
   have hs : HasSubst φ := hasSubst_of_constantCoeff_zero h0
   let ι : MvPowerSeries σ V →ₐ[V] MvPowerSeries σ V := substAlgHom hs
@@ -260,15 +318,16 @@ theorem C_dvd_trace_of_jacobian : ∀ (V : Type) [CommRing V] [IsDomain V] [IsDi
       obtain ⟨u, hu⟩ := TraceJacobian.exists_eq_C_add_sum c
       rw [PlaceInt.mem_maximalIdeal_mvPowerSeries_iff, ← residue_eq_zero_iff] at hc
       rw [Ideal.mem_comap, Ideal.mem_comap, hu]
-      simp only [RingHom.coe_coe, map_add, map_sum, map_mul, hιC, hιX]
+
+      simp only [RingHom.coe_coe, map_add (f := _), map_sum, map_mul, hιC, hιX]
       refine add_mem ?_ (Ideal.sum_mem _ fun j _ =>
         Ideal.mul_mem_right _ _ (Ideal.subset_span ⟨j, rfl⟩))
       simp [red, hc]
   · rw [RingHom.coe_coe, hιC, ← hJ, RingHom.map_det]
     congr 1
     ext i j : 2
-    have : pderiv _ j (MvPowerSeries.map (C : V →+* MvPowerSeries σ V) (φ i) - C (X i))
-        = MvPowerSeries.map C (pderiv V j (φ i)) := by
+    have : pderiv j (MvPowerSeries.map (C : V →+* MvPowerSeries σ V) (φ i) - C (X i))
+        = MvPowerSeries.map C (pderiv (R := V) j (φ i)) := by
       ext m : 1
       simp [coeff_pderiv, coeff_C]
     simp only [RingHom.mapMatrix_apply, Matrix.map_apply, Matrix.of_apply]

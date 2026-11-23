@@ -1,19 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.NormalFam
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisGeometry₂.HoweUnram
-import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.IsStepWeil
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.ExistsNormLeHeightPow
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FinRepApply
-import Development.AbelianVarietyTheory.Definitions.Divisors.InstCMHostS
-import Formalism.LocalToGlobal.IndefiniteReal.PartsRow
-import Formalism.LocalToGlobal.IndefiniteReal.BaseLiftsPackageOfPrimitiveLinks
-import Formalism.LocalToGlobal.Divisibility.TrivialExtensionSideWellFormed
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.SphericalLabelOperatorsOnHyperspecialFixedVector
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.SphericalHeckeCombinationsCommuteFixedVectorsStatement
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.SupportedSubgroupSplitCommutePrimeIdempotents
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.AlgebraMapIntertwiningMapBijectiveOfIsSmooth
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SumTranslatesEqDoubleCosetAverageStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RankLeAleph0SmoothIrreducibleUnitaryAdelicStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.InstCMHostS
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.SphericalLabelOperatorsOnHyperspecialFixedVector
+public import Formalism.LocalToGlobal.IndefiniteReal.ConjSubConjSub
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RankLeAleph0SmoothIrreducibleUnitaryAdelicStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SumTranslatesEqDoubleCosetAverageStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.AlgebraMapIntertwiningMapBijectiveOfIsSmooth
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.SphericalHeckeCombinationsCommuteFixedVectorsStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import Development.AbelianVarietyTheory.PublishedTheorems.GaloisGeometry₂.HoweUnram
+
+@[expose] public section
 
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.MainNotions.S MeasureTheory IsDedekindDomain NumberField Matrix
 open Formalism.L2.Theta Formalism.L2.DIV Formalism.L2.Indef Formalism.DivisionValues Polynomial
@@ -45,7 +77,7 @@ theorem avg (ρ : G →* Module.End ℂ M) (K : Subgroup G) {ι : Type} (s : Fin
 
 def fixS (ρ : G →* Module.End ℂ M) (S : Submodule ℂ M) (K : Subgroup G) : Submodule ℂ M where
   carrier := {x | x ∈ S ∧ ∀ k ∈ K, ρ k x = x}
-  add_mem' := fun {x y} hx hy => ⟨S.add_mem hx.1 hy.1, fun k hk => by rw [map_add, hx.2 k hk, hy.2 k hk]⟩
+  add_mem' := fun {x y} hx hy => ⟨S.add_mem hx.1 hy.1, fun k hk => by rw [map_add (f := _), hx.2 k hk, hy.2 k hk]⟩
   zero_mem' := ⟨S.zero_mem, fun k _ => map_zero _⟩
   smul_mem' := fun c x hx => ⟨S.smul_mem c hx.1, fun k hk => by rw [map_smul, hx.2 k hk]⟩
 
@@ -108,6 +140,7 @@ theorem abs_scalar (ρ : G →* Module.End ℂ M) (S : Submodule ℂ M) (hS : �
   have hRF : ∀ a ∈ Loc, ∀ x ∈ F, ∑ γ ∈ R a, ρ γ x ∈ F := by
     intro a ha x hx
     refine ⟨S.sum_mem fun γ _ => hS γ x hx.1, fun k hk => ?_⟩
+
     rw [map_sum]
     have := (hR a ha).sum_eq (hR a ha) hk (fun g => ρ g x)
       (fun y l hl => by rw [map_mul, Module.End.mul_apply, hx.2 l hl])
@@ -135,14 +168,14 @@ theorem abs_scalar (ρ : G →* Module.End ℂ M) (S : Submodule ℂ M) (hS : �
   refine ⟨c, ?_⟩
   let W1 : Submodule ℂ M :=
     { carrier := {x | x ∈ F ∧ T x = c • x}
-      add_mem' := fun {x y} hx hy => ⟨F.add_mem hx.1 hy.1, by rw [map_add, hx.2, hy.2, smul_add]⟩
+      add_mem' := fun {x y} hx hy => ⟨F.add_mem hx.1 hy.1, by rw [map_add (f := _), hx.2, hy.2, smul_add]⟩
       zero_mem' := ⟨F.zero_mem, by rw [map_zero, smul_zero]⟩
       smul_mem' := fun a x hx => ⟨F.smul_mem a hx.1, by rw [map_smul, hx.2, smul_comm]⟩ }
   let W2 : Submodule ℂ M :=
     { carrier := {x | ∃ y ∈ F, x = T y - c • y}
       add_mem' := by
         rintro _ _ ⟨y, hy, rfl⟩ ⟨y', hy', rfl⟩
-        exact ⟨y + y', F.add_mem hy hy', by rw [map_add, smul_add]; abel⟩
+        exact ⟨y + y', F.add_mem hy hy', by rw [map_add (f := _), smul_add]; abel⟩
       zero_mem' := ⟨0, F.zero_mem, by rw [map_zero, smul_zero, sub_zero]⟩
       smul_mem' := by
         rintro a _ ⟨y, hy, rfl⟩
@@ -222,11 +255,11 @@ theorem rtA_apply (V : HSp D) (g : GA D V) (F : GA D V → ℂ) (x : GA D V) : r
 theorem pre_psi (Q : principalLevelFrame.RowPsi V n) (h : Formalism.AUTREP.GAf D.host.E n) : principalLevelFrame.pre Q (Q.ψ h) = h := by
   have hx : ∃ x, Q.ψ x = Q.ψ h := ⟨h, rfl⟩
   unfold principalLevelFrame.pre
-  rw [dif_pos hx]
+  rw [dite_eq_left hx]
   exact Q.inj hx.choose_spec
 
-open Classical in
 
+open Classical in
 def ext0 (Q : principalLevelFrame.RowPsi V n) : (Formalism.AUTREP.GAf D.host.E n → ℂ) →ₗ[ℂ] (GA D V → ℂ) where
   toFun x g := if ∃ y, Q.ψ y = g then x (principalLevelFrame.pre Q g) else 0
   map_add' x y := by
@@ -264,6 +297,7 @@ theorem extendByZeroThroughUnitaryFrame_hecke (Q : principalLevelFrame.RowPsi V 
     (x : Formalism.AUTREP.GAf D.host.E n → ℂ) :
     ext0 Q (principalLevelFrame.Hecke₃ Q R x) = ∑ γ ∈ R, rtA V γ (ext0 Q x) := by
   unfold principalLevelFrame.Hecke₃
+
   rw [principalLevelFrame.heckeG_apply, map_sum]
   refine Finset.sum_congr rfl fun γ hγ => ?_
   obtain ⟨y, rfl⟩ := hR γ hγ
@@ -359,7 +393,7 @@ theorem spherical_scalar : ∀ {D : D7} {V : HSp D} {n : ℕ} (hF : D.host.F = m
   have hsph : ∀ a ∈ Loc, SphOp V Pr (dd a) (GlobalTheory.Hk3.rep V Pr (dd a)) := fun a ha => by
     have h := hdd1 a ha
     unfold GlobalTheory.Hk3.rep
-    rw [dif_pos h]
+    rw [dite_eq_left h]
     exact h.choose_spec
   have hrepG : ∀ a ∈ Loc, ∀ γ ∈ GlobalTheory.Hk3.rep V Pr (dd a), ∃ y, Q.ψ y = γ := fun a ha γ hγ =>
     hon γ ((sphOp_facts hef hKv (hsph a ha)).1 γ hγ).1
@@ -440,6 +474,7 @@ theorem spherical_scalar : ∀ {D : D7} {V : HSp D} {n : ℕ} (hF : D.host.F = m
         exact hopfix _ x hx.2
     ·
       intro b hb x _
+
       rw [hTB, hTB, map_sum]
       refine Finset.sum_congr rfl fun γ hγ => ?_
       rw [← Module.End.mul_apply, ← map_mul, ← Module.End.mul_apply, ← map_mul]

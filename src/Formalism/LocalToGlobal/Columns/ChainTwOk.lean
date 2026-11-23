@@ -1,5 +1,54 @@
-import Formalism.LocalToGlobal.Columns.ChainTwL
-import Formalism.LocalToGlobal.Columns.ChainOneOkF
+module
+
+public import Formalism.LocalToGlobal.Columns.ChainTwL
+public import Formalism.LocalToGlobal.Columns.ChainOneB
+public import Formalism.LocalToGlobal.Columns.BlockTriangularMulVecMemPartialFlag
+public import Formalism.LocalToGlobal.Columns.ChainOneOk
+import Formalism.LocalToGlobal.Columns.ChainOneOkL
+public import Formalism.LocalToGlobal.Columns.ReductionExistsInLatticeStabilizerHolds
+public import Formalism.LocalToGlobal.Columns.ResidueFieldUnfoldingClaimsHold
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Module
 
@@ -45,7 +94,7 @@ theorem twInX_mem_std (P : HeightOneSpectrum (𝓞 E)) {n c : ℕ} (x : Sp E n) 
   constructor
   · intro h l
     have h1 := h (Fin.castAdd c l)
-    rwa [ciInX_apply, dif_pos (by simp)] at h1
+    rwa [ciInX_apply, dite_eq_left (by simp)] at h1
   · intro h l
     rw [ciInX_apply]
     split_ifs with hl
@@ -70,12 +119,12 @@ variable {X : Fields} {Pr : Primes X} {R : Ranks} (Ch : Chars X Pr R.m)
 
 open Classical
 
-variable (X) in
 
+variable (X) in
 def TwDegOne (P : HeightOneSpectrum (𝓞 X.E)) : Prop := (qOf P).Prime ∧ ((qOf P : ℕ) : 𝓞 X.E) ∉ P.asIdeal ^ 2
 
-variable (X Pr R) in
 
+variable (X Pr R) in
 def TwFinQ (sharp : Bool) : Prop :=
   ∀ (j : ℕ) (P : HeightOneSpectrum (𝓞 X.E)), P ∉ Pr.vGs → TwDegOne X P →
     {D : Quotient (twSetoid (Pr := Pr) (R := R) sharp j P) | ∃ h, Quotient.mk _ h = D ∧ TwBdd (Pr := Pr) j P h}.Finite

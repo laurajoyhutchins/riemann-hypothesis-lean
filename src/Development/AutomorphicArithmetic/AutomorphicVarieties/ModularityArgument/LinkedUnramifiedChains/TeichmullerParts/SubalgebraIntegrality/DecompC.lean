@@ -1,13 +1,53 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.LinkedUnramifiedChains.TeichmullerParts.UnramifiedTrivialInertialType
-import Development.AutomorphicArithmetic.AutomorphicVarieties.HeckeAlgebras.OrdinaryHeckeCharacters.GlBridge
-import Development.AutomorphicArithmetic.AutomorphicVarieties.HeckeAlgebras.OrdinaryHeckeCharacters.IndexNeZero
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IsUnifAt
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.SplitPlaceUnitaryLocalPointsEquivGL
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.HeckeAlgebras.IsTheta
+public import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.IsTemperedGLOfHasSatGL
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsFiniteAdelicUnitaryPointOfLocalFamily
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.UnitaryHeckeOperatorLevelIndicatorEqInvIndex
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.MemConnectedComponentOfOneOfPos
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.BuildingsResidueChars.UnitaryAdelicLocalComponentsContinuousLevelsOpen
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.ClassFieldRamification.IneCard
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.HeckeAlgebras.OrdinaryHeckeCharacters.GlBridge
 import Development.AutomorphicArithmetic.AutomorphicVarieties.HeckeAlgebras.OrdinaryHeckeCharacters.IwMemMul
-import Development.AutomorphicArithmetic.AutomorphicVarieties.BuildingsResidueChars.UnitaryAdelicLocalComponentsContinuousLevelsOpen
-import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.ClassFieldRamification.IneCard
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.MemConnectedComponentOfOneOfPos
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsFiniteAdelicUnitaryPointOfLocalFamily
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.UnitaryHeckeOperatorLevelIndicatorEqInvIndex
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.IsTemperedGLOfHasSatGL
+import Formalism.SharpRestriction.GrowthBounds.MonomialOrderSegments.BrData
+import GroundTheory.LocalFields.PadicLogSeries
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.MultiplicityOne.CompOfBis
+
+@[expose] public section
 
 noncomputable section
 
@@ -20,8 +60,8 @@ attribute [local instance] GlobalTheory.LocalData.complRel GlobalTheory.LocalDat
 variable {E : Type} [Field E] [NumberField E] [IsCMField E] {n : ℕ}
 
 theorem UpperTheory.V.Z.J.D.Dc.int_conj (x : UA E n) (u : Pl E)
-    (h : cLoc (conjSrc (GlobalTheory.SplitPts.conjE E) u) x ∈ GlobalTheory.LFun.KGL (conjSrc (GlobalTheory.SplitPts.conjE E) u) n) :
-    cLoc u x ∈ GlobalTheory.LFun.KGL u n := by
+    (h : cLoc (conjSrc (GlobalTheory.SplitPts.conjE E) u) x ∈ GlobalTheory.LFun.KGL (conjSrc (GlobalTheory.SplitPts.conjE E) u) (n := n)) :
+    cLoc u x ∈ GlobalTheory.LFun.KGL u (n := n) := by
   have h1 := GlobalTheory.BCT.LocGlue.intst E n _ u (conjLoc (GlobalTheory.SplitPts.conjE E) u) (conjLoc_spec _ u).2.2 _ h
   have e : cLoc u x = GlobalTheory.CuspRep.invT n _ (GeneralLinearGroup.map (conjLoc (GlobalTheory.SplitPts.conjE E) u)
       (cLoc (conjSrc (GlobalTheory.SplitPts.conjE E) u) x)) := by
@@ -43,14 +83,14 @@ theorem UpperTheory.V.Z.J.D.Dc.int_conj (x : UA E n) (u : Pl E)
 
 theorem UpperTheory.V.Z.J.D.Dc.int_over {w u : Pl E}
     (hu : u.under (𝓞 (maximalRealSubfield E)) = w.under (𝓞 (maximalRealSubfield E))) (x : UA E n)
-    (h : cLoc w x ∈ GlobalTheory.LFun.KGL w n) : cLoc u x ∈ GlobalTheory.LFun.KGL u n := by
+    (h : cLoc w x ∈ GlobalTheory.LFun.KGL w (n := n)) : cLoc u x ∈ GlobalTheory.LFun.KGL u (n := n) := by
   by_cases e : u = w
   · subst e
     exact h
   · rcases (GlobalTheory.SplitPts.over_split (w := w) ⟨u, e, hu⟩).2.2 u hu with rfl | rfl
     · exact h
     · refine UpperTheory.V.Z.J.D.Dc.int_conj x _ ?_
-      have e2 : ∀ v, v = w → cLoc v x ∈ GlobalTheory.LFun.KGL v n := by
+      have e2 : ∀ v, v = w → cLoc v x ∈ GlobalTheory.LFun.KGL v (n := n) := by
         rintro v rfl
         exact h
       exact e2 _ (GlobalTheory.SplitPts.conjSrc_conjSrc_cm w)
@@ -67,7 +107,7 @@ open scoped Matrix TensorProduct
 
 attribute [local instance] GlobalTheory.LocalData.complRel GlobalTheory.LocalData.isLocalField
 
-set_option synthInstance.maxHeartbeats 200000
+
 
 namespace UpperTheory.V.Z.J.D.Dc
 
@@ -102,17 +142,17 @@ theorem secRange (s : HidaSetting l L Ω) : GlobalTheory.BCT.IsSection (Set.rang
   have e : v = w.under (𝓞 (Lp L)) := (under_w s v).symm.trans h
   rw [e]
 
-open Classical in
 
+open Classical in
 def Pc (s : HidaSetting l L Ω) (n c : ℕ) (w : Plc L) : Subgroup (GLw n w) :=
-  if w ∈ s.w '' s.S then Kc _ n c else GlobalTheory.LFun.KGL w n
+  if w ∈ s.w '' s.S then Kc _ n c else GlobalTheory.LFun.KGL w (n := n)
 
 def Kf (s : HidaSetting l L Ω) (n c : ℕ) (w : GlobalTheory.BCT.Pl L) : Subgroup (GlobalTheory.BCT.UL n w) :=
   (Pc s n c w).subgroupOf (GlobalTheory.BCT.UL n w)
 
 variable (s : HidaSetting l L Ω) (n c : ℕ)
 
-theorem Pc_le (w : Plc L) : Pc s n c w ≤ GlobalTheory.LFun.KGL w n := by
+theorem Pc_le (w : Plc L) : Pc s n c w ≤ GlobalTheory.LFun.KGL w (n := n) := by
   unfold Pc
   split_ifs
   · rw [GlobalTheory.CohomologicalConjSelfDualTempered.UnrModel.kgl_eq_ko]
@@ -128,7 +168,7 @@ theorem Pc_open (w : Plc L) : IsOpen (Pc s n c w : Set (GLw n w)) := by
 
 variable {s n c}
 
-theorem Pc_notS {w : Plc L} (hw : w.under (𝓞 (Lp L)) ∉ s.S) : Pc s n c w = GlobalTheory.LFun.KGL w n := by
+theorem Pc_notS {w : Plc L} (hw : w.under (𝓞 (Lp L)) ∉ s.S) : Pc s n c w = GlobalTheory.LFun.KGL w (n := n) := by
   unfold Pc
   refine if_neg ?_
   rintro ⟨v, hv, rfl⟩
@@ -149,11 +189,11 @@ theorem levFam (hfin : s.S.Finite) :
   unfold Kf GlobalTheory.BCT.KL Pc
   rw [if_neg hw]
 
-theorem loc_of_glob (hU : GlobalTheory.BCT.Unr L) {k : finU L n} (hk : k ∈ GlobalTheory.BCT.globLev (Set.range s.w) (Kf s n c))
+theorem loc_of_glob (hU : GlobalTheory.BCT.Unr L) {k : finU (E := L) (n := n)} (hk : k ∈ GlobalTheory.BCT.globLev (Set.range s.w) (Kf s n c))
     (v : Plc (Lp L)) : cLoc (s.w v) (k : UA L n) ∈ Pc s n c (s.w v) :=
   (GlobalTheory.BCT.HopLev.mem_globLev hU _ _ k).1 hk (s.w v) ⟨v, rfl⟩
 
-theorem glob_of_loc (hU : GlobalTheory.BCT.Unr L) {k : finU L n} (h : ∀ v, cLoc (s.w v) (k : UA L n) ∈ Pc s n c (s.w v)) :
+theorem glob_of_loc (hU : GlobalTheory.BCT.Unr L) {k : finU (E := L) (n := n)} (h : ∀ v, cLoc (s.w v) (k : UA L n) ∈ Pc s n c (s.w v)) :
     k ∈ GlobalTheory.BCT.globLev (Set.range s.w) (Kf s n c) :=
   (GlobalTheory.BCT.HopLev.mem_globLev hU _ _ k).2 (by
     rintro _ ⟨v, rfl⟩
@@ -163,9 +203,9 @@ theorem cmp_mem {w : Plc L} (U : Subgroup (GLw n w)) (x : UA L n) (hx : cLoc w x
     cmp n w ((away l L n).rangeRestrict x) ∈ U := by
   unfold CaseU.cmp
   by_cases h : ((l : ℕ) : 𝓞 L) ∉ w.asIdeal
-  · rw [dif_pos h]
+  · rw [dite_eq_left h]
     exact hx
-  · rw [dif_neg h]
+  · rw [dite_eq_right h]
     exact one_mem _
 
 private theorem pi_mem_first_iwahori_filtration {σ : Type} [Finite σ] {G : σ → Type} [∀ v, Group (G v)] (I : ∀ v, Iwa (G v)) (b : ℕ)
@@ -181,7 +221,7 @@ theorem Q_empty {V : s.Lev} (hV : V.S' = s.S) (Q : QData V) : IsEmpty Q.Q := ⟨
 
 theorem goodOf {V : s.Lev} (hV : V.S' = s.S) (Q : QData V) {cf : Coef l} {m : ℕ} (τ₀ : KT n (wt s) →* GL (Fin m) cf.O)
     (b : ℕ) (hc : ∀ g : KT n (wt s), (∀ u, (g : GV n (wt s)) u ∈ Kc _ n c) → τ₀ g = 1) (h1 : 1 ≤ c) (hb : b + 1 ≤ c)
-    (hU : GlobalTheory.BCT.Unr L) (k : finU L n) (hk : k ∈ GlobalTheory.BCT.globLev (Set.range s.w) (Kf s n c)) :
+    (hU : GlobalTheory.BCT.Unr L) (k : finU (E := L) (n := n)) (hk : k ∈ GlobalTheory.BCT.globLev (Set.range s.w) (Kf s n c)) :
     (∃ u : Ub n s, u ∈ UQ n Q ∧ (u : Ga l L n) = (away l L n).rangeRestrict (k : UA L n) ∧ τ₀ (toKT n s u) = 1) ∧
       (fun v : V.frame.Vl => cLoc (s.w v.1) (k : UA L n)) ∈ (hset Q τ₀).X.I.I1 b := by
   haveI := Q_empty hV Q
@@ -244,8 +284,8 @@ theorem unramOf (hU : GlobalTheory.BCT.Unr L) (π : Submodule ℂ (UA L n → �
     (hw : w.under (𝓞 (Lp L)) ∉ s.S) : IsUnramU π w := by
   obtain ⟨φ, hφ, h0⟩ := Submodule.exists_mem_ne_zero_of_ne_bot hne
   refine ⟨φ, hφ.1, h0, fun x hx hK => ?_⟩
-  have hxf : x ∈ finU L n := (Subgroup.mem_inf.1 hx).1
-  have hmem : (⟨x, hxf⟩ : finU L n) ∈ GlobalTheory.BCT.globLev (Set.range s.w) (Kf s n c) := glob_of_loc hU fun v => by
+  have hxf : x ∈ finU (E := L) (n := n) := (Subgroup.mem_inf.1 hx).1
+  have hmem : (⟨x, hxf⟩ : finU (E := L) (n := n)) ∈ GlobalTheory.BCT.globLev (Set.range s.w) (Kf s n c) := glob_of_loc hU fun v => by
     by_cases e : v = w.under (𝓞 (Lp L))
     · subst e
       rw [Pc_notS (by rwa [under_w])]

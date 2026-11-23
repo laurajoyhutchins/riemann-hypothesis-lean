@@ -1,6 +1,54 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsHolPeriods
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.Signature
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsHolPeriods
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+
+@[expose] public section
 
 open NumberField Matrix
 open scoped nonZeroDivisors
@@ -10,10 +58,10 @@ namespace GlobalTheory.RiemannRel
 
 variable {g : ℕ}
 
+
 open NumberField Matrix in
 open scoped nonZeroDivisors in
 variable {g : ℕ} in
-
 theorem _root_.GlobalTheory.RiemannRel.hermForm_mulVec (G A B : Matrix (Fin g) (Fin g) ℂ) (v w : Fin g → ℂ) :
     _root_.ReciprocityTheory.ChartRestriction.G.Geo.Tor.hermForm G (A *ᵥ v) (B *ᵥ w) = v ⬝ᵥ (Aᵀ * G * B.map (starRingEnd ℂ)) *ᵥ star w := by
   have hstar : star (B *ᵥ w) = B.map (starRingEnd ℂ) *ᵥ star w := by
@@ -29,10 +77,10 @@ theorem _root_.GlobalTheory.RiemannRel.hermForm_col (G A B : Matrix (Fin g) (Fin
     _root_.ReciprocityTheory.ChartRestriction.G.Geo.Tor.hermForm G (A *ᵥ Pi.single j 1) (B *ᵥ Pi.single k 1) = (Aᵀ * G * B.map (starRingEnd ℂ)) j k := by
   rw [_root_.GlobalTheory.RiemannRel.hermForm_mulVec]; simp [Pi.star_single]
 
+
 open NumberField Matrix in
 open scoped nonZeroDivisors in
 variable {g : ℕ} in
-
 theorem _root_.GlobalTheory.RiemannRel.det_ne_zero (G A B : Matrix (Fin g) (Fin g) ℂ)
     (hpos : ∀ z : Fin g → ℂ, z ≠ 0 → 0 < (_root_.ReciprocityTheory.ChartRestriction.G.Geo.Tor.hermForm G z z).re)
     (hM : ∀ j k, ((Aᵀ * G * A.map (starRingEnd ℂ)) j k).im = 0)
@@ -83,10 +131,10 @@ theorem _root_.GlobalTheory.RiemannRel.det_ne_zero (G A B : Matrix (Fin g) (Fin 
   · simpa using h1
   · simpa using h2
 
+
 open NumberField Matrix in
 open scoped nonZeroDivisors in
 variable {g : ℕ} in
-
 theorem _root_.GlobalTheory.RiemannRel.symm_posDef (G A τ : Matrix (Fin g) (Fin g) ℂ) (hG : G.IsHermitian)
     (hA : A.det ≠ 0)
     (hpos : ∀ z : Fin g → ℂ, z ≠ 0 → 0 < (_root_.ReciprocityTheory.ChartRestriction.G.Geo.Tor.hermForm G z z).re)
@@ -198,38 +246,18 @@ theorem _root_.GlobalTheory.RiemannRel.differentiableOn_left_inverse {V : Type*}
   · subst hk; simp only [Matrix.updateRow_self]; exact differentiableOn_const _
   · simp only [Matrix.updateRow_ne hk]; exact hA k l
 
+
 open NumberField Matrix in
 open scoped nonZeroDivisors in
 variable {g : ℕ} in
-
 theorem _root_.GlobalTheory.RiemannRel.of_cols_mulVec (c : Fin g → Fin g → ℂ) (k : Fin g) :
     (Matrix.of fun i j => c j i) *ᵥ Pi.single k 1 = c k := by
   ext i; simp [mulVec, dotProduct, Pi.single_apply]
 
-theorem cols_iff (h τ : Matrix (Fin g) (Fin g) ℂ) (a b : Fin g → Fin g → ℂ) :
-    (∀ k, h *ᵥ a k = Pi.single k 1 ∧ h *ᵥ b k = τ *ᵥ Pi.single k 1) ↔
-      h * (Matrix.of fun i j => a j i) = 1 ∧ τ = h * (Matrix.of fun i j => b j i) := by
-  constructor
-  · intro H
-    constructor
-    · ext i j
-      have := congrFun (H j).1 i
-      simp only [mulVec, dotProduct] at this
-      simp [mul_apply, this, one_apply, Pi.single_apply]
-    · ext i j
-      have := congrFun (H j).2 i
-      rw [mulVec_single_one] at this
-      simp only [mulVec, dotProduct] at this
-      simp [mul_apply, this]
-  · rintro ⟨h1, rfl⟩ k
-    constructor
-    · rw [← of_cols_mulVec a k, mulVec_mulVec, h1, one_mulVec]
-    · rw [← mulVec_mulVec, of_cols_mulVec]
 
 open NumberField Matrix in
 open scoped nonZeroDivisors in
 variable {g : ℕ} in
-
 theorem _root_.GlobalTheory.RiemannRel.riemann_relations : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (H : _root_.ReciprocityTheory.ChartRestriction.G.Geo.Tor.Host E) (D : _root_.ReciprocityTheory.ChartRestriction.G.Geo.Tor.Datum H) (g : ℕ) (ty : Fin g → (E →+* ℂ)) (bas : (Fin g ⊕ Fin g → ℤ) ≃ₗ[ℤ] D.La), (∀ a b, D.EF (bas a) (bas b) = -_root_.ReciprocityTheory.ChartRestriction.G.Geo.Tor.omegaStd a b) → (∀ P, _root_.ReciprocityTheory.ChartRestriction.G.Geo.Tor.IsPeriod D ty P → ∃ h τ : Matrix (Fin g) (Fin g) ℂ, (∀ k, h *ᵥ P (bas (Pi.single (Sum.inl k) 1)) = Pi.single k 1 ∧ h *ᵥ P (bas (Pi.single (Sum.inr k) 1)) = τ *ᵥ Pi.single k 1) ∧ IsUnit h.det ∧ τ.IsSymm ∧ (τ.map Complex.im).PosDef ∧ ∀ h' τ' : Matrix (Fin g) (Fin g) ℂ, (∀ k, h' *ᵥ P (bas (Pi.single (Sum.inl k) 1)) = Pi.single k 1 ∧ h' *ᵥ P (bas (Pi.single (Sum.inr k) 1)) = τ' *ᵥ Pi.single k 1) → h' = h ∧ τ' = τ) ∧ ∀ (m : ℕ) (B : Set (Fin m → ℂ)) (P : (Fin m → ℂ) → (D.La →+ (Fin g → ℂ))) (h τ : (Fin m → ℂ) → Matrix (Fin g) (Fin g) ℂ), _root_.ReciprocityTheory.ChartRestriction.G.Geo.Tor.IsHolPeriods D ty B P → (∀ b ∈ B, (∀ k, h b *ᵥ P b (bas (Pi.single (Sum.inl k) 1)) = Pi.single k 1 ∧ h b *ᵥ P b (bas (Pi.single (Sum.inr k) 1)) = τ b *ᵥ Pi.single k 1)) → ∀ i j, DifferentiableOn ℂ (fun b => h b i j) B ∧ DifferentiableOn ℂ (fun b => τ b i j) B := by
   intro E _ _ _ H D g ty bas hEF
   have hnorm : ∀ (Q : D.La →+ (Fin g → ℂ)) (h τ : Matrix (Fin g) (Fin g) ℂ),

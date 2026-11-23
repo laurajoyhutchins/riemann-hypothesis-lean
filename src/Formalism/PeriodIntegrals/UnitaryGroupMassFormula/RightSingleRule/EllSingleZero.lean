@@ -1,4 +1,54 @@
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.RightSingleRule.PatEntryZero
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.RightSingleRule.PatEntryZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Matrix Formalism.REAL Formalism.QuantumDeterminants Formalism.FourierDecayAlt.Q
 
@@ -37,9 +87,9 @@ lemma ell_single_row (z : Fin (2 * r + k + 1) → ℂ) (l : Fin r) (b : Fin (2 *
   unfold ell
   rw [Finset.sum_eq_single l]
   · by_cases h : l.val + 1 < r
-    · rw [dif_pos h, dif_pos h, Matrix.single_apply]
+    · rw [dite_eq_left h, dite_eq_left h, Matrix.single_apply]
       simp
-    · rw [dif_neg h, dif_neg h, mulVec_single']
+    · rw [dite_eq_right h, dite_eq_right h, mulVec_single']
       simp
   · intro a' _ ha'
     have hne : eI k r l ≠ eI k r a' := fun h => ha' (Fin.ext (by
@@ -47,10 +97,10 @@ lemma ell_single_row (z : Fin (2 * r + k + 1) → ℂ) (l : Fin r) (b : Fin (2 *
       simp only [eI] at h'
       omega))
     by_cases h : a'.val + 1 < r
-    · rw [dif_pos h, Matrix.single_apply, if_neg]
+    · rw [dite_eq_left h, Matrix.single_apply, if_neg]
       rintro ⟨h1, -⟩
       exact hne h1
-    · rw [dif_neg h, mulVec_single', if_neg (Ne.symm hne)]
+    · rw [dite_eq_right h, mulVec_single', if_neg (Ne.symm hne)]
   · intro h
     exact absurd (Finset.mem_univ l) h
 
@@ -172,13 +222,6 @@ lemma tau_esI (l : Fin r) : WeylGroupFacts.tau k r (esI k r l) = eI k r l := by
     show r + k < 2 * r + k - l.val
     omega
 
-lemma sgn_esI (l : Fin r) : WeylGroupFacts.sgn k r (esI k r l) = 1 := by
-  have hl := l.isLt
-  unfold WeylGroupFacts.sgn
-  rw [if_neg]
-  simp only [esI]
-  omega
-
 lemma sgn_eI (l : Fin r) : WeylGroupFacts.sgn k r (eI k r l) = 1 := by
   have hl := l.isLt
   unfold WeylGroupFacts.sgn
@@ -212,10 +255,10 @@ lemma val_ev (z : Fin (2 * r + k + 1) → ℂ) (hz : inWb k r z) (l : Fin r) (j 
     ell_single_row]
   unfold xv fvec
   by_cases h : l.val + 1 < r
-  · rw [dif_pos h, dif_pos (show l.succ.val < r from h)]
+  · rw [dite_eq_left h, dite_eq_left (show l.succ.val < r from h)]
     simp only [bvec, Pi.single_apply]
     rfl
-  · rw [dif_neg h, dif_neg (show ¬ l.succ.val < r from h), one_mul]
+  · rw [dite_eq_right h, dite_eq_right (show ¬ l.succ.val < r from h), one_mul]
 
 lemma val_ve (z : Fin (2 * r + k + 1) → ℂ) (hz : inWb k r z) (l : Fin r) (j : Fin (mdim k r l.succ)) :
     ell k r z (Matrix.single (posL k r l.succ j) (esI k r l) 1) +
@@ -229,7 +272,7 @@ lemma val_ve (z : Fin (2 * r + k + 1) → ℂ) (hz : inWb k r z) (l : Fin r) (j 
   rw [herm_bvec_left]
   unfold fvec
   by_cases h : l.val + 1 < r
-  · rw [dif_pos h, dif_pos (show l.succ.val < r from h)]
+  · rw [dite_eq_left h, dite_eq_left (show l.succ.val < r from h)]
     simp only [bvec, Pi.single_apply]
     split_ifs with h1 h2 h3
     all_goals first
@@ -237,7 +280,7 @@ lemma val_ve (z : Fin (2 * r + k + 1) → ℂ) (hz : inWb k r z) (l : Fin r) (j 
       | exact absurd h3 h1
       | (rw [star_one, one_mul, star_sgn])
       | simp
-  · rw [dif_neg h, dif_neg (show ¬ l.succ.val < r from h), star_mul', star_sgn, mul_comm]
+  · rw [dite_eq_right h, dite_eq_right (show ¬ l.succ.val < r from h), star_mul', star_sgn, mul_comm]
 
 lemma val_ees (z : Fin (2 * r + k + 1) → ℂ) (hz : inWb k r z) (l : Fin r) :
     ell k r z (Matrix.single (eI k r l) (esI k r l) 1) +

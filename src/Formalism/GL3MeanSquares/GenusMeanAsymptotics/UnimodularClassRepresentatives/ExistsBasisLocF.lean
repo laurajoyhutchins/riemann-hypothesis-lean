@@ -1,4 +1,58 @@
-import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.LocalDensityRatio
+module
+
+public import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.LocalDensityRatio
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.DedekindDomain.Instances
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RingTheory.DedekindDomain.Dvr
+
+@[expose] public section
 
 open NumberField Module
 
@@ -79,7 +133,7 @@ theorem mem_span_RP (𝔭 : Ideal (𝓞 F)) [𝔭.IsPrime] (N : Submodule (𝓞 
     rw [this]
     exact Submodule.smul_mem _ _ (Submodule.subset_span hx)
 
-theorem exists_basis_locF {L : Submodule (𝓞 K) V} (hL : Submodule.IsLattice K L) {𝔭 : Ideal (𝓞 F)}
+theorem exists_basis_locF {L : Submodule (𝓞 K) V} (hL : Submodule.IsFullLattice K L) {𝔭 : Ideal (𝓞 F)}
     (h𝔭 : 𝔭.IsMaximal) : ∃ b : Basis (Fin (finrank K V)) K V, (∀ i, b i ∈ L) ∧
       locF 𝔭 (Submodule.span (𝓞 K) (Set.range b)) = locF 𝔭 L := by
   have : 𝔭.IsPrime := h𝔭.isPrime
@@ -88,18 +142,21 @@ theorem exists_basis_locF {L : Submodule (𝓞 K) V} (hL : Submodule.IsLattice K
   have : IsPrincipalIdealRing (RP K 𝔭) :=
     IsDedekindDomain.isPrincipalIdealRing_localization_over_prime (𝓞 K) 𝔭 hp0
   let M : Submodule (RP K 𝔭) V := Submodule.span (RP K 𝔭) (L : Set V)
-  have : Submodule.IsLattice K M :=
-    { fg := by
-        obtain ⟨s, hs⟩ := hL.fg
-        refine ⟨s, ?_⟩
-        show _ = Submodule.span (RP K 𝔭) (L : Set V)
-        rw [← hs, Submodule.span_span_of_tower]
+  have hMfg : M.FG := by
+    obtain ⟨s, hs⟩ := hL.fg
+    refine ⟨s, ?_⟩
+    show _ = Submodule.span (RP K 𝔭) (L : Set V)
+    rw [← hs, Submodule.span_span_of_tower]
+  have : Submodule.IsFullLattice K M :=
+    { toIsLattice := Submodule.IsLattice.of_fg K hMfg
       span_eq_top := by
         rw [eq_top_iff, ← hL.span_eq_top]
         exact Submodule.span_mono Submodule.subset_span }
+  have : Module.Free (RP K 𝔭) M := Submodule.IsLattice.free K M
+  have : Module.Finite (RP K 𝔭) M := Submodule.IsLattice.finite K M
   let b0 := Module.Free.chooseBasis (RP K 𝔭) M
-  let b1 := b0.extendOfIsLattice K
-  have hb1 : ∀ i, b1 i = (b0 i : V) := fun i => Basis.extendOfIsLattice_apply K b0 i
+  let b1 := b0.extendOfIsFullLattice K
+  have hb1 : ∀ i, b1 i = (b0 i : V) := fun i => Basis.extendOfIsFullLattice_apply K b0 i
   have hmem : ∀ i, ∃ t : 𝓞 F, t ∉ 𝔭 ∧ algebraMap (𝓞 F) (𝓞 K) t • b1 i ∈ L := fun i => by
     rw [← mem_locF, ← mem_span_RP, hb1]
     exact (b0 i).2

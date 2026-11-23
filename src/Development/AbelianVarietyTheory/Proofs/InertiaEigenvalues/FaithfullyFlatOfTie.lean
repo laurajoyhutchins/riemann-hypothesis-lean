@@ -1,8 +1,56 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExactOfTieLattice
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.FrobeniusSubOneWittTensorLatticeSurjectiveFixed
+module
+
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.EqTopOfSpanImage
+import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.MkMemAdmissibleAtIffCocycle
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsSubOfMemSpan
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.FrobSubMulSurjective
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.FrobeniusSubOneWittTensorLatticeSurjectiveFixed
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IntegersCompleteDVR
 import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsAlgClosedTiltFieldAndValuationRing
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsSubOfMemSpan
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.DiscreteValuationRing
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -97,7 +145,7 @@ theorem letter_cases {O E : Type} [CommRing O] [IsDomain O] [IsDiscreteValuation
       have h2 : IsUnit (ψ (f i) + w * z) := by
         have h3 := (Ideal.mem_jacobson_bot.1 hjac ((ψ g + z) * ↑s⁻¹)).mul s.isUnit
         convert h3 using 1
-        rw [hg, map_add, map_mul, map_mul, map_pow, ← hs, add_mul, mul_assoc, mul_assoc,
+        rw [hg, map_add (f := _), map_mul, map_mul, map_pow, ← hs, add_mul, mul_assoc, mul_assoc,
           Units.inv_mul]
         ring
       refine ⟨(ψ (f i) + w * z) * ↑t⁻¹, h2.mul t⁻¹.isUnit, ?_⟩
@@ -225,6 +273,7 @@ theorem faithfullyFlat_of_tie [IsDomain O] [IsDiscreteValuationRing O] (hp0 : (P
     · have h1 : ∑ i, (letE i : LetA O n) = 1 := by
         funext k
         simp [letE, Finset.sum_apply, Pi.single_apply]
+
       rw [← map_sum, h1, map_one]
     · intro i
       rw [← map_mul]
@@ -280,12 +329,12 @@ theorem map_mem_span {M : Type} [AddCommGroup M] [Module O M] (f : RW →ₐ[O] 
     induction x using TensorProduct.induction_on with
     | zero => simp
     | tmul a t => simp [TensorProduct.smul_tmul']
-    | add x y hx hy => simp only [smul_add, map_add, hx, hy]
+    | add x y hx hy => simp only [smul_add, map_add (f := _), hx, hy]
   intro x hx
   induction hx using Submodule.span_induction with
   | mem z hz => exact Submodule.subset_span (hs z hz)
   | zero => simp
-  | add z w _ _ hz hw => rw [map_add]; exact Submodule.add_mem _ hz hw
+  | add z w _ _ hz hw => rw [map_add (f := _)]; exact Submodule.add_mem _ hz hw
   | smul r z _ hz => rw [hsm]; exact Submodule.smul_mem _ _ hz
 
 theorem exists_sub_of_tie [IsDomain O] [IsPrincipalIdealRing O]
@@ -322,7 +371,7 @@ theorem exists_sub_of_tie [IsDomain O] [IsPrincipalIdealRing O]
         have h1 : latMap ι t ∈ S := hr ▸ LinearMap.mem_range_self _ t
         have h2 := U.smul_mem r ((hSm _).1 h1)
         simpa [TensorProduct.smul_tmul'] using h2
-      | add x y hx hy => rw [map_add]; exact U.add_mem hx hy
+      | add x y hx hy => rw [map_add (f := _)]; exact U.add_mem hx hy
     · refine (tensor_le_span φR hs hI U hUφ).trans (Submodule.span_le.2 ?_)
       rintro x ⟨hx, hx'⟩
       obtain ⟨t, rfl⟩ := hfix x hx'
@@ -336,17 +385,6 @@ theorem exists_sub_of_tie [IsDomain O] [IsPrincipalIdealRing O]
     rw [hspan]
     exact Submodule.subset_span ⟨x, hx, rfl⟩
 
-include E in
-
-theorem map_injective_of_tie (hfl : Module.Flat O RW) {T' T : LocLat G Qp LL O}
-    (ι : LatHom T'.L T.L) (hι : Function.Injective ι.f) : Function.Injective (W.map ι) := by
-  have h1 : Function.Injective (latMap ι) := fun x y hxy =>
-    Subtype.ext (hι (congrArg Subtype.val hxy))
-  have h2 : Function.Injective ((latMap ι).baseChange RW) :=
-    Module.Flat.lTensor_preserves_injective_linearMap (M := RW) (latMap ι) h1
-  intro x y hxy
-  refine E.jD_inj T' (h2 ?_)
-  rw [← jD_map', ← jD_map', hxy]
 
 end Generic
 
@@ -379,12 +417,15 @@ theorem torsionFree_RW (LL : FinExt l) (x : RW LL) (hx : (l : RW LL) * x = 0) : 
   let e := TensorProduct.equivFinsuppOfBasisLeft (N := WCb l)
     (Module.Free.chooseBasis ℤ_[l] ↥(OL LL))
   apply e.injective
-  rw [map_zero]
+  rw [e.map_zero]
   ext i : 1
-  have h : e ((l : RW LL) * x) i = 0 := by rw [hx, map_zero]; rfl
-  rw [← nsmul_eq_mul, map_nsmul, Finsupp.smul_apply, nsmul_eq_mul] at h
+  have h : e ((l : RW LL) * x) i = 0 := by rw [hx, e.map_zero]; rfl
+  have hsmul : e (l • x) = l • e x := by
+    simpa only [Nat.cast_smul_eq_nsmul] using e.map_smul (l : ℤ_[l]) x
+  rw [← nsmul_eq_mul, hsmul, Finsupp.smul_apply, nsmul_eq_mul] at h
   exact (mul_eq_zero.1 h).resolve_left (WittVector.irreducible l (k := Cb l)).ne_zero
 
+set_option synthInstance.maxHeartbeats 400000 in
 theorem faithfullyFlat_RW {P : LocPrime l} {AI : LocAinf l P} {H : LocHW l P} (E : LocFon l P AI H)
     (K : FinExt l) (s : ℕ) (LL : FinExt l) (h : Good K s LL) :
     letI := (E.E K s LL h).tie.ioE.toRingHom.toAlgebra
@@ -413,11 +454,5 @@ theorem flat_RW {l : ℕ} [Fact l.Prime] (LL : FinExt l) : Module.Flat ↥(OL LL
   haveI : Module.Flat ℤ_[l] (WCb l) :=
     flat_of_inj (GlobalTheory.WittTensorFixed.algebraMap_WCb_injective l)
   exact Module.Flat.baseChange ℤ_[l] ↥(OL LL) (WCb l)
-
-theorem map_injective {l : ℕ} [Fact l.Prime] {P : LocPrime l} {AI : LocAinf l P} {H : LocHW l P}
-    (E : LocFon l P AI H) (K : FinExt l) (s : ℕ) (LL : FinExt l) (h : Good K s LL)
-    {T' T : LocLat ↥(GK K) ℚ_[l] ↥LL.1 ↥(OL LL)} (ι : LatHom T'.L T.L)
-    (hι : Function.Injective ι.f) : Function.Injective ((H.W K s LL h).map ι) :=
-  map_injective_of_tie (E.E K s LL h).tie (flat_RW LL) ι hι
 
 end GlobalTheory.EtaleSub

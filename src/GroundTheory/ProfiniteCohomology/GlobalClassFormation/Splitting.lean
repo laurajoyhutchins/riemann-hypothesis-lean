@@ -1,9 +1,50 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.GlobalClassFormation.ResLocal
-import GroundTheory.ProfiniteCohomology.GlobalClassFormation.LocalResConj
-import GroundTheory.ProfiniteCohomology.GlobalClassFormation.LocalResKill
-import GroundTheory.ProfiniteCohomology.GlobalClassFormation.LocalInvariants
-import GroundTheory.GlobalFields.Adele.BaseChange.FiniteMap
+module
+
+public import GroundTheory.ProfiniteCohomology.GlobalClassFormation.ResLocal
+public import GroundTheory.GlobalFields.CompletionAtPlace.Integers
+public import GroundTheory.ProfiniteCohomology.GlobalClassFormation.LocalResConj
+public import GroundTheory.ProfiniteCohomology.GlobalClassFormation.LocalResKill
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
@@ -27,7 +68,7 @@ theorem finiteDimensional_adicCompletion_placesOver (w : PlacesOver E.1 v) :
     FiniteDimensional (v.adicCompletion K.1) (w.1.adicCompletion E.1) :=
   Module.finite_of_finrank_pos (by
     rw [finrank_eq_ramificationIdx_mul_inertiaDeg]
-    exact Nat.mul_pos (Ideal.ramificationIdx_pos w.1.asIdeal (𝓞 K.1)) (Ideal.inertiaDeg_pos w.1.asIdeal (𝓞 K.1)))
+    exact Nat.mul_pos (Ideal.ramificationIdx_pos (R := 𝓞 K.1) w.1.asIdeal) (Ideal.inertiaDeg_pos w.1.asIdeal (𝓞 K.1)))
 
 theorem exists_placeOfEmbedding_eq (w : PlacesOver E.1 v) :
     ∃ ι : ℚ̄ →ₐ[K.1] AlgebraicClosure (v.adicCompletion K.1), placeOfEmbedding ι E = w := by
@@ -52,9 +93,9 @@ theorem exists_placeOfEmbedding_eq (w : PlacesOver E.1 v) :
   rw [AlgHom.commutes]
   rfl
 
-set_option maxHeartbeats 2000000 in
-variable (v) in
 
+
+variable (v) in
 theorem exists_unitsLocalRes_unitsResField_eq_zero_of_placeOfEmbedding
     (ι : ℚ̄ →ₐ[K.1] AlgebraicClosure (v.adicCompletion K.1)) (x : cohomology (unitsLimitRep K) 2)
     (hx : Module.finrank (v.adicCompletion K.1) ((placeOfEmbedding ι E).1.adicCompletion E.1) •
@@ -120,7 +161,7 @@ theorem exists_infPlaceOfEmbedding_eq (w : v.placesOver E.1) :
   rw [AlgHom.commutes]
   rfl
 
-set_option maxHeartbeats 2000000 in
+
 
 theorem exists_unitsLocalRes_unitsResField_eq_zero_of_infPlaceOfEmbedding
     (ι : ℚ̄ →ₐ[K.1] AlgebraicClosure v.Completion) (x : cohomology (unitsLimitRep K) 2)
@@ -160,8 +201,8 @@ section Main
 
 open scoped NumberField.LiesOver
 
-set_option maxHeartbeats 2000000 in
 
+set_option maxHeartbeats 2000000 in
 theorem unitsResField_eq_zero_of_dvd_finrank (ι : LocalEmbeddings K) (x : cohomology (unitsLimitRep K) 2)
     (m : ℕ) (hm : m • x = 0) (hinf : ∀ v : InfinitePlace K.1, brauerLocal ι x (.inl v) = 0)
     (hfin : ∀ v : HeightOneSpectrum (𝓞 K.1), brauerLocal ι x (.inr v) ≠ 0 →
@@ -193,7 +234,9 @@ theorem unitsResField_eq_zero_of_dvd_finrank (ι : LocalEmbeddings K) (x : cohom
       (unitsLocalRes w.Completion ιE 2).hom ((unitsResField K E 2).hom x) = 0 := by
     intro w
     let v : InfinitePlace K.1 := w.comap (algebraMap K.1 E.1)
-    let w' : v.placesOver E.1 := ⟨w, ⟨rfl⟩⟩
+    let w' : v.placesOver E.1 := by
+      set_option synthInstance.maxHeartbeats 200000 in
+        exact ⟨w, ⟨rfl⟩⟩
     obtain ⟨ι', hι'⟩ := exists_infPlaceOfEmbedding_eq w'
     have key : ∀ u : v.placesOver E.1, infPlaceOfEmbedding ι' E = u →
         ∃ ιE : ℚ̄ →ₐ[E.1] AlgebraicClosure (u : InfinitePlace E.1).Completion,

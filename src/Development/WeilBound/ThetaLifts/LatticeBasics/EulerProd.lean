@@ -1,7 +1,52 @@
-import Development.WeilBound.ThetaLifts.LatticeBasics.HodgeTateFromSandwich
+module
+
+public import Development.WeilBound.ThetaLifts.LatticeBasics.HodgeTateFromSandwich
+public import Development.WeilBound.ThetaLifts.LatticeBasics.EulerB
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.LcscAdelicUnitaryGroup
+public import Development.WeilBound.ThetaLifts.LatticeBasics.EulerA
 import Development.WeilBound.ThetaLifts.LatticeBasics.FdEqZero
-import Development.WeilBound.ThetaLifts.LatticeBasics.EulerA
-import Development.WeilBound.ThetaLifts.LatticeBasics.EulerB
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -145,8 +190,8 @@ theorem prj_ne {u : Pl F} (h : u ≠ v) {g : UA σ Y.J} (hg : g ∈ locGrp σ Y 
 theorem int_mul_ne {u : Pl F} (h : u ≠ v) {x : UA σ Y.J} (hx : x ∈ locGrp σ Y v) (g : UA σ Y.J) : IntAt u (x * g) ↔ IntAt u g := by
   rw [← int_prj, map_mul, prj_ne h hx, one_mul, int_prj]
 
-variable (σ Y) in
 
+variable (σ Y) in
 def intGrp (v : Pl F) : Subgroup (UA σ Y.J) where
   carrier := {g | IntAt v g}
   one_mem' := fun z hz _ => by rw [inv_one, show mat (1 : UA σ Y.J) = 1 from rfl, Matrix.one_mulVec]; exact ⟨hz, hz⟩
@@ -189,8 +234,9 @@ theorem step (hL : Y.L.IsLattice E) {μ : Measure (UA σ Y.J)} (hμ : μ.IsHaarM
     (fun u g => forall₂_congr fun w hw => int_mul_ne (fun e : w = v => hv (e ▸ hw)) u.2 g)]
   congr 3
   ext g
-  rw [Set.mem_setOf_eq, Set.forall_mem_insert, and_comm]
-  exact and_congr_right' int_prj
+  simp only [Set.mem_inter_iff, Set.mem_preimage, Set.mem_setOf_eq, Set.forall_mem_insert]
+  rw [and_comm]
+  exact and_congr_left' (int_prj (σ := σ) (Y := Y) (v := v) (g := g))
 
 theorem _root_.GlobalTheory.ThK.Dbl.eulerProd : EulerProd := by
   intro F E _ _ _ _ _ σ B n Y r s _ hY T μ hμ μl hl f fl hf h
@@ -201,7 +247,7 @@ theorem _root_.GlobalTheory.ThK.Dbl.eulerProd : EulerProd := by
     | empty => simp [A]
     | insert v S hv ih =>
       rw [Finset.prod_insert hv, mul_assoc, ih]
-      refine Eq.trans ?_ (step hY.lat hμ (hl v).1 (hl v).2 hf (h v v.2).1 (h v v.2).2.1
+      refine Eq.trans ?_ (step hY.lat.toIsLattice hμ (hl v).1 (hl v).2 hf (h v v.2).1 (h v v.2).2.1
         (P := {u | ∃ h : u ∉ T, ⟨u, h⟩ ∉ insert v S}) (by rintro ⟨_, h'⟩; exact h' (Finset.mem_insert_self _ _))).symm
       congr 3
       ext g
@@ -220,7 +266,7 @@ theorem _root_.GlobalTheory.ThK.Dbl.eulerProd : EulerProd := by
   have := GlobalTheory.AdelicUnitaryTop.countable_heightOneSpectrum F
   have := tendsto_setIntegral_of_monotone (s := A) (f := f) (μ := μ) (fun S => by
     simp only [A, Set.setOf_forall]
-    exact (isClosed_iInter fun u => isClosed_iInter fun _ => isClosed_int hY.lat u).measurableSet)
+    exact (isClosed_iInter fun u => isClosed_iInter fun _ => isClosed_int hY.lat.toIsLattice u).measurableSet)
     (fun S S' hS g hg u ⟨h1, h2⟩ => hg u ⟨h1, fun h3 => h2 (hS h3)⟩) hf.integrableOn
   simpa only [e, u, Measure.restrict_univ] using this
 

@@ -1,4 +1,47 @@
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.SphericalCoordinates.PFrameEx
+module
+
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.SphericalCoordinates.PFrameEx
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 namespace UpperTheory.Gal.W2.FA
 
@@ -34,6 +77,7 @@ private theorem span_top (τ : J → F →+* PadicAlgCl p)
   have hsum : ∀ w : (∀ i, L i), φ w = ∑ i, ψ i (w i) := by
     intro w
     conv_lhs => rw [← Finset.univ_sum_single w]
+
     rw [map_sum]
     rfl
   have hrep : ∀ i, ∃ a : L i, ∀ y, ψ i y = Algebra.trace ℚ_[p] (L i) (a * y) := by
@@ -115,12 +159,17 @@ private theorem span_top (τ : J → F →+* PadicAlgCl p)
       intro i
       rw [ha i, trace_eq_sum_embeddings]
       simp only [map_mul]
+
     rw [Finset.sum_congr rfl (fun i _ => hi i), ← map_sum]
     have := hsum (fun i => (⟨τ i x, hm i x⟩ : L i))
     rw [← this, hφf x, map_zero])
   have ha0 : ∀ i, a i = 0 := by
     intro i
-    let s0 : L i →ₐ[ℚ_[p]] PadicAlgCl p := IsAlgClosed.lift
+    let s0 : L i →ₐ[ℚ_[p]] PadicAlgCl p := (by
+      refine @_root_.IsAlgClosed.lift _ _ _ _ _ _ _ _ _ _ _ ?_ ?_ ?_
+      solve_by_elim* (maxDepth := 2) only [*,
+        @_root_.DivisionSemiring.to_moduleIsTorsionFree,
+        @_root_.Algebra.IsIntegral.isAlgebraic, @_root_.inferInstance])
     apply (s0 : L i →+* PadicAlgCl p).injective
     rw [map_zero]
     exact hzero ⟨i, s0⟩
@@ -168,7 +217,7 @@ private theorem approx (τ : J → F →+* PadicAlgCl p)
     refine ⟨x1 + x2, fun i => ?_⟩
     have hcalc : τ i (x1 + x2) - ((w1 + w2) i : PadicAlgCl p) =
         (τ i x1 - (w1 i : PadicAlgCl p)) + (τ i x2 - (w2 i : PadicAlgCl p)) := by
-      rw [map_add]
+      rw [map_add (f := _)]
       show τ i x1 + τ i x2 - ((w1 i : PadicAlgCl p) + (w2 i : PadicAlgCl p)) = _
       ring
     rw [hcalc]

@@ -1,5 +1,57 @@
-import ReciprocityTheory.DualLattices.UnramifiedCokernelLowerBoundStatement
-import ReciprocityTheory.DualLattices.MapSmulOneMulVec
+module
+
+public import ReciprocityTheory.DualLattices.UnramifiedCokernelLowerBoundStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+public import Mathlib.Data.Matrix.ColumnRowPartitioned
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -30,14 +82,6 @@ def IdemGenStatement : Prop :=
   ∀ (R : Type) [CommRing R] (g d : ℕ) (P : Matrix (Fin g) (Fin g) R), P * P = P →
     Nonempty (LinearMap.range (Matrix.mulVecLin P) ≃ₗ[R] (Fin d → R)) →
     ∃ y : Fin d → LinearMap.range (Matrix.mulVecLin Pᵀ), Submodule.span R (Set.range y) = ⊤
-
-private lemma stdJ_form'' {D : Type} [CommRing D] {g : ℕ}
-    (M : Matrix (Fin g ⊕ Fin g) (Fin g ⊕ Fin g) D) (i j : Fin g ⊕ Fin g) :
-    (Mᵀ * stdJ D g * M) i j =
-      ∑ a, (M (Sum.inr a) i * M (Sum.inl a) j - M (Sum.inl a) i * M (Sum.inr a) j) := by
-  rw [Matrix.mul_assoc]
-  simp [Matrix.mul_apply, stdJ, Fintype.sum_sum_type, Matrix.one_apply, Finset.sum_sub_distrib]
-  try ring
 
 private lemma mul_eq_smul_one_comm_of_ne_zero {n : Type*} [Fintype n] [DecidableEq n] {R : Type*} [CommRing R]
     [IsDomain R] {A B : Matrix n n R} {c : R} (hc : c ≠ 0) (h : A * B = c • 1) :
@@ -276,9 +320,5 @@ theorem unramifiedCokernelLowerBound_of (hU7 : UnramifiedCokernelLengthStatement
   rw [hsplit, Real.rpow_add hx, h2, h3]
   apply mul_le_mul_of_nonneg_right _ (Real.rpow_nonneg hx.le _)
   exact_mod_cast h1
-
-theorem cokernelLowerBound_of (hU6 : CokernelLengthComparisonStatement) (hU7 : UnramifiedCokernelLengthStatement) (hEx : LenExStatement)
-    (hKG : KilledGenStatement) (hIG : IdemGenStatement) : CokernelLowerBoundStatement := by
-  exact And.intro (permutedCokernelLowerBound_of hU6 hEx hKG hIG) (unramifiedCokernelLowerBound_of hU7 hEx hKG hIG)
 
 end ReciprocityTheory.PGsh.Up

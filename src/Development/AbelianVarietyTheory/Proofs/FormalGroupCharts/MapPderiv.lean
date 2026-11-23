@@ -1,16 +1,57 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PlaceDivisors.StChartFH
-import Development.AbelianVarietyTheory.Definitions.TwoChartAtlas.TwoChartSt
-import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.NonemptyTensorQuotientEquiv
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PlaceDivisors.StChartFH
+public import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.AlgHomDualNumberExt
+public import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.DetJacobianFormalMulNEqPowMulUnitStatement
+public import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.FormalGroupLawChartFiniteHeightSpecialFibreStatement
 import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.IsAdicCompleteOfFgOfNatCastMem
-import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.AlgHomDualNumberExt
-import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.MapMaximalIdealEqKerMapResidue
-import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.DetJacobianFormalMulNEqPowMulUnitStatement
-import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.MvPowerSeriesMemMapCOfCoeffMem
-import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.MulFConstAndMap
-import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.IsReducedGenericFibreOfIsReduced
-import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.FormalGroupLawChartFiniteHeightSpecialFibreStatement
-import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.FinEtaleFormallyUnramified
+public import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.IsReducedGenericFibreOfIsReduced
+public import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.MapMaximalIdealEqKerMapResidue
+public import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.MulFConstAndMap
+public import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.MvPowerSeriesMemMapCOfCoeffMem
+public import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.NonemptyTensorQuotientEquiv
+public import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.FinEtaleFormallyUnramified
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 open CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj AlgebraicGeometry IsLocalRing TensorProduct
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.Geo.Tor.Germ ReciprocityTheory.ChartRestriction.G.Pdiv.ChartF
@@ -20,7 +61,7 @@ attribute [local instance] Over.cartesianMonoidalCategory
 namespace GlobalTheory.FormalTorsion
 
 theorem map_pderiv {R S σ : Type} [CommRing R] [CommRing S] (φ : R →+* S) (f : MvPowerSeries σ R) (s : σ) :
-    MvPowerSeries.map φ (MvPowerSeries.pderiv R s f) = MvPowerSeries.pderiv S s (MvPowerSeries.map φ f) := by
+    MvPowerSeries.map φ (MvPowerSeries.pderiv (R := R) s f) = MvPowerSeries.pderiv (R := S) s (MvPowerSeries.map φ f) := by
   ext n
   simp [MvPowerSeries.coeff_map, MvPowerSeries.coeff_pderiv]
 
@@ -109,15 +150,15 @@ theorem fhSt : ∀ (p : ℕ) [Fact p.Prime], FHSt p := by
     funext fun j => (hmap j).symm
   rw [hfun] at hMO
   obtain ⟨U, hU8⟩ := GlobalTheory.T.det_jacobian_formalMulN_eq_pow_mul_unit T d F (p ^ m)
-  have h2 : Matrix.of (fun i j : Fin d => MvPowerSeries.pderiv O (e j) (mulF (F.mapF iota) (p ^ m) i)) =
+  have h2 : Matrix.of (fun i j : Fin d => MvPowerSeries.pderiv (R := O) (e j) (mulF (F.mapF iota) (p ^ m) i)) =
       (MvPowerSeries.map iota).mapMatrix
-        (Matrix.of fun i j : Fin d => MvPowerSeries.pderiv T ((0 : Fin 1), j) (mulF F.F (p ^ m) i)) := by
+        (Matrix.of fun i j : Fin d => MvPowerSeries.pderiv (R := T) ((0 : Fin 1), j) (mulF F.F (p ^ m) i)) := by
     ext i j
     simp only [Matrix.of_apply, RingHom.mapMatrix_apply, Matrix.map_apply]
     rw [map_pderiv, hmap]
     rfl
   have hdet : Matrix.det (Matrix.of fun i j : Fin d =>
-      MvPowerSeries.pderiv O (e j) (mulF (F.mapF iota) (p ^ m) i)) =
+      MvPowerSeries.pderiv (R := O) (e j) (mulF (F.mapF iota) (p ^ m) i)) =
       (((p ^ m) ^ d : ℕ) : MvPowerSeries (Fin 1 × Fin d) O) *
         (Units.map (MvPowerSeries.map iota).toMonoidHom U : (MvPowerSeries (Fin 1 × Fin d) O)ˣ) := by
     rw [h2, ← RingHom.map_det, hU8, map_mul, map_pow, map_natCast]

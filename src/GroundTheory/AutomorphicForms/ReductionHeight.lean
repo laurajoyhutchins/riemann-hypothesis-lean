@@ -1,6 +1,50 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.AdelicGLn
-import GroundTheory.GlobalFields.IdeleGroups.IdeleNorms
+module
+
+public import GroundTheory.AutomorphicForms.AdelicGLn
+public import GroundTheory.GlobalFields.IdeleGroups.IdeleNorms
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Topology Filter Set Matrix
 open scoped NumberField.AdeleRing RestrictedProduct
@@ -37,9 +81,6 @@ theorem euclidNorm_le_sqrt_mul (y : Fin n → E) : euclidNorm y ≤ √n * ‖y�
 
 theorem norm_le_euclidNorm_pi (y : Fin n → E) : ‖y‖ ≤ euclidNorm y :=
   (pi_norm_le_iff_of_nonneg (euclidNorm_nonneg y)).2 fun i => norm_le_euclidNorm y i
-
-theorem euclidNorm_pos {y : Fin n → E} (hy : y ≠ 0) : 0 < euclidNorm y :=
-  lt_of_lt_of_le (norm_pos_iff.2 hy) (norm_le_euclidNorm_pi y)
 
 theorem continuous_euclidNorm : Continuous (euclidNorm : (Fin n → E) → ℝ) :=
   Real.continuous_sqrt.comp (continuous_finsetSum _ fun i _ =>
@@ -89,6 +130,7 @@ theorem infComp_vecMul (w : InfinitePlace K) (y : Fin n → 𝔸[K]) (M : Matrix
     infComp w (y ᵥ* M) = infComp w y ᵥ* (M.map (infEval w)) := by
   ext j
   simp only [infComp, vecMul, dotProduct, Matrix.map_apply]
+
   rw [← infEval_apply, map_sum]
   simp [map_mul]
 
@@ -97,6 +139,7 @@ theorem finComp_vecMul (v : HeightOneSpectrum (𝓞 K)) (y : Fin n → 𝔸[K])
     finComp v (y ᵥ* M) = finComp v y ᵥ* (M.map (finEval v)) := by
   ext j
   simp only [finComp, vecMul, dotProduct, Matrix.map_apply]
+
   rw [← finEval_apply, map_sum]
   simp [map_mul]
 
@@ -187,12 +230,6 @@ theorem HasFiniteContent.vecMul {y : Fin n → 𝔸[K]} (hy : HasFiniteContent y
 
 def ratVec (x : Fin n → K) : Fin n → 𝔸[K] := fun i => algebraMap K 𝔸[K] (x i)
 
-theorem finComp_ratVec (v : HeightOneSpectrum (𝓞 K)) (x : Fin n → K) (i : Fin n) :
-    finComp v (ratVec x) i = (x i : v.adicCompletion K) := rfl
-
-theorem infComp_ratVec (w : InfinitePlace K) (x : Fin n → K) (i : Fin n) :
-    infComp w (ratVec x) i = (x i : w.Completion) := rfl
-
 theorem ratVec_smul (c : K) (x : Fin n → K) :
     ratVec (c • x) = algebraMap K 𝔸[K] c • ratVec x := by
   ext i
@@ -201,6 +238,7 @@ theorem ratVec_smul (c : K) (x : Fin n → K) :
 theorem ratVec_vecMul (x : Fin n → K) (M : Matrix (Fin n) (Fin n) K) :
     ratVec (x ᵥ* M) = ratVec x ᵥ* M.map (algebraMap K 𝔸[K]) := by
   ext j
+
   simp [ratVec, vecMul, dotProduct, map_sum, map_mul]
 
 theorem eventually_norm_le_one (k : K) :
@@ -227,7 +265,8 @@ theorem prod_norm_mul_finprod_norm {c : K} (hc : c ≠ 0) :
       ∏ᶠ v : HeightOneSpectrum (𝓞 K), ‖(c : v.adicCompletion K)‖ = 1 := by
   have h := GroundTheory.Global.IdeleGroup.ideleModule_diagonal (Units.mk0 c hc)
   rw [Subtype.ext_iff, GroundTheory.Global.IdeleGroup.ideleModule_eq] at h
-  exact h
+  simpa only [GroundTheory.Global.IdeleGroup.coe_diagonal, Units.val_mk0,
+    AdeleRing.algebraMap_fst_apply, AdeleRing.algebraMap_snd_apply, Positive.val_one] using h
 
 theorem one_le_adelicNorm_ratVec {x : Fin n → K} (hx : x ≠ 0) : 1 ≤ adelicNorm (ratVec x) := by
   classical
@@ -239,13 +278,14 @@ theorem one_le_adelicNorm_ratVec {x : Fin n → K} (hx : x ≠ 0) : 1 ≤ adelic
     Filter.eventually_cofinite.1 (eventually_norm_eq_one hi₀)
   refine mul_le_mul ?_ ?_ (finprod_nonneg fun _ => norm_nonneg _)
     (Finset.prod_nonneg fun _ _ => pow_nonneg (euclidNorm_nonneg _) _)
-  · exact Finset.prod_le_prod (fun _ _ => pow_nonneg (norm_nonneg _) _) fun w _ =>
-      pow_le_pow_left₀ (norm_nonneg _) (norm_le_euclidNorm (infComp w (ratVec x)) i₀) _
+  · refine Finset.prod_le_prod₀ (fun _ _ => pow_nonneg (norm_nonneg _) _) fun w _ => ?_
+    simpa only [infComp, ratVec, AdeleRing.algebraMap_fst_apply] using
+      (pow_le_pow_left₀ (norm_nonneg _) (norm_le_euclidNorm (infComp w (ratVec x)) i₀) w.mult)
   · rw [finprod_eq_prod_of_mulSupport_subset _ (s := hfin'.toFinset ∪ hfin.toFinset)
       (fun v hv => Finset.mem_coe.2 (Finset.mem_union_left _ (hfin'.mem_toFinset.2 hv))),
       finprod_eq_prod_of_mulSupport_subset _ (s := hfin'.toFinset ∪ hfin.toFinset)
       (fun v hv => Finset.mem_coe.2 (Finset.mem_union_right _ (hfin.mem_toFinset.2 hv)))]
-    exact Finset.prod_le_prod (fun _ _ => norm_nonneg _) fun v _ =>
+    exact Finset.prod_le_prod₀ (fun _ _ => norm_nonneg _) fun v _ =>
       norm_le_pi_norm (finComp v (ratVec x)) i₀
 
 theorem adelicNorm_smul_rat {y : Fin n → 𝔸[K]} (hy : HasFiniteContent y) {c : K} (hc : c ≠ 0) :

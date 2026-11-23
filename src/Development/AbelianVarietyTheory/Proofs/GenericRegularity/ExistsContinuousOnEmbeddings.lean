@@ -1,21 +1,66 @@
-import Mathlib
+module
+
+public import Formalism.LocalToGlobal.ProjectiveLattices.NrmContPf
+public import Mathlib.RingTheory.Henselian
+public import Mathlib.RingTheory.RegularLocalRing.Defs
+public import Mathlib.Topology.Separation.CompletelyRegular
+public import Development.AbelianVarietyTheory.Proofs.AlgebraicCurves.AlgebraicIndependentFreeVar
+public import Development.AbelianVarietyTheory.Proofs.GenericRegularity.ContDiffEvalFun
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.AeEvalCircleMapNeZero
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.AemeasurableFinsumSection
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.ExistsLinearIndependentDIffTrdegAdjoinEq
+public import Development.AbelianVarietyTheory.Proofs.ToricGeometry.IntegralAndRationalOfPolynomialGrowth
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.MeasureTheory.Measure.RegularityCompacts
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Topology.Algebra.MvPolynomial
+import Mathlib.Topology.UniformSpace.Uniformizable
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.CastAddNeNatAdd
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.ValuationResidueLemmas
+import Std.Tactic.BVDecide.Normalize.Prop
 import Development.AbelianVarietyTheory.Definitions.RegularCharts.ModelAt
-import Formalism.LocalToGlobal.ProjectiveLattices.FrameCharts
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.UniformisationConclusion
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.SecBaseChangeAnySt
-import Formalism.LocalToGlobal.ProjectiveLattices.DivFinOfLawA3
-import Formalism.LocalToGlobal.ProjectiveLattices.NrmContPf
-import Formalism.LocalToGlobal.ProjectiveLattices.AxHSup
-import Formalism.LocalToGlobal.ProjectiveLattices.RegQFree
-import Formalism.LocalToGlobal.ProjectiveLattices.GenFrPf
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.NormOrderStatement
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.HeckeKer
-import Development.AbelianVarietyTheory.Proofs.HeightProofs.ExistsLinearIndependentDIffTrdegAdjoinEq
-import Development.AbelianVarietyTheory.Proofs.HeightProofs.AeEvalCircleMapNeZero
-import Development.AbelianVarietyTheory.Proofs.HeightProofs.AemeasurableFinsumSection
-import Development.AbelianVarietyTheory.Proofs.AlgebraicCurves.AlgebraicIndependentFreeVar
-import Development.AbelianVarietyTheory.Proofs.ToricGeometry.IntegralAndRationalOfPolynomialGrowth
-import Development.AbelianVarietyTheory.Proofs.GenericRegularity.ContDiffEvalFun
+
+@[expose] public section
 
 namespace GlobalTheory
 
@@ -73,8 +118,8 @@ theorem exists_continuousOn_roots {d : ℕ} (p : Polynomial (MvPolynomial (Fin d
   · rintro ⟨i, rfl⟩
     exact h2 i
 
-open Polynomial in
 
+open Polynomial in
 theorem exists_embeddings_of_roots {F L : Type} [Field F] [Field L] [Algebra F L]
     (pb : PowerBasis F L) (τ : F →+* ℂ) {n : ℕ} (r : Fin n → ℂ)
     (hr : ∀ z, ((minpoly F pb.gen).map τ).eval z = 0 ↔ ∃ i, r i = z) :
@@ -142,7 +187,7 @@ theorem exists_continuousOn_embeddings (K : Type) [Field K] [CharZero K] (σ : T
       (∀ f, τ f = ev f t) ∧ p.map (MvPolynomial.eval (cf t)) = (minpoly F pb.gen).map τ := by
     intro t ht
     have hinj : Function.Injective (MvPolynomial.eval₂Hom sg t : R →+* ℂ) := by
-      rw [injective_iff_map_eq_zero]
+      set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
       intro q hq
       by_contra h
       exact hG t ht q h hq
@@ -155,9 +200,10 @@ theorem exists_continuousOn_embeddings (K : Type) [Field K] [CharZero K] (σ : T
     refine ⟨IsFractionRing.lift hinj, hτa, hτ, ?_⟩
     have hmon : (minpoly F pb.gen).Monic := minpoly.monic pb.isIntegral_gen
     conv_rhs => rw [hmon.as_sum, pb.natDegree_minpoly]
-    rw [Polynomial.map_add, Polynomial.map_pow, Polynomial.map_X, Polynomial.map_sum,
-      Polynomial.map_add, Polynomial.map_pow, Polynomial.map_X, Polynomial.map_sum,
-      Finset.sum_range]
+
+    rw [Polynomial.map_add (f := _), Polynomial.map_pow, Polynomial.map_X, Polynomial.map_sum,
+    Polynomial.map_add, Polynomial.map_pow, Polynomial.map_X, Polynomial.map_sum,
+    Finset.sum_range]
     simp [cf, hτ]
   obtain ⟨y, V, hV, hyc, hy⟩ := exists_continuousOn_roots p hp (cf t₀) (by
     obtain ⟨τ, -, -, h⟩ := hτ t₀ ht₀
@@ -200,6 +246,7 @@ theorem exists_continuousOn_embeddings (K : Type) [Field K] [CharZero K] (σ : T
     refine hc.congr fun t ht => ?_
     show P t k a = _
     conv_lhs => rw [← pb.basis.sum_repr a]
+
     rw [map_sum]
     refine Finset.sum_congr rfl fun l _ => ?_
     rw [Algebra.smul_def, map_mul, pb.basis_eq_pow, map_pow, hP1 t ht, hP2 t ht]
@@ -209,8 +256,8 @@ theorem exists_continuousOn_embeddings (K : Type) [Field K] [CharZero K] (σ : T
     rw [← hP1 t ht, ← hP1 t ht]
     exact DFunLike.congr_fun hkl _
 
-open MeasureTheory ReciprocityTheory.ChartRestriction.G.T0 SectionSum in
 
+open MeasureTheory ReciprocityTheory.ChartRestriction.G.T0 SectionSum in
 theorem exists_local_families (K Ω : Type) [Field K] [CharZero K] [Countable K] [Field Ω]
     [Algebra K Ω] (D N : ℕ) (j₀ : Fin (N + 1)) (w : Fin (N + 1) → Ω) (hw : w j₀ = 1)
     (hfg : (⊤ : IntermediateField K Ω).FG) (htr : Algebra.trdeg K Ω = D)

@@ -1,7 +1,48 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.NonemptyTorusExtensionOfIsGt
-import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.QuasiCompactIffLocallyOfFinitePresentation
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.GrpObjOfDenseOpen
+module
+
+public import Mathlib.AlgebraicGeometry.Morphisms.SchemeTheoreticallyDominant
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsGrpPullback
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.GrpObjOfDenseOpen
+import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.IsSchemeTheoreticallyDominantSpecOfInjective
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 open CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj AlgebraicGeometry
 open scoped CategoryTheory.Obj
@@ -23,26 +64,9 @@ theorem isCommMonObj_of_dominant {S S' : Scheme.{0}} {f : S' ⟶ S} [QuasiCompac
     rw [lift_braiding_hom_assoc]
     exact Over.OverMorphism.ext ((h.2 T y x _ _ rfl rfl).trans
       ((congrArg (fun z => z.left ≫ φ) (_root_.mul_comm y x)).trans (h.2 T x y _ _ rfl rfl).symm))
-  refine ⟨ExtUnique.over_hom_ext_of_isPullback (IsPullback.of_hasPullback (A ⊗ A).hom f) ?_⟩
+  refine ⟨?_⟩
+  refine ExtUnique.over_hom_ext_of_isPullback (IsPullback.of_hasPullback (A ⊗ A).hom f) ?_
   exact congrArg (fun z => z.left) (key (Over.mk (pullback.snd (A ⊗ A).hom f))
     (Over.homMk (pullback.fst (A ⊗ A).hom f) (by simpa using pullback.condition)))
-
-theorem isCommMonObj_of_isGt {O C : Type} [CommRing O] [Field C] [Algebra O C]
-    (hinj : Function.Injective (algebraMap O C)) (E : SplitExt (Spec (CommRingCat.of O)))
-    (G : Over (Spec (CommRingCat.of O))) [GrpObj G] (h : E.IsGt G) : IsCommMonObj G := by
-  obtain ⟨hs, -⟩ := UnitRigidity.smooth_geometricallyConnected_of_isGt E G h
-  obtain ⟨d⟩ := h
-  have := d.q_affine
-  have := E.isAbelian.proper
-  have : IsSeparated G.hom := by
-    rw [← Over.w d.q]
-    infer_instance
-  let f : Spec (CommRingCat.of C) ⟶ Spec (CommRingCat.of O) :=
-    Spec.map (CommRingCat.ofHom (algebraMap O C))
-  have : IsSchemeTheoreticallyDominant f :=
-    ExtUnique.isSchemeTheoreticallyDominant_spec_of_injective _ hinj
-  obtain ⟨T⟩ := nonempty_torusExtension_of_isGt _ _ (GtBaseChange.isGt_extBC f E G d)
-  have := SemiAbelianCompare.isCommMonObj_of_torusExtension T
-  exact isCommMonObj_of_dominant (isGrpPullback_pullback G f)
 
 end GlobalTheory.SplitExtComm

@@ -1,12 +1,58 @@
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicUnimodularity.CartierFrobeniusFormLocal
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicUnimodularity.CoordTmulOneMul
-import Formalism.SharpRestriction.CuspSpanNormBounds.GlobAut
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicUnimodularity.CartierFrobeniusFormLocal
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicUnimodularity.CoordTmulOneMul
+public import Formalism.SharpRestriction.CuspSpanNormBounds.GlobAut
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
 namespace PI.WAU
 
 open IsDedekindDomain IsDedekindDomain.HeightOneSpectrum NumberField
+open Formalism.MainNotions.S (Af)
 open scoped TensorProduct
 
 theorem exists_den {K : Type} [Field K] [NumberField K] (x : K) :
@@ -89,51 +135,38 @@ section Coord
 variable {E : Type} [Field E] [NumberField E] [Algebra F E]
 variable {ι : Type} [Fintype ι] [DecidableEq ι] (b : Module.Basis ι F E)
 
-local notation "Af" => FiniteAdeleRing (𝓞 F) F
-
-def IntC (x : E ⊗[F] Af) : Prop := ∀ k, coord b x k ∈ Ohat F
+def IntC (x : E ⊗[F] Af F) : Prop := ∀ k, coord b x k ∈ Ohat F
 
 variable {b}
 
-theorem intC_add {x y : E ⊗[F] Af} (hx : IntC b x) (hy : IntC b y) : IntC b (x + y) := by
+theorem intC_add {x y : E ⊗[F] Af F} (hx : IntC b x) (hy : IntC b y) : IntC b (x + y) := by
   intro k
-  rw [map_add]
+  rw [map_add (f := _)]
   exact ohat_add (hx k) (hy k)
 
-theorem intC_nsmul {x : E ⊗[F] Af} (hx : IntC b x) (m : ℕ) : IntC b (m • x) := by
-  intro k
-  rw [map_nsmul]
-  exact ohat_nsmul (hx k) m
-
-theorem intC_sum {κ : Type*} (s : Finset κ) {f : κ → E ⊗[F] Af} (hf : ∀ i ∈ s, IntC b (f i)) :
+theorem intC_sum {κ : Type*} (s : Finset κ) {f : κ → E ⊗[F] Af F} (hf : ∀ i ∈ s, IntC b (f i)) :
     IntC b (∑ i ∈ s, f i) := by
   intro k
+
   rw [map_sum, Finset.sum_apply]
   exact ohat_sum s fun i hi => hf i hi k
 
-theorem smul_eq_algebraMap_mul (c : F) (a : Af) : c • a = algebraMap F Af c * a :=
+theorem smul_eq_algebraMap_mul (c : F) (a : Af F) : c • a = algebraMap F (Af F) c * a :=
   Algebra.smul_def c a
 
 theorem exists_den_mul (b : Module.Basis ι F E) :
-    ∃ m : ℕ, 0 < m ∧ ∀ x y : E ⊗[F] Af, IntC b x → IntC b y → IntC b (m • (x * y)) := by
+    ∃ m : ℕ, 0 < m ∧ ∀ x y : E ⊗[F] Af F, IntC b x → IntC b y → IntC b (m • (x * y)) := by
   obtain ⟨m, hm, h⟩ := exists_den_fin (fun p : ι × ι × ι => b.repr (b p.1 * b p.2.1) p.2.2)
   refine ⟨m, hm, fun x y hx hy k => ?_⟩
   rw [map_nsmul, coord_mul]
   simp only [Pi.smul_apply, Finset.smul_sum]
   refine ohat_sum _ fun i _ => ohat_sum _ fun j _ => ?_
   rw [smul_eq_algebraMap_mul, nsmul_eq_mul, ← mul_assoc]
-  have h1 : (m : Af) * algebraMap F Af (b.repr (b i * b j) k) = algebraMap F Af ((m : F) * b.repr (b i * b j) k) := by
+  have h1 : (m : Af F) * algebraMap F (Af F) (b.repr (b i * b j) k) =
+      algebraMap F (Af F) ((m : F) * b.repr (b i * b j) k) := by
     simp
   rw [h1]
   exact ohat_mul (h (i, j, k)) (ohat_mul (hx i) (hy j))
-
-theorem intC_incl {e : E} (he : ∀ k, IntF (b.repr e k)) :
-    IntC b (Algebra.TensorProduct.includeLeftRingHom (R := F) (B := Af) e) := by
-  intro k
-  rw [Algebra.TensorProduct.includeLeftRingHom_apply]
-  simp only [coord, TensorProduct.lift.tmul, LinearMap.mk₂_apply]
-  rw [← Algebra.algebraMap_eq_smul_one]
-  exact he k
 
 end Coord
 

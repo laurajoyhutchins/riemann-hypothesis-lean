@@ -1,12 +1,56 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsTranspOfMovesAt
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ExistsIsometryTriangularPeriodsOfFramePointMove
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ExistsRationalIsometryOfTraceIsometry
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.NotAntiIsometryOfTriangularRelatedPeriods
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.FramesDifferByIsometryAndTriangularOfPeriods
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ActLevFullLevelGroupFramedPoints
-import Development.AbelianVarietyTheory.Proofs.GenericRegularity.FrameBorelGroupoidProperties
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsTranspOfMovesAt
+import Development.AbelianVarietyTheory.Counterexamples.JetSurvey.LatticeAndConstantUnique
+public import Development.AbelianVarietyTheory.Proofs.GenericRegularity.ExistsUnitGramFrameBorelChange
+public import Development.AbelianVarietyTheory.Proofs.GenericRegularity.FrameBorelGroupoidProperties
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ActLevFullLevelGroupFramedPoints
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ExistsIsometryTriangularPeriodsOfFramePointMove
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ExistsRationalIsometryOfTraceIsometry
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.FramesDifferByIsometryAndTriangularOfPeriods
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.NotAntiIsometryOfTriangularRelatedPeriods
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExponentialDerivativeAtZeroIsTangent
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.IsCombAtIffIsDerivAt0
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.IsDerivAt0CompLinear
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.IsDerivAt0OfIsPullback
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.RelabelEmbeddingsGoodBijectiveConjCompat
 import Formalism.LocalToGlobal.ProjectiveLattices.FreeBridge
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Definitions.Divisors.NormNegCmConstantEqAtAllEmbeddings
+import Development.AbelianVarietyTheory.Definitions.ThetaValues.Generic
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -62,7 +106,7 @@ theorem bijMod_of_nat {I : Ideal R} (f : M →ₗ[R] N) {n : ℕ} (hn : (n : R) 
         exact ⟨c • a, Submodule.smul_mem_smul hc Submodule.mem_top, c • e, by
           rw [smul_add, map_smul, smul_comm c n e]⟩
       · rintro _ _ ⟨a, ha, e, rfl⟩ ⟨a', ha', e', rfl⟩
-        exact ⟨a + a', Submodule.add_mem _ ha ha', e + e', by rw [map_add, smul_add]; abel⟩
+        exact ⟨a + a', Submodule.add_mem _ ha ha', e + e', by rw [map_add (f := _), smul_add]; abel⟩
     obtain ⟨a', ha', e, he⟩ := key _ ha
     obtain ⟨b, hb⟩ := h₁ (a - a') ⟨e, by rw [map_sub, he, add_sub_cancel_left]⟩
     rw [sub_eq_iff_eq_add.1 hb]
@@ -142,7 +186,7 @@ theorem marking_of_levMove {g : ℕ} {σ : KA l →+* ℂ} {ty : Fin g → (E �
       congr 1
     have e4 : F.ex j P' ((l.M : ℂ)⁻¹ • P' (gam (F.t i (gM a)) - F.t j a)) = 1 := by
       have := F.ex_add j P' hP' ((l.M : ℂ)⁻¹ • P' (gam (F.t i (gM a)) - F.t j a)) ((l.M : ℂ)⁻¹ • P' (F.t j a))
-      rw [← smul_add, ← map_add, sub_add_cancel, e3] at this
+      rw [← smul_add, ← map_add (f := _), sub_add_cancel, e3] at this
       exact (mul_eq_right.1 this.symm)
     obtain ⟨e, he⟩ := (F.ex_ker j P' hP' _).1 e4
     have e5 : gam (F.t i (gM a)) - F.t j a = l.M • e := by
@@ -159,7 +203,7 @@ theorem marking_of_levMove {g : ℕ} {σ : KA l →+* ℂ} {ty : Fin g → (E �
 
 variable {c : Coeff l} {σ : c.F →+* ℂ} {r : ℕ} {U : Formalism.L2.PjFree.Unf Xo c σ r}
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem exists_marking_tri (hU : Formalism.L2.PjFree.IsUnf U) :
     ∃ T : ∀ k, Dw.La →ₗ[𝓞 E] (U.X k).Λ, (∀ k, BijMod l.Mb (T k)) ∧
@@ -216,7 +260,7 @@ theorem exists_marking_tri (hU : Formalism.L2.PjFree.IsUnf U) :
     rw [← a1, hh, Finset.sum_range]
     refine (apply_of_cols e h.toLinearMap (fun τ i j => cf τ i j) hcol (P v) τ ⟨i, hi⟩).trans
       (Finset.sum_congr rfl fun j _ => ?_)
-    rw [hP, Equiv.apply_symm_apply, dif_pos ⟨hi, j.2⟩]
+    rw [hP, Equiv.apply_symm_apply, dite_eq_left ⟨hi, j.2⟩]
     rfl
   · have := map_mem_smul_top _ (φ k').toLinearMap (hmk a)
     simpa only [LinearEquiv.trans_apply, LinearEquiv.symm_apply_apply, LinearMap.comp_apply, LinearEquiv.coe_coe,
@@ -329,8 +373,8 @@ open NumberField IsDedekindDomain Module ReciprocityTheory.ChartRestriction.G.FD
 open Formalism.BasicNotions Formalism.MainNotions Formalism.L2.DIV Formalism.IndefR Formalism.IndefR.Links GlobalTheory.BigTop GlobalTheory.BigOn GlobalTheory.CovTop Formalism.L2.Pj GlobalTheory.FormTies GlobalTheory.Shares
 open ReciprocityTheory.ChartRestriction.G.PullbackSections.PfModelLatA GlobalTheory.ShareOn
 
+
 open GlobalTheory.ShareOn.OneFrame in
-set_option maxHeartbeats 1000000 in
 
 theorem GlobalTheory.ShareOn.exists_movesAt_readsInv : ∀ {D : D7} {L : SizeData₂ D} {hT : GatTies D} {Gi : Formalism.MainNotions.G.Inst D L} {Gl : Formalism.MainNotions.G.LatInst D} {Kc : Formalism.MainNotions.G.Consts} {Y : DivX D} {cX : ExtraC} {ex : Extra D L hT Gi Gl Kc Y cX} {Csz : ℝ} (p : PtAt ex Csz), More p → ∀ (r : TwoRuns p.T p.P.Gp) (h : RunsOk (fw2 p) r), OwnPin r → ∀ (i : Fin D.R.m) (v : HeightOneSpectrum (𝓞 D.what₂.LL)), ∃ ψ : ∀ k : (uAt r v i).Comp, LaMod (p.T.Q.Dw ((i : ℕ) + 1)) p.T.Q.l ≃ₗ[𝓞 D.host.E] latQ p r i v k, ∀ (γ : LaMod (p.T.Q.Dw ((i : ℕ) + 1)) p.T.Q.l ≃ₗ[𝓞 D.host.E] LaMod (p.T.Q.Dw ((i : ℕ) + 1)) p.T.Q.l) (k : (uAt r v i).Comp) (x : Frame ((uAt r v i).X k).Ψ D.R.r) (hx : x ∈ ((uAt r v i).X k).dom), ∃ (k' : (uAt r v i).Comp) (a : GL (Fin D.R.r) D.host.E) (hm : GlobalTheory.LevelCusp.IsMatch ((uAt r v i).X k) ((uAt r v i).X k') a), ReadsInv p r i v ψ γ k k' a ∧ MovesAt p r i v γ k k' a hm x hx := by
   intro D L hT Gi Gl Kc Y cX ex Csz p _ r h _ i v

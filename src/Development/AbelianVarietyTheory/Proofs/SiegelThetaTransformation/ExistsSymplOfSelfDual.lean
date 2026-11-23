@@ -1,11 +1,62 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IsStabForm
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.HMatMulVecPerCrd
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.TensorLatticeSelfDualSemicharacterIndex
-import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.DualRestrictSurjectiveOfIsTorsionFreeQuotient
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsFundamentalDomainMeanNormSqThetaChar
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.PeriodCoordinateThetaOfSignedHeisenbergVacuumStatement
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.DetHermitianFormAtFramePeriodCoordsOfUnitFrameStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IsStabForm
+public import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.DualRestrictSurjectiveOfIsTorsionFreeQuotient
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.DetHermitianFormAtFramePeriodCoordsOfUnitFrameStatement
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.HMatMulVecPerCrd
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.PeriodCoordinateThetaOfSignedHeisenbergVacuumStatement
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.TensorLatticeSelfDualSemicharacterIndex
+import Development.AbelianVarietyTheory.Proofs.TorusHaarMeasure.ExistsIntMulIntegral
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsFundamentalDomainMeanNormSqThetaChar
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Dynamics.Ergodic.Action.Regular
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField Matrix Complex
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Out ReciprocityTheory.ChartRestriction.G.FD GlobalTheory GlobalTheory.ThFr
@@ -26,7 +77,7 @@ theorem exists_sympl_of_selfDual {V : Type} [AddCommGroup V] [Module ℚ V] [Fin
     ∃ b : Fin g ⊕ Fin g → V, (∀ u, u ∈ N ↔ ∃ m : Fin g ⊕ Fin g → ℤ, u = ∑ j, m j • b j) ∧
       ∀ i j, B (b i) (b j) = -(omegaStd (Pi.single i 1) (Pi.single j 1) : ℤ) := by
   haveI : Module.Finite ℤ N := Module.Finite.iff_fg.2 hfg
-  haveI : IsAddTorsionFree V := IsAddTorsionFree.of_module_rat V
+  haveI : HasUniqueDiv V := HasUniqueDiv.of_module_rat V
   haveI : Module.Free ℤ N := inferInstance
   choose f hf using fun (x y : N) => (hN x).1 x.2 y y.2
   let ω : LinearMap.BilinForm ℤ N := LinearMap.mk₂ ℤ (fun x y => -f x y)
@@ -51,7 +102,7 @@ theorem exists_sympl_of_selfDual {V : Type} [AddCommGroup V] [Module ℚ V] [Fin
     obtain ⟨k, hk, hv⟩ := hfull v
     have h1 : k • v ∈ Submodule.span ℚ (Set.range fun i => (e i : V)) := by
       have := congrArg (Subtype.val) (e.sum_repr ⟨_, hv⟩)
-      simp only [AddSubmonoidClass.coe_finset_sum, SetLike.val_smul] at this
+      simp only [AddSubmonoidClass.coe_finsetSum, SetLike.val_smul] at this
       rw [← this]
       exact Submodule.sum_mem _ fun i _ => zsmul_mem (Submodule.subset_span (Set.mem_range_self i)) _
     have := Submodule.smul_mem _ (k : ℚ)⁻¹ h1
@@ -78,7 +129,8 @@ theorem exists_sympl_of_selfDual {V : Type} [AddCommGroup V] [Module ℚ V] [Fin
         have : ∀ i, ψ (e i) = -(φ (e i) : ℚ) := fun i => by
           have := eQ.constr_basis ℚ (fun i => -(φ (e i) : ℚ)) i
           rwa [Module.Basis.mk_apply] at this
-        simp only [AddSubmonoidClass.coe_finset_sum, SetLike.val_smul, map_sum, map_zsmul, this]
+
+        simp only [AddSubmonoidClass.coe_finsetSum, SetLike.val_smul, map_sum, map_zsmul, this]
         simp
       let z := (B.toDual hnd).symm ψ
       have hz : ∀ y, B z y = ψ y := fun y => LinearMap.BilinForm.apply_toDual_symm_apply ψ y
@@ -90,7 +142,7 @@ theorem exists_sympl_of_selfDual {V : Type} [AddCommGroup V] [Module ℚ V] [Fin
   obtain ⟨c, hc⟩ := exists_isSymplecticBasis_of_finrank halt hbij hrk
   refine ⟨fun j => c j, fun u => ⟨fun hu => ⟨c.repr ⟨u, hu⟩, ?_⟩, ?_⟩, fun i j => ?_⟩
   · have := congrArg (Subtype.val) (c.sum_repr ⟨_, hu⟩)
-    simp only [AddSubmonoidClass.coe_finset_sum, SetLike.val_smul] at this
+    simp only [AddSubmonoidClass.coe_finsetSum, SetLike.val_smul] at this
     exact this.symm
   · rintro ⟨m, rfl⟩
     exact Submodule.sum_mem _ fun j _ => N.smul_mem _ (c j).2

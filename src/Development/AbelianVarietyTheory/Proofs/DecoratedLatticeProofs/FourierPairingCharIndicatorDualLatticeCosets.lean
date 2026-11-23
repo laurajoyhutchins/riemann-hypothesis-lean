@@ -1,7 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.T2SpaceMatrixOfIsNonarchimedeanLocalField
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.FourierPairingPairCharIndicatorDualLatticeIndicaStatement
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.FourierPairingPairCharIndicatorCosetIndicatorStatement
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.T2SpaceMatrixOfIsNonarchimedeanLocalField
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.FourierPairingPairCharIndicatorCosetIndicatorStatement
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.FourierPairingPairCharIndicatorDualLatticeIndicaStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -32,7 +74,7 @@ theorem inDual_smul {L : Submodule 𝒪[k] (n → k)} {η : n → k} (h : InDual
   rw [smul_dotProduct, Algebra.smul_def]
   exact mul_mem s.2 (h y hy)
 
-theorem isLocallyConstant_of_periodic (L : Submodule 𝒪[k] (n → k)) [L.IsLattice k] {g : (n → k) → ℂ}
+theorem isLocallyConstant_of_periodic (L : Submodule 𝒪[k] (n → k)) [L.IsFullLattice k] {g : (n → k) → ℂ}
     (hg : ∀ η ξ, InDual L ξ → g (η + ξ) = g η) : IsLocallyConstant g := by
   have hD := (dual_compact_open L).2
   refine (IsLocallyConstant.iff_exists_open g).2 fun x => ?_
@@ -57,7 +99,7 @@ private theorem secondCountableTopology_localField' (K : Type) [Field K] [Valuat
 variable [MeasurableSpace k] [BorelSpace k]
 
 theorem integrable_of_periodic (μ : Measure (n → k)) [μ.IsAddHaarMeasure] (q : Unif k)
-    (L : Submodule 𝒪[k] (n → k)) [L.IsLattice k] {g : (n → k) → ℂ}
+    (L : Submodule 𝒪[k] (n → k)) [L.IsFullLattice k] {g : (n → k) → ℂ}
     (hg : ∀ η ξ, InDual L ξ → g (η + ξ) = g η) (hs : ∀ η, g η ≠ 0 → InDual L (q.1 • η)) : Integrable g μ := by
   haveI := secondCountableTopology_localField' k
   have hlc := isLocallyConstant_of_periodic L hg
@@ -184,10 +226,10 @@ theorem fpair_charInd_dualInd_add_cosets : ∀ (k : Type) [Field k] [ValuativeRe
       fpair χ e μ (charInd (resChar χ hχ q) Q) (dualInd Q.lat) +
         ∑ Q'' ∈ withLat Q.lat, fpair χ e μ (charInd (resChar χ hχ q) Q) (cosetInd q Q''.lat Q''.red) := by
     simp only [fpair]
-    rw [← integral_finset_sum _ hint2, ← integral_add hint1 (integrable_finset_sum _ hint2)]
+    rw [← integral_finsetSum _ hint2, ← integral_add hint1 (integrable_finsetSum _ hint2)]
     congr 1
     funext η
-    simp only [Pi.add_apply, Finset.sum_apply, mul_add, Finset.mul_sum]
+    simp [mul_add, Finset.mul_sum]
   obtain ⟨ε, hε⟩ : ∃ ε : 𝓀[k]ˣ, (e = 1 ∧ ε = 1) ∨ (e = -1 ∧ ε = -1) := by
     rcases he with h | h
     · exact ⟨1, Or.inl ⟨h, rfl⟩⟩

@@ -1,26 +1,75 @@
-import Mathlib
-import Formalism.LocalRingCardinality.DataCD
-import Formalism.SharpRestriction.GlobalSchurBounds.GeneralLinearActions.GenusMassVolumes
-import Development.AbelianVarietyTheory.BlockTheory.GlobalSignature.PerpendicularEmbedding
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ContinuousMatrixEntryAbsSum
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.MeasurePreservingGlue
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ExistsBorelSectionUnitaryOrbitQuadric
+module
+
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ContinuousMatrixEntryAbsSum
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ExistsBorelSectionUnitaryOrbitQuadric
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ExistsIsOrthogonalComplementIsometryEmbeddingTraStatement
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ExistsTangentBorelSectionQuadricStatement
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ExistsUnitaryBlockEmbeddingOntoStabiliserStatement
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.HermitianNormFibreMeasureEqPolarCoordinatesStatement
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.HermitianNormFibreMeasureFiniteInvariantStatement
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.InvariantMeasureQuadricMulHaarStabilizerStatement
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.MeasurePreservingGlue
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.OrthogonalComplementUnitaryEmbeddingConjBlockStatement
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.PositiveDefiniteUnitSphereMassProofStatement
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.QuadricPointGaugePolarCoordinatesCompareTangentGStatement
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.QuadricPointGaugeSectionMulBlockCompareStatement
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.TendstoSublevelDensityProdMeasureStatement
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.UnitaryExpLieBallComparableEntryGaugeStatement
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.UnitaryLieVolumeBallSplitBasisVectorStatement
 import Development.AbelianVarietyTheory.Proofs.HeightProofs.HaarUpqEqOfOmegaDensity
 import Development.AbelianVarietyTheory.Proofs.HeightProofs.HaarUpqIsMulRightInvariant
 import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.UpqLocallyCompactGroup
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.UnitaryExpLieBallComparableEntryGaugeStatement
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.TendstoSublevelDensityProdMeasureStatement
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.HermitianNormFibreMeasureEqPolarCoordinatesStatement
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.QuadricPointGaugePolarCoordinatesCompareTangentGStatement
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.UnitaryLieVolumeBallSplitBasisVectorStatement
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ExistsTangentBorelSectionQuadricStatement
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.QuadricPointGaugeSectionMulBlockCompareStatement
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ExistsUnitaryBlockEmbeddingOntoStabiliserStatement
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.HermitianNormFibreMeasureFiniteInvariantStatement
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.InvariantMeasureQuadricMulHaarStabilizerStatement
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ExistsIsOrthogonalComplementIsometryEmbeddingTraStatement
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.OrthogonalComplementUnitaryEmbeddingConjBlockStatement
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.PositiveDefiniteUnitSphereMassProofStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+public import Mathlib.Analysis.Real.Pi.Bounds
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -57,7 +106,9 @@ theorem addHaar_sublevel {V : Type} [AddCommGroup V] [Module ℝ V] [Topological
   · intro r hr
     have h0 : N 0 = 0 := by simpa using hs 0 0 le_rfl
     exact ⟨(isOpen_lt hc continuous_const).measure_ne_zero lam ⟨0, by simpa [h0] using hr⟩,
-      ((measure_mono fun x (hx : N x < r) => hx.le).trans_lt (hK r).measure_lt_top).ne⟩
+      ((measure_mono (show {x | N x < r} ⊆ {x | N x ≤ r} from fun ⦃x⦄ hx => by
+        simp only [Set.mem_setOf_eq] at hx ⊢
+        exact hx.le)).trans_lt (hK r).measure_lt_top).ne⟩
 
 theorem isCompact_matrixEntryAbsSum_sublevel (r : ℝ) :
     IsCompact {Z : Matrix (Fin P ⊕ Fin Q) (Fin P ⊕ Fin Q) ℂ | l1 Z ≤ r} := by
@@ -131,16 +182,20 @@ theorem tendsto_fib (e : Option (Fin P' ⊕ Fin Q') ≃ (Fin P ⊕ Fin Q)) (he :
   · filter_upwards [GlobalTheory.T.quadricPointGauge_polarCoordinates_compare_tangentGauge P Q P' Q' e t ht, Ioo_mem_nhdsGT one_pos] with r hr hr1
     rw [GlobalTheory.T.hermitianNormFibreMeasure_eq_polar_coordinates P Q P' Q' e he fib hf _
       (isOpen_lt (continuous_ptGauge e) continuous_const).measurableSet fun y hy h0 => ?_]
-    · refine ⟨mul_le_mul_right (measure_mono fun u hu => ?_) _,
-        mul_le_mul_right (measure_mono fun u hu => (hr u hu.1).2 hu.2) _⟩
-      have h1 : u.1 ∈ Set.Ioo (-Real.pi) Real.pi := by
-        have h2 : |u.1| + 2 * ∑ i, ‖u.2 i‖ < t⁻¹ * r := hu
-        have h3 : 0 ≤ ∑ i, ‖u.2 i‖ := Finset.sum_nonneg fun _ _ => norm_nonneg _
-        have h4 : t⁻¹ * r ≤ 1 :=
-          mul_le_one₀ (inv_le_one_of_one_le₀ ht.le) hr1.1.le hr1.2.le
-        have h5 := Real.pi_gt_three
-        exact abs_lt.1 (by linarith)
-      exact ⟨h1, (hr u h1).1 hu⟩
+    · refine ⟨mul_le_mul_right ?_ _, mul_le_mul_right ?_ _⟩
+      · apply measure_mono
+        intro u hu
+        have h1 : u.1 ∈ Set.Ioo (-Real.pi) Real.pi := by
+          have h2 : |u.1| + 2 * ∑ i, ‖u.2 i‖ < t⁻¹ * r := hu
+          have h3 : 0 ≤ ∑ i, ‖u.2 i‖ := Finset.sum_nonneg fun _ _ => norm_nonneg _
+          have h4 : t⁻¹ * r ≤ 1 :=
+            mul_le_one₀ (inv_le_one_of_one_le₀ ht.le) hr1.1.le hr1.2.le
+          have h5 := Real.pi_gt_three
+          exact abs_lt.1 (by linarith)
+        exact ⟨h1, (hr u h1).1 hu⟩
+      · apply measure_mono
+        intro u hu
+        exact (hr u hu.1).2 hu.2
     · have h2 : ‖y (e none) - 1‖ + 2 * ∑ i, ‖y (e (some i))‖ < r := hy
       have h3 : 0 ≤ ∑ i, ‖y (e (some i))‖ := Finset.sum_nonneg fun _ _ => norm_nonneg _
       rw [h0, zero_sub, norm_neg, norm_one] at h2

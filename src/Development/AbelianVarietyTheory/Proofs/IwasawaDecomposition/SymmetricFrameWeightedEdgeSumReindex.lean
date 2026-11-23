@@ -1,5 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.OneSubEwMem
+module
+
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.OtherInstanceCharacterEqPsiSymmetricArgument
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.ConcreteLevelAdelicSubset
+import Formalism.LocalToGlobal.IndefiniteReal.AutomorphicEvaluation
+import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RowLevelMatch
+import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RowsJoinPinned
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.L2.Theta Formalism.IndefR.Mult Formalism.IndefR.Links Formalism.IndefR.Lev Formalism.IndefR.AutomorphicEvaluation Formalism.L2.DIV Formalism.L2.SG.RowDict Formalism.L2.SG.RowsJoinPinned Formalism.L2.SG.RowLevelMatch Formalism.L2.SG.HidaSetting Formalism.L2.SG.PoincareInHH.PoincareSetting Formalism.L2.SG.ConcreteSettingExists MeasureTheory NumberField IsDedekindDomain GlobalTheory.Mem GlobalTheory.Mem.SRe
 open scoped TensorProduct Matrix
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
@@ -35,11 +79,11 @@ theorem inner_eq {Q : Type} [AddCommGroup Q] (ρ k r : ℕ) (hr : r = k + 2 * ρ
   · by_cases h2 : i.1 + 1 < ρ
     · rw [sum_edge (t := i.1 + 1) (by omega) _ (fun j => by
         simp only [symEdge]; constructor <;> intro h <;> omega)]
-      rw [if_pos h1, if_pos h2, extF, dif_pos ⟨i.2, by omega⟩]
+      rw [if_pos h1, if_pos h2, extF, dite_eq_left ⟨i.2, by omega⟩]
       simp only [GlobalTheory.Mem.SymChar.wtA, if_pos h1, one_smul]
     · rw [sum_edge (t := ρ + k) (by omega) _ (fun j => by
         simp only [symEdge]; constructor <;> intro h <;> omega)]
-      rw [if_pos h1, if_neg h2, extF, dif_pos ⟨i.2, by omega⟩]
+      rw [if_pos h1, if_neg h2, extF, dite_eq_left ⟨i.2, by omega⟩]
       simp only [GlobalTheory.Mem.SymChar.wtA, if_pos h1, one_smul]
   · by_cases h2 : i.1 + 1 < ρ + k
     · rw [sum_edge (t := i.1 + 1) (by omega) _ (fun j => by
@@ -48,7 +92,7 @@ theorem inner_eq {Q : Type} [AddCommGroup Q] (ρ k r : ℕ) (hr : r = k + 2 * ρ
       simp only [GlobalTheory.Mem.SymChar.wtA, if_neg h1, if_pos h2]
       cases s
       · simp
-      · rw [extF, dif_pos ⟨i.2, by omega⟩]
+      · rw [extF, dite_eq_left ⟨i.2, by omega⟩]
         simp
     · rw [if_neg h1, if_neg h2]
       refine Finset.sum_eq_zero fun j _ => ?_
@@ -70,20 +114,20 @@ theorem sum_symEdge_wtA : ∀ (Q : Type) [AddCommGroup Q] (ρ k r : ℕ) (hr : r
     refine Finset.sum_congr rfl fun a _ => ?_
     have ha := a.2
     unfold termAt extF
-    rw [if_pos ha, dif_pos ⟨by omega, by split_ifs <;> omega⟩]
+    rw [if_pos ha, dite_eq_left ⟨by omega, by split_ifs <;> omega⟩]
   · rw [← Fin.sum_univ_eq_sum_range (fun n => termAt ρ k s F (ρ + n)) k]
     refine Finset.sum_congr rfl fun i _ => ?_
     have hi := i.2
     by_cases h : i.1 + 1 < k
-    · rw [dif_pos h]
+    · rw [dite_eq_left h]
       unfold termAt
       rw [if_neg (by omega), if_pos (by omega)]
       cases s
       · rfl
       · simp only [if_true]
         unfold extF
-        rw [dif_pos ⟨by omega, by omega⟩]
-    · rw [dif_neg h]
+        rw [dite_eq_left ⟨by omega, by omega⟩]
+    · rw [dite_eq_right h]
       unfold termAt
       rw [if_neg (by omega), if_neg (by omega)]
 

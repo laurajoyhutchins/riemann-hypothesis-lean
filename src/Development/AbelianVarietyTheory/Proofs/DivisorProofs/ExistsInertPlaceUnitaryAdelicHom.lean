@@ -1,22 +1,66 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.InclRMulPtAt
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.OneMemKAt
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.InclRMulPtAt
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.OneMemKAt
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LatAtVAtStable
-open NumberField IsDedekindDomain Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes GlobalTheory.WeilM GlobalTheory.AdelicU GlobalTheory.LFun GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels GlobalTheory.KFinLoc GlobalTheory.InertCoord
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
+
+open NumberField IsDedekindDomain Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes GlobalTheory.WeilM GlobalTheory.AdelicU GlobalTheory.LFun GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels GlobalTheory.InertCoord
 open scoped TensorProduct Matrix
 
 noncomputable section
 namespace GlobalTheory.InertPlace
 
 variable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E]
-  {v : Pl F} {w : HeightOneSpectrum (𝓞 E)} (hw : Formalism.UG.IsInertAt F E v w) (h : w.under (𝓞 F) = v)
+  {v : Pl (F := F)} {w : HeightOneSpectrum (𝓞 E)} (hw : Formalism.UG.IsInertAt F E v w) (h : w.under (𝓞 F) = v)
 
 theorem map_mul_nu {R S : Type} [NonUnitalNonAssocSemiring R] [NonUnitalNonAssocSemiring S] (f : R →ₙ+* S)
     {l m k : ℕ} (A : Matrix (Fin l) (Fin m) R) (B : Matrix (Fin m) (Fin k) R) :
     (A * B).map f = A.map f * B.map f := by
   ext i j; simp [Matrix.mul_apply, map_sum, map_mul]
 
-def blow {n : ℕ} (A : Matrix (Fin n) (Fin n) (w.adicCompletion E)) : Matrix (Fin n) (Fin n) (AE F E) :=
+def blow {n : ℕ} (A : Matrix (Fin n) (Fin n) (w.adicCompletion E)) : Matrix (Fin n) (Fin n) (_root_.GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.AE (F := F) (E := E)) :=
   1 + (A - 1).map (ptAt hw h)
 
 theorem blow_one {n : ℕ} : blow hw h (1 : Matrix (Fin n) (Fin n) (w.adicCompletion E)) = 1 := by
@@ -28,7 +72,7 @@ theorem blow_mul {n : ℕ} (A B : Matrix (Fin n) (Fin n) (w.adicCompletion E)) :
   simp only [blow, e, Matrix.map_add _ (map_add (ptAt hw h)), map_mul_nu]
   noncomm_ring
 
-def blowHom (n : ℕ) : Matrix (Fin n) (Fin n) (w.adicCompletion E) →* Matrix (Fin n) (Fin n) (AE F E) where
+def blowHom (n : ℕ) : Matrix (Fin n) (Fin n) (w.adicCompletion E) →* Matrix (Fin n) (Fin n) (_root_.GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.AE (F := F) (E := E)) where
   toFun := blow hw h
   map_one' := blow_one hw h
   map_mul' := blow_mul hw h
@@ -50,6 +94,7 @@ theorem blow_map_cA (σ : E →ₐ[F] E) {c : w.adicCompletion E →+* w.adicCom
 theorem map_pt_mul_incM {n : ℕ} (A : Matrix (Fin n) (Fin n) (w.adicCompletion E)) (J : Matrix (Fin n) (Fin n) E) :
     A.map (ptAt hw h) * incM F J = (A * J.map (algebraMap E _)).map (ptAt hw h) := by
   ext i j
+
   simp only [Matrix.mul_apply, Matrix.map_apply, incM, map_sum]
   refine Finset.sum_congr rfl fun k _ => ?_
   rw [mul_comm, inclR_mul_ptAt, mul_comm]
@@ -57,6 +102,7 @@ theorem map_pt_mul_incM {n : ℕ} (A : Matrix (Fin n) (Fin n) (w.adicCompletion 
 theorem incM_mul_map_pt {n : ℕ} (A : Matrix (Fin n) (Fin n) (w.adicCompletion E)) (J : Matrix (Fin n) (Fin n) E) :
     incM F J * A.map (ptAt hw h) = (J.map (algebraMap E _) * A).map (ptAt hw h) := by
   ext i j
+
   simp only [Matrix.mul_apply, Matrix.map_apply, incM, map_sum]
   refine Finset.sum_congr rfl fun k _ => ?_
   rw [inclR_mul_ptAt]
@@ -83,7 +129,7 @@ theorem blow_mulVec_pt {n : ℕ} (A : Matrix (Fin n) (Fin n) (w.adicCompletion E
     ext i; simp only [Matrix.mulVec, dotProduct, Matrix.map_apply, map_sum, map_mul]
   rw [blow, Matrix.add_mulVec, Matrix.one_mulVec, e1]
   ext i
-  rw [Pi.add_apply, ← map_add, Matrix.sub_mulVec, Matrix.one_mulVec, Pi.sub_apply, add_sub_cancel]
+  rw [Pi.add_apply, ← map_add (f := _), Matrix.sub_mulVec, Matrix.one_mulVec, Pi.sub_apply, add_sub_cancel]
 
 theorem pt_mem_latAt {n : ℕ} (X : Spc F E n) {x : Fin n → w.adicCompletion E} (hx : x ∈ GlobalTheory.LFun.latAt w X.L) :
     (fun i => ptAt hw h (x i)) ∈ GlobalTheory.InertSph.latAt X v := by
@@ -203,17 +249,17 @@ theorem conj_form {K : Type} [CommRing K] {n : ℕ} (c : K →+* K) (Ja p q m : 
 variable {Γ : Type} [Group Γ]
 
 def embHom {n : ℕ} (P : GL (Fin n) (w.adicCompletion E)) (φ : Γ →* GL (Fin n) (w.adicCompletion E)) :
-    Γ →* GL (Fin n) (AE F E) :=
+    Γ →* GL (Fin n) (_root_.GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.AE (F := F) (E := E)) :=
   (Units.map (blowHom hw h n)).comp ((MulAut.conj P).toMonoidHom.comp φ)
 
 theorem embHom_val {n : ℕ} (P : GL (Fin n) (w.adicCompletion E)) (φ : Γ →* GL (Fin n) (w.adicCompletion E)) (g : Γ) :
-    ((embHom hw h P φ g : GL (Fin n) (AE F E)) : Matrix (Fin n) (Fin n) (AE F E)) =
+    ((embHom hw h P φ g : GL (Fin n) (_root_.GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.AE (F := F) (E := E))) : Matrix (Fin n) (Fin n) (_root_.GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.AE (F := F) (E := E))) =
       blow hw h ((P * φ g * P⁻¹ : GL (Fin n) (w.adicCompletion E)) : Matrix (Fin n) (Fin n) (w.adicCompletion E)) := rfl
 
 end GlobalTheory.InertPlace
 
 open GlobalTheory.InertPlace in
-theorem GlobalTheory.InertPlace.exists_hom_inert : ∀ (F E : Type) [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] (σ : E →ₐ[F] E) (v : Pl F)
+theorem GlobalTheory.InertPlace.exists_hom_inert : ∀ (F E : Type) [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] (σ : E →ₐ[F] E) (v : Pl (F := F))
     (w : HeightOneSpectrum (𝓞 E)) (hw : Formalism.UG.IsInertAt F E v w) (h : w.under (𝓞 F) = v)
     (σL : w.adicCompletion E →+* w.adicCompletion E), IsConjAt σ h σL →
     ∀ {n : ℕ} (X : Spc F E n) (P : GL (Fin n) (w.adicCompletion E)) (δ : w.adicCompletion E),

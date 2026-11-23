@@ -1,10 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Degenerations.BaseFacts
-import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.GermEqZeroOfThickenings
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsUnitCharts
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsFiniteValues
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.TestFieldFiniteOverPadicStatement
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsAddExtension
+module
+
+public import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.GermEqZeroOfThickenings
+public import Development.AbelianVarietyTheory.Definitions.Degenerations.IsBasisB
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsFiniteValues
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.TestFieldFiniteOverPadicStatement
+import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.ExpandsAtOfSucc
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.WeightedChartPullback.CancelSecAct
+
+@[expose] public section
+
 open CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj AlgebraicGeometry
 open scoped CategoryTheory.Obj
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor
@@ -98,6 +142,18 @@ theorem top_le_wchart' (e : ℕ) :
 theorem factor_wVal (e : ℕ) :
     Ideal.Quotient.factor (lev_succ_le u e) (wVal u.U.toUnifPre (e + 1) (ce (e + 1)) jL jM) =
       wVal u.U.toUnifPre e (ce e) jL jM := by
+  have toStkA_valR {A : Type} [CommRing A] {X : Scheme.{0}} (x : Sp A ⟶ X)
+      (U : X.Opens) (z : Sp A) (ht : ⊤ ≤ x ⁻¹ᵁ U) (a : Γ(X, U)ˣ) :
+      toStkA z (valR x U a.val) = (gm x z U a).val := by
+    have hz : x z ∈ U := ht (show z ∈ (⊤ : (Sp A).Opens) from trivial)
+    have e1 : ∀ c, (Scheme.ΓSpecIso (CommRingCat.of A)).inv.hom ((Scheme.ΓSpecIso (CommRingCat.of A)).hom.hom c) = c :=
+      fun c => congrArg (fun f => CommRingCat.Hom.hom f c) (Iso.hom_inv_id (Scheme.ΓSpecIso (CommRingCat.of A)))
+    rw [valR, dif_pos ht, gm, dif_pos hz]
+    show ((Sp A).presheaf.germ ⊤ z trivial).hom ((Scheme.ΓSpecIso (CommRingCat.of A)).inv.hom
+        ((Scheme.ΓSpecIso (CommRingCat.of A)).hom.hom ((x.appLE U ⊤ ht).hom a.val))) =
+      ((Sp A).presheaf.germ (x ⁻¹ᵁ U) z hz).hom ((x.app U).hom a.val)
+    rw [e1]
+    exact TopCat.Presheaf.germ_res_apply (Sp A).presheaf (homOfLE ht) z trivial ((x.app U).hom a.val)
   have := fstG_mono (I := IsLocalRing.maximalIdeal u.V) (G := u.G) (e + 1)
   have ht := top_le_wchart' u c b₀ ce hce hbe hL hM e
   have e₁ : spMap (Ideal.Quotient.factor (lev_succ_le u e)) ≫ ce (e + 1) =
@@ -171,6 +227,18 @@ theorem hasSum_integral (c : Sp (OO p) ⟶ u.G.left) (b₀ : Sp (OO p) ⟶ u.D.t
     {k : ℕ} (σ : H0 u.U.LG.L k) (f : ∀ α, u.D.toPre.SecB k α) (hE : ∀ e, u.U.toUnifPre.ExpandsAt e k σ f) :
     HasSum (fun α => ((valR b₀ _ ((f α).f (fun i => d ((b₀ ≫ u.D.toPre.famφB α i) (cpt _)))) * x α : OO p) :
       PadicAlgCl p)) (ω ^ k * (secVal u.U.toUnifPre σ c jL : OO p)) := by
+  have toStkA_valR {A : Type} [CommRing A] {X : Scheme.{0}} (x : Sp A ⟶ X)
+      (U : X.Opens) (z : Sp A) (ht : ⊤ ≤ x ⁻¹ᵁ U) (a : Γ(X, U)ˣ) :
+      toStkA z (valR x U a.val) = (gm x z U a).val := by
+    have hz : x z ∈ U := ht (show z ∈ (⊤ : (Sp A).Opens) from trivial)
+    have e1 : ∀ c, (Scheme.ΓSpecIso (CommRingCat.of A)).inv.hom ((Scheme.ΓSpecIso (CommRingCat.of A)).hom.hom c) = c :=
+      fun c => congrArg (fun f => CommRingCat.Hom.hom f c) (Iso.hom_inv_id (Scheme.ΓSpecIso (CommRingCat.of A)))
+    rw [valR, dif_pos ht, gm, dif_pos hz]
+    show ((Sp A).presheaf.germ ⊤ z trivial).hom ((Scheme.ΓSpecIso (CommRingCat.of A)).inv.hom
+        ((Scheme.ΓSpecIso (CommRingCat.of A)).hom.hom ((x.appLE U ⊤ ht).hom a.val))) =
+      ((Sp A).presheaf.germ (x ⁻¹ᵁ U) z hz).hom ((x.app U).hom a.val)
+    rw [e1]
+    exact TopCat.Presheaf.germ_res_apply (Sp A).presheaf (homOfLE ht) z trivial ((x.app U).hom a.val)
   obtain ⟨r, h0, h1, h2⟩ := exists_lev_norm u
   refine hasSum_of_levels h0 h1 _ (fun e => ((ωe e ^ k * secVal u.U.toUnifPre σ c jL : OO p) : PadicAlgCl p)) _
     ((hω.pow k).mul_const _) fun e => ?_
@@ -185,8 +253,9 @@ theorem hasSum_integral (c : Sp (OO p) ⟶ u.G.left) (b₀ : Sp (OO p) ⟶ u.D.t
   have H := H₁ jL ((congrArg (fun q => q (cpt _) ∈ u.U.LG.L.U jL) (hce e)).mpr (top_le_comp hL _ trivial))
   rw [hbe e] at H₀
   rw [hbe e, hce e, eJ, Finset.sum_subset hT (fun α _ hα => by rw [H₀ α hα, zero_mul])] at H
-  rw [← AddSubmonoidClass.coe_finset_sum, ← AddSubgroupClass.coe_sub]
+  rw [← AddSubmonoidClass.coe_finsetSum, ← AddSubgroupClass.coe_sub]
   refine h2 e _ (Ideal.Quotient.eq.1 (toStkA_injective ?_))
+
   rw [map_mul, map_pow, hωe, map_mul, map_pow, map_sum, map_sum]
   refine (congrArg₂ (· * ·) ?_ (toStkA_map_valR _ c _ _ (top_le_secChart hL) _)).trans
     (H.trans (Finset.sum_congr rfl fun α _ => ?_))

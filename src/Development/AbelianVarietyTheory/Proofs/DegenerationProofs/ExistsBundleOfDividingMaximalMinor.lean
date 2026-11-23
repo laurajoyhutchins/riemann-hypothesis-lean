@@ -1,7 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Degenerations.ArithBase
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.SpanEqSpanMinor
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsAdaptedBasisTestLattice
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Degenerations.ArithBase
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.SpanEqSpanMinor
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsAdaptedBasisTestLattice
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 open CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj AlgebraicGeometry
 open scoped CategoryTheory.Obj
@@ -76,8 +123,8 @@ def OA (p : ℕ) [Fact p.Prime] : Subalgebra ℤ (PadicAlgCl p) := subalgebraOfS
 
 theorem mem_OA (x : PadicAlgCl p) : x ∈ OA p ↔ ‖x‖ ≤ 1 := mem_OO_iff x
 
-omit [DecidableEq J] in
 
+omit [DecidableEq J] in
 theorem mem_span_OO (B : Matrix J J (PadicAlgCl p)) (v : J → PadicAlgCl p) :
     v ∈ Submodule.span (OO p) (Set.range B) ↔ ∃ c : J → PadicAlgCl p, (∀ i, ‖c i‖ ≤ 1) ∧ c ᵥ* B = v := by
   refine (Submodule.mem_span_range_iff_exists_fun (OO p) (v := (B : J → J → PadicAlgCl p))).trans ?_
@@ -87,8 +134,8 @@ theorem mem_span_OO (B : Matrix J J (PadicAlgCl p)) (v : J → PadicAlgCl p) :
   · rintro ⟨c, hc, rfl⟩
     exact ⟨fun i => ⟨c i, (mem_OO_iff _).2 (hc i)⟩, by rw [vecMul_eq_sum]; rfl⟩
 
-omit [DecidableEq J] in
 
+omit [DecidableEq J] in
 theorem mem_span_OA (B : Matrix J J (PadicAlgCl p)) (v : J → PadicAlgCl p) :
     v ∈ Submodule.span (OA p) (Set.range B) ↔ v ∈ Submodule.span (OO p) (Set.range B) := by
   simp only [mem_span_OO, mem_span_rows, mem_OA]
@@ -121,8 +168,8 @@ section Val
 variable {o Ω : Type} [CommRing o] [Field Ω] [Algebra o Ω] {M : RatModel o Ω} {J : Type} [Fintype J] [DecidableEq J]
   {K : Type} [Field K] {y : Sp K ⟶ M.Z} {ξ : M.Z}
 
-omit [DecidableEq J] in
 
+omit [DecidableEq J] in
 theorem val_vecMul (h : ∀ w, y w ⤳ ξ) {c : J → Ω} {B : Matrix J J Ω} (hc : ∀ i, c i ∈ M.O ξ)
     (hB : ∀ i j, B i j ∈ M.O ξ) :
     (fun j => M.val y ((c ᵥ* B) j)) = (fun i => M.val y (c i)) ᵥ* B.map (M.val y) := by

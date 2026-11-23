@@ -1,5 +1,52 @@
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TensorRepresentations.InhabCAR
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TensorRepresentations.CARUnit
+module
+
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TensorRepresentations.InhabCAR
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -44,16 +91,22 @@ theorem fockT_stable_gen {E cp cm : Fin n → Fin n → Module.End ℂ W} (hC : 
     intro u v w z huv
     rw [fockT_cm_cp hC hjb huv, fockT_cm_cm hC, hx0]
     simp
-  refine ⟨hE0, fun a c => ?_, ?_, ?_⟩
-  · simp only [diagE, LinearMap.add_apply, map_add, hE0, zero_add, sgE]
-    split_ifs with h1 h2
-    · simp only [LinearMap.sum_apply, map_sum, Module.End.mul_apply]
-      refine Finset.sum_eq_zero fun y hy => hcpcm _ _ _ _ ⟨h1.1, ?_⟩
+  refine ⟨hE0, ?_, ?_, ?_⟩
+  · intro a c
+    simp only [diagE, LinearMap.add_apply, map_add (f := _), hE0, zero_add, sgE]
+    by_cases ha : ε a = true <;> by_cases hc : ε c = true
+    · simp only [if_pos (And.intro ha hc), LinearMap.sum_apply, map_sum, Module.End.mul_apply]
+      refine Finset.sum_eq_zero fun y hy => hcpcm a y c y ⟨ha, ?_⟩
       simpa [minusIdx] using hy
-    · simp only [LinearMap.neg_apply, LinearMap.sum_apply, map_neg, map_sum, Module.End.mul_apply]
-      refine neg_eq_zero.mpr (Finset.sum_eq_zero fun i hi => hcpcm _ _ _ _ ⟨?_, h2.2⟩)
+    · simp [ha, hc, sgE]
+    · simp [ha, hc, sgE]
+    · have ha0 : ε a = false := by cases h : ε a <;> simp_all
+      have hc0 : ε c = false := by cases h : ε c <;> simp_all
+      simp only [if_neg (show ¬(ε a = true ∧ ε c = true) from fun h => ha h.1),
+        if_pos (And.intro ha0 hc0), LinearMap.neg_apply, LinearMap.sum_apply, map_neg, map_sum,
+        Module.End.mul_apply]
+      refine neg_eq_zero.mpr (Finset.sum_eq_zero fun i hi => hcpcm i c i a ⟨?_, hc0⟩)
       simpa [plusIdx] using hi
-    · simp
   · simp only [dOp, LinearMap.sum_apply, map_sum, Module.End.mul_apply]
     refine Finset.sum_eq_zero fun i hi => Finset.sum_eq_zero fun a ha => ?_
     rw [hEc, fockT_cm_cp hC hjb ⟨by simpa [plusIdx] using hi, by simpa [minusIdx] using ha⟩, hx0]
@@ -82,7 +135,7 @@ theorem fock_contractLeft_involute (d : Module.Dual ℂ (Fin n × Fin n → ℂ)
       -CliffordAlgebra.involute (CliffordAlgebra.contractLeft d x) := by
   induction x using CliffordAlgebra.left_induction with
   | algebraMap r => simp [CliffordAlgebra.contractLeft_algebraMap]
-  | add x y hx hy => simp only [map_add, hx, hy, neg_add]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy, neg_add]
   | ι_mul x m hx =>
     simp only [map_mul, CliffordAlgebra.involute_ι, neg_mul, map_neg, CliffordAlgebra.contractLeft_ι_mul,
       hx, map_sub, map_smul, mul_neg]

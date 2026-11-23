@@ -1,5 +1,57 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.IsOpenDomP
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.UwClosedSubgroup
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.IsOpenDomP
+import Formalism.FormalDegreeBessel.FormalDegreeRatio.UnitaryWeylNormalHolds
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.BigCellZetaMinors
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.CornerBlockActionInvariant
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.LevelsOfBuiltSetting
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.SymmetricScalarBlockMatrixMul
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.UnipotentCoordinatesMeasurePreserving
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.UwClosedSubgroup
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Matrix MeasureTheory
 open scoped ComplexConjugate
@@ -141,34 +193,34 @@ theorem nL_eq {j ρ : ℕ} (hρ : 1 ≤ ρ) (a : Fin j → ℂ) :
       Matrix.fromCols_apply_inr, Matrix.zero_apply, Matrix.one_apply, Matrix.neg_apply, Matrix.of_apply,
       EmbeddingLike.apply_eq_iff_eq, Sum.inl.injEq, Sum.inr.injEq, reduceCtorEq, if_false, v1, v2, v3]
   · have := α.isLt; have := β.isLt
-    rw [dif_neg (by omega), dif_neg (by omega)]; ring
+    rw [dite_eq_right (by omega), dite_eq_right (by omega)]; ring
   · have := α.isLt; have := v.isLt
-    rw [wcH_apply hρ, dif_neg (by omega)]
+    rw [wcH_apply hρ, dite_eq_right (by omega)]
     by_cases hv : v.val = 0
-    · rw [dif_pos ⟨α.isLt, by omega⟩, if_pos hv]; simp
-    · rw [dif_neg (by omega), if_neg hv]; simp
+    · rw [dite_eq_left ⟨α.isLt, by omega⟩, if_pos hv]; simp
+    · rw [dite_eq_right (by omega), if_neg hv]; simp
   · have := α.isLt; have := β.isLt
-    rw [dif_neg (by omega), dif_neg (by omega)]; ring
+    rw [dite_eq_right (by omega), dite_eq_right (by omega)]; ring
   · have := u.isLt; have := β.isLt
-    rw [dif_neg (by omega), dif_neg (by omega)]; ring
+    rw [dite_eq_right (by omega), dite_eq_right (by omega)]; ring
   · have := u.isLt; have := v.isLt
-    rw [dif_neg (by omega), dif_neg (by omega)]; ring
+    rw [dite_eq_right (by omega), dite_eq_right (by omega)]; ring
   · have := u.isLt; have := β.isLt
-    rw [cL_last, dif_neg (show ¬(j + u.val < j ∧ j + (2 * ρ + k + 1) + β.val = j) by omega)]
+    rw [cL_last, dite_eq_right (show ¬(j + u.val < j ∧ j + (2 * ρ + k + 1) + β.val = j) by omega)]
     by_cases hu : u.val = 2 * ρ + k
-    · rw [dif_pos (show j + u.val = j + 2 * ρ + k ∧ j + 2 * ρ + k + 1 ≤ j + (2 * ρ + k + 1) + β.val by omega),
+    · rw [dite_eq_left (show j + u.val = j + 2 * ρ + k ∧ j + 2 * ρ + k + 1 ≤ j + (2 * ρ + k + 1) + β.val by omega),
         if_pos hu]
       have e : (⟨2 * (j + ρ) + k - (j + (2 * ρ + k + 1) + β.val), by omega⟩ : Fin j) = β.rev :=
         Fin.ext (by simp [Fin.rev]; omega)
       rw [e]; ring
-    · rw [dif_neg (show ¬(j + u.val = j + 2 * ρ + k ∧ j + 2 * ρ + k + 1 ≤ j + (2 * ρ + k + 1) + β.val) by omega),
+    · rw [dite_eq_right (show ¬(j + u.val = j + 2 * ρ + k ∧ j + 2 * ρ + k + 1 ≤ j + (2 * ρ + k + 1) + β.val) by omega),
         if_neg hu]; ring
   · have := α.isLt; have := β.isLt
-    rw [dif_neg (by omega), dif_neg (by omega)]; ring
+    rw [dite_eq_right (by omega), dite_eq_right (by omega)]; ring
   · have := α.isLt; have := v.isLt
-    rw [dif_neg (by omega), dif_neg (by omega)]; ring
+    rw [dite_eq_right (by omega), dite_eq_right (by omega)]; ring
   · have := α.isLt; have := β.isLt
-    rw [dif_neg (by omega), dif_neg (by omega)]; ring
+    rw [dite_eq_right (by omega), dite_eq_right (by omega)]; ring
 
 end nl
 
@@ -211,7 +263,7 @@ theorem minorDomain_mul_unipotent {r : ℕ} (Bs : B.RealPlaceData k r Wp Wq) (j 
   have hp : Bs.inSS ((Matrix.of.symm 1, Matrix.of.symm 1), (Matrix.of.symm 1, Matrix.of.symm m)) :=
     ⟨Formalism.FourierDecayAlt.P.BigCellZetaMinors.one_uw _, Formalism.QuantumDeterminants.WeylGroupFacts.mem_n_one, Formalism.FourierDecayAlt.P.BigCellZetaMinors.one_uw _, hm⟩
   have hs : B.sgs ((Matrix.of.symm 1, Matrix.of.symm 1), (Matrix.of.symm 1, Matrix.of.symm m)) g = g * m := by
-    simp [B.sgs]
+    simp only [B.sgs, Equiv.apply_symm_apply, inv_one, one_mul, mul_one]
   rw [← hs]
   exact domP_sgs Bs j hp hg
 
@@ -222,7 +274,8 @@ theorem domP_N_mul {r : ℕ} (Bs : B.RealPlaceData k r Wp Wq) (j : ℕ) {g : Q.M
     ⟨Formalism.FourierDecayAlt.P.BigCellZetaMinors.one_uw _, hmi, Formalism.FourierDecayAlt.P.BigCellZetaMinors.one_uw _, Formalism.QuantumDeterminants.WeylGroupFacts.mem_n_one⟩
   have hu : IsUnit m.det := Formalism.QuantumDeterminants.WeylGroupFacts.isUnit_of_uh hm.1
   have hs : B.sgs ((Matrix.of.symm 1, Matrix.of.symm m⁻¹), (Matrix.of.symm 1, Matrix.of.symm 1)) g = m * g := by
-    simp [B.sgs, Matrix.nonsing_inv_nonsing_inv _ hu]
+    simp only [B.sgs, Equiv.apply_symm_apply, inv_one, one_mul, mul_one,
+      Matrix.nonsing_inv_nonsing_inv _ hu]
   rw [← hs]
   exact domP_sgs Bs j hp hg
 

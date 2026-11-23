@@ -1,4 +1,57 @@
-import ReciprocityTheory.AnalyticForms.LeviForms.TailBoundA
+module
+
+public import ReciprocityTheory.AnalyticForms.LeviForms.IsRegFamilyInhabitStatement
+public import ReciprocityTheory.AnalyticForms.PotentialTheory.MaMeasureB
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.AnalyticForms.LeviForms.TailCut
+import ReciprocityTheory.AnalyticForms.LeviForms.TailCutA
+public import ReciprocityTheory.AnalyticForms.PotentialTheory.IntegrableOnTargetOfTsupport
+public import ReciprocityTheory.AnalyticForms.PotentialTheory.LogInt
+
+@[expose] public section
 
 namespace ReciprocityTheory.AnForm.P
 
@@ -37,12 +90,25 @@ theorem lintegral_rW_le {e : ℕ} {X : Type} [TopologicalSpace X] [CompactSpace 
       funext y; simp only [rW]; ring
     rw [this]
     exact (measurable_const.sub hrm).div_const 2
-  obtain ⟨hfin, hint⟩ := maMeasure_thm A Φ hΦ hΦp
+  have hforward {g : X → ℝ} (hg : Measurable g) (hgi : MIntegrable A Φ g) :
+      Integrable g (maMeasure A Φ) ∧ mInt A Φ g = ∫ y, g y ∂maMeasure A Φ := by
+    by_cases hP : Nonempty (ChartPartition A)
+    · have hμ : maMeasure A Φ = ∑ j, chartMeasure A hP.some Φ j := by
+        simp [maMeasure, hP, chartMeasure]
+      have hc j := chartMeasure_integrable_integral A hP.some Φ hΦ hΦp j hg hgi
+      rw [hμ]
+      refine ⟨integrable_finsetSum_measure.2 fun j _ => (hc j).1, ?_⟩
+      rw [integral_finsetSum_measure fun j _ => (hc j).1]
+      simp only [mInt, dif_pos hP, integralWith]
+      refine Finset.sum_congr rfl fun j _ => ?_
+      rw [(hc j).2]
+      exact integral_congr_ae (Filter.Eventually.of_forall fun y => by ring)
+    · simp [maMeasure, mInt, hP]
   have hlI := logNormIntegrable A L s m W hL hs hsnc Φ hΦ
-  have hI : Integrable (logNormSec L s) (maMeasure A Φ) := ((hint _ hlm).1).1 hlI
-  have h1 := (hint (fun _ => (1 : ℝ)) measurable_const).2
+  obtain ⟨hI, h2⟩ := hforward hlm hlI
+  obtain ⟨hI1, h1⟩ := hforward (g := fun _ => (1 : ℝ)) measurable_const
     (mIntegrableCont A Φ hΦ _ continuous_const)
-  have h2 := (hint _ hlm).2 hlI
+  letI : IsFiniteMeasure (maMeasure A Φ) := (integrable_const_iff_isFiniteMeasure one_ne_zero).1 hI1
   have hrI : Integrable (rW L s) (maMeasure A Φ) := (integrable_const _).sub (hI.const_mul 2)
   have hr0 : 0 ≤ᵐ[maMeasure A Φ] rW L s := Filter.Eventually.of_forall fun y =>
     le_trans (Real.exp_pos 1).le (rW_ge L s hle y)

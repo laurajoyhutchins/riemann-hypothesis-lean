@@ -1,17 +1,63 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.RemainderTerms.Statements
-import GroundTheory.HeightsAndTheta.Heights.RemainderTerms.StatementsFlag
-import GroundTheory.HeightsAndTheta.Heights.RemainderTerms.IsFlagIntegralOne
-import GroundTheory.HeightsAndTheta.Heights.RemainderTerms.FlagIntegralRealEqMulDdConst
-import GroundTheory.HeightsAndTheta.Heights.RemainderTerms.PCoinvAtTop
-import GroundTheory.HeightsAndTheta.Heights.RemainderTerms.PCoinvPolynomialReduction
-import GroundTheory.HeightsAndTheta.Heights.RemainderTerms.PCoinvMonomialReduction
-import GroundTheory.HeightsAndTheta.Heights.RemainderTerms.PCoinvStepReduction
-import GroundTheory.HeightsAndTheta.Heights.RemainderTerms.PCoinvIdealComponent
-import GroundTheory.HeightsAndTheta.Heights.RemainderTerms.PCoinvIdealRepresentation
-import GroundTheory.HeightsAndTheta.Heights.RemainderTerms.PHomogeneousComponentMul
-import GroundTheory.HeightsAndTheta.Heights.RemainderTerms.PCoinvStaircaseComponent
-import GroundTheory.HeightsAndTheta.Heights.RemainderTerms.PCoinvStaircaseDegree
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.RemainderTerms.IsFlagIntegralOne
+public import GroundTheory.HeightsAndTheta.Heights.RemainderTerms.StatementsCoinv
+public import GroundTheory.HeightsAndTheta.Heights.RemainderTerms.FlagIntegralRealEqMulDdConst
+public import GroundTheory.HeightsAndTheta.Heights.RemainderTerms.PCoinvAtTop
+public import GroundTheory.HeightsAndTheta.Heights.RemainderTerms.PCoinvIdealComponent
+public import GroundTheory.HeightsAndTheta.Heights.RemainderTerms.PCoinvIdealRepresentation
+public import GroundTheory.HeightsAndTheta.Heights.RemainderTerms.PCoinvMonomialReduction
+public import GroundTheory.HeightsAndTheta.Heights.RemainderTerms.PCoinvPolynomialReduction
+public import GroundTheory.HeightsAndTheta.Heights.RemainderTerms.PCoinvStaircaseComponent
+public import GroundTheory.HeightsAndTheta.Heights.RemainderTerms.PCoinvStaircaseDegree
+public import GroundTheory.HeightsAndTheta.Heights.RemainderTerms.PCoinvStepReduction
+public import GroundTheory.HeightsAndTheta.Heights.RemainderTerms.PHomogeneousComponentMul
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import GroundTheory.HeightsAndTheta.Heights.RemainderTerms.CoeffRenameProdCongrRight
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.RestTerms
@@ -56,8 +102,10 @@ theorem eval_top (f j k : ℕ) (L : IndefiniteRowSideFullHecke.RestTerms.Roots f
       (∑ m ∈ Finset.Icc 1 (j + k), ∑ b : Fin f, Coinv.bps ℝ f (j + k) m b * Q m b) := by
     rw [← e1, hcomp]
   have hzero : L (G - C c * s) = 0 := by
+
     rw [e2, map_sum, map_sum]
     refine Finset.sum_eq_zero fun m hm => ?_
+
     rw [map_sum, map_sum]
     refine Finset.sum_eq_zero fun b _ => ?_
     have hm1 : 1 ≤ m := (Finset.mem_Icc.mp hm).1
@@ -67,13 +115,13 @@ theorem eval_top (f j k : ℕ) (L : IndefiniteRowSideFullHecke.RestTerms.Roots f
     split_ifs with h
     · exact hL m b (Q m b) hm1 (by omega) (hQ m b)
     · exact map_zero L
-  calc L G = L (G - C c * s) + L (C c * s) := by rw [← map_add, sub_add_cancel]
+  calc L G = L (G - C c * s) + L (C c * s) := by rw [← map_add (f := _), sub_add_cancel]
     _ = c * L s := by rw [hzero, zero_add, C_mul', map_smul, smul_eq_mul]
 
 end FlagProportional
 
-open FlagProportional in
 
+open FlagProportional in
 theorem FlagIntegralProportional.intersectionNumber_baseChange : IndefiniteRowSideFullHecke.RestTerms.FlagIntegralProportional.Statement := by
   intro f j k _ _ _ I hI
   set s : IndefiniteRowSideFullHecke.RestTerms.Roots f j k := monomial (Coinv.staircase f (j + k)) 1

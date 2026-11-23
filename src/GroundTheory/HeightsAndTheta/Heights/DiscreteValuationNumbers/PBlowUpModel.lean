@@ -1,6 +1,57 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.CutIdentityRightSideCongrOfSubMem
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.StatementsReesAlgebraDim
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.CutIdentityRightSideCongrOfSubMem
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.StatementsReesAlgebraDim
+import Mathlib.Algebra.AffineMonoid.UniqueSums
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.NumbersDVR
@@ -17,6 +68,7 @@ variable {σ : Type*} {R : Type*} [CommRing R]
 
 theorem weight_comp_addMonoidHom_apply {M M' : Type*} [AddCommMonoid M] [AddCommMonoid M'] (w : σ → M)
     (f : M →+ M') (d : σ →₀ ℕ) : Finsupp.weight (fun v => f (w v)) d = f (Finsupp.weight w d) := by
+
   simp [Finsupp.weight_apply, Finsupp.sum, map_sum, map_nsmul]
 
 theorem weightedHomogeneousComponent_monomial' {M : Type*} [AddCommMonoid M] [DecidableEq M]
@@ -47,9 +99,9 @@ theorem coeff_aeval_C_mul_X_pow {B : Type*} [CommRing B] [Algebra R B] (a : σ �
       ring
     rw [h, Polynomial.coeff_C_mul_X_pow, weightedHomogeneousComponent_monomial']
     by_cases hd : Finsupp.weight ω d = n
-    · rw [if_pos hd.symm, if_pos hd]
-    · rw [if_neg (Ne.symm hd), if_neg hd, map_zero]
-  | add p q hp hq => simp only [map_add, Polynomial.coeff_add, hp, hq]
+    · simp only [hd, ↓reduceIte]
+    · simp only [hd, Ne.symm hd, ↓reduceIte, map_zero]
+  | add p q hp hq => simp only [map_add (f := _), Polynomial.coeff_add, hp, hq]
 
 theorem aeval_weightedHomogeneousComponent_of_forms {K : Type*} [DecidableEq K] {ι : K → Type*}
     (ω : σ → K → ℕ) (e : σ → MRing ι R) (he : ∀ v, IsMultiHomog (e v) (ω v)) (m : K → ℕ)
@@ -72,7 +124,7 @@ theorem aeval_weightedHomogeneousComponent_of_forms {K : Type*} [DecidableEq K] 
     · rw [(isWeightedHomogeneous_monomial ω d c
         (m := Finsupp.weight ω d) rfl).weightedHomogeneousComponent_ne m
         (Ne.symm hdm), hmon.weightedHomogeneousComponent_ne m (Ne.symm hdm), map_zero]
-  | add p q hp hq => simp only [map_add, hp, hq]
+  | add p q hp hq => simp only [map_add (f := _), hp, hq]
 
 end Graded
 
@@ -157,14 +209,15 @@ theorem isMultiHomogIdeal_blowUpOf {P : Ideal (MRing ι R)} (hP : IsMultiHomogId
       subst hn
       by_cases h1 : Finsupp.weight w d none = m none <;> by_cases h2 : L (Finsupp.weight w d) = L m <;>
         simp [h1, h2]
-    · simp only [coeff_weightedHomogeneousComponent, hT, key (Finsupp.weight w d) m, coeff_zero]
+    · simp only [coeff_weightedHomogeneousComponent, hT, key (Finsupp.weight w d) m, AddMonoidAlgebra.coeff_zero, Finsupp.zero_apply]
       by_cases h1 : Finsupp.weight w d none = n
       · have : ¬ Finsupp.weight w d none = m none := fun h => hn (h1.symm.trans h)
         simp [h1, hn]
       · simp [h1]
   intro p hp m
   rw [blowUpOf, RingHom.mem_ker] at hp ⊢
-  refine Polynomial.ext fun n => ?_
+  apply AddMonoidAlgebra.ext
+  ext n
   rw [hcoeff, Polynomial.coeff_zero, Ideal.Quotient.eq_zero_iff_mem, hsplit]
   split_ifs with hn
   · rw [aeval_weightedHomogeneousComponent_of_forms ωL _ hθ]
@@ -230,7 +283,7 @@ theorem BlowUpModel.proof (h₁ : ReesAlgebraDim.Statement.{u}) : BlowUpModel.St
           rw [aeval_C, Polynomial.algebraMap_apply]
           exact (reesAlgebra I).algebraMap_mem _
         | add p q hp hq =>
-          rw [map_add]
+          rw [map_add (f := _)]
           exact add_mem hp hq
         | mul_X p v hp =>
           rw [map_mul]
@@ -261,7 +314,7 @@ theorem BlowUpModel.proof (h₁ : ReesAlgebraDim.Statement.{u}) : BlowUpModel.St
             rw [map_zero]
             exact zero_mem _
           | add a b _ _ ha hb =>
-            rw [map_add]
+            rw [map_add (f := _)]
             exact add_mem ha hb
           | smul c a _ ha =>
             rw [LinearMap.map_smul, Polynomial.smul_eq_C_mul]

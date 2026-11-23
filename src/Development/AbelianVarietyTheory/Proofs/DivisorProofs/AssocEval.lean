@@ -1,6 +1,50 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.EqZeroOfForallPowDvd
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PadicContinuousEvaluationExistsUniqueSubstNaturaStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.EqZeroOfForallPowDvd
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PadicContinuousEvaluationExistsUniqueSubstNaturaStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.EpsilonPairingZeta
+import Development.AbelianVarietyTheory.Definitions.Divisors.GhostFrobenius
+
+@[expose] public section
+
 open MvPowerSeries GlobalTheory GlobalTheory.Katz GlobalTheory.QLog GlobalTheory.PDivGroup GlobalTheory.Sandwich GlobalTheory.IndefiniteRowSideFullHecke.EpsilonPairingZeta GlobalTheory.PDivLat
 open TensorProduct
 
@@ -102,7 +146,7 @@ theorem assoc_eval (p : ℕ) (O A : Type) [CommRing O] [CommRing A] [Bialgebra O
           induction c using TensorProduct.induction_on with
           | zero => simp
           | tmul a b => simp [Φ₁, Algebra.TensorProduct.one_def]
-          | add a b ha hb => rw [map_add, ha, hb, TensorProduct.add_tmul, map_add]
+          | add a b ha hb => rw [map_add (f := _), ha, hb, TensorProduct.add_tmul, map_add (f := _)]
         rw [key]
         simp [Φ₂]
       · simp [x3, h3.1, Φ₂, Algebra.TensorProduct.one_def]) (μ i)
@@ -130,21 +174,21 @@ theorem assoc_eval (p : ℕ) (O A : Type) [CommRing O] [CommRing A] [Bialgebra O
       induction c using TensorProduct.induction_on with
       | zero => simp
       | tmul a a' => simp
-      | add c c' hc hc' => rw [TensorProduct.add_tmul, map_add, hc, hc', map_add]
-    | add a b ha hb => rw [map_add, ha, hb, map_add]
+      | add c c' hc hc' => rw [TensorProduct.add_tmul, map_add (f := _), hc, hc', map_add (f := _)]
+    | add a b ha hb => rw [map_add (f := _), ha, hb, map_add (f := _)]
   have k2 : ∀ c : A ⊗[O] A, Φ₂ c = TensorProduct.assoc O A A A (LinearMap.rTensor A (Coalgebra.comul (R := O) (A := A)) c) := by
     intro c
     rw [← ka]
     induction c using TensorProduct.induction_on with
     | zero => simp
     | tmul a b => simp [Φ₂]
-    | add a b ha hb => rw [map_add, ha, hb, map_add, map_add]
+    | add a b ha hb => rw [map_add (f := _), ha, hb, map_add (f := _), map_add (f := _)]
   have k4 : ∀ c : A ⊗[O] A, Φ₄ c = LinearMap.lTensor A (Coalgebra.comul (R := O) (A := A)) c := by
     intro c
     induction c using TensorProduct.induction_on with
     | zero => simp
     | tmul a b => simp [Φ₄]
-    | add a b ha hb => rw [map_add, ha, hb, map_add]
+    | add a b ha hb => rw [map_add (f := _), ha, hb, map_add (f := _)]
   rw [k2, k4, Coalgebra.coassoc_apply]
 
 end GlobalTheory.Chart.Assoc

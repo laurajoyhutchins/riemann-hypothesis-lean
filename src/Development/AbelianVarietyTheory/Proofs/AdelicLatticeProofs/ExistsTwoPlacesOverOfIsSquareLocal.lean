@@ -1,6 +1,57 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AdelicHermitianForms.SqSubLeNormSub
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.IsQuadraticSqrtExtensionBasicFacts
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AdelicHermitianForms.SqSubLeNormSub
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.IsQuadraticSqrtExtensionBasicFacts
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+public import Mathlib.RingTheory.Valuation.Integral
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open NumberField IsDedekindDomain GlobalTheory.QNorm
 open scoped WithZero
 
@@ -21,7 +72,7 @@ theorem exists_centre_over {F E : Type} [Field F] [NumberField F] [Field E] [Num
     { carrier := {x | u (algebraMap (𝓞 E) E x) < 1}
       add_mem' := by
         intro a b ha hb
-        simp only [Set.mem_setOf_eq, map_add] at *
+        simp only [Set.mem_setOf_eq, map_add (f := _)] at *
         exact u.map_add_lt ha hb
       zero_mem' := by simp
       smul_mem' := by
@@ -71,15 +122,15 @@ theorem IsQuad.exists_embedding_root {F E L : Type} [Field F] [Field E] [Algebra
   · rw [key 1 1 0 (by simp)]; simp
   · intro x y
     rw [key (x * y) (A x * A y + δ * B x * B y) (A x * B y + B x * A y) (by
-      simp only [map_add, map_mul, ← h.sq]
+      simp only [map_add (f := _), map_mul, ← h.sq]
       linear_combination y * hAB x + (algebraMap F E (A x) + algebraMap F E (B x) * θ) * hAB y)]
-    simp only [map_add, map_mul, hr]; ring
+    simp only [map_add (f := _), map_mul, hr]; ring
   · rw [key 0 0 0 (by simp)]; simp
   · intro x y
     rw [key (x + y) (A x + A y) (B x + B y) (by
-      simp only [map_add]
+      simp only [map_add (f := _)]
       linear_combination hAB x + hAB y)]
-    simp only [map_add]; ring
+    simp only [map_add (f := _)]; ring
   · intro a
     change φ (A _) + φ (B _) * r = _
     rw [key _ a 0 (by simp)]; simp
@@ -90,8 +141,7 @@ theorem exists_val_sub_mul_lt_one {F L Γ : Type} [Field L] [LinearOrderedCommGr
     [Valued L Γ] (φ : F → L) (hφ : DenseRange φ) (r c : L) :
     ∃ ρ : F, Valued.v ((r - φ ρ) * c) < (1 : Γ) := by
   have hopen : IsOpen {x : L | Valued.v x < (1 : Γ)} := by
-    simpa using Valued.isOpen_ball L (1 : (MonoidWithZeroHom.ofClass
-      (Valued.v : Valuation L Γ)).ValueGroup₀)
+    simpa only [Valuation.restrict_lt_one_iff] using (Valued.isOpen_ball L 1)
   have hcont : Continuous fun x : L => (r - x) * c := by fun_prop
   exact hφ.exists_mem_open (hopen.preimage hcont) ⟨r, by simp⟩
 

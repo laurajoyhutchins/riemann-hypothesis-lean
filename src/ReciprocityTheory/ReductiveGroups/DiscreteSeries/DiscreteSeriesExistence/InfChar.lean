@@ -1,12 +1,58 @@
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.DiscreteSeriesExistence.DatumEmbeddingMemHlam
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.CasimirCoefficients.PsiExistsOfFormula
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TensorRepresentations.Resolvent
-import Formalism.FormalDegreeBessel.StatementIO
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TensorRepresentations.Gelfand
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TensorRepresentations.AntiEIsGlRep
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.DiscreteSeriesExistence.SmoothCore
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.DiscreteSeriesExistence.DatumA
-import Formalism.RealPlaceAnalysis.ThirdArithmeticHolds
+module
+
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.CasimirCoefficients.PsiExistsOfFormula
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TensorRepresentations.Resolvent
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.DiscreteSeriesExistence.DatumA
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.DiscreteSeriesExistence.EqZeroOfDatumEmbeddingEqZero
+import Formalism.RealPlaceAnalysis.RealPlaceTaylor.IntegrableComplexContinuousBoundedSupport
+public import Formalism.RealPlaceAnalysis.ThirdArithmeticHolds
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.Normed.Algebra.MatrixExponential
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.DiscreteSeriesExistence.RightDerivativeToL2
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.DiscreteSeriesExistence.RregRep
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.DiscreteSeriesExistence.SmoothCore
+
+@[expose] public section
 
 noncomputable section
 
@@ -52,8 +98,7 @@ private theorem Jm_conjTransposeDiscreteSeriesExistence : (Jm ε)ᴴ = Jm ε := 
   rw [Matrix.diagonal_conjTranspose]
   congr 1
   funext a
-  simp only [Pi.star_apply]
-  split_ifs <;> simp
+  by_cases h : ε a = true <;> simp [h]
 
 private theorem Jm_mul_Jm_conj_conjTranspose (Z : Matrix (Fin n) (Fin n) ℂ) :
     Jm ε * (Jm ε * Zᴴ * Jm ε) = Zᴴ * Jm ε := by
@@ -125,7 +170,7 @@ theorem icx_eabV_clm (φ : E →L[ℂ] ℂ) {f : Matrix (Fin n) (Fin n) ℂ → 
   show S7.RdV (S7.cpart1 ε (Matrix.single a b 1)) (fun x => φ (f x)) g +
       Complex.I • S7.RdV (S7.cpart2 ε (Matrix.single a b 1)) (fun x => φ (f x)) g =
     φ (S7.RdV (S7.cpart1 ε (Matrix.single a b 1)) f g + Complex.I • S7.RdV (S7.cpart2 ε (Matrix.single a b 1)) f g)
-  rw [rdV_clm φ hf h1 hg, rdV_clm φ hf h2 hg, map_add, map_smul]
+  rw [rdV_clm φ hf h1 hg, rdV_clm φ hf h2 hg, map_add (f := _), map_smul]
 
 end Fun
 
@@ -272,14 +317,14 @@ theorem icxGood_add_smul {x y : smD ε (rreg ε)} {Φ Φ' : Matrix (Fin n) (Fin 
   unfold IcxGood
   refine ⟨smoothOnGV_add_smul h1 k1 c, ?_, ?_⟩
   · have := isSmoothL2_add_smul h2 k2 c
-    simpa [map_add, map_smul] using this
+    simpa [map_add (f := _), map_smul] using this
   · have m1 : MemLp (fun y : Formalism.REAL.UJ ε => φ (Φ (Formalism.MainNotions.S.umat y))) 2 (Formalism.REAL.muG ε) := h2.2 []
     have m2 : MemLp (fun y : Formalism.REAL.UJ ε => φ (Φ' (Formalism.MainNotions.S.umat y))) 2 (Formalism.REAL.muG ε) := k2.2 []
     rw [Submodule.coe_add, Submodule.coe_smul, h3, k3,
       ← toL2_add_mul_of_memLp (fun g => φ (Φ g)) (fun g => φ (Φ' g)) m1 m2 c]
     congr 1
     funext g
-    simp [map_add, map_smul]
+    simp [map_add (f := _), map_smul]
 
 theorem icxGood_neg {x : smD ε (rreg ε)} {Φ : Matrix (Fin n) (Fin n) ℂ → E} (hx : IcxGood ε φ x Φ) :
     IcxGood ε φ (-x) (fun g => -Φ g) := by
@@ -427,7 +472,7 @@ theorem icx_genSub_eigen (A : Fin n → Fin n → Module.End ℂ M) (S : Submodu
       add_mem' := by
         intro u v hu hv
         simp only [Set.mem_setOf_eq] at hu hv ⊢
-        rw [map_add, hu, hv, smul_add]
+        rw [map_add (f := _), hu, hv, smul_add]
       zero_mem' := by simp
       smul_mem' := by
         intro r u hu

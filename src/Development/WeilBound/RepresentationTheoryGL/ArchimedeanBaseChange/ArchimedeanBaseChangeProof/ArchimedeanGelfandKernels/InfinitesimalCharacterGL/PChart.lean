@@ -1,8 +1,50 @@
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.ArchimedeanGelfandKernels.InfinitesimalCharacterGL.NatDegreeDefectGelf
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CasimirSignatureMemCenter
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.MapSingleAtEmb
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HeckeCharacterThetaInvariantExponent
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.ArchimedeanGelfandKernels.InfinitesimalCharacterGL.EopW
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.ArchimedeanGelfandKernels.IsMultZero
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HeckeCharacterThetaInvariantExponent
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CasimirSignatureMemCenter
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.ArchimedeanGelfandKernels.InfinitesimalCharacterGL.NatDegreeDefectGelf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 noncomputable section
 
@@ -13,7 +55,7 @@ namespace PositivityTheory.RgBcC.Bridge
 
 attribute [local instance] Matrix.normedAddCommGroup Matrix.normedSpace
 
-variable {E : Type} [Field E] [NumberField E] [IsTotallyComplex E] {a : ℕ}
+variable {E : Type} [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] {a : ℕ}
 
 theorem chart_add' (φ ψ : GA E a → ℂ) (g : GA E a) (x : Lie E a) : chart (φ + ψ) g x = chart φ g x + chart ψ g x := by
   unfold chart; split_ifs <;> simp
@@ -126,7 +168,16 @@ theorem rd_along (w : InfinitePlace E) (g : GA E a) (φ : Sm E a) (X : Matrix (F
 theorem rd_along' (w : InfinitePlace E) (g : GA E a) (φ : Sm E a) (i j : Fin a) (z : ℂ)
     {x : Matrix (Fin a) (Fin a) ℂ} (hx : x ∈ PositivityTheory.RgBcC.GLs a) :
     PositivityTheory.RgBcC.Rd (Matrix.single i j z) (along w g φ.1) x = along w g (lieS E a i j (atEmb w.embedding z) φ).1 x := by
-  rw [rd_along w g φ _ hx, GlobalTheory.OneRep.map_single_atEmb, lieS_apply]
+  have hzero : atEmb w.embedding 0 = 0 := by
+    classical
+    unfold atEmb
+    split_ifs <;> simp
+  have hmap : (Matrix.single i j z).map (atEmb w.embedding) =
+      Matrix.single i j (atEmb w.embedding z) := by
+    ext p q
+    simp only [Matrix.map_apply, Matrix.single_apply]
+    split_ifs <;> simp [hzero]
+  rw [rd_along w g φ _ hx, hmap, lieS_apply]
   rfl
 
 theorem eu_along (w : InfinitePlace E) (g : GA E a) (s : Bool) (φ : Sm E a) (i j : Fin a)

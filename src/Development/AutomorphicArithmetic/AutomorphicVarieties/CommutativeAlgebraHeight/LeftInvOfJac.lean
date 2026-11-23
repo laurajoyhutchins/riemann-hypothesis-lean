@@ -1,12 +1,65 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebraHeight.OfDetToDet
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebraHeight.OfDetToDet
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebraHeight.BcChiTmul
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebraHeight.DKillsPoly
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebraHeight.DUnit
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebraHeight.DkerOfKills
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.AdicCompletion.Noetherian
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
 import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebraHeight.IsLocalHom
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebraHeight.DUnit
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebraHeight.DkerOfKills
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebraHeight.BcChiTmul
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebraHeight.DKillsPoly
-import Mathlib.RingTheory.Jacobson.Radical
-import Mathlib.RingTheory.Jacobson.Ring
-import Mathlib.Algebra.MvPolynomial.Nilpotent
+public import Mathlib.Algebra.MvPolynomial.Nilpotent
+public import Mathlib.RingTheory.Jacobson.Ring
+
+@[expose] public section
 
 open TensorProduct IsLocalRing Polynomial UpperTheory.V.W UpperTheory.V.Alg UpperTheory.V.CA
 
@@ -17,7 +70,6 @@ private theorem left_inv_of_jac {A E K : Type} [CommRing A] [Ring E] [Algebra A 
   have hw : ∀ y : E ⊗[A] K, y * w ∈ Module.jacobson E (E ⊗[A] K) := by
     intro y
     induction y with
-    | zero => simp
     | add a b ha hb => rw [add_mul]; exact add_mem ha hb
     | tmul e a =>
       rw [Finset.mul_sum]
@@ -44,6 +96,7 @@ private theorem left_inv_of_jac {A E K : Type} [CommRing A] [Ring E] [Algebra A 
   have hv' : v * (1 + w) = 1 := hv
   have h := congrArg (Algebra.TensorProduct.comm A E K) hv'
   rw [map_mul, map_one] at h
+
   simpa [w, map_sum] using h
 
 private theorem kills_of_jac {n : ℕ} {k R : Type} [Field k] [Ring R] [Algebra k R] (D : Det n k R) (x : R)
@@ -55,6 +108,7 @@ private theorem kills_of_jac {n : ℕ} {k R : Type} [Field k] [Ring R] [Algebra 
     intro K _ _ φ
     rw [hP, ← D.nat]
     congr 1
+
     simp [Det.gen, map_sum, Finset.sum_mul]
   have hu : IsUnit P := by
     by_contra hnu
@@ -99,7 +153,6 @@ theorem UpperTheory.V.CA.d_rad :
       (Algebra.TensorProduct.includeRight : E →ₐ[A] ResidueField A ⊗[A] E).toRingHom
     haveI : RingHomSurjective f := ⟨fun t => by
       induction t with
-      | zero => exact ⟨0, map_zero _⟩
       | add a b ha hb =>
         obtain ⟨a, rfl⟩ := ha
         obtain ⟨b, rfl⟩ := hb

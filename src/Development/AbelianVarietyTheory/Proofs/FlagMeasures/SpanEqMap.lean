@@ -1,11 +1,59 @@
-import Mathlib
-import Formalism.SharpRestriction.CuspSpanNormBounds.FractionFieldToGenericStalkAlgebraMapEq
-import Development.AbelianVarietyTheory.Definitions.Foundations.IsHermND
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.ComplementReferenceCompactSubgroup
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.HermLat
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.HermLat
+public import Mathlib.RingTheory.Norm.Defs
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsEqZpowMulUnit
 import Development.AbelianVarietyTheory.Proofs.FlagMeasures.IsPrincipalIdealRingOfHenselian
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsEqZpowMulUnit
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.RelativeLatticeVolumeOfDetValuationStatement
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.RelativeLatticeVolumeOfDetValuationStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RingTheory.Norm.Transitivity
+
+@[expose] public section
 
 open ValuativeRel Formalism.MainNotions.S.Loc GlobalTheory.HL MeasureTheory
 open scoped Pointwise ENNReal Classical
@@ -28,7 +76,7 @@ theorem exists_basis [IsNonarchimedeanLocalField F] [CharZero F] (L : LocE F E) 
     intro s t h
     simp only [Algebra.smul_def, mul_one] at h
     have h' := congrArg L.cj h
-    simp only [map_add, map_mul, AlgEquiv.commutes, map_zero] at h'
+    simp only [map_add (f := _), map_mul, AlgEquiv.commutes, map_zero] at h'
     have ht : algebraMap F E t = 0 := by
       linear_combination e * h - e * h' - algebraMap F E t * hωe
     have hs : algebraMap F E s = 0 := by rw [ht] at h; simpa using h
@@ -46,7 +94,7 @@ theorem exists_basis [IsNonarchimedeanLocalField F] [CharZero F] (L : LocE F E) 
   refine ⟨b, fun x => ⟨fun h => ?_, fun h => ?_⟩, fun x => ?_⟩
   · have h1 := hx x
     have h2 := congrArg L.cj h1
-    simp only [map_add, map_mul, AlgEquiv.commutes] at h2
+    simp only [map_add (f := _), map_mul, AlgEquiv.commutes] at h2
     have h3 : algebraMap F E (b.repr x 1) = (x - L.cj x) * e := by
       linear_combination -e * h1 + e * h2 - algebraMap F E (b.repr x 1) * hωe
     have h4 : algebraMap F E (b.repr x 1) ∈ L.O := by
@@ -69,7 +117,7 @@ theorem exists_basis [IsNonarchimedeanLocalField F] [CharZero F] (L : LocE F E) 
     have h2 := congrArg L.cj h1
     have h3 := hx (x * ω)
     have h4 := congrArg L.cj h3
-    simp only [map_add, map_mul, AlgEquiv.commutes] at h2 h4
+    simp only [map_add (f := _), map_mul, AlgEquiv.commutes] at h2 h4
     generalize algebraMap F E (b.repr x 0) = a at *
     generalize algebraMap F E (b.repr x 1) = c at *
     generalize algebraMap F E (b.repr (x * ω) 0) = a' at *
@@ -141,7 +189,7 @@ theorem index_rmul : ∀ {F : Type} [Field F] [ValuativeRel F] [TopologicalSpace
     rw [Finset.sum_comm]
     simp only [mul_comm]
   have hinj : Function.Injective (Fintype.linearCombination E y).toAddMonoidHom := by
-    rw [injective_iff_map_eq_zero]
+    set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
     intro v hv
     exact funext (Fintype.linearIndependent_iff.1 hy v hv)
   rw [span_eq_map, span_eq_map, ← hW0, hcomp, ← AddSubgroup.map_map,

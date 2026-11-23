@@ -1,5 +1,56 @@
-import ReciprocityTheory.L2DbarEstimates.Localization.UnweightBackStatement
-import ReciprocityTheory.L2DbarEstimates.Mollifiers.MollifierL2LocTendsto
+module
+
+public import ReciprocityTheory.L2DbarEstimates.Localization.UnweightBackStatement
+public import ReciprocityTheory.L2DbarEstimates.Mollifiers.MollifierL2LocTendsto
+public import Mathlib.LinearAlgebra.Complex.FiniteDimensional
+public import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+public import Mathlib.Analysis.Calculus.ContDiff.WithLp
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Analysis.Calculus.FDeriv.Measurable
+
+@[expose] public section
 
 namespace ReciprocityTheory.L2DbarEstimates.F
 
@@ -11,8 +62,9 @@ noncomputable section
 namespace FlatWeightedEstimates
 
 lemma lint_sq {α E : Type*} [MeasurableSpace α] [NormedAddCommGroup E] (f : α → E)
-    (μ : Measure α) : ∫⁻ x, ‖f x‖ₑ ^ 2 ∂μ = eLpNorm f 2 μ ^ 2 := by
-  have h := eLpNorm_nnreal_pow_eq_lintegral (f := f) (μ := μ) (p := 2) two_ne_zero
+    (μ : Measure α) (hf : AEStronglyMeasurable f μ) :
+    ∫⁻ x, ‖f x‖ₑ ^ 2 ∂μ = eLpNorm f 2 μ ^ 2 := by
+  have h := eLpNorm_nnreal_pow_eq_lintegral (f := f) (μ := μ) (p := 2) two_ne_zero hf
   have e : ((2 : NNReal) : ℝ) = ((2 : ℕ) : ℝ) := by norm_num
   rw [e] at h
   simp only [ENNReal.rpow_natCast] at h
@@ -21,8 +73,13 @@ lemma lint_sq {α E : Type*} [MeasurableSpace α] [NormedAddCommGroup E] (f : α
 lemma tendsto_lint {ι α E : Type*} [MeasurableSpace α] [NormedAddCommGroup E] {l : Filter ι}
     {μ : Measure α} (F : ι → α → E) (h : Tendsto (fun i => eLpNorm (F i) 2 μ) l (𝓝 0)) :
     Tendsto (fun i => ∫⁻ x, ‖F i x‖ₑ ^ 2 ∂μ) l (𝓝 0) := by
-  simp_rw [lint_sq]
-  simpa using ENNReal.Tendsto.pow (n := 2) h
+  have hm : ∀ᶠ i in l, AEStronglyMeasurable (F i) μ :=
+    (h.eventually (Iio_mem_nhds ENNReal.zero_lt_top)).mono fun _ hi =>
+      aestronglyMeasurable_of_eLpNorm_ne_top hi.ne
+  have heq : (fun i => ∫⁻ x, ‖F i x‖ₑ ^ 2 ∂μ) =ᶠ[l]
+      (fun i => eLpNorm (F i) 2 μ ^ 2) := hm.mono fun i hi => lint_sq (F i) μ hi
+  exact (by simpa using ENNReal.Tendsto.pow (n := 2) h :
+    Tendsto (fun i => eLpNorm (F i) 2 μ ^ 2) l (𝓝 0)).congr' heq.symm
 
 lemma enorm_sq_V {n : ℕ} (x : V n) : ‖x‖ₑ ^ 2 = ∑ j, ‖x j‖ₑ ^ 2 := by
   simp only [← ofReal_norm]
@@ -185,7 +242,8 @@ theorem flatGraph (n : ℕ) (hGraph : B.GraphSt (V n) volume ℝ) (hSmooth : B.S
     refine (lintegral_congr fun y => ?_).trans (lintegral_finsetSum' _ (fun j _ => ?_))
     · rw [enorm_sq_V]
       rfl
-    · exact (((hmc j).continuous.aestronglyMeasurable.sub (hGj j).1).enorm).pow_const 2
+    · exact ((hmc j).continuous.aestronglyMeasurable.sub
+        (hGj j).aestronglyMeasurable).eNorm.pow_const 2
   · refine lt_of_le_of_lt (le_of_eq (lintegral_congr fun y => ?_)) h2
     exact congrArg (fun s => ‖s - D y‖ₑ ^ 2)
       (dop_div (fun j => B.moll (B.Kernel.std (V n) volume t) (fun u => G u j)) y).symm
@@ -194,8 +252,8 @@ theorem flatGraph (n : ℕ) (hGraph : B.GraphSt (V n) volume ℝ) (hSmooth : B.S
           (![fun u => G u k, fun u => G u k, fun u => G u j, fun u => G u j] p)) -
         fun u => S u j k) y‖ₑ ^ 2
     have hmeas : ∀ j k, AEMeasurable (Q j k) volume := fun j k =>
-      ((((Finset.measurable_sum _ fun p _ => (measurable_fderiv_apply_const ℝ _ _).const_mul
-        _).aestronglyMeasurable).sub (hSjk j k).1).enorm).pow_const 2
+      ((Finset.measurable_sum _ fun p _ => (measurable_fderiv_apply_const ℝ _ _).const_mul
+        _).aestronglyMeasurable.sub (hSjk j k).aestronglyMeasurable).eNorm.pow_const 2
     have hsum : ∫⁻ y, ∑ j, ∑ k, Q j k y = ∑ j, ∑ k, ∫⁻ y, Q j k y := by
       rw [lintegral_finsetSum' _ (fun j _ => Finset.aemeasurable_fun_sum _ fun k _ => hmeas j k)]
       exact Finset.sum_congr rfl fun j _ => lintegral_finsetSum' _ fun k _ => hmeas j k

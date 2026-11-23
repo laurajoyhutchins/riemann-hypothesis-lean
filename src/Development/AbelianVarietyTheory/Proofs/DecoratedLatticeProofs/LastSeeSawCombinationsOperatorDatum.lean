@@ -1,7 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.SmallPair
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.HermitianLinkMapAdditiveRationalEquivariant
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.AdelicPointComponentsAtPlacesLatticesVacua
+module
+
+public import Development.AbelianVarietyTheory.Definitions.LatticeFrames.SmallPair
+import Development.AbelianVarietyTheory.Counterexamples.HeightSurvey.StarPurelyImaginaryEqNeg
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.AdelicPointComponentsAtPlacesLatticesVacua
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.HermitianLinkMapAdditiveRationalEquivariant
+import Development.AbelianVarietyTheory.Proofs.HeightProofs.EmbeddingXiZeroNeZero
+import Formalism.LocalToGlobal.BesselHermitianTheta.LemmasWeil
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -150,7 +197,7 @@ theorem heisO_split {V₀ A L S L'' : HSp D} (o : OrthDec V₀ A L) (τ : Matrix
     heisO ψ V₀ S ((o.resS S).symm (x, kap τ S y)) Ξ ((o.resS S).symm (u, kap τ S w)) =
       ψ (symplOH A S u x) * ψ (symplOH S L'' w y) * Ξ ((o.resS S).symm (u + x, kap τ S (w + y))) := by
   simp only [heisO]
-  rw [o.symplOH_resS, AddEquiv.apply_symm_apply, AddEquiv.apply_symm_apply, ← map_add, Prod.mk_add_mk, kap_add,
+  rw [o.symplOH_resS, AddEquiv.apply_symm_apply, AddEquiv.apply_symm_apply, ← map_add (f := _), Prod.mk_add_mk, kap_add,
     symplOH_kap τ hτ, AddChar.map_add_eq_mul]
 
 end GlobalTheory.LastOpPf
@@ -169,7 +216,7 @@ theorem biComb_lastBi {V₀ A L S X T L'' : HSp D} (o : OrthDec V₀ A L) (o'' :
   funext u v
   simp only [Finset.sum_apply, lastBi_apply, comb_single, Pi.smul_apply, smul_eq_mul, one_mul, heisO_split o τ hτ]
   simp only [biComb, comb_apply]
-  simp only [heisO, lastBi_apply, map_add, Prod.fst_add, Prod.snd_add, o''.symplOH_resT, AddChar.map_add_eq_mul]
+  simp only [heisO, lastBi_apply, map_add (f := _), Prod.fst_add, Prod.snd_add, o''.symplOH_resT, AddChar.map_add_eq_mul]
   rw [Finset.sum_product]
   refine Finset.sum_congr rfl fun x _ => ?_
   rw [Finset.mul_sum, Finset.mul_sum]
@@ -197,7 +244,7 @@ theorem lastBi_comb {V₀ A L S X T L'' : HSp D} (o : OrthDec V₀ A L) (o'' : O
   have hK := heisO_split o τ hτ ψ Ξ (o.resS S z).1 u (kapInv τ S (o.resS S z).2) (o''.resT S v).2
   rw [hz] at hK
   rw [hK]
-  simp only [biComb, comb_single, Pi.smul_apply, smul_eq_mul, one_mul, heisO, lastBi_apply, map_add,
+  simp only [biComb, comb_single, Pi.smul_apply, smul_eq_mul, one_mul, heisO, lastBi_apply, map_add (f := _),
     AddEquiv.apply_symm_apply, Prod.fst_add, Prod.snd_add, add_zero, o''.symplOH_resT, symplOH_zero_right,
     AddChar.map_add_eq_mul, AddChar.map_zero_eq_one]
   ring

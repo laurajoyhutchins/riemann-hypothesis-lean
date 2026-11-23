@@ -1,9 +1,54 @@
-import Formalism.SharpRestriction.GrowthBounds.IntegralWeylLatticeSpan.WeylLatticeDescentHolds
-import Formalism.SharpRestriction.GrowthBounds.IntegralWeylLatticeSpan.ColSpanMulUnit
-import Formalism.SharpRestriction.GrowthBounds.IntegralWeylLatticeSpan.SelfDualCongr
-import Formalism.LocalToGlobal.GroupLattices.TiedFamilies.TieFin
-import Formalism.LocalToGlobal.GroupLattices.TiedFamilies.BlockRationalityField
-import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.BlockRatReal
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.IntegralWeylLatticeSpan.WeylLatticeDescentHolds
+public import Formalism.SharpRestriction.GrowthBounds.IntegralWeylLatticeSpan.ColSpanMulUnit
+public import Formalism.SharpRestriction.GrowthBounds.IntegralWeylLatticeSpan.SelfDualCongr
+public import Formalism.LocalToGlobal.GroupLattices.TiedFamilies.BlockRationalityField
+import Formalism.LocalRingCardinality.DataKerI
+public import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.BlockRatReal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Formalism.LocalToGlobal.GroupLattices.CloudFilling.ExistsPowOrbRep
+public import Formalism.LocalToGlobal.GroupLattices.CloudFilling.FillInstRecEqWj
+public import Formalism.LocalToGlobal.GroupLattices.PerfectRings.ExistsSqEqIntCast
+public import Formalism.LocalToGlobal.GroupLattices.PerfectRings.ExtWRec
+public import Formalism.LocalToGlobal.GroupLattices.TiedFamilies.FullTiedCBase
+public import Formalism.LocalToGlobal.GroupLattices.TiedFamilies.TieFin
+
+@[expose] public section
 
 noncomputable section
 
@@ -34,18 +79,6 @@ variable (D : D7) (H : FullTiedNoG D)
     Formalism.L2.Herm.awayFrom₂ (H.base.lev0 u) (D.what₂.places.resChar w) →* (ORec D w (nFr D (D.what₂.places.resChar w)))ˣ)
   (hd : ∀ u w h, ((packC D (fun u => H.base.lev0 u) (idStd D H I0 B hBs) ψ u w h).gat (rSc sc D.R.k (D.what₂.places.resChar w))
     (epSc D.R sc Ce (D.what₂.places.resChar w))).d = Module.finrank ℂ (D.mem u).A.Mu0)
-
-structure ChosenDataCompatibility : Prop where
-
-  joint : ∀ u, Joint0 H.base.lev0 u (T u)
-
-  psi0 : ∀ u, LevelZeroCharacterRational (D := (recC D sc Ce (fun u => H.base.lev0 u) (idStd D H I0 B hBs) ψ hd)) (formsOfRecursion D sc Ce (fun u => H.base.lev0 u) (idStd D H I0 B hBs) ψ hd T) u
-
-  psi : ∀ u (w : D.what₂.places.Pl) (hg : GIdx D.host (D.mem u).A.T (D.what₂.places.resChar w)),
-    PsiTied (LL := D.what₂.LL) (O := ORec D w (nFr D (D.what₂.places.resChar w)))
-      (Kf := KfRec D w (nFr D (D.what₂.places.resChar w)))
-      (((formsOfRecursion D sc Ce (fun u => H.base.lev0 u) (idStd D H I0 B hBs) ψ hd T) u).cls0).lev (H.base.lev0 u) (D.what₂.places.resChar w) (rank_eq_first_level D.R) D.what₂.embLL
-      ((cmpInC D sc Ce (fun u => H.base.lev0 u) (idStd D H I0 B hBs) ψ hd (levelZeroHermitianTransport D sc Ce (fun u => H.base.lev0 u) (idStd D H I0 B hBs) ψ hd H (fun _ => rfl)) (fun _ => rfl) B hBs (idStd_fr D H I0 B hBs)).embW u w hg) (ψ u w hg)
 
 variable {D H I0 B hBs sc Ce T ψ hd}
 

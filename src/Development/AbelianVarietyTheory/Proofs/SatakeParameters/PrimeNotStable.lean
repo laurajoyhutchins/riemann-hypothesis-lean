@@ -1,8 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.SameOffRefl
-import Formalism.LocalToGlobal.GroupLattices.TiedFamilies.TiePtOne
+module
+
+public import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.SameOffRefl
+public import Formalism.LocalToGlobal.GroupLattices.TiedFamilies.TiePtOne
+public import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.LocSpBot
+public import Formalism.LocalToGlobal.GroupLattices.TiedFamilies.EqOneOfPh
+import Formalism.LocalRingCardinality.SpanPowerMembership.LocAtA
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
 import Formalism.SharpRestriction.GrowthBounds.ChartedClasses.ToLEInvApply
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.ExistsMidLevIff
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Formalism.BasicNotions Formalism.MainNotions Formalism.MainNotions.G Formalism.L2.G Formalism.L2.G.Cmp Formalism.L2.Forms Formalism.UG Formalism.L2.DIV Formalism.L2.G.Pend Formalism.L2.PairingIndexBounds.F Formalism.MainNotions.G.KAat GlobalTheory.TwV GlobalTheory.TwV.Xc TensorProduct
 open scoped WithZero
 
@@ -72,11 +116,11 @@ theorem approx {F E K : Type} [Field F] [Field E] [Algebra F E] [Field K] [Algeb
     refine ⟨x1 + x2, ?_, ?_⟩
     · have : (s ((x1 + x2) ⊗ₜ[F] (1 : K))).1 - (s (t1 + t2)).1 =
           ((s (x1 ⊗ₜ[F] (1 : K))).1 - (s t1).1) + ((s (x2 ⊗ₜ[F] (1 : K))).1 - (s t2).1) := by
-        rw [TensorProduct.add_tmul, map_add, map_add, Prod.fst_add, Prod.fst_add]; ring
+        rw [TensorProduct.add_tmul, map_add (f := _), map_add (f := _), Prod.fst_add, Prod.fst_add]; ring
       rw [this]; exact Valuation.map_add_lt _ a1 a2
     · have : (s ((x1 + x2) ⊗ₜ[F] (1 : K))).2 - (s (t1 + t2)).2 =
           ((s (x1 ⊗ₜ[F] (1 : K))).2 - (s t1).2) + ((s (x2 ⊗ₜ[F] (1 : K))).2 - (s t2).2) := by
-        rw [TensorProduct.add_tmul, map_add, map_add, Prod.snd_add, Prod.snd_add]; ring
+        rw [TensorProduct.add_tmul, map_add (f := _), map_add (f := _), Prod.snd_add, Prod.snd_add]; ring
       rw [this]; exact Valuation.map_add_lt _ b1 b2
 
 theorem exists_frac {S K : Type} [CommRing S] [IsDedekindDomain S] [Field K] [Algebra S K] [IsFractionRing S K]
@@ -206,7 +250,7 @@ theorem prime_not_stable : ∀ (F E : Type) [Field F] [NumberField F] [Field E] 
   have hσs : ∀ s : 𝓞 E, s ∉ P.asIdeal → σO s ∉ P.asIdeal := by
     intro s hs hs'
     obtain ⟨t, i, hi, hti⟩ := P.isMaximal.exists_inv hs
-    have h1 : σO t * σO s + σO i = 1 := by rw [← map_mul, ← map_add, hti, map_one]
+    have h1 : σO t * σO s + σO i = 1 := by rw [← map_mul, ← map_add (f := _), hti, map_one]
     have h2 : (1 : 𝓞 E) ∈ P.asIdeal := h1 ▸ add_mem (Ideal.mul_mem_left _ _ hs') (hσP i hi)
     exact P.isPrime.ne_top ((Ideal.eq_top_iff_one _).2 h2)
 

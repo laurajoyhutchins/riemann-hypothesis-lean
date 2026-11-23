@@ -1,12 +1,59 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.PowSubSuccLe
-import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.IsGloballyGeneratedIffGeneratingSections
-import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.IsFiniteLengthOfIsArtinianRingAnnihilator
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ClosedImmersionPullbackKernelSup
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IsPullbackOfKernelSup
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SubobjectLeIffAffineSections
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.QuasicoherentSupSections
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IdealPowerSubobjectSections
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.PowSubSuccLe
+public import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.IsGloballyGeneratedIffGeneratingSections
+public import Development.AbelianVarietyTheory.Definitions.QuasicoherentCohomology.HdimEqZeroOfSubsingleton
+public import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.FormalAlgebraisation.GEClosedProj
+public import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.IsFiniteLengthOfIsArtinianRingAnnihilator
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ClosedImmersionPullbackKernelSup
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IdealPowerSubobjectSections
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IsPullbackOfKernelSup
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.QuasicoherentSupSections
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SubobjectLeIffAffineSections
+import GroundTheory.ArithmeticGeometry.SchemeCohomology.ProperCohomology.CokernelCoherent
+public import GroundTheory.ArithmeticGeometry.SchemeCohomology.ProperCohomology.FinitenessStep
+import GroundTheory.ArithmeticGeometry.SchemeCohomology.ProperCohomology.SupportMore
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.TypeStar
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -21,11 +68,13 @@ variable {X : Scheme.{0}}
 
 abbrev fn (V : X.Opens) : Γ(𝟙_ X.Modules, V) ≃ₗ[Γ(X, V)] Γ(X, V) := structureModuleSectionsEquiv V
 
-def subOf (J : X.IdealSheafData) : Subobject (𝟙_ X.Modules) := Subobject.mk (idealModuleι J)
+def subOf (J : X.IdealSheafData) : Subobject (𝟙_ X.Modules) :=
+  Subobject.mk (X := structureModule X) (idealModuleι J)
 
 theorem mem_secs_subOf (J : X.IdealSheafData) (V : X.affineOpens) (x : Γ(𝟙_ X.Modules, V.1)) :
     x ∈ secs (subOf J) V.1 ↔ fn V.1 x ∈ J.ideal V := by
-  unfold secs subOf
+  change x ∈ secs (E := structureModule X) (Subobject.mk (idealModuleι J)) V.1 ↔ _
+  unfold secs
   rw [← Subobject.underlyingIso_hom_comp_eq_mk, range_app_iso_comp,
     ← exists_idealModuleι_app_eq_iff_mem]
   constructor
@@ -115,7 +164,7 @@ theorem supportedIn_subOf (J : X.IdealSheafData) :
   have e : (Subobject.underlyingIso (idealModuleι J)).hom ≫ idealModuleι J = (subOf J).arrow :=
     Subobject.underlyingIso_hom_comp_eq_mk _
   let i : cokernel (subOf J).arrow ≅ cokernel (idealModuleι J) :=
-    cokernelIsoOfEq e.symm ≪≫ (cokernelEpiComp (Subobject.underlyingIso (idealModuleι J)).hom _)
+    cokernelIsoOfEq e.symm ≪≫ (cokernelEpiComp _ (Subobject.underlyingIso (idealModuleι J)).hom)
   exact (supportedIn_cokernel_idealModuleι J).of_iso i.symm
 
 theorem support_subset_of_supportedIn (J : X.IdealSheafData) {T : Set X} (hT : IsClosed T)

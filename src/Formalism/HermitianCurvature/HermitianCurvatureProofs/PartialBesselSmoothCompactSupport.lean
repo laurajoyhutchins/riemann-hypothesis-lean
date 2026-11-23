@@ -1,5 +1,72 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.PbWords
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.LeftFubiniNormalizedTower
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.PbWords
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.PhiBoundPartsOfRadicalParametrisation
+import Aesop.Main
+import Formalism.FormalDegreeBessel.FinalG
+import Formalism.FormalDegreeBessel.FormalDegreeRatio.UnitaryWeylNormalHolds
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.BetaSesquilinearity
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.ChartIntegralLocal
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.ContDiffBumpG
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.CornerBlockActionInvariant
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.NormDiagonalEntryDilationGeneratorLeOne
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.OpApplyZeroNear
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.OrbitalIntegralAeConvergenceContinuity
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.OrbitalIntegralIdentities
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.PsiContOf
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.RegularisedPairingViaPhase
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.SandwichRhoAction
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.SmoothLevOfCk
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.SmoothnessOnGoodSet
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.UnipotentCoordinatesMeasurePreserving
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.Countable
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Data.Set.Finite.List
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Matrix MeasureTheory Filter Topology
 
@@ -69,9 +136,6 @@ theorem lw_rtransl (t : Mat k r) : ∀ (u : List (Mat k r)) (f : Mat k r → E),
     funext g
     show LdV X (u.foldr LdV (fun y => f (y * t))) g = LdV X (u.foldr LdV f) (g * t)
     rw [lw_rtransl t u f, ldV_rtransl]
-
-theorem dLR_rtransl (t : Mat k r) (u : List (Mat k r)) (f : Mat k r → E) :
-    dLR u [] (fun y => f (y * t)) = fun y => dLR u [] f (y * t) := lw_rtransl t u f
 
 end words
 
@@ -209,8 +273,8 @@ section main
 variable {k p ρ n : ℕ} {Wp Wq : Type} [NormedAddCommGroup Wp] [InnerProductSpace ℂ Wp] [NormedAddCommGroup Wq]
   [InnerProductSpace ℂ Wq]
 
-open Classical in
 
+open Classical in
 def fam (Bj : B.RealPlaceData k ρ Wp Wq) (e : p + ρ = n) (Φt : Mat k n → (Wq →L[ℂ] Wp)) (x : PBQ.XP k p ρ)
     (g : Mat k n) : Wq →L[ℂ] Wp :=
   if PBQ.GoodP Bj x then (Bj.π (Matrix.of x.1.1)).comp (Φt (g * iotL k n (sxF e x))) else 0

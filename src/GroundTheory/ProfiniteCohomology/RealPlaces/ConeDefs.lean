@@ -1,6 +1,49 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.CompactSupportCohomology
-import GroundTheory.ProfiniteCohomology.CupProducts
+module
+
+public import GroundTheory.ProfiniteCohomology.CupProducts
+public import GroundTheory.ProfiniteCohomology.CompactSupportCohomology.HomApplyHomApplyEqOfCompEq
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
@@ -66,12 +109,10 @@ noncomputable def prodLift {P : CochainComplex (ModuleCat.{u} k) ℕ} (f : P ⟶
       exact Prod.ext (hom_apply_hom_apply_eq_of_comp_eq (f.comm n (n + 1)) x)
         (hom_apply_hom_apply_eq_of_comp_eq (g.comm n (n + 1)) x))
 
-@[reassoc (attr := simp)]
 theorem prodLift_prodFst {P : CochainComplex (ModuleCat.{u} k) ℕ} (f : P ⟶ M) (g : P ⟶ N) :
     prodLift f g ≫ prodFst M N = f :=
   HomologicalComplex.hom_ext _ _ fun _ => ModuleCat.hom_ext (LinearMap.ext fun _ => rfl)
 
-@[reassoc (attr := simp)]
 theorem prodLift_prodSnd {P : CochainComplex (ModuleCat.{u} k) ℕ} (f : P ⟶ M) (g : P ⟶ N) :
     prodLift f g ≫ prodSnd M N = g :=
   HomologicalComplex.hom_ext _ _ fun _ => ModuleCat.hom_ext (LinearMap.ext fun _ => rfl)
@@ -109,16 +150,16 @@ section Norm
 variable {k F : Type u} [CommRing k] [Group F] [TopologicalSpace F] [IsTopologicalGroup F]
 
 noncomputable def zeroCochain (B : Rep.{u} k F) [IsDiscreteRep B] : B →ₗ[k] (cochainsComplex B).X 0 where
-  toFun m := mkCochain B (fun _ => m) (IsLocallyConstant.const m)
+  toFun m := mkCochain (A := B) (fun _ => m) (IsLocallyConstant.const m)
   map_add' _ _ := rfl
   map_smul' _ _ := rfl
 
 theorem cochainOf_zeroCochain (B : Rep.{u} k F) [IsDiscreteRep B] (m : B) (σ : Fin 0 → F) :
-    cochainOf B (zeroCochain B m) σ = m :=
+    cochainOf (A := B) (zeroCochain B m) σ = m :=
   rfl
 
 theorem cochainOf_d_zeroCochain (B : Rep.{u} k F) [IsDiscreteRep B] (m : B) (σ : Fin 1 → F) :
-    cochainOf B (((cochainsComplex B).d 0 1).hom (zeroCochain B m)) σ = B.ρ (σ 0) m - m := by
+    cochainOf (A := B) (((cochainsComplex B).d 0 1).hom (zeroCochain B m)) σ = B.ρ (σ 0) m - m := by
   rw [cochainOf_d]
   simp [inhomogeneousCochains.d_hom_apply, cochainOf_zeroCochain, sub_eq_add_neg]
 

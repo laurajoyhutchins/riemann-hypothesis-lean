@@ -1,7 +1,52 @@
-import Development.WeilBound.CoreStatements.MinimalPrimeDimensions.MemMinimalPrimesOfMemSupport
-import Development.WeilBound.CoreStatements.MinimalPrimeDimensions.DifferentiableOnSheet
-import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.PFsLogSmul
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.UnderEqGenericPoint
+module
+
+public import Development.WeilBound.CoreStatements.MinimalPrimeDimensions.GenIdeal
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.UnderEqGenericPoint
+public import Development.WeilBound.CoreStatements.MinimalPrimeDimensions.DifferentiableOnSheet
+public import Development.WeilBound.CoreStatements.MinimalPrimeDimensions.MemMinimalPrimesOfMemSupport
+import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.PConeFsLogIntegrable
+public import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.PFsLogSmul
+import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.StatementsConeTangentAverage
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Topology.Connected.Separation
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -59,7 +104,7 @@ theorem map_notMem {K : Type} [Field K] [NumberField K] {m : ℕ} {P : Ideal (Mv
     exact Ideal.eq_top_of_isUnit_mem _ hmem ((Ne.isUnit ha0).map C)
   intro hmem
   apply hq
-  have hc := IsLocalization.comap_map_of_isPrime_disjoint (M := (nonZeroDivisors (𝓞 K)).map (C (σ := Fin m)))
+  have hc := IsLocalization.under_map_of_isPrime_disjoint (M := (nonZeroDivisors (𝓞 K)).map (C (σ := Fin m)))
     (S := MvPolynomial (Fin m) K) hP hdisj
   rw [← hc, Ideal.mem_comap]
   exact hmem
@@ -170,7 +215,7 @@ theorem stArch (h1 : StPts) (h2 : StCharts) : StArch := by
   have hℓm : Measurable fun y : EuclideanSpace ℂ (Fin m) => fsLog h (fun k => σ (u k)) (h.pointOf y) := by
     simp only [GroundTheory.Heights₂.Heights.ConeFsLog.fsLog_pointOf]
     have hc : Continuous fun y : EuclideanSpace ℂ (Fin m) => ∑ j : Fin m, σ (u j) * h.pointOf y j :=
-      continuous_finset_sum _ fun j _ => continuous_const.mul ((continuous_apply j).comp hpc)
+      continuous_finsetSum _ fun j _ => continuous_const.mul ((continuous_apply j).comp hpc)
     exact Real.measurable_log.comp (hc.norm.measurable.div measurable_norm)
   have hgm : Measurable fun y : CxPts p (σ.comp (algebraMap (𝓞 K) K)) =>
       fsLog h (fun k => σ (u k)) (coords p (σ.comp (algebraMap (𝓞 K) K)) hE.isLB s y) := by

@@ -1,5 +1,54 @@
-import Formalism.TorsionNormIteration.InvIntegralOfClass
-import Formalism.FormalGroupLog.FormalGroupLogProofs.ChainRule
+module
+
+public import Formalism.TorsionNormIteration.InvIntegralOfClass
+public import Formalism.FormalGroupLog.FormalGroupLogProofs.ChainRule
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Analysis.Normed.MulAction
+
+@[expose] public section
 
 noncomputable section
 
@@ -28,7 +77,7 @@ theorem Low.mul {m k : ℕ} {x y : MvPowerSeries ι K} (hx : Low m x) (hy : Low 
   rw [MvPowerSeries.coeff_mul]
   refine Finset.sum_eq_zero fun ab hab => ?_
   have hab' : ab.1 + ab.2 = d := by simpa using hab
-  have hdeg : ab.1.degree + ab.2.degree = d.degree := by rw [← hab', map_add]
+  have hdeg : ab.1.degree + ab.2.degree = d.degree := by rw [← hab', map_add (f := _)]
   by_cases h1 : ab.1.degree < m
   · rw [hx _ h1, zero_mul]
   · rw [hy _ (by omega), mul_zero]
@@ -36,12 +85,7 @@ theorem Low.mul {m k : ℕ} {x y : MvPowerSeries ι K} (hx : Low m x) (hy : Low 
 theorem Low.add {m : ℕ} {x y : MvPowerSeries ι K} (hx : Low m x) (hy : Low m y) :
     Low m (x + y) := by
   intro d hd
-  rw [map_add, hx d hd, hy d hd, add_zero]
-
-theorem Low.sub {m : ℕ} {x y : MvPowerSeries ι K} (hx : Low m x) (hy : Low m y) :
-    Low m (x - y) := by
-  intro d hd
-  rw [map_sub, hx d hd, hy d hd, sub_zero]
+  rw [map_add (f := _), hx d hd, hy d hd, add_zero]
 
 theorem low_zero (x : MvPowerSeries ι K) : Low 0 x := by
   intro d hd

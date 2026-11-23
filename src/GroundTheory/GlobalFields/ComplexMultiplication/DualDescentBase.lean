@@ -1,7 +1,52 @@
-import Mathlib
-import GroundTheory.GlobalFields.ComplexMultiplication.DualDescentField
-import GroundTheory.GlobalFields.ComplexMultiplication.BaseChangeDegree
-import GroundTheory.ArithmeticGeometry.AbelianVarieties.DualQuadratic
+module
+
+public import GroundTheory.ArithmeticGeometry.AbelianVarieties.DualIsogenyExists
+public import GroundTheory.GlobalFields.ComplexMultiplication.DifferentialBaseChange
+public import GroundTheory.GlobalFields.ComplexMultiplication.BaseChangeDegree
+public import GroundTheory.GlobalFields.ComplexMultiplication.DualDescentField
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import GroundTheory.GlobalFields.ComplexMultiplication.BaseChange
+
+@[expose] public section
 
 namespace GroundTheory.Global
 
@@ -17,14 +62,18 @@ variable {F Ω : Type u} [Field F] [Field Ω] [Algebra F Ω]
 
 theorem x_isogBaseChange (φ : Isogeny E E') :
     (isogBaseChange (F' := Ω) φ).x = bcEmb (F' := Ω) E φ.x := by
+  classical
   obtain ⟨⟨x, y, h, he, -⟩, -⟩ := φ.2
-  simp only [Isogeny.x, isogBaseChange_val, he]
+  change xOf _ (isogBaseChange (F' := Ω) φ).1 = _
+  rw [isogBaseChange_val, he, Point.map_some, Isogeny.x, he]
   rfl
 
 theorem y_isogBaseChange (φ : Isogeny E E') :
     (isogBaseChange (F' := Ω) φ).y = bcEmb (F' := Ω) E φ.y := by
+  classical
   obtain ⟨⟨x, y, h, he, -⟩, -⟩ := φ.2
-  simp only [Isogeny.y, isogBaseChange_val, he]
+  change yOf _ (isogBaseChange (F' := Ω) φ).1 = _
+  rw [isogBaseChange_val, he, Point.map_some, Isogeny.y, he]
   rfl
 
 theorem isogBaseChange_injective :

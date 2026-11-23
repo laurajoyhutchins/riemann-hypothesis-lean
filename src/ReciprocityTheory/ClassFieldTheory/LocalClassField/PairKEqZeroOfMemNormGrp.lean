@@ -1,13 +1,62 @@
-import Mathlib
-import ReciprocityTheory.ClassFieldTheory.LocalClassField.RecPairDefs
-import ReciprocityTheory.ClassFieldTheory.LocalClassField.RecPair
-import ReciprocityTheory.ClassFieldTheory.LocalClassField.RecUnr
+module
+
+public import ReciprocityTheory.ClassFieldTheory.LocalClassField.RecPairDefs
+public import ReciprocityTheory.ClassFieldTheory.LocalClassField.RecDefs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.ClassFieldTheory.LocalClassField.ExistsDvdQKPowSubOne
+public import ReciprocityTheory.ClassFieldTheory.LocalClassField.GabLim
+import ReciprocityTheory.ClassFieldTheory.LocalClassField.GalBasic
+public import ReciprocityTheory.ClassFieldTheory.LocalClassField.NormOpen
+public import ReciprocityTheory.ClassFieldTheory.LocalClassField.RecAbA
+public import ReciprocityTheory.ClassFieldTheory.LocalClassField.RecAbC
 import ReciprocityTheory.ClassFieldTheory.LocalClassField.RecCyclic
 import ReciprocityTheory.ClassFieldTheory.LocalClassField.RecFunct
-import ReciprocityTheory.ClassFieldTheory.LocalClassField.GabLim
-import ReciprocityTheory.ClassFieldTheory.LocalClassField.NormOpen
-import ReciprocityTheory.ClassFieldTheory.LocalClassField.RecAbC
-import ReciprocityTheory.ClassFieldTheory.LocalClassField.RecAbA
+import ReciprocityTheory.ClassFieldTheory.LocalClassField.RecPair
+public import ReciprocityTheory.ClassFieldTheory.LocalClassField.RecUnr
+
+@[expose] public section
 
 namespace ReciprocityTheory.DiscreteGroups.LocalClassField
 
@@ -25,11 +74,11 @@ theorem IsRecip.of_le {L' : IntermediateField ℚ_[p] (PadicAlgCl p)} (h : L ≤
 
 theorem IsRecip.mul {a b : Kˣ} {g g' : GK p K} (h : IsRecip p K L a g) (h' : IsRecip p K L b g') :
     IsRecip p K L (a * b) (g * g') := fun χ hχ => by
-  rw [pairK_mul, ← h χ hχ, ← h' χ hχ, ofMul_mul, map_add]
+  rw [pairK_mul, ← h χ hχ, ← h' χ hχ, ofMul_mul, map_add (f := _)]
 
 theorem IsRecip.congr {a : Kˣ} {g g' : GK p K} (h : IsRecip p K L a g) (hg : g⁻¹ * g' ∈ subG p K L) :
     IsRecip p K L a g' := fun χ hχ => by
-  rw [← h χ hχ, show g' = g * (g⁻¹ * g') by group, ofMul_mul, map_add, hχ _ hg, add_zero]
+  rw [← h χ hχ, show g' = g * (g⁻¹ * g') by group, ofMul_mul, map_add (f := _), hχ _ hg, add_zero]
 
 theorem exists_quot_data (hL : IsAbLK p K L) : ∃ (A : Type) (_ : AddCommGroup A) (_ : Finite A) (π : Additive (GK p K) →+ A),
     Surjective π ∧ (IsLocallyConstant fun g : GK p K => π (Additive.ofMul g)) ∧ Nat.card A = degLK p K L ∧
@@ -69,7 +118,7 @@ theorem IsRecip.unique (hL : IsAbLK p K L) {a : Kˣ} {g g' : GK p K} (h : IsReci
   by_contra hn
   obtain ⟨χ, hχ, hne⟩ := exists_char_ne_zero hL _ hn
   apply hne
-  rw [ofMul_mul, map_add, ofMul_inv, map_neg, h χ hχ, h' χ hχ, neg_add_cancel]
+  rw [ofMul_mul, map_add (f := _), ofMul_inv, map_neg, h χ hχ, h' χ hχ, neg_add_cancel]
 
 theorem exists_isRecip (hL : IsAbLK p K L) (a : Kˣ) : ∃ g : GK p K, IsRecip p K L a g :=
   exists_eval hL
@@ -108,8 +157,8 @@ theorem IsRecip.inv {a : Kˣ} {g : GK p K} (h : IsRecip p K L a g) : IsRecip p K
 theorem isRecip_one_of_mem {g : GK p K} (hg : g ∈ subG p K L) : IsRecip p K L 1 g := fun χ hχ => by
   rw [pairK_one, hχ g hg]
 
-variable (p K L) in
 
+variable (p K L) in
 def recipImage (H : Subgroup Kˣ) : Subgroup (GK p K) where
   carrier := {g | ∃ a ∈ H, IsRecip p K L a g}
   one_mem' := ⟨1, H.one_mem, isRecip_one_of_mem (subG p K L).one_mem⟩
@@ -195,27 +244,6 @@ theorem index_normGrp (hK : FiniteDimensional ℚ_[p] K) (hL : IsAbLK p K L) : (
   obtain ⟨φ, hs, hφ⟩ := exists_recipHom hK hL
   exact (recipHom_ker hK hL φ hs hφ).2
 
-theorem normGrp_sup (hK : FiniteDimensional ℚ_[p] K) {L' : IntermediateField ℚ_[p] (PadicAlgCl p)} (hL : IsAbLK p K L) (hL' : IsAbLK p K L') :
-    normGrp p K (L ⊔ L') = normGrp p K L ⊓ normGrp p K L' := by
-  ext a
-  obtain ⟨g, hg⟩ := exists_isRecip (hL.sup hL') a
-  rw [Subgroup.mem_inf, ← hg.mem_subG_iff hK (hL.sup hL'), ← (hg.of_le le_sup_left).mem_subG_iff hK hL,
-    ← (hg.of_le le_sup_right).mem_subG_iff hK hL', subG_sup_eq_inf, Subgroup.mem_inf]
-
-theorem normGrp_le_iff (hK : FiniteDimensional ℚ_[p] K) {L' : IntermediateField ℚ_[p] (PadicAlgCl p)} (hL : IsAbLK p K L) (hL' : IsAbLK p K L') :
-    normGrp p K L' ≤ normGrp p K L ↔ L ≤ L' := by
-  refine ⟨fun h => ?_, fun h => normGrp_anti hL'.fin hL.le h⟩
-  have h1 : normGrp p K (L ⊔ L') = normGrp p K L' := by rw [normGrp_sup hK hL hL', inf_eq_right.2 h]
-  have h2 : degLK p K (L ⊔ L') = degLK p K L' := by
-    rw [← index_normGrp hK (hL.sup hL'), ← index_normGrp hK hL', h1]
-  have hle : subG p K (L ⊔ L') ≤ subG p K L' := subG_anti le_sup_right
-  have h3 := Subgroup.relIndex_mul_index hle
-  have h4 : (subG p K (L ⊔ L')).relIndex (subG p K L') = 1 :=
-    Nat.eq_of_mul_eq_mul_right (degLK_pos (K := K) hL'.fin) (by rw [one_mul]; exact h3.trans h2)
-  have h5 : subG p K L' ≤ subG p K L := (Subgroup.relIndex_eq_one.1 h4).trans (subG_anti le_sup_left)
-  have := (subG_le_iff hL.le).1 h5
-  rwa [sup_eq_right.2 hL'.le] at this
-
 theorem exists_normGrp_eq_of_le (hK : FiniteDimensional ℚ_[p] K) (hL : IsAbLK p K L) (H : Subgroup Kˣ) (hH : normGrp p K L ≤ H) :
     ∃ L₀ : IntermediateField ℚ_[p] (PadicAlgCl p), IsAbLK p K L₀ ∧ L₀ ≤ L ∧ normGrp p K L₀ = H := by
   obtain ⟨L₀, hL₀, hle, he⟩ := exists_field_recipImage hK hL H
@@ -237,12 +265,6 @@ theorem exists_normGrp_eq_of_le (hK : FiniteDimensional ℚ_[p] K) (hL : IsAbLK 
 theorem isRecip_uniformiser_Kn (hK : FiniteDimensional ℚ_[p] K) {n : ℕ} (hn : 0 < n) (π : Kˣ) (hπ : vK p K π = 1) :
     IsRecip p K (Kn p K n) π (frobK p K) := fun χ hχ =>
   (pairK_uniformiser_unr hK π hπ χ (hχ.of_le (Kn_le_Kur hn))).symm
-
-theorem IsRecip.norm (hK : FiniteDimensional ℚ_[p] K) {M E : IntermediateField ℚ_[p] (PadicAlgCl p)} (hM : FiniteDimensional ℚ_[p] M) (h : K ≤ M) (hE : E ≤ L) {b : Mˣ} {a : Kˣ}
-    (ha : ofK p K (Additive.ofMul a) = normHom p K M (ofK p M (Additive.ofMul b))) {g : GK p M}
-    (hg : IsRecip p M L b g) : IsRecip p K E a (resGK h g) := fun χ hχ => by
-  rw [pairK_norm hK hM h b a ha χ]
-  exact hg (resChar h χ) fun s hs => hχ (resGK h s) fun x hx => hs x (hE hx)
 
 theorem stable_inv_of_stable {M : IntermediateField ℚ_[p] (PadicAlgCl p)} (hM : FiniteDimensional ℚ_[p] M) (σ : GK p K)
     (h : ∀ x ∈ M, σ x ∈ M) : ∀ x ∈ M, σ⁻¹ x ∈ M := by

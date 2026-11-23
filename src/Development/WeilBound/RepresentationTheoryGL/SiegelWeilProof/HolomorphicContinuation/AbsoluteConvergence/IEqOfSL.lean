@@ -1,7 +1,55 @@
-import Mathlib
-import Development.WeilBound.RepresentationTheoryGL.SiegelWeilProof.HolomorphicContinuation.AbsoluteConvergence.FarRightAlt
-import Development.WeilBound.RepresentationTheoryGL.SiegelWeilProof.HolomorphicContinuation.AbsoluteConvergence.ImportsAlt
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.SiegelWeilProof.HolomorphicContinuation.AbsoluteConvergence.FarRightAlt
+public import Development.WeilBound.RepresentationTheoryGL.SiegelWeilProof.HolomorphicContinuation.AbsoluteConvergence.FlatEq
+public import Development.WeilBound.RepresentationTheoryGL.SiegelWeilProof.HolomorphicContinuation.AbsoluteConvergence.ProjOp
+public import Development.WeilBound.RepresentationTheoryGL.SiegelWeilProof.HolomorphicContinuation.AbsoluteConvergence.VacOut
 import Development.WeilBound.RepresentationTheoryGL.SiegelWeilProof.HolomorphicContinuation.AbsoluteConvergence.ContinuousSecondCayleyBlockMap
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicTopology.FundamentalGroupoid.SimplyConnected
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -52,7 +100,15 @@ private theorem det_diff_lemma {N : ℕ} {A : ℂ → Matrix (Fin N) (Fin N) ℂ
   simp only [Matrix.det_apply']
   refine Differentiable.fun_sum fun σ _ => ?_
   refine Differentiable.fun_mul (differentiable_const _) ?_
-  exact Differentiable.fun_finset_prod fun i _ => h (σ i) i
+  classical
+  have hp : ∀ s : Finset (Fin N), Differentiable ℂ (fun w => ∏ i ∈ s, A w (σ i) i) := by
+    intro s
+    induction s using Finset.induction_on with
+    | empty => simpa using (differentiable_const (1 : ℂ))
+    | insert a s ha ih =>
+      simp only [Finset.prod_insert ha]
+      exact (h (σ a) a).fun_mul ih
+  exact hp Finset.univ
 
 private theorem adj_diff_lemma_2 {N : ℕ} {A : ℂ → Matrix (Fin N) (Fin N) ℂ}
     (h : ∀ i j, Differentiable ℂ fun w => A w i j) (a b : Fin N) :
@@ -198,7 +254,7 @@ theorem absThm_gen (hV : VacOut) (hP : ProjOp) (hT : TSGen) (hB : Basis) (hFar :
     hT m n ε c t p q e sL ρ hL G Pp Γ ι s₀ Ht sec I Λ hD W hWfd hWst ν κ hν hκ hproj hlift x (yy i)
       (QQ i) (hQW i) (hyy i)
   have hmap : ∀ i, Continuous fun k : ↥(KR n) => g * ι (↑k * yy i) := fun i =>
-    continuous_const.mul (hD.ιcont.comp ((continuous_mul_right (yy i)).comp continuous_subtype_val))
+    continuous_const.mul (hD.ιcont.comp ((continuous_mul_const (yy i)).comp continuous_subtype_val))
   have hAh : ∀ i, DifferentiableOn ℂ (fun z => ∫ k, κ k * F z (g * ι (↑k * yy i)) ∂ν) (Metric.ball s₀ r) := by
     intro i
     refine (hH (↥(KR n)) ν univ isCompact_univ (by simp) (Metric.ball s₀ r)
@@ -274,6 +330,7 @@ theorem absThm_gen (hV : VacOut) (hP : ProjOp) (hT : TSGen) (hB : Basis) (hFar :
     have h := I_eq_of_sL hS hLC hL hD (Q := P) (Q' := ∑ j, cc j • QQ j)
       (fun y => by simp [map_sum, map_smul, hPc y]) g
     rw [h]
+
     simp [map_sum, map_smul]
   have hsumHV := hv_sum_lemma_6 Finset.univ (s₀ := s₀)
     (f := fun j z => cc j * GlobalTheory.Eis.cosetSum Pp Γ (hz Ht sec s₀ z (QQ j)) g)

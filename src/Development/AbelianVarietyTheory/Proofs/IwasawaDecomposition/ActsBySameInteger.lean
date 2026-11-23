@@ -1,6 +1,54 @@
-import Mathlib
-import Formalism.LocalRingCardinality.DataLevel
-import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.Afsplit
+module
+
+public import Formalism.LocalRingCardinality.DataLevel
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Formalism.BasicNotions Formalism.UG Matrix
 
 namespace GlobalTheory.PrimeOrderScalar
@@ -202,26 +250,26 @@ theorem acts_by_same_integer : ∀ (F E : Type) [Field F] [NumberField F] [Field
     intro e he hσe
     obtain ⟨f, hf⟩ := hfix e hσe
     have hfi : IsIntegral ℤ f :=
-      (isIntegral_algebraMap_iff (algebraMap F E).injective).mp (hf ▸ he)
+      (isIntegral_algebraMap_iff ).mp (hf ▸ he)
     exact ⟨⟨f, hfi⟩, hf⟩
   have hE : ∀ o : 𝓞 E, Q (inclO w o) := by
     intro o
     obtain ⟨d', hd'⟩ := hdesc ((p : E) + σ p) (IsIntegral.add p.2 (hσint p))
-      (by rw [map_add, hinv, add_comm])
+      (by rw [map_add (f := _), hinv, add_comm])
     obtain ⟨c', hc'⟩ := hdesc ((o : E) * σ p + σ o * p)
       (IsIntegral.add (IsIntegral.mul o.2 (hσint p)) (IsIntegral.mul (hσint o) p.2))
-      (by rw [map_add, map_mul, map_mul, hinv, hinv]; ring)
+      (by rw [map_add (f := _), map_mul, map_mul, hinv, hinv]; ring)
     obtain ⟨δ, hδA, hδB⟩ := hW (algebraMap (𝓞 F) _ d')
     obtain ⟨γ, hγA, hγB⟩ := hW (algebraMap (𝓞 F) _ c')
     have hD : inclW (E := E) w (algebraMap (𝓞 F) (w.adicCompletionIntegers F) d') =
         inclO w p + inclO w (σO p) := by
-      rw [← map_add]
+      rw [← map_add (f := _)]
       apply Subtype.ext
       rw [inclW_algebraMap, coe_inclO, hd']
       rfl
     have hC : inclW (E := E) w (algebraMap (𝓞 F) (w.adicCompletionIntegers F) c') =
         inclO w o * inclO w (σO p) + inclO w (σO o) * inclO w p := by
-      rw [← map_mul, ← map_mul, ← map_add]
+      rw [← map_mul, ← map_mul, ← map_add (f := _)]
       apply Subtype.ext
       rw [inclW_algebraMap, coe_inclO, hc']
       rfl

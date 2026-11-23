@@ -1,4 +1,47 @@
-import Development.AutomorphicArithmetic.Foundations.Convolution.BlockEvaluation.TruncSpec
+module
+
+public import Development.AutomorphicArithmetic.Foundations.Convolution.BlockEvaluation.TruncSpec
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MeasureTheory NumberField IsDedekindDomain MvPolynomial Filter Topology UpperTheory.ConvolutionTheory UpperTheory.ConvolutionTheory.C UpperTheory.ConvolutionTheory.Ci
 open GroundTheory.Automorphic GroundTheory.Automorphic.Reduction
@@ -8,12 +51,12 @@ private theorem prj_self {H : Type*} [NormedAddCommGroup H] [InnerProductSpace �
   unfold prj
   exact Submodule.starProjection_eq_self_iff.2 (W.le_topologicalClosure hv)
 
-private theorem fixF_anti {K : Type} [Field K] [NumberField K] {n : ℕ} (μ : Measure (normOneGL K n)) [μ.IsHaarMeasure]
+private theorem fixF_anti {K : Type} [Field K] [NumberField K] {n : ℕ} (μ : Measure (normOneGL (K := K) (n := n))) [μ.IsHaarMeasure]
     {U U' : Subgroup (AdelicGLn.FiniteAdelicGL K n)} (h : U' ≤ U) : fixF μ U ≤ fixF μ U' := by
   unfold fixF
   exact biInf_mono fun u hu => h hu
 
-private theorem eig_fix {K : Type} [Field K] [NumberField K] {n : ℕ} {μ : Measure (normOneGL K n)} [μ.IsHaarMeasure]
+private theorem eig_fix {K : Type} [Field K] [NumberField K] {n : ℕ} {μ : Measure (normOneGL (K := K) (n := n))} [μ.IsHaarMeasure]
     (𝔞 : Amp μ) (hA : ∀ v, 𝔞.A v ∈ fixF μ 𝔞.U) {V : Submodule ℂ (LL μ)} {x : ℝ} (hx : 0 < x) {v : LL μ}
     (hv : v ∈ eigIn V 𝔞.A x) : v ∈ V ∧ 𝔞.A v = (x : ℂ) • v ∧ v ∈ fixF μ 𝔞.U := by
   obtain ⟨h1, h2⟩ := Submodule.mem_inf.1 hv
@@ -31,7 +74,7 @@ private theorem poly_ind {H σ ι : Type*} [NormedAddCommGroup H] [NormedSpace �
     (P : MvPolynomial σ (MvPolynomial ι ℂ)) (hP : ∀ y ∈ P.vars, y ∈ s) : ev P v = f P • v := by
   have hadd : ∀ P Q, ev P v = f P • v → ev Q v = f Q • v → ev (P + Q) v = f (P + Q) • v := by
     intro P Q hP hQ
-    rw [map_add, map_add, ContinuousLinearMap.add_apply, hP, hQ, add_smul]
+    rw [map_add (f := _), map_add (f := _), ContinuousLinearMap.add_apply, hP, hQ, add_smul]
   have hmul : ∀ P Q, ev P v = f P • v → ev Q v = f Q • v → ev (P * Q) v = f (P * Q) • v := by
     intro P Q hP hQ
     rw [map_mul, map_mul, ContinuousLinearMap.mul_apply, hQ, map_smul, hP, smul_smul, mul_comm]
@@ -52,7 +95,7 @@ private theorem poly_ind {H σ ι : Type*} [NormedAddCommGroup H] [NormedSpace �
   | add p q _ _ hp hq => exact hadd _ _ hp hq
   | mul p q _ _ hp hq => exact hmul _ _ hp hq
 
-private theorem eig_fixL {K : Type} [Field K] [NumberField K] {n : ℕ} {μ : Measure (normOneGL K n)} [μ.IsHaarMeasure]
+private theorem eig_fixL {K : Type} [Field K] [NumberField K] {n : ℕ} {μ : Measure (normOneGL (K := K) (n := n))} [μ.IsHaarMeasure]
     (𝔞 : Amp μ) (hA : ∀ v, 𝔞.A v ∈ fixF μ 𝔞.U) {V : Submodule ℂ (LL μ)} {x : ℝ} (hx : 0 < x) {v : LL μ}
     (hv : v ∈ eigIn V 𝔞.A x) {w : Pl K} (hw : w ∉ 𝔞.S) :
     v ∈ V ⊓ fixL μ w (GLnLocal.integralGL (w.adicCompletion K) n) := by
@@ -74,7 +117,7 @@ private theorem val_X {K : Type} [Field K] [NumberField K] {n : ℕ} (x : ℝ) (
     (t : Pl K → Multiset ℂ) (w : Pl K) (i : Fin n) :
     val (n := n) x Λ t (X (w, i)) = (t w).esymm (i + 1) := by simp [val, hval]
 
-private theorem ev_val {K : Type} [Field K] [NumberField K] {n : ℕ} {μ : Measure (normOneGL K n)} [μ.IsHaarMeasure]
+private theorem ev_val {K : Type} [Field K] [NumberField K] {n : ℕ} {μ : Measure (normOneGL (K := K) (n := n))} [μ.IsHaarMeasure]
     (𝔞 : Amp μ) (hA : ∀ v, 𝔞.A v ∈ fixF μ 𝔞.U) {V : Submodule ℂ (LL μ)} {x : ℝ} (hx : 0 < x)
     {ev : PR K n →+* (LL μ →L[ℂ] LL μ)} (hev : 𝔞.IsEv ev) {Λ : (K →+* ℂ) → Multiset ℂ} {t : Pl K → Multiset ℂ}
     (h : At μ 𝔞.S V Λ t) (P : PR K n) (hPv : ∀ y ∈ P.vars, y.1 ∉ 𝔞.S) {v : LL μ}
@@ -111,14 +154,6 @@ theorem UpperTheory.ConvolutionTheory.Ci.evVal :
     choose t ht using hB
     choose Λ hΛ using fun τ => (p1 τ).exists
     exact ⟨Λ, t, And.intro hΛ ht⟩
-  · obtain ⟨h1, h2⟩ := h
-    obtain ⟨h1', h2'⟩ := h'
-    refine ⟨funext fun τ => ?_, fun w hw => ?_⟩
-    · obtain ⟨m, -, hm⟩ := p1 τ
-      beta_reduce at hm
-      rw [hm (Λ τ) (h1 τ), hm (Λ' τ) (h1' τ)]
-    · have h3 := h2 w hw
-      obtain ⟨-, h4, -⟩ := h2 w hw
-      obtain ⟨m, -, hm⟩ := p2 w h4
-      beta_reduce at hm
-      rw [hm (t w) h3, hm (t' w) (h2' w hw)]
+  · refine ⟨funext fun τ => (p1 τ).unique (h.1 τ) (h'.1 τ), fun w hw => ?_⟩
+    have hs := h.2 w hw
+    exact (p2 w hs.2.1).unique hs (h'.2 w hw)

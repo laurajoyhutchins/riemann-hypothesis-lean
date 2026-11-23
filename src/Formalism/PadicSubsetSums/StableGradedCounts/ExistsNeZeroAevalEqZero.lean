@@ -1,4 +1,59 @@
-import Formalism.PadicSubsetSums.CentralIdempotents.SchurOrthogonalityCompact
+module
+
+public import Formalism.PadicSubsetSums.CentralIdempotents.SchurOrthogonalityCompact
+public import Mathlib.RingTheory.Flat.TorsionFree
+public import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.Charpoly.BaseChange
+public import Mathlib.LinearAlgebra.Eigenspace.Charpoly
+public import Mathlib.LinearAlgebra.Eigenspace.Minpoly
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Polynomial
 open scoped TensorProduct
@@ -68,7 +123,7 @@ theorem exists_annihilator_eq {K V : Type} [Field K] [AddCommGroup V] [Module K 
     have hcop : IsCoprime i a := hcopOf a fun hia =>
       hi.1 (hsq i (dvd_trans (mul_dvd_mul_left i hia) hdvd))
     refine ⟨ea + w, ?_, fun q hq => ?_⟩
-    · rw [map_add, hkill a i ea hea0, mul_comm, hkill i a w hw, add_zero]
+    · rw [map_add (f := _), hkill a i ea hea0, mul_comm, hkill i a w hw, add_zero]
     · have hw' : aeval g (i * q) w = 0 := by
         rw [mul_comm]
         exact hkill i q w hw
@@ -91,7 +146,7 @@ theorem exists_annihilator_eq {K V : Type} [Field K] [AddCommGroup V] [Module K 
         obtain ⟨u, t, hut⟩ := hcopOf _ hn
         apply hw0
         have h2 : aeval g (u * i + t * (a * q)) w = 0 := by
-          rw [map_add, hadd, hkill i u w hw, hkill (a * q) t w hwq, add_zero]
+          rw [map_add (f := _), hadd, hkill i u w hw, hkill (a * q) t w hwq, add_zero]
         rwa [hut, map_one, hone] at h2
       have hiq : i ∣ q := by
         first

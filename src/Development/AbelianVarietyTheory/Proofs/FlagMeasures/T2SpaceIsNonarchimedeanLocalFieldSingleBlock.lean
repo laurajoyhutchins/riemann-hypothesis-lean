@@ -1,6 +1,68 @@
-import Mathlib
-import Formalism.SharpRestriction.CuspSpanNormBounds.PsiEDef
-import Formalism.LocalRingCardinality.DataSpaces
+module
+
+public import Formalism.SharpRestriction.CuspSpanNormBounds.PsiEDef
+public import Mathlib.NumberTheory.Padics.Complex
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.MetricSpace.Ultra.TotallySeparated
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Formalism.SharpRestriction.CuspSpanNormBounds.FractionFieldToGenericStalkAlgebraMapEq
+public import Mathlib.Algebra.Algebra.Hom.Rat
+public import Mathlib.RingTheory.DedekindDomain.Factorization
+
+@[expose] public section
 
 open ValuativeRel IsDedekindDomain NumberField Filter Topology
 open scoped TensorProduct
@@ -81,6 +143,7 @@ theorem trace_base_change {F E K L : Type} [Field F] [Field E] [Algebra F E] [Fi
   have key : ∀ y : E, g y = ∑ i, f (b.repr y i) • g (b i) := by
     intro y
     conv_lhs => rw [← b.sum_repr y]
+
     rw [map_sum]
     refine Finset.sum_congr rfl fun i _ => ?_
     rw [Algebra.smul_def, Algebra.smul_def, map_mul, hc]
@@ -97,8 +160,9 @@ theorem trace_base_change {F E K L : Type} [Field F] [Field E] [Algebra F E] [Fi
     rw [key y]
     simp_rw [← hcb]
     exact congrFun (c.repr_sum_self _) i
+
   rw [Algebra.trace_eq_matrix_trace c, Algebra.trace_eq_matrix_trace b, Matrix.trace, Matrix.trace,
-    map_sum]
+  map_sum]
   refine Finset.sum_congr rfl fun i _ => ?_
   simp only [Matrix.diag, Algebra.leftMulMatrix_eq_repr_mul]
   rw [hcb, ← map_mul, hr]
@@ -131,7 +195,7 @@ def smallIdeal {F Ω : Type} [Field F] [NormedField Ω] [IsUltrametricDist Ω] (
   zero_mem' := by simp
   add_mem' := by
     intro a b ha hb
-    simp only [Set.mem_setOf_eq, map_add] at *
+    simp only [Set.mem_setOf_eq, map_add (f := _)] at *
     exact lt_of_le_of_lt (IsUltrametricDist.norm_add_le_max _ _) (max_lt ha hb)
   smul_mem' := by
     intro c x hx
@@ -145,12 +209,11 @@ theorem mem_smallIdeal {F Ω : Type} [Field F] [NormedField Ω] [IsUltrametricDi
     (σ : F →+* Ω) (x : 𝓞 F) : x ∈ smallIdeal σ ↔ ‖σ x‖ < 1 := Iff.rfl
 
 theorem smallIdeal_isPrime {F Ω : Type} [Field F] [NormedField Ω] [IsUltrametricDist Ω]
-    (σ : F →+* Ω) : (smallIdeal σ).IsPrime where
-  ne_top' := by
-    rw [Ideal.ne_top_iff_one, mem_smallIdeal]
+    (σ : F →+* Ω) : (smallIdeal σ).IsPrime := by
+  refine Ideal.isPrime_iff.mpr ⟨?_, ?_⟩
+  · rw [Ideal.ne_top_iff_one, mem_smallIdeal]
     simp
-  mem_or_mem' := by
-    intro x y h
+  · intro x y h
     simp only [mem_smallIdeal] at *
     by_contra h'
     push Not at h'
@@ -286,6 +349,7 @@ theorem sum_local_trace {l : ℕ} [Fact l.Prime] {F : Type} [Field F] [NumberFie
     ∑ s, Algebra.trace ℚ_[l] (K s) (ι s t) = ((Algebra.trace ℚ F t : ℚ) : ℚ_[l]) := by
   classical
   apply (algebraMap ℚ_[l] (PadicAlgCl l)).injective
+
   rw [map_sum, map_ratCast]
   have e : ((Algebra.trace ℚ F t : ℚ) : PadicAlgCl l) =
       algebraMap ℚ (PadicAlgCl l) (Algebra.trace ℚ F t) := by simp

@@ -1,7 +1,50 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LaurentMapIsIntegral
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EtaleCohomologyTwistedFilteredColimitContinuityStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IntegralStrictHenselianAcyclicFinitary
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LaurentMapIsIntegral
+public import Mathlib.Tactic.Linter.HaveILetI
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EtaleCohomologyTwistedFilteredColimitContinuityStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.Finset.Functor
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 open CategoryTheory Limits AlgebraicGeometry Opposite GlobalTheory.EtC GlobalTheory.EtC.GmStep
 
 noncomputable section
@@ -62,20 +105,11 @@ def cocone : Cocone (diag A S) where
            rw [laurentMap_comp]
            rfl }
 
-theorem cocone_ι_apply (t : Finset S) (p) :
-    ((cocone A S).ι.app t).hom p = laurentMap (Algebra.adjoin A (t : Set S)).val.toRingHom p := rfl
-
 theorem val_CT (t : Finset S) (a : Algebra.adjoin A (t : Set S)) (n : ℤ) :
     laurentMap (Algebra.adjoin A (t : Set S)).val.toRingHom (LaurentPolynomial.C a * LaurentPolynomial.T n) =
       LaurentPolynomial.C (a : S) * LaurentPolynomial.T n := by
   rw [map_mul, laurentMap_C, laurentMap_T]
   rfl
-
-theorem ι_map {t u : Finset S} (h : t ⟶ u) (p : LaurentPolynomial (Algebra.adjoin A (t : Set S))) :
-    laurentMap (Algebra.adjoin A (u : Set S)).val.toRingHom (((diag A S).map h).hom p) =
-      ((cocone A S).ι.app t).hom p := by
-  show ((diag A S).map h ≫ (cocone A S).ι.app u).hom p = _
-  rw [(cocone A S).w]
 
 theorem lm_val_incl {t u : Finset S} (h : (t : Set S) ⊆ u) (p : LaurentPolynomial (Algebra.adjoin A (t : Set S))) :
     laurentMap (Algebra.adjoin A (u : Set S)).val.toRingHom
@@ -97,7 +131,7 @@ theorem exists_finset_adjoin_laurent_preimage (x : LaurentPolynomial S) : ∃ (t
     have h2 : (t' : Set S) ⊆ ((t ⊔ t' : Finset S) : Set S) := Finset.coe_subset.2 le_sup_right
     refine ⟨t ⊔ t', laurentMap (Subalgebra.inclusion (Algebra.adjoin_mono h1)).toRingHom y +
       laurentMap (Subalgebra.inclusion (Algebra.adjoin_mono h2)).toRingHom y', ?_⟩
-    rw [map_add, lm_val_incl A S h1, lm_val_incl A S h2]
+    rw [map_add (f := _), lm_val_incl A S h1, lm_val_incl A S h2]
   | C_mul_T n a =>
     have hmem : a ∈ Algebra.adjoin A (({a} : Finset S) : Set S) :=
       Algebra.subset_adjoin (Finset.mem_coe.2 (Finset.mem_singleton_self a))

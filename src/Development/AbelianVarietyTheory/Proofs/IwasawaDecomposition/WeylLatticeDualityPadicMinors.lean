@@ -1,15 +1,55 @@
-import Mathlib
-import Formalism.UnipotentAdelicQuotients.WeylLatDual
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.DualWeylEqSpanColProd
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.StandardWeylLatticesFockDual
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.GramInjectivity.InstFintypeColChoice
-import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.WwCauchyBinet
-import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.WwInjective
-import Formalism.LocalToGlobal.Columns.CoefficientsModP.FkPderivBlockEmbNe
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ColumnMinorProductsFockReproducingDualWeylStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ColumnProductTransitionMatricesStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.WeylLatticeIntegralColumnMinorExpansionStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsFockFunctionalOnNablaXProductsStatement
+module
+
+public import Formalism.UnipotentAdelicQuotients.WeylLatDual
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.DualWeylEqSpanColProd
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ColumnMinorProductsFockReproducingDualWeylStatement
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ColumnProductTransitionMatricesStatement
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsFockFunctionalOnNablaXProductsStatement
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.WeylLatticeIntegralColumnMinorExpansionStatement
+import Formalism.GradedWeylDivisibility.DualWeylDominanceOf
+import Formalism.GradedWeylDivisibility.FinalB
+public import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.WwCauchyBinet
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.GramInjectivity.InstFintypeColChoice
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 open MvPolynomial
 
@@ -110,6 +150,7 @@ theorem canExpand (p : ℕ) [Fact p.Prime] {Lt T : Type} [Fintype Lt] [Decidable
   have h := PI.WwInjectiveWork.deX_eq_sum N nu cauchy_binet_minors (K := ℂ_[p])
     (fun s => WeylLatticeDuality.colsOf (y (e s)))
   change φ (PI.WwInjective.DeX N nu fun s => WeylLatticeDuality.colsOf (y (e s))) = _
+
   rw [h, map_sum]
   let eqv : PI.WwInjective.KM.ColChoice N nu ≃ (∀ s, ∀ c : Fin ((nu s).rowLen 0), Fin ((nu s).colLen c) ↪o Fin N) :=
     ⟨id, id, fun _ => rfl, fun _ => rfl⟩
@@ -136,7 +177,7 @@ theorem nsum {p : ℕ} [Fact p.Prime] {α : Type} (s : Finset α) (f : α → �
 theorem nprod {p : ℕ} [Fact p.Prime] {α : Type} (s : Finset α) (f : α → ℂ_[p]) (h : ∀ i ∈ s, ‖f i‖ ≤ 1) :
     ‖∏ i ∈ s, f i‖ ≤ 1 := by
   rw [norm_prod]
-  exact Finset.prod_le_one (fun i _ => norm_nonneg _) h
+  exact Finset.prod_le_one₀ (fun i _ => norm_nonneg _) h
 
 theorem nint {p : ℕ} [Fact p.Prime] (z : ℤ) : ‖(z : ℂ_[p])‖ ≤ 1 := IsUltrametricDist.norm_intCast_le_one _ z
 
@@ -166,6 +207,7 @@ theorem expand_prod (p : ℕ) [Fact p.Prime] {Lt : Type} [Fintype Lt] [Decidable
     Finset.sum_congr rfl fun k _ => by rw [map_prod, ← Finset.prod_mul_distrib]]
   rw [sum_prod_eq (fun s k => C (M s (i s) k : ℂ_[p]) * rho p N s (v s k))]
   refine Finset.prod_congr rfl fun s _ => ?_
+
   rw [h s (i s), map_sum]
   exact Finset.sum_congr rfl fun k _ => rho_zsmul p N s _ _
 
@@ -185,6 +227,7 @@ theorem stmt_holds : WeylLatticeDuality.Stmt := by
         (∏ s, (Cm s (i s) (J s) : ℂ_[p])) * φ (map (Int.castRingHom ℂ_[p]) (WeylLatticeDuality.nablaX N nu J)) := by
       intro i
       simp only [hβdef]
+
       rw [expand_prod p N b _ Cm hCm i, map_sum]
       refine Finset.sum_congr rfl fun J _ => ?_
       rw [← smul_eq_C_mul, map_smul, smul_eq_mul, hnab]
@@ -192,6 +235,7 @@ theorem stmt_holds : WeylLatticeDuality.Stmt := by
         φ (map (Int.castRingHom ℂ_[p]) (WeylLatticeDuality.nablaX N nu J)) =
           ∑ i : (∀ s, ι s), (∏ s, (B s (J s) (i s) : ℂ_[p])) * φ (β i) := by
       intro J
+
       rw [hnab, expand_prod p N _ b B hB J, map_sum]
       refine Finset.sum_congr rfl fun i _ => ?_
       rw [← smul_eq_C_mul, map_smul, smul_eq_mul]
@@ -213,6 +257,7 @@ theorem stmt_holds : WeylLatticeDuality.Stmt := by
       have hds : ∀ s, ev s (d s (i s)) =
           ∑ j, (B s j (i s) : ℂ_[p]) * ev s (GlobalTheory.WeylMinorDual.colProd ℤ N (nu s) (hY s) j) := by
         intro s
+
         rw [← hd s (i s), map_sum]
         exact Finset.sum_congr rfl fun j _ => by rw [map_zsmul, zsmul_eq_mul]
       simp only [hds]
@@ -289,6 +334,7 @@ theorem stmt_holds : WeylLatticeDuality.Stmt := by
           have hfs : ∀ s, ev s (f (e s)) = ∑ j, (z s j : ℂ_[p]) * ev s (GlobalTheory.WeylMinorDual.colProd ℤ N (nu s) (hY s) j) := by
             intro s
             conv_lhs => rw [← hz2 s]
+
             rw [map_sum]
             exact Finset.sum_congr rfl fun j _ => by rw [map_zsmul, zsmul_eq_mul]
           rw [LinearMap.smul_apply, canExpand p e N nu hY Ψ y, smul_eq_mul]

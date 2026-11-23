@@ -1,4 +1,55 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.SecondColumnDegree
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.SecondColumnDegree
+public import Mathlib.RingTheory.MvPolynomial.IrreducibleQuadratic
+public import Mathlib.RingTheory.Nilpotent.Exp
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -25,7 +76,7 @@ theorem trunc_apply (N : ℕ) (x : MvPolynomial σ k) :
 
 theorem trunc_deg (N : ℕ) (x : MvPolynomial σ k) : (trunc N x).totalDegree ≤ N := by
   rw [trunc_apply]
-  refine (totalDegree_finset_sum _ _).trans (Finset.sup_le fun j hj => ?_)
+  refine (MvPolynomial.totalDegree_finsetSum _ _).trans (Finset.sup_le fun j hj => ?_)
   by_cases h0 : homogeneousComponent j x = 0
   · rw [h0, totalDegree_zero]
     exact Nat.zero_le _
@@ -45,7 +96,7 @@ theorem trunc_id (N : ℕ) (x : MvPolynomial σ k) (hx : x.totalDegree ≤ N) : 
 theorem so_coef_add (c1 c2 : σ → σ → k) (P : MvPolynomial σ k) :
     secondOrder k (fun p q => c1 p q + c2 p q) P = secondOrder k c1 P + secondOrder k c2 P := by
   unfold secondOrder
-  simp only [map_add, add_mul, Finset.sum_add_distrib]
+  simp only [map_add (f := _), add_mul, Finset.sum_add_distrib]
 
 theorem so_iter_smul (c : σ → σ → k) (r : k) :
     ∀ (i : ℕ) (y : MvPolynomial σ k), (secondOrder k c)^[i] (r • y) = r • (secondOrder k c)^[i] y
@@ -68,8 +119,9 @@ private theorem totalDegree_pderiv_le' (i : σ) (y : MvPolynomial σ k) :
     (pderiv i y).totalDegree ≤ y.totalDegree := by
   classical
   conv_lhs => rw [MvPolynomial.as_sum y]
+
   rw [map_sum]
-  refine (totalDegree_finset_sum _ _).trans (Finset.sup_le fun s hs => ?_)
+  refine (MvPolynomial.totalDegree_finsetSum _ _).trans (Finset.sup_le fun s hs => ?_)
   rw [pderiv_monomial]
   refine le_trans ?_ (le_totalDegree hs)
   refine Finset.sup_le fun u hu => ?_
@@ -87,8 +139,8 @@ private theorem totalDegree_pderiv_le' (i : σ) (y : MvPolynomial σ k) :
 theorem deg_so_trunc (c : σ → σ → k) (N : ℕ) (x : MvPolynomial σ k) :
     (secondOrder k c (trunc N x)).totalDegree ≤ N := by
   unfold secondOrder
-  refine (totalDegree_finset_sum _ _).trans (Finset.sup_le fun l _ => ?_)
-  refine (totalDegree_finset_sum _ _).trans (Finset.sup_le fun l' _ => ?_)
+  refine (MvPolynomial.totalDegree_finsetSum _ _).trans (Finset.sup_le fun l _ => ?_)
+  refine (MvPolynomial.totalDegree_finsetSum _ _).trans (Finset.sup_le fun l' _ => ?_)
   refine (totalDegree_mul _ _).trans ?_
   rw [totalDegree_C, zero_add]
   exact ((totalDegree_pderiv_le' _ _).trans (totalDegree_pderiv_le' _ _)).trans (trunc_deg N x)
@@ -165,12 +217,12 @@ def E1 (c : ι → ι → k) (t : k) (N : ℕ) (y : MvPolynomial ι k) : MvPolyn
 theorem totalDegree_second_exp_le (c : ι → ι → k) (t : k) (N : ℕ) (y : MvPolynomial ι k) :
     (E1 c t N y).totalDegree ≤ y.totalDegree := by
   unfold E1
-  refine (totalDegree_finset_sum _ _).trans (Finset.sup_le fun i _ => ?_)
+  refine (MvPolynomial.totalDegree_finsetSum _ _).trans (Finset.sup_le fun i _ => ?_)
   exact (totalDegree_smul_le _ _).trans (totalDegree_iterate_secondOrder_le c _ i y le_rfl)
 
 theorem prodQ_deg (Q : Fin n → MvPolynomial ι k) : (prodQ Q).totalDegree ≤ ∑ b, (Q b).totalDegree := by
   unfold prodQ
-  refine (totalDegree_finset_prod _ _).trans (Finset.sum_le_sum fun b _ => ?_)
+  refine (MvPolynomial.totalDegree_finsetProd _ _).trans (Finset.sum_le_sum fun b _ => ?_)
   unfold colE
   exact totalDegree_rename_le _ _
 
@@ -194,6 +246,7 @@ theorem exp_col (c : ι → ι → k) (t : k) (N : ℕ) (Q : Fin n → MvPolynom
   have hR : ∀ l : ι, pderiv (l, b0) (∏ b ∈ univ.erase b0, colE b (Q b)) = 0 :=
     fun l => pderiv_prod_colE b0 _ (Finset.notMem_erase b0 _) Q l
   unfold E1
+
   rw [map_sum, Finset.sum_mul]
   refine Finset.sum_congr rfl fun i _ => ?_
   rw [so_colB_iter c b0 _ hR i, map_smul, smul_mul_assoc]

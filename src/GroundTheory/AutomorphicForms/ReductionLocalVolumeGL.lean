@@ -1,6 +1,64 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.ReductionLocalVolumeTorus
-import GroundTheory.AutomorphicForms.RealIwasawaIntegration
+module
+
+public import GroundTheory.AutomorphicForms.RealIwasawaUnipotentHaar
+public import Mathlib.MeasureTheory.Constructions.Pi
+public import Mathlib.MeasureTheory.Measure.Haar.OfBasis
+public import GroundTheory.AutomorphicForms.RealIwasawaIntegration
+public import GroundTheory.AutomorphicForms.ReductionLocalVolumeTorus
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Algebra.Group.Units
+import Mathlib.Topology.Algebra.Star.Unitary
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MeasureTheory Measure Set Matrix
 open scoped NNReal ENNReal
@@ -13,8 +71,8 @@ namespace Reduction
 
 variable {𝕜 : Type*} [RCLike 𝕜] {m : ℕ}
 
-variable (m) in
 
+variable (m) in
 def expPosDiag : (Fin (m + 1) → ℝ) ≃ₜ PosDiag (Fin (m + 1)) where
   toFun x := ⟨fun i => Real.exp (x i), fun i => Real.exp_pos _⟩
   invFun a := fun i => Real.log (a.1 i)
@@ -26,8 +84,8 @@ def expPosDiag : (Fin (m + 1) → ℝ) ≃ₜ PosDiag (Fin (m + 1)) where
     Real.continuousOn_log.comp_continuous ((continuous_apply i).comp continuous_subtype_val)
       fun a => (a.2 i).ne'
 
-variable (𝕜 m) in
 
+variable (𝕜 m) in
 def expDiag : (Fin (m + 1) → ℝ) ≃ₜ diagPosSubgroup (Fin (m + 1)) 𝕜 :=
   (expPosDiag m).trans diagPosHomeomorph
 
@@ -122,7 +180,9 @@ theorem unipotentOfCoords_unipotentPart_mul {b : GL (Fin n) 𝕜}
       Matrix (Fin n) (Fin n) 𝕜) * diagonal (fun i => (b : Matrix (Fin n) (Fin n) 𝕜) i i) =
       (b : Matrix (Fin n) (Fin n) 𝕜) := by
   ext i j
-  rw [mul_diagonal, coe_unipotentOfCoords, Matrix.add_apply, one_apply, strictUpperMatrix_apply]
+  rw [mul_diagonal, coe_unipotentOfCoords, Matrix.add_apply]
+  change (((1 : Matrix (Fin n) (Fin n) 𝕜) i j) + strictUpperMatrix (unipotentPart ↑b) i j) * _ = _
+  rw [Matrix.one_apply, strictUpperMatrix_apply]
   by_cases hij : i = j
   · subst hij; simp
   · by_cases h : i < j
@@ -325,7 +385,7 @@ theorem measure_siegelGL_lt_top [MeasurableSpace (unitaryGroup (Fin (m + 1)) �
     have hcont : ContinuousOn (fun b : GL (Fin (m + 1)) 𝕜 => ∑ l : Fin m,
         ‖(b : Matrix (Fin (m + 1)) (Fin (m + 1)) 𝕜) l.succ l.succ‖ /
           ‖(b : Matrix (Fin (m + 1)) (Fin (m + 1)) 𝕜) l.castSucc l.castSucc‖) ω :=
-      continuousOn_finset_sum _ fun l _ => ContinuousOn.div (hent _ _).norm.continuousOn
+      continuousOn_finsetSum _ fun l _ => ContinuousOn.div (hent _ _).norm.continuousOn
         (hent _ _).norm.continuousOn fun b hb => norm_ne_zero_iff.2 (hb0 b hb _)
     obtain ⟨B, hB⟩ := hω.exists_bound_of_continuousOn hcont
     refine ⟨max B 1, lt_of_lt_of_le one_pos (le_max_right _ _), fun b hb l => ?_⟩

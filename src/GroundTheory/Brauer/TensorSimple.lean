@@ -1,4 +1,61 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.Central.Defs
+public import Mathlib.LinearAlgebra.TensorProduct.Basis
+public import Mathlib.RingTheory.TensorProduct.Basic
+public import Mathlib.Algebra.Central.TensorProduct
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+public import Mathlib.RingTheory.SimpleRing.Congr
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TwoSidedIdeal.Instances
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.Central.Basic
+public import Mathlib.LinearAlgebra.Basis.VectorSpace
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Brauer
@@ -17,7 +74,7 @@ theorem coeff_tmul_one_mul (a : A) (x : A ⊗[K] B) (i : κ) :
   | zero => simp
   | tmul a' b =>
     simp [Algebra.TensorProduct.tmul_mul_tmul]
-  | add x y hx hy => simp only [mul_add, map_add, Finsupp.add_apply, hx, hy]
+  | add x y hx hy => simp only [mul_add, map_add (f := _), Finsupp.add_apply, hx, hy]
 
 theorem coeff_mul_tmul_one (a : A) (x : A ⊗[K] B) (i : κ) :
     TensorProduct.equivFinsuppOfBasisRight 𝒞 (x * (a ⊗ₜ[K] (1 : B))) i =
@@ -26,7 +83,7 @@ theorem coeff_mul_tmul_one (a : A) (x : A ⊗[K] B) (i : κ) :
   | zero => simp
   | tmul a' b =>
     simp [Algebra.TensorProduct.tmul_mul_tmul]
-  | add x y hx hy => simp only [add_mul, map_add, Finsupp.add_apply, hx, hy]
+  | add x y hx hy => simp only [add_mul, map_add (f := _), Finsupp.add_apply, hx, hy]
 
 theorem support_coeff_tmul_one_mul (a : A) (x : A ⊗[K] B) :
     (TensorProduct.equivFinsuppOfBasisRight 𝒞 ((a ⊗ₜ[K] (1 : B)) * x)).support ⊆
@@ -108,11 +165,6 @@ theorem center_tensorProduct_eq_map_includeLeft [Algebra.IsCentral K A] :
   rw [← e.apply_symm_apply x, ← hbx]
   simp [e]
 
-instance isCentral_tensorProduct [Algebra.IsCentral K A] [Algebra.IsCentral K B] :
-    Algebra.IsCentral K (A ⊗[K] B) where
-  out := by
-    rw [center_tensorProduct_eq_map_includeRight, Algebra.IsCentral.center_eq_bot, Algebra.map_bot]
-
 end Central
 
 section Simple
@@ -146,7 +198,7 @@ theorem exists_one_tmul_mem_of_ne_bot [Algebra.IsCentral K A] [IsSimpleRing A]
     (by
       rintro _ _ ⟨y, hy, hys, rfl⟩ ⟨z, hz, hzs, rfl⟩
       refine ⟨y + z, I.add_mem hy hz, ?_, by simp⟩
-      rw [map_add]
+      rw [map_add (f := _)]
       exact Finsupp.support_add.trans (Finset.union_subset hys hzs))
     (by
       rintro _ ⟨y, hy, hys, rfl⟩
@@ -228,12 +280,6 @@ section CSA
 universe u v
 
 variable {K : Type u} [Field K]
-
-noncomputable def tensorCSA (A B : CSA.{u, v} K) : CSA.{u, v} K where
-  toAlgCat := AlgCat.of K (A ⊗[K] B)
-
-@[simp]
-theorem tensorCSA_carrier (A B : CSA.{u, v} K) : (tensorCSA A B : Type v) = (A ⊗[K] B) := rfl
 
 end CSA
 

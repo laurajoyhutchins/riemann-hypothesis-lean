@@ -1,6 +1,50 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.KatoQuadraticCharacters.EulerFactorBounds.KatoTwistedClassNormCompatibleCyclotomic
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.KatoQuadraticCharacters.EulerFactorBounds.KmapComp
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.KatoQuadraticCharacters.EulerFactorBounds.SCls
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.KatoQuadraticCharacters.EulerFactorBounds.KatoTwistedClassNormCompatibleCyclotomic
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.ResMapBijective
+public import Mathlib.RingTheory.AdicCompletion.Noetherian
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.KatoQuadraticCharacters.EulerFactorBounds.KmapComp
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.KatoQuadraticCharacters.EulerFactorBounds.SCls
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open scoped MatrixGroups Matrix Classical
 open GlobalTheory.KZ GlobalTheory.K4 UpperTheory.V.Z.Kato.Sym UpperTheory.Kd.K4 UpperTheory.V.Z.Kato.Nb
@@ -168,7 +212,7 @@ theorem solve_mat [Fact l.Prime] (D T : Matrix (Fin 2) (Fin 2) (ZMod (l * M₀))
 theorem dn_vecMul (x : Row (l * M₀)) (Z : Matrix (Fin 2) (Fin 2) (ZMod (l * M₀))) :
     dn l M₀ (x ᵥ* Z) = dn l M₀ x ᵥ* Z.map (ZMod.castHom (dvd_mul_left M₀ l) (ZMod M₀)) := by
   ext j
-  simp only [dn, Matrix.vecMul, dotProduct, Fin.sum_univ_two, map_add, map_mul, Matrix.map_apply]
+  simp only [dn, Matrix.vecMul, dotProduct, Fin.sum_univ_two, map_add (f := _), map_mul, Matrix.map_apply]
 
 theorem solve_rows [Fact l.Prime] (x y x' y' : Row (l * M₀))
     (hD : ((x 0).val : ZMod l) * ((y 1).val : ZMod l) - ((x 1).val : ZMod l) * ((y 0).val : ZMod l) ≠ 0)
@@ -262,7 +306,7 @@ theorem wt_red [Fact l.Prime] {n : ℕ} (hl : l ^ n ∣ M₀) (h : N * M₀ ∣ 
       ZMod.castHom h (ZMod (N * M₀)) (((Matrix.GeneralLinearGroup.det m)⁻¹ : (ZMod (N * (l * M₀)))ˣ) : ZMod (N * (l * M₀))) := by
     rw [red_det, ← map_inv]; rfl
   rw [← Ideal.mem_span_singleton, ← Ideal.Quotient.eq, e2, red_coe]
-  simp only [Matrix.map_apply, map_mul, map_pow, map_add, e]
+  simp only [Matrix.map_apply, map_mul, map_pow, map_add (f := _), e]
 
 theorem sum_fibre [Fact l.Prime] (hN : Nat.Coprime l N) (hl : l ∣ M₀) (h : N * M₀ ∣ N * (l * M₀)) (x y : Row (l * M₀))
     (hD : ((x 0).val : ZMod l) * ((y 1).val : ZMod l) - ((x 1).val : ZMod l) * ((y 0).val : ZMod l) ≠ 0)
@@ -319,6 +363,7 @@ theorem UpperTheory.V.Z.Kato.Nb.sXiDist :
   obtain ⟨-, -, -, -, a5, -⟩ := sApi Ω ε X l n
   obtain ⟨c1, -, -, c4, -⟩ := sCls Ω ε X l n
   simp only [Xi]
+
   rw [map_sub, sub_eq_zero, map_sum, map_sum, eq_comm]
   refine Eq.trans ?_ (Finset.sum_fiberwise_of_maps_to (g := red h)
     (t := Finset.univ.filter (fun m : GL (Fin 2) (ZMod (N * M₀)) =>
@@ -338,8 +383,9 @@ theorem UpperTheory.V.Z.Kato.Nb.sXiDist :
       (y ᵥ* cD N (l * M₀) (m' : Matrix (Fin 2) (Fin 2) (ZMod (N * (l * M₀))))) : X.K))) (wt_red dl h m' w u)
     rewrite [map_sub, sub_eq_zero, (Finset.mem_filter.mp hm').2] at e
     exact e)) ?_
+
   rw [← map_sum, ← Finset.smul_sum, sum_fibre cop hl h x y hB.2 m hm10 (fun x' y' => clsK X l n (slD X N (a x' y' : X.K))),
-    map_smul, map_smul]
+  map_smul, map_smul]
   congr 1
   rw [← sub_eq_zero, ← map_sub]
   refine c4 _ _ _ _ (rep_prod X l n _ _ _ fun x' => rep_prod X l n _ _ _ fun y' =>

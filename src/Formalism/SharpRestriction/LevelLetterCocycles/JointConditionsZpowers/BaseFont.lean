@@ -1,4 +1,51 @@
-import Formalism.SharpRestriction.LevelLetterCocycles.DecompositionData
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.DecompositionData
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.CoassocSimps
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -351,8 +398,8 @@ theorem cj_sum (hF : Formalism.MainNotions.TruncatedSeriesCountingIdentities.Fon
         | rfl
         | (show cons0 LL k m u b.succ = u b; simp [cons0])
 
-include hc in
 
+include hc in
 theorem subquot_crys (hF : Formalism.MainNotions.TruncatedSeriesCountingIdentities.FontaineAt PD LL O) {S : (K →ₐ[Qp] LL) → Set ℤ}
     (hcr : ∀ x, IsCrys PD (matRep (Ms x))) (hS : ∀ x τ, JumpsInV PD (matRep (Ms x)) τ (S τ))
     (T : LocLat G Qp LL O) (hT : IsSubquotOfSums T.ρ (fun x => ⇑(Ms x))) :
@@ -384,8 +431,8 @@ theorem subquot_crys (hF : Formalism.MainNotions.TruncatedSeriesCountingIdentiti
   unfold CJ at hT'
   exact hT'
 
-include hc in
 
+include hc in
 theorem subsum_crys (hF : Formalism.MainNotions.TruncatedSeriesCountingIdentities.FontaineAt PD LL O) {S : (K →ₐ[Qp] LL) → Set ℤ}
     (hcr : ∀ x, IsCrys PD (matRep (Ms x))) (hS : ∀ x τ, JumpsInV PD (matRep (Ms x)) τ (S τ))
     (A : GRep G Qp LL O) (hA : IsSubOfSums A.ρ (fun x => ⇑(Ms x))) :
@@ -425,8 +472,8 @@ theorem subsum_crys (hF : Formalism.MainNotions.TruncatedSeriesCountingIdentitie
   unfold CJ at hA'
   exact hA'
 
-include hc in
 
+include hc in
 theorem jumps_of_multV_eq (hF : Formalism.MainNotions.TruncatedSeriesCountingIdentities.FontaineAt PD LL O) (x y : ι) (hx : IsCrys PD (matRep (Ms x)))
     (hy : IsCrys PD (matRep (Ms y))) (τ : K →ₐ[Qp] LL)
     (h : ∀ a, multV PD (matRep (Ms x)) τ a = multV PD (matRep (Ms y)) τ a) :

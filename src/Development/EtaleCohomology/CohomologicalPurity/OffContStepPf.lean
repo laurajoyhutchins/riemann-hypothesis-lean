@@ -1,4 +1,46 @@
-import Development.EtaleCohomology.CohomologicalPurity.LeafOffContPf
+module
+
+public import Development.EtaleCohomology.CohomologicalPurity.LeafOffContPf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 open CategoryTheory Limits AlgebraicGeometry Opposite GlobalTheory.EtC
@@ -137,11 +179,12 @@ theorem etale_complement_continuity_induction_of_five_lemma_inputs (hL : OffCont
   offContStep_of' hL offExcMV (hG hS hR)
 
 theorem dbl.inl_map {P' P : Arrow Spc} (φ : P' ⟶ P) : dbl.inl P' ≫ dbl.map φ = φ.right ≫ dbl.inl P :=
-  pushout.inl_desc _ _ _
+  pushout.inl_desc (f := P'.hom) (g := P'.hom) _ _ _
 
 theorem dbl.map_comp {P'' P' P : Arrow Spc} (φ : P'' ⟶ P') (ψ : P' ⟶ P) :
     dbl.map (φ ≫ ψ) = dbl.map φ ≫ dbl.map ψ := by
-  apply pushout.hom_ext
+  set_option synthInstance.maxHeartbeats 200000 in
+    apply pushout.hom_ext
   · change dbl.inl P'' ≫ dbl.map (φ ≫ ψ) = dbl.inl P'' ≫ dbl.map φ ≫ dbl.map ψ
     rw [dbl.inl_map, ← Category.assoc, dbl.inl_map, Category.assoc, dbl.inl_map, ← Category.assoc]; rfl
   · change dbl.inr P'' ≫ dbl.map (φ ≫ ψ) = dbl.inr P'' ≫ dbl.map φ ≫ dbl.map ψ
@@ -178,7 +221,7 @@ theorem pairFiveR_surj (bd : LeafBd) (q : ℕ) {J : Type} [SmallCategory J] [IsF
   obtain ⟨l, w, hw⟩ := (hS n).1 s
   refine ⟨IsFiltered.max k l, pull _ (F.map (IsFiltered.leftToMax k l).op).right (tw q i) n z +
     pull _ (F.map (IsFiltered.rightToMax k l).op).right (tw q i) n (Hs.fgt q _ n i w), ?_⟩
-  rw [map_add, ← GlobalTheory.EtC.pull_comp, ← GlobalTheory.EtC.pull_comp, ← Arrow.comp_right, ← Arrow.comp_right, hc, hc, ← Hs.fgt_pull, hw, hs,
+  rw [map_add (f := _), ← GlobalTheory.EtC.pull_comp, ← GlobalTheory.EtC.pull_comp, ← Arrow.comp_right, ← Arrow.comp_right, hc, hc, ← Hs.fgt_pull, hw, hs,
     add_sub_cancel]
 
 theorem pairFiveR_inj (bd : LeafBd) (q : ℕ) {J : Type} [SmallCategory J] [IsFiltered J] (F : Jᵒᵖ ⥤ Arrow Spc)

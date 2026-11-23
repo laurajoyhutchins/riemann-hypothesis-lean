@@ -1,8 +1,53 @@
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.IsFundOne
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.BlockAnti
-import Formalism.FlagUnipotentLattices.MemOfOrthogonalAnisotropic
-import Formalism.FormalDegreeBessel.StatementG
-import Formalism.SharpRestriction.CuspSpanNormBounds.FractionFieldToGenericStalkAlgebraMapEq
+module
+
+public import Formalism.FlagUnipotentLattices.MemOfOrthogonalAnisotropic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open Matrix
 
 noncomputable section
@@ -15,8 +60,6 @@ variable {K V : Type} [Field K] [StarRing K] [AddCommGroup V] [Module K V]
 
 def bl (y : V) : V →ₗ[K] K := H.B.flip y
 
-@[simp] theorem bl_apply (y v : V) : bl H y v = H.B v y := rfl
-
 def crd (e f : Fin r → V) (z : V) (g h : Fin r → V) (t : V) : V →ₗ[K] V :=
   ∑ a, (bl H (f a)).smulRight (g a) + ∑ a, (bl H (e a)).smulRight (h a) +
     ((H.B z z)⁻¹ • bl H z).smulRight t
@@ -24,12 +67,12 @@ def crd (e f : Fin r → V) (z : V) (g h : Fin r → V) (t : V) : V →ₗ[K] V 
 theorem crd_apply (e f : Fin r → V) (z : V) (g h : Fin r → V) (t v : V) :
     crd H e f z g h t v = ∑ a, H.B v (f a) • g a + ∑ a, H.B v (e a) • h a +
       ((H.B z z)⁻¹ * H.B v z) • t := by
-  simp [crd, LinearMap.sum_apply, smul_eq_mul]
+  simp [crd, bl, LinearMap.sum_apply, smul_eq_mul]
 
 def nil (e f : Fin r → V) : V →ₗ[K] V := LinearMap.id - ∑ b, (bl H (f b)).smulRight (e b)
 
 theorem nil_apply (e f : Fin r → V) (w : V) : nil H e f w = w - ∑ b, H.B w (f b) • e b := by
-  simp [nil, LinearMap.sum_apply]
+  simp [nil, bl, LinearMap.sum_apply]
 
 def rmap (e f : Fin r → V) (z : V) (e' f' : Fin r → V) (z' : V) : V →ₗ[K] V :=
   crd H e' f' z' e f z + nil H e f ∘ₗ (LinearMap.id - crd H e' f' z' e' f' z')
@@ -47,9 +90,10 @@ theorem gram (e f : Fin r → V) (z : V)
     intro a b; rw [← H.herm, hef]; split_ifs with h1 h2 h2 <;> simp_all
   have hze : ∀ a, H.B z (e a) = 0 := fun a => herm0 H (hez a)
   have hzf : ∀ a, H.B z (f a) = 0 := fun a => herm0 H (hfz a)
-  simp only [map_add, map_sub, map_neg, map_sum, map_smul, map_smulₛₗ, map_zero, LinearMap.add_apply, LinearMap.sub_apply, LinearMap.sum_apply,
-    LinearMap.smul_apply, LinearMap.zero_apply, smul_eq_mul, mul_zero, zero_mul, Finset.sum_const_zero, add_zero, zero_add, sub_zero, mul_ite, ite_mul, mul_one, one_mul,
-    Finset.sum_ite_eq, Finset.sum_ite_eq', Finset.mem_univ, if_true, starRingEnd_apply, star_zero, star_one, hee, hff, hef, hfe, hez, hfz, hze, hzf]
+
+  simp only [map_add (f := _), map_sub, map_neg, map_sum, map_smul, map_smulₛₗ, map_zero, LinearMap.add_apply, LinearMap.sub_apply, LinearMap.sum_apply,
+  LinearMap.smul_apply, LinearMap.zero_apply, smul_eq_mul, mul_zero, zero_mul, Finset.sum_const_zero, add_zero, zero_add, sub_zero, mul_ite, ite_mul, mul_one, one_mul,
+  Finset.sum_ite_eq, Finset.sum_ite_eq', Finset.mem_univ, if_true, starRingEnd_apply, star_zero, star_one, hee, hff, hef, hfe, hez, hfz, hze, hzf]
   simp only [mul_comm (star _)]; ring
 
 theorem rem_perp (e f : Fin r → V) (z : V)
@@ -63,7 +107,8 @@ theorem rem_perp (e f : Fin r → V) (z : V)
   have hze : ∀ a, H.B z (e a) = 0 := fun a => herm0 H (hez a)
   have hzf : ∀ a, H.B z (f a) = 0 := fun a => herm0 H (hfz a)
   refine ⟨fun a => ?_, fun a => ?_, ?_⟩ <;>
-    simp only [crd_apply, map_add, map_sub, map_neg, map_sum, map_smul, map_smulₛₗ, map_zero, LinearMap.add_apply, LinearMap.sub_apply, LinearMap.sum_apply,
+
+    simp only [crd_apply, map_add (f := _), map_sub, map_neg, map_sum, map_smul, map_smulₛₗ, map_zero, LinearMap.add_apply, LinearMap.sub_apply, LinearMap.sum_apply,
     LinearMap.smul_apply, LinearMap.zero_apply, smul_eq_mul, mul_zero, zero_mul, Finset.sum_const_zero, add_zero, zero_add, sub_zero, mul_ite, ite_mul, mul_one, one_mul,
     Finset.sum_ite_eq, Finset.sum_ite_eq', Finset.mem_univ, if_true, starRingEnd_apply, star_zero, star_one, hee, hff, hef, hfe, hez, hfz, hze, hzf, sub_self]
   field_simp
@@ -98,7 +143,8 @@ theorem nil_perp (e f : Fin r → V) (z : V) (hee : ∀ a b, H.B (e a) (e b) = 0
     (∀ a, H.B (nil H e f w) (e a) = 0) ∧ (∀ a, H.B (nil H e f w) (f a) = 0) ∧
       H.B (nil H e f w) z = H.B w z := by
   refine ⟨fun a => ?_, fun a => ?_, ?_⟩ <;>
-    simp only [nil_apply, map_add, map_sub, map_neg, map_sum, map_smul, map_smulₛₗ, map_zero, LinearMap.add_apply, LinearMap.sub_apply, LinearMap.sum_apply,
+
+    simp only [nil_apply, map_add (f := _), map_sub, map_neg, map_sum, map_smul, map_smulₛₗ, map_zero, LinearMap.add_apply, LinearMap.sub_apply, LinearMap.sum_apply,
     LinearMap.smul_apply, LinearMap.zero_apply, smul_eq_mul, mul_zero, zero_mul, Finset.sum_const_zero, add_zero, zero_add, sub_zero, mul_ite, ite_mul, mul_one, one_mul,
     Finset.sum_ite_eq, Finset.sum_ite_eq', Finset.mem_univ, if_true, starRingEnd_apply, star_zero, star_one, hee, hef, hez, hw, sub_self]
 
@@ -106,9 +152,10 @@ theorem nil_isom (e f : Fin r → V) (hee : ∀ a b, H.B (e a) (e b) = 0) (w w' 
     (hw : ∀ a, H.B w (e a) = 0) (hw' : ∀ a, H.B w' (e a) = 0) :
     H.B (nil H e f w) (nil H e f w') = H.B w w' := by
   have hw'' : ∀ a, H.B (e a) w' = 0 := fun a => herm0 H (hw' a)
-  simp only [nil_apply, map_add, map_sub, map_neg, map_sum, map_smul, map_smulₛₗ, map_zero, LinearMap.add_apply, LinearMap.sub_apply, LinearMap.sum_apply,
-    LinearMap.smul_apply, LinearMap.zero_apply, smul_eq_mul, mul_zero, zero_mul, Finset.sum_const_zero, add_zero, zero_add, sub_zero, mul_ite, ite_mul, mul_one, one_mul,
-    Finset.sum_ite_eq, Finset.sum_ite_eq', Finset.mem_univ, if_true, starRingEnd_apply, star_zero, star_one, hee, hw, hw'', sub_self]
+
+  simp only [nil_apply, map_add (f := _), map_sub, map_neg, map_sum, map_smul, map_smulₛₗ, map_zero, LinearMap.add_apply, LinearMap.sub_apply, LinearMap.sum_apply,
+  LinearMap.smul_apply, LinearMap.zero_apply, smul_eq_mul, mul_zero, zero_mul, Finset.sum_const_zero, add_zero, zero_add, sub_zero, mul_ite, ite_mul, mul_one, one_mul,
+  Finset.sum_ite_eq, Finset.sum_ite_eq', Finset.mem_univ, if_true, starRingEnd_apply, star_zero, star_one, hee, hw, hw'', sub_self]
 
 theorem rem_all (e f e' f' : Fin r → V) (z z' : V) (he'e : ∀ a b, H.B (e' a) (e' b) = 0) (hf'f : ∀ a b, H.B (f' a) (f' b) = 0)
     (he'f : ∀ a b, H.B (e' a) (f' b) = if a = b then 1 else 0)
@@ -159,22 +206,26 @@ theorem rmap_isom (e f e' f' : Fin r → V) (z z' : V) (hee : ∀ a b, H.B (e a)
     rw [crd_apply, crd_apply, crd_apply, crd_apply, gram H e f z hee hff hef hez hfz,
       gram H e' f' z' he'e hf'f he'f he'z hf'z, hzz']
   have c1 : H.B (crd H e' f' z' e f z v) (nil H e f w') = 0 := by
-    rw [crd_apply]; simp only [map_add, map_sub, map_neg, map_sum, map_smul, map_smulₛₗ, map_zero, LinearMap.add_apply, LinearMap.sub_apply, LinearMap.sum_apply,
+
+    rw [crd_apply]; simp only [map_add (f := _), map_sub, map_neg, map_sum, map_smul, map_smulₛₗ, map_zero, LinearMap.add_apply, LinearMap.sub_apply, LinearMap.sum_apply,
     LinearMap.smul_apply, LinearMap.zero_apply, smul_eq_mul, mul_zero, zero_mul, Finset.sum_const_zero, add_zero, zero_add, sub_zero, mul_ite, ite_mul, mul_one, one_mul,
     Finset.sum_ite_eq, Finset.sum_ite_eq', Finset.mem_univ, if_true, starRingEnd_apply, star_zero, star_one, m1', m2', m3']
   have c2 : H.B (nil H e f w) (crd H e' f' z' e f z v') = 0 := by
-    rw [crd_apply]; simp only [map_add, map_sub, map_neg, map_sum, map_smul, map_smulₛₗ, map_zero, LinearMap.add_apply, LinearMap.sub_apply, LinearMap.sum_apply,
+
+    rw [crd_apply]; simp only [map_add (f := _), map_sub, map_neg, map_sum, map_smul, map_smulₛₗ, map_zero, LinearMap.add_apply, LinearMap.sub_apply, LinearMap.sum_apply,
     LinearMap.smul_apply, LinearMap.zero_apply, smul_eq_mul, mul_zero, zero_mul, Finset.sum_const_zero, add_zero, zero_add, sub_zero, mul_ite, ite_mul, mul_one, one_mul,
     Finset.sum_ite_eq, Finset.sum_ite_eq', Finset.mem_univ, if_true, starRingEnd_apply, star_zero, star_one, n1, n2, n3, a5]
   have c3 : H.B (crd H e' f' z' e' f' z' v) w' = 0 := by
-    rw [crd_apply]; simp only [map_add, map_sub, map_neg, map_sum, map_smul, map_smulₛₗ, map_zero, LinearMap.add_apply, LinearMap.sub_apply, LinearMap.sum_apply,
+
+    rw [crd_apply]; simp only [map_add (f := _), map_sub, map_neg, map_sum, map_smul, map_smulₛₗ, map_zero, LinearMap.add_apply, LinearMap.sub_apply, LinearMap.sum_apply,
     LinearMap.smul_apply, LinearMap.zero_apply, smul_eq_mul, mul_zero, zero_mul, Finset.sum_const_zero, add_zero, zero_add, sub_zero, mul_ite, ite_mul, mul_one, one_mul,
     Finset.sum_ite_eq, Finset.sum_ite_eq', Finset.mem_univ, if_true, starRingEnd_apply, star_zero, star_one, b1', b2', b3']
   have c4 : H.B w (crd H e' f' z' e' f' z' v') = 0 := by
-    rw [crd_apply]; simp only [map_add, map_sub, map_neg, map_sum, map_smul, map_smulₛₗ, map_zero, LinearMap.add_apply, LinearMap.sub_apply, LinearMap.sum_apply,
+
+    rw [crd_apply]; simp only [map_add (f := _), map_sub, map_neg, map_sum, map_smul, map_smulₛₗ, map_zero, LinearMap.add_apply, LinearMap.sub_apply, LinearMap.sum_apply,
     LinearMap.smul_apply, LinearMap.zero_apply, smul_eq_mul, mul_zero, zero_mul, Finset.sum_const_zero, add_zero, zero_add, sub_zero, mul_ite, ite_mul, mul_one, one_mul,
     Finset.sum_ite_eq, Finset.sum_ite_eq', Finset.mem_univ, if_true, starRingEnd_apply, star_zero, star_one, a1, a2, a3]
-  simp only [map_add, LinearMap.add_apply]
+  simp only [map_add (f := _), LinearMap.add_apply]
   rw [hA, c1, c2, c3, c4, nil_isom H e f hee _ _ a4 b4]
 
 theorem rmap_vals (e f e' f' : Fin r → V) (z z' : V) (he'e : ∀ a b, H.B (e' a) (e' b) = 0) (hf'f : ∀ a b, H.B (f' a) (f' b) = 0)
@@ -187,7 +238,8 @@ theorem rmap_vals (e f e' f' : Fin r → V) (z z' : V) (he'e : ∀ a b, H.B (e' 
   have hz'e : ∀ a, H.B z' (e' a) = 0 := fun a => herm0 H (he'z a)
   have hz'f : ∀ a, H.B z' (f' a) = 0 := fun a => herm0 H (hf'z a)
   refine ⟨fun a => ?_, fun a => ?_, ?_⟩ <;>
-    simp only [rmap_apply, crd_apply, map_add, map_sub, map_neg, map_sum, map_smul, map_smulₛₗ, map_zero, LinearMap.add_apply, LinearMap.sub_apply, LinearMap.sum_apply,
+
+    simp only [rmap_apply, crd_apply, map_add (f := _), map_sub, map_neg, map_sum, map_smul, map_smulₛₗ, map_zero, LinearMap.add_apply, LinearMap.sub_apply, LinearMap.sum_apply,
     LinearMap.smul_apply, LinearMap.zero_apply, smul_eq_mul, mul_zero, zero_mul, Finset.sum_const_zero, add_zero, zero_add, sub_zero, mul_ite, ite_mul, mul_one, one_mul,
     Finset.sum_ite_eq, Finset.sum_ite_eq', Finset.mem_univ, if_true, starRingEnd_apply, star_zero, star_one, ite_smul, one_smul, zero_smul, Finset.sum_const_zero, he'e, hf'f, he'f, hf'e, he'z, hf'z, hz'e, hz'f,
       inv_mul_cancel₀ hzz'0, sub_self, nil_apply]
@@ -234,7 +286,12 @@ theorem tri_le (e : Fin r → V) (T : V →ₗ[K] V) (a : Fin r)
   have : T (e b) = (T (e b) - e b) + e b := by abel
   rw [this]
   refine Submodule.add_mem _ ?_ (Submodule.subset_span ⟨b, hb, rfl⟩)
-  exact Submodule.span_mono (Set.image_mono (f := e) (fun c (hc : c < b) => lt_trans hc hb)) (h b hb)
+  have hsub : {c : Fin r | c < b} ⊆ {c : Fin r | c < a} := by
+    intro c hc
+    change c < b at hc
+    change b < a at hb
+    exact lt_trans hc hb
+  exact Submodule.span_mono (Set.image_mono hsub) (h b hb)
 
 theorem tri_map (e e' : Fin r → V) (T : V →ₗ[K] V) (hT : ∀ a, T (e' a) = e a)
     (h : ∀ a, e' a - e a ∈ Submodule.span K (e '' {b | b < a})) :

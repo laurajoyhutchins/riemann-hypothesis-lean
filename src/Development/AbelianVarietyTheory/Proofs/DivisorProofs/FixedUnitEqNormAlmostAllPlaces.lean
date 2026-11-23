@@ -1,10 +1,57 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsIntBTmulBasis
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsSmallB
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AdicIntegralTensorBasisHenselExistsUniqueSqrtStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EventuallyAdicIntegralSpanClosedMulStar
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsTwistedNormModMaxIdealAdicTensorStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsRootSelectionUnitaryRankOne
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsIntBTmulBasis
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsSmallB
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EventuallyAdicIntegralSpanClosedMulStar
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AdicIntegralTensorBasisHenselExistsUniqueSqrtStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsTwistedNormModMaxIdealAdicTensorStatement
+import Development.AbelianVarietyTheory.Definitions.Divisors.TwOrbMEqTwOrbUOfNormal
+
+@[expose] public section
+
 open Matrix NumberField GlobalTheory.LKTrip GlobalTheory.LKRes GlobalTheory.LKMid GlobalTheory.LKCount IsDedekindDomain GlobalTheory.AdicSpan
 open scoped TensorProduct Classical
 noncomputable section
@@ -56,27 +103,33 @@ theorem good_eventually : ∀ (L : Type) [Field L] [NumberField L] (c : L →ₐ
       _ = _ := mul_one _
   · rw [Algebra.TensorProduct.one_def]; exact hint 1 (fun k => hlv (0, k))
   · intro y z hy hz k
-    rw [eq_sum_tmul bL v y, eq_sum_tmul bL v z, Finset.sum_mul_sum, map_sum, Finsupp.finset_sum_apply]
+
+    rw [eq_sum_tmul bL v y, eq_sum_tmul bL v z, Finset.sum_mul_sum, map_sum, Finsupp.finsetSum_apply]
     refine sum_mem fun i _ => ?_
-    rw [map_sum, Finsupp.finset_sum_apply]
+
+    rw [map_sum, Finsupp.finsetSum_apply]
     refine sum_mem fun j _ => ?_
     rw [Algebra.TensorProduct.tmul_mul_tmul, repr_tmul_apply]
     exact mul_mem (mul_mem (hy i) (hz j)) (hcv (i, j, k))
   · intro y z hy hz k
-    rw [eq_sum_tmul bL v y, eq_sum_tmul bL v z, Finset.sum_mul_sum, map_sum, Finsupp.finset_sum_apply]
+
+    rw [eq_sum_tmul bL v y, eq_sum_tmul bL v z, Finset.sum_mul_sum, map_sum, Finsupp.finsetSum_apply]
     refine Valuation.map_sum_lt _ one_ne_zero fun i _ => ?_
-    rw [map_sum, Finsupp.finset_sum_apply]
+
+    rw [map_sum, Finsupp.finsetSum_apply]
     refine Valuation.map_sum_lt _ one_ne_zero fun j _ => ?_
     rw [Algebra.TensorProduct.tmul_mul_tmul, repr_tmul_apply, map_mul, map_mul]
     exact lt_of_le_of_lt (mul_le_mul' (mul_le_mul' ((hmem _).1 (hy i)) le_rfl) ((hmem _).1 (hcv (i, j, k))))
       (by simpa using hz j)
   · intro y hy k
-    rw [eq_sum_tmul bL v y, map_sum, map_sum, Finsupp.finset_sum_apply]
+
+    rw [eq_sum_tmul bL v y, map_sum, map_sum, Finsupp.finsetSum_apply]
     refine sum_mem fun i _ => ?_
     rw [Algebra.TensorProduct.map_tmul, AlgHom.id_apply, repr_tmul_apply]
     exact mul_mem (hy i) (hsv (i, k))
   · intro y hy k
-    rw [eq_sum_tmul bL v y, map_sum, map_sum, Finsupp.finset_sum_apply]
+
+    rw [eq_sum_tmul bL v y, map_sum, map_sum, Finsupp.finsetSum_apply]
     refine Valuation.map_sum_lt _ one_ne_zero fun i _ => ?_
     rw [Algebra.TensorProduct.map_tmul, AlgHom.id_apply, repr_tmul_apply, map_mul]
     exact lt_of_le_of_lt (mul_le_mul' le_rfl ((hmem _).1 (hsv (i, k)))) (by simpa using hy i)
@@ -101,7 +154,7 @@ theorem unit_fixed_is_norm : ∀ (L : Type) [Field L] [NumberField L] (c : L →
     induction a using TensorProduct.induction_on with
     | zero => simp
     | tmul r l => simp [σ, hc]
-    | add a b ha hb => simp only [map_add, ha, hb]
+    | add a b ha hb => simp only [map_add (f := _), ha, hb]
   have hσinv : ∀ g : (v.adicCompletion ℚ ⊗[ℚ] L)ˣ, σ ↑g = ↑g → σ ↑g⁻¹ = ↑g⁻¹ := by
     intro g hg
     calc σ ↑g⁻¹ = σ ↑g⁻¹ * (↑g * ↑g⁻¹) := by simp

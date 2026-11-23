@@ -1,7 +1,48 @@
-import Development.AbelianVarietyTheory.Definitions.Divisors.PrimitiveStructureSheafDegTwoVanish
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.AbelianUnobstructed
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.AbelianHodgeDeRham
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.BijectiveCechDeRhamComparisonDegreeOne
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.PrimitiveStructureSheafDegTwoVanish
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 open CategoryTheory AlgebraicGeometry KaehlerDifferential MonoidalCategory CartesianMonoidalCategory MonObj
 open scoped TensorProduct
 open ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.Semi GlobalTheory.CatCoh GlobalTheory.Cris GlobalTheory.CechDR GlobalTheory.LiftSys GlobalTheory.Obs
@@ -27,7 +68,7 @@ theorem eq_jj {y : R₁} {i : I} (hq : α.q y = 0) (hk : α.k y = i) : y = jj α
   exact sub_eq_zero.mp h
 
 theorem jj_add (i i' : I) : jj α (i + i') = jj α i + jj α i' :=
-  (eq_jj α (by rw [map_add, jj_q, jj_q, add_zero]) (by rw [map_add, jj_k, jj_k]; rfl)).symm
+  (eq_jj α (by rw [map_add (f := _), jj_q, jj_q, add_zero]) (by rw [map_add (f := _), jj_k, jj_k]; rfl)).symm
 
 theorem jj_smul (r : R) (i : I) : jj α (r • i) = π r • jj α i :=
   (eq_jj α (by rw [map_smul, jj_q, smul_zero]) (by rw [α.smul, jj_k]; rfl)).symm
@@ -37,7 +78,7 @@ variable {B B₀ : Type} [CommRing B] [Algebra R B] [CommRing B₀] [Algebra R�
 def tau (hs : SemiHom π p) : I ⊗[R] B →+ R₁ ⊗[R₀] B₀ :=
   TensorProduct.liftAddHom
     (AddMonoidHom.mk' (fun i ↦ AddMonoidHom.mk' (fun b ↦ jj α i ⊗ₜ[R₀] p b)
-      (fun b b' ↦ by rw [map_add, TensorProduct.tmul_add]))
+      (fun b b' ↦ by rw [map_add (f := _), TensorProduct.tmul_add]))
       (fun i i' ↦ by ext b; simp [jj_add, TensorProduct.add_tmul]))
     (fun r i b ↦ by
       simp only [AddMonoidHom.mk'_apply]
@@ -66,7 +107,7 @@ theorem GlobalTheory.Obs.sig_inj_of_flat : ∀ (R R₀ : Type) [CommRing R] [Com
     | add a c ha hc =>
       obtain ⟨za, hza⟩ := ha
       obtain ⟨zc, hzc⟩ := hc
-      exact ⟨za + zc, by rw [map_add, hza, hzc, map_add, map_add, TensorProduct.tmul_add]; abel⟩
+      exact ⟨za + zc, by rw [map_add (f := _), hza, hzc, map_add (f := _), map_add (f := _), TensorProduct.tmul_add]; abel⟩
   obtain ⟨z, hz⟩ := hrange y
   rw [show Algebra.TensorProduct.map α.q (AlgHom.id R₀ B₀) y = 0 from hy, map_zero,
     TensorProduct.tmul_zero, sub_zero] at hz
@@ -75,7 +116,7 @@ theorem GlobalTheory.Obs.sig_inj_of_flat : ∀ (R R₀ : Type) [CommRing R] [Com
     induction z using TensorProduct.induction_on with
     | zero => simp
     | tmul i b => rw [tau_tmul, hσ, jj_k]; simp
-    | add a c ha hc => rw [map_add, map_add, map_add, map_add, ha, hc]
+    | add a c ha hc => rw [map_add (f := _), map_add (f := _), map_add (f := _), map_add (f := _), ha, hc]
   have hinj : Function.Injective (fun z ↦ TensorProduct.lid R B (LinearMap.rTensor B I.subtype z)) :=
     (TensorProduct.lid R B).injective.comp
       (Module.Flat.rTensor_preserves_injective_linearMap _ Subtype.val_injective)

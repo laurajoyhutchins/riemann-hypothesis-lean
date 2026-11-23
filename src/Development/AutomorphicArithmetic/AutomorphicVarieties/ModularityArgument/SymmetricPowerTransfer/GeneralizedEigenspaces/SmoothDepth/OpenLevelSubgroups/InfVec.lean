@@ -1,6 +1,57 @@
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.MkMemAdmissibleAtIffCocycle
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.GeneralizedEigenspaces.IsLevel
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsNeZeroWeightTensorIntertwiningAutRepStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SpanInfinitePlacesWeightRepresentationEqTop
+import Formalism.LocalRingCardinality.SpanPowerMembership.NZLevD
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.Interval.Finset.Box
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EqSplitFinMulSplitInf
 import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.GeneralizedEigenspaces.SmoothDepth.ContCoef
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsNeZeroWeightTensorIntertwiningAutRepStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SpanInfinitePlacesWeightRepresentationEqTop
+
+@[expose] public section
 
 open NumberField IsDedekindDomain ValuativeRel GlobalTheory.CuspRep GlobalTheory.PRep GlobalTheory.UnitaryBC GlobalTheory.SmGL GlobalTheory.SplitWeil GlobalTheory.LocGL Formalism.BasicNotions
 open UpperTheory.V.W (Plc Lp)
@@ -152,9 +203,11 @@ private theorem cv_eq (x : InfinitePlace L × Fin 2 → ℂ) :
     cv lam hj x = ∑ κ : InfinitePlace L → Fin (j + 1), eval x (A (InfinitePlace L) j κ) •
       PiTensorProduct.tprod ℂ fun v => mon (lam v) (hj v) (κ v) := by
   simp only [cv, D]
+
   rw [MultilinearMap.map_sum]
   refine Finset.sum_congr rfl fun κ _ => ?_
   rw [MultilinearMap.map_smul_univ, eval_A]
+  simp only [RingHom.id_apply]
 
 omit [DecidableEq (InfinitePlace L)] in
 private theorem cv_ne : ∃ x, cv lam hj x ≠ 0 := by
@@ -193,9 +246,11 @@ theorem UpperTheory.V.Z.Sym.Al.infVec :
   let φ : UA L 2 → Wt.VD (InfinitePlace L) j := fun g => ∑ κ, T (c κ) g • a κ
   have key : ∀ g x, MvPolynomial.eval x (φ g).1 = T (cv lam hj x) g := by
     intro g x
+
     rw [cv_eq, map_sum, Finset.sum_apply]
+
     simp only [φ, Submodule.coe_sum, Submodule.coe_smul, map_sum, MvPolynomial.smul_eval, map_smul, Pi.smul_apply,
-      smul_eq_mul, a]
+    smul_eq_mul, a]
     exact Finset.sum_congr rfl fun κ _ => mul_comm _ _
   refine ⟨fun v => -((lam v).w 1 + (j : ℤ)), φ, fun h0 => ?_, fun f => ?_, fun γ hγ g => ?_, fun u hu g => ?_,
     fun u hu g => ?_⟩
@@ -227,6 +282,7 @@ theorem UpperTheory.V.Z.Sym.Al.infVec :
       exact hle hw
   · have : f ∘ φ = ∑ κ, f (a κ) • T (c κ) := by
       funext g
+
       simp only [Function.comp, φ, map_sum, map_smul, smul_eq_mul, Finset.sum_apply, Pi.smul_apply]
       exact Finset.sum_congr rfl fun _ _ => mul_comm _ _
     rw [this]

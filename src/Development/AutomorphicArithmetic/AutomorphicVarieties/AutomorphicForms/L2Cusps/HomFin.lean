@@ -1,5 +1,44 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.L2Cusps.AbsCompactAlt
-import GroundTheory.AutomorphicForms.TensorProductTheorem.KProjApplyEqSelfIff
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.L2Cusps.AbsCompactAlt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open GroundTheory.Automorphic
 
@@ -33,8 +72,7 @@ theorem UpperTheory.V.KernelIndexFullLattice.homFin_holds :
     rw [map_smul]
     rfl
   haveI : IsNoetherian (MonoidAlgebra ℂ C) τ.asModule := isNoetherian_of_tower ℂ inferInstance
-  obtain ⟨t, ht, htop⟩ := CompleteLattice.WellFoundedGT.isSupFiniteCompact
-    (Submodule (MonoidAlgebra ℂ C) τ.asModule) {m | IsSimpleModule (MonoidAlgebra ℂ C) m}
+  obtain ⟨t, ht, htop⟩ := WellFoundedGT.isSupFiniteCompact (α := Submodule (MonoidAlgebra ℂ C) τ.asModule) {m | IsSimpleModule (MonoidAlgebra ℂ C) m}
   rw [IsSemisimpleModule.sSup_simples_eq_top] at htop
   let W : Submodule (MonoidAlgebra ℂ C) τ.asModule → Submodule ℂ M := fun m =>
     F ⊓ ((isotypicComponent (MonoidAlgebra ℂ C) σ.asModule m).restrictScalars ℂ : Submodule ℂ σ.asModule)
@@ -93,7 +131,7 @@ theorem UpperTheory.V.KernelIndexFullLattice.homFin_holds :
         intro hs y hy
         rw [Finset.sup_insert] at hy
         obtain ⟨y1, hy1, y2, hy2, rfl⟩ := Submodule.mem_sup.1 hy
-        rw [map_add]
+        rw [map_add (f := _)]
         exact add_mem (one a (hs (Finset.mem_insert_self a s)) y1 hy1)
           (ih ((Finset.subset_insert a s).trans hs) y2 hy2)
     have hx : (show τ.asModule from x) ∈ t.sup id := htop ▸ Submodule.mem_top

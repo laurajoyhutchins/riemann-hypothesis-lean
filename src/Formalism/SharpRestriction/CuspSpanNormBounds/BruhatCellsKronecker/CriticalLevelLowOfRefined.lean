@@ -1,7 +1,48 @@
-import Formalism.SharpRestriction.CuspSpanNormBounds.BruhatCellsKronecker.OwnEvIntro
-import Formalism.SharpRestriction.CuspSpanNormBounds.CongruenceAtSplitFrobeniusHolds
-import Formalism.SharpRestriction.CuspSpanNormBounds.SBridge
-import Formalism.SharpRestriction.CuspSpanNormBounds.PExtra
+module
+
+public import Formalism.SharpRestriction.CuspSpanNormBounds.PExtra
+public import Formalism.SharpRestriction.CuspSpanNormBounds.BruhatCellsKronecker.OwnEvIntro
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.Real.Pi.Bounds
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -130,7 +171,7 @@ theorem TfFacts.core (F : TfFacts D large₂ C' Cl Cu C0) {C3 : ℝ} (hCl : 4 �
   have hQ : ((D.R.k : ℝ) ^ 4) ^ (2 * D.R.rS + 1) ≤ ∏ j ∈ Finset.Ioc 1 D.R.m, bOne D τ j := by
     have hc : (Finset.Ioc 1 D.R.m).card = 2 * D.R.rS + 1 := by rw [Nat.card_Ioc]; omega
     rw [← hc, ← Finset.prod_const]
-    refine Finset.prod_le_prod (fun j _ => by positivity) (fun j hj => ?_)
+    refine Finset.prod_le_prod₀ (fun j _ => by positivity) (fun j hj => ?_)
     rw [Finset.mem_Ioc] at hj
     refine le_trans ?_ (F.hbk τ j (by omega) hj.2)
     rw [← Real.rpow_natCast]
@@ -333,7 +374,7 @@ theorem TfFacts.tframe (F : TfFacts D large₂ C' Cl Cu C0) {C3 : ℝ} (hCl : 4 
   have hg1 : 1 ≤ (gg D ^ 2) ^ D.R.k := one_le_pow₀ (one_le_pow₀ (by nlinarith))
   have hprod : (gg D ^ 2) ^ D.R.k ≤ ∏ τ, (Tcrit D w τ / Tr D w) ^ D.R.k := by
     have h1 : ∏ _τ : D.what₂.Tau, (gg D ^ 2) ^ D.R.k ≤ ∏ τ, (Tcrit D w τ / Tr D w) ^ D.R.k :=
-      Finset.prod_le_prod (fun τ _ => by positivity) (fun τ _ => pow_le_pow_left₀ (by positivity) (hτ τ) _)
+      Finset.prod_le_prod₀ (fun τ _ => by positivity) (fun τ _ => pow_le_pow_left₀ (by positivity) (hτ τ) _)
     refine le_trans ?_ h1
     rw [Finset.prod_const, Finset.card_univ, D.what₂.card_Tau]
     have hf : 1 ≤ D.R.f := by
@@ -370,7 +411,7 @@ theorem TfFacts.tframe (F : TfFacts D large₂ C' Cl Cu C0) {C3 : ℝ} (hCl : 4 
       have := Real.exp_one_lt_d9
       nlinarith
     calc Real.exp ((D.R.k : ℝ) / 4) ≤ Real.exp ((D.R.k : ℝ) * 1) := Real.exp_le_exp.2 (by linarith)
-      _ = Real.exp 1 ^ D.R.k := Real.exp_nat_mul 1 D.R.k
+      _ = Real.exp 1 ^ D.R.k := Real.exp_natCast_mul D.R.k 1
       _ ≤ gg D ^ D.R.k := pow_le_pow_left₀ (Real.exp_pos _).le h1 _
   have hfin : Real.exp 8 * (C0 * Real.exp ((D.R.k : ℝ) / 4)) < (gg D ^ 2) ^ D.R.k := by
     have e : (gg D ^ 2) ^ D.R.k = gg D ^ D.R.k * gg D ^ D.R.k := by ring

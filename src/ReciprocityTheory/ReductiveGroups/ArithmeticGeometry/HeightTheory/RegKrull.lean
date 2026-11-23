@@ -1,4 +1,59 @@
-import Mathlib
+module
+
+public import Mathlib.RingTheory.Ideal.Height
+public import Mathlib.RingTheory.IntegralClosure.IntegrallyClosed
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Etale.Weakly
+public import Mathlib.RingTheory.Ideal.KrullsHeightTheorem
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace ReciprocityTheory.ChartRestriction.G.T0
 
@@ -59,13 +114,13 @@ theorem exists_prime_colon [IsNoetherianRing R] (s a : R) (ha : a ∉ Ideal.span
 
 end KrullColonIdeal
 
-open KrullColonIdeal in
 
+open KrullColonIdeal in
 theorem mem_of_mem_heightOne_localizations {R K : Type*} [CommRing R] [IsDomain R] [IsNoetherianRing R]
     [IsIntegrallyClosed R] [Field K] [Algebra R K] [IsFractionRing R K] (x : K)
     (hx : ∀ p : Ideal R, p.IsPrime → p.height = 1 →
       ∃ a s : R, s ∉ p ∧ x * algebraMap R K s = algebraMap R K a) :
-    ∃ r : R, algebraMap R K r = x := by
+    ∃ r : R, algebraMap R K r = x := open KrullColonIdeal in by
   classical
 
   obtain ⟨a, b, hb0, hxab⟩ : ∃ a b : R, b ≠ 0 ∧ x * algebraMap R K b = algebraMap R K a := by
@@ -161,22 +216,8 @@ theorem mem_of_mem_heightOne_localizations {R K : Type*} [CommRing R] [IsDomain 
   have hle1 : (colonI b c).height ≤ 1 :=
     Ideal.height_le_one_of_isPrincipal_of_mem_minimalPrimes (Ideal.span {q0}) _ hmin
   have hge1 : (1 : ℕ∞) ≤ (colonI b c).height := by
-    unfold Ideal.height
-    refine le_iInf₂ (fun J hJ => ?_)
-    have hJP : colonI b c ≤ J := hJ.1.2
-    have hJne : J ≠ ⊥ := fun h => hPne (eq_bot_iff.2 (h ▸ hJP))
-    haveI : J.IsPrime := hJ.1.1
-    show 1 ≤ Order.height (⟨J, hJ.1.1⟩ : PrimeSpectrum R)
-    rw [ENat.one_le_iff_ne_zero, Ne, Order.height_eq_zero]
-    intro hmin
-    have hlt : (⟨⊥, inferInstance⟩ : PrimeSpectrum R) < ⟨J, hJ.1.1⟩ := by
-      refine lt_of_le_of_ne ?_ ?_
-      · first
-        | exact (bot_le : (⊥ : Ideal R) ≤ J)
-        | exact (PrimeSpectrum.asIdeal_le_asIdeal _ _).1 bot_le
-      · intro h
-        exact hJne (congrArg PrimeSpectrum.asIdeal h).symm
-    exact hmin.not_lt hlt
+    rw [ENat.one_le_iff_ne_zero, Ne, Ideal.height_eq_zero_iff_eq_bot]
+    exact hPne
   have hheight : (colonI b c).height = 1 := le_antisymm hle1 hge1
   obtain ⟨a', s', hs', hs'x⟩ := hx (colonI b c) hPprime hheight
   apply hs'

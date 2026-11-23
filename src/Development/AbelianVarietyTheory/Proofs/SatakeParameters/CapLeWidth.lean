@@ -1,18 +1,57 @@
-import Mathlib
-import Formalism.SharpRestriction.Divisibility.OrbitPlaces
-import Formalism.LocalRingCardinality.CoeNeZeroOfNotMem
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.BTLeFiveQuarters
+module
+
+public import Formalism.SharpRestriction.Divisibility.OrbitPlaces
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.AlLeParams
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.BTLeFiveQuarters
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.CapLe
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExcessMemIcc
 import Development.AbelianVarietyTheory.Proofs.SatakeParameters.NotMemTopPlaces
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.WPlPos
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExcessMemIcc
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.SumRangeSplit
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.TwoWLeFirstRow
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.NuDCardLeASq
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.RankTwoLogbFiveSqLe
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.XLeA
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ScaleOneLtA
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.AlLeParams
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.CapLe
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.NuDCardLeASq
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.RankTwoLogbFiveSqLe
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ScaleOneLtA
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.SumRangeSplit
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.TwoWLeFirstRow
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.WPlPos
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.XLeA
+import Formalism.LocalRingCardinality.CoeNeZeroOfNotMem
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open Formalism.MainNotions Formalism.BasicNotions Formalism.MainNotions.G Classical
 
 namespace GlobalTheory.ShapeRows

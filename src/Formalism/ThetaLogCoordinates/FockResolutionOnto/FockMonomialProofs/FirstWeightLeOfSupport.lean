@@ -1,4 +1,57 @@
-import Formalism.ThetaLogCoordinates.FockResolutionOnto.FockMonomialProofs.InitPartZeroXMul
+module
+
+public import Formalism.PolynomialDimension.MultinomialDepth.PartnerM
+public import Formalism.ThetaLogCoordinates.FockResolutionOnto.ShiftLastLetterThresholds
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 namespace Formalism.InvariantFactorPaths.L4
 
@@ -12,8 +65,8 @@ theorem cartan_eigC (LL : Letters N) (j : ℕ) (Cs : Finset (Fin r)) (μ : Fin r
     glAct p LL j c c x = ((μ c : ℤ) : ℚ_[p]) • x := by
   rw [WtSpC, mem_restrictSupport_iff] at hx
   ext m
-  rw [coeff_cartan, coeff_smul, smul_eq_mul]
-  by_cases h : coeff m x = 0
+  rw [coeff_cartan, MvPolynomial.coeff_smul, smul_eq_mul]
+  by_cases h : AddMonoidAlgebra.coeff x m = 0
   · simp [h]
   · have hm := hx (Finset.mem_coe.mpr (mem_support_iff.mpr h))
     rw [Set.mem_setOf_eq] at hm
@@ -139,14 +192,14 @@ theorem glAct_wtspC (LL : Letters N) (j : ℕ) (Cs : Finset (Fin r)) (c d : Fin 
 private theorem exists_mem_coeff_eq_prod_weight_sub_mul (LL : Letters N) (j : ℕ) (c : Fin r)
     (S : Submodule ℚ_[p] (MvPolynomial (Fin N × Fin r) ℚ_[p]))
     (hS : ∀ x ∈ S, glAct p LL j c c x ∈ S) (x : MvPolynomial (Fin N × Fin r) ℚ_[p]) (hx : x ∈ S) :
-    ∀ F : Finset ℤ, ∃ y ∈ S, ∀ m, coeff m y = (∏ w ∈ F, (((wt LL j c m : ℤ) : ℚ_[p]) - (w : ℚ_[p]))) * coeff m x := by
+    ∀ F : Finset ℤ, ∃ y ∈ S, ∀ m, AddMonoidAlgebra.coeff y m = (∏ w ∈ F, (((wt LL j c m : ℤ) : ℚ_[p]) - (w : ℚ_[p]))) * AddMonoidAlgebra.coeff x m := by
   intro F
   induction F using Finset.induction_on with
   | empty => exact ⟨x, hx, fun m => by simp⟩
   | insert a F ha ih =>
     obtain ⟨y, hy, hym⟩ := ih
     refine ⟨glAct p LL j c c y - ((a : ℤ) : ℚ_[p]) • y, sub_mem (hS y hy) (Submodule.smul_mem _ _ hy), fun m => ?_⟩
-    rw [coeff_sub, coeff_cartan, coeff_smul, smul_eq_mul, hym m, Finset.prod_insert ha]
+    rw [MvPolynomial.coeff_sub, coeff_cartan, MvPolynomial.coeff_smul, smul_eq_mul, hym m, Finset.prod_insert ha]
     ring
 private theorem compP_weight_eq_mem_of_glAct_stable (LL : Letters N) (j : ℕ) (c : Fin r)
     (S : Submodule ℚ_[p] (MvPolynomial (Fin N × Fin r) ℚ_[p]))
@@ -164,8 +217,8 @@ private theorem compP_weight_eq_mem_of_glAct_stable (LL : Letters N) (j : ℕ) (
     exact (Finset.ne_of_mem_erase hw) (by exact_mod_cast h.symm)
   have heq : compP (fun m => wt LL j c m = k) x = (∏ w ∈ F, ((k : ℚ_[p]) - (w : ℚ_[p])))⁻¹ • y := by
     ext m
-    rw [coeff_compP, coeff_smul, smul_eq_mul, hym m]
-    by_cases hm : coeff m x = 0
+    rw [coeff_compP, MvPolynomial.coeff_smul, smul_eq_mul, hym m]
+    by_cases hm : AddMonoidAlgebra.coeff x m = 0
     · simp [hm]
     · split_ifs with hk
       · rw [hk, ← mul_assoc, inv_mul_cancel₀ hD, one_mul]
@@ -232,12 +285,12 @@ theorem exists_hwC (LL : Letters N) (j : ℕ) (Cs : Finset (Fin r))
     refine ⟨hsupp x hx m0 hm0, compP (fun m => ∀ c ∈ Cs, wt LL j c m = wt LL j c m0) x,
       wcomp_memC LL j Cs S hSd _ x hx, ?_, ?_⟩
     · intro h0
-      have := congrArg (coeff m0) h0
-      rw [coeff_compP, if_pos (fun c _ => rfl), coeff_zero] at this
+      have := congrArg (AddMonoidAlgebra.coeff · m0) h0
+      rw [coeff_compP, if_pos (fun c _ => rfl), AddMonoidAlgebra.coeff_zero] at this
       exact (mem_support_iff.mp hm0) this
     · rw [WtSpC, mem_restrictSupport_iff]
       intro m hm
-      have hc : coeff m (compP (fun m => ∀ c ∈ Cs, wt LL j c m = wt LL j c m0) x) ≠ 0 :=
+      have hc : AddMonoidAlgebra.coeff (compP (fun m => ∀ c ∈ Cs, wt LL j c m = wt LL j c m0) x) m ≠ 0 :=
         mem_support_iff.mp (Finset.mem_coe.mp hm)
       rw [coeff_compP] at hc
       split_ifs at hc with hP
@@ -479,7 +532,7 @@ theorem typeProj_comm_later (LL : Letters N) (j j' : ℕ) (hjj : j ≤ j') (T : 
     (P : MvPolynomial (Fin N × Fin r) ℚ_[p] →ₗ[ℚ_[p]] MvPolynomial (Fin N × Fin r) ℚ_[p])
     (hP : IsTypeProj p LL j univ T P) (c d : Fin r) (x : MvPolynomial (Fin N × Fin r) ℚ_[p]) :
     P (glAct p LL j' c d x) = glAct p LL j' c d (P x) := by
-  rw [glAct_split LL j j' c d, LinearMap.add_apply, LinearMap.add_apply, map_add,
+  rw [glAct_split LL j j' c d, LinearMap.add_apply, LinearMap.add_apply, map_add (f := _),
     typeProj_glActC LL j univ T P hP c (Finset.mem_univ _) d (Finset.mem_univ _) x,
     typeProj_commC LL j univ T P hP (glRest p LL j j' c d) (fun a _ b _ y => glRest_comm LL j j' hjj c d a b y) x]
 

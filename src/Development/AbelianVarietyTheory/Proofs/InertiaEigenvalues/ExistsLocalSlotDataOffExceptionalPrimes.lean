@@ -1,18 +1,60 @@
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.BoundAtTwoAndThreeForFamily
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.TableLineDegreeTwo
+public import Formalism.SharpRestriction.LevelLetterCocycles.AdmissibleParameterJ
+public import Development.AbelianVarietyTheory.BlockTheory.NonGaloisCusps.BaseSizes
+public import Formalism.SharpRestriction.ParConsts
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ConductorPrimesLtSpecialPrimeThresholdEventuallyStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.JumpSlotConditionsAtLetterStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.LowJumpsAndCloudInWindowsAlongFamilyStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ParametersBaseSizeBoundsAlongFamilyStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ShiftedJumpUpperBoundLeTwistBoundStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.SpecialPrimeThresholdNumericsAlongFamilyStatement
+public import Formalism.PadicSubsetSums.StableGradedCounts.TOPSgLe
+public import Formalism.PadicSubsetSums.StableGradedCounts.TOPSgRange
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.CentralIdemCoeff
 import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.GlobalCore
-import Formalism.SharpRestriction.LevelLetterCocycles.IdempotentChoiceDepthZero
-import Formalism.SharpRestriction.LevelLetterCocycles.TableLineDegreeTwo
-import Formalism.SharpRestriction.LevelLetterCocycles.AdmissibleParameterJ
-import Development.AbelianVarietyTheory.BlockTheory.NonGaloisCusps.BaseSizes
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.MemIntPts
-import Formalism.PadicSubsetSums.StableGradedCounts.TOPSgLe
-import Formalism.PadicSubsetSums.StableGradedCounts.TOPSgRange
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ShiftedJumpUpperBoundLeTwistBoundStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.JumpSlotConditionsAtLetterStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.SpecialPrimeThresholdNumericsAlongFamilyStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.LowJumpsAndCloudInWindowsAlongFamilyStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ParametersBaseSizeBoundsAlongFamilyStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ConductorPrimesLtSpecialPrimeThresholdEventuallyStatement
+public import Formalism.PadicSubsetSums.CentralIdempotents.ResidueAvoidanceOfPrimes
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Formalism Formalism.ConjugateSelfDual ReciprocityTheory.Gal Formalism.BasicNotions Formalism.BasicNotions.Loc Formalism.MainNotions Formalism.MainNotions.N Formalism.WeaklyAdmissibleFiltrations GlobalTheory.Pass GlobalTheory.Cut
 

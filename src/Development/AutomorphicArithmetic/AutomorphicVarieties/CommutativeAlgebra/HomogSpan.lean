@@ -1,4 +1,50 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.ResMapBijective
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.ResMapBijective
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RingTheory.Ideal.BigOperators
+
+@[expose] public section
 
 open IsLocalRing MvPowerSeries UpperTheory.V.Alg
 
@@ -13,7 +59,7 @@ private theorem wcomp_mul_homog (O : Type) [CommRing O] {σ X : Type} [AddCommGr
     have hp' := Finset.HasAntidiagonal.mem_antidiagonal.1 hp
     by_cases h2 : Finsupp.weight wt p.2 = w
     · rw [coeff_wcomp, if_pos]
-      rw [← h, ← hp', map_add, h2, add_sub_cancel_right]
+      rw [← h, ← hp', map_add (f := _), h2, add_sub_cancel_right]
     · rw [he _ h2, mul_zero, mul_zero]
   · symm
     refine Finset.sum_eq_zero fun p hp => ?_
@@ -22,7 +68,7 @@ private theorem wcomp_mul_homog (O : Type) [CommRing O] {σ X : Type} [AddCommGr
     · rw [coeff_wcomp, if_neg, zero_mul]
       intro h1
       apply h
-      rw [← hp', map_add, h1, h2, sub_add_cancel]
+      rw [← hp', map_add (f := _), h1, h2, sub_add_cancel]
     · rw [he _ h2, mul_zero]
 
 theorem UpperTheory.V.Alg.homog_span :
@@ -47,14 +93,16 @@ theorem UpperTheory.V.Alg.homog_span :
     obtain ⟨a, ha⟩ := Ideal.mem_span_range_iff_exists_fun.1 hf
     choose G hG using fun i => W.surj (a i)
     have h1 : f - ∑ i, G i * e i ∈ RingHom.ker W.π := by
+
       rw [RingHom.mem_ker, map_sub, ← ha, map_sum]
       simp [hG, heg]
     have h2 := W.homog _ h1 j
+
     rw [RingHom.mem_ker, map_sub, map_sub, sub_eq_zero, map_sum, map_sum] at h2
     have hm : ∀ i, W.π (wcomp O W.wt (j - c i) (G i)) ∈ W.A := fun i =>
       W.part_le_A (j := j - c i) ⟨_, wcomp_mem O W.wt _ _, rfl⟩
     refine ⟨∑ i, ⟨_, hm i⟩ * g i, Ideal.mem_span_range_iff_exists_fun.2 ⟨fun i => ⟨_, hm i⟩, rfl⟩, ?_⟩
-    rw [h2, AddSubmonoidClass.coe_finset_sum]
+    rw [h2, AddSubmonoidClass.coe_finsetSum]
     refine Finset.sum_congr rfl fun i _ => ?_
     rw [wcomp_mul_homog O W.wt (he i), map_mul, heg]
     rfl
@@ -71,12 +119,13 @@ theorem UpperTheory.V.Alg.homog_span :
         exact ⟨f, rfl, {i}, fun n hn => hf n (by simpa using hn)⟩
       · exact ⟨0, map_zero _, ∅, fun n _ => map_zero _⟩
       · rintro a b ⟨f, hf, s, hs⟩ ⟨f', hf', s', hs'⟩
-        refine ⟨f + f', by rw [map_add, hf, hf'], s ∪ s', fun n hn => ?_⟩
+        refine ⟨f + f', by rw [map_add (f := _), hf, hf'], s ∪ s', fun n hn => ?_⟩
         rw [Finset.mem_union, not_or] at hn
-        rw [map_add, hs n hn.1, hs' n hn.2, add_zero]
+        rw [map_add (f := _), hs n hn.1, hs' n hn.2, add_zero]
     obtain ⟨f, hf, s, hs⟩ := hl
     have hsum : f = ∑ j ∈ s, wcomp O W.wt j f := by
       ext n
+
       rw [map_sum]
       simp only [coeff_wcomp]
       rw [Finset.sum_ite_eq]
@@ -86,8 +135,9 @@ theorem UpperTheory.V.Alg.homog_span :
     choose y hy hy' using key f (hf ▸ hx)
     have : x = ∑ j ∈ s, y j := by
       apply Subtype.ext
-      rw [AddSubmonoidClass.coe_finset_sum, ← hf]
+      rw [AddSubmonoidClass.coe_finsetSum, ← hf]
       conv_lhs => rw [hsum]
+
       rw [map_sum]
       exact Finset.sum_congr rfl fun j _ => (hy' j).symm
     rw [this]

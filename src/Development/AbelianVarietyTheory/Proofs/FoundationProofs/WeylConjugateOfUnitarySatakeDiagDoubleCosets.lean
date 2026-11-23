@@ -1,8 +1,52 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.LineOppositeParabolicUnitaryLeviSectionEq
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsAntiJFrame
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SymmetricFunctionInverseInvariant
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.UnitaryDivisorDualLabel
 import Formalism.SatakeDualWeyl.KpqSubgroupCompact
-import Development.AbelianVarietyTheory.Definitions.Divisors.LineOppositeParabolicUnitaryLeviSectionEq
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsAntiJFrame
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SymmetricFunctionInverseInvariant
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AbelianVarietyTheory.Definitions.Divisors.EqOfHasValueAtInfinite
+
+@[expose] public section
 
 noncomputable section
 
@@ -67,7 +111,7 @@ theorem coeff_coact {c : (Fin m → ℤ) →₀ ℂ} {w : Sgn m} (h : ∀ γ, ev
     rw [Finsupp.linearCombination_mapDomain]
     simpa [Finsupp.linearCombination_apply, Finsupp.sum, ev, mono_act] using h γ
   conv_lhs => rw [← e]
-  exact Finsupp.mapDomain_apply (coact_injective w) _ _
+  exact Finsupp.mapDomain_apply_of_injective (coact_injective w) _ _
 
 def chr (γ : Fin m → ℂˣ) : Multiplicative (Fin m → ℤ) →* ℂ where
   toFun a := mono a.toAdd γ
@@ -86,10 +130,11 @@ theorem weylConj_of_sym {α β : Fin m → ℂˣ} (h : ∀ a, sym a α = sym a �
   have hli := (linearIndependent_monoidHom (Multiplicative (Fin m → ℤ)) ℂ).comp _ chr_injective
   have e : ∑ w : Sgn m, Finsupp.single (act w α) (1 : ℂ) = ∑ w : Sgn m, Finsupp.single (act w β) (1 : ℂ) := by
     refine hli (funext fun a => ?_)
+
     simpa [map_sum, sym] using (show ∑ w : Sgn m, chr (act w α) a = ∑ w : Sgn m, chr (act w β) a from h a.toAdd)
   by_contra hn
   have h1 := DFunLike.congr_fun e β
-  rw [Finsupp.finset_sum_apply, Finsupp.finset_sum_apply, Finset.sum_eq_zero fun w _ =>
+  rw [Finsupp.finsetSum_apply, Finsupp.finsetSum_apply, Finset.sum_eq_zero fun w _ =>
     Finsupp.single_eq_of_ne (a := act w α) (a' := β) fun h0 => hn (by rw [h0]; exact weylConj_act w α)] at h1
   simp only [Finsupp.single_apply, Finset.sum_boole, eq_comm (a := (0 : ℂ)), Nat.cast_eq_zero,
     Finset.card_eq_zero, Finset.filter_eq_empty_iff] at h1

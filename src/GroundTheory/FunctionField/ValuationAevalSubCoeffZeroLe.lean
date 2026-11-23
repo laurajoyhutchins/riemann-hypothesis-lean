@@ -1,7 +1,61 @@
-import Mathlib
-import GroundTheory.FunctionField.PlaceDefs
+module
+
+public import GroundTheory.FunctionField.PlaceDefs
+public import GroundTheory.FunctionField.Approximation
 import GroundTheory.FunctionField.PlaceBasic
-import GroundTheory.FunctionField.Approximation
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.FunctionField
@@ -144,8 +198,9 @@ theorem exists_lift_basis (v : Place k K) :
   have hmem : (∑ α, algebraMap k K (d α) * (s' α : K)) =
       ((∑ α, algebraMap k v.ring (d α) * s' α : v.ring) : K) := by
     simp
+
   rw [hmem, v.valuation_lt_one_iff, ← ValuationSubring.valuation_lt_one_iff,
-    ← IsLocalRing.residue_eq_zero_iff, map_sum] at hd
+  ← IsLocalRing.residue_eq_zero_iff, map_sum] at hd
   have h : ∑ α, d α • b α = 0 := by
     rw [← hd]
     refine Finset.sum_congr rfl fun α _ => ?_
@@ -310,13 +365,17 @@ theorem sum_ord_mul_deg_le {x : K} (hx : Transcendental k x) (S : Finset (Place 
 theorem finite_ord_pos (x : K) : {v : Place k K | 0 < v.ord x}.Finite := by
   classical
   by_cases hx0 : x = 0
-  · convert Set.finite_empty
-    ext v
-    simp [hx0]
+  · have h : {v : Place k K | 0 < v.ord x} = ∅ := by
+      ext v
+      simp [hx0]
+    rw [h]
+    exact Set.finite_empty
   by_cases halg : IsAlgebraic k x
-  · convert Set.finite_empty
-    ext v
-    simp [v.ord_eq_zero_of_isAlgebraic halg hx0]
+  · have h : {v : Place k K | 0 < v.ord x} = ∅ := by
+      ext v
+      simp [v.ord_eq_zero_of_isAlgebraic halg hx0]
+    rw [h]
+    exact Set.finite_empty
   by_contra hinf
   obtain ⟨S, hSsub, hcard⟩ := Set.Infinite.exists_subset_card_eq hinf
     (Module.finrank (IntermediateField.adjoin k {x}) K + 1)

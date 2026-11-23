@@ -1,4 +1,50 @@
-import Development.AbelianVarietyTheory.Definitions.Divisors.DivisorSupportCondition
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.DivisorSupportCondition
+public import Mathlib.AlgebraicGeometry.ProjectiveSpectrum.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 open CategoryTheory Limits AlgebraicGeometry GlobalTheory.EtC
@@ -48,12 +94,12 @@ def Pt {X : Scheme.{0}} (p : X ⟶ S k) : Type := {y : S k ⟶ X // y ≫ p = �
 def Pt.map {Y X : Scheme.{0}} {q : Y ⟶ S k} {p : X ⟶ S k} (a : Y ⟶ X) (ha : a ≫ p = q) (y : Pt q) : Pt p :=
   ⟨y.1 ≫ a, by rw [Category.assoc, ha, y.2]⟩
 
-variable (k) in
 
+variable (k) in
 abbrev PN (N : ℕ) : Scheme.{0} := Proj (MvPolynomial.homogeneousSubmodule (Fin (N + 1)) k)
 
-variable (k) in
 
+variable (k) in
 def PNto (N : ℕ) : PN k N ⟶ S k :=
   Proj.toSpecZero _ ≫ Spec.map (CommRingCat.ofHom (algebraMap k (MvPolynomial.homogeneousSubmodule (Fin (N + 1)) k 0)))
 
@@ -61,8 +107,8 @@ def IsProj {X : Scheme.{0}} (p : X ⟶ S k) : Prop := ∃ (N : ℕ) (ι : X ⟶ 
 
 def SP (d : ℕ) {X : Scheme.{0}} (p : X ⟶ S k) : Prop := IsProper p ∧ SmoothOfRelativeDimension d p
 
-variable (k) in
 
+variable (k) in
 abbrev Fam : Type 1 := ∀ (d : ℕ) {X : Scheme.{0}} (p : X ⟶ S k), V l (pullback p p) (2 * d)
 
 variable {l}
@@ -82,8 +128,8 @@ structure IsDiag (δ : Fam l k) : Prop where
   span : ∀ (d : ℕ) {X : Scheme.{0}} (p : X ⟶ S k), SP d p → ∀ (y : Pt p) (U : X.Opens), (U : Set X) = (Set.range y.1)ᶜ →
     ∀ z : V l X (2 * d), pb l U.ι _ z = 0 → ∃ r : ℚ_[l], z = r • δ.cl d y
 
-variable (l) in
 
+variable (l) in
 def kun {X Y : Scheme.{0}} (p : X ⟶ S k) (q : Y ⟶ S k) (n : ℤ) :
     (⨁ i : ℤ, V l X i ⊗[ℚ_[l]] V l Y (n - i)) →ₗ[ℚ_[l]] V l (pullback p q) n :=
   DirectSum.toModule _ _ _ fun i => TensorProduct.lift

@@ -1,9 +1,57 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.FiniteCovolume.StLineNormalForm
-import GroundTheory.HeightsAndTheta.Heights.FiniteCovolume.PIdealClassesFinite
-import GroundTheory.HeightsAndTheta.Heights.FiniteCovolume.PLineCoeffsFG
-import GroundTheory.HeightsAndTheta.Heights.FiniteCovolume.PLinePairOrbitsFinite
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.ExistsCommonMultiple
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.FiniteCovolume.StLineNormalForm
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.ExistsCommonMultiple
+public import GroundTheory.HeightsAndTheta.Heights.FiniteCovolume.PIdealClassesFinite
+public import GroundTheory.HeightsAndTheta.Heights.FiniteCovolume.PLineCoeffsFG
+public import GroundTheory.HeightsAndTheta.Heights.FiniteCovolume.PLinePairOrbitsFinite
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GroundTheory.Heights₂.Heights.FiniteCovolume
 
@@ -17,16 +65,16 @@ section Denominators
 
 variable {E : Type*} [Field E] [NumberField E]
 
-omit [NumberField E] in
 
+omit [NumberField E] in
 theorem isIntegral_natCast_mul {n : ℕ} {x : E} (hx : IsIntegral ℤ x) :
     IsIntegral ℤ ((n : E) * x) := by
   have : IsIntegral ℤ (n : E) := by
     simpa using isIntegral_algebraMap (R := ℤ) (A := E) (x := (n : ℤ))
   exact this.mul hx
 
-omit [NumberField E] in
 
+omit [NumberField E] in
 theorem isIntegral_mul_of_dvd {a b : ℕ} {x : E} (hx : IsIntegral ℤ ((a : E) * x)) (hab : a ∣ b) :
     IsIntegral ℤ ((b : E) * x) := by
   obtain ⟨k, rfl⟩ := hab
@@ -47,8 +95,8 @@ theorem exists_nat_mul_isIntegral (x : E) : ∃ n : ℕ, 0 < n ∧ IsIntegral �
     rw [h', Int.cast_neg, neg_mul]
     exact hyx.neg
 
-omit [Field E] [NumberField E] in
 
+omit [Field E] [NumberField E] in
 theorem exists_common_multiple {ι : Type*} (s : Finset ι) (P : ι → ℕ → Prop)
     (hP : ∀ i a b, P i a → a ∣ b → P i b) (hex : ∀ i ∈ s, ∃ a, 0 < a ∧ P i a) :
     ∃ d, 0 < d ∧ ∀ i ∈ s, P i d :=
@@ -56,7 +104,7 @@ theorem exists_common_multiple {ι : Type*} (s : Finset ι) (P : ι → ℕ → 
 
 theorem exists_den_of_fg {J : AddSubgroup E} (hJ : J.FG) :
     ∃ d : ℕ, 0 < d ∧ ∀ j ∈ J, IsIntegral ℤ ((d : E) * j) := by
-  obtain ⟨S, rfl⟩ := hJ
+  obtain ⟨S, rfl⟩ := AddSubgroup.isAddFG_iff.mp hJ
   obtain ⟨d, hd, hS⟩ := exists_common_multiple S (fun s n => IsIntegral ℤ ((n : E) * s))
     (fun _ _ _ h hab => isIntegral_mul_of_dvd h hab) (fun s _ => exists_nat_mul_isIntegral s)
   refine ⟨d, hd, fun j hj => ?_⟩
@@ -66,8 +114,8 @@ theorem exists_den_of_fg {J : AddSubgroup E} (hJ : J.FG) :
   | add x y _ _ hx hy => rw [mul_add]; exact hx.add hy
   | neg x _ hx => rw [mul_neg]; exact hx.neg
 
-variable (E) in
 
+variable (E) in
 def intMultiples (N : ℕ) : AddSubgroup E :=
   (integralClosure ℤ E).toSubring.toAddSubgroup.comap (AddMonoidHom.mulLeft ((N : E)⁻¹))
 

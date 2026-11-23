@@ -1,5 +1,55 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.DivisibilityProofs.IsChainFirst
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.IsIntersectionFamily
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.FrameDefinitions.PermFinTwoUniv
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.MixedFieldContraction.GenericFibreKerTarget
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.MultihomogeneousIdeals.SwapLoc
+
+@[expose] public section
 
 noncomputable section
 
@@ -26,6 +76,7 @@ theorem algebraicIndependent_linearForms {F E : Type} [Field F] [Field E] [Algeb
       simp [Finset.sum_apply, Pi.single_apply]
     rw [← hTv i]
     conv_rhs => rw [hvi]
+
     simp [map_sum, Finset.sum_apply]
   let A : MvPolynomial κ F →ₐ[F] MvPolynomial D F :=
     aeval fun i => ∑ c, MvPolynomial.C (v i c) * MvPolynomial.X c
@@ -34,9 +85,11 @@ theorem algebraicIndependent_linearForms {F E : Type} [Field F] [Field E] [Algeb
   have hBA : B.comp A = AlgHom.id F _ := by
     apply MvPolynomial.algHom_ext
     intro i
+
     simp only [A, B, AlgHom.comp_apply, aeval_X, map_sum, map_mul, algHom_C, AlgHom.id_apply,
-      algebraMap_eq, Finset.mul_sum]
+    algebraMap_eq, Finset.mul_sum]
     rw [Finset.sum_comm]
+
     simp only [← mul_assoc, ← MvPolynomial.C_mul, ← Finset.sum_mul, ← map_sum, hdual]
     simp [Pi.single_apply, ite_mul]
   have hA : Function.Injective A := by
@@ -49,6 +102,7 @@ theorem algebraicIndependent_linearForms {F E : Type} [Field F] [Field E] [Algeb
       (aeval u).comp A := by
     apply MvPolynomial.algHom_ext
     intro i
+
     simp [A, map_sum, aeval_X, algHom_C]
   have : Function.Injective (aeval fun i => ∑ c, algebraMap F E (v i c) * u c :
       MvPolynomial κ F →ₐ[F] E) := by
@@ -80,6 +134,7 @@ theorem ker_eq_span_homogeneous {F E : Type} [Field F] [Field E] [Algebra F E]
   let ρ : MvPolynomial P F →ₐ[F] MvPolynomial P F := (rename a).comp ρ'
   have hρX : ∀ p, ρ (MvPolynomial.X p) = ∑ i, MvPolynomial.C (c p i) * MvPolynomial.X (a i) := by
     intro p
+
     simp [ρ, ρ', map_sum, aeval_X, rename_C, rename_X]
   have hxp : ∀ p, x p = ∑ i, algebraMap F E (c p i) * x (a i) := by
     intro p
@@ -89,6 +144,7 @@ theorem ker_eq_span_homogeneous {F E : Type} [Field F] [Field E] [Algebra F E]
     have : l p d = ∑ i, c p i * l (a i) d := by
       rw [← hc p]
       simp [Finset.sum_apply]
+
     rw [this, map_sum, Finset.sum_mul]
     refine Finset.sum_congr rfl fun i _ => ?_
     rw [map_mul, mul_assoc]
@@ -99,6 +155,7 @@ theorem ker_eq_span_homogeneous {F E : Type} [Field F] [Field E] [Algebra F E]
       exact (isHomogeneous_X F p).sub
         (IsHomogeneous.sum _ _ _ fun i _ => isHomogeneous_C_mul_X (c p i) (a i))
     · rw [hρX]
+
       simp only [map_sub, aeval_X, map_sum, map_mul, algHom_C, algebraMap_eq]
       simpa [sub_eq_zero] using hxp p
   have hle : Ideal.span S ≤ RingHom.ker (aeval x : MvPolynomial P F →ₐ[F] E) := by

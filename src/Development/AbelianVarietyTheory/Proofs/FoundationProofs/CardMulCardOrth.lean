@@ -1,12 +1,58 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Foundations.NormSumPairRankZeroOfCurveCoordNorm
-import Formalism.PairingDivisors.StatementH
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IdxEqRelIndex
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.FinsumNormNeg
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsTraceOneIntegerConjDiffPrimeTo
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.FrameEmbeddingUniqueFixedStatement
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.AbsNormCmPrimeInertPrimeSignStatement
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.SumCompSurjective
+module
+
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IdxEqRelIndex
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.HESmulRight
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.AbsNormCmPrimeInertPrimeSignStatement
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsTraceOneIntegerConjDiffPrimeTo
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.FinsumNormNeg
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.FrameEmbeddingUniqueFixedStatement
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.SumCompSurjective
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open NumberField Classical Formalism.BasicNotions Formalism.MainNotions Formalism.MainNotions.TaylorLogMetric Formalism.MainNotions.StandardLatticesGL3 GlobalTheory.NormSum GlobalTheory.RatEqui GlobalTheory.InertParity
 open scoped BigOperators Pointwise
 
@@ -173,11 +219,11 @@ theorem isotropic_step [Finite M] (h : IsHerm σ φ β) {X Y : Submodule R M}
     fun p => ?_⟩, ?_⟩
   · obtain ⟨p, rfl⟩ := hπ p
     obtain ⟨q, rfl⟩ := hπ q
-    rw [← map_add, hφ, hφ, hφ, hβ]; exact h1 _ _
+    rw [← map_add (f := _), hφ, hφ, hφ, hβ]; exact h1 _ _
   · obtain ⟨p, rfl⟩ := hπ p
     obtain ⟨p', rfl⟩ := hπ p'
     obtain ⟨q, rfl⟩ := hπ q
-    rw [← map_add, hβ, hβ, hβ]; exact h2 _ _ _
+    rw [← map_add (f := _), hβ, hβ, hβ]; exact h2 _ _ _
   · obtain ⟨p, rfl⟩ := hπ p
     obtain ⟨q, rfl⟩ := hπ q
     rw [← map_smul, ← map_smul, hβ, hβ]; exact h3 _ _ _
@@ -258,7 +304,7 @@ theorem line_step (h : IsHerm σ φ β) (hσ : ∀ a, σ (σ a) = a) {w : R} (hw
   have hb : ∀ a b : R, β (a • x) (b • x) = χ (a * σ b + σ a * b) := fun a b => by
     have := h1 (a • x) (b • x)
     rw [← add_smul, hχ' (a + b), show (a + b) * σ (a + b) = a * σ a + b * σ b + (a * σ b + σ a * b) by
-      rw [map_add]; ring, hχ, hχ, ← hχ', ← hχ'] at this
+      rw [map_add (f := _)]; ring, hχ, hχ, ← hχ', ← hχ'] at this
     exact (mul_left_cancel₀ (mul_ne_zero (h0 _) (h0 _)) this).symm
   have hn : ∀ a : R, β ((a * σ a) • x) (w • x) = φ (a • x) := fun a => by
     rw [hb, hχ']

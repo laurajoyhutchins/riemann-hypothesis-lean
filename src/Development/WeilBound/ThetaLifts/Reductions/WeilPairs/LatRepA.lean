@@ -1,7 +1,52 @@
-import Development.WeilBound.ThetaLifts.Reductions.WeilPairs.GoodLat
-import GroundTheory.GlobalFields.Adele.Compact
-import GroundTheory.GlobalFields.Adele.Approximation
-import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.PlaceDualB
+module
+
+public import Development.WeilBound.ThetaLifts.Reductions.WeilPairs.GoodLat
+public import GroundTheory.GlobalFields.Adele.Approximation
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IntAFSmulMemLatOF
+public import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.PlaceDualB
+public import GroundTheory.GlobalFields.Adele.Compact
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -58,6 +103,7 @@ theorem exists_dualBasis {Λ : Submodule (𝓞 E) (Matrix (Fin nT) (Fin nS) E)} 
   have hM : ∀ x : M, (x : Matrix (Fin nT) (Fin nS) E) = ∑ j, l j x • ((g (Finsupp.single j 1) : M) : Matrix (Fin nT) (Fin nS) E) := by
     intro x
     have h1 : x = g (f x) := LinearMap.congr_fun e x
+
     conv_lhs => rw [h1, ← (f x).univ_sum_single, map_sum, Submodule.coe_sum]
     refine Finset.sum_congr rfl fun j _ => ?_
     rw [show l j x = f x j from hl₀ j x, ← Finsupp.smul_single_one, map_smul, Submodule.coe_smul]
@@ -106,8 +152,8 @@ def sng (i : Fin nT) (k : Fin nS) : E →ₗ[F] Matrix (Fin nT) (Fin nS) E where
     simp only [sngG, Matrix.of_apply, Matrix.smul_apply, RingHom.id_apply]
     split_ifs <;> simp
 
-variable (F) in
 
+variable (F) in
 def tm (a : R) (γ : Matrix (Fin nT) (Fin nS) E) : Matrix (Fin nT) (Fin nS) (R ⊗[F] E) :=
   γ.map fun e => a ⊗ₜ[F] e
 
@@ -137,8 +183,8 @@ theorem tm_nsmul (n : ℕ) (a : R) (γ : Matrix (Fin nT) (Fin nS) E) : n • tm 
   | zero => simp [tm_zero_left]
   | succ n ih => rw [succ_nsmul, ih, succ_nsmul, tm_add_left]
 
-variable (R) in
 
+variable (R) in
 def coordM (l : Matrix (Fin nT) (Fin nS) E →ₗ[F] F) (z : Matrix (Fin nT) (Fin nS) (R ⊗[F] E)) : R :=
   ∑ i, ∑ k, cE R (l ∘ₗ sng i k) (z i k)
 
@@ -157,6 +203,7 @@ theorem coordM_tm (l : Matrix (Fin nT) (Fin nS) E →ₗ[F] F) (a : R) (γ : Mat
     coordM R l (tm F a γ) = l γ • a := by
   have h : l γ = ∑ i, ∑ k, l (sng (F := F) i k (γ i k)) := by
     conv_lhs => rw [← sum_sngG γ]
+
     simp only [map_sum]
     rfl
   rw [h, Finset.sum_smul]
@@ -205,7 +252,7 @@ theorem map_coordM {S : Type} [CommRing S] [Algebra F S] (f : R →ₐ[F] S) (l 
       simp [tm]
     rw [this, coordM_tm, coordM_tm, map_smul]
   | h2 a b ha hb =>
-    rw [coordM_add, map_add, ha, hb, Matrix.map_add _ (map_add _), coordM_add]
+    rw [coordM_add, map_add (f := _), ha, hb, Matrix.map_add _ (map_add _), coordM_add]
 
 end coord
 
@@ -214,8 +261,6 @@ theorem smul_ratWF (c : AF F) (γ : Matrix (Fin nT) (Fin nS) E) :
   ext i k
   simp [ratWF, tm, Matrix.smul_apply, Matrix.map_apply, incAF, inclR, Algebra.TensorProduct.algebraMap_apply,
     Algebra.TensorProduct.tmul_mul_tmul]
-
-theorem intAf_eq : Formalism.MainNotions.StandardLattice.intAf F = (GroundTheory.Global.integralFiniteAdeles (𝓞 F) F : Set (Af F)) := rfl
 
 theorem tm_mem_latOF {Λ : Submodule (𝓞 E) (Matrix (Fin nT) (Fin nS) E)} {β : Af F}
     (hβ : β ∈ GroundTheory.Global.integralFiniteAdeles (𝓞 F) F) {γ : Matrix (Fin nT) (Fin nS) E} (hγ : γ ∈ Λ) :

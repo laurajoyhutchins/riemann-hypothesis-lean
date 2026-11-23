@@ -1,11 +1,69 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.MemBddFormsOfWithSmoothings
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsLaplacianPolynomialKillsHarishChandraFinit
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LaplacianPolynomialKernelOfPolynomialLaplacian
+module
+
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.MemBddFormsOfWithSmoothings
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CasKOp
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CasimirGlFactorEmbeddingMemCapelliAlgebra
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsLaplacianPolynomialKillsHarishChandraFinit
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsPolyAnnihilatesCommutingLinearCombination
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsPolyMaximalCompactCasimirKillsKType
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExpGLImageBallMemNhds
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.DualInfinitesimalCharacterRegular
-import GroundTheory.AutomorphicForms.HarishChandraRegularity
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExpGLImageBallMemNhds
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LaplacianPolynomialKernelOfPolynomialLaplacian
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LeftInvariantLaplacianEqCasimirDecomposition
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MemZalgCommuteLieAction
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RealLieSmoothingMemSmoothAdelicFunctions
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsFiniteMeasureQuotMeasure
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.DualInfinitesimalCharacterRegular
+public import GroundTheory.AutomorphicForms.HarishChandraRegularity
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+public import Mathlib.Analysis.Calculus.ContDiff.FiniteDimension
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Matrix.FiniteDimensional
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Development.AbelianVarietyTheory.Definitions.Divisors.GlRes
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IsExpLieAlgebraComplexUnits
+
+set_option backward.isDefEq.respectTransparency false
+
+@[expose] public section
 
 open NumberField MeasureTheory Matrix GlobalTheory.AutomorphicL2Unitary GlobalTheory.UnitaryBC GlobalTheory.CuspRep GlobalTheory.CuspRep.CuspidalL2GL GlobalTheory.Petersson Formalism.L2.Host
 open Filter Topology GlobalTheory.HCAlpha GlobalTheory.ExpDeriv
@@ -15,7 +73,7 @@ noncomputable section
 
 namespace GlobalTheory.KeepOrth
 
-variable {E : Type} [Field E] [NumberField E] [IsTotallyComplex E] {a : ℕ}
+variable {E : Type} [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] {a : ℕ}
 
 theorem exists_poly_central {f : Sm E a} (h : IsAutForm f) {z : Module.End ℂ (Sm E a)} (hz : z ∈ Zalg E a) :
     ∃ p : Polynomial ℂ, p ≠ 0 ∧ Polynomial.aeval z p f = 0 := by
@@ -141,16 +199,16 @@ theorem eq_univ_of_exp {S : Set (GL (Fin a) (Cinf E))} (h1 : 1 ∈ S) (hS : ∀ 
     obtain ⟨X, rfl⟩ := hz
     exact hS y hy X 1
 
-variable (E a) in
 
+variable (E a) in
 abbrev bas : Module.Basis (Fin (Module.finrank ℝ (Lie E a))) ℝ (Lie E a) := Module.finBasis ℝ (Lie E a)
 
-omit [IsTotallyComplex E] in
 
+omit [_root_.NumberField.IsTotallyComplex E] in
 def crd (i : Fin (Module.finrank ℝ (Lie E a))) (z : Lie E a) : Lie E a →L[ℝ] ℝ :=
   (LinearMap.toContinuousLinearMap ((bas E a).coord i)).comp (lmul (invL z))
 
-omit [IsTotallyComplex E] in
+omit [_root_.NumberField.IsTotallyComplex E] in
 theorem contDiffOn_crd (i : Fin (Module.finrank ℝ (Lie E a))) : ContDiffOn ℝ (⊤ : ℕ∞) (crd i) (invSet E a) :=
   contDiffOn_clm_apply.2 fun v z hz => ((LinearMap.toContinuousLinearMap ((bas E a).coord i)).contDiff.contDiffAt.comp z
     (GlobalTheory.AutGrowth.contDiff_lmul_uncurry.contDiffAt.comp z
@@ -161,8 +219,9 @@ theorem chart_lie (X : Lie E a) (φ : Sm E a) (g : GA E a) (z : Lie E a) :
   unfold chart
   split_ifs
   · conv_lhs => rw [← (bas E a).sum_repr X]
+
     simp only [map_sum, map_smul, LinearMap.sum_apply, LinearMap.smul_apply, Submodule.coe_sum, Finset.sum_apply,
-      Module.Basis.coord_apply]
+    Module.Basis.coord_apply]
     rfl
   · simp
 
@@ -180,8 +239,8 @@ theorem hasFDerivAt_chart (φ : Sm E a) (g : GA E a) {z : Lie E a} (hz : z ∈ i
 
 variable {ω : HChar E} (μ : Measure (GA E a)) [μ.IsHaarMeasure] {ψ : GA E a → ℂ}
 
-variable (ψ) in
 
+variable (ψ) in
 def coef (φ : GA E a → ℂ) (x : GA E a) : ℂ := pet (latticeGL E a) μ (fun g => φ (g * x)) ψ
 
 theorem chart_coef (φ : GA E a → ℂ) (x : GA E a) (z : Lie E a) :
@@ -209,13 +268,13 @@ theorem hasFDerivAt_coef (hω : ω.IsUnitary) (h' : ψ ∈ bddForms E a ω) {φ 
       (lt_add_one _)).mono fun _ => le_of_lt
   have hi : ∀ i, Integrable (fun q : Quot (latticeGL E a) => (crd i z).smulRight
       (chart (lie E a (bas E a i) φ).1 (q.out * x) z * conj (ψ q.out))) (GlobalTheory.AutomorphicL2Unitary.quotMeasure (latticeGL E a) μ) :=
-    fun i => (ContinuousLinearMap.smulRightL ℝ _ ℂ (crd i z)).integrable_comp (integrable_chart μ hω h' (hl _) x z)
+    fun i => (StrongDual.smulRightL ℝ _ ℂ (crd i z)).integrable_comp (integrable_chart μ hω h' (hl _) x z)
   have key := hasFDerivAt_integral_of_dominated_of_fderiv_le (𝕜 := ℝ) (μ := GlobalTheory.AutomorphicL2Unitary.quotMeasure (latticeGL E a) μ)
     (F := fun y q => chart φ.1 (q.out * x) y * conj (ψ q.out))
     (F' := fun y q => ∑ i, (crd i y).smulRight (chart (lie E a (bas E a i) φ).1 (q.out * x) y * conj (ψ q.out)))
     (bound := fun _ => ∑ i, (‖crd i z‖ + 1) * (C i * D)) hs
     (.of_forall fun y => (integrable_chart μ hω h' h x y).1) (integrable_chart μ hω h' h x z)
-    (integrable_finset_sum _ fun i _ => hi i).1
+    (integrable_finsetSum _ fun i _ => hi i).1
     (.of_forall fun q y hy => (norm_sum_le _ _).trans (Finset.sum_le_sum fun i _ => by
       rw [ContinuousLinearMap.norm_smulRight_apply, norm_mul, Complex.norm_conj]
       exact mul_le_mul (hy.2 i) (mul_le_mul (GlobalTheory.CuspQuot.norm_chart_le (hC i) _ _) (hD _) (norm_nonneg _)
@@ -225,11 +284,11 @@ theorem hasFDerivAt_coef (hω : ω.IsUnitary) (h' : ψ ∈ bddForms E a ω) {φ 
       refine ((hasFDerivAt_chart φ (q.out * x) hy.1).mul_const (conj (ψ q.out))).congr_fderiv ?_
       ext1 v
       simp [Finset.mul_sum, mul_comm, mul_left_comm])
-  rw [integral_finset_sum _ fun i _ => hi i] at key
+  rw [integral_finsetSum _ fun i _ => hi i] at key
   rw [funext (chart_coef μ φ.1 x)]
   refine key.congr_fderiv (Finset.sum_congr rfl fun i _ => ?_)
   rw [chart_coef]
-  exact (ContinuousLinearMap.smulRightL ℝ _ ℂ (crd i z)).integral_comp_comm (integrable_chart μ hω h' (hl _) x z)
+  exact (StrongDual.smulRightL ℝ _ ℂ (crd i z)).integral_comp_comm (integrable_chart μ hω h' (hl _) x z)
 
 variable {V : Submodule ℂ (Sm E a)}
 
@@ -258,7 +317,7 @@ theorem lieD_coef (hω : ω.IsUnitary) (h' : ψ ∈ bddForms E a ω) {φ : Sm E 
   rw [lieD, (hasFDerivAt_coef μ hω h' h hl x (z := oneL E a) isUnit_one).fderiv, e (coef μ ψ _)]
   simp only [ContinuousLinearMap.sum_apply, ContinuousLinearMap.smulRight_apply, chart_coef, chart_lie X,
     Finset.sum_mul, smul_mul_assoc]
-  refine Eq.trans (Finset.sum_congr rfl fun i _ => ?_) (integral_finset_sum _ fun i _ =>
+  refine Eq.trans (Finset.sum_congr rfl fun i _ => ?_) (integral_finsetSum _ fun i _ =>
     (integrable_chart μ hω h' (hl (bas E a i)) x (oneL E a)).smul ((bas E a).coord i X)).symm
   simp only [Pi.smul_apply]
   rw [integral_smul, crd, ContinuousLinearMap.comp_apply, e1]
@@ -316,7 +375,7 @@ theorem pet_translate_eq_zero (hω : ω.IsUnitary) (h' : ψ ∈ bddForms E a ω)
   exact (key ▸ Set.mem_univ y : y ∈ {y | ∀ φ : V, (T φ).1 (infGL E a y) = 0}) ⟨φ, hφ⟩
 
 theorem pet_eq_zero_of_orthogonal (hB : GlobalTheory.Published.CuspFormsBoundedGL) (E : Type) [Field E] [NumberField E]
-    [IsTotallyComplex E] (a : ℕ) (π π' : CuspSub E a) (ω : HChar E) (hω : ω.IsUnitary) (h : π.HasCentChar ω)
+    [_root_.NumberField.IsTotallyComplex E] (a : ℕ) (π π' : CuspSub E a) (ω : HChar E) (hω : ω.IsUnitary) (h : π.HasCentChar ω)
     (h' : π'.HasCentChar ω) (μ : Measure (GA E a)) [μ.IsHaarMeasure]
     (h0 : ∀ φ ∈ π.V, ∀ ψ ∈ π'.V, pet (latticeGL E a) μ φ.1 ψ.1 = 0) :
     (∀ φ ∈ π.V, ∀ ψ ∈ π'.V, ∀ y : GL (Fin a) (Cinf E),

@@ -1,8 +1,47 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.NGData
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.TermLoc
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.LocClosed
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.LatSpanLeSpan
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.LocClosed
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.LatSpanLeSpan
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -32,17 +71,18 @@ variable {e f f' : Fin r → S.V}
 
 include hee hef hef' in
 theorem hT_e_chg (v : S.V) (b : Fin r) : S.hT (e b) (chg e f f' σ v) = S.hT (e b) v := by
-  rw [chg_apply, map_add, map_add, hT_e_pX hee, hT_e_pY hef, hT_e_pj hee hef]
+  rw [chg_apply, map_add (f := _), map_add (f := _), hT_e_pX hee, hT_e_pY hef, hT_e_pj hee hef]
   simp
 
 include hff hef in
 theorem hT_f_chg (v : S.V) (b : Fin r) : S.hT (f b) (chg e f f' σ v) = S.hT (f' b) v := by
-  rw [chg_apply, map_add, map_add, hT_f_pY hff, hT_f_pj hff hef, pX_apply, map_sum]
+
+  rw [chg_apply, map_add (f := _), map_add (f := _), hT_f_pY hff, hT_f_pj hff hef, pX_apply, map_sum]
   simp [map_smul, hfe' hef]
 
 include hee hff hef in
 theorem pj_chg (v : S.V) : pj e f (chg e f f' σ v) = pj e f (σ (pj e f' v)) := by
-  rw [chg_apply, map_add, map_add, pj_of_memX hee hef _ (pX_mem v), pj_of_memY hff hef _ (pY_mem v),
+  rw [chg_apply, map_add (f := _), map_add (f := _), pj_of_memX hee hef _ (pX_mem v), pj_of_memY hff hef _ (pY_mem v),
     pj_pj hee hff hef]
   simp
 
@@ -59,7 +99,7 @@ include hee hff hef hff' hef' hσ hX' in
 theorem chg_chg (v : S.V) : chg e f' f σ.symm (chg e f f' σ v) = v := by
   have hp : ∀ a, S.hT (e a) (σ (pj e f' v)) = 0 := perpX_map σ hσ hX' _ (fun b => hT_e_pj hee hef' v b)
   have h1 : pX e f (chg e f f' σ v) = pX e f' v := by
-    rw [chg_apply, map_add, map_add, pX_of_mem hef _ (pX_mem v), pX_of_memY hff _ (pY_mem v), pX_pj hff hef]
+    rw [chg_apply, map_add (f := _), map_add (f := _), pX_of_mem hef _ (pX_mem v), pX_of_memY hff _ (pY_mem v), pX_pj hff hef]
     simp
   have h2 : pY e f' (chg e f f' σ v) = pY e f' v := by
     rw [pY_apply, pY_apply]
@@ -70,7 +110,7 @@ theorem chg_chg (v : S.V) : chg e f' f σ.symm (chg e f f' σ v) = v := by
       have := hX' _ (pj_sub_mem (f := f) _ hp)
       rwa [map_sub, LinearEquiv.symm_apply_apply] at this
     have : σ.symm (pj e f (σ (pj e f' v))) = pj e f' v + (σ.symm (pj e f (σ (pj e f' v))) - pj e f' v) := by abel
-    rw [this, map_add, pj_pj hee hff' hef', pj_of_memX hee hef' _ hx, add_zero]
+    rw [this, map_add (f := _), pj_pj hee hff' hef', pj_of_memX hee hef' _ hx, add_zero]
   rw [chg_apply, h1, h2, h3, ← decomp (e := e) (f := f') v]
 
 include hee hef' in
@@ -93,7 +133,7 @@ theorem chg_perp (l : S.V) (hl : ∀ a, S.hT (e a) l = 0 ∧ S.hT (f' a) l = 0) 
 include hee hef in
 theorem chg_apply_of_orthogonal (z : S.V) (hz : ∀ a, S.hT (e a) z = 0 ∧ S.hT (f' a) z = 0) (hzf : ∀ a, S.hT (f a) z = 0)
     (hσz : σ z - z ∈ Submodule.span E (Set.range e)) : chg e f f' σ z = z := by
-  rw [chg_perp z hz, show σ z = z + (σ z - z) by abel, map_add, pj_of_memX hee hef _ hσz, add_zero,
+  rw [chg_perp z hz, show σ z = z + (σ z - z) by abel, map_add (f := _), pj_of_memX hee hef _ hσz, add_zero,
     pj_perp z fun a => ⟨(hz a).1, hzf a⟩]
 
 include hee hff hef in

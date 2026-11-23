@@ -1,5 +1,48 @@
-import Mathlib
-import GroundTheory.LocalFields.LocalArtinTransport
+module
+
+public import GroundTheory.LocalFields.LocalArtinMap
+public import GroundTheory.LocalFields.LocalArtinTransport
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+
+@[expose] public section
 
 noncomputable section
 
@@ -97,8 +140,8 @@ end Embedding
 
 section Intrinsic
 
-variable (K L) in
 
+variable (K L) in
 def localArtinMapOfField : Kˣ →* (L ≃ₐ[K] L) :=
   have : Algebra.IsSeparable K L := IsGalois.to_isSeparable
   artinOfEmbedding (IsSepClosed.lift : L →ₐ[K] SeparableClosure K)
@@ -109,28 +152,6 @@ theorem localArtinMapOfField_eq_artinOfEmbedding {Ω : Type*} [Field Ω] [Algebr
   let ε : SeparableClosure K ≃ₐ[K] Ω := IsSepClosure.equiv K (SeparableClosure K) Ω
   rw [localArtinMapOfField, ← artinOfEmbedding_algEquiv_comp ε]
   exact artinOfEmbedding_eq _ _
-
-theorem ker_artinOfEmbedding {Ω : Type*} [Field Ω] [Algebra K Ω] [IsSepClosure K Ω]
-    (ι : L →ₐ[K] Ω) : (artinOfEmbedding ι).ker = (normUnits K L).range := by
-  have := isAbelianGalois_fieldRange ι
-  have := finiteDimensional_fieldRange ι
-  have hker : (artinOfEmbedding ι).ker =
-      ((restrictAb ι.fieldRange (le_maximalAbelianExtension _)).comp (localArtinMap K Ω)).ker := by
-    ext x
-    simp [artinOfEmbedding, MonoidHom.mem_ker]
-  rw [hker, ker_restrictAb_localArtinMap]
-  ext x
-  constructor
-  · rintro ⟨w, rfl⟩
-    refine ⟨Units.map ι.equivFieldRange.symm.toRingEquiv.toRingHom.toMonoidHom w, Units.ext ?_⟩
-    simp [coe_normUnits, Algebra.norm_eq_of_algEquiv]
-  · rintro ⟨w, rfl⟩
-    refine ⟨Units.map ι.equivFieldRange.toRingEquiv.toRingHom.toMonoidHom w, Units.ext ?_⟩
-    simp [coe_normUnits, Algebra.norm_eq_of_algEquiv]
-
-theorem ker_localArtinMapOfField : (localArtinMapOfField K L).ker = (normUnits K L).range := by
-  have : Algebra.IsSeparable K L := IsGalois.to_isSeparable
-  exact ker_artinOfEmbedding _
 
 theorem surjective_localArtinMapOfField : Function.Surjective (localArtinMapOfField K L) := by
   have : Algebra.IsSeparable K L := IsGalois.to_isSeparable
@@ -143,15 +164,6 @@ theorem surjective_localArtinMapOfField : Function.Surjective (localArtinMapOfFi
   refine ⟨x, ?_⟩
   change (AlgEquiv.autCongr ι.equivFieldRange).symm _ = σ
   rw [hx, MulEquiv.symm_apply_apply]
-
-def localReciprocityOfField : Kˣ ⧸ (normUnits K L).range ≃* (L ≃ₐ[K] L) :=
-  (QuotientGroup.quotientMulEquivOfEq ker_localArtinMapOfField.symm).trans
-    (QuotientGroup.quotientKerEquivOfSurjective _ surjective_localArtinMapOfField)
-
-theorem localReciprocityOfField_mk (x : Kˣ) :
-    localReciprocityOfField (K := K) (L := L) (x : Kˣ ⧸ (normUnits K L).range) =
-      localArtinMapOfField K L x :=
-  rfl
 
 end Intrinsic
 

@@ -1,8 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.EqZeroOfForallPowDvd
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DividedInOfQuasiLogarithmStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.QuasiLogarithmDevissageGenerationStepStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.QuasiLogarithmDevissageStepIndependentStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.EqZeroOfForallPowDvd
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DividedInOfQuasiLogarithmStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.QuasiLogarithmDevissageGenerationStepStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.QuasiLogarithmDevissageStepIndependentStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.EpsilonPairingZeta
+import Development.AbelianVarietyTheory.Definitions.Divisors.GhostFrobenius
+
+@[expose] public section
+
 open MvPowerSeries GlobalTheory GlobalTheory.Katz GlobalTheory.QLog GlobalTheory.PDivGroup GlobalTheory.Sandwich GlobalTheory.IndefiniteRowSideFullHecke.EpsilonPairingZeta GlobalTheory.PDivLat
 
 set_option autoImplicit false
@@ -15,7 +59,7 @@ variable {B Q : Type} [CommRing B] [CommRing Q] [Algebra B Q] {σ ι : Type} [Fi
 
 theorem comb_add (b c : ι → B) (e : ι → MvPowerSeries σ Q) :
     comb (b + c) e = comb b e + comb c e := by
-  simp [comb, map_add, add_smul, Finset.sum_add_distrib]
+  simp [comb, map_add (f := _), add_smul, Finset.sum_add_distrib]
 
 theorem comb_sub (b c : ι → B) (e : ι → MvPowerSeries σ Q) :
     comb (b - c) e = comb b e - comb c e := by
@@ -34,12 +78,13 @@ theorem comb_mul_right (r : B) (b : ι → B) (e : ι → MvPowerSeries σ Q) :
 
 theorem coeff_comb (b : ι → B) (e : ι → MvPowerSeries σ Q) (α : σ →₀ ℕ) :
     coeff α (comb b e) = ∑ i, algebraMap B Q (b i) * coeff α (e i) := by
-  simp only [comb, map_sum, coeff_smul]
+  set_option synthInstance.maxHeartbeats 100000 in
+    simp only [comb, map_sum, coeff_smul]
 
 end GlobalTheory.BasisLift
 
-open GlobalTheory.BasisLift in
 
+open GlobalTheory.BasisLift in
 theorem GlobalTheory.basis_lift : ∀ (p : ℕ) [Fact p.Prime] (B O Q : Type) [CommRing B] [CommRing Q] [CommRing O] [Algebra B Q] (θ : B →+* O), IsFrame p Q θ → ∀ (d : ℕ) (μ : Fin d → MvPowerSeries (Fin d ⊕ Fin d) B), IsLift θ μ → ∀ (C : Type) [CommRing C] [Algebra O C], IsFrame p C (RingHom.id O) → ∀ Θ : Q →+* C, (∀ b, Θ (algebraMap B Q b) = algebraMap O C (θ b)) → ∀ (ι : Type) [Fintype ι] (e : ι → MvPowerSeries (Fin d) Q), (∀ i, QL μ ⊤ (e i)) → IsBasis (fun i => map θ (μ i)) (fun i => map Θ (e i)) → Relation.ReflTransGen (fun N N' : Ideal B => IsStep p θ N' N) ⊤ (Ideal.span {(p : B)}) → IsBasis μ e := by
   intro p _ B O Q _ _ _ _ θ hF d μ hL C _ _ hC Θ hΘ ι _ e he hB hch
   obtain ⟨u, hu⟩ := hF.unit_p
@@ -74,7 +119,7 @@ theorem GlobalTheory.basis_lift : ∀ (p : ℕ) [Fact p.Prime] (B O Q : Type) [C
       · intro α
         obtain ⟨x, -, hx⟩ := hs α
         obtain ⟨y, -, hy⟩ := hs' α
-        exact ⟨x + y, trivial, by rw [map_add, hx, hy, map_add]⟩
+        exact ⟨x + y, trivial, by rw [map_add (f := _), hx, hy, map_add (f := _)]⟩
       · rw [comb_add]; convert hq' using 1; abel
 
   have divP : ∀ h : MvPowerSeries (Fin d) Q, QL μ (Ideal.span {(p : B)}) h →
@@ -176,7 +221,7 @@ theorem GlobalTheory.basis_lift : ∀ (p : ℕ) [Fact p.Prime] (B O Q : Type) [C
       · intro α
         obtain ⟨a, -, ha⟩ := hS α
         obtain ⟨c, -, hc⟩ := hsF (Fs K) α
-        exact ⟨a + p ^ K * c, trivial, by simp [coeff_smul, ha, hc, map_add, map_mul, map_pow, map_natCast]⟩
+        exact ⟨a + p ^ K * c, trivial, by simp [coeff_smul, ha, hc, map_add (f := _), map_mul, map_pow, map_natCast]⟩
       · have h1 : x (K + 1) = x K + fun i => (p : B) ^ K * bF (Fs K) i := by
           funext i; simp [hx, Finset.sum_range_succ]
         have h2 : (Fs (K + 1)).1 = gF (Fs K) := by rw [hFs]
@@ -205,7 +250,7 @@ theorem GlobalTheory.basis_lift : ∀ (p : ℕ) [Fact p.Prime] (B O Q : Type) [C
       rw [hfe]
       have e1 : comb (x v) e + S + (p : Q) ^ v • (Fs v).1 - comb L e =
           (comb (x v) e - comb L e) + S + (p : Q) ^ v • (Fs v).1 := by abel
-      rw [e1, ← comb_sub, map_add, map_add, coeff_comb, coeff_smul]
+      rw [e1, ← comb_sub, map_add (f := _), map_add (f := _), coeff_comb, coeff_smul]
       refine add_mem (add_mem (Subring.sum_mem _ fun i _ => ?_) ?_) (hv _ (Fs v).2)
       · rw [show (x v - L) i = c i * (p : B) ^ v from (hc i).symm,
           show algebraMap B Q (c i * (p : B) ^ v) * coeff α (e i) =

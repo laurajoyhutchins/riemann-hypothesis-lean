@@ -1,7 +1,64 @@
-import Mathlib
-import Development.AutomorphicArithmetic.LocalEmbeddings.ULieDefs
+module
 
-open NumberField Matrix Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes GlobalTheory.AdelicU GlobalTheory.SiegelSet GlobalTheory.UAut GlobalTheory.ULie
+public import Mathlib.Algebra.Polynomial.AlgebraMap
+public import Mathlib.Basic.Complex.Basic
+public import Mathlib.LinearAlgebra.FiniteDimensional.Defs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Finiteness.Lattice
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AbelianVarietyTheory.Definitions.Divisors.LocallyCompactUnipFlag
+import Development.AbelianVarietyTheory.Definitions.Foundations.EventuallyNormFinLeOne
+import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.IsSmoothModerateOfIsAutFunSm
+import Formalism.SharpRestriction.GlobalSchurBounds.GeneralLinearActions.GenusMassVolumes
+public import Mathlib.Algebra.Polynomial.Monic
+public import Mathlib.LinearAlgebra.FiniteDimensional.Basic
+public import Mathlib.RingTheory.Adjoin.Polynomial.Basic
+
+@[expose] public section
+
+open NumberField Matrix Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes GlobalTheory.AdelicU GlobalTheory.SiegelSet GlobalTheory.UAut
 open scoped TensorProduct
 
 private theorem UpperTheory.adjoin_apply_mem_of_invariant_submodule {V : Type} [AddCommGroup V] [Module ℂ V]
@@ -93,6 +150,7 @@ theorem UpperTheory.finiteDimensional_span_adjoin_apply_of_commuting_algebraic :
               (Submodule.mem_map_of_mem hw)
           · have hsplit : (a ^ j) w = (a ^ (j - Q.natDegree)) ((a ^ Q.natDegree) w) := by
               rw [← Module.End.mul_apply, ← pow_add, Nat.sub_add_cancel (not_lt.mp hj)]
+
             rw [hsplit, hred w hw, map_neg, map_sum]
             refine U'.neg_mem (U'.sum_mem (fun i hi => ?_))
             rw [map_smul, ← Module.End.mul_apply, ← pow_add]
@@ -109,7 +167,7 @@ theorem UpperTheory.finiteDimensional_span_adjoin_apply_of_commuting_algebraic :
           exact hpow _ w hw
         · simp
         · show a (x + y) ∈ U'
-          rw [map_add]
+          rw [map_add (f := _)]
           exact U'.add_mem hx hy
       have hU'b : ∀ b ∈ (↑t : Set (Module.End ℂ V)), ∀ u ∈ U', b u ∈ U' := by
         intro b hb u hu
@@ -122,7 +180,7 @@ theorem UpperTheory.finiteDimensional_span_adjoin_apply_of_commuting_algebraic :
           exact hpow _ _ (hUinv _ b hb w hw)
         · simp
         · show b (x + y) ∈ U'
-          rw [map_add]
+          rw [map_add (f := _)]
           exact U'.add_mem hx hy
       have hle : U ↑(insert a t) ≤ U' := by
         rw [Submodule.span_le]

@@ -1,11 +1,59 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.HasGammaX
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ShintaniFormula
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.MultisetProdMapProductEqProdProd
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IwasawaCellDecomposition
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.MemCellOfUnipotentIwahoriProduct
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.AdelicIwasawaCellsDisjointOffFinset
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HeckeDEqSumOfAgree
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.IsSatVecUOfIsSphericalU
+public import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.NotIsGenericDetRepTwo
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsContinuousPadic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.NonemptyEquivOfRangeEq
+import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.HasExponentZeroIff
+
+@[expose] public section
 
 open NumberField IsDedekindDomain ValuativeRel Matrix MeasureTheory
 open Formalism.UG GlobalTheory.PRep GlobalTheory.LFun GlobalTheory.SmGL GlobalTheory.SplitWeil GlobalTheory.LocGL GlobalTheory.Whittaker GlobalTheory.LocLanglands
@@ -21,7 +69,7 @@ theorem eq_zero_of_not_antitone_int (E : Type) [Field E] [NumberField E] (w : He
     (hψ : ∀ x : w.adicCompletion E, (∀ y ∈ Ov E w, ψ (x * y) = 1) ↔ x ∈ Ov E w)
     (W : GL (Fin n) (w.adicCompletion E) → ℂ)
     (hWN : ∀ u ∈ unipB (w.adicCompletion E) (Fin n), ∀ g, W (u * g) = ψ (superDiag u) * W g)
-    (hWK : ∀ g, ∀ k ∈ KGL w n, W (g * k) = W g)
+    (hWK : ∀ g, ∀ k ∈ KGL w (n := n), W (g * k) = W g)
     (ϖ : (w.adicCompletion E)ˣ) (hϖ : IsUnifV E w (ϖ : w.adicCompletion E)) (l : Fin n → ℤ) (hl : ¬ Antitone l)
     (D : GL (Fin n) (w.adicCompletion E))
     (hDv : (D : Matrix (Fin n) (Fin n) (w.adicCompletion E)) =
@@ -98,7 +146,7 @@ theorem eq_zero_of_not_antitone_int (E : Type) [Field E] [NumberField E] (w : He
       rw [hT, hentry, if_neg (fun h => by rw [← h] at hb'; omega), if_neg (fun h => hai h.1.symm), add_zero]
     · intro h
       exact absurd (Finset.mem_univ i) h
-  have hk : T c ∈ KGL w n := by
+  have hk : T c ∈ KGL w (n := n) := by
     refine ⟨⟨Matrix.transvection i j ⟨c, hcO⟩, Matrix.transvection i j (-⟨c, hcO⟩),
       by rw [Matrix.transvection_mul_transvection_same i j hne, add_neg_cancel, Matrix.transvection_zero],
       by rw [Matrix.transvection_mul_transvection_same i j hne, neg_add_cancel, Matrix.transvection_zero]⟩, ?_⟩
@@ -126,61 +174,5 @@ theorem eq_zero_of_not_antitone_int (E : Type) [Field E] [NumberField E] (w : He
   rw [hkey, hWN (T x) hu D, hsd] at h1
   have h2 : (ψ x - 1) * W D = 0 := by rw [sub_mul, h1, one_mul, sub_self]
   exact (mul_eq_zero.1 h2).resolve_left (sub_ne_zero.2 hψy)
-
-theorem val_emb₂_tD_one (K : Type) [Field K] {m j n : ℕ} (hn : m + (j + 1) = n) (ϖ : Kˣ) (a : Fin m → ℤ) :
-    ((emb₂ K (stdSum hn) (GlobalTheory.IwaCell.tD ϖ a, 1) : GL (Fin n) K) : Matrix (Fin n) (Fin n) K) =
-      Matrix.diagonal fun k : Fin n => ((ϖ ^ (if h : (k : ℕ) < m then a ⟨k, h⟩ else 0) : Kˣ) : K) := by
-  rw [val_emb₂]
-  ext p q
-  obtain ⟨p, rfl⟩ := (stdSum hn).surjective p
-  obtain ⟨q, rfl⟩ := (stdSum hn).surjective q
-  rcases p with p | p <;> rcases q with q | q <;>
-    simp [GlobalTheory.IwaCell.val_tD, Matrix.diagonal_apply, Matrix.one_apply]
-  rw [show ((GlobalTheory.IwaCell.tD ϖ a : GL (Fin m) K) : Matrix (Fin m) (Fin m) K) = _ from GlobalTheory.SmGL.val_diagT K _]
-  simp [Matrix.diagonal_apply]
-
-theorem whittaker_value_emb₂_tD : ∀ (E : Type) [Field E] [NumberField E] (w : HeightOneSpectrum (𝓞 E)) (m j n : ℕ)
-    (hn : m + (j + 1) = n) (ψ : AddChar (w.adicCompletion E) ℂ),
-    (∀ x : w.adicCompletion E, (∀ y ∈ Ov E w, ψ (x * y) = 1) ↔ x ∈ Ov E w) →
-    ∀ (W : GL (Fin n) (w.adicCompletion E) → ℂ) (α : Fin n → ℂˣ),
-    (∀ u ∈ unipB (w.adicCompletion E) (Fin n), ∀ g, W (u * g) = ψ (superDiag u) * W g) →
-    (∀ g, ∀ k ∈ KGL w n, W (g * k) = W g) →
-    (∀ ϖ, IsUnifV E w ϖ → ∀ i ≤ n, heckeVec (rightReg ℂ (GL (Fin n) (w.adicCompletion E)) ℂ) (KGL w n)
-      (Tj ℂ n (Ov E w) ϖ i) W = satEig (qV E w) n (Finset.univ.val.map α) i • W) →
-    ∀ ϖ : (w.adicCompletion E)ˣ, IsUnifV E w (ϖ : w.adicCompletion E) → ∀ a : Fin m → ℤ,
-      W (emb₂ (w.adicCompletion E) (stdSum hn) (GlobalTheory.IwaCell.tD ϖ a, 1)) =
-        if Antitone a ∧ ∀ i, 0 ≤ a i then
-          GlobalTheory.JSW.sphW (qV E w) (fun i => (α i : ℂ)) (GlobalTheory.JSW.padTo (Nat.le.intro hn) fun i => (a i).toNat) * W 1
-        else 0 := by
-  intro E _ _ w m j n hn ψ hψ W α hN hK hH ϖ hϖ a
-  have hv := val_emb₂_tD_one (w.adicCompletion E) hn ϖ a
-  split_ifs with ha
-  · have hpow : ∀ i, ((ϖ ^ a i : (w.adicCompletion E)ˣ) : w.adicCompletion E) =
-        (ϖ : w.adicCompletion E) ^ (a i).toNat := by
-      intro i
-      conv_lhs => rw [← Int.toNat_of_nonneg (ha.2 i)]
-      rw [zpow_natCast, Units.val_pow_eq_pow_val]
-    have heq : emb₂ (w.adicCompletion E) (stdSum hn) (GlobalTheory.IwaCell.tD ϖ a, 1) =
-        Units.map (Matrix.diagonalRingHom (Fin n) (w.adicCompletion E)).toMonoidHom
-          (MulEquiv.piUnits.symm fun i => ϖ ^ (GlobalTheory.JSW.padTo (Nat.le.intro hn) fun i => (a i).toNat) i) := by
-      apply Units.ext
-      rw [hv]
-      ext p q
-      by_cases hpq : p = q
-      · subst hpq
-        by_cases hp : (p : ℕ) < m
-        · simp [Matrix.diagonal_apply, GlobalTheory.JSW.padTo, hp, hpow]
-        · simp [Matrix.diagonal_apply, GlobalTheory.JSW.padTo, hp]
-      · simp [Matrix.diagonal_apply, hpq]
-    rw [heq]
-    exact GlobalTheory.JSW.shintani_formula E w n ψ hψ W α hN hK hH ϖ hϖ _
-  · refine eq_zero_of_not_antitone_int E w n ψ hψ W hN hK ϖ hϖ _ ?_ _ hv
-    intro hanti
-    apply ha
-    refine ⟨fun p q hpq => ?_, fun i => ?_⟩
-    · have := hanti (show (⟨p, by omega⟩ : Fin n) ≤ ⟨q, by omega⟩ from Fin.le_def.2 (Fin.le_def.1 hpq))
-      simpa [p.2, q.2] using this
-    · have := hanti (show (⟨i, by omega⟩ : Fin n) ≤ ⟨m, by omega⟩ from Fin.le_def.2 (show (i : ℕ) ≤ m by omega))
-      simpa [i.2] using this
 
 end GlobalTheory.WhitTorus

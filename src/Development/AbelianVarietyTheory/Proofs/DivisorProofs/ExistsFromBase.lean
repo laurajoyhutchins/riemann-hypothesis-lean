@@ -1,9 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsOfPoint
-import Development.AbelianVarietyTheory.Definitions.Divisors.PerFactor
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsMumfordFamOfSubsingleton
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.SabPull
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.IsNatDiagIffIsDiag
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.SumMulEqZeroOfSumToReal
+public import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsOfPoint
+import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsUnifOfIsMumfordOf
 import Development.AbelianVarietyTheory.Definitions.Divisors.FromBase
+import Development.AbelianVarietyTheory.Definitions.Divisors.IsProperToroidalModelStructureMap
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TautBaseChangeTripleLiftLeft
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HomExtNormalSt
+import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.SiegelToroidalIntegral
+
+@[expose] public section
 
 noncomputable section
 
@@ -67,14 +112,6 @@ section Base
 
 variable {o W : Type} [CommRing o] [CommRing W] [IsDomain W] [IsLocalRing W] (T : TautBase o W) (N : ℕ)
 
-def sq : (G2 (Bp T N)).left ⟶ (G2 T.B).left :=
-  (lift (pushPt (cart T N).1.w (fst (Bp T N) (Bp T N))) (pushPt (cart T N).1.w (snd (Bp T N) (Bp T N)))).left
-
-theorem lamφ_sq (I : ULift.{0} (Finset (Fin 2))) :
-    lamφ (Bp T N) I ≫ pullback.fst T.B.hom (fC N) = sq T N ≫ lamφ T.B I :=
-  psum_push (cart T N) _ _ (lift (pushPt (cart T N).1.w (fst (Bp T N) (Bp T N)))
-    (pushPt (cart T N).1.w (snd (Bp T N) (Bp T N)))) (fun i => by fin_cases i <;> simp [x2]) I.down
-
 end Base
 
 end GlobalTheory.PolDeg.TautFrom
@@ -86,12 +123,6 @@ open GlobalTheory.PolDeg.TautEx GlobalTheory.PrimCocycle
 section Iso
 
 variable {o W : Type} [CommRing o] [CommRing W] [IsDomain W] [IsLocalRing W] (T : TautBase o W) (N : ℕ)
-
-def w0 : LB.Iso (abelian₂ T.B T.M.L) (abelian₂ T.B T.M.L) := ⟨fun p => (abelian₂ T.B T.M.L).g p.1 p.2⟩
-
-def wT : LB.Iso (abelian₂ (Bp T N) (Mp T N).L) ((abelian₂ T.B T.M.L).pull (sq T N)) :=
-  isoPull (chartPullLinComb T.M.L (pullback.fst T.B.hom (fC N)) (lamφ (Bp T N)) (lamφ T.B) lamε (sq T N)
-    (lamφ_sq T N)) (ReciprocityTheory.ChartRestriction.G.Geo.Tor.chartPullPull (abelian₂ T.B T.M.L) (sq T N) (sq T N) rfl) (w0 T)
 
 end Iso
 

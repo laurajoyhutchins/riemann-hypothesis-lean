@@ -1,4 +1,47 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.IsIntersectionFamily
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.IsIntersectionFamily
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -17,19 +60,20 @@ abbrev CechC (S : Type*) [CommRing S] {K : Type*} [Fintype K] (ι : K → Type*)
     [AddCommGroup M] [Module (MRingOver S ι) M] (n : ℕ) : Type _ :=
   ∀ I : Cell K ι n, LocalizedModule (cellMon S I.1) M
 
-open Classical in
 
+open Classical in
 def cellRes (S : Type*) [CommRing S] {K : Type*} {ι : K → Type*} (M : Type*) [AddCommGroup M]
     [Module (MRingOver S ι) M] (J I : ∀ k, Finset (ι k)) :
-    LocalizedModule (cellMon S J) M →ₗ[MRingOver S ι] LocalizedModule (cellMon S I) M :=
-  if h : cellMon S J ≤ cellMon S I then LocalizedModule.liftOfLE _ _ h else 0
+    LocalizedModule (cellMon S J) M →ₗ[MRingOver S ι] LocalizedModule (cellMon S I) M := by
+  classical
+  exact if h : cellMon S J ≤ cellMon S I then LocalizedModule.liftOfLE _ _ h else 0
 
 def faceSign {K : Type*} [Fintype K] [LinearOrder K] {ι : K → Type*} [∀ k, LinearOrder (ι k)]
     (I : ∀ k, Finset (ι k)) (k : K) (i : ι k) : ℤ :=
   (-1) ^ (((I k).filter (· < i)).card + ∑ l ∈ Finset.univ.filter (· < k), ((I l).card - 1))
 
-open Classical in
 
+open Classical in
 def cechD (S : Type*) [CommRing S] {K : Type*} [Fintype K] [LinearOrder K] (ι : K → Type*)
     [∀ k, LinearOrder (ι k)] (M : Type*) [AddCommGroup M] [Module (MRingOver S ι) M] (n : ℕ) :
     CechC S ι M n →ₗ[MRingOver S ι] CechC S ι M (n + 1) :=

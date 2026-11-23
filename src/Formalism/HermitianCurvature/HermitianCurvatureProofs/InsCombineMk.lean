@@ -1,4 +1,59 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.BlockTwist
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.BlockTwist
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.AdmissibleRecOfAdmissibleWord
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.FrameOfAdmissibleWord
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.FreeOf2RmatrixTranspose
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Matrix
 open scoped ComplexConjugate
@@ -317,8 +372,8 @@ theorem minus_l (mm1 : Ya - 1 ∈ fw.inv) : ∀ Y ∈ (fw.minus L a Ya).inv, Tw 
     have h2 := io_commute_xi hW fw hF ihx ihl (Ya - 1) mm1
     exact cj_eq_self_of_commute hW.fi_f _ (hW.kap.mul_right ((h1.mul_right h2).smul_right _).neg_right)
 
-omit m0 in
 
+omit m0 in
 theorem minus_m (ihc : Commute (io f : SlopeTestRemainingChoices S A) fw.c) (mm1 : Ya - 1 ∈ fw.inv) : Tw f fi (star s) (fw.m L Ya) := by
   obtain ⟨hcc, hcc'⟩ := hF.c_ci
   have hci : Commute (io f : SlopeTestRemainingChoices S A) fw.ci := by
@@ -376,9 +431,29 @@ theorem minus_F (hfree : fw.Free a) (ihc : Commute (io f : SlopeTestRemainingCho
     · exact ((Commute.zero_right _).mul_right (Commute.one_right _)).add_right ((hio _).mul_right ((hio _).mul_right (hfm i j)))
     · exact ((Commute.zero_right _).mul_right (Commute.zero_right _)).add_right ((hio _).mul_right (hio _))
   have hz := mem_zfns L
+  have hm : Tw f fi (star s) (fw.m L Ya) := by
+    obtain ⟨hcc, hcc'⟩ := hF.c_ci
+    have hci := commute_inv ihc hcc hcc'
+    have hdi : Commute (io f : SlopeTestRemainingChoices S A) (fw.di L) :=
+      hci.mul_right ((WaveHyp.wti (S := S) hW).pow_right _)
+    have hd : Commute (io f : SlopeTestRemainingChoices S A) (fw.d L) :=
+      ((WaveHyp.wt (S := S) hW).pow_right _).mul_right ihc
+    have hstar (x : A) : star (io x : SlopeTestRemainingChoices S A) = io (star x) := by
+      unfold io
+      rw [Matrix.scalar_apply, Matrix.scalar_apply, Matrix.star_eq_conjTranspose,
+        Matrix.diagonal_conjTranspose]
+      rfl
+    have hsf : star fi = f := by rw [← hW.star_f, star_star]
+    have hcj (z : SlopeTestRemainingChoices S A) : cj f fi (star z) = star (cj f fi z) := by
+      unfold cj
+      rw [star_mul, star_mul, hstar, hstar, hW.star_f, hsf, mul_assoc]
+    have hl : cj f fi (fw.l L (Ya - 1)) = fw.l L (Ya - 1) - s • 1 := ihl _ mm1
+    unfold Tw Formalism.FourierDecayAlt.Fr.FrameData.m
+    rw [cj_mul hW.f_fi, cj_mul hW.f_fi, cj_of_comm hW.fi_f hdi, cj_of_comm hW.fi_f hd,
+      hcj, hl, star_sub, star_smul, star_one, mul_sub, sub_mul, mul_smul_comm, mul_one,
+      smul_mul_assoc, di_d L fw hcc']
   have hE := block_twist hW.f_fi hW.fi_f (star s) (io L.ζbi) (io L.ζi) (io L.GG) (fw.m L Ya) (hW.io_fn hz.2.2.2.1)
-    (hW.io_fn hz.2.1) (hW.io_fn hz.2.2.2.2.1)
-    (minus_m (hW := hW) (fw := fw) (hF := hF) (Ya := Ya) (ihx := ihx) (ihl := ihl) (ihc := ihc) (mm1 := mm1))
+    (hW.io_fn hz.2.1) (hW.io_fn hz.2.2.2.2.1) hm
   exact frame_step hW.f_fi a (star s) _ fw.F UU hD hfree.2.2.1 ihF hE
 
 end Letters

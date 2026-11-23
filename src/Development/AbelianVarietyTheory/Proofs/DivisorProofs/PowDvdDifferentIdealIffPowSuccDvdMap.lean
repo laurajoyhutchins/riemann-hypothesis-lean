@@ -1,5 +1,60 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.DlogRatioVolumeFormNeZero
+module
+
+public import Mathlib.RingTheory.DedekindDomain.Different
+public import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Finiteness.Quotient
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.Divisors.CupPair
+import Development.AbelianVarietyTheory.Definitions.Divisors.OneFormMapEqKaehlerDifferentialMap
+
+@[expose] public section
+
 open GlobalTheory.PD GlobalTheory.CechDR KaehlerDifferential
 
 namespace GlobalTheory.TameDifferent
@@ -40,7 +95,7 @@ private theorem trace_add_of_short_exact {k A M C : Type*} [Field k]
     simp only [LinearMap.comp_apply, h2, hs']
   calc LinearMap.trace k M φ
       = LinearMap.trace k M ((φ ∘ₗ f) ∘ₗ r) + LinearMap.trace k M ((φ ∘ₗ s) ∘ₗ g) := by
-        rw [← map_add, ← hφ]
+        rw [← map_add (f := _), ← hφ]
     _ = _ := by
         rw [LinearMap.trace_comp_comm' r (φ ∘ₗ f), LinearMap.trace_comp_comm' g (φ ∘ₗ s), e1, e2]
 
@@ -59,7 +114,7 @@ theorem trace_quotient_pow {k B : Type*} [Field k] [CommRing B] [IsDedekindDomai
     have hbij : Function.Bijective
         (Ideal.Quotient.factor (Ideal.pow_le_self (I := P) (Nat.succ_ne_zero 0))) := by
       refine ⟨?_, Ideal.Quotient.factor_surjective _⟩
-      rw [injective_iff_map_eq_zero]
+      set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
       intro y hy
       obtain ⟨y, rfl⟩ := Ideal.Quotient.mk_surjective y
       rw [Ideal.Quotient.factor_mk, Ideal.Quotient.eq_zero_iff_mem] at hy
@@ -116,7 +171,7 @@ theorem trace_quotient_pow {k B : Type*} [Field k] [CommRing B] [IsDedekindDomai
       rw [key, ih']
       push_cast
       ring
-    · rw [injective_iff_map_eq_zero]
+    · set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
       intro y hy
       obtain ⟨y, rfl⟩ := Ideal.Quotient.mk_surjective y
       rw [hf, Ideal.Quotient.eq_zero_iff_mem] at hy
@@ -139,7 +194,7 @@ theorem trace_quotient_pow {k B : Type*} [Field k] [CommRing B] [IsDedekindDomai
       obtain ⟨u, hu, w, hw, rfl⟩ := Submodule.mem_sup.1 hm
       obtain ⟨y, rfl⟩ := Ideal.mem_span_singleton'.1 hw
       refine ⟨Ideal.Quotient.mk _ y, ?_⟩
-      rw [hf, map_add, Ideal.Quotient.eq_zero_iff_mem.2 hu, zero_add, mul_comm]
+      rw [hf, map_add (f := _), Ideal.Quotient.eq_zero_iff_mem.2 hu, zero_add, mul_comm]
     · intro y
       obtain ⟨y, rfl⟩ := Ideal.Quotient.mk_surjective y
       change Ideal.Quotient.mk _ x * f (Ideal.Quotient.mk _ y) =
@@ -211,7 +266,7 @@ theorem not_pow_dvd_differentIdeal [Algebra.IsSeparable (FractionRing A) (Fracti
   have h1 : x ∈ P ⊔ Q := by
     rw [Ideal.isCoprime_iff_sup_eq.mp hPQ]; trivial
   obtain ⟨u, hu, y, hy, rfl⟩ := Submodule.mem_sup.mp h1
-  rw [map_add, Ideal.Quotient.eq_zero_iff_mem.mpr hu, zero_add] at hx
+  rw [map_add (f := _), Ideal.Quotient.eq_zero_iff_mem.mpr hu, zero_add] at hx
   refine not_dvd_differentIdeal_of_intTrace_not_mem A _ Q hP y hy ?_ h
   rw [← Ideal.Quotient.eq_zero_iff_mem, intTrace_mk_eq P Q hP0 n hPQ hP y hy]
   exact mul_ne_zero hn hx

@@ -1,22 +1,75 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.FrobeniusSmoothVectors.EpresGr
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.FrobeniusSmoothVectors.EpresGr
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.AdicCompletion.Noetherian
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open IsLocalRing Matrix UpperTheory.V.Alg UpperTheory.V.U3 UpperTheory.V.Fr
 
-private theorem cw_skew {K : Type} [CommRing K] (x : GG 3 K) (hx : x * x = 1) (hr : x.right = -1)
+private theorem cw_skew {K : Type} [CommRing K] (x : GG (m := 3) (R := K)) (hx : x * x = 1) (hr : x.right = -1)
     (X : Matrix (Fin 3) (Fin 3) K) (hX : x.adFun X = X) :
-    (X * x.mat * Jmat K 3)ᵀ = -(X * x.mat * Jmat K 3) := by
+    (X * x.mat * Jmat (R := K) 3)ᵀ = -(X * x.mat * Jmat (R := K) 3) := by
   have h1 : x.left * theta x.left = 1 := by
     have := congrArg SemidirectProduct.left hx
     simpa [hr, sgnAct_neg_one] using this
   have hX' : x.mat * thetaLie X * ((x.left⁻¹ : GL (Fin 3) K) : Matrix (Fin 3) (Fin 3) K) = X := by
     simpa [GG.adFun, hr] using hX
   have h2 : (theta x.left)⁻¹ = x.left := inv_eq_of_mul_eq_one_left h1
-  have hg : x.mat = Jmat K 3 * x.matᵀ * Jmat K 3 := by
+  have hg : x.mat = Jmat (R := K) 3 * x.matᵀ * Jmat (R := K) 3 := by
     show ((x.left : GL (Fin 3) K) : Matrix (Fin 3) (Fin 3) K) = _
     conv_lhs => rw [← h2]
     rw [theta_inv_val]
     rfl
-  have hgJ : x.mat * Jmat K 3 = Jmat K 3 * x.matᵀ := by
+  have hgJ : x.mat * Jmat (R := K) 3 = Jmat (R := K) 3 * x.matᵀ := by
     conv_lhs => rw [hg]
     rw [Matrix.mul_assoc, Jmat_mul_Jmat, Matrix.mul_one]
   have hXg : X * x.mat = x.mat * thetaLie X := by
@@ -26,36 +79,36 @@ private theorem cw_skew {K : Type} [CommRing K] (x : GG 3 K) (hx : x * x = 1) (h
       show ((x.left⁻¹ : GL (Fin 3) K) : Matrix (Fin 3) (Fin 3) K) * (x.left : Matrix (Fin 3) (Fin 3) K) = 1
       rw [← Units.val_mul, inv_mul_cancel, Units.val_one]
     rw [this, Matrix.mul_one]
-  calc (X * x.mat * Jmat K 3)ᵀ = Jmat K 3 * x.matᵀ * Xᵀ := by
+  calc (X * x.mat * Jmat (R := K) 3)ᵀ = Jmat (R := K) 3 * x.matᵀ * Xᵀ := by
         rw [Matrix.transpose_mul, Matrix.transpose_mul, Jmat_transpose, Matrix.mul_assoc]
-    _ = x.mat * Jmat K 3 * Xᵀ := by rw [hgJ]
-    _ = -(X * x.mat * Jmat K 3) := by
+    _ = x.mat * Jmat (R := K) 3 * Xᵀ := by rw [hgJ]
+    _ = -(X * x.mat * Jmat (R := K) 3) := by
         rw [hXg, thetaLie]
         simp only [Matrix.mul_neg, Matrix.neg_mul, neg_neg, Matrix.mul_assoc, Jmat_mul_Jmat, Matrix.mul_one]
 
-private theorem cw_zero {K : Type} [Field K] (h2 : (2 : K) ≠ 0) (x : GG 3 K) (hx : x * x = 1) (hr : x.right = -1)
+private theorem cw_zero {K : Type} [Field K] (h2 : (2 : K) ≠ 0) (x : GG (m := 3) (R := K)) (hx : x * x = 1) (hr : x.right = -1)
     (X : Matrix (Fin 3) (Fin 3) K) (hX : x.adFun X = X) (a : (X * x.mat) 0 0 = 0) (b : (X * x.mat) 0 1 = 0)
     (c : (X * x.mat) 1 0 = 0) : X = 0 := by
   have hs := cw_skew x hx hr X hX
-  have e : ∀ i j, (X * x.mat * Jmat K 3) i j = (X * x.mat) i (Fin.rev j) := by
+  have e : ∀ i j, (X * x.mat * Jmat (R := K) 3) i j = (X * x.mat) i (Fin.rev j) := by
     intro i j
-    fin_cases j <;> simp [Matrix.mul_apply, Fin.sum_univ_three, Jmat] <;> rfl
-  have sk : ∀ i j, (X * x.mat * Jmat K 3) j i = -(X * x.mat * Jmat K 3) i j := by
+    fin_cases j <;> simp [Matrix.mul_apply, Fin.sum_univ_three, Jmat]
+  have sk : ∀ i j, (X * x.mat * Jmat (R := K) 3) j i = -(X * x.mat * Jmat (R := K) 3) i j := by
     intro i j
     have := congrFun (congrFun hs i) j
     simpa [Matrix.transpose_apply] using this
-  have dg : ∀ i, (X * x.mat * Jmat K 3) i i = 0 := by
+  have dg : ∀ i, (X * x.mat * Jmat (R := K) 3) i i = 0 := by
     intro i
     have h := sk i i
-    have h' : (2 : K) * (X * x.mat * Jmat K 3) i i = 0 := by rw [two_mul]; nth_rewrite 1 [h]; ring
+    have h' : (2 : K) * (X * x.mat * Jmat (R := K) 3) i i = 0 := by rw [two_mul]; nth_rewrite 1 [h]; ring
     exact (mul_eq_zero.mp h').resolve_left h2
-  have m01 : (X * x.mat * Jmat K 3) 0 1 = 0 := by rw [e]; exact b
-  have m02 : (X * x.mat * Jmat K 3) 0 2 = 0 := by rw [e]; exact a
-  have m12 : (X * x.mat * Jmat K 3) 1 2 = 0 := by rw [e]; exact c
-  have m10 : (X * x.mat * Jmat K 3) 1 0 = 0 := by rw [sk, m01, neg_zero]
-  have m20 : (X * x.mat * Jmat K 3) 2 0 = 0 := by rw [sk, m02, neg_zero]
-  have m21 : (X * x.mat * Jmat K 3) 2 1 = 0 := by rw [sk, m12, neg_zero]
-  have hM : X * x.mat * Jmat K 3 = 0 := by
+  have m01 : (X * x.mat * Jmat (R := K) 3) 0 1 = 0 := by rw [e]; exact b
+  have m02 : (X * x.mat * Jmat (R := K) 3) 0 2 = 0 := by rw [e]; exact a
+  have m12 : (X * x.mat * Jmat (R := K) 3) 1 2 = 0 := by rw [e]; exact c
+  have m10 : (X * x.mat * Jmat (R := K) 3) 1 0 = 0 := by rw [sk, m01, neg_zero]
+  have m20 : (X * x.mat * Jmat (R := K) 3) 2 0 = 0 := by rw [sk, m02, neg_zero]
+  have m21 : (X * x.mat * Jmat (R := K) 3) 2 1 = 0 := by rw [sk, m12, neg_zero]
+  have hM : X * x.mat * Jmat (R := K) 3 = 0 := by
     ext i j
     fin_cases i <;> fin_cases j
     all_goals simp only [Matrix.zero_apply]
@@ -68,7 +121,7 @@ private theorem cw_zero {K : Type} [Field K] (h2 : (2 : K) ≠ 0) (x : GG 3 K) (
       | exact m20
       | exact m21
   have hY : X * x.mat = 0 := by
-    have : X * x.mat = X * x.mat * Jmat K 3 * Jmat K 3 := by
+    have : X * x.mat = X * x.mat * Jmat (R := K) 3 * Jmat (R := K) 3 := by
       rw [Matrix.mul_assoc (X * x.mat), Jmat_mul_Jmat, Matrix.mul_one]
     rw [this, hM, Matrix.zero_mul]
   have hinv : x.mat * ((x.left⁻¹ : GL (Fin 3) K) : Matrix (Fin 3) (Fin 3) K) = 1 := by

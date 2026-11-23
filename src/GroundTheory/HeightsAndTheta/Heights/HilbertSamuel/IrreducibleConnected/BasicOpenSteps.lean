@@ -1,30 +1,63 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.Statements
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.PFiniteMapOpen
+module
+
+public import Mathlib.Algebra.MvPolynomial.Eval
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.RingTheory.KrullDimension.Basic
+public import Mathlib.Algebra.MvPolynomial.Funext
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+public import Mathlib.RingTheory.KrullDimension.Field
+public import Mathlib.RingTheory.KrullDimension.Polynomial
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.HilbertSamuel
 
 open MvPolynomial Filter Topology
-
-theorem IrreducibleBasicOpenConnected.eval_pullback {n d : ℕ} (A : Matrix (Fin d) (Fin n) ℂ)
-    (P : MvPolynomial (Fin d) ℂ) (x : Fin n → ℂ) :
-    eval x (ComplexSets.pullback A P) = eval (A.mulVec x) P := by
-  have h : ∀ i, eval x (ComplexSets.linPoly A i) = A.mulVec x i := by
-    intro i
-    simp [ComplexSets.linPoly, Matrix.mulVec, dotProduct, map_sum]
-  rw [ComplexSets.pullback, aeval_eq_bind₁]
-  change eval₂Hom (RingHom.id ℂ) x (bind₁ (ComplexSets.linPoly A) P) =
-    eval₂Hom (RingHom.id ℂ) (A.mulVec x) P
-  rw [eval₂Hom_bind₁]
-  congr 2
-  funext i
-  exact h i
-
-theorem IrreducibleBasicOpenConnected.eval_linPoly {n d : ℕ} (A : Matrix (Fin d) (Fin n) ℂ)
-    (x : Fin n → ℂ) : (fun i => eval x (ComplexSets.linPoly A i)) = A.mulVec x := by
-  funext i
-  simp [ComplexSets.linPoly, Matrix.mulVec, dotProduct, map_sum]
 
 theorem IrreducibleBasicOpenConnected.exists_dim {n : ℕ} {W : Ideal (MvPolynomial (Fin n) ℂ)}
     (hW : W.IsPrime) : ∃ d : ℕ, ringKrullDim (MvPolynomial (Fin n) ℂ ⧸ W) = d := by
@@ -56,44 +89,5 @@ theorem IrreducibleBasicOpenConnected.dense_ne_zero {d : ℕ} {R : MvPolynomial 
   rw [map_zero]
   by_contra hyR
   exact (Set.eq_empty_iff_forall_notMem.mp hne) y ⟨hball hy, hyR⟩
-
-theorem IrreducibleBasicOpenConnected.zeroSet_subset_closure {n d : ℕ} {W : Ideal (MvPolynomial (Fin n) ℂ)}
-    {A : Matrix (Fin d) (Fin n) ℂ} (hW : W.IsPrime) (hA : ComplexSets.IsFiniteProjection W A)
-    {R : MvPolynomial (Fin d) ℂ} (hR : R ≠ 0) :
-    ComplexSets.zeroSet W ⊆ closure {x | x ∈ ComplexSets.zeroSet W ∧ eval (A.mulVec x) R ≠ 0} := by
-  intro x hx
-  rw [mem_closure_iff_nhds]
-  intro U hU
-  have hN := IndefiniteRowSideFullHecke.ComplexSets.FiniteMapOpen.proof n d W (ComplexSets.linPoly A) hW hA.injective
-    hA.finite x hx U hU
-  have hfun : (fun z : Fin n → ℂ => fun i => eval z (ComplexSets.linPoly A i)) = fun z => A.mulVec z :=
-    funext fun z => IrreducibleBasicOpenConnected.eval_linPoly A z
-  rw [hfun, IrreducibleBasicOpenConnected.eval_linPoly] at hN
-  obtain ⟨y, ⟨z, ⟨hzW, hzU⟩, rfl⟩, hyR⟩ :=
-    mem_closure_iff_nhds.mp (IrreducibleBasicOpenConnected.dense_ne_zero hR (A.mulVec x)) _ hN
-  exact ⟨z, hzU, hzW, hyR⟩
-
-theorem IrreducibleBasicOpenConnected.exists_base_vanishing {n d : ℕ} {W : Ideal (MvPolynomial (Fin n) ℂ)}
-    {A : Matrix (Fin d) (Fin n) ℂ} (hW : W.IsPrime) (hA : ComplexSets.IsFiniteProjection W A)
-    {g : MvPolynomial (Fin n) ℂ} (hg : g ∉ W) :
-    ∃ Q : MvPolynomial (Fin d) ℂ, Q ≠ 0 ∧
-      ∀ x ∈ ComplexSets.zeroSet W, eval x g = 0 → eval (A.mulVec x) Q = 0 := by
-  letI : Algebra (MvPolynomial (Fin d) ℂ) (MvPolynomial (Fin n) ℂ ⧸ W) :=
-    (ComplexSets.projHom W A).toRingHom.toAlgebra
-  have : IsDomain (MvPolynomial (Fin n) ℂ ⧸ W) := Ideal.Quotient.isDomain W
-  have hne : Ideal.Quotient.mk W g ≠ 0 := fun h => hg (Ideal.Quotient.eq_zero_iff_mem.mp h)
-  have hcomap := Ideal.comap_ne_bot_of_integral_mem hne (Ideal.mem_span_singleton_self _)
-    (hA.finite.to_isIntegral _)
-  obtain ⟨Q, hQmem, hQ⟩ := Submodule.exists_mem_ne_zero_of_ne_bot hcomap
-  refine ⟨Q, hQ, fun x hx hgx => ?_⟩
-  rw [Ideal.mem_comap, Ideal.mem_span_singleton'] at hQmem
-  obtain ⟨c, hc⟩ := hQmem
-  obtain ⟨h, rfl⟩ := Ideal.Quotient.mk_surjective c
-  have hmem : ComplexSets.pullback A Q - h * g ∈ W := by
-    rw [← Ideal.Quotient.eq_zero_iff_mem, map_sub, map_mul, hc]
-    exact sub_eq_zero.mpr rfl
-  have hev := hx _ hmem
-  rw [map_sub, map_mul, hgx, mul_zero, sub_zero, IrreducibleBasicOpenConnected.eval_pullback] at hev
-  exact hev
 
 end GroundTheory.Heights₂.Heights.HilbertSamuel

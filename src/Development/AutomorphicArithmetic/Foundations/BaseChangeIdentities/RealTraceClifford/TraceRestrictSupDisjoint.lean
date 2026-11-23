@@ -1,5 +1,46 @@
-import Mathlib
-import Development.AutomorphicArithmetic.Foundations.BaseChangeIdentities.RealTraceClifford.ClifMod
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.RealDescent.RealLeviDescent.IsCoreMod
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AutomorphicArithmetic.Foundations.BaseChangeIdentities.RealTraceClifford.RealTrOfAll
+
+@[expose] public section
 
 noncomputable section
 
@@ -43,7 +84,7 @@ private theorem trace_restrict_sup_disjoint {V : Type} [AddCommGroup V] [Module 
       simp [LinearEquiv.conj_apply]
     rw [hc]
     apply Subtype.ext
-    rw [LinearMap.restrict_coe_apply, he, he, map_add]
+    rw [LinearMap.restrict_coe_apply, he, he, map_add (f := _)]
     rfl
   rw [hconj, LinearMap.trace_conj', LinearMap.trace_prodMap']
 
@@ -62,25 +103,25 @@ theorem UpperTheory.RealTr.trAdd :
     have hT : ∀ x ∈ S ⊔ S', f x ∈ S ⊔ S' := by
       intro x hx
       obtain ⟨a, ha, b, hb, rfl⟩ := Submodule.mem_sup.1 hx
-      rw [map_add]
+      rw [map_add (f := _)]
       exact Submodule.add_mem_sup (hS a ha) (hS' b hb)
     unfold PositivityTheory.RgBcC.RealD.trOn
-    rw [dif_pos hT, dif_pos hS, dif_pos hS']
+    rw [dite_eq_left hT, dite_eq_left hS, dite_eq_left hS']
     exact trace_restrict_sup_disjoint f S S' hF hF' hd hS hS' hT
   · intro S g c hf hg
     have hfg : ∀ x ∈ S, (f + g) x ∈ S := fun x hx => S.add_mem (hf x hx) (hg x hx)
     have hcf : ∀ x ∈ S, (c • f) x ∈ S := fun x hx => S.smul_mem c (hf x hx)
     refine ⟨?_, ?_, ?_⟩
     · unfold PositivityTheory.RgBcC.RealD.trOn
-      rw [dif_pos hfg, dif_pos hf, dif_pos hg, ← map_add]
+      rw [dite_eq_left hfg, dite_eq_left hf, dite_eq_left hg, ← map_add (f := _)]
       congr 1
     · unfold PositivityTheory.RgBcC.RealD.trOn
-      rw [dif_pos hcf, dif_pos hf]
+      rw [dite_eq_left hcf, dite_eq_left hf]
       have : (c • f).restrict hcf = c • f.restrict hf := by ext x; simp
       rw [this, map_smul, smul_eq_mul]
     · intro he
       unfold PositivityTheory.RgBcC.RealD.trOn
-      rw [dif_pos hf, dif_pos hg]
+      rw [dite_eq_left hf, dite_eq_left hg]
       congr 1
       ext x
       simp [he x x.2]
@@ -88,7 +129,7 @@ theorem UpperTheory.RealTr.trAdd :
     have h1 : ∀ x ∈ S, (g * f) x ∈ S := fun x hx => hg _ (hf x hx)
     have h2 : ∀ x ∈ S', (f * g) x ∈ S' := fun x hx => hf _ (hg x hx)
     unfold PositivityTheory.RgBcC.RealD.trOn
-    rw [dif_pos h1, dif_pos h2]
+    rw [dite_eq_left h1, dite_eq_left h2]
     let a : S →ₗ[ℂ] S' := f.restrict hf
     let b : S' →ₗ[ℂ] S := g.restrict hg
     have e1 : (g * f).restrict h1 = b ∘ₗ a := by ext x; rfl
@@ -98,6 +139,6 @@ theorem UpperTheory.RealTr.trAdd :
   · intro S hF
     have h1 : ∀ x ∈ S, (1 : Module.End ℂ V) x ∈ S := fun x hx => hx
     unfold PositivityTheory.RgBcC.RealD.trOn
-    rw [dif_pos h1]
+    rw [dite_eq_left h1]
     have : (1 : Module.End ℂ V).restrict h1 = LinearMap.id := by ext x; rfl
     rw [this, LinearMap.trace_id]

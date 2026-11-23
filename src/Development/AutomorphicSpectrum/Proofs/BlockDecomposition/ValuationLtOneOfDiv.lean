@@ -1,5 +1,56 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.PublishedTheorems.JacquetShalikaBound.FormQuasiInvariantMirabolic
+module
+
+public import Development.WeilBound.CoreStatements.PublishedTheorems.JacquetShalikaBound.FormQuasiInvariantMirabolic
+import GroundTheory.AutomorphicForms.AffineBruhat
+import GroundTheory.LocalFields.LocalFourierHaar
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -41,7 +92,7 @@ theorem exists_mem_lat {m : ℕ} (x : Fin m → F) : ∃ M, x ∈ lat F m M := b
     (show (fun _ => x i) ∈ lat F 1 (M i) from fun _ => hM i) 0
 
 theorem mem_lat_iff_box {m M : ℕ} {x : Fin m → F} :
-    x ∈ lat F m M ↔ ((uniformizer F : F) ^ M • x) ∈ Measures.box F (Fin m) := by
+    x ∈ lat F m M ↔ ((uniformizer F : F) ^ M • x) ∈ Measures.box (F := F) (ι := Fin m) := by
   rw [Measures.mem_box]
   rfl
 
@@ -218,11 +269,11 @@ theorem continuous_of_periodic {m c' : ℕ} {f : (Fin m → F) → ℂ}
     Continuous f := by
   have hϖ : (uniformizer F : F) ^ c' ≠ 0 := pow_ne_zero _ (uniformizer_ne_zero F)
   have hU : IsOpen ((fun y : Fin m → F => ((uniformizer F : F) ^ c')⁻¹ • y) ⁻¹'
-      Measures.box F (Fin m)) :=
+      Measures.box (F := F) (ι := Fin m)) :=
     Measures.isOpen_box.preimage (continuous_const_smul _)
   refine (IsLocallyConstant.iff_eventually_eq f |>.2 fun x => ?_).continuous
   have h0 : ((fun y : Fin m → F => ((uniformizer F : F) ^ c')⁻¹ • y) ⁻¹'
-      Measures.box F (Fin m)) ∈ nhds (0 : Fin m → F) :=
+      Measures.box (F := F) (ι := Fin m)) ∈ nhds (0 : Fin m → F) :=
     hU.mem_nhds (by simpa using Measures.zero_mem_box)
   have h1 : Filter.Tendsto (fun z : Fin m → F => z - x) (nhds x) (nhds 0) := by
     have : Continuous fun z : Fin m → F => z - x := continuous_id.sub continuous_const

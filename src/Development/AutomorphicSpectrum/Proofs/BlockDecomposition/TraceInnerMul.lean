@@ -1,5 +1,45 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.BlockMatrixMul
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.BlockMatrixMul
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -15,7 +55,7 @@ namespace GlobalTheory.CompanionTheory.EisCovar.Unip
 variable {D : D7} {n : ℕ}
 
 theorem halfTr_add' (a c : AE D) : halfTr (a + c) = halfTr a + halfTr c := by
-  simp only [GlobalTheory.StdUnn.halfTr, GlobalTheory.StdUnn.trA, map_add, mul_add]
+  simp only [GlobalTheory.StdUnn.halfTr, GlobalTheory.StdUnn.trA, map_add (f := _), mul_add]
 
 theorem halfTr_add_cA (s : AE D) : halfTr s + halfTr (cA D s) = trA s := by
   have hinv : Function.Involutive (cA D) := by
@@ -31,7 +71,7 @@ theorem halfTr_add_cA (s : AE D) : halfTr s + halfTr (cA D s) = trA s := by
     AlgEquiv.ofBijective { cA D with commutes' := hcomm } hinv.bijective
   have htr : trA (cA D s) = trA s := Algebra.trace_eq_of_algEquiv e s
   simp only [GlobalTheory.StdUnn.halfTr]
-  rw [htr, ← add_mul, ← map_add, add_halves, map_one, one_mul]
+  rw [htr, ← add_mul, ← map_add (f := _), add_halves, map_one, one_mul]
 
 theorem inner_add_add (V : HSp D) (z x : Mx D V.rank n) :
     GlobalTheory.StdUnn.inner V (z + x) (z + x) = GlobalTheory.StdUnn.inner V z z + GlobalTheory.StdUnn.inner V z x + GlobalTheory.StdUnn.inner V x z +

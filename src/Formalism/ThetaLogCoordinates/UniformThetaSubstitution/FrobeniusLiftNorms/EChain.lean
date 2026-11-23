@@ -1,8 +1,51 @@
-import Mathlib
-import Formalism.ThetaLogCoordinates.UniformThetaSubstitution.StatementJ
-import Formalism.ThetaLogCoordinates.UniformThetaSubstitution.FrobeniusLiftNorms.EJoint
-import Formalism.ThetaLogCoordinates.UniformThetaSubstitution.FrobeniusLiftNorms.NormLiftLeOne
-import Formalism.ThetaLogCoordinates.UniformThetaSubstitution.FrobeniusLiftNorms.OmegaOfTraceDuality
+module
+
+public import Formalism.ThetaLogCoordinates.UniformThetaSubstitution.CyclicPowerClassOfExpEquiv
+public import Formalism.ThetaLogCoordinates.UniformThetaSubstitution.FrobeniusLiftNorms.EJoint
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Formalism.GaussJetBounds.StatementP
+public import Formalism.GrowthSums.StatementA
+
+@[expose] public section
 
 noncomputable section
 
@@ -38,6 +81,7 @@ theorem constantCoeff_zLin {K : Type} [Field K] {ν r0 r1 : ℕ} [NeZero ν]
     (om oms : Fin ν → ZMod (2 * ν) → K) (x : Bool × EV ν r0 r1) :
     MvPowerSeries.constantCoeff (zLin om oms x) = 0 := by
   unfold zLin
+
   rw [map_sum]
   refine Finset.sum_eq_zero fun s _ => ?_
   split_ifs <;> simp
@@ -49,6 +93,7 @@ theorem subst_scale_zLin {K : Type} [Field K] {ν r0 r1 : ℕ} [NeZero ν]
         (zLin om oms x) = MvPowerSeries.C a * zLin om oms x := by
   have hb := hasSubst_scale (K := K) (ι := ZV ν r0 r1) a
   unfold zLin
+
   rw [← MvPowerSeries.coe_substAlgHom hb, map_sum, Finset.mul_sum]
   refine Finset.sum_congr rfl fun s _ => ?_
   rw [MvPowerSeries.coe_substAlgHom hb]
@@ -66,62 +111,5 @@ theorem ps_subst_C_mul {K κ : Type} [Field K] {w : MvPowerSeries κ K}
 end ScaledSeriesSubstitution
 
 open ScaledSeriesSubstitution
-
-theorem kernel_bounds_of_uniform_exponent (hS : ThmSUniform) (h1 : KernelValuationBoundPadic) (h2 : KernelValuationBoundEvenSizes) (h3 : KernelB) :
-    KernelBoundsOfUnramifiedExponent := by
-  intro p _ K0 _ _ _ _ σ hU hζ F hF be hbe j ν r0 r1 _ hj om oms ϖ μ U0 Φ hϖ hom hμ0 hμ hU0 hΦ0 hΦ
-    TT colN hts hp I n
-  obtain ⟨c, hc, -, -, hcl⟩ := hS K0 p σ hU hζ F hF be hbe
-  have hin := hcl ℂ_[p] j ν r0 r1 hj om oms ϖ μ U0 Φ hϖ hom hμ0 hμ hU0 hΦ0 hΦ
-  have hp2 : 2 < p := hU.2.1
-  have hpC : (p : ℂ_[p]) ≠ 0 := by exact_mod_cast hU.1.ne_zero
-  have hϖ0 : ϖ ≠ 0 := by
-    rintro rfl
-    apply hpC
-    rw [← hϖ, zero_pow]
-    have : 2 ^ 2 ≤ p ^ 2 := Nat.pow_le_pow_left hp2.le 2
-    omega
-  have hu : ∀ s : ZMod (2 * ν), ‖uS (j c) (j (σ c)) s‖ ≤ 1 := by
-    intro s
-    unfold uS
-    split_ifs
-    · rw [norm_neg, hj]
-      exact norm_lift_le_one hU hc
-    · rw [hj]
-      exact hc
-  have hin' : InClass (p : ℂ_[p]) (hhS p (uS (j c) (j (σ c)))) (MvPowerSeries.subst
-      (fun x => MvPowerSeries.C ϖ * (MvPowerSeries.X x : MvPowerSeries (ZV ν r0 r1) ℂ_[p]))
-      (thetaLog om oms ϖ μ (mvExp (-Φ) * U0))) := by
-    unfold thetaLog
-    rw [scale_scale hϖ0]
-    exact hin
-  exact ⟨h1 p ν r0 r1 _ ϖ _ TT colN hts hp I hp2 hϖ hu hin' n,
-    h2 p ν r0 r1 _ ϖ _ TT colN hts hp I hp2 hϖ hu hin' n,
-    fun i hi => h3 p ν r0 r1 i _ ϖ _ TT colN hts hp I hp2 hi hϖ hu hin' n⟩
-
-theorem theta_log_coordinates : ThetaLogCoord := by
-  intro K _ p ν r0 r1 _ om oms ϖ μ x hp hpK hϖ hμ0 hμ
-  have hb := hasSubst_scale (K := K) (ι := ZV ν r0 r1) ϖ⁻¹
-  have hz : PowerSeries.HasSubst (zLin om oms x : MvPowerSeries (ZV ν r0 r1) K) :=
-    PowerSeries.HasSubst.of_constantCoeff_zero (constantCoeff_zLin om oms x)
-  have hw : PowerSeries.HasSubst
-      (MvPowerSeries.C ϖ⁻¹ * zLin om oms x : MvPowerSeries (ZV ν r0 r1) K) :=
-    PowerSeries.HasSubst.of_constantCoeff_zero (by rw [map_mul, constantCoeff_zLin, mul_zero])
-  have hm : PowerSeries.HasSubst (PowerSeries.C ϖ * μ : PowerSeries K) :=
-    PowerSeries.HasSubst.of_constantCoeff_zero' (by rw [map_mul, hμ0, mul_zero])
-  have e1 : MvPowerSeries.subst
-      (fun y => MvPowerSeries.C ϖ⁻¹ * (MvPowerSeries.X y : MvPowerSeries (ZV ν r0 r1) K))
-      (MvPowerSeries.C ϖ * sSub om oms μ x) =
-      PowerSeries.subst (MvPowerSeries.C ϖ⁻¹ * zLin om oms x) (PowerSeries.C ϖ * μ) := by
-    rw [subst_C_mul hb, ps_subst_C_mul hw]
-    unfold sSub
-    rw [FormalGroupLaws.subst_subst hb hz, subst_scale_zLin]
-  have e2 := congrArg (fun f => (PowerSeries.subst (MvPowerSeries.C ϖ⁻¹ * zLin om oms x) f :
-    MvPowerSeries (ZV ν r0 r1) K)) (log_coordinates K p ϖ μ hp hpK hμ0 hμ)
-  rw [PowerSeries.subst_comp_subst_apply hm hw, ps_subst_C_mul hw ϖ PowerSeries.X,
-    PowerSeries.subst_X hw,
-    ← mul_assoc, ← map_mul, mul_inv_cancel₀ hϖ, map_one, one_mul] at e2
-  rw [e1]
-  exact e2
 
 end Formalism.InvariantFactorPaths.G7

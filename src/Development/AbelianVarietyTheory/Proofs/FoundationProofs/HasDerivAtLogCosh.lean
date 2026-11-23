@@ -1,15 +1,61 @@
-import Mathlib
-import Formalism.SharpRestriction.Divisibility.SchurIrreducible
-import Development.AbelianVarietyTheory.Definitions.Foundations.IsFockIPOfFockData
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ContinuousExptPY
-import Development.AbelianVarietyTheory.BlockTheory.TorsionBlocks.FockSingularValues
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.DilMonomial
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsGrpDataMapHaar
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.IsFockIPOfFockData
+public import Development.AbelianVarietyTheory.BlockTheory.TorsionBlocks.FockSingularValues
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.DilMonomial
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsGrpDataMapHaar
 import Development.AbelianVarietyTheory.Proofs.HeightProofs.FiniteDimKStableSubspaceKFiniteLie
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.DerivedAdjoint
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.FockKsetPreservesHomogeneousDegree
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.FockPolynomialKFiniteBothMembers
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsSvd
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.DerivedAdjoint
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsSvd
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.FockKsetPreservesHomogeneousDegree
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.FockPolynomialKFiniteBothMembers
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+public import Mathlib.Analysis.Calculus.Deriv.Prod
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.InnerProductSpace.Calculus
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.Normed.Algebra.MatrixExponential
+public import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 namespace GlobalTheory.FockDecay
@@ -164,7 +210,7 @@ theorem exists_gauss (σ : ℕ → ℝ) (hσ : ∀ i, min p q ≤ i → σ i = 0
 theorem pderiv_dil (u : Ix p q → ℝ) (l : Ln p q n 0) (P : Pol p q n 0) :
     MvPolynomial.pderiv l (dil n u P) = ((Real.exp (u l.1) : ℝ) : ℂ) • dil n u (MvPolynomial.pderiv l P) := by
   induction P using MvPolynomial.induction_on' with
-  | add P Q hP hQ => simp only [map_add, hP, hQ, smul_add]
+  | add P Q hP hQ => simp only [map_add (f := _), hP, hQ, smul_add]
   | monomial α c =>
     rw [dil_monomial, Derivation.map_smul, MvPolynomial.pderiv_monomial, dil_monomial, smul_smul]
     by_cases h : α l = 0
@@ -187,6 +233,7 @@ theorem killed_dil (u : Ix p q → ℝ) {Φ : Pol p q n 0} (h : KilledByPMinus �
   intro a b
   have := h a b
   simp only [lowerOp] at this ⊢
+
   simp only [pderiv_dil, Derivation.map_smul, ← Finset.smul_sum, ← map_sum, this, map_zero, smul_zero]
 
 theorem norm_sq_sum {σ H : Type} [DecidableEq σ] [NormedAddCommGroup H] [InnerProductSpace ℂ H]
@@ -212,8 +259,9 @@ theorem norm_dil_le {H : Type} [NormedAddCommGroup H] [InnerProductSpace ℂ H] 
   rw [mul_pow]
   conv_lhs => rw [Φ.as_sum]
   conv_rhs => rw [Φ.as_sum]
-  simp only [map_sum, dil_monomial, e _ (MvPolynomial.coeff _ _), smul_smul, map_smul, norm_sq_sum h,
-    Finset.mul_sum]
+
+  simp only [map_sum, dil_monomial, e _ (AddMonoidAlgebra.coeff _ _), smul_smul, map_smul, norm_sq_sum h,
+  Finset.mul_sum]
   refine Finset.sum_le_sum fun α _ => ?_
   rw [norm_mul, ← mul_assoc, ← mul_pow (Real.exp _), mul_comm (Real.exp _), Complex.norm_real, Real.norm_eq_abs,
     abs_of_pos (Real.exp_pos _)]
@@ -473,8 +521,8 @@ theorem adjZ_of_mem {Y : Mat p q} (hY : Y ∈ upq p q) : adjZ Y = -Y := by
   have h : Yᴴ * Jm p q = -(Jm p q * Y) := eq_neg_of_add_eq_zero_left hY
   rw [adjZ, Matrix.mul_assoc, h, Matrix.mul_neg, ← Matrix.mul_assoc, KStabLie.Jm_sq, Matrix.one_mul]
 
-open DerivedAdjoint in
 
+open DerivedAdjoint in
 theorem covariance (F : FockData T0 T1 T2) (g : T1.G) (Z : Mat p q) (P Q : Pol p q r s) :
     inner ℂ (F.ι Q) (F.π (g, 1) (F.ι (fockAct1 p q r s Z P))) =
       inner ℂ (F.ι (fockAct1 p q r s (adjZ (matG T1 g * Z * matG T1 g⁻¹)) Q)) (F.π (g, 1) (F.ι P)) := by
@@ -492,7 +540,7 @@ theorem covariance (F : FockData T0 T1 T2) (g : T1.G) (Z : Mat p q) (P Q : Pol p
   have hY' := mem_upq_of_adjZ hY
   rw [Matrix.mul_add, Matrix.add_mul, Matrix.mul_smul, Matrix.smul_mul, adjZ_add, adjZ_smul,
     adjZ_of_mem (conj_mem_upq T1 g hX'), adjZ_of_mem (conj_mem_upq T1 g hY')]
-  simp only [map_add, map_smul, map_neg, LinearMap.add_apply, LinearMap.smul_apply,
+  simp only [map_add (f := _), map_smul, map_neg, LinearMap.add_apply, LinearMap.smul_apply,
     LinearMap.neg_apply, inner_add_left, inner_add_right, inner_smul_left, inner_smul_right,
     inner_neg_left, covariance_real F g hX', covariance_real F g hY']
   simp
@@ -513,8 +561,9 @@ theorem act_lower {Φ : Pol p q n 0} (h : KilledByPMinus Φ) (C : Matrix (Fin q)
     rcases i with i | i <;> rcases j with j | j <;>
       simp [Eab, Matrix.sum_apply, Matrix.single_apply, ite_and]
   rw [e]
+
   simp only [map_sum, map_smul, LinearMap.sum_apply, LinearMap.smul_apply, fockAct1_lower, h _ _, neg_zero,
-    smul_zero, Finset.sum_const_zero]
+  smul_zero, Finset.sum_const_zero]
 
 theorem adjZ_upper (B : Matrix (Fin p) (Fin q) ℂ) :
     adjZ (Matrix.fromBlocks 0 B 0 0 : Mat p q) = Matrix.fromBlocks 0 0 (-Bᴴ) 0 := by
@@ -523,6 +572,7 @@ theorem adjZ_upper (B : Matrix (Fin p) (Fin q) ℂ) :
 theorem exists_killed (F : FockData T0 T1 T2) {k : T1.G} (hk : k ∈ T1.Kset) {Φ : Pol p q n 0}
     (h : KilledByPMinus Φ) : ∃ Q, F.π (k, 1) (F.ι Φ) = F.ι Q ∧ KilledByPMinus Q := by
   have hQ : F.π (k, 1) (F.ι Φ) ∈ LinearMap.range F.ι := by
+
     rw [← MvPolynomial.sum_homogeneousComponent Φ, map_sum, map_sum]
     refine Submodule.sum_mem _ fun d _ => ?_
     obtain ⟨Q, -, e⟩ := GlobalTheory.FockDegree.Om_Kset_homog p q n 0 T0 T1 T2 F _
@@ -560,6 +610,7 @@ theorem act_tanhDiag (σ : ℕ → ℝ) (t : ℝ) (α : Ln p q n 0 →₀ ℕ) :
     ext i j
     simp only [tanhDiag, Eab, Matrix.sum_apply, Matrix.smul_apply, Matrix.single_apply, Matrix.diagonal_apply,
       ite_and, smul_eq_mul, mul_ite, mul_one, mul_zero, Finset.sum_ite_eq', Finset.mem_univ, if_true]
+
   rw [e, map_sum, LinearMap.sum_apply]
   simp only [map_smul, LinearMap.smul_apply, cartan1, smul_smul, ← Finset.sum_smul]
   congr 1
@@ -585,6 +636,7 @@ theorem dil_eq_sum (u : Ix p q → ℝ) (Ψ : Pol p q n 0) :
     dil n u Ψ = ∑ α ∈ Ψ.support, (Ψ.coeff α *
       ((Real.exp (∑ l : Ln p q n 0, ((α l : ℝ) + 1 / 2) * u l.1) : ℝ) : ℂ)) • MvPolynomial.monomial α 1 := by
   conv_lhs => rw [Ψ.as_sum]
+
   rw [map_sum]
   refine Finset.sum_congr rfl fun α _ => ?_
   rw [dil_monomial, MvPolynomial.smul_monomial, MvPolynomial.smul_monomial]
@@ -594,6 +646,7 @@ theorem hasDerivAt_flow (F : FockData T0 T1 T2) (σ : ℕ → ℝ) (Ψ : Pol p q
     HasDerivAt (fun t : ℝ => F.π (T1.expt (t • diagP p q σ), 1) (F.ι (dil n (logCosh σ t) Ψ)))
       (F.π (T1.expt (t • diagP p q σ), 1)
         (F.ι (fockAct1 p q n 0 (diagP p q σ + tanhDiag p q σ t) (dil n (logCosh σ t) Ψ)))) t := by
+
   simp only [dil_eq_sum, map_sum, map_smul]
   refine HasDerivAt.fun_sum fun α _ => ?_
   have h1 : HasDerivAt (fun t : ℝ => ∑ l : Ln p q n 0, ((α l : ℝ) + 1 / 2) * logCosh σ t l.1)
@@ -602,7 +655,7 @@ theorem hasDerivAt_flow (F : FockData T0 T1 T2) (σ : ℕ → ℝ) (Ψ : Pol p q
   have h2 := (h1.exp.ofReal_comp.const_mul (Ψ.coeff α)).fun_smul
     (hasDerivAt_pi_at F (diagonalElement_mem p q σ).1 (MvPolynomial.monomial α 1) t)
   refine h2.congr_deriv ?_
-  rw [map_add, LinearMap.add_apply, act_tanhDiag, map_add, map_add, map_smul, map_smul, smul_add, smul_smul,
+  rw [map_add (f := _), LinearMap.add_apply, act_tanhDiag, map_add (f := _), map_add (f := _), map_smul, map_smul, smul_add, smul_smul,
     Complex.ofReal_mul, mul_assoc]
 
 theorem inner_flow (F : FockData T0 T1 T2) (σ : ℕ → ℝ) (hσ : ∀ i, min p q ≤ i → σ i = 0)

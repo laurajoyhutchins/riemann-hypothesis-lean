@@ -1,5 +1,54 @@
-import Mathlib
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.LocalMaximality.LiftFactorization
+module
+
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.LocalMaximality.LiftFactorization
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open KaehlerDifferential GlobalTheory.CechDR GlobalTheory.PD GlobalTheory.WH GlobalTheory.W1 UpperTheory.Gal.productCup_of_system
 open scoped TensorProduct
 
@@ -86,6 +135,7 @@ private theorem leib {ι E E' E'' : Type} [LinearOrder ι] [AddCommGroup E] [Mod
     have hA : ∑ i ∈ t.filter (· < j), GlobalTheory.cubeSign t i •
         μ (a ((t.erase i).filter (· ≤ j))) (b ((t.erase i).filter (j ≤ ·))) =
         μ (∑ i ∈ t.filter (· < j), GlobalTheory.cubeSign v i • a (v.erase i)) (b u) := by
+
       rw [map_sum, LinearMap.sum_apply]
       refine Finset.sum_congr rfl fun i hi => ?_
       have hi' : i < j := (Finset.mem_filter.1 hi).2
@@ -107,6 +157,7 @@ private theorem leib {ι E E' E'' : Type} [LinearOrder ι] [AddCommGroup E] [Mod
       rw [c0, c00, one_smul] at hd
       have hb2 := eq_neg_of_add_eq_zero_right hd
       calc _ = GlobalTheory.cubeSign t j • μ (a v) (∑ i ∈ t.filter (j < ·), GlobalTheory.cubeSign u i • b (u.erase i)) := by
+
             rw [map_sum, Finset.smul_sum]
             refine Finset.sum_congr rfl fun i hi => ?_
             have hi' : j < i := (Finset.mem_filter.1 hi).2
@@ -124,7 +175,7 @@ private theorem leib {ι E E' E'' : Type} [LinearOrder ι] [AddCommGroup E] [Mod
     have c5 : GlobalTheory.cubeSign v j = GlobalTheory.cubeSign t j := by
       have : v.filter (· < j) = t.filter (· < j) := by ext y; grind
       simp only [GlobalTheory.cubeSign, this]
-    rw [← hs, hA, hB, ev, map_add, LinearMap.add_apply, c4, c5, map_zsmul, LinearMap.smul_apply, smul_add]
+    rw [← hs, hA, hB, ev, map_add (f := _), LinearMap.add_apply, c4, c5, map_zsmul, LinearMap.smul_apply, smul_add]
     abel
   have lhs : ∑ i ∈ t, GlobalTheory.cubeSign t i • cupE μ a b (t.erase i) =
       ∑ j ∈ t, ∑ i ∈ t.erase j, GlobalTheory.cubeSign t i •
@@ -154,6 +205,7 @@ private theorem wd_cup {ν ρ E E' E'' : Type} [LinearOrder ν] [AddCommGroup E]
     [AddCommGroup E''] [Module ℂ E''] (μ : E →ₗ[ℂ] E' →ₗ[ℂ] E'') (w : ν → Module.End ℂ E) (w' : ν → Module.End ℂ E'')
     (hw : ∀ l m y, μ (w l m) y = w' l (μ m y)) (I : Finset ρ) (g : ρ → Finset ν → E) (y : ρ → E') (t : Finset ν) :
     wd w' (fun t' => ∑ i ∈ I, μ (g i t') (y i)) t = ∑ i ∈ I, μ (wd w (g i) t) (y i) := by
+
   simp only [wd_app, map_sum, LinearMap.sum_apply, Finset.smul_sum, map_zsmul, LinearMap.smul_apply, hw]
   exact Finset.sum_comm
 
@@ -253,7 +305,7 @@ theorem UpperTheory.Gal.productCup_of_system.rCup_of :
       rw [pow_add, pow_add _ n, mul_right_comm, hs1]
       ring
     have hz := congrArg (fun m => ((-1 : ℤ) ^ (p * (J.card + L.card))) • μ m (x (I.filter (i ≤ ·)))) h0
-    simp only [Pi.zero_apply, map_zero, LinearMap.zero_apply, smul_zero, map_add, LinearMap.add_apply, map_zsmul,
+    simp only [Pi.zero_apply, map_zero, LinearMap.zero_apply, smul_zero, map_add (f := _), LinearMap.add_apply, map_zsmul,
       LinearMap.smul_apply, smul_add, smul_smul] at hz
     simp only [smul_smul, hs1, hs2]
     exact hz.symm

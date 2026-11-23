@@ -1,14 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.HeightProofs.Hilbert90FiniteIdelesCongruenceStatement
-import Development.AbelianVarietyTheory.Proofs.HeightProofs.PowClassNumberIntegral
-import Development.AbelianVarietyTheory.Proofs.HeightProofs.ExistsXiOKNotTwistCond
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ExistsGeneratingCharacters
-import Development.AbelianVarietyTheory.Definitions.HeightFunctions.IntUnit
-import Formalism.LocalToGlobal.ProjectiveLattices.FullXi
-import Development.AbelianVarietyTheory.Definitions.HeightFunctions.NormComparisonConstants
-import Formalism.LocalToGlobal.ProjectiveLattices.DepthTie
-import Development.AbelianVarietyTheory.Definitions.Jets.EmbShortThLeThetaPlain
-import Development.AbelianVarietyTheory.Definitions.ExistenceOfLattices.CoeSelfDualLatticeInFrameCoordinatesEq
+module
+
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.PowClassNumberIntegral
+public import Development.AbelianVarietyTheory.Definitions.HeightFunctions.IntUnit
+public import Formalism.LocalToGlobal.ProjectiveLattices.FullXi
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.ExistsXiOKNotTwistCond
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.Hilbert90FiniteIdelesCongruenceStatement
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ExistsGeneratingCharacters
+import Formalism.LocalRingCardinality.SpanPowerMembership.ExampleLayerExistsGenerators
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Definitions.HeightFunctions.GrowthConstantBoundGcR
+
+@[expose] public section
 
 noncomputable section
 
@@ -65,7 +100,7 @@ theorem exists_rat {D : D7} (x : (AfE D)ˣ) (a : D.host.E) (h : (x : AfE D) = 1 
       rw [h] at this
       rw [h]
       exact this
-    rw [map_add, map_one, map_add, map_add, map_one, mul_add, h1, ← hx, mul_one, add_comm]
+    rw [map_add (f := _), map_one, map_add (f := _), map_add (f := _), map_one, mul_add, h1, ← hx, mul_one, add_comm]
 
 theorem cong_div {D : D7} (N : ℕ) (y : (AfE D)ˣ) (hu : IntUnit y) (hy : CongOne N y) :
     CongOne N (y / cjFin D y) ∧ NormOne (y / cjFin D y) := by

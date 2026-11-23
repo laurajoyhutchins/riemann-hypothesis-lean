@@ -1,8 +1,48 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DualMapCompDualMap
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsCoboundarySndTr
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.InvariantFormAbelianVarietyTranslateValue
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LogChernCocycleContractionInvariantFieldTrivialiStatement
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DualMapCompDualMap
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsCoboundarySndTr
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.InvariantFormAbelianVarietyTranslateValue
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LogChernCocycleContractionInvariantFieldTrivialiStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -68,7 +108,8 @@ theorem prism_sum' {I J : Type} {U : I → A.left.Opens} (t : Finset J) (z : J �
     rw [Finset.sum_insert ha, Finset.sum_insert ha, prism_add', ih]
 
 theorem triv_sec {P Q : GPt A} (φ : P.Hom Q) : φ.triv ≫ Q.sec = P.sec ≫ φ.dual := by
-  apply Thick.hom_ext
+  apply Thick.Hom.ext'
+  apply AlgHom.ext
   intro b
   rw [Thick.comp_φ, Thick.comp_φ]
   show TrivSqZeroExt.inl (φ.ρ b) = dualAlg φ.ρ (TrivSqZeroExt.inl b)
@@ -78,7 +119,8 @@ theorem triv_sec {P Q : GPt A} (φ : P.Hom Q) : φ.triv ≫ Q.sec = P.sec ≫ φ
 
 theorem triv_tan {P Q : GPt A} (φ : P.Hom Q) {v : epsR K ⟶ A} (hv : IsTangent v) :
     (φ.tr v).triv ≫ Q.tan hv = P.tan hv ≫ φ.dual := by
-  apply Thick.hom_ext
+  apply Thick.Hom.ext'
+  apply AlgHom.ext
   intro b
   rw [Thick.comp_φ, Thick.comp_φ]
   rfl
@@ -219,7 +261,7 @@ private theorem triv_coc_lemma_7 {K : Type} [Field K] {A : Over (Sp K)} [GrpObj 
   rw [d1_apply] at e
   have e' : ψ.ρ (chernRepEv1 β φ.triv hP) - chernRepEv1 β (φ.triv ≫ ψ.triv) hP +
       chernRepEv1 β ψ.triv hQ = 0 := e
-  have hcomp : (φ.comp ψ).triv = φ.triv ≫ ψ.triv := Thick.hom_ext fun _ ↦ rfl
+  have hcomp : (φ.comp ψ).triv = φ.triv ≫ ψ.triv := Thick.Hom.ext' (AlgHom.ext fun _ ↦ rfl)
   rw [sub_add_eq_add_sub, sub_eq_zero] at e'
   rw [hcomp]
   exact e'.symm
@@ -234,6 +276,7 @@ private theorem chern_cob_lemma_10 {K : Type} [Field K] {A : Over (Sp K)} [GrpOb
       (∑ k, cupZ _ (c k) (ω k).1)).1 - d1 _ β := by
   have hsum : (∑ k, cup _ (H1.mk _ (c k)) (Form.cl _ (ω k))) =
       H2.mk (O (dp0 K) (A.hom ≫ 𝟙 (Sp K))) (∑ k, cupZ _ (c k) (ω k).1) := by
+
     rw [map_sum]
     refine Finset.sum_congr rfl fun k _ ↦ ?_
     rw [← cup_mk]
@@ -253,10 +296,12 @@ private theorem prism_eq_of_pullback_cup_sub_d1 {K : Type} [Field K] {A : Over (
     ev (∑ k, tanVal v (ω k) • c k) φ.triv =
       (N Q - ∑ k, cupContractionCorrectionTerm (c k) (ω k) hv Q - G3 Q + cochainTangentDiffCoeff β hv Q) -
         φ.ρ (N P - ∑ k, cupContractionCorrectionTerm (c k) (ω k) hv P - G3 P + cochainTangentDiffCoeff β hv P) := by
+
   rw [hℓ1, prism_sub', map_sum, prism_sumZ', prismContractionTwoCochain_coboundary β hv φ hex] at hN
   simp only [prism_cup' hA] at hN
   rw [ev_sum_smul']
-  simp only [map_sub, map_add, map_sum]
+
+  simp only [map_sub, map_add (f := _), map_sum]
   have hsm : ∀ k, tanVal v (ω k) • ev (c k) φ.triv =
       ev (c k) φ.triv * algebraMap K Q.B (tanVal v (ω k)) := fun k ↦ by
     rw [Algebra.smul_def, mul_comm]

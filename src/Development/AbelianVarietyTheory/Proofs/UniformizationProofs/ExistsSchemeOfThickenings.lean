@@ -1,8 +1,58 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.CubeVal
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.UnifUniqSt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.IsNsmul
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.QkToAkU
+module
+
+public import Mathlib.AlgebraicGeometry.Morphisms.ClosedImmersion
+public import Mathlib.Combinatorics.Quiver.ReflQuiver
+public import Mathlib.Order.CompletePartialOrder
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.AlgebraicGeometry.Morphisms.SchemeTheoreticallyDominant
+import Mathlib.AlgebraicGeometry.Morphisms.WeaklyEtale
+import Mathlib.AlgebraicGeometry.Sites.Fpqc
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.ExtremalEpi
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsCompletedStrictHens
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.NonzeroLocus
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.CubicalStructures.CubeSymmetricSwapFirst
+
+@[expose] public section
+
 open CategoryTheory CategoryTheory.Limits MonoidalCategory CartesianMonoidalCategory MonObj AlgebraicGeometry
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Out ReciprocityTheory.ChartRestriction.G.Geo.Tor
 open scoped CategoryTheory.Obj
@@ -10,8 +60,8 @@ attribute [local instance] Over.cartesianMonoidalCategory
 
 namespace GlobalTheory.ThickGlue
 
-set_option backward.isDefEq.respectTransparency false in
 
+set_option backward.isDefEq.respectTransparency false in
 theorem exists_glue (B₀ : Scheme.{0}) (𝒰 : Set B₀.Opens)
     (hbas : ∀ U ∈ 𝒰, ∀ (W : B₀.Opens) (x : B₀), x ∈ U → x ∈ W → ∃ V ∈ 𝒰, x ∈ V ∧ V ≤ U ∧ V ≤ W)
     (hcov : sSup 𝒰 = ⊤) (F : 𝒰 ⥤ Scheme.{0})
@@ -23,7 +73,7 @@ theorem exists_glue (B₀ : Scheme.{0}) (𝒰 : Set B₀.Opens)
     ∃ (B : Scheme.{0}) (j : B₀ ⟶ B) (_ : IsClosedImmersion j) (_ : Surjective j)
       (κ : ∀ U, F.obj U ⟶ B) (_ : ∀ U, IsOpenImmersion (κ U)),
       (∀ U, U.1.ι ≫ j = e U ≫ κ U) ∧ (∀ U, j ⁻¹ᵁ (κ U).opensRange = U.1) ∧
-      ∀ {U V : 𝒰} (f : U ⟶ V), F.map f ≫ κ V = κ U := by
+      ∀ {U V : 𝒰} (f : U ⟶ V), F.map f ≫ κ V = κ U := set_option backward.isDefEq.respectTransparency false in by
   have hnat' : ∀ {U V : 𝒰} (f : U ⟶ V) (x : U.1.toScheme),
       F.map f (e U x) = e V (B₀.homOfLE (show U.1 ≤ V.1 from f.le) x) := by
     intro U V f x
@@ -160,9 +210,9 @@ theorem surjective_toSpec {B₀ : Scheme.{0}} {𝒜 : B₀.Opensᵒᵖ ⥤ CommR
   rw [toSpec, ← hU.isoSpec_hom]
   infer_instance
 
-set_option backward.isDefEq.respectTransparency false in
 
-theorem exists_scheme_of_thickenings : ∀ (B₀ : Scheme.{0}) (𝒰 : Set B₀.Opens), (∀ U ∈ 𝒰, IsAffineOpen U) → (∀ U ∈ 𝒰, ∀ f : Γ(B₀, U), B₀.basicOpen f ∈ 𝒰) → sSup 𝒰 = ⊤ → ∀ (𝒜 : B₀.Opensᵒᵖ ⥤ CommRingCat.{0}) (π : 𝒜 ⟶ B₀.presheaf), (∀ U ∈ 𝒰, Function.Surjective (π.app (Opposite.op U)).hom ∧ IsNilpotent (RingHom.ker (π.app (Opposite.op U)).hom)) → (∀ U ∈ 𝒰, ∀ a : 𝒜.obj (Opposite.op U), letI := (𝒜.map (homOfLE (B₀.basicOpen_le ((π.app (Opposite.op U)).hom a))).op).hom.toAlgebra; IsLocalization.Away a (𝒜.obj (Opposite.op (B₀.basicOpen ((π.app (Opposite.op U)).hom a))))) → ∃ (B : Scheme.{0}) (j : B₀ ⟶ B) (_ : IsClosedImmersion j) (_ : Surjective j) (φ : ∀ V : B.Opens, j ⁻¹ᵁ V ∈ 𝒰 → (Γ(B, V) ≅ 𝒜.obj (Opposite.op (j ⁻¹ᵁ V)))), (∀ V h, IsAffineOpen V ∧ (φ V h).hom ≫ π.app _ = j.app V) ∧ ∀ V V' h h' (hle : V' ≤ V), B.presheaf.map (homOfLE hle).op ≫ (φ V' h').hom = (φ V h).hom ≫ 𝒜.map (homOfLE (Scheme.Hom.preimage_mono j hle)).op := by
+set_option backward.isDefEq.respectTransparency false in
+theorem exists_scheme_of_thickenings : ∀ (B₀ : Scheme.{0}) (𝒰 : Set B₀.Opens), (∀ U ∈ 𝒰, IsAffineOpen U) → (∀ U ∈ 𝒰, ∀ f : Γ(B₀, U), B₀.basicOpen f ∈ 𝒰) → sSup 𝒰 = ⊤ → ∀ (𝒜 : B₀.Opensᵒᵖ ⥤ CommRingCat.{0}) (π : 𝒜 ⟶ B₀.presheaf), (∀ U ∈ 𝒰, Function.Surjective (π.app (Opposite.op U)).hom ∧ IsNilpotent (RingHom.ker (π.app (Opposite.op U)).hom)) → (∀ U ∈ 𝒰, ∀ a : 𝒜.obj (Opposite.op U), letI := (𝒜.map (homOfLE (B₀.basicOpen_le ((π.app (Opposite.op U)).hom a))).op).hom.toAlgebra; IsLocalization.Away a (𝒜.obj (Opposite.op (B₀.basicOpen ((π.app (Opposite.op U)).hom a))))) → ∃ (B : Scheme.{0}) (j : B₀ ⟶ B) (_ : IsClosedImmersion j) (_ : Surjective j) (φ : ∀ V : B.Opens, j ⁻¹ᵁ V ∈ 𝒰 → (Γ(B, V) ≅ 𝒜.obj (Opposite.op (j ⁻¹ᵁ V)))), (∀ V h, IsAffineOpen V ∧ (φ V h).hom ≫ π.app _ = j.app V) ∧ ∀ V V' h h' (hle : V' ≤ V), B.presheaf.map (homOfLE hle).op ≫ (φ V' h').hom = (φ V h).hom ≫ 𝒜.map (homOfLE (Scheme.Hom.preimage_mono j hle)).op := set_option backward.isDefEq.respectTransparency false in by
   intro B₀ 𝒰 haff hbo hcov 𝒜 p hp hloc
   have hloc' : ∀ U ∈ 𝒰, ∀ (a : 𝒜.obj (Opposite.op U)) (W : B₀.Opens)
       (_ : W = B₀.basicOpen ((p.app (Opposite.op U)).hom a)) (h : W ≤ U),

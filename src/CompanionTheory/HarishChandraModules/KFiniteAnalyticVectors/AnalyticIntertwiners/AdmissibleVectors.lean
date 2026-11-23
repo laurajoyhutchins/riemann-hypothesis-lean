@@ -1,4 +1,49 @@
-import CompanionTheory.HarishChandraModules.KFiniteAnalyticVectors.AnalyticIntertwiners.PCDesc
+module
+
+public import CompanionTheory.HarishChandraModules.KFiniteAnalyticVectors.AnalyticIntertwiners.Clause1
+public import CompanionTheory.HarishChandraModules.KFiniteAnalyticVectors.AnalyticIntertwiners.PCDesc
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.AnalyticVectors.ConjTransposeEqOfInG
+
+@[expose] public section
 
 open Matrix Topology Filter
 
@@ -33,7 +78,7 @@ theorem actLC_lie {E : Fin n → Fin n → Module.End ℂ M} (hE : IsGlRep E) (X
   induction X using Matrix.induction_on' with
   | h_zero => simp
   | h_add X X' h h' =>
-    rw [show (X + X') * Y - Y * (X + X') = (X * Y - Y * X) + (X' * Y - Y * X') by noncomm_ring, map_add, h, h', map_add]
+    rw [show (X + X') * Y - Y * (X + X') = (X * Y - Y * X) + (X' * Y - Y * X') by noncomm_ring, map_add (f := _), h, h', map_add (f := _)]
     noncomm_ring
   | h_std_basis a b x =>
     induction Y using Matrix.induction_on' with
@@ -52,7 +97,7 @@ variable {p q : ℕ}
 def twLC (E : Fin (p + q) → Fin (p + q) → Module.End ℂ M) (j : ℕ) : Mat p q →ₗ[ℂ] Module.End ℂ M where
   toFun Z := actLC E (rx Z) + ((j : ℂ) * (Z.trace / 2)) • 1
   map_add' X Y := by
-    rw [show rx (X + Y) = rx X + rx Y from rfl, map_add, trace_add]
+    rw [show rx (X + Y) = rx X + rx Y from rfl, map_add (f := _), trace_add]
     module
   map_smul' c X := by
     rw [show rx (c • X) = c • rx X from rfl, map_smul, trace_smul, RingHom.id_apply, smul_eq_mul]
@@ -123,7 +168,7 @@ def kdC {n : ℕ} {H : Type} [NormedAddCommGroup H] [InnerProductSpace ℂ H] (�
     rintro a b ⟨A, hA, ha, hsA⟩ ⟨B, hB, hb, hsB⟩
     refine ⟨A ⊔ B, inferInstance, Submodule.add_mem_sup ha hb, fun g hg v hv => ?_⟩
     obtain ⟨x, hx, y, hy, rfl⟩ := Submodule.mem_sup.1 hv
-    rw [map_add]
+    rw [map_add (f := _)]
     exact Submodule.add_mem_sup (hsA g hg x hx) (hsB g hg y hy)
   zero_mem' := ⟨⊥, inferInstance, Submodule.zero_mem _, fun g _ v hv => by
     rw [(Submodule.mem_bot ℂ).1 hv, map_zero]; exact Submodule.zero_mem _⟩
@@ -170,7 +215,7 @@ theorem harish_chandra_first_clause (hD : ForIrr fun _ ε H _ _ σ => Dense {v :
     { toFun := fun Z => (L Z).restrict (hLK Z)
       map_add' := fun X Y => LinearMap.ext fun v => Subtype.ext (by
         show L (X + Y) v = L X v + L Y v
-        rw [map_add]; rfl)
+        rw [map_add (f := _)]; rfl)
       map_smul' := fun c X => LinearMap.ext fun v => Subtype.ext (by
         show L (c • X) v = c • L X v
         rw [map_smul]; rfl) }
@@ -198,7 +243,7 @@ theorem harish_chandra_first_clause (hD : ForIrr fun _ ε H _ _ σ => Dense {v :
             rw [← rx_JC, ← rx_mulC, ← rx_mulC, (comm_iff_KC _).2 hYK]
           rw [Matrix.smul_mul, Matrix.mul_smul, h]
       obtain ⟨Y₁, h₁, Y₂, h₂, e, hk⟩ := upq_decC X
-      rw [e, map_add, map_smul]
+      rw [e, map_add (f := _), map_smul]
       exact add_mem (key Y₁ h₁ (hk hX).1) (Submodule.smul_mem _ _ (key Y₂ h₂ (hk hX).2))
     · have hle : Submodule.span ℂ {w : smD (epq p q) σ | w ∈ KF (epq p q) σ ∧ ∃ μ : Fin (p + q) → ℤ,
           ∀ a, smE (epq p q) σ a a w = (μ a : ℂ) • w} ≤
@@ -226,7 +271,7 @@ theorem harish_chandra_first_clause (hD : ForIrr fun _ ε H _ _ σ => Dense {v :
       intro Z v
       obtain ⟨Y₁, h₁, Y₂, h₂, e, -⟩ := upq_decC Z
       rw [e]
-      simp only [map_add, map_smul, LinearMap.add_apply, LinearMap.smul_apply, key Y₁ h₁, key Y₂ h₂]
+      simp only [map_add (f := _), map_smul, LinearMap.add_apply, LinearMap.smul_apply, key Y₁ h₁, key Y₂ h₂]
     refine ⟨fun μ => ?_, ?_, fun N hN => ?_⟩
     · have := hA _ _ _ σ hσ hσi fun i => ((μ (finSumFinEquiv.symm i) : ℚ) : ℝ) - (j : ℝ) / 2
       refine FiniteDimensional.of_injective ((φ.domRestrict (hwSub M.act μ)).codRestrict

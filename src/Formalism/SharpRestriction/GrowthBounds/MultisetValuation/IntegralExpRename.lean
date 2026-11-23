@@ -1,4 +1,48 @@
-import Formalism.SharpRestriction.GrowthBounds.MultisetValuation.AtPiEqRescale
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.MultisetValuation.InClassOfExp
+import Formalism.GaussJetBounds.GaussJetProofs.LogarithmWeightComparison
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Formalism.ThetaLogCoordinates.UniformThetaSubstitution.CyclicPowerClassOfExpEquiv
+
+@[expose] public section
 
 noncomputable section
 
@@ -23,6 +67,7 @@ theorem th_expK_zero {ι : Type} : expK (0 : MvPowerSeries ι K) = 1 := by
 
 theorem th_subst_expSum {σ τ : Type} {a : σ → MvPowerSeries τ K} (ha : MvPowerSeries.HasSubst a)
     (f : MvPowerSeries σ K) (M : ℕ) : MvPowerSeries.subst a (expSum f M) = expSum (MvPowerSeries.subst a f) M := by
+
   rw [expSum, expSum, ← MvPowerSeries.coe_substAlgHom ha, map_sum]
   refine Finset.sum_congr rfl fun k _ => ?_
   rw [map_mul, map_pow, MvPowerSeries.coe_substAlgHom ha, MvPowerSeries.subst_C]
@@ -48,6 +93,7 @@ theorem th_subst_expK {σ τ : Type} [Finite σ] (a : σ → MvPowerSeries τ K)
 theorem th_map_expK {ι K2 : Type} [Field K2] (φ : K →+* K2) (f : MvPowerSeries ι K) :
     MvPowerSeries.map φ (expK f) = expK (MvPowerSeries.map φ f) := by
   ext n
+
   rw [MvPowerSeries.coeff_map, coeff_expK, coeff_expK, map_sum]
   refine Finset.sum_congr rfl fun k _ => ?_
   rw [map_mul, map_inv₀, map_natCast, ← map_pow, MvPowerSeries.coeff_map]
@@ -69,8 +115,8 @@ theorem integralExp_zero {ι : Type} : E0 p (0 : MvPowerSeries ι (K0 p)) := by
 theorem integralExp_add {ι : Type} {f g : MvPowerSeries ι (K0 p)} (hf : E0 p f) (hg : E0 p g) : E0 p (f + g) := by
   obtain ⟨hf0, h, hh0, hfe⟩ := hf
   obtain ⟨hg0, h', hh0', hge⟩ := hg
-  refine ⟨by rw [map_add, hf0, hg0, add_zero], h + h' + h * h', by simp [hh0, hh0'], ?_⟩
-  rw [expK_add hf0 hg0, hfe, hge, map_add, map_add, map_mul]
+  refine ⟨by rw [map_add (f := _), hf0, hg0, add_zero], h + h' + h * h', by simp [hh0, hh0'], ?_⟩
+  rw [expK_add hf0 hg0, hfe, hge, map_add (f := _), map_add (f := _), map_mul]
   ring
 
 theorem integralExp_sum {ι α : Type} (s : Finset α) (f : α → MvPowerSeries ι (K0 p)) (h : ∀ a ∈ s, E0 p (f a)) :
@@ -102,7 +148,7 @@ theorem integralExp_rename {κ σ : Type} [Finite κ] (φ : κ → σ) {f : MvPo
   refine ⟨MvPowerSeries.constantCoeff_subst_eq_zero haK hXK hf0, ren φ h,
     MvPowerSeries.constantCoeff_subst_eq_zero haW hXW hh0, ?_⟩
   unfold ren
-  rw [← th_subst_expK _ hXK hf0, hfe, ← MvPowerSeries.coe_substAlgHom haK, map_add, map_one,
+  rw [← th_subst_expK _ hXK hf0, hfe, ← MvPowerSeries.coe_substAlgHom haK, map_add (f := _), map_one,
     MvPowerSeries.coe_substAlgHom haK, MvPowerSeries.map_subst haW]
   simp only [MvPowerSeries.map_X]
 
@@ -118,7 +164,7 @@ theorem exp_neg_integral {ι : Type} {f : MvPowerSeries ι (K0 p)} (hf : E0 p f)
         ((1 + h) * MvPowerSeries.invOfUnit (1 + h) 1) := by rw [hinv, map_one, mul_one]
     _ = (expK (-f) * expK f) * MvPowerSeries.map (algebraMap (WW p) (K0 p))
         (MvPowerSeries.invOfUnit (1 + h) 1) := by
-      rw [hfe, map_mul, map_add, map_one]
+      rw [hfe, map_mul, map_add (f := _), map_one]
       ring
     _ = _ := by rw [hneg, one_mul]
 

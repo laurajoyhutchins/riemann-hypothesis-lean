@@ -1,4 +1,50 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.Algebra.Hom
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -25,31 +71,5 @@ def simT (c : A →ₐ[k] A) : Subgroup Aˣ where
         = ((x⁻¹ : Aˣ) : A) * c ((x⁻¹ : Aˣ) : A) * (algebraMap k A s * algebraMap k A ((s⁻¹ : kˣ) : k)) := by
           rw [← map_mul, Units.mul_inv, map_one, mul_one]
       _ = algebraMap k A ((s⁻¹ : kˣ) : k) := by rw [← mul_assoc, h1, one_mul]
-
-def fixU (c : A →ₐ[k] A) : Subgroup Aˣ where
-  carrier := {a | c a = a}
-  one_mem' := by simp
-  mul_mem' := by
-    intro a b ha hb
-    simp only [Set.mem_setOf_eq, Units.val_mul, map_mul] at *
-    rw [ha, hb]
-  inv_mem' := by
-    intro a ha
-    simp only [Set.mem_setOf_eq] at *
-    have h : c ((a⁻¹ : Aˣ) : A) * a = 1 := by
-      conv_lhs => rw [← ha]
-      rw [← map_mul]
-      simp
-    calc c ((a⁻¹ : Aˣ) : A) = c ((a⁻¹ : Aˣ) : A) * a * ((a⁻¹ : Aˣ) : A) := by simp
-      _ = ((a⁻¹ : Aˣ) : A) := by rw [h, one_mul]
-
-def normSub (c : A →ₐ[k] A) : Subgroup (fixU k c) :=
-  Subgroup.closure {a : fixU k c | ∃ (t : kˣ) (x : Aˣ), ((a : Aˣ) : A) = algebraMap k A t * (x * c x)}
-
-def H1 (c : A →ₐ[k] A) : Type := fixU k c ⧸ normSub k c
-
-instance (c : A →ₐ[k] A) : CommGroup (H1 k c) := by
-  unfold H1
-  infer_instance
 
 end GlobalTheory.LKTorus

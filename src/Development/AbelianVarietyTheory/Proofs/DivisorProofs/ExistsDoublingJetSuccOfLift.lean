@@ -1,5 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DerivCompM
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DerivCompM
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.Divisors.IsAdmissibleIntegralBasisChangeOne
+
+@[expose] public section
 
 open GlobalTheory.Nef
 
@@ -57,11 +104,11 @@ theorem exists_jet_succ_of_lift (A B R : Type) [CommRing A] [CommRing B] [CommRi
   obtain ⟨D, hD_def⟩ : ∃ D : A → R, ∀ f, D f = coeff n (u f) := ⟨_, fun _ => rfl⟩
   have hDadd : ∀ f g, D (f + g) = D f + D g := fun f g => by
     simp only [hD_def]
-    rw [← map_add]
+    rw [← map_add (f := _)]
     apply coeff_eq_of_X_pow_dvd_sub _ (Nat.lt_succ_self n)
     have e : u (f + g) - (u f + u g) =
         (ψ (m f + m g) - (ψ (m f) + ψ (m g))) - rescale 2 (ψ (f + g) - (ψ f + ψ g)) := by
-      simp only [hu_def, map_add, map_sub]; ring
+      simp only [hu_def, map_add (f := _), map_sub]; ring
     rw [e]
     exact dvd_sub (hψadd _ _) (X_pow_dvd_rescale' _ (hψadd _ _))
   have hDmul : ∀ f g, D (f * g) = β (ε f) * D g + β (ε g) * D f := fun f g => by
@@ -73,7 +120,7 @@ theorem exists_jet_succ_of_lift (A B R : Type) [CommRing A] [CommRing B] [CommRi
       rw [e]
       exact dvd_sub (hψmul _ _) (X_pow_dvd_rescale' _ (hψmul _ _))
     simp only [hD_def]
-    rw [coeff_eq_of_X_pow_dvd_sub e1 (Nat.lt_succ_self n), map_add,
+    rw [coeff_eq_of_X_pow_dvd_sub e1 (Nat.lt_succ_self n), map_add (f := _),
       coeff_mul_of_X_pow_dvd' (hu f), mul_comm (rescale 2 (ψ f)), coeff_mul_of_X_pow_dvd' (hu g)]
     rw [coeff_rescale, pow_zero, one_mul, hψ0, hψ0, hεmf]
     ring
@@ -113,7 +160,7 @@ theorem exists_jet_succ_of_lift (A B R : Type) [CommRing A] [CommRing B] [CommRi
       exact pow_dvd_pow _ (by omega)
   · intro f g
     convert hψadd f g using 1
-    simp only [map_add]
+    simp only [map_add (f := _)]
     ring
   · convert hψone using 1
     dsimp only
@@ -127,7 +174,7 @@ theorem exists_jet_succ_of_lift (A B R : Type) [CommRing A] [CommRing B] [CommRi
   · intro f
     rw [X_pow_dvd_iff]
     intro i hi
-    simp only [map_sub, map_add, coeff_rescale, coeff_C_mul_X_pow]
+    simp only [map_sub, map_add (f := _), coeff_rescale, coeff_C_mul_X_pow]
     rcases Nat.lt_succ_iff_lt_or_eq.mp hi with h | h
     · rw [if_neg h.ne, if_neg h.ne]
       have := (X_pow_dvd_iff.mp (hu f)) i h
@@ -136,10 +183,10 @@ theorem exists_jet_succ_of_lift (A B R : Type) [CommRing A] [CommRing B] [CommRi
     · rw [h, if_pos rfl, if_pos rfl, hEm, hE, hD_def, hu_def, map_sub, coeff_rescale]
       linear_combination (-(coeff n (ψ (m f)) - 2 ^ n * coeff n (ψ f))) * hc
   · intro f
-    rw [← coeff_zero_eq_constantCoeff_apply, map_add, coeff_C_mul_X_pow, if_neg (by omega),
+    rw [← coeff_zero_eq_constantCoeff_apply, map_add (f := _), coeff_C_mul_X_pow, if_neg (by omega),
       add_zero, hψ0]
   · intro f
-    rw [map_add, coeff_C_mul_X_pow, if_neg (by omega), add_zero,
+    rw [map_add (f := _), coeff_C_mul_X_pow, if_neg (by omega), add_zero,
       coeff_eq_of_X_pow_dvd_sub (hψφ f) (by omega), hφ1]
   · intro f
     have e : ψ f + C (E f) * X ^ n - φ f = (ψ f - φ f) + C (E f) * X ^ n := by ring

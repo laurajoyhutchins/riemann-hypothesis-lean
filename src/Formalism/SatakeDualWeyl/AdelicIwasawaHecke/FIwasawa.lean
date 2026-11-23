@@ -1,5 +1,60 @@
-import Formalism.SatakeDualWeyl.StatementF
-import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.FIwasawaE
+module
+
+public import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.FIwasawaA
+public import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.FIwasawaE
+public import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.SphericalA
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.FIwasawaB
+
+@[expose] public section
 
 open Formalism.UG Matrix
 
@@ -15,7 +70,7 @@ theorem fIwasawa_ordL_mul (x y : L) (hx : x ≠ 0) (hy : y ≠ 0) :
   have hy' : Valued.v y ≠ 0 := (Valuation.ne_zero_iff _).mpr hy
   have hxy' : Valued.v (x * y) ≠ 0 := by rw [map_mul]; exact mul_ne_zero hx' hy'
   unfold Formalism.UG.ordL
-  rw [dif_neg hxy', dif_neg hx', dif_neg hy']
+  rw [dite_eq_right hxy', dite_eq_right hx', dite_eq_right hy']
   have key : WithZero.unzero hxy' = WithZero.unzero hx' * WithZero.unzero hy' := by
     apply WithZero.coe_injective
     simp only [WithZero.coe_mul, WithZero.coe_unzero, map_mul]
@@ -34,7 +89,7 @@ theorem fIwasawa_ordL_unit (x y : L) (hx : Valued.v x ≤ 1) (hy : Valued.v y �
   have hv : Valued.v x = 1 := le_antisymm hx hge
   have hne : Valued.v x ≠ 0 := by rw [hv]; exact one_ne_zero
   unfold Formalism.UG.ordL
-  rw [dif_neg hne]
+  rw [dite_eq_right hne]
   have key : WithZero.unzero hne = 1 := by
     apply WithZero.coe_injective
     rw [WithZero.coe_unzero, hv, WithZero.coe_one]

@@ -1,5 +1,43 @@
-import Mathlib
-import Formalism.LocalToGlobal.IndefiniteReal.LinksChar
+module
+
+public import Formalism.LocalToGlobal.IndefiniteReal.LinksDefs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 set_option genSizeOfSpec false
 set_option genInjectivity false
@@ -14,7 +52,7 @@ namespace GlobalTheory.Core.Rk
 
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
 
-set_option maxHeartbeats 2000000 in
+
 
 structure Tower (D : D7) extends LevCh D Unit where
 
@@ -73,49 +111,10 @@ abbrev CXP (P : W.Lv) : Submodule ℂ (SmT W.MX →ₗ[ℂ] (GA D D.sp.X' → �
 abbrev CX : Submodule ℂ (SmT W.MX →ₗ[ℂ] (GA D D.sp.X' → ℂ)) :=
   MultT W.θ W.MX (levS _ W.βX (W.datXt ())) (levChi _ W.βX (W.datXt ()))
 
-def ptY (k : ℕ) : PolF D (Yc D (k + 1)).rank (Yc D k).rank → (WO (Yc D k) (Yc D (k + 1)) → ℂ) :=
-  pureTensorO W.ψ W.θ (Yc D k) (Yc D (k + 1)) (cart (W.MY k)) (cart (W.MY (k + 1))) (onb (W.MY k)) (onb (W.MY (k + 1))) (W.vY k)
-
-def ptX : PolF D D.sp.X'.rank (Yc D (D.R.m - 1)).rank → (WO (Yc D (D.R.m - 1)) D.sp.X' → ℂ) :=
-  pureTensorO W.ψ W.θ (Yc D (D.R.m - 1)) D.sp.X' (cart (W.MY (D.R.m - 1))) (cart W.MX) (onb (W.MY (D.R.m - 1))) (onb W.MX) W.vX
-
-structure Pre : Prop where
-  chars : W.toLevCh.Is ()
-  inf : IsInfFam W.θ
-  std : IsStdChar D W.ψ (-1)
-  νY : ∀ j, j + 1 < D.R.m → IsMeasFD (Yc D j) (lev D.sp.cm (Yc D j).gram (W.βY j) (W.datYt () j W.triv)) (W.νY j) (W.fdY j)
-  νY' : IsMeasDef (Yc D (D.R.m - 1))
-    (lev D.sp.cm (Yc D (D.R.m - 1)).gram (W.βY (D.R.m - 1)) (W.datYt () (D.R.m - 1) W.triv)) (W.νY (D.R.m - 1)) (W.fdY (D.R.m - 1))
-  νX : IsMeasDef D.sp.X' (lev D.sp.cm D.sp.X'.gram W.βX (W.datXt ())) W.νX W.fdX
-  ωY : ∀ k, k + 1 < D.R.m → IsWeilDatumO W.ψ (Yc D k) (Yc D (k + 1)) (Lift.chrStep (W.toLevCh.mu ()) W.eta (k + 1)).1
-    (Lift.chrStep (W.toLevCh.mu ()) W.eta (k + 1)).2 (W.ωY k)
-  ωX : IsWeilDatumO W.ψ (Yc D (D.R.m - 1)) D.sp.X' (Lift.chrStep (W.toLevCh.mu ()) W.eta D.R.m).1
-    (Lift.chrStep (W.toLevCh.mu ()) W.eta D.R.m).2 W.ωX
-  vY : ∀ k, k + 1 < D.R.m → IsStepVecOf W.ψ W.θ (Yc D k) (Yc D (k + 1)) (cart (W.MY k)) (cart (W.MY (k + 1))) (W.ΛY k)
-    (W.ΛY (k + 1)) (W.βY k) (W.βY (k + 1)) (W.datYt () k W.triv) (W.chi (k + 1)) (W.Q ()) (W.xiR ()) (W.vac k) (W.vY k)
-  vX : IsStepVecOf W.ψ W.θ (Yc D (D.R.m - 1)) D.sp.X' (cart (W.MY (D.R.m - 1))) (cart W.MX) (W.ΛY (D.R.m - 1)) W.ΛX
-    (W.βY (D.R.m - 1)) W.βX (W.datYt () (D.R.m - 1) W.triv) (W.chi D.R.m) (W.Q ()) (W.xiR ()) W.vacX W.vX
-  ptY : ∀ k, k + 1 < D.R.m → ∀ P, IsThetaFunO W.ψ (Yc D k) (Yc D (k + 1)) (W.ptY k P)
-  ptX : ∀ P, IsThetaFunO W.ψ (Yc D (D.R.m - 1)) D.sp.X' (W.ptX P)
-  ItY : ∀ k, k + 1 < D.R.m → IsItW W.θ (W.MY k) (W.MY (k + 1)) (W.ωY k) (W.ptY k) (W.ItY k)
-  ItX : IsItW W.θ (W.MY (D.R.m - 1)) W.MX W.ωX W.ptX W.ItX
-
-structure Is : Prop extends W.Pre where
-  ioY : Lift.IsChainIo W.CC (D.R.m - 1) W.νY W.fdY (fun k => thetaKO (W.ωY k)) W.ptY W.ItY W.ioY
-  ioX : Lift.IsIo W.νX W.fdX (thetaKO W.ωX) W.ptX W.ItX _ _ W.ioX
-
 def thDn : W.CX →ₗ[ℂ] W.CC 0 := Lift.thetaDn W.CC W.ioY (D.R.m - 1) ∘ₗ W.ioX
 
 def IsDn (T : SmT W.MX →ₗ[ℂ] (GA D D.sp.X' → ℂ)) (T₀ : SmT (W.MY 0) →ₗ[ℂ] (GA D (Yc D 0) → ℂ)) : Prop :=
   ∃ h : T ∈ W.CX, T₀ = (W.thDn ⟨T, h⟩ : W.CC 0)
-
-def DnLev (P : W.Lv) : Prop := ∀ T ∈ W.CXP P, ∃ T₀ ∈ W.CP P 0, W.IsDn T T₀
-
-def Onto (P : W.Lv) : Prop := ∀ T₀ ∈ W.CP P 0, ∃ T ∈ W.CXP P, W.IsDn T T₀
-
-def Onto1 : Prop := Function.Surjective W.thDn
-
-def StepsOnto : Prop := (∀ k, k + 1 < D.R.m → Function.Surjective (W.ioY k)) ∧ Function.Surjective W.ioX
 
 end Tower
 

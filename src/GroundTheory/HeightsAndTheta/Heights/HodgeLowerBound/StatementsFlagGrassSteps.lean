@@ -1,7 +1,49 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.StatementsFlagGrassPush
-import GroundTheory.HeightsAndTheta.Heights.Intersections.Statements
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.MixedFieldContraction.ContractMixedFieldStatement
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.StatementsGrassHeight
+public import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.FlagIndices.InstFintypeFlIdx
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.MixedFieldContraction.GenericFibreKerTarget
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -37,7 +79,7 @@ def linForm (ℓ : Ψ × Fin N → ℤ) : RootPoly Ψ N := ∑ p, (ℓ p : ℚ) 
 
 def linDeg (ℓ : Ψ × Fin N → ℤ) : FlBlock Ψ N → ℤ := fun q => ∑ p, ℓ p * xDeg Ψ N p q
 
-def linLine (ℓ : Ψ × Fin N → ℤ) : HermLine (FlIdx Ψ N) := fsHerm (FlIdx Ψ N) (linDeg Ψ N ℓ)
+def linLine (ℓ : Ψ × Fin N → ℤ) : HermLine (FlIdx Ψ N) := fsHerm (ι := FlIdx Ψ N) (linDeg Ψ N ℓ)
 
 variable (j : ℕ)
 
@@ -77,40 +119,6 @@ def HFlProdLinear.Statement : Prop :=
 def FsInvPow.Statement : Prop :=
   ∀ (II : IntersectionSystem) (K : Type) [Fintype K] (ι : K → Type) [∀ k, Fintype (ι k)] (P : Ideal (MRing ι))
     (d : ℕ), IsIntersectionSystem II → IsArithVar P d →
-    II K ι P d (fun _ => fsHerm ι (fun _ => -1)) = (-1) ^ d * II K ι P d (fun _ => GroundTheory.Heights₂.Heights.fsMulti ι)
-
-def FlagGrassFibreDeg.Statement : Prop :=
-  ∀ (Ψ : Type) [Fintype Ψ] [DecidableEq Ψ] [Nonempty Ψ] (N j : ℕ) (hj : 1 ≤ j) (hjN : j ≤ N - 1),
-    ∃ (G : GenFibre (grFlV Ψ N j hj hjN) (PFl Ψ N))
-      (J : IFamily G.Φ (fibreIdx (FlIdx Ψ N) (grFlKappa Ψ N j hj hjN))),
-      IsFieldIntersection J ∧
-        ((J (fibreIdeal (grFlKappa Ψ N j hj hjN) G) (vandCount Ψ N j)
-          (fun i => fibreDeg (grFlKappa Ψ N j hj hjN) (vandLine Ψ N j i).a) : ℤ) : ℚ) = fdeg Ψ N j
-
-def GrassDegFlagInt.Statement : Prop :=
-  ∀ (Ψ : Type) [Fintype Ψ] [DecidableEq Ψ] [Nonempty Ψ] (N j : ℕ), 2 ≤ N → 1 ≤ j → j ≤ N - 1 →
-    ((flagInt Ψ N (muPoly Ψ N j ^ dimN Ψ N j * vandBlocks Ψ N j) : ℚ) : ℝ) =
-      (-1) ^ dimN Ψ N j * (fdeg Ψ N j : ℝ) *
-        geomDeg (grassIdeal (Fintype.card Ψ) j (N - j))
-          (GroundTheory.Heights₂.Heights.fsMulti (plBlocks (Fintype.card Ψ) j (N - j))) (dimN Ψ N j)
-
-example : Nonempty Unit ∧ 2 ≤ 2 ∧ 1 ≤ 1 ∧ 1 ≤ 2 - 1 ∧ vandCount Unit 2 1 = 0 ∧ dimFl Unit 2 + 1 = 2 := by
-  refine ⟨⟨()⟩, le_rfl, le_rfl, le_rfl, ?_, rfl⟩
-  unfold vandCount
-  rw [Fintype.card_eq_zero_iff]
-  constructor
-  rintro ⟨⟨u, a, b⟩, hab, hh⟩
-  fin_cases a <;> fin_cases b <;> simp_all
-
-example : IsArithVar (⊥ : Ideal (MRing (PBlk 2))) 2 := Inter.isArithVar_projLine
-
-example : Nonempty Unit ∧ 2 ≤ 2 ∧ (2 = dimFl Unit 2 + 1) ∧
-    linForm Unit 2 (fun p => if p = ((), 1) then 1 else 0) = X ((), 1) := by
-  refine ⟨⟨()⟩, le_rfl, rfl, ?_⟩
-  unfold linForm
-  rw [Fintype.sum_eq_single ((), 1)]
-  · simp
-  · intro p hp
-    simp [hp]
+    II K ι P d (fun _ => fsHerm (ι := ι) (fun _ => -1)) = (-1) ^ d * II K ι P d (fun _ => GroundTheory.Heights₂.Heights.fsMulti ι)
 
 end GroundTheory.Heights₂.Heights.LowerBoundFree

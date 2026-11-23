@@ -1,4 +1,48 @@
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.OrbitJetLogarithm.ProdRenameExpJetSeries
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.OrbitJetLogarithm.ProdRenameExpJetSeries
+public import Formalism.PeriodIntegrals.OrbAddOne
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.OrbitJetLogarithm.ApplyAt0EqZeroOfOrder
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -17,10 +61,10 @@ theorem bound_place {D : D7} (E : Ent D) (h5 : 5 ≤ p) (u : D.what₂.Word) (i 
     (hbe : ∀ z, OJ.B1 p 2 (be z) ∧ OJ.B2 p 2 (be z) ∧ OJ.B3 p 2 (be z) ∧ OJ.B4 p 2 (be z))
     (I : ColChoice (D.R.N (i + 1)) (E.nu u i)) (k : Pl D × Fin (D.R.N i) × Fin (D.R.N (i + 1)) →₀ ℕ)
     (z : Pl D) (m' : Pl D × ℕ × Fin (D.R.N i) →₀ ℕ) :
-    ‖MvPolynomial.coeff m' (applyAt0 (D.R.N i) (D.R.N (i + 1)) p
+    ‖AddMonoidAlgebra.coeff (applyAt0 (D.R.N i) (D.R.N (i + 1)) p
       (rename (pEmb (ptE D z) (Fin (D.R.N i) × Fin (D.R.N (i + 1))))
         (T1 (D.R.N i) (D.R.N (i + 1)) c (ep z) (sg z) (be z) (kz D z k)))
-      (∏ c' : Fin ((E.nu u i z).rowLen 0), minorXZ (D.R.N i) (D.R.N (i + 1)) z ((E.nu u i z).colLen c') (I z c')))‖
+      (∏ c' : Fin ((E.nu u i z).rowLen 0), minorXZ (D.R.N i) (D.R.N (i + 1)) z ((E.nu u i z).colLen c') (I z c'))) m'‖
       ≤ (p : ℝ) ^ (-β z) := by
   have hadm := admissible_jet_term E h5 u i z c hc (ep z) (sg z) (hep z) (hsg z) (be z) (hbe z) (kz D z k)
   have hK := hβ z _ hadm
@@ -79,10 +123,10 @@ theorem orbitsAddAtConjugate (D : D7) (E : Ent D) : OrbitsAddAtConjugate E := by
     exact Set.disjoint_singleton.mpr hxy
   have hprod : ∀ (k : Pl D × Fin (D.R.N i) × Fin (D.R.N (i + 1)) →₀ ℕ)
       (m' : Pl D × ℕ × Fin (D.R.N i) →₀ ℕ),
-      ‖MvPolynomial.coeff m' (applyAt0 (D.R.N i) (D.R.N (i + 1)) p
+      ‖AddMonoidAlgebra.coeff (applyAt0 (D.R.N i) (D.R.N (i + 1)) p
         (∏ z, rename (pEmb (ptE D z) (Fin (D.R.N i) × Fin (D.R.N (i + 1))))
           (T1 (D.R.N i) (D.R.N (i + 1)) ep0 (ep z) (sg z) (be z) (kz D z k)))
-        (Gxz (D.R.N i) (D.R.N (i + 1)) (E.nu u i) I))‖ ≤ (p : ℝ) ^ (-∑ z, β z) := by
+        (Gxz (D.R.N i) (D.R.N (i + 1)) (E.nu u i) I)) m'‖ ≤ (p : ℝ) ^ (-∑ z, β z) := by
     intro k m'
     have hT : ∀ z ∈ (Finset.univ : Finset (Pl D)),
         SerIn {v : Pl D × Fin (D.R.N i) × Fin (D.R.N (i + 1)) | v.1 ∈ ({z} : Set (Pl D))}
@@ -141,7 +185,8 @@ theorem orbitsAddAtConjugate (D : D7) (E : Ent D) : OrbitsAddAtConjugate E := by
           subst (psiA p ep0) (MvPowerSeries.monomial k (1 : ℂ_[p]) * L)
         + subst (psiA p ep0) (V * L) := by
     conv_lhs => rw [hUV]
-    rw [add_mul, Finset.sum_mul, ← MvPowerSeries.coe_substAlgHom (R := ℂ_[p]) hs, map_add, map_sum]
+
+    rw [add_mul, Finset.sum_mul, ← MvPowerSeries.coe_substAlgHom (R := ℂ_[p]) hs, map_add (f := _), map_sum]
     congr 1
     refine Finset.sum_congr rfl fun k _ => ?_
     rw [hmon k, map_smul]

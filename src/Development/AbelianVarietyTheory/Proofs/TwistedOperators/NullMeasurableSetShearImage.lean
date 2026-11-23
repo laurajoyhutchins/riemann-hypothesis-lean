@@ -1,4 +1,50 @@
-import Mathlib
+module
+
+public import Mathlib.MeasureTheory.Measure.Prod
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MeasureTheory
 
@@ -54,12 +100,12 @@ theorem nullMeasurableSet_shear_image {N : Subgroup H} (hN : IsClosed (N : Set H
   have he := measurableEmbedding_shear hN
   have hAB : NullMeasurableSet (A ×ˢ B) (κ.prod ν) := hA.prod hB
   refine (he.measurableSet_image.2 (measurableSet_toMeasurable (κ.prod ν) (A ×ˢ B))).nullMeasurableSet.congr ?_
-  refine (he.ae_map_iff (p := fun y => (shear N '' toMeasurable (κ.prod ν) (A ×ˢ B)) y =
-    (shear N '' (A ×ˢ B)) y)).2 ?_
+  refine (he.ae_map_iff (p := fun y => (y ∈ shear N '' toMeasurable (κ.prod ν) (A ×ˢ B)) ↔
+    (y ∈ shear N '' (A ×ˢ B)))).2 ?_
   filter_upwards [hAB.toMeasurable_ae_eq] with x hx
-  have e1 : (shear N '' toMeasurable (κ.prod ν) (A ×ˢ B)) (shear N x) = toMeasurable (κ.prod ν) (A ×ˢ B) x :=
-    propext he.injective.mem_set_image
-  have e2 : (shear N '' (A ×ˢ B)) (shear N x) = (A ×ˢ B) x := propext he.injective.mem_set_image
+  have e1 : shear N x ∈ shear N '' toMeasurable (κ.prod ν) (A ×ˢ B) ↔ x ∈ toMeasurable (κ.prod ν) (A ×ˢ B) :=
+    he.injective.mem_set_image
+  have e2 : shear N x ∈ shear N '' (A ×ˢ B) ↔ x ∈ (A ×ˢ B) := he.injective.mem_set_image
   rw [e1, e2]
   exact hx
 

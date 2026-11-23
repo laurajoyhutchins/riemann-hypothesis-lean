@@ -1,12 +1,66 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.HeckePairTop
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.HkDefs
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.IwUnitHk
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.IwThetaEx
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.IwBernRel
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.IwSimpleQuad
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.IwPermMul
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.IwDomMul
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.HeckePairTop
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.HkDefs
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.IwBernRel
+import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.IwHeckePairIwC
 import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.IwHkNorm
+import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.IwPermMul
+import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.IwSimpleQuad
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.IwThetaEx
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.IwUnitHk
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open ValuativeRel Matrix GlobalTheory.SmGL GlobalTheory.SplitWeil UpperTheory.V.Hi UpperTheory.V.AlgebraTools
 
 namespace UpperTheory.V.AlgebraTools
@@ -17,7 +71,8 @@ private theorem exists_algHom_of_comm {σ A H : Type} [CommRing A] [Ring H] [Alg
   have hc : ∀ a ∈ Set.range y, ∀ b ∈ Set.range y, a * b = b * a := by
     rintro _ ⟨i, rfl⟩ _ ⟨j, rfl⟩
     exact hy i j
-  have : IsMulCommutative (Algebra.adjoin A (Set.range y)) := Algebra.isMulCommutative_adjoin A hc
+  have : IsMulCommutative (Algebra.adjoin A (Set.range y)) :=
+    Algebra.isMulCommutative_adjoin A (fun a ha b hb _ => hc a ha b hb)
   letI : CommRing (Algebra.adjoin A (Set.range y)) :=
     { (inferInstance : Ring (Algebra.adjoin A (Set.range y))) with mul_comm := fun a b => this.is_comm.comm a b }
   refine ⟨(Algebra.adjoin A (Set.range y)).val.comp

@@ -1,4 +1,45 @@
-import Development.AutomorphicArithmetic.DedekindLFunctions.CharFamily
+module
+
+public import Development.AutomorphicArithmetic.DedekindLFunctions.CharFamily
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Complex MeasureTheory Set Filter Topology
 
@@ -28,38 +69,7 @@ def WindowHypU (g : ℝ → ℝ) (θ δ : ℝ) : Prop :=
     (∀ u ∈ Icc U ((1 + δ) * U), 0 ≤ R u ∧ g u ≤ R u) ∧
     ∫ u in Icc U ((1 + δ) * U), R u * Real.exp (-θ * u) ≤ Real.exp (η * U)
 
-open Classical in
-
-def famD (q : ℕ) [NeZero q] (S : Finset (DirichletCharacter ℂ q)) (w : ℝ) (hw : 0 < w) : CharFamily where
-  ι := Option {ξ : DirichletCharacter ℂ q // ξ ∈ S ∧ ξ ≠ 1}
-  N := fun i => match i with
-    | none => 1
-    | some _ => q
-  nz := fun i => by cases i <;> infer_instance
-  χ := fun i => match i with
-    | none => (1 : DirichletCharacter ℂ 1)
-    | some ξ => ξ.1
-  a := fun i => match i with
-    | none => 1
-    | some _ => w
-  a_pos := fun i => by cases i <;> simp [hw]
-  adm := fun i => by
-    cases i with
-    | none => exact Or.inl rfl
-    | some ξ => exact Or.inr ξ.2.2
-
-open Classical in
-
-def GmLevel (j : ℕ) (y : ℝ) : ℝ :=
-  G y + (3 * (2 : ℝ) ^ j + 1)⁻¹ *
-    ∑ ξ ∈ Finset.univ.filter (fun ξ : DirichletCharacter ℂ (2 ^ (j + 2)) => ξ.Even ∧ ξ ≠ 1), (Gchi ξ y).re
-
-def ZeroFreeAbove (j : ℕ) (θ : ℝ) : Prop :=
-  ∀ s : ℂ, θ < s.re → riemannZeta s ≠ 0 ∧
-    ∀ ξ : DirichletCharacter ℂ (2 ^ (j + 2)), ξ.Even → ξ ≠ 1 → DirichletCharacter.LFunction ξ s ≠ 0
-
-def LandauZeroFreeCriterion (j : ℕ) : Prop :=
-  ∀ θ : ℝ, 0 < θ → θ < 1 → ∀ y0 : ℝ, (∀ y ≥ y0, GmLevel j y ≤ y ^ θ) → ZeroFreeAbove j θ
+open Classical
 
 end Deduction
 

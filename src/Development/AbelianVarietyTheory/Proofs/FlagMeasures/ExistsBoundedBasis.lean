@@ -1,8 +1,66 @@
-import Mathlib
-import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.TransferenceMinima
-import Formalism.HermitianLattices.HermitianLatticesProofs.MassTelescope
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HermitianMassUpperBound
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ExistsPositiveAdd
+module
+
+public import Formalism.HermitianLattices.HermitianLatticesProofs.MassTelescope
+public import Formalism.SharpRestriction.GlobalSchurBounds.GeneralLinearActions.GapAtLeast
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.FundamentalDomainPointBound
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.EmbeddingHermSelf
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.ExistsFinsetSelfDualClassesHerm
+import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.IsLocalizedModuleSubtype
+import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.TraceHermNondegenerate
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HermitianMassUpperBound
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsFinsetSelfDualClassesRootDiscr
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ExistsPositiveAdd
+import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.FiniteClassesSelfDualOfSelfDual
+import Formalism.HermitianLattices.HermitianLatticesProofs.GenusBasic
+public import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.TransferenceMinima
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.DiscriminantEstimates.DiscriminantTheorems.ScaledBoundInequality
+
+@[expose] public section
 
 open NumberField Module Submodule
 open ReciprocityTheory.ChartRestriction.G.FD (herm cc fdeg rdE)
@@ -108,8 +166,8 @@ variable {E : Type} [Field E] [NumberField E] [IsCMField E]
 theorem rdE_pos : 0 < rdE E := Real.rpow_pos_of_pos
     (abs_pos.mpr (by exact_mod_cast NumberField.discr_ne_zero E)) _
 
-open ShortVectors in
 
+open ShortVectors in
 theorem exists_bounded_basis {n : ℕ} (hn : 1 ≤ n) (Λ : Submodule (𝓞 E) (Fin n → E)) (hfg : Λ.FG)
     (hint : ∀ x ∈ Λ, ∀ y ∈ Λ, IsIntegral ℤ (herm 1 x y))
     (hdual : ∀ x, (∀ y ∈ Λ, IsIntegral ℤ (herm 1 x y)) → x ∈ Λ) :
@@ -128,6 +186,7 @@ theorem exists_bounded_basis {n : ℕ} (hn : 1 ≤ n) (Λ : Submodule (𝓞 E) (
       obtain ⟨c, rfl⟩ := (mem_span_range_iff_exists_fun ℤ).1 ((hb y).2 hy)
       choose k hk using hk
       refine ⟨∑ j, c j * k j, ?_⟩
+
       rw [← traceHerm_apply, map_sum]
       simp only [map_zsmul, hk]
       simp)
@@ -148,8 +207,8 @@ theorem exists_bounded_basis {n : ℕ} (hn : 1 ≤ n) (Λ : Submodule (𝓞 E) (
   exact ⟨fun i => v (e i), fun i => (hb _).1 (hv _), hs2.comp e e.injective, fun σ i k =>
     SelfDualClasses.norm_herm_le σ _ _ _ (hle' _ σ) (hle' _ σ)⟩
 
-open StdMassBound RootClassCount in
 
+open StdMassBound RootClassCount in
 theorem mass_le [StarRing E] (hs : ∀ x : E, star x = IsCMField.complexConj E x) {n : ℕ} (hn : 1 ≤ n) {B : ℝ}
     (hB : B = 2 * (fdeg E : ℝ) * n ^ 2 * rdE E ^ 2) :
     Formalism.HermitianLatticesTheory.mass (stdForm E n) (stdLat E n) ≤ (1 + 2 * B) ^ (2 * fdeg E * n ^ 2) * (n * B) ^ (2 * fdeg E * n ^ 2) := by
@@ -200,8 +259,8 @@ theorem mass_le [StarRing E] (hs : ∀ x : E, star x = IsCMField.complexConj E x
     _ = s.card := by simp
     _ ≤ R.card := by exact_mod_cast hcard
 
-omit [IsCMField E] in
 
+omit [IsCMField E] in
 theorem mass_small [StarRing E] (hK : Formalism.HermitianLatticesTheory.IsCMUnram E) (hv : 1 ≤ Formalism.HermitianLatticesTheory.vInv E) {n : ℕ} (h1 : 1 ≤ n)
     (h2 : n ≤ 2) :
     Formalism.HermitianLatticesTheory.mass (Formalism.HermitianLatticesTheory.massTelescope_form E n) (Formalism.HermitianLatticesTheory.massTelescope_lat E n) ≤
@@ -227,8 +286,7 @@ theorem mass_small [StarRing E] (hK : Formalism.HermitianLatticesTheory.IsCMUnra
   have e2 : stdLat E n = Formalism.HermitianLatticesTheory.massTelescope_lat E n := by
     unfold stdLat Formalism.HermitianLatticesTheory.massTelescope_lat
     congr 2
-    funext i
-    simp
+    exact funext fun i => (Pi.basisFun_apply E (Fin n) i).symm
   rw [e1, e2, hr, hf] at hm
   refine hm.trans ?_
   have f1 : (1 : ℝ) ≤ Formalism.HermitianLatticesTheory.fDeg E := by exact_mod_cast (Fintype.card_pos : 0 < Formalism.HermitianLatticesTheory.fDeg E)

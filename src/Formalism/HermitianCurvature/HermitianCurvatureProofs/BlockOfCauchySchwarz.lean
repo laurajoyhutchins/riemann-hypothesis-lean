@@ -1,6 +1,50 @@
-import Formalism.HermitianCurvature.StatementKB
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.JointInstanceTheoremA
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.OutsideSystemsBound
+module
+
+public import Formalism.HermitianCurvature.StatementKB
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.JointInstanceTheoremA
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Finset
 open scoped ComplexConjugate
@@ -35,6 +79,7 @@ theorem qf_block (a : α → α → ℂ) (w : α → β → ℂ) (b : β → β 
   have hconj : (∑ x ∈ Y₂, ∑ y ∈ Y₁, conj (c (.inr x)) * conj (w y x) * c (.inl y)) =
       conj (∑ p ∈ Y₁, ∑ q ∈ Y₂, conj (c (.inl p)) * w p q * c (.inr q)) := by
     rw [Finset.sum_comm]
+
     simp only [map_sum, map_mul, Complex.conj_conj]
     refine Finset.sum_congr rfl fun p _ => Finset.sum_congr rfl fun q _ => ?_
     ring
@@ -82,6 +127,7 @@ theorem psd_iff_qf {γ : Type} (Y : Finset γ) (k : γ → γ → ℂ) :
       simp only [hc] at hre
       have him : (∑ i : Y, ∑ j : Y, conj (x i) * k i j * x j).im = 0 := by
         rw [← Complex.conj_eq_iff_im]
+
         simp only [map_sum, map_mul, Complex.conj_conj]
         rw [Finset.sum_comm]
         refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
@@ -159,6 +205,7 @@ theorem blockPSD_ones {α β : Type} (Y₁ : Finset α) (Y₂ : Finset β) :
   · have hq : qf (Y₁.disjSum Y₂) (blockK (fun _ _ => (1 : ℂ)) (fun _ _ => 1) (fun _ _ => 1)) c =
         conj (∑ x ∈ Y₁.disjSum Y₂, c x) * ∑ x ∈ Y₁.disjSum Y₂, c x := by
       unfold qf
+
       rw [map_sum, Finset.sum_mul_sum]
       refine Finset.sum_congr rfl fun x _ => Finset.sum_congr rfl fun y _ => ?_
       cases x <;> cases y <;> simp [blockK]
@@ -231,9 +278,5 @@ theorem block_cross_le {α β : Type} {Y₁ : Finset α} {Y₂ : Finset β} {a :
       ring
     rw [hns, hnr, hcr] at k2
     nlinarith [mul_pos hn hn, k2]
-
-theorem blockSchur_true : KB.BlockSchur := by
-  intro ι α β _ Y₁ Y₂ κa κw κb a w b hκ hv
-  exact block_cross_le (blockPSD_mul hκ (blockPSD_prod Finset.univ a w b (fun v _ => hv v)))
 
 end Formalism.FourierDecayAlt.P.PBA

@@ -1,8 +1,47 @@
-import Mathlib
-import Formalism.LocalToGlobal.IndefiniteReal.LinksDefs
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ContDiffDerivSnoc
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IsSmoothAutomorphicRightTranslateFinite
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.LevelGroupActionIsAction
+module
+
+public import Formalism.LocalToGlobal.IndefiniteReal.LinksDefs
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ContDiffDerivSnoc
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IsSmoothAutomorphicRightTranslateFinite
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.LevelGroupActionIsAction
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -52,7 +91,7 @@ theorem exists_principalLevelMultiplicity_finiteGroup_image (g0 : G0 L.Pg L.r) (
         actG0 V β L g0 (T v) := by
       intro v
       unfold actG0
-      rw [dif_pos hk]
+      rw [dite_eq_left hk]
       funext g
       simp [heckeOn, postOn_apply, heckeLin_apply]
     have h0 : IsMultMap θ M ∅ (levChi V β (flag1L L))
@@ -65,7 +104,7 @@ theorem exists_principalLevelMultiplicity_finiteGroup_image (g0 : G0 L.Pg L.r) (
     exact GlobalTheory.FlagAction.act_hasType (fun k hk => hT.lev v k hk) hk k hk' g
   · refine ⟨0, Submodule.zero_mem _, fun v => ?_⟩
     unfold actG0
-    rw [dif_neg hk]
+    rw [dite_eq_right hk]
     rfl
 
 theorem act_mem (g : G0 L.Pg L.r) {U : MMap M} (hU : U ∈ MultP θ M β L) : postOn M (actL V β L g) U ∈ MultP θ M β L := by
@@ -97,23 +136,13 @@ theorem gaL_act (hl : LiftsExist V β L) {c : G → ℂ} (hc : ∀ g a, c (g * a
       postOn M (actL V β L (eG (a * b))) U := fun a b => by
     rw [map_mul]
     exact (act_mul hl _ _ hU).symm
+
   rw [postOn_gaL, postOn_gaL, map_sum]
   simp only [map_smul, hm]
   refine (Fintype.sum_equiv (MulAut.conj g).toEquiv _ _ fun a => ?_).symm
   show _ = c (g * a * g⁻¹) • postOn M (actL V β L (eG (g * a * g⁻¹ * g))) U
   rw [hc, inv_mul_cancel_right]
 
-omit [Fintype G] in
-
-def repOn (hl : LiftsExist V β L) (W : Submodule ℂ (MMap M)) (hW : W ≤ MultP θ M β L)
-    (hs : ∀ g, ∀ U ∈ W, postOn M (actL V β L (eG g)) U ∈ W) : Representation ℂ G W where
-  toFun g := (postOn M (actL V β L (eG g))).restrict (hs g)
-  map_one' := LinearMap.ext fun U => Subtype.ext (by
-    show postOn M (actL V β L (eG 1)) U = U
-    rw [map_one]; exact act_one (hW U.2))
-  map_mul' g g' := LinearMap.ext fun U => Subtype.ext (by
-    show postOn M (actL V β L (eG (g * g'))) U = postOn M (actL V β L (eG g)) (postOn M (actL V β L (eG g')) U)
-    rw [map_mul]; exact act_mul hl _ _ (hW U.2))
 
 end GlobalTheory.MultAction
 

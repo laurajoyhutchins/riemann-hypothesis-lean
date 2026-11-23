@@ -1,4 +1,53 @@
-import Development.AutomorphicArithmetic.Foundations.Convolution.HermitianDescent.NormAlmostAll
+module
+
+public import Development.AutomorphicArithmetic.Foundations.Convolution.HermitianDescent.NormAlmostAll
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -15,6 +64,7 @@ private theorem sum_fixed (h : IsGal σ q) (r : R) :
   have h1 := Finset.sum_range_succ (fun j => (σ ^ j) r) q
   have h2 := Finset.sum_range_succ' (fun j => (σ ^ j) r) q
   rw [h1, h.pow, pow_zero] at h2
+
   rw [map_sum, add_right_cancel h2]
   refine Finset.sum_congr rfl fun j _ => ?_
   rw [pow_succ', AlgEquiv.mul_apply]
@@ -23,8 +73,8 @@ private theorem exists_tr (h : IsGal σ q) :
     ∃ t : R →ₗ[k] k, ∀ r, algebraMap k R (t r) = ∑ j ∈ Finset.range q, (σ ^ j) r := by
   choose t ht using fun r => h.fix _ (sum_fixed h r)
   refine ⟨⟨⟨t, fun a b => h.inj ?_⟩, fun c a => h.inj ?_⟩, ht⟩
-  · rw [map_add, ht, ht, ht, ← Finset.sum_add_distrib]
-    simp only [map_add]
+  · rw [map_add (f := _), ht, ht, ht, ← Finset.sum_add_distrib]
+    simp only [map_add (f := _)]
   · simp only [RingHom.id_apply, smul_eq_mul]
     rw [map_mul, ht, ht, Finset.mul_sum]
     simp only [Algebra.smul_def, map_mul, AlgEquiv.commutes]
@@ -86,7 +136,7 @@ theorem galBase : GalBase := by
       intro r hr
       refine Submodule.smul_induction_on hr (fun a ha n _ => ?_) (fun a b ha hb => ?_)
       · rw [map_smul, smul_eq_mul]; exact m.mul_mem_right _ ha
-      · rw [map_add]; exact m.add_mem ha hb
+      · rw [map_add (f := _)]; exact m.add_mem ha hb
     rw [Ideal.eq_top_iff_one, ← hc]
     exact key c (by rw [hm']; exact Submodule.mem_top)
   · set τ : A ⊗[k] R ≃ₐ[A] A ⊗[k] R := Algebra.TensorProduct.congr AlgEquiv.refl σ with hτ
@@ -99,7 +149,7 @@ theorem galBase : GalBase := by
       induction z using TensorProduct.induction_on with
       | zero => simp
       | tmul a r => rw [hp, h.pow]; rfl
-      | add a b ha hb => rw [map_add, map_add, ha, hb]
+      | add a b ha hb => rw [map_add (f := _), map_add (f := _), ha, hb]
     · refine Function.LeftInverse.injective (g := p) fun a => ?_
       rw [Algebra.TensorProduct.algebraMap_apply, hpp, mul_one, hc, one_smul]
       rfl
@@ -115,7 +165,7 @@ theorem galBase : GalBase := by
             Algebra.algebraMap_eq_smul_one (t (c * r)), ← TensorProduct.smul_tmul]
           rfl
         | add a b ha hb =>
-          simp only [map_add, mul_add, ha, hb, Finset.sum_add_distrib]
+          simp only [map_add (f := _), mul_add, ha, hb, Finset.sum_add_distrib]
       have h2 : ∀ j : ℕ, (τ ^ j) z = z := by
         intro j
         induction j with

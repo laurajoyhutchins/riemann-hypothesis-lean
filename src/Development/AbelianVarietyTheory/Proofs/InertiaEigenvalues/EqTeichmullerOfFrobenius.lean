@@ -1,13 +1,56 @@
-import Mathlib
-import Formalism.LocalRingCardinality.AdicCompletionLocal.LocTied
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.ExistsOfLayers
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ConstantCoeffTeichSub
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.AlgHomExtOfConstantCoeffZero
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CyclotomicPowerSeriesAlgHomActionLawsStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IntegersCompleteDVR
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsIntegralCyclotomicChar
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.TiltWittEqZeroOfPrimeMulEqZero
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.RootOfUnityPrimeToTeichmullerLift
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.ExistsOfLayers
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ConstantCoeffTeichSub
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CyclotomicPowerSeriesAlgHomActionLawsStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.TiltWittEqZeroOfPrimeMulEqZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.NumberTheory.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.DiscreteValuationRing
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Formalism.BasicNotions Formalism.BasicNotions.Loc Formalism.WeaklyAdmissibleFiltrations TensorProduct GlobalTheory.HWL PowerSeries
 
@@ -101,9 +144,9 @@ theorem ext_exists (p : ℕ) (π : A)
     obtain ⟨a', m', h1', h2'⟩ := hF x' k
     refine ⟨a * π ^ m' + a' * π ^ m, m + m', ?_, ?_⟩
     · convert dvd_add (h1.mul_right (algebraMap A E π ^ m')) (h1'.mul_right (algebraMap A E π ^ m)) using 1
-      simp only [map_add, map_mul, map_pow]; ring
+      simp only [map_add (f := _), map_mul, map_pow]; ring
     · convert dvd_add (h2.mul_right (f π ^ m')) (h2'.mul_right (f π ^ m)) using 1
-      simp only [map_add, map_mul, map_pow]; ring
+      simp only [map_add (f := _), map_mul, map_pow]; ring
   have hmul : ∀ x x', F (x * x') = F x * F x' := fun x x' => eqF _ _ fun k => by
     obtain ⟨a, m, h1, h2⟩ := hF x k
     obtain ⟨a', m', h1', h2'⟩ := hF x' k
@@ -142,7 +185,7 @@ theorem let_unique {n : ℕ} (f f' : LetA O n →ₐ[O] S) (hπ : f letπ = f' l
         funext i
         rw [cst_apply, add_comm]
         exact eq_X_mul_shift_add_const (a i)
-      rw [ha, map_add, map_add, map_mul, map_mul, hc, ← hπ, pow_succ', add_sub_add_left_eq_sub, ← mul_sub]
+      rw [ha, map_add (f := _), map_add (f := _), map_mul, map_mul, hc, ← hπ, pow_succ', add_sub_add_left_eq_sub, ← mul_sub]
       exact mul_dvd_mul_left _ (ih _)
   ext1 a
   rw [← sub_eq_zero]
@@ -154,6 +197,7 @@ theorem let_exists {n : ℕ} [NeZero n] (y : S) [IsAdicComplete (Ideal.span {y})
   obtain ⟨ev, hev⟩ := GlobalTheory.Cyc.IoMap.algHom_exists (R := O) y
     (GlobalTheory.Per.AinfComplete.summ_of_precomplete y) (sep_of_haus y)
   have h1 : ∑ i, u (Pi.single i 1) = 1 := by
+
     rw [← map_sum, Finset.univ_sum_single (fun _ : ZMod n => (1 : O))]
     exact map_one u
   have h2 : ∀ i j, u (Pi.single i 1) * u (Pi.single j 1) = if i = j then u (Pi.single i 1) else 0 := by
@@ -168,6 +212,7 @@ theorem let_exists {n : ℕ} [NeZero n] (y : S) [IsAdicComplete (Ideal.span {y})
       · simp [hk]
   have h3 : ∀ o : ZMod n → O, ∑ i, u (Pi.single i 1) * algebraMap O S (o i) = u o := by
     intro o
+
     conv_rhs => rw [← Finset.univ_sum_single o, map_sum]
     refine Finset.sum_congr rfl fun i _ => ?_
     rw [mul_comm, ← Algebra.smul_def, ← map_smul, ← Pi.single_smul, smul_eq_mul, mul_one]
@@ -252,7 +297,7 @@ theorem binomial_eval {B : Type} [CommRing B] [CharP B l] (ψ : ℤ_[l]⟦X⟧ �
     rw [X_dvd_iff]; simp
   have h3 : binomialSeries ℤ_[l] b = 1 + X * h := by linear_combination hh
   rw [h1, binomialSeries_add, binomialSeries_natMul, binomialSeries_nat, h3]
-  simp only [map_mul, map_pow, map_add, map_one]
+  simp only [map_mul, map_pow, map_add (f := _), map_one]
   rw [add_pow_char_pow, mul_pow, h2]
   simp
 
@@ -522,7 +567,7 @@ theorem comm_φ (p : ℕ) (φ₀ : O⟦X⟧ →ₐ[O] O⟦X⟧) (h0 : φ₀ X = 
     (hs : ∀ x : S, (∀ k, (t ^ p - 1) ^ k ∣ x) → x = 0) : f.comp (letφ φ₀) = φ.comp f := by
   have h1 : (f.comp (letφ φ₀)) letπ = t ^ p - 1 := by
     have : letφ φ₀ (letπ : LetA O n) = (1 + letπ) ^ p - 1 := funext fun i => h0
-    rw [AlgHom.comp_apply, this, map_sub, map_pow, map_add, map_one, ht]
+    rw [AlgHom.comp_apply, this, map_sub, map_pow, map_add (f := _), map_one, ht]
     ring
   refine let_unique _ _ ?_ (fun o => ?_) (by rw [h1]; exact hs)
   · rw [h1, AlgHom.comp_apply, ht, map_sub, map_one, hφ]

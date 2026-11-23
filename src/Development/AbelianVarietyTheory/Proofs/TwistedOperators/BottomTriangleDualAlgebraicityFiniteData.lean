@@ -1,23 +1,83 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.TwistPlacesOffPrimeQZero
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.BottomExistsIntegrable
-import Development.AbelianVarietyTheory.Definitions.Divisors.DiscreteSeriesHermitianUnique
-import Development.AbelianVarietyTheory.Statements.PlaceShiftStatements.NormSmall
-import Development.AbelianVarietyTheory.Statements.PlaceShiftStatements.DictAt
-import Development.AbelianVarietyTheory.Statements.HeckeThetaIntegrals.ThetaIntegralsAgree
-import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.WeilTensorModels
-import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.CuspAlongSmoothRows
-import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.ToricSymbols
-import Development.AbelianVarietyTheory.Definitions.Foundations.NormSumPairRankZeroOfCurveCoordNorm
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.UnitaryAdelicInfFinSplitPeriodsUnimodular
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.BottomTriangleMonomialSupportFinite
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.BottomTriangleFiniteDoubleCosets
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsOpenFixingSeesawVacuumDefiniteBottom
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MaximalCompactActsOnRealVacuaByDetPowers
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsOpenSubgroupFixVacuumTranslates
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FockPolynomialVectorBasisChangeEqSubstitution
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IntegrableOnThetaDefinite
+module
+
+public import Development.AbelianVarietyTheory.Definitions.ExistenceOfLattices.CoeSelfDualLatticeInFrameCoordinatesEq
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.MemHalfCosetSelf
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.TotalDegreeSubstFLe
+public import Formalism.LocalToGlobal.NumberFieldFamilies.ThetaCF
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ApplyAddInfRat
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.PureTensorLIntertwine
+import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.RationalPointsFinitePartSelfDualLatticeIff
+import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.SelfDualLatticePairingDual
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.SqNormIntegralFundamentalDomainEqL2NormSq
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.ExistsCentralRealPointUnitScalarSinglePlace
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.FiniteMonomialsWithPrescribedPlaceDegree
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.PowExpIOrInvInjective
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.SetIntegralFundamentalDomainRightTranslateInvari
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.SplitPlacePairMovesLatticeVacuumReading
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CompletedHomLatticeFinitelyGenerated
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EventuallyUnitaryPairKeepsCompletedLattice
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IntegrableOnThetaDefinite
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MaximalCompactActsOnRealVacuaByDetPowers
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.UnitaryAdelicCharacterTrivialRatAndSplit
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.NonarchimedeanGroupOfIsCompactIsOpen
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsNeZeroOfIsVacO
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ContinuousOnAtTau
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsLowestKTypeFockMapThetaVectors
 import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsNsmulIntMemLatO
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FockPolynomialVectorBasisChangeEqSubstitution
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.PtYAndItYOfPair
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.BottomTriangleMonomialSupportFinite
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.CompAtMtOfMemGfC
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsOpenFixingSeesawVacuumDefiniteBottom
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IsFockVacAtOfIsThetaAt
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.OmPureTensorOOfFinite
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.RatInOfDefinite
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ThetaKORatLeftAndEigenRight
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.TwistPlacesOffPrimeQZero
+import Development.AbelianVarietyTheory.Statements.HeckeThetaIntegrals.FormulaAt
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.L2.Theta Formalism.IndefR Formalism.IndefR.Datum Formalism.IndefR.Links Formalism.L2.DIV
 open IsDedekindDomain NumberField GlobalTheory.ChiGrid GlobalTheory.FunObj GlobalTheory.RowTest GlobalTheory.RowClaim
 open Formalism.L2.Host (HChar)
@@ -42,23 +102,25 @@ variable {D : D7} {ψ : AddChar (AF D.host.F) ℂ} {θ : InfFam D} {S T : HSp D}
 theorem isThetaFunO_of_fixSig {f : WO S T → ℂ} (h : IsThetaFunO ψ (fixSig S) (fixSig T) f) : IsThetaFunO ψ S T f :=
   ⟨h.quasi, h.level, h.cont, h.smooth⟩
 
-theorem isWeilDatumO_fixSig (h : IsWeilDatumO ψ S T χS χT om) : IsWeilDatumO ψ (fixSig S) (fixSig T) χS χT om where
-  std := h.std
-  hecS := h.hecS
-  hecT := h.hecT
-  resS := h.resS
-  resT := h.resT
-  om_pres p f hf := GlobalTheory.VacFixTarget.isThetaFunO_fixSig (h.om_pres p f (isThetaFunO_of_fixSig hf))
-  om_heis g k w f hf := h.om_heis g k w f (isThetaFunO_of_fixSig hf)
-  om_aut g hg k hk f hf := h.om_aut g hg k hk f (isThetaFunO_of_fixSig hf)
-  om_cont f hf := h.om_cont f (isThetaFunO_of_fixSig hf)
-  om_unit μ F h1 h2 p f hf := h.om_unit μ F h1 h2 p f (isThetaFunO_of_fixSig hf)
-  om_split e he g k hg hk x y hx hy := by
-    obtain ⟨r, hr, H⟩ := h.om_split e he g k hg hk x y hx hy
-    exact ⟨r, hr, fun ℓ hℓ f hf => H ℓ (fun u hu f' hf' => hℓ u hu f' (GlobalTheory.VacFixTarget.isThetaFunO_fixSig hf')) f
-      (isThetaFunO_of_fixSig hf)⟩
+theorem isWeilDatumO_fixSig (h : IsWeilDatumO ψ S T χS χT om) : IsWeilDatumO ψ (fixSig S) (fixSig T) χS χT om := by
+  refine {
+    std := h.std
+    hecS := h.hecS
+    hecT := h.hecT
+    resS := h.resS
+    resT := h.resT
+    om_pres p f hf := GlobalTheory.VacFixTarget.isThetaFunO_fixSig (h.om_pres p f (isThetaFunO_of_fixSig hf))
+    om_heis g k w f hf := h.om_heis g k w f (isThetaFunO_of_fixSig hf)
+    om_aut g hg k hk f hf := h.om_aut g hg k hk f (isThetaFunO_of_fixSig hf)
+    om_cont f hf := h.om_cont f (isThetaFunO_of_fixSig hf)
+    om_unit μ F h1 h2 p f hf := h.om_unit μ F h1 h2 p f (isThetaFunO_of_fixSig hf)
+    om_split := ?_ }
+  intro e he g k hg hk x y hx hy
+  obtain ⟨r, hr, H⟩ := h.om_split e he g k hg hk x y hx hy
+  exact ⟨r, hr, fun ℓ hℓ f hf => H ℓ (fun u hu f' hf' => hℓ u hu f' (GlobalTheory.VacFixTarget.isThetaFunO_fixSig hf')) f
+    (isThetaFunO_of_fixSig hf)⟩
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem exists_cong_fix_vac (hW : IsWeilDatumO ψ S T χS χT om)
     (hcS : ∀ τ, IsCartanInv (gramAt D S τ) (sS τ)) (hcT : ∀ τ, IsCartanInv (gramAt D T τ) (sT τ))
@@ -141,7 +203,7 @@ theorem exists_cong_fix_vac (hW : IsWeilDatumO ψ S T χS χT om)
   obtain ⟨n, hn⟩ := key
   exact ⟨_, Nat.mul_pos n₁.factorial_pos n.factorial_pos, hn⟩
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem eventually_fix (hW : IsWeilDatumO ψ S T χS χT om)
     (hcS : ∀ τ, IsCartanInv (gramAt D S τ) (sS τ)) (hcT : ∀ τ, IsCartanInv (gramAt D T τ) (sT τ))
@@ -161,7 +223,9 @@ theorem eventually_fix (hW : IsWeilDatumO ψ S T χS χT om)
   have htr : ∀ y : WO S T, y.map (infPart D) = 0 →
       ∀ᶠ k in 𝓝 (1 : GA D T), k ∈ GfC T → om (1, k) (heisO ψ S T y f₀) = heisO ψ S T y f₀ := by
     intro y hy0
-    obtain ⟨M, hM, hy⟩ := GlobalTheory.PlaceVec.exists_nsmul_mem_latO hsdS.1 hsdT.1 y hy0
+    obtain ⟨M, hM, hy⟩ := GlobalTheory.PlaceVec.exists_nsmul_mem_latO
+      (GlobalTheory.PlaceVec.selfDual_isFullLattice S ΛS hsdS)
+      (GlobalTheory.PlaceVec.selfDual_isFullLattice T ΛT hsdT) y hy0
     have hmv := hpair.eventually ((GlobalTheory.LatNhds.eventually_actO D S T ΛS ΛT hsdS hsdT
       (GlobalTheory.LatFinGen.latO_finitely_generated D S T ΛS ΛT hsdS hsdT)).2 y hy0 (2 * M) (Nat.mul_pos two_pos hM))
     filter_upwards [hN', hmv] with k hk hm hkf
@@ -179,7 +243,7 @@ theorem eventually_fix (hW : IsWeilDatumO ψ S T χS χT om)
     obtain ⟨y, rfl⟩ := hx
     exact htr y.1 y.2
   | zero => exact Filter.Eventually.of_forall fun k _ => map_zero _
-  | add a b _ _ ha hb => filter_upwards [ha, hb] with k h1 h2 hk; rw [map_add, h1 hk, h2 hk]
+  | add a b _ _ ha hb => filter_upwards [ha, hb] with k h1 h2 hk; rw [map_add (f := _), h1 hk, h2 hk]
   | smul c a _ ha => filter_upwards [ha] with k h1 hk; rw [map_smul, h1 hk]
 
 theorem exists_cong_of_eventually {P : GA D T → Prop} (h : ∀ᶠ k in 𝓝 (1 : GA D T), k ∈ GfC T → P k) :
@@ -244,8 +308,8 @@ theorem level_right [Finite T] (hX : IsBottomTri W i j X) :
   have hm : ((g, x * κ) : GA D A' × GA D WW) = (g, x) * (1, κ) := by simp
   rw [hm, map_mul, Module.End.mul_apply, hpt, h κ hκf hκ t]
 
-open Classical in
 
+open Classical in
 theorem scalar_exists (hX : IsBottomTri W i j X) (t : T) (τ₀ : D.what₂.Tau) :
     ∃ C w : ℂ, (w = Complex.exp Complex.I ∨ w = (Complex.exp Complex.I)⁻¹) ∧
       ∀ (k : FVar D WW.rank A'.rank →₀ ℕ) (h : GA D WW),
@@ -380,8 +444,8 @@ theorem det_mem {N : ℕ} (M : IntermediateField ℚ ℂ) (h : Matrix (Fin N) (F
 variable {D : D7} {T : Type} {L : LevCh D T} {sc : Consts} {G : GridData L sc} {W : G.Weil}
   {i j : Fin D.R.m} {A A' WW : HSp D} {X : Tri T A A' WW}
 
-variable (D) in
 
+variable (D) in
 def conjField : IntermediateField ℚ ℂ := ⨆ τ : D.what₂.Tau, (tauE D τ).toRatAlgHom.fieldRange
 
 theorem finiteDimensional_conjField : FiniteDimensional ℚ (conjField D) := by
@@ -475,58 +539,17 @@ theorem real_right (hX : IsBottomTri W i j X) (t : T) {γ r : GA D WW} (hγ : γ
     unfold Tri.ker' thetaKO
     have hm : ((g, x * r) : GA D A' × GA D WW) = (g, x) * (1, r) := by simp
     rw [hm, map_mul, Module.End.mul_apply, hmain]
+
     conv_lhs => rw [(C • Q).as_sum, map_sum, map_sum, Finset.sum_apply]
     refine Finset.sum_congr rfl fun k' _ => ?_
     rw [show MvPolynomial.monomial k' ((C • Q).coeff k') = (C • Q).coeff k' • MvPolynomial.monomial k' (1 : ℂ) by
       rw [MvPolynomial.smul_monomial, smul_eq_mul, mul_one], map_smul, map_smul, Pi.smul_apply, smul_eq_mul]
   unfold Tri.I'
   simp_rw [hker]
-  rw [integral_finset_sum _ fun k' _ => (integrable_snd hX t _ x).const_mul _]
+  rw [integral_finsetSum _ fun k' _ => (integrable_snd hX t _ x).const_mul _]
   exact Finset.sum_congr rfl fun k' _ => integral_const_mul _ _
 
 end Real
-
-theorem span_classSums' : ∀ {D : D7} {T : Type} [Finite T] {L : LevCh D T} {μ₀ : T} {sc : Consts} {G : GridData L sc} {W : G.Weil}
-    {i j : Fin D.R.m} {A A' WW : HSp D} {X : Tri T A A' WW}, GlobalTheory.FunPr.Hypotheses₂ → (∀ D, GlobalTheory.NormSum.Inp D) → L.Is μ₀ →
-    IsBottomTri W i j X →
-    ∃ (H : Finset (GA D WW)) (K : Finset (FVar D WW.rank A'.rank →₀ ℕ)) (M₀ : IntermediateField ℚ ℂ), FiniteDimensional ℚ M₀ ∧
-      (∀ h ∈ H, h ∈ GfC WW) ∧ ∀ t, ∀ h ∈ GfC WW, ∀ k, ∃ c : GA D WW → (FVar D WW.rank A'.rank →₀ ℕ) → ℂ, (∀ a b, c a b ∈ M₀) ∧
-        X.I' W.ψ W.θ t (MvPolynomial.monomial k 1) h =
-          ∑ h' ∈ H, ∑ k' ∈ K, c h' k' * X.I' W.ψ W.θ t (MvPolynomial.monomial k' 1) h' := by
-  intro D T _ L μ₀ sc G W i j A A' WW X hP hI hL hX
-  classical
-  obtain ⟨K, hK⟩ := vanish_off_finite hX
-  obtain ⟨J, hJ, hl⟩ := level_right hX
-  obtain ⟨H, hH, hc⟩ := GlobalTheory.BotClassFin.exists_reps hP hI hL hX J hJ
-  refine ⟨H, K, conjField D, finiteDimensional_conjField, hH, ?_⟩
-  intro t h hh k
-  obtain ⟨γ, hγ, r, hrI, h₀, hh₀, κ, hκJ, hκf, rfl⟩ := hc h hh
-  have hx : h₀ * κ ∈ GfC WW := mul_mem (hH h₀ hh₀) hκf
-  have hγr : γ * r ∈ GfC WW := by
-    have e : γ * r = (γ * r * h₀ * κ) * (h₀ * κ)⁻¹ := by group
-    rw [e]; exact mul_mem hh (inv_mem hx)
-  obtain ⟨c, hcM, hcE⟩ := real_right hX t hγ hrI hγr (h₀ * κ) k
-  have e1 : X.I' W.ψ W.θ t (MvPolynomial.monomial k 1) (γ * r * h₀ * κ) =
-      ∑ k' ∈ c.support, c.coeff k' * X.I' W.ψ W.θ t (MvPolynomial.monomial k' 1) h₀ := by
-    have e0 : γ * r * h₀ * κ = γ * ((h₀ * κ) * r) := by
-      rw [← GlobalTheory.AdelicSplit.commute_GinfC_GfC WW hrI hx]; simp only [mul_assoc]
-    rw [e0, rat_left hX t _ hγ, hcE]
-    refine Finset.sum_congr rfl fun k' _ => ?_
-    rw [hl t κ hκJ hκf]
-  refine ⟨fun h' k' => if h' = h₀ then c.coeff k' else 0, fun a b => ?_, ?_⟩
-  · dsimp only
-    split_ifs
-    · exact hcM b
-    · exact zero_mem _
-  rw [e1, Finset.sum_eq_single_of_mem h₀ hh₀ (fun b _ hb => by simp [hb])]
-  simp only [if_true]
-  calc ∑ k' ∈ c.support, c.coeff k' * X.I' W.ψ W.θ t (MvPolynomial.monomial k' 1) h₀
-      = ∑ k' ∈ c.support ∪ K, c.coeff k' * X.I' W.ψ W.θ t (MvPolynomial.monomial k' 1) h₀ :=
-        Finset.sum_subset Finset.subset_union_left fun k' _ hk' => by
-          rw [MvPolynomial.notMem_support_iff.1 hk', zero_mul]
-    _ = ∑ k' ∈ K, c.coeff k' * X.I' W.ψ W.θ t (MvPolynomial.monomial k' 1) h₀ :=
-        (Finset.sum_subset Finset.subset_union_right fun k' _ hk' => by
-          rw [hK t h₀ k' hk', mul_zero]).symm
 
 end GlobalTheory.BotSpanSnd
 

@@ -1,8 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IsLocIsoRefl
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsPlaceIsoReadingComponentsCharacters
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.OrientedHermitianFormQuadSumEqTrace
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HermitianLatticeSelfDualEverywhere
+module
+
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IsLocIsoRefl
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IsSplitChartSplitChart
+import Development.AbelianVarietyTheory.Counterexamples.HeightSurvey.StarPurelyImaginaryEqNeg
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HermitianLatticeSelfDualEverywhere
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.OrientedHermitianFormQuadSumEqTrace
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ValuationLeOneOfMem
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsIsSplitChartOne
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsPlaceIsoReadingComponentsCharacters
+import Formalism.LocalRingCardinality.SpanPowerMembership.LocAtA
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.L2.Theta Formalism.IndefR.Datum Formalism.IndefR.Links Formalism.L2.DIV
 open IsDedekindDomain NumberField MeasureTheory Matrix
@@ -216,6 +261,7 @@ theorem isSplitBasis_conj {β : GL (Fin n) (Kw (splitPrime τ))} {Λ : Submodule
   rw [e, ← SplitChart.map_mem_latAt_iff h2 h3]
   have e2 : (fun i => ψ (((GeneralLinearGroup.map ψ.symm.toRingHom β).val *ᵥ u) i)) = β.val *ᵥ fun i => ψ (u i) := by
     funext i
+
     simp [mulVec, dotProduct, map_sum, GeneralLinearGroup.map_apply]
   rw [e2, ← h]
   exact forall_congr' fun i => (SplitChart.map_mem_Ov_iff h3).symm
@@ -337,8 +383,8 @@ theorem map_neg_mulG {D : D7} (w : Pl D.host.E) (S : HSp D) {m : ℕ} (x : Matri
   exact Matrix.map_neg (cw w) (RingHom.map_neg (cw w)) _
 
 theorem chart_coX {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] {n d : ℕ}
-    {v : GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.Pl F} (t : E →ₐ[F] Fv F v) (b : GL (Fin n) (Fv F v)) (c : GL (Fin d) (Fv F v)) {k : Type} [Field k]
-    (j : Fv F v ≃+* k) (u : Matrix (Fin n) (Fin d) (GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.AE F E)) :
+    {v : GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.Pl (F := F)} (t : E →ₐ[F] Fv F v) (b : GL (Fin n) (Fv F v)) (c : GL (Fin d) (Fv F v)) {k : Type} [Field k]
+    (j : Fv F v ≃+* k) (u : Matrix (Fin n) (Fin d) (GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.AE (F := F) (E := E))) :
     (coX t b c u).map j = ((GeneralLinearGroup.map j.toRingHom b)⁻¹).val * (u.map (piW t)).map j *
       ((GeneralLinearGroup.map j.toRingHom c)⁻¹).valᵀ := by
   change (coX t b c u).map j.toRingHom = _
@@ -346,8 +392,8 @@ theorem chart_coX {F E : Type} [Field F] [NumberField F] [Field E] [NumberField 
   rfl
 
 theorem chart_coY {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] (σ : E →ₐ[F] E) {n d : ℕ}
-    (X : Spc F E n) (Y : Spc F E d) {v : GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.Pl F} (t : E →ₐ[F] Fv F v) (b : GL (Fin n) (Fv F v))
-    (c : GL (Fin d) (Fv F v)) {k : Type} [Field k] (j : Fv F v ≃+* k) (u : Matrix (Fin n) (Fin d) (GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.AE F E)) :
+    (X : Spc F E n) (Y : Spc F E d) {v : GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.Pl (F := F)} (t : E →ₐ[F] Fv F v) (b : GL (Fin n) (Fv F v))
+    (c : GL (Fin d) (Fv F v)) {k : Type} [Field k] (j : Fv F v ≃+* k) (u : Matrix (Fin n) (Fin d) (GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.AE (F := F) (E := E))) :
     (coY σ X Y t b c u).map j = -((GeneralLinearGroup.map j.toRingHom b).valᵀ * (X.J.map t).map j *
       (u.map (piW (t.comp σ))).map j * ((Y.J.map t).map j)ᵀ * (GeneralLinearGroup.map j.toRingHom c).val) := by
   change (coY σ X Y t b c u).map j.toRingHom = _
@@ -355,14 +401,14 @@ theorem chart_coY {F E : Type} [Field F] [NumberField F] [Field E] [NumberField 
   rfl
 
 theorem charts {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] (σ : E →ₐ[F] E) {n p q d : ℕ}
-    (e : Fin p ⊕ Fin q ≃ Fin d) (X : Spc F E n) (Y : Spc F E d) {v : GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.Pl F} (t : E →ₐ[F] Fv F v)
+    (e : Fin p ⊕ Fin q ≃ Fin d) (X : Spc F E n) (Y : Spc F E d) {v : GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.Pl (F := F)} (t : E →ₐ[F] Fv F v)
     (b : GL (Fin n) (Fv F v)) (c : GL (Fin d) (Fv F v)) {k : Type} [Field k] (j : Fv F v ≃+* k)
     (β g : GL (Fin n) k) (Gm : Matrix (Fin n) (Fin n) k) (hg : g.val = -(β.valᵀ * Gmᵀ * b.val.map j))
     (cc : GL (Fin d) k) (βV : GL (Fin p) k) (β₁ : GL (Fin q) k) (hC : c.val.map j * cc.val = blk e βV.val (-β₁.val))
     {ξ : k} (hξ : ξ ≠ 0) (GV : Matrix (Fin p) (Fin p) k) (G₁ : Matrix (Fin q) (Fin q) k)
     (hJ : (X.J.map t).map j = Gm) (hJ' : (Y.J.map t).map j = ξ • blk e GVᵀ G₁ᵀ)
     {A C₁ C₂ : Type} (ρ : Fin n ≃ A) (ρ₁ : Fin p ≃ C₁) (ρ₂ : Fin q ≃ C₂)
-    (u : Matrix (Fin n) (Fin d) (GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.AE F E)) (U U' : Matrix (Fin n) (Fin d) k)
+    (u : Matrix (Fin n) (Fin d) (GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.AE (F := F) (E := E))) (U U' : Matrix (Fin n) (Fin d) k)
     (hU : (u.map (piW t)).map j = U) (hU' : (u.map (piW (t.comp σ))).map j = U')
     (tr mu : Matrix A (C₁ ⊕ C₂) k)
     (htr : tr = chart j ρ (e.symm.trans (Equiv.sumCongr ρ₁ ρ₂)) g (invT cc) (coX t b c u))
@@ -495,8 +541,8 @@ theorem isMixChart_of {D : D7} {T : Type} {L : LevCh D T} {sc : Consts} {G : Gri
       · simp [Assignment.block] at hs
       · exact k6 r s
 
-theorem exists_mixChart : ∀ {D : D7} {T : Type} {L : LevCh D T} {sc : Consts} {G : GridData L sc} {μ₀ : T} (hL : L.Is μ₀) (W : G.Weil) (B : Frames G) (t : T) (i j : Fin D.R.m) (M : Vol G) (e : Num G i j) (Bs : Base D.host.F D.host.E) (Γ : GlobalTheory.IndefiniteRowSideFullHecke.UnitaryConjugation.Geo G i j) (X : Chars D.host.F D.host.E)
-    (om : Rep D.sp.cm.sig Γ.V Γ.W) (om' : Rep D.sp.cm.sig Γ.V' Γ.W) (h : IsTripleOf W M t i j e Bs Γ X), IsTriple Bs Γ X om om' → IsTied t i j e Bs Γ X →
+theorem exists_mixChart : ∀ {D : D7} {T : Type} {L : LevCh D T} {sc : Consts} {G : GridData L sc} {μ₀ : T} (hL : L.Is μ₀) (W : G.Weil) (B : Frames G) (t : T) (i j : Fin D.R.m) (M : Vol G) (e : Num G i j) (Bs : _root_.GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.Base D.host.F D.host.E) (Γ : GlobalTheory.IndefiniteRowSideFullHecke.UnitaryConjugation.Geo G i j) (X : _root_.GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.Chars D.host.F D.host.E)
+    (om : _root_.GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.Rep D.sp.cm.sig Γ.V Γ.W) (om' : _root_.GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.Rep D.sp.cm.sig Γ.V' Γ.W) (h : IsTripleOf W M t i j e Bs Γ X), IsTriple Bs Γ X om om' → IsTied t i j e Bs Γ X →
     ∀ (v : Bs.P) (w : Pl D.host.E), splitPrime (Bs.τ v) = w → ∀ jj : Fv D.host.F v ≃+* Kw w, IsPlaceIso (Bs.τ v) w jj → IsLocIso jj →
     ∀ cc : GL (Fin ((spW G i j).rank + (spW₁ G i j).rank)) (Kw w), (Γ.W.bas v).val.map jj * cc.val = basCols B e w →
     ∃ g ∈ KO (Kw w) (Fin (spW G i j).rank),

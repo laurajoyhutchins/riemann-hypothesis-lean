@@ -1,9 +1,45 @@
-import Mathlib
-import Formalism.LocalToGlobal.IndefiniteReal.RationalAdjoints.RatZOfTests
-import Formalism.LocalToGlobal.IndefiniteReal.RationalAdjoints.CoordRat
-import Formalism.LocalToGlobal.IndefiniteReal.RationalAdjoints.RatThOfLiftTest
+module
+
+public import Formalism.LocalToGlobal.IndefiniteReal.ZeroPartEigenvalueConvention
+public import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.GoodLiftPhase
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AlgebraicFormsBasisInjective
-import Formalism.LocalToGlobal.IndefiniteReal.ZeroPartEigenvalueConvention
+
+@[expose] public section
 
 noncomputable section
 
@@ -18,12 +54,6 @@ open Matrix
 
 variable {K : Type} [Field K] (σ : K →+* ℂ) {W : Type} [AddCommGroup W] [Module ℂ W] [FiniteDimensional ℂ W]
 
-def FunTest (S : Set W) : Prop :=
-  ∃ (N : ℕ) (ψ : Fin N → Module.Dual ℂ W), (∀ w, (∀ i, ψ i w = 0) → w = 0) ∧ ∀ s ∈ S, ∀ i, ψ i s ∈ Set.range σ
-
-def SpanTest (S : Set W) : Prop :=
-  ∃ (m : ℕ) (v : Fin m → W), LinearIndependent ℂ v ∧ ∀ s ∈ S, ∃ a : Fin m → K, s = ∑ i, σ (a i) • v i
-
 end Lin
 
 section Cx
@@ -31,15 +61,6 @@ section Cx
 open Formalism.DivisionValues Formalism.L2.Indef Formalism.L2.DIV Formalism.IndefR.Cx Formalism.IndefR.Rat GlobalTheory.IndefiniteRowSideFullHecke.GoodLiftPhase
 
 variable {K : Type} [Field K] [NumberField K] [StarRing K] {Bs : DefBase K} {A : DefAmb Bs} (X : CxData A)
-
-def liftsAll (j : Bs.J) : Set (X.W j) := {w | ∃ (t : Bs.Tup) (x : A.FL j t), X.θ' j t (X.jL j t x) = w}
-
-def liftsAt (j : Bs.J) (t : Bs.Tup) : Set (X.W j) := {w | ∃ x : A.FL j t, X.θ' j t (X.jL j t x) = w}
-
-def levelBasis (b : Bool) (j : Bs.J) : Set (X.W j) := Set.range fun k : Fin (X.dW b j) => X.w0C b j (Pi.single k 1)
-
-def LevelIn (b : Bool) (V : ∀ j t, Submodule K (A.FL j t)) : Prop :=
-  ∀ j t, ∀ x ∈ V j t, X.θ' j t (X.jL j t x) ∈ LinearMap.range (X.w0C b j)
 
 theorem liftTest_of_liftTestB {b : Bool} (h : LiftTestB X b) : LiftTest X := fun j => by
   obtain ⟨N, ψ, h1, h2, -⟩ := h j

@@ -1,5 +1,57 @@
-import Mathlib
-import Development.DiscreteGroups.GlobalIrreducibility.LConvCut
+module
+
+public import Development.DiscreteGroups.GlobalIrreducibility.LConvCut
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Eigenspace.Triangularizable
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Presheaf
+
+@[expose] public section
 
 open Module
 
@@ -103,9 +155,6 @@ def post (W : Submodule ℂ V) : Module.End ℂ W →ₗ[ℂ] (W →ₗ[ℂ] V) 
 def rs (W : Submodule ℂ V) (x : Module.End ℂ V) (h : ∀ v ∈ W, x v ∈ W) : Module.End ℂ W :=
   LinearMap.codRestrict W (x.domRestrict W) (fun v => h v v.2)
 
-theorem rs_coe (W : Submodule ℂ V) (x : Module.End ℂ V) (h : ∀ v ∈ W, x v ∈ W) (v : W) :
-    ((rs W x h v : W) : V) = x v := rfl
-
 theorem rs_comm (W : Submodule ℂ V) {ι : Type*} (a : ι → Module.End ℂ V)
     (ha : ∀ i j, a i * a j = a j * a i) (h : ∀ i, ∀ v ∈ W, a i v ∈ W) (i j : ι) :
     rs W (a i) (h i) * rs W (a j) (h j) = rs W (a j) (h j) * rs W (a i) (h i) := by
@@ -139,7 +188,7 @@ theorem exists_post (W : Submodule ℂ V) {ι : Type*} (a : ι → Module.End �
   | add x z _ _ hx hz =>
     obtain ⟨y1, h1, e1⟩ := hx
     obtain ⟨y2, h2, e2⟩ := hz
-    exact ⟨y1 + y2, add_mem h1 h2, by rw [map_add, map_add, e1, e2]⟩
+    exact ⟨y1 + y2, add_mem h1 h2, by rw [map_add (f := _), map_add (f := _), e1, e2]⟩
   | mul x z _ _ hx hz =>
     obtain ⟨y1, h1, e1⟩ := hx
     obtain ⟨y2, h2, e2⟩ := hz
@@ -206,7 +255,7 @@ theorem nak_one (U : Submodule ℂ V) (c : Module.End ℂ V) (N : ℕ) (hc : c ^
       have hz : z ∈ U ⊔ LinearMap.range (c ^ k) := by rw [ih]; exact Submodule.mem_top
       obtain ⟨u', hu', w', hw', rfl⟩ := Submodule.mem_sup.1 hz
       obtain ⟨z', rfl⟩ := LinearMap.mem_range.1 hw'
-      rw [map_add, ← add_assoc]
+      rw [map_add (f := _), ← add_assoc]
       apply Submodule.add_mem_sup (U.add_mem hu (hU _ hu'))
       exact LinearMap.mem_range.2 ⟨z', by rw [pow_succ']; rfl⟩
   have := key N
@@ -241,7 +290,7 @@ theorem nak {ι : Type*} [DecidableEq ι] (s : Finset ι) (b : ι → Module.End
     apply nak_one _ (b j) N hN
     · intro v hv
       obtain ⟨u, hu, w, hw, rfl⟩ := Submodule.mem_sup.1 hv
-      rw [map_add]
+      rw [map_add (f := _)]
       exact Submodule.add_mem_sup (hU j u hu)
         (iSup_range_inv s b (b j) (fun i => hcomm j i) w hw)
     · rw [← h]
@@ -360,7 +409,7 @@ theorem split_case (l t c n : ℕ) (IH : IHn l t c n) (V : Type) [AddCommGroup V
       have e2 := LinearMap.congr_fun hx2 ⟨r, hr⟩
       change x k = 0 at e1
       change x r = 0 at e2
-      rw [map_add, e1, e2, add_zero, LinearMap.zero_apply])
+      rw [map_add (f := _), e1, e2, add_zero, LinearMap.zero_apply])
   have h2 := finrank_map_pre_le (LinearMap.ker f) a hKinv
   have h3 := finrank_map_pre_le (LinearMap.range f) a hRinv
   rw [sub_finrank] at h1

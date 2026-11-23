@@ -1,14 +1,55 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PatchingModules.NilpotentLevelLowering.ActUVariableEqPow
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PatchingModules.NilpotentLevelLowering.PsModule
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PatchingModules.NilpotentLevelLowering.PsLinSmall
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PatchingModules.NilpotentLevelLowering.SpLocIdem
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PatchingModules.NilpotentLevelLowering.FreeSummand
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.TopNilMapMem
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.DeterminantRepresentations.ChiApi
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebraHeight.PairMap
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.CoEvLow
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.CoMvps
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PatchingModules.NilpotentLevelLowering.OpParts
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PatchingModules.NilpotentLevelLowering.LevelModule
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.DeterminantRepresentations.ChiApi
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.CoEvLow
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.CoMvps
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebraHeight.DGmap
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebraHeight.PairMap
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PatchingModules.NilpotentLevelLowering.OpParts
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.MvPowerSeries.Equiv
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.TopNilDefs
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Formalism.ConjugateSelfDual ReciprocityTheory.Gal Formalism.BasicNotions Formalism.MainNotions.N ValuativeRel IsLocalRing
 open GlobalTheory.CuspRep GlobalTheory.WeilDeligne GlobalTheory.LocLanglands GlobalTheory.LocGL GlobalTheory.GalOfCusp GlobalTheory.SmGL GlobalTheory.SplitWeil
 open UpperTheory.V.Alg UpperTheory.V.W UpperTheory.V.Hi UpperTheory.V.AlgebraTools UpperTheory.V.Pa UpperTheory.V.Pa.Lev
@@ -59,10 +100,10 @@ private theorem opCore {Λ : Type} [CommRing Λ] [IsLocalRing Λ] [IsNoetherianR
   have hi : ∀ t x, i (ev t • x) = act1 t (i x) := fun t => by
     induction t using MvPolynomial.induction_on with
     | C c => intro x; rw [evC, hC]; exact (LinearMap.congr_fun (act1.commutes c) _).symm
-    | add b c hb hc => intro x; rw [map_add, add_smul, map_add, hb, hc, map_add, LinearMap.add_apply]
+    | add b c hb hc => intro x; rw [map_add (f := _), add_smul, map_add (f := _), hb, hc, map_add (f := _), LinearMap.add_apply]
     | mul_X b p hb =>
       intro x
-      rw [map_mul, mul_smul, hb, evX, add_smul, map_add, hC, hX, map_mul, Module.End.mul_apply]
+      rw [map_mul, mul_smul, hb, evX, add_smul, map_add (f := _), hC, hX, map_mul, Module.End.mul_apply]
       simp
   have hcomm : ∀ t t' m, act1 t (act1 t' m) = act1 t' (act1 t m) := fun t t' m =>
     LinearMap.congr_fun ((Commute.all t t').map act1).eq m
@@ -75,16 +116,16 @@ private theorem opCore {Λ : Type} [CommRing Λ] [IsLocalRing Λ] [IsNoetherianR
       show i (pr (ρ _ m)) = ρ _ (i (pr m))
       rw [hρ p.1 p.2, hρ p.1 p.2, hpr, hi]) g _ rfl)
   obtain ⟨rk, e, he⟩ := freePart ρ hl hlm hP i pr hpi hρc s fun p x => by
-    rw [hρ p.1 p.2, ← hi, map_add, map_add, map_one, map_one, evy]
+    rw [hρ p.1 p.2, ← hi, map_add (f := _), map_add (f := _), map_one, map_one, evy]
   obtain ⟨j, κ, hj, hκ, hκj, hjr⟩ := quotPart act1 actw tr hsurj hker (fun p => hu p.1 p.2) ut ev i pr hpi hi hpr hr
     (fun p => s (MvPowerSeries.X p)) evy
   obtain ⟨_, hnS, η, φ, ψ, ηC, ηX, hφ, hψ, hψφ, hφn, hφψ⟩ := spPart (Λ := Λ) P hm hd β hβ ut ub hub actw f two
   have hη : ∀ t, θ (ev (MvPolynomial.rename Sum.inl t)) = η t := fun t => by
     induction t using MvPolynomial.induction_on with
     | C c => rw [MvPolynomial.rename_C, evC, θC, ηC]
-    | add b c hb hc => simp only [map_add, hb, hc]
+    | add b c hb hc => simp only [map_add (f := _), hb, hc]
     | mul_X b p hb =>
-      rw [map_mul, map_mul, map_mul, map_mul, hb, MvPolynomial.rename_X, evX, map_add, θC, θl, ηX p.1 p.2, Sp.u, map_add,
+      rw [map_mul, map_mul, map_mul, map_mul, hb, MvPolynomial.rename_X, evX, map_add (f := _), θC, θl, ηX p.1 p.2, Sp.u, map_add (f := _),
         Sum.elim_inl, ← hub p.1 p.2]
       rfl
   haveI : Module.Finite Λ N := Module.Finite.of_surjective pr fun x => ⟨_, hpi x⟩
@@ -152,7 +193,7 @@ private theorem mapRingHom_single_mul_charpoly_of_roots {R S G : Type} [CommRing
   rw [map_mul, q1El, q1El, map_list_prod, List.map_ofFn, MonoidAlgebra.mapRingHom_single, map_one]
   congr 3
   funext i
-  simp only [Function.comp_apply, map_sub, MonoidAlgebra.mapRingHom_single, map_one]
+  simp
 
 private theorem mapRingHom_single_mul_partial_charpoly {R S G : Type} [CommRing R] [CommRing S] [Group G] (f : R →+* S) {n : ℕ} (g ph ta : G) (u : Fin n → R)
     (i : Fin n) (y : R) : MonoidAlgebra.mapRingHom G f (MonoidAlgebra.single g 1 * q2El ph ta u i y) =
@@ -161,7 +202,7 @@ private theorem mapRingHom_single_mul_partial_charpoly {R S G : Type} [CommRing 
     MonoidAlgebra.mapRingHom_single, MonoidAlgebra.mapRingHom_single, map_one, map_one]
   congr 4
   funext k
-  simp only [Function.comp_apply, apply_ite (MonoidAlgebra.mapRingHom G f), map_sub, MonoidAlgebra.mapRingHom_single, map_one]
+  split_ifs with h <;> simp [h]
 
 private theorem kill_ren {R σ τ : Type} [CommRing R] [Finite τ] (z : MvPowerSeries τ R) :
     MvPowerSeries.killCompl (Function.Embedding.inl : σ ↪ σ ⊕ τ) (MvPowerSeries.rename Sum.inr z) =
@@ -276,7 +317,7 @@ theorem UpperTheory.V.Pa.Lev.opToTW :
     rw [hθ, hs, kill_ren, MvPowerSeries.map_C, MvPowerSeries.constantCoeff_map, ← hβ]
     rfl
   · show θ (ev _) = _
-    rw [evX, map_add, θC, θl, Sum.elim_inl, A.β.commutes, Sp.u, map_add]
+    rw [evX, map_add (f := _), θC, θl, Sum.elim_inl, A.β.commutes, Sp.u, map_add (f := _)]
     rfl
   · have := hk _ (rel.rel1 j g) m
     rwa [map_pow, map_mul, fEl_map, htr, mapRingHom_single_mul_charpoly_of_roots] at this

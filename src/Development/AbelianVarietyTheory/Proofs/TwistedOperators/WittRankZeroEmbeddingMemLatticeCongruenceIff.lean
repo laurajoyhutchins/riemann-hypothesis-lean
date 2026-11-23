@@ -1,8 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.TopOrthEmb
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.WeilRepRankZeroWittEmbeddingValueAtZero
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.MeasureToRealEqMass
+module
+
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.RowBesZeroE
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.WeilRepRankZeroWittEmbeddingValueAtZero
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.MeasureToRealEqMass
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.AdelicUnitaryTopology
 import Development.AbelianVarietyTheory.Proofs.SatakeParameters.LevelHyperspecialTrivialCharacterSplitsOffPlaces
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.FlagGenDiag
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.L2.Theta Formalism.IndefR.Datum MeasureTheory IsDedekindDomain NumberField Matrix
 open Formalism.IndefR Formalism.IndefR.Links GlobalTheory.MixModel GlobalTheory.MixPer GlobalTheory.Grow GlobalTheory.ChiGrid GlobalTheory.Unf GlobalTheory.FunObj GlobalTheory.RowUnf GlobalTheory.RowChain
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
@@ -24,7 +71,7 @@ theorem transport_haar_eq {G H : Type} [Group G] [TopologicalSpace G] [IsTopolog
       Measure.map_apply (map_continuous e).measurable ((map_continuous e.symm).measurable hs)]
     congr 1; ext x; simp
   have hq : Measure.QuasiMeasurePreserving e.symm ν μ :=
-    ⟨(map_continuous e.symm).measurable, by rw [hmap]⟩
+    ⟨(map_continuous e.symm).measurable.aemeasurable, by rw [hmap]⟩
   let eΓ : ΓH → ΓG := fun g => ⟨e g.1, hΓ' g.1 g.2⟩
   have heΓ : Function.Bijective eΓ := by
     refine ⟨fun a b hab => Subtype.ext (e.injective (congrArg Subtype.val hab)), fun y => ⟨⟨e.symm y.1, hΓ y.1 y.2⟩, ?_⟩⟩
@@ -95,6 +142,7 @@ theorem hatL_mulVec_rect {F E : Type} [Field F] [NumberField F] [Field E] [Numbe
     apply Submodule.subset_span
     refine ⟨M *ᵥ z, h z hz, ?_⟩
     funext i
+
     simp [Matrix.mulVec, dotProduct, map_sum]
   | zero => simp
   | add y z _ _ hy hz =>

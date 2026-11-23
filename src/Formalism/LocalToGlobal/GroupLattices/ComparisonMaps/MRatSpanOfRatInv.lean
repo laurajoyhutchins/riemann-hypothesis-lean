@@ -1,5 +1,48 @@
-import Formalism.LocalToGlobal.GroupLattices.ComparisonMaps.HRatInvOfTriv
-import Formalism.LocalRingCardinality.Lemmas
+module
+
+public import Formalism.LocalToGlobal.GroupLattices.ComparisonMaps.HRatInvOfTriv
+public import Formalism.LocalToGlobal.GroupLattices.ComparisonMaps.ProdMemSpan
+public import Formalism.LocalToGlobal.GroupLattices.ComparisonMaps.RatActGOf
+public import Formalism.LocalRingCardinality.Lemmas
+import Formalism.LocalToGlobal.GroupLattices.ComparisonMaps.DeterminantTwistRowActionMem
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MvPolynomial
 
@@ -41,6 +84,7 @@ theorem span_inv (hsep : ∀ F : W, (∀ t, ev t F = 0) → F = 0)
     rfl
   let ξj : Fin (Module.finrank LL C) → V := fun j => c.sum fun x a => π j a • x
   have hdec : (c.sum fun x a => a • φ x) = ∑ j, (κ j : Kf) • φ (ξj j) := by
+
     simp only [ξj, Finsupp.sum, map_sum, hsm, Finset.smul_sum, smul_smul]
     rw [Finset.sum_comm]
     refine Finset.sum_congr rfl fun x hx => ?_
@@ -58,6 +102,7 @@ theorem span_inv (hsep : ∀ F : W, (∀ t, ev t F = 0) → F = 0)
   have hzero : ∑ j, (κ j : Kf) • φ (y (ξj j) - ξj j) = 0 := by
     simp only [map_sub, hy, smul_sub, Finset.sum_sub_distrib]
     have h2 : ∑ x, (κ x : Kf) • Tm (φ (ξj x)) = Tm (∑ x, (κ x : Kf) • φ (ξj x)) := by
+
       rw [map_sum]
       exact Finset.sum_congr rfl fun x _ => (map_smul Tm _ _).symm
     rw [h2, ← hdec, hinv Tm hTm, sub_self]
@@ -67,6 +112,7 @@ theorem span_inv (hsep : ∀ F : W, (∀ t, ev t F = 0) → F = 0)
     refine hsep _ fun t => ?_
     choose q hq using fun j' => hval (y (ξj j') - ξj j') t
     have h3 := congrArg (ev t) hzero
+
     rw [map_sum, map_zero] at h3
     simp only [map_smul, smul_eq_mul, ← hq] at h3
     have h4 : ∑ j', q j' • (κ j' : Kf) = 0 := by
@@ -110,7 +156,7 @@ theorem inv_span [IsFractionRing G.O G.Kf] (w : HeightOneSpectrum (𝓞 LL))
     { carrier := {Q | MvPolynomial.map e Q ∈ G.P.HtupW L0}
       add_mem' := by
         intro Q Q' h h'
-        simp only [Set.mem_ofPred_eq, map_add] at h h' ⊢
+        simp only [Set.mem_ofPred_eq, map_add (f := _)] at h h' ⊢
         exact Submodule.add_mem _ h h'
       zero_mem' := by
         simp only [Set.mem_ofPred_eq, map_zero]
@@ -128,7 +174,7 @@ theorem inv_span [IsFractionRing G.O G.Kf] (w : HeightOneSpectrum (𝓞 LL))
   let Ur : Submodule LL (MvPolynomial (Σ v : Fin G.P.nV, Fin (G.P.n' v) × (Fin (G.P.m + 1) × Fin (G.P.m + 1))) LL) :=
     { carrier := {Q | InvAt G i L0 (MvPolynomial.map e Q)}
       add_mem' := fun {Q Q'} h h' γ hγ => by
-        rw [map_add, map_add, smul_add, h γ hγ, h' γ hγ]
+        rw [map_add (f := _), map_add (f := _), smul_add, h γ hγ, h' γ hγ]
       zero_mem' := fun γ _ => by rw [map_zero, map_zero, smul_zero]
       smul_mem' := fun a Q h γ hγ => by
         show ((G.lev i).χ γ : G.O) • (G.lev i).actX γ (MvPolynomial.map e (a • Q)) = MvPolynomial.map e (a • Q)

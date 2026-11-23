@@ -1,6 +1,46 @@
-import Mathlib
-import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeGroups.KatoUse
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.Brauer
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.MkMemAdmissibleAtIffCocycle
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.BlochKatoSelmerVanishes
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.Newform
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.HeightAndVanishing.DirichletPrimeToLPartMulLPowerPart
+import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.ResMapBijective
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.AdicCompletion.Noetherian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -101,10 +141,6 @@ def ES (W : R2 Ω l) (A : ValuationSubring Ω) : Prop :=
     ∀ n : ℕ, 1 ≤ n → ∀ w : Pl, w ∉ S' → l ^ n ∣ normV w - 1 → ∀ ψ : G ℚ Ω →* Multiplicative (ZMod (l ^ n)),
       KillsMu (normV w) ψ → Function.Surjective ψ → Tame c W y n w ψ
 
-def FinalTheorems (ι : Qbar l ≃+* ℂ) (e : ℕ) (W : R2 Ω l) (g : Newform (2 * e + 1)) : Prop :=
-  ¬ l ∣ g.M ∧ ‖ι.symm (g.a l)‖ = 1 ∧ ∃ χ : G ℚ Ω →* (Qbar l)ˣ, KillsMu l χ ∧
-    g.Att ι (tw W (cycBar ℚ Ω l ^ (-(e : ℤ)) * (dt W)⁻¹ * χ))
-
 structure Coc2 (c : Coef l) (n : ℕ) (S : Finset Pl) (ξ : G ℚ Ω → G ℚ Ω → Qbar l) : Prop where
   cont : Continuous fun p : G ℚ Ω × G ℚ Ω => ξ p.1 p.2
   int : ∀ s t, ξ s t ∈ c.O
@@ -125,15 +161,6 @@ def cup (W : R2 Ω l) (a b : G ℚ Ω → Fin 2 → Qbar l) (s t : G ℚ Ω) : Q
 
 def ht (W : R2 Ω l) (y z : G ℚ Ω → Fin 2 → Qbar l) (u : G ℚ Ω → Qbar l) (s : G ℚ Ω) : Qbar l :=
   (mat W s - 1).det * u s - om ((mat W s - 1).adjugate *ᵥ y s) (z s)
-
-structure Inp0 : Prop extends U3.CohInp where
-  lemM : Alg.LemmaM
-  lemM' : Alg.LemmaM'
-  lemP : Alg.LemmaP
-  adK : Af.AdVanishK
-  adQ : Af.AdVanishQ
-  newAut : Af.NewformAut
-  number : Af.CongruenceNumberRankThree
 
 end GlobalTheory.Ord2
 

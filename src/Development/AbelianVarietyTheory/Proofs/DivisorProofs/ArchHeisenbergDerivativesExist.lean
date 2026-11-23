@@ -1,9 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsFockMap
-import Development.AbelianVarietyTheory.Definitions.Divisors.DiscreteSeriesHermitianUnique
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SchwartzSeminormTranslateSubLineDerivLeStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SchwartzSeminormLinearPhaseSecondOrderLeStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SchwartzSeminormSmulLeftLinearPhaseLeStatement
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsFockMap
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SchwartzSeminormLinearPhaseSecondOrderLeStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SchwartzSeminormSmulLeftLinearPhaseLeStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SchwartzSeminormTranslateSubLineDerivLeStatement
+public import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.MetaplecticRepresentation
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -120,14 +162,14 @@ variable {F : Type} [Field F] [NumberField F] {κ : Type} [Fintype κ]
 def trL (c : κ → mixedEmbedding.mixedSpace F) : (κ → mixedEmbedding.mixedSpace F) →L[ℝ] ℝ :=
   LinearMap.toContinuousLinearMap
     { toFun := fun y => Algebra.trace ℝ (mixedEmbedding.mixedSpace F) (y ⬝ᵥ c)
-      map_add' := fun y y' => by rw [add_dotProduct, map_add]
+      map_add' := fun y y' => by rw [add_dotProduct, map_add (f := _)]
       map_smul' := fun r y => by rw [smul_dotProduct, map_smul]; rfl }
 
 theorem trL_apply (c y : κ → mixedEmbedding.mixedSpace F) :
     trL c y = Algebra.trace ℝ (mixedEmbedding.mixedSpace F) (y ⬝ᵥ c) := rfl
 
-variable (F) in
 
+variable (F) in
 def evH : AF F →+* mixedEmbedding.mixedSpace F :=
   (InfiniteAdeleRing.ringEquiv_mixedSpace F).toRingHom.comp (RingHom.fst _ _)
 
@@ -193,7 +235,7 @@ theorem rho_pureA [Invertible (2 : AF F)] {W : Type} [AddCommGroup W] [Module (A
     funext i
     rw [sub_neg_eq_add]
     change evH F (x i + realAd F t * a i) = evH F (x i) + t • evH F (a i)
-    rw [map_add, map_mul, evH_realAd, Algebra.smul_def]
+    rw [map_add (f := _), map_mul, evH_realAd, Algebra.smul_def]
   set A := x ⬝ᵥ (realAd F t • d.e u).2 + ⅟(2 : AF F) * ((realAd F t • d.e u).1 ⬝ᵥ (realAd F t • d.e u).2) with hAdef
   have hA : A = realAd F t * (x ⬝ᵥ b + ⅟(2 : AF F) * (realAd F t * (a ⬝ᵥ b))) := by
     rw [hAdef]
@@ -213,10 +255,10 @@ theorem rho_pureA [Invertible (2 : AF F)] {W : Type} [AddCommGroup W] [Module (A
     have e1 : evI F A = algebraMap ℝ (mixedEmbedding.mixedSpace F) t * ((⇑(evH F) ∘ x) ⬝ᵥ (⇑(evH F) ∘ b) +
         algebraMap ℝ (mixedEmbedding.mixedSpace F) (1 / 2) *
           (algebraMap ℝ (mixedEmbedding.mixedSpace F) t * ((⇑(evH F) ∘ a) ⬝ᵥ (⇑(evH F) ∘ b)))) := by
-      rw [← evH_apply, hA, map_mul, map_add, map_mul, map_mul, evH_realAd, RingHom.map_dotProduct,
+      rw [← evH_apply, hA, map_mul, map_add (f := _), map_mul, map_mul, evH_realAd, RingHom.map_dotProduct,
         RingHom.map_dotProduct, evH_invOf_two]
     rw [e1, trL_apply]
-    simp only [← Algebra.smul_def, map_add, map_smul, smul_eq_mul]
+    simp only [← Algebra.smul_def, map_add (f := _), map_smul, smul_eq_mul]
     change t * (Algebra.trace ℝ (mixedEmbedding.mixedSpace F) ((fun i => evH F (x i)) ⬝ᵥ Y) +
       1 / 2 * (t * Algebra.trace ℝ (mixedEmbedding.mixedSpace F) (X1 ⬝ᵥ Y))) =
       t * Algebra.trace ℝ (mixedEmbedding.mixedSpace F) ((fun i => evH F (x i)) ⬝ᵥ Y) +
@@ -227,8 +269,8 @@ theorem rho_pureA [Invertible (2 : AF F)] {W : Type} [AddCommGroup W] [Module (A
 
 end Adelic
 
-open scoped Classical in
 
+open scoped Classical in
 theorem derEx : GlobalTheory.RealLift.DerEx := by
   intro F E _ _ _ _ _ σ α β κ _ _ _ _ _ ψ JA JB d hψ
   let x₁ : Matrix α β (AE F E) → (κ → mixedEmbedding.mixedSpace F) := fun u i => evI F ((d.e u).1 i)

@@ -1,4 +1,60 @@
-import Development.WeilBound.CoreStatements.GaussianSeminormBounds.RealSeminormFiltration.CoreMain
+module
+
+public import Mathlib.Basic.Complex.Basic
+public import Mathlib.CategoryTheory.Category.Basic
+public import Mathlib.LinearAlgebra.Eigenspace.Basic
+public import Mathlib.Order.CompletePartialOrder
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.WeilBound.CoreStatements.GaussianSeminormBounds.RealSeminormFiltration.CoreCasB
+import Formalism.PeriodIntegrals.JointBlockShapes.MinusPart
+
+@[expose] public section
 
 noncomputable section
 
@@ -33,7 +89,7 @@ theorem gen_le {act : A →ₗ[ℂ] Module.End ℂ M} (h : Lie act) {g q l : Sub
   have Q : ∀ n, St act q (filt act l V n) → ∀ Z ∈ g, ∀ x ∈ filt act l V n, act Z x ∈ filt act l V (n + 1) := by
     intro n hn Z hZ x hx
     obtain ⟨a, ha, b, hb, rfl⟩ := Submodule.mem_sup.1 (hs hZ)
-    rw [map_add, LinearMap.add_apply]
+    rw [map_add (f := _), LinearMap.add_apply]
     exact add_mem (mono n (hn a ha x hx)) (up n b hb x hx)
   have P : ∀ n, St act q (filt act l V n) := by
     intro n
@@ -162,7 +218,7 @@ theorem alg_sup {r r₁ r₂ : I → I → Prop} (h : ∀ a b, r a b → r₁ a 
 
 def stab (act : (ι → Matrix I I ℂ) →ₗ[ℂ] Module.End ℂ M) (N : Submodule ℂ M) : Submodule ℂ (ι → Matrix I I ℂ) where
   carrier := {Z | ∀ x ∈ N, act Z x ∈ N}
-  add_mem' := fun {a b} ha hb x hx => by rw [map_add, LinearMap.add_apply]; exact add_mem (ha x hx) (hb x hx)
+  add_mem' := fun {a b} ha hb x hx => by rw [map_add (f := _), LinearMap.add_apply]; exact add_mem (ha x hx) (hb x hx)
   zero_mem' := fun x _ => by simp
   smul_mem' := fun c a ha x hx => by rw [map_smul, LinearMap.smul_apply]; exact N.smul_mem c (ha x hx)
 
@@ -191,6 +247,7 @@ theorem dg_eq (h : I → ℝ) : dg ι h = ∑ w, ∑ a, (h a : ℂ) • un w a a
 theorem dg_hw {act : (ι → Matrix I I ℂ) →ₗ[ℂ] Module.End ℂ M} (h : I → ℝ) {Λ : ι → I → ℂ} {f : M}
     (hf : ∀ w a, act (un w a a) f = Λ w a • f) : f ∈ (act (dg ι h)).eigenspace (∑ w, ∑ a, h a * Λ w a) := by
   rw [Module.End.mem_eigenspace_iff, dg_eq]
+
   simp only [map_sum, map_smul, LinearMap.sum_apply, LinearMap.smul_apply, hf, Finset.sum_smul, smul_smul]
 
 theorem cyc_le {act : (ι → Matrix I I ℂ) →ₗ[ℂ] Module.End ℂ M} (hL : Lie act) {sb pos z : I → I → Prop}

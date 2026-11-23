@@ -1,10 +1,64 @@
-import Formalism.LocalToGlobal.IndefiniteForms.IndefSide
-import Formalism.LocalToGlobal.ExponentGrids.ExponentGridsProofs.GridSquaresIndexEstimate
-import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.LocGlobIncl
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalGlobalInclusion.SmulMemIdealSmul
-import Formalism.HarderNarasimhan.HarderNarasimhanProofs.SlopeIneqMean
+module
+
+public import Formalism.LocalToGlobal.IndefiniteForms.IndefSide
+public import Formalism.LocalToGlobal.ExponentGrids.ExplicitSizeInequalityIndexed
+public import Formalism.HarderNarasimhan.HarderNarasimhanProofs.SlopeIneqMean
 import Formalism.HarderNarasimhan.HarderNarasimhanProofs.TwistFinrankEq
-import Formalism.LocalToGlobal.LatticeGeometry.OperatorNormFibers.PDescentCutA
+public import Formalism.LocalToGlobal.ExponentGrids.ExponentGridsProofs.FrameHeightOfDualSlope
+public import Formalism.LocalToGlobal.ExponentGrids.ExponentGridsProofs.GridSquaresIndexEstimate
+public import Formalism.LocalToGlobal.LatticeGeometry.OperatorNormFibers.PDescentCutA
+public import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.LocGlobIncl
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalGlobalInclusion.SmulMemIdealSmul
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Module NumberField IsDedekindDomain Finset
 open Formalism.DivisionValues (vw lw meanLog matLat)
@@ -119,8 +173,8 @@ def PPF (C b : ℝ) : ℝ :=
   C * (O.f : ℝ) ^ 2 * (O.nr : ℝ) ^ 6 *
     Real.log (b * O.nr * O.g1 * O.g2 * O.pd * O.pd' * |(O.dE : ℝ)|)
 
-open Classical in
 
+open Classical in
 def ee (C b : ℝ) (q : O.Sq) : ℕ :=
   if q = O.sv0 then ⌊O.PPF C b / Real.log (O.qq O.sv0)⌋₊ + 1 else 2
 
@@ -228,17 +282,7 @@ def LeafPol (O : FunData K Df) (C x CH b : ℝ) : Prop := O.pol C b ≤ x ^ CH
 
 end Leaves
 
-macro "pos_tac" : tactic =>
-  `(tactic| (repeat' (first | (positivity) | (apply mul_nonneg) | (apply add_nonneg) | (apply pow_nonneg))) <;> linarith)
 
-macro "onele_tac" : tactic =>
-  `(tactic| (repeat' (first | exact one_le_pow₀ (by assumption) | apply one_le_mul_of_one_le_of_one_le)) <;> assumption)
-
-theorem le_mul_one_le {a z t : ℝ} (ha : 0 ≤ a) (hz : 1 ≤ z) (ht : a * z = t) : a ≤ t := by
-  rw [← ht]
-  exact le_mul_of_one_le_right ha hz
-
-set_option maxHeartbeats 4000000 in
 
 theorem size_arith (f k m N L PPF Bw C b lx Sg cs np Rp lg l1 l2 l3 EM hI FP Arch Del T : ℝ)
     (hm : 1 ≤ m) (hf : 1 ≤ f) (hfk : f ≤ k) (hrN : k + m - 1 ≤ N) (hb : 1 ≤ b) (hL : 1 ≤ L) (hC : 1 ≤ C)
@@ -400,14 +444,6 @@ theorem htLe_mono {g : Pl K → ℤ} {z : K} {B B' : ℝ} (h : HtLe g z B) (hB :
   unfold Formalism.PairingDivisionLocalBalance.HtLe at h ⊢
   exact ⟨h.1, h.2.trans hB⟩
 
-theorem log_mul_le {a y : ℝ} (ha : 0 ≤ a) (hy : 1 ≤ y) : Real.log (a * y) ≤ max (Real.log a) 0 + Real.log y := by
-  rcases eq_or_lt_of_le ha with h | h
-  · rw [← h, zero_mul, Real.log_zero, max_self, zero_add]
-    exact Real.log_nonneg hy
-  · rw [Real.log_mul h.ne' (by linarith)]
-    have := le_max_left (Real.log a) 0
-    linarith
-
 section Sizes
 
 variable {Bs : DefBase K} {Df : DefSide Bs}
@@ -416,7 +452,7 @@ theorem Sig0_nonneg (O : FunData K Df) (C b : ℝ) : 0 ≤ O.Sig0 C b := by
   unfold FunData.Sig0
   exact Finset.sum_nonneg fun q _ => mul_nonneg (Nat.cast_nonneg _) (Real.log_natCast_nonneg _)
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem size_le (O : FunData K Df) (C x CH b : ℝ) (hC : 1 ≤ C) (hx : 1 ≤ x)
     (hL1 : 1 ≤ Real.log b) (hLx : Real.log b + Real.log x ≤ 3 * Real.log b)
@@ -701,7 +737,8 @@ theorem fcoord_sum {ι V P : Type} [Fintype ι] [DecidableEq ι] [AddCommGroup V
     Formalism.HermitianLatticesTheory.fcoord b X v (∑ p ∈ s, f p) = ∑ p ∈ s, Formalism.HermitianLatticesTheory.fcoord b X v (f p) := by
   have hv : Formalism.HermitianLatticesTheory.vecAt b v (∑ p ∈ s, f p) = ∑ p ∈ s, Formalism.HermitianLatticesTheory.vecAt b v (f p) := by
     funext i
-    simp [Formalism.HermitianLatticesTheory.vecAt, map_sum, Finsupp.finset_sum_apply, Finset.sum_apply]
+
+    simp [Formalism.HermitianLatticesTheory.vecAt, map_sum, Finsupp.finsetSum_apply, Finset.sum_apply]
   unfold Formalism.HermitianLatticesTheory.fcoord
   rw [hv]
   first
@@ -823,7 +860,7 @@ theorem ip_point (wf : Df.WF) (S : IndefData Df) (hl1a : S.BaseTypeSubspacesMapO
   rw [normAt_sq_eq, normAt_sq_eq, eq1, eq2]
   exact hcore
 
-theorem ip_first [IsTotallyComplex K] (wf : Df.WF) (S : IndefData Df) (hl1a : S.BaseTypeSubspacesMapOntoBothSides) (hl1c : S.RowLatticeBoundForBasis)
+theorem ip_first [_root_.NumberField.IsTotallyComplex K] (wf : Df.WF) (S : IndefData Df) (hl1a : S.BaseTypeSubspacesMapOntoBothSides) (hl1c : S.RowLatticeBoundForBasis)
     (hXE : ∀ v, IsUnit (S.XE v).det) (hD : 0 < S.D) {n : ℕ} (X' : InfinitePlace K → Matrix (Fin n) (Fin n) ℂ)
     (hX' : ∀ v, IsUnit (X' v).det) (Ψ : Matrix (Fin n) (Fin S.D) K) (hΨ : Function.Injective Ψ.mulVec)
     (g : InfinitePlace K → ℝ) (hg : ∀ v p, Df.Qp Bs.μ0 p ≠ ⊥ → g v ≤ ∑ j, Real.log (S.lam j Bs.μ0 p v)) :
@@ -937,10 +974,10 @@ theorem vw_one' (w : Pl K) : vw w (1 : K) = 0 := by
   unfold Formalism.DivisionValues.vw
   rw [FractionalIdeal.spanSingleton_one, FractionalIdeal.count_one]
 
-theorem functional_lower_bound_of_conditions [IsTotallyComplex K] (wf : Df.WF) (S : IndefData Df) (N : IndefNum Bs) (O : FunData K Df)
+theorem functional_lower_bound_of_conditions [_root_.NumberField.IsTotallyComplex K] (wf : Df.WF) (S : IndefData Df) (N : IndefNum Bs) (O : FunData K Df)
     (C x CH b : ℝ)
     (hD : 0 < S.D) (hH0 : S.H0) (hl1a : S.BaseTypeSubspacesMapOntoBothSides) (hl1c : S.RowLatticeBoundForBasis) (hXE : ∀ v, IsUnit (S.XE v).det)
-    (hRR : Submodule.IsLattice K S.RR)
+    (hRR : Submodule.IsFullLattice K S.RR)
     (hRRw : ∀ w : Pl K, Formalism.HermitianLatticesTheory.localization₂ w.asIdeal S.RR =
       Formalism.HermitianLatticesTheory.localization₂ w.asIdeal (matLat (S.ι (S.μ w)) (Df.abelian₂ (S.μ w))))
     (hC : 1 ≤ C) (hx : 1 ≤ x) (hL1 : 1 ≤ Real.log b) (hLx : Real.log b + Real.log x ≤ 3 * Real.log b)
@@ -1032,10 +1069,10 @@ theorem functional_lower_bound_of_conditions [IsTotallyComplex K] (wf : Df.WF) (
   unfold IndefData.muMaxRR
   linarith
 
-theorem functional_lower_bound_of_conditions_numeric [IsTotallyComplex K] (wf : Df.WF) (S : IndefData Df) (Z : IndefScale Bs) (C₀ CH : ℝ)
+theorem functional_lower_bound_of_conditions_numeric [_root_.NumberField.IsTotallyComplex K] (wf : Df.WF) (S : IndefData Df) (Z : IndefScale Bs) (C₀ CH : ℝ)
     (O : FunData K Df) (C : ℝ)
     (hD : 0 < S.D) (hH0 : S.H0) (hl1a : S.BaseTypeSubspacesMapOntoBothSides) (hl1c : S.RowLatticeBoundForBasis) (hXE : ∀ v, IsUnit (S.XE v).det)
-    (hRR : Submodule.IsLattice K S.RR)
+    (hRR : Submodule.IsFullLattice K S.RR)
     (hRRw : ∀ w : Pl K, Formalism.HermitianLatticesTheory.localization₂ w.asIdeal S.RR =
       Formalism.HermitianLatticesTheory.localization₂ w.asIdeal (matLat (S.ι (S.μ w)) (Df.abelian₂ (S.μ w))))
     (hC : 1 ≤ C) (hx : 1 ≤ Z.x) (hL1 : 1 ≤ Real.log Z.b) (hLx : Real.log Z.b + Real.log Z.x ≤ 3 * Real.log Z.b)

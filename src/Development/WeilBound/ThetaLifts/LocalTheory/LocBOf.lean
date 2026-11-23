@@ -1,4 +1,52 @@
-import Development.WeilBound.ThetaLifts.LocalTheory.StepFacEq
+module
+
+public import Development.WeilBound.ThetaLifts.LocalTheory.StepFacEq
+public import Development.WeilBound.ThetaLifts.LocalTheory.AdmissiblePureTensorSchwartz
+import Development.WeilBound.ThetaLifts.ConeHypotheses.PureEqPureA
+public import Development.WeilBound.ThetaLifts.LocalTheory.MemPolData
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -128,7 +176,7 @@ theorem locB_of (H : Hyp) (J : Hyp2) (hC : ConeFacB) (hS : StdB) : LocB' := by
   have std' : ∀ v ∈ X.T, ∃ φ ∈ SB _, ∃ φ' ∈ SB _, Rf.p v φ = Rf.p' v φ' ∧ Rf₁.p v (ev v φ) ≠ 0 ∧
       Rf₁.p' v (Λ v φ') = wT B X s (-(((a - (b + 2)) / 2 : ℕ) : ℤ)) v • Rf₁.p v (ev v φ) := fun v hv => by
     obtain ⟨φ, hφ, φ', hφ', x, y, z⟩ := std v hv
-    exact ⟨φ, hφ, φ', hφ', x, y, by rw [(hΛ v _ hφ').1, wT, dif_pos (t.chars.sub hv)]; exact z⟩
+    exact ⟨φ, hφ, φ', hφ', x, y, by rw [(hΛ v _ hφ').1, wT, dite_eq_left (t.chars.sub hv)]; exact z⟩
   haveI := m₁.real.nontriv
   have pt₁ : Pt B G.M (fun _ => SB _) R₁.p Rf₁.p ei ev := by
     refine pt_of ?_ X.T (fun v hv => ?_) fun v hv => ⟨vac_sb t.geo.hM v, by rw [(h2 v).1]; exact (m₁.fin.sph v hv).2⟩
@@ -227,7 +275,8 @@ theorem locB_of (H : Hyp) (J : Hyp2) (hC : ConeFacB) (hS : StdB) : LocB' := by
     · beta_reduce
       split_ifs
       exacts [(hΛ v _ ((a2 j).2.1 v)).2, vac_sb t₁.geo.hM' v]
-    · rw [map_sum, Finset.smul_sum]
+    · set_option synthInstance.maxHeartbeats 100000 in
+        rw [map_sum, Finset.smul_sum]
       exact Finset.sum_congr rfl fun i _ => by rw [h3 _ _ (a1 i).2.1 (ev_of_off (a1 i).2.2), pure_smul]
     · rw [cone_sum cadd _ fun j => admissible_pure_tensor_schwartz t.geo.hM' _ ⟨(a2 j).2.1, ev_of_off (a2 j).2.2⟩]
       refine Finset.sum_congr rfl fun j _ => ?_

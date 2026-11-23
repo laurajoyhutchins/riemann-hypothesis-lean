@@ -1,9 +1,53 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.GeneralizedEigenspaces.CharacterShapes.HodgeTateFromSandwich
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.GeneralizedEigenspaces.CharacterShapes.FiniteOrbits.WeakOne
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.GeneralizedEigenspaces.GlobalRationalGL.IntegralConjugation.UaFacts
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.GeneralizedEigenspaces.GlobalRationalGL.IntegralConjugation.RatFacts
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.SignatureIntegrality.SignatureTorusFixedPoints.BdMul
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EventuallyIntegralConjugateMemCentralizerMulInte
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.GeneralizedEigenspaces.CharacterShapes.HodgeTateFromSandwich
+import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.MkMemAdmissibleAtIffCocycle
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EventuallyIntegralConjugateMemCentralizerMulInte
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.GeneralizedEigenspaces.CharacterShapes.FiniteOrbits.WeakOne
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.GeneralizedEigenspaces.GlobalRationalGL.IntegralConjugation.RatFacts
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.GeneralizedEigenspaces.GlobalRationalGL.IntegralConjugation.UaFacts
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.SignatureIntegrality.LevelTorusLeTorus
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -131,7 +175,7 @@ private theorem int_of_Uo (w : Plc L) (x : (Kw w)ˣ) (h : x ∈ Uo (Kw w)) : (x 
   haveI : (Valued.v : Valuation (Kw w) (WithZero (Multiplicative ℤ))).Compatible := Valuation.Compatible.ofValuation _
   exact (ValuativeRel.isEquiv (valuation (Kw w)) Valued.v).le_one_iff_le_one.1 h1.le
 
-private theorem dg_KGL (w : Plc L) (d : Fin 2 → (Kw w)ˣ) (hd : ∀ i, d i ∈ Uo (Kw w)) : dg d ∈ GlobalTheory.LFun.KGL w 2 := by
+private theorem dg_KGL (w : Plc L) (d : Fin 2 → (Kw w)ˣ) (hd : ∀ i, d i ∈ Uo (Kw w)) : dg d ∈ GlobalTheory.LFun.KGL w (n := 2) := by
   have key : ∀ (e : Fin 2 → (Kw w)ˣ), (∀ i, e i ∈ Uo (Kw w)) → ∀ a b, (dg e).val a b ∈ w.adicCompletionIntegers L := by
     intro e he a b
     rw [val_diagT, Matrix.diagonal_apply]
@@ -142,7 +186,7 @@ private theorem dg_KGL (w : Plc L) (d : Fin 2 → (Kw w)ˣ) (hd : ∀ i, d i ∈
   rw [← map_inv]
   exact key _ fun i => inv_mem (hd i)
 
-private theorem sec_Kall (w : Plc L) (hw : IsSplitAt w) (g : GL (Fin 2) (Kw w)) (hg : g ∈ GlobalTheory.LFun.KGL w 2) :
+private theorem sec_Kall (w : Plc L) (hw : IsSplitAt w) (g : GL (Fin 2) (Kw w)) (hg : g ∈ GlobalTheory.LFun.KGL w (n := 2)) :
     secW 2 w g ∈ Kall L 2 := by
   obtain ⟨hsec, -, -, -, -, -, -, hint⟩ := uaFacts L 2
   obtain ⟨h1, h2, -, -⟩ := hsec w hw
@@ -227,8 +271,8 @@ theorem UpperTheory.V.Z.Sym.So.translate :
   have hy0 : φ y ≠ 0 := by
     rw [hy, hφ.level u huL]
     exact haf
-  have hufin : u ∈ finU L 2 := hu1 _ fun w hw => (Subgroup.mem_inf.1 ((hsec w (hSp w hw)).1 _)).1
-  have hyfin : y ∈ finU L 2 := mul_mem (mul_mem ha hf) hufin
+  have hufin : u ∈ finU (E := L) (n := 2) := hu1 _ fun w hw => (Subgroup.mem_inf.1 ((hsec w (hSp w hw)).1 _)).1
+  have hyfin : y ∈ finU (E := L) (n := 2) := mul_mem (mul_mem ha hf) hufin
   have hdy : ∀ w ∈ S, ((cLoc w y).val).det = 1 := by
     intro w hw
     have e : GeneralLinearGroup.det (cLoc w y) = 1 := by
@@ -239,7 +283,7 @@ theorem UpperTheory.V.Z.Sym.So.translate :
       rw [hy, map_mul, map_mul, hdaf, hwu w hw, e2, mul_inv_cancel]
     simpa [Matrix.GeneralLinearGroup.val_det_apply] using congrArg Units.val e
   obtain ⟨s, hs1, hs2⟩ := exProd S hSp hInj (fun w => cLoc w y)
-  have hsm : s ∈ finU L 2 ⊓ SUA L := hs1 _ fun w hw =>
+  have hsm : s ∈ finU (E := L) (n := 2) ⊓ SUA L := hs1 _ fun w hw =>
     Subgroup.mem_inf.2 ⟨(Subgroup.mem_inf.1 ((hsec w (hSp w hw)).1 _)).1, sec_SU w (hSp w hw) _ (hdy w hw)⟩
   refine ⟨s⁻¹ * y, mul_mem (inv_mem (Subgroup.mem_inf.1 hsm).1) hyfin, ?_, s, hsm, ?_⟩
   · intro w hw v hv

@@ -1,15 +1,62 @@
-import Mathlib
-import Formalism.SharpRestriction.CuspSpanNormBounds.FractionFieldToGenericStalkAlgebraMapEq
-import Formalism.SharpRestriction.CuspSpanNormBounds.PsiEDef
-import Development.AbelianVarietyTheory.Definitions.Foundations.IsHermND
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.ComplementReferenceCompactSubgroup
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.GFrames
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.EichlerIsometry
+module
+
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.MemCoord
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsSmulIntegral
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.IsIntegralOfQuad
+import Development.AbelianVarietyTheory.Proofs.FlagMeasures.IsPrincipalIdealRingOfHenselian
 import Development.AbelianVarietyTheory.Proofs.FlagMeasures.RationalExtend
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.IsIntegralOfQuad
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.StrongApproximationAdditiveQuadraticExtensionStatement
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.MemCoord
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsSmulIntegral
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.StrongApproximationAdditiveQuadraticExtensionStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open ValuativeRel Formalism.MainNotions.S.Loc GlobalTheory.HL NumberField IsDedekindDomain
 open scoped Pointwise ENNReal Classical
 open GlobalTheory.HL.SAN
@@ -86,35 +133,6 @@ theorem hf_sub_l {N : ℕ} (Hm : Matrix (Fin N) (Fin N) R) (a b y : Fin N → R)
     hf L Hm (a - b) y = hf L Hm a y - hf L Hm b y := by
   simp [hf, sub_mul, Finset.sum_sub_distrib]
 
-theorem exists_bound1 (x : R) : ∃ e ∈ 𝒪[K], e ≠ 0 ∧ Sm L e⁻¹ x := by
-  obtain ⟨t, ht⟩ := (L.cj_fix (x + L.cj x)).1 (by rw [map_add, L.cj_cj, add_comm])
-  obtain ⟨n, hn⟩ := (L.cj_fix (x * L.cj x)).1 (by rw [map_mul, L.cj_cj, mul_comm])
-  have key : ∀ k : K, ∃ c ∈ 𝒪[K], c ≠ 0 ∧ c * k ∈ 𝒪[K] := by
-    intro k
-    rcases (ValuativeRel.valuation K).valuationSubring.mem_or_inv_mem k with h | h
-    · exact ⟨1, (𝒪[K]).one_mem, one_ne_zero, by rw [one_mul]; exact h⟩
-    · by_cases hk : k = 0
-      · exact ⟨1, (𝒪[K]).one_mem, one_ne_zero, by simp [hk]⟩
-      · exact ⟨k⁻¹, h, inv_ne_zero hk, by rw [inv_mul_cancel₀ hk]; exact (𝒪[K]).one_mem⟩
-  obtain ⟨c1, hc1, hc10, ht1⟩ := key t
-  obtain ⟨c2, hc2, hc20, hn2⟩ := key n
-  refine ⟨c1 * c2, (𝒪[K]).mul_mem hc1 hc2, mul_ne_zero hc10 hc20, ?_⟩
-  have hI : algebraMap K R (c1 * c2) * x ∈ L.O := by
-    rw [L.O_def]
-    have htr : algebraMap K R (c2 * (c1 * t)) = algebraMap K R (c1 * c2) * x +
-        L.cj (algebraMap K R (c1 * c2) * x) := by
-      rw [map_mul L.cj, AlgEquiv.commutes, ← mul_add, ← ht]; simp only [map_mul]; ring
-    have hnr : algebraMap K R ((c1 * c1 * c2) * (c2 * n)) = algebraMap K R (c1 * c2) * x *
-        L.cj (algebraMap K R (c1 * c2) * x) := by
-      rw [map_mul L.cj, AlgEquiv.commutes]
-      have : algebraMap K R (c1 * c2) * x * (algebraMap K R (c1 * c2) * L.cj x) =
-        algebraMap K R (c1 * c2) * algebraMap K R (c1 * c2) * (x * L.cj x) := by ring
-      rw [this, ← hn]; simp only [map_mul]; ring
-    exact GlobalTheory.HL.PlacesInt.isIntegral_of_quad (R := 𝒪[K]) _ _
-      ⟨_, (𝒪[K]).mul_mem hc2 ht1⟩ ⟨_, (𝒪[K]).mul_mem ((𝒪[K]).mul_mem ((𝒪[K]).mul_mem hc1 hc1) hc2) hn2⟩ htr hnr
-  refine ⟨_, hI, ?_⟩
-  rw [← mul_assoc, ← map_mul, inv_mul_cancel₀ (mul_ne_zero hc10 hc20), map_one, one_mul]
-
 theorem exists_bound {ι : Type} [Fintype ι] (f : ι → R) : ∃ e ∈ 𝒪[K], e ≠ 0 ∧ ∀ i, Sm L e⁻¹ (f i) := by
   first
   | exact @_root_.GlobalTheory.SmulIntegralDenominator.main
@@ -183,6 +201,7 @@ theorem sig_sig (A : Places F E sig) (y : E) : sig (sig y) = y := by
 
 theorem hq_swap (A : Places F E sig) {N : ℕ} (Hm : Matrix (Fin N) (Fin N) E)
     (hH : ∀ i j, sig (Hm j i) = Hm i j) (x y : Fin N → E) : sig (hq sig Hm x y) = hq sig Hm y x := by
+
   simp only [hq, map_sum, map_mul, sig_sig A]
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
@@ -222,7 +241,8 @@ theorem bc_piQ (A : Places F E sig) (p : HeightOneSpectrum (𝓞 F)) {N r : ℕ}
       hf (A.L p) (Hm.map (A.loc p).ιE) (A.bc p x) (A.bc p y) :=
     fun x y => ((GlobalTheory.HL.RatExt.rational_extend A N p).2.2.2.2.1 Hm x y).symm
   funext j
-  simp only [piQ, piL, Places.bc, map_sub, map_sum, map_add, map_mul, h5]
+
+  simp only [piQ, piL, Places.bc, map_sub, map_sum, map_add (f := _), map_mul, h5]
 
 end Global
 
@@ -353,13 +373,13 @@ theorem strong_approx_params : ∀ {F E : Type} [Field F] [NumberField F] [Field
     haveI := (A.loc p).char0
     have hcH : (A.L p).cj (hf (A.L p) (Hm.map (A.loc p).ιE) (up p) (up p)) =
         hf (A.L p) (Hm.map (A.loc p).ιE) (up p) (up p) := by
-      rw [← hs p, map_add, (A.L p).cj_cj, add_comm]
+      rw [← hs p, map_add (f := _), (A.L p).cj_cj, add_comm]
     have hct : (A.L p).cj ((A.loc p).ιE t) = (A.loc p).ιE t := by
       rw [A.L_cj, (A.loc p).cj_ιE, ht, hq_swap A Hm hH]
     have h2 : algebraMap (A.loc p).Fp (A.loc p).Ep 2⁻¹ * 2 = 1 := by
       rw [← map_ofNat (algebraMap (A.loc p).Fp (A.loc p).Ep) 2, ← map_mul, inv_mul_cancel₀ two_ne_zero,
         map_one]
-    simp only [y, map_add, map_mul, map_sub, AlgEquiv.commutes, hcH, hct]
+    simp only [y, map_add (f := _), map_mul, map_sub, AlgEquiv.commutes, hcH, hct]
     linear_combination ((A.loc p).ιE t - hf (A.L p) (Hm.map (A.loc p).ιE) (up p) (up p)) * h2 + hs p
   obtain ⟨s, hs1, hs2⟩ := (GlobalTheory.T.strong_approximation_additive_quadratic_extension A d hd).2.2 t y hyO hytr
   refine ⟨u, s, horthu, hs1, fun p => ⟨fun j => ?_, ?_⟩⟩

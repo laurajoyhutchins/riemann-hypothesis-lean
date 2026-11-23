@@ -1,6 +1,50 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.PerCEmb
-import Formalism.LocalToGlobal.IndefiniteReal.ThPinsR
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.PerCEmb
+public import Formalism.LocalRingCardinality.RankBoundMonotoneInDimension
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open NumberField Matrix Complex MeasureTheory IsDedekindDomain
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.FD GlobalTheory GlobalTheory.ThFr GlobalTheory.Dict GlobalTheory.AdTh
 open GlobalTheory.SW hiding Level IsSB
@@ -91,7 +135,7 @@ theorem isUnit_det_of_isONFr {E : Type} [Field E] [NumberField E] [IsCMField E] 
     (x : Frame X.Ψ r) (h : IsONFr X x) (τ : X.Ψ) : IsUnit (mat x τ).det := by
   have e : FD.gram τ.1 X.Gm (mat x τ) = (mat x τ)ᵀ * (X.Gm.map τ.1 * (mat x τ).map conj) := by
     ext a b
-    simp only [FD.gram, hermC, FD.col, of_apply, mul_apply, transpose_apply, map_apply, Finset.mul_sum, mul_assoc]
+    simp only [FD.gram, hermC, FD.col, of_apply, Matrix.mul_apply, transpose_apply, map_apply, Finset.mul_sum, mul_assoc]
   have d := congrArg det (e.symm.trans (h τ))
   rw [det_mul, det_transpose, sgnM, det_diagonal] at d
   refine isUnit_iff_ne_zero.2 (left_ne_zero_of_mul (d ▸ Finset.prod_ne_zero_iff.2 fun a _ => ?_))
@@ -123,7 +167,7 @@ theorem perC_block {E : Type} [Field E] [NumberField E] [IsCMField E] {r : ℕ} 
   · simp only [ha, if_true]
     have : hermC τ.1 X.Gm (FD.col (mat x τ * b) a) (u τ) =
         ∑ c, b c a * hermC τ.1 X.Gm (FD.col (mat x τ) c) (u τ) := by
-      simp only [hermC, FD.col, mul_apply, Finset.mul_sum, Finset.sum_mul]
+      simp only [hermC, FD.col, Matrix.mul_apply, Finset.mul_sum, Finset.sum_mul]
       rw [Finset.sum_congr rfl fun i _ => Finset.sum_comm, Finset.sum_comm]
       refine Finset.sum_congr rfl fun _ _ => Finset.sum_congr rfl fun _ _ => Finset.sum_congr rfl fun _ _ => by ring
     rw [this]

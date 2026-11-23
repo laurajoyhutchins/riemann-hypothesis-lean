@@ -1,6 +1,60 @@
-import Development.AutomorphicArithmetic.FrobeniusLocalisation.DiffDefs
-import Development.AutomorphicArithmetic.FrobeniusLocalisation.VdFormula
-import Development.AutomorphicArithmetic.FrobeniusLocalisation.LayerBot
+module
+
+public import Development.AutomorphicArithmetic.FrobeniusLocalisation.DiffDefs
+public import Development.AutomorphicArithmetic.PrimeDiscriminants.SlopeTestRemainingChoices
+public import Development.AutomorphicArithmetic.FrobeniusLocalisation.CondESpec
+public import Development.AutomorphicArithmetic.FrobeniusLocalisation.LayerBot
+public import Development.AutomorphicArithmetic.FrobeniusLocalisation.VdFormula
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open UpperTheory.HF
 
@@ -70,12 +124,9 @@ theorem UpperTheory.HF.mem_ram :
     have hr : (Module.finrank ℚ H.E : ℝ) ≠ 0 := by
       have := Module.finrank_pos (R := ℚ) (M := H.E)
       positivity
-    have key := dvd_iff_padicValNat_ne_zero (p := l) hd
     simp only [HostRaw.ram, Nat.mem_primeFactors, HostRaw.vdH, Ne, div_eq_zero_iff, hr, or_false,
-      Nat.cast_eq_zero]
-    rw [Ne] at key
-    rw [← key]
-    tauto
+      Nat.cast_eq_zero, Nat.padicValNat_def, hl, hd, not_false_eq_true, true_and, and_true]
+    exact dvd_iff_multiplicity_ne_zero (p := l) hd
   have hlow : l ∈ H.ram → 1 - 1 / (H.el l : ℝ) ≤ H.vdH l := by
     intro hram
     have hpos : 0 < e := hdvdE.1 (hB.1 (hC.1 hram))

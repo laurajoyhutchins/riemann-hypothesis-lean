@@ -1,10 +1,52 @@
-import Mathlib
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ThetaParseval.SatakeLifts.PairOfLiftAlt
-import Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.LocalTypeDictionary.ThetaLiftGeneralLinear
-import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.BernsteinExponentBounds.BernAll
-import Development.WeilBound.CoreStatements.AbelianHeightsDuality.PublishedTheoremStatements.ProvedMore
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.SmoothContragredientIrreducibleAndReflexive
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PrincipalSeriesSatakeParameters
+module
+
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ThetaParseval.SatakeLifts.PairOfLiftAlt
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PrincipalSeriesSatakeParameters
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IsLocallyConstantModulus
+public import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.IsComplementaryProductOfIsCuspidal
+public import Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.LocalTypeDictionary.ThetaLiftGeneralLinear
+import Development.AutomorphicSpectrum.Proofs.GlobalProofs.BernsteinZelevinskyFiniteness
+public import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.BernsteinExponentBounds.BernAll
+import GroundTheory.LocalFields.PadicLogSeries
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -22,7 +64,7 @@ theorem isUnitaryChar_inv {G : Type} [Group G] {a : G →* ℂˣ} (ha : IsUnitar
 theorem liftIso_of (hP : PairOfLift) (hS : SrcGood) (hI : ContraIrr) (hU : ContraUnit) : LiftIso := by
   intro k _ _ _ _ n t ν b V _ _ W _ _ σ π hnt sν uν sb ub hs hi hu hs' hi' hL
   obtain ⟨a1, a2, a3⟩ := hS k n (ν * b) V σ (sν.mul sb) (isUnitaryChar_mul uν ub) hs hi hu
-  exact GlobalTheory.T.theta_lift_general_linear PositivityTheory.Prw.bernsteinZelevinskyFiniteness_holds PositivityTheory.RgUd.All.bernsteinUnitaryProductIrreducible
+  exact GlobalTheory.T.theta_lift_general_linear GlobalTheory.CompanionTheory.Published.bernsteinZelevinskyFiniteness PositivityTheory.RgUd.All.bernsteinUnitaryProductIrreducible
     k n t b⁻¹ _ _ (contra (src (ν * b) σ)) (contra π) hnt sb.inv (isUnitaryChar_inv ub) (isSmooth_contra _)
     (hI k n V _ a1 a2).1 (hU k n V _ a1 a2 a3).1 (isSmooth_contra _) (hI k _ W π hs' hi').1
     (hP k n (n + t) ν b V W σ π sν sb hs' hL)
@@ -44,6 +86,7 @@ theorem liftSat_of (hL : LiftIso) (hS : SrcGood) (hI : ContraIrr) (hU : ContraUn
   have s2 := hC K w n V _ a1 a2 a3 _ s1
   have s3 := hD K w t b⁻¹ ni ϖ hϖ
   have ud : IsUnitarisable (detRep (Fin t) b⁻¹) := (isUnitarisable_ofChar_iff _).2 fun _ => isUnitaryChar_inv ub _
+  set_option synthInstance.maxHeartbeats 200000 in
   have s4 := hP K w n t _ _ _ _ (isSmooth_contra _) (hI _ n V _ a1 a2).1
     ((isSmooth_ofChar_iff _).2 sb.inv.detChar) (isIrreducible_ofChar _) _ _ s2 s3
   have s5 := GlobalTheory.PrinSat.hasSatGL_of_equiv e s4
@@ -52,7 +95,7 @@ theorem liftSat_of (hL : LiftIso) (hS : SrcGood) (hI : ContraIrr) (hU : ContraUn
   have s6 := hC K w (n + t) _ _ (isSmooth_contra π) (hI _ _ W π hs' hi').1 u5 _ s5
   obtain ⟨e'⟩ := (hI _ _ W π hs' hi').2
   have s7 := GlobalTheory.PrinSat.hasSatGL_of_equiv e' s6
-  rw [Multiset.map_add, hG] at s7
+  rw [Multiset.map_add (f := _), hG] at s7
   simpa [Multiset.map_map, mul_comm] using s7
 
 end UpperTheory.Gal.TP.Loc

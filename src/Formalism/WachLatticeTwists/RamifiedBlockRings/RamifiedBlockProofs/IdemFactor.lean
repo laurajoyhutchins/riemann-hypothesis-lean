@@ -1,5 +1,69 @@
-import Formalism.WachLatticeTwists.RamifiedBlockRings.RamifiedBlockProofs.Normal
-import Formalism.WachLatticeTwists.RamifiedBlockRings.RightIdealImageOfSurjective
+module
+
+public import Formalism.WachLatticeTwists.RamifiedBlockRings.RightIdealImageOfSurjective
+public import Formalism.WachLatticeTwists.RamifiedBlockRings.RamifiedBlockProofs.CharpolyRevMap
+public import Formalism.WachLatticeTwists.RamifiedBlockRings.RamifiedBlockProofs.Normal
+import Mathlib.Algebra.AffineMonoid.UniqueSums
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.Eigenspace.Charpoly
+public import Mathlib.LinearAlgebra.Eigenspace.Zero
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.LinearAlgebra.Charpoly.Basic
+public import Mathlib.LinearAlgebra.Charpoly.ToMatrix
+public import Mathlib.LinearAlgebra.Eigenspace.Basic
+public import Mathlib.LinearAlgebra.Eigenspace.Minpoly
+
+@[expose] public section
 
 open Finset Classical
 
@@ -13,9 +77,9 @@ theorem eCore {K : Type} [Field K] {S : Type} [Fintype S] [DecidableEq S] (A : M
     (α : ℕ → K) (ht : 1 ≤ t)
     (hA : A.charpoly = ∏ i ∈ Finset.range t, (Polynomial.X - Polynomial.C (α i)))
     (hα : ∀ i j, i < t → j < t → α i = α j → i = j) :
-    let EA := ((List.range t).tail.map fun i => A - α i • (1 : Matrix S S K)).prod
-    let δ := ∏ i ∈ Finset.Ioo 0 t, (α 0 - α i)
-    EA * EA = δ • EA ∧ EA.rank = 1 ∧ A * EA = α 0 • EA ∧ δ ≠ 0 := by
+    (let EA := ((List.range t).tail.map fun i => A - α i • (1 : Matrix S S K)).prod
+     let δ := ∏ i ∈ Finset.Ioo 0 t, (α 0 - α i)
+     EA * EA = δ • EA ∧ EA.rank = 1 ∧ A * EA = α 0 • EA ∧ δ ≠ 0) := by
   intro EA δ
   let q : Polynomial K := ∏ i ∈ Finset.Ioo 0 t, (Polynomial.X - Polynomial.C (α i))
   have hEA : EA = Polynomial.aeval A q := by
@@ -50,7 +114,7 @@ theorem eCore {K : Type} [Field K] {S : Type} [Fintype S] [DecidableEq S] (A : M
       have : q = Polynomial.C δ + (Polynomial.X - Polynomial.C (α 0)) * h := by rw [← hh]; ring
       calc q * q = (Polynomial.C δ + (Polynomial.X - Polynomial.C (α 0)) * h) * q := by rw [← this]
         _ = _ := by ring
-    rw [hEA, ← map_mul, h3, map_add, map_mul, map_mul _ h, hCH, mul_zero, add_zero,
+    rw [hEA, ← map_mul, h3, map_add (f := _), map_mul, map_mul _ h, hCH, mul_zero, add_zero,
       Polynomial.aeval_C, Algebra.algebraMap_eq_smul_one, smul_mul_assoc, one_mul]
   refine ⟨hsq, ?_, hAE, hδ⟩
   let φ : Module.End K (S → K) := Matrix.toLin' A
@@ -66,7 +130,7 @@ theorem eCore {K : Type} [Field K] {S : Type} [Fintype S] [DecidableEq S] (A : M
       rw [hφc, hp, Polynomial.rootMultiplicity_mul (mul_ne_zero (Polynomial.X_sub_C_ne_zero _) hq0),
         Polynomial.rootMultiplicity_X_sub_C_self,
         Polynomial.rootMultiplicity_eq_zero (by rw [Polynomial.IsRoot, hδq]; exact hδ)]
-    calc EA.rank = Module.finrank K (LinearMap.range EA.mulVecLin) := rfl
+    calc EA.rank = Module.finrank K (LinearMap.range EA.mulVecLin) := (Matrix.finrank_range_mulVecLin EA).symm
       _ ≤ Module.finrank K (φ.eigenspace (α 0)) := Submodule.finrank_mono h1
       _ ≤ 1 := h2 ▸ LinearMap.finrank_eigenspace_le φ (α 0)
   · have hroot : φ.charpoly.IsRoot (α 0) := by
@@ -79,7 +143,7 @@ theorem eCore {K : Type} [Field K] {S : Type} [Fintype S] [DecidableEq S] (A : M
     rw [h2, hδq] at h1
     by_contra hlt
     have h0 : EA.rank = 0 := by omega
-    have h3 : LinearMap.range EA.mulVecLin = ⊥ := Submodule.finrank_eq_zero.mp h0
+    have h3 : LinearMap.range EA.mulVecLin = ⊥ := Submodule.finrank_eq_zero.mp ((Matrix.finrank_range_mulVecLin EA).trans h0)
     have h4 : EA.mulVecLin v ∈ LinearMap.range EA.mulVecLin := LinearMap.mem_range_self _ v
     rw [h3, Submodule.mem_bot] at h4
     have h5 : δ • v = 0 := by rw [← h1]; exact h4

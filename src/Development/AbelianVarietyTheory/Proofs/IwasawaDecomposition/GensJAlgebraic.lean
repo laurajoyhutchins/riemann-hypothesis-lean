@@ -1,15 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.TiedColumnData
-import Formalism.SharpRestriction.GlobalSchurBounds.ThickPlacesCorollaryOfAnyTranslate
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsColumnInputAssembled
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.DegreeEqTotDeg
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsColInJetsIn
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LawsOfOk
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FormsEquiv
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsPreHasLetters
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.TiedColumnData
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsColumnInputAssembled
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.DegreeEqTotDeg
 import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.BaseFieldsPrimesOk
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ResCharConj
 import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.CmInverseHalfDifferentMulRelativeDifferent
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsColInJetsIn
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsCommonField
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsGaloisGe
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FormsEquiv
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LawsOfOk
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ResCharConj
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Formalism.BasicNotions Formalism.MainNotions Formalism.MainNotions.Inhab Formalism.L2.Host GlobalTheory.EX GlobalTheory.EX.OB GlobalTheory.Mem GlobalTheory.Mem.Col2 GlobalTheory.Mem.Top GlobalTheory.Mem.Top.GroupRetwisting GlobalTheory.Mem.Top.Bl NumberField IsDedekindDomain
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
@@ -40,8 +78,8 @@ theorem finAlg_allSetJ (P : Pre) (J : AmbIn P.host) (χ : HChar P.host.E) {Ξ : 
   refine finAlg_biUnion ?_ fun k hk => hk.2
   exact (Set.finite_univ.prod ((Set.finite_Iio P.R.m).prod (hs.prod hs))).subset fun k hk => ⟨trivial, hk.1⟩
 
-open Classical in
 
+open Classical in
 def gensJ (P : Pre) (J : AmbIn P.host) (χ : HChar P.host.E) (Ξ : Set (HChar P.host.E)) : Finset ℂ :=
   if h : FinAlg (allSetJ P J χ Ξ) then h.choose else ∅
 
@@ -55,7 +93,7 @@ theorem gensJ_algebraic (P : Pre) (J : AmbIn P.host) (χ : HChar P.host.E) (Ξ :
 theorem allSetJ_subset (P : Pre) (J : AmbIn P.host) (χ : HChar P.host.E) {Ξ : Set (HChar P.host.E)} (h : Ξ.Finite)
     {K : Subfield ℂ} (hK : ∀ z ∈ gensJ P J χ Ξ, z ∈ K) : allSetJ P J χ Ξ ⊆ K := by
   have h1 := finAlg_allSetJ P J χ h
-  rw [gensJ, dif_pos h1] at hK
+  rw [gensJ, dite_eq_left h1] at hK
   exact h1.choose_spec.2.trans (Subfield.closure_le.2 hK)
 
 theorem jetsIn_of_isTw {B : Base} {X : PreX B.toPre} (hL : StagesInhab.HasLetters B.toPre) {I : ColIn B X} (h : I.Ok)
@@ -192,9 +230,9 @@ theorem extend_pinned : EvG fun K => ∀ (B : Base) (f : Fr B.toPre) (T : TwDat 
   refine ⟨fun _ => ∅, fun P g Ξ => if h : P = B.toPre then S P (h ▸ w.I.J) g Ξ else ∅, fun P g Ξ z hz => ?_, ?_⟩
   · dsimp only at hz
     by_cases h : P = B.toPre
-    · rw [dif_pos h] at hz
+    · rw [dite_eq_left h] at hz
       exact hSa _ _ _ _ z hz
-    · rw [dif_neg h] at hz
+    · rw [dite_eq_right h] at hz
       simp at hz
   intro B' f' T' hE hf _ hS₂
   have hK := Enl.KsC_eq hE
@@ -222,7 +260,7 @@ theorem extend_pinned : EvG fun K => ∀ (B : Base) (f : Fr B.toPre) (T : TwDat 
   have ef := eq_of_heq hf
   subst ef
   dsimp only at hS₂
-  rw [dif_pos rfl] at hS₂
+  rw [dite_eq_left rfl] at hS₂
   obtain ⟨I, hI, hTw, hJets, hC, hSS, hxi, hsel, hJ, hval, hroot, hfld⟩ :=
     hS B' w.px f' T' w.I.sel w.I.J hsp.1 hsp.2 hL hX w.ok.sel_ok w.ok.amb_ok hS₂
   have hval0 : ∀ C W V S N G, Formalism.L2.Host.ValLL0 (assemble B' C W V S N G) (Fr.at ⟨B', C, W, V, S, N, G⟩ f') :=

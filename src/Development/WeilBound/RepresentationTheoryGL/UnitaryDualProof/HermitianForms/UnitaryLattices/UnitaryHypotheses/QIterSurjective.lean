@@ -1,8 +1,55 @@
-import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.HermitianForms.UnitaryLattices.UnitaryHypotheses.BlkAtApply
-import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.MirabolicDerivatives.LeibnizDerivatives.HighestDerivProd
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.TwistedJacquetPhiMinusEquiv
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.MirabolicTwistedKernelDerivativeZeroStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.RestrictionMirabolicTwistedKernelStatement
+module
+
+public import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.MirabolicDerivatives.ColMatMulGlEmbMat
+public import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.HermitianForms.GlCongr
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.MirabolicTwistedKernelDerivativeZeroStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.RestrictionMirabolicTwistedKernelStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.TwistedJacquetPhiMinusEquiv
+public import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.HermitianForms.UnitaryLattices.UnitaryHypotheses.BlkAtApply
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -14,14 +61,14 @@ open PositivityTheory.RgUd.Form
 
 variable {k : Type} [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k]
 
-variable (k) in
 
+variable (k) in
 def qIter (ψ : AddChar k Circle) {n : ℕ} : (j : ℕ) → (τ : MRep k (n + j)) → τ.V →ₗ[ℂ] (iterPhi k ψ j τ).V
   | 0, _ => LinearMap.id
   | j + 1, τ => (qIter ψ j (MRep.phiM k ψ τ)).comp (twKer τ.ρ (MirUin k (n + j + 1)) (mirChar k ψ (n + j))).mkQ
 
-variable (k) in
 
+variable (k) in
 def emb (n : ℕ) : (j : ℕ) → Mir k n →* Mir k (n + j)
   | 0 => MonoidHom.id _
   | j + 1 => ((levi k (n + j + 1)).comp (Mir k (n + j)).subtype).comp (emb n j)
@@ -47,20 +94,28 @@ theorem ker_qIter (ψ : AddChar k Circle) {n : ℕ} :
   | 0, τ => by
     exact (Submodule.ker_mkQ _).trans (GlobalTheory.T.mirabolic_twisted_kernel_derivative_zero k ψ n τ.V τ.ρ)
   | j + 1, τ => by
-    obtain ⟨e, hle⟩ := GlobalTheory.CompanionTheory.BZMirStep.twKer_twAct_eq_map τ.ρ (MirUin k (n + j + 1)) (mirChar k ψ (n + j)) _
-      (levi_stab ψ (n + j)) (derUnipM k (n + j) n) (derCharM k ψ (n + j) n) (derUnipM k (n + j + 1) n)
-      (derCharM k ψ (n + j + 1) n) (GlobalTheory.CompanionTheory.BZMirStep.MirUin_step ψ (Nat.le_add_right n j))
-      (GlobalTheory.CompanionTheory.BZMirStep.levi_step ψ (Nat.le_add_right n j)) (GlobalTheory.CompanionTheory.BZMirStep.derUnipM_decomp (Nat.le_add_right n j))
+    let s := (levi k (n + j + 1)).comp (Mir k (n + j)).subtype
+    let N₁ := MirUin k (n + j + 1)
+    let N₂ := derUnipM k (n + j) n
+    let N := derUnipM k (n + j + 1) n
+    let θ₁ := mirChar k ψ (n + j)
+    let θ₂ := derCharM k ψ (n + j) n
+    let θ := derCharM k ψ (n + j + 1) n
+    let K := twKer τ.ρ N₁ θ₁
+    let L := twKer τ.ρ N θ
+    let σ : Representation ℂ (Mir k (n + j)) (τ.V ⧸ K) := (MRep.phiM k ψ τ).ρ
+    let T := twKer σ N₂ θ₂
+    have hnm : n ≤ n + j := Nat.le_add_right n j
+    have hmap : T = L.map K.mkQ ∧ K ≤ L :=
+      GlobalTheory.CompanionTheory.BZMirStep.twKer_twAct_eq_map τ.ρ N₁ θ₁ s
+        (levi_stab ψ (n + j)) N₂ θ₂ N θ
+        (GlobalTheory.CompanionTheory.BZMirStep.MirUin_step ψ hnm)
+        (GlobalTheory.CompanionTheory.BZMirStep.levi_step ψ hnm)
+        (GlobalTheory.CompanionTheory.BZMirStep.derUnipM_decomp hnm)
+    have hcomap : T.comap K.mkQ = L := by
+      rw [hmap.1, Submodule.comap_map_mkQ, sup_eq_right.2 hmap.2]
     have ih := ker_qIter ψ j (MRep.phiM k ψ τ)
-    show LinearMap.ker (((twKer (iterPhi k ψ j (MRep.phiM k ψ τ)).ρ (MirUin k n) 1).mkQ ∘ₗ
-      qIter k ψ j (MRep.phiM k ψ τ)) ∘ₗ (twKer τ.ρ (MirUin k (n + j + 1)) (mirChar k ψ (n + j))).mkQ) = _
-    refine (LinearMap.ker_comp _ _).trans ?_
-    rw [ih]
-    have e' : twKer (MRep.phiM k ψ τ).ρ (derUnipM k (n + j) n) (derCharM k ψ (n + j) n) =
-        (twKer τ.ρ (derUnipM k (n + j + 1) n) (derCharM k ψ (n + j + 1) n)).map
-          (twKer τ.ρ (MirUin k (n + j + 1)) (mirChar k ψ (n + j))).mkQ := e
-    rw [e']
-    exact (Submodule.comap_map_mkQ _ _).trans (sup_eq_right.2 hle)
+    exact (congrArg (Submodule.comap K.mkQ) ih).trans hcomap
 
 omit [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] in
 theorem glEmbMat_apply' (n : ℕ) (A : Matrix (Fin n) (Fin n) k) (a b : Fin (n + 1)) :

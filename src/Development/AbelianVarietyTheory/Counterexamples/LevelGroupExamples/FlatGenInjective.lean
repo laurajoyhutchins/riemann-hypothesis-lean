@@ -1,5 +1,48 @@
-import Mathlib
-import Formalism.LocalToGlobal.ProjectiveLattices.ChartDirectionsIntegral
+module
+
+public import Formalism.LocalToGlobal.ProjectiveLattices.ChartDirectionsIntegral
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -12,49 +55,9 @@ open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.S
 
 attribute [local instance] Over.cartesianMonoidalCategory
 
-theorem isIntPS_iff (T : CDVR) {n d : ℕ} (f : Germ.PS T.Fr n d) :
-    IsIntPS T f ↔ ∃ g : Germ.PS T.V n d, f = MvPowerSeries.map (algebraMap T.V T.Fr) g := by
-  constructor
-  · intro h
-    choose a ha using h
-    exact ⟨a, MvPowerSeries.ext fun e => (ha e).symm.trans (MvPowerSeries.coeff_map _ _ _).symm⟩
-  · rintro ⟨g, rfl⟩ e
-    exact ⟨MvPowerSeries.coeff e g, (MvPowerSeries.coeff_map _ _ _).symm⟩
-
-theorem flatGen_injective {X X' Y : Scheme.{0}} (L : LB X) (F : X' ⟶ X) {K : Type} [Fintype K]
-    (φ : K → (Y ⟶ X')) (ε : K → ℤ) (a b : LB.Gen (LB.LinComb L (fun k => φ k ≫ F) ε))
-    (h : flatGen L F φ ε a = flatGen L F φ ε b) : a = b := by
-  obtain ⟨a⟩ := a
-  obtain ⟨b⟩ := b
-  congr 1
-  funext j
-  have h1 := congrFun (congrArg LB.Gen.s h) (fun k _ => j k)
-  have hU : LB.wchart (L.pull F) φ (fun k _ => j k) = LB.wchart L (fun k => φ k ≫ F) j := by
-    refine le_antisymm (wchart_pull_le L F φ _) ?_
-    intro y hy
-    refine Set.mem_iInter.2 fun k => Set.mem_iInter.2 fun _ => ?_
-    exact Set.mem_iInter.1 hy k
-  have h2 := congrArg (res hU.ge) h1
-  have key : ∀ u : Γ(Y, LB.wchart L (fun k => φ k ≫ F) j)ˣ,
-      res hU.ge (res hU.le u) = u := fun u => by
-    ext
-    simp only [res, Units.coe_map, MonoidHom.coe_coe, ← CommRingCat.comp_apply, ← Functor.map_comp]
-    erw [show ((homOfLE hU.le).op ≫ (homOfLE hU.ge).op) = 𝟙 _ from Subsingleton.elim _ _, Y.presheaf.map_id]
-    rfl
-  exact (key (a j)).symm.trans (h2.trans (key (b j)))
-
 variable {E : Type} [Field E] [NumberField E] [IsCMField E] {H : Host E} {Dw : Datum H} {l : Level H}
 variable {Xo : Moduli Dw l} {c : Coeff l} [StarRing (𝓞 E)]
 variable {T : CDVR} {io : c.F →+* T.Fr} {y : IntFr Xo c T io}
-
-theorem series_integral (C : IntegralChartA3 Xo c T io y) :
-    letI := io.toAlgebra
-    (∀ j, IsIntPS T (C.ch.B.G.F j)) ∧ (∀ a j, IsIntPS T (C.ch.B.A.act a j)) ∧ IsIntPS T C.ch.B.ph1 ∧
-      IsIntPS T C.ch.B.ph2 ∧ IsIntPS T C.ch.B.sy ∧ ∀ a, IsIntPS T (C.ch.B.ad a) := by
-  obtain ⟨⟨h1, h2, h3, h4, h5, h6, -⟩, -⟩ := C.gen
-  exact ⟨fun j => (isIntPS_iff T _).2 ⟨_, h1 j⟩, fun a j => (isIntPS_iff T _).2 ⟨_, h2 a j⟩,
-    (isIntPS_iff T _).2 ⟨_, h3⟩, (isIntPS_iff T _).2 ⟨_, h4⟩, (isIntPS_iff T _).2 ⟨_, h5⟩,
-    fun a => (isIntPS_iff T _).2 ⟨_, h6 a⟩⟩
 
 theorem const_zero (C : IntegralChartA3 Xo c T io y) :
     (∀ j, MvPowerSeries.constantCoeff (C.FT j) = 0) ∧ ∀ a j, MvPowerSeries.constantCoeff (C.actT a j) = 0 := by

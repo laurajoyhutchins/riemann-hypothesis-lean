@@ -1,6 +1,49 @@
-import Mathlib
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.IntegralStructures.ZetaCharacterDivisibility.PhiOfDivOf
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.SplitPlaceUnitaryLocalPointsEquivGL
+module
+
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.SplitPlaceUnitaryLocalPointsEquivGL
+public import Development.AbelianVarietyTheory.Definitions.Divisors.GenOf
+public import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.DivisionOfDeterminantCharacter
+public import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.LimWPhi
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ThetaParseval.SplitLineSubtraction.RowDefOfOdd
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.ContinuousMapPFin
+import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.TripleAtt
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.AnnihilatorModels.GenericMulOfProd
+
+@[expose] public section
 
 noncomputable section
 
@@ -9,7 +52,6 @@ open GlobalTheory.CuspRep GlobalTheory.WeilDeligne GlobalTheory.Pst GlobalTheory
 open Formalism.MainNotions.SumRepresentations.At (sumRep)
 open GlobalTheory.TripleGal (rk1)
 open UpperTheory.V.Af (FrobEig algSat RepIso)
-open UpperTheory.Gal.TP.Sub (Cl Above unrPol)
 open UpperTheory.Gal.crystallineComparison (GenericMul rootPol)
 attribute [local instance] GlobalTheory.LocalData.complRel GlobalTheory.LocalData.isLocalField
 
@@ -21,8 +63,8 @@ variable {E : Type} [Field E] [NumberField E] [IsCMField E]
 
 abbrev cpl (w : HeightOneSpectrum (𝓞 E)) : HeightOneSpectrum (𝓞 E) := conjSrc (GlobalTheory.SplitPts.conjE E) w
 
-omit [NumberField E] [IsCMField E] in
 
+omit [NumberField E] [IsCMField E] in
 def SameK (x : E) (w w' : HeightOneSpectrum (𝓞 E)) : Prop :=
   ∀ y : 𝓞 E, (y : E) ∈ IntermediateField.adjoin ℚ {x} → (y ∈ w.asIdeal ↔ y ∈ w'.asIdeal)
 
@@ -38,13 +80,14 @@ def LocIso : Prop :=
   ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (a : ℕ) (w : HeightOneSpectrum (𝓞 E)), IsSplitAt w →
     locU (E := E) a (cpl w) = locU a w ∧
     ∃ β : GL (Fin a) ((cpl w).adicCompletion E) ≃ₜ* GL (Fin a) (w.adicCompletion E),
-      (∀ x : UA E a, β (cLoc (cpl w) x) = cLoc w x) ∧ (∀ g, g ∈ GlobalTheory.LFun.KGL (cpl w) a → β g ∈ GlobalTheory.LFun.KGL w a) ∧
+      (∀ x : UA E a, β (cLoc (cpl w) x) = cLoc w x) ∧ (∀ g, g ∈ GlobalTheory.LFun.KGL (cpl w) (n := a) → β g ∈ GlobalTheory.LFun.KGL w (n := a)) ∧
       ∀ (V : Type) [AddCommGroup V] [Module ℂ V] (σ : Representation ℂ (GL (Fin a) (w.adicCompletion E)) V),
         GlobalTheory.SmGL.IsCuspidal σ → GlobalTheory.SmGL.IsCuspidal (σ.comp β.toMulEquiv.toMonoidHom)
 
 def SatConj : Prop :=
   ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (a : ℕ) (U : Submodule ℂ (UA E a → ℂ)), IsAutRepU U →
-    ∀ w : HeightOneSpectrum (𝓞 E), IsSplitAt w → (∃ B, SatU U w B) → ∃ B, SatU U (cpl w) B
+    ∀ w : HeightOneSpectrum (𝓞 E), IsSplitAt w →
+      (∃ B, UpperTheory.Gal.TP.Sub.SatU U w B) → ∃ B, UpperTheory.Gal.TP.Sub.SatU U (cpl w) B
 
 def TyConj : Prop :=
   ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (l a : ℕ) (U : Submodule ℂ (UA E a → ℂ))

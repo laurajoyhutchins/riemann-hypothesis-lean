@@ -1,5 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Jets.BasicLiftAll
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Jets.SameFns
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Formalism.FourierDecayAlt Formalism.FourierDecayAlt.R Formalism.FourierDecayAlt.Wd Formalism.FourierDecayAlt.Fr Formalism.REAL Formalism.QuantumDeterminants MeasureTheory GlobalTheory.HatNF
 
@@ -14,23 +61,11 @@ section module
 
 variable {V W : Type} [AddCommGroup V] [Module ℂ V] [AddCommGroup W] [Module ℂ W]
 
-theorem IsPol.map {f : ℂ → V} (hf : IsPol f) (φ : V →ₗ[ℂ] W) : IsPol fun y => φ (f y) := by
-  induction hf with
-  | const a => exact IsPol.const _
-  | add _ _ h1 h2 => simpa only [map_add] using h1.add h2
-  | xsmul _ h => simpa only [map_smul] using h.xsmul
-
 end module
 
 section alg
 
 variable {A : Type} [Ring A] [Algebra ℂ A]
-
-theorem IsPol.mul {f g : ℂ → A} (hf : IsPol f) (hg : IsPol g) : IsPol fun y => f y * g y := by
-  induction hf with
-  | const a => exact hg.map (LinearMap.mulLeft ℂ a)
-  | add _ _ h1 h2 => simpa only [add_mul] using h1.add h2
-  | xsmul _ h => simpa only [smul_mul_assoc] using h.xsmul
 
 end alg
 
@@ -73,6 +108,7 @@ private lemma isPol_linearMap_eval {ι : Type} [Fintype ι] [DecidableEq ι] (g 
     intro y
     ext ρ'
     simp [Finset.sum_apply, Pi.single_apply]
+
   simp only [h, map_sum, map_smul]
   exact isPol_finset_sum _ fun ρ _ => isPol_eval_smul _ _
 
@@ -82,7 +118,7 @@ private lemma isPol_linearMap_comp (g : V →ₗ[ℂ] W) {f : ℂ → V} (hf : _
     _root_.GlobalTheory.RhvPoly.IsPol fun y => g (f y) := by
   induction hf with
   | const a => exact .const _
-  | add _ _ ihf ihg => simpa only [map_add] using ihf.add ihg
+  | add _ _ ihf ihg => simpa only [map_add (f := _)] using ihf.add ihg
   | xsmul _ ih => simpa only [map_smul] using ih.xsmul
 
 open MeasureTheory in
@@ -156,8 +192,8 @@ private lemma isPol_eq_zero_of_infinite_zeros {f : ℂ → V} (hf : _root_.Globa
     (hS.mono fun x hx => by simp [← hp, h0 x hx])
   simp [hp, this]
 
-open MeasureTheory in
 
+open MeasureTheory in
 theorem _root_.GlobalTheory.RhvPoly.rhv_mem_of_infinite : ∀ (P : _root_.Formalism.FourierDecayAlt.M.Par) (A : Type) [Ring A] [StarRing A] [Algebra ℂ A]
     (d : _root_.Formalism.FourierDecayAlt.Q.NFData P A) (K : Submodule ℂ A) (S : Set ℂ), S.Infinite →
     (∀ y ∈ S, _root_.GlobalTheory.HatNF.rhv d y ∈ K) → ∀ y : ℂ, _root_.GlobalTheory.HatNF.rhv d y ∈ K := by

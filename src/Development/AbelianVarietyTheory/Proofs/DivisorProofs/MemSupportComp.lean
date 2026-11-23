@@ -1,5 +1,47 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsEqOnMirabolicFin
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsEqOnMirabolicFin
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -60,8 +102,12 @@ theorem mem_support_comp {T T' : G →₀ ℂ} {k : G} (hk : k ∈ (comp T T').s
     ∃ a ∈ T.support, ∃ b ∈ T'.support, k = a * b := by
   classical
   unfold comp Finsupp.sum at hk
-  obtain ⟨a, ha, hk⟩ := Finset.mem_biUnion.1 (Finsupp.support_finset_sum hk)
-  obtain ⟨b, hb, hk⟩ := Finset.mem_biUnion.1 (Finsupp.support_finset_sum hk)
+  obtain ⟨a, ha, hk⟩ : ∃ a ∈ T.support,
+      k ∈ (∑ b ∈ T'.support, Finsupp.single (a * b) (T a * T' b)).support := by
+    exact Finset.mem_biUnion.1 (Finsupp.support_finsetSum hk)
+  obtain ⟨b, hb, hk⟩ : ∃ b ∈ T'.support,
+      k ∈ (Finsupp.single (a * b) (T a * T' b)).support := by
+    exact Finset.mem_biUnion.1 (Finsupp.support_finsetSum hk)
   exact ⟨a, ha, b, hb, Finset.mem_singleton.1 (Finsupp.support_single_subset hk)⟩
 
 theorem exists_fin (T : G →₀ ℂ) : ∃ (n : ℕ) (h : Fin n → G) (c : Fin n → ℂ),
@@ -83,8 +129,5 @@ def cell {n : ℕ} (z : GL (Fin n) F) (U : Set (GL (Fin n) F)) : Set (GL (Fin n)
 def Cuts (ψ : AddChar F ℂ) {n : ℕ} (U X A : Set (GL (Fin n) F)) : Prop :=
   ∃ T : GL (Fin n) F →₀ ℂ, ∀ f : GL (Fin n) F → ℂ, Eqv ψ f → (∀ u ∈ U, ∀ g, f (g * u) = f g) →
     ∀ g ∈ A, act T f g = X.indicator f g
-
-example (ψ : AddChar F ℂ) {n : ℕ} (U A : Set (GL (Fin n) F)) : Cuts ψ U Set.univ A :=
-  ⟨Finsupp.single 1 1, fun f _ _ g _ => by simp⟩
 
 end GlobalTheory.JSW.Cut

@@ -1,4 +1,45 @@
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.SphericalCoordinates.LevelChange
+module
+
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.SphericalCoordinates.LevelChange
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -11,7 +52,7 @@ namespace UpperTheory.Gal.W2
 
 private theorem formB_add_left {p : ℕ} [Fact p.Prime] {D : Datum p} {G : HTGroup p} (L : Link D G) (β : G.Cˣ)
     (a b c : VQ D) : formB L β (a + b) c = formB L β a c + formB L β b c := by
-  simp only [formB, map_add, LinearMap.add_apply]
+  simp only [formB, map_add (f := _), LinearMap.add_apply]
 
 private theorem formB_nsmul_left {p : ℕ} [Fact p.Prime] {D : Datum p} {G : HTGroup p} (L : Link D G) (β : G.Cˣ)
     (n : ℕ) (a c : VQ D) : formB L β (n • a) c = n * formB L β a c := by
@@ -19,7 +60,7 @@ private theorem formB_nsmul_left {p : ℕ} [Fact p.Prime] {D : Datum p} {G : HTG
 
 private theorem formB_add_right {p : ℕ} [Fact p.Prime] {D : Datum p} {G : HTGroup p} (L : Link D G) (β : G.Cˣ)
     (a b c : VQ D) : formB L β a (b + c) = formB L β a b + formB L β a c := by
-  simp only [formB, map_add]
+  simp only [formB, map_add (f := _)]
 
 private theorem formB_nsmul_right {p : ℕ} [Fact p.Prime] {D : Datum p} {G : HTGroup p} (L : Link D G) (β : G.Cˣ)
     (n : ℕ) (a c : VQ D) : formB L β a (n • c) = n * formB L β a c := by
@@ -70,7 +111,7 @@ theorem placeLoc_of : PlaceLoc := by
       add_mem' := by
         rintro a b ⟨m, u, hm, hu⟩ ⟨m', u', hm', hu'⟩
         refine ⟨m * m', m' • u + m • u', hm.mul_left hm', ?_⟩
-        rw [map_add, map_nsmul, map_nsmul, ← hu, ← hu', smul_add, smul_smul, smul_smul, mul_comm m' m]
+        rw [map_add (f := _), map_nsmul, map_nsmul, ← hu, ← hu', smul_add, smul_smul, smul_smul, mul_comm m' m]
       zero_mem' := ⟨1, 0, Nat.coprime_one_left p, by simp⟩
       neg_mem' := by
         rintro a ⟨m, u, hm, hu⟩
@@ -134,7 +175,7 @@ theorem placeLoc_of : PlaceLoc := by
           obtain ⟨a, ha⟩ := hx
           obtain ⟨b, hb⟩ := hy
           refine ⟨a + b, ?_⟩
-          rw [map_add, formB_add_right]
+          rw [map_add (f := _), formB_add_right]
           push_cast
           rw [ha, hb]
           ring
@@ -149,7 +190,7 @@ theorem placeLoc_of : PlaceLoc := by
       let f : D'.La →ₗ[ℤ] ℤ := AddMonoidHom.toIntLinearMap (AddMonoidHom.mk' c (fun a b => by
         have h3 : ((c (a + b) : ℤ) : ℚ) = ((c a + c b : ℤ) : ℚ) := by
           push_cast
-          rw [hc, hc, hc, map_add, formB_add_right]
+          rw [hc, hc, hc, map_add (f := _), formB_add_right]
           ring
         exact_mod_cast h3))
       obtain ⟨x, hx⟩ := hperf f

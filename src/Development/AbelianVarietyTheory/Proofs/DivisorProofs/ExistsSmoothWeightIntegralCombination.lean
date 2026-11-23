@@ -1,9 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsMetricFrOfIsMetricOn
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.ChernDegreeComplex
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ChernIntegralIndependentOfCoefficient
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ChernPartCombinationPower
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DivisorOfTensorSectionAdd
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IsMetricFrOfIsMetricOn
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ChernPartCombinationPower
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ChernDensDetWeightEqNegLeviLog
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ChernIntegralIndependentOfCoefficient
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 open CategoryTheory AlgebraicGeometry MvPolynomial MeasureTheory Filter Topology
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor
 open ReciprocityTheory.L2DbarEstimates (V)
@@ -69,7 +109,13 @@ def combSub (X : Var F) (σ : F →+* ℂ) : AddSubgroup (X.Dv × ((atlas X σ).
     exact ⟨_, _, ψ.tens φ, h1.tens h1', h2.tens h2', by rw [firstChernFormOfWeight_tensor _ _ h2 h2', h3, h3']; rfl⟩
   neg_mem' := by
     rintro ⟨D, w⟩ ⟨L, r, ψ, h1, h2, h3⟩
-    exact ⟨_, _, ψ.dual, GlobalTheory.LatChain.CanTens.presents_dual h1, h2.dual, by rw [firstChernFormOfWeight_dual _ h2, h3]; rfl⟩
+    have hdual : Presents (-D) (CechPic.dual L) (fun i => (r i)⁻¹) := by
+      refine ⟨CechPic.isLB_dual h1.isLB, fun i j hij => ?_, fun i x hx => (h1.isEqn i x hx).neg⟩
+      change (↑((r i)⁻¹) : X.Fn) =
+        fnOf (L.U i ⊓ L.U j) hij ↑((L.g i j)⁻¹) * ↑((r j)⁻¹)
+      rw [Units.val_inv_eq_inv_val, Units.val_inv_eq_inv_val, map_units_inv,
+        h1.isRatSec i j hij, mul_inv]
+    exact ⟨_, _, ψ.dual, hdual, h2.dual, by rw [firstChernFormOfWeight_dual _ h2, h3]; rfl⟩
 
 end GlobalTheory.ChernCalc.CombW
 

@@ -1,7 +1,51 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IntertwinerUnipotentInvariant
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.IsCharLab
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
 import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.DetCharacterMemPrincipalCongruenceFixedVectors
+import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.InjPrimeTo
 import Development.AbelianVarietyTheory.Proofs.FoundationProofs.MemChainVecsDet
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IntertwinerUnipotentInvariant
+
+@[expose] public section
+
 open Polynomial GlobalTheory.GLq GlobalTheory.GLp GlobalTheory.GLp.Supp GlobalTheory.SerSys GlobalTheory.TypeLeaf Formalism.BasicNotions Formalism.MainNotions.N Formalism.MainNotions.ArithmeticCylinders
 open scoped Classical
 
@@ -11,24 +55,7 @@ namespace GlobalTheory.SerSys.Opp
 
 open GlobalTheory.GLq.Opp
 
-open MonoidAlgebra in
 
-def reg {G H : Type} [Group G] [Group H] (i : G →* H) : Representation ℂ G (MonoidAlgebra ℂ H) where
-  toFun x := LinearMap.mulLeft ℂ (single (i x) (1 : ℂ))
-  map_one' := by
-    refine LinearMap.ext fun v => ?_
-    simp [← MonoidAlgebra.one_def]
-  map_mul' x y := by
-    refine LinearMap.ext fun v => ?_
-    simp [← mul_assoc, single_mul_single]
-
-open MonoidAlgebra in
-theorem map_conj {G : Type} [Group G] (p : G) (a : MonoidAlgebra ℂ G) :
-    mapDomainAlgHom ℂ ℂ (MulAut.conj p).toMonoidHom a = single p 1 * a * single p⁻¹ 1 := by
-  induction a using MonoidAlgebra.induction_on with
-  | of m => simp [single_mul_single]
-  | add x y hx hy => simp only [map_add, hx, hy, add_mul, mul_add]
-  | smul r x hx => simp only [map_smul, hx, smul_mul_assoc, mul_smul_comm]
 
 variable {g : ℕ} [Fact g.Prime] {k l n : ℕ}
 
@@ -48,7 +75,7 @@ theorem blk_eq (x : Gn g k) (y : Gn g l) : blk k l (k + l) x y = par finSumFinEq
       simp [entN]
     · simp [entN]
   unfold blk
-  rw [h, toG, dif_pos (Units.isUnit _), IsUnit.unit_of_val_units]
+  rw [h, toG, dite_eq_left (Units.isUnit _), IsUnit.unit_of_val_units]
 
 theorem eq_par (z : Gn g (k + l)) (h0 : InPar k (z : Mt g (k + l))) (h1 : tl k (z : Mt g (k + l)) = 1)
     (h2 : br k l (z : Mt g (k + l)) = 1) : ∃ B, z = par finSumFinEquiv 1 B 1 := by
@@ -56,13 +83,13 @@ theorem eq_par (z : Gn g (k + l)) (h0 : InPar k (z : Mt g (k + l))) (h1 : tl k (
     intro M i j
     have hi := i.2
     have hj := j.2
-    rw [tl, entN, dif_pos ⟨by omega, by omega⟩]
+    rw [tl, entN, dite_eq_left ⟨by omega, by omega⟩]
     rfl
   have e2 : ∀ (M : Mt g (k + l)) (i j : Fin l), br k l M i j = M (finSumFinEquiv (.inr i)) (finSumFinEquiv (.inr j)) := by
     intro M i j
     have hi := i.2
     have hj := j.2
-    rw [br, entN, dif_pos ⟨by omega, by omega⟩]
+    rw [br, entN, dite_eq_left ⟨by omega, by omega⟩]
     rfl
   refine ⟨Matrix.of fun i j => (z : Mt g (k + l)) (finSumFinEquiv (.inl i)) (finSumFinEquiv (.inr j)), ?_⟩
   apply Units.ext

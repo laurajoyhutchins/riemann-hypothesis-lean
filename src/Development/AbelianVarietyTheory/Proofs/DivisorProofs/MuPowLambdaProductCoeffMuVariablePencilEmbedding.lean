@@ -1,15 +1,65 @@
-import Development.AbelianVarietyTheory.Definitions.Divisors.TCoefMInMMul
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PscoTCore
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TDualProd
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BarMSingle
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DMBlockEntries
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DMDetbPEqZero
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LambdaCoeffCommutesModeDerivation
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LambdaMonomialCoeffDualNumberProductEq
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DMuEqExtDerivation
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MuCoeffPartialDerivMuEqSuccMul
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CoefMPencil
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.TCoefMInMMul
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BarMSingle
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CoefMPencil
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DMBlockEntries
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DMDetbPEqZero
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DMuEqExtDerivation
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LambdaCoeffCommutesModeDerivation
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LambdaMonomialCoeffDualNumberProductEq
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MuCoeffPartialDerivMuEqSuccMul
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TDualProd
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.WeightedDetDivergenceMemIdeal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 section
 
@@ -18,14 +68,6 @@ noncomputable section
 open MvPolynomial
 
 namespace GlobalTheory.PsCo.Pc1.A
-
-theorem core : ∀ {A : Type} [CommRing A] [Algebra ℂ A] {I : Type} [Fintype I] [DecidableEq I]
-    (D : I → Derivation ℂ A A) (dm : Derivation ℂ A A) (J : Ideal A) (Z : Matrix I I A) (u η : I → A) (E μ r : A),
-    (∀ x y, dm (Z x y) = D x (u y)) → (∀ w x y, D w (Z x y) = D x (Z w y)) → dm E = 0 →
-    (∀ x, D x E + μ * D x r * E - E * ∑ y, Z x y * η y ∈ J) → r = ∑ y, η y * u y →
-    dm (E * Z.det) + r * (E * Z.det) -
-      ∑ x, (D x (E * ∑ y, Z.adjugate y x * u y) + μ * D x r * (E * ∑ y, Z.adjugate y x * u y)) ∈ J :=
-  GlobalTheory.psco_t_core
 
 theorem dM_comm : ∀ {n : ℕ} (ε : Fin n → Bool) (w x : Mode ε) (P : Poly n), dM ε w (dM ε x P) = dM ε x (dM ε w P) :=
   GlobalTheory.PsCo.DMComm.dM_comm
@@ -92,9 +134,9 @@ private lemma pderiv_mu_lambdaPoly_lemma_5 (f : _root_.GlobalTheory.PsCo.Pc1.A.P
     pderiv none (_root_.GlobalTheory.PsCo.Pc1.A.inM n L f) = 0 := by
   induction f using MvPolynomial.induction_on with
   | C a => simp [_root_.GlobalTheory.PsCo.Pc1.A.inM]
-  | add p q hp hq => simp [map_add, hp, hq]
+  | add p q hp hq => simp [map_add (f := _), hp, hq]
   | mul_X p v hp =>
-    simp only [map_mul, Derivation.leibniz, hp, smul_eq_mul, map_add]
+    simp only [map_mul, Derivation.leibniz, hp, smul_eq_mul, map_add (f := _)]
     simp [_root_.GlobalTheory.PsCo.Pc1.A.inM, pderiv_X]
 
 open MvPolynomial in
@@ -111,9 +153,9 @@ private lemma pencilModeDerivation_lambdaPoly_lemma_7 (x : _root_.GlobalTheory.P
       _root_.GlobalTheory.PsCo.Pc1.A.inM n L (_root_.GlobalTheory.PsCo.Pc1.A.dL L ε x f) := by
   induction f using MvPolynomial.induction_on with
   | C a => simp [_root_.GlobalTheory.PsCo.Pc1.A.inM]
-  | add p q hp hq => simp [map_add, hp, hq]
+  | add p q hp hq => simp [map_add (f := _), hp, hq]
   | mul_X p v hp =>
-    simp only [map_mul, Derivation.leibniz, hp, smul_eq_mul, map_add]
+    simp only [map_mul, Derivation.leibniz, hp, smul_eq_mul, map_add (f := _)]
     simp [_root_.GlobalTheory.PsCo.Pc1.A.dMu, _root_.GlobalTheory.PsCo.Pc1.A.inM, mkDerivation_X]
 
 open MvPolynomial in
@@ -124,9 +166,9 @@ private lemma lambdaModeDerivation_entryPoly_lemma_8 (x : _root_.GlobalTheory.Ps
       _root_.GlobalTheory.PsCo.Pc1.A.inL n L (_root_.GlobalTheory.PsCo.Pc1.dM ε x P) := by
   induction P using MvPolynomial.induction_on with
   | C a => simp [_root_.GlobalTheory.PsCo.Pc1.A.inL]
-  | add p q hp hq => simp [map_add, hp, hq]
+  | add p q hp hq => simp [map_add (f := _), hp, hq]
   | mul_X p v hp =>
-    simp only [map_mul, Derivation.leibniz, hp, smul_eq_mul, map_add]
+    simp only [map_mul, Derivation.leibniz, hp, smul_eq_mul, map_add (f := _)]
     simp [_root_.GlobalTheory.PsCo.Pc1.A.dL, _root_.GlobalTheory.PsCo.Pc1.A.inL, mkDerivation_X]
 
 open MvPolynomial in
@@ -162,8 +204,9 @@ variable {n L : ℕ} (ε : Fin n → Bool) in
 private lemma modeDerivation_offDiagonalBlockSqNorm_lemma_19 (x : _root_.GlobalTheory.PsCo.Pc1.Mode ε) :
     _root_.GlobalTheory.PsCo.Pc1.dM ε x (_root_.GlobalTheory.PsCo.Pc1.rP ε) =
       ∑ j, X (Sum.inl j.1) * _root_.GlobalTheory.PsCo.Pc1.OmP ε x j := by
+
   simp [_root_.GlobalTheory.PsCo.Pc1.rP, _root_.GlobalTheory.PsCo.Pc1.OmP, map_sum, Derivation.leibniz,
-    modeDerivation_offDiagonalEntry_lemma_21]
+  modeDerivation_offDiagonalEntry_lemma_21]
 
 open MvPolynomial in
 variable {n L : ℕ} in
@@ -218,6 +261,7 @@ private lemma weight_modeDerivation_sub_mem_lemma_11 (M : ℕ) (m : Fin L → _r
     simp only [_root_.GlobalTheory.PsCo.Pc1.A.pencilConstantPartMatrix, Finset.sum_mul]
     rw [Finset.sum_comm]
     refine Finset.sum_congr rfl fun l _ => ?_
+
     rw [lambdaModeDerivation_entryPoly_lemma_8, hc, map_sum, Finset.mul_sum]
     refine Finset.sum_congr rfl fun y _ => ?_
     simp [_root_.GlobalTheory.PsCo.Pc1.A.inL, mul_assoc]
@@ -225,6 +269,7 @@ private lemma weight_modeDerivation_sub_mem_lemma_11 (M : ℕ) (m : Fin L → _r
         _root_.GlobalTheory.PsCo.Pc1.A.i2 L (X (Sum.inl j.1)) =
       _root_.GlobalTheory.PsCo.Pc1.A.i2 L (_root_.GlobalTheory.PsCo.Pc1.dM ε i (_root_.GlobalTheory.PsCo.Pc1.rP ε)) := by
     rw [modeDerivation_offDiagonalBlockSqNorm_lemma_19]
+
     simp [map_sum, _root_.GlobalTheory.PsCo.Pc1.A.pencilDerivativePartMatrix, _root_.GlobalTheory.PsCo.Pc1.A.i2, mul_comm]
   have hsplit : ∑ j, _root_.GlobalTheory.PsCo.Pc1.A.Zm ε L (_root_.GlobalTheory.PsCo.Pc1.A.pencilDerivativePartMatrix ε L) (_root_.GlobalTheory.PsCo.Pc1.A.pencilConstantPartMatrix ε c) i j *
         _root_.GlobalTheory.PsCo.Pc1.A.i2 L (X (Sum.inl j.1)) =
@@ -232,6 +277,7 @@ private lemma weight_modeDerivation_sub_mem_lemma_11 (M : ℕ) (m : Fin L → _r
           _root_.GlobalTheory.PsCo.Pc1.A.i2 L (X (Sum.inl j.1)) +
         _root_.GlobalTheory.PsCo.Pc1.A.inM n L
           (∑ j, _root_.GlobalTheory.PsCo.Pc1.A.pencilConstantPartMatrix ε c i j * _root_.GlobalTheory.PsCo.Pc1.A.inL n L (X (Sum.inl j.1))) := by
+
     simp only [_root_.GlobalTheory.PsCo.Pc1.A.Zm, add_mul, Finset.sum_add_distrib, Finset.mul_sum, map_sum, map_mul, mul_assoc]
     rfl
   rw [hsplit, pencilModeDerivation_embedding_lemma_16, hA, hB, pencilModeDerivation_lambdaPoly_lemma_7, hE]
@@ -295,6 +341,7 @@ private lemma coeff_eq_zero_of_mem_lambdaSquares_lemma_12 {g : _root_.GlobalTheo
     _root_.GlobalTheory.PsCo.Pc1.A.exL n L (_root_.GlobalTheory.PsCo.Pc1.A.coefM n L k g) = 0 := by
   rw [_root_.GlobalTheory.PsCo.Pc1.A.JM, Ideal.mem_span_range_iff_exists_fun] at hg
   obtain ⟨f, rfl⟩ := hg
+
   simp only [map_sum]
   refine Finset.sum_eq_zero fun l _ => ?_
   rw [← map_pow, mul_comm, muCoeff_lambdaPoly_mul_lemma_18, mul_comm, lambdaCoeff_mul_variable_sq_lemma_22]
@@ -323,7 +370,7 @@ private lemma coeff_pderiv_mu_lemma_13 (F : _root_.GlobalTheory.PsCo.Pc1.A.PolyM
       (k + 1 : _root_.GlobalTheory.PsCo.Pc1.Poly n) *
         _root_.GlobalTheory.PsCo.Pc1.A.exL n L (_root_.GlobalTheory.PsCo.Pc1.A.coefM n L (k + 1) F) := by
   rw [_root_.GlobalTheory.PsCo.Cw2a.t_coefM_pderiv]
-  simp only [Algebra.smul_def, map_add, map_natCast, map_one, nsmul_eq_mul, Nat.cast_add, Nat.cast_one]
+  simp only [Algebra.smul_def, map_add (f := _), map_natCast, map_one, nsmul_eq_mul, Nat.cast_add, Nat.cast_one]
   rw [show ((k : _root_.GlobalTheory.PsCo.Pc1.A.PolyL n L) + 1) =
       _root_.GlobalTheory.PsCo.Pc1.A.inL n L ((k : _root_.GlobalTheory.PsCo.Pc1.Poly n) + 1) by simp, extractCoeff_inl_mul]
 
@@ -399,15 +446,17 @@ private lemma koszulRecursion_solvable_of_product_lemma (M : ℕ) (m : Fin L →
       lambdaModeDerivation_entryPoly_lemma_8, _root_.GlobalTheory.PsCo.Pc1.OmP]
   have h2 : ∀ h i j, _root_.GlobalTheory.PsCo.Pc1.A.dMu L ε h (Z i j) = _root_.GlobalTheory.PsCo.Pc1.A.dMu L ε i (Z h j) := by
     intro h i j
+
     simp only [hZ, _root_.GlobalTheory.PsCo.Pc1.A.Zm, Derivation.leibniz, pencilModeDerivation_muVariable_lemma_9,
-      pencilModeDerivation_lambdaPoly_lemma_7, _root_.GlobalTheory.PsCo.Pc1.A.pencilDerivativePartMatrix, lambdaModeDerivation_entryPoly_lemma_8,
-      _root_.GlobalTheory.PsCo.Pc1.A.pencilConstantPartMatrix, map_add, map_sum, lambdaModeDerivation_variable_lemma_10, smul_zero, add_zero, smul_eq_mul,
-      mul_zero]
+    pencilModeDerivation_lambdaPoly_lemma_7, _root_.GlobalTheory.PsCo.Pc1.A.pencilDerivativePartMatrix, lambdaModeDerivation_entryPoly_lemma_8,
+    _root_.GlobalTheory.PsCo.Pc1.A.pencilConstantPartMatrix, map_add, map_sum, lambdaModeDerivation_variable_lemma_10, smul_zero, add_zero, smul_eq_mul,
+    mul_zero]
     simp only [MvPolynomial.derivation_C, mul_zero, smul_zero, zero_add, add_zero, Finset.sum_const_zero, map_zero,
       smul_eq_mul, _root_.GlobalTheory.PsCo.Pc1.OmP]
     rw [_root_.GlobalTheory.PsCo.DMComm.dM_comm ε h i]
   have h3 : pderiv none w = 0 := pderiv_mu_lambdaPoly_lemma_5 _
   have h5 : _root_.GlobalTheory.PsCo.Pc1.A.i2 L (_root_.GlobalTheory.PsCo.Pc1.rP ε) = ∑ j, b j * a j := by
+
     simp [hb, ha, _root_.GlobalTheory.PsCo.Pc1.rP, map_sum]
   have hmem := _root_.GlobalTheory.weighted_det_divergence_mem_ideal (fun x => _root_.GlobalTheory.PsCo.Pc1.A.dMu L ε x) (pderiv none)
     (_root_.GlobalTheory.PsCo.Pc1.A.JM L) Z a b w (_root_.GlobalTheory.PsCo.Pc1.A.muM n L)
@@ -425,14 +474,16 @@ private lemma koszulRecursion_solvable_of_product_lemma (M : ℕ) (m : Fin L →
     fun x k => _root_.GlobalTheory.PsCo.Pc1.A.exL n L (_root_.GlobalTheory.PsCo.Pc1.A.coefM n L k (w * ∑ j, Z.adjugate j x * a j)),
     ⟨fun k => ?_, fun k hk => ?_, fun x k hk => ?_⟩, ?_⟩
   · have hk := coeff_eq_zero_of_mem_lambdaSquares_lemma_12 hmem k
-    simp only [map_sub, map_add, map_sum, coeff_pderiv_mu_lemma_13, coeff_embedding_mul_lemma_14, coeff_modeDerivation_lemma_15, mul_assoc,
-      pencilModeDerivation_embedding_lemma_16, coeff_mu_mul_lemma_17, shift_const_mul_lemma_4] at hk
+
+    simp only [map_sub, map_add (f := _), map_sum, coeff_pderiv_mu_lemma_13, coeff_embedding_mul_lemma_14, coeff_modeDerivation_lemma_15, mul_assoc,
+    pencilModeDerivation_embedding_lemma_16, coeff_mu_mul_lemma_17, shift_const_mul_lemma_4] at hk
     simp only [← mul_assoc] at hk ⊢
     linear_combination hk
   · rw [hN] at hk
     simp only [hw, muCoeff_lambdaPoly_mul_lemma_18]
     rw [e1 k hk, mul_zero, map_zero]
   · rw [hN] at hk
+
     simp only [Finset.mul_sum, map_sum]
     refine Finset.sum_eq_zero fun j _ => ?_
     simp only [hw, ha, _root_.GlobalTheory.PsCo.Pc1.A.i2, AlgHom.comp_apply]
@@ -467,9 +518,9 @@ private lemma shift_add_lemma_3 (f g : ℕ → _root_.GlobalTheory.PsCo.Pc1.Poly
       _root_.GlobalTheory.PsCo.Pc1.prev f k + _root_.GlobalTheory.PsCo.Pc1.prev g k := by
   cases k <;> simp [_root_.GlobalTheory.PsCo.Pc1.prev]
 
+
 open MvPolynomial in
 variable {n L : ℕ} in
-
 theorem _root_.GlobalTheory.PsCo.Pc1.A.stAlg : _root_.GlobalTheory.PsCo.Pc1.StAlg := by
   intro n ε M P hP
   have hP' : P ∈ Submodule.span ℂ (Submonoid.closure
@@ -501,7 +552,7 @@ theorem _root_.GlobalTheory.PsCo.Pc1.A.stAlg : _root_.GlobalTheory.PsCo.Pc1.StAl
       ⟨fun k => ?_, fun k hk => ?_, fun x k hk => ?_⟩, ?_⟩
     · have h₁ := r₁ k
       have h₂ := r₂ k
-      simp only [map_add, shift_add_lemma_3, mul_add, Finset.sum_add_distrib] at h₁ h₂ ⊢
+      simp only [map_add (f := _), shift_add_lemma_3, mul_add, Finset.sum_add_distrib] at h₁ h₂ ⊢
       linear_combination h₁ + h₂
     · simp [s₁ k hk, s₂ k hk]
     · simp [t₁ x k hk, t₂ x k hk]

@@ -1,11 +1,58 @@
-import Development.WeilBound.ThetaLifts.SmallCones.ThetaUniq
-import Development.WeilBound.ThetaLifts.SmallCones.SliceArch
-import Development.WeilBound.ThetaLifts.LatticeBasics.IsCompactIntV
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.WeilRepresentationPreservesSchwartz
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsStdCharNegOneOfStandardTraceAdelicAddChar
-import GroundTheory.GlobalFields.TateThesis.SchwartzBruhatDual
-import GroundTheory.GlobalFields.TateThesis.AdelicCharDual
-import GroundTheory.GlobalFields.TateThesis.SchwartzBruhatFinite
+module
+
+public import Development.WeilBound.ThetaLifts.SmallCones.SliceArch
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.WeilRepresentationPreservesSchwartz
+public import Development.AbelianVarietyTheory.Definitions.Divisors.CTSmallCone
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsCompactOpenAddSubgroup
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsStdCharNegOneOfStandardTraceAdelicAddChar
+public import Development.WeilBound.ThetaLifts.LatticeBasics.IsCompactIntV
+public import GroundTheory.GlobalFields.TateThesis.AdelicCharDual
+public import GroundTheory.GlobalFields.TateThesis.SchwartzBruhatFinite
+import Mathlib.Algebra.Order.Archimedean.Real.Hom
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import GroundTheory.GlobalFields.TateThesis.AdeleIdealMeasure
+public import GroundTheory.GlobalFields.TateThesis.SchwartzBruhatDual
+
+@[expose] public section
 
 noncomputable section
 
@@ -17,11 +64,9 @@ open GlobalTheory.WeilM GlobalTheory.AdelicU GlobalTheory.IndefiniteRowSideFullH
 
 variable {F : Type} [Field F] [NumberField F] {κ κ₁ : Type} [Fintype κ] [Fintype κ₁]
 
+
 variable (F) in
-
 def qI : AF F →+* mixedSpace F := (InfiniteAdeleRing.ringEquiv_mixedSpace F).toRingHom.comp p1
-
-theorem qI_eq (a : AF F) : qI F a = evI F a := rfl
 
 theorem continuous_qI : Continuous (qI F) := by
   have : Continuous (InfiniteAdeleRing.ringEquiv_mixedSpace F) := by
@@ -66,8 +111,8 @@ theorem psi_eq {ψ : AddChar (AF F) ℂ} (hψ : IsStd ψ) (a : AF F) : ψ a =
   push_cast
   ring
 
-variable (F κ) in
 
+variable (F κ) in
 def aw0 : ((κ → mixedSpace F) × (κ → mixedSpace F)) →ₗ[ℝ] (κ → mixedSpace F) × ((κ → mixedSpace F) →L[ℝ] ℝ) :=
   LinearMap.prodMap LinearMap.id
     { toFun := fun c => -(2 * Real.pi) • trL c
@@ -117,10 +162,10 @@ theorem schr_pure {ψ : AddChar (AF F) ℂ} (hψ : IsStd ψ) (w : (κ → AF F) 
   have e2 : (fun i => p2 ((x + w.1) i)) = (fun i => p2 (x i)) + (fn2 w).1 := funext fun i => map_add _ _ _
   have e3 : p2 (x ⬝ᵥ w.2 + ⅟(2 : AF F) * (w.1 ⬝ᵥ w.2)) =
       (fun i => p2 (x i)) ⬝ᵥ (fn2 w).2 + p2 (⅟(2 : AF F)) * ((fn2 w).1 ⬝ᵥ (fn2 w).2) := by
-    rw [map_add, map_mul, RingHom.map_dotProduct, RingHom.map_dotProduct]; rfl
+    rw [map_add (f := _), map_mul, RingHom.map_dotProduct, RingHom.map_dotProduct]; rfl
   have e4 : -(2 * Real.pi) * Algebra.trace ℝ (mixedSpace F) (qI F (x ⬝ᵥ w.2 + ⅟(2 : AF F) * (w.1 ⬝ᵥ w.2))) =
       (aw0 F κ (ev2 w)).2 (fun i => qI F (x i)) + (aw0 F κ (ev2 w)).2 (aw0 F κ (ev2 w)).1 / 2 := by
-    rw [map_add, map_mul, RingHom.map_dotProduct, RingHom.map_dotProduct, h2, ← Algebra.smul_def, map_add, map_smul]
+    rw [map_add (f := _), map_mul, RingHom.map_dotProduct, RingHom.map_dotProduct, h2, ← Algebra.smul_def, map_add (f := _), map_smul]
     change _ = -(2 * Real.pi) * Algebra.trace ℝ (mixedSpace F) ((qI F ∘ x) ⬝ᵥ (qI F ∘ w.2)) +
       -(2 * Real.pi) * Algebra.trace ℝ (mixedSpace F) ((qI F ∘ w.1) ⬝ᵥ (qI F ∘ w.2)) / 2
     rw [smul_eq_mul]; ring
@@ -163,8 +208,8 @@ theorem fw_lc {ψ : AddChar (AF F) ℂ} (hψ : IsStd ψ) {g : (κ → Af F) → 
   · rw [hb x hx]
   · rw [show g (x + b₀.1) = 0 from image_eq_zero_of_notMem_tsupport (f := fun x => g (x + b₀.1)) hx, mul_zero, mul_zero]
 
-open GroundTheory.Global in
 
+open GroundTheory.Global in
 theorem annih {ψ : AddChar (AF F) ℂ} (hψ : IsStd ψ) {U : Set (Af F)} (hU : U ∈ 𝓝 0) :
     ∃ C : Set (Af F), IsCompact C ∧ ∀ b, (∀ a ∈ U, finChar ψ (a * b) = 1) → b ∈ C := by
   let χ : AddChar (AF F) Circle :=
@@ -197,8 +242,9 @@ theorem trace_nondeg (b : mixedSpace F) (h : ∀ y, Algebra.trace ℝ (mixedSpac
   refine (latticeBasis F).ext_elem fun j => ?_
   have := h (mixedEmbedding F ((integralBasis F).traceDual j))
   rw [← (latticeBasis F).sum_repr b] at this
+
   simp only [Finset.sum_mul, smul_mul_assoc, map_sum, map_smul, latticeBasis_apply, ← map_mul,
-    GlobalTheory.ThK.Dbl.Dense.trace_emb, Module.Basis.trace_mul_traceDual] at this
+  GlobalTheory.ThK.Dbl.Dense.trace_emb, Module.Basis.trace_mul_traceDual] at this
   simpa [apply_ite] using this
 
 theorem exists_half_trace : ∃ K : ℝ, 0 ≤ K ∧ ∀ x : mixedSpace F, x ≠ 0 → ∃ a, ‖a‖ * ‖x‖ ≤ K ∧
@@ -231,7 +277,7 @@ theorem ev_pure {B : Base F E} {M : Model σ X W} {M₁ : Model σ X₁ W₁} (h
     | add x y _ _ hx hy =>
       obtain ⟨a, ha, ha'⟩ := hx
       obtain ⟨b, hb, hb'⟩ := hy
-      exact ⟨a + b, add_mem ha hb, fun f => by simp only [GlobalTheory.ThK.Dbl.Dense.pureA_add, map_add, ha', hb']⟩
+      exact ⟨a + b, add_mem ha hb, fun f => by simp only [GlobalTheory.ThK.Dbl.Dense.pureA_add, map_add (f := _), ha', hb']⟩
     | smul c x _ hx =>
       obtain ⟨a, ha, ha'⟩ := hx
       exact ⟨c • a, Submodule.smul_mem _ _ ha, fun f => by simp only [GlobalTheory.ThK.Dbl.Dense.pureA_smul, map_smul, ha']⟩

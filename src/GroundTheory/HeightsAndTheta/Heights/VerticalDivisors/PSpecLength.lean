@@ -1,7 +1,51 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.IntToFracInjective
-import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.StatementsChart
-import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.StatementsOrd
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.StatementsChart
+public import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.StatementsOrd
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.Vertical
@@ -52,6 +96,7 @@ theorem length_quot_map_of_flat {A L : Type*} [CommRing A] [IsLocalRing A] [Comm
 
 theorem map_linForm {R S : Type*} [CommRing R] [CommRing S] {n : ℕ} (φ : R →+* S) (u : Fin n → R) :
     (linForm u).map φ = linForm (fun j => φ (u j)) := by
+
   simp only [linForm, map_sum, map_mul, MvPolynomial.map_C, MvPolynomial.map_X]
 
 theorem secLin_eq_mk_map {K : Type*} [Field K] [NumberField K] {n e : ℕ}
@@ -85,7 +130,7 @@ theorem SpecLength.proof (h1 : SpecChart.Statement) (h2 : FiniteOrd.Statement)
       (Module.length (Localization.AtPrime W) (Localization.AtPrime W ⧸
         ((integralModel I).map (algebraMap _ (Localization.AtPrime W)) ⊔
           Ideal.span {algebraMap _ (Localization.AtPrime W) (linForm u)}))).toNat := by
-    rw [localMult, dif_pos hWp, Ideal.map_sup, Ideal.map_span, Set.image_singleton]
+    rw [localMult, dite_eq_left hWp, Ideal.map_sup, Ideal.map_span, Set.image_singleton]
   unfold Ring.ord at hfin ⊢
   rw [hlen] at hfin ⊢
   split_ifs with hlW

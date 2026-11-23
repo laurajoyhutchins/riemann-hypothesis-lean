@@ -1,5 +1,55 @@
-import Development.WeilBound.ThetaLifts.SmallCones.WittOf
-import Development.WeilBound.ThetaLifts.TowerModels.PlaneMain
+module
+
+public import Development.WeilBound.ThetaLifts.TowerModels.PlaneMain
+public import Development.WeilBound.ThetaLifts.SmallCones.ColsOfMul
+public import Development.WeilBound.ThetaLifts.SmallCones.ThetaUniq
+public import Development.WeilBound.ThetaLifts.SmallCones.MatCancel
+public import Development.WeilBound.ThetaLifts.SmallCones.WittOf
+import Development.WeilBound.ThetaLifts.TowerModels.PlaneBas
+import Development.WeilBound.ThetaLifts.TowerModels.PlaneComp
+import Development.WeilBound.ThetaLifts.TowerModels.PlaneForm
+import Development.WeilBound.ThetaLifts.TowerModels.PlaneReal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.Divisors.MatchingOfParts
+
+@[expose] public section
 
 noncomputable section
 
@@ -65,7 +115,31 @@ theorem low_eps {B : Base F E} (hB : B.IsGood σ) {ε : E} {κ : ℂ} (hκ1 : κ
     have e := hH.xy
     rw [h2, form, zero_dotProduct] at e
     exact zero_ne_one e
-  refine ⟨by omega, by omega, fun i j => ?_, fun w => ?_, hL ▸ isLattice_comap n n₁ Y.L H.ι P hPι hY.lat, fun u => ?_,
+  have hlat : (Y.L.comap ((Matrix.mulVecLin H.ι).restrictScalars (𝓞 E))).IsLattice E :=
+    Submodule.IsLattice.of_fg E (fg_comap _ (fun u u' e => by
+      have := congrArg (P *ᵥ ·) (show H.ι *ᵥ u = H.ι *ᵥ u' from e)
+      simpa [Matrix.mulVec_mulVec, hPι] using this) Y.L hY.lat.fg)
+  have hfull : (Y.L.comap ((Matrix.mulVecLin H.ι).restrictScalars (𝓞 E))).IsFullLattice E := by
+    let := hlat
+    refine { span_eq_top := ?_ }
+    apply top_unique
+    intro u _
+    have hz : H.ι *ᵥ u ∈ Submodule.span E (Y.L : Set (Fin n → E)) := by
+      rw [Submodule.IsFullLattice.span_eq_top (self := hY.lat)]
+      trivial
+    have hmap : ∀ z ∈ Y.L, P *ᵥ z ∈
+        Submodule.span E (Y.L.comap ((Matrix.mulVecLin H.ι).restrictScalars (𝓞 E)) : Set (Fin n₁ → E)) := by
+      intro z hz
+      obtain ⟨a, b, u', -, -, hu', rfl⟩ := hH.split z hz
+      apply Submodule.subset_span
+      change H.ι *ᵥ (P *ᵥ (a • H.x + H.ι *ᵥ u' + b • H.y)) ∈ Y.L
+      rw [add_comm (a • H.x), hP]
+      exact (hH.low u').1 hu'
+    have hspan := (Submodule.span_le.mpr (show (Y.L : Set (Fin n → E)) ⊆
+        (Submodule.span E (Y.L.comap ((Matrix.mulVecLin H.ι).restrictScalars (𝓞 E)) : Set (Fin n₁ → E))).comap (Matrix.mulVecLin P) from hmap)) hz
+    simpa only [Submodule.mem_comap, Matrix.mulVecLin_apply, Matrix.mulVec_mulVec,
+      hPι, Matrix.one_mulVec] using hspan
+  refine ⟨by omega, by omega, fun i j => ?_, fun w => ?_, hL ▸ hfull, fun u => ?_,
     fun w => ?_, fun v u => ?_⟩
   · rw [← form_single (σ := σ) Y₁.J j i, ← form_single (σ := σ) Y₁.J i j, hform, hform, form_swap hcm hY.herm]
   · rw [← cg]

@@ -1,6 +1,52 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ArchimedeanSchwartz.NormChar
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ArchimedeanSchwartz.ShiftOf
-import GroundTheory.AutomorphicForms.GL2.GJStandardLCuspidalGen
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ArchimedeanSchwartz.ShiftOf
+public import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.StrongMultiplicityOne
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.CmBridge
+public import GroundTheory.AutomorphicForms.GL2.GJGlobalDefs
+public import GroundTheory.AutomorphicForms.GL2.GJStandardLFourier
+public import GroundTheory.AutomorphicForms.SmoothRepContragredient
+public import Formalism.DoubleCosetMeasures.Statement
+import GroundTheory.AutomorphicForms.GL2.GJFEInducedLevi
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.BaseChangeUnits.CycCOfCyclic
+
+@[expose] public section
 
 noncomputable section
 
@@ -31,20 +77,20 @@ def LocUnr : Prop :=
         ∏ i, (1 - (z i : ℂ)⁻¹ * ((Ideal.absNorm v.asIdeal : ℕ) : ℂ) ^ (-t))⁻¹
 
 def SatDict : Prop :=
-  ∀ (K : Type) [Field K] [NumberField K] [IsTotallyComplex K] (n : ℕ) (σ : CuspSub K n)
+  ∀ (K : Type) [Field K] [NumberField K] [_root_.NumberField.IsTotallyComplex K] (n : ℕ) (σ : CuspSub K n)
     (h : Cm.carrier σ ≤ centralCuspForms K n) (D : AdelicDecomposition (Cm.toRep σ h).toModule)
     (v : HeightOneSpectrum (𝓞 K)) (B : Multiset ℂˣ), (CG.mk σ).HasSat v B →
     ∃ z : Fin n → ℂˣ, Spherical.IsSatakeParameter (F := v.adicCompletion K) (D.finite.π v) (localHaar n v) z ∧
       B = Finset.univ.val.map z
 
 def CoefSm : Prop :=
-  ∀ (K : Type) [Field K] [NumberField K] [IsTotallyComplex K] (n : ℕ), 1 ≤ n → ∀ (μ : Measure (Reduction.normOneGL K n))
+  ∀ (K : Type) [Field K] [NumberField K] [_root_.NumberField.IsTotallyComplex K] (n : ℕ), 1 ≤ n → ∀ (μ : Measure (Reduction.normOneGL (K := K) (n := n)))
     [μ.IsHaarMeasure] (σ : CuspSub K n), Cm.carrier σ ≤ centralCuspForms K n → ∀ φ₂ : cuspForms K n,
     ∃ T : σ.V →ₗ[ℂ] Sm K n, (∀ φ : σ.V, (T φ).1 = GJGlobal.matrixCoeff μ φ.1.1 φ₂.1) ∧
       ∀ (τ : K →+* ℂ) (u : ℂ) (φ φ' : σ.V), φ'.1 = cap τ u φ.1 → T φ' = cap τ u (T φ)
 
 def ArchShift : Prop :=
-  ∀ (K : Type) [Field K] [NumberField K] [IsTotallyComplex K] (n : ℕ), 1 ≤ n → ∀ (ψ : Sm K n) (m : (K →+* ℂ) → Multiset ℂ),
+  ∀ (K : Type) [Field K] [NumberField K] [_root_.NumberField.IsTotallyComplex K] (n : ℕ), 1 ≤ n → ∀ (ψ : Sm K n) (m : (K →+* ℂ) → Multiset ℂ),
     (∀ τ u, cap τ u ψ = ((m τ).map (u + ·)).prod • ψ) → ∀ fi : AdelicGLn.InfiniteAdelicGL K n → ℂ,
     (∀ x, fi x = ψ.1 ((AdelicGLn.prodEquiv K n).symm (x, 1))) → (∃ x, fi x ≠ 0) →
     ∀ (μ : Measure (AdelicGLn.InfiniteAdelicGL K n)) [μ.IsHaarMeasure],
@@ -55,7 +101,7 @@ def ArchShift : Prop :=
         archZeta μ (archMatrixFourier φ') g s = k' * archZeta μ (archMatrixFourier φ) g (s + 1)
 
 def ArchBridge : Prop :=
-  ∀ (K : Type) [Field K] [NumberField K] [IsTotallyComplex K] (n : ℕ) (μ : Measure (AdelicGLn.InfiniteAdelicGL K n))
+  ∀ (K : Type) [Field K] [NumberField K] [_root_.NumberField.IsTotallyComplex K] (n : ℕ) (μ : Measure (AdelicGLn.InfiniteAdelicGL K n))
     [μ.IsHaarMeasure], (∀ x, ∃ y, archComp K n (infGL K n y) = x) ∧
     (∀ y, (AdelicGLn.prodEquiv K n).symm (archComp K n (infGL K n y), 1) = infGL K n y) ∧
     (∀ y, archAbsDet (archComp K n (infGL K n y)) = nrm (toL y.val)) ∧
@@ -68,6 +114,5 @@ def ArchBridge : Prop :=
 
 def BridgeOf : Prop := HaarL → ArchBridge
 def ArchOf : Prop := ShiftL → FourD → TestEx → ArchBridge → ArchShift
-def SideCenOf : Prop := ExpAlg → LocDual → LocUnr → SatDict → CoefSm → ArchShift → SideCen
 
 end UpperTheory.V.Z.Inf

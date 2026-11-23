@@ -1,8 +1,47 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsUniqueIsTanFrameOfIsEmpty
-import Development.AbelianVarietyTheory.Definitions.Divisors.P22
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.GrothendieckDeformation
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.KodairaSpencerMatrixUnique
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.GrothendieckDeformation
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.KodairaSpencerMatrixUnique
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.WedgeOrdVpBaseChangeOfNeBot
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.IsAbelianSchemeOfIsGrpPullback
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ObjIsAbelianSchemeDimRigidifiedSym
+import Development.AbelianVarietyTheory.Statements.PrincipalLattices.LogHermFormOfUnitDiscriminant
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.TypeStar
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -44,7 +83,7 @@ variable {R : Type} [CommRing R] {A : Over (Sp R)} [GrpObj A]
 
 def crysLo (d : Crys (epsDP R) (epsRed R) A) : HdR A where
   toFun c := (d ((constMor A).pull c)).fst
-  map_add' x y := by simp only [map_add, TrivSqZeroExt.fst_add]
+  map_add' x y := by simp only [map_add (f := _), TrivSqZeroExt.fst_add]
   map_smul' r c := by
     rw [LinearMap.map_smulₛₗ, map_smul, smul_eq_mul, RingHom.id_apply, smul_eq_mul,
       TrivSqZeroExt.algebraMap_eq_inl, TrivSqZeroExt.fst_mul]
@@ -52,7 +91,7 @@ def crysLo (d : Crys (epsDP R) (epsRed R) A) : HdR A where
 
 def crysHi (d : Crys (epsDP R) (epsRed R) A) : HdR A where
   toFun c := (d ((constMor A).pull c)).snd
-  map_add' x y := by simp only [map_add, TrivSqZeroExt.snd_add]
+  map_add' x y := by simp only [map_add (f := _), TrivSqZeroExt.snd_add]
   map_smul' r c := by
     rw [LinearMap.map_smulₛₗ, map_smul, smul_eq_mul, RingHom.id_apply, smul_eq_mul,
       TrivSqZeroExt.algebraMap_eq_inl, TrivSqZeroExt.snd_mul]
@@ -68,8 +107,7 @@ theorem crys_ext (P : AbelianDeRham) {g : ℕ} (hA : IsAbelianScheme A) (hg : Sm
   refine LinearMap.ext fun w => ?_
   obtain ⟨z, rfl⟩ := constMor_surjective P hA hg w
   induction z with
-  | zero => simp only [map_zero]
-  | add x y hx hy => simp only [map_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
   | tmul r c => rw [liftSemi_tmul, map_smul, map_smul, e]
 
 theorem fst_eq_crysLo (P : AbelianDeRham) {g : ℕ} (hA : IsAbelianScheme A)
@@ -77,8 +115,7 @@ theorem fst_eq_crysLo (P : AbelianDeRham) {g : ℕ} (hA : IsAbelianScheme A)
     (w : prim (epsDP R) (epsRed R) A) : (d w).fst = crysLo d ((redMor A).pull w) := by
   obtain ⟨z, rfl⟩ := constMor_surjective P hA hg w
   induction z with
-  | zero => simp only [map_zero, TrivSqZeroExt.fst_zero]
-  | add x y hx hy => simp only [map_add, TrivSqZeroExt.fst_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), TrivSqZeroExt.fst_add, hx, hy]
   | tmul r c =>
     rw [liftSemi_tmul, map_smul, LinearMap.map_smulₛₗ, redMor_constMor, map_smul]
     simp [crysLo]
@@ -124,8 +161,7 @@ theorem constMor_isBC (P : AbelianDeRham) {g : ℕ} (hA : IsAbelianScheme A)
   have e : ∀ z, liftSemi (constMor A).pull z = (liftMor (epsDP R) hic).pull (liftSemi (bcMor hφ).pull z) :=
     fun z => by
       induction z with
-      | zero => simp only [map_zero]
-      | add x y hx hy => simp only [map_add, hx, hy]
+      | add x y hx hy => simp only [map_add (f := _), hx, hy]
       | tmul r c =>
         rw [liftSemi_tmul, liftSemi_tmul, map_smul,
           ← GrpMor.pull_pull (bcMor hφ) (liftMor (epsDP R) hic) (constMor A) (fun _ => rfl) (by simpa using e1) c]
@@ -180,7 +216,7 @@ open GlobalTheory.Cris GlobalTheory.Published GlobalTheory.Published.AbelianDeRh
 
 variable {R : Type} [CommRing R] {A : Over (Sp R)} [GrpObj A]
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem exists_retraction_of_isKSValue_one (P : AbelianDeRham) (GD : GrothendieckDeformation)
     {A' : Over (Sp (DualNumber R))} [GrpObj A'] {i : A.left ⟶ A'.left} (h : IsGrpPullback A A' (epsRed R) i)

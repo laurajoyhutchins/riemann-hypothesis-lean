@@ -1,8 +1,56 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FockTranslateSchwartzMajorant
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.IkedaPartialFourierIntegralMemAdelicSchwartz
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.GaussianIsSchwartzFunction
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TamePartRight
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FockTranslateSchwartzMajorant
+import Aesop.Main
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.GaussianIsSchwartzFunction
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.IkedaPartialFourierIntegralMemAdelicSchwartz
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TamePartRight
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.LcscAdelicUnitaryGroup
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.LocallyConstant.Algebra
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Bool
+
+@[expose] public section
 
 noncomputable section
 open scoped Matrix NNReal ENNReal ComplexConjugate TensorProduct Topology
@@ -24,7 +72,7 @@ theorem eq_zero_of_orth_SB {Y : Type} [AddCommGroup Y] [TopologicalSpace Y] [IsT
   have hN : {y | ‖f y - f y0‖ < ‖f y0‖ / 2} ∈ 𝓝 y0 :=
     (isOpen_lt (hf.sub continuous_const).norm continuous_const).mem_nhds (by simpa using hpos)
   obtain ⟨C, hCa, hCu, hC⟩ := local_compact_nhds hN
-  obtain ⟨U, hU, hyU, hUC⟩ := (loc_compact_Haus_tot_disc_of_zero_dim (H := Y)).mem_nhds_iff.mp hCa
+  obtain ⟨U, hU, hyU, hUC⟩ := (loc_compact_Haus_tot_disc_of_zero_dim (X := Y)).mem_nhds_iff.mp hCa
   have hUc : IsCompact U := hC.of_isClosed_subset hU.1 hUC
   have hk : U.indicator (1 : Y → ℂ) ∈ GlobalTheory.WeilM.SB Y :=
     ⟨(LocallyConstant.indicator (1 : LocallyConstant _ ℂ) hU).isLocallyConstant,
@@ -170,7 +218,7 @@ theorem exists_conj_polyV (q : MvPolynomial (D.what₂.Tau × Fin m × Fin n × 
     refine ⟨p' + q', fun z => ?_⟩
     have h1 := hp z
     have h2 := hq z
-    simp only [polyV_eq, map_add] at h1 h2 ⊢
+    simp only [polyV_eq, map_add (f := _)] at h1 h2 ⊢
     rw [h1, h2]
   | mul_X p k hp =>
     obtain ⟨p', hp⟩ := hp

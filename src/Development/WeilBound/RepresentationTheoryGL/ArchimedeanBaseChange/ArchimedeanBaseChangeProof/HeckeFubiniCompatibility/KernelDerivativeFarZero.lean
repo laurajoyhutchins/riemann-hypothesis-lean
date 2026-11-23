@@ -1,8 +1,58 @@
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SecondCountableG
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LengthFunctionFactsHoldStatement
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.HeckeFubiniCompatibility.MultHasCompactSupport
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.KernelActionEquivariantStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.RightDerivativeCalculusHoldsStatement
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.ArchimedeanGelfandKernels.IsMultZero
+import Aesop.Main
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.DifferentiableAtOfSmooth
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.KernelActionEquivariantStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LengthFunctionFactsHoldStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.RightDerivativeCalculusHoldsStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SecondCountableG
+import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.WaveSolutionExistence
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.HeckeFubiniCompatibility.MultHasCompactSupport
+import GroundTheory.AutomorphicForms.RealGroups
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.CStarAlgebra.ContinuousLinearMap
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -187,7 +237,7 @@ theorem Rd_clm (T : V →L[ℂ] W) (X : Mat n) {f : Mat n → V} (hf : ContDiffO
 theorem Eu_clm (T : V →L[ℂ] W) (s : Bool) (a b : Fin n) {f : Mat n → V} (hf : ContDiffOn ℝ ∞ f (GLs n)) :
     Set.EqOn (Eu s a b fun x => T (f x)) (fun x => T (Eu s a b f x)) (GLs n) := by
   intro g hg
-  simp only [Eu, Pi.smul_apply, Pi.add_apply, Rd_clm T _ hf hg, map_smul, map_add]
+  simp only [Eu, Pi.smul_apply, Pi.add_apply, Rd_clm T _ hf hg, map_smul, map_add (f := _)]
 
 theorem Epow_clm (T : V →L[ℂ] W) (s : Bool) {f : Mat n → V} (hf : ContDiffOn ℝ ∞ f (GLs n)) (m : ℕ) :
     ∀ a b : Fin n, Set.EqOn (Epow s m a b fun x => T (f x)) (fun x => T (Epow s m a b f x)) (GLs n) := by
@@ -197,6 +247,7 @@ theorem Epow_clm (T : V →L[ℂ] W) (s : Bool) {f : Mat n → V} (hf : ContDiff
     by_cases hab : a = b <;> simp [Epow, hab]
   | succ m ih =>
     intro a b x hx
+
     simp only [Epow, Finset.sum_apply, map_sum]
     refine Finset.sum_congr rfl fun c _ => ?_
     rw [GlobalTheory.CompanionTheory.WaveAll.Eu_congr GlobalTheory.CompanionTheory.WaveAll.isOpen_GLs (ih c b) s a c hx]
@@ -204,6 +255,7 @@ theorem Epow_clm (T : V →L[ℂ] W) (s : Bool) {f : Mat n → V} (hf : ContDiff
 
 theorem gel_clm (T : V →L[ℂ] W) (s : Bool) (m : ℕ) {f : Mat n → V} (hf : ContDiffOn ℝ ∞ f (GLs n)) {x : Mat n}
     (hx : x ∈ GLs n) : gel s m (fun x => T (f x)) x = T (gel s m f x) := by
+
   simp only [gel, Finset.sum_apply, map_sum]
   exact Finset.sum_congr rfl fun a _ => Epow_clm T s hf m a a hx
 

@@ -1,4 +1,54 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.TheoremPCompactOfTransportSite
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.LevTransportHer
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.ThmPActualCptOfOuter
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.ThmPActualCptOfStepParts2
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.ContinuousExtensionOfFourierDecay
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.DerivCombCongr
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.LevelSquareIntegrableOfTransport
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.ResidueSquareIntegrablePositiveRank
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MeasureTheory Filter Topology
 open scoped Matrix
@@ -219,28 +269,22 @@ theorem stepDensCptAll_of_levT (hT : Formalism.FourierDecayAlt.P.PTie.LevTranspo
   unfold ph RRform
   rw [form_tr μ l.castSucc l.succ l'.succ hjl1 c (Function.update c l t) hupd μi T κ hκ hpair, eX, eY, mul_left_comm]
   congr 3
+  change shiftV l.castSucc (Function.update c l t) =
+    Function.update (shiftV l.castSucc c) l' t
   funext m
-  simp only [shiftV, Function.update]
-  split_ifs with hA hB hB
-  · subst hB
-    first | (simp only [eq_rec_constant]; done) | (simp only [eq_rec_constant]; rfl) | rfl | simp
-  · exfalso
-    apply hB
+  by_cases hm : m = l'
+  · subst m
+    simp only [shiftV, e0, Function.update_self]
+  · rw [Function.update_of_ne hm]
+    unfold shiftV
+    rw [Function.update_of_ne]
+    intro he
+    apply hm
     apply Fin.ext
-    have := congrArg Fin.val hA
-    change m.val + (l.castSucc : Fin (P.r + 1)).val = l.val at this
-    have hcs := Fin.val_castSucc l
+    have hv := congrArg Fin.val he
+    simp only [Fin.val_castSucc] at hv
     rw [hl'v]
     omega
-  · exfalso
-    apply hA
-    apply Fin.ext
-    have := congrArg Fin.val hB
-    rw [hl'v] at this
-    change m.val + (l.castSucc : Fin (P.r + 1)).val = l.val
-    have hcs := Fin.val_castSucc l
-    omega
-  · rfl
 
 theorem theorem_P_compact_of_step_density (hT : Formalism.FourierDecayAlt.P.PTie.LevTransportHer) (h0 : StepExp0) : ThmPActualCpt :=
   thmPActualCpt_of_outer (stepDensCptAll_of_levT hT h0) (formIntOuterCpt_of_levT hT)

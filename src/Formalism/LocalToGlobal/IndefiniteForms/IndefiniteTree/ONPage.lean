@@ -1,5 +1,51 @@
-import Mathlib
-import Formalism.LocalToGlobal.IndefiniteForms.IndefiniteTree.ExampleSatisfiesConditionsAtFive
+module
+
+public import Formalism.LocalToGlobal.IndefiniteForms.IndefiniteTree.ExampleSatisfiesConditionsAtFive
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+public import Mathlib.Analysis.Real.Pi.Bounds
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Module NumberField IsDedekindDomain
 
@@ -24,13 +70,9 @@ def wpp (O : OnObj S P c) : ℝ := aa O / Xp O / (O.x * nH O)
 
 def dl2 (O : OnObj S P c) : ℝ := (O.T2 : ℝ) / nH O
 
-def x0 (ε : ℝ) : ℝ := (2 / ε) ^ (2 / ε)
-
 def ConstC (c : OnConst) : Prop := 1 ≤ c.C
 
 def ConstBad (c : OnConst) : Prop := 14 ≤ c.Cb1 ∧ 66 * c.C + 4 ≤ c.Cb2
-
-def XLarge (O : OnObj S P c) (C2 : ℝ) : Prop := 3 ≤ O.x ∧ 3 * c.C * C2 ≤ O.x ∧ x0 O.eps ≤ O.x
 
 def ExponentSmallBound (O : OnObj S P c) : Prop := 0 < O.eps ∧ O.eps < 1 / 52
 
@@ -314,7 +356,7 @@ theorem two_cube_le (y n : ℝ) (hy : 0 ≤ y) (hn : 4 ≤ n) : 2 * y ^ 3 ≤ Re
   have : Real.exp y * 4 ≤ Real.exp y * n := mul_le_mul_of_nonneg_left hn he.le
   linarith
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem leafSizes_of_page (O : OnObj S P c) (C2 : ℝ) (hC2 : 0 ≤ C2) (hC : 1 ≤ c.C)
     (hx : 3 ≤ O.x) (hxC : 3 * c.C * C2 ≤ O.x)
@@ -481,67 +523,7 @@ def PageLeaves (O : OnObj S P c) (C2 : ℝ) : Prop :=
     EtaPowerBound O ∧ LeafSign O ∧ NodeCountBound O ∧ LogPrimeProductBound O ∧ ProductWithRatioBound O ∧ ConductorCongruentPrimePair O ∧ SquaredTimeBound O ∧ PowerTwelveBound O ∧
     DiscriminantDegreeBound O ∧ ProductLowerBoundTwist O ∧ TwistDensityBounds O ∧ TimeDiscriminantBound O C2 ∧ TieVd O ∧ SecondRatioDefinition O ∧ TieBp O ∧ TieNc O
 
-abbrev pageC : OnConst := ⟨1, 14, 70⟩
-
-def px : ℝ := (10 : ℝ) ^ (1200 : ℕ)
-
-def pe : ℝ := 1 / 100
-
 variable (K)
-
-abbrev pageO (v0 : InfinitePlace K) (Tw0 : Finset (HeightOneSpectrum (𝓞 K))) : OnObj (exampleIndefiniteData K v0 Tw0 0) Unit pageC where
-  nZ := fun _ => 1
-  ρ := fun _ => 1
-  U := ⊤
-  ψ := fun _ => 1
-  V₀ := fun _ => ⊤
-  e := fun _ => LinearMap.id
-  Ms := fun _ => stdLat K 1
-  φ := fun _ => LinearMap.id
-  Th1 := fun _ _ => stdLat K 1
-  Th := fun _ _ => stdLat K 1
-  ThK := fun _ _ => stdLat K 1
-  Th0 := fun _ _ => stdLat K 1
-  ThJ := fun _ _ => stdLat K 1
-  X₃ := fun _ _ => stdLat K 1
-  σ := fun _ _ => 1
-  a := fun _ _ => 1
-  E := fun _ _ => 0
-  r1 := fun _ _ => 0
-  r2 := fun _ _ => 0
-  pde := 0
-  ε0 := fun _ _ => 0
-  nX := fun _ _ => 1
-  θ' := fun _ _ => LinearMap.id
-  eX := fun _ _ => LinearMap.id
-  pr := fun _ _ => LinearMap.id
-  Mt := fun _ _ => stdLat K 1
-  nnK := fun _ => 1
-  Jp := fun _ _ => 0
-  k := 47
-  m := 44
-  f := 256
-  bp := px * Real.exp (px ^ pe) / Real.exp (px ^ (pe / 3))
-  Sc := 0
-  eta := 0
-  T := px * 100000
-  DF := 16
-  X2 := px * Real.exp (px ^ pe) / (px * Real.exp (px ^ pe) / Real.exp (px ^ (pe / 3)) / (px * (256 / 2)))
-  x := px
-  eps := pe
-  vd := 8
-  rr := 90
-  de2 := 1
-  Nc := ((1 : ℕ) : ℝ) / (256 / 2) * 47 * Real.exp (px ^ pe) * px ^ (2 * pe) / (256 / 2)
-  wt := fun _ => 0
-  th := fun _ => 0
-  ad := fun _ => 0
-  T2 := 1
-  g1 := 118273
-  g2 := 275969
-  q1 := 11
-  dd := 7
-  sm := {2}
 
 variable {K}
 

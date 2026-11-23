@@ -1,18 +1,68 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.UniformisationConclusion
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.HeckeKer
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsHolPeriods
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ThetaUnifAV
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.UnifUniqSt
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IsDiscreteValuationRingIntegralClosurePadicInt
-import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.BoundedOnFramesIffIntegralOnFrames
+module
+
+public import Mathlib.NumberTheory.Padics.Complex
+public import Mathlib.NumberTheory.Padics.PadicIntegers
+public import Mathlib.RingTheory.SimpleRing.Principal
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IsDiscreteValuationRingIntegralClosurePadicInt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.Padics.RingHoms
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.AdicCompletion.RingHom
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.MetricSpace.Ultra.TotallySeparated
+public import Mathlib.Data.ZMod.QuotientRing
+
+@[expose] public section
 
 open IsLocalRing
 
 namespace GlobalTheory
 
-open IsLocalRing in
 
+open IsLocalRing in
 theorem _root_.GlobalTheory.nonempty_padicInt_ringHom_of_isAdicComplete {V : Type*} [CommRing V] (I : Ideal V)
     [IsAdicComplete I V] (p : ℕ) [Fact p.Prime] (hp : (p : V) ∈ I) : Nonempty (ℤ_[p] →+* V) := by
   have hzero : ∀ n : ℕ, ∀ a ∈ Ideal.span {((p ^ n : ℕ) : ℤ)}, (Int.castRingHom (V ⧸ I ^ n)) a = 0 := by
@@ -35,8 +85,8 @@ theorem _root_.GlobalTheory.nonempty_padicInt_ringHom_of_isAdicComplete {V : Typ
   rw [← PadicInt.zmod_cast_comp_toZModPow m n hle]
   exact hx
 
-open IsLocalRing in
 
+open IsLocalRing in
 theorem _root_.GlobalTheory.exists_padicInt_algebra_finite (V : Type*) [CommRing V] [IsDomain V]
     [IsDiscreteValuationRing V] [IsAdicComplete (maximalIdeal V) V] [CharZero V]
     [Finite (ResidueField V)] :
@@ -71,8 +121,8 @@ theorem _root_.GlobalTheory.exists_padicInt_algebra_finite (V : Type*) [CommRing
     rw [himage]
     exact hmem
 
-open IsLocalRing in
 
+open IsLocalRing in
 theorem _root_.GlobalTheory.exists_ringEquiv_integralClosure_padicInt (V K : Type*) [CommRing V] [IsDomain V]
     [IsDiscreteValuationRing V] [IsAdicComplete (maximalIdeal V) V] [Field K] [CharZero K]
     [Algebra V K] [IsFractionRing V K] [Finite (ResidueField V)] :
@@ -242,8 +292,8 @@ private theorem isAdicComplete_integralClosure_padicInt (p : ℕ) [Fact p.Prime]
     have hfin := le_of_tendsto hlim' hbound
     simpa [nm, g, L] using hfin
 
-open IsLocalRing in
 
+open IsLocalRing in
 theorem _root_.GlobalTheory.completeDVR_eq_integralClosure_padicInt :
     (∀ (V K : Type) [CommRing V] [IsDomain V] [IsDiscreteValuationRing V] [IsAdicComplete (maximalIdeal V) V] [Field K] [CharZero K] [Algebra V K] [IsFractionRing V K], Finite (ResidueField V) → ∃ (p : ℕ) (_ : Fact p.Prime) (K₀ : IntermediateField ℚ_[p] (PadicAlgCl p)) (e : K ≃+* K₀) (e₀ : V ≃+* integralClosure ℤ_[p] K₀), FiniteDimensional ℚ_[p] K₀ ∧ ∀ x, e (algebraMap V K x) = ((e₀ x : integralClosure ℤ_[p] K₀) : K₀)) ∧ ∀ (p : ℕ) [Fact p.Prime] (K₀ K' : IntermediateField ℚ_[p] (PadicAlgCl p)) (h : K₀ ≤ K'), FiniteDimensional ℚ_[p] K' → IsDiscreteValuationRing (integralClosure ℤ_[p] K') ∧ IsFractionRing (integralClosure ℤ_[p] K') K' ∧ (∀ [IsLocalRing (integralClosure ℤ_[p] K')], IsAdicComplete (maximalIdeal (integralClosure ℤ_[p] K')) (integralClosure ℤ_[p] K')) ∧ ∃ f : integralClosure ℤ_[p] K₀ →+* integralClosure ℤ_[p] K', f.Finite ∧ IsLocalHom f ∧ ∀ x, ((f x : integralClosure ℤ_[p] K') : K') = IntermediateField.inclusion h x := by
   refine ⟨fun V K _ _ _ _ _ _ _ _ hres => ?_, fun p _ K₀ K' h hK' => ?_⟩

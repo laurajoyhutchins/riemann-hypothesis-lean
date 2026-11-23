@@ -1,7 +1,53 @@
-import Mathlib
-import Formalism.LocalToGlobal.GlobalTheory.GL3.PLinkThIndep
-import Formalism.LocalToGlobal.GlobalTheory.GL3.PLinkThU
-import Formalism.GL3MeanSquares.HookFormulaTorsion.SquareEqDiagOfQuadraticEven
+module
+
+public import Formalism.LocalToGlobal.GlobalTheory.GL3.PLinkThU
+public import Formalism.GL3MeanSquares.HookFormulaTorsion.SquareEqDiagOfQuadraticEven
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.GroupTheory.FiniteAbelian.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -17,6 +63,7 @@ theorem Hf_add_left (T : Tor D) (x x' y : VC D N N') :
 
 theorem Hf_herm (T : Tor D) (x y : VC D N N') :
     Hf D T y x = starRingEnd ℂ (Hf D T x y) := by
+
   simp only [Hf, map_div₀, map_sum, map_mul, Complex.conj_conj, Complex.conj_ofReal]
   congr 1
   refine Finset.sum_congr rfl fun τ _ => Finset.sum_congr rfl fun i _ =>
@@ -81,13 +128,6 @@ theorem term_indep (T : Tor D) {La₁ La₂ : AddSubgroup (VC D N N')} (hS : Sem
     simp
   rw [hb]
   exact rep_shift T hS hG a.2 hab (-a + b).2 z
-
-theorem term_out (T : Tor D) {La₁ La₂ : AddSubgroup (VC D N N')} (hS : SemiChar T La₂)
-    {G : VC D N N' → ℂ} (hG : G ∈ ThSp D T La₁) (a : La₂) (z : VC D N N') :
-    al D T ((Quotient.out (a : La₂ ⧸ La₁.addSubgroupOf La₂) : La₂) : VC D N N') *
-        U D T ((Quotient.out (a : La₂ ⧸ La₁.addSubgroupOf La₂) : La₂) : VC D N N') G z =
-      al D T (a : VC D N N') * U D T (a : VC D N N') G z :=
-  term_indep T hS hG a _ (QuotientAddGroup.out_eq' _).symm z
 
 end Formalism.L2.GlobalTheoryTheory.IntegralLatticeDensity.IO
 
@@ -195,7 +235,7 @@ theorem sqrt_d_pos (D : D7) : 0 < Real.sqrt D.host.d :=
 
 theorem Hf_add_right (T : Tor D) (x y y' : VC D N N') :
     Hf D T x (y + y') = Hf D T x y + Hf D T x y' := by
-  rw [Hf_herm T (y + y') x, Hf_add_left, map_add, ← Hf_herm, ← Hf_herm]
+  rw [Hf_herm T (y + y') x, Hf_add_left, map_add (f := _), ← Hf_herm, ← Hf_herm]
 
 theorem Hf_self_im (T : Tor D) (x : VC D N N') : (Hf D T x x).im = 0 := by
   have h := congrArg Complex.im (Hf_herm T x x)

@@ -1,19 +1,65 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsSncModel
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.BlowupProjections.BlowupProjStatement
-import Development.AutomorphicSpectrum.Definitions.DivisibilityTowers.Proportional
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterAlgRes
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterPCProof
-import ReciprocityTheory.AnalyticForms.RegularLocalRings.LocTransfer
-import ReciprocityTheory.AnalyticForms.RegularLocalRings.Immersion
+module
+
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsSncModel
+public import ReciprocityTheory.AnalyticForms.RegularLocalRings.IsOpenAlt
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterPC
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.SncResolutionBoundaryNormalCrossingStatement
+import Development.AutomorphicSpectrum.Proofs.MetricProofs.SncResolutionCompactEmbedded
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.SncResolutionCoverAndCone
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.SncResolutionLocalChartPolynomial
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.SncResolutionRegularLocalRingStatement
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.SncResolutionTransitionPolynomial
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import ReciprocityTheory.AnalyticForms.RegularLocalRings.Immersion
+public import ReciprocityTheory.AnalyticForms.RegularLocalRings.SNCstep
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterAlgRes
 import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterMinor
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.FiniteMinimalPrimes
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.SncResolutionCompactEmbeddedStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.SncResolutionTransitionPolynomialStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.SncResolutionCoverAndConeStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.SncResolutionLocalChartPolynomialStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.SncResolutionRegularLocalRingStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.SncResolutionBoundaryNormalCrossingStatement
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterPCProof
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.FiniteMinimalPrimes
+public import ReciprocityTheory.AnalyticForms.RegularLocalRings.ExistsAtlas
+
+@[expose] public section
 
 namespace GlobalTheory.CompanionTheory.Ar.Cmp.SncRes
 
@@ -35,7 +81,7 @@ theorem not_mem_conePts_top (z : (Σ k, ι k) → ℂ) :
 
 theorem exists_isEmbedded_of_algRes {P J : Ideal (MRing ι)} {e : ℕ} (hJ : IsMultiHomogIdeal J)
     (hJP : ¬ J ≤ P) (hPC : ∀ f : MRing ι, map (Int.castRingHom ℂ) f ∈ pC P → f ∈ P)
-    (R : ReciprocityTheory.AnForm.R.AlgRes ι (pC P) (pC J) e)
+    (R : ReciprocityTheory.AnForm.R.AlgRes (ι := ι) (pC P) (pC J) e)
     (hsurj : ∀ z ∈ ReciprocityTheory.AnForm.R.conePts (pC P), ∃ i, ∃ x ∈ R.src i,
       ReciprocityTheory.AnForm.R.SameOrbit (fun q => eval (R.coord i x) (R.lift i q)) z)
     (hinj : ∀ i j, ∀ x ∈ R.src i, ∀ x' ∈ R.src j,
@@ -50,7 +96,7 @@ theorem exists_isEmbedded_of_algRes {P J : Ideal (MRing ι)} {e : ℕ} (hJ : IsM
             eval (ReciprocityTheory.AnForm.R.affCoord p fun q => eval (R.coord i y) (R.lift i q)) (F l)) :
     ∃ R' : AnLogRes P J e, IsEmbedded R'.A P R'.U R'.lift := by
   classical
-  let R0 : ReciprocityTheory.AnForm.R.AlgRes ι (pC P) ⊤ e :=
+  let R0 : ReciprocityTheory.AnForm.R.AlgRes (ι := ι) (pC P) ⊤ e :=
     { M := R.M
       n := R.n
       amb := R.amb
@@ -164,14 +210,14 @@ theorem isEmbedded_of_isSncModel : ∀ (K : Type) [Fintype K] (ι : K → Type) 
   classical
   have hPh : ReciprocityTheory.AnForm.R.IsMultiHomogIdeal (pC (mCoordIdeal y)) := isMultiHomogIdeal_pC hP.2.1.2.1
   have hDh : ReciprocityTheory.AnForm.R.IsMultiHomogIdeal (pC J) := isMultiHomogIdeal_pC hJ
-  obtain ⟨hcpt, hsrc⟩ := GlobalTheory.T.snc_resolution_compact_embedded K ι _ hPh
-  obtain ⟨himage, htrans⟩ := GlobalTheory.T.snc_resolution_transition_polynomial K ι _ hPh
-  obtain ⟨hcover, hliftmem, hcompat, hsurj, hinj, hzero⟩ := GlobalTheory.T.snc_resolution_cover_and_cone K ι _ _ hPh hDh
-  have hinv := GlobalTheory.T.snc_resolution_local_chart_polynomial K ι _ hPh
+  obtain ⟨hcpt, hsrc⟩ := Top.compact_open_embedding K ι _ hPh
+  obtain ⟨himage, htrans⟩ := chart_image_and_trans K ι _ hPh
+  obtain ⟨hcover, hliftmem, hcompat, hsurj, hinj, hzero⟩ := chart_lifts_package K ι _ _ hPh hDh
+  have hinv := ChartInv.chart_coord_ratio K ι _ hPh
   have hreg := GlobalTheory.T.snc_resolution_regular_local_ring K ι Ω y e J hP hsnc
   have hsc := GlobalTheory.T.snc_resolution_boundary_normal_crossing K ι Ω y e J hP hJ hJP hsnc
   let E := Fintype.equivFin ((k : K) → ι k)
-  let R : ReciprocityTheory.AnForm.R.AlgRes ι (pC (mCoordIdeal y)) (pC J) e :=
+  let R : ReciprocityTheory.AnForm.R.AlgRes (ι := ι) (pC (mCoordIdeal y)) (pC J) e :=
     { M := Pts (pC (mCoordIdeal y))
       compact := hcpt
       n := Fintype.card ((k : K) → ι k)

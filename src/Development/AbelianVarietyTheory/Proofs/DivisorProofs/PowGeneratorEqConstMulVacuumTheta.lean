@@ -1,14 +1,76 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.GenReads
-import Formalism.SharpRestriction.Divisibility.GeneratorPowers.ThExprUniqOfChartIndep2
-import Formalism.LocalToGlobal.ProjectiveLattices.ThProps
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.RdUEqConstMulClsSum
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.ReadingEqThP
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.ExistsLetterRowWeightDictionary
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.FockHxDifferentiable
-import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.ExistsIsNabUncond
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AnalyticFibreDescriptionUniqueStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsLevelOneThetaNeZeroOnIdealHalfLatticeStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.GenReads
+public import Formalism.SharpRestriction.Divisibility.GeneratorPowers.ThExprUniqOfChartIndep2
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.ContinuousRmulPair
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.ThetaRuleMemSec
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.ThetaValueExistsUniqueOfChartIndependence
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AnalyticFibreDescriptionUniqueStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsLevelOneThetaNeZeroOnIdealHalfLatticeStatement
+public import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.ExistsIsNabUncond
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.LevelMapFibreSimplyTransitive
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.AnalyticFibreUnitFrameUniformisation
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.DualHalfLevelMarkingExistsAndMatch
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.ExistsLetterRowWeightDictionary
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.ExistsLiftMarked
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.ExistsSymplOfSelfDual
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.FockHxDifferentiable
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.FramedPointGeneratorIsThetaLevelOne
+import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.HMatMulVecPerCrd
+import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.HermitianFormAtFrameLaws
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.ProdLevelOneThetaEqVacuumTheta
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.RdUEqConstMulClsSum
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.ReadingEqThP
+import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.ReadsExistsUniqueTheta
+import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.ThetaSeriesTestFunctionHolomorphicWeight
+import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.ThetaValueStandardLatticeEqClassicalTheta
+import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.UniformisationComponentLatticesMarkings
+import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.AllSixAbelianSchemeLawsHold
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Std.Tactic.BVDecide.Normalize.Prop
+import Formalism.LocalToGlobal.IndefiniteReal.ExistsChosenExtremalVector
+import Formalism.LocalToGlobal.IndefiniteReal.LinksDefs
+
+@[expose] public section
 
 namespace GlobalTheory.AdTh.GenConst
 
@@ -80,7 +142,7 @@ theorem exists_anFib_trans (π : Fin g ≃ Fin g) (A : AnFib X bas idx e x L y) 
   have hT : ∀ z, T z = z ∘ π.symm := fun _ => rfl
   have hp : ∀ v, T (pv X (π.trans idx) x v) = pv X idx x v := pv_trans π x
   refine ⟨{ ex := fun z => A.ex (T z)
-            ex_add := fun z w => by rw [map_add, A.ex_add]
+            ex_add := fun z w => by rw [map_add (f := _), A.ex_add]
             ex_onto := A.ex_onto.comp T.surjective
             ex_ker := fun z => by
               rw [A.ex_ker]
@@ -101,7 +163,7 @@ theorem exists_anFib_trans (π : Fin g ≃ Fin g) (A : AnFib X bas idx e x L y) 
             χ := A.χ
             χ_norm := A.χ_norm
             fr_per := fun v hv j z hz => by
-              rw [hx_trans, hx_trans, pv_trans, map_add, hp]
+              rw [hx_trans, hx_trans, pv_trans, map_add (f := _), hp]
               exact A.fr_per v hv j _ hz }, fun mk hmk a ha => ?_, fun ϑ h j z => h j (T z)⟩
   · rw [(A.der ℓ).2 U h f]
     have := T.comp_right_fderiv (f := fun z => valAt' (A.ex z).left U f) (x := 0)
@@ -192,7 +254,7 @@ theorem exists_root_ne_zero {X : Data E r} {bas : (Fin g ⊕ Fin g → ℤ) ≃�
   obtain ⟨b₁, -, hb₁⟩ := MarkLift.modN_of_mem_half l hs' (Submodule.sub_mem _ ha' ha)
   obtain ⟨b₂, hb₂⟩ := MarkLift.modN_of_mem_bar l hs'' ((Submodule.Quotient.eq _).1 hq)
   have e₀ : mk a' = mk a + l.M • mk (b₁ + b₂) := by
-    rw [← map_nsmul, smul_add, ← hb₁, ← hb₂, ← add_smul, hss, one_smul, ← map_add, add_sub_cancel]
+    rw [← map_nsmul, smul_add, ← hb₁, ← hb₂, ← add_smul, hss, one_smul, ← map_add (f := _), add_sub_cancel]
   set y := Y (fun _ => Submodule.Quotient.mk a) b
   have hv : y - (l.M : E)⁻¹ • mk a' + mk (b₁ + b₂) - t ∈ L := L.sub_mem (L.add_mem hy (hmk.mem _)) ht
   have e₁ : (l.M : E)⁻¹ • (mk a + l.M • t) + (y - (l.M : E)⁻¹ • mk a' + mk (b₁ + b₂) - t) = y := by

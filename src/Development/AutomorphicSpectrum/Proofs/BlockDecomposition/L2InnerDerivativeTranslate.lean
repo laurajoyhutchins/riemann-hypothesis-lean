@@ -1,6 +1,50 @@
-import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.CuspDiscreteDecompositionGL
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.NotIsFinitePartOfBot
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.AestronglyMeasurableQuotMeasureIffLift
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.T2SpaceAdelicGeneralLinearGroupNumberField
+import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.BaseChangeDefiniteUnitary
+import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.IsNormalisedOfIsDiscrete
+import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.IsCompactOperatorOfIsHilbertSchmidt
+
+@[expose] public section
 
 open NumberField MeasureTheory Topology Matrix GlobalTheory.AutomorphicL2Unitary GlobalTheory.DiscreteSum GlobalTheory.OpTrace GlobalTheory.UnitaryBC GlobalTheory.DiscSpec GlobalTheory.CuspRep GlobalTheory.CuspRep.CuspidalL2GL
 
@@ -65,23 +109,28 @@ theorem integrable_pair [μ.IsMulRightInvariant] [LocallyCompactSpace G] [IsFini
   set C : ENNReal := eLpNorm u 2 (GlobalTheory.AutomorphicL2Unitary.quotMeasure Γ μ) * eLpNorm (descend Γ ψ) 2 (GlobalTheory.AutomorphicL2Unitary.quotMeasure Γ μ) with hC
   have hb : ∀ s, ∫⁻ q, ‖Function.uncurry (fun (s : ℝ) (q : GlobalTheory.AutomorphicL2Unitary.Quot Γ) => conj (u q) * ψ (sec Γ q * c s)) (s, q)‖ₑ
       ∂GlobalTheory.AutomorphicL2Unitary.quotMeasure Γ μ ≤ C := fun s => by
-    have h1 := eLpNorm_le_eLpNorm_mul_eLpNorm_of_nnnorm (μ := GlobalTheory.AutomorphicL2Unitary.quotMeasure Γ μ) (p := 2) (q := 2) (r := 1)
-      (Lp.aestronglyMeasurable u) (((hψ.mul_right (c s)).2).1) (fun a b => conj a * b) 1
+    have h1 := eLpNorm_le_eLpNorm_mul_eLpNorm (μ := GlobalTheory.AutomorphicL2Unitary.quotMeasure Γ μ) (p := 2) (q := 2) (r := 1)
+      (fun a b : ℂ => conj a * b) 1 (by fun_prop)
+      (Lp.aestronglyMeasurable u) ((hψ.mul_right (c s)).2.aestronglyMeasurable)
       (Filter.Eventually.of_forall fun q => by simp)
     have h2 : eLpNorm (descend Γ fun x => ψ (x * c s)) 2 (GlobalTheory.AutomorphicL2Unitary.quotMeasure Γ μ) = eLpNorm (descend Γ ψ) 2 (GlobalTheory.AutomorphicL2Unitary.quotMeasure Γ μ) := by
       have e : descend Γ (fun x => ψ (x * c s)) = descend Γ ψ ∘ rmul Γ (c s) := by
         funext q
         rw [descend_eq_sec (hψ.1.mul_right (c s)), ← sec_mul_eq hψ.1]
       rw [e]
-      exact eLpNorm_comp_measurePreserving hψ.2.1 (measurePreserving_rmul (c s))
-    rw [eLpNorm_one_eq_lintegral_enorm, h2] at h1
+      exact eLpNorm_comp_measurePreserving hψ.2.aestronglyMeasurable (measurePreserving_rmul (c s))
+    have hm₁ : AEStronglyMeasurable (fun q => conj (u q) * descend Γ (fun x => ψ (x * c s)) q)
+        (GlobalTheory.AutomorphicL2Unitary.quotMeasure Γ μ) :=
+      (Complex.continuous_conj.comp_aestronglyMeasurable (Lp.aestronglyMeasurable u)).mul
+        (hψ.mul_right (c s)).2.aestronglyMeasurable
+    rw [eLpNorm_one_eq_lintegral_eNorm hm₁, h2] at h1
     simp only [ENNReal.coe_one, one_mul] at h1
     refine le_trans (le_of_eq ?_) h1
     refine lintegral_congr fun q => ?_
     simp only [Function.uncurry, descend_eq_sec (hψ.1.mul_right (c s))]
   refine lt_of_le_of_lt (lintegral_mono hb) ?_
   rw [lintegral_const, Measure.restrict_apply_univ]
-  refine ENNReal.mul_lt_top (ENNReal.mul_lt_top (Lp.memLp u).2 hψ.2.2) ?_
+  refine ENNReal.mul_lt_top (ENNReal.mul_lt_top (Lp.memLp u) hψ.2) ?_
   simp [Set.uIoc, Real.volume_Ioc]
 
 variable [μ.IsMulRightInvariant] [LocallyCompactSpace G] [IsFiniteMeasureOnCompacts μ]

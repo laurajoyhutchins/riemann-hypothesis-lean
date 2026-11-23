@@ -1,4 +1,46 @@
-import Formalism.LocalToGlobal.TorsionIntegrality.WeierstrassTwoTorsion.CompInv
+module
+
+public import Formalism.LocalToGlobal.TorsionIntegrality.WeierstrassTwoTorsion.CompInv
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open PowerSeries
 
@@ -7,29 +49,6 @@ universe u v
 noncomputable section
 
 namespace Formalism.L2.Th1.A
-
-def DLCoeff : Prop :=
-  ∀ (R : Type u) [CommRing R] (f : LaurentSeries R) (n : ℤ),
-    (dL f).coeff n = ((n + 1 : ℤ) : R) * f.coeff (n + 1)
-
-def DLLeibniz : Prop :=
-  ∀ (R : Type u) [CommRing R] (f g : LaurentSeries R), dL (f * g) = f * dL g + g * dL f
-
-def DLCoe : Prop :=
-  ∀ (R : Type u) [CommRing R] (f : R⟦X⟧), dL (toL f) = toL (derivative R f)
-
-def UPowRules : Prop :=
-  ∀ (R : Type u) [CommRing R],
-    (uPow 0 : LaurentSeries R) = 1 ∧ (uPow 1 : LaurentSeries R) = toL X ∧
-    (∀ m n : ℤ, (uPow (m + n) : LaurentSeries R) = uPow m * uPow n) ∧
-    (∀ n : ℤ, dL (uPow n : LaurentSeries R) = HahnSeries.C ((n : ℤ) : R) * uPow (n - 1)) ∧
-    (∀ r : R, dL (HahnSeries.C r : LaurentSeries R) = 0) ∧
-    (∀ r : R, toL (C r) = (HahnSeries.C r : LaurentSeries R))
-
-def ToLInjective : Prop :=
-  ∀ (R : Type u) [CommRing R],
-    Function.Injective (toL : R⟦X⟧ → LaurentSeries R) ∧
-    ∀ (n : ℤ) (f g : LaurentSeries R), uPow n * f = uPow n * g → f = g
 
 def CompInvSpec : Prop :=
   ∀ (R : Type u) [CommRing R] (s : R⟦X⟧), constantCoeff s = 0 → IsUnit (coeff 1 s) →
@@ -45,7 +64,7 @@ def CompInvMap : Prop :=
 
 def IntegSpec : Prop :=
   ∀ (K : Type u) [Field K] [CharZero K] (f : K⟦X⟧),
-    constantCoeff (integ f) = 0 ∧ derivative K (integ f) = f ∧
-    ∀ g : K⟦X⟧, constantCoeff g = 0 → derivative K g = f → g = integ f
+    constantCoeff (integ f) = 0 ∧ derivative (integ f) = f ∧
+    ∀ g : K⟦X⟧, constantCoeff g = 0 → derivative g = f → g = integ f
 
 end Formalism.L2.Th1.A

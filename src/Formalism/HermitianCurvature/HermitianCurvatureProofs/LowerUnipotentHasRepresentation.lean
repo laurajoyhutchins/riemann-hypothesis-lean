@@ -1,8 +1,56 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutJAPRCoreCut
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutJAPRDatumConst
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.SumDualVectorEqZeta
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutJAPRCoreCut
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutJAPRDatumConst
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.SumDualVectorEqZeta
 import Formalism.HermitianCurvature.HermitianCurvatureProofs.ActualAdjointnessFromHermitian
 import Formalism.HermitianCurvature.HermitianCurvatureProofs.NFRadRedA
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Formalism.REAL Formalism.QuantumDeterminants Formalism.FourierDecayAlt Formalism.FourierDecayAlt.Q NumberField
 open scoped ComplexConjugate Matrix
@@ -152,7 +200,7 @@ theorem annulus_polynomial_sigma (TT : ℝ) : AnnulusPolynomial TT (fun ζ => si
 theorem annulus_polynomial_add {TT : ℝ} {f g : ℂ → ℂ} (hf : AnnulusPolynomial TT f) (hg : AnnulusPolynomial TT g) : AnnulusPolynomial TT (fun ζ => f ζ + g ζ) := by
   obtain ⟨p, hp⟩ := hf
   obtain ⟨q, hq⟩ := hg
-  exact ⟨p + q, fun ζ hζ => by rw [map_add, ← hp ζ hζ, ← hq ζ hζ]⟩
+  exact ⟨p + q, fun ζ hζ => by rw [map_add (f := _), ← hp ζ hζ, ← hq ζ hζ]⟩
 
 theorem annulus_polynomial_mul {TT : ℝ} {f g : ℂ → ℂ} (hf : AnnulusPolynomial TT f) (hg : AnnulusPolynomial TT g) : AnnulusPolynomial TT (fun ζ => f ζ * g ζ) := by
   obtain ⟨p, hp⟩ := hf
@@ -298,7 +346,7 @@ theorem lower_unipotent_has_representation (hk : 1 ≤ k) (hz : inWb k r z) (hz'
     HasRep k r z z' (fun _ _ _ F ζ => Q.tL k r z z' (Fin.last r) Y 1 0 F (mu0 k r z z' ζ)) := by
   have hfv : fvec k r z (Fin.last r) = z := by
     unfold fvec
-    rw [dif_neg (by simp)]
+    rw [dite_eq_right (by simp)]
   refine hr_congr (hr_sum Finset.univ
     (fun i : Ix k r => fun E _ _ F ζ => ∑ j ∈ (Finset.univ : Finset (Ix k r)),
       (-((-1 : ℂ) ^ ((i : ℕ) + (j : ℕ)) * xbv k r z' (Fin.last r) i) * ((mu0 k r z z' ζ)⁻¹ *ᵥ z) (pL k r j)) •

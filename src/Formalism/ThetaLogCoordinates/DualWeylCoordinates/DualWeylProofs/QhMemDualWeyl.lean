@@ -1,5 +1,56 @@
-import Formalism.ThetaLogCoordinates.DualWeylCoordinates.DualWeylProofs.QhDetZpowMem
-import Formalism.GradedWeylDivisibility.FinalC
+module
+
+public import Formalism.GradedWeylDivisibility.StatementA
+public import Formalism.ThetaLogCoordinates.DualWeylCoordinates.DefsMod
+public import Formalism.ThetaLogCoordinates.DualWeylCoordinates.DualWeylProofs.QhDetZpowMem
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.Interval.Finset.Box
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -72,7 +123,7 @@ lemma qh_phi_mono (d : Fin n × Fin n →₀ ℕ) (r : R) :
   rw [e, map_smul, qh_phi_mono1, smul_monomial]
 
 lemma qh_phi_coeff (Q : MvPolynomial (Fin n × Fin n) R) (d0 : Fin n × Fin n →₀ ℕ) :
-    coeff d0 (coeff (Finsupp.mapDomain Prod.snd d0) (qhPhi R n Q)) = coeff d0 Q := by
+    AddMonoidAlgebra.coeff (AddMonoidAlgebra.coeff (qhPhi R n Q) (Finsupp.mapDomain Prod.snd d0)) d0 = AddMonoidAlgebra.coeff Q d0 := by
   induction Q using MvPolynomial.induction_on' with
   | monomial d r =>
     rw [qh_phi_mono]
@@ -82,13 +133,13 @@ lemma qh_phi_coeff (Q : MvPolynomial (Fin n × Fin n) R) (d0 : Fin n × Fin n �
       split_ifs
       · rw [coeff_monomial, if_neg h]
       · simp
-  | add p q hp hq => rw [map_add, coeff_add, coeff_add, coeff_add, hp, hq]
+  | add p q hp hq => rw [map_add (f := _), MvPolynomial.coeff_add, MvPolynomial.coeff_add, MvPolynomial.coeff_add, hp, hq]
 
 lemma qh_weight (d : Fin n × Fin n →₀ ℕ) :
     Finsupp.weight (Formalism.GradedWeylDivisibility.colW n n) d = ⇑(Finsupp.mapDomain Prod.snd d) := by
   induction d using Finsupp.induction_linear with
   | zero => simp
-  | add d1 d2 h1 h2 => rw [map_add, h1, h2, Finsupp.mapDomain_add, Finsupp.coe_add]
+  | add d1 d2 h1 h2 => rw [map_add (f := _), h1, h2, Finsupp.mapDomain_add, Finsupp.coe_add]
   | single v e =>
     rw [Finsupp.weight_single, Finsupp.mapDomain_single]
     funext a
@@ -122,10 +173,12 @@ lemma qh_homog [IsDomain R] (Q : MvPolynomial (Fin n × Fin n) R) (ν : Fin n �
   rw [qh_weight]
   by_contra hne
   apply hd
-  rw [← qh_phi_coeff, h, coeff_monomial, if_neg, coeff_zero]
-  intro heq
-  apply hne
-  rw [← heq]; rfl
+  have hne' : Finsupp.equivFunOnFinite.symm ν ≠ Finsupp.mapDomain Prod.snd d := by
+    intro heq
+    apply hne
+    rw [← heq]; rfl
+  rw [← qh_phi_coeff, h, coeff_monomial, if_neg hne']
+  simp
 
 lemma qh_invariant [IsDomain R] (Q : MvPolynomial (Fin n × Fin n) R) (ν : Fin n → ℕ)
     (hQ : algebraMap _ (GLCoord R n) (rename Prod.swap Q) ∈ inducedSections R (fun a => (ν a : ℤ)))

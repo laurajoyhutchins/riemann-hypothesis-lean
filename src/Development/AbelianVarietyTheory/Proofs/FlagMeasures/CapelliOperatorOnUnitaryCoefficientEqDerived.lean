@@ -1,6 +1,51 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.CapelliEigenvalues.Smooth
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.SmoothVecUnitaryModule
+module
+
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.SmoothVecUnitaryModule
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.CapelliEigenvalues.CoreDefs
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.CapelliEigenvalues.Smooth
+import Formalism.RealPlaceAnalysis.RealPlaceTaylor.CartanInvolutionConjTransposeMul
+import Formalism.RealPlaceAnalysis.RealPlaceTaylor.VectorComplexifiedDerivativeCommutator
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.CoassocSimps
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Matrix Formalism.REAL Formalism.QuantumDeterminants GlobalTheory.SmoothVecMod
 
@@ -16,7 +61,7 @@ lemma eabV_pair {E E' : Type} [NormedAddCommGroup E] [NormedSpace ℂ E] [Normed
     L (EabV ε a b f g) = EabV ε a b (fun x => L (f x)) g := by
   obtain ⟨h1, h2, -, -⟩ := complex_parts_mem_lie_algebra_holds n ε (Matrix.single a b 1)
   unfold EabV EcV
-  rw [map_add, map_smul, (rdVPair_of vector_right_derivative_extends n ε E E' L f _ g hf h1 hg).2,
+  rw [map_add (f := _), map_smul, (rdVPair_of vector_right_derivative_extends n ε E E' L f _ g hf h1 hg).2,
     (rdVPair_of vector_right_derivative_extends n ε E E' L f _ g hf h2 hg).2]
 
 variable {H : Type} [NormedAddCommGroup H] [InnerProductSpace ℂ H]
@@ -103,9 +148,10 @@ theorem capelli_coef : PI.UnitaryGroupMassFormula.CapelliEig.FunAct := by
   have h0 : IsCoef ε σ P B (fun x => P.comp ((σ x).comp Q)) := fun _ _ _ => rfl
   have e : Q w = (B w : Hs) := rfl
   rw [e, actU_eq hσ]
+
   simp only [capelli, qdetOp, qminorOp, qdet, qminor, map_sum, map_mul, map_intCast, Finset.sum_apply,
-    _root_.sum_apply, LinearMap.sum_apply, Submodule.coe_sum, Pi.smul_apply,
-    _root_.smul_apply]
+  _root_.sum_apply, LinearMap.sum_apply, Submodule.coe_sum, Pi.smul_apply,
+  _root_.smul_apply]
   refine Finset.sum_congr rfl fun τ _ => ?_
   have h := h0.word hσ (List.ofFn fun k : Fin n => (u - ((k : ℕ) : ℂ), τ k, k)) g hg w
   simp only [List.map_ofFn, Function.comp_def] at h

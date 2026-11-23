@@ -1,4 +1,50 @@
-import Formalism.GradedWeylDivisibility.StatementD
+module
+
+public import Formalism.GradedWeylDivisibility.StatementD
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open MvPolynomial
 
@@ -16,14 +62,15 @@ theorem ldbasis_linearIndependent {σ R ι : Type*} [CommRing R] (o : MonomialOr
   have htne : (s.filter fun j => g j ≠ 0).Nonempty := ⟨i, Finset.mem_filter.mpr ⟨hi, hgi⟩⟩
   obtain ⟨j, hj, hjmax⟩ :=
     (s.filter fun j => g j ≠ 0).exists_max_image (fun j => o.toSyn (o.degree (v j))) htne
-  have hcoeff := congrArg (MvPolynomial.coeff (o.degree (v j))) hsum
-  rw [coeff_zero, coeff_sum, Finset.sum_eq_single j] at hcoeff
-  · rw [coeff_smul, smul_eq_mul] at hcoeff
+  have hcoeff := congrArg (AddMonoidAlgebra.coeff · (o.degree (v j))) hsum
+  rw [AddMonoidAlgebra.coeff_zero, Finsupp.zero_apply, MvPolynomial.coeff_sum,
+    Finset.sum_eq_single j] at hcoeff
+  · rw [AddMonoidAlgebra.coeff_smul_apply, smul_eq_mul] at hcoeff
     have hone : (v j).coeff (o.degree (v j)) = 1 := hlc j
     rw [hone, mul_one] at hcoeff
     exact (Finset.mem_filter.mp hj).2 hcoeff
   · intro k hk hkj
-    rw [coeff_smul]
+    rw [AddMonoidAlgebra.coeff_smul_apply]
     by_cases hgk : g k = 0
     · rw [hgk, zero_smul]
     · have hle := hjmax k (Finset.mem_filter.mpr ⟨hk, hgk⟩)
@@ -53,9 +100,9 @@ theorem ldbasis_initMinor_rowHom (R : Type*) [CommRing R] {r n s : ℕ} (I : Fin
   apply hprod
   intro h0
   apply hd
-  show coeff d ((Equiv.Perm.sign σ) •
-    ∏ i, (X (I (σ i), Fin.castLE hs i) : MvPolynomial (Fin r × Fin n) R)) = 0
-  rw [Units.smul_def, coeff_smul, h0, smul_zero]
+  show AddMonoidAlgebra.coeff ((Equiv.Perm.sign σ) •
+    ∏ i, (X (I (σ i), Fin.castLE hs i) : MvPolynomial (Fin r × Fin n) R)) d = 0
+  rw [Units.smul_def, AddMonoidAlgebra.coeff_smul_apply, h0, smul_zero]
 
 theorem ldbasis_bidet_rowHom (R : Type*) [CommRing R] {r n K : ℕ} (sz : Fin K → ℕ) (hsz : ∀ k, sz k ≤ n)
     (I : ∀ k, Fin (sz k) → Fin r) :
@@ -69,7 +116,7 @@ theorem ldbasis_rowWt_bidetExp {r n K : ℕ} (sz : Fin K → ℕ) (hsz : ∀ k, 
     rowWt (bidetExp sz hsz I) = ∑ k : Fin K, ∑ p : Fin (sz k), (Pi.single (I k p) 1 : Fin r → ℕ) := by
   classical
   funext a
-  simp only [rowWt, rowDeg, bidetExp, Finsupp.finset_sum_apply, Finset.sum_apply,
+  simp only [rowWt, rowDeg, bidetExp, Finsupp.finsetSum_apply, Finset.sum_apply,
     Finsupp.single_apply, Pi.single_apply]
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl (fun k _ => ?_)

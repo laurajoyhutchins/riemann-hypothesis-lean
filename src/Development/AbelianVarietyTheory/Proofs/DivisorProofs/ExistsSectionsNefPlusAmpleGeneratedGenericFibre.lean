@@ -1,19 +1,56 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.CharZeroFunctionField
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.SmallSecTensTriv
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.VolGe
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.EqOfIsometricTrivShift
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.ExistsAlgClosedBaseChange
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsNefRationalFibreOfNefFiniteFieldFibresStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsSectionExtendingRationalGenericFibreMulIntStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.TensOfIsNef
-import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.IsProjOverCompOfIsClosedImmersion
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.ExistsAlgClosedBaseChange
+public import Development.AbelianVarietyTheory.Definitions.Divisors.NefFibOfIsNef
 import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.IsProjOverIffIsProperAndExistsIsAmpleLB
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ClsLinCombSingle
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsGeneratingSecsOfClsEq
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.NefFibPowIff
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.NefFibreTwistExists
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RationalDegreeEqOrderSum
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsGeneratingSecsOfClsEq
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsSectionExtendingRationalGenericFibreMulIntStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsNefRationalFibreOfNefFiniteFieldFibresStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.NefFibreTwistExists
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RationalDegreeEqOrderSum
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.NefFibPowIff
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.TensOfIsNef
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Definitions.Divisors.CharZeroFunctionField
+
+@[expose] public section
+
 open CategoryTheory AlgebraicGeometry TopologicalSpace Filter Topology
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor
 open GlobalTheory GlobalTheory.ArInt GlobalTheory.CxPts GlobalTheory.Cartier GlobalTheory.VolBr
@@ -25,7 +62,12 @@ namespace GlobalTheory.GenFibreGen
 theorem nefFib_pow : ∀ (k : Type) [CommRing k] (X : Scheme.{0}) [IsIntegral X] (p : X ⟶ Sp k) (D : ℕ), IsArithVar p D → ∀ (L : HermLB p) (n : ℕ), NefFib L → NefFib (L.pow n) := by
   intro k _ X _ p D hX L n hL
   rcases Nat.eq_zero_or_pos n with rfl | hn
-  · refine AmpleTwistNef.nefFib_of_cls_eq ?_ (nefFib_of_isNef (HermLB.isNef_triv (p := p) (D := D)))
+  · have htriv : NefFib (HermLB.triv p) := by
+      intro Z i _ _ κ _ _ _ _
+      exact (interNum_eq_zero_of_cls_eq_zero κ _
+        (fun _ => LB.isLB_pull (LB.isLB_triv X) i) 0
+        (by rw [CechPic.cls_pull (LB.isLB_triv X)]; exact map_zero _)).ge
+    refine AmpleTwistNef.nefFib_of_cls_eq ?_ htriv
     erw [CechPic.cls_lbPow L.isLB 0, zero_smul]
     rfl
   · have := hX.finite
@@ -61,7 +103,7 @@ theorem exists_secs_generic : GlobalTheory.Published.NefNumerics → ∀ (k : Ty
       rw [map_nsmul]
       congr 1
       erw [CechPic.cls_tens (pull_isLB A.isLB _) (pull_isLB (L.pow n).isLB _), CechPic.cls_tens (L.pow n).isLB A.isLB]
-      rw [map_add, CechPic.cls_pull A.isLB, CechPic.cls_pull (L.pow n).isLB, add_comm]) (Fin N) t ht
+      rw [map_add (f := _), CechPic.cls_pull A.isLB, CechPic.cls_pull (L.pow n).isLB, add_comm]) (Fin N) t ht
   choose s hs using fun i => GlobalTheory.T.exists_section_extending_rationalGenericFibre_mul_int k X p D hX _ (((L.pow n).tens A).pow m).isLB (v i)
   refine ⟨m, N, s, hm, fun x hx => ?_⟩
   obtain ⟨y, rfl⟩ := exists_fst_eq k X p x hx

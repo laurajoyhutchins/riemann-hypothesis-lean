@@ -1,12 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Jets.ColValMonomial
-import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.RosIdSt
-import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.ExistsGenRosati
-import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.ExistsUniqueNormPrim
-import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.ExistsIndexOfLocal
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.RigidifiedIsoRespectsCubeAndSymmetry
-import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.GlobalFnsHolds
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ExistsPowMulEqOne
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Jets.ColValMonomial
+public import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.GlobalFnsHolds
+public import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.RosIdSt
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.RigidifiedIsoRespectsCubeAndSymmetry
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FirstCohomology.PhiPowSt
+
+@[expose] public section
 
 noncomputable section
 open CategoryTheory CategoryTheory.Limits AlgebraicGeometry MonoidalCategory CartesianMonoidalCategory MonObj IsLocalRing NumberField
@@ -66,21 +103,6 @@ theorem Pt1.exists_frameSer : ∃ r : PS V 1 y.d, JetSer.IsSer1 y.x _ (y.ρ.s (f
       simp [Hom.one_def]
   have : (η[y.t.G].left ≫ JetSer.primφ (y.t.act.act H.w0) i) z ∈ y.P.U.LG.L.U y.j := by rw [key]; exact hj
   exact this
-
-theorem Pt1.Transl.smul {y : Pt1 E H V F} {q : ℕ} (hq : 1 ≤ q) {c : 𝓞 E} {s h : Fam y.P.D.toPre F q}
-    (ht : y.Transl q c s h) {ξ : F} {n : ℕ} (hn : 1 ≤ n) (hξ : ξ ^ n = 1) : y.Transl q c s (ξ • h) := by
-  obtain ⟨p, x, w, ζ, t', h₁, h₂, hw, hζ, hf, hΦ', hs⟩ := ht
-  obtain ⟨Φ, hΦ⟩ := phiFun_of_globalFns GlobalTheory.globalFns_holds V _ y.P.D F q hq p w hw
-  obtain ⟨M, hM, hU⟩ := (ThetaFinOrd.finOrd_iff p w ζ Φ hΦ).1 hf
-  have hξ0 : ξ ≠ 0 := by
-    rintro rfl
-    rw [zero_pow (by omega)] at hξ
-    exact zero_ne_one hξ
-  refine ⟨p, x, w, ξ * ζ, t', h₁, h₂, hw, mul_ne_zero hξ0 hζ,
-    (ThetaFinOrd.finOrd_iff p w _ Φ hΦ).2 ⟨M * n, Nat.mul_pos hM hn, ?_⟩, hΦ', ?_⟩
-  · rw [mul_smul, smul_pow, pow_mul' ξ, hξ, pow_mul _ M n, hU, one_pow, one_pow, one_smul]
-  · rw [isSmul_iff] at hs ⊢
-    rw [hs, mul_smul]
 
 end Inhabitant
 

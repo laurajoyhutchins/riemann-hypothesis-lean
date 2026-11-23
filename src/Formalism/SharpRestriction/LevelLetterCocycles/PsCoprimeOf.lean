@@ -1,7 +1,51 @@
-import Mathlib
-import Formalism.SharpRestriction.LevelLetterCocycles.LemmasUnramifiedOfRingCondition
-import Formalism.SharpRestriction.LevelLetterCocycles.SecondComparisonInCoordinates
-import Formalism.SharpRestriction.LevelLetterCocycles.KillerLevCoreOf
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.LemmasUnramifiedOfRingCondition
+public import Formalism.SharpRestriction.LevelLetterCocycles.KillerLevCoreOf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PowerSeries.Inverse
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -92,8 +136,8 @@ private lemma constantCoeff_pi0_eq_zero_of_RingP (W : LocWach PD LL O v n) (hR :
 private lemma constantCoeff_ps_eq_p (W : LocWach PD LL O v n) (hR : RingP W) (s : ℕ) (i : ZMod n) :
     PowerSeries.constantCoeff (ps W s i) = ((PD.p : ℕ) : O) := by
   have e : ps W s = (W.φA ^ s) W.π₀ + ((PD.p : ℕ) : LetA O n) := by
-    simp only [ps, qA, lA, map_add, map_natCast]
-  rw [e, Pi.add_apply, map_add, constantCoeff_phiA_pow_eq_zero_of_eq_zero W s _ (constantCoeff_pi0_eq_zero_of_RingP W hR) i, zero_add,
+    simp only [ps, qA, lA, map_add (f := _), map_natCast]
+  rw [e, Pi.add_apply, map_add (f := _), constantCoeff_phiA_pow_eq_zero_of_eq_zero W s _ (constantCoeff_pi0_eq_zero_of_RingP W hR) i, zero_add,
     Pi.natCast_apply, map_natCast]
 
 private lemma ps_apply_ne_zero (W : LocWach PD LL O v n) (hR : RingP W) (s : ℕ) (i : ZMod n) :
@@ -129,7 +173,7 @@ private lemma isUnit_one_add_mul_pi0 (W : LocWach PD LL O v n) (hR : RingP W) (w
     IsUnit (1 + w * W.π₀) := by
   rw [Pi.isUnit_iff]
   intro i
-  rw [PowerSeries.isUnit_iff_constantCoeff, Pi.add_apply, Pi.one_apply, Pi.mul_apply, map_add,
+  rw [PowerSeries.isUnit_iff_constantCoeff, Pi.add_apply, Pi.one_apply, Pi.mul_apply, map_add (f := _),
     map_one, map_mul, constantCoeff_pi0_eq_zero_of_RingP W hR i, mul_zero, add_zero]
   exact isUnit_one
 
@@ -155,7 +199,7 @@ theorem psStable_of [IsDomain O] [NeZero n] (W : LocWach PD LL O v n) (hR : Ring
     rw [hw, Eat_X_add_p_pi0_eq_qA]
   have hγq : W.γA W.gam (qA W) = qA W * (1 + (w : LetA O n) * W.π₀) := by
     have e : W.γA W.gam (qA W) = W.γA W.gam W.π₀ + ((PD.p : ℕ) : LetA O n) := by
-      simp only [qA, lA, map_add, map_natCast]
+      simp only [qA, lA, map_add (f := _), map_natCast]
     rw [e, sub_eq_iff_eq_add.mp hw']
     simp only [qA, lA]
     ring
@@ -245,7 +289,7 @@ private lemma exists_lA_eq_mul_ps_add_mul_ps_of_lt [IsDomain O] (W : LocWach PD 
     exact phiA_pow_mem_AΔ W _ (pi0_mem_AΔ W hR)
   refine ⟨-(W.φA ^ s) e, neg_mem hc, 1, one_mem _, ?_⟩
   have hpt : ps W (s + (m + 1)) = (W.φA ^ (s + (m + 1))) W.π₀ + lA W := by
-    simp only [ps, qA, lA, map_add, map_natCast]
+    simp only [ps, qA, lA, map_add (f := _), map_natCast]
   rw [hpt, hφt]
   ring
 

@@ -1,6 +1,57 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.Intersections.PPFFibreSum
-import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.LengthLocalizedModuleQuotient
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.StatementsPFFibreMult
+public import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.LengthLocalizedModuleQuotient
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.PPFFibreSum
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.Inter
@@ -29,8 +80,8 @@ variable {K : Type} [Fintype K] {ι : K → Type} [∀ k, Fintype (ι k)]
   {K' : Type} [Fintype K'] {ι' : K' → Type} [∀ k, Fintype (ι' k)]
   {κ : K → K'} {v : (Σ k, ι k) → (Σ k', ι' k')} {P' : Ideal (MRing ι')}
 
-omit [Fintype K'] [∀ k, Fintype (ι' k)] in
 
+omit [Fintype K'] [∀ k, Fintype (ι' k)] in
 theorem baseSubst_rename (hv : IsBlockMap κ v) (G : GenFibre v P') (t : MRing ι) :
     baseSubst κ G (rename v t) = C (aeval G.x t) := by
   have h : (baseSubst κ G).comp (rename v : MRing ι →ₐ[ℤ] MRing ι').toRingHom =
@@ -44,18 +95,18 @@ theorem baseSubst_rename (hv : IsBlockMap κ v) (G : GenFibre v P') (t : MRing �
       rw [eval₂Hom_X']
       have h1 : (v p).1 ∈ Set.range κ := ⟨p.1, (hv.2.2.1 p).symm⟩
       have h2 : v p ∈ Set.range v := ⟨p, rfl⟩
-      rw [dif_pos h1, dif_pos h2, hv.2.1 h2.choose_spec]
+      rw [dite_eq_left h1, dite_eq_left h2, hv.2.1 h2.choose_spec]
   exact DFunLike.congr_fun h t
 
-omit [Fintype K'] [∀ k, Fintype (ι' k)] in
 
+omit [Fintype K'] [∀ k, Fintype (ι' k)] in
 theorem baseSubst_X_fib (G : GenFibre v P') (q : Σ k : FibreBlock κ, ι' k.1) :
     baseSubst κ G (X ⟨q.1.1, q.2⟩) = X q := by
   unfold baseSubst
-  rw [eval₂Hom_X', dif_neg q.1.2]
+  rw [eval₂Hom_X', dite_eq_right q.1.2]
+
 
 omit [Fintype K'] [∀ k, Fintype (ι' k)] in
-
 theorem exists_baseSubst_mul (hv : IsBlockMap κ v) (G : GenFibre v P') (g : MRingOver G.Φ (fibreIdx ι' κ)) :
     ∃ (t : MRing ι) (f : MRing ι'), aeval G.x t ≠ 0 ∧ baseSubst κ G (rename v t) * g = baseSubst κ G f := by
   induction g using MvPolynomial.induction_on with
@@ -69,7 +120,7 @@ theorem exists_baseSubst_mul (hv : IsBlockMap κ v) (G : GenFibre v P') (g : MRi
     obtain ⟨t₁, f₁, ht₁, e₁⟩ := h₁
     obtain ⟨t₂, f₂, ht₂, e₂⟩ := h₂
     refine ⟨t₁ * t₂, f₁ * rename v t₂ + rename v t₁ * f₂, by rw [map_mul]; exact mul_ne_zero ht₁ ht₂, ?_⟩
-    rw [map_mul, map_mul, map_add, map_mul, map_mul, ← e₁, ← e₂]
+    rw [map_mul, map_mul, map_add (f := _), map_mul, map_mul, ← e₁, ← e₂]
     ring
   | mul_X g q h =>
     obtain ⟨t, f, ht, e⟩ := h
@@ -77,22 +128,22 @@ theorem exists_baseSubst_mul (hv : IsBlockMap κ v) (G : GenFibre v P') (g : MRi
     rw [map_mul, ← e, baseSubst_X_fib]
     ring
 
-omit [Fintype K'] [∀ k, Fintype (ι' k)] in
 
+omit [Fintype K'] [∀ k, Fintype (ι' k)] in
 theorem isUnit_baseSubst_rename (hv : IsBlockMap κ v) (G : GenFibre v P') {t : MRing ι} (ht : aeval G.x t ≠ 0) :
     IsUnit (baseSubst κ G (rename v t)) := by
   rw [baseSubst_rename hv]
   exact (isUnit_iff_ne_zero.mpr ht).map C
 
-omit [Fintype K'] [∀ k, Fintype (ι' k)] in
 
+omit [Fintype K'] [∀ k, Fintype (ι' k)] in
 theorem ker_baseSubst_le (hv : IsBlockMap κ v) (G : GenFibre v P') : RingHom.ker (baseSubst κ G) ≤ P' := by
   intro a ha
   rw [RingHom.mem_ker] at ha
   rw [← G.genericFibre_ker_target, RingHom.mem_ker, ← aeval_baseSubst hv, ha, map_zero]
 
-omit [Fintype K'] [∀ k, Fintype (ι' k)] in
 
+omit [Fintype K'] [∀ k, Fintype (ι' k)] in
 theorem fibreIdeal_eq_map (hv : IsBlockMap κ v) (G : GenFibre v P') :
     fibreIdeal κ G = P'.map (baseSubst κ G) := by
   apply le_antisymm
@@ -108,8 +159,8 @@ theorem fibreIdeal_eq_map (hv : IsBlockMap κ v) (G : GenFibre v P') :
     rw [Ideal.mem_comap, fibreIdeal, RingHom.mem_ker, aeval_baseSubst hv, ← RingHom.mem_ker, G.genericFibre_ker_target]
     exact ha
 
-omit [Fintype K'] [∀ k, Fintype (ι' k)] in
 
+omit [Fintype K'] [∀ k, Fintype (ι' k)] in
 theorem exists_of_mem_map (hv : IsBlockMap κ v) (G : GenFibre v P') (W : Ideal (MRing ι'))
     {g : MRingOver G.Φ (fibreIdx ι' κ)} (hg : g ∈ W.map (baseSubst κ G)) :
     ∃ (t : MRing ι) (w : MRing ι'), aeval G.x t ≠ 0 ∧ w ∈ W ∧
@@ -124,7 +175,7 @@ theorem exists_of_mem_map (hv : IsBlockMap κ v) (G : GenFibre v P') (W : Ideal 
     obtain ⟨t₂, w₂, ht₂, hw₂, e₂⟩ := h₂
     refine ⟨t₁ * t₂, w₁ * rename v t₂ + rename v t₁ * w₂, by rw [map_mul]; exact mul_ne_zero ht₁ ht₂,
       W.add_mem (W.mul_mem_right _ hw₁) (W.mul_mem_left _ hw₂), ?_⟩
-    rw [map_mul, map_mul, map_add, map_mul, map_mul, ← e₁, ← e₂]
+    rw [map_mul, map_mul, map_add (f := _), map_mul, map_mul, ← e₁, ← e₂]
     ring
   | smul c g _ h =>
     obtain ⟨t, w, ht, hw, e⟩ := h
@@ -133,8 +184,8 @@ theorem exists_of_mem_map (hv : IsBlockMap κ v) (G : GenFibre v P') (W : Ideal 
     rw [smul_eq_mul, map_mul, map_mul, map_mul, ← e, ← e']
     ring
 
-omit [Fintype K'] [∀ k, Fintype (ι' k)] in
 
+omit [Fintype K'] [∀ k, Fintype (ι' k)] in
 theorem comap_fibreOf_and_isPrime (hv : IsBlockMap κ v) (G : GenFibre v P') (W : Ideal (MRing ι')) [W.IsPrime]
     (hPW : P' ≤ W) (hI : imageZ v W = imageZ v P') :
     (fibreOf κ G W).comap (baseSubst κ G) = W ∧ (fibreOf κ G W).IsPrime := by
@@ -229,7 +280,7 @@ theorem PFFibreMult.proof : PFFibreMult.Statement := by
       rw [fibreIdeal_eq_map hv G, Ideal.map_sup, Ideal.map_span, Set.image_singleton]
     rw [hJ0, Ideal.map_map, Ideal.map_map, hcomp]
   unfold multAt
-  rw [dif_pos hQ, dif_pos hWp, ObjectsChow.VerticalPartMultiplicity.length_localizedModule_quotient,
+  rw [dite_eq_left hQ, dite_eq_left hWp, ObjectsChow.VerticalPartMultiplicity.length_localizedModule_quotient,
     ObjectsChow.VerticalPartMultiplicity.length_localizedModule_quotient, hJ,
     length_quot_map_of_surjective θ hsurj _ hker]
 

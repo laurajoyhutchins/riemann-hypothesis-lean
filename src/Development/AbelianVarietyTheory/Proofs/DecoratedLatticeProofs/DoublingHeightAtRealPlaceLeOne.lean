@@ -1,4 +1,49 @@
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.SphericalVolumeLift
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.SphericalZero
+import Development.AbelianVarietyTheory.Definitions.Foundations.EventuallyEqOfIsPreconnected
 import Development.AbelianVarietyTheory.Definitions.LatticeFrames.IntegrandSZero
+
+@[expose] public section
+
 open scoped ComplexConjugate Matrix NNReal
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.L2.Theta Formalism.L2.Pj Formalism.IndefR.Datum MeasureTheory IsDedekindDomain NumberField
 open GlobalTheory.AutomorphicL2Unitary GlobalTheory.Cusp GlobalTheory.AdelicU GlobalTheory.Doubling GlobalTheory.Cont
@@ -72,7 +117,7 @@ theorem map_identity (φ : A →+* ℂ) (hφ : ∀ x, φ (ρ x) = star (φ x)) (
     intro X; ext i j
     simp [Formalism.UG.cT, conjTranspose_apply, hφ]
   have := congrArg φ.mapMatrix h
-  simpa only [map_add, map_mul, RingHom.mapMatrix_apply, hcT, Matrix.map_mul] using this
+  simpa only [map_add (f := _), map_mul, RingHom.mapMatrix_apply, hcT, Matrix.map_mul] using this
 
 end Block
 
@@ -114,7 +159,7 @@ theorem det_one_add_ge (W : Matrix (Fin n) (Fin n) ℂ) (hW : ‖W.det‖ = 1) :
     calc (2 : ℝ) ^ n = ∏ i, (2 * Real.sqrt (hh.eigenvalues i)) := by
           rw [Finset.prod_mul_distrib, hs, mul_one, Finset.prod_const, Finset.card_univ, Fintype.card_fin]
       _ ≤ ∏ i, (1 + hh.eigenvalues i) := by
-          refine Finset.prod_le_prod (fun i _ => by positivity) fun i _ => ?_
+          refine Finset.prod_le_prod₀ (fun i _ => by positivity) fun i _ => ?_
           have := Real.sq_sqrt (hnn i)
           nlinarith [sq_nonneg (Real.sqrt (hh.eigenvalues i) - 1)]
   · have e : 1 + Wᴴ * W = U * (1 + diagonal (RCLike.ofReal ∘ hh.eigenvalues)) * star U := by

@@ -1,9 +1,53 @@
-import Mathlib
+module
 
-private theorem UpperTheory.Reformulated.B.LimitOfFinite.aux {A : Type*} {M : Type*} [CommRing A] [AddCommGroup M] [Module A M]
-    [Module.Finite A M] (I : Ideal A) (hI : IsPrecomplete I A) (f : ℕ → M)
-    (hf : ∀ m, f m - f (m + 1) ∈ (I ^ m • ⊤ : Submodule A M)) :
-    ∃ L : M, ∀ m, f m - L ∈ (I ^ m • ⊤ : Submodule A M) := by
+public import Mathlib.RingTheory.AdicCompletion.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
+theorem UpperTheory.Reformulated.B.LimitOfFinite.exists_limit_of_finite.{u_1, u_2}
+    {A : Type u_1} {M : Type u_2} [CommRing A] [AddCommGroup M] [Module A M] [Module.Finite A M]
+    (I : Ideal A) (hI : IsPrecomplete I A) (f : ℕ → M)
+    (hf : ∀ m : ℕ, f m - f (m + 1) ∈ (I ^ m • ⊤ : Submodule A M)) :
+    ∃ L : M, ∀ m : ℕ, f m - L ∈ (I ^ m • ⊤ : Submodule A M) := by
   classical
   obtain ⟨n, s, hs⟩ := Module.Finite.exists_fin (R := A) (M := M)
   have key : ∀ (J : Ideal A) (x : M), x ∈ (J • ⊤ : Submodule A M) →
@@ -58,115 +102,3 @@ private theorem UpperTheory.Reformulated.B.LimitOfFinite.aux {A : Type*} {M : Ty
   rw [h2]
   exact Submodule.neg_mem _ (Submodule.sum_mem _ fun i _ =>
     Submodule.smul_mem_smul (ha i m) Submodule.mem_top)
-
-theorem UpperTheory.Reformulated.B.LimitOfFinite.exists_limit_of_finite.{u_1, u_2} :
-    ∀ {A : Type u_1} {M : Type u_2} [inst : CommRing A] [inst_1 : AddCommGroup M]
-      [inst_2 :
-        @_root_.Module A M (@CommSemiring.toSemiring A (@CommRing.toCommSemiring A inst))
-          (@AddCommGroup.toAddCommMonoid M inst_1)]
-      [@Module.Finite A M (@CommSemiring.toSemiring A (@CommRing.toCommSemiring A inst))
-          (@AddCommGroup.toAddCommMonoid M inst_1) inst_2]
-      (I : @Ideal A (@CommSemiring.toSemiring A (@CommRing.toCommSemiring A inst))),
-      @IsPrecomplete A inst I A (@Ring.toAddCommGroup A (@CommRing.toRing A inst))
-          (@Semiring.toModule A (@CommSemiring.toSemiring A (@CommRing.toCommSemiring A inst))) →
-        ∀ (f : Nat → M),
-          (∀ (m : Nat),
-              @Membership.mem M
-                (@Submodule A M (@CommSemiring.toSemiring A (@CommRing.toCommSemiring A inst))
-                  (@AddCommGroup.toAddCommMonoid M inst_1) inst_2)
-                (@SetLike.instMembership
-                  (@Submodule A M (@CommSemiring.toSemiring A (@CommRing.toCommSemiring A inst))
-                    (@AddCommGroup.toAddCommMonoid M inst_1) inst_2)
-                  M
-                  (@Submodule.setLike A M (@CommSemiring.toSemiring A (@CommRing.toCommSemiring A inst))
-                    (@AddCommGroup.toAddCommMonoid M inst_1) inst_2))
-                (@HSMul.hSMul (@Ideal A (@CommSemiring.toSemiring A (@CommRing.toCommSemiring A inst)))
-                  (@Submodule A M (@CommSemiring.toSemiring A (@CommRing.toCommSemiring A inst))
-                    (@AddCommGroup.toAddCommMonoid M inst_1) inst_2)
-                  (@Submodule A M (@CommSemiring.toSemiring A (@CommRing.toCommSemiring A inst))
-                    (@AddCommGroup.toAddCommMonoid M inst_1) inst_2)
-                  (@instHSMul (@Ideal A (@CommSemiring.toSemiring A (@CommRing.toCommSemiring A inst)))
-                    (@Submodule A M (@CommSemiring.toSemiring A (@CommRing.toCommSemiring A inst))
-                      (@AddCommGroup.toAddCommMonoid M inst_1) inst_2)
-                    (@Submodule.instSMul A (@CommSemiring.toSemiring A (@CommRing.toCommSemiring A inst)) A
-                      (@CommSemiring.toSemiring A (@CommRing.toCommSemiring A inst))
-                      (@Semiring.toModule A (@CommSemiring.toSemiring A (@CommRing.toCommSemiring A inst))) M
-                      (@AddCommGroup.toAddCommMonoid M inst_1) inst_2 inst_2
-                      (@IsScalarTower.left A M
-                        (@Semiring.toMonoid A (@CommSemiring.toSemiring A (@CommRing.toCommSemiring A inst)))
-                        (@DistribMulAction.toMulAction A M
-                          (@Semiring.toMonoid A (@CommSemiring.toSemiring A (@CommRing.toCommSemiring A inst)))
-                          (@AddCommMonoid.toAddMonoid M (@AddCommGroup.toAddCommMonoid M inst_1))
-                          (@Module.toDistribMulAction A M (@CommSemiring.toSemiring A (@CommRing.toCommSemiring A inst))
-                            (@AddCommGroup.toAddCommMonoid M inst_1) inst_2)))))
-                  (@HPow.hPow (@Ideal A (@CommSemiring.toSemiring A (@CommRing.toCommSemiring A inst))) Nat
-                    (@Ideal A (@CommSemiring.toSemiring A (@CommRing.toCommSemiring A inst)))
-                    (@instHPow (@Ideal A (@CommSemiring.toSemiring A (@CommRing.toCommSemiring A inst))) Nat
-                      (@Submodule.instPowNat A (@CommSemiring.toSemiring A (@CommRing.toCommSemiring A inst)) A
-                        (@CommSemiring.toSemiring A (@CommRing.toCommSemiring A inst))
-                        (@Semiring.toModule A (@CommSemiring.toSemiring A (@CommRing.toCommSemiring A inst)))
-                        (@IsScalarTower.right A A (@CommRing.toCommSemiring A inst)
-                          (@CommSemiring.toSemiring A (@CommRing.toCommSemiring A inst))
-                          (@Algebra.id A (@CommRing.toCommSemiring A inst)))))
-                    I m)
-                  (@Top.top
-                    (@Submodule A M (@CommSemiring.toSemiring A (@CommRing.toCommSemiring A inst))
-                      (@AddCommGroup.toAddCommMonoid M inst_1) inst_2)
-                    (@Submodule.instTop A M (@CommSemiring.toSemiring A (@CommRing.toCommSemiring A inst))
-                      (@AddCommGroup.toAddCommMonoid M inst_1) inst_2)))
-                (@HSub.hSub M M M
-                  (@instHSub M (@SubNegMonoid.toSub M (@AddGroup.toSubNegMonoid M (@AddCommGroup.toAddGroup M inst_1))))
-                  (f m)
-                  (f
-                    (@HAdd.hAdd Nat Nat Nat (@instHAdd Nat instAddNat) m
-                      (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))))))) →
-            ∃ (L : M),
-              ∀ (m : Nat),
-                @Membership.mem M
-                  (@Submodule A M (@CommSemiring.toSemiring A (@CommRing.toCommSemiring A inst))
-                    (@AddCommGroup.toAddCommMonoid M inst_1) inst_2)
-                  (@SetLike.instMembership
-                    (@Submodule A M (@CommSemiring.toSemiring A (@CommRing.toCommSemiring A inst))
-                      (@AddCommGroup.toAddCommMonoid M inst_1) inst_2)
-                    M
-                    (@Submodule.setLike A M (@CommSemiring.toSemiring A (@CommRing.toCommSemiring A inst))
-                      (@AddCommGroup.toAddCommMonoid M inst_1) inst_2))
-                  (@HSMul.hSMul (@Ideal A (@CommSemiring.toSemiring A (@CommRing.toCommSemiring A inst)))
-                    (@Submodule A M (@CommSemiring.toSemiring A (@CommRing.toCommSemiring A inst))
-                      (@AddCommGroup.toAddCommMonoid M inst_1) inst_2)
-                    (@Submodule A M (@CommSemiring.toSemiring A (@CommRing.toCommSemiring A inst))
-                      (@AddCommGroup.toAddCommMonoid M inst_1) inst_2)
-                    (@instHSMul (@Ideal A (@CommSemiring.toSemiring A (@CommRing.toCommSemiring A inst)))
-                      (@Submodule A M (@CommSemiring.toSemiring A (@CommRing.toCommSemiring A inst))
-                        (@AddCommGroup.toAddCommMonoid M inst_1) inst_2)
-                      (@Submodule.instSMul A (@CommSemiring.toSemiring A (@CommRing.toCommSemiring A inst)) A
-                        (@CommSemiring.toSemiring A (@CommRing.toCommSemiring A inst))
-                        (@Semiring.toModule A (@CommSemiring.toSemiring A (@CommRing.toCommSemiring A inst))) M
-                        (@AddCommGroup.toAddCommMonoid M inst_1) inst_2 inst_2
-                        (@IsScalarTower.left A M
-                          (@Semiring.toMonoid A (@CommSemiring.toSemiring A (@CommRing.toCommSemiring A inst)))
-                          (@DistribMulAction.toMulAction A M
-                            (@Semiring.toMonoid A (@CommSemiring.toSemiring A (@CommRing.toCommSemiring A inst)))
-                            (@AddCommMonoid.toAddMonoid M (@AddCommGroup.toAddCommMonoid M inst_1))
-                            (@Module.toDistribMulAction A M (@CommSemiring.toSemiring A (@CommRing.toCommSemiring A inst))
-                              (@AddCommGroup.toAddCommMonoid M inst_1) inst_2)))))
-                    (@HPow.hPow (@Ideal A (@CommSemiring.toSemiring A (@CommRing.toCommSemiring A inst))) Nat
-                      (@Ideal A (@CommSemiring.toSemiring A (@CommRing.toCommSemiring A inst)))
-                      (@instHPow (@Ideal A (@CommSemiring.toSemiring A (@CommRing.toCommSemiring A inst))) Nat
-                        (@Submodule.instPowNat A (@CommSemiring.toSemiring A (@CommRing.toCommSemiring A inst)) A
-                          (@CommSemiring.toSemiring A (@CommRing.toCommSemiring A inst))
-                          (@Semiring.toModule A (@CommSemiring.toSemiring A (@CommRing.toCommSemiring A inst)))
-                          (@IsScalarTower.right A A (@CommRing.toCommSemiring A inst)
-                            (@CommSemiring.toSemiring A (@CommRing.toCommSemiring A inst))
-                            (@Algebra.id A (@CommRing.toCommSemiring A inst)))))
-                      I m)
-                    (@Top.top
-                      (@Submodule A M (@CommSemiring.toSemiring A (@CommRing.toCommSemiring A inst))
-                        (@AddCommGroup.toAddCommMonoid M inst_1) inst_2)
-                      (@Submodule.instTop A M (@CommSemiring.toSemiring A (@CommRing.toCommSemiring A inst))
-                        (@AddCommGroup.toAddCommMonoid M inst_1) inst_2)))
-                  (@HSub.hSub M M M
-                    (@instHSub M (@SubNegMonoid.toSub M (@AddGroup.toSubNegMonoid M (@AddCommGroup.toAddGroup M inst_1))))
-                    (f m) L) := by
-  intro A M _ _ _ _ I hI f hf
-  exact UpperTheory.Reformulated.B.LimitOfFinite.aux I hI f hf

@@ -1,20 +1,64 @@
-import Development.AutomorphicArithmetic.Foundations.Convolution.TensFun
-import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.KernelTransforms.HopBasic
-import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.KernelTransforms.PrjFix
-import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.KernelTransforms.LocEmb
-import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.KernelTransforms.NormIntLe
-import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.KernelTransforms.HomConv
-import Development.AutomorphicArithmetic.Foundations.Convolution.PowerSumTraces.SummandFactor
-import Development.AutomorphicArithmetic.LocalTestFunctions.ExistsCompactOpenBiinvariantOfTest
-import Development.AutomorphicArithmetic.LocalTestFunctions.LocalOperatorCompRhoLEqOfRightInvariant
-import Development.AutomorphicArithmetic.LocalTestFunctions.LocalOperatorCommuteRhoFOfTrivialAtPlace
-import Development.AutomorphicArithmetic.LocalTestFunctions.IntegratedRightRegularEqLocalOperator
-import Development.AutomorphicArithmetic.LocalTestFunctions.ExistsOpenCompactLevelSubgroup
-import Development.AutomorphicArithmetic.LocalTestFunctions.IndicatorLevelEqProdLocalIndicator
-import Development.AutomorphicArithmetic.LocalTestFunctions.FinprodLocalEqIndicatorMulProd
-import Development.AutomorphicArithmetic.LocalTestFunctions.IndicatorIntegralAwayMulLocalEmbedding
-import Development.AutomorphicArithmetic.LocalTestFunctions.CompProjFixedLevelEqOfLocalInvariance
-import Development.AutomorphicArithmetic.LocalTestFunctions.ExistsTestFunctionIntegralProdLocalFactors
+module
+
+public import Development.AutomorphicArithmetic.Foundations.Convolution.PowerSumTraces.SummandFactor
+public import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.KernelTransforms.NormIntLe
+public import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.KernelTransforms.PrjFix
+public import Development.AutomorphicArithmetic.LocalTestFunctions.CompProjFixedLevelEqOfLocalInvariance
+public import Development.AutomorphicArithmetic.LocalTestFunctions.ExistsCompactOpenBiinvariantOfTest
+public import Development.AutomorphicArithmetic.LocalTestFunctions.ExistsOpenCompactLevelSubgroup
+public import Development.AutomorphicArithmetic.LocalTestFunctions.ExistsTestFunctionIntegralProdLocalFactors
+public import Development.AutomorphicArithmetic.LocalTestFunctions.FinprodLocalEqIndicatorMulProd
+public import Development.AutomorphicArithmetic.LocalTestFunctions.IndicatorIntegralAwayMulLocalEmbedding
+public import Development.AutomorphicArithmetic.LocalTestFunctions.IndicatorLevelEqProdLocalIndicator
+public import Development.AutomorphicArithmetic.LocalTestFunctions.IntegratedRightRegularEqLocalOperator
+public import Development.AutomorphicArithmetic.LocalTestFunctions.LocalOperatorCommuteRhoFOfTrivialAtPlace
+public import Development.AutomorphicArithmetic.LocalTestFunctions.LocalOperatorCompRhoLEqOfRightInvariant
+import GroundTheory.GlobalFields.LocalAtPlace
+import GroundTheory.LocalFields.PadicLogSeries
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.KernelTransforms.LocEmb
+
+@[expose] public section
 
 open MeasureTheory NumberField IsDedekindDomain MvPolynomial
 open GroundTheory.Automorphic GroundTheory.Automorphic.Reduction GroundTheory.Automorphic.RightCosetSpace
@@ -84,7 +128,7 @@ private theorem ft_intInd {X : Type*} [MeasurableSpace X] (m : Measure X) (S : S
   simp
 
 theorem UpperTheory.ConvolutionTheory.Tf.finTens :
-    ∀ (K : Type) [Field K] [NumberField K] (n : ℕ) (μ : Measure (normOneGL K n)) [μ.IsHaarMeasure] (m : Measure (AdelicGLn.FiniteAdelicGL K n)) [m.IsHaarMeasure] (r : ℕ) (w : Fin r → Pl K), Function.Injective w →
+    ∀ (K : Type) [Field K] [NumberField K] (n : ℕ) (μ : Measure (normOneGL (K := K) (n := n))) [μ.IsHaarMeasure] (m : Measure (AdelicGLn.FiniteAdelicGL K n)) [m.IsHaarMeasure] (r : ℕ) (w : Fin r → Pl K), Function.Injective w →
       ∀ (f : ∀ v : Pl K, Gw n v → ℂ), (∀ i, Test (f (w i))) →
       (∀ v, v ∉ Set.range w → f v = (GLnLocal.integralGL (v.adicCompletion K) n : Set (Gw n v)).indicator 1) →
       ∃ e : TF K n, (∀ h, e h = ∏ᶠ v, f v (finAt v (finEmb K n h))) ∧
@@ -172,11 +216,11 @@ theorem UpperTheory.ConvolutionTheory.Tf.finTens :
     have hc : (∏ i, (((mw i).real (J i : Set (Gw n (w i))) : ℝ) : ℂ)) ≠ 0 := Finset.prod_ne_zero_iff.2 fun i _ => hvne i
 
     obtain ⟨g, hg, -, hgop⟩ := UpperTheory.exists_testFunction_integral_prod_local_factors K n m r w hw mw J hJco ψ hψ R hfree e₀ he₀
-    have hT' : (fun i => (((rightRegularRep (rationalGLOne K n) μ).compHom (MultiplicityOne.finProj K n) MultiplicityOne.continuous_finProj).compHom
+    have hT' : (fun i => (((rightRegularRep (rationalGLOne (K := K) (n := n)) μ).compHom (MultiplicityOne.finProj K n) MultiplicityOne.continuous_finProj).compHom
         (AdelicGLn.localEmbedding (w i)) (UpperTheory.ConvolutionTheory.Tf.locEmb K n (w i)).1).integrated (mw i) (UnitaryRep.ccToL1 (mw i) (ψ i))) = T :=
       funext fun i => UpperTheory.integrated_rightRegular_eq_localOperator K n μ (w i) (mw i) (ψ i) (T i) (hT i)
     have h1 : Ofin μ m g = (List.ofFn T).prod ∘L Ofin μ m e₀ := by
-      have := hgop (LL μ) ((rightRegularRep (rationalGLOne K n) μ).compHom (MultiplicityOne.finProj K n) MultiplicityOne.continuous_finProj)
+      have := hgop (LL μ) ((rightRegularRep (rationalGLOne (K := K) (n := n)) μ).compHom (MultiplicityOne.finProj K n) MultiplicityOne.continuous_finProj)
       rw [hT'] at this
       exact this
     let ν : Measure (archGroup K n) := Measure.haar

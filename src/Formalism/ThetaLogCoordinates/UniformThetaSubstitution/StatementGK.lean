@@ -1,6 +1,50 @@
-import Mathlib
-import Formalism.ThetaLogCoordinates.UniformThetaSubstitution.StatementJ
-import Formalism.ThetaLogCoordinates.UniformThetaSubstitution.StatementW
+module
+
+public import Formalism.ThetaLogCoordinates.UniformThetaSubstitution.StatementJ
+public import Formalism.GaussJetBounds.StatementP
+public import Formalism.ThetaLogCoordinates.UniformThetaSubstitution.IsLawOfLog
+public import Formalism.ThetaLogCoordinates.UniformThetaSubstitution.StatementE
+public import Formalism.ThetaLogCoordinates.UniformThetaSubstitution.StatementG
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -17,7 +61,7 @@ def GenericExistsK : Prop :=
     ∃ (K : Type) (_ : NormedField K), IsUltrametricDist K ∧ CharZero K ∧
       ∃ (φ : F →+* K) (Y : σ → K), (∀ z, ‖φ z‖ = ‖z‖) ∧
         ∀ P : MvPolynomial σ F,
-          ‖MvPolynomial.eval₂ φ Y P‖ = ⨆ n : σ →₀ ℕ, ‖MvPolynomial.coeff n P‖
+          ‖MvPolynomial.eval₂ φ Y P‖ = ⨆ n : σ →₀ ℕ, ‖AddMonoidAlgebra.coeff P n‖
 
 def GaussBoundNoOperatorGeneric : Prop :=
   ∀ (K : Type) [NormedField K] [IsUltrametricDist K] [CharZero K] (p : ℕ) [Fact p.Prime]
@@ -25,7 +69,7 @@ def GaussBoundNoOperatorGeneric : Prop :=
     (F : MvPowerSeries (ZV ν r0 r1) K) (TT : Finset (ZMod (2 * ν))) (colN : ZMod (2 * ν) → ℕ)
     (hts : ∀ s, Fin (colN s) → ℕ) (hp : ∀ s c, hts s c ≤ r0) (I : ∀ s c, Fin (hts s c) → Fin r1),
     2 < p → ‖(p : K)‖ = (p : ℝ)⁻¹ → (∀ s, ‖u s‖ ≤ 1) → InClass (p : K) (hhS p u) F →
-    ∀ n, ‖MvPolynomial.coeff n (frameJet colN hts hp I F)‖ ≤
+    ∀ n, ‖AddMonoidAlgebra.coeff (frameJet colN hts hp I F) n‖ ≤
       (p : ℝ) ^ (-(excessGain (p : ℝ) TT (dSet TT) (fun s => (alG TT colN hts s : ℝ))
           (fun s => (capG TT colN hts s : ℝ))
           (deLoss p r0 r1 TT (alG TT colN hts) (lsG TT colN hts)) +
@@ -37,7 +81,7 @@ def GaussBoundArbitraryGeneric : Prop :=
     (F : MvPowerSeries (ZV ν r0 r1) K) (TT : Finset (ZMod (2 * ν))) (colN : ZMod (2 * ν) → ℕ)
     (hts : ∀ s, Fin (colN s) → ℕ) (hp : ∀ s c, hts s c ≤ r0) (I : ∀ s c, Fin (hts s c) → Fin r1),
     2 < p → ‖(p : K)‖ = (p : ℝ)⁻¹ → (∀ s, ‖u s‖ ≤ 1) → InClass (p : K) (hhS p u) F →
-    ∀ n, ‖MvPolynomial.coeff n (frameJet colN hts hp I F)‖ ≤
+    ∀ n, ‖AddMonoidAlgebra.coeff (frameJet colN hts hp I F) n‖ ≤
       (p : ℝ) ^ (-(gainG (p : ℝ) TT (oddT TT) (fun s => (alG TT colN hts s : ℝ))
           (fun s => (capG TT colN hts s : ℝ))
           (deLoss p r0 r1 TT (alG TT colN hts) (lsG TT colN hts)) -
@@ -54,7 +98,7 @@ def GaussBK : Prop :=
           (if s.val % 2 = 0 then
             min (hts s c) i - ((univ.image (I s c)) ∩ univ.filter (fun b : Fin r1 => b.val < i)).card
           else ((univ.image (I s c)) ∩ univ.filter (fun b : Fin r1 => b.val < i)).card)) *
-        MvPolynomial.coeff n (frameJet colN hts hp I F)‖ ≤
+        AddMonoidAlgebra.coeff (frameJet colN hts hp I F) n‖ ≤
       (p : ℝ) ^ (-(gainG (p : ℝ) TT (oddT TT) (fun s => (alG TT colN hts s : ℝ))
           (fun s => (capG TT colN hts s : ℝ))
           (deLoss p r0 r1 TT (alG TT colN hts) (lsG TT colN hts)) +
@@ -68,7 +112,7 @@ def KernelValuationBoundUltrametric : Prop :=
     2 < p → ‖(p : K)‖ = (p : ℝ)⁻¹ → ϖ ^ (p ^ 2 - 1) = (p : K) → (∀ s, ‖u s‖ ≤ 1) →
     InClass (p : K) (hhS p u) (MvPowerSeries.subst
       (fun x => MvPowerSeries.C ϖ * (MvPowerSeries.X x : MvPowerSeries (ZV ν r0 r1) K)) Th) →
-    ∀ n, ‖MvPolynomial.coeff n (frameJet colN hts hp I Th)‖ ≤
+    ∀ n, ‖AddMonoidAlgebra.coeff (frameJet colN hts hp I Th) n‖ ≤
       (p : ℝ) ^ (-(excessGain (p : ℝ) TT (dSet TT) (fun s => (alG TT colN hts s : ℝ))
         (fun s => (capG TT colN hts s : ℝ)) (deLoss p r0 r1 TT (alG TT colN hts) (lsG TT colN hts))))
 
@@ -80,7 +124,7 @@ def KernelBoundArbitrarySizes : Prop :=
     2 < p → ‖(p : K)‖ = (p : ℝ)⁻¹ → ϖ ^ (p ^ 2 - 1) = (p : K) → (∀ s, ‖u s‖ ≤ 1) →
     InClass (p : K) (hhS p u) (MvPowerSeries.subst
       (fun x => MvPowerSeries.C ϖ * (MvPowerSeries.X x : MvPowerSeries (ZV ν r0 r1) K)) Th) →
-    ∀ n, ‖MvPolynomial.coeff n (frameJet colN hts hp I Th)‖ ≤
+    ∀ n, ‖AddMonoidAlgebra.coeff (frameJet colN hts hp I Th) n‖ ≤
       (p : ℝ) ^ (-(gainG (p : ℝ) TT (oddT TT) (fun s => (alG TT colN hts s : ℝ))
         (fun s => (capG TT colN hts s : ℝ)) (deLoss p r0 r1 TT (alG TT colN hts) (lsG TT colN hts)) -
         ∑ s ∈ TT \ oddT TT, (alG TT colN hts s : ℝ)))
@@ -97,7 +141,7 @@ def KernelBK : Prop :=
           (if s.val % 2 = 0 then
             min (hts s c) i - ((univ.image (I s c)) ∩ univ.filter (fun b : Fin r1 => b.val < i)).card
           else ((univ.image (I s c)) ∩ univ.filter (fun b : Fin r1 => b.val < i)).card)) *
-        MvPolynomial.coeff n (frameJet colN hts hp I Th)‖ ≤
+        AddMonoidAlgebra.coeff (frameJet colN hts hp I Th) n‖ ≤
       (p : ℝ) ^ (-(gainG (p : ℝ) TT (oddT TT) (fun s => (alG TT colN hts s : ℝ))
         (fun s => (capG TT colN hts s : ℝ)) (deLoss p r0 r1 TT (alG TT colN hts) (lsG TT colN hts))))
 
@@ -119,11 +163,11 @@ def KernelBoundsGeneric : Prop :=
           MvPowerSeries (Bool × EV ν r0 r1) K)) (MvPowerSeries.map j be)) →
     ∀ (TT : Finset (ZMod (2 * ν))) (colN : ZMod (2 * ν) → ℕ) (hts : ∀ s, Fin (colN s) → ℕ)
       (hp : ∀ s c, hts s c ≤ r0) (I : ∀ s c, Fin (hts s c) → Fin r1) n,
-      ‖MvPolynomial.coeff n (frameJet colN hts hp I (thetaLog om oms ϖ μ (mvExp (-Φ) * U0)))‖ ≤
+      ‖AddMonoidAlgebra.coeff (frameJet colN hts hp I (thetaLog om oms ϖ μ (mvExp (-Φ) * U0))) n‖ ≤
           (p : ℝ) ^ (-(excessGain (p : ℝ) TT (dSet TT) (fun s => (alG TT colN hts s : ℝ))
             (fun s => (capG TT colN hts s : ℝ))
             (deLoss p r0 r1 TT (alG TT colN hts) (lsG TT colN hts)))) ∧
-      ‖MvPolynomial.coeff n (frameJet colN hts hp I (thetaLog om oms ϖ μ (mvExp (-Φ) * U0)))‖ ≤
+      ‖AddMonoidAlgebra.coeff (frameJet colN hts hp I (thetaLog om oms ϖ μ (mvExp (-Φ) * U0))) n‖ ≤
           (p : ℝ) ^ (-(gainG (p : ℝ) TT (oddT TT) (fun s => (alG TT colN hts s : ℝ))
             (fun s => (capG TT colN hts s : ℝ))
             (deLoss p r0 r1 TT (alG TT colN hts) (lsG TT colN hts)) -
@@ -134,22 +178,10 @@ def KernelBoundsGeneric : Prop :=
               min (hts s c) i -
                 ((univ.image (I s c)) ∩ univ.filter (fun b : Fin r1 => b.val < i)).card
             else ((univ.image (I s c)) ∩ univ.filter (fun b : Fin r1 => b.val < i)).card)) *
-          MvPolynomial.coeff n
-            (frameJet colN hts hp I (thetaLog om oms ϖ μ (mvExp (-Φ) * U0)))‖ ≤
+          AddMonoidAlgebra.coeff (frameJet colN hts hp I (thetaLog om oms ϖ μ (mvExp (-Φ) * U0)))
+            n‖ ≤
           (p : ℝ) ^ (-(gainG (p : ℝ) TT (oddT TT) (fun s => (alG TT colN hts s : ℝ))
             (fun s => (capG TT colN hts s : ℝ))
             (deLoss p r0 r1 TT (alG TT colN hts) (lsG TT colN hts))))
-
-def ChainModel : Prop :=
-  ∀ (p : ℕ) [Fact p.Prime], 2 < p →
-    ∃ (K0 : Type) (_ : NormedField K0) (_ : IsUltrametricDist K0) (_ : CharZero K0)
-      (_ : CompleteSpace K0) (σ : K0 →+* K0) (F be : MvPowerSeries (Fin 2) K0)
-      (K : Type) (_ : NormedField K) (_ : IsUltrametricDist K) (_ : CharZero K) (j : K0 →+* K)
-      (ϖ : K) (μ : PowerSeries K),
-      UnrOK K0 p σ ∧ (∃ ζ : K0, IsPrimitiveRoot ζ (p ^ 2 - 1)) ∧ IsLawOfLog p F ∧ BetaHyp p F be ∧
-        ¬ Simeq be 0 ∧ (∀ a, ‖j a‖ = ‖a‖) ∧ ϖ ^ (p ^ 2 - 1) = (p : K) ∧
-        PowerSeries.constantCoeff μ = 0 ∧
-        (PowerSeries.subst μ (lamF p ϖ) : PowerSeries K) = PowerSeries.X ∧
-        OmOK p 1 (fun _ _ => (1 : K)) (fun _ _ => (1 : K))
 
 end Formalism.InvariantFactorPaths.G7

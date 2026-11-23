@@ -1,8 +1,55 @@
-import Mathlib
-import ReciprocityTheory.ThetaQuasiPeriods.ThetaQuasiPeriodStatement
-import ReciprocityTheory.ThetaQuasiPeriods.Transl
-import ReciprocityTheory.ThetaQuasiPeriods.Change
-import Development.AbelianVarietyTheory.Proofs.ToricGeometry.NodupRootsOfDerivativeNeZero
+module
+
+public import Mathlib.Algebra.MvPolynomial.Eval
+public import Mathlib.Algebra.Polynomial.Derivative
+public import Mathlib.Algebra.Polynomial.Roots
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.Analysis.Calculus.FDeriv.Defs
+public import Mathlib.RingTheory.SimpleRing.Principal
+public import Development.AbelianVarietyTheory.Proofs.ToricGeometry.NodupRootsOfDerivativeNeZero
+public import Mathlib.Algebra.MvPolynomial.Funext
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import Mathlib.Topology.Algebra.MvPolynomial
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Filter Topology
 
@@ -12,11 +59,13 @@ open Polynomial
 
 variable {d : ℕ}
 
-open Classical in
 
+open Classical in
 noncomputable def partialProd (p : Polynomial (MvPolynomial (Fin d) ℂ))
-    (u : Set ((Fin d → ℂ) × ℂ)) (x : Fin d → ℂ) : ℂ[X] :=
-  (((p.map (MvPolynomial.eval x)).roots.filter fun y => (x, y) ∈ u).map fun y => X - C y).prod
+    (u : Set ((Fin d → ℂ) × ℂ)) (x : Fin d → ℂ) : ℂ[X] := by
+  classical
+  exact (((p.map (MvPolynomial.eval x)).roots.filter fun y => (x, y) ∈ u).map
+    fun y => X - C y).prod
 
 theorem card_roots_map {p : Polynomial (MvPolynomial (Fin d) ℂ)} (hp : p.Monic) (x : Fin d → ℂ) :
     (p.map (MvPolynomial.eval x)).roots.card = p.natDegree := by
@@ -34,7 +83,7 @@ theorem partialProd_mul_compl {p : Polynomial (MvPolynomial (Fin d) ℂ)} (hp : 
     partialProd p u x * partialProd p uᶜ x = p.map (MvPolynomial.eval x) := by
   classical
   unfold partialProd
-  rw [← Multiset.prod_add, ← Multiset.map_add]
+  rw [← Multiset.prod_add, ← Multiset.map_add (f := _)]
   convert Polynomial.prod_multiset_X_sub_C_of_monic_of_roots_card_eq (hp.map (MvPolynomial.eval x))
     (by rw [card_roots_map hp x, hp.natDegree_map]) using 3
   convert Multiset.filter_add_not (fun y => (x, y) ∈ u) (p.map (MvPolynomial.eval x)).roots using 2
@@ -90,14 +139,14 @@ theorem differentiableAt_coeff_partialProd {p : Polynomial (MvPolynomial (Fin d)
   have heq : (fun x => (partialProd p u x).coeff k) =ᶠ[𝓝 x₀]
       fun x => ((R₀.filter fun y => (x₀, y) ∈ u).map fun y => X - C (ψ y x)).prod.coeff k := by
     filter_upwards [hroots, hall] with x hx hxa
-    unfold partialProd
-    rw [hx, Multiset.filter_map, Multiset.map_map]
-    congr 3
-    refine Multiset.filter_congr fun y hy => ?_
-    refine hxa y (Multiset.mem_toFinset.mpr hy) ?_
-    have hmem : ψ y x ∈ (p.map (MvPolynomial.eval x)).roots := by
-      rw [hx]; exact Multiset.mem_map_of_mem _ hy
-    exact (Polynomial.mem_roots (hp.map _).ne_zero).mp hmem
+    have hfilter : (R₀.filter fun y => (x, ψ y x) ∈ u) =
+        (R₀.filter fun y => (x₀, y) ∈ u) := by
+      refine Multiset.filter_congr fun y hy => ?_
+      refine hxa y (Multiset.mem_toFinset.mpr hy) ?_
+      have hmem : ψ y x ∈ (p.map (MvPolynomial.eval x)).roots := by
+        rw [hx]; exact Multiset.mem_map_of_mem _ hy
+      exact (Polynomial.mem_roots (hp.map _).ne_zero).mp hmem
+    simp only [partialProd, hx, Multiset.filter_map, Multiset.map_map, Function.comp_def, hfilter]
   refine DifferentiableAt.congr_of_eventuallyEq ?_ heq
   exact differentiableAt_coeff_prod _ ψ
     (fun y hy => (hψ y (Multiset.mem_of_mem_filter hy)).1.differentiableAt) k
@@ -109,9 +158,9 @@ theorem eq_of_map_eval_eq_of_dense {a b : Polynomial (MvPolynomial (Fin d) ℂ)}
   have hfun : (fun x => MvPolynomial.eval x (a.coeff i)) = fun x => MvPolynomial.eval x (b.coeff i) := by
     refine Continuous.ext_on hU (MvPolynomial.continuous_eval _) (MvPolynomial.continuous_eval _) ?_
     intro x hx
-    have := congrArg (fun P => Polynomial.coeff P i) (h x hx)
+    have := congrArg (fun P => _root_.AddMonoidAlgebra.coeff (M := ℕ) P i) (h x hx)
     simpa [Polynomial.coeff_map] using this
-  exact congrArg (fun c => MvPolynomial.coeff _ c) (MvPolynomial.funext fun x => congrFun hfun x)
+  exact congrArg (fun c => AddMonoidAlgebra.coeff c _) (MvPolynomial.funext fun x => congrFun hfun x)
 
 end GlobalTheory.SimpleRoots
 
@@ -176,7 +225,7 @@ theorem isConnected_unramified_cover_of_irreducible :
     refine ⟨∑ k ∈ Finset.range (p.natDegree + 1), Polynomial.monomial k (a k), fun x hx => ?_⟩
     ext k
     rw [Polynomial.coeff_map, Polynomial.finsetSum_coeff]
-    simp only [Polynomial.coeff_monomial, Finset.sum_ite_eq', Finset.mem_range]
+    simp only [Polynomial.coeff_monomial_apply, Finset.sum_ite_eq', Finset.mem_range]
     split_ifs with hk'
     · exact (ha k x hx).symm
     · have := natDegree_partialProd_le hp s x

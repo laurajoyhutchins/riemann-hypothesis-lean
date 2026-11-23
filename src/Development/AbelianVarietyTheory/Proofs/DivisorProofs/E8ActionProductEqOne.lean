@@ -1,12 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsE8WeightedBundle
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsChartMember
-import ReciprocityTheory.AnalyticForms.RegularLocalRings.FinalTheorems
-import Development.AbelianVarietyTheory.Definitions.ModuliSpaces.GoodClass
-import Development.AbelianVarietyTheory.Definitions.ModuliSpaces.ExistsArBaseAway
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ClsLinCombSingle
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.CubeVal
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsE8WeightedBundle
+public import Development.AbelianVarietyTheory.Definitions.ModuliSpaces.ExistsArBaseAway
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
 import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.LBPull
+import Development.AbelianVarietyTheory.Definitions.Divisors.FromBase
+import Development.AbelianVarietyTheory.Definitions.Divisors.IsUnimodMod
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj IsLocalRing
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Out ReciprocityTheory.ChartRestriction.G.Geo.Tor
 open GlobalTheory.Toroidal GlobalTheory.LocM GlobalTheory.PolFan GlobalTheory.ZM GlobalTheory.SiegelTor GlobalTheory.TorRef GlobalTheory.PolDeg
@@ -30,12 +67,13 @@ theorem lam_mul_left (M : RigLB B) (cub : CubicalStr B M) {T : Over S} (x x' y :
   have ht := DVR.pullGen_isGen _ _ _ _ cub.isGen (lift x (lift x' y)).left
   have h0 := (GlobalTheory.CechPic.cls_eq_zero_iff (LB.isLB_linComb M.isLB _ _)).2 ⟨_, ht⟩
   rw [GlobalTheory.CechPic.cls_linComb M.isLB] at h0
-  have e := prod_cub x x' y (U := Multiplicative (FreeAbelianGroup (T.left ⟶ B.left)))
-    (fun ψ => Multiplicative.ofAdd (FreeAbelianGroup.of ψ))
-  have e' := congrArg (fun u => FreeAbelianGroup.lift (fun ψ => GlobalTheory.CechPic.pull ψ (GlobalTheory.CechPic.cls M.L M.isLB))
+  have e := prod_cub x x' y (U := Multiplicative (FreeAddCommGroup (T.left ⟶ B.left)))
+    (fun ψ => Multiplicative.ofAdd (FreeAddCommGroup.of ψ))
+  have e' := congrArg (fun u => FreeAddCommGroup.lift (fun ψ => GlobalTheory.CechPic.pull ψ (GlobalTheory.CechPic.cls M.L M.isLB))
     (Multiplicative.toAdd u)) e
-  simp only [toAdd_prod, toAdd_zpow, toAdd_ofAdd, toAdd_mul, toAdd_inv, map_sum, map_zsmul, map_add, map_neg,
-    FreeAbelianGroup.lift_apply_of] at e'
+
+  simp only [toAdd_prod, toAdd_zpow, toAdd_ofAdd, toAdd_mul, toAdd_inv, map_sum, map_zsmul, map_add (f := _), map_neg,
+  FreeAddCommGroup.lift_apply_of] at e'
   have e'' := e'.symm.trans h0
   simp only [lam, pt]
   linear_combination (norm := abel) e''
@@ -126,9 +164,10 @@ theorem cechPicard_pullback_e8Bundle_class (W : Matrix (Fin 8) (Fin 8) ℤ) {A :
     (L : LB A.left) (hL : L.IsLB) (M : RigLB B) (h : IsE8WeightedBundle W pr L M.L) {T : Over S} (s : T ⟶ A) :
     GlobalTheory.CechPic.pull s.left (GlobalTheory.CechPic.cls L hL) =
       bil (GlobalTheory.CechPic.cls M.L M.isLB) W (fun a => s ≫ pr a) (fun b => s ≫ pr b) := by
+
   rw [(GlobalTheory.CechPic.cls_eq_iff hL (LB.isLB_linComb M.isLB (K := (Fin 8 × Fin 8) × Fin 4)
-    (fun k => lamPts (pr k.1.1) (pr k.1.2) k.2) (fun k => -(W k.1.1 k.1.2 * negε k.2)))).2 h,
-    GlobalTheory.CechPic.cls_linComb M.isLB, map_sum]
+  (fun k => lamPts (pr k.1.1) (pr k.1.2) k.2) (fun k => -(W k.1.1 k.1.2 * negε k.2)))).2 h,
+  GlobalTheory.CechPic.cls_linComb M.isLB, map_sum]
   have hm : ∀ x y : A ⟶ B, s.left ≫ (x * y).left = ((s ≫ x) * (s ≫ y)).left := fun x y => by
     rw [← Over.comp_left, MonObj.comp_mul]
   have h1 : s.left ≫ (1 : A ⟶ B).left = (1 : T ⟶ B).left := by

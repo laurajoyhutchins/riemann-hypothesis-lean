@@ -1,4 +1,46 @@
-import Formalism.LocalToGlobal.CharacterGerms.RowTiePDescJet
+module
+
+public import Formalism.LocalToGlobal.CharacterGerms.RowTiePDescJet
+public import Formalism.LocalToGlobal.CharacterGerms.RowTieDesc
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -49,7 +91,7 @@ theorem descSpanSt_of (hS : HaSpanSt) : DescSpanSt Xo c := by
     rw [MvPolynomial.map_map, RingHom.ext_int (ι.comp (Int.castRingHom T.Fr)) (Int.castRingHom C)]
   let Ls := chartLetterSystem C3 V ι a
   let tc : (Fin n × Fin (chD C3.ch) →₀ ℕ) → C := fun μ =>
-    MvPolynomial.coeff μ (MvPowerSeries.trunc' C (DescP.cst P.totalDegree) f)
+    AddMonoidAlgebra.coeff (MvPowerSeries.trunc' C (DescP.cst P.totalDegree) f) μ
   have hP2 : ∀ g : PS C n (chD C3.ch),
       Y.nab Ls n g P = ∑ i, cc i * Y.nab Ls n g (MvPolynomial.map ι (Q i)) := by
     intro g
@@ -92,7 +134,7 @@ theorem descSpanSt_of (hS : HaSpanSt) : DescSpanSt Xo c := by
     refine ⟨hZ (e j).2 T.Fr, fun μ => ?_⟩
     simp only [Q]
     rw [MvPolynomial.coeff_map, eq_intCast]
-    exact ⟨((MvPolynomial.coeff μ (Z (e j).2) : ℤ) : T.V), map_intCast _ _⟩
+    exact ⟨((AddMonoidAlgebra.coeff (Z (e j).2) μ : ℤ) : T.V), map_intCast _ _⟩
   · intro j μ
     rw [MvPowerSeries.coeff_monomial]
     split_ifs

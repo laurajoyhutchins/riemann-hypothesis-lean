@@ -1,10 +1,62 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.FlagPairDefinitePartLattice
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.ChartGen
-import Development.AbelianVarietyTheory.PublishedTheorems.DiscreteSeriesUnitary₂.MaxMass
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.NormalFormDualOrthogonalLast
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.HermitianLatticeDiscriminantOrderNeZeroUnimodula
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.LatticeQuotientGensAndIntermediateCount
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.NormalFormDualOrthogonalLast
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.HermitianLatticeDiscriminantOrderNeZeroUnimodula
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.LatticeQuotientGensAndIntermediateCount
+import Formalism.HermitianLattices.HermitianLatticesProofs.DualBasic
+import Formalism.HermitianLattices.HermitianLatticesProofs.GenusBasic
+import Formalism.HermitianLattices.HermitianLatticesProofs.GenusCovol
+import Formalism.HermitianLattices.HermitianLatticesProofs.IndexBasic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField Formalism.HermitianLatticeCounting.S6 GlobalTheory.HermLat GlobalTheory.DegCnt
 open scoped Pointwise ENNReal Classical
@@ -123,13 +175,13 @@ theorem genBy_dual (h : V →ₗ⋆[K] V →ₗ[K] K) {X Y : Submodule (𝓞 K) 
       intro y hy
       rw [hY] at hy
       obtain ⟨a, ha, s, hs, rfl⟩ := Submodule.mem_sup.1 hy
-      rw [map_add, LinearMap.add_apply]
+      rw [map_add (f := _), LinearMap.add_apply]
       refine add_mem ((Formalism.HermitianLatticesTheory.dualBasic_mem_dual h X v).1 hv a ha) ?_
       clear hy
       induction hs using Submodule.span_induction with
       | mem s hs => exact hv' ⟨s, hs⟩ trivial
       | zero => simp
-      | add a b _ _ ha hb => rw [map_add, LinearMap.add_apply]; exact add_mem ha hb
+      | add a b _ _ ha hb => rw [map_add (f := _), LinearMap.add_apply]; exact add_mem ha hb
       | smul c a _ ha =>
         rw [Formalism.HermitianLatticesTheory.genusBasic_hsmul_left Formalism.HermitianLatticesTheory.genusCovol_hinj Formalism.HermitianLatticesTheory.star_algebraMap_ringOfIntegers_mem_range]
         rw [← Algebra.smul_def]
@@ -156,23 +208,38 @@ theorem fixLat_isLattice {H : HermSpace K V} {g : 𝓞 K} (hg : g ≠ 0) {L' L :
     {Γ : Submodule (𝓞 K) (V × V)} (hL' : Submodule.IsLattice K L') (hL : Submodule.IsLattice K L)
     (hΓ : IsModIso H g L' L Γ) : Submodule.IsLattice K (fixLat Γ) := by
   refine ⟨hL.fg.of_le (fixLat_le hΓ).2, ?_⟩
-  rw [eq_top_iff, ← hL.span_eq_top, Submodule.span_le]
-  intro y hy
-  have hn := GlobalTheory.Mass.DiscOrder.idxN_ne_zero hL' hL.fg
-  set n : 𝓞 K := ((GlobalTheory.Mass.idxN L L' : ℕ) : 𝓞 K) with hn'
-  have hn0 : n ≠ 0 := Nat.cast_ne_zero.2 hn
-  have h1 : n • y ∈ L' := GlobalTheory.Mass.LatticeGens.idxN_smul_mem L' L hy
-  have h2 : (g * n) • y ∈ fixLat Γ := by
-    rw [mul_smul]
-    exact hΓ.2.1 ⟨⟨_, h1, rfl⟩, ⟨_, L.smul_mem n hy, rfl⟩⟩
-  have h3 : algebraMap (𝓞 K) K (g * n) ≠ 0 := by simpa using ⟨hg, hn0⟩
-  have h4 : y = (algebraMap (𝓞 K) K (g * n))⁻¹ • ((g * n) • y) := by
-    rw [← algebraMap_smul K (g * n) y, smul_smul, inv_mul_cancel₀ h3, one_smul]
-  rw [h4]
-  exact Submodule.smul_mem _ _ (Submodule.subset_span h2)
+  intro s hs hli
+  exact (LinearIndependent.iff_fractionRing _ _).mp hli
+
+theorem fixLat_isFullLattice {H : HermSpace K V} {g : 𝓞 K} (hg : g ≠ 0)
+    {L' L : Submodule (𝓞 K) V} {Γ : Submodule (𝓞 K) (V × V)}
+    (hL' : Submodule.IsFullLattice K L') (hL : Submodule.IsFullLattice K L)
+    (hΓ : IsModIso H g L' L Γ) : Submodule.IsFullLattice K (fixLat Γ) := by
+  letI : Submodule.IsLattice K (fixLat Γ) :=
+    fixLat_isLattice hg hL'.toIsLattice hL.toIsLattice hΓ
+  obtain ⟨d, hd, hdL⟩ := Formalism.HermitianLatticesTheory.indexBasic_denom
+    (nonZeroDivisors (𝓞 K)) L L' hL.fg (by
+      rw [Formalism.HermitianLatticesTheory.indexBasic_locS_top (K := K) L'
+        (Submodule.IsFullLattice.span_eq_top (self := hL'))]
+      exact le_top)
+  have hd0 : d ≠ 0 := nonZeroDivisors.ne_zero hd
+  have hgd : algebraMap (𝓞 K) K (g * d) ≠ 0 := by
+    simpa using (mul_ne_zero hg hd0)
+  refine ⟨?_⟩
+  rw [← Submodule.IsFullLattice.span_eq_top (self := hL)]
+  refine le_antisymm (Submodule.span_mono (fixLat_le hΓ).2) ?_
+  rw [Submodule.span_le]
+  intro v hv
+  have hv' : (g * d) • v ∈ fixLat Γ := by
+    apply hΓ.2.1
+    exact ⟨⟨d • v, hdL v hv, by change g • (d • v) = (g * d) • v; rw [mul_smul]⟩,
+      ⟨d • v, L.smul_mem d hv, by change g • (d • v) = (g * d) • v; rw [mul_smul]⟩⟩
+  have he : v = (algebraMap (𝓞 K) K (g * d))⁻¹ • ((g * d) • v) := by
+    rw [← algebraMap_smul K (g * d), smul_smul, inv_mul_cancel₀ hgd, one_smul]
+  rw [SetLike.mem_coe, he]
+  exact Submodule.smul_mem _ _ (Submodule.subset_span hv')
 
 omit [NumberField K] in
-
 theorem div_mem_dual {H : HermSpace K V} {g : 𝓞 K} (hg : g ≠ 0) {L' L : Submodule (𝓞 K) V}
     {Γ : Submodule (𝓞 K) (V × V)} (hΓ : IsModIso H g L' L Γ) {s y : V} (h : (s, y) ∈ Γ) :
     (algebraMap (𝓞 K) K g)⁻¹ • (s - y) ∈ Formalism.HermitianLatticesTheory.dual H.B.flip (fixLat Γ) := by
@@ -185,8 +252,8 @@ theorem div_mem_dual {H : HermSpace K V} {g : 𝓞 K} (hg : g ≠ 0) {L' L : Sub
   change _ = _ * (H.B s a - H.B y a)
   rw [ht, map_mul, ← mul_assoc, inv_mul_cancel₀ h3, one_mul]
 
-omit [NumberField K] [IsScalarTower (𝓞 K) K V] in
 
+omit [NumberField K] [IsScalarTower (𝓞 K) K V] in
 theorem graph_le {H : HermSpace K V} {g : 𝓞 K} {L' L : Submodule (𝓞 K) V}
     {Γ₁ Γ₂ : Submodule (𝓞 K) (V × V)} (h1 : IsModIso H g L' L Γ₁) (h2 : IsModIso H g L' L Γ₂)
     (hf : fixLat Γ₁ = fixLat Γ₂) {S : Set V} (hS : L' = fixLat Γ₁ ⊔ Submodule.span (𝓞 K) S)
@@ -214,7 +281,7 @@ theorem main : ∀ (K V : Type) [Field K] [NumberField K] [StarRing K] [AddCommG
   have hg0 : (g : 𝓞 K) ≠ 0 := Nat.cast_ne_zero.2 (by omega)
   have hgK : algebraMap (𝓞 K) K g ≠ 0 := by simpa using (by omega : g ≠ 0)
   obtain ⟨an, -, -, hint, -⟩ := Formalism.HermitianLatticesTheory.dualBasic (𝓞 K) K V H.B.flip hs Formalism.HermitianLatticesTheory.star_algebraMap_ringOfIntegers_mem_range
-  have hLa : Submodule.IsLattice K La := hd₀' ▸ fixLat_isLattice hg0 hd₀.1.1 hL₀.1 hd₀.2.2.1
+  have hLa : Submodule.IsFullLattice K La := hd₀' ▸ fixLat_isFullLattice hg0 hd₀.1.1 hL₀.1 hd₀.2.2.1
   have hle : La ≤ L₀ := hd₀' ▸ (fixLat_le hd₀.2.2.1).2
   have hx : GlobalTheory.Mass.idxN L₀ La = x := hd₀' ▸ hd₀.2.2.2.1
   have hgen : GenBy L₀ La j := hd₀' ▸ hd₀.2.2.2.2

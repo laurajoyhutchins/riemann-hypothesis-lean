@@ -1,4 +1,47 @@
-import Formalism.GradedWeylDivisibility.StatementA
+module
+
+public import Formalism.GradedWeylDivisibility.StatementA
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MvPolynomial
 
@@ -11,11 +54,6 @@ def RowDivClosed {R : Type*} [CommRing R] {r n : ℕ} (M : Submodule R (MvPolyno
 
 def fockQ {σ : Type*} (f g : MvPolynomial σ ℚ) : ℚ :=
   ∑ m ∈ f.support, f.coeff m * g.coeff m * ((∏ k ∈ m.support, (m k).factorial : ℕ) : ℚ)
-
-def bidetSpan (R : Type*) [CommRing R] (r n : ℕ) (ν : Fin n → ℕ) :
-    Submodule R (MvPolynomial (Fin r × Fin n) R) :=
-  Submodule.span R {f | ∃ (K : ℕ) (sz : Fin K → ℕ) (hsz : ∀ k, sz k ≤ n) (I : ∀ k, Fin (sz k) → Fin r),
-      shapeDeg sz = ν ∧ f = bideterminant R sz hsz I}
 
 def HWLine : Prop :=
   ∀ (K : Type) [Field K] [Infinite K] (r n : ℕ) (hn : n ≤ r) (ν : Fin n → ℕ), Antitone ν →
@@ -47,9 +85,6 @@ def HWInClosed : Prop :=
     ∀ M : Submodule ℚ (MvPolynomial (Fin r × Fin n) ℚ), M ≤ dualWeyl ℚ r n ν → RowDivClosed M → M ≠ ⊥ →
       hw ℚ hn ν ∈ M
 
-def NablaTallZero : Prop :=
-  ∀ (r n : ℕ) (ν : Fin n → ℕ), (∃ s : Fin n, r ≤ s.val ∧ 0 < ν s) → dualWeyl ℚ r n ν = ⊥
-
 def ClosedEqNabla : Prop :=
   ∀ (r n : ℕ) (hn : n ≤ r) (ν : Fin n → ℕ), Antitone ν →
     ∀ M : Submodule ℚ (MvPolynomial (Fin r × Fin n) ℚ), M ≤ dualWeyl ℚ r n ν → RowDivClosed M →
@@ -57,16 +92,6 @@ def ClosedEqNabla : Prop :=
 
 def WeylEqNablaQ : Prop :=
   ∀ (r n : ℕ) (hn : n ≤ r) (ν : Fin n → ℕ), Antitone ν → weyl ℚ r n hn ν = dualWeyl ℚ r n ν
-
-def BideterminantSpanClosed : Prop :=
-  ∀ (R : Type) [CommRing R] (r n : ℕ) (ν : Fin n → ℕ), RowDivClosed (bidetSpan R r n ν)
-
-def HighestWeightVectorMemBideterminantSpan : Prop :=
-  ∀ (R : Type) [CommRing R] (r n : ℕ) (hn : n ≤ r) (ν : Fin n → ℕ), Antitone ν →
-    hw R hn ν ∈ bidetSpan R r n ν
-
-def DualWeylModuleEqBideterminantSpanRat : Prop :=
-  ∀ (r n : ℕ) (ν : Fin n → ℕ), Antitone ν → dualWeyl ℚ r n ν = bidetSpan ℚ r n ν
 
 def WeylRationalOf : Prop := WeylEqNablaQ → WeylRational
 

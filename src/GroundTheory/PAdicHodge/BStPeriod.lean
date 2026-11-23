@@ -1,7 +1,50 @@
-import Mathlib
-import GroundTheory.PAdicHodge.ThetaBDeRhamPlusFieldCycloUnitBdRZpow
-import GroundTheory.PAdicHodge.LogMul
-import GroundTheory.PAdicHodge.TiltValuation
+module
+
+public import GroundTheory.PAdicHodge.BdRAlgCl
+public import GroundTheory.PAdicHodge.UntiltFrobeniusEquivSymmEpsilonNeOne
+public import GroundTheory.PAdicHodge.LogMul
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -15,12 +58,12 @@ section Cp
 variable {p : ℕ} [hp : Fact p.Prime]
 
 local notation "𝒪" => normInteger ℂ_[p]
-local notation "𝒪♭" => PreTilt (normInteger ℂ_[p]) p
-local notation "𝔹" => BDeRhamPlus (normInteger ℂ_[p]) p
-local notation "𝔪" => maximalIdeal (BDeRhamPlus (normInteger ℂ_[p]) p)
+local notation "𝒪♭" => PreTilt 𝒪 p
+local notation "𝔹" => BDeRhamPlus 𝒪 p
+local notation "𝔪" => maximalIdeal 𝔹
+
 
 variable (p) in
-
 def pRootSeq : ℕ → ℂ_[p]
   | 0 => p
   | (n + 1) => (IsAlgClosed.exists_pow_nat_eq (pRootSeq n) hp.out.pos).choose
@@ -44,16 +87,16 @@ theorem norm_pRootSeq_le (n : ℕ) : ‖pRootSeq p n‖ ≤ 1 := by
   have : 1 < ‖pRootSeq p n‖ ^ p ^ n := one_lt_pow₀ hlt (pow_ne_zero _ hp.out.ne_zero)
   linarith
 
-variable (p) in
 
+variable (p) in
 def pRootSeqInt (n : ℕ) : 𝒪 :=
   ⟨pRootSeq p n, mem_normInteger.2 (norm_pRootSeq_le n)⟩
 
 theorem pRootSeqInt_succ_pow (n : ℕ) : pRootSeqInt p (n + 1) ^ p = pRootSeqInt p n :=
   Subtype.ext (by simp [pRootSeqInt, pRootSeq_succ_pow])
 
-variable (p) in
 
+variable (p) in
 def pFlat : 𝒪♭ :=
   IsPerfectoidField.ofCompatible p (pRootSeqInt p) pRootSeqInt_succ_pow
 
@@ -83,11 +126,9 @@ theorem qBdR_mem : qBdR (p := p) ∈ 𝔪 := by
   simp only [eq_ratCast, Rat.cast_inv, Rat.cast_natCast, h]
   rw [inv_mul_cancel₀ natCast_p_ne_zero_cp, sub_self]
 
+
 variable (p) in
-
 def uBdR : 𝔹 := logOnePlus 𝔪 (qBdR (p := p)) qBdR_mem
-
-theorem uBdR_mem : uBdR p ∈ 𝔪 := logOnePlus_mem qBdR_mem
 
 variable {K : IntermediateField ℚ_[p] (PadicAlgCl p)}
 

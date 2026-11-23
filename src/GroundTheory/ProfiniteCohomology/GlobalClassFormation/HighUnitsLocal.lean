@@ -1,8 +1,53 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.ClassFormations.HighFormations
-import GroundTheory.ProfiniteCohomology.GlobalClassFormation.SignsCup
+module
+
+public import GroundTheory.ProfiniteCohomology.GlobalClassFormation.LocalInvariants
+public import GroundTheory.ProfiniteCohomology.ClassFormations.HighFormations
 import GroundTheory.ProfiniteCohomology.GlobalClassFormation.CupDecompositionGlobal
-import GroundTheory.ProfiniteCohomology.GlobalClassFormation.IdeleLimits.SubsingletonCohomologyThreeInfiniteDecomposition
+import GroundTheory.ProfiniteCohomology.GlobalClassFormation.SignsCup
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RepresentationTheory.Homological.GroupCohomology.FiniteCyclic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
@@ -42,26 +87,26 @@ section Real
 
 variable (v : InfinitePlace K.1) (hv : v.IsReal)
 
-include hv in
 
+include hv in
 theorem card_gal_infAlgClosure_of_isReal :
     Fintype.card Gal(AlgebraicClosure v.Completion/v.Completion) = 2 := by
-  obtain ⟨s, hs⟩ := IsAlgClosed.exists_eq_mul_self (-1 : AlgebraicClosure v.Completion)
-  obtain ⟨σ, hσ⟩ := exists_gal_ne_of_sq_eq_neg_one v hv (s := s) (by rw [sq, ← hs])
+  obtain ⟨s, hs⟩ := IsAlgClosed.exists_pow_nat_eq (-1 : AlgebraicClosure v.Completion) (n := 2) (by decide)
+  obtain ⟨σ, hσ⟩ := exists_gal_ne_of_sq_eq_neg_one v hv (s := s) hs
   have h1 : 1 < Fintype.card Gal(AlgebraicClosure v.Completion/v.Completion) :=
     Fintype.one_lt_card_iff.2 ⟨σ, 1, fun h => hσ (by rw [h]; rfl)⟩
   have h2 := card_gal_le_two v.Completion (AlgebraicClosure v.Completion) (infAlgClosure_finrank_le_two v)
   omega
 
-include hv in
 
+include hv in
 theorem isCyclic_gal_infAlgClosure_of_isReal :
     IsCyclic Gal(AlgebraicClosure v.Completion/v.Completion) :=
   isCyclic_of_prime_card (p := 2)
     (by rw [Nat.card_eq_fintype_card, card_gal_infAlgClosure_of_isReal v hv])
 
-include hv in
 
+include hv in
 theorem natCard_localGaloisCohomology_two_of_isReal :
     Nat.card (localGaloisCohomology K 2 (.inl v)) = 2 := by
   change Nat.card (cohomology (galUnitsZ v.Completion (AlgebraicClosure v.Completion)) 2) = 2
@@ -86,8 +131,8 @@ theorem natCard_localGaloisCohomology_two_of_isReal :
     rw [quadraticInv_apply, quadraticInv_apply, quadraticInvFun_of_ne_zero _ _ hx,
       quadraticInvFun_of_ne_zero _ _ hx0]
 
-include hv in
 
+include hv in
 theorem subsingleton_localGaloisCohomology_of_isReal_of_odd {r : ℕ} (hr : Odd r) :
     Subsingleton (localGaloisCohomology K r (.inl v)) := by
   classical
@@ -104,8 +149,8 @@ theorem subsingleton_localGaloisCohomology_of_isReal_of_odd {r : ℕ} (hr : Odd 
       (Rep.FiniteCyclicGroup.groupCohomologyIsoOdd A g hg 1 odd_one).symm
   exact e.toLinearEquiv.injective.subsingleton
 
-include hv in
 
+include hv in
 theorem natCard_localGaloisCohomology_of_isReal_of_even {r : ℕ} (hr0 : r ≠ 0) (hr : Even r) :
     Nat.card (localGaloisCohomology K r (.inl v)) = 2 := by
   classical

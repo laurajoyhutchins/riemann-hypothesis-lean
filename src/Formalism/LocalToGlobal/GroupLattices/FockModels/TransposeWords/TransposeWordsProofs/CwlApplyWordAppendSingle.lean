@@ -1,5 +1,55 @@
-import Formalism.LocalToGlobal.GroupLattices.FockModels.TransposeWords.FockPairingHighestWeight
-import Formalism.GradedWeylDivisibility.FockSpaceTableaux.ColSums
+module
+
+public import Formalism.GradedWeylDivisibility.StatementE
+public import Formalism.GradedWeylDivisibility.FockSpaceTableaux.ColSums
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Monotonicity.Lemmas
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Presheaf
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open MvPolynomial
 
@@ -20,11 +70,11 @@ def cwl_iota : MvPolynomial (Fin r × Fin n) R →+*
 def cwl_coeffT (d : Fin r × Fin n →₀ ℕ)
     (G : MvPolynomial (Fin r × Fin n) (MvPolynomial (Fin r × Fin n) R)) :
     MvPolynomial (Fin r × Fin n) R :=
-  ∑ m ∈ G.support, monomial m (coeff d (coeff m G))
+  ∑ m ∈ G.support, monomial m (AddMonoidAlgebra.coeff (AddMonoidAlgebra.coeff G m) d)
 
 theorem cwl_coeff_coeffT (d m : Fin r × Fin n →₀ ℕ)
     (G : MvPolynomial (Fin r × Fin n) (MvPolynomial (Fin r × Fin n) R)) :
-    coeff m (cwl_coeffT d G) = coeff d (coeff m G) := by
+    AddMonoidAlgebra.coeff (cwl_coeffT d G) m = AddMonoidAlgebra.coeff (AddMonoidAlgebra.coeff G m) d := by
   classical
   unfold cwl_coeffT
   rw [coeff_sum]
@@ -32,16 +82,12 @@ theorem cwl_coeff_coeffT (d m : Fin r × Fin n →₀ ℕ)
   rw [Finset.sum_ite_eq']
   split_ifs with h
   · rfl
-  · rw [notMem_support_iff.mp h, coeff_zero]
+  · rw [notMem_support_iff.mp h]
+    simp
 
 theorem cwl_coeffT_add (d : Fin r × Fin n →₀ ℕ)
     (G H : MvPolynomial (Fin r × Fin n) (MvPolynomial (Fin r × Fin n) R)) :
     cwl_coeffT d (G + H) = cwl_coeffT d G + cwl_coeffT d H := by
-  ext m
-  simp [cwl_coeff_coeffT]
-
-theorem cwl_coeffT_zero (d : Fin r × Fin n →₀ ℕ) :
-    cwl_coeffT (R := R) d 0 = 0 := by
   ext m
   simp [cwl_coeff_coeffT]
 
@@ -52,7 +98,7 @@ theorem cwl_coeffT_sum {ι : Type*} (s : Finset ι) (d : Fin r × Fin n →₀ �
   simp [cwl_coeff_coeffT, coeff_sum]
 
 theorem cwl_coeffT_monomial (d u : Fin r × Fin n →₀ ℕ) (c : MvPolynomial (Fin r × Fin n) R) :
-    cwl_coeffT d (monomial u c) = monomial u (coeff d c) := by
+    cwl_coeffT d (monomial u c) = monomial u (AddMonoidAlgebra.coeff c d) := by
   classical
   ext m
   rw [cwl_coeff_coeffT, coeff_monomial, coeff_monomial]
@@ -152,8 +198,9 @@ theorem cwl_coeffT_Phi (L : List (Fin r × Fin r × (Fin r × Fin n)))
       rw [List.nodup_append] at hL'
       intro h
       exact hL'.2.2 v h v (by simp) rfl
+
     rw [cwl_Phi_append_single, cwl_tau_iota, Polynomial.eval₂_eq_sum, Polynomial.sum_def,
-      map_sum, cwl_coeffT_sum]
+    map_sum, cwl_coeffT_sum]
     have key : ∀ (j : ℕ) (c : MvPolynomial (Fin r × Fin n) R),
         cwl_coeffT d (cwl_Phi w (cwl_iota c * C (X (s, a, v).2.2) ^ j)) =
           if j ≤ d v then cwl_coeffT (d - Finsupp.single v j) (cwl_Phi w (cwl_iota c)) else 0 := by
@@ -208,7 +255,7 @@ theorem cwl_coeffT_Phi (L : List (Fin r × Fin r × (Fin r × Fin n)))
 
 theorem cw_eval_coeffT (d : Fin r × Fin n →₀ ℕ) (y : Fin r × Fin n → R)
     (G : MvPolynomial (Fin r × Fin n) (MvPolynomial (Fin r × Fin n) R)) :
-    eval y (cwl_coeffT d G) = coeff d (eval (fun v => C (y v)) G) := by
+    eval y (cwl_coeffT d G) = AddMonoidAlgebra.coeff (eval (fun v => C (y v)) G) d := by
   induction G using MvPolynomial.induction_on' with
   | monomial u c =>
     rw [cwl_coeffT_monomial, eval_monomial, eval_monomial]
@@ -216,7 +263,7 @@ theorem cw_eval_coeffT (d : Fin r × Fin n →₀ ℕ) (y : Fin r × Fin n → R
         C (u.prod fun v k => y v ^ k) := by
       simp [Finsupp.prod, map_prod]
     rw [h, mul_comm c, coeff_C_mul, mul_comm]
-  | add p q hp hq => rw [cwl_coeffT_add, map_add, map_add, coeff_add, hp, hq]
+  | add p q hp hq => rw [cwl_coeffT_add, map_add (f := _), map_add (f := _), MvPolynomial.coeff_add, hp, hq]
 
 def cwUpd (l : Fin r × Fin r × (Fin r × Fin n)) (y : Fin r × Fin n → MvPolynomial (Fin r × Fin n) R) :
     Fin r × Fin n → MvPolynomial (Fin r × Fin n) R :=
@@ -316,7 +363,7 @@ theorem cw_mem_letters (l : Fin r × Fin r × (Fin r × Fin n)) :
     have e3' : s.val < a.val := e3
     subst e1'
     refine ⟨s', a', ?_⟩
-    rw [dif_pos ⟨by omega, by omega⟩]
+    rw [dite_eq_left ⟨by omega, by omega⟩]
     simp only [Option.some.injEq, Prod.mk.injEq, and_true]
     exact Fin.ext e2'
 

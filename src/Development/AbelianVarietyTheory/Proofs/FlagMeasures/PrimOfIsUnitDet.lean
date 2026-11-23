@@ -1,4 +1,54 @@
-import Mathlib
+module
+
+public import Mathlib.LinearAlgebra.Matrix.Determinant.Basic
+public import Mathlib.RingTheory.Ideal.Defs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
+
+@[expose] public section
 
 namespace GlobalTheory.GramCount
 
@@ -19,7 +69,7 @@ theorem ip_add_left (x x' y : Fin n → A) : ip c (x + x') y = ip c x y + ip c x
   simp only [ip, Pi.add_apply, add_mul, Finset.sum_add_distrib]
 
 theorem ip_add_right (x y y' : Fin n → A) : ip c x (y + y') = ip c x y + ip c x y' := by
-  simp only [ip, Pi.add_apply, map_add, mul_add, Finset.sum_add_distrib]
+  simp only [ip, Pi.add_apply, map_add (f := _), mul_add, Finset.sum_add_distrib]
 
 theorem ip_sub_left (x x' y : Fin n → A) : ip c (x - x') y = ip c x y - ip c x' y := by
   simp only [ip, Pi.sub_apply, sub_mul, Finset.sum_sub_distrib]
@@ -53,11 +103,13 @@ theorem ip_sum_left {ι : Type} (s : Finset ι) (x : ι → Fin n → A) (y : Fi
 theorem ip_sum_right {ι : Type} (s : Finset ι) (x : Fin n → A) (y : ι → Fin n → A) :
     ip c x (∑ a ∈ s, y a) = ∑ a ∈ s, ip c x (y a) := by
   unfold ip
+
   simp only [Finset.sum_apply, map_sum, Finset.mul_sum]
   exact Finset.sum_comm
 
 theorem cj_ip (hc : ∀ u, c (c u) = u) (x y : Fin n → A) : c (ip c x y) = ip c y x := by
   unfold ip
+
   rw [map_sum]
   refine Finset.sum_congr rfl fun i _ => ?_
   rw [map_mul, hc, mul_comm]
@@ -66,6 +118,7 @@ theorem map_ip {B : Type} [CommRing B] (c' : B →+* B) (φ : A →+* B)
     (hφ : ∀ u, φ (c u) = c' (φ u)) (x y : Fin n → A) :
     φ (ip c x y) = ip c' (fun i => φ (x i)) (fun i => φ (y i)) := by
   unfold ip
+
   rw [map_sum]
   refine Finset.sum_congr rfl fun i _ => ?_
   rw [map_mul, hφ]
@@ -183,7 +236,7 @@ theorem card_fixed_sq (hc : ∀ u, c (c u) = u) {ω : A} (hω : IsUnit (ω - c �
       right_inv := fun p => by
         obtain ⟨⟨f, hf0⟩, ⟨g, hg0⟩⟩ := p
         have key : v • (f + ω • g - σ (f + ω • g)) = g := by
-          rw [map_add, hs, hf0, hg0, add_sub_add_left_eq_sub, ← sub_smul, smul_smul, mul_comm,
+          rw [map_add (f := _), hs, hf0, hg0, add_sub_add_left_eq_sub, ← sub_smul, smul_smul, mul_comm,
             hv1, one_smul]
         refine Prod.ext (Subtype.ext ?_) (Subtype.ext ?_)
         · show f + ω • g - ω • v • (f + ω • g - σ (f + ω • g)) = f

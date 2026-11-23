@@ -1,5 +1,48 @@
-import ReciprocityTheory.DualLattices.CotangentSurjective
-import ReciprocityTheory.DualLattices.VDetEqOneOfIntegral
+module
+
+public import ReciprocityTheory.DualLattices.VDetEqOneOfIntegral
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.DualLattices.TensorSpan
+
+@[expose] public section
 
 noncomputable section
 
@@ -27,23 +70,5 @@ def projPts {C : Type} [Field C] {n s : ℕ} (M : Set (Fin n × Fin s → C)) (�
 def IsLaStable {C : Type} [Field C] {v : Valuation C NNReal} {n s : ℕ} (a : Fin n → C)
     (M : Lat v (Fin n × Fin s)) : Prop :=
   ∀ w ∈ M.pts, (fun y : Fin n × Fin s => a y.1 * w y) ∈ M.pts
-
-def DiscriminantColengthStatement : Prop :=
-  ∀ (C : Type) [Field C] [IsAlgClosed C] (v : Valuation C NNReal) (R : Type) [CommRing R]
-    [Algebra R C], v.Integers R → (∃ c : C, 0 < v c ∧ v c < 1) →
-    ∀ (n : ℕ) (a : Fin n → C), Function.Injective a → (∀ τ, v (a τ) ≤ 1) →
-    (∀ (s : ℕ) (F S : Lat v (Fin n × Fin s)), F.B = freeMat a s →
-      S.pts = sumPts (fun _ => Lat.std v (Fin s)) →
-      colen F S ^ 2 = v (discr a) ^ s) ∧
-    (∀ (s : ℕ) (M S : Lat v (Fin n × Fin s)) (Mτ : Fin n → Lat v (Fin s)), IsLaStable a M →
-      (∀ τ, (Mτ τ).pts = projPts M.pts τ) → S.pts = sumPts Mτ →
-      v (discr a) ^ s ≤ colen M S ^ 2) ∧
-    (∀ (s h : ℕ) (A : Fin n → Matrix (Fin s) (Fin h) C) (F : Lat v (Fin n × Fin h))
-      (M' S : Lat v (Fin n × Fin s)) (Mτ : Fin n → Lat v (Fin s)), F.B = freeMat a h →
-      (∀ τ, Function.Surjective (A τ).mulVec) →
-      M'.pts = (fun w : Fin n × Fin h → C => fun y : Fin n × Fin s =>
-        ∑ l, A y.1 y.2 l * w (y.1, l)) '' F.pts →
-      (∀ τ, (Mτ τ).pts = projPts M'.pts τ) → S.pts = sumPts Mτ →
-      colen M' S ^ 2 * v (discr a) ^ h ≤ v (discr a) ^ (2 * s))
 
 end ReciprocityTheory.PGsh.Up

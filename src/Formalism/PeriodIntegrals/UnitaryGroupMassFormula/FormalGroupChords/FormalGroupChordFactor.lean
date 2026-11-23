@@ -1,6 +1,51 @@
-import Mathlib
-import Formalism.PeriodIntegrals.FglChordFactor
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.FormalGroupChords.SubstBivariateSeriesDifferencePair
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.FormalGroupChords.SubstBivariateSeriesDifferencePair
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdditiveIntegralGroups.CoeffPowMemS
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdditiveIntegralGroups.GlueHoldsVar
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.FormalGroupChords.NormDeltaWc
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.FormalGroupChords.SubstPairSecondVariable
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -88,7 +133,7 @@ theorem main_mv (p : ℕ) [Fact p.Prime] (W : WeierstrassCurve ℂ_[p]) (wq ex :
     rcases mul_eq_zero.1 h5 with h | h
     · exact hX0ne h
     · have h7 := congrArg MvPowerSeries.constantCoeff h
-      rw [map_add, map_one, hDa, map_zero] at h7
+      rw [map_add (f := _), map_one, hDa, map_zero] at h7
       norm_num at h7
   have hP1z : MvPowerSeries.subst ![MvPowerSeries.X 0,
       PowerSeries.subst (MvPowerSeries.X 0 : MvPowerSeries (Fin 2) ℂ_[p]) (iW W wq)] P1 = 0 := by
@@ -123,7 +168,7 @@ theorem main_mv (p : ℕ) [Fact p.Prime] (W : WeierstrassCurve ℂ_[p]) (wq ex :
         PowerSeries.subst (MvPowerSeries.X 1 : MvPowerSeries (Fin 2) ℂ_[p]) (Dser W wq) + 1) = 0 := by
       linear_combination hiD1 - PowerSeries.subst (MvPowerSeries.X 1 : MvPowerSeries (Fin 2) ℂ_[p]) (Dser W wq) * e
     have h7 := congrArg MvPowerSeries.constantCoeff ((mul_eq_zero.1 h5).resolve_left hX1ne)
-    rw [map_add, map_mul, hDb, map_one, map_zero, mul_one, cc_msubst hs0 hφ0 U'] at h7
+    rw [map_add (f := _), map_mul, hDb, map_one, map_zero, mul_one, cc_msubst hs0 hφ0 U'] at h7
     linear_combination h7
   have hP2c : MvPowerSeries.constantCoeff P2 = -1 := by
     have hPP : Pser wq = (MvPowerSeries.X 1 - MvPowerSeries.X 0) *
@@ -137,7 +182,7 @@ theorem main_mv (p : ℕ) [Fact p.Prime] (W : WeierstrassCurve ℂ_[p]) (wq ex :
         PowerSeries.subst (MvPowerSeries.X 1 : MvPowerSeries (Fin 2) ℂ_[p]) wq) = 0 := by
       linear_combination -e
     have h7 := congrArg MvPowerSeries.constantCoeff ((mul_eq_zero.1 h5).resolve_left (pow_ne_zero 2 hX1ne))
-    rw [map_add, cc_psubst hb0, hwq0, map_zero, cc_msubst hs0 hφ0 P2] at h7
+    rw [map_add (f := _), cc_psubst hb0, hwq0, map_zero, cc_msubst hs0 hφ0 P2] at h7
     linear_combination h7
 
   have hwa0 : MvPowerSeries.constantCoeff (PowerSeries.subst (MvPowerSeries.X 0 : MvPowerSeries (Fin 2) ℂ_[p]) wq) = 1 := by

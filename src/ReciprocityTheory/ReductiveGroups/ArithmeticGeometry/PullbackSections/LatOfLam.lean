@@ -1,5 +1,45 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.LatOfLamSt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.DiscriminantEstimates.DiscriminantTheorems.TBDisc
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.LatOfLamSt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.DiscriminantEstimates.DiscriminantTheorems.TBDisc
+
+@[expose] public section
 
 noncomputable section
 
@@ -32,29 +72,6 @@ theorem latOfLam : LatOfLamSt := by
       linarith
   have hUD := discriminant_of_product_lower B.KO (B.Cusp j ka) Nf (B.Mlat j ka) _ hPL
   have hFG := formalGroup_of_discriminant B.KO (B.Cusp j ka) Nf (B.Mlat j ka) hUD
-  refine ⟨hFG, ?_⟩
-  set c : 𝓞 B.KO := ((D.host.g 0 * D.host.g 1 : ℕ) : 𝓞 B.KO) ^ (D.R.f * D.R.r * ka.n) with hc
-  have hc0 : c ≠ 0 := by
-    refine pow_ne_zero _ ?_
-    have : (D.host.g 0 * D.host.g 1 : ℕ) ≠ 0 := Nat.mul_ne_zero (hg 0).ne' (hg 1).ne'
-    exact_mod_cast this
-  have hsc : ((S.sK * c : 𝓞 B.KO) : B.KO) ≠ 0 := by
-    intro h0
-    exact mul_ne_zero hs hc0 (by exact_mod_cast h0)
-  rw [eq_top_iff, ← hspan]
-  refine Submodule.span_le.mpr fun x hx => ?_
-  have hmem : (S.sK * c : 𝓞 B.KO) • x ∈ B.Mlat j ka := by
-    apply hH2.2.2.2
-    simp only [WeightAlgebra.PJ.Thc, WeightAlgebra.PJ.scaled]
-    refine ⟨c • x, ⟨x, hx, rfl⟩, ?_⟩
-    simp only [LinearMap.smul_apply, LinearMap.id_apply]
-    rw [mul_smul]
-  have hx' : x = ((S.sK * c : 𝓞 B.KO) : B.KO)⁻¹ • (((S.sK * c : 𝓞 B.KO) : B.KO) • x) := by
-    rw [smul_smul, inv_mul_cancel₀ hsc, one_smul]
-  rw [hx']
-  refine Submodule.smul_mem _ _ ?_
-  have : (((S.sK * c : 𝓞 B.KO) : B.KO) • x) = (S.sK * c : 𝓞 B.KO) • x := algebraMap_smul B.KO _ x
-  rw [this]
-  exact Submodule.subset_span hmem
+  exact Submodule.IsLattice.of_fg B.KO hFG
 
 end ReciprocityTheory.ChartRestriction.G.PullbackSections

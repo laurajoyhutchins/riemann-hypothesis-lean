@@ -1,7 +1,53 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.LocalEulerCharacteristic.ConjAction
-import GroundTheory.ProfiniteCohomology.GaloisCohomology.Kummer
-import GroundTheory.ProfiniteCohomology.CupProducts.Cocycles
+module
+
+public import GroundTheory.ProfiniteCohomology.CohomologyFunctoriality.QuotientToInvariantsFunctorPreservesZeroMorphism
+public import GroundTheory.ProfiniteCohomology.CupProducts
+public import GroundTheory.ProfiniteCohomology.InflationRestriction.CohomologyResMemCohomologyConjInvariants
+public import GroundTheory.ProfiniteCohomology.CupProducts.Cocycles
+public import GroundTheory.ProfiniteCohomology.GaloisCohomology.Kummer
+public import GroundTheory.ProfiniteCohomology.LocalEulerCharacteristic.ConjAction
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
@@ -16,11 +62,12 @@ section MapAlong
 
 theorem H0Iso_hom_cohomology_class_zero (A : Rep.{u} k G) [IsDiscreteRep A] (z : cocycles A 0) :
     (((H0Iso A).hom.hom (cohomologyπ A 0 z) : A.ρ.invariants) : A) =
-      cochainOf A (cocycleι A 0 z) Fin.elim0 := by
+      cochainOf (A := A) (cocycleι (A := A) (p := 0) z) Fin.elim0 := by
   have h1 : (CochainComplex.isoHomologyπ₀ (cochainsComplex A)).inv.hom (cohomologyπ A 0 z) = z := by
     exact congrArg (fun φ => φ.hom z) (CochainComplex.isoHomologyπ₀ (cochainsComplex A)).hom_inv_id
   have h2 := congrArg (fun φ => φ.hom z) (cocyclesIso₀_hom_comp_f A)
-  change (shortComplexH0 A).f.hom ((cocyclesIso₀ A).hom.hom z) = cocycleι A 0 z at h2
+  change (shortComplexH0 A).f.hom ((cocyclesIso₀ A).hom.hom z) =
+    cocycleι (A := A) (p := 0) z at h2
   change (((cocyclesIso₀ A).hom.hom ((CochainComplex.isoHomologyπ₀ (cochainsComplex A)).inv.hom
     (cohomologyπ A 0 z)) : A.ρ.invariants) : A) = _
   rw [h1, ← h2]
@@ -36,7 +83,7 @@ theorem H0Iso_hom_cohomologyMapAlong (x : cohomology A 0) :
   obtain ⟨z, rfl⟩ := cohomologyπ_surjective A 0 x
   rw [cohomologyMapAlong_cohomologyπ, H0Iso_hom_cohomology_class_zero, H0Iso_hom_cohomology_class_zero,
     cochainOf_cocycleι_cocyclesMapAlong]
-  change f.hom (cochainOf A (cocycleι A 0 z) (⇑φ ∘ Fin.elim0)) = _
+  change f.hom (cochainOf (A := A) (cocycleι (A := A) (p := 0) z) (⇑φ ∘ Fin.elim0)) = _
   rw [Subsingleton.elim (⇑φ ∘ Fin.elim0) Fin.elim0]
 
 end MapAlong
@@ -57,11 +104,6 @@ def invariantsConj (g : G) : (Rep.res N.subtype A).ρ.invariants →ₗ[k] (Rep.
   map_add' a b := Subtype.ext (map_add _ _ _)
   map_smul' c a := Subtype.ext (map_smul _ _ _)
 
-omit [TopologicalSpace G] [IsTopologicalGroup G] [IsDiscreteRep A] in
-@[simp]
-theorem coe_invariantsConj_apply (g : G) (a : (Rep.res N.subtype A).ρ.invariants) :
-    ((invariantsConj A N g a : (Rep.res N.subtype A).ρ.invariants) : A) = A.ρ g a :=
-  rfl
 
 theorem H0Iso_hom_cohomologyConj (g : G) (x : cohomology (Rep.res N.subtype A) 0) :
     (H0Iso (Rep.res N.subtype A)).hom.hom ((cohomologyConj A N 0 g).hom x) =

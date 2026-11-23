@@ -1,10 +1,54 @@
-import Formalism.LocalToGlobal.InertKernelTheory.DefsFrONB
-import Formalism.LocalToGlobal.InertKernelTheory.InertCoprimeLemmas.PowerSeriesEmbedding
-import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.KummerThetaLogarithms.SqrtInUnramifiedCompletion
+module
+
+public import Formalism.LocalToGlobal.InertKernelTheory.DefsFrONB
+public import Formalism.LocalRingCardinality.SpanPowerMembership.ExampleLayerExistsGenerators
+public import Formalism.LocalToGlobal.GlobalTheory.GL3.CubicFields.PeriodRelations.LeadingConstantNeZero
+public import Formalism.LocalToGlobal.InertKernelTheory.InertCoprimeLemmas.PowerSeriesEmbedding
+public import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.KummerThetaLogarithms.SqrtInUnramifiedCompletion
 import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.TransportFirstLevel
-import Formalism.SharpRestriction.GlobalSchurBounds.GlobalRankLatticeProofs.UnitTraceSumBounds.TestVectorMemSchwartzBruhat
-import Formalism.LocalRingCardinality.SpanPowerMembership.ExampleLayerExistsGenerators
-import Formalism.LocalToGlobal.GlobalTheory.GL3.CubicFields.PeriodRelations.LeadingConstantNeZero
+import Formalism.SharpRestriction.GlobalSchurBounds.GlobalRankLatticeProofs.UnitTraceSumBounds.FamilyLogGammaSmallHolds
+public import Formalism.SharpRestriction.GlobalSchurBounds.GlobalRankLatticeProofs.UnitTraceSumBounds.TestVectorMemSchwartzBruhat
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.MetricSpace.Ultra.TotallySeparated
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -99,7 +143,7 @@ theorem conjugation_fixed_closure : FixConj := by
   have h2 : (2 : MaximalUnramifiedExtension p) ≠ 0 := two_ne_zero
   obtain ⟨u, hu⟩ : ∃ u : MaximalUnramifiedExtension p, u = (y + σ y) / 2 := ⟨_, rfl⟩
   obtain ⟨v, hv⟩ : ∃ v : MaximalUnramifiedExtension p, v = (y - σ y) / (2 * rK) := ⟨_, rfl⟩
-  have hσu : σ u = u := by rw [hu, map_div₀, map_add, hy, map_ofNat]; ring
+  have hσu : σ u = u := by rw [hu, map_div₀, map_add (f := _), hy, map_ofNat]; ring
   have hσv : σ v = v := by
     rw [hv, map_div₀, map_sub, map_mul, hy, hσr, map_ofNat]
     field_simp
@@ -125,7 +169,7 @@ theorem conjugation_fixed_closure : FixConj := by
           (a : D.host.E) + (b : D.host.E) * D.host.sqrtMinusD := by
         push_cast; rfl
       simp only
-      rw [e, hlc, hrK, map_add, map_mul, map_ratCast, map_ratCast, map_add, map_mul, map_ratCast, map_ratCast]
+      rw [e, hlc, hrK, map_add (f := _), map_mul, map_ratCast, map_ratCast, map_add (f := _), map_mul, map_ratCast, map_ratCast]
     have hh := map_mem_closure hcont hmem hmaps
     rw [hyc]
     exact hh
@@ -143,7 +187,7 @@ theorem conjugation_fixed_closure : FixConj := by
         lamC lam (D.host.φ₀ (D.host.conj D.host.sqrtMinusD)) at h
       rw [hc, hlc, hlc, map_neg, map_neg, ← hrK] at h
       exact h
-    rw [hyc, map_add, map_mul, hu', hv', hr', hyuv, map_add, map_mul, hσu, hσv, hσr]
+    rw [hyc, map_add (f := _), map_mul, hu', hv', hr', hyuv, map_add (f := _), map_mul, hσu, hσv, hσr]
     push_cast
     ring
 

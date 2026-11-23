@@ -1,5 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RowSubst
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RowSubst
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open MvPolynomial Formalism.GradedWeylDivisibility GlobalTheory.GenCoef
 
 set_option autoImplicit false
@@ -87,12 +133,13 @@ theorem PSh_rowGen_C (a b : Fin N) (r : O) : PSh a b 0 (rowGen O a b (C r)) := b
 theorem PSh_rowGen (a b : Fin N) (hab : a ≠ b) (u : Fin N → ℤ) (f : MvPolynomial (Fin N × Fin N) O)
     (hf : IsWeightedHomogeneous (wZ N) f u) : PSh a b u (rowGen O a b f) := by
   classical
+
   rw [f.as_sum, map_sum]
-  have key : ∀ d ∈ f.support, PSh a b u (rowGen O a b (monomial d (coeff d f))) := by
+  have key : ∀ d ∈ f.support, PSh a b u (rowGen O a b (monomial d (AddMonoidAlgebra.coeff f d))) := by
     intro d hd
     have hw : Finsupp.weight (wZ N) d = u := hf (mem_support_iff.mp hd)
     rw [monomial_eq, map_mul, Finsupp.prod, map_prod]
-    have h1 := (PSh_rowGen_C a b (coeff d f)).mul
+    have h1 := (PSh_rowGen_C a b (AddMonoidAlgebra.coeff f d)).mul
       (PSh.prod d.support (fun v => d v • wZ N v) (fun v => rowGen O a b (X v ^ d v)) fun v _ => by
         rw [map_pow]; exact (PSh_rowGen_X a b hab v).pow (d v))
     rw [zero_add] at h1
@@ -165,6 +212,7 @@ theorem proj_rowAct (a b : Fin N) (hab : a ≠ b) (k : ℕ) (w : Fin N → ℕ) 
       rowDiv O a b k f := by
   classical
   rw [rowAct_transvection, Polynomial.eval_eq_sum_range]
+
   simp only [one_pow, mul_one, map_sum]
   have : ∀ j, (rowGen O a b f).coeff j = rowDiv O a b j f := fun j => rfl
   simp only [this, proj_rowDiv a b hab _ k w f hf, Finset.sum_ite_eq', Finset.mem_range]
@@ -230,7 +278,8 @@ theorem rowDiv_mem_dwAlg : ∀ (O : Type) [CommRing O] (N : ℕ) (ν : Fin N →
     have hlin : ∀ (s : Finset (Fin N → ℕ)) (F : (Fin N → ℕ) → MvPolynomial (Fin N × Fin N) O),
         rowDiv O a b k (∑ w ∈ s, F w) = ∑ w ∈ s, rowDiv O a b k (F w) := by
       intro s F
-      simp only [rowDiv, map_sum, Polynomial.finset_sum_coeff]
+
+      simp only [rowDiv, map_sum, Polynomial.finsetSum_coeff]
     rw [hlin]
     refine Finset.sum_congr rfl fun w _ => ?_
     simp only [Module.End.mul_apply]

@@ -1,5 +1,56 @@
-import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.ExistsDualBound
-import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.ExistsLatticeOfFibLocNeZeroGood
+module
+
+public import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.ApplyMemSmul
+public import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.ExistsMulDvdUnif
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Matrix.FiniteDimensional
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField Module
 
@@ -7,48 +58,13 @@ noncomputable section
 
 namespace Formalism.HermitianLattices.Ext.L3.D2.IA
 
-theorem relIndex_eq_of_map {G M : Type*} [Group G] [AddCommGroup M] (H T : Subgroup G)
-    (N' N : AddSubgroup M) (f : G → M) (hf : ∀ X ∈ T, f X ∈ N)
-    (hc : ∀ X ∈ T, ∀ Y ∈ T, X⁻¹ * Y ∈ H ↔ f X - f Y ∈ N')
-    (hsurj : ∀ Z ∈ N, ∃ X ∈ T, f X - Z ∈ N') : H.relIndex T = N'.relIndex N := by
-  unfold Subgroup.relIndex AddSubgroup.relIndex Subgroup.index AddSubgroup.index
-  let g : (T ⧸ H.subgroupOf T) → (N ⧸ N'.addSubgroupOf N) :=
-    Quotient.lift (s := QuotientGroup.leftRel (H.subgroupOf T))
-      (fun X : T => ((⟨f X, hf X X.2⟩ : N) : N ⧸ N'.addSubgroupOf N)) (by
-        intro X Y hXY
-        have hXY := QuotientGroup.leftRel_apply.1 hXY
-        have h1 : f X - f Y ∈ N' := (hc X X.2 Y Y.2).1 (by simpa [Subgroup.mem_subgroupOf] using hXY)
-        rw [QuotientAddGroup.eq, AddSubgroup.mem_addSubgroupOf]
-        have := N'.neg_mem h1
-        simpa [neg_add_eq_sub] using this)
-  refine Nat.card_eq_of_bijective g ⟨?_, ?_⟩
-  · intro a b
-    induction a using QuotientGroup.induction_on with | _ X => ?_
-    induction b using QuotientGroup.induction_on with | _ Y => ?_
-    intro hab
-    have h1 : ((⟨f X, hf X X.2⟩ : N) : N ⧸ N'.addSubgroupOf N) = ((⟨f Y, hf Y Y.2⟩ : N) : N ⧸ N'.addSubgroupOf N) := hab
-    rw [QuotientAddGroup.eq, AddSubgroup.mem_addSubgroupOf] at h1
-    rw [QuotientGroup.eq, Subgroup.mem_subgroupOf]
-    have h2 : f X - f Y ∈ N' := by
-      have := N'.neg_mem h1
-      simpa [neg_add_eq_sub] using this
-    simpa using (hc X X.2 Y Y.2).2 h2
-  · intro b
-    induction b using QuotientAddGroup.induction_on with | _ Z => ?_
-    obtain ⟨X, hX, hXZ⟩ := hsurj Z Z.2
-    refine ⟨((⟨X, hX⟩ : T) : T ⧸ H.subgroupOf T), ?_⟩
-    show ((⟨f X, hf X hX⟩ : N) : N ⧸ N'.addSubgroupOf N) = (Z : N ⧸ N'.addSubgroupOf N)
-    rw [QuotientAddGroup.eq, AddSubgroup.mem_addSubgroupOf]
-    have := N'.neg_mem hXZ
-    simpa [neg_add_eq_sub] using this
-
 variable {K : Type} [Field K] [StarRing K]
 variable {V : Type} [AddCommGroup V] [Module K V] [FiniteDimensional K V]
 
 theorem surjective_of_nondegenerate {h : V →ₗ⋆[K] V →ₗ[K] K} (hn : h.Nondegenerate) :
     Function.Surjective h := by
   have hinj : Function.Injective h := by
-    rw [injective_iff_map_eq_zero]
+    set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
     intro x hx
     exact hn.1 x (fun y => by rw [hx]; rfl)
   have hbij : Function.Bijective (h.rangeRestrict) :=
@@ -83,7 +99,7 @@ theorem exists_adj {h : V →ₗ⋆[K] V →ₗ[K] K} (hs : h.IsSymm) (hn : h.No
   refine ⟨{ toFun := Y, map_add' := fun a b => ?_, map_smul' := fun a b => ?_ }, fun x y => hY y x⟩
   · rw [← sub_eq_zero]
     refine hn.2 _ (fun x => ?_)
-    rw [map_sub, map_add, hY, hY, hY, map_add, sub_self]
+    rw [map_sub, map_add (f := _), hY, hY, hY, map_add (f := _), sub_self]
   · rw [← sub_eq_zero]
     refine hn.2 _ (fun x => ?_)
     rw [RingHom.id_apply, map_sub, map_smul, hY, hY, map_smul, sub_self]

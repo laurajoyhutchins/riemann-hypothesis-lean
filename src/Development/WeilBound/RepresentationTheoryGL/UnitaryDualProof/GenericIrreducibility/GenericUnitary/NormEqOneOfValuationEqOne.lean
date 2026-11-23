@@ -1,6 +1,57 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.IsSubquotientDetRepParInd
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.NormalizedAbsCharacterization
+module
+
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.IsSubquotientDetRepParInd
+public import Mathlib.Algebra.Group.Submonoid.Units
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.NormalizedAbsCharacterization
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import Mathlib.Topology.Algebra.Group.Units
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -10,8 +61,8 @@ namespace PositivityTheory.RgUd.Exp.Rpow
 
 variable {k : Type} [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k]
 
-variable (k) in
 
+variable (k) in
 theorem exists_unit_uniformizer : ∃ ϖ : kˣ, valuation k (ϖ : k) = uniformizer k := by
   obtain ⟨x, hx⟩ := valuation_surjective (uniformizer k)
   have hx0 : x ≠ 0 := by
@@ -37,8 +88,8 @@ def normHom (χ : kˣ →* ℂˣ) : kˣ →* ℝ where
   map_one' := by simp
   map_mul' x y := by simp
 
-omit [TopologicalSpace k] [IsNonarchimedeanLocalField k] in
 
+omit [TopologicalSpace k] [IsNonarchimedeanLocalField k] in
 theorem mem_units_integer {u : kˣ} (hu : valuation k (u : k) = 1) :
     u ∈ (𝒪[k]).toSubmonoid.units := by
   refine ⟨?_, ?_⟩
@@ -70,7 +121,7 @@ theorem norm_eq_one_of_valuation_eq_one (χ : kˣ →* ℂˣ) (hχ : IsSmoothCha
 theorem norm_eq_nabs_rpow (k : Type) [Field k] [ValuativeRel k] [TopologicalSpace k]
     [IsNonarchimedeanLocalField k] (χ : kˣ →* ℂˣ) (hχ : IsSmoothChar χ) :
     ∃ s : ℝ, ∀ z : kˣ, ‖(χ z : ℂ)‖ = nabs k z ^ s := by
-  obtain ⟨ϖ, hϖ⟩ := exists_unit_uniformizer k
+  obtain ⟨ϖ, hϖ⟩ := exists_unit_uniformizer (k := k)
   set a := ‖(χ ϖ : ℂ)‖
   set b := nabs k ϖ
   have ha : 0 < a := norm_pos_iff.2 (χ ϖ).ne_zero
@@ -89,7 +140,7 @@ theorem norm_eq_nabs_rpow (k : Type) [Field k] [ValuativeRel k] [TopologicalSpac
     simp only [ordHom, MonoidHom.coe_mk, OneHom.coe_mk, toAdd_mul, toAdd_zpow, toAdd_ofAdd, hord1] at e2
     rw [e2]
     simp [m]
-  have hu : valuation k (u : k) = 1 := ord_eq_zero_iff.1 hordu
+  have hu : valuation k (u : k) = 1 := (ord_eq_zero_iff).1 hordu
   have hz : z = u * ϖ ^ m := by
     simp only [u, mul_assoc, ← zpow_add, neg_add_cancel, zpow_zero, mul_one]
   have hnorm : ‖(χ z : ℂ)‖ = a ^ m := by

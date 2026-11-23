@@ -1,7 +1,46 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.ThetaValues.PolyDerivSmulLetter
-import Development.AbelianVarietyTheory.Definitions.ThetaValues.ExistsMemRowHighestTotalDegreeEqTwo
-import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.FirstCoordinateAdmissible
+module
+
+public import Development.AbelianVarietyTheory.Definitions.ThetaValues.PolyDerivSmulLetter
+public import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.FirstCoordinateAdmissible
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 open Matrix Complex NumberField MeasureTheory
 open scoped ComplexConjugate ComplexOrder
@@ -29,8 +68,8 @@ def thA (φ : TF n g) (x : Frame X.Ψ r) (z : Fin n → Fin g → ℂ) : ℂ :=
 def thP (φ : TF n g) (P : Harm.Poly ℂ X.Ψ q0 X.p0 (Fin n)) (x : Frame X.Ψ r) : ℂ :=
   polyDeriv P (letterDir X hr idx) (thA X bas idx φ x) 0
 
-open Classical in
 
+open Classical in
 def wG (γ : GL (Fin r) E) (φ : TF n g) : TF n g :=
   if h : ∃ ψ : TF n g, IsSB ψ ∧ ∀ x ∈ X.dom, thA X bas idx ψ (lact γ x) = thA X bas idx φ x
   then h.choose else 0
@@ -73,8 +112,8 @@ def IsDbl (φ₁ φ₂ : TF n g) (ψ : Matrix (Fin n) (Fin r) E → ℂ) : Prop 
       kZero X idx x₁ x₂ z₁ w *
         thH X.Ψ ψ (dblZ X x₁ x₂) (dblz X idx x₁ x₂ z₁ w) (dblz' X idx x₁ x₂ z₁ w)
 
-open Classical in
 
+open Classical in
 def dbl (φ₁ φ₂ : TF n g) : Matrix (Fin n) (Fin r) E → ℂ :=
   if h : ∃ ψ, IsSB ψ ∧ IsDbl X bas idx φ₁ φ₂ ψ then h.choose else 0
 
@@ -202,8 +241,8 @@ def Level.lats (D : Level X) : Set (Lt E r) :=
   {L | SelfD X L ∧ ∃ s : 𝓞 E, IsCoprime (Ideal.span {s}) (D.𝔪 * conjI D.𝔪) ∧
     (∀ v ∈ L, s • v ∈ X.Λ) ∧ ∀ v ∈ X.Λ, s • v ∈ L}
 
-open Classical in
 
+open Classical in
 def Level.dat (D : Level X) (hn : r ≤ n) (y : Matrix (Fin n) (Fin r) E) : ℂ :=
   if h : (∃ k : D.J, D.Red (fun i => y (Fin.castLE hn i)) k) ∧
       ∀ k : Fin n, r ≤ (k : ℕ) → Cong X D.𝔪 (y k) 0 then (D.lam h.1.choose : ℂˣ) else 0

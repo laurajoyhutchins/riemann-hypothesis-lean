@@ -1,5 +1,54 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.TensorProductTheorem.Window
+module
+
+public import GroundTheory.AutomorphicForms.SmoothRep
+public import Mathlib.Order.CompletePartialOrder
+public import Mathlib.RepresentationTheory.Irreducible
+public import GroundTheory.AutomorphicForms.TensorProductTheorem.Window
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -15,8 +64,8 @@ variable {L : Type*} [Group L] [TopologicalSpace L] [IsTopologicalGroup L]
 
 section General
 
-variable (σ) in
 
+variable (σ) in
 def genSubrep (N : Submodule ℂ V) : Subrepresentation σ where
   toSubmodule := ⨆ g : L, N.map (σ g)
   apply_mem_toSubmodule g x hx := by
@@ -48,7 +97,7 @@ variable (hσ : IsSmooth σ) {K : Subgroup L} (hKc : IsCompact (K : Set L))
 def genKernel : Submodule ℂ (genSubrep σ N).toSubmodule where
   carrier := {u | ∀ g, fixedProj σ hσ hKc hKo (σ g u) = 0}
   add_mem' {a b} ha hb g := by
-    simp only [mem_setOf_eq, Submodule.coe_add, map_add, ha g, hb g, add_zero]
+    simp only [mem_setOf_eq, Submodule.coe_add, map_add (f := _), ha g, hb g, add_zero]
   zero_mem' g := by simp
   smul_mem' c a ha g := by
     simp only [mem_setOf_eq, Submodule.coe_smul, map_smul, ha g, smul_zero]
@@ -98,8 +147,8 @@ section Simple
 variable (hNK : N ≤ fixedVectors σ K)
   (hNst : ∀ g, ∀ n ∈ N, (fixedProj σ hσ hKc hKo (σ g n) : V) ∈ N)
 
-include hNK hNst in
 
+include hNK hNst in
 theorem mem_of_mem_genSubrep_fixed {u : V} (hu : u ∈ (genSubrep σ N).toSubmodule)
     (huK : u ∈ fixedVectors σ K) : u ∈ N := by
   have h1 : (fixedProj σ hσ hKc hKo u : V) = u := fixedProj_apply_of_mem hσ hKc hKo huK
@@ -127,8 +176,8 @@ theorem genQuotMk_injective : Function.Injective (genQuotMk hσ hKc hKo N) := by
   rw [this]
   rfl
 
-include hNK in
 
+include hNK in
 theorem genQuotMk_mem_fixedVectors (n : N) :
     genQuotMk hσ hKc hKo N n ∈ fixedVectors (genQuotRep hσ hKc hKo N) K := by
   intro k hk
@@ -137,8 +186,8 @@ theorem genQuotMk_mem_fixedVectors (n : N) :
   congr 1
   exact Subtype.ext (hNK n.2 k hk)
 
-include hNK hNst in
 
+include hNK hNst in
 theorem isIrreducible_genQuotRep (hN0 : N ≠ ⊥)
     (hNmin : ∀ N₁ : Submodule ℂ V, N₁ ≤ N → N₁ ≠ ⊥ →
       (∀ g, ∀ n ∈ N₁, (fixedProj σ hσ hKc hKo (σ g n) : V) ∈ N₁) → N₁ = N) :

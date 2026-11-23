@@ -1,10 +1,52 @@
-import Mathlib
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.EigenvalueSeparation.StableEigenspaces.InterpolationL2Bound
-import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.SliceTensors.PExpFin
-import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.SliceTensors.ContinuousAT
-import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.ExponentialNegativity.NormalisedExistence.ExistsNormed
-import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.ExponentialNegativity.DiagonalInfinityValues.InfGLValDiag
-import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.ExponentialNegativity.CommonEigenvectors.KillPoly
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.EigenvalueSeparation.StableEigenspaces.InterpolationL2Bound
+public import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.SliceTensors.PExpFin
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ConstantTermUnipotentIntegralVariant
+import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ConstantTermAutomorphicCriterion
+public import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.ExponentialNegativity.CommonEigenvectors.KillPoly
+public import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.ExponentialNegativity.DiagonalInfinityValues.InfGLValDiag
+public import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.ExponentialNegativity.NormalisedExistence.ExistsNormed
+public import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.SliceTensors.ContinuousAT
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 open NumberField IsDedekindDomain MeasureTheory Polynomial Formalism.L2.Host
@@ -13,7 +55,7 @@ open PositivityTheory.Rg.Rs PositivityTheory.Rg.Rs.PExpFin
 
 namespace GlobalTheory.CompanionTheory.HullExp
 
-variable {E : Type} [Field E] [NumberField E] [IsTotallyComplex E] {N : ℕ}
+variable {E : Type} [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] {N : ℕ}
 
 def trans (r : ℕ) (s : ℝ) : Module.End ℂ (GA E N → ℂ) where
   toFun f g := f (aT E N r s * g)
@@ -94,7 +136,7 @@ theorem lo_add {φ ψ : Sm E N} (h : LO φ) (h' : LO ψ) : LO (φ + ψ) := by
   · have h1 : finRep E N k φ = φ := hk.1
     have h2 : finRep E N k ψ = ψ := hk.2
     change finRep E N k (φ + ψ) = φ + ψ
-    rw [map_add, h1, h2]
+    rw [map_add (f := _), h1, h2]
 
 theorem lo_smul {φ : Sm E N} (h : LO φ) (c : ℂ) : LO (c • φ) := by
   refine ⟨fun γ g => ?_, isOpen_stab_of_mem_nhds _ _ (Filter.mem_of_superset (h.2.mem_nhds (by simp)) fun k hk => ?_)⟩
@@ -182,7 +224,7 @@ def bdSub (r : ℕ) (ρ : ℝ) : Submodule ℂ (Sm E N) where
     rw [ct_smul]
     exact (klSub r 1 p).smul_mem c (hpk _ ⟨μ, 𝓕, hμ, h𝓕, rfl⟩)
 
-theorem isStable_bdSub (r : ℕ) (ρ : ℝ) : IsStable (bdSub (E := E) (N := N) r ρ) := by
+theorem isStable_bdSub (r : ℕ) (ρ : ℝ) : _root_.GlobalTheory.CuspRep.IsStable (bdSub (E := E) (N := N) r ρ) := by
   rintro o φ ⟨hφ, p, hp, hpz, hpk⟩
   refine ⟨lo_act hφ o, p, hp, hpz, ?_⟩
   rintro F ⟨μ, 𝓕, hμ, h𝓕, rfl⟩
@@ -225,8 +267,8 @@ theorem mem_bdSub {r : ℕ} (hr : 0 < r) (hrN : r < N) {ρ : ℝ} {φ : Sm E N} 
 
 end GlobalTheory.CompanionTheory.HullExp
 
-open GlobalTheory.CompanionTheory.HullExp in
 
+open GlobalTheory.CompanionTheory.HullExp in
 theorem GlobalTheory.CompanionTheory.HullExp.hullNonPos : PositivityTheory.Rg.BcB.E.E3.HullNonPos := by
   intro E _ _ _ N S hS φ hφ r hr hrN c hc
   have hd : (0 : ℝ) < Module.finrank ℚ E := by exact_mod_cast Module.finrank_pos

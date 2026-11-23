@@ -1,5 +1,56 @@
-import ReciprocityTheory.ClassFieldTheory.LocalClassField.UnrExtA
-import Lemmata.GeneralBFactUpperTerForm.Imports
+module
+
+public import ReciprocityTheory.ClassFieldTheory.LocalClassField.UnrDefs
+public import Lemmata.GeneralBFactUpperTerForm.Imports
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ClassFieldTheory.LocalClassField.NormSubEqOneOfPowEqOne
+public import ReciprocityTheory.ClassFieldTheory.LocalClassField.UnrExtA
+
+@[expose] public section
 
 namespace ReciprocityTheory.DiscreteGroups.LocalClassField
 
@@ -24,6 +75,7 @@ theorem norm_sum_eq_one {K : IntermediateField ℚ_[p] (PadicAlgCl p)} {ι : Typ
   rw [hs]
   refine le_antisymm (norm_le_one _) (not_lt.1 fun hlt => ?_)
   have h0 := (res_eq_zero_iff _).2 hlt
+
   rw [map_sum] at h0
   let c : ι → resK p K := fun j => ⟨res (b j), (mem_resK_iff K _).2 ⟨b j, hb j, rfl⟩⟩
   have h1 : ∑ j, c j • IsLocalRing.residue (Obar p) (ω j) = 0 := by
@@ -80,7 +132,7 @@ theorem comb_injective {L : IntermediateField ℚ_[p] (PadicAlgCl p)} (hKL : K �
     (ω : ι → Obar p) (hL : ∀ j, (ω j : PadicAlgCl p) ∈ L)
     (hω : LinearIndependent (resK p K) (fun i => IsLocalRing.residue (Obar p) (ω i))) :
     Function.Injective (comb hKL ω hL) := by
-  rw [injective_iff_map_eq_zero]
+  set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
   intro a ha
   funext i
   have h1 := norm_le_norm_sum p K ω hω a i
@@ -97,13 +149,14 @@ noncomputable def resMod {L : IntermediateField ℚ_[p] (PadicAlgCl p)} (hKL : K
     rw [Subfield.smul_def, smul_eq_mul]
     exact (resK p L).mul_mem (resK_mono hKL c.2) hx
 
+set_option synthInstance.maxHeartbeats 100000 in
 theorem exists_lifts {L : IntermediateField ℚ_[p] (PadicAlgCl p)}
     (hL : FiniteDimensional ℚ_[p] L) (hKL : K ≤ L) :
     ∃ f : ℕ, 0 < f ∧ qK p L = qK p K ^ f ∧ ∃ ω : Fin f → Obar p, (∀ j, (ω j : PadicAlgCl p) ∈ L) ∧
       LinearIndependent (resK p K) (fun i => IsLocalRing.residue (Obar p) (ω i)) := by
   have hfL : Finite (resK p L) := finite_resK L hL
   have hfW : Finite (resMod hKL) := hfL
-  have hMF : Module.Finite (resK p K) (resMod hKL) := Module.Finite.of_finite
+  letI : Module.Finite (resK p K) (resMod hKL) := Module.Finite.of_finite
   have hcard : Nat.card (resMod hKL) = Nat.card (resK p K) ^ Module.finrank (resK p K) (resMod hKL) :=
     Module.natCard_eq_pow_finrank
   have hnt : Nontrivial (resMod hKL) :=

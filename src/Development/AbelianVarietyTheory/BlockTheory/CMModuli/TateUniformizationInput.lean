@@ -1,8 +1,49 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.Clauses
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.GtPtBridgeSt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.RosatiAdj
-import Development.AbelianVarietyTheory.BlockTheory.CMModuli.TorusGraphMaps
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.CMModuli.TorusGraphMaps
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.PushInvertible
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -51,13 +92,6 @@ def torusLieEigen (H : Host E) (X : Type) [AddCommGroup X] [Module (𝓞 E) X] (
   smul_mem' := fun c v hv a χ => by
     simp only [AddMonoidHom.smul_apply, hv a χ, smul_eq_mul]
     ring
-
-instance torusLieEigen_finite (H : Host E) (X : Type) [AddCommGroup X] [Module.Free ℤ X]
-    [Module.Finite ℤ X] [Module (𝓞 E) X] (k : Type) [Field k] (τ : 𝓞 E →+* k) :
-    Module.Finite k (torusLieEigen H X k τ) := by
-  have : Module.Finite k (X →+ k) :=
-    Module.Finite.equiv (addMonoidHomLequivInt (A := X) (B := k) k).symm
-  infer_instance
 
 variable {R : Type} [CommRing R] [IsDomain R]
 
@@ -132,30 +166,10 @@ def coeffRt : c.F := IntermediateField.inclusion c.le (baseKA l).ρ
 
 def coeffZeta : c.F := IntermediateField.inclusion c.le (baseKA l).ζ
 
-lemma coeffRt_val : ((coeffRt c : c.F) : ℂ) = H.rt0 := rfl
-
-lemma coeffZeta_val : ((coeffZeta c : c.F) : ℂ) = zeta l.A := rfl
-
 variable {c}
 
 def IsFracImage {O : Type} [CommRing O] (β : O →+* c.F) : Prop :=
   ∀ x : c.F, ∃ a s : O, β s ≠ 0 ∧ x * β s = β a
-
-lemma isFracImage_V (W : ValuationSubring ℂ) : IsFracImage (c.V W).subtype := by
-  intro x
-  rcases eq_or_ne x 0 with rfl | hx
-  · exact ⟨0, 1, by simp, by simp⟩
-  rcases (c.V W).mem_or_inv_mem x with h | h
-  · exact ⟨⟨x, h⟩, 1, by simp, by simp⟩
-  · exact ⟨1, ⟨x⁻¹, h⟩, by simpa using hx, by simpa using mul_inv_cancel₀ hx⟩
-
-lemma IsFracImage.ext {O K : Type} [CommRing O] [Field K] {β : O →+* c.F} (h : IsFracImage β)
-    {gam gam' : c.F →+* K} (hgam : ∀ x, gam (β x) = gam' (β x)) : gam = gam' := by
-  ext x
-  obtain ⟨a, s, hs, hx⟩ := h x
-  have h1 : gam x * gam (β s) = gam' x * gam (β s) := by
-    rw [← map_mul, hx, hgam a, hgam s, ← map_mul, hx]
-  exact mul_right_cancel₀ ((map_ne_zero gam).mpr hs) h1
 
 end Base
 
@@ -196,20 +210,6 @@ namespace ArcInput
 
 variable {D : Datum H} {l : Level H} {c : Coeff l} {O : Type} [CommRing O] {β : O →+* c.F}
   {O' : Type} [CommRing O'] [IsDomain O'] {b : O →+* O'}
-
-lemma gam_unique (x x' : ArcInput D c β O' b) : x.gam = x'.gam :=
-  x.frac.ext fun a => by rw [x.gam_over, x'.gam_over]
-
-lemma gam_rt (x : ArcInput D c β O' b) (r : O) (hr : ((β r : c.F) : ℂ) = H.rt0) :
-    x.gam (coeffRt c) = algebraMap O' (FractionRing O') (b r) := by
-  rw [← x.gam_over]; congr 1; exact Subtype.ext hr.symm
-
-lemma gam_zeta (x : ArcInput D c β O' b) (z : O) (hz : ((β z : c.F) : ℂ) = zeta l.A) :
-    x.gam (coeffZeta c) = algebraMap O' (FractionRing O') (b z) := by
-  rw [← x.gam_over]; congr 1; exact Subtype.ext hz.symm
-
-lemma charZero (x : ArcInput D c β O' b) : CharZero (FractionRing O') :=
-  x.gam.charZero_iff x.gam.injective |>.mp inferInstance
 
 end ArcInput
 

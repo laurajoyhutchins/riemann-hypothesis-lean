@@ -1,7 +1,55 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.IsProjOverCompOfIsClosedImmersion
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.AbProj
+import Development.AbelianVarietyTheory.Definitions.Divisors.MapSmulOfIsHausdorff
 import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.TateUnramifiedOfTorsionUnramified
-import Development.AbelianVarietyTheory.Definitions.Degenerations.OfDerivationFnOn
-import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.IsProjOverCompOfIsClosedImmersion
+import Development.AbelianVarietyTheory.PublishedTheorems.RelativeAmpleness.RelAmpleAndKTrivIff
+
+@[expose] public section
 
 noncomputable section
 
@@ -80,7 +128,10 @@ theorem range_cmap (i : Fin 2) : Set.range (cmap R i) = (chart R 1 i : Set (PSpa
   rwa [chartι_eq] at e
 
 theorem cmap_str (i : Fin 2) : cmap R i ≫ PSpace.str R 1 = spMap (algebraMap R (Polynomial R)) := by
-  rw [cmap, pt_str, Polynomial.algebraMap_eq]
+  rw [cmap, pt, PSpace.str, ProjPoint.ofHom_toSpecZero_assoc, ← Spec.map_comp]
+  congr 1
+  ext1
+  exact RingHom.ext fun r => by simp [Polynomial.algebraMap_eq]
 
 theorem cmap_preimage (i : Fin 2) : cmap R i ⁻¹ᵁ chart R 1 (Fin.rev i) = spOpen (Polynomial.X : Polynomial R) := by
   rw [cmap, pt_preimage_chart]; simp [vec, ne_rev i]
@@ -97,7 +148,14 @@ theorem overlap_eq :
   set L := Localization.Away (Polynomial.X : Polynomial R)
   set s : L := IsLocalization.Away.invSelf (Polynomial.X : Polynomial R)
   have hs : algebraMap (Polynomial R) L Polynomial.X * s = 1 := IsLocalization.Away.mul_invSelf _
-  rw [cmap, cmap, spMap_pt, spMap_pt]
+  have hmap {B : Type} [CommRing B] (ψ : Polynomial R →+* B) (i : Fin 2) :
+      spMap ψ ≫ pt Polynomial.C (vec R i) (span_vec R i) =
+        pt (ψ.comp Polynomial.C) (ψ ∘ vec R i) (span_range_comp_eq_top _ (span_vec R i) ψ) := by
+    refine (ProjPoint.SpecMap_ofHom _ _ _ ψ).trans ?_
+    unfold pt
+    congr 1
+    exact MvPolynomial.ringHom_ext (fun r => by simp) (fun j => by simp)
+  rw [cmap, cmap, hmap, hmap]
   refine pt_congr R (RingHom.ext fun r => ?_) _ _ (Units.mkOfMulEqOne s _ (by rw [mul_comm]; exact hs)) ?_
   · rw [RingHom.comp_apply, RingHom.comp_apply, ← Polynomial.algebraMap_eq]
     simp only [AlgHom.toRingHom_eq_coe, RingHom.coe_coe, AlgHom.commutes]
@@ -137,8 +195,8 @@ theorem str_cmap (i : Fin 2) (x : Sp (Polynomial R)) :
 
 end GlobalTheory.ProjLineOpen
 
-open GlobalTheory.ProjLineOpen GlobalTheory.ProjSpace in
 
+open GlobalTheory.ProjLineOpen GlobalTheory.ProjSpace in
 theorem GlobalTheory.isOpen_setOf_charts_mem (R : Type) [CommRing R] (Y : Scheme.{0}) (g₀ g₁ : Sp (Polynomial R) ⟶ Y)
     (hg : spMap (algebraMap (Polynomial R) (Localization.Away (Polynomial.X : Polynomial R))) ≫ g₀ =
       spMap (Polynomial.aeval (IsLocalization.Away.invSelf (Polynomial.X : Polynomial R) :

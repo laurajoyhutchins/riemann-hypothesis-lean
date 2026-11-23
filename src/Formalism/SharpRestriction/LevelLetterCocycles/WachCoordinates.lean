@@ -1,12 +1,46 @@
-import Mathlib
-import Formalism.SharpRestriction.LevelLetterCocycles.UsedLocalConclusion
-import Formalism.WeaklyAdmissibleFiltrations.Statement
-import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
-import Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow
-import Formalism.SharpRestriction.LevelLetterCocycles.LiftingTheory
-import Formalism.SharpRestriction.LevelLetterCocycles.DeltaInvariantLattices
-import Formalism.SharpRestriction.LevelLetterCocycles.LocalTheoryWindows
-import Formalism.WindowSums.Statement
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.LocalTheoryWindows
+public import Formalism.WindowSums.Statement
+public import Formalism.SharpRestriction.LevelLetterCocycles.CrystallineMapLemmas
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -106,8 +140,8 @@ def CrysLat (T : LocLat G Qp LL O) : Prop :=
   FiniteDimensional LL T.V ∧ IsModuleTopology LL T.V ∧ (∀ x, Continuous fun g => T.ρ g x) ∧
     IsCrys PD T.ρ
 
-variable (LL O) in
 
+variable (LL O) in
 def HodgeExact : Prop :=
   (∀ (T₁ T₂ : LocLat G Qp LL O) (F : LatHom T₁.L T₂.L), CrysLat PD T₁ → CrysLat PD T₂ → F.Onto →
     ∀ (τ : K →ₐ[Qp] LL) (a : ℤ), IsJumpV PD T₂.ρ τ a → IsJumpV PD T₁.ρ τ a) ∧
@@ -138,8 +172,8 @@ def ThmELiftAt (n : ℕ) [NeZero n] (emb : ZMod n → (K₀ →ₐ[Qp] LL))
         arcLen →
       F.LiftF PD (ePar PD.p n j (gPar Gp S η) h (Mb₁ + hb₁) (Mb₂ + hb₂) cuts arcLen)
 
-open Classical in
 
+open Classical in
 def hCor {n : ℕ} (b w S η : ℕ) (sz : ZMod n → ℕ) : ℕ :=
   if ∃ i, b ≤ sz i ∧ sz i ≤ b + η then b + η + S else w + S + η
 
@@ -362,18 +396,6 @@ def admitted (D : D7) (HW : HWOf D.loc) (F : FonOf D.loc D.locA HW) (Cm : CmpOf 
 
 def Stmt (D : D7) (HW : HWOf D.loc) (F : FonOf D.loc D.locA HW) (Cm : CmpOf D.loc D.locA HW F) (C C₁ C₂ : ℝ) : Prop :=
   admitted D HW F Cm C → Conclusion1 D C₁ ∧ Conclusion2 D C₂
-
-def RealisationStatementAll : Prop :=
-  ∃ C₁ C₀ : ℝ, ∀ (D : D7) (HW : HWOf D.loc) (F : FonOf D.loc D.locA HW) (Cm : CmpOf D.loc D.locA HW F) (C : ℝ), admitted D HW F Cm C → Conclusion1 D C₁ ∧ ∀ C₂ : ℝ, C₀ ≤ C₂ → Conclusion2 D C₂
-
-theorem closed_form_iff_threshold_form : RealisationStatementAll ↔ ∃ C₁ C₀ : ℝ, ∀ (D : D7) (HW : HWOf D.loc) (F : FonOf D.loc D.locA HW) (Cm : CmpOf D.loc D.locA HW F) (C C₂ : ℝ), C₀ ≤ C₂ → Stmt D HW F Cm C C₁ C₂ := by
-  constructor
-  · rintro ⟨C₁, C₀, h⟩
-    exact ⟨C₁, C₀, fun D HW F Cm C C₂ hC₂ hA =>
-      ⟨(h D HW F Cm C hA).1, (h D HW F Cm C hA).2 C₂ hC₂⟩⟩
-  · rintro ⟨C₁, C₀, h⟩
-    exact ⟨C₁, C₀, fun D HW F Cm C hA =>
-      ⟨(h D HW F Cm C C₀ le_rfl hA).1, fun C₂ hC₂ => (h D HW F Cm C C₂ hC₂ hA).2⟩⟩
 
 end Record
 

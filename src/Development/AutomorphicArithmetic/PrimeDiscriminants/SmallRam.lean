@@ -1,5 +1,52 @@
-import Mathlib
-import Formalism.SharpRestriction.RamificationFrobenius.TotientGaloisClasses.HostFacts
+module
+
+public import Formalism.SharpRestriction.RamificationFrobenius.TotientGaloisClasses.ConjEMemHostFIff
+public import Formalism.SharpRestriction.RamificationFrobenius.TotientGaloisClasses.HostFacts
+import Mathlib.Algebra.AffineMonoid.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.KrullDimension.PID
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Ideal
 
@@ -38,43 +85,6 @@ theorem mem_sq_of_dvd_QS (hE : H.toHostRaw.Exact) {l : ℕ} (hl : l.Prime) (hd :
   have hle : Ideal.map (algebraMap ℤ (𝓞 H.E)) (span {(l : ℤ)}) ≤ P ^ 2 := le_pow_of_le_ramificationIdx' hnt
   rw [Ideal.map_span, Set.image_singleton, Ideal.span_singleton_le_iff_mem] at hle
   simpa using hle
-
-theorem QS_notMem (hE : H.toHostRaw.Exact) (P : HeightOneSpectrum (𝓞 H.E)) {p : ℕ} (hp : p.Prime)
-    (hc : Nat.card (𝓞 H.E ⧸ P.asIdeal) = p) (h2 : (p : 𝓞 H.E) ∉ P.asIdeal ^ 2) : (H.QS : 𝓞 H.E) ∉ P.asIdeal := by
-  have hP := P.isPrime
-  have hpm : (p : 𝓞 H.E) ∈ P.asIdeal := by
-    rw [← Ideal.Quotient.eq_zero_iff_mem, map_natCast, ← hc, ← nsmul_one]
-    exact card_nsmul_eq_zero'
-  intro hm
-  by_cases hd : p ∣ H.QS
-  · exact h2 (H.mem_sq_of_dvd_QS hE hp hd P.asIdeal hpm)
-  · have hcop : IsCoprime ((p : ℕ) : 𝓞 H.E) ((H.QS : ℕ) : 𝓞 H.E) := ((Nat.Prime.coprime_iff_not_dvd hp).2 hd).cast
-    obtain ⟨a, b, hab⟩ := hcop
-    exact hP.ne_top ((Ideal.eq_top_iff_one _).2 (hab ▸ P.asIdeal.add_mem (P.asIdeal.mul_mem_left a hpm) (P.asIdeal.mul_mem_left b hm)))
-
-theorem condN_mul_notMem (hE : H.toHostRaw.Exact) (P : HeightOneSpectrum (𝓞 H.E)) {p : ℕ} (hp : p.Prime)
-    (hc : Nat.card (𝓞 H.E ⧸ P.asIdeal) = p) (h2 : (p : 𝓞 H.E) ∉ P.asIdeal ^ 2) {T : ℕ}
-    (h : ((2 * H.q * H.d * T : ℕ) : 𝓞 H.E) ∉ P.asIdeal) : ((H.condN * T : ℕ) : 𝓞 H.E) ∉ P.asIdeal := by
-  intro hm
-  have e : ((H.condN * T : ℕ) : 𝓞 H.E) = (H.QS : 𝓞 H.E) * ((H.q * H.d * T : ℕ) : 𝓞 H.E) := by
-    simp only [HostRaw.condN]; push_cast; ring
-  rw [e] at hm
-  rcases P.isPrime.mem_or_mem hm with h1 | h1
-  · exact H.QS_notMem hE P hp hc h2 h1
-  · refine h ?_
-    have e' : ((2 * H.q * H.d * T : ℕ) : 𝓞 H.E) = 2 * ((H.q * H.d * T : ℕ) : 𝓞 H.E) := by push_cast; ring
-    rw [e']
-    exact P.asIdeal.mul_mem_left _ h1
-
-theorem two_mul_notMem_of_condN (P : HeightOneSpectrum (𝓞 H.E)) {T : ℕ}
-    (h : ((H.condN * T : ℕ) : 𝓞 H.E) ∉ P.asIdeal) : ((2 * H.q * H.d * T : ℕ) : 𝓞 H.E) ∉ P.asIdeal := by
-  intro hm
-  obtain ⟨c, hc⟩ := H.two_dvd_QS
-  refine h ?_
-  have e : ((H.condN * T : ℕ) : 𝓞 H.E) = (c : 𝓞 H.E) * ((2 * H.q * H.d * T : ℕ) : 𝓞 H.E) := by
-    simp only [HostRaw.condN]; rw [hc]; push_cast; ring
-  rw [e]
-  exact P.asIdeal.mul_mem_left _ hm
 
 end Formalism.HC.HostAx
 

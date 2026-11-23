@@ -1,4 +1,61 @@
-import Formalism.LocalToGlobal.CharacterGerms.RowTieFB
+module
+
+public import Formalism.LocalToGlobal.CharacterGerms.Interface
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+public import Mathlib.Data.Nat.Choose.Dvd
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Presheaf
+public import Mathlib.Algebra.BigOperators.Field
+
+@[expose] public section
 
 noncomputable section
 
@@ -19,22 +76,9 @@ theorem mm_zero : V.MM (0 : C) := by
   unfold VF.MM
   simp
 
-theorem mm_of_ge_one {a : C} (h : V.Ge 1 a) : V.MM a := by
-  unfold VF.MM
-  unfold VF.Ge at h
-  exact lt_of_lt_of_le (by exact_mod_cast one_pos) h
-
 theorem mm_add {a b : C} (ha : V.MM a) (hb : V.MM b) : V.MM (a + b) := by
   unfold VF.MM at *
   exact lt_of_lt_of_le (lt_min ha hb) (V.v.map_add a b)
-
-theorem mm_neg {a : C} (ha : V.MM a) : V.MM (-a) := by
-  unfold VF.MM at *
-  rwa [V.v.map_neg]
-
-theorem mm_sub {a b : C} (ha : V.MM a) (hb : V.MM b) : V.MM (a - b) := by
-  rw [sub_eq_add_neg]
-  exact mm_add ha (mm_neg hb)
 
 theorem mm_sum {ι : Type*} {s : Finset ι} {f : ι → C} (h : ∀ i ∈ s, V.MM (f i)) : V.MM (∑ i ∈ s, f i) :=
   Finset.sum_induction f (fun x => V.MM x) (fun _ _ => mm_add) mm_zero h
@@ -44,10 +88,6 @@ theorem mm_mul_int {a b : C} (ha : V.Ge 0 a) (hb : V.MM b) : V.MM (a * b) := by
   unfold VF.MM at *
   rw [V.v.map_mul]
   exact lt_of_lt_of_le hb (le_add_of_nonneg_left h0)
-
-theorem v_pow_coe {a : C} {t : ℝ} (h : V.v a = (t : WithTop ℝ)) (k : ℕ) :
-    V.v (a ^ k) = (((k : ℝ) * t : ℝ) : WithTop ℝ) := by
-  rw [V.v.map_pow, h, ← WithTop.coe_nsmul, nsmul_eq_mul]
 
 theorem mm_of_pow {a : C} {n : ℕ} (h : V.MM (a ^ n)) : V.MM a := by
   unfold VF.MM at *
@@ -222,60 +262,6 @@ end ValuationNonnegativity
 section Closed
 
 variable {C : Type} [Field C]
-
-def CoefficientIdentityCondition : Prop :=
-  AllFB fun C _ V _ I _ _ X => X.RankHyp → ∀ H : ∀ g, X.CartHyp V g, X.AltC → ∀ g a, X.big g a →
-    ∃ M : JJ I g → JJ I g → C, ∀ (w : I g → C) (x : ℕ → I g ⊕ JJ I g → C), (RawChart.cart (H g)).Good a w x →
-      (∀ c, V.MM ((RawChart.cart (H g)).V2 x c)) →
-      ∃ c1 : JJ I g → C, (∀ q, X.ty (1 - g) q ≠ a + 2 → c1 q = 0) ∧
-        ∀ q, V.MM ((RawChart.cart (H g)).c0' x q ^ V.l - ∑ q', c1 q' * M q' q)
-
-def IndependenceSpanCondition : Prop :=
-  AllFB fun C _ V _ I _ _ X => X.RankHyp → ∀ H : ∀ g, X.CartHyp V g, X.AltC → ∀ g a, X.big g a →
-    ∃ e : Fin X.j' → JJ I g → C, ∀ (w : I g → C) (x : ℕ → I g ⊕ JJ I g → C), (RawChart.cart (H g)).Good a w x →
-      (∀ c, V.MM ((RawChart.cart (H g)).V2 x c)) →
-      ∃ b : Fin X.j' → C, ∀ q, V.MM ((RawChart.cart (H g)).c0' x q ^ V.l - ∑ r, b r * e r q)
-
-theorem independence_bound_of_span (h : IndependenceSpanCondition) : IndependenceBoundAllCharts := by
-  intro C _ _ V O _ _ dd Y d _ I _ p hrk H hR2 hAlt g a hbig N w x hg hV hind
-  have := Y.algClosed
-  obtain ⟨e, he⟩ := h C V O dd Y d I p hrk H hAlt g a hbig
-  exact ValuationNonnegativity.independence_bound_of_span_raw (RawChart.cart (H g)) a _ (hR2 hAlt g a hbig) e he N w x hg hV hind
-
-theorem independence_span_of_coefficient (h : CoefficientIdentityCondition) : IndependenceSpanCondition := by
-  intro C _ _ V O _ _ dd Y d _ I _ p hrk H hAlt g a hbig
-  have key : ∀ g' : Fin 2, (Y.raw p).big g' a → (Y.raw p).big g' (a + 2) := by
-    obtain ⟨hd, hpar⟩ := hAlt
-    have hev := ValuationNonnegativity.even_val_add_two hd a
-    have e1 : ∀ b, (Y.raw p).big 1 b ↔ ¬ (Y.raw p).big 0 b := fun b => by
-      simpa using hrk.big_compl 0 b
-    intro g' hb
-    fin_cases g'
-    · exact (hpar (a + 2)).2 (hev.2 ((hpar a).1 hb))
-    · simp only [Fin.mk_one] at hb ⊢
-      rw [e1, hpar] at hb ⊢
-      rwa [hev]
-  have hsmall : ¬ (Y.raw p).big (1 - g) (a + 2) := fun h2 => (hrk.big_compl g (a + 2)).1 h2 (key g hbig)
-  have hcard : Fintype.card {q : JJ I g // (Y.raw p).ty (1 - g) q = a + 2} = (Y.raw p).j' := by
-    rw [Fintype.card_subtype]; exact hrk.rk_small (1 - g) (a + 2) hsmall
-  obtain ⟨M, hM⟩ := h C V O dd Y d I p hrk H hAlt g a hbig
-  let σ := (Fintype.equivFinOfCardEq hcard).symm
-  refine ⟨fun r => M (σ r).1, fun w x hg hV => ?_⟩
-  obtain ⟨c1, hsupp, hc1⟩ := hM w x hg hV
-  refine ⟨fun r => c1 (σ r).1, fun q => ?_⟩
-  have hsum : ∑ q', c1 q' * M q' q = ∑ r, c1 (σ r).1 * M (σ r).1 q := by
-    rw [← Finset.sum_filter_of_ne (p := fun q' => (Y.raw p).ty (1 - g) q' = a + 2)
-      (fun q' _ hne => by
-        by_contra hq
-        exact hne (by rw [hsupp q' hq, zero_mul]))]
-    rw [Finset.sum_subtype (Finset.univ.filter fun q' => (Y.raw p).ty (1 - g) q' = a + 2)
-      (p := fun q' => (Y.raw p).ty (1 - g) q' = a + 2) (fun q' => by simp)]
-    exact (Equiv.sum_comp σ (fun s => c1 s.1 * M s.1 q)).symm
-  rw [← hsum]
-  exact hc1 q
-
-theorem independence_bound_of_coefficient (h : CoefficientIdentityCondition) : IndependenceBoundAllCharts :=
-  independence_bound_of_span (independence_span_of_coefficient h)
 
 end Closed
 

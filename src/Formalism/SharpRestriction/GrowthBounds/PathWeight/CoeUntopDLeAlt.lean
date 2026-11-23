@@ -1,4 +1,45 @@
-import Formalism.SharpRestriction.GrowthBounds.PathWeight.GeneratorImageIsSymbol
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.PathWeight.GeneratorImageIsSymbol
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -125,12 +166,12 @@ theorem span_mul_image_mem_span {O : Type} [CommRing O] {σ τ υ : Type} (f : M
     induction hG using Submodule.span_induction with
     | mem b hb => exact key a ha b hb
     | zero => simp
-    | add x y _ _ hx hy => rw [map_add, mul_add, map_add]; exact Submodule.add_mem _ hx hy
+    | add x y _ _ hx hy => rw [map_add (f := _), mul_add, map_add (f := _)]; exact Submodule.add_mem _ hx hy
     | smul c x _ hx => rw [map_smul, mul_smul_comm, map_smul]; exact Submodule.smul_mem _ c hx
   induction hA using Submodule.span_induction with
   | mem a ha => exact step1 a ha
   | zero => simp
-  | add x y _ _ hx hy => rw [map_add, add_mul, map_add]; exact Submodule.add_mem _ hx hy
+  | add x y _ _ hx hy => rw [map_add (f := _), add_mul, map_add (f := _)]; exact Submodule.add_mem _ hx hy
   | smul c x _ hx => rw [map_smul, smul_mul_assoc, map_smul]; exact Submodule.smul_mem _ c hx
 
 theorem generator_pair_conditions_of_admitted (D : Formalism.BasicNotions.D7) (hA3 : Formalism.MainNotions.SourceCleaning.StandardMonomialSpanBis D) (hB1 : Formalism.MainNotions.SourceCleaning.PathPairCorrespondence D) : GeneratorSpanInclusion := by
@@ -166,7 +207,7 @@ theorem generator_pair_conditions_of_admitted (D : Formalism.BasicNotions.D7) (h
     · ext; simp; omega
     · have h3 : i.val - 1 + 1 < Mj X.Fr j := by have := i.2; omega
       show (if h : i.val - 1 + 1 < Mj X.Fr j then (⟨i.val - 1 + 1, h⟩ : Fin (Mj X.Fr j)) else _) = i
-      rw [dif_pos h3]
+      rw [dite_eq_left h3]
       ext; simp; omega
     · ext y
       show y < i ↔ y ≤ (⟨i.val - 1, by omega⟩ : Fin (Mj X.Fr j))

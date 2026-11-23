@@ -1,7 +1,48 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.HasDivPlace
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
 import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsGDatumOneOneOne
-import Development.AbelianVarietyTheory.Definitions.Divisors.HasDivPlace
-import Development.AbelianVarietyTheory.Definitions.Divisors.CompactBIffCompact
+
+@[expose] public section
 
 noncomputable section
 
@@ -50,7 +91,7 @@ def trd : 𝓞 E →ₗ[ℤ] ℤ :=
         have h1 := (A.δ_int x).choose_spec
         have h2 := (A.δ_int y).choose_spec
         have : (((A.δ_int (x + y)).choose : ℤ) : ℚ) = ((A.δ_int x).choose : ℤ) + ((A.δ_int y).choose : ℤ) := by
-          rw [← h, ← h1, ← h2, ← map_add, ← mul_add]; simp
+          rw [← h, ← h1, ← h2, ← map_add (f := _), ← mul_add]; simp
         exact_mod_cast this }
 
 theorem trd_spec (x : 𝓞 E) : ((A.trd x : ℤ) : ℚ) = Algebra.trace ℚ E (A.δ * x) := (A.δ_int x).choose_spec.symm
@@ -177,9 +218,6 @@ def datum {n : ℕ} (h : A.Facts n) (q : ℕ) [Fact q.Prime] (hs : A.SplitK q) (
     have := h5 c M hM
     have ht : A.tau 0 = A.τ₀ := rfl
     simpa [ht] using this
-
-theorem datum_toG {n : ℕ} (h : A.Facts n) (q q' : ℕ) [Fact q.Prime] [Fact q'.Prime] (hs hp hs' hp') :
-    (A.datum h q hs hp).toG = (A.datum h q' hs' hp').toG := rfl
 
 theorem herm (n : ℕ) : ((A.H n).map (cj E))ᵀ = A.H n := by
   rw [H, Matrix.diagonal_map (map_zero _), Matrix.diagonal_transpose]

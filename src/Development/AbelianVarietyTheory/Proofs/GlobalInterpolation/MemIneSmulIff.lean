@@ -1,6 +1,49 @@
-import Mathlib
-import Formalism.SharpRestriction.ValuationFrobeniusEpsilon.LeastPrimeTwists.StrictlyAntitoneWeights.HatTripleRepresentations.GradedDegreeZeroLocal
-import ReciprocityTheory.GaloisValuations.ArithOfA
+module
+
+public import Mathlib.NumberTheory.NumberField.Basic
+public import Mathlib.RingTheory.DedekindDomain.Ideal.Lemmas
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.GaloisValuations.ArithOfA
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Pointwise
 
@@ -21,34 +64,5 @@ theorem eq_of_prime_mem {q : ℕ} (hq : q.Prime) {v w : HeightOneSpectrum (𝓞 
   rw [e, ← Ideal.mem_comap, ← Ideal.mem_comap]
   change n ∈ v.asIdeal.under ℤ ↔ n ∈ w.asIdeal.under ℤ
   rw [← h1, ← h2]
-
-theorem mem_Ine_smul_iff {F Ω : Type*} [Field F] [NumberField F] [Field Ω] [Algebra F Ω] [IsAlgClosure F Ω]
-    (A : ValuationSubring Ω) (x σ : Formalism.ConjugateSelfDual.G F Ω) :
-    σ ∈ Formalism.MainNotions.V.Lang.Ine (F := F) (x • A) ↔ x⁻¹ * σ * x ∈ Formalism.MainNotions.V.Lang.Ine (F := F) A := by
-  constructor
-  · intro h
-    have := ReciprocityTheory.Gal.conj_mem_Ine_smul (F := F) (A := x • A) (γ := x⁻¹) (σ := σ) h
-    rw [inv_inv, inv_smul_smul] at this
-    exact this
-  · intro h
-    have := ReciprocityTheory.Gal.conj_mem_Ine_smul (F := F) (A := A) (γ := x) (σ := x⁻¹ * σ * x) h
-    rw [show x * (x⁻¹ * σ * x) * x⁻¹ = σ by group] at this
-    exact this
-
-theorem mem_Dec_smul_iff {F Ω : Type*} [Field F] [NumberField F] [Field Ω] [Algebra F Ω]
-    (A : ValuationSubring Ω) (x σ : Formalism.ConjugateSelfDual.G F Ω) :
-    σ ∈ Formalism.MainNotions.V.Lang.Dec (F := F) (x • A) ↔ x⁻¹ * σ * x ∈ Formalism.MainNotions.V.Lang.Dec (F := F) A := by
-  rw [Formalism.MainNotions.V.Lang.mem_Dec, Formalism.MainNotions.V.Lang.mem_Dec, mul_smul, mul_smul, inv_smul_eq_iff]
-
-theorem main : ∀ (D : Formalism.BasicNotions.D7) (V : Formalism.BasicNotions.VData D), Formalism.MainNotions.V.Pf.V3.P4.F_PlcConj V := by
-  intro D V q hq A hA
-  have : IsAlgClosure ℚ Formalism.BasicNotions.TV.QbarQ := AlgebraicClosure.instIsAlgClosure ℚ
-  obtain ⟨v, hv, hqv⟩ := hA
-  obtain ⟨w, hw, hqw⟩ := V.plc_above q hq
-  obtain rfl := eq_of_prime_mem hq hqv hqw
-  obtain ⟨x, hx⟩ := ReciprocityTheory.Gal.exists_smul_eq_of_over (F := ℚ) hw hv
-  refine ⟨x, fun σ => ?_, fun σ => ?_⟩
-  · rw [← hx]; exact mem_Ine_smul_iff _ x σ
-  · rw [← hx]; exact mem_Dec_smul_iff _ x σ
 
 end GlobalTheory.PlaceConjQ

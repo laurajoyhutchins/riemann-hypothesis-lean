@@ -1,6 +1,50 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.IsStratHom
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.BhattScholzeIntegral
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.IsStratHom
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -13,7 +57,7 @@ theorem ultra (l : ℕ) {A : Type} [CommRing A] (u : A) (ρ : ℝ≥0) : IsUltra
   refine IsUltrametricDist.isUltrametricDist_of_forall_norm_add_le_max_norm fun x y => ?_
   refine (denseRange_ofPre l u ρ).induction_on₂ (p := fun x y => ‖x + y‖ ≤ max ‖x‖ ‖y‖)
     (isClosed_le (by fun_prop) (by fun_prop)) (fun a b => ?_) x y
-  rw [← map_add, norm_ofPre, norm_ofPre, norm_ofPre]
+  rw [← map_add (f := _), norm_ofPre, norm_ofPre, norm_ofPre]
   exact gauge_add_le_max l u ρ a b
 
 def smallIdeal (l : ℕ) {A : Type} [CommRing A] (u : A) (ρ : ℝ≥0) (r : ℝ≥0) : Ideal A where
@@ -22,7 +66,7 @@ def smallIdeal (l : ℕ) {A : Type} [CommRing A] (u : A) (ρ : ℝ≥0) (r : ℝ
   add_mem' {x y} hx hy := by
     haveI := ultra l u ρ
     change ‖toDisc l u ρ (x + y)‖ ≤ r
-    rw [map_add]
+    rw [map_add (f := _)]
     exact (IsUltrametricDist.norm_add_le_max _ _).trans (max_le hx hy)
   smul_mem' a x hx := by
     change ‖toDisc l u ρ (a * x)‖ ≤ r
@@ -65,7 +109,7 @@ theorem small (l : ℕ) [hl : Fact l.Prime] (K : FinExt l) (bk : BK K) (A : Type
       simp only [Polynomial.coe_add, Polynomial.coe_mul, Polynomial.coe_X, Polynomial.coe_C] at this
       rw [hw, map_mul, map_natCast] at this
       exact this.symm
-    rw [e, map_add, map_mul, map_mul, map_natCast]
+    rw [e, map_add (f := _), map_mul, map_mul, map_natCast]
     exact add_mem (Ideal.mul_mem_right _ _ hXm) (Ideal.mul_mem_right _ _ hlm)
   have hJ : bk.J.map s ≤ smallIdeal l (s X) ρ θ := by
     rw [Ideal.map_le_iff_le_comap]
@@ -89,7 +133,7 @@ theorem isClosed_expand {D D' ι : Type} [NormedCommRing D] [NormedCommRing D'] 
     filter_upwards [Metric.tendsto_nhds.1 hz.1 (ε / 2) (by positivity)] with i hi
     rw [dist_zero_right] at hi ⊢
     rw [dist_eq_norm] at hd
-    have e : c i y = c i z + c i (y - z) := by rw [← map_add]; congr 1; ring
+    have e : c i y = c i z + c i (y - z) := by rw [← map_add (f := _)]; congr 1; ring
     have := norm_add_le (c i z) (c i (y - z))
     have := hc i (y - z)
     rw [e]; linarith
@@ -109,7 +153,7 @@ theorem isClosed_expand {D D' ι : Type} [NormedCommRing D] [NormedCommRing D'] 
 
 theorem disc_expand (l : ℕ) [Fact l.Prime] (K : FinExt l) (bk : BK K) (A : Type) [CommRing A] (s : bk.S →+* A)
     (ι : Type) (TB : TopBasis s bk.J ι) (ρ : ℝ≥0) (h0 : 0 < ρ) (h1 : ρ < 1) (j : bk.DS ρ →+* Disc l (s X) ρ)
-    (hj : IsDiscMap s j) (cD : ι → (Disc l (s X) ρ →+ bk.DS ρ))
+    (hj : IsDiscMap (l := _) (u := _) (ρ := _) s j) (cD : ι → (Disc l (s X) ρ →+ bk.DS ρ))
     (hc : (∀ i a, cD i (toDisc l (s X) ρ a) = toDisc l (X : bk.S) ρ (TB.c i a)) ∧
       (∀ i x y, cD i (j x * y) = x * cD i y) ∧ (∀ i y, ‖cD i y‖ ≤ ‖y‖)) (y : Disc l (s X) ρ) :
     Filter.Tendsto (fun i => cD i y) Filter.cofinite (nhds 0) ∧
@@ -134,6 +178,7 @@ theorem disc_expand (l : ℕ) [Fact l.Prime] (K : FinExt l) (bk : BK K) (A : Typ
       have h2 := hn _ (TB.approx a n F fun i hi => by
         by_contra h
         exact hi (hF (by simpa using h)))
+
       rw [map_sub, map_sum] at h2
       rw [dist_comm, dist_eq_norm]
       simp only [hc1, hj.ext, ← map_mul]

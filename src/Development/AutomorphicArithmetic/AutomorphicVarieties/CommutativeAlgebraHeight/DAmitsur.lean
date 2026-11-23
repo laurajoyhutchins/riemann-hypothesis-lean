@@ -1,6 +1,59 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebraHeight.OfDetToDet
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebraHeight.OfDetToDet
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebraHeight.HomTwo
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.MvPolynomial.Ideal
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
 import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebraHeight.IsLocalHom
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebraHeight.HomTwo
+public import Mathlib.Algebra.FreeAlgebra
+public import Mathlib.Algebra.MvPolynomial.Supported
+
+@[expose] public section
 
 open TensorProduct IsLocalRing Polynomial UpperTheory.V.W UpperTheory.V.Alg UpperTheory.V.CA
 
@@ -55,7 +108,7 @@ private theorem amJ_step (x : Fin k → F) {N : ℕ} {d : F} (hd : d ∈ amJ x (
     subst hp
     simp only at h
     rw [h] at hw
-    simp at hw
+    simp [FreeMonoid.length_one] at hw
   | add u v hu hv ihu ihv =>
     obtain ⟨L, hL, e, he, h⟩ := ihu
     obtain ⟨L', hL', e', he', h'⟩ := ihv
@@ -71,7 +124,7 @@ private theorem amJ_fac (x : Fin k → F) (N : ℕ) :
   induction N with
   | zero =>
     refine ⟨[], by simp, ⟨0, zero_mem _, by simp [amP]⟩, ∑ a, x a, ?_, by simp [amP]⟩
-    exact sum_mem fun a _ => AddSubmonoid.subset_closure ⟨1, FreeMonoid.of a, by simp, by simp⟩
+    exact sum_mem fun a _ => AddSubmonoid.subset_closure ⟨1, FreeMonoid.of a, by simp [FreeMonoid.length_of], by simp⟩
   | succ N ih =>
     obtain ⟨L, hL, ⟨q, hq, h1⟩, d, hd, h2⟩ := ih
     obtain ⟨L', hL', e, he, h3⟩ := amJ_step x hd
@@ -99,17 +152,18 @@ private theorem am_univ (k N : ℕ) :
     clear h
     induction hd using AddSubmonoid.closure_induction with
     | zero => simp
-    | add u v _ _ hu hv => rw [map_add, hu, hv, add_zero]
+    | add u v _ _ hu hv => rw [map_add (f := _), hu, hv, add_zero]
     | mem u hu =>
       obtain ⟨c, w, hw', rfl⟩ := hu
       rw [map_zsmul, hw, hx w (by omega), smul_zero]
   have := congrArg (FreeAlgebra.lift ℤ x) h
-  rw [map_add, map_add, h0, add_zero, map_one, map_sum, amP, map_list_prod, List.map_map] at this
+
+  rw [map_add (f := _), map_add (f := _), h0, add_zero, map_one, map_sum, amP, map_list_prod, List.map_map] at this
   simp only [FreeAlgebra.lift_ι_apply] at this
   rw [this, amP]
   congr 1
   refine List.map_congr_left fun p _ => ?_
-  simp only [Function.comp, map_add, map_one, map_zsmul, hw]
+  simp only [Function.comp, map_add (f := _), map_one, map_zsmul, hw]
 
 end Fac
 
@@ -120,8 +174,8 @@ variable {k : ℕ}
 private noncomputable def amWt (w : FreeMonoid (Fin k)) : Fin k →₀ ℕ := Multiset.toFinsupp (w.toList : Multiset (Fin k))
 
 private def amGood (n : ℕ) (Q : MvPolynomial (Fin k) (MvPolynomial (ℕ × FreeMonoid (Fin k)) ℤ)) : Prop :=
-  ∀ β, MvPolynomial.coeff β Q ∈ MvPolynomial.supported ℤ {v : ℕ × FreeMonoid (Fin k) | 1 ≤ v.1 ∧ v.1 ≤ n ∧ v.2 ≠ 1} ∧
-    (MvPolynomial.coeff β Q).IsWeightedHomogeneous (fun v => v.1 • amWt v.2) β
+  ∀ β, AddMonoidAlgebra.coeff Q β ∈ MvPolynomial.supported ℤ {v : ℕ × FreeMonoid (Fin k) | 1 ≤ v.1 ∧ v.1 ≤ n ∧ v.2 ≠ 1} ∧
+    (AddMonoidAlgebra.coeff Q β).IsWeightedHomogeneous (fun v => v.1 • amWt v.2) β
 
 private theorem amGood_mon (n : ℕ) (γ : Fin k →₀ ℕ) (P : MvPolynomial (ℕ × FreeMonoid (Fin k)) ℤ)
     (h1 : P ∈ MvPolynomial.supported ℤ {v : ℕ × FreeMonoid (Fin k) | 1 ≤ v.1 ∧ v.1 ≤ n ∧ v.2 ≠ 1})
@@ -176,12 +230,12 @@ private theorem amGood_prod (n : ℕ) (L : List (ℤ × FreeMonoid (Fin k))) (hL
 
 private theorem amWt_degree (w : FreeMonoid (Fin k)) : (amWt w).degree = w.length := by
   induction w using FreeMonoid.inductionOn' with
-  | one => simp [amWt]
+  | one => simp [amWt, FreeMonoid.length_one]
   | of_mul a w ih =>
     have : amWt (FreeMonoid.of a * w) = Finsupp.single a 1 + amWt w := by
-      simp only [amWt, FreeMonoid.toList_of_mul, ← Multiset.cons_coe, ← Multiset.singleton_add, map_add,
+      simp only [amWt, FreeMonoid.toList_of_mul, ← Multiset.cons_coe, ← Multiset.singleton_add, map_add (f := _),
         Multiset.toFinsupp_singleton]
-    rw [this, map_add, ih]; simp
+    rw [this, map_add (f := _), ih]; simp [FreeMonoid.length_mul, FreeMonoid.length_of]
 
 private theorem am_lift {A E B : Type} [CommRing A] [Ring E] [Algebra A E] [CommRing B] [Algebra A B]
     (π : MvPolynomial (Fin k) A →ₐ[A] B) (x : Fin k → E) (w : FreeMonoid (Fin k)) :
@@ -191,7 +245,7 @@ private theorem am_lift {A E B : Type} [CommRing A] [Ring E] [Algebra A E] [Comm
   | one => simp [amWt, Algebra.TensorProduct.one_def]
   | of_mul a w ih =>
     have : amWt (FreeMonoid.of a * w) = Finsupp.single a 1 + amWt w := by
-      simp only [amWt, FreeMonoid.toList_of_mul, ← Multiset.cons_coe, ← Multiset.singleton_add, map_add,
+      simp only [amWt, FreeMonoid.toList_of_mul, ← Multiset.cons_coe, ← Multiset.singleton_add, map_add (f := _),
         Multiset.toFinsupp_singleton]
     rw [this, map_mul, map_mul, ih, FreeMonoid.lift_eval_of, FreeMonoid.lift_eval_of,
       Algebra.TensorProduct.tmul_mul_tmul, ← map_mul, MvPolynomial.X, MvPolynomial.monomial_mul, one_mul]
@@ -201,7 +255,7 @@ private theorem am_one {n : ℕ} {A E B : Type} [CommRing A] [Ring E] [Algebra A
     D.D B (1 + b ⊗ₜ y) = 1 + ∑ i ∈ Finset.range n, algebraMap A B (D.lam (i + 1) y) * b ^ (i + 1) := by
   obtain ⟨h0, -, h, -⟩ := d_chi D y
   have := D.nat A[X] B (Polynomial.aeval b) (1 + X ⊗ₜ y)
-  rw [h, map_add, map_one, Algebra.TensorProduct.map_tmul, aeval_X, AlgHom.id_apply] at this
+  rw [h, map_add (f := _), map_one, Algebra.TensorProduct.map_tmul, aeval_X, AlgHom.id_apply] at this
   rw [this, Finset.sum_range_succ', h0, add_comm]
   simp
 
@@ -210,7 +264,7 @@ end Pol
 end UpperTheory.V.CA
 
 theorem UpperTheory.V.CA.d_amitsur :
-    ∀ (n k : ℕ) (α : Fin k →₀ ℕ), ∃ P : MvPolynomial (ℕ × FreeMonoid (Fin k)) ℤ, (∀ v ∈ P.vars, 1 ≤ v.1 ∧ v.1 ≤ n ∧ v.2 ≠ 1) ∧ P.IsWeightedHomogeneous (fun v => v.1 • Multiset.toFinsupp (v.2.toList : Multiset (Fin k))) α ∧ ∀ {A E : Type} [CommRing A] [Ring E] [Algebra A E] (D : Det n A E) (x : Fin k → E), MvPolynomial.coeff α (D.D (MvPolynomial (Fin k) A) (1 + Det.gen x)) = MvPolynomial.aeval (fun v => D.lam v.1 (FreeMonoid.lift x v.2)) P := by
+    ∀ (n k : ℕ) (α : Fin k →₀ ℕ), ∃ P : MvPolynomial (ℕ × FreeMonoid (Fin k)) ℤ, (∀ v ∈ P.vars, 1 ≤ v.1 ∧ v.1 ≤ n ∧ v.2 ≠ 1) ∧ P.IsWeightedHomogeneous (fun v => v.1 • Multiset.toFinsupp (v.2.toList : Multiset (Fin k))) α ∧ ∀ {A E : Type} [CommRing A] [Ring E] [Algebra A E] (D : Det n A E) (x : Fin k → E), AddMonoidAlgebra.coeff (D.D (MvPolynomial (Fin k) A) (1 + Det.gen x)) α = MvPolynomial.aeval (fun v => D.lam v.1 (FreeMonoid.lift x v.2)) P := by
   intro n k α
   obtain ⟨L, hL, hu⟩ := am_univ k α.degree
   have hg := amGood_prod n L hL α
@@ -226,13 +280,15 @@ theorem UpperTheory.V.CA.d_amitsur :
       Ideal.Quotient.eq_zero_iff_mem.2 (Ideal.subset_span ⟨amWt w, by simpa [amWt_degree] using hw, rfl⟩)
     rw [am_lift, this, zero_tmul]
   have h2 : π (D.D (MvPolynomial (Fin k) A) (1 + Det.gen x)) = π (MvPolynomial.map φ (L.map (amF n)).prod) := by
-    rw [← D.nat, map_add, map_one, Det.gen, map_sum]
+
+    rw [← D.nat, map_add (f := _), map_one, Det.gen, map_sum]
     simp only [Algebra.TensorProduct.map_tmul, AlgHom.id_apply]
     rw [h1, amP, map_list_prod, map_list_prod, map_list_prod, List.map_map, List.map_map, List.map_map]
     congr 1
     refine List.map_congr_left fun p _ => ?_
     simp only [Function.comp]
-    rw [am_lift, smul_tmul', am_one, amF, map_add, map_add, map_one (MvPolynomial.map φ), map_one π, map_sum, map_sum]
+
+    rw [am_lift, smul_tmul', am_one, amF, map_add (f := _), map_add (f := _), map_one (MvPolynomial.map φ), map_one π, map_sum, map_sum]
     congr 1
     refine Finset.sum_congr rfl fun i _ => ?_
     rw [← map_zsmul, ← map_pow, ← π.commutes, ← map_mul]
@@ -242,8 +298,8 @@ theorem UpperTheory.V.CA.d_amitsur :
     congr 1
     simp [φ, mul_comm]
   have h3 := MvPolynomial.mem_ideal_span_monomial_image.1 (Ideal.Quotient.eq.1 h2)
-  have h4 : MvPolynomial.coeff α (D.D (MvPolynomial (Fin k) A) (1 + Det.gen x) -
-      MvPolynomial.map φ (L.map (amF n)).prod) = 0 := by
+  have h4 : AddMonoidAlgebra.coeff (D.D (MvPolynomial (Fin k) A) (1 + Det.gen x) -
+      MvPolynomial.map φ (L.map (amF n)).prod) α = 0 := by
     by_contra h
     obtain ⟨β, hβ, hle⟩ := h3 α (MvPolynomial.mem_support_iff.2 h)
     exact absurd (Finsupp.degree_mono hle) (not_le.2 hβ)

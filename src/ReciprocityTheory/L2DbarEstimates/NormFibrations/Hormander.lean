@@ -1,15 +1,62 @@
-import ReciprocityTheory.L2DbarEstimates.JacobianInterpolationStatement
-import ReciprocityTheory.L2DbarEstimates.NormFibrations.Imports
-import ReciprocityTheory.L2DbarEstimates.ChartDerivatives.InhHasFDerivAtNormSq
-import ReciprocityTheory.L2DbarEstimates.Mollifiers.Imports
-import ReciprocityTheory.L2DbarEstimates.WeakHolomorphy.Imports
-import ReciprocityTheory.L2DbarEstimates.WeakHolomorphy.RegBall
-import ReciprocityTheory.L2DbarEstimates.MinimalSolutions.HilbertLemmas
-import ReciprocityTheory.L2DbarEstimates.BasicIdentity.ImportsAlt
-import ReciprocityTheory.L2DbarEstimates.HormanderEstimate.HStatementOf
-import ReciprocityTheory.L2DbarEstimates.HormanderEstimate.Closed
-import ReciprocityTheory.L2DbarEstimates.SkodaWeights.Imports
-import ReciprocityTheory.L2DbarEstimates.LeviForms.Imports
+module
+
+public import ReciprocityTheory.L2DbarEstimates.JacobianInterpolationStatement
+public import ReciprocityTheory.L2DbarEstimates.Localization.UnweightBackStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.L2DbarEstimates.BasicIdentity.Imports
+import ReciprocityTheory.L2DbarEstimates.BasicIdentity.TstarNormSq
+public import ReciprocityTheory.L2DbarEstimates.HormanderEstimate.Closed
+public import ReciprocityTheory.L2DbarEstimates.HormanderEstimate.HStatementOf
+import ReciprocityTheory.L2DbarEstimates.HormanderEstimate.RegMDbEqZeroOfNotMem
+public import ReciprocityTheory.L2DbarEstimates.LeviForms.ImportsAlt
+public import ReciprocityTheory.L2DbarEstimates.LeviForms.IntegrableWd
+public import ReciprocityTheory.L2DbarEstimates.LeviForms.MacofFderivApplyContDiffOn
+import ReciprocityTheory.L2DbarEstimates.Localization.Extend
+public import ReciprocityTheory.L2DbarEstimates.Mollifiers.HasCompactSupport
+public import ReciprocityTheory.L2DbarEstimates.Mollifiers.MollGraph
+public import ReciprocityTheory.L2DbarEstimates.NormFibrations.Imports
+public import ReciprocityTheory.L2DbarEstimates.SkodaWeights.VolProdFinApply
+public import ReciprocityTheory.L2DbarEstimates.WeakHolomorphy.RegBall
+
+@[expose] public section
 
 universe u
 
@@ -36,24 +83,7 @@ theorem tw (n : ℕ) (M : Type u) [TopologicalSpace M] [T2Space M]
     [SecondCountableTopology M] [MeasurableSpace M] [BorelSpace M] : TWStatement n M :=
   I.tw n M (hormander n M) (F.holoClosedNeed n M (regMAll n M))
 
-theorem ot0 (n : ℕ) (M : Type u) [TopologicalSpace M] [T2Space M]
-    [SecondCountableTopology M] [MeasurableSpace M] [BorelSpace M] : JacobianInterpolationStatement n M := by
-  have hB := I.basic n M
-  have hTL : I.TwistLeviStatement n M :=
-    I.twistLevi n M (I.logLevi n M (I.evLevi n M) (chain n M)) (chain n M) hB
-  have hA : I.ApplyStatement n M := I.applyTw n M (tw n M) hTL (I.dual n M hTL hB) hB
-  have hF : I.FixedStatement n M :=
-    I.fixed n M hA hB (I.vanish n C.mv C.mvDiv) (F.holoClosedNeed n M (regMAll n M))
-      (F.evalNeed n M C.mv) (fun H _ _ _ => cvx H)
-  exact I.ot0 n M hF (I.shellBound n M (I.polar n) (I.cov n)) (I.localData n M) I.cutoff
-
 theorem ma (n : ℕ) : MAStatement n :=
   I.ma n (I.maCof n)
-
-theorem detMono (n : ℕ) : DetMonoStatement n :=
-  I.maDet n
-
-theorem inhabited (n : ℕ) : InhabitedStatement n :=
-  etaleStein_nonempty n
 
 end ReciprocityTheory.L2DbarEstimates

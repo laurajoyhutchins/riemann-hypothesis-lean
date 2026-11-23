@@ -1,12 +1,61 @@
-import Mathlib
-import Formalism.LocalToGlobal.IndefiniteReal.ScalarOnPartsFull
-import Formalism.LocalToGlobal.IndefiniteReal.SubgroupCharExtensionOneApply
-import Formalism.LocalToGlobal.IndefiniteReal.OrthogonalComplementCharacterisation
-import Formalism.LocalToGlobal.IndefiniteReal.DatumVec
+module
+
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.LevelHyperspecialTrivialCharacterSplitsOffPlaces
+public import Development.AbelianVarietyTheory.Definitions.ExistenceOfLattices.CoeSelfDualLatticeInFrameCoordinatesEq
+public import Development.AbelianVarietyTheory.Definitions.ExistenceOfLattices.Hat1
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsAdelicUnitarySplitPlaceComponent
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.IntegralTensorAdelesEqAdelicCompletionOne
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.MemHyperspecialOfSplitPlaceStabilizer
 import Development.AbelianVarietyTheory.Proofs.SatakeParameters.SupportedSubgroupSplitCommutePrimeIdempotents
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.LevelHyperspecialTrivialCharacterSplitsOffPlaces
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsAdelicUnitarySplitPlaceComponent
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.MemHyperspecialOfSplitPlaceStabilizer
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.AdelicCompletionSelfDualOfSelfDualLattice
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.CompletedLatticeEqAdelicCompletionAndGram
+import Formalism.LocalToGlobal.Columns.StdLatUnimodular
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.NumberField.ClassNumber
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Formalism.LocalToGlobal.IndefiniteReal.LocalNewformFunction
+
+@[expose] public section
 
 noncomputable section
 
@@ -24,8 +73,6 @@ def splitIx (hr : r ≤ n) : Fin r ⊕ Fin (n - r) ≃ Fin n :=
   finSumFinEquiv.trans (finCongr (Nat.add_sub_cancel' hr))
 
 theorem splitIx_inl (hr : r ≤ n) (a : Fin r) : splitIx hr (Sum.inl a) = Fin.castLE hr a := Fin.ext rfl
-
-theorem splitIx_inr (hr : r ≤ n) (a : Fin (n - r)) : (splitIx hr (Sum.inr a)).val = r + a.val := rfl
 
 def diagMat (hr : r ≤ n) (M : Matrix (Fin r) (Fin r) κ) : Matrix (Fin n) (Fin n) κ :=
   (Matrix.fromBlocks M 0 0 1).submatrix (splitIx hr).symm (splitIx hr).symm
@@ -139,7 +186,7 @@ variable {A : Type} [CommRing A] {n : ℕ}
 
 theorem hform_add_left (σ : A →+* A) (J : Matrix (Fin n) (Fin n) A) (x x' y : Fin n → A) :
     Formalism.UG.hform σ J (x + x') y = Formalism.UG.hform σ J x y + Formalism.UG.hform σ J x' y := by
-  simp only [Formalism.UG.hform, Pi.add_apply, map_add, add_mul, Finset.sum_add_distrib]
+  simp only [Formalism.UG.hform, Pi.add_apply, map_add (f := _), add_mul, Finset.sum_add_distrib]
 
 theorem hform_zero_left (σ : A →+* A) (J : Matrix (Fin n) (Fin n) A) (y : Fin n → A) :
     Formalism.UG.hform σ J 0 y = 0 := by
@@ -197,8 +244,10 @@ theorem swp_hermA (c : E ≃ₐ[F] E) (σ : E →ₐ[F] E) (hσ : ∀ x, σ x = 
       Formalism.UG.hform (Formalism.UG.sigR σ (Formalism.L2.Herm.Af F)) (J.map (Formalism.UG.inclE (F := F) (Formalism.L2.Herm.Af F)))
         (fun i => Formalism.UG.inclE (F := F) (Formalism.L2.Herm.Af F) (x i)) (fun i => swp F E (y i)) := by
   unfold Formalism.UG.hform GlobalTheory.AdLat.hermA
+
   rw [Finset.sum_comm, map_sum (swp F E)]
   refine Finset.sum_congr rfl fun a _ => ?_
+
   rw [map_sum (swp F E)]
   refine Finset.sum_congr rfl fun b _ => ?_
   have e1 : swp F E (GlobalTheory.AdLat.sg (FiniteAdeleRing (𝓞 F) F) c (GlobalTheory.AdLat.fv F x a)) =
@@ -323,7 +372,7 @@ theorem mem_dual_iff {V : HSp D} {Λ : Submodule (𝓞 D.host.E) (Fin V.rank →
       rw [← hform_eq_sum]; exact hv y hy
     · exact ⟨0, by simp⟩
     · rintro a b _ _ ⟨s, hs⟩ ⟨t, ht⟩
-      exact ⟨s + t, by rw [map_add, hs, ht]; simp only [Pi.add_apply, add_mul, Finset.sum_add_distrib]⟩
+      exact ⟨s + t, by rw [map_add (f := _), hs, ht]; simp only [Pi.add_apply, add_mul, Finset.sum_add_distrib]⟩
     · rintro c a _ ⟨s, hs⟩
       exact ⟨c * s, by
         rw [map_mul, hs]; simp only [Pi.smul_apply, Algebra.smul_def, Finset.mul_sum, mul_assoc]⟩
@@ -456,7 +505,7 @@ theorem exists_matrix_lift {R T : Type} [CommRing R] [CommRing T] {n : ℕ} (ψ 
   rw [RingHom.map_det, RingHom.mapMatrix_apply, e]
   exact (Matrix.isUnits_det_units k).ne_zero
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem exists_local_lift {V : HSp D} {β : GL (Fin V.rank) (Lev.EAf D)}
     {Λ : Submodule (𝓞 D.host.E) (Fin V.rank → D.host.E)} {N : ℕ} (hB : IsBaseFrame V β Λ N)
@@ -479,7 +528,7 @@ theorem exists_local_lift {V : HSp D} {β : GL (Fin V.rank) (Lev.EAf D)}
   have hsf := supp_fin V (f := e + cA D e) hs
   rw [← hp] at hκ
   have hf : finSw D (e + cA D e) = p + Formalism.UG.sigR D.sp.cm.sig (Formalism.L2.Herm.Af D.host.F) p := by
-    rw [RingHom.map_add, finSw_cA, hp]
+    rw [RingHom.map_add (f := _), finSw_cA, hp]
   have hSt : finE V κ ∈ St β :=
     mem_St_of_part D.sp.cm.sig V.gram Λ β hB.1 (hatL_selfDual hB) p u hpp (sigR_int p.2) Y hu' (finE V κ)
       (finE_mem_UA V κ) _ hf hsf hκ

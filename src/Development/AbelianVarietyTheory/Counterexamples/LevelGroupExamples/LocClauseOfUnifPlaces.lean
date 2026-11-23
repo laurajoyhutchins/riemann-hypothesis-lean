@@ -1,7 +1,47 @@
-import Mathlib
-import Formalism.LocalToGlobal.ProjectiveLattices.EquivariantFiniteGroup
-import Formalism.LocalToGlobal.GlobalTheory.GL5.FamilyMassVolumeIdentityOfClassDecomp
-import Development.AbelianVarietyTheory.Proofs.TorusHaarMeasure.NormBcharMulNfacRmul
+module
+
+public import Formalism.LocalToGlobal.ProjectiveLattices.EquivariantFiniteGroup
+public import Development.AbelianVarietyTheory.Proofs.TorusHaarMeasure.NormBcharMulNfacRmul
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -44,12 +84,6 @@ theorem lact_rmul_lact {Ψ : Finset (E →+* ℂ)} (γ' γ : GL (Fin r) E) (y b 
   show (γ' : Matrix (Fin r) (Fin r) E).map τ.1 * ((γ : Matrix (Fin r) (Fin r) E).map τ.1 * mat y τ * mat b τ) =
     ((γ' * γ : GL (Fin r) E) : Matrix (Fin r) (Fin r) E).map τ.1 * (mat y τ * mat b τ)
   simp only [Units.val_mul, Matrix.map_mul, Matrix.mul_assoc]
-
-theorem lact_one {Ψ : Finset (E →+* ℂ)} (y : Frame Ψ r) : lact (1 : GL (Fin r) E) y = y := by
-  funext τ
-  show ((1 : GL (Fin r) E) : Matrix (Fin r) (Fin r) E).map τ.1 * mat y τ = y τ
-  rw [Units.val_one, ← RingHom.mapMatrix_apply, map_one, Matrix.one_mul]
-  rfl
 
 theorem locClause_of_unif {V : HSp D} {X : Comp → Data E r} {dict : GA D V → Σ k, Frame (X k).Ψ r}
     {Kf : Subgroup (GA D V)} {th : ∀ c, (X c).Ψ → (Ainf D.host.F ⊗[D.host.F] D.host.E →+* ℂ)} {hr : V.rank = r}
@@ -110,6 +144,7 @@ theorem continuous_place {F L : Type} [Field F] [NumberField F] [Field L] [Numbe
       ∑ i, θ (fstA F (B.repr z i) ⊗ₜ[F] (1 : L)) * τ (b i) := by
     intro z
     conv_lhs => rw [← B.sum_repr z]
+
     simp only [map_sum]
     refine Finset.sum_congr rfl fun i _ => ?_
     rw [Algebra.TensorProduct.basis_apply, TensorProduct.smul_tmul', smul_eq_mul, mul_one,
@@ -117,7 +152,7 @@ theorem continuous_place {F L : Type} [Field F] [NumberField F] [Field L] [Numbe
       Algebra.TensorProduct.tmul_mul_tmul, mul_one, one_mul]
   rw [show (fun z : AF F ⊗[F] L => θ (Algebra.TensorProduct.map (fstA F) (AlgHom.id F L) z)) =
     fun z => ∑ i, θ (fstA F (B.repr z i) ⊗ₜ[F] (1 : L)) * τ (b i) from funext hz]
-  refine continuous_finset_sum _ fun i _ => Continuous.mul ?_ continuous_const
+  refine continuous_finsetSum _ fun i _ => Continuous.mul ?_ continuous_const
   have hf : Continuous (fstA F) := continuous_fst
   exact hθ.2.comp (hf.comp (IsModuleTopology.continuous_of_linearMap (B.coord i)))
 

@@ -1,6 +1,44 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.Reframe
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.Realises
+module
+
+public import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.Reframe
+public import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.Realises
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -42,8 +80,8 @@ def RealAt (d : Dec J std) (j : ℕ) (hj : j ≤ D.R.m) (h : ((sysS H X std).Pj 
         dPow (bAt J j hj La.1).1 (fun _ => -(cTw D j)) * detF (cTw D j) z' *
         φ (clsAt X H j La.1 La.2) ((J.St j hj).eY.symm z')
 
-open Classical in
 
+open Classical in
 def sO (d : Dec J std) (ι : ℂ →+* ℂ_[D.what₂.places.resChar w]) (j : ℕ) (La : (sysS H X std).Lt j) : ℂ_[D.what₂.places.resChar w] :=
   if hj : j ≤ D.R.m then ι (sPt d j hj La * cOp (sysS H X std) D (hT.gat_pos u w hg) j (t.O u μ).dgen) else 0
 
@@ -67,8 +105,8 @@ def cKs (S : J.At std) (ι : ℂ →+* ℂ_[D.what₂.places.resChar w]) (j : �
   ι (kT J j hj a' * (kS J j (Nat.le_of_succ_le hj) a * cOp (sysS H X std) D (hT.gat_pos u w hg) j (t.O u μ).dgen)⁻¹) *
     ltC S.g S.hLT ^ (-(∑ τ, szT (sysS H X std) D (hT.gat_pos u w hg) j τ))
 
-open Classical in
 
+open Classical in
 def scT (d : Dec J std) (S : J.At std) (ι : ℂ →+* ℂ_[D.what₂.places.resChar w]) (j : ℕ) (c' : Lv.comp (j + 1))
     (L' : ((sysS H X std).Pj (j + 1)).Tup) : ℂ_[D.what₂.places.resChar w] :=
   if hj : j + 1 ≤ D.R.m then

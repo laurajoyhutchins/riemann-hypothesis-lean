@@ -1,5 +1,59 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.DefClassNum
+public import Mathlib.MeasureTheory.Constructions.Polish.EmbeddingReal
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+public import Mathlib.RingTheory.Complex
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
 import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.IsLatMeasurableConst
+
+@[expose] public section
+
 open MeasureTheory NumberField Matrix Finset Formalism.MainNotions.S GlobalTheory.Count GlobalTheory.FlagMeas GlobalTheory.FlagBase
 
 noncomputable section
@@ -32,7 +86,7 @@ theorem detNorm_pos_iff (x : MatInf E j) : 0 < detNorm E j x ↔ ∀ w, (Matrix.
 theorem continuous_detNorm :
     Continuous fun x : InfinitePlace E → Fin j → Fin j → ℂ => detNorm E j x := by
   unfold detNorm
-  refine continuous_finset_prod _ fun w _ => ?_
+  refine continuous_finsetProd _ fun w _ => ?_
   refine (Continuous.norm ?_).pow 2
   exact Continuous.matrix_det (A := fun x : InfinitePlace E → Fin j → Fin j → ℂ => Matrix.of (x w))
     (continuous_apply w)
@@ -182,10 +236,11 @@ theorem mem_autGL {Λ : Submodule (𝓞 E) (Fin j → E)} {x : MatInf E j} :
   · rintro ⟨γ, h, rfl⟩
     exact ⟨γ, h, fun _ _ _ => rfl⟩
 
-theorem exists_denominator (Λ : Submodule (𝓞 E) (Fin j → E)) (hΛ : Submodule.IsLattice E Λ) :
+theorem exists_denominator (Λ : Submodule (𝓞 E) (Fin j → E)) (hΛ : Submodule.IsFullLattice E Λ) :
     ∃ N : E, N ≠ 0 ∧ ∀ γ ∈ autSub Λ, ∀ a b, IsIntegral ℤ (N * (γ : Matrix (Fin j) (Fin j) E) a b) := by
   classical
-  obtain ⟨S, hS⟩ := hΛ.fg
+  letI : Submodule.IsFullLattice E Λ := hΛ
+  obtain ⟨S, hS⟩ := Submodule.IsLattice.fg E Λ
   obtain ⟨d, hd⟩ := IsLocalization.exist_integer_multiples (nonZeroDivisors (𝓞 E))
     (S ×ˢ (Finset.univ : Finset (Fin j))) (fun p : (Fin j → E) × Fin j => p.1 p.2)
   have h1 : ∀ y ∈ Λ, ∀ a, IsIntegral ℤ (((d : 𝓞 E) : E) * y a) := by
@@ -210,7 +265,7 @@ theorem exists_denominator (Λ : Submodule (𝓞 E) (Fin j → E)) (hΛ : Submod
   have h2 : ∀ v : Fin j → E, ∃ c : 𝓞 E, c ≠ 0 ∧ c • v ∈ Λ := by
     intro v
     have hv : v ∈ Submodule.span E (Λ : Set (Fin j → E)) := by
-      rw [hΛ.span_eq_top]; trivial
+      rw [Submodule.IsFullLattice.span_eq_top]; trivial
     obtain ⟨t, ht⟩ := multiple_mem_span_of_mem_localization_span (nonZeroDivisors (𝓞 E)) E _ v hv
     rw [Submodule.span_eq] at ht
     exact ⟨t, nonZeroDivisors.coe_ne_zero t, ht⟩
@@ -228,7 +283,7 @@ theorem exists_denominator (Λ : Submodule (𝓞 E) (Fin j → E)) (hΛ : Submod
     rw [mul_assoc]
     exact h4
 
-theorem finite_bounded (Λ : Submodule (𝓞 E) (Fin j → E)) (hΛ : Submodule.IsLattice E Λ) (C : ℝ) :
+theorem finite_bounded (Λ : Submodule (𝓞 E) (Fin j → E)) (hΛ : Submodule.IsFullLattice E Λ) (C : ℝ) :
     {γ : GL (Fin j) E | γ ∈ autSub Λ ∧ ∀ w a b, ‖emb γ w a b‖ ≤ C}.Finite := by
   obtain ⟨N, hN, h⟩ := exists_denominator Λ hΛ
   set B : ℝ := (∑ φ : E →+* ℂ, ‖φ N‖) * C
@@ -254,7 +309,7 @@ theorem entry_le_nrm (x : MatInf E j) (w a b) : ‖x w a b‖ ≤ nrm x :=
   (norm_le_pi_norm (x w a) b).trans ((norm_le_pi_norm (x w) a).trans
     (norm_le_pi_norm (show InfinitePlace E → Fin j → Fin j → ℂ from x) w))
 
-theorem finite_orbit (Λ : Submodule (𝓞 E) (Fin j → E)) (hΛ : Submodule.IsLattice E Λ) (x : MatInf E j)
+theorem finite_orbit (Λ : Submodule (𝓞 E) (Fin j → E)) (hΛ : Submodule.IsFullLattice E Λ) (x : MatInf E j)
     (hx : 0 < detNorm E j x) (C : ℝ) :
     {γ : GL (Fin j) E | γ ∈ autSub Λ ∧ nrm (emb γ * x) ≤ C}.Finite := by
   let y : MatInf E j := fun w a b => (Matrix.of (x w))⁻¹ a b
@@ -309,7 +364,7 @@ def dir (x : MatInf E j) : ℝ :=
 
 theorem measurable_dir : Measurable (dir : MatInf E j → ℝ) := by
   refine (measurable_embeddingReal (InfinitePlace E → Fin j → Fin j → ℂ)).comp ?_
-  refine measurable_pi_lambda _ fun w => measurable_pi_lambda _ fun a => measurable_pi_lambda _ fun b => ?_
+  refine Measurable.of_eval fun w => Measurable.of_eval fun a => Measurable.of_eval fun b => ?_
   have h : Measurable fun x : InfinitePlace E → Fin j → Fin j → ℂ => x w a b := by fun_prop
   exact (Complex.measurable_ofReal.comp measurable_nrm.inv).mul h
 
@@ -360,7 +415,7 @@ theorem measurableSet_dom (Λ : Submodule (𝓞 E) (Fin j → E)) : MeasurableSe
     ((measurableSet_eq_fun measurable_nrm (measurable_nrm.comp hm)).inter
       (measurableSet_le measurable_dir (measurable_dir.comp hm)))
 
-theorem exists_mul_mem_dom (Λ : Submodule (𝓞 E) (Fin j → E)) (hΛ : Submodule.IsLattice E Λ) (x : MatInf E j)
+theorem exists_mul_mem_dom (Λ : Submodule (𝓞 E) (Fin j → E)) (hΛ : Submodule.IsFullLattice E Λ) (x : MatInf E j)
     (hx : 0 < detNorm E j x) : ∃ γ ∈ autSub Λ, emb γ * x ∈ dom Λ := by
   have h1 : (1 : GL (Fin j) E) ∈ {γ : GL (Fin j) E | γ ∈ autSub Λ ∧ nrm (emb γ * x) ≤ nrm x} :=
     ⟨one_mem _, by rw [emb_one_mul]⟩
@@ -397,7 +452,7 @@ theorem scl_mem_dom {Λ : Submodule (𝓞 E) (Fin j → E)} {x : MatInf E j} (hx
     rw [emb_mul, matInf_mul_assoc]
 
 open scoped Pointwise in
-theorem covol_eq (Λ : Submodule (𝓞 E) (Fin j → E)) (hΛ : Submodule.IsLattice E Λ) (ν : Measure (MatInf E j))
+theorem covol_eq (Λ : Submodule (𝓞 E) (Fin j → E)) (hΛ : Submodule.IsFullLattice E Λ) (ν : Measure (MatInf E j))
     (hν : ∀ γ ∈ autSub Λ, ν.map (fun x => emb γ * x) = ν) (h0 : ν {g | 0 < detNorm E j g}ᶜ = 0)
     (A : Set (MatInf E j)) (hA : MeasurableSet A) (hAX : A ⊆ {g | 0 < detNorm E j g})
     (hinv : ∀ γ ∈ autGL E j Λ, ∀ g ∈ A, γ * g ∈ A) : covol (autGL E j Λ) ν A = ν (A ∩ dom Λ) := by
@@ -438,7 +493,7 @@ theorem covol_eq (Λ : Submodule (𝓞 E) (Fin j → E)) (hΛ : Submodule.IsLatt
     rw [Set.mem_inv_smul_set_iff]
     exact h
 
-theorem exists_cone_domain : ∀ (E : Type) [Field E] [NumberField E], IsTotallyComplex E → ∀ j : ℕ, ∀ Λ : Submodule (𝓞 E) (Fin j → E), Submodule.IsLattice E Λ → ∃ D : Set (MatInf E j), MeasurableSet D ∧ D ⊆ {g | 0 < detNorm E j g} ∧ (∀ g, 0 < detNorm E j g → ∃ γ ∈ autGL E j Λ, γ * g ∈ D) ∧ (∀ g ∈ D, ∀ t : ℝ, 0 < t → (fun w a b => (t : ℂ) * g w a b) ∈ D) ∧ ∀ (G : MatInf E j → ENNReal) (A : Set (MatInf E j)), Measurable (fun g => {g | 0 < detNorm E j g}.indicator G g) → (∀ γ ∈ autGL E j Λ, ∀ g, 0 < detNorm E j g → G (γ * g) = G g) → MeasurableSet A → A ⊆ {g | 0 < detNorm E j g} → (∀ γ ∈ autGL E j Λ, ∀ g ∈ A, γ * g ∈ A) → covol (autGL E j Λ) (((haarGL E j).restrict {g | 0 < detNorm E j g}).withDensity G) A = ∫⁻ g in A ∩ D, G g ∂(haarGL E j) := by
+theorem exists_cone_domain : ∀ (E : Type) [Field E] [NumberField E], IsTotallyComplex E → ∀ j : ℕ, ∀ Λ : Submodule (𝓞 E) (Fin j → E), Submodule.IsFullLattice E Λ → ∃ D : Set (MatInf E j), MeasurableSet D ∧ D ⊆ {g | 0 < detNorm E j g} ∧ (∀ g, 0 < detNorm E j g → ∃ γ ∈ autGL E j Λ, γ * g ∈ D) ∧ (∀ g ∈ D, ∀ t : ℝ, 0 < t → (fun w a b => (t : ℂ) * g w a b) ∈ D) ∧ ∀ (G : MatInf E j → ENNReal) (A : Set (MatInf E j)), Measurable (fun g => {g | 0 < detNorm E j g}.indicator G g) → (∀ γ ∈ autGL E j Λ, ∀ g, 0 < detNorm E j g → G (γ * g) = G g) → MeasurableSet A → A ⊆ {g | 0 < detNorm E j g} → (∀ γ ∈ autGL E j Λ, ∀ g ∈ A, γ * g ∈ A) → covol (autGL E j Λ) (((haarGL E j).restrict {g | 0 < detNorm E j g}).withDensity G) A = ∫⁻ g in A ∩ D, G g ∂(haarGL E j) := by
   intro E _ _ _ j Λ hΛ
   refine ⟨dom Λ, measurableSet_dom Λ, fun x hx => hx.1, ?_, fun g hg t ht => scl_mem_dom hg ht, ?_⟩
   · intro g hg

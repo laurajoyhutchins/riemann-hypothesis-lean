@@ -1,7 +1,68 @@
-import Formalism.HermitianCurvature.HerGenC
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.QQMemAdjAlgCpt
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.HerAnalyticFAllOfTop
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.ThmPActualOfAnalytic
+module
+
+public import Formalism.HermitianCurvature.HerGenC
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.QQMemAdjAlgCpt
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CoordinateSplitAssocMeasurePreserving
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.DiagScalarCommuteTransposedRMatrix
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.DiagonalTransferAction
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.EqOfContinuousOffZero
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.FrameOfAdmissibleWord
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.FsvMulFsvNeg
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.HasFDerivAtFsvOther
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.HerClassesOfParts
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.HsInnerAddSmulRight
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.LiftMemMatrixAlgebra
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.MeasurableOfContinuousOnZero
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.NormalFormOrderZeroOfParts
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.QNFAsm
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.RadJFExists
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.SfiniteOfIsHaarOn
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.SignedCoordinateEqSignSmul
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.TopDensNonnegOfKappa
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.TopIdentFromParts
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.TopTwistDensOfZeta
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.IsCompactZetaLe
+
+@[expose] public section
 
 open MeasureTheory
 
@@ -19,17 +80,6 @@ variable {S : Type} [Fintype S] [DecidableEq S]
 variable {P : M.Par} {z z' : Fin (2 * P.r + P.k + 1) → ℂ} {π : Mx P.k P.r → (Wp →L[ℂ] Wp)}
   {π' : Mx P.k P.r → (Wq →L[ℂ] Wq)} {L : R.LevelData (Pr (RadSp P.k P.r z z' π π')) P.r}
   {st : Fr.Start (Pr (RadSp P.k P.r z z' π π'))} {l0 : ℕ} {D : B.RealPlaceData P.k P.r Wp Wq}
-
-theorem herGenC_herGen {i : Fin (P.r + 1)} {Φ : RadSp P.k P.r z z' π π'}
-    (h : HerGenC S P z z' π π' L st l0 D i Φ) : HerGen S P z z' π π' L st l0 D i Φ := by
-  induction h with
-  | jf F Φ hF hΦ => exact HerGen.jf F Φ hF.1 hΦ
-  | slice l w a b Φ hw _ ih => exact HerGen.slice l w a b Φ hw ih
-  | waveC l w s Wv Wv' a b Φ hw h1 h2 _ ih => exact HerGen.waveC l w s Wv Wv' a b Φ hw h1 h2 ih
-  | waveZ w s Wv Wv' a b Φ hw h1 h2 _ ih => exact HerGen.waveZ w s Wv Wv' a b Φ hw h1 h2 ih
-
-theorem herKc_le_herK (i : Fin (P.r + 1)) : herKc S P z z' π π' L st l0 D i ≤ herK S P z z' π π' L st l0 D i :=
-  Submodule.span_le.mpr fun _ hΦ => Submodule.subset_span (herGenC_herGen hΦ)
 
 theorem herKc_sliceIn : SliceIn (S := S) P z z' π π' L st (herKc S P z z' π π' L st l0 D) l0 := by
   intro w hw l x hx
@@ -75,14 +125,6 @@ def StepFormCptAll : Prop :=
     StepDens (S := S) P z z' π π' μ L st (herKc S P z z' π π' L st l0 D) l0 ∧
       FormInt S P z z' π π' μ L st l0 (herKc S P z z' π π' L st l0 D)
 
-theorem stepFormCptAll_of_stepFormAll (h : StepFormAll) : StepFormCptAll := by
-  intro Wp Wq _ _ _ _ _ _ S _ _ P z z' π π' X μ L st l0 D hD h1 h2 hz hz' hπ hπ'
-  obtain ⟨hSD, hFI⟩ := h Wp Wq S P z z' π π' X μ L st l0 D hD h1 h2 hz hz' hπ hπ'
-  have hle : ∀ i (x : Ix S → RadSp P.k P.r z z' π π'), InK (herKc S P z z' π π' L st l0 D i) x →
-      InK (herK S P z z' π π' L st l0 D i) x := fun i x hx a => herKc_le_herK i (hx a)
-  exact ⟨fun w hw l x y hx hy c hc => hSD w hw l x y (hle _ x hx) (hle _ y hy) c hc,
-    fun w hw i c hc x y hx hy => hFI w hw i c hc x y (hle _ x hx) (hle _ y hy)⟩
-
 theorem thmPActualCpt_of_herClassesCpt (hHer : HerClassesCpt) (hWC : WaveCommQQAll) : ThmPActualCpt := by
   intro Wp Wq _ _ _ _ _ _ S _ _ P z z' π π' X μ L st l0 D A mm hD hl1 hl2 hz hz' hπ hπ' hA hmm
   obtain ⟨K, hAdj, hTD, hTT, hSl, hSD, hWK, hFS, hCor, hJ⟩ :=
@@ -117,13 +159,5 @@ theorem herClassesCpt_of_parts (hT : HerCptTopAll) (hSF : StepFormCptAll) : HerC
 
 theorem thmPActualCpt_of_parts (hT : HerCptTopAll) (hSF : StepFormCptAll) : ThmPActualCpt :=
   thmPActualCpt_of_herClassesCpt (herClassesCpt_of_parts hT hSF) waveCommQQAll
-
-theorem thmPActualCpt_of_top (hT : HerCptTopAll) (hSF : StepFormAll) : ThmPActualCpt :=
-  thmPActualCpt_of_parts hT (stepFormCptAll_of_stepFormAll hSF)
-
-theorem thmPActualCpt_of_thmPActual (h : ThmPActual) : ThmPActualCpt := by
-  intro Wp Wq _ _ _ _ _ _ S _ _ P z z' π π' X μ L st l0 D A mm hD hl1 hl2 hz hz' hπ hπ' hA hmm
-  obtain ⟨K, h1, h2, h3, h4⟩ := h Wp Wq S P z z' π π' X μ L st l0 D A mm hD hl1 hl2 hz hz' hπ hπ' hA hmm
-  exact ⟨K, h1, h2, h3, fun F ε hε hF _ hG => h4 F ε hε hF hG⟩
 
 end Formalism.FourierDecayAlt.P5.HerC

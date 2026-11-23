@@ -1,11 +1,65 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.FromNAdd
-import Development.AutomorphicSpectrum.Statements.AlgebraStatements.PolarisedFlagStatement
+module
+
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.FromNAdd
+public import Development.WeilBound.CoreStatements.TorusUniformisation.ChowMahlerFamilies.FunctionFamilyIdempotent
+public import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.StepOrderRes
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsLatFlagPair
 import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LemmaBTHoldsStatement
-import Development.WeilBound.CoreStatements.TorusUniformisation.ChowMahlerFamilies.IsDerAtOneCompOfIsDiffOf
-import Development.WeilBound.CoreStatements.TorusUniformisation.ChowMahlerFamilies.FunctionFamilyIdempotent
-import Development.WeilBound.CoreStatements.TorusUniformisation.ChowMahlerFamilies.FunctionFamilyChartFacts
-import Development.WeilBound.CoreStatements.TorusUniformisation.ChowMahlerFamilies.TestCharacterExists
+public import Development.WeilBound.CoreStatements.TorusUniformisation.ChowMahlerFamilies.FunctionFamilyChartFacts
+public import Development.WeilBound.CoreStatements.TorusUniformisation.ChowMahlerFamilies.IsDerAtOneCompOfIsDiffOf
+public import Development.WeilBound.CoreStatements.TorusUniformisation.ChowMahlerFamilies.TestCharacterExists
+import Mathlib.Algebra.AffineMonoid.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Morphisms.SchemeTheoreticallyDominant
+import Mathlib.AlgebraicGeometry.Morphisms.WeaklyEtale
+import Mathlib.AlgebraicGeometry.Sites.Fpqc
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.ExtremalEpi
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AutomorphicSpectrum.Definitions.DivisibilityTowers.CompactGapsGE
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory NumberField MvPolynomial ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Geo ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.Semi GlobalTheory.CompanionTheory.Ar GlobalTheory.CompanionTheory.Ar.Num GlobalTheory.CompanionTheory.Ar.Top
 open GroundTheory.Heights₂.Heights.NumbersDVR (pointIdeal segreVec IsFlagFrame IsFlagPair SameGenericFibre IsModelOver divCycle)
 open GroundTheory.Heights₂.Heights.IndefiniteRowSideFullHecke.NumbersDVR.Bundles (mseg fnField)
@@ -27,11 +81,13 @@ theorem sep {B Ix : Type} [CommRing B] [Fintype Ix] [DecidableEq Ix] (b : Module
   have h0 : ∀ j k, Algebra.trace ℤ B (b j * y k) = if k = j then d else 0 := fun j k => by
     have := congrFun (congrFun (Matrix.adjugate_mul M) k) j
     rw [Matrix.mul_apply, Matrix.smul_apply, Matrix.one_apply, ← hdet] at this
+
     simp only [y, Finset.mul_sum, mul_smul_comm, map_sum, map_smul, smul_eq_mul]
     simp only [mul_comm (b j), ← hMa, this]
     simp
   have hr : ∀ x k, Algebra.trace ℤ B (x * y k) = d * b.repr x k := fun x k => by
     conv_lhs => rw [← b.sum_repr x]
+
     simp only [Finset.sum_mul, smul_mul_assoc, map_sum, map_smul, h0, smul_eq_mul]
     simp [mul_comm]
   have h1 : ∀ x, d • x = ∑ k, Algebra.trace ℤ B (x * y k) • b k := fun x => by
@@ -46,20 +102,24 @@ theorem sep {B Ix : Type} [CommRing B] [Fintype Ix] [DecidableEq Ix] (b : Module
   have h2 : ∀ x, d • x = ∑ k, Algebra.trace ℤ B (x * b k) • y k := fun x => by
     conv_lhs => rw [← b.sum_repr x]
     conv_rhs => rw [← b.sum_repr x]
+
     simp only [Finset.smul_sum, smul_comm d, h2', Finset.sum_mul, smul_mul_assoc, map_sum, map_smul,
-      Finset.sum_smul, smul_assoc]
+    Finset.sum_smul, smul_assoc]
     rw [Finset.sum_comm]
   refine ⟨y, fun β a => ?_, ?_⟩
   · have e1 : ∀ k, d • β (a * b k) (y k) = ∑ l, Algebra.trace ℤ B (a * b k * y l) • β (b l) (y k) := fun k => by
+
       rw [← AddMonoidHom.smul_apply, ← map_zsmul, h1, map_sum β, AddMonoidHom.finsetSum_apply]
       simp only [map_zsmul, AddMonoidHom.smul_apply]
     have e2 : ∀ l, d • β (b l) (a * y l) = ∑ k, Algebra.trace ℤ B (a * y l * b k) • β (b l) (y k) := fun l => by
+
       rw [← map_zsmul, h2, map_sum (β (b l))]
       simp only [map_zsmul]
     simp only [Finset.smul_sum, e1, e2]
     rw [Finset.sum_comm]
     simp only [mul_right_comm a]
   · have e : ∀ a, Algebra.trace ℤ B ((∑ k, b k * y k) * a) = d * Algebra.trace ℤ B a := fun a => by
+
       rw [Algebra.trace_eq_matrix_trace b a, Matrix.trace, Finset.mul_sum, Finset.sum_mul, map_sum]
       refine Finset.sum_congr rfl fun k _ => ?_
       rw [Matrix.diag_apply, Algebra.leftMulMatrix_eq_repr_mul, ← hr]
@@ -217,8 +277,9 @@ theorem exists_dual_family [Module.Finite R L] [Module.Projective R L] :
   ext x
   have h1 : x = f (g x) := (LinearMap.congr_fun hfg x).symm
   conv_lhs => rw [h1, ← Finset.univ_sum_single (g x)]
+
   simp only [map_sum, LinearMap.sum_apply, LinearMap.smul_apply, LinearMap.comp_apply, LinearMap.proj_apply,
-    smul_eq_mul]
+  smul_eq_mul]
   refine Finset.sum_congr rfl fun l _ => ?_
   rw [mul_comm, ← smul_eq_mul, ← map_smul, ← map_smul, ← Pi.single_smul', smul_eq_mul, _root_.mul_one]
 
@@ -247,25 +308,30 @@ theorem part3 [Module.Finite R L] [Module.Projective R L] (hκ : ∀ a, κ a ∈
           (augIdeal A).toCotangent (∑ l, u (∑ k, y k • ρ k (v l)) • fl l) := by
         have e2 := hlam (∑ k, y k • u ∘ₗ ρ k)
         have e3 := congrArg θ e2
+
         simp only [map_sum, map_smul, hu', ← hfl] at e3
+
         simp only [map_sum, LinearMap.map_smul_of_tower, e3, map_smul]
         simp
       rw [Ideal.toCotangent_eq] at e1
       convert res_sq (RC := RC) (κ := κ) hs0 _ e1 using 1
       funext z
-      simp only [← ha, res_apply]
-      simp [hf', hαs, map_sum]
+      simp only [Pi.sub_apply, Finset.sum_apply, res_apply, Submodule.coe_sum,
+        Submodule.coe_smul, Subalgebra.coe_smul,
+        Pi.smul_apply, smul_eq_mul, map_mul, hf', hαs, ← ha]
+      simp [Subalgebra.coe_sub, map_sub, map_sum, map_mul, hf', hαs]
     | zero => convert Q.zero_mem using 1; funext z; simp
     | add a b _ _ ha hb =>
       convert Q.add_mem ha hb using 1
       funext z
-      simp only [Prod.fst_add, Prod.snd_add, Pi.add_apply, mul_add, add_mul, Finset.sum_add_distrib]
+      simp only [Prod.fst_add, Prod.snd_add, Pi.add_apply, mul_add, Finset.sum_add_distrib,
+        add_mul]
       ring
     | smul c a _ ha =>
       convert Q.smul_mem c ha using 1
       funext z
-      simp only [Prod.smul_fst, Prod.smul_snd, Pi.smul_apply, Subalgebra.smul_def, smul_eq_mul, mul_sub,
-        Finset.mul_sum, Finset.sum_mul]
+      simp only [Prod.smul_fst, Prod.smul_snd, Pi.smul_apply, Subalgebra.smul_def, smul_eq_mul,
+        Finset.mul_sum, Finset.sum_mul, mul_sub]
       congr 1
       · exact Finset.sum_congr rfl fun _ _ => by ring
       · exact Finset.sum_congr rfl fun _ _ => Finset.sum_congr rfl fun _ _ => by ring
@@ -390,6 +456,7 @@ theorem eig_mem {B Ix Ω V : Type} [CommRing B] [Fintype Ix] [Field Ω] [CharZer
   rw [← Int.cast_smul_eq_zsmul Ω, ← Int.cast_smul_eq_zsmul Ω] at h1
   have h2 := smul_right_injective V (Int.cast_ne_zero.2 hd : (d : Ω) ≠ 0) h1
   simp only [hβ, map_mul, mul_smul, Module.End.mul_apply] at h2
+
   rw [LinearMap.mem_ker, LinearMap.sub_apply, LinearMap.smul_apply, LinearMap.id_apply, map_sum, Finset.smul_sum, ← h2]
   simp only [map_smul, sub_self]
 
@@ -466,7 +533,7 @@ theorem th_iff (RC : Subalgebra O C) (hsec : IsSec pq sc) {r : ℕ} (v : Fin r �
       · funext k
         exact congrArg (algebraMap Ω C) (hm k)
     | zero => rw [Prod.fst_zero, Prod.snd_zero, map_zero, map_zero]; exact Submodule.zero_mem _
-    | add a b _ _ ha hb => rw [Prod.fst_add, Prod.snd_add, map_add, map_add]; exact Submodule.add_mem _ ha hb
+    | add a b _ _ ha hb => rw [Prod.fst_add, Prod.snd_add, map_add (f := _), map_add (f := _)]; exact Submodule.add_mem _ ha hb
     | neg a _ ha => rw [Prod.fst_neg, Prod.snd_neg, map_neg, map_neg]; exact Submodule.neg_mem _ ha
   · rintro _ ⟨f, u, hf, hu, rfl⟩
     refine Submodule.subset_span ⟨(fun x => ((f.1.1 (toN sc x) : CR O y c') : Ω), fun k => P.j u (v k)),
@@ -484,12 +551,12 @@ theorem toLi_comm (a : 𝓞 E) (v : P.L) : P.toLi (P.ρ a v) = 𝔐.ρ a (P.toLi
 
 theorem j_comp (a : 𝓞 E) (u : Module.Dual (CR O y c') P.L) (w : 𝔐.Li) :
     P.j (u ∘ₗ P.ρ a) w = P.j u (𝔐.ρ a w) := by
-  refine P.toLi_bc.inductionOn w (fun w => P.j (u ∘ₗ P.ρ a) w = P.j u (𝔐.ρ a w)) (by simp) (fun v => ?_)
+  refine P.toLi_bc.inductionOn w (fun v => ?_)
     (fun s n hn => ?_) (fun m n hm hn => ?_)
   · rw [← toLi_comm, P.j_apply, P.j_apply]
     rfl
   · simp only [map_smul, hn]
-  · simp only [map_add, hm, hn]
+  · simp only [map_add (f := _), hm, hn]
 
 open PositivityTheory.Xgn.FunctionFamilyIdempotent in
 theorem mul_toN (hsec : IsSec pq sc) {N : ℕ} (a : 𝓞 E) (x : Fin N → F) :
@@ -588,6 +655,7 @@ theorem PositivityTheory.Xgn.teichmuller_test_function : ∀ (E : Type) [Field E
       (∑ k, (⟨kap O y c' C (algebraMap O (CR O y c') (g (z k))), hκ _⟩ : RC) *
         (σ' ^ p ^ ee τ) (pq (Ideal.Quotient.mk _ (RingOfIntegers.basis E k)))) (by
       have e1 := congrArg ((algebraMap O C).comp g) hsum
+
       rw [map_intCast, map_sum] at e1
       apply Subtype.ext
       push_cast
@@ -608,10 +676,12 @@ theorem PositivityTheory.Xgn.teichmuller_test_function : ∀ (E : Type) [Field E
     refine ⟨fun j => algebraMap Ω C (a j), fun u => ?_⟩
     have h6 : P.toLi (∑ k, algebraMap O (CR O y c') (g (z k)) • P.ρ (RingOfIntegers.basis E k) x) =
         ∑ j, a j • b (e τ) j := by
+
       rw [ha, map_sum]
       refine Finset.sum_congr rfl fun k _ => ?_
       rw [map_smul, toLi_comm, ← hg]
       rfl
     change algebraMap Ω C (algebraMap (CR O y c') Ω _) = ∑ j, algebraMap Ω C (a j) * algebraMap Ω C (P.j u (b (e τ) j))
+
     rw [← P.j_apply, h6, map_sum, map_sum]
     simp only [map_smul, smul_eq_mul, map_mul]

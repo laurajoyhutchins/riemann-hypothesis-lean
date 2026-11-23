@@ -1,4 +1,53 @@
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.UnitaryClassMass.PSurjF
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.UnitaryClassMass.PSurjF
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.UnitaryClassMass.PSurjH
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField PI.UJClassFin PI.UJClassMass Formalism.HermitianLatticesTheory IsDedekindDomain
 
@@ -12,7 +61,7 @@ def HermApprox : Prop :=
     [IsScalarTower (𝓞 E) E V] [FiniteDimensional E V]
     (h : V →ₗ⋆[E] V →ₗ[E] E) (M : ℕ) (b : Module.Basis (Fin M) E V) (L0 : Submodule (𝓞 E) V),
     (∀ a, σ a = star a) → (∃ θ : E, σ θ ≠ θ) →
-    h.IsSymm → h.Nondegenerate → Submodule.IsLattice E L0 →
+    h.IsSymm → h.Nondegenerate → Submodule.IsFullLattice E L0 →
     ∀ N ∈ genus h L0, ∀ P : Finset (Ideal (𝓞 E)), (∀ p ∈ P, p.IsMaximal) →
       ∃ γ : UJ (σ : E →+* E) (gramOf h b), ∀ p ∈ P,
         loc (K := E) p (gmap (linOf b (γ : GL (Fin M) E)) L0) = loc (K := E) p N
@@ -68,8 +117,10 @@ theorem hermToF (hst : ∀ a : F, star (algebraMap F E a) = algebraMap F E a)
     by_contra hav
     exact hno ⟨a, hav, ha⟩
   obtain ⟨Q, hIQ, hQp, hQc⟩ := Ideal.exists_ideal_over_prime_of_isIntegral v.asIdeal I hle
-  have hQm : Q.IsMaximal :=
-    Ideal.isMaximal_of_isIntegral_of_isMaximal_comap (R := 𝓞 F) Q (by rw [hQc]; exact v.isMaximal)
+  have hQm : Q.IsMaximal := by
+    apply Ideal.isMaximal_of_isIntegral_of_isMaximal_under (R := 𝓞 F) Q
+    rw [hQc]
+    exact v.isMaximal
   have hsQ : algebraMap (𝓞 F) (𝓞 E) s ∉ Q := fun hq => hs (by rw [← hQc]; exact hq)
   have hs' : algebraMap (𝓞 F) (𝓞 E) s ∈ hcompl (K := E) Q := by
     apply Submonoid.subset_closure

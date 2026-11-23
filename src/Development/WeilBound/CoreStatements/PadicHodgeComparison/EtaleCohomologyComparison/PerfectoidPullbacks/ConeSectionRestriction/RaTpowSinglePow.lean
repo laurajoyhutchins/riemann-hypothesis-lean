@@ -1,5 +1,58 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.ConeSectionRestriction.SeamDefs
+module
+
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.ConeSectionRestriction.SeamDefs
+public import Mathlib.FieldTheory.IntermediateField.Adjoin.Defs
+public import Mathlib.RingTheory.AlgebraicIndependent.Defs
+public import Mathlib.RingTheory.Localization.FractionRing
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.MvPolynomial.IrreducibleQuadratic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Presheaf
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
@@ -24,10 +77,6 @@ theorem ra_tpow_single {d : ℕ} (t : Fin d → Rˣ) (k : Fin d) (z : ℤ) : tpo
   unfold tpow
   rw [Finset.prod_eq_single k (fun j _ hj => by simp [Pi.single_apply, hj]) (by simp)]
   simp
-
-theorem ra_unit_pow_eq {d : ℕ} (t : Fin d → Rˣ) (k : Fin d) (N : ℕ) :
-    (t k : R) ^ N = tpow t (Pi.single k (N : ℤ)) := by
-  rw [ra_tpow_single, zpow_natCast, Units.val_pow_eq_pow_val]
 
 theorem ra_expS_add {d : ℕ} (S : Finset (Fin (d + 1))) (m m' : Fin d → ℤ) (hm : m ∈ expS S) (hm' : m' ∈ expS S) :
     m + m' ∈ expS S := by
@@ -88,7 +137,7 @@ theorem torusS_loc (t : Fin (n + 1) → Rˣ) (ht : AlgebraicIndependent K fun k 
       ((MvPolynomial.aeval u p : torusS K t S) : R) = MvPolynomial.aeval (fun k => (t k : R)) p := fun p => by
     induction p using MvPolynomial.induction_on with
     | C c => simp
-    | add p q hp hq => simp only [map_add, Subalgebra.coe_add, hp, hq]
+    | add p q hp hq => simp only [map_add (f := _), Subalgebra.coe_add, hp, hq]
     | mul_X p k hp => simp only [map_mul, Subalgebra.coe_mul, hp, MvPolynomial.aeval_X]; rfl
   have hinj := algebraicIndependent_iff_injective_aeval.mp ht
   refine ⟨fun p q h => hinj (by rw [← hval, ← hval, h]), fun a => ?_⟩
@@ -125,7 +174,7 @@ theorem torusS_loc (t : Fin (n + 1) → Rˣ) (ht : AlgebraicIndependent K fun k 
       obtain ⟨f1, g1, hg1, h1⟩ := hx
       obtain ⟨f2, g2, hg2, h2⟩ := hy
       refine ⟨f1 * g2 + f2 * g1, g1 * g2, by rw [map_mul]; exact hg1.mul hg2, ?_⟩
-      simp only [map_add, map_mul]
+      simp only [map_add (f := _), map_mul]
       linear_combination (MvPolynomial.aeval (fun k => (t k : R)) g2) * h1 +
         (MvPolynomial.aeval (fun k => (t k : R)) g1) * h2
     | mul x y _ _ hx hy =>
@@ -164,10 +213,12 @@ theorem torusS_frac [IsDomain R] (t : Fin (n + 1) → Rˣ) (S : Finset (Fin (n +
 theorem torusS_succ_span (t : Fin (n + 1) → Rˣ) (k : Fin (n + 1)) :
     ∀ x ∈ torusS K t (Finset.univ.erase k.succ), x ∈ Submodule.span K (tpow t '' {m | m ≠ fun _ => -1}) := by
   intro x hx
-  refine Submodule.span_mono (Set.image_mono fun m hm h => ?_) (ra_torusS_le_span t _ x hx)
-  have := hm.1 k (by simp)
-  rw [h] at this
-  norm_num at this
+  have hsub : expS (Finset.univ.erase k.succ) ⊆ {m | m ≠ fun _ => -1} := by
+    intro m hm h
+    have := hm.1 k (by simp)
+    rw [h] at this
+    norm_num at this
+  exact Submodule.span_mono (Set.image_mono hsub) (ra_torusS_le_span t _ x hx)
 
 theorem torus_scale [IsDomain R] (t : Fin (n + 1) → Rˣ) (i : Fin (n + 2)) :
     ∃ w ∈ torusS K t (Finset.univ.erase i), w ≠ 0 ∧

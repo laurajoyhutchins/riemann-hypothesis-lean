@@ -1,12 +1,50 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.ModuliSpaces.AuxiliaryInertOddPrime
-import Development.AbelianVarietyTheory.Definitions.Degenerations.AdmissiblePadicIntMaximalIdeal
-import Development.AbelianVarietyTheory.Definitions.ThetaMetrics.TwistingSheafOneChartEqPreimageStandardChart
-import Development.AbelianVarietyTheory.Definitions.ShimuraVarieties.PowObjGeometricallyConnected
-import Development.AbelianVarietyTheory.Definitions.ShimuraVarieties.IsOpenOfMemIrreducibleComponentsOfFinite
-import Development.AbelianVarietyTheory.Statements.HeckeInFamilies.GenericMemChart
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsSabCancel
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.IsProperZeroTriple
+module
+
+public import Mathlib.AlgebraicGeometry.Morphisms.Flat
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsCompletedStrictHens
+public import Development.AbelianVarietyTheory.Definitions.Degenerations.IsNormalSchemeSp
+public import Development.AbelianVarietyTheory.Definitions.ShimuraVarieties.IsOpenOfMemIrreducibleComponentsOfFinite
+public import Development.AbelianVarietyTheory.Definitions.ThetaMetrics.TwistingSheafOneChartEqPreimageStandardChart
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.PushInvertible
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor
@@ -22,34 +60,11 @@ section Amp
 
 variable {D : Datum H} {Xo : ∀ l : Level H, Moduli D l}
 
-def Top.Amp {n N : ℕ} (T : Top Xo n N) : Prop :=
-  ∃ k : ℕ, Nonempty (GlobalTheory.LN.AmpFrames T.t.G T.t.PP.L ((n ^ k) ^ 2))
-
-def System.Amp (S : System Xo) : Prop := ∀ i, (S.T i).Amp
-
-theorem topExists_iff_amp : TopExists ↔
-    ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (H : Host E) (D : Datum H), 1 ≤ D.p + D.q →
-      ∀ (Xo : ∀ l : Level H, Moduli D l) (n : ℕ), AuxiliaryInertOddPrime H n → ∃ J : ℕ, 1 ≤ J ∧ ∃ T : Top Xo n (n ^ J), T.Amp :=
-  Iff.rfl
-
 end Amp
 
 section Refl
 
 variable {U : Scheme.{0}} {F O : Type} [Field F] [CommRing O] {c : U ⟶ Sp F} {t₀ : SAB H U} {β : O →+* F}
-
-def Cpt.Above.refl (C : Cpt c t₀ β) : C.Above C (RingHom.id O) (𝟙 U) (ObjComp.sabMapId t₀) where
-  π := 𝟙 _
-  π_over := by rw [show spMap (RingHom.id O) = 𝟙 _ from Spec.map_id _, Category.id_comp, Category.comp_id]
-  fin := by
-    have : IsIso (spMap (RingHom.id O)) := (show spMap (RingHom.id O) = 𝟙 _ from Spec.map_id _) ▸ inferInstance
-    refine (fun w => ?_ : ∀ w : 𝟙 C.X ≫ C.s = C.s ≫ spMap (RingHom.id O), IsFinite (pullback.lift (𝟙 C.X) C.s w)) _
-    have h : pullback.lift (𝟙 C.X) C.s w ≫ pullback.fst _ _ = 𝟙 _ := pullback.lift_fst _ _ _
-    have : IsIso (pullback.lift (𝟙 C.X) C.s w) := IsIso.of_isIso_fac_right h
-    infer_instance
-  mu := ObjComp.sabMapId C.t
-  j_comm := (Category.comp_id _).trans (Category.id_comp _).symm
-  φ_comm := (Category.comp_id _).trans (Category.id_comp _).symm
 
 end Refl
 
@@ -57,33 +72,7 @@ section Abelian
 
 variable {O F : Type} [CommRing O] [Field F] (β : O →+* F) {X : Scheme.{0}} (s : X ⟶ Sp O) (t : SAB H X)
 
-def Cpt.ofAbelian (hn : Geo.Tor.IsNormalScheme X) (hp : IsProjOver s) (hf : Flat s) (ha : IsProper t.G.hom)
-    (t₀ : SAB H (pullback s (spMap β))) (m : SABMap t₀ t (𝟙 _ ≫ pullback.fst _ _)) :
-    Cpt (pullback.snd s (spMap β)) t₀ β :=
-  ⟨X, s, hn, hp, hf, 𝟙 _, Category.id_comp _, inferInstance, by simp, t, m, by simp [Point.abLocus_eq_univ]⟩
-
-def tensorTriple (H : Host E) (A : Over X) [GrpObj A] [IsCommMonObj A] (hA : IsAbelianScheme A) : SAB H X where
-  G := Serre.tensorObj (𝓞 E) (Serre.intAct A)
-  semi := isSemiAbelian_of_isAbelianScheme _ ((Serre.isTensor (𝓞 E) (Serre.intAct A)).isAbelianScheme hA)
-  act := (Serre.isTensor (𝓞 E) (Serre.intAct A)).algAct (𝓞 E)
-  PP := (UU.CP.triv _).L
-  cub := (UU.CP.triv _).c
-  sym := isSymmetric_of_symmetry_generator _ _ (UU.CP.triv _).sym_gen (UU.CP.triv _).sym_rig
-  adj := fun _ => ⟨⟨fun _ => 1⟩, ZJ.isGen_one_of_g_eq_one _
-    (ZJ.div_g_eq_one _ _ (Out.Inh.linComb_triv_g _ _) (Out.Inh.linComb_triv_g _ _))⟩
-  prim := ⟨⟨fun _ => 1⟩, ZJ.isGen_one_of_g_eq_one _
-    (ZJ.div_g_eq_one _ _ (Out.Inh.linComb_triv_g _ _) fun _ _ => rfl)⟩
-
 variable (A : Over X) [GrpObj A] [IsCommMonObj A] (hA : IsAbelianScheme A)
-
-theorem isProper_tensorTriple : IsProper (tensorTriple H A hA).G.hom :=
-  ((Serre.isTensor (𝓞 E) (Serre.intAct A)).isAbelianScheme hA).proper
-
-theorem exists_retract_tensorTriple :
-    ∃ (i : A ⟶ (tensorTriple H A hA).G) (r : (tensorTriple H A hA).G ⟶ A), i ≫ r = 𝟙 A := by
-  let b := Module.Free.chooseBasis ℤ (𝓞 E)
-  obtain ⟨j⟩ := b.index_nonempty
-  exact ⟨_, _, (Serre.isTensor (𝓞 E) (Serre.intAct A)).tmul_mapLeft_self (b.coord j) (m := b j) (by simp)⟩
 
 end Abelian
 

@@ -1,7 +1,48 @@
-import Mathlib
-import Formalism.SharpRestriction.Divisibility.WeightDegreeSizes
-import Formalism.SharpRestriction.GlobalSchurBounds.FiniteModelOfAdmissibleTransports
-import Formalism.LocalToGlobal.HilbertRowConditions.RowPin
+module
+
+public import Formalism.LocalToGlobal.KernelLattices.InterlaceAll
+public import Formalism.LocalRingCardinality.Lemmas
+public import Formalism.LocalToGlobal.KernelLattices.KernelLocalFactors.InterlaceDifferenceShiftInvariant
+public import Formalism.SharpRestriction.GlobalSchurBounds.FiniteModelOfAdmissibleTransports
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -54,12 +95,13 @@ lemma blk_IntSpan_of {D : D7} {u : D.what₂.Word}
     funext τ
     exact hg2 τ
   | zero => rw [map_zero]; exact AddSubgroup.zero_mem _
-  | add x y _ _ hx hy => rw [map_add]; exact AddSubgroup.add_mem _ hx hy
+  | add x y _ _ hx hy => rw [map_add (f := _)]; exact AddSubgroup.add_mem _ hx hy
   | neg x _ hx => rw [map_neg]; exact AddSubgroup.neg_mem _ hx
 
 variable {D : D7} {T : TwForms D} {u : D.what₂.Word} {μ : D.what₂.Tup}
 
 lemma emb_memT (i : ℕ) (x : ((T.fm u μ).lat i).V) : (T.fm u μ).emb i x ∈ (T.fm u μ).Fi i := by
+
   rw [← ((T.fm u μ).emb_basis i).2, ← ((T.fm u μ).lat i).b.sum_repr x, map_sum]
   exact Submodule.sum_mem _ (fun a _ => by
     rw [LinearMap.map_smulₛₗ]; exact Submodule.smul_mem _ _ (Submodule.subset_span ⟨a, rfl⟩))
@@ -90,7 +132,7 @@ theorem PRat_ofT (P : PendTw D T u μ) (h4 : ∀ τ, Formalism.MainNotions.Prime
   | zero => exact ⟨0, by simp⟩
   | add x y _ _ hx hy =>
     obtain ⟨a1, h1⟩ := hx; obtain ⟨a2, h2⟩ := hy
-    exact ⟨a1 + a2, by rw [map_add, map_add, map_add, h1, h2]⟩
+    exact ⟨a1 + a2, by rw [map_add (f := _), map_add (f := _), map_add (f := _), h1, h2]⟩
   | smul r x _ hx =>
     obtain ⟨a1, h1⟩ := hx
     exact ⟨r • a1, by rw [LinearMap.map_smulₛₗ, LinearMap.map_smulₛₗ, h1, LinearMap.map_smul]⟩
@@ -110,8 +152,5 @@ theorem lowerTieTwAt_integral (h : LowerTieTwAt D T u μ) : ∃ hr : (T.fm u μ)
   have h4 : ∀ τ, Formalism.MainNotions.PrimeDegreeVariant.IsBr (Nm_succ D.R) (lamTr D u τ) (sgTr D u τ) (P.br τ) := fun τ => by
     rw [hP τ]; exact brOneIsBr D u τ (interlaceTr D u hI τ)
   exact ⟨PRat_ofT P h4 hz, Pt_integralT P h4 hz _⟩
-
-theorem twisted_chain_integral_of_lowerTieTwAt (h : ∀ u μ, μ ≠ D.what₂.mu0 → LowerTieTwAt D T u μ) : Formalism.MainNotions.WeightDegreeSizes.TwistedChainIntegral D T :=
-  fun u μ hμ => lowerTieTwAt_integral (h u μ hμ)
 
 end Formalism.MainNotions.DIV.HookProducts.AdmPtTw

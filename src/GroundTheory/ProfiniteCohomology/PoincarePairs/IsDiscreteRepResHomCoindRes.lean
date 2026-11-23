@@ -1,7 +1,50 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.CompactSupportCohomology.CompactCupEqCompactCupRight
-import GroundTheory.ProfiniteCohomology.MackeyFormula.CompactSupport
-import GroundTheory.ProfiniteCohomology.PoincareDuality.NsmulEqZeroOfNonemptyAddEquiv
+module
+
+public import GroundTheory.ProfiniteCohomology.CompactSupportCohomology.CompactCupEqCompactCupRight
+public import GroundTheory.ProfiniteCohomology.MackeyFormula.CompactSupport
+public import GroundTheory.ProfiniteCohomology.PoincareDuality.NsmulEqZeroOfNonemptyAddEquiv
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -21,11 +64,6 @@ variable {k G : Type u} [CommRing k] [Group G]
 def dualEvalPairing (D M : Rep.{u} k G) : dualRep D M ⊗ M ⟶ D :=
   (β_ (dualRep D M) M).hom ≫ evalPairing D M
 
-@[simp]
-theorem dualEvalPairing_tmul (D M : Rep.{u} k G) (f : M →ₗ[k] D) (m : M) :
-    (dualEvalPairing D M).hom ((f : dualRep D M) ⊗ₜ[k] m : (dualRep D M ⊗ M : Rep k G)) = f m :=
-  rfl
-
 variable {H : Type u} [Group H]
 
 theorem resFunctor_map_comp_id (ψ : H →* G) {A B C : Rep.{u} k G} (μ : A ⊗ B ⟶ C) :
@@ -35,7 +73,7 @@ theorem resFunctor_map_comp_id (ψ : H →* G) {A B C : Rep.{u} k G} (μ : A ⊗
   induction x using TensorProduct.induction_on with
   | zero => simp only [map_zero]
   | tmul a b => rfl
-  | add x y hx hy => simp only [map_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
 
 end Eval
 
@@ -77,8 +115,8 @@ variable {k G : Type u} [CommRing k] [Group G] [TopologicalSpace G] [IsTopologic
   [∀ v, TopologicalSpace (Hv v)] [∀ v, IsTopologicalGroup (Hv v)] [∀ v, CompactSpace (Hv v)]
   (φ : ∀ v, Hv v →ₜ* G)
 
-omit [∀ v, CompactSpace (Hv v)] in
 
+omit [∀ v, CompactSpace (Hv v)] in
 instance isDiscreteRep_resHom_coind_res {K : Type u} [Group K] [TopologicalSpace K]
     [IsTopologicalGroup K] [CompactSpace K] (ψ : K →ₜ* G) (V : OpenSubgroup G) (A : Rep.{u} k G)
     [IsDiscreteRep A] :

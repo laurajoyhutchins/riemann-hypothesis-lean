@@ -1,5 +1,62 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ImV
+module
+
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ImV
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.NumberTheory.NumberField.CanonicalEmbedding.Basic
+public import Mathlib.NumberTheory.NumberField.InfinitePlace.TotallyRealComplex
+import Mathlib.Algebra.Order.Archimedean.Real.Hom
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.Foundations.InFrameStabilizer
+import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.FrameLats
+import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.MemConfTOfDetNeZero
+import Development.AbelianVarietyTheory.Proofs.FlagMeasures.IsVolData
+import Formalism.FormalDegreeBessel.StatementWR
+import Formalism.SharpRestriction.CuspSpanNormBounds.Point
+import Formalism.SharpRestriction.GlobalSchurBounds.GeneralLinearActions.GenusMassVolumes
+
+@[expose] public section
 
 open NumberField IsDedekindDomain MeasureTheory Matrix Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.QuantumDeterminants Formalism.MainNotions.S GlobalTheory.SgAlg GlobalTheory.SgGlob GlobalTheory.SnMass GlobalTheory.SnMass.VolN GlobalTheory.SnMass.SkewVol
 open scoped TensorProduct ENNReal nonZeroDivisors Classical
@@ -9,11 +66,11 @@ namespace GlobalTheory.SnMass.SkewVol
 
 open NumberField.InfinitePlace
 
-def cxPlaceEquiv (E : Type) [Field E] [NumberField E] [IsTotallyComplex E] :
+def cxPlaceEquiv (E : Type) [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] :
     {w : InfinitePlace E // IsComplex w} ≃ InfinitePlace E :=
   Equiv.subtypeUnivEquiv fun w => IsTotallyComplex.isComplex w
 
-def mixedCoords (E : Type) [Field E] [NumberField E] [IsTotallyComplex E] :
+def mixedCoords (E : Type) [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] :
     mixedEmbedding.mixedSpace E ≃ₗ[ℝ] ((InfinitePlace E → ℝ) × (InfinitePlace E → ℝ)) where
   toFun x := (fun w => (x.2 ⟨w, IsTotallyComplex.isComplex w⟩).re,
     fun w => (x.2 ⟨w, IsTotallyComplex.isComplex w⟩).im)
@@ -27,7 +84,7 @@ def mixedCoords (E : Type) [Field E] [NumberField E] [IsTotallyComplex E] :
     · apply Complex.ext <;> rfl
   right_inv y := rfl
 
-private theorem measurePreserving_mixedSpace_snd (E : Type) [Field E] [NumberField E] [IsTotallyComplex E] :
+private theorem measurePreserving_mixedSpace_snd (E : Type) [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] :
     MeasurePreserving (Prod.snd : mixedEmbedding.mixedSpace E → ({w : InfinitePlace E // IsComplex w} → ℂ))
       volume volume := by
   have : IsEmpty {w : InfinitePlace E // IsReal w} :=
@@ -41,7 +98,7 @@ private theorem measurePreserving_mixedSpace_snd (E : Type) [Field E] [NumberFie
   rw [h, Measure.map_snd_prod]
   simp
 
-theorem measurePreserving_mixedCoords (E : Type) [Field E] [NumberField E] [IsTotallyComplex E] :
+theorem measurePreserving_mixedCoords (E : Type) [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] :
     MeasurePreserving (mixedCoords E) volume volume := by
   have h2 := measurePreserving_piCongrLeft (fun _ : InfinitePlace E => (volume : Measure ℂ))
     (cxPlaceEquiv E)
@@ -58,7 +115,7 @@ theorem measurePreserving_mixedCoords (E : Type) [Field E] [NumberField E] [IsTo
   rw [e]
   exact key
 
-theorem mixedCoords_mixedEmbedding (E : Type) [Field E] [NumberField E] [IsTotallyComplex E]
+theorem mixedCoords_mixedEmbedding (E : Type) [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E]
     (x : E) : mixedCoords E (mixedEmbedding E x) = (reV x, imV x) := by
   ext w <;> simp [mixedCoords, reV, imV, mixedEmbedding.mixedEmbedding_apply_isComplex]
 

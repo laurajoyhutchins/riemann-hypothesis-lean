@@ -1,23 +1,73 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.LevelCohomology.HcDefs
-import Development.AutomorphicArithmetic.AutomorphicVarieties.HeightAndVanishing.EtaKer
-import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeDeformations.HostNumber
-import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeGroups.AdRepBaseLiftApply
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeDeformations.AdjointDiagonalRepPreservesWeightPiece
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeGroups.AdRepBaseLiftApply
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.SelmerTransport.RestrictionMemInvariantH1
+import Development.AutomorphicArithmetic.AutomorphicVarieties.HeightAndVanishing.DirichletPrimeToLPartMulLPowerPart
+import Development.AutomorphicArithmetic.AutomorphicVarieties.LevelCohomology.UnramifiedCocycleIsCoboundaryOfBernoulliUnit
+import Formalism.ConjugateSelfDual.Statement
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Formalism.ConjugateSelfDual ReciprocityTheory.Gal IsLocalRing UpperTheory.V UpperTheory.V.Base UpperTheory.V.HV UpperTheory.V.X
 
 section SlopeTestRemainingChoices
 open UpperTheory.V.U3 UpperTheory.V.UnitaryThreeInertia
 
-private def eGb {k : Type} [CommRing k] (a : k) : Gb k (-2) :=
+private def eGb {k : Type} [CommRing k] (a : k) : Gb (k := k) (-2) :=
   (⟨Matrix.single 2 0 a, by
     intro i j h
-    fin_cases i <;> fin_cases j <;> first | (exfalso; revert h; decide) | simp⟩ : gw k (-2))
+    fin_cases i <;> fin_cases j <;> first | (exfalso; revert h; decide) | simp⟩ : gw (R := k) (-2))
 
 private theorem eGb_val {k : Type} [CommRing k] (a : k) : (eGb a).val 2 0 = a := by
   show Matrix.single 2 0 a 2 0 = a
   exact Matrix.single_apply_same _ _ _
 
-private theorem gb_ext {k : Type} [CommRing k] {X Y : Gb k (-2)} (h : X.val 2 0 = Y.val 2 0) : X = Y := by
+private theorem gb_ext {k : Type} [CommRing k] {X Y : Gb (k := k) (-2)} (h : X.val 2 0 = Y.val 2 0) : X = Y := by
   have hX : ∀ a b, UpperTheory.V.U3.wt a b ≠ -2 → (X.val : Matrix (Fin 3) (Fin 3) k) a b = 0 := X.2
   have hY : ∀ a b, UpperTheory.V.U3.wt a b ≠ -2 → (Y.val : Matrix (Fin 3) (Fin 3) k) a b = 0 := Y.2
   apply Subtype.ext
@@ -27,15 +77,15 @@ private theorem gb_ext {k : Type} [CommRing k] {X Y : Gb k (-2)} (h : X.val 2 0 
     exact h
   · have hw : UpperTheory.V.U3.wt a b ≠ -2 := by
       revert hab
-      fin_cases a <;> fin_cases b <;> first | decide | simp [UpperTheory.V.U3.wt, UpperTheory.V.U3.wt1]
+      fin_cases a <;> fin_cases b <;> decide
     exact (hX a b hw).trans (hY a b hw).symm
 
-private theorem gb_add {k : Type} [CommRing k] (X Y : Gb k (-2)) : (X + Y).val 2 0 = X.val 2 0 + Y.val 2 0 := rfl
-private theorem gb_sub {k : Type} [CommRing k] (X Y : Gb k (-2)) : (X - Y).val 2 0 = X.val 2 0 - Y.val 2 0 := rfl
+private theorem gb_add {k : Type} [CommRing k] (X Y : Gb (k := k) (-2)) : (X + Y).val 2 0 = X.val 2 0 + Y.val 2 0 := rfl
+private theorem gb_sub {k : Type} [CommRing k] (X Y : Gb (k := k) (-2)) : (X - Y).val 2 0 = X.val 2 0 - Y.val 2 0 := rfl
 
-private theorem gb_rep {k D : Type} [CommRing k] [Group D] (η : D →* ℤˣ) (Ψ : D →* kˣ) (g : D) (X : Gb k (-2))
+private theorem gb_rep {k D : Type} [CommRing k] [Group D] (η : D →* ℤˣ) (Ψ : D →* kˣ) (g : D) (X : Gb (k := k) (-2))
     (c : k) (hc : c * (Ψ g : k) ^ 2 = ((η g : ℤ) : k)) :
-    (gRep η Ψ (-2) g X).val 2 0 = c * X.val 2 0 := by
+    (UnitaryThreeInertia.gRep η Ψ (-2) g X).val 2 0 = c * X.val 2 0 := by
   rw [gRep_val, adRep_baseLift_apply]
   have hw : UpperTheory.V.U3.wt 2 0 = -2 := by decide
   have r0 : Fin.rev (0 : Fin 3) = 2 := rfl
@@ -48,10 +98,10 @@ private theorem gb_rep {k D : Type} [CommRing k] [Group D] (η : D →* ℤˣ) (
     exact h0.symm
   rw [hc']
   rcases Int.units_eq_one_or (η g) with h1 | h1
-  · rw [if_pos h1, h1]
+  · rw [ite_eq_left h1, h1]
     simp only [Units.val_one, Int.cast_one]
     ring
-  · rw [if_neg (by rw [h1]; decide), h1]
+  · rw [ite_eq_right (by rw [h1]; decide), h1]
     simp only [Units.val_neg, Units.val_one, Int.cast_neg, Int.cast_one]
     ring
 
@@ -74,7 +124,7 @@ theorem UpperTheory.V.X.xppOf :
     fun v => (Submodule.mem_iInf _).1 hL v
   have hlc : IsLocallyConstant (fun g => (f g).val 2 0) :=
     ((IsLocallyConstant.iff_continuous _).2 hcont).comp
-      (fun X : UpperTheory.V.UnitaryThreeInertia.Gb (ResidueField O) (-2) => X.val 2 0)
+      (fun X : UpperTheory.V.UnitaryThreeInertia.Gb (k := ResidueField O) (-2) => X.val 2 0)
   obtain ⟨m, hm⟩ := hmain (fun g => (f g).val 2 0) hlc
     (by
       intro g h

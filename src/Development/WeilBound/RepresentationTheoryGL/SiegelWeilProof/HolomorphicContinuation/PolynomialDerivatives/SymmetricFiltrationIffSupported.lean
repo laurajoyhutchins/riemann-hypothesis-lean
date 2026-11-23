@@ -1,6 +1,58 @@
-import Development.WeilBound.RepresentationTheoryGL.SiegelWeilProof.HolomorphicContinuation.PolynomialDerivatives.ProdMapPowSingle
-import Development.WeilBound.RepresentationTheoryGL.SiegelWeilProof.HolomorphicContinuation.PolynomialDerivatives.PairSym
-import Development.WeilBound.RepresentationTheoryGL.SiegelWeilProof.HolomorphicContinuation.PolynomialDerivatives.PderivPowMonomial
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.SiegelWeilProof.HolomorphicContinuation.PolynomialDerivatives.ProdMapPowSingle
+public import Development.WeilBound.RepresentationTheoryGL.SiegelWeilProof.HolomorphicContinuation.PolynomialDerivatives.PairSym
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Bool
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -19,7 +71,7 @@ theorem symmetric_filtration_iff_supported (ε : Fin m → Bool) (s : Sym m n) :
   · intro h
     rw [mem_supported]
     intro v hv
-    rw [Finset.mem_coe, mem_vars] at hv
+    rw [Finset.mem_coe, MvPolynomial.mem_vars_iff_mem_support] at hv
     obtain ⟨t, ht, hvt⟩ := hv
     rw [Finsupp.mem_support_iff] at hvt
     cases v with
@@ -28,8 +80,8 @@ theorem symmetric_filtration_iff_supported (ε : Fin m → Bool) (s : Sym m n) :
   · intro h t ht k hk
     rw [mem_supported] at h
     rcases hk with hk | hk
-    · exact h (Finset.mem_coe.2 ((mem_vars _).2 ⟨t, ht, Finsupp.mem_support_iff.2 hk⟩))
-    · exact h (Finset.mem_coe.2 ((mem_vars _).2 ⟨t, ht, Finsupp.mem_support_iff.2 hk⟩))
+    · exact h (Finset.mem_coe.2 ((MvPolynomial.mem_vars_iff_mem_support _).2 ⟨t, ht, Finsupp.mem_support_iff.2 hk⟩))
+    · exact h (Finset.mem_coe.2 ((MvPolynomial.mem_vars_iff_mem_support _).2 ⟨t, ht, Finsupp.mem_support_iff.2 hk⟩))
 
 theorem symmetric_filtration_mul {ε : Fin m → Bool} {u v : Sym m n} (hu : SymbolInFirstFamily ε u) (hv : SymbolInFirstFamily ε v) : SymbolInFirstFamily ε (u * v) := by
   rw [symmetric_filtration_iff_supported] at *; exact Subalgebra.mul_mem _ hu hv
@@ -142,7 +194,7 @@ theorem etaLe_add_lt {u v : Sym m n} {d : ℕ} (hu : EtaLe u d) (hv : EtaLt v d)
 
 theorem etaLt_zero_eq {r : Sym m n} (h : EtaLt r 0) : r = 0 := by
   ext t
-  rw [coeff_zero]
+  simp only [AddMonoidAlgebra.coeff_zero]
   by_contra hc
   exact Nat.not_lt_zero _ (h t (mem_support_iff.2 hc))
 
@@ -160,7 +212,7 @@ theorem etaGt_sum {ι : Type*} (T : Finset ι) (u : ι → Sym m n) {N : ℕ} (h
 
 theorem eq_zero_of_le_gt {r : Sym m n} {N : ℕ} (h₁ : EtaLe r N) (h₂ : EtaGt r N) : r = 0 := by
   ext t
-  rw [coeff_zero]
+  simp only [AddMonoidAlgebra.coeff_zero]
   by_contra hc
   have ht := mem_support_iff.2 hc
   have a : ed t ≤ N := h₁ t ht
@@ -230,6 +282,7 @@ theorem opL_pair (ε : Fin m → Bool) (c : ℝ) (hc : c ≠ 0) (a b : Fin m) :
 
 theorem symK_pair (ε : Fin m → Bool) (i j : Fin n) (a b : Fin m) : symK ε i j (pairSym (n := n) ε a b) = 0 := by
   unfold pairSym
+
   rw [map_sum]
   simp only [Derivation.leibniz, smul_eq_mul]
   unfold vecVar covVar
@@ -301,7 +354,7 @@ private theorem list_prod_pderiv_pow_monomial (e : Fin m × Fin n × Bool → �
     rw [List.map_cons, List.prod_cons, Module.End.mul_apply, ih hL.2, pderiv_pow_monomial', List.toFinset_cons,
       Finset.sum_insert haL, Finset.prod_insert haL]
     have h0 : (∑ k ∈ L.toFinset, Finsupp.single k (e k)) a = 0 := by
-      rw [Finsupp.finset_sum_apply]
+      rw [Finsupp.finsetSum_apply]
       refine Finset.sum_eq_zero fun k hk => ?_
       rw [Finsupp.single_apply, if_neg]
       rintro rfl
@@ -333,9 +386,9 @@ theorem op_inj {s : Sym m n} (h : ∀ f, op s f = 0) : s = 0 := by
   have h1 := h (monomial (t0.comapDomain Sum.inr Sum.inr_injective.injOn) 1)
   unfold op at h1
   simp only [opMono_monomial] at h1
-  have h2 := congrArg (coeff (t0.comapDomain Sum.inl Sum.inl_injective.injOn)) h1
-  rw [coeff_sum, coeff_zero] at h2
-  simp only [coeff_smul, coeff_monomial, smul_eq_mul] at h2
+  have h2 := congrArg (AddMonoidAlgebra.coeff · (t0.comapDomain Sum.inl Sum.inl_injective.injOn)) h1
+  simp only [coeff_sum, AddMonoidAlgebra.coeff_zero] at h2
+  simp only [MvPolynomial.coeff_smul, coeff_monomial, smul_eq_mul] at h2
   rw [Finset.sum_eq_single t0] at h2
   · rw [if_pos] at h2
     · refine absurd h2 (mul_ne_zero (mem_support_iff.1 ht0) ?_)
@@ -343,7 +396,7 @@ theorem op_inj {s : Sym m n} (h : ∀ f, op s f = 0) : s = 0 := by
       rw [Finsupp.comapDomain_apply, Nat.descFactorial_self]
       exact_mod_cast Nat.factorial_ne_zero _
     · ext k
-      simp [Finsupp.tsub_apply, Finsupp.finset_sum_apply, Finsupp.single_apply]
+      simp [Finsupp.tsub_apply, Finsupp.finsetSum_apply, Finsupp.single_apply]
   · intro b hb hbt
     split_ifs with hc
     · apply mul_eq_zero_of_right
@@ -364,7 +417,7 @@ theorem op_inj {s : Sym m n} (h : ∀ f, op s f = 0) : s = 0 := by
       | inr k => exact heq k (Finset.mem_univ _)
       | inl k =>
         have hck := DFunLike.congr_fun hc k
-        simp [Finsupp.tsub_apply, Finsupp.finset_sum_apply, Finsupp.single_apply, heq k (Finset.mem_univ _)] at hck
+        simp [Finsupp.tsub_apply, Finsupp.finsetSum_apply, Finsupp.single_apply, heq k (Finset.mem_univ _)] at hck
         exact hck
     · rw [mul_zero]
   · intro hn

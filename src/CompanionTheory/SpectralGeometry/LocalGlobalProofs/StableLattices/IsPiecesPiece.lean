@@ -1,6 +1,54 @@
-import Mathlib
-import CompanionTheory.RealGroups.UnitaryAdmissibility.ArchimedeanUnitaryDual.StSandwich
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.StableLattices.IsCongIdealTwoTorsion
+module
+
+public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.StableLattices.IsCongIdealTwoTorsion
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open CompanionTheory.Rg.FlB
 
@@ -102,7 +150,8 @@ theorem end_ext (hF : IsFrame h δ e f W) {A B : Module.End L V} (he : ∀ i, A 
     (hf : ∀ i, A (f i) = B (f i)) (hw : ∀ w ∈ W, A w = B w) : A = B := by
   ext x
   obtain ⟨a, b, w, hwW, rfl⟩ := hF.2.2.2.2.2 x
-  simp [map_add, map_sum, he, hf, hw w hwW]
+
+  simp [map_add (f := _), map_sum, he, hf, hw w hwW]
 
 theorem isPieces_piece (hh : IsHerm s h) (hδ : δ ≠ 0) (hF : IsFrame h δ e f W) :
     IsPieces (piece hh δ e f) := by
@@ -159,16 +208,19 @@ theorem piece_mem {Λ : AddSubgroup V} (hΛ : IsLat L Λ) (hA : IsAdapted h e f 
   obtain ⟨ha, hb, hww⟩ := (hA a b w hw).1 hx
   rcases i with _ | i | i
   · have : piece hh δ e f none (∑ i, a i • e i + ∑ i, b i • f i + w) = w := by
-      simp [map_add, map_sum, piece_e hh hδ hF, piece_f hh hδ hF, piece_w hh hF _ hw]
+
+      simp [map_add (f := _), map_sum, piece_e hh hδ hF, piece_f hh hδ hF, piece_w hh hF _ hw]
     rw [this]
     have := (hA 0 0 w hw).2 ⟨fun i => by simp, fun i => by simp, hww⟩
     simpa using this
   · have : piece hh δ e f (some (Sum.inl i)) (∑ i, a i • e i + ∑ i, b i • f i + w) = a i • e i := by
-      simp [map_add, map_sum, piece_e hh hδ hF, piece_f hh hδ hF, piece_w hh hF _ hw]
+
+      simp [map_add (f := _), map_sum, piece_e hh hδ hF, piece_f hh hδ hF, piece_w hh hF _ hw]
     rw [this]
     exact lat_smul hΛ (by simpa using ha i) (e_mem hA hh i)
   · have : piece hh δ e f (some (Sum.inr i)) (∑ i, a i • e i + ∑ i, b i • f i + w) = b i • f i := by
-      simp [map_add, map_sum, piece_e hh hδ hF, piece_f hh hδ hF, piece_w hh hF _ hw]
+
+      simp [map_add (f := _), map_sum, piece_e hh hδ hF, piece_f hh hδ hF, piece_w hh hF _ hw]
     rw [this]
     exact lat_smul hΛ (by simpa using hb i) (f_mem hA hh i)
 
@@ -259,7 +311,7 @@ theorem h_smul_left (hh : IsHerm s h) (c : L) (x y : V) : h (c • x) y = s c * 
   rw [hh.2.2.1 y (c • x), hh.2.1, map_mul, ← hh.2.2.1 y x]
 
 theorem h_add_left (hh : IsHerm s h) (x x' y : V) : h (x + x') y = h x y + h x' y := by
-  rw [hh.2.2.1 y (x + x'), hh.1, map_add, ← hh.2.2.1 y x, ← hh.2.2.1 y x']
+  rw [hh.2.2.1 y (x + x'), hh.1, map_add (f := _), ← hh.2.2.1 y x, ← hh.2.2.1 y x']
 
 theorem h_zero_left (hh : IsHerm s h) (y : V) : h 0 y = 0 := by
   rw [hh.2.2.1 y 0, h_zero_right hh, map_zero]

@@ -1,10 +1,67 @@
-import Mathlib
-import Formalism.HermitianCurvature.StatementTBB
-import Formalism.HermitianCurvature.StatementU
-import Formalism.HermitianCurvature.LetterProductDoubleDegreeCount
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutBPEqDecay
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.CapelliEigenSumLinearCombinationStatement
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.PolynomialSmulCapelliEigenfunctionSum
+module
+
+public import Formalism.HermitianCurvature.StatementU
+public import Formalism.HermitianCurvature.StatementQ
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.CapelliEigenSumLinearCombination
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.CapelliModuleModel
+import Development.AbelianVarietyTheory.Proofs.JetHarmonics.CkOnInCCCongrOnGroup
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ConjEntrySmulCapelliEigenSum
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.PolynomialSmulCapelliEigenfunctionSum
+import Development.AbelianVarietyTheory.Proofs.JetHarmonics.QuantumDetVectorMultiplierShiftPlus
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutBPEqDecay
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutFpmDecay
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.DminStarPd
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.HomogeneityNaturalDegree
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.TheoremPIntegralOfPlaces
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.MinorSmoothness.ExpSecondHermitianMemLevel
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.UnipotentCorrectionU1.WeightBoundMultiplicative
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Formalism.FourierDecayAlt Formalism.REAL Formalism.QuantumDeterminants Finset
 
@@ -54,7 +111,7 @@ private lemma entry_smul_eigenfunction_lemma_6 {k r : ℕ} {Wp Wq : Type} [Norme
     intro g hg
     have h1 := (hmul _ (hsm c)).2 a b v g hg
     have h2 := (hmul _ (hsm c)).1 ((E a b) v) g hg
-    rw [Module.End.mul_apply, LinearMap.add_apply, Module.End.mul_apply, map_add, Pi.add_apply, h1, h2, hEH]
+    rw [Module.End.mul_apply, LinearMap.add_apply, Module.End.mul_apply, map_add (f := _), Pi.add_apply, h1, h2, hEH]
     split_ifs with hbc
     · subst hbc
       have h3 := (hmul _ (hsm a)).1 v g hg
@@ -87,6 +144,7 @@ private lemma entry_smul_eigenfunction_lemma_6 {k r : ℕ} {Wp Wq : Type} [Norme
     have hcong : ∀ g ∈ _root_.Formalism.FourierDecayAlt.B.GV k r, (fun g : _root_.Formalism.FourierDecayAlt.B.Mat k r => ∑ a, g i a • ev (ι (v s a)) g) g =
         ev (∑ a, x a (ι (v s a))) g := by
       intro g hg
+
       rw [map_sum, Finset.sum_apply]
       refine Finset.sum_congr rfl fun a _ => ?_
       have h3 := (hmul _ (hsm a)).1 (ι (v s a)) g hg
@@ -121,6 +179,7 @@ private lemma entry_smul_eigenfunction_lemma_6 {k r : ℕ} {Wp Wq : Type} [Norme
     show g i j • f g = _
     rw [← hw g hg, ← h3]
     show ev (x j (ι w)) g = _
+
     rw [hv, map_sum, Finset.sum_apply]
 
 open Finset in
@@ -208,8 +267,8 @@ private lemma isEigenSum_poly_smul {k r : ℕ} {Wp Wq : Type} [NormedAddCommGrou
       Finsupp.prod_mapDomain_index (fun _ => pow_zero _) (fun _ _ _ => pow_add _ _ _)]
     rfl
 
-open Finset in
 
+open Finset in
 theorem _root_.GlobalTheory.gfPow_smul_comp_polyOp_eigenSum :
     ∀ (k r : ℕ) (Wp Wq : Type) [NormedAddCommGroup Wp] [InnerProductSpace ℂ Wp] [NormedAddCommGroup Wq] [InnerProductSpace ℂ Wq] [FiniteDimensional ℂ Wp] [FiniteDimensional ℂ Wq] (Wq' : Type) [NormedAddCommGroup Wq'] [InnerProductSpace ℂ Wq'] [FiniteDimensional ℂ Wq'] (z z' : Fin (2 * r + k + 1) → ℂ) (lam : Fin (2 * r + k + 1) → ℝ) (A₀ : ℝ) (p₀ dA : ℕ) (f : _root_.Formalism.FourierDecayAlt.B.Mat k r → (Wq →L[ℂ] Wp)) (Aop : _root_.Formalism.FourierDecayAlt.B.Mat k r → (Wq' →L[ℂ] Wq)), (∀ s t, s ≠ t → 2 * (((2 * r + 2) * p₀ + dA : ℕ) : ℝ) < |lam s - lam t|) → (_root_.Formalism.FourierDecayAlt.B.CkOn ⊤ (_root_.Formalism.FourierDecayAlt.B.GV k r) (f) ∧ ∀ m : ℕ, _root_.Formalism.FourierDecayAlt.B.InCC (A₀) m (f)) → (∀ Y : ℝ, ∀ g ∈ _root_.Formalism.FourierDecayAlt.B.GV k r, _root_.Formalism.FourierDecayAlt.Q.CV k r (Y : ℂ) (f) g = ((∏ s, (Y + lam s) : ℝ) : ℂ) • (f) g) → (∃ (n₁ : ℕ) (c : Fin n₁ → _root_.Formalism.FourierDecayAlt.B.Mat k r → ℂ) (L : Fin n₁ → (Wq' →L[ℂ] Wq)), (∀ i, _root_.Formalism.FourierDecayAlt.U.IsPolyDeg dA (c i)) ∧ ∀ g, Aop g = ∑ i, c i g • L i) → (∃ (N₀ : ℕ) (Fi : Fin N₀ → _root_.Formalism.FourierDecayAlt.B.Mat k r → (Wq' →L[ℂ] Wp)) (ν : Fin N₀ → Fin (2 * r + k + 1) → ℤ), (∀ i s, |ν i s| ≤ (((2 * r + 2) * p₀ + dA : ℕ) : ℤ)) ∧ (∀ i, (_root_.Formalism.FourierDecayAlt.B.CkOn ⊤ (_root_.Formalism.FourierDecayAlt.B.GV k r) (Fi i) ∧ ∀ m : ℕ, _root_.Formalism.FourierDecayAlt.B.InCC (A₀ - (((2 * r + 2) * p₀ + dA : ℕ) : ℝ)) m (Fi i))) ∧ (∀ i, (∀ Y : ℝ, ∀ g ∈ _root_.Formalism.FourierDecayAlt.B.GV k r, _root_.Formalism.FourierDecayAlt.Q.CV k r (Y : ℂ) (Fi i) g = ((∏ s, (Y + lam s + (ν i s : ℝ)) : ℝ) : ℂ) • (Fi i) g)) ∧ ∀ g ∈ _root_.Formalism.FourierDecayAlt.B.GV k r, (fun g => ((_root_.Formalism.QuantumDeterminants.Gf k r z z' g ^ p₀ : ℝ) : ℂ) • (f g).comp (Aop g)) g = ∑ i, Fi i g) := by
   intro k r Wp Wq _ _ _ _ _ _ Wq' _ _ _ z z' lam A₀ p₀ dA f Aop hgap hf heig hA
@@ -247,6 +306,7 @@ theorem _root_.GlobalTheory.gfPow_smul_comp_polyOp_eigenSum :
     (fun i g => (((_root_.Formalism.QuantumDeterminants.Gf k r z z' g ^ p₀ : ℝ) : ℂ) * c i g) • (f g).comp (L i)) _
     (fun i _ => ⟨e, A₀ - e, le_rfl, le_rfl, hpiece i⟩)
     (fun g _ => by
-      simp [hAop, ContinuousLinearMap.comp_finset_sum, ContinuousLinearMap.comp_smul, Finset.smul_sum, smul_smul])
+      ext v
+      simp [hAop, Finset.smul_sum, smul_smul])
 
 end GlobalTheory

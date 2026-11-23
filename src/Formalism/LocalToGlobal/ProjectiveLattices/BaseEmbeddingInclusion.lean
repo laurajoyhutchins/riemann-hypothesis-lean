@@ -1,5 +1,54 @@
-import Formalism.LocalToGlobal.ProjectiveLattices.PetersonNormSubspace
-import Formalism.LocalToGlobal.IndefiniteReal.GramCEqTranspose
+module
+
+public import Mathlib.Basic.Complex.Basic
+public import Mathlib.LinearAlgebra.TensorProduct.Tower
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Formalism.LocalRingCardinality.DataTheta
+public import Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow
+import Formalism.LocalToGlobal.BesselHermitianTheta.IsAutFunDef
+import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsCompletedStrictHens
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.Signature
+
+@[expose] public section
 
 noncomputable section
 
@@ -13,38 +62,7 @@ section Ext
 variable {K L : Type} [Field K] [Field L] [Algebra K L] {M : Type} [AddCommGroup M] [Module K M]
   {W : Type} [AddCommGroup W] [Module ℂ W]
 
-def extJ (σ : L →+* ℂ) (jK : M →ₛₗ[σ.comp (algebraMap K L)] W) : L ⊗[K] M →ₛₗ[σ] W :=
-  letI : Module K W := Module.compHom W (σ.comp (algebraMap K L))
-  let B : L →ₗ[K] M →ₗ[K] W := LinearMap.mk₂ K (fun a m => σ a • jK m)
-    (fun a a' m => by rw [map_add, add_smul])
-    (fun k a m => by
-      show σ (k • a) • jK m = (σ (algebraMap K L k)) • (σ a • jK m)
-      rw [Algebra.smul_def, map_mul, mul_smul])
-    (fun a m m' => by rw [map_add, smul_add])
-    (fun k a m => by
-      show σ a • jK (k • m) = (σ (algebraMap K L k)) • (σ a • jK m)
-      rw [map_smulₛₗ, RingHom.comp_apply, smul_comm])
-  { toFun := TensorProduct.lift B
-    map_add' := map_add _
-    map_smul' := fun a x => by
-      induction x using TensorProduct.induction_on with
-      | zero => simp
-      | tmul b m =>
-        rw [TensorProduct.smul_tmul', TensorProduct.lift.tmul, TensorProduct.lift.tmul]
-        show σ (a • b) • jK m = σ a • (σ b • jK m)
-        rw [smul_eq_mul, map_mul, mul_smul]
-      | add x y hx hy => rw [smul_add, map_add, map_add, hx, hy, smul_add] }
-
 def incl : M →ₗ[K] L ⊗[K] M := TensorProduct.mk K L M 1
-
-theorem incl_injective : Function.Injective (incl (K := K) (L := L) (M := M)) := by
-  have h1 : Function.Injective ((Algebra.linearMap K L).rTensor M) :=
-    Module.Flat.rTensor_preserves_injective_linearMap _ (algebraMap K L).injective
-  have h2 : (incl (K := K) (L := L) (M := M)) =
-      ((Algebra.linearMap K L).rTensor M).comp (TensorProduct.lid K M).symm.toLinearMap := by
-    ext m; simp [incl]
-  rw [h2]
-  exact h1.comp (TensorProduct.lid K M).symm.injective
 
 end Ext
 
@@ -59,39 +77,6 @@ def rhoOf (LL : Type) [Field LL] [Algebra K LL] {G0 : Type} [Group G0] (ρC : G0
   toFun g := (ρC g).baseChange LL
   map_one' := by rw [map_one]; exact LinearMap.baseChange_one _ _
   map_mul' g g' := by rw [map_mul]; exact LinearMap.baseChange_mul _ _
-
-def formsLOf (Comp : (LL →+* ℂ) → Type) (X : ∀ σ, Comp σ → Data E r) (la : ∀ σ c, Wt (X σ c).Ψ r)
-    (rd : ∀ σ : LL →+* ℂ, C →ₛₗ[σ.comp (algebraMap K LL)] FDSec (X σ)) (V : (LL →+* ℂ) → HSp D)
-    (dict : ∀ σ, GA D (V σ) → Σ k, Frame (X σ k).Ψ r) (mu : ∀ σ, GA D (V σ) → ℂ)
-    (hL2 : ∀ σ, JMemL2 (V σ) (σ.comp (algebraMap K LL)) (rd σ) (dict σ) (mu σ))
-    (hRd : ∀ σ, RdHolCusp (σ.comp (algebraMap K LL)) (la σ) (rd σ))
-    [NumberField K] (Pt : HeightOneSpectrum (𝓞 K) → Type) (nrmC : ∀ lp, Pt lp → C → ℝ)
-    (h0 : ∀ lp y f, 0 ≤ nrmC lp y f) (hz : ∀ lp y, nrmC lp y 0 = 0)
-    (ha : ∀ lp y f g, nrmC lp y (f + g) ≤ max (nrmC lp y f) (nrmC lp y g))
-    (hs : ∀ lp y (x : K) f, nrmC lp y (x • f) = FinitePlace.mk lp x * nrmC lp y f)
-    {G0 : Type} [Group G0] (ρC : G0 →* (C →ₗ[K] C)) (chiC : G0 →* Kˣ) :
-    Formalism.IndefR.Arith.FormsL LL K (LL ⊗[K] C) (fun σ => ↥(SS (V σ) (la σ) (dict σ) (mu σ))) G0 where
-  WK := LinearMap.range (incl (K := K) (L := LL) (M := C))
-  Pt := Pt
-  nrm lp y w := nrmC lp y ((LinearEquiv.ofInjective _ incl_injective).symm w)
-  nrm_nonneg lp y w := h0 lp y _
-  nrm_zero lp y := by rw [map_zero]; exact hz lp y
-  nrm_add lp y w w' := by rw [map_add]; exact ha lp y _ _
-  nrm_smul lp y x w := by rw [map_smul]; exact hs lp y x _
-  towKs := inferInstance
-  ρ := rhoOf LL ρC
-  chi := (Units.map (algebraMap K LL).toMonoidHom).comp chiC
-  j σ := extJ σ (jSS (V σ) (σ.comp (algebraMap K LL)) (la σ) (rd σ) (dict σ) (mu σ) (hL2 σ) (hRd σ))
-
-def mapX {WL : Type} [AddCommGroup WL] [Module LL WL] [Module K WL] [NumberField K]
-    {W W' : (LL →+* ℂ) → Type} [∀ σ, NormedAddCommGroup (W σ)] [∀ σ, InnerProductSpace ℂ (W σ)]
-    [∀ σ, NormedAddCommGroup (W' σ)] [∀ σ, InnerProductSpace ℂ (W' σ)] {G0 : Type} [Group G0]
-    (A : Formalism.IndefR.Arith.FormsL LL K WL W G0) (u : ∀ σ, W σ ≃ₗ[ℂ] W' σ) :
-    Formalism.IndefR.Arith.FormsL LL K WL W' G0 :=
-  { A with j := fun σ => (u σ).toLinearMap.comp (A.j σ) }
-
-def BaseEmbeddingInclusion (F : IntermediateField ℚ ℂ) [Algebra F LL] (σ₀ : LL →+* ℂ) : Prop :=
-  ∀ x : F, σ₀ (algebraMap F LL x) = (x : ℂ)
 
 end Forms
 

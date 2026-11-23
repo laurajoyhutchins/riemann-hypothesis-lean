@@ -1,4 +1,49 @@
-import Mathlib
+module
+
+public import Mathlib.Analysis.CStarAlgebra.Module.Constructions
+public import Mathlib.Analysis.InnerProductSpace.Adjoint
+public import Mathlib.MeasureTheory.Function.L2Space
+public import Mathlib.MeasureTheory.Group.FundamentalDomain
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -42,17 +87,6 @@ structure Ctx : Type 1 where
   fd : IsFundamentalDomain Γ F μ
 
 attribute [instance] Ctx.grp Ctx.top Ctx.tg Ctx.lc Ctx.sc Ctx.t2 Ctx.ms Ctx.bs Ctx.haar Ctx.cn
-
-def Ctx.line : Ctx :=
-  letI : MeasurableSpace (Multiplicative ℝ) := borel _
-  haveI : BorelSpace (Multiplicative ℝ) := ⟨rfl⟩
-  haveI : SecondCountableTopology (Multiplicative ℝ) := inferInstanceAs (SecondCountableTopology ℝ)
-  { G := Multiplicative ℝ
-    μ := Measure.haar
-    Γ := ⊥
-    proper := fun _ _ => Set.toFinite _
-    F := Set.univ
-    fd := .mk' MeasurableSet.univ.nullMeasurableSet fun _ => ⟨1, trivial, fun _ _ => Subsingleton.elim _ _⟩ }
 
 def Ctx.ν (X : Ctx) : Measure X.G := X.μ.restrict X.F
 
@@ -106,14 +140,6 @@ def CvTest : Prop := ∀ (X : Ctx) (φ ψ : X.G → ℂ), Tst φ → Tst ψ →
 def KerMul : Prop := ∀ (X : Ctx) (φ ψ : X.G → ℂ), Tst φ → Tst ψ → ∀ x y,
   ∫ z, ker X.Γ φ x z * ker X.Γ ψ z y ∂X.ν = ker X.Γ (cv X.μ φ ψ) x y
 
-def ApproxF : Prop := ∀ (X : Ctx) (φ : X.G → ℂ) (V : Set X.G) (ε : ℝ), Tst φ → V ∈ nhds (1 : X.G) → 0 < ε →
-  ∃ ψ : X.G → ℂ, Tst ψ ∧ tsupport ψ ⊆ V ∧ ∫ z, ‖ψ z⁻¹‖ ∂X.μ = 1 ∧
-    ∀ y, ‖cv X.μ (adj ψ) (cv X.μ φ ψ) y - φ y‖ ≤ ε
-
-def Approx : Prop := ∀ (X : Ctx) (φ : X.G → ℂ) (V : Set X.G) (ε : ℝ) (x y : X.G), Tst φ → V ∈ nhds (1 : X.G) → 0 < ε →
-  ∃ ψ : X.G → ℂ, Tst ψ ∧ tsupport ψ ⊆ V ∧ ∫ z, ‖ψ z⁻¹‖ ∂X.μ = 1 ∧
-    ‖ker X.Γ (cv X.μ (adj ψ) (cv X.μ φ ψ)) x y - ker X.Γ φ x y‖ ≤ ε
-
 def OpExA : Prop := ∀ (X : Ctx) (ι : Type) [Fintype ι] (Φ : Matrix ι ι (X.G → ℂ)), (∀ i j, Tst (Φ i j)) →
   ∃! T, X.IsOp Φ T
 
@@ -132,20 +158,9 @@ def ColOp : Prop := ∀ (X : Ctx) (ι : Type) [Fintype ι] (ψ : X.G → ℂ), T
     (∀ i, (T u i : X.G → ℂ) =ᵐ[X.ν] fun x => ker X.Γ (cv X.μ (Φ i j) ψ) x y) ∧
     ∀ x i v, X.IsCol ψ x i v → inner ℂ v (T u) = ker X.Γ (cv X.μ (adj ψ) (cv X.μ (Φ i j) ψ)) x y
 
-def ColNorm : Prop := ∀ (X : Ctx) (ι : Type) [Fintype ι] (Φ : Matrix ι ι (X.G → ℂ)) (T : X.Hs ι →L[ℂ] X.Hs ι)
-  (V : Set X.G), (∀ i j, Tst (Φ i j)) → X.IsOp Φ T → IsCompact V → ∃ (C : ℝ≥0∞) (Ω : Set X.G), C ≠ ⊤ ∧ IsCompact Ω ∧
-    ∀ ψ : X.G → ℂ, Tst ψ → tsupport ψ ⊆ V → ∫ z, ‖ψ z⁻¹‖ ∂X.μ = 1 → ∀ y j u, X.IsCol ψ y j u →
-      ‖T u‖ₑ ^ 2 ≤ C * cnt X.Γ Ω y
-
 def CellSum : Prop := ∀ (X : Ctx) (ι : Type) [Countable ι] (a : ι → X.G) (Ω₀ Ω : Set X.G) (w : X.G → ℝ≥0∞) (c : ι → ℝ≥0∞),
   IsCompact Ω₀ → IsCompact Ω → (∀ x, ∃ γ ∈ X.Γ, ∃ i, ∃ o ∈ Ω₀, γ * x = a i * o) → (∀ γ ∈ X.Γ, ∀ x, w (γ * x) = w x) →
   (∀ i, ∀ o ∈ Ω₀, w (a i * o) ≤ c i) → ∫⁻ x, w x * cnt X.Γ Ω x ∂X.ν ≤ X.μ (Ω₀ * Ω) * ∑' i, c i
-
-def PtBound : Prop := ∀ (X : Ctx) (ι : Type) [Fintype ι] (Φ₁ Φ₂ : Matrix ι ι (X.G → ℂ)) (T₁ T₂ : X.Hs ι →L[ℂ] X.Hs ι),
-  (∀ i j, Tst (Φ₁ i j)) → (∀ i j, Tst (Φ₂ i j)) → X.IsOp Φ₁ T₁ → X.IsOp Φ₂ T₂ →
-  ∃ (C : ℝ≥0∞) (Ω : Set X.G), C ≠ ⊤ ∧ IsCompact Ω ∧ ∀ (U : X.Hs ι →L[ℂ] X.Hs ι) (Φ : Matrix ι ι (X.G → ℂ)),
-    (∀ i j, Tst (Φ i j)) → X.IsOp Φ (T₁ * U * T₂) → ∀ i j x y,
-      ‖ker X.Γ (Φ i j) x y‖ₑ ≤ C * ‖U‖ₑ * (cnt X.Γ Ω x + cnt X.Γ Ω y)
 
 end PositivityTheory.Rg.BcB.E1
 

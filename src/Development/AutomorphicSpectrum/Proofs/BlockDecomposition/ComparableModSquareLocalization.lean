@@ -1,6 +1,48 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.AcrisKummerUnits.Splits
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LiftIdempotentAdicComplete
+module
+
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.AcrisKummerUnits.Splits
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LiftIdempotentAdicComplete
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 open CategoryTheory AlgebraicGeometry CrystallineSemistableComparison CrystallineSemistableComparison.R
 
@@ -17,7 +59,7 @@ theorem exists_eq_add_of_mem_span_quot {S : Type} [CommRing S] (ϖ x y : S)
   exact ⟨c, d, by linear_combination hd⟩
 
 theorem mem_span_or_mem_span {S : Type} [CommRing S] (ϖ : S)
-    [IsAdicComplete (Ideal.span {ϖ}) S] (h0 : Val0 (S ⧸ Ideal.span {ϖ ^ 2}))
+    [IsAdicComplete (Ideal.span {ϖ}) S] (h0 : Val0 (S := S ⧸ Ideal.span {ϖ ^ 2}))
     (P : Ideal S) (hP : P.IsPrime) (f g : S ⧸ compI P) :
     f ∈ Ideal.span {g, Ideal.Quotient.mk (compI P) ϖ ^ 2} ∨
       g ∈ Ideal.span {f, Ideal.Quotient.mk (compI P) ϖ ^ 2} := by
@@ -39,7 +81,7 @@ theorem mem_span_or_mem_span {S : Type} [CommRing S] (ϖ : S)
   · right
     have hz := key e he heP
     have hb := congrArg (Ideal.Quotient.mk (compI P)) hcd'
-    simp only [map_mul, map_add, map_sub, map_one, map_pow, hz, sub_zero, one_mul] at hb
+    simp only [map_mul, map_add (f := _), map_sub, map_one, map_pow, hz, sub_zero, one_mul] at hb
     rw [hb]
     exact Ideal.mem_span_pair.2 ⟨Ideal.Quotient.mk _ c', Ideal.Quotient.mk _ d', by ring⟩
   · left
@@ -55,7 +97,7 @@ theorem mem_span_or_mem_span {S : Type} [CommRing S] (ϖ : S)
       rw [map_sub, map_one] at hz
       exact (sub_eq_zero.1 hz).symm
     have ha := congrArg (Ideal.Quotient.mk (compI P)) hcd
-    simp only [map_mul, map_add, map_pow, hz', one_mul] at ha
+    simp only [map_mul, map_add (f := _), map_pow, hz', one_mul] at ha
     rw [ha]
     exact Ideal.mem_span_pair.2 ⟨Ideal.Quotient.mk _ c, Ideal.Quotient.mk _ d, by ring⟩
 

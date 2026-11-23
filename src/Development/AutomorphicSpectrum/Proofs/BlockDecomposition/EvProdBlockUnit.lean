@@ -1,11 +1,50 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.ArakelovCycleHeights.QpSndStr
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.ResidueDegreeOfIsClosedImmersion
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.ArFormExists
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IsPullHermPullLine
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsIsUnder
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.PullRatioTopEq
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ProdZpowSingle
+module
+
+public import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.ArakelovCycleHeights.QpSndStr
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IsPullHermPullLine
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsIsUnder
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ProdZpowSingle
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.PullRatioTopEq
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 open CategoryTheory AlgebraicGeometry Limits TopologicalSpace MvPolynomial
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor
 open GlobalTheory.AbLaw GlobalTheory.CechPic GlobalTheory.ProjSpace GlobalTheory.CxPts GlobalTheory.Cartier GlobalTheory.ArInt
@@ -154,8 +193,8 @@ theorem mem_pick_ptC (y : CxPts (mpStr ℤ m n) σ₀) :
     y ∈ ptsIn (mpStr ℤ m n) σ₀ (M.B.U (pick M.isLB y) ⊓ mchart (ptC y)) :=
   mem_ptsIn_inf.2 ⟨mem_pick M.isLB y, mem_ptC y⟩
 
-open Classical in
 
+open Classical in
 def hOf (z : (Σ k, Bk n k) → ℂ) : ℝ :=
   if hz : ∃ y, IsUnder y z then hval M a u hz.choose z (pick M.isLB hz.choose) (ptC hz.choose) else 0
 
@@ -176,7 +215,7 @@ theorem hOf_eq (h1 : (∀ i j c',
     {y : CxPts (mpStr ℤ m n) σ₀} {z : (Σ k, Bk n k) → ℂ} (hy : IsUnder y z) (i : M.B.ι) (c : ∀ k, Bk n k)
     (hi : y ∈ ptsIn (mpStr ℤ m n) σ₀ (M.B.U i ⊓ mchart c)) : hOf M a u z = hval M a u y z i c := by
   have hz : ∃ y, IsUnder y z := ⟨y, hy⟩
-  rw [hOf, dif_pos hz, uniq z _ _ hz.choose_spec hy]
+  rw [hOf, dite_eq_left hz, uniq z _ _ hz.choose_spec hy]
   have h0 := mem_pick_ptC M y
   rw [mem_ptsIn_inf] at h0 hi
   rw [hval_chart M a u h1 z (pick M.isLB y) i (ptC y) (mem_ptsIn_inf.2 h0) (mem_ptsIn_inf.2 ⟨hi.1, h0.2⟩),
@@ -223,7 +262,7 @@ def lineOf (h1 : (∀ i j c',
       rw [hOf_eq M a u h1 h2 uniq (isUnder_smul hy l hl) _ _ (mem_pick_ptC M y),
         hOf_eq M a u h1 h2 uniq hy _ _ (mem_pick_ptC M y), hval_smul]
     · have hz' : ¬ ∃ y, IsUnder y (fun p => l p.1 * z p) := fun ⟨y, hy⟩ => hz ⟨y, isUnder_of_smul l hl hy⟩
-      rw [hOf, dif_neg hz', hOf, dif_neg hz, mul_zero]
+      rw [hOf, dite_eq_right hz', hOf, dite_eq_right hz, mul_zero]
 
 theorem isHermRep_lineOf (h1 : (∀ i j c',
       res (le_inf (inf_le_left.trans inf_le_right) inf_le_right :

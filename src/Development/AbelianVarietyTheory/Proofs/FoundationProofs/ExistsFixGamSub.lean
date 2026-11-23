@@ -1,12 +1,59 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsAutAll
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IsIntPrimeDivRootOfUnitySubOnePow
+module
+
+public import Mathlib.Data.Nat.Prime.Defs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+public import Mathlib.NumberTheory.Multiplicity
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.KummerTowerQqPowLevelEqQ
+public import Mathlib.Algebra.Order.GroupWithZero.Basic
+public import Mathlib.Algebra.Ring.Defs
+public import Mathlib.Algebra.Ring.Parity
+public import Mathlib.Data.Nat.Factorization.Basic
+
+@[expose] public section
 
 noncomputable section
 
 namespace GlobalTheory.K5.MonX
 
-open GlobalTheory.K5 GlobalTheory.KumDlog GlobalTheory.K5.Rel
+open GlobalTheory.K5 GlobalTheory.KumDlog
 
 theorem exists_pow_eq {p : ℕ} [Fact p.Prime] (hp2 : p ≠ 2) {m n i : ℕ} (hm : 1 ≤ m)
     (hi : ¬ p ^ (n - m) ∣ i) :
@@ -34,8 +81,8 @@ theorem exists_pow_eq {p : ℕ} [Fact p.Prime] (hp2 : p ≠ 2) {m n i : ℕ} (hm
   obtain ⟨e, d, hd, hed⟩ := Nat.exists_eq_pow_mul_and_not_dvd (Nat.sub_ne_zero_of_lt hK1) p
     hp.ne_one
   have hd0 : d ≠ 0 := by rintro rfl; exact hd (dvd_zero _)
-  rw [hed, padicValNat.mul (pow_ne_zero _ hp.ne_zero) hd0, padicValNat.prime_pow,
-    padicValNat.eq_zero_of_not_dvd hd, add_zero] at hval
+  rw [hed, Nat.multiplicity_mul (pow_ne_zero _ hp.ne_zero) hd0,
+    Nat.multiplicity_prime_pow, multiplicity_eq_zero_of_not_dvd hd, add_zero] at hval
   have hK : (1 + p ^ m) ^ (p ^ (n - v - 1 - m)) = 1 + p ^ e * d := by omega
   refine ⟨p ^ (n - v - 1 - m), d, u, hd, hu, ?_, p ^ (e - 1) * d, ?_⟩
   · rw [hK, mul_add, mul_one, show n - 1 = v + e by omega, pow_add]
@@ -46,12 +93,12 @@ end GlobalTheory.K5.MonX
 
 namespace GlobalTheory.K5.MonX
 
-open GlobalTheory.K5 GlobalTheory.KumDlog GlobalTheory.K5.Rel
+open GlobalTheory.K5 GlobalTheory.KumDlog
 
 end GlobalTheory.K5.MonX
 
 namespace GlobalTheory.K5.MonX
 
-open GlobalTheory.K5 GlobalTheory.KumDlog GlobalTheory.K5.Rel
+open GlobalTheory.K5 GlobalTheory.KumDlog
 
 end GlobalTheory.K5.MonX

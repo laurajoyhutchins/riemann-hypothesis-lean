@@ -1,5 +1,56 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CoeffOfW
+module
+
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CoeffOfW
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PowerSeries.NoZeroDivisors
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.IsPotential
+
+@[expose] public section
+
 open Formalism Formalism.BasicNotions Formalism.BasicNotions.Loc Formalism.WeaklyAdmissibleFiltrations TensorProduct PowerSeries GlobalTheory.Prism GlobalTheory.BK GlobalTheory.BKReal GlobalTheory.BKGal GlobalTheory.Per Filter GlobalTheory.CrysPrism
 open scoped Formalism.Per
 
@@ -27,20 +78,20 @@ theorem mul_pow_factorial_dvd (l i : ℕ) (hl : l ≠ 0) (hi : i ≠ 0) :
 
 theorem exists_padic (l : ℕ) [hl : Fact l.Prime] (i : ℕ) (hi : i ≠ 0) :
     ∃ d : ℤ_[l], (i.factorial : ℤ_[l]) * d = (l : ℤ_[l]) ^ (i - 1) := by
-  have hv : padicValNat l i.factorial ≤ i - 1 := by
-    have h := sub_one_mul_padicValNat_factorial (p := l) i
+  have hv : multiplicity l i.factorial ≤ i - 1 := by
+    have h := hl.out.sub_one_mul_multiplicity_factorial (n := i)
     have h2 := hl.out.two_le
     have h3 : (l.digits i).sum ≠ 0 := by
       intro h0
       have hne : l.digits i ≠ [] := Nat.digits_ne_nil_iff_ne_zero.2 hi
       exact Nat.getLast_digit_ne_zero l hi (List.sum_eq_zero_iff.1 h0 _ (List.getLast_mem hne))
-    have h4 : 1 * padicValNat l i.factorial ≤ (l - 1) * padicValNat l i.factorial :=
+    have h4 : 1 * multiplicity l i.factorial ≤ (l - 1) * multiplicity l i.factorial :=
       Nat.mul_le_mul_right _ (by omega)
     omega
-  obtain ⟨s, hs⟩ : l ^ padicValNat l i.factorial ∣ i.factorial := pow_padicValNat_dvd
+  obtain ⟨s, hs⟩ : l ^ multiplicity l i.factorial ∣ i.factorial := (by rw [← Nat.padicValNat_def]; exact _root_.Dvd.intro_left _ (_root_.Nat.divMaxPow_mul_pow_padicValNat _ _))
   have hs' : ¬ l ∣ s := by
     intro h
-    refine pow_succ_padicValNat_not_dvd (p := l) (Nat.factorial_ne_zero i) ?_
+    refine pow_succ_multiplicity_not_dvd (p := l) (Nat.factorial_ne_zero i) ?_
     rw [pow_succ]
     conv_rhs => rw [hs]
     exact Nat.mul_dvd_mul_left _ h
@@ -52,9 +103,9 @@ theorem exists_padic (l : ℕ) [hl : Fact l.Prime] (i : ℕ) (hi : i ≠ 0) :
   obtain ⟨s', hs2⟩ := hu.exists_right_inv
   obtain ⟨k, hk⟩ := Nat.exists_eq_add_of_le hv
   refine ⟨(l : ℤ_[l]) ^ k * s', ?_⟩
-  have h5 : (i.factorial : ℤ_[l]) = (l : ℤ_[l]) ^ padicValNat l i.factorial * s := by exact_mod_cast congrArg (Nat.cast : ℕ → ℤ_[l]) hs
+  have h5 : (i.factorial : ℤ_[l]) = (l : ℤ_[l]) ^ multiplicity l i.factorial * s := by exact_mod_cast congrArg (Nat.cast : ℕ → ℤ_[l]) hs
   rw [hk, pow_add]
-  linear_combination ((l : ℤ_[l]) ^ k * s') * h5 + ((l : ℤ_[l]) ^ padicValNat l i.factorial * (l : ℤ_[l]) ^ k) * hs2
+  linear_combination ((l : ℤ_[l]) ^ k * s') * h5 + ((l : ℤ_[l]) ^ multiplicity l i.factorial * (l : ℤ_[l]) ^ k) * hs2
 
 theorem abstract {R : Type} [CommRing R] (htf : ∀ n : ℕ, n ≠ 0 → ∀ x : R, (n : R) * x = 0 → x = 0)
     (S : Subring R) (φ : R →+* R) (l : ℕ) (hl : l ≠ 0) (u x : R) (xs : ℕ → R)
@@ -127,7 +178,7 @@ theorem add_mem {x y : ZMod a → K⟦X⟧⟦X⟧} (hx : x ∈ QSet t K e) (hy :
   obtain ⟨w, rfl⟩ := hy
   refine ⟨v + w, funext fun τ => ?_⟩
   ext j m
-  simp only [Pi.add_apply, map_add, coeff_ofW, add_div]
+  simp only [Pi.add_apply, map_add (f := _), coeff_ofW, add_div]
 
 theorem neg_mem {x : ZMod a → K⟦X⟧⟦X⟧} (hx : x ∈ QSet t K e) : -x ∈ QSet t K e := by
   obtain ⟨v, rfl⟩ := hx

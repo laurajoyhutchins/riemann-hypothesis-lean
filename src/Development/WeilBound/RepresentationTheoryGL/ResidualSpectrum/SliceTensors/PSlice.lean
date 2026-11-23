@@ -1,5 +1,50 @@
-import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.SliceTensors.PSliceE
-import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.SliceTensors.PSliceF
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.ExponentialNegativity.ExpNegGlue
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.T2SpaceAdelicGeneralLinearGroupNumberField
+public import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.SliceTensors.PSliceA
+public import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.SliceTensors.PSliceD
+public import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.SliceTensors.PSliceE
+public import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.SliceTensors.PSliceF
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -7,8 +52,8 @@ open NumberField MeasureTheory GlobalTheory.CuspRep GlobalTheory.UnitaryBC Globa
 
 namespace PositivityTheory.Rg.Rs
 
-open SliceClasses in
 
+open SliceClasses in
 theorem slice_of : Dict → FinTr → Slice := by
   intro hD hFin E _ _ _ r s hr hs V hV c hc
   obtain ⟨φ₀, hφ₀V, F₀, hCT, F, hFspan, hFne, hFeig⟩ := hc
@@ -33,12 +78,12 @@ theorem slice_of : Dict → FinTr → Slice := by
   let W : Submodule ℂ (Sm E (r + s)) :=
     { carrier := {φ | φ ∈ V ∧ ∀ (t : ℝ) g, (T φ).1 (aT E (r + s) r t * g) = Complex.exp (c * t) * (T φ).1 g}
       add_mem' := fun {φ ψ} hφ hψ => ⟨V.add_mem hφ.1 hψ.1, fun t g => by
-        simp only [map_add, Submodule.coe_add, Pi.add_apply, hφ.2 t g, hψ.2 t g, mul_add]⟩
+        simp only [map_add (f := _), Submodule.coe_add, Pi.add_apply, hφ.2 t g, hψ.2 t g, mul_add]⟩
       zero_mem' := ⟨V.zero_mem, fun t g => by simp⟩
       smul_mem' := fun b φ hφ => ⟨V.smul_mem b hφ.1, fun t g => by
         simp only [map_smul, Submodule.coe_smul, Pi.smul_apply, smul_eq_mul, hφ.2 t g]
         ring⟩ }
-  have hWst : IsStable W := by
+  have hWst : _root_.GlobalTheory.CuspRep.IsStable W := by
     rintro o φ ⟨hφ, he⟩
     refine ⟨hV.stable o φ hφ, fun t g => ?_⟩
     have e1 : ltS (aT E (r + s) r t) (T φ) = Complex.exp (c * t) • T φ := Subtype.ext (funext fun g => he t g)

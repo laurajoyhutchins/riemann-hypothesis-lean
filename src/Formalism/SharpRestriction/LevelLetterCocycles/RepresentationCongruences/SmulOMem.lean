@@ -1,5 +1,55 @@
-import Formalism.SharpRestriction.LevelLetterCocycles.RepresentationCongruences.QALetterNe
-import Formalism.SharpRestriction.LevelLetterCocycles.RepresentationCongruences.Imports
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.RepresentationCongruences.GammaPi0EqPi0MulUnit
+public import Formalism.SharpRestriction.LevelLetterCocycles.FrobeniusPowUniformizerFactorisation
+public import Formalism.SharpRestriction.LevelLetterCocycles.RepresentationCongruences.Imports
+public import Formalism.SharpRestriction.LevelLetterCocycles.RepresentationCongruences.QALetterNe
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.SharpRestriction.LevelLetterCocycles.AdmBoundsBOfAdm
+
+@[expose] public section
 
 noncomputable section
 
@@ -100,6 +150,7 @@ theorem build [IsDomain O] (W : LocWach PD LL O v n) (hcase : Formalism.MainNoti
   have hyy : ∀ r < R₀, ∀ m, algebraMap O LL (yy r m) =
       (PD.p : LL) ^ (2 * R₀) * ∑ k, algebraMap O LL (c₀ k) * sol₁ k r m := by
     intro r hr m
+
     simp only [hyydef, map_sum, map_mul, hys' _ _ _ hr, Finset.mul_sum]
     exact Finset.sum_congr rfl fun k _ => by ring
   have hyy0 : ∀ m, yy 0 m = (PD.p : O) ^ (2 * R₀) * c₀ m := by
@@ -157,8 +208,9 @@ theorem build [IsDomain O] (W : LocWach PD LL O v n) (hcase : Formalism.MainNoti
       nlinarith [mul_nonneg (show (0:ℚ) ≤ (PD.p : ℚ) - 2 by linarith) (show (0:ℚ) ≤ r' - k by linarith)]
     choose o' ho' using hint
     refine ⟨∑ k', c₀ k' * o' k', hinj ?_⟩
+
     simp only [map_mul, map_pow, map_natCast, map_sum, ho', hyydef, hys' _ _ _ hr, Finset.sum_mul,
-      Finset.mul_sum]
+    Finset.mul_sum]
     exact Finset.sum_congr rfl fun k' _ => by ring
   choose! o ho using hos
 
@@ -249,6 +301,7 @@ theorem build [IsDomain O] (W : LocWach PD LL O v n) (hcase : Formalism.MainNoti
     hz₁, hn₁eq, hBR, hR1, hR₀lt.le, hyy, rfl, ?_, ?_, ?_, ?_, ?_, ?_⟩
   · exact sum_mem' W _ _ fun r _ => smulA_mem W (pow_mem hπ₀ r) (hvec _)
   · exact sum_mem' W _ _ fun k _ => smulO_mem W _ (hxk k)
+
   · rw [hXeq, map_sum, ← Finset.sum_sub_distrib, Finset.smul_sum]
     refine Finset.sum_congr rfl fun k _ => ?_
     rw [map_smul, ← smul_sub, hxke k]
@@ -259,8 +312,9 @@ theorem build [IsDomain O] (W : LocWach PD LL O v n) (hcase : Formalism.MainNoti
       ⟨Zc m, hZ m, b₁ m, hb₁.1.1 m, by rw [pow_one]⟩, by rw [one_smul]⟩
   · have hφX : W.φD T (∑ r ∈ Finset.range R₀, W.π₀ ^ r • Formalism.MainNotions.LiftingTheory.vecB W T b₁ (yy r)) =
         ∑ m, (∑ r ∈ Finset.range R₀, (W.φA W.π₀) ^ r * cO (yy r m)) • W.φD T (b₁ m) := by
+
       simp only [map_sum, Formalism.MainNotions.N.FrobeniusPowerSeries.DYAa.phi_smul, Formalism.MainNotions.LiftingTheory.vecB, map_pow, map_smul,
-        Finset.smul_sum, Finset.sum_smul]
+      Finset.smul_sum, Finset.sum_smul]
       rw [Finset.sum_comm]
       refine Finset.sum_congr rfl fun m _ => Finset.sum_congr rfl fun r _ => ?_
       rw [← algebraMap_smul (LetA O n) (yy r m), smul_smul]

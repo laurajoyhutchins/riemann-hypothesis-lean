@@ -1,6 +1,49 @@
-import Mathlib
-import GroundTheory.LocalFields.AbstractLocalReciprocity.ExistsOpenSubgroupMemFixedModule
-import GroundTheory.LocalFields.CompleteTrivial
+module
+
+public import GroundTheory.LocalFields.AbstractLocalReciprocity.ExistsOpenSubgroupMemFixedModule
+public import GroundTheory.LocalFields.CompleteTrivial
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GroundTheory.LocalField.Abstract
 
@@ -27,10 +70,6 @@ namespace TateModel
 
 variable {A K L Γ M} (T : TateModel A K L Γ M)
 
-include T in
-
-theorem normal : (L.subgroupOf K).Normal :=
-  T.ker_hom ▸ T.hom.normal_ker
 
 theorem equiv_smul (σ : K) (a : fixedModule A L) (h : (σ : G) • (a : A) ∈ fixedModule A L) :
     T.equiv ⟨(σ : G) • (a : A), h⟩ = T.hom σ • T.equiv a := by
@@ -72,12 +111,8 @@ noncomputable def quotientEquiv : K ⧸ L.subgroupOf K ≃* Γ :=
   (QuotientGroup.quotientMulEquivOfEq T.ker_hom.symm).trans
     (QuotientGroup.quotientKerEquivOfSurjective T.hom T.surjective_hom)
 
-@[simp]
-theorem quotientEquiv_mk (σ : K) : T.quotientEquiv (σ : K ⧸ L.subgroupOf K) = T.hom σ :=
-  rfl
 
 include T in
-
 theorem relIndex_eq_natCard : L.relIndex K = Nat.card Γ :=
   Nat.card_congr T.quotientEquiv.toEquiv
 
@@ -144,8 +179,8 @@ theorem map_ker_norm [Fintype Γ] [(L.subgroupOf K).FiniteIndex] :
   · intro hm
     exact ⟨T.equiv.symm m, (T.norm_eq_one_iff _).2 (by simpa using hm), by simp⟩
 
-omit [(L.subgroupOf K).Normal] in
 
+omit [(L.subgroupOf K).Normal] in
 theorem augmentation_eq_map :
     augmentation A K L =
       (GroundTheory.LocalField.augmentation Γ M).map
@@ -166,8 +201,8 @@ theorem augmentation_eq_map :
     rw [MulEquiv.apply_symm_apply] at h
     rw [map_div, Subgroup.coe_div, h]
 
-omit [(L.subgroupOf K).Normal] in
 
+omit [(L.subgroupOf K).Normal] in
 theorem mem_augmentation_iff (a : fixedModule A L) :
     (a : A) ∈ augmentation A K L ↔ T.equiv a ∈ GroundTheory.LocalField.augmentation Γ M := by
   rw [T.augmentation_eq_map]

@@ -1,5 +1,62 @@
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.DiscreteSeriesExistence.MeasurePreservingMulRight
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.AnalyticVectors.ConjTransposeEqOfInG
+module
+
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.CasimirCoefficients.PsiExistsStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+public import Mathlib.Analysis.Calculus.Deriv.Prod
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+public import Mathlib.Analysis.Normed.Algebra.MatrixExponential
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Analysis.Calculus.ContDiff.Basic
+public import Mathlib.Analysis.Calculus.ContDiff.Comp
+public import Mathlib.Analysis.Calculus.ContDiff.Operations
+public import Mathlib.Analysis.Calculus.Deriv.Add
+public import Mathlib.Analysis.Calculus.Deriv.Mul
+public import Mathlib.Analysis.SpecialFunctions.Exponential
+
+@[expose] public section
 
 noncomputable section
 
@@ -179,7 +236,7 @@ theorem IsSmoothVecU.add {v w : H} (hv : IsSmoothVecU ε σ v) (hw : IsSmoothVec
   refine ⟨U1 ∩ U2, fun g => F1 g + F2 g, hU1.inter hU2, ⟨hg1, hg2⟩,
     (hF1.mono Set.inter_subset_left).add (hF2.mono Set.inter_subset_right), fun g hg hgJ => ?_⟩
   show σ g (v + w) = F1 g + F2 g
-  rw [map_add]
+  rw [map_add (f := _)]
   exact congrArg₂ (· + ·) (hE1 g hg.1 hgJ) (hE2 g hg.2 hgJ)
 
 theorem IsSmoothVecU.smul (c : ℂ) {v : H} (hv : IsSmoothVecU ε σ v) : IsSmoothVecU ε σ (c • v) := by
@@ -224,14 +281,14 @@ theorem dS_smul_vec (c : ℂ) (X : Matrix (Fin n) (Fin n) ℂ) (v : H) : dS σ X
   show deriv (fun t : ℝ => σ (NormedSpace.exp ((t : ℂ) • X)) (c • v)) 0 =
     c • deriv (fun t : ℝ => σ (NormedSpace.exp ((t : ℂ) • X)) v) 0
   simp only [map_smul]
-  exact deriv_const_smul' (f := fun t : ℝ => σ (NormedSpace.exp ((t : ℂ) • X)) v) (x := 0) c
+  exact deriv_const_smul_field (f := fun t : ℝ => σ (NormedSpace.exp ((t : ℂ) • X)) v) (x := 0) c
 
 theorem dS_add_smul (hσ : IsURepOn (UJset ε) σ) {X Y : Matrix (Fin n) (Fin n) ℂ} (hX : inG ε X) (hY : inG ε Y)
     (r : ℝ) {v : H} (hv : IsSmoothVecU ε σ v) :
     dS σ (X + (r : ℂ) • Y) v = dS σ X v + (r : ℂ) • dS σ Y v := by
   obtain ⟨D, hD⟩ := smd_orbit_deriv hv
   have e : ∀ Z, inG ε Z → dS σ Z v = D Z := fun Z hZ => (hD Z hZ).deriv
-  rw [e _ (smd_inG_add_smul hX hY r), e X hX, e Y hY, map_add]
+  rw [e _ (smd_inG_add_smul hX hY r), e X hX, e Y hY, map_add (f := _)]
   have hY' : ((r : ℂ) • Y) = r • Y := by
     ext a b; simp [Complex.real_smul]
   rw [hY', map_smul]

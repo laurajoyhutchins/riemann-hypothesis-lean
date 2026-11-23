@@ -1,5 +1,51 @@
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.LaplaceOperators.KTypeLemma.QuotientHighestWeightTensorStandard
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.LaplaceOperators.CapelliIdentity.Expand
+module
+
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.LaplaceOperators.KTypeLemma.QuotientHighestWeightTensorStandard
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.LaplaceOperators.CapelliIdentity.CapelliCentralStatement
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.LaplaceOperators.CapelliIdentity.Expand
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -49,6 +95,7 @@ theorem IsPolyN.map {F : ℂ → X} {N : ℕ} (hF : IsPolyN F N) (L : X →ₗ[�
   obtain ⟨c, hc⟩ := hF
   refine ⟨fun k => L (c k), fun x => ?_⟩
   beta_reduce
+
   rw [hc, map_sum]
   exact Finset.sum_congr rfl fun k _ => map_smul L _ _
 
@@ -121,13 +168,14 @@ theorem poly_coeff_eq_zero {N : ℕ} (v : ℕ → X) (h : ∀ x : ℂ, ∑ k ∈
     apply Polynomial.funext
     intro x
     have h1 := congrArg φ (h x)
+
     rw [map_sum, map_zero] at h1
     simp only [map_smul, smul_eq_mul] at h1
-    rw [Polynomial.eval_zero, Polynomial.eval_finset_sum, ← h1]
+    rw [Polynomial.eval_zero, Polynomial.eval_finsetSum, ← h1]
     exact Finset.sum_congr rfl fun j _ => by
       rw [Polynomial.eval_mul, Polynomial.eval_C, Polynomial.eval_pow, Polynomial.eval_X, mul_comm]
   have h2 := congrArg (fun q : Polynomial ℂ => q.coeff k) hp0
-  simpa [Polynomial.finset_sum_coeff, Polynomial.coeff_C_mul_X_pow, Finset.mem_range.2 hk] using h2
+  simpa [Polynomial.finsetSum_coeff, Polynomial.coeff_C_mul_X_pow, Finset.mem_range.2 hk] using h2
 
 end Poly
 
@@ -203,8 +251,9 @@ theorem adjVec_key (E : Fin (m + 1) → Fin (m + 1) → Module.End ℂ M) (hE : 
     · intro h
       exact absurd (mem_univ b) h
   rw [← hsum, ← Finset.sum_congr rfl (fun c _ => hx c)]
+
   simp only [Pi.add_apply, Pi.smul_apply, eeV_apply', adjVec, LinearMap.sum_apply, LinearMap.smul_apply,
-    capEntry_mul_apply, map_sum, map_smul, smul_add, sum_add_distrib, smul_sum]
+  capEntry_mul_apply, map_sum, map_smul, smul_add, sum_add_distrib, smul_sum]
   rw [Finset.sum_comm]
   congr 1
   refine sum_congr rfl fun c _ => ?_
@@ -264,8 +313,10 @@ theorem shiftPoly_aeval (E : Fin (m + 1) → Fin (m + 1) → Module.End ℂ M) (
   rw [← key (m + 1) (fun t => eeV E - ((θ t : ℝ) : ℂ) • (1 : Module.End ℂ (Fin (m + 1) → M)))]
   congr 2
   funext t
-  simp only [Function.comp, map_add, Polynomial.aeval_X, Polynomial.aeval_C,
-    Algebra.algebraMap_eq_smul_one]
+  change Polynomial.aeval (-eeV E)
+    (Polynomial.X + Polynomial.C ((θ t : ℝ) : ℂ)) = -(eeV E - ((θ t : ℝ) : ℂ) • 1)
+  simp only [Polynomial.aeval_add, Polynomial.aeval_X, Polynomial.aeval_C]
+  rw [Algebra.algebraMap_eq_smul_one]
   abel
 
 theorem prodShift_eeV_of_capelli (E : Fin (m + 1) → Fin (m + 1) → Module.End ℂ M) (hE : IsGlRep E)
@@ -282,6 +333,7 @@ theorem prodShift_eeV_of_capelli (E : Fin (m + 1) → Fin (m + 1) → Module.End
       funext b
       rw [hC ω (f b) (hf b)]
       rfl
+
     rw [h2, hg, map_sum] at h1
     simp only [map_smul] at h1
     rw [sum_shift, shiftPoly_eval, Finset.sum_smul, ← sub_eq_zero, ← Finset.sum_sub_distrib] at h1
@@ -310,7 +362,7 @@ theorem prodShift_eeV_of_capelli (E : Fin (m + 1) → Fin (m + 1) → Module.End
     intro k hk
     have e1 : ((shiftPoly θ).coeff k • (-eeV E) ^ k) f =
         ((-eeV E) ^ k) (eeV E (g k)) + ((-eeV E) ^ k) (if k = 0 then 0 else g (k - 1)) := by
-      rw [LinearMap.smul_apply, ← map_smul ((-eeV E) ^ k), ← hcoef k (Finset.mem_range.1 hk), map_add]
+      rw [LinearMap.smul_apply, ← map_smul ((-eeV E) ^ k), ← hcoef k (Finset.mem_range.1 hk), map_add (f := _)]
     have e2 : ((-eeV E) ^ k) (eeV E (g k)) = -(((-eeV E) ^ (k + 1)) (g k)) := by
       rw [pow_succ, Module.End.mul_apply, LinearMap.neg_apply, map_neg, neg_neg]
     rw [e1, e2]

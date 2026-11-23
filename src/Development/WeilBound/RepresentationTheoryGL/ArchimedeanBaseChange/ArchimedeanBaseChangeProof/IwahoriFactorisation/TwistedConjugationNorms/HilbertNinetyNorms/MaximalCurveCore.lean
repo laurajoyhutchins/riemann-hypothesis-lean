@@ -1,8 +1,49 @@
-import Mathlib
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.IwahoriFactorisation.TwistedConjugationNorms.OneCoset
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.IwahoriFactorisation.TwistedConjugationNorms.HilbertNinetyNorms.DiagonalConjDistinctValuationsEq
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.MemCentIffTwConj
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.IwahoriFactorisation.TwistedConjugationNorms.OneCoset
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.MemCentIffTwConj
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PlaceConjugationPropertiesCmFieldStatement
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.IwahoriFactorisation.TwistedConjugationNorms.HilbertNinetyNorms.DiagonalConjDistinctValuationsEq
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 noncomputable section
 
@@ -103,14 +144,6 @@ theorem ordL_eq_neg_log' (y : L) : ordL y = -WithZero.log (Valued.v y) := by
     rfl
 
 theorem v_ne_zero' {y : L} (hy : y ≠ 0) : Valued.v y ≠ 0 := (Valuation.ne_zero_iff _).2 hy
-
-theorem log_v_pow_mul (ϖ u : Lˣ) (hϖ : ordL (ϖ : L) = 1) (hu : Valued.v (u : L) = 1) (k : ℤ) :
-    WithZero.log (Valued.v (((ϖ ^ k * u : Lˣ)) : L)) = -k := by
-  have hϖ' : WithZero.log (Valued.v (ϖ : L)) = -1 := by rw [ordL_eq_neg_log'] at hϖ; omega
-  rw [Units.val_mul, Units.val_zpow_eq_zpow_val, map_mul, map_zpow₀,
-    WithZero.log_mul (zpow_ne_zero _ (v_ne_zero' ϖ.ne_zero)) (by rw [hu]; exact one_ne_zero), WithZero.log_zpow, hu,
-    WithZero.log_one, hϖ', smul_eq_mul]
-  ring
 
 end Val
 
@@ -226,12 +259,11 @@ theorem le_and_half_le_prod_one_sub_exp_neg_of_bounds (hU : Unr E) (w : Pl E) (h
     rw [thL_diagT w hw, ← map_mul, ← map_mul]
     congr 1
     funext i
-    simp only [Pi.mul_apply, map_zpow, hϖc, ← _root_.zpow_neg]
     have hki : -k i.rev = k i := by
       have := hη i
       simp only [hk]
       linarith
-    rw [hki, mul_comm]
+    simp only [Pi.mul_apply, map_zpow, hϖc, ← _root_.zpow_neg, hki, mul_comm]
   · refine ⟨fun i j hij => by rw [diagT_val_apply, if_neg hij], fun i => ?_⟩
     rw [diagT_val_apply, if_pos rfl]
     have hl : WithZero.log (Valued.v (((η i * ϖ ^ (-k i)) : (w.adicCompletion E)ˣ) : w.adicCompletion E)) = 0 := by

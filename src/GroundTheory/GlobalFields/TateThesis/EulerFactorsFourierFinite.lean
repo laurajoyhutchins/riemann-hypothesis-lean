@@ -1,6 +1,53 @@
-import Mathlib
-import GroundTheory.GlobalFields.TateThesis.EulerFactorsInverse
-import GroundTheory.GlobalFields.TateThesis.SchwartzBruhatFinite
+module
+
+public import GroundTheory.GlobalFields.TateThesis.EulerFactorsFinite
+import GroundTheory.GlobalFields.TateThesis.AdeleScaling
+public import GroundTheory.GlobalFields.TateThesis.EulerFactorsInverse
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain IsDedekindDomain.HeightOneSpectrum Topology Filter
   MeasureTheory WithZero
@@ -79,12 +126,7 @@ theorem condExp_eq (v : HeightOneSpectrum (𝓞 K)) :
 
 theorem condExp_eq_zero {v : HeightOneSpectrum (𝓞 K)} (hv : ¬ v.asIdeal ∣ χ.conductor) :
     χ.condExp v = 0 := by
-  rw [condExp_eq, multiplicity_eq_zero.2 hv, Nat.cast_zero]
-
-theorem one_le_condExp {v : HeightOneSpectrum (𝓞 K)} (hv : v.asIdeal ∣ χ.conductor) :
-    1 ≤ χ.condExp v := by
-  rw [condExp_eq]
-  exact_mod_cast multiplicity_pos_of_dvd hv
+  rw [condExp_eq, multiplicity_eq_zero_of_not_dvd hv, Nat.cast_zero]
 
 theorem finiteTestFun_add (x : FiniteAdeleRing (𝓞 K) K) {h : FiniteAdeleRing (𝓞 K) K}
     (hh : ∀ v, Valued.v (h v) ≤ exp (-χ.condExp v)) :
@@ -151,8 +193,8 @@ def conductorChar (u : (FiniteAdeleRing (𝓞 K) K)ˣ) : ℂ :=
 theorem conductorChar_ne_zero (u : (FiniteAdeleRing (𝓞 K) K)ˣ) : χ.conductorChar u ≠ 0 :=
   Finset.prod_ne_zero_iff.2 fun _ _ ↦ Circle.coe_ne_zero _
 
-open Classical in
 
+open Classical in
 theorem finiteTest_mul {v : HeightOneSpectrum (𝓞 K)} (u : (v.adicCompletion K)ˣ)
     (hu : Valued.v (u : v.adicCompletion K) = 1) (x : v.adicCompletion K) :
     χ.finiteTest v (u * x) =
@@ -251,7 +293,7 @@ theorem exists_mem_unitsLevel_ne_one {v : HeightOneSpectrum (𝓞 K)} (hv : v.as
     rfl
   have hcont : Continuous ((χ.toIdele.comp ofFinite).comp (finiteUnitsSingle v)) :=
     (χ.continuous_toIdele.comp continuous_ofFinite).comp (continuous_finiteUnitsSingle v)
-  have hn := multiplicity_pos_of_dvd hv
+  have hn := multiplicity_pos_of_dvd hv (Ideal.finiteMultiplicity v.isPrime.ne_top χ.conductor_ne_bot)
   have hnot : ¬ unitsLevel v (multiplicity v.asIdeal χ.conductor - 1) ≤
       ((χ.toIdele.comp ofFinite).comp (finiteUnitsSingle v)).ker := by
     rw [unitsLevel_le_ker_iff v Circle.noSmallSubgroups _ hcont]
@@ -268,7 +310,7 @@ theorem finiteFourier_eq_zero_of_le {y : FiniteAdeleRing (𝓞 K) K} {v : Height
     finiteFourier K χ.finiteTestFun y = 0 := by
   obtain ⟨a, ha, ha1⟩ := χ.exists_mem_unitsLevel_ne_one hv
   set u := finiteUnitsSingle v a
-  have hn := multiplicity_pos_of_dvd hv
+  have hn := multiplicity_pos_of_dvd hv (Ideal.finiteMultiplicity v.isPrime.ne_top χ.conductor_ne_bot)
   have hu : ∀ w, Valued.v ((u : FiniteAdeleRing (𝓞 K) K) w) = 1 := by
     intro w
     rw [← coe_finiteComponent]
@@ -305,14 +347,14 @@ theorem finiteFourier_eq_zero_of_le {y : FiniteAdeleRing (𝓞 K) K} {v : Height
     rw [sub_mul, ← h1, one_mul, sub_self]
   exact (mul_eq_zero.1 h2).resolve_left (sub_ne_zero.2 fun h ↦ ha1 (Circle.coe_eq_one.1 h))
 
-open Classical in
 
+open Classical in
 def unitOrOne {F : Type*} [GroupWithZero F] (x : F) : Fˣ :=
   if h : x = 0 then 1 else Units.mk0 x h
 
 theorem coe_unitOrOne {F : Type*} [GroupWithZero F] {x : F} (hx : x ≠ 0) :
     ((unitOrOne x : Fˣ) : F) = x := by
-  rw [unitOrOne, dif_neg hx, Units.val_mk0]
+  rw [unitOrOne, dite_eq_right hx, Units.val_mk0]
 
 theorem finiteTestFun_eq_zero_of_dvd {x : FiniteAdeleRing (𝓞 K) K} {v : HeightOneSpectrum (𝓞 K)}
     (hv : v.asIdeal ∣ χ.conductor) (hx : Valued.v (x v) ≠ 1) : χ.finiteTestFun x = 0 :=

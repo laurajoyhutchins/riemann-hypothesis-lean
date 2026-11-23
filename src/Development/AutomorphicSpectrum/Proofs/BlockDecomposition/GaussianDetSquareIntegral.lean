@@ -1,6 +1,64 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.JoinCol
-import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.PAreaMultiplicityWeight
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.JoinCol
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.CategoryTheory.Category.Basic
+public import Mathlib.LinearAlgebra.Complex.FiniteDimensional
+public import Mathlib.MeasureTheory.Integral.Bochner.Basic
+public import Mathlib.MeasureTheory.Measure.Haar.OfBasis
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.MeasureTheory.Integral.Gamma
+public import Mathlib.MeasureTheory.Integral.Pi
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.MeasureTheory.Group.Integral
+public import Mathlib.MeasureTheory.Integral.Bochner.ContinuousLinearMap
+import ReciprocityTheory.L2DbarEstimates.IsLocalHomeomorph
+
+@[expose] public section
+
 open MeasureTheory ReciprocityTheory.L2DbarEstimates GlobalTheory.CompanionTheory.FSCrofton
 open scoped ENNReal ComplexConjugate
 
@@ -112,6 +170,7 @@ def rowF (G : Matrix β (Fin d) ℂ) (a c : Fin d) (r : β → ℂ) : ℂ :=
 
 theorem rowF_eq (G : Matrix β (Fin d) ℂ) (a c : Fin d) (r : β → ℂ) :
     rowF G a c r = ∑ i, ∑ j, (G i a * conj (G j c)) * (r i * conj (r j) * eR r) := by
+
   rw [rowF, map_sum, Finset.sum_mul_sum, Finset.sum_mul]
   refine Finset.sum_congr rfl fun i _ => ?_
   rw [Finset.sum_mul]
@@ -123,17 +182,17 @@ theorem integrable_rowF (G : Matrix β (Fin d) ℂ) (a c : Fin d) : Integrable (
   have : rowF G a c = fun r => ∑ i, ∑ j, (G i a * conj (G j c)) * (r i * conj (r j) * eR r) :=
     funext (rowF_eq G a c)
   rw [this]
-  exact integrable_finset_sum _ fun i _ => integrable_finset_sum _ fun j _ =>
+  exact MeasureTheory.integrable_finsetSum _ fun i _ => MeasureTheory.integrable_finsetSum _ fun j _ =>
     (integrable_row i j).const_mul _
 
 theorem integral_rowF (G : Matrix β (Fin d) ℂ) (a c : Fin d) :
     ∫ r, rowF G a c r = (Real.pi : ℂ) ^ Fintype.card β * (G.conjTranspose * G) c a := by
   simp_rw [rowF_eq]
-  rw [integral_finset_sum _ fun i _ => integrable_finset_sum _ fun j _ =>
+  rw [MeasureTheory.integral_finsetSum _ fun i _ => MeasureTheory.integrable_finsetSum _ fun j _ =>
     (integrable_row i j).const_mul _]
   simp only [Matrix.mul_apply, Matrix.conjTranspose_apply, Finset.mul_sum]
   refine Finset.sum_congr rfl fun i _ => ?_
-  rw [integral_finset_sum _ fun j _ => (integrable_row i j).const_mul _]
+  rw [MeasureTheory.integral_finsetSum _ fun j _ => (integrable_row i j).const_mul _]
   simp only [integral_const_mul, integral_row, mul_ite, mul_zero, Finset.sum_ite_eq, Finset.mem_univ,
     if_true]
   simp only [Complex.star_def]
@@ -152,6 +211,7 @@ theorem det_expand (G : Matrix β (Fin d) ℂ) (C : Fin d → β → ℂ) :
     simp [Matrix.transpose_apply]
   have hc : conj M.det =
       ∑ τ : Equiv.Perm (Fin d), ((Equiv.Perm.sign τ : ℤ) : ℂ) * ∏ k, conj (M k (τ k)) := by
+
     rw [hd, map_sum]
     refine Finset.sum_congr rfl fun τ _ => ?_
     rw [map_mul, map_prod]
@@ -217,25 +277,25 @@ def fR (G : Matrix β (Fin d) ℂ) (C : Fin d → β → ℂ) : ℝ :=
 theorem integrable_fR_complex (G : Matrix β (Fin d) ℂ) :
     Integrable (fun C => ((fR G C : ℝ) : ℂ)) := by
   simp_rw [fR, det_expand]
-  exact integrable_finset_sum _ fun σ _ => integrable_finset_sum _ fun τ _ =>
+  exact MeasureTheory.integrable_finsetSum _ fun σ _ => MeasureTheory.integrable_finsetSum _ fun τ _ =>
     (integrable_prod_rowF G σ τ).const_mul _
 
 theorem integral_fR_complex (G : Matrix β (Fin d) ℂ) :
     ∫ C, ((fR G C : ℝ) : ℂ) = ((Real.pi : ℂ) ^ Fintype.card β) ^ d * (d.factorial : ℂ) *
       (G.conjTranspose * G).det := by
   simp_rw [fR, det_expand]
-  rw [integral_finset_sum _ fun σ _ => integrable_finset_sum _ fun τ _ =>
+  rw [MeasureTheory.integral_finsetSum _ fun σ _ => MeasureTheory.integrable_finsetSum _ fun τ _ =>
     (integrable_prod_rowF G σ τ).const_mul _]
   rw [← perm_sum]
   refine Finset.sum_congr rfl fun σ _ => ?_
-  rw [integral_finset_sum _ fun τ _ => (integrable_prod_rowF G σ τ).const_mul _]
+  rw [MeasureTheory.integral_finsetSum _ fun τ _ => (integrable_prod_rowF G σ τ).const_mul _]
   refine Finset.sum_congr rfl fun τ _ => ?_
   rw [integral_const_mul, integral_prod_rowF]
 
 end GlobalTheory.CompanionTheory.FSCrofton.GaussDet
 
-open GlobalTheory.CompanionTheory.FSCrofton.GaussDet in
 
+open GlobalTheory.CompanionTheory.FSCrofton.GaussDet in
 theorem GlobalTheory.CompanionTheory.FSCrofton.lintegral_gW_norm_det_sq (d : ℕ) (β : Type) [Fintype β] [DecidableEq β]
     (G : Matrix β (Fin d) ℂ) :
     ∫⁻ C : Fin d → β → ℂ, gW d β C * ENNReal.ofReal (‖(Matrix.of C * G).det‖ ^ 2) =

@@ -1,5 +1,47 @@
-import Formalism.LocalToGlobal.PairingIndexBounds.SplitPairEquations.EqPOf
-import Formalism.LocalToGlobal.TorsionIntegrality.QuadraticSemicharacters.SelfDualCovolume
+module
+
+public import Formalism.LocalToGlobal.PairingIndexBounds.SplitPairEquations.Reduction
+public import Formalism.LocalToGlobal.TorsionIntegrality.QuadraticSemicharacters.GaussDegenerate
+public import Formalism.LocalToGlobal.PairingIndexBounds.SplitPairEquations.NormOneUnitIdealAlt
+public import Formalism.LocalToGlobal.TorsionIntegrality.QuadraticSemicharacters.SelfDualCovolume
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 open NumberField Formalism.BasicNotions Classical
@@ -32,20 +74,20 @@ theorem tripleData_of {B : Ker.Base D cc δ} (hL : B.LatAll) {N N' : ℕ}
     {L₁ L₂ L₃ : Submodule (𝓞 D.host.E) (Fin N → D.host.E)} {L₁' L₂' L₃' : Submodule (𝓞 D.host.E) (Fin N' → D.host.E)}
     (a1 : TaylorLogMetric.admitted D N N' L₁ L₁') (a2 : TaylorLogMetric.admitted D N N' L₂ L₂') (a3 : TaylorLogMetric.admitted D N N' L₃ L₃') :
     TripleData (Ker.formV (TaylorLogMetric.area (TaylorLogMetric.lamOf D cc δ)) D.what₂.Tau N N') (TaylorLogMetric.al D B.tor)
-      (TaylorLogMetric.La D B.tor L₁ L₁') (TaylorLogMetric.La D B.tor L₂ L₂') (TaylorLogMetric.La D B.tor L₃ L₃') where
-  herm := formV_herm' _ _ _ _
-  sd₁ := (hL.1 N N' _ _ a1).1
-  sd₂ := (hL.1 N N' _ _ a2).1
-  sd₃ := (hL.1 N N' _ _ a3).1
-  sc₁ := (hL.1 N N' _ _ a1).2
-  sc₂ := (hL.1 N N' _ _ a2).2
-  sc₃ := (hL.1 N N' _ _ a3).2
-  i₁₂ := (hL.2 N N' _ _ _ _ a1 a2).1
-  i₂₁ := (hL.2 N N' _ _ _ _ a1 a2).2
-  i₁₃ := (hL.2 N N' _ _ _ _ a1 a3).1
-  i₃₁ := (hL.2 N N' _ _ _ _ a1 a3).2
-  i₂₃ := (hL.2 N N' _ _ _ _ a2 a3).1
-  i₃₂ := (hL.2 N N' _ _ _ _ a2 a3).2
+      (TaylorLogMetric.La D B.tor L₁ L₁') (TaylorLogMetric.La D B.tor L₂ L₂') (TaylorLogMetric.La D B.tor L₃ L₃') :=
+  { herm := formV_herm' _ _ _ _
+    sd₁ := (hL.1 N N' _ _ a1).1
+    sd₂ := (hL.1 N N' _ _ a2).1
+    sd₃ := (hL.1 N N' _ _ a3).1
+    sc₁ := (hL.1 N N' _ _ a1).2
+    sc₂ := (hL.1 N N' _ _ a2).2
+    sc₃ := (hL.1 N N' _ _ a3).2
+    i₁₂ := (hL.2 N N' _ _ _ _ a1 a2).1
+    i₂₁ := (hL.2 N N' _ _ _ _ a1 a2).2
+    i₁₃ := (hL.2 N N' _ _ _ _ a1 a3).1
+    i₃₁ := (hL.2 N N' _ _ _ _ a1 a3).2
+    i₂₃ := (hL.2 N N' _ _ _ _ a2 a3).1
+    i₃₂ := (hL.2 N N' _ _ _ _ a2 a3).2 }
 
 theorem left_move_triangles_of_unit {B : Ker.Base D cc δ} (hL : B.LatAll) (hM : MuOneL B) : Tr0L D B.tor := by
   intro N N' L L₁ hN hN' h1 h2 G hG

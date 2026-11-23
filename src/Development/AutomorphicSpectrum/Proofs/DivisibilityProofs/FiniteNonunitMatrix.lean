@@ -1,5 +1,53 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.MembershipProofs.SplitQuadraticAlgebraOrder
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.HilbertNinetyQuotientHomEqIff
+public import Development.AutomorphicSpectrum.Proofs.MembershipProofs.SplitQuadraticAlgebraOrder
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Matrix GlobalTheory.WeilM GlobalTheory.CompanionTheory.SiegelChar
 
@@ -93,9 +141,9 @@ theorem triv_of_cell {F : Type} [Field F] [Infinite F] {E : Type} [CommRing E] [
   simp only [Set.mem_compl_iff, Set.mem_union, Set.mem_setOf_eq, not_or, not_not] at ht
   obtain ⟨⟨⟨W, hW⟩, u2⟩, u3⟩ := ht
   have s1 : σ (y (algebraMap F E t)) = y' (algebraMap F E t) := by
-    simp only [y, y', map_add, hsm, hσh, h1, map_mul, map_sub, c.commutes, hc]; module
+    simp only [y, y', map_add (f := _), hsm, hσh, h1, map_mul, map_sub, c.commutes, hc]; module
   have s2 : σ (y' (algebraMap F E t)) = y (algebraMap F E t) := by
-    simp only [y, y', map_add, hsm, hσk, h1, map_mul, map_sub, c.commutes, hc]; module
+    simp only [y, y', map_add (f := _), hsm, hσk, h1, map_mul, map_sub, c.commutes, hc]; module
   have cm : y (algebraMap F E t) * y' (algebraMap F E t) = y' (algebraMap F E t) * y (algebraMap F E t) := by
     simp only [y, y', add_mul, mul_add, smul_mul_smul_comm, hk1, hk2, one_mul, mul_one]; module
   have w1 : y' (algebraMap F E t) * (↑W⁻¹ : Matrix β β E) = 1 := by rw [← hW, Units.mul_inv]
@@ -188,7 +236,7 @@ theorem char_trivial_artinian : ∀ (F : Type) [Field F] [CharZero F] (E : Type)
     exact hlam g ⟨_, _, mul_eq_one_comm.mp b, b⟩ a
   generalize Cy * M1 = e at *
   generalize Cx * M2 = f at *
-  have hsum : σ e + σ f = 1 := by rw [← map_add, hM1, h1]
+  have hsum : σ e + σ f = 1 := by rw [← map_add (f := _), hM1, h1]
   have hse : σ e = f := by
     calc σ e = σ e * (e + f) + σ f * f := by rw [hM1, if', mul_one, add_zero]
       _ = (σ e + σ f) * f := by rw [mul_add, ie, zero_add, add_mul]

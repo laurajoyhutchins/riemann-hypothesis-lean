@@ -1,5 +1,59 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.CountingFormula.DensAtGoodOf
+module
+
+public import Formalism.SharpRestriction.CuspSpanNormBounds.FractionFieldToGenericStalkAlgebraMapEq
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.SharpRestriction.CuspSpanNormBounds.Point
+
+@[expose] public section
 
 noncomputable section
 
@@ -20,7 +74,8 @@ theorem locE_isUnit_or_exists_algEquiv_prod_swap {F E : Type} [Field F] [Valuati
   · exact Or.inl hfield
   right
   obtain ⟨x, hx⟩ := not_forall.1 hfield
-  obtain ⟨hx0, hxu⟩ := _root_.not_imp.1 hx
+  have hx0 : x ≠ 0 := fun heq => hx (fun hne => (hne heq).elim)
+  have hxu : ¬ IsUnit x := fun hu => hx (fun _ => hu)
   have hfix : ∀ y : E, L.cj y = y → ∃ a : F, algebraMap F E a = y := fun y hy => (L.cj_fix y).1 hy
   obtain ⟨a, ha⟩ := hfix (x * L.cj x) (by rw [map_mul, L.cj_cj, mul_comm])
   have hN : x * L.cj x = 0 := by
@@ -32,7 +87,7 @@ theorem locE_isUnit_or_exists_algEquiv_prod_swap {F E : Type} [Field F] [Valuati
       exact hne ha.symm
     refine IsUnit.of_mul_eq_one (L.cj x * algebraMap F E a⁻¹) ?_
     rw [← mul_assoc, ← ha, ← map_mul, mul_inv_cancel₀ ha0, map_one]
-  obtain ⟨t, ht⟩ := hfix (x + L.cj x) (by rw [map_add, L.cj_cj, add_comm])
+  obtain ⟨t, ht⟩ := hfix (x + L.cj x) (by rw [map_add (f := _), L.cj_cj, add_comm])
   have ht0 : t ≠ 0 := by
     rintro rfl
     rw [map_zero] at ht
@@ -84,7 +139,7 @@ theorem locE_isUnit_or_exists_algEquiv_prod_swap {F E : Type} [Field F] [Valuati
         simp only [Prod.algebraMap_apply, Algebra.algebraMap_self, RingHom.id_apply]
         rw [← smul_add, hpq, Algebra.algebraMap_eq_smul_one] }
   have ginj : Function.Injective g := by
-    rw [injective_iff_map_eq_zero]
+    set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
     intro z hz
     have hz' : z.1 • p + z.2 • q = 0 := hz
     have h1 : z.1 • p = 0 := by
@@ -107,7 +162,7 @@ theorem locE_isUnit_or_exists_algEquiv_prod_swap {F E : Type} [Field F] [Valuati
   have hez : e0.symm (g z) = z := e0.symm_apply_apply z
   have hcz : L.cj (g z) = g z.swap := by
     show L.cj (z.1 • p + z.2 • q) = z.2 • p + z.1 • q
-    rw [map_add, map_smul, map_smul, hcp, hcq, add_comm]
+    rw [map_add (f := _), map_smul, map_smul, hcp, hcq, add_comm]
   rw [hcz, hez]
   exact e0.symm_apply_apply z.swap
 

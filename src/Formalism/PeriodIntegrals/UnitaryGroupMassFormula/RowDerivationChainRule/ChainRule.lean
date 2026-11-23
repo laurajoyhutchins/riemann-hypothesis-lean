@@ -1,6 +1,54 @@
-import Mathlib
-import Formalism.PeriodIntegrals.RowLetter
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.RowDerivationChainRule.Development
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.RowDerivationChainRule.Development
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open MvPolynomial
 
@@ -16,7 +64,7 @@ variable {K : Type} [Field K] {k : ℕ}
 
 theorem RE_add (a b : Fin k) (f g : MvPolynomial (Fin k × Fin k) K) :
     RE K k a b (f + g) = RE K k a b f + RE K k a b g := by
-  simp only [PI.RL.RE, map_add, mul_add, Finset.sum_add_distrib]
+  simp only [PI.RL.RE, map_add (f := _), mul_add, Finset.sum_add_distrib]
 
 theorem RE_C (a b : Fin k) (r : K) : RE K k a b (C r) = 0 := by
   simp [PI.RL.RE]
@@ -51,14 +99,14 @@ private theorem derivation_aeval_eq_sum_pderiv {K : Type*} [CommRing K] {σ τ :
     rw [aeval_C, MvPolynomial.algebraMap_eq, hC]
     simp
   next p q hp hq =>
-    rw [map_add, hadd, hp, hq, ← Finset.sum_add_distrib]
+    rw [map_add (f := _), hadd, hp, hq, ← Finset.sum_add_distrib]
     refine Finset.sum_congr rfl (fun c _ => ?_)
-    rw [map_add, map_add, add_mul]
+    rw [map_add (f := _), map_add (f := _), add_mul]
   next p i ih =>
     have e : ∀ c, aeval g (pderiv c (p * X i)) * D (g c) =
         g i * (aeval g (pderiv c p) * D (g c)) + (if c = i then aeval g p * D (g i) else 0) := by
       intro c
-      rw [pderiv_mul_eq, pderiv_X_eq_ite, map_add, map_mul, map_mul, aeval_X]
+      rw [pderiv_mul_eq, pderiv_X_eq_ite, map_add (f := _), map_mul, map_mul, aeval_X]
       by_cases h : c = i
       · subst h; rw [if_pos rfl, if_pos rfl, map_one]; ring
       · rw [if_neg h, if_neg h, map_zero]; ring

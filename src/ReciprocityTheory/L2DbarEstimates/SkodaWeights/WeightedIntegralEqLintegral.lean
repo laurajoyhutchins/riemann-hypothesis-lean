@@ -1,4 +1,53 @@
-import ReciprocityTheory.L2DbarEstimates.SkodaWeights.SkodaWeightStatement
+module
+
+public import ReciprocityTheory.L2DbarEstimates.SkodaWeights.SkodaWeightStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.L2DbarEstimates.ChartDerivatives.ChartSymmEventuallyEq
+public import ReciprocityTheory.L2DbarEstimates.ChartDerivatives.MeasurableSetImageOfIsLocalHomeomorph
+
+@[expose] public section
 
 namespace ReciprocityTheory.L2DbarEstimates.H
 
@@ -29,24 +78,27 @@ lemma weightedIntegral_eq_lintegral (n : ℕ) {M : Type*} [MeasurableSpace M] (z
 
 lemma eLpNorm_two_weighted_eq (n : ℕ) {M : Type*} [MeasurableSpace M] (z : M → V n) {ψ : M → ℝ}
     (hψ : Measurable ψ) (f : M → ℂ) :
-    eLpNorm f 2 (wvol n z ψ) = wint n z f ψ ^ (1 / (2 : ℝ)) := by
-  rw [eLpNorm_eq_lintegral_rpow_enorm (by norm_num) (by norm_num), ENNReal.toReal_ofNat,
-    ← weightedIntegral_eq_lintegral n z hψ f]
+    eLpNorm' f 2 (wvol n z ψ) = wint n z f ψ ^ (1 / (2 : ℝ)) := by
+  rw [eLpNorm'_eq_lintegral_eNorm, ← weightedIntegral_eq_lintegral n z hψ f]
 
 theorem l2w (n : ℕ) (M : Type*) [MeasurableSpace M] : WeightedL2Properties n M := by
   intro z ψ hψ
   refine ⟨fun P => ae_weighted_iff_ae n z hψ P, fun F => ?_, fun f hf hfin => ?_⟩
   · have hlt := Lp.eLpNorm_lt_top F
     have hw : wint n z F ψ = eLpNorm F 2 (wvol n z ψ) ^ (2 : ℝ) := by
-      rw [eLpNorm_two_weighted_eq n z hψ, ← ENNReal.rpow_mul]
+      rw [eLpNorm_eq_eLpNorm' (by norm_num) (by norm_num) (Lp.aestronglyMeasurable F),
+        ENNReal.toReal_ofNat, eLpNorm_two_weighted_eq n z hψ, ← ENNReal.rpow_mul]
       norm_num
     refine ⟨?_, ?_⟩
     · rw [hw]
       exact ENNReal.rpow_lt_top_of_nonneg (by norm_num) hlt.ne
     · rw [hw, Lp.norm_def, ← ENNReal.toReal_rpow, Real.rpow_two]
   · have hmem : MemLp f 2 (wvol n z ψ) := by
-      refine ⟨hf.mono_ac (withDensity_absolutelyContinuous _ _), ?_⟩
-      rw [eLpNorm_two_weighted_eq n z hψ f]
+      change eLpNorm f 2 (wvol n z ψ) < ⊤
+      have hfw : AEStronglyMeasurable f (wvol n z ψ) :=
+        hf.mono_ac (withDensity_absolutelyContinuous _ _)
+      rw [eLpNorm_eq_eLpNorm' (by norm_num) (by norm_num) hfw, ENNReal.toReal_ofNat,
+        eLpNorm_two_weighted_eq n z hψ f]
       exact ENNReal.rpow_lt_top_of_nonneg (by norm_num) hfin.ne
     exact ⟨hmem.toLp f, (ae_weighted_iff_ae n z hψ (fun x => (hmem.toLp f : M → ℂ) x = f x)).mp
       (MemLp.coeFn_toLp hmem)⟩

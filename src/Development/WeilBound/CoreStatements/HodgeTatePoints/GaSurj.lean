@@ -1,6 +1,51 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.LeadMinor
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.RelatedPairsOrbitalTermEq
+module
+
+public import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.IsCompactUnitaryPointsAtPlaceFstMemCompact
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.RelatedPairsOrbitalTermEq
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -50,8 +95,10 @@ private theorem toZMod_cycZ_eq_one_of_cycMod_eq_one (σ : E →+* K) (hσ : ∀ 
     rw [h1, h2]
   refine ⟨b, ∑ i, y i, Submodule.sum_mem _ fun i _ => hy i, ?_⟩
   conv_lhs => rw [hz]
+
   rw [map_sum, map_sum]
-  simp only [he, map_add, hrho, ← hb, algebraMap_smul]
+  simp only [he, map_add (f := _), hrho, ← hb, algebraMap_smul]
+
   rw [Finset.sum_add_distrib, map_sum, Finset.smul_sum]
   unfold HTChart.q
   congr 1
@@ -77,7 +124,7 @@ theorem exists_q_add (σ : E →+* K) (hσ : ∀ a : 𝓞 E, σ (a : E) ∈ (alg
       obtain ⟨x1, y1, hy1, e1⟩ := hu
       obtain ⟨x2, y2, hy2, e2⟩ := hv
       refine ⟨x1 + x2, y1 + y2, D.om.add_mem hy1 hy2, ?_⟩
-      rw [map_add, e1, e2, q_add, map_add, smul_add]
+      rw [map_add (f := _), e1, e2, q_add, map_add (f := _), smul_add]
       abel
     | smul a v _ hv =>
       obtain ⟨x1, y1, hy1, e1⟩ := hv
@@ -88,7 +135,7 @@ theorem exists_q_add (σ : E →+* K) (hσ : ∀ a : 𝓞 E, σ (a : E) ∈ (alg
       = ((p : A) ^ R) • eigProj D.ρΩ σ y0 := by
     simp [LinearMap.map_smul_of_tower]
   refine ⟨x, y' + y0, D.om.add_mem hy' hy0, ?_⟩
-  rw [map_add, e, ht0, map_add, smul_add, add_assoc]
+  rw [map_add (f := _), e, ht0, map_add (f := _), smul_add, add_assoc]
 
 end
 
@@ -115,7 +162,7 @@ theorem q_surj : ∀ (A K : Type) [CommRing A] [Field K] [Algebra A K] [CharZero
         exact Submodule.subset_span (by simp only [Finset.coe_image]; exact ⟨w, hw, rfl⟩)
       | zero => simp
       | add u v _ _ hu hv =>
-        rw [map_add]
+        rw [map_add (f := _)]
         exact Submodule.add_mem _ hu hv
       | smul n u _ hu =>
         rw [map_zsmul]

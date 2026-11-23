@@ -1,26 +1,51 @@
-import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.PDefectAverage
-import GroundTheory.HeightsAndTheta.Heights.LocalFiniteness.IsolatedPointsCountPrime
-import GroundTheory.HeightsAndTheta.Heights.LocalFiniteness.UniformIntegrabilityProportionalityHolds
-import GroundTheory.HeightsAndTheta.Heights.LocalFiniteness.TargetsProjFullRankMeetsRegular
-import GroundTheory.HeightsAndTheta.Heights.LocalFiniteness.TargetsCurveVertPointLength
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.PConeSheetGramLintegral
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PChartEnergyCocycle
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PVertPointMultChart
-import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.PCurveSectionQuotFinite
-import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.PCurveVertIndex
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.StatementsProjGenericRank
-import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.PProjRegularNull
-import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.PPtsPosDensMeasurable
-import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.PPtsPosPartLocal
-import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.PPtsPosPartProjIndep
-set_option maxSynthPendingDepth 1
+module
 
-theorem GroundTheory.Heights₂.Heights.AutoClose.PtsPosPartProjIndep : GroundTheory.Heights₂.Heights.PtsPosPartProjIndep.Statement :=
-  @GroundTheory.Heights₂.Heights.PtsPosPartProjIndep.proof GroundTheory.Heights₂.Heights.AutoClose.PtsSheetSimpleNull GroundTheory.Heights₂.Heights.AutoClose.PtsSheetOnlyNull GroundTheory.Heights₂.Heights.PtsPosPartLocal.proof GroundTheory.Heights₂.Heights.PtsPosDensMeasurable.proof
+public import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.StatementsMahler
+public import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.PDefectAverage
+public import GroundTheory.HeightsAndTheta.Heights.LocalFiniteness.TargetsCurveVertPointLength
+import GroundTheory.HeightsAndTheta.Heights.LocalFiniteness.UniformIntegrabilityProportionalityHolds
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
+set_option maxSynthPendingDepth 1
 
 theorem GroundTheory.Heights₂.Heights.AutoClose.DefectAverage : GroundTheory.Heights₂.Heights.DefectAverage.Statement :=
   @GroundTheory.Heights₂.Heights.DefectAverage.proof GroundTheory.Heights₂.Heights.AutoClose.MahlerAverageSplit GroundTheory.Heights₂.Heights.AutoClose.CycleAverage
-
-theorem GroundTheory.Heights₂.Heights.AutoClose.ConeSheetGramLintegral : GroundTheory.Heights₂.Heights.ConeSheetGramLintegral.Statement :=
-  @GroundTheory.Heights₂.Heights.ConeSheetGramLintegral.proof GroundTheory.Heights₂.Heights.AutoClose.ConeSliceSheetParam GroundTheory.Heights₂.Heights.AutoClose.ConeMapArea

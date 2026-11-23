@@ -1,32 +1,51 @@
-import Formalism.ThetaSupremumBounds.GaussianShiftBounds.Assembly
-import Formalism.ThetaSupremumBounds.GaussianShiftBounds.HeightsoundOf
-import Formalism.ThetaSupremumBounds.GaussianShiftBounds.BlockIntegralOf
-import Formalism.ThetaSupremumBounds.GaussianShiftBounds.ClassSchur
-import Mathlib
-import Formalism.QuotientMetricDivisors.HermitianTwistDivisors.TheoremDivIneq
-import Formalism.ThetaSupremumBounds.StatementD
-import Formalism.ThetaSupremumBounds.GaussianShiftBounds.DominanceMono
-import Formalism.ThetaSupremumBounds.GaussianShiftBounds.FockJet
-import Formalism.ThetaSupremumBounds.GaussianShiftBounds.GaussCoord
-import Formalism.ThetaSupremumBounds.StatementE
+module
+
+public import Formalism.ThetaSupremumBounds.StatementA
+public import Formalism.ThetaSupremumBounds.GaussianShiftBounds.FockJet
+public import Formalism.ThetaSupremumBounds.GaussianShiftBounds.GaussCoord
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace Formalism.DimensionVariation
 
-theorem liftOperatorBound_of_fockJet (hF : FockJet) : LiftOperatorBound := by
-  intro Pl ι Cl Cl' _ _ _ _ A B _ _ _ _ _ r ν n s Th c Rc lam Om S γ γ' ε hν hn hs hs2 hTh hc hS hRc hRs
-    hOm hlam hγ hγ' hε
-  have hB := blockBound_of_fockJet hF
-  unfold liftNormSq
-  apply csInf_le ⟨0, fun X hX => hX.1⟩
-  refine ⟨?_, fun fn => ?_⟩
-  · exact mul_nonneg (by positivity) (mul_nonneg (sq_nonneg S) (Finset.prod_nonneg fun τ _ =>
-      mul_nonneg (pow_nonneg (inv_nonneg.2 (hOm τ).le) _) (by positivity)))
-  · exact weightedSchurBound Cl Cl' A B γ γ' ε (fun L L' => liftBlock (c L L') Rc lam) _ fn hγ hγ' hε
-      (fun L L' => hB Pl ι (A →L[ℂ] B) r ν n s (Th L L') (c L L') Rc lam Om S hν hn hs hs2 (hTh L L')
-        (hc L L') (hS L L') hRc hRs hOm hlam)
-
 theorem blockBound : BlockBound := blockBound_of_fockJet gaussianCoeffIntegral
-theorem periodValue : PeriodValue := period_value
-theorem liftOperatorBound : LiftOperatorBound := liftOperatorBound_of_fockJet gaussianCoeffIntegral
 
 end Formalism.DimensionVariation

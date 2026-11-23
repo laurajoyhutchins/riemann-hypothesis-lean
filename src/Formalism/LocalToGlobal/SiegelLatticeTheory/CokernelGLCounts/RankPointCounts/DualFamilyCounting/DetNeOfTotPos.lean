@@ -1,4 +1,52 @@
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.GramComb
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.GramComb
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.StepsR
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.ExistsDualGen
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.CountingFormula.GoodRDet
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -17,7 +65,11 @@ theorem emb_G {T T' : ℕ} (Z : MatZ D) (φ : D.host.E →+* ℂ) :
     φ (GZ (T : D.host.E) (T' : D.host.E) Z) =
       ((Complex.normSq (φ Z.det) - (T : ℝ) * T' * Complex.normSq (φ (leadMinorE Z D.R.rS)) : ℝ) : ℂ) := by
   have hφ : ∀ a, φ (star a) = starRingEnd ℂ (φ a) := D.sp.cm.cmUnram.2.1 φ
-  rw [GZ, PI.UnitaryGroupMassFormula.CntFormula.DetGa.leadMinorE_full D Z]
+  have hfull : leadMinorE Z (D.R.rS + 1) = Z.det := by
+    unfold leadMinorE
+    rw [dite_eq_left le_rfl]
+    rfl
+  rw [GZ, hfull]
   simp only [map_sub, map_mul, map_natCast, hφ, Complex.mul_conj]
   push_cast
   ring
@@ -26,7 +78,9 @@ theorem det_ne_of_totPos {T T' : ℕ} (Z : MatZ D) (hP : Formalism.MainNotions.S
     Z.det ≠ 0 := by
   intro h0
   have : Nonempty D.what₂.Tau := Fintype.card_pos_iff.1 (by
-    rw [D.what₂.card_Tau]; unfold Formalism.BasicNotions.Ranks.f Formalism.BasicNotions.Ranks.n; positivity)
+    rw [D.what₂.card_Tau]; have h := D.R.m_le_f; have h₂ := D.R.two_le_m
+    unfold Formalism.BasicNotions.Ranks.f Formalism.BasicNotions.Ranks.n
+    omega)
   obtain ⟨τ⟩ := this
   have h1 := hP τ
   rw [emb_G D Z, Complex.ofReal_re, h0, map_zero, Complex.normSq_zero, zero_sub] at h1
@@ -36,8 +90,12 @@ theorem det_ne_of_totPos {T T' : ℕ} (Z : MatZ D) (hP : Formalism.MainNotions.S
 
 theorem inv_last (Z : MatZ D) (hdet : Z.det ≠ 0) :
     Z⁻¹ (Fin.last D.R.rS) (Fin.last D.R.rS) = leadMinorE Z D.R.rS / Z.det := by
+  have hprev : leadMinorE Z D.R.rS = (Z.submatrix Fin.castSucc Fin.castSucc).det := by
+    unfold leadMinorE
+    rw [dite_eq_left (Nat.le_succ _)]
+    rfl
   rw [Matrix.inv_def, Matrix.smul_apply, Matrix.adjugate_apply,
-    PI.UnitaryGroupMassFormula.CntFormula.DetGa.det_updateRow_last_single, ← PI.UnitaryGroupMassFormula.CntFormula.DetGa.leadMinorE_prev D Z,
+    PI.UnitaryGroupMassFormula.CntFormula.DetGa.det_updateRow_last_single, ← hprev,
     Ring.inverse_eq_inv', smul_eq_mul, div_eq_inv_mul]
 
 theorem gam'_last (N' : ℕ) (Z : MatZ D) :
@@ -67,7 +125,7 @@ theorem tv_pos (hD : TotPosAll) {N N' : ℕ} (hN : 0 < N) (Z : MatZ D)
   have ht : φ (tv N N' Z) = (((N : ℝ)⁻¹ - N' * (Complex.normSq (φ (leadMinorE Z D.R.rS)) /
       Complex.normSq (φ Z.det)) : ℝ) : ℂ) := by
     rw [tv, gam'_last, inv_last D Z hdet]
-    simp only [map_add, map_mul, map_neg, map_natCast, map_inv₀, hφ, map_div₀, star_div₀]
+    simp only [map_add (f := _), map_mul, map_neg, map_natCast, map_inv₀, hφ, map_div₀, star_div₀]
     rw [div_mul_div_comm, ← Complex.normSq_eq_conj_mul_self, ← Complex.normSq_eq_conj_mul_self]
     push_cast
     ring
@@ -89,8 +147,8 @@ open Formalism.L2.SG.Pf.Cnt.R1
 
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
 
-variable [Fact Formalism.HermitianLattices.Ext.L3.HermRepUnram] in
 
+variable [Fact Formalism.HermitianLattices.Ext.L3.HermRepUnram] in
 theorem ratPair_of (hD : TotPosAll) : RatPair := by
   intro D u u' _ F0 what₂ _ Z hP
   have hN : 0 < (D.mem u).A.T := (D.mem u).A.T_prime.pos
@@ -105,8 +163,9 @@ theorem ratPair_of (hD : TotPosAll) : RatPair := by
   have hpp : ∀ a a', (VS D).hT (p a) (p a') = Gam' (D.mem u').A.T Z a a' := hpv_pv hy hN hw0 hwt
   have hzh : ∀ a b, (VS D).hT (F0.fvec a) (f' b) = Z a b := by
     intro a b
+
     simp only [hf', map_sum, map_smul, smul_eq_mul, hfp, mul_ite, mul_one, mul_zero, Finset.sum_ite_eq,
-      Finset.mem_univ, if_true]
+    Finset.mem_univ, if_true]
   have hgr : ∀ b c, (VS D).hT (f' b) (f' c) = Gam D.host.E D.R.rS (D.mem u').A.T b c := by
     intro b c
     rw [hf', gram_comb' p Z b c]
@@ -124,6 +183,7 @@ theorem ratPair_of (hD : TotPosAll) : RatPair := by
     have hv : Z.mulVec (Fin.snoc (α := fun _ => D.host.E) c 0) = 0 := by
       funext a
       have h1 := congrArg ((VS D).hT (F0.fvec a)) hc
+
       rw [map_sum, map_zero] at h1
       simp only [map_smul, smul_eq_mul, hzh] at h1
       simp only [Matrix.mulVec, dotProduct, Pi.zero_apply]

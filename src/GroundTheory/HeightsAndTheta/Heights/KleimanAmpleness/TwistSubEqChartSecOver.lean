@@ -1,8 +1,56 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.ImportsExtraMore
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.PBundlePair
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.ChartRingOverOneBlockBase
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.AssemblyBase
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.ImportsExtraMore
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.ImportsTerExtra
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.AssemblyBase
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.ChartRingOverOneBlockBase
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.PBundlePair
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.Kleiman.SectionsOverLocalization
@@ -70,8 +118,6 @@ theorem prod_coord_mem_secOver (y : (Σ k, ι k) → Ω) (k₀ : K) {N : ℕ} (e
 
 variable {N : ℕ} {y : (Σ k, ι k) → Ω} {k₀ : K} (e : ι k₀ ≃ Fin (N + 1))
 
-local notation "X" => IndefiniteRowSideFullHecke.Kleiman2.blockVec y k₀ ∘ e.symm
-
 theorem twist_sub_eq_chartSecOver (β : K → ℤ)
     (Q : Kleiman.LineBundle S (IndefiniteRowSideFullHecke.Kleiman2.blockVec y k₀ ∘ e.symm))
     (hQ : ∀ c : ℤ, (Q.twist (Kleiman.twistSys S (IndefiniteRowSideFullHecke.Kleiman2.blockVec y k₀ ∘ e.symm) c)).secs =
@@ -84,6 +130,7 @@ theorem twist_sub_eq_chartSecOver (β : K → ℤ)
     rw [SetLike.mem_coe, mem_sub_iff_gam]
     refine exists_congr fun n => ?_
     rw [Kleiman.SubSystem.gam, hQ]
+  let X := IndefiniteRowSideFullHecke.Kleiman2.blockVec y k₀ ∘ e.symm
   obtain ⟨i, hi⟩ := I.2.1
   have hxi : X i ≠ 0 := (Kleiman.mem_support _).mp (I.2.2 hi)
   have hcard := Finset.card_erase_add_one hi
@@ -107,24 +154,26 @@ theorem twist_sub_eq_chartSecOver (β : K → ℤ)
     convert h using 2
     abel
   · rintro ⟨n, hn⟩
-    refine ⟨(X i ^ c)⁻¹ * t, ?_, by field_simp⟩
-    rw [← SetLike.mem_coe, hsubQ]
-    refine ⟨n + c, ?_⟩
-    have h := secOver_mul y hP hn
-    rw [show Kleiman.xProd I ^ (n + c) * ((X i ^ c)⁻¹ * t) =
-        (∏ j ∈ I.1.erase i, X j) ^ c * (Kleiman.xProd I ^ n * t) by
-      rw [hxI]; field_simp; ring]
-    convert h using 2
-    funext k
-    rw [← hcard]
-    simp only [Pi.add_apply, Pi.smul_apply, smul_eq_mul]
-    push_cast
-    ring
+    refine ⟨(X i ^ c)⁻¹ * t, ?_, ?_⟩
+    · rw [← SetLike.mem_coe, hsubQ]
+      refine ⟨n + c, ?_⟩
+      have h := secOver_mul y hP hn
+      rw [show Kleiman.xProd I ^ (n + c) * ((X i ^ c)⁻¹ * t) =
+          (∏ j ∈ I.1.erase i, X j) ^ c * (Kleiman.xProd I ^ n * t) by
+        rw [hxI]; field_simp; ring]
+      convert h using 2
+      funext k
+      rw [← hcard]
+      simp only [Pi.add_apply, Pi.smul_apply, smul_eq_mul]
+      push_cast
+      ring
+    · change X i ^ c * ((X i ^ c)⁻¹ * t) = t
+      field_simp
 
 end ModelTwistGenerated
 
-open ModelTwistGenerated in
 
+open ModelTwistGenerated in
 theorem ModelTwistGenerated.proof (hCG : ChartSecGen.Statement) : ModelTwistGenerated.Statement := by
   classical
   intro S _ K _ _ ι _ Ω _ _ y k₀ hS hM β

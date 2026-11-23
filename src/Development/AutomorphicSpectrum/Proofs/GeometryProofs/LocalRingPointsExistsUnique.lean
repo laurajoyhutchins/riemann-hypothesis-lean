@@ -1,11 +1,59 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsGenericFlag
-import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.FrameDefinitions.Metric
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsGrpPullback
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.IsUnitIffUnitAt
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.RegAtIffChartLocalizationStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExistsUniqueCentreLocalHomStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.PrimeChartExistsUniquePointStatement
+module
+
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.CoordsAt
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ArithmeticHilbertSamuelLowerBound
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExistsUniqueCentreLocalHomStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.IsUnitIffUnitAt
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.PrimeChartExistsUniquePointStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.RegAtIffChartLocalizationStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsCompletedStrictHens
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.CubicalStructures.CubeSymmetricSwapFirst
+
+@[expose] public section
 
 noncomputable section
 
@@ -78,7 +126,7 @@ theorem exists_homog {K : Type} [Fintype K] {J : K → Type} (c : ∀ k, J k)
     have hp : ∀ n, aeval v ((∏ k, X ⟨k, c k⟩ : MvPolynomial (Σ k, J k) ℤ) ^ n) = (∏ k, e k) ^ n := by
       intro n
       simp [map_prod, hc S v s e h1 h2]
-    rw [map_add, map_mul, map_mul, hF S v s e h1 h2, hG S v s e h1 h2, hp, hp, map_add]
+    rw [map_add (f := _), map_mul, map_mul, hF S v s e h1 h2, hG S v s e h1 h2, hp, hp, map_add (f := _)]
     simp only [pow_add, Finset.prod_mul_distrib, Finset.prod_pow]
     ring
   | mul_X f p hf =>
@@ -140,8 +188,8 @@ theorem aeval_eq_zero_of_ratio {K : Type} [Fintype K] {J : K → Type} (y : (Σ 
       rw [map_aeval_int, map_aeval_int]
       congr 2
       funext p
-      simp only [inc, σ, map_mul, map_C, map_X, eval₂Hom_C, eval₂Hom_X']
-      simp only [Subring.subtype_apply, hb, RingHom.id_apply]
+      simp only [inc, σ, map_mul, MvPolynomial.map_C, MvPolynomial.map_X,
+        eval₂Hom_C, eval₂Hom_X', Subring.subtype_apply, hb]
       rw [← mul_assoc, ← C_mul]
       congr 2
       have := hy p.1
@@ -155,8 +203,7 @@ theorem aeval_eq_zero_of_ratio {K : Type} [Fintype K] {J : K → Type} (y : (Σ 
     rw [map_aeval_int]
     congr 2
     funext p
-    simp only [th, map_mul, eval₂Hom_C, eval₂Hom_X']
-    exact hw p
+    simpa only [th, map_mul, eval₂Hom_C, eval₂Hom_X'] using hw p
   rw [h2, h1, map_zero]
 
 section Main
@@ -310,7 +357,7 @@ theorem exists_local_ext {o : Type} [CommRing o] [Algebra o Ω] {κ : Type} {x :
   change (a : Ω) * (((s : Algebra.adjoin o (Set.range fun j => x j / x c)) : Ω) * (b : Ω)⁻¹) = 1
   rw [← mul_assoc, ev, mul_inv_cancel₀ b0]
 
-set_option maxHeartbeats 2000000 in
+
 
 theorem existsUnique_point (T : CoordTie ℤ ξ (fun c' : (k : K) → J k => ∏ k, y ⟨k, c' k⟩))
     (w : (Σ k, J k) → R) (hu : ∀ k, ∃ c, IsUnit (w ⟨k, c⟩))

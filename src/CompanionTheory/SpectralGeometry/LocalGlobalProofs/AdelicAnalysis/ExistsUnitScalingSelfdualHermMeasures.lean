@@ -1,11 +1,64 @@
-import Mathlib
-import CompanionTheory.SpectralGeometry.CountingDefinitions.AdelicEulerProducts.IsEulerProd
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.CoordinateHaarMeasure
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.TensorLocallyCompactRing
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.CompletionIsLocalRing
+module
+
+public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.CoordinateHaarMeasure
+public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.CompletionIsLocalRing
+public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.ExistsUnipotentInvariantCompactlySupportedWeightStatement
 import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.InfiniteAdelesLocalRingTotallyReal
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.ExistsUnipotentInvariantCompactlySupportedWeightStatement
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.SelfdualMeasureTransportEquivStatement
+public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.SelfdualMeasureTransportEquivStatement
+import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.TensorLocallyCompactRing
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.Countable
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open HeckeCharacterZeroLocus.SiegelWeilU GlobalTheory.CompanionTheory.SW NumberField IsDedekindDomain MeasureTheory Topology
 open scoped TensorProduct ENNReal NNReal Matrix Kronecker
 
@@ -55,9 +108,8 @@ theorem trace_sigR [FiniteDimensional F E] (R : Type) [CommRing R] [Algebra F R]
     (hinv : ∀ x, σ (σ x) = x) (y : R ⊗[F] E) :
     Algebra.trace R (R ⊗[F] E) (sigR R σ y) = Algebra.trace R (R ⊗[F] E) y := by
   induction y with
-  | zero => simp
   | tmul r e => rw [HaarCoord.sigR_tmul, trace_tmul, trace_tmul, trace_sigma hinv]
-  | add a b ha hb => rw [map_add, map_add, map_add, ha, hb]
+  | add a b ha hb => rw [map_add (f := _), map_add (f := _), map_add (f := _), ha, hb]
 
 def gramB (σ : E →ₐ[F] E) {d : ℕ} (b : Module.Basis (Fin d) F E) : Matrix (Fin d) (Fin d) F :=
   fun k l => Algebra.trace F E (b k * σ (b l))
@@ -81,10 +133,12 @@ theorem gramB_det [FiniteDimensional F E] [Algebra.IsSeparable F E] {σ : E →�
       intro k
       have := congrFun hv0 k
       simp only [Matrix.mulVec, dotProduct, gramB, Pi.zero_apply] at this
+
       rw [hw, map_sum, Finset.mul_sum, map_sum, ← this]
       refine Finset.sum_congr rfl fun l _ => ?_
       rw [map_smul, mul_smul_comm, map_smul, smul_eq_mul, mul_comm]
     have hx := b.sum_repr x
+
     rw [← hx, Finset.sum_mul, map_sum]
     refine Finset.sum_eq_zero fun k _ => ?_
     rw [smul_mul_assoc, map_smul, hk, smul_zero]
@@ -163,20 +217,23 @@ theorem off_diag [FiniteDimensional F E] [CharZero F] {σ : E →ₐ[F] E} (hinv
   set C := Algebra.TensorProduct.basis R b with hC
   have h1 : sigR R σ x * y = sigR R σ (x * sigR R σ y) := by
     rw [map_mul, HaarCoord.sigR_sigR R hinv]
-  rw [h1, map_add, trace_sigR R hinv, HaarCoord.half_add_self (F := F) R]
+  rw [h1, map_add (f := _), trace_sigR R hinv, HaarCoord.half_add_self (F := F) R]
   have hx : x = ∑ k, C.repr x k • ((1 : R) ⊗ₜ[F] b k) := by
     conv_lhs => rw [← C.sum_repr x]
     simp [hC, Algebra.TensorProduct.basis_apply]
   have hy : sigR R σ y = ∑ l, C.repr y l • ((1 : R) ⊗ₜ[F] σ (b l)) := by
     conv_lhs => rw [← C.sum_repr y]
+
     rw [map_sum]
     refine Finset.sum_congr rfl fun l _ => ?_
     rw [hC, Algebra.TensorProduct.basis_apply, TensorProduct.smul_tmul', TensorProduct.smul_tmul',
       HaarCoord.sigR_tmul]
   rw [hy]
   conv_lhs => rw [hx]
+
   rw [Finset.sum_mul, map_sum]
   refine Finset.sum_congr rfl fun k _ => ?_
+
   rw [smul_mul_assoc, map_smul, smul_eq_mul, Finset.mul_sum, map_sum]
   congr 1
   refine Finset.sum_congr rfl fun l _ => ?_
@@ -194,7 +251,8 @@ theorem pair_eq [FiniteDimensional F E] [CharZero F] {σ : E →ₐ[F] E} (hinv 
   have hT : ∀ a c, (T : Matrix (Fin n) (Fin n) (R ⊗[F] E)) c a =
       sigR R σ ((T : Matrix (Fin n) (Fin n) (R ⊗[F] E)) a c) := fun a c => (T.2 c a).symm
   unfold pairHerm
-  rw [sum_square, map_add, mul_add, map_sum, map_sum, Finset.mul_sum, Finset.mul_sum]
+
+  rw [sum_square, map_add (f := _), mul_add, map_sum, map_sum, Finset.mul_sum, Finset.mul_sum]
   simp only [dotProduct, Fintype.sum_sum_type, Fintype.sum_prod_type, formB_mulVec_inl,
     formB_mulVec_inr]
   congr 1
@@ -324,8 +382,8 @@ theorem hermVec_isHomeomorph {d : ℕ} (b : Module.Basis (Fin d) F E) (n : ℕ) 
   have h2 := toVec_isHomeomorph hcm R b n
   exact ((h1.homeomorph _).trans (h2.homeomorph _)).isHomeomorph
 
-include hcm in
 
+include hcm in
 theorem sd_core {d : ℕ} (b : Module.Basis (Fin d) F E) (n : ℕ) (lam : Measure R)
     [lam.IsAddHaarMeasure] (ψR : R → ℂ) (c : ℝ≥0)
     (h : ∀ μ : Measure (Idx n d → R),
@@ -356,7 +414,8 @@ theorem sd_core {d : ℕ} (b : Module.Basis (Fin d) F E) (n : ℕ) (lam : Measur
   have hsm : c • Measure.map (hermVec R σ b n) (coordHerm R σ b lam n) =
       Measure.map hh.toMeasurableEquiv (c • coordHerm R σ b lam n) := by
     rw [Measure.map_smul]
-    rfl
+    · rfl
+    · exact hh.toMeasurableEquiv.measurable.aemeasurable
   rw [hsm]
   exact hinj.eq_iff
 

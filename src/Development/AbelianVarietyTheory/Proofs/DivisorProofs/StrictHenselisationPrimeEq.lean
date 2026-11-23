@@ -1,7 +1,56 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TorsorsTrivial
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.OriginIdeal
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SpreadTorsorToEtaleAlgebraStatement
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TorsorsTrivial
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.OriginIdeal
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SpreadTorsorToEtaleAlgebraStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open IsLocalRing Polynomial
 
 noncomputable section
@@ -25,14 +74,14 @@ theorem torsor_baseChange : ∀ (B₁ B₂ D₁ : Type) [CommRing B₁] [CommRin
         induction x using TensorProduct.induction_on with
         | zero => simp
         | tmul b d => simp [Algebra.TensorProduct.congr_apply]
-        | add x y hx hy => simp only [map_add] at hx hy ⊢; rw [hx, hy]
+        | add x y hx hy => simp only [map_add (f := _)] at hx hy ⊢; rw [hx, hy]
       map_mul' := by
         intro g h
         refine AlgEquiv.ext fun x => ?_
         induction x using TensorProduct.induction_on with
         | zero => simp
         | tmul b d => simp [Algebra.TensorProduct.congr_apply]
-        | add x y hx hy => simp only [map_add] at hx hy ⊢; rw [hx, hy] }
+        | add x y hx hy => simp only [map_add (f := _)] at hx hy ⊢; rw [hx, hy] }
   refine ⟨act₂, inferInstance, inferInstance, inferInstance, ?_⟩
   let e₀ := LinearEquiv.ofBijective (Algebra.TensorProduct.productMap
       (Pi.algHom B₁ (fun _ : Multiplicative (ZMod q) => D₁) (fun _ => AlgHom.id B₁ D₁))
@@ -47,11 +96,11 @@ theorem torsor_baseChange : ∀ (B₁ B₂ D₁ : Type) [CommRing B₁] [CommRin
     intro z
     induction z using TensorProduct.induction_on with
     | zero => simp
-    | add x y hx hy => simp only [map_add] at hx hy ⊢; rw [hx, hy]
+    | add x y hx hy => simp only [map_add (f := _)] at hx hy ⊢; rw [hx, hy]
     | tmul b w =>
       induction w using TensorProduct.induction_on with
       | zero => simp
-      | add x y hx hy => simp only [TensorProduct.tmul_add, map_add] at hx hy ⊢; rw [hx, hy]
+      | add x y hx hy => simp only [TensorProduct.tmul_add, map_add (f := _)] at hx hy ⊢; rw [hx, hy]
       | tmul x y =>
         funext g
         simp [act₂, e₀, TensorProduct.AlgebraTensorModule.distribBaseChange_tmul,
@@ -114,7 +163,7 @@ theorem exists_stage_torsor : ∀ (T O : Type) [CommRing T] [IsDomain T] [IsLoca
     have h1 : ψ.toRingHom.comp (algebraMap (Polynomial T) E) = φ.comp (algebraMap (Polynomial T) _) := by
       rw [hφ]; exact ψ.comp_algebraMap
     rw [h1, ← Ideal.comap_comap, hloc]
-    exact Localization.AtPrime.comap_maximalIdeal (R := Polynomial T) (I := P)
+    exact Localization.AtPrime.under_maximalIdeal (R := Polynomial T) (I := P)
 
   have hunit : ∀ y : Q.primeCompl, IsUnit (ψ.toRingHom (y : E)) := by
     intro y

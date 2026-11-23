@@ -1,5 +1,48 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsProperToroidalModelStructureMap
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IsProperToroidalModelStructureMap
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.AdicCompletion.RingHom
+public import Mathlib.RingTheory.Finiteness.NilpotentKer
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 open IsLocalRing GlobalTheory.Toroidal
 
@@ -10,8 +53,8 @@ section Etale
 variable {O S : Type} [CommRing O] [IsLocalRing O] [IsNoetherianRing O] [CommRing S] [IsLocalRing S]
   [IsNoetherianRing S] [Algebra O S]
 
-omit [IsNoetherianRing O] in
 
+omit [IsNoetherianRing O] in
 theorem finite_quotient (hm : (maximalIdeal O).map (algebraMap O S) = maximalIdeal S)
     [Module.Finite O (S ⧸ maximalIdeal S)] (n : ℕ) :
     Module.Finite O (S ⧸ (maximalIdeal O ^ (n + 1)).map (algebraMap O S)) := by
@@ -24,8 +67,8 @@ theorem finite_quotient (hm : (maximalIdeal O).map (algebraMap O S) = maximalIde
   have hx' : x ∈ maximalIdeal S := Ideal.Quotient.eq_zero_iff_mem.1 hx
   exact mem_nilradical.2 ⟨n + 1, by rw [← map_pow, Ideal.Quotient.eq_zero_iff_mem]; exact Ideal.pow_mem_pow hx' _⟩
 
-omit [IsNoetherianRing O] in
 
+omit [IsNoetherianRing O] in
 theorem formallyUnramified_quotient (hm : (maximalIdeal O).map (algebraMap O S) = maximalIdeal S)
     [Module.Finite O (S ⧸ maximalIdeal S)] [Algebra.FormallyUnramified O (S ⧸ maximalIdeal S)] (n : ℕ) :
     Algebra.FormallyUnramified O (S ⧸ (maximalIdeal O ^ (n + 1)).map (algebraMap O S)) := by
@@ -42,7 +85,7 @@ theorem formallyUnramified_quotient (hm : (maximalIdeal O).map (algebraMap O S) 
   have H : (maximalIdeal O).map (algebraMap O (S ⧸ J)) = maximalIdeal (S ⧸ J) := by
     rw [← hmap, ← hm, Ideal.map_map]; rfl
   have : IsLocalHom (algebraMap O (S ⧸ J)) :=
-    ((local_hom_TFAE (algebraMap O (S ⧸ J))).out 2 0 rfl rfl).mp H.le
+    ((local_hom_tfae (algebraMap O (S ⧸ J))).out 3 1 rfl rfl).mp H.le
   let g : (S ⧸ maximalIdeal S) →ₐ[O] ResidueField (S ⧸ J) :=
     Ideal.Quotient.liftₐ _ ((IsScalarTower.toAlgHom O (S ⧸ J) (ResidueField (S ⧸ J))).comp (Ideal.Quotient.mkₐ O J))
       fun a ha => by
@@ -203,7 +246,7 @@ theorem exists_extension : ∀ (O R' E Ω : Type) [CommRing O] [IsLocalRing O] [
     ∃ b : R' →+* E, b.comp φ' = ψ ∧ v.comp b = u' := by
   intro O R' E Ω _ _ _ _ _ _ _ _ _ φ' ψ u' v het hun hE hψ _ hv hc hr
   obtain ⟨b, h1, h2⟩ := exists_extension_of_surjective het hun (maximalIdeal E) ψ
-    (((local_hom_TFAE ψ).out 0 2 rfl rfl).mp hψ) v.rangeRestrict v.rangeRestrict_surjective
+    (((local_hom_tfae ψ).out 1 3 rfl rfl).mp hψ) v.rangeRestrict v.rangeRestrict_surjective
     (v.ker_rangeRestrict.trans hv) (u'.codRestrict v.range hr)
     (RingHom.ext fun x => Subtype.ext (RingHom.congr_fun hc x).symm)
   exact ⟨b, h1, RingHom.ext fun x => congrArg Subtype.val (RingHom.congr_fun h2 x)⟩

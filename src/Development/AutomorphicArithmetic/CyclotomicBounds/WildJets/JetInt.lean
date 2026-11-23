@@ -1,14 +1,63 @@
-import Mathlib
+module
+
+public import Formalism.LocalToGlobal.KernelLattices.ThDistC
+public import Development.AutomorphicArithmetic.CyclotomicBounds.WildJets.BvvInt
+import Formalism.LocalToGlobal.Columns.CoefficientsModP.FkMapInitMinor
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AbelianVarietyTheory.Definitions.Divisors.CmHostImaginaryGeneratorNeZero
+import Development.AbelianVarietyTheory.Definitions.Divisors.FlatTensorVacuum
+import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.ExistsMatchOver
+import Development.AbelianVarietyTheory.Statements.HeckeThetaIntegrals.FormulaAt
 import Development.AbelianVarietyTheory.Statements.PlaceShiftStatements.InfClassAt
-import Development.AbelianVarietyTheory.Statements.PlaceShiftStatements.DictAt
-import Development.AbelianVarietyTheory.Definitions.Divisors.DiscreteSeriesHermitianUnique
-import Development.AbelianVarietyTheory.Definitions.Foundations.NormSumPairRankZeroOfCurveCoordNorm
-import Development.AbelianVarietyTheory.Statements.CuspidalUnitaryTwists.ExistsSmallSpherical
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.PadicValuationThetaKernelJetBound
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HighestWeightBelow
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.VwNatCastNonneg
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.JetKapIff
-import Development.AutomorphicArithmetic.CyclotomicBounds.WildJets.BvvInt
+import Formalism.LocalRingCardinality.DataTheta
+import Formalism.LocalToGlobal.BesselHermitianTheta.NoncompactGapAtLeastRange
+import Formalism.LocalToGlobal.IndefiniteReal.IndefiniteWeightData
+import Formalism.LocalToGlobal.IndefiniteReal.LinksDefs
+import Formalism.LocalToGlobal.IndefiniteReal.LocalNewformFunction
+import Formalism.SharpRestriction.GlobalSchurBounds.GeneralLinearActions.GapAtLeast
+import Formalism.SharpRestriction.GlobalSchurBounds.GeneralLinearActions.GenusMassVolumes
+
+@[expose] public section
 
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.L2.Theta Formalism.IndefR Formalism.IndefR.Datum Formalism.IndefR.Links Formalism.L2.DIV
 open IsDedekindDomain NumberField Matrix GlobalTheory.ChiGrid GlobalTheory.FunObj GlobalTheory.RowTest GlobalTheory.RowClaim GlobalTheory.TestLat GlobalTheory.SumSize
@@ -46,7 +95,7 @@ private theorem zaeval_mem {σ τ : Type} {p : MvPolynomial σ ℂ} (hp : p ∈ 
     refine RingHom.mem_range.mpr ⟨C z, ?_⟩
     simp [MvPolynomial.algebraMap_eq]
   | add p q hp' hq' =>
-    rw [map_add, map_add]
+    rw [map_add (f := _), map_add (f := _)]
     exact add_mem hp' hq'
   | mul_X p v hp' =>
     rw [map_mul, map_mul, MvPolynomial.map_X, MvPolynomial.aeval_X]
@@ -75,6 +124,7 @@ open Classical in
 private theorem jetLin_zmem (k : DVar ι a b →₀ ℕ)
     {p : MvPolynomial ((ι × Fin b × Fin b) ⊕ DVar ι a b) ℂ} (hp : p ∈ zPol _) :
     jetLin (fun m => if m = k then (1 : ℂ) else 0) p ∈ zPol (ι × Fin b × Fin b) := by
+
   rw [p.as_sum, map_sum]
   refine sum_mem fun μ _ => ?_
   rw [jetLin_mono]
@@ -90,9 +140,10 @@ private theorem jetLin_split (p : MvPolynomial ((ι × Fin b × Fin b) ⊕ DVar 
       jetLin J p = ∑ k ∈ S, J k • jetLin (fun m => if m = k then (1 : ℂ) else 0) p := by
   have hsplit : ∀ J' : (DVar ι a b →₀ ℕ) → ℂ, jetLin J' p = ∑ μ ∈ p.support,
       monomial (μ.comapDomain Sum.inl Sum.inl_injective.injOn)
-        (coeff μ p * J' (μ.comapDomain Sum.inr Sum.inr_injective.injOn)) := by
+        (AddMonoidAlgebra.coeff p μ * J' (μ.comapDomain Sum.inr Sum.inr_injective.injOn)) := by
     intro J'
     conv_lhs => rw [p.as_sum]
+
     rw [map_sum]
     simp only [jetLin_mono]
   refine ⟨p.support.image (fun μ => μ.comapDomain Sum.inr Sum.inr_injective.injOn), fun J => ?_⟩
@@ -159,8 +210,16 @@ theorem UpperTheory.WildA.jetInt :
     rw [Submodule.coe_sum]
     simp only [Submodule.coe_smul, hJQ]
     exact hS J
-  rw [hop, hsum, map_sum, Finsupp.finset_sum_apply]
+
+  rw [hop, hsum, map_sum, Finsupp.finsetSum_apply]
   simp only [map_smul, Finsupp.smul_apply, smul_eq_mul, hz]
-  rw [← Finsupp.sum_finset_sum_index (by simp) (by intros; push_cast; ring)]
+  let f : ((Formalism.L2.Ker.DVar ι a b →₀ ℕ) →₀ ℤ) →+ ℂ :=
+    { toFun := fun c => c.sum fun m z => (z : ℂ) * J m
+      map_zero' := by simp
+      map_add' := by
+        intro x y
+        exact Finsupp.sum_add_index' (by simp) (by intros; push_cast; ring) }
+  change ∑ x ∈ S, J x * (z x : ℂ) = f (∑ k ∈ S, Finsupp.single k (z k))
+  rw [map_sum]
   refine Finset.sum_congr rfl fun k _ => ?_
-  rw [Finsupp.sum_single_index (by simp), mul_comm]
+  simp [f, Finsupp.sum_single_index, mul_comm]

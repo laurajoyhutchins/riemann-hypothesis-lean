@@ -1,8 +1,47 @@
-import Formalism.LocalToGlobal.GroupLattices.TiedFamilies.EqOneOfPh
-import Formalism.LocalToGlobal.GroupLattices.ComparisonMaps.RecAct
-import Formalism.LocalToGlobal.GroupLattices.ComparisonMaps.ClsOrb
-import Formalism.LocalToGlobal.GroupLattices.LevelGatherings.GramDetIsUnit
-import Formalism.LocalToGlobal.HermitianForms.RankEqFirstLevel
+module
+
+public import Formalism.LocalToGlobal.GroupLattices.TiedFamilies.EqOneOfPh
+public import Formalism.LocalToGlobal.GroupLattices.ComparisonMaps.TiedRec
+public import Formalism.LocalToGlobal.GroupLattices.ComparisonMaps.ClsOrb
+public import Formalism.LocalToGlobal.GroupLattices.ComparisonMaps.RecAct
+public import Formalism.LocalToGlobal.GroupLattices.LevelGatherings.GramDetIsUnit
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -60,7 +99,7 @@ theorem comp_re {a b : ℕ} (h : a = b) (σ : E →ₐ[F] E) (J : Matrix (Fin a)
   subst h
   obtain rfl : J' = J := by ext x y; exact hJ x y
   obtain ⟨i, hi⟩ := hs (Quotient.mk'' x)
-  obtain ⟨g, hg, k, hk, e⟩ := (DoubleCoset.eq _ _ (yG i) x).1 hi
+  obtain ⟨g, hg, k, hk, e⟩ := (@DoubleCoset.eq _ _ _ _ (yG i) x).1 hi
   obtain ⟨γ, hγ, eγ⟩ := Subgroup.mem_map.1 (Subgroup.mem_subgroupOf.1 hg)
   refine ⟨i, γ, k.1, hγ, Subgroup.mem_subgroupOf.1 hk, k.2, ?_⟩
   rw [reGL_rfl, reGL_rfl, eγ, e]; rfl
@@ -85,21 +124,22 @@ end Away
 
 variable {D : D7} (X : Formalism.L2.Herm.Herm0 D)
 
-set_option maxHeartbeats 4000000 in
+
 
 theorem locGood_locAt (u : D.what₂.Word) (w : D.what₂.places.Pl) (hg : GIdx D.host (D.mem u).A.T (D.what₂.places.resChar w))
-    (B : GL (Fin D.R.k) D.host.E) : LocGood (sigD D) (gramN D 0 (Nat.zero_le _)) (locAt X u w hg B) where
-  herm := isHerm_re (rank_eq_first_level D.R) _ D.sp.gram0 _ (gramN_zero D) D.sp.baseGram_isHermitian
-  det := det_re (rank_eq_first_level D.R) D.sp.gram0 _ (gramN_zero D) (isUnit_det_gram0 D.sp)
-  sig := fun v x => (X.g u w hg).spl_sig _ ((X.g u w hg).pl v).2 x
-  yG_mem := fun i => reGL_mem_UPts (rank_eq_first_level D.R) D.sp.cm.sig D.sp.gram0 _ (gramN_zero D) _ _ ((X.g u w hg).yG i).2
-  yG_p := fun i v => by
-    have h1 := (X.g u w hg).yG_p i _ ((X.g u w hg).pl v).2
-    have h2 := bc_reGL (rank_eq_first_level D.R) (prV (E := D.host.E) ((X.g u w hg).pl v).1) ((X.g u w hg).yG i).1
-    rw [h1, map_one] at h2
-    exact h2
+    (B : GL (Fin D.R.k) D.host.E) : LocGood (sigD D) (gramN D 0 (Nat.zero_le _)) (locAt X u w hg B) := by
+  refine { herm := isHerm_re (rank_eq_first_level D.R) _ D.sp.gram0 _ (gramN_zero D) D.sp.baseGram_isHermitian
+           det := det_re (rank_eq_first_level D.R) D.sp.gram0 _ (gramN_zero D) (isUnit_det_gram0 D.sp)
+           sig := fun v x => (X.g u w hg).spl_sig _ ((X.g u w hg).pl v).2 x
+           yG_mem := fun i => reGL_mem_UPts (rank_eq_first_level D.R) D.sp.cm.sig D.sp.gram0 _ (gramN_zero D) _ _ ((X.g u w hg).yG i).2
+           yG_p := ?_ }
+  intro i v
+  have h1 := (X.g u w hg).yG_p i _ ((X.g u w hg).pl v).2
+  have h2 := bc_reGL (rank_eq_first_level D.R) (prV (E := D.host.E) ((X.g u w hg).pl v).1) ((X.g u w hg).yG i).1
+  rw [h1, map_one] at h2
+  exact h2
 
-set_option maxHeartbeats 4000000 in
+
 
 theorem ptEx_rec (T : ∀ u : D.what₂.Word, Forms0 D u) (u : D.what₂.Word) (w : D.what₂.places.Pl)
     (hg : GIdx D.host (D.mem u).A.T (D.what₂.places.resChar w)) (B : GL (Fin D.R.k) D.host.E) :
@@ -112,7 +152,7 @@ def SameUloc (T : ∀ u : D.what₂.Word, Forms0 D u) (u : D.what₂.Word) : Pro
 theorem sameUloc_of_joint (T : ∀ u : D.what₂.Word, Forms0 D u) (u : D.what₂.Word) (hJ : Joint0 X.lev0 u (T u)) :
     SameUloc X T u := hJ.Uloc_eq
 
-set_option maxHeartbeats 4000000 in
+
 
 theorem ptAll_rec (T : ∀ u : D.what₂.Word, Forms0 D u) (u : D.what₂.Word) (hU : SameUloc X T u) (w : D.what₂.places.Pl)
     (hg : GIdx D.host (D.mem u).A.T (D.what₂.places.resChar w)) (B : GL (Fin D.R.k) D.host.E) :
@@ -125,7 +165,7 @@ theorem ptAll_rec (T : ∀ u : D.what₂.Word, Forms0 D u) (u : D.what₂.Word) 
   rw [bc_reGL, hU w']
   exact Subgroup.mem_map.2 ⟨_, ((mem_awayP_iff _ _ k).1 hk).2 w' hw', rfl⟩
 
-set_option maxHeartbeats 4000000 in
+
 
 theorem awayEx_rec (T : ∀ u : D.what₂.Word, Forms0 D u) (u : D.what₂.Word) (hU : SameUloc X T u) (w : D.what₂.places.Pl)
     (hg : GIdx D.host (D.mem u).A.T (D.what₂.places.resChar w)) (B : GL (Fin D.R.k) D.host.E)

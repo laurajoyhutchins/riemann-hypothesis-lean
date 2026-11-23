@@ -1,6 +1,51 @@
-import Mathlib
-import GroundTheory.GlobalFields.NormResidueSymbol.RationalDiagonal
-import GroundTheory.GlobalFields.NormResidueSymbol.RationalCyclotomic
+module
+
+public import GroundTheory.GlobalFields.NormResidueSymbol.RationalCyclotomic
+public import GroundTheory.GlobalFields.NormResidueSymbol.RangeIdeleNormLeKerIdeleSymbol
+public import GroundTheory.GlobalFields.NormResidueSymbol.RationalLocal
+public import GroundTheory.GlobalFields.NormResidueSymbol.RationalDiagonal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+
+@[expose] public section
 
 namespace GroundTheory.Global
 
@@ -14,8 +59,6 @@ namespace RationalSymbol
 open _root_.GroundTheory.Global.Cyclotomic GroundTheory.LocalField.Abstract
 
 attribute [local instance] galCommGroup
-
-local notation "ℚ̄" => AlgebraicClosure ℚ
 
 section Unit
 
@@ -92,7 +135,8 @@ theorem rootsOfUnityField_le_maxCyclotomic (m : ℕ) [NeZero m] :
     rootsOfUnityField m ≤ maxCyclotomic :=
   adjoin_le_iff.2 fun _ hx ↦ subset_adjoin ℚ _ ⟨m, Nat.pos_of_neZero m, hx⟩
 
-theorem restrictNormal_eq_ideleSymbol (m : ℕ) [NeZero m] (x : IdeleGroup ℚ) (σ : Gal(ℚ̄/ℚ))
+theorem restrictNormal_eq_ideleSymbol (m : ℕ) [NeZero m] (x : IdeleGroup ℚ)
+    (σ : Gal(AlgebraicClosure ℚ/ℚ))
     (hσ : cycRestrict σ = reciprocityMap (IdeleClassGroup.mk ℚ x)) :
     σ.restrictNormal (rootsOfUnityField m) = ideleSymbol ℚ (rootsOfUnityField m) x := by
   obtain ⟨⟨a, y⟩, rfl⟩ := RationalIdeles.mulMap_bijective.2 x
@@ -112,8 +156,10 @@ theorem restrictNormal_eq_ideleSymbol (m : ℕ) [NeZero m] (x : IdeleGroup ℚ) 
     have hp' : ζ ^ (prime (placeOf ⟨p, hp⟩) ^ k) = 1 := by rw [prime_placeOf ⟨p, hp⟩]; exact hζ
     rw [ideleSymbol_apply_of_mem_positiveSubgroup L y _ hp']
     apply Subtype.ext
-    have h1 : ((σ₂ ζ : L) : ℚ̄) = σ ζ := AlgEquiv.restrictNormal_commutes σ L ζ
-    have hmem : (ζ : ℚ̄) ∈ maxCyclotomic := rootsOfUnityField_le_maxCyclotomic m ζ.2
+    have h1 : ((σ₂ ζ : L) : AlgebraicClosure ℚ) = σ ζ :=
+      AlgEquiv.restrictNormal_commutes σ L ζ
+    have hmem : (ζ : AlgebraicClosure ℚ) ∈ maxCyclotomic :=
+      rootsOfUnityField_le_maxCyclotomic m ζ.2
     have hζ' : (⟨ζ, hmem⟩ : maxCyclotomic) ^ (prime (placeOf ⟨p, hp⟩) ^ k) = 1 :=
       Subtype.ext (by simpa using congrArg Subtype.val hp')
     have h2 := reciprocityMap_apply_of_mem_positiveSubgroup y (placeOf ⟨p, hp⟩) hζ'
@@ -132,9 +178,9 @@ theorem restrictNormal_eq_ideleSymbol (m : ℕ) [NeZero m] (x : IdeleGroup ℚ) 
     _ = σ₁ r := by rw [this]
 
 theorem coe_ideleSymbol_apply (m : ℕ) [NeZero m] (x : IdeleGroup ℚ) (z : rootsOfUnityField m) :
-    ((ideleSymbol ℚ (rootsOfUnityField m) x z : rootsOfUnityField m) : ℚ̄) =
+    ((ideleSymbol ℚ (rootsOfUnityField m) x z : rootsOfUnityField m) : AlgebraicClosure ℚ) =
       ((reciprocityMap (IdeleClassGroup.mk ℚ x)
-        ⟨z, rootsOfUnityField_le_maxCyclotomic m z.2⟩ : maxCyclotomic) : ℚ̄) := by
+        ⟨z, rootsOfUnityField_le_maxCyclotomic m z.2⟩ : maxCyclotomic) : AlgebraicClosure ℚ) := by
   obtain ⟨σ, hσ⟩ := cycRestrict_surjective (reciprocityMap (IdeleClassGroup.mk ℚ x))
   rw [← restrictNormal_eq_ideleSymbol m x σ hσ, ← hσ, coe_cycRestrict_apply]
   exact AlgEquiv.restrictNormal_commutes σ (rootsOfUnityField m) z

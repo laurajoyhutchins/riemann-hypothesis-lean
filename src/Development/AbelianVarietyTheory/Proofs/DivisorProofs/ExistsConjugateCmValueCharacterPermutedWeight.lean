@@ -1,10 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.LatticeNormTransport
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ContinuousOfTameLoc
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsNatHeckeCharacterTrivialCongruentUnits
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.LatticeNormTransport
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ContinuousOfTameLoc
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ContinuousInfIdele
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsNatHeckeCharacterTrivialCongruentUnits
 import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.UnitOpenAndCongrOpen
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.HeckeCharFiniteOrderUnitIdele
-import Formalism.LocalToGlobal.UnitaryNorms.CharExGen
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.HeckeCharFiniteOrderUnitIdele
+public import Formalism.LocalToGlobal.UnitaryNorms.CharExGen
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Algebra.Group.Units
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -334,17 +378,23 @@ theorem conj_real (ψ : E →+* ℂ) (k : maximalRealSubfield E) :
 
 theorem conjChar_trivOnF (hT : TrivOnF χ) (hbij : Function.Bijective fun i => InfinitePlace.mk (φ i)) :
     TrivOnF (conjChar φ σ p hp χ m hχ) := by
+  have eval_prod {α : Type} (s : Finset α) (f : α → (maximalRealSubfield E)ˣ →* ℂˣ) (k : (maximalRealSubfield E)ˣ) :
+      (∏ i ∈ s, f i) k = ∏ i ∈ s, f i k := by
+    classical
+    induction s using Finset.induction_on with
+    | empty => simp
+    | insert a s ha ih => simp [ha, ih, MonoidHom.mul_apply]
   refine ⟨fun v k => ?_, fun w k => ?_⟩
   · have h := hT.1 v k
     unfold HChar.resFin at h ⊢
-    rw [MonoidHom.finset_prod_apply] at h ⊢
+    rw [eval_prod] at h ⊢
     have e : ∀ P : HeightOneSpectrum (𝓞 E), ((conjChar φ σ p hp χ m hχ).locK P).comp (upF (maximalRealSubfield E)) k =
         Units.map (σ : ℂ →+* ℂ).toMonoidHom ((χ.locK P).comp (upF (maximalRealSubfield E)) k) := fun P =>
       conjChar_loc (hp := hp) (hχ := hχ) _ _
     simp only [e]
     rw [← map_prod, h, map_one]
   · unfold HChar.resInf
-    rw [MonoidHom.finset_prod_apply]
+    rw [eval_prod]
     refine Finset.prod_eq_one fun w' _ => ?_
     obtain ⟨j, rfl⟩ := hbij.2 w'
     apply Units.ext

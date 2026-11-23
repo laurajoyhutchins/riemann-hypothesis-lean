@@ -1,14 +1,52 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Statements.GeometryStatements.FlatDegree
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsCMFrame
-import Development.AutomorphicSpectrum.Proofs.AdelicProofs.HermitianMetricLogNormFormulaStatement
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.GramDetNeZeroLocalBasisCofiniteStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ChowlaSelbergPeriodStatement
-import Development.AutomorphicSpectrum.Proofs.AdelicProofs.LogNormsExtDegreeAdelicStatement
+module
+
+public import Development.AutomorphicSpectrum.Statements.GeometryStatements.FlatDegree
+public import Development.AutomorphicSpectrum.Proofs.AdelicProofs.HermitianMetricLogNormFormulaStatement
+public import Development.AutomorphicSpectrum.Proofs.AdelicProofs.LogNormsExtDegreeAdelic
 import Development.AutomorphicSpectrum.Proofs.AdelicProofs.SumEmbeddingsBaseChangeStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.FrameFunctionCmValueStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.FrameFunctionCmHeightStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.FrameFunctionCmNumberFieldStatement
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.GramDetNeZeroLocalBasisCofiniteStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ChowlaSelbergPeriodStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.FrameFunctionCmHeightStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.FrameFunctionCmNumberFieldStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.FrameFunctionCmValueStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsCMFrame
+
+@[expose] public section
 
 noncomputable section
 
@@ -43,7 +81,7 @@ theorem flatDegree_logOm_re (E : Type) [Field E] [NumberField E] {d : ℕ} [NeZe
       deriv χ.LFunction 1 / χ.LFunction 1) :
     (logOm E χ).re = x - Real.log (rootDiscr E) + Real.log (Real.sqrt d) := by
   have hrd : 0 < rootDiscr E := by
-    unfold NumberField.rootDiscr
+    rw [NumberField.rootDiscr_def]
     apply Real.rpow_pos_of_pos
     exact_mod_cast abs_pos.mpr (NumberField.discr_ne_zero E)
   have hd : 0 < √(d : ℝ) :=

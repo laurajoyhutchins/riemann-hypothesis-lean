@@ -1,6 +1,53 @@
-import ReciprocityTheory.AnalyticForms.PotentialTheory.IsPotentialPullbackStatement
-import ReciprocityTheory.AnalyticForms.PotentialTheory.LocDens
-import ReciprocityTheory.AnalyticForms.PotentialTheory.Partition
+module
+
+public import ReciprocityTheory.AnalyticForms.PotentialTheory.IsPotentialOfFun
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.AnalyticForms.PotentialTheory.LocDens
+public import Mathlib.MeasureTheory.Function.LocallyIntegrable
+public import Mathlib.MeasureTheory.Integral.Bochner.ContinuousLinearMap
+
+@[expose] public section
 
 namespace ReciprocityTheory.AnForm.M
 
@@ -134,46 +181,6 @@ theorem integral_chartPartMeasure [CompactSpace X] [T2Space X] [BorelSpace X]
     refine integral_congr_ae (Filter.Eventually.of_forall fun y => ?_)
     simp only [NNReal.smul_def, smul_eq_mul, Real.coe_toNNReal']
     ring
-
-private theorem isFiniteMeasure_sum' {α : Type} [MeasurableSpace α] {n : ℕ} (μ : Fin n → Measure α)
-    (h : ∀ j, IsFiniteMeasure (μ j)) : IsFiniteMeasure (∑ j, μ j) := by
-  refine Finset.sum_induction μ (fun ν => IsFiniteMeasure ν) (fun a b ha hb => ?_) ?_
-    (fun j _ => h j)
-  · haveI := ha
-    haveI := hb
-    infer_instance
-  · infer_instance
-
-private theorem mul_max_sub_mul_max_neg_eq_mul (a b : ℝ) : b * max (1 * a) 0 - b * max (-1 * a) 0 = b * a := by
-  rcases le_total 0 a with h | h
-  · rw [max_eq_left (by linarith : (0 : ℝ) ≤ 1 * a), max_eq_right (by linarith : -1 * a ≤ 0)]
-    ring
-  · rw [max_eq_right (by linarith : 1 * a ≤ 0), max_eq_left (by linarith : (0 : ℝ) ≤ -1 * a)]
-    ring
-
-theorem mIntMeasure : MIntMeasureStatement := by
-  intro e X _ _ _ _ _ A Φ hΦ
-  have hP : Nonempty (ChartPartition A) := existsPartition A
-  refine ⟨∑ j, chartPartMeasure A hP.some Φ 1 j, ∑ j, chartPartMeasure A hP.some Φ (-1) j,
-    isFiniteMeasure_sum' _ (fun j => isFiniteMeasure_chartPartMeasure A hP.some Φ hΦ 1 j),
-    isFiniteMeasure_sum' _ (fun j => isFiniteMeasure_chartPartMeasure A hP.some Φ hΦ (-1) j), ?_⟩
-  intro g hg hgi
-  have h1 := fun j => integral_chartPartMeasure A hP.some Φ hΦ 1 j g hg hgi
-  have h2 := fun j => integral_chartPartMeasure A hP.some Φ hΦ (-1) j g hg hgi
-  refine ⟨integrable_finset_sum_measure.2 (fun j _ => (h1 j).1),
-    integrable_finset_sum_measure.2 (fun j _ => (h2 j).1), ?_⟩
-  rw [integral_finset_sum_measure (fun j _ => (h1 j).1),
-    integral_finset_sum_measure (fun j _ => (h2 j).1), ← Finset.sum_sub_distrib]
-  unfold mInt
-  rw [dif_pos hP]
-  unfold integralWith
-  refine Finset.sum_congr rfl (fun j _ => ?_)
-  rw [(h1 j).2, (h2 j).2, ← integral_sub (integrableOn_part A hP.some Φ hΦ 1 j g hg hgi)
-    (integrableOn_part A hP.some Φ hΦ (-1) j g hg hgi)]
-  refine integral_congr_ae (Filter.Eventually.of_forall fun y => ?_)
-  dsimp only
-  rw [mul_max_sub_mul_max_neg_eq_mul]
-  ring
 
 end
 

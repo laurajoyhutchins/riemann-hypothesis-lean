@@ -1,8 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.SimpleTwistedTraceFormulaStable
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsUnifAt
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GramDetChangeOfBasesStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PlaceConjugationPropertiesCmFieldStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IsUnifAt
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GramDetChangeOfBasesStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PlaceConjugationPropertiesCmFieldStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.Matrix.Permutation
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -39,7 +84,7 @@ theorem aeval_conj (P : GL (Fin n) K) (D : Matrix (Fin n) (Fin n) K) (Q : K[X]) 
     aeval ((P : Matrix (Fin n) (Fin n) K) * D * ((P⁻¹ : GL (Fin n) K) : Matrix (Fin n) (Fin n) K)) Q =
       (P : Matrix (Fin n) (Fin n) K) * aeval D Q * ((P⁻¹ : GL (Fin n) K) : Matrix (Fin n) (Fin n) K) := by
   induction Q using Polynomial.induction_on' with
-  | add p q hp hq => rw [map_add, map_add, hp, hq, Matrix.mul_add, Matrix.add_mul]
+  | add p q hp hq => rw [map_add (f := _), map_add (f := _), hp, hq, Matrix.mul_add, Matrix.add_mul]
   | monomial k a =>
     rw [aeval_monomial, aeval_monomial, conj_pow]
     have hc : algebraMap K (Matrix (Fin n) (Fin n) K) a * (P : Matrix (Fin n) (Fin n) K) =
@@ -230,9 +275,9 @@ theorem ordL_eq_of_v {x y : L} (h : Valued.v x = Valued.v y) : ordL x = ordL y :
   unfold ordL
   by_cases hx : Valued.v x = 0
   · have hy : Valued.v y = 0 := by rw [← h]; exact hx
-    rw [dif_pos hx, dif_pos hy]
+    rw [dite_eq_left hx, dite_eq_left hy]
   · have hy : Valued.v y ≠ 0 := by rw [← h]; exact hx
-    rw [dif_neg hx, dif_neg hy]
+    rw [dite_eq_right hx, dite_eq_right hy]
     have e : WithZero.unzero hx = WithZero.unzero hy := by
       apply WithZero.coe_injective
       rw [WithZero.coe_unzero, WithZero.coe_unzero, h]
@@ -243,7 +288,7 @@ theorem ordL_mul' {x y : L} (hx : x ≠ 0) (hy : y ≠ 0) : ordL (x * y) = ordL 
   have h0' : Valued.v y ≠ 0 := by simpa using hy
   have h1 : Valued.v (x * y) ≠ 0 := by rw [map_mul]; exact mul_ne_zero h0 h0'
   unfold ordL
-  rw [dif_neg h1, dif_neg h0, dif_neg h0']
+  rw [dite_eq_right h1, dite_eq_right h0, dite_eq_right h0']
   have e : WithZero.unzero h1 = WithZero.unzero h0 * WithZero.unzero h0' := by
     apply WithZero.coe_injective
     rw [WithZero.coe_mul, WithZero.coe_unzero, WithZero.coe_unzero, WithZero.coe_unzero, map_mul]
@@ -279,7 +324,7 @@ end Ord
 
 variable {E : Type} [Field E] [NumberField E] [IsCMField E]
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem kapSign_eq_one_of_vals (hU : Unr E) (w : Pl E) (n : ℕ) (γ : GLw n w) (hγ : γ ∈ UL n w)
     (v : Fin n → ℤ) (hv : Function.Injective v) (hrev : ∀ i j, v j = -v i → j = Fin.rev i)
@@ -326,6 +371,7 @@ theorem kapSign_eq_one_of_vals (hU : Unr E) (w : Pl E) (n : ℕ) (γ : GLw n w) 
     exact mul_ne_zero ((map_ne_zero (cj w)).2 hPdet) hPdet
   have hherm : ∀ i j, cj w (H j i) = H i j := by
     intro i j
+
     simp only [hHdef, Matrix.mul_apply, Matrix.transpose_apply, Matrix.map_apply, map_sum, map_mul, hinv]
     exact Finset.sum_congr rfl fun k _ => mul_comm _ _
   have hun : ∀ i j, cj w (u i) * H i j * u j = H i j := by

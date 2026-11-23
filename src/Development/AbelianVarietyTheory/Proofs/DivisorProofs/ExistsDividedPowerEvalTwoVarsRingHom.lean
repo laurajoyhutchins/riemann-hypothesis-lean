@@ -1,4 +1,54 @@
-import Mathlib
+module
+
+public import Mathlib.RingTheory.MvPolynomial.IrreducibleQuadratic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Data.Nat.Choose.Cast
+
+@[expose] public section
+
 open MvPolynomial
 
 set_option autoImplicit false
@@ -21,8 +71,8 @@ theorem ex_injective : Function.Injective ex := by
 
 theorem bv_eq (p : ℕ × ℕ) :
     bv p = ((p.1.factorial : ℚ)⁻¹ * (p.2.factorial : ℚ)⁻¹) • monomial (ex p) (1 : ℚ) := by
-  rw [bv, ex, X_pow_eq_monomial, X_pow_eq_monomial, smul_monomial, smul_monomial, monomial_mul,
-    smul_monomial]
+  rw [bv, ex, X_pow_eq_monomial, X_pow_eq_monomial, smul_monomial, smul_monomial,
+    monomial_mul_monomial, smul_monomial]
   simp
 
 theorem bv_li : LinearIndependent ℚ bv := by
@@ -39,8 +89,8 @@ theorem ex_add (p q : ℕ × ℕ) : ex (p + q) = ex p + ex q := by
 
 theorem bv_mul (p q : ℕ × ℕ) :
     bv p * bv q = ((p.1 + q.1).choose p.1 * (p.2 + q.2).choose p.2 : ℕ) • bv (p + q) := by
-  rw [bv_eq, bv_eq, bv_eq, smul_mul_smul, monomial_mul, ← ex_add, ← Nat.cast_smul_eq_nsmul ℚ, smul_smul,
-    mul_one]
+  rw [bv_eq, bv_eq, bv_eq, smul_mul_smul, monomial_mul_monomial, ← ex_add,
+    ← Nat.cast_smul_eq_nsmul ℚ, smul_smul, mul_one]
   congr 1
   simp only [Prod.fst_add, Prod.snd_add, Nat.cast_mul, Nat.cast_add_choose]
   field_simp
@@ -70,18 +120,21 @@ variable {B : Type} [CommRing B] (u v : ℕ → B)
 
 def ψ : D →ₗ[ℤ] B := β.constr ℤ fun p ↦ u p.1 * v p.2
 
+
 open Classical in
+def φ (q : MvPolynomial (Fin 2) ℚ) : B := by
+  classical
+  exact if h : q ∈ D then ψ u v ⟨q, h⟩ else 0
 
-def φ (q : MvPolynomial (Fin 2) ℚ) : B := if h : q ∈ D then ψ u v ⟨q, h⟩ else 0
-
-theorem φ_of_mem {q : MvPolynomial (Fin 2) ℚ} (h : q ∈ D) : φ u v q = ψ u v ⟨q, h⟩ := dif_pos h
+theorem φ_of_mem {q : MvPolynomial (Fin 2) ℚ} (h : q ∈ D) :
+    φ u v q = ψ u v ⟨q, h⟩ := dite_eq_left h
 
 theorem φ_bv (p : ℕ × ℕ) : φ u v (bv p) = u p.1 * v p.2 := by
   rw [φ_of_mem u v (bv_mem p), ← β_eq, ψ, Module.Basis.constr_basis]
 
 theorem φ_add {x y : MvPolynomial (Fin 2) ℚ} (hx : x ∈ D) (hy : y ∈ D) :
     φ u v (x + y) = φ u v x + φ u v y := by
-  rw [φ_of_mem u v hx, φ_of_mem u v hy, φ_of_mem u v (add_mem hx hy), ← map_add]; rfl
+  rw [φ_of_mem u v hx, φ_of_mem u v hy, φ_of_mem u v (add_mem hx hy), ← map_add (f := _)]; rfl
 
 theorem φ_zsmul (z : ℤ) {x : MvPolynomial (Fin 2) ℚ} (hx : x ∈ D) : φ u v (z • x) = z • φ u v x := by
   rw [φ_of_mem u v hx, φ_of_mem u v (Submodule.smul_mem _ z hx), ← map_zsmul]; rfl
@@ -119,8 +172,8 @@ end GlobalTheory.DPEval2
 
 namespace GlobalTheory
 
-open DPEval2 in
 
+open DPEval2 in
 theorem dpEval_two :
     ∀ (B : Type) [CommRing B] (u v : ℕ → B), u 0 = 1 → v 0 = 1 →
     (∀ m n, u m * u n = ((m + n).choose m : B) * u (m + n)) →
@@ -135,7 +188,8 @@ theorem dpEval_two :
       (∀ z : ℤ, ∀ d ∈ Submodule.span ℤ (Set.range fun p : ℕ × ℕ ↦ ((p.1.factorial : ℚ)⁻¹ • (MvPolynomial.X 0 : MvPolynomial (Fin 2) ℚ) ^ p.1) * ((p.2.factorial : ℚ)⁻¹ • MvPolynomial.X 1 ^ p.2)),
         φ (z • d) = z • φ d) := by
   intro B _ u v _ _ hu hv
-  refine ⟨φ u v, fun a c ↦ φ_bv u v (a, c), fun d hd e he ↦ ?_, fun z d hd ↦ φ_zsmul u v z hd⟩
-  exact ⟨φ_add u v hd he, mul_mem hd he, φ_mul u v hu hv hd he⟩
+  refine ⟨DPEval2.φ u v, fun a c ↦ DPEval2.φ_bv u v (a, c), fun d hd e he ↦ ?_,
+    fun z d hd ↦ DPEval2.φ_zsmul u v z hd⟩
+  exact ⟨DPEval2.φ_add u v hd he, DPEval2.mul_mem hd he, DPEval2.φ_mul u v hu hv hd he⟩
 
 end GlobalTheory

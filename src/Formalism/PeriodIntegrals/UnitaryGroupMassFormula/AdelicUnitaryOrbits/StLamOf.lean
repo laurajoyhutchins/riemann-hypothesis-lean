@@ -1,6 +1,56 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicUnitaryOrbits.UnitChoice
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicUnitaryOrbits.QuadFiniteDimensional
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicUnitaryOrbits.UnitChoice
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -88,9 +138,10 @@ theorem core {R S : Type} [CommRing R] [CommRing S] (ι : R →+* S) (s : S →+
   have hE1 : ∑ i, ι (e i) = 1 := by rw [← map_sum, hsum1, map_one]
   have hsl : s (∑ i, ι (e i) * (ι (p i) + ι (q i) * Θ)) =
       ∑ i, ι (e i) * (ι (p i) - ι (q i) * Θ) := by
+
     rw [map_sum]
     refine Finset.sum_congr rfl fun i _ => ?_
-    rw [map_mul, map_add, map_mul, hsι, hsι, hsι, hsΘ]
+    rw [map_mul, map_add (f := _), map_mul, hsι, hsι, hsι, hsΘ]
     ring
   have hn : ∀ i, (ι (p i) + ι (q i) * Θ) * (ι (p i) - ι (q i) * Θ) = 1 := fun i => by
     rw [norm_one _ _ _ _ hΘ, ← map_pow, ← map_pow, ← map_mul, ← map_sub, hnorm i, map_one]
@@ -110,16 +161,18 @@ theorem core {R S : Type} [CommRing R] [CommRing S] (ι : R →+* S) (s : S →+
     rw [hz]
     have hsz : s (∑ i, ι (e i) * (ι Bt - (ι (p i) - ι (q i) * Θ) * w)) =
         ∑ i, ι (e i) * (ι Bt - (ι (p i) + ι (q i) * Θ) * (ι a - ι b * Θ)) := by
+
       rw [map_sum]
       refine Finset.sum_congr rfl fun i _ => ?_
-      simp only [hw, map_mul, map_sub, map_add, hsι, hsΘ]
+      simp only [hw, map_mul, map_sub, map_add (f := _), hsι, hsΘ]
       ring
     have hprod : (∑ i, ι (e i) * (ι Bt - (ι (p i) - ι (q i) * Θ) * w)) *
         s (∑ i, ι (e i) * (ι Bt - (ι (p i) - ι (q i) * Θ) * w)) = ι (∑ i, e i * f i) := by
+
       rw [hsz, glue_mul _ hidS horS, map_sum]
       refine Finset.sum_congr rfl fun i _ => ?_
       rw [hw, norm_id _ _ _ _ _ _ _ hΘ, hf i, map_mul]
-      simp only [map_sub, map_add, map_mul, map_pow]
+      simp only [map_sub, map_add (f := _), map_mul, map_pow]
     have hu := hunit.map ι
     rw [← hprod] at hu
     exact isUnit_of_mul_isUnit_left hu
@@ -152,7 +205,7 @@ theorem decomp (θ : E) (hspan : ∀ e : E, ∃ p q : F, e = algebraMap F E p + 
     obtain ⟨a1, b1, rfl⟩ := hx
     obtain ⟨a2, b2, rfl⟩ := hy
     refine ⟨a1 + a2, b1 + b2, ?_⟩
-    rw [map_add, map_add]
+    rw [map_add (f := _), map_add (f := _)]
     ring
 
 end Tensor
@@ -238,7 +291,7 @@ theorem quadGen : QuadGen := by
   obtain ⟨v, u, hsq⟩ := hspan (e ^ 2)
   have hse : σ e ≠ e := fun h => he ((hfix e).mp h)
   have hσsq : σ e ^ 2 = algebraMap F E v + algebraMap F E u * σ e := by
-    rw [← map_pow, hsq, map_add, map_mul, AlgHom.commutes, AlgHom.commutes]
+    rw [← map_pow, hsq, map_add (f := _), map_mul, AlgHom.commutes, AlgHom.commutes]
   have hsum : σ e = algebraMap F E u - e := by
     have h0 : (σ e - e) * (σ e + e - algebraMap F E u) = 0 := by
       linear_combination hσsq - hsq
@@ -246,7 +299,7 @@ theorem quadGen : QuadGen := by
     · exact absurd (sub_eq_zero.mp h) hse
     · linear_combination h
   have hθsq : (2 * e - algebraMap F E u) ^ 2 = algebraMap F E (4 * v + u ^ 2) := by
-    simp only [map_add, map_mul, map_pow, map_ofNat]
+    simp only [map_add (f := _), map_mul, map_pow, map_ofNat]
     linear_combination 4 * hsq
   refine ⟨2 * e - algebraMap F E u, 4 * v + u ^ 2, hθsq, ?_, ?_, ?_⟩
   · rw [map_sub, map_mul, map_ofNat, AlgHom.commutes, hsum]
@@ -261,7 +314,7 @@ theorem quadGen : QuadGen := by
     obtain ⟨c0, c1, hx⟩ := hspan x
     refine ⟨c0 + c1 * u / 2, c1 / 2, ?_⟩
     rw [hx]
-    simp only [map_add, map_mul, map_div₀, map_ofNat]
+    simp only [map_add (f := _), map_mul, map_div₀, map_ofNat]
     ring
 
 theorem stLam : StLam := stLam_of quadGen

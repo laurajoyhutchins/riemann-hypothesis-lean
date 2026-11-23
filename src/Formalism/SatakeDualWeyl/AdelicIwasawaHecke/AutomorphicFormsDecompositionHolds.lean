@@ -1,4 +1,47 @@
-import Formalism.SatakeDualWeyl.Statement
+module
+
+public import Formalism.SatakeDualWeyl.Statement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -16,54 +59,11 @@ theorem mem_AMFK_iff {k : Type} [CommRing k] {W : Type} [AddCommGroup W] [Module
 
 theorem exists_rep (s : ClassSet Γ K → G) (hs : ∀ c, DoubleCoset.mk Γ K (s c) = c) (g : G) :
     ∃ p : Γ × K, g = (p.1 : G) * s (DoubleCoset.mk Γ K g) * (p.2 : G) := by
-  have h := (DoubleCoset.eq Γ K (s (DoubleCoset.mk Γ K g)) g).1 (hs _)
+  have h := (@DoubleCoset.eq _ _ Γ K (s (DoubleCoset.mk Γ K g)) g).1 (hs _)
   obtain ⟨a, ha, b, hb, hab⟩ := h
   exact ⟨(⟨a, ha⟩, ⟨b, hb⟩), hab⟩
 
-theorem mk_of_eq (s : ClassSet Γ K → G) (hs : ∀ c, DoubleCoset.mk Γ K (s c) = c)
-    (c : ClassSet Γ K) (g : G) (γ : Γ) (κ : K) (e : g = (γ : G) * s c * κ) :
-    DoubleCoset.mk Γ K g = c := by
-  conv_rhs => rw [← hs c]
-  rw [DoubleCoset.eq]
-  refine ⟨(γ : G)⁻¹, Γ.inv_mem γ.2, (κ : G)⁻¹, K.inv_mem κ.2, ?_⟩
-  rw [e]
-  group
-
-theorem rho_eq_of_eq {k : Type} [CommRing k] {W : Type} [AddCommGroup W] [Module k W]
-    (ρ : Representation k Γ W) (x : G) (w : W)
-    (hw : ∀ γ ∈ stabAt Γ K x, ρ γ w = w) (γ γ' : Γ) (κ κ' : K)
-    (e : (γ : G) * x * κ = (γ' : G) * x * κ') : ρ γ w = ρ γ' w := by
-  have e' : (γ : G) = (γ' : G) * x * (κ' : G) * (κ : G)⁻¹ * x⁻¹ := by
-    rw [← e]
-    group
-  have hmem : x⁻¹ * ((γ'⁻¹ * γ : Γ) : G) * x ∈ K := by
-    have h1 : x⁻¹ * ((γ'⁻¹ * γ : Γ) : G) * x = (κ' : G) * (κ : G)⁻¹ := by
-      rw [Subgroup.coe_mul, Subgroup.coe_inv, e']
-      group
-    rw [h1]
-    exact K.mul_mem κ'.2 (K.inv_mem κ.2)
-  have h := hw (γ'⁻¹ * γ) hmem
-  calc ρ γ w = ρ (γ' * (γ'⁻¹ * γ)) w := by rw [mul_inv_cancel_left]
-    _ = ρ γ' (ρ (γ'⁻¹ * γ) w) := by rw [map_mul]; rfl
-    _ = ρ γ' w := by rw [h]
-
 variable {k : Type} [CommRing k] {W : Type} [AddCommGroup W] [Module k W]
-
-def extend (s : ClassSet Γ K → G) (hs : ∀ c, DoubleCoset.mk Γ K (s c) = c)
-    (ρ : Representation k Γ W) (w : ClassSet Γ K → W) (g : G) : W :=
-  ρ (Classical.choose (exists_rep Γ K s hs g)).1 (w (DoubleCoset.mk Γ K g))
-
-theorem extend_eq (s : ClassSet Γ K → G) (hs : ∀ c, DoubleCoset.mk Γ K (s c) = c)
-    (ρ : Representation k Γ W) (w : ClassSet Γ K → W)
-    (hw : ∀ c, ∀ γ ∈ stabAt Γ K (s c), ρ γ (w c) = w c)
-    (c : ClassSet Γ K) (g : G) (γ : Γ) (κ : K) (e : g = (γ : G) * s c * κ) :
-    extend Γ K s hs ρ w g = ρ γ (w c) := by
-  have hc : DoubleCoset.mk Γ K g = c := mk_of_eq Γ K s hs c g γ κ e
-  have hp := Classical.choose_spec (exists_rep Γ K s hs g)
-  unfold extend
-  generalize Classical.choose (exists_rep Γ K s hs g) = p at hp ⊢
-  rw [hc] at hp ⊢
-  exact rho_eq_of_eq Γ K ρ (s c) (w c) (hw c) p.1 γ p.2 κ (hp.symm.trans e)
 
 end Rep
 

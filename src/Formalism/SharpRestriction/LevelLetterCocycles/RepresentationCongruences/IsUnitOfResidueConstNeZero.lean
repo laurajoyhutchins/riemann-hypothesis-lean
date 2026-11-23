@@ -1,4 +1,49 @@
-import Formalism.SharpRestriction.LevelLetterCocycles.RepresentationCongruences.ExistsPhiBridge
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.RepresentationCongruences.ExistsPhiBridge
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PowerSeries.Inverse
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -34,30 +79,12 @@ theorem residueConst_phi_eq (P : PhiData O l) (f : O⟦X⟧) : residueConst (P.�
     have h6 : P.φ (X - C (l : O)) = P.u * (X - C (l : O)) * X ^ (l - 1) := P.6
     rw [map_sub, hCa] at h6
     have h6' : P.φ X = P.u * (X - C (l : O)) * X ^ (l - 1) + C (l : O) := by rw [← h6]; ring
-    rw [h6', map_add, map_mul, map_pow, residueConst_X_eq_zero, zero_pow (by omega), mul_zero, zero_add,
+    rw [h6', map_add (f := _), map_mul, map_pow, residueConst_X_eq_zero, zero_pow (by omega), mul_zero, zero_add,
       residueConst_apply, PowerSeries.constantCoeff_C]
     exact (IsLocalRing.residue_eq_zero_iff _).2 P.4
   conv_lhs => rw [PowerSeries.eq_shift_mul_X_add_const f]
-  rw [map_add, map_mul, map_add, map_mul, hX, mul_zero, zero_add, hCa]
+  rw [map_add (f := _), map_mul, map_add (f := _), map_mul, hX, mul_zero, zero_add, hCa]
   rw [residueConst_apply, residueConst_apply, PowerSeries.constantCoeff_C]
-
-theorem residueConst_p1_eq_zero (P : PhiData O l) : residueConst (P.p 1) = 0 := by
-  have hl2 : 2 ≤ l := (Fact.out : l.Prime).two_le
-  have hCa : ∀ a : O, P.φ (C a) = C a := by
-    intro a
-    first
-    | exact P.φ.commutes a
-    | simpa using P.φ.commutes a
-    | simpa [PowerSeries.algebraMap_apply'] using P.φ.commutes a
-    | simpa [PowerSeries.algebraMap_apply] using P.φ.commutes a
-  unfold PhiData.p
-  rw [Function.iterate_one]
-  have h6 : P.φ (X - C (l : O)) = P.u * (X - C (l : O)) * X ^ (l - 1) := P.6
-  rw [map_sub, hCa] at h6
-  have h6' : P.φ X = P.u * (X - C (l : O)) * X ^ (l - 1) + C (l : O) := by rw [← h6]; ring
-  rw [h6', map_add, map_mul, map_pow, residueConst_X_eq_zero, zero_pow (by omega), mul_zero, zero_add,
-    residueConst_apply, PowerSeries.constantCoeff_C]
-  exact (IsLocalRing.residue_eq_zero_iff _).2 P.4
 
 theorem level_poly_decomposition (P : PhiData O l) (s : ℕ) (hs : 1 ≤ s) :
     ∃ e h : O⟦X⟧, P.p s = C (l : O) * e + X ^ l * h ∧ residueConst e ≠ 0 := by
@@ -80,7 +107,7 @@ theorem level_poly_decomposition (P : PhiData O l) (s : ℕ) (hs : 1 ≤ s) :
       residueConst a'' = 0 := by
     intro a b a' b'
     refine ⟨a * C (l : O) * a' + a * X ^ l * b' + X ^ l * b * a', X ^ l * b * b', by ring, ?_⟩
-    simp only [map_add, map_mul, hκC, hκXl, mul_zero, zero_mul, add_zero]
+    simp only [map_add (f := _), map_mul, hκC, hκXl, mul_zero, zero_mul, add_zero]
   have hpow : ∀ a b : O⟦X⟧, ∀ m, 2 ≤ m → ∃ a' b' : O⟦X⟧,
       (C (l : O) * a + X ^ l * b) ^ m = C (l : O) * a' + X ^ l * b' ∧ residueConst a' = 0 := by
     intro a b m hm
@@ -109,9 +136,9 @@ theorem level_poly_decomposition (P : PhiData O l) (s : ℕ) (hs : 1 ≤ s) :
     obtain ⟨e, h, he, hk⟩ := ih
     obtain ⟨a', b', hab, hka⟩ := hpow (1 - P.u * X ^ (l - 1)) P.u l hl2
     refine ⟨P.φ e + a' * P.φ h, b' * P.φ h, ?_, ?_⟩
-    · rw [Function.iterate_succ_apply', he, map_add, map_mul, map_mul, hCa, map_pow, hφX, hab]
+    · rw [Function.iterate_succ_apply', he, map_add (f := _), map_mul, map_mul, hCa, map_pow, hφX, hab]
       ring
-    · rw [map_add, map_mul, hka, zero_mul, add_zero, residueConst_phi_eq]
+    · rw [map_add (f := _), map_mul, hka, zero_mul, add_zero, residueConst_phi_eq]
       exact hk
 
 theorem isUnit_of_residueConst_ne_zero {e : O⟦X⟧} (hκ : residueConst e ≠ 0) : IsUnit e := by

@@ -1,8 +1,53 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalUnitaryOrbits.QSplitHolds
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalUnitaryOrbits.CrossMSmulRight
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerOrbitVolume.LocDensCntRes
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalUnitaryOrbits.MemUnifOIff
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerOrbitVolume.LocDensCntRes
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalUnitaryOrbits.EtaVCases
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalUnitaryOrbits.OBas1OfUnitV
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalUnitaryOrbits.CrossMSmulRight
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalUnitaryOrbits.MemUnifOIff
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalUnitaryOrbits.QInertHolds
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalUnitaryOrbits.QSplitHolds
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -60,7 +105,7 @@ theorem resQ_of (hT : ThetaBas σ J ψ v) : ResQ σ J ψ v := by
   obtain ⟨θ, h1, h2, h3, h4⟩ := hT hstd hun
   set iθ : Fv F v ⊗[F] E := inclR (F := F) (Fv F v) (θ : E) with hiθ
   have hss : sigO σ (sigO σ θ) = θ := RingOfIntegers.ext (by simp only [sigO_coe]; exact sig_sig σ hstd.1 _)
-  obtain ⟨t, ht⟩ := fix_int σ hstd.1 (θ + sigO σ θ) (by rw [map_add, hss, add_comm])
+  obtain ⟨t, ht⟩ := fix_int σ hstd.1 (θ + sigO σ θ) (by rw [map_add (f := _), hss, add_comm])
   obtain ⟨m, hm⟩ := fix_int σ hstd.1 (θ * sigO σ θ) (by rw [map_mul, hss, mul_comm])
   have hθ2 : θ * θ = algebraMap (𝓞 F) (𝓞 E) t * θ - algebraMap (𝓞 F) (𝓞 E) m := by
     rw [ht, hm]; ring
@@ -117,7 +162,7 @@ theorem resQ_of (hT : ThetaBas σ J ψ v) : ResQ σ J ψ v := by
       map_mul' := fun x y => by
         rw [hρ (x * y) (c0 x * c0 y - c1 x * c1 y * M0) (c0 x * c1 y + c1 x * c0 y + c1 x * c1 y * T0) ?_]
         · show _ = ρf x * ρf y
-          simp only [ρf, map_add, map_sub, map_mul, T0, M0, hgt]
+          simp only [ρf, map_add (f := _), map_sub, map_mul, T0, M0, hgt]
           linear_combination (-(g (redR v (c1 x)) * g (redR v (c1 y)))) * hQθ
         · show (x : Fv F v ⊗[F] E) * (y : Fv F v ⊗[F] E) = _
           rw [hc x, hc y]
@@ -131,11 +176,11 @@ theorem resQ_of (hT : ThetaBas σ J ψ v) : ResQ σ J ψ v := by
       map_add' := fun x y => by
         rw [hρ (x + y) (c0 x + c0 y) (c1 x + c1 y) ?_]
         · show _ = ρf x + ρf y
-          simp only [ρf, map_add]
+          simp only [ρf, map_add (f := _)]
           ring
         · show (x : Fv F v ⊗[F] E) + (y : Fv F v ⊗[F] E) = _
           rw [hc x, hc y]
-          simp only [AddMemClass.coe_add, sc_eq', map_add]
+          simp only [AddMemClass.coe_add, sc_eq', map_add (f := _)]
           ring }
   refine ⟨ρ, ?_, ?_, ?_⟩
   · intro q
@@ -180,12 +225,12 @@ theorem resQ_of (hT : ThetaBas σ J ψ v) : ResQ σ J ψ v := by
   · intro x y hxy
     have hy : (y : Fv F v ⊗[F] E) = sc (E := E) v ((c0 x + c1 x * T0 : v.adicCompletionIntegers F) : Fv F v) +
         sc (E := E) v ((-c1 x : v.adicCompletionIntegers F) : Fv F v) * iθ := by
-      rw [hxy, hc x, map_add, map_mul, sigR_sc, sigR_sc, hsiθ]
-      simp only [AddMemClass.coe_add, MulMemClass.coe_mul, NegMemClass.coe_neg, sc_eq', map_add, map_mul, map_neg, T0]
+      rw [hxy, hc x, map_add (f := _), map_mul, sigR_sc, sigR_sc, hsiθ]
+      simp only [AddMemClass.coe_add, MulMemClass.coe_mul, NegMemClass.coe_neg, sc_eq', map_add (f := _), map_mul, map_neg, T0]
       ring
     show ρf y = sigQ σ v (ρf x)
     rw [hρ y _ _ hy]
-    simp only [ρf, map_add, map_mul, map_neg, hgt, sigQ_alg]
+    simp only [ρf, map_add (f := _), map_mul, map_neg, hgt, sigQ_alg]
     have hsq : sigQ σ v θb = Ideal.Quotient.mk (IE (E := E) v) (algebraMap (𝓞 F) (𝓞 E) t) - θb := by
       simp only [θb]
       rw [sigQ_mk, hσθ, map_sub]

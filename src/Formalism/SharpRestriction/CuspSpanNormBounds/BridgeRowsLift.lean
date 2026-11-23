@@ -1,7 +1,48 @@
-import Formalism.SharpRestriction.CuspSpanNormBounds.BruhatCellsKronecker.LisoSmulMem
-import Formalism.SharpRestriction.CuspSpanNormBounds.BruhatCellsKronecker.LadjFrame
-import Formalism.SharpRestriction.CuspSpanNormBounds.BruhatCellsKronecker.LretrCancel
-import Formalism.SharpRestriction.CuspSpanNormBounds.BruhatCellsKronecker.LTheta
+module
+
+public import Formalism.SharpRestriction.CuspSpanNormBounds.BruhatCellsKronecker.IdLiftDef
+public import Formalism.SharpRestriction.CuspSpanNormBounds.BruhatCellsKronecker.LTheta
+public import Formalism.SharpRestriction.CuspSpanNormBounds.BruhatCellsKronecker.LadjFrame
+public import Formalism.SharpRestriction.CuspSpanNormBounds.BruhatCellsKronecker.LisoSmulMem
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Formalism.SharpRestriction.CuspSpanNormBounds.BruhatCellsKronecker.CellDef
+
+@[expose] public section
 
 noncomputable section
 
@@ -75,35 +116,6 @@ theorem rlift_spl_of_retr (hcm : Formalism.HermitianLatticesTheory.IsCMUnram E) 
     simp only [LinearMap.sub_apply, LinearMap.smul_apply, LinearMap.comp_apply]
     rw [h0, hzero' y hy, map_zero, smul_zero, sub_zero]
 
-theorem rlift_spl_exists (hcm : Formalism.HermitianLatticesTheory.IsCMUnram E) (Λ : Submodule (𝓞 E) S.V) (X : Submodule E S.V)
-    (hlat : Submodule.IsLattice E Λ) (huni : Formalism.HermitianLatticesTheory.IsUnimodular S.hT Λ) (hiso : ∀ x ∈ X, ∀ y ∈ X, S.hT x y = 0)
-    (z m : S.V) (hz : z ∈ Λ) (hzX : ∀ x ∈ X, S.hT x z = 0) (hm : m ∈ Λ) (hmX : ∀ x ∈ X, S.hT x m = 0)
-    (hmz : S.hT m z = 1) :
-    ∃ P P' : S.V →ₗ[E] S.V, rlift_Spl Λ X P P' ∧ P z = 0 := by
-  obtain ⟨product_zeroth_terms, hid, hX, hint⟩ := l_retr E S Λ X hlat
-  have hdual : ∀ l ∈ Λ, ∃ o : 𝓞 E, (o : E) = S.hT m l := by
-    intro l hl
-    have h1 : l ∈ Formalism.HermitianLatticesTheory.dual S.hT Λ := by rw [huni]; exact hl
-    unfold Formalism.HermitianLatticesTheory.dual Formalism.E.hdual at h1
-    simp only [Submodule.mem_iInf, Submodule.mem_comap, LinearMap.restrictScalars_apply] at h1
-    obtain ⟨o, ho⟩ := Submodule.mem_one.1 (h1 m hm)
-    exact ⟨o, ho⟩
-  obtain ⟨P, P', hS, hk⟩ := rlift_spl_of_retr hcm Λ X huni hiso (product_zeroth_terms - (S.hT m).smulRight (product_zeroth_terms z))
-    (fun x hx => by
-      simp only [LinearMap.sub_apply, LinearMap.smulRight_apply]
-      rw [rlift_swap (hmX x hx), zero_smul, sub_zero, hid x hx])
-    (fun y => by
-      simp only [LinearMap.sub_apply, LinearMap.smulRight_apply]
-      exact X.sub_mem (hX y) (X.smul_mem _ (hX z)))
-    (fun l hl => by
-      simp only [LinearMap.sub_apply, LinearMap.smulRight_apply]
-      obtain ⟨o, ho⟩ := hdual l hl
-      rw [← ho]
-      exact Λ.sub_mem (hint l hl) (liso_smul_mem Λ o (hint z hz)))
-  refine ⟨P, P', hS, hk z hzX ?_⟩
-  simp only [LinearMap.sub_apply, LinearMap.smulRight_apply]
-  rw [hmz, one_smul, sub_self]
-
 section Spl
 
 variable {Λ : Submodule (𝓞 E) S.V} {X : Submodule E S.V} {P P' : S.V →ₗ[E] S.V}
@@ -151,7 +163,7 @@ theorem rlift_three {X : Submodule E S.V} (hiso : ∀ x ∈ X, ∀ y ∈ X, S.hT
     {x w y x' w' y' : S.V} (hx : x ∈ X) (hx' : x' ∈ X) (hw : ∀ v ∈ X, S.hT v w = 0) (hw' : ∀ v ∈ X, S.hT v w' = 0)
     (hyy : S.hT y y' = 0) (hwy : S.hT w y' = 0) (hyw : S.hT y w' = 0) :
     S.hT (x + w + y) (x' + w' + y') = S.hT x y' + S.hT w w' + S.hT y x' := by
-  simp only [map_add, LinearMap.add_apply]
+  simp only [map_add (f := _), LinearMap.add_apply]
   rw [hiso x hx x' hx', hw' x hx, rlift_swap (hw x' hx'), hyy, hwy, hyw]
   ring
 

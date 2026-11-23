@@ -1,9 +1,44 @@
-import Mathlib
-import Formalism.LocalToGlobal.ProjectiveLattices.LiftCurveSt
-import Formalism.LocalToGlobal.ProjectiveLattices.IntAtExtExtAll
-import Formalism.LocalToGlobal.ProjectiveLattices.IsGenFrGenFr
-import Formalism.LocalToGlobal.ProjectiveLattices.EquivariantFiniteGroup
-import Formalism.LocalToGlobal.ProjectiveLattices.PetersonNormSubspace
+module
+
+public import Formalism.LocalToGlobal.ProjectiveLattices.LiftCurveSt
+public import Formalism.LocalToGlobal.ProjectiveLattices.IntAtExtExtAll
+public import Formalism.LocalToGlobal.ProjectiveLattices.IsGenFrGenFr
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -65,22 +100,8 @@ def CurveModelExists : Prop :=
     (ka wL wF : WeightFamilies.Wt D j) (G : GlobalFamilyData (XP h j hj) ka wL wF) (S : WeightAlgebra.Scal (recB h.toLawsCore)),
     CurveModelAt h j hj hg G S
 
-example : XP h j hj = recPlus h j hj := rfl
-
-example {ka wL wF : WeightFamilies.Wt D j} (G : GlobalFamilyData (XP h j hj) ka wL wF) (S : WeightAlgebra.Scal (recB h.toLawsCore)) (a b : ℝ)
-    (hT : G.TiedW S a b) : Generates h j hj S.sW G.w := hT.1
-
 theorem ptNorm_nonneg (σ : T.Q.c.F →+* ℂ) (u : WeightFamilies.Wt D j) (F : CuspAt h j u) (p : FPt (T.U j σ).X) :
     0 ≤ ptNorm h j σ u F p :=
   mul_nonneg (norm_nonneg _) (pnorm_fac_nonneg _ _ _)
-
-theorem ptNorm_le_l2Norm (σ : T.Q.c.F →+* ℂ) {wL : WeightFamilies.Wt D j} {N : ℕ} (w : Fin N → CuspAt h j wL)
-    (p : FPt (T.U j σ).X) (i : Fin N) : ptNorm h j σ wL (w i) p ≤ l2Norm h j σ w p :=
-  Real.le_sqrt_of_sq_le
-    (Finset.single_le_sum (f := fun i => ptNorm h j σ wL (w i) p ^ 2) (fun _ _ => sq_nonneg _) (Finset.mem_univ i))
-
-example (σ : T.Q.c.F →+* ℂ) (u : WeightFamilies.Wt D j) (F : CuspAt h j u) :
-    supE (T.U j σ).X (laU (T.U j σ) (wtA u) u.n) (rdU (T.U j σ) (F.1 : T.R j)) =
-      ⨆ p, ENNReal.ofReal (ptNorm h j σ u F p) := rfl
 
 end GlobalTheory.IndefiniteRowSideFullHecke.FullTranscendenceDegree

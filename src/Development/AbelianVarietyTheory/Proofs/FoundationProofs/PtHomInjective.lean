@@ -1,9 +1,47 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Foundations.NormSumPairRankZeroOfCurveCoordNorm
-import Development.AbelianVarietyTheory.BlockTheory.TorsionBlocks.PolarLatticePairs
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IdealPeriodLatticeOfCurveDatum
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.InducedTypeThetaGenusOnePermutes
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.StandardPairLatticeLocallyOrthonormalBasis
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.TorsionBlocks.PolarLatticePairs
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IdealPeriodLatticeOfCurveDatum
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.InducedTypeThetaGenusOnePermutes
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.StandardPairLatticeLocallyOrthonormalBasis
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Classical Formalism.BasicNotions Formalism.MainNotions Formalism.MainNotions.TaylorLogMetric Formalism.MainNotions.StandardLatticesGL3 GlobalTheory.IndefiniteRowSideFullHecke.PolarLatticePairs
 open scoped Pointwise
 
@@ -51,7 +89,7 @@ theorem single_mem (D : D7) (cc : Ideal (𝓞 D.host.K)) (δ : ℂ) (a d : ℕ) 
       · exact D.host.AA0.zero_mem
     · rw [← ptHom_smul, Matrix.smul_single, smul_eq_mul, mul_smul_comm]
   | zero => rw [smul_zero, Matrix.single_zero, map_zero]; exact zero_mem _
-  | add x y _ _ hx hy => rw [smul_add, Matrix.single_add, map_add]; exact add_mem (hx r) (hy r)
+  | add x y _ _ hx hy => rw [smul_add, Matrix.single_add, map_add (f := _)]; exact add_mem (hx r) (hy r)
   | smul s x _ hx => rw [smul_smul]; exact hx _
 
 theorem La0_eq_map (D : D7) (cc : Ideal (𝓞 D.host.K)) (δ : ℂ) (a d : ℕ) :
@@ -63,17 +101,12 @@ theorem La0_eq_map (D : D7) (cc : Ideal (𝓞 D.host.K)) (δ : ℂ) (a d : ℕ) 
     refine ⟨((c : D.host.K) : D.host.E) • A, fun i j => ?_, ptHom_smul D cc δ a d c A⟩
     exact Submodule.subset_span ⟨c, hc, A i j, (GlobalTheory.OddGenus.mem_iff_entries D a d A).1 hA i j, rfl⟩
   · rintro _ ⟨z, hz, rfl⟩
+
     rw [Matrix.matrix_eq_sum_single z, map_sum]
     refine sum_mem fun i _ => ?_
+
     rw [map_sum]
     refine sum_mem fun j _ => ?_
     simpa using single_mem D cc δ a d i j (hz i j) 1
-
-theorem pt_mem_iff : ∀ (D : D7) (cc : Ideal (𝓞 D.host.K)) (δ : ℂ) (a d : ℕ), Crv D cc δ → ∀ z : Matrix (Fin d) (Fin a) D.host.E, pt D (tor0 D cc δ) δ z ∈ La0 D (tor0 D cc δ) a d ↔ z ∈ lat0 D cc a d := by
-  intro D cc δ a d h z
-  have hδ : δ ≠ 0 :=
-    (GlobalTheory.CurveLattice.lattice_of_curve D (GlobalTheory.InducedType.induced_type D).1 cc δ h).2.1
-  rw [La0_eq_map, ← ptHom_apply]
-  exact AddSubgroup.mem_map_iff_mem (ptHom_injective D cc hδ a d)
 
 end GlobalTheory.ThetaLatticePoints

@@ -1,5 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AlgebraMapEqMk
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AlgebraMapEqMk
+public import Mathlib.RingTheory.PicardGroup
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open scoped TensorProduct
 
 set_option autoImplicit false
@@ -10,7 +59,7 @@ open GlobalTheory.KummerAlg
 
 section
 variable {B : Type} [CommRing B] {L : Type} [AddCommGroup L] [Module B L] {n : ℕ}
-  (φ : MultilinearMap B (fun _ : Fin (n + 1) => L) B)
+  (φ : (Π _ : Fin (n + 1), L) →ₘₗ[B] B)
 
 theorem gen_pow (f : L) : gen φ f ^ (n + 1) = algebraMap B (Alg φ) (φ fun _ => f) := by
   rw [← prod_gen, Finset.prod_const, Finset.card_univ, Fintype.card_fin]
@@ -71,7 +120,7 @@ end
 
 section
 variable {B : Type} [CommRing B] {L : Type} [AddCommGroup L] [Module B L] {n : ℕ}
-  (φ : MultilinearMap B (fun _ : Fin (n + 1) => L) B)
+  (φ : (Π _ : Fin (n + 1), L) →ₘₗ[B] B)
 
 theorem T_shift
     (hsw : ∀ e ℓ : L, (gen φ e ⊗ₜ[B] gen φ ℓ : Alg φ ⊗[B] Alg φ) = gen φ ℓ ⊗ₜ gen φ e)
@@ -153,7 +202,7 @@ theorem ext_gen (ζ : B) (hζ : ζ ^ (n + 1) = 1) (g : Multiplicative (ZMod (n +
   next r =>
     rw [← algebraMap_eq_mk, AlgEquiv.commutes, one_tmul_algebraMap, algebraMap_tmul_one]
   next p p' hp hp' =>
-    rw [map_add, map_add, TensorProduct.tmul_add, TensorProduct.add_tmul, mul_add, mul_add, hp, hp']
+    rw [map_add (f := _), map_add (f := _), TensorProduct.tmul_add, TensorProduct.add_tmul, mul_add, mul_add, hp, hp']
   next p ℓ hp =>
     have : Ideal.Quotient.mk (ideal φ) (p * MvPolynomial.X ℓ) =
         Ideal.Quotient.mk (ideal φ) p * gen φ ℓ := by rw [map_mul]; rfl
@@ -173,7 +222,7 @@ end
 
 section
 variable {B : Type} [CommRing B] {L : Type} [AddCommGroup L] [Module B L] {n : ℕ}
-  (φ : MultilinearMap B (fun _ : Fin (n + 1) => L) B)
+  (φ : (Π _ : Fin (n + 1), L) →ₘₗ[B] B)
 
 theorem tw_neg_mul (ζ : B) (hζ : ζ ^ (n + 1) = 1) (g h : ZMod (n + 1)) :
     tw ζ (-h) * tw ζ g = tw ζ (g - h) := by
@@ -233,6 +282,7 @@ theorem ev_E (c : L →₀ B) (hc : (c.sum fun f a => a • φ fun _ => f) = 1) 
     ev φ ζ hζ g (E φ c s (tw ζ (-h.toAdd))) = if g = h then 1 else 0 := by
   have h1 : ev φ ζ hζ g (E φ c s (tw ζ (-h.toAdd))) = algebraMap B (Alg φ)
       (s * ∑ j ∈ Finset.range (n + 1), tw ζ (g.toAdd - h.toAdd) ^ j) := by
+
     rw [E, map_smul, map_sum, Finset.mul_sum, map_sum, Finset.smul_sum]
     refine Finset.sum_congr rfl fun j hj => ?_
     rw [map_smul, kummerTensorEvalAction_powerRatio φ c hc ζ hζ g j (by simp at hj; omega), ← tw_neg_mul ζ hζ, mul_pow,
@@ -252,7 +302,7 @@ end
 
 section
 variable {B : Type} [CommRing B] {L : Type} [AddCommGroup L] [Module B L] {n : ℕ}
-  (φ : MultilinearMap B (fun _ : Fin (n + 1) => L) B)
+  (φ : (Π _ : Fin (n + 1), L) →ₘₗ[B] B)
 
 theorem bijective_succ (hq : IsUnit ((n + 1 : ℕ) : B))
     (hφ : ∀ p : Ideal B, p.IsPrime → ∃ e : L, φ (fun _ => e) ∉ p) (ζ : B) (hζ : ζ ^ (n + 1) = 1)
@@ -270,7 +320,7 @@ theorem bijective_succ (hq : IsUnit ((n + 1 : ℕ) : B))
     induction t using TensorProduct.induction_on with
     | zero => simp
     | tmul a b => rfl
-    | add x y hx hy => rw [map_add, map_add, Pi.add_apply, hx, hy]
+    | add x y hx hy => rw [map_add (f := _), map_add (f := _), Pi.add_apply, hx, hy]
   obtain ⟨c, hc⟩ := Finsupp.mem_span_range_iff_exists_finsupp.1 (one_mem_span_pow φ hφ 1)
   simp only [pow_one] at hc
   have hsw := swap φ hφ
@@ -302,18 +352,19 @@ theorem bijective_succ (hq : IsUnit ((n + 1 : ℕ) : B))
         _ = (a ⊗ₜ[B] (1 : Alg φ)) * ((1 : Alg φ) ⊗ₜ[B] b) * ∑ h, Eh h := by
             rw [Finset.mul_sum]; refine Finset.sum_congr rfl fun h _ => ?_; ring
         _ = a ⊗ₜ b := by rw [hsum, mul_one, Algebra.TensorProduct.tmul_mul_tmul, mul_one, one_mul]
-    | add x y hx hy => rw [map_add, hψadd, hx, hy]
+    | add x y hx hy => rw [map_add (f := _), hψadd, hx, hy]
   · intro d
     funext g
     rw [hΦev]
+
     simp only [ψ, map_sum, map_mul, ev_tmul, map_one, mul_one, hEh,
-      ev_E φ c hc s hs ζ hζ hk, ite_mul, one_mul, zero_mul, Finset.sum_ite_eq, Finset.mem_univ,
-      if_true]
+    ev_E φ c hc s hs ζ hζ hk, ite_mul, one_mul, zero_mul, Finset.sum_ite_eq, Finset.mem_univ,
+    if_true]
 
 end
 
 theorem bijective : ∀ (B : Type) [CommRing B] (L : Type) [AddCommGroup L] [Module B L]
-    [Module.Invertible B L] (q : ℕ) [NeZero q] (φ : MultilinearMap B (fun _ : Fin q => L) B),
+    [Module.Invertible B L] (q : ℕ) [NeZero q] (φ : (Π _ : Fin q, L) →ₘₗ[B] B),
     IsUnit (q : B) → (∀ p : Ideal B, p.IsPrime → ∃ e : L, φ (fun _ => e) ∉ p) →
     ∀ (ζ : B) (hζ : ζ ^ q = 1), (∀ k : ℕ, 0 < k → k < q → IsUnit (1 - ζ ^ k)) →
     Function.Bijective (Algebra.TensorProduct.productMap

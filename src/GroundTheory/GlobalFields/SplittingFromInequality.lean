@@ -1,7 +1,55 @@
-import Mathlib
-import GroundTheory.GlobalFields.FirstInequalityStatement
-import GroundTheory.GlobalFields.IdeleGroups.LocalNormsEverywhere
-import GroundTheory.GlobalFields.Adele.WeakApproxUnits
+module
+
+public import GroundTheory.GlobalFields.FirstInequalityStatement
+public import GroundTheory.GlobalFields.IdeleGroups.LocalNorms
+public import GroundTheory.GlobalFields.KummerTheory.Splitting
+public import GroundTheory.GlobalFields.Adele.WeakApproxUnits
+public import GroundTheory.GlobalFields.IdeleGroups.LocalNormGroups
+public import GroundTheory.GlobalFields.IdeleGroups.LocalNormsEverywhere
+import GroundTheory.GlobalFields.LocalFieldAtPlace
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GroundTheory.Global
 
@@ -22,10 +70,13 @@ theorem IdeleGroup.finiteProj_diagonal (v : HeightOneSpectrum (𝓞 K)) (a : Kˣ
 theorem IdeleGroup.infiniteProj_diagonal (w : InfinitePlace K) (a : Kˣ) :
     IdeleGroup.infiniteProj w (IdeleGroup.diagonal K a) =
       Units.map (algebraMap K w.Completion).toMonoidHom a :=
-  Units.ext (IdeleGroup.coe_infiniteProj_diagonal w a)
+  by
+    apply Units.ext
+    simpa [AbsoluteValue.Completion.algebraMap_def, WithAbs.algebraMap_right_apply] using
+      IdeleGroup.coe_infiniteProj_diagonal w a
+
 
 variable (L) in
-
 theorem exists_diagonal_mul_mem_localNorms (S : Finset (HeightOneSpectrum (𝓞 K)))
     (x : IdeleGroup K) :
     ∃ a : Kˣ, (∀ v ∈ S, IdeleGroup.finiteProj v (IdeleGroup.diagonal K a * x) ∈
@@ -91,12 +142,6 @@ theorem FirstInequality.finrank_eq_one_of_eventually_splitsCompletely (hFI : Fir
     (h : ∀ᶠ v : HeightOneSpectrum (𝓞 K) in cofinite, SplitsCompletely L v) :
     Module.finrank K L = 1 :=
   hFI.finrank_eq_one_of_sup_eq_top (ideleNorm_range_sup_eq_top_of_eventually_splitsCompletely h)
-
-theorem FirstInequality.finrank_eq_one_of_splitsCompletely_of_finite (hFI : FirstInequality.{u})
-    {T : Set (HeightOneSpectrum (𝓞 K))} (hT : T.Finite) (h : ∀ v ∉ T, SplitsCompletely L v) :
-    Module.finrank K L = 1 :=
-  hFI.finrank_eq_one_of_eventually_splitsCompletely
-    (eventually_cofinite.2 (hT.subset fun v hv ↦ by_contra fun hvT ↦ hv (h v hvT)))
 
 end Cyclic
 

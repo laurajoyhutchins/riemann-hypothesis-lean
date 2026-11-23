@@ -1,7 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.IsSepClosedResidueFieldPowerSeriesComplex
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BijectiveResidueCompEtaleHenselian
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.FlatMapMaximalIdealIsSeparable
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.CMModuli.ProjectiveSpaceOverSpec
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BijectiveResidueCompEtaleHenselian
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.FlatMapMaximalIdealIsSeparable
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.Monoidal.Mon
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.Quiver.ReflQuiver
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Mathlib.Topology.Sheaves.Presheaf
+
+@[expose] public section
+
 open CategoryTheory Limits AlgebraicGeometry IsLocalRing
 
 noncomputable section
@@ -93,22 +140,5 @@ theorem exists_ringHom_of_isStrictHenselisation {R S T : Type} [CommRing R] [IsL
   simp only [RingHom.comp_apply, AlgHom.toRingHom_eq_coe, RingHom.coe_coe]
   rw [h1, ι.commutes]
   rfl
-
-theorem lift : ∀ {X Y : Scheme.{0}} (f : X ⟶ Y) {x : X} (L : GlobalTheory.NCyc.StrictLoc X x)
-    (M : GlobalTheory.NCyc.StrictLoc Y (f x)), ∃ h : L.scheme ⟶ M.scheme, h ≫ M.toX = L.toX ≫ f := by
-  intro X Y f x L M
-  haveI : IsLocalHom L.φ := L.isStrictHenselisation.2.2.1
-  haveI : HenselianLocalRing L.A := L.henselian
-  haveI : IsSepClosed (ResidueField L.A) := L.isSepClosed
-  haveI : IsLocalHom (L.φ.comp (f.stalkMap x).hom) := inferInstance
-  obtain ⟨g, hg⟩ := exists_ringHom_of_isStrictHenselisation M.φ M.isStrictHenselisation (L.φ.comp (f.stalkMap x).hom)
-  refine ⟨Spec.map (CommRingCat.ofHom g), ?_⟩
-  have e : CommRingCat.ofHom M.φ ≫ CommRingCat.ofHom g = f.stalkMap x ≫ CommRingCat.ofHom L.φ := by
-    ext r; exact DFunLike.congr_fun hg r
-  simp only [GlobalTheory.NCyc.StrictLoc.toX, Category.assoc]
-  rw [← Category.assoc (Spec.map _), ← Spec.map_comp, e]
-  have key : Spec.map (f.stalkMap x ≫ CommRingCat.ofHom L.φ) =
-      Spec.map (CommRingCat.ofHom L.φ) ≫ Spec.map (f.stalkMap x) := Spec.map_comp _ _
-  rw [key, Category.assoc, Scheme.SpecMap_stalkMap_fromSpecStalk]
 
 end GlobalTheory.NCyc.StrictLocLift

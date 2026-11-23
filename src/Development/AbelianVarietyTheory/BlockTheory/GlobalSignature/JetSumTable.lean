@@ -1,11 +1,44 @@
-import Mathlib
-import Formalism.LocalToGlobal.Columns.AbelianHostFieldConditions
-import Formalism.LocalToGlobal.Columns.StdLatUnimodular
-import Formalism.LocalToGlobal.Columns.ScaledRamifiedLattice
-import Formalism.LocalToGlobal.Columns.FiniteSumNonzeroLargeDepth
-import Formalism.LocalToGlobal.KernelLattices.XiIndCClass
-import Formalism.LocalToGlobal.KernelLattices.LateralTheory
-import Formalism.LocalToGlobal.KernelLattices.ThDistC
+module
+
+public import Formalism.LocalToGlobal.KernelLattices.ThDistC
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain
 
@@ -21,8 +54,8 @@ variable {E : Type} [Field E] [NumberField E] [StarRing E] {a b : ℕ}
 
 def adj (x : HomE E a b) : HomE E b a := Matrix.toLin' (LinearMap.toMatrix' x).conjTranspose
 
-omit [NumberField E] in
 
+omit [NumberField E] in
 theorem adj_single (x : HomE E a b) (α : Fin a) (β : Fin b) :
     adj x (Pi.single β 1) α = star (x (Pi.single α 1) β) := by
   rw [adj, Matrix.toLin'_apply, Matrix.mulVec_single_one]
@@ -48,21 +81,6 @@ def InIntClosure {H I : Type} (Sup : Set H) (tab : H → I → ℂ_[p]) (M : Set
   ∀ F : Finset I, (F : Set I) ⊆ M → ∀ ε : ℝ, 0 < ε →
     ∃ c : H →₀ ℂ_[p], (c.support : Set H) ⊆ Sup ∧ (∀ x, ‖c x‖ ≤ 1) ∧
       ∀ m ∈ F, ‖J m - c.sum fun x r => r * tab x m‖ < ε
-
-theorem InIntClosure.single {H I : Type} {Sup : Set H} (tab : H → I → ℂ_[p]) (M : Set I) {x : H} (hx : x ∈ Sup) :
-    InIntClosure Sup tab M (tab x) := by
-  classical
-  intro F _ ε hε
-  refine ⟨Finsupp.single x 1, ?_, ?_, ?_⟩
-  · intro y hy
-    have := Finsupp.support_single_subset (Finset.mem_coe.1 hy)
-    rw [Finset.mem_singleton] at this
-    exact this ▸ hx
-  · intro y
-    rw [Finsupp.single_apply]
-    split_ifs <;> simp
-  · intro m _
-    simp [hε]
 
 variable {X : Fields} {a b : ℕ}
 
@@ -104,7 +122,7 @@ def MomAt (D : Dat) {H : D7} (cc : Ideal (𝓞 H.host.K)) (A : Amb D.X) (u : D.P
     (∀ P ∈ rowSG D.Pr sel mu, Nat.Coprime (Ideal.absNorm cc) (qOf P)) →
     ∀ (i b : ℕ), i < D.R.m → b = D.R.N (i + 1) →
     ∀ (SG SG' : Finset (HeightOneSpectrum (𝓞 D.X.E)))
-      (d : DecoSet D.X.E (D.R.N i) (D.Pr.vT u) SG) (d' : DecoSet D.X.E b (D.Pr.vT u) SG'),
+      (d : DecoSet (E := D.X.E) (n := D.R.N i) (ST := D.Pr.vT u) (SG := SG)) (d' : DecoSet (E := D.X.E) (n := b) (ST := D.Pr.vT u) (SG := SG')),
       StdAtT d.1 → StdAtT d'.1 →
       ∀ Ξ₀ : HomE D.X.E (D.R.N i) b → D.X.K,
         OffDatum (cAof sel mu cst) (cBof sel mu cst u) d.1.N d'.1.N (rowSG D.Pr sel mu) w Ξ₀ →

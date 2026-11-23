@@ -1,10 +1,48 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.CubeVal
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.UnifUniqSt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.IsNsmul
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.QkToAkU
-import Development.AbelianVarietyTheory.Definitions.Uniformization.PointEqOfSubsingleton
-import Development.AbelianVarietyTheory.Definitions.Uniformization.WCompat
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Uniformization.WCompat
+public import Mathlib.NumberTheory.Padics.PadicIntegers
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits MonoidalCategory CartesianMonoidalCategory MonObj AlgebraicGeometry
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Out ReciprocityTheory.ChartRestriction.G.Geo.Tor
@@ -39,16 +77,9 @@ theorem finExt_self (V : Type) [CommRing V] [IsDomain V] [IsLocalRing V]
   · rw [hmap]
     exact h
 
-theorem CDVR.finExt_self {V : Type} [CommRing V] [IsDomain V] [IsLocalRing V] (h : CDVR V) : FinExt V V :=
-  GlobalTheory.UU.finExt_self V h.2.1
-
 theorem cdvr_padicInt (p : ℕ) [Fact p.Prime] : CDVR ℤ_[p] := by
   refine ⟨inferInstance, inferInstance, inferInstance⟩
-example (p : ℕ) [Fact p.Prime] : FinExt ℤ_[p] ℤ_[p] := (cdvr_padicInt p).finExt_self
 
-example (p : ℕ) [Fact p.Prime] : ¬ FinExt ℤ_[p] ℚ_[p] := fun h => by
-  have := h.2.2.2.1.map_nonunit (p : ℤ_[p]) (IsUnit.mk0 _ (by simpa using (Fact.out : p.Prime).ne_zero))
-  exact PadicInt.irreducible_p.not_isUnit this
 section
 variable {R : Type} [CommRing R] [IsDomain R] {I : Ideal R} {D : DegPre R}
   {A : PolAV (Spec (CommRingCat.of (FractionRing R)))} {G : Over (Spec (CommRingCat.of R))} [GrpObj G] [IsCommMonObj G]
@@ -86,22 +117,8 @@ def PreU.Acts (U : PreU I D A G) (F : Type) [Field F] [Algebra (FractionRing R) 
 def GtTors (D : DegPre R) {F : Type} [Field F] [Algebra (FractionRing R) F] (k : ℕ) (g : GtPtF D F) : Prop :=
   ∃ h, GtPtF.IsNsmul k g h ∧ h.IsZero
 
-def addφ (D : DegPre R) (a b : D.X) : Fin 10 → ((D.P.A ⊗ D.P.A).left ⟶ D.P.A.left) :=
-  let x := fst D.P.A D.P.A; let y := snd D.P.A D.P.A; let c := fun χ => toUnit (D.P.A ⊗ D.P.A) ≫ D.c χ
-  ![x.left, (x * c (a + b)).left, (c (a + b)).left, y.left, (y * c (a - b)).left, (c (a - b)).left,
-    (x * y * c a).left, (c a).left, (x * y⁻¹ * c b).left, (c b).left]
-
 def addε : Fin 10 → ℤ := ![1, 1, -1, 1, 1, -1, -1, 1, -1, 1]
 
-theorem PullB.refl (D : DegPre R) (F : Type) [Field F] [Algebra (FractionRing R) F] (k : ℕ) (s : Raw D F k) :
-    PullB D F (𝟙 _) k s s := by
-  intro α z J _
-  rw [MonoidalCategory.id_whiskerRight, Over.id_left]
-  rfl
-
-example (x y a b : ℤ) :
-    ∑ k, addε k * (![x, x + (a + b), a + b, y, y + (a - b), a - b, x + y + a, a, x - y + b, b] k) ^ 2 = 0 := by
-  simp [Fin.sum_univ_succ, addε]; ring
 end
 end GlobalTheory.UU
 end

@@ -1,6 +1,48 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.GlobalSectionsRankAlgClosed
-import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.WeilIsAlternatingSkewNatural
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.GlobalSectionsRankAlgClosed
+public import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.WeilIsAlternatingSkewNatural
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -107,8 +149,8 @@ end GlobalTheory.LevelOfPairing
 
 namespace GlobalTheory
 
-open LevelOfPairing in
 
+open LevelOfPairing in
 theorem exists_level_of_pairing : GlobalFnsSt → WeilSt → MulNSt → ∀ (S : Scheme.{0}) [IsLocallyNoetherian S] (P : PolAV S) (M : ℕ) (ze : Γ(S, ⊤)ˣ), IsPrimitiveRoot ze M → (∀ (K : Type) [Field K] (s : Spec (CommRingCat.of K) ⟶ S), (M : K) ≠ 0 ∧ IsPrimitiveRoot (Units.map s.appTop.hom.toMonoidHom ze) M) → ∀ x : Fin (2 * P.g) → (baseOver S ⟶ P.A), (∀ i, x i ^ M = 1) → (∀ i j, WeilIs P.A P.L M (x i) (x j) (ze ^ stdSymp P.g i j)) → ∃ lev : Level P M ze, lev.pt = x := by
   intro hG hW hN S _ P M ze hze hK x hx hp
   have := P.isAb.comm
@@ -121,14 +163,14 @@ theorem exists_level_of_pairing : GlobalFnsSt → WeilSt → MulNSt → ∀ (S :
       c = c' := by
     intro K _ s c c' e
     obtain ⟨hu, hm, -⟩ := hW S P M (Over.mk s)
-    refine injective_comb (R := fun a b u => WeilIs P.A P.L M a b u) (cm _) hu hm (hK K s).2 _
+    refine LevelOfPairing.injective_comb (R := fun a b u => WeilIs P.A P.L M a b u) (cm _) hu hm (hK K s).2 _
       (tor _ _) (fun i j => ?_) c c' e
     have h := CommPairing.weilIs_pull hG P.isAb P.isLB
       (Over.homMk s (by simp) : Over.mk s ⟶ baseOver S) (hp i j)
     exact (map_zpow (Units.map s.appTop.hom.toMonoidHom) ze _) ▸ h
   refine ⟨⟨x, hze, hx, fun K _ _ s => ind K s, fun K _ _ s z hz => ?_, hp⟩, rfl⟩
   have hM : M ≠ 0 := fun e => (hK K s).1 (by rw [e, Nat.cast_zero])
-  exact surjective_comb (cm _) hM _ (tor _ _)
+  exact LevelOfPairing.surjective_comb (cm _) hM _ (tor _ _)
     ((hN S P M (Nat.one_le_iff_ne_zero.2 hM)).2.2.2.2 K s (hK K s).1) (ind K s) z hz
 
 end GlobalTheory

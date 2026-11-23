@@ -1,9 +1,62 @@
-import Mathlib
-import ReciprocityTheory.AnalyticForms.PlurisubharmonicFunctions.HessCRestrictThm
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.StatementsChartCutoffEnergy
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.AMassStA
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.ChartMassAffine
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PChartDensityIntegrable
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PChartEnergyCocycle
+import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PChartHessCompare
+import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PHermFormCompare
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.InnerProductSpace.Calculus
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Mathlib.Topology.UniformSpace.Uniformizable
+public import ReciprocityTheory.AnalyticForms.PlurisubharmonicFunctions.HessCRestrictThm
 import ReciprocityTheory.AnalyticForms.PlurisubharmonicFunctions.PartsAlg
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.StatementsChartCutoffEnergy
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PChartEnergyCocycle
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PChartEnergySwap
+public import ReciprocityTheory.AnalyticForms.AnalyticCharts.MaDensCompEqZeroOfRankLt
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -21,7 +74,7 @@ variable {e : ℕ}
 
 theorem contDiff_gbPot_of_le {D : ℕ} (m : ℕ) : ContDiff ℝ m (gbPot (D := D)) := by
   have hs : ContDiff ℝ m fun y : Fin D → ℂ => 1 + ∑ i, ‖y i‖ ^ 2 :=
-    contDiff_const.add (ContDiff.sum fun i _ => (contDiff_norm_sq ℝ).comp (contDiff_apply ℝ ℂ i))
+    contDiff_const.add (ContDiff.sum fun i _ => (contDiff_norm_sq ℝ).comp (contDiff_apply ℝ (fun _ => ℂ) i))
   have hpos : ∀ y : Fin D → ℂ, 0 < 1 + ∑ i, ‖y i‖ ^ 2 := fun y => by positivity
   exact (hs.sqrt fun y => (hpos y).ne').log fun y => (Real.sqrt_pos.mpr (hpos y)).ne'
 
@@ -59,7 +112,7 @@ theorem chartCutoff_apply (k : ℕ) (y : Fin D → ℂ) :
 
 theorem contDiff_chartCutoff (k : ℕ) (m : ℕ) : ContDiff ℝ m (chartCutoff (D := D) k) := by
   have hs : ContDiff ℝ m fun y : Fin D → ℂ => ∑ i, ‖y i‖ ^ 2 :=
-    ContDiff.sum fun i _ => (contDiff_norm_sq ℝ).comp (contDiff_apply ℝ ℂ i)
+    ContDiff.sum fun i _ => (contDiff_norm_sq ℝ).comp (contDiff_apply ℝ (fun _ => ℂ) i)
   exact Real.smoothTransition.contDiff.comp (contDiff_const.sub (hs.div_const _))
 
 theorem chartCutoff_nonneg (k : ℕ) (y : Fin D → ℂ) : 0 ≤ chartCutoff k y := Real.smoothTransition.nonneg _

@@ -1,4 +1,47 @@
-import Development.EtaleCohomology.EtaleSheaves.longPf
+module
+
+public import Development.EtaleCohomology.EtaleSheaves.longPf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 open CategoryTheory Limits GlobalTheory.EtC
@@ -45,9 +88,9 @@ def ι (K : Cx R) (N : ℕ) : tr K N ⟶ tr K (N + 1) where
     have hij' : i + 1 = j := hij
     by_cases h : -(N : ℤ) ≤ i
     · have hj : -(N : ℤ) ≤ j := by omega
-      rw [ιf, dif_pos h, ιf, dif_pos hj, tr_d K N i j h hj, tr_d K (N + 1) i j (by push_cast; omega) (by push_cast; omega)]
+      rw [ιf, dite_eq_left h, ιf, dite_eq_left hj, tr_d K N i j h hj, tr_d K (N + 1) i j (by push_cast; omega) (by push_cast; omega)]
       simp
-    · rw [ιf, dif_neg h, zero_comp]
+    · rw [ιf, dite_eq_right h, zero_comp]
       exact (trZ K N i (by omega)).eq_of_src _ _
 
 def pf (K : Cx R) (N : ℕ) (i : ℤ) : (tr K (N + 1)).X i ⟶ (Sg K N).X i :=
@@ -70,14 +113,14 @@ theorem ιp (K : Cx R) (N : ℕ) : ι K N ≫ pp K N = 0 := by
   by_cases h : -(N : ℤ) ≤ i
   · exact (SgZ K N i (by push_cast; omega)).eq_of_tgt _ _
   · show ιf K N i ≫ _ = 0
-    rw [ιf, dif_neg h, zero_comp]
+    rw [ιf, dite_eq_right h, zero_comp]
 
 theorem nat1 {K L : Cx R} (g : K ⟶ L) (N : ℕ) : ι K N ≫ trm g (N + 1) = trm g N ≫ ι L N := by
   refine HomologicalComplex.hom_ext _ _ (fun i => ?_)
   rw [HomologicalComplex.comp_f, HomologicalComplex.comp_f]
   by_cases h : -(N : ℤ) ≤ i
   · show ιf K N i ≫ _ = _ ≫ ιf L N i
-    rw [ιf, dif_pos h, ιf, dif_pos h, trm_f g N i h, trm_f g (N + 1) i (by push_cast; omega)]
+    rw [ιf, dite_eq_left h, ιf, dite_eq_left h, trm_f g N i h, trm_f g (N + 1) i (by push_cast; omega)]
     simp
   · exact (trZ K N i (by omega)).eq_of_src _ _
 
@@ -89,11 +132,9 @@ theorem nat2 {K L : Cx R} (g : K ⟶ L) (N : ℕ) :
   by_cases h : i = -((N + 1 : ℕ) : ℤ)
   · subst h
     show pf K N _ ≫ _ = _ ≫ pf L N _
-    rw [pf, dif_pos rfl, pf, dif_pos rfl, trm_f g (N + 1) _ (by omega)]
+    rw [pf, dite_eq_left rfl, pf, dite_eq_left rfl, trm_f g (N + 1) _ (by omega)]
     simp [CochainComplex.singleFunctor, CochainComplex.singleFunctors, HomologicalComplex.single_map_f_self,
       HomologicalComplex.singleObjXSelf]
-    erw [Category.id_comp, Category.id_comp, Category.assoc, Category.assoc, Iso.inv_hom_id_assoc]
-    rfl
   · exact (SgZ L N i h).eq_of_tgt _ _
 
 theorem sesK (K : Cx R) (N : ℕ) : (ShortComplex.mk (ι K N) (pp K N) (ιp K N)).ShortExact := by
@@ -101,14 +142,14 @@ theorem sesK (K : Cx R) (N : ℕ) : (ShortComplex.mk (ι K N) (pp K N) (ιp K N)
   intro i
   by_cases h : -(N : ℤ) ≤ i
   · have hz : IsZero ((Sg K N).X i) := SgZ K N i (by push_cast; omega)
-    have : IsIso (ιf K N i) := by rw [ιf, dif_pos h]; infer_instance
+    have : IsIso (ιf K N i) := by rw [ιf, dite_eq_left h]; infer_instance
     have hI : IsIso ((ShortComplex.mk (ι K N) (pp K N) (ιp K N)).map (HomologicalComplex.eval _ _ i)).f := this
     refine ShortComplex.ShortExact.mk' ?_ inferInstance (hz.epi _)
     rw [ShortComplex.exact_iff_epi _ (hz.eq_of_tgt _ _)]
     infer_instance
   · by_cases h' : i = -((N + 1 : ℕ) : ℤ)
     · have hz : IsZero ((tr K N).X i) := trZ K N i (by omega)
-      have : IsIso (pf K N i) := by subst h'; rw [pf, dif_pos rfl]; exact IsIso.comp_isIso' inferInstance (IsIso.comp_isIso' inferInstance (Iso.isIso_inv _))
+      have : IsIso (pf K N i) := by subst h'; rw [pf, dite_eq_left rfl]; exact IsIso.comp_isIso' inferInstance (IsIso.comp_isIso' inferInstance (Iso.isIso_inv _))
       have hI : IsIso ((ShortComplex.mk (ι K N) (pp K N) (ιp K N)).map (HomologicalComplex.eval _ _ i)).g := this
       refine ShortComplex.ShortExact.mk' ?_ (hz.mono _) inferInstance
       rw [ShortComplex.exact_iff_mono _ (hz.eq_of_src _ _)]

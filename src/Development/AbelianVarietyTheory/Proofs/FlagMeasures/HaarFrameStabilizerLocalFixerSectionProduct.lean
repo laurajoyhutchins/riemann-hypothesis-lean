@@ -1,10 +1,60 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.Measures
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.SemidirectVolume.Closed
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsContinuousUnitriangularSectionStatement
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.HermitianFlagDualBasis
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.LocalUnitaryGroupTuplesTopologicalFacts
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.NilpotentOfStrict
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.Measures
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsContinuousUnitriangularSectionStatement
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.HermitianFlagDualBasis
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.LocalUnitaryGroupTuplesTopologicalFacts
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.NilpotentOfStrict
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.SemidirectVolume.Closed
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.Countable
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open NumberField IsDedekindDomain MeasureTheory Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.L2.SG.Sub Formalism.L2.SG.Measures
 open scoped TensorProduct ENNReal
 
@@ -182,6 +232,7 @@ theorem coef_mul {g k : HA R σ J} {A B : Matrix (Fin (r + 1)) (Fin (r + 1)) (R 
     (hg : Coef P g A) (hk : Coef P k B) : Coef P (g * k) (A * B) := by
   have hg' : ∀ a, lin R σ J g (ratV (F := F) R (F0 P a)) = ∑ c, A c a • ratV (F := F) R (F0 P c) := hg
   intro b
+
   rw [lin_mul, hk b, map_sum]
   simp only [map_smul, hg', Finset.smul_sum, smul_smul, Matrix.mul_apply, Finset.sum_smul]
   rw [Finset.sum_comm]
@@ -225,7 +276,7 @@ theorem mul_inv_mem_frameFixer_of_agree_on_frame {g k : HA R σ J} (hk : k ∈ S
     induction hw using Submodule.span_induction with
     | mem y hy => obtain ⟨a, _, rfl⟩ := hy; exact h a
     | zero => simp
-    | add x y _ _ hx hy => rw [map_add, map_add, hx, hy]
+    | add x y _ _ hx hy => rw [map_add (f := _), map_add (f := _), hx, hy]
     | smul c x _ hx => rw [map_smul, map_smul, hx]
   intro b
   obtain ⟨w, hw, hwk⟩ := uni_le_map (Y := F0 P) (g := k) hk Set.univ (fun _ _ _ _ => Set.mem_univ _)
@@ -284,7 +335,7 @@ theorem haar_S_local : ∀ (F E : Type) [Field F] [NumberField F] [Field E] [Num
         (p : {p : Fin (r + 1) × Fin (r + 1) // p.1 < p.2}) => (u * umat x) p.1.1 p.1.2) := by
       refine continuous_pi fun p => ?_
       simp only [Matrix.mul_apply]
-      exact continuous_finset_sum _ fun c _ => continuous_const.mul (umat_entry_continuous c p.1.2)
+      exact continuous_finsetSum _ fun c _ => continuous_const.mul (umat_entry_continuous c p.1.2)
     refine ⟨_, hφc.measurable, GlobalTheory.UnitriHaar.map_unitri_mul F E v r μU hμU u (umat_utri _).1 (umat_utri _).2, ?_⟩
     intro x
     have h1 : Coef P (s * t0 x) (u * umat x) := coef_mul (hνcoef ⟨s, hs⟩) (ht0coef x)

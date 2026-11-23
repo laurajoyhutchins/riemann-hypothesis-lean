@@ -1,5 +1,46 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.UnlinkedHalfIntegral.UnitFormC
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.UnlinkedHalfIntegral.UnlinkedHeckeRoots.UnitFamC
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.UnlinkedHalfIntegral.UnitFormC
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.UnlinkedHalfIntegral.UnlinkedHeckeRoots.UnitFamC
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 open Formalism.ConjugateSelfDual CongruenceSubgroup UpperHalfPlane UpperTheory.V.Af UpperTheory.V.Sd
 open scoped MatrixGroups ModularForm
@@ -31,7 +72,7 @@ private theorem coef_comb {N : ℕ} {k : ℤ} {I : Type} (s : Finset I) (c : I �
   | insert a s ha ih =>
     rw [Finset.sum_insert ha, Finset.sum_insert ha, ← ih, ← coef_smul]
     unfold coef
-    rw [← map_add]
+    rw [← map_add (f := _)]
     congr 1
     exact ModularForm.qExpansion_add one_pos (one_mem_per N) (c a • f a) (∑ a ∈ s, c a • f a)
 
@@ -105,6 +146,7 @@ theorem UpperTheory.V.Z.Sym.Unl.unitFormC :
     simp
   refine ⟨∑ a, c a • f a, hasChar_comb χ _ f hfam, ?_, vanOff_comb c f hvan, ?_, ?_⟩
   · intro n
+
     rw [coef_comb, map_sum]
     refine IsUltrametricDist.norm_sum_le_of_forall_le_of_nonneg zero_le_one fun a _ => ?_
     rw [map_mul, norm_mul, hcn, one_mul]
@@ -127,6 +169,7 @@ theorem UpperTheory.V.Z.Sym.Unl.unitFormC :
     obtain ⟨f', hfam', hvan', hco⟩ := hcj σ
     refine ⟨∑ a : (ZMod N)ˣ, (σ (2 * u)⁻¹ * cj σ χ ((a⁻¹ : (ZMod N)ˣ) : ZMod N)) • f' a,
       hasChar_comb (cj σ χ) _ f' hfam', vanOff_comb _ f' hvan', fun n => ?_⟩
+
     rw [coef_comb, coef_comb, map_sum]
     refine Finset.sum_congr rfl fun a _ => ?_
     rw [hco, map_mul σ (c a), hc]

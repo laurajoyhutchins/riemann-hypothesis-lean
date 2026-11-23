@@ -1,11 +1,55 @@
-import Mathlib
-import ReciprocityTheory.CommutativeAlgebra.MaximalIdealSquares.RingKrullDimQuotientSpanSingletonAddOne
-import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.IsRegularRingOfSmooth
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.UniformisationConclusion
-import Development.AbelianVarietyTheory.Definitions.AbelianSchemeLaws.FirstCohomologyVanishesSpecOfIsLocalRing
-import Development.AbelianVarietyTheory.Definitions.Degenerations.OfDerivationFnOn
-import Development.AbelianVarietyTheory.Definitions.Degenerations.PlOrdSomeOfAssociated
-import Development.AbelianVarietyTheory.Statements.SemistableTorsion.SemistableFin
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Degenerations.OfDerivationFnOn
+public import Mathlib.RingTheory.RegularLocalRing.Defs
+public import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.IsRegularRingOfSmooth
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import ReciprocityTheory.CommutativeAlgebra.MaximalIdealSquares.RingKrullDimQuotientSpanSingletonAddOne
+
+@[expose] public section
+
 open CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj AlgebraicGeometry
 open scoped CategoryTheory.Obj
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor
@@ -161,13 +205,12 @@ theorem mem_span_of_map_eq_zero (R A B D : Type) [CommRing R] [CommRing A] [Comm
   · intro v hv
     obtain ⟨v, rfl⟩ := c.surjective v
     have hv' : (mapBaseChange R A B).lTensor D v = 0 := by
-      simpa [LinearMap.baseChange_eq_ltensor] using hv
+      simpa [LinearMap.baseChange_eq_lTensor] using hv
     obtain ⟨w, rfl⟩ := (lTensor_exact D (mapBaseChange R A B).exact_subtype_ker_map
       (mapBaseChange_surjective R A B hs) v).mp hv'
     clear hv hv'
     induction w with
-    | zero => simp
-    | add x y hx hy => rw [map_add, map_add]; exact add_mem hx hy
+    | add x y hx hy => simp only [map_add]; exact add_mem hx hy
     | tmul d w =>
       obtain ⟨y, hy⟩ := (exact_kerCotangentToTensor_mapBaseChange R A B hs w.1).mp w.2
       obtain ⟨y, rfl⟩ := Ideal.toCotangent_surjective _ y
@@ -201,11 +244,10 @@ theorem mem_span_of_residue {A D k M I I' : Type} [CommRing A] [CommRing D] [IsL
       ((Algebra.linearMap D k).restrictScalars A).exact_subtype_ker_map hs v).mp hv
     clear hv
     induction w with
-    | zero => exact ⟨0, by rw [map_zero, smul_zero]⟩
     | add x y hx hy =>
       obtain ⟨x', hx⟩ := hx
       obtain ⟨y', hy⟩ := hy
-      exact ⟨x' + y', by rw [map_add, hx, hy, smul_add]⟩
+      exact ⟨x' + y', by rw [map_add (f := _), hx, hy, smul_add]⟩
     | tmul d m =>
       obtain ⟨e, he⟩ := hk d.1 d.2
       exact ⟨e ⊗ₜ m, by
@@ -225,8 +267,8 @@ theorem mem_span_of_residue {A D k M I I' : Type} [CommRing A] [CommRing D] [IsL
     change (1 : D) ⊗ₜ[A] g i ∈ _
     rw [this]
     exact Submodule.add_mem_sup hn (Submodule.smul_mem_smul hπ hwN)
-  exact Submodule.le_of_le_smul_of_le_jacobson_bot (IsNoetherian.noetherian N)
-    (IsLocalRing.maximalIdeal_le_jacobson ⊥) hle (Submodule.subset_span ⟨i, rfl⟩)
+  exact Submodule.le_of_le_smul_of_le_jacobson (IsNoetherian.noetherian N)
+    (le_of_eq (IsLocalRing.ringJacobson_eq_maximalIdeal (R := D)).symm) hle (Submodule.subset_span ⟨i, rfl⟩)
 
 theorem mem_span_of_tower {A D K M I : Type} [CommRing A] [CommRing D] [CommRing K] [Algebra A D]
     [Algebra D K] [Algebra A K] [IsScalarTower A D K] [AddCommGroup M] [Module A M] (g : I → M)
@@ -264,7 +306,6 @@ theorem exists_mul_mem_span (R A B K I : Type) [CommRing R] [CommRing A] [CommRi
   have : Subsingleton (K ⊗[A] (RingHom.ker (algebraMap A B) ⧸ N)) := by
     refine subsingleton_of_forall_eq 0 fun v => ?_
     induction v with
-    | zero => rfl
     | add x y hx hy => rw [hx, hy, add_zero]
     | tmul d m =>
       obtain ⟨m, rfl⟩ := N.mkQ_surjective m

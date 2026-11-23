@@ -1,5 +1,56 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.DefiniteClassNumber.AdelicLattice
+module
+
+public import GroundTheory.AutomorphicForms.DefiniteClassNumber.AdelicLattice
+import GroundTheory.GlobalFields.Adele.Compact
+import GroundTheory.GlobalFields.Adele.Topology
+import GroundTheory.GlobalFields.TateThesis.AdelicCharDual
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 set_option linter.unusedSectionVars false
 
@@ -20,8 +71,8 @@ variable {κ : Type*} [Fintype κ] (b : Basis κ K E)
 
 section Core
 
-variable (ι) in
 
+variable (ι) in
 def stdSub : AddSubgroup (ι → FinAdele K ⊗[K] E) where
   carrier := stdLattice ι (FinAdele K) b (intAdeles K)
   add_mem' hx hy := stdLattice_add b hx hy
@@ -35,8 +86,8 @@ def stdSub : AddSubgroup (ι → FinAdele K ⊗[K] E) where
 theorem mem_stdSub {x : ι → FinAdele K ⊗[K] E} :
     x ∈ stdSub ι b ↔ x ∈ stdLattice ι (FinAdele K) b (intAdeles K) := Iff.rfl
 
-variable (ι) in
 
+variable (ι) in
 def integralCore : AddSubgroup (ι → FinAdele K ⊗[K] E) where
   carrier := {u | ∀ β : 𝓞 E, ((1 : FinAdele K) ⊗ₜ[K] (β : E)) • u ∈ stdSub ι b}
   add_mem' {u v} hu hv β := by
@@ -76,6 +127,7 @@ theorem mem_integralCore_iff_basis {u : ι → FinAdele K ⊗[K] E} :
   have hβ : (β : E) = ∑ s, ((RingOfIntegers.basis E).repr β s) •
       ((RingOfIntegers.basis E s : 𝓞 E) : E) := by
     have := congrArg (algebraMap (𝓞 E) E) ((RingOfIntegers.basis E).sum_repr β)
+
     rw [map_sum] at this
     simp only [map_zsmul] at this
     exact this.symm
@@ -244,8 +296,9 @@ theorem isCompact_coreStabilizer (hH : IsUnit H.det) :
   show _ = unitaryCoords H (FinAdele K) b g (i, j, m)
   rw [unitaryCoords_apply]
   conv_rhs => rw [← mul_one (unitaryMat g i j), hone]
+
   simp only [Finset.mul_sum, mul_smul_comm, map_sum, map_smul, Finsupp.coe_finsetSum,
-    Finset.sum_apply, Finsupp.smul_apply, smul_eq_mul]
+  Finset.sum_apply, Finsupp.smul_apply, smul_eq_mul]
   refine Finset.sum_congr rfl fun k _ => ?_
   rw [← mul_assoc, ← map_mul, mul_assoc, inv_mul_cancel₀ (hd0 (j, k)), mul_one]
 
@@ -263,7 +316,7 @@ def coreLattice (g : unitaryPoints K E H (FinAdele K)) : AddSubgroup (ι → K �
     exact zero_mem _
   add_mem' {x y} hx hy := by
     show unitaryMat g⁻¹ *ᵥ toFinAdele K E ι (x + y) ∈ integralCore ι b
-    rw [map_add, mulVec_add]
+    rw [map_add (f := _), mulVec_add]
     exact add_mem hx hy
   neg_mem' {x} hx := by
     show unitaryMat g⁻¹ *ᵥ toFinAdele K E ι (-x) ∈ integralCore ι b
@@ -300,8 +353,8 @@ theorem mulVec_mem_coreLattice_iff (γ : unitaryPoints K E H K) (g : unitaryPoin
   rw [mem_coreLattice, mem_coreLattice, toFinAdele_mulVec, _root_.mul_inv_rev, unitaryMat_mul,
     mulVec_mulVec, Matrix.mul_assoc, unitaryMat_inv_mul, Matrix.mul_one]
 
-variable (H) in
 
+variable (H) in
 def transCore (g : unitaryPoints K E H (FinAdele K)) : Set (ι → FinAdele K ⊗[K] E) :=
   {z | unitaryMat g⁻¹ *ᵥ z ∈ integralCore ι b}
 
@@ -367,8 +420,8 @@ theorem coreLattice_eq_iff {g g' : unitaryPoints K E H (FinAdele K)} :
     coreLattice b H g = coreLattice b H g' ↔ g⁻¹ * g' ∈ coreStabilizer b H :=
   ⟨mem_coreStabilizer_of_coreLattice_eq b, coreLattice_eq_of_mem_coreStabilizer b⟩
 
-variable (H) in
 
+variable (H) in
 theorem exists_int_smul_mem_coreLattice : ∃ N : ℤ, N ≠ 0 ∧
     ∀ (g : unitaryPoints K E H (FinAdele K)) (x : ι → K ⊗[K] E), x ∈ adelicLattice b H g →
       (N : K) • x ∈ coreLattice b H g := by
@@ -381,6 +434,7 @@ theorem exists_int_smul_mem_coreLattice : ∃ N : ℤ, N ≠ 0 ∧
   have hβ : (β : E) = ∑ s, ((RingOfIntegers.basis E).repr β s) •
       ((RingOfIntegers.basis E s : 𝓞 E) : E) := by
     have := congrArg (algebraMap (𝓞 E) E) ((RingOfIntegers.basis E).sum_repr β)
+
     rw [map_sum] at this
     simp only [map_zsmul] at this
     exact this.symm

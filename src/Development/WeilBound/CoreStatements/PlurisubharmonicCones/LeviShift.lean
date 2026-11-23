@@ -1,10 +1,65 @@
-import Mathlib
-import ReciprocityTheory.AnalyticForms.LeviForms.TailBound
-import ReciprocityTheory.AnalyticForms.LeviForms.MixedIntegralInclusionExclusion
-import ReciprocityTheory.AnalyticForms.PotentialTheory.MaMeasure
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.TailBoundStatementHoldsStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.IsCompactRWSublevel
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.IsomorphicLinesPotentialDifference
+module
+
+public import ReciprocityTheory.AnalyticForms.LeviForms.IsRegFamilyInhabitStatement
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.IsCompactRWSublevel
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.IsomorphicLinesPotentialDifference
+import Development.AutomorphicSpectrum.Proofs.MetricProofs.MongeAmpereIntegralCongrPotentials
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.TailBoundStatementHoldsStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.AnalyticForms.LeviForms.MixedIntegralInclusionExclusion
+import ReciprocityTheory.AnalyticForms.LeviForms.TailBoundA
+import ReciprocityTheory.AnalyticForms.LeviForms.TailCut
+import ReciprocityTheory.AnalyticForms.PotentialTheory.ContDiffAtOfIsPotential
+import ReciprocityTheory.AnalyticForms.PotentialTheory.IntegrableOnTargetOfTsupport
+import ReciprocityTheory.AnalyticForms.PotentialTheory.MaMeasureB
+import ReciprocityTheory.AnalyticForms.PotentialTheory.PshShiftA
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Development.AutomorphicSpectrum.Definitions.MetricPeriods.IsTwiceDifferentiableAt
+
+@[expose] public section
 
 open MeasureTheory Filter Topology ReciprocityTheory.AnForm ReciprocityTheory.AnForm.M ReciprocityTheory.AnForm.P GlobalTheory.CompanionTheory.Ar.PB
 open scoped ContDiff
@@ -57,11 +112,24 @@ theorem term_zero (A : FinHolAtlas e X) (Θ : Fin e → LocPot X) (L : LocPot X)
   set δ : ℝ := ε / (2 * (M + 1)) with hδ
   have hδ0 : 0 < δ := by positivity
   have hK := GlobalTheory.CompanionTheory.Ar.Giv.isCompact_rW_sublevel A L s hL hs R
-  have hun := Metric.tendstoUniformlyOn_iff.1 (hg0 _ (fun y hy => hy.1) hK) δ hδ0
+  have hun := Metric.tendstoUniformlyOn_iff.1 (hg0 _ (fun y (hy : y ∈ (bdry s)ᶜ ∩ {y | rW L s y ≤ R}) => hy.1) hK) δ hδ0
   filter_upwards [hu, hg, hun] with t ⟨hu1, hu2, hu3⟩ ⟨hg1, hg2⟩ hun
   have hpot : ∀ i, IsPotential A (Θ i + LocPot.ofFun (u t i)) := fun i =>
     isPotentialAdd A _ _ (hΘ i) (isPotential_ofFun A _ (hu1 i))
-  have hI := ((maMeasure_thm A _ hpot hu2).2 (g t) hg1.measurable).2 (mIntegrableCont A _ hpot _ hg1)
+  have hI : mInt A (fun i => Θ i + LocPot.ofFun (u t i)) (g t) =
+      ∫ y, g t y ∂maMeasure A (fun i => Θ i + LocPot.ofFun (u t i)) := by
+    by_cases hP : Nonempty (ChartPartition A)
+    · have hμ : maMeasure A (fun i => Θ i + LocPot.ofFun (u t i)) =
+          ∑ j, chartMeasure A hP.some (fun i => Θ i + LocPot.ofFun (u t i)) j := by
+        simp [maMeasure, hP, chartMeasure]
+      have hc j := chartMeasure_integrable_integral A hP.some _ hpot hu2 j hg1.measurable
+        (mIntegrableCont A _ hpot _ hg1)
+      rw [hμ, integral_finsetSum_measure fun j _ => (hc j).1]
+      simp only [mInt, dif_pos hP, integralWith]
+      refine Finset.sum_congr rfl fun j _ => ?_
+      rw [(hc j).2]
+      exact integral_congr_ae (Filter.Eventually.of_forall fun y => by ring)
+    · simp [maMeasure, mInt, hP]
   have hnull := bdry_null A L s m W hL hs hsnc _ hpot
   have hmass := (hC C₁ (u t) hC₁ hu1 hu2 hu3 (Real.exp 1) le_rfl).1
   have htail := (hC C₁ (u t) hC₁ hu1 hu2 hu3 R hR2).2
@@ -114,7 +182,7 @@ theorem term_zero (A : FinHolAtlas e X) (Θ : Fin e → LocPot X) (L : LocPot X)
     max_lt (by convert hR1 using 1; ring) (half_pos hε)
   linarith
 
-set_option maxHeartbeats 1000000 in
+
 theorem weak_zero (A : FinHolAtlas e X) (Θ L : LocPot X) (s : X → X → ℂ) {n : ℕ} (m : Fin n → ℕ)
     (W : Fin n → Set X) (hΘ : IsPotential A Θ) (hΘp : IsPosPot A Θ) (hL : IsPotential A L)
     (hs : IsSection A L s) (hsnc : IsSNC A L s m W) (hle : ∀ y, logNormSec L s y ≤ 0) (P : Fin e → LocPot X)

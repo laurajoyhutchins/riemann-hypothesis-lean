@@ -1,4 +1,50 @@
-import Mathlib
+module
+
+public import Mathlib.Basic.Complex.Basic
+public import Mathlib.RingTheory.Kaehler.Basic
+public import Mathlib.Algebra.Module.LinearMap.Rat
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open MvPolynomial
 
 namespace GlobalTheory.CompanionTheory.Kaehler
@@ -59,7 +105,7 @@ theorem maximalIdeal_eq_span_of_span_D :
         have : (⟨f 0, hmem 0⟩ : m) = 0 := by ext; simp [hf]
         rw [this, map_zero]
       map_add' := fun a b => by
-        rw [← map_add]
+        rw [← map_add (f := _)]
         congr 1
         ext
         simp [hf]
@@ -67,7 +113,7 @@ theorem maximalIdeal_eq_span_of_span_D :
   have hD₀ : ∀ s, D₀ s = m.toCotangent ⟨f s, hmem s⟩ := fun _ => rfl
   have leib : ∀ a b, D₀ (a * b) = ψ a • D₀ b + ψ b • D₀ a := by
     intro a b
-    rw [hD₀, hD₀, hD₀, ← map_smul, ← map_smul, ← map_add, Ideal.toCotangent_eq]
+    rw [hD₀, hD₀, hD₀, ← map_smul, ← map_smul, ← map_add (f := _), Ideal.toCotangent_eq]
     have h2 : f a * f b ∈ m ^ 2 := by
       rw [pow_two]; exact Ideal.mul_mem_mul (hmem a) (hmem b)
     have : ((⟨f (a * b), hmem (a * b)⟩ : m) : B)
@@ -97,7 +143,8 @@ theorem maximalIdeal_eq_span_of_span_D :
     rintro _ ⟨s, _, rfl⟩
     exact hfs s
   apply le_antisymm _ hJm
-  exact Submodule.le_of_le_smul_of_le_jacobson_bot (IsNoetherian.noetherian m)
-    (IsLocalRing.maximalIdeal_le_jacobson _) hle
+  exact Submodule.le_of_le_smul_of_le_jacobson (IsNoetherian.noetherian m)
+    (by simpa only [Ideal.jacobson_bot] using
+      (IsLocalRing.maximalIdeal_le_jacobson (⊥ : Ideal B))) hle
 
 end GlobalTheory.CompanionTheory.Kaehler

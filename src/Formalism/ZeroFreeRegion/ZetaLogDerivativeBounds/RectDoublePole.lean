@@ -1,5 +1,52 @@
-import Formalism.ZeroFreeRegion.SmallHeightLogDeriv
-import Formalism.LFunctionBounds.LFunctionBoundsProofs.RectResidue
+module
+
+public import Formalism.ZeroFreeRegion.SmallHeightLogDeriv
+public import Formalism.LFunctionBounds.ExpSumLowerBound
+public import Formalism.LFunctionBounds.LFunctionBoundsProofs.RectResidue
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Complex
 
@@ -49,7 +96,7 @@ theorem rdp_horiz (a p : ℂ) (y x0 x1 : ℝ) (hy : y ≠ p.im) :
     have h2 := (rdp_hasDerivAt_prim a p ((x : ℂ) + y * I) (hne x)).comp x hh
     simpa [Function.comp_def] using h2
   have hcont : Continuous (fun x : ℝ => a / ((x : ℂ) + y * I - p) ^ 2) := by
-    refine Continuous.div continuous_const (by fun_prop) (fun x => ?_)
+    refine Continuous.div₀ continuous_const (by fun_prop) (fun x => ?_)
     exact pow_ne_zero _ (sub_ne_zero.2 (hne x))
   exact intervalIntegral.integral_eq_sub_of_hasDerivAt (fun x _ => hder x)
     (hcont.intervalIntegrable _ _)
@@ -71,7 +118,7 @@ theorem rdp_vert (a p : ℂ) (x y0 y1 : ℝ) (hx : x ≠ p.re) :
     simp only [Function.comp_def] at h2
     exact h2.congr_deriv (mul_comm _ _)
   have hcont : Continuous (fun y : ℝ => I * (a / ((x : ℂ) + y * I - p) ^ 2)) := by
-    refine continuous_const.mul (Continuous.div continuous_const (by fun_prop) (fun y => ?_))
+    refine continuous_const.mul (Continuous.div₀ continuous_const (by fun_prop) (fun y => ?_))
     exact pow_ne_zero _ (sub_ne_zero.2 (hne y))
   rw [← intervalIntegral.integral_const_mul]
   exact intervalIntegral.integral_eq_sub_of_hasDerivAt (fun y _ => hder y)
@@ -91,10 +138,10 @@ theorem rdp_seg (g G : ℂ → ℂ) (a b p : ℂ) (γ : ℝ → ℂ) (s t : ℝ)
     IntervalIntegrable (fun u => g (γ u) - a / (γ u - p) ^ 2) MeasureTheory.volume s t ∧
     IntervalIntegrable (fun u => a / (γ u - p) ^ 2) MeasureTheory.volume s t := by
   have hD : ContinuousOn (fun u => a / (γ u - p) ^ 2) (Set.uIcc s t) := by
-    refine ContinuousOn.div continuousOn_const (by fun_prop) (fun u hu => ?_)
+    refine ContinuousOn.div₀ continuousOn_const (by fun_prop) (fun u hu => ?_)
     exact pow_ne_zero _ (sub_ne_zero.2 (hP u hu))
   have hS : ContinuousOn (fun u => G (γ u) + b / (γ u - p)) (Set.uIcc s t) := by
-    refine hG.add (ContinuousOn.div continuousOn_const (by fun_prop) (fun u hu => ?_))
+    refine hG.add (ContinuousOn.div₀ continuousOn_const (by fun_prop) (fun u hu => ?_))
     exact sub_ne_zero.2 (hP u hu)
   refine ⟨(hS.congr fun u hu => ?_).intervalIntegrable, hD.intervalIntegrable⟩
   rw [hg _ (hP u hu)]

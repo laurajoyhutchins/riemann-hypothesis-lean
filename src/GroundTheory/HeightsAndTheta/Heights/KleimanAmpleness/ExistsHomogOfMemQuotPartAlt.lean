@@ -1,5 +1,57 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.ImportsTerTer
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.CellMeets
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.KleimanNefness.ModelSt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.Kleiman.SectionsOverLocalization
@@ -58,6 +110,7 @@ theorem mConeMapOver_homog {g : MRingOver S ι} {d : K → ℕ} (hg : IsMultiHom
   classical
   conv_lhs => rw [g.as_sum]
   conv_rhs => rw [g.as_sum]
+
   simp only [map_sum, Finset.sum_mul]
   refine Finset.sum_congr rfl fun μ hμ => ?_
   have hX : ∏ p : Σ k, ι k, (X p.1 : MvPolynomial K Ω) ^ μ p = ∏ k, (X k : MvPolynomial K Ω) ^ d k := by
@@ -144,15 +197,15 @@ def evLin (I : ∀ k, Finset (ι k)) (hI : CellMeets y I) :
         have hs0 := aeval_ne_zero_of_mem hI s.2
         have hs0' := aeval_ne_zero_of_mem hI s'.2
         rw [LocalizedModule.mk_add_mk, ev_mk, ev_mk, ev_mk]
-        simp only [Submonoid.smul_def, map_add, evalAtPoint_smul, Submonoid.coe_mul, map_mul]
+        simp only [Submonoid.smul_def, map_add (f := _), evalAtPoint_smul, Submonoid.coe_mul, map_mul]
         field_simp
   map_smul' s x := by
     induction x using LocalizedModule.induction_on with
     | h m t =>
       rw [LocalizedModule.smul'_mk, ev_mk, ev_mk, map_smul, smul_div_assoc, RingHom.id_apply]
 
-open Classical in
 
+open Classical in
 def evMap (I : ∀ k, Finset (ι k)) :
     LocalizedModule (cellMon S I) (MRingOver S ι ⧸ mIdealOver S y) →ₗ[S] Ω :=
   if h : CellMeets y I then evLin y I h else 0
@@ -161,7 +214,7 @@ theorem evMap_mk' {I : ∀ k, Finset (ι k)} (hI : CellMeets y I) (m : MRingOver
     (t : cellMon S I) :
     evMap y I (LocalizedModule.mk m t) = ev0 y m / aeval y (t : MRingOver S ι) := by
   unfold evMap
-  rw [dif_pos hI]
+  rw [dite_eq_left hI]
   exact ev_mk y I hI _ t
 
 theorem evMap_mk {I : ∀ k, Finset (ι k)} (hI : CellMeets y I) (g : MRingOver S ι) (t : cellMon S I) :
@@ -172,7 +225,7 @@ theorem evMap_mk {I : ∀ k, Finset (ι k)} (hI : CellMeets y I) (g : MRingOver 
 theorem evMap_of_not {I : ∀ k, Finset (ι k)} (hI : ¬ CellMeets y I)
     (x : LocalizedModule (cellMon S I) (MRingOver S ι ⧸ mIdealOver S y)) : evMap y I x = 0 := by
   unfold evMap
-  rw [dif_neg hI]
+  rw [dite_eq_right hI]
   rfl
 
 end Eval
@@ -280,7 +333,7 @@ theorem evMap_injOn {I : ∀ k, Finset (ι k)} (hI : CellMeets y I) (γ : K → 
 theorem map_evMap_locPart {I : ∀ k, Finset (ι k)} (hI : CellMeets y I) (γ : K → ℤ) :
     (locPart ι (quotPart S (mIdealOver S y)) (cellMon S I) γ).map (evMap y I) = cellSec S y γ I := by
   unfold cellSec
-  rw [if_pos hI]
+  rw [ite_eq_left hI]
   apply le_antisymm
   · rw [Submodule.map_le_iff_le_comap]
     intro x hx
@@ -332,7 +385,7 @@ theorem cellRes_mk {M : Type} [AddCommGroup M] [Module (MRingOver S ι) M] {J I 
     (h : cellMon S J ≤ cellMon S I) (m : M) (t : cellMon S J) :
     cellRes S M J I (LocalizedModule.mk m t) = LocalizedModule.mk m ⟨t.1, h t.2⟩ := by
   unfold cellRes
-  rw [dif_pos h, IsLocalizedModule.mk_eq_mk', IsLocalizedModule.liftOfLE_mk', ← IsLocalizedModule.mk_eq_mk']
+  rw [dite_eq_left h, IsLocalizedModule.mk_eq_mk', IsLocalizedModule.liftOfLE_mk', ← IsLocalizedModule.mk_eq_mk']
 
 variable {Ω : Type} [Field Ω] [Algebra S Ω] {y : (Σ k, ι k) → Ω}
 
@@ -344,7 +397,7 @@ theorem cellRes_smul {J I : ∀ k, Finset (ι k)} (s : S)
     | h m t => rw [LocalizedModule.smul'_mk, cellRes_mk h, cellRes_mk h,
         LocalizedModule.smul'_mk]
   · unfold cellRes
-    rw [dif_neg h]
+    rw [dite_eq_right h]
     simp
 
 theorem cellRes_mem_locPart {J I : ∀ k, Finset (ι k)} (h : cellMon S J ≤ cellMon S I) (γ : K → ℤ)

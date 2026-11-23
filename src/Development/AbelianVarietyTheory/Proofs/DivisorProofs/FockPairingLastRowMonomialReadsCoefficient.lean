@@ -1,7 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CapelliDeterminantFirstRowsMemBmW
-import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.CoefficientSpaceEqSpanOrbitExtremalVector
-import Formalism.BranchSandwichDivisors.DivFromPassageAndNorm
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CapelliDeterminantFirstRowsMemBmW
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.SplitLastBlockActX
+import Formalism.LocalToGlobal.Divisibility.CoefModLemmas
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open MvPolynomial Formalism.GradedWeylDivisibility Formalism.BranchingDeterminantCap Formalism.BasicNotions Formalism.L2.DIV GlobalTheory.Mem.Gelf GlobalTheory.Mem.GelfCheck GlobalTheory.BrCompare
 
@@ -19,7 +64,7 @@ def spl (K : Type) [Field K] (n : ℕ) : BP K n →+* MvPolynomial (Unit × Fin 
         _ →ₐ[K] _).toRingHom.comp (incl K n).toRingHom))
 
 theorem coefOne_eq (b : Fin n → ℕ) (x : BP K n) :
-    coefOne K n b (incl K n x) = coeff (GlobalTheory.BranchFormula.expOf fun _ : Unit => b) (spl K n x) := by
+    coefOne K n b (incl K n x) = AddMonoidAlgebra.coeff (spl K n x) (GlobalTheory.BranchFormula.expOf fun _ : Unit => b) := by
   unfold coefOne
   rw [GlobalTheory.BranchFormula.coefLast_eq_coeff]
   simp [spl, coeff_map]
@@ -53,7 +98,7 @@ theorem emb_inj : Function.Injective (fun v : Fin n × Fin n => ((v.1.castSucc, 
 
 theorem key (x : BP K n) (β : Unit × Fin n →₀ ℕ) (p : MvPolynomial (Fin n × Fin n) K) :
     fockB x (rename (lastV n) (monomial β (1 : K)) * emb K n p) =
-      ((∏ u, (β u).factorial : ℕ) : K) * fockB (coeff β (spl K n x)) p := by
+      ((∏ u, (β u).factorial : ℕ) : K) * fockB (AddMonoidAlgebra.coeff (spl K n x) β) p := by
   classical
   induction x using MvPolynomial.induction_on generalizing β p with
   | C a =>
@@ -62,7 +107,7 @@ theorem key (x : BP K n) (β : Unit × Fin n →₀ ℕ) (p : MvPolynomial (Fin 
     · subst h; simp [fockB_C_left]
     · rw [if_neg h, if_neg (Ne.symm h), ← fockBL_apply]; simp
   | add f g hf hg =>
-    simp only [← fockBL_apply, map_add, LinearMap.add_apply, coeff_add] at *
+    simp only [← fockBL_apply, map_add (f := _), LinearMap.add_apply, MvPolynomial.coeff_add] at *
     rw [hf, hg, mul_add]
   | mul_X f v hf =>
     obtain ⟨a, s⟩ := v
@@ -109,7 +154,7 @@ theorem spl_zmon (b : Fin n → ℕ) :
 theorem spl_emb (q : MvPolynomial (Fin n × Fin n) K) : spl K n (emb K n q) = C q := by
   induction q using MvPolynomial.induction_on with
   | C a => rw [emb, rename_C, spl_C]
-  | add p q hp hq => simp only [map_add, hp, hq]
+  | add p q hp hq => simp only [map_add (f := _), hp, hq]
   | mul_X p v hp => rw [map_mul, map_mul, hp, bmF_emb_X, spl_up, map_mul]
 
 theorem fockB_zmon_emb : ∀ (K : Type) [Field K] (n : ℕ) (b : Fin n → ℕ), (∀ (x : BP K n) (p : MvPolynomial (Fin n × Fin n) K), fockB x (zmon K n b * emb K n p) = (bfact b : K) * fockB (coefOne K n b (incl K n x)) p) ∧ ∀ p q : MvPolynomial (Fin n × Fin n) K, fockB (zmon K n b * emb K n q) (zmon K n b * emb K n p) = (bfact b : K) * fockB q p := by

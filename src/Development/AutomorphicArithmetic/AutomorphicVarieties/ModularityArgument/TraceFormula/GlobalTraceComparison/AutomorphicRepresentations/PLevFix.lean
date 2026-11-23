@@ -1,8 +1,52 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.TraceFormula.GlobalTraceComparison.AutomorphicRepresentations.SlotBasic
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.TraceFormula.GlobalTraceComparison.TraceAsymptotics.FinprodSplitAlt
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FiniteRestrictionVanishing
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MemKUConjOfComp
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsLocalTranslationCompCommutingOperator
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.TraceFormula.GlobalTraceComparison.AutomorphicRepresentations.SlotBasic
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.TraceFormula.GlobalTraceComparison.TraceAsymptotics.SplitLineAlt
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MemKUConjOfComp
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.HasSatakeGLOfIsSatVecGL
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsLocalTranslationCompCommutingOperator
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FiniteRestrictionVanishing
+import GroundTheory.LocalFields.PadicLogSeries
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Separation.Connected
+
+@[expose] public section
 
 noncomputable section
 
@@ -116,7 +160,7 @@ theorem levFix_pf :
       x ∈ Lev S M ↔ ∀ i : Pl E × Bool, Sl S i → qw n i.1 i.2 x ∈ M i.1 := by
     intro M x
     simp only [Lev, Subgroup.mem_iInf, Subgroup.mem_comap, Subtype.forall]
-  have memK : ∀ x : GF E n, x ∈ Kf E n ↔ ∀ u : Pl E, qw n u false x ∈ KGL u n := by
+  have memK : ∀ x : GF E n, x ∈ Kf E n ↔ ∀ u : Pl E, qw n u false x ∈ KGL u (n := n) := by
     intro x
     simp only [Kf, Subgroup.mem_iInf, Subgroup.mem_comap]
     rfl
@@ -152,19 +196,19 @@ theorem levFix_pf :
 
   have hHo : IsOpen (stb n ψ : Set (GF E n)) := (π.cusp ψ hψ).1.level
   have hcore : ∀ w : Pl E, ∃ M : Subgroup (GLw n w), IsOpen (M : Set (GLw n w)) ∧
-      M ≤ KGL w n ⊓ (stb n ψ).comap (jw n w false) ⊓ (stb n ψ).comap (jw n w true) ∧
-      ∀ k ∈ KGL w n, ∀ x ∈ M, k * x * k⁻¹ ∈ M := fun w =>
+      M ≤ KGL w (n := n) ⊓ (stb n ψ).comap (jw n w false) ⊓ (stb n ψ).comap (jw n w true) ∧
+      ∀ k ∈ KGL w (n := n), ∀ x ∈ M, k * x * k⁻¹ ∈ M := fun w =>
     core_exists _ _ (GlobalTheory.LFun.SatCompare.isOpen_isCompact_KGL w n).2
       (((GlobalTheory.LFun.SatCompare.isOpen_isCompact_KGL w n).1.inter (hHo.preimage (hloc w false).1)).inter
         (hHo.preimage (hloc w true).1))
   choose M hMo hMle hMn using hcore
-  refine ⟨fun w => if w ∈ Z then M w else KGL w n, fun w => ?_, ψ, hψ, hψ0, fun k hk => ?_⟩
+  refine ⟨fun w => if w ∈ Z then M w else KGL w (n := n), fun w => ?_, ψ, hψ, hψ0, fun k hk => ?_⟩
   · by_cases hw : w ∈ Z
     · simp only [if_pos hw]
       exact ⟨hMo w, fun x hx => (hMle w hx).1.1, hMn w, fun h => absurd hw h⟩
     · simp only [if_neg hw]
       exact ⟨(GlobalTheory.LFun.SatCompare.isOpen_isCompact_KGL w n).1, le_rfl,
-        fun k hk x hx => (KGL w n).mul_mem ((KGL w n).mul_mem hk hx) ((KGL w n).inv_mem hk), fun _ => trivial⟩
+        fun k hk x hx => (KGL w (n := n)).mul_mem ((KGL w (n := n)).mul_mem hk hx) ((KGL w (n := n)).inv_mem hk), fun _ => trivial⟩
   have hkN := (mem _ k).1 hk
   have hkK : k ∈ Kf E n := (hK k).1 ((mem _ k).2 fun i hi => by
     have := hkN i hi

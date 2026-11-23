@@ -1,54 +1,56 @@
-import Formalism.IncomingBounds.LevelTail
+module
+
+public import Mathlib.Analysis.SpecialFunctions.Log.Base
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 open scoped BigOperators
 
 namespace Formalism.IncomingBounds
 
-def InvWeight : Prop :=
-  ∀ l : ℕ, 2 ≤ l → ∀ n n' : ℤ, ((l : ℤ) ^ 2 - 1) ∣ (n - l * n') →
-    ∃ k : ℤ, ((n : ℝ) + n') * rho l = k + (n' : ℝ) / ((l : ℝ) - 1)
-
-def BinomGcd : Prop :=
-  ∀ l : ℕ, l.Prime → ∀ n : ℕ, 2 ≤ n →
-    ((∃ k, 0 < k ∧ k < n ∧ ¬ l ∣ n.choose k) ↔ ¬ ∃ e : ℕ, n = l ^ e) ∧
-      ∀ e : ℕ, 1 ≤ e → n = l ^ e → ∃ k, 0 < k ∧ k < n ∧ ¬ l ^ 2 ∣ n.choose k
-
 def FactValBounds : Prop :=
   ∀ l : ℕ, l.Prime → ∀ N : ℕ, 1 ≤ N →
     (N : ℝ) / ((l : ℝ) - 1) - (Real.logb l N + 1) ≤ (padicValNat l N.factorial : ℝ) ∧
       (padicValNat l N.factorial : ℝ) ≤ ((N : ℝ) - 1) / ((l : ℝ) - 1)
-
-def UProduct : Prop :=
-  ∀ l : ℕ, 2 ≤ l → ∀ x : ℕ,
-    uFac l x = (-((l - 1).factorial : ℚ)) ^ x *
-      ∏ y ∈ Finset.range x, ∏ i ∈ Finset.Ico 1 l, (1 + (l : ℚ) * y / i)
-
-def LogCoeffVal : Prop :=
-  ∀ l : ℕ, l.Prime → 5 ≤ l → ∀ s : ℕ, 1 ≤ s →
-    1 / ((l : ℝ) - 1) + ((s : ℝ) + 1) / 4 ≤ (s : ℝ) - padicValNat l s
-
-def LemmaMExponent : Prop :=
-  ∀ l : ℕ, 2 ≤ l → ∀ s0 : ℕ,
-    1 + (l : ℝ) * (∑ t ∈ Finset.range s0, ((l : ℝ) ^ 2) ^ t) =
-        1 + ((l : ℝ) ^ (2 * s0 + 1) - l) * rho l ∧
-      ∀ s : ℕ, (∑ t ∈ Finset.range (s + 1), ((l : ℝ) ^ 2) ^ t) =
-        (l : ℝ) ^ 2 * (∑ t ∈ Finset.range s, ((l : ℝ) ^ 2) ^ t) + 1
-
-def LemmaMNumerics : Prop :=
-  ∀ l : ℕ, 5 ≤ l → ∀ i : ℕ, Odd i →
-    (l : ℝ) ^ 2 * rho l = 1 + rho l ∧
-    (∀ i' : ℕ, 3 ≤ i' → (l : ℝ) - 2 ≤ (l : ℝ) ^ i' * rho l - ((i' : ℝ) - 1)) ∧
-    (∀ i' : ℕ, 2 ≤ i' → 0 < (l : ℝ) ^ i' * rho l - ((i' : ℝ) - 1) ∧ 0 < (l : ℝ) ^ i' - i') ∧
-    1 + rho l ≤ (l : ℝ) * (1 + rho l) - 1 ∧
-    ((l : ℝ) ^ 2) ^ ((i + 1) / 2) * (3 * ((l : ℝ) ^ i)⁻¹ / 8) = 3 * (l : ℝ) / 8 ∧
-    1 < 3 * (l : ℝ) / 8 ∧
-    1 / ((l : ℝ) - 1) - (rho l + 1 / 2 - ((l : ℝ) ^ i)⁻¹ / 8) < 0 ∧
-    1 / 2 - 1 / (8 * (l : ℝ)) ≤ rho l + 1 / 2 - ((l : ℝ) ^ i)⁻¹ / 8 ∧
-    (∀ i' : ℕ, 1 ≤ i' → (i' : ℝ) < (l : ℝ) ^ i' / ((l : ℝ) - 1)) ∧
-    ∀ J v : ℕ, 2 ≤ J → l ^ v ≤ J →
-      let rm : ℝ := rho l + 1 / 2 - ((l : ℝ) ^ i)⁻¹ / 8
-      (v = 0 → rm ≤ ((J : ℝ) - 1) * (rm - 1 / ((l : ℝ) - 1)) + rm - v) ∧
-        (1 ≤ v → 3 / 8 ≤ ((J : ℝ) - 1) * (rm - 1 / ((l : ℝ) - 1)) + rm - v)
 
 end Formalism.IncomingBounds

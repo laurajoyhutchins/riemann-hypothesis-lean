@@ -1,4 +1,47 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.MultihomogeneousIdeals.CurveFilt
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.IsIntersectionFamily
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -14,23 +57,6 @@ def formsDeg (F : Type*) [Field F] (ι : K → Type*) [∀ k, Fintype (ι k)] (d
 
 def hilbFn (J : Ideal (MRingOver F ι)) (d : K → ℕ) : ℕ :=
   Module.finrank F ((formsDeg F ι d).map (Ideal.Quotient.mkₐ F J).toLinearMap)
-
-instance finiteDimensional_formsDeg (d : K → ℕ) : FiniteDimensional F (formsDeg F ι d) := by
-  classical
-  unfold formsDeg
-  apply FiniteDimensional.span_of_finite
-  have hfin : {m : (Σ k, ι k) →₀ ℕ | ∀ k, ∑ i, m ⟨k, i⟩ = d k}.Finite := by
-    apply (Set.finite_Iic (Finsupp.equivFunOnFinite.symm fun p : Σ k, ι k => d p.1)).subset
-    intro m hm
-    rw [Set.mem_Iic, Finsupp.le_def]
-    intro p
-    simp only [Finsupp.equivFunOnFinite_symm_apply_apply]
-    rw [← hm p.1]
-    exact Finset.single_le_sum (f := fun i => m ⟨p.1, i⟩) (fun _ _ => Nat.zero_le _)
-      (Finset.mem_univ p.2)
-  exact (hfin.image fun m => monomial m (1 : F)).subset (by
-    rintro f ⟨m, hm, rfl⟩
-    exact ⟨m, hm, rfl⟩)
 
 attribute [local instance] MvPolynomial.weightedGradedAlgebra
 

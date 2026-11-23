@@ -1,8 +1,60 @@
-import Mathlib
-import Formalism.HermitianLattices.HermitianLatticesProofs.UnimodUnramUnique
-import Formalism.LocalRingCardinality.DataHost
-import Formalism.FrobeniusOrbits.HostCorollaries
-import Formalism.SatakeDualWeyl.Statement
+module
+
+public import Formalism.LocalRingCardinality.DataHost
+public import Formalism.SatakeDualWeyl.Statement
+public import Mathlib.RingTheory.Henselian
+public import Formalism.HermitianLattices.HermitianLatticesProofs.UnimodUnramUnique
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.FreeModule.IdealQuotient
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RingTheory.DedekindDomain.Factorization
+
+@[expose] public section
 
 open IsDedekindDomain HeightOneSpectrum IsLocalRing WithZero NumberField Filter Topology
 
@@ -73,8 +125,8 @@ section Local2
 variable {R : Type*} [CommRing R] [IsDedekindDomain R] {K : Type*} [Field K] [Algebra R K]
   [IsFractionRing R K] (v : HeightOneSpectrum R)
 
-local notation "Ov" => v.adicCompletionIntegers K
 local notation "Kv" => v.adicCompletion K
+local notation "Ov" => v.adicCompletionIntegers K
 
 theorem adicInt_dvd_iff (x y : Ov) :
     x ∣ y ↔ Valued.v (y : Kv) ≤ Valued.v (x : Kv) := by
@@ -195,8 +247,8 @@ section Residue
 variable {R : Type*} [CommRing R] [IsDedekindDomain R] {K : Type*} [Field K] [Algebra R K]
   [IsFractionRing R K] (v : HeightOneSpectrum R)
 
-local notation "Ov" => v.adicCompletionIntegers K
 local notation "Kv" => v.adicCompletion K
+local notation "Ov" => v.adicCompletionIntegers K
 
 theorem adicCompl_val_algebraMap (y : K) : Valued.v (algebraMap K Kv y) = v.valuation K y := by
   first
@@ -306,10 +358,6 @@ theorem adel_conj_bE : H.conj (H.sqd) = - H.sqd := by
     | simp [Formalism.HC.HostRaw.conj, Formalism.HC.Frame.cc]
   rw [hc]; simp
 
-theorem adel_aE_sq : H.sqq ^ 2 = -(H.q : H.E) := H.sqq_sq
-
-theorem adel_bE_sq : H.sqd ^ 2 = -(H.d : H.E) := H.sqd_sq
-
 theorem adel_mem_F (x : H.E) (hx : H.conj x = x) : x ∈ H.F := by
   have key : ∀ φ : H.E →+* ℂ, starRingEnd ℂ (φ x) = φ x := fun φ => by
     have h1 := Formalism.HC.HostAx.conjE_apply (H := H.toHostAx) φ x
@@ -331,13 +379,6 @@ open Formalism.FrobeniusOrbits Formalism.TwoAdicCyclotomicDecomposition
 open scoped TensorProduct
 
 variable {R : Formalism.BasicNotions.Ranks} (H : Formalism.BasicNotions.Host R)
-
-theorem adel_bE_ne : (H.sqd : H.E) ≠ 0 := by
-  intro h
-  obtain ⟨-, hd, -, -, -⟩ := H.hyp
-  have h2 := H.sqd_sq
-  rw [h, zero_pow two_ne_zero, eq_comm, neg_eq_zero, Nat.cast_eq_zero] at h2
-  exact hd.ne_zero h2
 
 def adelBeta : H.F :=
   ⟨H.sqq / H.sqd, adel_mem_F H _ (by
@@ -366,7 +407,7 @@ theorem adelNq_spec : 4 * adelNq H = (H.q : ℤ) + 1 := by
 theorem adelic_theta_conj : H.conj (adelTheta H) = 1 - adelTheta H := by
   unfold adelTheta
   first
-  | (rw [map_div₀, map_add, map_one, adel_conj_bE, map_ofNat]; ring)
+  | (rw [map_div₀, map_add (f := _), map_one, adel_conj_bE, map_ofNat]; ring)
   | (simp [adel_conj_bE]; ring)
 
 theorem adelic_theta_mul_one_sub : adelTheta H * (1 - adelTheta H) = ((adelNd H : ℤ) : H.E) := by
@@ -432,7 +473,7 @@ theorem adel_local (v : HeightOneSpectrum (𝓞 H.F)) :
       + algebraMap H.F (v.adicCompletion H.F) (adelBeta H) = 1 := by
     have h := congrArg (algebraMap H.F (v.adicCompletion H.F)) (adelic_alpha_beta_linear H)
     first
-    | (rw [map_add, map_mul, map_ofNat, map_one] at h; exact h)
+    | (rw [map_add (f := _), map_mul, map_ofNat, map_one] at h; exact h)
     | simpa using h
   have hI4 : algebraMap H.F (v.adicCompletion H.F) (adelAlpha H) ^ 2
       + algebraMap H.F (v.adicCompletion H.F) (adelAlpha H)
@@ -441,7 +482,7 @@ theorem adel_local (v : HeightOneSpectrum (𝓞 H.F)) :
       = ((adelNq H : ℤ) : v.adicCompletion H.F) := by
     have h := congrArg (algebraMap H.F (v.adicCompletion H.F)) (adelic_alpha_beta_norm H)
     first
-    | (rw [map_add, map_add, map_mul, map_mul, map_pow, map_pow, map_intCast, map_intCast] at h; exact h)
+    | (rw [map_add (f := _), map_add (f := _), map_mul, map_mul, map_pow, map_pow, map_intCast, map_intCast] at h; exact h)
     | simpa using h
   by_cases hdv : ((H.d : ℤ) : 𝓞 H.F) ∈ v.asIdeal
   · have hqv : ((H.q : ℤ) : 𝓞 H.F) ∉ v.asIdeal := fun h => adel_not_both H v ⟨hdv, h⟩
@@ -533,7 +574,7 @@ theorem adel_hom_key {A B : Type*} [CommRing A] [CommRing B] (f : A →+* B) (S 
 theorem adel_alg {B : Type*} [CommRing B] (τ : B →+* B) (s t u : B) (N : ℤ)
     (hs : τ s = s) (ht : τ t = t) (hτu : τ u = 1 - u) (hu : u * (1 - u) = N)
     (hk : s * s + s * t + (N : B) * (t * t) = -1) : τ (s + u * t) * (s + u * t) = -1 := by
-  rw [map_add, map_mul, hs, ht, hτu]
+  rw [map_add (f := _), map_mul, hs, ht, hτu]
   linear_combination hk + t * t * hu
 
 theorem exists_adelic_neg_one (σ : H.E →ₐ[H.F] H.E) (hσ : ∀ x, σ x = H.conj x) :

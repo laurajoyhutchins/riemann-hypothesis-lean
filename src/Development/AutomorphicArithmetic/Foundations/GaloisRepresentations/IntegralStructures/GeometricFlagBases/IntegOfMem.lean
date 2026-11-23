@@ -1,11 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.HasDivPlace
-import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsGDatumOneOneOne
-import Development.AbelianVarietyTheory.Definitions.Divisors.HxiTZeroComb
-import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsTjCorrDiagModel
-import Development.AbelianVarietyTheory.Definitions.Divisors.CompactBIffCompact
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.PAdicWittLattices.BcMapFst
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.IntegralStructures.GeometricFlagBases.IsGrRefl
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.HasDivPlace
+public import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsGDatumOneOneOne
+public import Development.AbelianVarietyTheory.Definitions.Divisors.HxiTZeroComb
+public import Development.AbelianVarietyTheory.Definitions.Divisors.CompactBIffCompact
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.PAdicWittLattices.BcMapFst
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.IntegralStructures.GeometricFlagBases.IsGrRefl
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CompEqOneOfTransl
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -110,12 +148,12 @@ def KS.tower {R : Type} [Field R] [Algebra ℚ R] {gb : GBase D.toG R} {k : ℕ}
 
 section Grp
 
-variable (D) in
 
+variable (D) in
 def mulF (x : 𝓞 D.F) : Module.End (AfP p) (AfP p ⊗[ℚ] VQ D) := (actQ D (algebraMap (𝓞 D.F) D.O x)).baseChange (AfP p)
 
-variable (D) in
 
+variable (D) in
 def idHat (𝔟 : Ideal (𝓞 D.F)) : AddSubgroup (AfP p ⊗[ℚ] VQ D) :=
   AddSubgroup.closure {z | ∃ x ∈ 𝔟, ∃ v ∈ LaHat D, z = mulF D x v}
 
@@ -125,12 +163,12 @@ def CongId (𝔟 : Ideal (𝓞 D.F)) (g : G.GAf) : Prop := ∀ v ∈ LaHat D, L.
 
 def IsLev (𝔟 : Ideal (𝓞 D.F)) (K : Subgroup G.GAf) : Prop := ∀ g, g ∈ K ↔ g ∈ L.KN 1 ∧ CongId L 𝔟 g
 
-variable (D) in
 
+variable (D) in
 def uId (q : ℕ) (r : ℤ) : Ideal (𝓞 D.F) := Ideal.span {(q : 𝓞 D.F), D.ω - (r : 𝓞 D.F)}
 
-variable (D) in
 
+variable (D) in
 structure AtPrime (q : ℕ) (r : ℤ) (𝔴 : Ideal (𝓞 D.F)) : Prop where
   prime : q.Prime
   ne : q ≠ p
@@ -140,19 +178,16 @@ structure AtPrime (q : ℕ) (r : ℤ) (𝔴 : Ideal (𝓞 D.F)) : Prop where
   max : 𝔴.IsMaximal
   le : uId D q r ≤ 𝔴
 
-variable (D) in
 
+variable (D) in
 def LevOK (q : ℕ) (r : ℤ) (𝔴 𝔫 : Ideal (𝓞 D.F)) : Prop :=
   ∃ (N₀ : ℕ) (𝔞 : Ideal (𝓞 D.F)), 3 ≤ N₀ ∧ N₀.Coprime q ∧ N₀.Coprime p ∧ 𝔞 ⊔ 𝔴 = ⊤ ∧ (∃ e : ℕ, uId D q r ^ e ≤ 𝔞) ∧
     𝔫 = Ideal.span {(N₀ : 𝓞 D.F)} * 𝔞
 
-variable (D) in
 
+variable (D) in
 def LevAt (q : ℕ) (r : ℤ) (𝔴 : Ideal (𝓞 D.F)) (N₀ : ℕ) (𝔞 : Ideal (𝓞 D.F)) : Prop :=
   3 ≤ N₀ ∧ N₀.Coprime q ∧ N₀.Coprime p ∧ 𝔞 ⊔ 𝔴 = ⊤ ∧ ∃ e : ℕ, uId D q r ^ e ≤ 𝔞
-
-def UnitAt (𝔴 : Ideal (𝓞 D.F)) (h : G.GAf) : Prop :=
-  ∃ s : 𝓞 D.F, s ∉ 𝔴 ∧ ∀ v ∈ LaHat D, ∃ v' ∈ LaHat D, L.actG h v' = mulF D s v
 
 structure IsTjElt (q : ℕ) (r : ℤ) (𝔴 : Ideal (𝓞 D.F)) (j : ℕ) (h : G.GAf) : Prop where
   away : ∀ n : ℕ, n.Coprime q → L.CongOne n h

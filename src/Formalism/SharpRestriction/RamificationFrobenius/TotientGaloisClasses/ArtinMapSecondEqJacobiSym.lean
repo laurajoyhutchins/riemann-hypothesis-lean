@@ -1,6 +1,52 @@
-import Formalism.SharpRestriction.RamificationFrobenius.TotientGaloisClasses.ConjEMemHostFIff
-import Formalism.SharpRestriction.RamificationFrobenius.TotientGaloisClasses.FrameCyclicGenerator
-import Formalism.FrobeniusOrbits.HostCorollaries
+module
+
+public import Formalism.SharpRestriction.RamificationFrobenius.TotientGaloisClasses.ConjEMemHostFIff
+public import Formalism.FrobeniusOrbits.FrobeniusOrbitsProofs.EqZeroOfNegEq
+public import Formalism.FrobeniusOrbits.RealSubfieldLeCompositum
+public import Formalism.FrobeniusOrbits.FrobeniusOrbitsProofs.CoprimeTwoPow
+import Formalism.FrobeniusOrbits.FrobeniusOrbitsProofs.Galois
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IntermediateField Ideal
 
@@ -48,6 +94,7 @@ theorem gs_act {K : Type*} [Field K] [CharZero K] {p : ℕ} [Fact p.Prime] {x : 
   have hχ : ∀ a : ZMod p, σ (Cond.chi p K a) = Cond.chi p K a := by
     intro a; simp [Cond.chi, MulChar.ringHomComp_apply]
   have h1 : σ (Cond.gs p hx) = gaussSum (Cond.chi p K) (AddChar.mulShift (AddChar.zmodChar p hx) (w : ZMod p)) := by
+
     simp only [Cond.gs, gaussSum, map_sum, map_mul, hψ, hχ, AddChar.mulShift_apply]
   have h2 := gaussSum_mulShift (Cond.chi p K) (AddChar.zmodChar p hx) w
   have h3 : Cond.chi p K (w : ZMod p) = ((jacobiSym (v : ℤ) p : ℤ) : K) := by
@@ -144,12 +191,6 @@ theorem artinMap_first_eq_one (u : (ZMod (2 ^ (e + 2) * q * d))ˣ) (hu : (u : ZM
   rw [artinMap_first_eq_jacobiSym, jacobiSym.mod_left' (a₂ := 1) (by exact_mod_cast Int.natCast_modEq_iff.mpr hu), jacobiSym.one_left]
   rfl
 
-theorem artinMap_second_eq_one (u : (ZMod (2 ^ (e + 2) * q * d))ˣ) (hu : (u : ZMod (2 ^ (e + 2) * q * d)).val ≡ 1 [MOD d]) :
-    (art0 e hH u).1.2 = 1 := by
-  apply Units.ext
-  rw [artinMap_second_eq_jacobiSym, jacobiSym.mod_left' (a₂ := 1) (by exact_mod_cast Int.natCast_modEq_iff.mpr hu), jacobiSym.one_left]
-  rfl
-
 theorem artinMap_dyadic_eq_one (u : (ZMod (2 ^ (e + 2) * q * d))ˣ)
     (hu : (u : ZMod (2 ^ (e + 2) * q * d)).val ≡ 1 [MOD 2 ^ (e + 2)]) : (art0 e hH u).2 = 1 := by
   rw [artinMap_dyadic_eq e hH u 1 (by rw [(ZMod.natCast_eq_natCast_iff _ _ _).mpr hu]; simp), hcl_one]
@@ -209,7 +250,7 @@ theorem algEquiv_apply_eq_tau_of_galE_eq_art0 (ι : L →ₐ[ℚ] Cond.Cyc (2 ^ 
       have hN : ∀ w : L, w ^ 2 ^ (e + 2) = 1 → ι w ^ (2 ^ (e + 2) * q * d) = 1 := by
         intro w hw
         rw [pow_mul, pow_mul, ← map_pow, hw, map_one, one_pow, one_pow]
-      rw [h1, hval, Cond.pow_mod_of hz, Cond.pow_mod_of hz', map_add, map_add, map_add, map_pow, map_pow,
+      rw [h1, hval, Cond.pow_mod_of hz, Cond.pow_mod_of hz', map_add (f := _), map_add (f := _), map_add (f := _), map_pow, map_pow,
         hτ _ (hN _ hz), hτ _ (hN _ hz')]
     · subst hy
       show ι ((σ (aE ζ y b) : hostE ζ y b) : L) = τ (ι y)

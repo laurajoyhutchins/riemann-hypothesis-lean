@@ -1,7 +1,59 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.Cartier
-import GroundTheory.HeightsAndTheta.Heights.HeightComparison.IsMultiHomogIdealIff
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PChangeOfModel
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.Objects
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsChangeOfModel
+public import Mathlib.RingTheory.RegularLocalRing.Defs
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.Cartier
+public import GroundTheory.HeightsAndTheta.Heights.HeightComparison.IsMultiHomogIdealIff
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PChangeOfModel
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -38,7 +90,7 @@ theorem mem_divSupp_and_multAt_eq {P W : Ideal (MRing κ)} {f g u v : MRing κ} 
   refine ⟨⟨GroundTheory.Heights₂.Heights.NumbersDVR.mem_minimalPrimes_of_mul_mem hu hv (mul_mem_sup_span huv)
     (mul_mem_sup_span hvu) hf.1, hf.2⟩, ?_⟩
   unfold multAt
-  rw [dif_pos hWp, dif_pos hWp,
+  rw [dite_eq_left hWp, dite_eq_left hWp,
     GroundTheory.Heights₂.Heights.NumbersDVR.length_localized_eq_of_mul_mem hu hv (mul_mem_sup_span huv)
       (mul_mem_sup_span hvu)]
 
@@ -101,6 +153,7 @@ theorem wh_lin [DecidableEq K] (A : ∀ k, ι₂ k → ι k → ℤ) (q : Σ k, 
     IsWeightedHomogeneous (GroundTheory.Heights₂.Heights.NumbersDVR.blockWeight (Sum.elim ι ι₂))
       (rename inlV (linForm A q)) (Pi.single (Sum.inl q.1) 1) := by
   rw [← mem_weightedHomogeneousSubmodule]
+
   simp only [linForm, map_sum, map_mul, rename_C, rename_X]
   refine Submodule.sum_mem _ fun i _ => ?_
   rw [← smul_eq_C_mul]
@@ -256,7 +309,8 @@ theorem proof : GraphIsometric.Statement := by
         refine sup_le (fun p hp => RingHom.mem_ker.mpr (hx.2 p hp))
           (Ideal.span_le.mpr (Set.range_subset_iff.mpr fun j' => ?_))
         show φ _ = 0
-        simpa [φ, linForm, linApply] using hall j'
+        simp only [φ, RingHom.comp_apply]
+        exact ((hev (linForm A ⟨k, j'⟩)).symm.trans (hlin ⟨k, j'⟩)).trans (hall j')
       have h0 := RingHom.mem_ker.mp (hle hN)
       have hne : φ ((∏ k', (X ⟨k', i k'⟩ : MRing ι)) ^ N) ≠ 0 := by
         simp only [φ, map_pow, map_prod, RingHom.comp_apply, map_X, eval_X]

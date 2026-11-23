@@ -1,9 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsInvExp
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsGenOfValEq
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HarrisTaylorTypeTjIsogeniesRepresentableStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ConjDualPartsKilledOfPerfectPairingStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AbelianSchemeTorsionPointLocallyConstantGeomPoinStatement
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsInvExp
+import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.AbelianSchemeLawsWithoutCohomology
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AbelianSchemeMulNFiniteFlatSurjective
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AbelianSchemeTorsionPointLocallyConstantGeomPoinStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ConjDualPartsKilledOfPerfectPairingStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsBirigidifiedKthRootPullbackBundle
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsGenOfValEq
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HarrisTaylorTypeTjIsogeniesRepresentableStatement
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.BiadditiveOfTrivAxes
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.LBPull
+
+@[expose] public section
 
 noncomputable section
 
@@ -35,8 +81,8 @@ def kerAct {s : S ⟶ Sp R} {o o' : Obj b N s} (ψ : o.A ⟶ o'.A) [IsMonHom ψ]
       haveI := o.act.hom a
       exact MonObj.mul_comp _ _ _)
 
-open GlobalTheory.CechPic in
 
+open GlobalTheory.CechPic in
 theorem val_act {s : S ⟶ Sp R} (o : Obj b N s) (a : D.O) {T : Over S} (x y : T ⟶ o.A) :
     BirigidPow.val o.isLB (x ≫ o.act.act a) y = BirigidPow.val o.isLB x (y ≫ o.act.act (D.star a).unop) := by
   have e := (cls_eq_iff (pull_isLB o.isLB _) (pull_isLB o.isLB _)).2 (o.rosati a)
@@ -46,8 +92,8 @@ theorem val_act {s : S ⟶ Sp R} (o : Obj b N s) (a : D.O) {T : Over S} (x y : T
     lift_fst, lift_snd_assoc] at e'
   exact e'
 
-open GlobalTheory.TranslChar GlobalTheory.CechPic in
 
+open GlobalTheory.TranslChar GlobalTheory.CechPic in
 theorem exists_pairing {s : S ⟶ Sp R} {c : ℕ} {o o' : Obj b N s} {ψ : o.A ⟶ o'.A} [IsMonHom ψ]
     (hψ : IsPIsog c o o' ψ) {ψ' : o'.A ⟶ o.A} [IsMonHom ψ'] (h₁ : ψ ≫ ψ' = (𝟙 o.A) ^ c)
     (h₂ : ψ' ≫ ψ = (𝟙 o'.A) ^ c) (hl : ∀ a : D.O, o.act.act a ≫ ψ = ψ ≫ o'.act.act a)
@@ -157,10 +203,10 @@ theorem exists_pairing {s : S ⟶ Sp R} {c : ℕ} {o o' : Obj b N s} {ψ : o.A �
             (G₁ ≫ snd o'.A T) _ hz w
           have hV : i ≫ G₂ = (i ≫ G₁) ≫ tr y := by
             apply CartesianMonoidalCategory.hom_ext
-            · rw [Category.assoc _ (tr y), tr_fst, MonObj.comp_mul, Category.assoc i G₁ (snd _ _ ≫ y),
+            · rw [Category.assoc _ (tr y), show tr y ≫ fst _ _ = _ from lift_fst _ _, MonObj.comp_mul, Category.assoc i G₁ (snd _ _ ≫ y),
                 ← Category.assoc G₁, ← hiz, Category.assoc i G₁, ← MonObj.comp_mul, mul_inv_cancel_left,
                 Category.assoc]
-            · rw [Category.assoc _ (tr y), tr_snd, Category.assoc, Category.assoc, ht]
+            · rw [Category.assoc _ (tr y), show tr y ≫ snd _ _ = _ from lift_snd _ _, Category.assoc, Category.assoc, ht]
           have hV' : i.left ≫ g₂ = (i.left ≫ g₁) ≫ (tr y).left := congrArg (fun q => q.left) hV
           choose J' hJ' using fun χ : V.left ⟶ (G2 o'.A).left => exists_chart hL (χ w')
           have e := ha _ i.left w' J' hJ'
@@ -293,7 +339,7 @@ theorem kerAct_add (a a' : 𝓞 D.F) (y : kerPts ψ T) : kerAct ψ h T (algebraM
     kerAct ψ h T (algebraMap (𝓞 D.F) D.O a) y * kerAct ψ h T (algebraMap (𝓞 D.F) D.O a') y :=
   Subtype.ext (by
     change y.1 ≫ _ = (y.1 ≫ _) * (y.1 ≫ _)
-    rw [map_add, o.act.add, MonObj.comp_mul])
+    rw [map_add (f := _), o.act.add, MonObj.comp_mul])
 
 theorem kerAct_natCast (n : ℕ) (y : kerPts ψ T) : kerAct ψ h T (algebraMap (𝓞 D.F) D.O n) y = y ^ n := by
   induction n with

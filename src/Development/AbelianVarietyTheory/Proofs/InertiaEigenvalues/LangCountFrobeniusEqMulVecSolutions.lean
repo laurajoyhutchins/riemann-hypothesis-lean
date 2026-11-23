@@ -1,6 +1,59 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.MooreNorm
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.LangXRoot
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.MooreNorm
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.LangXRoot
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Analysis.Normed.Group.Ultra
+public import Mathlib.FieldTheory.Finite.GaloisField
+
+@[expose] public section
 
 noncomputable section
 
@@ -12,8 +65,8 @@ theorem langCount_card_fixed (F : Type) [Field F] [IsAlgClosed F] (p : ℕ) [Fac
     (e : ℕ) (he : 0 < e) : Nat.card {c : F // c ^ p ^ e = c} = p ^ e := by
   have hq : 1 < p ^ e := Nat.one_lt_pow he.ne' (Fact.out : p.Prime).one_lt
   have hsep : (X ^ p ^ e - X : F[X]).Separable := galois_poly_separable p (p ^ e) (dvd_pow_self p he.ne')
-  have hdeg : (X ^ p ^ e - X : F[X]).natDegree = p ^ e := FiniteField.X_pow_card_sub_X_natDegree_eq F hq
-  have hne : (X ^ p ^ e - X : F[X]) ≠ 0 := FiniteField.X_pow_card_sub_X_ne_zero F hq
+  have hdeg : (X ^ p ^ e - X : F[X]).natDegree = p ^ e := Polynomial.natDegree_X_pow_sub_X (R := F) hq
+  have hne : (X ^ p ^ e - X : F[X]) ≠ 0 := Polynomial.X_pow_sub_X_ne_zero hq
   have hcard := Polynomial.card_rootSet_eq_natDegree (K := F) hsep (IsAlgClosed.splits_domain _)
   rw [hdeg] at hcard
   have h2 : Nat.card ((X ^ p ^ e - X : F[X]).rootSet F) = p ^ e := by
@@ -53,6 +106,7 @@ theorem langCount_card_semilinear (F : Type) [Field F] [IsAlgClosed F] (p : ℕ)
     intro v
     have hv : Φ v = b.equivFun.symm (fun i => b.equivFun v i ^ p ^ e) := by
       conv_lhs => rw [← b.sum_equivFun v]
+
       rw [map_sum, Module.Basis.equivFun_symm_apply]
       refine Finset.sum_congr rfl fun i _ => ?_
       rw [hΦ, hb]
@@ -86,9 +140,8 @@ theorem langCount : ∀ (F : Type) [NontriviallyNormedField F] [IsUltrametricDis
     intro a b
     rw [← Matrix.mulVec_add]
     congr 1
-    funext i
-    simp only [Pi.add_apply]
-    rw [add_pow_char_pow])
+    ext i
+    simpa using (add_pow_char_pow (a i) (b i) p e))
   have hΦ : ∀ (c : F) (v : m → F), Φ (c • v) = c ^ p ^ e • Φ v := by
     intro c v
     show A⁻¹.mulVec (fun i => (c • v) i ^ p ^ e) = c ^ p ^ e • A⁻¹.mulVec (fun i => v i ^ p ^ e)

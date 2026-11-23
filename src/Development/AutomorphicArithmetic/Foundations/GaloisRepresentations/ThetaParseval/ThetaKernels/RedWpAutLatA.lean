@@ -1,10 +1,59 @@
-import Development.WeilBound.ThetaLifts.Reductions.WeilPairs.AutLatA
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ThetaParseval.HalfIndexLattices.SplitStab
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ThetaParseval.HalfIndexLattices.IsLatRepL
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ThetaParseval.ThetaKernels.RedWpAutDef
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ThetaParseval.ThetaKernels.GamQFEqOneIffK
+module
 
-set_option synthInstance.maxHeartbeats 200000
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ThetaParseval.HalfIndexLattices.IsLatRepL
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ThetaParseval.ThetaKernels.RedWpAutDef
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsIsHalfIdem
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.FiniteRationalPointsCompletedLattice
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FiniteDetSmulSubOne
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RationalLatticeSelfDualFgFullIndex
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RelIndexMapNsmulComapEqAbsNormDetStatement
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ThetaParseval.ThetaKernels.GamQFEqOneIffK
+public import Development.WeilBound.ThetaLifts.Reductions.WeilPairs.AutLatA
+import Development.WeilBound.ThetaLifts.Reductions.WeilPairs.FinIdemSmulOfReal
+import Development.WeilBound.ThetaLifts.Reductions.WeilPairs.LatRepA
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalUnitaryOrbits.QInertHolds
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Matrix.FiniteDimensional
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
+
 
 section
 noncomputable section
@@ -64,10 +113,10 @@ theorem isHeisQ_k (C : _root_.PositivityTheory.ThKW.Ctx_k σ B JS JT ξ₀ θ ι
     IsHeis (sgOF σ) w (gamQF σ JS JT ξ₀ B.ψ) fun x => opFF hc w (finRatF F x) := by
   have H := isHeis_opFF (_root_.PositivityTheory.ThKW.AutLatA.sgsg_k C.good) C.hS C.hT C.hξ hc hw
   have e : ∀ x y, gamQF σ JS JT ξ₀ B.ψ x y = gamFF σ JS JT ξ₀ B.ψ (finRatF F x) (finRatF F y) := fun _ _ => rfl
-  exact ⟨H.sg_sg, H.w_add, fun x y z => by rw [e, e, e, map_add, H.add_left],
-    fun x y z => by rw [e, e, e, map_add, H.add_right], fun x => by rw [e, H.alt],
+  exact ⟨H.sg_sg, H.w_add, fun x y z => by rw [e, e, e, map_add (f := _), H.add_left],
+    fun x y z => by rw [e, e, e, map_add (f := _), H.add_right], fun x => by rw [e, H.alt],
     fun r x y => by rw [e, e, map_smul, map_smul, H.adj], fun v => by rw [map_zero, H.zero],
-    fun x y v => by rw [H.comp, e, map_smul, map_add]⟩
+    fun x y v => by rw [H.comp, e, map_smul, map_add (f := _)]⟩
 theorem idx_eq_k (C : _root_.PositivityTheory.ThKW.Ctx_k σ B JS JT ξ₀ θ ι) (hG : GoodLat Λ) (hR : RatSD σ JS JT ξ₀ Λ)
     (hO : _root_.UpperTheory.TP.W.IsLatRepL σ JS JT ξ₀ B.ψ hc Λ w lam Om) {g : GAF σ JS} {h : GAF σ JT} {a b}
     (ha : IsRatF σ JS g a) (hb : IsRatF σ JT h⁻¹ b) :
@@ -127,15 +176,19 @@ theorem data_k (C : _root_.PositivityTheory.ThKW.Ctx_k σ B JS JT ξ₀ θ ι) (
     obtain ⟨s, hs⟩ := fg
     choose k hk hk' using full
     refine ⟨∏ y ∈ s, k (sandw b a y), Finset.prod_ne_zero_iff.2 fun y _ => (hk _).ne', fun x hx => ?_⟩
-    rw [← hs] at hx
-    induction hx using AddSubgroup.closure_induction with
-    | mem x hx =>
-      obtain ⟨m, hm⟩ := Finset.dvd_prod_of_mem (fun y => k (sandw b a y)) hx
+    suffices h : ∀ z : A, (∏ y ∈ s, k (sandw b a y)) • sandw b a z.1 ∈ A by
+      exact h ⟨x, hx⟩
+    intro z
+    have hz : z ∈ AddSubsemigroup.closure (s : Set A) := by rw [hs]; trivial
+    induction hz using AddSubsemigroup.closure_induction with
+    | mem z hz =>
+      obtain ⟨m, hm⟩ := Finset.dvd_prod_of_mem (fun y : A => k (sandw b a y)) (show z ∈ s from hz)
       rw [hm, mul_comm, mul_smul]
       exact nsmul_mem (hk' _) m
-    | zero => rw [map_zero, smul_zero]; exact zero_mem _
-    | add x y _ _ hx hy => rw [map_add, smul_add]; exact add_mem hx hy
-    | neg x _ hx => rw [map_neg, smul_neg]; exact neg_mem hx
+    | add x y _ _ hx hy =>
+      change (∏ y ∈ s, k (sandw b a y)) • sandw b a (x.1 + y.1) ∈ A
+      rw [map_add, smul_add]
+      exact add_mem hx hy
   have i1 := GlobalTheory.T.relIndex_map_nsmul_comap_eq_abs_norm_pow_mul_det _ _ A fg full (sandw b a - 1) N hN hd fun x hx => by
     rw [LinearMap.sub_apply, smul_sub]
     exact sub_mem (hNA x hx) (nsmul_mem hx N)

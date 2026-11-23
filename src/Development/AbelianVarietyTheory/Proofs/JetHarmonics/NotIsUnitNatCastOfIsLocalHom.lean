@@ -1,6 +1,47 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PlaceDivisors.StChartFH
-import Development.AbelianVarietyTheory.BlockTheory.JetGauges.OriginChartMultiplication
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.JetGauges.OriginChartMultiplication
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PlaceDivisors.StChartF
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.MvPolynomial.Ideal
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -14,39 +55,6 @@ open scoped TensorProduct
 attribute [local instance] Over.cartesianMonoidalCategory
 
 namespace GlobalTheory.TorsionCompare
-
-theorem mulF_mapF {T O : Type} [CommRing T] [CommRing O] (f : T →+* O) {d : ℕ} (F : FGLaw T d)
-    (n : ℕ) : mulF (F.mapF f) n = fun i => MvPowerSeries.map f (mulSeries F n i) := by
-  induction n with
-  | zero => funext i; simp [mulF, mulSeries_zero]
-  | succ n ih =>
-    funext i
-    have h : ∀ q : Fin 2 × Fin d, MvPowerSeries.constantCoeff
-        ((![mulSeries F n, pt T d 0] : Fin 2 → Pt T 1 d) q.1 q.2) = 0 := by
-      rintro ⟨a, j⟩
-      fin_cases a
-      · exact constantCoeff_mulSeries F n j
-      · simp [pt]
-    rw [mulSeries_succ]
-    show ev ![mulF (F.mapF f) n, pt O d 0] (MvPowerSeries.map f (F.F i)) =
-      MvPowerSeries.map f (ev ![mulSeries F n, pt T d 0] (F.F i))
-    unfold ev
-    rw [MvPowerSeries.map_subst (MvPowerSeries.hasSubst_of_constantCoeff_zero h), ih]
-    congr 1
-    funext q
-    obtain ⟨a, j⟩ := q
-    fin_cases a
-    · rfl
-    · simp [pt]
-
-theorem span_mulF_eq_torsionIdeal {T O : Type} [CommRing T] [CommRing O] (f : T →+* O) {d : ℕ}
-    (F : FGLaw T d) (n : ℕ) :
-    Ideal.span (Set.range (mulF (F.mapF f) n)) = torsionIdeal f F n := by
-  rw [mulF_mapF]; rfl
-
-def quotEquiv {T O : Type} [CommRing T] [CommRing O] (f : T →+* O) {d : ℕ}
-    (F : FGLaw T d) (n : ℕ) : QF (F.mapF f) n ≃ₐ[O] TorsionRing f F n :=
-  Ideal.quotientEquivAlgOfEq O (span_mulF_eq_torsionIdeal f F n)
 
 section Jets
 

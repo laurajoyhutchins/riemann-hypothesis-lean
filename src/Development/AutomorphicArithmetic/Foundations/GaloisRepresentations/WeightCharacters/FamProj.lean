@@ -1,4 +1,43 @@
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.WeightCharacters.DeltaNear
+module
+
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.WeightCharacters.DeltaNear
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -20,10 +59,10 @@ theorem famProj_of : EvLem → SumRep → FamProj := by
       (∀ φ ∈ U, p φ = φ) ∧ ∀ V ∈ t, V ≠ U → ∀ φ ∈ V, p φ = 0 := fun U => by
     by_cases hU : U ∈ t
     · obtain ⟨C, hC, hc⟩ := (hind (Finset.mem_coe.2 hU)).symm.exists_isCompl
-      refine ⟨U.subtype ∘ₗ Submodule.linearProjOfIsCompl U C hc.symm, fun _ => ⟨fun φ => Subtype.property _, fun φ hφ =>
-        congrArg Subtype.val (Submodule.linearProjOfIsCompl_apply_left hc.symm ⟨φ, hφ⟩), fun V hV hne φ hφ => ?_⟩⟩
-      have h0 : Submodule.linearProjOfIsCompl U C hc.symm φ = 0 :=
-        Submodule.linearProjOfIsCompl_apply_right' hc.symm
+      refine ⟨U.subtype ∘ₗ Submodule.projectionOnto U C hc.symm, fun _ => ⟨fun φ => Subtype.property _, fun φ hφ =>
+        congrArg Subtype.val (Submodule.projectionOnto_apply_left hc.symm ⟨φ, hφ⟩), fun V hV hne φ hφ => ?_⟩⟩
+      have h0 : Submodule.projectionOnto U C hc.symm φ = 0 :=
+        Submodule.projectionOnto_apply_of_mem_right hc.symm
           (hC (le_sSup (show V ∈ (t : Set (Submodule ℂ (UA E a → ℂ))) \ {U} from ⟨hV, hne⟩) hφ))
       simp [h0]
     · exact ⟨0, fun h => absurd h hU⟩
@@ -31,8 +70,8 @@ theorem famProj_of : EvLem → SumRep → FamProj := by
   have key : ∀ φ ∈ S, ∑ U ∈ t, p U φ = φ ∧ ∀ U ∈ t, ∀ x, p U (RU E a x φ) = RU E a x (p U φ) := by
     let P : Submodule ℂ (UA E a → ℂ) :=
       { carrier := {φ | ∑ U ∈ t, p U φ = φ ∧ ∀ U ∈ t, ∀ x, p U (RU E a x φ) = RU E a x (p U φ)}
-        add_mem' := fun h1 h2 => ⟨by simp only [map_add, Finset.sum_add_distrib, h1.1, h2.1], fun U hU x => by
-          simp only [map_add, h1.2 U hU x, h2.2 U hU x]⟩
+        add_mem' := fun h1 h2 => ⟨by simp only [map_add (f := _), Finset.sum_add_distrib, h1.1, h2.1], fun U hU x => by
+          simp only [map_add (f := _), h1.2 U hU x, h2.2 U hU x]⟩
         zero_mem' := ⟨by simp, fun U _ x => by simp⟩
         smul_mem' := fun c φ h => ⟨by simp only [map_smul, ← Finset.smul_sum, h.1], fun U hU x => by
           simp only [map_smul, h.2 U hU x]⟩ }

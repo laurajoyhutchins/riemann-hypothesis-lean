@@ -1,11 +1,47 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.MassDataInst
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.TermOp
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.LocVol
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.CntLocal
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.RealObj
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.SupportG
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.PairVal
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.LocVol
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.RealObj
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.SupportG
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -109,16 +145,10 @@ theorem inMass_bC (h : (bC X hb hK FdN FdN' u u' X0 L T sd C Th R).ρ0 ≠ 0) :
   change (bC X hb hK FdN FdN' u u' X0 L T sd C Th R).AA / (bC X hb hK FdN FdN' u u' X0 L T sd C Th R).ρ0 * (bC X hb hK FdN FdN' u u' X0 L T sd C Th R).ρ0 = (bC X hb hK FdN FdN' u u' X0 L T sd C Th R).AA
   rw [div_mul_eq_mul_div, mul_div_assoc, div_self h, mul_one]
 
-theorem link_sig (h : T.Gam1 = (bC X hb hK FdN FdN' u u' X0 L T sd C Th R).Gam1) :
-    T.pairSum (T.sc T.genSet) =
-      (bC X hb hK FdN FdN' u u' X0 L T sd C Th R).Gam1 * (bC X hb hK FdN FdN' u u' X0 L T sd C Th R).Sig := pairSum_eq T h
-
 theorem energy_defs :
     (bC X hb hK FdN FdN' u u' X0 L T sd C Th R).e1 = max sd 1 ∧
       (bC X hb hK FdN FdN' u u' X0 L T sd C Th R).δ =
         C * ((D.R.rS : ℝ) + 1) * (C / Th) ^ (Fintype.card (NumberField.InfinitePlace X.B.I.F)) := ⟨rfl, rfl⟩
-
-theorem inJacMod_bC : (bC X hb hK FdN FdN' u u' X0 L T sd C Th R).InJacMod := rfl
 
 theorem scaled_volume_level_subgroup (hV : 0 < X.volK2) (A : AnIn) :
     (Real.sqrt (c0X X u FdN * c0X X u' FdN'))⁻¹ * X.volK2 =
@@ -136,9 +166,6 @@ theorem scaled_volume_level_subgroup (hV : 0 < X.volK2) (A : AnIn) :
   generalize (bOf X hb hK FdN FdN' u u' X0 L A).c0' = b
   rw [show X.volK2 * a * (X.volK2 * b) = X.volK2 ^ 2 * (a * b) by ring, Real.sqrt_mul (sq_nonneg _),
     Real.sqrt_sq hV.le, mul_inv, mul_right_comm, inv_mul_cancel₀ hV.ne', one_mul]
-
-def LevelOneLatticeAgreementAt (TR : TypedRed X) (A : AnIn) : Prop :=
-  (Gam1 TR : ℝ) = (bOf X hb hK FdN FdN' u u' X0 L A).Gam1
 
 end OfSetting
 
@@ -292,18 +319,6 @@ theorem inOrdinary_bCF (hP : ProdConv X u u' ψ) :
   exact inOrdinary_bC X hb hK FdN FdN' u u' X0 (locOf X u u' ψ) T sd C Th
     ⟨KVOf X u u' vR Q (VConstants X u u' 1 i0 i0' FdN FdN' νq), KtopVOf X u u' M δ (VConstants X u u' 1 i0 i0' FdN FdN' νq)⟩ hP.2.2.2.2.1.ne'
 
-theorem inTypedC_of
-    (h : InTypedAt X hb hK FdN FdN' u u' X0
-      (anOf T (kapN D * Formalism.L2.SG.RealObj.DisintegrationConstant X u u' 1) (Formalism.L2.SG.RealObj.degX X)
-        ((locOf X u u' ψ).volZZ / (((locOf X u u' ψ).localVolumeArchimedean * ∏ p, (locOf X u u' ψ).localVolumeAtPlace p) * (locOf X u u' ψ).volPP) *
-          ((locOf X u u' ψ).volPP * (Formalism.L2.SG.RealObj.IntC X u u' 1 / kapN D)))
-        (Formalism.L2.SG.RealObj.IntC X u u' 1 / kapN D) (Formalism.L2.SG.RealObj.IntOO X u u' 1) sd C Th D.R.rS
-        (Fintype.card (NumberField.InfinitePlace X.B.I.F))
-        ⟨KVOf X u u' vR Q (VConstants X u u' 1 i0 i0' FdN FdN' νq), KtopVOf X u u' M δ (VConstants X u u' 1 i0 i0' FdN FdN' νq)⟩) ψ) :
-    InTypedC X hb hK FdN FdN' u u' X0 ψ T sd C Th vR Q M δ i0 i0' νq := h
-
-theorem inJacMod_bCF : (bCF X hb hK FdN FdN' u u' X0 ψ T sd C Th vR Q M δ i0 i0' νq).InJacMod := rfl
-
 def LevelOneLatticeAgreement : Prop := T.Gam1 = (bCF X hb hK FdN FdN' u u' X0 ψ T sd C Th vR Q M δ i0 i0' νq).Gam1
 
 def ttC : Prop :=
@@ -315,9 +330,6 @@ theorem ttC_of_split (h : GSplitX X) : ttC X hb hK FdN FdN' u u' X0 ψ T sd C Th
   refine Finset.prod_congr rfl (fun p _ => ?_)
   rw [(h p).1]
   rfl
-
-def MassDataDstarC : Prop :=
-  (bCF X hb hK FdN FdN' u u' X0 ψ T sd C Th vR Q M δ i0 i0' νq).Dstar = D.what₂.Dstar
 
 def EnergyLinkC (jn : ℝ) : Prop := (bCF X hb hK FdN FdN' u u' X0 ψ T sd C Th vR Q M δ i0 i0' νq).IntN = jn
 

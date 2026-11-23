@@ -1,6 +1,58 @@
-import Mathlib
-import Lemmata.FirstBlockLemmaH.Imports
-import Lemmata.GeneralBFactThirdVariant.Imports
+module
+
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.LinearAlgebra.TensorProduct.Pi
+public import Mathlib.NumberTheory.NumberField.InfinitePlace.Embeddings
+public import Mathlib.RingTheory.Flat.Basic
+public import Lemmata.FirstBlockLemmaH.Imports
+public import Lemmata.GeneralBFactThirdVariant.Imports
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.Module.Torsion.Basic
+public import Mathlib.RingTheory.Flat.TorsionFree
+
+@[expose] public section
 
 noncomputable section
 
@@ -69,6 +121,7 @@ theorem phi1_bijective (hΨ : ∀ σ : E →+* ℂ, σ ∈ Ψ ↔ ComplexEmbeddi
     let B := Algebra.TensorProduct.basis ℝ (RingOfIntegers.basis E)
     have hx := li1 hΨ (fun k => B.repr t k) (fun τ hτ => by
       have h1 := congrFun ht ⟨τ, hτ⟩
+
       rw [← B.sum_repr t, map_sum] at h1
       simpa [B, Algebra.TensorProduct.basis_apply, phi1_tmul, Finset.sum_apply, Complex.real_smul]
         using h1)
@@ -123,7 +176,7 @@ theorem phiI_eq (t : ℝ ⊗[ℤ] (ι → 𝓞 E)) (τ : Ψ) (i : ι) :
   induction t using TensorProduct.induction_on with
   | zero => simp
   | tmul x n => simp [phiI_tmul, phi1_tmul, TensorProduct.piRightHom_tmul]
-  | add x y hx hy => simp only [map_add, Pi.add_apply, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), Pi.add_apply, hx, hy]
 
 variable {Ψ}
 
@@ -174,7 +227,7 @@ def kap (s : 𝓞 E) (hs : ∀ v ∈ M, ∀ i,
   map_add' x y := by
     funext i
     apply IsFractionRing.injective (𝓞 E) E
-    simp only [Pi.add_apply, map_add]
+    simp only [Pi.add_apply, map_add (f := _)]
     rw [kapF_spec, kapF_spec, kapF_spec]
     simp [mul_add]
 
@@ -232,7 +285,7 @@ theorem theta_bijective (hΨ : ∀ σ : E →+* ℂ, σ ∈ Ψ ↔ ComplexEmbedd
         rw [show ((kap b M s hsI v i : 𝓞 E) : E) = algebraMap (𝓞 E) E (kap b M s hsI v i) from rfl,
           kap_spec, map_mul]
         ring
-      | add x y hx hy => intro τ i; simp only [map_add, Pi.add_apply, hx, hy, mul_add]
+      | add x y hx hy => intro τ i; simp only [map_add (f := _), Pi.add_apply, hx, hy, mul_add]
     intro t t' h
     apply hκR
     apply (phiI_bijective hΨ).1
@@ -261,7 +314,7 @@ theorem theta_bijective (hΨ : ∀ σ : E →+* ℂ, σ ∈ Ψ ↔ ComplexEmbedd
         rw [iota1_repr, map_mul]
         rw [show ((n i : 𝓞 E) : E) = algebraMap (𝓞 E) E (n i) from rfl]
         ring
-      | add x y hx hy => intro τ i; simp only [map_add, Pi.add_apply, hx, hy, mul_add]
+      | add x y hx hy => intro τ i; simp only [map_add (f := _), Pi.add_apply, hx, hy, mul_add]
     intro u
     obtain ⟨t, ht⟩ := (phiI_bijective (ι := ι) hΨ).2
       (fun τ i => ((τ : E →+* ℂ) (algebraMap (𝓞 E) E s'))⁻¹ * u τ i)

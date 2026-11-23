@@ -1,9 +1,64 @@
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.PowEqOneOfIsIntegralOfMulComplexConjEqOneAlt
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.RootOfUnityEqOneOfSubOneMemSpan
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.MemIdealSmulTopIffForallDual
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.IdealInfSmulTopOfProjective
-import Development.WeilBound.CoreStatements.EqualVolumeCompactOpens.DiagMulVecTmul
-import Development.WeilBound.CoreStatements.EqualVolumeCompactOpens.InfSpanNeBot
+module
+
+public import Development.WeilBound.CoreStatements.EqualVolumeCompactOpens.EqVolSDOf
+public import Development.WeilBound.CoreStatements.EqualVolumeCompactOpens.LevelIdeal
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.IdealInfSmulTopOfProjective
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.MemIdealSmulTopIffForallDual
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.MultilinearSubMem
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.PowEqOneOfIsIntegralOfMulComplexConjEqOneAlt
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.RootOfUnityEqOneOfSubOneMemSpan
+public import Development.WeilBound.CoreStatements.EqualVolumeCompactOpens.DiagMulVecTmul
+import Development.WeilBound.CoreStatements.EqualVolumeCompactOpens.InclAdInjective
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.ArakelovInstances.IsStrictDom
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.LiftFactorization
+
+@[expose] public section
 
 noncomputable section
 
@@ -17,24 +72,6 @@ section frames
 variable {E : Type} [Field E] [NumberField E] [IsCMField E] {r : ℕ} {Ψ : Finset (E →+* ℂ)}
 
 omit [NumberField E] [IsCMField E]
-
-theorem frame_ext {x y : Frame Ψ r} (h : ∀ τ, mat x τ = mat y τ) : x = y := funext fun τ => h τ
-
-theorem mat_rmul (x b : Frame Ψ r) (τ : Ψ) : mat (rmul x b) τ = mat x τ * mat b τ := rfl
-
-theorem mat_lact (γ : GL (Fin r) E) (x : Frame Ψ r) (τ : Ψ) :
-    mat (lact γ x) τ = (γ : Matrix (Fin r) (Fin r) E).map τ.1 * mat x τ := rfl
-
-theorem lact_rmul (γ : GL (Fin r) E) (x b : Frame Ψ r) : lact γ (rmul x b) = rmul (lact γ x) b :=
-  frame_ext fun τ => by simp only [mat_rmul, mat_lact, Matrix.mul_assoc]
-
-theorem lact_mul (a b : GL (Fin r) E) (x : Frame Ψ r) : lact (a * b) x = lact a (lact b x) :=
-  frame_ext fun τ => by simp only [mat_lact, Units.val_mul, Matrix.map_mul, Matrix.mul_assoc]
-
-theorem lact_one' (x : Frame Ψ r) : lact (1 : GL (Fin r) E) x = x :=
-  frame_ext fun τ => by rw [mat_lact, Units.val_one, Matrix.map_one _ (map_zero _) (map_one _), Matrix.one_mul]
-
-def scal (s : Ψ → ℂ) : Frame Ψ r := fun τ => (s τ • (1 : Matrix (Fin r) (Fin r) ℂ) : Matrix (Fin r) (Fin r) ℂ)
 
 end frames
 
@@ -71,7 +108,7 @@ theorem levelFacts : LevelFacts := by
       have e' : ((1 + a : 𝓞 E) : E) = s := by
         have : algebraMap (𝓞 E) E a = s - 1 := by first | exact e | exact e.symm
         show algebraMap (𝓞 E) E (1 + a) = s
-        rw [map_add, map_one, this]
+        rw [map_add (f := _), map_one, this]
         ring
       have h5 := hN (1 + a) (by rw [e']; exact hss) (by simpa using ha)
       refine Units.ext ?_

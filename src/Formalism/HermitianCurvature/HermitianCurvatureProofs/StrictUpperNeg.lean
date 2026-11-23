@@ -1,8 +1,59 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.UnipotentCoordinatesMeasurePreserving
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.SubMulRight
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.UnipotentCoordinatesMeasurePreserving
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.ExistsHaarStabilizer
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.CompactGroupHaarExists
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.ConjugationContinuousOnInvertible
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.LowerParabolicCoordinates
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.SubMulRight
 import Formalism.HermitianCurvature.HermitianCurvatureProofs.SymmetricScalarBlockMatrixMul
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.DirectionsInParabolic
 import Formalism.HermitianCurvature.HermitianCurvatureProofs.TwoByOneBlock
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.Countable
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Matrix MeasureTheory Formalism.REAL Formalism.QuantumDeterminants Formalism.FourierDecayAlt
 
@@ -35,14 +86,14 @@ theorem upper_eQ_cc {j : ℕ} (p : (G.UT j → ℂ) × (Fin j → ℂ)) (a b : F
 theorem upper_eQ_cl {j : ℕ} (p : (G.UT j → ℂ) × (Fin j → ℂ)) (a : Fin j) :
     G.upper (eQ j p) a.castSucc (Fin.last j) = p.2 a := by
   simp only [G.upper, G.strictUpper, Matrix.add_apply, Matrix.of_apply, Matrix.one_apply]
-  rw [if_neg (Fin.castSucc_ne_last a), dif_pos (Fin.castSucc_lt_last a), zero_add]
+  rw [if_neg (Fin.castSucc_ne_last a), dite_eq_left (Fin.castSucc_lt_last a), zero_add]
   have e : (⟨(a.castSucc, Fin.last j), Fin.castSucc_lt_last a⟩ : G.UT (j + 1)) = eL (Sum.inr a) := rfl
   rw [e, eQ_eq, combineUpperTriangular_inr]
 
 theorem upper_eQ_lc {j : ℕ} (p : (G.UT j → ℂ) × (Fin j → ℂ)) (b : Fin j) :
     G.upper (eQ j p) (Fin.last j) b.castSucc = 0 := by
   simp only [G.upper, G.strictUpper, Matrix.add_apply, Matrix.of_apply, Matrix.one_apply]
-  rw [if_neg (Ne.symm (Fin.castSucc_ne_last b)), dif_neg (not_lt.2 (Fin.castSucc_lt_last b).le), zero_add]
+  rw [if_neg (Ne.symm (Fin.castSucc_ne_last b)), dite_eq_right (not_lt.2 (Fin.castSucc_lt_last b).le), zero_add]
 
 theorem upper_eQ_ll {j : ℕ} (p : (G.UT j → ℂ) × (Fin j → ℂ)) :
     G.upper (eQ j p) (Fin.last j) (Fin.last j) = 1 := by
@@ -113,11 +164,10 @@ theorem utInv_mp : ∀ m : ℕ, MeasurePreserving (utInv m) volume volume
     have e : utInv (j + 1) = eQ j ∘ (fun p : (G.UT j → ℂ) × (Fin j → ℂ) =>
         (utInv j p.1, -((G.upper p.1)⁻¹ *ᵥ p.2))) ∘ (eQ j).symm := by
       funext u
-      obtain ⟨p, rfl⟩ := (eQ j).surjective u
-      simp only [Function.comp_apply, MeasurableEquiv.symm_apply_apply]
-      exact utInv_eQ p
+      simpa only [Function.comp_apply, MeasurableEquiv.apply_symm_apply] using
+        utInv_eQ ((eQ j).symm u)
     rw [e]
-    exact (eQ_mp j).comp (hg.comp (eQ_mp j).symm)
+    exact (eQ_mp j).comp (hg.comp (MeasurePreserving.symm (eQ j) (eQ_mp j)))
 
 end utinv
 
@@ -210,8 +260,8 @@ theorem muN_fwd (j : ℕ) : D.muN k (j + 0) = ((U.muRC k j 0).prod (volume : Mea
     Measure.map_map (Dx2.SplitF.psi_meas j 0) (measurable_id.prodMap hm)]
   congr 1
   funext p
-  simp only [Function.comp_apply, Prod.map, id, Dx2.SplitF.Psi, psiF]
-  rw [show Matrix.of (Matrix.of.symm (1 : B.Mat k 0)) = (1 : B.Mat k 0) from rfl, embG_one, Matrix.mul_one]
+  simp only [Function.comp_apply, Prod.map_fst, Prod.map_snd, id_eq, Dx2.SplitF.Psi, psiF,
+    Equiv.apply_symm_apply, embG_one, Matrix.mul_one]
 
 theorem muN_rev (j : ℕ) : D.muN k (j + 0) = ((U.muRC k j 0).prod (volume : Measure (G.UT j → ℂ))).map (psiR k j) := by
   have : SigmaFinite (U.muRC k j 0) := Dx2.SplitF.sf_RC j 0

@@ -1,10 +1,58 @@
-import Formalism.HermitianCurvature.FrameMinor
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.OperatorRepresentations
+module
+
+public import Formalism.HermitianCurvature.StatementQr
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.AnisotropicColumnSums
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CapelliCoordinates
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.FrameEntries
 import Formalism.HermitianCurvature.HermitianCurvatureProofs.LemmaDDeterminantIdentity
 import Formalism.HermitianCurvature.HermitianCurvatureProofs.RestrictionIrrelevantDoubleLevelOperator
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CapelliCoordinates
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.AnisotropicColumnSums
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.FrameEntries
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Matrix Finset
 open scoped ContDiff
@@ -49,7 +97,7 @@ theorem capelli_two_eval (hD : IsOpen D) (z : Fin (2 * r + k + 1) → ℂ) (u : 
       ((yV k r z i D E c) φ).1 g = yv k r z i g c • φ.1 g := by
     intro c φ
     unfold yV opV
-    rw [dif_pos ⟨hD, OperatorRepresentations.good_yv z c⟩]
+    rw [dite_eq_left ⟨hD, OperatorRepresentations.good_yv z c⟩]
     show cutF k r i D (mulF _ φ.1) g = _
     rw [cutF_of_mem hg]
     rfl
@@ -57,7 +105,7 @@ theorem capelli_two_eval (hD : IsOpen D) (z : Fin (2 * r + k + 1) → ℂ) (u : 
       ((etaV k r z i D E c) φ).1 g = ybv k r z i g c • φ.1 g := by
     intro c φ
     unfold etaV opV
-    rw [dif_pos ⟨hD, OperatorRepresentations.good_ybv z c⟩]
+    rw [dite_eq_left ⟨hD, OperatorRepresentations.good_ybv z c⟩]
     show cutF k r i D (mulF _ φ.1) g = _
     rw [cutF_of_mem hg]
     rfl
@@ -215,6 +263,7 @@ theorem qrow_sum (y x : Fin (2 * r + k + 1) → ℂ) (Bs : Fin (k - 1) → Fin (
       omega
   calc ∑ d, qrow k r y x Bs j (bvec (posL k r (Fin.last r) d)) * v (posL k r (Fin.last r) d)
       = Lq (∑ d, v (posL k r (Fin.last r) d) • bvec (posL k r (Fin.last r) d)) := by
+
         rw [map_sum]
         refine Finset.sum_congr rfl fun d _ => ?_
         rw [map_smul, smul_eq_mul, mul_comm]
@@ -229,10 +278,10 @@ theorem bc_herm {y x : Fin (2 * r + k + 1) → ℂ} {Bs : Fin (k - 1) → Fin (2
       if j.val = 0 then herm (Hpk k r) y w else if j.val = 1 then herm (Hpk k r) x w else 0 := by
   have hBw : ∀ a, herm (Hpk k r) (Bs a) w = 0 := fun a => hB.2.2 a w hw
   by_cases h0 : j.val = 0
-  · rw [bc, dif_pos h0, if_pos h0]
+  · rw [bc, dite_eq_left h0, if_pos h0]
   · by_cases h1 : j.val = 1
-    · rw [bc, dif_neg h0, dif_pos h1, if_neg h0, if_pos h1]
-    · rw [bc, dif_neg h0, dif_neg h1, if_neg h0, if_neg h1, hBw]
+    · rw [bc, dite_eq_right h0, dite_eq_left h1, if_neg h0, if_pos h1]
+    · rw [bc, dite_eq_right h0, dite_eq_right h1, if_neg h0, if_neg h1, hBw]
 
 theorem gram {y x : Fin (2 * r + k + 1) → ℂ} {Bs : Fin (k - 1) → Fin (2 * r + k + 1) → ℂ}
     (hd : gd k r y x ≠ 0) (hB : IsFrameOf k r [y, x] Bs) (j j' : Fin (mdim k r (Fin.last r))) :
@@ -245,33 +294,33 @@ theorem gram {y x : Fin (2 * r + k + 1) → ℂ} {Bs : Fin (k - 1) → Fin (2 * 
     rw [← Qx2.herm_star (Bs a) x, hBx, star_zero]
   have hne : ∀ {m m' : Fin (mdim k r (Fin.last r))}, m.val ≠ m'.val → m ≠ m' := fun h e => h (congrArg Fin.val e)
   by_cases h0 : j.val = 0
-  · rw [qrow, dif_pos h0]
+  · rw [qrow, dite_eq_left h0]
     by_cases h0' : j'.val = 0
-    · rw [bc, dif_pos h0', if_pos (Fin.ext (h0.trans h0'.symm)), div_eq_one_iff_eq hd, gd]
+    · rw [bc, dite_eq_left h0', if_pos (Fin.ext (h0.trans h0'.symm)), div_eq_one_iff_eq hd, gd]
       ring
     · by_cases h1' : j'.val = 1
-      · rw [bc, dif_neg h0', dif_pos h1', if_neg (hne (by omega)), div_eq_zero_iff]
+      · rw [bc, dite_eq_right h0', dite_eq_left h1', if_neg (hne (by omega)), div_eq_zero_iff]
         left
         ring
-      · rw [bc, dif_neg h0', dif_neg h1', if_neg (hne (by omega)), hBy, hBx]
+      · rw [bc, dite_eq_right h0', dite_eq_right h1', if_neg (hne (by omega)), hBy, hBx]
         simp
   · by_cases h1 : j.val = 1
-    · rw [qrow, dif_neg h0, dif_pos h1]
+    · rw [qrow, dite_eq_right h0, dite_eq_left h1]
       by_cases h0' : j'.val = 0
-      · rw [bc, dif_pos h0', if_neg (hne (by omega)), div_eq_zero_iff]
+      · rw [bc, dite_eq_left h0', if_neg (hne (by omega)), div_eq_zero_iff]
         left
         ring
       · by_cases h1' : j'.val = 1
-        · rw [bc, dif_neg h0', dif_pos h1', if_pos (Fin.ext (h1.trans h1'.symm)), div_eq_one_iff_eq hd, gd]
+        · rw [bc, dite_eq_right h0', dite_eq_left h1', if_pos (Fin.ext (h1.trans h1'.symm)), div_eq_one_iff_eq hd, gd]
           ring
-        · rw [bc, dif_neg h0', dif_neg h1', if_neg (hne (by omega)), hBy, hBx]
+        · rw [bc, dite_eq_right h0', dite_eq_right h1', if_neg (hne (by omega)), hBy, hBx]
           simp
-    · rw [qrow, dif_neg h0, dif_neg h1]
+    · rw [qrow, dite_eq_right h0, dite_eq_right h1]
       by_cases h0' : j'.val = 0
-      · rw [bc, dif_pos h0', if_neg (hne (by omega)), hyB]
+      · rw [bc, dite_eq_left h0', if_neg (hne (by omega)), hyB]
       · by_cases h1' : j'.val = 1
-        · rw [bc, dif_neg h0', dif_pos h1', if_neg (hne (by omega)), hxB]
-        · rw [bc, dif_neg h0', dif_neg h1', hB.2.1]
+        · rw [bc, dite_eq_right h0', dite_eq_left h1', if_neg (hne (by omega)), hxB]
+        · rw [bc, dite_eq_right h0', dite_eq_right h1', hB.2.1]
           by_cases hjj : j = j'
           · subst hjj
             simp

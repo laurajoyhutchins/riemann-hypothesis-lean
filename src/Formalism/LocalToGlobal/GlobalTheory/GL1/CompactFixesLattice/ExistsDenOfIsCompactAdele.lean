@@ -1,5 +1,48 @@
-import Formalism.LocalToGlobal.GlobalTheory.GL1.CompactFixesLattice.CompactFixesLattice
-import Formalism.LocalToGlobal.GlobalTheory.GL1.CompactFixesLattice.AdeleIntA
+module
+
+public import Formalism.LocalToGlobal.GlobalTheory.GL1.CompactFixesLattice.CompactFixesLattice
+public import Formalism.LocalToGlobal.GlobalTheory.GL1.CompactFixesLattice.AdeleIntA
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -18,38 +61,6 @@ theorem algebraMap_mem_intAd (m : 𝓞 F) : algebraMap F (AF F) (m : F) ∈ intA
 theorem smul_mem_intAd (m : 𝓞 F) {a : AF F} (ha : a ∈ intAd F) : (m : F) • a ∈ intAd F := by
   rw [Algebra.smul_def]
   exact mul_mem (algebraMap_mem_intAd m) ha
-
-theorem exists_den_adele (a : AF F) : ∃ d : 𝓞 F, d ≠ 0 ∧ (d : F) • a ∈ intAd F := by
-  obtain ⟨r, hr, h⟩ := Formalism.L2.GlobalTheoryTheory.FiltrationBoundaryCriterion.CompactFixesLatticeTheory.AdeleIntA.exists_den (R := 𝓞 F) (K := F) a
-  refine ⟨r, hr, ?_⟩
-  rw [Algebra.smul_def]
-  exact h
-
-theorem exists_den_of_isCompact_adele (C : Set (AF F)) (hC : IsCompact C) :
-    ∃ d : 𝓞 F, d ≠ 0 ∧ ∀ a ∈ C, (d : F) • a ∈ intAd F := by
-  classical
-  have hopen : ∀ d : {d : 𝓞 F // d ≠ 0},
-      IsOpen {a : AF F | ((d : 𝓞 F) : F) • a ∈ intAd F} := by
-    intro d
-    have hc : Continuous fun a : AF F => algebraMap F (AF F) ((d : 𝓞 F) : F) * a :=
-      continuous_const.mul continuous_id
-    have := isOpen_intAd.preimage hc
-    convert this using 1
-    ext a
-    simp only [Set.mem_ofPred_eq, Set.mem_preimage, SetLike.mem_coe, Algebra.smul_def]
-  have hcov : C ⊆ ⋃ d : {d : 𝓞 F // d ≠ 0}, {a : AF F | ((d : 𝓞 F) : F) • a ∈ intAd F} := by
-    intro a _
-    obtain ⟨d, hd, h⟩ := exists_den_adele a
-    exact Set.mem_iUnion.mpr ⟨⟨d, hd⟩, h⟩
-  obtain ⟨t, ht⟩ := hC.elim_finite_subcover _ hopen hcov
-  refine ⟨∏ d ∈ t, (d : 𝓞 F), Finset.prod_ne_zero_iff.mpr fun d _ => d.2, fun a ha => ?_⟩
-  obtain ⟨d, hdt, hd⟩ := Set.mem_iUnion₂.mp (ht ha)
-  have hd' : ((d : 𝓞 F) : F) • a ∈ intAd F := hd
-  rw [← Finset.mul_prod_erase t _ hdt, mul_comm]
-  have e : (((∏ x ∈ t.erase d, (x : 𝓞 F)) * (d : 𝓞 F) : 𝓞 F) : F) =
-      ((∏ x ∈ t.erase d, (x : 𝓞 F) : 𝓞 F) : F) * ((d : 𝓞 F) : F) := rfl
-  rw [e, mul_smul]
-  exact smul_mem_intAd _ hd'
 
 theorem exists_sub_mem_intAd (a : AF F) : ∃ u : F, a - algebraMap F (AF F) u ∈ intAd F :=
   Formalism.L2.GlobalTheoryTheory.FiltrationBoundaryCriterion.CompactFixesLatticeTheory.AdeleIntA.exists_approx_adele (R := 𝓞 F) (K := F) a

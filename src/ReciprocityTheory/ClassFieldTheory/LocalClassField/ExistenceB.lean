@@ -1,8 +1,51 @@
-import Mathlib
-import ReciprocityTheory.ClassFieldTheory.LocalClassField.RecPairDefs
-import ReciprocityTheory.ClassFieldTheory.LocalClassField.PairKEqZeroOfMemNormGrp
-import ReciprocityTheory.ClassFieldTheory.LocalClassField.NormLimit
-import ReciprocityTheory.ClassFieldTheory.LocalClassField.NormOpen
+module
+
+public import ReciprocityTheory.ClassFieldTheory.LocalClassField.RecPairDefs
+public import ReciprocityTheory.ClassFieldTheory.LocalClassField.RecDefs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.ClassFieldTheory.LocalClassField.GalBasic
+public import ReciprocityTheory.ClassFieldTheory.LocalClassField.PairKEqZeroOfMemNormGrp
+
+@[expose] public section
 
 namespace ReciprocityTheory.DiscreteGroups.LocalClassField
 
@@ -18,7 +61,7 @@ theorem exists_maximal_exponent_abelian_extension (hK : FiniteDimensional ℚ_[p
       one_mem' := fun χ _ => map_zero χ.1
       mul_mem' := fun {a b} ha hb χ h => by
         show χ.1 (Additive.ofMul a + Additive.ofMul b) = 0
-        rw [map_add, ha χ h, hb χ h, add_zero]
+        rw [map_add (f := _), ha χ h, hb χ h, add_zero]
       inv_mem' := fun {a} ha χ h => by
         show χ.1 (- Additive.ofMul a) = 0
         rw [map_neg, ha χ h, neg_zero] }
@@ -35,7 +78,7 @@ theorem exists_maximal_exponent_abelian_extension (hK : FiniteDimensional ℚ_[p
   · rw [hLU, commutator_def, Subgroup.commutator_le]
     intro a _ b _ χ _
     show χ.1 (Additive.ofMul a + Additive.ofMul b + - Additive.ofMul a + - Additive.ofMul b) = 0
-    rw [map_add, map_add, map_add, map_neg, map_neg]
+    rw [map_add (f := _), map_add (f := _), map_add (f := _), map_neg, map_neg]
     abel
   · refine Subtype.ext (AddMonoidHom.ext fun x => ?_)
     show n • χ.1 x = 0
@@ -91,7 +134,7 @@ theorem mem_subG_adjoin (S : Set (PadicAlgCl p)) (g : GK p K) (h : ∀ x ∈ S, 
   induction hx using IntermediateField.adjoin_induction with
   | mem x hx => exact h x hx
   | algebraMap x => exact (g.restrictScalars ℚ_[p]).commutes x
-  | add x y _ _ hx hy => rw [map_add, hx, hy]
+  | add x y _ _ hx hy => rw [map_add (f := _), hx, hy]
   | inv x _ hx => rw [map_inv₀, hx]
   | mul x y _ _ hx hy => rw [map_mul, hx, hy]
 
@@ -121,7 +164,7 @@ theorem isSolvable_of_abelian_tower {M : IntermediateField ℚ_[p] (PadicAlgCl p
     Group.IsSolvable (GalLK p K L) := by
   have h2 : derivedSeries (GK p K) 2 ≤ subG p K L := by
     have h1 : derivedSeries (GK p K) 1 ≤ subG p K M := hM.comm
-    rw [derivedSeries_succ]
+    change ⁅derivedSeries (GK p K) 1, derivedSeries (GK p K) 1⁆ ≤ subG p K L
     refine (Subgroup.commutator_mono h1 h1).trans ?_
     rw [Subgroup.commutator_le]
     intro g₁ hg₁ g₂ hg₂

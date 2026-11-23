@@ -1,4 +1,58 @@
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.GelfandTsetlinLowering.LiftTupleD
+module
+
+public import Formalism.GradedWeylDivisibility.FockSpaceTableaux.LBidetMinor
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.GelfandTsetlinLowering.LiftTupleM
+public import Formalism.GradedWeylDivisibility.DualWeylDominanceOf
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.GelfandTsetlinLowering.LiftTupleD
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Formalism.LocalRingCardinality.Params
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.GelfandTsetlinLowering.LiftTupleA
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.GelfandTsetlinLowering.LiftTupleC
+
+@[expose] public section
 
 noncomputable section
 
@@ -94,7 +148,7 @@ theorem lam_natW_val {n N : ℕ} (h : n + 1 = N) (lam : DomWeight N) (t : ℕ) (
   subst h
   have hds : lam.detShift = lam.w ⟨n, by omega⟩ := by
     unfold DomWeight.detShift
-    rw [dif_pos (by omega)]
+    rw [dite_eq_left (by omega)]
     exact congrArg lam.w (Fin.ext (by simp))
   have hle : lam.w ⟨n, by omega⟩ ≤ lam.w ⟨t, ht⟩ :=
     lam.anti (Fin.le_iff_val_le_val.mpr (by show t ≤ n; omega))
@@ -106,13 +160,13 @@ theorem lam_detShift {n N : ℕ} (h : n + 1 = N) (lam : DomWeight N) :
     lam.detShift = lam.w ⟨n, by omega⟩ := by
   subst h
   unfold DomWeight.detShift
-  rw [dif_pos (by omega)]
+  rw [dite_eq_left (by omega)]
   exact congrArg lam.w (Fin.ext (by simp))
 
 theorem sg_detShift {n : ℕ} (sg : DomWeight n) (hn : 0 < n) :
     sg.detShift = sg.w ⟨n - 1, by omega⟩ := by
   unfold DomWeight.detShift
-  rw [dif_pos hn]
+  rw [dite_eq_left hn]
 
 theorem aLast_val {n N : ℕ} (h : n + 1 = N) (lam : DomWeight N) (sg : DomWeight n) (hI : Interlace h lam sg)
     (hn : 0 < n) :
@@ -175,7 +229,7 @@ theorem colWt_eq {n N : ℕ} (h : n + 1 = N) (lam : DomWeight N) (sg : DomWeight
     have h1 := card_lt_sz sg sz hshape ⟨tv, htn⟩
     have h2 := hL.2 ⟨tv, htn⟩
     simp only at h1 h2
-    rw [h1, h2, dif_pos (by omega), dif_pos hn]
+    rw [h1, h2, dite_eq_left (by omega), dite_eq_left hn]
     have e1 := natW_sg_val sg ⟨tv, htn⟩
     have e2 := lam_natW_val h lam tv htv
     have e3 := aLast_val h lam sg hI hn
@@ -186,12 +240,10 @@ theorem colWt_eq {n N : ℕ} (h : n + 1 = N) (lam : DomWeight N) (sg : DomWeight
     · subst ht0
       have hw2 : initW N (0 + 1) ⟨0, htv⟩ = 1 := by simp [initW]
       rw [hw2, mul_one, if_pos rfl]
-      simp only at e1 e2 e3 e4 ⊢
       have := sg.anti (show (⟨0, htn⟩ : Fin n) ≤ ⟨n - 1, by omega⟩ by rw [Fin.le_def]; simp)
       omega
     · have hw2 : initW N (0 + 1) ⟨tv, htv⟩ = 0 := by simp only [initW]; rw [if_neg (by simp; omega)]
       rw [hw2, mul_zero, if_neg ht0]
-      simp only at e1 e2 e3 e4 ⊢
       omega
   · have htn' : tv = n := by omega
     subst htn'

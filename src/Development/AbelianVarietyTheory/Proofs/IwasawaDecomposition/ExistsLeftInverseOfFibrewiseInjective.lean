@@ -1,5 +1,51 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsCompletedStrictHens
+module
+
+public import Mathlib.Algebra.Field.Defs
+public import Mathlib.Data.Matrix.Mul
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.Module.Submodule.Ker
+public import Mathlib.LinearAlgebra.Basis.VectorSpace
+public import Mathlib.LinearAlgebra.Matrix.ToLin
+
+@[expose] public section
 
 namespace GlobalTheory
 
@@ -15,39 +61,5 @@ theorem matrix_exists_left_inverse_of_field {K : Type} [Field K] {m n : ℕ}
   refine ⟨LinearMap.toMatrix' g, ?_⟩
   have := congrArg LinearMap.toMatrix' hg
   rwa [LinearMap.toMatrix'_comp, LinearMap.toMatrix'_toLin', LinearMap.toMatrix'_id] at this
-
-theorem matrix_exists_left_inverse_of_forall_field (R : Type) [CommRing R] (m n : ℕ)
-    (Q : Matrix (Fin m) (Fin n) R)
-    (h : ∀ (K : Type) [Field K] (φ : R →+* K), Function.Injective (Q.map φ).mulVec) :
-    ∃ Q' : Matrix (Fin n) (Fin m) R, Q' * Q = 1 := by
-  let I : Ideal R :=
-    { carrier := {r | ∃ L : Matrix (Fin n) (Fin m) R, L * Q = r • (1 : Matrix (Fin n) (Fin n) R)}
-      add_mem' := by
-        rintro a b ⟨L, hL⟩ ⟨L', hL'⟩
-        exact ⟨L + L', by rw [Matrix.add_mul, hL, hL', add_smul]⟩
-      zero_mem' := ⟨0, by simp⟩
-      smul_mem' := by
-        rintro c a ⟨L, hL⟩
-        exact ⟨c • L, by rw [Matrix.smul_mul, hL, smul_smul, smul_eq_mul]⟩ }
-  have hI : I = ⊤ := by
-    by_contra hne
-    obtain ⟨p, hp, hIp⟩ := Ideal.exists_le_maximal I hne
-    letI : Field (R ⧸ p) := Ideal.Quotient.field p
-    obtain ⟨Lb, hLb⟩ := matrix_exists_left_inverse_of_field _ (h (R ⧸ p) (Ideal.Quotient.mk p))
-    choose s hs using Ideal.Quotient.mk_surjective (I := p)
-    let L : Matrix (Fin n) (Fin m) R := Lb.map s
-    have hL : L.map (Ideal.Quotient.mk p) = Lb := by
-      ext i j
-      simp [L, hs]
-    have hdet : Ideal.Quotient.mk p (L * Q).det = 1 := by
-      rw [RingHom.map_det, RingHom.mapMatrix_apply, Matrix.map_mul, hL, hLb, Matrix.det_one]
-    have hmem : (L * Q).det ∈ I :=
-      ⟨(L * Q).adjugate * L, by rw [Matrix.mul_assoc, Matrix.adjugate_mul]⟩
-    have h0 := Ideal.Quotient.eq_zero_iff_mem.2 (hIp hmem)
-    rw [hdet] at h0
-    exact one_ne_zero h0
-  have h1 : (1 : R) ∈ I := by rw [hI]; trivial
-  obtain ⟨L, hL⟩ := h1
-  exact ⟨L, by rw [hL, one_smul]⟩
 
 end GlobalTheory

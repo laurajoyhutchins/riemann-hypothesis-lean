@@ -1,5 +1,54 @@
-import Mathlib
-import Formalism.SharpRestriction.LevelLetterCocycles.ExistsInertiaCharpolyFactorOfTameType
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.DataN
+import Formalism.PadicSubsetSums.StableGradedCounts.ZBrauerNesbittAlg
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open Formalism.MainNotions Formalism.MainNotions.N
 
 namespace GlobalTheory.SplitField
@@ -46,6 +95,7 @@ theorem mem_span_of_map_mem_span {L E ι : Type} [Field L] [Field E] [Fintype ι
   let Λ : (ι → E) →ₗ[E] E := ∑ i, f (c i) • LinearMap.proj i
   have hΛ : ∀ v, Λ (f ∘ v) = f (l v) := by
     intro v
+
     simp [Λ, hlc, map_sum, mul_comm]
   have hker : Submodule.span E ((fun v => f ∘ v) '' S) ≤ LinearMap.ker Λ := by
     rw [Submodule.span_le]
@@ -184,7 +234,7 @@ theorem endSpanned_of_isoSub {Γ L : Type} [Group Γ] [Field L] {a : ℕ} (τ : 
       refine ⟨by simp, ?_⟩
       simp only [Matrix.zero_mulVec]
       have : (⟨0, W.zero_mem⟩ : W) = 0 := rfl
-      rw [this, map_zero]; rfl
+      rw [this, e.map_zero]; rfl
     | add x y hx' hy' hx hy =>
       intro v
       obtain ⟨h1, e1⟩ := hx v
@@ -192,7 +242,7 @@ theorem endSpanned_of_isoSub {Γ L : Type} [Group Γ] [Field L] {a : ℕ} (τ : 
       refine ⟨by rw [Matrix.add_mulVec]; exact W.add_mem h1 h2, ?_⟩
       have : (⟨(x + y).mulVec v, by rw [Matrix.add_mulVec]; exact W.add_mem h1 h2⟩ : W) = ⟨_, h1⟩ + ⟨_, h2⟩ := by
         ext1; simp [Matrix.add_mulVec]
-      rw [this, map_add, Submodule.coe_add, e1, e2, Matrix.add_mulVec]
+      rw [this, map_add (f := _), Submodule.coe_add, e1, e2, Matrix.add_mulVec]
     | smul c x hx' hx =>
       intro v
       obtain ⟨h1, e1⟩ := hx v

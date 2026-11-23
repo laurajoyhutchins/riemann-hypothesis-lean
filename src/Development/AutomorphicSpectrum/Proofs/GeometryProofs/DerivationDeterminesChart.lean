@@ -1,7 +1,69 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.OneLeftSpMap
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ImplicitFunctionHolomorphicStatement
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.AnChart
+module
+
+public import Mathlib.Algebra.DualNumber
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.Analysis.Calculus.FDeriv.Defs
+public import Mathlib.RingTheory.Smooth.StandardSmooth
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ImplicitFunctionHolomorphicStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.AnChart
+import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.ExponentialFamilyPeriods
+import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsHodgeGram
+import Mathlib.CategoryTheory.Monoidal.Cartesian.Basic
+import Mathlib.CategoryTheory.Monoidal.Category
+import Mathlib.CategoryTheory.Monoidal.Mon
+import Mathlib.Topology.Sheaves.Presheaf
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.CubicalStructures.CubeSymmetricSwapFirst
+
+@[expose] public section
 
 noncomputable section
 
@@ -68,7 +130,7 @@ theorem dualEval_fst [Fintype ι] (ψ : R →+* ℂ) (x v : ι → ℂ) (p : MvP
   induction p using MvPolynomial.induction_on with
   | C a => simp [dualEval, dirDeriv_C]
   | add p q hp hq =>
-    simp [map_add, hp.1, hp.2, hq.1, hq.2, dirDeriv_add]
+    simp [map_add (f := _), hp.1, hp.2, hq.1, hq.2, dirDeriv_add]
   | mul_X p i hp =>
     have hX : dualEval ψ x v (X i) = TrivSqZeroExt.inl (x i) + TrivSqZeroExt.inr (v i) := by
       simp [dualEval]
@@ -117,7 +179,7 @@ theorem der_eq_dirDeriv [Fintype ι] (P : Algebra.SubmersivePresentation R A ι 
     rw [dirDeriv_C, show algebraMap P.Ring A (C a) = algebraMap R A a from
       (IsScalarTower.algebraMap_apply R P.Ring A a).symm]
     exact h0 a
-  | add p q hp hq => rw [map_add, map_add, hp, hq, dirDeriv_add]
+  | add p q hp hq => rw [map_add (f := _), map_add (f := _), hp, hq, dirDeriv_add]
   | mul_X p i hp =>
     have hX : algebraMap P.Ring A (X i) = P.val i := by simp
     rw [map_mul, hL, dirDeriv_mul, dirDeriv_X, hX, hp, algebraMap_ring_eq]
@@ -234,7 +296,8 @@ theorem bijective_base [Fintype ι] (P : Algebra.SubmersivePresentation R A ι �
         Dc c (algebraMap P.Ring A (Sum.elim P.relation T j)) := fun c j => by
       rw [hF, der_eq_dirDeriv P χ₀ (Dc c) (h0 c) (hL c)]
     refine ⟨v₁ + ∑ c, (w (Sum.inr c) - F v₁ (Sum.inr c)) • (fun i => Dc c (P.val i)), ?_⟩
-    rw [map_add, map_sum]
+
+    rw [map_add (f := _), map_sum]
     funext j
     simp only [map_smul, Pi.add_apply, Finset.sum_apply, Pi.smul_apply, smul_eq_mul, hFc]
     rcases j with j | c'

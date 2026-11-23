@@ -1,4 +1,73 @@
-import Mathlib
+module
+
+public import Mathlib.Analysis.Analytic.Basic
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.Analysis.Calculus.FDeriv.Defs
+public import Mathlib.LinearAlgebra.Complex.FiniteDimensional
+public import Mathlib.MeasureTheory.Integral.Bochner.Basic
+public import Mathlib.MeasureTheory.Integral.IntegrableOn
+public import Mathlib.MeasureTheory.Measure.Haar.OfBasis
+public import Mathlib.Order.CompletePartialOrder
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+public import Mathlib.Analysis.Calculus.InverseFunctionTheorem.FDeriv
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+public import Mathlib.RingTheory.Complex
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Analysis.Calculus.FDeriv.Analytic
+public import Mathlib.Analysis.Calculus.FDeriv.RestrictScalars
+public import Mathlib.MeasureTheory.Function.Jacobian
+public import Mathlib.MeasureTheory.Integral.DominatedConvergence
+public import Mathlib.RingTheory.Norm.Transitivity
+
+@[expose] public section
 
 noncomputable section
 
@@ -80,8 +149,11 @@ theorem exists_inj_cover {O : Set (Fin e → ℂ)} {Q : (Fin e → ℂ) → (Fin
   classical
   set s : Set (Set (Fin e → ℂ)) :=
     insert ∅ {b | b ∈ TopologicalSpace.countableBasis (Fin e → ℂ) ∧ b ⊆ O ∧ InjOn Q b}
-  have hs : s.Countable :=
-    ((TopologicalSpace.countable_countableBasis _).mono fun b hb => hb.1).insert ∅
+  have hs : s.Countable := by
+    apply Set.Countable.insert
+    apply (TopologicalSpace.countable_countableBasis (Fin e → ℂ)).mono
+    intro b hb
+    exact hb.1
   have hmem : ∀ n, Set.enumerateCountable hs ∅ n ∈ s := Set.enumerateCountable_mem hs
     (Set.mem_insert _ _)
   refine ⟨Set.enumerateCountable hs ∅, fun n => ?_, fun n => ?_, fun n => ?_, ?_⟩
@@ -125,7 +197,7 @@ theorem integrable_tsum_of_summable {α : Type*} [MeasurableSpace α] {μ : Meas
     simp_rw [this]
     rw [← ENNReal.ofReal_tsum_of_nonneg (fun n => integral_nonneg fun _ => norm_nonneg _) hs]
     exact ENNReal.ofReal_ne_top
-  have hae : ∀ᵐ y ∂μ, ∑' n, ‖F n y‖ₑ < ⊤ := ae_lt_top' (AEMeasurable.ennreal_tsum hmeas) hlin
+  have hae : ∀ᵐ y ∂μ, ∑' n, ‖F n y‖ₑ < ⊤ := ae_lt_top' (AEMeasurable.tsum hmeas) hlin
   have hsum : ∀ᵐ y ∂μ, Summable fun n => F n y := by
     filter_upwards [hae] with y hy
     refine Summable.of_norm ?_
@@ -145,7 +217,8 @@ theorem tsum_finsum_disjointed {α : Type*} {D : ℕ → Set α} (hd : Pairwise 
   have hsub : ∀ n, D n ⊆ O := fun n => hU ▸ subset_iUnion D n
   have hterm : ∀ n, ∑ᶠ u ∈ D n ∩ G, f u = ∑ u ∈ hG.toFinset, if u ∈ D n then f u else 0 := by
     intro n
-    rw [finsum_mem_eq_finite_toFinset_sum f (hG.subset fun u hu => ⟨hsub n hu.1, hu.2⟩),
+    have hfin : (D n ∩ G).Finite := hG.subset fun u hu => ⟨hsub n hu.1, hu.2⟩
+    rw [finsum_mem_eq_finite_toFinset_sum f hfin,
       Finset.sum_ite, Finset.sum_const_zero, add_zero]
     congr 1
     ext u

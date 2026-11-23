@@ -1,4 +1,47 @@
-import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.TranslateProduct
+module
+
+public import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.ThetaZeroLogDerivative
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 open scoped BigOperators ComplexConjugate
@@ -14,66 +57,16 @@ def FtQuasi : Prop :=
   ∀ (L : PeriodPair) (t ω z : ℂ), ω ∈ L.lattice →
     fT L t (z + ω) = Complex.exp (-(2 * (Real.pi : ℂ)) * Complex.I * (altE L ω t : ℂ)) * fT L t z
 
-def FtPow : Prop :=
-  ∀ (L : PeriodPair) (t : ℂ) (N : ℕ), (N : ℂ) * t ∈ L.lattice → IsPeriodic L (fun z => fT L t z ^ N)
-
-def FtOrder : Prop :=
-  ∀ (L : PeriodPair) (t z : ℂ), t ∉ L.lattice →
-    MeromorphicAt (fT L t) z ∧ meromorphicOrderAt (fT L t) z
-      = (by classical exact if z + t ∈ L.lattice then 1 else if z ∈ L.lattice then -1 else 0)
-
-def FtInv : Prop :=
-  ∀ (L : PeriodPair) (t z : ℂ), z ∉ L.lattice → z - t ∉ L.lattice → fT L t (-z) * fT L t (z - t) = 1
-
-def FtDouble : Prop :=
-  ∀ (L : PeriodPair) (y z : ℂ), z ∉ L.lattice → z + y ∉ L.lattice →
-    fT L (2 * y) z = fT L y (z + y) * fT L y z
-
 def OpUTh0 : Prop :=
   ∀ (L : PeriodPair) (t x z : ℂ),
     opU L x (th0 L t) z
       = Complex.exp (-(Real.pi : ℂ) * Complex.I * (altE L x t : ℂ)) * opU L (x + t) (sgStar L) z
         / opU L t (sgStar L) 0
 
-def ThetaZeroTranslateProduct : Prop :=
-  ∀ (L : PeriodPair) (t P Q z : ℂ), Q ∉ L.lattice → z + P + t ∉ L.lattice →
-    opU L (P + Q) (th0 L t) z * opU L (P - Q) (th0 L t) z
-      = opU L Q (sgStar L) 0 ^ 2 * (L.weierstrassP Q - L.weierstrassP (z + P + t))
-        * opU L P (th0 L t) z ^ 2
-
-def ThetaZeroCube : Prop :=
-  ∀ (L : PeriodPair) (ω₀ b c : ℂ), ω₀ ∈ L.lattice → ω₀ / 2 ∉ L.lattice →
-    IsPeriodic L (fun a =>
-      th0 L (ω₀ / 2) (a + b + c) * th0 L (ω₀ / 2) a * th0 L (ω₀ / 2) b * th0 L (ω₀ / 2) c
-        / (th0 L (ω₀ / 2) (a + b) * th0 L (ω₀ / 2) (b + c) * th0 L (ω₀ / 2) (c + a)))
-
-def ThetaZeroSecond : Prop :=
-  ∀ (L : PeriodPair) (ω₀ : ℂ), ω₀ ∈ L.lattice → ω₀ / 2 ∉ L.lattice →
-    deriv (th0 L (ω₀ / 2)) 0 = 0 ∧
-    iteratedDeriv 2 (th0 L (ω₀ / 2)) 0 = -(L.weierstrassP (ω₀ / 2) + s2 L)
-
 def ThetaZeroLine : Prop :=
   ∀ (L : PeriodPair) (ω₀ : ℂ) (F : ℂ → ℂ), ω₀ ∈ L.lattice → ω₀ / 2 ∉ L.lattice → Differentiable ℂ F →
     (∀ ω ∈ L.lattice, ∀ z, F (z + ω) = thetaZeroCharacter L ω₀ ω
       * Complex.exp ((Real.pi : ℂ) * herm L z ω + (Real.pi : ℂ) * herm L ω ω / 2) * F z) →
     ∀ z, F z = F 0 * th0 L (ω₀ / 2) z
-
-def IsFibreReps (L : PeriodPair) (α t : ℂ) (T : Finset ℂ) : Prop :=
-  (∀ Q ∈ T, α * Q - t ∈ L.lattice ∧ 2 * Q ∉ L.lattice) ∧
-  (∀ Q ∈ T, ∀ Q' ∈ T, (Q - Q' ∈ L.lattice ∨ Q + Q' ∈ L.lattice) → Q = Q') ∧
-  (∀ z, α * z - t ∈ L.lattice → ∃ Q ∈ T, z - Q ∈ L.lattice ∨ z + Q ∈ L.lattice)
-
-def FibreRepsExist : Prop :=
-  ∀ (L : PeriodPair) (α t : ℂ), α ≠ 0 → MulStable L α → 2 * t ∈ L.lattice →
-    (∀ z, α * z - t ∈ L.lattice → 2 * z ∉ L.lattice) → ∃ T : Finset ℂ, IsFibreReps L α t T
-
-def Th0Isogeny : Prop :=
-  ∀ (L : PeriodPair) (α ω₀ : ℂ) (T : Finset ℂ), α ≠ 0 → MulStable L α → ω₀ ∈ L.lattice →
-    ω₀ / 2 ∉ L.lattice → IsFibreReps L α (ω₀ / 2) T →
-    (∀ ω ∈ L.lattice, thetaZeroCharacter L ω₀ (α * ω) = thetaZeroCharacter L ω₀ ω ^ (2 * T.card)) →
-    (2 * (T.card : ℝ) = Complex.normSq α) ∧
-    ∀ z, z ∉ L.lattice → z - ω₀ / 2 ∉ L.lattice →
-      th0 L (ω₀ / 2) (α * z) * (L.weierstrassP z - L.weierstrassP (ω₀ / 2)) ^ T.card
-        = th0 L (ω₀ / 2) z ^ (2 * T.card) * ∏ Q ∈ T, (L.weierstrassP z - L.weierstrassP Q)
 
 end Formalism.L2.Th1.F

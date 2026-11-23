@@ -1,8 +1,50 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.RowMinor
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.EncardBiUnionLe
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.CardIntegralFramesFixedLiftLeStatement
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsSublatticeLiftsModuloFixingUnipotentStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.RowMinor
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.CardIntegralFramesFixedLiftLeStatement
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.EncardBiUnionLe
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsSublatticeLiftsModuloFixingUnipotentStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -41,8 +83,9 @@ theorem eq_zero_of_orth_frame (F : LFlag S r T) (F' : LFlag S r T') (b₀ : Fin 
     refine Matrix.eq_zero_of_vecMul_eq_zero hd ?_
     funext b
     have := h (b₀.succAbove b)
+
     simp only [map_sum, LinearMap.map_smulₛₗ, LinearMap.sum_apply, LinearMap.smul_apply, smul_eq_mul,
-      starRingEnd_apply] at this
+    starRingEnd_apply] at this
     simpa [Matrix.vecMul, dotProduct, Zhat, brS, FlagG.fvec] using this
   have : ∀ a, c a = 0 := fun a => by simpa using congrFun h0 a
   simp [this]
@@ -70,8 +113,9 @@ theorem eq_zero_of_span_E {x : (hS D).V} (hx : x ∈ Submodule.span D.host.E (Se
   obtain ⟨c, rfl⟩ := (Submodule.mem_span_range_iff_exists_fun D.host.E).1 hx
   have : ∀ a, c a = 0 := fun a => by
     have := h a
+
     simp only [map_sum, LinearMap.map_smulₛₗ, LinearMap.sum_apply, LinearMap.smul_apply, smul_eq_mul,
-      D.sp.hyp_ef] at this
+    D.sp.hyp_ef] at this
     simpa using this
   simp [this]
 
@@ -80,6 +124,7 @@ theorem eq_zero_of_span_F {x : (hS D).V} (hx : x ∈ Submodule.span D.host.E (Se
   obtain ⟨c, rfl⟩ := (Submodule.mem_span_range_iff_exists_fun D.host.E).1 hx
   have : ∀ a, c a = 0 := fun a => by
     have := h a
+
     simp only [map_sum, map_smul, smul_eq_mul, D.sp.hyp_ef] at this
     simpa using this
   simp [this]
@@ -116,7 +161,7 @@ theorem iXY_mem_of_split {T : D.host.E} (F0 : FlagG (VS D) D.R.rS T) (he : F0.e 
     refine eq_zero_of_span_F D (YS_le D hy) fun i => ?_
     have h1 := hX _ hx i
     have h2 : (hS D).hT (D.sp.hypE i) (D.sp.iXY 0 p) = 0 := hT_swap (D.sp.hyp_orthX i p).1
-    rw [map_sub, map_add, map_add, h2, hX a haX i, hwE i] at h1
+    rw [map_sub, map_add (f := _), map_add (f := _), h2, hX a haX i, hwE i] at h1
     simpa using h1
   subst hy0
   have h3 : w - D.sp.iXY 0 p ∈ F0.X := by
@@ -159,7 +204,7 @@ theorem exists_lift {T T' : D.host.E} (F0 : FlagG (VS D) D.R.rS T) (he : F0.e = 
     have h1 := hf2 (p + q) b
     have h2 := hf2 p b
     have h3 := hf2 q b
-    simp only [Submodule.coe_add, map_add, map_sub, LinearMap.add_apply, LinearMap.sub_apply] at h1 h2 h3 ⊢
+    simp only [Submodule.coe_add, map_add (f := _), map_sub, LinearMap.add_apply, LinearMap.sub_apply] at h1 h2 h3 ⊢
     linear_combination h1 - h2 - h3
   · show f (c • p) = c • f p
     have e1 : c • f p = algebraMap _ D.host.E c • f p := (algebraMap_smul D.host.E c (f p)).symm
@@ -170,7 +215,7 @@ theorem exists_lift {T T' : D.host.E} (F0 : FlagG (VS D) D.R.rS T) (he : F0.e = 
     have h1 := hf2 (c • p) b
     have h2 := hf2 p b
     rw [e2] at h1
-    simp only [map_add, map_sub, map_smul, LinearMap.map_smulₛₗ, LinearMap.add_apply, LinearMap.sub_apply,
+    simp only [map_add (f := _), map_sub, map_smul, LinearMap.map_smulₛₗ, LinearMap.add_apply, LinearMap.sub_apply,
       LinearMap.smul_apply, smul_eq_mul] at h1 h2 ⊢
     linear_combination h1 - (starRingEnd D.host.E) (algebraMap _ D.host.E c) * h2
 

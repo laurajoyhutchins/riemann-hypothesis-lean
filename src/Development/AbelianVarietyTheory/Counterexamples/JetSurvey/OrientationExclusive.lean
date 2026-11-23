@@ -1,8 +1,47 @@
-import Mathlib
-import Formalism.SharpRestriction.Divisibility.GeneratorPowers.H1algStatement
-import Formalism.LocalToGlobal.ProjectiveLattices.DepRun
-import Formalism.SharpRestriction.Divisibility.GeneratorPowers.SpanResCharNeBot
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.HolomorphicFamilies.WeightFloorInequalities
+module
+
+public import Formalism.SharpRestriction.Divisibility.AbelianOpenPart.OEOsInjective
+public import Formalism.LocalToGlobal.ProjectiveLattices.PartitionExtendByZeroAntitone
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Formalism.SharpRestriction.Divisibility.GeneratorPowers.GermCut
+
+@[expose] public section
 
 noncomputable section
 
@@ -49,7 +88,7 @@ theorem kappa_last (Tp : ParamsT D L P) (hK : DV.KapDef D) {j : ℕ} (hj : InR D
     linarith
   rw [DV.aPlusQ_eq, hcast] at e2
   unfold DV.sigPar DV.eQ at e2
-  rw [dif_neg hi1, dif_pos hb, dif_pos ⟨h1, h2⟩, hidx] at e2
+  rw [dite_eq_right hi1, dite_eq_left hb, dite_eq_left ⟨h1, h2⟩, hidx] at e2
   have ht : 5 ≤ D.R.t := by
     have a1 := Tp.split; have a2 := Tp.nP_eq; have a3 := Tp.TO_nW; have a4 := Tp.nW_40
     have : 1 * Tp.nWn ≤ Tp.TO * Tp.nWn := Nat.mul_le_mul_right _ (by have := Tp.TO_40; omega)
@@ -66,36 +105,5 @@ theorem kappa_last (Tp : ParamsT D L P) (hK : DV.KapDef D) {j : ℕ} (hj : InR D
   unfold kaR
   rw [e1]
   exact_mod_cast this
-
-theorem lR_lastPos (Tp : ParamsT D L P) (hK : DV.KapDef D) {j : ℕ} (hj : InR D j) : (lR Tp hK j).LastPos := by
-  intro τ i hi
-  have hn : ¬ i.1 + 1 < (D.R.sigW j).1 := by omega
-  have hk := kappa_last Tp hK hj τ i hi
-  show 1 ≤ ofGaps (lGapP D (kaR Tp hK j) Tp.TO Tp.nWn τ) i
-  rw [ofGaps_last _ _ hn]
-  unfold lGapP
-  rw [if_neg hn]
-  have hp : (0 : ℤ) < (WeightAlgebra.Tp D j Tp.TO : ℤ) := by unfold WeightAlgebra.Tp; push_cast; omega
-  rw [Int.fdiv_eq_ediv_of_nonneg _ hp.le]
-  have h1 : ((Tp.Dp : ℤ) + 2) * Tp.nWn + 2 * D.R.r ≤ Tp.TO := by exact_mod_cast Tp.TO_nW
-  have h40 : 40 * ((Tp.Dp : ℤ) + 2) ≤ Tp.TO := by exact_mod_cast Tp.TO_40
-  have : (1 : ℤ) ≤ (((kaR Tp hK j).aP τ i : ℤ) - ((WeightFamilies.dimY D j : ℤ) + 2) * Tp.nWn - 2 * D.R.r) / (WeightAlgebra.Tp D j Tp.TO : ℤ) := by
-    rw [Int.le_ediv_iff_mul_le hp]
-    unfold WeightAlgebra.Tp
-    rw [dimY_eq Tp hj]
-    push_cast
-    nlinarith
-  omega
-
-theorem one_le_DF (Tp : ParamsT D L P) (hK : DV.KapDef D) {j : ℕ} (hj : InR D j) (τ : D.what₂.Tau) :
-    1 ≤ WeightAlgebra.DF (lR Tp hK j) := by
-  have hk : 5 ≤ D.R.k := by have := D.R.m_add_three_le_k; have := D.R.two_le_m; omega
-  have hs : (D.R.sigW j).1 = D.R.k + j - 1 := rfl
-  have h1 := lR_lastPos Tp hK hj τ ⟨(D.R.sigW j).1 - 1, by omega⟩ (by show (D.R.sigW j).1 - 1 + 1 = _; omega)
-  unfold WeightAlgebra.DF WeightAlgebra.degP
-  refine le_trans ?_ (Finset.single_le_sum (f := fun τ => (∑ i, (lR Tp hK j).aP τ i) + ∑ i, (lR Tp hK j).aM τ i)
-    (fun _ _ => Nat.zero_le _) (Finset.mem_univ τ))
-  exact le_trans (le_trans h1 (Finset.single_le_sum (f := fun i => (lR Tp hK j).aP τ i) (fun _ _ => Nat.zero_le _)
-    (Finset.mem_univ _))) (Nat.le_add_right _ _)
 
 end GlobalTheory.DepthBoundProbe

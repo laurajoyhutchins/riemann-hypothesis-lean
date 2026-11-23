@@ -1,7 +1,45 @@
-import Mathlib
-import Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow
-import Formalism.SharpRestriction.LevelLetterCocycles.BlochKatoPhases
-import Formalism.SharpRestriction.LevelLetterCocycles.ArithmeticCylinders
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.BlochKatoPhases
+public import Formalism.SharpRestriction.LevelLetterCocycles.ArithmeticCylinders
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -185,8 +223,8 @@ def BasisOf (i : X.Tw) (j : ℕ) (b : Bool) (Sg : Set (Y.Dat i j b)) (S : Finset
   (↑S ⊆ Sg) ∧ LinearIndependent (X.O i) (fun a : ↥S => AO Y i j b (Y.th i j b a)) ∧
   Submodule.span (X.O i) ((fun a => AO Y i j b (Y.th i j b a)) '' ↑S) = (Th Y i j b Sg).map (AO Y i j b)
 
-open Classical in
 
+open Classical in
 def levs (i : X.Tw) (S : ∀ (j : ℕ) (b : Bool), Finset (Y.Dat i j b)) : Finset (PlE D.host) :=
   (Finset.Icc 1 D.R.m).biUnion fun j =>
     (Finset.univ : Finset Bool).biUnion fun b => (S j b).biUnion (Y.lev i j b)
@@ -194,9 +232,6 @@ def levs (i : X.Tw) (S : ∀ (j : ℕ) (b : Bool), Finset (Y.Dat i j b)) : Finse
 def SgJ (i : X.Tw) (j : ℕ) (b : Bool) : Set (Y.Dat i j b) := E.Dat0 i j b
 
 def ThJ (i : X.Tw) (j : ℕ) (b : Bool) : Submodule (X.O i) (Y.Fm i j b) := Th Y i j b (SgJ Y E i j b)
-
-def ThSub (Sg0 : ∀ (i : X.Tw) (j : ℕ) (b : Bool), Set (Y.Dat i j b)) : Prop :=
-  ∀ i, ∀ j ∈ Finset.Icc 1 D.R.m, ∀ b : Bool, Th Y i j b (Sg0 i j b) ≤ ThJ Y E i j b
 
 def IdxAt (i : X.Tw) (j : ℕ) (b : Bool) (Sg : Set (Y.Dat i j b)) (k : ℕ) (Q : Finset (PlE D.host))
     (ψ : G D.host.E N.Om →* (X.Ok i k)ˣ) (e : ℝ) : Prop :=
@@ -214,8 +249,8 @@ def InclAt (i : X.Tw) (j : ℕ) (b : Bool) (Sg : Set (Y.Dat i j b)) (k : ℕ) (Q
     (ψ : G D.host.E N.Om →* (X.Ok i k)ˣ) : Prop :=
   eThPsi Y i j b k Q ψ Sg ≤ eThPMt Y i j b k Q ψ
 
-open Classical in
 
+open Classical in
 def GoodTw (N0 : X.Tw → ℕ) (i : X.Tw) (eps' : ℝ)
     (S : ∀ (j : ℕ) (b : Bool), Finset (Y.Dat i j b)) (A : Finset (PlE D.host)) (Q : Finset (PlE D.host)) (k' : ℕ)
     (ψ' : X.RCG i Q →* (X.Ok i k')ˣ) : Prop :=
@@ -229,15 +264,6 @@ def GoodTw (N0 : X.Tw → ℕ) (i : X.Tw) (eps' : ℝ)
         (((V0 Y i j b).restrictScalars (X.O i)).baseChange (X.Ok i k')) ∧
       InclAt Y i j b (SgJ Y E i j b) k' Q (Formalism.MainNotions.BlochKatoReduction.Gen.psiAt b (ψ'.comp (X.art i Q)))) ∧
     Formalism.MainNotions.BlochKatoReduction.Gen.partAT bkP i Q k' ψ' eps' ∧ Formalism.MainNotions.BlochKatoReduction.Gen.partC N0 i Q k' ψ' eps' ∧ Formalism.MainNotions.BlochKatoReduction.Gen.partD i Q k' ψ' eps'
-
-def TwistTheoremAtIndex (N0 : X.Tw → ℕ) (i : X.Tw) : Prop :=
-  Formalism.MainNotions.BlochKatoReduction.Gen.SetHyp bkP i → ∀ eps' : ℝ, 0 < eps' →
-    (∀ j ∈ Finset.Icc 1 D.R.m, ∀ b : Bool, FullRk Y E i j b (SgJ Y E i j b)) →
-  ∀ S : ∀ (j : ℕ) (b : Bool), Finset (Y.Dat i j b),
-    (∀ j ∈ Finset.Icc 1 D.R.m, ∀ b : Bool, BasisOf Y i j b (SgJ Y E i j b) (S j b)) →
-  ∀ A : Finset (PlE D.host),
-  ∃ (Q : Finset (PlE D.host)) (k' : ℕ) (ψ' : X.RCG i Q →* (X.Ok i k')ˣ),
-    GoodTw Y bkP E N0 i eps' S A Q k' ψ'
 
 def Mall (i : X.Tw) (j : ℕ) (b : Bool) : Submodule (X.O i) (Y.Fm i j b) :=
   Y.Bsup i j b ⊓ (Fm0 Y i j b).restrictScalars (X.O i)
@@ -296,9 +322,6 @@ def TwistedSeriesSpecialisation : Prop :=
 
 abbrev XD (D : Formalism.BasicNotions.D7) : Type := ExpDat D.nexp
 
-def aux₃ (D : Formalism.BasicNotions.D7) (bkP : Formalism.MainNotions.BlochKatoReduction.BK D) (E : XD D) (N0 : D.ntw.Tw → ℕ) : Prop :=
-  ∀ i, D.ntw.NonzeroIndexPlace i → TwistTheoremAtIndex D.nexp (Formalism.MainNotions.BlochKatoReduction.pin bkP) E N0 i
-
 def adm1 (D : Formalism.BasicNotions.D7) (bkP : Formalism.MainNotions.BlochKatoReduction.BK D) (N0 : D.ntw.Tw → ℕ) : Prop :=
   Formalism.MainNotions.BlochKatoReduction.aux₃ D bkP N0
 
@@ -325,10 +348,6 @@ def admitted (D : Formalism.BasicNotions.D7) (bkP : Formalism.MainNotions.BlochK
     (N0 : D.ntw.Tw → ℕ) : Prop :=
   adm1 D bkP N0 ∧ adm2 D bkP N0 ∧ adm3 D E ∧ ArchimedeanSignatureMatching D ∧ adm5 D ∧ adm7 D E ∧
     adm8 D N0 ∧ adm9 D ∧ adm10 D ∧ adm11 D
-
-def Stmt (D : Formalism.BasicNotions.D7) (bkP : Formalism.MainNotions.BlochKatoReduction.BK D) (E : XD D) :
-    Prop :=
-  ∀ N0 : D.ntw.Tw → ℕ, admitted D bkP E N0 → aux₃ D bkP E N0
 
 end Formalism.MainNotions.IntegralHeckeForms
 

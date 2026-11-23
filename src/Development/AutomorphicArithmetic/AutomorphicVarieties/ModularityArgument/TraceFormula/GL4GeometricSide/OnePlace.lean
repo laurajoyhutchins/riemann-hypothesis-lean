@@ -1,4 +1,48 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.TraceFormula.GL4GeometricSide.InnerEq
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.TraceFormula.GL4GeometricSide.InnerEq
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.RealDescent.RealLeviDescent.HighestVectorsRegularLine
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 open UpperTheory.V.Z.GSp4Splitting PositivityTheory.RgBcC PositivityTheory.RgBcC.RealD PositivityTheory.Rg.BcB.Desc
 open scoped InnerProductSpace
@@ -56,8 +100,8 @@ private theorem twist {A : Module.End ℂ V} (hA : A * A = 1) (hE : ∀ a b, A *
         _ = _ := by simp only [mul_assoc]
     rw [this]; exact mul_mem hu hv
 
-variable (E1 E2) in
 
+variable (E1 E2) in
 private def cyc (x : V) : Submodule ℂ V where
   carrier := {y | ∃ a ∈ alg E1 E2, a x = y}
   add_mem' := by
@@ -121,14 +165,14 @@ private theorem alg_res {E1' E2' : Fin n → Fin n → Module.End ℂ X}
 
 private theorem pair_res {E1' E2' : Fin n → Fin n → Module.End ℂ X}
     (h1 : ∀ a b x, (E1' a b x : V) = E1 a b x) (h2 : ∀ a b x, (E2' a b x : V) = E2 a b x) (h : IsPair E1 E2) :
-    IsPair E1' E2' where
-  gl1 := gl_res h1 h.gl1
-  gl2 := gl_res h2 h.gl2
-  comm a b c d := by
-    ext x
-    simpa [h1, h2] using LinearMap.congr_fun (h.comm a b c d) x
-  unitK a b x y := by simpa [kF, h1, h2, Submodule.coe_inner] using h.unitK a b x y
-  unitP a b x y := by simpa [pF, h1, h2, Submodule.coe_inner] using h.unitP a b x y
+    IsPair E1' E2' :=
+  { gl1 := gl_res h1 h.gl1,
+    gl2 := gl_res h2 h.gl2,
+    comm := fun a b c d => by
+      ext x
+      simpa [h1, h2] using LinearMap.congr_fun (h.comm a b c d) x,
+    unitK := fun a b x y => by simpa [kF, h1, h2, Submodule.coe_inner] using h.unitK a b x y,
+    unitP := fun a b x y => by simpa [pF, h1, h2, Submodule.coe_inner] using h.unitP a b x y }
 
 private theorem fin_comap {S : Submodule ℂ V} (hS : FiniteDimensional ℂ S) :
     FiniteDimensional ℂ (S.comap X.subtype) :=
@@ -151,14 +195,14 @@ private theorem der_res {σ : Un n →* (V →ₗ[ℂ] V)} {σ' : Un n →* (X �
     exact Asymptotics.isLittleO_norm_left.1 h0.norm_left
 
 private theorem isK_res {σ : Un n →* (V →ₗ[ℂ] V)} {σ' : Un n →* (X →ₗ[ℂ] X)}
-    (hσ : ∀ k x, (σ' k x : V) = σ k x) (hK : IsK σ) : IsK σ' where
-  iso k x y := by simpa [Submodule.coe_inner, hσ] using hK.iso k x y
-  fin v := by
-    obtain ⟨S, hfd, hv, hs⟩ := hK.fin v
-    refine ⟨S.comap X.subtype, fin_comap hfd, hv, fun k w hw => ?_⟩
-    show (σ' k w : V) ∈ S
-    rw [hσ]; exact hs k _ hw
-  cont v w := by simpa [Submodule.coe_inner, hσ] using hK.cont v w
+    (hσ : ∀ k x, (σ' k x : V) = σ k x) (hK : IsK σ) : IsK σ' :=
+  { iso := fun k x y => by simpa [Submodule.coe_inner, hσ] using hK.iso k x y,
+    fin := fun v => by
+      obtain ⟨S, hfd, hv, hs⟩ := hK.fin v
+      refine ⟨S.comap X.subtype, fin_comap hfd, hv, fun k w hw => ?_⟩
+      show (σ' k w : V) ∈ S
+      rw [hσ]; exact hs k _ hw,
+    cont := fun v w => by simpa [Submodule.coe_inner, hσ] using hK.cont v w }
 
 private theorem rep_res {σ : Un n →* (V →ₗ[ℂ] V)} (h : ∀ k, ∀ x ∈ X, σ k x ∈ X) :
     ∃ σ' : Un n →* (X →ₗ[ℂ] X), ∀ k x, (σ' k x : V) = σ k x :=
@@ -178,11 +222,11 @@ private theorem trOn_res {S : Submodule ℂ V} (hSX : S ≤ X) {f : Module.End �
       exact H _ hx
   unfold trOn
   by_cases H : ∀ x ∈ S, f x ∈ S
-  · rw [dif_pos H, dif_pos (hiff.2 H), ← LinearMap.trace_conj' _ (Submodule.comapSubtypeEquivOfLe hSX)]
+  · rw [dite_eq_left H, dite_eq_left (hiff.2 H), ← LinearMap.trace_conj' _ (Submodule.comapSubtypeEquivOfLe hSX)]
     congr 1
     ext x
     simp [LinearEquiv.conj_apply, h, Submodule.comapSubtypeEquivOfLe]
-  · rw [dif_neg H, dif_neg fun H' => H (hiff.1 H')]
+  · rw [dite_eq_right H, dite_eq_right fun H' => H (hiff.1 H')]
 
 private theorem iso_res {σ : Un n →* (V →ₗ[ℂ] V)} {σ' : Un n →* (X →ₗ[ℂ] X)}
     (hσ : ∀ k x, (σ' k x : V) = σ k x) (hK : IsK σ) (E : KMod n) {S : Submodule ℂ V} (hfd : FiniteDimensional ℂ S)

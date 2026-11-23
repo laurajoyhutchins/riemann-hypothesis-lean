@@ -1,5 +1,48 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RigExtMapRelFrobCompRigOfOmega
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.ToSpanSingletonConstGenInjective
+public import Mathlib.RingTheory.MvPowerSeries.Substitution
+public import Mathlib.RingTheory.WittVector.Teichmuller
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -104,8 +147,8 @@ section Witt
 
 variable (p : ℕ) [Fact p.Prime] {k : Type} [Field k] [CharP k p] {σ : Type} {d : ℕ}
 
-variable (k) in
 
+variable (k) in
 abbrev Fr : Type := FractionRing (WittVector p k)
 
 def lift (f : MvPowerSeries σ k) : MvPowerSeries σ (Fr p k) :=
@@ -123,30 +166,30 @@ theorem _root_.GlobalTheory.Katz.constantCoeff_lift {f : MvPowerSeries σ k}
   rw [← coeff_zero_eq_constantCoeff_apply, _root_.GlobalTheory.Katz.coeff_lift,
     coeff_zero_eq_constantCoeff_apply, h, WittVector.teichmuller_zero, map_zero]
 
-variable (k σ) in
 
+variable (k σ) in
 def intBy (c : WittVector p k) : Submodule (WittVector p k) (MvPowerSeries σ (Fr p k)) where
   carrier := {f | ∀ α, ∃ w : WittVector p k, coeff α f = algebraMap _ (Fr p k) (c * w)}
   zero_mem' _ := ⟨0, by simp⟩
   add_mem' {f g} hf hg α := by
     obtain ⟨v, hv⟩ := hf α
     obtain ⟨w, hw⟩ := hg α
-    exact ⟨v + w, by rw [map_add, hv, hw, mul_add, map_add]⟩
+    exact ⟨v + w, by rw [map_add (f := _), hv, hw, mul_add, map_add (f := _)]⟩
   smul_mem' r f hf α := by
     obtain ⟨w, hw⟩ := hf α
     refine ⟨r * w, ?_⟩
     change r • coeff α f = _
     rw [hw, Algebra.smul_def, ← map_mul, mul_left_comm]
 
-variable (k σ) in
 
+variable (k σ) in
 def quasiInt : Submodule (WittVector p k) (MvPowerSeries σ (Fr p k)) where
   carrier := {f | ∀ α i, ∃ w : WittVector p k, (α i : Fr p k) * coeff α f = algebraMap _ (Fr p k) w}
   zero_mem' _ _ := ⟨0, by simp⟩
   add_mem' {f g} hf hg α i := by
     obtain ⟨v, hv⟩ := hf α i
     obtain ⟨w, hw⟩ := hg α i
-    exact ⟨v + w, by rw [map_add, mul_add, hv, hw, map_add]⟩
+    exact ⟨v + w, by rw [map_add (f := _), mul_add, hv, hw, map_add (f := _)]⟩
   smul_mem' r f hf α i := by
     obtain ⟨w, hw⟩ := hf α i
     refine ⟨r * w, ?_⟩
@@ -183,8 +226,8 @@ section Chart
 
 variable {k : Type} [CommRing k] {σ : Type} [Finite σ]
 
-variable (k) in
 
+variable (k) in
 def evA {A : Type} [CommRing A] [Algebra k A] (x : σ → A) (hx : ∀ i, IsNilpotent (x i)) :
     MvPowerSeries σ k →ₐ[k] A :=
   { (constantCoeff : MvPowerSeries Empty A →+* A).comp
@@ -196,8 +239,8 @@ def evA {A : Type} [CommRing A] [Algebra k A] (x : σ → A) (hx : ∀ i, IsNilp
         (hasSubst_of_constantCoeff_nilpotent fun i => by simpa using hx i)) r)).trans ?_
       rw [MvPowerSeries.algebraMap_apply, constantCoeff_C] }
 
-variable (k) in
 
+variable (k) in
 def Presents {B : ℕ → Type} [∀ n, CommRing (B n)] [∀ n, Algebra k (B n)] (y : ∀ n, σ → B n)
     (hy : ∀ n i, IsNilpotent (y n i)) : Prop :=
   (∀ n, Function.Surjective (evA k (y n) (hy n))) ∧

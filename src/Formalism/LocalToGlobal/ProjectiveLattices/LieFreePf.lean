@@ -1,9 +1,52 @@
-import Formalism.LocalToGlobal.ProjectiveLattices.IntFrames
-import Formalism.LocalToGlobal.ProjectiveLattices.LieAlg
-import Formalism.LocalToGlobal.ProjectiveLattices.LieRel
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.UniversalCharts.UnivChartLoc
+module
 
-set_option synthInstance.maxHeartbeats 400000
+public import Formalism.LocalToGlobal.ProjectiveLattices.IntFrames
+public import Formalism.LocalToGlobal.ProjectiveLattices.LieAlg
+public import Formalism.LocalToGlobal.ProjectiveLattices.LieRel
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.RankPf
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.UniversalCharts.UnivChartLoc
+
+@[expose] public section
+
+
 
 noncomputable section
 
@@ -33,7 +76,7 @@ theorem int_val (T : CDVR) (io : c.F →+* T.Fr) (τ : E →+* ℂ) (a : 𝓞 E)
   rw [hpa, map_zero] at h3
   exact h3.symm
 
-set_option maxHeartbeats 800000 in
+
 
 theorem lieFree : LieFreeSt Xo c := by
   intro T io G t' x m1 m2 _ u₀ hu₀t hu₀e hu₀b
@@ -57,7 +100,9 @@ theorem lieFree : LieFreeSt Xo c := by
         fun j => algebraMap T.V T.Fr (tmap hxc (G.act.act a) cc j) := hM0
   have h1 := m1.cart
   have h2 : IsGrpPullback t'.G G.G (fB T.V T.Fr) m2.φ := m2.cart
-  choose vA hvA using fun e : Fin n → T.Fr => relA_exists_v x h1 h2 (tvec (x := x') e)
+  have hex : ∀ e : Fin n → T.Fr, ∃ v, RelA x m1.φ m2.φ v (tvec (x := x') e) :=
+    fun e => relA_exists_v x h1 h2 (tvec (x := x') e)
+  choose vA hvA using hex
   have coordA : ∀ w, IsTanAt x w → ∃ e : Fin n → T.Fr, (vA e).left = w := by
     intro w hw
     let v0 : epsAt x ⟶ Xo.univ.t.G := Over.homMk w hw.1

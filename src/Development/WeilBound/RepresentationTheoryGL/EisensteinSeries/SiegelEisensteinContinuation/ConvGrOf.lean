@@ -1,4 +1,54 @@
-import Development.WeilBound.RepresentationTheoryGL.EisensteinSeries.SiegelEisensteinContinuation.Descend
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.EisensteinSeries.SiegelEisensteinContinuation.StripEntire
+public import Mathlib.Analysis.Complex.Circle
+public import Mathlib.LinearAlgebra.UnitaryGroup
+public import Mathlib.Topology.Instances.Matrix
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -36,15 +86,17 @@ def stab (R : Type) [CommRing R] (s : Set ι) : Subgroup (GL ι R) where
     exact key _ _ (fun r hr c hc => (hb r hr c hc).2) fun r hr c hc => (ha r hr c hc).2
   inv_mem' := fun {a} ha r hr c hc => ⟨(ha r hr c hc).2, by rw [inv_inv]; exact (ha r hr c hc).1⟩
 
-open Classical in
 
+open Classical in
 def bdet (s : Set ι) (g : GL ι R) : Rˣ :=
-  if h : IsUnit ((g : Matrix ι ι R).submatrix (Subtype.val : s → ι) Subtype.val).det then h.unit else 1
+  by classical
+    exact if h : IsUnit ((g : Matrix ι ι R).submatrix (Subtype.val : s → ι) Subtype.val).det then h.unit else 1
+
 
 open Classical in
-
 def ext {G : Type} [Group G] (K P : Subgroup G) (f : G → ℝ) (g : G) : ℝ :=
-  if h : ∃ k : K, g * (k : G)⁻¹ ∈ P then f (g * (h.choose : G)⁻¹) else 0
+  by classical
+    exact if h : ∃ k : K, g * (k : G)⁻¹ ∈ P then f (g * (h.choose : G)⁻¹) else 0
 
 namespace Ad
 
@@ -191,9 +243,10 @@ def LeviS : Prop := ForAd fun {_} {R} _ _ _ _ A => ∀ (ι : Type) [Fintype ι] 
     (∀ s : Set ι, Iwa (A.uQ ε s ⊓ A.uQ ε Set.univ) (A.uK ε ι)) ∧
     ∀ s : Set ι, PullHt (A.uK ε ι) (A.uQ ε Set.univ) π (A.uH ε s) (A.htGL s)
 
-open Classical in
 
-def LeviQ : Prop := ForAd fun {_} {_} _ _ _ _ A => ∀ (ι : Type) [Fintype ι] [DecidableEq ι] (ε : ℤˣ) (s : Set ι),
+open Classical in
+def LeviQ : Prop := by classical
+  exact ForAd fun {_} {_} _ _ _ _ A => ∀ (ι : Type) [Fintype ι] [DecidableEq ι] (ε : ℤˣ) (s : Set ι),
   Iwa (A.uQ ε s ⊓ A.uQ ε Set.univ) (A.uK ε ι) →
   ∃ (π : A.uQ ε s →* A.U ε (sᶜ : Set ι)) (j : A.U ε (sᶜ : Set ι) →* A.uQ ε s) (c₀ : A.U ε ι → ℂ),
     IsLevi (A.uΓ ε ι) (A.uK ε ι) (A.uQ ε s) (A.uΓ ε _) (A.uK ε _) π j c₀ ∧

@@ -1,7 +1,52 @@
-import Mathlib
-import Formalism.ThetaLogCoordinates.UniformThetaSubstitution.StatementAB
-import Formalism.GrowthSums.FactorialBaseGrowth.PathBasisOfCount
-import Formalism.GrowthSums.FactorialBaseGrowth.QuadraticExponentIdentity
+module
+
+public import Formalism.ThetaLogCoordinates.UniformThetaSubstitution.StatementAB
+public import Formalism.GrowthSums.FactorialBaseGrowth.PathBasisOfCount
+public import Formalism.GrowthSums.FactorialBaseGrowth.QuadraticExponentIdentity
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.BigOperators.Field
+
+@[expose] public section
 
 noncomputable section
 
@@ -35,11 +80,11 @@ theorem digits_sum_le_lgN (p m : ℕ) (hp : 1 < p) :
 theorem factorialValuationLowerBound : FactorialLg := by
   intro p m hp
   have : Fact p.Prime := ⟨hp⟩
-  have h1 := sub_one_mul_padicValNat_factorial (p := p) m
+  have h1 := hp.sub_one_mul_multiplicity_factorial (n := m)
   have h2 := Nat.digit_sum_le p m
   have h3 := digits_sum_le_lgN p m hp.one_lt
   have h4 : m ≤ (p - 1) * (padicValNat p m.factorial + lgN p m) := by
-    rw [mul_add, h1]
+    rw [Nat.padicValNat_def, mul_add, h1]
     omega
   have hp1 : (0 : ℝ) < (p : ℝ) - 1 := by
     have : (1 : ℝ) < p := by exact_mod_cast hp.one_lt

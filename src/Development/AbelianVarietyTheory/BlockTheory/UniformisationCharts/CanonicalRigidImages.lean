@@ -1,6 +1,49 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ThickTransComp
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.AbelianSchemeQuotients.QSurjective
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ThickTransComp
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.AbelianSchemeQuotients.QSurjective
+public import Mathlib.Tactic.ENatToNat
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -59,8 +102,6 @@ def oε : Fin 4 → ℤ := ![1, -1, -1, 1]
 
 def oεinv : Fin 4 → ℤ := fun k => - oε k
 
-def oLB (χ : D.X) : LB (Be D I e).left := LB.LinComb D.P.L (oφ D I e (𝟙 _) χ) oε
-
 def cubAt {T : Over (Se R I e)} (a b d : up I e T ⟶ D.P.A) :=
   LB.pullGen (Z := T.left) D.P.L (thφ D.P.A (x3 D.P.A)) thε D.cub.t (lift a (lift b d)).left
 
@@ -115,34 +156,5 @@ structure GtIso (G : Over (Spec (CommRingCat.of R))) [GrpObj G] [IsCommMonObj G]
 
   i_char : ∀ χ : D.X, LB.Gen.Corr D.P.L _ _ _ _
     (LB.pullGen D.P.L _ _ (x χ) i.left) (unitGen D.P.L (charUnit (Se R I e) D.X χ))
-
-def IsCanonRig (χ : D.X) (r : LB.Gen ((oLB D I e χ).pull (eSec (Be D I e)))) : Prop :=
-  ∀ j : Fin 4 → D.P.L.ι, LB.Coh D.P.L (fun k => eSec (Be D I e) ≫ oφ D I e (𝟙 _) χ k) j →
-    r.s (fun _ => j) = 1
-
-def IsGtOfData (H : Over (Se R I e)) [GrpObj H] : Prop :=
-  ∃ (hB : IsAbelianScheme (Be D I e))
-    (r : ∀ χ, LB.Gen ((oLB D I e χ).pull (eSec (Be D I e))))
-    (hL : ∀ χ, (oLB D I e χ).IsLB) (hr : ∀ χ, (r χ).IsGen)
-    (hadd : ∀ χ χ' : D.X, ∃ t : LB.Iso (oLB D I e χ') (LB.div (oLB D I e (χ + χ')) (oLB D I e χ)),
-      t.IsGen)
-    (hzero : ∃ t : LB.Gen (oLB D I e 0), t.IsGen)
-    (hprim : ∀ χ : D.X, ∃ t : LB.Gen (abelian₂ (Be D I e) (oLB D I e χ)), t.IsGen),
-    (∀ χ, IsCanonRig D I e χ (r χ)) ∧
-    SplitExt.IsGt
-      ({ B := Be D I e, isAbelian := hB, X := D.X,
-         O := fun χ => ⟨oLB D I e χ, r χ, hL χ, hr χ⟩,
-         addIso := hadd, zeroTriv := hzero, primitive := hprim } : SplitExt (Se R I e)) H
-
-def NonemptyIffIsGt : Prop :=
-  ∀ (R : Type) [CommRing R] [IsDomain R] (D : DegPre R) (I : Ideal R) (e : ℕ)
-    (G : Over (Spec (CommRingCat.of R))) [GrpObj G] [IsCommMonObj G],
-    Nonempty (GtIso D I e G) ↔ IsGtOfData D I e (thickObj R I e G)
-
-example : ∑ k, oε k = 0 ∧ oεinv = ![-1, 1, 1, -1] := by decide
-
-example {T T' : Over (Se R I e)} (f : T' ⟶ T) (y : T ⟶ Be D I e) :
-    (down D I e (f ≫ y)).left = f.left ≫ (down D I e y).left := by
-  simp [down]
 
 end GlobalTheory.IndefiniteRowSideFullHecke.CanonicalRigidImages

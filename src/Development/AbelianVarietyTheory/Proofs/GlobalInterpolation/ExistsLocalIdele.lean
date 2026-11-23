@@ -1,9 +1,50 @@
-import Mathlib
-import Formalism.LocalToGlobal.KernelLattices.ThDistC
-import Development.AbelianVarietyTheory.BlockTheory.GlobalSignature.IndexExponentDegree
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.EmbHInjective
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ExistsSupportedIdele
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsFiniteAdeleBaseChangeEquiv
+module
+
+public import Formalism.LocalToGlobal.KernelLattices.ThDistC
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ExistsSupportedIdele
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsFiniteAdeleBaseChangeEquiv
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Formalism.L2.DIV Formalism.L2.Ker
 open TensorProduct Formalism.UG Formalism.UG.P
@@ -55,7 +96,7 @@ theorem val_le_of_mem (P : HeightOneSpectrum (𝓞 E)) (n : ℕ) (z : RInt F E)
   | zero =>
     rw [Subring.coe_zero, map_zero, afsplit_zero_apply, map_zero]; exact zero_le
   | add x y _ _ hx hy =>
-    rw [Subring.coe_add, map_add, afsplit_add_apply]
+    rw [Subring.coe_add, map_add (f := _), afsplit_add_apply]
     exact Valuation.map_add_le _ hx hy
   | smul a x _ hx =>
     rw [smul_eq_mul, Subring.coe_mul, map_mul, afsplit_mul_apply, map_mul]
@@ -100,8 +141,8 @@ theorem val_of_unif (P : HeightOneSpectrum (𝓞 E)) (y₀ : RInt F E) (b : 𝓞
     rw [map_one, ← WithZero.exp_zero, WithZero.exp_lt_exp]
     norm_num
 
-include h1 h2 in
 
+include h1 h2 in
 theorem exists_unif {K : Type} [Field K] (ξ : Chr F E K) (v : HeightOneSpectrum (𝓞 F)) (hξ : inertAt E v ≤ ξ.ker)
     (P : HeightOneSpectrum (𝓞 E)) (hP : P.asIdeal.under (𝓞 F) = v.asIdeal) :
     ∃ y ∈ Formalism.L2.DIV.suppAt E v, Valued.v (ι (y : AfE F E) P) = WithZero.exp (-1 : ℤ) ∧
@@ -123,7 +164,7 @@ theorem exists_unif {K : Type} [Field K] (ξ : Chr F E K) (v : HeightOneSpectrum
     · rw [hQ, hz.1, hv.1]
     · rw [hz.2 Q hQ, hv.2 Q hQ]
   unfold unifVal
-  rw [dif_pos hex]
+  rw [dite_eq_left hex]
   exact (hex.choose_spec v hP y y₀ b e1 hb hb2 e2 e3 e4).symm
 
 end

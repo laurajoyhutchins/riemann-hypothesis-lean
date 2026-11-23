@@ -1,4 +1,53 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.SelmerTransport.RestrictionMemInvariantH1
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.SelmerTransport.RestrictionMemInvariantH1
+public import Mathlib.RingTheory.Length
+public import Mathlib.Topology.Algebra.Module.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 noncomputable section
 
@@ -23,8 +72,8 @@ private theorem len_le_of_ker_le {R P A B : Type} [CommRing R] [AddCommGroup P] 
 variable {R G M : Type} [CommRing R] [Group G] [TopologicalSpace G] [IsTopologicalGroup G] [AddCommGroup M] [Module R M]
   [TopologicalSpace M] [IsTopologicalAddGroup M] [ContinuousConstSMul R M] [DiscreteTopology M]
 
-omit [IsTopologicalAddGroup M] [DiscreteTopology M] in
 
+omit [IsTopologicalAddGroup M] [DiscreteTopology M] in
 instance continuousConstSMul_sub (N : Submodule R M) : ContinuousConstSMul R N :=
   ⟨fun c => (continuous_subtype_val.const_smul c).subtype_mk _⟩
 
@@ -80,7 +129,7 @@ private theorem exists_ext (ρ : Representation R G M) (hρ : ContAction ρ) {U'
       rw [map_mul]
       apply mul_left_cancel (a := s)
       rw [← e1, ← mul_assoc, ← e0]
-    rw [ht, hcz, map_add, eg, map_mul, Module.End.mul_apply, add_assoc]
+    rw [ht, hcz, map_add (f := _), eg, map_mul, Module.End.mul_apply, add_assoc]
   have hL0 : ∀ (u : U') (g : U), y0 (Subgroup.inclusion h u * g) = z.1 u + ρ u (y0 g) := by
     intro u g
     obtain ⟨u', hu'⟩ := exists_inclusion_mul_eq_mul_inclusion_of_normal h u g
@@ -109,7 +158,7 @@ private theorem exists_ext (ρ : Representation R G M) (hρ : ContAction ρ) {U'
     have hcomm : ∀ x : M, ρ s (ρ (conjHom U' (s : G) u : G) x) = ρ u (ρ s x) := by
       intro x
       rw [← Module.End.mul_apply, ← map_mul, hsc, map_mul, Module.End.mul_apply]
-    rw [ht, hcz, map_add, hc, hcomm, map_add]
+    rw [ht, hcz, map_add (f := _), hc, hcomm, map_add (f := _)]
     abel
   have hc1 : ∀ u : U', ρ u (y0 1) = y0 1 := by
     intro u
@@ -152,8 +201,8 @@ private theorem exists_normal_conj_inclusion {K : Type} [Group K] {U' U : Subgro
   apply Subtype.ext
   simp [mul_assoc]
 
-omit [IsTopologicalGroup G] [DiscreteTopology M] in
 
+omit [IsTopologicalGroup G] [DiscreteTopology M] in
 private theorem exists_infl (ρ : Representation R G M) {U' U : Subgroup G} [U'.Normal] (h : U' ≤ U)
     [DiscreteTopology (U ⧸ U'.subgroupOf U)] (z : U' → M) (y : U → M)
     (hL : ∀ (u : U') (g : U), y (Subgroup.inclusion h u * g) = z u + ρ u (y g))
@@ -165,7 +214,7 @@ private theorem exists_infl (ρ : Representation R G M) {U' U : Subgroup G} [U'.
     intro a b u
     simp only [hF]
     rw [← mul_assoc, hR, hR]
-    simp only [map_add, Subgroup.coe_mul, map_mul, Module.End.mul_apply]
+    simp only [map_add (f := _), Subgroup.coe_mul, map_mul, Module.End.mul_apply]
     abel
   have hFl : ∀ (a b : U) (u : U'), F (a * Subgroup.inclusion h u) b = F a b := by
     intro a b u
@@ -188,7 +237,7 @@ private theorem exists_infl (ρ : Representation R G M) {U' U : Subgroup G} [U'.
       rw [hL]
       abel
     calc ρ u (F a b) = F (Subgroup.inclusion h u * a) b := by
-          simp only [hF, map_add, map_sub, e1, mul_assoc]
+          simp only [hF, map_add (f := _), map_sub, e1, mul_assoc]
           simp only [Subgroup.coe_mul, Subgroup.coe_inclusion, map_mul, Module.End.mul_apply]
           abel
       _ = F (a * Subgroup.inclusion h v) b := by rw [hv]
@@ -218,7 +267,7 @@ private theorem exists_infl (ρ : Representation R G M) {U' U : Subgroup G} [U'.
   show ρ a (W (QuotientGroup.mk b, QuotientGroup.mk c) : M) - (W (QuotientGroup.mk (a * b), QuotientGroup.mk c) : M)
     + (W (QuotientGroup.mk a, QuotientGroup.mk (b * c)) : M) - (W (QuotientGroup.mk a, QuotientGroup.mk b) : M) = 0
   rw [hW, hW, hW, hW]
-  simp only [hF, map_add, map_sub, Subgroup.coe_mul, map_mul, Module.End.mul_apply, mul_assoc]
+  simp only [hF, map_add (f := _), map_sub, Subgroup.coe_mul, map_mul, Module.End.mul_apply, mul_assoc]
   abel
 
 omit [IsTopologicalGroup G] [DiscreteTopology M] in
@@ -277,7 +326,7 @@ private theorem mem_range_resU (ρ : Representation R G M) {U' U : Subgroup G} (
   show y (Subgroup.inclusion h u) - c (Subgroup.inclusion h u) = z.1 u
   rw [hz u, hc1 u, hc0, sub_zero]
 
-set_option maxHeartbeats 800000 in
+
 
 theorem length_restriction_coker_le_H2 (ρ : Representation R G M) (hρ : ContAction ρ) {U' U : Subgroup G} [U'.Normal]
     (h : U' ≤ U) (ho : IsOpen (U'.subgroupOf U : Set U)) :
@@ -342,9 +391,9 @@ theorem length_restriction_coker_le_H2 (ρ : Representation R G M) (hρ : ContAc
     exact (Submodule.Quotient.mk_eq_zero _ (x := (⟨_, h1⟩ : invariantsUnderSubgroupH1 ρ U U'))).mpr hm
   exact len_le_of_ker_le f g hfs hker
 
+
 omit [TopologicalSpace G] [IsTopologicalGroup G] [TopologicalSpace M] [IsTopologicalAddGroup M]
   [ContinuousConstSMul R M] [DiscreteTopology M] in
-
 theorem length_H0_quotient_rep_le (ρ : Representation R G M) (U' U : Subgroup G) [(U'.subgroupOf U).Normal] :
     Module.length R (H0 (quotRep ρ U U')) ≤ Module.length R (H0U ρ U) := by
   refine Module.length_le_of_injective

@@ -1,9 +1,53 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.Coords
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.CechPairings.Imports
-import GroundTheory.ArithmeticGeometry.SchemeCohomology.CechSeparated
-import GroundTheory.ArithmeticGeometry.SchemeCohomology.AffineVanishing
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsIsoToBidualOfLocalFrames
+module
+
+public import GroundTheory.ArithmeticGeometry.SchemeCohomology.CechSeparated
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IsFrameOfForallExists
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.CapOComp
+import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.SubsingletonOfSheafPullback
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsIsoToBidualOfLocalFrames
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+
+@[expose] public section
 
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
@@ -53,20 +97,21 @@ def Compat (V : X.Opens) (s : ∀ α, κ α → Γ(X, V ⊓ U α)) : Prop :=
     ∑ k' : κ β, rs (show V ⊓ U α ⊓ U β ≤ U α ⊓ U β from inf_le_inf_right _ inf_le_right) (g α β k k') *
       rs (show V ⊓ U α ⊓ U β ≤ V ⊓ U β from inf_le_inf_right _ inf_le_left) (s β k')
 
-variable {U κ g} in
 
+variable {U κ g} in
 theorem Compat.on {V : X.Opens} {s : ∀ α, κ α → Γ(X, V ⊓ U α)} (hs : Compat U κ g V s) (α β : ι)
     (k : κ α) {T : X.Opens} (h₁ : T ≤ V ⊓ U α) (h₂ : T ≤ U α ⊓ U β) (h₃ : T ≤ V ⊓ U β) :
     rs h₁ (s α k) = ∑ k' : κ β, rs h₂ (g α β k k') * rs h₃ (s β k') := by
   have hT : T ≤ V ⊓ U α ⊓ U β := le_inf h₁ (h₂.trans inf_le_right)
   have := congrArg (rs hT) (hs α β k)
+
   simp only [map_sum, map_mul, rs_rs] at this
   exact this
 
 def secGroup (V : X.Opens) : AddSubgroup (∀ α, κ α → Γ(X, V ⊓ U α)) where
   carrier := {s | Compat U κ g V s}
   add_mem' := fun {s t} hs ht α β k => by
-    simp only [Pi.add_apply, map_add, hs α β k, ht α β k, mul_add, Finset.sum_add_distrib]
+    simp only [Pi.add_apply, map_add (f := _), hs α β k, ht α β k, mul_add, Finset.sum_add_distrib]
   zero_mem' := fun α β k => by
     simp only [Pi.zero_apply, map_zero, mul_zero, Finset.sum_const_zero]
   neg_mem' := fun {s} hs α β k => by
@@ -88,13 +133,13 @@ instance secGroupModule (V : X.Opens) : Module Γ(X, V) (secGroup U κ g V) wher
   smul_add a s t := Subtype.ext <| funext fun α => funext fun k => mul_add _ _ _
   add_smul a b s := Subtype.ext <| funext fun α => funext fun k => by
     change rs _ (a + b) * s.1 α k = rs _ a * s.1 α k + rs _ b * s.1 α k
-    rw [map_add, add_mul]
+    rw [map_add (f := _), add_mul]
   zero_smul s := Subtype.ext <| funext fun α => funext fun k => by
     change rs _ 0 * s.1 α k = 0
     rw [map_zero, zero_mul]
 
-variable {U κ g} in
 
+variable {U κ g} in
 theorem smul_val {V : X.Opens} (a : Γ(X, V)) (s : secGroup U κ g V) (α : ι) (k : κ α) :
     (a • s).1 α k = rs inf_le_left a * s.1 α k := rfl
 
@@ -150,6 +195,7 @@ theorem isSheaf_secPresheaf : (secPresheaf U κ g).IsSheaf := by
       rw [iSup_inf_eq, iSup_inf_eq]
     refine eq_of_cover (fun j => C j ⊓ U α ⊓ U β) (fun j => inf_le_inf_right _ (hC α j)) hle
       fun j => ?_
+
     simp only [map_sum, map_mul, rs_rs]
     have h1 := (sf' j).2.on α β k (T := C j ⊓ U α ⊓ U β) inf_le_left
       (inf_le_inf_right _ inf_le_right) (inf_le_inf_right _ inf_le_left)
@@ -205,6 +251,7 @@ def ofCoord (hg : IsCoc U κ g) {V : X.Opens} {β : ι} (h : V ≤ U β) (t : κ
     secGroup U κ g V :=
   ⟨fun α k => ∑ k', rs (le_inf inf_le_right (inf_le_left.trans h)) (g α β k k') * rs inf_le_left (t k'),
     fun α γ k => by
+
     simp only [map_sum, map_mul, rs_rs, Finset.mul_sum]
     have hT1 : V ⊓ U α ⊓ U γ ≤ U α ⊓ U γ := inf_le_inf_right _ inf_le_right
     have hT2 : V ⊓ U α ⊓ U γ ≤ U γ ⊓ U β := le_inf inf_le_right (inf_le_left.trans (inf_le_left.trans h))
@@ -222,6 +269,7 @@ theorem ofCoord_val (hg : IsCoc U κ g) {V : X.Opens} {β : ι} (h : V ≤ U β)
 theorem coord_ofCoord' (hg : IsCoc U κ g) {V : X.Opens} {α β : ι} (hα : V ≤ U α) (hβ : V ≤ U β)
     (t : κ β → Γ(X, V)) (k : κ α) :
     coord hα (ofCoord hg hβ t) k = ∑ k', rs (le_inf hα hβ) (g α β k k') * t k' := by
+
   simp only [coord_apply, ofCoord_val, map_sum, map_mul, rs_rs, rs_self]
 
 theorem coord_ofCoord (hg : IsCoc U κ g) {V : X.Opens} {β : ι} (h : V ≤ U β) (t : κ β → Γ(X, V)) :
@@ -263,8 +311,8 @@ section Frames
 variable {X : Scheme.{0}} {ι : Type} {U : ι → X.Opens} {κ : ι → Type} [∀ α, Fintype (κ α)]
   {g : ∀ α β, κ α → κ β → Γ(X, U α ⊓ U β)}
 
-open Classical in
 
+open Classical in
 def frame (hg : IsCoc U κ g) (β : ι) (k : κ β) : Γ(toMod U κ g, U β) :=
   show secGroup U κ g (U β) from ofCoord hg le_rfl (Pi.single k 1)
 
@@ -311,8 +359,8 @@ theorem mul_g_tuple {n : ℕ} (a b c : Fin (n + 1)) (i : Fin (n + 1) → ι) (k 
     Finset.sum_ite_eq', Finset.mem_univ, if_true] at h1
   exact h1
 
-open Classical in
 
+open Classical in
 theorem g_self_tuple {n : ℕ} (a : Fin (n + 1)) (i : Fin (n + 1) → ι) (k m : V.κ (i a)) :
     rs (le_inf (capO_le U i a) (capO_le U i a)) (V.g (i a) (i a) k m) = if k = m then 1 else 0 := by
   classical
@@ -346,6 +394,7 @@ theorem isCoc : IsCoc U V.κ V.g := by
       · exact h₂.trans inf_le_right
     have e (m : V.κ γ) : ∑ k', rs h₁ (V.g α β k k') * rs h₂ (V.g β γ k' m) = rs h₃ (V.g α γ k m) := by
       have := congrArg (rs hT) (mul_g_tuple V (0 : Fin 3) 1 2 i k m)
+
       simp only [map_sum, map_mul, rs_rs] at this
       exact this
     simp only [← e, Finset.mul_sum, Finset.sum_mul]
@@ -380,6 +429,7 @@ def secOf (n : ℕ) (x : K.X n) (i : Fin (n + 1) → ι) :
 theorem coord_secOf (n : ℕ) (x : K.X n) (i : Fin (n + 1) → ι) (a : Fin (n + 1)) (k : V.κ (i a)) :
     coord (inter_le' i a) (secOf V n x i) k = rs (inter_le_capO i) (V.e n a x i k) := by
   rw [secOf, coord_ofCoord', V.e_chg n a 0 x i k]
+
   simp only [map_sum, map_mul, rs_rs]
 
 def cochainEquiv (n : ℕ) : K.X n ≃+ Cochain (modulesAb (toMod U V.κ V.g)).obj U n where
@@ -400,7 +450,7 @@ def cochainEquiv (n : ℕ) : K.X n ≃+ Cochain (modulesAb (toMod U V.κ V.g)).o
     funext i
     refine sec_ext_coord (isCoc V) (inter_le' i 0) fun k => ?_
     change _ = coord (inter_le' i 0) (secOf V n x i + secOf V n y i) k
-    rw [map_add, Pi.add_apply, coord_secOf, coord_secOf, coord_secOf, map_add, Pi.add_apply,
+    rw [map_add (f := _), Pi.add_apply, coord_secOf, coord_secOf, coord_secOf, map_add (f := _), Pi.add_apply,
       Pi.add_apply, map_add]
 
 theorem cochainEquiv_δ (n : ℕ) (j : Fin (n + 2)) (x : K.X n) (i : Fin (n + 2) → ι) :
@@ -419,6 +469,7 @@ theorem cochainEquiv_δ (n : ℕ) (j : Fin (n + 2)) (x : K.X n) (i : Fin (n + 2)
 theorem cochainEquiv_d (n : ℕ) (x : K.X n) :
     cochainEquiv V (n + 1) (K.d n x) = d (modulesAb (toMod U V.κ V.g)).obj U n (cochainEquiv V n x) := by
   funext i
+
   rw [d_apply, Cos.d_apply, map_sum, Finset.sum_apply]
   refine Finset.sum_congr rfl fun j _ => ?_
   rw [map_zsmul, Pi.smul_apply, cochainEquiv_δ]
@@ -484,10 +535,6 @@ theorem rs_toY {A B : X.Opens} {T T' : W.toScheme.Opens} (h : W.ι ''ᵁ T ≤ A
     rs hT (toY W h x) = toY W h' (rs hAB x) :=
   (rs_rs h (W.ι.image_mono hT) x).trans (rs_rs hAB h' x).symm
 
-theorem toY_toY {A B : X.Opens} {T : W.toScheme.Opens} (hAB : B ≤ A) (h' : W.ι ''ᵁ T ≤ B)
-    (h : W.ι ''ᵁ T ≤ A) (x : Γ(X, A)) : toY W h' (rs hAB x) = toY W h x :=
-  rs_rs hAB h' x
-
 theorem image_preimage_of_le {A : X.Opens} (h : A ≤ W) : W.ι ''ᵁ (W.ι ⁻¹ᵁ A) = A := by
   rw [Scheme.Hom.image_preimage_eq_opensRange_inf, Scheme.Opens.opensRange_ι, inf_eq_right.2 h]
 
@@ -538,7 +585,7 @@ def restrictVB (hUW : ∀ α, U α ≤ W) (V : VB str U K) :
         exact toY_ofY W _ _ _
       map_add' := fun x y => by
         funext i k
-        simp only [map_add, Pi.add_apply] }
+        simp only [map_add (f := _), Pi.add_apply] }
   e_smul n a c x i k := by
     change toY W _ (V.e n a (c • x) i k) = _ * toY W _ (V.e n a x i k)
     rw [V.e_smul, map_mul, toY_str W (image_capO W hUW i)]
@@ -548,6 +595,7 @@ def restrictVB (hUW : ∀ α, U α ≤ W) (V : VB str U K) :
     rw [V.e_δ, rs_toY W _ _ (capO_comp U i b.succAbove) (image_capO W hUW i).le]
   e_chg n a b x i k := by
     change toY W _ (V.e n a x i k) = ∑ k', rs _ (toY W _ (V.g (i a) (i b) k k')) * toY W _ (V.e n b x i k')
+
     rw [V.e_chg n a b x i k, map_sum]
     refine Finset.sum_congr rfl fun k' _ => ?_
     rw [map_mul, rs_toY W _ _ (le_inf (capO_le U i a) (capO_le U i b)) (image_capO W hUW i).le]

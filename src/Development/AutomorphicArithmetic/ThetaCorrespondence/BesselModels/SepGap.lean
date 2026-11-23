@@ -1,13 +1,56 @@
-import Mathlib
-import Development.AutomorphicArithmetic.ThetaCorrespondence.BesselModels.BurGapOfHyp
-import Development.AutomorphicArithmetic.ThetaCorrespondence.BesselModels.GapArith
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.SeparationLineOfBessel
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IsBesselFrameOfBesselDatumRealPlaceStatement
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.StandardCharTraceSingleRealPlaceStatement
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.BesselCharacterRealPlaceUnipotentEqTraceStatement
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.TopLineFromSeparation
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.FactorisationFromTopLine
+module
+
+public import Development.AutomorphicArithmetic.ThetaCorrespondence.BesselModels.BurGapOfHyp
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.ParRowZero
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.BesselCharacterRealPlaceUnipotentEqTraceStatement
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.FactorisationFromTopLine
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IsBesselFrameOfBesselDatumRealPlaceStatement
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.SeparationLineOfBessel
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.StandardCharTraceSingleRealPlaceStatement
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.TopLineFromSeparation
+public import Development.AutomorphicArithmetic.ThetaCorrespondence.BesselModels.GapArith
+public import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.LiftsCart
 import Formalism.LocalToGlobal.IndefiniteReal.LevelTypeEquivalence.InfFam
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 noncomputable section
 
@@ -116,8 +159,9 @@ theorem besselDatum_middleVector_norm_eq {A B : HSp D} {c : ℕ} {ε : D.host.E}
   rw [h2] at h1
   refine Eq.trans ?_ (congrArg (tauE D τ) h1)
   show star _ ⬝ᵥ _ = _
+
   simp only [dotProduct, mulVec, gramAt, Matrix.mul_apply, Formalism.UG.cT, transpose_apply, map_apply, map_sum, map_mul,
-    Pi.star_apply, HermitianOrthogonalExtensionData.besDat, Finset.mul_sum, Finset.sum_mul]
+  Pi.star_apply, HermitianOrthogonalExtensionData.besDat, Finset.mul_sum, Finset.sum_mul]
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
   rw [show (D.sp.cm.sig : D.host.E →+* D.host.E) (d.a j ⟨ρ, by omega⟩) = star (d.a j ⟨ρ, by omega⟩) from rfl,
@@ -166,7 +210,7 @@ theorem lastVertex_besselDatum_isFrame_isGeneric {D : D7} {T : Type} {L : LevCh 
     rw [h4, GlobalTheory.T.standardChar_trace_single_realPlace D W.ψ W.ψ_std W.θ W.θ_is τ t h1 h2, h3, Finset.mul_sum]
     simp only [mul_assoc]
 
-set_option maxHeartbeats 1600000 in
+
 
 theorem topLine_gap (hB : BurGapPos) (hCT : CoefTensor) (hTS : TopSep) :
     All fun {D} _ _ _ {G} W M => ∀ (S : D.what₂.Tau → SPar) (MB : DSModel (G.V (.grid D.R.m 0)) S), HasGap MB →

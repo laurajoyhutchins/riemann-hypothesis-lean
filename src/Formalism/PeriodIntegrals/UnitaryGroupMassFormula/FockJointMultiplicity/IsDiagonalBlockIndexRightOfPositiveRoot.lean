@@ -1,6 +1,55 @@
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.FockJointMultiplicity.ExistHW
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.FockJointMultiplicity.ExistWt
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.FockJointMultiplicity.ExistPad
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.FockJointMultiplicity.JointMultOfSteps
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.FockJointMultiplicity.ExistHW
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.FockJointMultiplicity.ExistPad
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.FockJointMultiplicity.ExistWt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open MvPolynomial FockH1Action PI.FJM
 
@@ -53,31 +102,33 @@ theorem monomialRightWeight_eq_weight_sub (m : Ln p q r s →₀ ℕ) (y : Ix r 
   · simp
 
 theorem leftAction_diagonal_of (hW : FormWt1) (P : Pol p q r s) (x : Ix p q) (W : ℤ)
-    (h : ∀ m, coeff m P ≠ 0 → wt1 m x = W) :
+    (h : ∀ m, AddMonoidAlgebra.coeff P m ≠ 0 → wt1 m x = W) :
     fockAct1 p q r s (Eab x x) P = ((((W : ℚ) + sh1 p q r s x : ℚ)) : ℂ) • P := by
   conv_lhs => rw [P.as_sum]
   conv_rhs => rw [P.as_sum]
+
   rw [map_sum, Finset.smul_sum]
   apply Finset.sum_congr rfl
   intro m hm
-  have e : monomial m (coeff m P) = coeff m P • monomial m (1 : ℂ) := by
+  have e : monomial m (AddMonoidAlgebra.coeff P m) = AddMonoidAlgebra.coeff P m • monomial m (1 : ℂ) := by
     rw [smul_monomial, smul_eq_mul, mul_one]
   rw [e, map_smul, hW, h m (mem_support_iff.1 hm), smul_comm]
 
 theorem rightAction_diagonal_of (hW : FormWt2) (P : Pol p q r s) (y : Ix r s) (W : ℤ)
-    (h : ∀ m, coeff m P ≠ 0 → wt2 m y = W) :
+    (h : ∀ m, AddMonoidAlgebra.coeff P m ≠ 0 → wt2 m y = W) :
     fockAct2 p q r s (Eab y y) P = ((((W : ℚ) + sh2 p q r s y : ℚ)) : ℂ) • P := by
   conv_lhs => rw [P.as_sum]
   conv_rhs => rw [P.as_sum]
+
   rw [map_sum, Finset.smul_sum]
   apply Finset.sum_congr rfl
   intro m hm
-  have e : monomial m (coeff m P) = coeff m P • monomial m (1 : ℂ) := by
+  have e : monomial m (AddMonoidAlgebra.coeff P m) = AddMonoidAlgebra.coeff P m • monomial m (1 : ℂ) := by
     rw [smul_monomial, smul_eq_mul, mul_one]
   rw [e, map_smul, hW, h m (mem_support_iff.1 hm), smul_comm]
 
 theorem mem_wtSub1 (hW : FormWt1) (P : Pol p q r s) (μ : Ix p q → ℚ)
-    (h : ∀ x, ∃ W : ℤ, (W : ℚ) + sh1 p q r s x = μ x ∧ ∀ m, coeff m P ≠ 0 → wt1 m x = W) :
+    (h : ∀ x, ∃ W : ℤ, (W : ℚ) + sh1 p q r s x = μ x ∧ ∀ m, AddMonoidAlgebra.coeff P m ≠ 0 → wt1 m x = W) :
     P ∈ wtSub (fockAct1 p q r s) μ := by
   simp only [wtSub, Submodule.mem_iInf, LinearMap.mem_ker]
   intro x
@@ -86,7 +137,7 @@ theorem mem_wtSub1 (hW : FormWt1) (P : Pol p q r s) (μ : Ix p q → ℚ)
   simp
 
 theorem mem_wtSub2 (hW : FormWt2) (P : Pol p q r s) (μ : Ix r s → ℚ)
-    (h : ∀ y, ∃ W : ℤ, (W : ℚ) + sh2 p q r s y = μ y ∧ ∀ m, coeff m P ≠ 0 → wt2 m y = W) :
+    (h : ∀ y, ∃ W : ℤ, (W : ℚ) + sh2 p q r s y = μ y ∧ ∀ m, AddMonoidAlgebra.coeff P m ≠ 0 → wt2 m y = W) :
     P ∈ wtSub (fockAct2 p q r s) μ := by
   simp only [wtSub, Submodule.mem_iInf, LinearMap.mem_ker]
   intro y
@@ -118,7 +169,7 @@ theorem hwVec_hom (w : Ln p q r s → ℕ) (a b c d : List ℤ) (d1 d2 d3 d4 : �
 
 theorem wtVec1 (a b c d : List ℤ) (hd : ShapeData p q r s a b c d) (x : Ix p q) :
     ∃ W : ℤ, (W : ℚ) + sh1 p q r s x = wtOf1 p q r s a b c d x ∧
-      ∀ m, coeff m (hwVec p q r s a b c d) ≠ 0 → wt1 m x = W := by
+      ∀ m, AddMonoidAlgebra.coeff (hwVec p q r s a b c d) m ≠ 0 → wt1 m x = W := by
   obtain ⟨ha, hc, hb, hdd, hpa, hpb, hpc, hpd, h1, h2, h3, h4⟩ := hd
   cases x with
   | inl i₀ =>
@@ -166,7 +217,7 @@ theorem wtVec1 (a b c d : List ℤ) (hd : ShapeData p q r s a b c d) (x : Ix p q
 
 theorem wtVec2 (a b c d : List ℤ) (hd : ShapeData p q r s a b c d) (y : Ix r s) :
     ∃ W : ℤ, (W : ℚ) + sh2 p q r s y = wtOf2 p q r s a b c d y ∧
-      ∀ m, coeff m (hwVec p q r s a b c d) ≠ 0 → wt2 m y = W := by
+      ∀ m, AddMonoidAlgebra.coeff (hwVec p q r s a b c d) m ≠ 0 → wt2 m y = W := by
   obtain ⟨ha, hc, hb, hdd, hpa, hpb, hpc, hpd, h1, h2, h3, h4⟩ := hd
   cases y with
   | inl k₀ =>

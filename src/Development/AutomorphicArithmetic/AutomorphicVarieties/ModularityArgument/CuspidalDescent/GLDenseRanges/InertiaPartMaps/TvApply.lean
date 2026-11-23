@@ -1,4 +1,53 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.CuspidalDescent.GLDenseRanges.KirCusp
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.CuspidalDescent.GLDenseRanges.KirCusp
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.NonemptyEquivOfRangeEq
+import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.BaseChangeDefiniteUnitary
+
+@[expose] public section
 
 noncomputable section
 
@@ -232,7 +281,7 @@ private theorem rowStep {W : Type} [AddCommGroup W] [Module ℂ W] (τ : Represe
   rw [hyv] at eq4
   exact eq4
 
-set_option synthInstance.maxHeartbeats 200000 in
+
 private theorem exists_mem_Kc_rows_unitriangular (p : GL (Fin n) k) (i : Fin n)
     (hp : ∀ a, i < a → (∀ j, j < a → (p : Matrix (Fin n) (Fin n) k) a j = 0) ∧ (p : Matrix (Fin n) (Fin n) k) a a = 1)
     (hd : ∀ j, j ≤ i → valuation k ((p : Matrix (Fin n) (Fin n) k) i j - (1 : Matrix (Fin n) (Fin n) k) i j) < 1) :
@@ -258,7 +307,7 @@ private theorem exists_mem_Kc_rows_unitriangular (p : GL (Fin n) k) (i : Fin n)
   let y₀ : Fin n → 𝒪[k] := Pi.single i 1
   have hdot : d₀ ⬝ᵥ y₀ = d₀ i := by simp [y₀]
   have hu : IsUnit (1 + d₀ ⬝ᵥ y₀) := by
-    rw [hdot, hI.isUnit_iff_valuation_eq_one, map_add, map_one]
+    rw [hdot, hI.isUnit_iff_valuation_eq_one, map_add (f := _), map_one]
     exact Valuation.map_one_add_of_lt _ (hdv i)
   obtain ⟨u, hu'⟩ := hu
   have hc : ((u⁻¹ : (𝒪[k])ˣ) : 𝒪[k]) * (1 + d₀ ⬝ᵥ y₀) = 1 := by rw [← hu']; exact u.inv_mul
@@ -267,7 +316,7 @@ private theorem exists_mem_Kc_rows_unitriangular (p : GL (Fin n) k) (i : Fin n)
   have hM : ∀ a b, (M : Matrix (Fin n) (Fin n) k) a b =
       (1 : Matrix (Fin n) (Fin n) k) a b + (Pi.single i (1 : k) : Fin n → k) a * d b := by
     intro a b
-    simp only [M, GeneralLinearGroup.map_apply, M₀, tv_apply, map_add, map_mul]
+    simp only [M, GeneralLinearGroup.map_apply, M₀, tv_apply, map_add (f := _), map_mul]
     congr 1
     · simp [Matrix.one_apply]
     · congr 1
@@ -278,7 +327,7 @@ private theorem exists_mem_Kc_rows_unitriangular (p : GL (Fin n) k) (i : Fin n)
     rw [SetLike.mem_coe, MonoidHom.mem_ker]
     apply GeneralLinearGroup.ext
     intro a b
-    rw [GeneralLinearGroup.map_apply, tv_apply, map_add]
+    rw [GeneralLinearGroup.map_apply, tv_apply, map_add (f := _)]
     have hz : Ideal.Quotient.mk (𝓂[k] ^ 1) (y₀ a * d₀ b) = 0 := by
       rw [Ideal.Quotient.eq_zero_iff_mem, pow_one]
       exact Ideal.mul_mem_left _ _ (hmax _ (hdv b))

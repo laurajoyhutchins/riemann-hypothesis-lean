@@ -1,4 +1,54 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.MvPolynomial.PDeriv
+public import Mathlib.Basic.Complex.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.Order.BigOperators.GroupWithZero.Finset
+public import Mathlib.Algebra.Star.BigOperators
+
+@[expose] public section
 
 namespace GroundTheory.Automorphic.HarishChandra
 
@@ -27,19 +77,19 @@ theorem mfact_add_single [DecidableEq σ] (s : σ →₀ ℕ) (a : σ) :
   ring
 
 noncomputable def fischer (f g : MvPolynomial σ ℂ) : ℂ :=
-  ∑ m ∈ g.support, (mfact m : ℂ) * star (coeff m f) * coeff m g
+  ∑ m ∈ g.support, (mfact m : ℂ) * star (AddMonoidAlgebra.coeff f m) * AddMonoidAlgebra.coeff g m
 
 theorem fischer_eq_sum (f g : MvPolynomial σ ℂ) (s : Finset (σ →₀ ℕ)) (hg : g.support ⊆ s) :
-    fischer f g = ∑ m ∈ s, (mfact m : ℂ) * star (coeff m f) * coeff m g :=
+    fischer f g = ∑ m ∈ s, (mfact m : ℂ) * star (AddMonoidAlgebra.coeff f m) * AddMonoidAlgebra.coeff g m :=
   Finset.sum_subset hg fun m _ hm => by simp [MvPolynomial.notMem_support_iff.1 hm]
 
 theorem fischer_add_left (f f' g : MvPolynomial σ ℂ) :
     fischer (f + f') g = fischer f g + fischer f' g := by
-  simp only [fischer, coeff_add, star_add, mul_add, add_mul, Finset.sum_add_distrib]
+  simp only [fischer, MvPolynomial.coeff_add, star_add, mul_add, add_mul, Finset.sum_add_distrib]
 
 theorem fischer_smul_left (c : ℂ) (f g : MvPolynomial σ ℂ) :
     fischer (c • f) g = star c * fischer f g := by
-  simp only [fischer, coeff_smul, smul_eq_mul, star_mul', Finset.mul_sum]
+  simp only [fischer, MvPolynomial.coeff_smul, smul_eq_mul, star_mul', Finset.mul_sum]
   exact Finset.sum_congr rfl fun _ _ => by ring
 
 theorem fischer_add_right (f g g' : MvPolynomial σ ℂ) :
@@ -48,12 +98,12 @@ theorem fischer_add_right (f g g' : MvPolynomial σ ℂ) :
   set s := g.support ∪ g'.support
   rw [fischer_eq_sum f (g + g') s (MvPolynomial.support_add),
     fischer_eq_sum f g s Finset.subset_union_left, fischer_eq_sum f g' s Finset.subset_union_right]
-  simp only [coeff_add, mul_add, Finset.sum_add_distrib]
+  simp only [MvPolynomial.coeff_add, mul_add, Finset.sum_add_distrib]
 
 theorem fischer_smul_right (c : ℂ) (f g : MvPolynomial σ ℂ) :
     fischer f (c • g) = c * fischer f g := by
   rw [fischer_eq_sum f (c • g) g.support (MvPolynomial.support_smul), fischer, Finset.mul_sum]
-  simp only [coeff_smul, smul_eq_mul]
+  simp only [MvPolynomial.coeff_smul, smul_eq_mul]
   exact Finset.sum_congr rfl fun _ _ => by ring
 
 @[simp] theorem fischer_zero_left (g : MvPolynomial σ ℂ) : fischer 0 g = 0 := by simp [fischer]
@@ -97,7 +147,7 @@ theorem fischer_X_mul (a : σ) (f g : MvPolynomial σ ℂ) :
   | add p q hp hq => rw [mul_add, fischer_add_left, fischer_add_left, hp, hq]
   | monomial s c =>
     induction g using MvPolynomial.induction_on' with
-    | add p q hp hq => rw [fischer_add_right, map_add, fischer_add_right, hp, hq]
+    | add p q hp hq => rw [fischer_add_right, map_add (f := _), fischer_add_right, hp, hq]
     | monomial t d =>
       rw [X, monomial_mul, one_mul, pderiv_monomial, fischer_monomial, fischer_monomial]
       by_cases ht : t a = 0
@@ -132,7 +182,7 @@ theorem fischer_pderiv (a : σ) (f g : MvPolynomial σ ℂ) :
   rw [← fischer_conj_symm, ← fischer_X_mul, fischer_conj_symm]
 
 theorem fischer_self (f : MvPolynomial σ ℂ) :
-    fischer f f = ((∑ m ∈ f.support, (mfact m : ℝ) * Complex.normSq (coeff m f) : ℝ) : ℂ) := by
+    fischer f f = ((∑ m ∈ f.support, (mfact m : ℝ) * Complex.normSq (AddMonoidAlgebra.coeff f m) : ℝ) : ℂ) := by
   rw [fischer]
   push_cast
   refine Finset.sum_congr rfl fun m _ => ?_
@@ -141,7 +191,7 @@ theorem fischer_self (f : MvPolynomial σ ℂ) :
 theorem fischer_self_eq_zero_iff (f : MvPolynomial σ ℂ) : fischer f f = 0 ↔ f = 0 := by
   refine ⟨fun h => ?_, fun h => by simp [h]⟩
   rw [fischer_self, Complex.ofReal_eq_zero] at h
-  have hnn : ∀ m ∈ f.support, 0 ≤ (mfact m : ℝ) * Complex.normSq (coeff m f) :=
+  have hnn : ∀ m ∈ f.support, 0 ≤ (mfact m : ℝ) * Complex.normSq (AddMonoidAlgebra.coeff f m) :=
     fun m _ => mul_nonneg (Nat.cast_nonneg _) (Complex.normSq_nonneg _)
   have hz := (Finset.sum_eq_zero_iff_of_nonneg hnn).1 h
   ext m

@@ -1,9 +1,53 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.GlobalClassFormation.IdeleLimits
+module
+
+public import GroundTheory.ProfiniteCohomology.GlobalClassFormation.IdeleLimits
+public import GroundTheory.ProfiniteCohomology.LocalClassFormation.CupSymbolReal
+public import GroundTheory.ProfiniteCohomology.LocalClassFormation.CupSymbolSep
+import GroundTheory.GlobalFields.CompletionAtPlace.Integers
+import GroundTheory.GlobalFields.CyclotomicCharacters.Character
 import GroundTheory.ProfiniteCohomology.GlobalClassFormation.LocalLimits.InfRange
-import GroundTheory.ProfiniteCohomology.LocalClassFormation.CupSymbolReal
-import GroundTheory.ProfiniteCohomology.LocalClassFormation.CupSymbolSep
-import GroundTheory.GlobalFields.InfiniteNormIndex.LocalSymbol
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
@@ -11,8 +55,6 @@ namespace GroundTheory.ProfCoh
 open NumberField GroundTheory.Global FiniteSubfield IsDedekindDomain
 
 open scoped NumberField.LiesOver DirectSum
-
-local notation "ℚ̄" => AlgebraicClosure ℚ
 
 noncomputable section
 
@@ -24,7 +66,7 @@ variable (v : InfinitePlace K.1)
 
 theorem exists_infCompletion_algEquiv : ∃ (F : FiniteSubfield) (_ : Fact (K ≤ F)) (w : v.placesOver F.1),
     Nonempty ((w : InfinitePlace F.1).Completion ≃ₐ[v.Completion] AlgebraicClosure v.Completion) := by
-  obtain ⟨ι⟩ : Nonempty (ℚ̄ →ₐ[K.1] AlgebraicClosure v.Completion) := nonempty_algHom_of_isSepClosed
+  obtain ⟨ι⟩ : Nonempty (AlgebraicClosure ℚ →ₐ[K.1] AlgebraicClosure v.Completion) := nonempty_algHom_of_isSepClosed
   obtain ⟨p, hp⟩ := exists_level_infCompletionEmbedding_surjective ι
   exact ⟨p.1, inferInstance, infPlaceOfEmbedding ι p.1, ⟨AlgEquiv.ofBijective (infCompletionEmbedding ι p.1)
     ⟨(infCompletionEmbedding ι p.1).toRingHom.injective, hp p le_rfl⟩⟩⟩
@@ -108,13 +150,13 @@ theorem placeInv_bijective_inr (v : HeightOneSpectrum (𝓞 K.1)) :
     Function.Bijective (placeInv (K := K) (.inr v)) :=
   brauerInvZOfIsSepClosure_bijective (v.adicCompletion K.1) (AlgebraicClosure (v.adicCompletion K.1))
 
-variable (K) in
 
+variable (K) in
 def sumPlaceInv : (⨁ v : Place K.1, localGaloisCohomology K 2 v) →+ QZ :=
   by classical exact DirectSum.toAddMonoid fun v => placeInv v
 
-open Classical in
 
+open Classical in
 theorem sumPlaceInv_of (v : Place K.1) (t : localGaloisCohomology K 2 v) :
     sumPlaceInv K (DirectSum.of _ v t) = placeInv v t := by
   unfold sumPlaceInv

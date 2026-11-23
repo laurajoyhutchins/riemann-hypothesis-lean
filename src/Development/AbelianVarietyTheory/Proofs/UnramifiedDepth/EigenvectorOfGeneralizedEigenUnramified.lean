@@ -1,5 +1,56 @@
-import Mathlib
-import Formalism.LocalToGlobal.CharacterGerms.GeNatCast
+module
+
+public import Formalism.LocalToGlobal.CharacterGerms.GeNatCast
+public import Mathlib.Data.Matrix.Mul
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.Order.Archimedean.Defs
+public import Mathlib.Algebra.Polynomial.Identities
+public import Mathlib.Algebra.Ring.GeomSum
+public import Mathlib.RingTheory.TensorProduct.Basic
+public import Mathlib.RingTheory.TensorProduct.Maps
+
+@[expose] public section
 
 open scoped BigOperators TensorProduct
 open Formalism.L2.FormalSeriesBounds
@@ -42,7 +93,7 @@ theorem step {O B : Type*} [CommRing O] [CommRing B] (a p : O →+* B) (J : Idea
     · intro b hb
       apply hreg (4 * y)
       have : p (1 + l * (4 * y)) * b = (2 * p ε - 1) * ((2 * p ε - 1) * b) := by
-        simp only [map_add, map_mul, map_one, map_natCast, map_ofNat]
+        simp only [map_add (f := _), map_mul, map_one, map_natCast, map_ofNat]
         linear_combination (-4 * b) * hp
       rw [this]
       exact J.mul_mem_left _ hb
@@ -76,7 +127,7 @@ theorem step {O B : Type*} [CommRing O] [CommRing B] (a p : O →+* B) (J : Idea
     apply hreg (-((l : O) ^ d' * x ^ (l ^ (d' + 1) - 1)))
     have : p (1 + l * (-((l : O) ^ d' * x ^ (l ^ (d' + 1) - 1)))) * b =
         -((((l ^ (d' + 1) : ℕ) : B) * p x ^ (l ^ (d' + 1) - 1) - 1) * b) := by
-      simp only [map_add, map_mul, map_one, map_natCast, map_neg, map_pow, Nat.cast_pow]
+      simp only [map_add (f := _), map_mul, map_one, map_natCast, map_neg, map_pow, Nat.cast_pow]
       ring
     rw [this]
     exact J.neg_mem hb
@@ -131,7 +182,7 @@ def levelIdeal {κ : Type} [Fintype κ] [DecidableEq κ] {B : Type} [CommRing B]
   carrier := {b | ∀ i, V.Ge m ((Φ b).mulVec w i)}
   add_mem' := by
     intro a b ha hb i
-    rw [map_add, Matrix.add_mulVec]
+    rw [map_add (f := _), Matrix.add_mulVec]
     exact (ha i).add (hb i)
   zero_mem' := by
     intro i
@@ -164,7 +215,7 @@ theorem eigen_of_gen_eigen (C : Type) [Field C] (V : VF C) (O : Type) [CommRing 
     induction b using TensorProduct.induction_on with
     | zero => intro i j; rw [map_zero]; exact VF.Ge.zero 0
     | tmul x y => intro i j; rw [hΦt]; exact (hψ y).mul_int (hL x i j)
-    | add a b ha hb => intro i j; rw [map_add]; exact (ha i j).add (hb i j)
+    | add a b ha hb => intro i j; rw [map_add (f := _)]; exact (ha i j).add (hb i j)
   let a : O →+* O ⊗[ℤ] O := Algebra.TensorProduct.includeLeftRingHom
   let p : O →+* O ⊗[ℤ] O := (Algebra.TensorProduct.includeRight : O →ₐ[ℤ] O ⊗[ℤ] O).toRingHom
   have ha : ∀ x, Φ (a x) = L x := fun x => by

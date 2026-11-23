@@ -1,6 +1,49 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.GaloisModules.Discrete
-import GroundTheory.ProfiniteCohomology.GaloisModules.FixedField
+module
+
+public import GroundTheory.ProfiniteCohomology.GaloisModules.CoeGalRootsOfUnityHomApply
+public import Mathlib.RepresentationTheory.Homological.GroupCohomology.LowDegree
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
@@ -11,14 +54,6 @@ section General
 
 variable {G M : Type} [Group G] [CommGroup M] (φ : G →* Monoid.End M)
 
-theorem d₁₂_intRepOfMonoidEnd (f : G → Additive M) :
-    (d₁₂ (Rep.of (intRepOfMonoidEnd.{0} φ))).hom f = (d₁₂ (Rep.of (zRepOfMonoidEnd φ))).hom f :=
-  rfl
-
-theorem d₂₃_intRepOfMonoidEnd (f : G × G → Additive M) :
-    (d₂₃ (Rep.of (intRepOfMonoidEnd.{0} φ))).hom f = (d₂₃ (Rep.of (zRepOfMonoidEnd φ))).hom f :=
-  rfl
-
 def cocycles₂IntRepAddEquiv :
     cocycles₂ (Rep.of (intRepOfMonoidEnd.{0} φ)) ≃+ cocycles₂ (Rep.of (zRepOfMonoidEnd φ)) where
   toFun x := ⟨x.1, x.2⟩
@@ -26,11 +61,6 @@ def cocycles₂IntRepAddEquiv :
   left_inv _ := rfl
   right_inv _ := rfl
   map_add' _ _ := rfl
-
-theorem mem_coboundaries₂_intRepOfMonoidEnd_iff (f : G × G → Additive M) :
-    f ∈ coboundaries₂ (Rep.of (intRepOfMonoidEnd.{0} φ)) ↔
-      f ∈ coboundaries₂ (Rep.of (zRepOfMonoidEnd φ)) :=
-  Iff.rfl
 
 theorem h2π_intRepOfMonoidEnd_surjective :
     Function.Surjective (H2π (Rep.of (intRepOfMonoidEnd.{0} φ))).hom :=
@@ -42,8 +72,7 @@ theorem h2π_zRepOfMonoidEnd_surjective :
 
 theorem map_ker_h2π_intRepOfMonoidEnd :
     (H2π (Rep.of (intRepOfMonoidEnd.{0} φ))).hom.toAddMonoidHom.ker.map
-        (cocycles₂IntRepAddEquiv φ : cocycles₂ (Rep.of (intRepOfMonoidEnd.{0} φ)) →+
-          cocycles₂ (Rep.of (zRepOfMonoidEnd φ))) =
+        (cocycles₂IntRepAddEquiv φ).toAddMonoidHom =
       (H2π (Rep.of (zRepOfMonoidEnd φ))).hom.toAddMonoidHom.ker := by
   ext x
   constructor
@@ -62,11 +91,14 @@ theorem map_ker_h2π_intRepOfMonoidEnd :
 noncomputable def h2IntRepAddEquiv :
     groupCohomology (Rep.of (intRepOfMonoidEnd.{0} φ)) 2 ≃+
       groupCohomology (Rep.of (zRepOfMonoidEnd φ)) 2 :=
-  ((QuotientAddGroup.quotientKerEquivOfSurjective _
+  ((QuotientAddGroup.quotientKerEquivOfSurjective
+      (H2π (Rep.of (intRepOfMonoidEnd.{0} φ))).hom.toAddMonoidHom
       (h2π_intRepOfMonoidEnd_surjective φ)).symm.trans
     (QuotientAddGroup.congr _ _ (cocycles₂IntRepAddEquiv φ)
       (map_ker_h2π_intRepOfMonoidEnd φ))).trans
-    (QuotientAddGroup.quotientKerEquivOfSurjective _ (h2π_zRepOfMonoidEnd_surjective φ))
+    (QuotientAddGroup.quotientKerEquivOfSurjective
+      (H2π (Rep.of (zRepOfMonoidEnd φ))).hom.toAddMonoidHom
+      (h2π_zRepOfMonoidEnd_surjective φ))
 
 theorem h2IntRepAddEquiv_H2_class (x : cocycles₂ (Rep.of (intRepOfMonoidEnd.{0} φ))) :
     h2IntRepAddEquiv φ ((H2π _).hom x) = (H2π _).hom (cocycles₂IntRepAddEquiv φ x) := by

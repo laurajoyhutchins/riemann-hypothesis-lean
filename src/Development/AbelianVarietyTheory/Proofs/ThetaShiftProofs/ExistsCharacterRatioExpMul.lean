@@ -1,6 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.TopLeWchartNsmul
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ToStkAInjective
+module
+
+public import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.TopLeWchartNsmul
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ValCalc
+import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.HolomorphicHomDetermined
+import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.ThickenedPointToTorusExtensionGenerator
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ToStkAInjective
+
+@[expose] public section
 
 noncomputable section
 
@@ -19,6 +64,20 @@ theorem exists_ratio_valR {A : Type} [CommRing A] [IsLocalRing A] {X : Scheme.{0
   obtain ⟨a, ha⟩ := TorusCoord.exists_ratio hL (fun _ _ _ => rfl) t ht t' ht'
   refine ⟨a, fun z J hJ => ha _ _ z J hJ, fun j hj => ?_⟩
   obtain ⟨J, hJ⟩ := TorusCoord.exists_good' hL (cpt A)
+  have toStkA_valR {B : Type} [CommRing B] {Y : Scheme.{0}} (x : Sp B ⟶ Y)
+      (U : Y.Opens) (z : Sp B) (ht : ⊤ ≤ x ⁻¹ᵁ U) (b : Γ(Y, U)ˣ) :
+      toStkA z (valR x U b.val) = (gm x z U b).val := by
+    have hz : x z ∈ U := ht (show z ∈ (⊤ : (Sp B).Opens) from trivial)
+    have e1 : ∀ c, (Scheme.ΓSpecIso (CommRingCat.of B)).inv.hom
+        ((Scheme.ΓSpecIso (CommRingCat.of B)).hom.hom c) = c :=
+      fun c => congrArg (fun f => CommRingCat.Hom.hom f c)
+        (Iso.hom_inv_id (Scheme.ΓSpecIso (CommRingCat.of B)))
+    rw [valR, dite_eq_left ht, gm, dite_eq_left hz]
+    show ((Sp B).presheaf.germ ⊤ z trivial).hom ((Scheme.ΓSpecIso (CommRingCat.of B)).inv.hom
+        ((Scheme.ΓSpecIso (CommRingCat.of B)).hom.hom ((x.appLE U ⊤ ht).hom b.val))) =
+      ((Sp B).presheaf.germ (x ⁻¹ᵁ U) z hz).hom ((x.app U).hom b.val)
+    rw [e1]
+    exact TopCat.Presheaf.germ_res_apply (Sp B).presheaf (homOfLE ht) z trivial ((x.app U).hom b.val)
   apply toStkA_injective
   have hm : (𝟙 (Sp A) : Sp A ⟶ Sp A) (cpt A) ∈ LB.wchart L φ j := hj (x := cpt A) trivial
   rw [map_mul, toStkA_valR _ ⊤ _ le_rfl, toStkA_valR _ (LB.wchart L φ j) _ hj (t.s j),

@@ -1,5 +1,49 @@
-import Mathlib
-import Development.AutomorphicArithmetic.LocalEmbeddings.JetsChain
+module
+
+public import Development.AutomorphicArithmetic.LocalEmbeddings.JetsChain
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FiniteFinClAndGamOrd
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.AdelicUnitaryTopology
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IntegralEqFinClSumAvg
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IntegralEqVolMulSum
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.ExistsMatchOver
+import Development.AbelianVarietyTheory.Statements.HeckeThetaIntegrals.FormulaAt
+
+@[expose] public section
 
 noncomputable section
 
@@ -108,6 +152,7 @@ theorem sum_last {A : ℕ → Type} (o : ∀ n, A n → GfC (V n)) (w : ∀ n, A
   rw [finsum_snoc n hA]
   refine finsum_congr fun a => ?_
   letI : ∀ j : Fin n, Fintype (A j) := fun j => @Fintype.ofFinite _ (hA j (by omega))
+
   rw [sumV_eq comp v o w n fun j hj => hA j (by omega), finsum_eq_sum_of_fintype, finsum_eq_sum_of_fintype, map_sum, Finset.mul_sum]
   refine Finset.sum_congr rfl fun c _ => ?_
   have e1 : ext (P := fun j => GfC (V j)) (n + 1)
@@ -155,13 +200,55 @@ include hc hF hFa hc' hF' hFa' h
 theorem pairP_rat {X X' : ∀ n, GfC (V n)} {Y Y' : ∀ n, GfC (V' n)} (hX : ∀ j < N, ∃ γ ∈ ratFin (V j), X' j = γ * X j)
     (hY : ∀ j ≤ N, ∃ γ ∈ ratFin (V' j), Y' j = γ * Y j) (h1 : X N = e (Y N)) (h2 : X' N = e (Y' N)) :
     pairP comp v comp' v' N B X' Y' = pairP comp v comp' v' N B X Y := by
+  have left : ∀ n ≤ N, ∀ γ ∈ GQ (V n), ∀ g, ptF comp v ρ Λ X n (γ * g) = ptF comp v ρ Λ X n g := by
+    intro n hn
+    cases n with
+    | zero => exact fun γ hγ g => (hF _).symm.trans ((hFa γ hγ g).trans (hF _))
+    | succ n =>
+      intro γ hγ g
+      have hArrow : ArrowOK comp ρ ker Λ n := hc n (by omega)
+      obtain ⟨κ, h1, h2⟩ := exists_haar (V n) hArrow.1
+      simp only [ptF_succ hArrow κ h1 h2, hArrow.2.2.2.2.2.1 γ hγ]
+  have leftp : ∀ n ≤ N, ∀ γ ∈ GQ (V' n), ∀ g, ptF comp' v' ρ' Λ' Y n (γ * g) = ptF comp' v' ρ' Λ' Y n g := by
+    intro n hn
+    cases n with
+    | zero => exact fun γ hγ g => (hF' _).symm.trans ((hFa' γ hγ g).trans (hF' _))
+    | succ n =>
+      intro γ hγ g
+      have hArrow : ArrowOK comp' ρ' ker' Λ' n := hc' n (by omega)
+      obtain ⟨κ, h1, h2⟩ := exists_haar (V' n) hArrow.1
+      simp only [ptF_succ hArrow κ h1 h2, hArrow.2.2.2.2.2.1 γ hγ]
+  have rat : ∀ n ≤ N, ptF comp v ρ Λ X' n = ptF comp v ρ Λ X n := by
+    intro n hn
+    induction n with
+    | zero => rfl
+    | succ n ih =>
+      have hArrow : ArrowOK comp ρ ker Λ n := hc n (by omega)
+      obtain ⟨κ, h1, h2⟩ := exists_haar (V n) hArrow.1
+      obtain ⟨γ, hγ, e⟩ := hX n (by omega)
+      funext g
+      rw [ptF_succ hArrow κ h1 h2, ptF_succ hArrow κ h1 h2, ih (by omega), e]
+      exact avg_rat _ κ (fun z => ker n z g * ptF comp v ρ Λ X n z) (fun q hq z => by
+        rw [hArrow.2.2.2.2.1 q hq, left n (by omega) q hq]) hγ _
+  have ratp : ∀ n ≤ N, ptF comp' v' ρ' Λ' Y' n = ptF comp' v' ρ' Λ' Y n := by
+    intro n hn
+    induction n with
+    | zero => rfl
+    | succ n ih =>
+      have hArrow : ArrowOK comp' ρ' ker' Λ' n := hc' n (by omega)
+      obtain ⟨κ, h1, h2⟩ := exists_haar (V' n) hArrow.1
+      obtain ⟨γ, hγ, e⟩ := hY n (by omega)
+      funext g
+      rw [ptF_succ hArrow κ h1 h2, ptF_succ hArrow κ h1 h2, ih (by omega), e]
+      exact avg_rat _ κ (fun z => ker' n z g * ptF comp' v' ρ' Λ' Y n z) (fun q hq z => by
+        rw [hArrow.2.2.2.2.1 q hq, leftp n (by omega) q hq]) hγ _
   obtain ⟨κ, k1, k2⟩ := exists_haar _ h.defn
   obtain ⟨γ, hγ, e3⟩ := hY N le_rfl
   rw [pairP, pairP, h1, h2, ← last_avg h (ptF_real comp v ρ Λ X' N) (ptF_real comp' v' ρ' Λ' Y' N) κ k1 k2,
-    ← last_avg h (ptF_real comp v ρ Λ X N) (ptF_real comp' v' ρ' Λ' Y N) κ k1 k2, ptF_rat hc hF hFa hX N le_rfl,
-    ptF_rat hc' hF' hFa' (fun j hj => hY j hj.le) N le_rfl, e3]
+    ← last_avg h (ptF_real comp v ρ Λ X N) (ptF_real comp' v' ρ' Λ' Y N) κ k1 k2, rat N le_rfl,
+    ratp N le_rfl, e3]
   exact avg_rat _ κ (fun z => ptF comp v ρ Λ X N (s z) * ptF comp' v' ρ' Λ' Y N z) (fun q hq z => by
-    rw [map_mul, ptF_left hc hF hFa X N le_rfl _ (h.rat q hq), ptF_left hc' hF' hFa' Y N le_rfl q hq]) hγ _
+    rw [map_mul, left N le_rfl _ (h.rat q hq), leftp N le_rfl q hq]) hγ _
 
 theorem one_term (μ : ∀ n, Measure (GA D (V n))) (fd : ∀ n, Set (GA D (V n)))
     (K : ∀ n, Subgroup (GL (Fin (V n).rank) (Lev.EAf D)))
@@ -178,6 +265,70 @@ theorem one_term (μ : ∀ n, Measure (GA D (V n))) (fd : ∀ n, Set (GA D (V n)
         ((∏ j : Fin N, wgt (V j) (μ j) (K j) (c.1 j)) * ∏ i : Fin (N + 1), wgt (V' i) (μ' i) (K' i) (c.2 i)) *
           pairP comp v comp' v' N B (ptX N e (fun j => Quotient.out (c.1 j)) (fun i => Quotient.out (c.2 i)))
             (ext (P := fun j => GfC (V' j)) (N + 1) fun i => Quotient.out (c.2 i)) := by
+  have real : ∀ n ≤ N, IsFinReal (ρ n) (liftC μ fd ker F n) (Λ n)
+      (sumV (A := fun n => FinCl (V n) (K n)) (fun _ c => Quotient.out c)
+        (fun n => wgt (V n) (μ n) (K n)) comp v n) := by
+    intro n hn
+    induction n with
+    | zero => exact hF
+    | succ n ih =>
+      intro h
+      have ih := ih (by omega)
+      have hn' : n < N := Nat.lt_of_succ_le hn
+      obtain ⟨h1, ⟨K₀, h2, h3, h4⟩, h5⟩ := hK n hn'
+      obtain ⟨-, a2, a3, a4, a5, -, a7, a8⟩ := hc n hn'
+      obtain ⟨hfin, κ, hκH, hκP, hU⟩ := GlobalTheory.DefiniteClassReal.integral_eq_finClSum_avg (V n) a2 K₀ (K n) h2 h1 h3 (μ n) (fd n) h4
+        (fun g => ker n g h * liftC μ fd ker F n g)
+        (fun γ hγ g => by
+          rw [a5 γ hγ, liftC_left hc hFa μ fd n (by omega) γ hγ])
+        (fun k hk g => by
+          rw [(h5 k hk).2, liftC_right μ fd n k (h5 k hk).1])
+        (fun z => (a7 z h).mul (by
+          have e : ∀ k : GinfC (V n), liftC μ fd ker F n (z * k) = Λ n (ρ n (k : GA D (V n))⁻¹ (ρ n z⁻¹ (sumV
+              (A := fun n => FinCl (V n) (K n)) (fun _ c => Quotient.out c) (fun n => wgt (V n) (μ n) (K n)) comp v n
+              (finOf _ z)))) := fun k => by
+            rw [ih, finOf_mul_inf, mul_inv_rev, map_mul, Module.End.mul_apply]
+          simp only [e]
+          exact a4 _))
+      haveI := Fintype.ofFinite (FinCl (V n) (K n))
+      simp only [liftC, sumV]
+
+      rw [hU, finsum_eq_sum_of_fintype, finsum_eq_sum_of_fintype, map_sum, map_sum]
+      refine Finset.sum_congr rfl fun c _ => ?_
+      simp only [isFinReal_apply a3 ih]
+      rw [a8 κ hκH hκP, map_smul, map_smul, smul_eq_mul, wgt, div_eq_mul_inv]
+  have real' : ∀ n ≤ N, IsFinReal (ρ' n) (liftC μ' fd' ker' F' n) (Λ' n)
+      (sumV (A := fun n => FinCl (V' n) (K' n)) (fun _ c => Quotient.out c)
+        (fun n => wgt (V' n) (μ' n) (K' n)) comp' v' n) := by
+    intro n hn
+    induction n with
+    | zero => exact hF'
+    | succ n ih =>
+      intro h
+      have ih := ih (by omega)
+      have hn' : n < N := Nat.lt_of_succ_le hn
+      obtain ⟨h1, ⟨K₀, h2, h3, h4⟩, h5⟩ := hK' n hn'
+      obtain ⟨-, a2, a3, a4, a5, -, a7, a8⟩ := hc' n hn'
+      obtain ⟨hfin, κ, hκH, hκP, hU⟩ := GlobalTheory.DefiniteClassReal.integral_eq_finClSum_avg (V' n) a2 K₀ (K' n) h2 h1 h3 (μ' n) (fd' n) h4
+        (fun g => ker' n g h * liftC μ' fd' ker' F' n g)
+        (fun γ hγ g => by
+          rw [a5 γ hγ, liftC_left hc' hFa' μ' fd' n (by omega) γ hγ])
+        (fun k hk g => by
+          rw [(h5 k hk).2, liftC_right μ' fd' n k (h5 k hk).1])
+        (fun z => (a7 z h).mul (by
+          have e : ∀ k : GinfC (V' n), liftC μ' fd' ker' F' n (z * k) = Λ' n (ρ' n (k : GA D (V' n))⁻¹ (ρ' n z⁻¹ (sumV
+              (A := fun n => FinCl (V' n) (K' n)) (fun _ c => Quotient.out c) (fun n => wgt (V' n) (μ' n) (K' n)) comp' v' n
+              (finOf _ z)))) := fun k => by
+            rw [ih, finOf_mul_inf, mul_inv_rev, map_mul, Module.End.mul_apply]
+          simp only [e]
+          exact a4 _))
+      haveI := Fintype.ofFinite (FinCl (V' n) (K' n))
+      simp only [liftC, sumV]
+
+      rw [hU, finsum_eq_sum_of_fintype, finsum_eq_sum_of_fintype, map_sum, map_sum]
+      refine Finset.sum_congr rfl fun c _ => ?_
+      simp only [isFinReal_apply a3 ih]
+      rw [a8 κ hκH hκP, map_smul, map_smul, smul_eq_mul, wgt, div_eq_mul_inv]
   obtain ⟨n1, ⟨K₀, n2, n3, n4⟩, n5⟩ := hN
   have fA : ∀ j < N, Finite (FinCl (V j) (K j)) := fun j hj =>
     (ClassFin.finite_finCl_and_gamOrd _ _ (hc j hj).2.1 (hK j hj).1).1
@@ -185,7 +336,7 @@ theorem one_term (μ : ∀ n, Measure (GA D (V n))) (fd : ∀ n, Set (GA D (V n)
     rcases (Nat.lt_succ_iff.1 hj).eq_or_lt with rfl | hj
     · exact (ClassFin.finite_finCl_and_gamOrd _ _ h.pos n1).1
     · exact (ClassFin.finite_finCl_and_gamOrd _ _ (hc' j hj).2.1 (hK' j hj).1).1
-  rw [last_int h (liftC_real hc hF hFa μ fd K hK N le_rfl) (liftC_real hc' hF' hFa' μ' fd' K' hK' N le_rfl)
+  rw [last_int h (real N le_rfl) (real' N le_rfl)
     (liftC_left hc hFa μ fd N le_rfl) (liftC_left hc' hFa' μ' fd' N le_rfl) n1 n2 n3 n4
     (fun k hk => ⟨liftC_right μ fd N _ (n5 k hk).1, liftC_right μ' fd' N _ (n5 k hk).2⟩)]
   refine (sum_last comp' v' (A := fun n => FinCl (V' n) (K' n)) (fun _ c => Quotient.out c) (fun n => wgt (V' n) (μ' n) (K' n)) N fA'
@@ -195,6 +346,7 @@ theorem one_term (μ : ∀ n, Measure (GA D (V n))) (fd : ∀ n, Set (GA D (V n)
   letI : ∀ j : Fin (N + 1), Fintype (FinCl (V' j) (K' j)) := fun j => @Fintype.ofFinite _ (fA' j j.2)
   rw [finsum_eq_sum_of_fintype, finsum_eq_sum_of_fintype, Fintype.sum_prod_type_right]
   refine Finset.sum_congr rfl fun b _ => ?_
+
   rw [sumV_eq comp v _ _ N fA, finsum_eq_sum_of_fintype, map_sum, LinearMap.sum_apply, Finset.mul_sum]
   refine Finset.sum_congr rfl fun a _ => ?_
   have e1 : ptV comp v (ptX N e (fun j => Quotient.out (a j)) (fun i => Quotient.out (b i))) N =

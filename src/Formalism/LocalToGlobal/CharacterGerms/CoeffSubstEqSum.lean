@@ -1,4 +1,55 @@
-import Formalism.LocalToGlobal.CharacterGerms.RowTiePGerm
+module
+
+public import Formalism.LocalToGlobal.CharacterGerms.IntSubst
+public import Mathlib.RingTheory.MvPowerSeries.Substitution
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.Order.Floor.Semiring
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.CocycleRightZeroThd
+
+@[expose] public section
 
 noncomputable section
 
@@ -108,15 +159,6 @@ theorem Tends.add {s t : ℕ → C} {x y : C} (hs : Tends V s x) (ht : Tends V t
   rw [e]
   exact ge_add_lemma_2 (h1 n (le_of_max_le_left hn)) (h2 n (le_of_max_le_right hn))
 
-theorem Tends.neg {s : ℕ → C} {x : C} (hs : Tends V s x) : Tends V (fun n => -s n) (-x) := by
-  intro w
-  obtain ⟨n0, h0⟩ := hs w
-  refine ⟨n0, fun n hn => ?_⟩
-  have e : -x - -s n = -(x - s n) := by ring
-  show V.Ge w (-x - -s n)
-  rw [e]
-  exact ge_neg_lemma_3 (h0 n hn)
-
 theorem Tends.sub {s t : ℕ → C} {x y : C} (hs : Tends V s x) (ht : Tends V t y) :
     Tends V (fun n => s n - t n) (x - y) := by
   intro w
@@ -211,7 +253,7 @@ theorem TendsS.unique {f : ℕ → MvPowerSeries σ C} {F G : MvPowerSeries σ C
 theorem TendsS.add {f g : ℕ → MvPowerSeries σ C} {F G : MvPowerSeries σ C} (hf : TendsS V f F)
     (hg : TendsS V g G) : TendsS V (fun n => f n + g n) (F + G) := by
   intro μ
-  simpa only [map_add] using (hf μ).add (hg μ)
+  simpa only [map_add (f := _)] using (hf μ).add (hg μ)
 
 theorem TendsS.sub {f g : ℕ → MvPowerSeries σ C} {F G : MvPowerSeries σ C} (hf : TendsS V f F)
     (hg : TendsS V g G) : TendsS V (fun n => f n - g n) (F - G) := by
@@ -266,7 +308,7 @@ theorem Ord.mul {k k' : ℕ} {f g : MvPowerSeries σ C} (hf : Ord k f) (hg : Ord
   intro p hp
   rw [Finset.HasAntidiagonal.mem_antidiagonal] at hp
   have hd : Finsupp.degree p.1 + Finsupp.degree p.2 = Finsupp.degree μ := by
-    rw [← hp, map_add]
+    rw [← hp, map_add (f := _)]
   by_cases h1 : Finsupp.degree p.1 < k
   · rw [hf p.1 h1, zero_mul]
   · have h2 : Finsupp.degree p.2 < k' := by omega
@@ -275,10 +317,6 @@ theorem Ord.mul {k k' : ℕ} {f g : MvPowerSeries σ C} (hf : Ord k f) (hg : Ord
 theorem Ord.one : Ord 0 (1 : MvPowerSeries σ C) := by
   intro μ h
   exact absurd h (Nat.not_lt_zero _)
-
-theorem Ord.mono {k k' : ℕ} {f : MvPowerSeries σ C} (hf : Ord k f) (h : k' ≤ k) : Ord k' f := by
-  intro μ hμ
-  exact hf μ (lt_of_lt_of_le hμ h)
 
 theorem Ord.pow {k : ℕ} {f : MvPowerSeries σ C} (hf : Ord k f) (e : ℕ) : Ord (k * e) (f ^ e) := by
   induction e with

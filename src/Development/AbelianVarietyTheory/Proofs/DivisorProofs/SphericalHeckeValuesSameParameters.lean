@@ -1,6 +1,58 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GaloisOfPolarized
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ElementaryDivisorsMulMinusculeTopTermStatement
+module
+
+public import Formalism.SatakeDualWeyl.StatementE
+public import Formalism.SatakeDualWeyl.StatementF
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ElementaryDivisorsMulMinusculeTopTermStatement
+public import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.HeckeActMem
+public import Formalism.SatakeDualWeyl.KpqSubgroupCompact
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GaloisOfRegularForms
+import Development.AutomorphicArithmetic.IntegralCasts.IsOpenStabOfMemNhds
+
+@[expose] public section
 
 noncomputable section
 
@@ -32,29 +84,6 @@ theorem dosetInd_congr {g x : G} (h : ∃ a ∈ K, ∃ b ∈ K, x = a * g * b) :
   · rw [dosetInd_of_not hy, dosetInd_of_not]
     rintro ⟨c, hc, d, hd, rfl⟩
     exact hy ⟨c * a, K.mul_mem hc ha, b * d, K.mul_mem hb hd, by group⟩
-
-theorem hAct_add (hK : IsCommensurated K) {f f' : G → ℂ} (hf : f ∈ Hecke ℂ K) (hf' : f' ∈ Hecke ℂ K) (φ : G → ℂ) (g : G) :
-    hAct K (f + f') φ g = hAct K f φ g + hAct K f' φ g := by
-  unfold hAct
-  rw [← finsum_add_distrib]
-  · exact finsum_congr fun x => by simp [add_mul]
-  · exact (Formalism.UG.P.finite_supp K hK f hf).subset fun x hx h0 => hx (by simp [h0])
-  · exact (Formalism.UG.P.finite_supp K hK f' hf').subset fun x hx h0 => hx (by simp [h0])
-
-theorem hAct_smul (c : ℂ) (f φ : G → ℂ) (g : G) : hAct K (c • f) φ g = c * hAct K f φ g := by
-  unfold hAct
-  rw [mul_finsum]
-  exact finsum_congr fun x => by simp [mul_assoc]
-
-def agree (hK : IsCommensurated K) (φ φ' : G → ℂ) : Submodule ℂ (G → ℂ) where
-  carrier := {h | h ∈ Hecke ℂ K ∧ hAct K h φ 1 = hAct K h φ' 1}
-  zero_mem' := ⟨Submodule.zero_mem _, by simp [hAct]⟩
-  add_mem' := by
-    rintro f f' ⟨hf, e⟩ ⟨hf', e'⟩
-    exact ⟨Submodule.add_mem _ hf hf', by rw [hAct_add hK hf hf', hAct_add hK hf hf', e, e']⟩
-  smul_mem' := by
-    rintro c f ⟨hf, e⟩
-    exact ⟨Submodule.smul_mem _ c hf, by rw [hAct_smul, hAct_smul, e]⟩
 
 theorem biInv_apply {h : G → ℂ} (hh : h ∈ Hecke ℂ K) {g x : G} (hx : ∃ a ∈ K, ∃ b ∈ K, x = a * g * b) : h x = h g := by
   obtain ⟨a, ha, b, hb, rfl⟩ := hx

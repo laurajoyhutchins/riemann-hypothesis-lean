@@ -1,9 +1,59 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.StandardTraceAdelicAddCharLocalComponentNeOne
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsLocallyConstantAddChar
-import Development.WeilBound.CoreStatements.GaussianSeminormBounds.RealSeminormFiltration.RLLieB
-import Development.WeilBound.CoreStatements.GaussianSeminormBounds.RealSeminormFiltration.RLLieD
-import Development.WeilBound.CoreStatements.GaussianSeminormBounds.RealSeminormFiltration.RLFock
+module
+
+public import Development.WeilBound.CoreStatements.GaussianSeminormBounds.RealSeminormFiltration.RLLieB
+public import Development.WeilBound.CoreStatements.GaussianSeminormBounds.RealSeminormFiltration.RLFock
+public import Development.WeilBound.CoreStatements.GaussianSeminormBounds.RealSeminormFiltration.RLActs
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsLocallyConstantAddChar
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.StandardTraceAdelicAddCharLocalComponentNeOne
+import Development.WeilBound.CoreStatements.GaussianSeminormBounds.RealSeminormFiltration.EvIHalfTrace
+public import Development.WeilBound.CoreStatements.GaussianSeminormBounds.RealSeminormFiltration.RLLieD
+import Mathlib.Algebra.Order.Archimedean.Real.Hom
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.InnerProductSpace.EuclideanDist
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ContinuousAtPlace
+
+@[expose] public section
 
 noncomputable section
 
@@ -29,12 +79,13 @@ theorem trace_nondeg (l : κ → mixedEmbedding.mixedSpace F)
   refine (mixedEmbedding.latticeBasis F).ext_elem fun j => ?_
   have := h (Pi.single i (mixedEmbedding F ((integralBasis F).traceDual j)))
   rw [dotProduct_single, ← (mixedEmbedding.latticeBasis F).sum_repr (l i)] at this
+
   simp only [Finset.sum_mul, smul_mul_assoc, map_sum, map_smul, mixedEmbedding.latticeBasis_apply, ← map_mul, trace_emb,
-    Module.Basis.trace_mul_traceDual] at this
+  Module.Basis.trace_mul_traceDual] at this
   simpa [apply_ite] using this
 
-variable (F κ) in
 
+variable (F κ) in
 structure Co (l : Type) [Fintype l] where
   e1 : (κ → mixedEmbedding.mixedSpace F) ≃L[ℝ] EuclideanSpace ℝ l
   e2 : (κ → mixedEmbedding.mixedSpace F) ≃ₗ[ℝ] EuclideanSpace ℝ l
@@ -113,9 +164,9 @@ theorem vec_ext {w w' : l ⊕ l → ℝ} (h1 : pPart w = pPart w') (h2 : qPart w
 
 theorem vec_add (w w') : c.vec (w + w') = c.vec w + c.vec w' := by
   refine vec_ext ?_ ?_
-  · rw [pPart_add, pPart_vec, pPart_vec, pPart_vec, ← map_add]
+  · rw [pPart_add, pPart_vec, pPart_vec, pPart_vec, ← map_add (f := _)]
     exact congrArg c.e1 (funext fun i => Fock.evI_add _ _)
-  · rw [qPart_add, qPart_vec, qPart_vec, qPart_vec, ← map_add]
+  · rw [qPart_add, qPart_vec, qPart_vec, qPart_vec, ← map_add (f := _)]
     exact congrArg c.e2 (funext fun i => Fock.evI_add _ _)
 
 theorem vec_smul (t : ℝ) (w) : c.vec (realAd F t • w) = t • c.vec w := by
@@ -143,6 +194,7 @@ theorem eq_zero_of_vec {p : (κ → AF F) × (κ → AF F)} (hp : At (evI F) p) 
 theorem sympl_vec (w w') : sympl (c.vec w) (c.vec w') =
     -Algebra.trace ℝ (mixedEmbedding.mixedSpace F) (evI F (w.1 ⬝ᵥ w'.2 - w'.1 ⬝ᵥ w.2)) := by
   rw [sympl, real_inner_comm, pPart_vec, qPart_vec, pPart_vec, qPart_vec, c.pair, c.pair, ← Fock.evIh_apply]
+
   simp only [dotProduct, map_sub, map_sum, map_mul, Fock.evIh_apply]
   ring
 

@@ -1,9 +1,50 @@
-import Development.AutomorphicArithmetic.Foundations.Convolution.PowerSumTraces.TwistFactor
-import Development.AutomorphicArithmetic.Foundations.Convolution.PowerSumTraces.LocUApply
-import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.KernelTransforms.LocEmb
-import Development.AutomorphicArithmetic.TwistedTraces.IsotypicMultiplicityTensorProduct
-import Development.AutomorphicArithmetic.TwistedTraces.IntegralOperatorFixedInvariantOfLeftInvariantKer
-import Development.AutomorphicArithmetic.TwistedTraces.SummandLeClosureSpanLocalTypeImages
+module
+
+public import Development.AutomorphicArithmetic.Foundations.Convolution.PowerSumTraces.TwistFactor
+import Development.AbelianVarietyTheory.Definitions.Divisors.T2SpaceGeneralLinearGroup
+public import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.KernelTransforms.LocEmb
+public import Development.AutomorphicArithmetic.TwistedTraces.IntegralOperatorFixedInvariantOfLeftInvariantKer
+public import Development.AutomorphicArithmetic.TwistedTraces.IsotypicMultiplicityTensorProduct
+public import Development.AutomorphicArithmetic.TwistedTraces.SummandLeClosureSpanLocalTypeImages
+import GroundTheory.GlobalFields.LocalAtPlace
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Development.AutomorphicArithmetic.Foundations.Convolution.PowerSumTraces.LocUApply
+
+@[expose] public section
 
 open MeasureTheory NumberField IsDedekindDomain Filter GroundTheory.Automorphic GroundTheory.Automorphic.Reduction GroundTheory.Automorphic.RightCosetSpace
 open GroundTheory.Automorphic.CuspidalSpectrum GlobalTheory.IndefiniteRowSideFullHecke.IwahoriDoubleCosets GlobalTheory.PRep Formalism.BasicNotions GlobalTheory.CuspRep GlobalTheory.SmGL UpperTheory.ConvolutionTheory UpperTheory.ConvolutionTheory.C UpperTheory.ConvolutionTheory.C.Sf
@@ -20,18 +61,11 @@ theorem UpperTheory.ConvolutionTheory.C.twistFactor :
       locU μ (w i) g (locU μ (w j) h v) = locU μ (w j) h (locU μ (w i) g v) := by
     intro i j hij g h v
     have hc := (UpperTheory.ConvolutionTheory.Tf.locEmb K n (w i)).2.2.2.1 (w j) (fun e => hij (hw e.symm)) g h
-    have e : ∀ (a : Gw n (w i)) (b : Gw n (w j)), (locU μ (w i) a) ((locU μ (w j) b) v) =
-        rightRegularRep (rationalGLOne K n) μ (MultiplicityOne.finProj K n (AdelicGLn.localEmbedding (w i) a *
-          AdelicGLn.localEmbedding (w j) b)) v := by
-      intro a b
-      rw [map_mul, UnitaryRep.map_mul_apply]
-      rfl
-    have e' : (locU μ (w j) h) ((locU μ (w i) g) v) =
-        rightRegularRep (rationalGLOne K n) μ (MultiplicityOne.finProj K n (AdelicGLn.localEmbedding (w j) h *
-          AdelicGLn.localEmbedding (w i) g)) v := by
-      rw [map_mul, UnitaryRep.map_mul_apply]
-      rfl
-    exact (e g h).trans ((congrArg (fun u => rightRegularRep (rationalGLOne K n) μ (MultiplicityOne.finProj K n u) v) hc).trans e'.symm)
+    let ρ := (rightRegularRep (rationalGLOne (K := K) (n := n)) μ).compHom
+      (MultiplicityOne.finProj K n) (MultiplicityOne.continuous_finProj (K := K) (n := n))
+    change ρ (AdelicGLn.localEmbedding (w i) g) (ρ (AdelicGLn.localEmbedding (w j) h) v) =
+      ρ (AdelicGLn.localEmbedding (w j) h) (ρ (AdelicGLn.localEmbedding (w i) g) v)
+    simp only [← UnitaryRep.map_mul_apply, hc]
   obtain ⟨c, hc⟩ := UpperTheory.isotypic_multiplicity_tensor_product r (fun i => Gw n (w i)) (LL μ) (fun i => (τ i).V) (fun i => locU μ (w i))
     (fun i => (τ i).ρ) V Z (fun i => (τ i).smooth) (fun i => (τ i).irred) hcomm hZ0 hZV hinv
     (fun i => UpperTheory.summand_le_closure_span_local_type_images K n μ V (w i) (τ i) hV (hτ i)) (fun U hU => by rw [hfix]; exact hadm U hU)

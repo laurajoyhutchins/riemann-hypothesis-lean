@@ -1,68 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Degenerations.AdmissibleBaseOfCompleteDvr
-import Development.AbelianVarietyTheory.Definitions.Degenerations.HomExtSt
-import Development.AbelianVarietyTheory.Definitions.Degenerations.CharZeroOfIsPrimitiveRoot
-import Development.AbelianVarietyTheory.Definitions.Uniformization.TXFrame
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Degenerations.CharZeroOfIsPrimitiveRoot
+public import Development.AbelianVarietyTheory.Definitions.Uniformization.TXFrame
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import Mathlib.Analysis.Normed.Group.Ultra
+
+@[expose] public section
+
 open GlobalTheory GlobalTheory.Ex
 
 namespace GlobalTheory.Ex.AdicNormSum
-
-theorem norm_le_of_mem_span {R : Type} [CommRing R] {C : Type} [NormedField C] [IsUltrametricDist C]
-    {E : Type} [AddCommGroup E] [Module R E] (φ : R → C) (f : E →+ C)
-    (hφ : ∀ (a : R) (y : E), f (a • y) = φ a * f y) (h1 : ∀ a, ‖φ a‖ ≤ 1) (t : Set E) (c : ℝ) (hc0 : 0 ≤ c)
-    (hc : ∀ y ∈ t, ‖f y‖ ≤ c) : ∀ y ∈ Submodule.span R t, ‖f y‖ ≤ c := by
-  intro y hy
-  induction hy using Submodule.span_induction with
-  | mem y hy => exact hc y hy
-  | zero => simpa using hc0
-  | add y z _ _ a b => rw [map_add]; exact (IsUltrametricDist.norm_add_le_max _ _).trans (max_le a b)
-  | smul a y _ b =>
-    rw [hφ, norm_mul]
-    exact (mul_le_mul (h1 a) b (norm_nonneg _) zero_le_one).trans_eq (one_mul c)
-
-theorem hasSum_of_sumI {R : Type} [CommRing R] (I : Ideal R) (hI : I.FG) {C : Type} [NormedField C] [IsUltrametricDist C]
-    [Module R C] (φ : R →+* C) (hφ : ∀ (a : R) (y : C), a • y = φ a * y) (h1 : ∀ a, ‖φ a‖ ≤ 1)
-    (h2 : ∀ a ∈ I, ‖φ a‖ < 1) {Ix : Type} {x : Ix → C} {s : C} (h : GlobalTheory.UT.SumI I x s) : HasSum x s := by
-  classical
-  obtain ⟨N, ⟨t, rfl⟩, -, -, h⟩ := h
-  obtain ⟨u, hu⟩ := hI
-  obtain ⟨ρ, hρ0, hρ1, hρ⟩ : ∃ ρ : ℝ, 0 ≤ ρ ∧ ρ < 1 ∧ ∀ a ∈ I, ‖φ a‖ ≤ ρ := by
-    have hs : (u.sup fun a => ‖φ a‖₊) < 1 := by
-      rw [Finset.sup_lt_iff (by simp)]
-      intro a ha
-      exact_mod_cast h2 a (hu ▸ Ideal.subset_span ha)
-    refine ⟨(u.sup fun a => ‖φ a‖₊ : NNReal), NNReal.coe_nonneg _, by exact_mod_cast hs, ?_⟩
-    rw [← hu]
-    refine norm_le_of_mem_span φ φ.toAddMonoidHom (fun a y => map_mul φ a y) h1 _ _ (NNReal.coe_nonneg _) ?_
-    intro a ha
-    exact_mod_cast Finset.le_sup (f := fun a => ‖φ a‖₊) ha
-  obtain ⟨M, hM0, hM⟩ : ∃ M : ℝ, 0 ≤ M ∧ ∀ y ∈ Submodule.span R (t : Set C), ‖y‖ ≤ M := by
-    refine ⟨(t.sup fun a => ‖a‖₊ : NNReal), NNReal.coe_nonneg _, ?_⟩
-    refine norm_le_of_mem_span φ (AddMonoidHom.id C) hφ h1 _ _ (NNReal.coe_nonneg _) ?_
-    intro a ha
-    exact_mod_cast Finset.le_sup (f := fun a : C => ‖a‖₊) ha
-  have hP : ∀ n : ℕ, ∀ y ∈ I ^ n • Submodule.span R (t : Set C), ‖y‖ ≤ ρ ^ n * M := by
-    intro n
-    induction n with
-    | zero => intro y hy; rw [pow_zero, Ideal.one_eq_top, Submodule.top_smul] at hy; simpa using hM y hy
-    | succ n ih =>
-      intro y hy
-      rw [pow_succ', Submodule.mul_smul] at hy
-      refine Submodule.smul_induction_on hy (fun a ha z hz => ?_)
-        (fun y z a b => (IsUltrametricDist.norm_add_le_max _ _).trans (max_le a b))
-      rw [hφ, norm_mul, pow_succ', mul_assoc]
-      exact mul_le_mul (hρ a ha) (ih z hz) (norm_nonneg _) hρ0
-  have hlim : Filter.Tendsto (fun n : ℕ => ρ ^ n * M) Filter.atTop (nhds 0) := by
-    simpa using (tendsto_pow_atTop_nhds_zero_of_lt_one hρ0 hρ1).mul_const M
-  have key : Filter.Tendsto (fun T : Finset Ix => ∑ i ∈ T, x i) Filter.atTop (nhds s) := by
-    rw [Metric.tendsto_atTop]
-    intro ε hε
-    obtain ⟨n, hn⟩ := (hlim.eventually (gt_mem_nhds hε)).exists
-    obtain ⟨S, hS⟩ := h n
-    refine ⟨S, fun T hT => ?_⟩
-    rw [dist_comm, dist_eq_norm]
-    exact (hP n _ (hS T hT)).trans_lt hn
-  exact key
 
 open Filter Topology in
 private lemma exists_norm_le_mul_of_mem_ideal_smul_fg {R C : Type} [CommRing R] [NormedField C]
@@ -109,7 +95,7 @@ private lemma exists_uniform_norm_bound_lt_one_of_fg {R C : Type} [CommRing R] [
       exact NNReal.coe_le_coe.mpr (Finset.le_sup (f := fun g => ‖φ g‖₊) hg)
     · simp
     · intro a b _ _ ha hb
-      rw [map_add]
+      rw [map_add (f := _)]
       exact (IsUltrametricDist.norm_add_le_max _ _).trans (max_le ha hb)
     · intro a b _ hb
       rw [smul_eq_mul, map_mul, norm_mul]
@@ -146,11 +132,11 @@ private lemma norm_le_pow_of_mem_ideal_pow {R C : Type} [CommRing R] [NormedFiel
       rw [map_mul, norm_mul, pow_succ]
       exact mul_le_mul (ih a ha) (hI b hb) (norm_nonneg _) (pow_nonneg hc0 n)
     · intro a b ha hb
-      rw [map_add]
+      rw [map_add (f := _)]
       exact (IsUltrametricDist.norm_add_le_max _ _).trans (max_le ha hb)
 
-open Filter Topology in
 
+open Filter Topology in
 theorem _root_.GlobalTheory.Ex.AdicNormSum.main : ∀ (R : Type) [CommRing R] [IsDomain R]
     [IsNoetherianRing R] (I : Ideal R) (C : Type) [NormedField C] [IsUltrametricDist C]
     [Algebra (FractionRing R) C], _root_.GlobalTheory.Ex.CExt R I C → ∀ (Ix : Type) (x : Ix → C)

@@ -1,6 +1,56 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.FgHonA
-import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.FgHonB
+module
+
+public import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.FgDefs
+public import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.KurDefs
+public import Formalism.TorsionNormIteration.InverseIntegralClasses.MemSpanOfNormLe
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.PowerSeries.Expand
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.FgBasic
+public import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.FgHonA
+
+@[expose] public section
 
 noncomputable section
 
@@ -42,12 +92,12 @@ private theorem coeff_subst_X_pow_lemma (f : PowerSeries K) {k : ℕ} (hk : k �
     simp [this]
 
 theorem desc_congr (hl : l.Prime) (hl1 : ‖(l : K)‖ < 1) (D : PowerSeries K)
-    (hD : DivBy (l : K) (derivative K D)) :
+    (hD : DivBy (l : K) (PowerSeries.derivative D)) :
     DivBy (l : K) (D - (desc l D).subst ((X : PowerSeries K) ^ l)) ∧
-      IntegralPS (derivative K (desc l D)) := by
+      IntegralPS (PowerSeries.derivative (desc l D)) := by
   have hl0 : (l : K) ≠ 0 := Nat.cast_ne_zero.mpr hl.ne_zero
   have hlpos : 0 < ‖(l : K)‖ := norm_pos_iff.mpr hl0
-  have hD' : ∀ n, ‖coeff n (derivative K D)‖ ≤ ‖(l : K)‖ := hD
+  have hD' : ∀ n, ‖coeff n (PowerSeries.derivative D)‖ ≤ ‖(l : K)‖ := hD
   have hD2 : ∀ m, ‖coeff (m + 1) D‖ * ‖((m : K) + 1)‖ ≤ ‖(l : K)‖ := by
     intro m
     have h := hD' m
@@ -83,7 +133,7 @@ theorem desc_congr (hl : l.Prime) (hl1 : ‖(l : K)‖ < 1) (D : PowerSeries K)
     exact le_of_mul_le_mul_left h2 hlpos
 
 theorem desc_key {ι : Type} (hF : FrobField K l σ) {D : PowerSeries K}
-    (hD0 : constantCoeff D = 0) (hD' : DivBy (l : K) (derivative K D)) (P : MvPowerSeries ι K)
+    (hD0 : constantCoeff D = 0) (hD' : DivBy (l : K) (PowerSeries.derivative D)) (P : MvPowerSeries ι K)
     (hP0 : MvPowerSeries.constantCoeff P = 0) (hP : IntegralMv P) :
     DivByMv (l : K) (MvPowerSeries.expand l hF.prime.ne_zero
       ((desc l D).subst (MvPowerSeries.map σ P)) - D.subst P) := by
@@ -119,7 +169,7 @@ theorem desc_key {ι : Type} (hF : FrobField K l σ) {D : PowerSeries K}
 theorem desc_QCls (hF : FrobField K l σ) {Φ : MvPowerSeries (Fin 2) K} {A : PowerSeries K} {b : K}
     (hΦ0 : MvPowerSeries.constantCoeff Φ = 0) (hΦ : IntegralMv Φ) (hA0 : constantCoeff A = 0)
     (hA : IntegralPS A) (hb : ‖b‖ ≤ 1) {D : PowerSeries K} (hD : QCls l Φ A b D)
-    (hD' : DivBy (l : K) (derivative K D)) :
+    (hD' : DivBy (l : K) (PowerSeries.derivative D)) :
     QCls l (MvPowerSeries.map σ Φ) (PowerSeries.map σ A) b (desc l D) := by
   have hl0 : l ≠ 0 := hF.prime.ne_zero
   refine ⟨by rw [desc_const, hD.D0], (desc_congr hF.prime hF.norm_l D hD').2, ?_, ?_⟩

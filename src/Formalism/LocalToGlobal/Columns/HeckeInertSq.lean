@@ -1,5 +1,46 @@
-import Formalism.LocalToGlobal.Columns.HeckeInertLemmas
-import Formalism.LocalToGlobal.Columns.MemOfSmulMemOfAddEqOne
+module
+
+public import Formalism.LocalToGlobal.Columns.DecoFin
+public import Formalism.LocalToGlobal.Columns.MemOfSmulMemOfAddEqOne
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -156,7 +197,7 @@ theorem hi_exists_conj {I J : Ideal (𝓞 E)} (hJ : ∀ a ∈ J, cO E a ∈ J) (
     ∃ α ∈ I, ∃ β ∈ J, α + β = 1 ∧ cO E α = α ∧ cO E β = β := by
   obtain ⟨a, ha, b, hb, hab⟩ :=
     Submodule.mem_sup.1 (show (1 : 𝓞 E) ∈ I ⊔ J by rw [hIJ]; exact Submodule.mem_top)
-  have hc1 : cO E a + cO E b = 1 := by rw [← map_add, hab, map_one]
+  have hc1 : cO E a + cO E b = 1 := by rw [← map_add (f := _), hab, map_one]
   refine ⟨a * cO E a, Ideal.mul_mem_right _ _ ha, 1 - a * cO E a, ?_, by ring, ?_, ?_⟩
   · have e : 1 - a * cO E a = a * cO E b + b * cO E a + b * cO E b := by
       have h1 : (a + b) * (cO E a + cO E b) = 1 := by rw [hab, hc1, one_mul]
@@ -169,7 +210,12 @@ theorem hi_exists_conj {I J : Ideal (𝓞 E)} (hJ : ∀ a ∈ J, cO E a ∈ J) (
 
 theorem hi_hStd_conj {a : 𝓞 E} (ha : cO E a = a) (m x : Sp E n) :
     hStd E n (a • m) x = hStd E n m (a • x) := by
-  rw [wmp_hStd_osmul_left, wmp_hStd_osmul_right, ha]
+  have hl : hStd E n (a • m) x = algebraMap (𝓞 E) E (cO E a) * hStd E n m x := by
+    rw [← algebraMap_smul E a m, LinearMap.map_smulₛₗ, LinearMap.smul_apply, smul_eq_mul, algebraMap_cO]
+    rfl
+  have hr : hStd E n m (a • x) = algebraMap (𝓞 E) E a * hStd E n m x := by
+    rw [← algebraMap_smul E a x, map_smul, smul_eq_mul]
+  rw [hl, hr, ha]
 
 theorem hiCorner_mem_dual {α β : 𝓞 E} (hα : cO E α = α) (hβ : cO E β = β) {M N : Submodule (𝓞 E) (Sp E n)}
     (hM : IsUnimodular (hStd E n) M) (hN : IsUnimodular (hStd E n) N) (x : Sp E n) :
@@ -194,7 +240,7 @@ theorem hiCorner_mem_dual {α β : 𝓞 E} (hα : cO E α = α) (hβ : cO E β =
     obtain ⟨y1, hy1, y2, hy2, rfl⟩ := Submodule.mem_sup.1 hy
     obtain ⟨m, hm, rfl⟩ := (Submodule.mem_smul_pointwise_iff_exists _ _ _).1 hy1
     obtain ⟨z, hz, rfl⟩ := (Submodule.mem_smul_pointwise_iff_exists _ _ _).1 hy2
-    rw [map_add, LinearMap.add_apply, hi_hStd_conj hα, hi_hStd_conj hβ]
+    rw [map_add (f := _), LinearMap.add_apply, hi_hStd_conj hα, hi_hStd_conj hβ]
     exact Submodule.add_mem _ ((mem_dual M _).1 hM' m hm) ((mem_dual N _).1 hN' z hz)
 
 theorem hiCorner_unimodular {α β : 𝓞 E} (hab : α + β = 1) (hα : cO E α = α) (hβ : cO E β = β)
@@ -216,11 +262,11 @@ theorem hiCorner_unimodular {α β : 𝓞 E} (hab : α + β = 1) (hα : cO E α 
     exact (hiCorner_mem_dual hα hβ hM hN x).2 ⟨hr2.1 x hx, hr1.2 x hx⟩
 
 theorem hiCorner_lattice {α β : 𝓞 E} (hab : α + β = 1) {N e M : Submodule (𝓞 E) (Sp E n)}
-    (hN : Submodule.IsLattice E N) (hM : Submodule.IsLattice E M) {i j : 𝓞 E} (hi : i ≠ 0) (hj : j ≠ 0)
+    (hN : Submodule.IsLattice E N) (hM : Submodule.IsFullLattice E M) {i j : 𝓞 E} (hi : i ≠ 0) (hj : j ≠ 0)
     (hNi : ∀ x ∈ N, i • x ∈ e) (hej : ∀ y ∈ e, j • y ∈ M) : Submodule.IsLattice E (hiCorner α β M N) := by
   have hD : Submodule.IsLattice E (M ⊔ N) := ⟨hM.fg.sup hN.fg, by
-    rw [eq_top_iff, ← hM.span_eq_top]
-    exact Submodule.span_mono (SetLike.coe_subset_coe.2 (le_sup_left : M ≤ M ⊔ N))⟩
+    intro s hs hli
+    exact (LinearIndependent.iff_fractionRing _ _).mp hli⟩
   refine lattice_of_smul hN hD (hiCorner_le (fun m hm => Submodule.mem_sup_left (M.smul_mem α hm))
     (fun x hx => Submodule.mem_sup_right (N.smul_mem β hx))) (mul_ne_zero hj hi) fun x hx => ?_
   refine hiCorner_inf hab M N ⟨?_, N.smul_mem _ hx⟩

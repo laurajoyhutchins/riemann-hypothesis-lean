@@ -1,13 +1,62 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.HkDefs
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.SwapOne
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.HkDedekind
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.HkDefs
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.HkDedekind
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.SwapOne
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open MvPolynomial Equiv UpperTheory.V.AlgebraTools.Hk
 
 private theorem X_sub_ne {R : Type} [CommRing R] [IsDomain R] {n : ℕ} (q : R) {i j : Fin n} (h : i ≠ j) :
     (X i - C q * X j : MvPolynomial (Fin n) R) ≠ 0 := by
   intro h0
-  have := congrArg (MvPolynomial.coeff (Finsupp.single i 1)) h0
+  have := congrArg (AddMonoidAlgebra.coeff · (Finsupp.single i 1)) h0
   simp [MvPolynomial.coeff_X', MvPolynomial.coeff_C_mul, Finsupp.single_left_inj, h, Ne.symm h] at this
 
 theorem UpperTheory.V.AlgebraTools.hkFaith :
@@ -26,12 +75,14 @@ theorem UpperTheory.V.AlgebraTools.hkFaith :
     have h1 : b.th (∑ u, c u * Y u x) * b.one = 0 := by
       calc b.th (∑ u, c u * Y u x) * b.one
           = ∑ u, b.th (c u) * (b.th (Y u x) * b.one) := by
+
             rw [map_sum, Finset.sum_mul]; simp [map_mul, mul_assoc]
         _ = ∑ u, b.th (c u) * (b.T u * b.th x * b.one) := by simp [hY1]
         _ = (∑ u, b.th (c u) * b.T u) * b.th x * b.one := by
             rw [Finset.sum_mul, Finset.sum_mul]; simp [mul_assoc]
         _ = 0 := hc x
     have h2 := congrArg (algebraMap (MvPolynomial (Fin n) R) K) (hfaith _ h1)
+
     rw [map_sum, map_zero] at h2
     simp_rw [map_mul, hY2, Finset.mul_sum] at h2
     rw [Finset.sum_comm] at h2

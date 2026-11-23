@@ -1,5 +1,53 @@
-import Mathlib
-import Formalism.LocalToGlobal.ProjectiveLattices.OneLtAbsNormReal
+module
+
+public import Formalism.LocalToGlobal.ProjectiveLattices.OneLtAbsNormReal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -317,14 +365,14 @@ theorem eventually_ne {h : S} (hh : ψ h ≠ 0) : ∀ᶠ ψ' in closeF V ψ, ψ'
   rw [h0, zero_sub, Valuation.map_neg] at h1
   exact lt_irrefl _ h1
 
-open Classical in
 
+open Classical in
 def ext (h : S) (χ₀ : Localization.Away h →+* K) (ψ' : S →+* K) : Localization.Away h →+* K :=
   if hh : ψ' h = 0 then χ₀ else IsLocalization.Away.lift h (Ne.isUnit hh)
 
 theorem ext_comp {h : S} (χ₀ : Localization.Away h →+* K) {ψ' : S →+* K} (hh : ψ' h ≠ 0) :
     (ext h χ₀ ψ').comp (algebraMap S _) = ψ' := by
-  rw [ext, dif_neg hh]
+  rw [ext, dite_eq_right hh]
   exact IsLocalization.Away.lift_comp h _
 
 theorem tend_ext {h : S} (hh : ψ h ≠ 0) {χ₀ : Localization.Away h →+* K} (h0 : χ₀.comp (algebraMap S _) = ψ)
@@ -360,7 +408,7 @@ theorem Tend.cong {a : (S →+* K) → K} {b : V} (h : Tend V ψ a (algebraMap V
     rw [hw]
     exact le_of_lt h1
   obtain ⟨y, hy⟩ := hint
-  refine ⟨b + y, by rw [map_add, hy, add_sub_cancel], ?_⟩
+  refine ⟨b + y, by rw [map_add (f := _), hy, add_sub_cancel], ?_⟩
   rw [add_sub_cancel_left]
   have h3 : valV V (algebraMap V K y) < 1 := by
     rw [hy]

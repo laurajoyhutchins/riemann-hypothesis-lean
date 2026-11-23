@@ -1,4 +1,48 @@
-import ReciprocityTheory.ThetaQuasiPeriods.PeriodLattice
+module
+
+public import ReciprocityTheory.ThetaQuasiPeriods.PeriodLattice
+public import Mathlib.Analysis.Calculus.FDeriv.Defs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -48,15 +92,6 @@ def ThetaCharShiftStatement : Prop :=
       eC (ofRealVec a ⬝ᵥ (τ *ᵥ ofRealVec a) / 2 + ofRealVec a ⬝ᵥ (z + ofRealVec b + ofRealVec b')) *
         theta a' b' (z + τ *ᵥ ofRealVec a + ofRealVec b) τ
 
-def ThetaNegStatement : Prop :=
-  ∀ (ι : Type) [Fintype ι] (a b : ι → ℝ) (z : ι → ℂ) (τ : Matrix ι ι ℂ),
-    theta (-a) (-b) (-z) τ = theta a b z τ
-
-def ThetaHalfParityStatement : Prop :=
-  ∀ (ι : Type) [Fintype ι] (n n' : ι → ℤ) (z : ι → ℂ) (τ : Matrix ι ι ℂ),
-    theta (fun i => (n i : ℝ) / 2) (fun i => (n' i : ℝ) / 2) (-z) τ =
-      (-1) ^ (n ⬝ᵥ n') * theta (fun i => (n i : ℝ) / 2) (fun i => (n' i : ℝ) / 2) z τ
-
 def ThetaTranslTauStatement : Prop :=
   ∀ (ι : Type) [Fintype ι] (a b : ι → ℝ) (z : ι → ℂ) (τ : Matrix ι ι ℂ) (B : Matrix ι ι ℤ), B.IsSymm →
     theta a b z (τ + B.map (fun x : ℤ => (x : ℂ))) =
@@ -72,17 +107,5 @@ def ThetaGLStatement : Prop :=
           ((U : Matrix ι ι ℤ).map (fun x : ℤ => (x : ℂ)))ᵀ) =
       theta (((U : Matrix ι ι ℤ).map (fun x : ℤ => (x : ℝ)))ᵀ *ᵥ a)
         (((U⁻¹ : (Matrix ι ι ℤ)ˣ) : Matrix ι ι ℤ).map (fun x : ℤ => (x : ℝ)) *ᵥ b) z τ
-
-def ThetaBlockStatement : Prop :=
-  ∀ (ι₁ ι₂ : Type) [Fintype ι₁] [Fintype ι₂] (a₁ b₁ : ι₁ → ℝ) (a₂ b₂ : ι₂ → ℝ) (z₁ : ι₁ → ℂ)
-    (z₂ : ι₂ → ℂ) (τ₁₁ : Matrix ι₁ ι₁ ℂ) (τ₁₂ : Matrix ι₁ ι₂ ℂ) (τ₂₂ : Matrix ι₂ ι₂ ℂ),
-    Matrix.fromBlocks τ₁₁ τ₁₂ τ₁₂ᵀ τ₂₂ ∈ SiegelH (ι₁ ⊕ ι₂) →
-    theta (Sum.elim a₁ a₂) (Sum.elim b₁ b₂) (Sum.elim z₁ z₂) (Matrix.fromBlocks τ₁₁ τ₁₂ τ₁₂ᵀ τ₂₂) =
-      ∑' l₂ : ι₂ → ℤ, eC (shiftVec a₂ l₂ ⬝ᵥ (τ₂₂ *ᵥ shiftVec a₂ l₂) / 2 +
-          shiftVec a₂ l₂ ⬝ᵥ (z₂ + ofRealVec b₂)) *
-        theta a₁ b₁ (z₁ + τ₁₂ *ᵥ shiftVec a₂ l₂) τ₁₁
-
-def ThetaGenusOneStatement : Prop :=
-  ∀ z τ : ℂ, theta (ι := Fin 1) 0 0 (fun _ => z) (Matrix.of fun _ _ => τ) = jacobiTheta₂ z τ
 
 end ReciprocityTheory.PTheta

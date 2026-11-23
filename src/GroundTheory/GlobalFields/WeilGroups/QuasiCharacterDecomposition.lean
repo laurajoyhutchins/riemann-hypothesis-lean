@@ -1,5 +1,52 @@
-import Mathlib
-import GroundTheory.GlobalFields.WeilGroups.QuasiCharacter
+module
+
+public import GroundTheory.GlobalFields.WeilGroups.QuasiCharacter
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField
 
@@ -23,10 +70,6 @@ theorem ofUnitary_toUnitary (ψ : QuasiCharacter K) (h : ∀ c, ‖((ψ c : ℂ�
   rfl
 
 theorem mul_modulePow_zero (ψ : QuasiCharacter K) : ψ * modulePow (0 : ℂ) = ψ := by
-  ext c
-  simp
-
-theorem ofUnitary_one_mul (ψ : QuasiCharacter K) : ofUnitary 1 * ψ = ψ := by
   ext c
   simp
 
@@ -77,8 +120,8 @@ theorem ofUnitaryMulModulePow_bijective :
   · obtain ⟨χ, σ, h⟩ := ψ.exists_ofUnitary_mul_modulePow
     exact ⟨(χ, Multiplicative.ofAdd σ), h⟩
 
-variable (K) in
 
+variable (K) in
 def unitaryDecomposition : QuasiCharacter K ≃* HeckeCharacter K × Multiplicative ℝ :=
   (MulEquiv.ofBijective _ ofUnitaryMulModulePow_bijective).symm
 
@@ -96,33 +139,6 @@ theorem norm_apply (c : IdeleClassGroup K) :
     ‖((ψ c : ℂˣ) : ℂ)‖ = (IdeleClassGroup.ideleModule K c : ℝ) ^ ψ.exponent := by
   conv_lhs => rw [← ψ.ofUnitary_unitaryPart_mul_modulePow_exponent]
   exact norm_ofUnitary_mul_modulePow _ _ _
-
-@[simp]
-theorem unitaryPart_ofUnitary_mul_modulePow (χ : HeckeCharacter K) (σ : ℝ) :
-    (ofUnitary χ * modulePow (σ : ℂ)).unitaryPart = χ :=
-  (eq_of_ofUnitary_mul_modulePow_eq
-    (ofUnitary_unitaryPart_mul_modulePow_exponent (ofUnitary χ * modulePow (σ : ℂ)))).1
-
-@[simp]
-theorem exponent_ofUnitary_mul_modulePow (χ : HeckeCharacter K) (σ : ℝ) :
-    (ofUnitary χ * modulePow (σ : ℂ)).exponent = σ :=
-  (eq_of_ofUnitary_mul_modulePow_eq
-    (ofUnitary_unitaryPart_mul_modulePow_exponent (ofUnitary χ * modulePow (σ : ℂ)))).2
-
-@[simp]
-theorem unitaryPart_ofUnitary (χ : HeckeCharacter K) : (ofUnitary χ).unitaryPart = χ := by
-  have h := unitaryPart_ofUnitary_mul_modulePow χ 0
-  rwa [Complex.ofReal_zero, mul_modulePow_zero] at h
-
-@[simp]
-theorem exponent_ofUnitary (χ : HeckeCharacter K) : (ofUnitary χ).exponent = 0 := by
-  have h := exponent_ofUnitary_mul_modulePow χ 0
-  rwa [Complex.ofReal_zero, mul_modulePow_zero] at h
-
-@[simp]
-theorem exponent_modulePow (σ : ℝ) : (modulePow (σ : ℂ) : QuasiCharacter K).exponent = σ := by
-  have h := exponent_ofUnitary_mul_modulePow (1 : HeckeCharacter K) σ
-  rwa [ofUnitary_one_mul] at h
 
 end QuasiCharacter
 

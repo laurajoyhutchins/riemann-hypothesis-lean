@@ -1,6 +1,48 @@
-import Formalism.LocalToGlobal.Columns.TiedCls
-import Formalism.LocalToGlobal.Columns.AtTOwedS
-import Formalism.LocalRingCardinality.SpanPowerMembership.ExampleLayerExistsGenerators
+module
+
+public import Formalism.LocalToGlobal.Columns.TiedCrd
+public import Formalism.LocalRingCardinality.SpanPowerMembership.ExampleLayerExistsGenerators
+public import Formalism.LocalToGlobal.Columns.RecLevelLocP
+public import Formalism.LocalToGlobal.Columns.RecLevelStep
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Module Matrix
 open scoped TensorProduct
@@ -35,10 +77,6 @@ def tieEV : {P // P ∈ Pr.vT u} ≃ {v : HeightOneSpectrum (𝓞 X.F) // (Pr.T 
       obtain ⟨P, hP, hov⟩ := (mem_plUnder_iff_norm hc (rls_vT_iff hX hPr u) (Pr.T u) (hPr.piT_norm u) v).2 hv
       exact ⟨⟨P, hP⟩, Subtype.ext (HeightOneSpectrum.ext hov.symm)⟩)
 
-theorem tieEV_over (P : {P // P ∈ Pr.vT u}) : IsOver (tieEV hc hX hPr u P).1 P.1 := rfl
-
-theorem tieEV_val (P : {P // P ∈ Pr.vT u}) : (tieEV hc hX hPr u P).1 = underPl X.F P.1 := rfl
-
 end Gen
 
 section Val
@@ -46,8 +84,8 @@ section Val
 variable {K : Type} [Field K] [NumberField K] (Pl : Rows.Places K) (pw : Pl.Pl → HeightOneSpectrum (𝓞 K))
   (hval : ∀ w (x : K), x ≠ 0 → Pl.val w x = ((vAdd (pw w) x : ℤ) : WithTop ℤ))
 
-include hval in
 
+include hval in
 theorem att_val_pos (w : Pl.Pl) (x : 𝓞 K) : (0 : WithTop ℤ) < Pl.val w (x : K) ↔ x ∈ (pw w).asIdeal := by
   by_cases hx : x = 0
   · subst hx
@@ -62,8 +100,8 @@ theorem att_val_pos (w : Pl.Pl) (x : 𝓞 K) : (0 : WithTop ℤ) < Pl.val w (x :
     unfold Formalism.BasicNotions.vAdd
     rw [← WithTop.coe_zero, WithTop.coe_lt_coe, neg_pos, ← WithZero.log_one, WithZero.log_lt_log h0 one_ne_zero]
 
-include hval in
 
+include hval in
 theorem att_resChar_mem (w : Pl.Pl) : ((Pl.resChar w : ℕ) : 𝓞 K) ∈ (pw w).asIdeal := by
   rw [← att_val_pos Pl pw hval]
   have h := Pl.val_resChar w
@@ -77,8 +115,8 @@ section Seen
 
 variable {X : Fields} {Pr : Primes X} (hc : CMData X.F X.E) (hX : X.Ok) (hPr : Pr.Ok) (u : Pr.Word)
 
-include hc in
 
+include hc in
 theorem att_mem_conjP (P : Pl X.E) (x : 𝓞 X.F) :
     algebraMap (𝓞 X.F) (𝓞 X.E) x ∈ (conjPrime₂ P).asIdeal ↔ algebraMap (𝓞 X.F) (𝓞 X.E) x ∈ P.asIdeal := by
   rw [mem_conjP, rll_cO_algebraMap hc]
@@ -88,7 +126,7 @@ theorem att_tauOf (w : HeightOneSpectrum (𝓞 X.K)) (hw : (Pr.T u : 𝓞 X.K) �
   have := hX.nonempty_Tau
   have e : tauOfR hX hPr u w P = tauOfC w P.1 := by
     unfold tauOfR
-    rw [dif_pos hw]
+    rw [dite_eq_left hw]
     rfl
   rw [e, ← mem_pullW]
   show algebraMap (𝓞 X.F) (𝓞 X.E) x ∈ P.1.asIdeal ↔ _
@@ -96,16 +134,6 @@ theorem att_tauOf (w : HeightOneSpectrum (𝓞 X.K)) (hw : (Pr.T u : 𝓞 X.K) �
   · rw [show pullW (tauOfC w P.1) w = P.1 from h]
   · rw [show pullW (tauOfC w P.1) w = conjPrime₂ P.1 from h, att_mem_conjP hc]
 
-include hX hPr in
-open Classical in
-
-theorem att_seenP (w : HeightOneSpectrum (𝓞 X.K)) (hw : (Pr.T u : 𝓞 X.K) ∈ w.asIdeal) (τ : X.Tau) :
-    X.embO τ (if decide (seenC Pr u w) = true then Pr.piT u else X.conjO (Pr.piT u)) ∈ w.asIdeal := by
-  by_cases h : seenC Pr u w
-  · rw [if_pos (decide_eq_true h)]
-    exact h τ
-  · rw [if_neg (by simpa using h)]
-    exact ((seenC_or_seenBarC hX hPr u w hw).resolve_left h) τ
 
 end Seen
 
@@ -115,7 +143,7 @@ variable {d : ColDat} (a : ColArgs d)
 
 theorem att_star_eq (x : d.host.E) : star x = d.host.conj x := Formalism.BasicNotions.Examples₂.star_eq_conj d.host x
 
-set_option maxHeartbeats 1000000 in
+
 
 def atTTied (hH : HostHyp d) (u : d.what₂.Word) : CF.AtTTied (D := d.colRec a) u where
   eV := tieEV d.sp.cm d.hX d.hPr u
@@ -138,9 +166,12 @@ def atTTied (hH : HostHyp d) (u : d.what₂.Word) : CF.AtTTied (D := d.colRec a)
   res_conj := fun v pb hpb h => by
     have h1 : pb = cO d.X.E (d.Pr.piT u) := by
       apply RingOfIntegers.ext
-      rw [hpb, ← att_star_eq]
-      rfl
-    exact (basePi_of_ok d.hX d.hPr u).conj_notMem v.2 (h1 ▸ Ideal.Quotient.eq_zero_iff_mem.1 h)
+      change algebraMap (𝓞 d.X.E) d.X.E pb = algebraMap (𝓞 d.X.E) d.X.E (cO d.X.E (d.Pr.piT u))
+      rw [algebraMap_cO, att_star_eq (d := d)]
+      exact hpb
+    change Ideal.Quotient.mk v.1.asIdeal pb = 0 at h
+    rw [h1] at h
+    exact (basePi_of_ok d.hX d.hPr u).conj_notMem v.2 (Ideal.Quotient.eq_zero_iff_mem.mp h)
   res_v := fun v x => (Ideal.Quotient.eq_zero_iff_mem (I := v.1.asIdeal)).symm
   tauOf := fun w hw v x => by
     have hT : (d.Pr.T u : 𝓞 d.X.K) ∈ (d.plEq w).asIdeal := by

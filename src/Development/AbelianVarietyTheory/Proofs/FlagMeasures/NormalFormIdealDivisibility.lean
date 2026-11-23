@@ -1,10 +1,59 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.FlagPairDefinitePartLattice
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.ChartGen
-import Development.AbelianVarietyTheory.PublishedTheorems.DiscreteSeriesUnitary₂.MaxMass
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.NormalFormDualOrthogonalLast
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.SameBlockAppend
-import Formalism.FlagUnipotentLattices.MinkowskiFactorialBounds.ExistsHasLeadingCoeffOfMemSpanBelow
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.NormalFormDualOrthogonalLast
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.SameBlockAppend
+public import Formalism.FlagUnipotentLattices.MinkowskiFactorialBounds.ExistsHasLeadingCoeffOfMemSpanBelow
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 open NumberField Formalism.HermitianLatticeCounting.P Formalism.HermitianLatticeCounting.S6 GlobalTheory.HermLat GlobalTheory.DegCnt
@@ -15,8 +64,8 @@ namespace GlobalTheory.DegCnt.PosIso
 variable {K V : Type} [Field K] [NumberField K] [StarRing K] [AddCommGroup V] [Module K V]
   [Module (𝓞 K) V] [IsScalarTower (𝓞 K) K V]
 
-omit [StarRing K] in
 
+omit [StarRing K] in
 theorem exists_section (M : Submodule (𝓞 K) V) (hM : M.FG) (φ : V →ₗ[K] K) (h0 : ∃ y ∈ M, φ y ≠ 0) :
     ∃ v ∈ Submodule.span K (M : Set V), φ v = 1 ∧ ∀ y ∈ M, φ y • v ∈ M := by
   let J : Submodule (𝓞 K) K := M.map (φ.restrictScalars (𝓞 K))
@@ -47,8 +96,8 @@ theorem exists_section (M : Submodule (𝓞 K) V) (hM : M.FG) (φ : V →ₗ[K] 
       exact ⟨v + v', add_mem hv hv', by simp, fun y hy => by rw [smul_add]; exact add_mem (h y hy) (h' y hy)⟩
   exact key 1 h1
 
-omit [NumberField K] in
 
+omit [NumberField K] in
 theorem det_smul_mem (H : HermSpace K V) (Λ : Submodule (𝓞 K) V) {j : ℕ} (x x' : Fin j → V)
     (hx : ∀ a, x a ∈ Λ) (hG : ∀ a b, H.B (x a) (x' b) ∈ (1 : Submodule (𝓞 K) K)) (p : Fin j → K)
     (hp : ∀ b, H.B (∑ a, p a • x a) (x' b) ∈ (1 : Submodule (𝓞 K) K)) :
@@ -61,6 +110,7 @@ theorem det_smul_mem (H : HermSpace K V) (Λ : Submodule (𝓞 K) V) {j : ℕ} (
   have h1 : Matrix.vecMul p G = fun b => algebraMap (𝓞 K) K (η b) := by
     funext b
     rw [hη]
+
     simp [Matrix.vecMul, dotProduct, hGdef, map_sum]
   have h2 : G.det • p = Matrix.vecMul (Matrix.vecMul p G) G.adjugate := by
     rw [Matrix.vecMul_vecMul, Matrix.mul_adjugate, Matrix.vecMul_smul, Matrix.vecMul_one]
@@ -70,6 +120,7 @@ theorem det_smul_mem (H : HermSpace K V) (Λ : Submodule (𝓞 K) V) {j : ℕ} (
     have := congrFun h2 a
     rw [Pi.smul_apply, smul_eq_mul] at this
     rw [this, h1, hGm, ← RingHom.map_adjugate]
+
     simp [Matrix.vecMul, dotProduct, map_sum]
   rw [smul_smul, h3, algebraMap_smul]
   exact Λ.smul_mem _ (hx a)
@@ -218,9 +269,10 @@ theorem prod_smul_mem (F F' : FlagD H r) (Λ : Submodule (𝓞 K) V) (aa : Fin r
   rw [← hA, ← hA', ← Matrix.det_conjTranspose, Dl, ← Matrix.det_mul, ← Matrix.det_mul]
   congr 1
   ext a b
+
   simp only [Matrix.mul_apply, Matrix.of_apply, map_sum, map_smul, LinearMap.sum_apply, LinearMap.smul_apply,
-    LinearMap.map_smulₛₗ, Matrix.submatrix_apply, Zhat, Matrix.conjTranspose_apply, smul_eq_mul, Finset.sum_mul,
-    Finset.mul_sum, starRingEnd_apply]
+  LinearMap.map_smulₛₗ, Matrix.submatrix_apply, Zhat, Matrix.conjTranspose_apply, smul_eq_mul, Finset.sum_mul,
+  Finset.mul_sum, starRingEnd_apply]
   first
     | (refine Finset.sum_congr rfl fun c _ => Finset.sum_congr rfl fun d _ => by ring)
     | (rw [Finset.sum_comm]; refine Finset.sum_congr rfl fun c _ => Finset.sum_congr rfl fun d _ => by ring)
@@ -333,7 +385,7 @@ theorem Ia_step (N : NF H r) (b : Fin r) (hb : N.j ≤ b.val) {y : V} (hy : y �
   | zero => simp
   | add y y' _ _ h h' =>
     convert add_mem h h' using 1
-    simp only [map_add, LinearMap.add_apply]; module
+    simp only [map_add (f := _), LinearMap.add_apply]; module
   | smul a y _ h =>
     convert Submodule.smul_mem _ a h using 1
     simp only [map_smul, LinearMap.smul_apply, smul_eq_mul]; module
@@ -354,6 +406,7 @@ theorem II_le (N : NF H r) : II N.F N.F' ≤ Ia N r := by
     refine Matrix.eq_zero_of_vecMul_eq_zero (Dl_ne N) ?_
     funext b
     have := X_iso N.F' hξ' (e_mem_X N.F' (Fin.castLE N.j_le b))
+
     simpa [Matrix.vecMul, dotProduct, Zhat, map_sum] using this
   simpa [this] using hi
 
@@ -534,7 +587,7 @@ theorem exists_adapted (N : NF H r) (Λ : Submodule (𝓞 K) V) (hΛ : Λ.FG) (b
       ∀ y ∈ Λ, y ∈ Ia N (b.val + 1) → H.B y (N.ist b) • v ∈ Λ := by
   by_cases h0 : ∃ y ∈ Λ ⊓ rs (𝓞 K) (Ia N (b.val + 1)), H.B.flip (N.ist b) y ≠ 0
   · obtain ⟨v, hv, h1, h⟩ := exists_section _ (hΛ.of_le inf_le_left) _ h0
-    have hv' : v ∈ Ia N (b.val + 1) := (Submodule.span_le.2 fun y hy => hy.2) hv
+    have hv' : v ∈ Ia N (b.val + 1) := (Submodule.span_le.2 fun y (hy : y ∈ Λ ⊓ rs (𝓞 K) (Ia N (b.val + 1))) => (show y ∈ Ia N (b.val + 1) from hy.2)) hv
     refine ⟨v, ?_, fun y hy hy' => (h y ⟨hy, hy'⟩).1⟩
     have := Ia_step N b hb hv'
     rwa [show H.B v (N.ist b) = 1 from h1, one_smul] at this
@@ -562,7 +615,7 @@ theorem normal_position : ∀ (K V : Type) [Field K] [NumberField K] [StarRing K
   have hγ : ∀ γ ∈ 𝔠, ∀ y ∈ ipow N.𝔡 (2 * ∑ a ∈ Finset.range N.j, ((r : ℤ) - a)),
       (γ : K) * y / Dl N.F N.F' N.j (N.j_le.trans (Nat.le_succ r)) ∈ (1 : Submodule (𝓞 K) K) :=
     fun γ h y hy => (h𝔠 N.j _ le_rfl (Dl_ne N) γ h y hy).1
-  have hfg : Λ.FG := ((isUnimod_iff H Λ).1 hΛ.1).1.fg
+  have hfg : Λ.FG := ((isUnimod_iff H Λ).1 hΛ.1).1.1
   choose! v hv hvΛ using exists_adapted N Λ hfg
   obtain ⟨u, hu, huz, huv⟩ := exists_unitri N v hv
   have hz : (1 : K) ∈ lead N.F Λ (Fin.last r) := by rw [hΛ.2.1.2]; exact Submodule.mem_one.2 ⟨1, map_one _⟩

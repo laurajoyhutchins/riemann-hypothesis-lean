@@ -1,4 +1,53 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.Rationality.BasisChangeSt
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.Rationality.BasisChangeSt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Analysis.Normed.Group.Ultra
+
+@[expose] public section
 
 namespace ReciprocityTheory.ChartRestriction.G.FreeQuotientRank
 
@@ -8,7 +57,7 @@ open MvPolynomial
 
 variable {K : Type*} [NormedField K] [IsUltrametricDist K] {ι : Type*}
 
-def CB (Q : MvPolynomial ι K) (c : ℝ) : Prop := ∀ μ, ‖coeff μ Q‖ ≤ c
+def CB (Q : MvPolynomial ι K) (c : ℝ) : Prop := ∀ μ, ‖AddMonoidAlgebra.coeff Q μ‖ ≤ c
 
 lemma cb_sum {α : Type*} (s : Finset α) (g : α → MvPolynomial ι K) {c : ℝ} (hc : 0 ≤ c)
     (h : ∀ a ∈ s, CB (g a) c) : CB (∑ a ∈ s, g a) c := by
@@ -61,7 +110,7 @@ lemma cb_lin [Fintype ι] (A : ι → ι → K) {c : ℝ} (hc : 0 ≤ c) (hA : �
   classical
   refine cb_sum _ _ hc (fun k _ => fun μ => ?_)
   rw [MvPolynomial.coeff_C_mul, norm_mul]
-  calc ‖A i k‖ * ‖MvPolynomial.coeff μ (X k : MvPolynomial ι K)‖ ≤ ‖A i k‖ * 1 := by
+  calc ‖A i k‖ * ‖AddMonoidAlgebra.coeff (X k : MvPolynomial ι K) μ‖ ≤ ‖A i k‖ * 1 := by
         apply mul_le_mul_of_nonneg_left _ (norm_nonneg _)
         rw [MvPolynomial.coeff_X']
         split_ifs <;> simp
@@ -78,6 +127,7 @@ theorem basisChange_holds : BasisChangeStatement := by
     fun i => cb_lin A hC0 hA i
   have key : CB (MvPolynomial.bind₁ (fun i => ∑ k, MvPolynomial.C (A i k) * MvPolynomial.X k) P) (C ^ d) := by
     conv => arg 1; rw [P.as_sum]
+
     rw [map_sum]
     refine cb_sum _ _ (pow_nonneg hC0 d) (fun v hv => ?_)
     rw [MvPolynomial.bind₁_monomial]
@@ -87,14 +137,14 @@ theorem basisChange_holds : BasisChangeStatement := by
     have hprod : CB (∏ i ∈ v.support, (∑ k, MvPolynomial.C (A i k) * MvPolynomial.X k) ^ v i)
         (∏ i ∈ v.support, C ^ v i) :=
       cb_prod _ _ _ (fun i => pow_nonneg hC0 _) (fun i _ => cb_pow hC0 (hL i) (v i))
-    have hb := cb_C_mul (MvPolynomial.coeff v P) hprod
+    have hb := cb_C_mul (AddMonoidAlgebra.coeff P v) hprod
     have hpow : ∏ i ∈ v.support, C ^ v i = C ^ d := by
       rw [Finset.prod_pow_eq_pow_sum, ← hdeg]
       rfl
     intro ν
-    calc ‖MvPolynomial.coeff ν (MvPolynomial.C (MvPolynomial.coeff v P) *
-          ∏ i ∈ v.support, (∑ k, MvPolynomial.C (A i k) * MvPolynomial.X k) ^ v i)‖
-        ≤ ‖MvPolynomial.coeff v P‖ * ∏ i ∈ v.support, C ^ v i := hb ν
+    calc ‖AddMonoidAlgebra.coeff (MvPolynomial.C (AddMonoidAlgebra.coeff P v) *
+          ∏ i ∈ v.support, (∑ k, MvPolynomial.C (A i k) * MvPolynomial.X k) ^ v i) ν‖
+        ≤ ‖AddMonoidAlgebra.coeff P v‖ * ∏ i ∈ v.support, C ^ v i := hb ν
       _ ≤ 1 * C ^ d := by
           rw [hpow]
           exact mul_le_mul_of_nonneg_right (hP1 v) (pow_nonneg hC0 d)

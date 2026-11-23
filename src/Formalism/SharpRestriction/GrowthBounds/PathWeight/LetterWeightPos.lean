@@ -1,4 +1,51 @@
-import Formalism.SharpRestriction.GrowthBounds.PathWeight.GeneratorImageIsSymbol
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.PathWeight.GeneratorImageIsSymbol
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.BitVec
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -22,10 +69,10 @@ theorem weighted_component_mul_lowest {f g : MvPolynomial σ R} {a b : ℕ}
   · refine Finset.sum_congr rfl fun x hx => ?_
     rw [coeff_weightedHomogeneousComponent, coeff_weightedHomogeneousComponent]
     have hx' : x.1 + x.2 = m := Finset.HasAntidiagonal.mem_antidiagonal.1 hx
-    have hw : Finsupp.weight wt x.1 + Finsupp.weight wt x.2 = a + b := by rw [← map_add, hx', h]
-    by_cases h1 : coeff x.1 f = 0
+    have hw : Finsupp.weight wt x.1 + Finsupp.weight wt x.2 = a + b := by rw [← map_add (f := _), hx', h]
+    by_cases h1 : AddMonoidAlgebra.coeff f x.1 = 0
     · simp [h1]
-    by_cases h2 : coeff x.2 g = 0
+    by_cases h2 : AddMonoidAlgebra.coeff g x.2 = 0
     · simp [h2]
     have e1 := hf x.1 (mem_support_iff.2 h1)
     have e2 := hg x.2 (mem_support_iff.2 h2)
@@ -36,7 +83,7 @@ theorem weighted_component_mul_lowest {f g : MvPolynomial σ R} {a b : ℕ}
     have hx' : x.1 + x.2 = m := Finset.HasAntidiagonal.mem_antidiagonal.1 hx
     by_cases h1 : Finsupp.weight wt x.1 = a
     · by_cases h2 : Finsupp.weight wt x.2 = b
-      · exact absurd (by rw [← hx', map_add, h1, h2]) h
+      · exact absurd (by rw [← hx', map_add (f := _), h1, h2]) h
       · simp [h2]
     · simp [h1]
 
@@ -45,7 +92,7 @@ theorem support_weight_mul_lower {f g : MvPolynomial σ R} {a b : ℕ}
     ∀ m ∈ (f * g).support, a + b ≤ Finsupp.weight wt m := by
   intro m hm
   obtain ⟨m1, h1, m2, h2, rfl⟩ := Finset.mem_add.1 (MvPolynomial.support_mul f g hm)
-  rw [map_add]
+  rw [map_add (f := _)]
   exact Nat.add_le_add (hf m1 h1) (hg m2 h2)
 
 theorem weighted_component_prod_lowest {ι : Type*} (s : Finset ι) (f : ι → MvPolynomial σ R) (o : ι → ℕ)
@@ -68,8 +115,9 @@ end Low
 
 theorem depth_filtration_rename {O : Type*} [CommRing O] [IsDomain O] {σ τ : Type*} {w : O} (f : σ → τ)
     {P : MvPolynomial σ (KK O)} {j : ℕ} (hP : InWj w P j) : InWj w (rename f P) j := by
-  have h : rename f P = ∑ m ∈ P.support, rename f (monomial m (coeff m P)) := by
+  have h : rename f P = ∑ m ∈ P.support, rename f (monomial m (AddMonoidAlgebra.coeff P m)) := by
     conv_lhs => rw [P.as_sum]
+
     rw [map_sum]
   rw [h]
   refine inWj_sum _ _ fun m _ => ?_
@@ -125,6 +173,7 @@ theorem substitution_rename_lift (w : O) (hn : Even n') (g : Matrix (Fin k) (Fin
     · have hE' : Even (posOf n' (eL F j v.1)).val := (posOf_even hn _).2 hE
       have h1 : (LLT n').vec (rho F j k v).1 = true := by simp [LLT, rho, hE']
       have h2 : (LLs F j).vec v.1 = true := by simp [LLs, hE]
+
       rw [if_pos h1, if_pos h2, map_sum]
       refine Finset.sum_congr rfl fun b _ => ?_
       rw [map_mul, rename_C]
@@ -132,6 +181,7 @@ theorem substitution_rename_lift (w : O) (hn : Even n') (g : Matrix (Fin k) (Fin
     · have hE' : ¬ Even (posOf n' (eL F j v.1)).val := fun h => hE ((posOf_even hn _).1 h)
       have h1 : ¬ (LLT n').vec (rho F j k v).1 = true := by simp [LLT, rho, hE']
       have h2 : ¬ (LLs F j).vec v.1 = true := by simp [LLs, hE]
+
       rw [if_neg h1, if_neg h2, map_sum]
       refine Finset.sum_congr rfl fun b _ => ?_
       rw [map_mul, rename_C]
@@ -200,15 +250,16 @@ theorem segment_substitution_weighted_homog (hn : Even n') (Y : MvPolynomial (Fi
   rw [segment_substitution_aeval]
   have h : aeval (fun v => (X (rho F j (r + K) v) : RRing O n' (r + K)) ^ omL F j p v.1) Y =
       ∑ m ∈ Y.support,
-        aeval (fun v => (X (rho F j (r + K) v) : RRing O n' (r + K)) ^ omL F j p v.1) (monomial m (coeff m Y)) := by
+        aeval (fun v => (X (rho F j (r + K) v) : RRing O n' (r + K)) ^ omL F j p v.1) (monomial m (AddMonoidAlgebra.coeff Y m)) := by
     conv_lhs => rw [Y.as_sum]
+
     rw [map_sum]
   rw [h]
   refine IsWeightedHomogeneous.sum _ _ _ fun m hm => ?_
   rw [aeval_monomial]
   have hw : Finsupp.weight (symWt (r := r) (K := K) (LLs F j).toLetters (omL F j p)) m = o :=
     hY (mem_support_iff.1 hm)
-  have hC : algebraMap O (RRing O n' (r + K)) (coeff m Y) = C (coeff m Y) := rfl
+  have hC : algebraMap O (RRing O n' (r + K)) (AddMonoidAlgebra.coeff Y m) = C (AddMonoidAlgebra.coeff Y m) := rfl
   rw [hC]
   apply IsWeightedHomogeneous.C_mul
   rw [← hw, Finsupp.weight_apply, Finsupp.sum, Finsupp.prod]
@@ -236,7 +287,7 @@ theorem segment_substitution_eq_rename (Y : MvPolynomial (Fin (Mj F j) × Fin (r
       unfold powSubst; rw [aeval_C]; rfl
     rw [e1, e2, map_C, rename_C]
   | add P Q hP hQ =>
-    simp only [map_add, hP, hQ]
+    simp only [map_add (f := _), hP, hQ]
   | mul_X P v hP =>
     simp only [map_mul]
     rw [hP]

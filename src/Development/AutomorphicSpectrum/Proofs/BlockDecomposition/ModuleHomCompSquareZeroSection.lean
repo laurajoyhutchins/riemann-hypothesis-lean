@@ -1,6 +1,46 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.HodgeWedgeFields.H1CommutesBaseChange
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.AbelianSchemeGerms
+module
+
+public import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.HodgeWedgeFields.H1CommutesBaseChange
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.AbelianSchemeGerms
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -72,7 +112,7 @@ theorem pairing_differential_pullback (ψ : S →+* S') (hψ : SemiHom (RingHom.
   induction ω using ind1 with
   | h a b => rw [SemiHom.oneFormMap_smul_semilinear, SemiHom.m1_D, pair_smul_D, pair_smul_D]; rfl
   | h0 => simp
-  | ha x y hx hy => rw [map_add, map_add, map_add, hx, hy]
+  | ha x y hx hy => rw [map_add (f := _), map_add (f := _), map_add (f := _), hx, hy]
 
 theorem pair_map (u : M →ₗ[B] N) (t : S →+* TrivSqZeroExt B M) (ht : OverR R t)
     (ht' : OverR R ((TrivSqZeroExt.map u).toRingHom.comp t)) (ω : Ω[S⁄R]) :
@@ -82,7 +122,7 @@ theorem pair_map (u : M →ₗ[B] N) (t : S →+* TrivSqZeroExt B M) (ht : OverR
     rw [pair_smul_D, pair_smul_D, map_smul]
     simp
   | h0 => simp
-  | ha x y hx hy => rw [map_add, map_add, map_add, hx, hy]
+  | ha x y hx hy => rw [map_add (f := _), map_add (f := _), map_add (f := _), hx, hy]
 
 def mkT (ε : S →+* B) (l : Ω[S⁄R] →+ M) (hl : ∀ a ω, l (a • ω) = ε a • l ω) : S →+* TrivSqZeroExt B M where
   toFun a := TrivSqZeroExt.inl (ε a) + TrivSqZeroExt.inr (l (D R S a))
@@ -105,7 +145,7 @@ theorem pair_mkT (ε : S →+* B) (l : Ω[S⁄R] →+ M) (hl : ∀ a ω, l (a �
   induction ω using ind1 with
   | h a b => rw [pair_smul_D, hl]; simp [mkT]
   | h0 => simp
-  | ha x y hx hy => rw [map_add, map_add, hx, hy]
+  | ha x y hx hy => rw [map_add (f := _), map_add (f := _), hx, hy]
 
 end Pair
 

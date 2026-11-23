@@ -1,14 +1,55 @@
-import Formalism.SharpRestriction.GrowthBounds.BinomialRatio
-import Formalism.SharpRestriction.GrowthBounds.CoarseMultiplicity.SegFormZeroRight
-import Formalism.SharpRestriction.GrowthBounds.CoarseMultiplicity.TestFlat
-import Formalism.SharpRestriction.GrowthBounds.CoarseMultiplicity.Beyond44OfRestRawTail
-import Formalism.SharpRestriction.GrowthBounds.CoarseMultiplicity.PairedLiftAtOfIdentity
-import Formalism.SharpRestriction.GrowthBounds.CoarseMultiplicity.GTheta
-import Formalism.SharpRestriction.GrowthBounds.CoarseMultiplicity.OPlusAtOf
-import Formalism.SharpRestriction.GrowthBounds.CoarseMultiplicity.KeyOne
-import Formalism.SharpRestriction.GrowthBounds.CoarseMultiplicity.KeyMinorDvd
-import Formalism.SharpRestriction.GrowthBounds.CoarseMultiplicity.PsiRes0Ne
-import Formalism.SharpRestriction.GrowthBounds.CoarseMultiplicity.BFFinal
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.CoarseMultiplicity.SegFormZeroRight
+public import Formalism.SharpRestriction.GrowthBounds.CoarseMultiplicity.TestFlat
+public import Formalism.SharpRestriction.GrowthBounds.CoarseMultiplicity.Lemma44IdentityOfRawTail
+public import Formalism.SharpRestriction.GrowthBounds.CoarseMultiplicity.PolyUpperBoundDelta
+public import Formalism.SharpRestriction.GrowthBounds.CoarseMultiplicity.PairedLiftAtOfIdentity
+public import Formalism.SharpRestriction.GrowthBounds.CoarseMultiplicity.GTheta
+public import Formalism.SharpRestriction.GrowthBounds.CoarseMultiplicity.OPlusAtOf
+public import Formalism.SharpRestriction.GrowthBounds.CoarseMultiplicity.KeyOne
+public import Formalism.SharpRestriction.GrowthBounds.CoarseMultiplicity.KeyMinorDvd
+public import Formalism.SharpRestriction.GrowthBounds.CoarseMultiplicity.PsiRes0Ne
+public import Formalism.SharpRestriction.GrowthBounds.CoarseMultiplicity.BFFinal
+public import Formalism.SharpRestriction.GrowthBounds.BinomialRatio
+public import Formalism.SharpRestriction.GrowthBounds.GLWeightTheory
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -29,7 +70,5 @@ def RawTailReduction : Prop := RestAsmRT
 
 theorem stmtEExt_of_15c {D : Formalism.BasicNotions.D7} (h : admitted D → RawTailReduction) : ExtendedClosedForm D :=
   stmtEExt_of_rawTail1 fun hA => restRawTail1_of (third_key_of_order key3Ord) (local_fourth_of_order (loc4Ord_of (loc4Div_of loc4Res))) (h hA)
-
-theorem stmtE_of_15c {D : Formalism.BasicNotions.D7} (h : admitted D → RawTailReduction) : ClosedFormOfAdmitted D := (stmtEExt_of_15c h).closed_of_extended_closed
 
 end Formalism.MainNotions.ColumnSystems.Pf

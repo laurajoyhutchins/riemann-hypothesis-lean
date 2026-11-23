@@ -1,8 +1,58 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.CoinducedModules.CohomologyCoindCokernelIsoHom
-import GroundTheory.ProfiniteCohomology.CohomologyFunctoriality.QuotientToInvariantsFunctorPreservesZeroMorphism
-import GroundTheory.ProfiniteCohomology.InflationRestriction.CohomologyResMemCohomologyConjInvariants
-import GroundTheory.ProfiniteCohomology.ClassFormations.IsIsoCohomologyMapAlongResSubgroupOfHom
+module
+
+public import GroundTheory.ProfiniteCohomology.CohomologyFunctoriality
+public import GroundTheory.ProfiniteCohomology.ContinuousCochains.LongExactSequence
+public import GroundTheory.ProfiniteCohomology.CohomologyFunctoriality.QuotientToInvariantsFunctorPreservesZeroMorphism
+public import GroundTheory.ProfiniteCohomology.CoinducedModules.CohomologyCoindCokernelIsoHom
+public import GroundTheory.ProfiniteCohomology.FilteredHomology
+public import GroundTheory.ProfiniteCohomology.InflationRestriction.CohomologyResMemCohomologyConjInvariants
+import GroundTheory.ProfiniteCohomology.InflationRestriction.DegreeOne
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import GroundTheory.ProfiniteCohomology.CoinducedModules
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
@@ -36,15 +86,9 @@ noncomputable def innerConjMor (A : Rep.{u} k Γ) (g : Γ) : Rep.res (innerConjH
     congr 2
     group⟩
 
-omit [TopologicalSpace Γ] [IsTopologicalGroup Γ] in
-@[simp]
-theorem innerConjMor_hom_apply (A : Rep.{u} k Γ) (g : Γ) (a : A) :
-    (innerConjMor A g).hom a = A.ρ g a :=
-  rfl
+
 
 omit [TopologicalSpace Γ] [IsTopologicalGroup Γ] in
-
-@[reassoc]
 theorem innerConjMor_naturality {A B : Rep.{u} k Γ} (f : A ⟶ B) (g : Γ) :
     (Rep.resFunctor (innerConjHom g)).map f ≫ innerConjMor B g = innerConjMor A g ≫ f := by
   ext a
@@ -62,7 +106,6 @@ noncomputable def innerConjShortComplexMor (S : ShortComplex (Rep.{u} k Γ)) (g 
   comm₁₂ := (innerConjMor_naturality S.f g).symm
   comm₂₃ := (innerConjMor_naturality S.g g).symm
 
-@[reassoc]
 theorem δ_comp_cohomologyInnerConj {S : ShortComplex (Rep.{u} k Γ)} [IsDiscreteRep S.X₁]
     [IsDiscreteRep S.X₂] [IsDiscreteRep S.X₃] (hS : S.ShortExact) (i j : ℕ) (hij : i + 1 = j)
     (g : Γ) :
@@ -77,7 +120,15 @@ theorem cohomologyInnerConj_zero (A : Rep.{u} k Γ) [IsDiscreteRep A] (g : Γ) :
   intro x
   obtain ⟨z, rfl⟩ := homologyπ_surjective (cochainsComplex A) 0 x
   change (cohomologyInnerConj A 0 g).hom ((cohomologyπ A 0).hom z) = (cohomologyπ A 0).hom z
-  rw [cohomologyInnerConj, cohomologyπ_cohomologyMapAlong_apply]
+  rw [cohomologyInnerConj]
+  have h := ConcreteCategory.congr_hom
+    (cohomologyπ_cohomologyMapAlong (innerConjHom g) (continuous_innerConjHom g)
+      (innerConjMor A g) 0) z
+  change (cohomologyMapAlong (innerConjHom g) (continuous_innerConjHom g)
+    (innerConjMor A g) 0).hom ((cohomologyπ A 0).hom z) =
+    (cohomologyπ A 0).hom ((cocyclesMapAlong (innerConjHom g)
+      (continuous_innerConjHom g) (innerConjMor A g) 0).hom z) at h
+  rw [h]
   congr 1
   apply iCycles_injective (cochainsComplex A) 0
   rw [iCycles_cyclesMap_apply]

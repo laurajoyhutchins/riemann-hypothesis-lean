@@ -1,6 +1,51 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.EntryMem
-import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.SpanMono
-import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.WcompMulHomog
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.EntryMem
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.SpanMono
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.WcompMulHomog
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Formalism.ConjugateSelfDual ReciprocityTheory.Gal IsLocalRing UpperTheory.V UpperTheory.V.Base UpperTheory.V.Alg UpperTheory.V.HV UpperTheory.V.GradeZeroInterpolatingElement
 
@@ -44,7 +89,7 @@ private theorem span_zero {O S K : Type} [CommRing O] [CommRing S] [Algebra O S]
     obtain ⟨hz1, hz2⟩ := hz
     refine ⟨B.add_mem hy1 hz1, ?_⟩
     have e : (⟨y + z, B.add_mem hy1 hz1⟩ : B) = ⟨y, hy1⟩ + ⟨z, hz1⟩ := rfl
-    rw [e, map_add, hy2, hz2, add_zero]
+    rw [e, map_add (f := _), hy2, hz2, add_zero]
   | smul a y _ hy =>
     obtain ⟨hy1, hy2⟩ := hy
     refine ⟨B.smul_mem hy1 a, ?_⟩
@@ -89,7 +134,7 @@ theorem UpperTheory.V.GradeZeroInterpolatingElement.signs :
     exact this
   refine ⟨?_, ?_, ?_, ?_, ?_⟩
   · intro hneg n hn f hf
-    rw [AlgHom.comp_apply]
+    change ξ (M.toSS f) = 0
     apply zero_of n f hf
     intro L hsum
     obtain ⟨a, ha, hlt⟩ := list_neg (fun a => wt a.2.1 a.2.2) L (by rw [hsum]; exact hn)
@@ -97,7 +142,7 @@ theorem UpperTheory.V.GradeZeroInterpolatingElement.signs :
     by_contra hne
     exact hneg _ _ hlt ⟨a.1, hne⟩
   · intro hpos n hn f hf
-    rw [AlgHom.comp_apply]
+    change ξ (M.toSS f) = 0
     apply zero_of n f hf
     intro L hsum
     obtain ⟨a, ha, hlt⟩ := list_pos (fun a => wt a.2.1 a.2.2) L (by rw [hsum]; exact hn)
@@ -108,13 +153,15 @@ theorem UpperTheory.V.GradeZeroInterpolatingElement.signs :
     obtain ⟨f, hf, hfx⟩ := from_part 1 g 0 2 (by decide)
     apply hg
     have := hpos 1 one_pos f hf
-    rw [AlgHom.comp_apply, hfx] at this
+    change ξ (M.toSS f) = 0 at this
+    rw [hfx] at this
     exact this
   · rintro hneg ⟨g, hg⟩
     obtain ⟨f, hf, hfx⟩ := from_part (-1) g 2 0 (by decide)
     apply hg
     have := hneg (-1) (by norm_num) f hf
-    rw [AlgHom.comp_apply, hfx] at this
+    change ξ (M.toSS f) = 0 at this
+    rw [hfx] at this
     exact this
   · intro ξ' hs
     have key : ∀ x : M.SS, (x : M.S) ∈ M.sPart ((0 : ℤ), 0) → ξ x = ξ' x := by

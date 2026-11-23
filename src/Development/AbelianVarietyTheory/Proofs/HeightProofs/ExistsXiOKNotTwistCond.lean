@@ -1,45 +1,57 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.HeightFunctions.XiValIffXiAt
-import Development.AbelianVarietyTheory.BlockTheory.HeightDefect.FieldTwistConditions
-import Development.AbelianVarietyTheory.Counterexamples.HeightSurvey.ExistsXiOKEvenRamified
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.IsOpenCongruenceIdelesAndRealFiniteParts
-import Formalism.LocalRingCardinality.HostCls
+module
+
+public import Development.AbelianVarietyTheory.Definitions.ExistenceOfLattices.CoeSelfDualLatticeInFrameCoordinatesEq
+public import Development.AbelianVarietyTheory.Counterexamples.HeightSurvey.ExistsXiOKEvenRamified
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
 namespace GlobalTheory.TwistFieldCompare
 
 open NumberField IsDedekindDomain ReciprocityTheory.ChartRestriction.G.Geo.Tor Formalism.BasicNotions Formalism.MainNotions Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.L2.Pj Formalism.L2.Theta
-open GlobalTheory.FinalJoin GlobalTheory.IndefiniteRowSideFullHecke
+open GlobalTheory.FinalJoin
 open scoped TensorProduct
 
 variable {D : D7}
-
-def Reformulated (D : D7) (p : ℕ) : Prop := p = D.host.pde ∨ p = D.host.pde'
 
 theorem cF_eq (a : D.host.E) : GlobalTheory.Member.cF D a = D.host.conj a := by
   apply D.host.φ₀.injective
   rw [GlobalTheory.XiCounterexample.conj_emb]
   exact (D.host.conjE_apply D.host.φ₀ a).symm
-
-theorem barF_tmul (a : Af D.host.F) (e : D.host.E) :
-    barF D (a ⊗ₜ[D.host.F] e) = a ⊗ₜ[D.host.F] D.host.conj e := by
-  rw [← cF_eq]; rfl
-
-theorem bar_eq (x : AfE D) : FieldTwistConditions.bar D x = barF D x := by
-  induction x using TensorProduct.induction_on with
-  | zero => rw [map_zero, map_zero]
-  | tmul a e => rw [barF_tmul, ← D.conjF_eq]; rfl
-  | add x y hx hy => rw [map_add, map_add, hx, hy]
-
-theorem normOne_iff (x : (AfE D)ˣ) : FieldTwistConditions.NormOne D x ↔ NormOne x := by
-  unfold FieldTwistConditions.NormOne NormOne
-  rw [bar_eq]
-
-def UnramOff (D : D7) (p : ℕ) (xi : (AfE D)ˣ →* ℂˣ) : Prop := ∀ x, NormOne x → CongOne p x → xi x = 1
-
-def OrderFifteen (D : D7) (p : ℕ) (xi : (AfE D)ˣ →* ℂˣ) : Prop :=
-  ∀ v : HeightOneSpectrum (𝓞 D.host.F), (p : 𝓞 D.host.F) ∈ v.asIdeal →
-    ∀ n : ℕ, (∀ u, FieldTwistConditions.InertiaAt D v u → xi u ^ n = 1) ↔ 15 ∣ n
 
 end GlobalTheory.TwistFieldCompare

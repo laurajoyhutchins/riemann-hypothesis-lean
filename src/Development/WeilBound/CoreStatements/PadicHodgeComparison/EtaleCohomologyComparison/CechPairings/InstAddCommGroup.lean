@@ -1,6 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.OfNatTrans
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.FaceFaceApply
+module
+
+public import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.OfNatTrans
+public import Mathlib.Algebra.Category.CommAlgCat.Basic
+public import Mathlib.Tactic.Continuity
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.FaceFaceApply
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
@@ -29,7 +74,6 @@ def Almost (I : Ideal R) (f : M →ₗ[R] N) : Prop := ∀ s ∈ I, UpTo s f
 def ExactUpTo {P : Type w''} [AddCommGroup P] [Module R P] (s : R) (f : M →ₗ[R] N) (g : N →ₗ[R] P) : Prop :=
   ∀ y, g y = 0 → ∃ x, f x = s • y
 
-def Killed (s : R) (M : Type w) [AddCommGroup M] [Module R M] : Prop := ∀ x : M, s • x = 0
 end UpTo
 
 structure Cx (R : Type) [CommRing R] : Type (w + 1) where
@@ -67,8 +111,6 @@ variable {C}
 theorem mem_B_succ {n : ℕ} {x : C.X (n + 1)} : x ∈ C.B (n + 1) ↔ ∃ y, C.d n y = x :=
   LinearMap.mem_range
 
-theorem d_mem_B (n : ℕ) (y : C.X n) : C.d n y ∈ C.B (n + 1) := mem_B_succ.2 ⟨y, rfl⟩
-
 @[ext]
 structure Hom {R S : Type} [CommRing R] [CommRing S] (C : Cx.{w₁} R) (D : Cx.{w₂} S)
     (σ : R →+* S) where
@@ -83,8 +125,8 @@ variable {R₁ R₂ R₃ : Type} [CommRing R₁] [CommRing R₂] [CommRing R₃]
   {C₁ : Cx.{w₁} R₁} {C₂ : Cx.{w₂} R₂} {C₃ : Cx.{w₃} R₃}
   {σ₁₂ : R₁ →+* R₂} {σ₂₃ : R₂ →+* R₃} {σ₁₃ : R₁ →+* R₃}
 
-variable (C) in
 
+variable (C) in
 def id : Hom C C (RingHom.id R) where
   f _ := LinearMap.id
   comm _ _ := rfl
@@ -137,7 +179,7 @@ def d (n : ℕ) : Cn F n →ₗ[R] Cn F (n + 1) where
   toFun f s := ∑ i : Fin (n + 2), (-1 : ℤ) ^ (i : ℕ) • (F.map (toLast i s)).hom (f (face i s))
   map_add' f g := by
     funext s
-    simp only [Pi.add_apply, map_add, smul_add, Finset.sum_add_distrib]
+    simp only [Pi.add_apply, map_add (f := _), smul_add, Finset.sum_add_distrib]
   map_smul' r f := by
     funext s
     simp only [Pi.smul_apply, map_smul, RingHom.id_apply, Finset.smul_sum]
@@ -172,6 +214,7 @@ theorem d_d (n : ℕ) (f : Cn F n) : d F (n + 1) (d F n f) = 0 := by
   funext s
   change ∑ j : Fin (n + 3), (-1 : ℤ) ^ (j : ℕ) • (F.map (toLast j s)).hom
       (∑ i : Fin (n + 2), (-1 : ℤ) ^ (i : ℕ) • term F (face j s) f i.succAbove (Fin.strictMono_succAbove i).monotone) = 0
+
   simp only [map_sum, map_zsmul, Finset.smul_sum, smul_smul, term_face]
   rw [← Fintype.sum_prod_type']
   refine Finset.sum_involution (fun p _ => (p.1.succAbove p.2, p.2.predAbove p.1)) ?_ ?_ ?_ ?_
@@ -242,6 +285,7 @@ theorem d_pullC (n : ℕ) (f : Cn F n) : d F' n (m.pullC n f) = m.pullC (n + 1) 
   funext s
   change ∑ i : Fin (n + 2), (-1 : ℤ) ^ (i : ℕ) • (F'.map (toLast i s)).hom (m.τ _ (f (face i s ⋙ m.G))) =
     m.τ _ (∑ i : Fin (n + 2), (-1 : ℤ) ^ (i : ℕ) • (F.map (m.G.map (toLast i s))).hom (f (face i s ⋙ m.G)))
+
   rw [map_sum]
   exact Finset.sum_congr rfl fun i _ => by rw [map_zsmul, m.nat]
 
@@ -252,11 +296,6 @@ def pull (n : ℕ) : H F n →ₛₗ[σ] H F' n := m.hom.mapH n
 end Mor
 
 def Mor.ofBlk {F : C ⥤ ModuleCat.{0} R} {F' : C' ⥤ ModuleCat.{0} R'} (m : GlobalTheory.CatH.Mor F F' σ) : Mor F F' σ := ⟨m.G, m.τ, m.nat⟩
-
-theorem H_eq_blk (F : C ⥤ ModuleCat.{0} R) (n : ℕ) : H F n = GlobalTheory.CatH.H F n := rfl
-
-theorem pull_ofBlk {F : C ⥤ ModuleCat.{0} R} {F' : C' ⥤ ModuleCat.{0} R'} (m : GlobalTheory.CatH.Mor F F' σ) (n : ℕ)
-    (x : GlobalTheory.CatH.H F n) : (Mor.ofBlk m).pull n x = m.pull n x := rfl
 
 structure SubF (F : C ⥤ ModuleCat.{w} R) where
   S : ∀ T : C, Submodule R (F.obj T)
@@ -271,17 +310,6 @@ def SubF.fn (S : SubF F) : C ⥤ ModuleCat.{w} R where
 def SubF.inc (S : SubF F) : Mor S.fn F (RingHom.id R) where
   G := 𝟭 C
   τ T := (S.S T).subtype
-  nat _ _ := rfl
-
-def SubF.quot (S : SubF F) : C ⥤ ModuleCat.{w} R where
-  obj T := ModuleCat.of R (F.obj T ⧸ S.S T)
-  map φ := ModuleCat.ofHom (Submodule.mapQ _ _ (F.map φ).hom fun _ hx => S.map_mem φ hx)
-  map_id T := by ext x; simp
-  map_comp φ ψ := by ext x; simp
-
-def SubF.proj (S : SubF F) : Mor F S.quot (RingHom.id R) where
-  G := 𝟭 C
-  τ T := (S.S T).mkQ
   nat _ _ := rfl
 
 def SubF.img (S : SubF F) (n : ℕ) : Submodule R (H F n) := LinearMap.range (S.inc.pull n)
@@ -310,10 +338,11 @@ def cupC {p q n : ℕ} (h : p + q = n) : Cn F₁ p →ₗ[R] Cn F₂ q →ₗ[R]
     (fun f g g' => funext fun s => by simp [term_add])
     (fun r f g => funext fun s => by simp [term_smul])
 
-open Classical in
 
-def cup {p q n : ℕ} (h : p + q = n) (x : H F₁ p) (y : H F₂ q) : H F₃ n :=
-  if hz : d F₃ n (P.cupC h (Quotient.out x).1 (Quotient.out y).1) = 0 then (cx F₃).cls _ hz else 0
+open Classical in
+def cup {p q n : ℕ} (h : p + q = n) (x : H F₁ p) (y : H F₂ q) : H F₃ n := by
+  classical
+  exact if hz : d F₃ n (P.cupC h (Quotient.out x).1 (Quotient.out y).1) = 0 then (cx F₃).cls _ hz else 0
 
 end Pairing
 
@@ -346,7 +375,7 @@ attribute [instance] Sys.ab Sys.md
 
 def Sys.lim {R : Type} [CommRing R] (S : Sys.{w} R) : Submodule R (∀ n, S.M n) where
   carrier := {x | ∀ n, S.r n (x (n + 1)) = x n}
-  add_mem' ha hb n := by rw [Pi.add_apply, map_add, ha n, hb n]; rfl
+  add_mem' ha hb n := by rw [Pi.add_apply, map_add (f := _), ha n, hb n]; rfl
   zero_mem' n := map_zero _
   smul_mem' c x hx n := by rw [Pi.smul_apply, map_smul, hx n]; rfl
 

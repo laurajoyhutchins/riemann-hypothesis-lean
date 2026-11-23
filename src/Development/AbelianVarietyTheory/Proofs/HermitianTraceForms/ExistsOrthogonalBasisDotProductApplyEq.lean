@@ -1,11 +1,65 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.Signature
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.Signature
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GlobalTheory.HermDiag
 
 open Module Matrix
 
 section Abstract
+
+universe u
 
 variable {E : Type*} [Field E] {c : E →+* E}
 
@@ -19,7 +73,7 @@ theorem eq_zero_of_apply_self_eq_zero {V : Type*} [AddCommGroup V] [Module E V]
     rw [LinearMap.map_smul, LinearMap.smul_apply, smul_eq_mul, inv_mul_cancel₀ hne']
   have h1' : B y ((B x y)⁻¹ • x) = 1 := by rw [← hB, h1, map_one]
   have h3 := h0 ((B x y)⁻¹ • x + y)
-  rw [map_add, LinearMap.map_add₂, LinearMap.map_add₂, h0, h0, h1, h1'] at h3
+  rw [map_add (f := _), LinearMap.map_add₂, LinearMap.map_add₂, h0, h0, h1, h1'] at h3
   apply h2
   linear_combination h3
 
@@ -53,7 +107,7 @@ theorem exists_orthogonal_basis_cons_of_ker {V : Type*} [AddCommGroup V] [Module
         intro t y hy hc
         have hy' : B y x = 0 := by simpa using hy
         have h3 : B (t • x + y) x = 0 := by rw [hc]; simp
-        rw [LinearMap.map_add, LinearMap.add_apply, hy', add_zero, LinearMap.map_smul,
+        rw [LinearMap.map_add (f := _), LinearMap.add_apply, hy', add_zero, LinearMap.map_smul,
           LinearMap.smul_apply, smul_eq_mul] at h3
         exact (mul_eq_zero.1 h3).resolve_right hx)
       (by
@@ -70,8 +124,6 @@ theorem exists_orthogonal_basis_cons_of_ker {V : Type*} [AddCommGroup V] [Module
   · rw [← hB, hk, map_zero]
   · exact hk i
   · exact hv' i j (ne_of_apply_ne _ hij)
-
-universe u in
 
 theorem exists_orthogonal_basis_fin (h2 : (2 : E) ≠ 0) (d : ℕ) :
     ∀ {V : Type u} [AddCommGroup V] [Module E V] [FiniteDimensional E V]
@@ -142,6 +194,7 @@ theorem transpose_mul_mul_map_apply {m : Type*} (c : E → E) (G : Matrix n n E)
 theorem map_dotProduct_mulVec_comp (hc : ∀ t, c (c t) = t) {G : Matrix n n E}
     (hG : ∀ a b, c (G a b) = G b a) (x y : n → E) :
     c (x ⬝ᵥ G *ᵥ (c ∘ y)) = y ⬝ᵥ G *ᵥ (c ∘ x) := by
+
   simp only [dotProduct_mulVec_comp_eq_sum, map_sum, map_mul, hc, hG]
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun a _ => Finset.sum_congr rfl fun b _ => ?_
@@ -242,9 +295,6 @@ variable {E : Type} [Field E] [NumberField E] [IsCMField E] {r : ℕ}
 theorem herm_eq_dotProduct (G : Matrix (Fin r) (Fin r) E) (x y : Fin r → E) :
     FD.herm G x y = x ⬝ᵥ G *ᵥ (FD.cc ∘ y) :=
   (dotProduct_mulVec_comp_eq_sum FD.cc G x y).symm
-
-theorem coe_complexConj_ringHom :
-    ⇑((IsCMField.complexConj E : E →+* E)) = FD.cc := rfl
 
 theorem exists_congr_diagonal_herm {G : Matrix (Fin r) (Fin r) E}
     (hG : ∀ a b, FD.cc (G a b) = G b a) :

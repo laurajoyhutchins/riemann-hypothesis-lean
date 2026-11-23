@@ -1,6 +1,63 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.InfPartFPlaceIdem
-import Development.AbelianVarietyTheory.Proofs.HeightProofs.QuadraticExtNormFormOverAlgebra
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.InfPartFPlaceIdem
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.QuadraticExtNormFormOverAlgebra
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.WeilTensorModels
+import Development.AbelianVarietyTheory.Definitions.Divisors.HilbertNinetyQuotientHomEqIff
+import Development.AbelianVarietyTheory.Definitions.Foundations.NormEulerPolySubOneLe
+
+@[expose] public section
+
 open scoped TensorProduct Matrix
 open NumberField IsDedekindDomain Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes
 open GlobalTheory.WeilM GlobalTheory.LFun GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels
@@ -108,7 +165,7 @@ theorem tensor_decomp {A : Type} [CommRing A] [Algebra F A] (δ : E)
   | add x y hx hy =>
     obtain ⟨a, b, rfl⟩ := hx
     obtain ⟨a', b', rfl⟩ := hy
-    exact ⟨a + a', b + b', by rw [map_add, map_add]; ring⟩
+    exact ⟨a + a', b + b', by rw [map_add (f := _), map_add (f := _)]; ring⟩
 
 theorem tensor_inj {A : Type} [CommRing A] [Algebra F A] : Function.Injective (algebraMap A (A ⊗[F] E)) :=
   Algebra.TensorProduct.includeLeft_injective (R := F) (S := F) (A := A) (B := E) (algebraMap F E).injective
@@ -205,7 +262,7 @@ theorem tensor_prod_ext {R A B : Type} [CommRing R] [CommRing A] [CommRing B]
     | zero => simp
     | tmul m x => simp [← TensorProduct.add_tmul, h]
     | add a b ha hb =>
-      simp only [map_add]
+      simp only [map_add (f := _)]
       rw [add_add_add_comm, ← ha, ← hb]
   rw [key a, h1, h2]; simp
 
@@ -246,8 +303,8 @@ theorem char_eq_of_mul_conj (hc : IsCMExt F E σ) {χ : (AEF F E)ˣ →* Circle}
   rw [map_mul, map_one, ← hcx] at h2
   exact mul_right_cancel h2
 
-variable (σ J) in
 
+variable (σ J) in
 def cutDet (ε : AEF F E) (h : ε * ε = ε) : GAF σ J →* (AEF F E)ˣ :=
   (Units.map (cut ε h)).comp ((Matrix.GeneralLinearGroup.det (n := Fin n) (R := AEF F E)).comp (matHomF σ J))
 
@@ -307,7 +364,7 @@ theorem cutDet_conj (hJ : IsHermND σ J) (ε : AEF F E) (h1 : ε * ε = ε) {e :
   have hx' : (x : AEF F E) = e * (mtF σ J g).det + (1 - e) := hx
   have e2 : cAF σ e * cAF σ e = cAF σ e := by rw [← RingHom.map_mul, he]
   have e5 : cAF σ x = cAF σ e * cAF σ (mtF σ J g).det + (1 - cAF σ e) := by
-    rw [hx', RingHom.map_add, RingHom.map_mul, RingHom.map_sub, RingHom.map_one]
+    rw [hx', RingHom.map_add (f := _), RingHom.map_mul, RingHom.map_sub, RingHom.map_one]
   rw [cutDet_val, e5]
   exact cut_mul e2 a1 a2 (det_supp hg) (det_mul_conj hJ g)
 

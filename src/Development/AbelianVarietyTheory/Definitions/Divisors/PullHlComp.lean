@@ -1,5 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.GalMapMul
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.GalMapMul
+public import Mathlib.Algebra.Algebra.ZMod
+public import Mathlib.NumberTheory.Padics.RingHoms
+public import Mathlib.RepresentationTheory.Basic
+public import Mathlib.RingTheory.Polynomial.Cyclotomic.Basic
+public import Mathlib.RingTheory.WittVector.IsPoly
+public import Mathlib.Tactic.ReduceModChar
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+
+@[expose] public section
 
 noncomputable section
 open CategoryTheory Limits AlgebraicGeometry Opposite CochainComplex CochainComplex.HomComplex
@@ -12,7 +62,7 @@ def pick {α : Type*} [Zero α] (P : α → Prop) : α := by
 
 theorem pick_spec {α : Type*} [Zero α] {P : α → Prop} (h : ∃ a, P a) : P (pick P) := by
   unfold pick
-  rw [dif_pos h]
+  rw [dite_eq_left h]
   exact h.choose_spec
 
 abbrev Sec.res {R : Type} [CommRing R] {F : Shv R} {V U : Scheme.{0}} (g : V ⟶ U) (x : Sec F U) : Sec F V := (F.obj.map g.op).hom x
@@ -90,9 +140,9 @@ def Sx.sub {E : Spc} {N : ℕ} {U : Scheme.{0}} (x : Sx E N U) (j l : ℕ) (h : 
 
 def Pair.IsAW {I J K : Cx R} (μ : Pair I J K) {E : Spc} {n m k : ℤ} (hk : n + m = k) (α : Cochain ((chains R).obj E) I n)
     (β : Cochain ((chains R).obj E) J m) (γ : Cochain ((chains R).obj E) K k) : Prop :=
-  ∀ (N : ℕ) (w : ℤ) (h : -(N : ℤ) + k = w) (U : Scheme.{0}) (x : Sx E N U), ev γ N w h U x =
+  ∀ (N : ℕ) (w : ℤ) (h : -(N : ℤ) + k = w) (U : Scheme.{0}) (x : Sx E N U), ev (R := R) γ N w h U x =
     ∑ p : Fin (N + 1), (m * (p : ℕ)).negOnePow • μ.mul U (-((p : ℕ) : ℤ) + n) (-((N - p : ℕ) : ℤ) + m) w (by omega)
-      (ev α p _ rfl U (x.sub 0 p (by omega))) (ev β (N - p) _ rfl U (x.sub p (N - p) (by omega)))
+      (ev (R := R) α p _ rfl U (x.sub 0 p (by omega))) (ev (R := R) β (N - p) _ rfl U (x.sub p (N - p) (by omega)))
 
 def Pair.cup {I J K : Cx R} (μ : Pair I J K) (E : Spc) {n m k : ℤ} (hk : n + m = k) :
     CohomologyClass ((chains R).obj E) I n →+ CohomologyClass ((chains R).obj E) J m →+ CohomologyClass ((chains R).obj E) K k :=
@@ -108,11 +158,11 @@ def cup (q : ℕ) {E : Spc} {n m i j : ℤ} : Ht q E n i →+ Ht q E m j →+ Ht
 
 def one (q : ℕ) (E : Spc) : Ht q E 0 0 :=
   pick fun c => ∃ α : Cocycle _ _ 0, CohomologyClass.mk α = c ∧
-    ∀ (U : Scheme.{0}) (x : Sx E 0 U) (ζ : Prim q Γ(U, ⊤)), ev α.1 0 0 (by simp) U x = resGen 0 ζ
+    ∀ (U : Scheme.{0}) (x : Sx E 0 U) (ζ : Prim q Γ(U, ⊤)), ev (R := ZMod q) α.1 0 0 (by simp) U x = resGen 0 ζ
 
 def rootClass {q : ℕ} (i : ℤ) {X : Scheme.{0}} (ζ : Prim q Γ(X, ⊤)) : Ht q (sch.obj X) 0 i :=
   pick fun c => ∃ α : Cocycle _ _ 0, CohomologyClass.mk α = c ∧
-    ∀ (U : Scheme.{0}) (x : U ⟶ X), ev α.1 0 0 (by simp) U x = Sec.res x (resGen i ζ)
+    ∀ (U : Scheme.{0}) (x : U ⟶ X), ev (R := ZMod q) α.1 0 0 (by simp) U x = Sec.res x (resGen i ζ)
 
 def cpow (q : ℕ) {E : Spc} (x : Ht q E 2 1) (k : ℕ) : Ht q E (2 * k) k :=
   Nat.rec (motive := fun k : ℕ => Ht q E (2 * k) k) ((one q E).cast (by simp) (by simp))
@@ -136,21 +186,21 @@ def kumT (q : ℕ) : ∀ U : Scheme.{0}, (Γ(U, ⊤))ˣ → Sec ((res _ (tw q 1)
 
 def kum (q : ℕ) {X : Scheme.{0}} (u : (Γ(X, ⊤))ˣ) : Ht q (sch.obj X) 1 1 :=
   pick fun c => ∃ γ : Cocycle _ _ 1, CohomologyClass.mk γ = c ∧
-    (∀ (U : Scheme.{0}) (x : U ⟶ X), ev γ.1 1 0 (by simp) U x = 0) ∧
+    (∀ (U : Scheme.{0}) (x : U ⟶ X), ev (R := ZMod q) γ.1 1 0 (by simp) U x = 0) ∧
     ∀ (U : Scheme.{0}) (x : U ⟶ X) (v : (Γ(U, ⊤))ˣ), v ^ q = Units.map x.appTop.hom.toMonoidHom u →
-      ev γ.1 0 1 (by simp) U x = Sec.map ((res _ (tw q 1)).d 0 1) (kumT q U v)
+      ev (R := ZMod q) γ.1 0 1 (by simp) U x = Sec.map ((res _ (tw q 1)).d 0 1) (kumT q U v)
 
 def lineUnit {E : Spc} (L : E ⟶ ofCat (glCat 1)) {U : Scheme.{0}} (x : Sx E 1 U) : (Γ(U, ⊤))ˣ :=
   Matrix.GeneralLinearGroup.det (glMat ((L.app (op (SimplexCategory.mk 1))).app (op U) x))
 
 def c1 (q : ℕ) {E : Spc} (L : E ⟶ ofCat (glCat 1)) : Ht q E 2 1 :=
   pick fun c => ∃ γ : Cocycle _ _ 2, CohomologyClass.mk γ = c ∧
-    (∀ (U : Scheme.{0}) (x : Sx E 0 U), ev γ.1 0 2 (by simp) U x = 0) ∧
+    (∀ (U : Scheme.{0}) (x : Sx E 0 U), ev (R := ZMod q) γ.1 0 2 (by simp) U x = 0) ∧
     (∀ (U : Scheme.{0}) (x : Sx E 1 U) (v : (Γ(U, ⊤))ˣ), v ^ q = lineUnit L x →
-      ev γ.1 1 1 (by simp) U x = Sec.map ((res _ (tw q 1)).d 0 1) (kumT q U v)) ∧
+      ev (R := ZMod q) γ.1 1 1 (by simp) U x = Sec.map ((res _ (tw q 1)).d 0 1) (kumT q U v)) ∧
     ∀ (U : Scheme.{0}) (x : Sx E 2 U) (v w : (Γ(U, ⊤))ˣ), v ^ q = lineUnit L (x.sub 0 1 (by omega)) →
       w ^ q = lineUnit L (x.sub 1 1 (by omega)) →
-      ev γ.1 2 0 (by simp) U x = kumT q U v + kumT q U w - kumT q U (v * w)
+      ev (R := ZMod q) γ.1 2 0 (by simp) U x = kumT q U v + kumT q U w - kumT q U (v * w)
 
 end Kummer
 
@@ -174,7 +224,7 @@ instance (I : Cx S) (J : Cx R) : Zero (NatOp I J) := ⟨⟨fun _ _ => 0, fun _ _
 
 def SemiMap.op {I : Cx S} {J : Cx R} (ρ : SemiMap I J) : NatOp I J :=
   pick fun c => ∀ (E : Spc) (n : ℤ) (α : Cocycle ((chains S).obj E) I n) (β : Cocycle ((chains R).obj E) J n),
-    (∀ (p : ℕ) (s : ℤ) (h : -(p : ℤ) + n = s) (U : Scheme.{0}) (x : Sx E p U), ev β.1 p s h U x = ρ.app U s (ev α.1 p s h U x)) →
+    (∀ (p : ℕ) (s : ℤ) (h : -(p : ℤ) + n = s) (U : Scheme.{0}) (x : Sx E p U), ev (R := R) β.1 p s h U x = ρ.app U s (ev (R := S) α.1 p s h U x)) →
     c.app E n (CohomologyClass.mk α) = CohomologyClass.mk β
 
 def restrMap (φ : R →+* S) (F : Shv S) : SemiMap (res S F) (res R ((restr φ).obj F)) :=

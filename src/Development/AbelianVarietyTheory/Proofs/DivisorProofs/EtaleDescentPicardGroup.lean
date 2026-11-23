@@ -1,12 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.IndEtOfForallFinset
-import Development.AbelianVarietyTheory.Definitions.Divisors.DivisorSupportCondition
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PositiveDegreeClassesDieOnEtaleCoverStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsEtaleFaithfullyFlatRefiningEtaleSurjectionStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EtaleCocycleCoboundaryIffStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BijectiveMultiplicativeGroupSectionsUnitsStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PicFaithfullyFlatDescentUnitCocyclesStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsEtaleFaithfullyFlatPicMapAlgebraEqOneStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.DivisorSupportCondition
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EtaleCocycleCoboundaryIffStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PicFaithfullyFlatDescentUnitCocyclesStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BijectiveMultiplicativeGroupSectionsUnitsStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsEtaleFaithfullyFlatPicMapAlgebraEqOneStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsEtaleFaithfullyFlatRefiningEtaleSurjectionStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PositiveDegreeClassesDieOnEtaleCoverStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 open CategoryTheory Limits AlgebraicGeometry Opposite CochainComplex CochainComplex.HomComplex Simplicial TensorProduct GlobalTheory.EtC
 
@@ -20,9 +62,6 @@ def gmOf (C : CommRingCat.{0}) : Additive Cˣ →+ (onRings Gm).obj C :=
   ((toSheafify Scheme.etaleTopology (Scheme.Γ ⋙ unitsF)).app (op (Spec C))).hom.toAddMonoidHom.comp
     ((AddEquiv.ulift.{0, 1}.symm : Additive Γ(Spec C, ⊤)ˣ ≃+ ULift.{1} (Additive Γ(Spec C, ⊤)ˣ)).toAddMonoidHom.comp
       (MulEquiv.toAdditive (Units.mapEquiv (gsi C).symm.toMulEquiv)).toAddMonoidHom)
-
-theorem gmOf_apply (C : CommRingCat.{0}) (a : Additive Cˣ) :
-    gmOf C a = ofRings.sec unitsF (Spec C) (ULift.up (Additive.ofMul (Units.mapEquiv (gsi C).symm.toMulEquiv a.toMul))) := rfl
 
 theorem gmOf_bijective (C : CommRingCat.{0}) : Function.Bijective (gmOf C) := by
   have h := GlobalTheory.T.bijective_multiplicativeGroup_sections_units (Spec C)
@@ -53,7 +92,7 @@ theorem mem_cocycles_units_iff (w : (B ⊗[A] B)ˣ) :
   change (_ = _) ↔ _
   rw [AddMonoidHom.add_apply]
   erw [gmOf_nat, gmOf_nat, gmOf_nat]
-  rw [← map_add, (gmOf_bijective _).1.eq_iff]
+  rw [← map_add (f := _), (gmOf_bijective _).1.eq_iff]
   simp only [MonoidHom.toAdditive_apply_apply, toMul_ofMul]
   rw [← ofMul_mul, EmbeddingLike.apply_eq_iff_eq, Units.ext_iff]
   simp
@@ -67,7 +106,7 @@ theorem zOf_coe {w : (B ⊗[A] B)ˣ} (hw : UCoc A B w) :
     (zOf hw : (onRings Gm).obj (CommRingCat.of (B ⊗[A] B))) = gmOf (CommRingCat.of (B ⊗[A] B)) (Additive.ofMul w) := rfl
 
 theorem UCoc_mul {w v : (B ⊗[A] B)ˣ} (hw : UCoc A B w) (hv : UCoc A B v) : UCoc A B (w * v) := by
-  rw [← mem_cocycles_units_iff, ofMul_mul, map_add]
+  rw [← mem_cocycles_units_iff, ofMul_mul, map_add (f := _)]
   exact add_mem ((mem_cocycles_units_iff w).2 hw) ((mem_cocycles_units_iff v).2 hv)
 
 theorem UCoc_inv {w : (B ⊗[A] B)ˣ} (hw : UCoc A B w) : UCoc A B w⁻¹ := by
@@ -76,7 +115,7 @@ theorem UCoc_inv {w : (B ⊗[A] B)ˣ} (hw : UCoc A B w) : UCoc A B w⁻¹ := by
 
 theorem zOf_mul {w v : (B ⊗[A] B)ˣ} (hw : UCoc A B w) (hv : UCoc A B v) :
     zOf (UCoc_mul hw hv) = zOf hw + zOf hv :=
-  Subtype.ext (by rw [zOf_coe, ofMul_mul, map_add]; rfl)
+  Subtype.ext (by rw [zOf_coe, ofMul_mul, map_add (f := _)]; rfl)
 
 theorem zOf_inv {w : (B ⊗[A] B)ˣ} (hw : UCoc A B w) : zOf (UCoc_inv hw) = - zOf hw :=
   Subtype.ext (by rw [zOf_coe, ofMul_inv, map_neg]; rfl)
@@ -91,7 +130,7 @@ theorem UCoc_map {B' : Type} [CommRing B'] [Algebra A B'] (φ : B →ₐ[A] B') 
     induction t using TensorProduct.induction_on with
     | zero => simp
     | tmul a b => simp
-    | add x y hx hy => simp only [map_add, hx, hy]
+    | add x y hx hy => simp only [map_add (f := _), hx, hy]
   have e2 : ∀ t : B ⊗[A] B, Algebra.TensorProduct.map (AlgHom.id A B')
       (Algebra.TensorProduct.includeLeft : B' →ₐ[A] B' ⊗[A] B') (Algebra.TensorProduct.map φ φ t) =
       Algebra.TensorProduct.map φ (Algebra.TensorProduct.map φ φ) (Algebra.TensorProduct.map (AlgHom.id A B)
@@ -100,7 +139,7 @@ theorem UCoc_map {B' : Type} [CommRing B'] [Algebra A B'] (φ : B →ₐ[A] B') 
     induction t using TensorProduct.induction_on with
     | zero => simp
     | tmul a b => simp
-    | add x y hx hy => simp only [map_add, hx, hy]
+    | add x y hx hy => simp only [map_add (f := _), hx, hy]
   have e3 : ∀ t : B ⊗[A] B, (Algebra.TensorProduct.includeRight : B' ⊗[A] B' →ₐ[A] B' ⊗[A] (B' ⊗[A] B'))
       (Algebra.TensorProduct.map φ φ t) = Algebra.TensorProduct.map φ (Algebra.TensorProduct.map φ φ)
       ((Algebra.TensorProduct.includeRight : B ⊗[A] B →ₐ[A] B ⊗[A] (B ⊗[A] B)) t) := by
@@ -209,7 +248,7 @@ theorem common {x y : H ℤ (sp A) Gm 1} {c d : CommRing.Pic A} (hx : Rep x c) (
 theorem rep_unique {x : H ℤ (sp A) Gm 1} {c c' : CommRing.Pic A} (h : Rep x c) (h' : Rep x c') : c = c' := by
   obtain ⟨C, _, _, _, _, w, hw, v, hv, e1, rfl, e2, rfl⟩ := common h h'
   have hq := UCoc_mul hw (UCoc_inv hv)
-  have h0 : cg A C (zOf hq) = 0 := by rw [zOf_mul hw (UCoc_inv hv), zOf_inv hv, map_add, map_neg, e1, e2, add_neg_cancel]
+  have h0 : cg A C (zOf hq) = 0 := by rw [zOf_mul hw (UCoc_inv hv), zOf_inv hv, map_add (f := _), map_neg, e1, e2, add_neg_cancel]
   rw [cg_zero_iff] at h0
   have : w = (w * v⁻¹) * v := by rw [inv_mul_cancel_right]
   rw [this, cd_mul hq hv, h0, one_mul]
@@ -217,7 +256,7 @@ theorem rep_unique {x : H ℤ (sp A) Gm 1} {c c' : CommRing.Pic A} (h : Rep x c)
 theorem rep_add {x y : H ℤ (sp A) Gm 1} {c d : CommRing.Pic A} (hx : Rep x c) (hy : Rep y d) : Rep (x + y) (c * d) := by
   obtain ⟨C, _, _, _, _, w, hw, v, hv, e1, f1, e2, f2⟩ := common hx hy
   refine ⟨C, inferInstance, inferInstance, inferInstance, inferInstance, w * v, UCoc_mul hw hv, ?_, ?_⟩
-  · rw [zOf_mul hw hv, map_add, e1, e2]
+  · rw [zOf_mul hw hv, map_add (f := _), e1, e2]
   · rw [cd_mul hw hv, f1, f2]
 
 theorem rep_exists (x : H ℤ (sp A) Gm 1) : ∃ c, Rep x c := by
@@ -245,8 +284,8 @@ end GlobalTheory.EtC.PicardFirstCohomology
 
 namespace GlobalTheory.EtC
 
-open PicardFirstCohomology in
 
+open PicardFirstCohomology in
 theorem b6pic_holds : DivisorPicardCompatibility := by
   intro A _
   choose e he using rep_exists (A := A)

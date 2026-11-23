@@ -1,7 +1,57 @@
-import Mathlib
+module
+
+public import Mathlib.RingTheory.AdjoinRoot
+public import Mathlib.RingTheory.DiscreteValuationRing.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RingTheory.DiscreteValuationRing.TFAE
+
+@[expose] public section
+
 open IsLocalRing
-set_option synthInstance.maxHeartbeats 400000
-set_option maxHeartbeats 1000000
+
+
 
 namespace GlobalTheory
 
@@ -11,7 +61,7 @@ theorem adjoinRoot_uniformiser_isDVR : ∀ (R : Type) [CommRing R] [IsDomain R] 
   intro R _ _ _ π e hπ he _
   set f : R[X] := X ^ e - C π with hf
   have hmon : f.Monic := monic_X_pow_sub_C π he.ne'
-  have hdeg : f.natDegree = e := natDegree_X_pow_sub_C
+  have hdeg : f.natDegree = e := natDegree_X_pow_sub_C _
   haveI : Module.Finite R (AdjoinRoot f) := (AdjoinRoot.powerBasis' hmon).finite
   haveI : Algebra.IsIntegral R (AdjoinRoot f) := Algebra.IsIntegral.of_finite R _
   haveI : IsNoetherianRing (AdjoinRoot f) := IsNoetherianRing.of_finite R _
@@ -29,13 +79,18 @@ theorem adjoinRoot_uniformiser_isDVR : ∀ (R : Type) [CommRing R] [IsDomain R] 
     obtain ⟨p, rfl⟩ := AdjoinRoot.mk_surjective a
     refine ⟨p.coeff 0, AdjoinRoot.mk f p.divX, ?_⟩
     conv_lhs => rw [← X_mul_divX_add p]
-    rw [map_add, map_mul, AdjoinRoot.mk_X, AdjoinRoot.mk_C, add_comm]
+    rw [map_add (f := _), map_mul, AdjoinRoot.mk_X, AdjoinRoot.mk_C, add_comm]
     rfl
   have hπm : π ∈ maximalIdeal R := (mem_maximalIdeal _).2 hπ.not_isUnit
 
   have hcomap : ∀ M : Ideal (AdjoinRoot f), M.IsMaximal →
-      M.comap (algebraMap R (AdjoinRoot f)) = maximalIdeal R := fun M hM =>
-    IsLocalRing.eq_maximalIdeal (Ideal.isMaximal_comap_of_isIntegral_of_isMaximal M)
+      M.comap (algebraMap R (AdjoinRoot f)) = maximalIdeal R := by
+    intro M hM
+    letI : M.IsMaximal := hM
+    exact IsLocalRing.eq_maximalIdeal
+      (Ideal.isMaximal_comap_of_isIntegral_of_isMaximal
+        (algebraMap R (AdjoinRoot f))
+        (algebraMap_isIntegral_iff.mpr (inferInstance : Algebra.IsIntegral R (AdjoinRoot f))) M)
   have hxM : ∀ M : Ideal (AdjoinRoot f), M.IsMaximal → x ∈ M := by
     intro M hM
     have : algebraMap R _ π ∈ M := by
@@ -81,6 +136,6 @@ theorem adjoinRoot_uniformiser_isDVR : ∀ (R : Type) [CommRing R] [IsDomain R] 
     intro hF
     obtain ⟨b, hb⟩ := hF.mul_inv_cancel hx0
     exact (mem_maximalIdeal x).1 (hxM _ (maximalIdeal.isMaximal _)) (IsUnit.of_mul_eq_one b hb)
-  exact ((IsDiscreteValuationRing.TFAE (AdjoinRoot f) hnf).out 4 0).1 (show (maximalIdeal (AdjoinRoot f)).IsPrincipal from ⟨⟨x, hmax⟩⟩)
+  exact ((IsDiscreteValuationRing.TFAE (AdjoinRoot f) hnf).out 5 1).1 (show (maximalIdeal (AdjoinRoot f)).IsPrincipal from ⟨⟨x, hmax⟩⟩)
 
 end GlobalTheory

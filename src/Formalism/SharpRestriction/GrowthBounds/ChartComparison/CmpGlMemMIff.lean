@@ -1,6 +1,44 @@
-import Formalism.LocalToGlobal.GroupLattices.ComparisonMaps.CmpCMemMIff
-import Formalism.LocalToGlobal.GroupLattices.ComparisonMaps.CompFintype
-import Formalism.LocalToGlobal.GroupLattices.TiedFamilies.IsUnitDetBlockPreimage
+module
+
+public import Formalism.LocalToGlobal.GroupLattices.ComparisonMaps.CmpCMemMIff
+public import Formalism.LocalToGlobal.GroupLattices.TiedFamilies.IsUnitDetBlockPreimage
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -98,9 +136,6 @@ def cmpGlL (tE : Tau → E →+* LL) (hc : ∀ τ x, emb τ (σ x) = starRingEnd
   map_smul' a x := by
     funext i L
     exact congrFun (congrFun (cmpB_smul (H (X.eC.symm i).1) hc a x) (X.eC.symm i).2) L
-
-theorem cmpGlL_apply (tE : Tau → E →+* LL) (hc : ∀ τ x, emb τ (σ x) = starRingEnd ℂ (emb τ x)) (H : ∀ β, X.Hyp e pos tE β)
-    (x : V) : cmpGlL tE hc H x = X.cmpGl e pos x := rfl
 
 theorem cmpGl_rat (x : V) : RatFn G e (X.cmpGl e pos x) := fun i L =>
   cmpC_rat (S := X.S (X.eC.symm i).1) (G := X.gat (X.eC.symm i).1) (e := e) (A := X.A (X.eC.symm i).1) (pos := pos)

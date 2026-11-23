@@ -1,5 +1,47 @@
-import Formalism.LocalToGlobal.GlobalTheory.GL6.FrobeniusNoKernelOfFrobeniusSimilitude
-import Formalism.LocalToGlobal.GlobalTheory.GL6.ComplementSmulLocalExtensionMatrix
+module
+
+public import Formalism.LocalToGlobal.GlobalTheory.GL6.ComplementSmulLocalExtensionMatrix
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -101,7 +143,7 @@ theorem local_diamond_of_idempotent (S : StepLevel F E σ J T f bad) (v : Height
     linear_combination (-c ^ 2 + 2 * c * c' - c' ^ 2) * hee + hcc
   have hμ'μ : μ' * μ = 1 := by rw [mul_comm]; exact hμμ'
   have hσμ : sigR σ (v.adicCompletion F) μ = μ' := by
-    rw [hμdef, hμ'def, map_add, map_mul, map_mul, map_sub, map_one, hσ, hσc, hσc']
+    rw [hμdef, hμ'def, map_add (f := _), map_mul, map_mul, map_sub, map_one, hσ, hσc, hσc']
     ring
   have hμO : μ ∈ intV E v :=
     add_mem (mul_mem hc he) (mul_mem hc' (sub_mem (one_mem _) he))
@@ -195,12 +237,6 @@ theorem local_diamonds_of_split (Tf : FormsTied D u) (hs : SplitAtT Tf.atT) : Lo
 
 theorem diamond_elements_of_split (Tf : FormsTied D u) (hs : SplitAtT Tf.atT) : DiamondElementsExist Tf :=
   diamond_elements_of_local Tf (local_diamonds_of_split Tf hs)
-
-theorem admissible_of_split_and_round_trips
-    (hS : ∀ (D : D7) (u : D.what₂.Word) (Tf : FormsTied D u), ChiFin Tf → SplitAtT Tf.atT)
-    (hR : ∀ (D : D7) (u : D.what₂.Word), FormsCompatible D u → Formalism.MainNotions.product_first_zeroth_parts.RoundUp D u ∧ Formalism.MainNotions.product_first_zeroth_parts.RoundDn D u) :
-    LinkAdmT :=
-  admissible_of_diamonds_and_round_trips (fun D u Tf hc => diamond_elements_of_split Tf (hS D u Tf hc)) hR
 
 end Tied
 

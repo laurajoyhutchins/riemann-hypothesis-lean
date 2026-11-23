@@ -1,6 +1,41 @@
-import Development.AutomorphicArithmetic.Foundations.Convolution.RealGroupAnalysis.UnramifiedSplitting.SplitAt
-import Development.AutomorphicArithmetic.Foundations.Convolution.RealGroupAnalysis.GaussianProducts.ExistsRowSec
-import Development.AutomorphicArithmetic.Foundations.Convolution.RealGroupAnalysis.IsotypicQuotients.IsotypQuot
+module
+
+public import Development.AutomorphicArithmetic.Foundations.Convolution.RealGroupAnalysis.UnramifiedSplitting.SplitAt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -21,14 +56,14 @@ structure UMeas where
 
 variable {E : Type} [Field E] [NumberField E]
 
-variable (E) in
 
+variable (E) in
 def em : GL (Fin 2) (A ℚ) →* GL (Fin 2) (A E) := Matrix.GeneralLinearGroup.map (AdeleBaseChange.adeleMap ℚ E)
 
 def Per (M : Meas ℚ) (U : UMeas) (χ : HChar ℚ) (φ : GL (Fin 2) (A E) → ℂ) : ℂ :=
   ∫ t, ((χ.1 t : ℂˣ) : ℂ) * ∫ g in M.D, φ (em E (gl g * dM t)) ∂M.μ ∂U.υ
 
-variable [IsTotallyComplex E]
+variable [_root_.NumberField.IsTotallyComplex E]
 
 def Tr (P : CuspSub E 2) : Submodule ℂ (GL (Fin 2) (A E) → ℂ) :=
   Submodule.span ℂ {φ | ∃ f ∈ P.V, ∃ h, φ = fun g => f.1 (g * h)}
@@ -45,11 +80,11 @@ def NoPer (M : Meas ℚ) (U : UMeas) (χ : HChar ℚ) (P : CuspSub E 2) : Prop :
 def UMeasEx : Prop := Nonempty UMeas
 
 def CenEx : Prop :=
-  ∀ (E : Type) [Field E] [NumberField E] [IsTotallyComplex E], Module.finrank ℚ E = 2 → ∀ P : CuspSub E 2, ConjInv P →
+  ∀ (E : Type) [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E], Module.finrank ℚ E = 2 → ∀ P : CuspSub E 2, ConjInv P →
     ∃ ω : HChar ℚ, CenN P ω
 
 def AsaiNV : Prop :=
-  ∀ (E : Type) [Field E] [NumberField E] [IsTotallyComplex E] (_ : Dat ℚ E) (M : Meas ℚ) (U : UMeas) (P : CuspSub E 2) (ω η : HChar ℚ),
+  ∀ (E : Type) [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] (_ : Dat ℚ E) (M : Meas ℚ) (U : UMeas) (P : CuspSub E 2) (ω η : HChar ℚ),
     ConjInv P → CenN P ω → (∀ a, ‖((ω.1 a : ℂˣ) : ℂ)‖ = 1) → IsQuadCharOf E η → ¬ (NoPer M U ω⁻¹ P ∧ NoPer M U (ω * η)⁻¹ P)
 
 end UpperTheory.ConvolutionTheory.RankTwoDescent

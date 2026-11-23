@@ -1,4 +1,50 @@
-import Formalism.SharpRestriction.GrowthBounds.ExponentialPartialDerivatives.UnshiftEvalEqSubstRawUnit
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.ExponentialPartialDerivatives.UnshiftEvalEqSubstRawUnit
+public import Formalism.LocalToGlobal.CharacterGerms.RowTieSelf
+import Formalism.LocalToGlobal.CharacterGerms.ConstMemTypeSetOfNonneg
+import Formalism.LocalToGlobal.CharacterGerms.RowTieCartAdd
+import Formalism.LocalToGlobal.CharacterGerms.RowTiePAddCvSelf
+import Formalism.LocalToGlobal.CharacterGerms.RowTiePGerm
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -19,6 +65,7 @@ def colU (col : Fin 2) : RawChart C d (fun _ => I0) (Fin dd) :=
 theorem linW_const {I : Fin 2 → Type} [∀ g, Fintype (I g)] {κ : Type} (X : RawChart C d I κ) (g : Fin 2) (j : κ) :
     MvPowerSeries.constantCoeff
       (∑ c : I g, X.u g c j • (MvPowerSeries.X (⟨g, c⟩ : WV I) : MvPowerSeries (WV I) C)) = 0 := by
+
   rw [map_sum]
   refine Finset.sum_eq_zero fun c _ => ?_
   rw [← MvPowerSeries.coeff_zero_eq_constantCoeff_apply, MvPowerSeries.coeff_smul,
@@ -58,6 +105,7 @@ theorem hRow_self : (Y.rawSelf p).hRow = ∑ col, (colU Y p col).hRow := by
   show ((Y.k : ℕ) : C) • MvPowerSeries.subst (fun q : Fin 2 × (Fin 2 × Fin dd) => (Y.rawSelf p).expPt q.1 q.2)
     (∑ col, hCol col Y.h) = ∑ col, ((Y.k : ℕ) : C) •
       MvPowerSeries.subst (fun q : Fin 2 × Fin dd => (colU Y p col).expPt q.1 q.2) Y.h
+
   rw [← MvPowerSeries.coe_substAlgHom hES, map_sum, Finset.smul_sum]
   refine Finset.sum_congr rfl fun col _ => ?_
   rw [MvPowerSeries.coe_substAlgHom, subst_E_hCol]
@@ -67,6 +115,7 @@ theorem subst_sg_self {τ : Type} {a : Fin 2 × Fin dd → MvPowerSeries τ C}
     MvPowerSeries.subst a ((Y.rawSelf p).sg v) =
       ∑ col, MvPowerSeries.subst (fun i => a (col, i)) ((colU Y p col).sg fun i => v (col, i)) := by
   have hS := MvPowerSeries.hasSubst_of_constantCoeff_zero ha
+
   rw [Y.rawSelf_sg p v, ← MvPowerSeries.coe_substAlgHom hS, map_sum]
   refine Finset.sum_congr rfl fun col _ => ?_
   rw [MvPowerSeries.coe_substAlgHom, subst_inCol ha]
@@ -83,6 +132,7 @@ theorem derAt_self : DerAt V (Y.rawSelf p) := by
   have e1 : MvPowerSeries.subst (fun q : Fin 2 × (Fin 2 × Fin dd) => (Y.rawSelf p).expPt q.1 q.2)
       (∑ col, hCol col (J col)) =
       ∑ col, MvPowerSeries.subst (fun q : Fin 2 × Fin dd => (colU Y p col).expPt q.1 q.2) (J col) := by
+
     rw [← MvPowerSeries.coe_substAlgHom hES, map_sum]
     refine Finset.sum_congr rfl fun col _ => ?_
     rw [MvPowerSeries.coe_substAlgHom, subst_E_hCol]
@@ -95,6 +145,7 @@ theorem derAt_self : DerAt V (Y.rawSelf p) := by
     exact expPt_col Y p g col i
   have e3 : dVar (⟨1 - g, k⟩ : WV fun _ : Fin 2 => I0) (Y.rawSelf p).hRow =
       ∑ col, dVar (⟨1 - g, k⟩ : WV fun _ : Fin 2 => I0) (colU Y p col).hRow := by
+
     rw [hRow_self, dVar_eq, map_sum]
     simp only [dVar_eq]
   rw [e3, e1, e2, ← Finset.sum_sub_distrib, Finset.smul_sum]
@@ -119,8 +170,8 @@ theorem addM_self : AddM V (Y.rawSelf p) := by
 
 end CEqGen
 
-open CEqGen in
 
+open CEqGen in
 theorem cEqSelf_holds : CEqSelfSt := by
   intro C _ _ V O _ _ dd Y d _ I0 _ p _ H
   exact cEq_of (Y.rawSelf p) H

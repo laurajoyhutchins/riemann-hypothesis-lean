@@ -1,5 +1,54 @@
-import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.ExponentialNegativity.L2DecayOfCountEscape
-import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.ExponentialNegativity.ConstantTermSteps.ConjBlock
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.ExponentialNegativity.L2DecayOfCountEscape
+public import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.ExponentialNegativity.ConstantTermSteps.ConjBlock
+import GroundTheory.AutomorphicForms.CuspidalDiscreteness.ExistsLintegralConstantTermL2SqLe
+import GroundTheory.GlobalFields.Adele.Topology
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Dynamics.Ergodic.Action.Regular
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import GroundTheory.AutomorphicForms.Reduction
+
+@[expose] public section
 
 noncomputable section
 
@@ -20,7 +69,7 @@ theorem unipGL_mem_adelicBorel (r : ℕ) (X : UPos n r → 𝔸[K]) :
   have hij' : (j : ℕ) < i := hij
   simp only [unipMatrix, Matrix.add_apply, blockEntry_apply, Matrix.one_apply]
   have hne : i ≠ j := fun h => by subst h; omega
-  rw [if_neg hne, dif_neg (by omega), add_zero]
+  rw [if_neg hne, dite_eq_right (by omega), add_zero]
 
 theorem ctn_unipGL_mul {r : ℕ} {φ : AdelicGLn.AdelicGL K n → ℂ} (hφ : IsLeftInvariant φ)
     (X : UPos n r → 𝔸[K]) (g : AdelicGLn.AdelicGL K n) :
@@ -76,17 +125,16 @@ theorem tor_add (x y : Fin n → ℝ) : tor K (x + y) = tor K x * tor K y := by
   unfold tor
   rw [← map_mul]
   congr 1
-  funext i
-  simp only [Pi.add_apply, Pi.mul_apply]
+  ext i
+  simp only [Pi.mul_apply, Pi.add_apply]
   rw [posIdele_mul]
-  congr 1
-  exact Real.exp_add _ _
+  simp only [Real.exp_add]
 
 theorem aR_mul (r : ℕ) (s t : ℝ) : aR K n r s * aR K n r t = aR K n r (s + t) := by
   unfold aR
   rw [← tor_add]
   congr 1
-  funext i
+  ext i
   simp only [Pi.add_apply]
   split_ifs <;> ring
 
@@ -117,10 +165,10 @@ theorem sr_shift {r : ℕ} (hr : 0 < r) (hrn : r < n) (x : Fin n → ℝ) (s : �
     sr (shift r x s) r' = sr x r' + if r' = r then s else 0 := by
   unfold sr
   by_cases h : 0 < r' ∧ r' < n
-  · rw [dif_pos h, dif_pos h]
+  · rw [dite_eq_left h, dite_eq_left h]
     simp only [shift]
     split_ifs <;> first | omega | ring
-  · rw [dif_neg h, dif_neg h]
+  · rw [dite_eq_right h, dite_eq_right h]
     have : r' ≠ r := by omega
     simp [this]
 
@@ -128,7 +176,7 @@ theorem tor_shift (r : ℕ) (x : Fin n → ℝ) (s : ℝ) : tor K (shift r x s) 
   unfold aR
   rw [← tor_add]
   congr 1
-  funext i
+  ext i
   simp only [shift, Pi.add_apply]
   split_ifs <;> ring
 

@@ -1,7 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.UnitLemmaGroup
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.LinearDescent
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.FourierMatch
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.UnitLemmaGroup
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -13,7 +55,7 @@ variable {K : UQ} (B : InvAlg K)
 
 theorem herm_add_right (x y z₁ z₂ : B.A) : B.herm x y (z₁ + z₂) = B.herm x y z₁ + B.herm x y z₂ := by
   unfold InvAlg.herm
-  rw [map_add, mul_add, map_add]
+  rw [map_add (f := _), mul_add, map_add (f := _)]
 
 theorem herm_zero_right (x y : B.A) : B.herm x y 0 = 0 := by
   unfold InvAlg.herm
@@ -26,6 +68,7 @@ theorem herm_smul_right' (x y z : B.A) (a : K.E) : B.herm x y (a • z) = K.c a 
 theorem herm_sum_smul_left {n : ℕ} (x z : B.A) (a : Fin n → K.E) (v : Fin n → B.A) :
     B.herm x (∑ j, a j • v j) z = ∑ j, a j * B.herm x (v j) z := by
   unfold InvAlg.herm
+
   rw [Finset.mul_sum, Finset.sum_mul, map_sum]
   refine Finset.sum_congr rfl fun j _ => ?_
   rw [mul_smul_comm, smul_mul_assoc, map_smul, smul_eq_mul]
@@ -38,6 +81,7 @@ theorem herm_mul_left_of_fixed (x g y z : B.A) (hg : B.σ g = g) :
 theorem repr_mul {n : ℕ} (e : Module.Basis (Fin n) K.E B.A) (g z : B.A) (i : Fin n) :
     e.repr (g * z) i = ∑ j, e.repr z j * e.repr (g * e j) i := by
   conv_lhs => rw [← e.sum_repr z]
+
   rw [Finset.mul_sum, map_sum, Finset.sum_apply']
   refine Finset.sum_congr rfl fun j _ => ?_
   rw [mul_smul_comm, map_smul, Finsupp.smul_apply, smul_eq_mul]
@@ -59,6 +103,7 @@ theorem herm_basis_orthonormal : ∀ (K : UQ) (B : InvAlg K) (x w : B.A), B.σ B
     intro z hz i
     rw [← herm_mul_left_of_fixed B x B.g (e i) z hg]
     conv_lhs => rw [← e.sum_repr (B.g * e i)]
+
     rw [herm_sum_smul_left, repr_mul, map_sum]
     refine Finset.sum_congr rfl fun j _ => ?_
     rw [hz j, RingEquiv.map_mul K.c, hM, mul_comm]
@@ -73,7 +118,7 @@ theorem herm_basis_orthonormal : ∀ (K : UQ) (B : InvAlg K) (x w : B.A), B.σ B
     | mem y hy => obtain ⟨l, rfl⟩ := hy; exact hpow l
     | zero => intro i; simp [herm_zero_right]
     | add y z _ _ hy hz =>
-      intro i; rw [add_mul, herm_add_right, hy i, hz i, map_add, Finsupp.add_apply, map_add]
+      intro i; rw [add_mul, herm_add_right, hy i, hz i, map_add (f := _), Finsupp.add_apply, map_add (f := _)]
     | smul a y _ hy =>
       intro i; rw [smul_mul_assoc, herm_smul_right', hy i, LinearEquiv.map_smul, Finsupp.smul_apply, smul_eq_mul,
         RingEquiv.map_mul K.c]

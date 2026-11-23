@@ -1,5 +1,50 @@
-import Formalism.SharpRestriction.GrowthBounds.IntegralWeylLatticeSpan.LatSOfLocBasis
-import Formalism.LocalToGlobal.GroupLattices.TiedFamilies.TiePtOne
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.IntegralWeylLatticeSpan.LatSOfLocBasis
+public import Formalism.LocalToGlobal.GroupLattices.TiedFamilies.TiePtOne
+import Formalism.LocalToGlobal.GroupLattices.ComparisonMaps.ClsLat
+import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.Bridge
+public import Formalism.SharpRestriction.GenusPolyhedralBounds.RelativeIndexClassSets.LocIdFr
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -32,8 +77,8 @@ theorem fst_mulVec' (M : GL (Fin n) (E ⊗[F] v.adicCompletion F)) (x : Fin n �
   funext a
   exact RingHom.map_mulVec (piF v φ) _ _ _
 
-include halg in
 
+include halg in
 theorem fst_latB (B' : GL (Fin n) E) (t : Fin n → v.adicCompletion F) :
     (∃ x ∈ Formalism.L2.Herm.locL v (latB B'), ∀ a, (φ (x a)).1 = t a) ↔
       ∀ a, (((bc (piE v φ) B')⁻¹ : GL (Fin n) (v.adicCompletion F)) :
@@ -42,8 +87,8 @@ theorem fst_latB (B' : GL (Fin n) E) (t : Fin n → v.adicCompletion F) :
     (by rw [Nat.cast_one]; exact v.asIdeal.ne_top_iff_one.1 v.isPrime.ne_top)
     (fun i => by rw [Nat.cast_one, one_smul]; exact latB_col B' i) t
 
-include halg in
 
+include halg in
 theorem int_of_move {Lb : Submodule (𝓞 E) (Fin n → E)} (B B' : GL (Fin n) E)
     (hb : ∀ t : Fin n → v.adicCompletion F, (∃ x ∈ Formalism.L2.Herm.locL v Lb, ∀ a, (φ (x a)).1 = t a) ↔
       ∀ a, (((bc (piE v φ) B)⁻¹ : GL (Fin n) (v.adicCompletion F)) :

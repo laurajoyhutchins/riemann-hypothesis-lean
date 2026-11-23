@@ -1,7 +1,56 @@
-import Formalism.PieriBlockIdeals.FactorialValuationSum
-import Formalism.PieriBlockIdeals.PieriColumnMinors.LabelSumNeedsLeFalse
-import Formalism.PieriBlockIdeals.PieriColumnMinors.DividedPowerZeroZeroVector
-import Formalism.PieriBlockIdeals.PieriColumnMinors.LastGradedImpliesOneBlock
+module
+
+public import Formalism.PieriBlockIdeals.FactorialValuationSum
+public import Formalism.PieriBlockIdeals.PieriColumnMinors.DividedPowerZeroZeroVector
+public import Formalism.PieriBlockIdeals.PieriColumnMinors.LabelSumNeedsLeFalse
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -287,7 +336,7 @@ theorem sum_padicVal_shift_eq_factorial (l : ℕ) [Fact l.Prime] (mB : ℤ) (n :
       simp only [Finset.mem_Ioo, Finset.notMem_empty, iff_false]
       omega
     rw [this]
-    simp
+    simp [Nat.padicValNat_def]
   | succ n ih =>
     have hins : Finset.Ioo mB (mB + 1 + ((n + 1 : ℕ) : ℤ)) =
         insert (mB + 1 + (n : ℤ)) (Finset.Ioo mB (mB + 1 + (n : ℤ))) := by
@@ -297,11 +346,11 @@ theorem sum_padicVal_shift_eq_factorial (l : ℕ) [Fact l.Prime] (mB : ℤ) (n :
     have hnot : (mB + 1 + (n : ℤ)) ∉ Finset.Ioo mB (mB + 1 + (n : ℤ)) := by
       simp
     rw [hins, Finset.sum_insert hnot, ih, Nat.factorial_succ,
-      padicValNat.mul (Nat.succ_ne_zero n) (Nat.factorial_ne_zero n)]
+      (show ∀ {p a b : ℕ} [_root_.Fact (_root_.Nat.Prime p)], a ≠ 0 → b ≠ 0 → _root_.padicValNat p (a * b) = _root_.padicValNat p a + _root_.padicValNat p b from by simpa only [← _root_.Nat.padicValNat_def] using @_root_.Nat.multiplicity_mul) (Nat.succ_ne_zero n) (Nat.factorial_ne_zero n)]
     congr 1
     unfold vl
     have : mB + 1 + (n : ℤ) - mB = ((n + 1 : ℕ) : ℤ) := by push_cast; ring
-    rw [this, padicValInt.of_nat]
+    rw [this, padicValInt.of_nat, Nat.padicValNat_def]
 
 theorem first_bound_holds : FactorialValuationSum := by
   intro l xm mB hl hlt
@@ -313,9 +362,9 @@ theorem first_bound_holds : FactorialValuationSum := by
     have he : mB + 1 + (xm - mB - 1) = xm := by ring
     rw [he] at h
     exact h
-  · have h3 := sub_one_mul_padicValNat_factorial (p := l) (xm - mB - 1).toNat
+  · have h3 := Nat.Prime.sub_one_mul_multiplicity_factorial (n := (xm - mB - 1).toNat) hl
     have h4 : (l - 1) * padicValNat l ((xm - mB - 1).toNat).factorial ≤ (xm - mB - 1).toNat := by
-      rw [h3]; exact Nat.sub_le _ _
+      rw [Nat.padicValNat_def, h3]; exact Nat.sub_le _ _
     have hl2 := hl.two_le
     have hl1 : (0 : ℝ) < (l : ℝ) - 1 := by
       have : (2 : ℝ) ≤ (l : ℝ) := by exact_mod_cast hl2
@@ -535,21 +584,6 @@ theorem second_valuation_up_to_holds : Step2ValUpTo := by
   have h3 : (((xm - maxB t w : ℤ) : ℝ) - 1) / ((l : ℝ) - 1) ≤ ((h : ℝ) - 1) / ((l : ℝ) - 1) :=
     div_le_div_of_nonneg_right (by linarith) hl1
   have h4 := mul_le_mul_of_nonneg_left h3 (Nat.cast_nonneg j : (0 : ℝ) ≤ (j : ℝ))
-  linarith
-
-theorem c_prime_le_coarse_holds : CPrimeLeCoarse := by
-  intro l k j t q h N' ecl xm xp mB I hl hI
-  unfold cPrime cCoarse labelSumBoundPos
-  have h1 := (harmonic_positive_log_holds l h I hI).1
-  have hl1 : (0 : ℝ) ≤ (l : ℝ) - 1 := by
-    have : (2 : ℝ) ≤ (l : ℝ) := by exact_mod_cast hl
-    linarith
-  have h2 : ((h : ℝ) - 1) / ((l : ℝ) - 1) ≤ ((h : ℝ) + (N' : ℝ)) / ((l : ℝ) - 1) + 6 := by
-    have h3 : ((h : ℝ) - 1) / ((l : ℝ) - 1) ≤ ((h : ℝ) + (N' : ℝ)) / ((l : ℝ) - 1) :=
-      div_le_div_of_nonneg_right (by have : (0 : ℝ) ≤ (N' : ℝ) := Nat.cast_nonneg _; linarith) hl1
-    linarith
-  have h4 := mul_le_mul_of_nonneg_left h2
-    (by positivity : (0 : ℝ) ≤ (q : ℝ) + 2 * (j : ℝ))
   linarith
 
 theorem labelRHSPlus_shift_invariant (l k t h : ℕ) (I : ℝ) (xm xp mB c : ℤ) :

@@ -1,6 +1,54 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.Graded
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.OrbitVanishingLocal
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.PartSpan
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.OrbitVanishingLocal
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.PartSpan
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.MvPowerSeries.NoZeroDivisors
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RingTheory.MvPowerSeries.Order
+
+@[expose] public section
 
 open IsLocalRing MvPowerSeries UpperTheory.V.Alg
 
@@ -41,6 +89,7 @@ private lemma coeff_map_zero {O K σ τ : Type} [CommRing O] [CommRing K] [Algeb
   obtain ⟨μ, hμ, hs⟩ := key
   obtain ⟨b, -, hb⟩ := hs f (fun m hm => hf m (not_le.1 hm))
   have h1 : ψ f ∈ RingHom.ker (constantCoeff : MvPowerSeries τ K →+* K) ^ N := by
+
     rw [hb, map_sum]
     refine Ideal.sum_mem _ fun m hm => ?_
     have hπ : ψ (monomial m 1) = m.prod fun i k => ψ (MvPowerSeries.X i) ^ k := by
@@ -68,11 +117,13 @@ private lemma homog_ker {O K σ τ X : Type} [CommRing O] [CommRing K] [Algebra 
   have h1 := coeff_map_zero ψ hψ (n.degree + 1) (f - ∑ i ∈ T, wcomp O w i f) (fun m hm => by
     have hm' : Finsupp.weight w m ∈ T :=
       Finset.mem_insert_of_mem (Finset.mem_image_of_mem _ (hfin.mem_toFinset.2 (Nat.lt_succ_iff.1 hm)))
+
     rw [map_sub, map_sum]
     simp only [coeff_wcomp]
     rw [Finset.sum_ite_eq, if_pos hm', sub_self]) n (Nat.lt_succ_self _)
+
   rw [map_sub, hf, zero_sub, map_neg, neg_eq_zero, map_sum, map_sum,
-    Finset.sum_eq_single_of_mem j (Finset.mem_insert_self _ _)] at h1
+  Finset.sum_eq_single_of_mem j (Finset.mem_insert_self _ _)] at h1
   · exact h1
   · intro i _ hi
     exact hg i _ (wcomp_mem O w i f) n (fun h => hi (h.symm.trans hn))
@@ -102,7 +153,7 @@ theorem UpperTheory.V.Alg.chart_ker :
       · rw [RingHom.mem_ker] at ha hb
         rw [hD a b, ha, hb, zero_smul, zero_smul, add_zero]
       · intro a b ha hb
-        rw [map_add, ha, hb, add_zero]
+        rw [map_add (f := _), ha, hb, add_zero]
     have := key _ hcf
     rw [map_smul, smul_eq_mul] at this
     exact (mul_eq_zero.1 this).resolve_left hc

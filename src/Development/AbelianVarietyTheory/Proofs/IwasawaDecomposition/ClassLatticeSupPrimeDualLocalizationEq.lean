@@ -1,8 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.GlESymmApply
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsSmulMemLatticeOfMemCompletionStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.UnitaryCompletionMapsDualLatticesStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LevelPrimeUnramifiedUniformizerStatement
+module
+
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.GlESymmApply
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsSmulMemLatticeOfMemCompletionStatement
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LevelPrimeUnramifiedUniformizerStatement
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.UnitaryCompletionMapsDualLattices
+public import Formalism.LocalToGlobal.GlobalTheory.GL6.PBwLocBases
+import Formalism.LocalToGlobal.GlobalTheory.GL6.PRLocV
+import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.Afsplit
+import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.Bridge
+import Formalism.SharpRestriction.GrowthBounds.IntegralWeylLatticeSpan.LatSOfLocBasis
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -15,8 +59,8 @@ section Core
 
 variable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E]
 
-set_option maxHeartbeats 1000000 in
-set_option synthInstance.maxHeartbeats 400000 in
+
+
 
 theorem nsmul_latS_of_nsmul {n : ℕ} (v : HeightOneSpectrum (𝓞 F)) (T : ℕ) (L M : Submodule (𝓞 E) (Fin n → E))
     (h : ∀ z ∈ M, T • z ∈ L) (w : Fin n → E ⊗[F] v.adicCompletion F)
@@ -37,8 +81,8 @@ theorem nsmul_latS_of_nsmul {n : ℕ} (v : HeightOneSpectrum (𝓞 F)) (T : ℕ)
     | smul a x _ hx => rw [smul_comm]; exact Submodule.smul_mem _ a hx
   exact key w hw
 
-set_option maxHeartbeats 1000000 in
-set_option synthInstance.maxHeartbeats 400000 in
+
+
 
 theorem nsmul_dual_mem_loc {σ : E →ₐ[F] E} {n : ℕ} {J : Matrix (Fin n) (Fin n) E} {T f : ℕ}
     {bad : Set (HeightOneSpectrum (𝓞 F))} (S : StepLevel F E σ J T f bad) (hJ : IsUnit J.det)
@@ -48,7 +92,9 @@ theorem nsmul_dual_mem_loc {σ : E →ₐ[F] E} {n : ℕ} {J : Matrix (Fin n) (F
       (y⁻¹).1 *ᵥ x ∈ latS (F := F) (v.adicCompletion F) (intV E v) S.Lb)
     (z : Fin n → E) (hz : z ∈ dualL (σ : E →+* E) J L) :
     ∃ r : 𝓞 F, r ∉ v.asIdeal ∧ algebraMap (𝓞 F) (𝓞 E) r • T • z ∈ L := by
-  have hLb : Submodule.IsLattice E S.Lb := ⟨Module.Finite.iff_fg.mp S.Lb_fin, S.Lb_span⟩
+  have hLb : Submodule.IsFullLattice E S.Lb :=
+    { toIsLattice := Submodule.IsLattice.of_fg E (Module.Finite.iff_fg.mp S.Lb_fin)
+      span_eq_top := S.Lb_span }
 
   have hT : ∀ x ∈ dualL (σ : E →+* E) J S.Lb, T • x ∈ S.Lb := by
     intro x hx
@@ -57,22 +103,36 @@ theorem nsmul_dual_mem_loc {σ : E →ₐ[F] E} {n : ℕ} {J : Matrix (Fin n) (F
     | zero => simp
     | add x y _ _ hx hy => rw [smul_add]; exact add_mem hx hy
     | smul a x _ hx => rw [smul_comm]; exact Submodule.smul_mem _ a hx
-  have hdual := GlobalTheory.T.unitary_completion_maps_dualLattices F E σ n J v L S.Lb y hJ hL hLb hy hyl
-  have h1 : (fun a => inclE (F := F) (v.adicCompletion F) (z a)) ∈
-      latS (F := F) (v.adicCompletion F) (intV E v) (dualL (σ : E →+* E) J L) :=
-    Submodule.subset_span ⟨z, hz, rfl⟩
-  have h2 := nsmul_latS_of_nsmul v T S.Lb (dualL (σ : E →+* E) J S.Lb) hT _ ((hdual _).mp h1)
+  let zV : Fin n → E ⊗[F] v.adicCompletion F := fun a => inclE (F := F) (v.adicCompletion F) (z a)
+  have hdual : (y⁻¹).1 *ᵥ zV ∈
+      latS (F := F) (v.adicCompletion F) (intV E v) (dualL (σ : E →+* E) J S.Lb) := by
+    apply (GlobalTheory.DualCompletion.mem_latS_dualL σ J hJ v S.Lb hLb _).2
+    intro u hu
+    have huL : y.1 *ᵥ u ∈ latS (F := F) (v.adicCompletion F) (intV E v) L := by
+      apply (hyl _).2
+      rwa [Matrix.mulVec_mulVec, ← Units.val_mul, inv_mul_cancel, Units.val_one, Matrix.one_mulVec]
+    have hyU : cT (sigR σ (v.adicCompletion F)) y.1 *
+        J.map (inclE (F := F) (v.adicCompletion F)) * y.1 =
+        J.map (inclE (F := F) (v.adicCompletion F)) := hy
+    have hpair := Formalism.UG.P.hform_mulVec (sigR σ (v.adicCompletion F))
+      (J.map (inclE (F := F) (v.adicCompletion F))) y.1 u ((y⁻¹).1 *ᵥ zV)
+    rw [hyU, Matrix.mulVec_mulVec, ← Units.val_mul, mul_inv_cancel, Units.val_one,
+      Matrix.one_mulVec] at hpair
+    rw [← hpair]
+    exact Formalism.L2.G.RelativeIndexFlags.pair_int v σ J L z
+      ((GlobalTheory.DualCompletion.mem_dualL (σ : E →+* E) J L z).1 hz) _ huL
+  have h2 := nsmul_latS_of_nsmul v T S.Lb (dualL (σ : E →+* E) J S.Lb) hT _ hdual
   rw [← Matrix.mulVec_smul] at h2
   have h3 := (hyl _).mpr h2
   have h4 : (fun a => inclE (F := F) (v.adicCompletion F) ((T • z) a)) ∈
       latS (F := F) (v.adicCompletion F) (intV E v) L := by
     convert h3 using 1
     funext a
-    simp
+    simp only [zV, Pi.smul_apply, map_nsmul]
   exact GlobalTheory.T.exists_smul_mem_lattice_of_mem_completion F E v n L hL (T • z) h4
 
-set_option maxHeartbeats 1000000 in
-set_option synthInstance.maxHeartbeats 400000 in
+
+
 
 theorem nsmul_dual_mem_loc_adelic {σ : E →ₐ[F] E} {n : ℕ} {J : Matrix (Fin n) (Fin n) E} {T f : ℕ}
     {bad : Set (HeightOneSpectrum (𝓞 F))} (S : StepLevel F E σ J T f bad) (hJ : IsUnit J.det)
@@ -113,8 +173,8 @@ theorem loc_sup_ker_smul {R V k : Type} [CommRing R] [AddCommGroup V] [Module R 
     obtain ⟨s, hs, hsx⟩ := (mem_loc res M x).mp hx
     exact (mem_loc res _ x).mpr ⟨s, hs, Submodule.mem_sup_left hsx⟩
 
-set_option maxHeartbeats 1000000 in
-set_option synthInstance.maxHeartbeats 400000 in
+
+
 
 theorem loc_lk_eq_loc_cls : ∀ (D : D7) (u : D.what₂.Word) (A : AtTTied u) (i : ℕ) (hi : i ≤ D.R.m) (K : ClsTied u i hi) (v : (D.mem u).A.vT) (c : (D.mem u).C.cls i), loc (A.res v) (Lk A i hi v c) = loc (A.res v) (clsCrd D u i hi c) := by
   intro D u A i hi K v c

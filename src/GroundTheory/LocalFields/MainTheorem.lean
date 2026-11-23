@@ -1,8 +1,48 @@
-import Mathlib
-import GroundTheory.LocalFields.LocalArtinUniqueness
-import GroundTheory.LocalFields.LocalArtinCompletion
-import GroundTheory.LocalFields.LocalArtinFunctoriality
-import GroundTheory.LocalFields.LocalArtinTransport
+module
+
+public import GroundTheory.LocalFields.LocalArtinFunctoriality
+public import GroundTheory.LocalFields.LocalArtinTransport
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+
+@[expose] public section
 
 noncomputable section
 
@@ -14,28 +54,6 @@ section Main
 
 variable (K : Type*) [Field K] [ValuativeRel K] [TopologicalSpace K] [IsNonarchimedeanLocalField K]
   (Ω : Type*) [Field Ω] [Algebra K Ω] [IsSepClosure K Ω]
-
-theorem localArtinMap_spec :
-    Continuous (localArtinMap K Ω) ∧
-      (∀ π : Kˣ, ord (π : K) = 1 →
-        restrictAb (maximalUnramifiedExtension K Ω) maximalUnramifiedExtension_le_maximalAbelianExtension
-          (localArtinMap K Ω π) = maximalUnramifiedExtensionFrobenius K Ω) ∧
-      ∀ (L : IntermediateField K Ω) [FiniteDimensional K L] [IsAbelianGalois K L],
-        ((restrictAb L (le_maximalAbelianExtension L)).comp (localArtinMap K Ω)).ker =
-            (normUnits K L).range ∧
-          Function.Surjective ((restrictAb L (le_maximalAbelianExtension L)).comp (localArtinMap K Ω)) :=
-  ⟨continuous_localArtinMap, fun _ hπ => restrictAb_localArtinMap_uniformizer hπ,
-    fun L _ _ => ⟨ker_restrictAb_localArtinMap L, surjective_restrictAb_localArtinMap L⟩⟩
-
-theorem localArtinMap_unramified (L : IntermediateField K Ω) (hL : IsUnramifiedSubextension L)
-    (x : Kˣ) :
-    have := hL.1
-    have := hL.isGalois
-    restrictAb L (hL.le_maximalUnramifiedExtension.trans maximalUnramifiedExtension_le_maximalAbelianExtension)
-      (localArtinMap K Ω x) = unramifiedFrobenius K Ω L ^ ord (x : K) :=
-  have := hL.1
-  have := hL.isGalois
-  restrictAb_localArtinMap_of_le_maximalUnramifiedExtension L hL.le_maximalUnramifiedExtension x
 
 end Main
 

@@ -1,9 +1,61 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.Intersections.ImportsTerFurther
-import GroundTheory.HeightsAndTheta.Heights.Intersections.PLocRingFrac
-import GroundTheory.HeightsAndTheta.Heights.Intersections.NotMemOfNonZeroDivisor
-import GroundTheory.HeightsAndTheta.Heights.Intersections.PHorizNotMem
-import GroundTheory.HeightsAndTheta.Heights.Intersections.NotIsUnitOfNumMem
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.ImportsTerFurther
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.LocRing
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.NotIsUnitOfNumMem
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.NotMemOfNonZeroDivisor
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.PHorizNotMem
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.PLocRingFrac
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.Inter
@@ -49,7 +101,7 @@ theorem card_add_two_le [CharZero E] (ψ : MRing ι →+* E) (j : ∀ k, ι k) (
 
   have hPQ : P < Q ∅ := by
     obtain ⟨T, hT, hPT⟩ := hPh
-    refine SetLike.lt_iff_le_and_exists.mpr ⟨?_, u, ?_, huP⟩
+    refine IsConcreteLE.lt_iff_le_and_exists.mpr ⟨?_, u, ?_, huP⟩
     · rw [hPT, Ideal.span_le]
       intro g hg
       obtain ⟨b, hb⟩ := hT g hg
@@ -72,7 +124,7 @@ theorem card_add_two_le [CharZero E] (ψ : MRing ι →+* E) (j : ∀ k, ι k) (
             simp [ρ, cS, h1]
           · simp [ρ, cS, h1, h2]
       · simp [ρ]
-    refine SetLike.lt_iff_le_and_exists.mpr ⟨fun g hg => ?_, X ⟨k, j k⟩, ?_, ?_⟩
+    refine IsConcreteLE.lt_iff_le_and_exists.mpr ⟨fun g hg => ?_, X ⟨k, j k⟩, ?_, ?_⟩
     · rw [hmem] at hg ⊢
       have := congrArg (fun f => f g) e
       simp only [RingHom.comp_apply, AlgHom.toRingHom_eq_coe, RingHom.coe_coe] at this
@@ -80,7 +132,7 @@ theorem card_add_two_le [CharZero E] (ψ : MRing ι →+* E) (j : ∀ k, ι k) (
     · rw [hmem, specMap_X]
       simp [cS]
     · rw [hmem, specMap_X, hj, map_one, mul_one]
-      simp only [cS, if_neg hk]
+      simp only [cS, ite_eq_right hk]
       exact MvPolynomial.X_ne_zero k
 
   let Qt : Ideal (MRing ι) := RingHom.ker ((Int.castRingHom (ZMod 2)).comp MvPolynomial.constantCoeff)
@@ -94,7 +146,7 @@ theorem card_add_two_le [CharZero E] (ψ : MRing ι →+* E) (j : ∀ k, ι k) (
   have hc2 : MvPolynomial.constantCoeff (2 : MRing ι) = 2 := by
     rw [show (2 : MRing ι) = MvPolynomial.C 2 from (map_ofNat MvPolynomial.C 2).symm, constantCoeff_C]
   have hlast : Q Finset.univ < Qt := by
-    refine SetLike.lt_iff_le_and_exists.mpr ⟨fun g hg => ?_, 2, ?_, ?_⟩
+    refine IsConcreteLE.lt_iff_le_and_exists.mpr ⟨fun g hg => ?_, 2, ?_, ?_⟩
     · rw [hmem, huniv, MvPolynomial.C_eq_zero, Int.cast_eq_zero] at hg
       simp [Qt, RingHom.mem_ker, hg]
     · rw [RingHom.mem_ker, RingHom.comp_apply, hc2, map_ofNat]
@@ -143,8 +195,8 @@ theorem funField_le_locRing (P : Ideal (MRing ι)) [P.IsPrime] : funField P ≤ 
 
 end RegularityFunctionFieldNumber
 
-open regularityEmbedding_holds in
 
+open regularityEmbedding_holds in
 theorem RegularityFunctionFieldNumber.proof : RegularityFunctionFieldNumber.Statement := by
   intro K _ ι _ P hP
   classical

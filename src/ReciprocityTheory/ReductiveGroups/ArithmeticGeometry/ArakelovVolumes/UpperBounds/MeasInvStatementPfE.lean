@@ -1,4 +1,68 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.MeasInvStatementPfD
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.MeasInvStatementPfD
+public import Mathlib.LinearAlgebra.Complex.FiniteDimensional
+public import Mathlib.MeasureTheory.Constructions.BorelSpace.Complex
+public import Mathlib.MeasureTheory.Constructions.Pi
+public import Mathlib.MeasureTheory.Measure.Haar.OfBasis
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Complex
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.MeasureTheory.Measure.Lebesgue.EqHaar
+
+@[expose] public section
 
 namespace ReciprocityTheory.ChartRestriction.G.AR.Up.MI
 
@@ -66,7 +130,7 @@ lemma one_le_normSq_jacU {y : UpI ι r → ℂ} (hy : y ∈ Cy ι r) : 1 ≤ Com
   rw [map_prod]
   calc (1 : ℝ) = ∏ _i : Ix ι r, (1 : ℝ) := Finset.prod_const_one.symm
     _ ≤ _ := by
-      refine Finset.prod_le_prod (fun _ _ => zero_le_one) fun i _ => ?_
+      refine Finset.prod_le_prod₀ (fun _ _ => zero_le_one) fun i _ => ?_
       split_ifs
       · have h1 := ((hy (dI i.1 i.2.2)).1 rfl).1
         rw [Complex.normSq_eq_norm_sq]
@@ -78,7 +142,7 @@ lemma normSq_jacU_le {y : UpI ι r → ℂ} (hy : y ∈ Cy ι r) :
   unfold jacU
   rw [map_prod]
   calc _ ≤ ∏ _i : Ix ι r, (4 : ℝ) := by
-        refine Finset.prod_le_prod (fun _ _ => Complex.normSq_nonneg _) fun i _ => ?_
+        refine Finset.prod_le_prod₀ (fun _ _ => Complex.normSq_nonneg _) fun i _ => ?_
         split_ifs
         · have h1 := norm_le_of_Cy hy (dI i.1 i.2.2)
           rw [Complex.normSq_eq_norm_sq]
@@ -91,7 +155,7 @@ lemma Cy_subset_ball : Cy ι r ⊆ Metric.closedBall 0 2 := fun y hy =>
 
 lemma continuous_jacU : Continuous (jacU (ι := ι) (r := r)) := by
   unfold jacU
-  refine continuous_finset_prod _ fun i _ => ?_
+  refine continuous_finsetProd _ fun i _ => ?_
   by_cases h : i.2.2 < i.2.1
   · simp only [h, ↓reduceIte]
     exact continuous_apply _

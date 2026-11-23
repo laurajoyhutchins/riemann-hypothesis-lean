@@ -1,7 +1,60 @@
-import Mathlib
-import ReciprocityTheory.ThetaQuasiPeriods.Change
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SquareIntegrability.ContinuousRl
-import Development.AbelianVarietyTheory.Definitions.ThetaMetrics.ExistsEventuallyNormRiemannThetaTermLe
+module
+
+public import Mathlib.Analysis.Calculus.FDeriv.Defs
+public import ReciprocityTheory.ThetaQuasiPeriods.PeriodLattice
+public import Development.AbelianVarietyTheory.Definitions.ThetaMetrics.ExistsEventuallyNormRiemannThetaTermLe
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SquareIntegrability.ContinuousRl
+public import ReciprocityTheory.ThetaQuasiPeriods.Change
+public import ReciprocityTheory.ThetaQuasiPeriods.Transl
+
+@[expose] public section
 
 noncomputable section
 
@@ -454,20 +507,8 @@ def thetaLevelCharBasis (a b : ι → ℝ) (hτ : τ ∈ SiegelH ι) (hN : 0 < N
     (thetaLevelCharBasis a b hτ hN hr k : (ι → ℂ) → ℂ) = levelTheta a b N τ (r k) := by
   simp [thetaLevelCharBasis]
 
-def thetaLevelBasis (hτ : τ ∈ SiegelH ι) (hN : 0 < N) {κ : Type*}
-    {r : κ → ι → ℤ} (hr : Function.Bijective fun k i => (r k i : ZMod N)) :
-    Module.Basis κ ℂ (thetaLevel N τ) :=
-  (thetaLevelCharBasis 0 0 hτ hN hr).map (LinearEquiv.ofEq _ _ (thetaLevelChar_zero N τ))
-
-@[simp] theorem thetaLevelBasis_apply (hτ : τ ∈ SiegelH ι) (hN : 0 < N) {κ : Type*}
-    {r : κ → ι → ℤ} (hr : Function.Bijective fun k i => (r k i : ZMod N)) (k : κ) :
-    (thetaLevelBasis hτ hN hr k : (ι → ℂ) → ℂ) =
-      fun z => theta (fun i => (r k i : ℝ) / N) 0 ((N : ℂ) • z) ((N : ℂ) • τ) := by
-  funext z
-  simp [thetaLevelBasis, levelTheta_zero_zero]
 
 omit [Fintype ι] in
-
 theorem bijective_fin_zmod (hN : 0 < N) :
     Function.Bijective fun (c : ι → Fin N) i => ((((c i : ℕ) : ℤ)) : ZMod N) := by
   have : NeZero N := ⟨hN.ne'⟩
@@ -563,9 +604,5 @@ theorem exists_half_char_of_sign {α : (ι → ℤ) → (ι → ℤ) → ℂ}
   have : ofRealVec (fun i => (((-q) i : ℤ) : ℝ) / 2) = -ofRealVec (fun i => (q i : ℝ) / 2) := by
     funext i; simp [ofRealVec, neg_div]
   rw [this, neg_dotProduct]; ring
-
-example : Module.finrank ℂ (thetaLevel 3 !![1 + 2 * I, 1 / 2 + I; 1 / 2 + I, 2 * I]) = 9 := by
-  rw [finrank_thetaLevel ⟨isSiegel_example.1, isSiegel_example.2⟩ (by norm_num)]
-  simp
 
 end GlobalTheory

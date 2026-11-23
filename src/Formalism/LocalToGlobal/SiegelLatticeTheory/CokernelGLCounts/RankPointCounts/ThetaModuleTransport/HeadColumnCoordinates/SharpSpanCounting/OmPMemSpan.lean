@@ -1,4 +1,48 @@
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.ThetaModuleTransport.HeadColumnCoordinates.SharpSpanCounting.AdjLast
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.ThetaModuleTransport.HeadColumnCoordinates.SharpSpanCounting.MemPerpSpanIff
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.ThetaModuleTransport.HeadColumnCoordinates.SharpSpanCounting.AdjLast
+import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.ThetaModuleTransport.HeadColumnCoordinates.SharpSpanCounting.HSumRight
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.LsDatumA
+
+@[expose] public section
 
 noncomputable section
 
@@ -19,7 +63,7 @@ theorem h_omP_omP (f f' : Fin (r + 1) → V) (T' : F) (hF' : Formalism.MainNotio
       funext a
       rfl
     have h2 : H.Dl f f' r = ((H.Zhat f f').submatrix Fin.castSucc Fin.castSucc).det := by
-      rw [Formalism.MainNotions.S.Loc.HermSp.Dl, dif_pos (Nat.le_succ r), hcast]
+      rw [Formalism.MainNotions.S.Loc.HermSp.Dl, dite_eq_left (Nat.le_succ r), hcast]
     rw [← h2, hD0, mul_zero]
   have hterm : ∀ b b', (H.Zhat f f').adjugate b (Fin.last r) *
       (M.L.cj ((H.Zhat f f').adjugate b' (Fin.last r)) * H.h (f' b) (f' b')) = 0 := by
@@ -41,6 +85,7 @@ theorem h_z_omP (f f' : Fin (r + 1) → V) (hD : IsUnit (H.Dl f f' (r + 1))) :
       M.L.cj (H.Zhat f f').det := by
     have h1 := congrFun (congrFun (Matrix.mul_adjugate (H.Zhat f f')) (Fin.last r)) (Fin.last r)
     rw [Matrix.mul_apply, Matrix.smul_apply, Matrix.one_apply_eq, smul_eq_mul, mul_one] at h1
+
     rw [← h1, map_sum]
     exact Finset.sum_congr rfl fun b _ => by rw [map_mul, mul_comm]
   unfold omP
@@ -103,7 +148,7 @@ theorem mkW_decomp (f f' : Fin (r + 1) → V) (T T' : F) (hF : Formalism.MainNot
       (H.h u (f (Fin.last r)) + algebraMap F E T * H.h u (omP H f f')) •
         H.mkW f ⟨omP H f f', omP_mem H f f' hD⟩ := by
   have hmem := decomp H f f' T T' hF hF' hD hD0 u hu u.2 _ _ rfl rfl
-  rw [← sub_eq_zero, ← map_smul, ← map_smul, ← map_add, ← map_sub, Formalism.MainNotions.S.Loc.HermSp.mkW,
+  rw [← sub_eq_zero, ← map_smul, ← map_smul, ← map_add (f := _), ← map_sub, Formalism.MainNotions.S.Loc.HermSp.mkW,
     Submodule.mkQ_apply, Submodule.Quotient.mk_eq_zero, Submodule.mem_comap]
   exact hmem
 

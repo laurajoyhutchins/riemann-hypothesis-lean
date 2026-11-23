@@ -1,4 +1,62 @@
-import Formalism.HermitianCurvature.StatementG
+module
+
+public import Formalism.HermitianCurvature.StatementG
+import Aesop.Main
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.Countable
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.MeasureTheory.Measure.Lebesgue.VolumeOfBalls
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.MeasureTheory.Integral.Bochner.Set
+public import Mathlib.MeasureTheory.Integral.Prod
+
+@[expose] public section
 
 namespace Formalism.FourierDecayAlt.P.DiagonalPointSigmaFinite
 
@@ -10,9 +68,6 @@ instance sigmaFinite_mu (β : ℂ) : SigmaFinite (mu β) := by unfold mu; infer_
 
 instance sigmaFinite_muPi (β : ℂ) (ι : Type) [Fintype ι] : SigmaFinite (muPi β ι) := by
   unfold muPi; infer_instance
-
-instance sigmaFinite_muXY (β : ℂ) (m : ℕ) : SigmaFinite (muXY β m) := by
-  unfold muXY; infer_instance
 
 section
 
@@ -79,7 +134,7 @@ theorem smooth_cutoff_mem_unit_interval (r : ℝ) : 0 ≤ chi0 r ∧ chi0 r ≤ 
 
 theorem critCut_mem_Icc {n : ℕ} (δ : ℝ) (z : ℂ) (x : Fin n → ℂ) : 0 ≤ critCut δ z x ∧ critCut δ z x ≤ 1 :=
   ⟨Finset.prod_nonneg fun _ _ => (smooth_cutoff_mem_unit_interval _).1,
-    Finset.prod_le_one (fun _ _ => (smooth_cutoff_mem_unit_interval _).1) fun _ _ => (smooth_cutoff_mem_unit_interval _).2⟩
+    Finset.prod_le_one₀ (fun _ _ => (smooth_cutoff_mem_unit_interval _).1) fun _ _ => (smooth_cutoff_mem_unit_interval _).2⟩
 
 theorem integrable_cut_smul {β : ℂ} {m : ℕ} {F : XY m → V} (hF : Integrable F (muXY β m))
     {χ : (Fin (m + 1) → ℂ) → ℝ} (hχ : Continuous χ) {B : ℝ} (hB : ∀ x, |χ x| ≤ B) :
@@ -310,7 +365,7 @@ theorem ns_arith (m C₉ q ny : ℕ) {ε : ℝ} (hε : 0 < ε)
   rw [e]
   linarith
 
-set_option maxHeartbeats 1000000 in
+
 theorem _root_.Formalism.FourierDecayAlt.P.nonstationary_estimate_of_parts : Formalism.FourierDecayAlt.G.NonStatStepOfParts := by
   intro hNS hGL _hGD hRel _hCC hAF hOm hCut hIn
   obtain ⟨C₉, hAF⟩ := hAF

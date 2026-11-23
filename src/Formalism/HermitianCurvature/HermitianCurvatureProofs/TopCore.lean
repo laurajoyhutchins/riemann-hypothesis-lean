@@ -1,8 +1,60 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.WeightProductGermIndep
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.OneSubPowLe
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.IsCompactRoots
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.StandardPairingDecay
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.Lam1
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.PsiNegBetaL
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.ComponentFamilySettingOfSettingBis
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.IsCompactRoots
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.OneSubPowLe
 import Formalism.HermitianCurvature.HermitianCurvatureProofs.PBTAsm
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.PtEntryAppendStart
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.StandardPairingDecay
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.WeightProductGermIndep
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 namespace Formalism.FourierDecayAlt.P.GermRateSplit
 
@@ -49,7 +101,7 @@ theorem top_core {Cb Cc : ℝ} {S : C.HidaSetting E Wp Wq} {p : ∀ v, KB.Pl (D.
     have hz : ∀ j, (p v).V F' (PBL.stdS S (ptJ s h x y j)) = 0 := by
       intro j
       unfold KB.Pl.V D.vecV
-      rw [dif_neg]
+      rw [dite_eq_right]
       rintro ⟨hl, -⟩
       have hl' := (PBD.isLocPt_toStd_iff _ _ hg _ 1 _).1 hl
       refine hgood fun q hq => hl'.1 q ?_
@@ -207,7 +259,7 @@ theorem top_core {Cb Cc : ℝ} {S : C.HidaSetting E Wp Wq} {p : ∀ v, KB.Pl (D.
           Real.sqrt_one, Complex.ofReal_one, one_smul]
       · have h0 : (p v).V F' (H ++ [(m + 2, l2 * z)]) = 0 := by
           unfold KB.Pl.V D.vecV
-          rw [dif_neg]
+          rw [dite_eq_right]
           rintro ⟨-, hpos⟩
           exact hG (lt_of_lt_of_eq hpos (congrArg (fun T => D.ptG T S.G.r (H ++ [(m + 2, l2 * z)])) hTTeq))
         rw [hOL2] at h0

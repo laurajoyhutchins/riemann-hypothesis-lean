@@ -1,5 +1,51 @@
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.TwistedFactors.CuspDecayHeights.HeightLe
+public import GroundTheory.AutomorphicForms.CuspidalDiscreteness.Counting
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.PSeries
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+public import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
 import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.UnipotentBlockMatrices.UnipotentBlockPairs
-import GroundTheory.AutomorphicForms.CuspidalDiscreteness.Counting
+import Development.WeilBound.RepresentationTheoryGL.TwistedFactors.TruncatedCuspIrreducibility.AdelDefs
+import Development.WeilBound.RepresentationTheoryGL.TwistedFactors.TruncatedCuspIrreducibility.ScatteringLimits
+public import Mathlib.NumberTheory.Height.Basic
+
+@[expose] public section
 
 open MeasureTheory NumberField Set Filter Topology
 open GroundTheory.Automorphic GroundTheory.Automorphic.Reduction GroundTheory.Automorphic.RightCosetSpace
@@ -36,7 +82,7 @@ private theorem step {α β ι : Type} [Fintype ι] (e : β → ι → α) (he :
     rw [← ENNReal.ofReal_prod_of_nonneg fun i _ => (inv_pos.2 (hf _)).le, ← ENNReal.ofReal_mul (by positivity)]
     refine ENNReal.ofReal_le_ofReal ?_
     rw [← inv_pow, ← Finset.card_univ, ← Finset.prod_const, ← Finset.prod_const, ← Finset.prod_mul_distrib]
-    refine Finset.prod_le_prod (fun _ _ => (inv_pos.2 (hH b)).le) fun i _ => ?_
+    refine Finset.prod_le_prod₀ (fun _ _ => (inv_pos.2 (hH b)).le) fun i _ => ?_
     rw [← div_eq_mul_inv, le_div_iff₀ (hf _), inv_mul_le_iff₀ (hH b), mul_comm]
     exact h b i
   refine ne_top_of_le_ne_top ?_ (ENNReal.tsum_le_tsum h1)
@@ -122,11 +168,12 @@ private theorem entry_le {K : Type} [Field K] [NumberField K] {n : ℕ} (γ : GL
     fun v => max_le (norm_apply_le_locHeight (finAt v (AdelicGLn.diagonal K n γ)) i j) (one_le_locHeight _)
   refine mul_le_mul ?_ ?_ (finprod_nonneg fun _ => le_max_of_le_right zero_le_one)
     (zero_le_one.trans (one_le_prod_locHeight _))
-  · refine Finset.prod_le_prod (fun _ _ => by positivity) fun w _ => ?_
+  · refine Finset.prod_le_prod₀ (fun _ _ => by positivity) fun w _ => ?_
     refine pow_le_pow_left₀ (by positivity) (max_le ?_ (one_le_locHeight _)) _
     refine le_trans (le_of_eq ?_) (norm_apply_le_locHeight (infAt w (AdelicGLn.diagonal K n γ)) i j)
-    exact (InfinitePlace.Completion.norm_coe w _).symm
-  · refine finprod_le_finprod ((finite_mulSupport_locHeight_finAt (AdelicGLn.diagonal K n γ)).subset fun v hv h1 => hv ?_)
+    rw [infAt_apply, AdelicGLn.diagonal_apply, ← GroundTheory.Global.norm_algebraMap_apply]
+    rfl
+  · refine finprod_le_finprod₀ ((finite_mulSupport_locHeight_finAt (AdelicGLn.diagonal K n γ)).subset fun v hv h1 => hv ?_)
       (fun _ => le_max_of_le_right zero_le_one) (finite_mulSupport_locHeight_finAt _) hf
     exact le_antisymm ((hf v).trans_eq h1) (le_max_right _ _)
 
@@ -159,7 +206,7 @@ theorem UpperTheory.V.Z.InvariantSubmoduleMonicPolynomial.sumHt :
   have hF1 : ∀ γ, 1 ≤ F γ := fun γ => one_le_height _
   have hb : BddBelow (Set.range F) := ⟨1, Set.forall_mem_range.2 hF1⟩
   have hi : 1 ≤ ⨅ γ, F γ := le_ciInf hF1
-  obtain ⟨γ₀, h₀⟩ := exists_lt_of_ciInf_lt (f := F) (a := 2 * ⨅ γ, F γ) (by linarith)
+  obtain ⟨γ₀, h₀⟩ := exists_lt_of_ciInf_lt (f := F) (b := 2 * ⨅ γ, F γ) (by linarith)
   rw [← (Equiv.mulRight γ₀⁻¹).tsum_eq fun γ : Gam K n =>
     ENNReal.ofReal (AutomorphicForm.height ((γ : G1 K n) : AdelicGLn.AdelicGL K n) ^ M)⁻¹, ← ENNReal.tsum_mul_left]
   refine ENNReal.tsum_le_tsum fun γ => ?_

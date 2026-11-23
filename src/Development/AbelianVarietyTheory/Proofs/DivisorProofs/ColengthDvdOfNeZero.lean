@@ -1,4 +1,54 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.AffineMonoid.Basic
+public import Mathlib.NumberTheory.NumberField.Basic
+public import Mathlib.RingTheory.DedekindDomain.Different
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.Algebra.Hom.Rat
+
+@[expose] public section
 
 open NumberField
 
@@ -12,7 +62,7 @@ theorem injective_of_charZero {F : Type} [Field F] [CharZero F] (f : 𝓞 E →+
     Function.Injective f := by
   rw [RingHom.injective_iff_ker_eq_bot]
   apply Ideal.eq_bot_of_comap_eq_bot (R := ℤ)
-  rw [RingHom.comap_ker]
+  rw [Ideal.under_def, RingHom.comap_ker]
   rw [RingHom.ker_eq_bot_iff_eq_zero]
   intro n hn
   have : f.comp (algebraMap ℤ (𝓞 E)) = Int.castRingHom F := RingHom.ext_int _ _
@@ -53,6 +103,7 @@ theorem sum_eq_trace {F : Type} [Field F] [CharZero F] {ι : Type} [Fintype ι]
     rw [Fintype.bijective_iff_injective_and_card]
     exact ⟨hφ, by rw [hc, AlgHom.card]⟩
   apply (algebraMap F K).injective
+
   rw [map_sum, ← IsScalarTower.algebraMap_apply ℚ F K, trace_eq_sum_embeddings K]
   exact hbij.sum_comp (fun f : E →ₐ[ℚ] K => f x)
 
@@ -63,6 +114,7 @@ theorem mul_dual_expand {c : Module.Free.ChooseBasisIndex ℤ (𝓞 E) → 𝓞 
   apply FaithfulSMul.algebraMap_injective (𝓞 E) E
   set b := integralBasis E
   set ω := RingOfIntegers.basis E
+
   rw [map_mul, hc, map_sum]
   have hrepr : ∀ k, algebraMap (𝓞 E) E ((ω.repr (a * ω k) l) • c k) =
       (b.traceDual.repr (algebraMap (𝓞 E) E a * b.traceDual l) k) •
@@ -92,6 +144,7 @@ theorem mul_proj {T : Type} [CommRing T] (t : 𝓞 E →+* T) {R : Type} [Ring R
   set ω := RingOfIntegers.basis E
   have h1 : ∀ l, t (a * c l) • A (ω l) = ∑ k, (ω.repr (a * ω k) l) • (t (c k) • A (ω l)) := by
     intro l
+
     rw [mul_dual_expand hc, map_sum, Finset.sum_smul]
     simp only [map_zsmul, smul_assoc]
     rfl
@@ -100,6 +153,7 @@ theorem mul_proj {T : Type} [CommRing T] (t : 𝓞 E →+* T) {R : Type} [Ring R
     _ = ∑ k, ∑ l, (ω.repr (a * ω k) l) • (t (c k) • A (ω l)) := by
         refine Finset.sum_congr rfl fun k _ => ?_
         conv_lhs => rw [← ω.sum_repr (a * ω k)]
+
         rw [map_sum, Finset.smul_sum]
         simp only [map_zsmul, smul_comm (t (c k))]
     _ = ∑ l, t (a * c l) • A (ω l) := by rw [Finset.sum_comm]; simp only [h1]
@@ -134,6 +188,7 @@ theorem sum_proj_eq_one {F : Type} [Field F] [CharZero F] {ι : Type} [Fintype �
     rw [eq_intCast, eq_ratCast, Rat.cast_intCast]
   simp_rw [h1]
   rw [Finset.sum_comm]
+
   simp_rw [← Finset.sum_smul, htr, Int.cast_smul_eq_zsmul, ← map_zsmul, ← map_sum, ω.sum_repr, map_one]
 
 theorem colength_dvd_of_ne_zero (F T : Type) [Field F] [CharZero F] [CommRing T] [IsDomain T]
@@ -173,6 +228,7 @@ theorem colength_dvd_of_ne_zero (F T : Type) [Field F] [CharZero F] [CommRing T]
     intro i
     ext r s
     simp only [P]
+
     rw [Matrix.map_apply, Matrix.sum_apply, Matrix.sum_apply, map_sum]
     refine Finset.sum_congr rfl fun k _ => ?_
     simp only [Matrix.smul_apply, smul_eq_mul, map_mul, AF, RingHom.comp_apply, RingHom.mapMatrix_apply,
@@ -204,6 +260,7 @@ theorem colength_dvd_of_ne_zero (F T : Type) [Field F] [CharZero F] [CommRing T]
       algebraMap T F (u x.1 x.2 k)), Fintype.sum_sigma]
     calc _ = ∑ i, (d i)⁻¹ * algebraMap T F (P i k j) := by
           refine Finset.sum_congr rfl fun i _ => ?_
+
           rw [hcol, map_sum, Finset.mul_sum]
           refine Finset.sum_congr rfl fun l _ => ?_
           rw [map_mul]

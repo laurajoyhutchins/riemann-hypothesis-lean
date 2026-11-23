@@ -1,4 +1,46 @@
-import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.StatementB
+module
+
+public import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.TrDual
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 open scoped BigOperators
@@ -18,9 +60,6 @@ def IsHom (F FE : MvPowerSeries (Fin 2) K) (θ : PowerSeries K) : Prop :=
 
 def mulS (K : Type) [Field K] (l : ℕ) (c : K) : PowerSeries K :=
   PowerSeries.subst (PowerSeries.C c * lgF K l) (expF K l)
-
-def combS {κ : Type} [Fintype κ] (l : ℕ) (c : κ → K) : MvPowerSeries κ K :=
-  PowerSeries.subst (∑ j, MvPowerSeries.C (c j) * at1 j (lgF K l)) (expF K l)
 
 end Defs
 
@@ -68,13 +107,6 @@ def TransportNorm : Prop :=
       Simeq (ph : MvPowerSeries Unit K) (PowerSeries.subst θ phE) →
       NormRel l σ ph α
 
-def FixedLinear : Prop :=
-  ∀ (K : Type) [NormedField K] [IsUltrametricDist K] [CharZero K] (l : ℕ) (σ : K →+* K),
-    UnrOK K l σ → ∀ F : MvPowerSeries (Fin 2) K, IsLawOfLog l F →
-    ∀ be0 : MvPowerSeries (Fin 2) K, F1 F be0 → ∀ n : K, ‖n‖ ≤ 1 → σ n = n →
-      Simeq (MvPowerSeries.subst ![MvPowerSeries.X 0, at1 (1 : Fin 2) (mulS K l n)] be0)
-        (MvPowerSeries.C n * be0)
-
 def NormUnits : Prop :=
   ∀ (K : Type) [NormedField K] [IsUltrametricDist K] [CharZero K] (l : ℕ) (σ : K →+* K),
     UnrOK K l σ → ∀ (ph : PowerSeries K), PowerSeries.constantCoeff ph = 0 →
@@ -91,36 +123,10 @@ def SecondLevelOfNorm : Prop :=
       Simeq (MvPowerSeries.C (2 : K) * ph)
         (MvPowerSeries.subst (fun _ : Fin 2 => (PowerSeries.X : PowerSeries K)) (cob F ph))
 
-def SplitPh : Prop :=
-  ∀ (K : Type) [NormedField K] [IsUltrametricDist K] [CharZero K] (l : ℕ) (σ : K →+* K),
-    UnrOK K l σ → ∀ F : MvPowerSeries (Fin 2) K, IsLawOfLog l F →
-    ∀ ph : PowerSeries K, PowerSeries.constantCoeff ph = 0 → F1 F (cob F ph) →
-    (∀ α : K, ‖α‖ = 1 → σ (σ α) = α → NormRel l σ ph α) →
-    ∀ (κ E : Type) [Fintype κ] [Fintype E] [DecidableEq E] (c : κ → Bool × E → K),
-      (∀ k x, ‖c k x‖ ≤ 1 ∧ σ (σ (c k x)) = c k x) →
-      (∀ x x' : Bool × E, ∑ k, c k x * σ (c k x') = if x.1 ≠ x'.1 ∧ x.2 = x'.2 then 1 else 0) →
-      Simeq (∑ k, PowerSeries.subst (combS l (c k)) ph)
-        (∑ e : E, MvPowerSeries.subst
-          (fun a : Fin 2 => (MvPowerSeries.X (if a = 0 then (false, e) else (true, e)) :
-            MvPowerSeries (Bool × E) K)) (cob F ph))
-
-def UnramTop : Prop :=
-  ∀ (K : Type) [NormedField K] (l : ℕ) (σ : K →+* K), UnrOK K l σ →
-    Formalism.DworkPowerSeriesWeights.Unram l (⊤ : Subfield K)
-
 def FOfBetaHyp : Prop :=
   ∀ (K : Type) [NormedField K] [IsUltrametricDist K] [CharZero K] (l : ℕ) (σ : K →+* K),
     UnrOK K l σ → (∃ ζ : K, IsPrimitiveRoot ζ (l ^ 2 - 1)) →
     ∀ F : MvPowerSeries (Fin 2) K, IsLawOfLog l F →
     ∀ be0 : MvPowerSeries (Fin 2) K, Formalism.InvariantFactorPaths.G7.BetaHyp l F be0 → F1 F be0 ∧ F2 l σ be0
-
-def EigenEven : Prop :=
-  ∀ (K : Type) [Field K] (l d : ℕ) [NeZero d] (σ : K →+* K), 2 ≤ l → ∀ (ι : Type) [Fintype ι]
-    (om oms : ι → K) (a : K) (c : ι → ι → K), (∀ r r', σ (σ (c r' r)) = c r' r) →
-    (∀ r, a * om r = ∑ r', c r' r * om r') → ∀ s : ZMod d, s.val % 2 = 0 →
-    MvPowerSeries.subst (fun x : Bool × ι => if x.1 = false then
-        PowerSeries.subst (∑ r, MvPowerSeries.C (c x.2 r) * at1 (false, r) (lgF K l)) (expF K l)
-        else (MvPowerSeries.X x : MvPowerSeries (Bool × ι) K)) (zXY l σ om oms s) =
-      MvPowerSeries.C (σ^[s.val] a) * zXY l σ om oms s
 
 end Formalism.L2.Th1.D

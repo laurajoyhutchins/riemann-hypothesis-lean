@@ -1,6 +1,50 @@
-import Formalism.LocalToGlobal.GroupLattices.PendingLemmas.WeightUpdateAtPlace
-import Formalism.SharpRestriction.GrowthBounds.MultisetValuation.TminusLinApply
-import Formalism.SharpRestriction.GrowthBounds.MultisetValuation.NatCastInvMemRp
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.MultisetValuation.TminusLinApply
+public import Formalism.SharpRestriction.GrowthBounds.MultisetValuation.HkLatTupUpdate
+public import Formalism.LocalToGlobal.GroupLattices.PendingLemmas.WeightUpdateAtPlace
+import Formalism.SharpRestriction.GrowthBounds.LatticeSystems
+public import Formalism.SharpRestriction.GrowthBounds.MultisetValuation.NatCastInvMemRp
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Formalism.SharpRestriction.GrowthBounds.MultisetValuation.DescentCore
+
+@[expose] public section
 
 noncomputable section
 
@@ -86,8 +130,8 @@ def TT (b0 : A) (hfin : Finite {γ : Γ // sm γ b0 = b0}) (B : Finset A) : Fins
 theorem mem_TT (b0 : A) (hfin : Finite {γ : Γ // sm γ b0 = b0}) (B : Finset A) (γ : Γ) :
     γ ∈ TT sm h1 hm b0 hfin B ↔ sm γ b0 ∈ B := Set.Finite.mem_toFinset _
 
-include h1 hm in
 
+include h1 hm in
 theorem sum_unfold (S : A → Prop) (Rp : Finset A) (hRp : ∀ a ∈ Rp, S a)
     (hex : ∀ a, S a → ∃! a0, a0 ∈ Rp ∧ ∃ γ, a = sm γ a0)
     (hst : ∀ a, S a → 0 < Nat.card {γ : Γ // sm γ a = a}) (B : Finset A) (hB : ∀ b ∈ B, S b) (f : A → K) :
@@ -98,8 +142,8 @@ theorem sum_unfold (S : A → Prop) (Rp : Finset A) (hRp : ∀ a ∈ Rp, S a)
   rw [orbit_sum_stabilizer sm h1 hm b0.1 B f _ (mem_TT sm h1 hm b0.1 _ B), ← mul_assoc, inv_mul_cancel₀, one_mul]
   exact Nat.cast_ne_zero.2 (hst b0.1 (hRp b0.1 b0.2)).ne'
 
-include h1 hm in
 
+include h1 hm in
 theorem adj (S : A → Prop) (Rp : Finset A) (hRp : ∀ a ∈ Rp, S a)
     (hex : ∀ a, S a → ∃! a0, a0 ∈ Rp ∧ ∃ γ, a = sm γ a0)
     (hst : ∀ a, S a → 0 < Nat.card {γ : Γ // sm γ a = a})

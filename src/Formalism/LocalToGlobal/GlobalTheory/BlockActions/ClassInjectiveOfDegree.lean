@@ -1,5 +1,51 @@
-import Formalism.LocalToGlobal.GlobalTheory.BlockActions.InJSymRestrict
-import Formalism.LocalToGlobal.GlobalTheory.BlockActions.ClassMapEstimateOfPartial
+module
+
+public import Formalism.LocalToGlobal.GlobalTheory.BlockActions.ClassMapEstimateOfPartial
+public import Formalism.LocalToGlobal.GlobalTheory.BlockActions.CTExtUnitary
+public import Formalism.LocalToGlobal.GlobalTheory.BlockActions.DefNOfFact
+public import Formalism.LocalToGlobal.GlobalTheory.BlockActions.InJSymRestrict
+public import Formalism.LocalToGlobal.GlobalTheory.BlockActions.TilEqLevel
+import Formalism.LocalToGlobal.GlobalTheory.ExistsUnitaryOneDetEq
+import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.RationalPointsLeHolds
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -30,7 +76,7 @@ theorem isUnit_of_extE (Tf : FormsTiedSym D u Ch chOf) (δ : Matrix (Fin (D.R.N 
     rw [Matrix.mul_assoc, hQ, hP1]
   exact Matrix.isUnit_det_of_left_inverse hl
 
-set_option maxHeartbeats 4000000 in
+
 
 theorem til_injective (Tf : FormsTiedSym D u Ch chOf)
     (hSD : ∀ c, dualSet (sigD D : D.host.E →+* D.host.E) (gramP D) (Tf.clsP.lat c) = (Tf.clsP.lat c : Set (Fin (D.R.N D.R.m - 1) → D.host.E)))
@@ -60,7 +106,7 @@ theorem til_injective (Tf : FormsTiedSym D u Ch chOf)
     Formalism.UG.P.base_change_mem_holds _ _ _ _ _ _ hc _ Δ hΔ
   apply Tf.clsP.y_bij.1
   show (Quotient.mk'' (Tf.clsP.y c) : Cls Tf.clsP.lev) = Quotient.mk'' (Tf.clsP.y c')
-  apply (DoubleCoset.eq _ _ _ _).2
+  apply (@DoubleCoset.eq _ _ _ _ _ _).2
   refine ⟨⟨_, hrU⟩, ?_, ⟨K⁻¹, inv_mem hKU⟩, ?_, ?_⟩
   · exact Subgroup.mem_subgroupOf.2 (Subgroup.mem_map.2 ⟨Δ, hΔ, rfl⟩)
   · exact Subgroup.mem_subgroupOf.2 (inv_mem hK)
@@ -88,7 +134,7 @@ theorem class_injective_of_degree
 theorem vT_nonempty (D : D7) (u : D.what₂.Word) : Nonempty (D.mem u).A.vT := by
   rw [← Fintype.card_pos_iff, (D.mem u).A.card_vT]
   simp only [Ranks.f, Ranks.n]
-  positivity
+  exact Nat.mul_pos (by decide) D.R.toFrame.ord_pos
 
 theorem classMapInjective_of_finrank_lt
     (hSD : ∀ (D : D7) (u : D.what₂.Word) (Ch : ℕ → Type) (chOf : ∀ i, (D.mem u).C.cls i → Ch i) (Tf : FormsTiedSym D u Ch chOf),

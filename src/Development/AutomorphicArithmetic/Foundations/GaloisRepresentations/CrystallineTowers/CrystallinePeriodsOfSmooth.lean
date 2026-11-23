@@ -1,7 +1,49 @@
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.SemistableModelSemistable
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsAdmDOne
-import Development.AutomorphicArithmetic.ThetaCorrespondence.FockModels.TiltedDrinfeld.Bridge
+module
+
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.SemistableModelSemistable
+public import Development.WeilBound.CoreStatements.CrystallinePeriodRings.LocTied6
+public import Development.AutomorphicArithmetic.ThetaCorrespondence.FockModels.TiltedDrinfeld.Bridge
 import Development.WeilBound.CoreStatements.CrystallinePeriodRings.AinfMapSurjective
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Formalism.LocalRingCardinality.AdicCompletionLocal.InstIsAdicCompleteOCSpanSingletonSetCast
+
+@[expose] public section
 
 set_option backward.isDefEq.respectTransparency false
 
@@ -42,33 +84,9 @@ theorem isAdmP_of_isAdm (T : LocTied6 l P AI) {d : ℕ} {G : Subgroup (PadicAlgC
   · ext i j
     apply T.eD.injective
     have := congrFun (congrFun (hσ σ) i) j
+
     simp only [Matrix.mul_apply, Matrix.map_apply, map_sum, map_mul, UpperTheory.Lit.Drps.eD_alg T, T.actD,
-      RingEquiv.apply_symm_apply] at this ⊢
+    RingEquiv.apply_symm_apply] at this ⊢
     exact this
-
-theorem isAdmD_of_isAdmP (T : LocTied l P AI) {d : ℕ} {G : Subgroup (PadicAlgCl l ≃ₐ[ℚ_[l]] PadicAlgCl l)}
-    {r : G → Matrix (Fin d) (Fin d) ℚ_[l]} (h : IsAdmP P G r) :
-    GlobalTheory.AdmBr.IsAdmD ((T.eD : P.R.BdR →+* Per.BdR l).comp (algebraMap ℚ_[l] P.R.BdR))
-      (Set.range (T.eD ∘ P.ιB ∘ T.eB.symm)) G r := by
-  obtain ⟨A, B, hm, hAB, hσ⟩ := h
-  have hS : ∀ x ∈ Set.range P.ιB, T.eD x ∈ Set.range (T.eD ∘ P.ιB ∘ T.eB.symm) := by
-    rintro _ ⟨y, rfl⟩
-    exact ⟨T.eB y, by simp⟩
-  refine ⟨A.map T.eD, B.map T.eD, fun i j => ⟨hS _ (hm i j).1, hS _ (hm i j).2⟩, ?_, fun σ => ?_⟩
-  · rw [← Matrix.map_mul, hAB, Matrix.map_one _ (map_zero _) (map_one _)]
-  · ext i j
-    have := congrArg T.eD (congrFun (congrFun (hσ σ) i) j)
-    simp only [Matrix.mul_apply, Matrix.map_apply, map_sum, map_mul, T.actD] at this ⊢
-    exact this
-
-def CrystallinePeriodMatrices : Prop :=
-  ∀ (l : ℕ) [Fact l.Prime] (P : LocPrime l) (AI : LocAinf l P) (T : LocTied l P AI)
-    (K : IntermediateField ℚ_[l] (PadicAlgCl l)) [hK : FiniteDimensional ℚ_[l] K] (M : Model l K),
-    M.Good → Smooth M.p → ∀ (n a : ℕ) (b : Module.Basis (Fin a) ℚ_[l] (M.V n)),
-      GlobalTheory.AdmBr.IsAdmD ((T.eD : P.R.BdR →+* Per.BdR l).comp (algebraMap ℚ_[l] P.R.BdR))
-        (Set.range (T.eD ∘ P.ιB ∘ T.eB.symm)) (Formalism.BasicNotions.Loc.GK ⟨K, hK⟩) (M.mat n b)
-
-theorem crystalline_periods_of_smooth (h : SmoothModelCrystalline) : CrystallinePeriodMatrices := fun l _ P AI T K _ M hM hs n a b =>
-  (UpperTheory.Lit.Cmp.locTied6 l P AI ⟨T⟩).elim fun FreeQuotientRank => isAdmD_of_isAdmP T (isAdmP_of_isAdm FreeQuotientRank (h l K M hM hs n a b))
 
 end UpperTheory.Gal.Seam

@@ -1,5 +1,52 @@
-import Mathlib
-import Formalism.LocalRingCardinality.DataTheta
+module
+
+public import Formalism.LocalRingCardinality.DataTheta
+public import Mathlib.Analysis.InnerProductSpace.SingularValues
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -43,25 +90,10 @@ theorem fockAct1_lower {p q n : ℕ} (a : Fin p) (b : Fin q) (Φ : Pol p q n 0) 
     | C a => simp
     | add P Q hP hQ => simp [hP, hQ]
     | mul_X P k hP =>
-      simp only [Derivation.leibniz, map_add, smul_eq_mul, hP, MvPolynomial.pderiv_X]
+      simp only [Derivation.leibniz, map_add (f := _), smul_eq_mul, hP, MvPolynomial.pderiv_X]
       by_cases h1 : k = i <;> by_cases h2 : k = j <;> simp [Pi.single_apply, h1, h2] <;>
         (try split_ifs) <;> (try simp) <;> (try ring)
   simp [omE, raiB, lowB, linePos, hne, hc (Sum.inr b, Sum.inl c) (Sum.inl a, Sum.inl c)]
-
-example {p q n : ℕ} : KilledByPMinus (1 : Pol p q n 0) := by
-  intro a b; simp [lowerOp]
-
-example {p q n : ℕ} (a : Fin p) (c : Fin n) :
-    KilledByPMinus (MvPolynomial.X (Sum.inl a, Sum.inl c) : Pol p q n 0) := by
-  intro a' b
-  refine Finset.sum_eq_zero fun c' _ => ?_
-  rw [MvPolynomial.pderiv_X_of_ne (by simp), map_zero]
-
-example : ¬ KilledByPMinus
-    (MvPolynomial.X (Sum.inl 0, Sum.inl 0) * MvPolynomial.X (Sum.inr 0, Sum.inl 0) : Pol 1 1 1 0) := by
-  intro h
-  have := h 0 0
-  simp [lowerOp, MvPolynomial.pderiv_X, Pi.single_apply] at this
 
 end GlobalTheory.IndefiniteRowSideFullHecke.FockSingularValues
 

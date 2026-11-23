@@ -1,5 +1,64 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.MaxVSpanSingleton
+module
+
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.MaxVSpanSingleton
+public import Formalism.LocalToGlobal.Columns.FiniteSumNonzeroLargeDepth
+import Formalism.HermitianLattices.HermitianLatticesProofs.DualBasic
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AbelianVarietyTheory.BlockTheory.GlobalSignature.CharacterValuation
+import Formalism.LocalToGlobal.KernelLattices.XiIndCClass
+import Formalism.SharpRestriction.CuspSpanNormBounds.Point
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Formalism.BasicNotions Formalism.HermitianLatticesTheory Formalism.L2.DIV Formalism.L2.Col Formalism.L2.Ker Formalism.MainNotions GlobalTheory.CharVal GlobalTheory.IndefiniteRowSideFullHecke.CharacterValuation
 open Matrix
@@ -72,13 +131,53 @@ theorem star_mul_mem {N : Submodule (𝓞 E) (Sp E n)} (hN : dual (hStd E n) N =
     rw [Algebra.smul_def, star_mul', ← hs, mul_assoc, ← Algebra.smul_def]
     exact Submodule.smul_mem _ s hx
 
+theorem span_eq_top_of_isSdLat {N : Submodule (𝓞 E) (Sp E n)} (hN : IsSdLat N) :
+    Submodule.span E (N : Set (Sp E n)) = ⊤ := by
+  classical
+  apply Submodule.dualAnnihilator_eq_bot_iff.mp
+  apply le_antisymm ?_ bot_le
+  intro f hf
+  let v : Sp E n := fun i => star (f (Pi.single i 1))
+  have hpair : hStd E n v = f := by
+    apply (Pi.basisFun E (Fin n)).ext
+    intro i
+    rw [Pi.basisFun_apply, hStd_apply, Finset.sum_eq_single i]
+    · simp [v]
+    · intro j _ hj
+      simp [hj]
+    · simp
+  have hline (r : E) : r • v ∈ N := by
+    rw [← show dual (hStd E n) N = N from hN.2, dualBasic_mem_dual]
+    intro y hy
+    have hy0 : hStd E n v y = 0 := by
+      rw [hpair]
+      exact (Submodule.mem_dualAnnihilator f).mp hf y (Submodule.subset_span hy)
+    have hz : hStd E n y v = 0 := by
+      simpa [hy0] using ((hStd_isSymm (E := E) (n := n)).eq v y).symm
+    simp [hz]
+  have hv : v = 0 := by
+    funext i
+    change v i = 0
+    by_contra hi
+    let coord := (LinearMap.proj i : Sp E n →ₗ[E] E).restrictScalars (𝓞 E)
+    have htop : N.map coord = ⊤ := by
+      rw [eq_top_iff]
+      intro x _
+      exact ⟨(x / v i) • v, hline _, div_mul_cancel₀ _ hi⟩
+    have : Module.Finite (𝓞 E) E := Module.finite_def.mpr (htop ▸ hN.1.fg.map coord)
+    exact RingOfIntegers.not_isField E
+      (isField_of_isIntegral_of_isField (IsFractionRing.injective (𝓞 E) E) (Field.toIsField E))
+  rw [Submodule.mem_bot]
+  simpa [hv] using hpair.symm
+
+
 omit [StarRing E] in
-theorem exists_det_ne_zero {N : Submodule (𝓞 E) (Sp E n)} (hN : Submodule.IsLattice E N) :
+theorem exists_det_ne_zero {N : Submodule (𝓞 E) (Sp E n)} (hN : Submodule.span E (N : Set (Sp E n)) = ⊤) :
     ∃ A : Matrix (Fin n) (Fin n) E, (∀ j, A.col j ∈ N) ∧ A.det ≠ 0 := by
   have h : ∀ j : Fin n, ∃ t : nonZeroDivisors (𝓞 E), t • (Pi.single j 1 : Sp E n) ∈ N := by
     intro j
     have := multiple_mem_span_of_mem_localization_span (nonZeroDivisors (𝓞 E)) E (N : Set (Sp E n))
-      (Pi.single j 1) (by rw [hN.span_eq_top]; trivial)
+      (Pi.single j 1) (by rw [hN]; trivial)
     rwa [Submodule.span_eq] at this
   choose t ht using h
   refine ⟨Matrix.diagonal fun j => algebraMap (𝓞 E) E (t j), fun j => ?_, ?_⟩
@@ -109,7 +208,7 @@ theorem exists_denom (P : HeightOneSpectrum (𝓞 E)) (F : Finset E) (h : ∀ x 
 theorem exists_max_det {N : Submodule (𝓞 E) (Sp E n)} (hN : IsSdLat N) (P : HeightOneSpectrum (𝓞 E)) :
     ∃ B : Matrix (Fin n) (Fin n) E, (∀ j, B.col j ∈ N) ∧ B.det ≠ 0 ∧
       ∀ C : Matrix (Fin n) (Fin n) E, (∀ j, C.col j ∈ N) → P.valuation E C.det ≤ P.valuation E B.det := by
-  obtain ⟨A, hA, hA0⟩ := exists_det_ne_zero hN.1
+  obtain ⟨A, hA, hA0⟩ := exists_det_ne_zero (span_eq_top_of_isSdLat hN)
   have hsA : P.valuation E (star A.det) ≠ 0 := by simpa using hA0
   obtain ⟨z, ⟨B, hB, hB0, rfl⟩, hz⟩ := Int.exists_greatest_of_bdd
     (P := fun z => ∃ B : Matrix (Fin n) (Fin n) E, (∀ j, B.col j ∈ N) ∧ B.det ≠ 0 ∧

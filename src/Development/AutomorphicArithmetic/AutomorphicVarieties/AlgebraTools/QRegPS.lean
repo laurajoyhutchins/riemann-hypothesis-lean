@@ -1,6 +1,55 @@
-import Mathlib
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.UltraDefs
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.MemSpanVariable
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.UltraDefs
+public import Mathlib.RingTheory.MvPowerSeries.Basic
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.MemSpanVariable
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+public import Mathlib.RingTheory.MvPowerSeries.Order
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Filter UpperTheory.V.AlgebraTools
 open scoped TensorProduct
@@ -60,7 +109,7 @@ private theorem monoVal_X_eq {O σ : Type} [CommRing O] (α : σ →₀ ℕ) :
 private theorem eq_of_le_of_degree_eq {σ : Type} {α β : σ →₀ ℕ} (h : β ≤ α)
     (hd : β.degree = α.degree) : β = α := by
   obtain ⟨γ, rfl⟩ := exists_add_of_le h
-  rw [map_add] at hd
+  rw [map_add (f := _)] at hd
   have : γ = 0 := by
     rw [← Finsupp.degree_eq_zero_iff]
     omega
@@ -81,6 +130,7 @@ theorem UpperTheory.V.AlgebraTools.qRegAt_mvPowerSeries :
     rw [α.2]
     exact_mod_cast Nat.lt_succ_self a
   have h1 : MvPowerSeries.coeff α.1 (u + v) = MvPowerSeries.constantCoeff (c α) := by
+
     rw [huv, map_sum, Finset.sum_eq_single α]
     · rw [monoVal_X_eq, smul_eq_mul, MvPowerSeries.coeff_monomial_mul]
       simp
@@ -90,7 +140,7 @@ theorem UpperTheory.V.AlgebraTools.qRegAt_mvPowerSeries :
       exact hβ (Subtype.ext (eq_of_le_of_degree_eq hle (β.2.trans α.2.symm)))
     · simp
   have h2 : MvPowerSeries.constantCoeff (c α) ∈ I := by
-    rw [← h1, map_add, h0, zero_add]
+    rw [← h1, map_add (f := _), h0, zero_add]
     exact coeff_mem_of_mem_map I v hv _
   have h3 : c α = (c α - MvPowerSeries.C (MvPowerSeries.constantCoeff (c α))) +
       MvPowerSeries.C (MvPowerSeries.constantCoeff (c α)) := by ring

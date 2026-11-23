@@ -1,23 +1,67 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.EqZeroOfForallPowDvd
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.EqZeroOfForallPowDvd
+public import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.EpsilonPairingZeta
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AinfFrameSolutionCongrEqTransposeMulStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AinfFrameSolutionMulCongrGmTransposeStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsAinfFrameLiftTwistedFrobeniusStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsAinfSolutionOfApproxModPhiXiMuStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsUnitMatrixLiftModTauAinfStatement
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FontaineAinfLocalDomainXiAdicOrder
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsUniquePadicOfFrobeniusEigenAinf
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FrobeniusXiEqPMulUnitStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsAinfFrameLiftTwistedFrobeniusStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AinfFrobeniusSemilinearEquationExistsUniqueStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsIsoWindowsOfMatrixCongrModTauStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AinfSquareZeroFrameInvariantEqZeroOfTauDvdStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FrobXiEigenvectorEqOfFrameImageEqStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FrobeniusLiftSolvesModFrobXiMuStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FrobeniusXiEqPMulUnitStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsIsoWindowsOfMatrixCongrModTauStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsNilpotentBlockFrobeniusXiAinfOfFrameBlockPStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsNilpotentInvTransposeBlockFrobeniusAinfOfFrameStatement
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MuDvdFrobXiSub
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsUnitMatrixLiftModTauAinfStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsNilpotentInvTransposeBlockFrobeniusAinfOfFrameStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsNilpotentBlockFrobeniusXiAinfOfFrameBlockPStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsAinfSolutionOfApproxModPhiXiMuStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MuDvdLiftOfFrameMatrixEquationStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FrobeniusLiftSolvesModFrobXiMuStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TransposeLiftSolvesModFrobXiMuStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FrobXiEigenvectorEqOfFrameImageEqStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AinfFrameSolutionCongrEqTransposeMulStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AinfFrameSolutionMulCongrGmTransposeStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MuDvdLiftOfFrameMatrixEquationStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TransposeLiftSolvesModFrobXiMuStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.DualLattices.AinfFacts
+import Development.AbelianVarietyTheory.Definitions.Divisors.GhostFrobenius
+
+@[expose] public section
+
 open MvPowerSeries GlobalTheory GlobalTheory.Katz GlobalTheory.QLog GlobalTheory.PDivGroup GlobalTheory.Sandwich GlobalTheory.IndefiniteRowSideFullHecke.EpsilonPairingZeta GlobalTheory.PDivLat
 
 set_option autoImplicit false
@@ -136,9 +180,9 @@ theorem window_lift : ∀ (p : ℕ) [Fact p.Prime] (C : Type) [Field C] [IsAlgCl
   have hYF : ∀ i m, F.τ ∣ Y i m - F.a (F0 i m) := fun i m => ⟨F.a (F1 i m), by rw [hF0 i m]; ring⟩
   have hGG : ∀ i m, F.τ ∣ Gm m i - F.a (G0 i m) := fun i m => ⟨F.a (G1 i m), by rw [hG0 i m]; ring⟩
   have hθY : ∀ i m, WittVector.fontaineTheta O p (F0 i m) = F.θ (Y i m) := by
-    intro i m; rw [hF0 i m, map_add, map_mul, hθτ, zero_mul, add_zero, F.θ_a]
+    intro i m; rw [hF0 i m, map_add (f := _), map_mul, hθτ, zero_mul, add_zero, F.θ_a]
   have hθG : ∀ i m, WittVector.fontaineTheta O p (G0 i m) = F.θ (Gm m i) := by
-    intro i m; rw [hG0 i m, map_add, map_mul, hθτ, zero_mul, add_zero, F.θ_a]
+    intro i m; rw [hG0 i m, map_add (f := _), map_mul, hθτ, zero_mul, add_zero, F.θ_a]
   have hdvdμ : ∀ x : Ainf p O, Sandwich.mu ε ∣ x → F.τ ∣ F.a x := by
     rintro x ⟨c, rfl⟩; rw [map_mul, ← F.p_τ]; exact ⟨p * F.a c, by ring⟩
   have hone : ∀ i j, F.τ ∣ (1 : Matrix (Fin d ⊕ Fin k) (Fin d ⊕ Fin k) F.B) i j -
@@ -319,9 +363,9 @@ theorem window_lift : ∀ (p : ℕ) [Fact p.Prime] (C : Type) [Field C] [IsAlgCl
   refine ⟨Fa, Ga, Ψ, Ψ', hGaFa, hFaΨ, hΨΨ', fun i m => ?_, fun m i => ?_⟩
   · obtain ⟨c, hc⟩ := hFw1 m i
     show WittVector.fontaineTheta O p (Fw m i) = _
-    rw [sub_eq_iff_eq_add.1 hc, map_add, map_mul, theta_mu hv hε, zero_mul, zero_add, hθY]
+    rw [sub_eq_iff_eq_add.1 hc, map_add (f := _), map_mul, theta_mu hv hε, zero_mul, zero_add, hθY]
   · obtain ⟨c, hc⟩ := hGw1 m i
     show WittVector.fontaineTheta O p (Gw m i) = _
-    rw [sub_eq_iff_eq_add.1 hc, map_add, map_mul, theta_mu hv hε, zero_mul, zero_add, hθG]
+    rw [sub_eq_iff_eq_add.1 hc, map_add (f := _), map_mul, theta_mu hv hε, zero_mul, zero_add, hθG]
 
 end GlobalTheory.WinLift.Top

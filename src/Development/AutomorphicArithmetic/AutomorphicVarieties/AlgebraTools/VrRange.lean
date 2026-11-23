@@ -1,6 +1,52 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.InvAlg
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.EqLagIff
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.UnitsBasic
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.InvAlg
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.UnitsBasic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Polynomial Matrix IsLocalRing TensorProduct UpperTheory.V.AlgebraTools
 
@@ -88,9 +134,11 @@ private theorem rec_spec (hpq : p ≠ q) (a b : ι) (ha : a = p ∨ a = q) (hb :
       · rw [h, U.coi.ortho hpq, zero_mul]
     refine ⟨?_, ?_⟩
     · rw [← h1, mul_smul_comm, smul_mul_assoc, hid, hid]
-    · apply OddForm.Ext.ext
-      · rw [vrEnt_ev, map_smul, U.tr_ep, smul_eq_mul, mul_one]
-      · apply Subtype.ext
+    · apply Prod.ext
+      · change (vrEnt U p q (z.ev • U.ep a)).ev = z.ev
+        rw [vrEnt_ev, map_smul, U.tr_ep, smul_eq_mul, mul_one]
+      · change (vrEnt U p q (z.ev • U.ep a)).od = z.od
+        apply Subtype.ext
         rw [vrEnt_od, hod, map_smul, U.st_ep]
         simp only [mul_smul_comm, smul_mul_assoc, hpa, smul_zero, add_zero]
         rfl
@@ -98,20 +146,24 @@ private theorem rec_spec (hpq : p ≠ q) (a b : ι) (ha : a = p ∨ a = q) (hb :
     have hev := hz.2 h1
     rw [h2, hb']
     refine ⟨hmem, ?_⟩
-    apply OddForm.Ext.ext
-    · rw [vrEnt_ev, hev, ← hmem]
+    apply Prod.ext
+    · change (vrEnt U p q (z.od : E)).ev = z.ev
+      rw [vrEnt_ev, hev, ← hmem]
       exact (units_basic T o U).2.2.1 p q _ hpq
-    · apply Subtype.ext
+    · change (vrEnt U p q (z.od : E)).od = z.od
+      apply Subtype.ext
       rw [vrEnt_od, hmem, hoff, add_zero]
   · have ha' : a = q := ha.resolve_left h2
     have hb' : b = p := hb.resolve_right (fun h => h1 (ha'.trans h.symm))
     have hev := hz.2 h1
     rw [ha', hb']
     refine ⟨sand_st U p q _ hmem, ?_⟩
-    apply OddForm.Ext.ext
-    · rw [vrEnt_ev, T.tr_st, hev, ← hmem]
+    apply Prod.ext
+    · change (vrEnt U p q (T.st (z.od : E))).ev = z.ev
+      rw [vrEnt_ev, T.tr_st, hev, ← hmem]
       exact (units_basic T o U).2.2.1 p q _ hpq
-    · apply Subtype.ext
+    · change (vrEnt U p q (T.st (z.od : E))).od = z.od
+      apply Subtype.ext
       rw [vrEnt_od, T.st_st, hmem, hoff, zero_add]
 
 end aux

@@ -1,7 +1,52 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.Graded
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.OrbitVanishingLocal
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.ChartFree
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.ChartSum
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.OrbitVanishingLocal
+public import Mathlib.RingTheory.MvPowerSeries.Rename
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.ChartFree
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.ChartSum
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open IsLocalRing MvPowerSeries UpperTheory.V.Alg
 
@@ -17,23 +62,24 @@ private theorem chart_add_weight {τ τ' X : Type} [AddCommGroup X] (g : τ' →
     Finsupp.weight wt (Finsupp.mapDomain g n) = Finsupp.weight (fun s => wt (g s)) n := by
   induction n using Finsupp.induction_linear with
   | zero => simp
-  | add a b ha hb => rw [Finsupp.mapDomain_add, map_add, map_add, ha, hb]
+  | add a b ha hb => rw [Finsupp.mapDomain_add, map_add (f := _), map_add (f := _), ha, hb]
   | single a b => simp [Finsupp.weight_single]
 
 private theorem chart_add_rename {O A X τ τ' : Type} [CommRing O] [IsDomain O] [CommRing A] [Algebra O A]
     [AddCommGroup X] {𝒜 : X → Submodule O A} {x : A →ₐ[O] O} {wt : τ → X}
     {φ : A →ₐ[O] MvPowerSeries τ (FractionRing O)} (h : IsChart 𝒜 x wt φ) (ε : τ ≃ τ') (wt' : τ' → X)
     (hw : ∀ s, wt' s = wt (ε.symm s)) :
-    IsChart 𝒜 x wt' (((rename ε).restrictScalars O).comp φ) where
-  graded j f hf n hn := by
+    IsChart 𝒜 x wt' (((rename ε).restrictScalars O).comp φ) := by
+  refine ⟨?_, ?_, ?_, ?_⟩
+  · intro j f hf n hn
     show coeff n (rename ε (φ f)) = 0
     rw [chart_add_coeff]
     refine h.graded j f hf _ ?_
     rwa [chart_add_weight, ← funext hw]
-  const f := by
+  · intro f
     show constantCoeff (rename ε (φ f)) = _
     rw [constantCoeff_rename, h.const]
-  onto i := by
+  · intro i
     obtain ⟨f, h1, h2⟩ := h.onto (ε.symm i)
     refine ⟨f, ?_, fun i' hi' => ?_⟩
     · show coeff _ (rename ε (φ f)) ≠ 0
@@ -41,7 +87,7 @@ private theorem chart_add_rename {O A X τ τ' : Type} [CommRing O] [IsDomain O]
     · show coeff _ (rename ε (φ f)) = 0
       rw [chart_add_coeff, Finsupp.mapDomain_single]
       exact h2 _ fun h3 => hi' (ε.symm.injective h3)
-  inj f hx hf := by
+  · intro f hx hf
     refine h.inj f hx fun i => ?_
     have h1 : coeff _ (rename ε (φ f)) = 0 := hf (ε i)
     rwa [chart_add_coeff, Finsupp.mapDomain_single, ε.symm_apply_apply] at h1

@@ -1,9 +1,47 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.PerValNeZero
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsPeriodsInFrameOffBoundaryStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.TwoMarkingsDifferByLevelIsometryStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsStalkFactor
-import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.HolomorphicHomDetermined
+module
+
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.PerValNeZero
+public import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.HolomorphicHomDetermined
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsPeriodsInFrameOffBoundaryStatement
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsStalkFactor
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.TwoMarkingsDifferByLevelIsometryStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -39,8 +77,8 @@ theorem eventually_coord_eq {B : Type} [TopologicalSpace B] {b₀ : B} {lam : B 
   let M : B → (Fin r → ℝ) →L[ℝ] W := fun b => ∑ m, (ContinuousLinearMap.proj m).smulRight (lam b m)
   have hM : ∀ b c, M b c = ∑ m, c m • lam b m := fun b c => by simp [M]
   have hMc : ContinuousAt M b₀ := by
-    refine tendsto_finset_sum _ fun m _ => ?_
-    exact ((ContinuousLinearMap.smulRightL ℝ (Fin r → ℝ) W (ContinuousLinearMap.proj m)).continuous.continuousAt.comp
+    refine tendsto_finsetSum _ fun m _ => ?_
+    exact ((StrongDual.smulRightL ℝ (Fin r → ℝ) W (ContinuousLinearMap.proj m)).continuous.continuousAt.comp
       (continuousAt_pi.1 hl m))
   obtain ⟨K, hK0, hK⟩ := (M b₀).toLinearMap.exists_antilipschitzWith (LinearMap.ker_eq_bot'.2 fun c hc =>
     funext (Fintype.linearIndependent_iff.1 hi c ((hM b₀ c).symm.trans hc)))
@@ -221,8 +259,8 @@ theorem isEx_chart (h : IsExpChart ch ex) {x : CxPts (genStr Z) σ} (hx : x ∈ 
     exact e _ (ch.left_inv hx) ▸ this
   · rw [hv, map_zero_eq_one (hadd x hx)]
 
-variable (Fu ex) in
 
+variable (Fu ex) in
 def Match (x : CxPts (genStr Z) σ) (i : Fin Fu.n) (P : (Fu.Di i).La →+ (Fin g → ℂ)) (y : Sp ℂ ⟶ Xo.XF c)
     (L : (Fin g → ℂ) ≃ₗ[ℂ] (Fin g' → ℂ)) : Prop :=
   (∀ z, Fu.ex i P z = 1 ↔ ex x (L z) = 1) ∧ ∀ (w) (v : Sp (DualNumber ℂ) ⟶ Z.oF.t.G.left),
@@ -345,8 +383,8 @@ theorem isHolTo_chart (h : IsLogChart k ch ex lam ρ) {B : Set (Fin n → ℂ)} 
   exact HolAt.precomp (c := fun zw : (Fin n → ℂ) × (Fin g' → ℂ) => (ex (ch.symm zw.1) zw.2).left)
     (k := fun t : (Fin n → ℂ) × (Fin g' → ℂ) => (logExp k t.1, t.2)) (z := bz) hh d
 
-variable (Fu ch ex lam k) in
 
+variable (Fu ch ex lam k) in
 def Marks (s : Fin n → ℂ) (i : Fin Fu.n) (T : (Fu.Di i).La ≃+ (Fin r → ℤ)) : Prop :=
   ∀ (a : CxFr Z σ) (W : Letter Dw → Fin g' → ℂ), a.1 = ch.symm (logExp k s) → Dirs a (fun w => (ex a.1 w).left) W →
     ∃ (Q : (Fu.Di i).La →+ (Letter Dw → ℂ)) (gm : (Fu.Di i).La ≃ₗ[𝓞 E] (Fu.Di i).La), Per Fu a i Q ∧

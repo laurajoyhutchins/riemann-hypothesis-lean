@@ -1,9 +1,44 @@
-import Mathlib
-import Formalism.SharpRestriction.ElevenLe
-import Formalism.LocalRingCardinality.DataParamsT
-import Development.AbelianVarietyTheory.Definitions.Divisors.BplusOfEquivariant
-import Development.AbelianVarietyTheory.Definitions.Divisors.GridTestLatticeLargestSlopeBound
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.LabelDatum
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.BplusOfEquivariant
+public import Development.AbelianVarietyTheory.Definitions.Divisors.GridTestLatticeLargestSlopeBound
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.LabelDatum
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -65,18 +100,6 @@ def rowForm (w : SmT (R.MY 0)) (t : Mult.MMap (R.MY 0)) : GA D (Yc D 0) → ℂ 
 def Separates (w : SmT (R.MY 0)) (ρ : G.RealVec) (ξ : Module.Dual ℂ (coefPlus G W.θ).W) : Prop :=
   ∀ t ∈ R.EEat R.triv, t ≠ 0 → ∃ Ψ ∈ Cols G W.θ, ∃ Φ : G.Datum,
     FConv W M ρ ξ Ψ Φ (rowForm R w t) ∧ fPsiPhi W M ρ ξ Ψ Φ (rowForm R w t) ≠ 0
-
-def SeparatesSpan (w : SmT (R.MY 0)) (ρ : G.RealVec) (ξ : Module.Dual ℂ (coefPlus G W.θ).W) : Prop :=
-  ∀ t ∈ R.EEat R.triv, t ≠ 0 → ∃ Ψ ∈ Cols G W.θ, ∃ c : G.Datum →₀ ℂ,
-    (∀ Φ ∈ c.support, FConv W M ρ ξ Ψ Φ (rowForm R w t)) ∧ (c.sum fun Φ a => a * fPsiPhi W M ρ ξ Ψ Φ (rowForm R w t)) ≠ 0
-
-example (w : SmT (R.MY 0)) (ρ : G.RealVec) (h : Separates R W M w ρ 0) : R.EEat R.triv = ⊥ := by
-  refine (Submodule.eq_bot_iff _).2 fun t ht => by_contra fun h0 => ?_
-  obtain ⟨Ψ, -, Φ, -, h2⟩ := h t ht h0
-  refine h2 ?_
-  have e : pairVec (coefPlus G W.θ) 0 Ψ = (0 : ℂ) • pairVec (coefPlus G W.θ) 0 Ψ := by
-    funext x; simp [pairVec_apply]
-  rw [fPsiPhi, e, ← one_smul ℂ (thetaChi W M ρ Φ _), Bplus_smul, zero_mul, zero_mul]
 
 end Main
 

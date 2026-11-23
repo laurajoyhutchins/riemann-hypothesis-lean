@@ -1,7 +1,59 @@
-import Development.WeilBound.ThetaLifts.LatticeBasics.HermRank
-import Development.WeilBound.ThetaLifts.CartanFactorisation.ExistsMaximalCompactInfinite
-import Development.WeilBound.ThetaLifts.FrameEstimates.LatArch
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.FiniteAdeleTopology
+module
+
+public import Development.WeilBound.ThetaLifts.CartanFactorisation.ExistsMaximalCompactInfinite
+public import CompanionTheory.SpectralGeometry.CountingDefinitions.AdelicEulerProducts.CountData
+public import Development.WeilBound.ThetaLifts.LatticeBasics.RankPolData
+public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.FiniteAdeleTopology
+public import Development.AutomorphicSpectrum.Proofs.TwistedProofs.EqZeroOfPiInf
+public import Development.AutomorphicSpectrum.Proofs.TwistedProofs.ExistsAdelePiInf
+import Development.WeilBound.CoreStatements.CompactAveragingSplitting.EigenvectorLifting.Kcompact
+public import Development.WeilBound.ThetaLifts.FrameEstimates.LatArch
+public import Development.WeilBound.ThetaLifts.LatticeBasics.HermRank
+import Formalism.LocalToGlobal.IndefiniteReal.PHeisFCA
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicLocalCompactness.T2SpaceTensorProductFiniteExtension
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.WeilBound.CoreStatements.CompactAveragingSplitting.EigenvectorLifting.FinSplit
+public import Development.WeilBound.ThetaLifts.LatticeBasics.ExistsIsGauss
+
+@[expose] public section
 
 noncomputable section
 
@@ -57,8 +109,8 @@ theorem cpt_sig {n r s : ℕ} {M : Matrix (Fin n) (Fin n) ℂ} (h : HasSig M r s
 
 variable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] {σ : E →ₐ[F] E} {n : ℕ}
 
-variable (F) in
 
+variable (F) in
 def fA : Af F →+ AF F := AddMonoidHom.inr (Ainf F) (Af F)
 
 theorem fA_mul (x : Af F) (a : AF F) : fA F x * a = fA F (x * a.2) := Prod.ext (zero_mul _) rfl
@@ -90,13 +142,14 @@ theorem exists_arch_section (h : IsCMExt F E σ) (τ : ∀ w : InfinitePlace F, 
     have h3 : ∀ t z, c • realAd F t • x z = 0 := fun t z => by rw [smul_comm, x1 _ c hc, smul_zero]
     rw [smul_sub, smul_sub, smul_smul c, h2]
     simp only [sub_self, Finset.smul_sum, smul_add, h3, add_zero, Finset.sum_const_zero]
-  · simp only [map_sub, map_sum, map_add, sm, x2, PositivityTheory.ThKEst.LatArchPf.emb_realAd h.1]
+
+  · simp only [map_sub, map_sum, map_add (f := _), sm, x2, PositivityTheory.ThKEst.LatArchPf.emb_realAd h.1]
     rw [show evInf F w (fA F 1) = 0 from rfl, Finset.sum_eq_single w (fun v _ hv => by simp [Pi.single_eq_of_ne hv.symm])
       (by simp)]
     simp
 
-variable (F E) in
 
+variable (F E) in
 def lamF : AddSubgroup (AE F E) where
   carrier := (fun x : Ix E → Af F => ∑ i, fA F (x i) • bA F i) '' Set.univ.pi fun _ => Oh F
   zero_mem' := ⟨0, fun _ _ v => zero_mem _, Finset.sum_eq_zero fun _ _ => by simp⟩

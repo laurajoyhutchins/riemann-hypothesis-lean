@@ -1,5 +1,44 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ThetaPartD
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ThetaPartD
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.PublishedTheorems.GlobalTheta.IsSchwartzBruhatOfProd
+
+@[expose] public section
 
 noncomputable section
 
@@ -19,7 +58,7 @@ theorem sigR_map {R R' : Type} [CommRing R] [Algebra F R] [CommRing R'] [Algebra
   induction x using TensorProduct.induction_on with
   | zero => simp
   | tmul a e => simp [sigR]
-  | add x y hx hy => simp only [map_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
 
 def hermMap {R R' : Type} [CommRing R] [Algebra F R] [CommRing R'] [Algebra F R'] (f : R →ₐ[F] R')
     (σ : E →ₐ[F] E) {n : ℕ} (S : HermR R σ n) : HermR R' σ n :=
@@ -51,10 +90,11 @@ theorem sigR_hR (R : Type) [CommRing R] [Algebra F R] (σ : E →ₐ[F] E) (hσ 
     induction z using TensorProduct.induction_on with
     | zero => simp
     | tmul a e => simp [sigR, hσ]
-    | add x y hx hy => simp only [map_add, hx, hy]
+    | add x y hx hy => simp only [map_add (f := _), hx, hy]
   have h3 : ∀ i j, sigR R σ (JR R J i j) = JR R J j i := by
     intro i j
     simp [sigR, JR, inclR, hJ j i]
+
   simp only [hR, Formalism.UG.hform, map_sum, map_mul, h2, h3]
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
@@ -65,6 +105,7 @@ theorem hermMap_hR {R R' : Type} [CommRing R] [Algebra F R] [CommRing R'] [Algeb
     Algebra.TensorProduct.map f (AlgHom.id F E) (hR R σ J x y) =
       hR R' σ J (fun i => Algebra.TensorProduct.map f (AlgHom.id F E) (x i))
         (fun i => Algebra.TensorProduct.map f (AlgHom.id F E) (y i)) := by
+
   simp only [hR, Formalism.UG.hform, map_sum, map_mul, sigR_map]
   refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
   simp [JR, inclR]
@@ -93,14 +134,6 @@ theorem hermMap_gramH {σ : E →ₐ[F] E} (hCM : IsCMExt F E σ) {M : ℕ} {J :
   apply Subtype.ext
   funext a c
   exact hermMap_hR f σ J (X a) (X c)
-
-theorem isUnit_hermOf_det (R : Type) [CommRing R] [Algebra F R] [Nontrivial (R ⊗[F] E)] (σ : E →ₐ[F] E) {n : ℕ}
-    (T : Matrix (Fin n) (Fin n) E) (hT : ∀ a b, σ (T b a) = T a b) (hd : T.det ≠ 0) :
-    IsUnit (HeckeCharacterZeroLocus.SiegelWeilU.hermOf R σ T hT : Matrix (Fin n) (Fin n) (R ⊗[F] E)).det := by
-  have h : (HeckeCharacterZeroLocus.SiegelWeilU.hermOf R σ T hT : Matrix (Fin n) (Fin n) (R ⊗[F] E)).det = inclR R T.det :=
-    ((inclR R).map_det T).symm
-  rw [h]
-  exact (IsUnit.mk0 _ hd).map (inclR R)
 
 end Cm
 

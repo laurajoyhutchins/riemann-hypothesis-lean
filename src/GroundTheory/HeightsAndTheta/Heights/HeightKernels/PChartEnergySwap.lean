@@ -1,7 +1,59 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.StatementsChartEnergySwap
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.ChartHessHolo
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PChartDensityIntegrable
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.StatementsChartEnergySwap
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.AMassStA
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.ChartHessHolo
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PChartDensityIntegrable
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.InnerProductSpace.Calculus
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+public import Mathlib.Analysis.SpecialFunctions.Complex.LogDeriv
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -70,7 +122,7 @@ theorem hermChartPot_swap (M : Matrix (Fin (e + 1 + 1)) (Fin (e + 1 + 1)) ℂ) (
 
 theorem contDiff_gbPot {D : ℕ} : ContDiff ℝ 2 (gbPot (D := D)) := by
   have hs : ContDiff ℝ 2 fun y : Fin D → ℂ => 1 + ∑ i, ‖y i‖ ^ 2 :=
-    contDiff_const.add (ContDiff.sum fun i _ => (contDiff_norm_sq ℝ).comp (contDiff_apply ℝ ℂ i))
+    contDiff_const.add (ContDiff.sum fun i _ => (contDiff_norm_sq ℝ).comp (contDiff_apply ℝ (fun _ => ℂ) i))
   have hpos : ∀ y : Fin D → ℂ, 0 < 1 + ∑ i, ‖y i‖ ^ 2 := fun y => by positivity
   exact (hs.sqrt fun y => (hpos y).ne').log fun y => (Real.sqrt_pos.mpr (hpos y)).ne'
 
@@ -82,12 +134,12 @@ theorem contDiff_hermChartPot (M : Matrix (Fin (e + 1)) (Fin (e + 1)) ℂ) (hM :
 
 theorem contDiffAt_chartInv {y : Fin (e + 1) → ℂ} (hy : y 0 ≠ 0) : ContDiffAt ℂ 2 chartInv y := by
   have h0 : ContDiffAt ℂ 2 (fun y : Fin (e + 1) → ℂ => (y 0)⁻¹) y :=
-    (contDiff_apply ℂ ℂ (0 : Fin (e + 1))).contDiffAt.inv hy
+    (contDiff_apply ℂ (fun _ => ℂ) (0 : Fin (e + 1))).contDiffAt.inv hy
   refine contDiffAt_pi.2 fun j => ?_
   by_cases hj : j = 0
   · subst hj
     simpa [chartInv] using h0
-  · simpa [chartInv, hj] using h0.mul (contDiff_apply ℂ ℂ j).contDiffAt
+  · simpa [chartInv, hj] using h0.mul (contDiff_apply ℂ (fun _ => ℂ) j).contDiffAt
 
 def logCoord (y : Fin (e + 1) → ℂ) (y' : Fin (e + 1) → ℂ) : ℂ :=
   Complex.log (y' 0 / y 0) + (Real.log ‖y 0‖ : ℂ)
@@ -103,12 +155,12 @@ theorem contDiffAt_logCoord {y : Fin (e + 1) → ℂ} (hy : y 0 ≠ 0) : ContDif
     rw [div_self hy]
     exact Complex.one_mem_slitPlane
   exact ((Complex.contDiffAt_log hmem).comp y
-    ((contDiff_apply ℂ ℂ (0 : Fin (e + 1))).contDiffAt.div_const (y 0))).add contDiffAt_const
+    ((contDiff_apply ℂ (fun _ => ℂ) (0 : Fin (e + 1))).contDiffAt.div_const (y 0))).add contDiffAt_const
 
 end ChartEnergySwapHessian
 
-open ChartEnergySwapHessian ChartMongeAmpereAffineInvariance in
 
+open ChartEnergySwapHessian ChartMongeAmpereAffineInvariance in
 theorem ChartEnergySwapInvariant.proof : ChartEnergySwapInvariant.Statement := by
   intro e M N hM hN k
   set S := swapFirstTwo e with hS

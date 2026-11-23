@@ -1,8 +1,53 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.MemClosureOfMemChartRing
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.PHilbertPositive
-import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.IntNumRelabel
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.AlgebraMapMemChartRingLine
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.IsFieldSubalgebraSelf
 import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PCutRegular
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.IsGraphGenTwistBundleZero
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.MemClosureOfMemChartRing
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.PHilbertPositive
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.Kleiman.SectionsOverLocalization
@@ -16,16 +61,10 @@ section OneBlock
 
 variable {F : Type} [Field F] {Ω : Type} [Field Ω] [Algebra F Ω]
 
-def unitSigmaEquiv (κ : Type) : (Σ _ : Unit, κ) ≃ κ where
-  toFun v := v.2
-  invFun i := ⟨(), i⟩
-  left_inv _ := rfl
-  right_inv _ := rfl
-
 variable {κ : Type} [Fintype κ]
 
-omit [Fintype κ] in
 
+omit [Fintype κ] in
 theorem chartRingOver_oneBlock_eq (x : κ → Ω) (c : Unit → κ) :
     chartRingOver F (IndefiniteRowSideFullHecke.Kleiman2.oneBlock x) c = Algebra.adjoin F (Set.range fun i => x i / x (c ())) := by
   unfold chartRingOver
@@ -37,8 +76,8 @@ theorem chartRingOver_oneBlock_eq (x : κ → Ω) (c : Unit → κ) :
   · rintro ⟨a, rfl⟩
     exact ⟨⟨(), a⟩, rfl⟩
 
-omit [Fintype κ] in
 
+omit [Fintype κ] in
 theorem mem_secOver_oneBlock (x : κ → Ω) (n : ℤ) (t : Ω) :
     t ∈ secOver F (IndefiniteRowSideFullHecke.Kleiman2.oneBlock x) (fun _ => n) ↔
       ∀ j, x j ≠ 0 → t * x j ^ (-n) ∈ Algebra.adjoin F (Set.range fun i => x i / x j) := by
@@ -51,8 +90,8 @@ theorem mem_secOver_oneBlock (x : κ → Ω) (n : ℤ) (t : Ω) :
   · intro h c hc
     exact h (c ()) (hc ())
 
-omit [Fintype κ] in
 
+omit [Fintype κ] in
 theorem secOver_oneBlock_comp {κ' : Type} (σ : κ' ≃ κ) (x : κ → Ω) (n : ℤ) :
     secOver F (IndefiniteRowSideFullHecke.Kleiman2.oneBlock (x ∘ σ)) (fun _ => n) = secOver F (IndefiniteRowSideFullHecke.Kleiman2.oneBlock x) (fun _ => n) := by
   ext t
@@ -69,8 +108,8 @@ theorem secOver_oneBlock_comp {κ' : Type} (σ : κ' ≃ κ) (x : κ → Ω) (n 
     rw [hr]
     exact h (σ j') hj'
 
-omit [Fintype κ] in
 
+omit [Fintype κ] in
 theorem relDim_oneBlock_eq_iff (P : Ideal (MvPolynomial (Σ _ : Unit, κ) F)) (e : ℕ) :
     FieldNumbers.relDim P = ((e : ℕ) : WithBot (WithTop ℤ)) ↔
       ringKrullDim (MvPolynomial (Σ _ : Unit, κ) F ⧸ P) = ((e + 1 : ℕ) : WithBot ℕ∞) := by

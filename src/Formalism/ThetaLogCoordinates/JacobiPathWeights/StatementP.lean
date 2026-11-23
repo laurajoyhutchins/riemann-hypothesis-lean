@@ -1,5 +1,49 @@
-import Mathlib
-import Formalism.ThetaLogCoordinates.JacobiPathWeights.IndexWeightsDominance
+module
+
+public import Formalism.ThetaLogCoordinates.JacobiPathWeights.IndexWeightsDominance
+public import Mathlib.Data.Int.Interval
+public import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -15,15 +59,21 @@ def dGT : (n : ℕ) → (Fin n → ℤ) → ℕ
   | 0, _ => 1
   | n + 1, μ => ∑ κ ∈ gtBox μ, dGT n κ
 
-open Classical in
-
-def stripsUp {n : ℕ} (μ : Fin n → ℤ) (b : ℕ) : Finset (Fin n → ℤ) :=
-  (Fintype.piFinset fun i => Finset.Icc (μ i) (μ i + b)).filter fun ν => HStrip ν μ b
 
 open Classical in
+def stripsUp {n : ℕ} (μ : Fin n → ℤ) (b : ℕ) : Finset (Fin n → ℤ) := by
+  letI : DecidablePred (fun ν => HStrip ν μ b) := fun ν => by
+    unfold HStrip
+    infer_instance
+  exact (Fintype.piFinset fun i => Finset.Icc (μ i) (μ i + b)).filter fun ν => HStrip ν μ b
 
-def stripsDown {n : ℕ} (μ : Fin n → ℤ) (b : ℕ) : Finset (Fin n → ℤ) :=
-  (Fintype.piFinset fun i => Finset.Icc (μ i - b) (μ i)).filter fun ν => HStrip μ ν b
+
+open Classical in
+def stripsDown {n : ℕ} (μ : Fin n → ℤ) (b : ℕ) : Finset (Fin n → ℤ) := by
+  letI : DecidablePred (fun ν => HStrip μ ν b) := fun ν => by
+    unfold HStrip
+    infer_instance
+  exact (Fintype.piFinset fun i => Finset.Icc (μ i - b) (μ i)).filter fun ν => HStrip μ ν b
 
 def StripsMem : Prop :=
   ∀ (n : ℕ) (μ ν : Fin n → ℤ) (b : ℕ),

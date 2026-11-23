@@ -1,14 +1,58 @@
-import Mathlib
-import Formalism.LocalToGlobal.IndefiniteReal.DatumVec
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ExistsInverseChart
-import Development.AbelianVarietyTheory.Proofs.HeightProofs.HeisenbergDirectionalDerivFormulaAndSmooth
-import Development.AbelianVarietyTheory.Proofs.HeightProofs.SymplecticValTauCompat
-import Development.AbelianVarietyTheory.Proofs.HeightProofs.SymplecticRealPartVanish
-import Development.AbelianVarietyTheory.Proofs.HeightProofs.RealAdeleExtAndStandardCharacterFormula
-import Development.AbelianVarietyTheory.Proofs.HeightProofs.SmoothIffRealCoordinatesAndRealLines
-import Development.AbelianVarietyTheory.Proofs.HeightProofs.ContinuousOfHeisenbergLevelAndSmooth
-import Development.AbelianVarietyTheory.Proofs.HeightProofs.CocompactTensor
-import Development.AbelianVarietyTheory.Proofs.HeightProofs.MeanSquareAddFundamentalDomainOfCocompact
+module
+
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.IsTopologicalRingAE
+public import Formalism.LocalToGlobal.IndefiniteReal.LocalNewformFunction
+public import Development.AbelianVarietyTheory.Counterexamples.HeightSurvey.StarPurelyImaginaryEqNeg
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ExistsInverseChart
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.ContinuousOfHeisenbergLevelAndSmooth
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.HeisenbergDirectionalDerivFormulaAndSmooth
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.RealAdeleExtAndStandardCharacterFormula
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.SmoothIffRealCoordinatesAndRealLines
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.SymplecticRealPartVanish
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.SymplecticValTauCompat
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -24,11 +68,11 @@ variable {D : D7} {θ : InfFam D} {σ : (D.what₂.Tau → ℂ) →+ Formalism.L
 
 theorem symplOH_add_left (x x' y : WO S T) : symplOH S T (x + x') y = symplOH S T x y + symplOH S T x' y := by
   unfold symplOH symplO hO
-  simp only [Matrix.add_apply, mul_add, Finset.sum_add_distrib, map_add]
+  simp only [Matrix.add_apply, mul_add, Finset.sum_add_distrib, map_add (f := _)]
 
 theorem symplOH_add_right (x y y' : WO S T) : symplOH S T x (y + y') = symplOH S T x y + symplOH S T x y' := by
   unfold symplOH symplO hO
-  simp only [Matrix.add_apply, mul_add, add_mul, Finset.sum_add_distrib, map_add]
+  simp only [Matrix.add_apply, mul_add, add_mul, Finset.sum_add_distrib, map_add (f := _)]
 
 theorem gramInv_star (V : HSp D) (i j) : star (V.gram⁻¹ i j) = V.gram⁻¹ j i := by
   have h : V.gram.IsHermitian := by
@@ -41,6 +85,7 @@ theorem herm_sum {A : Type} [CommRing A] {m n : ℕ} (c : A →+* A) (hc : ∀ a
     (x y : Matrix (Fin m) (Fin n) A) :
     c (∑ a, ∑ b, ∑ e, ∑ d, P a b * c (y e b) * Q e d * x d a) =
       ∑ a, ∑ b, ∑ e, ∑ d, P a b * c (x e b) * Q e d * y d a := by
+
   simp only [map_sum, map_mul, hc, hP, hQ]
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun _ _ => Finset.sum_congr rfl fun _ _ => ?_
@@ -69,6 +114,7 @@ theorem map_hO_zero {A B : Type} [CommRing A] [CommRing B] {m n : ℕ} (q : A �
       rw [h1, mul_zero]
     · have h1 : q (y i j) = 0 := congrFun (congrFun h i) j
       rw [hc _ h1, mul_zero, zero_mul, zero_mul]
+
   simp only [map_sum, hk, Finset.sum_const_zero]
 
 theorem map_trace_hO_zero {F E A B : Type} [Field F] [Field E] [Algebra F E] [FiniteDimensional F E]
@@ -83,7 +129,7 @@ theorem map_trace_hO_zero {F E A B : Type} [Field F] [Field E] [Algebra F E] [Fi
     intro z
     induction z using TensorProduct.induction_on with
     | zero => simp only [RingHom.map_zero]
-    | add a b ha hb => simp only [RingHom.map_add, ha, hb]
+    | add a b ha hb => simp only [RingHom.map_add (f := _), ha, hb]
     | tmul a e => rfl
   have hh := map_hO_zero (Algebra.TensorProduct.map p (AlgHom.id F E)).toRingHom (sigR A s)
     (fun z hz => by rw [hc, hz, map_zero]) P Q x y h
@@ -120,8 +166,8 @@ theorem continuous_symplOH {X : Type} [TopologicalSpace X] {x y : X → WO S T} 
   have hx' : ∀ i j, Continuous fun t => x t i j := fun i j =>
     (continuous_apply j).comp ((continuous_apply i).comp hx)
   have hh : Continuous fun t => hO S T (x t) (y t) :=
-    continuous_finset_sum _ fun _ _ => continuous_finset_sum _ fun _ _ => continuous_finset_sum _ fun _ _ =>
-      continuous_finset_sum _ fun _ _ => ((continuous_const.mul (hy' _ _)).mul continuous_const).mul (hx' _ _)
+    continuous_finsetSum _ fun _ _ => continuous_finsetSum _ fun _ _ => continuous_finsetSum _ fun _ _ =>
+      continuous_finsetSum _ fun _ _ => ((continuous_const.mul (hy' _ _)).mul continuous_const).mul (hx' _ _)
   have ht : Continuous (Algebra.trace (AF D.host.F) (Formalism.L2.Theta.AE D)) := IsModuleTopology.continuous_of_linearMap _
   exact continuous_const.mul (ht.comp (continuous_const.mul hh))
 
@@ -157,13 +203,14 @@ def omO (S T : HSp D) : RW T S →ₗ[ℝ] RW T S →ₗ[ℝ] ℝ :=
     (fun x y y' => by
       rw [← Finset.sum_add_distrib]
       refine Finset.sum_congr rfl fun τ _ => ?_
-      simp only [formAt, Pi.add_apply, mul_add, add_mul, map_add, Finset.sum_add_distrib, Complex.add_re])
+      simp only [formAt, Pi.add_apply, mul_add, add_mul, map_add (f := _), Finset.sum_add_distrib, Complex.add_re])
     (fun c x y => by rw [smul_eq_mul, Finset.mul_sum]; exact Finset.sum_congr rfl fun τ _ => formAt_smul_right τ c _ _)
 
 theorem complexEmbedding_hermitianQuadrupleSum {A : Type} [CommRing A] (φ : A →+* ℂ) (c : A →+* A) (hc : ∀ a, φ (c a) = starRingEnd ℂ (φ a))
     {m n : ℕ} (x y : Fin m → Fin n → A) (P : Fin n → Fin n → A) (Q : Fin m → Fin m → A) :
     φ (∑ a, ∑ b, ∑ e, ∑ d, P a b * c (y e b) * Q e d * x d a) =
       ∑ a, ∑ b, ∑ e, ∑ d, φ (P a b) * starRingEnd ℂ (φ (y e b)) * φ (Q e d) * φ (x d a) := by
+
   simp only [map_sum, map_mul, hc]
 
 theorem valTau_symplO (hθ : IsInfFam θ) (τ : D.what₂.Tau) (x y : WO S T) :
@@ -173,7 +220,7 @@ theorem valTau_symplO (hθ : IsInfFam θ) (τ : D.what₂.Tau) (x y : WO S T) :
     (fun i k => incA D (S.gram⁻¹ i k)) (fun i k => incA D (T.gram i k))
   simp only [hi] at h
   unfold valTau symplO formAt
-  rw [SymplVal.trace_AE, RingHom.map_add, RingHom.map_add, comp_cA hθ, RingHom.map_mul, RingHom.map_mul, comp_incA hθ,
+  rw [SymplVal.trace_AE, RingHom.map_add (f := _), RingHom.map_add (f := _), comp_cA hθ, RingHom.map_mul, RingHom.map_mul, comp_incA hθ,
     Complex.add_re, Complex.conj_re, two_mul]
   erw [h]
   rfl
@@ -208,14 +255,14 @@ theorem omO_self (h : Chart θ σ) (x : RW T S) : omO S T x x = 0 := by
   rw [← h1, h2, h.pi_iota] at h3
   linarith
 
-theorem theta_zero : IsThetaFunO ψ S T 0 where
+theorem theta_zero : IsThetaFunO ψ S T 0 := {
   quasi γ w := by simp only [Pi.zero_apply, mul_zero]
   level := ⟨⊤, isOpen_univ, fun u _ _ => by funext w; simp only [heisO, Pi.zero_apply, mul_zero]⟩
   cont := continuous_const
-  smooth k L _ _ w := contDiff_const
+  smooth k L _ _ w := contDiff_const }
 
 theorem theta_add {f g : WO S T → ℂ} (hf : IsThetaFunO ψ S T f) (hg : IsThetaFunO ψ S T g) :
-    IsThetaFunO ψ S T (f + g) where
+    IsThetaFunO ψ S T (f + g) := {
   quasi γ w := by simp only [Pi.add_apply, hf.quasi, hg.quasi, mul_add]
   level := by
     obtain ⟨U, hU, h1⟩ := hf.level
@@ -227,9 +274,9 @@ theorem theta_add {f g : WO S T → ℂ} (hf : IsThetaFunO ψ S T f) (hg : IsThe
     unfold heisO at e1 e2 ⊢
     rw [Pi.add_apply, Pi.add_apply, mul_add, e1, e2]
   cont := hf.cont.add hg.cont
-  smooth k L h1 h2 w := (hf.smooth k L h1 h2 w).add (hg.smooth k L h1 h2 w)
+  smooth k L h1 h2 w := (hf.smooth k L h1 h2 w).add (hg.smooth k L h1 h2 w) }
 
-theorem theta_smul (c : ℂ) {f : WO S T → ℂ} (hf : IsThetaFunO ψ S T f) : IsThetaFunO ψ S T (c • f) where
+theorem theta_smul (c : ℂ) {f : WO S T → ℂ} (hf : IsThetaFunO ψ S T f) : IsThetaFunO ψ S T (c • f) := {
   quasi γ w := by
     rw [Pi.smul_apply, Pi.smul_apply, hf.quasi, smul_eq_mul, smul_eq_mul, mul_left_comm]
   level := by
@@ -240,7 +287,7 @@ theorem theta_smul (c : ℂ) {f : WO S T → ℂ} (hf : IsThetaFunO ψ S T f) : 
     unfold heisO at e1 ⊢
     rw [Pi.smul_apply, Pi.smul_apply, smul_eq_mul, smul_eq_mul, mul_left_comm, e1]
   cont := hf.cont.const_smul c
-  smooth k L h1 h2 w := contDiff_const.mul (hf.smooth k L h1 h2 w)
+  smooth k L h1 h2 w := contDiff_const.mul (hf.smooth k L h1 h2 w) }
 
 theorem theta_sub {f g : WO S T → ℂ} (hf : IsThetaFunO ψ S T f) (hg : IsThetaFunO ψ S T g) :
     IsThetaFunO ψ S T (f - g) := by
@@ -328,7 +375,7 @@ theorem theta_heisO_real (hθ : IsInfFam θ) (hψ : IsStdChar D ψ (-1)) {x : WO
         Complex.exp (-(Real.pi * Complex.I) * (Complex.ofRealCLM ((omO S T).flip z (piW θ T S w + y)))) *
           f ((w + iotaW σ T S z) + iotaW σ T S y) := by
       funext y
-      rw [heisO_iota h hψ, AddMonoidHom.map_add, h.pi_iota, add_right_comm]
+      rw [heisO_iota h hψ, AddMonoidHom.map_add (f := _), h.pi_iota, add_right_comm]
       rfl
     rw [e]
     refine ContDiff.mul (Complex.contDiff_exp.comp (contDiff_const.mul (Complex.ofRealCLM.contDiff.comp ?_)))
@@ -383,7 +430,7 @@ theorem heisO_line_add (hθ : IsInfFam θ) (hψ : IsStdChar D ψ (-1)) {L : ℝ 
   have h1 : ψ (symplOH S T (L s) (L t)) = 1 := by
     rw [e s, e t, psi_symplOH h hψ, h.pi_iota, LinearMap.map_smul₂, map_smul, omO_self h]
     simp
-  rw [heisO_heisO, h1, one_smul, L.map_add]
+  rw [heisO_heisO, h1, one_smul, map_add L]
 
 theorem hasDerivAt_heisO (hθ : IsInfFam θ) (hψ : IsStdChar D ψ (-1)) {L : ℝ →+ WO S T} (hL : IsRealDir T S L)
     {f : WO S T → ℂ} (hf : IsThetaFunO ψ S T f) (w : WO S T) (s : ℝ) :

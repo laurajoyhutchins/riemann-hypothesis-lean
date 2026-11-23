@@ -1,9 +1,55 @@
-import Mathlib
-import Formalism.LocalToGlobal.IndefiniteReal.CxPassSk
-import Formalism.LocalToGlobal.Divisibility.RowLatLemmas
-import Formalism.LocalToGlobal.Divisibility.FramesLemmas
+module
+
+public import Formalism.LocalToGlobal.IndefiniteReal.CxPassSk
+public import Mathlib.Analysis.CStarAlgebra.CStarMatrix
+public import Formalism.LocalToGlobal.Divisibility.FramesLemmas
+public import Formalism.LocalToGlobal.Divisibility.LiftLatLemmas
 import Formalism.LocalToGlobal.Divisibility.ProjLemmas
-import Formalism.BranchSandwichDivisors.StatementL
+import Formalism.LocalToGlobal.Divisibility.RowLatLemmas
+public import Formalism.LocalToGlobal.IndefiniteReal.CxLemmas
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.LocalToGlobal.GlobalTheory.DivPassage
+
+@[expose] public section
 
 open Module NumberField IsDedekindDomain
 open scoped Matrix ComplexOrder InnerProductSpace
@@ -24,12 +70,6 @@ theorem inv_smul_ne {n : ℕ} (k : ℂ) (hk : k ≠ 0) (A : Matrix (Fin n) (Fin 
       intro hu
       exact h (isUnit_of_mul_isUnit_right hu)
     rw [Matrix.nonsing_inv_apply_not_isUnit _ h, Matrix.nonsing_inv_apply_not_isUnit _ h', smul_zero]
-
-theorem quotMetC_smul {n d : ℕ} (A : Matrix (Fin n) (Fin n) ℂ) (hA : A.PosDef) (P : Matrix (Fin d) (Fin n) ℂ)
-    (c : ℝ) (hc : 0 < c) : quotMetC P ((c : ℂ) • A) = (c : ℂ) • quotMetC P A := by
-  have hc' : (c : ℂ) ≠ 0 := by exact_mod_cast hc.ne'
-  unfold quotMetC
-  rw [inv_smul_ne _ hc', Matrix.mul_smul, Matrix.smul_mul, inv_smul_ne _ (inv_ne_zero hc'), inv_inv]
 
 theorem unitary_inv {n : ℕ} (A : Matrix (Fin n) (Fin n) ℂ) (hA : IsUnit A.det)
     (R : Matrix (Fin n) (Fin n) ℂ) (hR : Rᴴ * A * R = A) (hRu : IsUnit R.det) :
@@ -218,24 +258,6 @@ theorem blk_ext {a b : ℕ} {A A' : Matrix (Fin a) (Fin b) α} (h : ∀ x, A *�
     rw [Matrix.toLin'_apply, Matrix.toLin'_apply, h x])
 
 end Gen
-
-theorem blk_orth {K : Type} [Field K] [StarRing K] {n m d d' : ℕ} (H : Matrix (Fin n) (Fin n) K)
-    (z : Matrix (Fin n) (Fin d) K) (Pr : Matrix (Fin d) (Fin n) K) (hPr : Pr = orthPr H z)
-    (H' : Matrix (Fin m) (Fin m) K) (z' : Matrix (Fin m) (Fin d') K) (P' : Matrix (Fin d') (Fin m) K)
-    (hP' : IsOrthProj H' z' P') (R : Matrix (Fin n) (Fin m) K) (Q : Matrix (Fin d) (Fin d') K)
-    (hR : zᴴ * H * R = Q * (z'ᴴ * H')) : Pr * R = (Pr * R * z') * P' := by
-  obtain ⟨-, h2⟩ := hP'
-  rw [Matrix.mul_sub, Matrix.mul_one, sub_eq_zero] at h2
-  have hR' : zᴴ * H * R = Q * z'ᴴ * H' := by rw [hR]; simp only [Matrix.mul_assoc]
-  have e : Q * z'ᴴ * H' * z' * P' = Q * z'ᴴ * H' := by
-    calc Q * z'ᴴ * H' * z' * P' = Q * (z'ᴴ * H' * (z' * P')) := by simp only [Matrix.mul_assoc]
-      _ = Q * (z'ᴴ * H') := by rw [← h2]
-      _ = Q * z'ᴴ * H' := by simp only [Matrix.mul_assoc]
-  subst hPr
-  unfold orthPr
-  calc (zᴴ * H * z)⁻¹ * (zᴴ * H) * R = (zᴴ * H * z)⁻¹ * (zᴴ * H * R) := by simp only [Matrix.mul_assoc]
-    _ = (zᴴ * H * z)⁻¹ * (Q * z'ᴴ * H' * z' * P') := by rw [hR', e]
-    _ = (zᴴ * H * z)⁻¹ * (zᴴ * H) * R * z' * P' := by rw [← hR']; simp only [Matrix.mul_assoc]
 
 theorem blk_maj {K : Type} [Field K] [NumberField K] {n d : ℕ} (X : InfinitePlace K → Matrix (Fin n) (Fin n) ℂ)
     (Y : InfinitePlace K → Matrix (Fin d) (Fin d) ℂ) (v : InfinitePlace K) (J : Matrix (Fin d) (Fin n) K) (c : ℂ)
@@ -727,23 +749,13 @@ theorem side_lv (b : Bool) :
     lv (faceOf I.A I.P0 I.ψ0 I.P1 I.ψ1 I.Dc I.Sp I.Zsc I.X.zs) b = I.A.side (I.lvP b) (I.lvψ b) I.X.zs := by
   cases b <;> rfl
 
-theorem side_g : lv (faceOf I.A ⊥ 1 I.P1 I.ψ1 I.Dc I.Sp I.Zsc I.X.zs) false = I.A.side ⊥ 1 I.X.zs := rfl
-
-theorem toR_cr (b : Bool) (t : I.A.fam.base.Tup) :
-    HEq (I.cr.toR I.X.zs b t) ((I.A.fam.R t).toF (I.A.fam.lvl (I.lvP b) (I.lvψ b)) (I.X.zs.Z t)) := by
-  cases b <;> exact HEq.rfl
-
-theorem toR_cg (t : I.A.fam.base.Tup) :
-    I.cg.toR I.X.zs false t = (I.A.fam.R t).toF (I.A.fam.lvl ⊥ 1) (I.X.zs.Z t) := rfl
-
-theorem Jm_eq (b : Bool) : I.Jm b = I.Jt b I.A.fam.base.μ0 := rfl
-
 theorem iC_cpt {Bs : DefBase K} {A : DefAmb Bs} (X : CxData A) {fc : DefSub A → DefFace Bs} (cr : Crd A fc) (b : Bool)
     (t : Bs.Tup) (x : Fin ((lv (fc X.zs) b).dQ t) → K) :
     X.iC cr b t (cpt Bs.v0.embedding x) = X.Θ t (X.jR t (cr.toR X.zs b t x)) := by
   have hx : x = ∑ k, x k • (Pi.single k (1 : K) : Fin ((lv (fc X.zs) b).dQ t) → K) := by
     funext i; simp [Finset.sum_apply, Pi.single_apply]
   conv_rhs => rw [hx]
+
   simp only [map_sum, map_smul, LinearMap.map_smulₛₗ, CxData.iC, lin_apply, cpt]
 
 theorem gramE_unit' {Bs : DefBase K} {A : DefAmb Bs} (X : CxData A) {fc : DefSub A → DefFace Bs} (cr : Crd A fc) (b : Bool)

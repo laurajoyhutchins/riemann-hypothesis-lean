@@ -1,5 +1,51 @@
-import Mathlib
+module
+
+public import Formalism.LocalToGlobal.IndefiniteReal.DatumVec
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AbelianVarietyTheory.Definitions.Divisors.IsUnitaryOnTheta
 import Development.AbelianVarietyTheory.Proofs.TwistedOperators.TameOnOne
+import Formalism.LocalToGlobal.IndefiniteReal.LinksDefs
+
+@[expose] public section
 
 noncomputable section
 
@@ -25,7 +71,7 @@ theorem topL_eq {a b r : ℕ} (ha : r ≤ a) (hb : r ≤ b) (A : Matrix (Fin b) 
   ext i j
   have hij : i.val < b ∧ j.val < a := ⟨lt_of_lt_of_le i.isLt hb, lt_of_lt_of_le j.isLt ha⟩
   show (if h : i.val < b ∧ j.val < a then A ⟨i.val, h.1⟩ ⟨j.val, h.2⟩ else 0) = A (Fin.castLE hb i) (Fin.castLE ha j)
-  rw [dif_pos hij]
+  rw [dite_eq_left hij]
   rfl
 
 theorem topL_mul {a b c r : ℕ} (ha : r ≤ a) (hb : r ≤ b) (hc : r ≤ c) (A : Matrix (Fin b) (Fin c) κ)
@@ -131,7 +177,7 @@ theorem omegaQ_blockTri : ∀ (D : D7) (a b r : ℕ), r ≤ a → r ≤ b → �
   unfold omegaQ
   by_cases h : ∀ PP ∈ Q, LowZero r (y PP) ∧ IsUnit (topL r (y PP)).det
   · have h' := hcond.mpr h
-    rw [dif_pos h', dif_pos h, hsplit, hsplit]
+    rw [dite_eq_left h', dite_eq_left h, hsplit, hsplit]
     refine Finset.prod_congr rfl fun PP _ => ?_
     congr 1
     obtain ⟨P, hP⟩ := PP
@@ -147,7 +193,7 @@ theorem omegaQ_blockTri : ∀ (D : D7) (a b r : ℕ), r ≤ a → r ≤ b → �
     simp only [map_mul, map_inv, Units.val_mul, Units.val_inv_eq_inv_val]
     field_simp
   · have h' : ¬ ∀ PP ∈ Q, LowZero r (y' PP) ∧ IsUnit (topL r (y' PP)).det := fun h'' => h (hcond.mp h'')
-    rw [dif_neg h', dif_neg h, mul_zero, mul_zero]
+    rw [dite_eq_right h', dite_eq_right h, mul_zero, mul_zero]
 
 end GlobalTheory.OmegaTwistLaw
 

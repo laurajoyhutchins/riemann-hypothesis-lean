@@ -1,8 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.OneSubOfIsIrreducible
-import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.WeilTensorLiftConclusion
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.AlgebraMapIntertwiningMapBijectiveOfIsSmooth
-open GlobalTheory.PRep GlobalTheory.SmGL GlobalTheory.SplitWeil GlobalTheory.TypeTwo
+module
+
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.IsUnitarisableOfCharIff
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.NotInSupportOfSubsingleton
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
+open GlobalTheory.PRep GlobalTheory.SmGL GlobalTheory.SplitWeil
 open scoped TensorProduct
 
 noncomputable section
@@ -22,7 +66,7 @@ def up (U : Subrepresentation X) : Subrepresentation (extTensor X T) where
       refine ⟨⟨X g.1 u, U.apply_mem_toSubmodule g.1 u.2⟩ ⊗ₜ T g.2 w, ?_⟩
       simp
     | add x y hx hy =>
-      rw [map_add, map_add]; exact add_mem hx hy
+      rw [map_add (f := _), map_add (f := _)]; exact add_mem hx hy
 
 def down (S : Subrepresentation (extTensor X T)) : Subrepresentation X where
   toSubmodule :=
@@ -86,7 +130,7 @@ theorem map_mem (S : Subrepresentation (extTensor X T)) (r : MonoidAlgebra ℂ H
     rw [MonoidAlgebra.of_apply, Representation.asAlgebraHom_single_one, ← h1]
     exact S.apply_mem_toSubmodule _ hz
   | add f g hf hg =>
-    rw [map_add, TensorProduct.map_add_right, LinearMap.add_apply]
+    rw [map_add (f := _), TensorProduct.map_add_right, LinearMap.add_apply]
     exact S.toSubmodule.add_mem hf hg
   | smul c f hf =>
     rw [map_smul, TensorProduct.map_smul_right, LinearMap.smul_apply]
@@ -102,7 +146,9 @@ theorem up_down (hirr : T.IsIrreducible)
     induction x using TensorProduct.induction_on with
     | zero => rw [map_zero]; exact zero_mem _
     | tmul u w => simpa using u.2 w
-    | add x y hx hy => rw [map_add]; exact add_mem hx hy
+    | add x y hx hy =>
+      rw [map_add]
+      exact add_mem hx hy
   · intro y hy
     let b := Module.Basis.ofVectorSpace ℂ W
     let F := TensorProduct.equivFinsuppOfBasisRight (M := V) b
@@ -145,7 +191,9 @@ theorem down_up [Nontrivial W] (U : Subrepresentation X) : down X T (up X T U) =
       induction x using TensorProduct.induction_on with
       | zero => rw [map_zero, map_zero]; exact zero_mem _
       | tmul u w' => simpa [f] using U.toSubmodule.smul_mem (φ w') u.2
-      | add x y hx hy => rw [map_add, map_add]; exact add_mem hx hy
+      | add x y hx hy =>
+        simp only [map_add]
+        exact add_mem hx hy
     obtain ⟨x, hx⟩ := hv w
     have h2 := key x
     rw [hx] at h2
@@ -174,17 +222,6 @@ def orderIso (hirr : T.IsIrreducible)
         induction x using TensorProduct.induction_on with
         | zero => rw [map_zero]; exact zero_mem (up X T U').toSubmodule
         | tmul u w => exact ⟨⟨u, h u.2⟩ ⊗ₜ w, by simp⟩
-        | add x y hx hy => rw [map_add]; exact (up X T U').toSubmodule.add_mem hx hy }
-
-def upEquiv (U : Subrepresentation X) :
-    (extTensor U.toRepresentation T).Equiv (up X T U).toRepresentation :=
-  Representation.Equiv.mk (LinearEquiv.ofInjective (U.toSubmodule.subtype.rTensor W)
-      (Module.Flat.rTensor_preserves_injective_linearMap _ U.toSubmodule.injective_subtype)) (fun g => by
-    apply TensorProduct.ext'
-    intro u w
-    apply Subtype.ext
-    simp only [Subrepresentation.toRepresentation, MonoidHom.coe_mk, OneHom.coe_mk]
-    erw [LinearEquiv.ofInjective_apply]
-    exact Module.Flat.rTensor_preserves_injective_linearMap _ U.toSubmodule.injective_subtype)
+        | add x y hx hy => rw [map_add (f := _)]; exact (up X T U').toSubmodule.add_mem hx hy }
 
 end GlobalTheory.ExtTensorSub

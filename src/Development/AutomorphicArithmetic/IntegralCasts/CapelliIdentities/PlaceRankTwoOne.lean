@@ -1,4 +1,64 @@
-import Mathlib
+module
+
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.MeasureTheory.Measure.Haar.Basic
+public import Mathlib.Topology.Instances.Matrix
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.Complex
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+public import Mathlib.Topology.Algebra.Group.Units
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.LinearAlgebra.Determinant
+public import Mathlib.MeasureTheory.Measure.Lebesgue.EqHaar
+public import Mathlib.RingTheory.Norm.Transitivity
+
+@[expose] public section
 
 noncomputable def UpperTheory.Reformulated.B.placeRankTwoOne.Jm :
     {n : Nat} → (Fin n → Bool) → Matrix (Fin n) (Fin n) Complex :=
@@ -734,10 +794,7 @@ theorem UpperTheory.Reformulated.B.placeRankTwoOne.laurent_T_neg_one_mul_T_one :
     inferInstanceAs (LocallyCompactSpace (Fin n → Fin n → ℂ))
   exact (isClosed_UJ ε).locallyCompactSpace
 
-noncomputable def UpperTheory.Reformulated.B.placeRankTwoOne.muG :
-    {n : Nat} →
-      (ε : Fin n → Bool) → @MeasureTheory.Measure (↥(@UpperTheory.Reformulated.B.placeRankTwoOne.UJ n ε)) (UpperTheory.Reformulated.B.placeRankTwoOne.instMeasurableSpaceUJ n ε) :=
-    fun {n : Nat} (ε : Fin n → Bool) ↦
+noncomputable def UpperTheory.Reformulated.B.placeRankTwoOne.muG : {n : ℕ} → (ε : Fin n → Bool) → MeasureTheory.Measure ↥(UpperTheory.Reformulated.B.placeRankTwoOne.UJ ε) := fun {n : Nat} (ε : Fin n → Bool) ↦
       @MeasureTheory.Measure.haar (↥(@UpperTheory.Reformulated.B.placeRankTwoOne.UJ n ε))
         (@Subgroup.toGroup
           (@Units (Matrix (Fin n) (Fin n) Complex)
@@ -807,9 +864,7 @@ noncomputable def UpperTheory.Reformulated.B.placeRankTwoOne.hs :
           @HPow.hPow Real Nat Real (@instHPow Real Nat (@NPow.toPow Real (@Monoid.toNPow Real Real.instMonoid)))
             (@Norm.norm Complex Complex.instNorm (g i j)) (@OfNat.ofNat Nat (nat_lit 2) (instOfNatNat (nat_lit 2)))
 
-noncomputable def UpperTheory.Reformulated.B.placeRankTwoOne.hsG :
-    {n : Nat} → {ε : Fin n → Bool} → ↥(@UpperTheory.Reformulated.B.placeRankTwoOne.UJ n ε) → Real :=
-    fun {n : Nat} {ε : Fin n → Bool} (g : ↥(@UpperTheory.Reformulated.B.placeRankTwoOne.UJ n ε)) ↦
+noncomputable def UpperTheory.Reformulated.B.placeRankTwoOne.hsG : {n : ℕ} → {ε : Fin n → Bool} → ↥(UpperTheory.Reformulated.B.placeRankTwoOne.UJ ε) → ℝ := fun {n : Nat} {ε : Fin n → Bool} (g : ↥(@UpperTheory.Reformulated.B.placeRankTwoOne.UJ n ε)) ↦
       @UpperTheory.Reformulated.B.placeRankTwoOne.hs n
         (@Units.val (Matrix (Fin n) (Fin n) Complex)
           (@Semiring.toMonoid (Matrix (Fin n) (Fin n) Complex)
@@ -1019,7 +1074,7 @@ theorem UpperTheory.Reformulated.B.placeRankTwoOne.volume_growth :
     Units.continuous_val.comp continuous_subtype_val
   have hB : IsClosed {g : UJ ε | hsG g ≤ R ^ 2} :=
     isClosed_le (f := fun g : UJ ε => ∑ i, ∑ j, ‖g.val.val i j‖ ^ 2)
-      (continuous_finset_sum _ fun i _ => continuous_finset_sum _ fun j _ =>
+      (continuous_finsetSum _ fun i _ => continuous_finsetSum _ fun j _ =>
         (hval.matrix_elem i j).norm.pow 2) continuous_const
   have hact : Continuous fun p : UJ ε × (Fin n → Fin n → ℂ) => act (p.1⁻¹).val.val p.2 :=
     continuous_pi fun j => (hval.comp continuous_fst.inv).matrix_mulVec

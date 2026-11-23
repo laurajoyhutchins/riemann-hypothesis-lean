@@ -1,4 +1,45 @@
-import Formalism.SharpRestriction.CuspSpanNormBounds.GlobAut
+module
+
+public import Formalism.SharpRestriction.CuspSpanNormBounds.GlobAut
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -12,30 +53,6 @@ variable (I : AutInst)
 
 abbrev AEf : Type := I.E ⊗[I.F] Af I.F
 
-abbrev GLf (j : ℕ) : Type := GL (Fin j) (AEf I)
-
-abbrev GLinf (j : ℕ) : Type := InfinitePlace I.F → GL (Fin j) ℂ
-
-abbrev GLA (j : ℕ) : Type := GLinf I j × GLf I j
-
-def ratGL (j : ℕ) : GL (Fin j) I.E →* GLA I j :=
-  MonoidHom.prod (MonoidHom.pi fun v => Matrix.GeneralLinearGroup.map (I.φ v))
-    (Matrix.GeneralLinearGroup.map (Formalism.UG.inclE (F := I.F) (Af I.F)))
-
-def idl (u : (AEf I)ˣ) : Submodule (𝓞 I.E) I.E :=
-  Submodule.span (𝓞 I.E)
-    {e : I.E | ((u⁻¹ : (AEf I)ˣ) : AEf I) * Formalism.UG.inclE (F := I.F) (Af I.F) e ∈ IntAf I.F I.E}
-
-open Classical in
-
-def nrmF (u : (AEf I)ˣ) : ℝ :=
-  if h : IsFractional (nonZeroDivisors (𝓞 I.E)) (idl I u) then
-    ((FractionalIdeal.absNorm (⟨idl I u, h⟩ : FractionalIdeal (nonZeroDivisors (𝓞 I.E)) I.E) : ℚ) : ℝ)⁻¹
-  else 0
-
-def detNorm {j : ℕ} (m : GLA I j) : ℝ :=
-  nrmF I (Matrix.GeneralLinearGroup.det m.2) *
-    ∏ v, ‖((Matrix.GeneralLinearGroup.det (m.1 v) : ℂˣ) : ℂ)‖ ^ 2
 
 end Formalism.L2.S.S7.GLOne
 

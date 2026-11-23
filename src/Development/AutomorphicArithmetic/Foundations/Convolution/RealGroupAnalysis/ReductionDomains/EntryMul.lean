@@ -1,5 +1,43 @@
-import Development.AutomorphicArithmetic.Foundations.Convolution.RealGroupAnalysis.ReductionDomains.ContinuousEntry
-import GroundTheory.GlobalFields.TateThesis.AdeleScaling
+module
+
+public import Development.AutomorphicArithmetic.Foundations.Convolution.RealGroupAnalysis.ThetaLiftTrivialOrbitTermsVanish
+public import GroundTheory.AutomorphicForms.ReductionIwasawa
+import GroundTheory.AutomorphicForms.ReductionCore
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 open NumberField IsDedekindDomain MeasureTheory Matrix Topology Filter
 open GroundTheory.Global GroundTheory.Automorphic GroundTheory.Automorphic.GJMatrix
@@ -25,7 +63,7 @@ private theorem real_iff {n : ℕ} (M : Matrix (Fin n) (Fin n) ℝ) :
     ext i j
     have h3 := hb (Pi.single i 1) (Pi.single j 1)
     rw [single_one_vecMul, single_one_vecMul, single_one_dotProduct] at h3
-    rw [mul_apply, one_apply]
+    rw [Matrix.mul_apply, Matrix.one_apply]
     simp only [transpose_apply]
     refine Eq.trans h3 ?_
     simp [Pi.single_apply]
@@ -41,7 +79,7 @@ private theorem entry_mul {F : Type} [Field F] [NumberField F] (k : G1 F) (w : I
 
 private theorem entry_one {F : Type} [Field F] [NumberField F] (w : InfinitePlace F) (i j : Fin 2) :
     ((1 : Matrix (Fin 2) (Fin 2) (A F)) i j).1 w = (1 : Matrix (Fin 2) (Fin 2) w.Completion) i j := by
-  rw [one_apply, one_apply]
+  rw [Matrix.one_apply, Matrix.one_apply]
   split_ifs <;> rfl
 
 private theorem place_iff {F : Type} [Field F] [NumberField F] [IsTotallyReal F] (k : G1 F) (w : InfinitePlace F) :
@@ -57,17 +95,19 @@ private theorem place_iff {F : Type} [Field F] [NumberField F] [IsTotallyReal F]
         (fun i => ψ.toRingHom (z i)) ᵥ* M := by
     intro z
     ext j
+
     simp only [vecMul, dotProduct, map_sum, map_mul]
     rfl
   have key : ∀ i j, (M * Mᵀ) i j = ψ (((k.1 * k.1ᵀ) i j).1 w) := by
     intro i j
-    rw [entry_mul, map_sum, mul_apply]
+
+    rw [entry_mul, map_sum, Matrix.mul_apply]
     refine Finset.sum_congr rfl fun l _ => ?_
     rw [map_mul]
     rfl
   have key1 : ∀ i j, (1 : Matrix (Fin 2) (Fin 2) ℝ) i j = ψ (((1 : Matrix (Fin 2) (Fin 2) (A F)) i j).1 w) := by
     intro i j
-    rw [entry_one, one_apply, one_apply]
+    rw [entry_one, Matrix.one_apply, Matrix.one_apply]
     split_ifs <;> simp
   have h1 : Reduction.infAt w (gl k) ∈ Reduction.archCompact w ↔
       ∀ z : Fin 2 → ℝ, Reduction.euclidNorm (z ᵥ* M) = Reduction.euclidNorm z := by

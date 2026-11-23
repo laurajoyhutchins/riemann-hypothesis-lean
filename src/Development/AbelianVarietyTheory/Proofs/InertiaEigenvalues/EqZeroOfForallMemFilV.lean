@@ -1,6 +1,64 @@
-import Mathlib
-import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
+module
+
+public import Formalism.WeaklyAdmissibleFiltrations.Statement
+public import Mathlib.RingTheory.Coalgebra.CoassocSimps
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
 import Formalism.SharpRestriction.LevelLetterCocycles.LocCoh
+public import Mathlib.FieldTheory.Separable
+public import Mathlib.RingTheory.Flat.Basic
+public import Mathlib.RingTheory.Unramified.Basic
+public import Mathlib.RingTheory.Unramified.Field
+
+@[expose] public section
 
 noncomputable section
 
@@ -16,8 +74,8 @@ variable {Qp : Type} [Field Qp] (F : Type) [CommRing F] [Algebra Qp F]
     {V' : Type} [AddCommGroup V'] [Module LL V'] [Module Qp V'] [IsScalarTower Qp LL V']
     {V'' : Type} [AddCommGroup V''] [Module LL V''] [Module Qp V''] [IsScalarTower Qp LL V'']
 
-variable (Qp) in
 
+variable (Qp) in
 def bil (β : V →ₗ[LL] V' →ₗ[LL] V'') : V ⊗[Qp] F →ₗ[LL] V' ⊗[Qp] F →ₗ[LL] V'' ⊗[Qp] F :=
   TensorProduct.curry
     ((AlgebraTensorModule.map (TensorProduct.lift β) (LinearMap.mul' Qp F)).comp
@@ -27,21 +85,21 @@ def bil (β : V →ₗ[LL] V' →ₗ[LL] V'') : V ⊗[Qp] F →ₗ[LL] V' ⊗[Qp
     bil Qp F β (v ⊗ₜ[Qp] b) (w ⊗ₜ[Qp] b') = β v w ⊗ₜ[Qp] (b * b') := by
   simp [bil]
 
-variable (Qp LL V) in
 
+variable (Qp LL V) in
 def sm : LL ⊗[Qp] F →ₗ[LL] V ⊗[Qp] F →ₗ[LL] V ⊗[Qp] F := bil Qp F (LinearMap.lsmul LL V)
 
 @[simp] theorem sm_tmul (c : LL) (v : V) (b b' : F) :
     sm Qp F LL V (c ⊗ₜ[Qp] b) (v ⊗ₜ[Qp] b') = (c • v) ⊗ₜ[Qp] (b * b') := by
   simp [sm]
 
-variable (Qp) in
 
+variable (Qp) in
 abbrev ext (f : V →ₗ[LL] V') : V ⊗[Qp] F →ₗ[LL] V' ⊗[Qp] F :=
   AlgebraTensorModule.map f (LinearMap.id : F →ₗ[Qp] F)
 
-variable (Qp LL V) in
 
+variable (Qp LL V) in
 abbrev mulR (b : F) : V ⊗[Qp] F →ₗ[LL] V ⊗[Qp] F :=
   AlgebraTensorModule.map (LinearMap.id : V →ₗ[LL] V) (LinearMap.mulLeft Qp b)
 
@@ -52,7 +110,7 @@ theorem sm_tmul_left (c : LL) (b : F) (x : V ⊗[Qp] F) :
   induction x using TensorProduct.induction_on with
   | zero => simp
   | tmul v b' => simp [TensorProduct.smul_tmul']
-  | add x y hx hy => simp only [map_add, hx, hy, smul_add]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy, smul_add]
 
 theorem sm_one_tmul (b : F) (x : V ⊗[Qp] F) :
     sm Qp F LL V ((1 : LL) ⊗ₜ[Qp] b) x = mulR Qp F LL V b x := by
@@ -62,46 +120,46 @@ theorem sm_one_tmul (b : F) (x : V ⊗[Qp] F) :
   induction x using TensorProduct.induction_on with
   | zero => simp
   | tmul v b' => simp [Algebra.TensorProduct.one_def]
-  | add x y hx hy => simp only [map_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
 
 theorem bil_sm_left (β : V →ₗ[LL] V' →ₗ[LL] V'') (r : LL ⊗[Qp] F) (x : V ⊗[Qp] F) (y : V' ⊗[Qp] F) :
     bil Qp F β (sm Qp F LL V r x) y = sm Qp F LL V'' r (bil Qp F β x y) := by
   induction r using TensorProduct.induction_on with
   | zero => simp
-  | add r s hr hs => simp only [map_add, LinearMap.add_apply, hr, hs]
+  | add r s hr hs => simp only [map_add (f := _), LinearMap.add_apply, hr, hs]
   | tmul c b =>
     induction x using TensorProduct.induction_on with
     | zero => simp
-    | add r s hr hs => simp only [map_add, LinearMap.add_apply, hr, hs]
+    | add r s hr hs => simp only [map_add (f := _), LinearMap.add_apply, hr, hs]
     | tmul v b' =>
       induction y using TensorProduct.induction_on with
       | zero => simp
-      | add r s hr hs => simp only [map_add, hr, hs]
+      | add r s hr hs => simp only [map_add (f := _), hr, hs]
       | tmul w b'' => simp [mul_assoc]
 
 theorem bil_sm_right (β : V →ₗ[LL] V' →ₗ[LL] V'') (r : LL ⊗[Qp] F) (x : V ⊗[Qp] F) (y : V' ⊗[Qp] F) :
     bil Qp F β x (sm Qp F LL V' r y) = sm Qp F LL V'' r (bil Qp F β x y) := by
   induction r using TensorProduct.induction_on with
   | zero => simp
-  | add r s hr hs => simp only [map_add, LinearMap.add_apply, hr, hs]
+  | add r s hr hs => simp only [map_add (f := _), LinearMap.add_apply, hr, hs]
   | tmul c b =>
     induction x using TensorProduct.induction_on with
     | zero => simp
-    | add r s hr hs => simp only [map_add, LinearMap.add_apply, hr, hs]
+    | add r s hr hs => simp only [map_add (f := _), LinearMap.add_apply, hr, hs]
     | tmul v b' =>
       induction y using TensorProduct.induction_on with
       | zero => simp
-      | add r s hr hs => simp only [map_add, hr, hs]
+      | add r s hr hs => simp only [map_add (f := _), hr, hs]
       | tmul w b'' => simp [mul_left_comm]
 
 theorem sm_self (r s : LL ⊗[Qp] F) : sm Qp F LL LL r s = r * s := by
   induction r using TensorProduct.induction_on with
   | zero => simp
-  | add r s hr hs => simp only [map_add, LinearMap.add_apply, hr, hs, add_mul]
+  | add r s hr hs => simp only [map_add (f := _), LinearMap.add_apply, hr, hs, add_mul]
   | tmul c b =>
     induction s using TensorProduct.induction_on with
     | zero => simp
-    | add r s hr hs => simp only [map_add, hr, hs, mul_add]
+    | add r s hr hs => simp only [map_add (f := _), hr, hs, mul_add]
     | tmul v b' => simp
 
 theorem sm_mul (r s : LL ⊗[Qp] F) (x : V ⊗[Qp] F) :
@@ -117,11 +175,11 @@ theorem ext_sm (f : V →ₗ[LL] V') (r : LL ⊗[Qp] F) (x : V ⊗[Qp] F) :
     ext Qp F f (sm Qp F LL V r x) = sm Qp F LL V' r (ext Qp F f x) := by
   induction r using TensorProduct.induction_on with
   | zero => simp
-  | add r s hr hs => simp only [map_add, LinearMap.add_apply, hr, hs]
+  | add r s hr hs => simp only [map_add (f := _), LinearMap.add_apply, hr, hs]
   | tmul c b =>
     induction x using TensorProduct.induction_on with
     | zero => simp
-    | add r s hr hs => simp only [map_add, hr, hs]
+    | add r s hr hs => simp only [map_add (f := _), hr, hs]
     | tmul v b' => simp
 
 theorem eq_zero_of_forall_ext (x : V ⊗[Qp] F) (h : ∀ φ : V →ₗ[LL] LL, ext Qp F φ x = 0) : x = 0 := by
@@ -136,7 +194,7 @@ theorem eq_zero_of_forall_ext (x : V ⊗[Qp] F) (h : ∀ φ : V →ₗ[LL] LL, e
       obtain ⟨s, hs⟩ := hx
       obtain ⟨s', hs'⟩ := hy
       refine ⟨s ∪ s', fun t ht => ?_⟩
-      simp only [map_add, LinearMap.add_apply, Finset.sum_add_distrib]
+      simp only [map_add (f := _), LinearMap.add_apply, Finset.sum_add_distrib]
       rw [← hs t (Finset.subset_union_left.trans ht), ← hs' t (Finset.subset_union_right.trans ht)]
     | tmul v b =>
       refine ⟨(bV.repr v).support, fun t ht => ?_⟩
@@ -154,7 +212,7 @@ theorem eq_sum_basis {ι : Type} [Fintype ι] (bV : Basis ι LL V) (x : V ⊗[Qp
   induction x using TensorProduct.induction_on with
   | zero => simp
   | add x y hx hy =>
-    simp only [map_add, LinearMap.add_apply, Finset.sum_add_distrib]
+    simp only [map_add (f := _), LinearMap.add_apply, Finset.sum_add_distrib]
     rw [← hx, ← hy]
   | tmul v b =>
     simp only [AlgebraTensorModule.map_tmul, LinearMap.id_apply, sm_tmul, mul_one,
@@ -180,7 +238,7 @@ theorem exists_idem [FiniteDimensional Qp K] [CharZero Qp] (τ : K →ₐ[Qp] LL
       intro t
       induction t using TensorProduct.induction_on with
       | zero => simp
-      | add x y hx hy => simp only [map_add, hx, hy]
+      | add x y hx hy => simp only [map_add (f := _), hx, hy]
       | tmul a b => simp
     rw [this, ht1, map_one]
   · have h := congrArg (Algebra.TensorProduct.map τ (AlgHom.id Qp K)) (ht c)
@@ -201,9 +259,11 @@ theorem idem_repr (τ : K →ₐ[Qp] LL) : ∃ (n : ℕ) (a : Fin n → LL) (c :
   obtain ⟨n, a, c, h⟩ := TensorProduct.exists_sum_tmul_eq (exists_idem τ).choose
   refine ⟨n, a, c, ?_, ?_⟩
   · rw [idem, h]
+
     simp [map_sum]
   · have := (exists_idem τ).choose_spec.1
     rw [h] at this
+
     simpa [map_sum] using this
 
 theorem tmul_mul_idem (τ : K →ₐ[Qp] LL) (c : K) :
@@ -223,6 +283,7 @@ theorem mulR_sm_idem (τ : K →ₐ[Qp] LL) (c : K) (x : V ⊗[Qp] F) :
 theorem sm_idem_of_eigen (τ : K →ₐ[Qp] LL) (x : V ⊗[Qp] F)
     (hx : ∀ c : K, mulR Qp F LL V (algebraMap K F c) x = τ c • x) : sm Qp F LL V (idem F τ) x = x := by
   obtain ⟨n, a, c, h, h1⟩ := idem_repr F τ
+
   rw [h, map_sum, LinearMap.sum_apply]
   simp only [sm_tmul_left, hx, smul_smul, ← Finset.sum_smul, h1, one_smul]
 
@@ -287,7 +348,7 @@ theorem FilV_induction {a : ℤ} {p : V ⊗[Qp] F → Prop} (h0 : p 0)
   induction y using TensorProduct.induction_on with
   | zero => simpa using h0
   | tmul v b => exact ht v b b.2
-  | add x y hx hy => rw [map_add]; exact ha _ _ hx hy
+  | add x y hx hy => rw [map_add (f := _)]; exact ha _ _ hx hy
 
 theorem FilV_antitone : Antitone (FilV PD (LL := LL) (V := V)) := fun a _ hab _ hx =>
   FilV_induction PD (p := fun x => x ∈ FilV PD (LL := LL) (V := V) a) (Submodule.zero_mem _)
@@ -312,7 +373,7 @@ theorem coord_mem_fil {ι : Type} [DecidableEq ι] (b : Basis ι Qp V) {a : ℤ}
   · intro v c hc
     simpa using ((PD.Fil a).restrictScalars Qp).smul_mem (b.repr v i) hc
   · intro x y hx hy
-    simpa only [map_add, Finsupp.add_apply] using Submodule.add_mem _ hx hy
+    simpa only [map_add (f := _), Finsupp.add_apply] using Submodule.add_mem _ hx hy
 
 theorem eq_zero_of_forall_mem_FilV (x : V ⊗[Qp] F) (hx : ∀ a, x ∈ FilV PD (LL := LL) (V := V) a) :
     x = 0 := by
@@ -332,9 +393,9 @@ theorem bil_mem_FilV (β : V →ₗ[LL] V' →ₗ[LL] V'') {a b : ℤ} {x : V �
       (by simp) (fun w d hd => ?_) (fun x x' h h' => ?_) hy
     · rw [bil_tmul]
       exact tmul_mem_FilV PD _ (PD.Fil_mul _ _ _ _ hc hd)
-    · rw [map_add]
+    · rw [map_add (f := _)]
       exact Submodule.add_mem _ h h'
-  · rw [map_add, LinearMap.add_apply]
+  · rw [map_add (f := _), LinearMap.add_apply]
     exact Submodule.add_mem _ h h'
 
 theorem sm_mem_FilV {a b : ℤ} {r : LL ⊗[Qp] F} {y : V ⊗[Qp] F}
@@ -351,7 +412,7 @@ theorem ext_mem_FilV (f : V →ₗ[LL] V') {a : ℤ} {x : V ⊗[Qp] F}
     (hx : x ∈ FilV PD (LL := LL) (V := V) a) : ext Qp F f x ∈ FilV PD (LL := LL) (V := V') a :=
   FilV_induction PD (p := fun x => ext Qp F f x ∈ FilV PD (LL := LL) (V := V') a) (by simp)
     (fun v _ hb => tmul_mem_FilV PD (f v) hb)
-    (fun _ _ h h' => by rw [map_add]; exact Submodule.add_mem _ h h') hx
+    (fun _ _ h h' => by rw [map_add (f := _)]; exact Submodule.add_mem _ h h') hx
 
 theorem mem_DdR (ρ : Representation LL G V) (x : V ⊗[Qp] F) :
     x ∈ DdR PD ρ ↔ ∀ g, actVdR PD ρ g x = x := by
@@ -373,15 +434,15 @@ theorem act_bil (ρ : Representation LL G V) (ρ' : Representation LL G V') (ρ'
     actVdR PD ρ'' g (bil Qp F β x y) = bil Qp F β (actVdR PD ρ g x) (actVdR PD ρ' g y) := by
   induction x using TensorProduct.induction_on with
   | zero => simp
-  | add r s hr hs => simp only [map_add, LinearMap.add_apply, hr, hs]
+  | add r s hr hs => simp only [map_add (f := _), LinearMap.add_apply, hr, hs]
   | tmul v b' =>
     induction y using TensorProduct.induction_on with
     | zero => simp
-    | add r s hr hs => simp only [map_add, hr, hs]
+    | add r s hr hs => simp only [map_add (f := _), hr, hs]
     | tmul w b'' => simp [hβ]
 
-variable (LL) in
 
+variable (LL) in
 abbrev actR (g : G) : LL ⊗[Qp] F →ₗ[LL] LL ⊗[Qp] F := actVdR PD (Representation.trivial LL G LL) g
 
 theorem act_sm (ρ : Representation LL G V) (g : G) (r : LL ⊗[Qp] F) (x : V ⊗[Qp] F) :
@@ -397,7 +458,7 @@ theorem act_ext (ρ : Representation LL G V) (ρ' : Representation LL G V') (f :
     actVdR PD ρ' g (ext Qp F f x) = ext Qp F f (actVdR PD ρ g x) := by
   induction x using TensorProduct.induction_on with
   | zero => simp
-  | add r s hr hs => simp only [map_add, hr, hs]
+  | add r s hr hs => simp only [map_add (f := _), hr, hs]
   | tmul v b' => simp [hf]
 
 theorem exists_of_actR_fixed (x : LL ⊗[Qp] F) (hx : ∀ g, actR PD LL g x = x) :
@@ -413,7 +474,7 @@ theorem exists_of_actR_fixed (x : LL ⊗[Qp] F) (hx : ∀ g, actR PD LL g x = x)
       have : ∀ (q : Qp) (z : F), PD.actdR g (q • z) = q • PD.actdR g z := fun q z =>
         ((PD.actdR g).toLinearMap.restrictScalars Qp).map_smul q z
       simp [e, this]
-    | add a b ha hb => simp only [map_add, Finsupp.add_apply, ha, hb]
+    | add a b ha hb => simp only [map_add (f := _), Finsupp.add_apply, ha, hb]
   have hx' : x = (e x).sum fun i c => b i ⊗ₜ[Qp] c := by
     rw [← TensorProduct.equivFinsuppOfBasisLeft_symm_apply]
     exact (e.symm_apply_apply x).symm
@@ -460,7 +521,7 @@ theorem dual_family (ρ : Representation LL G V) (ρ' : Representation LL G V') 
       exact LinearMap.congr_fun h x
     induction x using TensorProduct.induction_on with
     | zero => simp
-    | add x y hx hy => simp only [map_add, LinearMap.add_apply, hx, hy]
+    | add x y hx hy => simp only [map_add (f := _), LinearMap.add_apply, hx, hy]
     | tmul x b => simp [this]
   have hw : ∀ a (y : V' ⊗[Qp] F), bil Qp F β (v a ⊗ₜ[Qp] (1 : F)) y = ext Qp F (w.coord a) y := by
     intro a y
@@ -470,18 +531,22 @@ theorem dual_family (ρ : Representation LL G V) (ρ' : Representation LL G V') 
       exact LinearMap.congr_fun h y
     induction y using TensorProduct.induction_on with
     | zero => simp
-    | add x y hx hy => simp only [map_add, hx, hy]
+    | add x y hx hy => simp only [map_add (f := _), hx, hy]
     | tmul x b => simp [this]
   have hx : ∀ x, sm Qp F LL V e x = ∑ i, sm Qp F LL V (bil Qp F β x (d' i)) (d i) := by
     intro x
     have h1 : ∀ i, bil Qp F β x (d' i) = e * ∑ a, ext Qp F (v.coord a) x * r a i := by
       intro i
+
       rw [hd', bil_sm_right, sm_self, map_sum]
       simp only [bil_sm_right, sm_self, hv, mul_comm]
+
     simp only [h1, sm_mul, map_sum, LinearMap.sum_apply]
     rw [Finset.sum_comm]
+
     conv_lhs => rw [eq_sum_basis v x, ← he, sm_mul, map_sum, map_sum]
     refine Finset.sum_congr rfl fun a _ => ?_
+
     rw [sm_comm e (ext Qp F (v.coord a) x), hr, map_sum, map_sum]
   have hed' : ∀ i, sm Qp F LL V' e (d' i) = d' i := fun i => by rw [hd', ← sm_mul, he]
   have hδ : ∀ i j, bil Qp F β (d j) (d' i) = if j = i then e else 0 := by
@@ -497,6 +562,7 @@ theorem dual_family (ρ : Representation LL G V) (ρ' : Representation LL G V') 
     intro z hz h
     have : ∀ a, ext Qp F (w.coord a) z = 0 := by
       intro a
+
       rw [← hw, ← hz, bil_sm_right, ← bil_sm_left, hr, map_sum, LinearMap.sum_apply]
       simp [bil_sm_left, h]
     rw [eq_sum_basis w z]
@@ -513,9 +579,11 @@ theorem dual_family (ρ : Representation LL G V) (ρ' : Representation LL G V') 
       · simp
   · rw [← sub_eq_zero]
     refine hz _ ?_ fun j => ?_
-    · rw [map_sub, ← sm_mul, he, map_sum]
+    · set_option synthInstance.maxHeartbeats 100000 in
+        rw [map_sub, ← sm_mul, he, map_sum]
       simp only [sm_comm e, hed']
-    · rw [map_sub, map_sum]
+    · set_option synthInstance.maxHeartbeats 100000 in
+        rw [map_sub, map_sum]
       simp only [bil_sm_right, hδ, sm_self]
       rw [Finset.sum_eq_single j (fun b _ hb => by simp [Ne.symm hb]) (by simp)]
       simp [mul_comm]
@@ -542,6 +610,7 @@ theorem idem_mem_FilV (τ : K →ₐ[Qp] LL) : idem F τ ∈ FilV PD (LL := LL) 
 
 theorem actR_idem (τ : K →ₐ[Qp] LL) (g : G) : actR PD LL g (idem F τ) = idem F τ := by
   obtain ⟨n, a, c, h, -⟩ := idem_repr F τ
+
   rw [h, map_sum]
   simp
 
@@ -567,18 +636,6 @@ structure Adapted (ρ : Representation LL G V) (τ : K →ₐ[Qp] LL) {ι : Type
   span : ∀ (n : ℤ), ∀ y ∈ FilV PD (LL := LL) (V := V) n, ∃ r : ι → LL ⊗[Qp] F,
     (∀ i, r i ∈ FilV PD (LL := LL) (V := LL) (n - k i)) ∧
       sm Qp F LL V (idem F τ) y = ∑ i, sm Qp F LL V (r i) (d i)
-
-theorem adapted_trivial (τ : K →ₐ[Qp] LL) :
-    Adapted PD (Representation.trivial LL G LL) τ (fun _ : Unit => idem F τ) (fun _ => 0) where
-  mem _ := by
-    refine ⟨?_, idem_mem_FilV PD τ⟩
-    have := sm_idem_mem_DdRE PD (Representation.trivial LL G LL) τ (x := 1)
-      ((mem_DdR PD _ _).2 fun g => by simp [Algebra.TensorProduct.one_def])
-    rwa [sm_self, mul_one] at this
-  indep r h i := by
-    rw [mul_comm]
-    simpa [sm_self] using h
-  span n y hy := ⟨fun _ => y, fun _ => by simpa using hy, by simp [sm_self, mul_comm]⟩
 
 end Period
 

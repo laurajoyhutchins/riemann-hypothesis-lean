@@ -1,5 +1,49 @@
-import Mathlib
-import Development.WeilBound.RepresentationTheoryGL.SiegelWeilProof.HolomorphicContinuation.MinorFormulas.CayDivA
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.SiegelWeilProof.HolomorphicContinuation.MinorFormulas.CayDivA
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -38,7 +82,10 @@ theorem cayDiv_of : CayDivOf := by
   have hcomm : ∀ a ∈ Sop s m n, ∀ b ∈ Sop s m n, a * b = b * a := by
     rintro _ ⟨x, rfl⟩ _ ⟨y, rfl⟩
     exact hC n s m x.1 y.1 x.2.1 x.2.2 y.2.1 y.2.2
-  letI : CommRing (Algebra.adjoin ℂ (Sop s m n)) := Algebra.adjoinCommRingOfComm ℂ hcomm
+  letI : IsMulCommutative (Algebra.adjoin ℂ (Sop s m n)) :=
+    Algebra.isMulCommutative_adjoin ℂ (fun a ha b hb _ => hcomm a ha b hb)
+  letI : CommRing (Algebra.adjoin ℂ (Sop s m n)) := by
+    open scoped IsMulCommutative in exact inferInstance
   let g : Bool × Fin n × Fin n → Algebra.adjoin ℂ (Sop s m n) :=
     fun x => ⟨opH s m x.1 x.2.1 x.2.2, Algebra.subset_adjoin ⟨x, rfl⟩⟩
   let φ : PAB n →ₐ[ℂ] Algebra.adjoin ℂ (Sop s m n) := MvPolynomial.aeval g
@@ -52,6 +99,7 @@ theorem cayDiv_of : CayDivOf := by
     intro ρ M
     rw [← Matrix.det_transpose, Matrix.det_apply]
     change (Algebra.adjoin ℂ (Sop s m n)).val _ = _
+
     rw [map_sum]
     refine Finset.sum_congr rfl fun σ _ => ?_
     rw [Units.smul_def, map_zsmul, ← Int.cast_smul_eq_zsmul ℂ, Fin.prod_univ_def, map_list_prod, List.map_map,
@@ -69,7 +117,7 @@ theorem cayDiv_of : CayDivOf := by
     rw [show Matrix.det (fun p q : Fin n => (X (false, p, q) + X (true, p, q) : PAB n)) =
         Matrix.det (Matrix.of fun p q : Fin n => (X (false, p, q) + X (true, p, q) : PAB n)) from rfl,
       AlgHom.map_det, hcoe_det]
-    simp only [AlgHom.mapMatrix_apply, Matrix.map_apply, Matrix.of_apply, map_add, Subalgebra.coe_add, hφX]
+    simp only [AlgHom.mapMatrix_apply, Matrix.map_apply, Matrix.of_apply, map_add (f := _), Subalgebra.coe_add, hφX]
     rfl
   have hpow : ∀ (x : Algebra.adjoin ℂ (Sop s m n)) (N : ℕ) (Q : Fm n),
       ((x ^ N : Algebra.adjoin ℂ (Sop s m n)) : Module.End ℂ (Fm n)) Q = (x : Module.End ℂ (Fm n))^[N] Q := by
@@ -107,7 +155,7 @@ theorem cayDiv_of : CayDivOf := by
   case zero => simp [divZ_zero]
   case add =>
     intro x y _ _ hx hy
-    rw [map_add, Subalgebra.coe_add, LinearMap.add_apply]
+    rw [map_add (f := _), Subalgebra.coe_add, LinearMap.add_apply]
     exact divZ_add hx hy
   case smul =>
     intro a x _ hx

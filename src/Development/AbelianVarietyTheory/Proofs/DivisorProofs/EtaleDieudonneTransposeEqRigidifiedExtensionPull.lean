@@ -1,4 +1,50 @@
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsRedDual
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsRedDual
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.OmegaBaseChangeBijectiveOfPEqZeroStatement
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RigToLieBijectiveAndDualRigOfOmegaBijectiveOfIsE
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.WittDualReduction
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -9,12 +55,16 @@ open CategoryTheory TensorProduct Coalgebra Bialgebra GlobalTheory GlobalTheory.
 namespace GlobalTheory.Dieu.EtFromConn
 
 theorem rigToLie_toBase_rig {p : ℕ} [Fact p.Prime] {k k' : Type} [Field k] [CharP k p] [Field k']
-    [CharP k' p] [Algebra k k'] (G : PDivGroup p k) (r : G.RigExt) (w : G.dual.omega) :
+    [CharP k' p] [Algebra k k'] (G : PDivGroup p k) (r : ((G.cocycles × G.omega) ⧸ _root_.LinearMap.range (G.cob.prod (_root_.LinearMap.codRestrict G.omegaSub ((_root_.LinearMap.piMap fun i => _root_.GlobalTheory.AugCot.d (_root_.Bialgebra.counitAlgHom _ (G.A i))).domRestrict G.funs) (fun b n => (_root_.GlobalTheory.PDiv.cotMap_d _ _).trans (_root_.congrArg _ (b.2 n))))))) (w : G.dual.omega) :
     (G.baseChange k').rigToLie (p_eq_zero p k') ((G.toBase k').rig r)
       (omegaMap _ _ (PerfdLat.dualBaseChange k' G).hom ((G.dual.toBase k').omega w)) =
       algebraMap k k' (G.rigToLie (p_eq_zero p k) r w) := by
-  rw [rigToLie_apply, rigToLie_apply, SemiHom.rigToExt_rig,
-    SemiHom.extChar_vecExt _ (p_eq_zero p k)]
+  set_option backward.isDefEq.respectTransparency false in
+   change (G.baseChange k').primLie ((G.baseChange k').extChar (p_eq_zero p k')
+    ((G.baseChange k').rigToExt ((G.toBase k').rig r))) _ =
+    algebraMap k k' (G.primLie (G.extChar (p_eq_zero p k) (G.rigToExt r)) w)
+  set_option backward.isDefEq.respectTransparency false in
+   rw [SemiHom.rigToExt_rig, SemiHom.extChar_vecExt _ (p_eq_zero p k)]
   exact primLie_toBase G _ w
 
 theorem linearMap_eq_of_liftSemi_surjective {R R' M N : Type} [CommRing R] [CommRing R']
@@ -25,10 +75,10 @@ theorem linearMap_eq_of_liftSemi_surjective {R R' M N : Type} [CommRing R] [Comm
   obtain ⟨t, rfl⟩ := hf v
   induction t using TensorProduct.induction_on with
   | zero => simp only [map_zero]
-  | add x y hx hy => simp only [map_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
   | tmul r m => rw [liftSemi_tmul, map_smul, map_smul, h]
 
-set_option maxHeartbeats 2000000 in
+
 theorem red_of_isTr (p : ℕ) [Fact p.Prime] (B : Base p (fun _ _ G => G.IsConn)) (k k' : Type)
     [Field k] [CharP k p] [PerfectRing k p] [Field k'] [CharP k' p] [PerfectRing k' p]
     (σ : k →+* k') (G' : PDivGroup p k') (G : PDivGroup p k) (h' : G'.IsEt) (h : G.IsEt)
@@ -60,8 +110,10 @@ theorem red_of_isTr (p : ℕ) [Fact p.Prime] (B : Base p (fun _ _ G => G.IsConn)
       (r' lb).comp (G.dual.baseChange k').rigOfOmega :=
     linearMap_eq_of_liftSemi_surjective (G.dual.toBase k').omega
       (T.omega_baseChange_bijective_of_p_eq_zero G.dual k' (p_eq_zero p k)).2 _ _ fun w => by
-        rw [LinearMap.comp_apply, LinearMap.comp_apply, rigToLie_toBase_rig, key1]
-        rfl
+        set_option backward.isDefEq.respectTransparency false in
+          simp only [LinearMap.comp_apply]
+          rw [rigToLie_toBase_rig]
+          exact (key1 w).symm
   have hinj := (PDivGroup.rigToLie_bijective_and_dual_rigOfOmega_bijective_of_isEt p k'
     (p_eq_zero p k') G' h').1.1
   apply hinj
@@ -89,7 +141,7 @@ theorem red_of_isTr (p : ℕ) [Fact p.Prime] (B : Base p (fun _ _ G => G.IsConn)
   rw [← hx', (redDual_spec B G' h').1, h2, ← hψ, e4, e5]
   have e7 := LinearMap.congr_fun key2 (omegaMap _ _ (PerfdLat.dualBaseChange k' G).inv
     (omegaMap _ _ (dualHom G' (G.baseChange k') s.lift) w'))
-  rw [LinearMap.comp_apply, LinearMap.comp_apply, e6] at e7
+  simp only [LinearMap.comp_apply, e6] at e7
   exact e7.symm
 
 end GlobalTheory.Dieu.EtFromConn

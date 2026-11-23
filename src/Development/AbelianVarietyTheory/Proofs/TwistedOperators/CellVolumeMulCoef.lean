@@ -1,12 +1,63 @@
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.RowGrpEq
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.RepresentationAtEveryPlace
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.RowPeriodGroupsSplitRealFiniteLargeDepth
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.RowTestMemLatticeStabilizerOfLocalMatrices
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.MemFinitePointsOfHasLocalLatticeMatrices
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ExistsMemProjEqOnFinset
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.FourierJacobiMeasureUnitriangularCoordinates
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.InverseUnipotentVolumeConjDiagonalUnitsGLMul
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.IwasawaMeasureExistence.MeasureEqRelIndexMul
+module
+
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.RowGrpEq
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.RepresentationAtEveryPlace
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.InverseUnipotentVolumeConjDiagonalUnitsGLMul
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.CoefProd
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.FourierJacobiMeasureUnitriangularCoordinates
+import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.PeriodIdealZpowCompletionAdeleConjIff
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DiagonalBlockDetBlockTriangular
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ExistsMemProjEqOnFinset
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.MemFinitePointsOfHasLocalLatticeMatrices
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.RowPeriodGroupsSplitRealFiniteLargeDepth
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.RowTestMemLatticeStabilizerOfLocalMatrices
+import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.IdemElt
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicLocalCompactness.T2SpaceTensorProductFiniteExtension
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.IwasawaMeasureExistence.MeasureEqRelIndexMul
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.RealLineOfPeriodsOnLine
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.L2.Theta Formalism.IndefR Formalism.IndefR.Datum Formalism.IndefR.Links Formalism.L2.DIV
 open IsDedekindDomain NumberField MeasureTheory Matrix GlobalTheory.ChiGrid GlobalTheory.FunObj GlobalTheory.RowTest GlobalTheory.StdFrames GlobalTheory.RowClaim
 open GlobalTheory.MixModel GlobalTheory.MixPer GlobalTheory.Grow GlobalTheory.RowUnf GlobalTheory.RowChain GlobalTheory.SeeSaw GlobalTheory.RowVal GlobalTheory.RowReal
@@ -86,7 +137,9 @@ theorem symN_eq_uni (n : Type) [Fintype n] [DecidableEq n] {c : ℕ} (hc : 1 ≤
         have := h4 (.inl r) (.inl s) le_rfl
         change g.val r s = _ at this
         rw [this]
-        simp [one_apply])
+        change (1 : Matrix (n ⊕ Fin (2 * σ)) (n ⊕ Fin (2 * σ)) k) (.inl r) (.inl s) =
+          (1 : Matrix n n k) r s
+        simp only [Matrix.one_apply, Sum.inl.injEq])
       simpa using hu
     · rw [symN_odd]
       refine Subgroup.subset_closure fun r s hrs => hx r s ?_
@@ -274,7 +327,7 @@ theorem eq_zero_of_places {e : AE D} {P : Finset (Pl D.host.E)} (he : IsIdemSum 
       · rw [hx w h, mul_zero]
       · rw [e2 w h, zero_mul]
   have h3 := congrArg (cA D) (key _ h2)
-  rw [map_mul, cA_cA, map_zero] at h3
+  rw [map_mul, SeeSaw.cA_cA, map_zero] at h3
   rw [← ha, add_mul, key a h1, h3, add_zero]
 
 theorem adj_blk (S : HSp D) (g : GA D S) {p q : ℕ} (J : Mx D S.rank p) (J' : Mx D S.rank q) :
@@ -317,6 +370,7 @@ theorem mem_flagN {e : AE D} {P : Finset (Pl D.host.E)} (he : IsIdemSum e P) {S 
   have q1 : ∀ {q : ℕ} (M : Mx D S.rank S.rank) (J : Mx D S.rank q) (w : Pl D.host.E),
       (∀ i j, piAt w (blk d.p0 M J i j) = 0) → ∀ i j, piAt w (blk (HMul.hMul (adj d.j0) (gA S)) M J i j) = 0 :=
     fun M J w h i j => by
+
       rw [q0, Matrix.mul_apply, map_sum]
       exact Finset.sum_eq_zero fun l _ => by rw [map_mul, h, mul_zero]
   have q2 : ∀ {q : ℕ} (M : Mx D S.rank S.rank) (J : Mx D S.rank q),
@@ -618,8 +672,8 @@ theorem diagGL_sign_mem_KO {n : Type} [Fintype n] [DecidableEq n] (p : n → Pro
     split_ifs <;> simp
   · rw [diagonal_apply_ne _ hij, diagonal_apply_ne _ hij, map_zero]
 
-omit [ValuativeRel k] in
 
+omit [ValuativeRel k] in
 theorem diag_normalises {n : Type} [Fintype n] [DecidableEq n] {c : ℕ} {y : GL (n ⊕ Fin c) k} {f : n ⊕ Fin c → k}
     (hy : y.val = diagonal f) (x : GL (n ⊕ Fin c) k) : x ∈ symN k n c ↔ y⁻¹ * x * y ∈ symN k n c := by
   have hf : ∀ r, f r ≠ 0 := fun r h => by
@@ -651,7 +705,7 @@ theorem conjLevel_eq (G : GridData L sc) (t : T) (w : Pl D.host.E) {j : ℕ} (h1
   refine map_conj_map (toFrame (G := locGrid G t w) one_le_sLen hj) (fun x => (frameGL_mem_KO _ x).trans ?_) _
   exact (givenLevel_eq G t w h1 hj.le) ▸ Iff.rfl
 
-set_option maxHeartbeats 1600000 in
+
 
 theorem idxRatio_row {μ₀ : T} (hL : L.Is μ₀) (S : GridChoice W U) {t : T} (ht : t ∈ U) {j : ℕ} (hi : j ∈ idx D)
     (hj : j ≤ D.R.m) (hj' : j < D.R.m)
@@ -699,7 +753,7 @@ theorem idxRatio_row {μ₀ : T} (hL : L.Is μ₀) (S : GridChoice W U) {t : T} 
 
 end Main
 
-set_option maxHeartbeats 1600000 in
+
 
 theorem cell_volume_mul_coef : Big fun {D} _ _ _ _ _ _ _ _ _ _ _ ch => ∀ (s : ℤˣ), ∀ j ∈ idx D,
     ∀ la : Measure ((GlobalTheory.CellMass.rowN ch.G j).subgroupOf (GfC (ch.G.V (.grid D.R.m j)))), la.IsHaarMeasure →

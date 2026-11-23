@@ -1,13 +1,60 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.WeakShimuraTheory.NearSplit
-import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.EntryMem
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PublishedTheorems.FerreroWashington
-import Development.AutomorphicArithmetic.AutomorphicVarieties.WeakShimuraTheory.CompactIntegralFields.PtPair
-import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.GeAlgTop
-import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.EiiUnit
-import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.XvanExt
-import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.LocVanP
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.WeakShimuraTheory.NearSplit
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.EntryMem
+import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.LocalRingsCompletion.dvrFinite
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.EiiUnit
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.GeAlgTop
 import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.LMemMax
-import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.SelmerTransport.NormO
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.LocVanP
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.XvanExt
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.WeakShimuraTheory.CompactIntegralFields.PtPair
+import Mathlib.Algebra.GroupWithZero.Submonoid.CancelMulZero
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Formalism.ConjugateSelfDual Formalism.HC ReciprocityTheory.Gal IsLocalRing Polynomial UpperTheory.V.Base UpperTheory.V.Alg UpperTheory.V.HV UpperTheory.V.GradeZeroInterpolatingElement UpperTheory.V.Ws
 
@@ -72,6 +119,7 @@ private theorem lattice {O : Type} [CommRing O] [IsDomain O] [IsLocalRing O] {H 
     have e5 : residue O (r h s s) = residue O (r h s s) - residue O 0 := by simp
     rw [← e4, e5, ← e3]
     conv_rhs => rw [← e2]
+
     simp only [map_sum, map_mul, hm, ← Finset.sum_sub_distrib, Finset.mul_sum]
     refine Finset.sum_congr rfl fun g _ => ?_
     ring
@@ -194,7 +242,7 @@ private theorem locVan {Ω : Type} [Field Ω] [CharZero Ω] [IsAlgClosure ℚ Ω
     rw [Algebra.smul_def, hf]
   have key := cob_of_coord (fun g : D.Gp p => Raw.bar γ g) z fun φ =>
     locVanP D hD hL _ (residue c.O) (fun a ha => (residue_eq_zero_iff a).2 ha) γ hγ p hp (fun g => φ (z g)) (hz.comp φ)
-      (fun g h => by simp only [hco, hs, map_add, map_smul, smul_eq_mul])
+      (fun g h => by simp only [hco, hs, map_add (f := _), map_smul, smul_eq_mul])
   simpa only [hf] using key
 
 private theorem core {Ω : Type} [Field Ω] [CharZero Ω] [IsAlgClosure ℚ Ω] {l : ℕ} [Fact l.Prime] {c : Coef l} (D : Raw Ω c)
@@ -250,7 +298,7 @@ private theorem core {Ω : Type} [Field Ω] [CharZero Ω] [IsAlgClosure ℚ Ω] 
       rw [← hc, hmul, hc g, hc h]
       ring
     simp only [z]
-    rw [hγ, e, map_add, map_mul, map_mul, hdiag, hdiag, map_mul, Units.val_mul, map_mul]
+    rw [hγ, e, map_add (f := _), map_mul, map_mul, hdiag, hdiag, map_mul, Units.val_mul, map_mul]
     have := hU g
     have := hU h
     field_simp
@@ -276,7 +324,7 @@ private theorem core {Ω : Type} [Field Ω] [CharZero Ω] [IsAlgClosure ℚ Ω] 
             apply mul_left_cancel₀ hb
             linear_combination (r (D.sg p) u s * v + r (D.sg p) u u - r (D.sg p) s s) * e1 - (r g u s * v + r g u u - r g s s) * e2
           rw [e3]
-          simp only [map_add, map_neg, map_mul, hoff, mul_zero, neg_zero, add_zero]
+          simp only [map_add (f := _), map_neg, map_mul, hoff, mul_zero, neg_zero, add_zero]
         simp only [map_sub, map_mul, hdiag] at e
         simp only [z]
         rw [hγ]
@@ -307,6 +355,7 @@ theorem UpperTheory.V.Ws.triV :
     have e : Matrix.single i i (1 : R') = ∑ g ∈ b.support, y (b g) • mapRep y ρ g := by
       ext p q
       have h2 := congrArg y (congrFun (congrFun hb p) q)
+
       rw [Finsupp.sum, Matrix.sum_apply, map_sum] at h2
       rw [Matrix.sum_apply]
       simp only [Matrix.smul_apply, smul_eq_mul, map_mul, mapRep_apply] at h2 ⊢
@@ -369,13 +418,13 @@ theorem UpperTheory.V.Ws.triV :
   · refine core D hD hC.loc 𝔞 r u hu i j (hE i) hij gij (hmul i j (grefl i) gji) ⟨x / y, h⟩ fun g hg => hinj ?_
     obtain ⟨e1, e2⟩ := hφ ⟨g, hg⟩
     have e : 𝔞.toK ⟨x / y, h⟩ = x / y := rfl
-    simp only [map_add, map_mul, e] at e1 e2 ⊢
+    simp only [map_add (f := _), map_mul, e] at e1 e2 ⊢
     field_simp
     linear_combination y * e1 - x * e2
   · refine core D hD hC.loc 𝔞 r u hu j i (hE j) hij.symm gji (fun g h => by rw [hmul j i gij (grefl i), add_comm])
       ⟨y / x, h⟩ fun g hg => hinj ?_
     obtain ⟨e1, e2⟩ := hφ ⟨g, hg⟩
     have e : 𝔞.toK ⟨y / x, h⟩ = y / x := rfl
-    simp only [map_add, map_mul, e] at e1 e2 ⊢
+    simp only [map_add (f := _), map_mul, e] at e1 e2 ⊢
     field_simp
     linear_combination x * e2 - y * e1

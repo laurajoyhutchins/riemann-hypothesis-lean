@@ -1,5 +1,56 @@
-import Mathlib
-import GroundTheory.PAdicHodge.KerTheta
+module
+
+public import GroundTheory.PAdicHodge.KerTheta
+public import Mathlib.RingTheory.DiscreteValuationRing.Basic
+public import Mathlib.RingTheory.Perfectoid.BDeRham
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.AdicCompletion.LocalRing
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RingTheory.AdicCompletion.Completeness
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -83,7 +134,7 @@ theorem isDomain_of_isAdicComplete {π : B} [IsAdicComplete (span {π}) B]
 
 theorem isDiscreteValuationRing_of_isAdicComplete {π : B} [IsAdicComplete (span {π}) B]
     (hmax : (span {π}).IsMaximal) (hpow : ∀ n : ℕ, π ^ n ≠ 0) :
-    haveI := isDomain_of_isAdicComplete hmax hpow
+    haveI := isDomain_of_isAdicComplete hmax hpow;
     IsDiscreteValuationRing B ∧ Irreducible π := by
   have := isDomain_of_isAdicComplete hmax hpow
   have := hmax
@@ -114,10 +165,6 @@ theorem isDiscreteValuationRing_of_isAdicComplete {π : B} [IsAdicComplete (span
   obtain ⟨n, u, rfl⟩ := exists_eq_pow_mul_unit_of_isAdicComplete hmax hx
   exact ⟨n, u, rfl⟩
 
-theorem maximalIdeal_eq_span_of_isMaximal [IsLocalRing B] {π : B} (hmax : (span {π}).IsMaximal) :
-    maximalIdeal B = span {π} :=
-  (IsLocalRing.eq_maximalIdeal hmax).symm
-
 end Abstract
 
 section General
@@ -126,7 +173,7 @@ variable (R : Type*) [CommRing R] (p : ℕ) [Fact p.Prime] [Fact ¬IsUnit (p : R
   [IsAdicComplete (span {(p : R)}) R]
 
 local notation "𝕎R♭" => WittVector p (PreTilt R p)
-local notation "𝔸" => Localization.Away (p : WittVector p (PreTilt R p))
+local notation "𝔸" => Localization.Away (p : 𝕎R♭)
 
 def toBDeRhamPlus : 𝔸 →+* BDeRhamPlus R p :=
   algebraMap 𝔸 (AdicCompletion (RingHom.ker (fontaineThetaInvertP R p)) 𝔸)
@@ -137,11 +184,6 @@ def wittToBDeRhamPlus : 𝕎R♭ →+* BDeRhamPlus R p :=
 def thetaBDeRhamPlus : BDeRhamPlus R p →+* Localization.Away (p : R) :=
   (RingHom.kerLift (fontaineThetaInvertP R p)).comp
     (AdicCompletion.evalOneₐ (RingHom.ker (fontaineThetaInvertP R p))).toRingHom
-
-@[simp]
-theorem thetaBDeRhamPlus_toBDeRhamPlus (x : 𝔸) :
-    thetaBDeRhamPlus R p (toBDeRhamPlus R p x) = fontaineThetaInvertP R p x :=
-  rfl
 
 @[simp]
 theorem fontaineThetaInvertP_algebraMap (x : 𝕎R♭) :
@@ -268,8 +310,8 @@ theorem toBDeRhamPlus_mem_span_pow_iff {ξ : 𝕎R♭}
     AdicCompletion.evalₐ_of, Ideal.Quotient.eq_zero_iff_mem, ker_fontaineThetaInvertP hξ,
     Ideal.span_singleton_pow, mem_span_singleton]
 
-omit [IsAdicComplete (span {(p : R)}) R] in
 
+omit [IsAdicComplete (span {(p : R)}) R] in
 theorem eq_zero_of_algebraMap_mul_eq_zero {x : 𝕎R♭} (hx : x ∈ nonZeroDivisors 𝕎R♭) {y : 𝔸}
     (h : algebraMap 𝕎R♭ 𝔸 x * y = 0) : y = 0 := by
   obtain ⟨⟨w, s⟩, rfl⟩ := IsLocalization.mk'_surjective (Submonoid.powers (p : 𝕎R♭)) y
@@ -279,16 +321,6 @@ theorem eq_zero_of_algebraMap_mul_eq_zero {x : 𝕎R♭} (hx : x ∈ nonZeroDivi
   refine ⟨m, mem_nonZeroDivisors_iff_left.mp hx _ ?_⟩
   rw [← hm]
   ring
-
-end General
-
-section DVR
-
-variable {R : Type*} [CommRing R] {p : ℕ} [Fact p.Prime] [Fact ¬IsUnit (p : R)]
-  [IsAdicComplete (span {(p : R)}) R]
-
-local notation "𝕎R♭" => WittVector p (PreTilt R p)
-local notation "𝔸" => Localization.Away (p : WittVector p (PreTilt R p))
 
 theorem isMaximal_ker_thetaBDeRhamPlus (hF : Function.Surjective (frobenius (ModP R p) p))
     (hK : IsField (Localization.Away (p : R))) : (RingHom.ker (thetaBDeRhamPlus R p)).IsMaximal :=
@@ -336,7 +368,7 @@ theorem isDomain_bDeRhamPlus {ξ : 𝕎R♭} (hξ : RingHom.ker (fontaineTheta R
 theorem isDiscreteValuationRing_bDeRhamPlus {ξ : 𝕎R♭}
     (hξ : RingHom.ker (fontaineTheta R p) = span {ξ}) (hξ0 : ξ ∈ nonZeroDivisors 𝕎R♭)
     (hF : Function.Surjective (frobenius (ModP R p) p)) (hK : IsField (Localization.Away (p : R))) :
-    haveI := isDomain_bDeRhamPlus hξ hξ0 hF hK
+    haveI := isDomain_bDeRhamPlus hξ hξ0 hF hK;
     IsDiscreteValuationRing (BDeRhamPlus R p) := by
   have := isAdicComplete_bDeRhamPlus hξ
   have := hK.nontrivial
@@ -356,7 +388,7 @@ theorem irreducible_wittToBDeRhamPlus {ξ : 𝕎R♭}
 
 theorem maximalIdeal_bDeRhamPlus {ξ : 𝕎R♭} (hξ : RingHom.ker (fontaineTheta R p) = span {ξ})
     (hF : Function.Surjective (frobenius (ModP R p) p)) (hK : IsField (Localization.Away (p : R))) :
-    haveI := isLocalRing_bDeRhamPlus hξ hF hK
+    haveI := isLocalRing_bDeRhamPlus hξ hF hK;
     maximalIdeal (BDeRhamPlus R p) = RingHom.ker (thetaBDeRhamPlus R p) :=
   haveI := isLocalRing_bDeRhamPlus hξ hF hK
   (IsLocalRing.eq_maximalIdeal (isMaximal_ker_thetaBDeRhamPlus hF hK)).symm
@@ -364,27 +396,11 @@ theorem maximalIdeal_bDeRhamPlus {ξ : 𝕎R♭} (hξ : RingHom.ker (fontaineThe
 theorem maximalIdeal_bDeRhamPlus_eq_span {ξ : 𝕎R♭}
     (hξ : RingHom.ker (fontaineTheta R p) = span {ξ})
     (hF : Function.Surjective (frobenius (ModP R p) p)) (hK : IsField (Localization.Away (p : R))) :
-    haveI := isLocalRing_bDeRhamPlus hξ hF hK
+    haveI := isLocalRing_bDeRhamPlus hξ hF hK;
     maximalIdeal (BDeRhamPlus R p) = span {wittToBDeRhamPlus R p ξ} :=
   (maximalIdeal_bDeRhamPlus hξ hF hK).trans (ker_thetaBDeRhamPlus hξ)
 
-def residueFieldBDeRhamPlusEquiv {ξ : 𝕎R♭} (hξ : RingHom.ker (fontaineTheta R p) = span {ξ})
-    (hF : Function.Surjective (frobenius (ModP R p) p)) (hK : IsField (Localization.Away (p : R))) :
-    haveI := isLocalRing_bDeRhamPlus hξ hF hK
-    ResidueField (BDeRhamPlus R p) ≃+* Localization.Away (p : R) :=
-  haveI := isLocalRing_bDeRhamPlus hξ hF hK
-  (Ideal.quotEquivOfEq (maximalIdeal_bDeRhamPlus hξ hF hK)).trans
-    (RingHom.quotientKerEquivOfSurjective (surjective_thetaBDeRhamPlus R p hF))
-
-theorem residueFieldBDeRhamPlusEquiv_residue {ξ : 𝕎R♭}
-    (hξ : RingHom.ker (fontaineTheta R p) = span {ξ})
-    (hF : Function.Surjective (frobenius (ModP R p) p)) (hK : IsField (Localization.Away (p : R)))
-    (x : BDeRhamPlus R p) :
-    haveI := isLocalRing_bDeRhamPlus hξ hF hK
-    residueFieldBDeRhamPlusEquiv hξ hF hK (residue (BDeRhamPlus R p) x) = thetaBDeRhamPlus R p x :=
-  rfl
-
-end DVR
+end General
 
 namespace IsPerfectoidField
 
@@ -392,9 +408,9 @@ variable {K : Type*} [NontriviallyNormedField K] [IsUltrametricDist K]
 variable (p : ℕ) [Fact p.Prime] [IsPerfectoidField K p]
 
 local notation "𝒪" => normInteger K
-local notation "𝕎𝒪♭" => WittVector p (PreTilt (normInteger K) p)
-local notation "θ" => fontaineTheta (normInteger K) p
-local notation "𝔹" => BDeRhamPlus (normInteger K) p
+local notation "𝕎𝒪♭" => WittVector p (PreTilt 𝒪 p)
+local notation "θ" => fontaineTheta 𝒪 p
+local notation "𝔹" => BDeRhamPlus 𝒪 p
 
 theorem isLocalization_away [CharZero K] : IsLocalization.Away (p : 𝒪) K := by
   rw [IsLocalization.Away, isLocalization_iff]
@@ -455,14 +471,14 @@ theorem mem_nonZeroDivisors_of_ker_eq_span {ξ : 𝕎𝒪♭} (hξ : RingHom.ker
   rw [h₀, zero_coeff] at h1
   exact not_isUnit_zero h1
 
-variable (K p) in
 
+variable (K p) in
 def kerThetaGenerator : 𝕎𝒪♭ :=
   haveI := isPrincipal_ker_fontaineTheta K p
   Submodule.IsPrincipal.generator (RingHom.ker θ)
 
-variable (K p) in
 
+variable (K p) in
 theorem ker_fontaineTheta_eq_span_kerThetaGenerator : RingHom.ker θ = span {kerThetaGenerator K p} :=
   haveI := isPrincipal_ker_fontaineTheta K p
   (Submodule.IsPrincipal.span_singleton_generator (RingHom.ker θ)).symm
@@ -497,14 +513,6 @@ theorem irreducible_wittToBDeRhamPlus {ξ : 𝕎𝒪♭} (hξ : RingHom.ker θ =
 theorem isAdicComplete_maximalIdeal_bDeRhamPlus : IsAdicComplete (maximalIdeal 𝔹) 𝔹 := by
   rw [maximalIdeal_bDeRhamPlus_eq_span (ker_fontaineTheta_eq_span_kerThetaGenerator K p)]
   exact isAdicComplete_bDeRhamPlus (ker_fontaineTheta_eq_span_kerThetaGenerator K p)
-
-def residueFieldBDeRhamPlusEquiv : ResidueField 𝔹 ≃+* K :=
-  (Ideal.quotEquivOfEq (maximalIdeal_bDeRhamPlus (K := K) (p := p))).trans
-    (RingHom.quotientKerEquivOfSurjective (surjective_thetaBDeRhamPlusField (K := K) p))
-
-theorem residueFieldBDeRhamPlusEquiv_residue (x : 𝔹) :
-    residueFieldBDeRhamPlusEquiv (residue 𝔹 x) = thetaBDeRhamPlusField p x :=
-  rfl
 
 end IsPerfectoidField
 

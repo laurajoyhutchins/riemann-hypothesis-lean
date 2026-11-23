@@ -1,5 +1,56 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.HasLenOfLatLen
+module
+
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.HasLenOfLatLen
+import Development.AbelianVarietyTheory.Proofs.SatakeParameters.InvMemDoubleCosetAndComm
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.Interval.Finset.Box
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -47,9 +98,6 @@ def mat3 (p : Fin (N + 2) → L) (M : Fin N → Fin (N + 2) → L) (l : Fin (N +
     Matrix (Fin (N + 2)) (Fin (N + 2)) L :=
   Matrix.of (Fin.cons (α := fun _ => Fin (N + 2) → L) p (Fin.snoc (α := fun _ => Fin (N + 2) → L) M l))
 
-@[simp] theorem blockMatrix_first (p : Fin (N + 2) → L) (M : Fin N → Fin (N + 2) → L) (l : Fin (N + 2) → L) :
-    mat3 p M l 0 = p := rfl
-
 @[simp] theorem blockMatrix_middle (p : Fin (N + 2) → L) (M : Fin N → Fin (N + 2) → L) (l : Fin (N + 2) → L) (j : Fin N) :
     mat3 p M l (mid j) = M j := by
   show (Fin.cons (α := fun _ => Fin (N + 2) → L) p (Fin.snoc (α := fun _ => Fin (N + 2) → L) M l)) (mid j) = M j
@@ -64,7 +112,7 @@ def mat3 (p : Fin (N + 2) → L) (M : Fin N → Fin (N + 2) → L) (l : Fin (N +
 theorem vecMul_blockMatrix (ρ p : Fin (N + 2) → L) (M : Fin N → Fin (N + 2) → L) (l : Fin (N + 2) → L) :
     ρ ᵥ* mat3 p M l = ρ 0 • p + ∑ j, ρ (mid j) • M j + ρ (Fin.last (N + 1)) • l := by
   rw [Matrix.vecMul_eq_sum, sum_idx]
-  simp
+  simp only [blockMatrix_middle, blockMatrix_last, show mat3 p M l 0 = p from rfl]
 
 theorem det_tri (A : Matrix (Fin (N + 2)) (Fin (N + 2)) L) (B : Matrix (Fin N) (Fin N) L)
     (h0 : ∀ i, i ≠ 0 → A i 0 = 0) (hl : ∀ j, j ≠ Fin.last (N + 1) → A (Fin.last (N + 1)) j = 0)
@@ -252,7 +300,7 @@ theorem vecMul_basis (q : Fin (N + 2) → L) (g₀ U V C : Matrix (Fin N) (Fin N
 theorem det_basis (q : Fin (N + 2) → L) (B : Matrix (Fin N) (Fin N) L) (s : Fin N → L) (y : L) :
     (mat3 q (fun k => vec3 (0 : L) (B k) (s k)) (vec3 (0 : L) 0 y)).det = q 0 * y * B.det := by
   have := det_tri (mat3 q (fun k => vec3 (0 : L) (B k) (s k)) (vec3 (0 : L) 0 y)) B ?_ ?_ ?_
-  · simpa using this
+  · simpa [mat3] using this
   · intro i hi
     rcases idx_cases i with rfl | ⟨j, rfl⟩ | rfl
     · exact absurd rfl hi
@@ -324,7 +372,11 @@ theorem spanEq : SpanEq := by
   obtain ⟨R', hR'⟩ : ∃ R', R' = rowLat P ⊔ Submodule.span (intL L) {ρ ᵥ* P} := ⟨_, rfl⟩
   rw [← hR']
   have p1 : ∀ i, P i ∈ R' := fun i => hR' ▸ Submodule.mem_sup_left (row_mem_rowLat _ i)
-  have hq' : q ∈ R' := by simpa [hP] using p1 0
+  have hq' : q ∈ R' := by
+    have h := p1 0
+    rw [hP] at h
+    change q ∈ R' at h
+    exact h
   have hm' : ∀ k, vec3 (0 : L) ((U + V * g₀) k) (((V * g₀) *ᵥ b) k) ∈ R' := fun k => by
     have := p1 (mid k)
     simpa [hP, hM] using this
@@ -358,7 +410,9 @@ theorem spanEq : SpanEq := by
   · rw [hR']
     refine sup_le (rowLat_le.2 fun i => ?_) ?_
     · rcases idx_cases i with rfl | ⟨j, rfl⟩ | rfl
-      · simpa [hP] using hqR
+      · rw [hP]
+        change q ∈ R
+        exact hqR
       · simpa [hP, hM] using m1 j
       · simpa [hP] using hyR
     · rw [Submodule.span_le, Set.singleton_subset_iff, eρ]

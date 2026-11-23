@@ -1,7 +1,55 @@
-import Development.AbelianVarietyTheory.Definitions.Divisors.BadElt
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FinrankRangeMulLeftIdempotentGroupAlgebra
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.UnitriSubOnePow
-import Formalism.LocalToGlobal.Divisibility.ProjLemmas
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.BadElt
+public import Formalism.LocalToGlobal.Divisibility.GoodPartHermitianSpec
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FinrankRangeMulLeftIdempotentGroupAlgebra
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.UnitriSubOnePow
+public import Formalism.LocalToGlobal.Divisibility.ProjLemmas
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.Finsupp.Pointwise
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.MainNotions Formalism.MainNotions.ArithmeticCylinders GlobalTheory.BadCount Module
 
 noncomputable section
@@ -15,8 +63,8 @@ theorem coeff_one_mul_comm (a b : MonoidAlgebra K G) : (a * b).coeff 1 = (b * a)
   rw [Formalism.L2.DIV.coeff_mul_fin, Formalism.L2.DIV.coeff_mul_fin]
   exact Fintype.sum_equiv (Equiv.inv G) _ _ (fun s => by simp [mul_comm])
 
-open Classical in
 
+open Classical in
 theorem coeff_lvlIdem_eq (P : Subgroup G) (ψ : P →* Kˣ) (t : G) :
     (Formalism.L2.DIV.lvlIdem P ψ).coeff t =
       if h : t ∈ P then (Nat.card P : K)⁻¹ * ((ψ (⟨t, h⟩ : P)⁻¹ : Kˣ) : K) else 0 := by
@@ -72,8 +120,8 @@ namespace GlobalTheory.BadCount
 abbrev sdg {A : Type} [AddCommMonoid A] {N : ℕ} (M : Matrix (Fin N) (Fin N) A) : A :=
   ∑ i ∈ Finset.range (N - 1), entN M i (i + 1)
 
-open Classical in
 
+open Classical in
 theorem coeff_eU (g N : ℕ) [NeZero g] (ψ₀ : AddChar (ZMod g) ℂ) (x : GL (Fin N) (ZMod g)) :
     (eU g N ψ₀).coeff x =
       if IsUniUp (x : Matrix (Fin N) (Fin N) (ZMod g)) then
@@ -107,8 +155,8 @@ theorem extAt_restr (k : Fin 2) (y : G0g D.nd) (hy : ∀ kv : (Σ k : Fin 2, D.n
     exact extAt_apply D _ _ v
   · rw [extAt_apply_ne D k _ _ h, hy ⟨k', v⟩ h]
 
-open Classical in
 
+open Classical in
 theorem sum_trivOff [Fintype (G0g D.nd)] (k : Fin 2) [Fintype (∀ v : D.nd.PlG k, GL (Fin D.R.r) (ZMod (D.host.g k)))]
     (F : (∀ v : D.nd.PlG k, GL (Fin D.R.r) (ZMod (D.host.g k))) → ℂ) :
     ∑ y : G0g D.nd, (if ∀ kv : (Σ k : Fin 2, D.nd.PlG k), kv.1 ≠ k → y kv = 1 then F (fun v => y ⟨k, v⟩) else 0) =
@@ -141,8 +189,8 @@ def phiAt (k : Fin 2) (ψ₀ : AddChar (ZMod (D.host.g k)) ℂ) (f : (ZMod (D.ho
   exact if IsUniUp (u : Matrix (Fin D.R.r) (Fin D.R.r) (ZMod (D.host.g k))) then
     (ψ₀ (sdg (u : Matrix (Fin D.R.r) (Fin D.R.r) (ZMod (D.host.g k)))))⁻¹ * (D.ntypes.eSer k f).coeff u⁻¹ else 0
 
-open Classical in
 
+open Classical in
 def cardU (k : Fin 2) : ℂ :=
   haveI : NeZero (D.host.g k) := ⟨(D.host.g_prime k).ne_zero⟩
   ((Finset.univ.filter fun u : GL (Fin D.R.r) (ZMod (D.host.g k)) =>
@@ -205,8 +253,8 @@ open Polynomial
 
 variable (D : D7)
 
-open Classical in
 
+open Classical in
 theorem term_eq [Fintype (G0g D.nd)] (P : Subgroup (G0g D.nd)) (lam : P →* ℂˣ)
     (ψ : ∀ kv : (Σ k : Fin 2, D.nd.PlG k), AddChar (ZMod (D.host.g kv.1)) ℂ) (hW : IsWhit D P lam ψ)
     (k : Fin 2) (S : Finset (Tup D k)) (y : G0g D.nd) :

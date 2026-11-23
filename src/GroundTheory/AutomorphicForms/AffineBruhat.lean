@@ -1,7 +1,56 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.GLnLocal
-import GroundTheory.AutomorphicForms.GLnLattice
-import GroundTheory.AutomorphicForms.FiniteBruhat
+module
+
+public import GroundTheory.AutomorphicForms.GLnLocal
+public import GroundTheory.AutomorphicForms.FiniteBruhat
+public import Mathlib.GroupTheory.SemidirectProduct
+public import GroundTheory.AutomorphicForms.GLnLattice
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -137,10 +186,7 @@ def diagPow : (Fin n → Multiplicative ℤ) →* GL (Fin n) F where
   map_one' := by
     refine Units.ext ?_
     change (diagonal fun i => ϖ ^ ((1 : Fin n → Multiplicative ℤ) i).toAdd) = 1
-    rw [← diagonal_one]
-    congr 1
-    funext i
-    simp
+    simp only [Pi.one_apply, toAdd_one, zpow_zero, diagonal_one]
   map_mul' a b := by
     refine Units.ext ?_
     change (diagonal fun i => ϖ ^ ((a * b) i).toAdd) =
@@ -206,93 +252,11 @@ theorem affineWeylGL_apply (w : ExtendedAffineWeyl n) (i j : Fin n) :
   rw [Units.val_mul, diagPow_val, diagonal_mul, permGL_apply]
   split_ifs <;> simp
 
-theorem valuation_le_of_mem_doubleCoset {w w' : ExtendedAffineWeyl n}
-    (h : affineWeylGL F n w' ∈ doubleCoset (affineWeylGL F n w) (iwahori F n) (iwahori F n))
-    (c : Fin n) :
-    valuation F ϖ ^ (w'.left (w'.right c)).toAdd ≤ valuation F ϖ ^ (w.left (w.right c)).toAdd ∧
-      (w.right c < w'.right c →
-        valuation F ϖ ^ (w'.left (w'.right c)).toAdd <
-          valuation F ϖ ^ (w.left (w.right c)).toAdd) := by
-  classical
-  obtain ⟨x, hx, y, hy, hxy⟩ := mem_doubleCoset.mp h
-  have hy' : y⁻¹ ∈ iwahori F n := (iwahori F n).inv_mem hy
-  have hmat : (x : Matrix (Fin n) (Fin n) F) * (affineWeylGL F n w : Matrix (Fin n) (Fin n) F) =
-      (affineWeylGL F n w' : Matrix (Fin n) (Fin n) F) *
-        ((y⁻¹ : GL (Fin n) F) : Matrix (Fin n) (Fin n) F) := by
-    rw [← Units.val_mul, ← Units.val_mul, hxy]
-    congr 1
-    group
-  have hent := congrFun (congrFun hmat (w'.right c)) c
-  rw [mul_apply, Fintype.sum_eq_single (w.right c), mul_apply,
-    Fintype.sum_eq_single c] at hent
-  rotate_left
-  · intro l hl
-    rw [affineWeylGL_apply, if_neg, zero_mul]
-    exact fun e => hl (w'.right.injective e).symm
-  · intro l hl
-    rw [affineWeylGL_apply, if_neg, mul_zero]
-    exact hl
-  rw [affineWeylGL_apply, if_pos rfl, affineWeylGL_apply, if_pos rfl] at hent
-  have hv := congrArg (valuation F) hent
-  rw [map_mul, map_mul, map_zpow₀, map_zpow₀, ((mem_iwahori_iff F n).mp hy').2.2 c, mul_one] at hv
-  obtain ⟨hx1, hx2, -⟩ := (mem_iwahori_iff F n).mp hx
-  have hpos : 0 < valuation F ϖ ^ (w.left (w.right c)).toAdd :=
-    zpow_pos (valuation_uniformizer_pos F) _
-  refine ⟨?_, fun hlt => ?_⟩
-  · rw [← hv]
-    calc valuation F (x (w'.right c) (w.right c)) * valuation F ϖ ^ (w.left (w.right c)).toAdd
-        ≤ 1 * valuation F ϖ ^ (w.left (w.right c)).toAdd := mul_le_mul_of_nonneg_right
-          (hx1 _ _) hpos.le
-      _ = _ := one_mul _
-  · rw [← hv]
-    calc valuation F (x (w'.right c) (w.right c)) * valuation F ϖ ^ (w.left (w.right c)).toAdd
-        < 1 * valuation F ϖ ^ (w.left (w.right c)).toAdd := mul_lt_mul_of_pos_right
-          (hx2 _ _ hlt) hpos
-      _ = _ := one_mul _
-
-theorem eq_of_affineWeylGL_mem_doubleCoset {w w' : ExtendedAffineWeyl n}
-    (h : affineWeylGL F n w' ∈ doubleCoset (affineWeylGL F n w) (iwahori F n) (iwahori F n)) :
-    w = w' := by
-  have h' : affineWeylGL F n w ∈
-      doubleCoset (affineWeylGL F n w') (iwahori F n) (iwahori F n) := by
-    obtain ⟨x, hx, y, hy, hxy⟩ := mem_doubleCoset.mp h
-    refine mem_doubleCoset.mpr ⟨x⁻¹, (iwahori F n).inv_mem hx, y⁻¹, (iwahori F n).inv_mem hy, ?_⟩
-    rw [hxy]
-    group
-  have heq : ∀ c, valuation F ϖ ^ (w'.left (w'.right c)).toAdd =
-      valuation F ϖ ^ (w.left (w.right c)).toAdd := fun c =>
-    le_antisymm (valuation_le_of_mem_doubleCoset F n h c).1
-      (valuation_le_of_mem_doubleCoset F n h' c).1
-  have hle : ∀ c, w'.right c ≤ w.right c := by
-    intro c
-    by_contra hlt
-    push Not at hlt
-    exact ((valuation_le_of_mem_doubleCoset F n h c).2 hlt).ne (heq c)
-  have hπ := perm_eq_one_of_forall_le (w'.right * w.right⁻¹) (fun x => by
-    simpa using hle (w.right⁻¹ x))
-  have hright : w.right = w'.right := by
-    have := congrArg (· * w.right) hπ
-    simpa using this.symm
-  have hinj := (zpow_right_strictAnti₀ (valuation_uniformizer_pos F)
-    (valuation_uniformizer_lt_one F)).injective
-  refine SemidirectProduct.ext ?_ hright
-  funext i
-  have := heq (w.right⁻¹ i)
-  rw [← hright, show w.right (w.right⁻¹ i) = i from w.right.apply_symm_apply i] at this
-  exact Multiplicative.toAdd.injective (hinj this).symm
-
-theorem affineWeylGL_injective : Function.Injective (affineWeylGL F n) := by
-  intro w w' h
-  apply eq_of_affineWeylGL_mem_doubleCoset F n
-  rw [← h]
-  exact mem_doubleCoset_self _ _ _
-
 end AffineWeyl
 
 section Existence
 
 variable {F n} in
-
 def RowsReducedOn (M : Matrix (Fin n) (Fin n) F) (R : Finset (Fin n)) : Prop :=
   ∃ p : Fin n → Fin n, ∀ i ∈ R,
     M i (p i) ≠ 0 ∧ (∀ c, c ≠ p i → M i c = 0) ∧ (∀ r, r ≠ i → M r (p i) = 0)
@@ -595,49 +559,6 @@ end Existence
 
 section Decomposition
 
-theorem doubleCoset_affineWeylGL_injective {w w' : ExtendedAffineWeyl n} {g : GL (Fin n) F}
-    (hw : g ∈ doubleCoset (affineWeylGL F n w) (iwahori F n) (iwahori F n))
-    (hw' : g ∈ doubleCoset (affineWeylGL F n w') (iwahori F n) (iwahori F n)) : w = w' := by
-  have e : doubleCoset (affineWeylGL F n w) (iwahori F n) (iwahori F n) =
-      doubleCoset (affineWeylGL F n w') (iwahori F n) (iwahori F n) :=
-    (doubleCoset_eq_of_mem hw).symm.trans (doubleCoset_eq_of_mem hw')
-  have hmem := mem_doubleCoset_self (iwahori F n) (iwahori F n) (affineWeylGL F n w')
-  rw [← e] at hmem
-  exact eq_of_affineWeylGL_mem_doubleCoset F n hmem
-
-theorem affineBruhat_decomposition (g : GL (Fin n) F) :
-    ∃! w : ExtendedAffineWeyl n,
-      g ∈ doubleCoset (affineWeylGL F n w) (iwahori F n) (iwahori F n) := by
-  obtain ⟨w, hw⟩ := exists_mem_doubleCoset_affineWeylGL F n g
-  exact ⟨w, hw, fun w' hw' => (doubleCoset_affineWeylGL_injective F n hw hw').symm⟩
-
-theorem iUnion_doubleCoset_affineWeylGL :
-    ⋃ w : ExtendedAffineWeyl n, doubleCoset (affineWeylGL F n w) (iwahori F n) (iwahori F n) =
-      Set.univ :=
-  Set.eq_univ_of_forall fun g =>
-    Set.mem_iUnion.mpr (exists_mem_doubleCoset_affineWeylGL F n g)
-
-theorem pairwise_disjoint_doubleCoset_affineWeylGL :
-    Pairwise (Function.onFun Disjoint fun w : ExtendedAffineWeyl n =>
-      doubleCoset (affineWeylGL F n w) (iwahori F n) (iwahori F n)) := by
-  intro w w' hww'
-  rw [Function.onFun, Set.disjoint_left]
-  intro g hw hw'
-  exact hww' (doubleCoset_affineWeylGL_injective F n hw hw')
-
-theorem bijective_mk_affineWeylGL :
-    Function.Bijective fun w : ExtendedAffineWeyl n =>
-      DoubleCoset.mk (iwahori F n) (iwahori F n) (affineWeylGL F n w) := by
-  constructor
-  · intro w w' hww'
-    obtain ⟨x, hx, y, hy, hxy⟩ := (DoubleCoset.eq _ _ _ _).mp hww'
-    exact eq_of_affineWeylGL_mem_doubleCoset F n (mem_doubleCoset.mpr ⟨x, hx, y, hy, hxy⟩)
-  · intro q
-    obtain ⟨w, hw⟩ := exists_mem_doubleCoset_affineWeylGL F n q.out
-    refine ⟨w, ?_⟩
-    simp only
-    rw [← mk_eq_of_doubleCoset_eq (doubleCoset_eq_of_mem hw), out_eq']
-
 end Decomposition
 
 section Integral
@@ -646,8 +567,8 @@ theorem affineWeylGL_inr (σ : Equiv.Perm (Fin n)) :
     affineWeylGL F n (SemidirectProduct.inr σ) = permGL F σ :=
   SemidirectProduct.lift_inr _ _ _ _
 
-omit [TopologicalSpace F] [IsNonarchimedeanLocalField F] in
 
+omit [TopologicalSpace F] [IsNonarchimedeanLocalField F] in
 theorem permGL_mem_integralGL (σ : Equiv.Perm (Fin n)) : permGL F σ ∈ integralGL F n := by
   rw [mem_integralGL_iff]
   refine ⟨fun i j => ?_, fun i j => ?_⟩

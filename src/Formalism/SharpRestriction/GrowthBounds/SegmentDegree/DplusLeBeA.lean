@@ -1,4 +1,50 @@
-import Formalism.SharpRestriction.GrowthBounds.SegmentDegree.WindowSmall
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.SegmentDegree.AtypicalPathSmallWeight
+public import Formalism.SharpRestriction.GrowthBounds.SegmentDegree.NegDminusLeMu
+public import Formalism.SharpRestriction.GrowthBounds.ValuationLowestDegreeRename
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -156,18 +202,8 @@ theorem vp_le {s : ℕ} {μ : Fin (N + 1) → Fin (r + K) → ℤ} (h : VP LL n0
         rw [hme] at h2
         exact le_trans h2 (ih (by omega) (by omega) _)
 
-theorem vp_mono {s s' : ℕ} (hss : s' ≤ s) {μ : Fin (N + 1) → Fin (r + K) → ℤ} (h : VP LL n0 B s μ) :
-    VP LL n0 B s' μ :=
-  ⟨h.1, fun t ht => h.2.1 t (by omega), fun i hi => h.2.2 i (by omega)⟩
-
-theorem vp_congr {s : ℕ} {μ μ' : Fin (N + 1) → Fin (r + K) → ℤ} (h : VP LL n0 B s μ)
-    (he : ∀ t : Fin (N + 1), t.val ≤ s → μ' t = μ t) : VP LL n0 B s μ' := by
-  refine ⟨by rw [he 0 (by simp)]; exact h.1, fun t ht => by rw [he t ht]; exact h.2.1 t ht, fun i hi => ?_⟩
-  rw [he i.castSucc (by simp; omega), he i.succ (by simp; omega)]
-  exact h.2.2 i hi
 
 open Classical in
-
 theorem vp_update {s : ℕ} (hs : s < N) {μ : Fin (N + 1) → Fin (r + K) → ℤ} (h : VP LL n0 B s μ)
     (la' : Fin (r + K) → ℤ) (hd : Dominant la')
     (hst : StepOK LL n0 B ⟨s, hs⟩ (μ (⟨s, hs⟩ : Fin N).castSucc) la') :

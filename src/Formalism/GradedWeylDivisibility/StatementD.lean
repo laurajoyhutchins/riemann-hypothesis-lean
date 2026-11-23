@@ -1,4 +1,48 @@
-import Formalism.GradedWeylDivisibility.FinalC
+module
+
+public import Formalism.GradedWeylDivisibility.StatementC
+public import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MvPolynomial
 
@@ -62,12 +106,6 @@ def NablaLDiag : Prop :=
         Submodule.span R (Set.range fun i => (∏ a, t a ^ μ i a)⁻¹ • rowAct K g⁻¹ (map (algebraMap R K) (b i))) =
           nablaL R K k n ν (g * Matrix.diagonal t)
 
-def NablaLTwist : Prop :=
-  ∀ (R K : Type) [CommRing R] [Field K] [Algebra R K] (φ : K ≃+* K) (ψ : R ≃+* R),
-    (∀ x : R, φ (algebraMap R K x) = algebraMap R K (ψ x)) →
-    ∀ (k n : ℕ) (ν : Fin n → ℕ) (g : Matrix (Fin k) (Fin k) K) (F : MvPolynomial (Fin k × Fin n) K),
-      F ∈ nablaL R K k n ν g ↔ map (φ : K →+* K) F ∈ nablaL R K k n ν (g.map φ)
-
 def NablaLLe : Prop :=
   ∀ (R K : Type) [CommRing R] [Field K] [Algebra R K] (k n : ℕ) (ν : Fin n → ℕ) (g : Matrix (Fin k) (Fin k) K),
     IsUnit g.det → ∀ F ∈ nablaL R K k n ν g, F ∈ dualWeyl K k n ν
@@ -88,13 +126,6 @@ def dualLat (R K : Type*) [CommRing R] [Field K] [Algebra R K] {V : Type*} [AddC
     obtain ⟨a, ha⟩ := hφ v hv
     refine ⟨c * a, ?_⟩
     rw [LinearMap.smul_apply, ← ha, map_mul, Algebra.smul_def]
-
-def DualLatBasis : Prop :=
-  ∀ (R K : Type) [CommRing R] [IsDomain R] [Field K] [Algebra R K], Function.Injective (algebraMap R K) →
-    ∀ (V : Type) [AddCommGroup V] [Module K V] [Module R V] [IsScalarTower R K V] {ι : Type} [Fintype ι]
-      [DecidableEq ι] (b : Module.Basis ι K V),
-      LinearIndependent R (fun i => b.dualBasis i) ∧
-      dualLat R K (Submodule.span R (Set.range b)) = Submodule.span R (Set.range fun i => b.dualBasis i)
 
 def blockEmb (K : Type*) [CommRing K] {S : Type*} {k n : ℕ} (s : S) :
     MvPolynomial (Fin k × Fin n) K →ₐ[K] MvPolynomial (S × (Fin k × Fin n)) K :=

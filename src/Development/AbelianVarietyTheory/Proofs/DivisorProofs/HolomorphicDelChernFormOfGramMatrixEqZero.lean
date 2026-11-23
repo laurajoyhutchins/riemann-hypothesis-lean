@@ -1,7 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.IsTypeIsRealConst
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ClosedFormsMulClosed
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ChernFormOfGramMatrixAtHolomorphicFrameChange
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.IsTypeIsRealConst
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ChernFormOfGramMatrixAtHolomorphicFrameChange
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ClosedFormsMulClosed
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Calculus.FDeriv.Symmetric
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+
+@[expose] public section
+
 open Set Matrix Filter Topology
 open GlobalTheory.HermFrame GlobalTheory.CxForm
 open ReciprocityTheory.L2DbarEstimates (V)
@@ -88,7 +133,8 @@ theorem delAt_sum_smul {ι : Type} [Fintype ι] {v : V n} {u : ι → V n → �
       ∑ i, del (u i) v (coordVec c) • α i := by
     refine (bas n).ext_elem fun S => ?_
     rw [FormMul.repr_coefwise]
-    simp only [map_sum, map_smul, Finsupp.finset_sum_apply, Finsupp.smul_apply, smul_eq_mul]
+
+    simp only [map_sum, map_smul, Finsupp.finsetSum_apply, Finsupp.smul_apply, smul_eq_mul]
     rw [del_sum fun i _ => (hu i).mul_const _, ContinuousLinearMap.sum_apply]
     refine Finset.sum_congr rfl fun i _ => ?_
     rw [del_mul (hu i) (differentiableAt_const _), del_const]
@@ -104,7 +150,7 @@ theorem delAt_add {v : V n} {F G : V n → Alt n} (hF : ∀ S, DifferentiableAt 
   rw [← mul_add]
   congr 1
   refine (bas n).ext_elem fun S => ?_
-  simp only [map_add, Finsupp.add_apply, FormMul.repr_coefwise]
+  simp only [map_add (f := _), Finsupp.add_apply, FormMul.repr_coefwise]
   rw [del_add (hF S) (hG S), ContinuousLinearMap.add_apply]
 
 theorem delAt_const (α : Alt n) (v : V n) : delAt (fun _ => α) v = 0 := by
@@ -124,7 +170,7 @@ def closedAt (v : V n) : Subalgebra ℂ (V n → Ev n) where
   add_mem' := by
     rintro F G ⟨hF, hF0⟩ ⟨hG, hG0⟩
     refine ⟨fun S => ?_, ?_⟩
-    · simp only [Pi.add_apply, Subalgebra.coe_add, map_add, Finsupp.add_apply]
+    · simp only [Pi.add_apply, Subalgebra.coe_add, map_add (f := _), Finsupp.add_apply]
       exact (hF S).add (hG S)
     · simp only [Pi.add_apply, Subalgebra.coe_add]
       rw [delAt_add hF hG, hF0, hG0, add_zero]
@@ -138,20 +184,20 @@ theorem mem_closedAt {v : V n} {F : V n → Ev n} : F ∈ closedAt v ↔
 theorem coeff_charpolyRev_map {R S r : Type} [CommRing R] [CommRing S] [Fintype r] [DecidableEq r] (f : R →+* S)
     (M : Matrix r r R) (j : ℕ) : (M.map f).charpolyRev.coeff j = f (M.charpolyRev.coeff j) := by
   rw [← Polynomial.coeff_map]
-  congr 1
   rw [Matrix.charpolyRev, Matrix.charpolyRev, ← Polynomial.coe_mapRingHom, RingHom.map_det]
-  congr 1
-  ext a b : 2
+  apply congrArg (fun A : Matrix r r (Polynomial S) => A.det.coeff j)
+  ext a b
   simp [Matrix.one_apply, apply_ite (Polynomial.map f)]
 
 theorem mem_closedAt_of_symm {v : V n} {u : Fin n × Fin n → V n → ℂ} (hu : ∀ p, DifferentiableAt ℝ (u p) v)
     (hs : ∀ a b c, del (u (a, b)) v (coordVec c) = del (u (c, b)) v (coordVec a)) :
     (fun x => ∑ p, u p x • sym p) ∈ closedAt v := by
   refine mem_closedAt.2 ⟨fun S => ?_, ?_⟩
-  · simp only [AddSubmonoidClass.coe_finset_sum, Subalgebra.coe_smul, map_sum, map_smul, Finsupp.finset_sum_apply,
-      Finsupp.smul_apply, smul_eq_mul]
+  · set_option synthInstance.maxHeartbeats 100000 in
+      simp only [AddSubmonoidClass.coe_finsetSum, Subalgebra.coe_smul, map_sum, map_smul, Finsupp.finsetSum_apply,
+        Finsupp.smul_apply, smul_eq_mul]
     exact DifferentiableAt.fun_sum fun p _ => (hu p).mul_const _
-  · simp only [AddSubmonoidClass.coe_finset_sum, Subalgebra.coe_smul]
+  · simp only [AddSubmonoidClass.coe_finsetSum, Subalgebra.coe_smul]
     rw [delAt_sum_smul hu]
     simp only [Fintype.sum_prod_type]
     set T : Alt n := ∑ c, ∑ a, ∑ b, del (u (a, b)) v (coordVec c) • (dz c * (sym (a, b) : Alt n)) with hT
@@ -179,6 +225,7 @@ theorem delAt_chernAt_of_conn_eq_zero {H : V n → Matrix r r ℂ} {v : V n} (h 
       (fun p => (h.curv hu (j := 1) (by norm_num) _ _).diff i k)
       fun a b c => congrFun (congrFun (mdel_curv_comm h hu (h0 a) (h0 c) (coordVec b)) i) k
   let M : Matrix r r (closedAt v) := Matrix.of fun i k => ⟨_, hm i k⟩
+  set_option synthInstance.maxHeartbeats 200000 in
   have e : (fun w => chernAt H w j) = (kappa ^ j • (-M).charpolyRev.coeff j : closedAt v) := by
     funext w
     let ev : closedAt v →+* Ev n := (Pi.evalRingHom (fun _ => Ev n) w).comp (closedAt v).val.toRingHom
@@ -193,6 +240,7 @@ theorem delAt_chernAt_of_conn_eq_zero {H : V n → Matrix r r ℂ} {v : V n} (h 
     show kappa ^ j • _ = kappa ^ j • ev _
     rw [← e1]
     rfl
+  set_option synthInstance.maxHeartbeats 200000 in
   have := (kappa ^ j • (-M).charpolyRev.coeff j : closedAt v).2
   rw [← e] at this
   exact (mem_closedAt.1 this).2

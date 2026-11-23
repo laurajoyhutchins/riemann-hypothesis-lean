@@ -1,10 +1,58 @@
-import Mathlib
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.SatakeExponents.UniformizerValuations.LeviMatchingWords.MatchLM
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.MatchingUnitOf
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.HintConstMul
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IsCompactMaximalPairPlace
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ConstantTermMultiplicative
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.MatchingSplitOf
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.SatakeExponents.UniformizerValuations.LeviMatchingWords.MatchLM
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ConstantTermLocallyConstant
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ConstantTermMultiplicative
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FiniteSphNe
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.HasCompactSupportTj
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.HintConstMul
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IsCompactMaximalPairPlace
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LocalAlgebraHolds
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.MatchingSplitOf
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.MatchingUnitOf
+import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SphericalOneOfLocalAlgebra
+import GroundTheory.LocalFields.PadicLogSeries
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 noncomputable section
 
@@ -86,11 +134,11 @@ theorem isHecke_ctMu {a b : ℕ} (h : a + b = n) {w : Pl E} (hU : UL n w = ⊤) 
     (hf : IsHecke (KL n w) f) : IsHecke (K2 a b w) (ctMu h w μ f) := by
   have hH := GlobalTheory.CompanionTheory.CtMulSplit.isHk_of_isHecke hU hf
   set F : GLw n w → ℂ := fun y => f (toSub (UL n w) y) with hF
-  have hb : ∀ u ∈ GlobalTheory.LFun.KGL w n, ∀ g, F (u * g) = F g ∧ F (g * u) = F g := fun u hu g =>
+  have hb : ∀ u ∈ GlobalTheory.LFun.KGL w (n := n), ∀ g, F (u * g) = F g ∧ F (g * u) = F g := fun u hu g =>
     ⟨by simpa using hH.2.2.2 u hu 1 (Subgroup.one_mem _) g, by simpa using hH.2.2.2 1 (Subgroup.one_mem _) u hu g⟩
-  have hbi := GlobalTheory.CompanionTheory.GL3BlockMatrixLocal.constant_term_bi_invariant (a := a) (b := b) h w (GlobalTheory.LFun.KGL w n) le_rfl
+  have hbi := GlobalTheory.CompanionTheory.GL3BlockMatrixLocal.constant_term_bi_invariant (a := a) (b := b) h w (GlobalTheory.LFun.KGL w (n := n)) le_rfl
     (fun k hk k' hk' => mul_mem (mul_mem hk hk') (inv_mem hk)) F hH.2.2.2 1 1 (one_mem _) (one_mem _)
-  have hone : (1 : GLw a w × GLw b w) ∈ leviOf h w (GlobalTheory.LFun.KGL w n) := GlobalTheory.CompanionTheory.CtHecke.blk_zero_mem h w (one_mem _)
+  have hone : (1 : GLw a w × GLw b w) ∈ leviOf h w (GlobalTheory.LFun.KGL w (n := n)) := GlobalTheory.CompanionTheory.CtHecke.blk_zero_mem h w (one_mem _)
   have e : ctMu h w μ f = fun m => GlobalTheory.CompanionTheory.CtHecke.cMu μ m * phi3 h w F 1 1 m := by
     funext m
     show GlobalTheory.CompanionTheory.CtHecke.cMu μ m * ct h w F m = _
@@ -197,24 +245,6 @@ theorem word_ct (d : LocData E n) (a : ℕ) (ha : a ≤ n) {w : Pl E} (hCt : MT.
           hSp E a (n - a) w (C A) (C (d.hU w k)) (isHecke_ctMu _ hU _ hμ hA) (isHecke_ctMu _ hU _ hμ hTk),
           ← mul hTk hA]
         exact key
-
-theorem matchLMWordOf : PositivityTheory.Rg.BcB.F.MLM.MatchLMWordOf := by
-  intro hS hCt hSp _ E _ _ _ hE n d hd a ha w hG l
-  have hP : w ∉ d.P := by simp [LocData.P, hG.2.1, hG.2.2.1]
-  have htr : (wordL d a ha w l).tr d.P d.one w = (wordL d a ha w l).s w := if_neg hP
-  obtain ⟨hW, A, B, -, -, hs, ht, hm⟩ := word_ct d a ha hCt hSp hE hd hG l
-  rw [htr, hs, ht, hm]
-  have hμ := hG.2.2.2.2
-  have hw := hG.1
-  have h1 := hS E n a ha w hw (d.μ w) hμ _ hW 1 le_rfl
-  have hone : IsHecke (KL n w) (lone (KL n w)) := GlobalTheory.CompanionTheory.MatchUnit.isHecke_lone_KL hE
-  have e1 : lpow (KL n w) (wordU d w l) 1 = wordU d w l := lconv_lone_right hW
-  have e2 : mconv (ctMu (Nat.add_sub_cancel' ha) w (d.μ w) (wordU d w l))
-      (ctMu (Nat.add_sub_cancel' ha) w (d.μ w) (lone (KL n w))) =
-      ctMu (Nat.add_sub_cancel' ha) w (d.μ w) (wordU d w l) := by
-    rw [← hCt E n a ha w hw (d.μ w) hμ _ _ hW hone, lconv_lone_right hW]
-  rw [e1] at h1
-  exact e2 ▸ h1
 
 end GlobalTheory.CompanionTheory.MatchWord
 

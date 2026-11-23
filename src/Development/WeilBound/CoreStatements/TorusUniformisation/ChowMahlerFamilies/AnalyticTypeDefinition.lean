@@ -1,14 +1,61 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.BdryChart
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsFlatAnIffIsConstMul
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.LevelSectionsExactKernelLocusOpen
-import Development.AutomorphicSpectrum.Definitions.MetricPeriods.ClopenCondOnto
-import Development.AbelianVarietyTheory.Definitions.Uniformization.PointEqOfSubsingleton
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.BlowupProjections.BlowupProjStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.UniformisedEigenFrameOne
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.KahlerFormsOverSubalgebraClosureProperties
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.FamilyUnifExpUnique
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.LieMultIffExistsFrame
+module
+
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsFlatAnIffIsConstMul
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.FamilyUnifExpUnique
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.LieMultIffExistsFrame
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.KahlerFormsOverSubalgebraClosureProperties
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.PeriodEigenFrameStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.UniformisedEigenFrameOne
+import Development.AutomorphicSpectrum.Proofs.MetricProofs.PeriodHermitianTypeCompatibilityStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 section
 open NumberField Matrix
@@ -43,11 +90,13 @@ theorem exists_matrix {E : Type} [Field E] [NumberField E] {La : Type} [AddCommG
     (fun n => (LinearMap.toMatrix b b (gam.baseChange E)) n m)
   choose a ha using hN
   have h2 : j ((N : 𝓞 E) • gam (e m)) = j (∑ n, a n • e n) := by
+
     rw [map_smul, h1, map_sum, Finset.smul_sum]
     refine Finset.sum_congr rfl fun n _ => ?_
     rw [map_smul, ← smul_assoc, ← ha n, algebraMap_smul]
   obtain ⟨s, hs⟩ := IsLocalizedModule.exists_of_eq (S := nonZeroDivisors (𝓞 E)) (f := j) h2
   have h3 := congrArg φ hs
+
   simp only [Submonoid.smul_def, hφ, map_sum] at h3
   have hs0 : τ ((s : 𝓞 E) : E) ≠ 0 := by
     simpa using nonZeroDivisors.ne_zero s.2
@@ -76,6 +125,7 @@ theorem change_basis {p q g : ℕ} (T T' : (Fin g → ℂ) →ₗ[ℂ] (Fin g �
   have hu' : IsUnit A'ᵀ.det := by rw [det_transpose]; exact hu
   refine ⟨C * A, Fm * A, B * A'ᵀ⁻¹, fun a => ?_, fun n => ?_, fun j n => ?_, ?_⟩
   · rw [← hC a]
+
     simp only [map_sum, map_smul, h1, Matrix.mul_apply, Finset.sum_smul, Finset.smul_sum, smul_smul]
     exact Finset.sum_comm
   · have e1 : (Matrix.of fun m k => T' (πf m) k) = A' * Matrix.of fun m k => T' (πe m) k := by
@@ -253,10 +303,12 @@ theorem cond_transport (D : Datum H) {g p q : ℕ} (ty : Fin g → (E →+* ℂ)
     (fun a => by
       show tyPart ty τ' _ = _
       rw [← hC.1 a, ← hcomm]
+
       simp only [hgam, map_sum, map_smul])
     (fun n => by
       show tyPart ty _ _ = _
       rw [hgam, hcomm, hC.2.1]
+
       simp only [map_sum, map_smul])
     hC.2.2
   exact ⟨C', Fm', B', ⟨k1, k2, k3⟩, k4⟩
@@ -324,11 +376,11 @@ theorem level_of_marking {D : Datum H} {l : Level H} {Xo : Moduli D l} {σ : KA 
     obtain ⟨e, he⟩ := hgam (r • a') (Submodule.smul_mem_smul hr Submodule.mem_top)
     obtain ⟨k, hk⟩ : l.M ∣ l.M' := Nat.dvd_lcm_left _ _
     refine ⟨e + k • r • (gam e' - e'), ?_⟩
-    rw [smul_add, ← map_smul, map_add, he, hk, smul_comm r, map_nsmul, map_smul gam, mul_smul, mul_smul, smul_add,
+    rw [smul_add, ← map_smul, map_add (f := _), he, hk, smul_comm r, map_nsmul, map_smul gam, mul_smul, mul_smul, smul_add,
       smul_sub, smul_sub, smul_sub]
     abel
   · rintro x y ⟨e, he⟩ ⟨e', he'⟩
-    exact ⟨e + e', by rw [map_add, he, he', smul_add]; abel⟩
+    exact ⟨e + e', by rw [map_add (f := _), he, he', smul_add]; abel⟩
 
 end PositivityTheory.Xgn.AnalyticTypeDefinition
 

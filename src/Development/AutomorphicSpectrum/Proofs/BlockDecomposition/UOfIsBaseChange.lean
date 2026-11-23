@@ -1,5 +1,46 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.HodgeWedgeFields.H1CommutesBaseChange
+module
+
+public import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.HodgeWedgeFields.H1CommutesBaseChange
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -370,6 +411,7 @@ theorem par_of_family (hS : Stein F) {W : Type} [AddCommGroup W] [Module R W] (g
   have hdec : ∀ w, ∑ k, lam k w • v k = w := fun w ↦ by
     have e1 : a (b w) = w := LinearMap.congr_fun hab w
     conv_rhs => rw [← e1, pi_eq_sum_univ' (b w)]
+
     simp [lam, v, map_sum]
   let abelian₂ : ∀ k T, Ω[F.obj T⁄R] →ₗ[F.obj T] F.obj T := fun k T ↦
     (hu T).lift (Algebra.linearMap R (F.obj T) ∘ₗ lam k)
@@ -381,16 +423,17 @@ theorem par_of_family (hS : Stein F) {W : Type} [AddCommGroup W] [Module R W] (g
         simp only [LinearMap.sum_apply, LinearMap.comp_apply, LinearMap.toSpanSingleton_apply, hLam,
           LinearMap.id_apply, algebraMap_smul]
         have := congrArg (u T) (hdec w)
+
         rw [map_sum] at this
         simpa using this
     simpa using LinearMap.congr_fun e ξ
   have hcomp : ∀ k ⦃T T' : C⦄ (φ : T ⟶ T') (ξ : Ω[F.obj T⁄R]),
       mp F φ (abelian₂ k T ξ) = abelian₂ k T' (p1 F φ ξ) := fun k T T' φ ξ ↦ by
-    refine (hu T).inductionOn ξ _ (by simp) (fun w ↦ ?_) (fun s n hn ↦ ?_) (fun a b ha hb ↦ ?_)
+    refine (hu T).inductionOn ξ (fun w ↦ ?_) (fun s n hn ↦ ?_) (fun a b ha hb ↦ ?_)
     · rw [← hc φ w, hLam, hLam]
       exact (mp F φ).commutes _
     · rw [(abelian₂ k T).map_smul, oneFormsMapOfFunctorMorphism_smul, (abelian₂ k T').map_smul, smul_eq_mul, smul_eq_mul, map_mul, hn]
-    · simp only [map_add, ha, hb]
+    · simp only [map_add (f := _), ha, hb]
   let jm : W →ₗ[R] Glob1 F := LinearMap.codRestrict (Glob1 F) (LinearMap.pi u) fun w T T' φ ↦ hc φ w
   have hj : ∀ w T, (jm w).1 T = u T w := fun _ _ ↦ rfl
   have hinj : Function.Injective jm := (injective_iff_map_eq_zero jm).2 fun w h ↦ by
@@ -410,6 +453,7 @@ theorem par_of_family (hS : Stein F) {W : Type} [AddCommGroup W] [Module R W] (g
         rfl)
     choose r hr using hd
     refine ⟨∑ k, r k • v k, Subtype.ext (funext fun T ↦ ?_)⟩
+
     rw [hj, map_sum]
     refine Eq.trans (Finset.sum_congr rfl fun k _ ↦ ?_) (hexp T (ω.1 T))
     rw [map_smul, ← congrFun (hr k) T, ← algebraMap_smul (F.obj T) (r k) (u T (v k))]

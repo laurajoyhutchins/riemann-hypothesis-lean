@@ -1,14 +1,67 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Statements.GeometryStatements.CurveSemiAbelianConjecture
-import Development.AutomorphicSpectrum.Statements.GeometryStatements.SeparableFormGroupElementFixesUniquePositiveLine
-import Development.AutomorphicSpectrum.Definitions.DivisibilityTowers.Proportional
-import GroundTheory.HeightsAndTheta.Heights.Intersections.OneNotMemOfIsPrime
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.AssemblyBase
-import GroundTheory.ArithmeticGeometry.AbelianVarieties.JacobianSmoothness.RingKrullDimLeRingKrullDimQuotientAddOne
-import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.CurveVerticalPointChart
-import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.PCurveVertPointResidue
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PCoordConeArithVar
-import Development.AutomorphicSpectrum.Statements.GeometryStatements.ExistsAlgPtOff
+module
+
+public import GroundTheory.FunctionField.PlaceDefs
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.LocRing
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ArithmeticHilbertSamuelLowerBound
+public import Development.AutomorphicSpectrum.Statements.GeometryStatements.ExistsAlgPtOff
+public import GroundTheory.ArithmeticGeometry.AbelianVarieties.JacobianSmoothness.RingKrullDimLeRingKrullDimQuotientAddOne
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.OneNotMemOfIsPrime
+public import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.CurveVerticalPointChart
+public import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.PCurveVertPointResidue
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.GapCondExample
+import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.GermComp1ZeroPointLeft
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PSmallSectionsNonzero
+import GroundTheory.HeightsAndTheta.Heights.Intersections.PrimeComplMapLeNonZeroDivisorsQuot
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Geo ReciprocityTheory.ChartRestriction.G.Geo.Tor GlobalTheory.CompanionTheory.Ar GlobalTheory.CompanionTheory.Ar.Crv GlobalTheory.CompanionTheory.Ar.Conj
 
@@ -90,9 +143,9 @@ theorem chart_isFractionRing (w : (Σ k, J k) → K) (hbir : Birational w) (c : 
   show z = aeval w g * _ / (aeval w h * _)
   rw [mul_div_mul_right _ _ hm, hz, mul_div_cancel_right₀ _ h0]
 
+
 include p in
 omit [Fintype B] [∀ k, Fintype (J k)] in
-
 theorem prime_isMaximal_of_isFractionRing (A : Type) [CommRing A] [IsDomain A] [Algebra A K] [IsFractionRing A K]
     [Algebra.FiniteType ℤ A] (q : Ideal A) (hq : q.IsPrime) (h0 : q ≠ ⊥) : q.IsMaximal := by
   have hpK : CharP K p := charP_of_injective_algebraMap (algebraMap (ZMod p) K).injective p
@@ -110,8 +163,8 @@ theorem prime_isMaximal_of_isFractionRing (A : Type) [CommRing A] [IsDomain A] [
     rw [Ring.krullDimLE_iff, hd]; simp
   exact Ring.krullDimLE_one_iff_of_noZeroDivisors.1 hle q h0 hq
 
-include p in
 
+include p in
 theorem chart_prime_isMaximal (w : (Σ k, J k) → K) (hbir : Birational w) (c : ∀ k, J k)
     (hc : ∀ k, w ⟨k, c k⟩ ≠ 0) (q : Ideal (chartRingZ w c)) (hq : q.IsPrime) (h0 : q ≠ ⊥) : q.IsMaximal := by
   have hfr := chart_isFractionRing w hbir c hc
@@ -229,8 +282,10 @@ theorem IsRho.injective (hV : (mCoordIdeal w).IsPrime) (hW : W.IsPrime) (hVW : m
     Function.Injective ρ := by
   haveI := hV
   haveI := hW
-  rw [injective_iff_map_eq_zero]
+  change Function.Injective ρ.toAddMonoidHom
+  apply (injective_iff_map_eq_zero ρ.toAddMonoidHom).2
   intro x hx
+  change ρ x = 0 at hx
   obtain ⟨u, v, a, hu, hv, hvW, hxu⟩ := (mem_locRing_iff hVW).1 x.2
   have h1 := hρ x u v a hu hv hvW hxu
   rw [hx, zero_mul] at h1

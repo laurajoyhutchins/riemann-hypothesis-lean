@@ -1,16 +1,56 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.UnderTie
-import Formalism.LocalToGlobal.Columns.XtPhiTopGCongr
-import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.CsSpan
+module
+
+public import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.UnderTie
+public import Development.AbelianVarietyTheory.BlockTheory.GlobalSignature.SplittingProjection
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.AdelicLatticeCompletionLocalGlobal
+import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.MemStabGLAdeleIff
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.MulVecMemLocLatIffOfFrame
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ImportsTer
 import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.CsApprox
 import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.CsGlob
-import Formalism.SharpRestriction.GrowthBounds.ChartedClasses.ToLEInvApply
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.AdelicLatticeCompletionLocalGlobal
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.MemStabGLAdeleIff
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.MulVecMemLocLatIffOfFrame
-import Development.AbelianVarietyTheory.BlockTheory.GlobalSignature.SplittingProjection
-import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.AfsplitB
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ImportsTer
+import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.CsSpan
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Matrix Formalism.BasicNotions Formalism.UG Formalism.L2.Col Formalism.L2.PairingIndexBounds.F Formalism.MainNotions.G.KAat Formalism.L2.Forms Formalism.L2.Ker Formalism.MainNotions Formalism.L2.DIV Formalism.MainNotions.G GlobalTheory.TwU GlobalTheory.TwV
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
 
@@ -28,10 +68,6 @@ theorem localization_mono {W : Type} [AddCommGroup W] [Module (𝓞 E) W] (p : I
     {L N : Submodule (𝓞 E) W} (h : L ≤ N) : Formalism.HermitianLatticesTheory.localization₂ p L ≤ Formalism.HermitianLatticesTheory.localization₂ p N := by
   rintro x ⟨s, hs, hx⟩
   exact ⟨s, hs, h hx⟩
-
-theorem le_localized_self {W : Type} [AddCommGroup W] [Module (𝓞 E) W] (p : Ideal (𝓞 E)) [p.IsPrime]
-    (L : Submodule (𝓞 E) W) : L ≤ Formalism.HermitianLatticesTheory.localization₂ p L := fun x hx =>
-  ⟨1, p.primeCompl.one_mem, by simpa using hx⟩
 
 theorem localization_le_of_le_localization₂ {W : Type} [AddCommGroup W] [Module (𝓞 E) W] (p : Ideal (𝓞 E)) [p.IsPrime]
     {L N : Submodule (𝓞 E) W} (h : L ≤ Formalism.HermitianLatticesTheory.localization₂ p N) : Formalism.HermitianLatticesTheory.localization₂ p L ≤ Formalism.HermitianLatticesTheory.localization₂ p N := by
@@ -71,7 +107,7 @@ theorem hform_smul_left {n : ℕ} (σ : E →+* E) (J : Matrix (Fin n) (Fin n) E
 
 theorem hform_add_left {n : ℕ} (σ : E →+* E) (J : Matrix (Fin n) (Fin n) E) (x x' y : Fin n → E) :
     hform σ J (x + x') y = hform σ J x y + hform σ J x' y := by
-  simp only [hform, Pi.add_apply, map_add, add_mul, Finset.sum_add_distrib]
+  simp only [hform, Pi.add_apply, map_add (f := _), add_mul, Finset.sum_add_distrib]
 
 theorem hform_zero_left {n : ℕ} (σ : E →+* E) (J : Matrix (Fin n) (Fin n) E) (y : Fin n → E) :
     hform σ J 0 y = 0 := by
@@ -104,7 +140,7 @@ theorem dualSet_le_locP {n : ℕ} (σ : E →+* E) (e : 𝓞 E ≃+* 𝓞 E)
     | add x x' _ _ hx hx' =>
       obtain ⟨r, hr⟩ := hx
       obtain ⟨r', hr'⟩ := hx'
-      rw [hform_add_left, ← hr, ← hr', ← map_add]
+      rw [hform_add_left, ← hr, ← hr', ← map_add (f := _)]
       exact ⟨_, rfl⟩
     | smul c x _ hx =>
       obtain ⟨r, hr⟩ := hx
@@ -274,7 +310,8 @@ theorem globLat_le_localization_globLat (Lb : Submodule (𝓞 E) (Fin n → E)) 
   have hfin : ∀ g, Module.Finite (𝓞 E) (Formalism.UG.CS.globLat g Lb) := fun g => Module.Finite.iff_fg.2 (hlat g).fg
   have hq : Q.under (𝓞 F) = v := HeightOneSpectrum.ext hQ.symm
   intro z hz
-  refine mem_localization_of_mem_localLattice F E n v _ (hfin x₁) (hlat x₁).span_eq_top z ?_ Q hq
+  letI := Formalism.UG.P.csGlob_lattice (F := F) Lb hf hs x₁
+  refine mem_localization_of_mem_localLattice F E n v _ (hfin x₁) Submodule.IsFullLattice.span_eq_top z ?_ Q hq
   have hz' : (fun i => Formalism.UG.inclE (F := F) (v.adicCompletion F) (z i)) ∈ GlobalTheory.IndefiniteRowSideFullHecke.SplittingProjection.locLat v (Formalism.UG.CS.globLat x Lb) :=
     Submodule.subset_span ⟨z, hz, rfl⟩
   rw [mem_locLat_iff_adelic v _ (hfin x₁), mem_latS_globLat_iff Lb hf hs]
@@ -334,7 +371,7 @@ theorem latCo_le_locP (sp : Spaces R F E) (J : Matrix (Fin N) (Fin N) E) (co : G
 
 end Glue
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem lat_eq : UnderTie (fun {D L hT Gi Gl Kc Y cX ex t u μ St} A dtU a => ∀ (j : ℕ) (hj : j ≤ D.R.m) (β : (St j hj).Ch) (x x₁ : UA D j hj)
   (p p₁ : ChPt (R := D.R) t.sel (t.tup μ) (t.word u) j), IsPtAd A a j hj β x p → IsPtAd A a j hj β x₁ p₁ →

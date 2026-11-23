@@ -1,9 +1,61 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CosetOff
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.HaarMeasureLocalBallStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LocalFactorSandwichApprox
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.CompletionIsLocalRing
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.ImportsFurtherSide
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CosetOff
+public import CompanionTheory.SpectralGeometry.CountingDefinitions.AdelicEulerProducts.IsEulerProd
+import Aesop.Main
+public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.CompletionIsLocalRing
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.ImportsFurtherSide
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.HaarMeasureLocalBallStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LocalFactorSandwichApprox
+import Formalism.LocalToGlobal.SiegelLatticeTheory.CasimirVolumeRatios.AdeleLC
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open HeckeCharacterZeroLocus.SiegelWeilU GlobalTheory.CompanionTheory.SW NumberField IsDedekindDomain MeasureTheory Topology Filter GlobalTheory.CompanionTheory.Equi
 open scoped Classical
 
@@ -52,7 +104,8 @@ theorem small_box (v : HeightOneSpectrum (𝓞 F)) (ι : Type) [Fintype ι] {U :
     exact isCompact_univ_pi fun _ => isCompact_ball v k
   · intro k
     exact isClosed_set_pi fun _ _ => isClosed_ball v k
-  · intro y hy
+  · rw [mem_nhdsSet_iff_forall]
+    intro y hy
     have : y = 0 := by
       funext i
       have h : y i ∈ ⋂ n, GlobalTheory.CompanionTheory.Mass.MeanV.Sandwich.ballV (F := F) v n :=
@@ -252,15 +305,15 @@ theorem loc_approx : ∀ (F : Type) [Field F] [NumberField F] (v : HeightOneSpec
     intro c
     rw [boxInd_eq, integral_indicator_one (hmeas k c), hr]
   have hg : Integrable (fun y => ∑ c ∈ C, ψ c * boxInd v k c y) μ :=
-    integrable_finset_sum _ fun c _ => (hbi c).const_mul _
+    integrable_finsetSum _ fun c _ => (hbi c).const_mul _
   have hs : Integrable (fun y => ∑ c ∈ C, boxInd v k c y) μ :=
-    integrable_finset_sum _ fun c _ => hbi c
+    integrable_finsetSum _ fun c _ => hbi c
   have e1 : ∫ y, ∑ c ∈ C, ψ c * boxInd v k c y ∂μ = ∑ c ∈ C, ψ c * vol := by
-    rw [integral_finset_sum _ fun c _ => (hbi c).const_mul _]
+    rw [integral_finsetSum _ fun c _ => (hbi c).const_mul _]
     refine Finset.sum_congr rfl fun c _ => ?_
     rw [integral_const_mul, hint]
   have e2 : ∫ y, ∑ c ∈ C, boxInd v k c y ∂μ = (C.card : ℝ) * vol := by
-    rw [integral_finset_sum _ fun c _ => hbi c]
+    rw [integral_finsetSum _ fun c _ => hbi c]
     simp [hint]
   have hb := norm_integral_le_of_norm_le (hs.const_mul δ)
     (Eventually.of_forall fun y => (by simpa [Real.norm_eq_abs] using hpt y :

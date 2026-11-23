@@ -1,7 +1,55 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PrimitiveFrobeniusFixed.IsAdmissiblePrimeListNil
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PrimitiveFrobeniusFixed.DerBasic
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PrimitiveFrobeniusFixed.IsAdmissiblePrimeListNil
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PrimitiveFrobeniusFixed.AdmProd
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PrimitiveFrobeniusFixed.DerBasic
 import Development.AutomorphicArithmetic.AutomorphicVarieties.PrimitiveFrobeniusFixed.GalBasic
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PrimitiveFrobeniusFixed.AdmProd
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Formalism.ConjugateSelfDual ReciprocityTheory.Gal Formalism.GaloisCohomology UpperTheory.V UpperTheory.V.Base UpperTheory.V.Odd UpperTheory.V.Stick UpperTheory.V.ML
 open scoped nonZeroDivisors Pointwise
@@ -128,7 +176,7 @@ private theorem di_gen {l F r : ℕ} (τ : ℕ → G ℚ Ω) (P : G ℚ Ω → P
     have hqF : q.Coprime F := di_cop hqP
     refine ih hL' (fun p hp => hτ p (List.mem_cons_of_mem _ hp)) ?_
       (fun p hp => hP p (List.mem_cons_of_mem _ hp))
-    refine forall_fixMu_of_mul_closed_of_tau_of_fixMu_mul (τ q) P hmul hqP.1 (Nat.Coprime.mul hqF.symm hqc.symm) (hτ q (by simp))
+    refine forall_fixMu_of_mul_closed_of_tau_of_fixMu_mul (τ q) P hmul hqP.1 (Nat.Coprime.mul_left hqF.symm hqc.symm) (hτ q (by simp))
       (hP q (by simp)) ?_
     intro g hg
     apply hbig
@@ -154,7 +202,7 @@ private theorem di_step {l M F r : ℕ} (hF : F ≠ 0) (hM : M ∣ F) {x : ℕ �
   have hd0 : L.prod ≠ 0 := AP.2.1
   have hN1 : F * L.prod ≠ 0 := mul_ne_zero hF hd0
   have hN2 : F * (q * L.prod) ≠ 0 := mul_ne_zero hF (mul_ne_zero hq.ne_zero hd0)
-  have hcop : (F * L.prod).Coprime q := Nat.Coprime.mul (di_cop hqP).symm (AP.2.2.1 q hL).symm
+  have hcop : (F * L.prod).Coprime q := Nat.Coprime.mul_left (di_cop hqP).symm (AP.2.2.1 q hL).symm
   have hτq : τ q ∈ fixMu ℚ Ω (F * L.prod) := hτ.1 _ hcop
   have DB := derBasic Ω (F * (q * L.prod)) r hN2 τ L (x (q * L.prod)) (hS.ne _ hAqd) (hS.fix _ hAqd)
   have DBU := derBasic Ω (F * (q * L.prod)) r hN2 τ [] (der τ L (x (q * L.prod))) DB.1 DB.2.1

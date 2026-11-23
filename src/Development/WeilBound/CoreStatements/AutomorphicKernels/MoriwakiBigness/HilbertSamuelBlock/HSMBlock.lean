@@ -1,38 +1,81 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.AssemblyConditional
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.AssemblyBridge
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PResolutionDegree
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PProjFSMass
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PGenDegGeomDeg
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PBlockResolutionDegreeIntegral
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PHSMTransport
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PKrullDimMatAct
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PProjFrameGraphDeg
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PGraphChangeOfModel
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PBlockGraphDeg
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PVeroneseGraphDeg
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PVeroneseGramMono
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PTwoBlockPieceIndex
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PTwoBlockModuleFinite
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PModulePieceHilbert
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PTwoBlockModuleCycle
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PBlockResolutionImageSup
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PBlockImageInverse
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PIsomInvariance
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PGraphIsometric
-import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.ChangeOfModel
-import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.ExistsUnique
-import GroundTheory.HeightsAndTheta.Heights.Intersections.PConsequences
-import GroundTheory.HeightsAndTheta.Heights.Intersections.PPtsAbsIntegrable
-import GroundTheory.HeightsAndTheta.Heights.Intersections.PPtsAbsMeasurable
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.GraphStatementHoldsStatement
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.FibreDim
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.GenericDegreeOfArithSystemStatement
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsArith
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.BlowupProjections.BlowupProjStatement
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterNamed
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.FibreDim
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.GraphStatementHoldsStatement
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.DegreeAndCoordinatesOfResolutionStatement
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.DegreeGenericOfDegree
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.DegreeOfIsIntersectionSystem
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.GenericDegreeOfArithSystemStatement
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.PointsIntegrableOfResolutionStatementStatement
 import Development.AutomorphicSpectrum.Proofs.MetricProofs.ResolutionExistsOfResolutionStatementStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.PointsIntegrableOfResolutionStatementStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.DegreeAndCoordinatesOfResolutionStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.DegreeGenericOfDegree
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.DegreeOfIsIntersectionSystem
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.Assembly
+import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.AssemblyBase
+import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.AssemblyBridge
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.AssemblyConditional
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PBlockGraphDeg
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PBlockImageInverse
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PBlockResolutionDegreeIntegral
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PBlockResolutionImageSup
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PGenDegGeomDeg
+import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PGraphChangeOfModel
+import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PGraphIsometric
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PHSMTransport
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PIsomInvariance
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PKrullDimMatAct
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PModulePieceHilbert
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PProjFSMass
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PProjFrameGraphDeg
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PResolutionDegree
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PTwoBlockModuleCycle
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PTwoBlockModuleFinite
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PTwoBlockPieceIndex
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PVeroneseGramMono
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PVeroneseGraphDeg
+import GroundTheory.HeightsAndTheta.Heights.Intersections.PConsequences
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.PPtsAbsIntegrable
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.PPtsAbsMeasurable
+import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.ChangeOfModel
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 namespace PositivityTheory.LocalParametersCuspidal.MB.HSM
 

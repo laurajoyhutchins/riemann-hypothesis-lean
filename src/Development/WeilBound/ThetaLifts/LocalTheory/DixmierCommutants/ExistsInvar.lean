@@ -1,4 +1,50 @@
-import Development.WeilBound.CoreStatements.LocallyConstantCoinvariants.PfSurj
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.HilbertNinetyQuotientHomEqIff
+public import Development.WeilBound.CoreStatements.LocallyConstantCoinvariants.PfSurj
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import Mathlib.Topology.LocallyConstant.Algebra
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -15,7 +61,7 @@ def cs (H : AddSubgroup V) (x : V) : V → ℂ := Set.indicator {y | y - x ∈ H
 theorem cs_mem {H : AddSubgroup V} (ho : IsOpen (H : Set V)) (hc : IsCompact (H : Set V)) (x : V) : cs H x ∈ SB V := by
   have o : IsOpen {y | y - x ∈ H} := ho.preimage (continuous_id.sub continuous_const)
   have c : IsClosed {y | y - x ∈ H} := (H.isClosed_of_isOpen ho).preimage (continuous_id.sub continuous_const)
-  refine ⟨(LocallyConstant.charFn ℂ ⟨c, o⟩).2, HasCompactSupport.intro (hc.image (continuous_add_right x)) fun y hy => ?_⟩
+  refine ⟨(LocallyConstant.charFn ℂ ⟨c, o⟩).2, HasCompactSupport.intro (hc.image (show Continuous (fun y : V => y + x) from continuous_id.add continuous_const)) fun y hy => ?_⟩
   exact Set.indicator_of_notMem (s := {y | y - x ∈ H}) (fun h => hy ⟨y - x, h, sub_add_cancel y x⟩) (1 : V → ℂ)
 
 theorem exists_invar {f : V → ℂ} (hf : f ∈ SB V) : ∃ W ∈ 𝓝 (0 : V), ∀ h ∈ W, ∀ y, f (y + h) = f y := by
@@ -24,7 +70,7 @@ theorem exists_invar {f : V → ℂ} (hf : f ∈ SB V) : ∃ W ∈ 𝓝 (0 : V),
   obtain ⟨u, w, hu, -, h0, hK, huw⟩ := generalized_tube_lemma (isCompact_singleton (x := (0 : V))) hf.2 ho
     (by rintro ⟨a, b⟩ ⟨ha, -⟩; simp only [Set.mem_singleton_iff] at ha; simp [ha])
   have hu0 : u ∈ 𝓝 (0 : V) := hu.mem_nhds (h0 rfl)
-  refine ⟨u ∩ -u, inter_mem hu0 (neg_mem_nhds_zero V hu0), fun h hh y => ?_⟩
+  refine ⟨u ∩ {h | -h ∈ u}, inter_mem hu0 (continuous_neg.continuousAt.preimage_mem_nhds (by simpa only [neg_zero] using hu0)), fun h hh y => ?_⟩
   by_cases hy : y ∈ tsupport f
   · exact sub_eq_zero.1 (huw (⟨hh.1, hK hy⟩ : (h, y) ∈ u ×ˢ w))
   · by_cases hy' : y + h ∈ tsupport f
@@ -66,7 +112,7 @@ theorem cs_ne {H : AddSubgroup V} {x y : V} (h : cs H x y ≠ 0) : y - x ∈ H :
   exact h (Set.indicator_of_notMem (s := {y | y - x ∈ H}) h' _)
 
 theorem nhds_sub {x : V} {B : Set V} (hB : B ∈ 𝓝 x) : {h | x + h ∈ B} ∈ 𝓝 (0 : V) :=
-  (continuous_add_left x).continuousAt.preimage_mem_nhds (by simpa using hB)
+  (continuous_const.add continuous_id).continuousAt.preimage_mem_nhds (by simpa using hB)
 
 theorem kil_loc (hV : ∀ W ∈ 𝓝 (0 : V), ∃ H : AddSubgroup V, IsOpen (H : Set V) ∧ IsCompact (H : Set V) ∧ (H : Set V) ⊆ W)
     {Z : Submodule ℂ (V → ℂ)} {U : Set V} (h : ∀ x ∈ U, ∃ B ∈ 𝓝 x, Kil Z B) : Kil Z U := by

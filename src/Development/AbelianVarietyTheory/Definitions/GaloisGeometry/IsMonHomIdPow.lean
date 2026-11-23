@@ -1,7 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.IsHeckeMapLevRefl
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ForgetIsHeckeOne
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LevelPosOfCoprime
+module
+
+public import Mathlib.AlgebraicGeometry.Pullbacks
+public import Mathlib.Combinatorics.Quiver.ReflQuiver
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsDimEqOne
+import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsRootSelectionUnitaryRankOne
+public import Development.AbelianVarietyTheory.Definitions.Divisors.HasDivPlace
+import Development.AbelianVarietyTheory.Definitions.Divisors.IsCyclotomicExtensionQI
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsSeqOfStep
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.CocycleRightZeroThd
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.HtArith
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.CubicalStructures.CubeSymmetricSwapFirst
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -41,32 +89,5 @@ theorem isMonHom_id_pow {S : Scheme.{0}} (A : Over S) [GrpObj A] [IsCommMonObj A
     exact inferInstanceAs (IsMonHom (lift (𝟙 A ^ n) (𝟙 A) ≫ μ[A]))
 
 variable {G : HTGroup p} (L : Link D G)
-
-theorem isIsogWit_mul {S : Scheme.{0}} {s : S ⟶ Sp R} {N : ℕ} (o : Obj b N s) (c : ℕ) (hc : c.Coprime p) :
-    IsIsogWit L 1 o o (𝟙 o.A ^ c) (𝟙 o.A ^ c) c (c * c) := by
-  haveI := isMonHom_id_pow o.A c
-  refine ⟨inferInstance, inferInstance, fun a => ?_, fun a => ?_, ?_, ?_, hc, Nat.Coprime.mul hc hc,
-    fun k _ _ t β ht => ?_⟩
-  · haveI := o.act.hom a
-    rw [comp_pow', pow_comp', Category.comp_id, Category.id_comp]
-  · haveI := o.act.hom a
-    rw [comp_pow', pow_comp', Category.comp_id, Category.id_comp]
-  · rw [comp_pow', Category.comp_id, ← pow_mul]
-  · rw [comp_pow', Category.comp_id, ← pow_mul]
-  obtain ⟨I, hI⟩ := o.geom k t β ht
-  refine ⟨I, I, hI, hI, fun n hn hnp x y => ?_⟩
-  have e1 : ((c : ℕ) : ℤ) • L.actG 1 (inAf D x) = ((1 : ℕ) : ℤ) • L.actG 1 (inAf D (c • x)) := by
-    simp only [map_one, Module.End.one_apply, Nat.cast_one, one_smul, natCast_zsmul]
-    change c • ForgetHecke.inAfHom D x = ForgetHecke.inAfHom D (c • x)
-    rw [map_nsmul]
-  show I.ev n x ≫ 𝟙 o.A ^ c = I.ev n y ↔ ∃ v ∈ LaHat D, ((c : ℕ) : ℤ) • L.actG 1 (inAf D x) = inAf D y + n • v
-  rw [e1, ForgetHecke.acts_one_iff L n hn hnp (c • x) y, comp_pow', Category.comp_id, ← TateIsoO.ev_nsmul,
-    ← I.ker n hn hnp (c • x - y)]
-  have hx : I.ev n (c • x) = I.ev n (c • x - y) * I.ev n y := by rw [← I.add, sub_add_cancel]
-  rw [hx, mul_eq_right]
-
-theorem isHeckeWit_mul {N : ℕ} (M : Model b N) (c : ℕ) (hc : c.Coprime p) :
-    IsHeckeWit L 1 M M (𝟙 M.X) M.univ (𝟙 _ ^ c) (𝟙 _ ^ c) c (c * c) (GlobalTheory.UPel.HT.EtLev.LevForget.idMap M.univ) :=
-  ⟨Category.id_comp _, isIsogWit_mul L M.univ c hc⟩
 
 end GlobalTheory.DrinLev.HT.MulModel

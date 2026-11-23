@@ -1,9 +1,56 @@
-import Mathlib
-import GroundTheory.GlobalFields.IdeleGroups.SIdeleHerbrand
-import GroundTheory.GlobalFields.HerbrandQuotients.SUnits
-import GroundTheory.GlobalFields.IdeleGroups.LocalNormsEverywhere
-import GroundTheory.GlobalFields.IdeleGroups.GaloisOnAdeles.Action
-import GroundTheory.GlobalFields.CompletionAtPlace.Degree
+module
+
+public import GroundTheory.GlobalFields.CompletionAtPlace
+public import GroundTheory.GlobalFields.HerbrandQuotients.CycTate
+public import GroundTheory.GlobalFields.IdeleGroups.SIdeleGroups.Galois
+public import Mathlib.NumberTheory.RamificationInertia.Galois
+public import GroundTheory.GlobalFields.CompletionAtPlace.Degree
+public import GroundTheory.GlobalFields.HerbrandQuotients.SUnits
+public import GroundTheory.GlobalFields.IdeleGroups.LocalNormsEverywhere
+public import GroundTheory.GlobalFields.IdeleGroups.SIdeleHerbrand
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.NumberField.Completion.Ramification
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GroundTheory.Global
 
@@ -27,6 +74,7 @@ theorem map_cycSubOne {ρA : Representation ℤ G A} {ρB : Representation ℤ G
 theorem map_cycNorm [Fintype G] {ρA : Representation ℤ G A} {ρB : Representation ℤ G B}
     {f : A →+ B} (hf : ∀ g a, f (ρA g a) = ρB g (f a)) (a : A) :
     f (cycNorm ρA a) = cycNorm ρB (f a) := by
+
   rw [cycNorm_apply, cycNorm_apply, map_sum]
   simp only [hf]
 
@@ -36,9 +84,8 @@ variable {K L : Type*} [Field K] [NumberField K] [Field L] [NumberField L] [Alge
 
 namespace IdeleGroup
 
-omit [NumberField K] [NumberField L] in
-open scoped Classical in
 
+open scoped Classical in
 theorem finrank_infiniteCompletion_eq_ite [IsGalois K L] (v : InfinitePlace K)
     (w : InfinitePlace L) [w.LiesOver v] :
     (finrank v.Completion w.Completion : ℚ) = if v.IsUnramifiedIn L then 1 else 2 := by
@@ -54,8 +101,8 @@ theorem finrank_infiniteCompletion_eq_ite [IsGalois K L] (v : InfinitePlace K)
       exact h this
     rw [if_neg hn, h.finrank_eq_two v, Nat.cast_ofNat]
 
-open AdicLiesOver in
 
+open AdicLiesOver in
 theorem finrank_adicCompletion_eq_ramificationIdxIn_mul [IsGalois K L]
     (v : HeightOneSpectrum (𝓞 K)) (w : PlacesOver L v) :
     finrank (v.adicCompletion K) (w.1.adicCompletion L) =
@@ -68,8 +115,8 @@ end IdeleGroup
 
 namespace IdeleGroup
 
-open AdeleBaseChange in
 
+open AdeleBaseChange in
 theorem exists_finset_unramified_sup_sIdeles_eq_top :
     ∃ S : Finset (HeightOneSpectrum (𝓞 K)),
       (∀ v ∉ (S : Set (HeightOneSpectrum (𝓞 K))), ∀ w : PlacesOver L v,
@@ -88,8 +135,8 @@ theorem exists_finset_unramified_sup_sIdeles_eq_top :
 
 variable [IsGalois K L]
 
-open AdeleBaseChange AdicLiesOver in
 
+open AdeleBaseChange AdicLiesOver in
 theorem cycHerbrand_ideleClassGroup (σ : Gal(L/K)) (hσ : ∀ g, g ∈ Subgroup.zpowers σ) :
     HasHerbrandQuotient
         (cycSubOne (Representation.ofMulDistribMulAction Gal(L/K) (IdeleClassGroup L)) σ)
@@ -132,6 +179,7 @@ theorem cycHerbrand_ideleClassGroup (σ : Gal(L/K)) (hσ : ∀ g, g ∈ Subgroup
   have hpS : ∀ b, p (cycSubOne ρB σ b) = cycSubOne ρC σ (p b) := fun b ↦ by
     rw [cycSubOne_apply, cycSubOne_apply, map_sub, hpG]
   have hpN : ∀ b, p (cycNorm ρB b) = cycNorm ρC (p b) := fun b ↦ by
+
     rw [cycNorm_apply, cycNorm_apply, map_sum]
     simp only [hpG]
   obtain ⟨wFin⟩ : Nonempty (∀ v : HeightOneSpectrum (𝓞 K), PlacesOver L v) :=

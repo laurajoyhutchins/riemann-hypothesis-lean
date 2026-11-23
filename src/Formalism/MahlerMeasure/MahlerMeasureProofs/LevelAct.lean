@@ -1,4 +1,55 @@
-import Formalism.MahlerMeasure.LevelSum
+module
+
+public import Formalism.MahlerMeasure.LevelSum
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Data.Rat.Cast.Lemmas
+
+@[expose] public section
 
 namespace Formalism.GM
 
@@ -16,7 +67,7 @@ theorem tieF_apply' (g : MvPolynomial σ k) :
   simp [tieF]
 
 theorem coeff_X_mul_pderiv' (i : σ) (p : MvPolynomial σ k) (m : σ →₀ ℕ) :
-    coeff m (X i * pderiv i p) = coeff m p * (m i : k) := by
+    AddMonoidAlgebra.coeff (X i * pderiv i p) m = AddMonoidAlgebra.coeff p m * (m i : k) := by
   classical
   refine MvPolynomial.induction_on' p ?_ ?_
   · intro s a
@@ -39,7 +90,7 @@ theorem coeff_X_mul_pderiv' (i : σ) (p : MvPolynomial σ k) (m : σ →₀ ℕ)
     · subst h; rfl
     · simp
   · intro p q hp hq
-    simp only [map_add, mul_add, coeff_add, hp, hq, add_mul]
+    simp only [map_add (f := _), mul_add, MvPolynomial.coeff_add, hp, hq, add_mul]
 
 theorem euler_w_of_biHom {a b : ℕ} {g : MvPolynomial σ k} (h : BiHom w e a b g) :
     (∑ c, X (w c) * pderiv (w c) g) = (a : k) • g := by
@@ -47,7 +98,7 @@ theorem euler_w_of_biHom {a b : ℕ} {g : MvPolynomial σ k} (h : BiHom w e a b 
   rw [MvPolynomial.coeff_sum, MvPolynomial.coeff_smul, smul_eq_mul]
   simp_rw [coeff_X_mul_pderiv']
   rw [← Finset.mul_sum]
-  by_cases hm : coeff m g = 0
+  by_cases hm : AddMonoidAlgebra.coeff g m = 0
   · rw [hm]; simp
   · obtain ⟨h1, -⟩ := h m (MvPolynomial.mem_support_iff.mpr hm)
     rw [← h1, Nat.cast_sum]
@@ -59,7 +110,7 @@ theorem euler_e_of_biHom {a b : ℕ} {g : MvPolynomial σ k} (h : BiHom w e a b 
   rw [MvPolynomial.coeff_sum, MvPolynomial.coeff_smul, smul_eq_mul]
   simp_rw [coeff_X_mul_pderiv']
   rw [← Finset.mul_sum]
-  by_cases hm : coeff m g = 0
+  by_cases hm : AddMonoidAlgebra.coeff g m = 0
   · rw [hm]; simp
   · obtain ⟨-, h2⟩ := h m (MvPolynomial.mem_support_iff.mpr hm)
     rw [← h2, Nat.cast_sum]
@@ -85,6 +136,7 @@ theorem pderiv_X_inj {f : Fin r → σ} (hf : Function.Injective f) (c d : Fin r
 theorem pderiv_e_S (he : Function.Injective e) (hwe : ∀ c d, w c ≠ e d)
     (c : Fin r) : pderiv (e c) (∑ d, X (w d) * X (e d) : MvPolynomial σ k) = X (w c) := by
   have h0 : ∀ d, pderiv (e c) (X (w d) : MvPolynomial σ k) = 0 := fun d => mvPolynomial_pderiv_X_of_ne (hwe d c)
+
   rw [map_sum]
   simp only [Derivation.leibniz, h0, pderiv_X_inj he, smul_eq_mul, mul_ite, mul_one, mul_zero,
     add_zero, Finset.sum_ite_eq', Finset.mem_univ, ↓reduceIte]
@@ -93,6 +145,7 @@ theorem pderiv_w_S (hw : Function.Injective w) (hwe : ∀ c d, w c ≠ e d)
     (c : Fin r) : pderiv (w c) (∑ d, X (w d) * X (e d) : MvPolynomial σ k) = X (e c) := by
   have h0 : ∀ d, pderiv (w c) (X (e d) : MvPolynomial σ k) = 0 :=
     fun d => mvPolynomial_pderiv_X_of_ne (fun h => hwe c d h.symm)
+
   rw [map_sum]
   simp only [Derivation.leibniz, h0, pderiv_X_inj hw, smul_eq_mul, mul_ite, mul_one, mul_zero,
     zero_add, Finset.sum_ite_eq', Finset.mem_univ, ↓reduceIte]
@@ -124,7 +177,7 @@ theorem F_S_mul (hw : Function.Injective w) (he : Function.Injective e) (hwe : �
       = ∑ c, (g + (X (w c) * pderiv (w c) g + X (e c) * pderiv (e c) g) +
           (∑ d, X (w d) * X (e d)) * pderiv (w c) (pderiv (e c) g)) := by
         refine Finset.sum_congr rfl (fun c _ => ?_)
-        rw [h1, map_add, h2, h3]
+        rw [h1, map_add (f := _), h2, h3]
         ring
     _ = (∑ _c : Fin r, g) + ((∑ c, X (w c) * pderiv (w c) g) + ∑ c, X (e c) * pderiv (e c) g) +
           (∑ d, X (w d) * X (e d)) * ∑ c, pderiv (w c) (pderiv (e c) g) := by

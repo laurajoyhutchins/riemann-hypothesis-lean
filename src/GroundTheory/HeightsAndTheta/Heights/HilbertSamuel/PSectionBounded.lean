@@ -1,6 +1,55 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsSectionRing
-import GroundTheory.PowerSubgroups.CountableNeighbourhoods.PSectionBoundedCountable
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsSectionRing
+public import GroundTheory.PowerSubgroups.CountableNeighbourhoods.PSectionBoundedCountable
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GroundTheory.Heights₂.Heights.HilbertSamuel
 
@@ -129,6 +178,7 @@ theorem mConeMap_homog (y : (Σ k, ι k) → Ω) {g : MRing ι} {d : K → ℕ} 
   classical
   conv_lhs => rw [g.as_sum]
   conv_rhs => rw [g.as_sum]
+
   rw [map_sum, map_sum, map_sum, Finset.sum_mul]
   refine Finset.sum_congr rfl fun m hm => ?_
   have hdeg := hg m hm
@@ -179,7 +229,7 @@ theorem exists_form_of_mem_chartRingZ (y : (Σ k, ι k) → Ω) (c : ∀ k, ι k
       homog_add (homog_mul h₁ (homog_chartMon c δ₂)) ?_, ?_⟩
     · rw [add_comm δ₁]
       exact homog_mul h₂ (homog_chartMon c δ₁)
-    · rw [map_add, map_mul, map_mul, v₁, v₂, aeval_chartMon, aeval_chartMon, hpow]
+    · rw [map_add (f := _), map_mul, map_mul, v₁, v₂, aeval_chartMon, aeval_chartMon, hpow]
       ring
   | mul x z _ _ hx hz =>
     obtain ⟨δ₁, e₁, h₁, v₁⟩ := hx
@@ -311,12 +361,14 @@ theorem exists_lower (y : (Σ k, ι k) → Ω) (A : HermLine ι) (q : ℕ) (w : 
           rw [Finset.prod_mul_distrib]
           ring
   have hΦy : aeval y Φ = 0 := by
+
     rw [hΦ, map_sub, map_sum, aeval_chartMon, Finset.sum_congr rfl fun j _ => hterm j, ← Finset.sum_mul, hsum,
-      one_mul, sub_self]
+    one_mul, sub_self]
   refine ⟨∑ j, coeffNorm (U j), Finset.sum_nonneg fun j _ => coeffNorm_nonneg _, ?_⟩
   intro z hz hmax hz0
   have hr : ∀ k, ‖z ⟨k, c k⟩‖ ≠ 0 := fun k => norm_ne_zero_iff.mpr (hz0 k)
   have hΦz := vanish hz hΦh hΦy
+
   simp only [hΦ, map_sub, map_sum, map_mul, eval_chartMon, sub_eq_zero] at hΦz
   have hbd : ∏ k, ‖z ⟨k, c k⟩‖ ^ D k ≤
       ∑ j, coeffNorm (U j) * A.h z * ∏ k, (‖z ⟨k, c k⟩‖ ^ (-A.a k) * ‖z ⟨k, c k⟩‖ ^ D k) := by
@@ -367,8 +419,8 @@ theorem exists_lower (y : (Σ k, ι k) → Ω) (A : HermLine ι) (q : ℕ) (w : 
 
 end SectionBounded
 
-open SectionBounded in
 
+open SectionBounded in
 theorem SectionBounded.proof : SectionBounded.Statement := by
   intro K _ ι _ Ω _ y A q w hw hgen hsm n s hs
   classical

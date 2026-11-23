@@ -1,7 +1,51 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.GlobalClassFormation.ABHNPrep
-import GroundTheory.ProfiniteCohomology.GlobalClassFormation.ClassSplit
-import GroundTheory.ProfiniteCohomology.GlobalClassFormation.IdeleRestriction.ExistsInfIdelesLocalResIdelesResFieldEqZeroOfInf
+module
+
+public import GroundTheory.ProfiniteCohomology.GlobalClassFormation.ABHNPrep
+public import GroundTheory.ProfiniteCohomology.GlobalClassFormation.ClassSplit
+public import GroundTheory.ProfiniteCohomology.GlobalClassFormation.IdeleRestriction.ExistsInfIdelesLocalResIdelesResFieldEqZeroOfInf
+import GroundTheory.ProfiniteCohomology.GlobalClassFormation.LocalDegrees
+import GroundTheory.ProfiniteCohomology.GlobalClassFormation.SumInvariants
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
@@ -9,8 +53,6 @@ namespace GroundTheory.ProfCoh
 open CategoryTheory NumberField IntermediateField GroundTheory.Global FiniteSubfield IsDedekindDomain
 
 open scoped DirectSum GroundTheory.Global.SemiLocal
-
-local notation "ℚ̄" => AlgebraicClosure ℚ
 
 noncomputable section
 
@@ -73,7 +115,7 @@ theorem exists_unitsToIdeles_eq_of_idelesSumInv_eq_zero (y : cohomology (limitRe
     rw [hy'def, map_sub, hy, idelesSumInv_unitsToIdeles, sub_zero]
   suffices h : ∃ x, (unitsToIdeles K 2).hom x = y' by
     obtain ⟨x, hx⟩ := h
-    exact ⟨x + globalCupClass (iChar K) a₀, by rw [map_add, hx, hy'def, sub_add_cancel]⟩
+    exact ⟨x + globalCupClass (iChar K) a₀, by rw [map_add (f := _), hx, hy'def, sub_add_cancel]⟩
   obtain ⟨m, hm0, hm⟩ := exists_nsmul_eq_zero_limitRep y'
   let S : Finset (HeightOneSpectrum (𝓞 K.1)) :=
     (idelesLimitCohomologyEquiv ι (by norm_num : 1 ≤ 2) y').support.preimage Sum.inr Sum.inr_injective.injOn
@@ -143,12 +185,6 @@ theorem sumPlaceInv_eq_zero_iff (y : ⨁ v : Place K.1, localGaloisCohomology K 
     exact ⟨x, by rw [brauerLocal_apply, hx, AddEquiv.apply_symm_apply]⟩
   · rintro ⟨x, rfl⟩
     exact brauerSumInv_eq_zero ι x
-
-theorem albertBrauerHasseNoether :
-    Function.Injective (brauerLocal ι) ∧
-      (∀ y : ⨁ v : Place K.1, localGaloisCohomology K 2 v, sumPlaceInv K y = 0 ↔ ∃ x, brauerLocal ι x = y) ∧
-      Function.Surjective (sumPlaceInv K) :=
-  ⟨brauerLocal_injective ι, sumPlaceInv_eq_zero_iff ι, sumPlaceInv_surjective K⟩
 
 end
 

@@ -1,11 +1,56 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CosetRefinement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CharacterSumLocalConstantFourth
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CharacterSumLocalConstantSecondStatement
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.MemZmuOfPowPred
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.MemParahoricOfTrivialReduction
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.IntAtNatCast
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.SumModGPeriodValues
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CosetRefinement
+public import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.RedPEqZeroOfDiv
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.MemParahoricOfTrivialReduction
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.MemZmuOfPowPred
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.SumModGPeriodValues
+import Development.AbelianVarietyTheory.Proofs.SatakeParameters.UnfoldingAffineLinearMapAddEqAddFrM
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.FreeModule.IdealQuotient
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.TopPlaceLogTheta
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Formalism.BasicNotions Formalism.MainNotions Formalism.L2.DIV Formalism.L2.Col Formalism.L2.Ker GlobalTheory.IndefiniteRowSideFullHecke.PlaceLogThetaBounds GlobalTheory.ColNorms
 open scoped ComplexOrder
@@ -47,8 +92,8 @@ theorem dvd_of_intAt_div (hq : (Formalism.L2.Col.qOf P).Prime) (d : ℕ) :
     field_simp
     ring
 
-open Classical in
 
+open Classical in
 theorem card_vals_le (hq : (Formalism.L2.Col.qOf P).Prime) (A B c : ℕ) :
     ((LocE.valsQ E (Formalism.L2.Col.qOf P) A B).filter fun a => IntAt P ((Formalism.L2.Col.qOf P : E) ^ c * a)).card ≤
       Formalism.L2.Col.qOf P ^ (B + c) := by
@@ -107,8 +152,8 @@ theorem unfolding_smallHomFunction_levelPrime_bounded (hq : (Formalism.L2.Col.qO
     refine intAt_sum _ fun j _ => (mem_stdAt.1 hy j).mul ?_
     have h := hent _ (left_ne_zero_of_mul ht) (Fin.castAdd c l) (Fin.castAdd (c + 1) j)
     have hj := j.2
-    rw [linearMap_unfolding_apply_single, dif_neg (by unfold Loc.IsFree; simp only [Fin.val_castAdd]; omega), dif_pos (by simp),
-      dif_pos (by simp)] at h
+    rw [linearMap_unfolding_apply_single, dite_eq_right (by unfold Loc.IsFree; simp only [Fin.val_castAdd]; omega), dite_eq_left (by simp),
+      dite_eq_left (by simp)] at h
     simpa [LocE.scE] using h
   · unfold Loc.E1
     congr 1
@@ -135,7 +180,7 @@ theorem unfolding_smallHomFunction_levelPrime_bounded (hq : (Formalism.L2.Col.qO
       by_contra h0
       refine hn (Fintype.mem_piFinset.2 fun p => Finset.mem_filter.2 ⟨Fintype.mem_piFinset.1 ht p, ?_⟩)
       have h := hent _ (left_ne_zero_of_mul h0) p.1.1 p.1.2
-      rw [linearMap_unfolding_apply_single, dif_pos p.2] at h
+      rw [linearMap_unfolding_apply_single, dite_eq_left p.2] at h
       have h' := intAt_zpow_mono (v := ((c + 1 : ℕ) : ℤ)) (by
         have := p.1.2.2
         unfold LocE.scE
@@ -159,8 +204,9 @@ theorem unfolding_smallHomFunction_levelPrime_bounded (hq : (Formalism.L2.Col.qO
       rw [map_mul, norm_mul, (pow_eq_one_iff_of_nonneg (norm_nonneg _) hq.ne_zero).1 h2, mul_one]
       exact hΦ.2.2 σ y
     unfold Loc.E1
+
     rw [hsum, map_mul, norm_mul, map_pow, map_inv₀, map_pow, map_natCast, norm_pow, norm_inv, norm_pow, Complex.norm_natCast,
-      map_sum]
+    map_sum]
     have hb : ‖∑ t ∈ Fintype.piFinset fun _ : Loc.FC n' (c + 1) n c => V,
         σ (Φ (Loc.xx1 x t) * psi (-Loc.chArg (Loc.xx1 x t)))‖ ≤ ((q : ℝ) ^ (B + (c + 1))) ^ F := by
       refine (norm_sum_le _ _).trans ((Finset.sum_le_card_nsmul _ _ 1 fun t _ => hterm _).trans ?_)
@@ -223,6 +269,7 @@ theorem relIndex_le (hq : ((Formalism.L2.Col.qOf P : ℕ) : 𝓞 E) ∉ P.asIdea
     · exact GlobalTheory.CongLevel.smul_mem_sclLat P _ hq0 _ _ _ x hx
     · exact GlobalTheory.CongLevel.bvec_mem P _ hq0 _ _ _
   · rw [Nat.card_fun, Nat.card_prod, Nat.card_eq_fintype_card (α := Fin (n + c)), Fintype.card_fin]
+    rw [← Ideal.absNorm_eq_natCard]
     rfl
 
 theorem norm_volN_inv_le {k K : Type} [CommRing k] [Field K] {n c : ℕ}

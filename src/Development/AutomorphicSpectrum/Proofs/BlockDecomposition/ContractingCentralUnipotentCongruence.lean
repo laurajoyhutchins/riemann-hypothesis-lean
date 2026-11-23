@@ -1,6 +1,61 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.SquareIntegrableTempered.CasselmanCriterion.Zj
-import GroundTheory.AutomorphicForms.SupercuspidalCoefficients
+module
+
+public import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.SquareIntegrableTempered.CasselmanCriterion.Zj
+public import GroundTheory.AutomorphicForms.InductionParabolicGroups
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AbelianVarietyTheory.Definitions.Foundations.MatrixMeasurableSpace
+import Development.AbelianVarietyTheory.Definitions.Foundations.SmoothPartStable
+import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.NonemptyEquivOfRangeEq
+import GroundTheory.AutomorphicForms.LocallyProfinite
+
+@[expose] public section
+
 open GlobalTheory.PRep GlobalTheory.SplitWeil GlobalTheory.SmGL GlobalTheory.LocGL GlobalTheory.JHMult
 
 noncomputable section
@@ -46,12 +101,24 @@ theorem diagGL_conj_mem {n : ℕ} {α : Type*} [LinearOrder α] {β : Fin n → 
       rw [h0, mul_zero, zero_mul, one_apply_ne hil, sub_zero, map_zero]
       exact zero_le
   have hP : diagGL k n D ∈ blockUpper k n β := levi_le_blockUpper (diagGL_mem_levi D)
-  refine Subgroup.mem_inf.2 ⟨mem_congruenceSubgroup_of_le (hb u hu) ?_,
+  have hentry : ∀ w ∈ congruenceSubgroup k n m ⊓ unipotentRadical k n β, ∀ i l,
+      valuation k ((diagGL k n D * w * (diagGL k n D)⁻¹ : GL (Fin n) k) i l) ≤ 1 := by
+    intro w hw i l
+    have he : valuation k ((1 : Matrix (Fin n) (Fin n) k) i l) ≤ 1 := by
+      by_cases h : i = l <;> simp [Matrix.one_apply, h]
+    have eq : (diagGL k n D * w * (diagGL k n D)⁻¹ : GL (Fin n) k) i l =
+        ((diagGL k n D * w * (diagGL k n D)⁻¹ : GL (Fin n) k) i l -
+          (1 : Matrix (Fin n) (Fin n) k) i l) + (1 : Matrix (Fin n) (Fin n) k) i l := by ring
+    rw [eq]
+    exact ((valuation k).map_add _ _).trans
+      (max_le ((hb w hw i l).trans (pow_le_one' (valuation_uniformizer_lt_one k).le m)) he)
+  refine Subgroup.mem_inf.2 ⟨(mem_congruenceSubgroup_iff k n).2 ⟨?_, hb u hu⟩,
     conj_mem_unipotentRadical hP (Subgroup.mem_inf.1 hu).2⟩
-  have : (diagGL k n D * u * (diagGL k n D)⁻¹)⁻¹ =
+  refine (mem_integralGL_iff k n).2 ⟨hentry u hu, ?_⟩
+  have eq : (diagGL k n D * u * (diagGL k n D)⁻¹)⁻¹ =
       diagGL k n D * u⁻¹ * (diagGL k n D)⁻¹ := by group
-  rw [this]
-  exact hb _ (Subgroup.inv_mem _ hu)
+  rw [eq]
+  exact hentry _ (Subgroup.inv_mem _ hu)
 
 def zjDiag {h N : ℕ} (d : Fin h → ℕ) (hd : ∑ a, d a = N) (t : kˣ) (j : Fin h) : Fin N → kˣ :=
   fun i => if Zl.JC.blockIdx d hd i ≤ j then t else 1

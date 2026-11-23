@@ -1,8 +1,74 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EigRank
+public import Mathlib.NumberTheory.NumberField.CMField
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.Monoidal.Cartesian.Over
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.IsLinearHomPull
 import Development.AbelianVarietyTheory.Definitions.Divisors.HasDefect
 import Development.AbelianVarietyTheory.Definitions.Divisors.HasRigidChart
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.ToroidalCompactificationBis
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EigRank
+import Development.AbelianVarietyTheory.Definitions.Divisors.IsProperToroidalModelStructureMap
+public import Development.AbelianVarietyTheory.Definitions.ModuliSpaces.IsInvDer
+public import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.DenseInterior
+import Formalism.LocalToGlobal.ProjectiveLattices.ErealAddIInf
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.CocycleRightZeroThd
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.BaseChangeKernels.SurjOfCover
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.HtArith
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.LieBridgeA
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.LieBridgeB
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.CubicalStructures.CubeSymmetricSwapFirst
+
+@[expose] public section
+
 open CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj AlgebraicGeometry NumberField IsLocalRing
 open scoped CategoryTheory.Obj Matrix TensorProduct
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Out ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor Formalism.L2.Pj
@@ -65,12 +131,15 @@ theorem eigRank_cast_eq_trace {O R k : Type} [CommRing O] [CommRing R] [Field k]
     intro c hc
     have : Pb = ∑ i, φ (f i) • (A (b i)).map φ := by
       ext i j
+
       simp [Pb, hPdef, Matrix.sum_apply, map_sum]
     rw [this, Matrix.vecMul_sum]
+
     simp_rw [Matrix.vecMul_smul, hc _, smul_smul, ← Finset.sum_smul, ← map_mul, ← map_sum, h1, map_one, one_smul]
   have hPbPb : Pb * Pb = Pb := by rw [← Matrix.map_mul, hPP]
   unfold eigRank
   rw [eigSp_eq_range _ _ Pb hPbA hfix, finrank_range_eq_trace Pb hPbPb]
+
   simp [Pb, Matrix.trace, map_sum]
 
 theorem isOpen_eigRank_eq_of_datum {O R K : Type} [CommRing O] [CommRing R] [Field K] [CharZero K] (j : K →+* R)
@@ -128,6 +197,7 @@ theorem exists_datum {E : Type} [Field E] [NumberField E] (F : IntermediateField
   have hrep : ∀ (y : E) i, bE.repr y i = Algebra.trace ℚ E (y * d i) := by
     intro y i
     conv_rhs => rw [← bE.sum_repr y]
+
     rw [Finset.sum_mul, map_sum]
     simp_rw [smul_mul_assoc, map_smul, hdr, smul_eq_mul, mul_ite, _root_.mul_one]
     simp
@@ -138,8 +208,9 @@ theorem exists_datum {E : Type} [Field E] [NumberField E] (F : IntermediateField
   have hA : ∑ i, d i * bE i = 1 := by
     rw [← sub_eq_zero]
     refine hnd.1 _ fun y => ?_
+
     rw [Algebra.traceForm_apply, sub_mul, map_sub, _root_.one_mul, Finset.sum_mul, map_sum, sub_eq_zero,
-      Algebra.trace_eq_matrix_trace bE y, Matrix.trace]
+    Algebra.trace_eq_matrix_trace bE y, Matrix.trace]
     refine Finset.sum_congr rfl fun i _ => ?_
     rw [Matrix.diag, Algebra.leftMulMatrix_eq_repr_mul, hrep]
     congr 1
@@ -160,6 +231,7 @@ theorem exists_datum {E : Type} [Field E] [NumberField E] (F : IntermediateField
     conv_lhs => rw [← bO.sum_repr x]
     exact (map_sum Aa _ _).trans (Finset.sum_congr rfl fun j _ => map_zsmul Aa _ _)
   refine ⟨_, inferInstance, fun i => g (d i), bO, ?_, ?_⟩
+
   · simp_rw [hg, ← map_mul, ← map_sum, ← hbE, hA, map_one]
   · intro a
     calc ∑ i, g (d i) • A (a * bO i)
@@ -174,6 +246,7 @@ theorem exists_datum {E : Type} [Field E] [NumberField E] (F : IntermediateField
       _ = ∑ j, (embR F hF iF τ a * g (d j)) • A (bO j) := by
           refine Finset.sum_congr rfl fun j _ => ?_
           congr 1
+
           rw [hg, ← map_mul, ← hB a j, map_sum]
           refine Finset.sum_congr rfl fun i _ => ?_
           rw [map_mul g, map_intCast g, _root_.mul_comm]

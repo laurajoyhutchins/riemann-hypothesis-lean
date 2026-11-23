@@ -1,4 +1,55 @@
-import Mathlib
+module
+
+public import Mathlib.Topology.Algebra.Module.ModuleTopology
+public import Mathlib.Topology.Instances.Matrix
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.SetTheory.ZFC.PSet
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import Mathlib.Topology.Algebra.Group.Units
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RingTheory.TensorProduct.Free
+
+@[expose] public section
 
 noncomputable def UpperTheory.Reformulated.B.Yzd4.cT :
     {A : Type} →
@@ -374,23 +425,9 @@ theorem UpperTheory.Reformulated.B.Yzd4.aux4 :
         simp only [Matrix.mul_assoc]
     _ = J := by rw [h1, h2, Matrix.one_mul, Matrix.mul_one]
 
-noncomputable def UpperTheory.Reformulated.B.Yzd4.UJ :
-    {A : Type} →
-      [inst : CommRing A] →
-        {n : Type} →
-          [inst_1 : Fintype n] →
-            [inst_2 : DecidableEq n] →
-              @RingHom A A (@Semiring.toNonAssocSemiring A (@CommSemiring.toSemiring A (@CommRing.toCommSemiring A inst)))
-                  (@Semiring.toNonAssocSemiring A (@CommSemiring.toSemiring A (@CommRing.toCommSemiring A inst))) →
-                Matrix n n A →
-                  @Subgroup
-                    (@Matrix.GeneralLinearGroup n A inst_2 inst_1
-                      (@CommSemiring.toSemiring A (@CommRing.toCommSemiring A inst)))
-                    (@Units.instGroup (Matrix n n A)
-                      (@Semiring.toMonoid (Matrix n n A)
-                        (@Matrix.semiring n A (@CommSemiring.toSemiring A (@CommRing.toCommSemiring A inst)) inst_1
-                          inst_2))) :=
-    fun {A : Type} [inst : CommRing A] {n : Type} [inst_1 : Fintype n] [inst_2 : DecidableEq n]
+noncomputable def UpperTheory.Reformulated.B.Yzd4.UJ : {A : Type} →
+  [inst : CommRing A] →
+    {n : Type} → [inst_1 : Fintype n] → [inst_2 : DecidableEq n] → (A →+* A) → Matrix n n A → Subgroup (GL n A) := fun {A : Type} [inst : CommRing A] {n : Type} [inst_1 : Fintype n] [inst_2 : DecidableEq n]
         (σ :
           @RingHom A A (@Semiring.toNonAssocSemiring A (@CommSemiring.toSemiring A (@CommRing.toCommSemiring A inst)))
             (@Semiring.toNonAssocSemiring A (@CommSemiring.toSemiring A (@CommRing.toCommSemiring A inst))))
@@ -1134,28 +1171,17 @@ noncomputable def UpperTheory.Reformulated.B.Yzd4.topTens :
             (@DivisionSemiring.toSemiring E (@Semifield.toDivisionSemiring E (@Field.toSemifield E inst_1))) inst_2)
           (@UpperTheory.Reformulated.B.Yzd4.aux9 F inst R inst_3 inst_4))
 
-noncomputable def UpperTheory.Reformulated.B.Yzd4.d18 :
-    {F E : Type} →
-      [inst : Field F] →
-        [inst_1 : Field E] →
-          [inst_2 :
-              @Algebra F E (@Semifield.toCommSemiring F (@Field.toSemifield F inst))
-                (@DivisionSemiring.toSemiring E (@Semifield.toDivisionSemiring E (@Field.toSemifield E inst_1)))] →
-            (R : Type) →
-              [inst_3 : CommRing R] →
-                [inst_4 :
-                    @Algebra F R (@Semifield.toCommSemiring F (@Field.toSemifield F inst))
-                      (@CommSemiring.toSemiring R (@CommRing.toCommSemiring R inst_3))] →
-                  (σ :
-                      @AlgHom F E E (@Semifield.toCommSemiring F (@Field.toSemifield F inst))
-                        (@DivisionSemiring.toSemiring E (@Semifield.toDivisionSemiring E (@Field.toSemifield E inst_1)))
-                        (@DivisionSemiring.toSemiring E (@Semifield.toDivisionSemiring E (@Field.toSemifield E inst_1)))
-                        inst_2 inst_2) →
-                    {M : Nat} →
-                      (J : Matrix (Fin M) (Fin M) E) →
-                        [TopologicalSpace R] →
-                          Set (@UpperTheory.Reformulated.B.Yzd4.HA F E inst inst_1 inst_2 R inst_3 inst_4 σ M J) → Prop :=
-    fun {F E : Type} [inst : Field F] [inst_1 : Field E]
+noncomputable def UpperTheory.Reformulated.B.Yzd4.d18 : {F E : Type} →
+  [inst : Field F] →
+    [inst_1 : Field E] →
+      [inst_2 : Algebra F E] →
+        (R : Type) →
+          [inst_3 : CommRing R] →
+            [inst_4 : Algebra F R] →
+              (σ : E →ₐ[F] E) →
+                {M : ℕ} →
+                  (J : Matrix (Fin M) (Fin M) E) →
+                    [TopologicalSpace R] → Set (UpperTheory.Reformulated.B.Yzd4.HA R σ J) → Prop := fun {F E : Type} [inst : Field F] [inst_1 : Field E]
         [inst_2 :
           @Algebra F E (@Semifield.toCommSemiring F (@Field.toSemifield F inst))
             (@DivisionSemiring.toSemiring E (@Semifield.toDivisionSemiring E (@Field.toSemifield E inst_1)))]
@@ -1515,22 +1541,9 @@ noncomputable def UpperTheory.Reformulated.B.Yzd4.d18 :
               t)
             s)
 
-theorem UpperTheory.Reformulated.B.Yzd4.blockM_one_partner_eq_one :
-    ∀ {F E : Type} [inst : Field F] [inst_1 : Field E]
-      [inst_2 :
-        @Algebra F E (@Semifield.toCommSemiring F (@Field.toSemifield F inst))
-          (@DivisionSemiring.toSemiring E (@Semifield.toDivisionSemiring E (@Field.toSemifield E inst_1)))]
-      (R : Type) [inst_3 : CommRing R]
-      [inst_4 :
-        @Algebra F R (@Semifield.toCommSemiring F (@Field.toSemifield F inst))
-          (@CommSemiring.toSemiring R (@CommRing.toCommSemiring R inst_3))]
-      (σ :
-        @AlgHom F E E (@Semifield.toCommSemiring F (@Field.toSemifield F inst))
-          (@DivisionSemiring.toSemiring E (@Semifield.toDivisionSemiring E (@Field.toSemifield E inst_1)))
-          (@DivisionSemiring.toSemiring E (@Semifield.toDivisionSemiring E (@Field.toSemifield E inst_1))) inst_2 inst_2)
-      {M : Nat} (J : Matrix (Fin M) (Fin M) E) [inst_5 : TopologicalSpace R],
-      @UpperTheory.Reformulated.B.Yzd4.d18 F E inst inst_1 inst_2 R inst_3 inst_4 σ M J inst_5
-        (@Set.univ (@UpperTheory.Reformulated.B.Yzd4.HA F E inst inst_1 inst_2 R inst_3 inst_4 σ M J)) := by
+theorem UpperTheory.Reformulated.B.Yzd4.blockM_one_partner_eq_one : ∀ {F E : Type} [inst : Field F] [inst_1 : Field E] [inst_2 : Algebra F E] (R : Type) [inst_3 : CommRing R]
+  [inst_4 : Algebra F R] (σ : E →ₐ[F] E) {M : ℕ} (J : Matrix (Fin M) (Fin M) E) [inst_5 : TopologicalSpace R],
+  UpperTheory.Reformulated.B.Yzd4.d18 R σ J Set.univ := by
   intro F E _ _ _ R _ _ σ M J _
   letI : TopologicalSpace (TensorProduct F R E) := UpperTheory.Reformulated.B.Yzd4.topTens R
   exact ⟨Set.univ, isOpen_univ, rfl⟩
@@ -1553,8 +1566,7 @@ theorem UpperTheory.Reformulated.B.Yzd4.blockM_mul_alt :
       @UpperTheory.Reformulated.B.Yzd4.d18 F E inst inst_1 inst_2 R inst_3 inst_4 σ M J inst_5 s →
         @UpperTheory.Reformulated.B.Yzd4.d18 F E inst inst_1 inst_2 R inst_3 inst_4 σ M J inst_5 t →
           @UpperTheory.Reformulated.B.Yzd4.d18 F E inst inst_1 inst_2 R inst_3 inst_4 σ M J inst_5
-            (@Inter.inter (Set (@UpperTheory.Reformulated.B.Yzd4.HA F E inst inst_1 inst_2 R inst_3 inst_4 σ M J))
-              (@Set.instInter (@UpperTheory.Reformulated.B.Yzd4.HA F E inst inst_1 inst_2 R inst_3 inst_4 σ M J)) s t) := by
+            (s ∩ t) := by
   intro F E _ _ _ R _ _ σ M J _ s t hs ht
   letI : TopologicalSpace (TensorProduct F R E) := UpperTheory.Reformulated.B.Yzd4.topTens R
   obtain ⟨a, ha, rfl⟩ := hs
@@ -1705,7 +1717,7 @@ private theorem sigR_continuous {F E : Type} [Field F] [Field E] [Algebra F E]
     induction x using TensorProduct.induction_on with
     | zero => simp
     | tmul a b => simp [UpperTheory.Reformulated.B.Yzd4.sigR]
-    | add a b ha hb => simp [map_add, ha, hb]
+    | add a b ha hb => simp [map_add (f := _), ha, hb]
   rw [h]
   exact IsModuleTopology.continuous_of_linearMap _
 

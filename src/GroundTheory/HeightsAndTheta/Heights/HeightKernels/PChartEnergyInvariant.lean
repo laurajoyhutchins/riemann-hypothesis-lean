@@ -1,8 +1,55 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.StatementsChartEnergyInvariant
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.StatementsChartEnergySwap
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.ChartMassAffine
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PChartMassInvariant
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.StatementsChartEnergyInvariant
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.StatementsChartEnergySwap
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.ChartMassAffine
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PChartMassInvariant
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -116,9 +163,9 @@ theorem invariantUnder_of_row_one (hS : ChartEnergySwapInvariant.Statement)
   set A := C * (S * T)⁻¹ with hAdef
   have hCA : C = A * (S * T) := by rw [hAdef, Matrix.mul_assoc, nonsing_inv_mul _ hU, Matrix.mul_one]
   have hA0 : ∀ j : Fin (e + 1), A 0 j.succ = 0 := fun j => by
-    rw [hAdef, mul_apply]
+    rw [hAdef, Matrix.mul_apply]
     simp_rw [hST0]
-    rw [← mul_apply, mul_nonsing_inv _ hU, one_apply_ne (Fin.succ_ne_zero j).symm]
+    rw [← Matrix.mul_apply, mul_nonsing_inv _ hU, one_apply_ne (Fin.succ_ne_zero j).symm]
   have hAdet : A.det ≠ 0 := fun h => hC (by rw [hCA, det_mul, h, zero_mul])
   have h := invariantUnder_mul (invariantUnder_of_row_zero A hA0 hAdet)
     (invariantUnder_mul hSinv (invariantUnder_of_row_zero T hT0 hTdet') hSdet) hAdet
@@ -126,8 +173,8 @@ theorem invariantUnder_of_row_one (hS : ChartEnergySwapInvariant.Statement)
 
 end ChartEnergyInvariance
 
-open ChartEnergyInvariance in
 
+open ChartEnergyInvariance in
 theorem ChartEnergyLinearInvariant.proof (hS : ChartEnergySwapInvariant.Statement) :
     ChartEnergyLinearInvariant.Statement := by
   intro e M N C hM hN hC k

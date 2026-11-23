@@ -1,5 +1,46 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicClassFiniteness.StGenusOf
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicClassFiniteness.StGenusOf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -18,8 +59,8 @@ def HInt {m : ℕ} (J : Matrix (Fin m) (Fin m) E) (M : Submodule (𝓞 E) (Fin m
 def HDual {m : ℕ} (J : Matrix (Fin m) (Fin m) E) (M : Submodule (𝓞 E) (Fin m → E)) (d : ℕ) : Prop :=
   ∀ w : Fin m → E, (∀ x ∈ M, hform (starRingEnd E) J x w ∈ (algebraMap (𝓞 E) E).range) → (d : E) • w ∈ M
 
-variable (E) in
 
+variable (E) in
 def Lat (m d : ℕ) : Set (Matrix (Fin m) (Fin m) E × Submodule (𝓞 E) (Fin m → E)) :=
   {p | IsHerm (starRingEnd E) p.1 ∧ p.1.det ≠ 0 ∧ p.2.FG ∧ Submodule.span E (p.2 : Set (Fin m → E)) = ⊤ ∧
     HInt p.1 p.2 ∧ HDual p.1 p.2 d}
@@ -31,15 +72,15 @@ def Iso {m : ℕ} (p q : Matrix (Fin m) (Fin m) E × Submodule (𝓞 E) (Fin m �
 def FinCl {m : ℕ} (S : Set (Matrix (Fin m) (Fin m) E × Submodule (𝓞 E) (Fin m → E))) : Prop :=
   ∃ T : Set (Matrix (Fin m) (Fin m) E × Submodule (𝓞 E) (Fin m → E)), T.Finite ∧ ∀ p ∈ S, ∃ q ∈ T, Iso p q
 
-variable (E) in
 
+variable (E) in
 def HL (m : ℕ) : Prop := ∀ d : ℕ, 1 ≤ d → FinCl (Lat E m d)
 
 def gram {m k : ℕ} (J : Matrix (Fin m) (Fin m) E) (v : Fin k → Fin m → E) : Matrix (Fin k) (Fin k) E :=
   Matrix.of fun i j => hform (starRingEnd E) J (v i) (v j)
 
-variable (E) in
 
+variable (E) in
 def SplitSet (m k d : ℕ) (G : Set (Matrix (Fin k) (Fin k) E)) :
     Set (Matrix (Fin m) (Fin m) E × Submodule (𝓞 E) (Fin m → E)) :=
   {p | p ∈ Lat E m d ∧ ∃ v : Fin k → Fin m → E, (∀ i, v i ∈ p.2) ∧ gram p.1 v ∈ G}
@@ -196,7 +237,7 @@ theorem stH_of_hl (hHL : ∀ (F E : Type) [Field F] [NumberField F] [Field E] [N
     show cT (starRingEnd E) ((dite _ _ _ : Submodule (𝓞 E) (Fin n → E) × GL (Fin n) E).2 : Matrix (Fin n) (Fin n) E) * J *
         ((dite _ _ _ : Submodule (𝓞 E) (Fin n → E) × GL (Fin n) E).2 : Matrix (Fin n) (Fin n) E) = q.1 ∧
       IsImg (dite _ _ _ : Submodule (𝓞 E) (Fin n → E) × GL (Fin n) E).2 q.2 (dite _ _ _ : Submodule (𝓞 E) (Fin n → E) × GL (Fin n) E).1
-    rw [dif_pos h]
+    rw [dite_eq_left h]
     exact Classical.choose_spec (Classical.choose_spec h)
   refine ⟨(hT0.image (fun q => (pick q).1)).toFinset, fun M hfg hspan hsd => ?_⟩
   have hLat : (J, M) ∈ Lat E n 1 := by

@@ -1,7 +1,70 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.PrimeEqBotOrMaximalIdealOfIsFieldAway
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.FiniteAlgebraLocalCompletion
-import ReciprocityTheory.AnalyticForms.RegularLocalRings.IntToRatA
+module
+
+public import Mathlib.AlgebraicGeometry.Morphisms.FiniteType
+public import Mathlib.AlgebraicGeometry.Morphisms.Flat
+public import Mathlib.Combinatorics.Quiver.ReflQuiver
+public import Mathlib.NumberTheory.Padics.Complex
+public import Mathlib.NumberTheory.Padics.PadicIntegers
+public import Mathlib.RingTheory.RegularLocalRing.Defs
+public import Mathlib.RingTheory.SimpleRing.Principal
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.PrimeEqBotOrMaximalIdealOfIsFieldAway
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+public import Mathlib.AlgebraicGeometry.FunctionField
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+public import Mathlib.NumberTheory.Padics.RingHoms
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.AdicCompletion.Functoriality
+public import Mathlib.RingTheory.AdicCompletion.Noetherian
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+public import Mathlib.RingTheory.Ideal.Quotient.Index
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+public import ReciprocityTheory.AnalyticForms.RegularLocalRings.IntToRatA
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.FiniteAlgebraLocalCompletion
+public import Mathlib.Algebra.Algebra.ZMod
+public import Mathlib.FieldTheory.Minpoly.IsIntegrallyClosed
+public import Mathlib.RingTheory.DedekindDomain.IntegralClosure
+
+@[expose] public section
 
 namespace GlobalTheory
 
@@ -129,8 +192,8 @@ theorem charZero_integralClosure_padicInt : CharZero (integralClosure ℤ_[p] K)
   haveI : CharZero K := charZero_of_injective_algebraMap (algebraMap ℚ_[p] K).injective
   inferInstance
 
-omit [Algebra ℚ_[p] K] [IsScalarTower ℤ_[p] ℚ_[p] K] [FiniteDimensional ℚ_[p] K] in
 
+omit [Algebra ℚ_[p] K] [IsScalarTower ℤ_[p] ℚ_[p] K] [FiniteDimensional ℚ_[p] K] in
 theorem isLocalHom_of_injective_integralClosure {B : Type*} [CommRing B] [Algebra ℤ_[p] B]
     (g : B →ₐ[ℤ_[p]] integralClosure ℤ_[p] K) (hg : Function.Injective g) :
     IsLocalHom (g : B →+* integralClosure ℤ_[p] K) := by
@@ -138,14 +201,6 @@ theorem isLocalHom_of_injective_integralClosure {B : Type*} [CommRing B] [Algebr
   refine RingHom.IsIntegral.tower_top (algebraMap ℤ_[p] B) _ ?_
   rw [g.comp_algebraMap]
   exact fun x => (Algebra.IsIntegral.isIntegral x : IsIntegral ℤ_[p] x)
-
-theorem natCast_mem_maximalIdeal_integralClosure :
-    (p : integralClosure ℤ_[p] K) ∈ maximalIdeal (integralClosure ℤ_[p] K) := by
-  haveI := ReciprocityTheory.ChartRestriction.G.T0.FiniteAlgebraLocalCompletion.cl_faithful ℤ_[p] ℚ_[p] K
-  haveI := ReciprocityTheory.ChartRestriction.G.T0.FiniteAlgebraLocalCompletion.cl_isLocalHom ℤ_[p] K
-  have : (p : ℤ_[p]) ∈ maximalIdeal ℤ_[p] := by
-    rw [PadicInt.maximalIdeal_eq_span_p]; exact Ideal.mem_span_singleton_self _
-  simpa using map_nonunit (algebraMap ℤ_[p] (integralClosure ℤ_[p] K)) _ this
 
 variable {L : Type*} [Field L] [Algebra ℚ_[p] L] [Algebra ℤ_[p] L]
   [IsScalarTower ℤ_[p] ℚ_[p] L] [FiniteDimensional ℚ_[p] L]
@@ -213,7 +268,7 @@ theorem exists_injective_algHom_integralClosure (B : Type*) [CommRing B] [IsDoma
       (g : B →ₐ[ℤ_[p]] integralClosure ℤ_[p] K), Function.Injective g := by
   classical
   have hinj : Function.Injective (algebraMap ℤ_[p] B) := by
-    rw [injective_iff_map_eq_zero]
+    set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
     intro a ha
     by_contra h0
     obtain ⟨n, u, rfl⟩ := IsDiscreteValuationRing.eq_unit_mul_pow_irreducible h0
@@ -224,9 +279,13 @@ theorem exists_injective_algHom_integralClosure (B : Type*) [CommRing B] [IsDoma
   haveI : FaithfulSMul ℤ_[p] (PadicAlgCl p) := (faithfulSMul_iff_algebraMap_injective _ _).mpr (by
     rw [IsScalarTower.algebraMap_eq ℤ_[p] ℚ_[p] (PadicAlgCl p)]
     exact (algebraMap ℚ_[p] (PadicAlgCl p)).injective.comp (IsFractionRing.injective _ _))
-  let φ : B →ₐ[ℤ_[p]] PadicAlgCl p := IsAlgClosed.lift
+  let φ : B →ₐ[ℤ_[p]] PadicAlgCl p := (by
+    refine @_root_.IsAlgClosed.lift _ _ _ _ _ _ _ _ _ _ _ ?_ ?_ ?_
+    solve_by_elim* (maxDepth := 2) only [*,
+      @_root_.DivisionSemiring.to_moduleIsTorsionFree,
+      @_root_.Algebra.IsIntegral.isAlgebraic, @_root_.inferInstance])
   have hφ : Function.Injective φ := by
-    rw [injective_iff_map_eq_zero]
+    set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
     intro b hb
     have : (RingHom.ker φ).comap (algebraMap ℤ_[p] B) = ⊥ := by
       refine eq_bot_iff.mpr fun a ha => ?_
@@ -245,7 +304,7 @@ theorem exists_injective_algHom_integralClosure (B : Type*) [CommRing B] [IsDoma
     | mem x hx =>
       exact IntermediateField.subset_adjoin _ _ (by simpa using ⟨x, hx, rfl⟩)
     | zero => rw [map_zero]; exact K.zero_mem
-    | add x y _ _ hx hy => rw [map_add]; exact K.add_mem hx hy
+    | add x y _ _ hx hy => rw [map_add (f := _)]; exact K.add_mem hx hy
     | smul a x _ hx =>
       rw [map_smul, ← algebraMap_smul ℚ_[p]]
       exact K.smul_mem hx
@@ -491,14 +550,5 @@ theorem exists_padic_point_scheme {Z : Scheme.{0}} [IsIntegral Z]
   exact ⟨K, hK, H K le_rfl⟩
 
 end Scheme
-
-example (p : ℕ) [Fact p.Prime] : ∃ m : Ideal (Polynomial ℤ), m.IsMaximal ∧
-    (p : Polynomial ℤ) ∈ m ∧ Polynomial.X ∈ m := by
-  let φ : Polynomial ℤ →+* ZMod p := Polynomial.eval₂RingHom (Int.castRingHom _) 0
-  refine ⟨RingHom.ker φ, RingHom.ker_isMaximal_of_surjective φ fun x => ?_, ?_, ?_⟩
-  · obtain ⟨n, rfl⟩ := ZMod.intCast_surjective x
-    exact ⟨n, map_intCast φ n⟩
-  · simp [RingHom.mem_ker]
-  · simp [RingHom.mem_ker, φ]
 
 end GlobalTheory

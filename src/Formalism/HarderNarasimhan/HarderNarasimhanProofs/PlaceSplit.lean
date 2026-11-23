@@ -1,4 +1,60 @@
-import Formalism.HarderNarasimhan.DefsPl
+module
+
+public import Formalism.HarderNarasimhan.DefsPl
+import Mathlib.Algebra.Order.Archimedean.Real.Hom
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+public import Mathlib.NumberTheory.NumberField.CanonicalEmbedding.Basic
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Module NumberField Matrix
 
@@ -9,7 +65,7 @@ namespace Formalism.HN
 namespace PlaceDecomposition
 section
 
-theorem dense_comb (K : Type*) [Field K] [NumberField K] [IsTotallyComplex K]
+theorem dense_comb (K : Type*) [Field K] [NumberField K] [_root_.NumberField.IsTotallyComplex K]
     (t : InfinitePlace K → ℂ) :
     ∃ r : Free.ChooseBasisIndex ℤ (𝓞 K) → ℝ, ∀ u : InfinitePlace K,
       ∑ k, (r k : ℂ) * u.embedding ((RingOfIntegers.basis K k : 𝓞 K) : K) = t u := by
@@ -91,12 +147,14 @@ theorem li_map {K L : Type*} [Field K] [Field L] (σ : K →+* L) {n m : Type*} 
       funext j
       simp [Finset.sum_apply, Pi.single_apply]
     conv_lhs => rw [hx]
+
     simp only [map_sum, map_smul]
   have hid : ∀ k k', ∑ i, σ (u k i) * σ (g (Pi.single i 1) k') = if k' = k then 1 else 0 := by
     intro k k'
     have h0 := congrFun ((hexp k).symm.trans (hgu k)) k'
     simp only [Finset.sum_apply, Pi.smul_apply, smul_eq_mul] at h0
     have h1 := congrArg σ h0
+
     rw [map_sum] at h1
     simp only [map_mul] at h1
     rw [h1, Pi.single_apply]
@@ -174,7 +232,7 @@ end
 
 section
 
-variable {K V ι : Type*} [Field K] [NumberField K] [StarRing K] [IsTotallyComplex K]
+variable {K V ι : Type*} [Field K] [NumberField K] [StarRing K] [_root_.NumberField.IsTotallyComplex K]
   [AddCommGroup V] [Module K V] [Module (𝓞 K) V] [IsScalarTower (𝓞 K) K V]
   [Fintype ι] [DecidableEq ι]
 
@@ -200,6 +258,7 @@ theorem fcoord_lincomb (b : Basis ι K V) (X : InfinitePlace K → Matrix ι ι 
   let F : V →+ (ι → ℂ) :=
     { toFun := Formalism.HermitianLatticesTheory.fcoord b X v, map_zero' := hzero, map_add' := hadd }
   change F (∑ k, c k • y k) = _
+
   rw [map_sum]
   exact Finset.sum_congr rfl fun k _ => fcoord_smul b X v (c k) (y k)
 
@@ -290,7 +349,7 @@ end
 
 section
 
-variable {K V ι : Type*} [Field K] [NumberField K] [StarRing K] [IsTotallyComplex K]
+variable {K V ι : Type*} [Field K] [NumberField K] [StarRing K] [_root_.NumberField.IsTotallyComplex K]
   [AddCommGroup V] [Module K V] [Module (𝓞 K) V] [IsScalarTower (𝓞 K) K V]
   [Fintype ι] [DecidableEq ι]
 
@@ -303,7 +362,7 @@ theorem span_real_eq_complex (b : Basis ι K V) (X : InfinitePlace K → Matrix 
     intro c w hw
     have key : Submodule.span ℝ (Formalism.HermitianLatticesTheory.fcoord b X v '' (N : Set V)) ≤
         (Submodule.span ℝ (Formalism.HermitianLatticesTheory.fcoord b X v '' (N : Set V))).comap
-          (DistribMulAction.toLinearMap ℝ (ι → ℂ) (v.embedding (c : K))) := by
+          (DistribSMul.toLinearMap ℝ (ι → ℂ) (v.embedding (c : K))) := by
       rw [Submodule.span_le]
       rintro _ ⟨x, hx, rfl⟩
       show v.embedding (c : K) • Formalism.HermitianLatticesTheory.fcoord b X v x ∈
@@ -424,7 +483,7 @@ end
 
 section
 
-variable {K V ι : Type*} [Field K] [NumberField K] [StarRing K] [IsTotallyComplex K]
+variable {K V ι : Type*} [Field K] [NumberField K] [StarRing K] [_root_.NumberField.IsTotallyComplex K]
   [AddCommGroup V] [Module K V] [Module (𝓞 K) V] [IsScalarTower (𝓞 K) K V]
   [Fintype ι] [DecidableEq ι] [DecidableEq (InfinitePlace K)]
 

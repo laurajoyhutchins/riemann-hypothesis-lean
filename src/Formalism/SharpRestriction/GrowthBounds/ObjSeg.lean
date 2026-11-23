@@ -1,5 +1,48 @@
-import Formalism.SharpRestriction.GrowthBounds.ObjPol
-import Formalism.SharpRestriction.GrowthBounds.UnramifiedQuadraticSetting
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.ObjPol
+public import Formalism.SharpRestriction.GrowthBounds.UnramifiedQuadraticSetting
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -231,8 +274,8 @@ def blockLat (O : Type*) [CommRing O] [IsDomain O] [IsDiscreteValuationRing O] (
 abbrev SegVs (O : Type*) [CommRing O] [IsDomain O] (r s t : ℕ) :=
   SegBlock s r → MvPolynomial (BVar (2 * s + 1) r t) (KK O)
 
-open Classical in
 
+open Classical in
 def segLat (O : Type*) [CommRing O] [IsDomain O] [IsDiscreteValuationRing O] (p r : ℕ) [NeZero r]
     (S : SegData s) (aTop : Fin s → ℕ) (aPlus : ℕ) (m : ℝ) : Submodule O (SegVs O r s S.t) :=
   Submodule.pi Set.univ (fun b => if Kept p r S aTop b then blockLat O p r S aTop aPlus m b else ⊥)
@@ -273,8 +316,8 @@ def blockRank (O : Type*) [CommRing O] [IsDomain O] [IsDiscreteValuationRing O] 
     (blockData p S aTop aPlus m b).SSZ O (r := r)
   Module.finrank (KK O) (Submodule.span (KK O) (L : Set (MvPolynomial (BVar (2 * s + 1) r S.t) (KK O))))
 
-open Classical in
 
+open Classical in
 def segRank (O : Type*) [CommRing O] [IsDomain O] [IsDiscreteValuationRing O] (p r : ℕ) [NeZero r]
     (S : SegData s) (aTop : Fin s → ℕ) (aPlus : ℕ) (m : ℝ) : ℕ :=
   ∑ᶠ b : SegBlock s r, if Kept p r S aTop b then blockRank O p r S aTop aPlus m b else 0
@@ -282,9 +325,6 @@ def segRank (O : Type*) [CommRing O] [IsDomain O] [IsDiscreteValuationRing O] (p
 def blockOrd (p : ℕ) {r : ℕ} (S : SegData s) (b : SegBlock s r) : ℕ :=
   (∑ i, (S.P p i * oEff S b i + (∑ c : Fin (r + 1), if (c : ℕ) = 0 then 0 else b.rz i c) + b.ry i 0)) +
     b.oPlus
-
-def windowA (r : ℕ) (S : SegData s) : Finset ℕ :=
-  Icc S.a ⌊(S.a : ℝ) + (S.a : ℝ) / (((r : ℝ) + 1) * S.Y)⌋₊
 
 section Orbit
 
@@ -314,8 +354,8 @@ def segS (TT : Finset (Fin n')) (j : Fin (numSeg TT)) : ℕ := (segDists TT j).l
 def segPos (TT : Finset (Fin n')) (j : Fin (numSeg TT)) (i : Fin (segS TT j)) : Fin n' :=
   posAdd (segStart TT j) ((segDists TT j).get i)
 
-open Classical in
 
+open Classical in
 def segData (p : ℕ) (TT : Finset (Fin n')) (bT : Fin n' → ℕ) (a : ℕ) (b' Y La E0 : ℝ) (j : Fin (numSeg TT)) :
     SegData (segS TT j) where
   sigma := ((List.finRange (segS TT j)).filter

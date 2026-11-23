@@ -1,6 +1,53 @@
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.CorePInvInUJ
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.IntMuCD
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.KSchur
+module
+
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.PolarAct
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.Countable
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.CorePInvInUJ
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.IntMuCD
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.JacBaseA
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.KSchur
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.KinstSecondCountable
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.PolarBasic
+
+@[expose] public section
 
 noncomputable section
 
@@ -57,6 +104,9 @@ theorem muPolarMat_mul_right (ε : Fin n → Bool) {G : Matrix (Fin n) (Fin n) �
   have hR : Measurable (rmulPR G) := (continuous_rmulPR G).measurable
   have hA : Measurable (actR (ε := ε) G) := (JacB.actR_continuous hG).measurable
   have hc := coreP hG
+  have : IsFiniteMeasure (dk ε) := by
+    rw [isFiniteMeasure_iff, (dk_props ε).1.measure_univ]
+    exact ENNReal.one_lt_top
 
   have key : ∀ S : Set (Fin n → Fin n → ℂ), MeasurableSet S →
       muPolarMat ε S = ∫⁻ z, dk ε {k | polarPR (k, z) ∈ S}
@@ -91,7 +141,7 @@ theorem muPolar_mul_right (ε : Fin n → Bool) (g : UJ ε) :
   swap
   · simp only [Measure.comap, dif_neg h, Measure.map_zero]
   haveI : BorelSpace (UJ ε) := ⟨rfl⟩
-  have hRm : Measurable (fun x : UJ ε => x * g) := (continuous_mul_right g).measurable
+  have hRm : Measurable (fun x : UJ ε => x * g) := (continuous_mul_const g).measurable
   have hG : inUJ ε (toM g) := g.2
   have h4 := muPolarMat_mul_right ε hG
   have hRM : Measurable (rmulPR (toM g)) := (continuous_rmulPR (toM g)).measurable

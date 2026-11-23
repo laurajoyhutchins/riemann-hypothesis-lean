@@ -1,6 +1,50 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.CompEqOneIffPush
-import Development.AbelianVarietyTheory.Definitions.Divisors.Subsingleton
+module
+
+public import Mathlib.Combinatorics.Quiver.ReflQuiver
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.AbelianSchemeQuotients.IsAbelianScheme
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.CocycleRightZeroThd
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.NonzeroLocus
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.RosatiAdj
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -20,41 +64,7 @@ def QuotGlobal : Prop :=
     ∃ (B : Over S) (_ : GrpObj B) (q : A ⟶ B), IsAbelianScheme B ∧ IsMonHom q ∧ IsFinite q.left ∧
       Flat q.left ∧ Surjective q.left ∧ IsPullback ((fst H A ≫ i) * snd H A) (snd H A) q q
 
-def IsStable {S : Scheme.{0}} {O : Type} [Ring O] {A K : Over S} [GrpObj A] (ρ : RingAct A O) (i : K ⟶ A) : Prop :=
-  ∀ a : O, ∃ g : K ⟶ K, g ≫ i = i ≫ ρ.act a
-
 def InSub {S : Scheme.{0}} {A K T : Over S} (i : K ⟶ A) (x : T ⟶ A) : Prop :=
   ∃ y : T ⟶ K, y ≫ i = x
-
-def ChainOfKernels : Prop :=
-  ∀ (S : Scheme.{0}) [IsLocallyNoetherian S] (O : Type) [Ring O] (A : Over S) [GrpObj A] [IsCommMonObj A]
-    (ρ : RingAct A O) (𝔴 : Ideal O) (d n : ℕ) (K : Fin (n + 1) → Over S) (_ : ∀ j, GrpObj (K j))
-    (i : ∀ j, K j ⟶ A), IsAbelianScheme A → (∀ j, IsMonHom (i j)) → (∀ j, Mono (i j)) →
-    (∀ j, IsIsogDeg (toUnit (K j)) (d ^ (j : ℕ))) → (∀ j, IsStable ρ (i j)) →
-    (∀ (j : Fin n) (T : Over S) (x : T ⟶ A), InSub (i j.castSucc) x → InSub (i j.succ) x) →
-    (∀ (T : Over S) (x : T ⟶ A), InSub (i (Fin.last n)) x ↔ KilledBy ρ 𝔴 x) →
-    ∃ C : Chain ρ 𝔴 d n, ∀ (j : Fin (n + 1)) (T : Over S) (x : T ⟶ A), x ≫ C.π j = 1 ↔ InSub (i j) x
-
-def ChainOfKernelsUnique : Prop :=
-  ∀ (S : Scheme.{0}) (O : Type) [Ring O] (A : Over S) [GrpObj A] [IsCommMonObj A] (ρ : RingAct A O)
-    (𝔴 : Ideal O) (d n : ℕ) (C C' : Chain ρ 𝔴 d n),
-    (∀ (j : Fin (n + 1)) (T : Over S) (x : T ⟶ A), x ≫ C.π j = 1 ↔ x ≫ C'.π j = 1) →
-    Nonempty (ChainMap C' C (𝟙 S) (𝟙 A.left))
-
-def KernelsOfChain : Prop :=
-  ∀ (S : Scheme.{0}) (O : Type) [Ring O] (A : Over S) [GrpObj A] [IsCommMonObj A] (ρ : RingAct A O)
-    (𝔴 : Ideal O) (d n : ℕ) (C : Chain ρ 𝔴 d n) (j : Fin (n + 1)),
-    ∃ (K : Over S) (_ : GrpObj K) (i : K ⟶ A), IsMonHom i ∧ Mono i ∧ IsIsogDeg (toUnit K) (d ^ (j : ℕ)) ∧
-      IsStable ρ i ∧ ∀ (T : Over S) (x : T ⟶ A), x ≫ C.π j = 1 ↔ InSub i x
-
-def ChainFunctorRep : Prop :=
-  ∀ (S : Scheme.{0}) [IsLocallyNoetherian S] (O : Type) [Ring O] (A : Over S) [GrpObj A] [IsCommMonObj A]
-    (ρ : RingAct A O) (𝔴 : Ideal O) (d n : ℕ) (K : Over S) (_ : GrpObj K) (i : K ⟶ A), IsAbelianScheme A →
-    IsMonHom i → Mono i → IsIsogDeg (toUnit K) (d ^ n) →
-    (∀ (T : Over S) (x : T ⟶ A), InSub i x ↔ KilledBy ρ 𝔴 x) →
-    ∃ (Y : Scheme.{0}) (g : Y ⟶ S) (C : Chain (actPull ρ g) 𝔴 d n), IsProper g ∧
-      ∀ (T : Scheme.{0}) (t : T ⟶ S) (C' : Chain (actPull ρ t) 𝔴 d n),
-        ∃! f : T ⟶ Y, f ≫ g = t ∧ ∃ u : ((Over.pullback t).obj A).left ⟶ ((Over.pullback g).obj A).left,
-          u ≫ pullback.fst A.hom g = pullback.fst A.hom t ∧ Nonempty (ChainMap C' C f u)
 
 end GlobalTheory.IwLevel

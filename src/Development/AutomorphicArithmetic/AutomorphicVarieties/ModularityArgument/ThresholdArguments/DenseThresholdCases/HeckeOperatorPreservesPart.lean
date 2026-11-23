@@ -1,12 +1,54 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ThresholdArguments.DenseThresholdCases.DiscreteSeriesCoefficientsCuspidal
-import Development.AutomorphicArithmetic.AutomorphicVarieties.HeckeAlgebras.OrdinaryHeckeCharacters.PartAct0
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ThresholdArguments.DenseThresholdCases.LitAut
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ThresholdArguments.DenseThresholdCases.UnitaryPointProperties
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ThresholdArguments.DenseThresholdCases.TClParts
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ThresholdArguments.DenseThresholdCases.CharOfScalar
+module
 
-set_option maxHeartbeats 800000
-set_option synthInstance.maxHeartbeats 200000
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ThresholdArguments.DenseThresholdCases.LitAut
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ThresholdArguments.DenseThresholdCases.UnitaryPointProperties
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.DecompSigmaOrd
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.HidaCompleteRings.EigOfQuot
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.HidaCompleteRings.LocIdem
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.HidaCompleteRings.PointEig
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.HidaCompleteRings.QuotOfEig
+import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.SelmerTransport.DvrFacts
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.HeckeAlgebras.OrdinaryHeckeCharacters.HiComm
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ThresholdArguments.DenseThresholdCases.CharOfScalar
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ThresholdArguments.DenseThresholdCases.TClParts
+import Formalism.PadicSubsetSums.StableGradedCounts.ZBrauerNesbittAlg
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
+
+
 
 section
 open NumberField IsDedekindDomain Formalism.ConjugateSelfDual ReciprocityTheory.Gal Formalism.BasicNotions Polynomial ValuativeRel IsLocalRing GlobalTheory.CuspRep GlobalTheory.WeilDeligne GlobalTheory.LocLanglands GlobalTheory.LocGL GlobalTheory.GalOfCusp GlobalTheory.SmGL GlobalTheory.SplitWeil UpperTheory.V UpperTheory.V.Hi
@@ -65,7 +107,7 @@ private theorem pa_stab (Y : Submodule A M) (op : ι → Module.End A M) (opC : 
   induction ht using Algebra.adjoin_induction with
   | mem x hx => obtain ⟨i, hi⟩ := hx; intro F hF; rw [h2 i x hi]; exact hZ i _ ⟨hF, F.2⟩
   | algebraMap b => intro F hF; rw [h3]; exact Z.smul_mem _ hF
-  | add x y _ _ hx hy => intro F hF; rw [map_add]; exact Z.add_mem (hx F hF) (hy F hF)
+  | add x y _ _ hx hy => intro F hF; rw [map_add (f := _)]; exact Z.add_mem (hx F hF) (hy F hF)
   | mul x y _ _ hx hy => intro F hF; rw [map_mul]; exact hx _ (hy F hF)
 private theorem pa_eig {T E : Type} {J : Type u} [CommRing T] [AddCommGroup E] [Module K E] [FiniteDimensional K E]
     (act : T →+* Module.End K E) (z : T → K) (Z : J → Submodule K E) (hZ : ⨆ j, Z j = ⊤)
@@ -94,7 +136,7 @@ private theorem pa_chr {T E : Type} [CommRing T] [AddCommGroup E] [Module K E]
   · change z 0 • v = _
     rw [← hz _ v hv]; simp
   · change z (s + t) • v = (z s + z t) • v
-    rw [← hz _ v hv, map_add, LinearMap.add_apply, hz t v hv, hz s v hv, add_smul]
+    rw [← hz _ v hv, map_add (f := _), LinearMap.add_apply, hz t v hv, hz s v hv, add_smul]
 private theorem pa_inst {J : Type u} (Y0 Y : Submodule A M) [Module.Finite A Y] (hle : Y ≤ Y0) (op : ι → Module.End A M)
     [hc : Fact (CommOn Y op)] (e : Module.End A Y0) (he : e ∈ heckeAlg Y0 op)
     (hi : IsIdempotentElem e) (hY : ∀ y : Y0, (y : M) ∈ Y ↔ e y = y)
@@ -153,7 +195,7 @@ private theorem pa_inst {J : Type u} (Y0 Y : Submodule A M) [Module.Finite A Y] 
         obtain ⟨hx, hx'⟩ := hx
         obtain ⟨hy, hy'⟩ := hy
         exact ⟨add_mem hx hy, by
-          rw [show (⟨x + y, add_mem hx hy⟩ : O) = ⟨x, hx⟩ + ⟨y, hy⟩ from rfl, map_add]; exact add_mem hx' hy'⟩
+          rw [show (⟨x + y, add_mem hx hy⟩ : O) = ⟨x, hx⟩ + ⟨y, hy⟩ from rfl, map_add (f := _)]; exact add_mem hx' hy'⟩
     obtain ⟨h, h'⟩ := key F (hOZ ▸ hEO hF)
     rwa [show (ρ0 e ⟨F, h⟩ : W) = F from hfix ⟨F, hF⟩] at h'
   let act : heckeAlg Y op →+* Module.End K E := ρ.comp (heckeAlg Y op).val.toRingHom
@@ -185,7 +227,7 @@ private theorem pa_inst {J : Type u} (Y0 Y : Submodule A M) [Module.Finite A Y] 
         | add x y _ _ hx hy =>
           obtain ⟨μ, hμ⟩ := hx
           obtain ⟨ν, hν⟩ := hy
-          exact ⟨μ + ν, fun F hF => by rw [map_add, LinearMap.add_apply, hμ F hF, hν F hF, add_smul]⟩
+          exact ⟨μ + ν, fun F hF => by rw [map_add (f := _), LinearMap.add_apply, hμ F hF, hν F hF, add_smul]⟩
         | mul x y _ _ hx hy =>
           obtain ⟨μ, hμ⟩ := hx
           obtain ⟨ν, hν⟩ := hy
@@ -304,7 +346,7 @@ theorem hecke_operator_preserves_part {L Ω : Type} [Field L] [NumberField L] [F
   · refine Y.Y.smul_mem _ ?_
     exact finsum_induction (p := fun φ : Module.End ℂ (Fin H.m → H.X.Fn ℂ d) => φ F ∈ Y.Y) (zero_mem _)
       (fun _ _ => add_mem) fun q => h1 _ F hF
-set_option maxHeartbeats 800000 in
+
 theorem UpperTheory.V.Hi.partAct0_alt :
     _root_.GlobalTheory.Mem.LiteralAutomorphy.LiteratureRankNHypothesis → ∀ (L Ω : Type) [Field L] [NumberField L] [Field Ω] [Algebra L Ω] [IsAlgClosure L Ω] (l : ℕ) [Fact l.Prime] (n : ℕ) (c : Coef l) (H : HSet L Ω l n c), H.Ax →
     ∀ (A : Type) [CommRing A] [Algebra c.O A] [Alg.IsCO c.O A] (θ : H.X.I.T →* Aˣ), H.IsWt θ →

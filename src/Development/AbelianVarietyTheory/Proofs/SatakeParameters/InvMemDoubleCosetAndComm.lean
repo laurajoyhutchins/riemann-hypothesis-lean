@@ -1,7 +1,62 @@
-import Mathlib
-import Formalism.SatakeDualWeyl.KpqSubgroupCompact
-import Formalism.SatakeDualWeyl.StatementF
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ImportsTail
+module
+
+public import Formalism.SatakeDualWeyl.StatementF
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ImportsTail
+public import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.Cartan
+public import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.Heckecomm
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Formalism.UG Matrix
 
@@ -35,7 +90,7 @@ variable {B : V →ₛₗ[σ] V →ₗ[L] L} {W : Submodule L V} {Λ : Set V}
 theorem SelfDual.add (h : SelfDual B W Λ) {u v : V} (hu : u ∈ Λ) (hv : v ∈ Λ) : u + v ∈ Λ := by
   rw [h] at hu hv ⊢
   refine ⟨W.add_mem hu.1 hv.1, fun w hw => ?_⟩
-  rw [map_add, LinearMap.add_apply]
+  rw [map_add (f := _), LinearMap.add_apply]
   exact add_mem (hu.2 w hw) (hv.2 w hw)
 
 theorem SelfDual.smul (h : SelfDual B W Λ) (hσ : ∀ x ∈ intL L, σ x ∈ intL L) {c : L} (hc : c ∈ intL L)
@@ -60,9 +115,9 @@ theorem SelfDual.decomp (h : SelfDual B W Λ) (hσ : ∀ x ∈ intL L, σ x ∈ 
   refine ⟨_, hc, _, hd, v + ((-((B y v - B y y * B x v) * (1 - B x x * B y y)⁻¹)) • x +
     (-((B x v - B x x * B y v) * (1 - B x x * B y y)⁻¹)) • y),
     h.add hv (h.add (h.smul hσ (neg_mem hc) hx) (h.smul hσ (neg_mem hd) hy)), ?_, ?_, ?_⟩
-  · simp only [map_add, map_smul, smul_eq_mul, hxy]
+  · simp only [map_add (f := _), map_smul, smul_eq_mul, hxy]
     linear_combination (-(B x v)) * mul_inv_cancel₀ h0
-  · simp only [map_add, map_smul, smul_eq_mul, hyx]
+  · simp only [map_add (f := _), map_smul, smul_eq_mul, hyx]
     linear_combination (-(B y v)) * mul_inv_cancel₀ h0
   · module
 
@@ -86,7 +141,7 @@ theorem SelfDual.inter (h : SelfDual B W Λ) (hB : ∀ u v, σ (B u v) = B v u) 
     obtain ⟨c, -, d, -, w₀, hw₀, h1, h2, rfl⟩ := hdec w hw
     have e1 : B v x = 0 := by rw [← hB, hx v (mem_perp.1 hv).2.1, map_zero]
     have e2 : B v y = 0 := by rw [← hB, hy v (mem_perp.1 hv).2.2, map_zero]
-    simp only [map_add, map_smul, e1, e2, smul_zero, zero_add]
+    simp only [map_add (f := _), map_smul, e1, e2, smul_zero, zero_add]
     exact hv' w₀ ⟨hw₀, mem_perp.2 ⟨((h w₀).1 hw₀).1, h1, h2⟩⟩
 
 def refl (B : V →ₛₗ[σ] V →ₗ[L] L) (w : V) (μ : L) : V →ₗ[L] V :=
@@ -243,7 +298,7 @@ theorem exists_swap [FiniteDimensional L V] (hσ : ∀ x, Valued.v (σ x) = Valu
     have h4 := mem_perp.1 h3.2
     have : (s₁ ∘ₗ s₀) (c • (π • e) + d • f + v₀) =
         (c * (-r * π * π) + d * (1 + π * r')) • e + (c * (1 + π * r) + d * (-r')) • (π • f) + s₀ v₀ := by
-      simp only [LinearMap.comp_apply, map_add, map_smul, s₀e, s₀f, f₁ _ h4.2.1 h4.2.2, se, sf]
+      simp only [LinearMap.comp_apply, map_add (f := _), map_smul, s₀e, s₀f, f₁ _ h4.2.1 h4.2.2, se, sf]
       module
     rw [this]
     refine hΛ'.add (hΛ'.add (hΛ'.smul hσO ?_ he) (hΛ'.smul hσO ?_ hπf)) h3.1
@@ -254,7 +309,7 @@ theorem exists_swap [FiniteDimensional L V] (hσ : ∀ x, Valued.v (σ x) = Valu
     have h4 := mem_perp.1 h3.2
     have : (s₁ ∘ₗ s₀) (c • e + d • (π • f) + v₀) =
         (c * (-r) + d * (1 + π * r')) • (π • e) + (c * (1 + π * r) + d * (-r' * π * π)) • f + s₀ v₀ := by
-      simp only [LinearMap.comp_apply, map_add, map_smul, s₀e, s₀f, f₁ _ h4.2.1 h4.2.2, se, sf]
+      simp only [LinearMap.comp_apply, map_add (f := _), map_smul, s₀e, s₀f, f₁ _ h4.2.1 h4.2.2, se, sf]
       module
     rw [this]
     refine hΛ.add (hΛ.add (hΛ.smul hσO ?_ hπe) (hΛ.smul hσO ?_ hf)) h3.1
@@ -300,8 +355,9 @@ theorem form_single (J : Matrix (Fin n) (Fin n) L) (i j : Fin n) :
 omit [Valued L (WithZero (Multiplicative ℤ))] in
 theorem form_herm (hσσ : ∀ x, σ (σ x) = x) {J : Matrix (Fin n) (Fin n) L}
     (hJ : ∀ i j, σ (J i j) = J j i) (u v : Fin n → L) : σ (form σ J u v) = form σ J v u := by
+
   simp only [form_apply, Matrix.mulVec, dotProduct, map_sum, map_mul, Function.comp_apply, hσσ, hJ,
-    Finset.mul_sum]
+  Finset.mul_sum]
   rw [Finset.sum_comm]
   exact Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => by ring
 

@@ -1,6 +1,45 @@
-import Formalism.LocalToGlobal.Columns.HeckeInert
-import Formalism.LocalToGlobal.Columns.GSetLemmas
-import Formalism.LocalToGlobal.Columns.UnipotentRightActionFunctionsW
+module
+
+public import Formalism.LocalToGlobal.Columns.HeckeInert
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -12,7 +51,7 @@ section Fin
 
 variable {E : Type} [Field E] [NumberField E] [StarRing E] {n : ℕ} {ST SG : Finset (HeightOneSpectrum (𝓞 E))}
 
-theorem DecoSet.inertSet_finite {P : Ideal (𝓞 E)} (hP : P ≠ ⊥) (s : List ℕ) (d : DecoSet E n ST SG) :
+theorem DecoSet.inertSet_finite {P : Ideal (𝓞 E)} (hP : P ≠ ⊥) (s : List ℕ) (d : DecoSet (E := E) (n := n) (ST := ST) (SG := SG)) :
     (d.inertSet P s).Finite := by
   have hPk : P ^ s.sum ≠ ⊥ := pow_ne_zero _ hP
   obtain ⟨a, haP, ha⟩ := Submodule.exists_mem_ne_zero_of_ne_bot hPk
@@ -21,7 +60,7 @@ theorem DecoSet.inertSet_finite {P : Ideal (𝓞 E)} (hP : P ≠ ⊥) (s : List 
     exact ⟨fun h => ha (Ideal.span_singleton_eq_bot.1 h), hPk⟩
   have hfin := finite_between ((Ideal.span {a} * P ^ s.sum) • d.1.N) d.1.N
     (finite_quot_smul d.1.N d.2.lat.fg _ hI)
-  refine Set.Finite.of_injOn (f := fun e : DecoSet E n ST SG => Ideal.span {a} • e.1.N) ?_ ?_ hfin
+  refine Set.Finite.of_injOn (f := fun e : DecoSet (E := E) (n := n) (ST := ST) (SG := SG) => Ideal.span {a} • e.1.N) ?_ ?_ hfin
   · intro e he
     obtain ⟨h1, h2⟩ := he.1.smul_le
     refine ⟨?_, ?_⟩
@@ -40,13 +79,13 @@ theorem DecoSet.inertSet_finite {P : Ideal (𝓞 E)} (hP : P ≠ ⊥) (s : List 
       exact le_antisymm (hsub _ _ h) (hsub _ _ h.symm)
     exact Subtype.ext (Deco.ext hN (he.2.1.trans he'.2.1.symm) (he.2.2.trans he'.2.2.symm))
 
-theorem DecoSet.mem_inertNb {P : Ideal (𝓞 E)} (hP : P ≠ ⊥) (s : List ℕ) (d e : DecoSet E n ST SG) :
+theorem DecoSet.mem_inertNb {P : Ideal (𝓞 E)} (hP : P ≠ ⊥) (s : List ℕ) (d e : DecoSet (E := E) (n := n) (ST := ST) (SG := SG)) :
     e ∈ d.inertNb P s ↔ e ∈ d.inertSet P s := by
   unfold DecoSet.inertNb
-  rw [dif_pos (DecoSet.inertSet_finite hP s d), Set.Finite.mem_toFinset]
+  rw [dite_eq_left (DecoSet.inertSet_finite hP s d), Set.Finite.mem_toFinset]
 
 theorem DecoSet.sum_inertNb_smul {M : Type} [AddCommMonoid M] (P : Ideal (𝓞 E)) (s : List ℕ)
-    (g : UF E n × GLG E n SG) (d : DecoSet E n ST SG) (ψ : DecoSet E n ST SG → M) :
+    (g : UF E n × GLG (E := E) (n := n) (SG := SG)) (d : DecoSet (E := E) (n := n) (ST := ST) (SG := SG)) (ψ : DecoSet (E := E) (n := n) (ST := ST) (SG := SG) → M) :
     ∑ e ∈ (g • d).inertNb P s, ψ e = ∑ e ∈ d.inertNb P s, ψ (g • e) := by
   symm
   exact Finset.sum_equiv (MulAction.toPerm g) (fun e => (DecoSet.smul_mem_inertNb_iff g).symm) (fun e _ => rfl)

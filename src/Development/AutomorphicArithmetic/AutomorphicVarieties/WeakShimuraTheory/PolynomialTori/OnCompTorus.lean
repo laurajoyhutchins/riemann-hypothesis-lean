@@ -1,11 +1,55 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.WeakShimuraTheory.NearSplit
-import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.EntryMem
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.Graded
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.FramedTwoCoboundaries
-import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.SgnMulSelf
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.CoEvLow
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.CoMvps
-import Mathlib.RingTheory.MvPowerSeries.NoZeroDivisors
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.DecompSigmaOrd
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.CoEvLow
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.CoMvps
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.SgnMulSelf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.MvPowerSeries.Inverse
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Development.AutomorphicArithmetic.AutomorphicVarieties.WeakShimuraTheory.RedIdeal
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Formalism.ConjugateSelfDual Formalism.HC ReciprocityTheory.Gal IsLocalRing UpperTheory.V.Base UpperTheory.V.Alg UpperTheory.V.HV UpperTheory.V.GradeZeroInterpolatingElement UpperTheory.V.Ws
 
@@ -59,16 +103,16 @@ theorem UpperTheory.V.Ws.Po.onCompTorus :
   have ht1 : (t.1 : MvPowerSeries (Fin 2) B) = 1 + MvPowerSeries.X 0 := rfl
   have ht2 : (t.2 : MvPowerSeries (Fin 2) B) = 1 + MvPowerSeries.X 1 := rfl
   obtain ⟨x', ⟨xC, xX⟩, -⟩ := co_ev O B O (Fin 2) x (fun _ => 0) fun _ => zero_mem _
-  have x1 : x' t.1 = 1 := by rw [ht1, map_add, map_one, xX, add_zero]
-  have x2 : x' t.2 = 1 := by rw [ht2, map_add, map_one, xX, add_zero]
+  have x1 : x' t.1 = 1 := by rw [ht1, map_add (f := _), map_one, xX, add_zero]
+  have x2 : x' t.2 = 1 := by rw [ht2, map_add (f := _), map_one, xX, add_zero]
   obtain ⟨y', ⟨yC, yX⟩, -⟩ := co_ev O B R (Fin 2) y ![(s.1 : R) - 1, (s.2 : R) - 1] fun i => by
     rw [← res_eq_zero_iff O]
     fin_cases i
     · simp [h1]
     · simp [h2]
-  have y1 : y' t.1 = s.1 := by rw [ht1, map_add, map_one, yX]; simp
-  have y2 : y' t.2 = s.2 := by rw [ht2, map_add, map_one, yX]; simp
-  obtain ⟨ρ', hρ'⟩ := conj_lift (ρ.map c) t (by rw [← res_map x', x1, map_one]) (by rw [← res_map x', x2, map_one])
+  have y1 : y' t.1 = s.1 := by rw [ht1, map_add (f := _), map_one, yX]; simp
+  have y2 : y' t.2 = s.2 := by rw [ht2, map_add (f := _), map_one, yX]; simp
+  obtain ⟨ρ', hρ'⟩ := conj_lift (ρ.map c) t (by rw [← UpperTheory.V.Alg.res_map x' _, x1, map_one]) (by rw [← UpperTheory.V.Alg.res_map x' _, x2, map_one])
   have he : ∀ g a b, ρ'.hom g a b = (wv t (wt a b)).val * MvPowerSeries.C (ρ.hom g a b) :=
     fun g a b => by rw [hρ']; rfl
   refine ⟨MvPowerSeries (Fin 2) B, inferInstance, inferInstance, inferInstance, inferInstance, ρ',

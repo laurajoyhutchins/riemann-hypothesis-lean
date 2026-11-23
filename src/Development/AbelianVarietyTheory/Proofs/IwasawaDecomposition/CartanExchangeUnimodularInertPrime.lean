@@ -1,12 +1,59 @@
-import Mathlib
-import Formalism.LocalToGlobal.Columns.HeckeInertComm
-import Formalism.LocalToGlobal.Columns.CoefficientsModP.LatticeBasisExistsHolds
+module
+
+public import Formalism.LocalRingCardinality.SpanPowerMembership.Places
+public import Formalism.LocalToGlobal.Columns.HeckeInert
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.StandardBaseFlagComplementIntegralLattice
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.SameAtOfLocalizationEq
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.InvMemDoubleCosetAndComm
+public import Formalism.LocalToGlobal.Columns.ReferenceActionRationalLevels
+public import Formalism.LocalToGlobal.Columns.TwQCmp
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
 import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.PatchAtSelf
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.InvMemDoubleCosetAndComm
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.SameAtOfLocalizationEq
-import Formalism.LocalRingCardinality.SpanPowerMembership.Places
-import Formalism.LocalToGlobal.Columns.TwQCmp
-import Formalism.LocalToGlobal.Columns.ReferenceActionRationalLevels
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Formalism.HermitianLatticesTheory Formalism.L2.Col GlobalTheory.InertExchange
 open Classical
 
@@ -43,7 +90,7 @@ theorem exists_trace_one (P : HeightOneSpectrum (𝓞 E)) (hin : ∃ x : 𝓞 E,
     rw [e]
     exact sub_mem h2 (Ideal.mul_mem_left _ _ h1)
   have e1 : ((u : E) + star (u : E)) = algebraMap (𝓞 E) E (u + cO E u) := by
-    rw [map_add, algebraMap_cO]
+    rw [map_add (f := _), algebraMap_cO]
   have hv : P.valuation E ((u : E) + star (u : E)) = 1 := by
     rw [e1]; exact (P.valuation_eq_one_iff_notMem (K := E)).2 hu
   have hne : ((u : E) + star (u : E)) ≠ 0 := by
@@ -77,7 +124,7 @@ theorem exists_unif_star (P : HeightOneSpectrum (𝓞 E)) (hP : conjPrime₂ P =
   have hfix : ∀ r : 𝓞 E, star ((r + cO E r : 𝓞 E) : E) = ((r + cO E r : 𝓞 E) : E) := by
     intro r
     change star (algebraMap (𝓞 E) E (r + cO E r)) = algebraMap (𝓞 E) E (r + cO E r)
-    rw [map_add, algebraMap_cO, star_add, star_star, add_comm]
+    rw [map_add (f := _), algebraMap_cO, star_add, star_star, add_comm]
   by_cases h1 : P.valuation E (r1 : E) = WithZero.exp (-1 : ℤ)
   · exact ⟨r1, hfix a, h1⟩
   by_cases h2 : P.valuation E (r2 : E) = WithZero.exp (-1 : ℤ)
@@ -88,7 +135,7 @@ theorem exists_unif_star (P : HeightOneSpectrum (𝓞 E)) (hP : conjPrime₂ P =
   have key : (x : E) * (r1 : E) - (r2 : E) = ((x : E) - star (x : E)) * star (a : E) := by
     change algebraMap (𝓞 E) E x * algebraMap (𝓞 E) E (a + cO E a) - algebraMap (𝓞 E) E (x * a + cO E (x * a)) =
       (algebraMap (𝓞 E) E x - star (algebraMap (𝓞 E) E x)) * star (algebraMap (𝓞 E) E a)
-    simp only [map_add, map_mul, algebraMap_cO, star_mul]
+    simp only [map_add (f := _), map_mul, algebraMap_cO, star_mul]
     ring
   have hvx : P.valuation E ((x : E) - star (x : E)) = 1 := by
     have e : ((x : E) - star (x : E)) = -(algebraMap (𝓞 E) E (cO E x - x)) := by
@@ -171,7 +218,7 @@ theorem mem_localization_iff_of_isUnimodular {n : ℕ} (P : HeightOneSpectrum (�
       ring
     | zero => simp
     | add x z _ _ hx hz =>
-      rw [map_add, LinearMap.add_apply]
+      rw [map_add (f := _), LinearMap.add_apply]
       exact add_mem hx hz
     | smul r x _ hx =>
       rw [← algebraMap_smul E r x, LinearMap.map_smulₛₗ, LinearMap.smul_apply, smul_eq_mul, starRingEnd_apply,
@@ -199,7 +246,11 @@ theorem cartanInert : ∀ {E : Type} [Field E] [NumberField E] [StarRing E] (n :
     intro M hM v
     rw [SetLike.mem_coe, hM v]
     simp only [Submodule.mem_top, true_and, SetLike.mem_coe, GlobalTheory.UnitarySwap.mem_int, hv]
-  obtain ⟨d, hd0, hd⟩ := exists_smul_le_of_lattice (K := E) hN'.fg hN
+  have hsymm : (hStd E n).IsSymm := ⟨fun x y => hStd_star x y⟩
+  letI : Submodule.IsLattice E N := hN
+  have hNfull : Submodule.IsFullLattice E N :=
+    ⟨GlobalTheory.LoopC.Base.span_eq_top_of_unimodular (hStd E n) hsymm hStd_nondeg hN hNu⟩
+  obtain ⟨d, hd0, hd⟩ := exists_smul_le_of_lattice (K := E) hN'.fg hNfull
   have hdE : algebraMap (𝓞 E) E d ≠ 0 := by rwa [Ne, FaithfulSMul.algebraMap_eq_zero_iff]
   have hV0 : P.valuation E (algebraMap (𝓞 E) E d) ≠ 0 := (Valuation.ne_zero_iff _).2 hdE
   set k : ℕ := (-WithZero.log (P.valuation E (algebraMap (𝓞 E) E d))).toNat with hkdef
@@ -229,7 +280,8 @@ theorem cartanInert : ∀ {E : Type} [Field E] [NumberField E] [StarRing E] (n :
   have hσ : ∀ x : E, Valued.v (starRingEnd E x) = Valued.v x := fun x => by
     rw [hv, hv, starRingEnd_apply, valuation_star P hP]
   have hB : ∀ u v : Sp E n, starRingEnd E (hStd E n u v) = hStd E n v u := fun u v => by
-    simp only [hStd_apply, map_sum, starRingEnd_apply, star_mul, star_star]
+    set_option synthInstance.maxHeartbeats 100000 in
+      simp only [hStd_apply, map_sum, starRingEnd_apply, star_mul, star_star]
   have hτO : τ ∈ Formalism.UG.intL E := by rw [GlobalTheory.UnitarySwap.mem_int, hv]; exact hτ
   have hϖ' : Valued.v (ϖ : E) = WithZero.exp (-1 : ℤ) := by rw [hv]; exact hϖv
   obtain ⟨s, hs, -, hs1, hs2⟩ := GlobalTheory.UnitarySwap.exists_swap (L := E) (V := Sp E n) (B := hStd E n)

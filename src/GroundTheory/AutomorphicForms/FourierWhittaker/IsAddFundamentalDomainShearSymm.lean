@@ -1,5 +1,50 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.FourierWhittaker.Single
+module
+
+public import GroundTheory.AutomorphicForms.FourierWhittaker.Single
+import GroundTheory.AutomorphicForms.ReductionMeasure
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.Countable
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+
+@[expose] public section
 
 open NumberField NumberField.mixedEmbedding MeasureTheory Topology Set Filter IsDedekindDomain Matrix
 open scoped NumberField.AdeleRing
@@ -97,7 +142,7 @@ theorem blockEntry_eq_of_vanishing {X : Matrix (Fin n) (Fin n) 𝔸[K]}
 
 theorem uMat_extLow_apply_of_lt (i j : Fin n) (hj : (j : ℕ) < k) (hi : k ≤ (i : ℕ)) :
     uMat (extLow B) i j = 0 := by
-  rw [uMat_apply, if_neg (fun h => by subst h; omega), dif_neg (fun h => by rw [Fin.lt_def] at h; omega)]
+  rw [uMat_apply, if_neg (fun h => by subst h; omega), dite_eq_right (fun h => by rw [Fin.lt_def] at h; omega)]
 
 theorem uMat_extLow_inv_apply_of_lt (i j : Fin n) (hj : (j : ℕ) < k) (hi : k ≤ (i : ℕ)) :
     (((uGL (extLow B))⁻¹ : GL (Fin n) 𝔸[K]) : Matrix (Fin n) (Fin n) 𝔸[K]) i j = 0 := by
@@ -135,13 +180,13 @@ def shear : (UPos n k → 𝔸[K]) ≃+ (UPos n k → 𝔸[K]) where
     simp only
     rw [blockEntry_eq_of_vanishing (blockEntry_mul_vanishing (uMat_extLow_apply_of_lt B) A),
       Matrix.mul_assoc, ← coe_uGL, ← Units.val_mul, mul_inv_cancel, Units.val_one, Matrix.mul_one,
-      blockEntry_apply, dif_pos u.2]
+      blockEntry_apply, dite_eq_left u.2]
   right_inv Z := by
     funext u
     simp only
     rw [blockEntry_eq_of_vanishing (blockEntry_mul_vanishing (uMat_extLow_inv_apply_of_lt B) Z),
       Matrix.mul_assoc, ← coe_uGL, ← Units.val_mul, inv_mul_cancel, Units.val_one, Matrix.mul_one,
-      blockEntry_apply, dif_pos u.2]
+      blockEntry_apply, dite_eq_left u.2]
   map_add' A A' := by
     funext u
     simp [blockEntry_add, Matrix.add_mul]
@@ -163,12 +208,12 @@ theorem unipMatrix_mul_uMat_extLow (A : UPos n k → 𝔸[K]) :
     rw [if_pos rfl, if_pos rfl, hv (by omega), add_zero]
   · rw [if_neg hij, if_neg hij]
     by_cases hlt : i < j
-    · rw [dif_pos hlt, dif_pos hlt, Pi.add_apply, extU]
+    · rw [dite_eq_left hlt, dite_eq_left hlt, Pi.add_apply, extU]
       congr 1
       split_ifs with h
       · rfl
       · exact hv h
-    · rw [dif_neg hlt, dif_neg hlt, zero_add]
+    · rw [dite_eq_right hlt, dite_eq_right hlt, zero_add]
       exact hv (fun h => hlt (by rw [Fin.lt_def]; omega))
 
 theorem continuous_blockEntry :
@@ -206,7 +251,7 @@ theorem isAddFundamentalDomain_shear_symm :
     (fun z u => ?_) (fun u z z' hzz' => ?_) y
   · show (blockEntry z * uMat (extLow B)) u.1.1 u.1.2 = _
     rw [Matrix.mul_apply, ← Finset.add_sum_erase _ _ (Finset.mem_univ u.1.2), blockEntry_apply,
-      dif_pos u.2, uMat_apply, if_pos rfl, mul_one]
+      dite_eq_left u.2, uMat_apply, if_pos rfl, mul_one]
   · refine Finset.sum_congr rfl fun c hc => ?_
     by_cases hcu : c < u.1.2
     · rw [blockEntry_apply, blockEntry_apply]
@@ -215,7 +260,7 @@ theorem isAddFundamentalDomain_shear_symm :
       · rfl
     · have hne : c ≠ u.1.2 := Finset.ne_of_mem_erase hc
       have : uMat (extLow B) c u.1.2 = 0 := by
-        rw [uMat_apply, if_neg hne, dif_neg (fun h => hcu (by
+        rw [uMat_apply, if_neg hne, dite_eq_right (fun h => hcu (by
           rw [Fin.lt_def] at h ⊢; have := Fin.val_injective.ne hne; omega))]
       rw [this, mul_zero, mul_zero]
 

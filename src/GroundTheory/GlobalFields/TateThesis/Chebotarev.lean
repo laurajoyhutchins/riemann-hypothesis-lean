@@ -1,7 +1,58 @@
-import Mathlib
-import GroundTheory.GlobalFields.TateThesis.ChebotarevCount
-import GroundTheory.GlobalFields.TateThesis.ChebotarevAbelian
+module
+
+public import GroundTheory.GlobalFields.TateThesis.ChebotarevCount
+public import Mathlib.NumberTheory.NumberField.DirichletDensity
+public import Mathlib.Order.CompletePartialOrder
+import Batteries.Tactic.OpenPrivate
+public import GroundTheory.GlobalFields.TateThesis.ChebotarevAbelian
 import GroundTheory.GlobalFields.TateThesis.DegreeOneDensity
+import GroundTheory.GlobalFields.TateThesis.PrimeZetaPole
+import Mathlib.Algebra.Group.ConjFinite
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 namespace GroundTheory.Global
 
@@ -52,10 +103,11 @@ theorem primeIdealZetaSum_eq_mul_of_card_fiber {A : Set (HeightOneSpectrum (𝓞
     _ = _ := by
         rw [Finset.sum_const, Finset.card_univ, ← Nat.card_eq_fintype_card, hcard', nsmul_eq_mul]
 
+open private HasDirichletDensity.eq_1 from Mathlib.NumberTheory.NumberField.DirichletDensity in
 theorem HasDirichletDensity.union {A B : Set (HeightOneSpectrum (𝓞 K))} {a b : ℝ}
     (hA : A.HasDirichletDensity a) (hB : B.HasDirichletDensity b) (hd : Disjoint A B) :
     (A ∪ B).HasDirichletDensity (a + b) := by
-  unfold Set.HasDirichletDensity at *
+  rw [HasDirichletDensity.eq_1] at hA hB ⊢
   refine (hA.add hB).congr' ?_
   filter_upwards [self_mem_nhdsWithin] with s hs
   rw [primeIdealZetaSum_union hd hs, add_div]
@@ -77,7 +129,8 @@ theorem natCard_isConj_mul_natCard_centralizer (σ : G) :
     Nat.card_congr (Equiv.subtypeEquiv ConjAct.toConjAct.toEquiv fun g ↦ by
       rw [Subgroup.mem_centralizer_singleton_iff]
       change _ ↔ ConjAct.toConjAct g • σ = σ
-      rw [ConjAct.toConjAct_smul, mul_inv_eq_iff_eq_mul])
+      rw [ConjAct.toConjAct_smul, mul_inv_eq_iff_eq_mul]
+      rfl)
   rw [Nat.card_coe_set_eq, ← horb, ← MulAction.index_stabilizer, hstab, mul_comm,
     Subgroup.card_mul_index]
   rfl
@@ -111,6 +164,7 @@ theorem hasDirichletDensity_deuringSet (σ : Gal(L/K)) :
     by_contra he
     exact hu ⟨w, he, HeightOneSpectrum.ext hw.over.symm⟩
 
+open private HasDirichletDensity.eq_1 from Mathlib.NumberTheory.NumberField.DirichletDensity in
 theorem hasDirichletDensity_chebotarevSet_isConj (σ : Gal(L/K)) :
     (chebotarevSet {τ : Gal(L/K) | IsConj σ τ}).HasDirichletDensity
       (1 / Nat.card (Subgroup.centralizer {σ})) := by
@@ -139,7 +193,7 @@ theorem hasDirichletDensity_chebotarevSet_isConj (σ : Gal(L/K)) :
   have hEK := tendsto_primeIdealZetaSum_univ_div_univ E K
   have hEpos := (tendsto_primeIdealZetaSum_univ_atTop E).eventually_gt_atTop 0
   have hKpos := (tendsto_primeIdealZetaSum_univ_atTop K).eventually_gt_atTop 0
-  unfold Set.HasDirichletDensity at hA ⊢
+  rw [HasDirichletDensity.eq_1] at hA ⊢
   have hlim := (hA.const_mul (n : ℝ)⁻¹).mul hEK
   have hval : (n : ℝ)⁻¹ * (1 / orderOf σ) * 1 = 1 / Nat.card (Subgroup.centralizer {σ}) := by
     rw [← hZ]

@@ -1,8 +1,64 @@
-import Mathlib
-import GroundTheory.GlobalFields.IdeleGroups.NormOneCompact
-import GroundTheory.GlobalFields.IdeleGroups.StandardOpenEquiv
-import GroundTheory.GlobalFields.Adele.Topology
-import GroundTheory.GlobalFields.TateThesis.AdeleMeasurable
+module
+
+public import GroundTheory.GlobalFields.TateThesis.AdeleMeasurable
+public import GroundTheory.GlobalFields.IdeleGroups.ClassGroup
+import GroundTheory.GlobalFields.Adele.Approximation
+public import GroundTheory.GlobalFields.Adele.Topology
+public import GroundTheory.GlobalFields.IdeleGroups.StandardOpenEquiv
+import GroundTheory.GlobalFields.LocalAtPlace
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+public import Mathlib.RingTheory.Complex
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Topology Filter MeasureTheory TopologicalSpace
 open scoped NumberField.AdeleRing RestrictedProduct ENNReal NNReal
@@ -83,7 +139,7 @@ namespace IdeleGroup
 
 instance secondCountableTopology_standardOpenSubgroup :
     SecondCountableTopology (standardOpenSubgroup K) :=
-  (standardOpenSubgroupEquiv K).toHomeomorph.isEmbedding.secondCountableTopology
+  (standardOpenSubgroupEquiv (K := K)).toHomeomorph.isEmbedding.secondCountableTopology
 
 instance secondCountableTopology : SecondCountableTopology (IdeleGroup K) := by
   let U : IdeleGroup K ⧸ standardOpenSubgroup K → Set (IdeleGroup K) :=
@@ -294,7 +350,7 @@ omit [NumberField K] in
 theorem infinitePlaceMeasure_of_isComplex {w : InfinitePlace K} (hw : w.IsComplex) :
     infinitePlaceMeasure w =
       Measure.map (isometryEquivComplexOfIsComplex hw).symm ((2 : ℝ≥0∞) • volume) := by
-  rw [infinitePlaceMeasure, dif_neg (not_isReal_iff_isComplex.2 hw)]
+  rw [infinitePlaceMeasure, dite_eq_right (not_isReal_iff_isComplex.2 hw)]
 
 instance isAddHaarMeasure_infinitePlaceMeasure (w : InfinitePlace K) :
     (infinitePlaceMeasure w).IsAddHaarMeasure := by
@@ -320,8 +376,8 @@ theorem map_mul_left_volume_complex {z : ℂ} (hz : z ≠ 0) :
   rw [hdet, abs_of_nonneg (by positivity)] at h
   exact h
 
-omit [NumberField K] in
 
+omit [NumberField K] in
 theorem map_mul_left_infinitePlaceMeasure (w : InfinitePlace K) {a : w.Completion} (ha : a ≠ 0) :
     Measure.map (a * ·) (infinitePlaceMeasure w) =
       ENNReal.ofReal (‖a‖ ^ w.mult)⁻¹ • infinitePlaceMeasure w := by
@@ -340,7 +396,7 @@ theorem map_mul_left_infinitePlaceMeasure (w : InfinitePlace K) {a : w.Completio
     rw [Measure.map_map (measurable_const_mul a) e.symm.continuous.measurable]
     have : (a * ·) ∘ e.symm = e.symm ∘ (e a * ·) := funext he
     rw [this, ← Measure.map_map e.symm.continuous.measurable (measurable_const_mul _),
-      Real.map_volume_mul_left hea, Measure.map_smul]
+      Real.map_volume_mul_left hea, Measure.map_smul _ e.symm.continuous.measurable.aemeasurable]
     congr 2
     have h0 : e 0 = 0 := map_zero (ringEquivRealOfIsReal hw)
     rw [abs_inv, ← Real.norm_eq_abs, e.isometry.norm_map_of_map_zero h0, mult, if_pos hw,
@@ -360,7 +416,9 @@ theorem map_mul_left_infinitePlaceMeasure (w : InfinitePlace K) {a : w.Completio
     rw [Measure.map_map (measurable_const_mul a) e.symm.continuous.measurable]
     have : (a * ·) ∘ e.symm = e.symm ∘ (e a * ·) := funext he
     rw [this, ← Measure.map_map e.symm.continuous.measurable (measurable_const_mul _),
-      Measure.map_smul, map_mul_left_volume_complex hea, smul_comm, Measure.map_smul]
+      Measure.map_smul _ (measurable_const_mul (e a)).aemeasurable,
+      map_mul_left_volume_complex hea, smul_comm,
+      Measure.map_smul _ e.symm.continuous.measurable.aemeasurable]
     congr 2
     have h0 : e 0 = 0 := map_zero (ringEquivComplexOfIsComplex hc)
     rw [e.isometry.norm_map_of_map_zero h0, mult, if_neg hw]
@@ -468,26 +526,11 @@ theorem measurePreserving_prodEquiv :
   funext x
   exact (IdeleGroup.prodEquiv K).apply_symm_apply x
 
-theorem ideleMeasure_preimage_prod {A : Set (InfiniteAdeleRing K)ˣ}
-    {B : Set (FiniteAdeleRing (𝓞 K) K)ˣ} (hA : MeasurableSet A) (hB : MeasurableSet B) :
-    ideleMeasure K (IdeleGroup.prodEquiv K ⁻¹' (A ×ˢ B)) =
-      infiniteIdeleMeasure K A * finiteIdeleMeasure K B := by
-  rw [(measurePreserving_prodEquiv K).measure_preimage (hA.prod hB).nullMeasurableSet,
-    Measure.prod_prod]
-
 theorem integral_ideleMeasure {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
     (f : IdeleGroup K → E) :
     ∫ x, f x ∂ideleMeasure K = ∫ p, f ((IdeleGroup.prodEquiv K).symm p)
       ∂(infiniteIdeleMeasure K).prod (finiteIdeleMeasure K) := by
   exact integral_map_equiv (IdeleGroup.prodEquiv K).symm.toHomeomorph.toMeasurableEquiv f
-
-theorem standardOpenSubgroup_eq_preimage :
-    (IdeleGroup.standardOpenSubgroup K : Set (IdeleGroup K)) =
-      IdeleGroup.prodEquiv K ⁻¹' (Set.univ ×ˢ (finiteIntegralUnits K : Set _)) := by
-  ext x
-  simp only [SetLike.mem_coe, Set.mem_preimage, Set.mem_prod, Set.mem_univ, true_and]
-  rw [mem_finiteIntegralUnits, IdeleGroup.mem_standardOpenSubgroup]
-  rfl
 
 end Preserving
 

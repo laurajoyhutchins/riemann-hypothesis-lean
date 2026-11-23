@@ -1,4 +1,53 @@
-import Formalism.LocalToGlobal.Columns.CardFilterNeighboursEqPaths
+module
+
+public import Formalism.LocalToGlobal.Columns.CardFilterNeighboursEqPaths
+public import Formalism.LocalToGlobal.Columns.HeckeSpCount
+public import Formalism.LocalToGlobal.Columns.WmpNatCardQuotEqPowFinrank
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.FreeModule.IdealQuotient
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -274,11 +323,11 @@ variable {E : Type} [Field E] [NumberField E] [StarRing E] {n : ℕ} {ST SG : Fi
 theorem inf_toAddSubgroup {R V : Type} [Ring R] [AddCommGroup V] [Module R V] (p q : Submodule R V) :
     (p ⊓ q).toAddSubgroup = p.toAddSubgroup ⊓ q.toAddSubgroup := rfl
 
-open Classical in
 
-theorem pathCount_eq_card_middle (P Q : HeightOneSpectrum (𝓞 E)) (i j : ℕ) (d f : DecoSet E n ST SG) :
+open Classical in
+theorem pathCount_eq_card_middle (P Q : HeightOneSpectrum (𝓞 E)) (i j : ℕ) (d f : DecoSet (E := E) (n := n) (ST := ST) (SG := SG)) :
     decorationPathCount P.asIdeal Q.asIdeal i j d f =
-      Nat.card {e : DecoSet E n ST SG // e ∈ d.heckeSet P.asIdeal i ∧ f ∈ e.heckeSet Q.asIdeal j} := by
+      Nat.card {e : DecoSet (E := E) (n := n) (ST := ST) (SG := SG) // e ∈ d.heckeSet P.asIdeal i ∧ f ∈ e.heckeSet Q.asIdeal j} := by
   have hP : P.asIdeal ≠ ⊥ := P.ne_bot
   have hP' := conjIdeal_ne_bot hP
   have hQ : Q.asIdeal ≠ ⊥ := Q.ne_bot
@@ -366,9 +415,9 @@ theorem ideal_sq_smul_le {P : HeightOneSpectrum (𝓞 E)} {N M B : Submodule (�
 
 theorem card_paths_eq_submodulePairs (P : HeightOneSpectrum (𝓞 E)) (hne : conjPrime₂ P ≠ P)
     (hST : ∀ R : ST, R.1 ≠ P ∧ R.1 ≠ conjPrime₂ P) (hSG : ∀ w : SG, w.1 ≠ P ∧ w.1 ≠ conjPrime₂ P)
-    (d f : DecoSet E n ST SG) (hf : f.1.f = d.1.f) (hb : f.1.be = d.1.be)
+    (d f : DecoSet (E := E) (n := n) (ST := ST) (SG := SG)) (hf : f.1.f = d.1.f) (hb : f.1.be = d.1.be)
     (hPM : ∀ p ∈ P.asIdeal, ∀ p' ∈ P.asIdeal, ∀ x ∈ f.1.N, p • p' • x ∈ d.1.N) (i j : ℕ) :
-    Nat.card {e : DecoSet E n ST SG // e ∈ d.heckeSet P.asIdeal i ∧ f ∈ e.heckeSet P.asIdeal j} =
+    Nat.card {e : DecoSet (E := E) (n := n) (ST := ST) (SG := SG) // e ∈ d.heckeSet P.asIdeal i ∧ f ∈ e.heckeSet P.asIdeal j} =
       Nat.card (submoduleChainSet (conjPrime₂ P) (d.1.N ⧸ (f.1.N ⊓ d.1.N).comap d.1.N.subtype) i j) := by
   classical
   set N := d.1.N with hNdef
@@ -376,7 +425,7 @@ theorem card_paths_eq_submodulePairs (P : HeightOneSpectrum (𝓞 E)) (hne : con
   set C' := (M ⊓ N).comap N.subtype with hC'
   have hq0 : 0 < Nat.card (𝓞 E ⧸ (conjPrime₂ P).asIdeal) := by have := one_lt_card_residue (conjPrime₂ P); omega
 
-  have hmem : ∀ e : {e : DecoSet E n ST SG // e ∈ d.heckeSet P.asIdeal i ∧ f ∈ e.heckeSet P.asIdeal j},
+  have hmem : ∀ e : {e : DecoSet (E := E) (n := n) (ST := ST) (SG := SG) // e ∈ d.heckeSet P.asIdeal i ∧ f ∈ e.heckeSet P.asIdeal j},
       ((e.1.1.N ⊓ N).comap N.subtype).map C'.mkQ ∈ submoduleChainSet (conjPrime₂ P) (N ⧸ C') i j := by
     rintro ⟨e, ⟨hn1, -, -⟩, ⟨hn2, -, -⟩⟩
     obtain ⟨i11, i12, ⟨i13⟩⟩ := (isHeckeNbr_iff P i _ _).1 hn1
@@ -411,7 +460,7 @@ theorem card_paths_eq_submodulePairs (P : HeightOneSpectrum (𝓞 E)) (hne : con
         ← inf_toAddSubgroup e.1.N N, hBN, ← inf_toAddSubgroup M N] at hmul
       rw [hBN, ← hmul] at c2
       exact Nat.eq_of_mul_eq_mul_right (pow_pos hq0 i) c2
-  let Φ : {e : DecoSet E n ST SG // e ∈ d.heckeSet P.asIdeal i ∧ f ∈ e.heckeSet P.asIdeal j} →
+  let Φ : {e : DecoSet (E := E) (n := n) (ST := ST) (SG := SG) // e ∈ d.heckeSet P.asIdeal i ∧ f ∈ e.heckeSet P.asIdeal j} →
       submoduleChainSet (conjPrime₂ P) (N ⧸ C') i j := fun e => ⟨_, hmem e⟩
   refine Nat.card_eq_of_bijective Φ ⟨?_, ?_⟩
   ·
@@ -518,7 +567,7 @@ theorem card_paths_eq_submodulePairs (P : HeightOneSpectrum (𝓞 E)) (hne : con
         ← inf_toAddSubgroup, ← inf_toAddSubgroup, hinf]
       exact hMB
     obtain ⟨ψ'⟩ := wmp_quot_equiv_of_card (conjPrime₂ P) _ hkill' hcard'
-    let e : DecoSet E n ST SG := ⟨{ N := N', f := d.1.f, be := d.1.be },
+    let e : DecoSet (E := E) (n := n) (ST := ST) (SG := SG) := ⟨{ N := N', f := d.1.f, be := d.1.be },
       d.2.replN hl hu (fun R => hsame R.1 (hST R).1 (hST R).2) (fun w => hsame w.1 (hSG w).1 (hSG w).2)⟩
     have he1 : e ∈ d.heckeSet P.asIdeal i := ⟨hnb, rfl, rfl⟩
     have he2 : f ∈ e.heckeSet P.asIdeal j := ⟨(isHeckeNbr_iff P j _ _).2 ⟨hPM', hPbar, ⟨ψ'⟩⟩, hf, hb⟩
@@ -528,7 +577,7 @@ theorem card_paths_eq_submodulePairs (P : HeightOneSpectrum (𝓞 E)) (hne : con
 
 theorem pathCount_symm_same_prime (P : HeightOneSpectrum (𝓞 E)) (hne : conjPrime₂ P ≠ P)
     (hST : ∀ R : ST, R.1 ≠ P ∧ R.1 ≠ conjPrime₂ P) (hSG : ∀ w : SG, w.1 ≠ P ∧ w.1 ≠ conjPrime₂ P) (i j : ℕ)
-    (d f : DecoSet E n ST SG) :
+    (d f : DecoSet (E := E) (n := n) (ST := ST) (SG := SG)) :
     decorationPathCount P.asIdeal P.asIdeal i j d f = decorationPathCount P.asIdeal P.asIdeal j i d f := by
   rw [pathCount_eq_card_middle P P i j d f, pathCount_eq_card_middle P P j i d f]
   by_cases hc : f.1.f = d.1.f ∧ f.1.be = d.1.be ∧
@@ -550,7 +599,7 @@ theorem pathCount_symm_same_prime (P : HeightOneSpectrum (𝓞 E)) (hne : conjPr
         rw [Submodule.card_eq_card_quotient_mul_card Y, hXY, hY']
         exact Nat.mul_ne_zero (pow_ne_zero _ (by omega)) (pow_ne_zero _ (by omega))
       rw [hT, hT]
-  · have h0 : ∀ k l, Nat.card {e : DecoSet E n ST SG //
+  · have h0 : ∀ k l, Nat.card {e : DecoSet (E := E) (n := n) (ST := ST) (SG := SG) //
         e ∈ d.heckeSet P.asIdeal k ∧ f ∈ e.heckeSet P.asIdeal l} = 0 := by
       intro k l
       rw [Nat.card_eq_zero]

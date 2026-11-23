@@ -1,5 +1,43 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.MultiplicityOne.HeckeIntegrability.LevelTrAAlt
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.TraceFormula.GlobalTraceComparison.AutomorphicRepresentations.PiTermEqTraceSumOfDegreeFourTest
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.MultiplicityOne.HeckeIntegrability.LevelTrAAlt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 open UpperTheory.V.Z.Tf.GlobalTraceComparison.Pi UpperTheory.V.Z.Mult.Pi
 
@@ -51,7 +89,7 @@ theorem levIdx_pf :
     SlotBasic → LevTop → LevIdx := by
   intro hF _ E _ _ _ n S Z N hS hZ hG
   obtain ⟨-, -, h3, h4, -, -, h7⟩ := hF E n S hS
-  have hK : ∀ g, g ∈ PositivityTheory.Rg.BcB.G8.Kf E n ↔ ∀ i, Sl S i → qw n i.1 i.2 g ∈ GlobalTheory.LFun.KGL i.1 n := fun g => by
+  have hK : ∀ g, g ∈ PositivityTheory.Rg.BcB.G8.Kf E n ↔ ∀ i, Sl S i → qw n i.1 i.2 g ∈ GlobalTheory.LFun.KGL i.1 (n := n) := fun g => by
     rw [← h7, mem_Lev]
   have hLe : Lev S N ≤ PositivityTheory.Rg.BcB.G8.Kf E n := fun g hg =>
     (hK g).2 fun i hi => (hG i.1).2.1 ((mem_Lev S N g).1 hg i hi)
@@ -75,7 +113,7 @@ theorem levIdx_pf :
       · rw [(hG i.1).2.2.2 hw]
         exact (hK g).1 hg i hi
   have key := relIndex_positions (A := fun i : GlobalTheory.BCT.Pl E × Bool => GlobalTheory.BCT.GLw n i.1) (PositivityTheory.Rg.BcB.G8.Kf E n)
-    (fun i => qw n i.1 i.2) (fun i => jw n i.1 i.2) (fun i => GlobalTheory.LFun.KGL i.1 n) (fun i => N i.1)
+    (fun i => qw n i.1 i.2) (fun i => jw n i.1 i.2) (fun i => GlobalTheory.LFun.KGL i.1 (n := n)) (fun i => N i.1)
     (Z ×ˢ (Finset.univ : Finset Bool))
     (fun i _ a => (h3 i.1 i.2).2.2.1 a)
     (fun i hi k hk hne a => h4 i k (hposition i hi) (hposition k hk) hne a)
@@ -85,7 +123,7 @@ theorem levIdx_pf :
         rw [(h3 i.1 i.2).2.2.1 a]
         exact ha
       · rw [h4 i k (hposition i hi) hk hik a]
-        exact (GlobalTheory.LFun.KGL k.1 n).one_mem)
+        exact (GlobalTheory.LFun.KGL k.1 (n := n)).one_mem)
     (fun i hi k hk => (hK k).1 hk i (hposition i hi))
   rw [hEq, key, Finset.prod_product]
   refine Finset.prod_congr rfl fun w _ => ?_

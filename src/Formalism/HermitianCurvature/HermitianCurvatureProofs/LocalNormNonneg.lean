@@ -1,7 +1,50 @@
-import Formalism.HermitianCurvature.StatementKB
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.BlockOfCauchySchwarz
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.TheoremPIntegralOfPlaces
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.BlockEstimatesSumForm
+module
+
+public import Formalism.HermitianCurvature.StatementKB
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.BlockEstimatesSumForm
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.JointInstanceTheoremA
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.TheoremPIntegralOfPlaces
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Finset Filter Topology
 open scoped ComplexConjugate
@@ -16,20 +59,6 @@ variable {E : Type} [Field E] [NumberField E] [IsCMField E] {Wp Wq : InfinitePla
   [∀ x, InnerProductSpace ℂ (Wq x)] (S : C.HidaSetting E Wp Wq)
   (RR : Fin S.f → ℝ → ℕ → List C.Letter → C.LPt → C.LPt → ℂ)
 
-example : (KB.withRR S RR).W = S.W := rfl
-example : (KB.withRR S RR).base.Wall = S.base.Wall := rfl
-example : (KB.withRR S RR).base.cnt = S.base.cnt := rfl
-example : (KB.withRR S RR).base.K = S.base.K := rfl
-example : (KB.withRR S RR).base.Ntop = S.base.Ntop := rfl
-example : (KB.withRR S RR).base.av = S.base.av := rfl
-example : (KB.withRR S RR).base.vol = S.base.vol := rfl
-example : (KB.withRR S RR).base.La = S.base.La := rfl
-example : (KB.withRR S RR).base.wt = S.base.wt := rfl
-example : (KB.withRR S RR).base.f = S.base.f := rfl
-example : (KB.withRR S RR).base.r = S.base.r := rfl
-example (v : Fin S.f) ε i a p q : (KB.withRR S RR).gramLoc v ε i a p q =
-    ((√(C.nLoc S.G.k S.G.r S.fr (S.pd v).G p) * √(C.nLoc S.G.k S.G.r S.fr (S.pd v).G q) : ℝ) : ℂ) *
-      RR v ε i a p q := rfl
 end defeq
 
 theorem extract_prob {ι X : Type} [Fintype ι] (U : Finset X) (θ : ℕ → ι → X → ℝ)

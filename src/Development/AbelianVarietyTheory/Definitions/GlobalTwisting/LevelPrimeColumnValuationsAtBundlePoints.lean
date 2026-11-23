@@ -1,8 +1,41 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.ValidForConstructedPointClassesEventuallyWorking
-import Formalism.SharpRestriction.GlobalSchurBounds.ProductFirstZerothParts
-import Formalism.SharpRestriction.Divisibility.WeightDegreeSizes
-import Formalism.LocalToGlobal.GroupLattices.AdmissibleAtGeneratorPlaces
+module
+
+public import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.ValidForConstructedPointClassesEventuallyWorking
+public import Formalism.LocalToGlobal.GroupLattices.AdmissibleAtGeneratorPlaces
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -23,26 +56,6 @@ def H_aAtG (𝒜 : FamClass) : Prop :=
       Formalism.L2.G.Adm2InU.UsedTuplesBoundByConstant (Fm.D x i) (Fm.L x i) (Fm.ex x hx i).errX C1) ∧ Formalism.MainNotions.WeightDegreeSizes.familySizeBoundAtTypePrime Fm C1
 
 def ArithmeticConditionAtBundlePoints {Bd : BdT} (Q : V4.Slot) (Lk : LkT Bd) : Prop := Row Q Lk fun 𝒜 _ => H_aAtG 𝒜
-
-structure All (𝒜 : FamClass) : Prop where
-  aP10 : LevelPrimeColumnValuationsClosed 𝒜
-  aAtG : H_aAtG 𝒜
-
-theorem row_all {Bd : BdT} {Q : V4.Slot} {Lk : LkT Bd}
-    (aP10 : LevelPrimeColumnValuationsAtBundlePoints Q Lk) (aAtG : ArithmeticConditionAtBundlePoints Q Lk) :
-    Row Q Lk fun 𝒜 _ => All 𝒜 :=
-  Row.imp (Row.and aP10 aAtG)
-    fun _ _ _ ⟨a0, a1⟩ => ⟨a0, a1⟩
-
-theorem row_of_all {Bd : BdT} {Q : V4.Slot} {Lk : LkT Bd} (h : Row Q Lk fun 𝒜 _ => All 𝒜) :
-    LevelPrimeColumnValuationsAtBundlePoints Q Lk ∧ ArithmeticConditionAtBundlePoints Q Lk :=
-  ⟨Row.imp h fun _ _ _ t => t.aP10, Row.imp h fun _ _ _ t => t.aAtG⟩
-
-example (𝒜 : FamClass) : LevelPrimeColumnValuationsClosed 𝒜 ↔
-    EvC (fun D O => ∀ u, Formalism.MainNotions.product_first_zeroth_parts.Conclusion5Sharp D u ∧ Formalism.L2.G.Adm2InU.TwistedColumnBoundAtT O.X O.ex.tw u) 𝒜 := Iff.rfl
-
-example {Bd : BdT} {Q : V4.Slot} (Lk : LkT Bd) (h : Row0 Q LevelPrimeColumnValuationsClosed) (h' : Row0 Q H_aAtG) : LevelPrimeColumnValuationsAtBundlePoints Q Lk ∧ ArithmeticConditionAtBundlePoints Q Lk :=
-  ⟨h.row Lk, h'.row Lk⟩
 
 end GlobalTheory.Fc.AllBundlePointProperties
 

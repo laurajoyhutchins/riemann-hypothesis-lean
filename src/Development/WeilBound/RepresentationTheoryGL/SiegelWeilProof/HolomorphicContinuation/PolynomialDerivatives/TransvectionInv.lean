@@ -1,4 +1,57 @@
-import Development.WeilBound.RepresentationTheoryGL.SiegelWeilProof.HolomorphicContinuation.PolynomialDerivatives.PairSym
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.SiegelWeilProof.HolomorphicContinuation.PolynomialDerivatives.PairSym
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Bool
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -78,9 +131,9 @@ theorem symK_rename (ε : Fin m → Bool) (i j : Fin n) (p : MvPolynomial (Final
   · intro a
     simp [MvPolynomial.derivation_C]
   · intro p q hp hq
-    simp only [map_add, hp, hq]
+    simp only [map_add (f := _), hp, hq]
   · intro p v hp
-    simp only [map_mul, Derivation.leibniz, smul_eq_mul, map_add, hp, symK_rename_X]
+    simp only [map_mul, Derivation.leibniz, smul_eq_mul, map_add (f := _), hp, symK_rename_X]
 
 theorem Dsrc_eq_zero (ε : Fin m → Bool) (i j : Fin n) (p : MvPolynomial (FinalTheorems m n) ℂ)
     (h : symK ε i j (rename (phi ε) p) = 0) : Dsrc (m := m) i j p = 0 := by
@@ -95,12 +148,14 @@ theorem act_comp (A B : Matrix (Fin n) (Fin n) ℂ) :
     act (m := m) (B * A) = (act A).comp (act B) := by
   apply MvPolynomial.algHom_ext
   rintro (⟨l, a⟩ | ⟨l, b⟩)
+
   · simp only [act, AlgHom.comp_apply, aeval_X, Sum.elim_inl, map_sum, map_mul, aeval_C,
-      MvPolynomial.algebraMap_eq, Matrix.mul_apply, Finset.sum_mul, Finset.mul_sum, mul_assoc]
+    MvPolynomial.algebraMap_eq, Matrix.mul_apply, Finset.sum_mul, Finset.mul_sum, mul_assoc]
     rw [Finset.sum_comm]
+
   · simp only [act, AlgHom.comp_apply, aeval_X, Sum.elim_inr, map_sum, map_mul, aeval_C,
-      MvPolynomial.algebraMap_eq, Matrix.mul_inv_rev, Matrix.mul_apply, Finset.sum_mul, Finset.mul_sum,
-      mul_assoc]
+    MvPolynomial.algebraMap_eq, Matrix.mul_inv_rev, Matrix.mul_apply, Finset.sum_mul, Finset.mul_sum,
+    mul_assoc]
     rw [Finset.sum_comm]
     refine Finset.sum_congr rfl fun k _ => Finset.sum_congr rfl fun j _ => ?_
     ring
@@ -132,10 +187,10 @@ theorem fix_of_exp (δ : Derivation ℂ (MvPolynomial (FinalTheorems m n) ℂ) (
     · intro a
       simp [Φ, MvPolynomial.derivation_C, Polynomial.algebraMap_apply, MvPolynomial.algebraMap_eq]
     · intro p q hp hq
-      simp only [map_add, Polynomial.derivative_add, hp, hq, mul_add]
+      simp only [map_add (f := _), Polynomial.derivative_add, hp, hq, mul_add]
     · intro p v hp
       rw [map_mul, Polynomial.derivative_mul, hp, Derivation.leibniz, smul_eq_mul, smul_eq_mul]
-      simp only [mul_add, map_add, map_mul, hΦδ, hX, hC, Polynomial.derivative_add, Polynomial.derivative_C,
+      simp only [mul_add, map_add (f := _), map_mul, hΦδ, hX, hC, Polynomial.derivative_add, Polynomial.derivative_C,
         Polynomial.derivative_mul, Polynomial.derivative_X, zero_add, one_mul, mul_zero, add_zero, Polynomial.C_mul]
       ring
   have hev1 : ∀ q, Polynomial.eval 1 (Φ q) = φ q := by
@@ -144,7 +199,7 @@ theorem fix_of_exp (δ : Derivation ℂ (MvPolynomial (FinalTheorems m n) ℂ) (
     · intro a
       simp [Φ, Polynomial.algebraMap_apply, MvPolynomial.algebraMap_eq]
     · intro p q hp hq
-      simp only [map_add, Polynomial.eval_add, hp, hq]
+      simp only [map_add (f := _), Polynomial.eval_add, hp, hq]
     · intro p v hp
       rw [map_mul, map_mul, Polynomial.eval_mul, hp, hX, hφ]
       simp
@@ -154,7 +209,7 @@ theorem fix_of_exp (δ : Derivation ℂ (MvPolynomial (FinalTheorems m n) ℂ) (
     · intro a
       simp [Φ, Polynomial.algebraMap_apply, MvPolynomial.algebraMap_eq]
     · intro p q hp hq
-      simp only [map_add, Polynomial.eval_add, hp, hq]
+      simp only [map_add (f := _), Polynomial.eval_add, hp, hq]
     · intro p v hp
       rw [map_mul, Polynomial.eval_mul, hp, hX]
       simp
@@ -254,15 +309,16 @@ theorem Dsrc_monomial (l : Fin n) (d : FinalTheorems m n →₀ ℕ) (r : ℂ) :
       wgt_single l k v]
     have hX : (X v : MvPolynomial (FinalTheorems m n) ℂ) ^ (k - 1) * X v = X v ^ k := by
       rw [← pow_succ, Nat.sub_add_cancel (Nat.pos_of_ne_zero hk)]
-    simp only [smul_eq_mul, nsmul_eq_mul, Int.cast_add, Int.cast_mul, Int.cast_natCast, map_add, map_mul,
+    simp only [smul_eq_mul, nsmul_eq_mul, Int.cast_add, Int.cast_mul, Int.cast_natCast, map_add (f := _), map_mul,
       map_natCast]
     calc _ = (k : MvPolynomial (FinalTheorems m n) ℂ) * C ((wgt l (Finsupp.single v 1) : ℤ) : ℂ) * (X v ^ (k - 1) * X v) *
             monomial f r + C ((wgt l f : ℤ) : ℂ) * (X v ^ k * monomial f r) := by ring
       _ = _ := by rw [hX]; ring
 
 theorem coeff_Dsrc (l : Fin n) (p : MvPolynomial (FinalTheorems m n) ℂ) (d : FinalTheorems m n →₀ ℕ) :
-    coeff d (Dsrc (m := m) l l p) = ((wgt l d : ℤ) : ℂ) * coeff d p := by
+    AddMonoidAlgebra.coeff (Dsrc (m := m) l l p) d = ((wgt l d : ℤ) : ℂ) * AddMonoidAlgebra.coeff p d := by
   conv_lhs => rw [p.as_sum]
+
   rw [map_sum, coeff_sum]
   simp only [Dsrc_monomial, coeff_C_mul, coeff_monomial]
   rw [Finset.sum_eq_single d]
@@ -296,9 +352,9 @@ theorem act_diag (D : Fin n → ℂ) (hD : ∀ l, D l ≠ 0) (p : MvPolynomial (
     ring
   have hw : ∀ d ∈ p.support, ∀ l, wgt l d = 0 := by
     intro d hd l
-    have h := congrArg (coeff d) (hp l)
-    rw [coeff_Dsrc, coeff_zero] at h
-    have hc : coeff d p ≠ 0 := mem_support_iff.mp hd
+    have h := congrArg (AddMonoidAlgebra.coeff · d) (hp l)
+    rw [coeff_Dsrc, AddMonoidAlgebra.coeff_zero, Finsupp.zero_apply] at h
+    have hc : AddMonoidAlgebra.coeff p d ≠ 0 := mem_support_iff.mp hd
     exact_mod_cast (mul_eq_zero.mp h).resolve_right hc
   have hprod : ∀ d ∈ p.support, (d.prod fun v k => cv v ^ k) = 1 := by
     intro d hd
@@ -314,6 +370,7 @@ theorem act_diag (D : Fin n → ℂ) (hD : ∀ l, D l ≠ 0) (p : MvPolynomial (
     congr 1
     exact_mod_cast h
   conv_lhs => rw [p.as_sum]
+
   rw [map_sum]
   conv_rhs => rw [p.as_sum]
   refine Finset.sum_congr rfl fun d hd => ?_

@@ -1,18 +1,74 @@
-import Mathlib
-import Formalism.SharpRestriction.CuspSpanNormBounds.GlobAut
-import Formalism.SharpRestriction.CuspSpanNormBounds.UnimodularSchurMeasures.RightRegularIsometricMultiplicative
-import Formalism.SharpRestriction.CuspSpanNormBounds.UnimodularSchurMeasures.RrdStronglyMeasurable
-import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.ConcreteLevelAdelicSubset
-import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.ProjRows
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicUnimodularity.ConstructionA
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicUnimodularity.ConstructionA
+public import Formalism.SharpRestriction.CuspSpanNormBounds.BridgeLitG
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.SettingBlocks
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.LevelSubgroupCharacterUnitary
+public import Formalism.SharpRestriction.CuspSpanNormBounds.UnimodularSchurMeasures.RrExistsMeasRep
+public import Mathlib.Analysis.InnerProductSpace.Completion
+public import Mathlib.Analysis.InnerProductSpace.TensorProduct
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.ConcreteLevelAdelicSubset
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.WuDecayPf
+public import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.AdIndexEq
 import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicUnimodularity.ConstructionB
 import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicUnimodularity.ConstructionD
-import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.AdIndexEq
-import Formalism.SharpRestriction.CuspSpanNormBounds.BridgeLitG
-import Formalism.SharpRestriction.CuspSpanNormBounds.NonemptyParameterModels.UnitaryPointsRankZeroSubsingleton
-import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.SettingBlocks
-import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.WuDecayPf
-import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.LevelSubgroupCharacterUnitary
+public import Formalism.SharpRestriction.CuspSpanNormBounds.NonemptyParameterModels.UnitaryPointsRankZeroSubsingleton
+public import Formalism.SharpRestriction.CuspSpanNormBounds.UnimodularSchurMeasures.RightRegularIsometricMultiplicative
+public import Formalism.SharpRestriction.CuspSpanNormBounds.UnimodularSchurMeasures.RrdStronglyMeasurable
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.MeasureTheory.Integral.Pi
+import Mathlib.MeasureTheory.Measure.SeparableMeasure
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Algebra.Group.Units
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.BitVec
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -110,8 +166,8 @@ abbrev Cw (l : List V) : Type := UniformSpace.Completion (tw H l).C
 def ctens (l : List V) (x : ∀ v, H v) : Cw H l := ((pt H l x : (tw H l).C) : Cw H l)
 
 def cop (l : List V) (A : ∀ v, H v →L[ℂ] H v) : Cw H l →L[ℂ] Cw H l :=
-  ((UniformSpace.Completion.toComplL (𝕜 := ℂ) (E := (tw H l).C)).comp (op H l A)).extend
-    (UniformSpace.Completion.toComplL (𝕜 := ℂ) (E := (tw H l).C))
+  (UniformSpace.Completion.toComplL.comp (op H l A)).extend
+    (UniformSpace.Completion.toComplL : (tw H l).C →L[ℂ] Cw H l)
 
 theorem ctens_inner (l : List V) (x y : ∀ v, H v) :
     ⟪ctens H l x, ctens H l y⟫_ℂ = (l.map fun v => ⟪x v, y v⟫_ℂ).prod := by
@@ -121,7 +177,7 @@ theorem ctens_inner (l : List V) (x y : ∀ v, H v) :
 
 theorem cop_ctens (l : List V) (A : ∀ v, H v →L[ℂ] H v) (x : ∀ v, H v) :
     cop H l A (ctens H l x) = ctens H l (fun v => A v (x v)) := by
-  have e1 : ctens H l x = UniformSpace.Completion.toComplL (𝕜 := ℂ) (E := (tw H l).C) (pt H l x) := rfl
+  have e1 : ctens H l x = UniformSpace.Completion.toComplL (S := ℂ) (pt H l x) := rfl
   rw [e1, cop, ContinuousLinearMap.extend_eq]
   · rw [ContinuousLinearMap.comp_apply, op_pt]; rfl
   all_goals first
@@ -135,7 +191,7 @@ theorem ctens_dense [DecidableEq V] (l : List V) (hl : l.Nodup) :
     rintro _ ⟨y, rfl⟩
     have hy : y ∈ Submodule.span ℂ (Set.range (pt H l)) := by rw [pt_span H l hl]; trivial
     have h2 := Submodule.mem_map_of_mem
-      (f := (UniformSpace.Completion.toComplL (𝕜 := ℂ) (E := (tw H l).C)).toLinearMap) hy
+      (f := (UniformSpace.Completion.toComplL : (tw H l).C →L[ℂ] Cw H l).toLinearMap) hy
     rw [Submodule.map_span, ← Set.range_comp] at h2
     exact h2
   exact Dense.mono h1 UniformSpace.Completion.denseRange_coe
@@ -253,7 +309,7 @@ theorem exists_opInt (π : G → (H →L[ℂ] H)) (hiso : ∀ g x, ‖π g x‖ 
       map_add' := fun a b => by
         unfold rrd_vec
         rw [← integral_add (rrd_int hiso hmeas hf a) (rrd_int hiso hmeas hf b)]
-        congr 1; funext g; rw [map_add, smul_add]
+        congr 1; funext g; rw [map_add (f := _), smul_add]
       map_smul' := fun c a => by
         unfold rrd_vec
         rw [RingHom.id_apply, ← integral_smul]
@@ -794,6 +850,7 @@ theorem hform_inv {A : Type} [CommRing A] {n : Type} [Fintype n] [DecidableEq n]
     simp only [Formalism.UG.hform, dotProduct, mulVec, Finset.mul_sum, mul_assoc]
   have hσ : (fun i => σ ((M *ᵥ x) i)) = (M.map σ) *ᵥ (fun i => σ (x i)) := by
     funext i
+
     simp [mulVec, dotProduct, map_sum, map_mul]
   rw [hdot, hdot, hσ, ← vecMul_transpose, ← dotProduct_mulVec]
   simp only [mulVec_mulVec, ← Matrix.mul_assoc]
@@ -1288,25 +1345,27 @@ theorem level_set_unipotent_mod_g (A : UnitaryGroupInstance D) {L : UnitaryLatti
     Rf.ew_orth Rf.ew_int Rf.bw_w Rf.bwd_w Rf.bw_dual Rf.latticeSpan x hx
 
 theorem frameOK (A : UnitaryGroupInstance D) {L : UnitaryLatticeData D} (P : AdditiveCharacterData A) (Rf : ReferenceFrame A L) :
-    BunA.FrameOK A.I (gD D) Rf.e0 Rf.f0 Rf.z0 Rf.bw Rf.bwd P.psiEf where
-  hg := gD_ne D
-  hadd := P.psiEf_add
-  hint := P.psiEf_int
-  he0 := fun a => (Rf.vectorsInLattice.1 a).1
-  hf0 := fun a => (Rf.vectorsInLattice.1 a).2
-  hz0 := Rf.vectorsInLattice.2.1
-  hbw := fun i => (Rf.vectorsInLattice.2.2 i).1
-  hbwd := fun i => (Rf.vectorsInLattice.2.2 i).2
-  hfe := fun a b hab => by
-    have h := (Rf.gramIntegral b a).2.2
-    rw [if_neg (Ne.symm hab), sub_zero] at h
-    rw [unitaryCongruence.hA_symm A.I (Rf.e0 b)]; exact unitaryCongruence.Z_sig _ _ h
-  hfz := fun a => (Rf.formsAtZero.2 a).2
-  hbe := fun i a => by
-    rw [unitaryCongruence.hA_symm A.I (Rf.e0 a)]; exact unitaryCongruence.Z_sig _ _ ((Rf.weightVectorsIntegral i).2.2 a).2.2.1
-  hbb := fun i j hij => by
-    have h := Rf.bw_dual i j
-    rwa [if_neg hij, sub_zero] at h
+    BunA.FrameOK A.I (gD D) Rf.e0 Rf.f0 Rf.z0 Rf.bw Rf.bwd P.psiEf :=
+  { hg := gD_ne D
+    hadd := P.psiEf_add
+    hint := P.psiEf_int
+    he0 := fun a => (Rf.vectorsInLattice.1 a).1
+    hf0 := fun a => (Rf.vectorsInLattice.1 a).2
+    hz0 := Rf.vectorsInLattice.2.1
+    hbw := fun i => (Rf.vectorsInLattice.2.2 i).1
+    hbwd := fun i => (Rf.vectorsInLattice.2.2 i).2
+    hfe := fun a b hab => by
+      have h := (Rf.gramIntegral b a).2.2
+      rw [if_neg (Ne.symm hab), sub_zero] at h
+      rw [unitaryCongruence.hA_symm A.I (Rf.e0 b)]
+      exact unitaryCongruence.Z_sig _ _ h
+    hfz := fun a => (Rf.formsAtZero.2 a).2
+    hbe := fun i a => by
+      rw [unitaryCongruence.hA_symm A.I (Rf.e0 a)]
+      exact unitaryCongruence.Z_sig _ _ ((Rf.weightVectorsIntegral i).2.2 a).2.2.1
+    hbb := fun i j hij => by
+      have h := Rf.bw_dual i j
+      rwa [if_neg hij, sub_zero] at h }
 
 theorem level_subgroup_measure_pos (A : UnitaryGroupInstance D) {L : UnitaryLatticeData D} (P : AdditiveCharacterData A) (Rf : ReferenceFrame A L) (μf : Measure A.I.Gf)
     [μf.IsHaarMeasure] : 0 < μf (K2set A.I (gD D) Rf.e0 Rf.z0 Rf.bw) := by

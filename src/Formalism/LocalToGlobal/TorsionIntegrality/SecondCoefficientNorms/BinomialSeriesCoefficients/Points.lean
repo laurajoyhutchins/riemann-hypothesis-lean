@@ -1,5 +1,51 @@
-import Formalism.LocalToGlobal.TorsionIntegrality.SecondCoefficientNorms.IsotropicVanish
-import Formalism.LocalToGlobal.TorsionIntegrality.SecondCoefficientNorms.BinomialSeriesCoefficients.DegreeLeOfMemAntidiagonal
+module
+
+public import Formalism.LocalToGlobal.TorsionIntegrality.SecondCoefficientNorms.IsotropicVanish
+public import Formalism.LocalToGlobal.TorsionIntegrality.SecondCoefficientNorms.BinomialSeriesCoefficients.DegreeLeOfMemAntidiagonal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 open scoped BigOperators
@@ -60,7 +106,7 @@ theorem subst_linv_l (h : IsLogPair l linv) {x : MvPowerSeries σ K}
 theorem constantCoeff_add_l (h : IsLogPair l linv) {x y : MvPowerSeries σ K}
     (hx : MvPowerSeries.constantCoeff x = 0) (hy : MvPowerSeries.constantCoeff y = 0) :
     MvPowerSeries.constantCoeff (PowerSeries.subst x l + PowerSeries.subst y l) = 0 := by
-  rw [map_add, constantCoeff_subst_l h hx, constantCoeff_subst_l h hy, add_zero]
+  rw [map_add (f := _), constantCoeff_subst_l h hx, constantCoeff_subst_l h hy, add_zero]
 
 theorem constantCoeff_C_mul_l (h : IsLogPair l linv) (a : K) {x : MvPowerSeries σ K}
     (hx : MvPowerSeries.constantCoeff x = 0) :
@@ -70,6 +116,7 @@ theorem constantCoeff_C_mul_l (h : IsLogPair l linv) (a : K) {x : MvPowerSeries 
 theorem constantCoeff_sum_l (h : IsLogPair l linv) {n : Type} [Fintype n] (c : n → K)
     {u : n → MvPowerSeries σ K} (hu : ∀ j, MvPowerSeries.constantCoeff (u j) = 0) :
     MvPowerSeries.constantCoeff (∑ j, MvPowerSeries.C (c j) * PowerSeries.subst (u j) l) = 0 := by
+
   rw [map_sum]
   exact Finset.sum_eq_zero fun j _ => constantCoeff_C_mul_l h (c j) (hu j)
 
@@ -150,7 +197,7 @@ theorem fmul_fadd (h : IsLogPair l linv) (a : K) {x y : MvPowerSeries σ K}
 theorem fmul_add (h : IsLogPair l linv) (a b : K) {x : MvPowerSeries σ K}
     (hx : MvPowerSeries.constantCoeff x = 0) :
     fmul l linv (a + b) x = fadd l linv (fmul l linv a x) (fmul l linv b x) := by
-  rw [fadd, l_fmul h a hx, l_fmul h b hx, fmul, map_add, add_mul]
+  rw [fadd, l_fmul h a hx, l_fmul h b hx, fmul, map_add (f := _), add_mul]
 
 theorem fadd_fmul_neg (h : IsLogPair l linv) (a : K) {x : MvPowerSeries σ K}
     (hx : MvPowerSeries.constantCoeff x = 0) :
@@ -413,6 +460,7 @@ theorem isPt_flin (h : IsLogPair l linv) (hF : FGInt R l linv) {n : Type} [Finty
     | insert j s hj ih =>
       have h0 : MvPowerSeries.constantCoeff
           (∑ j ∈ s, MvPowerSeries.C (c j) * PowerSeries.subst (u j) l) = 0 := by
+
         rw [map_sum]
         exact Finset.sum_eq_zero fun j _ => constantCoeff_C_mul_l h (c j) (hu j).1
       have := isPt_fadd h hF (isPt_fmul h (hc j) (hu j)) ih

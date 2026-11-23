@@ -1,10 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.IsDualDualRep
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.PoitouTateNineTermTransgressionZeroApply
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.ContinuousCycMod
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.IsDualDualRep
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ContinuousAlgebraMapPadicInt
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsIsJumpMultiset
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.FiniteQuotientPow
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Proofs.FoundationProofs.LocalGaloisRepInvariantsFromFractionRing
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ContinuousAlgebraMapPadicInt
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsIsJumpMultiset
+import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.PoitouTateNineTermTransgressionZeroApply
+import Development.AbelianVarietyTheory.PublishedTheorems.GaloisGeometry₂.TateDualCrystalline
+
+@[expose] public section
 
 namespace GlobalTheory.BKCup
 
@@ -38,6 +81,7 @@ theorem dot_dual {O L : Type} [CommRing O] [CommRing L] (φ : O →+* L) {m : �
     Matrix.mulVec_mulVec, h2, Matrix.one_mulVec]
 
 set_option maxHeartbeats 1000000 in
+set_option synthInstance.maxHeartbeats 100000 in
 theorem cup_cob {m : ℕ} (r r' : ↥Gw →* GL (Fin m) O)
     (hr : Continuous fun g => ((r g : GL (Fin m) O) : Matrix (Fin m) (Fin m) O))
     (hr' : Continuous fun g => ((r' g : GL (Fin m) O) : Matrix (Fin m) (Fin m) O))
@@ -52,8 +96,32 @@ theorem cup_cob {m : ℕ} (r r' : ↥Gw →* GL (Fin m) O)
       Bw.toLL (y g ⬝ᵥ ((r' g : GL (Fin m) O) : Matrix (Fin m) (Fin m) O).mulVec (y' h)) =
         Bw.toLL (algebraMap ℤ_[l] O ((cycZ E Ω l (g : Ω ≃ₐ[E] Ω) : ℤ_[l]ˣ) : ℤ_[l])) * f h - f (g * h) + f g := by
   have hG := (GlobalTheory.LocalIntegers.good_integers l Bw.LL).1
-  let A := grepOf Bw r hr
-  let A' := grepOf Bw r' hr'
+  have rep_apply {s : ↥Gw →* GL (Fin m) O} (g : ↥(GK Bw.Kw)) (x : Fin m → ↥Bw.LL.1) :
+      Bw.rep s g x = (((s (Bw.e.symm g) : GL (Fin m) O) : Matrix (Fin m) (Fin m) O).map Bw.toLL).mulVec x := rfl
+  let mkRep (s : ↥Gw →* GL (Fin m) O)
+      (hs : Continuous fun g => ((s g : GL (Fin m) O) : Matrix (Fin m) (Fin m) O)) :
+      GRep ↥(GK Bw.Kw) ℚ_[l] ↥Bw.LL.1 ↥(OL Bw.LL) := by
+    haveI : IsTopologicalRing ↥Bw.LL.1 := hG.2.2.2.1
+    exact { V := Fin m → ↥Bw.LL.1
+            acg := inferInstance
+            modLL := inferInstance
+            modQp := inferInstance
+            towQp := inferInstance
+            modO := inferInstance
+            towO := inferInstance
+            fd := inferInstance
+            top := inferInstance
+            mtop := inferInstance
+            cadd := inferInstance
+            csmul := inferInstance
+            ρ := Bw.rep s
+            cont := by
+              intro x
+              simp only [rep_apply]
+              exact ((hs.comp Bw.e_symm_cont).matrix_map
+                (continuous_subtype_val.comp Bw.eO_cont)).matrix_mulVec continuous_const }
+  let A := mkRep r hr
+  let A' := mkRep r' hr'
   have hA : IsDR (P.PD Bw.Kw) A.ρ := by
     change Module.finrank ↥Bw.LL.1 ↥(DdR (P.PD Bw.Kw) (Bw.rep r)) =
       Module.finrank ℚ_[l] ↥Bw.Kw.1 * Module.finrank ↥Bw.LL.1 (Fin m → ↥Bw.LL.1)
@@ -73,7 +141,8 @@ theorem cup_cob {m : ℕ} (r r' : ↥Gw →* GL (Fin m) O)
       f (Bw.e g) = c (Bw.e g) ⬝ᵥ Bw.rep r' (Bw.e g) (c' (Bw.e h)) := congrFun hf' (Bw.e g, Bw.e h)
   rw [cycLL_eq, rep_apply, MulEquiv.symm_apply_apply, ← map_mul] at h1
   refine Eq.trans ?_ h1.symm
-  simp only [dotProduct, Matrix.mulVec, map_sum, map_mul, Matrix.map_apply, hy, hy']
+  set_option synthInstance.maxHeartbeats 100000 in
+    simp only [dotProduct, Matrix.mulVec, map_sum, map_mul, Matrix.map_apply, hy, hy']
 
 end Bridge
 

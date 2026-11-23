@@ -1,9 +1,48 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ThetaUnifAV
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.MapsAtLeA
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.GlobalSectionsRankAlgClosed
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SymplecticGenerators.SymplecticCharacters.OneEqSpTranslZero
-import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.AwayToAwayRightEqOfComp
+module
+
+public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.AwayToAwayRightEqOfComp
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -42,6 +81,7 @@ def combHom (hv : ∀ i, IsTangent (v i)) :
 theorem tanExp_tanExp (hv : ∀ i, IsTangent (v i)) {m : ℕ} (M : Fin m → Fin n → R)
     (c : Fin m → R) : tanExp (fun i => tanExp v (M i)) c = tanExp v (∑ i, c i • M i) := by
   change _ = (combHom hv (∑ i, c i • M i)).toMul
+
   rw [map_sum, toMul_sum, tanExp, lieExp]
   refine Finset.prod_congr rfl fun i _ => ?_
   refine (comp_lieExp v _ _ _).trans ?_
@@ -67,14 +107,21 @@ theorem isLieBasis_iff_isUnit_det (hv : IsLieBasis v) (M : Matrix (Fin n) (Fin n
       tanExp (fun i => tanExp v (M i)) c = tanExp v (Matrix.vecMul c M) := fun c => by
     rw [Matrix.vecMul_eq_sum]
     exact tanExp_tanExp hv.1 (fun i => M i) c
-  obtain ⟨hinj, -⟩ := isLieBasisOver_self hv
+  have hinj : Function.Injective (fun c : Fin n → R => tanExp v c) := by
+    intro a b hab
+    obtain ⟨c, hc, hu⟩ := hv.2 (tanExp v b) (isTangent_tanExp hv.1 b)
+    have ha : IsLieComb a v (tanExp v b) :=
+      (isLieComb_iff_tanExp _ _).2 hab.symm
+    have hb : IsLieComb b v (tanExp v b) :=
+      (isLieComb_iff_tanExp _ _).2 rfl
+    exact (hu a ha).trans (hu b hb).symm
   rw [← Matrix.isUnit_iff_isUnit_det]
   constructor
   · intro h
     refine Matrix.vecMul_surjective_iff_isUnit.1 fun d => ?_
     obtain ⟨c, hc, -⟩ := h.2 _ (isTangent_tanExp hv.1 d)
     rw [isLieComb_iff_tanExp, key] at hc
-    exact ⟨c, (hinj _ _ hc).symm⟩
+    exact ⟨c, (hinj hc).symm⟩
   · intro h
     refine ⟨fun i => isTangent_tanExp hv.1 _, fun w hw => ?_⟩
     obtain ⟨d, hd, -⟩ := hv.2 w hw
@@ -86,7 +133,7 @@ theorem isLieBasis_iff_isUnit_det (hv : IsLieBasis v) (M : Matrix (Fin n) (Fin n
       rw [isLieComb_iff_tanExp, key, hc', hd]
     · change IsLieComb _ _ _ at h'
       rw [isLieComb_iff_tanExp, key, hd, ← hc'] at h'
-      exact Matrix.vecMul_injective_of_isUnit h (hinj _ _ h').symm
+      exact Matrix.vecMul_injective_of_isUnit h (hinj h').symm
 
 theorem lieComb_algebra (R : Type) [CommRing R] (G : Over (Sp R)) [GrpObj G] [IsCommMonObj G]
     (n : ℕ) (v : Fin n → (epsR R ⟶ G)) (hv : ∀ i, IsTangent (v i)) :

@@ -1,5 +1,48 @@
-import Formalism.LocalToGlobal.CharacterGerms.RowTieUpFBrPl
-import Lemmata.MiscLemmasH.Imports
+module
+
+public import Mathlib.RingTheory.AdicCompletion.Basic
+public import Lemmata.MiscLemmasH.Imports
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -14,56 +57,6 @@ section Complete
 variable {Z : Type} [CommRing Z] (π : Z) {A : Type} [CommRing A] [Algebra Z A] {N : ℕ}
   (β : Module.Basis (Fin N) Z A)
 
-theorem mem_pow_iff (n : ℕ) (x : A) :
-    x ∈ ((Ideal.span {algebraMap Z A π}) ^ n • (⊤ : Submodule A A)) ↔
-      ∀ i, β.repr x i ∈ ((Ideal.span {π}) ^ n • (⊤ : Submodule Z Z)) := by
-  simp only [Ideal.smul_eq_mul, Ideal.mul_top, Ideal.span_singleton_pow, Ideal.mem_span_singleton]
-  constructor
-  · rintro ⟨y, rfl⟩ i
-    refine ⟨β.repr y i, ?_⟩
-    rw [← map_pow, ← Algebra.smul_def, map_smul, Finsupp.smul_apply, smul_eq_mul]
-  · intro h
-    choose d hd using h
-    refine ⟨∑ i, d i • β i, ?_⟩
-    conv_lhs => rw [← β.sum_repr x]
-    rw [Finset.mul_sum]
-    refine Finset.sum_congr rfl fun i _ => ?_
-    rw [hd i, mul_smul, Algebra.smul_def (π ^ n), map_pow]
-
-include β in
-theorem complete_of_basis [IsAdicComplete (Ideal.span {π}) Z] :
-    IsAdicComplete (Ideal.span {algebraMap Z A π}) A where
-  haus' := by
-    intro x hx
-    have h0 : ∀ i, β.repr x i = 0 := by
-      intro i
-      refine IsHausdorff.haus' (I := Ideal.span {π}) _ fun n => ?_
-      rw [SModEq.sub_mem, sub_zero]
-      have := hx n
-      rw [SModEq.sub_mem, sub_zero] at this
-      exact (mem_pow_iff π β n x).1 this i
-    have : β.repr x = 0 := Finsupp.ext h0
-    simpa using this
-  prec' := by
-    intro f hf
-    have h1 : ∀ i, ∃ L : Z, ∀ n, β.repr (f n) i ≡ L [SMOD ((Ideal.span {π}) ^ n • (⊤ : Submodule Z Z))] := by
-      intro i
-      refine IsPrecomplete.prec' (I := Ideal.span {π}) (fun n => β.repr (f n) i) ?_
-      intro m n hmn
-      have := hf hmn
-      rw [SModEq.sub_mem] at this ⊢
-      have h2 := (mem_pow_iff π β m _).1 this i
-      simpa using h2
-    choose L hL using h1
-    refine ⟨∑ i, L i • β i, fun n => ?_⟩
-    rw [SModEq.sub_mem, mem_pow_iff π β]
-    intro i
-    have := hL i n
-    rw [SModEq.sub_mem] at this
-    have e : β.repr (∑ j, L j • β j) i = L i := by
-      simp [Finsupp.single_apply]
-    rw [map_sub, Finsupp.sub_apply, e]
-    exact this
 
 end Complete
 

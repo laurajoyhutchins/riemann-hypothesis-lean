@@ -1,7 +1,48 @@
-import Mathlib
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ThetaParseval.SatakeLifts.PairOfLiftAlt
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SatakeParametersOfTwist
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsFixedIff
+module
+
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ThetaParseval.SatakeLifts.PairOfLiftAlt
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SatakeParametersOfTwist
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -24,7 +65,7 @@ private theorem unram_apply (hc : IsUnram c) {x : (w.adicCompletion K)ˣ}
     (Valued.v : Valuation (w.adicCompletion K) (WithZero (Multiplicative ℤ)))
   exact hc x (he.eq_one_iff_eq_one.2 hx)
 
-private theorem unram_det (hc : IsUnram c) {n : ℕ} {g : GL (Fin n) (w.adicCompletion K)} (hg : g ∈ KGL w n) :
+private theorem unram_det (hc : IsUnram c) {n : ℕ} {g : GL (Fin n) (w.adicCompletion K)} (hg : g ∈ KGL w (n := n)) :
     c (Matrix.GeneralLinearGroup.det g) = 1 :=
   unram_apply hc (GlobalTheory.SphGal.isUnitAt_det_of_mem hg)
 
@@ -42,7 +83,7 @@ end SlopeTestRemainingChoices
 
 theorem satTwist : SatTwist := by
   intro K _ _ w n c V _ _ ρ hc ϖ₀ h₀ B h
-  have hf : ∀ x, x ∈ fixed (twist ρ (detChar (Fin n) c)) (KGL w n) ↔ x ∈ fixed ρ (KGL w n) := fun x => by
+  have hf : ∀ x, x ∈ fixed (twist ρ (detChar (Fin n) c)) (KGL w (n := n)) ↔ x ∈ fixed ρ (KGL w (n := n)) := fun x => by
     simp only [GlobalTheory.LGrp.mem_fixed]
     refine forall₂_congr fun g hg => ?_
     rw [twist_apply, detChar_apply, unram_det hc hg, Units.val_one, one_smul]

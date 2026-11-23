@@ -1,5 +1,51 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.Statements
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.Statements
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.Vertical
@@ -31,7 +77,7 @@ theorem toChart_rename (p : MvPolynomial (Fin n) D) :
     toChart k P j (rename Sum.inl p) = C (toBase P j p) := by
   induction p using MvPolynomial.induction_on with
   | C d => simp [toChart]
-  | add p q hp hq => simp only [map_add, hp, hq]
+  | add p q hp hq => simp only [map_add (f := _), hp, hq]
   | mul_X p m hp => simp only [map_mul, hp, rename_X]; simp [toChart]
 
 theorem incIdeal_le_ker : incIdeal P k ≤ RingHom.ker (toChart k P j) := by
@@ -41,6 +87,7 @@ theorem incIdeal_le_ker : incIdeal P k ≤ RingHom.ker (toChart k P j) := by
     rw [toChart_rename]
     simp [toBase, Ideal.Quotient.eq_zero_iff_mem.2 hp]
   · show toChart k P j _ = 0
+
     simp only [map_sum, map_mul]
     rw [← Finset.add_sum_erase _ _ (Finset.mem_univ j)]
     have hs : ∀ l ∈ Finset.univ.erase j,
@@ -99,15 +146,17 @@ theorem back_toChart (g : MvPolynomial (Fin n ⊕ (Fin k × Fin n)) D) :
       · subst hm
         have hinc : toLoc k P m (∑ l, X (Sum.inr (i, l)) * X (Sum.inl l)) = 0 :=
           toLoc_mem k P m (Ideal.mem_sup_right (Ideal.subset_span ⟨i, rfl⟩))
-        rw [← Finset.add_sum_erase _ _ (Finset.mem_univ m), map_add, map_sum] at hinc
+
+        rw [← Finset.add_sum_erase _ _ (Finset.mem_univ m), map_add (f := _), map_sum] at hinc
         have hinv : baseToLoc k P m (IsLocalization.Away.invSelf (Ideal.Quotient.mk P (X m))) *
             toLoc k P m (X (Sum.inl m)) = 1 := by
           have e := baseToLoc_toBase k P m (X m)
           rw [rename_X] at e
           rw [← e, toBase, RingHom.comp_apply, ← map_mul, mul_comm, IsLocalization.Away.mul_invSelf,
             map_one]
+
         simp only [RingHom.comp_apply, toChart, eval₂Hom_X', Sum.elim_inr, solve, ↓reduceIte,
-          back, map_neg, map_mul, map_sum, eval₂Hom_C, eval₂Hom_X', baseToLoc_toBase, rename_X]
+        back, map_neg, map_mul, map_sum, eval₂Hom_C, eval₂Hom_X', baseToLoc_toBase, rename_X]
         simp only [map_mul] at hinc
         set u := toLoc k P m (X (Sum.inr (i, m)))
         set xm := toLoc k P m (X (Sum.inl m))
@@ -123,8 +172,8 @@ theorem back_toChart (g : MvPolynomial (Fin n ⊕ (Fin k × Fin n)) D) :
 
 end ChartTorsion
 
-open ChartTorsion in
 
+open ChartTorsion in
 theorem ChartTorsion.proof : ChartTorsion.Statement := by
   intro D _ _ n k P hP hPD c g hc hcg j
   by_cases hj : (X j : MvPolynomial (Fin n) D) ∈ P

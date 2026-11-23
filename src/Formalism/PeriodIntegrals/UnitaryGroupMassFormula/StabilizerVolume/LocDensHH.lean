@@ -1,6 +1,54 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerVolume.LocDensHL
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerVolume.DensVDx
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerVolume.UnifVSpec
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicLocalCompactness.T2SpaceTensorProductFiniteExtension
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerVolume.DensFibV
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerVolume.DensVDx
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerVolume.LocDensHL
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerVolume.PosNear
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.MetricSpace.Ultra.TotallySeparated
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -33,6 +81,7 @@ theorem hform_mul_left {M a : ℕ} (Jm : Matrix (Fin M) (Fin M) A) (Y : Fin a �
       ∑ k, s (C i k) * Formalism.UG.hform s Jm (Y k) (Y j) := by
 
   unfold Formalism.UG.hform
+
   simp only [map_sum, map_mul, Finset.mul_sum, Finset.sum_mul]
   conv_rhs => rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun p _ => ?_
@@ -51,6 +100,7 @@ theorem pol_solve {a : ℕ} (h πA : A) (hh : h + h = 1) (hsh : s h = h)
     simp [Matrix.map_apply, Matrix.transpose_apply, hS]
   have h2 : ((h • (Tinv * Sm))ᵀ).map s = h • (Sm * (Tinv.map s)ᵀ) := by
     ext i k
+
     simp [Matrix.mul_apply, Matrix.map_apply, Matrix.transpose_apply, hS, hsh, map_sum]
   have e1 : Tm * (Tinv * Sm) = Sm := by rw [← Matrix.mul_assoc, hTT, Matrix.one_mul]
   have e2 : Sm * ((Tinv.map s)ᵀ * Tm) = Sm := by rw [hTs, Matrix.mul_one]
@@ -78,14 +128,15 @@ variable {b v}
 
 theorem intA_add {z w : Fv F v ⊗[F] E} (hz : intA b v z) (hw : intA b v w) : intA b v (z + w) := by
   intro k
-  rw [map_add, Finsupp.add_apply]
+  rw [map_add (f := _), Finsupp.add_apply]
   exact add_mem (hz k) (hw k)
 
 theorem intA_sum {ι : Type} (t : Finset ι) (f : ι → Fv F v ⊗[F] E) (hf : ∀ i ∈ t, intA b v (f i)) :
     intA b v (∑ i ∈ t, f i) := by
 
   intro k
-  rw [map_sum, Finsupp.finset_sum_apply]
+
+  rw [map_sum, Finsupp.finsetSum_apply]
   exact sum_mem fun i hi => hf i hi k
 
 theorem intA_smul {c : Fv F v} (hc : c ∈ v.adicCompletionIntegers F) {z : Fv F v ⊗[F] E}
@@ -127,11 +178,12 @@ theorem sigR_smul (σ : E →ₐ[F] E) (c : Fv F v) (z : Fv F v ⊗[F] E) :
   induction z using TensorProduct.induction_on with
   | zero => simp
   | tmul x y => simp [sigR, TensorProduct.smul_tmul', Algebra.TensorProduct.map_tmul]
-  | add x y hx hy => rw [smul_add, map_add, map_add, hx, hy, smul_add]
+  | add x y hx hy => rw [smul_add, map_add (f := _), map_add (f := _), hx, hy, smul_add]
 
 theorem intA_sig (σ : E →ₐ[F] E)
     (hg : ∀ k m, algebraMap F (Fv F v) (b.repr (σ (b k)) m) ∈ v.adicCompletionIntegers F)
     {z : Fv F v ⊗[F] E} (hz : intA b v z) : intA b v (sigR (Fv F v) σ z) := by
+
 
   rw [← (Algebra.TensorProduct.basis (Fv F v) b).sum_repr z, map_sum]
   refine intA_sum _ _ fun k _ => ?_
@@ -268,7 +320,7 @@ theorem hensAA_holds : HensAA := by
   have hTii : ∀ i j, intA b v (Ti i j) := fun i j => intA_incl _ (g5 i j)
 
   set h : Fv F v ⊗[F] E := inclR (Fv F v) (1 / 2 : E) with hhdef
-  have hh : h + h = 1 := by rw [hhdef, ← map_add, add_halves, map_one]
+  have hh : h + h = 1 := by rw [hhdef, ← map_add (f := _), add_halves, map_one]
   have hsh : s h = h := by
     rw [hsdef, hhdef, sigR_incl]
     congr 1

@@ -1,9 +1,56 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsGenericFlag
-import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.FrameDefinitions.Metric
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsGrpPullback
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.RegAtIffChartLocalizationStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.GermGenPtInjectiveRangeRegAtStatement
+module
+
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.CoordsAt
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.Bundle
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.GermGenPtInjectiveRangeRegAtStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.RegAtIffChartLocalizationStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsCompletedStrictHens
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.CubicalStructures.CubeSymmetricSwapFirst
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Geo ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.Semi GlobalTheory.CompanionTheory.Ar
 
@@ -98,46 +145,9 @@ theorem exists_point (hT : CoordTie o ξ x) {c : κ} (hc : x c ≠ 0) (P : Ideal
   have h3 : (s : Ω) = secVal ξ U h t := ht.symm
   rw [h3, ← h2, key, hst, Ideal.mem_comap, not_not]
 
-theorem chart_le_regAt (hT : CoordTie o ξ x) {c : κ} {p : Cpt ξ} (hp : InChart ξ x c p) {a : Ω}
-    (ha : a ∈ chartRing o x c) : a ∈ regAt ξ p :=
-  (hT.ring c hp.1 a).1 ha p hp
-
 theorem exists_den (hT : CoordTie o ξ x) {c : κ} {p : Cpt ξ} (hp : InChart ξ x c p) {a : Ω}
     (ha : a ∈ regAt ξ p) : ∃ s ∈ chartRing o x c, unitAt ξ p s ∧ s * a ∈ chartRing o x c :=
   (GlobalTheory.T.regAt_iff_chart_localization X Ω ξ o κ x hT c p hp a).1 ha
-
-theorem exists_pow_mul_mem (hT : CoordTie o ξ x) {c : κ} (hc : x c ≠ 0) {f a : Ω} (hf : f ∈ chartRing o x c)
-    (h : ∀ p : Cpt ξ, InChart ξ x c p → unitAt ξ p f → a ∈ regAt ξ p) :
-    ∃ n : ℕ, f ^ n * a ∈ chartRing o x c := by
-  let I : Ideal (chartRing o x c) :=
-    { carrier := {s | (s : Ω) * a ∈ chartRing o x c}
-      add_mem' := fun {u v} hu hv => by
-        show ((u + v : chartRing o x c) : Ω) * a ∈ chartRing o x c
-        have : ((u + v : chartRing o x c) : Ω) * a = (u : Ω) * a + (v : Ω) * a := by
-          push_cast; ring
-        rw [this]
-        exact add_mem hu hv
-      zero_mem' := by
-        show ((0 : chartRing o x c) : Ω) * a ∈ chartRing o x c
-        simp
-      smul_mem' := fun t u hu => by
-        show ((t • u : chartRing o x c) : Ω) * a ∈ chartRing o x c
-        have : ((t • u : chartRing o x c) : Ω) * a = (t : Ω) * ((u : Ω) * a) := by
-          simp [_root_.mul_assoc]
-        rw [this]
-        exact mul_mem t.2 hu }
-  have hrad : (⟨f, hf⟩ : chartRing o x c) ∈ I.radical := by
-    rw [Ideal.radical_eq_sInf, Ideal.mem_sInf]
-    rintro P ⟨hle, hP⟩
-    by_contra hfP
-    obtain ⟨p, hp, hs⟩ := exists_point hT hc P hP
-    have hu : unitAt ξ p f := by
-      by_contra hn
-      exact hfP ((hs ⟨f, hf⟩).2 hn)
-    obtain ⟨s, hsA, hsu, hsa⟩ := exists_den hT hp (h p hp hu)
-    exact (hs ⟨s, hsA⟩).1 (hle hsa) hsu
-  obtain ⟨n, hn⟩ := hrad
-  exact ⟨n, hn⟩
 
 variable {E : Type} [AddCommGroup E] [Module Ω E]
 
@@ -172,9 +182,6 @@ end Chart
 section Bundle
 
 variable {κ : Type} {x : κ → Ω} {E : Type} [AddCommGroup E] [Module Ω E] {r : ℕ}
-
-noncomputable def latOf (ξ : Spec (CommRingCat.of Ω) ⟶ X) (W : ChartBundle ℤ x r E) : Lat ξ E := fun p =>
-  Submodule.span (regAt ξ p) {e | ∃ c, InChart ξ x c p ∧ e ∈ W.lat c}
 
 end Bundle
 

@@ -1,8 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.SurjectiveOfIsPullbackSqZero
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.IsNoetherianRingDualNumber
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.AbelianHodgeDeRham
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.BijectiveCechDeRhamComparisonDegreeOne
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.SurjectiveOfIsPullbackSqZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Development.AbelianVarietyTheory.Definitions.Divisors.IsKSValueOneOfRetraction
+import Development.AbelianVarietyTheory.Definitions.Divisors.PrimitiveCrystalHodgeLiftClasses
+
+@[expose] public section
+
 open CategoryTheory AlgebraicGeometry KaehlerDifferential DividedPowers ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.Semi GlobalTheory.CatCoh GlobalTheory.Cris GlobalTheory.CechDR GlobalTheory.DeRham GlobalTheory.SqLift GlobalTheory.LiftSys GlobalTheory.Published
 attribute [local instance] Over.cartesianMonoidalCategory
 
@@ -40,7 +84,7 @@ theorem exists_unique_formExt : ∀ (R R₀ : Type) [CommRing R] [CommRing R₀]
     AddMonoidHom.mk' g (fun s t => by
       ext w
       show α (l (s + t)) * E w = α (l s) * E w + α (l t) * E w
-      rw [key (l (s + t)) (l s + l t) (by rw [map_add, hl, hl, hl]) _ (hEmem w), map_add, add_mul])
+      rw [key (l (s + t)) (l s + l t) (by rw [map_add (f := _), hl, hl, hl]) _ (hEmem w), map_add (f := _), add_mul])
   have hf : ∀ (r : R₀) (s : Sec s₀ U.unop.1) (w : GlobForm s₀), f (r • s) w = f s (r • w) := by
     intro r s w
     obtain ⟨r', rfl⟩ := hπ r
@@ -58,13 +102,13 @@ theorem exists_unique_formExt : ∀ (R R₀ : Type) [CommRing R] [CommRing R₀]
       rw [TensorProduct.smul_tmul', TensorProduct.liftAddHom_tmul, TensorProduct.liftAddHom_tmul]
       show α (l (p b • s)) * E w = α b * (α (l s) * E w)
       rw [key (l (p b • s)) (b * l s) (by rw [hl, map_mul, hl, smul_eq_mul]) _ (hEmem w), map_mul, mul_assoc]
-    | add x y hx hy => rw [smul_add, map_add, map_add, hx, hy, mul_add]
+    | add x y hx hy => rw [smul_add, map_add (f := _), map_add (f := _), hx, hy, mul_add]
   have hmem : ∀ t : Sec s₀ U.unop.1 ⊗[R₀] GlobForm s₀, T t ∈ I.map (algebraMap R B') := by
     intro t
     induction t using TensorProduct.induction_on with
     | zero => simp
     | tmul s w => exact Ideal.mul_mem_left _ _ (hEmem w)
-    | add x y hx hy => rw [map_add]; exact Ideal.add_mem _ hx hy
+    | add x y hx hy => rw [map_add (f := _)]; exact Ideal.add_mem _ hx hy
   have hev : ∀ w : GlobForm s₀, θ (w.1 U) = E w := by
     intro w
     have h1 : hb.equiv.symm (w.1 U) = 1 ⊗ₜ w := by
@@ -75,13 +119,12 @@ theorem exists_unique_formExt : ∀ (R R₀ : Type) [CommRing R] [CommRing R₀]
   refine ⟨θ, ⟨fun b w => ?_, fun w => hmem _, hev⟩, fun y ⟨hy1, _, hy3⟩ => ?_⟩
   · rw [hθ, hθ, LinearEquiv.map_smul, hsm]
   · ext x
-    refine hb.inductionOn x _ ?_ ?_ ?_ ?_
-    · simp
+    refine hb.inductionOn x ?_ ?_ ?_
     · intro w
       exact (hy3 w).trans (hev w).symm
     · intro s n hn
       rw [← hl s, hy1, hn, hθ, hθ, LinearEquiv.map_smul, hsm]
     · intro n₁ n₂ h₁ h₂
-      rw [map_add, map_add, h₁, h₂]
+      rw [map_add (f := _), map_add (f := _), h₁, h₂]
 
 end GlobalTheory.LiftSys

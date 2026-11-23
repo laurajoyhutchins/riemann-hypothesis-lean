@@ -1,6 +1,63 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutJATCDatumTransitPt
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutJATCDtrSGen
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutJATCDtrSIo
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutJATCDatumTransitPt
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutJATCDatumTransitCut
+import Formalism.FormalDegreeBessel.FinalG
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutJASSnRepDatumUnit
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutJASSnRepThtFacts
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutJATCDtrSGen
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutJATCDtrSIo
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.FrameEntries
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.RestrictionIrrelevantDoubleLevelOperator
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Formalism.REAL Formalism.QuantumDeterminants Formalism.FourierDecayAlt NumberField
 open scoped ComplexConjugate Matrix
@@ -59,14 +116,14 @@ theorem io_fam (hk : 2 ≤ k) (hz : inWb k r z) (hz' : inWb k r z') (hT : 0 < Tz
   rw [ioMulVec]
   by_cases hout : i.val < r ∨ r + k < i.val
   · rw [fam_out hout, prWv_bvec_out z' hout, herm_zero_l, zero_smul, sub_zero, Matrix.mulVec_zero,
-      dif_neg (by omega)]
+      dite_eq_right (by omega)]
   · by_cases h0 : i.val = r
-    · rw [frame_family_middle_index h0, hfix, h11, one_smul, sub_self, Matrix.mulVec_zero, dif_neg (by omega)]
+    · rw [frame_family_middle_index h0, hfix, h11, one_smul, sub_self, Matrix.mulVec_zero, dite_eq_right (by omega)]
     · by_cases hl : i.val = r + k
       · rw [frame_family_last_index (by omega) hl, TF.prWv_smul, prWv_self hz' hT', smul_zero, herm_zero_l, zero_smul, sub_zero,
-          Matrix.mulVec_zero, dif_neg (by omega)]
+          Matrix.mulVec_zero, dite_eq_right (by omega)]
       · have hm : r + 1 ≤ i.val ∧ i.val < r + k := by omega
-        rw [frame_family_middle_range hm, dif_pos hm,
+        rw [frame_family_middle_range hm, dite_eq_left hm,
           DU.prWv_fix (hFr.1 _) (hFr.2.2 _ z' (by simp)), hFr.2.2 _ _ (by simp), zero_smul, sub_zero]
 
 end pt
@@ -172,11 +229,11 @@ theorem datum_transit_existence : DTExists := by
       rw [← Matrix.mulVec_mulVec, ← Matrix.mulVec_mulVec, hh' i, hx', io_fam hk hz hz' hT hT' hsec h₁ hFr₁ c' i,
         hy', io_fam hk hz hz' hT hT' hsec h₂ hFr₂ c' i]
       by_cases hm : r + 1 ≤ i.val ∧ i.val < r + k
-      · rw [dif_pos hm, dif_pos hm]
+      · rw [dite_eq_left hm, dite_eq_left hm]
         have := hh i
         rw [hx, hy, frame_family_middle_range hm, frame_family_middle_range hm] at this
         exact this
-      · rw [dif_neg hm, dif_neg hm, Matrix.mulVec_zero]
+      · rw [dite_eq_right hm, dite_eq_right hm, Matrix.mulVec_zero]
     rw [key, Matrix.mul_assoc, FrameEntries.mul_inv_uh hh'U, Matrix.mul_one]
 
 end

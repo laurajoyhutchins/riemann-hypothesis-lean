@@ -1,4 +1,47 @@
-import Development.WeilBound.CoreStatements.PublishedTheorems.JacquetShalikaRigidity.ColumnConjugationMeasure
+module
+
+public import Development.WeilBound.CoreStatements.PublishedTheorems.JacquetShalikaRigidity.ColumnConjugationMeasure
+import GroundTheory.GlobalFields.LocalAtPlace
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -144,7 +187,7 @@ theorem isOpen_gd (T : Set (Pl E)) : IsOpen {g : GA E k | ∀ w, w ∉ T → Gd 
   · exact hV.preimage (hp.comp (hv.matrix_elem i j))
   · exact hV.preimage (hp.comp (hw.matrix_elem i j))
 
-theorem isOpen_G0 (hG : jumpWindows.G0) {E : Type} [Field E] [NumberField E] [IsTotallyComplex E] {k : ℕ}
+theorem isOpen_G0 (hG : jumpWindows.G0) {E : Type} [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] {k : ℕ}
     (S : Finset (Pl E)) : IsOpen (G0 (k := k) S) := by
   have hcont : ∀ w, Continuous (cLoc w : GA E k → _) := (hG E k).2.2.2.2.2.2.2.2.2.2.2.2.1
   rw [isOpen_iff_forall_mem_open]
@@ -159,7 +202,7 @@ theorem isOpen_G0 (hG : jumpWindows.G0) {E : Type} [Field E] [NumberField E] [Is
   · exact (isOpen_gd _).inter (hT.isOpen_biInter fun w _ => (isOpen_exp _ k {0}).preimage (hcont w))
   · refine ⟨fun w hw => not_not.1 hw, Set.mem_iInter₂.2 fun w hw => hg w hw.2⟩
 
-theorem decomp (hG : jumpWindows.G0) {E : Type} [Field E] [NumberField E] [IsTotallyComplex E] {k : ℕ}
+theorem decomp (hG : jumpWindows.G0) {E : Type} [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] {k : ℕ}
     (S T : Finset (Pl E)) : ∀ g : GA E k, (∀ w, w ∉ S → Iwasawa.iwasawaExponent _ k (cLoc w g) = 0) →
       (∀ w, w ∉ S → w ∉ T → cLoc w g ∈ GLnLocal.integralGL (w.adicCompletion E) k) →
       ∃ n g₀ κ : GA E k, UU 0 n ∧ InS S g₀ ∧ cInf κ = 1 ∧ (∀ w ∈ S, cLoc w κ = 1) ∧

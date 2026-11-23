@@ -1,10 +1,60 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.BlockSplitAll
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.IsobaricDiscreteSelfDualStrongMultiplicityOne
-import Formalism.LocalToGlobal.GaloisLevelStructure.TiedHecke
-import Formalism.LocalToGlobal.NormalizedHeckeFactors.HeckeStdTwOfStd
-import Formalism.LocalToGlobal.NormalizedHeckeFactors.CoverAct
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ResidueEqOfGenerators
+module
+
+public import Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow
+public import Formalism.LocalToGlobal.GaloisLevelStructure.DefsAut
+public import Formalism.LocalToGlobal.NormalizedHeckeFactors.CoverAlg
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ResidueEqOfGenerators
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.FreeModule.IdealQuotient
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.Foundations.MatrixMeasurableSpace
+import Development.AbelianVarietyTheory.Definitions.Foundations.SmoothPartStable
+import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.ExistsReadingLaws
+import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.RankOneUnitary
+import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.LeviEmbMemNormalizerLower
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.MainNotions Formalism.MainNotions.N Formalism.ConjugateSelfDual ReciprocityTheory.Gal Polynomial NumberField IsDedekindDomain GlobalTheory.PRep GlobalTheory.SmGL GlobalTheory.SplitWeil GlobalTheory.RowTie GlobalTheory.SplitRead
 
 noncomputable section
@@ -36,7 +86,7 @@ theorem heckeD_add (L : Type) [Field L] [NumberField L] [IsCMField L] (n : ℕ) 
     by_contra hn
     apply hcc
     dsimp only
-    rw [dif_neg]
+    rw [dite_eq_right]
     rintro ⟨x, hx, rfl⟩
     exact hn ⟨x, hx, rfl⟩
   rw [Pi.add_apply, Pi.smul_apply]
@@ -65,7 +115,7 @@ theorem pt_of_eigvec : ∀ {O K V : Type} [CommRing O] [Field K] [Algebra O K] [
     | add a b _ _ iha ihb =>
       obtain ⟨c1, h1⟩ := iha
       obtain ⟨c2, h2⟩ := ihb
-      exact ⟨c1 + c2, by rw [LinearMap.add_apply, h1, h2, map_add, add_smul]⟩
+      exact ⟨c1 + c2, by rw [LinearMap.add_apply, h1, h2, map_add (f := _), add_smul]⟩
     | mul a b _ _ iha ihb =>
       obtain ⟨c1, h1⟩ := iha
       obtain ⟨c2, h2⟩ := ihb
@@ -78,7 +128,7 @@ theorem pt_of_eigvec : ∀ {O K V : Type} [CommRing O] [Field K] [Algebra O K] [
     rw [← hf (s * t), map_mul, mul_comm, mul_smul, ← hf s, ← map_smul, ← hf t]; rfl)
   have f0 : f 0 = 0 := uniq _ _ (by rw [← hf 0, map_zero, zero_smul]; rfl)
   have fa : ∀ s t, f (s + t) = f s + f t := fun s t => uniq _ _ (by
-    rw [← hf (s + t), map_add, add_smul, ← hf s, ← hf t]; rfl)
+    rw [← hf (s + t), map_add (f := _), add_smul, ← hf s, ← hf t]; rfl)
   have fc : ∀ r, f (algebraMap O (Algebra.adjoin O S) r) = r := fun r => uniq _ _ (by
     rw [← hf]
     show (algebraMap O (Module.End K V) r) e = _
@@ -144,7 +194,7 @@ theorem descent : ∀ {K C : Type} [Field K] [Field C] (φ : K →+* C) {ι : Ty
 
 theorem coeff_monic_poly_sum {R : Type} [Semiring R] (n k : ℕ) (hk1 : 1 ≤ k) (hk2 : k ≤ n) (c : ℕ → R) :
     (X ^ n + ∑ k' ∈ Finset.Icc 1 n, C (c k') * X ^ (n - k')).coeff (n - k) = c k := by
-  rw [coeff_add, coeff_X_pow, if_neg (by omega), zero_add, finset_sum_coeff]
+  rw [coeff_add, coeff_X_pow, if_neg (by omega), zero_add, finsetSum_coeff]
   rw [Finset.sum_eq_single k]
   · rw [coeff_C_mul_X_pow, if_pos rfl]
   · intro b hb hbk

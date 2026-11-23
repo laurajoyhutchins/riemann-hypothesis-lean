@@ -1,8 +1,58 @@
-import Formalism.GradedWeylDivisibility.StatementB
-import Formalism.GradedWeylDivisibility.FockSpaceTableaux.LFockqLemmas
-import Formalism.RealPlaceAnalysis.RealPlaceTaylor.ProdFactorialSupportSubSingle
+module
+
+public import Formalism.GradedWeylDivisibility.StatementB
+public import Formalism.GradedWeylDivisibility.FockSpaceTableaux.FockRowAdj
+import Formalism.GradedWeylDivisibility.FockSpaceTableaux.FockSubAdj
 import Formalism.GradedWeylDivisibility.FockSpaceTableaux.LFocksLemmas
-import Formalism.GradedWeylDivisibility.FockSpaceTableaux.FockRowAdj
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open MvPolynomial Formalism.REAL
 
@@ -28,7 +78,7 @@ lemma lfockq_eval_rowGen {r n : ℕ} (a b : Fin r) (t : ℂ) (f : MvPolynomial (
   | C c =>
     simp [rowGen, rowAct]
   | add p q hp hq =>
-    rw [map_add, Polynomial.eval_add, hp, hq, map_add]
+    rw [map_add (f := _), Polynomial.eval_add, hp, hq, map_add (f := _)]
   | mul_X p v hp =>
     rw [map_mul, Polynomial.eval_mul, hp, map_mul]
     congr 1
@@ -127,14 +177,14 @@ lemma lfockq_adjC {r n : ℕ} (a b : Fin r) (k : ℕ) (F G : MvPolynomial (Fin r
   have hpq : p = q := by
     apply Polynomial.funext
     intro t
-    simp only [p, q, Polynomial.eval_finset_sum, Polynomial.eval_mul, Polynomial.eval_C,
+    simp only [p, q, Polynomial.eval_finsetSum, Polynomial.eval_mul, Polynomial.eval_C,
       Polynomial.eval_pow, Polynomial.eval_X]
     calc _ = ∑ i ∈ Finset.range N, t ^ i * fockF ((rowGen ℂ a b F).coeff i) G :=
           Finset.sum_congr rfl fun i _ => mul_comm _ _
       _ = ∑ i ∈ Finset.range N, t ^ i * fockF F ((rowGen ℂ b a G).coeff i) := key t
       _ = _ := Finset.sum_congr rfl fun i _ => mul_comm _ _
   have hc := congrArg (fun s : Polynomial ℂ => s.coeff k) hpq
-  simp only [p, q, Polynomial.finset_sum_coeff, Polynomial.coeff_C_mul_X_pow] at hc
+  simp only [p, q, Polynomial.finsetSum_coeff, Polynomial.coeff_C_mul_X_pow] at hc
   rw [Finset.sum_ite_eq, Finset.sum_ite_eq] at hc
   simpa [rowDiv, Finset.mem_range.mpr hk] using hc
 

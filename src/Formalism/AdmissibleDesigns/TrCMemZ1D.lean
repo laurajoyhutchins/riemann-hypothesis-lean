@@ -1,4 +1,48 @@
-import Formalism.AdmissibleDesigns.SelfGood
+module
+
+public import Formalism.AdmissibleDesigns.NonemptyPl
+public import Formalism.SharpRestriction.LevelLetterCocycles.GoodCongruenceDataOf
+public import Formalism.WachLatticeTwists.RamifiedBlockRings.DistinctEigenvalueCornerPerturbation
+public import Formalism.WachLatticeTwists.ShapeRowIsomorphisms.Statement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 variable [hT2Core : Fact ReciprocityTheory.ChartRestriction.T2.Core]
 
@@ -114,8 +158,8 @@ variable {G : Type} [Group G] [TopologicalSpace G] {Qp K₀ K : Type} [Field Qp]
     {M : Type} [AddCommGroup M] [Module A M] [Module O' M] [SMulCommClass A O' M]
     (r : GG →* A) (χ : GG →* T'ˣ) (E : A) (Dw : Subgroup GG) (eG : Dw ≃* G)
 
-variable (PD LL O M) in
 
+variable (PD LL O M) in
 structure CoefDict (e : ℕ) where
   Ce : TwLat PD LL O e
   u : M ≃+ (Ce.V ⧸ Ce.L.T)
@@ -132,12 +176,6 @@ variable {σ r χ E Dw eG}
 
 def trC {e : ℕ} (Cd : CoefDict PD LL O σ M r χ Dw eG e) (z : Dw → M) : G → Cd.Ce.V ⧸ Cd.Ce.L.T :=
   fun g => Cd.u (z (eG.symm g))
-
-theorem actD_mul {e : ℕ} (Ce : TwLat PD LL O e) (g h : G) (x : Ce.V ⧸ Ce.L.T) :
-    actD Ce.L (g * h) x = actD Ce.L g (actD Ce.L h x) := by
-  refine Submodule.Quotient.induction_on _ x (fun v => ?_)
-  simp only [actD, Submodule.mapQ_apply, map_mul]
-  all_goals rfl
 
 theorem trC_hf {e t cB : ℕ} {I : Subgroup G} {J : (K →ₐ[Qp] LL) → Set ℤ}
     (hTB : Formalism.MainNotions.N.TBAt PD (O := O) I J t cB) (het : e < t)
@@ -167,7 +205,7 @@ theorem trC_mem_Z1D {e : ℕ} (Cd : CoefDict PD LL O σ M r χ Dw eG e) [Topolog
   have hc : (z : Dw → M) (eG.symm g * eG.symm h) = (z : Dw → M) (eG.symm g) +
       resRep (uRep O' (M := M) r χ) Dw (eG.symm g) ((z : Dw → M) (eG.symm h)) := z.2 _ _
   simp only [trC, map_mul]
-  rw [hc, map_add]
+  rw [hc, map_add (f := _)]
   congr 1
   have hu := Cd.u_act (eG.symm g) ((z : Dw → M) (eG.symm h))
   rw [MulEquiv.apply_symm_apply] at hu

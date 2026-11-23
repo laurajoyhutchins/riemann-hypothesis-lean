@@ -1,5 +1,47 @@
-import Mathlib
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.AnnihilatorModels.GenericScale
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.FiniteDimensionalWdSpace
+public import Formalism.LocalRingCardinality.AdicCompletionLocal.LocTied
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.TrivialOnInertiaOfUnr
+
+@[expose] public section
 
 noncomputable section
 
@@ -16,9 +58,6 @@ theorem co_tmul {F L B : Type} [Field F] [Field L] [Algebra F L] [CommRing B] [A
 
 def onR {F B : Type} (L : Type) [Field F] [Field L] [Algebra F L] [CommRing B] [Algebra F B] (s : B →ₐ[F] B) : L ⊗[F] B →+* L ⊗[F] B :=
   (Algebra.TensorProduct.map (AlgHom.id F L) s).toRingHom
-
-theorem onR_tmul {F B : Type} (L : Type) [Field F] [Field L] [Algebra F L] [CommRing B] [Algebra F B] (s : B →ₐ[F] B) (x : L) (b : B) :
-    onR L s (x ⊗ₜ[F] b) = x ⊗ₜ[F] s b := rfl
 
 def CoFacts : Prop :=
   ∀ (F L B : Type) [Field F] [Field L] [Algebra F L] [CommRing B] [Algebra F B] (a : ℕ),
@@ -59,7 +98,8 @@ def DetCore : Prop :=
 def WdLift : Prop :=
   ∀ (l : ℕ) [Fact l.Prime] (P : LocPrime l) (ι : Om l ≃+* ℂ) (K LL : FinExt l) (V : Type) [AddCommGroup V] [Module ↥LL.1 V]
     [Module ℚ_[l] V] [IsScalarTower ℚ_[l] ↥LL.1 V] (ρ : Representation ↥LL.1 ↥(GK K) V) (N : Type) [AddCommGroup N] [Module ℂ N]
-    (κ : ↥(Dpst P ρ) → N), (∀ x y, κ (x + y) = κ x + κ y) → (∀ (c : ↥LL.1) x, κ (c • x) = ι (c : Om l) • κ x) →
+    (κ : ↥(Dpst P ρ) → N), (∀ x y, κ (x + y) = κ x + κ y) →
+    (∀ (c : ↥LL.1) x, κ ((Dpst P ρ).module.toSMul.smul c x) = ι (c : Om l) • κ x) →
     (∀ (c : ↥(MaximalUnramifiedExtension l)) x, κ (mulD P ρ c x) = ι (c : Om l) • κ x) → ∃ j : WDSpace P ι ρ →ₗ[ℂ] N, ∀ x, j (wdMk P ι ρ x) = κ x
 
 def DetMem : Prop :=
@@ -100,7 +140,8 @@ def DetE : Prop :=
     (∀ g, Matrix.GeneralLinearGroup.det (c g) = Matrix.GeneralLinearGroup.det (r g)) → IsSst P (Bw.repE LL r) →
     ∀ (hr : IsPst P (Bw.repE LL r)) (hc : IsPst P (Bw.repE LL c)) (g : ↥(Weil h)), deg g = -1 →
       haveI := hr.finite; haveI := hc.finite
-      LinearMap.det (wdRho P ι Bw h hj (Bw.repE LL r) g) = LinearMap.det (wdRho P ι Bw h hj (Bw.repE LL c) g)
+      LinearMap.det (GlobalTheory.Pst.wdRho P ι Bw h hj (Bw.repE LL r) g) =
+        LinearMap.det (GlobalTheory.Pst.wdRho P ι Bw h hj (Bw.repE LL c) g)
 
 def CommonModel : Prop :=
   ∀ (l : ℕ) [Fact l.Prime] (P : LocPrime l) (AI : LocAinf l P), Nonempty (LocTied l P AI) →

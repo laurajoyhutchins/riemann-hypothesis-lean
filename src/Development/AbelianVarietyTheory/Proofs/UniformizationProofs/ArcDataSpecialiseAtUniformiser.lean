@@ -1,21 +1,63 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.UnifUniqSt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.UnifPowOf3
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ValCalc
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.RosVal
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.DvrLem
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.TwistBCPf
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ValEqOfAppInjective
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.HasArcDataIff
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.OLinBaseChangeSt
+public import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.RelationsAreFunctions
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ArcWitPsiOnBasicOpen
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.DvrAdmissibleBaseAndPowerSeriesEvalUniformiser
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExistsPolAVGenericFibre
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.IsPullFOfGenRel
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.QkToAkUSpecialises
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.SmoothOfRelativeDimensionOfGeneric
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PowerSeries.Inverse
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.OneArc
 import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.RigIsoCongr
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsMonHomOfMul
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.TwistBCPf
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.PhiGenPf
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.FamMod
 import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.CubePullbacks.CubePull
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.IsPullFOfGenRel
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.SmoothOfRelativeDimensionOfGeneric
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.DvrAdmissibleBaseAndPowerSeriesEvalUniformiser
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ArcWitPsiOnBasicOpen
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExistsPolAVGenericFibre
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.QkToAkUSpecialises
+public import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.ExistsCommonField
+public import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.TraceFormTwistIsoOfPullback
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits MonoidalCategory CartesianMonoidalCategory MonObj AlgebraicGeometry
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Out
@@ -47,7 +89,7 @@ variable {E : Type} [Field E] [NumberField E] [IsCMField E] {H : Host E} {D : Da
   {O' : Type} [CommRing O'] [IsDomain O'] {b : O →+* O'} {a : ArcIn D l β O' b} {R R' : Type} [CommRing R]
   [IsDomain R] [CommRing R'] [IsDomain R'] {I : Ideal R} {I' : Ideal R'} {f : O' →+* R} {u : R} {χ : Sp R ⟶ Y.X}
 
-set_option maxHeartbeats 1600000 in
+
 
 theorem level_specialises (hL : Laws) (hL₂ : Laws2) (hT : TwistBaseChangeStatement) (hR : AdmBase R I)
     (hR' : AdmBase R' I') (W : ArcWit Y a I f u χ) (hχ : χ ≫ Y.s = spMap f ≫ spMap b) {g : R →+* R'}
@@ -151,7 +193,7 @@ theorem level_specialises (hL : Laws) (hL₂ : Laws2) (hT : TwistBaseChangeState
   obtain ⟨p₁, hp₁, hp₁'⟩ := exists_partner hL.globalFns W (Units.map ιF.toMonoidHom uS) hF hv hkM q₁
   obtain ⟨gp, gb, gv⟩ := exists_gtPt hL.globalFns s1 s2 (e := W.e.toAddEquiv) s5 q₀.g (Over.mk (specOf σ)) (spMap κ) hσf
     (fun z => unitOn (uS ^ (a.be q₀.y z / k))) (fun y z => by
-      rw [map_add, Int.add_ediv_of_dvd_left (dvd_be a hkM _ _), zpow_add]
+      rw [map_add (f := _), Int.add_ediv_of_dvd_left (dvd_be a hkM _ _), zpow_add]
       exact map_mul (Units.map _) _ _)
   have pull : GtPt.IsPullF F ρ.left gp p₁.g := by
     obtain ⟨c₁, c₂, c₃⟩ := hq₁
@@ -194,7 +236,7 @@ theorem level_specialises (hL : Laws) (hL₂ : Laws2) (hT : TwistBaseChangeState
     exact (congrArg₂ (· * ·) (gm_unitOn_spMap π _ y).symm
       (congrArg (fun r => val (q₀.g.s z) r y J) hπκ.symm)).trans (gv z _ hz _ (spMap π) y J J' hJ hJ')
 
-set_option maxHeartbeats 1600000 in
+
 
 theorem specialise (hL : Laws) (hL₂ : Laws2) (hT : TwistBaseChangeStatement) (hU : UnifBaseChangeSt) (h5 : Laws5)
     (hR : AdmBase R I) (hR' : AdmBase R' I') (hf : Function.Injective f) (W : ArcWit Y a I f u χ)
@@ -323,7 +365,7 @@ theorem eval_unique {V : Type} [CommRing V] [IsDomain V] [IsDiscreteValuationRin
       intro p
       obtain ⟨t, ht⟩ := ih (PowerSeries.mk fun i => PowerSeries.coeff (i + 1) p)
       refine ⟨t, ?_⟩
-      rw [PowerSeries.eq_shift_mul_X_add_const p, map_add, map_add, map_mul, map_mul, h₁, h₁', h₂, h₂']
+      rw [PowerSeries.eq_shift_mul_X_add_const p, map_add (f := _), map_add (f := _), map_mul, map_mul, h₁, h₁', h₂, h₂']
       linear_combination ϖ * ht
   refine RingHom.ext fun p => sub_eq_zero.1 (IsHausdorff.haus hV.toIsHausdorff _ fun n => ?_)
   rw [SModEq.zero, smul_eq_mul, Ideal.mul_top, hϖ.maximalIdeal_eq, Ideal.span_singleton_pow, Ideal.mem_span_singleton]
@@ -331,8 +373,8 @@ theorem eval_unique {V : Type} [CommRing V] [IsDomain V] [IsDiscreteValuationRin
 
 end GlobalTheory.ArcSpecialise
 
-open GlobalTheory.ArcSpecialise ReciprocityTheory.ChartRestriction.G.Geo.Tor in
 
+open GlobalTheory.ArcSpecialise ReciprocityTheory.ChartRestriction.G.Geo.Tor in
 theorem GlobalTheory.hasArcData_specialise : Laws → Laws2 → DVR.TwistBaseChangeStatement → UnifBaseChangeSt → Laws5 → ∀ (E : Type) [Field E] [NumberField E] [NumberField.IsCMField E] (H : Geo.Tor.Host E) (Dm : Geo.Tor.Datum H) (l : Geo.Tor.Level H) (Xo : Geo.Tor.Moduli Dm l) (c : Geo.Tor.Coeff l) (O : Type) [CommRing O] (β : O →+* c.F) (Y : Geo.Tor.Model Xo c β) (V : Type) [CommRing V] [IsDomain V] [CharZero V] [IsDiscreteValuationRing V] (b : O →+* V) (ϖ : V) (a : Geo.Tor.ArcIn Dm l β V b), Irreducible ϖ → IsAdicComplete (IsLocalRing.maximalIdeal V) V → ∀ (ev : PowerSeries V →+* V), (∀ x, ev (PowerSeries.C x) = x) → ev PowerSeries.X = ϖ → ∀ χ : Geo.Tor.Sp (PowerSeries V) ⟶ Y.X, χ ≫ Y.s = Geo.Tor.spMap (PowerSeries.C (R := V)) ≫ Geo.Tor.spMap b → Set.range (jK V ≫ Geo.Tor.spMap ev ≫ χ) ⊆ Set.range Y.j → Y.HasArcData a (Ideal.span {PowerSeries.X}) (PowerSeries.C (R := V)) PowerSeries.X χ → Y.HasArcData a (Ideal.span {ϖ}) (RingHom.id V) ϖ (Geo.Tor.spMap ev ≫ χ) := by
   intro hL hL₂ hT hU h5 E _ _ _ H Dm l Xo c O _ β Y V _ _ _ _ b ϖ a hϖ hV ev ev₁ ev₂ χ hχ hj h
   obtain ⟨W⟩ := (Y.hasArcData_iff _ _ _ _ _).1 h

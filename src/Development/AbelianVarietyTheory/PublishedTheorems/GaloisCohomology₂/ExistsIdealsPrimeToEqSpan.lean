@@ -1,10 +1,56 @@
-import Mathlib
-import ReciprocityTheory.GaloisValuations.Global
-import Development.AbelianVarietyTheory.BlockTheory.GlobalSignature.RayPrincipalIdeals
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.ExistsUniqueHcharOfFiniteOrder
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.UnitOpenAndCongrOpen
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FiniteIndexUnitIdlSup
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.DenseRangeUnits
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.GlobalSignature.RayPrincipalIdeals
+public import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.ExistsUniqueHcharOfFiniteOrder
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FiniteIndexUnitIdlSup
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.DenseRangeUnits
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.UnitOpenAndCongrOpen
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.NeutralLocalFields.LocalFieldComparison.HCFFromRecipA
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -460,7 +506,7 @@ theorem exists_idealsPrimeTo_eq_span {F : Type} [Field F] [NumberField F] {𝔪 
   rw [Units.val_mk0, FractionalIdeal.coeIdeal_span_singleton]
   exact count_span_eq_zero h0 hc w hw
 
-theorem kills_of_rayPrincipal {F : Type} [Field F] [NumberField F] [IsTotallyComplex F] {𝔪 : Ideal (𝓞 F)}
+theorem kills_of_rayPrincipal {F : Type} [Field F] [NumberField F] [_root_.NumberField.IsTotallyComplex F] {𝔪 : Ideal (𝓞 F)}
     {A : Type} [CommGroup A] (f : idealsPrimeTo 𝔪 →* A) (hf : ∀ J : idealsPrimeTo 𝔪, J.1 ∈ rayPrincipal 𝔪 → f J = 1)
     (x : 𝓞 F) (J : idealsPrimeTo 𝔪) (hx : x - 1 ∈ 𝔪)
     (hJ : (J.1 : FractionalIdeal (𝓞 F)⁰ F) = (Ideal.span {x} : Ideal (𝓞 F))) : f J = 1 := by
@@ -472,12 +518,6 @@ theorem kills_of_rayPrincipal {F : Type} [Field F] [NumberField F] [IsTotallyCom
       (IsTotallyComplex.complexEmbedding_not_isReal (Complex.ofRealHom.comp φ))
   · rw [coe_toPrincipalIdeal, hJ, FractionalIdeal.coeIdeal_span_singleton]
     rfl
-
-example {F : Type} [Field F] [NumberField F] [IsTotallyComplex F] (𝔪 : Ideal (𝓞 F)) (x : 𝓞 F) (J : idealsPrimeTo 𝔪)
-    (hx : x - 1 ∈ 𝔪) (hJ : (J.1 : FractionalIdeal (𝓞 F)⁰ F) = (Ideal.span {x} : Ideal (𝓞 F))) :
-    (QuotientGroup.mk J : RayClassGroup 𝔪) = 1 :=
-  kills_of_rayPrincipal (A := RayClassGroup 𝔪) (QuotientGroup.mk' ((rayPrincipal 𝔪).subgroupOf (idealsPrimeTo 𝔪)))
-    (fun I h => (QuotientGroup.eq_one_iff I).2 h) x J hx hJ
 
 end GlobalTheory.Published
 

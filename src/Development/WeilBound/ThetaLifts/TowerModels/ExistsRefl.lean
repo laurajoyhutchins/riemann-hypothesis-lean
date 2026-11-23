@@ -1,4 +1,59 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.Algebra.Basic
+public import Mathlib.Basic.Complex.Basic
+public import Mathlib.Data.Matrix.Mul
+public import Mathlib.LinearAlgebra.BilinearMap
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.Star.Pi
+public import Mathlib.Analysis.Real.Sqrt
+public import Mathlib.LinearAlgebra.Matrix.ToLin
+
+@[expose] public section
 
 namespace PositivityTheory.ThKG.Tow.Levi
 
@@ -30,6 +85,7 @@ theorem iso_of_hf {g : Matrix n n ℂ} (h : ∀ x y, hf M (g *ᵥ x) (g *ᵥ y) 
 
 omit [DecidableEq n] in
 theorem hf_conj (hM : ∀ i j, star (M j i) = M i j) (x y : n → ℂ) : starRingEnd ℂ (hf M x y) = hf M y x := by
+
   simp only [hf_apply, dotProduct, mulVec, map_sum, map_mul, Finset.mul_sum]
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
@@ -112,7 +168,7 @@ theorem exists_move (hM : ∀ i j, star (M j i) = M i j) (h1 : θ * θ = 1) (h2 
   have ep : ∀ x, θ *ᵥ (x + θ *ᵥ x) = (1 : ℂ) • (x + θ *ᵥ x) := fun x => by rw [mulVec_add, hθθ, one_smul, add_comm]
   have em : ∀ x, θ *ᵥ (x - θ *ᵥ x) = (-1 : ℂ) • (x - θ *ᵥ x) := fun x => by rw [mulVec_sub, hθθ, neg_one_smul, neg_sub]
   obtain ⟨κ₁, a1, a2, a3, a4⟩ := exists_refl hM h1 h2 h3 (Or.inl rfl) (ep v) (ep w) (by
-    simp only [map_add, LinearMap.add_apply, hθ, hs, e, ew, ew'])
+    simp only [map_add (f := _), LinearMap.add_apply, hθ, hs, e, ew, ew'])
   obtain ⟨κ₂, b1, b2, b3, b4⟩ := exists_refl hM h1 h2 h3 (Or.inr rfl) (em v) (em w) (by
     simp only [map_sub, LinearMap.sub_apply, hθ, hs, e, ew, ew'])
   refine ⟨κ₂ * κ₁, t, by exact_mod_cast ht.ne', iso_of_hf fun x y => ?_, b2.mul_left a2, ?_⟩

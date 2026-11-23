@@ -1,5 +1,54 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.StatementsDualStackedExcLinear
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.StatementsDualStackedExcLinear
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.Algebra.ZMod
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -29,8 +78,8 @@ theorem charOf_linPrime {n : ℕ} (α : T → k) (M : T → Fin n → k) : charO
     rw [h, Int.natAbs_natCast]
   exact key _ ((comap_linPrime α M).trans hker)
 
-omit [Fintype T] in
 
+omit [Fintype T] in
 theorem exists_alpha_ne {α : T → k} (hα : Submodule.span ℤ (Set.range α) = ⊤) : ∃ s, α s ≠ 0 := by
   by_contra h
   push Not at h
@@ -80,17 +129,22 @@ theorem length_mul_log [Finite k] :
 
 theorem geoNum_linPrime (hCut : LinPrimeCut.Statement) (hBase : LinPrimeBase.Statement) :
     ∀ (n : ℕ) (α : T → k) (M : T → Fin (n + 1) → k), Submodule.span ℤ (Set.range α) = ⊤ → LinFormsIndep M →
-      geoNum n (linPrime α M) (fun _ => degSecond) = ((Module.length ℤ k).toNat : ℤ)
-  | 0, α, M, hα, hM => by
+      geoNum n (linPrime α M) (fun _ => degSecond) = ((Module.length ℤ k).toNat : ℤ) := by
+  intro n
+  induction n with
+  | zero =>
+    intro α M hα hM
     have hrel := isRelevant_linPrime hα hM
-    rw [geoNum, dif_pos hrel]
+    rw [geoNum, dite_eq_left hrel]
+    unfold LinPrimeBase.Statement at hBase
     obtain ⟨e⟩ := hBase T k α M hα hM (fun κ => (hrel κ).choose) (fun κ => (hrel κ).choose_spec)
     rw [e.toAddEquiv.toIntLinearEquiv.length_eq]
-  | n + 1, α, M, hα, hM => by
+  | succ n ih =>
+    intro α M hα hM
     have hrel : ∀ κ, ∃ j, (X ⟨κ, j⟩ : MRing (stackedBlocks T)) ∉ linPrime α M := isRelevant_linPrime hα hM
     rw [geoNum]
     unfold IsRelevant
-    rw [dif_pos hrel, Fintype.sum_sum_type, Fintype.sum_unique, Fintype.sum_unique]
+    rw [dite_eq_left hrel, Fintype.sum_sum_type, Fintype.sum_unique, Fintype.sum_unique]
     rw [show degSecond (Sum.inl default) = 0 from degSecond_inl, show degSecond (Sum.inr default) = 1 from degSecond_inr,
       zero_mul, zero_add, one_mul]
     obtain ⟨M', hM', hsupp, hmult⟩ := hCut T k n α M hα hM ((hrel (Sum.inr ())).choose)
@@ -101,12 +155,12 @@ theorem geoNum_linPrime (hCut : LinPrimeCut.Statement) (hBase : LinPrimeBase.Sta
     have hmult' : multAt (linPrime α M ⊔ Ideal.span {(X ⟨Sum.inr default, (hrel (Sum.inr default)).choose⟩ :
         MRing (stackedBlocks T))}) (linPrime α M') = 1 := hmult
     rw [hmult', Nat.cast_one, one_mul]
-    exact geoNum_linPrime hCut hBase n α M' hα hM'
+    exact ih α M' hα hM'
 
 end StackedExceptionalSecondGeometric
 
-open StackedExceptionalSecondGeometric in
 
+open StackedExceptionalSecondGeometric in
 theorem DualStackedExcGeoSecond.proof (hLin : DualStackedExcLinear.Statement) (hCut : LinPrimeCut.Statement)
     (hBase : LinPrimeBase.Statement) : DualStackedExcGeoSecond.Statement := by
   intro K _ _ i F F' T _ _ b b' a hi hlt hcov hab E hE

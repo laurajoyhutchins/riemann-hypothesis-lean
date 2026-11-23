@@ -1,9 +1,50 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SquareIntegrability.GCauchyStatement
-import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.ExistsTranslateJetNeZero
-import Development.AbelianVarietyTheory.Proofs.TorusSplitting.CoeffEqZeroOfOrthonormal
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsImEqLattice
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.DifferentiableFderivApply
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SquareIntegrability.FourierProjections.HfNegRight
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GlobalTheory.UpperHalfImaginaryForm
 
@@ -29,7 +70,8 @@ theorem imForm_apply (x y : EuclideanSpace ℂ ι) : imForm x y = (Hf x y).im :=
 
 theorem imForm_swap (x y : EuclideanSpace ℂ ι) : imForm y x = -imForm x y := by
   have h : Hf y x = starRingEnd ℂ (Hf x y) := by
-    simp [Hf, map_sum, mul_comm]
+    set_option synthInstance.maxHeartbeats 100000 in
+      simp [Hf, map_sum, mul_comm]
   rw [imForm_apply, imForm_apply, h, Complex.conj_im]
 
 variable {n : ℕ}
@@ -80,7 +122,7 @@ theorem upper_int (b : Module.Basis (Fin n) ℝ (EuclideanSpace ℂ ι))
     | add z w _ _ hz hw =>
       obtain ⟨k₁, h₁⟩ := hz
       obtain ⟨k₂, h₂⟩ := hw
-      exact ⟨k₁ + k₂, by simp [map_add, h₁, h₂]⟩
+      exact ⟨k₁ + k₂, by simp [map_add (f := _), h₁, h₂]⟩
     | smul n z _ hz =>
       obtain ⟨k₁, h₁⟩ := hz
       exact ⟨n * k₁, by simp [map_zsmul, h₁, zsmul_eq_mul]⟩
@@ -92,7 +134,7 @@ theorem upper_int (b : Module.Basis (Fin n) ℝ (EuclideanSpace ℂ ι))
   | add z w _ _ hz hw =>
     obtain ⟨k₁, h₁⟩ := hz
     obtain ⟨k₂, h₂⟩ := hw
-    exact ⟨k₁ + k₂, by simp [map_add, LinearMap.add_apply, h₁, h₂]⟩
+    exact ⟨k₁ + k₂, by simp [map_add (f := _), LinearMap.add_apply, h₁, h₂]⟩
   | smul n z _ hz =>
     obtain ⟨k₁, h₁⟩ := hz
     exact ⟨n * k₁, by simp [map_zsmul, LinearMap.smul_apply, h₁, zsmul_eq_mul]⟩
@@ -112,7 +154,7 @@ theorem exists_coc {ι : Type} [Fintype ι]
     exact upper_sub b γ γ'
   have hadd : upper b (γ + γ') (γ + γ') =
       upper b γ γ + upper b γ γ' + upper b γ' γ + upper b γ' γ' := by
-    simp only [map_add, LinearMap.add_apply]
+    simp only [map_add (f := _), LinearMap.add_apply]
     ring
   dsimp only
   rw [← Complex.exp_add, ← Complex.exp_add, Complex.exp_eq_exp_iff_exists_int]

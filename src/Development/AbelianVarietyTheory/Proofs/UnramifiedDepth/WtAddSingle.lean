@@ -1,7 +1,54 @@
-import Mathlib
-import ReciprocityTheory.DualLattices.DetPolyMulCayleyOmegaPow
-import ReciprocityTheory.DualLattices.VEqZeroOfPowEqOne
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.WeightedSumBounds.PeriodValuation
+module
+
+public import ReciprocityTheory.DualLattices.FischerAdjointStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.DualLattices.DetPolyMulCayleyOmegaPow
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open ReciprocityTheory.PGsh
 
@@ -19,17 +66,18 @@ def pair : MvPolynomial σ C →ₗ[C] MvPolynomial σ C →ₗ[C] C :=
   (basisMonomials σ C).constr C fun A => wt C A • lcoeff C A
 
 theorem pair_monomial (A : σ →₀ ℕ) (c : C) (Q : MvPolynomial σ C) :
-    pair (monomial A c) Q = c * wt C A * coeff A Q := by
+    pair (monomial A c) Q = c * wt C A * AddMonoidAlgebra.coeff Q A := by
   have h : monomial A c = c • (basisMonomials σ C) A := by
     rw [coe_basisMonomials, smul_monomial, smul_eq_mul, mul_one]
   rw [h, map_smul, pair, Module.Basis.constr_basis, LinearMap.smul_apply, LinearMap.smul_apply, lcoeff_apply,
     smul_eq_mul, smul_eq_mul, mul_assoc]
 
 theorem pair_eq (P Q : MvPolynomial σ C) :
-    pair P Q = ∑ A ∈ P.support, coeff A P * wt C A * coeff A Q := by
+    pair P Q = ∑ A ∈ P.support, AddMonoidAlgebra.coeff P A * wt C A * AddMonoidAlgebra.coeff Q A := by
   conv_lhs => rw [P.as_sum]
+
   rw [map_sum, LinearMap.sum_apply]
-  exact Finset.sum_congr rfl fun A _ => pair_monomial A (coeff A P) Q
+  exact Finset.sum_congr rfl fun A _ => pair_monomial A (AddMonoidAlgebra.coeff P A) Q
 
 theorem wt_add_single (A : σ →₀ ℕ) (j : σ) :
     wt C (A + Finsupp.single j 1) = wt C A * ((A j : C) + 1) := by
@@ -57,12 +105,13 @@ theorem wt_add_single (A : σ →₀ ℕ) (j : σ) :
   ring
 
 theorem coeff_pderiv' (j : σ) (A : σ →₀ ℕ) (Q : MvPolynomial σ C) :
-    coeff A (pderiv j Q) = coeff (A + Finsupp.single j 1) Q * ((A j : C) + 1) :=
+    AddMonoidAlgebra.coeff (pderiv j Q) A = AddMonoidAlgebra.coeff Q (A + Finsupp.single j 1) * ((A j : C) + 1) :=
   coeff_pderiv Q A
 
 theorem pair_X_mul (j : σ) (P Q : MvPolynomial σ C) :
     pair (P * X j) Q = pair P (pderiv j Q) := by
   conv_lhs => rw [P.as_sum]
+
   rw [pair_eq P, Finset.sum_mul, map_sum, LinearMap.sum_apply]
   refine Finset.sum_congr rfl fun A _ => ?_
   rw [show (X j : MvPolynomial σ C) = monomial (Finsupp.single j 1) 1 from rfl, monomial_mul, mul_one,
@@ -87,6 +136,7 @@ theorem pair_det (n : ℕ) (P Q : MvPolynomial (Fin n × Fin n) C) :
     refine Finset.sum_congr rfl fun s _ => ?_
     rw [Units.smul_def, Fin.prod_univ_def]
     rfl
+
   rw [hdet, cayOp, Finset.mul_sum, map_sum, LinearMap.sum_apply, LinearMap.sum_apply, map_sum]
   refine Finset.sum_congr rfl fun s _ => ?_
   rw [mul_smul_comm, map_zsmul, LinearMap.smul_apply, LinearMap.smul_apply, map_zsmul]
@@ -115,7 +165,7 @@ theorem pair_pow (n x : ℕ) :
     ring
 
 theorem main :
-    (∀ (C : Type) [Field C] [CharZero C] (n₀ x : ℕ), (∏ c ∈ Finset.range n₀, (c.factorial : C)) * (∑ A ∈ (cayDet n₀ C ^ x).support, MvPolynomial.coeff A (cayDet n₀ C ^ x) * (A.prod fun _ e => (e.factorial : C)) * MvPolynomial.coeff A (cayDet n₀ C ^ x)) = ∏ c ∈ Finset.range n₀, ((x + c).factorial : C)) := by
+    (∀ (C : Type) [Field C] [CharZero C] (n₀ x : ℕ), (∏ c ∈ Finset.range n₀, (c.factorial : C)) * (∑ A ∈ (cayDet n₀ C ^ x).support, AddMonoidAlgebra.coeff (cayDet n₀ C ^ x) A * (A.prod fun _ e => (e.factorial : C)) * AddMonoidAlgebra.coeff (cayDet n₀ C ^ x) A) = ∏ c ∈ Finset.range n₀, ((x + c).factorial : C)) := by
   intro C _ _ n₀ x
   have h := pair_pow (C := C) n₀ x
   rw [pair_eq] at h

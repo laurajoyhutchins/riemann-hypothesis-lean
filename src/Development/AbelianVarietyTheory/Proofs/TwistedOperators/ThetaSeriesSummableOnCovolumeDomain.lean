@@ -1,16 +1,71 @@
-import Mathlib
-import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.AdjointIsotropicDecomposition
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ThetaRestrictIsotropicQuotientWittTowerPropertieStatement
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.AdjointIsotropicDecomposition
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ComplexEmbeddingHermitianQuadrupleSum
+import Development.AbelianVarietyTheory.Counterexamples.HeightSurvey.StarPurelyImaginaryEqNeg
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.SqNormIntegralFundamentalDomainEqL2NormSq
 import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.EqZeroOfLintegralEqZero
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.RationalSymplecticPointsSelfAnnihilator
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.EqZeroOfCoefficientsSeparatingCharactersEqZero
-import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.SqNormIntegralFundamentalDomainEqL2NormSq
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.InfPartOneSubEInfSmul
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.SymplecticAdelicFormBiadditiveAlternatingRationa
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.StdCharFinitePartRationalEqExpTrace
+import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ExistsInverseChart
+import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.FinTensMemLatO
 import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.RealIdemMulOfReal
+import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.StdCharFinitePartRationalEqExpTrace
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.SymplecticAdelicFormBiadditiveAlternatingRationa
 import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ThetaNormSqSumHeisenbergTranslatesDistinctChars
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsInvariantForm
+import Development.AbelianVarietyTheory.Proofs.HeightProofs.CocompactTensor
+import Development.AbelianVarietyTheory.Proofs.HeightProofs.ContinuousOfHeisenbergLevelAndSmooth
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.EqZeroOfCoefficientsSeparatingCharactersEqZero
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.RationalSymplecticPointsSelfAnnihilator
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsInvariantForm
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.InfPartOneSubEInfSmul
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ThetaRestrictIsotropicQuotientWittTowerPropertieStatement
+import Formalism.LocalToGlobal.ProjectiveLattices.HalfOneAddSqrtNegIsIntegral
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Real.Pi.Bounds
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+import Formalism.LocalToGlobal.IndefiniteReal.LinksDefs
+
+@[expose] public section
 
 noncomputable section
 
@@ -122,8 +177,7 @@ theorem summable_norm_of_lattice {Y : Type} {n : ℕ} (T : Y → ℂ) (ℓ : Y �
       have := (Real.summable_one_div_int_pow (p := 2)).2 one_lt_two
       refine this.congr fun k => ?_
       simp [sq_abs]
-    refine Summable.of_nonneg_of_le hg0 (fun k => ?_) (h2.add (summable_of_finite_support (f := fun k : ℤ => if k = 0 then (1 : ℝ) else 0)
-      ((Set.finite_singleton (0 : ℤ)).subset fun k hk => by simpa using hk)))
+    refine Summable.of_nonneg_of_le hg0 (fun k => ?_) (h2.add ((hasSum_ite_eq (0 : ℤ) (1 : ℝ)).summable))
     by_cases hk : k = 0
     · simp [g, hk]
     · have hpos : 0 < (k : ℝ) ^ 2 := by positivity
@@ -138,7 +192,7 @@ theorem summable_norm_of_lattice {Y : Type} {n : ℕ} (T : Y → ℂ) (ℓ : Y �
       Finset.mem_image_of_mem _ hk
     calc ∑ k ∈ s, b k ≤ ∑ k ∈ Fintype.piFinset t, b k := Finset.sum_le_sum_of_subset_of_nonneg hsub fun _ _ _ => hb0 _
       _ = ∏ i, ∑ k ∈ t i, g k := (Finset.prod_univ_sum t fun _ => g).symm
-      _ ≤ ∏ _i : Fin n, ∑' k, g k := Finset.prod_le_prod (fun i _ => Finset.sum_nonneg fun _ _ => hg0 _)
+      _ ≤ ∏ _i : Fin n, ∑' k, g k := Finset.prod_le_prod₀ (fun i _ => Finset.sum_nonneg fun _ _ => hg0 _)
           fun i _ => hg.sum_le_tsum _ fun _ _ => hg0 _
       _ = (∑' k, g k) ^ n := by simp
   have hsupp : ∀ y : Function.support T, ∃ k : Fin n → ℤ, ∀ i, ℓ y i = k i := fun y => by
@@ -309,7 +363,7 @@ theorem psi_symplO (h : Chart θ σ) (hψ : IsStdChar D ψ (-1)) (w : WO S T) (x
 def realLine (σ : (D.what₂.Tau → ℂ) →+ AE D) (S T : HSp D) (z : RW T S) : ℝ →+ WO S T where
   toFun t := iotaW σ T S (t • z)
   map_zero' := by rw [zero_smul, map_zero]
-  map_add' a b := by rw [add_smul, map_add]
+  map_add' a b := by rw [add_smul, map_add (f := _)]
 
 theorem isRealDir_realLine (h : Chart θ σ) (z : RW T S) : Formalism.L2.Theta.IsRealDir T S (realLine σ S T z) :=
   ⟨(h.continuous_iota T S).comp (continuous_id.smul continuous_const), fun t => h.real_iota T S _⟩
@@ -323,7 +377,7 @@ theorem psi_realLine (h : Chart θ σ) (hψ : IsStdChar D ψ (-1)) (w : WO S T) 
   simp only [smul_eq_mul, Complex.ofReal_mul]
   ring
 
-set_option synthInstance.maxHeartbeats 400000 in
+
 
 theorem omO_rat (h : Chart θ σ) (x y : WO S T) (q : D.host.F)
     (hq : symplO S T x y = algebraMap D.host.F (AF D.host.F) q) :
@@ -377,7 +431,7 @@ theorem exists_coords (ψ : AddChar (AF D.host.F) ℂ) (hψ : IsStdChar D ψ (-1
     let Λ : Matrix (Fin T.rank) (Fin S.rank) D.host.E →+ ℝ :=
       { toFun := fun l => omO S T (z (y - y')) (z l)
         map_zero' := by rw [map_zero, map_zero]
-        map_add' := fun a b => by rw [map_add, map_add] }
+        map_add' := fun a b => by rw [map_add (f := _), map_add (f := _)] }
     have h1 : ∀ i, Λ (lam i) = 0 := fun i => by
       have := congrFun hyy i
       show omO S T (z (y - y')) (z (lam i)) = 0

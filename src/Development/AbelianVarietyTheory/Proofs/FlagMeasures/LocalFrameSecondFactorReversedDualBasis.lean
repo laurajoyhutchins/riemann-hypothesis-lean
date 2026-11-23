@@ -1,11 +1,56 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.SelfDualAt
-import Formalism.LocalToGlobal.HermitianForms.TiedStep
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.SelfDualAt
+public import Formalism.LocalToGlobal.HermitianForms.PsiZeroNontrivialCharacter
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.FirstComponentsBasisLocalLatticeSplitStatement
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.HermitianLocalLevelUnitriangularIffStatement
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.IntegralExtensionFiniteAdelesBasicProperties
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.InvUpperUnitriangularSuperdiagNegStatement
 import Development.AbelianVarietyTheory.Proofs.FlagMeasures.SplitPlaceLatticeComponents
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.IntegralExtensionFiniteAdelesBasicProperties
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.FirstComponentsBasisLocalLatticeSplitStatement
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.HermitianLocalLevelUnitriangularIffStatement
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.InvUpperUnitriangularSuperdiagNegStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.UG Formalism.L2.Forms NumberField IsDedekindDomain Matrix GlobalTheory.St.G
 open scoped TensorProduct
 
@@ -87,7 +132,7 @@ theorem reversed_relation_mod : ∀ (F : Type) [Field F] [NumberField F] (v : He
     have e : R i j = (if i = Fin.rev j then 1 else 0) + (g : v.adicCompletion F) * s i j := by
       rw [← this]; ring
     rw [e]
-    simp only [Ro, map_add, map_mul, map_natCast, hφS]
+    simp only [Ro, map_add (f := _), map_mul, map_natCast, hφS]
     congr 1
     split_ifs <;> simp
   have hinj : Function.Injective φ := Subtype.val_injective
@@ -95,6 +140,7 @@ theorem reversed_relation_mod : ∀ (F : Type) [Field F] [NumberField F] (v : He
     apply hinj
     have := congrFun (congrFun hrel x) y
     simp only [Matrix.mul_apply, Matrix.transpose_apply] at this
+
     simp only [map_sum, map_mul, hφA, hφM, hφR]
     exact this
   have hg0 : ρ (g : v.adicCompletionIntegers F) = 0 := by
@@ -103,11 +149,12 @@ theorem reversed_relation_mod : ∀ (F : Type) [Field F] [NumberField F] (v : He
     exact Ideal.mem_span_singleton_self _
   have hρR : ∀ i j, ρ (Ro i j) = if i = Fin.rev j then 1 else 0 := by
     intro i j
-    simp only [Ro, map_add, map_mul, hg0, zero_mul, add_zero]
+    simp only [Ro, map_add (f := _), map_mul, hg0, zero_mul, add_zero]
     split_ifs <;> simp
   have hρA : ∀ a c, ρ (Ao a c) = redM F v A a c := fun a c => (show redM F v A a c = ρ (Ao a c) from dif_pos (hA a c)).symm
   have hρM : ∀ a c, ρ (Mo a c) = redM F v M a c := fun a c => (show redM F v M a c = ρ (Mo a c) from dif_pos (hM a c)).symm
   have h := congrArg ρ hE
+
   simp only [map_sum, map_mul, hρR, hρA, hρM] at h
   rw [← h]
   refine Finset.sum_congr rfl fun l _ => ?_
@@ -144,7 +191,7 @@ theorem residue_character : ∀ (F E : Type) [Field F] [NumberField F] [Field E]
     intro r r'
     have : ((0 : v.adicCompletion F), r + r') = (0, r) + (0, r') := by simp
     simp only [P]
-    rw [this, map_add, mul_add, map_add, hadd]
+    rw [this, map_add (f := _), mul_add, map_add (f := _), hadd]
   have hP1 : ∀ r : v.adicCompletionIntegers F, P ((g : v.adicCompletion F) * r) = 1 := by
     intro r
     have : algebraMap F (E ⊗[F] v.adicCompletion F) ((g : F)⁻¹) * sp.symm (0, (g : v.adicCompletion F) * r) =
@@ -192,7 +239,7 @@ theorem residue_character : ∀ (F E : Type) [Field F] [NumberField F] [Field E]
       map_add_eq_mul' := fun a b => by
         rw [← hQadd]
         apply hQres
-        rw [map_add, hlift, hlift, hlift] }
+        rw [map_add (f := _), hlift, hlift, hlift] }
   have hψ : ∀ u, ψ (IsLocalRing.residue _ u) = Q u := fun u => hQres _ _ (hlift _)
   refine ⟨ψ, ?_, ?_⟩
   · intro h1
@@ -244,7 +291,7 @@ theorem sum_super_eq {A : Type} [AddCommMonoid A] {n : ℕ} (f : Fin n → Fin n
       intro h
       exact hb (Fin.ext h.symm)
     · simp
-  · rw [dif_neg hi]
+  · rw [dite_eq_right hi]
     symm
     refine Finset.sum_eq_zero fun y _ => ?_
     rw [if_neg]
@@ -253,8 +300,8 @@ theorem sum_super_eq {A : Type} [AddCommMonoid A] {n : ℕ} (f : Fin n → Fin n
 
 end SecondFactor
 
-open SecondFactor in
 
+open SecondFactor in
 theorem local_frame_second_factor : ∀ (F E : Type) [Field F] [NumberField F] [Field E] [NumberField E] [StarRing E] [Algebra F E] (cm : CMData F E) (n : ℕ) (J : Matrix (Fin n) (Fin n) E), IsHerm (cm.sig : E →+* E) J → J.det ≠ 0 → ∀ (t : ℕ) (v : HeightOneSpectrum (𝓞 F)) (sp : E ⊗[F] v.adicCompletion F ≃+* v.adicCompletion F × v.adicCompletion F), (∀ x, sp (sigR cm.sig (v.adicCompletion F) x) = swapR _ (sp x)) → (∀ a : v.adicCompletion F, sp ((1 : E) ⊗ₜ[F] a) = (a, a)) → (∀ x, x ∈ intV E v ↔ (sp x).1 ∈ v.adicCompletionIntegers F ∧ (sp x).2 ∈ v.adicCompletionIntegers F) → ∀ (g : ℕ), IsLocalRing.maximalIdeal (v.adicCompletionIntegers F) = Ideal.span {((g : ℕ) : v.adicCompletionIntegers F)} → ∀ (L : Submodule (𝓞 E) (Fin n → E)), IsLat L → ∀ (e : E ⊗[F] v.adicCompletion F), sp e = (0, 1) → ∀ (b bd : Fin n → Fin n → E ⊗[F] v.adicCompletion F), (∀ i, b i ∈ loc v L) → (∀ i, bd i ∈ loc v L) → (∀ i, b i = e • b i) → (∀ i, bd i = sigR cm.sig (v.adicCompletion F) e • bd i) → (∀ i j, ∃ s ∈ intV E v, hR cm.sig J (v.adicCompletion F) (bd i) (b j) - (if i = j then e else 0) = (g : E ⊗[F] v.adicCompletion F) * s) → (∀ y ∈ loc v L, InModL (loc v L) g (Set.range b ∪ Set.range bd) y) → ∀ (psi : E ⊗[F] Ad F → ℂ), (∀ x y, psi (x + y) = psi x * psi y) → (∀ x ∈ OAd F E, psi x = 1) → (∃ a ∈ intV E v, psi (Formalism.UG.P.afsplitIE v (algebraMap F (E ⊗[F] v.adicCompletion F) ((g : F)⁻¹) * (e * a))) ≠ 1) → ∃ (fr : GL (Fin n) (v.adicCompletion F)) (ψ : AddChar (kv F v) ℂ), ψ ≠ 1 ∧ (∀ x : Fin n → v.adicCompletion F, (∃ y ∈ loc v L, ∀ c, (sp (y c)).1 = x c) ↔ ∀ c, ((fr⁻¹ : GL (Fin n) (v.adicCompletion F)) : Matrix (Fin n) (Fin n) (v.adicCompletion F)).mulVec x c ∈ v.adicCompletionIntegers F) ∧ ∀ y ∈ levelVL cm.sig J v L, ((∀ i : Fin n, InModL (loc v L) g (b '' {j | j.1 < i.1}) ((y.1 - 1) *ᵥ b i)) ↔ InJ n t n false (redM F v ((fr⁻¹ * bc ((RingHom.fst _ _).comp sp.toRingHom) y * fr : GL (Fin n) (v.adicCompletion F)) : Matrix (Fin n) (Fin n) (v.adicCompletion F)))) ∧ ((∀ i : Fin n, InModL (loc v L) g (b '' {j | j.1 < i.1}) ((y.1 - 1) *ᵥ b i)) → psi (Formalism.UG.P.afsplitIE v (algebraMap F (E ⊗[F] v.adicCompletion F) ((g : F)⁻¹) * supSum (hR cm.sig J (v.adicCompletion F)) b bd y.1)) = lamJ ψ (fun _ => 1) n t 0 n (redM F v ((fr⁻¹ * bc ((RingHom.fst _ _).comp sp.toRingHom) y * fr : GL (Fin n) (v.adicCompletion F)) : Matrix (Fin n) (Fin n) (v.adicCompletion F)))) := by
   intro F E _ _ _ _ _ _ cm n J hJ hdet t v sp hsig halg hint g hg L hL e he b bd hb hbd hbe hbde hdual hspan psi hadd hpsiO hne
   obtain ⟨sp', h1, h2⟩ : ∃ sp' : E ⊗[F] v.adicCompletion F ≃+* v.adicCompletion F × v.adicCompletion F,
@@ -413,11 +460,13 @@ theorem local_frame_second_factor : ∀ (F E : Type) [Field F] [NumberField F] [
         ∑ x : Fin n, ∑ y : Fin n, (if (x : ℕ) + 1 = y then (f x y : v.adicCompletion F) else 0) := by
     intro f
     show algebraMap (v.adicCompletionIntegers F) (v.adicCompletion F) _ = _
+
     simp only [map_sum, apply_ite (algebraMap (v.adicCompletionIntegers F) (v.adicCompletion F)), map_zero]
     rfl
   have hrr : ∀ i j, ((rr i j : v.adicCompletionIntegers F) : v.adicCompletion F) = ∑ l, sR l (Fin.rev i) * A l j := by
     intro i j
     show algebraMap (v.adicCompletionIntegers F) (v.adicCompletion F) _ = _
+
     simp only [rr, map_sum, map_mul]
     rfl
   have hterm : ∀ i j, (sp (hR cm.sig J (v.adicCompletion F) (bd i) (y.1 *ᵥ b j))).2 =
@@ -429,6 +478,7 @@ theorem local_frame_second_factor : ∀ (F E : Type) [Field F] [NumberField F] [
         simp [Matrix.mulVec, dotProduct, Matrix.mul_apply]
       rw [e1, hfA, Matrix.mul_apply]
       simp only [Matrix.mulVec, dotProduct]
+
       rw [map_sum, Prod.snd_sum]
       refine Finset.sum_congr rfl fun d _ => ?_
       rw [map_mul, Prod.snd_mul, hfrBE, ← h1]
@@ -445,6 +495,7 @@ theorem local_frame_second_factor : ∀ (F E : Type) [Field F] [NumberField F] [
   have hss : sp (supSum (hR cm.sig J (v.adicCompletion F)) b bd y.1) =
       (0, (sO : v.adicCompletion F) + (g : v.adicCompletion F) * (rO : v.adicCompletion F)) := by
     unfold supSum
+
     rw [map_sum]
     refine Prod.ext ?_ ?_
     · rw [Prod.fst_sum]
@@ -481,6 +532,7 @@ theorem local_frame_second_factor : ∀ (F E : Type) [Field F] [NumberField F] [
     · rw [if_neg h, if_neg (fun h' => h h'.1)]
   rw [hlam, hsupM, map_neg]
   congr 2
+
   simp only [sO, map_sum, apply_ite (IsLocalRing.residue (v.adicCompletionIntegers F)), map_zero, hredA]
 
 end GlobalTheory.St.G

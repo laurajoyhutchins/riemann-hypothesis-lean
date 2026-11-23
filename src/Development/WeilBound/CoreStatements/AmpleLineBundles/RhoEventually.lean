@@ -1,6 +1,54 @@
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ComplexPointsClosureCoords
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.SegreChartBundle
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LocalRingPointsExistsUniqueStatement
+module
+
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ComplexPointsClosureCoords
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.EtaleLocalizationAtPrimeTensorOfLowHeight
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.Bundle
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.HodgeIPIffHodgeFormConj
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.CoordsAtSmul
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LocalRingPointsExistsUniqueStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.SegreChartBundle
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Algebra.MvPolynomial
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LocRatio
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField TensorProduct Filter Topology Matrix
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Geo ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.Semi GlobalTheory.CompanionTheory.Ar
 
@@ -21,7 +69,7 @@ omit [∀ k, Fintype (J k)] in
 theorem evp_cont (c : (k : K) → J k) (P : MvPolynomial ((k : K) → J k) ℤ) {w : (Σ k, J k) → ℂ}
     (hc : ∀ k, w ⟨k, c k⟩ ≠ 0) : ContinuousAt (evp c P) w := by
   have hρ : ∀ c', ContinuousAt (fun v : (Σ k, J k) → ℂ => segreRatio c c' v) w := fun c' =>
-    tendsto_finset_prod _ fun k _ =>
+    tendsto_finsetProd _ fun k _ =>
       ContinuousAt.div (continuous_apply _).continuousAt (continuous_apply _).continuousAt (hc k)
   have e : evp c P =
       fun v => MvPolynomial.eval (fun c' => segreRatio c c' v) (MvPolynomial.map (algebraMap ℤ ℂ) P) := by
@@ -44,7 +92,7 @@ theorem evp_conj (c : (k : K) → J k) (P : MvPolynomial ((k : K) → J k) ℤ) 
   unfold evp
   induction P using MvPolynomial.induction_on with
   | C n => simp
-  | add p q hp hq => simp only [map_add, hp, hq]
+  | add p q hp hq => simp only [map_add (f := _), hp, hq]
   | mul_X p i hp =>
     rw [map_mul, map_mul, map_mul, hp]
     simp only [MvPolynomial.aeval_X, segreRatio, map_prod, map_div₀]
@@ -53,7 +101,7 @@ def chi (c : (k : K) → J k) (w : (Σ k, J k) → ℂ) : ℝ := ∏ k, ‖w ⟨
 
 theorem chi_cont (c : (k : K) → J k) {w : (Σ k, J k) → ℂ} (hw : ∀ k, ∃ i, w ⟨k, i⟩ ≠ 0) :
     ContinuousAt (chi c) w := by
-  refine tendsto_finset_prod _ fun k _ => ContinuousAt.div (continuous_apply _).norm.continuousAt
+  refine tendsto_finsetProd _ fun k _ => ContinuousAt.div (continuous_apply _).norm.continuousAt
     (continuous_pi fun i => continuous_apply _).norm.continuousAt ?_
   obtain ⟨i, hi⟩ := hw k
   exact norm_ne_zero_iff.2 fun h => hi (congrFun h i)
@@ -137,14 +185,14 @@ theorem exists_rho_pos {w : W} (h : ∃ l, 0 < f l w) : ∃ l, 0 < rho f l w := 
 
 theorem rho_cont [TopologicalSpace W] {w : W} (hc : ∀ l, ContinuousAt (f l) w) (l : Λ) :
     ContinuousAt (rho f l) w :=
-  continuousAt_const.max ((continuousAt_const.mul (hc l)).sub (tendsto_finset_sum _ fun m _ => hc m))
+  continuousAt_const.max ((continuousAt_const.mul (hc l)).sub (tendsto_finsetSum _ fun m _ => hc m))
 
 theorem rho_eventually [TopologicalSpace W] {w : W} (hc : ∀ l, ContinuousAt (f l) w) (hf : ∀ l, 0 ≤ f l w)
     (h : ∃ l, 0 < f l w) {l : Λ} (hl : f l w = 0) : ∀ᶠ v in 𝓝 w, rho f l v = 0 := by
   obtain ⟨l₀, h₀⟩ := h
   have hs : 0 < ∑ m, f m w := Finset.sum_pos' (fun m _ => hf m) ⟨l₀, Finset.mem_univ _, h₀⟩
   have h1 : ContinuousAt (fun v => ((Fintype.card Λ : ℝ) + 1) * f l v - ∑ m, f m v) w :=
-    (continuousAt_const.mul (hc l)).sub (tendsto_finset_sum _ fun m _ => hc m)
+    (continuousAt_const.mul (hc l)).sub (tendsto_finsetSum _ fun m _ => hc m)
   have h2 := h1.eventually_lt (continuousAt_const (y := (0 : ℝ))) (by simp only [hl]; linarith)
   exact h2.mono fun v hv => max_eq_left hv.le
 
@@ -176,8 +224,8 @@ theorem exists_poly {κ : Type} {x : κ → Ω} {c : κ} {g : Ω} (hg : g ∈ ch
   rw [Algebra.adjoin_range_eq_range_aeval] at h
   exact h
 
-open Classical in
 
+open Classical in
 def vl (ξ : Sp Ω ⟶ X) (y : (Σ k, J k) → Ω) (a : Ω) (w : (Σ k, J k) → ℂ) : ℂ :=
   if h : ∃ s : ℂ, ∃ z : Sp ℂ ⟶ X, CoordsAt ξ y z w ∧ ValAt ξ z a s then h.choose else 0
 
@@ -191,7 +239,7 @@ theorem vl_eq (hall : ∀ q : X, genPt ξ ⤳ q)
     (tie : CoordTie ℤ ξ (fun c' : (k : K) → J k => ∏ k, y ⟨k, c' k⟩)) {z : Sp ℂ ⟶ X} {w : (Σ k, J k) → ℂ}
     (h : CoordsAt ξ y z w) {a : Ω} {s : ℂ} (hs : ValAt ξ z a s) : vl ξ y a w = s := by
   have he : ∃ s : ℂ, ∃ z : Sp ℂ ⟶ X, CoordsAt ξ y z w ∧ ValAt ξ z a s := ⟨s, z, h, hs⟩
-  rw [vl, dif_pos he]
+  rw [vl, dite_eq_left he]
   obtain ⟨z', h', hs'⟩ := he.choose_spec
   rw [pt_unique hall tie h' h] at hs'
   exact CxVal.unique hs' hs
@@ -252,6 +300,7 @@ theorem chart_cover {κ : Type} {x : κ → Ω} (tie : CoordTie ℤ ξ x) {E : T
     refine TieFrame.exists_unitAt_of_sum tie.gen p _ (fun l => (a l : Ω))
       (fun l => TieFrame.chart_le_regAt tie hp (g l).1.2) (fun l => TieFrame.chart_le_regAt tie hp (a l).2) ?_
     have := congrArg (chartRing ℤ x c).val hag
+
     simpa [map_sum] using this
 
 end CoverDenseAlt.Met

@@ -1,11 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.PoincareDeRhamDuality
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.AbelianDeRhamStructure
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.BijectiveCechDeRhamComparisonDegreeOne
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.AbelianHodgeDeRham
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.ExistsCrystalPairing
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.CubeTheorem
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CrystallineH2SmallCoverBijective
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.CrystallineConnectionFormCoboundaryZero
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsLocalization
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.VanishingH1InvertingMorphisms
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsNilpotentOfMemSmallCover
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Definitions.Divisors.IsKSValueOneOfRetraction
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -34,14 +72,14 @@ theorem hasLoc (s : X ⟶ Sp R) : Desc.HasLoc ((IsTriv s).ι ⋙ O (dp0 R) s) :=
   · obtain ⟨⟨_, n, rfl⟩, hm⟩ :=
       (IsLocalization.map_eq_zero_iff (Submonoid.powers b') (Localization.Away b') x).1 hx
     exact ⟨n, hm⟩
-  · exact ObjectProperty.hom_ext _ (Thick.hom_ext (ThickLoc.liftφ_algebraMap u.hom hu))
+  · exact ObjectProperty.hom_ext _ (Thick.Hom.ext' (AlgHom.ext (ThickLoc.liftφ_algebraMap u.hom hu)))
   · have hv' : ∀ x : T.obj.B, v.hom.φ (algebraMap T.obj.B (Localization.Away b') x) = u.hom.φ x :=
       fun x ↦ by rw [← hv]; rfl
     have : (v.hom.φ : Localization.Away b' →+* S.obj.B) =
         (ThickLoc.liftφ u.hom hu : Localization.Away b' →+* S.obj.B) := by
       refine IsLocalization.ringHom_ext (Submonoid.powers b') (RingHom.ext fun x ↦ ?_)
       exact (hv' x).trans (ThickLoc.liftφ_algebraMap u.hom hu x).symm
-    exact ObjectProperty.hom_ext _ (Thick.hom_ext fun x ↦ RingHom.congr_fun this x)
+    exact ObjectProperty.hom_ext _ (Thick.Hom.ext' (AlgHom.ext fun x ↦ RingHom.congr_fun this x))
 
 theorem pull_restrict_small_injective : ∀ (R : Type) [CommRing R] (X : Scheme.{0}) (s : X ⟶ Sp R) (K : Type) (U : K → X.Opens), ⨆ i, U i = ⊤ → Function.Injective (CoefMap.restrict ((IsTriv s).ι ⋙ O (dp0 R) s) (ObjectProperty.ι (fun T : (IsTriv s).FullSubcategory => IsSmall (dp0 R) s U T.obj))).pull2 := by
   intro R _ X s K U hU

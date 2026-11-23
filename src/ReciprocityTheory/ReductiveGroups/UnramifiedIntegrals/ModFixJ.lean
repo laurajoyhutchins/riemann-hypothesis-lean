@@ -1,10 +1,56 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.ModGDefs
-import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.ModGBasic
-import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.ModChebOm
-import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.ModSepInt
-import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.ModFrobCong
-import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.IsIntegralOfRoot
+module
+
+public import Mathlib.FieldTheory.KrullTopology
+public import Mathlib.RingTheory.Valuation.ValuationSubring
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.LocalToGlobal.TorsionIntegrality.CMGoodModels.Statement
+public import Mathlib.Topology.Algebra.OpenSubgroup
+import ReciprocityTheory.NeutralLocalFields.HilbertClassField
+
+@[expose] public section
 
 noncomputable section
 open scoped BigOperators Classical UpperHalfPlane
@@ -71,66 +117,5 @@ theorem fixJStab_isOpen {E Ω : Type*} [Field E] [Field Ω] [Algebra E Ω] [Alge
   rw [mem_fixJStab]
   intro r hr
   exact hg ⟨r, IntermediateField.subset_adjoin E _ hr⟩
-
-theorem fixJ_ker_isOpen (E Ω : Type) [Field E] [NumberField E] [Field Ω] [Algebra E Ω] [IsAlgClosure E Ω]
-    (art : (Ω ≃ₐ[E] Ω) →* ClassGroup (𝓞 E)) (hk : art.ker = hilbertSubgroup E Ω) :
-    IsOpen (art.ker : Set (Ω ≃ₐ[E] Ω)) := by
-  refine Subgroup.isOpen_of_isClosed_of_finiteIndex _ ?_
-  rw [hk]
-  exact Subgroup.isClosed_topologicalClosure _
-
-theorem fixJ (hH : _root_.Neutral.HilbertClassField.Statement) (hC : ChebOmSt)
-    {d : ℕ} {L : PeriodPair} (hsf : Squarefree d) (hd : d % 4 = 3) (hL : HasCMBy d L)
-    (x : Om d) (hx : (x : ℂ) = jInv L) (σ : Om d ≃ₐ[KQ d] Om d) (hσ : σ ∈ hilbertSubgroup (KQ d) (Om d)) :
-    σ x = x := by
-  obtain ⟨art, -, hker, hfrob⟩ := hH (KQ d) (Om d)
-  have hxi : IsIntegral ℤ x := by
-    obtain ⟨y, hy, hyi⟩ := exists_Om d (cm1 d L hsf hd hL)
-    have : y = x := Subtype.ext (hy.trans hx.symm)
-    rwa [this] at hyi
-  obtain ⟨P, hP, hPx⟩ := hxi
-  have hxs : x ∈ fixJRoots (Ω := Om d) P := by
-    rw [mem_fixJRoots hP]
-    rwa [show algebraMap ℤ (Om d) = Int.castRingHom (Om d) from RingHom.ext_int _ _] at hPx
-  obtain ⟨n, hn0, hn⟩ := sepInt (fixJRoots (Ω := Om d) P) (fun r hr => isIntegral_of_mem_fixJRoots hP hr)
-  set S : Set (HeightOneSpectrum (𝓞 (KQ d))) := {v | (n : 𝓞 (KQ d)) ∈ v.asIdeal} with hS
-  have hSfin : S.Finite := finite_places (KQ d) hn0
-
-  have key : ∀ (A : ValuationSubring (Om d)) (v : HeightOneSpectrum (𝓞 (KQ d))), LiesAbove A v → v ∉ S →
-      ∀ r ∈ fixJRoots (Ω := Om d) P, ∀ r' ∈ fixJRoots (Ω := Om d) P, r - r' ∈ A.nonunits → r = r' := by
-    intro A v hA hv r hr r' hr' h
-    by_contra hne
-    have h1 := hn r hr r' hr' hne A h
-    apply hv
-    rw [hS, Set.mem_ofPred_eq, ← hA]
-    simpa using h1
-  set H : Subgroup (Om d ≃ₐ[KQ d] Om d) := art.ker ⊓ fixJStab (KQ d) (Om d) P with hH
-  have := fixJStab_normal (E := KQ d) (Ω := Om d) hP
-  have hHn : H.Normal := inferInstance
-  have hHo : IsOpen (H : Set (Om d ≃ₐ[KQ d] Om d)) := by
-    rw [hH, Subgroup.coe_inf]
-    exact (fixJ_ker_isOpen _ _ art hker).inter fixJStab_isOpen
-  obtain ⟨A, v, φ, hA, hv, hp, hφ, hσφ⟩ := hC (KQ d) (Om d) S hSfin H hHn hHo (by
-    intro A v hA hv g hg
-    refine ⟨by rw [hker]; exact inertiaEl_mem_hilbert hg, fun r hr => ?_⟩
-    exact key A v hA hv _ (map_mem_fixJRoots hP g hr) _ hr
-      (hg.2 r (mem_of_isIntegral A (isIntegral_of_mem_fixJRoots hP hr)))) σ
-  have hσ1 : art σ = 1 := by rw [← MonoidHom.mem_ker, hker]; exact hσ
-  have hφ1 : art φ = 1 := by
-    have : σ⁻¹ * φ ∈ art.ker := hσφ.1
-    rw [MonoidHom.mem_ker, map_mul, map_inv, hσ1, inv_one, one_mul] at this
-    exact this
-  have hcl := hfrob v A φ hA hφ
-  rw [hφ1] at hcl
-  have h1 := frobCong hsf hd hL x hx A v hA hp hcl.symm
-  have h2 := hφ.2 x (mem_of_isIntegral A (isIntegral_of_mem_fixJRoots hP hxs))
-  have h3 : φ x - x ∈ A.nonunits := by
-    have := fixJ_nonunits_add A h2 h1
-    simpa using this
-  have h4 : φ x = x := key A v hA hv _ (map_mem_fixJRoots hP φ hxs) _ hxs h3
-  have h5 := hσφ.2 x hxs
-  rw [AlgEquiv.mul_apply, h4] at h5
-  calc σ x = σ (σ⁻¹ x) := by rw [h5]
-    _ = x := by rw [← AlgEquiv.mul_apply, mul_inv_cancel]; rfl
 
 end ReciprocityTheory.ChartRestriction.L1

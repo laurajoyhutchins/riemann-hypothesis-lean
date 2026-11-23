@@ -1,6 +1,62 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.FiniteAlgebrasOverHenselianAndComplete
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BijectiveBaseChangeResidueFieldOfFiniteEtale
+module
+
+public import Mathlib.FieldTheory.IsSepClosed
+public import Mathlib.RingTheory.Etale.Basic
+public import Mathlib.RingTheory.Henselian
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BijectiveBaseChangeResidueFieldOfFiniteEtale
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.FiniteAlgebrasOverHenselianAndComplete
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.RingTheory.Unramified.LocalRing
+
+@[expose] public section
 
 open IsLocalRing TensorProduct
 
@@ -79,7 +135,7 @@ theorem exists_trans {E F : Idx R Ω} (h : E ≤ F) :
   refine ⟨φ, fun a => ?_⟩
   have := congrArg (fun g => liftEquiv R Ω F (g (1 ⊗ₜ a))) hφ
   simp only [Algebra.TensorProduct.map_tmul, AlgHom.coe_id, id_eq, AlgHom.coe_comp,
-    Function.comp_apply, AlgEquiv.toAlgHom_eq_coe, AlgHom.coe_coe, AlgEquiv.apply_symm_apply] at this
+    Function.comp_apply, AlgEquiv.coe_toAlgHom, AlgHom.coe_coe, AlgEquiv.apply_symm_apply] at this
   rw [red_apply, red_apply, this]
   simp
 
@@ -131,8 +187,10 @@ theorem comap_ker_red (E : Idx R Ω) :
 theorem ker_red (E : Idx R Ω) : RingHom.ker (red R Ω E) = maximalIdeal (Lift R Ω E) := by
   have hp : (RingHom.ker (red R Ω E)).IsPrime := RingHom.ker_isPrime _
   haveI : Algebra.IsIntegral R (Lift R Ω E) := Algebra.IsIntegral.of_finite R _
+  have hIntegral : (algebraMap R (Lift R Ω E)).IsIntegral := algebraMap_isIntegral_iff.mpr this
   have : (RingHom.ker (red R Ω E)).IsMaximal :=
-    Ideal.isMaximal_of_isIntegral_of_isMaximal_comap (R := R) _ (by rw [comap_ker_red]; infer_instance)
+    Ideal.isMaximal_of_isIntegral_of_isMaximal_comap (algebraMap R (Lift R Ω E)) hIntegral _
+      (by rw [comap_ker_red]; infer_instance)
   exact IsLocalRing.eq_maximalIdeal this
 
 theorem red_eq_zero_iff (E : Idx R Ω) (a : Lift R Ω E) :
@@ -170,23 +228,26 @@ theorem trans_injective (E F : Idx R Ω) (h : E ≤ F) : Function.Injective (tra
   haveI := Module.FaithfullyFlat.faithfulSMul (A := Lift R Ω E) (B := Lift R Ω F)
   exact FaithfulSMul.algebraMap_injective (Lift R Ω E) (Lift R Ω F)
 
-variable (R Ω) in
 
+variable (R Ω) in
 def ofA (E : Idx R Ω) : Lift R Ω E →ₐ[R] SH R Ω := DirectLimit.Algebra.of (R := R) (Lift R Ω) (trans R Ω) E
 
-theorem ofA_injective (E : Idx R Ω) : Function.Injective (ofA R Ω E) :=
+theorem ofA_injective (E : Idx R Ω) : Function.Injective (ofA (R := R) (Ω := Ω) E) :=
   DirectLimit.mk_injective (trans R Ω) (fun i j h => trans_injective i j h) E
 
 theorem ofA_trans {E F : Idx R Ω} (h : E ≤ F) (a : Lift R Ω E) :
-    ofA R Ω F (trans R Ω E F h a) = ofA R Ω E a := DirectLimit.Algebra.of_f ..
+    ofA (R := R) (Ω := Ω) F (trans R Ω E F h a) = ofA (R := R) (Ω := Ω) E a :=
+      DirectLimit.Algebra.of_f ..
 
-theorem redSH_ofA (E : Idx R Ω) (a : Lift R Ω E) : redSH R Ω (ofA R Ω E a) = red R Ω E a := rfl
+theorem redSH_ofA (E : Idx R Ω) (a : Lift R Ω E) :
+    redSH R Ω (ofA (R := R) (Ω := Ω) E a) = red R Ω E a := rfl
 
-theorem exists_ofA (s : SH R Ω) : ∃ E a, ofA R Ω E a = s := by
-  obtain ⟨E, a, rfl⟩ := DirectLimit.exists_eq_mk _ s
+theorem exists_ofA (s : SH R Ω) : ∃ E a, ofA (R := R) (Ω := Ω) E a = s := by
+  obtain ⟨E, a, rfl⟩ := DirectLimit.exists_eq_mk (trans R Ω) s
   exact ⟨E, a, rfl⟩
 
-theorem exists_ofA_finset (s : Finset (SH R Ω)) : ∃ E, ∀ x ∈ s, ∃ a, ofA R Ω E a = x := by
+theorem exists_ofA_finset (s : Finset (SH R Ω)) :
+    ∃ E, ∀ x ∈ s, ∃ a, ofA (R := R) (Ω := Ω) E a = x := by
   classical
   induction s using Finset.induction_on with
   | empty => exact ⟨Classical.arbitrary _, by simp⟩
@@ -200,7 +261,8 @@ theorem exists_ofA_finset (s : Finset (SH R Ω)) : ∃ E, ∀ x ∈ s, ∃ a, of
     · obtain ⟨a, rfl⟩ := hE y hy
       exact ⟨trans R Ω E G hEG a, ofA_trans hEG a⟩
 
-theorem isUnit_ofA_iff (E : Idx R Ω) (a : Lift R Ω E) : IsUnit (ofA R Ω E a) ↔ IsUnit a := by
+theorem isUnit_ofA_iff (E : Idx R Ω) (a : Lift R Ω E) :
+    IsUnit (ofA (R := R) (Ω := Ω) E a) ↔ IsUnit a := by
   refine ⟨fun h => ?_, fun h => h.map _⟩
   rw [isUnit_iff_red_ne_zero, ← redSH_ofA]
   exact (h.map (redSH R Ω)).ne_zero
@@ -214,7 +276,7 @@ instance : IsLocalRing (SH R Ω) := by
     nontrivial_of_ne 1 0 (fun h => by simpa using congrArg (redSH R Ω) h)
   refine IsLocalRing.of_isUnit_or_isUnit_one_sub_self fun s => ?_
   obtain ⟨E, a, rfl⟩ := exists_ofA s
-  rw [← map_one (ofA R Ω E), ← map_sub, isUnit_ofA_iff, isUnit_ofA_iff]
+  rw [← map_one (ofA (R := R) (Ω := Ω) E), ← map_sub, isUnit_ofA_iff, isUnit_ofA_iff]
   exact IsLocalRing.isUnit_or_isUnit_one_sub_self a
 
 theorem mem_maximalIdeal_iff (s : SH R Ω) : s ∈ maximalIdeal (SH R Ω) ↔ redSH R Ω s = 0 := by
@@ -223,11 +285,13 @@ theorem mem_maximalIdeal_iff (s : SH R Ω) : s ∈ maximalIdeal (SH R Ω) ↔ re
 theorem ker_redSH : RingHom.ker (redSH R Ω) = maximalIdeal (SH R Ω) := by
   ext s; rw [mem_maximalIdeal_iff]; rfl
 
-instance isLocalHom_ofA (E : Idx R Ω) : IsLocalHom (ofA R Ω E : Lift R Ω E →+* SH R Ω) where
+instance isLocalHom_ofA (E : Idx R Ω) :
+    IsLocalHom (ofA (R := R) (Ω := Ω) E : Lift R Ω E →+* SH R Ω) where
   map_nonunit a h := (isUnit_ofA_iff E a).1 h
 
-theorem ofA_algebraMap (E : Idx R Ω) (r : R) : ofA R Ω E (algebraMap R _ r) = algebraMap R (SH R Ω) r :=
-  (ofA R Ω E).commutes r
+theorem ofA_algebraMap (E : Idx R Ω) (r : R) :
+    ofA (R := R) (Ω := Ω) E (algebraMap R _ r) = algebraMap R (SH R Ω) r :=
+  (ofA (R := R) (Ω := Ω) E).commutes r
 
 instance isLocalHom_algebraMap : IsLocalHom (algebraMap R (SH R Ω)) where
   map_nonunit r h := by
@@ -242,35 +306,38 @@ theorem map_maximalIdeal :
   have ha : a ∈ maximalIdeal (Lift R Ω E) := by
     rw [mem_maximalIdeal, mem_nonunits_iff, ← isUnit_ofA_iff]; exact hs
   rw [← map_maximalIdeal_lift] at ha
-  have := Ideal.mem_map_of_mem (ofA R Ω E : Lift R Ω E →+* SH R Ω) ha
-  rwa [Ideal.map_map, show ((ofA R Ω E : Lift R Ω E →+* SH R Ω)).comp (algebraMap R _) =
+  have := Ideal.mem_map_of_mem (ofA (R := R) (Ω := Ω) E : Lift R Ω E →+* SH R Ω) ha
+  rwa [Ideal.map_map, show ((ofA (R := R) (Ω := Ω) E : Lift R Ω E →+* SH R Ω)).comp (algebraMap R _) =
     algebraMap R (SH R Ω) from RingHom.ext (ofA_algebraMap E)] at this
 
 instance : HenselianLocalRing (SH R Ω) := by
     classical
     refine ⟨fun f hf a₀ h0 hu => ?_⟩
     obtain ⟨E, hE⟩ := exists_ofA_finset (insert a₀ f.coeffs)
-    let i : Lift R Ω E →+* SH R Ω := ofA R Ω E
+    let i : Lift R Ω E →+* SH R Ω := ofA (R := R) (Ω := Ω) E
     have hlift : f ∈ lifts i := by
       rw [lifts_iff_coeff_lifts]
       intro n
       by_cases hn : f.coeff n = 0
       · exact ⟨0, by simp [hn]⟩
       · obtain ⟨b, hb⟩ := hE _ (Finset.mem_insert_of_mem (coeff_mem_coeffs hn))
-        exact ⟨b, hb⟩
+        exact ⟨b, by simpa [i] using hb⟩
     obtain ⟨g, hg, -, hgm⟩ := lifts_and_natDegree_eq_and_monic hlift hf
     obtain ⟨b, hb⟩ := hE a₀ (Finset.mem_insert_self _ _)
-    change i b = a₀ at hb
+    change (ofA (R := R) (Ω := Ω) E) b = a₀ at hb
     subst hg hb
-    rw [eval_map, eval₂_at_apply] at h0
-    rw [derivative_map, eval_map, eval₂_at_apply] at hu
+    change eval (i b) (Polynomial.map i g) ∈ maximalIdeal (SH R Ω) at h0
+    rw [eval_map_apply] at h0
+    change IsUnit (eval (i b) (derivative (Polynomial.map i g))) at hu
+    rw [derivative_map, eval_map_apply] at hu
     have h0' : g.eval b ∈ maximalIdeal (Lift R Ω E) := fun hu' => h0 (hu'.map i)
     have hu' : IsUnit (g.derivative.eval b) := IsLocalHom.map_nonunit _ hu
     obtain ⟨a, ha, hab⟩ := HenselianRing.is_henselian (I := maximalIdeal (Lift R Ω E)) g hgm b h0'
       (hu'.map _)
     refine ⟨i a, ?_, ?_⟩
     · rw [IsRoot, eval_map, eval₂_at_apply, ha.eq_zero, map_zero]
-    · rw [← map_sub]
+    · change i a - i b ∈ maximalIdeal (SH R Ω)
+      rw [← map_sub]
       exact fun hh => hab (IsLocalHom.map_nonunit _ hh)
 
 end GlobalTheory.StrictHensOfHens
@@ -306,7 +373,7 @@ theorem redSH_surjective : Function.Surjective (redSH R Ω) := by
     IntermediateField.adjoin.finiteDimensional hi⟩
   obtain ⟨a, ha⟩ := exists_one_tmul E ((liftEquiv R Ω E).symm
     ⟨ω, IntermediateField.mem_adjoin_simple_self _ _⟩)
-  refine ⟨ofA R Ω E a, ?_⟩
+  refine ⟨ofA (R := R) (Ω := Ω) E a, ?_⟩
   rw [redSH_ofA, red_apply, ha, AlgEquiv.apply_symm_apply]
 
 def resRingEquiv : ResidueField (SH R Ω) ≃+* Ω :=

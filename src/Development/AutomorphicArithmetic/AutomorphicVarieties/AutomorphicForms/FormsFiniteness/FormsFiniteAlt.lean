@@ -1,4 +1,46 @@
-import GroundTheory.AutomorphicForms.AutomorphicFormSpaces
+module
+
+public import GroundTheory.AutomorphicForms.AutomorphicFormSpaces.HasModerateGrowthZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -36,15 +78,15 @@ theorem AlgMod.mono {M : Type} [AddCommGroup M] [Module ℂ M] {S S' N : Submodu
   obtain ⟨p, hp, hx⟩ := h
   exact ⟨p, hp, fun x hxS => hx x (hS hxS)⟩
 
-theorem Bdd.mono {S S' : Submodule ℂ (archSmooth K n)} (h : Bdd S) (hS : S' ≤ S) : Bdd S' where
-  left φ hφ := h.left φ (hS hφ)
-  growth φ hφ := h.growth φ (hS hφ)
-  level := h.level.imp fun _ hL => ⟨hL.1, fun φ hφ => hL.2 φ (hS hφ)⟩
-  types := h.types.imp fun _ hV => ⟨hV.1, hV.2.1, fun φ hφ => hV.2.2 φ (hS hφ)⟩
-  centre z hz := (h.centre z hz).mono hS
+theorem Bdd.mono {S S' : Submodule ℂ (archSmooth K n)} (h : Bdd S) (hS : S' ≤ S) : Bdd S' :=
+  { left := fun φ hφ => h.left φ (hS hφ)
+    growth := fun φ hφ => h.growth φ (hS hφ)
+    level := h.level.imp fun _ hL => ⟨hL.1, fun φ hφ => hL.2 φ (hS hφ)⟩
+    types := h.types.imp fun _ hV => ⟨hV.1, hV.2.1, fun φ hφ => hV.2.2 φ (hS hφ)⟩
+    centre := fun z hz => (h.centre z hz).mono hS }
+
 
 variable (K n) in
-
 def FinAt : Prop := ∀ S : Submodule ℂ (archSmooth K n), Bdd S → FiniteDimensional ℂ S
 
 def FormsFinite : Prop := ∀ (K : Type) [Field K] [NumberField K] (n : ℕ), FinAt K n

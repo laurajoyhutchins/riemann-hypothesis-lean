@@ -1,15 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsDatNeZero
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsTorsCharZero
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RigOfOmegaInjectiveOfEqZero
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.CrysToDRBijective
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.AbelianHodgeDeRham
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsCocyclesOmega
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CobOneDiagSumEq
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DiagSumCoc
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsTorsCharTorsVal
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PDivGroupCocycleMemCobRangeOfDiagonalSumZeroStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsPrimitiveDeRhamClassTorsionCharacterStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsDatNeZero
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CobOneDiagSumEq
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DiagSumCoc
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsCocyclesOmega
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsPrimitiveDeRhamClassTorsionCharacterStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsTorsCharTorsVal
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PDivGroupCocycleMemCobRangeOfDiagonalSumZeroStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IsTorsCharZero
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -26,7 +63,7 @@ namespace GlobalTheory.PtExt
 
 theorem pullTwo_mulBy_pow_self (p : ℕ) (R : Type) [CommRing R] (G : PDivGroup p R) (n : ℕ)
     (c : G.A n ⊗[R] G.A n) :
-    pullbackTwo (mulBy R (G.A n) (p ^ n)) c =
+    pullbackTwo (PDiv.mulBy (R := R) (A := G.A n) (p ^ n)) c =
       (Algebra.TensorProduct.lift (Bialgebra.counitAlgHom R (G.A n)) (Bialgebra.counitAlgHom R (G.A n))
         (fun _ _ ↦ Commute.all _ _) c) • (1 : G.A n ⊗[R] G.A n) := by
   induction c using TensorProduct.induction_on with
@@ -35,16 +72,18 @@ theorem pullTwo_mulBy_pow_self (p : ℕ) (R : Type) [CommRing R] (G : PDivGroup 
     have ha := G.mulBy_pow_self n a
     have hb := G.mulBy_pow_self n b
     simp only [pullbackTwo, TensorProduct.map_tmul, Algebra.TensorProduct.lift_tmul]
-    change mulBy R (G.A n) (p ^ n) a ⊗ₜ[R] mulBy R (G.A n) (p ^ n) b = _
+    change PDiv.mulBy (R := R) (A := G.A n) (p ^ n) a ⊗ₜ[R]
+      PDiv.mulBy (R := R) (A := G.A n) (p ^ n) b = _
     rw [ha, hb]
     simp [Algebra.algebraMap_eq_smul_one, Algebra.TensorProduct.one_def, TensorProduct.smul_tmul', smul_smul,
       TensorProduct.tmul_smul, mul_comm]
-  | add x y hx hy => rw [map_add, hx, hy, map_add, add_smul]
+  | add x y hx hy => rw [map_add (f := _), hx, hy, map_add (f := _), add_smul]
 
 theorem exists_isCan_rigToExt_eq : ∀ (p : ℕ) [Fact p.Prime] (R : Type) [CommRing R] (N : ℕ), (p : R) ^ N = 0 →
     ∀ (A : Over (Sp R)) [GrpObj A], IsAbelianScheme A → AllPrim (dp0 R) (𝟙 _) A →
-    Function.Surjective (toH1O (A.hom ≫ 𝟙 _)) → ∀ (G : PDivGroup p R) (t : G.TorsionTower A) (x : G.RigExt),
-    ∃ (c : primDR A) (x' : G.RigExt), IsCan t c x' ∧ G.rigToExt x' = G.rigToExt x := by
+    Function.Surjective (toH1O (A.hom ≫ 𝟙 _)) →
+    ∀ (G : PDivGroup p R) (t : PDivGroup.TorsionTower G A) (x : G.RigExt),
+      ∃ (c : primDR A) (x' : G.RigExt), IsCan t c x' ∧ G.rigToExt x' = G.rigToExt x := by
   intro p _ R _ N hN A _ hA hP hS G t x
   obtain ⟨⟨z, w⟩, rfl⟩ := Submodule.mkQ_surjective _ x
   have hq : ((p ^ N : ℕ) : R) = 0 := by rw [Nat.cast_pow, hN]

@@ -1,10 +1,68 @@
-import Mathlib
-import ReciprocityTheory.DualLattices.CotangentSurjective
-import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.IsTight
-import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.StepOrderRes
-import ReciprocityTheory.DualLattices.PowMemCarrier
-import ReciprocityTheory.DualLattices.UpSmith
-import ReciprocityTheory.DualLattices.MemOfSumSingleEqZero
+module
+
+public import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.IsTight
+public import Mathlib.FieldTheory.IsAlgClosed.Basic
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.DualLattices.UpSmith
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Algebra.Module.Torsion.Basic
+public import Mathlib.RingTheory.Flat.Basic
+public import Mathlib.RingTheory.Flat.TorsionFree
+public import Mathlib.RingTheory.LocalRing.Module
+import ReciprocityTheory.DualLattices.MapTensorSpan
+
+@[expose] public section
 
 noncomputable section
 
@@ -114,7 +172,22 @@ lemma exists_hasLen (hv : v.Integers R) {Y : Type} (A B : Submodule R (Y → C))
   let b := Module.finBasis R A
   let e := b.equivFun
   obtain ⟨s, hs⟩ := hKfg.map (e : A →ₗ[R] (Fin (Module.finrank R A) → R))
-  obtain ⟨c, ⟨f⟩⟩ := Smith.smith_gen hv (Module.finrank R A)
+  have smith_gen : ∀ (b : ℕ) {ι : Type} [Fintype ι] (g : ι → Fin b → R),
+      ∃ c : Fin b → R, Nonempty (((Fin b → R) ⧸ Submodule.span R (Set.range g)) ≃ₗ[R]
+        ((i : Fin b) → R ⧸ Ideal.span {c i})) := by
+    intro b
+    induction b with
+    | zero =>
+      intro ι _ g
+      exact ⟨Fin.elim0, ⟨LinearEquiv.ofSubsingleton _ _⟩⟩
+    | succ b ih =>
+      intro ι _ g
+      obtain ⟨i0, a, u, s, hu, hau, hs, -, -⟩ := Smith.exists_pivot hv g
+      obtain ⟨e1⟩ := Smith.pivot_equiv g i0 a u s hu hau hs
+      obtain ⟨c, ⟨e2⟩⟩ := ih (fun j => Fin.removeNth i0 (g j - s j • a • u))
+      exact ⟨Fin.cons a c, ⟨(e1.trans ((LinearEquiv.refl R _).prodCongr e2)).trans
+        (Smith.consEquiv a c)⟩⟩
+  obtain ⟨c, ⟨f⟩⟩ := smith_gen (Module.finrank R A)
     (fun i : s => (i : Fin (Module.finrank R A) → R))
   refine ⟨_, Module.finrank R A, c, ⟨?_⟩, rfl⟩
   have hr : Set.range (fun i : s => (i : Fin (Module.finrank R A) → R)) = ↑s := by

@@ -1,9 +1,62 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.IsNormalFormStabilizerMeasure
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.CommonStabilizerSetEqRangeNormalFormStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.IsNormalFormStabilizerMeasure
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.CommonStabilizerSetEqRangeNormalFormStatement
 import Development.AbelianVarietyTheory.Proofs.FlagMeasures.IsotropicLeviEmbeddingHomomorphismProperties
 import Development.AbelianVarietyTheory.Proofs.FlagMeasures.IsotropicStabilizerRadicalStructure
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.LintegralInvEqOfBiInvariantMatGroup
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.LintegralInvEqOfBiInvariantMatGroup
+import Mathlib.Algebra.Order.Archimedean.Real.Hom
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.Countable
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.Eigenspace.Zero
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.LinearAlgebra.Charpoly.Basic
+
+@[expose] public section
 
 noncomputable section
 
@@ -77,7 +130,7 @@ theorem upperIn_eq (β : Fin r → ℕ) (x : UTin β → ℂ) : upperIn β x = 1
 theorem strIn_inj (β : Fin r → ℕ) : Function.Injective (strIn β) := fun x y h => by
   funext p
   have := congrFun (congrFun h p.1.1.1) p.1.1.2
-  rwa [strIn_apply, strIn_apply, dif_pos ⟨p.1.2, p.2⟩, dif_pos ⟨p.1.2, p.2⟩] at this
+  rwa [strIn_apply, strIn_apply, dite_eq_left ⟨p.1.2, p.2⟩, dite_eq_left ⟨p.1.2, p.2⟩] at this
 
 theorem mem_strIn (β : Fin r → ℕ) (A : Matrix (Fin r) (Fin r) ℂ) (hA : ∀ a b, ¬ (a < b ∧ β a = β b) → A a b = 0) :
     A ∈ Set.range (strIn β) := by
@@ -195,7 +248,7 @@ theorem topL_snd (q : PTop k r j) : (topL k r j q).2 =
 theorem topL_inj : Function.Injective (topL k r j) := fun x y h => by
   refine Prod.ext (funext fun a => ?_) (Prod.ext (funext fun p => ?_) (funext fun a => ?_))
   · have := congrFun (congrArg Prod.fst h) a.1
-    rwa [topL_fst, topL_fst, dif_pos a.2, dif_pos a.2] at this
+    rwa [topL_fst, topL_fst, dite_eq_left a.2, dite_eq_left a.2] at this
   · have := congrFun (congrFun (congrArg Prod.snd h) p.1.1.1) p.1.1.2
     simpa [topL_snd, skewM, p.1.2, p.2] using this
   · have := congrFun (congrFun (congrArg Prod.snd h) a.1) a.1
@@ -452,8 +505,8 @@ theorem pEl_mul_neg (B : Fin r → Fin (k + 1) → ℂ) (S : Matrix (Fin r) (Fin
   · simp
   · ext a b; simp [Rad.herm_neg_left, Rad.herm_neg_right]
 
-set_option synthInstance.maxSize 1024 in
 
+set_option synthInstance.maxSize 1024 in
 theorem range_eq_and_injective_parabolic_unipotent_product {β : Fin r → ℕ} (hβ : ∀ a b : Fin r, j ≤ b.val → (β a = β b ↔ j ≤ a.val)) :
     lebR0 k r j β = (volume : Measure ((UTin β → ℂ) × PTop k r j)).map fun q =>
       (Matrix.of.symm (pTop k r j q.2 * uEmb k r (upperIn β q.1)) : Mt k r) := by
@@ -519,8 +572,8 @@ theorem lebesgue_right_mul_invariant {β : Fin r → ℕ} (hβ : ∀ a b : Fin r
     funext fun x => (Matrix.mul_assoc (Matrix.of x : Mat k r) _ _).symm
   rw [e, ← Measure.map_map (continuous_rmulM _).measurable (continuous_rmulM _).measurable, h1, h2]
 
-set_option synthInstance.maxSize 1024 in
 
+set_option synthInstance.maxSize 1024 in
 theorem isHaarOn_range {β : Fin r → ℕ} (hβ : ∀ a b : Fin r, j ≤ b.val → (β a = β b ↔ j ≤ a.val)) :
     IsHaarOn (Set.range (rEl k r j β)) (lebR0 k r j β) := by
   have hemb : MeasurableEmbedding fun q => (Matrix.of.symm (rEl k r j β q) : Mt k r) :=

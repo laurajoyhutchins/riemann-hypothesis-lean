@@ -1,15 +1,63 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.MetricPeriods.ClopenCondOnto
-import Development.AutomorphicSpectrum.Definitions.MetricPeriods.PInjective
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.ExistsSymplecticBasisLagrangianBetween
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.SymplecticUnipotentShape
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.SiegelOfRiemann
-import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.FromBlocksMapIntCastMemSymplecticGroup
-import ReciprocityTheory.AnalyticForms.AnalyticCharts.Osgood
-import GroundTheory.HeightsAndTheta.Heights.Regularisation.Assembly
-import GroundTheory.HeightsAndTheta.Heights.Regularisation.PRiemannExtensionSlices
-import GroundTheory.HeightsAndTheta.Heights.Regularisation.PPuncturedExpOrder
-import GroundTheory.HeightsAndTheta.Heights.Regularisation.PLogCoverDescent
+module
+
+public import Development.AutomorphicSpectrum.Definitions.MetricPeriods.ClopenCondOnto
+public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.FromBlocksMapIntCastMemSymplecticGroup
+public import Development.AutomorphicSpectrum.Definitions.MetricPeriods.PInjective
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.ExistsSymplecticBasisLagrangianBetween
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.SymplecticUnipotentShape
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.SiegelOfRiemann
+public import GroundTheory.HeightsAndTheta.Heights.Regularisation.Assembly
+public import GroundTheory.HeightsAndTheta.Heights.Regularisation.PLogCoverDescent
+public import GroundTheory.HeightsAndTheta.Heights.Regularisation.PPuncturedExpOrder
+public import GroundTheory.HeightsAndTheta.Heights.Regularisation.PRiemannExtensionSlices
+import GroundTheory.HeightsAndTheta.Heights.Regularisation.PosSemidefOfIntQuadNonneg
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Filter Topology Matrix Metric GroundTheory.Heights₂.Heights.Regular
 
@@ -240,7 +288,8 @@ theorem det_frame_ne_zero (L : LogPeriods n a g Λ) (bas : Module.Basis (Fin g �
       intro i k
       have h := T_fix L i x
       rw [hx] at h
-      simp only [map_add, map_sum, map_zsmul, hTa, hTb, smul_add, Finset.sum_add_distrib] at h
+
+      simp only [map_add (f := _), map_sum, map_zsmul, hTa, hTb, smul_add, Finset.sum_add_distrib] at h
       have h' : ∑ j, cv j • ∑ l, Q.B i j l • bas (.inl l) = 0 := by
         exact add_eq_left.1 (add_left_cancel h)
       have h2 := congrArg (bas.coord (.inl k)) h'
@@ -268,7 +317,8 @@ theorem det_frame_ne_zero (L : LogPeriods n a g Λ) (bas : Module.Basis (Fin g �
       have e1 : L.P w (x : Λ) = ∑ i, cu i • L.P w (bas (.inl i)) +
           ∑ j, cv j • ∑ k, Q.τ w j k • L.P w (bas (.inl k)) := by
         conv_lhs => rw [hx]
-        simp only [map_add, map_sum, map_zsmul, hQP w hw]
+
+        simp only [map_add (f := _), map_sum, map_zsmul, hQP w hw]
       rw [L.s_eq x w hw, e1]
       simp only [Pi.add_apply, Finset.sum_apply, Pi.smul_apply, zsmul_eq_mul, smul_eq_mul, hAP w hw,
         Pi.mul_apply, Pi.intCast_apply, add_mul, Finset.sum_add_distrib, e2, Finset.sum_mul,
@@ -279,8 +329,8 @@ theorem det_frame_ne_zero (L : LogPeriods n a g Λ) (bas : Module.Basis (Fin g �
     refine ⟨fun k => (cu k : ℂ) + ∑ j, (cv j : ℂ) * T0 0 j k, ?_⟩
     funext m
     have hF : ContinuousAt (fun z => ∑ k, ((cu k : ℂ) + ∑ j, (cv j : ℂ) * T0 z j k) * A z k m) 0 :=
-      tendsto_finset_sum _ fun k _ => ContinuousAt.mul
-        (continuousAt_const.add (tendsto_finset_sum _ fun j _ => continuousAt_const.mul (hTc j k)))
+      tendsto_finsetSum _ fun k _ => ContinuousAt.mul
+        (continuousAt_const.add (tendsto_finsetSum _ fun j _ => continuousAt_const.mul (hTc j k)))
         (hAc k m)
     have hs : ContinuousAt (fun z => L.s x z m) 0 :=
       (differentiableOn_pi.1 (L.s_hol x) m).continuousOn.continuousAt (ball_mem_nhds 0 one_pos)

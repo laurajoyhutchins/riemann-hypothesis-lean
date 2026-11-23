@@ -1,7 +1,57 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.LatIntZero
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ExistsMeasureOfBoundedMoments
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.Taylor
+module
+
+public import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.LatIntZero
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ExistsMeasureOfBoundedMoments
+public import Mathlib.RingTheory.MvPolynomial.IrreducibleQuadratic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import Mathlib.Topology.Algebra.MvPolynomial
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.MetricSpace.Ultra.TotallySeparated
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.Taylor
+
+@[expose] public section
 
 open GlobalTheory.MomOne GlobalTheory.MomN PowerSeries
 open scoped ComplexConjugate ContDiff
@@ -64,6 +114,7 @@ theorem jetL_monomial {κ : Type} [Fintype κ] (v : κ → V) (G : V → ℂ) (u
 theorem jetL_apply {κ : Type} [Fintype κ] (v : κ → V) (G : V → ℂ) (P : MvPolynomial κ ℂ) :
     jetL v G P = ∑ m ∈ P.support, P.coeff m * monoJet v G m := by
   conv_lhs => rw [P.as_sum]
+
   rw [map_sum]
   refine Finset.sum_congr rfl fun m _ => ?_
   have e : MvPolynomial.monomial m (P.coeff m) = P.coeff m • MvPolynomial.monomial m (1 : ℂ) := by
@@ -135,7 +186,7 @@ theorem isMom_eval (ι : ℂ ≃+* ℂ_[q]) {κ : Type} [Fintype κ] {v : κ →
     congr 1
     exact h _ (fun l => u.toMultiset.toList.get l) _
       (evalFn_monomial ι u _ (by rw [List.ofFn_get, Multiset.coe_toList]))
-  | add P Q hP hQ => rw [map_add, map_add, hP, hQ, evalFn_add, map_add]
+  | add P Q hP hQ => rw [map_add (f := _), map_add (f := _), hP, hQ, evalFn_add, map_add (f := _)]
 
 theorem X_pow_mem_span (k : ℕ) :
     (Polynomial.X : Polynomial ℂ) ^ k ∈ Submodule.span ℂ (Set.range fun j => descPochhammer ℂ j) := by
@@ -174,6 +225,7 @@ theorem monomial_mem_span {κ : Type} [Fintype κ] (m : κ →₀ ℕ) :
     rw [MvPolynomial.monomial_eq, MvPolynomial.C_1, one_mul, Finsupp.prod_fintype _ _ (fun i => pow_zero _)]
     refine Finset.prod_congr rfl fun i _ => ?_
     have := congrArg (Polynomial.aeval (MvPolynomial.X i : MvPolynomial κ ℂ)) (hc (m i))
+
     rw [Polynomial.aeval_X_pow, Finsupp.sum, map_sum] at this
     rw [← this]
     simp only [map_smul]
@@ -193,7 +245,7 @@ theorem eq_of_mem_span (ι : ℂ ≃+* ℂ_[q]) {κ : Type} [Fintype κ] {v : κ
   induction hP using Submodule.span_induction with
   | mem x hx => obtain ⟨n, rfl⟩ := hx; exact h n
   | zero => simp [evalFn_zero]
-  | add x y _ _ hx hy => rw [evalFn_add, map_add, hx, hy, map_add, map_add]
+  | add x y _ _ hx hy => rw [evalFn_add, map_add (f := _), hx, hy, map_add (f := _), map_add (f := _)]
   | smul c x _ hx => rw [evalFn_smul, map_smul, hx, map_smul, smul_eq_mul, smul_eq_mul, map_mul]
 
 theorem jet_eq_monoJet {κ : Type} [Fintype κ] {v : κ → V} {G : V → ℂ} (hG : ContDiff ℂ ⊤ G) {k : ℕ}
@@ -225,7 +277,7 @@ theorem momInt_iff_norm_mahler_le : ∀ (q : ℕ) [Fact q.Prime] (ι : ℂ ≃+*
     refine (μ.le_opNorm _).trans (mul_le_one₀ hμ (norm_nonneg _) ?_)
     refine (ContinuousMap.norm_le _ zero_le_one).2 fun a => ?_
     rw [evalFn_Bm, norm_prod]
-    exact Finset.prod_le_one (fun _ _ => norm_nonneg _) fun i _ => GlobalTheory.MultiMahler.norm_binomC_le _ _
+    exact Finset.prod_le_one₀ (fun _ _ => norm_nonneg _) fun i _ => GlobalTheory.MultiMahler.norm_binomC_le _ _
   · intro h
     let e := Fintype.equivFin κ
     let c : (Fin (Fintype.card κ) → ℕ) → ℂ_[q] := fun n' => ι (mahler v G (n' ∘ e))
@@ -235,7 +287,7 @@ theorem momInt_iff_norm_mahler_le : ∀ (q : ℕ) [Fact q.Prime] (ι : ℂ ≃+*
     let r : C(Fin (Fintype.card κ) → ℤ_[q], κ → ℤ_[q]) := ⟨fun a i => a (e i), by fun_prop⟩
     let T : C(κ → ℤ_[q], ℂ_[q]) →ₗ[ℂ_[q]] ℂ_[q] :=
       { toFun := fun F => μ' (F.comp r)
-        map_add' := fun F F' => by rw [ContinuousMap.add_comp, map_add]
+        map_add' := fun F F' => by rw [ContinuousMap.add_comp, map_add (f := _)]
         map_smul' := fun s F => by rw [ContinuousMap.smul_comp, map_smul]; rfl }
     have hT : ∀ F, ‖T F‖ ≤ 1 * ‖F‖ := fun F => by
       refine (μ'.le_opNorm _).trans (mul_le_mul hμ' ?_ (norm_nonneg _) zero_le_one)

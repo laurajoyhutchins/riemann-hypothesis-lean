@@ -1,4 +1,59 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.BigOperators.Group.Finset.Defs
+public import Mathlib.Basic.Real.Basic
+public import Mathlib.Order.Interval.Finset.Nat
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.BigOperators.Group.Finset.Basic
+public import Mathlib.Algebra.Order.BigOperators.GroupWithZero.Finset
+public import Mathlib.Data.Finset.Max
+
+@[expose] public section
 
 namespace GroundTheory.BlockD.FourierDecayAlt.WaveGridLiftGrid
 
@@ -36,10 +91,10 @@ theorem prod_le_prod_range_of_rank (A : Finset ℕ) (F : ℕ → ℝ) (φ : ℕ 
     (hmap : ∀ s ∈ A, φ s < k) (hw : ∀ j, 1 ≤ w j) :
     ∏ s ∈ A, F s ≤ ∏ j ∈ range k, w j := by
   classical
-  calc ∏ s ∈ A, F s ≤ ∏ s ∈ A, w (φ s) := prod_le_prod hF0 hF
+  calc ∏ s ∈ A, F s ≤ ∏ s ∈ A, w (φ s) := prod_le_prod₀ hF0 hF
     _ = ∏ j ∈ A.image φ, w j := (prod_image hinj).symm
     _ ≤ ∏ j ∈ range k, w j := by
-      apply prod_le_prod_of_subset_of_one_le
+      apply prod_le_prod_of_subset_of_one_le₀
       · intro j hj
         obtain ⟨s, hs, rfl⟩ := mem_image.mp hj
         exact mem_range.mpr (hmap s hs)
@@ -82,6 +137,7 @@ theorem cloud_prod_le (k : ℕ) (lam : ℕ → ℝ) (c g Y : ℝ) (hk : 1 ≤ k)
     push_cast
     ring
   have hone : (1 : ℝ) ≤ (2 + c) * k := by nlinarith
+  have hbound0 : 0 ≤ (2 + c) * k := by positivity
   rw [← prod_filter_mul_prod_filter_not (Icc 1 (k - 1)) (fun s => 0 < Y + lam s)]
   have hL : ∏ s ∈ (Icc 1 (k - 1)).filter (fun s => 0 < Y + lam s),
       (1 + (1 + c) / max |Y + lam s| 1) ≤ (2 + c) * k := by
@@ -142,7 +198,7 @@ theorem cloud_prod_le (k : ℕ) (lam : ℕ → ℝ) (c g Y : ℝ) (hk : 1 ≤ k)
     · rw [not_nonempty_iff_eq_empty.mp hne, prod_empty]
       exact hone
   calc _ ≤ ((2 + c) * k) * ((2 + c) * k) :=
-        mul_le_mul hL hR (prod_nonneg fun s _ => hF0 s) (by linarith)
+        mul_le_mul_of_nonneg hL hR (prod_nonneg fun s _ => hF0 s) hbound0
     _ = (2 + c) ^ 2 * (k : ℝ) ^ 2 := by ring
 
 end GroundTheory.BlockD.FourierDecayAlt.WaveGridLiftGrid

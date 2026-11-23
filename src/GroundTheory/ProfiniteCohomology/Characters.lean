@@ -1,9 +1,55 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.CharactersDefs
-import GroundTheory.ProfiniteCohomology.Colimit
-import GroundTheory.ProfiniteCohomology.ContinuousCochains.LongExactSequence
-import GroundTheory.ProfiniteCohomology.CupProducts
-import GroundTheory.TateCohomology.Characters
+module
+
+public import GroundTheory.ProfiniteCohomology.CharactersDefs
+public import GroundTheory.ProfiniteCohomology.ContinuousCochains.LongExactSequence
+public import GroundTheory.TateCohomology.Characters
+public import GroundTheory.ProfiniteCohomology.DiscreteModules.IsDiscreteRepIffForallExistsOpenNormalSubgroup
+public import GroundTheory.ProfiniteCohomology.Colimit
+import GroundTheory.TateCohomology.UniquelyDivisible
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
@@ -28,7 +74,6 @@ theorem cochainsMap_nsmul (f : A ⟶ B) (m : ℕ) : cochainsMap (m • f) = m �
     rfl
 
 variable (A) in
-
 theorem cohomologyMap_nsmul_id (m n : ℕ) : cohomologyMap (m • 𝟙 A) n = m • 𝟙 (cohomology A n) := by
   change HomologicalComplex.homologyMap (cochainsMap (m • 𝟙 A)) n =
     m • 𝟙 ((cochainsComplex A).homology n)
@@ -93,7 +138,6 @@ theorem cochainsComplex_d_zero_one_trivial :
 
 omit [TopologicalSpace G] [IsTopologicalGroup G] in
 variable {G M} in
-
 theorem d_one_trivial_apply (f : (Fin 1 → G) → M) (g : Fin 2 → G) :
     (inhomogeneousCochains.d (Rep.trivial ℤ G M) 1).hom f g =
       f (fun _ => g 1) - f (fun _ => g 0 * g 1) + f (fun _ => g 0) := by
@@ -110,7 +154,6 @@ theorem d_one_trivial_apply (f : (Fin 1 → G) → M) (g : Fin 2 → G) :
   abel
 
 variable {G M} in
-
 theorem dLocallyConstant_one_trivial_eq_zero_iff
     (f : locallyConstantCochains (Rep.trivial ℤ G M) 1) :
     (dLocallyConstant (Rep.trivial ℤ G M) 1).hom f = 0 ↔
@@ -147,7 +190,6 @@ theorem ker_sc_one_g_trivial :
   rfl
 
 variable {G M} in
-
 theorem mem_ker_sc_one_trivial_iff (f : ((cochainsComplex (Rep.trivial ℤ G M)).sc 1).X₂) :
     f ∈ LinearMap.ker ((cochainsComplex (Rep.trivial ℤ G M)).sc 1).g.hom ↔
       ∀ x y : G, f.1 (fun _ => x * y) = f.1 (fun _ => x) + f.1 (fun _ => y) :=
@@ -202,15 +244,12 @@ theorem cohomologyOneIsoOfIsTrivial_hom_cohomologyπ (z : cocycles (Rep.trivial 
   have h1 : e.inv.hom ((K.homologyπ 1).hom z) = z := by
     have := ConcreteCategory.congr_hom e.hom_inv_id z
     rwa [HomologicalComplex.isoHomologyπ_hom] at this
-  have h2 := (K.sc 1).moduleCatCyclesIso_hom_i_apply z
   show ((cocyclesOneTrivialEquiv G M)
     ((K.sc 1).moduleCatCyclesIso.hom.hom (e.inv.hom ((K.homologyπ 1).hom z)))).1
       (Additive.ofMul g) = _
   rw [h1]
-  show (((K.sc 1).moduleCatLeftHomologyData.i).hom ((K.sc 1).moduleCatCyclesIso.hom.hom z)).1
-    (fun _ => g) = _
-  rw [h2]
-  rfl
+  exact congrArg (fun f : (K.sc 1).X₂ => f.1 (fun _ => g))
+    ((K.sc 1).moduleCatCyclesIso_hom_i_apply z)
 
 noncomputable def cohomologyOneRatModIntIso :
     cohomology (Rep.trivial ℤ G (AddCircle (1 : ℚ))) 1 ≅ ModuleCat.of ℤ (Additive G →ₜ+ QZ) :=
@@ -255,12 +294,6 @@ noncomputable def cohomologyTwoIntIso :
 noncomputable def cohomologyTwoIntAddEquiv :
     cohomology (Rep.trivial ℤ G ℤ) 2 ≃+ (Additive G →ₜ+ QZ) :=
   (cohomologyTwoIntIso G).toLinearEquiv.toAddEquiv
-
-theorem cohomologyTwoIntAddEquiv_symm_apply (χ : Additive G →ₜ+ QZ) :
-    (cohomologyTwoIntAddEquiv G).symm χ =
-      (δ (GroundTheory.GroupCoh.ratSES_shortExact G) 1 2 rfl).hom
-        ((cohomologyOneRatModIntIso G).inv.hom χ) :=
-  rfl
 
 end Profinite
 

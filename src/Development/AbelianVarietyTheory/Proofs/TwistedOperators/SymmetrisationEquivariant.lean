@@ -1,7 +1,50 @@
-import Mathlib
-import Formalism.SharpRestriction.Divisibility.SchurIrreducible
-import Formalism.LocalToGlobal.BesselHermitianTheta.DefsReal
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.SymbolCongr
+module
+
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.SymbolCongr
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Formalism.BasicNotions.TH Formalism.MainNotions.SchurIrreducible GlobalTheory.InducedPBW
 
@@ -95,7 +138,7 @@ theorem comm_mem (h : SymbolCongr act) (Y : Mat p q) (v : V) (a : List (PIx p q)
       List.length_map, ug_comm, map_pLin, pLin_unitP] at h1 h2 ⊢
     rw [← kOnS_X] at h1
     rw [show b.length + 1 + a.length = b.length + (a.length + 1) by omega] at h2
-    rw [kOnS_mul, mul_commutator_mul_expand, mul_leibniz_comm, map_add, map_add, map_add]
+    rw [kOnS_mul, mul_commutator_mul_expand, mul_leibniz_comm, map_add (f := _), map_add (f := _), map_add (f := _)]
     have hs := Submodule.add_mem _ h1 h2
     convert hs using 1
     abel
@@ -158,6 +201,7 @@ theorem monomial_mem (h : SymbolCongr act) {Y : Mat p q} (hY : IsKC Y) (v : V)
       cls act (act Y v) (symU p q (MvPolynomial.monomial α 1)) -
       cls act v (ugι p q Y * symU p q (MvPolynomial.monomial α 1)) ∈
         indFlt act (Finsupp.toMultiset α).toList.length := by
+
   rw [mul_symU_monomial_eq_avg_perm, map_smul, map_sum]
   apply sub_inv_factorial_smul_sum_mem
   intro σ
@@ -175,6 +219,7 @@ theorem homog_mem (h : SymbolCongr act) {Y : Mat p q} (hY : IsKC Y) (v : V) (k :
       (cls act v ∘ₗ symU p q ∘ₗ kOnS Y + cls act (act Y v) ∘ₗ symU p q -
         cls act v ∘ₗ LinearMap.mulLeft ℂ (ugι p q Y) ∘ₗ symU p q) Q := fun Q => by
     simp
+
   rw [hlin, MvPolynomial.as_sum P, map_sum]
   refine Submodule.sum_mem _ fun d hd => ?_
   rw [show MvPolynomial.monomial d (P.coeff d) = P.coeff d • MvPolynomial.monomial d 1 by
@@ -192,8 +237,8 @@ end GlobalTheory.InducedPBW.Equivariant
 
 namespace GlobalTheory.InducedPBW
 
-open Equivariant in
 
+open Equivariant in
 theorem symmetrisation_equivariant : ∀ (p q : ℕ) (V : Type) [AddCommGroup V] [Module ℂ V] (act : Mat p q →ₗ[ℂ] Module.End ℂ V), SymbolCongr act → ∀ (k : ℕ) (Y : Mat p q), IsKC Y → ∀ z ∈ symTens p q V k, (indRel act).mkQ (LinearMap.rTensor V (symU p q) (LinearMap.rTensor V (kOnS Y) z + LinearMap.lTensor _ (act Y) z)) - (indRel act).mkQ (LinearMap.rTensor V (LinearMap.mulLeft ℂ (ugι p q Y)) (LinearMap.rTensor V (symU p q) z)) ∈ indFlt act k := by
   intro p q V _ _ act h k Y hY z hz
   unfold symTens at hz
@@ -202,13 +247,13 @@ theorem symmetrisation_equivariant : ∀ (p q : ℕ) (V : Type) [AddCommGroup V]
   induction w using TensorProduct.induction_on with
   | zero => simp
   | tmul P v =>
-    simp only [LinearMap.rTensor_tmul, LinearMap.lTensor_tmul, Submodule.coe_subtype, map_add,
+    simp only [LinearMap.rTensor_tmul, LinearMap.lTensor_tmul, Submodule.coe_subtype, map_add (f := _),
       LinearMap.mulLeft_apply, ← cls_apply]
     exact homog_mem act h hY v k P ((MvPolynomial.mem_homogeneousSubmodule k _).mp P.2)
   | add x y hx hy =>
     have hs := Submodule.add_mem _ hx hy
     convert hs using 1
-    simp only [map_add]
+    simp only [map_add (f := _)]
     abel
 
 end GlobalTheory.InducedPBW

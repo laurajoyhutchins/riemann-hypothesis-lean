@@ -1,5 +1,56 @@
-import Mathlib
-import ReciprocityTheory.SemistableReduction.ComapInclusionIsLocalHom
+module
+
+public import ReciprocityTheory.SemistableReduction.ComapInclusionIsLocalHom
+public import Mathlib.Topology.Algebra.Valued.NormedValued
+public import Mathlib.Algebra.MvPolynomial.Funext
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace ReciprocityTheory.MultiplicativeHeights
 
@@ -11,11 +62,8 @@ noncomputable abbrev unitBallRing (K : Type*) [NormedField K] [IsUltrametricDist
 
 theorem mem_unitBallRing {K : Type*} [NormedField K] [IsUltrametricDist K] (x : K) :
     x ∈ unitBallRing K ↔ ‖x‖ ≤ 1 := by
-  first
-  | (change ‖x‖₊ ≤ 1 ↔ ‖x‖ ≤ 1
-     rw [← NNReal.coe_le_coe, coe_nnnorm, NNReal.coe_one])
-  | (rw [unitBallRing, Valuation.mem_valuationSubring_iff]
-     simp [NormedField.valuation_apply, ← NNReal.coe_le_coe])
+  change ‖x‖₊ ≤ 1 ↔ ‖x‖ ≤ 1
+  rw [← NNReal.coe_le_coe, coe_nnNorm, NNReal.coe_one]
 
 theorem residue_eq_zero_iff_norm_lt_one {K : Type*} [NormedField K] [IsUltrametricDist K]
     (x : unitBallRing K) :
@@ -36,9 +84,7 @@ theorem residue_eq_zero_iff_norm_lt_one {K : Type*} [NormedField K] [IsUltrametr
   · intro hlt hu
     obtain ⟨y, hy⟩ := hu.exists_right_inv
     have h := congrArg (fun t : unitBallRing K => ‖(t : K)‖) hy
-    first
-    | simp only [MulMemClass.coe_mul, OneMemClass.coe_one, norm_mul, norm_one] at h
-    | simp at h
+    simp only [MulMemClass.coe_mul, OneMemClass.coe_one, norm_mul, norm_one] at h
     have hy1 : ‖(y : K)‖ ≤ 1 := (mem_unitBallRing (y : K)).1 y.2
     nlinarith [norm_nonneg (x : K), norm_nonneg (y : K)]
 
@@ -99,17 +145,18 @@ theorem exists_torus_point_one_le_norm_sum {K : Type*} [NormedField K] [IsUltram
     omega
   let aO : (Fin n → ℤ) → unitBallRing K := fun χ => ⟨a χ, (mem_unitBallRing _).2 (ha χ)⟩
   let P : MvPolynomial (Fin n) (unitBallRing K) := ∑ χ ∈ F, monomial (e χ) (aO χ)
-  have hcoeff : coeff (e χ₀) P = aO χ₀ := by
+  have hcoeff : AddMonoidAlgebra.coeff P (e χ₀) = aO χ₀ := by
     simp only [P, coeff_sum, coeff_monomial]
     rw [Finset.sum_eq_single_of_mem χ₀ hχ₀]
     · simp
     · intro χ hχ hne
-      rw [if_neg]
+      rw [ite_eq_right]
       exact fun h => hne (he χ hχ χ₀ hχ₀ h)
   have hQ : MvPolynomial.map (IsLocalRing.residue (unitBallRing K)) P ≠ 0 := by
     intro h0
-    have h4 := congrArg (coeff (e χ₀)) h0
-    rw [coeff_map, hcoeff, coeff_zero, residue_eq_zero_iff_norm_lt_one] at h4
+    have h4 := congrArg (AddMonoidAlgebra.coeff · (e χ₀)) h0
+    rw [coeff_map, hcoeff, AddMonoidAlgebra.coeff_zero, Finsupp.zero_apply,
+      residue_eq_zero_iff_norm_lt_one] at h4
     exact absurd ha₀ (ne_of_lt h4)
   obtain ⟨y, hy, hyne⟩ : ∃ y ∈ Set.pi Set.univ (fun _ : Fin n =>
       {y : IsLocalRing.ResidueField (unitBallRing K) | ∃ x : unitBallRing K,
@@ -137,6 +184,7 @@ theorem exists_torus_point_one_le_norm_sum {K : Type*} [NormedField K] [IsUltram
     exact zero_ne_one h6
   have hval : ((eval σ P : unitBallRing K) : K) =
       ∑ χ ∈ F, a χ * ∏ i, (σ i : K) ^ (χ i + N).toNat := by
+
     simp only [P, map_sum, eval_monomial]
     rw [AddSubmonoidClass.coe_finsetSum]
     refine Finset.sum_congr rfl fun χ _ => ?_

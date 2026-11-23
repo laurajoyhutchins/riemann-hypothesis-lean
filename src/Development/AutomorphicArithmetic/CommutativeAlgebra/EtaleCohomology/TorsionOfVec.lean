@@ -1,5 +1,48 @@
-import Development.AutomorphicArithmetic.CommutativeAlgebra.EtaleCohomology.VecZero
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.ZASmul
+module
+
+public import Development.AutomorphicArithmetic.CommutativeAlgebra.EtaleCohomology.VecZero
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.ZASmul
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+
+@[expose] public section
 
 set_option backward.isDefEq.respectTransparency false
 
@@ -60,19 +103,20 @@ private theorem torsion_of_vec (t : A) (c : A →+* C) (ht : IsUnit (c t))
   have hψ₁ : ∀ q w x, ψ₁ (q ⊗ₜ[R] w) x = (q • x) ⊗ₜ[A] ((1 : A) ⊗ₜ[R] w) := fun _ _ _ => rfl
   let ψ : (F ⊗[R] T) ⊗[F] C →+ P := TensorProduct.liftAddHom ψ₁ (fun f m x => by
     induction m with
-    | zero => simp
-    | add m m' hm hm' => simp only [smul_add, map_add, AddMonoidHom.add_apply, hm, hm']
+    | add m m' hm hm' => simp only [smul_add, map_add (f := _), AddMonoidHom.add_apply, hm, hm']
     | tmul q w =>
       rw [TensorProduct.smul_tmul', hψ₁, hψ₁, smul_eq_mul, mul_comm, mul_smul])
   have hψ : ∀ q w x, ψ ((q ⊗ₜ[R] w) ⊗ₜ[F] x) = (q • x) ⊗ₜ[A] ((1 : A) ⊗ₜ[R] w) := fun _ _ _ => rfl
   have h1 : ∑ k, (c (a k) * Ring.inverse (c t) ^ r) ⊗ₜ[A] ((1 : A) ⊗ₜ[R] v k) = 0 := by
     have := congrArg ψ h
+
     rw [map_sum, map_zero] at this
     simpa only [hψ, one_smul] using this
   have hinv : c t * Ring.inverse (c t) = 1 := Ring.mul_inverse_cancel _ ht
   have h2 : (TensorProduct.mk A C (A ⊗[R] T) 1) (∑ k, (a k ⊗ₜ[R] v k : A ⊗[R] T)) = 0 := by
     have e : (TensorProduct.mk A C (A ⊗[R] T) 1) (∑ k, (a k ⊗ₜ[R] v k : A ⊗[R] T)) =
         t ^ r • ∑ k, (c (a k) * Ring.inverse (c t) ^ r) ⊗ₜ[A] ((1 : A) ⊗ₜ[R] v k) := by
+
       rw [map_sum, Finset.smul_sum]
       refine Finset.sum_congr rfl fun k _ => ?_
       have e1 : t ^ r • (c (a k) * Ring.inverse (c t) ^ r) = a k • (1 : C) := by
@@ -88,7 +132,7 @@ private theorem apply_tensor (h : T →+ N) (hh : ∀ (s : R) (w : T), h (s • 
     (v : ι → T) (a : ι → A) (s : A) (hs : s • ∑ k, (a k ⊗ₜ[R] v k : A ⊗[R] T) = 0) :
     s • ∑ k, a k • h (v k) = 0 := by
   let B : A →+ T →+ N := AddMonoidHom.mk' (fun x => AddMonoidHom.mk' (fun w => x • h w)
-      (fun w w' => by rw [map_add, smul_add]))
+      (fun w w' => by rw [map_add (f := _), smul_add]))
       (fun x y => by ext w; simp [add_smul])
   have hB : ∀ x w, B x w = x • h w := fun _ _ => rfl
   let φ : A ⊗[R] T →+ N := TensorProduct.liftAddHom B (fun r x w => by
@@ -96,10 +140,10 @@ private theorem apply_tensor (h : T →+ N) (hh : ∀ (s : R) (w : T), h (s • 
   have hφ : ∀ x w, φ (x ⊗ₜ[R] w) = x • h w := fun _ _ => rfl
   have hφs : ∀ (b : A) (y : A ⊗[R] T), φ (b • y) = b • φ y := fun b y => by
     induction y with
-    | zero => simp
-    | add y y' hy hy' => simp only [smul_add, map_add, hy, hy']
+    | add y y' hy hy' => simp only [smul_add, map_add (f := _), hy, hy']
     | tmul x w => rw [TensorProduct.smul_tmul', hφ, hφ, smul_eq_mul, mul_smul]
   have := congrArg φ hs
+
   rw [hφs, map_sum, map_zero] at this
   simpa only [hφ] using this
 
@@ -140,7 +184,7 @@ private theorem lev_smul (e : EtFam l K) (M : Model l K) (n j : ℕ) (z : ℤ_[l
 private def levAdd (e : EtFam l K) (M : Model l K) (n j : ℕ) : M.T j →+ M.MH n j :=
   AddMonoidHom.mk' (fun w => e M n j (w.lev n)) fun w w' => map_add (e M n j) (w.lev n) (w'.lev n)
 
-set_option maxHeartbeats 8000000 in
+
 theorem vecZero : VecZero := by
   intro l _ K B e _ M j ι _ v c r h
   have h' : ∑ k, ((1 : ℚ_[l]) ⊗ₜ[ℤ_[l]] (v k)) ⊗ₜ[ℚ_[l]] (B.c (c k) * Ring.inverse (B.c (tA l)) ^ r) = 0 := h

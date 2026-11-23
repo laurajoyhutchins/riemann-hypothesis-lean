@@ -1,5 +1,47 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.DifferentialFormsCech.CechDifferentialPullback.Bridge
+module
+
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.DifferentialFormsCech.CechDifferentialPullback.Bridge
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 set_option backward.isDefEq.respectTransparency false
 open CategoryTheory AlgebraicGeometry TopologicalSpace Opposite Limits GroundTheory.Arith.SchemeCoh GlobalTheory.SheafPull CrystallineSemistableComparison CrystallineSemistableComparison.Om CrystallineSemistableComparison.Om.Cech
 
@@ -23,7 +65,8 @@ theorem algebraMap_sec (W : X.Opens) (r : K) :
 theorem toOm_smul (a : ℕ) (W : X.Opens) (r : K) (x : OmU q W a) :
     letI := algΓ q
     CrystallineSemistableComparison.Om.Cech.toOm q a W (r • x) =
-      (smulAbRingHom (Omega q a) (algebraMap K Γ(X, ⊤) r)).hom.app (op W) (CrystallineSemistableComparison.Om.Cech.toOm q a W x) := by
+      (smulAbRingHom (Omega q a) (algebraMap K Γ(X, ⊤) r)).asHom.hom.app (op W)
+        (CrystallineSemistableComparison.Om.Cech.toOm q a W x) := by
   letI := algΓ q
   rw [← algebraMap_smul (Sec q W) r x]
   have h := ((toOmega q a).app (op W)).hom.map_smul (algebraMap K (Sec q W) r) x
@@ -36,15 +79,16 @@ variable {ι : Type} (U : ι → X.Opens) (a : ℕ)
 theorem formCoch_smul (n : ℕ) (r : K) (c : (Glob.formCos q U a).X n) :
     letI := algΓ q
     formCoch q U a n (r • c) =
-      push U (smulAbRingHom (Omega q a) (algebraMap K Γ(X, ⊤) r)).hom n (formCoch q U a n c) := by
+      GroundTheory.Arith.SchemeCoh.push U
+        (smulAbRingHom (Omega q a) (algebraMap K Γ(X, ⊤) r)).asHom.hom n (formCoch q U a n c) := by
   letI := algΓ q
   funext i
   change res _ (inter_le_capO U i) (CrystallineSemistableComparison.Om.Cech.toOm q a (Pb.capO U i) (r • c i)) =
-    (smulAbRingHom (Omega q a) (algebraMap K Γ(X, ⊤) r)).hom.app (op (inter U i))
+    (smulAbRingHom (Omega q a) (algebraMap K Γ(X, ⊤) r)).asHom.hom.app (op (inter U i))
       (res _ (inter_le_capO U i) (CrystallineSemistableComparison.Om.Cech.toOm q a (Pb.capO U i) (c i)))
   rw [toOm_smul]
   exact (ConcreteCategory.congr_hom
-    ((smulAbRingHom (Omega q a) (algebraMap K Γ(X, ⊤) r)).hom.naturality
+    ((smulAbRingHom (Omega q a) (algebraMap K Γ(X, ⊤) r)).asHom.hom.naturality
       (homOfLE (inter_le_capO U i)).op) _).symm
 
 theorem formToCO_smul (j : ℕ) (r : K) (x : (Glob.formCos q U a).cx.H j) :
@@ -59,7 +103,7 @@ theorem formToCO_smul (j : ℕ) (r : K) (x : (Glob.formCos q U a).cx.H j) :
   have hd : d (modulesAb (Omega q a)).obj U j (formCoch q U a j c) = 0 := by
     rw [← formCoch_d]
     exact (congrArg _ hc').trans (map_zero _)
-  change _ = GroundTheory.Arith.SchemeCoh.cechHMap U (smulAbRingHom (Omega q a) (algebraMap K Γ(X, ⊤) r)).hom j
+  change _ = GroundTheory.Arith.SchemeCoh.cechHMap U (smulAbRingHom (Omega q a) (algebraMap K Γ(X, ⊤) r)).asHom.hom j
     (GroundTheory.Arith.SchemeCoh.cls (formCoch q U a j c) hd)
   rw [GroundTheory.Arith.SchemeCoh.cechHMap_cls]
   exact GroundTheory.Arith.SchemeCoh.cls_congr U (formCoch_smul q U a j r c) _ _

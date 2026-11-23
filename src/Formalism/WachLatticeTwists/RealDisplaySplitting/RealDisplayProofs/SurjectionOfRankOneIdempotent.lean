@@ -1,5 +1,56 @@
-import Formalism.WachLatticeTwists.RealDisplaySplitting.SurjectionRankOneIdempotent
-import Formalism.WachLatticeTwists.RamifiedBlockRings.RamifiedBlockProofs.Normal
+module
+
+public import Formalism.WachLatticeTwists.RealDisplaySplitting.SurjectionRankOneIdempotent
+public import Mathlib.LinearAlgebra.Matrix.Rank
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.WachLatticeTwists.RamifiedBlockRings.Statement
+
+@[expose] public section
 
 open Finset Classical
 
@@ -64,7 +115,8 @@ theorem rank_one_factor (O : Type) [CommRing O] [IsDomain O] [IsDiscreteValuatio
       simp only [Matrix.map_apply, ZeroMemClass.coe_zero, Pi.zero_apply] at this
       exact hd0 ((map_eq_zero_iff _ hinj).1 this)
     have hrk' : Module.finrank (FractionRing O)
-        (LinearMap.range (e.map (algebraMap O (FractionRing O))).mulVecLin) = 1 := hrk
+        (LinearMap.range (e.map (algebraMap O (FractionRing O))).mulVecLin) = 1 :=
+      (Matrix.finrank_range_mulVecLin _).trans hrk
     have hall := (finrank_eq_one_iff_of_nonzero' _ hnz).1 hrk'
     intro i j
     obtain ⟨t, ht⟩ := hall ⟨_, hcol j⟩
@@ -120,12 +172,14 @@ theorem surjection_of_rank_one_idempotent (O : Type) [CommRing O] [IsDomain O] [
     funext i
     show algebraMap O (FractionRing O) (∑ j, ρ a i j • u j) =
       ∑ j, ρ a i j • algebraMap O (FractionRing O) (u j)
+
     rw [map_sum]
     simp [Algebra.smul_def]
   · intro a u
     funext i
     show (1 : Submodule O (FractionRing O)).mkQ (∑ j, ρ a i j • u j) =
       ∑ j, ρ a i j • (1 : Submodule O (FractionRing O)).mkQ (u j)
+
     rw [map_sum]
     simp only [map_smul]
   · intro u x
@@ -171,16 +225,5 @@ theorem surjection_of_rank_one_idempotent (O : Type) [CommRing O] [IsDomain O] [
     simp only [hc, Matrix.of_apply, smul_eq_mul]
     rw [show ∑ j, u i * w j * v j = u i * ∑ j, w j * v j by
       rw [Finset.mul_sum]; exact Finset.sum_congr rfl fun j _ => by ring, hwv, mul_one]
-
-theorem scalar_action_on_block (O : Type) [CommRing O] (A : Type) [Ring A] [Algebra O A] (M : Type) [AddCommGroup M] [Module A M]
-    [Module O M] [IsScalarTower O A M] (E : A) (δO : O) (hE : ∀ m : M, E • m = δO • m)
-    (hsc : ∀ c : A, ∃ y : O, ∀ m : M, c • m = y • m) : ScalarActionOnBlock O A M E δO := by
-  refine ⟨fun c => ?_, fun x hx => ?_⟩
-  · obtain ⟨y, hy⟩ := hsc c
-    refine ⟨y * δO, Ideal.mul_mem_left _ y (Ideal.mem_span_singleton_self δO), fun m => ?_⟩
-    rw [mul_smul, hE, hy, mul_smul]
-  · obtain ⟨a, rfl⟩ := Ideal.mem_span_singleton'.1 hx
-    refine ⟨algebraMap O A a, fun m => ?_⟩
-    rw [mul_smul, hE, algebraMap_smul, mul_smul]
 
 end Formalism.RepresentationBoundsCohomology.SF

@@ -1,5 +1,51 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.HidaSetting
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.HidaSetting
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Matrix.Spectrum
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -40,12 +86,13 @@ theorem hJ_sum_right {ι : Type*} (s : Finset ι) (x : Fin n → ℂ) (c : ι �
 
 theorem hJ_conj (x y : Fin n → ℂ) : hJ ε x y = conj (hJ ε y x) := by
   unfold hJ Formalism.REAL.Jm
+
   simp only [Matrix.mulVec_diagonal, dotProduct, Pi.star_apply, map_sum, map_mul]
   refine Finset.sum_congr rfl (fun i _ => ?_)
   split_ifs <;> simp <;> ring
 
 theorem hJ_add_left (x x' y : Fin n → ℂ) : hJ ε (x + x') y = hJ ε x y + hJ ε x' y := by
-  rw [hJ_conj, hJ_add_right, map_add, ← hJ_conj, ← hJ_conj]
+  rw [hJ_conj, hJ_add_right, map_add (f := _), ← hJ_conj, ← hJ_conj]
 
 theorem hJ_smul_left (a : ℂ) (x y : Fin n → ℂ) : hJ ε (a • x) y = conj a * hJ ε x y := by
   rw [hJ_conj, hJ_smul_right, map_mul, ← hJ_conj]
@@ -53,11 +100,9 @@ theorem hJ_smul_left (a : ℂ) (x y : Fin n → ℂ) : hJ ε (a • x) y = conj 
 theorem hJ_sub_left (x x' y : Fin n → ℂ) : hJ ε (x - x') y = hJ ε x y - hJ ε x' y := by
   rw [hJ_conj, hJ_sub_right, map_sub, ← hJ_conj, ← hJ_conj]
 
-theorem hJ_neg_left (x y : Fin n → ℂ) : hJ ε (-x) y = -hJ ε x y := by
-  rw [hJ_conj, hJ_neg_right, map_neg, ← hJ_conj]
-
 theorem hJ_sum_left {ι : Type*} (s : Finset ι) (c : ι → ℂ) (x : ι → Fin n → ℂ) (y : Fin n → ℂ) :
     hJ ε (∑ i ∈ s, c i • x i) y = ∑ i ∈ s, conj (c i) * hJ ε (x i) y := by
+
   rw [hJ_conj, hJ_sum_right, map_sum]
   simp only [map_mul, ← hJ_conj]
 
@@ -171,7 +216,7 @@ theorem step_exists (x y : Fin n → ℂ) (hxy : hJ ε x x = hJ ε y y) (hx : hJ
       apply hx
       linear_combination h2 / 2
     have hH1 : hJ ε (x + y) (x + y) = hJ ε (x + y) x + conj (hJ ε (x + y) x) := by
-      simp only [hJ_add_left, hJ_add_right, map_add]
+      simp only [hJ_add_left, hJ_add_right, map_add (f := _)]
       linear_combination hxy' - hxy - hcr
     obtain ⟨hI1, hm1⟩ := gen (x + y) hu1 hH1
     have hc0 : hJ ε y y ≠ 0 := by rw [← hxy]; exact hx

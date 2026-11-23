@@ -1,9 +1,55 @@
-import Development.WeilBound.ThetaLifts.EigenvalueEndgame.TowerCodimensionTwo
-import Development.WeilBound.ThetaLifts.ConeHypotheses.PureEqPureA
-import Development.WeilBound.ThetaLifts.SmallCones.ThetaUniq
-import Development.WeilBound.ThetaLifts.CartanFactorisation.Unimod
-import Development.WeilBound.ThetaLifts.CartanFactorisation.IntegrableOnRight
-import Development.WeilBound.ThetaLifts.TowerModels.LeviAd
+module
+
+public import Development.WeilBound.ThetaLifts.SmallCones.ThetaUniq
+public import Development.WeilBound.ThetaLifts.CartanFactorisation.CartanConj
+public import Development.WeilBound.ThetaLifts.EigenvalueEndgame.PlaneRemovalConfiguration
+public import Development.WeilBound.ThetaLifts.CartanFactorisation.IntegrableOnRight
+public import Development.WeilBound.ThetaLifts.CartanFactorisation.Unimod
+public import Development.WeilBound.ThetaLifts.ConeHypotheses.PureEqPureA
+public import Development.WeilBound.ThetaLifts.EigenvalueEndgame.TowerCodimensionTwo
+public import Development.WeilBound.ThetaLifts.TowerModels.LeviAd
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.Divisors.MatchingOfParts
+
+@[expose] public section
 
 noncomputable section
 
@@ -28,10 +74,35 @@ theorem I_inv {n d : ℕ} {X : Spc F E n} {W : Spc F E d} {B : Base F E} {M : Mo
 
 theorem iAut_of (hT : ThetaBasic) (hC : PositivityTheory.ThKF.ICont) (hS : PositivityTheory.ThKCT.SoStab) : IAut := by
   intro F E _ _ _ _ _ σ B a a' G X om om' t
-  exact ⟨fun Φ hΦ => ⟨(hC F E σ B _ _ _ _ _ _ _ _ _ _ _ _ (pairV t)).1 (weilCondV t) Φ (polData_le t.geo.hM hΦ),
-      I_inv hT (pairV t) (polData_le t.geo.hM hΦ)⟩,
-    fun Φ hΦ => ⟨(hC F E σ B _ _ _ _ _ _ _ _ _ _ _ _ (pairV' t)).2 (hS F E σ B _ _ _ _ _ _ _ _ _ _ _ _ (pairV' t)) Φ hΦ.2,
-      I_inv hT (pairV' t) (polData_le t.geo.hM' hΦ.1)⟩⟩
+  have hecke_div {χ χ' : Chr F E} (h : IsHecke F E χ) (h' : IsHecke F E χ') : IsHecke F E (χ / χ') :=
+    ⟨h.1.div' h'.1, fun x => by rw [MonoidHom.div_apply, h.2, h'.2, div_one]⟩
+  have res_div {K : Subgroup (AF F)ˣ} {χ χ' : Chr F E} {m n k : ℕ} (h : ResEtaPow K χ m)
+      (h' : ResEtaPow K χ' n) (e : k = m + n) : ResEtaPow K (χ / χ') k := fun x => by
+    rw [MonoidHom.div_apply, Circle.coe_div, h, h', e]
+    split_ifs
+    · simp
+    · rw [pow_add, div_eq_mul_inv, ← inv_pow, inv_neg, inv_one]
+  have pairV : IsPair B G.M X.β (X.β / X.α) om (a - G.p) G.p (a + a' - (G.p + G.q)) (G.p + G.q) :=
+    ⟨t.base, t.geo.hV, t.geo.hW, t.geo.hM, t.chars.heckeβ, hecke_div t.chars.heckeβ t.chars.heckeα,
+      t.chars.resβ, res_div t.chars.resβ t.chars.resα rfl, t.weil⟩
+  have pairV' : IsPair B G.M' X.α (X.α / X.β) om' G.q (a' - G.q) (a + a' - (G.p + G.q)) (G.p + G.q) :=
+    ⟨t.base, t.geo.hV', t.geo.hW, t.geo.hM', t.chars.heckeα, hecke_div t.chars.heckeα t.chars.heckeβ,
+      t.chars.resα, res_div t.chars.resα t.chars.resβ (add_comm _ _), t.weil'⟩
+  have weilCondV : a + a' + 2 * min (a - G.p) G.p < 2 * a ∨ min (a - G.p) G.p = 0 := by
+    have := t.geo.eBig
+    left
+    omega
+  have polData_le {n d : ℕ} {Y : Spc F E n} {W : Spc F E d} {M : Model σ Y W} (hM : M.IsGood B.ψ) :
+      PolData B M ≤ schA F (Fin n × Fin d) := by
+    refine Submodule.span_le.2 ?_
+    rintro _ ⟨f, -, φ, h1, h2, rfl⟩
+    obtain ⟨g, hg, e⟩ := pure_eq_pureA hM φ h1 h2
+    rw [e]
+    exact Submodule.subset_span ⟨f, g, hg, rfl⟩
+  exact ⟨fun Φ hΦ => ⟨(hC F E σ B _ _ _ _ _ _ _ _ _ _ _ _ pairV).1 weilCondV Φ (polData_le t.geo.hM hΦ),
+      I_inv hT pairV (polData_le t.geo.hM hΦ)⟩,
+    fun Φ hΦ => ⟨(hC F E σ B _ _ _ _ _ _ _ _ _ _ _ _ pairV').2 (hS F E σ B _ _ _ _ _ _ _ _ _ _ _ _ pairV') Φ hΦ.2,
+      I_inv hT pairV' (polData_le t.geo.hM' hΦ.1)⟩⟩
 
 theorem perpZero_of (hQ : SqInt) (hA : IAut) : PerpZero := by
   intro F E _ _ _ _ _ σ B a a' G X om om' t f hf h1 h2

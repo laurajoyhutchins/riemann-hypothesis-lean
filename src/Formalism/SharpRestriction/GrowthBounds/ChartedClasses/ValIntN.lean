@@ -1,5 +1,46 @@
-import Formalism.SharpRestriction.GrowthBounds.ChartedClasses.ClsChartedLabAt
-import Formalism.SharpRestriction.GrowthBounds.ChartedClasses.CompInjLocJ
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.ChartComparison.LocTiesOf
+public import Formalism.SharpRestriction.GrowthBounds.ChartedClasses.ExistsIsCGBases
+public import Formalism.SharpRestriction.GrowthBounds.ChartedClasses.InTwSt
+public import Formalism.SharpRestriction.GrowthBounds.ChartedClasses.CompInjLocJ
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -39,36 +80,9 @@ structure AtHyp (Z : AtIn X0 Tw u μ w h Lv) (Gt : GatTies D) (c : LatCmp D) : P
 
 variable {Gt : GatTies D} {c : LatCmp D} {T : ∀ u : D.what₂.Word, Forms0 D u}
 
-theorem AtHyp.hyp {Z : AtIn X0 Tw u μ w h Lv} (A : AtHyp Z Gt c) (K : CmpTied D X0 T Gt c) : CmpJHyp c (Z.I Gt) where
-  core := fun j hj β => core_of_R hj K A.fl_t A.fill (A.ties j hj β)
-  ok := A.ok
-  twUnit := A.twUnit
-  valIntN := A.valIntN
-  iwF := fun j hj β => iwF_of hj (Z.Fo j hj) (Z.Lc j hj) (Gt.gat_pos u w h) β
-  fin := A.fin
-  card := A.card
-
 theorem AtHyp.chX {Z : AtIn X0 Tw u μ w h Lv} (A : AtHyp Z Gt c) (j : ℕ) (hj : j + 1 ≤ D.R.m) : ChX (((Z.I Gt).at' j hj).st) :=
   chX_stepInOf hj (Z.Fo j hj) (Z.Lc j hj) (Gt.gat_pos u w h) (fun β => (A.ties j hj β).sameU) (fun β => (A.ties j hj β).frRat)
     (A.hypC j hj)
-
-def AtHyp.lab {Z : AtIn X0 Tw u μ w h Lv} (A : AtHyp Z Gt c) (fl_m : Fl.mm = D.R.m) (c0 : Formalism.L2.G.TwTie0.ClsAt0 D u μ w h Lv)
-    (fill : ∀ j, D.R.m < j → Lv.comp j → (D.chTw u μ).cls j) (rat : ∀ j, j < D.R.m → (Tw.fm u μ).KRat j)
-    (dgam : (D.chTw u μ).DGam ∣ (D.mem u).C.DGam) : LabIn (Z.I Gt) where
-  onCh := fun _ _ => rfl
-  chX := A.chX
-  fl_t := A.fl_t
-  fl_m := fl_m
-  c0 := c0
-  fill := fill
-  rat := rat
-  dgam := dgam
-
-def kaAtZ {Z : AtIn X0 Tw u μ w h Lv} (A : AtHyp Z Gt c) (K : CmpTied D X0 T Gt c) (fl_m : Fl.mm = D.R.m)
-    (c0 : Formalism.L2.G.TwTie0.ClsAt0 D u μ w h Lv) (fill : ∀ j, D.R.m < j → Lv.comp j → (D.chTw u μ).cls j)
-    (rat : ∀ j, j < D.R.m → (Tw.fm u μ).KRat j) (dgam : (D.chTw u μ).DGam ∣ (D.mem u).C.DGam) :
-    TwTie.KerAtMu D c Tw u μ w h (chainAt (A.hyp K) Gt) :=
-  kaAt (A.lab fl_m c0 fill rat dgam) (A.hyp K) Gt
 
 end Formalism.MainNotions.G.KAat
 

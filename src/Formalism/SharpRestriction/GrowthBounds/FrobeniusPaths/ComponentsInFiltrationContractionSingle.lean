@@ -1,5 +1,53 @@
-import Formalism.SharpRestriction.GrowthBounds.FrobeniusPaths.DividedPowerZeroOfGlActionZero
-import Formalism.SharpRestriction.GrowthBounds.RootWeights.DerivativeValuationBounds
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.FrobeniusPaths.DividedPowerZeroOfGlActionZero
+public import Formalism.SharpRestriction.GrowthBounds.RootWeights.DerivativeValuationBounds
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -7,8 +55,8 @@ open MvPolynomial Finset Formalism.MainNotions.G Formalism.MainNotions.Covariant
 
 namespace Formalism.MainNotions.LemmaBAlt
 
-open Classical in
 
+open Classical in
 def twistedMatrixSubstitution {R B : Type*} [CommRing R] [CommRing B] {ι : Type*} {n : ℕ} (LL : Letters ι) (S : Set ι)
     (φ : R →+* B) (m m' : Matrix (Fin n) (Fin n) B) :
     MvPolynomial (ι × Fin n) R →+* MvPolynomial (ι × Fin n) B :=
@@ -164,7 +212,7 @@ theorem support_degrees_add_subset {R : Type*} [CommRing R] {ι : Type*} {n : �
   rw [not_or, mem_support_degrees_iff, mem_support_degrees_iff] at hcon
   push Not at hcon
   apply hm
-  rw [map_add, MvPolynomial.coeff_add, AddMonoidAlgebra.coeff_add, Finsupp.add_apply, hcon.1 m, hcon.2 m, add_zero]
+  rw [map_add (f := _), MvPolynomial.coeff_add, AddMonoidAlgebra.coeff_add, Finsupp.add_apply, hcon.1 m, hcon.2 m, add_zero]
 
 theorem support_degrees_smul_subset {R : Type*} [CommRing R] {ι : Type*} {n : ℕ} (LL : Letters ι) (S : Set ι) (j : Fin n)
     (a : R) (G : MvPolynomial (ι × Fin n) R) {k : ℤ} (hk : k ∈ sDegs LL S j (a • G)) :
@@ -343,8 +391,9 @@ theorem lemma_A3_over_field (D : Formalism.BasicNotions.D7) (hW : WordValuationB
 theorem map_linear_combination_words {R R' : Type*} [CommRing R] [CommRing R'] (φ : R →+* R') (l : StandardWordIndex n LL B →₀ R) :
     MvPolynomial.map φ (Finsupp.linearCombination R (columnWord LL B R) l) =
       Finsupp.linearCombination R' (columnWord LL B R') (l.mapRange φ (map_zero φ)) := by
+
   rw [Finsupp.linearCombination_apply, Finsupp.linearCombination_apply, Finsupp.sum_mapRange_index (by simp),
-    Finsupp.sum, Finsupp.sum, map_sum]
+  Finsupp.sum, Finsupp.sum, map_sum]
   refine Finset.sum_congr rfl fun x _ => ?_
   rw [MvPolynomial.smul_eq_C_mul, MvPolynomial.smul_eq_C_mul, map_mul, MvPolynomial.map_C]
   unfold columnWord
@@ -370,12 +419,6 @@ theorem lemma_A3_over_domain (D : Formalism.BasicNotions.D7) (hW : WordValuation
   exact (Finsupp.mem_span_image_iff_linearCombination O).2 ⟨l, (Finsupp.mem_supported O _).2 hs, rfl⟩
 
 end words
-
-theorem lemma_A3_of_word_bound (D : Formalism.BasicNotions.D7) (hW : WordValuationBounds) (hV : ValuationLemmaField D) (hB : AdmB D) : DefiniteRankOne D := by
-  have h17 : PathBasisOverRing D := hB.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.1
-  have h18 : FirstLettersLowerSet D := hB.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.1
-  intro p _ O _ _ _ _ N n _ LL B th M
-  exact ⟨lemma_A3_over_domain LL B D hW hV.1 h17 h18 O th M, lemma_A3_over_field LL B D hW hV.1 h17 h18 (FF O) th M⟩
 
 section rank1
 
@@ -491,6 +534,7 @@ theorem conjugate_operator_sum {Q F : Type*} [CommRing Q] [AddCommGroup F] [Modu
     intro b
     have := congrArg (fun f => f K) (hI b)
     simpa [Module.End.mul_apply, LinearMap.add_apply, LinearMap.smul_apply, LinearMap.sum_apply] using this
+
   rw [map_sum]
   simp only [map_smul, h, smul_add, add_smul, Finset.sum_add_distrib]
   congr 1
@@ -550,6 +594,7 @@ theorem sum_U_mul_V_eq_one : ∑ m, twistColumnVector N jj m * twistRowVector N 
   rw [Matrix.mul_apply, Matrix.one_apply_eq] at this
   unfold twistColumnVector twistRowVector
   simp only [← map_mul]
+
   rw [← map_sum, ← map_one (C : GLLaurent ℤ n →+* TwistedRing N n), ← this]
   congr 1
   exact Finset.sum_congr rfl fun m _ => mul_comm _ _
@@ -565,7 +610,7 @@ theorem twist_substitution_X_vector {l : Fin N} (hl : l ∈ S) (hv : LL.vec l = 
     twistSub (R := ℤ) LL S jj (X (l, m)) =
       X (l, m) + (laurentPower N n 1 - 1) * twistRowVector N jj m * ∑ b, twistColumnVector N jj b * X (l, b) := by
   rw [twist_substitution_eq_action, twisted_action_X, if_pos hl, if_pos hv]
-  simp only [twist_matrix_apply, map_add, map_mul, map_sub, map_one, add_mul, Finset.sum_add_distrib]
+  simp only [twist_matrix_apply, map_add (f := _), map_mul, map_sub, map_one, add_mul, Finset.sum_add_distrib]
   congr 1
   · simp [apply_ite C, Finset.sum_ite_eq']
   · unfold laurentPower twistRowVector twistColumnVector
@@ -577,7 +622,7 @@ theorem twist_substitution_X_covector {l : Fin N} (hl : l ∈ S) (hv : ¬ LL.vec
     twistSub (R := ℤ) LL S jj (X (l, m)) =
       X (l, m) + (laurentPower N n (-1) - 1) * twistColumnVector N jj m * ∑ b, twistRowVector N jj b * X (l, b) := by
   rw [twist_substitution_eq_action, twisted_action_X, if_pos hl, if_neg hv]
-  simp only [twist_matrix_apply, map_add, map_mul, map_sub, map_one, add_mul, Finset.sum_add_distrib]
+  simp only [twist_matrix_apply, map_add (f := _), map_mul, map_sub, map_one, add_mul, Finset.sum_add_distrib]
   congr 1
   · simp [apply_ite C, Finset.sum_ite_eq]
   · unfold laurentPower twistRowVector twistColumnVector
@@ -620,8 +665,11 @@ theorem twist_column_kernel_eq_lambda {B : Fin N → ℕ} (Pa : PPath n N LL B) 
   induction j generalizing J with
   | zero =>
     have h0 : columnLambdaOperator N jj c (extOne : Finset (Fin n) → TwistedRing N n) = extOne := by
-      unfold columnLambdaOperator lambdaOperator
-      split_ifs <;> simp [Module.End.mul_apply, total_contraction_exterior_one]
+      have hlambda {P : Type} [CommRing P] (u v : Fin n → P) (θ : P) :
+          lambdaOperator u v θ (extOne : Finset (Fin n) → P) = extOne := by
+        simp [lambdaOperator, Module.End.mul_apply, total_contraction_exterior_one]
+      unfold columnLambdaOperator
+      split_ifs <;> exact hlambda (P := TwistedRing N n) _ _ _
     simp only [Kcol]
     rw [h0, map_exterior_one]
   | succ j ih =>
@@ -1068,7 +1116,5 @@ theorem word_valuation_bounds : WordValuationBounds := by
     exact filtration_bound_later_columns LL (-1) _ _ P.mu c _ (i.val + 1) hout h0 N hN (I c)
 
 end final
-
-theorem prvA3_of_valuationField_of_admB (D : Formalism.BasicNotions.D7) (hV : ValuationLemmaField D) (hB : AdmB D) : DefiniteRankOne D := lemma_A3_of_word_bound D word_valuation_bounds hV hB
 
 end Formalism.MainNotions.LemmaBAlt

@@ -1,7 +1,47 @@
-import Formalism.SharpRestriction.CuspSpanNormBounds.RelevantZeroGramTerms
-import Formalism.SharpRestriction.CuspSpanNormBounds.SArith
-import Formalism.SharpRestriction.CuspSpanNormBounds.LocalDataRealPlace
-import Formalism.LocalRingCardinality.DataParams₂
+module
+
+public import Formalism.SharpRestriction.CuspSpanNormBounds.SArith
+public import Formalism.SharpRestriction.CuspSpanNormBounds.LocalDataRealPlace
+public import Formalism.LocalRingCardinality.DataParams₂
+import Mathlib.Algebra.AffineMonoid.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -44,22 +84,19 @@ def Tcrit (u : D.what₂.Word) (τ : D.what₂.Tau) : ℝ :=
 
 def Tr (u : D.what₂.Word) : ℝ := ((D.mem u).A.T : ℝ)
 
-def beUU (κ : ℝ) (u u' : D.what₂.Word) (τ : D.what₂.Tau) (Y : ℝ) : ℝ :=
-  beS κ D.R.rS (lamS D.R (D.hc τ)) (Tr D u) (Tr D u') (uS D u τ) (uS D u' τ) Y
-
 def tV (u u' : D.what₂.Word) (τ : D.what₂.Tau) : ℝ :=
   Real.sqrt (Tcrit D u τ * Tcrit D u' τ / (Tr D u * Tr D u'))
 
-open Classical in
 
+open Classical in
 def aEff (u : D.what₂.Word) (τ : D.what₂.Tau) : ℝ :=
   if IsTop D τ then uOne D u τ 1 * bTop D τ / ((D.R.k : ℝ) * D.s.Del) else uOne D u τ 1 - vOne D τ 1
 
 def gaG : ℝ :=
   ∏ᶠ p ∈ typedPl D, ∏ i ∈ Finset.Icc 1 D.R.k, ((Ideal.absNorm p.asIdeal : ℝ) ^ i - 1)
 
-open Classical in
 
+open Classical in
 def genScal (u u' : D.what₂.Word) : ℝ :=
   (∏ᶠ p ∈ typedPl D, (1 + 3 / (Ideal.absNorm p.asIdeal : ℝ))) * gaG D *
     (∑' P : D.s.Pair u u',
@@ -67,19 +104,9 @@ def genScal (u u' : D.what₂.Word) : ℝ :=
           D.s.Gterm (D.s.pfst P) ≠ 0 ∧ D.s.Gterm (D.s.psnd P) ≠ 0
       then D.s.pval P else 0).re
 
-def hsDiagAllD (u : D.what₂.Word) : ℝ := hsNormSq (KD D u u - ContinuousLinearMap.id ℂ (D.s.Cu u))
-
-def f3G : ℝ := ∏ᶠ p ∈ typedPl D, (1 + 3 / (Ideal.absNorm p.asIdeal : ℝ))
-
 def IsSat {u u' : D.what₂.Word} (Φ : Set (D.s.Term u u')) : Prop :=
   Φ = famG D.s ∨ Φ = famNG D.s ∨ Φ = {t | D.s.Gterm t = 0 ∧ ¬ D.s.isId t} ∨
     Φ = {t | D.s.relevant t ∧ D.s.Gterm t = 0 ∧ ¬ D.s.isId t}
-
-def Line2a : Prop :=
-  ∀ (u u' : D.what₂.Word) (Φ : Set (D.s.Term u u')), IsSat D Φ → Summable (fun p : pairsIn D.s Φ => ‖D.s.pval p.1‖) →
-    hsNormSq (KOf D.s u u' Φ) ≤ f3G D * gaG D * (∑' p : pairsIn D.s Φ, D.s.pval p.1).re
-
-def HostFactorProductPowerIdentity : Prop := f3G D = (∏ i : Fin 2, (1 + 3 / (D.host.g i : ℝ))) ^ D.R.f
 
 def StandingNumericalData (C0 : ℝ) : Prop :=
   let k : ℝ := D.R.k

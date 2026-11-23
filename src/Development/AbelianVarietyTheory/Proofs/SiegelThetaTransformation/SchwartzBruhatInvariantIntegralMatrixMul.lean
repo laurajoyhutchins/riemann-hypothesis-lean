@@ -1,5 +1,65 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IMemSiegel
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IMemSiegel
+public import Mathlib.LinearAlgebra.Matrix.Bilinear
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Matrix.FiniteDimensional
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.CoassocSimps
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.LinearAlgebra.FreeModule.Finite.CardQuotient
+public import Mathlib.RingTheory.Norm.Transitivity
+
+@[expose] public section
+
 open Matrix Complex GlobalTheory.SW
 open scoped ComplexConjugate Real
 
@@ -106,7 +166,7 @@ theorem exists_den (T : Matrix κ ι K →ₗ[ℚ] Matrix κ ι K) :
     · rw [e, Int.cast_natCast] at h; exact h
     · rw [e, Int.cast_neg, Int.cast_natCast, neg_mul] at h; simpa using h.neg
   | zero => rw [map_zero, smul_zero]; exact fun _ _ => isIntegral_zero
-  | add x y _ _ hx hy => rw [map_add, smul_add]; exact intM_add hx hy
+  | add x y _ _ hx hy => rw [map_add (f := _), smul_add]; exact intM_add hx hy
   | neg x _ hx => rw [map_neg, smul_neg]; exact fun k i => (hx k i).neg
 
 theorem map_nat_smul (T : Matrix κ ι K →ₗ[ℚ] Matrix κ ι K) (M : ℕ) (y : Matrix κ ι K) :
@@ -204,7 +264,7 @@ theorem haarAt_mul (R M : ℕ) (hR : 0 < R) (hM : 0 < M) (φ : Matrix κ ι K �
 theorem haar_eq_haarAt {R : ℕ} (hR : 0 < R) {φ : Matrix κ ι K → ℂ} (h : HasLevel R φ) :
     haar φ = haarAt R φ := by
   have hs : IsSB φ := ⟨R, hR, h⟩
-  rw [haar, dif_pos hs, ← haarAt_mul _ R hs.choose_spec.1 hR φ hs.choose_spec.2, mul_comm,
+  rw [haar, dite_eq_left hs, ← haarAt_mul _ R hs.choose_spec.1 hR φ hs.choose_spec.2, mul_comm,
     haarAt_mul _ _ hR hs.choose_spec.1 φ h]
 
 theorem haar_comp (T : Matrix κ ι K ≃ₗ[ℚ] Matrix κ ι K) (φ : Matrix κ ι K → ℂ) (hφ : IsSB φ) :
@@ -225,7 +285,7 @@ theorem haar_comp (T : Matrix κ ι K ≃ₗ[ℚ] Matrix κ ι K) (φ : Matrix �
       push_cast; ring
     · have := h.2 (T x) _ (hT2 y hy)
       rw [smul_smul, ← Nat.cast_mul] at this
-      simp only [map_add]
+      simp only [map_add (f := _)]
       rw [← this]
       congr 2
       exact map_nat_smul T.toLinearMap _ _

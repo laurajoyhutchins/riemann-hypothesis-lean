@@ -1,6 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.HeightFunctions.FiniteDimensionalOfSz
-import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.LFunctionPositiveConductorFourEight
+module
+
+public import Development.AbelianVarietyTheory.Definitions.HeightFunctions.FiniteDimensionalOfSz
+public import Mathlib.NumberTheory.NumberField.InfinitePlace.TotallyRealComplex
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.GroupTheory.FiniteAbelian.Duality
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+public import Mathlib.NumberTheory.RamificationInertia.Galois
+public import Mathlib.NumberTheory.RamificationInertia.Inertia
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -13,11 +60,11 @@ open scoped IntermediateField Pointwise
 
 variable {K L : Type} [Field K] [NumberField K] [Field L] [NumberField L] [Algebra K L]
 
+
 set_option autoImplicit false in
 open NumberField IsDedekindDomain Polynomial in
 open scoped IntermediateField Pointwise in
 variable {K L : Type} [Field K] [NumberField K] [Field L] [NumberField L] [Algebra K L] in
-
 theorem _root_.GlobalTheory.FieldSize.RaySplit.ncard_eq_primesOver (𝔭 : HeightOneSpectrum (𝓞 K)) :
     {Q : HeightOneSpectrum (𝓞 L) | Q.asIdeal.comap (algebraMap (𝓞 K) (𝓞 L)) = 𝔭.asIdeal}.ncard =
       (𝔭.asIdeal.primesOver (𝓞 L)).ncard := by
@@ -112,9 +159,9 @@ private theorem ncard_primesOver_eq_finrank_iff_frob_eq_one {F R : Type} [Field 
     have hroots := Polynomial.card_le_degree_of_subset_roots
       (p := (X ^ Fintype.card (𝓞 F ⧸ 𝔭.asIdeal) - X : (𝓞 R ⧸ P)[X])) (Z := Finset.univ)
       (fun y _ => by
-        rw [Polynomial.mem_roots (FiniteField.X_pow_card_sub_X_ne_zero _ hq1)]
+        rw [Polynomial.mem_roots (Polynomial.X_pow_sub_X_ne_zero hq1)]
         simp [hall y])
-    rw [Finset.card_univ, FiniteField.X_pow_card_sub_X_natDegree_eq _ hq1, hcard] at hroots
+    rw [Finset.card_univ, Polynomial.natDegree_X_pow_sub_X hq1, hcard] at hroots
     have hle := (Nat.pow_le_pow_iff_right hq1).mp (hroots.trans (pow_one _).symm.le)
     have hpos : 0 < Module.finrank (𝓞 F ⧸ 𝔭.asIdeal) (𝓞 R ⧸ P) := by
       rcases Nat.eq_zero_or_pos (Module.finrank (𝓞 F ⧸ 𝔭.asIdeal) (𝓞 R ⧸ P)) with h0 | h0
@@ -157,7 +204,7 @@ set_option autoImplicit false in
 open NumberField IsDedekindDomain Polynomial in
 open scoped IntermediateField Pointwise in
 variable {K L : Type} [Field K] [NumberField K] [Field L] [NumberField L] [Algebra K L] in
-private theorem false_of_ringHom_real_of_isTotallyComplex {F : Type} [Field F] [NumberField F] [IsTotallyComplex F]
+private theorem false_of_ringHom_real_of_isTotallyComplex {F : Type} [Field F] [NumberField F] [_root_.NumberField.IsTotallyComplex F]
     (φ : F →+* ℝ) : False := by
   have h := IsTotallyComplex.isComplex (InfinitePlace.mk ((algebraMap ℝ ℂ).comp φ))
   rw [← InfinitePlace.not_isReal_iff_isComplex, InfinitePlace.isReal_mk_iff] at h
@@ -166,12 +213,12 @@ private theorem false_of_ringHom_real_of_isTotallyComplex {F : Type} [Field F] [
   ext x
   simp [ComplexEmbedding.conjugate_coe_eq]
 
+
 set_option autoImplicit false in
 open NumberField IsDedekindDomain Polynomial in
 open scoped IntermediateField Pointwise in
 variable {K L : Type} [Field K] [NumberField K] [Field L] [NumberField L] [Algebra K L] in
-
-theorem _root_.GlobalTheory.FieldSize.RaySplit.ncard_eq_finrank_iff : ∀ (K R : Type) [Field K] [NumberField K] [IsTotallyComplex K] [Field R] [NumberField R]
+theorem _root_.GlobalTheory.FieldSize.RaySplit.ncard_eq_finrank_iff : ∀ (K R : Type) [Field K] [NumberField K] [_root_.NumberField.IsTotallyComplex K] [Field R] [NumberField R]
     [Algebra K R] [IsAbelianGalois K R] (n : ℕ), 0 < n → _root_.GlobalTheory.FieldSize.IsRay R (Ideal.span {(n : 𝓞 K)}) →
     ∀ 𝔭 : HeightOneSpectrum (𝓞 K), (n : 𝓞 K) ∉ 𝔭.asIdeal →
       ({Q : HeightOneSpectrum (𝓞 R) | Q.asIdeal.comap (algebraMap (𝓞 K) (𝓞 R)) = 𝔭.asIdeal}.ncard = Module.finrank K R ↔

@@ -1,5 +1,52 @@
-import Formalism.SharpRestriction.GrowthBounds.MonomialOrderSegments.MemPolKIff
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.MapCastMono
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.MonomialOrderSegments.MemPolKIff
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.MapCastMono
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Presheaf
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -114,7 +161,7 @@ theorem fock_add_left (F F' G : MvPolynomial σ K) : fock (F + F') G = fock F G 
   rw [fock_eq_sum (F + F') G G.support (Or.inr (Finset.Subset.refl _)),
     fock_eq_sum F G G.support (Or.inr (Finset.Subset.refl _)),
     fock_eq_sum F' G G.support (Or.inr (Finset.Subset.refl _)), ← Finset.sum_add_distrib]
-  exact Finset.sum_congr rfl fun α _ => by rw [coeff_add]; ring
+  exact Finset.sum_congr rfl fun α _ => by rw [MvPolynomial.coeff_add]; ring
 
 theorem fock_add_right (F G G' : MvPolynomial σ K) : fock F (G + G') = fock F G + fock F G' := by
   rw [fock_comm, fock_add_left, fock_comm G, fock_comm G']
@@ -122,7 +169,7 @@ theorem fock_add_right (F G G' : MvPolynomial σ K) : fock F (G + G') = fock F G
 theorem fock_smul_left (c : K) (F G : MvPolynomial σ K) : fock (c • F) G = c * fock F G := by
   rw [fock_eq_sum (c • F) G G.support (Or.inr (Finset.Subset.refl _)),
     fock_eq_sum F G G.support (Or.inr (Finset.Subset.refl _)), Finset.mul_sum]
-  exact Finset.sum_congr rfl fun α _ => by rw [coeff_smul, smul_eq_mul]; ring
+  exact Finset.sum_congr rfl fun α _ => by rw [MvPolynomial.coeff_smul, smul_eq_mul]; ring
 
 theorem fock_smul_right (c : K) (F G : MvPolynomial σ K) : fock F (c • G) = c * fock F G := by
   rw [fock_comm, fock_smul_left, fock_comm]
@@ -134,14 +181,8 @@ theorem fock_neg_left (F G : MvPolynomial σ K) : fock (-F) G = -fock F G := by
   have := fock_smul_left (-1 : K) F G
   simpa using this
 
-theorem fock_neg_right (F G : MvPolynomial σ K) : fock F (-G) = -fock F G := by
-  rw [fock_comm, fock_neg_left, fock_comm]
-
 theorem fock_sub_left (F F' G : MvPolynomial σ K) : fock (F - F') G = fock F G - fock F' G := by
   rw [sub_eq_add_neg, fock_add_left, fock_neg_left, ← sub_eq_add_neg]
-
-theorem fock_sub_right (F G G' : MvPolynomial σ K) : fock F (G - G') = fock F G - fock F G' := by
-  rw [sub_eq_add_neg, fock_add_right, fock_neg_right, ← sub_eq_add_neg]
 
 theorem fock_sum_left {ι : Type} (s : Finset ι) (f : ι → MvPolynomial σ K) (G : MvPolynomial σ K) :
     fock (∑ i ∈ s, f i) G = ∑ i ∈ s, fock (f i) G := by
@@ -168,6 +209,7 @@ theorem fock_eq_sum_right (F G : MvPolynomial σ K) :
 theorem dg_eq_sum_f (f : (σ →₀ ℕ) → K) (F : MvPolynomial σ K) :
     dg f F = ∑ α ∈ F.support, monomial α (f α * F.coeff α) := by
   conv_lhs => rw [← support_sum_monomial_coeff F]
+
   rw [map_sum]
   exact Finset.sum_congr rfl fun α _ => dg_monomial f α _
 

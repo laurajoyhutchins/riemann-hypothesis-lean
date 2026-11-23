@@ -1,6 +1,60 @@
-import Mathlib
-import GroundTheory.TateCohomology.DiagonalSuccIsoFreeInvSingle
-import GroundTheory.TateCohomology.DimensionShift
+module
+
+public import GroundTheory.TateCohomology.DiagonalSuccIsoFreeInvSingle
+public import GroundTheory.TateCohomology.InducedNorm
+public import Mathlib.RepresentationTheory.FiniteIndex
+public import Mathlib.RepresentationTheory.Homological.GroupCohomology.Shapiro
+public import GroundTheory.TateCohomology.DimensionShift
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.Monoidal.Mon
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.CoassocSimps
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.GroupCoh
@@ -58,7 +112,6 @@ lemma shapiroCochains_hom_f_zero_const (B : Rep.{u} k S) (c : B) (hc : ∀ s : S
   have h := ProjectiveResolution.lift_commutes_zero (𝟙 (Rep.trivial k S k))
     (resBarResolution (k := k) S) (barResolution k S)
   have h3 := congrArg (fun φ => φ.hom (Finsupp.single v (MonoidAlgebra.single g (1 : k)))) h
-  simp at h3
   change (trivialToInvariant S B c hc).hom (((barResolution k S).π.f 0).hom
     (((barHomotopyEquiv (k := k) S).inv.f 0).hom (Finsupp.single v (MonoidAlgebra.single g 1)))) = c
   erw [h3]
@@ -72,10 +125,12 @@ end Cochains
 
 section Unit
 
+open scoped Classical
+
 variable {k G : Type u} [CommRing k] [Group G] (S : Subgroup G)
 
-open scoped Classical in
 
+open scoped Classical in
 noncomputable def toResCoind (B : Rep.{u} k S) : B ⟶ res S.subtype (coind S.subtype B) :=
   Rep.ofHom ⟨LinearMap.codRestrict _
     (LinearMap.pi fun g : G => if h : g ∈ S then B.ρ ⟨g, h⟩ else 0) (fun b => by
@@ -103,8 +158,8 @@ noncomputable def toResCoind (B : Rep.{u} k S) : B ⟶ res S.subtype (coind S.su
         rw [dif_neg hx, dif_neg hxs]
         rfl)⟩
 
-open scoped Classical in
 
+open scoped Classical in
 lemma toResCoind_apply (B : Rep.{u} k S) (b : B) (x : G) :
     ((toResCoind S B).hom b).1 x = if h : x ∈ S then B.ρ ⟨x, h⟩ b else 0 := by
   change (if h : x ∈ S then B.ρ ⟨x, h⟩ else 0) b = _
@@ -112,8 +167,8 @@ lemma toResCoind_apply (B : Rep.{u} k S) (b : B) (x : G) :
 
 variable [Fintype G] [Fintype S]
 
-open scoped Classical in
 
+open scoped Classical in
 lemma sum_toResCoind (B : Rep.{u} k S) (b : B) (g : G) :
     ∑ h : G, ((toResCoind S B).hom b).1 (g * h) = B.ρ.norm b := by
   rw [show (∑ h : G, ((toResCoind S B).hom b).1 (g * h)) =
@@ -159,8 +214,8 @@ noncomputable def tateShapiroMap (B : Rep.{u} k S) :
   CochainComplex.ConnectData.map _ _ (chainsMap S.subtype (toResCoind S B))
     (shapiroCochainsHomotopyEquiv S B).hom (shapiro_comm_zero S B)
 
-omit [Fintype G] [Fintype S] in
 
+omit [Fintype G] [Fintype S] in
 lemma toResCoind_naturality {B B' : Rep.{u} k S} (φ : B ⟶ B') :
     toResCoind S B ≫ (resFunctor S.subtype).map (coindMap S.subtype φ) = φ ≫ toResCoind S B' := by
   classical
@@ -172,14 +227,14 @@ lemma toResCoind_naturality {B B' : Rep.{u} k S} (φ : B ⟶ B') :
   · exact hom_comm_apply φ _ _
   · exact map_zero _
 
-omit [Fintype G] [Fintype S] in
 
+omit [Fintype G] [Fintype S] in
 lemma freeLift_comp_hom {H : Type u} [Group H] {B B' : Rep.{u} k H} (φ : B ⟶ B') {α : Type u}
     (x : α → B) : freeLift k H B x ≫ φ = freeLift k H B' (fun a => φ.hom (x a)) :=
   free_ext _ _ _ _ _ fun i => by simp
 
-omit [Fintype G] [Fintype S] in
 
+omit [Fintype G] [Fintype S] in
 lemma shapiroCochains_naturality {B B' : Rep.{u} k S} (φ : B ⟶ B') :
     (shapiroCochainsHomotopyEquiv S B).hom ≫ cochainsMap (MonoidHom.id G) (coindMap S.subtype φ) =
       cochainsMap (MonoidHom.id S) φ ≫ (shapiroCochainsHomotopyEquiv S B').hom := by
@@ -218,7 +273,6 @@ lemma isIso_homologyMap_tateShapiroMap_of_pos (B : Rep.{u} k S) (n : ℕ) [NeZer
     (inferInstance : IsIso ((shapiroCochainsHomotopyEquiv S B).toHomologyIso n).hom)
   infer_instance
 
-@[simps]
 noncomputable def tateShapiroMapShortComplex (X : ShortComplex (Rep.{u} k S)) :
     X.map (tateComplexFunctor k S) ⟶
       (X.map (coindFunctor k S.subtype)).map (tateComplexFunctor k G) where
@@ -228,8 +282,8 @@ noncomputable def tateShapiroMapShortComplex (X : ShortComplex (Rep.{u} k S)) :
   comm₁₂ := tateShapiroMap_naturality S X.f
   comm₂₃ := tateShapiroMap_naturality S X.g
 
-omit [Fintype S] in
 
+omit [Fintype S] in
 lemma shortExact_map_coindFunctor {X : ShortComplex (Rep.{u} k S)} (hX : X.ShortExact) :
     (X.map (coindFunctor k S.subtype)).ShortExact := by
   classical
@@ -291,8 +345,8 @@ theorem tateAcyclic_coind_of_sum_eq (M : Rep.{u} k S) (φ : M.V →ₗ[k] M.V)
     (hφ : ∀ m : M, ∑ s : S, M.ρ s (φ (M.ρ s⁻¹ m)) = m) : TateAcyclic (coind S.subtype M) :=
   tateAcyclic_of_sum_eq _ (coindNormLift S M φ) (sum_coindNormLift S M φ hφ)
 
-omit [Fintype G] in
 
+omit [Fintype G] in
 lemma fromCoindRes_id_surjective (B : Rep.{u} k S) :
     Function.Surjective (fromCoindRes B LinearMap.id).hom := by
   classical
@@ -310,8 +364,8 @@ noncomputable abbrev coindBotShiftShortComplex (B : Rep.{u} k S) : ShortComplex 
   ShortComplex.mk (kernel.ι (fromCoindRes B LinearMap.id)) (fromCoindRes B LinearMap.id)
     (kernel.condition _)
 
-omit [Fintype G] in
 
+omit [Fintype G] in
 lemma coindBotShiftShortComplex_shortExact (B : Rep.{u} k S) :
     (coindBotShiftShortComplex S B).ShortExact := by
   have : Epi (fromCoindRes B LinearMap.id) :=
@@ -385,33 +439,14 @@ lemma homologyMap_tateShapiroMap_comp_tateCoindIso_hom (B : Rep.{u} k S) (n : �
     HomologicalComplex.homologyMap (tateShapiroMap S B) n ≫ (tateCoindIso S B n).hom = 𝟙 _ :=
   (asIso (HomologicalComplex.homologyMap (tateShapiroMap S B) n)).hom_inv_id
 
-theorem tateCoindIso_naturality {B B' : Rep.{u} k S} (f : B ⟶ B') (n : ℤ) :
-    (tateCohomologyFunctor n).map (coindMap S.subtype f) ≫ (tateCoindIso S B' n).hom =
-      (tateCoindIso S B n).hom ≫ (tateCohomologyFunctor n).map f :=
-  (tateCoindNatIso S n).hom.naturality f
-
-theorem tateCoindIso_δ {X : ShortComplex (Rep.{u} k S)} (hX : X.ShortExact) (n : ℤ) :
-    TateCohomology.δ (shortExact_map_coindFunctor S hX) n ≫ (tateCoindIso S X.X₁ (n + 1)).hom =
-      (tateCoindIso S X.X₃ n).hom ≫ TateCohomology.δ hX n := by
-  have key := tateShapiroMap_δ S hX n
-  refine (cancel_epi (HomologicalComplex.homologyMap (tateShapiroMap S X.X₃) n)).1 ?_
-  refine ((Category.assoc _ _ _).symm.trans ?_).trans (Category.assoc _ _ _)
-  refine (congrArg (· ≫ (tateCoindIso S X.X₁ (n + 1)).hom) key.symm).trans ?_
-  refine (Category.assoc _ _ _).trans ?_
-  refine (congrArg (TateCohomology.δ hX n ≫ ·)
-    (homologyMap_tateShapiroMap_comp_tateCoindIso_hom S X.X₁ (n + 1))).trans ?_
-  refine (Category.comp_id _).trans ?_
-  exact ((congrArg (· ≫ TateCohomology.δ hX n)
-    (homologyMap_tateShapiroMap_comp_tateCoindIso_hom S X.X₃ n)).trans (Category.id_comp _)).symm
-
 end Main
 
 section Ind
 
 variable {k G : Type u} [CommRing k] [Group G] (S : Subgroup G) [Fintype G] [Fintype S]
 
-open scoped Classical in
 
+open scoped Classical in
 noncomputable def tateIndNatIso (n : ℤ) :
     indFunctor k S.subtype ⋙ tateCohomologyFunctor n ≅
       tateCohomologyFunctor (R := k) (G := S) n :=
@@ -421,35 +456,6 @@ noncomputable def tateIndIso (B : Rep.{u} k S) (n : ℤ) :
     tateCohomology (ind S.subtype B) n ≅ tateCohomology B n :=
   (tateIndNatIso S n).app B
 
-theorem tateIndIso_naturality {B B' : Rep.{u} k S} (f : B ⟶ B') (n : ℤ) :
-    (tateCohomologyFunctor n).map ((indFunctor k S.subtype).map f) ≫ (tateIndIso S B' n).hom =
-      (tateIndIso S B n).hom ≫ (tateCohomologyFunctor n).map f :=
-  (tateIndNatIso S n).hom.naturality f
-
-omit [Fintype S] in
-
-lemma shortExact_map_indFunctor {X : ShortComplex (Rep.{u} k S)} (hX : X.ShortExact) :
-    (X.map (indFunctor k S.subtype)).ShortExact := by
-  classical
-  have : (indFunctor k S.subtype).IsLeftAdjoint :=
-    (Rep.indResAdjunction k S.subtype).isLeftAdjoint
-  have : (indFunctor k S.subtype).IsRightAdjoint := (Rep.resIndAdjunction k S).isRightAdjoint
-  have := hX.mono_f
-  have := hX.epi_g
-  exact hX.map (indFunctor k S.subtype)
-
-theorem tateIndIso_δ {X : ShortComplex (Rep.{u} k S)} (hX : X.ShortExact) (n : ℤ) :
-    TateCohomology.δ (shortExact_map_indFunctor S hX) n ≫ (tateIndIso S X.X₁ (n + 1)).hom =
-      (tateIndIso S X.X₃ n).hom ≫ TateCohomology.δ hX n := by
-  classical
-  have h1 := TateCohomology.δ_naturality (shortExact_map_indFunctor S hX)
-    (shortExact_map_coindFunctor S hX) (X.mapNatTrans (indCoindNatIso k S).hom) n
-  have h2 := tateCoindIso_δ S hX n
-  refine (Category.assoc _ _ _).symm.trans ?_
-  refine (congrArg (· ≫ (tateCoindIso S X.X₁ (n + 1)).hom) h1).trans ?_
-  refine (Category.assoc _ _ _).trans ?_
-  refine (congrArg (_ ≫ ·) h2).trans ?_
-  exact (Category.assoc _ _ _).symm
 
 end Ind
 

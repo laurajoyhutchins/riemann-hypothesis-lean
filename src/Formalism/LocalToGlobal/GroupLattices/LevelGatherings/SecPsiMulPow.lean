@@ -1,7 +1,47 @@
-import Mathlib
-import Formalism.FrobeniusOrbits.Statement
-import Formalism.SharpRestriction.GrowthBounds.UnramifiedQuadraticSetting
-import Formalism.SharpRestriction.InertJacobiLevels.VVEqEmptyOfNotIsResidueClassZero
+module
+
+public import Formalism.SharpRestriction.InertJacobiLevels.VVEqEmptyOfNotIsResidueClassZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -71,11 +111,6 @@ theorem posG_step (v : Fin (nOrb z)) (s : Fin (orderOf z)) : posG z ⟨v, posAdd
   simp only [posAdd]
   exact pow_mod_orderOf z _
 
-theorem nOrb_mul_order : nOrb z * orderOf z = Nat.card G := by
-  unfold nOrb
-  rw [← Nat.card_zpowers, mul_comm]
-  exact (Subgroup.zpowers z).card_mul_index
-
 end Generic
 
 open Formalism.FrobeniusOrbits Formalism.BasicNotions
@@ -84,12 +119,6 @@ theorem iotaH_nsmul (φ : Formalism.HC.Frame) (h : φ.A) (i : ℕ) : φ.iota (i 
   induction i with
   | zero => simp [Formalism.HC.Frame.iota_zero]
   | succ n ih => rw [succ_nsmul, Formalism.HC.Frame.iota_add, ih]; exact (pow_succ _ _).symm
-
-theorem bsC_add_nsmul {N : ℕ} [NeZero N] (h t : ZMod N) (i : ℕ) :
-    Formalism.MainNotions.Inhab.bsC h (t + i • h) = Formalism.MainNotions.Inhab.bsC h t := by
-  induction i with
-  | zero => simp
-  | succ n ih => rw [succ_nsmul, ← add_assoc, Formalism.MainNotions.Inhab.bsC_step, ih]
 
 theorem bsA_add_nsmul {φ : Formalism.HC.Frame} (h t : φ.A) (i : ℕ) :
     Formalism.MainNotions.Inhab.bsA h (t + i • h) = Formalism.MainNotions.Inhab.bsA h t := by
@@ -122,8 +151,8 @@ theorem secPsi_const (φ : Formalism.HC.Frame) (z g : φ.Psi) (hz : (z : φ.GG).
   show (_, _) = (_, _)
   rw [h1, h2, bsA_add_nsmul]
 
-open Classical in
 
+open Classical in
 instance orbSecPsi (φ : Formalism.HC.Frame) : OrbSec φ.Psi where
   sec z g := if (z : φ.GG).1 = 1 then secPsi φ z g else Quotient.out (QuotientGroup.mk g : φ.Psi ⧸ Subgroup.zpowers z)
   sec_mem z g := by

@@ -1,4 +1,55 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.ResMapBijective
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.ResMapBijective
+public import Mathlib.RepresentationTheory.Basic
+public import Mathlib.RingTheory.MvPowerSeries.Rename
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -44,14 +95,14 @@ def gw (j : X) : Submodule R (Matrix ι ι R) :=
       zero_mem' := fun _ _ _ => rfl
       smul_mem' := fun c Y h a b e => by simp [h a b e] }
 
-variable {R} in
+variable {R}
 
 def Normalises {Γ : Type} [Group Γ] (ρ : Γ →* Matrix ι ι R) : Prop :=
   (∀ g, ∃ ν : R, (ρ g)ᵀ * Φ.JR R * ρ g = ν • Φ.JR R) ∧
   (∃ π : Γ →* Equiv.Perm Φ.κ, ∀ g a b, ρ g a b ≠ 0 → Φ.blk a = π g (Φ.blk b)) ∧
   ∀ g a b, w a ≠ w b → ρ g a b = 0
 
-variable {Φ R} in
+variable {Φ} in
 theorem ad_mem {Γ : Type} [Group Γ] {ρ : Γ →* Matrix ι ι R} (h : Φ.Normalises ρ) (j : X) (s : Γ) {Y : Matrix ι ι R}
     (hY : Y ∈ Φ.gw R j) : ρ s * Y * ρ s⁻¹ ∈ Φ.gw R j := by
   obtain ⟨h1, ⟨π, h2⟩, h3⟩ := h
@@ -86,8 +137,7 @@ theorem ad_mem {Γ : Type} [Group Γ] {ρ : Γ →* Matrix ι ι R} (h : Φ.Norm
     have k6 : w d = w b := by_contra fun n => k3 (h3 s⁻¹ d b n)
     exact e (by rw [k5, ← k6, k4])
 
-variable {Φ R} in
-
+variable {Φ} in
 def adRep {Γ : Type} [Group Γ] {ρ : Γ →* Matrix ι ι R} (h : Φ.Normalises ρ) (j : X) :
     Representation R Γ (Φ.gw R j) where
   toFun s :=
@@ -98,8 +148,6 @@ def adRep {Γ : Type} [Group Γ] {ρ : Γ →* Matrix ι ι R} (h : Φ.Normalise
   map_mul' s t := LinearMap.ext fun Y => Subtype.ext (by simp [mul_assoc])
 
 variable [IsLocalRing O]
-
-variable {R} in
 
 def HH [IsCO O R] (h : Matrix ι ι R) : Prop :=
   hᵀ * Φ.JR R * h = Φ.JR R ∧ (∀ a b, Φ.blk a ≠ Φ.blk b → h a b = 0) ∧ h.map (res O R) = 1
@@ -169,9 +217,9 @@ def H1c : Submodule k ((Γ → M) × (F.T → M)) where
   add_mem' := by
     rintro x y ⟨a1, a2, a3, a4, a5⟩ ⟨b1, b2, b3, b4, b5⟩
     refine ⟨a1.add b1, fun s t => ?_, fun q n h => ?_, fun v s => ?_, ?_⟩
-    · simp only [Prod.fst_add, Pi.add_apply, a2, b2, map_add]; abel
+    · simp only [Prod.fst_add, Pi.add_apply, a2, b2, map_add (f := _)]; abel
     · simp [a3 q n h, b3 q n h]
-    · simp only [Prod.fst_add, Prod.snd_add, Pi.add_apply, a4, b4, map_add]; abel
+    · simp only [Prod.fst_add, Prod.snd_add, Pi.add_apply, a4, b4, map_add (f := _)]; abel
     · simp [a5, b5]
   zero_mem' := ⟨IsLocallyConstant.const 0, by simp, by simp, by simp, rfl⟩
   smul_mem' := by
@@ -193,10 +241,10 @@ def framedTwoCocycles : Submodule k (F.C2 M) where
     rintro x y ⟨a1, a2, a3, a4, a5, a6⟩ ⟨b1, b2, b3, b4, b5, b6⟩
     refine ⟨a1.add b1, fun v => (a2 v).add (b2 v), fun q => (a3 q).add (b3 q), fun s t u => ?_, fun v s t => ?_,
       fun q s t => ?_⟩
-    · simp only [Prod.fst_add, Pi.add_apply, map_add]
+    · simp only [Prod.fst_add, Pi.add_apply, map_add (f := _)]
       rw [add_add_add_comm, a4, b4, add_add_add_comm]
-    · simp only [Prod.fst_add, Prod.snd_add, Pi.add_apply, a5, b5, dOne, map_add]; abel
-    · simp only [Prod.fst_add, Prod.snd_add, Pi.add_apply, a6, b6, dOne, map_add]; abel
+    · simp only [Prod.fst_add, Prod.snd_add, Pi.add_apply, a5, b5, dOne, map_add (f := _)]; abel
+    · simp only [Prod.fst_add, Prod.snd_add, Pi.add_apply, a6, b6, dOne, map_add (f := _)]; abel
   zero_mem' := ⟨IsLocallyConstant.const 0, fun _ => IsLocallyConstant.const 0, fun _ => IsLocallyConstant.const 0,
     by simp, by simp [dOne], by simp [dOne]⟩
   smul_mem' := by
@@ -251,7 +299,7 @@ def LemmaP : Prop :=
     [IsAdicComplete (maximalIdeal O) O] [Finite (ResidueField O)] [CharP (ResidueField O) l], l ≠ 2 →
   ∀ (ι X : Type) [Fintype ι] [DecidableEq ι] [AddCommGroup X] [Module.Free ℤ X] [Module.Finite ℤ X] (w : ι → X)
     (Φ : FormData O w) (Γ : Type) [Group Γ] [TopologicalSpace Γ] [IsTopologicalGroup Γ] [CompactSpace Γ]
-    [TotallyDisconnectedSpace Γ] [T2Space Γ], PhiCond Γ l →
+    [TotallyDisconnectedSpace Γ] [T2Space Γ], PhiCond (Γ := Γ) l →
   ∀ (rbar : Γ →* Matrix ι ι (ResidueField O)) (r0 : Lift O rbar O) (hbar : Φ.Normalises rbar), Φ.Normalises r0.hom →
   ∀ (F : Frame Γ) (L : ∀ q, Cond O (rbar.comp (F.ψ q))), (∀ q, ∀ n ∈ F.N q, rbar (F.ψ q n) = 1) →
     (∀ q, Φ.IsLocCond (r0.hom.comp (F.ψ q)) (F.N q) (L q)) → (∀ q, L q O (r0.comap (F.ψ q) (F.hψ q))) →

@@ -1,7 +1,57 @@
-import Mathlib
-import Formalism.LocalToGlobal.KernelLattices.DeterminantCokernelCount.CokernelIndexFactors.StatementB
+module
+
+public import Formalism.LocalToGlobal.KernelLattices.DeterminantCokernelCount.CokernelIndexFactors.StatementB
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Definitions.Jets.CmLatticeCommutatorPairingPowEqOneOfGoodLift
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.OpUConstMul
+
+@[expose] public section
+
 open GlobalTheory.MomOne Formalism.L2.Ker.JMB
 open scoped ComplexConjugate BigOperators ComplexOrder
 
@@ -68,7 +118,7 @@ theorem _root_.GlobalTheory.MomOne.LiftChange.norm_int {d : ℕ} (hd : d % 4 = 3
     rfl
   have hconj : conj (_root_.Formalism.L2.Ker.JMB.w0 (4 * k + 3)) = 1 - _root_.Formalism.L2.Ker.JMB.w0 (4 * k + 3) := by
     rw [hw]
-    simp only [map_div₀, map_add, map_one, map_mul, Complex.conj_I, Complex.conj_ofReal,
+    simp only [map_div₀, map_add (f := _), map_one, map_mul, Complex.conj_I, Complex.conj_ofReal,
       map_ofNat]
     ring
   have hquad : _root_.Formalism.L2.Ker.JMB.w0 (4 * k + 3) ^ 2 - _root_.Formalism.L2.Ker.JMB.w0 (4 * k + 3) + ((k : ℂ) + 1) = 0 := by
@@ -83,7 +133,7 @@ theorem _root_.GlobalTheory.MomOne.LiftChange.norm_int {d : ℕ} (hd : d % 4 = 3
       simp only [Polynomial.eval_add, Polynomial.eval_sub, Polynomial.eval_pow, Polynomial.eval_X,
         Polynomial.eval_C, Polynomial.eval_zero] at this
       linarith [(Nat.cast_nonneg k : (0 : ℚ) ≤ k)]
-    · simp only [map_add, map_sub, map_pow, Polynomial.aeval_X, Polynomial.aeval_C]
+    · simp only [map_add (f := _), map_sub, map_pow, Polynomial.aeval_X, Polynomial.aeval_C]
       push_cast
       linear_combination hquad
   have hmem : ∀ a b : ℤ, (a : ℂ) + (b : ℂ) * _root_.Formalism.L2.Ker.JMB.w0 (4 * k + 3) ∈ _root_.Formalism.L2.Ker.JMB.Qbar := fun a b =>
@@ -91,13 +141,13 @@ theorem _root_.GlobalTheory.MomOne.LiftChange.norm_int {d : ℕ} (hd : d % 4 = 3
   refine ⟨hmem u v, ?_, ⟨u ^ 2 + u * v + v ^ 2 * ((k : ℤ) + 1), ?_⟩⟩
   · have : conj ((u : ℂ) + (v : ℂ) * _root_.Formalism.L2.Ker.JMB.w0 (4 * k + 3)) =
         ((u + v : ℤ) : ℂ) + ((-v : ℤ) : ℂ) * _root_.Formalism.L2.Ker.JMB.w0 (4 * k + 3) := by
-      rw [map_add, map_mul, hconj]
+      rw [map_add (f := _), map_mul, hconj]
       simp only [map_intCast]
       push_cast
       ring
     rw [this]
     exact hmem _ _
-  · rw [map_add, map_mul, hconj]
+  · rw [map_add (f := _), map_mul, hconj]
     simp only [map_intCast]
     push_cast
     linear_combination (-(v : ℂ) ^ 2) * hquad
@@ -123,8 +173,8 @@ end GlobalTheory.MomOne.LiftChange
 namespace GlobalTheory.MomOne
 open LiftChange
 
-open scoped ComplexConjugate BigOperators ComplexOrder in
 
+open scoped ComplexConjugate BigOperators ComplexOrder in
 theorem _root_.GlobalTheory.MomOne.lift_change : ∀ (q : ℕ) [Fact q.Prime] (lam : _root_.Formalism.L2.Ker.JMB.Qbar →+* ℂ_[q]) (g : ℕ) (S : _root_.Formalism.L2.Ker.JMB.Setup g) (r : ℕ) (b : Fin r → Fin g → ℂ) (e : (Fin g → ℂ) → ℂ) (t : Fin g → ℂ) (n m s : ℕ) (eps : ℂ) (y : Fin r → Fin (q ^ n)), S.Ok → (∀ i, b i ∈ S.La) → S.IsTheta e → _root_.Formalism.L2.Ker.JMB.IsIdem lam S.d m eps → 2 * n ≤ m → (∀ i, ∃ z : ℤ, (_root_.Formalism.L2.Ker.JMB.hf S.Hm (eps • b i) t).im = z) → s ≡ 1 [MOD q ^ n] → _root_.Formalism.L2.Ker.JMB.opW S.d S.Hm ((s : ℂ) • _root_.Formalism.L2.Ker.JMB.liftY q n eps b y) (_root_.Formalism.L2.Ker.JMB.opU S.Hm t e) = _root_.Formalism.L2.Ker.JMB.opW S.d S.Hm (_root_.Formalism.L2.Ker.JMB.liftY q n eps b y) (_root_.Formalism.L2.Ker.JMB.opU S.Hm t e) ∧ ∀ v ∈ S.La, _root_.Formalism.L2.Ker.JMB.kap S.Hm v ((s : ℂ) • _root_.Formalism.L2.Ker.JMB.liftY q n eps b y) = _root_.Formalism.L2.Ker.JMB.kap S.Hm v (_root_.Formalism.L2.Ker.JMB.liftY q n eps b y) := by
   intro q _ lam g S r b e t n m s eps y hS hb he hid hnm hti hs
   obtain ⟨hprime, hd16, hpos, -, -, -, hbeta, -⟩ := id hS
@@ -137,6 +187,7 @@ theorem _root_.GlobalTheory.MomOne.lift_change : ∀ (q : ℕ) [Fact q.Prime] (l
   have hconjhf : ∀ x w : Fin g → ℂ, conj (_root_.Formalism.L2.Ker.JMB.hf S.Hm x w) = _root_.Formalism.L2.Ker.JMB.hf S.Hm w x := by
     intro x w
     unfold _root_.Formalism.L2.Ker.JMB.hf
+
     simp only [map_sum, map_mul, Complex.conj_conj]
     rw [Finset.sum_comm]
     refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
@@ -187,8 +238,8 @@ theorem _root_.GlobalTheory.MomOne.lift_change : ∀ (q : ℕ) [Fact q.Prime] (l
     have hdivN : ((q : ℤ) ^ n) ∣ N := by
       obtain ⟨-, h1, h2⟩ := hid
       unfold _root_.Formalism.L2.Ker.JMB.lamA at h1 h2
-      rw [dif_pos hepsQ] at h1
-      rw [dif_pos hconjQ] at h2
+      rw [dite_eq_left hepsQ] at h1
+      rw [dite_eq_left hconjQ] at h2
       have hle1 : ‖lam ⟨eps, hepsQ⟩‖ ≤ 1 := by
         have h3 := IsUltrametricDist.norm_add_le_max (lam ⟨eps, hepsQ⟩ - 1) 1
         rw [sub_add_cancel, norm_one] at h3

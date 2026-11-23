@@ -1,12 +1,58 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TorsorsTrivial
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.OriginIdeal
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ClosureFiniteEtale
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PointAtZero
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GoodIffEtaleAt
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsNoetherianModelOfDivisorOfConstants
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsNoetherianNormalLocalApprox
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LocalizationAtPrimeIsDiscreteValuationRingOfHeig
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TorsorsTrivial
+public import Mathlib.RingTheory.Ideal.Height
+public import Mathlib.RingTheory.IntegralClosure.IntegrallyClosed
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsNoetherianModelOfDivisorOfConstants
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LocalizationAtPrimeIsDiscreteValuationRingOfHeig
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.IntegralClosure.GoingDown
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open IsLocalRing Polynomial
 
 noncomputable section
@@ -31,7 +77,7 @@ theorem height_comap_eq_one_of_goingDown {A B : Type} [CommRing A] [IsDomain A] 
     haveI := hr
     obtain ⟨P₁, hP₁Q, hP₁, hP₁o⟩ := Ideal.exists_ideal_lt_liesOver_of_lt (p := r) (q := p) Q hrp
     haveI := hP₁
-    haveI : (⊥ : Ideal A).IsPrime := Ideal.bot_prime
+    haveI : (⊥ : Ideal A).IsPrime := Ideal.isPrime_bot
     obtain ⟨P₀, hP₀P₁, hP₀, -⟩ := Ideal.exists_ideal_lt_liesOver_of_lt (p := ⊥) (q := r) P₁
       (bot_lt_iff_ne_bot.mpr hr0)
     haveI := hP₀
@@ -41,7 +87,7 @@ theorem height_comap_eq_one_of_goingDown {A B : Type} [CommRing A] [IsDomain A] 
     have h4 : (1 : ℕ∞) ≤ P₁.height := le_trans le_add_self h1
     have h3 : (1 : ℕ∞) + 1 ≤ 1 := le_trans (by gcongr) h2
     exact absurd h3 (by decide)
-  · haveI : (⊥ : Ideal A).IsPrime := Ideal.bot_prime
+  · haveI : (⊥ : Ideal A).IsPrime := Ideal.isPrime_bot
     have := Ideal.height_add_one_le_of_lt_of_isPrime (bot_lt_iff_ne_bot.mpr hne)
     simpa using this
 
@@ -86,7 +132,7 @@ theorem exists_kummer_enlargement : ∀ (T : Type) [CommRing T] [IsDomain T] [Is
   have hy : ∀ p : Ideal A, ∃ y : T, y ^ q = i (π p) := by
     intro p
     obtain ⟨y, hy⟩ := hT (X ^ q - C (i (π p))) (monic_X_pow_sub_C _ hq.ne')
-      (by rw [natDegree_X_pow_sub_C]; exact hq)
+      (by rw [natDegree_X_pow_sub_C _]; exact hq)
     refine ⟨y, ?_⟩
     simpa [sub_eq_zero] using hy
   choose y hy using hy
@@ -172,7 +218,7 @@ theorem exists_kummer_enlargement : ∀ (T : Type) [CommRing T] [IsDomain T] [Is
   set P : Ideal B := p₁.comap (algebraMap B (loc S)) with hP
   have hPh : P.height = 1 := by
     rw [hP, ← hp₁]
-    exact IsLocalization.height_comap M p₁
+    exact IsLocalization.height_under M p₁
   have hcomap : p₁.comap f = P.comap (algebraMap A B) := by
     rw [hP, Ideal.comap_comap, ← IsScalarTower.algebraMap_eq]
     rfl
@@ -191,7 +237,7 @@ theorem exists_kummer_enlargement : ∀ (T : Type) [CommRing T] [IsDomain T] [Is
     obtain ⟨hrprime, har⟩ := hr
     by_contra hlt
     have hlt' : r < p₁.comap f := lt_of_le_of_ne hrp (fun e => hlt (e ▸ le_rfl))
-    haveI : (⊥ : Ideal A).IsPrime := Ideal.bot_prime
+    haveI : (⊥ : Ideal A).IsPrime := Ideal.isPrime_bot
     have hr0 : (⊥ : Ideal A) < r := by
       refine bot_lt_iff_ne_bot.mpr fun h => ha ?_
       have : a ∈ r := har (Ideal.mem_span_singleton_self a)

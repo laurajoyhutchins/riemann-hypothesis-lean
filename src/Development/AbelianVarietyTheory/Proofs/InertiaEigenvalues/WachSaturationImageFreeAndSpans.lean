@@ -1,10 +1,53 @@
-import Mathlib
-import Formalism.SharpRestriction.LevelLetterCocycles.UsedLocalConclusion
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.NotFullBot
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.MemSatMOfSmul
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.EqTopOfSpanImage
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.FontaineAndDecompletion
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.WachLatticeFreeOfCrystalline
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.NotFullBot
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.MemSatMOfSmul
+public import Formalism.SharpRestriction.LevelLetterCocycles.DeltaInvariantLattices
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.DvrComplete
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.EqTopOfSpanImage
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.MemXSmulOfProjective
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.WachLatticeFreeOfCrystalline
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PowerSeries.Ideal
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Formalism.WeaklyAdmissibleFiltrations Formalism.BasicNotions Formalism.BasicNotions.Loc TensorProduct GlobalTheory.NL Formalism.MainNotions.DeltaInvariantLattices
 
@@ -30,7 +73,7 @@ theorem isBaseChange_between (A E : Type) [CommRing A] [CommRing E] [Algebra A E
     induction t using TensorProduct.induction_on with
     | zero => simp
     | tmul x y => simp [Φ, IsBaseChange.equiv_tmul, i]
-    | add a b ha hb => simp only [map_add, ha, hb]
+    | add a b ha hb => simp only [map_add (f := _), ha, hb]
   have hΦi : Function.Injective Φ := by
     intro s t hst
     apply hiT
@@ -40,7 +83,7 @@ theorem isBaseChange_between (A E : Type) [CommRing A] [CommRing E] [Algebra A E
     intro d
     obtain ⟨x, rfl⟩ := hq d
     have : q x ∈ LinearMap.range Φ := by
-      refine h₁.inductionOn x (fun x => q x ∈ LinearMap.range Φ) (by simp) ?_ ?_ ?_
+      refine h₁.inductionOn x ?_ ?_ ?_
       · intro m
         refine ⟨1 ⊗ₜ ⟨q m, hqS m m.2⟩, ?_⟩
         simp [Φ, LinearMap.liftBaseChange_tmul]
@@ -48,7 +91,7 @@ theorem isBaseChange_between (A E : Type) [CommRing A] [CommRing E] [Algebra A E
         rw [map_smul]
         exact (LinearMap.range Φ).smul_mem e hy
       · intro a b ha hb
-        rw [map_add]
+        rw [map_add (f := _)]
         exact (LinearMap.range Φ).add_mem ha hb
     exact this
   refine IsBaseChange.of_equiv (LinearEquiv.ofBijective Φ ⟨hΦi, hΦs⟩) ?_
@@ -81,7 +124,7 @@ end GlobalTheory.NL.SatFree
 
 namespace GlobalTheory.NL.SatFree
 
-set_option maxHeartbeats 1600000 in
+
 
 theorem satM_free_loc {l : ℕ} [Fact l.Prime] {P : LocPrime l} (H : LocHW l P) (K : FinExt l)
     (s : ℕ) (LL : FinExt l) (h : Good K s LL) (T₁ T₂ : Lt K LL) (π : LatHom T₁.L T₂.L)
@@ -173,8 +216,16 @@ theorem satM_free_and_spans : ∀ (D : Formalism.BasicNotions.D7) (HW : HWOf D.l
   have hex : Function.Injective (((HW l).W K s LL h).map ι) ∧
       Function.Exact (((HW l).W K s LL h).map ι) (((HW l).W K s LL h).map π) ∧
       Function.Surjective (((HW l).W K s LL h).map π) :=
-    GlobalTheory.EtaleExact.DD_exact D HW F (GlobalTheory.Decompl.fontaine_and_decompletion D HW F) l K s LL h
-      T₀ T₁ T₂ ι π hses
+    by
+      haveI := GlobalTheory.EtaleExact.finite_OL LL
+      haveI : IsNoetherianRing ↥(OL LL) := IsNoetherianRing.of_finite ℤ_[l] ↥(OL LL)
+      have hp : ((D.loc l).PD K).p = l := (D.loc l).PD_p K
+      refine GlobalTheory.EtaleExact.exact_of_tie (((F l).E K s LL h).tie)
+        (GlobalTheory.EtaleExact.map_ne_top_of_tie (((F l).E K s LL h).tie) ?_ ?_) T₀ T₁ T₂ ι π hses
+      · rw [hp]
+        exact GlobalTheory.EtaleExact.isUnit_or_dvd_pow (D.loc l) LL
+      · rw [hp]
+        exact GlobalTheory.EtaleExact.sep_RW LL
   exact satM_free_loc (HW l) K s LL h T₁ T₂ π c1 c2 hex.2.2 hflat
 
 end GlobalTheory.NL.SatFree
